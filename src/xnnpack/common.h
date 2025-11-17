@@ -421,4 +421,7 @@
 #define XNN_LOG2_BIT_SIZEOF_INT4 2  // log2(4)
 #define XNN_LOG2_BIT_SIZEOF_UINT4 2  // log2(4)
 
+#define XNN_LOG2_BIT_SIZEOF_INT2 1  // log2(2)
+#define XNN_LOG2_BIT_SIZEOF_UINT2 1  // log2(2)
+
 #endif  // XNNPACK_SRC_XNNPACK_COMMON_H_

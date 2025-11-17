@@ -152,7 +152,7 @@ cc_test(
 cc_test(
     name = "dot",
     srcs = ["dot.cc"],
-    shard_count = 12,
+    shard_count = 18,
     deps = TEST_DEPS,
 )
 

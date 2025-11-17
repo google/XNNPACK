@@ -13,6 +13,7 @@
 #include <numeric>
 #include <random>
 #include <type_traits>
+#include <utility>
 #include <vector>
 
 #include <gtest/gtest.h>
@@ -258,6 +259,58 @@ void TestStaticB(A, B, C) {
   }
 }
 
+struct DotShapes {
+  std::vector<size_t> a, b, c;
+  std::vector<size_t> batch_dims;
+  std::vector<size_t> dot_dims;
+};
+
+template <typename B, typename Rng>
+DotShapes RandomDotShapes(Rng& rng, size_t num_k_dims, size_t a_rank,
+                          size_t b_rank, size_t output_rank) {
+  // We want the total number of output elements to be reasonable, so choose
+  // `max_dim` such that a random shape of rank `output_rank` produces this
+  // max size.
+  constexpr size_t max_size = 20;
+  const size_t max_output_dim = static_cast<size_t>(std::ceil(
+      std::pow(static_cast<double>(max_size),
+               1.0 / static_cast<double>(std::max<size_t>(1, output_rank)))));
+
+  std::vector<size_t> batch_dims =
+      random_shape(rng, output_rank - 2, 1, max_output_dim);
+
+  // Start with the batch dimensions.
+  DotShapes shapes = {batch_dims, batch_dims, batch_dims, batch_dims};
+
+  // Add the dot dimensions (m, k..., n)
+  std::vector<size_t> dot_dims(num_k_dims + 2);
+  std::generate(dot_dims.begin(), dot_dims.end(),
+                [&]() { return dim_dist(rng); });
+  for (int d = 1; d < num_k_dims; ++d) {
+    dot_dims[1 + d] = k23_dim_dist(rng);
+  }
+
+  // Align the shape as required by the type of B.
+  dot_dims = align_logical_shape<B>(dot_dims);
+
+  // The output gets m, n.
+  shapes.c.push_back(dot_dims[0]);
+  shapes.c.push_back(dot_dims.back());
+  // A gets m.
+  shapes.a.push_back(dot_dims[0]);
+  // A and B get the k dims.
+  for (size_t i = 0; i < num_k_dims; ++i) {
+    shapes.a.push_back(dot_dims[i + 1]);
+    shapes.b.push_back(dot_dims[i + 1]);
+  }
+  // B gets n.
+  shapes.b.push_back(dot_dims.back());
+
+  shapes.dot_dims = std::move(dot_dims);
+
+  return shapes;
+}
+
 template <typename A, typename B, typename C>
 void TestDynamicB(A, B, C) {
   ReplicableRandomDevice rng;
@@ -277,14 +330,6 @@ void TestDynamicB(A, B, C) {
     const size_t num_k_dims =
         std::uniform_int_distribution<size_t>(1, max_k_dims)(rng);
     const size_t output_rank = std::max(a_rank, b_rank) - num_k_dims + 1;
-
-    // We want the total number of output elements to be reasonable, so choose
-    // `max_dim` such that a random shape of rank `output_rank` produces this
-    // max size.
-    constexpr size_t max_size = 20;
-    const size_t max_output_dim = static_cast<size_t>(std::ceil(
-        std::pow(static_cast<double>(max_size),
-                 1.0 / static_cast<double>(std::max<size_t>(1, output_rank)))));
 
     SubgraphBuilder subgraph(4);
     const uint32_t a_id = 0;
@@ -332,46 +377,17 @@ void TestDynamicB(A, B, C) {
     ASSERT_EQ(runtime.Status(), ynn_status_success);
 
     for (int reshape = 0; reshape < 2; ++reshape) {
-      std::vector<size_t> batch_dims =
-          random_shape(rng, output_rank - 2, 1, max_output_dim);
-
-      // Start with the batch dimensions.
-      std::vector<size_t> c_shape = batch_dims;
-      std::vector<size_t> a_shape = batch_dims;
-      std::vector<size_t> b_shape = batch_dims;
-
-      // Add the dot dimensions (m, k..., n)
-      std::vector<size_t> dot_dims(num_k_dims + 2);
-      std::generate(dot_dims.begin(), dot_dims.end(),
-                    [&]() { return dim_dist(rng); });
-      for (int d = 1; d < num_k_dims; ++d) {
-        dot_dims[1 + d] = k23_dim_dist(rng);
-      }
-
-      // Align the shape as required by the type of B.
-      dot_dims = align_logical_shape<B>(dot_dims);
-
-      // The output gets m, n.
-      c_shape.push_back(dot_dims[0]);
-      c_shape.push_back(dot_dims.back());
-      // A gets m.
-      a_shape.push_back(dot_dims[0]);
-      // A and B get the k dims.
-      for (size_t i = 0; i < num_k_dims; ++i) {
-        a_shape.push_back(dot_dims[i + 1]);
-        b_shape.push_back(dot_dims[i + 1]);
-      }
-      // B gets n.
-      b_shape.push_back(dot_dims.back());
+      DotShapes shapes =
+          RandomDotShapes<B>(rng, num_k_dims, a_rank, b_rank, output_rank);
 
       // Remove the broadcasted batch dimensions from a and b.
-      size_t a_broadcast_dims = a_shape.size() - a_rank;
-      size_t b_broadcast_dims = b_shape.size() - b_rank;
-      a_shape.erase(a_shape.begin(), a_shape.begin() + a_broadcast_dims);
-      b_shape.erase(b_shape.begin(), b_shape.begin() + b_broadcast_dims);
+      size_t a_broadcast_dims = shapes.a.size() - a_rank;
+      size_t b_broadcast_dims = shapes.b.size() - b_rank;
+      shapes.a.erase(shapes.a.begin(), shapes.a.begin() + a_broadcast_dims);
+      shapes.b.erase(shapes.b.begin(), shapes.b.begin() + b_broadcast_dims);
 
-      Tensor<A> a(a_shape);
-      Tensor<B> b(to_physical_shape<B>(b_shape));
+      Tensor<A> a(shapes.a);
+      Tensor<B> b(to_physical_shape<B>(shapes.b));
       a.generate([&]() { return a_gen(rng); });
       b.generate([&]() { return b_gen(rng); });
 
@@ -383,23 +399,23 @@ void TestDynamicB(A, B, C) {
         std::sort(inv_b_perm.begin(), inv_b_perm.end(),
                   [&](int i, int j) { return b_perm[i] < b_perm[j]; });
         b_tr = b.transpose(inv_b_perm).deep_copy();
-        b_shape = permute(inv_b_perm, b_shape);
+        shapes.b = permute(inv_b_perm, shapes.b);
       }
 
-      runtime.ReshapeExternalTensor(a_shape, a.data(), a_id)
-          .ReshapeExternalTensor(b_shape, b_tr.data(), b_id);
+      runtime.ReshapeExternalTensor(shapes.a, a.data(), a_id)
+          .ReshapeExternalTensor(shapes.b, b_tr.data(), b_id);
 
-      Tensor<C> c(c_shape);
+      Tensor<C> c(shapes.c);
       if (!init_c) {
         c.generate([&]() { return c_gen(rng); });
-        runtime.ReshapeExternalTensor(c_shape, c.data(), c_id);
+        runtime.ReshapeExternalTensor(shapes.c, c.data(), c_id);
       }
       runtime.ReshapeRuntime();
       ASSERT_EQ(runtime.Status(), ynn_status_success);
 
-      ASSERT_EQ(runtime.GetExternalTensorShape(output_id), c_shape);
+      ASSERT_EQ(runtime.GetExternalTensorShape(output_id), shapes.c);
 
-      Tensor<C> expected(c_shape);
+      Tensor<C> expected(shapes.c);
       if (init_c) {
         expected.fill(init_value);
       } else {
@@ -417,27 +433,180 @@ void TestDynamicB(A, B, C) {
       broadcast_extent_1(a);
       broadcast_extent_1(b);
 
-      for (const auto& i : EnumerateIndices(batch_dims)) {
+      for (const auto& i : EnumerateIndices(shapes.batch_dims)) {
         Reference(slice_batches(a, i), slice_batches(b, i),
                   slice_batches(expected, i));
       }
       size_t num_k_elements = 1;
       for (size_t i = 0; i < num_k_dims; ++i) {
-        num_k_elements *= dot_dims[i + 1];
+        num_k_elements *= shapes.dot_dims[i + 1];
       }
-      for (const auto& i : EnumerateIndices(c_shape)) {
+      for (const auto& i : EnumerateIndices(shapes.c)) {
         if (std::is_integral<C>::value) {
           ASSERT_EQ(c(i), expected(i))
               << "i=" << index_to_string(i) << " num_k_dims=" << num_k_dims
-              << " a_shape=" << index_to_string(a_shape)
-              << " b_shape=" << index_to_string(b_shape);
+              << " shapes.a=" << index_to_string(shapes.a)
+              << " shapes.b=" << index_to_string(shapes.b);
         } else {
           const float tolerance = epsilon(type_of<C>()) * (num_k_elements + 1) *
                                   max_abs_value * max_abs_value * 2.0f;
           ASSERT_NEAR(c(i), expected(i), tolerance)
               << "i=" << index_to_string(i) << " num_k_dims=" << num_k_dims
-              << " a_shape=" << index_to_string(a_shape)
-              << " b_shape=" << index_to_string(b_shape);
+              << " shapes.a=" << index_to_string(shapes.a)
+              << " shapes.b=" << index_to_string(shapes.b);
+        }
+      }
+    }
+  }
+}
+
+template <typename A, typename B, typename C>
+void TestStaticShapeDynamicB(A, B, C) {
+  ReplicableRandomDevice rng;
+
+  const float max_abs_value = 10.0f;
+  TypeGenerator<A> a_gen(-max_abs_value, max_abs_value, quantization_params{});
+  TypeGenerator<B> b_gen(-max_abs_value, max_abs_value, quantization_params{});
+  TypeGenerator<C> c_gen(-max_abs_value, max_abs_value, quantization_params{});
+
+  TestScheduler scheduler(3);
+
+  for (auto _ : FuzzTest(std::chrono::seconds(5))) {
+    const size_t a_rank = rank_dist(rng);
+    const size_t b_rank = rank_dist(rng);
+    const size_t max_k_dims =
+        std::min<size_t>(2, std::min(a_rank, b_rank) - 2) + 1;
+    const size_t num_k_dims =
+        std::uniform_int_distribution<size_t>(1, max_k_dims)(rng);
+    const size_t output_rank = std::max(a_rank, b_rank) - num_k_dims + 1;
+
+    DotShapes shapes =
+        RandomDotShapes<B>(rng, num_k_dims, a_rank, b_rank, output_rank);
+
+    // Remove the broadcasted batch dimensions from a and b.
+    size_t a_broadcast_dims = shapes.a.size() - a_rank;
+    size_t b_broadcast_dims = shapes.b.size() - b_rank;
+    shapes.a.erase(shapes.a.begin(), shapes.a.begin() + a_broadcast_dims);
+    shapes.b.erase(shapes.b.begin(), shapes.b.begin() + b_broadcast_dims);
+
+    ASSERT_EQ(shapes.b.size(), b_rank);
+
+    std::vector<int> b_perm = iota(0, b_rank);
+    // `Tensor::transpose` doesn't support type_element_count != 1, so it's
+    // tricky to test that codepath.
+    if (type_element_count(type_of<B>()) == 1) {
+      // Make a random transpose.
+      std::shuffle(b_perm.begin(), b_perm.end(), rng);
+      if (b_perm[b_perm.size() - 1] == b_perm.size() - 1 ||
+          b_perm[b_perm.size() - 2] == b_perm.size() - 1) {
+        // This transpose affects the innermost dimension.
+      } else if (!random_bool(rng)) {
+        // We can only optimize transposes where the stride 1 dimension is the n
+        // or k dimension, so filter out the rest (50% of the time).
+        b_perm = iota(0, b_rank);
+      }
+    }
+    std::vector<int> inv_b_perm = b_perm;
+    // Apply the inverse of the permutation, so the shape arrives as
+    // expected.
+    std::sort(inv_b_perm.begin(), inv_b_perm.end(),
+              [&](int i, int j) { return b_perm[i] < b_perm[j]; });
+
+    SubgraphBuilder subgraph(4);
+    const uint32_t a_id = 0;
+    const uint32_t b_id = 1;
+    const uint32_t output_id = 3;
+    subgraph.AddInput(type_of<A>(), shapes.a, a_id)
+        .AddInput(type_of<B>(), permute(inv_b_perm, shapes.b), b_id)
+        .AddOutput(type_of<C>(), shapes.c, output_id);
+
+    uint32_t c_id = 2;
+    const bool init_c = random_bool(rng);
+    const C init_value = random_bool(rng) ? c_gen(rng) : static_cast<C>(0);
+    if (init_c) {
+      if (init_value == 0 && random_bool(rng)) {
+        c_id = YNN_INVALID_VALUE_ID;
+      } else {
+        subgraph.AddScalar<C>(init_value, c_id);
+      }
+    } else {
+      subgraph.AddInput(type_of<C>(), shapes.c, c_id);
+    }
+
+    uint32_t b_tr_id = b_id;
+    if (b_perm != iota(0, b_rank)) {
+      b_tr_id = YNN_INVALID_VALUE_ID;
+      subgraph.AddTensor(type_of<B>(), b_rank, b_tr_id);
+      subgraph.AddTranspose(b_perm, b_id, b_tr_id);
+    }
+
+    subgraph.AddDot(num_k_dims, a_id, b_tr_id, c_id, output_id);
+
+    Runtime runtime(subgraph.GetSubgraph(),
+                    random_bool(rng) ? &scheduler : nullptr);
+    ASSERT_EQ(runtime.Status(), ynn_status_success);
+
+    for (int revalue = 0; revalue < 2; ++revalue) {
+      Tensor<A> a(shapes.a);
+      Tensor<B> b(to_physical_shape<B>(permute(inv_b_perm, shapes.b)));
+      a.generate([&]() { return a_gen(rng); });
+      b.generate([&]() { return b_gen(rng); });
+
+      runtime.SetupExternalTensor(a.data(), a_id)
+          .SetupExternalTensor(b.data(), b_id);
+
+      Tensor<C> c(shapes.c);
+      if (!init_c) {
+        c.generate([&]() { return c_gen(rng); });
+        runtime.SetupExternalTensor(c.data(), c_id);
+      }
+
+      Tensor<C> expected(shapes.c);
+      if (init_c) {
+        expected.fill(init_value);
+      } else {
+        // Copy the expected output before running the pipeline, since it is
+        // updated in place by the test and reference implementations.
+        expected.assign(c);
+      }
+
+      runtime.SetupExternalTensor(c.data(), output_id)
+          .ReshapeRuntime()
+          .InvokeRuntime();
+      ASSERT_EQ(runtime.Status(), ynn_status_success);
+
+      // Apply the transpose so we can compute the reference result.
+      if (b_perm != iota(0, b_rank)) {
+        b = b.transpose(b_perm).deep_copy();
+      }
+
+      // Put broadcast dimensions back for the reference computation.
+      a = a.expand_dims(iota(0, a_broadcast_dims));
+      b = b.expand_dims(iota(0, b_broadcast_dims));
+      broadcast_extent_1(a);
+      broadcast_extent_1(b);
+
+      for (const auto& i : EnumerateIndices(shapes.batch_dims)) {
+        Reference(slice_batches(a, i), slice_batches(b, i),
+                  slice_batches(expected, i));
+      }
+      size_t num_k_elements = 1;
+      for (size_t i = 0; i < num_k_dims; ++i) {
+        num_k_elements *= shapes.dot_dims[i + 1];
+      }
+      for (const auto& i : EnumerateIndices(shapes.c)) {
+        if (std::is_integral<C>::value) {
+          ASSERT_EQ(c(i), expected(i))
+              << "i=" << index_to_string(i) << " num_k_dims=" << num_k_dims
+              << " shapes.a=" << index_to_string(shapes.a)
+              << " shapes.b=" << index_to_string(shapes.b);
+        } else {
+          const float tolerance = epsilon(type_of<C>()) * (num_k_elements + 1) *
+                                  max_abs_value * max_abs_value * 2.0f;
+          ASSERT_NEAR(c(i), expected(i), tolerance)
+              << "i=" << index_to_string(i) << " num_k_dims=" << num_k_dims
+              << " shapes.a=" << index_to_string(shapes.a)
+              << " shapes.b=" << index_to_string(shapes.b);
         }
       }
     }
@@ -455,6 +624,12 @@ TEST_P(Dot, StaticB) {
 TEST_P(Dot, DynamicB) {
   SwitchThreeTypes(GetParam(), [&](auto a_type, auto b_type, auto c_type) {
     TestDynamicB(a_type, b_type, c_type);
+  });
+}
+
+TEST_P(Dot, StaticShapeDynamicB) {
+  SwitchThreeTypes(GetParam(), [&](auto a_type, auto b_type, auto c_type) {
+    TestStaticShapeDynamicB(a_type, b_type, c_type);
   });
 }
 

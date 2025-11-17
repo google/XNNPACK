@@ -8,18 +8,8 @@
 
 #include <cstddef>
 #include <cstdint>  // IWYU pragma: keep
-#include <type_traits>
-
-#include "ynnpack/base/type.h"
 
 namespace ynn {
-
-template <typename T>
-static constexpr std::integral_constant<
-    size_t, sizeof(T) * 8 / type_info<T>::element_count()>
-elem_size_of(T) {
-  return {};
-}
 
 // `m`, `n` are the logical shape (number of elements) of the input, but strides
 // are a physical shape (number of bytes). `factor` is how many rows are to be

@@ -7,7 +7,9 @@
 #include <stddef.h>
 
 #include "src/xnnpack/common.h"
+#include "src/xnnpack/config-types.h"
 #include "src/xnnpack/config.h"
+#include "src/xnnpack/hardware-config.h"
 #include "src/xnnpack/init-once.h"
 #include "src/xnnpack/lut.h"
 
@@ -53,6 +55,7 @@ static void init_x8_lut_config(void) {
       } else
     #endif
     {
+      x8_lut_config.microkernel = xnn_x8_lut_ukernel__scalar_u4;
     }
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();

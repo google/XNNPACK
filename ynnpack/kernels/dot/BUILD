@@ -5,7 +5,7 @@
 
 load("@rules_cc//cc:cc_library.bzl", "cc_library")
 load("@rules_cc//cc:cc_test.bzl", "cc_test")
-load("//ynnpack:build_defs.bzl", "ynn_cc_library", "ynn_generate_src_hdr")
+load("//ynnpack:build_defs.bzl", "ynn_cc_library", "ynn_generate_src_hdr", "ynn_kernel_copts")
 
 _COMPATIBLE_WITH = []
 
@@ -265,6 +265,73 @@ ynn_generate_src_hdr(
 )
 
 ynn_generate_src_hdr(
+    name = "x86_f16c_fp16_fp16_fp32",
+    compatible_with = _COMPATIBLE_WITH,
+    generator = "//ynnpack/kernels/dot/generator",
+    generator_args = [
+        "x86_f16c_fp16_fp16_fp32",
+        "dot,1x32x1",
+        "dot,2x32x1",
+        "dot,2x16x1",
+        "dot,3x16x1",
+        "dot,4x16x1",
+        "dot,4x8x1",
+        "dot,6x8x1",
+        "dot,8x8x1",
+    ],
+    output_hdr = "x86_f16c_fp16_fp16_fp32.inc",
+    output_src = "x86_f16c_fp16_fp16_fp32.cc",
+)
+
+ynn_generate_src_hdr(
+    name = "x86_f16c_fma3_fp16_fp16_fp32",
+    compatible_with = _COMPATIBLE_WITH,
+    generator = "//ynnpack/kernels/dot/generator",
+    generator_args = [
+        "x86_f16c_fma3_fp16_fp16_fp32",
+        "dot,1x32x1",
+        "dot,2x32x1",
+        "dot,1x16x1",
+        "dot,2x16x1",
+        "dot,4x16x1",
+        "dot,2x8x1",
+        "dot,4x8x1",
+        "dot,8x8x1",
+    ],
+    output_hdr = "x86_f16c_fma3_fp16_fp16_fp32.inc",
+    output_src = "x86_f16c_fma3_fp16_fp16_fp32.cc",
+)
+
+ynn_generate_src_hdr(
+    name = "x86_avx512f_fp16_fp16_fp32",
+    compatible_with = _COMPATIBLE_WITH,
+    generator = "//ynnpack/kernels/dot/generator",
+    generator_args = [
+        "x86_avx512f_fp16_fp16_fp32",
+        "dot,1x64x1",
+        "dot,2x64x1",
+        "dot,3x64x1",
+        "dot,4x64x1",
+        "dot,5x64x1",
+        "dot,2x32x1",
+        "dot,3x32x1",
+        "dot,4x32x1",
+        "dot,5x32x1",
+        # The kernels which are commented out should be good, but for some
+        # reason they don't perform well. They don't seem to spill, so keeping them
+        # until we understand why are they slower.
+        # "dot,6x32x1",
+        # "dot,8x32x1",
+        # "dot,10x32x1",
+        # "dot,12x32x1",
+        "dot,5x16x1",
+        # "dot,16x16x1",
+    ],
+    output_hdr = "x86_avx512f_fp16_fp16_fp32.inc",
+    output_src = "x86_avx512f_fp16_fp16_fp32.cc",
+)
+
+ynn_generate_src_hdr(
     name = "arm64_neon_fp32",
     compatible_with = _COMPATIBLE_WITH,
     generator = "//ynnpack/kernels/dot/generator",
@@ -284,6 +351,28 @@ ynn_generate_src_hdr(
     ],
     output_hdr = "arm64_neon_fp32.inc",
     output_src = "arm64_neon_fp32.cc",
+)
+
+ynn_generate_src_hdr(
+    name = "arm64_neon_bf16_bf16_fp32",
+    compatible_with = _COMPATIBLE_WITH,
+    generator = "//ynnpack/kernels/dot/generator",
+    generator_args = [
+        "arm64_neon_bf16_bf16_fp32",
+        "dot,1x32x4",
+        "dot,2x32x4",
+        "dot,3x32x4",
+        "dot,2x16x4",
+        "dot,3x16x4",
+        "dot,4x16x4",
+        "dot,5x16x4",
+        "dot,4x8x4",
+        "dot,6x8x4",
+        "dot,8x8x4",
+        "dot,8x4x4",
+    ],
+    output_hdr = "arm64_neon_bf16_bf16_fp32.inc",
+    output_src = "arm64_neon_bf16_bf16_fp32.cc",
 )
 
 ynn_generate_src_hdr(
@@ -464,6 +553,7 @@ ynn_cc_library(
     name = "dot",
     srcs = ["dot.cc"],
     hdrs = [
+        "arm64_neon_bf16_bf16_fp32.inc",
         "arm64_neon_fp32.inc",
         "arm64_neoni8mm_int8_int8_int32.inc",
         "arm64_sme.h",
@@ -479,25 +569,26 @@ ynn_cc_library(
         "x86_avx512bw_int8_int8_int32.inc",
         "x86_avx512bw_int8_int8_int32_k16.inc",
         "x86_avx512f_bf16_bf16_fp32.inc",
+        "x86_avx512f_fp16_fp16_fp32.inc",
         "x86_avx512f_fp32.inc",
         "x86_avx512f_fp32_k2.inc",
         "x86_avx512f_fp32_k4.inc",
         "x86_avx512vnni_uint8_int8_int32.inc",
         "x86_avx512vnni_uint8_int8_int32_k16.inc",
         "x86_avx_fp32.inc",
+        "x86_f16c_fma3_fp16_fp16_fp32.inc",
+        "x86_f16c_fp16_fp16_fp32.inc",
         "x86_fma3_fp32.inc",
         "x86_sse2_fp32.inc",
     ],
     compatible_with = _COMPATIBLE_WITH,
-    copts = ["-fno-unroll-loops"],
+    copts = ynn_kernel_copts(unroll_loops = False),
     per_arch_srcs = {
         "x86_sse2": ["x86_sse2_fp32.cc"],
-        "x86_avx": [
-            "x86_avx_fp32.cc",
-        ],
-        "x86_fma3": [
-            "x86_fma3_fp32.cc",
-        ],
+        "x86_avx": ["x86_avx_fp32.cc"],
+        "x86_f16c": ["x86_f16c_fp16_fp16_fp32.cc"],
+        "x86_f16c_fma3": ["x86_f16c_fma3_fp16_fp16_fp32.cc"],
+        "x86_fma3": ["x86_fma3_fp32.cc"],
         "x86_avx2": [
             "x86_avx2_int8_int8_int32.cc",
             "x86_avx2_fp32_k2.cc",
@@ -511,6 +602,7 @@ ynn_cc_library(
             "x86_avx512f_fp32_k2.cc",
             "x86_avx512f_fp32_k4.cc",
             "x86_avx512f_bf16_bf16_fp32.cc",
+            "x86_avx512f_fp16_fp16_fp32.cc",
         ],
         "x86_avx512bw": [
             "x86_avx512bw_int8_int8_int32.cc",
@@ -533,7 +625,10 @@ ynn_cc_library(
             "x86_avx512vnni_uint8_int8_int32.cc",
             "x86_avx512vnni_uint8_int8_int32_k16.cc",
         ],
-        "arm64_neon": ["arm64_neon_fp32.cc"],
+        "arm64_neon": [
+            "arm64_neon_fp32.cc",
+            "arm64_neon_bf16_bf16_fp32.cc",
+        ],
         "arm_neon": ["arm_neon_int8_int8_int32.cc"],
         "arm_neondot": ["arm_neondot_int8_int8_int32.cc"],
         "arm64_neoni8mm": ["arm64_neoni8mm_int8_int8_int32.cc"],
@@ -563,6 +658,21 @@ cc_test(
     deps = [
         ":dot",
         "//ynnpack:ynnpack_h",
+        "//ynnpack/base",
+        "//ynnpack/base/test:buffer",
+        "//ynnpack/base/test:fuzz_test",
+        "//ynnpack/base/test:random",
+        "//ynnpack/base/test:tensor",
+        "//ynnpack/base/test:util",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "consistent_arithmetic_test",
+    srcs = ["consistent_arithmetic_test.cc"],
+    deps = [
+        ":dot",
         "//ynnpack/base",
         "//ynnpack/base/test:buffer",
         "//ynnpack/base/test:fuzz_test",

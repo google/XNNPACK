@@ -147,7 +147,7 @@ xnnpack_unit_test(
     srcs = [
         "convert-nc.cc",
     ],
-    deps = OPERATOR_TEST_DEPS,
+    deps = OPERATOR_TEST_DEPS + ["//:subgraph_h"],
 )
 
 xnnpack_unit_test(

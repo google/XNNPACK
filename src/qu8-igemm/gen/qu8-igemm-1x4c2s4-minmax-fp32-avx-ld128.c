@@ -80,7 +80,7 @@ void xnn_qu8_igemm_minmax_fp32_ukernel_1x4c2s4__avx_ld128(
         __m128i vxa0 = _mm_cvtepu8_epi16(va0);
         a0 += 8;
 
-        const __m128i vb01 = _mm_loadu_si128((const __m128i*) w);
+        const __m128i vb01 = _mm_load_si128((const __m128i*) w);
         const __m128i vxb0 = _mm_sub_epi16(_mm_unpacklo_epi8(vb01, vzero), vb_zero_point);
         const __m128i vxb1 = _mm_sub_epi16(_mm_unpackhi_epi8(vb01, vzero), vb_zero_point);
 

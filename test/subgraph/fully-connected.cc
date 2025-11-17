@@ -34,6 +34,7 @@ template <typename Input, typename Filter, typename Bias, typename Scale>
 void MatrixVectorMultiply(const Input* input, const Tensor<Filter>& filter,
                           Tensor<Bias> bias,
                           const xnn_quantization_params& input_quantization,
+                          const float* channelwise_filter_zero_point,
                           int filter_zero_point, Tensor<Scale> filter_scale,
                           size_t filter_ic_block_size, int bias_zero_point,
                           Tensor<Scale> bias_scale, float* output) {
@@ -81,10 +82,50 @@ void MatrixVectorMultiplyInt4(const Input* input, const Tensor<Filter>& filter,
   }
 }
 
+template <typename Input, typename Filter, typename Bias, typename Scale>
+void MatrixVectorMultiplyInt2(const Input* input, const Tensor<Filter>& filter,
+                              Tensor<Bias> bias,
+                              const xnn_quantization_params& input_quantization,
+                              const float* filter_zero_point,
+                              Tensor<Scale> filter_scale,
+                              size_t filter_ic_block_size, int bias_zero_point,
+                              Tensor<Scale> bias_scale, float* output) {
+  for (size_t oc = 0; oc < filter.extent(0); ++oc) {
+    double output_ic =
+        bias.empty() ? 0.0f
+                     : dequantize(bias(oc), {bias_zero_point, bias_scale(oc)});
+    for (size_t ic = 0; ic < filter.extent(1); ++ic) {
+      for (size_t p = 0; p < 4; ++p) {
+        float input_ic = dequantize(input[ic * 4 + p], input_quantization);
+        float filter_ic = dequantize(
+            filter(oc, ic)[p],
+            filter_scale(oc, (ic * 4 + p) / filter_ic_block_size),
+            filter_zero_point[oc]);
+        output_ic += input_ic * filter_ic;
+      }
+    }
+    output[oc] = output_ic;
+  }
+}
+
+template <typename Input, typename Bias, typename Scale>
+void MatrixVectorMultiply(const Input* input, const Tensor<qcint2>& filter,
+                          Tensor<Bias> bias,
+                          const xnn_quantization_params& input_quantization,
+                          const float* channelwise_filter_zero_point,
+                          int filter_zero_point, Tensor<Scale> filter_scale,
+                          size_t filter_ic_block_size, int bias_zero_point,
+                          Tensor<Scale> bias_scale, float* output) {
+  return MatrixVectorMultiplyInt2(
+      input, filter, bias, input_quantization, channelwise_filter_zero_point,
+      filter_scale, filter_ic_block_size, bias_zero_point, bias_scale, output);
+}
+
 template <typename Input, typename Bias, typename Scale>
 void MatrixVectorMultiply(const Input* input, const Tensor<qcint4>& filter,
                           Tensor<Bias> bias,
                           const xnn_quantization_params& input_quantization,
+                          const float* channelwise_filter_zero_point,
                           int filter_zero_point, Tensor<Scale> filter_scale,
                           size_t filter_ic_block_size, int bias_zero_point,
                           Tensor<Scale> bias_scale, float* output) {
@@ -97,6 +138,7 @@ template <typename Input, typename Bias, typename Scale>
 void MatrixVectorMultiply(const Input* input, const Tensor<qcuint4>& filter,
                           Tensor<Bias> bias,
                           const xnn_quantization_params& input_quantization,
+                          const float* channelwise_filter_zero_point,
                           int filter_zero_point, Tensor<Scale> filter_scale,
                           size_t filter_ic_block_size, int bias_zero_point,
                           Tensor<Scale> bias_scale, float* output) {
@@ -109,7 +151,9 @@ template <typename Input, typename Filter, typename Bias, typename Scale>
 Tensor<float> ReferenceImpl(Tensor<Input> input, Tensor<Filter> filter,
                             Tensor<Bias> bias,
                             const xnn_quantization_params& input_quantization,
-                            int filter_zero_point, Tensor<Scale> filter_scale,
+                            const float* channelwise_filter_zero_point,
+                            int filter_zero_point,
+                            Tensor<Scale> filter_scale,
                             size_t filter_ic_block_size, int bias_zero_point,
                             Tensor<Scale> bias_scale, uint32_t flags) {
   if (flags & XNN_FLAG_TRANSPOSE_WEIGHTS) {
@@ -124,12 +168,18 @@ Tensor<float> ReferenceImpl(Tensor<Input> input, Tensor<Filter> filter,
   Tensor<float> output_batches = output.slice(output.rank() - 1, 0);
 
   for (const auto& i : EnumerateIndices(output_batches.shape())) {
-    MatrixVectorMultiply(&input_batches(i), filter, bias, input_quantization,
-                         filter_zero_point, filter_scale, filter_ic_block_size,
-                         bias_zero_point, bias_scale, &output_batches(i));
+    MatrixVectorMultiply(
+        &input_batches(i), filter, bias, input_quantization,
+        channelwise_filter_zero_point, filter_zero_point, filter_scale,
+        filter_ic_block_size, bias_zero_point, bias_scale, &output_batches(i));
   }
 
   return output;
+}
+
+// Generate 4 values at once with uint8.
+DatatypeGenerator<quint8> MakeDatatypeGenerator(qcint2) {
+  return DatatypeGenerator<quint8>();
 }
 
 // Generate 2 values at once with uint8.
@@ -156,6 +206,7 @@ void TestStaticB(xnn_datatype convert_to = xnn_datatype_invalid,
                  size_t block_size = no_blockwise) {
   const bool channelwise_quantization =
       xnn_datatype_is_channelwise_quantized(datatype_of<Filter>());
+  const bool is_qc2w = std::is_same<Filter, qcint2>::value;
   // If the filter datatype is sub-byte, we have more than one filter element
   // per value.
   const size_t filter_channel_factor =
@@ -169,6 +220,7 @@ void TestStaticB(xnn_datatype convert_to = xnn_datatype_invalid,
   auto input_gen = MakeDatatypeGenerator(Input());
   auto output_gen = MakeDatatypeGenerator(Output());
   std::uniform_int_distribution<> channels_dist{1, 100};
+  std::uniform_real_distribution<> zero_point_dist{-1.5f, -0.5f};
   // TODO(b/408280445): The rank should go down to 1, but hits a bug in QP8
   // code paths that assume the LHS has rank >= 2.
   std::uniform_int_distribution<> rank_dist{2, XNN_MAX_TENSOR_DIMS - 1};
@@ -223,6 +275,11 @@ void TestStaticB(xnn_datatype convert_to = xnn_datatype_invalid,
         random_quantization(datatype_of<Filter>(), rng, 0.001f, 2.0f);
     Tensor<Scale> filter_scale({channelwise_quantization ? output_channels : 1,
                                 divide_round_up(input_channels, block_size)});
+    // Needed for qc2w only.
+    std::vector<float> channelwise_zero_point(output_channels);
+    std::generate(channelwise_zero_point.begin(), channelwise_zero_point.end(),
+                  [&]() { return zero_point_dist(rng); });
+
     if (filter_scale.size() > 1) {
       // Generate random per-channel scales, in the range of the original scale.
       std::uniform_real_distribution<float> filter_scale_dist(
@@ -292,7 +349,7 @@ void TestStaticB(xnn_datatype convert_to = xnn_datatype_invalid,
       filter_quantization.zero_point = static_cast<int32_t>(
           (NumericLimits<Filter>::min() + NumericLimits<Filter>::max() + 1) /
           2);
-      uint32_t id = 0;
+      uint32_t id = XNN_INVALID_VALUE_ID;
       ASSERT_EQ(
           xnn_status_success,
           xnn_define_blockwise_quantized_tensor_value_v2(
@@ -302,6 +359,18 @@ void TestStaticB(xnn_datatype convert_to = xnn_datatype_invalid,
               filter_dims.size(),
               /*channel_dim=*/0, block_size, filter_dims.data(), filter.data(),
               filter_id, /*flags=*/0, datatype_of<Scale>(), &id));
+      ASSERT_EQ(id, filter_id);
+    } else if (is_qc2w) {
+      uint32_t id = XNN_INVALID_VALUE_ID;
+      ASSERT_EQ(
+          xnn_status_success,
+          xnn_define_channelwise_quantized_tensor_value_v3(
+              subgraph.Subgraph(), xnn_datatype_qcint2,
+              filter_quantization.zero_point,
+              reinterpret_cast<const float*>(filter_scale.data()),
+              filter_dims.size(), /*channel_dim=*/0, filter_dims.data(),
+              filter.base(), filter_id, /*flags=*/0, &id,
+              channelwise_zero_point.data()));
       ASSERT_EQ(id, filter_id);
     } else if (channelwise_quantization) {
       const size_t channel_dim = flags & XNN_FLAG_TRANSPOSE_WEIGHTS ? 1 : 0;
@@ -374,10 +443,12 @@ void TestStaticB(xnn_datatype convert_to = xnn_datatype_invalid,
         bias_zero_point = bias_quantization.zero_point;
         bias_scale.fill(bias_quantization.scale);
       }
-      Tensor<float> expected =
-          ReferenceImpl(input, filter, bias, input_quantization,
-                        filter_quantization.zero_point, filter_scale,
-                        block_size, bias_zero_point, bias_scale, flags);
+      Tensor<float> expected = ReferenceImpl(
+          input, filter, bias, input_quantization,
+          is_qc2w ? channelwise_zero_point.data() : nullptr,
+          filter_quantization.zero_point,
+          filter_scale, block_size, bias_zero_point, bias_scale, flags);
+
       for (float& i : expected) {
         i = std::max(i, output_min);
         i = std::min(i, output_max);
@@ -465,6 +536,9 @@ TEST(FullyConnectedQD8F16QC8W, static_b) {
 }
 TEST(FullyConnectedQD8F32QC4W, static_b) {
   TestStaticB<float, qcint4, float>(/*convert_to=*/xnn_datatype_qdint8);
+}
+TEST(FullyConnectedQD8F32QC2W, static_b) {
+  TestStaticB<float, qcint2, float>(/*convert_to=*/xnn_datatype_qdint8);
 }
 TEST(FullyConnectedQD8F32QC8W, static_b) {
   TestStaticB<float, qcint8, float>(/*convert_to=*/xnn_datatype_qdint8);
@@ -622,6 +696,7 @@ void TestDynamicB(xnn_datatype convert_to = xnn_datatype_invalid,
       bias_scale.fill(bias_quantization.scale);
       Tensor<float> expected = ReferenceImpl(
           input, filter, bias, input_quantization,
+          /*channelwise_filter_zero_point=*/nullptr,
           filter_quantization.zero_point, filter_scale, block_size,
           bias_quantization.zero_point, bias_scale, flags);
       for (float& i : expected) {

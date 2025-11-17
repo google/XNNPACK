@@ -55,10 +55,18 @@ enum xnn_status xnn_reshape_external_value(
                   external_id, value->allocation_type);
     return xnn_status_invalid_parameter;
   }
-  struct xnn_shape* shape = &value->shape;
-  shape->num_dims = num_dims;
-  for (size_t i = 0; i < num_dims; ++i) {
-    shape->dim[i] = dims[i];
+  struct xnn_shape new_shape = {.num_dims = num_dims};
+  for (int k = 0; k < num_dims; k++) {
+    new_shape.dim[k] = dims[k];
+  }
+  if (!xnn_shape_match(&value->shape, &new_shape)) {
+    if (value->flags & XNN_VALUE_FLAG_SHAPE_IS_STATIC) {
+      xnn_log_error("failed to reshape runtime: Value %" PRIu32
+                    " is flagged as having a static shape",
+                    external_id);
+      return xnn_status_invalid_parameter;
+    }
+    value->shape = new_shape;
   }
   value->size = xnn_runtime_tensor_get_size(value);
   return xnn_status_success;
@@ -265,7 +273,9 @@ static enum xnn_status initialize_workspace_values(
         value->quantization.dynamic_params =
           (void*) ((uintptr_t) runtime->workspace->data + mem_alloc_tracker->usage[i].alloc_offset
                    + xnn_tensor_get_rounded_size(value));
-
+        value->quantization.row_sum =
+          (void*) ((uintptr_t) value->quantization.dynamic_params +
+                   xnn_tensor_get_rounded_dynamic_quant_param_size(value));
       }
     }
   }
@@ -304,6 +314,8 @@ static enum xnn_status initialize_workspace_values(
                 value->datatype == xnn_datatype_qduint8) {
               value->quantization.dynamic_params = (void*) ((uintptr_t) value->quantization.dynamic_params
                                                             + workspace_data_delta);
+              value->quantization.row_sum = (void*) ((uintptr_t) value->quantization.row_sum
+                                                      + workspace_data_delta);
             }
           }
         }
@@ -556,9 +568,15 @@ static enum xnn_status create_runtime_impl(
 
   xnn_subgraph_rewrite_ssa(subgraph);
 
+  status = xnn_subgraph_rewrite_for_row_sum(subgraph);
+  if (status != xnn_status_success) {
+    xnn_log_error("failed to rewrite subgraph for row_sum");
+    goto error;
+  }
+
   const uint32_t optimization_flags =
 #ifdef XNN_SLINKY_ENABLED
-      XNN_FLAG_SLINKY_ENABLED |
+      XNN_FLAG_SLINKY_ENABLED | XNN_FLAG_SLINKY_STATIC_BOUNDS |
 #endif
       XNN_FLAG_HINT_SPARSE_INFERENCE | XNN_FLAG_HINT_FP16_INFERENCE |
       XNN_FLAG_FORCE_FP16_INFERENCE | XNN_FLAG_NO_OPERATOR_FUSION |
@@ -844,6 +862,7 @@ enum xnn_status xnn_plan_memory(
       size_t tensor_size = xnn_tensor_get_rounded_size(value);
       if (value->datatype == xnn_datatype_qdint8 || value->datatype == xnn_datatype_qduint8) {
         tensor_size += xnn_tensor_get_rounded_dynamic_quant_param_size(value);
+        tensor_size += xnn_tensor_get_rounded_row_sum_size(value);
       }
       xnn_add_value_allocation_tracker(&mem_alloc_tracker, i, tensor_size);
     }

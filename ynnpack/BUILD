@@ -76,22 +76,12 @@ selects.config_setting_group(
     ],
 )
 
-config_setting(
-    name = "windows_x86_msvc",
-    constraint_values = [
-        "@platforms//os:windows",
+selects.config_setting_group(
+    name = "msvc",
+    match_any = [
+        "@rules_cc//cc/compiler:msvc-cl",
+        "@rules_cc//cc/compiler:clang-cl",
     ],
-    flag_values = {"@bazel_tools//tools/cpp:compiler": "msvc"},
-    visibility = ["//:__subpackages__"],
-)
-
-config_setting(
-    name = "windows_x86_clangcl",
-    constraint_values = [
-        "@platforms//os:windows",
-    ],
-    flag_values = {"@bazel_tools//tools/cpp:compiler": "clangcl"},
-    visibility = ["//:__subpackages__"],
 )
 
 define_build_option(
@@ -172,6 +162,14 @@ define_build_option(
 define_build_option(
     name = "ynn_enable_x86_f16c",
     default_all = [":ynn_enable_x86_avx"],
+)
+
+define_build_option(
+    name = "ynn_enable_x86_f16c_fma3",
+    default_all = [
+        ":ynn_enable_x86_f16c",
+        ":ynn_enable_x86_fma3",
+    ],
 )
 
 define_build_option(

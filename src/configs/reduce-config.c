@@ -73,25 +73,26 @@ XNN_INIT_ONCE_GUARD(qu8_rsum);
   xnn_log_info("Using reduce_discontiguous microkernel '%s'.", #ukernel);
 
 static uint32_t pack_xint8_x4(uint8_t value) {
-  uint32_t result;
-  *((uint8_t*) &result) = value;
-  *((uint8_t*) &result + 1) = value;
-  *((uint8_t*) &result + 2) = value;
-  *((uint8_t*) &result + 3) = value;
+  uint32_t v32 = (uint32_t)value;
+  uint32_t result = v32 | (v32 << 8) | (v32 << 16) | (v32 << 24);
   return result;
 }
 
 static uint32_t pack_uint16_x2(uint16_t value) {
-  uint32_t result;
-  *((uint16_t*) &result) = value;
-  *((uint16_t*) &result + 1) = value;
+  uint32_t v32 = (uint32_t)value;
+  uint32_t result = v32 | (v32 << 16);
   return result;
 }
 
+typedef union {
+    float f;
+    uint32_t u;
+} FloatUInt32;
+
 static uint32_t pack_float32(float value) {
-  uint32_t result;
-  *((float*) &result) = value;
-  return result;
+  FloatUInt32 data;
+  data.f = value;
+  return data.u;
 }
 
 static void init_s8_rmax_config(void) {
@@ -268,8 +269,13 @@ static void init_u8_rmax_config(void) {
         u8_rmax_config.ukernel = XNN_INIT_REDUCE_UKERNEL(xnn_u8_rmax_ukernel__sse2_u32_acc2);
         u8_rmax_config.rd_ukernel = XNN_INIT_REDUCE_DISCONTIGUOUS_UKERNEL(xnn_u8_rdmax_ukernel_2p2x__sse2_u32);
         u8_rmax_config.rd_width = 32;
-      }
+      } else
     #endif
+    {
+      u8_rmax_config.ukernel = XNN_INIT_REDUCE_UKERNEL(xnn_u8_rmax_ukernel__scalar_u2_acc2);
+      u8_rmax_config.rd_ukernel = XNN_INIT_REDUCE_DISCONTIGUOUS_UKERNEL(xnn_u8_rdmax_ukernel_2p2x__scalar_u2);
+      u8_rmax_config.rd_width = 2;
+    }
   #elif XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
@@ -806,8 +812,11 @@ static void init_f32_rmax_config(void) {
     #if XNN_ENABLE_SSE
       if (hardware_config->arch_flags & xnn_arch_x86_sse) {
         f32_rmax_config.ukernel = XNN_INIT_REDUCE_UKERNEL(xnn_f32_rmax_ukernel__sse_u16_acc4);
-      }
+      } else
     #endif
+    {
+      f32_rmax_config.ukernel = XNN_INIT_REDUCE_UKERNEL(xnn_f32_rmax_ukernel__scalar_u4_acc4);
+    }
     #if XNN_ENABLE_AVX512F
       if (hardware_config->arch_flags & xnn_arch_x86_avx512f) {
         f32_rmax_config.rd_ukernel = XNN_INIT_REDUCE_DISCONTIGUOUS_UKERNEL(xnn_f32_rdmax_ukernel_2p2x__avx512f_u32);
@@ -824,8 +833,12 @@ static void init_f32_rmax_config(void) {
       if (hardware_config->arch_flags & xnn_arch_x86_sse2) {
         f32_rmax_config.rd_ukernel = XNN_INIT_REDUCE_DISCONTIGUOUS_UKERNEL(xnn_f32_rdmax_ukernel_2p2x__sse2_u32);
         f32_rmax_config.rd_width = 32;
-      }
+      } else
     #endif
+    {
+      f32_rmax_config.rd_ukernel = XNN_INIT_REDUCE_DISCONTIGUOUS_UKERNEL(xnn_f32_rdmax_ukernel_2p2x__scalar_u2);
+      f32_rmax_config.rd_width = 2;
+    }
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     f32_rmax_config.ukernel = XNN_INIT_REDUCE_UKERNEL(xnn_f32_rmax_ukernel__wasmsimd_pminmax_u16_acc4);
     f32_rmax_config.rd_ukernel = XNN_INIT_REDUCE_DISCONTIGUOUS_UKERNEL(xnn_f32_rdmax_ukernel_2p2x__wasmsimd_u32);
@@ -847,6 +860,8 @@ static void init_f32_rmax_config(void) {
     f32_rmax_config.rd_ukernel = XNN_INIT_REDUCE_DISCONTIGUOUS_UKERNEL(xnn_f32_rdmax_ukernel_2p2x__scalar_u2);
     f32_rmax_config.rd_width = 2;
   #endif
+  assert(f32_rmax_config.ukernel != NULL);
+  assert(f32_rmax_config.rd_ukernel != NULL);
 
   f32_rmax_config.identity_value = pack_float32(-INFINITY);
 }
@@ -880,8 +895,11 @@ static void init_f32_rminmax_config(void) {
     #if XNN_ENABLE_SSE
       if (hardware_config->arch_flags & xnn_arch_x86_sse) {
         f32_rminmax_config.ukernel = XNN_INIT_REDUCE_UKERNEL(xnn_f32_rminmax_ukernel__sse_u16_acc4);
-      }
+      } else
     #endif
+    {
+      f32_rminmax_config.ukernel = XNN_INIT_REDUCE_UKERNEL(xnn_f32_rminmax_ukernel__scalar_u4_acc4);
+    }
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     f32_rminmax_config.ukernel = XNN_INIT_REDUCE_UKERNEL(xnn_f32_rminmax_ukernel__wasmsimd_minmax_u16_acc4);
   #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
@@ -1111,8 +1129,7 @@ static void init_f32_rsum2_config(void) {
         f32_rsum2_config.rd_width = 16;
       } else
     #endif
-    {
-    }
+    ;  // todo scalar kernel
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     f32_rsum2_config.ukernel = XNN_INIT_REDUCE_UKERNEL(xnn_f32_rsum2_ukernel__wasmsimd_u16_acc4);
     f32_rsum2_config.rd_ukernel2 = XNN_INIT_REDUCE_DISCONTIGUOUS_UKERNEL2(xnn_f32_rdsum2_ukernel_7p7x__wasmsimd_u16);

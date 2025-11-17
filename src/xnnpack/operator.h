@@ -308,8 +308,10 @@ struct xnn_operator {
         };
       };
       const struct xnn_reduce_config* reduce_config;
+      // Extra reduce config for row_sum.
+      const struct xnn_reduce_config* reduce_config2;
       const struct xnn_unary_elementwise_config* cvt_config;
-    };  // For softmax and reduce operators.
+    };  // For softmax, convert and reduce operators.
     const struct xnn_maxpool_config* maxpool_config;
     const struct xnn_unpool_config* unpool_config;
     const struct xnn_zip_config* zip_config;

@@ -52,6 +52,7 @@ cc_library(
         "xnnpack.h",
     ],
     compatible_with = _COMPATIBLE_WITH,
+    defines = ["XNNPACK_USING_YNNPACK=1"],
     visibility = ["//visibility:public"],
     deps = [
         ":dynamic_quantization",

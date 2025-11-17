@@ -10,6 +10,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
+#include <iostream>
 #include <limits>
 #include <string>
 
@@ -89,7 +90,18 @@ class ReplicableRandomDevice {
         scoped_trace_(__FILE__, __LINE__,
                       "To replicate this failure, re-run the test with "
                       "`--gtest_random_seed=" +
-                          std::to_string(random_seed_) + "`.") {}
+                          std::to_string(random_seed_) + "`.") {
+    static bool is_set = false;
+    static int last_seed = 0;
+    if (!is_set || last_seed != random_seed_) {
+      std::cout
+          << "Creating a random device for testing, to replicate it re-run the "
+             "test with  `--gtest_random_seed="
+          << random_seed_ << "`." << std::endl;
+      is_set = true;
+      last_seed = random_seed_;
+    }
+  }
 
   // Wrapped methods from `BaseRandomDevice`.
   result_type operator()() { return random_generator_(); }

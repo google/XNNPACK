@@ -48,6 +48,11 @@ void ynn_runtime_value::make_buffer(ynn_runtime& runtime,
     }
   }
   buffer = ynn::make_buffer_expr(symbol, rank(), std::move(elem_size));
+  for (size_t i = 0; i < rank(); ++i) {
+    if (!extents[i].defined() || slinky::is_constant(extents[i], 1)) {
+      buffer->dim(i) = slinky::dim::broadcast();
+    }
+  }
   assert(buffer->sym() == symbol);
 }
 
@@ -74,7 +79,8 @@ slinky::var ynn_runtime::make_global_variable(slinky::expr value,
 std::unique_ptr<ynn::scheduling_info> ynn_runtime::make_schedule(
     const std::vector<slinky::var>& dims, const slinky::buffer_expr_ptr output,
     uint32_t output_value, slinky::span<const slinky::expr> given_splits,
-    const slinky::expr& element_cost) {
+    const slinky::expr& element_cost,
+    const std::vector<slinky::index_t>& loop_order) {
   auto sched = std::make_unique<ynn::scheduling_info>();
 
   int max_threads = threadpool() ? threadpool()->thread_count() : 1;
@@ -82,9 +88,6 @@ std::unique_ptr<ynn::scheduling_info> ynn_runtime::make_schedule(
   // Enough tasks to have good load balancing.
   slinky::index_t target_task_count = max_threads > 1 ? max_threads * 2 : 1;
 
-  // Area is selected such that tiles fit better into cache, this is a
-  // constant for now, but we could add a more advanced logic based on
-  // hardware info.
   assert(dims.size() == output->rank() || dims.size() + 1 == output->rank());
   // For min_max reductions dims.size() + 1 == output.rank().
   // Otherwise, dims.size() == output->rank().
@@ -95,11 +98,20 @@ std::unique_ptr<ynn::scheduling_info> ynn_runtime::make_schedule(
   }
   assert(output->rank() == output_extents.size());
 
+  // Area is selected such that tiles fit better into cache, this is a
+  // constant for now, but we could add a more advanced logic based on
+  // hardware info.
   slinky::expr tile_area = slinky::ceil_div(slinky::expr(32768 * 4),
                                             output->elem_size() * element_cost);
   std::vector<slinky::expr> splits(rank);
   slinky::expr tile_area_so_far = 1;
-  for (int d = 0; d < rank; ++d) {
+
+  auto get_loop_dim = [&](int index_d) {
+    return index_d < loop_order.size() ? loop_order[index_d] : index_d;
+  };
+
+  for (int index_d = 0; index_d < rank; ++index_d) {
+    int d = get_loop_dim(index_d);
     if (!output_extents[d].defined()) continue;
     if (d < given_splits.size()) {
       splits[d] = given_splits[d];
@@ -119,7 +131,8 @@ std::unique_ptr<ynn::scheduling_info> ynn_runtime::make_schedule(
   std::vector<slinky::expr> workers(rank);
   slinky::expr threads_so_far = 1;
 
-  for (int d = rank - 1; d >= 0; --d) {
+  for (int index_d = rank - 1; index_d >= 0; --index_d) {
+    int d = get_loop_dim(index_d);
     if (max_threads == 1) {
       workers[d] = slinky::loop::serial;
     } else if (output_extents[d].defined() && splits[d].defined()) {
@@ -135,7 +148,8 @@ std::unique_ptr<ynn::scheduling_info> ynn_runtime::make_schedule(
     }
   }
 
-  for (int d = 0; d < rank; ++d) {
+  for (int index_d = 0; index_d < rank; ++index_d) {
+    int d = get_loop_dim(index_d);
     if (output_extents[d].defined() && splits[d].defined()) {
       sched->loop_splits.push_back({dims[d], splits[d], workers[d], d});
     }
@@ -225,6 +239,7 @@ void ynn_runtime::schedule() {
   for (int i = funcs.size() - 1; i >= 0; --i) {
     slinky::func& f = funcs[i];
     scheduling_data& sched_data = func_scheduling_data[i];
+    std::vector<int>& loop_nest = sched_data.loop_nest;
     // First of all, we need to find where this function can be scheduled
     // based on its customers. The options are a range of loop levels starting
     // from outermost root to a common subnest of its consumer loop nests.
@@ -241,28 +256,25 @@ void ynn_runtime::schedule() {
         const std::vector<int>& consumer_loop_nest =
             func_scheduling_data[consumer].loop_nest;
         if (!loop_nest_initialized) {
-          sched_data.loop_nest = consumer_loop_nest;
+          loop_nest = consumer_loop_nest;
           loop_nest_initialized = true;
           continue;
         }
-        if (consumer_loop_nest.size() < sched_data.loop_nest.size()) {
-          sched_data.loop_nest.erase(
-              sched_data.loop_nest.begin() + consumer_loop_nest.size(),
-              sched_data.loop_nest.end());
+        if (consumer_loop_nest.size() < loop_nest.size()) {
+          loop_nest.erase(loop_nest.begin() + consumer_loop_nest.size(),
+                          loop_nest.end());
         }
-        for (int j = 0; j < std::min(consumer_loop_nest.size(),
-                                     sched_data.loop_nest.size());
-             ++j) {
-          if (sched_data.loop_nest[j] != consumer_loop_nest[j]) {
-            sched_data.loop_nest.erase(sched_data.loop_nest.begin() + j,
-                                       sched_data.loop_nest.end());
+        for (int j = 0;
+             j < std::min(consumer_loop_nest.size(), loop_nest.size()); ++j) {
+          if (loop_nest[j] != consumer_loop_nest[j]) {
+            loop_nest.erase(loop_nest.begin() + j, loop_nest.end());
             break;
           }
         }
       }
     }
 
-    int compute_at = sched_data.loop_nest.size();
+    int compute_at = -1;
     // The total number of elements shared between the producer and consumer
     // at the proposed compute_at level.
     sched_data.splits_match = 0;
@@ -274,61 +286,54 @@ void ynn_runtime::schedule() {
     // we are risking over-compute. If it doesn't have schedule info then we
     // just compute at the innermost location.
     if (sched && !sched->loop_splits.empty()) {
-      // Reverse to simplify indexing below.
-      std::reverse(sched->loop_splits.begin(), sched->loop_splits.end());
-
+      std::vector<ynn::scheduling_split>& loop_splits = sched->loop_splits;
       // Make sure that extents of the dims belonging to subnest match.
-      const std::vector<ynn::scheduling_split>& loop_splits =
-          sched->loop_splits;
+      // Reverse to simplify indexing below.
+      std::reverse(loop_splits.begin(), loop_splits.end());
 
       const ynn_runtime_value& v = value(sched->base_buffer_id);
       assert(v.is_valid());
       const std::vector<slinky::expr> extents = v.extents;
-      int splits_match;
-      for (compute_at = 0, splits_match = 0;
-           compute_at < sched_data.loop_nest.size() &&
-           splits_match < loop_splits.size();
-           splits_match++) {
-        int loop_nest_id = sched_data.loop_nest[compute_at];
-        slinky::expr loop_extent = global_loop_nest[loop_nest_id].extent;
-        // Loops can't be shared if the existing loop step and this loop
-        // step are not equal and both are required.
-        if (loop_splits[splits_match].step_is_required &&
-            global_loop_nest[loop_nest_id].step_is_required &&
-            !prove_true(loop_splits[splits_match].step ==
-                        global_loop_nest[loop_nest_id].step)) {
+      compute_at = 0;
+      for (int split_i = 0; split_i < loop_splits.size(); ++split_i) {
+        if (compute_at >= loop_nest.size()) {
           break;
         }
-        if (!prove_true(extents[loop_splits[splits_match].axis] ==
-                        loop_extent)) {
-        } else {
+        const ynn::scheduling_split& split = loop_splits[split_i];
+        int loop_nest_id = loop_nest[compute_at];
+        loop_level& global_loop = global_loop_nest[loop_nest_id];
+        // Loops can't be shared if the existing loop step and this loop
+        // step are not equal and both are required.
+        if (split.step_is_required && global_loop.step_is_required &&
+            !prove_true(split.step == global_loop.step)) {
+          break;
+        }
+        if (prove_true(extents[split.axis] == global_loop.extent)) {
           // We can overwrite the current loop step if it's not required, but
           // this one is.
-          if (loop_splits[splits_match].step_is_required) {
-            global_loop_nest[loop_nest_id].step =
-                loop_splits[splits_match].step;
-            global_loop_nest[loop_nest_id].step_is_required = true;
+          if (split.step_is_required) {
+            global_loop.step = split.step;
+            global_loop.step_is_required = true;
           }
           // NOTE(vksnk): Another example of how can we use scheduling_info from
           // all functions assigned to a loop to compute a loop step.
           // global_loop_nest[loop_nest[compute_at]].step = slinky::simplify(
           //     slinky::min(global_loop_nest[loop_nest[compute_at]].step,
           //                 loop_splits[splits_match].step));
-          sched_data.match_volume *= loop_extent;
+          sched_data.match_volume *= global_loop.extent;
           compute_at++;
-          sched_data.splits_match = splits_match;
+          sched_data.splits_match = split_i;
         }
       }
       // Remove the inner part of the loop nest which we were not able to
       // match.
-      sched_data.loop_nest.erase(sched_data.loop_nest.begin() + compute_at,
-                                 sched_data.loop_nest.end());
+      loop_nest.erase(loop_nest.begin() + compute_at, loop_nest.end());
     }
 
     if (sched && sched->force_root) {
       compute_at = 0;
       sched_data.splits_match = 0;
-      sched_data.loop_nest.clear();
+      loop_nest.clear();
     }
 
     sched_data.compute_at = compute_at;
@@ -339,16 +344,18 @@ void ynn_runtime::schedule() {
     // computations than certain threshold.
     if (sched && !sched->loop_splits.empty() &&
         prove_true(sched_data.match_volume == 1)) {
+      const std::vector<ynn::scheduling_split>& loop_splits =
+          sched->loop_splits;
       // Update the global loop nest by adding loops of this function.
       const ynn_runtime_value& v = value(sched->base_buffer_id);
       assert(v.is_valid());
       const std::vector<slinky::expr> extents = v.extents;
       int splits_match = sched_data.splits_match;
-      for (int j = splits_match; j < sched->loop_splits.size(); j++) {
-        const ynn::scheduling_split& dim = sched->loop_splits[j];
+      for (int j = splits_match; j < loop_splits.size(); j++) {
+        const ynn::scheduling_split& dim = loop_splits[j];
         global_loop_nest.push_back(
             {{&f, dim.var}, extents[dim.axis], dim.step, dim.step_is_required});
-        sched_data.loop_nest.push_back(global_loop_nest.size() - 1);
+        loop_nest.push_back(global_loop_nest.size() - 1);
       }
     }
 
@@ -371,33 +378,40 @@ void ynn_runtime::schedule() {
       f.compute_root();
     } else {
       const std::vector<int>& loop_nest = sched_data.loop_nest;
-      const slinky::loop_id& lid =
-          global_loop_nest[loop_nest[compute_at - 1]].loop_id;
-      f.compute_at(lid);
+      if (compute_at > 0) {
+        const slinky::loop_id& lid =
+            global_loop_nest[loop_nest[compute_at - 1]].loop_id;
+        f.compute_at(lid);
+      }
       if (sched) {
         for (auto& b : sched->scheduled_buffers) {
           if (b.store_at_min_depth == 0) {
             b.buffer->store_at({&funcs[i], slinky::var()});
+          } else if (b.store_at_min_depth < loop_nest.size()) {
+            const slinky::loop_id& lid =
+                global_loop_nest[loop_nest[b.store_at_min_depth - 1]].loop_id;
+            b.buffer->store_at(lid);
+          } else {
+            b.buffer->store_root();
           }
         }
       }
     }
 
     if (sched && !sched->loop_splits.empty() && prove_true(match_volume == 1)) {
+      std::vector<ynn::scheduling_split>& loop_splits = sched->loop_splits;
+      const std::vector<int>& loop_nest = sched_data.loop_nest;
       // Reverse it back.
-      std::reverse(sched->loop_splits.begin(), sched->loop_splits.end());
+      std::reverse(loop_splits.begin(), loop_splits.end());
 
+      const int splits_match = sched_data.splits_match;
       std::vector<slinky::func::loop_info> loops;
-
-      int splits_match = sched_data.splits_match;
-      loops.reserve(sched->loop_splits.size() - splits_match);
-      for (int j = 0; j < sched->loop_splits.size() - splits_match; ++j) {
-        const ynn::scheduling_split& dim = sched->loop_splits[j];
+      loops.reserve(loop_splits.size() - splits_match);
+      for (int j = 0; j < loop_splits.size() - splits_match; ++j) {
+        const ynn::scheduling_split& dim = loop_splits[j];
         loops.push_back(
             {dim.var,
-             global_loop_nest[sched_data.loop_nest[sched_data.loop_nest.size() -
-                                                   j - 1]]
-                 .step,
+             global_loop_nest[loop_nest[loop_nest.size() - j - 1]].step,
              dim.workers});
       }
 
@@ -542,14 +556,17 @@ ynn_runtime::ynn_runtime(const ynn_subgraph& subgraph,
       value.symbol = symbols.insert_unique(value.name());
     }
     if (value.is_static()) {
+      for (size_t d = 0; d < value.extents.size(); ++d) {
+        if (!value.extents[d].defined() ||
+            slinky::is_constant(value.extents[d], 1)) {
+          value.data->dim(d) = slinky::dim::broadcast();
+        }
+      }
+
       value.buffer =
           slinky::buffer_expr::make_constant(value.symbol, value.data);
     } else if (value.is_external_input()) {
-      value.buffer = ynn::make_buffer_expr(value.symbol, value.rank(),
-                                           type_elem_size(value.type));
-      for (int d = 0; d < i.rank(); ++d) {
-        value.buffer->dim(d).fold_factor = slinky::dim::unfolded;
-      }
+      value.make_buffer(*this);
 
       if (!value.data) {
         value.data =
@@ -607,6 +624,15 @@ ynn_status ynn_runtime::build() {
     if (value.is_external_output()) {
       assert(value.buffer);
       outputs.push_back(value.buffer);
+    }
+
+    if (value.data) {
+      for (size_t d = 0; d < value.extents.size(); ++d) {
+        if (!value.extents[d].defined() ||
+            slinky::is_constant(value.extents[d], 1)) {
+          value.data->dim(d) = slinky::dim::broadcast();
+        }
+      }
     }
   }
 

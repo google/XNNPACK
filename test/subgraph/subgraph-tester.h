@@ -554,6 +554,10 @@ class SubgraphTester {
     return &subgraph_->values[value_id];
   }
 
+  xnn_value* MutableValue(uint32_t value_id) {
+    return &subgraph_->values[value_id];
+  }
+
   const xnn_node* Node(uint32_t node_id) const {
     return &subgraph_->nodes[node_id];
   }

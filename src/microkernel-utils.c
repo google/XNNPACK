@@ -152,3 +152,20 @@ size_t xnn_gemm_best_tile_size(size_t num_groups, size_t m, size_t n,
       num_tiles_m * divide_round_up(n, nc) * num_groups);
   return nc;
 }
+
+// Checks whether to use the `nr2` config or not.
+bool xnn_use_nr2(size_t nr, size_t nr2, size_t output_channels) {
+  size_t nr_overcompute = (nr - output_channels % nr) % nr;
+  size_t nr2_overcompute = (nr2 - output_channels % nr2) % nr2;
+  // Switch to alternative microkernel when:
+  // 1. Alternative microkernel better supports fewer output channels, or
+  // 2. Alternative microkernel has less overcompute and default wastes >1% of
+  // output channels
+  if (nr > output_channels || (nr2_overcompute < nr_overcompute &&
+                               nr_overcompute * 100 > output_channels)) {
+    // Default microkernel is suboptimal, use a microkernel that better
+    // supports fewer output channels.
+    return true;
+  }
+  return false;
+}

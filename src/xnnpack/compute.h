@@ -350,10 +350,12 @@ struct gemm_context {
   union {
     struct xnn_hmp_gemm_ukernel ukernel;
     struct xnn_hmp_dqgemm_ukernel dq_ukernel;
+    struct xnn_hmp_dqgemm_qc2w_ukernel dq_qc2w_ukernel;
     struct xnn_hmp_qp8gemm_ukernel qp8_ukernel;
   };
   // Parameters for dynamically quantized inputs.
   const struct xnn_qd8_quantization_params* quantization_params;
+  const float* row_sum;
   // Stride between each group of quantization params.
   size_t gq_stride;
   // Parameters for fused GEMM.
@@ -368,6 +370,7 @@ struct gemm_context {
   const struct xnn_pack_lh_config* packed_lh_config;
   // Whether to use the `dq_kernel` or not.
   bool dynamic_quantization;
+  bool with_row_sum;
 };
 
 XNN_PRIVATE void xnn_compute_grouped_gemm(
@@ -1224,7 +1227,11 @@ struct f16_qd8_convert_context {
   size_t y_stride;
   size_t batch_size;
   struct xnn_qd8_quantization_params* quantization_params;
+  // Needed to be compatible with f32_qd8_convert_context.
+  float* row_sum;
   xnn_reduce_ukernel_fn rminmax_ukernel;
+  // Needed to be compatible with f32_qd8_convert_context.
+  xnn_reduce_ukernel_fn rsum_ukernel;
   xnn_vunary_ukernel_fn convert_ukernel;
   xnn_init_unary_uparams_fn init_params;
   union {
@@ -1240,7 +1247,9 @@ struct f32_qd8_convert_context {
   size_t y_stride;
   size_t batch_size;
   struct xnn_qd8_quantization_params* quantization_params;
+  float* row_sum;
   xnn_reduce_ukernel_fn rminmax_ukernel;
+  xnn_reduce_ukernel_fn rsum_ukernel;
   xnn_vunary_ukernel_fn convert_ukernel;
   xnn_init_unary_uparams_fn init_params;
   union {

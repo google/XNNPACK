@@ -276,7 +276,7 @@ void xnn_${DATATYPE_SPEC}_packw_gemm_goi_ukernel_x${NR}c${KR}__${ISA}${"_madd" i
         size_t nb = n;
         for (nb = 0; nb < n; ++nb) {
           $if DATATYPE in ["QS4"]:
-            ((${BTYPE}*) out)[nb] = b[nb] << 4;
+            ((uint32_t*) out)[nb] = (uint32_t) b[nb] << 4;
           $else:
             ((${BTYPE}*) out)[nb] = b[nb];
         }

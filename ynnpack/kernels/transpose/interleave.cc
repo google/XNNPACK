@@ -7,8 +7,8 @@
 
 #include <cassert>
 #include <cstddef>
-#include <cstdint>
 #include <cstring>
+#include <type_traits>
 
 #include "ynnpack/base/arch.h"
 #include "ynnpack/base/arithmetic.h"
@@ -19,23 +19,23 @@ namespace ynn {
 
 namespace {
 
-template <typename T>
+template <typename ElemSize>
 void interleave_impl(size_t factor, size_t m, size_t n, size_t stride_a,
-                     const T* a, T* x) {
+                     const void* a, void* x, ElemSize elem_size) {
   if (factor == 1) {
     assert(m == 1);
-    memcpy(x, a, n * sizeof(T));
+    memcpy(x, a, n * elem_size);
     return;
   }
   assert(m <= factor);
   for (size_t j = 0; j < n; ++j) {
     for (size_t i = 0; i < m; ++i) {
-      memcpy(x, offset_bytes(a, i * stride_a + j * sizeof(T)), sizeof(T));
-      x = offset_bytes(x, sizeof(T));
+      memcpy(x, offset_bytes(a, i * stride_a + j * elem_size), elem_size);
+      x = offset_bytes(x, elem_size);
     }
     for (size_t i = m; i < factor; ++i) {
-      memset(x, 0, sizeof(T));
-      x = offset_bytes(x, sizeof(T));
+      memset(x, 0, elem_size);
+      x = offset_bytes(x, elem_size);
     }
   }
 }
@@ -70,31 +70,31 @@ void interleave_x4(size_t factor, size_t m, size_t n, size_t stride_a,
 }
 void interleave_x8(size_t factor, size_t m, size_t n, size_t stride_a,
                    const void* a, void* x) {
-  interleave_impl(factor, m, n, stride_a, static_cast<const uint8_t*>(a),
-                  static_cast<uint8_t*>(x));
+  interleave_impl(factor, m, n, stride_a, a, x,
+                  std::integral_constant<size_t, 1>{});
 }
 void interleave_x16(size_t factor, size_t m, size_t n, size_t stride_a,
                     const void* a, void* x) {
-  interleave_impl(factor, m, n, stride_a, static_cast<const uint16_t*>(a),
-                  static_cast<uint16_t*>(x));
+  interleave_impl(factor, m, n, stride_a, a, x,
+                  std::integral_constant<size_t, 2>{});
 }
 void interleave_x32(size_t factor, size_t m, size_t n, size_t stride_a,
                     const void* a, void* x) {
-  interleave_impl(factor, m, n, stride_a, static_cast<const uint32_t*>(a),
-                  static_cast<uint32_t*>(x));
+  interleave_impl(factor, m, n, stride_a, a, x,
+                  std::integral_constant<size_t, 4>{});
 }
 void interleave_x64(size_t factor, size_t m, size_t n, size_t stride_a,
                     const void* a, void* x) {
-  interleave_impl(factor, m, n, stride_a, static_cast<const uint64_t*>(a),
-                  static_cast<uint64_t*>(x));
+  interleave_impl(factor, m, n, stride_a, a, x,
+                  std::integral_constant<size_t, 8>{});
 }
 
 interleave_kernel_fn get_interleave_kernel(size_t element_size_bits, size_t m) {
-#define YNN_INTERLEAVE_KERNEL(arch_flags, name, M, type)                 \
-  if (elem_size_of(type{}) == element_size_bits && (m == M || M == 0)) { \
-    if (is_arch_supported(arch_flags)) {                                 \
-      return name;                                                       \
-    }                                                                    \
+#define YNN_INTERLEAVE_KERNEL(arch_flags, name, M, kernel_element_size_bits) \
+  if (kernel_element_size_bits == element_size_bits && (m == M || M == 0)) { \
+    if (is_arch_supported(arch_flags)) {                                     \
+      return name;                                                           \
+    }                                                                        \
   }
 #include "ynnpack/kernels/transpose/interleave.inc"
 #undef YNN_INTERLEAVE_KERNEL

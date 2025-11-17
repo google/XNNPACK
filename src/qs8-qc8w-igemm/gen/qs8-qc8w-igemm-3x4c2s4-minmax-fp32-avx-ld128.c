@@ -99,7 +99,7 @@ void xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_3x4c2s4__avx_ld128(
         __m128i vxa2 = _mm_cvtepi8_epi16(va2);
         a2 += 8;
 
-        const __m128i vb01 = _mm_loadu_si128((const __m128i*) w);
+        const __m128i vb01 = _mm_load_si128((const __m128i*) w);
         const __m128i vxb0 = _mm_cvtepi8_epi16(vb01);
         const __m128i vxb1 = _mm_srai_epi16(_mm_unpackhi_epi8(vb01, vb01), 8);
 
@@ -141,7 +141,7 @@ void xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_3x4c2s4__avx_ld128(
     __m128 vscaled1x0123 = _mm_cvtepi32_ps(vacc1x0123);
     __m128 vscaled2x0123 = _mm_cvtepi32_ps(vacc2x0123);
 
-    const __m128 vscale0123 = _mm_loadu_ps((const float*) w);
+    const __m128 vscale0123 = _mm_load_ps((const float*) w);
     w = (const float*) w + 4;
     vscaled0x0123 = _mm_mul_ps(vscaled0x0123, vscale0123);
     vscaled1x0123 = _mm_mul_ps(vscaled1x0123, vscale0123);

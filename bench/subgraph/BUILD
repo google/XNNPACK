@@ -21,6 +21,7 @@ BENCHMARKS_SLOW_LARGE = {
     "layer_norm": (False, False),
     "mobilenet": (False, False),
     "softmax": (False, False),
+    "static_reduce": (False, False),
     "transformer": (True, False),
     "unary": (False, True),
 }

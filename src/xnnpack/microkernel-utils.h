@@ -32,6 +32,10 @@ size_t xnn_gemm_best_tile_size(size_t num_groups, size_t m, size_t n,
 bool xnn_should_inline_lhs_packing(const struct xnn_gemm_config* gemm_config,
                                    size_t m_packed_stride, size_t n_stride,
                                    size_t cn_stride, size_t mc, size_t nc);
+
+// Checks whether to use the `nr2` config or not.
+bool xnn_use_nr2(size_t nr, size_t nr2, size_t output_channels);
+
 #ifdef __cplusplus
 }
 #endif

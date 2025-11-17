@@ -13,6 +13,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
+#include <optional>
 #include <sstream>
 #include <string>
 
@@ -118,7 +119,6 @@ void dot(benchmark::State& state, uint64_t arch_flags, dot_kernel_fn kernel,
 
 template <typename A, typename B, typename C>
 void get_dot_kernel(benchmark::State& state, A, B, C) {
-  constexpr uint64_t all_archs = -1;
   const size_t m = state.range(0);
   const size_t n = state.range(1);
   const size_t k = state.range(2);
@@ -129,7 +129,9 @@ void get_dot_kernel(benchmark::State& state, A, B, C) {
 
   dot_type type = {type_of<A>(), type_of<B>(), type_of<C>()};
   for (auto _ : state) {
-    get_dot_kernel(type, {m, n, k}, &packed_shape, all_archs);
+    get_dot_kernel(type, {m, n, k}, &packed_shape,
+                   /*consistent_arithmetic=*/false,
+                   /*transpose_a=*/std::nullopt);
   }
 }
 

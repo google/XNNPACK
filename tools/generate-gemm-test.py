@@ -193,7 +193,7 @@ std::vector<GemmTestParams> CreateTests(
       "k_eq_" + kbs,
       tester.clone()
           .m(mr).n(nr).k(k_block)
-          $if WEIGHTS_DATATYPE in ['qb4w', 'qc4w']:
+          $if WEIGHTS_DATATYPE in ['qb4w', 'qc4w', 'qc2w']:
             .b_zero_point(8)
           $if WEIGHTS_DATATYPE in ['qb4w']:
             .bl(32)
@@ -205,7 +205,7 @@ std::vector<GemmTestParams> CreateTests(
           tester.clone()
               .m(mr).n(nr).k(k_block)
               .a_stride(xnnpack::NextPrime(k_block + 1))
-              $if WEIGHTS_DATATYPE in ['qb4w', 'qc4w']:
+              $if WEIGHTS_DATATYPE in ['qb4w', 'qc4w', 'qc2w']:
                 .b_zero_point(8)
               $if WEIGHTS_DATATYPE in ['qb4w']:
                 .bl(32)
@@ -215,7 +215,7 @@ std::vector<GemmTestParams> CreateTests(
       "k_eq_" + kbs + "_subtile",
       tester.clone()
           .k(k_block)
-          $if WEIGHTS_DATATYPE in ['qb4w', 'qc4w']:
+          $if WEIGHTS_DATATYPE in ['qb4w', 'qc4w', 'qc2w']:
             .b_zero_point(8)
           $if WEIGHTS_DATATYPE in ['qb4w']:
             .bl(32)
@@ -226,7 +226,7 @@ std::vector<GemmTestParams> CreateTests(
       "k_eq_" + kbs + "_subtile_m",
       tester.clone()
           .n(nr).k(k_block)
-          $if WEIGHTS_DATATYPE in ['qb4w', 'qc4w']:
+          $if WEIGHTS_DATATYPE in ['qb4w', 'qc4w', 'qc2w']:
             .b_zero_point(8)
           $if WEIGHTS_DATATYPE in ['qb4w']:
             .bl(32)
@@ -236,7 +236,7 @@ std::vector<GemmTestParams> CreateTests(
       "k_eq_" + kbs + "_subtile_n",
       tester.clone()
           .m(mr).k(k_block)
-          $if WEIGHTS_DATATYPE in ['qb4w', 'qc4w']:
+          $if WEIGHTS_DATATYPE in ['qb4w', 'qc4w', 'qc2w']:
             .b_zero_point(8)
           $if WEIGHTS_DATATYPE in ['qb4w']:
             .bl(32)
@@ -247,7 +247,7 @@ std::vector<GemmTestParams> CreateTests(
         "k_eq_" + kb2s,
         tester.clone()
           .m(mr).n(nr).k(k_block * 2)
-          $if WEIGHTS_DATATYPE in ['qb4w', 'qc4w']:
+          $if WEIGHTS_DATATYPE in ['qb4w', 'qc4w', 'qc2w']:
             .b_zero_point(8)
           $if WEIGHTS_DATATYPE in ['qb4w']:
             .bl(32)
@@ -259,7 +259,7 @@ std::vector<GemmTestParams> CreateTests(
             tester.clone()
                 .m(mr).n(nr).k(k_block * 2)
                 .a_stride(xnnpack::NextPrime(k_block * 2 + 1))
-                $if WEIGHTS_DATATYPE in ['qb4w', 'qc4w']:
+                $if WEIGHTS_DATATYPE in ['qb4w', 'qc4w', 'qc2w']:
                   .b_zero_point(8)
               $if WEIGHTS_DATATYPE in ['qb4w']:
                 .bl(32)
@@ -269,7 +269,7 @@ std::vector<GemmTestParams> CreateTests(
         "k_eq_" + kb2s + "_subtile",
         tester.clone()
             .k(k_block * 2)
-            $if WEIGHTS_DATATYPE in ['qb4w', 'qc4w']:
+            $if WEIGHTS_DATATYPE in ['qb4w', 'qc4w', 'qc2w']:
               .b_zero_point(8)
             $if WEIGHTS_DATATYPE in ['qb4w']:
               .bl(32)
@@ -282,7 +282,7 @@ std::vector<GemmTestParams> CreateTests(
             "k_lt_" + akbs,
             tester.clone()
                 .m(mr).n(nr)
-                $if WEIGHTS_DATATYPE in ['qb4w', 'qc4w']:
+                $if WEIGHTS_DATATYPE in ['qb4w', 'qc4w', 'qc2w']:
                   .b_zero_point(8)
                 $if WEIGHTS_DATATYPE in ['qb4w']:
                   .bl(32)
@@ -295,7 +295,7 @@ std::vector<GemmTestParams> CreateTests(
                 tester.clone()
                     .m(mr).n(nr)
                     .a_stride(xnnpack::NextPrime(adj_k_block + 1))
-                    $if WEIGHTS_DATATYPE in ['qb4w', 'qc4w']:
+                    $if WEIGHTS_DATATYPE in ['qb4w', 'qc4w', 'qc2w']:
                       .b_zero_point(8)
                     $if WEIGHTS_DATATYPE in ['qb4w']:
                       .bl(32)
@@ -305,7 +305,7 @@ std::vector<GemmTestParams> CreateTests(
         gemm_tests.push_back(GemmTestParams(
             "k_lt_" + akbs + "_subtile",
             tester.clone()
-                $if WEIGHTS_DATATYPE in ['qb4w', 'qc4w']:
+                $if WEIGHTS_DATATYPE in ['qb4w', 'qc4w', 'qc2w']:
                   .b_zero_point(8)
                 $if WEIGHTS_DATATYPE in ['qb4w']:
                   .bl(32)
@@ -318,7 +318,7 @@ std::vector<GemmTestParams> CreateTests(
           "k_gt_" + akbs,
           tester.clone()
               .m(mr).n(nr)
-              $if WEIGHTS_DATATYPE in ['qb4w', 'qc4w']:
+              $if WEIGHTS_DATATYPE in ['qb4w', 'qc4w', 'qc2w']:
                 .b_zero_point(8)
               $if WEIGHTS_DATATYPE in ['qb4w']:
                 .bl(32)
@@ -331,7 +331,7 @@ std::vector<GemmTestParams> CreateTests(
               tester.clone()
                   .m(mr).n(nr)
                   .a_stride(xnnpack::NextPrime(adj_k_block * 2 + 1))
-                  $if WEIGHTS_DATATYPE in ['qb4w', 'qc4w']:
+                  $if WEIGHTS_DATATYPE in ['qb4w', 'qc4w', 'qc2w']:
                     .b_zero_point(8)
                 $if WEIGHTS_DATATYPE in ['qb4w']:
                   .bl(32)
@@ -341,7 +341,7 @@ std::vector<GemmTestParams> CreateTests(
       gemm_tests.push_back(GemmTestParams(
           "k_gt_" + akbs + "_subtile",
           tester.clone()
-              $if WEIGHTS_DATATYPE in ['qb4w', 'qc4w']:
+              $if WEIGHTS_DATATYPE in ['qb4w', 'qc4w', 'qc2w']:
                 .b_zero_point(8)
               $if WEIGHTS_DATATYPE in ['qb4w']:
                 .bl(32)
@@ -354,7 +354,7 @@ std::vector<GemmTestParams> CreateTests(
             "k_div_" + kbs,
             tester.clone()
                 .m(mr).n(nr)
-                $if WEIGHTS_DATATYPE in ['qb4w', 'qc4w']:
+                $if WEIGHTS_DATATYPE in ['qb4w', 'qc4w', 'qc2w']:
                   .b_zero_point(8)
                 $if WEIGHTS_DATATYPE in ['qb4w']:
                   .bl(32)
@@ -367,7 +367,7 @@ std::vector<GemmTestParams> CreateTests(
                 tester.clone()
                     .m(mr).n(nr)
                     .a_stride(xnnpack::NextPrime(k_block * 3 + 1))
-                    $if WEIGHTS_DATATYPE in ['qb4w', 'qc4w']:
+                    $if WEIGHTS_DATATYPE in ['qb4w', 'qc4w', 'qc2w']:
                       .b_zero_point(8)
                     $if WEIGHTS_DATATYPE in ['qb4w']:
                       .bl(32)
@@ -377,7 +377,7 @@ std::vector<GemmTestParams> CreateTests(
         gemm_tests.push_back(GemmTestParams(
             "k_div_" + kbs + "_subtile",
             tester.clone()
-                $if WEIGHTS_DATATYPE in ['qb4w', 'qc4w']:
+                $if WEIGHTS_DATATYPE in ['qb4w', 'qc4w', 'qc2w']:
                   .b_zero_point(8)
                 $if WEIGHTS_DATATYPE in ['qb4w']:
                   .bl(32)
@@ -390,7 +390,7 @@ std::vector<GemmTestParams> CreateTests(
           "n_gt_" + nrs,
           tester.clone()
               .m(mr)
-              $if WEIGHTS_DATATYPE in ['qb4w', 'qc4w']:
+              $if WEIGHTS_DATATYPE in ['qb4w', 'qc4w', 'qc2w']:
                 .b_zero_point(8)
               $if WEIGHTS_DATATYPE in ['qb4w']:
                 .bl(32)
@@ -407,7 +407,7 @@ std::vector<GemmTestParams> CreateTests(
               tester.clone()
                   .m(mr)
                   .a_stride(xnnpack::NextPrime(k_block * 3 + 1))
-                  $if WEIGHTS_DATATYPE in ['qb4w', 'qc4w']:
+                  $if WEIGHTS_DATATYPE in ['qb4w', 'qc4w', 'qc2w']:
                     .b_zero_point(8)
                   $if WEIGHTS_DATATYPE in ['qb4w']:
                     .bl(32)
@@ -421,7 +421,7 @@ std::vector<GemmTestParams> CreateTests(
       gemm_tests.push_back(GemmTestParams(
           "n_gt_" + nrs + "_subtile",
           tester.clone()
-              $if WEIGHTS_DATATYPE in ['qb4w', 'qc4w']:
+              $if WEIGHTS_DATATYPE in ['qb4w', 'qc4w', 'qc2w']:
                 .b_zero_point(8)
               $if WEIGHTS_DATATYPE in ['qb4w']:
                 .bl(32)
@@ -436,7 +436,7 @@ std::vector<GemmTestParams> CreateTests(
           "n_div_" + nrs,
           tester.clone()
               .m(mr)
-              $if WEIGHTS_DATATYPE in ['qb4w', 'qc4w']:
+              $if WEIGHTS_DATATYPE in ['qb4w', 'qc4w', 'qc2w']:
                 .b_zero_point(8)
               $if WEIGHTS_DATATYPE in ['qb4w']:
                 .bl(32)
@@ -450,7 +450,7 @@ std::vector<GemmTestParams> CreateTests(
               tester.clone()
                   .m(mr)
                   .a_stride(xnnpack::NextPrime(k_block * 3 + 1))
-                  $if WEIGHTS_DATATYPE in ['qb4w', 'qc4w']:
+                  $if WEIGHTS_DATATYPE in ['qb4w', 'qc4w', 'qc2w']:
                     .b_zero_point(8)
                   $if WEIGHTS_DATATYPE in ['qb4w']:
                     .bl(32)
@@ -461,7 +461,7 @@ std::vector<GemmTestParams> CreateTests(
       gemm_tests.push_back(GemmTestParams(
           "n_div_" + nrs + "_subtile",
           tester.clone()
-              $if WEIGHTS_DATATYPE in ['qb4w', 'qc4w']:
+              $if WEIGHTS_DATATYPE in ['qb4w', 'qc4w', 'qc2w']:
                 .b_zero_point(8)
               $if WEIGHTS_DATATYPE in ['qb4w']:
                 .bl(32)
@@ -474,7 +474,7 @@ std::vector<GemmTestParams> CreateTests(
             "small_kernel",
             tester.clone()
                 .m(mr).n(nr).ks(3)
-                $if WEIGHTS_DATATYPE in ['qb4w', 'qc4w']:
+                $if WEIGHTS_DATATYPE in ['qb4w', 'qc4w', 'qc2w']:
                   .b_zero_point(8)
                 $if WEIGHTS_DATATYPE in ['qb4w']:
                   .bl(32)
@@ -484,7 +484,7 @@ std::vector<GemmTestParams> CreateTests(
             "small_kernel_subtile",
             tester.clone()
                 .ks(3)
-                $if WEIGHTS_DATATYPE in ['qb4w', 'qc4w']:
+                $if WEIGHTS_DATATYPE in ['qb4w', 'qc4w', 'qc2w']:
                   .b_zero_point(8)
                 $if WEIGHTS_DATATYPE in ['qb4w']:
                   .bl(32)
@@ -496,7 +496,7 @@ std::vector<GemmTestParams> CreateTests(
             "n_gt_" + nrs + "_small_kernel",
             tester.clone()
                 .m(mr).ks(3)
-                $if WEIGHTS_DATATYPE in ['qb4w', 'qc4w']:
+                $if WEIGHTS_DATATYPE in ['qb4w', 'qc4w', 'qc2w']:
                   .b_zero_point(8)
                 $if WEIGHTS_DATATYPE in ['qb4w']:
                   .bl(32)
@@ -510,7 +510,7 @@ std::vector<GemmTestParams> CreateTests(
             "n_div_" + nrs + "_small_kernel",
             tester.clone()
                 .m(mr).ks(3)
-                $if WEIGHTS_DATATYPE in ['qb4w', 'qc4w']:
+                $if WEIGHTS_DATATYPE in ['qb4w', 'qc4w', 'qc2w']:
                   .b_zero_point(8)
                 $if WEIGHTS_DATATYPE in ['qb4w']:
                   .bl(32)
@@ -523,7 +523,7 @@ std::vector<GemmTestParams> CreateTests(
           tester.clone()
               .mr(mr).nr(nr).kr(kr).sr(sr)
               .cm_stride(xnnpack::NextPrime(nr + 1))
-              $if WEIGHTS_DATATYPE in ['qb4w', 'qc4w']:
+              $if WEIGHTS_DATATYPE in ['qb4w', 'qc4w', 'qc2w']:
                 .b_zero_point(8)
               $if WEIGHTS_DATATYPE in ['qb4w']:
                 .bl(32)
@@ -537,7 +537,7 @@ std::vector<GemmTestParams> CreateTests(
             tester.clone()
                 .m(mr).n(nr).ks(3)
                 .a_offset(xnnpack::NextPrime(mr * k_block * 3 + 1))
-                $if WEIGHTS_DATATYPE in ['qb4w', 'qc4w']:
+                $if WEIGHTS_DATATYPE in ['qb4w', 'qc4w', 'qc2w']:
                   .b_zero_point(8)
                 $if WEIGHTS_DATATYPE in ['qb4w']:
                   .bl(32)
@@ -548,9 +548,9 @@ std::vector<GemmTestParams> CreateTests(
             tester.clone()
                 .m(mr).n(nr).ks(3)
                 .a_offset(xnnpack::NextPrime(mr * k_block * 3 + 1))
-                $if WEIGHTS_DATATYPE in ['qb4w', 'qc4w']:
+                $if WEIGHTS_DATATYPE in ['qb4w', 'qc4w', 'qc2w']:
                   .b_zero_point(8)
-                $if WEIGHTS_DATATYPE in ['qb4w']:
+                $if WEIGHTS_DATATYPE in ['qb4w', 'qc2w']:
                   .bl(32)
             , test_func, arch_flags)
             .loop_k(1, k_block * 3, k_block + 1)
@@ -562,7 +562,7 @@ std::vector<GemmTestParams> CreateTests(
               "min",
               tester.clone()
                   .m(mr).n(nr).k(k_block).min(0.0f)
-                  $if WEIGHTS_DATATYPE in ['qb4w', 'qc4w']:
+                  $if WEIGHTS_DATATYPE in ['qb4w', 'qc4w', 'qc2w']:
                     .b_zero_point(8)
                   $if WEIGHTS_DATATYPE in ['qb4w']:
                     .bl(32)
@@ -571,7 +571,7 @@ std::vector<GemmTestParams> CreateTests(
               "max",
               tester.clone()
                   .m(mr).n(nr).k(k_block).max(0.0f)
-                  $if WEIGHTS_DATATYPE in ['qb4w', 'qc4w']:
+                  $if WEIGHTS_DATATYPE in ['qb4w', 'qc4w', 'qc2w']:
                     .b_zero_point(8)
                   $if WEIGHTS_DATATYPE in ['qb4w']:
                     .bl(32)
@@ -581,7 +581,7 @@ std::vector<GemmTestParams> CreateTests(
               "qmin",
               tester.clone()
                   .m(mr).n(nr).k(k_block).qmin(128)
-                  $if WEIGHTS_DATATYPE in ['qb4w', 'qc4w']:
+                  $if WEIGHTS_DATATYPE in ['qb4w', 'qc4w', 'qc2w']:
                     .b_zero_point(8)
                   $if WEIGHTS_DATATYPE in ['qb4w']:
                     .bl(32)
@@ -590,7 +590,7 @@ std::vector<GemmTestParams> CreateTests(
               "qmax",
               tester.clone()
                   .m(mr).n(nr).k(k_block).qmax(128)
-                  $if WEIGHTS_DATATYPE in ['qb4w', 'qc4w']:
+                  $if WEIGHTS_DATATYPE in ['qb4w', 'qc4w', 'qc2w']:
                     .b_zero_point(8)
                   $if WEIGHTS_DATATYPE in ['qb4w']:
                     .bl(32)
@@ -600,7 +600,7 @@ std::vector<GemmTestParams> CreateTests(
           tester.clone()
               .m(mr).n(nr).k(k_block)
               .cm_stride(xnnpack::NextPrime(nr + 1))
-              $if WEIGHTS_DATATYPE in ['qb4w', 'qc4w']:
+              $if WEIGHTS_DATATYPE in ['qb4w', 'qc4w', 'qc2w']:
                 .b_zero_point(8)
               $if WEIGHTS_DATATYPE in ['qb4w']:
                 .bl(32)
@@ -687,7 +687,7 @@ $if TEST_NAME.startswith('GENERATE') and INPUT_DATATYPE in ['f32', 'f16']:
             $if NR > 1:
               .n(${NR})
             .k(k)
-            $if WEIGHTS_DATATYPE in ['qb4w', 'qc4w']:
+            $if WEIGHTS_DATATYPE in ['qb4w', 'qc4w', 'qc2w']:
               .b_zero_point(8)
             .${TEST_FUN}(${", ".join(TEST_ARGS)});
         }
@@ -790,7 +790,7 @@ def generate_test_cases(
         weights_datatype = token
     elif token in {"gemm", "igemm", "gemminc"}:
       ukernel_type = token
-    elif token in {"qc4w", "qc8w", "qb4w"}:
+    elif token in {"qc4w", "qc2w", "qc8w", "qb4w"}:
       weights_datatype = token
     elif token in {"f32acc"}:
       accum_type = token

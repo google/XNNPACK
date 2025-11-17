@@ -674,8 +674,6 @@ TEST(WORKSPACE, internally_allocated_dynamic_quantization_parameters) {
   xnnpack::Buffer<float> input(batch_size * input_channels,
                                xnnpack::XnnExtraBytes);
   xnnpack::Buffer<float> subgraph_output(batch_size * output_channels);
-  xnnpack::Buffer<xnn_quantization_params> quantization_params(
-      3 + XNN_EXTRA_QUANTIZATION_PARAMS);
   xnnpack::Buffer<float> kernel_scale(output_channels);
   xnnpack::Buffer<float> bias(output_channels);
   xnnpack::Buffer<int8_t> kernel(input_channels * output_channels);

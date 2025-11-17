@@ -14,6 +14,7 @@ class x86_avx512vnni_uint8_int8_int32_k16(x86_avx):  # pylint: disable=invalid-n
     )
     self.a_type = "uint8_t"
     self.b_type = "int8_t"
+    self.flags += ["dot_flag::consistent_arithmetic"]
     # This kernel already has 2 accumulators per tile.
     self.min_tiles = max(1, self.min_tiles // 4)
 

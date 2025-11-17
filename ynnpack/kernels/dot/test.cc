@@ -164,6 +164,7 @@ void TestMatMul(AT, BT, CT, const DotShape& shape, const KernelInfo& kernel,
   const size_t n = shape.n;
   const size_t k = shape.k;
   const bool transpose_a = kernel.flags & dot_flag::transpose_a;
+  const bool unpacked_b = kernel.flags & dot_flag::unaligned_b;
 
   const float max_abs_value = 10.0f;
   TypeGenerator<AT> a_gen(-max_abs_value, max_abs_value, quantization_params{});
@@ -172,7 +173,7 @@ void TestMatMul(AT, BT, CT, const DotShape& shape, const KernelInfo& kernel,
 
   Tensor<AT> a({m, k});
   Tensor<BT> b({k, n / B_info::element_count()},
-               Alignment{.bytes = tile_n * sizeof(BT)});
+               Alignment{.bytes = (unpacked_b ? 1 : tile_n) * sizeof(BT)});
   Tensor<CT> c({m, n});
   Tensor<CT> expected;
 
@@ -188,7 +189,7 @@ void TestMatMul(AT, BT, CT, const DotShape& shape, const KernelInfo& kernel,
 
   // dot kernels require B's k and n dimensions to be aligned to tile_k,
   // tile_n. The kernel might also require b to be packed (tile_k > 1).
-  Tensor<BT> packed_b = PackB(b, tile_k, tile_n);
+  Tensor<BT> packed_b = unpacked_b ? b : PackB(b, tile_k, tile_n);
   Tensor<AT> packed_a = transpose_a ? TransposeA(a, tile_k) : a;
 
   kernel.kernel(m, n, 1, 1, k, packed_a.stride(0) * sizeof(AT), 0, 0,

@@ -7,7 +7,7 @@ Auto-generated file. Do not edit!
 
 PROD_AVX512SKX_MICROKERNEL_SRCS = [
     "src/f16-f32-vcvt/gen/f16-f32-vcvt-avx512skx-u16.c",
-    "src/f16-f32acc-rdsum/gen/f16-f32acc-rdsum-7p7x-avx512skx-u64.c",
+    "src/f16-f32acc-rdsum/gen/f16-f32acc-rdsum-7p7x-minmax-avx512skx-u64.c",
     "src/f16-f32acc-rdsum2/gen/f16-f32acc-rdsum2-7p7x-avx512skx.c",
     "src/f16-f32acc-rsum/gen/f16-f32acc-rsum-avx512skx-u32-acc2.c",
     "src/f16-f32acc-rsum2/gen/f16-f32acc-rsum2-avx512skx.c",
@@ -59,9 +59,9 @@ PROD_AVX512SKX_MICROKERNEL_SRCS = [
 
 NON_PROD_AVX512SKX_MICROKERNEL_SRCS = [
     "src/f16-f32-vcvt/gen/f16-f32-vcvt-avx512skx-u32.c",
-    "src/f16-f32acc-rdsum/gen/f16-f32acc-rdsum-7p7x-avx512skx-u16.c",
-    "src/f16-f32acc-rdsum/gen/f16-f32acc-rdsum-7p7x-avx512skx-u32.c",
-    "src/f16-f32acc-rdsum/gen/f16-f32acc-rdsum-7p7x-avx512skx-u128.c",
+    "src/f16-f32acc-rdsum/gen/f16-f32acc-rdsum-7p7x-minmax-avx512skx-u16.c",
+    "src/f16-f32acc-rdsum/gen/f16-f32acc-rdsum-7p7x-minmax-avx512skx-u32.c",
+    "src/f16-f32acc-rdsum/gen/f16-f32acc-rdsum-7p7x-minmax-avx512skx-u128.c",
     "src/f16-f32acc-rsum/gen/f16-f32acc-rsum-avx512skx-u16.c",
     "src/f16-f32acc-rsum/gen/f16-f32acc-rsum-avx512skx-u48-acc3.c",
     "src/f16-f32acc-rsum/gen/f16-f32acc-rsum-avx512skx-u64-acc2.c",

@@ -6,7 +6,7 @@
 load("@rules_cc//cc:cc_library.bzl", "cc_library")
 load("@rules_cc//cc:cc_test.bzl", "cc_test")
 load("@rules_python//python:py_binary.bzl", "py_binary")
-load("//ynnpack:build_defs.bzl", "ynn_cc_library", "ynn_generate_src_hdr")
+load("//ynnpack:build_defs.bzl", "ynn_cc_library", "ynn_generate_src_hdr", "ynn_kernel_copts")
 
 _COMPATIBLE_WITH = []
 
@@ -140,6 +140,7 @@ ynn_cc_library(
         "x86_sse41.inc",
     ],
     compatible_with = _COMPATIBLE_WITH,
+    copts = ynn_kernel_copts(),
     per_arch_srcs = {
         "arm_neon": ["arm_neon.cc"],
         "x86_avx": ["x86_avx.cc"],

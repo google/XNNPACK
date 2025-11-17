@@ -76,6 +76,13 @@ ynn_status ynn_value::set_external_shape(size_t rank, const size_t* dims) {
 
   ynn::init_buffer(*data, ynn::type_size_bytes(type), rank, physical_dims,
                    data->base);
+
+  for (size_t d = 0; d < rank; ++d) {
+    if (!extents[d].defined() || slinky::is_constant(extents[d], 1)) {
+      data->dim(d) = slinky::dim::broadcast();
+    }
+  }
+
   return ynn_status_success;
 }
 
@@ -115,7 +122,8 @@ std::optional<float> ynn_value::as_scalar_float() const {
       return static_cast<float>(static_scalar_value<uint8_t>());
     case ynn_type_int4:
     case ynn_type_uint4:
-      // int4 values can't be scalars.
+    case ynn_type_int2:
+      // int4 & int2 values can't be scalars.
     case ynn_type_opaque:
     case ynn_type_invalid:
       break;

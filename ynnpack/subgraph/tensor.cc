@@ -134,6 +134,13 @@ ynn_status ynn_define_tensor_value(ynn_subgraph_t subgraph, enum ynn_type type,
     }
   }
 
+  for (size_t d = 0; d < value->extents.size(); ++d) {
+    if (!value->extents[d].defined() ||
+        slinky::is_constant(value->extents[d], 1)) {
+      value->data->dim(d) = slinky::dim::broadcast();
+    }
+  }
+
   return ynn_status_success;
 }
 

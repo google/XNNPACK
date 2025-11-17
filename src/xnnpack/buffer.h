@@ -928,6 +928,7 @@ xnn_quantization_params random_quantization(xnn_datatype datatype, Rng& rng,
     case xnn_datatype_qint8:
     case xnn_datatype_qcint8:
     case xnn_datatype_qcint4:
+    case xnn_datatype_qcint2:
       // signed integer quantization assumes zero point is 0.
       return {0, scale_dist(rng)};
     case xnn_datatype_quint8:

@@ -5,6 +5,7 @@
 
 load("@rules_cc//cc:cc_library.bzl", "cc_library")
 load("@rules_cc//cc:cc_test.bzl", "cc_test")
+load("//ynnpack:build_defs.bzl", "ynn_kernel_copts")
 
 _COMPATIBLE_WITH = []
 
@@ -16,7 +17,8 @@ cc_library(
         "lut.h",
     ],
     compatible_with = _COMPATIBLE_WITH,
-    visibility = ["//ynnpack:__subpackages__"],
+    copts = ynn_kernel_copts(),
+    visibility = ["//visibility:private"],
     deps = [
         "//ynnpack:ynnpack_h",
         "//ynnpack/base",
