@@ -4,7 +4,7 @@
 # LICENSE file in the root directory of this source tree.
 
 load("@rules_cc//cc:cc_test.bzl", "cc_test")
-load("//ynnpack:build_defs.bzl", "ynn_cc_library")
+load("//ynnpack:build_defs.bzl", "ynn_cc_library", "ynn_kernel_copts")
 
 _COMPATIBLE_WITH = []
 
@@ -22,6 +22,7 @@ ynn_cc_library(
         "transpose.inc",
     ],
     compatible_with = _COMPATIBLE_WITH,
+    copts = ynn_kernel_copts(),
     per_arch_srcs = {
         "arm_neon": [
             "arm_neon.h",
@@ -46,7 +47,10 @@ ynn_cc_library(
 
 cc_test(
     name = "test",
-    srcs = ["test.cc"],
+    srcs = [
+        "switch_element_size.h",
+        "test.cc",
+    ],
     deps = [
         ":transpose",
         "//ynnpack/base",
@@ -58,7 +62,10 @@ cc_test(
 
 cc_test(
     name = "bench",
-    srcs = ["bench.cc"],
+    srcs = [
+        "bench.cc",
+        "switch_element_size.h",
+    ],
     args = ["--benchmark_min_time=1x"],
     deps = [
         ":transpose",

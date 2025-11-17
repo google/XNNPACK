@@ -839,6 +839,7 @@ class BatchMatMulOperatorTester {
       ASSERT_EQ(xnn_status_success,
                 xnn_setup_convert_nc_f32_qd8(convert_op, input_a.data(),
                                              input_a_qd8.data(),
+                                             /*row_sum=*/nullptr,
                                              quantization_params.data()));
       ASSERT_EQ(xnn_status_success,
                 xnn_run_operator(convert_op, /*threadpool=*/nullptr));

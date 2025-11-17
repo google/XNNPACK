@@ -78,7 +78,7 @@ void xnn_qu8_gemm_minmax_fp32_ukernel_4x4c2s4__avx_ld64(
   XNN_FORCE_REALIZATION(voutput_min);
 
   do {
-    __m128i vacc0x0123 = _mm_loadu_si128((const __m128i*) w);
+    __m128i vacc0x0123 = _mm_load_si128((const __m128i*) w);
     __m128i vacc1x0123 = vacc0x0123;
     __m128i vacc2x0123 = vacc0x0123;
     __m128i vacc3x0123 = vacc0x0123;

@@ -15,6 +15,7 @@ namespace ynn {
 
 bool type_is_integral(ynn_type t) {
   switch (t) {
+    case ynn_type_int2:
     case ynn_type_int4:
     case ynn_type_uint4:
     case ynn_type_int8:
@@ -34,6 +35,7 @@ bool type_is_integral(ynn_type t) {
 
 size_t type_size_bytes(ynn_type t) {
   switch (t) {
+    case ynn_type_int2:
     case ynn_type_int4:
     case ynn_type_uint4:
       return 1;
@@ -61,6 +63,8 @@ const char* to_string(ynn_type type) {
       return "invalid";
     case ynn_type_opaque:
       return "opaque";
+    case ynn_type_int2:
+      return "int2";
     case ynn_type_int4:
       return "int4";
     case ynn_type_uint4:

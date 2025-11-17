@@ -567,7 +567,7 @@ void xnn_qs8_qc4w_packw_gemm_goi_ukernel_x16c8__avxvnni_prfm(
       if XNN_LIKELY(b != NULL) {
         size_t nb = n;
         for (nb = 0; nb < n; ++nb) {
-          ((int32_t*) out)[nb] = b[nb] << 4;
+          ((uint32_t*) out)[nb] = (uint32_t) b[nb] << 4;
         }
         b += n;
       } else {

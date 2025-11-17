@@ -217,11 +217,13 @@ static enum xnn_status setup_convert_operator(
     case xnn_operator_type_convert_nc_f32_qd8:
     {
       void* quantization_params = output_value->quantization.dynamic_params;
+      void* row_sum = output_value->quantization.row_sum;
       assert(quantization_params != NULL);
       return xnn_setup_convert_nc_f32_qd8(
         opdata->operator_objects[0],
         input_data,
         output_data,
+        row_sum,
         quantization_params);
     }
     case xnn_operator_type_convert_nc_f16_qdu8:

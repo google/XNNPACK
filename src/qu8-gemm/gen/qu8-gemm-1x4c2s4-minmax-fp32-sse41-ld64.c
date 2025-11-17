@@ -60,7 +60,7 @@ void xnn_qu8_gemm_minmax_fp32_ukernel_1x4c2s4__sse41_ld64(
   XNN_FORCE_REALIZATION(voutput_min);
 
   do {
-    __m128i vacc0x0123 = _mm_loadu_si128((const __m128i*) w);
+    __m128i vacc0x0123 = _mm_load_si128((const __m128i*) w);
     w = (const void*) ((const int32_t*) w + 4);
 
     size_t k = kc;

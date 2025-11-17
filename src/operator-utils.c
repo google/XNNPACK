@@ -263,6 +263,27 @@ const char* xnn_unary_operator_to_string(enum xnn_unary_operator op)
   return "unknown";
 }
 
+const char* xnn_reduce_operator_to_string(enum xnn_reduce_operator op) {
+  switch (op) {
+    case xnn_reduce_mean:
+      return "mean";
+    case xnn_reduce_mean_squared:
+      return "mean_squared";
+    case xnn_reduce_sum:
+      return "sum";
+    case xnn_reduce_sum_squared:
+      return "sum_squared";
+    case xnn_reduce_max:
+      return "max";
+    case xnn_reduce_min:
+      return "min";
+    case xnn_reduce_invalid:
+      return "invalid";
+  }
+  XNN_UNREACHABLE;
+  return "unknown";
+}
+
 const char* xnn_binary_operator_to_string(enum xnn_binary_operator op)
 {
   switch (op) {

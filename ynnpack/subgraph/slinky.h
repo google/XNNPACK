@@ -28,10 +28,6 @@ inline int axis_to_slinky_dim(int rank, int axis) {
   return axis < 0 ? -(axis + 1) : rank - (axis + 1);
 }
 
-// This helper replaces extent 1 dimensions with unbounded dimensions of stride
-// 0, which allows those dimensions to broadcast.
-void allow_broadcasting(slinky::raw_buffer& buf);
-
 slinky::buffer_expr_ptr make_buffer_expr(slinky::var sym, int rank,
                                          slinky::expr elem_size);
 slinky::buffer_expr_ptr make_buffer_expr(slinky::node_context& ctx,

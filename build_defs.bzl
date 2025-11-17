@@ -176,7 +176,7 @@ def xnnpack_msvc_std_copts():
 
 def xnnpack_std_copts():
     """Compiler flags to specify language standard for C sources."""
-    return ["-std=c99", "-Wimplicit-fallthrough"]
+    return ["-std=c99"]
 
 def xnnpack_std_cxxopts():
     """Compiler flags to specify language standard for C++ sources."""

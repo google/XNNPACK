@@ -30,13 +30,20 @@ enum xnn_status resize_unary_elementwise_output_tensor(
   size_t old_dynamic_quant_params_size =
       xnn_tensor_get_dynamic_quant_param_size(output->datatype, &output->shape,
                                               output->quantization.num_nonbatch_dims);
+  size_t old_row_sum_size =
+      xnn_tensor_get_row_sum_size(output->datatype, &output->shape,
+                                  output->quantization.num_nonbatch_dims);
   memcpy(&output->shape.dim[0], &input->shape.dim[0], input->shape.num_dims * sizeof(size_t));
   output->quantization.dynamic_params_size =
       xnn_tensor_get_dynamic_quant_param_size(output->datatype, &output->shape,
                                               output->quantization.num_nonbatch_dims);
+  output->quantization.row_sum_size =
+      xnn_tensor_get_row_sum_size(output->datatype, &output->shape,
+                                  output->quantization.num_nonbatch_dims);
   const size_t new_size = xnn_runtime_tensor_get_size(output);
   if (new_size > output->size ||
       output->quantization.dynamic_params_size > old_dynamic_quant_params_size ||
+      output->quantization.row_sum_size > old_row_sum_size ||
       opdata->workspace_size > old_workspace_size) {
     output->size = new_size;
     return xnn_status_reallocation_required;

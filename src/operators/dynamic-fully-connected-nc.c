@@ -408,19 +408,17 @@ static enum xnn_status reshape_dynamic_fully_connected_nc(
 
   struct xnn_ukernel_gemm* ukernel =
       &dynamic_fully_connected_op->ukernel.gemm_ukernels->gemm;
-  bool use_gemm_nr2 = false;
-  if (ukernel->nr > output_channels) {
-    uint32_t gemm_nr2_mr =
-        dynamic_fully_connected_op->ukernel.gemm_ukernels->gemm_nr2.mr;
-    // Default microkernel is suboptimal, use a microkernel that better supports
-    // less output channels.
-    if (gemm_nr2_mr != 0 &&
-        dynamic_fully_connected_op->ukernel.gemm_ukernels->gemm_nr2
-                .gemm_cases[gemm_nr2_mr - 1]
-                .function[XNN_UARCH_DEFAULT] != NULL) {
-      use_gemm_nr2 = true;
-      ukernel = &dynamic_fully_connected_op->ukernel.gemm_ukernels->gemm_nr2;
-    }
+  struct xnn_ukernel_gemm* ukernel_nr2 =
+      &dynamic_fully_connected_op->ukernel.gemm_ukernels->gemm_nr2;
+  bool use_gemm_nr2 =
+      ukernel_nr2->nr != 0 &&
+      ukernel_nr2->gemm_cases[ukernel_nr2->mr - 1]
+              .function[XNN_UARCH_DEFAULT] != NULL &&
+      xnn_use_nr2(ukernel->nr, ukernel_nr2->nr, output_channels);
+  if (use_gemm_nr2) {
+    xnn_log_debug("Using `nr2` GEMM config for %s operator.",
+                  xnn_operator_type_to_string_v2(dynamic_fully_connected_op));
+    ukernel = ukernel_nr2;
   }
 
   const uint32_t nr = ukernel->nr;

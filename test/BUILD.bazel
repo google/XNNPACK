@@ -108,24 +108,6 @@ xnnpack_cxx_library(
     deps = MICROKERNEL_TEST_DEPS + xnnpack_test_deps_for_library(),
 )
 
-####################### Unit tests for microkernel lists #######################
-# TODO: b/381390736 - Reenable once fixed.
-#sh_test(
-#    name = "microkernel_lists_test",
-#    size = "small",
-#    srcs = ["microkernel_lists_test.sh"],
-#    data = [
-#        "//:cmake_microkernel_lists",
-#        "//:generated_microkernel_lists",
-#        "//gen:bzl_microkernel_lists",
-#    ],
-#    target_compatible_with = xnnpack_select_if(
-#        "//build_config:linux",
-#        [],
-#        ["@platforms//:incompatible"],
-#    ),
-#)
-
 ######################### Unit tests for micro-kernels #########################
 
 [xnnpack_unit_test(
@@ -726,6 +708,16 @@ xnnpack_unit_test(
         "qd8-f16-qc4w-gemm-minmax-2.cc",
         "qd8-f16-qc4w-gemm-minmax-3.cc",
         "qd8-f16-qc4w-gemm-minmax-4.cc",
+    ],
+    deps = MICROKERNEL_TEST_DEPS + [
+        ":gemm_microkernel_tester",
+    ],
+)
+
+xnnpack_unit_test(
+    name = "qd8_f32_qc2w_gemm_minmax_test",
+    srcs = [
+        "qd8-f32-qc2w-gemm-minmax.cc",
     ],
     deps = MICROKERNEL_TEST_DEPS + [
         ":gemm_microkernel_tester",

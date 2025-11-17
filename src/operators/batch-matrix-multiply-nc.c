@@ -16,6 +16,7 @@
 #include "src/xnnpack/compute.h"
 #include "src/xnnpack/config-types.h"
 #include "src/xnnpack/config.h"
+#include "src/xnnpack/internal.h"
 #include "src/xnnpack/log.h"
 #include "src/xnnpack/math.h"
 #include "src/xnnpack/microfnptr.h"
@@ -132,147 +133,232 @@ error:
   return status;
 }
 
-enum xnn_status xnn_create_batch_matrix_multiply_nc_f16(
-    uint32_t flags, xnn_operator_t* batch_matrix_multiply_op_out) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f16_gemm_config();
-  if (gemm_config == NULL) {
-    xnn_log_error(
-        "failed to create %s operator: unsupported hardware configuration",
-        xnn_operator_type_to_string(
-            xnn_operator_type_batch_matrix_multiply_nc_f16));
-    return xnn_status_unsupported_hardware;
-  }
+struct bmm_context {
+  // Parameters
+  uint32_t flags;
+  int8_t input_zero_point;
+  int8_t output_zero_point;
+  float output_min;
+  float output_max;
+  float requantization_scale;
+  const struct xnn_gemm_config* gemm_config;
+  enum xnn_operator_type operator_type;
+  xnn_operator_t* op_out;
 
-  const struct gemm_fused_ukernels* gemm_ukernels = &gemm_config->minmax;
-  if (gemm_config->linear.gemm[gemm_config->mr - 1]
+  // Constant weights variant parameters
+  size_t batch_size_b;
+  size_t k;
+  size_t n;
+  const void* data_b;
+  const void* packing_params;
+  xnn_init_scale_params_fn init_scale_b;
+  const float* scale_b;
+  size_t scale_b_size;
+  size_t extra_weights_bytes;
+
+  // State
+  const struct gemm_fused_ukernels* gemm_ukernels;
+  union {
+    struct xnn_f16_minmax_params f16_minmax;
+    struct xnn_f32_minmax_params f32_minmax;
+    union xnn_qs8_qc8w_conv_minmax_params qs8_qc8w_minmax;
+  } params;
+  size_t params_size;
+
+  // Note that when setting up this field, the `packing_params` field must be
+  // set to point to the address of `packing_params_`.
+  union {
+    struct xnn_qs8_qc8w_packing_params qs8_qc8w;
+    struct xnn_qs8_packing_params qs8;
+  } packing_params_;
+
+  // Stores the scales_b pointer when it is dynamically computed while creating
+  // the operator. This allows to clean it up after the operator has been
+  // created.
+  void* scales_params_to_cleanup;
+};
+
+struct bmm_variant;
+
+typedef enum xnn_status (*variant_setup_fn)(const struct bmm_variant*,
+                                            struct bmm_context*);
+
+struct bmm_variant {
+  // Checks inputs related to and sets up the `gemm_ukernels` field of the
+  // context.
+  variant_setup_fn setup_ukernels;
+  // Checks inputs related to and sets up the `params` and `params_size` fields
+  // of the context.
+  variant_setup_fn setup_params;
+  // Checks inputs related to and sets up the `packing_params_` and
+  // `packing_params` fields of the context.
+  variant_setup_fn setup_packing_params;
+  // Releases any resources that were created by the setup functions and that
+  // need to be cleaned up before the `create` function returns.
+  variant_setup_fn cleanup;
+};
+
+static enum xnn_status setup_linear_ukernels(const struct bmm_variant* variant,
+                                             struct bmm_context* context) {
+  context->gemm_ukernels = &context->gemm_config->minmax;
+  if (context->gemm_config->linear.gemm[context->gemm_config->mr - 1]
           .function[XNN_UARCH_DEFAULT] != NULL) {
-    gemm_ukernels = &gemm_config->linear;
+    context->gemm_ukernels = &context->gemm_config->linear;
   }
-
-  struct xnn_f16_minmax_params params;
-  if XNN_LIKELY (gemm_config->init.f16 != NULL) {
-    gemm_config->init.f16(&params, xnn_float16_from_float(-INFINITY),
-                          xnn_float16_from_float(INFINITY));
-  }
-
-  return create_batch_matrix_multiply_nc(
-      flags, &params, sizeof(params), gemm_config, gemm_ukernels,
-      xnn_operator_type_batch_matrix_multiply_nc_f16,
-      batch_matrix_multiply_op_out);
+  return xnn_status_success;
 }
 
-enum xnn_status xnn_create_batch_matrix_multiply_nc_pf16(
-    uint32_t flags, xnn_operator_t* batch_matrix_multiply_op_out) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_pf16_gemm_config();
-  if (gemm_config == NULL) {
-    xnn_log_error(
-        "failed to create %s operator: unsupported hardware configuration",
-        xnn_operator_type_to_string(
-            xnn_operator_type_batch_matrix_multiply_nc_pf16));
-    return xnn_status_unsupported_hardware;
+static enum xnn_status setup_params_f16(const struct bmm_variant* variant,
+                                        struct bmm_context* context) {
+  if XNN_LIKELY (context->gemm_config->init.f16 != NULL) {
+    context->gemm_config->init.f16(&context->params.f16_minmax,
+                                   xnn_float16_from_float(-INFINITY),
+                                   xnn_float16_from_float(INFINITY));
+    context->params_size = sizeof(context->params.f16_minmax);
   }
-
-  const struct gemm_fused_ukernels* gemm_ukernels = &gemm_config->minmax;
-  if (gemm_config->linear.gemm[gemm_config->mr - 1]
-          .function[XNN_UARCH_DEFAULT] != NULL) {
-    gemm_ukernels = &gemm_config->linear;
-  }
-
-  struct xnn_f16_minmax_params params;
-  if XNN_LIKELY (gemm_config->init.f16 != NULL) {
-    gemm_config->init.f16(&params, xnn_float16_from_float(-INFINITY),
-                          xnn_float16_from_float(INFINITY));
-  }
-
-  return create_batch_matrix_multiply_nc(
-      flags, &params, sizeof(params), gemm_config, gemm_ukernels,
-      xnn_operator_type_batch_matrix_multiply_nc_pf16,
-      batch_matrix_multiply_op_out);
+  return xnn_status_success;
 }
 
-enum xnn_status xnn_create_batch_matrix_multiply_nc_bf16_f32(
-    uint32_t flags, xnn_operator_t* batch_matrix_multiply_op_out) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_bf16_f32_gemm_config();
-  if (gemm_config == NULL) {
-    xnn_log_error(
-        "failed to create %s operator: unsupported hardware configuration",
-        xnn_operator_type_to_string(
-            xnn_operator_type_batch_matrix_multiply_nc_bf16_f32));
-    return xnn_status_unsupported_hardware;
+static enum xnn_status setup_params_f32(const struct bmm_variant* variant,
+                                        struct bmm_context* context) {
+  if XNN_LIKELY (context->gemm_config->init.f32 != NULL) {
+    context->gemm_config->init.f32(&context->params.f32_minmax, -INFINITY,
+                                   INFINITY);
+    context->params_size = sizeof(context->params.f32_minmax);
   }
-
-  const struct gemm_fused_ukernels* gemm_ukernels = &gemm_config->minmax;
-  if (gemm_config->linear.gemm[gemm_config->mr - 1]
-          .function[XNN_UARCH_DEFAULT] != NULL) {
-    gemm_ukernels = &gemm_config->linear;
-  }
-
-  struct xnn_f32_minmax_params params;
-  if XNN_LIKELY (gemm_config->init.f32 != NULL) {
-    gemm_config->init.f32(&params, -INFINITY, INFINITY);
-  }
-
-  return create_batch_matrix_multiply_nc(
-      flags, &params, sizeof(params), gemm_config, gemm_ukernels,
-      xnn_operator_type_batch_matrix_multiply_nc_bf16_f32,
-      batch_matrix_multiply_op_out);
+  return xnn_status_success;
 }
 
-enum xnn_status xnn_create_batch_matrix_multiply_nc_f32(
-    uint32_t flags, xnn_operator_t* batch_matrix_multiply_op_out) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config(flags);
-  if (gemm_config == NULL) {
+static enum xnn_status setup_params_qs8_qc8w(const struct bmm_variant* variant,
+                                             struct bmm_context* context) {
+  if (context->output_min > context->output_max) {
     xnn_log_error(
-        "failed to create %s operator: unsupported hardware configuration",
-        xnn_operator_type_to_string(
-            xnn_operator_type_batch_matrix_multiply_nc_f32));
-    return xnn_status_unsupported_hardware;
+        "failed to create %s operator with [%f, %f] output range:"
+        " lower bound must be less than or equal to upper bound",
+        xnn_operator_type_to_string(context->operator_type),
+        context->output_min, context->output_max);
+    return xnn_status_invalid_parameter;
   }
 
-  const struct gemm_fused_ukernels* gemm_ukernels = &gemm_config->minmax;
-  if (gemm_config->linear.gemm[gemm_config->mr - 1]
-          .function[XNN_UARCH_DEFAULT] != NULL) {
-    gemm_ukernels = &gemm_config->linear;
+  if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
+    xnn_log_error("failed to create %s operator: XNNPACK is not initialized",
+                  xnn_operator_type_to_string(context->operator_type));
+    return xnn_status_uninitialized;
   }
-
-  struct xnn_f32_minmax_params params;
-  if XNN_LIKELY (gemm_config->init.f32 != NULL) {
-    gemm_config->init.f32(&params, -INFINITY, INFINITY);
+  if XNN_LIKELY (context->gemm_config->init.qs8_qc8w != NULL) {
+    context->gemm_config->init.qs8_qc8w(
+        &context->params.qs8_qc8w_minmax, context->output_zero_point,
+        (int8_t)context->output_min, (int8_t)context->output_max);
+    context->params_size = sizeof(context->params.qs8_qc8w_minmax);
   }
-
-  return create_batch_matrix_multiply_nc(
-      flags, &params, sizeof(params), gemm_config, gemm_ukernels,
-      xnn_operator_type_batch_matrix_multiply_nc_f32,
-      batch_matrix_multiply_op_out);
+  return xnn_status_success;
 }
 
-enum xnn_status xnn_create_batch_matrix_multiply_nc_pf32(
-    uint32_t flags, xnn_operator_t* batch_matrix_multiply_op_out) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_pf32_gemm_config();
-  if (gemm_config == NULL) {
-    xnn_log_error(
-        "failed to create %s operator: unsupported hardware configuration",
-        xnn_operator_type_to_string(
-            xnn_operator_type_batch_matrix_multiply_nc_pf32));
-    return xnn_status_unsupported_hardware;
+static enum xnn_status setup_packing_params_qx8_f32_qc8w(
+    const struct bmm_variant* variant, struct bmm_context* context) {
+  if (context->gemm_config->pack_weights_and_biases) {
+    context->packing_params_.qs8_qc8w = (struct xnn_qs8_qc8w_packing_params){
+        /*input_zero_point=*/1, /*scale_multiplier=*/1.0f};
+  } else {
+    context->packing_params_.qs8 =
+        (struct xnn_qs8_packing_params){/*input_zero_point=*/1};
   }
-
-  const struct gemm_fused_ukernels* gemm_ukernels = &gemm_config->minmax;
-  if (gemm_config->linear.gemm[gemm_config->mr - 1]
-          .function[XNN_UARCH_DEFAULT] != NULL) {
-    gemm_ukernels = &gemm_config->linear;
-  }
-
-  struct xnn_f32_minmax_params params;
-  if XNN_LIKELY (gemm_config->init.f32 != NULL) {
-    gemm_config->init.f32(&params, -INFINITY, INFINITY);
-  }
-
-  return create_batch_matrix_multiply_nc(
-      flags, &params, sizeof(params), gemm_config, gemm_ukernels,
-      xnn_operator_type_batch_matrix_multiply_nc_pf32,
-      batch_matrix_multiply_op_out);
+  context->packing_params = &context->packing_params_;
+  context->init_scale_b =
+      (xnn_init_scale_params_fn)xnn_init_qs8_qc8w_scale_fp32_params;
+  context->scale_b_size = sizeof(float);
+  context->extra_weights_bytes = sizeof(float);
+  return xnn_status_success;
 }
+
+static enum xnn_status setup_packing_params_qs8(
+    const struct bmm_variant* variant, struct bmm_context* context) {
+  if (context->batch_size_b) {  // Const weights.
+    if (context->requantization_scale <= 0.0 ||
+        context->requantization_scale > 255.0) {
+      xnn_log_error(
+          "failed to create %s operator: requantization scale %.7g must be in "
+          "the (0, 255] range.",
+          xnn_operator_type_to_string(context->operator_type),
+          context->requantization_scale);
+      return xnn_status_unsupported_parameter;
+    }
+
+    context->packing_params_.qs8 = (struct xnn_qs8_packing_params){
+        .input_zero_point = context->input_zero_point};
+    const size_t scale_params_size =
+        sizeof(float) * context->batch_size_b * context->n;
+    float* scale_params = xnn_allocate_zero_memory(scale_params_size);
+    context->scales_params_to_cleanup = scale_params;
+    if (scale_params == NULL) {
+      xnn_log_error("failed to allocate %zu bytes for %s scale params",
+                    scale_params_size,
+                    xnn_operator_type_to_string(context->operator_type));
+      return xnn_status_out_of_memory;
+    }
+    for (size_t i = 0; i < context->batch_size_b * context->n; ++i) {
+      scale_params[i] = context->requantization_scale;
+    }
+    context->packing_params = &context->packing_params_;
+    context->init_scale_b =
+        (xnn_init_scale_params_fn)xnn_init_qs8_qc8w_scale_fp32_params;
+    context->scale_b = scale_params;
+    context->scale_b_size = sizeof(float);
+  } else {  // Non const weights.
+    if (context->scale_b != NULL) {
+      xnn_operator_t batch_matrix_multiply_op = *context->op_out;
+      xnn_allocate_extra_params(batch_matrix_multiply_op,
+                                /*extra_params_size=*/1);
+
+      context->packing_params_.qs8_qc8w = (struct xnn_qs8_qc8w_packing_params){
+          .input_zero_point = context->input_zero_point,
+          .scale_multiplier = *context->scale_b};
+      memcpy(batch_matrix_multiply_op->extra_params,
+             &context->packing_params_.qs8_qc8w,
+             sizeof(context->packing_params_.qs8_qc8w));
+    }
+  }
+  return xnn_status_success;
+}
+
+static enum xnn_status cleanup_qs8(const struct bmm_variant* variant,
+                                   struct bmm_context* context) {
+  xnn_release_memory(context->scales_params_to_cleanup);
+  return xnn_status_success;
+}
+
+static enum xnn_status UNUSED(const struct bmm_variant* variant,
+                              struct bmm_context* context) {
+  return xnn_status_success;
+}
+
+static struct bmm_variant f16_variant = {
+    .setup_ukernels = setup_linear_ukernels,
+    .setup_params = setup_params_f16,
+    .setup_packing_params = UNUSED,
+    .cleanup = UNUSED,
+};
+
+static struct bmm_variant f32_variant = {
+    .setup_ukernels = setup_linear_ukernels,
+    .setup_params = setup_params_f32,
+    .setup_packing_params = UNUSED,
+    .cleanup = UNUSED,
+};
+
+static struct bmm_variant qx8_f32_qc8w_variant = {
+    .setup_ukernels = setup_linear_ukernels,
+    .setup_params = setup_params_f32,
+    .setup_packing_params = setup_packing_params_qx8_f32_qc8w,
+    .cleanup = UNUSED,
+};
+
+static struct bmm_variant qs8_variant = {
+    .setup_ukernels = setup_linear_ukernels,
+    .setup_params = setup_params_qs8_qc8w,
+    .setup_packing_params = setup_packing_params_qs8,
+    .cleanup = cleanup_qs8,
+};
 
 enum xnn_status create_batch_matrix_multiply_nc_const_weights(
     size_t batch_size_b, size_t k, size_t n, const void* data_b,
@@ -398,232 +484,239 @@ enum xnn_status create_batch_matrix_multiply_nc_const_weights(
   return xnn_status_success;
 }
 
+enum xnn_status create_batch_matrix_multiply_nc_helper(
+    const struct bmm_variant* variant, struct bmm_context* context) {
+  enum xnn_status status = xnn_status_invalid_state;
+  if (context->gemm_config == NULL) {
+    xnn_log_error(
+        "failed to create %s operator: unsupported hardware configuration",
+        xnn_operator_type_to_string(context->operator_type));
+    return xnn_status_unsupported_hardware;
+  }
+
+  XNN_IF_ERROR_GOTO(error, variant->setup_ukernels(variant, context));
+  XNN_IF_ERROR_GOTO(error, variant->setup_params(variant, context));
+
+  XNN_IF_ERROR_GOTO(error, create_batch_matrix_multiply_nc(
+      context->flags, &context->params, context->params_size,
+      context->gemm_config, context->gemm_ukernels, context->operator_type,
+      context->op_out));
+
+  XNN_IF_ERROR_GOTO(error, variant->setup_packing_params(variant, context));
+
+  if (context->batch_size_b) {
+    XNN_IF_ERROR_GOTO(error, create_batch_matrix_multiply_nc_const_weights(
+        context->batch_size_b, context->k, context->n, context->data_b,
+        context->gemm_config->log2_filter_element_size,
+        context->gemm_config->bias_element_size, context->packing_params,
+        context->init_scale_b, context->scale_b, context->scale_b_size,
+        context->extra_weights_bytes, context->flags, context->op_out));
+  }
+
+error:
+  variant->cleanup(variant, context);
+  return xnn_status_success;
+}
+
+enum xnn_status xnn_create_batch_matrix_multiply_nc_f16(
+    uint32_t flags, xnn_operator_t* batch_matrix_multiply_op_out) {
+  return xnn_create_batch_matrix_multiply_nc_f16_const_weights(
+      /*batch_size_b=*/0, /*k=*/0, /*n=*/0, /*data_b=*/0, flags,
+      batch_matrix_multiply_op_out);
+}
+
+enum xnn_status xnn_create_batch_matrix_multiply_nc_pf16(
+    uint32_t flags, xnn_operator_t* batch_matrix_multiply_op_out) {
+  return xnn_create_batch_matrix_multiply_nc_pf16_const_weights(
+      /*batch_size_b=*/0, /*k=*/0, /*n=*/0, /*data_b=*/0, flags,
+      batch_matrix_multiply_op_out);
+}
+
+enum xnn_status xnn_create_batch_matrix_multiply_nc_bf16_f32(
+    uint32_t flags, xnn_operator_t* batch_matrix_multiply_op_out) {
+  struct bmm_context context = {
+      .flags = flags,
+      .gemm_config = xnn_init_bf16_f32_gemm_config(),
+      .operator_type = xnn_operator_type_batch_matrix_multiply_nc_bf16_f32,
+      .op_out = batch_matrix_multiply_op_out,
+  };
+  return create_batch_matrix_multiply_nc_helper(&f32_variant, &context);
+}
+
+enum xnn_status xnn_create_batch_matrix_multiply_nc_f32(
+    uint32_t flags, xnn_operator_t* batch_matrix_multiply_op_out) {
+  return xnn_create_batch_matrix_multiply_nc_f32_const_weights(
+      /*batch_size_b=*/0, /*k=*/0, /*n=*/0, /*data_b=*/0, flags,
+      batch_matrix_multiply_op_out);
+}
+
+enum xnn_status xnn_create_batch_matrix_multiply_nc_pf32(
+    uint32_t flags, xnn_operator_t* batch_matrix_multiply_op_out) {
+  return xnn_create_batch_matrix_multiply_nc_pf32_const_weights(
+      /*batch_size_b=*/0, /*k=*/0, /*n=*/0, /*data_b=*/0, flags,
+      batch_matrix_multiply_op_out);
+}
+
 enum xnn_status xnn_create_batch_matrix_multiply_nc_f16_const_weights(
     size_t batch_size_b, size_t k, size_t n, const void* data_b, uint32_t flags,
     xnn_operator_t* batch_matrix_multiply_op_out) {
-  const enum xnn_status status = xnn_create_batch_matrix_multiply_nc_f16(
-      flags, batch_matrix_multiply_op_out);
-  if (status != xnn_status_success) {
-    return status;
-  }
-
-  return create_batch_matrix_multiply_nc_const_weights(
-      batch_size_b, k, n, data_b,
-      /*log2_kernel_element_size=*/XNN_LOG2_SIZEOF_FLOAT16,
-      /*bias_element_size=*/sizeof(xnn_float16), /*packing_params=*/NULL,
-      /*init_scale_b=*/NULL, /*scale_b=*/NULL, /*scale_b_size=*/0,
-      /*extra_weights_bytes=*/0, flags, batch_matrix_multiply_op_out);
+  struct bmm_context context = {
+      .flags = flags,
+      .gemm_config = xnn_init_f16_gemm_config(),
+      .operator_type = xnn_operator_type_batch_matrix_multiply_nc_f16,
+      .batch_size_b = batch_size_b,
+      .k = k,
+      .n = n,
+      .data_b = data_b,
+      .op_out = batch_matrix_multiply_op_out,
+  };
+  return create_batch_matrix_multiply_nc_helper(&f16_variant, &context);
 }
 
 enum xnn_status xnn_create_batch_matrix_multiply_nc_pf16_const_weights(
     size_t batch_size_b, size_t k, size_t n, const xnn_float16* data_b,
     uint32_t flags, xnn_operator_t* batch_matrix_multiply_op_out) {
-  const enum xnn_status status = xnn_create_batch_matrix_multiply_nc_pf16(
-      flags, batch_matrix_multiply_op_out);
-  if (status != xnn_status_success) {
-    return status;
-  }
-
-  return create_batch_matrix_multiply_nc_const_weights(
-      batch_size_b, k, n, data_b,
-      /*log2_kernel_element_size=*/XNN_LOG2_SIZEOF_FLOAT16,
-      /*bias_element_size=*/sizeof(xnn_float16), /*packing_params=*/NULL,
-      /*init_scale_b=*/NULL, /*scale_b=*/NULL, /*scale_b_size=*/0,
-      /*extra_weights_bytes=*/0, flags, batch_matrix_multiply_op_out);
+  struct bmm_context context = {
+      .flags = flags,
+      .gemm_config = xnn_init_pf16_gemm_config(),
+      .operator_type = xnn_operator_type_batch_matrix_multiply_nc_pf16,
+      .batch_size_b = batch_size_b,
+      .k = k,
+      .n = n,
+      .data_b = data_b,
+      .op_out = batch_matrix_multiply_op_out,
+  };
+  return create_batch_matrix_multiply_nc_helper(&f16_variant, &context);
 }
 
 enum xnn_status xnn_create_batch_matrix_multiply_nc_f32_const_weights(
     size_t batch_size_b, size_t k, size_t n, const float* data_b,
     uint32_t flags, xnn_operator_t* batch_matrix_multiply_op_out) {
-  const enum xnn_status status = xnn_create_batch_matrix_multiply_nc_f32(
-      flags, batch_matrix_multiply_op_out);
-  if (status != xnn_status_success) {
-    return status;
-  }
-
-  return create_batch_matrix_multiply_nc_const_weights(
-      batch_size_b, k, n, data_b,
-      /*log2_kernel_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
-      /*bias_element_size=*/sizeof(float), /*packing_params=*/NULL,
-      /*init_scale_b=*/NULL, /*scale_b=*/NULL, /*scale_b_size=*/0,
-      /*extra_weights_bytes=*/0, flags, batch_matrix_multiply_op_out);
+  struct bmm_context context = {
+      .flags = flags,
+      .gemm_config = xnn_init_f32_gemm_config(flags),
+      .operator_type = xnn_operator_type_batch_matrix_multiply_nc_f32,
+      .batch_size_b = batch_size_b,
+      .k = k,
+      .n = n,
+      .data_b = data_b,
+      .op_out = batch_matrix_multiply_op_out,
+  };
+  return create_batch_matrix_multiply_nc_helper(&f32_variant, &context);
 }
 
 enum xnn_status xnn_create_batch_matrix_multiply_nc_pf32_const_weights(
     size_t batch_size_b, size_t k, size_t n, const float* data_b,
     uint32_t flags, xnn_operator_t* batch_matrix_multiply_op_out) {
-  const enum xnn_status status = xnn_create_batch_matrix_multiply_nc_pf32(
-      flags, batch_matrix_multiply_op_out);
-  if (status != xnn_status_success) {
-    return status;
-  }
-
-  return create_batch_matrix_multiply_nc_const_weights(
-      batch_size_b, k, n, data_b,
-      /*log2_kernel_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
-      /*bias_element_size=*/sizeof(float), /*packing_params=*/NULL,
-      /*init_scale_b=*/NULL, /*scale_b=*/NULL, /*scale_b_size=*/0,
-      /*extra_weights_bytes=*/0, flags, batch_matrix_multiply_op_out);
+  struct bmm_context context = {
+      .flags = flags,
+      .gemm_config = xnn_init_pf32_gemm_config(),
+      .operator_type = xnn_operator_type_batch_matrix_multiply_nc_pf32,
+      .op_out = batch_matrix_multiply_op_out,
+      .batch_size_b = batch_size_b,
+      .k = k,
+      .n = n,
+      .data_b = data_b,
+  };
+  return create_batch_matrix_multiply_nc_helper(&f32_variant, &context);
 }
 
 enum xnn_status create_batch_matrix_multiply_nc_qx8_f32_qc8w(
     size_t batch_size_b, size_t k, size_t n, const int8_t* data_b,
     const float* scale_b, uint32_t flags,
     const struct xnn_gemm_config* gemm_config,
-    enum xnn_operator_type expected_operator_type,
+    enum xnn_operator_type operator_type,
     xnn_operator_t* batch_matrix_multiply_op_out) {
-  if (gemm_config == NULL) {
-    xnn_log_error(
-        "failed to create %s operator: unsupported hardware configuration",
-        xnn_operator_type_to_string(expected_operator_type));
-    return xnn_status_unsupported_hardware;
-  }
-
-  const struct gemm_fused_ukernels* gemm_ukernels = &gemm_config->minmax;
-  if (gemm_config->linear.gemm[gemm_config->mr - 1]
-          .function[XNN_UARCH_DEFAULT] != NULL) {
-    gemm_ukernels = &gemm_config->linear;
-  }
-
-  struct xnn_f32_minmax_params params;
-  if XNN_LIKELY (gemm_config->init.f32 != NULL) {
-    gemm_config->init.f32(&params, -INFINITY, INFINITY);
-  }
-
-  enum xnn_status status = create_batch_matrix_multiply_nc(
-      flags, &params, sizeof(params), gemm_config, gemm_ukernels,
-      expected_operator_type, batch_matrix_multiply_op_out);
-  if (status != xnn_status_success) {
-    return status;
-  }
-
-  // We only allow static `qcint8` weights.
-  if (gemm_config->pack_weights_and_biases) {
-    const struct xnn_qs8_qc8w_packing_params packing_params = {
-        /*input_zero_point=*/1, /*scale_multiplier=*/1.0f};
-    return create_batch_matrix_multiply_nc_const_weights(
-        batch_size_b, k, n, data_b,
-        /*log2_kernel_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
-        /*bias_element_size=*/sizeof(int32_t), &packing_params,
-        /*init_scale_b=*/
-          (xnn_init_scale_params_fn) xnn_init_qs8_qc8w_scale_fp32_params,
-        /*scale_b=*/scale_b, /*scale_b_size=*/sizeof(float),
-        /*extra_weights_bytes=*/sizeof(float), flags,
-        batch_matrix_multiply_op_out);
-  } else {
-    const struct xnn_qs8_packing_params packing_params = {
-        /*input_zero_point=*/1};
-    return create_batch_matrix_multiply_nc_const_weights(
-        batch_size_b, k, n, data_b,
-        /*log2_kernel_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
-        /*bias_element_size=*/sizeof(int32_t), &packing_params,
-        /*init_scale_b=*/
-          (xnn_init_scale_params_fn) xnn_init_qs8_qc8w_scale_fp32_params,
-        /*scale_b=*/scale_b, /*scale_b_size=*/sizeof(float),
-        /*extra_weights_bytes=*/sizeof(float), flags,
-        batch_matrix_multiply_op_out);
-  }
+  struct bmm_context context = {
+      .flags = flags,
+      .gemm_config = gemm_config,
+      .operator_type = operator_type,
+      .batch_size_b = batch_size_b,
+      .k = k,
+      .n = n,
+      .data_b = data_b,
+      .scale_b = scale_b,
+      .op_out = batch_matrix_multiply_op_out,
+  };
+  return create_batch_matrix_multiply_nc_helper(&qx8_f32_qc8w_variant,
+                                                &context);
 }
 
 enum xnn_status xnn_create_batch_matrix_multiply_nc_qd8_f32_qc8w(
     size_t batch_size_b, size_t k, size_t n, const int8_t* data_b,
     const float* scale_b, uint32_t flags,
     xnn_operator_t* batch_matrix_multiply_op_out) {
-  const struct xnn_gemm_config* gemm_config =
-      xnn_init_qd8_f32_qc8w_gemm_config();
-  return create_batch_matrix_multiply_nc_qx8_f32_qc8w(
-      batch_size_b, k, n, data_b, scale_b, flags, gemm_config,
-      xnn_operator_type_batch_matrix_multiply_nc_qd8_f32_qc8w,
-      batch_matrix_multiply_op_out);
+  struct bmm_context context = {
+      .flags = flags,
+      .gemm_config = xnn_init_qd8_f32_qc8w_gemm_config(),
+      .operator_type = xnn_operator_type_batch_matrix_multiply_nc_qd8_f32_qc8w,
+      .batch_size_b = batch_size_b,
+      .k = k,
+      .n = n,
+      .data_b = data_b,
+      .scale_b = scale_b,
+      .op_out = batch_matrix_multiply_op_out,
+  };
+  return create_batch_matrix_multiply_nc_helper(&qx8_f32_qc8w_variant,
+                                                &context);
 }
 
 enum xnn_status xnn_create_batch_matrix_multiply_nc_qp8_f32_qc8w(
     size_t batch_size_b, size_t k, size_t n, const int8_t* data_b,
     const float* scale_b, uint32_t flags,
     xnn_operator_t* batch_matrix_multiply_op_out) {
-  const struct xnn_gemm_config* gemm_config =
-      xnn_init_qp8_f32_qc8w_gemm_config();
-  return create_batch_matrix_multiply_nc_qx8_f32_qc8w(
-      batch_size_b, k, n, data_b, scale_b, flags, gemm_config,
-      xnn_operator_type_batch_matrix_multiply_nc_qp8_f32_qc8w,
-      batch_matrix_multiply_op_out);
+  struct bmm_context context = {
+      .flags = flags,
+      .gemm_config = xnn_init_qp8_f32_qc8w_gemm_config(),
+      .operator_type = xnn_operator_type_batch_matrix_multiply_nc_qp8_f32_qc8w,
+      .batch_size_b = batch_size_b,
+      .k = k,
+      .n = n,
+      .data_b = data_b,
+      .scale_b = scale_b,
+      .op_out = batch_matrix_multiply_op_out,
+  };
+  return create_batch_matrix_multiply_nc_helper(
+      &qx8_f32_qc8w_variant, &context);
 }
 
 enum xnn_status xnn_create_batch_matrix_multiply_nc_qdu8_f32_qc8w(
     size_t batch_size_b, size_t k, size_t n, const int8_t* data_b,
     const float* scale_b, uint32_t flags,
     xnn_operator_t* batch_matrix_multiply_op_out) {
-  const struct xnn_gemm_config* gemm_config =
-      xnn_init_qdu8_f32_qc8w_gemm_config();
-  return create_batch_matrix_multiply_nc_qx8_f32_qc8w(
-      batch_size_b, k, n, data_b, scale_b, flags, gemm_config,
-      xnn_operator_type_batch_matrix_multiply_nc_qdu8_f32_qc8w,
-      batch_matrix_multiply_op_out);
+  struct bmm_context context = {
+      .flags = flags,
+      .gemm_config = xnn_init_qdu8_f32_qc8w_gemm_config(),
+      .operator_type = xnn_operator_type_batch_matrix_multiply_nc_qdu8_f32_qc8w,
+      .batch_size_b = batch_size_b,
+      .k = k,
+      .n = n,
+      .data_b = data_b,
+      .scale_b = scale_b,
+      .op_out = batch_matrix_multiply_op_out,
+  };
+  return create_batch_matrix_multiply_nc_helper(
+      &qx8_f32_qc8w_variant, &context);
 }
 
 enum xnn_status xnn_create_batch_matrix_multiply_nc_qs8(
     int8_t input_zero_point, int8_t output_zero_point, int8_t output_min,
     int8_t output_max, const float* scale_b, uint32_t flags,
     xnn_operator_t* batch_matrix_multiply_op_out) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_qs8_qc8w_gemm_config();
-  if (gemm_config == NULL) {
-    xnn_log_error(
-        "failed to create %s operator: unsupported hardware configuration",
-        xnn_operator_type_to_string(
-            xnn_operator_type_batch_matrix_multiply_nc_qs8));
-    return xnn_status_unsupported_hardware;
-  }
-
-  const struct gemm_fused_ukernels* gemm_ukernels = &gemm_config->minmax;
-  if (gemm_config->linear.gemm[gemm_config->mr - 1]
-          .function[XNN_UARCH_DEFAULT] != NULL) {
-    gemm_ukernels = &gemm_config->minmax;
-  }
-
-  if (output_min > output_max) {
-    xnn_log_error(
-        "failed to create %s operator with [%d, %d] output range: lower bound "
-        "must be less than or equal to upper bound",
-        xnn_operator_type_to_string(
-            xnn_operator_type_batch_matrix_multiply_nc_qs8),
-        output_min, output_max);
-    return xnn_status_invalid_parameter;
-  }
-
-  if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
-    xnn_log_error("failed to create %s operator: XNNPACK is not initialized",
-      xnn_operator_type_to_string(
-          xnn_operator_type_batch_matrix_multiply_nc_qs8));
-    return xnn_status_uninitialized;
-  }
-
-  union xnn_qs8_qc8w_conv_minmax_params params;
-  if XNN_LIKELY(gemm_config->init.qs8_qc8w != NULL) {
-    gemm_config->init.qs8_qc8w(&params, output_zero_point, output_min,
-                               output_max);
-  }
-
-  enum xnn_status status = create_batch_matrix_multiply_nc(
-      flags, &params, sizeof(params), gemm_config, gemm_ukernels,
-      xnn_operator_type_batch_matrix_multiply_nc_qs8,
-      batch_matrix_multiply_op_out);
-
-  if (status != xnn_status_success) {
-    return status;
-  }
-
-  if (scale_b != NULL) {
-    xnn_operator_t batch_matrix_multiply_op = *batch_matrix_multiply_op_out;
-    xnn_allocate_extra_params(
-        batch_matrix_multiply_op, /*extra_params_size=*/1);
-
-    struct xnn_qs8_qc8w_packing_params packing_params = {
-        .input_zero_point = input_zero_point, .scale_multiplier = *scale_b};
-    memcpy(batch_matrix_multiply_op->extra_params, &packing_params,
-           sizeof(packing_params));
-  }
-
-  return status;
+  struct bmm_context context = {
+      .flags = flags,
+      .input_zero_point = input_zero_point,
+      .output_zero_point = output_zero_point,
+      .output_min = output_min,
+      .output_max = output_max,
+      .scale_b = scale_b,
+      .scale_b_size = sizeof(float),
+      .gemm_config = xnn_init_qs8_qc8w_gemm_config(),
+      .operator_type = xnn_operator_type_batch_matrix_multiply_nc_qs8,
+      .op_out = batch_matrix_multiply_op_out,
+  };
+  return create_batch_matrix_multiply_nc_helper(
+      &qs8_variant, &context);
 }
 
 enum xnn_status xnn_create_batch_matrix_multiply_nc_qs8_const_weights(
@@ -631,60 +724,24 @@ enum xnn_status xnn_create_batch_matrix_multiply_nc_qs8_const_weights(
     int8_t input_zero_point, int8_t output_zero_point, int8_t output_min,
     int8_t output_max, float requantization_scale, uint32_t flags,
     xnn_operator_t* batch_matrix_multiply_op_out) {
-  enum xnn_status status = xnn_create_batch_matrix_multiply_nc_qs8(
-      input_zero_point, output_zero_point, output_min, output_max,
-      /*scale_b=*/NULL, flags, batch_matrix_multiply_op_out);
-  if (status != xnn_status_success) {
-    return status;
-  }
+  struct bmm_context context = {
+      .flags = flags,
+      .input_zero_point = input_zero_point,
+      .output_zero_point = output_zero_point,
+      .output_min = output_min,
+      .output_max = output_max,
+      .requantization_scale = requantization_scale,
+      .gemm_config = xnn_init_qs8_qc8w_gemm_config(),
+      .operator_type = xnn_operator_type_batch_matrix_multiply_nc_qs8,
+      .op_out = batch_matrix_multiply_op_out,
+      .batch_size_b = batch_size_b,
+      .k = k,
+      .n = n,
+      .data_b = data_b,
 
-  if (requantization_scale <= 0) {
-    xnn_log_error(
-        "failed to create %s operator: requantization scale %.7g is less or "
-        "equal to 0.0",
-        xnn_operator_type_to_string(
-            xnn_operator_type_batch_matrix_multiply_nc_qs8),
-        requantization_scale);
-    return xnn_status_unsupported_parameter;
-  }
-
-  if (requantization_scale > 255.0) {
-    xnn_log_error(
-        "failed to create %s operator: requantization scale %.7g is greater "
-        "than 255.0",
-        xnn_operator_type_to_string(
-            xnn_operator_type_batch_matrix_multiply_nc_qs8),
-        requantization_scale);
-    return xnn_status_unsupported_parameter;
-  }
-
-  const struct xnn_qs8_packing_params packing_params = {
-      .input_zero_point = input_zero_point};
-  float* scale_params = xnn_allocate_zero_memory(
-      sizeof(float) * batch_size_b * n);
-  if (scale_params == NULL) {
-    xnn_log_error("failed to allocate %zu bytes for %s scale params",
-                  sizeof(float) * batch_size_b * n,
-                  xnn_operator_type_to_string(
-                      xnn_operator_type_batch_matrix_multiply_nc_qs8));
-    return xnn_status_out_of_memory;
-  }
-  for (size_t i = 0; i < batch_size_b * n; ++i) {
-    scale_params[i] = requantization_scale;
-  }
-
-  status = create_batch_matrix_multiply_nc_const_weights(
-      batch_size_b, k, n, data_b,
-      /*log2_kernel_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
-      /*bias_element_size=*/sizeof(int32_t), &packing_params,
-      /*init_scale_b=*/
-        (xnn_init_scale_params_fn) xnn_init_qs8_to_qs8_qc8w_scale_fp32_params,
-      /*scale_b=*/scale_params, /*scale_b_size=*/sizeof(float),
-      /*extra_weights_bytes=*/0, flags,
-      batch_matrix_multiply_op_out);
-
-  xnn_release_memory(scale_params);
-  return status;
+  };
+  return create_batch_matrix_multiply_nc_helper(
+      &qs8_variant, &context);
 }
 
 static enum xnn_status reshape_batch_matrix_multiply_nc(
@@ -1489,7 +1546,7 @@ enum xnn_status xnn_setup_batch_matrix_multiply_nc_qp8_f32_qc8w(
 
 enum xnn_status xnn_setup_batch_matrix_multiply_nc_qdu8_f32_qc8w(
     xnn_operator_t batch_matrix_multiply_op, void* workspace,
-    const int8_t* input_a, const float* input_b,
+    const int8_t* input_a, const int8_t* input_b,
     const struct xnn_quantization_params* quantization_params, float* output) {
   return setup_batch_matrix_multiply_nc(
       batch_matrix_multiply_op,

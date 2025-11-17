@@ -48,8 +48,9 @@ static void init_f16_avgpool_config(void) {
         f16_avgpool_config.init.f16 = xnn_init_f16_scaleminmax_scalar_params;
         f16_avgpool_config.primary_tile = 9;
         f16_avgpool_config.channel_tile = 8;
-      }
+      } else
     #endif
+    ;  // no f16 support
   #endif
 }
 
@@ -100,8 +101,14 @@ static void init_f32_avgpool_config(void) {
         f32_avgpool_config.init.f32 = xnn_init_f32_scaleminmax_scalar_params;
         f32_avgpool_config.primary_tile = 9;
         f32_avgpool_config.channel_tile = 4;
-      }
+      } else
     #endif
+    {
+      f32_avgpool_config.ukernel = XNN_INIT_AVGPOOL_UKERNEL(xnn_f32_avgpool_minmax_ukernel_9p__scalar_u1);
+      f32_avgpool_config.init.f32 = xnn_init_f32_scaleminmax_scalar_params;
+      f32_avgpool_config.primary_tile = 9;
+      f32_avgpool_config.channel_tile = 1;
+    }
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     f32_avgpool_config.ukernel = XNN_INIT_AVGPOOL_UKERNEL(xnn_f32_avgpool_minmax_ukernel_9p__wasmsimd_u4);
     f32_avgpool_config.init.f32 = xnn_init_f32_scaleminmax_scalar_params;

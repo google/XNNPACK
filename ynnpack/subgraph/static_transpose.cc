@@ -75,9 +75,11 @@ auto make_transpose_impl(int rank, size_t elem_count,
     const slinky::index_t m = sliced_output.dim(input_dim0).extent();
     const slinky::index_t n = sliced_output.dim(0).extent() * elem_count;
     const slinky::index_t n_bytes_a = m * output.elem_size;
-    assert(sliced_input.dim(input_dim0).stride() == output.elem_size);
+    assert(sliced_input.dim(input_dim0).extent() == 1 ||
+           sliced_input.dim(input_dim0).stride() == output.elem_size);
     const slinky::index_t input_stride = sliced_input.dim(0).stride();
-    assert(sliced_output.dim(0).stride() == output.elem_size);
+    assert(sliced_output.dim(0).extent() == 1 ||
+           sliced_output.dim(0).stride() == output.elem_size);
     const slinky::index_t output_stride =
         sliced_output.dim(input_dim0).stride();
 

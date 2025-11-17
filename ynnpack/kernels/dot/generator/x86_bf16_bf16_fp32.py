@@ -13,6 +13,8 @@ class x86_bf16_bf16_fp32(x86):
     super().__init__(arch, "bf16_bf16_fp32", "float", bits, tile_shape)
     self.a_type = "bfloat16"
     self.b_type = "bfloat16"
+    # Very interestingly, fma doesn't seem to matter for bf16!
+    self.flags += ["dot_flag::consistent_arithmetic"]
 
   def header(self):
     return super().header() + f"""
@@ -67,9 +69,12 @@ class x86_avx2_bf16_bf16_fp32(x86_bf16_bf16_fp32, x86_avx):
   def product(self, i, j, k):
     add = f"{self._mm()}_add_ps"
     mul = f"{self._mm()}_mul_ps"
+    # This "backwards" reduction order (1 first, then 0) is used to match the
+    # behavior of dpbf16ps, which is documented to do the reduction in this
+    # order, enabling all of these kernels to be numerically consistent.
     return f"""
-c_{i}_{j} = {add}(c_{i}_{j}, {mul}(a_{i}_{k+0}, b_{k+0}_{j}));
 c_{i}_{j} = {add}(c_{i}_{j}, {mul}(a_{i}_{k+1}, b_{k+1}_{j}));
+c_{i}_{j} = {add}(c_{i}_{j}, {mul}(a_{i}_{k+0}, b_{k+0}_{j}));
 """
 
 
@@ -79,8 +84,8 @@ class x86_avx2_fma3_bf16_bf16_fp32(x86_avx2_bf16_bf16_fp32):
 
   def product(self, i, j, k):
     return f"""
-c_{i}_{j} = {self._mm()}_fmadd_ps(a_{i}_{k+0}, b_{k+0}_{j}, c_{i}_{j});
 c_{i}_{j} = {self._mm()}_fmadd_ps(a_{i}_{k+1}, b_{k+1}_{j}, c_{i}_{j});
+c_{i}_{j} = {self._mm()}_fmadd_ps(a_{i}_{k+0}, b_{k+0}_{j}, c_{i}_{j});
 """
 
 
@@ -90,8 +95,8 @@ class x86_avx512f_bf16_bf16_fp32(x86_bf16_bf16_fp32, x86_avx512f):
 
   def product(self, i, j, k):
     return f"""
-c_{i}_{j} = {self._mm()}_fmadd_ps(a_{i}_{k+0}, b_{k+0}_{j}, c_{i}_{j});
 c_{i}_{j} = {self._mm()}_fmadd_ps(a_{i}_{k+1}, b_{k+1}_{j}, c_{i}_{j});
+c_{i}_{j} = {self._mm()}_fmadd_ps(a_{i}_{k+0}, b_{k+0}_{j}, c_{i}_{j});
 """
 
 

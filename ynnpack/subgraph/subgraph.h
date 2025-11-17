@@ -28,7 +28,10 @@
 
 namespace ynn {
 
-using axes_set = std::bitset<YNN_MAX_TENSOR_RANK>;
+// dot packing splits + transposes 2 dimensions.
+constexpr size_t ynn_internal_extra_dims = 2;
+
+using axes_set = std::bitset<YNN_MAX_TENSOR_RANK + ynn_internal_extra_dims>;
 
 // Define a transpose node, optionally using a slinky copy that may alias even
 // if dimension 0 is not stride 1 in the result.
@@ -102,6 +105,11 @@ struct ynn_value {
   }
 
   std::string name() const;
+
+  // Get the extent of a dimension, or 1 if it is implicitly broadcasted.
+  slinky::expr extent(size_t i) const {
+    return i < extents.size() && extents[i].defined() ? extents[i] : 1;
+  }
 
   // Asserting that the value is reshapable to a static scalar value of type T,
   // returns that value.

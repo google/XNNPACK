@@ -21,7 +21,7 @@ namespace ynn {
 namespace {
 
 template <typename TAB, typename TC>
-__arm_new("za") __arm_locally_streaming void dot_impl(
+__arm_new("za") __arm_locally_streaming void sme2_dot(
     size_t M, size_t N, size_t K3, size_t K2, size_t K1, size_t A_stride_m,
     size_t A_stride_k3, size_t A_stride_k2, const void* A, size_t B_stride_k3,
     size_t B_stride_k2, size_t B_stride_k1, const void* B, size_t C_in_stride_m,
@@ -215,7 +215,7 @@ void dot_fp32_sme2(size_t M, size_t N, size_t K3, size_t K2, size_t K1,
                    const void* A, size_t B_stride_k3, size_t B_stride_k2,
                    size_t B_stride_k1, const void* B, size_t C_in_stride_m,
                    const void* C_in, size_t C_out_stride_m, void* C_out) {
-  dot_impl<float, float>(M, N, K3, K2, K1, A_stride_m, A_stride_k3, A_stride_k2,
+  sme2_dot<float, float>(M, N, K3, K2, K1, A_stride_m, A_stride_k3, A_stride_k2,
                          A, B_stride_k3, B_stride_k2, B_stride_k1, B,
                          C_in_stride_m, C_in, C_out_stride_m, C_out);
 }
@@ -227,7 +227,7 @@ void dot_bf16_bf16_fp32_sme2(size_t M, size_t N, size_t K3, size_t K2,
                              size_t B_stride_k1, const void* B,
                              size_t C_in_stride_m, const void* C_in,
                              size_t C_out_stride_m, void* C_out) {
-  dot_impl<bfloat16_t, float>(
+  sme2_dot<bfloat16_t, float>(
       M, N, K3, K2, K1, A_stride_m, A_stride_k3, A_stride_k2, A, B_stride_k3,
       B_stride_k2, B_stride_k1, B, C_in_stride_m, C_in, C_out_stride_m, C_out);
 }
@@ -239,7 +239,7 @@ void dot_fp16_fp16_fp32_sme2(size_t M, size_t N, size_t K3, size_t K2,
                              size_t B_stride_k1, const void* B,
                              size_t C_in_stride_m, const void* C_in,
                              size_t C_out_stride_m, void* C_out) {
-  dot_impl<float16_t, float>(
+  sme2_dot<float16_t, float>(
       M, N, K3, K2, K1, A_stride_m, A_stride_k3, A_stride_k2, A, B_stride_k3,
       B_stride_k2, B_stride_k1, B, C_in_stride_m, C_in, C_out_stride_m, C_out);
 }
@@ -251,7 +251,7 @@ void dot_int8_int8_int32_sme2(size_t M, size_t N, size_t K3, size_t K2,
                               size_t B_stride_k1, const void* B,
                               size_t C_in_stride_m, const void* C_in,
                               size_t C_out_stride_m, void* C_out) {
-  dot_impl<int8_t, int32_t>(
+  sme2_dot<int8_t, int32_t>(
       M, N, K3, K2, K1, A_stride_m, A_stride_k3, A_stride_k2, A, B_stride_k3,
       B_stride_k2, B_stride_k1, B, C_in_stride_m, C_in, C_out_stride_m, C_out);
 }

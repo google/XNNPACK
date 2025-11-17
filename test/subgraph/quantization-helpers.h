@@ -75,9 +75,24 @@ void FakeDynamicQuantize(Tensor<Data> input, xnn_datatype datatype) {
 template <typename Data>
 void FakeDynamicQuantize(const Tensor<quantized<Data>>& input, xnn_datatype) {}
 
-// The next chunk of things enables us to work with int4 data in the
+// The next chunk of things enables us to work with int2 and int4 data in the
 // datatype/Tensor template system. It's not a perfect abstraction, I think with
 // a little bit of improvement, this could be a clean mechanism.
+
+// Four int2 values stored in an int8.
+struct int2x4 {
+  uint8_t value;
+
+  int2x4() = default;
+  int2x4(uint8_t value) : value(value) {}  // NOLINT
+
+  int8_t operator[](size_t i) const {
+    int8_t result = (value >> (i * 2)) & 0x3;
+    // Sign extend
+    result = static_cast<int8_t>(result << 6) >> 6;
+    return result;
+  }
+};
 
 // Two int4 values stored in an int8.
 struct int4x2 {
@@ -109,6 +124,7 @@ using qcint8 = quantized<int8_t, channelwise>;
 using qint32 = quantized<int32_t>;
 using qcint32 = quantized<int32_t, channelwise>;
 using qcint4 = quantized<int4x2, channelwise>;
+using qcint2 = quantized<int2x4, channelwise>;
 
 // Bogus datatype used to indicate an invalid type.
 using invalid_type = quantized<float>;
@@ -116,6 +132,16 @@ using invalid_type = quantized<float>;
 // This is not a "real" XNNPACK datatype, but it is required to match the
 // behavior of F32QC4W (b/407771627).
 using qcuint4 = quantized<uint4x2, channelwise>;
+
+template <>
+class NumericLimits<qcint2> {
+ public:
+  static int32_t min() { return -2; }
+  static int32_t max() { return 1; }
+  static int32_t smallest_normal() { return 0; }
+  static int32_t min_identity() { return max(); }
+  static int32_t max_identity() { return min(); }
+};
 
 template <>
 class NumericLimits<qcint4> {
@@ -139,7 +165,9 @@ class NumericLimits<qcuint4> {
 
 template <typename T>
 xnn_datatype datatype_of() {
-  if (std::is_same<T, qcint4>::value) {
+  if (std::is_same<T, qcint2>::value) {
+    return xnn_datatype_qcint2;
+  } else if (std::is_same<T, qcint4>::value) {
     return xnn_datatype_qcint4;
   } else if (std::is_same<T, qcuint4>::value) {
     return xnn_datatype_qcint4;
@@ -180,10 +208,12 @@ xnn_quantization_params CalculateGEMMQuantizationParams(
       dequantize(NumericLimits<Input>::min(), input_quantization);
   const float input_max =
       dequantize(NumericLimits<Input>::max(), input_quantization);
-  const float filter_min =
-      dequantize(NumericLimits<Filter>::min(), filter_quantization);
-  const float filter_max =
-      dequantize(NumericLimits<Filter>::max(), filter_quantization);
+  const float filter_min = dequantize(
+      NumericLimits<Filter>::min(), filter_quantization.scale,
+      filter_quantization.zero_point);
+  const float filter_max = dequantize(
+      NumericLimits<Filter>::max(), filter_quantization.scale,
+      filter_quantization.zero_point);
   const float bias_min = dequantize(-max_abs_bias<Bias>(), bias_quantization);
   const float bias_max = dequantize(max_abs_bias<Bias>(), bias_quantization);
 

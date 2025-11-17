@@ -46,6 +46,12 @@ typedef void (*xnn_dqgemm_ukernel_fn)(
     const void* params,
     const struct xnn_qd8_quantization_params* quantization_params);
 
+typedef void (*xnn_dqgemm_qc2w_ukernel_fn)(
+    size_t mr, size_t nr, size_t k, const void* a, size_t a_stride,
+    const void* w, void* c, size_t cm_stride, size_t cn_stride,
+    const void* params, const float* row_sum,
+    const struct xnn_qd8_quantization_params* quantization_params);
+
 typedef void (*xnn_dqgemm_bl_ukernel_fn)(
     size_t mr, size_t nr, size_t k, const void* a, size_t a_stride,
     const void* w, void* c, size_t cm_stride, size_t cn_stride,
@@ -133,6 +139,12 @@ typedef void (*xnn_qd8_f16_qb4w_gemm_ukernel_fn)(
     size_t mr, size_t nr, size_t k, const int8_t* a, size_t a_stride,
     const void* w, xnn_float16* c, size_t cm_stride, size_t cn_stride,
     const struct xnn_f16_qb4w_minmax_params* params,
+    const struct xnn_qd8_quantization_params* quantization_params);
+
+typedef void (*xnn_qd8_f32_qc2w_gemm_ukernel_fn)(
+    size_t mr, size_t nr, size_t k, const int8_t* a, size_t a_stride,
+    const void* w, float* c, size_t cm_stride, size_t cn_stride,
+    const struct xnn_f32_minmax_params* params, const float* row_sum,
     const struct xnn_qd8_quantization_params* quantization_params);
 
 typedef void (*xnn_qd8_f32_qc4w_gemm_ukernel_fn)(
@@ -1317,6 +1329,10 @@ typedef void (*xnn_indirection_init_resize_bilinear2d_chw_fn)(
 
 struct xnn_hmp_dqgemm_ukernel {
   xnn_dqgemm_ukernel_fn function[XNN_MAX_UARCH_TYPES];
+};
+
+struct xnn_hmp_dqgemm_qc2w_ukernel {
+  xnn_dqgemm_qc2w_ukernel_fn function[XNN_MAX_UARCH_TYPES];
 };
 
 struct xnn_hmp_dqgemm_bl_ukernel {
