@@ -8,12 +8,10 @@
 #include <algorithm>
 #include <array>
 #include <cassert>
-#include <cmath>
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
 #include <memory>
-#include <numeric>
 #include <optional>
 #include <tuple>
 #include <utility>
@@ -24,9 +22,8 @@
 #include "ynnpack/base/base.h"
 #include "ynnpack/base/type.h"
 #include "ynnpack/include/ynnpack.h"
+#include "ynnpack/kernels/dot/pack.h"
 #include "ynnpack/kernels/dot/schedule.h"
-#include "ynnpack/kernels/transpose/interleave.h"
-#include "ynnpack/kernels/transpose/transpose.h"
 #include "ynnpack/subgraph/runtime.h"
 #include "ynnpack/subgraph/slinky.h"
 #include "ynnpack/subgraph/subgraph.h"
@@ -313,81 +310,35 @@ auto make_pack_impl() {
     const index_t block_n = output_ni.extent();
     assert(output_ki.min() == 0);
     assert(output_ni.min() == 0);
-    assert(output_ko.min() == 0);
     assert(output_ki.extent() == 1 || output_ki.stride() == output.elem_size);
     assert(output_ni.extent() == 1 || output_ki.extent() == 1 ||
            output_ni.stride() == output_ki.stride() * tile_k);
     (void)output_ki;
 
-    // Slice off the dimensions we will handle. We compute the offsets into the
-    // input using the dimensions below, so we don't need to slice these at the
-    // output mins.
-    input.slice({0, 1});
+    input.slice(0, output_no.min() * block_n);
+    input.slice(0);
     output.slice({0, 1, 2, 3});
 
     // Depending on the strides of the input, we might use either an interleave
     // or a transpose kernel to implement this packing.
-    interleave_kernel_fn interleave = nullptr;
-    transpose_kernel_fn transpose = nullptr;
-    transpose_kernel_fn transpose_blocks = nullptr;
-    if (input_n.stride() == elem_size) {
-      if (tile_k == 1) {
-        // This is just a transpose of entire blocks at once. Try to get a
-        // kernel for that.
-        transpose_blocks = get_transpose_kernel(elem_size * block_n * 8);
-      }
-      if (!transpose_blocks) {
-        // We're interleaving rows of the input to produce rows of the output.
-        interleave = get_interleave_kernel(elem_size * 8, tile_k);
-      }
-    } else {
-      // We're transposing columns of the input to rows of the output, but doing
-      // tile_k of them at a time.
-      transpose = get_transpose_kernel(elem_size * 8 * tile_k);
-    }
+    const bool transpose =
+        input_n.extent() > 1 && input_n.stride() != elem_size;
+    const index_t input_stride =
+        transpose ? input_n.stride() : input_k.stride();
+
+    // We need the extent of the intersection of the input and output bounds.
+    assert(output_ko.min() == 0);
+    const index_t k = std::min(output_ko.end() * tile_k, input_k.end());
+    assert(input_n.min() <= output_no.min() * block_n);
+    const index_t n = std::min(output_no.end() * block_n, input_n.end()) -
+                      output_no.begin() * block_n;
+
+    packer p(transpose, elem_size, tile_k, block_n);
 
     slinky::for_each_element(
         [&](void* output, const void* input) {
-          if (transpose_blocks) {
-            assert(output_ko.extent() == 1 ||
-                   output_ko.stride() == elem_size * block_n);
-            const index_t n = input_n.end() - output_no.begin() * block_n;
-            input = offset_bytes(
-                input, input_n.flat_offset_bytes(output_no.begin() * block_n));
-            transpose_blocks(output_no.extent(), output_ko.extent(),
-                             n * elem_size, input_k.stride(), input,
-                             output_no.stride(), output);
-          } else {
-            for (index_t no = output_no.begin(); no < output_no.end(); ++no) {
-              const index_t n = std::min(block_n, input_n.end() - no * block_n);
-              const void* i =
-                  offset_bytes(input, input_n.flat_offset_bytes(no * block_n));
-              void* o = offset_bytes(output, output_no.flat_offset_bytes(no));
-              if (interleave) {
-                // In each row, we have a range that we produce via
-                // interleaving, which handles padding of rows, but we also have
-                // padding in the columns, which the interleave kernel does not
-                // handle. Here we compute the size produced by interleaving
-                // (including the padded rows), and then the size of the padding
-                // in each row, which we set to 0.
-                const index_t row_size = n * tile_k * elem_size;
-                const index_t padding_size = (block_n - n) * tile_k * elem_size;
-                for (index_t ko = output_ko.begin(); ko < output_ko.end();
-                     ++ko) {
-                  const index_t k =
-                      std::min<index_t>(tile_k, input_k.end() - ko * tile_k);
-                  interleave(tile_k, k, n, input_k.stride(), i, o);
-                  memset(offset_bytes(o, row_size), 0, padding_size);
-                  i = offset_bytes(i, input_k.stride() * tile_k);
-                  o = offset_bytes(o, output_ko.stride());
-                }
-              } else {
-                assert(input_k.stride() == elem_size || input_k.extent() == 1);
-                transpose(output_ko.extent(), n, input_k.extent() * elem_size,
-                          input_n.stride(), i, output_ko.stride(), o);
-              }
-            }
-          }
+          p.pack(k, n, input_stride, input, output_ko.stride(),
+                 output_no.stride(), output);
         },
         output, input);
     return 0;
@@ -504,7 +455,6 @@ auto make_transpose_a_impl(index_t tile_k) {
         const slinky::dim& output_m = output.dim(1);
 
         const index_t elem_size = input.elem_size;
-        assert(output_ko.min() == 0);
         assert(output_m.stride() == elem_size * tile_k);
         (void)output_m;
 
@@ -512,20 +462,22 @@ auto make_transpose_a_impl(index_t tile_k) {
         input.slice(0, output_m.min());
         output.slice({0, 1});
 
+        // We need the intersection of the input and output bounds.
+        const index_t m =
+            std::min(output_m.end(), input_m.end()) - output_m.begin();
+        assert(input_k.min() <= output_ko.min() * tile_k);
+        assert(output_ko.min() == 0);
+        const index_t k = std::min(output_ko.end() * tile_k, input_k.end());
+
         // We're transposing columns of the input to rows of the output, but
         // doing tile_k of them at a time.
-        // TODO(b/454131137): If the input is already transposed, we can just
-        // interleave the rows instead.
-        transpose_kernel_fn transpose =
-            get_transpose_kernel(elem_size * 8 * tile_k);
-        assert(transpose);
+        // TODO(b/454131137): Support already transposed inputs here.
+        packer p(/*transpose=*/true, elem_size, tile_k, /*tile_n=*/m);
 
         slinky::for_each_element(
             [&](void* output, const void* input) {
-              assert(input_k.stride() == elem_size || input_k.extent() == 1);
-              transpose(output_ko.extent(), output_m.extent(),
-                        input_k.extent() * elem_size, input_m.stride(), input,
-                        output_ko.stride(), output);
+              p.pack(k, m, input_m.stride(), input, output_ko.stride(),
+                     /*output_block_stride=*/0, output);
             },
             output, input);
         return 0;

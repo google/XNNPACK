@@ -543,6 +543,18 @@ cc_library(
 )
 
 cc_library(
+    name = "pack",
+    srcs = ["pack.cc"],
+    hdrs = ["pack.h"],
+    compatible_with = _COMPATIBLE_WITH,
+    visibility = ["//ynnpack:__subpackages__"],
+    deps = [
+        "//ynnpack/base",
+        "//ynnpack/kernels/transpose",
+    ],
+)
+
+cc_library(
     name = "arm64_sme_stubs",
     srcs = ["arm64_sme_stubs.cc"],
     compatible_with = _COMPATIBLE_WITH,
@@ -688,6 +700,16 @@ cc_test(
     srcs = ["schedule_test.cc"],
     deps = [
         ":schedule",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "pack_test",
+    srcs = ["pack_test.cc"],
+    deps = [
+        ":pack",
+        "//ynnpack/base",
         "@com_google_googletest//:gtest_main",
     ],
 )

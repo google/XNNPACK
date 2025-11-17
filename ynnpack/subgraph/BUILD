@@ -87,6 +87,7 @@ cc_library(
         "//ynnpack/base:log",
         "//ynnpack/kernels/binary",
         "//ynnpack/kernels/dot",
+        "//ynnpack/kernels/dot:pack",
         "//ynnpack/kernels/dot:schedule",
         "//ynnpack/kernels/reduce",
         "//ynnpack/kernels/ternary",
