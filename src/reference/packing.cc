@@ -2372,7 +2372,7 @@ void xnn_pack_kai_f16_weights_and_biases(
           (const void*)((uintptr_t)weights + group * weights_group_stride),
           /*bias=*/
           free_accumulator_init
-              ? (const float*)accumulator_init
+              ? accumulator_init
               : (const float*)(accumulator_init) + group * output_channels,
           /*scale=*/NULL,
           /*rhs_packed=*/
@@ -2388,7 +2388,7 @@ void xnn_pack_kai_f16_weights_and_biases(
           (const void*)((uintptr_t)weights + group * weights_group_stride),
           /*bias=*/
           free_accumulator_init
-              ? (const float*)accumulator_init
+              ? accumulator_init
               : (const float*)(accumulator_init) + group * output_channels,
           /*scale=*/NULL,
           /*rhs_packed=*/

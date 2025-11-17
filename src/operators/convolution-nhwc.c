@@ -2186,13 +2186,20 @@ static enum xnn_status reshape_igemm(
       convolution_op->convolution_op->group_output_channels;
 
   const struct xnn_pack_lh_config* packed_lh_config = NULL;
-  bool inline_lhs_packing = convolution_op->flags & XNN_FLAG_INLINE_LHS_PACKING;
+  bool inline_lhs_packing =
+      (convolution_op->flags & XNN_FLAG_INLINE_LHS_PACKING) ||
+      (igemm_ukernel.packed_lhs_function[XNN_UARCH_DEFAULT] != NULL);
   switch (convolution_op->type) {
     case xnn_operator_type_convolution_nhwc_pqs8_qs8_qc8w:
       if (inline_lhs_packing) {
         packed_lh_config = xnn_init_x8_igemm_pack_lh_config();
       }
       break;
+    case xnn_operator_type_convolution_nhwc_pf16:
+        if (inline_lhs_packing) {
+           packed_lh_config = xnn_init_x16_igemm_pack_lh_config();
+        }
+        break;
     default:
       break;
   }
@@ -2204,8 +2211,7 @@ static enum xnn_status reshape_igemm(
     if (inline_lhs_packing) {
       assert(workspace_size);
       per_thread_workspace_size = packed_lh_config->size_for_igemm_fn(
-          mr, /*kc=*/group_input_channels
-                  << packed_lh_config->log2_packed_element_size,
+          mr, /*kc=*/group_input_channels,
           /*ks=*/kernel_size, mr_packed, kr, sr);
       xnn_log_debug("Inlining LHS packing for %s.",
                     xnn_operator_type_to_string(convolution_op->type));

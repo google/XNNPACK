@@ -874,6 +874,11 @@ static void compute_batch_inline_packed_igemm(
   const size_t kc = context->kc;
   const size_t ks = context->ks;
   const size_t cm_stride = context->cm_stride;
+  const size_t kc_elems =
+      kc >> context->packed_lh_config->log2_input_element_size;
+  const size_t cm_stride_elems = cm_stride >> context->log2_csize;
+  const size_t cm_stride_kernel =
+      (context->log2_csize == 0) ? cm_stride : cm_stride_elems;
   const size_t a_offset = context->a_offset + batch_index * context->ba_stride +
                           group_index * context->ga_stride;
   const void* packed_w = (const void*)((uintptr_t)context->packed_w +
@@ -889,7 +894,7 @@ static void compute_batch_inline_packed_igemm(
 
     // Pack the LHS data into the workspace.
     context->packed_lh_config->pack_lh_for_igemm_fn(
-        mr_step, kc, ks, mr_packed, context->kr, context->sr,
+        mr_step, kc_elems, ks, mr_packed, context->kr, context->sr,
         /*a=*/
         (const void**)((uintptr_t)context->indirect_a +
                        mr_block_start * ks * sizeof(void*)),
@@ -897,8 +902,8 @@ static void compute_batch_inline_packed_igemm(
 
     // Compute the iGEMM on the packed LHS data.
     context->ukernel.packed_lhs_function[uarch_index](
-        mr_step, context->nc, kc, ks, /*packed_lhs=*/workspace, packed_w,
-        (void*)(c + mr_block_start * cm_stride), cm_stride, &context->params);
+        mr_step, context->nc, kc_elems, ks, /*packed_lhs=*/workspace, packed_w,
+        (void*)(c + mr_block_start * cm_stride), cm_stride_kernel, &context->params);
 
     mr_block_size -= mr_step;
     mr_block_start += mr_step;

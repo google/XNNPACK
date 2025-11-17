@@ -26,6 +26,7 @@
 #include "src/xnnpack/datatype.h"
 #include "src/xnnpack/math.h"
 #include "src/xnnpack/subgraph.h"
+#include "src/xnnpack/operator.h"
 #include "test/replicable_random_device.h"
 #include "test/subgraph/runtime-flags.h"
 #include <pthreadpool.h>
@@ -566,6 +567,21 @@ class SubgraphTester {
   }
 
   xnn_subgraph* Subgraph() const { return subgraph_.get(); }
+
+  // Utility to help force inline LHS packing for the last convolution node (pf16)
+  // This helps to test for previous failure case.
+  SubgraphTester& ForceInlineLhsPackingPf16OnLastConv() {
+    const uint32_t num_nodes = xnn_subgraph_get_num_nodes(subgraph_.get());
+    for (int i = static_cast<int>(num_nodes) - 1; i >= 0; --i) {
+      xnn_node* node = &subgraph_->nodes[i];
+      if (node->type == xnn_node_type_convolution_2d) {
+        node->packed_input_datatype = xnn_datatype_pfp16;
+        node->flags |= XNN_FLAG_INLINE_LHS_PACKING;
+        break;
+      }
+    }
+    return *this;
+  }
 
   template <typename T>
   float* GetExternalTensorData(uint32_t external_id) {
