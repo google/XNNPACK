@@ -14,7 +14,18 @@ using ::testing::Matcher;
 namespace ynn {
 
 // Generate an (optionally transposed) matrix using an `iota` function down
-// the columns.
+// the columns:
+//
+// [ 0   m    2m  ...]
+// [ 1  m+1  2m+1 ...]
+// [ 2  m+1  2m+1 ...]
+// [ .   .    .    . ]
+// [ .   .    .    . ]
+// [ .   .    .    . ]
+// [m-1 2m-1 3m-1 ...]
+//
+// If `transposed` is true, the result is the above, transposed.
+//
 template <typename T>
 std::vector<T> iota_columns(bool transposed, size_t m, size_t n) {
   std::vector<T> result(m * n);

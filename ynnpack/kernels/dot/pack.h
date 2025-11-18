@@ -32,11 +32,11 @@ class packer {
 
  protected:
   size_t elem_size;
-  size_t log2_tile_m;
+  size_t tile_m;
   size_t tile_n;
-  interleave_kernel_fn interleave = nullptr;
-  transpose_kernel_fn transpose = nullptr;
-  transpose_kernel_fn transpose_blocks = nullptr;
+  interleave_kernel_fn interleave_fn = nullptr;
+  transpose_kernel_fn transpose_fn = nullptr;
+  transpose_kernel_fn transpose_blocks_fn = nullptr;
 };
 
 }  // namespace ynn

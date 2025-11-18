@@ -14,22 +14,37 @@
 namespace ynn {
 
 packer::packer(bool transpose, size_t elem_size, size_t tile_m, size_t tile_n)
-    : elem_size(elem_size), log2_tile_m(std::log2(tile_m)), tile_n(tile_n) {
-  assert(tile_m == 1 << log2_tile_m);
+    : elem_size(elem_size), tile_m(tile_m), tile_n(tile_n) {
   const size_t elem_size_bits = elem_size * 8;
+  // This operation is fusing 3 separate transposes (with padding as needed):
+  //
+  // 1. (optional) the caller might want to transpose the input prior to the
+  // subsequent transposes (`transpose` = true). We assume this transpose is of
+  // `tile_m` x elements at a time.
+  // 2. A small transpose of `tile_m` x elements at a time
+  // 3. A larger transpose of `tile_m * tile_m` x elements at a time
+  //
+  // If each transpose has an element size that is a multiple of the previous
+  // transpose's element size, those transposes partially "cancel out",
+  // resulting in a different transpose instead.
   if (transpose) {
+    // We have all 3 transposes.
     // We're transposing columns of the input to rows of the output, but doing
-    // tile_m of them at a time.
-    this->transpose = get_transpose_kernel(elem_size_bits << log2_tile_m);
+    // `tile_m` of them at a time. In this case, (2) and (3) are equivalent to
+    // "bitcasting" the input to have elements that are `tile_m` x larger (and
+    // `tile_m` x fewer of them), and then transposing that. (3) is handled by a
+    // loop over calls to this kernel below.
+    transpose_fn = get_transpose_kernel(elem_size_bits * tile_m);
   } else {
-    if (log2_tile_m == 0) {
-      // This is just a transpose of entire blocks at once. Try to get a
-      // kernel for that.
-      transpose_blocks = get_transpose_kernel(elem_size_bits * tile_n);
+    // We only have (2) and (3).
+    if (tile_m == 1) {
+      // (2) is a no-op, we only need to do (3). Try to find a kernel for that.
+      transpose_blocks_fn = get_transpose_kernel(elem_size_bits * tile_n);
     }
-    if (!transpose_blocks) {
+    if (!transpose_blocks_fn) {
+      // We need to do (2) (or we don't have a kernel for the trivial case).
       // We're interleaving rows of the input to produce rows of the output.
-      interleave = get_interleave_kernel(elem_size_bits, 1 << log2_tile_m);
+      interleave_fn = get_interleave_kernel(elem_size_bits, tile_m);
     }
   }
 }
@@ -37,22 +52,21 @@ packer::packer(bool transpose, size_t elem_size, size_t tile_m, size_t tile_n)
 void packer::pack(size_t m, size_t n, size_t input_stride, const void* input,
                   size_t output_stride, size_t output_block_stride,
                   void* output) {
-  const size_t tile_m = 1 << log2_tile_m;
-  if (transpose_blocks) {
+  if (transpose_blocks_fn) {
     assert(tile_m == 1);
     assert(m == 1 || output_stride == elem_size * tile_n);
-    transpose_blocks(ceil_div(n, tile_n), m, n * elem_size, input_stride, input,
-                     output_block_stride, output);
-  } else if (transpose) {
+    transpose_blocks_fn(ceil_div(n, tile_n), m, n * elem_size, input_stride,
+                        input, output_block_stride, output);
+  } else if (transpose_fn) {
     while (n > 0) {
       const size_t n_i = std::min(n, tile_n);
-      transpose(ceil_div(m, tile_m), n_i, m * elem_size, input_stride, input,
-                output_stride, output);
+      transpose_fn(ceil_div(m, tile_m), n_i, m * elem_size, input_stride, input,
+                   output_stride, output);
       input = offset_bytes(input, input_stride * tile_n);
       output = offset_bytes(output, output_block_stride);
       n = sub_sat(n, tile_n);
     }
-  } else if (interleave) {
+  } else if (interleave_fn) {
     while (n > 0) {
       const size_t n_i = std::min(n, tile_n);
       // In each row, we have a range that we produce via
@@ -67,7 +81,7 @@ void packer::pack(size_t m, size_t n, size_t input_stride, const void* input,
       void* output_i = output;
       for (size_t i = 0; i < m; i += tile_m) {
         const size_t m_i = std::min(m - i, tile_m);
-        interleave(tile_m, m_i, n_i, input_stride, input_i, output_i);
+        interleave_fn(tile_m, m_i, n_i, input_stride, input_i, output_i);
         memset(offset_bytes(output_i, row_size), 0, padding_size);
         input_i = offset_bytes(input_i, input_stride * tile_m);
         output_i = offset_bytes(output_i, output_stride);
