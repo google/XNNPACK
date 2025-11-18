@@ -220,3 +220,9 @@ cc_test(
     srcs = ["stencil_copy.cc"],
     deps = TEST_DEPS,
 )
+
+cc_test(
+    name = "runtime",
+    srcs = ["runtime.cc"],
+    deps = TEST_DEPS,
+)
