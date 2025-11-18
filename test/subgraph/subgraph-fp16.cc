@@ -1275,6 +1275,7 @@ TEST(SUBGRAPH_FP16_DUPLICATE_INPUTS, converted_only_once) {
   ASSERT_EQ(convert_out->allocation_type, xnn_allocation_type_workspace);
 }
 
+#if XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI
 // This test targets the failure where pf16 packed-LHS iGEMM kernels were
 // accidentally invoked through the non-packed iGEMM call path. The packed-LHS
 // kernels have a different function signature, so the runtime ended up passing
@@ -1284,7 +1285,7 @@ TEST(SUBGRAPH_FP16_DUPLICATE_INPUTS, converted_only_once) {
 TEST(SUBGRAPH_FP16_CONVOLUTION, inline_lhs_packing_pf16) {
 
     const auto* hw = xnn_init_hardware_config();
-    if (!hw || (hw->arch_flags & xnn_arch_arm_sme2)
+    if (!hw || (hw->arch_flags & xnn_arch_arm_sme2) == 0
             || (hw->arch_flags & xnn_arch_arm_sme ) == 0) {
       GTEST_SKIP() << "PF16/SME(2) path not available on this target";
     }
@@ -1298,6 +1299,7 @@ TEST(SUBGRAPH_FP16_CONVOLUTION, inline_lhs_packing_pf16) {
   const uint32_t filter_id = 1;
   const uint32_t bias_id = 2;
   const uint32_t output_id = 3;
+  const uint32_t runtime_flags = xnn_test_runtime_flags() & ~XNN_FLAG_NO_INLINED_LHS_PACKING;
 
   // Build FP32 graph (then rewrite to FP16 in tester).
   tester.AddInputTensorF32({1, 8, 8, 32}, input_id)
@@ -1315,11 +1317,9 @@ TEST(SUBGRAPH_FP16_CONVOLUTION, inline_lhs_packing_pf16) {
                 /*group_output_channels=*/64,
                 /*output_min=*/-INFINITY,
                 /*output_max=*/INFINITY},
-                input_id, filter_id, bias_id, output_id)
-        .Optimize()
+                input_id, filter_id, bias_id, output_id, 0)
         .RewriteForFp16()
-        .ForceInlineLhsPackingPf16OnLastConv()
-        .Optimize();
+        .Optimize(runtime_flags);
 
   // Reference FP32 graph for output comparison.
   reference_tester
@@ -1338,27 +1338,30 @@ TEST(SUBGRAPH_FP16_CONVOLUTION, inline_lhs_packing_pf16) {
               /*group_output_channels=*/64,
               /*output_min=*/-INFINITY,
               /*output_max=*/INFINITY},
-          input_id, filter_id, bias_id, output_id)
-      .Optimize();
+          input_id, filter_id, bias_id, output_id, 0)
+      .Optimize(runtime_flags);
 
-  // Sanity-check whether inline LHS packing got requested or a pack_lh node was inserted.
-  bool saw_inline_or_pack = false;
-  (void) saw_inline_or_pack;
+  // Sanity-check whether inline LHS packing got requested
+  bool saw_inline = false;
   for (uint32_t i = 0; i < tester.NumNodes(); i++) {
     const xnn_node* n = tester.Node(i);
-    if ((n->type == xnn_node_type_convolution_2d &&
-         (n->flags & XNN_FLAG_INLINE_LHS_PACKING)) ||
-        (n->type == xnn_node_type_pack_lh)) {
-      saw_inline_or_pack = true;
+    if (n->type == xnn_node_type_convolution_2d &&
+        (n->flags & XNN_FLAG_INLINE_LHS_PACKING)) {
+      saw_inline = true;
       break;
     }
   }
 
+  EXPECT_TRUE(saw_inline)
+      << "Inlined LHS packing was not selected; "
+         "check PF16 config and runtime flags";
+
   // Create runtimes.
   xnn_runtime_t fp16_runtime_ptr = nullptr;
+
   xnn_status status =
       xnn_create_runtime_v2(tester.Subgraph(), /*threadpool=*/nullptr,
-                            xnn_test_runtime_flags(), &fp16_runtime_ptr);
+                            runtime_flags, &fp16_runtime_ptr);
   if (status == xnn_status_unsupported_hardware) {
     // If SME(2)/PF16 isn’t available, skip.
     GTEST_SKIP();
@@ -1369,7 +1372,7 @@ TEST(SUBGRAPH_FP16_CONVOLUTION, inline_lhs_packing_pf16) {
 
   xnn_runtime_t fp32_runtime_ptr = nullptr;
   status = xnn_create_runtime_v2(reference_tester.Subgraph(), /*threadpool=*/nullptr,
-                                 xnn_test_runtime_flags(), &fp32_runtime_ptr);
+                                 runtime_flags, &fp32_runtime_ptr);
   ASSERT_EQ(xnn_status_success, status);
   std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_fp32_runtime(
       fp32_runtime_ptr, xnn_delete_runtime);
@@ -1400,6 +1403,6 @@ TEST(SUBGRAPH_FP16_CONVOLUTION, inline_lhs_packing_pf16) {
     ASSERT_NEAR(out_fp16[i], out_fp32[i], tol);
   }
 }
-
+#endif
 
 }  // namespace xnnpack

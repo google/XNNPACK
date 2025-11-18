@@ -4009,7 +4009,8 @@ enum xnn_status xnn_subgraph_optimize_packed_lhs(xnn_subgraph_t subgraph,
           node->flags |= XNN_FLAG_INLINE_LHS_PACKING;
         }
         if (input_datatype == xnn_datatype_fp16 &&
-            kernel_datatype == xnn_datatype_fp16 &&
+            (kernel_datatype == xnn_datatype_fp16 ||
+            kernel_datatype == xnn_datatype_fp32) &&
             output_datatype == xnn_datatype_fp16 &&
             xnn_init_pf16_gemm_config() != NULL &&
             !(optimization_flags & XNN_FLAG_NO_INLINED_LHS_PACKING)) {

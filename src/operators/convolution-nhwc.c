@@ -2196,10 +2196,10 @@ static enum xnn_status reshape_igemm(
       }
       break;
     case xnn_operator_type_convolution_nhwc_pf16:
-        if (inline_lhs_packing) {
-           packed_lh_config = xnn_init_x16_igemm_pack_lh_config();
-        }
-        break;
+      if (inline_lhs_packing) {
+        packed_lh_config = xnn_init_x16_igemm_pack_lh_config();
+      }
+      break;
     default:
       break;
   }
