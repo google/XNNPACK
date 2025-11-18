@@ -5,7 +5,7 @@
 
 load("@rules_cc//cc:cc_library.bzl", "cc_library")
 load("@rules_cc//cc:cc_test.bzl", "cc_test")
-load("//ynnpack:build_defs.bzl", "ynn_cc_library", "ynn_generate_src_hdr", "ynn_kernel_copts")
+load("//ynnpack:build_defs.bzl", "ynn_binary_linkopts", "ynn_binary_malloc", "ynn_cc_library", "ynn_generate_src_hdr", "ynn_kernel_copts", "ynn_test_deps")
 
 _COMPATIBLE_WITH = []
 
@@ -667,6 +667,8 @@ ynn_cc_library(
 cc_test(
     name = "test",
     srcs = ["test.cc"],
+    linkopts = ynn_binary_linkopts(),
+    malloc = ynn_binary_malloc(),
     deps = [
         ":dot",
         "//ynnpack:ynnpack_h",
@@ -676,13 +678,14 @@ cc_test(
         "//ynnpack/base/test:random",
         "//ynnpack/base/test:tensor",
         "//ynnpack/base/test:util",
-        "@com_google_googletest//:gtest_main",
-    ],
+    ] + ynn_test_deps(),
 )
 
 cc_test(
     name = "consistent_arithmetic_test",
     srcs = ["consistent_arithmetic_test.cc"],
+    linkopts = ynn_binary_linkopts(),
+    malloc = ynn_binary_malloc(),
     deps = [
         ":dot",
         "//ynnpack/base",
@@ -691,44 +694,48 @@ cc_test(
         "//ynnpack/base/test:random",
         "//ynnpack/base/test:tensor",
         "//ynnpack/base/test:util",
-        "@com_google_googletest//:gtest_main",
-    ],
+    ] + ynn_test_deps(),
 )
 
 cc_test(
     name = "schedule_test",
     srcs = ["schedule_test.cc"],
+    linkopts = ynn_binary_linkopts(),
+    malloc = ynn_binary_malloc(),
     deps = [
         ":schedule",
-        "@com_google_googletest//:gtest_main",
-    ],
+    ] + ynn_test_deps(),
 )
 
 cc_test(
     name = "pack_test",
     srcs = ["pack_test.cc"],
+    linkopts = ynn_binary_linkopts(),
+    malloc = ynn_binary_malloc(),
     deps = [
         ":pack",
         "//ynnpack/base",
-        "@com_google_googletest//:gtest_main",
-    ],
+    ] + ynn_test_deps(),
 )
 
 cc_test(
     name = "get_dot_kernel_test",
     srcs = ["get_dot_kernel_test.cc"],
+    linkopts = ynn_binary_linkopts(),
+    malloc = ynn_binary_malloc(),
     deps = [
         ":dot",
         "//ynnpack:ynnpack_h",
         "//ynnpack/base",
-        "@com_google_googletest//:gtest_main",
-    ],
+    ] + ynn_test_deps(),
 )
 
 cc_test(
     name = "bench",
     srcs = ["bench.cc"],
     args = ["--benchmark_min_time=1x"],
+    linkopts = ynn_binary_linkopts(),
+    malloc = ynn_binary_malloc(),
     deps = [
         ":dot",
         "//ynnpack/base",

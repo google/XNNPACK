@@ -9,8 +9,10 @@
 #include <cstdint>
 
 #include "ynnpack/base/build_config.h"
+#ifdef YNN_ENABLE_CPUINFO
 #include "ynnpack/base/log.h"
 #include <cpuinfo.h>
+#endif
 
 namespace ynn {
 
@@ -39,11 +41,12 @@ bool can_use_amx_tile() { return false; }
 
 uint64_t get_supported_arch_flags() {
   static uint64_t flags = []() -> uint64_t {
+    uint64_t result = 0;
+#ifdef YNN_ENABLE_CPUINFO
     if (!cpuinfo_initialize()) {
       YNN_LOG_WARNING() << "Failed to initialize cpuinfo";
       return 0;
     }
-    uint64_t result = 0;
 
 #ifdef YNN_ARCH_X86
     result |= arch_flag::sse2;
@@ -74,6 +77,7 @@ uint64_t get_supported_arch_flags() {
     if (cpuinfo_has_arm_sme()) result |= arch_flag::sme;
     if (cpuinfo_has_arm_sme2()) result |= arch_flag::sme2;
 #endif  // YNN_ARCH_ARM
+#endif  // YNN_ENABLE_CPUINFO
     return result;
   }();
   return flags;

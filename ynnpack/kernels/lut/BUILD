@@ -5,7 +5,7 @@
 
 load("@rules_cc//cc:cc_library.bzl", "cc_library")
 load("@rules_cc//cc:cc_test.bzl", "cc_test")
-load("//ynnpack:build_defs.bzl", "ynn_kernel_copts")
+load("//ynnpack:build_defs.bzl", "ynn_benchmark_deps", "ynn_binary_linkopts", "ynn_binary_malloc", "ynn_kernel_copts", "ynn_test_deps")
 
 _COMPATIBLE_WITH = []
 
@@ -28,24 +28,26 @@ cc_library(
 cc_test(
     name = "test",
     srcs = ["test.cc"],
+    linkopts = ynn_binary_linkopts(),
+    malloc = ynn_binary_malloc(),
     deps = [
         ":lut",
         "//ynnpack/base",
         "//ynnpack/base/test:buffer",
         "//ynnpack/base/test:util",
-        "@com_google_googletest//:gtest_main",
-    ],
+    ] + ynn_test_deps(),
 )
 
 cc_test(
     name = "bench",
     srcs = ["bench.cc"],
     args = ["--benchmark_min_time=1x"],
+    linkopts = ynn_binary_linkopts(),
+    malloc = ynn_binary_malloc(),
     deps = [
         ":lut",
         "//ynnpack/base",
         "//ynnpack/base/test:buffer",
         "//ynnpack/base/test:random",
-        "@com_google_benchmark//:benchmark_main",
-    ],
+    ] + ynn_benchmark_deps(),
 )

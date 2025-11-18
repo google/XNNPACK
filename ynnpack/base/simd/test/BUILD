@@ -4,7 +4,7 @@
 # LICENSE file in the root directory of this source tree.
 
 load("@rules_cc//cc:cc_test.bzl", "cc_test")
-load("//ynnpack:build_defs.bzl", "ynn_cc_library")
+load("//ynnpack:build_defs.bzl", "ynn_binary_linkopts", "ynn_binary_malloc", "ynn_cc_library", "ynn_test_deps")
 
 package(default_visibility = ["//ynnpack:__subpackages__"])
 
@@ -43,9 +43,10 @@ ynn_cc_library(
 
 cc_test(
     name = "test",
+    linkopts = ynn_binary_linkopts(),
+    malloc = ynn_binary_malloc(),
     tags = ["simd_wrapper_test"],
     deps = [
         ":tests",
-        "@com_google_googletest//:gtest_main",
-    ],
+    ] + ynn_test_deps(),
 )

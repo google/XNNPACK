@@ -1,6 +1,7 @@
 #include "ynnpack/kernels/dot/pack.h"
 
 #include <cstddef>
+#include <numeric>
 #include <vector>
 
 #include <gmock/gmock.h>

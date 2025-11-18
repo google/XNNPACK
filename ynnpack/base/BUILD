@@ -89,9 +89,15 @@ cc_library(
         "type.h",
     ],
     compatible_with = _COMPATIBLE_WITH,
+    local_defines = select({
+        "//ynnpack:ynn_enable_cpuinfo": ["YNN_ENABLE_CPUINFO"],
+        "//conditions:default": [],
+    }),
     deps = [
         ":log",
         "//ynnpack:ynnpack_h",
-        "@cpuinfo",
-    ],
+    ] + select({
+        "//ynnpack:ynn_enable_cpuinfo": ["@cpuinfo"],
+        "//conditions:default": [],
+    }),
 )

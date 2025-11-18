@@ -5,6 +5,7 @@
 
 load("@rules_cc//cc:cc_library.bzl", "cc_library")
 load("@rules_cc//cc:cc_test.bzl", "cc_test")
+load("//ynnpack:build_defs.bzl", "ynn_binary_linkopts", "ynn_binary_malloc", "ynn_test_deps")
 
 cc_library(
     name = "scheduler",
@@ -35,35 +36,38 @@ cc_library(
 cc_test(
     name = "slinky_thread_pool",
     srcs = ["slinky_thread_pool.cc"],
+    linkopts = ynn_binary_linkopts(),
+    malloc = ynn_binary_malloc(),
     deps = [
         ":scheduler",
         "//ynnpack/subgraph:slinky_thread_pool",
-        "@com_google_googletest//:gtest_main",
-    ],
+    ] + ynn_test_deps(),
 )
 
 cc_test(
     name = "fold_constants",
     srcs = ["fold_constants.cc"],
+    linkopts = ynn_binary_linkopts(),
+    malloc = ynn_binary_malloc(),
     deps = [
         ":subgraph_builder",
         "//ynnpack:ynnpack_h",
         "//ynnpack/base",
         "//ynnpack/subgraph",
-        "@com_google_googletest//:gtest_main",
-    ],
+    ] + ynn_test_deps(),
 )
 
 cc_test(
     name = "invalidate_dead_values",
     srcs = ["invalidate_dead_values.cc"],
+    linkopts = ynn_binary_linkopts(),
+    malloc = ynn_binary_malloc(),
     deps = [
         ":subgraph_builder",
         "//ynnpack:ynnpack_h",
         "//ynnpack/base",
         "//ynnpack/subgraph",
-        "@com_google_googletest//:gtest_main",
-    ],
+    ] + ynn_test_deps(),
 )
 
 TEST_DEPS = [
@@ -76,12 +80,13 @@ TEST_DEPS = [
     "//ynnpack/base/test:random",
     "//ynnpack/base/test:tensor",
     "//ynnpack/base/test:util",
-    "@com_google_googletest//:gtest_main",
-]
+] + ynn_test_deps()
 
 cc_test(
     name = "binary",
     srcs = ["binary.cc"],
+    linkopts = ynn_binary_linkopts(),
+    malloc = ynn_binary_malloc(),
     deps = TEST_DEPS + [
         "//ynnpack/kernels/binary:reference",
     ],
@@ -90,75 +95,19 @@ cc_test(
 cc_test(
     name = "unary",
     srcs = ["unary.cc"],
+    linkopts = ynn_binary_linkopts(),
+    malloc = ynn_binary_malloc(),
     deps = TEST_DEPS + [
         "//ynnpack/kernels/unary:reference",
     ],
 )
 
 cc_test(
-    name = "broadcast_like",
-    srcs = ["broadcast_like.cc"],
-    deps = TEST_DEPS,
-)
-
-cc_test(
-    name = "copy",
-    srcs = ["copy.cc"],
-    deps = TEST_DEPS,
-)
-
-cc_test(
-    name = "static_broadcast",
-    srcs = ["static_broadcast.cc"],
-    deps = TEST_DEPS,
-)
-
-cc_test(
-    name = "static_expand_dims",
-    srcs = ["static_expand_dims.cc"],
-    deps = TEST_DEPS,
-)
-
-cc_test(
-    name = "static_reshape",
-    srcs = ["static_reshape.cc"],
-    deps = TEST_DEPS,
-)
-
-cc_test(
-    name = "split_dim",
-    srcs = ["split_dim.cc"],
-    deps = TEST_DEPS,
-)
-
-cc_test(
-    name = "fuse_dim",
-    srcs = ["fuse_dim.cc"],
-    deps = TEST_DEPS,
-)
-
-cc_test(
-    name = "fuse_dims",
-    srcs = ["fuse_dims.cc"],
-    deps = TEST_DEPS,
-)
-
-cc_test(
-    name = "concatenate",
-    srcs = ["concatenate.cc"],
-    deps = TEST_DEPS,
-)
-
-cc_test(
     name = "dot",
     srcs = ["dot.cc"],
+    linkopts = ynn_binary_linkopts(),
+    malloc = ynn_binary_malloc(),
     shard_count = 18,
-    deps = TEST_DEPS,
-)
-
-cc_test(
-    name = "errors",
-    srcs = ["errors.cc"],
     deps = TEST_DEPS,
 )
 
@@ -170,59 +119,34 @@ cc_test(
         "//ynnpack:x86": ["fusion.cc"],
         "//conditions:default": [],
     }),
+    linkopts = ynn_binary_linkopts(),
+    malloc = ynn_binary_malloc(),
     deps = TEST_DEPS + ["//ynnpack/subgraph"],
 )
 
-cc_test(
-    name = "get_tensor_shape",
-    srcs = ["get_tensor_shape.cc"],
+[cc_test(
+    name = name,
+    srcs = [name + ".cc"],
+    linkopts = ynn_binary_linkopts(),
+    malloc = ynn_binary_malloc(),
     deps = TEST_DEPS,
-)
-
-cc_test(
-    name = "reduce",
-    srcs = ["reduce.cc"],
-    deps = TEST_DEPS,
-)
-
-cc_test(
-    name = "even_split",
-    srcs = ["even_split.cc"],
-    deps = TEST_DEPS,
-)
-
-cc_test(
-    name = "stack",
-    srcs = ["stack.cc"],
-    deps = TEST_DEPS,
-)
-
-cc_test(
-    name = "static_transpose",
-    srcs = ["static_transpose.cc"],
-    deps = TEST_DEPS,
-)
-
-cc_test(
-    name = "static_slice",
-    srcs = ["static_slice.cc"],
-    deps = TEST_DEPS,
-)
-
-cc_test(
-    name = "static_pad",
-    srcs = ["static_pad.cc"],
-    deps = TEST_DEPS,
-)
-
-cc_test(
-    name = "stencil_copy",
-    srcs = ["stencil_copy.cc"],
-    deps = TEST_DEPS,
-)
-
-cc_test(
-    name = "runtime",
-    srcs = ["runtime.cc"],
-    deps = TEST_DEPS,
-)
+) for name in [
+    "copy",
+    "static_broadcast",
+    "static_expand_dims",
+    "static_reshape",
+    "split_dim",
+    "fuse_dim",
+    "fuse_dims",
+    "concatenate",
+    "errors",
+    "get_tensor_shape",
+    "reduce",
+    "even_split",
+    "runtime",
+    "stack",
+    "static_transpose",
+    "static_slice",
+    "static_pad",
+    "stencil_copy",
+]]

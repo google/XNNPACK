@@ -15,6 +15,7 @@ py_library(
         "generator.py",
         "x86.py",
     ],
+    tags = ["manual"],
     visibility = [
         "//ynnpack/kernels/binary:__pkg__",
         "//ynnpack/kernels/ternary:__pkg__",
@@ -26,6 +27,7 @@ py_test(
     name = "compiler_test",
     srcs = ["compiler_test.py"],
     tags = [
+        "manual",
         "xnnpack_tap_main_only",
     ],
     deps = [":generator"],

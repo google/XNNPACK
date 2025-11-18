@@ -5,6 +5,7 @@
 
 load("@rules_cc//cc:cc_library.bzl", "cc_library")
 load("@rules_cc//cc:cc_test.bzl", "cc_test")
+load("//ynnpack:build_defs.bzl", "ynn_binary_linkopts", "ynn_binary_malloc", "ynn_test_deps")
 
 _COMPATIBLE_WITH = []
 
@@ -70,6 +71,8 @@ cc_library(
 cc_test(
     name = "dynamic_quantization_test",
     srcs = ["dynamic_quantization_test.cc"],
+    linkopts = ynn_binary_linkopts(),
+    malloc = ynn_binary_malloc(),
     deps = [
         ":dynamic_quantization",
         "//ynnpack:ynnpack_h",
@@ -79,8 +82,7 @@ cc_test(
         "//ynnpack/base/test:tensor",
         "//ynnpack/base/test:util",
         "//ynnpack/subgraph/test:subgraph_builder",
-        "@com_google_googletest//:gtest_main",
-    ],
+    ] + ynn_test_deps(),
 )
 
 config_setting(
