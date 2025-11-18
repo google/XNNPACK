@@ -1946,6 +1946,46 @@ enum xnn_status xnn_create_convolution2d_nhwc_f32(
                                           convolution_op_out);
 }
 
+enum xnn_status xnn_create_convolution2d_nhwc_pf16(
+    uint32_t input_padding_top, uint32_t input_padding_right,
+    uint32_t input_padding_bottom, uint32_t input_padding_left,
+    uint32_t kernel_height, uint32_t kernel_width, uint32_t subsampling_height,
+    uint32_t subsampling_width, uint32_t dilation_height,
+    uint32_t dilation_width, uint32_t groups, size_t group_input_channels,
+    size_t group_output_channels, size_t input_channel_stride,
+    size_t output_channel_stride, const void* kernel, const void* bias,
+    float output_min, float output_max, uint32_t flags,
+    xnn_weights_cache_t weights_cache,
+    xnn_operator_t* convolution_op_out) {
+  struct convolution2d_nhwc_context context = {
+      .input_padding_top = input_padding_top,
+      .input_padding_right = input_padding_right,
+      .input_padding_bottom = input_padding_bottom,
+      .input_padding_left = input_padding_left,
+      .kernel_height = kernel_height,
+      .kernel_width = kernel_width,
+      .subsampling_height = subsampling_height,
+      .subsampling_width = subsampling_width,
+      .dilation_height = dilation_height,
+      .dilation_width = dilation_width,
+      .groups = groups,
+      .group_input_channels = group_input_channels,
+      .group_output_channels = group_output_channels,
+      .input_channel_stride = input_channel_stride,
+      .output_channel_stride = output_channel_stride,
+      .kernel = kernel,
+      .bias = bias,
+      .output_min = output_min,
+      .output_max = output_max,
+      .flags = flags,
+      .weights_cache = weights_cache,
+      .gemm_config = xnn_init_pf16_gemm_config(),
+      .operator_type = xnn_operator_type_convolution_nhwc_pf16,
+  };
+  return create_convolution2d_nhwc_helper(&f16_variant, &context,
+                                          convolution_op_out);
+}
+
 enum xnn_status xnn_create_convolution2d_nhwc_f32_f16(
     uint32_t input_padding_top, uint32_t input_padding_right,
     uint32_t input_padding_bottom, uint32_t input_padding_left,
@@ -2146,11 +2186,18 @@ static enum xnn_status reshape_igemm(
       convolution_op->convolution_op->group_output_channels;
 
   const struct xnn_pack_lh_config* packed_lh_config = NULL;
-  bool inline_lhs_packing = convolution_op->flags & XNN_FLAG_INLINE_LHS_PACKING;
+  bool inline_lhs_packing =
+      (convolution_op->flags & XNN_FLAG_INLINE_LHS_PACKING) ||
+      (igemm_ukernel.packed_lhs_function[XNN_UARCH_DEFAULT] != NULL);
   switch (convolution_op->type) {
     case xnn_operator_type_convolution_nhwc_pqs8_qs8_qc8w:
       if (inline_lhs_packing) {
         packed_lh_config = xnn_init_x8_igemm_pack_lh_config();
+      }
+      break;
+    case xnn_operator_type_convolution_nhwc_pf16:
+      if (inline_lhs_packing) {
+        packed_lh_config = xnn_init_x16_igemm_pack_lh_config();
       }
       break;
     default:
@@ -2164,8 +2211,7 @@ static enum xnn_status reshape_igemm(
     if (inline_lhs_packing) {
       assert(workspace_size);
       per_thread_workspace_size = packed_lh_config->size_for_igemm_fn(
-          mr, /*kc=*/group_input_channels
-                  << packed_lh_config->log2_packed_element_size,
+          mr, /*kc=*/group_input_channels,
           /*ks=*/kernel_size, mr_packed, kr, sr);
       xnn_log_debug("Inlining LHS packing for %s.",
                     xnn_operator_type_to_string(convolution_op->type));
@@ -2977,6 +3023,22 @@ enum xnn_status xnn_reshape_convolution2d_nhwc_f32(
       output_width_out, threadpool);
 }
 
+enum xnn_status xnn_reshape_convolution2d_nhwc_pf16(
+    xnn_operator_t convolution_op, size_t batch_size, size_t input_height,
+    size_t input_width, size_t* workspace_size, size_t* output_height_out,
+    size_t* output_width_out, pthreadpool_t threadpool) {
+  return reshape_convolution2d_nhwc(
+      convolution_op, xnn_operator_type_convolution_nhwc_pf16, batch_size,
+      input_height, input_width,
+      /*log2_input_element_size=*/XNN_LOG2_SIZEOF_FLOAT16,
+      /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_FLOAT16,
+      /*log2_accumulator_element_size=*/XNN_LOG2_SIZEOF_FLOAT16,
+      /*extra_weights_elements_size=*/sizeof(uint16_t),
+      /*log2_output_element_size=*/XNN_LOG2_SIZEOF_FLOAT16,
+      /*dynamic_quantization=*/false, workspace_size, output_height_out,
+      output_width_out, threadpool);
+}
+
 static enum xnn_status setup_igemm(xnn_operator_t convolution_op,
                                    void* workspace,
                                    uint32_t log2_input_element_size) {
@@ -3171,6 +3233,16 @@ enum xnn_status xnn_setup_convolution2d_nhwc_f16(xnn_operator_t convolution_op,
                                                  void* output) {
   return setup_convolution2d_nhwc(
       convolution_op, xnn_operator_type_convolution_nhwc_f16, workspace, input,
+      output, /*quantization_params=*/NULL,
+      /*log2_input_element_size=*/XNN_LOG2_SIZEOF_FLOAT16);
+}
+
+enum xnn_status xnn_setup_convolution2d_nhwc_pf16(xnn_operator_t convolution_op,
+                                                  void* workspace,
+                                                  const void* input,
+                                                  void* output) {
+  return setup_convolution2d_nhwc(
+      convolution_op, xnn_operator_type_convolution_nhwc_pf16, workspace, input,
       output, /*quantization_params=*/NULL,
       /*log2_input_element_size=*/XNN_LOG2_SIZEOF_FLOAT16);
 }

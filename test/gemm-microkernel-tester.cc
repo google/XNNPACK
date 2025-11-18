@@ -1,5 +1,7 @@
 #include "test/gemm-microkernel-tester.h"
 
+#include <gtest/gtest.h>
+
 #include <algorithm>
 #include <cassert>
 #include <cmath>
@@ -10,7 +12,6 @@
 #include <limits>
 #include <random>
 
-#include <gtest/gtest.h>
 #include "include/xnnpack.h"
 #include "src/xnnpack/buffer.h"
 #include "src/xnnpack/common.h"
@@ -2546,7 +2547,7 @@ void GemmMicrokernelTester::Test_PF16(
                                          "input_f16");
   xnnpack::Buffer<xnn_float16> weights(n() * k(), /*extra_bytes=*/{0},
                                        "weights");
-  xnnpack::Buffer<xnn_float16> bias(n(), 0.0f);
+  xnnpack::Buffer<xnn_float16> bias(n(), xnn_float16_from_float(0.0f));
   xnnpack::Buffer<xnn_float16> c((m() - 1) * cm_stride() + n(),
                                  /*extra_bytes=*/{0}, "c");
   xnnpack::Buffer<xnn_float16> c_ref(m() * n(), 0, /*extra_bytes=*/{0},
@@ -2574,7 +2575,9 @@ void GemmMicrokernelTester::Test_PF16(
   ASSERT_NE(pack_lh_config, nullptr);
 
   // Loop over the iterations.
-  std::generate(input_f16.begin(), input_f16.end(), std::ref(f32rng));
+  for (size_t idx = 0; idx < input_f16.size(); idx++) {
+    input_f16[idx] = xnn_float16_from_float(f32rng());
+  }
 
   // Pack the left-hand operand.
   const size_t input_packed_size =
@@ -2586,8 +2589,12 @@ void GemmMicrokernelTester::Test_PF16(
                              /*lhs_stride=*/k() * sizeof(xnn_float16),
                              input_packed.data());
 
-  std::generate(weights.begin(), weights.end(), std::ref(f32rng));
-  std::generate(bias.begin(), bias.end(), std::ref(f32rng));
+  for (size_t idx = 0; idx < weights.size(); idx++) {
+    weights[idx] = xnn_float16_from_float(f32rng());
+  }
+  for (size_t idx = 0; idx < bias.size(); idx++) {
+    bias[idx] = xnn_float16_from_float(f32rng());
+  }
 
   // RHS packing.
   pack(/*flags=*/0, &gemm_config, k(), n(),
@@ -2607,21 +2614,22 @@ void GemmMicrokernelTester::Test_PF16(
   // Compute 32-bit results and output quantization arguments.
   std::fill(c_ref.begin(), c_ref.end(), 0.0f);
   for (size_t m_index = 0; m_index < m(); m_index++) {
-    for (size_t n_index = 0; n_index < n(); n_index++) {
-      for (size_t k_index = 0; k_index < k(); k_index++) {
+      for (size_t n_index = 0; n_index < n(); n_index++) {
+        for (size_t k_index = 0; k_index < k(); k_index++) {
+          c_ref[m_index * n() + n_index] =
+              c_ref[m_index * n() + n_index] +
+              xnn_float16(input_f16[m_index * k() + k_index] *
+                          weights[n_index * k() + k_index]);
+        }
         c_ref[m_index * n() + n_index] =
-            c_ref[m_index * n() + n_index] +
-            xnn_float16(input_f16[m_index * k() + k_index] *
-                        weights[n_index * k() + k_index]);
+            c_ref[m_index * n() + n_index] + bias[n_index];
       }
-      c_ref[m_index * n() + n_index] =
-          c_ref[m_index * n() + n_index] + bias[n_index];
     }
-  }
 
   // Prepare parameters.
   xnn_f16_minmax_params minmax_params;
-  init_minmax_params(&minmax_params, min(), max());
+  init_minmax_params(&minmax_params, xnn_float16_from_float(min()),
+                     xnn_float16_from_float(max()));
 
   for (size_t m_index = 0; m_index < m(); m_index++) {
     for (size_t n_index = 0; n_index < n(); n_index++) {
@@ -2948,6 +2956,163 @@ void GemmMicrokernelTester::Test_PQS8(
     }
   }
 }
+#if XNN_ENABLE_KLEIDIAI
+#if XNN_ENABLE_ARM_SME2 || XNN_ENABLE_ARM_SME
+void GemmMicrokernelTester::Test_PF16(
+    xnn_pf16_f16_packed_igemm_minmax_ukernel_fn packed_igemm,
+    xnn_init_f16_minmax_params_fn init_minmax_params,
+    xnn_pack_lh_igemm_ukernel_fn pack_lh_for_igemm_fn,
+    xnn_pack_lh_igemm_size_fn size_for_igemm_fn,
+    xnn_pack_weights_and_biases_fn pack_wb,
+    xnn_packed_stride_weights_and_biases_fn packed_stride_wb) {
+  ASSERT_LE(m(), mr());
+  ASSERT_EQ(xnn_initialize(nullptr), xnn_status_success);
+
+  xnnpack::ReplicableRandomDevice rng;
+  auto f32rng = std::bind(std::uniform_real_distribution<float>(-1.f, 1.f),
+                          std::ref(rng));
+  const float max_abs_product = 1.0f;
+
+  // Inputs/weights/bias.
+  xnnpack::Buffer<xnn_float16> a_f16((mr() - 1) * a_stride() + k(),
+                                     xnnpack::XnnExtraBytes, "input_f16");
+  xnnpack::Buffer<xnn_float16> b_f16(n() * ks() * k(), /*extra_bytes=*/{0},
+                                     "weights_f16");
+  // Bias in FP16 for conv_goki rhs_imatmul packer variant.
+  xnnpack::Buffer<xnn_float16> bias_f16(n(), xnn_float16_from_float(0.0f));
+
+  // Output buffer is FP16 as produced by the ukernel; we convert to float for
+  // reference comparison.
+  xnnpack::Buffer<xnn_float16> c((m() - 1) * cm_stride() + n());
+  xnnpack::Buffer<float> c_ref(m() * n(), 0.0f);
+
+  // Fill inputs with proper fp16 conversion.
+  for (size_t idx = 0; idx < a_f16.size(); idx++) {
+    a_f16[idx] = xnn_float16_from_float(f32rng());
+  }
+  for (size_t idx = 0; idx < b_f16.size(); idx++) {
+    b_f16[idx] = xnn_float16_from_float(f32rng());
+  }
+  for (size_t idx = 0; idx < bias_f16.size(); idx++) {
+    bias_f16[idx] = xnn_float16_from_float(f32rng());
+  }
+
+  // Prepare im2col pointers (elements).
+  xnnpack::Buffer<const xnn_float16*> im2col(mr() * ks());
+  // The junk data needs to be initialized for some kernels because msan will
+  // assert in functions like lrintf, etc.
+  xnnpack::Buffer<xnn_float16> junk(k(), 0, xnnpack::XnnExtraBytes);
+  // Zero row for packer when zero_index is used.
+  xnnpack::Buffer<xnn_float16> zero_row(k(), 0);
+
+  for (size_t ks_index = 0; ks_index < ks(); ks_index++) {
+    for (size_t m_index = 0; m_index < mr(); m_index++) {
+      im2col[ks_index * mr() + m_index] =
+          a_f16.data() + a_stride() * m_index - a_offset();
+    }
+  }
+  std::shuffle(im2col.begin(), im2col.end(), rng);
+  if (zero_index() != SIZE_MAX) {
+    for (size_t ks_index = 0; ks_index < ks(); ks_index++) {
+      im2col[ks_index * mr() + zero_index()] = a_f16.data();
+    }
+  }
+  for (size_t ks_index = 0; ks_index < ks(); ks_index++) {
+    for (size_t m_index = m(); m_index < mr(); m_index++) {
+      im2col[ks_index * mr() + m_index] = junk.data();
+    }
+  }
+
+  // Compute packed weights buffer size using conv_goki packer directly; size helper returns bytes.
+  const size_t packed_rhs_size =
+      xnn_packed_size_kai_f16_conv_goki_w(n(), ks(), k());
+  xnnpack::Buffer<uint8_t, XNN_ALLOCATION_ALIGNMENT> packed_w(
+      packed_rhs_size, /*extra_bytes=*/{0}, "packed_w_f16");
+  std::fill(packed_w.begin(), packed_w.end(), 0);
+
+  // Pack RHS (weights + FP16 bias) for IGEMM using conv_goki path.
+  xnn_pack_kai_f16_conv_goki_w_sme(
+      /*g=*/1,
+      /*nc=*/n(),
+      /*ks=*/ks(),
+      /*kc=*/k(),
+      /*nr=*/nr(),
+      /*kr=*/kr(),
+      /*sr=*/sr(),
+      /*k=*/reinterpret_cast<const uint16_t*>(b_f16.data()),
+      /*b=*/reinterpret_cast<const uint16_t*>(bias_f16.data()),
+      /*scale=*/nullptr,
+      /*packed_weights=*/packed_w.data(),
+      /*extra_bytes=*/0,
+      /*params=*/nullptr);
+
+  // Pack the LHS for IGEMM.
+  const size_t packed_lhs_size =
+      size_for_igemm_fn(m(), k(), ks(), mr_packed(), kr(), sr());
+  xnnpack::Buffer<int8_t> packed_lhs(packed_lhs_size);
+  const void* zero_pointer = (zero_index() != SIZE_MAX)
+                                 ? static_cast<const void*>(a_f16.data())
+                                 : nullptr;
+  pack_lh_for_igemm_fn(
+      m(), k(), ks(), mr_packed(), kr(), sr(), (const void**)im2col.data(),
+      a_offset() * sizeof(xnn_float16), zero_pointer, packed_lhs.data());
+
+  // Reference computation (float accumulation).
+  std::fill(c_ref.begin(), c_ref.end(), 0.0f);
+  for (size_t m_index = 0; m_index < m(); m_index++) {
+    for (size_t n_index = 0; n_index < n(); n_index++) {
+      float acc = 0.0f;
+      const size_t k_eff = ks() * k();
+      for (size_t kk = 0; kk < k_eff; kk++) {
+        const size_t ks_index = kk / k();
+        const size_t k_index = kk % k();
+        const xnn_float16* base = im2col[ks_index * mr() + m_index];
+        const float a_val = xnn_float16_to_float(
+            (base == a_f16.data()) ? base[k_index]
+                                   : base[k_index + a_offset()]);
+        const float b_val = xnn_float16_to_float(
+            b_f16[(n_index * ks() + ks_index) * k() + k_index]);
+        acc += a_val * b_val;
+      }
+      acc += xnn_float16_to_float(bias_f16[n_index]);
+      c_ref[m_index * n() + n_index] = acc;
+    }
+  }
+
+  // MinMax clamp.
+  xnn_f16_minmax_params minmax_params;
+  init_minmax_params(&minmax_params, xnn_float16_from_float(min()),
+                     xnn_float16_from_float(max()));
+  for (size_t mi = 0; mi < m(); mi++) {
+    for (size_t ni = 0; ni < n(); ni++) {
+      c_ref[mi * n() + ni] =
+          std::max(std::min(c_ref[mi * n() + ni], max()), min());
+    }
+  }
+
+  // Run kernel.
+  // Pass cm_stride in elements; ukernel wrapper converts to bytes when calling
+  // KAI.
+  packed_igemm(m(), n(), k(), ks(), packed_lhs.data(), packed_w.data(),
+               c.data(), cm_stride(), &minmax_params);
+
+  const float tolerance =
+      compute_sum_tolerance(max_abs_product, ks() * k(),
+                            xnnpack::NumericLimits<xnn_float16>::epsilon());
+  for (size_t i = 0; i < m(); i++) {
+    for (size_t j = 0; j < n(); j++) {
+      const float c_val = xnn_float16_to_float(c[i * cm_stride() + j]);
+      ASSERT_NEAR(c_val, c_ref[i * n() + j], tolerance)
+          << "at " << i << ", " << j << ": reference = " << c_ref[i * n() + j]
+          << ", optimized = " << c_val << ", Mr x Nr x Kr = " << mr() << " x "
+          << nr() << " x " << kr() << ", M x N x K = " << m() << " x " << n()
+          << " x " << k() << ", ks = " << ks()
+          << ", cm_stride = " << cm_stride();
+    }
+  }
+}
+#endif
+#endif
 
 void GemmMicrokernelTester::Test(
     xnn_qp8_f32_qb4w_gemm_minmax_ukernel_fn gemm,

@@ -1565,9 +1565,8 @@ enum xnn_status xnn_subgraph_fusion(xnn_subgraph_t subgraph) {
             (padding_datatype == xnn_datatype_fp32 && padding_value == 0) ||
             ((padding_datatype == xnn_datatype_qint8 ||
               padding_datatype == xnn_datatype_quint8) &&
-             padding_value ==
-                 (uint32_t)subgraph->values[producer->outputs[0]]
-                     .quantization.zero_point);
+             padding_value == (uint32_t)subgraph->values[producer->outputs[0]]
+                                  .quantization.zero_point);
         switch (consumer->type) {
           case xnn_node_type_convolution_2d:
             if (is_spatial_2d_padding && is_zero_padding &&
@@ -4007,6 +4006,20 @@ enum xnn_status xnn_subgraph_optimize_packed_lhs(xnn_subgraph_t subgraph,
                         xnn_datatype_to_string(xnn_datatype_pqint8), node_id,
                         xnn_node_type_to_string(node->type));
           node->packed_input_datatype = xnn_datatype_pqint8;
+          node->flags |= XNN_FLAG_INLINE_LHS_PACKING;
+        }
+        if (input_datatype == xnn_datatype_fp16 &&
+            (kernel_datatype == xnn_datatype_fp16 ||
+            kernel_datatype == xnn_datatype_fp32) &&
+            output_datatype == xnn_datatype_fp16 &&
+            xnn_init_pf16_gemm_config() != NULL &&
+            !(optimization_flags & XNN_FLAG_NO_INLINED_LHS_PACKING)) {
+          // Note that there is currently no option to not use inlining for this
+          // iGEMM kernel.
+          xnn_log_debug("Setting assumed_datatype=%s for node #%u (%s).",
+                        xnn_datatype_to_string(xnn_datatype_pfp16), node_id,
+                        xnn_node_type_to_string(node->type));
+          node->packed_input_datatype = xnn_datatype_pfp16;
           node->flags |= XNN_FLAG_INLINE_LHS_PACKING;
         }
       } break;
