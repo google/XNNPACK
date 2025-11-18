@@ -3,6 +3,7 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+#include <algorithm>
 #include <cassert>
 #include <cmath>
 #include <cstddef>
@@ -60,6 +61,15 @@ KernelInfo all_kernels[] = {
 #include "ynnpack/kernels/dot/kernels.inc"
 #undef YNN_DOT_KERNEL
 };
+
+// Get the alignment that satisfies the requirement of any dot kernel.
+size_t get_max_alignment() {
+  size_t result = 1;
+  for (const KernelInfo& kernel : all_kernels) {
+    result = std::max(result, kernel.tile_n * kernel.tile_k);
+  }
+  return result;
+}
 
 // Align the last two dimensions of x up to a multiple of a2, a1, with zero
 // padding.
@@ -147,7 +157,8 @@ void TestMatMul(AT, BT, CT, size_t k) {
   const size_t n = 65536;
 
   Tensor<AT> a({m, k});
-  Tensor<BT> b({k, n / B_info::element_count()});
+  Tensor<BT> b({k, n / B_info::element_count()},
+               Alignment({.bytes = get_max_alignment()}));
   Tensor<CT> init_c({m, n});
   a.generate([&]() { return a_gen(rng); });
   b.generate([&]() { return b_gen(rng); });
