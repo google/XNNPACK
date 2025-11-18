@@ -4009,6 +4009,15 @@ enum xnn_status xnn_subgraph_optimize_packed_lhs(xnn_subgraph_t subgraph,
           node->packed_input_datatype = xnn_datatype_pqint8;
           node->flags |= XNN_FLAG_INLINE_LHS_PACKING;
         }
+
+        if (input_datatype == xnn_datatype_fp32 &&
+            kernel_datatype == xnn_datatype_fp32 &&
+            output_datatype == xnn_datatype_fp32) {
+              if ((xnn_init_pf32_gemm_config() != NULL)) {
+                node->packed_input_datatype = xnn_datatype_pfp32;
+                node->flags |= XNN_FLAG_INLINE_LHS_PACKING;
+              }
+            }
       } break;
       default:
         break;
