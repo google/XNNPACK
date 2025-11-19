@@ -7,6 +7,7 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <assert.h>
+#include <float.h>
 #include <inttypes.h>
 #include <math.h>
 #include <stddef.h>
@@ -14,6 +15,8 @@
 #include <string.h>
 
 #include "include/xnnpack.h"
+#include "src/operators/fingerprint_id.h"
+#include "src/operators/fingerprint_cache.h"
 #include "src/xnnpack/allocator.h"
 #include "src/xnnpack/cache.h"
 #include "src/xnnpack/common.h"
@@ -94,10 +97,24 @@ struct deconv2d_context {
     struct xnn_qu8_packing_params qu8;
   } packing_params_;
   float requantization_scale_value;
+  enum xnn_fingerprint_id fingerprint_id;
+  enum xnn_fingerprint_id_helper fingerprint_id_nr2;
+  enum xnn_fingerprint_id_helper fingerprint_id_subconv;
+  bool should_fingerprint;
 
   void* scale_params_for_cleanup;
   void* kernel_scale_for_cleanup;
+  void* kernel_for_cleanup;
+  void* bias_for_cleanup;
 };
+
+static bool is_subconv2d(struct deconv2d_context* context) {
+  return max(context->stride_height, context->stride_width) > 1 &&
+         max(context->dilation_height, context->dilation_width) == 1 &&
+         context->stride_width <= context->kernel_width &&
+         context->stride_height <= context->kernel_height &&
+         !(context->flags & XNN_FLAG_INLINE_LHS_PACKING);
+}
 
 static enum xnn_status create_deconvolution2d_nhwc(
     struct deconv2d_context* context) {
@@ -273,10 +290,7 @@ static enum xnn_status create_deconvolution2d_nhwc(
       ((kernel_size * k_stride << log2_filter_element_size) +
        bias_element_size + extra_weights_bytes) *
       n_stride;
-  if (max(stride_height, stride_width) > 1 &&
-      max(dilation_height, dilation_width) == 1 &&
-      stride_width <= kernel_width && stride_height <= kernel_height &&
-      !(flags & XNN_FLAG_INLINE_LHS_PACKING)) {
+  if (is_subconv2d(context)) {
     ukernel_type = xnn_microkernel_type_subconv2d;
     const size_t subkernels = stride_height * stride_width;
     packed_group_weights_size =
@@ -864,7 +878,13 @@ static enum xnn_status setup_packing_params_qx8_f32_qc8w(
 static enum xnn_status cleanup_context(const struct deconv2d_variant* variant,
                                struct deconv2d_context* context) {
   xnn_release_simd_memory(context->scale_params_for_cleanup);
+  context->scale_params_for_cleanup = NULL;
   xnn_release_simd_memory(context->kernel_scale_for_cleanup);
+  context->kernel_scale_for_cleanup = NULL;
+  xnn_release_simd_memory(context->kernel_for_cleanup);
+  context->kernel_for_cleanup = NULL;
+  xnn_release_simd_memory(context->bias_for_cleanup);
+  context->bias_for_cleanup = NULL;
   return xnn_status_success;
 }
 
@@ -976,6 +996,7 @@ static enum xnn_status setup_variant_and_gemm_config(
         if (gemm_nr2_config->minmax.igemm[gemm_nr2_config->mr - 1]
                 .function[XNN_UARCH_DEFAULT] != NULL) {
           context->gemm_config = gemm_nr2_config;
+          context->fingerprint_id_nr2 = xnn_fingerprint_id_helper_nr2;
         }
       }
       break;
@@ -1029,11 +1050,58 @@ static enum xnn_status setup_variant_and_gemm_config(
   return xnn_status_success;
 }
 
+static enum xnn_status setup_fingerprint_id(
+    struct deconv2d_context* context, bool* should_fingerprint) {
+  // This avoids an infinite recursion. We only attempt to fingerprint a
+  // function if this is true.
+  context->should_fingerprint = context->fingerprint_id == 0;
+  switch (context->operator_type) {
+    case xnn_operator_type_deconvolution_nhwc_f16:
+      context->fingerprint_id = xnn_fingerprint_id_deconvolution2d_nhwc_f16_f16_f16;
+      break;
+    case xnn_operator_type_deconvolution_nhwc_f32:
+      context->fingerprint_id = xnn_fingerprint_id_deconvolution2d_nhwc_f32_f32_f32;
+      break;
+    case xnn_operator_type_deconvolution_nhwc_qs8:
+      context->fingerprint_id = xnn_fingerprint_id_deconvolution2d_nhwc_qs8_qs8_qs8;
+      break;
+    case xnn_operator_type_deconvolution_nhwc_qs8_qc8w:
+      context->fingerprint_id = xnn_fingerprint_id_deconvolution2d_nhwc_qs8_qs8_qc8w;
+      break;
+    case xnn_operator_type_deconvolution_nhwc_pqs8_qs8_qc8w:
+      context->fingerprint_id = xnn_fingerprint_id_deconvolution2d_nhwc_pqs8_qs8_qc8w;
+      break;
+    case xnn_operator_type_deconvolution_nhwc_qd8_f32_qc8w:
+      context->fingerprint_id = xnn_fingerprint_id_deconvolution2d_nhwc_qd8_f32_qc8w;
+      break;
+    case xnn_operator_type_deconvolution_nhwc_qdu8_f32_qc8w:
+      context->fingerprint_id = xnn_fingerprint_id_deconvolution2d_nhwc_qdu8_f32_qc8w;
+      break;
+    case xnn_operator_type_deconvolution_nhwc_qu8:
+      context->fingerprint_id = xnn_fingerprint_id_deconvolution2d_nhwc_qu8_qu8_qu8;
+      break;
+    default:
+      xnn_log_error(
+          "Unhandled fingerprint id (%s) when generating deconvolution fingerprint data",
+          xnn_operator_type_to_string(context->operator_type));
+      return xnn_status_invalid_parameter;
+  }
+  context->fingerprint_id =
+      context->fingerprint_id | context->fingerprint_id_nr2 |
+      (is_subconv2d(context) ? xnn_fingerprint_id_helper_subconv2d : 0);
+  return xnn_status_success;
+}
+
 static enum xnn_status create_deconvolution2d_nhwc_helper(
     struct deconv2d_context* context) {
   const struct deconv2d_variant* variant;
   enum xnn_status status = xnn_status_uninitialized;
+  bool should_fingerprint = false;
   XNN_IF_ERROR_GOTO(error, setup_variant_and_gemm_config(&variant, context));
+  XNN_IF_ERROR_GOTO(error, setup_fingerprint_id(context, &should_fingerprint));
+  if (context->should_fingerprint) {
+    XNN_IF_ERROR_GOTO(error, xnn_fingerprint_deconvolution2d_nhwc(context->fingerprint_id));
+  }
   XNN_IF_ERROR_GOTO(error, variant->check_input_scale(variant, context));
   XNN_IF_ERROR_GOTO(error, variant->compute_scale_params(variant, context));
   XNN_IF_ERROR_GOTO(error, variant->check_kernel_scale(variant, context));
@@ -1047,6 +1115,178 @@ static enum xnn_status create_deconvolution2d_nhwc_helper(
   XNN_IF_ERROR_GOTO(error, create_deconvolution2d_nhwc(context));
 error:
   cleanup_context(variant, context);
+  return status;
+}
+
+static enum xnn_status generate_fingerprint_parameters(struct deconv2d_context* context) {
+  // Common parameters.
+  context->output_padding_top = 1;
+  context->output_padding_right = 1;
+  context->output_padding_bottom = 1;
+  context->output_padding_left = 1;
+  context->kernel_height = 3;
+  context->kernel_width = 3;
+  context->stride_height = 1;
+  context->stride_width = 1;
+  context->dilation_height = 1;
+  context->dilation_width = 1;
+  context->groups = 2;
+  context->group_input_channels = 23;
+  context->group_output_channels = 48;
+  context->input_pixel_stride = context->groups * context->group_input_channels;
+  context->output_pixel_stride = context->groups * context->group_output_channels;
+
+  // Variant specific parameters.
+  switch (context->fingerprint_id & ~xnn_fingerprint_id_helper_flag_mask) {
+    case xnn_fingerprint_id_deconvolution2d_nhwc_f16_f16_f16:
+      context->output_min = FLT_MIN;
+      context->output_max = FLT_MAX;
+      context->operator_type = xnn_operator_type_deconvolution_nhwc_f16;
+      break;
+    case xnn_fingerprint_id_deconvolution2d_nhwc_f32_f32_f32:
+      context->output_min = FLT_MIN;
+      context->output_max = FLT_MAX;
+      context->operator_type = xnn_operator_type_deconvolution_nhwc_f32;
+      break;
+    case xnn_fingerprint_id_deconvolution2d_nhwc_pqs8_qs8_qc8w:
+      context->input_zero_point = 0;
+      context->input_scale = 1;
+      // `context->kernel_scale` is set below.
+      context->output_zero_point = 0;
+      context->output_scale = 1;
+      context->output_min = INT8_MIN;
+      context->output_max = INT8_MAX;
+      context->operator_type = xnn_operator_type_deconvolution_nhwc_pqs8_qs8_qc8w;
+      break;
+    case xnn_fingerprint_id_deconvolution2d_nhwc_pqs8_qs8_qs8:
+      context->input_zero_point = 0;
+      context->input_scale = 1;
+      context->kernel_scale_value = 1;
+      context->output_zero_point = 0;
+      context->output_scale = 1;
+      context->output_min = INT8_MIN;
+      context->output_max = INT8_MAX;
+      context->operator_type = xnn_operator_type_deconvolution_nhwc_pqs8_qs8_qc8w;
+      break;
+    case xnn_fingerprint_id_deconvolution2d_nhwc_qd8_f32_qc8w:
+      // `context->kernel_scale` is set below.
+      context->output_min = FLT_MIN;
+      context->output_max = FLT_MAX;
+      context->operator_type = xnn_operator_type_deconvolution_nhwc_qd8_f32_qc8w;
+      break;
+    case xnn_fingerprint_id_deconvolution2d_nhwc_qdu8_f32_qc8w:
+      // `context->kernel_scale` is set below.
+      context->output_min = FLT_MIN;
+      context->output_max = FLT_MAX;
+      context->operator_type = xnn_operator_type_deconvolution_nhwc_qdu8_f32_qc8w;
+      break;
+    case xnn_fingerprint_id_deconvolution2d_nhwc_qs8_qs8_qc8w:
+      context->input_zero_point = 0;
+      context->input_scale = 1;
+      // `context->kernel_scale` is set below.
+      context->output_zero_point = 0;
+      context->output_scale = 1;
+      context->output_min = INT8_MIN;
+      context->output_max = INT8_MAX;
+      context->operator_type = xnn_operator_type_deconvolution_nhwc_qs8_qc8w;
+      break;
+    case xnn_fingerprint_id_deconvolution2d_nhwc_qs8_qs8_qs8:
+      context->input_zero_point = 0;
+      context->input_scale = 1;
+      // `context->kernel_scale` is set below.
+      context->output_zero_point = 0;
+      context->output_scale = 1;
+      context->output_min = INT8_MIN;
+      context->output_max = INT8_MAX;
+      context->operator_type = xnn_operator_type_deconvolution_nhwc_qs8;
+      break;
+    case xnn_fingerprint_id_deconvolution2d_nhwc_qu8_qu8_qu8:
+      context->input_zero_point = 0;
+      context->input_scale = 1;
+      context->kernel_scale_value = 1;
+      context->output_zero_point = 0;
+      context->output_scale = 1;
+      context->output_min = 0;
+      context->output_max = UINT8_MAX;
+      context->operator_type = xnn_operator_type_deconvolution_nhwc_qu8;
+      break;
+    default:
+      xnn_log_error(
+          "Unhandled fingerprint id (%s) when generating deconvolution fingerprint data",
+          xnn_fingerprint_id_to_string(context->fingerprint_id));
+      return xnn_status_invalid_parameter;
+  }
+
+  XNN_RETURN_IF_ERROR(setup_variant_and_gemm_config(/*variant=*/NULL, context));
+
+  // Adjust the context depending on given flags.
+  if (context->fingerprint_id & xnn_fingerprint_id_helper_subconv2d) {
+    context->stride_height = 2;
+    context->stride_width = 2;
+  }
+  if (context->fingerprint_id & xnn_fingerprint_id_helper_nr2) {
+    context->group_output_channels = context->gemm_config->nr - 1;
+    context->output_pixel_stride = context->groups * context->group_output_channels;
+    // Redo the gemm config setup to pick-up the other gemm config.
+    XNN_RETURN_IF_ERROR(setup_variant_and_gemm_config(/*variant=*/NULL, context));
+  }
+
+  // Set `context->kernel_scale` when needed.
+  if (context->input_scale && !context->kernel_scale_value) {
+    const size_t kernel_scale_size = context->groups * context->group_output_channels;
+    const size_t kernel_scale_size_bytes = kernel_scale_size * sizeof(float);
+    float* kernel_scale = xnn_allocate_simd_memory(kernel_scale_size_bytes);
+    if (!kernel_scale) {
+      xnn_log_error(
+          "Could not allocate %zu bytes when generating deconvolution fingerprint (%s) data",
+          kernel_scale_size_bytes,
+          xnn_fingerprint_id_to_string(context->fingerprint_id));
+      return xnn_status_out_of_memory;
+    }
+    context->kernel_scale_for_cleanup = kernel_scale;
+    context->kernel_scale = kernel_scale;
+    for (size_t i = 0; i < kernel_scale_size; ++i) {
+      kernel_scale[i] = 1;
+    }
+  }
+
+  { // Generate kernel data.
+    const size_t kernel_size =
+        context->groups * context->group_output_channels *
+        context->kernel_height * context->kernel_width *
+        context->group_input_channels *
+        (1 << context->gemm_config->log2_filter_element_size);
+    context->kernel_for_cleanup = xnn_allocate_simd_memory(kernel_size);
+    context->kernel = context->kernel_for_cleanup;
+    fill_fingerprint_buffer(context->kernel_for_cleanup, kernel_size);
+    const size_t bias_size = context->groups * context->group_output_channels *
+                             context->gemm_config->bias_element_size;
+    context->bias_for_cleanup = xnn_allocate_simd_memory(bias_size);
+    context->bias = context->bias_for_cleanup;
+    fill_fingerprint_buffer(context->bias_for_cleanup, bias_size);
+  }
+  return xnn_status_success;
+}
+
+
+enum xnn_status xnn_fingerprint_deconvolution2d_nhwc(
+    const enum xnn_fingerprint_id fingerprint_id) {
+  struct fingerprint_context f_context =
+      create_fingerprint_context(fingerprint_id);
+  if (f_context.status != xnn_status_uninitialized) {
+    if (f_context.status != xnn_status_success) {
+      xnn_log_error("Error creating fingerprint context for %s",
+                    xnn_fingerprint_id_to_string(fingerprint_id));
+    }
+    return f_context.status;
+  }
+
+  struct deconv2d_context context = {.fingerprint_id = fingerprint_id,
+                                     .weights_cache = &f_context.cache,
+                                     .deconvolution_op_out = &f_context.op};
+  XNN_RETURN_IF_ERROR(generate_fingerprint_parameters(&context));
+  enum xnn_status status = create_deconvolution2d_nhwc_helper(&context);
+  finalize_fingerprint_context(&f_context);
   return status;
 }
 
