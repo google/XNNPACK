@@ -35,6 +35,7 @@ packer::packer(bool transpose, size_t elem_size, size_t tile_m, size_t tile_n)
     // `tile_m` x fewer of them), and then transposing that. (3) is handled by a
     // loop over calls to this kernel below.
     transpose_fn = get_transpose_kernel(elem_size_bits * tile_m);
+    assert(transpose_fn);
   } else {
     // We only have (2) and (3).
     if (tile_m == 1) {
@@ -45,6 +46,7 @@ packer::packer(bool transpose, size_t elem_size, size_t tile_m, size_t tile_n)
       // We need to do (2) (or we don't have a kernel for the trivial case).
       // We're interleaving rows of the input to produce rows of the output.
       interleave_fn = get_interleave_kernel(elem_size_bits, tile_m);
+      assert(interleave_fn);
     }
   }
 }
