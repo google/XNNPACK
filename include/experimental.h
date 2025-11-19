@@ -16,6 +16,7 @@
 #include <stdint.h>
 
 #include "include/xnnpack.h"
+#include "src/operators/fingerprint_id.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -97,6 +98,66 @@ enum xnn_status xnn_create_runtime_with_threadpool(
 enum xnn_status xnn_update_runtime_with_threadpool(
   xnn_runtime_t runtime,
   xnn_threadpool_t threadpool);
+
+
+typedef struct xnn_fingerprint* xnn_fingerprint_t;
+
+struct xnn_fingerprint {
+  uint32_t id;
+  uint32_t value;
+};
+
+/// Check whether the given configuration matches one that is currently in use.
+///
+/// @returns `xnn_status_success` if the configuration matches.
+enum xnn_status xnn_check_fingerprint(struct xnn_fingerprint fingerprint);
+
+/// Return the fingerprint corresponding to the given id or NULL if it wasn't
+/// set.
+const struct xnn_fingerprint* xnn_get_fingerprint(uint32_t id);
+
+/// Set the given fingerprint.
+void xnn_set_fingerprint(struct xnn_fingerprint fingerprint);
+
+/// Clear all fingerprints that were computed until now.
+void xnn_clear_fingerprints();
+
+enum xnn_status xnn_fingerprint_fully_connected_nc_f16();
+enum xnn_status xnn_fingerprint_fully_connected_nc_f32_f16();
+enum xnn_status xnn_fingerprint_fully_connected_nc_bf16_f32();
+enum xnn_status xnn_fingerprint_fully_connected_nc_f32();
+enum xnn_status xnn_fingerprint_fully_connected_nc_f32_f32_f32_nr2();
+enum xnn_status xnn_fingerprint_fully_connected_nc_f32_qc4w();
+enum xnn_status xnn_fingerprint_fully_connected_nc_f32_qc8w();
+enum xnn_status xnn_fingerprint_fully_connected_nc_qd8_f16_qc4w();
+enum xnn_status xnn_fingerprint_fully_connected_nc_qd8_f16_qb4w();
+enum xnn_status xnn_fingerprint_fully_connected_nc_qd8_f16_qb4w_f16_scales();
+enum xnn_status xnn_fingerprint_fully_connected_nc_qd8_f32_qc2w();
+enum xnn_status xnn_fingerprint_fully_connected_nc_qd8_f32_qc4w();
+enum xnn_status xnn_fingerprint_fully_connected_nc_qd8_f32_qb4w();
+enum xnn_status xnn_fingerprint_fully_connected_nc_qd8_f16_qc8w();
+enum xnn_status xnn_fingerprint_fully_connected_nc_qd8_f32_qc8w();
+enum xnn_status xnn_fingerprint_fully_connected_nc_qs8();
+enum xnn_status xnn_fingerprint_fully_connected_nc_qs8_qc4w();
+enum xnn_status xnn_fingerprint_fully_connected_nc_qs8_qc8w();
+enum xnn_status xnn_fingerprint_fully_connected_nc_qu8();
+enum xnn_status xnn_fingerprint_fully_connected_nc_qp8_f32_qc4w();
+enum xnn_status xnn_fingerprint_fully_connected_nc_qp8_f32_qc8w();
+enum xnn_status xnn_fingerprint_fully_connected_nc_qp8_f32_qb4w();
+enum xnn_status xnn_fingerprint_fully_connected_nc_qp8_f32_qb4w_f16_scales();
+enum xnn_status xnn_fingerprint_fully_connected_nc_pf32();
+enum xnn_status xnn_fingerprint_fully_connected_nc_qdu8_f16_qc8w();
+enum xnn_status xnn_fingerprint_fully_connected_nc_qdu8_f32_qc8w();
+enum xnn_status xnn_fingerprint_fully_connected_nc_qdu8_f32_qc4w();
+enum xnn_status xnn_fingerprint_fully_connected_nc_qdu8_f32_qb4w();
+enum xnn_status xnn_fingerprint_fully_connected_nc_qdu8_f16_qc4w();
+enum xnn_status xnn_fingerprint_fully_connected_nc_pf16();
+enum xnn_status xnn_fingerprint_fully_connected_nc_pqs8_qc8w();
+enum xnn_status xnn_fingerprint_fully_connected_nc_qd8_f32_qb4w_f16_scales();
+enum xnn_status xnn_fingerprint_fully_connected_nc_qdu8_f32_qb4w_f16_scales();
+enum xnn_status xnn_fingerprint_convolution2d_nchw(enum xnn_fingerprint_id fingerprint_id);
+enum xnn_status xnn_fingerprint_convolution2d_nhwc(enum xnn_fingerprint_id fingerprint_id);
+enum xnn_status xnn_fingerprint_deconvolution2d_nhwc(enum xnn_fingerprint_id fingerprint_id);
 
 #ifdef __cplusplus
 }  // extern "C"
