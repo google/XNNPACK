@@ -140,6 +140,7 @@ xnnpack_cc_library(
         "include/xnnpack.h",
     ],
     deps = [
+        ":fingerprint_id",
         "@pthreadpool",
     ],
 )
@@ -749,6 +750,56 @@ xnnpack_cc_library(
 )
 
 xnnpack_cc_library(
+    name = "fingerprint_id",
+    srcs = ["src/operators/fingerprint_id.c"],
+    hdrs = [
+        "src/operators/fingerprint_id.h",
+        "src/operators/fingerprint_id.h.inc",
+    ],
+)
+
+xnnpack_cc_library(
+    name = "fingerprint_cache",
+    srcs = ["src/operators/fingerprint_cache.c"],
+    hdrs = ["src/operators/fingerprint_cache.h"],
+    deps = [
+        ":allocator",
+        ":cache",
+        ":fingerprint_id",
+        ":init_once",
+        ":mutex",
+        ":operator_delete",
+        ":xnnpack_h",
+    ],
+)
+
+xnnpack_cc_library(
+    name = "fingerprint_check",
+    srcs = ["src/xnnpack/fingerprint_check.c"],
+    deps = [
+        ":common",
+        ":fingerprint_cache",  # build_cleaner: keep
+        ":fingerprint_id",
+        ":internal",
+        ":logging",
+        ":xnnpack_h",
+    ],
+)
+
+xnnpack_cc_library(
+    name = "operator_delete",
+    srcs = ["src/operator-delete.c"],
+    deps = [
+        ":allocator",
+        ":logging",
+        ":operator_h",
+        ":operator_utils",
+        ":params",
+        ":xnnpack_h",
+    ],
+)
+
+xnnpack_cc_library(
     name = "operators",
     srcs = OPERATOR_SRCS,
     hdrs = [
@@ -767,6 +818,8 @@ xnnpack_cc_library(
         ":cache",
         ":common",
         ":datatype",
+        ":fingerprint_cache",
+        ":fingerprint_id",
         ":indirection",
         ":internal",
         ":logging",
@@ -779,6 +832,7 @@ xnnpack_cc_library(
         ":microparams_init",
         ":node_type",
         ":normalization",
+        ":operator_delete",
         ":operator_type",
         ":operator_utils",
         ":pack_lh",
@@ -790,6 +844,7 @@ xnnpack_cc_library(
         ":xnnpack_h",
         "//src/configs:config_hdrs",
         "//src/configs:hardware_config",
+        "//src/configs:microkernel_configs",
         "@pthreadpool",
     ],
 )
@@ -908,6 +963,8 @@ xnnpack_cc_library(
             "//:allocator",
             "//:build_identifier",  # build_cleaner: keep
             "//:common",  # build_cleaner: keep
+            "//:fingerprint_check",
+            "//:fingerprint_id",
             "//:init_once",
             "//:logging",
             "//:math",  # build_cleaner: keep
