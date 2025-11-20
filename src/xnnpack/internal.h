@@ -14,6 +14,7 @@
 
 #include "include/xnnpack.h"
 #include "src/xnnpack/config-types.h"
+#include "src/xnnpack/log.h"
 #include "src/xnnpack/math.h"
 #include "src/xnnpack/subgraph.h"
 

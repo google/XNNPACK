@@ -450,6 +450,14 @@ TARGET_LINK_LIBRARIES(buffer-test PRIVATE
 ADD_TEST(NAME buffer-test COMMAND buffer-test)
 SET_TARGET_PROPERTIES(buffer-test PROPERTIES CXX_EXTENSIONS YES)
 
+ADD_EXECUTABLE(fingerprint-cache-test fingerprint_cache.cc)
+TARGET_LINK_LIBRARIES(fingerprint-cache-test PRIVATE
+  xnnpack-test
+  xnnpack-fingerprint-cache
+  xnnpack-fingerprint-id)
+ADD_TEST(NAME fingerprint-cache-test COMMAND fingerprint-cache-test)
+SET_TARGET_PROPERTIES(fingerprint-cache-test PROPERTIES CXX_EXTENSIONS YES)
+
 IF(XNNPACK_BUILD_LIBRARY)
   ADD_EXECUTABLE(weights-cache-test weights-cache.cc)
   TARGET_LINK_LIBRARIES(weights-cache-test PRIVATE XNNPACK pthreadpool GTest::gtest GTest::gtest_main)

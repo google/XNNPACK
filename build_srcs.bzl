@@ -12,7 +12,6 @@ Lists of target-specific sources used to build XNNPACK.
 """
 
 OPERATOR_SRCS = [
-    "src/operator-delete.c",
     "src/operator-run.c",
     "src/operators/argmax-pooling-nhwc.c",
     "src/operators/average-pooling-nhwc.c",
