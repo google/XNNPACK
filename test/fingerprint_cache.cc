@@ -39,14 +39,14 @@ TEST(FingerprintIdTest, ComputeFingerprintIdValueWorks) {
   EXPECT_THAT(xnn_compute_fingerprint_id_value(
                   xnn_fingerprint_id_helper_test, xnn_fingerprint_id_helper_f16,
                   xnn_fingerprint_id_helper_f32, xnn_fingerprint_id_helper_qc8w,
-                  xnn_fingerprint_id_helper_nr2, 0),
-              xnn_fingerprint_id_test_f16_f32_qc8w_nr2);
+                  xnn_fingerprint_id_helper_example_flag, 0),
+              xnn_fingerprint_id_test_f16_f32_qc8w_example_flag);
 }
 
 TEST(FingerprintIdTest, ToStringIsCorrect) {
-  EXPECT_THAT(
-      xnn_fingerprint_id_to_string(xnn_fingerprint_id_test_f16_f32_qc8w_nr2),
-      StrEq("xnn_fingerprint_id_test_f16_f32_qc8w_nr2"));
+  EXPECT_THAT(xnn_fingerprint_id_to_string(
+                  xnn_fingerprint_id_test_f16_f32_qc8w_example_flag),
+              StrEq("xnn_fingerprint_id_test_f16_f32_qc8w_example_flag"));
 }
 
 struct FingerprintCacheTest : testing::Test {
@@ -63,7 +63,7 @@ struct FingerprintCacheTest : testing::Test {
 
 TEST_F(FingerprintCacheTest, SetAndGetFingerprint) {
   const struct xnn_fingerprint expected{
-      /*id=*/xnn_fingerprint_id_test_f16_f32_qc8w_nr2,
+      /*id=*/xnn_fingerprint_id_test_f16_f32_qc8w_example_flag,
       /*value=*/314};
   xnn_set_fingerprint(expected);
   const struct xnn_fingerprint* fingerprint = xnn_get_fingerprint(expected.id);
@@ -74,10 +74,10 @@ TEST_F(FingerprintCacheTest, SetAndGetFingerprint) {
 
 TEST_F(FingerprintCacheTest, SetGetFingerprintMultipleTimesDoesntDeadlock) {
   constexpr struct xnn_fingerprint finger1{
-      /*id=*/xnn_fingerprint_id_test_f16_f32_qc8w_nr2,
+      /*id=*/xnn_fingerprint_id_test_f16_f32_qc8w_example_flag,
       /*value=*/314};
   constexpr struct xnn_fingerprint finger2{
-      /*id=*/xnn_fingerprint_id_test_f16_f32_qc8w_nr2,
+      /*id=*/xnn_fingerprint_id_test_f16_f32_qc8w_example_flag,
       /*value=*/654};
   static_assert(finger1.id == finger2.id,
                 "This test checks that updating a fingerprint value doesn't "
@@ -95,20 +95,21 @@ TEST_F(FingerprintCacheTest, SetGetFingerprintMultipleTimesDoesntDeadlock) {
 }
 
 TEST_F(FingerprintCacheTest, InitializeAndFinalize) {
-  struct fingerprint_context context =
-      create_fingerprint_context(xnn_fingerprint_id_test_f16_f32_qc8w_nr2);
+  struct fingerprint_context context = create_fingerprint_context(
+      xnn_fingerprint_id_test_f16_f32_qc8w_example_flag);
   EXPECT_THAT(context.status, Eq(xnn_status_uninitialized));
   EXPECT_THAT(context.fingerprint_id,
-              Eq(xnn_fingerprint_id_test_f16_f32_qc8w_nr2));
+              Eq(xnn_fingerprint_id_test_f16_f32_qc8w_example_flag));
   finalize_fingerprint_context(&context);
-  EXPECT_THAT(xnn_get_fingerprint(xnn_fingerprint_id_test_f16_f32_qc8w_nr2),
-              NotNull());
+  EXPECT_THAT(
+      xnn_get_fingerprint(xnn_fingerprint_id_test_f16_f32_qc8w_example_flag),
+      NotNull());
 }
 
 TEST_F(FingerprintCacheTest, ReserveAndWrite) {
   constexpr size_t kBufferSize = 8;
-  struct fingerprint_context context =
-      create_fingerprint_context(xnn_fingerprint_id_test_f16_f32_qc8w_nr2);
+  struct fingerprint_context context = create_fingerprint_context(
+      xnn_fingerprint_id_test_f16_f32_qc8w_example_flag);
   uint8_t* buffer = reinterpret_cast<uint8_t*>(
       context.cache.reserve_space(context.cache.context, kBufferSize));
   ASSERT_THAT(buffer, NotNull());
@@ -122,8 +123,9 @@ TEST_F(FingerprintCacheTest, ReserveAndWrite) {
               Eq(XNN_CACHE_NOT_FOUND));
   finalize_fingerprint_context(&context);
   const xnn_fingerprint* fingerprint =
-      xnn_get_fingerprint(xnn_fingerprint_id_test_f16_f32_qc8w_nr2);
+      xnn_get_fingerprint(xnn_fingerprint_id_test_f16_f32_qc8w_example_flag);
   ASSERT_THAT(fingerprint, NotNull());
-  EXPECT_THAT(fingerprint->id, Eq(xnn_fingerprint_id_test_f16_f32_qc8w_nr2));
+  EXPECT_THAT(fingerprint->id,
+              Eq(xnn_fingerprint_id_test_f16_f32_qc8w_example_flag));
   EXPECT_THAT(fingerprint->value, Not(Eq(0)));
 }
