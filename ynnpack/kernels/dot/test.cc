@@ -40,27 +40,6 @@ std::ostream& operator<<(std::ostream& os, const DotShape& shape) {
   return os << shape.m << "x" << shape.n << "x" << shape.k;
 }
 
-// Align the last two dimensions of x up to a multiple of a2, a1, with zero
-// padding.
-template <typename T>
-Tensor<T> AlignUp(Tensor<T> x, size_t a2, size_t a1) {
-  std::vector<size_t> extents = x.extents();
-  extents[extents.size() - 2] = align_up(extents[extents.size() - 2], a2);
-  extents[extents.size() - 1] = align_up(extents[extents.size() - 1], a1);
-  if (extents == x.extents()) {
-    return x;
-  }
-
-  Tensor<T> aligned(extents, Alignment({.bytes = a1 * a2 * sizeof(T)}));
-
-  aligned.fill(0);
-  Tensor<T> cropped = aligned;
-  cropped.set_shape(x.extents(), aligned.strides());
-  cropped.assign(x);
-
-  return aligned;
-}
-
 // If `tile_k > 1`, we need to transpose b such that `tile_k` values of the k
 // dimension are contiguous in memory.
 template <typename T>
