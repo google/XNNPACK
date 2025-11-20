@@ -671,6 +671,7 @@ cc_test(
     malloc = ynn_binary_malloc(),
     deps = [
         ":dot",
+        ":pack",
         "//ynnpack:ynnpack_h",
         "//ynnpack/base",
         "//ynnpack/base/test:buffer",

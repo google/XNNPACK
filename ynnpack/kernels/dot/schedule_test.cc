@@ -47,7 +47,7 @@ constexpr size_t block_k = 2;
 constexpr size_t a_stride_m = 10;
 constexpr size_t a_stride_k = 1;
 constexpr size_t b_stride_k = 12;
-constexpr size_t b_stride_block_n = 1;
+constexpr size_t b_stride_n = 1;
 constexpr size_t init_c_stride_m = 7;
 constexpr size_t c_stride_m = 13;
 constexpr size_t c_stride_n = 1;
@@ -61,7 +61,7 @@ const void* a_at(size_t m, size_t k) {
   return a + m * a_stride_m + k * a_stride_k;
 };
 const void* b_at(size_t k, size_t n) {
-  return b + k * b_stride_k + n * b_stride_block_n / block_n;
+  return b + k * b_stride_k + n * b_stride_n;
 };
 const void* init_c_at(size_t m, size_t n) {
   return init_c + m * init_c_stride_m + n * c_stride_n;
@@ -94,7 +94,7 @@ TEST(run_dot, loop_m) {
 
   std::vector<dot_call> calls;
   run_dot(loops, m, n, k, block_m, block_n, block_k, a_stride_m, a_stride_k, a,
-          b_stride_k, b_stride_block_n, b, init_c_stride_m, init_c, c_stride_m,
+          b_stride_k, b_stride_n, b, init_c_stride_m, init_c, c_stride_m,
           c_stride_n, c, make_record_calls(calls));
   ASSERT_THAT(calls,
               ElementsAre(dot_call_at(block_m, n, k, 0 * block_m, 0, 0),
@@ -107,7 +107,7 @@ TEST(run_dot, loop_n) {
 
   std::vector<dot_call> calls;
   run_dot(loops, m, n, k, block_m, block_n, block_k, a_stride_m, a_stride_k, a,
-          b_stride_k, b_stride_block_n, b, init_c_stride_m, init_c, c_stride_m,
+          b_stride_k, b_stride_n, b, init_c_stride_m, init_c, c_stride_m,
           c_stride_n, c, make_record_calls(calls));
 
   ASSERT_THAT(calls,
@@ -123,7 +123,7 @@ TEST(run_dot, loop_n_tail) {
 
   std::vector<dot_call> calls;
   run_dot(loops, m, n, k, block_m, block_n, block_k, a_stride_m, a_stride_k, a,
-          b_stride_k, b_stride_block_n, b, init_c_stride_m, init_c, c_stride_m,
+          b_stride_k, b_stride_n, b, init_c_stride_m, init_c, c_stride_m,
           c_stride_n, c, make_record_calls(calls));
 
   ASSERT_THAT(calls,
@@ -137,7 +137,7 @@ TEST(run_dot, loop_k) {
 
   std::vector<dot_call> calls;
   run_dot(loops, m, n, k, block_m, block_n, block_k, a_stride_m, a_stride_k, a,
-          b_stride_k, b_stride_block_n, b, init_c_stride_m, init_c, c_stride_m,
+          b_stride_k, b_stride_n, b, init_c_stride_m, init_c, c_stride_m,
           c_stride_n, c, make_record_calls(calls));
 
   ASSERT_THAT(calls,

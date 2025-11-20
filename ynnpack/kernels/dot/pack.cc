@@ -13,9 +13,9 @@
 
 namespace ynn {
 
-packer::packer(bool transpose, size_t elem_size, size_t tile_m, size_t tile_n)
-    : elem_size(elem_size), tile_m(tile_m), tile_n(tile_n) {
-  const size_t elem_size_bits = elem_size * 8;
+packer::packer(bool transpose, size_t elem_size_bits, size_t tile_m,
+               size_t tile_n)
+    : elem_size_bits(elem_size_bits), tile_m(tile_m), tile_n(tile_n) {
   // This operation is fusing 3 separate transposes (with padding as needed):
   //
   // 1. (optional) the caller might want to transpose the input prior to the
@@ -56,14 +56,14 @@ void packer::pack(size_t m, size_t n, size_t input_stride, const void* input,
                   void* output) {
   if (transpose_blocks_fn) {
     assert(tile_m == 1);
-    assert(m == 1 || output_stride == elem_size * tile_n);
-    transpose_blocks_fn(ceil_div(n, tile_n), m, n * elem_size, input_stride,
-                        input, output_block_stride, output);
+    assert(m == 1 || output_stride == tile_n * elem_size_bits / 8);
+    transpose_blocks_fn(ceil_div(n, tile_n), m, n * elem_size_bits / 8,
+                        input_stride, input, output_block_stride, output);
   } else if (transpose_fn) {
     while (n > 0) {
       const size_t n_i = std::min(n, tile_n);
-      transpose_fn(ceil_div(m, tile_m), n_i, m * elem_size, input_stride, input,
-                   output_stride, output);
+      transpose_fn(ceil_div(m, tile_m), n_i, m * elem_size_bits / 8,
+                   input_stride, input, output_stride, output);
       input = offset_bytes(input, input_stride * tile_n);
       output = offset_bytes(output, output_block_stride);
       n = sub_sat(n, tile_n);
@@ -77,8 +77,8 @@ void packer::pack(size_t m, size_t n, size_t input_stride, const void* input,
       // handle. Here we compute the size produced by interleaving
       // (including the padded rows), and then the size of the padding
       // in each row, which we set to 0.
-      const size_t row_size = n_i * tile_m * elem_size;
-      const size_t padding_size = (tile_n - n_i) * tile_m * elem_size;
+      const size_t row_size = n_i * tile_m * elem_size_bits / 8;
+      const size_t padding_size = (tile_n - n_i) * tile_m * elem_size_bits / 8;
       const void* input_i = input;
       void* output_i = output;
       for (size_t i = 0; i < m; i += tile_m) {
@@ -88,7 +88,7 @@ void packer::pack(size_t m, size_t n, size_t input_stride, const void* input,
         input_i = offset_bytes(input_i, input_stride * tile_m);
         output_i = offset_bytes(output_i, output_stride);
       }
-      input = offset_bytes(input, elem_size * tile_n);
+      input = offset_bytes(input, tile_n * elem_size_bits / 8);
       output = offset_bytes(output, output_block_stride);
       n = sub_sat(n, tile_n);
     }

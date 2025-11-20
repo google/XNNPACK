@@ -52,7 +52,7 @@ void block_dot_m(ptrdiff_t m, size_t n, size_t k, ptrdiff_t block_m,
 // Block a dot's n dimension, calling f at each block.
 template <typename DotFn>
 void block_dot_n(size_t m, ptrdiff_t n, size_t k, ptrdiff_t block_n,
-                 const void* a, size_t b_stride_block_n, const void* b,
+                 const void* a, size_t b_stride_n, const void* b,
                  size_t init_c_stride_m, const void* init_c, size_t c_stride_m,
                  size_t c_stride_n, void* c, DotFn f) {
   do {
@@ -61,7 +61,7 @@ void block_dot_n(size_t m, ptrdiff_t n, size_t k, ptrdiff_t block_n,
     n -= block_n;
     if (init_c) init_c = offset_bytes(init_c, c_stride_n * block_n);
     c = offset_bytes(c, c_stride_n * block_n);
-    b = offset_bytes(b, b_stride_block_n);
+    b = offset_bytes(b, b_stride_n * block_n);
   } while (n > 0);
 }
 
@@ -98,7 +98,7 @@ template <typename DotFn>
 void run_dot(slinky::span<dot_loop> loops, size_t m, size_t n, size_t k,
              size_t block_m, size_t block_n, size_t block_k, size_t a_stride_m,
              size_t a_stride_k, const void* a, size_t b_stride_k,
-             size_t b_stride_block_n, const void* b, size_t init_c_stride_m,
+             size_t b_stride_n, const void* b, size_t init_c_stride_m,
              const void* init_c, size_t c_stride_m, size_t c_stride_n, void* c,
              DotFn f) {
   assert(!loops.empty());
@@ -113,9 +113,9 @@ void run_dot(slinky::span<dot_loop> loops, size_t m, size_t n, size_t k,
                            init_c_stride_m, init_c, c_stride_m, c_stride_n, c,
                            f);
       case dot_loop::n:
-        return block_dot_n(m, n, k, block_n * loop.blocks, a,
-                           b_stride_block_n * loop.blocks, b, init_c_stride_m,
-                           init_c, c_stride_m, c_stride_n, c, f);
+        return block_dot_n(m, n, k, block_n * loop.blocks, a, b_stride_n, b,
+                           init_c_stride_m, init_c, c_stride_m, c_stride_n, c,
+                           f);
       case dot_loop::k:
         return block_dot_k(m, n, k, block_k * loop.blocks, a_stride_k, a,
                            b_stride_k, b, init_c_stride_m, init_c, c_stride_m,
@@ -127,8 +127,8 @@ void run_dot(slinky::span<dot_loop> loops, size_t m, size_t n, size_t k,
                            const void* b, size_t init_c_stride_m,
                            const void* init_c, void* c) {
       run_dot(loops, m, n, k, block_m, block_n, block_k, a_stride_m, a_stride_k,
-              a, b_stride_k, b_stride_block_n, b, init_c_stride_m, init_c,
-              c_stride_m, c_stride_n, c, f);
+              a, b_stride_k, b_stride_n, b, init_c_stride_m, init_c, c_stride_m,
+              c_stride_n, c, f);
     };
     switch (loop.dim) {
       case dot_loop::m:
@@ -136,9 +136,9 @@ void run_dot(slinky::span<dot_loop> loops, size_t m, size_t n, size_t k,
                            init_c_stride_m, init_c, c_stride_m, c_stride_n, c,
                            recursive_f);
       case dot_loop::n:
-        return block_dot_n(m, n, k, block_n * loop.blocks, a,
-                           b_stride_block_n * loop.blocks, b, init_c_stride_m,
-                           init_c, c_stride_m, c_stride_n, c, recursive_f);
+        return block_dot_n(m, n, k, block_n * loop.blocks, a, b_stride_n, b,
+                           init_c_stride_m, init_c, c_stride_m, c_stride_n, c,
+                           recursive_f);
       case dot_loop::k:
         return block_dot_k(m, n, k, block_k * loop.blocks, a_stride_k, a,
                            b_stride_k, b, init_c_stride_m, init_c, c_stride_m,

@@ -26,11 +26,12 @@ namespace ynn {
 namespace {
 
 template <typename AT, typename BT, typename CT>
-void dot(size_t M, size_t N, size_t K3, size_t K2, size_t K1, size_t A_stride_m,
-         size_t A_stride_k3, size_t A_stride_k2, const AT* A,
-         size_t B_stride_k3, size_t B_stride_k2, size_t B_stride_k1,
-         const BT* B, size_t C_in_stride_m, const CT* C_in,
-         size_t C_out_stride_m, CT* C_out) {
+void dot_1x128x1_1x1x1(size_t M, size_t N, size_t K3, size_t K2, size_t K1,
+                       size_t A_stride_m, size_t A_stride_k3,
+                       size_t A_stride_k2, const AT* A, size_t B_stride_k3,
+                       size_t B_stride_k2, size_t B_stride_k1, const BT* B,
+                       size_t C_in_stride_m, const CT* C_in,
+                       size_t C_out_stride_m, CT* C_out) {
   using B_info = type_info<BT>;
   assert(M == 1);
   CT* acc = YNN_ALLOCA(CT, N);
@@ -60,18 +61,16 @@ void dot(size_t M, size_t N, size_t K3, size_t K2, size_t K1, size_t A_stride_m,
   }
 }
 
-// Unfortunately the compiler doesn't see that it should unroll the j loop by 2
-// for `type_info::element_count() == 2`, if we do it manually we get a
-// 5x speedup from this code.
 template <typename AT, typename BT, typename CT>
-void dot_unroll2(size_t M, size_t N, size_t K3, size_t K2, size_t K1,
-                 size_t A_stride_m, size_t A_stride_k3, size_t A_stride_k2,
-                 const AT* A, size_t B_stride_k3, size_t B_stride_k2,
-                 size_t B_stride_k1, const BT* B, size_t C_in_stride_m,
-                 const CT* C_in, size_t C_out_stride_m, CT* C_out) {
+void dot_1x128x2_1x1x2(size_t M, size_t N, size_t K3, size_t K2, size_t K1,
+                       size_t A_stride_m, size_t A_stride_k3,
+                       size_t A_stride_k2, const AT* A, size_t B_stride_k3,
+                       size_t B_stride_k2, size_t B_stride_k1, const BT* B,
+                       size_t C_in_stride_m, const CT* C_in,
+                       size_t C_out_stride_m, CT* C_out) {
   using B_info = type_info<BT>;
   assert(M == 1);
-  assert(N % 2 == 0);
+  assert(K1 % 2 == 0);
   CT* acc = YNN_ALLOCA(CT, N);
   std::fill_n(acc, N, 0);
   for (size_t k3 = 0; k3 < K3; ++k3) {
@@ -80,14 +79,15 @@ void dot_unroll2(size_t M, size_t N, size_t K3, size_t K2, size_t K1,
     for (size_t k2 = 0; k2 < K2; ++k2) {
       const BT* B_k2 = offset_bytes(B_k3, k2 * B_stride_k2);
       const AT* A_k2 = offset_bytes(A_k3, k2 * A_stride_k2);
-      for (size_t k1 = 0; k1 < K1; ++k1) {
+      for (size_t k1 = 0; k1 < K1; k1 += 2) {
         const BT* B_k1 = offset_bytes(B_k2, k1 * B_stride_k1);
-        const AT A_k1 = A_k2[k1];
-        for (size_t j = 0; j < N; j += 2) {
-          acc[j + 0] +=
-              static_cast<CT>(A_k1) * static_cast<CT>(B_info::get(B_k1, j + 0));
-          acc[j + 1] +=
-              static_cast<CT>(A_k1) * static_cast<CT>(B_info::get(B_k1, j + 1));
+        const AT A_k1_0 = A_k2[k1 + 0];
+        const AT A_k1_1 = A_k2[k1 + 1];
+        for (size_t j = 0; j < N; ++j) {
+          const auto B_k1_0 = B_info::get(B_k1, 2 * j + 0);
+          const auto B_k1_1 = B_info::get(B_k1, 2 * j + 1);
+          acc[j] += static_cast<CT>(A_k1_0) * static_cast<CT>(B_k1_0);
+          acc[j] += static_cast<CT>(A_k1_1) * static_cast<CT>(B_k1_1);
         }
       }
     }
@@ -103,81 +103,78 @@ void dot_unroll2(size_t M, size_t N, size_t K3, size_t K2, size_t K1,
 
 }  // namespace
 
-void dot_fp32(size_t m, size_t n, size_t k3, size_t k2, size_t k1,
-              size_t a_stride_m, size_t a_stride_k3, size_t a_stride_k2,
-              const void* a, size_t b_stride_k3, size_t b_stride_k2,
-              size_t b_stride_k1, const void* b, size_t c_in_stride_m,
-              const void* c_in, size_t c_out_stride_m, void* c_out) {
-  dot(m, n, k3, k2, k1, a_stride_m, a_stride_k3, a_stride_k2,
-      static_cast<const float*>(a), b_stride_k3, b_stride_k2, b_stride_k1,
-      static_cast<const float*>(b), c_in_stride_m,
-      static_cast<const float*>(c_in), c_out_stride_m,
-      static_cast<float*>(c_out));
+void dot_fp32_1x128x1_1x1x1(size_t m, size_t n, size_t k3, size_t k2, size_t k1,
+                            size_t a_stride_m, size_t a_stride_k3,
+                            size_t a_stride_k2, const void* a,
+                            size_t b_stride_k3, size_t b_stride_k2,
+                            size_t b_stride_k1, const void* b,
+                            size_t c_in_stride_m, const void* c_in,
+                            size_t c_out_stride_m, void* c_out) {
+  dot_1x128x1_1x1x1(m, n, k3, k2, k1, a_stride_m, a_stride_k3, a_stride_k2,
+                    static_cast<const float*>(a), b_stride_k3, b_stride_k2,
+                    b_stride_k1, static_cast<const float*>(b), c_in_stride_m,
+                    static_cast<const float*>(c_in), c_out_stride_m,
+                    static_cast<float*>(c_out));
 }
 
-void dot_fp16_fp16_fp32(size_t m, size_t n, size_t k3, size_t k2, size_t k1,
-                        size_t a_stride_m, size_t a_stride_k3,
-                        size_t a_stride_k2, const void* a, size_t b_stride_k3,
-                        size_t b_stride_k2, size_t b_stride_k1, const void* b,
-                        size_t c_in_stride_m, const void* c_in,
-                        size_t c_out_stride_m, void* c_out) {
-  dot(m, n, k3, k2, k1, a_stride_m, a_stride_k3, a_stride_k2,
-      static_cast<const half*>(a), b_stride_k3, b_stride_k2, b_stride_k1,
-      static_cast<const half*>(b), c_in_stride_m,
-      static_cast<const float*>(c_in), c_out_stride_m,
-      static_cast<float*>(c_out));
+void dot_fp16_fp16_fp32_1x128x1_1x1x1(
+    size_t m, size_t n, size_t k3, size_t k2, size_t k1, size_t a_stride_m,
+    size_t a_stride_k3, size_t a_stride_k2, const void* a, size_t b_stride_k3,
+    size_t b_stride_k2, size_t b_stride_k1, const void* b, size_t c_in_stride_m,
+    const void* c_in, size_t c_out_stride_m, void* c_out) {
+  dot_1x128x1_1x1x1(m, n, k3, k2, k1, a_stride_m, a_stride_k3, a_stride_k2,
+                    static_cast<const half*>(a), b_stride_k3, b_stride_k2,
+                    b_stride_k1, static_cast<const half*>(b), c_in_stride_m,
+                    static_cast<const float*>(c_in), c_out_stride_m,
+                    static_cast<float*>(c_out));
 }
 
-void dot_bf16_bf16_fp32(size_t m, size_t n, size_t k3, size_t k2, size_t k1,
-                        size_t a_stride_m, size_t a_stride_k3,
-                        size_t a_stride_k2, const void* a, size_t b_stride_k3,
-                        size_t b_stride_k2, size_t b_stride_k1, const void* b,
-                        size_t c_in_stride_m, const void* c_in,
-                        size_t c_out_stride_m, void* c_out) {
-  dot(m, n, k3, k2, k1, a_stride_m, a_stride_k3, a_stride_k2,
-      static_cast<const bfloat16*>(a), b_stride_k3, b_stride_k2, b_stride_k1,
-      static_cast<const bfloat16*>(b), c_in_stride_m,
-      static_cast<const float*>(c_in), c_out_stride_m,
-      static_cast<float*>(c_out));
+void dot_bf16_bf16_fp32_1x128x1_1x1x1(
+    size_t m, size_t n, size_t k3, size_t k2, size_t k1, size_t a_stride_m,
+    size_t a_stride_k3, size_t a_stride_k2, const void* a, size_t b_stride_k3,
+    size_t b_stride_k2, size_t b_stride_k1, const void* b, size_t c_in_stride_m,
+    const void* c_in, size_t c_out_stride_m, void* c_out) {
+  dot_1x128x1_1x1x1(m, n, k3, k2, k1, a_stride_m, a_stride_k3, a_stride_k2,
+                    static_cast<const bfloat16*>(a), b_stride_k3, b_stride_k2,
+                    b_stride_k1, static_cast<const bfloat16*>(b), c_in_stride_m,
+                    static_cast<const float*>(c_in), c_out_stride_m,
+                    static_cast<float*>(c_out));
 }
 
-void dot_int8_int8_int32(size_t m, size_t n, size_t k3, size_t k2, size_t k1,
-                         size_t a_stride_m, size_t a_stride_k3,
-                         size_t a_stride_k2, const void* a, size_t b_stride_k3,
-                         size_t b_stride_k2, size_t b_stride_k1, const void* b,
-                         size_t c_in_stride_m, const void* c_in,
-                         size_t c_out_stride_m, void* c_out) {
-  dot(m, n, k3, k2, k1, a_stride_m, a_stride_k3, a_stride_k2,
-      static_cast<const int8_t*>(a), b_stride_k3, b_stride_k2, b_stride_k1,
-      static_cast<const int8_t*>(b), c_in_stride_m,
-      static_cast<const int32_t*>(c_in), c_out_stride_m,
-      static_cast<int32_t*>(c_out));
+void dot_int8_int8_int32_1x128x1_1x1x1(
+    size_t m, size_t n, size_t k3, size_t k2, size_t k1, size_t a_stride_m,
+    size_t a_stride_k3, size_t a_stride_k2, const void* a, size_t b_stride_k3,
+    size_t b_stride_k2, size_t b_stride_k1, const void* b, size_t c_in_stride_m,
+    const void* c_in, size_t c_out_stride_m, void* c_out) {
+  dot_1x128x1_1x1x1(m, n, k3, k2, k1, a_stride_m, a_stride_k3, a_stride_k2,
+                    static_cast<const int8_t*>(a), b_stride_k3, b_stride_k2,
+                    b_stride_k1, static_cast<const int8_t*>(b), c_in_stride_m,
+                    static_cast<const int32_t*>(c_in), c_out_stride_m,
+                    static_cast<int32_t*>(c_out));
 }
 
-void dot_uint8_int8_int32(size_t m, size_t n, size_t k3, size_t k2, size_t k1,
-                          size_t a_stride_m, size_t a_stride_k3,
-                          size_t a_stride_k2, const void* a, size_t b_stride_k3,
-                          size_t b_stride_k2, size_t b_stride_k1, const void* b,
-                          size_t c_in_stride_m, const void* c_in,
-                          size_t c_out_stride_m, void* c_out) {
-  dot(m, n, k3, k2, k1, a_stride_m, a_stride_k3, a_stride_k2,
-      static_cast<const uint8_t*>(a), b_stride_k3, b_stride_k2, b_stride_k1,
-      static_cast<const int8_t*>(b), c_in_stride_m,
-      static_cast<const int32_t*>(c_in), c_out_stride_m,
-      static_cast<int32_t*>(c_out));
+void dot_uint8_int8_int32_1x128x1_1x1x1(
+    size_t m, size_t n, size_t k3, size_t k2, size_t k1, size_t a_stride_m,
+    size_t a_stride_k3, size_t a_stride_k2, const void* a, size_t b_stride_k3,
+    size_t b_stride_k2, size_t b_stride_k1, const void* b, size_t c_in_stride_m,
+    const void* c_in, size_t c_out_stride_m, void* c_out) {
+  dot_1x128x1_1x1x1(m, n, k3, k2, k1, a_stride_m, a_stride_k3, a_stride_k2,
+                    static_cast<const uint8_t*>(a), b_stride_k3, b_stride_k2,
+                    b_stride_k1, static_cast<const int8_t*>(b), c_in_stride_m,
+                    static_cast<const int32_t*>(c_in), c_out_stride_m,
+                    static_cast<int32_t*>(c_out));
 }
 
-void dot_int8_int4_int32(size_t m, size_t n, size_t k3, size_t k2, size_t k1,
-                         size_t a_stride_m, size_t a_stride_k3,
-                         size_t a_stride_k2, const void* a, size_t b_stride_k3,
-                         size_t b_stride_k2, size_t b_stride_k1, const void* b,
-                         size_t c_in_stride_m, const void* c_in,
-                         size_t c_out_stride_m, void* c_out) {
-  dot_unroll2(m, n, k3, k2, k1, a_stride_m, a_stride_k3, a_stride_k2,
-              static_cast<const int8_t*>(a), b_stride_k3, b_stride_k2,
-              b_stride_k1, static_cast<const int4x2*>(b), c_in_stride_m,
-              static_cast<const int32_t*>(c_in), c_out_stride_m,
-              static_cast<int32_t*>(c_out));
+void dot_int8_int4_int32_1x128x2_1x1x2(
+    size_t m, size_t n, size_t k3, size_t k2, size_t k1, size_t a_stride_m,
+    size_t a_stride_k3, size_t a_stride_k2, const void* a, size_t b_stride_k3,
+    size_t b_stride_k2, size_t b_stride_k1, const void* b, size_t c_in_stride_m,
+    const void* c_in, size_t c_out_stride_m, void* c_out) {
+  dot_1x128x2_1x1x2(m, n, k3, k2, k1, a_stride_m, a_stride_k3, a_stride_k2,
+                    static_cast<const int8_t*>(a), b_stride_k3, b_stride_k2,
+                    b_stride_k1, static_cast<const int4x2*>(b), c_in_stride_m,
+                    static_cast<const int32_t*>(c_in), c_out_stride_m,
+                    static_cast<int32_t*>(c_out));
 }
 
 float estimate_dot_cost(size_t m, size_t n, size_t k, size_t block_m,

@@ -22,7 +22,7 @@ class packer {
   // If `transpose` is true, the input is transposed prior to the above reshape
   // and transpose operation.
   // `tile_m` must be a power of 2.
-  packer(bool transpose, size_t elem_size, size_t tile_m, size_t tile_n);
+  packer(bool transpose, size_t elem_size_bits, size_t tile_m, size_t tile_n);
 
   // Run the packing operation for input and output buffers. The input has an
   // un-transposed shape of `m` x `n`. The output will be rounded up to a
@@ -31,7 +31,7 @@ class packer {
             size_t output_stride, size_t output_block_stride, void* output);
 
  protected:
-  size_t elem_size;
+  size_t elem_size_bits;
   size_t tile_m;
   size_t tile_n;
   interleave_kernel_fn interleave_fn = nullptr;
