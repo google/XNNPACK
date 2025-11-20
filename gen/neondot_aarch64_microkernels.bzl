@@ -1,9 +1,9 @@
-"""
-Microkernel filenames lists for neondot_aarch64.
-
-Auto-generated file. Do not edit!
-  Generator: tools/update-microkernels.py
-"""
+#
+# Microkernel filenames lists for neondot_aarch64.
+#
+# Auto-generated file. Do not edit!
+#   Generator: tools/update-microkernels.py
+#
 
 PROD_NEONDOT_AARCH64_MICROKERNEL_SRCS = [
     "src/qb4-packw/gen/qb4-packw-x16c4-gemm-goi-aarch64-neondot.c",

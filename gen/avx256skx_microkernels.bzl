@@ -1,9 +1,9 @@
-"""
-Microkernel filenames lists for avx256skx.
-
-Auto-generated file. Do not edit!
-  Generator: tools/update-microkernels.py
-"""
+#
+# Microkernel filenames lists for avx256skx.
+#
+# Auto-generated file. Do not edit!
+#   Generator: tools/update-microkernels.py
+#
 
 PROD_AVX256SKX_MICROKERNEL_SRCS = [
     "src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-avx256skx-rr2-p5-u32-acc2.c",

@@ -1,9 +1,9 @@
-"""
-Microkernel filenames lists for neonfma_aarch64.
-
-Auto-generated file. Do not edit!
-  Generator: tools/update-microkernels.py
-"""
+#
+# Microkernel filenames lists for neonfma_aarch64.
+#
+# Auto-generated file. Do not edit!
+#   Generator: tools/update-microkernels.py
+#
 
 PROD_NEONFMA_AARCH64_MICROKERNEL_SRCS = [
     "src/f32-conv-hwc2chw/f32-conv-hwc2chw-3x3s2p1c3x4-aarch64-neonfma-2x2.c",

@@ -1,9 +1,9 @@
-"""
-Microkernel filenames lists for neonbf16.
-
-Auto-generated file. Do not edit!
-  Generator: tools/update-microkernels.py
-"""
+#
+# Microkernel filenames lists for neonbf16.
+#
+# Auto-generated file. Do not edit!
+#   Generator: tools/update-microkernels.py
+#
 
 PROD_NEONBF16_MICROKERNEL_SRCS = [
 ]

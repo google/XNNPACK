@@ -1,9 +1,9 @@
-"""
-Microkernel filenames lists.
-
-Auto-generated file. Do not edit!
-  Generator: tools/update-microkernels.py
-"""
+#
+# Microkernel filenames lists.
+#
+# Auto-generated file. Do not edit!
+#   Generator: tools/update-microkernels.py
+#
 
 load("aarch32_microkernels.bzl", _AARCH32_ASM_MICROKERNEL_SRCS = "AARCH32_ASM_MICROKERNEL_SRCS", _NON_PROD_AARCH32_ASM_MICROKERNEL_SRCS = "NON_PROD_AARCH32_ASM_MICROKERNEL_SRCS", _PROD_AARCH32_ASM_MICROKERNEL_SRCS = "PROD_AARCH32_ASM_MICROKERNEL_SRCS")
 load("aarch64_microkernels.bzl", _AARCH64_ASM_MICROKERNEL_SRCS = "AARCH64_ASM_MICROKERNEL_SRCS", _NON_PROD_AARCH64_ASM_MICROKERNEL_SRCS = "NON_PROD_AARCH64_ASM_MICROKERNEL_SRCS", _PROD_AARCH64_ASM_MICROKERNEL_SRCS = "PROD_AARCH64_ASM_MICROKERNEL_SRCS")

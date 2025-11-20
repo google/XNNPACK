@@ -1,9 +1,9 @@
-"""
-Microkernel filenames lists for sse2fma.
-
-Auto-generated file. Do not edit!
-  Generator: tools/update-microkernels.py
-"""
+#
+# Microkernel filenames lists for sse2fma.
+#
+# Auto-generated file. Do not edit!
+#   Generator: tools/update-microkernels.py
+#
 
 PROD_SSE2FMA_MICROKERNEL_SRCS = [
     "src/f32-vapproxgelu/gen/f32-vapproxgelu-sse2fma-rational-12-10-div.c",
