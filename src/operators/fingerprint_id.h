@@ -188,10 +188,10 @@ enum xnn_fingerprint_id {
 // Computes the fingerprint id value from the given helper values.
 //
 // Warning: All calls should have the last variadic argument be 0.
-enum xnn_fingerprint_id xnn_compute_fingerprint_id_value(
-    enum xnn_fingerprint_id_helper op, enum xnn_fingerprint_id_helper in,
-    enum xnn_fingerprint_id_helper out, enum xnn_fingerprint_id_helper weights,
-    ...);
+enum xnn_fingerprint_id xnn_compute_fingerprint_id_value(uint32_t op,
+                                                         uint32_t in,
+                                                         uint32_t out,
+                                                         uint32_t weights, ...);
 
 const char* xnn_fingerprint_id_to_string(
     enum xnn_fingerprint_id fingerprint_id);

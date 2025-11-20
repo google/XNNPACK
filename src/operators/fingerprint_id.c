@@ -9,17 +9,15 @@
 #include <stdint.h>
 
 enum xnn_fingerprint_id xnn_compute_fingerprint_id_value(
-    enum xnn_fingerprint_id_helper op, enum xnn_fingerprint_id_helper in,
-    enum xnn_fingerprint_id_helper out, enum xnn_fingerprint_id_helper weights,
-    ...) {
+    uint32_t op, uint32_t in, uint32_t out, uint32_t weights, ...) {
   uint32_t id = op << XNN_FINGERPRINT_ID_OP_OFFSET |
                 in << XNN_FINGERPRINT_ID_IN_OFFSET |
                 out << XNN_FINGERPRINT_ID_OUT_OFFSET |
                 weights << XNN_FINGERPRINT_ID_WEIGHTS_OFFSET;
   va_list args;
   va_start(args, weights);
-  enum xnn_fingerprint_id_helper flag;
-  while ((flag = (enum xnn_fingerprint_id_helper)va_arg(args, int)) != 0) {
+  uint32_t flag;
+  while ((flag = (uint32_t)va_arg(args, uint32_t)) != 0) {
     id |= flag;
   }
   return (enum xnn_fingerprint_id)id;
