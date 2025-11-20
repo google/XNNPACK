@@ -1,9 +1,9 @@
-"""
-Microkernel filenames lists for wasmsimd.
-
-Auto-generated file. Do not edit!
-  Generator: tools/update-microkernels.py
-"""
+#
+# Microkernel filenames lists for wasmsimd.
+#
+# Auto-generated file. Do not edit!
+#   Generator: tools/update-microkernels.py
+#
 
 PROD_WASMSIMD_MICROKERNEL_SRCS = [
     "src/f16-f32-vcvt/gen/f16-f32-vcvt-wasmsimd-int16-u16.c",

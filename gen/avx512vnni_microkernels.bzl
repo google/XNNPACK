@@ -1,9 +1,9 @@
-"""
-Microkernel filenames lists for avx512vnni.
-
-Auto-generated file. Do not edit!
-  Generator: tools/update-microkernels.py
-"""
+#
+# Microkernel filenames lists for avx512vnni.
+#
+# Auto-generated file. Do not edit!
+#   Generator: tools/update-microkernels.py
+#
 
 PROD_AVX512VNNI_MICROKERNEL_SRCS = [
     "src/qd8-f32-qb4w-gemm/gen/qd8-f32-qb4w-gemm-1x16c8-minmax-avx512vnni-prfm.c",

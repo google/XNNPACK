@@ -1,9 +1,9 @@
-"""
-Microkernel filenames lists for ssse3.
-
-Auto-generated file. Do not edit!
-  Generator: tools/update-microkernels.py
-"""
+#
+# Microkernel filenames lists for ssse3.
+#
+# Auto-generated file. Do not edit!
+#   Generator: tools/update-microkernels.py
+#
 
 PROD_SSSE3_MICROKERNEL_SRCS = [
     "src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-3x3p1-minmax-ssse3-2x4-acc2.c",

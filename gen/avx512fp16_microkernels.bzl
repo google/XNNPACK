@@ -1,9 +1,9 @@
-"""
-Microkernel filenames lists for avx512fp16.
-
-Auto-generated file. Do not edit!
-  Generator: tools/update-microkernels.py
-"""
+#
+# Microkernel filenames lists for avx512fp16.
+#
+# Auto-generated file. Do not edit!
+#   Generator: tools/update-microkernels.py
+#
 
 PROD_AVX512FP16_MICROKERNEL_SRCS = [
     "src/f16-rminmax/gen/f16-rmax-avx512fp16-u128-acc4.c",
