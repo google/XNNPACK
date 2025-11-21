@@ -26,39 +26,43 @@ static void transpose(size_t m, size_t n, size_t n_bytes_a, size_t stride_a,
                       ElemSize elem_size_bits) {
   assert(elem_size_bits % 8 == 0);
   const auto elem_size = elem_size_bits / 8;
-  for (size_t i = 0; i < m; ++i) {
-    const void* a_i = offset_bytes(a, i * elem_size);
-    void* x_i = offset_bytes(x, i * stride_x);
-    if ((i + 1) * elem_size <= n_bytes_a) {
+
+  // TODO(dsharlet): We could unroll this loop such that it reads and writes
+  // at least one cache line at a time, and then add prefetching. Attempts
+  // to do this yielded no improvement so far.
+  while (m > 0) {
+    const void* a_j = a;
+    void* x_j = x;
+    if (elem_size <= n_bytes_a) {
       // This column of input is fully in bounds.
-      // TODO(dsharlet): We could unroll this loop such that it reads and writes
-      // at least one cache line at a time, and then add prefetching. Attempts
-      // to do this yielded no improvement so far.
       size_t j = n;
       while (j > 0) {
-        memcpy(x_i, a_i, elem_size);
-        x_i = offset_bytes(x_i, elem_size);
-        a_i = offset_bytes(a_i, stride_a);
+        memcpy(x_j, a_j, elem_size);
+        x_j = offset_bytes(x_j, elem_size);
+        a_j = offset_bytes(a_j, stride_a);
         --j;
       }
-    } else if (i * elem_size < n_bytes_a) {
+      n_bytes_a -= elem_size;
+    } else if (n_bytes_a > 0) {
       // This column of input is partially in bounds.
-      const size_t copy_size = n_bytes_a - i * elem_size;
-      assert(copy_size < elem_size);
-      const size_t fill_size = elem_size - copy_size;
+      assert(n_bytes_a < elem_size);
       size_t j = n;
       while (j > 0) {
-        memcpy(x_i, a_i, copy_size);
-        memset(offset_bytes(x_i, copy_size), 0, fill_size);
-        x_i = offset_bytes(x_i, elem_size);
-        a_i = offset_bytes(a_i, stride_a);
+        memcpy(x_j, a_j, n_bytes_a);
+        memset(offset_bytes(x_j, n_bytes_a), 0, elem_size - n_bytes_a);
+        x_j = offset_bytes(x_j, elem_size);
+        a_j = offset_bytes(a_j, stride_a);
         --j;
       }
+      n_bytes_a = 0;
     } else {
       // This column of input is fully out of bounds. The entire output row is
       // 0.
-      memset(x_i, 0, n * elem_size);
+      memset(x_j, 0, n * elem_size);
     }
+    --m;
+    a = offset_bytes(a, elem_size);
+    x = offset_bytes(x, stride_x);
   }
 }
 
