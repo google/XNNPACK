@@ -104,6 +104,11 @@ static enum xnn_status reshape_concatenate_operator(
   enum xnn_status status;
 
   size_t num_inputs = opdata->num_inputs;
+  if (num_inputs == 0) {
+    // Everything here is a no-op.
+    return xnn_status_success;
+  }
+
   assert(num_inputs <= XNN_MAX_OPERATOR_OBJECTS);
   uint32_t input_id[XNN_MAX_OPERATOR_OBJECTS];
   for (size_t i = 0; i < num_inputs; ++i) {
