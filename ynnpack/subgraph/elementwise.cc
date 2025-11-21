@@ -137,6 +137,71 @@ auto make_unary_elementwise_impl(unary_kernel_fn kernel) {
       };
 }
 
+inline const slinky::dim& dim_or_broadcast(const slinky::raw_buffer& buf,
+                                           std::ptrdiff_t d) {
+  return d < static_cast<std::ptrdiff_t>(buf.rank) ? buf.dim(d)
+                                                   : slinky::dim::broadcast();
+}
+
+inline bool same_bounds(const slinky::dim& a, const slinky::dim& b) {
+  return a.min() == b.min() && a.max() == b.max();
+}
+
+template <typename... Dims>
+inline bool same_bounds(const slinky::dim& a, const slinky::dim& b,
+                        const Dims&... dims) {
+  return same_bounds(a, b) && same_bounds(b, dims...);
+}
+
+// The guiding rule for whether two dimensions can be fused is whether the
+// resulting fusion and thus 1D array can be viewed as contiguous in memory.
+//
+// If either inner or outer dimension is a broadcast dimension, they cannot be
+// fused. Broadcast dimensions are represented with a stride of 0, except in the
+// case where extent=1. In this case, stride does not matter.
+//
+// If both dimensions are not broadcasts, it must satisfy the rule:
+//
+//       outer.stride() == inner.extent() * inner.stride()
+//
+inline bool can_fuse_dims(const slinky::dim& inner, const slinky::dim& outer) {
+#if MARIES_INTERPRETATION
+  if (inner.stride() == 0) {
+    // A stride of 0 would indicate a broadcast which we cannot fuse. However,
+    // if the extent is 1, it is actually a scalar and can be fused.
+    return inner.extent() == 1;
+  }
+  if (outer.extent() != 1 && outer.stride() == 0) return false;
+
+#ifdef UNDEFINED_BEHAVIOR_SANITIZER
+  // Some integer overflow below is harmless when multiplied by zero, but
+  // flagged by ubsan.
+  slinky::index_t next_stride =
+      inner.stride() == 0 ? 0 : inner.stride() * inner.extent();
+#else
+  slinky::index_t next_stride =
+      inner.stride() * (inner.max() - inner.min() + 1);
+#endif
+
+  return next_stride == outer.stride();
+#else
+  if (outer.min() == outer.max() && outer.fold_factor() != 0) return true;
+
+#ifdef UNDEFINED_BEHAVIOR_SANITIZER
+  // Some integer overflow below is harmless when multiplied by zero, but
+  // flagged by ubsan.
+  slinky::index_t next_stride =
+      inner.stride() == 0 ? 0 : inner.stride() * inner.extent();
+#else
+  slinky::index_t next_stride =
+      inner.stride() * (inner.max() - inner.min() + 1);
+#endif
+  if (next_stride != outer.stride()) return false;
+
+  return next_stride == 0 || inner.fold_factor() == slinky::dim::unfolded;
+#endif
+}
+
 // Binary kernels only support a single global params object, i.e. it must be
 // globally broadcasted. Currently, the only operation that needs to support
 // non-scalar params is `convert` with non-scalar quantization data.
@@ -148,33 +213,39 @@ auto make_binary_elementwise_impl(binary_kernel_fn kernel,
              slinky::buffer<const void, YNN_MAX_TENSOR_RANK> a,
              slinky::buffer<const void, YNN_MAX_TENSOR_RANK> b,
              slinky::buffer<void, YNN_MAX_TENSOR_RANK> x) -> slinky::index_t {
-    // Try to fuse dimensions where possible.
-    slinky::optimize_dims(x, a, b);
+    slinky::dim a_dims[2], b_dims[2], x_dims[2];
+    for (int i = 0; i < 2; ++i) {
+      a_dims[i] = dim_or_broadcast(a, 0);
+      b_dims[i] = dim_or_broadcast(b, 0);
+      x_dims[i] = dim_or_broadcast(x, 0);
 
-    // We're going to handle the two innermost dimensions with the kernel, or
-    // treat them as broadcasts if there aren't two dimensions.
-    const slinky::dim broadcast(0, 0, 0, 0);
+      // `x` is already a view to the correct tile in the larger output buffer.
+      // Inputs `a` and `b` are not. We must explicitly set their offsets
+      // according to `x` before slicing.
+      if (a.rank > 0) a.slice(0, x_dims[i].min());
+      if (b.rank > 0) b.slice(0, x_dims[i].min());
+      if (x.rank > 0) x.slice(0);
 
-    const slinky::dim& a_n = a.rank > 0 ? a.dim(0) : broadcast;
-    const slinky::dim& b_n = b.rank > 0 ? b.dim(0) : broadcast;
-    const slinky::dim& x_n = x.rank > 0 ? x.dim(0) : broadcast;
-    const slinky::dim& a_m = a.rank > 1 ? a.dim(1) : broadcast;
-    const slinky::dim& b_m = b.rank > 1 ? b.dim(1) : broadcast;
-    const slinky::dim& x_m = x.rank > 1 ? x.dim(1) : broadcast;
+      while (x.rank > 0 && same_bounds(x_dims[i], a_dims[i], b_dims[i]) &&
+             can_fuse_dims(x_dims[i], dim_or_broadcast(x, 0)) &&
+             can_fuse_dims(a_dims[i], dim_or_broadcast(a, 0)) &&
+             can_fuse_dims(b_dims[i], dim_or_broadcast(b, 0))) {
+        a_dims[i] = slinky::fuse(a_dims[i], a.dim(0));
+        b_dims[i] = slinky::fuse(b_dims[i], b.dim(0));
+        x_dims[i] = slinky::fuse(x_dims[i], x.dim(0));
 
-    assert(!a_n.is_folded(x_n));
-    assert(!b_n.is_folded(x_n));
-    assert(!x_n.is_folded());
-    assert(!a_m.is_folded(x_m));
-    assert(!b_m.is_folded(x_m));
-    assert(!x_m.is_folded());
+        if (a.rank > 0) a.slice(0);
+        if (b.rank > 0) b.slice(0);
+        if (x.rank > 0) x.slice(0);
+      }
+    }
 
-    if (a.rank > 0) a.slice(0, x.dim(0).min());
-    if (b.rank > 0) b.slice(0, x.dim(0).min());
-    if (x.rank > 0) x.slice(0);
-    if (a.rank > 0) a.slice(0, x.dim(0).min());
-    if (b.rank > 0) b.slice(0, x.dim(0).min());
-    if (x.rank > 0) x.slice(0);
+    const slinky::dim& a_n = a_dims[0];
+    const slinky::dim& b_n = b_dims[0];
+    const slinky::dim& x_n = x_dims[0];
+    const slinky::dim& a_m = a_dims[1];
+    const slinky::dim& b_m = b_dims[1];
+    const slinky::dim& x_m = x_dims[1];
 
     slinky::for_each_element(
         [&](void* x, const void* a, const void* b) {
