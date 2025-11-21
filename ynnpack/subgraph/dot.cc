@@ -46,6 +46,11 @@ namespace {
 // or other source of CPU metadata. This was determined experimentally.
 constexpr index_t cache_size_l2 = 128 * 1024;
 
+// When we want arithmetic to be consistent, we need to make all tiling
+// decisions independently of any hardware dependent parameters (cache sizes,
+// kernel tile sizes, etc.).
+constexpr index_t consistent_block_n = 64;
+
 // The wrapper for the kernel we use when we actually want to run a dot kernel
 // on some buffers.
 auto make_dot_impl(dot_type type, bool consistent_arithmetic, bool transposed_a,
@@ -362,7 +367,7 @@ auto make_pack_impl(int elem_count) {
 // kernel's block_n.
 uint32_t define_pack_b(ynn_subgraph_t subgraph, const dot_type& type,
                        const dot_kernel& kernel, size_t num_k_dims,
-                       uint32_t input_b_id) {
+                       bool consistent_arithmetic, uint32_t input_b_id) {
   const ynn_value& b = subgraph->value(input_b_id);
 
   ynn_value& packed_b = subgraph->new_internal_value();
@@ -379,12 +384,21 @@ uint32_t define_pack_b(ynn_subgraph_t subgraph, const dot_type& type,
   const index_t elem_size_bits = type_size_bytes(b.type) * 8 / element_count;
   const index_t cache_elements = cache_size_l2 * 8 / elem_size_bits;
 
-  // How many blocks of N fit in the cache?
-  slinky::expr cache_blocks_n = slinky::floor_div<slinky::expr>(
-      cache_elements, kernel.block_n * k1 * k2 * k3);
-  slinky::expr block_n = kernel.block_n * max(1, cache_blocks_n);
+  // When choosing block_n, we have the following concerns:
+  // - We want to make the block bigger than the kernel's `block_n`
+  // - If we want consistent arithmetic: it should be independent of the kernel.
+  const index_t align_block_n =
+      consistent_arithmetic ? consistent_block_n : kernel.block_n;
 
+  // - We want to maximize block_n if the block will fit in cache
+  slinky::expr cache_blocks_n = slinky::floor_div<slinky::expr>(
+      cache_elements, align_block_n * k1 * k2 * k3);
+  slinky::expr block_n = align_block_n * max(1, cache_blocks_n);
+
+  // - We don't want the block to be bigger than n (the number of columns of B).
+  // - We want it to be aligned to a multiple of the kernel's `tile_n`.
   block_n = min(slinky::align_up(n, kernel.tile_n), block_n);
+
   // Make a global variable for the alignment, which is a messy expression,
   // but keep the max outside it, so slinky can learn bounds from it
   // (hacky...).
@@ -833,7 +847,8 @@ ynn_status ynn_define_dot(ynn_subgraph_t subgraph, size_t num_k_dims,
       return status;
     }
   } else {
-    packed_b_id = define_pack_b(subgraph, type, kernel, num_k_dims, input_b_id);
+    packed_b_id = define_pack_b(subgraph, type, kernel, num_k_dims,
+                                consistent_arithmetic, input_b_id);
   }
 
   ynn_node node;
@@ -901,9 +916,15 @@ ynn_status ynn_define_dot(ynn_subgraph_t subgraph, size_t num_k_dims,
     node.inputs[0] = define_transpose_a(*subgraph, kernel.tile_k, input_a_id);
   }
 
-  node.create = [consistent_arithmetic, pack_b, transpose_a,
-                 block_n_unpacked = kernel.block_n](const ynn_node& node,
-                                                    ynn_runtime& runtime) {
+  // If we're using an unpacked kernel, we'll be reading columns of B, make sure
+  // that we read at least a cache line at a time.
+  const int b_elem_size = type_size_bytes(b.type);
+  const int block_n_unpacked = consistent_arithmetic
+                                   ? consistent_block_n
+                                   : std::max(YNN_CACHE_LINE_SIZE / b_elem_size,
+                                              unpacked_kernel.block_n);
+  node.create = [consistent_arithmetic, pack_b, transpose_a, block_n_unpacked](
+                    const ynn_node& node, ynn_runtime& runtime) {
     const ynn_node::dot& op = std::get<ynn_node::dot>(node.op);
     const size_t num_k_dims = op.num_k_dims;
     const ynn_runtime_value& input_a = runtime.value(node.inputs[0]);
