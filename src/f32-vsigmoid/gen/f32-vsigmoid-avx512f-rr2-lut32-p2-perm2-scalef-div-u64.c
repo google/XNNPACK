@@ -175,7 +175,7 @@ void xnn_f32_vsigmoid_ukernel__avx512f_rr2_lut32_p2_perm2_scalef_div_u64(
     batch >>= XNN_LOG2_SIZEOF_FLOAT;
     const __mmask16 vmask = _cvtu32_mask16((uint32_t) ((UINT32_C(1) << batch) - UINT32_C(1)));
 
-    const __m512 vx = _mm512_maskz_loadu_ps(vmask, input);
+    const __m512 vx = _mm512_mask_loadu_ps(_mm512_setzero_ps(), vmask, input);
     const __m512 vz = _mm512_castsi512_ps(_mm512_or_epi32(_mm512_castps_si512(vx), vsign_mask));
 
     __m512 vn = _mm512_fmadd_ps(vz, vlog2e, vmagic_bias);
