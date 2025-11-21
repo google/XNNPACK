@@ -8,9 +8,10 @@
 #include <stdarg.h>
 #include <stdint.h>
 
+// CHANGED: 'weights' type changed to 'int' to satisfy va_start requirements
 enum xnn_fingerprint_id xnn_compute_fingerprint_id_value(
     enum xnn_fingerprint_id_helper op, enum xnn_fingerprint_id_helper in,
-    enum xnn_fingerprint_id_helper out, enum xnn_fingerprint_id_helper weights,
+    enum xnn_fingerprint_id_helper out, int weights,
     ...) {
   uint32_t id = op << XNN_FINGERPRINT_ID_OP_OFFSET |
                 in << XNN_FINGERPRINT_ID_IN_OFFSET |
@@ -19,6 +20,7 @@ enum xnn_fingerprint_id xnn_compute_fingerprint_id_value(
   va_list args;
   va_start(args, weights);
   enum xnn_fingerprint_id_helper flag;
+  // Note: We cast the variadic argument to int when retrieving it
   while ((flag = (enum xnn_fingerprint_id_helper)va_arg(args, int)) != 0) {
     id |= flag;
   }
