@@ -282,4 +282,4 @@ void dot_int8_int8_int32_sme(size_t M, size_t N, size_t K3, size_t K2,
 
 }  // namespace ynn
 
-#endif  // MEMORY_SANITIZER
+#endif  // YNN_DISABLE_SME

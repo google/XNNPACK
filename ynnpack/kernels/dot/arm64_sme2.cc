@@ -14,7 +14,7 @@
 #include "ynnpack/kernels/dot/arm64_sme_internal.h"
 #include "ynnpack/kernels/dot/dot.h"
 
-#ifndef YNN_DISABLE_SME  // b/453644115
+#ifndef YNN_DISABLE_SME
 
 namespace ynn {
 
@@ -258,4 +258,4 @@ void dot_int8_int8_int32_sme2(size_t M, size_t N, size_t K3, size_t K2,
 
 }  // namespace ynn
 
-#endif  // MEMORY_SANITIZER
+#endif  // YNN_DISABLE_SME
