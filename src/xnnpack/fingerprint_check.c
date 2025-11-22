@@ -23,10 +23,45 @@ static enum xnn_status compute_fingerprint(
     const enum xnn_fingerprint_id fingerprint_id) {
   // LINT.IfChange(fingerprint_compute)
   switch (fingerprint_id) {
-    case xnn_fingerprint_id_test_f16_f32_qc8w_example_flag:
+    XNNPACK_FINGERPRINT_FC_OP(f16);
+    XNNPACK_FINGERPRINT_FC_OP(pf16);
+    XNNPACK_FINGERPRINT_FC_OP(qd8, f32, qc2w);
+    XNNPACK_FINGERPRINT_FC_OP(qd8, f16, qc4w);
+    XNNPACK_FINGERPRINT_FC_OP(qdu8, f16, qc4w);
+    XNNPACK_FINGERPRINT_FC_OP(qd8, f16, qb4w);
+    XNNPACK_FINGERPRINT_FC_OP(qd8, f32, qc4w);
+    XNNPACK_FINGERPRINT_FC_OP(qdu8, f32, qc4w);
+    XNNPACK_FINGERPRINT_FC_OP(qp8, f32, qc4w);
+    XNNPACK_FINGERPRINT_FC_OP(qp8, f32, qc8w);
+    XNNPACK_FINGERPRINT_FC_OP(qp8, f32, qb4w);
+    XNNPACK_FINGERPRINT_FC_OP(qd8, f32, qb4w);
+    XNNPACK_FINGERPRINT_FC_OP(qdu8, f32, qb4w);
+    XNNPACK_FINGERPRINT_FC_OP(qd8, f32, qc8w);
+    XNNPACK_FINGERPRINT_FC_OP(qdu8, f32, qc8w);
+    XNNPACK_FINGERPRINT_FC_OP(qd8, f16, qc8w);
+    XNNPACK_FINGERPRINT_FC_OP(qdu8, f16, qc8w);
+    XNNPACK_FINGERPRINT_FC_OP(bf16, f32);
+    XNNPACK_FINGERPRINT_FC_OP(f32);
+    XNNPACK_FINGERPRINT_FC_OP(f32, f32, f32, nr2);
+    XNNPACK_FINGERPRINT_FC_OP(pf32);
+    XNNPACK_FINGERPRINT_FC_OP(f32, qc4w);
+    XNNPACK_FINGERPRINT_FC_OP(f32, qc8w);
+    XNNPACK_FINGERPRINT_FC_OP(qs8);
+    XNNPACK_FINGERPRINT_FC_OP(qs8, qc4w);
+    XNNPACK_FINGERPRINT_FC_OP(qs8, qc8w);
+    XNNPACK_FINGERPRINT_FC_OP(pqs8, qc8w);
+    XNNPACK_FINGERPRINT_FC_OP(qu8);
+    case xnn_fingerprint_id_test_f16_f32_qc8w_nr2:
       xnn_set_fingerprint(
           (struct xnn_fingerprint){.id = fingerprint_id, .value = 0xbadbeef});
       return xnn_status_success;
+    case xnn_fingerprint_id_convolution2d_nchw_f16_f16_f16_conv2d_hwc2chw:
+    case xnn_fingerprint_id_convolution2d_nchw_f16_f16_f16_conv2d_hwc2chw_fp32_static_weights:
+    case xnn_fingerprint_id_convolution2d_nchw_f16_f16_f16_dwconv:
+    case xnn_fingerprint_id_convolution2d_nchw_f16_f16_f16_dwconv_fp32_static_weights:
+    case xnn_fingerprint_id_convolution2d_nchw_f32_f32_f32_dwconv:
+    case xnn_fingerprint_id_convolution2d_nchw_f32_f32_f32_conv2d_hwc2chw:
+      return xnn_fingerprint_convolution2d_nchw(fingerprint_id);
     case xnn_fingerprint_id_unknown:
     case xnn_fingerprint_id_no_fingerprint:
       return xnn_status_unsupported_parameter;

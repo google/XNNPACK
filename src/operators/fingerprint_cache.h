@@ -41,6 +41,9 @@ void finalize_fingerprint_context(struct fingerprint_context* context);
 uint32_t fingerprint_cache_get_fingerprint(
     const struct xnn_weights_cache_provider* provider);
 
+// Fill data with pseudo-random deterministic data.
+void fill_fingerprint_buffer(uint8_t* data, size_t bytes);
+
 #ifdef __cplusplus
 }  // extern "C"
 #endif  // __cplusplus
