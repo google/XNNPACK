@@ -36,7 +36,7 @@ class packer {
   size_t tile_n;
   interleave_kernel_fn interleave_fn = nullptr;
   transpose_kernel_fn transpose_fn = nullptr;
-  transpose_kernel_fn transpose_blocks_fn = nullptr;
+  ynn::transpose_fn transpose_blocks_fn = nullptr;
 };
 
 }  // namespace ynn

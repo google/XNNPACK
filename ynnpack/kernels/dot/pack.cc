@@ -34,13 +34,15 @@ packer::packer(bool transpose, size_t elem_size_bits, size_t tile_m,
     // "bitcasting" the input to have elements that are `tile_m` x larger (and
     // `tile_m` x fewer of them), and then transposing that. (3) is handled by a
     // loop over calls to this kernel below.
+    // Since we're tiling this ourselves, we don't need the added overhead of a
+    // tiled transpose.
     transpose_fn = get_transpose_kernel(elem_size_bits * tile_m);
     assert(transpose_fn);
   } else {
     // We only have (2) and (3).
     if (tile_m == 1) {
       // (2) is a no-op, we only need to do (3). Try to find a kernel for that.
-      transpose_blocks_fn = get_transpose_kernel(elem_size_bits * tile_n);
+      transpose_blocks_fn = get_tiled_transpose(elem_size_bits * tile_n);
     }
     if (!transpose_blocks_fn) {
       // We need to do (2) (or we don't have a kernel for the trivial case).

@@ -68,9 +68,9 @@ auto make_transpose_impl(int rank, size_t elem_count,
       return 0;
     }
 
-    const transpose_kernel_fn ukernel =
-        get_transpose_kernel(output.elem_size * 8 / elem_count);
-    assert(ukernel);
+    const transpose_fn kernel =
+        get_tiled_transpose(output.elem_size * 8 / elem_count);
+    assert(kernel);
 
     const slinky::index_t m = sliced_output.dim(input_dim0).extent();
     const slinky::index_t n = sliced_output.dim(0).extent() * elem_count;
@@ -83,7 +83,7 @@ auto make_transpose_impl(int rank, size_t elem_count,
     const slinky::index_t output_stride =
         sliced_output.dim(input_dim0).stride();
 
-    // Remove the transposed dimensions. These loops are inside the ukernel.
+    // Remove the transposed dimensions. These loops are inside the kernel.
     // We need to slice the input at the min of the output so we get the
     // correct pointers. `for_each_element` handles this for us for the
     // other dimensions. The order here is important because slicing dim0
@@ -94,8 +94,8 @@ auto make_transpose_impl(int rank, size_t elem_count,
     sliced_output.slice({0, static_cast<size_t>(input_dim0)});
 
     slinky::for_each_element(
-        [=](void* out, const void* in) {
-          ukernel(m, n, n_bytes_a, input_stride, in, output_stride, out);
+        [=, &kernel](void* out, const void* in) {
+          kernel(m, n, n_bytes_a, input_stride, in, output_stride, out);
         },
         sliced_output, sliced_input);
 
