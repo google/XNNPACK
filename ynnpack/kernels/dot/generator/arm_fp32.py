@@ -8,6 +8,7 @@ class arm_neon_fp32(arm_neon):
     super().__init__("neon", "fp32", "float", (1, 4, 1))
     self.a_type = "float"
     self.b_type = "float"
+    self.flags += ["dot_flag::consistent_arithmetic"]
 
   def header(self):
     return super().header() + """

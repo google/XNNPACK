@@ -8,6 +8,7 @@ class arm_int8_int8_int32(arm_neon):
     super().__init__(arch, "int8_int8_int32", "int32_t", tile_shape)
     self.a_type = "int8_t"
     self.b_type = "int8_t"
+    self.flags += ["dot_flag::consistent_arithmetic"]
 
 
 class arm_neon_int8_int8_int32(arm_int8_int8_int32):
