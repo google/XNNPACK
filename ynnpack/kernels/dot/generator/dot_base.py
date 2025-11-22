@@ -146,6 +146,8 @@ void {func_name}(
     """Get pointers to a(i, k1) within the current block."""
     ty = ty or self.a_type
     i = f"min({i}, M - 1)" if i != 0 else i
+    if "dot_flag::transpose_a" in self.flags:
+      i, k1 = k1, i
     return f"reinterpret_cast<const {ty}*>(offset_bytes(A_k1, ({i} * A_stride_m) + ({k1} * sizeof({self.a_type}))))"
 
   def b_ptr(self, k1, j, ty=None):
