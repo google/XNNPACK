@@ -339,12 +339,12 @@ def main(args):
 
   with io.StringIO() as microkernels_bzl:
     microkernels_bzl.write('''\
-"""
-Microkernel filenames lists.
-
-Auto-generated file. Do not edit!
-  Generator: tools/update-microkernels.py
-"""
+#
+# Microkernel filenames lists.
+#
+# Auto-generated file. Do not edit!
+#   Generator: tools/update-microkernels.py
+#
 
 ''')
     prod_c_vars_per_arch = dict()
@@ -360,12 +360,12 @@ Auto-generated file. Do not edit!
       arch_microkernels_bzl_filename = key + '_microkernels.bzl'
       with io.StringIO() as arch_microkernels_bzl:
         arch_microkernels_bzl.write(f'''\
-"""
-Microkernel filenames lists for {key}.
-
-Auto-generated file. Do not edit!
-  Generator: tools/update-microkernels.py
-"""
+#
+# Microkernel filenames lists for {key}.
+#
+# Auto-generated file. Do not edit!
+#   Generator: tools/update-microkernels.py
+#
 ''')
         prod_c_vars = write_grouped_microkernels_bzl(
             arch_microkernels_bzl,
