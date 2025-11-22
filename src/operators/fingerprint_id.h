@@ -187,8 +187,10 @@ enum xnn_fingerprint_id {
 //
 // Warning: All calls should have the last variadic argument be 0.
 enum xnn_fingerprint_id xnn_compute_fingerprint_id_value(
-    enum xnn_fingerprint_id_helper op, enum xnn_fingerprint_id_helper in,
-    enum xnn_fingerprint_id_helper out, enum xnn_fingerprint_id_helper weights,
+    enum xnn_fingerprint_id_helper op,
+    enum xnn_fingerprint_id_helper in,
+    enum xnn_fingerprint_id_helper out,
+    int weights, /* Update this line in the header as well */
     ...);
 
 const char* xnn_fingerprint_id_to_string(
