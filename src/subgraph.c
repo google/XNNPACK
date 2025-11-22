@@ -3426,6 +3426,12 @@ static enum xnn_status optimize_common_subgraphs_binary_const_noop(
     }
   }
 
+  // If the constant shape isn't static, there could be a broadcast that
+  // prevents us from knowing the output shape.
+  if ((const_value->flags & XNN_VALUE_FLAG_SHAPE_IS_STATIC) == 0) {
+    return xnn_status_success;
+  }
+
   const enum xnn_binary_operator binary_operator = node->binary_operator;
   const bool const_is_zero = (const_value->flags & XNN_VALUE_FLAG_IS_ZERO) != 0;
   const bool const_is_one = (const_value->flags & XNN_VALUE_FLAG_IS_ONE) != 0;
@@ -3445,39 +3451,36 @@ static enum xnn_status optimize_common_subgraphs_binary_const_noop(
   }
 
   // Otherwise, if this is a `mul(x, 1.0)`, `div(x, 1.0)`, `add(x, 0.0)`, or
-  // `sub(x, 0.0)`. then skip this op.
+  // `sub(x, 0.0)`, then skip this op.
   else if ((const_is_one &&
             (binary_operator == xnn_binary_multiply ||
              (binary_operator == xnn_binary_divide && const_is_rhs))) ||
            (const_is_zero &&
             (binary_operator == xnn_binary_add ||
              (binary_operator == xnn_binary_subtract && const_is_rhs)))) {
-    if (short_circuit(subgraph, input_value->id, node->outputs[0])) {
-      xnn_log_info("Elided spurious %s[#%u](v%03u, %s).",
-                   binary_operator == xnn_binary_multiply ? "mul"
-                   : binary_operator == xnn_binary_divide ? "div"
-                   : binary_operator == xnn_binary_add    ? "add"
-                                                          : "sub",
-                   node->id, input_value->id, const_is_zero ? "0.0" : "1.0");
-      xnn_node_clear(node);
-      (*changes)++;
-    } else if (input_value->flags & XNN_VALUE_FLAG_SHAPE_IS_STATIC &&
-               const_value->flags & XNN_VALUE_FLAG_SHAPE_IS_STATIC) {
-      // If this node cannot be elided, and both input shapes are static, then
-      // try to replace it with a `copy` or `broadcast` of the input value.
-      struct xnn_shape* output_shape = &subgraph->values[node->outputs[0]].shape;
-      XNN_RETURN_IF_ERROR(
-          xnn_shape_binary_broadcast(&input_value->shape, &const_value->shape,
-                                     output_shape),
-          "Incompatible input shapes for %s[#%u](v%03u, %s).",
-          binary_operator == xnn_binary_multiply ? "mul"
-          : binary_operator == xnn_binary_divide ? "div"
-          : binary_operator == xnn_binary_add    ? "add"
-                                                 : "sub",
-          node->id, input_value->id, const_is_zero ? "0.0" : "1.0");
-
-      // If the output shape matches the input shape, just copy the input.
-      if (xnn_shape_match(&input_value->shape, output_shape)) {
+    // We can elide the operation if the constant is a scalar: the scalar is
+    // broadcasted to the shape of the input and the output has the same shape.
+    const bool constant_is_scalar =
+        xnn_shape_multiply_all_dims(&const_value->shape) == 1 &&
+        const_value->shape.num_dims <= input_value->shape.num_dims;
+    // We can elide the operation if the input value and the output value have
+    // the same shape.
+    const bool input_and_output_have_the_same_shape =
+        (input_value->flags & XNN_VALUE_FLAG_SHAPE_IS_STATIC) &&
+        xnn_shape_match(&input_value->shape, &output_value->shape);
+    if (constant_is_scalar || input_and_output_have_the_same_shape) {
+      // We try to elide the operation...
+      if (short_circuit(subgraph, input_value->id, node->outputs[0])) {
+        xnn_log_info("Elided spurious %s[#%u](v%03u, %s).",
+                     binary_operator == xnn_binary_multiply ? "mul"
+                     : binary_operator == xnn_binary_divide ? "div"
+                     : binary_operator == xnn_binary_add    ? "add"
+                                                            : "sub",
+                     node->id, input_value->id, const_is_zero ? "0.0" : "1.0");
+        xnn_node_clear(node);
+        (*changes)++;
+      } else {
+        // ... if it fails, input and output have the same shape so we can copy.
         XNN_RETURN_IF_ERROR(xnn_define_copy(subgraph, input_value->id,
                                             node->outputs[0], node->flags),
                             "Failed to create new `Copy` node.");
@@ -3490,28 +3493,8 @@ static enum xnn_status optimize_common_subgraphs_binary_const_noop(
                                                    : "sub",
             node->id, input_value->id, const_is_zero ? "0.0" : "1.0", node_id,
             input_value->id);
+        (*changes)++;
       }
-
-      // Otherwise, we need to broadcast the input to the output shape.
-      else {
-        XNN_RETURN_IF_ERROR(
-            xnn_define_static_broadcast(subgraph, output_shape->num_dims,
-                                        output_shape->dim, input_value->id,
-                                        node->outputs[0],
-                                        node->flags),
-            "Failed to create new `Broadcast` node.");
-        node = move_last_node_to(subgraph, node_id);
-        xnn_log_info(
-            "Replaced spurious %s[#%u](v%03u, %s) with "
-            "static_broadcast[#%u](v%03u).",
-            binary_operator == xnn_binary_multiply ? "mul"
-            : binary_operator == xnn_binary_divide ? "div"
-            : binary_operator == xnn_binary_add    ? "add"
-                                                   : "sub",
-            node->id, input_value->id, const_is_zero ? "0.0" : "1.0", node_id,
-            input_value->id);
-      }
-      (*changes)++;
     }
   }
 
@@ -3636,10 +3619,29 @@ static enum xnn_status optimize_common_subgraphs_iter(
                                       XNN_VALUE_FLAG_SHAPE_IS_STATIC) != 0;
     }
     if (all_input_shapes_are_static) {
-      for (int k = 0; k < node->num_outputs; k++) {
-        subgraph->values[node->outputs[k]].flags |=
-            XNN_VALUE_FLAG_SHAPE_IS_STATIC;
+      // Propagate static shapes for nodes for which we know how to do so.
+      switch (node->type) {
+        case xnn_node_type_unary_elementwise:
+          // Unary elementwise ops output always have the same shape as their
+          // input.
+          subgraph->values[node->outputs[0]].shape =
+              subgraph->values[node->inputs[0]].shape;
+          subgraph->values[node->outputs[0]].flags |=
+              XNN_VALUE_FLAG_SHAPE_IS_STATIC;
+          break;
+        case xnn_node_type_binary_elementwise:
+          // Compute the broadcasted output size of binary elementwise ops.
+          xnn_shape_binary_broadcast(&subgraph->values[node->inputs[0]].shape,
+                                     &subgraph->values[node->inputs[1]].shape,
+                                     &subgraph->values[node->outputs[0]].shape);
+          subgraph->values[node->outputs[0]].flags |=
+              XNN_VALUE_FLAG_SHAPE_IS_STATIC;
+          break;
+        default:
+          // We don't reshape outputs and don't mark their shapes as static.
+          break;
       }
+      // TODO: b/455537016 - expand to other know node types.
     }
 
     // Propagate constants through constant-preserving ops.
