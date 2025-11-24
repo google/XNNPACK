@@ -148,3 +148,41 @@ dependencies. To check out the code:
    ]
    ```
 4. Run `gclient sync` to get the source.
+
+### Configuring
+
+GN builds live alongside their configuration in a directory like `out/Default`.
+To configure a build:
+
+1. Enter build arguments with 
+   ```sh
+   gn args out/Default
+   ```
+   GN will open your preferred text editor.
+2. Enter the build configuration, for example:
+   ```gn
+   # Build in release mode
+   is_debug=false
+   target_cpu="x64"
+   xnnpack_enable_avx512=false
+   use_siso=true
+   use_remoteexec=false
+   ```
+3. Save and close the file. GN will generate the appropriate build files.
+
+To see all possible build arguments and what they're currently set to, use
+`gn args --list out/Default`. Not all of the arguments listed will affect
+XNNPACK.
+
+If you need to recreate your build files, GN will usually do this itself. If you
+want to do it manually, `gn gen out/Default` will do that. To delete the build 
+files, and all object files use `gn clean out/Default`
+
+Directories that are not like `out/Default` might work, but are not supported.
+
+### Building
+
+To build all targets, run
+```sh
+  autoninja -C out/Default
+```
