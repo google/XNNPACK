@@ -85,7 +85,7 @@ class half {
   bool is_zero() const {
     // Check for +/- zero (0x0000/0x8000). uint16 overflow is well defined to
     // wrap around.
-    return bits_ * 2 == 0;
+    return static_cast<uint16_t>(bits_ * 2) == 0;
   }
 
   static constexpr half epsilon() {

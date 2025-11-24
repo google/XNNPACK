@@ -77,3 +77,15 @@ cc_test(
         ":tensor",
     ] + ynn_test_deps(),
 )
+
+cc_test(
+    name = "float_test",
+    srcs = ["float_test.cc"],
+    linkopts = ynn_binary_linkopts(),
+    malloc = ynn_binary_malloc(),
+    deps = [
+        ":fuzz_test",
+        ":random",
+        "//ynnpack/base",
+    ] + ynn_test_deps(),
+)
