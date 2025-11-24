@@ -821,6 +821,7 @@ xnnpack_cc_library(
         ":fingerprint_cache",
         ":fingerprint_id",
         ":indirection",
+        ":init_once",
         ":internal",
         ":logging",
         ":math",
@@ -830,12 +831,13 @@ xnnpack_cc_library(
         ":microkernel_utils",
         ":microparams_h",
         ":microparams_init",
+        ":mutex",
         ":node_type",
         ":normalization",
-        ":operator_delete",
+        ":operator_delete",  # build_cleaner: keep
         ":operator_type",
         ":operator_utils",
-        ":pack_lh",
+        ":pack_lh",  # build_cleaner: keep
         ":packing",
         ":params",
         ":quantization",
@@ -844,7 +846,7 @@ xnnpack_cc_library(
         ":xnnpack_h",
         "//src/configs:config_hdrs",
         "//src/configs:hardware_config",
-        "//src/configs:microkernel_configs",
+        "//src/configs:microkernel_configs",  # build_cleaner: keep
         "@pthreadpool",
     ],
 )
