@@ -41,11 +41,11 @@ packer::packer(bool transpose, size_t elem_size_bits, size_t tile_m,
   } else {
     // We only have (2) and (3).
     if (tile_m == 1) {
-      // (2) is a no-op, we only need to do (3). Try to find a kernel for that.
+      // (2) is a no-op, we only need to do (3).
       transpose_blocks_fn = get_tiled_transpose(elem_size_bits * tile_n);
-    }
-    if (!transpose_blocks_fn) {
-      // We need to do (2) (or we don't have a kernel for the trivial case).
+      assert(transpose_blocks_fn);
+    } else {
+      // We need to do (2).
       // We're interleaving rows of the input to produce rows of the output.
       interleave_fn = get_interleave_kernel(elem_size_bits, tile_m);
       assert(interleave_fn);

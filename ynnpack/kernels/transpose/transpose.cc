@@ -23,8 +23,8 @@ namespace ynn {
 
 namespace {
 
-void transpose(size_t m, size_t n, size_t n_bytes_a, size_t stride_a,
-               const uint4x2* a, size_t stride_x, uint4x2* x) {
+void transpose_x4(size_t m, size_t n, size_t n_bytes_a, size_t stride_a,
+                  const uint4x2* a, size_t stride_x, uint4x2* x) {
   assert(m % 2 == 0);
   assert(n % 2 == 0);
   // Handle the in bounds columns first.
@@ -47,33 +47,33 @@ void transpose(size_t m, size_t n, size_t n_bytes_a, size_t stride_a,
 
 void transpose_x4(size_t m, size_t n, size_t n_bytes_a, size_t stride_a,
                   const void* a, size_t stride_x, void* x) {
-  transpose(m, n, n_bytes_a, stride_a, static_cast<const uint4x2*>(a), stride_x,
-            static_cast<uint4x2*>(x));
+  transpose_x4(m, n, n_bytes_a, stride_a, static_cast<const uint4x2*>(a),
+               stride_x, static_cast<uint4x2*>(x));
 }
 void transpose_x8(size_t m, size_t n, size_t n_bytes_a, size_t stride_a,
                   const void* a, size_t stride_x, void* x) {
   transpose(m, n, n_bytes_a, stride_a, a, stride_x, x,
-            std::integral_constant<size_t, 8>{});
+            std::integral_constant<size_t, 1>{});
 }
 void transpose_x16(size_t m, size_t n, size_t n_bytes_a, size_t stride_a,
                    const void* a, size_t stride_x, void* x) {
   transpose(m, n, n_bytes_a, stride_a, a, stride_x, x,
-            std::integral_constant<size_t, 16>{});
+            std::integral_constant<size_t, 2>{});
 }
 void transpose_x32(size_t m, size_t n, size_t n_bytes_a, size_t stride_a,
                    const void* a, size_t stride_x, void* x) {
   transpose(m, n, n_bytes_a, stride_a, a, stride_x, x,
-            std::integral_constant<size_t, 32>{});
+            std::integral_constant<size_t, 4>{});
 }
 void transpose_x64(size_t m, size_t n, size_t n_bytes_a, size_t stride_a,
                    const void* a, size_t stride_x, void* x) {
   transpose(m, n, n_bytes_a, stride_a, a, stride_x, x,
-            std::integral_constant<size_t, 64>{});
+            std::integral_constant<size_t, 8>{});
 }
 void transpose_x128(size_t m, size_t n, size_t n_bytes_a, size_t stride_a,
                     const void* a, size_t stride_x, void* x) {
   transpose(m, n, n_bytes_a, stride_a, a, stride_x, x,
-            std::integral_constant<size_t, 128>{});
+            std::integral_constant<size_t, 16>{});
 }
 
 transpose_kernel_fn get_transpose_kernel(size_t element_size_bits) {
@@ -85,6 +85,12 @@ transpose_kernel_fn get_transpose_kernel(size_t element_size_bits) {
   }
 #include "ynnpack/kernels/transpose/transpose.inc"
 #undef YNN_TRANSPOSE_KERNEL
+  // TODO(dsharlet): There is currently a bit of a wart here in that
+  // `get_transpose_kernel` can fail for element sizes we don't have a kernel
+  // for, but `get_tiled_tranpose` always works because it returns a call to
+  // `transpose` with a runtime valued element wise. We could do that here, but
+  // we'd have to return `transpose_fn` (std::function) instead of
+  // `transpose_kernel_fn` (a function pointer).
   YNN_LOG_DEBUG() << "Unsupported transpose of " << element_size_bits
                   << "-bit elements.";
   return nullptr;
@@ -126,9 +132,20 @@ transpose_fn make_tiled_transpose(size_t elem_size_bits,
 
 transpose_fn get_tiled_transpose(size_t elem_size_bits) {
   transpose_kernel_fn transpose_fn = get_transpose_kernel(elem_size_bits);
-  if (!transpose_fn) return nullptr;
-
-  return make_tiled_transpose(elem_size_bits, transpose_fn);
+  if (transpose_fn) {
+    return make_tiled_transpose(elem_size_bits, transpose_fn);
+  } else if (elem_size_bits % 8 == 0) {
+    // TODO(dsharlet): Tiling might be helpful here too, but hopefully we are
+    // only hitting this case when elem_size_bits is very large, and the
+    // overhead of calling memcpy is insignificant.
+    return [elem_size = elem_size_bits / 8](
+               size_t m, size_t n, size_t n_bytes_a, size_t stride_a,
+               const void* a, size_t stride_x, void* x) {
+      return transpose(m, n, n_bytes_a, stride_a, a, stride_x, x, elem_size);
+    };
+  } else {
+    return nullptr;
+  }
 }
 
 }  // namespace ynn
