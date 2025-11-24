@@ -98,15 +98,15 @@ void xnn_s8_maxpool_minmax_ukernel_9p__sse41_u16(
       xnn_storeu_s8(o, vacc); o += 16;
     }
     if (c > 0) {
-      const xnn_simd_s8_t vi0 = xnn_load_tail_impl(i0, c);
-      const xnn_simd_s8_t vi1 = xnn_load_tail_impl(i1, c);
-      const xnn_simd_s8_t vi2 = xnn_load_tail_impl(i2, c);
-      const xnn_simd_s8_t vi3 = xnn_load_tail_impl(i3, c);
-      const xnn_simd_s8_t vi4 = xnn_load_tail_impl(i4, c);
-      const xnn_simd_s8_t vi5 = xnn_load_tail_impl(i5, c);
-      const xnn_simd_s8_t vi6 = xnn_load_tail_impl(i6, c);
-      const xnn_simd_s8_t vi7 = xnn_load_tail_impl(i7, c);
-      const xnn_simd_s8_t vi8 = xnn_load_tail_impl(i8, c);
+      const xnn_simd_s8_t vi0 = xnn_load_tail_safe_impl(i0, c);
+      const xnn_simd_s8_t vi1 = xnn_load_tail_safe_impl(i1, c);
+      const xnn_simd_s8_t vi2 = xnn_load_tail_safe_impl(i2, c);
+      const xnn_simd_s8_t vi3 = xnn_load_tail_safe_impl(i3, c);
+      const xnn_simd_s8_t vi4 = xnn_load_tail_safe_impl(i4, c);
+      const xnn_simd_s8_t vi5 = xnn_load_tail_safe_impl(i5, c);
+      const xnn_simd_s8_t vi6 = xnn_load_tail_safe_impl(i6, c);
+      const xnn_simd_s8_t vi7 = xnn_load_tail_safe_impl(i7, c);
+      const xnn_simd_s8_t vi8 = xnn_load_tail_safe_impl(i8, c);
 
       const xnn_simd_s8_t vmax018 = xnn_max_s8(xnn_max_s8(vi0, vi1), vi8);
       const xnn_simd_s8_t vmax23 = xnn_max_s8(vi2, vi3);
@@ -179,15 +179,15 @@ void xnn_s8_maxpool_minmax_ukernel_9p__sse41_u16(
         xnn_storeu_s8(o, vacc); o += 16;
       }
       if (c > 0) {
-        const xnn_simd_s8_t vi0 = xnn_load_tail_impl(i0, c);
-        const xnn_simd_s8_t vi1 = xnn_load_tail_impl(i1, c);
-        const xnn_simd_s8_t vi2 = xnn_load_tail_impl(i2, c);
-        const xnn_simd_s8_t vi3 = xnn_load_tail_impl(i3, c);
-        const xnn_simd_s8_t vi4 = xnn_load_tail_impl(i4, c);
-        const xnn_simd_s8_t vi5 = xnn_load_tail_impl(i5, c);
-        const xnn_simd_s8_t vi6 = xnn_load_tail_impl(i6, c);
-        const xnn_simd_s8_t vi7 = xnn_load_tail_impl(i7, c);
-        const xnn_simd_s8_t vi8 = xnn_load_tail_impl(i8, c);
+        const xnn_simd_s8_t vi0 = xnn_load_tail_safe_impl(i0, c);
+        const xnn_simd_s8_t vi1 = xnn_load_tail_safe_impl(i1, c);
+        const xnn_simd_s8_t vi2 = xnn_load_tail_safe_impl(i2, c);
+        const xnn_simd_s8_t vi3 = xnn_load_tail_safe_impl(i3, c);
+        const xnn_simd_s8_t vi4 = xnn_load_tail_safe_impl(i4, c);
+        const xnn_simd_s8_t vi5 = xnn_load_tail_safe_impl(i5, c);
+        const xnn_simd_s8_t vi6 = xnn_load_tail_safe_impl(i6, c);
+        const xnn_simd_s8_t vi7 = xnn_load_tail_safe_impl(i7, c);
+        const xnn_simd_s8_t vi8 = xnn_load_tail_safe_impl(i8, c);
         const xnn_simd_s8_t vprev = xnn_load_tail_safe_impl(o, c);
 
         const xnn_simd_s8_t vmax018 = xnn_max_s8(xnn_max_s8(vi0, vi1), vi8);

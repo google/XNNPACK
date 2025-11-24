@@ -104,7 +104,7 @@ $elif DATATYPE == "f16" and ARCH != "neonfp16arith":
     $if SIMD_SIZE > 1:
       if (c > 0) {
         $for K in range(9):
-          const xnn_simd_${DATATYPE_IMPL}_t vi${K} = xnn_load_tail_impl(i${K}, c);
+          const xnn_simd_${DATATYPE_IMPL}_t vi${K} = xnn_load_tail_safe_impl(i${K}, c);
 
         const xnn_simd_${DATATYPE_IMPL}_t vmax018 = xnn_max_${DATATYPE_IMPL}(xnn_max_${DATATYPE_IMPL}(vi0, vi1), vi8);
         const xnn_simd_${DATATYPE_IMPL}_t vmax23 = xnn_max_${DATATYPE_IMPL}(vi2, vi3);
@@ -159,7 +159,7 @@ $elif DATATYPE == "f16" and ARCH != "neonfp16arith":
       $if SIMD_SIZE > 1:
         if (c > 0) {
           $for K in range(9):
-            const xnn_simd_${DATATYPE_IMPL}_t vi${K} = xnn_load_tail_impl(i${K}, c);
+            const xnn_simd_${DATATYPE_IMPL}_t vi${K} = xnn_load_tail_safe_impl(i${K}, c);
           const xnn_simd_${DATATYPE_IMPL}_t vprev = xnn_load_tail_safe_impl(o, c);
 
           const xnn_simd_${DATATYPE_IMPL}_t vmax018 = xnn_max_${DATATYPE_IMPL}(xnn_max_${DATATYPE_IMPL}(vi0, vi1), vi8);
