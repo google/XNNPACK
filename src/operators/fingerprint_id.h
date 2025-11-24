@@ -179,17 +179,18 @@ enum xnn_fingerprint_id {
       XNN_FINGERPRINT_ID_VALUE(unknown, unknown, unknown, unknown),
   xnn_fingerprint_id_no_fingerprint =
       XNN_FINGERPRINT_ID_VALUE(no_fingerprint, unknown, unknown, unknown),
-// LINT.ThenChange(../xnnpack/fingerprint_check.c:fingerprint_compute)
 #undef XNN_FINGERPRINT_ID
 };
 
 // Computes the fingerprint id value from the given helper values.
 //
 // Warning: All calls should have the last variadic argument be 0.
+//
+// Note: `weights` is defined as an `uint32_t` because variadic lists in C must
+// start with a type that doesn't go through integral promotion.
 enum xnn_fingerprint_id xnn_compute_fingerprint_id_value(
     enum xnn_fingerprint_id_helper op, enum xnn_fingerprint_id_helper in,
-    enum xnn_fingerprint_id_helper out, enum xnn_fingerprint_id_helper weights,
-    ...);
+    enum xnn_fingerprint_id_helper out, uint32_t weights, ...);
 
 const char* xnn_fingerprint_id_to_string(
     enum xnn_fingerprint_id fingerprint_id);
