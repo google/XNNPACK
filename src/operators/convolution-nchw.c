@@ -1,9 +1,10 @@
-// Copyright 2019 Google LLC
+// Copyright 2019-2025 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
 #include <assert.h>
+#include <float.h>
 #include <inttypes.h>
 #include <math.h>
 #include <stddef.h>
@@ -12,6 +13,8 @@
 #include <string.h>
 
 #include "include/xnnpack.h"
+#include "src/operators/fingerprint_cache.h"
+#include "src/operators/fingerprint_id.h"
 #include "src/xnnpack/allocator.h"
 #include "src/xnnpack/cache.h"
 #include "src/xnnpack/common.h"
@@ -436,6 +439,81 @@ static const struct conv2d_variant f32_conv = {
   .init_dwconv = init_dwconv_f32,
 };
 
+static enum xnn_status select_convolution2d_ukernel(
+    enum xnn_microkernel_type* ukernel_type,
+    const struct xnn_dwconv2d_chw_parameters** dwconv2d_parameters,
+    uint32_t input_padding_top, uint32_t input_padding_right,
+    uint32_t input_padding_bottom, uint32_t input_padding_left,
+    uint32_t kernel_height, uint32_t kernel_width, uint32_t subsampling_height,
+    uint32_t subsampling_width, uint32_t dilation_height,
+    uint32_t dilation_width, uint32_t groups, size_t group_input_channels,
+    size_t group_output_channels, uint32_t flags,
+    const struct xnn_dwconv2d_chw_config* dwconv2d_chw_config,
+    const enum xnn_operator_type operator_type) {
+  // Common features used to decide which parameters to select.
+  const bool any_padding = (input_padding_left | input_padding_top |
+                            input_padding_right | input_padding_bottom) != 0;
+  const bool is_1x1 = kernel_width == 1 && kernel_height == 1 &&
+                      subsampling_height == 1 && subsampling_width == 1;
+  const bool is_3x3 = kernel_width == 3 && kernel_height == 3 &&
+                      dilation_height == 1 && dilation_width == 1;
+  const bool is_5x5 = kernel_width == 5 && kernel_height == 5 &&
+                      dilation_height == 1 && dilation_width == 1;
+  const bool nhwc_input = (flags & XNN_FLAG_INPUT_NHWC) != 0;
+  if (is_1x1 && !any_padding && !nhwc_input && groups == 1) {
+    *ukernel_type = xnn_microkernel_type_spmm;
+  } else if (is_3x3 && subsampling_height == 2 && subsampling_width == 2 &&
+             input_padding_top == 1 && input_padding_left == 1 &&
+             input_padding_bottom == 1 && input_padding_right == 1 &&
+             nhwc_input && groups == 1) {
+    *ukernel_type = xnn_microkernel_type_conv2d_hwc2chw;
+  } else if (is_3x3 && subsampling_height == 1 && subsampling_width == 1 &&
+             input_padding_top == 1 && input_padding_left == 1 &&
+             input_padding_bottom == 1 && input_padding_right == 1 &&
+             !nhwc_input && group_input_channels == 1 &&
+             group_output_channels == 1) {
+    *ukernel_type = xnn_microkernel_type_dwconv;
+    *dwconv2d_parameters = &dwconv2d_chw_config->dwconv2d_chw_3x3;
+  } else if (is_3x3 && subsampling_height == 2 && subsampling_width == 2 &&
+             (input_padding_top == 0 || input_padding_top == 1) &&
+             input_padding_left == 1 && input_padding_bottom == 1 &&
+             input_padding_right == 1 && !nhwc_input &&
+             group_input_channels == 1 && group_output_channels == 1) {
+    *ukernel_type = xnn_microkernel_type_dwconv;
+    *dwconv2d_parameters = &dwconv2d_chw_config->dwconv2d_chw_3x3s2;
+  } else if (is_5x5 && subsampling_height == 1 && subsampling_width == 1 &&
+             input_padding_top == 2 && input_padding_left == 2 &&
+             input_padding_bottom == 2 && input_padding_right == 2 &&
+             !nhwc_input && group_input_channels == 1 &&
+             group_output_channels == 1) {
+    *ukernel_type = xnn_microkernel_type_dwconv;
+    *dwconv2d_parameters = &dwconv2d_chw_config->dwconv2d_chw_5x5;
+  } else if (is_5x5 && subsampling_height == 2 && subsampling_width == 2 &&
+             (input_padding_top == 1 || input_padding_top == 2) &&
+             input_padding_left == 2 && input_padding_bottom == 2 &&
+             input_padding_right == 2 && !nhwc_input &&
+             group_input_channels == 1 && group_output_channels == 1) {
+    *ukernel_type = xnn_microkernel_type_dwconv;
+    *dwconv2d_parameters = &dwconv2d_chw_config->dwconv2d_chw_5x5s2;
+  } else {
+    xnn_log_error("failed to create %s operator with %" PRIu32 "x%" PRIu32
+                  " kernel, %" PRIu32 "x%" PRIu32 " subsampling, %" PRIu32
+                  "x%" PRIu32
+                  " dilation"
+                  ", %" PRIu32 "+%" PRIu32 "x%" PRIu32 "+%" PRIu32
+                  " padding, %" PRIu32 "x%zu input channels, and %" PRIu32
+                  "x%zu output channels: "
+                  "only selected convolution parameters are supported",
+                  xnn_operator_type_to_string(operator_type), kernel_width,
+                  kernel_height, subsampling_width, subsampling_height,
+                  dilation_width, dilation_height, input_padding_top,
+                  input_padding_left, input_padding_bottom, input_padding_right,
+                  groups, group_input_channels, groups, group_output_channels);
+    return xnn_status_unsupported_parameter;
+  }
+  return xnn_status_success;
+}
+
 static enum xnn_status create_convolution2d_nchw(
     const struct conv2d_variant* variant,
     uint32_t input_padding_top,
@@ -606,66 +684,15 @@ static enum xnn_status create_convolution2d_nchw(
     goto error;
   }
 
-  status = xnn_status_unsupported_parameter;
-
   enum xnn_microkernel_type ukernel_type;
   const struct xnn_dwconv2d_chw_parameters* dwconv2d_parameters = NULL;
-  // Supported cases:
-  // + 1x1 convolution (no groups)
-  // + 3x3 stride-2 with 3 input channels and NHWC input layout
-  // + 3x3 stride-2 depthwise convolution with horizontal padding 1 & no vertical padding
-  // + 3x3 stride-1 depthwise convolution with horizontal padding 1 & no vertical padding
-  // + 5x5 stride-2 depthwise convolution with horizontal padding 2 & no vertical padding
-  // + 5x5 stride-1 depthwise convolution with horizontal padding 2 & no vertical padding
-  const bool any_padding = (input_padding_left | input_padding_top | input_padding_right | input_padding_bottom) != 0;
-  const bool is_1x1 = kernel_width == 1 && kernel_height == 1 && subsampling_height == 1 && subsampling_width == 1;
-  const bool is_3x3 = kernel_width == 3 && kernel_height == 3 && dilation_height == 1 && dilation_width == 1;
-  const bool is_5x5 = kernel_width == 5 && kernel_height == 5 && dilation_height == 1 && dilation_width == 1;
-  const bool nhwc_input = (flags & XNN_FLAG_INPUT_NHWC) != 0;
-  if (is_1x1 && !any_padding && !nhwc_input && groups == 1) {
-    ukernel_type = xnn_microkernel_type_spmm;
-  } else if (is_3x3 && subsampling_height == 2 && subsampling_width == 2 &&
-    input_padding_top == 1 && input_padding_left == 1 && input_padding_bottom == 1 && input_padding_right == 1 &&
-    nhwc_input && groups == 1)
-  {
-    ukernel_type = xnn_microkernel_type_conv2d_hwc2chw;
-  } else if (is_3x3 && subsampling_height == 1 && subsampling_width == 1 &&
-    input_padding_top == 1 && input_padding_left == 1 && input_padding_bottom == 1 && input_padding_right == 1 &&
-    !nhwc_input && group_input_channels == 1 && group_output_channels == 1)
-  {
-    ukernel_type = xnn_microkernel_type_dwconv;
-    dwconv2d_parameters = &dwconv2d_chw_config->dwconv2d_chw_3x3;
-  } else if (is_3x3 && subsampling_height == 2 && subsampling_width == 2 &&
-    (input_padding_top == 0 || input_padding_top == 1) && input_padding_left == 1 && input_padding_bottom == 1 && input_padding_right == 1 &&
-    !nhwc_input && group_input_channels == 1 && group_output_channels == 1)
-  {
-    ukernel_type = xnn_microkernel_type_dwconv;
-    dwconv2d_parameters = &dwconv2d_chw_config->dwconv2d_chw_3x3s2;
-  } else if (is_5x5 && subsampling_height == 1 && subsampling_width == 1 &&
-    input_padding_top == 2 && input_padding_left == 2 && input_padding_bottom == 2 && input_padding_right == 2 &&
-    !nhwc_input && group_input_channels == 1 && group_output_channels == 1)
-  {
-    ukernel_type = xnn_microkernel_type_dwconv;
-    dwconv2d_parameters = &dwconv2d_chw_config->dwconv2d_chw_5x5;
-  } else if (is_5x5 && subsampling_height == 2 && subsampling_width == 2 &&
-    (input_padding_top == 1 || input_padding_top == 2) && input_padding_left == 2 && input_padding_bottom == 2 && input_padding_right == 2 &&
-    !nhwc_input && group_input_channels == 1 && group_output_channels == 1)
-  {
-    ukernel_type = xnn_microkernel_type_dwconv;
-    dwconv2d_parameters = &dwconv2d_chw_config->dwconv2d_chw_5x5s2;
-  } else {
-    xnn_log_error("failed to create %s operator with %" PRIu32 "x%" PRIu32
-                  " kernel, %" PRIu32 "x%" PRIu32 " subsampling, %" PRIu32
-                  "x%" PRIu32 " dilation, %" PRIu32 "+%" PRIu32 "x%" PRIu32
-                  "+%" PRIu32 " padding, %" PRIu32
-                  "x%zu input channels, and %" PRIu32
-                  "x%zu output channels: only selected convolution parameters "
-                  "are supported",
-                  xnn_operator_type_to_string(operator_type), kernel_width,
-                  kernel_height, subsampling_width, subsampling_height,
-                  dilation_width, dilation_height, input_padding_top,
-                  input_padding_left, input_padding_bottom, input_padding_right,
-                  groups, group_input_channels, groups, group_output_channels);
+  status = select_convolution2d_ukernel(
+      &ukernel_type, &dwconv2d_parameters, input_padding_top,
+      input_padding_right, input_padding_bottom, input_padding_left,
+      kernel_height, kernel_width, subsampling_height, subsampling_width,
+      dilation_height, dilation_width, groups, group_input_channels,
+      group_output_channels, flags, dwconv2d_chw_config, operator_type);
+  if (status != xnn_status_success) {
     goto error;
   }
 
@@ -786,6 +813,272 @@ error:
   return status;
 }
 
+struct fingerprint_parameters {
+  uint32_t kernel_width;
+  uint32_t kernel_height;
+  uint32_t dilation_height;
+  uint32_t dilation_width;
+  uint32_t subsampling_height;
+  uint32_t subsampling_width;
+  uint32_t input_padding_top;
+  uint32_t input_padding_left;
+  uint32_t input_padding_bottom;
+  uint32_t input_padding_right;
+  uint32_t groups;
+  uint32_t group_input_channels;
+  uint32_t group_output_channels;
+  uint32_t input_channel_stride;
+  uint32_t output_channel_stride;
+  uint32_t flags;
+};
+
+static const struct fingerprint_parameters
+    fingerprint_parameters_conv2d_hwc2chw = {
+        .kernel_width = 3,
+        .kernel_height = 3,
+        .dilation_height = 1,
+        .dilation_width = 1,
+        .subsampling_height = 2,
+        .subsampling_width = 2,
+        .input_padding_top = 1,
+        .input_padding_left = 1,
+        .input_padding_bottom = 1,
+        .input_padding_right = 1,
+        .groups = 1,
+        .group_input_channels = 3,
+        .group_output_channels = 1,
+        .input_channel_stride = 3,
+        .output_channel_stride = 1,
+        .flags = XNN_FLAG_INPUT_NHWC,
+};
+
+static const struct fingerprint_parameters
+    fingerprint_parameters_conv2d_hwc2chw_fp32_static_weights = {
+        .kernel_width = 3,
+        .kernel_height = 3,
+        .dilation_height = 1,
+        .dilation_width = 1,
+        .subsampling_height = 2,
+        .subsampling_width = 2,
+        .input_padding_top = 1,
+        .input_padding_left = 1,
+        .input_padding_bottom = 1,
+        .input_padding_right = 1,
+        .groups = 1,
+        .group_input_channels = 3,
+        .group_output_channels = 1,
+        .input_channel_stride = 3,
+        .output_channel_stride = 1,
+        .flags = XNN_FLAG_INPUT_NHWC | XNN_FLAG_FP32_STATIC_WEIGHTS,
+};
+
+static const struct fingerprint_parameters fingerprint_parameters_dwconv = {
+    .kernel_width = 3,
+    .kernel_height = 3,
+    .dilation_height = 1,
+    .dilation_width = 1,
+    .subsampling_height = 1,
+    .subsampling_width = 1,
+    .input_padding_top = 1,
+    .input_padding_left = 1,
+    .input_padding_bottom = 1,
+    .input_padding_right = 1,
+    .groups = 1,
+    .group_input_channels = 1,
+    .group_output_channels = 1,
+    .input_channel_stride = 1,
+    .output_channel_stride = 1,
+    .flags = 0,
+};
+
+static const struct fingerprint_parameters
+    fingerprint_parameters_dwconv_fp32_static_weights = {
+        .kernel_width = 3,
+        .kernel_height = 3,
+        .dilation_height = 1,
+        .dilation_width = 1,
+        .subsampling_height = 1,
+        .subsampling_width = 1,
+        .input_padding_top = 1,
+        .input_padding_left = 1,
+        .input_padding_bottom = 1,
+        .input_padding_right = 1,
+        .groups = 1,
+        .group_input_channels = 1,
+        .group_output_channels = 1,
+        .input_channel_stride = 1,
+        .output_channel_stride = 1,
+        .flags = XNN_FLAG_FP32_STATIC_WEIGHTS,
+};
+
+struct fingerprint_buffers {
+  void* data;
+  void* kernel;
+  void* bias;
+};
+
+// Returns the given `buffer` pointer, then advances it by `bytes` bytes,
+// rounded up to `XNN_ALLOCATION_ALIGNMENT`.
+static void* get_and_advance_simd_buffer(uint8_t** buffer, size_t bytes) {
+  uint8_t* const res = *buffer;
+  *buffer += bytes + (XNN_ALLOCATION_ALIGNMENT - (bytes % XNN_ALLOCATION_ALIGNMENT));
+  return res;
+};
+
+static struct fingerprint_buffers generate_fingerprint_data(
+    const struct fingerprint_parameters* params, const size_t element_size) {
+  const size_t kernel_size = params->kernel_width * params->kernel_height *
+                             params->group_input_channels *
+                             params->group_output_channels * params->groups;
+  const size_t bias_size = params->group_output_channels * params->groups;
+  const size_t bytes = (kernel_size + bias_size) * element_size + XNN_ALLOCATION_ALIGNMENT * 1;
+  uint8_t* buffer = xnn_allocate_simd_memory(bytes);
+  fill_fingerprint_buffer(buffer, bytes);
+  return (struct fingerprint_buffers){
+      .data = buffer,
+      .kernel = get_and_advance_simd_buffer(&buffer, kernel_size),
+      .bias = get_and_advance_simd_buffer(&buffer, bias_size),
+  };
+}
+
+enum xnn_status xnn_fingerprint_convolution2d_nchw(
+    const enum xnn_fingerprint_id fingerprint_id) {
+  struct fingerprint_parameters params;
+  const struct conv2d_variant* variant = NULL;
+  switch (fingerprint_id) {
+    case xnn_fingerprint_id_no_fingerprint:
+      return xnn_status_success;
+    case xnn_fingerprint_id_convolution2d_nchw_f16_f16_f16_conv2d_hwc2chw:
+      params = fingerprint_parameters_conv2d_hwc2chw;
+      variant = &f16_conv;
+      break;
+    case xnn_fingerprint_id_convolution2d_nchw_f32_f32_f32_conv2d_hwc2chw:
+      params = fingerprint_parameters_conv2d_hwc2chw;
+      variant = &f32_conv;
+      break;
+    case xnn_fingerprint_id_convolution2d_nchw_f16_f16_f16_conv2d_hwc2chw_fp32_static_weights:
+      params = fingerprint_parameters_conv2d_hwc2chw_fp32_static_weights;
+      variant = &f16_conv;
+      break;
+    case xnn_fingerprint_id_convolution2d_nchw_f16_f16_f16_dwconv:
+      params = fingerprint_parameters_dwconv;
+      variant = &f16_conv;
+      break;
+    case xnn_fingerprint_id_convolution2d_nchw_f32_f32_f32_dwconv:
+      params = fingerprint_parameters_dwconv;
+      variant = &f32_conv;
+      break;
+    case xnn_fingerprint_id_convolution2d_nchw_f16_f16_f16_dwconv_fp32_static_weights:
+      params = fingerprint_parameters_dwconv_fp32_static_weights;
+      variant = &f16_conv;
+      break;
+    default:
+      xnn_log_error("Unknown fingerprint ID for convolution 2D NHWC: %d.", fingerprint_id);
+      return xnn_status_invalid_parameter;
+  }
+  struct fingerprint_context context =
+      create_fingerprint_context(fingerprint_id);
+  if (context.status != xnn_status_uninitialized) {
+    if (context.status != xnn_status_success) {
+      xnn_log_error("Error creating fingerprint context for convolution 2D NCHW: %d.", fingerprint_id);
+    }
+    return context.status;
+  }
+  const struct fingerprint_buffers data = generate_fingerprint_data(
+      &params, 1 << variant->log2_filter_element_size);
+  enum xnn_status status = create_convolution2d_nchw(
+      variant, params.input_padding_top, params.input_padding_right,
+      params.input_padding_bottom, params.input_padding_left,
+      params.kernel_height, params.kernel_width, params.subsampling_height,
+      params.subsampling_width, params.dilation_height, params.dilation_width,
+      params.groups, params.group_input_channels, params.group_output_channels,
+      params.input_channel_stride, params.output_channel_stride, data.kernel,
+      data.bias, /*output_min=*/FLT_MIN, /*output_max=*/FLT_MAX, params.flags,
+      &context.cache, &context.op);
+  finalize_fingerprint_context(&context);
+  xnn_release_simd_memory(data.data);
+  return status;
+}
+
+static enum xnn_fingerprint_id get_fingerprint_for(
+    const struct conv2d_variant* variant,
+    uint32_t input_padding_top,
+    uint32_t input_padding_right,
+    uint32_t input_padding_bottom,
+    uint32_t input_padding_left,
+    uint32_t kernel_height,
+    uint32_t kernel_width,
+    uint32_t subsampling_height,
+    uint32_t subsampling_width,
+    uint32_t dilation_height,
+    uint32_t dilation_width,
+    uint32_t groups,
+    size_t group_input_channels,
+    size_t group_output_channels,
+    uint32_t flags)
+{
+  // Get the microkernel type.
+  //
+  // We can use a dummy config here. We're only interested in the microkernel
+  // type populated by `select_convolution2d_ukernel()`.
+  enum xnn_microkernel_type microkernel_type;
+  {
+    struct xnn_dwconv2d_chw_config dummy_config = {};
+    const struct xnn_dwconv2d_chw_parameters* dummy_parameters = NULL;
+    select_convolution2d_ukernel(
+        &microkernel_type, &dummy_parameters, input_padding_top,
+        input_padding_right, input_padding_bottom, input_padding_left,
+        kernel_height, kernel_width, subsampling_height, subsampling_width,
+        dilation_height, dilation_width, groups, group_input_channels,
+        group_output_channels, flags, &dummy_config, variant->operator_type);
+  }
+
+  // Compute the index in a static map of cases.
+  uint32_t index = 0;
+  // Bit 2: operator type.
+  switch (variant->operator_type) {
+    case xnn_operator_type_convolution_nchw_f16:
+      index |= 0 << 2;
+      break;
+    case xnn_operator_type_convolution_nchw_f32:
+      index |= 1 << 2;
+      break;
+    default:
+      xnn_log_error("Unknown operator type for convolution 2D NHWC: %d.", variant->operator_type);
+      return xnn_fingerprint_id_unknown;
+  }
+  // Bit 1: microkernel type.
+  switch (microkernel_type) {
+    case xnn_microkernel_type_conv2d_hwc2chw:
+      index |= 0 << 1;
+      break;
+    case xnn_microkernel_type_dwconv:
+      index |= 1 << 1;
+      break;
+    case xnn_microkernel_type_spmm:
+      return xnn_fingerprint_id_no_fingerprint;
+    default:
+      xnn_log_error("Unknown microkernel type for convolution 2D NHWC: %d.", microkernel_type);
+      return xnn_fingerprint_id_unknown;
+  }
+  // Bit 0: are the weights provided as f32 for an f16 operator?
+  if (flags & XNN_FLAG_FP32_STATIC_WEIGHTS) {
+    index |= 1 << 0;
+  }
+
+  static const enum xnn_fingerprint_id id_map[] = {
+    xnn_fingerprint_id_convolution2d_nchw_f16_f16_f16_conv2d_hwc2chw,
+    xnn_fingerprint_id_convolution2d_nchw_f16_f16_f16_conv2d_hwc2chw_fp32_static_weights,
+    xnn_fingerprint_id_convolution2d_nchw_f16_f16_f16_dwconv,
+    xnn_fingerprint_id_convolution2d_nchw_f16_f16_f16_dwconv_fp32_static_weights,
+    xnn_fingerprint_id_convolution2d_nchw_f32_f32_f32_conv2d_hwc2chw,
+    xnn_fingerprint_id_unknown,
+    xnn_fingerprint_id_convolution2d_nchw_f32_f32_f32_dwconv,
+    xnn_fingerprint_id_unknown,
+  };
+  assert(index < sizeof(id_map) / sizeof(id_map[0]));
+  return id_map[index];
+}
 
 enum xnn_status xnn_create_convolution2d_nchw_f16(
     uint32_t input_padding_top,
@@ -811,6 +1104,17 @@ enum xnn_status xnn_create_convolution2d_nchw_f16(
     xnn_weights_cache_t weights_cache,
     xnn_operator_t* convolution_op_out)
 {
+  const enum xnn_fingerprint_id fingerprint_id = get_fingerprint_for(
+      &f16_conv, input_padding_top, input_padding_right, input_padding_bottom,
+      input_padding_left, kernel_height, kernel_width, subsampling_height,
+      subsampling_width, dilation_height, dilation_width, groups,
+      group_input_channels, group_output_channels, flags);
+  enum xnn_status status = xnn_fingerprint_convolution2d_nchw(fingerprint_id);
+  if (status != xnn_status_success) {
+    xnn_log_error("Failed fingerprinting %s.", xnn_operator_type_to_string(f16_conv.operator_type));
+    return status;
+  }
+
   return create_convolution2d_nchw(
       &f16_conv, input_padding_top, input_padding_right, input_padding_bottom,
       input_padding_left, kernel_height, kernel_width, subsampling_height,
@@ -819,7 +1123,6 @@ enum xnn_status xnn_create_convolution2d_nchw_f16(
       output_channel_stride, kernel, bias, output_min, output_max, flags,
       weights_cache, convolution_op_out);
 }
-
 
 enum xnn_status xnn_create_convolution2d_nchw_f32(
     uint32_t input_padding_top,
@@ -845,6 +1148,16 @@ enum xnn_status xnn_create_convolution2d_nchw_f32(
     xnn_weights_cache_t weights_cache,
     xnn_operator_t* convolution_op_out)
 {
+  const enum xnn_fingerprint_id fingerprint_id = get_fingerprint_for(
+      &f32_conv, input_padding_top, input_padding_right, input_padding_bottom,
+      input_padding_left, kernel_height, kernel_width, subsampling_height,
+      subsampling_width, dilation_height, dilation_width, groups,
+      group_input_channels, group_output_channels, flags);
+  enum xnn_status status = xnn_fingerprint_convolution2d_nchw(fingerprint_id);
+  if (status != xnn_status_success) {
+    xnn_log_error("Failed fingerprinting %s.", xnn_operator_type_to_string(f32_conv.operator_type));
+    return status;
+  }
   return create_convolution2d_nchw(
       &f32_conv, input_padding_top, input_padding_right, input_padding_bottom,
       input_padding_left, kernel_height, kernel_width, subsampling_height,

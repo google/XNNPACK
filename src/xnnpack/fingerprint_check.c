@@ -55,6 +55,13 @@ static enum xnn_status compute_fingerprint(
       xnn_set_fingerprint(
           (struct xnn_fingerprint){.id = fingerprint_id, .value = 0xbadbeef});
       return xnn_status_success;
+    case xnn_fingerprint_id_convolution2d_nchw_f16_f16_f16_conv2d_hwc2chw:
+    case xnn_fingerprint_id_convolution2d_nchw_f16_f16_f16_conv2d_hwc2chw_fp32_static_weights:
+    case xnn_fingerprint_id_convolution2d_nchw_f16_f16_f16_dwconv:
+    case xnn_fingerprint_id_convolution2d_nchw_f16_f16_f16_dwconv_fp32_static_weights:
+    case xnn_fingerprint_id_convolution2d_nchw_f32_f32_f32_dwconv:
+    case xnn_fingerprint_id_convolution2d_nchw_f32_f32_f32_conv2d_hwc2chw:
+      return xnn_fingerprint_convolution2d_nchw(fingerprint_id);
     case xnn_fingerprint_id_unknown:
     case xnn_fingerprint_id_no_fingerprint:
       return xnn_status_unsupported_parameter;

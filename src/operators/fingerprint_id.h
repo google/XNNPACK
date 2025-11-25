@@ -131,6 +131,7 @@ enum xnn_fingerprint_id_helper {
   xnn_fingerprint_id_helper_test = 1,
   xnn_fingerprint_id_helper_no_fingerprint = 2,
   xnn_fingerprint_id_helper_fully_connected_nc = 3,
+  xnn_fingerprint_id_helper_convolution2d_nchw = 4,
   // Type values
   xnn_fingerprint_id_helper_bf16 = 0,
   xnn_fingerprint_id_helper_f16 = 1,
@@ -153,6 +154,9 @@ enum xnn_fingerprint_id_helper {
   // use the same flags values. Flags values that don't overlap between
   // operators may reuse the same value.
   xnn_fingerprint_id_helper_nr2 = (1 << 0),
+  xnn_fingerprint_id_helper_fp32_static_weights = (1 << 1),
+  xnn_fingerprint_id_helper_conv2d_hwc2chw = (1 << 2),
+  xnn_fingerprint_id_helper_dwconv = (1 << 3),
   // The C preprocessor is obnoxious. For variadic arguments, there's no way to
   // differentiate between an empty argument list and one argument. This value
   // allows us to avoid bending around this issue when generating the
