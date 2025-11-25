@@ -165,7 +165,7 @@ void TestMatMul(AT, BT, CT, size_t k) {
   init_c.generate([&]() { return c_gen(rng); });
 
   Tensor<CT> c;
-
+  int consistent_kernels = 0;
   for (const KernelInfo& kernel : all_kernels) {
     if (kernel.type != multi_type_of(AT(), BT(), CT())) {
       continue;
@@ -180,6 +180,7 @@ void TestMatMul(AT, BT, CT, size_t k) {
       continue;
     }
     std::cout << "Considering kernel " << kernel.name << std::endl;
+    ++consistent_kernels;
 
     const bool transpose_a = kernel.flags & dot_flag::transpose_a;
     const size_t tile_k = kernel.tile_k;
@@ -216,6 +217,7 @@ void TestMatMul(AT, BT, CT, size_t k) {
       c = kernel_c;
     }
   }
+  ASSERT_GT(consistent_kernels, 0) << "No consistent_arithmetic kernels found.";
 }
 
 const char* to_string(const KernelInfo& param) { return ""; }

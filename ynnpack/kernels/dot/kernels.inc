@@ -120,15 +120,26 @@ YNN_DOT_KERNEL(arch_flag::sme, dot_int8_int8_int32_sme,
 #include "ynnpack/kernels/dot/arm_neon_int8_int8_int32.inc"
 #endif  // YNN_ARCH_ARM_NEON
 
+#if defined(YNN_ARCH_X86) || defined(YNN_ARCH_ARM64)
+// On x86 and on ARM64, we consider kernels that use FMA to be consistent (and
+// not ones that don't).
+#define YNN_DOT_KERNEL_CONSISTENT_ARITHMETIC 0
+#else
+#define YNN_DOT_KERNEL_CONSISTENT_ARITHMETIC dot_flag::consistent_arithmetic
+#endif
+
+
 YNN_DOT_KERNEL(arch_flag::none, dot_fp32_1x128x1_1x1x1,
                1, 128, 1, 1, 1,
-               0, float, float, float)
+               YNN_DOT_KERNEL_CONSISTENT_ARITHMETIC,
+               float, float, float)
 YNN_DOT_KERNEL(arch_flag::none, dot_fp16_fp16_fp32_1x128x1_1x1x1,
                1, 128, 1, 1, 1,
                dot_flag::consistent_arithmetic, half, half, float)
 YNN_DOT_KERNEL(arch_flag::none, dot_bf16_bf16_fp32_1x128x1_1x1x1,
                1, 128, 1, 1, 1,
-               0, bfloat16, bfloat16, float)
+               YNN_DOT_KERNEL_CONSISTENT_ARITHMETIC,
+               bfloat16, bfloat16, float)
 YNN_DOT_KERNEL(arch_flag::none, dot_int8_int8_int32_1x128x1_1x1x1,
                1, 128, 1, 1, 1,
                dot_flag::consistent_arithmetic, int8_t, int8_t, int32_t)
