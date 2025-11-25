@@ -156,6 +156,13 @@ inline bool same_bounds(const slinky::dim& a, const slinky::dim& b,
   return same_bounds(a, b) && same_bounds(b, dims...);
 }
 
+// A dimension is contiguous if it satisfies one of the following:
+//   1. Its extent is 1. In this case, we disregard stride.
+//   2. Its stride is equal to its element size.
+inline bool is_continguous(const slinky::dim& dim, const int element_size) {
+  return dim.extent() == 1 || dim.stride() == element_size;
+}
+
 // Binary kernels only support a single global params object, i.e. it must be
 // globally broadcasted. Currently, the only operation that needs to support
 // non-scalar params is `convert` with non-scalar quantization data.
@@ -168,7 +175,13 @@ auto make_binary_elementwise_impl(binary_kernel_fn kernel,
              slinky::buffer<const void, YNN_MAX_TENSOR_RANK> b,
              slinky::buffer<void, YNN_MAX_TENSOR_RANK> x) -> slinky::index_t {
     slinky::dim a_dims[2], b_dims[2], x_dims[2];
+
     for (int i = 0; i < 2; ++i) {
+      // If the output innermost (n) dimension has extent 1, we need to make the
+      // n dimension of all inputs a broadcast. This case is not expected to
+      // happen. For now, we add an assert to catch this case if it does.
+      assert(i != 0 || is_continguous(dim_or_broadcast(x, 0), x.elem_size));
+
       a_dims[i] = dim_or_broadcast(a, 0);
       b_dims[i] = dim_or_broadcast(b, 0);
       x_dims[i] = dim_or_broadcast(x, 0);
