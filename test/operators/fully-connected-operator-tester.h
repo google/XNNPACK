@@ -667,7 +667,7 @@ class FullyConnectedOperatorTester {
     const size_t k4 = round_up(input_channels(), 4);
 
     xnnpack::Buffer<int8_t> input(
-        (batch_size() - 1) * input_stride() + input_channels(),
+        (batch_size() - 1) * input_stride() + k4,
         xnnpack::XnnExtraBytes);
     const size_t kernel_stride = transpose_weights()
         ? (output_channels() + 3) / 4 : (input_channels() + 3) / 4;
@@ -697,7 +697,7 @@ class FullyConnectedOperatorTester {
         quantization_params[i].zero_point = w8dist(rng);
         quantization_params[i].inv_scale = f32idist(rng);
         int32_t row_sum_value = 0;
-        for (size_t j = 0; j < input_channels(); ++j) {
+        for (size_t j = 0; j < k4; ++j) {
           row_sum_value += input[i * input_stride() + j];
         }
         row_sum[i] = static_cast<float>(row_sum_value);

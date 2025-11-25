@@ -573,20 +573,14 @@ void xnn_pack_qs8_qc2w_gemm_goi_w(
   assert(params != nullptr);
 
   const size_t skr = sr * kr;
-  const uint32_t izp = static_cast<uint32_t>(params->input_zero_point);
+  const int32_t izp = static_cast<int32_t>(params->input_zero_point);
   do {
     size_t nr_block_start = 0;
     do {
       const size_t nr_block_size = min(nc - nr_block_start, nr);
       unaligned_int32_t* packed_b =
           static_cast<unaligned_int32_t*>(packed_weights);
-      if (b) {
-        for (size_t i = 0; i < nr_block_size; ++i) {
-          packed_b[i] = b[nr_block_start + i] * 16;
-        }
-      } else {
-        std::fill_n(packed_b, nr_block_size, 0);
-      }
+      copy_bias(b, nr_block_start, nr_block_size, packed_b);
       packed_weights = static_cast<int32_t*>(packed_weights) + nr;
 
       for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size;
@@ -605,13 +599,13 @@ void xnn_pack_qs8_qc2w_gemm_goi_w(
         for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size;
              ++nr_block_offset) {
           int32_t ksum = 0;
+          const size_t kc_begin =
+              round_down_po2(kr_block_start, skr) +
+              ((kr_block_start + nr_block_offset * kr) & (skr - 1));
 
           for (size_t kr_block_offset = 0; kr_block_offset < kr;
-               kr_block_offset++) {
-            const size_t kc_idx =
-                round_down_po2(kr_block_start, skr) +
-                ((kr_block_start + kr_block_offset + nr_block_offset * kr) &
-                 (skr - 1));
+               ++kr_block_offset) {
+            const size_t kc_idx = kc_begin + kr_block_offset;
             const size_t k_offset =
                 (nr_block_start + nr_block_offset) * kc + kc_idx;
 
@@ -639,10 +633,11 @@ void xnn_pack_qs8_qc2w_gemm_goi_w(
             kv_3 = sign_extend_int2(kv_3);
 
             ksum += kv_0 + kv_1 + kv_2 + kv_3;
-            static_cast<int8_t*>(packed_weights)[kr_block_offset] = kv;
+            static_cast<int8_t*>(packed_weights)[kr_block_offset] = kv ^ 0xAA;
           }
 
           packed_b[nr_block_offset] = packed_b[nr_block_offset] - ksum * izp;
+          // kr * 4 crumbs
           packed_weights = static_cast<uint8_t*>(packed_weights) + kr;
         }
         packed_weights = static_cast<uint8_t*>(packed_weights) +
@@ -676,20 +671,14 @@ void xnn_pack_qs8_qc2w_gemm_gio_w(
 
   // row sums, weights, zero points, extra data
   const size_t skr = sr * kr;
-  const uint32_t izp = static_cast<uint32_t>(params->input_zero_point);
+  const int32_t izp = static_cast<int32_t>(params->input_zero_point);
   do {
     size_t nr_block_start = 0;
     do {
       const size_t nr_block_size = min(nc - nr_block_start, nr);
       unaligned_int32_t* packed_b =
           static_cast<unaligned_int32_t*>(packed_weights);
-      if (b) {
-        for (size_t i = 0; i < nr_block_size; ++i) {
-          packed_b[i] = b[nr_block_start + i] * 16;
-        }
-      } else {
-        std::fill_n(packed_b, nr_block_size, 0);
-      }
+      copy_bias(b, nr_block_start, nr_block_size, packed_b);
       packed_weights = static_cast<int32_t*>(packed_weights) + nr;
 
       // Skip another nr for the float zero points
@@ -747,7 +736,7 @@ void xnn_pack_qs8_qc2w_gemm_gio_w(
             kv_3 = sign_extend_int2(kv_3);
 
             ksum += kv_0 + kv_1 + kv_2 + kv_3;
-            static_cast<int8_t*>(packed_weights)[kr_block_offset] = kv;
+            static_cast<int8_t*>(packed_weights)[kr_block_offset] = kv ^ 0xAA;
           }
 
           packed_b[nr_block_offset] = packed_b[nr_block_offset] - ksum * izp;

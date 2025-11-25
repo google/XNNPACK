@@ -1747,7 +1747,7 @@ void GemmMicrokernelTester::Test(
                                                    *minmax.second, &inv_scale);
     quantization_params[i].inv_scale = qd8_params.inv_scale;
     quantization_params[i].zero_point = qd8_params.zero_point;
-    int32_t a_row_sum = 0;
+
     for (size_t j = 0; j < k4; ++j) {
       float scaled_input = input_ptr[j] * inv_scale;
       scaled_input = std::min<float>(
@@ -1759,10 +1759,17 @@ void GemmMicrokernelTester::Test(
       a[i * a_stride() + j] = static_cast<int8_t>(
           std::lrintf(scaled_input) +
           static_cast<long>(quantization_params[i].zero_point));
+    }
+  }
+
+  for (size_t i = 0; i < m(); ++i) {
+    int32_t a_row_sum = 0;
+    for (size_t j = 0; j < k4; ++j) {
       a_row_sum += a[i * a_stride() + j];
     }
     row_sum[i] = a_row_sum;
   }
+
   for (size_t i = m(); i < mr(); ++i) {
     quantization_params[i].zero_point = quantization_params[m() - 1].zero_point;
     quantization_params[i].inv_scale = quantization_params[m() - 1].inv_scale;
@@ -1840,9 +1847,9 @@ void GemmMicrokernelTester::Test(
   }
 
   gemm(m(), n(), k4, a.data(), a_stride() * sizeof(int8_t),
-        static_cast<const void*>(packed_w.data()), c.data(),
-        cm_stride() * sizeof(float), nr() * sizeof(float), &params,
-        row_sum.data(), quantization_params.data());
+       static_cast<const void*>(packed_w.data()), c.data(),
+       cm_stride() * sizeof(float), nr() * sizeof(float), &params,
+       row_sum.data(), quantization_params.data());
 
   const float tolerance =
       compute_sum_tolerance(max_abs_product, ks() * k(),

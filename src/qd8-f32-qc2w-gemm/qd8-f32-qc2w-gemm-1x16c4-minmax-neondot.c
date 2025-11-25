@@ -28,6 +28,7 @@ void xnn_qd8_f32_qc2w_gemm_minmax_ukernel_1x16c4__neondot(
   kc = round_up_po2(kc, 4 * sizeof(int8_t));
   const int8_t* a0 = a;
   float* c0 = c;
+  const int8x16_t vmask = vmovq_n_s8(0x03);
 
   // Loop over groups of 16 columns.
   do {
@@ -43,15 +44,15 @@ void xnn_qd8_f32_qc2w_gemm_minmax_ukernel_1x16c4__neondot(
         vld1q_dup_s32(&quantization_params[0].zero_point);
     const int32x4_t rh_col_sum_0123 = vld1q_s32(w);
     w = (const int32_t*)w + 4;
-    int32x4_t vacc_0x0123 = vmulq_s32(rh_col_sum_0123, vlh_zero_point_0);
     const int32x4_t rh_col_sum_4567 = vld1q_s32(w);
     w = (const int32_t*)w + 4;
-    int32x4_t vacc_0x4567 = vmulq_s32(rh_col_sum_4567, vlh_zero_point_0);
     const int32x4_t rh_col_sum_89AB = vld1q_s32(w);
     w = (const int32_t*)w + 4;
-    int32x4_t vacc_0x89AB = vmulq_s32(rh_col_sum_89AB, vlh_zero_point_0);
     const int32x4_t rh_col_sum_CDEF = vld1q_s32(w);
     w = (const int32_t*)w + 4;
+    int32x4_t vacc_0x0123 = vmulq_s32(rh_col_sum_0123, vlh_zero_point_0);
+    int32x4_t vacc_0x4567 = vmulq_s32(rh_col_sum_4567, vlh_zero_point_0);
+    int32x4_t vacc_0x89AB = vmulq_s32(rh_col_sum_89AB, vlh_zero_point_0);
     int32x4_t vacc_0xCDEF = vmulq_s32(rh_col_sum_CDEF, vlh_zero_point_0);
 
     // Initialize the bias with the scaled left-hand weight sums.
@@ -61,8 +62,8 @@ void xnn_qd8_f32_qc2w_gemm_minmax_ukernel_1x16c4__neondot(
     //  * rh_zero_points_NNNN: per-j zero points, float, one column per lane.
     //  * scaled_lh_row_sum_MxNNNN: per-ij biases, float, one column per lane.
     //
-    const float32x4_t lh_row_sum_0 =
-        vld1q_dup_f32(&row_sum[0]);
+    const float32x4_t lh_row_sum_0 = vld1q_dup_f32(&row_sum[0]);
+
     const float32x4_t rh_zero_points_0123 = vld1q_f32(w);
     w = (const float*)w + 4;
     const float32x4_t rh_zero_points_4567 = vld1q_f32(w);
@@ -72,14 +73,21 @@ void xnn_qd8_f32_qc2w_gemm_minmax_ukernel_1x16c4__neondot(
     const float32x4_t rh_zero_points_CDEF = vld1q_f32(w);
     w = (const float*)w + 4;
 
+    // Compensation for uint2 compute: -2 row_sum.
+    const float32x4_t vtwo = vdupq_n_f32(2.0f);
+    const float32x4_t biased_rh_zero_points_0123 = vaddq_f32(rh_zero_points_0123, vtwo);
+    const float32x4_t biased_rh_zero_points_4567 = vaddq_f32(rh_zero_points_4567, vtwo);
+    const float32x4_t biased_rh_zero_points_89AB = vaddq_f32(rh_zero_points_89AB, vtwo);
+    const float32x4_t biased_rh_zero_points_CDEF = vaddq_f32(rh_zero_points_CDEF, vtwo);
+
     const float32x4_t scaled_lh_row_sum_0x0123 =
-        vmulq_f32(rh_zero_points_0123, lh_row_sum_0);
+        vmulq_f32(biased_rh_zero_points_0123, lh_row_sum_0);
     const float32x4_t scaled_lh_row_sum_0x4567 =
-        vmulq_f32(rh_zero_points_4567, lh_row_sum_0);
+        vmulq_f32(biased_rh_zero_points_4567, lh_row_sum_0);
     const float32x4_t scaled_lh_row_sum_0x89AB =
-        vmulq_f32(rh_zero_points_89AB, lh_row_sum_0);
+        vmulq_f32(biased_rh_zero_points_89AB, lh_row_sum_0);
     const float32x4_t scaled_lh_row_sum_0xCDEF =
-        vmulq_f32(rh_zero_points_CDEF, lh_row_sum_0);
+        vmulq_f32(biased_rh_zero_points_CDEF, lh_row_sum_0);
 
     // Inner accumulation loop along the 16 columns.
     size_t k = kc;
@@ -107,32 +115,29 @@ void xnn_qd8_f32_qc2w_gemm_minmax_ukernel_1x16c4__neondot(
       const int8x16_t vb_CDEFx16 = vld1q_s8(w);
       w = (const int8_t*)w + 16;
 
-      const int8x16_t v2 = vdupq_n_s8(2);
-      const int8x16_t v3 = vdupq_n_s8(3);
-
       // First crumb.
-      const int8x16_t vb_0123x0123 = vsubq_s8(veorq_s8(vandq_s8(vb_0123x16, v3), v2), v2);
-      const int8x16_t vb_4567x0123 = vsubq_s8(veorq_s8(vandq_s8(vb_4567x16, v3), v2), v2);
-      const int8x16_t vb_89ABx0123 = vsubq_s8(veorq_s8(vandq_s8(vb_89ABx16, v3), v2), v2);
-      const int8x16_t vb_CDEFx0123 = vsubq_s8(veorq_s8(vandq_s8(vb_CDEFx16, v3), v2), v2);
+      const int8x16_t vb_0123x0123 = vandq_s8(vb_0123x16, vmask);
+      const int8x16_t vb_4567x0123 = vandq_s8(vb_4567x16, vmask);
+      const int8x16_t vb_89ABx0123 = vandq_s8(vb_89ABx16, vmask);
+      const int8x16_t vb_CDEFx0123 = vandq_s8(vb_CDEFx16, vmask);
 
       // Second crumb.
-      const int8x16_t vb_0123x4567 = vsubq_s8(veorq_s8(vandq_s8(vshrq_n_s8(vb_0123x16, 2), v3), v2), v2);
-      const int8x16_t vb_4567x4567 = vsubq_s8(veorq_s8(vandq_s8(vshrq_n_s8(vb_4567x16, 2), v3), v2), v2);
-      const int8x16_t vb_89ABx4567 = vsubq_s8(veorq_s8(vandq_s8(vshrq_n_s8(vb_89ABx16, 2), v3), v2), v2);
-      const int8x16_t vb_CDEFx4567 = vsubq_s8(veorq_s8(vandq_s8(vshrq_n_s8(vb_CDEFx16, 2), v3), v2), v2);
+      const int8x16_t vb_0123x4567 = vandq_s8(vshrq_n_s8(vb_0123x16, 2), vmask);
+      const int8x16_t vb_4567x4567 = vandq_s8(vshrq_n_s8(vb_4567x16, 2), vmask);
+      const int8x16_t vb_89ABx4567 = vandq_s8(vshrq_n_s8(vb_89ABx16, 2), vmask);
+      const int8x16_t vb_CDEFx4567 = vandq_s8(vshrq_n_s8(vb_CDEFx16, 2), vmask);
 
       // Third crumb.
-      const int8x16_t vb_0123x89AB = vsubq_s8(veorq_s8(vandq_s8(vshrq_n_s8(vb_0123x16, 4), v3), v2), v2);
-      const int8x16_t vb_4567x89AB = vsubq_s8(veorq_s8(vandq_s8(vshrq_n_s8(vb_4567x16, 4), v3), v2), v2);
-      const int8x16_t vb_89ABx89AB = vsubq_s8(veorq_s8(vandq_s8(vshrq_n_s8(vb_89ABx16, 4), v3), v2), v2);
-      const int8x16_t vb_CDEFx89AB = vsubq_s8(veorq_s8(vandq_s8(vshrq_n_s8(vb_CDEFx16, 4), v3), v2), v2);
+      const int8x16_t vb_0123x89AB = vandq_s8(vshrq_n_s8(vb_0123x16, 4), vmask);
+      const int8x16_t vb_4567x89AB = vandq_s8(vshrq_n_s8(vb_4567x16, 4), vmask);
+      const int8x16_t vb_89ABx89AB = vandq_s8(vshrq_n_s8(vb_89ABx16, 4), vmask);
+      const int8x16_t vb_CDEFx89AB = vandq_s8(vshrq_n_s8(vb_CDEFx16, 4), vmask);
 
       // Fourth crumb.
-      const int8x16_t vb_0123xCDEF = vsubq_s8(veorq_s8(vandq_s8(vshrq_n_s8(vb_0123x16, 6), v3), v2), v2);
-      const int8x16_t vb_4567xCDEF = vsubq_s8(veorq_s8(vandq_s8(vshrq_n_s8(vb_4567x16, 6), v3), v2), v2);
-      const int8x16_t vb_89ABxCDEF = vsubq_s8(veorq_s8(vandq_s8(vshrq_n_s8(vb_89ABx16, 6), v3), v2), v2);
-      const int8x16_t vb_CDEFxCDEF = vsubq_s8(veorq_s8(vandq_s8(vshrq_n_s8(vb_CDEFx16, 6), v3), v2), v2);
+      const int8x16_t vb_0123xCDEF = vandq_s8(vshrq_n_s8(vb_0123x16, 6), vmask);
+      const int8x16_t vb_4567xCDEF = vandq_s8(vshrq_n_s8(vb_4567x16, 6), vmask);
+      const int8x16_t vb_89ABxCDEF = vandq_s8(vshrq_n_s8(vb_89ABx16, 6), vmask);
+      const int8x16_t vb_CDEFxCDEF = vandq_s8(vshrq_n_s8(vb_CDEFx16, 6), vmask);
 
       // Multiply-accumulate: 1x16 * 16x16 --> 1x16.
       vacc_0x0123 =
@@ -191,20 +196,17 @@ void xnn_qd8_f32_qc2w_gemm_minmax_ukernel_1x16c4__neondot(
         const int8x8_t va_0x01234567 = vld1_s8(a0);
         a0 += 8;
 
-        const int8x16_t v2 = vdupq_n_s8(2);
-        const int8x16_t v3 = vdupq_n_s8(3);
-
         // First crumb.
-        const int8x16_t vb_0123x0123 = vsubq_s8(veorq_s8(vandq_s8(vb_0123x16, v3), v2), v2);
-        const int8x16_t vb_4567x0123 = vsubq_s8(veorq_s8(vandq_s8(vb_4567x16, v3), v2), v2);
-        const int8x16_t vb_89ABx0123 = vsubq_s8(veorq_s8(vandq_s8(vb_89ABx16, v3), v2), v2);
-        const int8x16_t vb_CDEFx0123 = vsubq_s8(veorq_s8(vandq_s8(vb_CDEFx16, v3), v2), v2);
+        const int8x16_t vb_0123x0123 = vandq_s8(vb_0123x16, vmask);
+        const int8x16_t vb_4567x0123 = vandq_s8(vb_4567x16, vmask);
+        const int8x16_t vb_89ABx0123 = vandq_s8(vb_89ABx16, vmask);
+        const int8x16_t vb_CDEFx0123 = vandq_s8(vb_CDEFx16, vmask);
 
         // Second crumb.
-        const int8x16_t vb_0123x4567 = vsubq_s8(veorq_s8(vandq_s8(vshrq_n_s8(vb_0123x16, 2), v3), v2), v2);
-        const int8x16_t vb_4567x4567 = vsubq_s8(veorq_s8(vandq_s8(vshrq_n_s8(vb_4567x16, 2), v3), v2), v2);
-        const int8x16_t vb_89ABx4567 = vsubq_s8(veorq_s8(vandq_s8(vshrq_n_s8(vb_89ABx16, 2), v3), v2), v2);
-        const int8x16_t vb_CDEFx4567 = vsubq_s8(veorq_s8(vandq_s8(vshrq_n_s8(vb_CDEFx16, 2), v3), v2), v2);
+        const int8x16_t vb_0123x4567 = vandq_s8(vshrq_n_s8(vb_0123x16, 2), vmask);
+        const int8x16_t vb_4567x4567 = vandq_s8(vshrq_n_s8(vb_4567x16, 2), vmask);
+        const int8x16_t vb_89ABx4567 = vandq_s8(vshrq_n_s8(vb_89ABx16, 2), vmask);
+        const int8x16_t vb_CDEFx4567 = vandq_s8(vshrq_n_s8(vb_CDEFx16, 2), vmask);
 
         // Multiply-accumulate: 1x4 * 4x16 --> 1x16.
         vacc_0x0123 =
@@ -242,14 +244,11 @@ void xnn_qd8_f32_qc2w_gemm_minmax_ukernel_1x16c4__neondot(
             vld1_lane_u32((const uint32_t *)a0, vmov_n_u32(0), 0));
         a0 += 4;
 
-        const int8x16_t v2 = vdupq_n_s8(2);
-        const int8x16_t v3 = vdupq_n_s8(3);
-
         // First crumb.
-        const int8x16_t vb_0123x0123 = vsubq_s8(veorq_s8(vandq_s8(vb_0123x16, v3), v2), v2);
-        const int8x16_t vb_4567x0123 = vsubq_s8(veorq_s8(vandq_s8(vb_4567x16, v3), v2), v2);
-        const int8x16_t vb_89ABx0123 = vsubq_s8(veorq_s8(vandq_s8(vb_89ABx16, v3), v2), v2);
-        const int8x16_t vb_CDEFx0123 = vsubq_s8(veorq_s8(vandq_s8(vb_CDEFx16, v3), v2), v2);
+        const int8x16_t vb_0123x0123 = vandq_s8(vb_0123x16, vmask);
+        const int8x16_t vb_4567x0123 = vandq_s8(vb_4567x16, vmask);
+        const int8x16_t vb_89ABx0123 = vandq_s8(vb_89ABx16, vmask);
+        const int8x16_t vb_CDEFx0123 = vandq_s8(vb_CDEFx16, vmask);
 
         // Multiply-accumulate: 1x4 * 4x16 --> 1x16.
         vacc_0x0123 = vdotq_lane_s32(vacc_0x0123, vb_0123x0123, va_0x0123, 0);
@@ -311,15 +310,16 @@ void xnn_qd8_f32_qc2w_gemm_minmax_ukernel_1x16c4__neondot(
     // Load and apply the biases with the right-hand scaling factor.
     const float32x4_t vbias0123 = vld1q_f32(w);
     w = (const float*)w + 4;
-    vout_0x0123 = vmlaq_f32(vbias0123, vout_0x0123, rh_scale_0123);
     const float32x4_t vbias4567 = vld1q_f32(w);
     w = (const float*)w + 4;
-    vout_0x4567 = vmlaq_f32(vbias4567, vout_0x4567, rh_scale_4567);
     const float32x4_t vbias89AB = vld1q_f32(w);
     w = (const float*)w + 4;
-    vout_0x89AB = vmlaq_f32(vbias89AB, vout_0x89AB, rh_scale_89AB);
     const float32x4_t vbiasCDEF = vld1q_f32(w);
     w = (const float*)w + 4;
+
+    vout_0x0123 = vmlaq_f32(vbias0123, vout_0x0123, rh_scale_0123);
+    vout_0x4567 = vmlaq_f32(vbias4567, vout_0x4567, rh_scale_4567);
+    vout_0x89AB = vmlaq_f32(vbias89AB, vout_0x89AB, rh_scale_89AB);
     vout_0xCDEF = vmlaq_f32(vbiasCDEF, vout_0xCDEF, rh_scale_CDEF);
 
     // Apply the min/max scaling.
