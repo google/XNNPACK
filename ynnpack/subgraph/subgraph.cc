@@ -26,7 +26,6 @@
 #include "ynnpack/base/arithmetic.h"
 #include "ynnpack/base/base.h"
 #include "ynnpack/base/bfloat16.h"
-#include "ynnpack/base/build_config.h"
 #include "ynnpack/base/half.h"
 #include "ynnpack/base/log.h"
 #include "ynnpack/base/to_string.h"

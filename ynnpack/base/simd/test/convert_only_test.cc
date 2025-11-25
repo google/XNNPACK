@@ -9,7 +9,6 @@
 
 #include <gtest/gtest.h>
 #include "ynnpack/base/arch.h"
-#include "ynnpack/base/build_config.h"
 #if defined(YNN_ARCH_X86_AVX512F) || defined(YNN_ARCH_X86_AVX512BW) || \
     defined(YNN_ARCH_X86_AVX512BF16) || defined(YNN_ARCH_X86_AVX512FP16)
 #include "ynnpack/base/simd/x86_avx.h"

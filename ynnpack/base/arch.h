@@ -8,8 +8,6 @@
 
 #include <cstdint>
 
-#include "ynnpack/base/build_config.h"
-
 namespace ynn {
 
 // This should be an enum class, but bitfields are messy.

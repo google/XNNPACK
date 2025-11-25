@@ -7,7 +7,6 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
-#include <numeric>
 #include <ostream>
 #include <type_traits>
 #include <vector>
@@ -15,14 +14,12 @@
 #include <gtest/gtest.h>
 #include "ynnpack/base/arch.h"  // IWYU pragma: keep
 #include "ynnpack/base/arithmetic.h"
-#include "ynnpack/base/build_config.h"
 #include "ynnpack/base/test/buffer.h"
 #include "ynnpack/base/test/fuzz_test.h"
 #include "ynnpack/base/test/random.h"
 #include "ynnpack/base/test/tensor.h"
 #include "ynnpack/base/test/util.h"
 #include "ynnpack/base/type.h"
-#include "ynnpack/include/ynnpack.h"
 #include "ynnpack/kernels/dot/dot.h"
 #include "ynnpack/kernels/dot/pack.h"
 

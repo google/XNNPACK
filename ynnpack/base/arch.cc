@@ -8,7 +8,6 @@
 #include <cstddef>
 #include <cstdint>
 
-#include "ynnpack/base/build_config.h"
 #ifdef YNN_ENABLE_CPUINFO
 #include "ynnpack/base/log.h"
 #include <cpuinfo.h>

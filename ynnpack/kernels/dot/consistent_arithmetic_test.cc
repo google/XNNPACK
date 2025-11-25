@@ -18,7 +18,7 @@
 #include <gtest/gtest.h>
 #include "ynnpack/base/arch.h"  // IWYU pragma: keep
 #include "ynnpack/base/arithmetic.h"
-#include "ynnpack/base/build_config.h"
+#include "ynnpack/base/base.h"
 #include "ynnpack/base/test/buffer.h"
 #include "ynnpack/base/test/fuzz_test.h"
 #include "ynnpack/base/test/random.h"

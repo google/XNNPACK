@@ -11,7 +11,6 @@
 
 #include <gtest/gtest.h>
 #include "ynnpack/base/arch.h"
-#include "ynnpack/base/build_config.h"
 #include "ynnpack/include/ynnpack.h"
 #include "ynnpack/kernels/dot/dot.h"
 

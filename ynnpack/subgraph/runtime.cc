@@ -25,7 +25,7 @@
 #ifdef YNN_ENABLE_PERFETTO
 #include "ynnpack/subgraph/perfetto.h"
 #endif
-#include "ynnpack/base/build_config.h"
+#include "ynnpack/base/base.h"
 #include "ynnpack/base/log.h"
 #include "ynnpack/base/type.h"
 #include "ynnpack/include/ynnpack.h"
