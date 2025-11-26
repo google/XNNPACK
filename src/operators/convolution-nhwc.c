@@ -72,6 +72,7 @@ static enum xnn_status create_vmulcaddc_path(
     xnn_pack_vmulcaddc_w_fn pack_vmulcaddc_w, const void* packing_params,
     const void* vmulcaddc_params, size_t vmulcaddc_params_size,
     const struct xnn_vmulcaddc_config* vmulcaddc_config,
+    enum xnn_fingerprint_id fingerprint_id,
     enum xnn_operator_type operator_type, xnn_operator_t convolution_op) {
   assert(vmulcaddc_config != NULL);
   assert(vmulcaddc_params != NULL);
@@ -100,11 +101,13 @@ static enum xnn_status create_vmulcaddc_path(
   pack_vmulcaddc_w(groups, vmulcaddc_config->channel_tile, kernel, bias,
                    weights_ptr, packing_params);
 
+  const struct xnn_weights_cache_look_up_key cache_key = {
+    .seed = groups ^ vmulcaddc_config->channel_tile,
+    .kernel = kernel,
+    .bias = bias,
+    .fingerprint_id = fingerprint_id,
+  };
   if (use_weights_cache(convolution_op)) {
-    struct xnn_weights_cache_look_up_key cache_key;
-    cache_key.seed = groups ^ vmulcaddc_config->channel_tile;
-    cache_key.kernel = kernel;
-    cache_key.bias = bias;
     convolution_op->packed_weights.offset = xnn_look_up_or_insert_weights_cache(
         convolution_op->weights_cache, &cache_key, weights_ptr,
         aligned_total_weights_size);
@@ -133,8 +136,9 @@ static enum xnn_status create_dwconv_path(
     xnn_init_qs8_qc8w_scale_params_fn init_scale_params,
     const float* scale_params, const void* dwconv_params,
     size_t dwconv_params_size, const struct xnn_dwconv_config* dwconv_ukernel,
-    bool linear_activation, enum xnn_operator_type operator_type,
-    size_t* zero_size, xnn_operator_t convolution_op) {
+    bool linear_activation, enum xnn_fingerprint_id fingerprint_id,
+    enum xnn_operator_type operator_type, size_t* zero_size,
+    xnn_operator_t convolution_op) {
   assert(dwconv_ukernel != NULL);
   enum xnn_status status = xnn_status_out_of_memory;
   const uint8_t primary_tile = dwconv_ukernel->primary_tile;
@@ -203,10 +207,12 @@ static enum xnn_status create_dwconv_path(
     cache_seed = ~cache_seed;
   }
   if (use_weights_cache(convolution_op)) {
-    struct xnn_weights_cache_look_up_key cache_key;
-    cache_key.seed = cache_seed;
-    cache_key.kernel = kernel;
-    cache_key.bias = bias;
+    struct xnn_weights_cache_look_up_key cache_key = {
+      .seed = cache_seed,
+      .kernel = kernel,
+      .bias = bias,
+      .fingerprint_id = fingerprint_id,
+    };
     convolution_op->packed_weights.offset = xnn_look_up_or_insert_weights_cache(
         convolution_op->weights_cache, &cache_key, weights_ptr,
         aligned_total_weights_size);
@@ -243,6 +249,7 @@ static enum xnn_status create_igemm(
     const float* kernel_scale_params, const void* gemm_params,
     size_t gemm_params_size, const struct xnn_gemm_config* gemm_config,
     bool linear_activation, bool relu_activation,
+    enum xnn_fingerprint_id fingerprint_id,
     enum xnn_operator_type operator_type, xnn_operator_t convolution_op,
     size_t* zero_size) {
   enum xnn_status status = xnn_status_out_of_memory;
@@ -256,11 +263,13 @@ static enum xnn_status create_igemm(
                               group_output_channels ^ nr ^ kr ^ sr ^
                               ukernel_type ^ flags;
 
+  const struct xnn_weights_cache_look_up_key cache_key = {
+    .seed = cache_seed,
+    .kernel = kernel,
+    .bias = bias,
+    .fingerprint_id = fingerprint_id,
+  };
   if (use_weights_cache(convolution_op)) {
-    struct xnn_weights_cache_look_up_key cache_key;
-    cache_key.seed = cache_seed;
-    cache_key.kernel = kernel;
-    cache_key.bias = bias;
     convolution_op->packed_weights.offset =
         xnn_weights_cache_look_up(convolution_op->weights_cache, &cache_key);
   }
@@ -392,10 +401,6 @@ static enum xnn_status create_igemm(
   }
 
   if (use_weights_cache(convolution_op)) {
-    struct xnn_weights_cache_look_up_key cache_key;
-    cache_key.seed = cache_seed;
-    cache_key.kernel = kernel;
-    cache_key.bias = bias;
     convolution_op->packed_weights.offset = xnn_look_up_or_insert_weights_cache(
         convolution_op->weights_cache, &cache_key, weights_ptr,
         aligned_total_weights_size);
@@ -708,10 +713,11 @@ static enum xnn_status create_convolution2d_nhwc(
     case xnn_microkernel_type_vmulcaddc: {
       status = create_vmulcaddc_path(
           context->groups, context->kernel, context->bias,
-          context->gemm_config->log2_filter_element_size, context->gemm_config->bias_element_size,
-          context->pack_vmulcaddc_w, context->packing_params_ptr, context->vmulcaddc_params_ptr,
-          context->vmulcaddc_params_size, context->vmulcaddc_config, context->operator_type,
-          convolution_op);
+          context->gemm_config->log2_filter_element_size,
+          context->gemm_config->bias_element_size, context->pack_vmulcaddc_w,
+          context->packing_params_ptr, context->vmulcaddc_params_ptr,
+          context->vmulcaddc_params_size, context->vmulcaddc_config,
+          context->fingerprint_id, context->operator_type, convolution_op);
       if (status != xnn_status_success) {
         goto error;
       }
@@ -727,13 +733,17 @@ static enum xnn_status create_convolution2d_nhwc(
         goto error;
       }
       status = create_dwconv_path(
-          context->kernel_height, context->kernel_width, context->groups, context->kernel, context->bias, context->flags,
-          context->gemm_config->log2_input_element_size, context->gemm_config->log2_filter_element_size,
-          context->gemm_config->bias_element_size, context->pack_dwconv_hwg_w, context->pack_dwconv_ghw_w,
-          context->packing_params_ptr, variant->extra_weights_bytes, variant->init_scale_params,
-          context->scale_params, context->dwconv_params_ptr, context->dwconv_params_size, context->dwconv_ukernel,
-          context->linear_activation, context->operator_type,
-          &zero_size, convolution_op);
+          context->kernel_height, context->kernel_width, context->groups,
+          context->kernel, context->bias, context->flags,
+          context->gemm_config->log2_input_element_size,
+          context->gemm_config->log2_filter_element_size,
+          context->gemm_config->bias_element_size, context->pack_dwconv_hwg_w,
+          context->pack_dwconv_ghw_w, context->packing_params_ptr,
+          variant->extra_weights_bytes, variant->init_scale_params,
+          context->scale_params, context->dwconv_params_ptr,
+          context->dwconv_params_size, context->dwconv_ukernel,
+          context->linear_activation, context->fingerprint_id,
+          context->operator_type, &zero_size, convolution_op);
       if (status != xnn_status_success) {
         goto error;
       }
@@ -749,14 +759,19 @@ static enum xnn_status create_convolution2d_nhwc(
         goto error;
       }
       status = create_igemm(
-          context->microkernel_type, kernel_size, context->groups, context->group_input_channels,
-          context->group_output_channels, context->kernel, context->bias, context->flags,
-          context->gemm_config->log2_input_element_size, context->gemm_config->log2_filter_element_size,
+          context->microkernel_type, kernel_size, context->groups,
+          context->group_input_channels, context->group_output_channels,
+          context->kernel, context->bias, context->flags,
+          context->gemm_config->log2_input_element_size,
+          context->gemm_config->log2_filter_element_size,
           context->gemm_config->bias_element_size, context->pack_conv_kgo_w,
-          context->pack_conv_goki_w, context->packing_params_ptr, variant->extra_weights_bytes,
-          variant->init_scale_params, context->scale_params, variant->init_kernel_scale_params,
-          context->kernel_scale_params, context->gemm_params_ptr, context->gemm_params_size, context->gemm_config,
-          context->linear_activation, context->relu_activation, context->operator_type, convolution_op,
+          context->pack_conv_goki_w, context->packing_params_ptr,
+          variant->extra_weights_bytes, variant->init_scale_params,
+          context->scale_params, variant->init_kernel_scale_params,
+          context->kernel_scale_params, context->gemm_params_ptr,
+          context->gemm_params_size, context->gemm_config,
+          context->linear_activation, context->relu_activation,
+          context->fingerprint_id, context->operator_type, convolution_op,
           &zero_size);
       if (status != xnn_status_success) {
         goto error;
