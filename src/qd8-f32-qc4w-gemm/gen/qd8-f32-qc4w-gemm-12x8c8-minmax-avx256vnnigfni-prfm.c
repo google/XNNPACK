@@ -387,6 +387,7 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_12x8c8__avx256vnnigfni_prfm(
     __m256 vout10x01234567 = _mm256_cvtepi32_ps(vacc10x01234567);
     __m256 vout11x01234567 = _mm256_cvtepi32_ps(vacc11x01234567);
 
+
     vout0x01234567 = _mm256_mul_ps(vout0x01234567, _mm256_set1_ps(quantization_params[0].inv_scale));
     vout1x01234567 = _mm256_mul_ps(vout1x01234567, _mm256_set1_ps(quantization_params[1].inv_scale));
     vout2x01234567 = _mm256_mul_ps(vout2x01234567, _mm256_set1_ps(quantization_params[2].inv_scale));
