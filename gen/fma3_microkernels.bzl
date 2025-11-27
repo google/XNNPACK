@@ -1,9 +1,9 @@
-"""
-Microkernel filenames lists for fma3.
-
-Auto-generated file. Do not edit!
-  Generator: tools/update-microkernels.py
-"""
+#
+# Microkernel filenames lists for fma3.
+#
+# Auto-generated file. Do not edit!
+#   Generator: tools/update-microkernels.py
+#
 
 PROD_FMA3_MICROKERNEL_SRCS = [
     "src/f16-dwconv/gen/f16-dwconv-3p16c-minmax-fma3.c",

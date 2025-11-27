@@ -1,9 +1,9 @@
-"""
-Microkernel filenames lists for avx256vnni.
-
-Auto-generated file. Do not edit!
-  Generator: tools/update-microkernels.py
-"""
+#
+# Microkernel filenames lists for avx256vnni.
+#
+# Auto-generated file. Do not edit!
+#   Generator: tools/update-microkernels.py
+#
 
 PROD_AVX256VNNI_MICROKERNEL_SRCS = [
     "src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-1x8c8-minmax-avx256vnni.c",

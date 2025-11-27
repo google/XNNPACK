@@ -1,9 +1,9 @@
-"""
-Microkernel filenames lists for neonfma.
-
-Auto-generated file. Do not edit!
-  Generator: tools/update-microkernels.py
-"""
+#
+# Microkernel filenames lists for neonfma.
+#
+# Auto-generated file. Do not edit!
+#   Generator: tools/update-microkernels.py
+#
 
 PROD_NEONFMA_MICROKERNEL_SRCS = [
     "src/f32-dwconv/gen/f32-dwconv-3p8c-minmax-neonfma.c",

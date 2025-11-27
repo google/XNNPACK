@@ -1,9 +1,9 @@
-"""
-Microkernel filenames lists for neon.
-
-Auto-generated file. Do not edit!
-  Generator: tools/update-microkernels.py
-"""
+#
+# Microkernel filenames lists for neon.
+#
+# Auto-generated file. Do not edit!
+#   Generator: tools/update-microkernels.py
+#
 
 PROD_NEON_MICROKERNEL_SRCS = [
     "src/f16-f32-vcvt/gen/f16-f32-vcvt-neon-int16-u16.c",
