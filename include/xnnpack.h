@@ -15,7 +15,6 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "src/operators/fingerprint_id.h"
 #include <pthreadpool.h>
 
 #ifdef __cplusplus
