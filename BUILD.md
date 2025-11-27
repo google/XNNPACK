@@ -118,3 +118,33 @@ CC=clang-19 CXX=clang++-19 bazel test -c fastbuild --local_test_jobs=HOST_CPUS /
 | Linux    | AArch64 | Clang 20 | `fastbuild` |       |     ✅    | |
 | Linux    | AArch64 | GCC 13   | `fastbuild` |       |     ✅    | |
 
+## Building with GN
+
+* GN is the build system used by the Chromium project.
+* GN support is incomplete and experimental as of November 2025 and is not
+  automatically tested yet. If these instructions do not work for you,
+  [open an issue.](https://github.com/google/XNNPACK/issues)
+
+### Getting the code
+When building with GN, XNNPACK uses Chromium's `depot_tools` to fetch some
+dependencies. To check out the code:
+
+1. Install `depot_tools` according to the [upstream instructions.](https://commondatastorage.googleapis.com/chrome-infra-docs/flat/depot_tools/docs/html/depot_tools_tutorial.html#_setting_up)
+2. Create an enter a new directory for XNNPACK with
+   ```sh
+   mkdir XNNPACK && cd XNNPACK
+   ```
+3. Create a file named `.gclient` with these contents:
+   ```
+    solutions = [
+      { "name"        : 'xnnpack',
+        "url"         : 'https://github.com/google/XNNPACK',
+        "deps_file"   : 'DEPS',
+        "managed"     : False,
+        "custom_deps" : {
+       },
+       "custom_vars": {},
+     },
+   ]
+   ```
+4. Run `gclient sync` to get the source.
