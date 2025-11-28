@@ -1095,7 +1095,7 @@ void GEMMBenchmark(benchmark::State& state,
 }
 #endif //   XNN_ENABLE_KLEIDIAI && (XNN_ENABLE_ARM_SME2 || XNN_ENABLE_ARM_SME)
 
-#if XNN_ENABLE_KLEIDIAI && XNN_ENABLE_ARM_SME2
+#if XNN_ENABLE_KLEIDIAI && (XNN_ENABLE_ARM_SME2 || XNN_ENABLE_ARM_SME)
 void GEMMBenchmark(benchmark::State& state,
                    xnn_pf16_gemm_minmax_ukernel_fn gemm,
                    xnn_init_f16_minmax_params_fn init_minmax_params,
@@ -1144,10 +1144,10 @@ void GEMMBenchmark(benchmark::State& state,
 
   // Pack the left-hand operand.
   const size_t input_packed_size =
-      xnn_x16_pack_lh_size__neonsme2(mc, kc, mr_packed, kr, sr);
+      xnn_x16_pack_lh_size__neonsme(mc, kc, mr_packed, kr, sr);
   xnnpack::Buffer<uint8_t, XNN_ALLOCATION_ALIGNMENT> input_packed(
       input_packed_size, /*extra_bytes=*/{0}, "input_packed");
-  xnn_x16_pack_lh_ukernel__neonsme2(mc, kc, mr_packed, kr, sr,
+  xnn_x16_pack_lh_ukernel__neonsme(mc, kc, mr_packed, kr, sr,
                                     /*m_idx_start=*/0, a.data(),
                                     /*lhs_stride=*/kc * sizeof(xnn_float16),
                                     input_packed.data());
@@ -1205,7 +1205,7 @@ void GEMMBenchmark(benchmark::State& state,
       static_cast<uint64_t>(state.iterations()) * 2 * mc * nc * kc,
       benchmark::Counter::kIsRate);
 }
-#endif  // XNN_ENABLE_KLEIDIAI && XNN_ENABLE_ARM_SME2
+#endif  // XNN_ENABLE_KLEIDIAI && (XNN_ENABLE_ARM_SME2 || XNN_ENABLE_ARM_SME)
 
 void GEMMBenchmark(benchmark::State& state,
                    xnn_qp8_f32_qb4w_gemm_minmax_ukernel_fn gemm,
