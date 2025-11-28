@@ -37,13 +37,12 @@ static f32x16x8& operator+=(f32x16x8& a, bf16x32x4 b) {
   return a;
 }
 
-static f32x16& reduce_add(
-    f32x16& a, bf16x32 b,
+static f32x16 reduce_add(
+    f32x16 a, bf16x32 b,
     std::integral_constant<size_t, 2> /*horizontal_factor*/) {
-  f32x16 b_f32(_mm512_dpbf16_ps(
-    _mm512_setzero_ps(), reinterpret_cast<__m512bh>(b.v),
-    reinterpret_cast<__m512bh>(_mm512_set1_epi16(bfloat16(1.0f).to_bits()))));
-  return a += b_f32;
+  return f32x16{_mm512_dpbf16_ps(
+      a.v, reinterpret_cast<__m512bh>(b.v),
+      reinterpret_cast<__m512bh>(_mm512_set1_epi16(bfloat16(1.0f).to_bits())))};
 }
 
 }  // namespace simd
