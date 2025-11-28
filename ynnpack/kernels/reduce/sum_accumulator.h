@@ -25,6 +25,13 @@ AccT reduce_add(AccT acc, AT a,
   return acc += a;
 }
 
+struct Identity {
+  template <typename T>
+  YNN_ALWAYS_INLINE T operator()(const T& x) const {
+    return x;
+  }
+};
+
 template <typename AccT>
 auto sum_rows(AccT acc[4], std::integral_constant<size_t, 16> /*K*/) {
   using OutAccT = simd::vec<typename AccT::value_type, 4>;
@@ -65,7 +72,7 @@ auto sum_rows(AccT acc[4], std::integral_constant<size_t, 4>/*K*/) {
   return (t[0] + t[1]) + (t[2] + t[3]);
 }
 
-template <typename AccT, size_t K_>
+template <typename AccT, size_t K_, typename MapFn = Identity>
 struct sum_accumulator_x32 {
   static constexpr std::integral_constant<size_t, 4> N = {};
   static constexpr std::integral_constant<size_t, K_> K = {};
@@ -73,6 +80,7 @@ struct sum_accumulator_x32 {
       horizontal_factor = {};
 
   AccT acc[N];
+  MapFn map_fn;
 
   sum_accumulator_x32() = default;
 
@@ -93,10 +101,10 @@ struct sum_accumulator_x32 {
     auto a_2 = 2 < n ? load(offset_bytes(A, 2 * A_stride_n), zero, k) : zero;
     auto a_3 = 3 < n ? load(offset_bytes(A, 3 * A_stride_n), zero, k) : zero;
 
-    acc[0] = reduce_add(acc[0], a_0, horizontal_factor);
-    acc[1] = reduce_add(acc[1], a_1, horizontal_factor);
-    acc[2] = reduce_add(acc[2], a_2, horizontal_factor);
-    acc[3] = reduce_add(acc[3], a_3, horizontal_factor);
+    acc[0] = reduce_add(acc[0], map_fn(a_0), horizontal_factor);
+    acc[1] = reduce_add(acc[1], map_fn(a_1), horizontal_factor);
+    acc[2] = reduce_add(acc[2], map_fn(a_2), horizontal_factor);
+    acc[3] = reduce_add(acc[3], map_fn(a_3), horizontal_factor);
   }
 
   template <typename T, typename NT>
@@ -109,12 +117,13 @@ struct sum_accumulator_x32 {
   }
 };
 
-template <typename InVT, typename AccT>
+template <typename InVT, typename AccT, typename MapFn = Identity>
 struct sum_accumulator_k1_1 {
   static constexpr std::integral_constant<size_t, 1> K2 = {};
   static constexpr std::integral_constant<size_t, AccT::N> N = {};
 
   AccT acc;
+  MapFn map_fn;
 
   sum_accumulator_k1_1() = default;
 
@@ -129,7 +138,7 @@ struct sum_accumulator_k1_1 {
     assert(n <= N);
     assert(n > 0);
 
-    acc += load(offset_bytes(A, 0 * A_stride_k2), InVT(0), n);
+    acc += map_fn(load(offset_bytes(A, 0 * A_stride_k2), InVT(0), n));
   }
 
   template <typename T, typename NT>
