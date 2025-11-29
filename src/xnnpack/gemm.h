@@ -302,6 +302,10 @@ DECLARE_PF16_GEMM_MINMAX_UKERNEL_FUNCTION(
     xnn_pf16_gemm_minmax_ukernel_1x32c2__neonsme2)
 DECLARE_PF16_GEMM_MINMAX_UKERNEL_FUNCTION(
     xnn_pf16_gemm_minmax_ukernel_32x32c2__neonsme2)
+DECLARE_PF16_GEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_pf16_gemm_minmax_ukernel_1x32c2__neonsme)
+DECLARE_PF16_GEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_pf16_gemm_minmax_ukernel_32x32c2__neonsme)
 
 size_t xnn_pf32_gemm_minmax_ukernel_1x32c2__neonsme2_get_mr();
 size_t xnn_pf32_gemm_minmax_ukernel_1x32c2__neonsme2_get_nr();
