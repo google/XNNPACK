@@ -1,9 +1,9 @@
-"""
-Microkernel filenames lists for neonsme.
-
-Auto-generated file. Do not edit!
-  Generator: tools/update-microkernels.py
-"""
+#
+# Microkernel filenames lists for neonsme.
+#
+# Auto-generated file. Do not edit!
+#   Generator: tools/update-microkernels.py
+#
 
 PROD_NEONSME_MICROKERNEL_SRCS = [
     "src/pf32-gemm/pf32-gemm-1x32-minmax-neonsme.c",

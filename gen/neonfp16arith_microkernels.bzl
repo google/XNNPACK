@@ -1,9 +1,9 @@
-"""
-Microkernel filenames lists for neonfp16arith.
-
-Auto-generated file. Do not edit!
-  Generator: tools/update-microkernels.py
-"""
+#
+# Microkernel filenames lists for neonfp16arith.
+#
+# Auto-generated file. Do not edit!
+#   Generator: tools/update-microkernels.py
+#
 
 PROD_NEONFP16ARITH_MICROKERNEL_SRCS = [
     "src/f16-avgpool/gen/f16-avgpool-9p-minmax-neonfp16arith.c",

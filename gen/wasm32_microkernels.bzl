@@ -1,9 +1,9 @@
-"""
-Microkernel filenames lists for wasm32.
-
-Auto-generated file. Do not edit!
-  Generator: tools/update-microkernels.py
-"""
+#
+# Microkernel filenames lists for wasm32.
+#
+# Auto-generated file. Do not edit!
+#   Generator: tools/update-microkernels.py
+#
 
 PROD_WASM32_ASM_MICROKERNEL_SRCS = [
 ]
