@@ -180,10 +180,8 @@ auto make_unary_elementwise_impl(unary_kernel_fn kernel) {
 // data, this would need to change.
 auto make_binary_elementwise_impl(binary_kernel_fn kernel,
                                   const binary_params& params) {
-  return [kernel, params](
-             slinky::buffer<const void, YNN_MAX_TENSOR_RANK> a,
-             slinky::buffer<const void, YNN_MAX_TENSOR_RANK> b,
-             slinky::buffer<void, YNN_MAX_TENSOR_RANK> x) -> slinky::index_t {
+  return [kernel, params](slinky::raw_buffer a, slinky::raw_buffer b,
+                          slinky::raw_buffer x) -> slinky::index_t {
     slinky::dim a_dims[2], b_dims[2], x_dims[2];
 
     for (int i = 0; i < 2; ++i) {
