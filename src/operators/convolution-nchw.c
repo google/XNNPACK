@@ -932,7 +932,11 @@ static void* get_and_advance_simd_buffer(uint8_t** buffer, size_t bytes) {
 };
 
 static struct fingerprint_buffers generate_fingerprint_data(
-    const struct fingerprint_parameters* params, const size_t element_size) {
+    const struct conv2d_variant* const variant,
+    const struct fingerprint_parameters* params) {
+  const size_t element_size = (params->flags & XNN_FLAG_FP32_STATIC_WEIGHTS)
+                                  ? sizeof(float)
+                                  : (1 << variant->log2_filter_element_size);
   const size_t kernel_size = params->kernel_width * params->kernel_height *
                              params->group_input_channels *
                              params->group_output_channels * params->groups;
@@ -942,8 +946,9 @@ static struct fingerprint_buffers generate_fingerprint_data(
   fill_fingerprint_buffer(buffer, bytes);
   return (struct fingerprint_buffers){
       .data = buffer,
-      .kernel = get_and_advance_simd_buffer(&buffer, kernel_size),
-      .bias = get_and_advance_simd_buffer(&buffer, bias_size),
+      .kernel =
+          get_and_advance_simd_buffer(&buffer, kernel_size * element_size),
+      .bias = get_and_advance_simd_buffer(&buffer, bias_size * sizeof(float)),
   };
 }
 
@@ -990,8 +995,7 @@ enum xnn_status xnn_fingerprint_convolution2d_nchw(
     }
     return context.status;
   }
-  const struct fingerprint_buffers data = generate_fingerprint_data(
-      &params, 1 << variant->log2_filter_element_size);
+  const struct fingerprint_buffers data = generate_fingerprint_data(variant, &params);
   enum xnn_status status = create_convolution2d_nchw(
       variant, params.input_padding_top, params.input_padding_right,
       params.input_padding_bottom, params.input_padding_left,

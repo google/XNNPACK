@@ -999,6 +999,18 @@ static enum xnn_status force_coherent_kernel_scale_values_f32(const struct fc_va
   return xnn_status_success;
 }
 
+static enum xnn_status force_coherent_bias_values_i32(
+    const struct fc_variant* variant, struct fc_context* context) {
+  // We cast the `const` away because we know that the data was created for the
+  // fingerprinting and that its safe to modify.
+  int32_t* bias = (int32_t*)(uintptr_t)context->bias;
+  for (size_t i = 0; i < context->output_channels; ++i) {
+    // Set the topmost 5 bits to 0.
+    bias[i] = bias[i] & 0x07ffffff;
+  }
+  return xnn_status_success;
+}
+
 static enum xnn_status set_min_block_size(const struct fc_variant* variant,
                               struct fc_context* context) {
   context->block_size = XNN_MIN_BLOCKSIZE;
@@ -1032,7 +1044,8 @@ struct fc_variant {
   fc_setup_function setup_scale_params;
   // These functions will enforce constraints on the data that is generated to
   // create a fingerprint.
-  fc_setup_function fingerprint_constraints[XNN_FC_VARIANT_FINGERPRINT_CONSTRAINT_MAX_COUNT];
+  fc_setup_function
+      fingerprint_constraints[XNN_FC_VARIANT_FINGERPRINT_CONSTRAINT_MAX_COUNT];
   // Constants.
   size_t extra_weights_bytes;
   size_t kernel_scale_element_size;
@@ -1266,11 +1279,11 @@ static const struct fc_variant qs8_variant = {
     .setup_packing_params = setup_packing_params_qs8,
     .setup_packing_functions = setup_packing_functions_from_gemm_config,
     .setup_scale_params = setup_scale_params_qs8,
-    .fingerprint_constraints = {force_coherent_kernel_scale_values_bf16},
+    .fingerprint_constraints = {force_coherent_kernel_scale_values_bf16,
+                                force_coherent_bias_values_i32},
     .extra_weights_bytes = sizeof(float),
     .kernel_scale_element_size = 0,
 };
-
 
 static const struct fc_variant qs8_qc4w_variant = {
     .check_output_bounds = check_output_bounds_f32,
@@ -1285,7 +1298,8 @@ static const struct fc_variant qs8_qc4w_variant = {
     .setup_packing_params = setup_packing_params_qs8_qc4w,
     .setup_packing_functions = setup_packing_functions_from_gemm_config,
     .setup_scale_params = setup_scale_params_qx8_qcyw,
-    .fingerprint_constraints = {force_coherent_kernel_scale_values_f32},
+    .fingerprint_constraints = {force_coherent_kernel_scale_values_f32,
+                                force_coherent_bias_values_i32},
     .extra_weights_bytes = sizeof(float),
     .kernel_scale_element_size = 0,
 };
@@ -1303,7 +1317,8 @@ static const struct fc_variant qs8_qc8w_variant = {
     .setup_packing_params = setup_packing_params_qs8,
     .setup_packing_functions = setup_packing_functions_from_gemm_config,
     .setup_scale_params = setup_scale_params_qx8_qcyw,
-    .fingerprint_constraints = {force_coherent_kernel_scale_values_f32},
+    .fingerprint_constraints = {force_coherent_kernel_scale_values_f32,
+                                force_coherent_bias_values_i32},
     .extra_weights_bytes = sizeof(float),
     .kernel_scale_element_size = 0,
 };
@@ -1321,11 +1336,10 @@ static const struct fc_variant qu8_variant = {
     .setup_packing_params = setup_packing_params_qu8,
     .setup_packing_functions = setup_packing_functions_from_gemm_config,
     .setup_scale_params = UNUSED,
-    .fingerprint_constraints = {},
+    .fingerprint_constraints = {force_coherent_bias_values_i32},
     .extra_weights_bytes = 0,
     .kernel_scale_element_size = 0,
 };
-
 
 static enum xnn_status setup_variant_and_gemm_config(
     const struct fc_variant** variant, struct fc_context* context) {
