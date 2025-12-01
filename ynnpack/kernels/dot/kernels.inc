@@ -37,9 +37,7 @@ YNN_DOT_KERNEL(arch_flag::amxint8, dot_uint8_int8_int32_16x64x64_16x16x4_amxint8
 #endif  // MEMORY_SANITIZER
 #endif  // YNN_ARCH_X86_AVX2
 #ifdef YNN_ARCH_X86_FMA3
-#ifndef MEMORY_SANITIZER  // TODO(b/458235638)
 #include "ynnpack/kernels/dot/x86_fma3_fp32.inc"
-#endif  // MEMORY_SANITIZER
 #endif  // YNN_ARCH_X86_FMA3
 #ifdef YNN_ARCH_X86_AVX2_FMA3
 #include "ynnpack/kernels/dot/x86_avx2_fma3_bf16_bf16_fp32.inc"

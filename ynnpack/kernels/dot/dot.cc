@@ -318,9 +318,14 @@ dot_kernel get_dot_kernel(const dot_shape& shape,
 #include "ynnpack/kernels/dot/kernels.inc"
 #undef YNN_DOT_KERNEL
   if (!packed_shape) {
-    YNN_LOG_INFO() << "Using dot kernel " << optimizer.kernel_used
-                   << " for dot " << shape.m << "x" << shape.n << "x"
-                   << shape.k1;
+    if (optimizer.result.kernel) {
+      YNN_LOG_INFO() << "Using dot kernel " << optimizer.kernel_used
+                     << " for dot " << shape.m << "x" << shape.n << "x"
+                     << shape.k1;
+    } else {
+      YNN_LOG_WARNING() << "No dot kernel found for dot " << shape.m << "x"
+                        << shape.n << "x" << shape.k1;
+    }
   }
   return optimizer.result;
 }
