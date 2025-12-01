@@ -13,7 +13,6 @@
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/math.h"
 #include "src/xnnpack/pack-lh.h"
-#include "src/xnnpack/config.h"
 
 #if XNN_ENABLE_KLEIDIAI
 #include "kai/ukernels/matmul/pack/kai_lhs_pack_x8p2vlx4_x8_sme.h"
@@ -29,8 +28,6 @@ void xnn_x8_pack_lh_ukernel__neonsme(size_t m, size_t k, size_t mr_packed,
                                       void* XNN_RESTRICT lhs_packed) {
  
 #if XNN_ENABLE_KLEIDIAI
-  const struct xnn_gemm_config* gemm_config = xnn_init_pqs8_qc8w_gemm_config();
-  mr_packed = gemm_config->mr_packed;
   if (mr_packed == 1) {
     memcpy(lhs_packed, lhs, sizeof(int8_t) * k);
   } else {
@@ -46,8 +43,6 @@ size_t xnn_x8_pack_lh_size__neonsme(size_t m, size_t k, size_t mr_packed,
                                      size_t kr, size_t sr) {
 
 #if XNN_ENABLE_KLEIDIAI
-  const struct xnn_gemm_config* gemm_config = xnn_init_pqs8_qc8w_gemm_config();
-  mr_packed = gemm_config->mr_packed;
   if (mr_packed == 1) {
     return m * sizeof(int8_t) * k;
   } else {
@@ -64,8 +59,6 @@ size_t xnn_x8_pack_lh_offset__neonsme(size_t m, size_t k, size_t mr_packed,
                                        size_t kr, size_t sr) {
 
 #if XNN_ENABLE_KLEIDIAI
-  const struct xnn_gemm_config* gemm_config = xnn_init_pqs8_qc8w_gemm_config();
-  mr_packed = gemm_config->mr_packed;
   if (mr_packed == 1) {
     return m * sizeof(int8_t) * k;
   } else {
