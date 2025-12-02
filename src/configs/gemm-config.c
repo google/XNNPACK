@@ -407,7 +407,7 @@ static void init_pf32_gemm_config(void) {
       pf32_gemm_config.arch = xnn_arch_arm_sme2;
       pf32_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_pf32_gemm_minmax_ukernel_1x32__neonsme2);
       pf32_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(mr)] =XNN_INIT_HMP_GEMM_UKERNEL(xnn_pf32_gemm_minmax_ukernel_32x32__neonsme2);
-      pf32_gemm_config.minmax.igemm[XNN_MR_TO_INDEX(mr)] = xnn_init_hmp_packed_igemm_ukernel( (xnn_packed_lhs_igemm_ukernel_fn)xnn_pf32_igemm_minmax_ukernel_32x32__neonsme);
+      pf32_gemm_config.minmax.igemm[XNN_MR_TO_INDEX(mr)] = xnn_init_hmp_packed_igemm_ukernel( (xnn_packed_lhs_igemm_ukernel_fn)xnn_pf32_igemm_minmax_ukernel_32x32__neonsme2);
       pf32_gemm_config.init.f32 = xnn_init_f32_minmax_scalar_params;
       pf32_gemm_config.pack_weights_and_biases = xnn_pack_kai_f32_weights_and_biases;
       pf32_gemm_config.packed_stride_weights_and_biases = xnn_packed_stride_kai_f32_weights_and_biases;
