@@ -104,8 +104,7 @@ struct deconv2d_context {
 
   void* scale_params_for_cleanup;
   void* kernel_scale_for_cleanup;
-  void* kernel_for_cleanup;
-  void* bias_for_cleanup;
+  void* fingerprint_data_for_cleanup;
 };
 
 static bool is_subconv2d(struct deconv2d_context* context) {
@@ -505,6 +504,7 @@ static enum xnn_status create_deconvolution2d_nhwc(
                      kernel_size ^ nr ^ kr ^ sr ^ ukernel_type;
     cache_key.kernel = kernel;
     cache_key.bias = bias;
+    cache_key.fingerprint_id = context->fingerprint_id;
     deconvolution_op->packed_weights.offset =
         xnn_look_up_or_insert_weights_cache(deconvolution_op->weights_cache,
                                             &cache_key, weights_ptr,
@@ -881,10 +881,8 @@ static enum xnn_status cleanup_context(const struct deconv2d_variant* variant,
   context->scale_params_for_cleanup = NULL;
   xnn_release_simd_memory(context->kernel_scale_for_cleanup);
   context->kernel_scale_for_cleanup = NULL;
-  xnn_release_simd_memory(context->kernel_for_cleanup);
-  context->kernel_for_cleanup = NULL;
-  xnn_release_simd_memory(context->bias_for_cleanup);
-  context->bias_for_cleanup = NULL;
+  xnn_release_simd_memory(context->fingerprint_data_for_cleanup);
+  context->fingerprint_data_for_cleanup = NULL;
   return xnn_status_success;
 }
 
@@ -1118,6 +1116,14 @@ error:
   return status;
 }
 
+// Returns the given `buffer` pointer, then advances it by `bytes` bytes,
+// rounded up to `XNN_ALLOCATION_ALIGNMENT`.
+static void* get_and_advance_simd_buffer(uint8_t** buffer, size_t bytes) {
+  uint8_t* const res = *buffer;
+  *buffer += bytes + (XNN_ALLOCATION_ALIGNMENT - (bytes % XNN_ALLOCATION_ALIGNMENT));
+  return res;
+};
+
 static enum xnn_status generate_fingerprint_parameters(struct deconv2d_context* context) {
   // Common parameters.
   context->output_padding_top = 1;
@@ -1236,34 +1242,46 @@ static enum xnn_status generate_fingerprint_parameters(struct deconv2d_context* 
     const size_t kernel_scale_size = context->groups * context->group_output_channels;
     const size_t kernel_scale_size_bytes = kernel_scale_size * sizeof(float);
     float* kernel_scale = xnn_allocate_simd_memory(kernel_scale_size_bytes);
-    if (!kernel_scale) {
-      xnn_log_error(
-          "Could not allocate %zu bytes when generating deconvolution fingerprint (%s) data",
-          kernel_scale_size_bytes,
-          xnn_fingerprint_id_to_string(context->fingerprint_id));
-      return xnn_status_out_of_memory;
-    }
     context->kernel_scale_for_cleanup = kernel_scale;
     context->kernel_scale = kernel_scale;
-    for (size_t i = 0; i < kernel_scale_size; ++i) {
-      kernel_scale[i] = 1;
-    }
   }
 
-  { // Generate kernel data.
-    const size_t kernel_size =
+  {  // Generate kernel data.
+    const size_t kernel_bytes =
         context->groups * context->group_output_channels *
         context->kernel_height * context->kernel_width *
         context->group_input_channels *
         (1 << context->gemm_config->log2_filter_element_size);
-    context->kernel_for_cleanup = xnn_allocate_simd_memory(kernel_size);
-    context->kernel = context->kernel_for_cleanup;
-    fill_fingerprint_buffer(context->kernel_for_cleanup, kernel_size);
-    const size_t bias_size = context->groups * context->group_output_channels *
-                             context->gemm_config->bias_element_size;
-    context->bias_for_cleanup = xnn_allocate_simd_memory(bias_size);
-    context->bias = context->bias_for_cleanup;
-    fill_fingerprint_buffer(context->bias_for_cleanup, bias_size);
+    const size_t bias_bytes = context->groups * context->group_output_channels *
+                              context->gemm_config->bias_element_size;
+
+    const bool set_kernel_scale =
+        context->input_scale && !context->kernel_scale_value;
+    const size_t kernel_scale_size =
+        set_kernel_scale ? context->groups * context->group_output_channels : 0;
+    const size_t kernel_scale_bytes = kernel_scale_size * sizeof(float);
+    const size_t bytes = kernel_bytes + bias_bytes + kernel_scale_bytes +
+                         XNN_ALLOCATION_ALIGNMENT * 2;
+    uint8_t* buffer = xnn_allocate_simd_memory(bytes);
+    if (!buffer) {
+      xnn_log_error(
+          "Could not allocate %zu bytes when generating deconvolution "
+          "fingerprint (%s) data",
+          bytes, xnn_fingerprint_id_to_string(context->fingerprint_id));
+      return xnn_status_out_of_memory;
+    }
+    fill_fingerprint_buffer(buffer, bytes);
+    context->fingerprint_data_for_cleanup = buffer;
+    context->kernel = get_and_advance_simd_buffer(&buffer, kernel_bytes);
+    context->bias = get_and_advance_simd_buffer(&buffer, bias_bytes);
+    if (set_kernel_scale) {
+      float* kernel_scale =
+          get_and_advance_simd_buffer(&buffer, kernel_scale_bytes);
+      context->kernel_scale = kernel_scale;
+      for (size_t i = 0; i < kernel_scale_size; ++i) {
+        kernel_scale[i] = 1;
+      }
+    }
   }
   return xnn_status_success;
 }
@@ -1274,18 +1292,20 @@ enum xnn_status xnn_fingerprint_deconvolution2d_nhwc(
   struct fingerprint_context f_context =
       create_fingerprint_context(fingerprint_id);
   if (f_context.status != xnn_status_uninitialized) {
+    // The fingerprint either already exists or an error was returned.
     if (f_context.status != xnn_status_success) {
       xnn_log_error("Error creating fingerprint context for %s",
                     xnn_fingerprint_id_to_string(fingerprint_id));
     }
     return f_context.status;
   }
-
+  enum xnn_status status = f_context.status;
   struct deconv2d_context context = {.fingerprint_id = fingerprint_id,
                                      .weights_cache = &f_context.cache,
                                      .deconvolution_op_out = &f_context.op};
-  XNN_RETURN_IF_ERROR(generate_fingerprint_parameters(&context));
-  enum xnn_status status = create_deconvolution2d_nhwc_helper(&context);
+  XNN_IF_ERROR_GOTO(error, generate_fingerprint_parameters(&context));
+  XNN_IF_ERROR_GOTO(error, create_deconvolution2d_nhwc_helper(&context));
+error:
   finalize_fingerprint_context(&f_context);
   return status;
 }
