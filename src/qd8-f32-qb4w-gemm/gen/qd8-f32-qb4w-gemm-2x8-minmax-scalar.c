@@ -17,6 +17,7 @@
 #include "src/xnnpack/math.h"
 #include "src/xnnpack/microparams.h"
 
+#include "src/xnnpack/unaligned.h"
 
 
 void xnn_qd8_f32_qb4w_gemm_minmax_ukernel_2x8__scalar(
@@ -53,14 +54,14 @@ void xnn_qd8_f32_qb4w_gemm_minmax_ukernel_2x8__scalar(
 
   kc = round_up_po2(kc, 2);
   do {
-    const float vksum0 = ((const float*) w)[0];
-    const float vksum1 = ((const float*) w)[1];
-    const float vksum2 = ((const float*) w)[2];
-    const float vksum3 = ((const float*) w)[3];
-    const float vksum4 = ((const float*) w)[4];
-    const float vksum5 = ((const float*) w)[5];
-    const float vksum6 = ((const float*) w)[6];
-    const float vksum7 = ((const float*) w)[7];
+    const float vksum0 = unaligned_indexed_load_f32(w, 0);
+    const float vksum1 = unaligned_indexed_load_f32(w, 1);
+    const float vksum2 = unaligned_indexed_load_f32(w, 2);
+    const float vksum3 = unaligned_indexed_load_f32(w, 3);
+    const float vksum4 = unaligned_indexed_load_f32(w, 4);
+    const float vksum5 = unaligned_indexed_load_f32(w, 5);
+    const float vksum6 = unaligned_indexed_load_f32(w, 6);
+    const float vksum7 = unaligned_indexed_load_f32(w, 7);
     const float vinput_zero_point0 = (const float) quantization_params[0].zero_point;
     float vout0x0 = vksum0 * vinput_zero_point0;
     float vout0x1 = vksum1 * vinput_zero_point0;
