@@ -9,6 +9,7 @@
 #include <cstdint>
 #include <numeric>
 #include <tuple>
+#include <type_traits>
 #include <utility>
 #include <variant>
 #include <vector>
@@ -65,6 +66,105 @@ inline bool same_bounds(const slinky::dim& a, const slinky::dim& b,
 //   2. Its stride is equal to its element size.
 inline bool is_continguous(const slinky::dim& dim, const int element_size) {
   return dim.extent() == 1 || dim.stride() == element_size;
+}
+
+// Helper to apply a function to pairs of elements in a parameter pack.
+template <typename F, typename A, typename B>
+void apply_to_pairs(F&& f, A&& a, B&& b) {
+  f(std::forward<A>(a), std::forward<B>(b));
+}
+
+template <typename F, typename A, typename B, typename... Pairs>
+void apply_to_pairs(F&& f, A&& a, B&& b, Pairs&&... pairs) {
+  f(std::forward<A>(a), std::forward<B>(b));
+  apply_to_pairs(std::forward<F>(f), std::forward<Pairs>(pairs)...);
+}
+
+// Helper to apply a predicate to pairs of elements in a parameter pack and
+// return true if the predicate is true for all pairs.
+template <typename F, typename A, typename B>
+bool all_of_pairs(F&& f, A&& a, B&& b) {
+  return f(std::forward<A>(a), std::forward<B>(b));
+}
+
+template <typename F, typename A, typename B, typename... Pairs>
+bool all_of_pairs(F&& f, A&& a, B&& b, Pairs&&... pairs) {
+  return f(std::forward<A>(a), std::forward<B>(b)) &&
+         all_of_pairs(std::forward<F>(f), std::forward<Pairs>(pairs)...);
+}
+
+// Peels off the innermost `NumInnerDims` dimensions of `x` and `inputs`,
+// and where possible, fuses dimensions of buffers from the innermost to the
+// outermost.
+//
+// `x` is the output buffer.
+// `x_dims` is an array of size `NumInnerDims` that is used to store the
+// dimensions of `x` after the peeling.
+//
+// `inputs` is a parameter pack of pairs of pointers to the dimensions of the
+// inputs after the peeling, and the buffers themselves e.g. { &a_dims[0], a,
+// &b_dims[0], b, ... }. The dimensions must be pointers to arrays of size
+// `NumInnerDims`.
+template <int NumInnerDims, typename... DimBufferPairs>
+void fuse_and_slice_leading_dims(slinky::dim* x_dims, slinky::raw_buffer& x,
+                                 DimBufferPairs&&... inputs) {
+  for (int i = 0; i < NumInnerDims; ++i) {
+    // If the output innermost (n) dimension has extent 1, we need to make the n
+    // dimension of all inputs a broadcast. This case is not expected to happen.
+    // For now, we add an assert to catch this case if it does.
+    assert(i != 0 || is_continguous(dim0_or_broadcast(x), x.elem_size));
+
+    x_dims[i] = dim0_or_broadcast(x);
+
+    // Initialize `in_dims[i]` for each input.
+    apply_to_pairs(
+        [i](slinky::dim* in_dims, const slinky::raw_buffer& in_buf) {
+          in_dims[i] = dim0_or_broadcast(in_buf);
+        },
+        inputs...);
+
+    // `x` is already a view to the correct tile in the larger output buffer.
+    // Inputs are not. We must explicitly set their offsets according to `x`
+    // before slicing.
+    apply_to_pairs(
+        [x_min_i = x_dims[i].min()](const slinky::dim* /*in_dims*/,
+                                    slinky::raw_buffer& in_buf) {
+          slice0_if_not_scalar(in_buf, x_min_i);
+        },
+        inputs...);
+    slice0_if_not_scalar(x);
+
+    while (x.rank > 0) {
+      // First check whether fusing dimensions is possible.
+      bool can_fuse_all =
+          slinky::can_fuse(x_dims[i], x.dim(0)) &&
+          all_of_pairs(
+              [x_dims, i](const slinky::dim* in_dims,
+                          const slinky::raw_buffer& in_buf) {
+                return same_bounds(x_dims[i], in_dims[i]) &&
+                       slinky::can_fuse(in_dims[i], dim0_or_broadcast(in_buf));
+              },
+              inputs...);
+      if (!can_fuse_all) {
+        break;
+      }
+
+      // Fuse the dimensions.
+      x_dims[i] = slinky::fuse(x_dims[i], x.dim(0));
+      apply_to_pairs(
+          [i](slinky::dim* in_dims, const slinky::raw_buffer& in_buf) {
+            in_dims[i] = slinky::fuse(in_dims[i], dim0_or_broadcast(in_buf));
+          },
+          inputs...);
+
+      apply_to_pairs(
+          [](slinky::dim* /*in_dims*/, slinky::raw_buffer& in_buf) {
+            slice0_if_not_scalar(in_buf);
+          },
+          inputs...);
+      x.slice(0);
+    }
+  }
 }
 
 // Call a unary kernel with a params buffer.
@@ -140,26 +240,7 @@ auto make_unary_elementwise_impl(unary_kernel_fn kernel) {
       [kernel](slinky::raw_buffer a, slinky::raw_buffer x) -> slinky::index_t {
         slinky::dim a_dims[2], x_dims[2];
 
-        for (int i = 0; i < 2; ++i) {
-          a_dims[i] = dim0_or_broadcast(a);
-          x_dims[i] = dim0_or_broadcast(x);
-
-          // `x` is already a view to the correct tile in the larger output
-          // buffer. Inputs `a` and `b` are not. We must explicitly set their
-          // offsets according to `x` before slicing.
-          slice0_if_not_scalar(a, x_dims[i].min());
-          slice0_if_not_scalar(x);
-
-          while (x.rank > 0 && same_bounds(x_dims[i], a_dims[i]) &&
-                 slinky::can_fuse(x_dims[i], x.dim(0)) &&
-                 slinky::can_fuse(a_dims[i], dim0_or_broadcast(a))) {
-            a_dims[i] = slinky::fuse(a_dims[i], dim0_or_broadcast(a));
-            x_dims[i] = slinky::fuse(x_dims[i], x.dim(0));
-
-            slice0_if_not_scalar(a);
-            x.slice(0);
-          }
-        }
+        fuse_and_slice_leading_dims<2>(&x_dims[0], x, &a_dims[0], a);
 
         // We don't support broadcasting of `a` here in the innermost
         // dimension (and it would waste computation).
@@ -190,36 +271,7 @@ auto make_binary_elementwise_impl(binary_kernel_fn kernel,
                           slinky::raw_buffer x) -> slinky::index_t {
     slinky::dim a_dims[2], b_dims[2], x_dims[2];
 
-    for (int i = 0; i < 2; ++i) {
-      // If the output innermost (n) dimension has extent 1, we need to make the
-      // n dimension of all inputs a broadcast. This case is not expected to
-      // happen. For now, we add an assert to catch this case if it does.
-      assert(i != 0 || is_continguous(dim0_or_broadcast(x), x.elem_size));
-
-      a_dims[i] = dim0_or_broadcast(a);
-      b_dims[i] = dim0_or_broadcast(b);
-      x_dims[i] = dim0_or_broadcast(x);
-
-      // `x` is already a view to the correct tile in the larger output buffer.
-      // Inputs `a` and `b` are not. We must explicitly set their offsets
-      // according to `x` before slicing.
-      slice0_if_not_scalar(a, x_dims[i].min());
-      slice0_if_not_scalar(b, x_dims[i].min());
-      slice0_if_not_scalar(x);
-
-      while (x.rank > 0 && same_bounds(x_dims[i], a_dims[i], b_dims[i]) &&
-             slinky::can_fuse(x_dims[i], x.dim(0)) &&
-             slinky::can_fuse(a_dims[i], dim0_or_broadcast(a)) &&
-             slinky::can_fuse(b_dims[i], dim0_or_broadcast(b))) {
-        a_dims[i] = slinky::fuse(a_dims[i], dim0_or_broadcast(a));
-        b_dims[i] = slinky::fuse(b_dims[i], dim0_or_broadcast(b));
-        x_dims[i] = slinky::fuse(x_dims[i], x.dim(0));
-
-        slice0_if_not_scalar(a);
-        slice0_if_not_scalar(b);
-        x.slice(0);
-      }
-    }
+    fuse_and_slice_leading_dims<2>(&x_dims[0], x, &a_dims[0], a, &b_dims[0], b);
 
     const slinky::dim& a_n = a_dims[0];
     const slinky::dim& b_n = b_dims[0];
@@ -255,43 +307,8 @@ auto make_ternary_elementwise_impl(ternary_kernel_fn kernel) {
                slinky::raw_buffer x) -> slinky::index_t {
         slinky::dim a_dims[2], b_dims[2], c_dims[2], x_dims[2];
 
-        for (int i = 0; i < 2; ++i) {
-          // If the output innermost (n) dimension has extent 1, we need to make
-          // the n dimension of all inputs a broadcast. This case is not
-          // expected to happen. For now, we add an assert to catch this case if
-          // it does.
-          assert(i != 0 || is_continguous(dim0_or_broadcast(x), x.elem_size));
-
-          a_dims[i] = dim0_or_broadcast(a);
-          b_dims[i] = dim0_or_broadcast(b);
-          c_dims[i] = dim0_or_broadcast(c);
-          x_dims[i] = dim0_or_broadcast(x);
-
-          // `x` is already a view to the correct tile in the larger output
-          // buffer. Inputs `a` and `b` are not. We must explicitly set their
-          // offsets according to `x` before slicing.
-          slice0_if_not_scalar(a, x_dims[i].min());
-          slice0_if_not_scalar(b, x_dims[i].min());
-          slice0_if_not_scalar(c, x_dims[i].min());
-          slice0_if_not_scalar(x);
-
-          while (x.rank > 0 &&
-                 same_bounds(x_dims[i], a_dims[i], b_dims[i], c_dims[i]) &&
-                 slinky::can_fuse(x_dims[i], x.dim(0)) &&
-                 slinky::can_fuse(a_dims[i], dim0_or_broadcast(a)) &&
-                 slinky::can_fuse(b_dims[i], dim0_or_broadcast(b)) &&
-                 slinky::can_fuse(c_dims[i], dim0_or_broadcast(c))) {
-            a_dims[i] = slinky::fuse(a_dims[i], dim0_or_broadcast(a));
-            b_dims[i] = slinky::fuse(b_dims[i], dim0_or_broadcast(b));
-            c_dims[i] = slinky::fuse(c_dims[i], dim0_or_broadcast(c));
-            x_dims[i] = slinky::fuse(x_dims[i], x.dim(0));
-
-            slice0_if_not_scalar(a);
-            slice0_if_not_scalar(b);
-            slice0_if_not_scalar(c);
-            x.slice(0);
-          }
-        }
+        fuse_and_slice_leading_dims<2>(&x_dims[0], x, &a_dims[0], a, &b_dims[0],
+                                       b, &c_dims[0], c);
 
         const slinky::dim& a_n = a_dims[0];
         const slinky::dim& b_n = b_dims[0];
