@@ -4010,6 +4010,23 @@ enum xnn_status xnn_subgraph_optimize_packed_lhs(xnn_subgraph_t subgraph,
           node->packed_input_datatype = xnn_datatype_pqint8;
           node->flags |= XNN_FLAG_INLINE_LHS_PACKING;
         }
+
+        if (input_datatype == xnn_datatype_fp32 &&
+            kernel_datatype == xnn_datatype_fp32 &&
+            output_datatype == xnn_datatype_fp32 &&
+            xnn_init_pf32_gemm_config() != NULL &&
+            !(optimization_flags & XNN_FLAG_NO_INLINED_LHS_PACKING)) {
+            // Note that there is currently no option to not use inlining for this
+            // iGEMM kernel.
+            xnn_log_debug("Setting assumed_datatype=%s for node #%u (%s).",
+                         xnn_datatype_to_string(xnn_datatype_pfp32), node_id,
+                         xnn_node_type_to_string(node->type));
+            node->packed_input_datatype = xnn_datatype_pfp32;
+            if(node->type == xnn_node_type_convolution_2d) {
+              node->flags |= XNN_FLAG_INLINE_LHS_PACKING;
+            }
+          }
+
         if (input_datatype == xnn_datatype_fp16 &&
             (kernel_datatype == xnn_datatype_fp16 ||
             kernel_datatype == xnn_datatype_fp32) &&
@@ -4024,7 +4041,8 @@ enum xnn_status xnn_subgraph_optimize_packed_lhs(xnn_subgraph_t subgraph,
           node->packed_input_datatype = xnn_datatype_pfp16;
           node->flags |= XNN_FLAG_INLINE_LHS_PACKING;
         }
-      } break;
+      }
+        break;
       default:
         break;
     }
