@@ -57,8 +57,7 @@ auto make_dot_impl(dot_type type, bool consistent_arithmetic, bool transposed_a,
                    bool pack_b, size_t num_k_dims) {
   return [type, consistent_arithmetic, transposed_a, pack_b, num_k_dims](
              slinky::raw_buffer a, slinky::raw_buffer b,
-             slinky::buffer<const void, YNN_MAX_TENSOR_RANK> init_c,
-             slinky::raw_buffer c) -> index_t {
+             slinky::raw_buffer init_c, slinky::raw_buffer c) -> index_t {
     // If the dot has fewer than 3 reduction dimensions, we use this dummy
     // dimension instead.
     slinky::dim dummy_dim = slinky::dim(0, 0, 0, 0);
@@ -159,7 +158,7 @@ auto make_dot_impl(dot_type type, bool consistent_arithmetic, bool transposed_a,
     assert(!b_k2.is_folded());
     assert(!b_k3.is_folded());
 
-    if (init_c.base() && init_c.base() != c.base && c_n.extent() > 1) {
+    if (init_c.base && init_c.base != c.base && c_n.extent() > 1) {
       if (init_c_n.stride() == 0) {
         // The initializer is broadcasted in the n dimension, which the kernel
         // cannot handle. We need to copy it to the output, and update the

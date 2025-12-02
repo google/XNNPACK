@@ -11,6 +11,7 @@
 #ifndef XNNPACK_YNNPACK_SUBGRAPH_SLINKY_H_
 #define XNNPACK_YNNPACK_SUBGRAPH_SLINKY_H_
 
+#include <cassert>
 #include <cstddef>
 #include <string>
 #include <vector>
@@ -119,6 +120,136 @@ struct scheduling_info {
 
   bool force_root = false;
 };
+
+namespace internal {
+
+// Helper to apply a function to pairs of elements in a parameter pack.
+template <typename F, typename A, typename B>
+void apply_to_pairs(F&& f, A&& a, B&& b) {
+  f(std::forward<A>(a), std::forward<B>(b));
+}
+
+template <typename F, typename A, typename B, typename... Pairs>
+void apply_to_pairs(F&& f, A&& a, B&& b, Pairs&&... pairs) {
+  f(std::forward<A>(a), std::forward<B>(b));
+  apply_to_pairs(std::forward<F>(f), std::forward<Pairs>(pairs)...);
+}
+
+// Helper to apply a predicate to pairs of elements in a parameter pack and
+// return true if the predicate is true for all pairs.
+template <typename F, typename A, typename B>
+bool all_of_pairs(F&& f, A&& a, B&& b) {
+  return f(std::forward<A>(a), std::forward<B>(b));
+}
+
+template <typename F, typename A, typename B, typename... Pairs>
+bool all_of_pairs(F&& f, A&& a, B&& b, Pairs&&... pairs) {
+  return f(std::forward<A>(a), std::forward<B>(b)) &&
+         all_of_pairs(std::forward<F>(f), std::forward<Pairs>(pairs)...);
+}
+
+}  // namespace internal
+
+inline const slinky::dim& dim0_or_broadcast(const slinky::raw_buffer& buf) {
+  return buf.rank > 0 ? buf.dim(0) : slinky::dim::broadcast();
+}
+
+inline void slice0_if_not_scalar(slinky::raw_buffer& buf, slinky::index_t min) {
+  if (buf.rank > 0) buf.slice(0, min);
+}
+
+inline void slice0_if_not_scalar(slinky::raw_buffer& buf) {
+  if (buf.rank > 0) buf.slice(0);
+}
+
+inline bool same_bounds(const slinky::dim& a, const slinky::dim& b) {
+  // Return true if the dimensions have the same min and max or if they are
+  // both broadcasts.
+  return (a.min() == b.min() && a.max() == b.max()) ||
+         (a.stride() == 0 && b.stride() == 0);
+}
+
+template <typename... Dims>
+inline bool same_bounds(const slinky::dim& a, const slinky::dim& b,
+                        const Dims&... dims) {
+  return same_bounds(a, b) && same_bounds(b, dims...);
+}
+
+// A dimension is contiguous if it satisfies one of the following:
+//   1. Its extent is 1. In this case, we disregard stride.
+//   2. Its stride is equal to its element size.
+inline bool is_continguous(const slinky::dim& dim, const int element_size) {
+  return dim.extent() == 1 || dim.stride() == element_size;
+}
+
+// Peels off the innermost `NumInnerDims` dimensions of `x` and `inputs`,
+// and where possible, fuses dimensions of buffers from the innermost to the
+// outermost.
+//
+// `x` is the output buffer.
+// `x_dims` is an array of size `NumInnerDims` that is used to store the
+// dimensions of `x` after the peeling.
+//
+// `inputs` is a parameter pack of pairs of pointers to the dimensions of the
+// inputs after the peeling, and the buffers themselves e.g. { &a_dims[0], a,
+// &b_dims[0], b, ... }. The dimensions must be pointers to arrays of size
+// `NumInnerDims`.
+template <int NumInnerDims, typename... DimBufferPairs>
+void fuse_and_slice_leading_dims(slinky::dim* x_dims, slinky::raw_buffer& x,
+                                 DimBufferPairs&&... inputs) {
+  for (int i = 0; i < NumInnerDims; ++i) {
+    // If the output innermost (n) dimension has extent 1, we need to make the n
+    // dimension of all inputs a broadcast. This case is not expected to happen.
+    // For now, we add an assert to catch this case if it does.
+    assert(i != 0 || is_continguous(dim0_or_broadcast(x), x.elem_size));
+
+    x_dims[i] = dim0_or_broadcast(x);
+
+    // Initialize `in_dims[i]` for each input.
+    internal::apply_to_pairs(
+        [i](slinky::dim* in_dims, const slinky::raw_buffer& in_buf) {
+          in_dims[i] = dim0_or_broadcast(in_buf);
+        },
+        inputs...);
+
+    // `x` is already a view to the correct tile in the larger output buffer.
+    // Inputs are not. We must explicitly set their offsets according to `x`
+    // before slicing.
+    internal::apply_to_pairs(
+        [x_min_i = x_dims[i].min()](const slinky::dim* /*in_dims*/,
+                                    slinky::raw_buffer& in_buf) {
+          slice0_if_not_scalar(in_buf, x_min_i);
+        },
+        inputs...);
+    slice0_if_not_scalar(x);
+
+    while (x.rank > 0) {
+      // First check whether fusing dimensions is possible.
+      bool can_fuse_all =
+          slinky::can_fuse(x_dims[i], x.dim(0)) &&
+          internal::all_of_pairs(
+              [x_dims, i](const slinky::dim* in_dims,
+                          const slinky::raw_buffer& in_buf) {
+                return same_bounds(x_dims[i], in_dims[i]) &&
+                       slinky::can_fuse(in_dims[i], dim0_or_broadcast(in_buf));
+              },
+              inputs...);
+      if (!can_fuse_all) {
+        break;
+      }
+
+      // Fuse the dimensions and slice.
+      x_dims[i] = slinky::fuse(x_dims[i], x.dim(0));
+      internal::apply_to_pairs(
+          [i](slinky::dim* in_dims, slinky::raw_buffer& in_buf) {
+            in_dims[i] = slinky::fuse(in_dims[i], dim0_or_broadcast(in_buf));
+            slice0_if_not_scalar(in_buf);
+          },
+          inputs...);
+      x.slice(0);
+    }
+  }
+}
 
 }  // namespace ynn
 
