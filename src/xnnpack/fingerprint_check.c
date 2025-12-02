@@ -103,6 +103,27 @@ static enum xnn_status compute_fingerprint(
     case xnn_fingerprint_id_convolution2d_nhwc_pqs8_qs8_qc8w_dwconv:
     case xnn_fingerprint_id_convolution2d_nhwc_pqs8_qs8_qc8w:
       return xnn_fingerprint_convolution2d_nhwc(fingerprint_id);
+    case xnn_fingerprint_id_deconvolution2d_nhwc_f16_f16_f16:
+    case xnn_fingerprint_id_deconvolution2d_nhwc_f16_f16_f16_subconv2d:
+    case xnn_fingerprint_id_deconvolution2d_nhwc_f32_f32_f32:
+    case xnn_fingerprint_id_deconvolution2d_nhwc_f32_f32_f32_nr2:
+    case xnn_fingerprint_id_deconvolution2d_nhwc_f32_f32_f32_subconv2d:
+    case xnn_fingerprint_id_deconvolution2d_nhwc_f32_f32_f32_subconv2d_nr2:
+    case xnn_fingerprint_id_deconvolution2d_nhwc_pqs8_qs8_qc8w:
+    case xnn_fingerprint_id_deconvolution2d_nhwc_pqs8_qs8_qc8w_subconv2d:
+    case xnn_fingerprint_id_deconvolution2d_nhwc_pqs8_qs8_qs8:
+    case xnn_fingerprint_id_deconvolution2d_nhwc_pqs8_qs8_qs8_subconv2d:
+    case xnn_fingerprint_id_deconvolution2d_nhwc_qd8_f32_qc8w:
+    case xnn_fingerprint_id_deconvolution2d_nhwc_qd8_f32_qc8w_subconv2d:
+    case xnn_fingerprint_id_deconvolution2d_nhwc_qdu8_f32_qc8w:
+    case xnn_fingerprint_id_deconvolution2d_nhwc_qdu8_f32_qc8w_subconv2d:
+    case xnn_fingerprint_id_deconvolution2d_nhwc_qs8_qs8_qc8w:
+    case xnn_fingerprint_id_deconvolution2d_nhwc_qs8_qs8_qc8w_subconv2d:
+    case xnn_fingerprint_id_deconvolution2d_nhwc_qs8_qs8_qs8:
+    case xnn_fingerprint_id_deconvolution2d_nhwc_qs8_qs8_qs8_subconv2d:
+    case xnn_fingerprint_id_deconvolution2d_nhwc_qu8_qu8_qu8:
+    case xnn_fingerprint_id_deconvolution2d_nhwc_qu8_qu8_qu8_subconv2d:
+      return xnn_fingerprint_deconvolution2d_nhwc(fingerprint_id);
     case xnn_fingerprint_id_unknown:
     case xnn_fingerprint_id_no_fingerprint:
       return xnn_status_unsupported_parameter;
