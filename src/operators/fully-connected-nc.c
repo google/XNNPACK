@@ -47,46 +47,6 @@ static float clamp(const float value, const float minimum, const float maximum) 
   return maximum >= a ? a : maximum;
 }
 
-static enum xnn_fingerprint_id get_fingerprint_id(
-    const enum xnn_operator_type operator_type) {
-  switch (operator_type) {
-#define XNNPACK_OP_TYPE_TO_FINGERPRINT(...)                                 \
-  case XNN_CONCAT_TYPES(xnn_operator_type_fully_connected_nc, __VA_ARGS__): \
-    return XNN_EXPAND_TYPES(xnn_fingerprint_id_fully_connected_nc, __VA_ARGS__);
-
-    XNNPACK_OP_TYPE_TO_FINGERPRINT(f16);
-    XNNPACK_OP_TYPE_TO_FINGERPRINT(pf16);
-    XNNPACK_OP_TYPE_TO_FINGERPRINT(qd8, f32, qc2w);
-    XNNPACK_OP_TYPE_TO_FINGERPRINT(qd8, f16, qc4w);
-    XNNPACK_OP_TYPE_TO_FINGERPRINT(qdu8, f16, qc4w);
-    XNNPACK_OP_TYPE_TO_FINGERPRINT(qd8, f16, qb4w);
-    XNNPACK_OP_TYPE_TO_FINGERPRINT(qd8, f32, qc4w);
-    XNNPACK_OP_TYPE_TO_FINGERPRINT(qdu8, f32, qc4w);
-    XNNPACK_OP_TYPE_TO_FINGERPRINT(qp8, f32, qc4w);
-    XNNPACK_OP_TYPE_TO_FINGERPRINT(qp8, f32, qc8w);
-    XNNPACK_OP_TYPE_TO_FINGERPRINT(qp8, f32, qb4w);
-    XNNPACK_OP_TYPE_TO_FINGERPRINT(qd8, f32, qb4w);
-    XNNPACK_OP_TYPE_TO_FINGERPRINT(qdu8, f32, qb4w);
-    XNNPACK_OP_TYPE_TO_FINGERPRINT(qd8, f32, qc8w);
-    XNNPACK_OP_TYPE_TO_FINGERPRINT(qdu8, f32, qc8w);
-    XNNPACK_OP_TYPE_TO_FINGERPRINT(qd8, f16, qc8w);
-    XNNPACK_OP_TYPE_TO_FINGERPRINT(qdu8, f16, qc8w);
-    XNNPACK_OP_TYPE_TO_FINGERPRINT(bf16, f32);
-    XNNPACK_OP_TYPE_TO_FINGERPRINT(f32);
-    XNNPACK_OP_TYPE_TO_FINGERPRINT(pf32);
-    XNNPACK_OP_TYPE_TO_FINGERPRINT(f32, qc4w);
-    XNNPACK_OP_TYPE_TO_FINGERPRINT(f32, qc8w);
-    XNNPACK_OP_TYPE_TO_FINGERPRINT(qs8);
-    XNNPACK_OP_TYPE_TO_FINGERPRINT(qs8, qc4w);
-    XNNPACK_OP_TYPE_TO_FINGERPRINT(qs8, qc8w);
-    XNNPACK_OP_TYPE_TO_FINGERPRINT(pqs8, qc8w);
-    XNNPACK_OP_TYPE_TO_FINGERPRINT(qu8);
-#undef XNNPACK_OP_TYPE_TO_FINGERPRINT
-    default:
-      return xnn_fingerprint_id_unknown;
-  }
-}
-
 static enum xnn_operator_type get_operator_type(
     const enum xnn_fingerprint_id fingerprint_id) {
   switch (fingerprint_id) {
@@ -143,7 +103,8 @@ static enum xnn_status create_fully_connected_nc(
     const struct xnn_gemm_config* gemm_config,
     const struct gemm_fused_ukernels* gemm_ukernels,
     const enum xnn_operator_type operator_type,
-    xnn_weights_cache_t weights_cache, xnn_operator_t* fully_connected_op_out) {
+    xnn_weights_cache_t weights_cache, enum xnn_fingerprint_id fingerprint_id,
+    xnn_operator_t* fully_connected_op_out) {
   xnn_operator_t fully_connected_op = NULL;
   enum xnn_status status = xnn_status_uninitialized;
   assert(gemm_config);
@@ -307,7 +268,7 @@ static enum xnn_status create_fully_connected_nc(
   cache_key.seed = cache_seed;
   cache_key.kernel = kernel;
   cache_key.bias = bias;
-  cache_key.fingerprint_id = get_fingerprint_id(operator_type);
+  cache_key.fingerprint_id = fingerprint_id;
   if (use_weights_cache(fully_connected_op)) {
     cache_offset = xnn_weights_cache_look_up(fully_connected_op->weights_cache,
                                              &cache_key);
@@ -1444,7 +1405,6 @@ static enum xnn_status setup_variant_and_gemm_config(
       if (context->fingerprint_id ==
           xnn_fingerprint_id_fully_connected_nc_f32_f32_f32_nr2) {
         context->gemm_config = gemm_nr2_config;
-        break;
       } else if (gemm_nr2_config != NULL &&
                  gemm_nr2_config->minmax.gemm[gemm_nr2_config->mr - 1]
                          .function[XNN_UARCH_DEFAULT] != NULL &&
@@ -1575,17 +1535,20 @@ static enum xnn_status create_fully_connected_nc_helper(
   XNN_IF_ERROR_GOTO(error, variant->setup_packing_functions(variant, context));
   XNN_IF_ERROR_GOTO(error, variant->setup_scale_params(variant, context));
 
-  XNN_IF_ERROR_GOTO(error, create_fully_connected_nc(
-      context->input_channels, context->output_channels, context->input_stride,
-      context->output_stride, context->kernel, context->bias, context->flags,
-      context->block_size, context->blockwise_kernel_scale_params,
-      context->pack_gemm_gio_w, context->pack_gemm_goi_w,
-      context->packing_params, variant->extra_weights_bytes,
-      context->init_scale_params, context->scale_params,
-      context->init_kernel_scale_params, context->kernel_scale_params,
-      &context->params, context->params_size, context->gemm_config,
-      &context->gemm_config->minmax, context->operator_type,
-      context->weights_cache, context->fully_connected_op_out));
+  XNN_IF_ERROR_GOTO(
+      error,
+      create_fully_connected_nc(
+          context->input_channels, context->output_channels,
+          context->input_stride, context->output_stride, context->kernel,
+          context->bias, context->flags, context->block_size,
+          context->blockwise_kernel_scale_params, context->pack_gemm_gio_w,
+          context->pack_gemm_goi_w, context->packing_params,
+          variant->extra_weights_bytes, context->init_scale_params,
+          context->scale_params, context->init_kernel_scale_params,
+          context->kernel_scale_params, &context->params, context->params_size,
+          context->gemm_config, &context->gemm_config->minmax,
+          context->operator_type, context->weights_cache,
+          context->fingerprint_id, context->fully_connected_op_out));
 error:
   cleanup_context(variant, context);
   return status;
