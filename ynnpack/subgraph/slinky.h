@@ -241,9 +241,10 @@ void fuse_and_slice_leading_dims(slinky::dim* x_dims, slinky::raw_buffer& x,
       // Fuse the dimensions and slice.
       x_dims[i] = slinky::fuse(x_dims[i], x.dim(0));
       internal::apply_to_pairs(
-          [i](slinky::dim* in_dims, slinky::raw_buffer& in_buf) {
+          [i, x_min_i = x.dim(0).min()](slinky::dim* in_dims,
+                                        slinky::raw_buffer& in_buf) {
             in_dims[i] = slinky::fuse(in_dims[i], dim0_or_broadcast(in_buf));
-            slice0_if_not_scalar(in_buf);
+            slice0_if_not_scalar(in_buf, x_min_i);
           },
           inputs...);
       x.slice(0);
