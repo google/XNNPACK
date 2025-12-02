@@ -27,11 +27,11 @@ void xnn_pf32_igemm_minmax_ukernel_32x32__neonsme(
     const struct xnn_f32_minmax_params* minmax_params) {
 
   const size_t kai_kr = 1;
-  const size_t k = ks * round_up(kc/sizeof(float), kai_kr);
+  const size_t k = ks * round_up(kc, kai_kr);
 
 #if XNN_ENABLE_KLEIDIAI
   kai_run_matmul_clamp_f32_f32p2vlx1_f32p2vlx1b_2vlx2vl_sme_mopa(
-      mr, nc, k , lhs_packed, rhs_packed, dst, dst_stride_row,
+      mr, nc, k , lhs_packed, rhs_packed, dst, dst_stride_row * sizeof(float),
       /*dst_stride_col=*/sizeof(float), minmax_params->scalar.min,
       minmax_params->scalar.max);
 #else

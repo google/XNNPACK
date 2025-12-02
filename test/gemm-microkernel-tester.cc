@@ -2627,14 +2627,14 @@ void GemmMicrokernelTester::Test_PF32(
 
   // Pack the LHS.
   const size_t packed_lhs_size =
-      size_for_igemm_fn(m(), k()*sizeof(float), ks(), mr_packed(), kr(), sr());
+      size_for_igemm_fn(m(), k(), ks(), mr_packed(), kr(), sr());
   xnnpack::Buffer<float> packed_lhs(packed_lhs_size);
   pack_lh_for_igemm_fn(
-      m(), k()*sizeof(float), ks(), mr_packed(), kr(), sr(), (const void**)im2col.data(),
+      m(), k(), ks(), mr_packed(), kr(), sr(), (const void**)im2col.data(),
       a_offset() * sizeof(float), zero_pointer, packed_lhs.data());
 
-  packed_igemm(m(), n(), k()*sizeof(float), ks(), packed_lhs.data(), packed_w.data(),
-               c.data(), cm_stride() * sizeof(float), &minmax_params);
+  packed_igemm(m(), n(), k(), ks(), packed_lhs.data(), packed_w.data(),
+               c.data(), cm_stride() , &minmax_params);
   
   const float tolerance = compute_sum_tolerance(
       max_abs_product, ks() * k(), xnnpack::NumericLimits<float>::epsilon());

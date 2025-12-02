@@ -1504,6 +1504,7 @@ static enum xnn_status compute_fingerprint_id(
   switch (context->operator_type) {
     OPERATOR_TYPE_CASE(f16);
     OPERATOR_TYPE_CASE(pf16);
+    OPERATOR_TYPE_CASE(pf32);
     OPERATOR_TYPE_CASE(f32);
     OPERATOR_TYPE_CASE(qd8, f16, qc8w);
     OPERATOR_TYPE_CASE(qdu8, f16, qc8w);
@@ -1583,6 +1584,9 @@ static enum xnn_status select_gemm_config(
       break;
     case xnn_operator_type_convolution_nhwc_pf16:
       context->gemm_config = xnn_init_pf16_gemm_config();
+      break;
+    case xnn_operator_type_convolution_nhwc_pf32:
+      context->gemm_config = xnn_init_pf32_gemm_config();
       break;
     case xnn_operator_type_convolution_nhwc_f32:
       context->gemm_config = xnn_init_f32_igemm_config();
@@ -1802,6 +1806,10 @@ enum xnn_status xnn_fingerprint_convolution2d_nhwc(
     case xnn_fingerprint_id_convolution2d_nhwc_f32_f32_f32:
       variant = &f32_variant;
       context.operator_type = xnn_operator_type_convolution_nhwc_f32;
+      break;
+    case xnn_fingerprint_id_convolution2d_nhwc_pf32_pf32_pf32:
+      variant = &f32_variant;
+      context.operator_type = xnn_operator_type_convolution_nhwc_pf32;
       break;
     default:
       xnn_log_error(

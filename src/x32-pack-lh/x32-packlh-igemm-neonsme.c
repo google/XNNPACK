@@ -27,7 +27,7 @@ void xnn_x32_pack_lh_ukernel__igemm_neonsme(size_t m, size_t kc, size_t ks,
                                             void* lhs_packed) {
 #if XNN_ENABLE_KLEIDIAI
   assert(kr == 1);
-  kai_run_lhs_imatmul_pack_x32p2vlx1_x32p_sme(m, ks, kc/sizeof(float), a,
+  kai_run_lhs_imatmul_pack_x32p2vlx1_x32p_sme(m, ks, kc, a,
                                             a_offset, zero, lhs_packed);
 #else
   assert("Not compiled with XNN_ENABLE_KLEIDIAI" && 0);
@@ -40,7 +40,7 @@ size_t xnn_x32_pack_lh_size__igemm_neonsme(size_t m, size_t kc, size_t ks,
 #if XNN_ENABLE_KLEIDIAI
   assert(kr == 1);
   return kai_get_lhs_packed_size_lhs_imatmul_pack_x32p2vlx1_x32p_sme(
-      m, ks, kc/sizeof(float));
+      m, ks, kc);
 #else
   assert("Not compiled with XNN_ENABLE_KLEIDIAI" && 0);
   return 0;
@@ -53,7 +53,7 @@ size_t xnn_x32_pack_lh_offset__igemm_neonsme(size_t m, size_t kc, size_t ks,
 #if XNN_ENABLE_KLEIDIAI
   assert(kr == 1);
   return kai_get_lhs_packed_offset_lhs_imatmul_pack_x32p2vlx1_x32p_sme(
-      m, ks, kc/sizeof(float));
+      m, ks, kc);
 #else
   assert("Not compiled with XNN_ENABLE_KLEIDIAI" && 0);
   return 0;
