@@ -152,8 +152,8 @@ void check_results(const OpInfo& op, const Tensor<quantized<A>>& a,
     const float b_i = dequantize(b(i), b_quantization);
     float expected = op(a_i, b_i);
     expected = fake_quantize(expected, x_quantization);
-    expected = std::max<float>(expected, type_info<X>::min());
-    expected = std::min<float>(expected, type_info<X>::max());
+    expected = std::max(expected, static_cast<float>(type_info<X>::min()));
+    expected = std::min(expected, static_cast<float>(type_info<X>::max()));
     if (std::isnan(expected)) {
       // We don't know how to represent NaN for quantized types.
     } else {

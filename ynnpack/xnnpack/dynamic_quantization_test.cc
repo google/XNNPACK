@@ -83,7 +83,9 @@ void TestImpl(T, size_t rank) {
       broadcast_extent_1(zero_point);
       for (const auto& i : EnumerateIndices(shape)) {
         ASSERT_NEAR(quantize<int8_t>(input(i), 1.0f / scale(i), zero_point(i)),
-                    output(i), 1);
+                    output(i), 1)
+            << "input=" << input(i) << ", scale=" << scale(i)
+            << ", zero_point=" << zero_point(i);
       }
     }
   }

@@ -73,6 +73,8 @@ YNN_ALWAYS_INLINE multi_vec<Vec, M> load(const typename Vec::value_type* ptr,
       x.v[i] = load(ptr + i * Vec::N, Vec{});
     } else if (n > 0) {
       x.v[i] = load(ptr + i * Vec::N, zero, n);
+    } else {
+      x.v[i] = zero;
     }
     n = sub_sat(n, Vec::N);
   }

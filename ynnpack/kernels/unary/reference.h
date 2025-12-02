@@ -481,7 +481,10 @@ void check_results(const unary_op_info& op, Tensor<A> a, Tensor<X> x,
         ASSERT_NEAR(expected, x(i), op.tolerance(expected, type_of<X>()))
             << "i = " << index_to_string(i) << ", a(i) = " << input_i << " ("
             << static_cast<float>(a(i)) << ")"
-            << ", x(i) = " << static_cast<int32_t>(x(i));
+            << ", x(i) = " << static_cast<int32_t>(x(i)) << "("
+            << dequantize(x(i), x_quantization) << ")"
+            << ", x_quantization = {scale=" << x_quantization.scale
+            << ", zero_point=" << x_quantization.zero_point << "}" << std::endl;
       }
     } else {
       const float input_i = dequantize(a(i), a_quantization);

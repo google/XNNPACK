@@ -8,6 +8,8 @@ build --cxxopt='-std=gnu++14'
 build --per_file_copt=ynnpack/.*@-std=c++17
 build --per_file_copt=external/.*slinky.*@-std=c++17
 
+build --copt=-ffp-contract=off
+
 # Sets the default Apple platform to macOS.
 build --apple_platform_type=macos
 
