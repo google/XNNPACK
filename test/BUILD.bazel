@@ -366,6 +366,17 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "pf16_f16_igemm_minmax_test",
+    srcs = [
+        "pf16-f16-igemm-minmax.cc",
+    ],
+    defines = xnnpack_kleidiai_defines(),
+    deps = MICROKERNEL_TEST_DEPS + [
+        ":gemm_microkernel_tester",
+    ],
+)
+
+xnnpack_unit_test(
     name = "f16_f32acc_igemm_minmax_test",
     srcs = [
         "f16-f32acc-igemm-minmax.cc",
@@ -1009,6 +1020,29 @@ xnnpack_unit_test(
     deps = [
         ":replicable_random_device",
         "//:buffer",
+    ],
+)
+
+xnnpack_unit_test(
+    name = "fingerprint_cache_test",
+    srcs = ["fingerprint_cache.cc"],
+    deps = [
+        "//:XNNPACK",
+        "//:cache",
+        "//:fingerprint_cache",
+        "//:fingerprint_id",
+    ],
+)
+
+xnnpack_unit_test(
+    name = "fingerprint_test",
+    srcs = ["fingerprint.cc"],
+    deps = [
+        "//:XNNPACK",
+        "//:cache",
+        "//:fingerprint_check",
+        "//:fingerprint_id",
+        "//:operators",
     ],
 )
 

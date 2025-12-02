@@ -69,11 +69,11 @@ void xnn_f32_velu_ukernel__avx2_rr1_lut16_p3_gather_u24(
     __m256 vn2 = _mm256_fmadd_ps(vz2, vlog2e, vmagic_bias);
 
     const __m256i vidx0 = _mm256_and_si256(_mm256_castps_si256(vn0), vindex_mask);
-    const __m256i vl0 = _mm256_i32gather_epi32(xnn_table_exp2minus_k_over_16, vidx0, sizeof(float));
+    const __m256i vl0 = _mm256_i32gather_epi32((const int*) xnn_table_exp2minus_k_over_16, vidx0, sizeof(float));
     const __m256i vidx1 = _mm256_and_si256(_mm256_castps_si256(vn1), vindex_mask);
-    const __m256i vl1 = _mm256_i32gather_epi32(xnn_table_exp2minus_k_over_16, vidx1, sizeof(float));
+    const __m256i vl1 = _mm256_i32gather_epi32((const int*) xnn_table_exp2minus_k_over_16, vidx1, sizeof(float));
     const __m256i vidx2 = _mm256_and_si256(_mm256_castps_si256(vn2), vindex_mask);
-    const __m256i vl2 = _mm256_i32gather_epi32(xnn_table_exp2minus_k_over_16, vidx2, sizeof(float));
+    const __m256i vl2 = _mm256_i32gather_epi32((const int*) xnn_table_exp2minus_k_over_16, vidx2, sizeof(float));
 
     const __m256i ven0 = _mm256_slli_epi32(_mm256_castps_si256(vn0), 19);
     vn0 = _mm256_sub_ps(vn0, vmagic_bias);
@@ -131,7 +131,7 @@ void xnn_f32_velu_ukernel__avx2_rr1_lut16_p3_gather_u24(
 
     __m256 vn = _mm256_fmadd_ps(vz, vlog2e, vmagic_bias);
     const __m256i vidx = _mm256_and_si256(_mm256_castps_si256(vn), vindex_mask);
-    const __m256i vl = _mm256_i32gather_epi32(xnn_table_exp2minus_k_over_16, vidx, sizeof(float));
+    const __m256i vl = _mm256_i32gather_epi32((const int*) xnn_table_exp2minus_k_over_16, vidx, sizeof(float));
 
     const __m256i ven = _mm256_slli_epi32(_mm256_castps_si256(vn), 19);
     vn = _mm256_sub_ps(vn, vmagic_bias);
@@ -164,7 +164,7 @@ void xnn_f32_velu_ukernel__avx2_rr1_lut16_p3_gather_u24(
 
     __m256 vn = _mm256_fmadd_ps(vz, vlog2e, vmagic_bias);
     const __m256i vidx = _mm256_and_si256(_mm256_castps_si256(vn), vindex_mask);
-    const __m256i vl = _mm256_i32gather_epi32(xnn_table_exp2minus_k_over_16, vidx, sizeof(float));
+    const __m256i vl = _mm256_i32gather_epi32((const int*) xnn_table_exp2minus_k_over_16, vidx, sizeof(float));
 
     const __m256i ven = _mm256_slli_epi32(_mm256_castps_si256(vn), 19);
     vn = _mm256_sub_ps(vn, vmagic_bias);

@@ -43,22 +43,22 @@ void transpose_x64_neon(size_t m, size_t n, size_t n_bytes_a, size_t stride_a,
 void transpose_x128_neon(size_t m, size_t n, size_t n_bytes_a, size_t stride_a,
                          const void* a, size_t stride_x, void* x) {
   transpose(m, n, n_bytes_a, stride_a, a, stride_x, x,
-            std::integral_constant<size_t, 128>{});
+            std::integral_constant<size_t, 16>{});
 }
 void transpose_x256_neon(size_t m, size_t n, size_t n_bytes_a, size_t stride_a,
                          const void* a, size_t stride_x, void* x) {
   transpose(m, n, n_bytes_a, stride_a, a, stride_x, x,
-            std::integral_constant<size_t, 256>{});
+            std::integral_constant<size_t, 32>{});
 }
 void transpose_x512_neon(size_t m, size_t n, size_t n_bytes_a, size_t stride_a,
                          const void* a, size_t stride_x, void* x) {
   transpose(m, n, n_bytes_a, stride_a, a, stride_x, x,
-            std::integral_constant<size_t, 512>{});
+            std::integral_constant<size_t, 64>{});
 }
 void transpose_x1024_neon(size_t m, size_t n, size_t n_bytes_a, size_t stride_a,
                           const void* a, size_t stride_x, void* x) {
   transpose(m, n, n_bytes_a, stride_a, a, stride_x, x,
-            std::integral_constant<size_t, 1024>{});
+            std::integral_constant<size_t, 128>{});
 }
 
 void interleave2_x4_neon(size_t factor, size_t m, size_t n, size_t stride_a,

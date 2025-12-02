@@ -26,6 +26,7 @@
 #if XNN_ENABLE_KLEIDIAI
 #include "kai/ukernels/matmul/pack/kai_rhs_imatmul_pack_kxn_qsi8cxp2vlx4sb_qs8cx_f32_i32_sme.h"
 #include "kai/ukernels/matmul/pack/kai_rhs_imatmul_pack_kxn_x32p2vlx1b_x32_x32_sme.h"
+#include "kai/ukernels/matmul/pack/kai_rhs_imatmul_pack_kxn_x16p2vlx2b_x16_x16_sme.h"
 #include "kai/ukernels/matmul/pack/kai_rhs_pack_kxn_f32p2vlx1biasf32_f32_f32_sme.h"
 #include "kai/ukernels/matmul/pack/kai_rhs_pack_kxn_qsi4c32p_qsu4c32s1s0.h"
 #include "kai/ukernels/matmul/pack/kai_rhs_pack_kxn_qsi4cxp_qs4cxs1s0.h"
@@ -573,20 +574,14 @@ void xnn_pack_qs8_qc2w_gemm_goi_w(
   assert(params != nullptr);
 
   const size_t skr = sr * kr;
-  const uint32_t izp = static_cast<uint32_t>(params->input_zero_point);
+  const int32_t izp = static_cast<int32_t>(params->input_zero_point);
   do {
     size_t nr_block_start = 0;
     do {
       const size_t nr_block_size = min(nc - nr_block_start, nr);
       unaligned_int32_t* packed_b =
           static_cast<unaligned_int32_t*>(packed_weights);
-      if (b) {
-        for (size_t i = 0; i < nr_block_size; ++i) {
-          packed_b[i] = b[nr_block_start + i] * 16;
-        }
-      } else {
-        std::fill_n(packed_b, nr_block_size, 0);
-      }
+      copy_bias(b, nr_block_start, nr_block_size, packed_b);
       packed_weights = static_cast<int32_t*>(packed_weights) + nr;
 
       for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size;
@@ -605,13 +600,13 @@ void xnn_pack_qs8_qc2w_gemm_goi_w(
         for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size;
              ++nr_block_offset) {
           int32_t ksum = 0;
+          const size_t kc_begin =
+              round_down_po2(kr_block_start, skr) +
+              ((kr_block_start + nr_block_offset * kr) & (skr - 1));
 
           for (size_t kr_block_offset = 0; kr_block_offset < kr;
-               kr_block_offset++) {
-            const size_t kc_idx =
-                round_down_po2(kr_block_start, skr) +
-                ((kr_block_start + kr_block_offset + nr_block_offset * kr) &
-                 (skr - 1));
+               ++kr_block_offset) {
+            const size_t kc_idx = kc_begin + kr_block_offset;
             const size_t k_offset =
                 (nr_block_start + nr_block_offset) * kc + kc_idx;
 
@@ -639,10 +634,11 @@ void xnn_pack_qs8_qc2w_gemm_goi_w(
             kv_3 = sign_extend_int2(kv_3);
 
             ksum += kv_0 + kv_1 + kv_2 + kv_3;
-            static_cast<int8_t*>(packed_weights)[kr_block_offset] = kv;
+            static_cast<int8_t*>(packed_weights)[kr_block_offset] = kv ^ 0xAA;
           }
 
           packed_b[nr_block_offset] = packed_b[nr_block_offset] - ksum * izp;
+          // kr * 4 crumbs
           packed_weights = static_cast<uint8_t*>(packed_weights) + kr;
         }
         packed_weights = static_cast<uint8_t*>(packed_weights) +
@@ -676,20 +672,14 @@ void xnn_pack_qs8_qc2w_gemm_gio_w(
 
   // row sums, weights, zero points, extra data
   const size_t skr = sr * kr;
-  const uint32_t izp = static_cast<uint32_t>(params->input_zero_point);
+  const int32_t izp = static_cast<int32_t>(params->input_zero_point);
   do {
     size_t nr_block_start = 0;
     do {
       const size_t nr_block_size = min(nc - nr_block_start, nr);
       unaligned_int32_t* packed_b =
           static_cast<unaligned_int32_t*>(packed_weights);
-      if (b) {
-        for (size_t i = 0; i < nr_block_size; ++i) {
-          packed_b[i] = b[nr_block_start + i] * 16;
-        }
-      } else {
-        std::fill_n(packed_b, nr_block_size, 0);
-      }
+      copy_bias(b, nr_block_start, nr_block_size, packed_b);
       packed_weights = static_cast<int32_t*>(packed_weights) + nr;
 
       // Skip another nr for the float zero points
@@ -747,7 +737,7 @@ void xnn_pack_qs8_qc2w_gemm_gio_w(
             kv_3 = sign_extend_int2(kv_3);
 
             ksum += kv_0 + kv_1 + kv_2 + kv_3;
-            static_cast<int8_t*>(packed_weights)[kr_block_offset] = kv;
+            static_cast<int8_t*>(packed_weights)[kr_block_offset] = kv ^ 0xAA;
           }
 
           packed_b[nr_block_offset] = packed_b[nr_block_offset] - ksum * izp;
@@ -2389,6 +2379,15 @@ void transpose_weights_x8(const int8_t* in, int8_t* out, size_t height,
   }
 }
 
+static void transpose_weights_x16(const uint16_t* in, uint16_t* out,
+                                  size_t height, size_t width) {
+  for (size_t j = 0; j < width; ++j) {
+    for (size_t i = 0; i < height; ++i) {
+      out[j * height + i] = in[i * width + j];
+    }
+  }
+}
+
 void xnn_pack_kai_qs8_qc8w_weights_and_biases_sme2(
     uint32_t flags, const struct xnn_gemm_config* gemm_config,
     size_t input_channels, size_t output_channels, size_t groups,
@@ -2554,7 +2553,7 @@ void xnn_pack_kai_f16_weights_and_biases(
   // initialized array as a workaround if bias is null.
   bool free_accumulator_init = false;
   if (accumulator_init == NULL) {
-    accumulator_init = calloc(output_channels, sizeof(xnn_float16));
+    accumulator_init = calloc(output_channels, sizeof(float));
     free_accumulator_init = true;
   }
 
@@ -2772,6 +2771,59 @@ void xnn_pack_kai_qb4_weights_and_biases(
         output_channels, nr, nr * weights_stride,
         (const float*)accumulator_init, weights_start);
   }
+}
+
+void xnn_pack_kai_f16_conv_goki_w_sme(size_t g, size_t nc, size_t ks,
+                                       size_t kc, size_t nr, size_t kr,
+                                       size_t sr, const uint16_t* k,
+                                       const uint16_t* b, const void* scale,
+                                       void* packed_weights, size_t extra_bytes,
+                                       const void* params) {
+
+  assert(g != 0);
+  assert(nr >= sr);
+  assert(k != nullptr);
+  assert(packed_weights != nullptr);
+
+  uint16_t* tmp_bias = NULL;
+
+  if (b == NULL) {
+    tmp_bias = (uint16_t*)xnn_allocate_zero_memory(g * nc * sizeof(uint16_t));
+    b = tmp_bias;
+  }
+
+  uint16_t* tmp_data =
+      (uint16_t*)xnn_allocate_memory(nc * ks * kc * sizeof(uint16_t));
+  const size_t rhs_row_stride = nc * sizeof(uint16_t);
+  const size_t packed_rhs_size =
+      kai_get_rhs_packed_size_rhs_imatmul_pack_kxn_x16p2vlx2b_x16_x16_sme(
+          nc, ks, kc);
+
+  for (size_t g_idx = 0; g_idx < g; ++g_idx) {
+
+    // TODO: Remove transpose_weights_x16 if KleidiAI release imatmul_pack_nxk packing variant
+    transpose_weights_x16(k, tmp_data, nc, ks * kc);
+    // Pass FP16 bias directly to the rhs_imatmul packer which expects FP16 bias
+    // for this kernel.
+    kai_run_rhs_imatmul_pack_kxn_x16p2vlx2b_x16_x16_sme(
+        nc, ks, kc, rhs_row_stride, tmp_data, b, packed_weights);
+
+    k += nc * ks * kc;
+    b += nc;
+
+    packed_weights = (void*)((uintptr_t)packed_weights + packed_rhs_size);
+  }
+
+  xnn_release_memory(tmp_data);
+
+  if (tmp_bias != NULL) {
+    xnn_release_memory(tmp_bias);
+  }
+}
+
+size_t xnn_packed_size_kai_f16_conv_goki_w(size_t nc, size_t ks, size_t kc) {
+  return kai_get_rhs_packed_size_rhs_imatmul_pack_kxn_x16p2vlx2b_x16_x16_sme(
+      nc, ks, kc);
 }
 
 void xnn_pack_kai_qs8_conv_goki_w_sme2(

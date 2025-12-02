@@ -1,9 +1,9 @@
-"""
-Microkernel filenames lists for avx512f.
-
-Auto-generated file. Do not edit!
-  Generator: tools/update-microkernels.py
-"""
+#
+# Microkernel filenames lists for avx512f.
+#
+# Auto-generated file. Do not edit!
+#   Generator: tools/update-microkernels.py
+#
 
 PROD_AVX512F_MICROKERNEL_SRCS = [
     "src/f32-avgpool/gen/f32-avgpool-9p-minmax-avx512f-u16.c",

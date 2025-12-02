@@ -1,9 +1,9 @@
-"""
-Microkernel filenames lists for hvx.
-
-Auto-generated file. Do not edit!
-  Generator: tools/update-microkernels.py
-"""
+#
+# Microkernel filenames lists for hvx.
+#
+# Auto-generated file. Do not edit!
+#   Generator: tools/update-microkernels.py
+#
 
 PROD_HVX_MICROKERNEL_SRCS = [
     "src/f32-avgpool/gen/f32-avgpool-9p-minmax-hvx-u32.c",

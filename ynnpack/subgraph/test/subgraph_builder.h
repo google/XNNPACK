@@ -240,6 +240,13 @@ class Runtime {
 
   ynn_status Status() const { return status_; }
 
+  template <typename T>
+  ynn_status Query(ynn_runtime_property property, T* result) {
+    size_t result_size = sizeof(T);
+    status_ = ynn_query_runtime(runtime_.get(), property, result, &result_size);
+    return status_;
+  }
+
  private:
   ynn_status status_;
   std::unique_ptr<ynn_runtime, decltype(&ynn_delete_runtime)> runtime_;

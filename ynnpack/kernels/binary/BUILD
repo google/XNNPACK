@@ -6,7 +6,7 @@
 load("@rules_cc//cc:cc_library.bzl", "cc_library")
 load("@rules_cc//cc:cc_test.bzl", "cc_test")
 load("@rules_python//python:py_binary.bzl", "py_binary")
-load("//ynnpack:build_defs.bzl", "ynn_cc_library", "ynn_generate_src_hdr", "ynn_kernel_copts")
+load("//ynnpack:build_defs.bzl", "ynn_benchmark_deps", "ynn_binary_linkopts", "ynn_binary_malloc", "ynn_cc_library", "ynn_generate_src_hdr", "ynn_kernel_copts", "ynn_test_deps")
 
 py_binary(
     name = "generator",
@@ -14,6 +14,7 @@ py_binary(
         "generator.py",
         "kernels.py",
     ],
+    tags = ["manual"],
     deps = ["//ynnpack/kernels/elementwise:generator"],
 )
 
@@ -153,6 +154,8 @@ cc_library(
 cc_test(
     name = "test",
     srcs = ["test.cc"],
+    linkopts = ynn_binary_linkopts(),
+    malloc = ynn_binary_malloc(),
     deps = [
         ":binary",
         ":reference",
@@ -162,18 +165,18 @@ cc_test(
         "//ynnpack/base/test:random",
         "//ynnpack/base/test:tensor",
         "//ynnpack/base/test:util",
-        "@com_google_googletest//:gtest_main",
-    ],
+    ] + ynn_test_deps(),
 )
 
 cc_test(
     name = "bench",
     srcs = ["bench.cc"],
     args = ["--benchmark_min_time=1x"],
+    linkopts = ynn_binary_linkopts(),
+    malloc = ynn_binary_malloc(),
     deps = [
         ":binary",
         "//ynnpack/base",
         "//ynnpack/base/test:tensor",
-        "@com_google_benchmark//:benchmark_main",
-    ],
+    ] + ynn_benchmark_deps(),
 )

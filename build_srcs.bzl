@@ -12,7 +12,6 @@ Lists of target-specific sources used to build XNNPACK.
 """
 
 OPERATOR_SRCS = [
-    "src/operator-delete.c",
     "src/operator-run.c",
     "src/operators/argmax-pooling-nhwc.c",
     "src/operators/average-pooling-nhwc.c",
@@ -285,6 +284,7 @@ MICROKERNEL_DEFS = [
     "src/x64-transposec/x64-transposec.inc",
     "src/x8-pack-lh/x8-pack-lh.inc",
     "src/x8-pack-lh/x8-pack-lh-igemm.inc",
+    "src/x16-pack-lh/x16-pack-lh-igemm.inc",
     "src/x8-packq/x8-packq.inc",
     "src/x8-packw/x8-packw.inc",
     "src/x8-transposec/x8-transposec.inc",

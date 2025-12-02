@@ -1,6 +1,7 @@
 #include "ynnpack/kernels/dot/pack.h"
 
 #include <cstddef>
+#include <numeric>
 #include <vector>
 
 #include <gmock/gmock.h>
@@ -52,7 +53,7 @@ TEST_P(pack, tile_1x1) {
   const int tile_m = 1;
   const int tile_n = 1;
 
-  packer p(transpose, elem_size, tile_m, tile_n);
+  packer p(transpose, elem_size * 8, tile_m, tile_n);
 
   const int m = 5;
   const int n = 3;
@@ -98,7 +99,7 @@ TEST_P(pack, tile_1x2) {
   const int tile_m = 1;
   const int tile_n = 2;
 
-  packer p(transpose, elem_size, tile_m, tile_n);
+  packer p(transpose, elem_size * 8, tile_m, tile_n);
 
   const int m = 5;
   const int n = 3;
@@ -138,7 +139,7 @@ TEST_P(pack, tile_1x4) {
   const int tile_m = 1;
   const int tile_n = 4;
 
-  packer p(transpose, elem_size, tile_m, tile_n);
+  packer p(transpose, elem_size * 8, tile_m, tile_n);
 
   const int m = 5;
   const int n = 3;
@@ -172,7 +173,7 @@ TEST_P(pack, tile_2x1) {
   const int tile_m = 2;
   const int tile_n = 1;
 
-  packer p(transpose, elem_size, tile_m, tile_n);
+  packer p(transpose, elem_size * 8, tile_m, tile_n);
 
   const int m = 5;
   const int n = 3;
@@ -211,7 +212,7 @@ TEST_P(pack, tile_2x2) {
   const int tile_m = 2;
   const int tile_n = 2;
 
-  packer p(transpose, elem_size, tile_m, tile_n);
+  packer p(transpose, elem_size * 8, tile_m, tile_n);
 
   const int m = 5;
   const int n = 3;
@@ -246,7 +247,7 @@ TEST_P(pack, tile_2x4) {
   const int tile_m = 2;
   const int tile_n = 4;
 
-  packer p(transpose, elem_size, tile_m, tile_n);
+  packer p(transpose, elem_size * 8, tile_m, tile_n);
 
   const int m = 5;
   const int n = 3;
@@ -277,7 +278,7 @@ TEST_P(pack, tile_4x2) {
   const int tile_m = 4;
   const int tile_n = 2;
 
-  packer p(transpose, elem_size, tile_m, tile_n);
+  packer p(transpose, elem_size * 8, tile_m, tile_n);
 
   const int m = 5;
   const int n = 3;

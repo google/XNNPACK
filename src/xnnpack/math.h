@@ -637,13 +637,13 @@ XNN_INLINE static xnn_float16 xnn_float16_zero() {
 XNN_INLINE static bool xnn_float16_is_zero(xnn_float16 f) {
   // Check for +/- zero (0x0000/0x8000). uint16 overflow is well defined to wrap
   // around.
-  return xnn_float16_to_bits(f) * 2 == 0;
+  return (uint16_t) (xnn_float16_to_bits(f) * 2) == 0;
 }
 
 XNN_INLINE static bool xnn_bfloat16_is_zero(xnn_bfloat16 f) {
   // Check for +/- zero (0x0000/0x8000). uint16 overflow is well defined to wrap
   // around.
-  return xnn_bfloat16_to_bits(f) * 2 == 0;
+  return (uint16_t) (xnn_bfloat16_to_bits(f) * 2) == 0;
 }
 
 #ifdef __cplusplus

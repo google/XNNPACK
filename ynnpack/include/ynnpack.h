@@ -445,6 +445,20 @@ enum ynn_status ynn_set_external_value_data(ynn_runtime_t runtime,
 
 enum ynn_status ynn_invoke_runtime(ynn_runtime_t runtime);
 
+enum ynn_runtime_property {
+  // The maximum number of tasks the runtime expects to run concurrently.
+  // `result` should be an `int32_t`
+  ynn_runtime_property_concurrency = 0,
+};
+
+// Query the runtime for the value of a property identified by `property`.
+// `result` points to a property-specific type.`result_size` should indicate how
+// much memory is available to write to `result`, and the value will be updated
+// to indicate how much memory was actually written.
+enum ynn_status ynn_query_runtime(ynn_runtime_t runtime,
+                                  enum ynn_runtime_property property,
+                                  void* result, size_t* result_size);
+
 void ynn_delete_runtime(ynn_runtime_t runtime);
 
 #ifdef __cplusplus

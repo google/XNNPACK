@@ -37,9 +37,7 @@ YNN_DOT_KERNEL(arch_flag::amxint8, dot_uint8_int8_int32_16x64x64_16x16x4_amxint8
 #endif  // MEMORY_SANITIZER
 #endif  // YNN_ARCH_X86_AVX2
 #ifdef YNN_ARCH_X86_FMA3
-#ifndef MEMORY_SANITIZER  // TODO(b/458235638)
 #include "ynnpack/kernels/dot/x86_fma3_fp32.inc"
-#endif  // MEMORY_SANITIZER
 #endif  // YNN_ARCH_X86_FMA3
 #ifdef YNN_ARCH_X86_AVX2_FMA3
 #include "ynnpack/kernels/dot/x86_avx2_fma3_bf16_bf16_fp32.inc"
@@ -67,33 +65,41 @@ YNN_DOT_KERNEL(arch_flag::amxint8, dot_uint8_int8_int32_16x64x64_16x16x4_amxint8
 
 #ifndef YNN_DISABLE_SME
 #ifdef YNN_ARCH_ARM64_SME2
-YNN_DOT_KERNEL(arch_flag::sme2, dot_fp32_sme2, sme_vl(float{}),
-               4 * sme_vl(float{}), 1, sme_vl(float{}), 1,
-               dot_flag::transpose_a, float, float, float)
-YNN_DOT_KERNEL(arch_flag::sme2, dot_bf16_bf16_fp32_sme2, sme_vl(float{}),
-               4 * sme_vl(float{}), 2, sme_vl(float{}), 2,
-               dot_flag::transpose_a, bfloat16, bfloat16, float)
-YNN_DOT_KERNEL(arch_flag::sme2, dot_fp16_fp16_fp32_sme2, sme_vl(float{}),
-               4 * sme_vl(float{}), 2, sme_vl(float{}), 2,
-               dot_flag::transpose_a, half, half, float)
-YNN_DOT_KERNEL(arch_flag::sme2, dot_int8_int8_int32_sme2, sme_vl(int32_t{}),
-               4 * sme_vl(int32_t{}), 4, sme_vl(int32_t{}), 4,
-               dot_flag::transpose_a, int8_t, int8_t, int32_t)
+YNN_DOT_KERNEL(arch_flag::sme2, dot_fp32_sme2,
+               sme_vl(float{}), 4 * sme_vl(float{}), 1, sme_vl(float{}), 1,
+               dot_flag::transpose_a | dot_flag::consistent_arithmetic,
+               float, float, float)
+YNN_DOT_KERNEL(arch_flag::sme2, dot_bf16_bf16_fp32_sme2,
+               sme_vl(float{}), 4 * sme_vl(float{}), 2, sme_vl(float{}), 2,
+               dot_flag::transpose_a,
+               bfloat16, bfloat16, float)
+YNN_DOT_KERNEL(arch_flag::sme2, dot_fp16_fp16_fp32_sme2,
+               sme_vl(float{}), 4 * sme_vl(float{}), 2, sme_vl(float{}), 2,
+               dot_flag::transpose_a,
+               half, half, float)
+YNN_DOT_KERNEL(arch_flag::sme2, dot_int8_int8_int32_sme2,
+               sme_vl(int32_t{}), 4 * sme_vl(int32_t{}), 4, sme_vl(int32_t{}), 4,
+               dot_flag::transpose_a | dot_flag::consistent_arithmetic,
+               int8_t, int8_t, int32_t)
 #endif  // YNN_ARCH_ARM64_SME2
 
 #ifdef YNN_ARCH_ARM64_SME
-YNN_DOT_KERNEL(arch_flag::sme, dot_fp32_sme, sme_vl(float{}),
-               4 * sme_vl(float{}), 1, sme_vl(float{}), 1,
-               dot_flag::transpose_a, float, float, float)
-YNN_DOT_KERNEL(arch_flag::sme, dot_bf16_bf16_fp32_sme, sme_vl(float{}),
-               4 * sme_vl(float{}), 2, sme_vl(float{}), 2,
-               dot_flag::transpose_a, bfloat16, bfloat16, float)
-YNN_DOT_KERNEL(arch_flag::sme, dot_fp16_fp16_fp32_sme, sme_vl(float{}),
-               4 * sme_vl(float{}), 2, sme_vl(float{}), 2,
-               dot_flag::transpose_a, half, half, float)
-YNN_DOT_KERNEL(arch_flag::sme, dot_int8_int8_int32_sme, sme_vl(int32_t{}),
-               4 * sme_vl(int32_t{}), 4, sme_vl(int32_t{}), 4,
-               dot_flag::transpose_a, int8_t, int8_t, int32_t)
+YNN_DOT_KERNEL(arch_flag::sme, dot_fp32_sme,
+               sme_vl(float{}), 4 * sme_vl(float{}), 1, sme_vl(float{}), 1,
+               dot_flag::transpose_a | dot_flag::consistent_arithmetic,
+               float, float, float)
+YNN_DOT_KERNEL(arch_flag::sme, dot_bf16_bf16_fp32_sme,
+               sme_vl(float{}), 4 * sme_vl(float{}), 2, sme_vl(float{}), 2,
+               dot_flag::transpose_a,
+               bfloat16, bfloat16, float)
+YNN_DOT_KERNEL(arch_flag::sme, dot_fp16_fp16_fp32_sme,
+               sme_vl(float{}), 4 * sme_vl(float{}), 2, sme_vl(float{}), 2,
+               dot_flag::transpose_a,
+               half, half, float)
+YNN_DOT_KERNEL(arch_flag::sme, dot_int8_int8_int32_sme,
+               sme_vl(int32_t{}), 4 * sme_vl(int32_t{}), 4, sme_vl(int32_t{}), 4,
+               dot_flag::transpose_a | dot_flag::consistent_arithmetic,
+               int8_t, int8_t, int32_t)
 #endif  // YNN_ARCH_ARM64_SME
 #endif  // YNN_DISABLE_SME
 
@@ -112,9 +118,32 @@ YNN_DOT_KERNEL(arch_flag::sme, dot_int8_int8_int32_sme, sme_vl(int32_t{}),
 #include "ynnpack/kernels/dot/arm_neon_int8_int8_int32.inc"
 #endif  // YNN_ARCH_ARM_NEON
 
-YNN_DOT_KERNEL(arch_flag::none, dot_fp32, 1, 128, 1, 1, 1, 0, float, float, float)
-YNN_DOT_KERNEL(arch_flag::none, dot_fp16_fp16_fp32, 1, 128, 1, 1, 1, dot_flag::consistent_arithmetic, half, half, float)
-YNN_DOT_KERNEL(arch_flag::none, dot_bf16_bf16_fp32, 1, 128, 1, 1, 1, 0, bfloat16, bfloat16, float)
-YNN_DOT_KERNEL(arch_flag::none, dot_int8_int8_int32, 1, 128, 1, 1, 1, dot_flag::consistent_arithmetic, int8_t, int8_t, int32_t)
-YNN_DOT_KERNEL(arch_flag::none, dot_uint8_int8_int32, 1, 128, 1, 1, 1, dot_flag::consistent_arithmetic, uint8_t, int8_t, int32_t)
-YNN_DOT_KERNEL(arch_flag::none, dot_int8_int4_int32, 1, 128, 1, 2, 1, dot_flag::consistent_arithmetic, uint8_t, int4x2, int32_t)
+#if defined(YNN_ARCH_X86) || defined(YNN_ARCH_ARM64)
+// On x86 and on ARM64, we consider kernels that use FMA to be consistent (and
+// not ones that don't).
+#define YNN_DOT_KERNEL_CONSISTENT_ARITHMETIC 0
+#else
+#define YNN_DOT_KERNEL_CONSISTENT_ARITHMETIC dot_flag::consistent_arithmetic
+#endif
+
+
+YNN_DOT_KERNEL(arch_flag::none, dot_fp32_1x128x1_1x1x1,
+               1, 128, 1, 1, 1,
+               YNN_DOT_KERNEL_CONSISTENT_ARITHMETIC,
+               float, float, float)
+YNN_DOT_KERNEL(arch_flag::none, dot_fp16_fp16_fp32_1x128x1_1x1x1,
+               1, 128, 1, 1, 1,
+               dot_flag::consistent_arithmetic, half, half, float)
+YNN_DOT_KERNEL(arch_flag::none, dot_bf16_bf16_fp32_1x128x1_1x1x1,
+               1, 128, 1, 1, 1,
+               YNN_DOT_KERNEL_CONSISTENT_ARITHMETIC,
+               bfloat16, bfloat16, float)
+YNN_DOT_KERNEL(arch_flag::none, dot_int8_int8_int32_1x128x1_1x1x1,
+               1, 128, 1, 1, 1,
+               dot_flag::consistent_arithmetic, int8_t, int8_t, int32_t)
+YNN_DOT_KERNEL(arch_flag::none, dot_uint8_int8_int32_1x128x1_1x1x1,
+               1, 128, 1, 1, 1,
+               dot_flag::consistent_arithmetic, uint8_t, int8_t, int32_t)
+YNN_DOT_KERNEL(arch_flag::none, dot_int8_int4_int32_1x128x2_1x1x2,
+               1, 128, 2, 1, 2,
+               dot_flag::consistent_arithmetic, uint8_t, int4x2, int32_t)

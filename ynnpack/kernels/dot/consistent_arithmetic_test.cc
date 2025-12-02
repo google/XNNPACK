@@ -3,6 +3,7 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+#include <algorithm>
 #include <cassert>
 #include <cmath>
 #include <cstddef>
@@ -17,7 +18,7 @@
 #include <gtest/gtest.h>
 #include "ynnpack/base/arch.h"  // IWYU pragma: keep
 #include "ynnpack/base/arithmetic.h"
-#include "ynnpack/base/build_config.h"
+#include "ynnpack/base/base.h"
 #include "ynnpack/base/test/buffer.h"
 #include "ynnpack/base/test/fuzz_test.h"
 #include "ynnpack/base/test/random.h"
@@ -60,6 +61,15 @@ KernelInfo all_kernels[] = {
 #include "ynnpack/kernels/dot/kernels.inc"
 #undef YNN_DOT_KERNEL
 };
+
+// Get the alignment that satisfies the requirement of any dot kernel.
+size_t get_max_alignment() {
+  size_t result = 1;
+  for (const KernelInfo& kernel : all_kernels) {
+    result = std::max(result, kernel.tile_n * kernel.tile_k);
+  }
+  return result;
+}
 
 // Align the last two dimensions of x up to a multiple of a2, a1, with zero
 // padding.
@@ -147,14 +157,15 @@ void TestMatMul(AT, BT, CT, size_t k) {
   const size_t n = 65536;
 
   Tensor<AT> a({m, k});
-  Tensor<BT> b({k, n / B_info::element_count()});
+  Tensor<BT> b({k, n / B_info::element_count()},
+               Alignment({.bytes = get_max_alignment()}));
   Tensor<CT> init_c({m, n});
   a.generate([&]() { return a_gen(rng); });
   b.generate([&]() { return b_gen(rng); });
   init_c.generate([&]() { return c_gen(rng); });
 
   Tensor<CT> c;
-
+  int consistent_kernels = 0;
   for (const KernelInfo& kernel : all_kernels) {
     if (kernel.type != multi_type_of(AT(), BT(), CT())) {
       continue;
@@ -169,6 +180,7 @@ void TestMatMul(AT, BT, CT, size_t k) {
       continue;
     }
     std::cout << "Considering kernel " << kernel.name << std::endl;
+    ++consistent_kernels;
 
     const bool transpose_a = kernel.flags & dot_flag::transpose_a;
     const size_t tile_k = kernel.tile_k;
@@ -205,6 +217,7 @@ void TestMatMul(AT, BT, CT, size_t k) {
       c = kernel_c;
     }
   }
+  ASSERT_GT(consistent_kernels, 0) << "No consistent_arithmetic kernels found.";
 }
 
 const char* to_string(const KernelInfo& param) { return ""; }

@@ -16,6 +16,7 @@
 #include <stdint.h>
 
 #include "include/xnnpack.h"
+#include "src/operators/fingerprint_id.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -97,6 +98,33 @@ enum xnn_status xnn_create_runtime_with_threadpool(
 enum xnn_status xnn_update_runtime_with_threadpool(
   xnn_runtime_t runtime,
   xnn_threadpool_t threadpool);
+
+
+typedef struct xnn_fingerprint* xnn_fingerprint_t;
+
+struct xnn_fingerprint {
+  uint32_t id;
+  uint32_t value;
+};
+
+/// Check whether the given configuration matches one that is currently in use.
+///
+/// @returns `xnn_status_success` if the configuration matches.
+enum xnn_status xnn_check_fingerprint(struct xnn_fingerprint fingerprint);
+
+/// Return the fingerprint corresponding to the given id or NULL if it wasn't
+/// set.
+const struct xnn_fingerprint* xnn_get_fingerprint(uint32_t id);
+
+/// Set the given fingerprint.
+void xnn_set_fingerprint(struct xnn_fingerprint fingerprint);
+
+/// Clear all fingerprints that were computed until now.
+void xnn_clear_fingerprints();
+
+enum xnn_status xnn_fingerprint_fully_connected_nc(enum xnn_fingerprint_id fingerprint_id);
+enum xnn_status xnn_fingerprint_convolution2d_nchw(enum xnn_fingerprint_id fingerprint_id);
+enum xnn_status xnn_fingerprint_convolution2d_nhwc(enum xnn_fingerprint_id fingerprint_id);
 
 #ifdef __cplusplus
 }  // extern "C"

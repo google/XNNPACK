@@ -82,16 +82,40 @@ cc_library(
         "base.h",
         "bfloat16.h",
         "bit_cast.h",
-        "build_config.h",
         "fp16.h",
         "half.h",
         "to_string.h",
         "type.h",
     ],
     compatible_with = _COMPATIBLE_WITH,
+    defines = select({
+        "@platforms//cpu:x86_32": [
+            "YNN_ARCH_X86",
+            "YNN_ARCH_X86_32",
+        ],
+        "@platforms//cpu:x86_64": [
+            "YNN_ARCH_X86",
+            "YNN_ARCH_X86_64",
+        ],
+        "//ynnpack:arm64": [
+            "YNN_ARCH_ARM",
+            "YNN_ARCH_ARM64",
+        ],
+        "//ynnpack:arm32": [
+            "YNN_ARCH_ARM",
+            "YNN_ARCH_ARM32",
+        ],
+        "//conditions:default": [],
+    }),
+    local_defines = select({
+        "//ynnpack:ynn_enable_cpuinfo": ["YNN_ENABLE_CPUINFO"],
+        "//conditions:default": [],
+    }),
     deps = [
         ":log",
         "//ynnpack:ynnpack_h",
-        "@cpuinfo",
-    ],
+    ] + select({
+        "//ynnpack:ynn_enable_cpuinfo": ["@cpuinfo"],
+        "//conditions:default": [],
+    }),
 )

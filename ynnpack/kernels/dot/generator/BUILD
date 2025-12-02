@@ -28,4 +28,5 @@ py_binary(
         "x86_uint8_int8_int32_k16.py",
     ],
     main = "generator.py",
+    tags = ["manual"],
 )

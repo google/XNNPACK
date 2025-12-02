@@ -21,7 +21,7 @@ class bfloat16 {
  public:
   bfloat16() = default;
   bfloat16(float x)  // NOLINT
-      : bits_(bit_cast<uint32_t>(x) >> 16) {}
+      : bits_(bit_cast<uint32_t>(x * rounding_multiplier) >> 16) {}
 
   operator float() const {  // NOLINT
     return bit_cast<float>(static_cast<uint32_t>(bits_) << 16);
@@ -38,7 +38,7 @@ class bfloat16 {
   bool is_zero() const {
     // Check for +/- zero (0x0000/0x8000). uint16 overflow is well defined to
     // wrap around.
-    return bits_ * 2 == 0;
+    return static_cast<uint16_t>(bits_ * 2) == 0;
   }
 
   // Not private due to -Werror=class-memaccess, which can't be disabled:
@@ -46,6 +46,15 @@ class bfloat16 {
   // - via .bazelrc, because it then applies to C code, and the compiler says
   //   this flag is not valid in C.
   uint16_t bits_;
+
+  // When rounding a float to bfloat16, we want to add 1 to the bit after the
+  // last bit in the mantissa. We can make the floating point hardware do this
+  // for us, by multiplying by 1 + 0.5*epsilon:
+  // a*rounding_multiplier = a*(1 + 0.5*epsilon) = a + a*0.5*epsilon.
+  // 0.5*epsilon is a power of 2, so this is effectively moving the leading 1
+  // from the mantissa to the bit after the last bit of the mantissa, and then
+  // adding it.
+  static constexpr float rounding_multiplier = 1.0f + 0.5f / 128.0f;
 };
 
 }  // namespace ynn

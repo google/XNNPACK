@@ -1,9 +1,9 @@
-"""
-Microkernel filenames lists for f16c.
-
-Auto-generated file. Do not edit!
-  Generator: tools/update-microkernels.py
-"""
+#
+# Microkernel filenames lists for f16c.
+#
+# Auto-generated file. Do not edit!
+#   Generator: tools/update-microkernels.py
+#
 
 PROD_F16C_MICROKERNEL_SRCS = [
     "src/f16-avgpool/gen/f16-avgpool-9p-minmax-f16c.c",

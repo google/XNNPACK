@@ -206,6 +206,7 @@ SET(MICROKERNEL_GEMM_UNIT_TESTS
     f32-qc8w-gemm-minmax
     f32-qc8w-gemm-relu
     pf16-gemm-minmax
+    pf16-f16-igemm-minmax
     pf32-gemm-minmax
     pqs8-qc8w-gemm-minmax
     qd8-f16-qb4w-gemm-minmax
@@ -448,6 +449,14 @@ TARGET_LINK_LIBRARIES(buffer-test PRIVATE
   xnnpack-datatype)
 ADD_TEST(NAME buffer-test COMMAND buffer-test)
 SET_TARGET_PROPERTIES(buffer-test PROPERTIES CXX_EXTENSIONS YES)
+
+ADD_EXECUTABLE(fingerprint-cache-test fingerprint_cache.cc)
+TARGET_LINK_LIBRARIES(fingerprint-cache-test PRIVATE
+  xnnpack-test
+  xnnpack-fingerprint-cache
+  xnnpack-fingerprint-id)
+ADD_TEST(NAME fingerprint-cache-test COMMAND fingerprint-cache-test)
+SET_TARGET_PROPERTIES(fingerprint-cache-test PROPERTIES CXX_EXTENSIONS YES)
 
 IF(XNNPACK_BUILD_LIBRARY)
   ADD_EXECUTABLE(weights-cache-test weights-cache.cc)

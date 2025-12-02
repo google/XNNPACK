@@ -15,9 +15,7 @@ namespace ynn {
 size_t sme_vl(float);
 size_t sme_vl(int32_t);
 
-#ifdef MEMORY_SANITIZER
-#define YNN_DISABLE_SME  // b/453644115
-#elif __APPLE__ && __clang_major__ < 17
+#if __APPLE__ && __clang_major__ < 17
 #define YNN_DISABLE_SME
 #endif
 

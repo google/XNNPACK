@@ -1,9 +1,9 @@
-"""
-Microkernel filenames lists for rvv.
-
-Auto-generated file. Do not edit!
-  Generator: tools/update-microkernels.py
-"""
+#
+# Microkernel filenames lists for rvv.
+#
+# Auto-generated file. Do not edit!
+#   Generator: tools/update-microkernels.py
+#
 
 PROD_RVV_MICROKERNEL_SRCS = [
     "src/f32-argmaxpool/f32-argmaxpool-9p8x-rvv-u1v.c",

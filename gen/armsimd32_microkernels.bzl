@@ -1,9 +1,9 @@
-"""
-Microkernel filenames lists for armsimd32.
-
-Auto-generated file. Do not edit!
-  Generator: tools/update-microkernels.py
-"""
+#
+# Microkernel filenames lists for armsimd32.
+#
+# Auto-generated file. Do not edit!
+#   Generator: tools/update-microkernels.py
+#
 
 PROD_ARMSIMD32_MICROKERNEL_SRCS = [
     "src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-1x2c4-minmax-fp32-armsimd32.c",

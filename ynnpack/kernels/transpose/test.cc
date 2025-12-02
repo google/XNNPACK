@@ -47,7 +47,7 @@ void fill_ramp(T* x, size_t n, size_t begin = 0, size_t stride = 1) {
 }
 
 template <typename T>
-void TestTranspose(T, transpose_kernel_fn kernel, std::vector<size_t> ms,
+void TestTranspose(T, transpose_fn kernel, std::vector<size_t> ms,
                    std::vector<size_t> ns) {
   constexpr size_t element_count = type_info<T>::element_count();
   const size_t max_m = *std::max_element(ms.begin(), ms.end());
@@ -176,6 +176,15 @@ TEST_P(Transpose, unaligned) {
   if (!is_arch_supported(kernel.arch_flags)) GTEST_SKIP();
   switch_element_size(kernel.element_size_bits, [&](auto type) {
     TestTranspose(type, kernel.kernel, unaligned_sizes, unaligned_sizes);
+  });
+}
+
+TEST_P(Transpose, tiled) {
+  TransposeParam kernel = GetParam();
+  if (!is_arch_supported(kernel.arch_flags)) GTEST_SKIP();
+  switch_element_size(kernel.element_size_bits, [&](auto type) {
+    auto tiled = make_tiled_transpose(kernel.element_size_bits, kernel.kernel);
+    TestTranspose(type, tiled, aligned_sizes, aligned_sizes);
   });
 }
 

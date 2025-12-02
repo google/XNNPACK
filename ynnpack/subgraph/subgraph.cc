@@ -26,7 +26,6 @@
 #include "ynnpack/base/arithmetic.h"
 #include "ynnpack/base/base.h"
 #include "ynnpack/base/bfloat16.h"
-#include "ynnpack/base/build_config.h"
 #include "ynnpack/base/half.h"
 #include "ynnpack/base/log.h"
 #include "ynnpack/base/to_string.h"
@@ -350,8 +349,12 @@ ynn_status ynn_subgraph::fold_constants(slinky::thread_pool* threadpool) {
   ynn_subgraph constants(*this);
   for (uint32_t i = 0; i < nodes.size(); ++i) {
     ynn_node& node = nodes[i];
-    if (std::all_of(node.inputs.begin(), node.inputs.end(), [&](uint32_t i) {
-          return i == YNN_INVALID_VALUE_ID || value_is_static[i];
+    if (std::all_of(node.inputs.begin(), node.inputs.end(),
+                    [&](uint32_t i) {
+                      return i == YNN_INVALID_VALUE_ID || value_is_static[i];
+                    }) &&
+        std::none_of(node.outputs.begin(), node.outputs.end(), [&](uint32_t i) {
+          return i != YNN_INVALID_VALUE_ID && values[i].is_external_output();
         })) {
       // Remove the node from the subgraph.
       node.invalidate();

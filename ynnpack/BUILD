@@ -85,6 +85,14 @@ selects.config_setting_group(
 )
 
 define_build_option(
+    name = "ynn_enable_cpuinfo",
+    default_any = [
+        ":arm",
+        ":x86",
+    ],
+)
+
+define_build_option(
     name = "ynn_enable_arm_neon",
     default_all = [":arm"],
 )

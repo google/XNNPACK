@@ -1,9 +1,9 @@
-"""
-Microkernel filenames lists for avx512vbmi.
-
-Auto-generated file. Do not edit!
-  Generator: tools/update-microkernels.py
-"""
+#
+# Microkernel filenames lists for avx512vbmi.
+#
+# Auto-generated file. Do not edit!
+#   Generator: tools/update-microkernels.py
+#
 
 PROD_AVX512VBMI_MICROKERNEL_SRCS = [
     "src/x8-lut/gen/x8-lut-avx512vbmi-vpermx2b-u128.c",

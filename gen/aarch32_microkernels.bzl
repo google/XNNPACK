@@ -1,9 +1,9 @@
-"""
-Microkernel filenames lists for aarch32.
-
-Auto-generated file. Do not edit!
-  Generator: tools/update-microkernels.py
-"""
+#
+# Microkernel filenames lists for aarch32.
+#
+# Auto-generated file. Do not edit!
+#   Generator: tools/update-microkernels.py
+#
 
 PROD_AARCH32_ASM_MICROKERNEL_SRCS = [
     "src/f32-gemm/gen/f32-gemm-1x8-minmax-asm-aarch32-neon-cortex-a53-prfm.S",

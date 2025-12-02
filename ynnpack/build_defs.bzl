@@ -236,6 +236,26 @@ def ynn_kernel_copts(unroll_loops = True):
         "//conditions:default": ["-O2"] + ([] if unroll_loops else ["-fno-unroll-loops"]),
     })
 
+def ynn_binary_linkopts():
+    return select({
+        "//conditions:default": [],
+    })
+
+def ynn_binary_malloc():
+    return select({
+        "//conditions:default": "@bazel_tools//tools/cpp:malloc",
+    })
+
+def ynn_test_deps():
+    return select({
+        "//conditions:default": ["@com_google_googletest//:gtest_main"],
+    })
+
+def ynn_benchmark_deps():
+    return select({
+        "//conditions:default": ["@com_google_benchmark//:benchmark_main"],
+    })
+
 def ynn_cc_library(
         name,
         srcs = [],

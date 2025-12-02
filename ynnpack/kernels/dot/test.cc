@@ -7,7 +7,6 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
-#include <numeric>
 #include <ostream>
 #include <type_traits>
 #include <vector>
@@ -15,15 +14,14 @@
 #include <gtest/gtest.h>
 #include "ynnpack/base/arch.h"  // IWYU pragma: keep
 #include "ynnpack/base/arithmetic.h"
-#include "ynnpack/base/build_config.h"
 #include "ynnpack/base/test/buffer.h"
 #include "ynnpack/base/test/fuzz_test.h"
 #include "ynnpack/base/test/random.h"
 #include "ynnpack/base/test/tensor.h"
 #include "ynnpack/base/test/util.h"
 #include "ynnpack/base/type.h"
-#include "ynnpack/include/ynnpack.h"
 #include "ynnpack/kernels/dot/dot.h"
+#include "ynnpack/kernels/dot/pack.h"
 
 namespace ynn {
 
@@ -39,70 +37,74 @@ std::ostream& operator<<(std::ostream& os, const DotShape& shape) {
   return os << shape.m << "x" << shape.n << "x" << shape.k;
 }
 
-// Align the last two dimensions of x up to a multiple of a2, a1, with zero
-// padding.
-template <typename T>
-Tensor<T> AlignUp(Tensor<T> x, size_t a2, size_t a1) {
-  std::vector<size_t> extents = x.extents();
-  extents[extents.size() - 2] = align_up(extents[extents.size() - 2], a2);
-  extents[extents.size() - 1] = align_up(extents[extents.size() - 1], a1);
-  if (extents == x.extents()) {
-    return x;
-  }
-
-  Tensor<T> aligned(extents, Alignment({.bytes = a1 * a2 * sizeof(T)}));
-
-  aligned.fill(0);
-  Tensor<T> cropped = aligned;
-  cropped.set_shape(x.extents(), aligned.strides());
-  cropped.assign(x);
-
-  return aligned;
-}
-
 // If `tile_k > 1`, we need to transpose b such that `tile_k` values of the k
 // dimension are contiguous in memory.
 template <typename T>
 Tensor<T> PackB(Tensor<T> b, size_t tile_k, size_t tile_n) {
-  Tensor<T> aligned_b = AlignUp(b, tile_k, tile_n);
-  if (tile_k == 1) {
-    return aligned_b;
-  }
+  const size_t elem_count = type_element_count(type_of<T>());
+  const size_t elem_size_bits = sizeof(T) * 8 / elem_count;
 
-  // The following is basically:
-  //   b.reshape(..., k/tile_k, tile_k, n).transpose(..., 1, 0)
-  size_t k = aligned_b.extent(b.rank() - 2);
-  std::vector<int32_t> perm(aligned_b.rank() - 2);
-  std::iota(perm.begin(), perm.end(), 0);
-  perm.push_back(aligned_b.rank() - 2);
-  perm.push_back(aligned_b.rank());
-  perm.push_back(aligned_b.rank() - 1);
-  Tensor<T> packed_b =
-      aligned_b.split(aligned_b.rank() - 2, {k / tile_k, tile_k})
-          .transpose(perm)
-          .deep_copy(Alignment{.bytes = YNN_ALLOCATION_ALIGNMENT});
-  packed_b.set_shape(aligned_b.extents(), aligned_b.strides());
-  return packed_b;
+  assert(tile_k % elem_count == 0);
+
+  // Get n, k dimensions from b, and remove them from the extents.
+  std::vector<size_t> extents = b.extents();
+  size_t n = extents.back() * elem_count;
+  extents.pop_back();
+  size_t k = extents.back();
+  extents.pop_back();
+
+  // Remember these extents, which are the batch dimensions for the transpose
+  // operation below.
+  std::vector<size_t> batch_extents = extents;
+
+  // Add the new transposed dimensions.
+  // blocks_n is always 1 (and thus `block_n = n`) in these tests.
+  extents.push_back(ceil_div(k, tile_k));
+  extents.push_back(align_up(n, tile_n));
+  extents.push_back(tile_k / elem_count);
+
+  // Make the result.
+  Tensor<T> result(extents, Alignment({.bytes = tile_k * tile_n * sizeof(T)}));
+  packer p(/*transpose=*/false, elem_size_bits, tile_k, align_up(n, tile_n));
+  for (const auto& i : EnumerateIndices(batch_extents)) {
+    p.pack(k, n, b.stride(b.rank() - 2) * sizeof(T), b.slice_leading(i).base(),
+           result.stride(result.rank() - 3) * sizeof(T), 0,
+           result.slice_leading(i).base());
+  }
+  return result;
 }
 
 template <typename T>
 Tensor<T> TransposeA(Tensor<T> a, size_t tile_k) {
-  Tensor<T> aligned_a = AlignUp(a, 1, tile_k);
+  const size_t elem_count = type_element_count(type_of<T>());
+  const size_t elem_size_bits = sizeof(T) * 8 / elem_count;
 
-  // The following is basically:
-  //   b.reshape(..., m, k/tile_k, tile_k).transpose(..., 2, 1, 0)
-  size_t k = aligned_a.extent(a.rank() - 1);
-  std::vector<int32_t> perm(aligned_a.rank() - 2);
-  std::iota(perm.begin(), perm.end(), 0);
-  perm.push_back(aligned_a.rank() - 1);
-  perm.push_back(aligned_a.rank() - 2);
-  perm.push_back(aligned_a.rank());
-  Tensor<T> packed_a =
-      aligned_a.split(aligned_a.rank() - 1, {k / tile_k, tile_k})
-          .transpose(perm)
-          .deep_copy(Alignment{.bytes = YNN_ALLOCATION_ALIGNMENT});
-  packed_a = packed_a.fuse({aligned_a.rank() - 1, aligned_a.rank()});
-  return packed_a;
+  assert(tile_k % elem_count == 0);
+
+  // Get n, k dimensions from a, and remove them from the extents.
+  std::vector<size_t> extents = a.extents();
+  size_t k = extents.back() * elem_count;
+  extents.pop_back();
+  size_t m = extents.back();
+  extents.pop_back();
+
+  // Remember these extents, which are the batch dimensions for the transpose
+  // operation below.
+  std::vector<size_t> batch_extents = extents;
+
+  // Add the new transposed dimensions.
+  extents.push_back(ceil_div(k, tile_k));
+  extents.push_back(m * tile_k);
+
+  // Make the result.
+  Tensor<T> result(extents);
+  packer p(/*transpose=*/true, elem_size_bits, tile_k, m * tile_k);
+  for (const auto& i : EnumerateIndices(batch_extents)) {
+    p.pack(k, m, a.stride(a.rank() - 2) * sizeof(T), a.slice_leading(i).base(),
+           result.stride(result.rank() - 2) * sizeof(T), 0,
+           result.slice_leading(i).base());
+  }
+  return result;
 }
 
 template <typename AT, typename BT, typename CT>
@@ -193,7 +195,7 @@ void TestMatMul(AT, BT, CT, const DotShape& shape, const KernelInfo& kernel,
   Tensor<AT> packed_a = transpose_a ? TransposeA(a, tile_k) : a;
 
   kernel.kernel(m, n, 1, 1, k, packed_a.stride(0) * sizeof(AT), 0, 0,
-                packed_a.base(), 0, 0, packed_b.stride(0) * sizeof(BT),
+                packed_a.base(), 0, 0, packed_b.stride(0) * sizeof(BT) / tile_k,
                 packed_b.base(), c.stride(0) * sizeof(CT),
                 init_zero ? nullptr : c.base(), c.stride(0) * sizeof(CT),
                 c.base());
@@ -302,9 +304,9 @@ void TestConv2D(AT, BT, CT, const KernelInfo& kernel) {
         w, co, kh, kw, ci, packed_a.stride(0) * sizeof(AT),
         packed_a.stride(1) * sizeof(AT), packed_a.stride(2) * sizeof(AT),
         packed_a.base(), packed_b.stride(0) * sizeof(BT),
-        packed_b.stride(1) * sizeof(BT), packed_b.stride(2) * sizeof(BT),
-        packed_b.base(), c.stride(0) * sizeof(CT), c.base(),
-        c.stride(0) * sizeof(CT), c.base());
+        packed_b.stride(1) * sizeof(BT),
+        packed_b.stride(2) * sizeof(BT) / tile_k, packed_b.base(),
+        c.stride(0) * sizeof(CT), c.base(), c.stride(0) * sizeof(CT), c.base());
 
     // Verify results.
     a = make_stencil_dim(a, 1, kw).transpose({2, 0, 1, 3});
@@ -373,9 +375,10 @@ TEST_P(Dot, TileAlignedN) {
   if (!is_arch_supported(kernel.arch_flags)) GTEST_SKIP();
   const DotShape& block_shape = kernel.block_shape;
   SwitchThreeTypes(kernel.type, [&](auto a_type, auto b_type, auto c_type) {
-    for (size_t n = kernel.tile_n; n < block_shape.n; n += kernel.tile_n) {
-      TestMatMul(a_type, b_type, c_type, block_shape.with_n(block_shape.n * n),
-                 kernel);
+    const size_t align_n =
+        kernel.tile_n * type_element_count(type_of<decltype(b_type)>());
+    for (size_t n = align_n; n < block_shape.n; n += align_n) {
+      TestMatMul(a_type, b_type, c_type, block_shape.with_n(n), kernel);
     }
   });
 }
@@ -386,8 +389,7 @@ TEST_P(Dot, TileAlignedK) {
   const DotShape& block_shape = kernel.block_shape;
   SwitchThreeTypes(kernel.type, [&](auto a_type, auto b_type, auto c_type) {
     for (size_t k = kernel.tile_k; k < block_shape.k; k += kernel.tile_k) {
-      TestMatMul(a_type, b_type, c_type, block_shape.with_k(block_shape.k * k),
-                 kernel);
+      TestMatMul(a_type, b_type, c_type, block_shape.with_k(k), kernel);
     }
   });
 }

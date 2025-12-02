@@ -1,9 +1,9 @@
-"""
-Microkernel filenames lists for fp16arith.
-
-Auto-generated file. Do not edit!
-  Generator: tools/update-microkernels.py
-"""
+#
+# Microkernel filenames lists for fp16arith.
+#
+# Auto-generated file. Do not edit!
+#   Generator: tools/update-microkernels.py
+#
 
 PROD_FP16ARITH_MICROKERNEL_SRCS = [
     "src/f16-vbinary/gen/f16-vdiv-fp16arith-u2.c",

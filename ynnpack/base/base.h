@@ -70,6 +70,8 @@
 // not defined on ARM?
 #define YNN_CACHE_LINE_SIZE 64
 
+#define YNN_ALLOCATION_ALIGNMENT 64
+
 #ifdef _MSC_VER
 #define YNN_ALLOCA(T, N) reinterpret_cast<T*>(_alloca((N) * sizeof(T)))
 #else

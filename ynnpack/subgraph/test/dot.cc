@@ -157,7 +157,11 @@ void TestStaticB(A, B, C) {
     Tensor<B> b(to_physical_shape<B>(b_shape));
     b.generate([&]() { return b_gen(rng); });
 
-    SubgraphBuilder subgraph(4);
+    uint32_t subgraph_flags = 0;
+    if (random_bool(rng)) {
+      subgraph_flags |= YNN_FLAG_CONSISTENT_ARITHMETIC;
+    }
+    SubgraphBuilder subgraph(4, subgraph_flags);
     const uint32_t a_id = 0;
     const uint32_t b_id = 1;
     const uint32_t output_id = 3;
@@ -331,7 +335,11 @@ void TestDynamicB(A, B, C) {
         std::uniform_int_distribution<size_t>(1, max_k_dims)(rng);
     const size_t output_rank = std::max(a_rank, b_rank) - num_k_dims + 1;
 
-    SubgraphBuilder subgraph(4);
+    uint32_t subgraph_flags = 0;
+    if (random_bool(rng)) {
+      subgraph_flags |= YNN_FLAG_CONSISTENT_ARITHMETIC;
+    }
+    SubgraphBuilder subgraph(4, subgraph_flags);
     const uint32_t a_id = 0;
     const uint32_t b_id = 1;
     const uint32_t output_id = 3;
@@ -512,7 +520,11 @@ void TestStaticShapeDynamicB(A, B, C) {
     std::sort(inv_b_perm.begin(), inv_b_perm.end(),
               [&](int i, int j) { return b_perm[i] < b_perm[j]; });
 
-    SubgraphBuilder subgraph(4);
+    uint32_t subgraph_flags = 0;
+    if (random_bool(rng)) {
+      subgraph_flags |= YNN_FLAG_CONSISTENT_ARITHMETIC;
+    }
+    SubgraphBuilder subgraph(4, subgraph_flags);
     const uint32_t a_id = 0;
     const uint32_t b_id = 1;
     const uint32_t output_id = 3;

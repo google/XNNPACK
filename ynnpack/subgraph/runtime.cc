@@ -10,7 +10,9 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstdlib>
+#include <cstring>
 #include <functional>
+#include <limits>
 #include <map>
 #include <memory>
 #include <sstream>
@@ -19,10 +21,11 @@
 #include <variant>
 #include <vector>
 
+
 #ifdef YNN_ENABLE_PERFETTO
 #include "ynnpack/subgraph/perfetto.h"
 #endif
-#include "ynnpack/base/build_config.h"
+#include "ynnpack/base/base.h"
 #include "ynnpack/base/log.h"
 #include "ynnpack/base/type.h"
 #include "ynnpack/include/ynnpack.h"
@@ -33,6 +36,7 @@
 #include "slinky/base/span.h"
 #include "slinky/base/thread_pool.h"
 #include "slinky/builder/pipeline.h"
+#include "slinky/builder/node_mutator.h"
 #include "slinky/builder/simplify.h"
 #include "slinky/builder/substitute.h"
 #include "slinky/runtime/buffer.h"
@@ -744,6 +748,46 @@ ynn_status ynn_set_external_value_data(ynn_runtime_t runtime,
 
 ynn_status ynn_invoke_runtime(ynn_runtime_t runtime) {
   return runtime->invoke();
+}
+
+namespace {
+
+int32_t get_max_concurrency(const ynn_runtime& runtime) {
+  int32_t result = 1;
+  slinky::recursive_mutate<slinky::loop>(
+      runtime.pipeline.body, [&](const slinky::loop* op) -> slinky::stmt {
+        if (!slinky::prove_true(op->max_workers == 1)) {
+          result = std::numeric_limits<int32_t>::max();
+        }
+        return slinky::stmt{op};
+      });
+  return result;
+}
+
+}  // namespace
+
+ynn_status ynn_query_runtime(ynn_runtime_t runtime,
+                             ynn_runtime_property property, void* result,
+                             size_t* result_size) {
+  if (!result_size || !result) {
+    YNN_LOG_ERROR() << "Invalid result pointer";
+    return ynn_status_error;
+  }
+  switch (property) {
+    case ynn_runtime_property_concurrency: {
+      memset(result, 0, *result_size);
+      if (*result_size < sizeof(int32_t)) {
+        YNN_LOG_ERROR() << "result must be an int32_t.";
+        return ynn_status_error;
+      }
+      *result_size = sizeof(int32_t);
+      int32_t max_threads = get_max_concurrency(*runtime);
+      memcpy(result, &max_threads, sizeof(int32_t));
+      return ynn_status_success;
+    }
+  }
+  YNN_LOG_ERROR() << "Unknown runtime property: " << property;
+  return ynn_status_error;
 }
 
 void ynn_delete_runtime(ynn_runtime_t runtime) { delete runtime; }
