@@ -1593,7 +1593,7 @@ error:
 
 enum xnn_status xnn_fingerprint_fully_connected_nc(
     const enum xnn_fingerprint_id fingerprint_id) {
-  enum xnn_status status = xnn_status_success;
+  enum xnn_status status = xnn_status_uninitialized;
   struct fingerprint_context fingerprint_context =
       create_fingerprint_context(fingerprint_id);
   struct fc_context context = {
@@ -1609,18 +1609,19 @@ enum xnn_status xnn_fingerprint_fully_connected_nc(
   };
   if (fingerprint_context.status == xnn_status_uninitialized) {
     const struct fc_variant* variant;
-    XNN_RETURN_IF_ERROR(setup_variant_and_gemm_config(&variant, &context));
-    XNN_RETURN_IF_ERROR(generate_fingerprint_data(variant, &context));
+    XNN_IF_ERROR_GOTO(error, setup_variant_and_gemm_config(&variant, &context));
+    XNN_IF_ERROR_GOTO(error, generate_fingerprint_data(variant, &context));
     for (int i = 0; i < XNN_FC_VARIANT_FINGERPRINT_CONSTRAINT_MAX_COUNT &&
                     variant->fingerprint_constraints[i];
          ++i) {
-      XNN_RETURN_IF_ERROR(
-          variant->fingerprint_constraints[i](variant, &context));
+      XNN_IF_ERROR_GOTO(error,
+                        variant->fingerprint_constraints[i](variant, &context));
     }
     status = create_fully_connected_nc_helper(&context);
   } else {
     status = fingerprint_context.status;
   }
+error:
   finalize_fingerprint_context(&fingerprint_context);
   return status;
 }
