@@ -420,7 +420,8 @@ jobs:
               --test_output=errors \
               --local_test_jobs=HOST_CPUS \
               //test/... \
-              //bench/...
+              //bench/... \
+              //ynnpack/...
         working-directory: ${{ github.workspace }}
       - name: Compress disk cache
         # Bazel's `--disk-cache` currently grows without bounds, so we remove files
@@ -440,7 +441,16 @@ jobs:
     env:
       CC: gcc-9
       CXX: g++-9
-      BAZEL_DEFINES: --define=xnn_enable_avxvnni=false --define=xnn_enable_avx256vnni=false --define=xnn_enable_avxvnniint8=false --define=xnn_enable_avx512amx=false --define=xnn_enable_avx512fp16=false --define=xnn_enable_avx512bf16=false
+      BAZEL_DEFINES: |
+        --define=xnn_enable_avxvnni=false
+        --define=xnn_enable_avx256vnni=false
+        --define=xnn_enable_avxvnniint8=false
+        --define=xnn_enable_avx512amx=false
+        --define=xnn_enable_avx512fp16=false
+        --define=xnn_enable_avx512bf16=false
+        --define=ynn_enable_x86_amx=false
+        --define=ynn_enable_x86_avx512fp16=false
+        --define=ynn_enable_x86_avx512bf16=false
     steps:
       - uses: actions/checkout@v4
       - name: Update apt
@@ -475,7 +485,8 @@ jobs:
               --local_test_jobs=HOST_CPUS \
               ${BAZEL_DEFINES} \
               //test/... \
-              //bench/...
+              //bench/... \
+              //ynnpack/...
         working-directory: ${{ github.workspace }}
       - name: Compress disk cache
         # Bazel's `--disk-cache` currently grows without bounds, so we remove files
@@ -532,7 +543,8 @@ jobs:
             --test_output=errors \
             --local_test_jobs=HOST_CPUS \
             //test/... \
-            //bench/...
+            //bench/... \
+            //ynnpack/...
         working-directory: ${{ github.workspace }}
       - name: Compress disk cache
         # Bazel's `--disk-cache` currently grows without bounds, so we remove files
@@ -550,6 +562,10 @@ jobs:
     # This ensures we have solid test coverage for _Float16
     runs-on: arm-ubuntu-arm-22.04-8core
     timeout-minutes: 60
+    env:
+      CC: gcc-13
+      CXX: g++-13
+      BAZEL_DEFINES: --define=ynn_enable_arm64_sme=false
     steps:
       - uses: actions/checkout@v4
       - name: Add repository ppa:ubuntu-toolchain-r/test for gcc-13 and g++-13
@@ -571,25 +587,23 @@ jobs:
             ${{ github.job }}-
       - name: Build tests
         if: ${{ !inputs.run-tests }}
-        env:
-          CC: gcc-13
-          CXX: g++-13
         run: |
             bazel build \
+              ${BAZEL_DEFINES} \
               //test/... \
-              //bench/...
+              //bench/... \
+              //ynnpack/...
         working-directory: ${{ github.workspace }}
       - name: Build and run tests
         if: ${{ inputs.run-tests }}
-        env:
-          CC: gcc-13
-          CXX: g++-13
         run: |
           bazel test \
             --test_output=errors \
             --local_test_jobs=HOST_CPUS \
+            ${BAZEL_DEFINES} \
             //test/... \
-            //bench/...
+            //bench/... \
+            //ynnpack/...
         working-directory: ${{ github.workspace }}
       - name: Compress disk cache
         # Bazel's `--disk-cache` currently grows without bounds, so we remove files
@@ -688,7 +702,8 @@ jobs:
             //test:pf32_gemm_minmax_test \
             //test:pf16_gemm_minmax_test \
             //test:pqs8_qc8w_gemm_minmax_test \
-            //test/subgraph/...
+            //test/subgraph/... \
+            //ynnpack/...
         working-directory: ${{ github.workspace }}
       - name: Build and run microkernel tests
         if: ${{ inputs.run-tests }}
@@ -732,6 +747,7 @@ jobs:
             --dynamic_mode=off \
             --features=fully_static_link \
             //test/subgraph/... \
+            //ynnpack/... \
             --cache_test_results=no \
             --test_output=errors \
             --test_timeout=600 \
