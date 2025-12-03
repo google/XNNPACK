@@ -654,7 +654,7 @@ jobs:
             sudo apt-get install libglib2.0-dev libfdt-dev libpixman-1-dev zlib1g-dev ninja-build
             tar xjf qemu-master.tar.bz2
             cd $(ls -dt qemu-* | tail -1)
-            ./configure --target-list=aarch64-linux-user --enable-debug-tcg
+            ./configure --target-list=aarch64-linux-user
             make -j $(nproc)
             cp -f build/qemu-aarch64 ../bin/
           fi
