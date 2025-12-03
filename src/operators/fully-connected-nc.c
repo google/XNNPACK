@@ -1957,10 +1957,12 @@ enum xnn_status xnn_create_fully_connected_nc_qd8_f32_qb4w_f16_scales(
     bf16_scale_buffer[i] =
         xnn_bfloat16_from_float(xnn_float16_to_float(kernel_scale[i]));
   }
-  return xnn_create_fully_connected_nc_qd8_f32_qb4w(
+  enum xnn_status status = xnn_create_fully_connected_nc_qd8_f32_qb4w(
       input_channels, output_channels, input_stride, output_stride, block_size,
       kernel_zero_point, (const uint16_t*)bf16_scale_buffer, kernel, bias, output_min, output_max,
       flags, weights_cache, fully_connected_op_out);
+  xnn_release_memory(bf16_scale_buffer);
+  return status;
 }
 
 enum xnn_status xnn_create_fully_connected_nc_qdu8_f32_qb4w(
