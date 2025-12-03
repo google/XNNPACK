@@ -58,6 +58,7 @@ cc_library(
 
 cc_test(
     name = "random_test",
+    size = "small",
     srcs = ["random_test.cc"],
     linkopts = ynn_binary_linkopts(),
     malloc = ynn_binary_malloc(),
@@ -69,6 +70,7 @@ cc_test(
 
 cc_test(
     name = "tensor_test",
+    size = "small",
     srcs = ["tensor_test.cc"],
     linkopts = ynn_binary_linkopts(),
     malloc = ynn_binary_malloc(),
@@ -80,6 +82,7 @@ cc_test(
 
 cc_test(
     name = "float_test",
+    size = "small",
     srcs = ["float_test.cc"],
     linkopts = ynn_binary_linkopts(),
     malloc = ynn_binary_malloc(),

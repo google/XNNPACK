@@ -43,6 +43,7 @@ ynn_cc_library(
 
 cc_test(
     name = "test",
+    size = "small",
     linkopts = ynn_binary_linkopts(),
     malloc = ynn_binary_malloc(),
     tags = ["simd_wrapper_test"],

@@ -153,6 +153,7 @@ cc_library(
 
 cc_test(
     name = "test",
+    size = "small",
     srcs = ["test.cc"],
     linkopts = ynn_binary_linkopts(),
     malloc = ynn_binary_malloc(),
@@ -170,6 +171,7 @@ cc_test(
 
 cc_test(
     name = "bench",
+    size = "small",
     srcs = ["bench.cc"],
     args = ["--benchmark_min_time=1x"],
     linkopts = ynn_binary_linkopts(),

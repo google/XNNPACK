@@ -47,6 +47,7 @@ ynn_cc_library(
 
 cc_test(
     name = "test",
+    size = "small",
     srcs = [
         "switch_element_size.h",
         "test.cc",
@@ -63,6 +64,7 @@ cc_test(
 
 cc_test(
     name = "bench",
+    size = "small",
     srcs = [
         "bench.cc",
         "switch_element_size.h",

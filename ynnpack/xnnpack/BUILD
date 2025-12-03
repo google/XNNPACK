@@ -70,6 +70,7 @@ cc_library(
 
 cc_test(
     name = "dynamic_quantization_test",
+    size = "small",
     srcs = ["dynamic_quantization_test.cc"],
     linkopts = ynn_binary_linkopts(),
     malloc = ynn_binary_malloc(),

@@ -666,6 +666,7 @@ ynn_cc_library(
 
 cc_test(
     name = "test",
+    size = "small",
     srcs = ["test.cc"],
     linkopts = ynn_binary_linkopts(),
     malloc = ynn_binary_malloc(),
@@ -684,6 +685,7 @@ cc_test(
 
 cc_test(
     name = "consistent_arithmetic_test",
+    size = "small",
     srcs = ["consistent_arithmetic_test.cc"],
     linkopts = ynn_binary_linkopts(),
     malloc = ynn_binary_malloc(),
@@ -700,6 +702,7 @@ cc_test(
 
 cc_test(
     name = "schedule_test",
+    size = "small",
     srcs = ["schedule_test.cc"],
     linkopts = ynn_binary_linkopts(),
     malloc = ynn_binary_malloc(),
@@ -710,6 +713,7 @@ cc_test(
 
 cc_test(
     name = "pack_test",
+    size = "small",
     srcs = ["pack_test.cc"],
     linkopts = ynn_binary_linkopts(),
     malloc = ynn_binary_malloc(),
@@ -721,6 +725,7 @@ cc_test(
 
 cc_test(
     name = "get_dot_kernel_test",
+    size = "small",
     srcs = ["get_dot_kernel_test.cc"],
     linkopts = ynn_binary_linkopts(),
     malloc = ynn_binary_malloc(),
@@ -733,6 +738,7 @@ cc_test(
 
 cc_test(
     name = "bench",
+    size = "small",
     srcs = ["bench.cc"],
     args = ["--benchmark_min_time=1x"],
     linkopts = ynn_binary_linkopts(),
