@@ -473,15 +473,15 @@ void check_results(const unary_op_info& op, Tensor<A> a, Tensor<X> x,
       const float input_i = dequantize(a(i), a_quantization);
       float expected = op(input_i);
       expected = fake_quantize(expected, x_quantization);
-      expected = std::max<float>(expected, type_info<X>::min());
-      expected = std::min<float>(expected, type_info<X>::max());
+      expected = clamp_float_to_int<X>(expected);
       if (std::isnan(expected)) {
         // This is expected to overflow.
       } else {
         ASSERT_NEAR(expected, x(i), op.tolerance(expected, type_of<X>()))
             << "i = " << index_to_string(i) << ", a(i) = " << input_i << " ("
             << static_cast<float>(a(i)) << ")"
-            << ", x(i) = " << static_cast<int32_t>(x(i));
+            << ", x(i) = " << static_cast<int32_t>(x(i)) << " ("
+            << dequantize(x(i), x_quantization) << ")" << std::endl;
       }
     } else {
       const float input_i = dequantize(a(i), a_quantization);
