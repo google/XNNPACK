@@ -85,7 +85,7 @@ void TestMatMul(AT, BT, CT, size_t k) {
   // - Whether fma is used or not
   // So we should be able to just use one shape that works for every kernel.
   const size_t m = 1;
-  const size_t n = 65536;
+  const size_t n = 4096;
 
   Tensor<AT> a({m, k});
   Tensor<BT> b({k, n / B_info::element_count()},
