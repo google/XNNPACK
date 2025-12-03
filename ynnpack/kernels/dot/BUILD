@@ -664,6 +664,18 @@ ynn_cc_library(
     }),
 )
 
+cc_library(
+    name = "pack_test_tensor",
+    testonly = True,
+    hdrs = ["pack_test_tensor.h"],
+    deps = [
+        ":pack",
+        "//ynnpack/base",
+        "//ynnpack/base/test:buffer",
+        "//ynnpack/base/test:tensor",
+    ],
+)
+
 cc_test(
     name = "test",
     srcs = ["test.cc"],
@@ -672,6 +684,7 @@ cc_test(
     deps = [
         ":dot",
         ":pack",
+        ":pack_test_tensor",
         "//ynnpack:ynnpack_h",
         "//ynnpack/base",
         "//ynnpack/base/test:buffer",
@@ -689,6 +702,7 @@ cc_test(
     malloc = ynn_binary_malloc(),
     deps = [
         ":dot",
+        ":pack_test_tensor",
         "//ynnpack/base",
         "//ynnpack/base/test:buffer",
         "//ynnpack/base/test:fuzz_test",
