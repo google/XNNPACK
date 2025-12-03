@@ -351,8 +351,32 @@ if ((hardware_config->arch_flags & xnn_arch_arm_sme2)) {
     pf16_gemm_config.mr_packed = mr;
     pf16_gemm_config.nr = nr < nstep_min ? nstep_min : nr;
     pf16_gemm_config.log2_kr = 1;
-#endif
-  } else {
+#endif // XNN_ENABLE_ARM_SME2
+  } else if ((hardware_config->arch_flags & xnn_arch_arm_sme)) {
+#if XNN_ENABLE_ARM_SME
+    const size_t mr = xnn_pf16_gemm_minmax_ukernel_32x32c2__neonsme_get_mr();
+    size_t nr = xnn_pf16_gemm_minmax_ukernel_32x32c2__neonsme_get_nr();
+    const size_t nstep_min = 16;
+    pf16_gemm_config.arch = xnn_arch_arm_sme;
+    pf16_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_pf16_gemm_minmax_ukernel_1x32c2__neonsme);
+    pf16_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(mr)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_pf16_gemm_minmax_ukernel_32x32c2__neonsme);
+    pf16_gemm_config.minmax.igemm[XNN_MR_TO_INDEX(mr)] =
+        xnn_init_hmp_packed_igemm_ukernel(
+            (xnn_packed_lhs_igemm_ukernel_fn)
+                xnn_pf16_f16_igemm_minmax_fp16_ukernel_32x32c2__neonsme);
+    pf16_gemm_config.init.f16 = xnn_init_f16_minmax_scalar_params;
+    pf16_gemm_config.pack_weights_and_biases = xnn_pack_kai_f16_weights_and_biases;
+    pf16_gemm_config.packed_stride_weights_and_biases = xnn_packed_stride_kai_f16_weights_and_biases;
+    pf16_gemm_config.pack_igemm_goki =
+      (xnn_pack_conv_goki_w_fn)xnn_pack_kai_f16_conv_goki_w_sme; // both sme and sme2 use the same packing kernel
+    pf16_gemm_config.pack_igemm_kgo =
+      (xnn_pack_conv_kgo_w_fn)xnn_pack_f16_conv_kgo_w;
+    pf16_gemm_config.mr = mr;
+    pf16_gemm_config.mr_packed = mr;
+    pf16_gemm_config.nr = nr < nstep_min ? nstep_min : nr;
+    pf16_gemm_config.log2_kr = 1;
+#endif // XNN_ENABLE_ARM_SME
+  }else {
     /* no action */
   }
   assert(pf16_gemm_config.mr <= XNN_MAX_MR);
