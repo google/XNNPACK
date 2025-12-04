@@ -72,7 +72,7 @@ class x86(dot_base):
     result = ""
 
     # Shift the accumulator registers down and the pointers up.
-    for i in range(0, self.block_shape[0], self.tile_shape[0]):
+    for i in range(0, self.block_shape[0]):
       for j in range(0, n, self.tile_shape[1]):
         result += f"c_{i}_{j} = c_{i}_{j + n};\n"
 
@@ -119,7 +119,7 @@ class x86_sse2(x86):
 
     # Load all of the output and add it, before writing anything.
     add_c_tiles = ""
-    for i in range(0, self.block_shape[0], self.tile_shape[0]):
+    for i in range(0, self.block_shape[0]):
       add_c_tiles += (
           f"c_{i}_0 = {self._mm()}_add_ps(c_{i}_0,"
           f" _mm_loadl_pi(_mm_setzero_ps(), {self.c_in_ptr(i, 0, '__m64')}));\n"
@@ -140,7 +140,7 @@ class x86_sse2(x86):
     result += "if (N & 1) {\n"
     # Load all of the output and add it, before writing anything.
     add_c_tiles = ""
-    for i in range(0, self.block_shape[0], self.tile_shape[0]):
+    for i in range(0, self.block_shape[0]):
       add_c_tiles += (
           f"c_{i}_0 = {self._mm()}_add_ss(c_{i}_0,"
           f" _mm_load_ss({self.c_in_ptr(i, 0)}));\n"
@@ -173,7 +173,7 @@ static const int32_t mask_table[16] = {-1, -1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 
     result += f"const __m{self.bits}i mask = {self._mm()}_loadu_si{self.bits}((const __m{self.bits}i*) &mask_table[8 - N]);\n"
 
     add_c_tiles = ""
-    for i in range(0, self.block_shape[0], self.tile_shape[0]):
+    for i in range(0, self.block_shape[0]):
       if self.c_type == "float":
         add_c_tiles += (
             f"c_{i}_0 = {self._mm()}_add_ps(c_{i}_0,"
@@ -217,7 +217,7 @@ class x86_avx512f(x86):
 
     add_c_tiles = ""
     # Load all of the output and add it, before writing anything.
-    for i in range(0, self.block_shape[0], self.tile_shape[0]):
+    for i in range(0, self.block_shape[0]):
       if self.c_type == "float":
         add_c_tiles += (
             f"c_{i}_0 = {self._mm()}_add_ps(c_{i}_0,"

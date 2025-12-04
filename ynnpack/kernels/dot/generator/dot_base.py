@@ -146,7 +146,14 @@ void {func_name}(
     """Get pointers to a(i, k1) within the current block."""
     ty = ty or self.a_type
     i = f"min({i}, M - 1)" if i != 0 else i
-    return f"reinterpret_cast<const {ty}*>(offset_bytes(A_k1, ({i} * A_stride_m) + ({k1} * sizeof({self.a_type}))))"
+    if "dot_flag::transpose_a" in self.flags:
+      offset = (
+          f"({k1//self.tile_shape[2]} * A_stride_m) + ({i} *"
+          f" {self.tile_shape[2]} * sizeof({self.a_type}))"
+      )
+    else:
+      offset = f"({i} * A_stride_m) + ({k1} * sizeof({self.a_type}))"
+    return f"reinterpret_cast<const {ty}*>(offset_bytes(A_k1, {offset}))"
 
   def b_ptr(self, k1, j, ty=None):
     """Get pointers to b(k1, j) within the current block."""
@@ -384,7 +391,11 @@ std::ptrdiff_t k1 = K1;
           f"B_k1_{j} = offset_bytes(B_k1_{j}, {self.block_shape[2]} *"
           " B_stride_k1);\n"
       )
-    block_body += f"A_k1 = offset_bytes(A_k1, {self.block_shape[2]} * sizeof({self.a_type}));\n"
+    if "dot_flag::transpose_a" in self.flags:
+      a_step = f"{self.block_shape[2]//self.tile_shape[2]} * A_stride_m"
+    else:
+      a_step = f"{self.block_shape[2]} * sizeof({self.a_type})"
+    block_body += f"A_k1 = offset_bytes(A_k1, {a_step});\n"
     result += indent(block_body, "  ") + "\n"
     if tile_body:
       result += "}\n"
