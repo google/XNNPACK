@@ -2817,7 +2817,8 @@ static enum xnn_status optimize_common_subgraphs_static_reshapes(
     // Replace the old shape with the new shape, filling any gaps from the input
     // shape.
     new_shape = node->params.static_reshape.new_shape;
-    XNN_RETURN_IF_ERROR(xnn_shape_fill_gaps(&input_value->shape, &new_shape));
+    XNN_RETURN_IF_ERROR(xnn_shape_fill_gaps(&input_value->shape, &new_shape),
+                        "Could not fill gaps for reshape[#%u].", node_id);
   } else if (node->type == xnn_node_type_static_expand_dims) {
     const struct xnn_shape* new_dims = &node->params.static_reshape.new_shape;
     new_shape.num_dims = input_value->shape.num_dims + new_dims->num_dims;
@@ -3727,6 +3728,9 @@ static enum xnn_status optimize_common_subgraphs_iter(
               node->params.static_reshape.new_shape;
           subgraph->values[node->outputs[0]].flags |=
               XNN_VALUE_FLAG_SHAPE_IS_STATIC;
+        } else {
+          // If the output shape isn't static, then there's nothing to optimize.
+          continue;
         }
         XNN_FALLTHROUGH
 
