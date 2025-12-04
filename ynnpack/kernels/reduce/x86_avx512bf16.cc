@@ -38,7 +38,7 @@ static f32x16x8& operator+=(f32x16x8& a, bf16x32x4 b) {
 }
 
 static f32x16 reduce_add(
-    f32x16 a, bf16x32 b,
+    f32x16 a, bf16x32 b, Identity /*map_fn*/,
     std::integral_constant<size_t, 2> /*horizontal_factor*/) {
   return f32x16{_mm512_dpbf16_ps(
       a.v, reinterpret_cast<__m512bh>(b.v),

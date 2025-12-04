@@ -59,16 +59,16 @@ static s32x4x4& operator+=(s32x4x4& a, u8x16 b) {
   return a;
 }
 
-static s32x4& reduce_add(
-    s32x4& a, s8x16 b,
+static s32x4 reduce_add(
+    s32x4 a, s8x16 b, Identity /*map_fn*/,
     std::integral_constant<size_t, 4> /*horizontal_factor*/) {
   a.v = vdotq_s32(a.v, b.v, vdupq_n_s8(1));
   return a;
 }
 
 // We want to accumulate uint8 dot products in int32 accumulators.
-static s32x4& reduce_add(
-    s32x4& a, u8x16 b,
+static s32x4 reduce_add(
+    s32x4 a, u8x16 b, Identity /*map_fn*/,
     std::integral_constant<size_t, 4> /*horizontal_factor*/) {
   a.v = vreinterpretq_s32_u32(vdotq_u32(vreinterpretq_u32_s32(a.v), b.v,
                               vdupq_n_u8(1)));

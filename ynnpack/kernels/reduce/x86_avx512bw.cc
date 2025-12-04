@@ -161,16 +161,16 @@ static s32x16x4& operator+=(s32x16x4& a, u8x64 b) {
   return a;
 }
 
-static s32x16& reduce_add(
-    s32x16& a, s8x64 b,
+static s32x16 reduce_add(
+    s32x16 a, s8x64 b, Identity /*map_fn*/,
     std::integral_constant<size_t, 4> /*horizontal_factor*/) {
   __m512i b2x = _mm512_maddubs_epi16(_mm512_set1_epi8(1), b.v);
   s32x16 b_s32(_mm512_madd_epi16(_mm512_set1_epi16(1), b2x));
   return a += b_s32;
 }
 
-static s32x16& reduce_add(
-    s32x16& a, u8x64 b,
+static s32x16 reduce_add(
+    s32x16 a, u8x64 b, Identity /*map_fn*/,
     std::integral_constant<size_t, 4> /*horizontal_factor*/) {
   __m512i b2x = _mm512_maddubs_epi16(b.v, _mm512_set1_epi8(1));
   s32x16 b_s32(_mm512_madd_epi16(_mm512_set1_epi16(1), b2x));

@@ -2,6 +2,7 @@
 #define XNNPACK_YNNPACK_BASE_SIMD_MULTI_VEC_H_
 
 #include <array>
+#include <cassert>
 #include <cstddef>
 #include <type_traits>
 
@@ -38,10 +39,30 @@ struct multi_vec {
     return res;
   }
 
+  YNN_ALWAYS_INLINE multi_vec operator*(multi_vec a) const {
+    multi_vec res;
+
+    YNN_UNROLL
+    for (size_t i = 0; i < M; ++i) {
+      res.v[i] = this->v[i] * a.v[i];
+    }
+
+    return res;
+  }
+
   YNN_ALWAYS_INLINE multi_vec operator+=(multi_vec a) {
     YNN_UNROLL
     for (size_t i = 0; i < M; ++i) {
       this->v[i] = this->v[i] + a.v[i];
+    }
+
+    return *this;
+  }
+
+  YNN_ALWAYS_INLINE multi_vec operator*=(multi_vec a) {
+    YNN_UNROLL
+    for (size_t i = 0; i < M; ++i) {
+      this->v[i] = this->v[i] * a.v[i];
     }
 
     return *this;
@@ -101,6 +122,14 @@ YNN_ALWAYS_INLINE void store(typename Vec::value_type* ptr,
     }
     n = sub_sat(n, Vec::N);
   }
+}
+
+template <int Index, typename Vec, typename ResultVec, size_t M>
+ResultVec extract(multi_vec<Vec, M> b, ResultVec) {
+  static_assert(Index * ResultVec::N < M * Vec::N);
+
+  return extract<Index % (Vec::N / ResultVec::N)>(
+      b.v[(Index * ResultVec::N) / Vec::N], ResultVec{});
 }
 
 }  // namespace simd

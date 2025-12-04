@@ -19,10 +19,25 @@ namespace ynn {
 using simd::transpose;
 using simd::extract;
 
-template <typename AccT, typename AT>
+struct Identity {
+  template <typename T>
+  T operator()(T x) {
+    return x;
+  }
+};
+
+struct Square {
+  template <typename T>
+  T operator()(T x) {
+    return x * x;
+  }
+};
+
+template <typename AccT, typename AT, typename MapFn>
 AccT reduce_add(AccT acc, AT a,
+                MapFn map_fn,
                 std::integral_constant<size_t, 1>/*horizontal_factor*/) {
-  return acc += a;
+  return acc += map_fn(a);
 }
 
 template <typename AccT>
@@ -65,7 +80,7 @@ auto sum_rows(AccT acc[4], std::integral_constant<size_t, 4>/*K*/) {
   return (t[0] + t[1]) + (t[2] + t[3]);
 }
 
-template <typename AccT, size_t K_>
+template <typename AccT, size_t K_, typename MapFn = Identity>
 struct sum_accumulator_x32 {
   static constexpr std::integral_constant<size_t, 4> N = {};
   static constexpr std::integral_constant<size_t, K_> K = {};
@@ -73,6 +88,7 @@ struct sum_accumulator_x32 {
       horizontal_factor = {};
 
   AccT acc[N];
+  MapFn map_fn;
 
   sum_accumulator_x32() = default;
 
@@ -93,10 +109,10 @@ struct sum_accumulator_x32 {
     auto a_2 = 2 < n ? load(offset_bytes(A, 2 * A_stride_n), zero, k) : zero;
     auto a_3 = 3 < n ? load(offset_bytes(A, 3 * A_stride_n), zero, k) : zero;
 
-    acc[0] = reduce_add(acc[0], a_0, horizontal_factor);
-    acc[1] = reduce_add(acc[1], a_1, horizontal_factor);
-    acc[2] = reduce_add(acc[2], a_2, horizontal_factor);
-    acc[3] = reduce_add(acc[3], a_3, horizontal_factor);
+    acc[0] = reduce_add(acc[0], a_0, map_fn, horizontal_factor);
+    acc[1] = reduce_add(acc[1], a_1, map_fn, horizontal_factor);
+    acc[2] = reduce_add(acc[2], a_2, map_fn, horizontal_factor);
+    acc[3] = reduce_add(acc[3], a_3, map_fn, horizontal_factor);
   }
 
   template <typename T, typename NT>
@@ -109,12 +125,14 @@ struct sum_accumulator_x32 {
   }
 };
 
-template <typename InVT, typename AccT>
+template <typename InVT, typename AccT, typename MapFn = Identity>
 struct sum_accumulator_k1_1 {
   static constexpr std::integral_constant<size_t, 1> K2 = {};
   static constexpr std::integral_constant<size_t, AccT::N> N = {};
+  static constexpr std::integral_constant<size_t, 1> horizontal_factor = {};
 
   AccT acc;
+  MapFn map_fn;
 
   sum_accumulator_k1_1() = default;
 
@@ -129,7 +147,9 @@ struct sum_accumulator_k1_1 {
     assert(n <= N);
     assert(n > 0);
 
-    acc += load(offset_bytes(A, 0 * A_stride_k2), InVT(0), n);
+    acc = reduce_add(
+        acc, load(offset_bytes(A, 0 * A_stride_k2), InVT(0), n),
+        map_fn, horizontal_factor);
   }
 
   template <typename T, typename NT>
