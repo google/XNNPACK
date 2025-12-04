@@ -738,7 +738,7 @@ void GEMMBenchmark(benchmark::State& state,
       mc + XNN_EXTRA_QUANTIZATION_PARAMS);
   xnnpack::Buffer<float> row_sum(mc + XNN_EXTRA_QUANTIZATION_PARAMS);
   const size_t w_elements =
-      nc_stride * (sizeof(float) * 2 + sizeof(int32_t)) + kc_stride * nc_stride;
+      nc_stride * (sizeof(float) * 3 + sizeof(int32_t)) + kc_stride * nc_stride;
 
   const size_t c_elements = mc * nc;
   const size_t num_buffers = 1 + benchmark::utils::DivideRoundUp<size_t>(
