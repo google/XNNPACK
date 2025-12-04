@@ -23,8 +23,7 @@ using f32x16x16 = multi_vec<f32x16, 16>;
 using f16x32x8 = multi_vec<f16x32, 8>;
 
 static f32x16& operator+=(f32x16& a, f16x16 b) {
-  a.v = _mm512_add_ps(a.v, _mm512_cvtph_ps(b.v));
-  return a;
+  return a += f32x16{_mm512_add_ps(a.v, _mm512_cvtph_ps(b.v))};
 }
 
 static f32x16x16& operator+=(f32x16x16& a, f16x32x8 b) {
