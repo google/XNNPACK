@@ -264,32 +264,46 @@
 #define XNN_UNPREDICTABLE(condition) (!!(condition))
 #endif
 
+#if defined(__clang__)
+// Clang ignores sanitizer attributes on functions that get inlined. Also:
+// - GCC does not allow this attribute to be specified after a function
+// - It takes precedence over always_inline, so we can specify both.
+#define XNN_NO_INLINE_SANITIZER __attribute__((__noinline__))
+#else
+#define XNN_NO_INLINE_SANITIZER
+#endif
+
 #if XNN_COMPILER_HAS_FEATURE(thread_sanitizer)
-#define XNN_DISABLE_TSAN __attribute__((__no_sanitize__("thread")))
+#define XNN_DISABLE_TSAN \
+  __attribute__((__no_sanitize__("thread"))) XNN_NO_INLINE_SANITIZER
 #else
 #define XNN_DISABLE_TSAN
 #endif
 
 #if XNN_COMPILER_HAS_FEATURE(memory_sanitizer)
-#define XNN_DISABLE_MSAN __attribute__((__no_sanitize__("memory")))
+#define XNN_DISABLE_MSAN \
+  __attribute__((__no_sanitize__("memory"))) XNN_NO_INLINE_SANITIZER
 #else
 #define XNN_DISABLE_MSAN
 #endif
 
 #if XNN_COMPILER_HAS_FEATURE(hwaddress_sanitizer)
-#define XNN_DISABLE_HWASAN __attribute__((__no_sanitize__("hwaddress")))
+#define XNN_DISABLE_HWASAN \
+  __attribute__((__no_sanitize__("hwaddress"))) XNN_NO_INLINE_SANITIZER
 #else
 #define XNN_DISABLE_HWASAN
 #endif
 
 #if XNN_COMPILER_HAS_FEATURE(address_sanitizer)
-#define XNN_DISABLE_ASAN __attribute__((__no_sanitize__("address")))
+#define XNN_DISABLE_ASAN \
+  __attribute__((__no_sanitize__("address"))) XNN_NO_INLINE_SANITIZER
 #else
 #define XNN_DISABLE_ASAN
 #endif
 
 #if XNN_COMPILER_HAS_FEATURE(undefined_behavior_sanitizer)
-#define XNN_DISABLE_UBSAN __attribute__((__no_sanitize__("undefined")))
+#define XNN_DISABLE_UBSAN \
+  __attribute__((__no_sanitize__("undefined"))) XNN_NO_INLINE_SANITIZER
 #else
 #define XNN_DISABLE_UBSAN
 #endif
