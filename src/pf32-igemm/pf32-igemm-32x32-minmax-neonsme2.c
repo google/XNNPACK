@@ -9,52 +9,35 @@
 
 #if XNN_ENABLE_KLEIDIAI
 #include "kai/ukernels/matmul/matmul_clamp_f32_f32p_f32p/kai_matmul_clamp_f32_f32p2vlx1_f32p2vlx1biasf32_sme2_mopa.h"
-#endif // XNN_ENABLE_KLEIDIAI
+
 
 size_t xnn_pf32_igemm_minmax_ukernel_32x32__neonsme2_get_mr(void)
 {
-#if XNN_ENABLE_KLEIDIAI
   return kai_get_mr_matmul_clamp_f32_f32p2vlx1_f32p2vlx1biasf32_sme2_mopa();
-#else
-  assert(
-      "Calling wrapped KleidiAI function, but XNNPACK was compiled without "
-      "`XNN_ENABLE_KLEIDIAI`." &&
-      0);
-  return 0;
-#endif  // XNN_ENABLE_KLEIDIAI
-
 }
 
 size_t xnn_pf32_igemm_minmax_ukernel_32x32__neonsme2_get_nr(void)
 {
-#if XNN_ENABLE_KLEIDIAI
   return kai_get_nr_matmul_clamp_f32_f32p2vlx1_f32p2vlx1biasf32_sme2_mopa();
-#else
-assert(
-    "Calling wrapped KleidiAI function, but XNNPACK was compiled without "
-    "`XNN_ENABLE_KLEIDIAI`." &&
-    0);
-return 0;
-#endif  // XNN_ENABLE_KLEIDIAI
 }
+#endif // XNN_ENABLE_KLEIDIAI
 
 void xnn_pf32_igemm_minmax_ukernel_32x32__neonsme2(
     size_t mr, size_t nc, size_t kc, size_t ks, const void* lhs_packed,
     const void* rhs_packed, float* dst, size_t dst_stride_row,
     const struct xnn_f32_minmax_params* minmax_params) {
-
+#if XNN_ENABLE_KLEIDIAI
   const size_t kai_kr = 1;
   const size_t k = ks * round_up(kc, kai_kr);
 
-#if XNN_ENABLE_KLEIDIAI
   kai_run_matmul_clamp_f32_f32p2vlx1_f32p2vlx1biasf32_sme2_mopa(
       mr, nc, k , lhs_packed, rhs_packed, dst, dst_stride_row * sizeof(float),
       /*dst_stride_col=*/sizeof(float), minmax_params->scalar.min,
       minmax_params->scalar.max);
 #else
-  assert(
-      "Calling KleidiAI microkernel wrapper, but XNNPACK was compiled without "
-      "`XNN_ENABLE_KLEIDIAI`." &&
-      0);
+    assert(
+        "Calling KleidiAI microkernel wrapper, but XNNPACK was compiled without "
+        "`XNN_ENABLE_KLEIDIAI`." &&
+        0);
 #endif  // XNN_ENABLE_KLEIDIAI
 }
