@@ -11,27 +11,16 @@ package(default_visibility = ["//ynnpack:__subpackages__"])
 ynn_cc_library(
     name = "tests",
     testonly = True,
+    hdrs = ["generic.h"],
     per_arch_srcs = {
         # This test defines different tests depending on which architecture is being compiled.
-        "x86_sse2": [
-            "test.cc",
-            "convert_only_test.cc",
-        ],
-        "x86_sse41": ["test.cc"],
-        "x86_avx": ["test.cc"],
-        "x86_avx2": [
-            "test.cc",
-            "convert_only_test.cc",
-        ],
-        "x86_f16c": ["convert_only_test.cc"],
-        "x86_avx512bf16": ["convert_only_test.cc"],
-        "x86_avx512fp16": ["convert_only_test.cc"],
-        "x86_avx512f": ["test.cc"],
-        "x86_avx512bw": ["test.cc"],
-        "arm_neon": [
-            "convert_only_test.cc",
-            "test.cc",
-        ],
+        "x86_sse2": ["x86_sse2.cc"],
+        "x86_sse41": ["x86_sse41.cc"],
+        "x86_avx": ["x86_avx.cc"],
+        "x86_avx2": ["x86_avx2.cc"],
+        "x86_avx512f": ["x86_avx512f.cc"],
+        "x86_avx512bw": ["x86_avx512bw.cc"],
+        "arm_neon": ["arm_neon.cc"],
     },
     deps = [
         "//ynnpack/base",  # buildcleaner:keep

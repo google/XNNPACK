@@ -124,6 +124,12 @@ YNN_ALWAYS_INLINE void store(typename Vec::value_type* ptr,
   }
 }
 
+template <int Index, typename Vec>
+Vec extract(Vec x, Vec) {
+  static_assert(Index == 0, "");
+  return x;
+}
+
 template <int Index, typename Vec, typename ResultVec, size_t M>
 ResultVec extract(multi_vec<Vec, M> b, ResultVec) {
   static_assert(Index * ResultVec::N < M * Vec::N);

@@ -12,7 +12,7 @@
 #include <type_traits>
 
 #include "ynnpack/base/simd/multi_vec.h"
-#include "ynnpack/base/simd/x86_sse.h"
+#include "ynnpack/base/simd/x86_sse2.h"
 #include "ynnpack/kernels/reduce/generic.h"
 #include "ynnpack/kernels/reduce/sum_accumulator.h"
 

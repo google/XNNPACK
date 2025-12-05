@@ -10,7 +10,7 @@
 #include <cstring>
 
 #include "ynnpack/base/simd/multi_vec.h"
-#include "ynnpack/base/simd/x86_avx512.h"
+#include "ynnpack/base/simd/x86_avx512f.h"
 #include "ynnpack/kernels/reduce/generic.h"
 #include "ynnpack/kernels/reduce/min_max_accumulator.h"
 #include "ynnpack/kernels/reduce/sum_accumulator.h"
