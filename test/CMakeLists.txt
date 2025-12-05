@@ -65,7 +65,7 @@ TARGET_LINK_LIBRARIES(gemm-microkernel-tester PRIVATE xnnpack-test xnnpack-packi
 TARGET_LINK_LIBRARIES(gemm-microkernel-tester PRIVATE pthreadpool)
 TARGET_LINK_LIBRARIES(gemm-microkernel-tester PUBLIC next-prime)
 IF(XNNPACK_ENABLE_KLEIDIAI)
-  TARGET_LINK_LIBRARIES(gemm-microkernel-tester PRIVATE kleidiai)
+  TARGET_LINK_LIBRARIES(gemm-microkernel-tester PRIVATE kleidiai kleidiai_qmx)
 ENDIF()
 
 ADD_LIBRARY(dwconv-microkernel-tester STATIC dwconv-microkernel-tester.cc)
@@ -82,7 +82,7 @@ TARGET_LINK_LIBRARIES(unary-ops PRIVATE xnnpack-test )
 ADD_LIBRARY(packq-microkernel-tester STATIC packq-microkernel-tester.cc)
 TARGET_LINK_LIBRARIES(packq-microkernel-tester PRIVATE xnnpack-test pthreadpool)
 IF(XNNPACK_ENABLE_KLEIDIAI)
-  TARGET_LINK_LIBRARIES(packq-microkernel-tester PRIVATE kleidiai)
+  TARGET_LINK_LIBRARIES(packq-microkernel-tester PRIVATE kleidiai kleidiai_qmx)
 ENDIF()
 
 ADD_SUBDIRECTORY(operators)
@@ -440,7 +440,7 @@ ENDIF()
 
 # Special-case
 IF(XNNPACK_ENABLE_KLEIDIAI)
-  TARGET_LINK_LIBRARIES(x8-packq-test PRIVATE kleidiai)
+  TARGET_LINK_LIBRARIES(x8-packq-test PRIVATE kleidiai kleidiai_qmx)
 ENDIF()
 
 ADD_EXECUTABLE(buffer-test buffer.cc)

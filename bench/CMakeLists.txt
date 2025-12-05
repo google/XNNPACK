@@ -29,13 +29,13 @@ ENDIF()
 ADD_LIBRARY(packq-benchmark STATIC packq-benchmark.cc)
 TARGET_LINK_LIBRARIES(packq-benchmark PRIVATE XNNPACK benchmark::benchmark xnnpack-bench-utils xnnpack-test)
 IF(XNNPACK_ENABLE_KLEIDIAI)
-  TARGET_LINK_LIBRARIES(packq-benchmark PRIVATE kleidiai)
+  TARGET_LINK_LIBRARIES(packq-benchmark PRIVATE kleidiai kleidiai_qmx)
 ENDIF()
 
 ADD_LIBRARY(gemm-benchmark STATIC gemm-benchmark.cc)
 TARGET_LINK_LIBRARIES(gemm-benchmark PRIVATE XNNPACK benchmark::benchmark xnnpack-bench-utils xnnpack-test)
 IF(XNNPACK_ENABLE_KLEIDIAI)
-  TARGET_LINK_LIBRARIES(gemm-benchmark PUBLIC kleidiai)
+  TARGET_LINK_LIBRARIES(gemm-benchmark PUBLIC kleidiai kleidiai_qmx)
 ENDIF()
 
 ADD_SUBDIRECTORY(subgraph)
@@ -129,5 +129,5 @@ ENDFOREACH()
 
 # Special-case
 IF(XNNPACK_ENABLE_KLEIDIAI)
-  TARGET_LINK_LIBRARIES(x8-packq-bench PRIVATE kleidiai)
+  TARGET_LINK_LIBRARIES(x8-packq-bench PRIVATE kleidiai kleidiai_qmx)
 ENDIF()
