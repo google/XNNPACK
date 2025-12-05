@@ -139,6 +139,11 @@ XNN_INIT_ONCE_GUARD(qu8_gemm);
       (xnn_qp8_f32_qb4w_gemm_minmax_ukernel_fn)ukernel); \
   xnn_log_info("Using qp8gemm_bl microkernel '%s'.", #ukernel);
 
+#define XNN_INIT_HMP_PACKED_IGEMM_UKERNEL(ukernel)                    \
+  xnn_init_hmp_packed_igemm_ukernel(                                  \
+      (xnn_packed_lhs_igemm_ukernel_fn)ukernel);                      \
+  xnn_log_info("Using igemm microkernel '%s'.", #ukernel);
+
 static void init_f16_gemm_config(void) {
   // Common parameters.
   f16_gemm_config.log2_input_element_size = XNN_LOG2_SIZEOF_FLOAT16;
@@ -337,9 +342,7 @@ if ((hardware_config->arch_flags & xnn_arch_arm_sme2)) {
     pf16_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_pf16_gemm_minmax_ukernel_1x32c2__neonsme2);
     pf16_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(mr)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_pf16_gemm_minmax_ukernel_32x32c2__neonsme2);
     pf16_gemm_config.minmax.igemm[XNN_MR_TO_INDEX(mr)] =
-        xnn_init_hmp_packed_igemm_ukernel(
-            (xnn_packed_lhs_igemm_ukernel_fn)
-                xnn_pf16_f16_igemm_minmax_fp16_ukernel_32x32c2__neonsme2);
+        XNN_INIT_HMP_PACKED_IGEMM_UKERNEL(xnn_pf16_f16_igemm_minmax_fp16_ukernel_32x32c2__neonsme2);
     pf16_gemm_config.init.f16 = xnn_init_f16_minmax_scalar_params;
     pf16_gemm_config.pack_weights_and_biases = xnn_pack_kai_f16_weights_and_biases;
     pf16_gemm_config.packed_stride_weights_and_biases = xnn_packed_stride_kai_f16_weights_and_biases;
@@ -431,7 +434,7 @@ static void init_pf32_gemm_config(void) {
       pf32_gemm_config.arch = xnn_arch_arm_sme2;
       pf32_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_pf32_gemm_minmax_ukernel_1x32__neonsme2);
       pf32_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(mr)] =XNN_INIT_HMP_GEMM_UKERNEL(xnn_pf32_gemm_minmax_ukernel_32x32__neonsme2);
-      pf32_gemm_config.minmax.igemm[XNN_MR_TO_INDEX(mr)] = xnn_init_hmp_packed_igemm_ukernel( (xnn_packed_lhs_igemm_ukernel_fn)xnn_pf32_igemm_minmax_ukernel_32x32__neonsme2);
+      pf32_gemm_config.minmax.igemm[XNN_MR_TO_INDEX(mr)] = XNN_INIT_HMP_PACKED_IGEMM_UKERNEL(xnn_pf32_igemm_minmax_ukernel_32x32__neonsme2);
       pf32_gemm_config.init.f32 = xnn_init_f32_minmax_scalar_params;
       pf32_gemm_config.pack_weights_and_biases = xnn_pack_kai_f32_weights_and_biases;
       pf32_gemm_config.packed_stride_weights_and_biases = xnn_packed_stride_kai_f32_weights_and_biases;
@@ -450,7 +453,7 @@ static void init_pf32_gemm_config(void) {
     pf32_gemm_config.arch = xnn_arch_arm_sme;
     pf32_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_pf32_gemm_minmax_ukernel_1x32__neonsme);
     pf32_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(mr)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_pf32_gemm_minmax_ukernel_32x32__neonsme);
-    pf32_gemm_config.minmax.igemm[XNN_MR_TO_INDEX(mr)] = xnn_init_hmp_packed_igemm_ukernel( (xnn_packed_lhs_igemm_ukernel_fn)xnn_pf32_igemm_minmax_ukernel_32x32__neonsme);
+    pf32_gemm_config.minmax.igemm[XNN_MR_TO_INDEX(mr)] = XNN_INIT_HMP_PACKED_IGEMM_UKERNEL(xnn_pf32_igemm_minmax_ukernel_32x32__neonsme);
     pf32_gemm_config.init.f32 = xnn_init_f32_minmax_scalar_params;
     pf32_gemm_config.pack_weights_and_biases = xnn_pack_kai_f32_weights_and_biases;
     pf32_gemm_config.packed_stride_weights_and_biases = xnn_packed_stride_kai_f32_weights_and_biases;
@@ -491,9 +494,7 @@ static void init_pqs8_qc8w_gemm_config(void) {
     pqs8_qc8w_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(mr)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_pqs8_qc8w_gemm_minmax_ukernel_32x32c4__neonsme2);
     pqs8_qc8w_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_pqs8_qc8w_gemm_minmax_ukernel_1x32c4__neonsme2);
     pqs8_qc8w_gemm_config.minmax.igemm[XNN_MR_TO_INDEX(mr)] =
-        xnn_init_hmp_packed_igemm_ukernel(
-            (xnn_packed_lhs_igemm_ukernel_fn)
-                xnn_pqs8_qc8w_igemm_minmax_fp32_ukernel_32x32c4__neonsme2);
+        XNN_INIT_HMP_PACKED_IGEMM_UKERNEL(xnn_pqs8_qc8w_igemm_minmax_fp32_ukernel_32x32c4__neonsme2);
     pqs8_qc8w_gemm_config.init.qs8_qc8w =
         xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params;
     pqs8_qc8w_gemm_config.pack_weights_and_biases =
