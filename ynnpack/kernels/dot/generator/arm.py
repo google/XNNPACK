@@ -53,7 +53,7 @@ class arm_neon(dot_base):
     result = ""
 
     # Shift the accumulator registers down and the pointers up.
-    for i in range(0, self.block_shape[0], self.tile_shape[0]):
+    for i in range(0, self.block_shape[0]):
       for j in range(0, n, self.tile_shape[1]):
         result += f"c_{i}_{j} = c_{i}_{j + n};\n"
 
@@ -75,7 +75,7 @@ class arm_neon(dot_base):
     result = ""
     result += f"assert(N < {self.tile_shape[1]});\n"
 
-    for i in range(0, self.block_shape[0], self.tile_shape[0]):
+    for i in range(0, self.block_shape[0]):
       if self.c_type == "float":
         result += f"float32x2_t c_{i}_0_lo = vget_low_f32(c_{i}_0);\n"
       elif self.c_type == "int32_t":
@@ -87,7 +87,7 @@ class arm_neon(dot_base):
 
     add_c_tiles = ""
     # Load all of the output and add it, before writing anything.
-    for i in range(0, self.block_shape[0], self.tile_shape[0]):
+    for i in range(0, self.block_shape[0]):
       if self.c_type == "float":
         add_c_tiles += (
             f"c_{i}_0_lo = vadd_f32(c_{i}_0_lo,"
@@ -105,7 +105,7 @@ class arm_neon(dot_base):
     result += indent(add_c_tiles, "    ") + "\n"
     result += "  }\n"
 
-    for i in reversed(range(0, self.block_shape[0], self.tile_shape[0])):
+    for i in reversed(range(0, self.block_shape[0])):
       if self.c_type == "float":
         result += f"  vst1_f32({self.c_out_ptr(i, 0)}, c_{i}_0_lo);\n"
         result += f"  c_{i}_0_lo = vget_high_f32(c_{i}_0);\n"
@@ -125,7 +125,7 @@ class arm_neon(dot_base):
 
     add_c_tiles = ""
     # Load all of the output and add it, before writing anything.
-    for i in range(0, self.block_shape[0], self.tile_shape[0]):
+    for i in range(0, self.block_shape[0]):
       if self.c_type == "float":
         add_c_tiles += (
             f"c_{i}_0_lo = vadd_f32(c_{i}_0_lo,"
@@ -143,7 +143,7 @@ class arm_neon(dot_base):
     result += indent(add_c_tiles, "    ") + "\n"
     result += "  }\n"
 
-    for i in reversed(range(0, self.block_shape[0], self.tile_shape[0])):
+    for i in reversed(range(0, self.block_shape[0])):
       if self.c_type == "float":
         result += f"  vst1_lane_f32({self.c_out_ptr(i, 0)}, c_{i}_0_lo, 0);\n"
       elif self.c_type == "int32_t":
@@ -153,7 +153,7 @@ class arm_neon(dot_base):
 
     result += "}\n"
 
-    result += f"N = 0;\n"
+    result += "N = 0;\n"
     return result
 
   def add_c_block_tail(self):

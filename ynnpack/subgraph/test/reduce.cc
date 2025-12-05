@@ -249,9 +249,7 @@ void TestMinMax(T) {
     for (int reshape = 0; reshape < 2; ++reshape) {
       std::vector<size_t> a_shape = random_shape(rng, input_rank);
       std::vector<size_t> c_shape = a_shape;
-      size_t num_k_elements = 1;
       for (int32_t i : reduce_axes) {
-        num_k_elements *= a_shape[i];
         c_shape[i] = 1;
       }
       c_shape.insert(c_shape.begin(), 2);

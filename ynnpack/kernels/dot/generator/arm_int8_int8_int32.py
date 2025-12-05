@@ -85,7 +85,8 @@ YNN_INTRINSIC int32_t unaligned_load_int8x4(const void* ptr) {
 
 class arm_neoni8mm_int8_int8_int32(arm_int8_int8_int32):
   def __init__(self):
-    super().__init__("neoni8mm", (1, 4, 8))
+    super().__init__("neoni8mm", (2, 4, 8))
+    self.flags += ["dot_flag::transpose_a"]
 
   def header(self):
     return "#include <tuple>\n" + super().header() + """
@@ -101,53 +102,45 @@ YNN_INTRINSIC std::tuple<int32x4_t, int32x4_t> transpose2x2_x64(int32x4_t x0, in
 """
 
   # This is one of the trickier generators. mmla is a 2x8*8x2 matrix multiply.
-  # We handle it in 2x8 tiles, with 4 accumulator registers per tile. However,
-  # the tile shape is 1x4, to get the base class's handling of adding/storing c,
-  # the tile handlers need to ignore the unaligned invocations, and handle the
-  # whole 2x8 tile.
+  # We handle it in 2x4 tiles, with 2 accumulator registers per tile.
 
-  def load_a_tile_k_tail(self, i, k, nk):
-    if i % 2 != 0: return ""
-    if k % nk != 0:
-      return ""
-    if nk == 16:
-      return f"""
-uint64x2x2_t a_{i}_{k}_u64;
-a_{i}_{k}_u64 = vld2q_lane_u64({self.a_ptr(i+0, k, "uint64_t")}, a_{i}_{k}_u64, 0);
-a_{i}_{k}_u64 = vld2q_lane_u64({self.a_ptr(i+1, k, "uint64_t")}, a_{i}_{k}_u64, 1);
-const int8x16_t a_{i}_{k+0} = vreinterpretq_s8_u64(a_{i}_{k}_u64.val[0]);
-const int8x16_t a_{i}_{k+8} = vreinterpretq_s8_u64(a_{i}_{k}_u64.val[1]);
-"""
-    else:
-      assert(nk <= 8)
-      return f"""
-uint64x2_t a_{i}_{k}_u64 = vld1q_dup_u64({self.a_ptr(i+0, k, "uint64_t")});
-const int8x16_t a_{i}_{k} = vreinterpretq_s8_u64(vld1q_lane_u64({self.a_ptr(i+1, k, "uint64_t")}, a_{i}_{k}_u64, 1));
+  def load_a_tile(self, i, k):
+    return f"""
+const int8x16_t a_{i}_{k} = vld1q_s8({self.a_ptr(i, k)});
 """
 
   def load_b_tile(self, k, j):
-    if j % 4 != 0: return ""
     return f"""
 int8x16_t b_{k}_{j+0} = vld1q_s8({self.b_ptr(k, j+0)});
 int8x16_t b_{k}_{j+2} = vld1q_s8({self.b_ptr(k, j+2)});
 """
 
   def init_c_tile(self, i, j):
-    if i % 2 != 0 or j % 4 != 0: return ""
     return f"""
 int32x4_t c_{i}_{j+0} = vdupq_n_s32(0);
 int32x4_t c_{i}_{j+2} = vdupq_n_s32(0);
 """
 
   def product(self, i, j, k):
-    if i % 2 != 0 or j % 4 != 0: return ""
     return f"""
 c_{i}_{j+0} = vmmlaq_s32(c_{i}_{j+0}, a_{i}_{k}, b_{k}_{j+0});
 c_{i}_{j+2} = vmmlaq_s32(c_{i}_{j+2}, a_{i}_{k}, b_{k}_{j+2});
   """
 
+  def add_c_tile(self, i, j):
+    return f"""
+c_{i+0}_{j} = vaddq_s32(c_{i+0}_{j}, vld1q_s32({self.c_in_ptr(i+0, j)}));
+c_{i+1}_{j} = vaddq_s32(c_{i+1}_{j}, vld1q_s32({self.c_in_ptr(i+1, j)}));
+"""
+
+  def store_c_tile(self, i, j):
+    # Write row 1 first, in case i is clamped by M.
+    return f"""
+vst1q_s32({self.c_out_ptr(i+1, j)}, c_{i+1}_{j});
+vst1q_s32({self.c_out_ptr(i+0, j)}, c_{i+0}_{j});
+"""
+
   def finalize_c_tile(self, i, j):
-    if i % 2 != 0 or j % 4 != 0: return ""
     return f"""
 int32x4_t c_{i+1}_{j+0};
 std::tie(c_{i}_{j+0}, c_{i+1}_{j+0}) = transpose2x2_x64(c_{i}_{j+0}, c_{i}_{j+2});

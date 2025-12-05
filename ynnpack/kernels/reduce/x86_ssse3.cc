@@ -12,7 +12,7 @@
 #include <type_traits>
 
 #include "ynnpack/base/simd/multi_vec.h"
-#include "ynnpack/base/simd/x86_sse.h"
+#include "ynnpack/base/simd/x86_sse2.h"
 #include "ynnpack/kernels/reduce/generic.h"
 #include "ynnpack/kernels/reduce/sum_accumulator.h"
 
@@ -55,16 +55,16 @@ static s32x4x4& operator+=(s32x4x4& a, u8x16 b) {
   return a;
 }
 
-static s32x4& reduce_add(
-    s32x4& a, s8x16 b,
+static s32x4 reduce_add(
+    s32x4 a, s8x16 b, Identity /*map_fn*/,
     std::integral_constant<size_t, 4> /*horizontal_factor*/) {
   __m128i b2x = _mm_maddubs_epi16(_mm_set1_epi8(1), b.v);
   s32x4 b_f32(_mm_madd_epi16(_mm_set1_epi16(1), b2x));
   return a += b_f32;
 }
 
-static s32x4& reduce_add(
-    s32x4& a, u8x16 b,
+static s32x4 reduce_add(
+    s32x4 a, u8x16 b, Identity /*map_fn*/,
     std::integral_constant<size_t, 4> /*horizontal_factor*/) {
   __m128i b2x = _mm_maddubs_epi16(b.v, _mm_set1_epi8(1));
   s32x4 b_f32(_mm_madd_epi16(_mm_set1_epi16(1), b2x));

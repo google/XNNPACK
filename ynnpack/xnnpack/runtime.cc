@@ -68,9 +68,7 @@ struct xnn_threadpool : public slinky::ref_counted<xnn_threadpool> {
     this->scheduler.schedule = scheduler.schedule;
   }
 
-  ~xnn_threadpool() final {
-    ynn_delete_threadpool(ynn);
-  }
+  ~xnn_threadpool() { ynn_delete_threadpool(ynn); }
 
   // This layer of `ynn_scheduler` exists to wrap the tasks in code to save,
   // modify, and restore the FPU state to what XNNPACK clients expected

@@ -13,19 +13,20 @@
 #include <type_traits>
 
 #include "ynnpack/base/arithmetic.h"
-#include "ynnpack/base/simd/arm.h"
+#include "ynnpack/base/simd/arm_neon.h"
 #include "ynnpack/base/simd/multi_vec.h"
 #include "ynnpack/kernels/reduce/generic.h"
 #include "ynnpack/kernels/reduce/min_max_accumulator.h"
-#include "ynnpack/kernels/reduce/sum_accumulator.h"
 #include "ynnpack/kernels/reduce/reduce.h"
-#include "ynnpack/kernels/reduce/arm_neon_xf16.h"
+#include "ynnpack/kernels/reduce/sum_accumulator.h"
 
 namespace ynn {
 
 namespace simd {
 
 using bf16x8x8 = multi_vec<bf16x8, 8>;
+using f32x4x16 = multi_vec<f32x4, 16>;
+using f32x4x2 = multi_vec<f32x4, 2>;
 
 static f32x4x2& operator+=(f32x4x2& a, bf16x8 x) {
   f32x4 b_0(vcvt_f32_bf16(vget_low_bf16(reinterpret_cast<bfloat16x8_t>(x.v))));

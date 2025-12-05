@@ -13,10 +13,24 @@
 #include <cstdint>
 #include <limits>
 
-#include "ynnpack/base/base.h"
 #include "ynnpack/base/type.h"
 
 namespace ynn {
+
+// Clamp a float to the range of the given integer or quantized integer type.
+template <typename Int>
+float clamp_float_to_int(float x) {
+  using Unwrapped = typename unwrap_quantized<Int>::type;
+  // It's tricky to do this with std::max/std::min, because the min/max values
+  // might not be exactly representable as floats, and so are ineffective to
+  // avoid converting to an out of bounds integer. To avoid this problem, we've
+  // determined a constant that when added to the min/max float values, results
+  // in the upper bound of the integer range.
+  constexpr int half_mantissa = sizeof(Unwrapped) * 8 > 23 ? 127 : 0;
+  x = std::max<float>(x, std::numeric_limits<Unwrapped>::min());
+  x = std::min<float>(x, std::numeric_limits<Unwrapped>::max() - half_mantissa);
+  return x;
+}
 
 // A cast that:
 // - Rounds to nearest integer
@@ -27,14 +41,7 @@ Result round_float_to_int(float x) {
   using Unwrapped = typename unwrap_quantized<Result>::type;
   x = std::isnan(x) ? 0.0f : x;
   x = std::round(x);
-  // It's tricky to do this with std::max/std::min, because the min/max values
-  // might not be exactly representable as floats, and so are ineffective to
-  // avoid converting to an out of bounds integer. To avoid this problem, we've
-  // determined a constant that when added to the min/max float values, results
-  // in the upper bound of the integer range.
-  constexpr int half_mantissa = sizeof(Unwrapped) * 8 > 23 ? 127 : 0;
-  x = std::max<float>(x, std::numeric_limits<Unwrapped>::min());
-  x = std::min<float>(x, std::numeric_limits<Unwrapped>::max() - half_mantissa);
+  x = clamp_float_to_int<Result>(x);
   return static_cast<Unwrapped>(x);
 }
 

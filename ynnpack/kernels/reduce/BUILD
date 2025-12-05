@@ -42,14 +42,8 @@ ynn_cc_library(
     compatible_with = _COMPATIBLE_WITH,
     copts = ynn_kernel_copts(unroll_loops = False),
     per_arch_srcs = {
-        "arm_neonfp16arith": [
-            "arm_neonfp16arith.cc",
-            "arm_neon_xf16.h",
-        ],
-        "arm_neonbf16": [
-            "arm_neonbf16.cc",
-            "arm_neon_xf16.h",
-        ],
+        "arm_neonfp16arith": ["arm_neonfp16arith.cc"],
+        "arm_neonbf16": ["arm_neonbf16.cc"],
         "arm_neondot": ["arm_neondot.cc"],
         "arm_neon": ["arm_neon.cc"],
         "x86_ssse3": ["x86_ssse3.cc"],

@@ -322,31 +322,39 @@ class Tensor {
     return result;
   }
 
+  // Crop this tensor to the region [begin, begin + extent) in each dimension.
+  Tensor<T> crop(const index_type& begin, const index_type& extent) const {
+    assert(rank() == begin.size());
+    assert(rank() == extent.size());
+
+    Tensor<T> result(*this);
+    result.extents_ = extent;
+    result.begin_ = begin_ + flat_offset(begin);
+    result.end_ = result.begin_;
+    index_type max(rank());
+    for (size_t i = 0; i < rank(); ++i) {
+      if (extent[i] == 0) {
+        // The result is empty.
+        return result;
+      } else {
+        max[i] = extent[i] - 1;
+      }
+    }
+    result.end_ = result.begin_ + result.flat_offset(max) + 1;
+    return result;
+  }
+
   // Remove `pre` elements from the beginning of each dimension, and `post`
-  // elements from the end of each dimension.
+  // elements from the end of each dimension.'
   Tensor<T> crop_padding(const index_type& pre, const index_type& post) const {
     assert(rank() == pre.size());
     assert(rank() == post.size());
 
-    Tensor<T> result(*this);
-    result.begin_ = begin_ + flat_offset(pre);
-    index_type max(rank());
+    index_type extents = extents_;
     for (size_t i = 0; i < rank(); ++i) {
-      if (result.extents_[i] >= pre[i] + post[i]) {
-        result.extents_[i] -= pre[i] + post[i];
-        max[i] = result.extents_[i] - 1;
-      } else {
-        result.extents_[i] = 0;
-      }
+      extents[i] = sub_sat(extents[i], pre[i] + post[i]);
     }
-    if (std::accumulate(result.extents_.begin(), result.extents_.end(),
-                        static_cast<size_t>(1), std::multiplies<>()) == 0) {
-      // The result is empty.
-      result.end_ = result.begin_;
-    } else {
-      result.end_ = result.begin_ + result.flat_offset(max) + 1;
-    }
-    return result;
+    return crop(pre, extents);
   }
 
   // Add `pre` indices before, `post` indices after, of padding of `value` to
