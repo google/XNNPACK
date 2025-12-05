@@ -3558,3 +3558,58 @@ INSTANTIATE_TEST_SUITE_P(
   #endif  // XNN_ENABLE_KLEIDIAI
 #endif  // XNN_ENABLE_ARM_SME && XNN_ARCH_ARM64
 
+
+#if XNN_ENABLE_ARM_SME2 && XNN_ARCH_ARM64
+  #if XNN_ENABLE_KLEIDIAI
+  INSTANTIATE_TEST_SUITE_P(
+      PF32_IGEMM_MINMAX_32X32__NEONSME2, GemmTest,
+      testing::ValuesIn(CreateTests4(
+          /*k_block=*/4,
+          /*adj_k_block=*/4,
+          /*mr=*/[]() -> size_t {
+        const struct xnn_hardware_config* hardware_config =
+              xnn_init_hardware_config();
+        if (hardware_config != nullptr && (hardware_config->arch_flags & xnn_arch_arm_sme2) == xnn_arch_arm_sme2) {
+          return xnn_pf32_igemm_minmax_ukernel_32x32__neonsme2_get_mr();
+        } else {
+          return 0;
+        }
+      }
+  , /*nr=*/[]() -> size_t {
+        const struct xnn_hardware_config* hardware_config =
+              xnn_init_hardware_config();
+        if (hardware_config != nullptr && (hardware_config->arch_flags & xnn_arch_arm_sme2) == xnn_arch_arm_sme2) {
+          return xnn_pf32_igemm_minmax_ukernel_32x32__neonsme2_get_nr();
+        } else {
+          return 0;
+        }
+      }
+  , /*kr=*/1, /*sr=*/1,
+          /*mr_packed=*/[]() -> size_t {
+        const struct xnn_hardware_config* hardware_config =
+              xnn_init_hardware_config();
+        if (hardware_config != nullptr && (hardware_config->arch_flags & xnn_arch_arm_sme2) == xnn_arch_arm_sme2) {
+          return xnn_pf32_igemm_minmax_ukernel_32x32__neonsme2_get_mr();
+        } else {
+          return 0;
+        }
+      }
+  ,
+          /*is_igemm=*/true,
+          /*unsigned_inputs=*/false,
+          /*planes=*/1,
+          [](GemmMicrokernelTester& tester) {
+            tester.Test_PF32(xnn_pf32_igemm_minmax_ukernel_32x32__neonsme2,
+                        xnn_init_f32_minmax_scalar_params,
+                        xnn_x32_pack_lh_ukernel__igemm_neonsme2,
+                        xnn_x32_pack_lh_size__igemm_neonsme2,
+                        xnn_pack_kai_pf32_conv_goki_w_sme);
+          },
+          xnn_arch_arm_sme2)),
+      [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
+        return info.param.test_name;
+      });
+
+  #endif  // XNN_ENABLE_KLEIDIAI
+#endif  // XNN_ENABLE_ARM_SME2 && XNN_ARCH_ARM64
+

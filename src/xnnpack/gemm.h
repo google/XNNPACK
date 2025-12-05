@@ -342,6 +342,7 @@ DECLARE_PF32_GEMM_MINMAX_UKERNEL_FUNCTION(
                             const struct xnn_f32_minmax_params* params);
 
 DECLARE_PF32_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_pf32_igemm_minmax_ukernel_32x32__neonsme)
+DECLARE_PF32_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_pf32_igemm_minmax_ukernel_32x32__neonsme2)
 
 size_t xnn_pqs8_qc8w_gemm_minmax_ukernel_1x32c4__neonsme2_get_mr();
 size_t xnn_pqs8_qc8w_gemm_minmax_ukernel_1x32c4__neonsme2_get_nr();
