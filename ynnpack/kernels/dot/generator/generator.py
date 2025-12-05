@@ -4,6 +4,7 @@ from collections.abc import Sequence
 import sys
 
 from ynnpack.kernels.dot.generator.arm_bf16_bf16_fp32 import arm64_neon_bf16_bf16_fp32
+from ynnpack.kernels.dot.generator.arm_bf16_bf16_fp32_k2 import arm_neonbf16_bf16_bf16_fp32_k2
 from ynnpack.kernels.dot.generator.arm_fp32 import arm64_neon_fp32
 from ynnpack.kernels.dot.generator.arm_int8_int8_int32 import arm_neon_int8_int8_int32
 from ynnpack.kernels.dot.generator.arm_int8_int8_int32 import arm_neondot_int8_int8_int32
@@ -51,6 +52,7 @@ arch_to_generator = {
         x86_avx512vnni_uint8_int8_int32_k16()
     ),
     "arm_neon_int8_int8_int32": arm_neon_int8_int8_int32(),
+    "arm_neonbf16_bf16_bf16_fp32_k2": arm_neonbf16_bf16_bf16_fp32_k2(),
     "arm_neondot_int8_int8_int32": arm_neondot_int8_int8_int32(),
     "arm_neoni8mm_int8_int8_int32": arm_neoni8mm_int8_int8_int32(),
     "arm64_neon_fp32": arm64_neon_fp32(),

@@ -12,6 +12,7 @@ py_binary(
     srcs = [
         "arm.py",
         "arm_bf16_bf16_fp32.py",
+        "arm_bf16_bf16_fp32_k2.py",
         "arm_fp32.py",
         "arm_int8_int8_int32.py",
         "dot_base.py",
