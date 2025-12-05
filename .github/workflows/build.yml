@@ -565,7 +565,9 @@ jobs:
     env:
       CC: gcc-13
       CXX: g++-13
-      BAZEL_DEFINES: --define=ynn_enable_arm64_sme=false
+      BAZEL_DEFINES: |
+        --define=ynn_enable_arm64_sme=false
+        --define=ynn_enable_arm_neonbf16=false
     steps:
       - uses: actions/checkout@v4
       - name: Add repository ppa:ubuntu-toolchain-r/test for gcc-13 and g++-13
