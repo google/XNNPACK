@@ -23,6 +23,7 @@ PROD_NEONSME2_MICROKERNEL_SRCS = [
     "src/x8-pack-lh/x8-packlh-neonsme2.c",
     "src/x16-pack-lh/x16-packlh-igemm-neonsme2.c",
     "src/x16-pack-lh/x16-packlh-neonsme2.c",
+    "src/x32-pack-lh/x32-packlh-igemm-neonsme2.c",
     "src/x32-pack-lh/x32-packlh-neonsme2.c",
 ]
 

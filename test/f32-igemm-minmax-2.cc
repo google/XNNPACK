@@ -3601,8 +3601,8 @@ INSTANTIATE_TEST_SUITE_P(
           [](GemmMicrokernelTester& tester) {
             tester.Test_PF32(xnn_pf32_igemm_minmax_ukernel_32x32__neonsme2,
                         xnn_init_f32_minmax_scalar_params,
-                        xnn_x32_pack_lh_ukernel__igemm_neonsme,
-                        xnn_x32_pack_lh_size__igemm_neonsme,
+                        xnn_x32_pack_lh_ukernel__igemm_neonsme2,
+                        xnn_x32_pack_lh_size__igemm_neonsme2,
                         xnn_pack_kai_pf32_conv_goki_w_sme);
           },
           xnn_arch_arm_sme2)),
