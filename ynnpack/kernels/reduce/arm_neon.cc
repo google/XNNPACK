@@ -38,7 +38,7 @@ static f32x4x16 reduce_add(
     float32x4_t hi =
         vreinterpretq_f32_u32(vshll_n_u16(vget_high_u16(b.v[i].v), 16));
 
-    a.v[2 * i] += f32x4{lo};
+    a.v[2 * i + 0] += f32x4{lo};
     a.v[2 * i + 1] += f32x4{hi};
   }
 
@@ -54,7 +54,8 @@ static f32x4 reduce_add(
       vreinterpretq_f32_u32(vandq_u32(pairs, vdupq_n_u32(0xFFFF0000)));
 
   a += f32x4{odd};
-  return a += f32x4{even};
+  a += f32x4{even};
+  return a;
 }
 
 static f32x4x16 reduce_add(
@@ -66,7 +67,7 @@ static f32x4x16 reduce_add(
         vreinterpretq_f32_u32(vshll_n_u16(vget_low_u16(b.v[i].v), 16));
     float32x4_t hi =
         vreinterpretq_f32_u32(vshll_n_u16(vget_high_u16(b.v[i].v), 16));
-    a.v[2 * i].v = vmlaq_f32(a.v[2 * i].v, lo, lo);
+    a.v[2 * i + 0].v = vmlaq_f32(a.v[2 * i + 0].v, lo, lo);
     a.v[2 * i + 1].v = vmlaq_f32(a.v[2 * i + 1].v, hi, hi);
   }
 

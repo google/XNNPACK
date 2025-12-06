@@ -46,7 +46,7 @@ static f32x4x16& operator+=(f32x4x16& a, f16x8x8 b) {
     f32x4 b_1(vcvt_f32_f16(vget_high_f16(
         reinterpret_cast<float16x8_t>(b.v[i].v))));
 
-    a.v[2 * i] += b_0;
+    a.v[2 * i + 0] += b_0;
     a.v[2 * i + 1] += b_1;
   }
 
@@ -75,7 +75,7 @@ static f32x4x16 reduce_add(
     f32x4 b_1(vcvt_f32_f16(vget_high_f16(
         reinterpret_cast<float16x8_t>(b.v[i].v))));
 
-    a.v[2 * i] += b_0 * b_0;
+    a.v[2 * i + 0] += b_0 * b_0;
     a.v[2 * i + 1] += b_1 * b_1;
   }
 

@@ -36,7 +36,7 @@ static f32x4x16& operator+=(f32x4x16& a, bf16x8x8 b) {
   YNN_UNROLL
   for (size_t i = 0; i < 8; ++i) {
     uint16x8x2_t zipped = vzipq_u16(b.v[i].v, zero);
-    a.v[2 * i].v = vbfdotq_f32(a.v[2 * i].v,
+    a.v[2 * i + 0].v = vbfdotq_f32(a.v[2 * i + 0].v,
         vreinterpretq_bf16_u16(zipped.val[0]), one);
     a.v[2 * i + 1].v = vbfdotq_f32(a.v[2 * i + 1].v,
         vreinterpretq_bf16_u16(zipped.val[1]), one);
@@ -62,7 +62,7 @@ static f32x4x16 reduce_add(
   YNN_UNROLL
   for (size_t i = 0; i < 8; ++i) {
     uint16x8x2_t zipped = vzipq_u16(b.v[i].v, zero);
-    a.v[2 * i].v = vbfdotq_f32(a.v[2 * i].v,
+    a.v[2 * i + 0].v = vbfdotq_f32(a.v[2 * i + 0].v,
         vreinterpretq_bf16_u16(zipped.val[0]),
         vreinterpretq_bf16_u16(zipped.val[0]));
     a.v[2 * i + 1].v = vbfdotq_f32(a.v[2 * i + 1].v,
