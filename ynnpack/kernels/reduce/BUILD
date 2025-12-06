@@ -55,6 +55,7 @@ ynn_cc_library(
         "x86_f16c": ["x86_f16c.cc"],
         "x86_avx512fp16": ["x86_avx512fp16.cc"],
         "x86_avx2": ["x86_avx2.cc"],
+        "x86_avx2_fma3": ["x86_avx2_fma3.cc"],
     },
     visibility = ["//ynnpack:__subpackages__"],
     deps = [
