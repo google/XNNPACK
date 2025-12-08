@@ -54,8 +54,8 @@ typedef void (*dot_kernel_fn)(size_t m, size_t n, size_t k3, size_t k2,
                               size_t c_in_stride_m, const void* c_in,
                               size_t c_out_stride_m, void* c_out);
 
-#define YNN_DOT_KERNEL(arch, name, block_m, block_n, block_k, tile_n, tile_k, \
-                       transpose_a, type_a, type_b, type_c)                   \
+#define YNN_DOT_KERNEL(arch, name, block_m, block_n, block_k, tile_m, tile_n, \
+                       tile_k, transpose_a, type_a, type_b, type_c)           \
   void name(size_t m, size_t n, size_t k3, size_t k2, size_t k1,              \
             size_t a_stride_m, size_t a_stride_k3, size_t a_stride_k2,        \
             const void* a, size_t b_stride_k3, size_t b_stride_k2,            \

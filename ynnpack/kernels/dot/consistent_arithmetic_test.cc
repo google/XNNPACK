@@ -43,6 +43,7 @@ struct KernelInfo {
   dot_kernel_fn kernel;
   const char* name;
   DotShape block_shape;
+  size_t tile_m;
   size_t tile_n;
   size_t tile_k;
   uint32_t flags;
@@ -50,11 +51,17 @@ struct KernelInfo {
 };
 
 KernelInfo all_kernels[] = {
-#define YNN_DOT_KERNEL(arch_flags, name, block_m, block_n, block_k, tile_n, \
-                       tile_k, flags, a_type, b_type, c_type)               \
-  KernelInfo{                                                               \
-      arch_flags, name,   #name, {block_m, block_n, block_k},               \
-      tile_n,     tile_k, flags, multi_type_of(a_type(), b_type(), c_type())},
+#define YNN_DOT_KERNEL(arch_flags, name, block_m, block_n, block_k, tile_m, \
+                       tile_n, tile_k, flags, a_type, b_type, c_type)       \
+  KernelInfo{arch_flags,                                                    \
+             name,                                                          \
+             #name,                                                         \
+             {block_m, block_n, block_k},                                   \
+             tile_m,                                                        \
+             tile_n,                                                        \
+             tile_k,                                                        \
+             flags,                                                         \
+             multi_type_of(a_type(), b_type(), c_type())},
 #include "ynnpack/kernels/dot/kernels.inc"
 #undef YNN_DOT_KERNEL
 };
@@ -113,16 +120,18 @@ void TestMatMul(AT, BT, CT, size_t k) {
     std::cout << "Considering kernel " << kernel.name << std::endl;
     ++consistent_kernels;
 
-    const size_t tile_k = kernel.tile_k;
+    const size_t tile_m = kernel.tile_m;
     const size_t tile_n = kernel.tile_n;
+    const size_t tile_k = kernel.tile_k;
 
     Tensor<CT> kernel_c = init_c.deep_copy();
 
     // dot kernels require B's k and n dimensions to be aligned to tile_k,
     // tile_n. The kernel might also require b to be packed (tile_k > 1).
     Tensor<BT> packed_b = pack_b(b, tile_k, tile_n);
-    Tensor<AT> packed_a =
-        (kernel.flags & dot_flag::transpose_a) ? transpose_a(a, tile_k) : a;
+    Tensor<AT> packed_a = (kernel.flags & dot_flag::transpose_a)
+                              ? transpose_a(a, tile_m, tile_k)
+                              : a;
 
     kernel.kernel(m, n, 1, 1, k, packed_a.stride(0) * sizeof(AT), 0, 0,
                   packed_a.base(), 0, 0,

@@ -21,8 +21,8 @@ namespace ynn {
 
 // Enable us to refer to kernels by name instead of by function pointer.
 std::map<dot_kernel_fn, std::string> kernels = {
-#define YNN_DOT_KERNEL(arch_flags, kernel, block_m, block_n, block_k, tile_n, \
-                       tile_k, flags, a_type, b_type, c_type)                 \
+#define YNN_DOT_KERNEL(arch_flags, kernel, block_m, block_n, block_k, tile_m, \
+                       tile_n, tile_k, flags, a_type, b_type, c_type)         \
   {kernel, #kernel},
 #include "ynnpack/kernels/dot/kernels.inc"
 #undef YNN_DOT_KERNEL

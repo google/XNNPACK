@@ -145,14 +145,13 @@ void {func_name}(
   def a_ptr(self, i, k1, ty=None):
     """Get pointers to a(i, k1) within the current block."""
     ty = ty or self.a_type
-    i = f"min({i}, M - 1)" if i != 0 else i
+    # When we clamp, we need to align down to the nearest tile.
+    i = f"min({i}, (M - 1) & ~{self.tile_shape[0] - 1})" if i != 0 else i
     if "dot_flag::transpose_a" in self.flags:
-      offset = (
-          f"({k1//self.tile_shape[2]} * A_stride_m) + ({i} *"
-          f" {self.tile_shape[2]} * sizeof({self.a_type}))"
-      )
-    else:
-      offset = f"({i} * A_stride_m) + ({k1} * sizeof({self.a_type}))"
+      k1 //= self.tile_shape[2]
+      i = f"{i} * {self.tile_shape[2]}"
+      i, k1 = k1, i
+    offset = f"({i} * A_stride_m) + ({k1} * sizeof({self.a_type}))"
     return f"reinterpret_cast<const {ty}*>(offset_bytes(A_k1, {offset}))"
 
   def b_ptr(self, k1, j, ty=None):
@@ -288,7 +287,7 @@ void {func_name}(
 
   def store_block(self):
     result = ""
-    for i in range(0, self.block_shape[0], self.tile_shape[0]):
+    for i in reversed(range(0, self.block_shape[0], self.tile_shape[0])):
       for j in range(0, self.block_shape[1], self.tile_shape[1]):
         result += self.store_c_tile(i, j)
     result += "\n"
@@ -296,7 +295,7 @@ void {func_name}(
 
   def store_block_tail(self):
     result = ""
-    for i in range(0, self.block_shape[0], self.tile_shape[0]):
+    for i in reversed(range(0, self.block_shape[0], self.tile_shape[0])):
       for j in range(0, self.block_shape[1], self.tile_shape[1]):
         result += self.store_c_tile_tail(i, j, "N")
     result += "\n"
@@ -515,7 +514,7 @@ do {
     inc = ""
     inc += (
         f"YNN_DOT_KERNEL(arch_flag::{self.arch}, {func_name}, {m}, {n}, {k},"
-        f" {self.tile_shape[1]}, {self.tile_shape[2]}, /*flags=*/{flags},"
+        f" {', '.join(str(s) for s in self.tile_shape)}, /*flags=*/{flags},"
         f" {self.a_type}, {self.b_type}, {self.c_type})\n"
     )
 

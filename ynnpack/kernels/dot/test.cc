@@ -76,6 +76,7 @@ struct KernelInfo {
   uint64_t arch_flags;
   dot_kernel_fn kernel;
   DotShape block_shape;
+  size_t tile_m;
   size_t tile_n;
   size_t tile_k;
   uint32_t flags;
@@ -89,8 +90,9 @@ void TestMatMul(AT, BT, CT, const DotShape& shape, const KernelInfo& kernel,
 
   ReplicableRandomDevice rng;
 
-  const size_t tile_k = kernel.tile_k;
+  const size_t tile_m = kernel.tile_m;
   const size_t tile_n = kernel.tile_n;
+  const size_t tile_k = kernel.tile_k;
   const size_t m = shape.m;
   const size_t n = shape.n;
   const size_t k = shape.k;
@@ -121,7 +123,7 @@ void TestMatMul(AT, BT, CT, const DotShape& shape, const KernelInfo& kernel,
   // dot kernels require B's k and n dimensions to be aligned to tile_k,
   // tile_n. The kernel might also require b to be packed (tile_k > 1).
   Tensor<BT> packed_b = unpacked_b ? b : pack_b(b, tile_k, tile_n);
-  Tensor<AT> packed_a = pack_a ? transpose_a(a, tile_k) : a;
+  Tensor<AT> packed_a = pack_a ? transpose_a(a, tile_m, tile_k) : a;
 
   kernel.kernel(m, n, 1, 1, k, packed_a.stride(0) * sizeof(AT), 0, 0,
                 packed_a.base(), 0, 0, packed_b.stride(0) * sizeof(BT) / tile_k,
@@ -149,8 +151,9 @@ void TestConv2D(AT, BT, CT, const KernelInfo& kernel) {
   ReplicableRandomDevice rng;
 
   const DotShape& block_shape = kernel.block_shape;
-  const size_t tile_k = kernel.tile_k;
+  const size_t tile_m = kernel.tile_m;
   const size_t tile_n = kernel.tile_n;
+  const size_t tile_k = kernel.tile_k;
   const bool pack_a = kernel.flags & dot_flag::transpose_a;
 
   // We always have m = 1, because that would just be a batch dimension here,
@@ -203,7 +206,7 @@ void TestConv2D(AT, BT, CT, const KernelInfo& kernel) {
 
     // We need to transpose before making the stencil, otherwise we "realize"
     // the im2col in memory.
-    Tensor<AT> packed_a = pack_a ? transpose_a(a, tile_k) : a;
+    Tensor<AT> packed_a = pack_a ? transpose_a(a, tile_m, tile_k) : a;
 
     if (pack_a) {
       // When we transpose, we tile_k, making the kw dimension tile_k times
@@ -367,13 +370,14 @@ TEST_P(Dot, Conv2D) {
   });
 }
 
-#define YNN_DOT_KERNEL(arch_flags, name, block_m, block_n, block_k, tile_n, \
-                       tile_k, flags, a_type, b_type, c_type)               \
+#define YNN_DOT_KERNEL(arch_flags, name, block_m, block_n, block_k, tile_m, \
+                       tile_n, tile_k, flags, a_type, b_type, c_type)       \
   INSTANTIATE_TEST_SUITE_P(name, Dot,                                       \
                            testing::Values(KernelInfo{                      \
                                arch_flags,                                  \
                                name,                                        \
                                {block_m, block_n, block_k},                 \
+                               tile_m,                                      \
                                tile_n,                                      \
                                tile_k,                                      \
                                flags,                                       \
