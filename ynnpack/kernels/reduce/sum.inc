@@ -47,6 +47,7 @@ YNN_UNARY_REDUCE_KERNEL(arch_flag::sse41, sum_int8_int32_sse41, int8_t, int32_t)
 #endif  // YNN_ARCH_X86_SSE41
 #ifdef YNN_ARCH_X86_SSE2
 YNN_UNARY_REDUCE_KERNEL(arch_flag::sse2, sum_fp32_sse2, float, float)
+YNN_UNARY_REDUCE_KERNEL(arch_flag::sse2, sum_bf16_fp32_sse2, bfloat16, float)
 YNN_UNARY_REDUCE_KERNEL(arch_flag::sse2, sum_uint8_int32_sse2, uint8_t, int32_t)
 YNN_UNARY_REDUCE_KERNEL(arch_flag::sse2, sum_int8_int32_sse2, int8_t, int32_t)
 #endif  // YNN_ARCH_X86_SSE2

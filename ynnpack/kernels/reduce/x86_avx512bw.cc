@@ -125,11 +125,11 @@ static f32x16 reduce_add(
     f32x16 a, bf16x32 b, Identity /*map_fn*/,
     std::integral_constant<size_t, 2> /*horizontal_factor*/) {
   __m512i mask = _mm512_set1_epi32(0xFFFF0000);
-  __m512 evens = _mm512_castsi512_ps(_mm512_slli_epi32(b.v, 16));
-  __m512 odds  = _mm512_castsi512_ps(_mm512_and_epi32(b.v, mask));
+  f32x16 evens(_mm512_castsi512_ps(_mm512_slli_epi32(b.v, 16)));
+  f32x16 odds(_mm512_castsi512_ps(_mm512_and_epi32(b.v, mask)));
 
-  a += f32x16{odds};
-  a += f32x16{evens};
+  a += odds;
+  a += evens;
   return a;
 }
 

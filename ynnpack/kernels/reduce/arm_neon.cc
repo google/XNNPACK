@@ -33,13 +33,11 @@ static f32x4x16 reduce_add(
     std::integral_constant<size_t, 1> /*horizontal_factor*/) {
   YNN_UNROLL
   for (int i = 0; i < 8; ++i) {
-    float32x4_t lo =
-        vreinterpretq_f32_u32(vshll_n_u16(vget_low_u16(b.v[i].v), 16));
-    float32x4_t hi =
-        vreinterpretq_f32_u32(vshll_n_u16(vget_high_u16(b.v[i].v), 16));
+    f32x4 lo(vreinterpretq_f32_u32(vshll_n_u16(vget_low_u16(b.v[i].v), 16)));
+    f32x4 hi(vreinterpretq_f32_u32(vshll_n_u16(vget_high_u16(b.v[i].v), 16)));
 
-    a.v[2 * i + 0] += f32x4{lo};
-    a.v[2 * i + 1] += f32x4{hi};
+    a.v[2 * i + 0] += lo;
+    a.v[2 * i + 1] += hi;
   }
 
   return a;
@@ -49,12 +47,11 @@ static f32x4 reduce_add(
     f32x4 a, bf16x8 b, Identity /*map_fn*/,
     std::integral_constant<size_t, 2> /*horizontal_factor*/) {
   uint32x4_t pairs = vreinterpretq_u32_u16(b.v);
-  float32x4_t even = vreinterpretq_f32_u32(vshlq_n_u32(pairs, 16));
-  float32x4_t odd =
-      vreinterpretq_f32_u32(vandq_u32(pairs, vdupq_n_u32(0xFFFF0000)));
+  f32x4 even(vreinterpretq_f32_u32(vshlq_n_u32(pairs, 16)));
+  f32x4 odd(vreinterpretq_f32_u32(vandq_u32(pairs, vdupq_n_u32(0xFFFF0000))));
 
-  a += f32x4{odd};
-  a += f32x4{even};
+  a += odd;
+  a += even;
   return a;
 }
 

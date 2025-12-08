@@ -137,11 +137,11 @@ static f32x8 reduce_add(
     f32x8 a, bf16x16 b, Identity /*map_fn*/,
     std::integral_constant<size_t, 2> /*horizontal_factor*/) {
   __m256 mask = _mm256_castsi256_ps(_mm256_set1_epi32(0xFFFF0000));
-  __m256 evens = _mm256_castsi256_ps(_mm256_slli_epi32(b.v, 16));
-  __m256 odds = _mm256_and_ps(_mm256_castsi256_ps(b.v), mask);
+  f32x8 evens(_mm256_castsi256_ps(_mm256_slli_epi32(b.v, 16)));
+  f32x8 odds(_mm256_and_ps(_mm256_castsi256_ps(b.v), mask));
 
-  a += f32x8{odds};
-  a += f32x8{evens};
+  a += odds;
+  a += evens;
   return a;
 }
 
@@ -153,11 +153,11 @@ static f32x8x16 reduce_add(
     __m256i lo_u32 = _mm256_cvtepu16_epi32(_mm256_castsi256_si128(b.v[i].v));
     __m256i hi_u32 =
         _mm256_cvtepu16_epi32(_mm256_extracti128_si256(b.v[i].v, 1));
-    __m256 lo_f32 = _mm256_castsi256_ps(_mm256_slli_epi32(lo_u32, 16));
-    __m256 hi_f32 = _mm256_castsi256_ps(_mm256_slli_epi32(hi_u32, 16));
+    f32x8 lo_f32(_mm256_castsi256_ps(_mm256_slli_epi32(lo_u32, 16)));
+    f32x8 hi_f32(_mm256_castsi256_ps(_mm256_slli_epi32(hi_u32, 16)));
 
-    a.v[2 * i + 0] += f32x8{_mm256_mul_ps(lo_f32, lo_f32)};
-    a.v[2 * i + 1] += f32x8{_mm256_mul_ps(hi_f32, hi_f32)};
+    a.v[2 * i + 0] += lo_f32 * lo_f32;
+    a.v[2 * i + 1] += hi_f32 * hi_f32;
   }
 
   return a;
@@ -167,10 +167,10 @@ static f32x8 reduce_add(
     f32x8 a, bf16x16 b, Square /*map_fn*/,
     std::integral_constant<size_t, 2> /*horizontal_factor*/) {
   __m256 mask = _mm256_castsi256_ps(_mm256_set1_epi32(0xFFFF0000));
-  __m256 evens = _mm256_castsi256_ps(_mm256_slli_epi32(b.v, 16));
-  __m256 odds = _mm256_and_ps(_mm256_castsi256_ps(b.v), mask);
-  a += f32x8{_mm256_mul_ps(odds, odds)};
-  a += f32x8{_mm256_mul_ps(evens, evens)};
+  f32x8 evens(_mm256_castsi256_ps(_mm256_slli_epi32(b.v, 16)));
+  f32x8 odds(_mm256_and_ps(_mm256_castsi256_ps(b.v), mask));
+  a += odds * odds;
+  a += evens * evens;
   return a;
 }
 
