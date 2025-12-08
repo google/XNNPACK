@@ -244,22 +244,15 @@ ynn_status subtract_a_times_sum_b(ynn_subgraph_t subgraph, size_t num_k_dims,
 //
 ynn_status define_xnn_accumulator_for_dot(
     ynn_subgraph_t subgraph, size_t num_k_dims, uint32_t a_id, uint32_t b_id,
-    uint32_t* init_output_id, uint32_t* output_id, uint32_t* add_to_output_id,
-    bool allow_reuse) {
+    uint32_t* init_output_id, uint32_t* output_id, bool allow_reuse) {
   const ynn_value& output_value = subgraph->value(*output_id);
   const ynn_value& a = subgraph->value(a_id);
   const ynn_value& b = subgraph->value(b_id);
   ynn_type type = accumulator_for_type(product_type(a.type, b.type));
 
-  *add_to_output_id = YNN_INVALID_VALUE_ID;
-  if (init_output_id && *init_output_id != YNN_INVALID_VALUE_ID) {
-    if (type_of_value(subgraph, *init_output_id) != type) {
-      // We have a bias of a different type than either the accumulators or the
-      // output, we need to just save it for later.
-      *add_to_output_id = *init_output_id;
-      *init_output_id = YNN_INVALID_VALUE_ID;
-    }
-  }
+  // `init_output_id` is strictly used for the quantization offsets calculated
+  // below.
+  assert(*init_output_id == YNN_INVALID_VALUE_ID);
 
   uint32_t a_zero_point_id = a.zero_point_id;
   uint32_t a_scale_id = a.scale_id;
@@ -317,28 +310,7 @@ ynn_status define_xnn_accumulator_for_dot(
       return status;
     }
 
-    if (*init_output_id != YNN_INVALID_VALUE_ID) {
-      uint32_t new_init_output_id = YNN_INVALID_VALUE_ID;
-
-      // This is to reset the scale of the bias, so it has the same scale as all
-      // other operands. The assumption here is that the bias scale is equal to
-      // the product of the input scales (which matches XNNPACK behavior) and
-      // since we multiply by the input scales product later (see the
-      // function-level comment for details) we need to remove it here.
-      ynn_value& bias = subgraph->value(*init_output_id);
-      bias.scale_id = YNN_INVALID_VALUE_ID;
-
-      status = define_binary_with_broadcasting(
-          subgraph, ynn_binary_add, *init_output_id, a_times_b_zero_point_id,
-          &new_init_output_id,
-          /*flags=*/0);
-      if (status != ynn_status_success) {
-        return status;
-      }
-      *init_output_id = new_init_output_id;
-    } else {
-      *init_output_id = a_times_b_zero_point_id;
-    }
+    *init_output_id = a_times_b_zero_point_id;
   }
 
   // We need to add a_zero_point * sum(b) to the accumulator initialization.
@@ -508,18 +480,21 @@ ynn_type accumulator_for_type(ynn_type type) {
 ynn_status define_xnn_dot(ynn_subgraph_t subgraph, size_t num_k_dims,
                           uint32_t a_id, uint32_t b_id, uint32_t bias_id,
                           uint32_t output_id) {
-  uint32_t init_accumulator_id = bias_id;
+  uint32_t bias_converted_id = bias_id;
   ynn_status status =
-      define_convert_dot_inputs(subgraph, a_id, &b_id, &init_accumulator_id);
+      define_convert_dot_inputs(subgraph, a_id, &b_id, &bias_converted_id);
   if (status != ynn_status_success) {
     return status;
   }
 
+  uint32_t init_accumulator_id = YNN_INVALID_VALUE_ID;
   uint32_t accumulator_id = output_id;
+  // If we have a bias, the dot product creates an intermediate value to
+  // accumulate into instead of reusing `output_id`.
+  const bool allow_reuse = (bias_converted_id == YNN_INVALID_VALUE_ID);
   status = define_xnn_accumulator_for_dot(subgraph, num_k_dims, a_id, b_id,
                                           &init_accumulator_id, &accumulator_id,
-                                          &bias_id,
-                                          /*allow_reuse=*/true);
+                                          allow_reuse);
   if (status != ynn_status_success) {
     return status;
   }
@@ -530,44 +505,42 @@ ynn_status define_xnn_dot(ynn_subgraph_t subgraph, size_t num_k_dims,
     return status;
   }
 
-  // If `bias_id` exists, we need to add it to the result. It might
-  // have a different type than either the accumulator or the output (e.g.
-  // qd8-f16 could have a bias of fp32, accumulator type of int32, and output
-  // type fp16). So, we need to potentially convert the accumulator to the type
-  // of the bias, add, and then convert to the output type.
-  // TODO: To make this fast, we probably need to pattern match this whole
-  // sequence into one elementwise op:
-  // output = f16(f32(accumulators_i32) + bias_f32)
-  uint32_t output_unconverted_id = accumulator_id;
-  if (bias_id != YNN_INVALID_VALUE_ID) {
-    // Convert the accumulator to the type of the bias.
-    uint32_t accumulator_converted_id = YNN_INVALID_VALUE_ID;
-    status = ynn::define_tensor_value_like(subgraph, bias_id,
-                                           &accumulator_converted_id);
-    if (status != ynn_status_success) {
-      return status;
-    }
+  // XNNPACK semantics: output = scale * (dot_result) + bias.
+  // We perform this in fp32 to support arbitrary bias scales and fusing.
+
+  uint32_t dot_result_as_float_id = accumulator_id;
+
+  // If the accumulator is integral (quantized), we must convert it to float.
+  // This conversion implicitly applies the scale_id attached to accumulator_id.
+  if (type_is_integral(type_of_value(subgraph, accumulator_id))) {
+    uint32_t float_val_id = YNN_INVALID_VALUE_ID;
+    status = ynn_define_tensor_value(subgraph, ynn_type_fp32, /*rank=*/0,
+                                     /*dims=*/nullptr, /*data=*/nullptr,
+                                     /*zero_point_id=*/YNN_INVALID_VALUE_ID,
+                                     /*scale_id=*/YNN_INVALID_VALUE_ID,
+                                     /*flags=*/0, &float_val_id);
+    if (status != ynn_status_success) return status;
 
     status = ynn_define_unary(subgraph, ynn_unary_convert, accumulator_id,
-                              &accumulator_converted_id, /*flags=*/0);
-    if (status != ynn_status_success) {
-      return status;
-    }
+                              &float_val_id, /*flags=*/0);
+    if (status != ynn_status_success) return status;
 
-    if (type_of_value(subgraph, output_id) !=
-        type_of_value(subgraph, accumulator_converted_id)) {
-      // The bias and output have different types, we'll have to convert again.
-      output_unconverted_id = YNN_INVALID_VALUE_ID;
-    } else {
-      output_unconverted_id = output_id;
-    }
+    dot_result_as_float_id = float_val_id;
+  }
 
-    status =
-        ynn_define_binary(subgraph, ynn_binary_add, accumulator_converted_id,
-                          bias_id, &output_unconverted_id, /*flags=*/0);
-    if (status != ynn_status_success) {
-      return status;
-    }
+  uint32_t output_unconverted_id = dot_result_as_float_id;
+  if (bias_converted_id != YNN_INVALID_VALUE_ID) {
+    // Ensure bias is also fp32 for the addition.
+    status = convert_to(subgraph, &bias_converted_id, ynn_type_fp32);
+    if (status != ynn_status_success) return status;
+
+    uint32_t added_id = YNN_INVALID_VALUE_ID;
+    status = define_binary_with_broadcasting(
+        subgraph, ynn_binary_add, dot_result_as_float_id, bias_converted_id,
+        &added_id, /*flags=*/0);
+    if (status != ynn_status_success) return status;
+
+    output_unconverted_id = added_id;
   }
 
   if (output_unconverted_id != output_id) {
