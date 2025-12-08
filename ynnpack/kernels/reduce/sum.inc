@@ -22,6 +22,7 @@ YNN_UNARY_REDUCE_KERNEL(arch_flag::avx512bf16, sum_bf16_fp32_avx512bf16, bfloat1
 YNN_UNARY_REDUCE_KERNEL(arch_flag::avx512fp16, sum_fp16_fp32_avx512fp16, half, float)
 #endif  // YNN_ARCH_X86_AVX512FP16
 #ifdef YNN_ARCH_X86_AVX512BW
+YNN_UNARY_REDUCE_KERNEL(arch_flag::avx512bw, sum_bf16_fp32_avx512bw, bfloat16, float)
 YNN_UNARY_REDUCE_KERNEL(arch_flag::avx512bw, sum_uint8_int32_avx512bw, uint8_t, int32_t)
 YNN_UNARY_REDUCE_KERNEL(arch_flag::avx512bw, sum_int8_int32_avx512bw, int8_t, int32_t)
 #endif  // YNN_ARCH_X86_AVX512BW
