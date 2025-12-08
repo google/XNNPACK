@@ -13,7 +13,6 @@
 #include "ynnpack/base/base.h"
 #include "ynnpack/base/bfloat16.h"
 #include "ynnpack/base/simd/multi_vec.h"
-#include "ynnpack/base/simd/x86_avx2.h"
 #include "ynnpack/base/simd/x86_avx512bw.h"
 #include "ynnpack/kernels/reduce/generic.h"
 #include "ynnpack/kernels/reduce/sum_accumulator.h"
@@ -25,16 +24,20 @@ namespace simd {
 using f32x16x8 = multi_vec<f32x16, 8>;
 using bf16x32x4 = multi_vec<bf16x32, 4>;
 
-static f32x16& operator+=(f32x16& a, bf16x16 b) {
-  return a += f32x16{_mm512_cvtpbh_ps(reinterpret_cast<__m256bh>(b.v))};
-}
-
 static f32x16x8& operator+=(f32x16x8& a, bf16x32x4 b) {
+  __m512bh ones = reinterpret_cast<__m512bh>(_mm512_set1_epi32(0x00003F80));
   YNN_UNROLL
-  for (size_t i = 0; i < 4; ++i) {
-    a.v[2 * i] += extract<0>(b.v[i], bf16x16{});
-    a.v[2 * i + 1] += extract<1>(b.v[i], bf16x16{});
+  for (int i = 0; i < 4; ++i) {
+    __m512i b_bits = reinterpret_cast<__m512i>(b.v[i].v);
+    __m512bh lo = reinterpret_cast<__m512bh>(
+        _mm512_cvtepu16_epi32(_mm512_castsi512_si256(b_bits)));
+    __m512bh hi = reinterpret_cast<__m512bh>(
+        _mm512_cvtepu16_epi32(_mm512_extracti64x4_epi64(b_bits, 1)));
+
+    a.v[2 * i].v = _mm512_dpbf16_ps(a.v[2 * i].v, lo, ones);
+    a.v[2 * i + 1].v = _mm512_dpbf16_ps(a.v[2 * i + 1].v, hi, ones);
   }
+
   return a;
 }
 
@@ -49,28 +52,19 @@ static f32x16 reduce_add(
 static f32x16x8 reduce_add(
     f32x16x8 a, bf16x32x4 b, Square /*map_fn*/,
     std::integral_constant<size_t, 1> /*horizontal_factor*/) {
-  f32x16x8 result = a;
-
   YNN_UNROLL
   for (int i = 0; i < 4; ++i) {
     __m512i b_bits = reinterpret_cast<__m512i>(b.v[i].v);
+    __m512bh lo = reinterpret_cast<__m512bh>(
+        _mm512_cvtepu16_epi32(_mm512_castsi512_si256(b_bits)));
+    __m512bh hi = reinterpret_cast<__m512bh>(
+        _mm512_cvtepu16_epi32(_mm512_extracti64x4_epi64(b_bits, 1)));
 
-    __m256i lower_half = _mm512_castsi512_si256(b_bits);
-    __m256i upper_half = _mm512_extracti64x4_epi64(b_bits, 1);
-
-    __m512i expanded_lo_i = _mm512_cvtepu16_epi32(lower_half);
-    __m512i expanded_hi_i = _mm512_cvtepu16_epi32(upper_half);
-
-    __m512bh expanded_lo = reinterpret_cast<__m512bh>(expanded_lo_i);
-    __m512bh expanded_hi = reinterpret_cast<__m512bh>(expanded_hi_i);
-
-    result.v[2 * i].v = _mm512_dpbf16_ps(result.v[2 * i].v, expanded_lo,
-                                       expanded_lo);
-    result.v[2 * i + 1].v = _mm512_dpbf16_ps(result.v[2 * i + 1].v, expanded_hi,
-                                             expanded_hi);
+    a.v[2 * i + 0].v = _mm512_dpbf16_ps(a.v[2 * i + 0].v, lo, lo);
+    a.v[2 * i + 1].v = _mm512_dpbf16_ps(a.v[2 * i + 1].v, hi, hi);
   }
 
-  return result;
+  return a;
 }
 
 static f32x16 reduce_add(

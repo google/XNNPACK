@@ -28,8 +28,12 @@ YNN_UNARY_REDUCE_KERNEL(arch_flag::avx512bw, sum_squared_int8_int32_avx512bw, in
 #ifdef YNN_ARCH_X86_AVX512F
 YNN_UNARY_REDUCE_KERNEL(arch_flag::avx512f, sum_squared_fp32_avx512f, float, float)
 #endif  // YNN_ARCH_X86_AVX512F
+#ifdef YNN_ARCH_X86_AVX2_FMA3
+YNN_UNARY_REDUCE_KERNEL(arch_flag::avx2 | arch_flag::fma3, sum_squared_bf16_fp32_avx2_fma3, bfloat16, float)
+#endif  // YNN_ARCH_X86_AVX2_FMA3
 #ifdef YNN_ARCH_X86_AVX2
 YNN_UNARY_REDUCE_KERNEL(arch_flag::avx2, sum_squared_fp32_avx2, float, float)
+YNN_UNARY_REDUCE_KERNEL(arch_flag::avx2, sum_squared_bf16_fp32_avx2, bfloat16, float)
 YNN_UNARY_REDUCE_KERNEL(arch_flag::avx2, sum_squared_int8_int32_avx2, int8_t, int32_t)
 YNN_UNARY_REDUCE_KERNEL(arch_flag::avx2, sum_squared_uint8_int32_avx2, uint8_t, int32_t)
 #endif  // YNN_ARCH_X86_AVX2
