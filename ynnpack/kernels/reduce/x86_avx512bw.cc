@@ -30,6 +30,7 @@ using s32x16x2 = multi_vec<s32x16, 2>;
 using s32x16x4 = multi_vec<s32x16, 4>;
 using f32x16x16 = multi_vec<f32x16, 16>;
 using bf16x32x8 = multi_vec<bf16x32, 8>;
+using f16x32x8 = multi_vec<f16x32, 8>;
 
 static s32x16x4& operator+=(s32x16x4& a, s8x64 b) {
   a.v[0] += s32x16{_mm512_cvtepi8_epi32(extract<0>(b, s8x16{}).v)};
@@ -44,6 +45,19 @@ static s32x16x4& operator+=(s32x16x4& a, u8x64 b) {
   a.v[1] += s32x16{_mm512_cvtepu8_epi32(extract<1>(b, u8x16{}).v)};
   a.v[2] += s32x16{_mm512_cvtepu8_epi32(extract<2>(b, u8x16{}).v)};
   a.v[3] += s32x16{_mm512_cvtepu8_epi32(extract<3>(b, u8x16{}).v)};
+  return a;
+}
+
+static f32x16& operator+=(f32x16& a, f16x16 b) {
+  return a += f32x16{_mm512_cvtph_ps(b.v)};
+}
+
+static f32x16x16& operator+=(f32x16x16& a, f16x32x8 b) {
+  YNN_UNROLL
+  for (size_t i = 0; i < 8; ++i) {
+    a.v[2 * i + 0] += extract<0>(b.v[i], f16x16{});
+    a.v[2 * i + 1] += extract<1>(b.v[i], f16x16{});
+  }
   return a;
 }
 
@@ -158,21 +172,43 @@ static f32x16 reduce_add(
   return a;
 }
 
+static f32x16x16 reduce_add(
+    f32x16x16 a, f16x32x8 b, Square /*map_fn*/,
+    std::integral_constant<size_t, 1> /*horizontal_factor*/) {
+  YNN_UNROLL
+  for (size_t i = 0; i < 8; ++i) {
+    __m512 lo = _mm512_cvtph_ps(extract<0>(b.v[i], f16x16{}).v);
+    __m512 hi = _mm512_cvtph_ps(extract<1>(b.v[i], f16x16{}).v);
+    a.v[2 * i + 0].v = _mm512_fmadd_ps(lo, lo, a.v[2 * i + 0].v);
+    a.v[2 * i + 1].v = _mm512_fmadd_ps(hi, hi, a.v[2 * i + 1].v);
+  }
+  return a;
+}
+
+static f32x16 reduce_add(
+    f32x16 a, f16x16 b, Square /*map_fn*/,
+    std::integral_constant<size_t, 1> /*horizontal_factor*/) {
+  __m512 b_f32 = _mm512_cvtph_ps(b.v);
+  a.v = _mm512_fmadd_ps(b_f32, b_f32, a.v);
+  return a;
+}
+
 }  // namespace simd
 
-using simd::s32x8;
-using simd::s32x16;
-using simd::s32x16x2;
-using simd::s32x16x4;
-using simd::f32x16;
-using simd::f32x16x16;
 using simd::bf16x32;
 using simd::bf16x32x8;
 using simd::f16x32;
+using simd::f16x32x8;
+using simd::f32x16;
+using simd::f32x16x16;
 using simd::s16x32;
+using simd::s32x16;
+using simd::s32x16x2;
+using simd::s32x16x4;
+using simd::s32x8;
 using simd::s8x32;
-using simd::u8x32;
 using simd::s8x64;
+using simd::u8x32;
 using simd::u8x64;
 
 using f16x32_rvar = float16_wrapper<f16x32, s16x32>;
@@ -295,6 +331,39 @@ void sum_squared_bf16_fp32_avx512bw(size_t n, size_t k3, size_t k2, size_t k1,
     tiled_reduce<sum_accumulator_x32<f32x16, 32, Square>, bfloat16, float>(
         n, k3, k2, k1, a_stride_n, a_stride_k3, a_stride_k2,
         reinterpret_cast<const bfloat16*>(a), /*C_stride_m=*/0,
+        reinterpret_cast<float*>(c));
+  }
+}
+
+void sum_fp16_fp32_avx512bw(size_t n, size_t k3, size_t k2, size_t k1,
+                            size_t a_stride_n, size_t a_stride_k3,
+                            size_t a_stride_k2, const void* a, size_t,
+                            void* c) {
+  if (k1 == 1 && a_stride_n == sizeof(half)) {
+    tiled_reduce<sum_accumulator_k1_1<f16x32x8, f32x16x16>, half, float>(
+        n, k3, k2, a_stride_k3, a_stride_k2, reinterpret_cast<const half*>(a),
+        /*C_stride_m=*/0, reinterpret_cast<float*>(c));
+  } else {
+    tiled_reduce<sum_accumulator_x32<f32x16, 16>, half, float>(
+        n, k3, k2, k1, a_stride_n, a_stride_k3, a_stride_k2,
+        reinterpret_cast<const half*>(a), /*C_stride_m=*/0,
+        reinterpret_cast<float*>(c));
+  }
+}
+
+void sum_squared_fp16_fp32_avx512bw(size_t n, size_t k3, size_t k2, size_t k1,
+                                    size_t a_stride_n, size_t a_stride_k3,
+                                    size_t a_stride_k2, const void* a, size_t,
+                                    void* c) {
+  if (k1 == 1 && a_stride_n == sizeof(half)) {
+    tiled_reduce<sum_accumulator_k1_1<f16x32x8, f32x16x16, Square>, half,
+                 float>(n, k3, k2, a_stride_k3, a_stride_k2,
+                        reinterpret_cast<const half*>(a),
+                        /*C_stride_m=*/0, reinterpret_cast<float*>(c));
+  } else {
+    tiled_reduce<sum_accumulator_x32<f32x16, 16, Square>, half, float>(
+        n, k3, k2, k1, a_stride_n, a_stride_k3, a_stride_k2,
+        reinterpret_cast<const half*>(a), /*C_stride_m=*/0,
         reinterpret_cast<float*>(c));
   }
 }
