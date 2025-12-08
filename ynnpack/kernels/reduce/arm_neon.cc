@@ -33,11 +33,9 @@ static f32x4x16 reduce_add(
     std::integral_constant<size_t, 1> /*horizontal_factor*/) {
   YNN_UNROLL
   for (int i = 0; i < 8; ++i) {
-    f32x4 lo(vreinterpretq_f32_u32(vshll_n_u16(vget_low_u16(b.v[i].v), 16)));
-    f32x4 hi(vreinterpretq_f32_u32(vshll_n_u16(vget_high_u16(b.v[i].v), 16)));
-
-    a.v[2 * i + 0] += lo;
-    a.v[2 * i + 1] += hi;
+    f32x4x2 b_f32 = convert(b.v[i], float{});
+    a.v[2 * i + 0] += b_f32.v[0];
+    a.v[2 * i + 1] += b_f32.v[1];
   }
 
   return a;
@@ -60,12 +58,9 @@ static f32x4x16 reduce_add(
     std::integral_constant<size_t, 1> /*horizontal_factor*/) {
   YNN_UNROLL
   for (int i = 0; i < 8; ++i) {
-    float32x4_t lo =
-        vreinterpretq_f32_u32(vshll_n_u16(vget_low_u16(b.v[i].v), 16));
-    float32x4_t hi =
-        vreinterpretq_f32_u32(vshll_n_u16(vget_high_u16(b.v[i].v), 16));
-    a.v[2 * i + 0].v = vmlaq_f32(a.v[2 * i + 0].v, lo, lo);
-    a.v[2 * i + 1].v = vmlaq_f32(a.v[2 * i + 1].v, hi, hi);
+    f32x4x2 b_f32 = convert(b.v[i], float{});
+    a.v[2 * i + 0].v = vmlaq_f32(a.v[2 * i + 0].v, b_f32.v[0].v, b_f32.v[0].v);
+    a.v[2 * i + 1].v = vmlaq_f32(a.v[2 * i + 1].v, b_f32.v[1].v, b_f32.v[1].v);
   }
 
   return a;

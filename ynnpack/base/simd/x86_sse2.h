@@ -3,8 +3,8 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#ifndef XNNPACK_YNNPACK_BASE_SIMD_X86_SSE_H_
-#define XNNPACK_YNNPACK_BASE_SIMD_X86_SSE_H_
+#ifndef XNNPACK_YNNPACK_BASE_SIMD_X86_SSE2_H_
+#define XNNPACK_YNNPACK_BASE_SIMD_X86_SSE2_H_
 
 #include <immintrin.h>
 
@@ -525,4 +525,4 @@ YNN_ALWAYS_INLINE std::array<vec<T, 4>, 4> transpose(
 
 }  // namespace ynn
 
-#endif  // XNNPACK_YNNPACK_BASE_SIMD_X86_SSE_H_
+#endif  // XNNPACK_YNNPACK_BASE_SIMD_X86_SSE2_H_

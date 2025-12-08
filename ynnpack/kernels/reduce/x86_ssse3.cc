@@ -13,6 +13,7 @@
 
 #include "ynnpack/base/simd/multi_vec.h"
 #include "ynnpack/base/simd/x86_sse2.h"
+#include "ynnpack/base/simd/x86_sse2_only.h"
 #include "ynnpack/kernels/reduce/generic.h"
 #include "ynnpack/kernels/reduce/sum_accumulator.h"
 
@@ -23,35 +24,12 @@ namespace simd {
 using s32x4x4 = multi_vec<s32x4, 4>;
 
 static s32x4x4& operator+=(s32x4x4& a, s8x16 b) {
-  __m128i i8_lo = _mm_unpacklo_epi8(b.v, b.v);
-  __m128i i8_hi = _mm_unpackhi_epi8(b.v, b.v);
-
-  s32x4 b_0(_mm_srai_epi32(_mm_unpacklo_epi16(i8_lo, i8_lo), 24));
-  s32x4 b_1(_mm_srai_epi32(_mm_unpackhi_epi16(i8_lo, i8_lo), 24));
-  s32x4 b_2(_mm_srai_epi32(_mm_unpacklo_epi16(i8_hi, i8_hi), 24));
-  s32x4 b_3(_mm_srai_epi32(_mm_unpackhi_epi16(i8_hi, i8_hi), 24));
-
-  a.v[0] += b_0;
-  a.v[1] += b_1;
-  a.v[2] += b_2;
-  a.v[3] += b_3;
+  a += convert(b, int32_t{});
   return a;
 }
 
 static s32x4x4& operator+=(s32x4x4& a, u8x16 b) {
-  const __m128i zero = _mm_setzero_si128();
-  __m128i i16_lo = _mm_unpacklo_epi8(b.v, zero);
-  __m128i i16_hi = _mm_unpackhi_epi8(b.v, zero);
-
-  s32x4 b_0(_mm_unpacklo_epi16(i16_lo, zero));
-  s32x4 b_1(_mm_unpackhi_epi16(i16_lo, zero));
-  s32x4 b_2(_mm_unpacklo_epi16(i16_hi, zero));
-  s32x4 b_3(_mm_unpackhi_epi16(i16_hi, zero));
-
-  a.v[0] += b_0;
-  a.v[1] += b_1;
-  a.v[2] += b_2;
-  a.v[3] += b_3;
+  a += convert(b, int32_t{});
   return a;
 }
 

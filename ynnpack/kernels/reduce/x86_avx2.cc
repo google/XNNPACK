@@ -3,8 +3,6 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include "ynnpack/base/simd/x86_avx2.h"
-
 #include <immintrin.h>
 
 #include <cassert>
@@ -16,6 +14,8 @@
 #include "ynnpack/base/base.h"
 #include "ynnpack/base/bfloat16.h"
 #include "ynnpack/base/half.h"
+#include "ynnpack/base/simd/x86_sse2.h"
+#include "ynnpack/base/simd/x86_avx2.h"
 #include "ynnpack/base/simd/multi_vec.h"
 #include "ynnpack/kernels/reduce/generic.h"
 #include "ynnpack/kernels/reduce/min_max_accumulator.h"
@@ -29,36 +29,15 @@ namespace simd {
 using f32x8x8 = multi_vec<f32x8, 8>;
 using f32x8x16 = multi_vec<f32x8, 16>;
 using s32x8x2 = multi_vec<s32x8, 2>;
-using s32x8x4 = multi_vec<s32x8, 4>;
 using bf16x16x8 = multi_vec<bf16x16, 8>;
 
 static s32x8x4& operator+=(s32x8x4& a, s8x32 b) {
-  s8x16 b_lo = extract<0>(b, s8x16{});
-  s8x16 b_hi = extract<1>(b, s8x16{});
-  s32x8 b_0(_mm256_cvtepi8_epi32(b_lo.v));
-  s32x8 b_1(_mm256_cvtepi8_epi32(_mm_srli_si128(b_lo.v, 8)));
-  s32x8 b_2(_mm256_cvtepi8_epi32(b_hi.v));
-  s32x8 b_3(_mm256_cvtepi8_epi32(_mm_srli_si128(b_hi.v, 8)));
-
-  a.v[0] += b_0;
-  a.v[1] += b_1;
-  a.v[2] += b_2;
-  a.v[3] += b_3;
+  a += convert(b, int32_t{});
   return a;
 }
 
 static s32x8x4& operator+=(s32x8x4& a, u8x32 b) {
-  u8x16 b_lo = extract<0>(b, u8x16{});
-  u8x16 b_hi = extract<1>(b, u8x16{});
-  s32x8 b_0(_mm256_cvtepu8_epi32(b_lo.v));
-  s32x8 b_1(_mm256_cvtepu8_epi32(_mm_srli_si128(b_lo.v, 8)));
-  s32x8 b_2(_mm256_cvtepu8_epi32(b_hi.v));
-  s32x8 b_3(_mm256_cvtepu8_epi32(_mm_srli_si128(b_hi.v, 8)));
-
-  a.v[0] += b_0;
-  a.v[1] += b_1;
-  a.v[2] += b_2;
-  a.v[3] += b_3;
+  a += convert(b, int32_t{});
   return a;
 }
 
@@ -123,11 +102,8 @@ static f32x8x16 reduce_add(
     std::integral_constant<size_t, 1> /*horizontal_factor*/) {
   YNN_UNROLL
   for (int i = 0; i < 8; ++i) {
-    __m256i lo = _mm256_cvtepu16_epi32(_mm256_castsi256_si128(b.v[i].v));
-    __m256i hi = _mm256_cvtepu16_epi32(_mm256_extracti128_si256(b.v[i].v, 1));
-
-    a.v[2 * i + 0] += f32x8{_mm256_castsi256_ps(_mm256_slli_epi32(lo, 16))};
-    a.v[2 * i + 1] += f32x8{_mm256_castsi256_ps(_mm256_slli_epi32(hi, 16))};
+    a.v[2 * i + 0] += convert(extract<0>(b.v[i], bf16x8{}), float{});
+    a.v[2 * i + 1] += convert(extract<1>(b.v[i], bf16x8{}), float{});
   }
 
   return a;
@@ -150,14 +126,11 @@ static f32x8x16 reduce_add(
     std::integral_constant<size_t, 1> /*horizontal_factor*/) {
   YNN_UNROLL
   for (int i = 0; i < 8; ++i) {
-    __m256i lo_u32 = _mm256_cvtepu16_epi32(_mm256_castsi256_si128(b.v[i].v));
-    __m256i hi_u32 =
-        _mm256_cvtepu16_epi32(_mm256_extracti128_si256(b.v[i].v, 1));
-    f32x8 lo_f32(_mm256_castsi256_ps(_mm256_slli_epi32(lo_u32, 16)));
-    f32x8 hi_f32(_mm256_castsi256_ps(_mm256_slli_epi32(hi_u32, 16)));
+    f32x8 b_lo = convert(extract<0>(b.v[i], bf16x8{}), float{});
+    f32x8 b_hi = convert(extract<1>(b.v[i], bf16x8{}), float{});
 
-    a.v[2 * i + 0] += lo_f32 * lo_f32;
-    a.v[2 * i + 1] += hi_f32 * hi_f32;
+    a.v[2 * i + 0] += b_lo * b_lo;
+    a.v[2 * i + 1] += b_hi * b_hi;
   }
 
   return a;

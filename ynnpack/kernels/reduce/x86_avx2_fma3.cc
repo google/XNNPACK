@@ -30,11 +30,8 @@ static f32x8x16 reduce_add(
     std::integral_constant<size_t, 1> /*horizontal_factor*/) {
   YNN_UNROLL
   for (int i = 0; i < 8; ++i) {
-    __m256i lo = _mm256_cvtepu16_epi32(_mm256_castsi256_si128(b.v[i].v));
-    __m256i hi = _mm256_cvtepu16_epi32(_mm256_extracti128_si256(b.v[i].v, 1));
-
-    a.v[2 * i + 0] += f32x8{_mm256_castsi256_ps(_mm256_slli_epi32(lo, 16))};
-    a.v[2 * i + 1] += f32x8{_mm256_castsi256_ps(_mm256_slli_epi32(hi, 16))};
+    a.v[2 * i + 0] += convert(extract<0>(b.v[i], bf16x8{}), float{});
+    a.v[2 * i + 1] += convert(extract<1>(b.v[i], bf16x8{}), float{});
   }
 
   return a;
@@ -57,13 +54,11 @@ static f32x8x16 reduce_add(
     std::integral_constant<size_t, 1> /*horizontal_factor*/) {
   YNN_UNROLL
   for (int i = 0; i < 8; ++i) {
-    __m256i lo = _mm256_cvtepu16_epi32(_mm256_castsi256_si128(b.v[i].v));
-    __m256i hi = _mm256_cvtepu16_epi32(_mm256_extracti128_si256(b.v[i].v, 1));
-    __m256 lo_f32 = _mm256_castsi256_ps(_mm256_slli_epi32(lo, 16));
-    __m256 hi_f32 = _mm256_castsi256_ps(_mm256_slli_epi32(hi, 16));
+    f32x8 b_lo = convert(extract<0>(b.v[i], bf16x8{}), float{});
+    f32x8 b_hi = convert(extract<1>(b.v[i], bf16x8{}), float{});
 
-    a.v[2 * i + 0].v = _mm256_fmadd_ps(lo_f32, lo_f32, a.v[2 * i + 0].v);
-    a.v[2 * i + 1].v = _mm256_fmadd_ps(hi_f32, hi_f32, a.v[2 * i + 1].v);
+    a.v[2 * i + 0].v = _mm256_fmadd_ps(b_lo.v, b_lo.v, a.v[2 * i + 0].v);
+    a.v[2 * i + 1].v = _mm256_fmadd_ps(b_hi.v, b_hi.v, a.v[2 * i + 1].v);
   }
 
   return a;
