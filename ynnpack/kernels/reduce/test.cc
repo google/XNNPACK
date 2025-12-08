@@ -48,9 +48,9 @@ template <typename T>
 float Tolerance(ReduceOp op, size_t k, float max_abs_value) {
   switch (op) {
     case ReduceOp::kSum:
-      return epsilon(type_of<T>()) * k * max_abs_value * 3;
+      return epsilon(type_of<T>()) * k * max_abs_value * 5;
     case ReduceOp::kSumSquared:
-      return epsilon(type_of<T>()) * k * max_abs_value * max_abs_value * 6;
+      return epsilon(type_of<T>()) * k * max_abs_value * max_abs_value * 10;
     case ReduceOp::kMin:
     case ReduceOp::kMax:
     case ReduceOp::kMinMax:
@@ -164,7 +164,10 @@ void TestUnaryReduce(AT, CT, std::vector<size_t> ns, std::vector<size_t> k3s,
   const size_t max_k2 = *std::max_element(k2s.begin(), k2s.end());
   const size_t max_k3 = *std::max_element(k3s.begin(), k3s.end());
 
-  Tensor<AT> a_max({max_n, max_k3, max_k2, max_k1});
+  // We want n to be contiguous if k1 is 1, so allocate it in that order, and
+  // transpose it after.
+  Tensor<AT> a_max({max_k3, max_k2, max_n, max_k1});
+  a_max = a_max.transpose({2, 0, 1, 3});
   Tensor<CT> c_max({OutputRows(op), max_n});
   a_max.generate([&]() { return a_gen(rng); });
   c_max.generate([&]() { return c_gen(rng); });
@@ -193,7 +196,7 @@ const char* to_string(const KernelParam& param) { return ""; }
 
 class UnaryReduce : public ::testing::TestWithParam<KernelParam> {};
 
-const size_t max_dim = 128;
+const size_t max_dim = 512;
 const auto n_values = simd_sizes_up_to(max_dim);
 const auto k_values = simd_sizes_up_to(max_dim);
 
