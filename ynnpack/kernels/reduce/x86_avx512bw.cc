@@ -32,22 +32,18 @@ using f32x16x16 = multi_vec<f32x16, 16>;
 using bf16x32x8 = multi_vec<bf16x32, 8>;
 
 static s32x16x4& operator+=(s32x16x4& a, s8x64 b) {
-  s8x32 b_lo = extract<0>(b, s8x32{});
-  s8x32 b_hi = extract<1>(b, s8x32{});
-  a.v[0] += s32x16{_mm512_cvtepi8_epi32(_mm256_castsi256_si128(b_lo.v))};
-  a.v[1] += s32x16{_mm512_cvtepi8_epi32(_mm256_extractf128_si256(b_lo.v, 1))};
-  a.v[2] += s32x16{_mm512_cvtepi8_epi32(_mm256_castsi256_si128(b_hi.v))};
-  a.v[3] += s32x16{_mm512_cvtepi8_epi32(_mm256_extractf128_si256(b_hi.v, 1))};
+  a.v[0] += s32x16{_mm512_cvtepi8_epi32(extract<0>(b, s8x16{}).v)};
+  a.v[1] += s32x16{_mm512_cvtepi8_epi32(extract<1>(b, s8x16{}).v)};
+  a.v[2] += s32x16{_mm512_cvtepi8_epi32(extract<2>(b, s8x16{}).v)};
+  a.v[3] += s32x16{_mm512_cvtepi8_epi32(extract<3>(b, s8x16{}).v)};
   return a;
 }
 
 static s32x16x4& operator+=(s32x16x4& a, u8x64 b) {
-  u8x32 b_lo = extract<0>(b, u8x32{});
-  u8x32 b_hi = extract<1>(b, u8x32{});
-  a.v[0] += s32x16{_mm512_cvtepu8_epi32(_mm256_castsi256_si128(b_lo.v))};
-  a.v[1] += s32x16{_mm512_cvtepu8_epi32(_mm256_extractf128_si256(b_lo.v, 1))};
-  a.v[2] += s32x16{_mm512_cvtepu8_epi32(_mm256_castsi256_si128(b_hi.v))};
-  a.v[3] += s32x16{_mm512_cvtepu8_epi32(_mm256_extractf128_si256(b_hi.v, 1))};
+  a.v[0] += s32x16{_mm512_cvtepu8_epi32(extract<0>(b, u8x16{}).v)};
+  a.v[1] += s32x16{_mm512_cvtepu8_epi32(extract<1>(b, u8x16{}).v)};
+  a.v[2] += s32x16{_mm512_cvtepu8_epi32(extract<2>(b, u8x16{}).v)};
+  a.v[3] += s32x16{_mm512_cvtepu8_epi32(extract<3>(b, u8x16{}).v)};
   return a;
 }
 

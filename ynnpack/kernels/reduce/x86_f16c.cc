@@ -38,15 +38,10 @@ static f32x8x2& operator+=(f32x8x2& a, f16x16 b) {
 static f32x8x16& operator+=(f32x8x16& a, f16x16x8 b) {
   YNN_UNROLL
   for (size_t i = 0; i < 8; ++i) {
-    a.v[2 * i] += extract<0>(b.v[i], f16x8{});
+    a.v[2 * i + 0] += extract<0>(b.v[i], f16x8{});
     a.v[2 * i + 1] += extract<1>(b.v[i], f16x8{});
   }
   return a;
-}
-
-template <int Index>
-static f32x4 extract(f32x8x2 x, f32x4) {
-  return extract<Index % 2>(x.v[Index / 2], f32x4{});
 }
 
 static f32x8x16 reduce_add(
@@ -56,7 +51,7 @@ static f32x8x16 reduce_add(
   for (size_t i = 0; i < 8; ++i) {
     f32x8 b_0(_mm256_cvtph_ps(extract<0>(b.v[i], f16x8{}).v));
     f32x8 b_1(_mm256_cvtph_ps(extract<1>(b.v[i], f16x8{}).v));
-    a.v[2 * i] += b_0 * b_0;
+    a.v[2 * i + 0] += b_0 * b_0;
     a.v[2 * i + 1] += b_1 * b_1;
   }
   return a;

@@ -26,8 +26,8 @@ namespace ynn {
 
 namespace simd {
 
-using f32x8x8 = simd::multi_vec<f32x8, 8>;
-using f32x8x16 = simd::multi_vec<f32x8, 16>;
+using f32x8x8 = multi_vec<f32x8, 8>;
+using f32x8x16 = multi_vec<f32x8, 16>;
 using s32x8x2 = multi_vec<s32x8, 2>;
 using s32x8x4 = multi_vec<s32x8, 4>;
 using bf16x16x8 = multi_vec<bf16x16, 8>;
