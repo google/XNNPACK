@@ -26,13 +26,13 @@ using f32x16x16 = multi_vec<f32x16, 16>;
 using f16x32x8 = multi_vec<f16x32, 8>;
 
 static f32x16& operator+=(f32x16& a, f16x16 b) {
-  return a += f32x16{_mm512_add_ps(a.v, _mm512_cvtph_ps(b.v))};
+  return a += f32x16{_mm512_cvtph_ps(b.v)};
 }
 
 static f32x16x16& operator+=(f32x16x16& a, f16x32x8 b) {
   YNN_UNROLL
   for (size_t i = 0; i < 8; ++i) {
-    a.v[2 * i] += extract<0>(b.v[i], f16x16{});
+    a.v[2 * i + 0] += extract<0>(b.v[i], f16x16{});
     a.v[2 * i + 1] += extract<1>(b.v[i], f16x16{});
   }
   return a;
@@ -45,7 +45,7 @@ static f32x16x16 reduce_add(
   for (size_t i = 0; i < 8; ++i) {
     f32x16 b_0(_mm512_cvtph_ps(extract<0>(b.v[i], f16x16{}).v));
     f32x16 b_1(_mm512_cvtph_ps(extract<1>(b.v[i], f16x16{}).v));
-    a.v[2 * i] += b_0 * b_0;
+    a.v[2 * i + 0] += b_0 * b_0;
     a.v[2 * i + 1] += b_1 * b_1;
   }
   return a;
