@@ -679,6 +679,9 @@ ynn_status always_alias_transpose(ynn_subgraph& subgraph, uint32_t& id) {
 }
 
 bool is_constant(const ynn_subgraph& subgraph, uint32_t id, int depth = 5) {
+  if (id == YNN_INVALID_VALUE_ID) {
+    return false;
+  }
   if (depth-- <= 0) {
     // We hit our limit for how far we look for constants.
     return false;
@@ -1024,11 +1027,14 @@ ynn_status ynn_define_dot(ynn_subgraph_t subgraph, size_t num_k_dims,
       split_n = {};
     }
 
-    std::vector<slinky::index_t> loop_order = {0, 1};
-    if (pack_b && !packed_b.is_static()) {
-      // Loop over n first so we don't redundantly compute the packing for each
-      // split of m.
-      std::swap(loop_order[0], loop_order[1]);
+    std::vector<slinky::index_t> loop_order;
+    if (output.rank() >= 2) {
+      loop_order = {0, 1};
+      if (pack_b && !packed_b.is_static()) {
+        // Loop over n first so we don't redundantly compute the packing for
+        // each split of m.
+        std::swap(loop_order[0], loop_order[1]);
+      }
     }
 
     slinky::expr splits[] = {split_n, split_m};
