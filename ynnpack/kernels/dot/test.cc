@@ -156,6 +156,10 @@ void TestConv2D(AT, BT, CT, const KernelInfo& kernel) {
   const size_t tile_k = kernel.tile_k;
   const bool pack_a = kernel.flags & dot_flag::transpose_a;
 
+  std::cout << "tile_k: " << tile_k << std::endl;
+  std::cout << "tile_n: " << tile_n << std::endl;
+  std::cout << "pack_a: " << pack_a << std::endl;
+
   // We always have m = 1, because that would just be a batch dimension here,
   // it does not exercise the dot kernel API.
   // TODO: Try to parameterize the test on this.
@@ -189,12 +193,21 @@ void TestConv2D(AT, BT, CT, const KernelInfo& kernel) {
     const size_t co = shape.co;
     const size_t ci = shape.ci;
 
+    std::cout << "Testing shape: " << w << "x" << kw << "x" << kh << "x" << co
+              << "x" << ci << std::endl;
+
     Tensor<AT> a({kh, w + kw - 1, ci});
     // dot kernels assume that the rows of b are aligned to a multiple of
     // block_n.
     Tensor<BT> b({kh, kw, ci, co / B_info::element_count()},
                  Alignment{.bytes = tile_n * sizeof(BT)});
     Tensor<CT> c({w, co});
+
+    std::cout << "A: {" << kh << ", " << w + kw - 1 << ", " << ci << "}"
+              << std::endl;
+    std::cout << "B: {" << kh << ", " << kw << ", " << ci << ", "
+              << co / B_info::element_count() << "}" << std::endl;
+    std::cout << "C: {" << w << ", " << co << "}" << std::endl;
 
     a.generate([&]() { return a_gen(rng); });
     b.generate([&]() { return b_gen(rng); });
@@ -211,14 +224,17 @@ void TestConv2D(AT, BT, CT, const KernelInfo& kernel) {
     if (pack_a) {
       // When we transpose, we tile_k, making the kw dimension tile_k times
       // bigger, which also dilates the kernel.
-      // [kh, ci/tile_k, wkw*tile_k] -> [kh, ci/tile_k, kw*tile_k, w]
+      // [kh, ci/tile_k, w, kw*tile_k] -> [kh, ci/tile_k, kw*tile_k, w]
       packed_a = make_stencil_dim(packed_a, 2, kw * tile_k, /*stride=*/1,
                                   /*dilation=*/tile_k);
 
       // [kh, ci/tile_k, kw*tile_k, w] -> [ci/tile_k, kh, kw*tile_k, w]
       packed_a = packed_a.transpose({1, 0, 2, 3});
+      std::cout << "Found transpose + stencil" << std::endl;
     } else {
-      // [kh, wkw, ci] -> [kh, kw, w, ci]
+      std::cout << "Found stencil + transpose" << std::endl;
+
+      // [kh, w, kw, ci] -> [kh, kw, w, ci]
       packed_a = make_stencil_dim(packed_a, 1, kw);
 
       // [kh, kw, w, ci] -> [w, kh, kw, ci]
