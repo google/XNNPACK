@@ -316,7 +316,7 @@ ynn_status create_ternary(const ynn_node& node, ynn_runtime& runtime,
   x.make_buffer(runtime);
 
   slinky::call_stmt::attributes attrs;
-  attrs.name = "ternary_elementwise";
+  attrs.name = to_string(std::get<ynn_node::ternary_elementwise>(node.op).op);
   attrs.allow_in_place = compute_allow_in_place(node, runtime.subgraph);
 
   // Make the dims and bounds for this operation (does not depend on the
@@ -477,10 +477,11 @@ void define_binary(ynn_subgraph& subgraph, ynn_node& node, uint32_t input_a_id,
 
 void define_ternary(ynn_subgraph& subgraph, ynn_node& node, uint32_t input_a_id,
                     uint32_t input_b_id, uint32_t input_c_id,
-                    uint32_t output_id, ternary_kernel_fn kernel) {
+                    uint32_t output_id, ternary_op op,
+                    ternary_kernel_fn kernel) {
   node.inputs = {input_a_id, input_b_id, input_c_id};
   node.outputs = {output_id};
-  node.op = ynn_node::opaque{"ternary"};
+  node.op = ynn_node::ternary_elementwise{op};
   infer_shape(node, subgraph);
   node.create = [kernel](const ynn_node& node, ynn_runtime& runtime) {
     return create_ternary(node, runtime, kernel);

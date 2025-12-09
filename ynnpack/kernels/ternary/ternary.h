@@ -8,6 +8,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <ostream>
 
 #include "ynnpack/base/type.h"
 #include "ynnpack/include/ynnpack.h"
@@ -68,6 +69,12 @@ enum class ternary_op {
   quantize_int8,      // i8(a / scale + zero_point)
   quantize_uint8,     // u8(a / scale + zero_point)
 };
+
+const char* to_string(ternary_op op);
+
+inline std::ostream& operator<<(std::ostream& os, ternary_op op) {
+  return os << to_string(op);
+}
 
 ternary_kernel_fn get_ternary_kernel(ternary_op op, ynn_type type_a,
                                      ynn_type type_b, ynn_type type_c,
