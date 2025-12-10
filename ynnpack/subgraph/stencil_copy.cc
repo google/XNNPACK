@@ -163,12 +163,24 @@ ynn_status ynn_define_stencil_copy(ynn_subgraph_t subgraph, size_t num_stencils,
     slinky::box_expr bounds =
         make_elementwise_bounds(input_dims, input.extents);
     for (const stencil_info& stencil : op.stencils) {
-      bounds[stencil.axis] = point(dims[stencil.new_axis] * stencil.dilation +
-                                   input_dims[stencil.axis] * stencil.stride);
+      size_t dilation = stencil.dilation;
+      size_t stride = stencil.stride;
+      if (op.transposed_input_tile_k > 0 && &stencil == &op.stencils.back()) {
+        dilation = op.transposed_input_tile_k;
+        stride = 1;
+      }
+      bounds[stencil.axis] = point(dims[stencil.new_axis] * dilation +
+                                   input_dims[stencil.axis] * stride);
     }
 
-    auto func = slinky::func::make_copy({input_buffer, std::move(bounds)},
-                                        {output.buffer, std::move(dims)});
+    std::vector<slinky::var> output_dims = dims;
+    if (op.transposed_input_tile_k > 0) {
+      assert(output_dims.size() >= 2);
+      std::swap(output_dims[0], output_dims[1]);
+    }
+    auto func =
+        slinky::func::make_copy({input_buffer, std::move(bounds)},
+                                {output.buffer, std::move(output_dims)});
     runtime.funcs.push_back(std::move(func));
     return ynn_status_success;
   };

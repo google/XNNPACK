@@ -19,6 +19,7 @@
 #include "ynnpack/kernels/ternary/ternary.h"
 #include "ynnpack/subgraph/elementwise.h"
 #include "ynnpack/subgraph/subgraph.h"
+#include "ynnpack/subgraph/utils.h"
 
 namespace {
 
@@ -322,9 +323,62 @@ bool remove_broadcast(ynn_subgraph& subgraph, ynn_node& node,
          remove_broadcast<ynn_node::broadcast_like>(subgraph, node, analysis);
 }
 
+bool rewrite_transpose_stencil(ynn_subgraph& subgraph, ynn_node& node,
+                               subgraph_analysis& analysis) {
+  YNN_LOG_DEBUG() << "rewrite_transpose_stencil";
+  const ynn_node::transpose_a* transpose_a =
+      std::get_if<ynn_node::transpose_a>(&node.op);
+  if (!transpose_a) {
+    return false;
+  }
+
+  auto producer_it = analysis.producers.find(node.inputs[0]);
+  if (producer_it == analysis.producers.end()) {
+    return false;
+  }
+  ynn_node* producer = producer_it->second;
+  const ynn_node::stencil_copy* stencil_copy =
+      std::get_if<ynn_node::stencil_copy>(&producer->op);
+  if (!stencil_copy) {
+    return false;
+  }
+
+  if (analysis.consumers[producer->outputs[0]].size() != 1) {
+    return false;
+  }
+
+  YNN_LOG_DEBUG() << "Rewriting transpose_a(stencil_copy(x)) to "
+                     "stencil_copy(transpose_a(x))";
+
+  uint32_t x = producer->inputs[0];
+  uint32_t p = producer->inputs[1];
+  uint32_t y = producer->outputs[0];
+
+  uint32_t y_prime_id =
+      ynn::define_transpose_a(subgraph, transpose_a->tile_k, x);
+
+  node.inputs = {y_prime_id, p};
+  node.op = *stencil_copy;
+  std::get<ynn_node::stencil_copy>(node.op).transposed_input_tile_k =
+      transpose_a->tile_k;
+  node.create = producer->create;
+  node.checks = producer->checks;
+
+  subgraph.value(y).invalidate();
+  producer->invalidate();
+
+  // Update analysis: node is now consumer of y_prime_id.
+  // New node added by define_transpose_a produces y_prime_id.
+  analysis.producers[y_prime_id] = &subgraph.nodes.back();
+  analysis.consumers[y_prime_id].push_back(&node);
+
+  return true;
+}
+
 }  // namespace
 
 ynn_status ynn_subgraph::fusion() {
+  YNN_LOG_DEBUG() << "Fusion";
   subgraph_analysis analysis(*this);
 
   for (ynn_node& node : nodes) {
@@ -335,6 +389,7 @@ ynn_status ynn_subgraph::fusion() {
         rewrite_convert_to_multiply(*this, node, analysis) ||
         rewrite_clamp(*this, node, analysis) ||
         rewrite_convert_to_quantize(*this, node, analysis) ||
+        rewrite_transpose_stencil(*this, node, analysis) ||
         remove_broadcast(*this, node, analysis);
   }
 
