@@ -6,6 +6,7 @@
 #include "ynnpack/kernels/ternary/ternary.h"
 
 #include "ynnpack/base/arch.h"  // IWYU pragma: keep
+#include "ynnpack/base/base.h"
 #include "ynnpack/base/type.h"  // IWYU pragma: keep
 #include "ynnpack/include/ynnpack.h"
 
@@ -25,6 +26,25 @@ ternary_kernel_fn get_ternary_kernel(ternary_op op, ynn_type type_a,
 #include "ynnpack/kernels/ternary/kernels.inc"
 #undef YNN_ELEMENTWISE_KERNEL
   return nullptr;
+}
+
+const char* to_string(ternary_op op) {
+  switch (op) {
+    case ternary_op::multiply:
+      return "multiply";
+    case ternary_op::multiply_add:
+      return "multiply_add";
+    case ternary_op::subtract_multiply:
+      return "subtract_multiply";
+    case ternary_op::clamp:
+      return "clamp";
+    case ternary_op::quantize_int8:
+      return "quantize_int8";
+    case ternary_op::quantize_uint8:
+      return "quantize_uint8";
+  }
+  YNN_UNREACHABLE;
+  return "unknown";
 }
 
 }  // namespace ynn

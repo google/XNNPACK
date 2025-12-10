@@ -57,8 +57,7 @@ auto make_dot_impl(dot_type type, bool consistent_arithmetic, bool transposed_a,
                    bool pack_b, size_t num_k_dims) {
   return [type, consistent_arithmetic, transposed_a, pack_b, num_k_dims](
              slinky::raw_buffer a, slinky::raw_buffer b,
-             slinky::buffer<const void, YNN_MAX_TENSOR_RANK> init_c,
-             slinky::raw_buffer c) -> index_t {
+             slinky::raw_buffer init_c, slinky::raw_buffer c) -> index_t {
     // If the dot has fewer than 3 reduction dimensions, we use this dummy
     // dimension instead.
     slinky::dim dummy_dim = slinky::dim(0, 0, 0, 0);
@@ -159,7 +158,7 @@ auto make_dot_impl(dot_type type, bool consistent_arithmetic, bool transposed_a,
     assert(!b_k2.is_folded());
     assert(!b_k3.is_folded());
 
-    if (init_c.base() && init_c.base() != c.base && c_n.extent() > 1) {
+    if (init_c.base && init_c.base != c.base && c_n.extent() > 1) {
       if (init_c_n.stride() == 0) {
         // The initializer is broadcasted in the n dimension, which the kernel
         // cannot handle. We need to copy it to the output, and update the
@@ -680,6 +679,9 @@ ynn_status always_alias_transpose(ynn_subgraph& subgraph, uint32_t& id) {
 }
 
 bool is_constant(const ynn_subgraph& subgraph, uint32_t id, int depth = 5) {
+  if (id == YNN_INVALID_VALUE_ID) {
+    return false;
+  }
   if (depth-- <= 0) {
     // We hit our limit for how far we look for constants.
     return false;
@@ -1025,11 +1027,14 @@ ynn_status ynn_define_dot(ynn_subgraph_t subgraph, size_t num_k_dims,
       split_n = {};
     }
 
-    std::vector<slinky::index_t> loop_order = {0, 1};
-    if (pack_b && !packed_b.is_static()) {
-      // Loop over n first so we don't redundantly compute the packing for each
-      // split of m.
-      std::swap(loop_order[0], loop_order[1]);
+    std::vector<slinky::index_t> loop_order;
+    if (output.rank() >= 2) {
+      loop_order = {0, 1};
+      if (pack_b && !packed_b.is_static()) {
+        // Loop over n first so we don't redundantly compute the packing for
+        // each split of m.
+        std::swap(loop_order[0], loop_order[1]);
+      }
     }
 
     slinky::expr splits[] = {split_n, split_m};

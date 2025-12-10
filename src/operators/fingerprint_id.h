@@ -133,6 +133,7 @@ enum xnn_fingerprint_id_helper {
   xnn_fingerprint_id_helper_fully_connected_nc = 3,
   xnn_fingerprint_id_helper_convolution2d_nchw = 4,
   xnn_fingerprint_id_helper_convolution2d_nhwc = 5,
+  xnn_fingerprint_id_helper_deconvolution2d_nhwc = 6,
   // Type values
   xnn_fingerprint_id_helper_bf16 = 0,
   xnn_fingerprint_id_helper_f16 = 1,
@@ -157,6 +158,7 @@ enum xnn_fingerprint_id_helper {
   // operators may reuse the same value.
   xnn_fingerprint_id_helper_nr2 = (1 << 0),
   xnn_fingerprint_id_helper_fp32_static_weights = (1 << 1),
+  xnn_fingerprint_id_helper_subconv2d = (1 << 1),
   xnn_fingerprint_id_helper_conv2d_hwc2chw = (1 << 2),
   xnn_fingerprint_id_helper_dwconv = (1 << 3),
   xnn_fingerprint_id_helper_vmulcaddc = (1 << 4),

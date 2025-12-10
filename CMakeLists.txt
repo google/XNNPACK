@@ -381,6 +381,9 @@ ENDIF()
 IF(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
   # Disable "note: parameter passing for argument of type ... changed/will change in ..."
   ADD_COMPILE_OPTIONS("-Wno-psabi")
+
+  # Don't generate fma automatically.
+  ADD_COMPILE_OPTIONS("-ffp-contract=off")
 ENDIF()
 
 # ---[ Build flags

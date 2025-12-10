@@ -489,10 +489,14 @@ void TestStaticB(xnn_datatype convert_to = xnn_datatype_invalid,
 
 TEST(FullyConnectedQC8, static_b) { TestStaticB<qint8, qcint8, qcint32>(); }
 TEST(FullyConnectedQS8, static_b) { TestStaticB<qint8, qint8, qint32>(); }
+#ifndef XNNPACK_USE_YNNPACK
 TEST(FullyConnectedQU8, static_b) { TestStaticB<quint8, quint8, qint32>(); }
+#endif  // XNNPACK_USE_YNNPACK
 
 TEST(FullyConnectedQS8QC8W, static_b) { TestStaticB<qint8, qcint8, qcint32>(); }
+#ifndef XNNPACK_USE_YNNPACK
 TEST(FullyConnectedQS8QC4W, static_b) { TestStaticB<qint8, qcint4, qcint32>(); }
+#endif  // XNNPACK_USE_YNNPACK
 
 TEST(FullyConnectedF16F32F16, static_b) {
   TestStaticB<xnn_float16, float, float>();
@@ -508,6 +512,7 @@ TEST(FullyConnectedF32F16F32, static_b) {
   TestStaticB<float, xnn_float16, float>();
 }
 
+#ifndef XNNPACK_USE_YNNPACK
 // TODO(b/407771627): Either add xnn_datatype_qcuint4, or remove F32QC4W.
 TEST(FullyConnectedF32QC4W, static_b) {
   // It looks like these kernels want the bias to be `float` and scaled by the
@@ -521,29 +526,35 @@ TEST(FullyConnectedF32QC8W, static_b) {
   // disable testing with a bias vector until we've figured this out.
   TestStaticB<float, qcint8, invalid_type>();
 }
+#endif  // XNNPACK_USE_YNNPACK
 
 TEST(FullyConnectedBF16F32, static_b) {
   TestStaticB<xnn_bfloat16, xnn_bfloat16, float, float>();
 }
 
+#ifndef XNNPACK_USE_YNNPACK
 TEST(FullyConnectedQD8F16QC4W, static_b) {
   TestStaticB<xnn_float16, qcint4, float>(
       /*convert_to=*/xnn_datatype_qdint8);
 }
+#endif  // XNNPACK_USE_YNNPACK
 TEST(FullyConnectedQD8F16QC8W, static_b) {
   TestStaticB<xnn_float16, qcint8, float>(
       /*convert_to=*/xnn_datatype_qdint8);
 }
+#ifndef XNNPACK_USE_YNNPACK
 TEST(FullyConnectedQD8F32QC4W, static_b) {
   TestStaticB<float, qcint4, float>(/*convert_to=*/xnn_datatype_qdint8);
 }
 TEST(FullyConnectedQD8F32QC2W, static_b) {
   TestStaticB<float, qcint2, float>(/*convert_to=*/xnn_datatype_qdint8);
 }
+#endif  // XNNPACK_USE_YNNPACK
 TEST(FullyConnectedQD8F32QC8W, static_b) {
   TestStaticB<float, qcint8, float>(/*convert_to=*/xnn_datatype_qdint8);
 }
 
+#ifndef XNNPACK_USE_YNNPACK
 TEST(FullyConnectedQD8F16QB4UW_BF16, static_b) {
   TestStaticB<xnn_float16, qcuint4, float, xnn_float16, xnn_bfloat16>(
       /*convert_to=*/xnn_datatype_qdint8, /*block_size=*/32);
@@ -578,6 +589,7 @@ TEST(FullyConnectedQD8F32QB4W_F16, static_b) {
   TestStaticB<float, qcint4, float, float, xnn_float16>(
       /*convert_to=*/xnn_datatype_qdint8, /*block_size=*/32);
 }
+#endif  // XNNPACK_USE_YNNPACK
 
 template <typename Input, typename Filter, typename Bias,
           typename Output = Input>

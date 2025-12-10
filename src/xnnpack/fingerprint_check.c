@@ -23,34 +23,35 @@ static enum xnn_status compute_fingerprint(
     const enum xnn_fingerprint_id fingerprint_id) {
   // LINT.IfChange(fingerprint_compute)
   switch (fingerprint_id) {
-    XNNPACK_FINGERPRINT_FC_OP(f16);
-    XNNPACK_FINGERPRINT_FC_OP(pf16);
-    XNNPACK_FINGERPRINT_FC_OP(qd8, f32, qc2w);
-    XNNPACK_FINGERPRINT_FC_OP(qd8, f16, qc4w);
-    XNNPACK_FINGERPRINT_FC_OP(qdu8, f16, qc4w);
-    XNNPACK_FINGERPRINT_FC_OP(qd8, f16, qb4w);
-    XNNPACK_FINGERPRINT_FC_OP(qd8, f32, qc4w);
-    XNNPACK_FINGERPRINT_FC_OP(qdu8, f32, qc4w);
-    XNNPACK_FINGERPRINT_FC_OP(qp8, f32, qc4w);
-    XNNPACK_FINGERPRINT_FC_OP(qp8, f32, qc8w);
-    XNNPACK_FINGERPRINT_FC_OP(qp8, f32, qb4w);
-    XNNPACK_FINGERPRINT_FC_OP(qd8, f32, qb4w);
-    XNNPACK_FINGERPRINT_FC_OP(qdu8, f32, qb4w);
-    XNNPACK_FINGERPRINT_FC_OP(qd8, f32, qc8w);
-    XNNPACK_FINGERPRINT_FC_OP(qdu8, f32, qc8w);
-    XNNPACK_FINGERPRINT_FC_OP(qd8, f16, qc8w);
-    XNNPACK_FINGERPRINT_FC_OP(qdu8, f16, qc8w);
-    XNNPACK_FINGERPRINT_FC_OP(bf16, f32);
-    XNNPACK_FINGERPRINT_FC_OP(f32);
-    XNNPACK_FINGERPRINT_FC_OP(f32, f32, f32, nr2);
-    XNNPACK_FINGERPRINT_FC_OP(pf32);
-    XNNPACK_FINGERPRINT_FC_OP(f32, qc4w);
-    XNNPACK_FINGERPRINT_FC_OP(f32, qc8w);
-    XNNPACK_FINGERPRINT_FC_OP(qs8);
-    XNNPACK_FINGERPRINT_FC_OP(qs8, qc4w);
-    XNNPACK_FINGERPRINT_FC_OP(qs8, qc8w);
-    XNNPACK_FINGERPRINT_FC_OP(pqs8, qc8w);
-    XNNPACK_FINGERPRINT_FC_OP(qu8);
+    case xnn_fingerprint_id_fully_connected_nc_f16_f16_f16:
+    case xnn_fingerprint_id_fully_connected_nc_pf16_pf16_pf16:
+    case xnn_fingerprint_id_fully_connected_nc_qd8_f32_qc2w:
+    case xnn_fingerprint_id_fully_connected_nc_qd8_f16_qc4w:
+    case xnn_fingerprint_id_fully_connected_nc_qdu8_f16_qc4w:
+    case xnn_fingerprint_id_fully_connected_nc_qd8_f16_qb4w:
+    case xnn_fingerprint_id_fully_connected_nc_qd8_f32_qc4w:
+    case xnn_fingerprint_id_fully_connected_nc_qdu8_f32_qc4w:
+    case xnn_fingerprint_id_fully_connected_nc_qp8_f32_qc4w:
+    case xnn_fingerprint_id_fully_connected_nc_qp8_f32_qc8w:
+    case xnn_fingerprint_id_fully_connected_nc_qp8_f32_qb4w:
+    case xnn_fingerprint_id_fully_connected_nc_qd8_f32_qb4w:
+    case xnn_fingerprint_id_fully_connected_nc_qdu8_f32_qb4w:
+    case xnn_fingerprint_id_fully_connected_nc_qd8_f32_qc8w:
+    case xnn_fingerprint_id_fully_connected_nc_qdu8_f32_qc8w:
+    case xnn_fingerprint_id_fully_connected_nc_qd8_f16_qc8w:
+    case xnn_fingerprint_id_fully_connected_nc_qdu8_f16_qc8w:
+    case xnn_fingerprint_id_fully_connected_nc_bf16_bf16_f32:
+    case xnn_fingerprint_id_fully_connected_nc_f32_f32_f32:
+    case xnn_fingerprint_id_fully_connected_nc_f32_f32_f32_nr2:
+    case xnn_fingerprint_id_fully_connected_nc_pf32_pf32_pf32:
+    case xnn_fingerprint_id_fully_connected_nc_f32_f32_qc4w:
+    case xnn_fingerprint_id_fully_connected_nc_f32_f32_qc8w:
+    case xnn_fingerprint_id_fully_connected_nc_qs8_qs8_qs8:
+    case xnn_fingerprint_id_fully_connected_nc_qs8_qs8_qc4w:
+    case xnn_fingerprint_id_fully_connected_nc_qs8_qs8_qc8w:
+    case xnn_fingerprint_id_fully_connected_nc_pqs8_pqs8_qc8w:
+    case xnn_fingerprint_id_fully_connected_nc_qu8_qu8_qu8:
+      return xnn_fingerprint_fully_connected_nc(fingerprint_id);
     case xnn_fingerprint_id_test_f16_f32_qc8w_nr2:
       xnn_set_fingerprint(
           (struct xnn_fingerprint){.id = fingerprint_id, .value = 0xbadbeef});
@@ -101,7 +102,29 @@ static enum xnn_status compute_fingerprint(
     case xnn_fingerprint_id_convolution2d_nhwc_pqs8_qs8_qc8w_vmulcaddc:
     case xnn_fingerprint_id_convolution2d_nhwc_pqs8_qs8_qc8w_dwconv:
     case xnn_fingerprint_id_convolution2d_nhwc_pqs8_qs8_qc8w:
+    case xnn_fingerprint_id_convolution2d_nhwc_pf32_pf32_pf32:
       return xnn_fingerprint_convolution2d_nhwc(fingerprint_id);
+    case xnn_fingerprint_id_deconvolution2d_nhwc_f16_f16_f16:
+    case xnn_fingerprint_id_deconvolution2d_nhwc_f16_f16_f16_subconv2d:
+    case xnn_fingerprint_id_deconvolution2d_nhwc_f32_f32_f32:
+    case xnn_fingerprint_id_deconvolution2d_nhwc_f32_f32_f32_nr2:
+    case xnn_fingerprint_id_deconvolution2d_nhwc_f32_f32_f32_subconv2d:
+    case xnn_fingerprint_id_deconvolution2d_nhwc_f32_f32_f32_subconv2d_nr2:
+    case xnn_fingerprint_id_deconvolution2d_nhwc_pqs8_qs8_qc8w:
+    case xnn_fingerprint_id_deconvolution2d_nhwc_pqs8_qs8_qc8w_subconv2d:
+    case xnn_fingerprint_id_deconvolution2d_nhwc_pqs8_qs8_qs8:
+    case xnn_fingerprint_id_deconvolution2d_nhwc_pqs8_qs8_qs8_subconv2d:
+    case xnn_fingerprint_id_deconvolution2d_nhwc_qd8_f32_qc8w:
+    case xnn_fingerprint_id_deconvolution2d_nhwc_qd8_f32_qc8w_subconv2d:
+    case xnn_fingerprint_id_deconvolution2d_nhwc_qdu8_f32_qc8w:
+    case xnn_fingerprint_id_deconvolution2d_nhwc_qdu8_f32_qc8w_subconv2d:
+    case xnn_fingerprint_id_deconvolution2d_nhwc_qs8_qs8_qc8w:
+    case xnn_fingerprint_id_deconvolution2d_nhwc_qs8_qs8_qc8w_subconv2d:
+    case xnn_fingerprint_id_deconvolution2d_nhwc_qs8_qs8_qs8:
+    case xnn_fingerprint_id_deconvolution2d_nhwc_qs8_qs8_qs8_subconv2d:
+    case xnn_fingerprint_id_deconvolution2d_nhwc_qu8_qu8_qu8:
+    case xnn_fingerprint_id_deconvolution2d_nhwc_qu8_qu8_qu8_subconv2d:
+      return xnn_fingerprint_deconvolution2d_nhwc(fingerprint_id);
     case xnn_fingerprint_id_unknown:
     case xnn_fingerprint_id_no_fingerprint:
       return xnn_status_unsupported_parameter;

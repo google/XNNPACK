@@ -169,6 +169,10 @@ xnnpack_unit_test(
 xnnpack_unit_test(
     name = "convolution_2d_test",
     srcs = ["convolution-2d.cc"],
+    defines = select({
+        "//ynnpack/xnnpack:use_ynnpack": ["XNNPACK_USE_YNNPACK"],
+        "//conditions:default": [],
+    }),
     deps = SUBGRAPH_TEST_DEPS + [":stencil"],
 )
 
@@ -188,6 +192,10 @@ xnnpack_unit_test(
     name = "fully_connected_test",
     timeout = "moderate",
     srcs = ["fully-connected.cc"],
+    defines = select({
+        "//ynnpack/xnnpack:use_ynnpack": ["XNNPACK_USE_YNNPACK"],
+        "//conditions:default": [],
+    }),
     deps = SUBGRAPH_TEST_DEPS,
 )
 

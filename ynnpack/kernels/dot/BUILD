@@ -376,6 +376,27 @@ ynn_generate_src_hdr(
 )
 
 ynn_generate_src_hdr(
+    name = "arm_neonbf16_bf16_bf16_fp32_k2",
+    compatible_with = _COMPATIBLE_WITH,
+    generator = "//ynnpack/kernels/dot/generator",
+    generator_args = [
+        "arm_neonbf16_bf16_bf16_fp32_k2",
+        # TODO: https://github.com/llvm/llvm-project/issues/170883, the tile sizes could probably be
+        # improved after indexed bfdot bugs are fixed.
+        "dot,1x32x4",
+        "dot,2x32x4",
+        "dot,2x16x4",
+        "dot,3x16x4",
+        "dot,4x16x4",
+        "dot,4x8x4",
+        "dot,6x8x4",
+        "dot,8x4x4",
+    ],
+    output_hdr = "arm_neonbf16_bf16_bf16_fp32_k2.inc",
+    output_src = "arm_neonbf16_bf16_bf16_fp32_k2.cc",
+)
+
+ynn_generate_src_hdr(
     name = "arm_neon_int8_int8_int32",
     compatible_with = _COMPATIBLE_WITH,
     generator = "//ynnpack/kernels/dot/generator",
@@ -425,12 +446,13 @@ ynn_generate_src_hdr(
     generator = "//ynnpack/kernels/dot/generator",
     generator_args = [
         "arm_neoni8mm_int8_int8_int32",
-        "dot,2x32x16",
-        "dot,2x16x16",
-        "dot,4x16x16",
-        "dot,6x8x16",
-        "dot,8x8x16",
-        "dot,8x4x16",
+        "dot,2x32x8",
+        "dot,4x16x8",
+        "dot,6x16x8",
+        "dot,6x8x8",
+        "dot,8x8x8",
+        "dot,10x8x8",
+        "dot,16x4x8",
     ],
     output_hdr = "arm64_neoni8mm_int8_int8_int32.inc",
     output_src = "arm64_neoni8mm_int8_int8_int32.cc",
@@ -570,6 +592,7 @@ ynn_cc_library(
         "arm64_neoni8mm_int8_int8_int32.inc",
         "arm64_sme.h",
         "arm_neon_int8_int8_int32.inc",
+        "arm_neonbf16_bf16_bf16_fp32_k2.inc",
         "arm_neondot_int8_int8_int32.inc",
         "dot.h",
         "kernels.inc",
@@ -642,6 +665,7 @@ ynn_cc_library(
             "arm64_neon_bf16_bf16_fp32.cc",
         ],
         "arm_neon": ["arm_neon_int8_int8_int32.cc"],
+        "arm_neonbf16": ["arm_neonbf16_bf16_bf16_fp32_k2.cc"],
         "arm_neondot": ["arm_neondot_int8_int8_int32.cc"],
         "arm64_neoni8mm": ["arm64_neoni8mm_int8_int8_int32.cc"],
         "arm64_sme": [
@@ -664,6 +688,18 @@ ynn_cc_library(
     }),
 )
 
+cc_library(
+    name = "pack_test_tensor",
+    testonly = True,
+    hdrs = ["pack_test_tensor.h"],
+    deps = [
+        ":pack",
+        "//ynnpack/base",
+        "//ynnpack/base/test:buffer",
+        "//ynnpack/base/test:tensor",
+    ],
+)
+
 cc_test(
     name = "test",
     srcs = ["test.cc"],
@@ -672,6 +708,7 @@ cc_test(
     deps = [
         ":dot",
         ":pack",
+        ":pack_test_tensor",
         "//ynnpack:ynnpack_h",
         "//ynnpack/base",
         "//ynnpack/base/test:buffer",
@@ -689,6 +726,7 @@ cc_test(
     malloc = ynn_binary_malloc(),
     deps = [
         ":dot",
+        ":pack_test_tensor",
         "//ynnpack/base",
         "//ynnpack/base/test:buffer",
         "//ynnpack/base/test:fuzz_test",

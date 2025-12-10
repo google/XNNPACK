@@ -2817,7 +2817,8 @@ static enum xnn_status optimize_common_subgraphs_static_reshapes(
     // Replace the old shape with the new shape, filling any gaps from the input
     // shape.
     new_shape = node->params.static_reshape.new_shape;
-    XNN_RETURN_IF_ERROR(xnn_shape_fill_gaps(&input_value->shape, &new_shape));
+    XNN_RETURN_IF_ERROR(xnn_shape_fill_gaps(&input_value->shape, &new_shape),
+                        "Could not fill gaps for reshape[#%u].", node_id);
   } else if (node->type == xnn_node_type_static_expand_dims) {
     const struct xnn_shape* new_dims = &node->params.static_reshape.new_shape;
     new_shape.num_dims = input_value->shape.num_dims + new_dims->num_dims;
@@ -3727,6 +3728,9 @@ static enum xnn_status optimize_common_subgraphs_iter(
               node->params.static_reshape.new_shape;
           subgraph->values[node->outputs[0]].flags |=
               XNN_VALUE_FLAG_SHAPE_IS_STATIC;
+        } else {
+          // If the output shape isn't static, then there's nothing to optimize.
+          continue;
         }
         XNN_FALLTHROUGH
 
@@ -4010,6 +4014,23 @@ enum xnn_status xnn_subgraph_optimize_packed_lhs(xnn_subgraph_t subgraph,
           node->packed_input_datatype = xnn_datatype_pqint8;
           node->flags |= XNN_FLAG_INLINE_LHS_PACKING;
         }
+
+        if (input_datatype == xnn_datatype_fp32 &&
+            kernel_datatype == xnn_datatype_fp32 &&
+            output_datatype == xnn_datatype_fp32 &&
+            xnn_init_pf32_gemm_config() != NULL &&
+            !(optimization_flags & XNN_FLAG_NO_INLINED_LHS_PACKING)) {
+            // Note that there is currently no option to not use inlining for this
+            // iGEMM kernel.
+            xnn_log_debug("Setting assumed_datatype=%s for node #%u (%s).",
+                         xnn_datatype_to_string(xnn_datatype_pfp32), node_id,
+                         xnn_node_type_to_string(node->type));
+            node->packed_input_datatype = xnn_datatype_pfp32;
+            if(node->type == xnn_node_type_convolution_2d) {
+              node->flags |= XNN_FLAG_INLINE_LHS_PACKING;
+            }
+          }
+
         if (input_datatype == xnn_datatype_fp16 &&
             (kernel_datatype == xnn_datatype_fp16 ||
             kernel_datatype == xnn_datatype_fp32) &&
@@ -4024,7 +4045,8 @@ enum xnn_status xnn_subgraph_optimize_packed_lhs(xnn_subgraph_t subgraph,
           node->packed_input_datatype = xnn_datatype_pfp16;
           node->flags |= XNN_FLAG_INLINE_LHS_PACKING;
         }
-      } break;
+      }
+        break;
       default:
         break;
     }

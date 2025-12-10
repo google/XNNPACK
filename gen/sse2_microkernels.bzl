@@ -1,9 +1,9 @@
-"""
-Microkernel filenames lists for sse2.
-
-Auto-generated file. Do not edit!
-  Generator: tools/update-microkernels.py
-"""
+#
+# Microkernel filenames lists for sse2.
+#
+# Auto-generated file. Do not edit!
+#   Generator: tools/update-microkernels.py
+#
 
 PROD_SSE2_MICROKERNEL_SRCS = [
     "src/f16-f32-vcvt/gen/f16-f32-vcvt-sse2-int16-u32.c",

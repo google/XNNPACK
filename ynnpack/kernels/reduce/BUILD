@@ -42,14 +42,8 @@ ynn_cc_library(
     compatible_with = _COMPATIBLE_WITH,
     copts = ynn_kernel_copts(unroll_loops = False),
     per_arch_srcs = {
-        "arm_neonfp16arith": [
-            "arm_neonfp16arith.cc",
-            "arm_neon_xf16.h",
-        ],
-        "arm_neonbf16": [
-            "arm_neonbf16.cc",
-            "arm_neon_xf16.h",
-        ],
+        "arm_neonfp16arith": ["arm_neonfp16arith.cc"],
+        "arm_neonbf16": ["arm_neonbf16.cc"],
         "arm_neondot": ["arm_neondot.cc"],
         "arm_neon": ["arm_neon.cc"],
         "x86_ssse3": ["x86_ssse3.cc"],
@@ -59,8 +53,8 @@ ynn_cc_library(
         "x86_avx512bw": ["x86_avx512bw.cc"],
         "x86_avx512f": ["x86_avx512f.cc"],
         "x86_f16c": ["x86_f16c.cc"],
-        "x86_avx512fp16": ["x86_avx512fp16.cc"],
         "x86_avx2": ["x86_avx2.cc"],
+        "x86_avx2_fma3": ["x86_avx2_fma3.cc"],
     },
     visibility = ["//ynnpack:__subpackages__"],
     deps = [
@@ -77,6 +71,7 @@ cc_test(
     srcs = ["test.cc"],
     linkopts = ynn_binary_linkopts(),
     malloc = ynn_binary_malloc(),
+    shard_count = 10,
     deps = [
         ":reduce",
         "//ynnpack/base",

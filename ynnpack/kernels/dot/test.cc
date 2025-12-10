@@ -13,7 +13,6 @@
 
 #include <gtest/gtest.h>
 #include "ynnpack/base/arch.h"  // IWYU pragma: keep
-#include "ynnpack/base/arithmetic.h"
 #include "ynnpack/base/test/buffer.h"
 #include "ynnpack/base/test/fuzz_test.h"
 #include "ynnpack/base/test/random.h"
@@ -21,7 +20,7 @@
 #include "ynnpack/base/test/util.h"
 #include "ynnpack/base/type.h"
 #include "ynnpack/kernels/dot/dot.h"
-#include "ynnpack/kernels/dot/pack.h"
+#include "ynnpack/kernels/dot/pack_test_tensor.h"
 
 namespace ynn {
 
@@ -35,76 +34,6 @@ struct DotShape {
 
 std::ostream& operator<<(std::ostream& os, const DotShape& shape) {
   return os << shape.m << "x" << shape.n << "x" << shape.k;
-}
-
-// If `tile_k > 1`, we need to transpose b such that `tile_k` values of the k
-// dimension are contiguous in memory.
-template <typename T>
-Tensor<T> PackB(Tensor<T> b, size_t tile_k, size_t tile_n) {
-  const size_t elem_count = type_element_count(type_of<T>());
-  const size_t elem_size_bits = sizeof(T) * 8 / elem_count;
-
-  assert(tile_k % elem_count == 0);
-
-  // Get n, k dimensions from b, and remove them from the extents.
-  std::vector<size_t> extents = b.extents();
-  size_t n = extents.back() * elem_count;
-  extents.pop_back();
-  size_t k = extents.back();
-  extents.pop_back();
-
-  // Remember these extents, which are the batch dimensions for the transpose
-  // operation below.
-  std::vector<size_t> batch_extents = extents;
-
-  // Add the new transposed dimensions.
-  // blocks_n is always 1 (and thus `block_n = n`) in these tests.
-  extents.push_back(ceil_div(k, tile_k));
-  extents.push_back(align_up(n, tile_n));
-  extents.push_back(tile_k / elem_count);
-
-  // Make the result.
-  Tensor<T> result(extents, Alignment({.bytes = tile_k * tile_n * sizeof(T)}));
-  packer p(/*transpose=*/false, elem_size_bits, tile_k, align_up(n, tile_n));
-  for (const auto& i : EnumerateIndices(batch_extents)) {
-    p.pack(k, n, b.stride(b.rank() - 2) * sizeof(T), b.slice_leading(i).base(),
-           result.stride(result.rank() - 3) * sizeof(T), 0,
-           result.slice_leading(i).base());
-  }
-  return result;
-}
-
-template <typename T>
-Tensor<T> TransposeA(Tensor<T> a, size_t tile_k) {
-  const size_t elem_count = type_element_count(type_of<T>());
-  const size_t elem_size_bits = sizeof(T) * 8 / elem_count;
-
-  assert(tile_k % elem_count == 0);
-
-  // Get n, k dimensions from a, and remove them from the extents.
-  std::vector<size_t> extents = a.extents();
-  size_t k = extents.back() * elem_count;
-  extents.pop_back();
-  size_t m = extents.back();
-  extents.pop_back();
-
-  // Remember these extents, which are the batch dimensions for the transpose
-  // operation below.
-  std::vector<size_t> batch_extents = extents;
-
-  // Add the new transposed dimensions.
-  extents.push_back(ceil_div(k, tile_k));
-  extents.push_back(m * tile_k);
-
-  // Make the result.
-  Tensor<T> result(extents);
-  packer p(/*transpose=*/true, elem_size_bits, tile_k, m * tile_k);
-  for (const auto& i : EnumerateIndices(batch_extents)) {
-    p.pack(k, m, a.stride(a.rank() - 2) * sizeof(T), a.slice_leading(i).base(),
-           result.stride(result.rank() - 2) * sizeof(T), 0,
-           result.slice_leading(i).base());
-  }
-  return result;
 }
 
 template <typename AT, typename BT, typename CT>
@@ -147,6 +76,7 @@ struct KernelInfo {
   uint64_t arch_flags;
   dot_kernel_fn kernel;
   DotShape block_shape;
+  size_t tile_m;
   size_t tile_n;
   size_t tile_k;
   uint32_t flags;
@@ -160,12 +90,13 @@ void TestMatMul(AT, BT, CT, const DotShape& shape, const KernelInfo& kernel,
 
   ReplicableRandomDevice rng;
 
-  const size_t tile_k = kernel.tile_k;
+  const size_t tile_m = kernel.tile_m;
   const size_t tile_n = kernel.tile_n;
+  const size_t tile_k = kernel.tile_k;
   const size_t m = shape.m;
   const size_t n = shape.n;
   const size_t k = shape.k;
-  const bool transpose_a = kernel.flags & dot_flag::transpose_a;
+  const bool pack_a = kernel.flags & dot_flag::transpose_a;
   const bool unpacked_b = kernel.flags & dot_flag::unaligned_b;
 
   const float max_abs_value = 10.0f;
@@ -191,8 +122,8 @@ void TestMatMul(AT, BT, CT, const DotShape& shape, const KernelInfo& kernel,
 
   // dot kernels require B's k and n dimensions to be aligned to tile_k,
   // tile_n. The kernel might also require b to be packed (tile_k > 1).
-  Tensor<BT> packed_b = unpacked_b ? b : PackB(b, tile_k, tile_n);
-  Tensor<AT> packed_a = transpose_a ? TransposeA(a, tile_k) : a;
+  Tensor<BT> packed_b = unpacked_b ? b : pack_b(b, tile_k, tile_n);
+  Tensor<AT> packed_a = pack_a ? transpose_a(a, tile_m, tile_k) : a;
 
   kernel.kernel(m, n, 1, 1, k, packed_a.stride(0) * sizeof(AT), 0, 0,
                 packed_a.base(), 0, 0, packed_b.stride(0) * sizeof(BT) / tile_k,
@@ -220,9 +151,10 @@ void TestConv2D(AT, BT, CT, const KernelInfo& kernel) {
   ReplicableRandomDevice rng;
 
   const DotShape& block_shape = kernel.block_shape;
-  const size_t tile_k = kernel.tile_k;
+  const size_t tile_m = kernel.tile_m;
   const size_t tile_n = kernel.tile_n;
-  const bool transpose_a = kernel.flags & dot_flag::transpose_a;
+  const size_t tile_k = kernel.tile_k;
+  const bool pack_a = kernel.flags & dot_flag::transpose_a;
 
   // We always have m = 1, because that would just be a batch dimension here,
   // it does not exercise the dot kernel API.
@@ -274,9 +206,9 @@ void TestConv2D(AT, BT, CT, const KernelInfo& kernel) {
 
     // We need to transpose before making the stencil, otherwise we "realize"
     // the im2col in memory.
-    Tensor<AT> packed_a = transpose_a ? TransposeA(a, tile_k) : a;
+    Tensor<AT> packed_a = pack_a ? transpose_a(a, tile_m, tile_k) : a;
 
-    if (transpose_a) {
+    if (pack_a) {
       // When we transpose, we tile_k, making the kw dimension tile_k times
       // bigger, which also dilates the kernel.
       // [kh, ci/tile_k, wkw*tile_k] -> [kh, ci/tile_k, kw*tile_k, w]
@@ -295,7 +227,7 @@ void TestConv2D(AT, BT, CT, const KernelInfo& kernel) {
 
     // dot kernels require B's k and n dimensions to be aligned to tile_k,
     // tile_n. The kernel might also require b to be packed (tile_k > 1).
-    Tensor<BT> packed_b = PackB(b, tile_k, tile_n);
+    Tensor<BT> packed_b = pack_b(b, tile_k, tile_n);
 
     b = b.crop_padding({0, 0, 0, 0},
                        {0, 0, 0, b.extent(3) - co / B_info::element_count()});
@@ -438,13 +370,14 @@ TEST_P(Dot, Conv2D) {
   });
 }
 
-#define YNN_DOT_KERNEL(arch_flags, name, block_m, block_n, block_k, tile_n, \
-                       tile_k, flags, a_type, b_type, c_type)               \
+#define YNN_DOT_KERNEL(arch_flags, name, block_m, block_n, block_k, tile_m, \
+                       tile_n, tile_k, flags, a_type, b_type, c_type)       \
   INSTANTIATE_TEST_SUITE_P(name, Dot,                                       \
                            testing::Values(KernelInfo{                      \
                                arch_flags,                                  \
                                name,                                        \
                                {block_m, block_n, block_k},                 \
+                               tile_m,                                      \
                                tile_n,                                      \
                                tile_k,                                      \
                                flags,                                       \

@@ -122,10 +122,13 @@ xnn_status xnn_validate_channelwise_quantized_tensor(
   return xnn_status_success;
 }
 
-xnn_status xnn_define_channelwise_quantized_tensor_value_v2(
+xnn_status xnn_define_channelwise_quantized_tensor_value_v3(
     xnn_subgraph_t subgraph, xnn_datatype datatype, int32_t zero_point,
     const float* scale, size_t num_dims, size_t channel_dim, const size_t* dims,
-    const void* data, uint32_t external_id, uint32_t flags, uint32_t* id_out) {
+    const void* data, uint32_t external_id, uint32_t flags, uint32_t* id_out,
+    const float* channelwise_zero_point) {
+  // Channelwise zero points are not supported yet.
+  assert(channelwise_zero_point == nullptr);
   assert(data);
   uint32_t zero_point_id = YNN_INVALID_VALUE_ID;
   if (zero_point != 0) {
@@ -173,6 +176,15 @@ xnn_status xnn_define_channelwise_quantized_tensor_value_v2(
       subgraph->ynn, ynn::type_from_xnn(datatype), num_dims, dims, data,
       /*zero_point_id=*/YNN_INVALID_VALUE_ID, scale_id,
       ynn::value_flags_from_xnn(flags), id_out));
+}
+
+xnn_status xnn_define_channelwise_quantized_tensor_value_v2(
+    xnn_subgraph_t subgraph, xnn_datatype datatype, int32_t zero_point,
+    const float* scale, size_t num_dims, size_t channel_dim, const size_t* dims,
+    const void* data, uint32_t external_id, uint32_t flags, uint32_t* id_out) {
+  return xnn_define_channelwise_quantized_tensor_value_v3(
+      subgraph, datatype, zero_point, scale, num_dims, channel_dim, dims, data,
+      external_id, flags, id_out, /*channelwise_zero_point=*/nullptr);
 }
 
 xnn_status xnn_define_blockwise_quantized_tensor_value_v2(

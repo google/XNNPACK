@@ -13,6 +13,7 @@
 #include <vector>
 
 #include "ynnpack/base/log.h"
+#include "ynnpack/base/type.h"
 #include "ynnpack/include/ynnpack.h"
 #include "ynnpack/kernels/binary/binary.h"
 #include "ynnpack/kernels/ternary/ternary.h"
@@ -68,8 +69,9 @@ bool rewrite_multiply_add(ynn_subgraph& subgraph, ynn_node& node,
             ynn::ternary_op::multiply_add, a.type, b.type, c.type, x.type);
         if (kernel != nullptr) {
           // Yes we do. Rewrite this to a multiply-add.
-          YNN_LOG_DEBUG() << "Rewriting convert to ternary multiply";
-          ynn::define_ternary(subgraph, node, a.id, b.id, c.id, x.id, kernel);
+          YNN_LOG_DEBUG() << "Rewriting convert to ternary multiply_add";
+          ynn::define_ternary(subgraph, node, a.id, b.id, c.id, x.id,
+                              ynn::ternary_op::multiply_add, kernel);
           return true;
         }
       }
@@ -110,7 +112,8 @@ bool rewrite_subtract_multiply(ynn_subgraph& subgraph, ynn_node& node,
           ynn::ternary_op::subtract_multiply, a.type, b.type, c.type, x.type);
       if (kernel != nullptr) {
         YNN_LOG_DEBUG() << "Rewriting convert to ternary subtract_multiply";
-        ynn::define_ternary(subgraph, node, a.id, b.id, c.id, x.id, kernel);
+        ynn::define_ternary(subgraph, node, a.id, b.id, c.id, x.id,
+                            ynn::ternary_op::subtract_multiply, kernel);
         return true;
       }
     }
@@ -157,7 +160,8 @@ bool rewrite_convert_to_multiply(ynn_subgraph& subgraph, ynn_node& node,
         // that matches the types we have.
         YNN_LOG_DEBUG() << "Rewriting convert to ternary multiply";
         ynn::define_ternary(subgraph, node, node.inputs[0], scale_a_id,
-                            scale_b_id, node.outputs[0], kernel);
+                            scale_b_id, node.outputs[0],
+                            ynn::ternary_op::multiply, kernel);
         return true;
       }
     }
@@ -199,15 +203,16 @@ bool rewrite_convert_to_quantize(ynn_subgraph& subgraph, ynn_node& node,
     return false;
   }
 
+  const ynn::ternary_op op = output.type == ynn_type_int8
+                                 ? ynn::ternary_op::quantize_int8
+                                 : ynn::ternary_op::quantize_uint8;
   ynn::ternary_kernel_fn kernel = ynn::get_ternary_kernel(
-      output.type == ynn_type_int8 ? ynn::ternary_op::quantize_int8
-                                   : ynn::ternary_op::quantize_uint8,
-      input.type, subgraph.value(output.scale_id).type,
+      op, input.type, subgraph.value(output.scale_id).type,
       subgraph.value(output.zero_point_id).type, output.type);
   if (kernel != nullptr) {
     YNN_LOG_DEBUG() << "Rewriting convert to quantize";
     ynn::define_ternary(subgraph, node, node.inputs[0], output.scale_id,
-                        output.zero_point_id, node.outputs[0], kernel);
+                        output.zero_point_id, node.outputs[0], op, kernel);
   }
   return false;
 }
@@ -235,7 +240,8 @@ bool rewrite_clamp(ynn_subgraph& subgraph, ynn_node& node,
         if (kernel != nullptr) {
           // Yes we do. Rewrite this to a clamp.
           YNN_LOG_DEBUG() << "Rewriting min(max(a, b), c) to ternary clamp";
-          ynn::define_ternary(subgraph, node, a.id, b.id, c.id, x.id, kernel);
+          ynn::define_ternary(subgraph, node, a.id, b.id, c.id, x.id,
+                              ynn::ternary_op::clamp, kernel);
           return true;
         }
       }

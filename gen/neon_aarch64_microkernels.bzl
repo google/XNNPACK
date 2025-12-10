@@ -1,9 +1,9 @@
-"""
-Microkernel filenames lists for neon_aarch64.
-
-Auto-generated file. Do not edit!
-  Generator: tools/update-microkernels.py
-"""
+#
+# Microkernel filenames lists for neon_aarch64.
+#
+# Auto-generated file. Do not edit!
+#   Generator: tools/update-microkernels.py
+#
 
 PROD_NEON_AARCH64_MICROKERNEL_SRCS = [
     "src/f32-vbinary/gen/f32-vdiv-aarch64-neon-u8.c",

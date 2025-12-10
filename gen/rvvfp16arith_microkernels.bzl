@@ -1,9 +1,9 @@
-"""
-Microkernel filenames lists for rvvfp16arith.
-
-Auto-generated file. Do not edit!
-  Generator: tools/update-microkernels.py
-"""
+#
+# Microkernel filenames lists for rvvfp16arith.
+#
+# Auto-generated file. Do not edit!
+#   Generator: tools/update-microkernels.py
+#
 
 PROD_RVVFP16ARITH_MICROKERNEL_SRCS = [
 ]

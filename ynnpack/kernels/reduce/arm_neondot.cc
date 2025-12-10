@@ -13,7 +13,7 @@
 #include <type_traits>
 
 #include "ynnpack/base/arithmetic.h"
-#include "ynnpack/base/simd/arm.h"
+#include "ynnpack/base/simd/arm_neon.h"
 #include "ynnpack/base/simd/multi_vec.h"
 #include "ynnpack/kernels/reduce/generic.h"
 #include "ynnpack/kernels/reduce/reduce.h"
@@ -59,19 +59,70 @@ static s32x4x4& operator+=(s32x4x4& a, u8x16 b) {
   return a;
 }
 
-static s32x4& reduce_add(
-    s32x4& a, s8x16 b,
+static s32x4 reduce_add(
+    s32x4 a, s8x16 b, Identity /*map_fn*/,
     std::integral_constant<size_t, 4> /*horizontal_factor*/) {
   a.v = vdotq_s32(a.v, b.v, vdupq_n_s8(1));
   return a;
 }
 
 // We want to accumulate uint8 dot products in int32 accumulators.
-static s32x4& reduce_add(
-    s32x4& a, u8x16 b,
+static s32x4 reduce_add(
+    s32x4 a, u8x16 b, Identity /*map_fn*/,
     std::integral_constant<size_t, 4> /*horizontal_factor*/) {
   a.v = vreinterpretq_s32_u32(vdotq_u32(vreinterpretq_u32_s32(a.v), b.v,
                               vdupq_n_u8(1)));
+  return a;
+}
+
+static s32x4x4 reduce_add(
+    s32x4x4 a, s8x16 b, Square /*map_fn*/,
+    std::integral_constant<size_t, 1> /*horizontal_factor*/) {
+  int8x8_t b_lo_s8 = vget_low_s8(b.v);
+  int8x8_t b_hi_s8 = vget_high_s8(b.v);
+  int16x8_t sq_lo = vmull_s8(b_lo_s8, b_lo_s8);
+  int16x8_t sq_hi = vmull_s8(b_hi_s8, b_hi_s8);
+
+  a.v[0].v = vaddw_s16(a.v[0].v, vget_low_s16(sq_lo));
+  a.v[1].v = vaddw_s16(a.v[1].v, vget_high_s16(sq_lo));
+  a.v[2].v = vaddw_s16(a.v[2].v, vget_low_s16(sq_hi));
+  a.v[3].v = vaddw_s16(a.v[3].v, vget_high_s16(sq_hi));
+
+  return a;
+}
+
+static s32x4x4 reduce_add(
+    s32x4x4 a, u8x16 b, Square /*map_fn*/,
+    std::integral_constant<size_t, 1> /*horizontal_factor*/) {
+  uint8x8_t b_lo_s8 = vget_low_u8(b.v);
+  uint8x8_t b_hi_s8 = vget_high_u8(b.v);
+  uint16x8_t sq_lo = vmull_u8(b_lo_s8, b_lo_s8);
+  uint16x8_t sq_hi = vmull_u8(b_hi_s8, b_hi_s8);
+
+  a.v[0].v = vreinterpretq_s32_u32(vaddw_u16(vreinterpretq_u32_s32(a.v[0].v),
+                                             vget_low_u16(sq_lo)));
+  a.v[1].v = vreinterpretq_s32_u32(vaddw_u16(vreinterpretq_u32_s32(a.v[1].v),
+                                             vget_high_u16(sq_lo)));
+  a.v[2].v = vreinterpretq_s32_u32(vaddw_u16(vreinterpretq_u32_s32(a.v[2].v),
+                                             vget_low_u16(sq_hi)));
+  a.v[3].v = vreinterpretq_s32_u32(vaddw_u16(vreinterpretq_u32_s32(a.v[3].v),
+                                             vget_high_u16(sq_hi)));
+
+  return a;
+}
+
+static s32x4 reduce_add(
+    s32x4 a, s8x16 b, Square /*map_fn*/,
+    std::integral_constant<size_t, 4> /*horizontal_factor*/) {
+  a.v = vdotq_s32(a.v, b.v, b.v);
+  return a;
+}
+
+// We want to accumulate uint8 dot products in int32 accumulators.
+static s32x4 reduce_add(
+    s32x4 a, u8x16 b, Square /*map_fn*/,
+    std::integral_constant<size_t, 4> /*horizontal_factor*/) {
+  a.v = vreinterpretq_s32_u32(vdotq_u32(vreinterpretq_u32_s32(a.v), b.v, b.v));
   return a;
 }
 
@@ -109,6 +160,40 @@ void sum_uint8_int32_neondot(size_t n, size_t k3, size_t k2, size_t k1,
         /*C_stride_m=*/0, reinterpret_cast<int32_t*>(c));
   } else {
     tiled_reduce<sum_accumulator_x32<s32x4, 16>, uint8_t, int32_t>(
+        n, k3, k2, k1, a_stride_n, a_stride_k3, a_stride_k2,
+        reinterpret_cast<const uint8_t*>(a), /*C_stride_m=*/0,
+        reinterpret_cast<int32_t*>(c));
+  }
+}
+
+void sum_squared_int8_int32_neondot(size_t n, size_t k3, size_t k2, size_t k1,
+                                    size_t a_stride_n, size_t a_stride_k3,
+                                    size_t a_stride_k2, const void* a, size_t,
+                                    void* c) {
+  if (k1 == 1 && a_stride_n == sizeof(int8_t)) {
+    tiled_reduce<sum_accumulator_k1_1<s8x16, s32x4x4, Square>, int8_t, int32_t>(
+        n, k3, k2, a_stride_k3, a_stride_k2, reinterpret_cast<const int8_t*>(a),
+        /*C_stride_m=*/0, reinterpret_cast<int32_t*>(c));
+  } else {
+    tiled_reduce<sum_accumulator_x32<s32x4, 16, Square>, int8_t, int32_t>(
+        n, k3, k2, k1, a_stride_n, a_stride_k3, a_stride_k2,
+        reinterpret_cast<const int8_t*>(a), /*C_stride_m=*/0,
+        reinterpret_cast<int32_t*>(c));
+  }
+}
+
+void sum_squared_uint8_int32_neondot(size_t n, size_t k3, size_t k2, size_t k1,
+                                     size_t a_stride_n, size_t a_stride_k3,
+                                     size_t a_stride_k2, const void* a, size_t,
+                                     void* c) {
+  if (k1 == 1 && a_stride_n == sizeof(uint8_t)) {
+    tiled_reduce<sum_accumulator_k1_1<u8x16, s32x4x4, Square>, uint8_t,
+      int32_t>(
+        n, k3, k2, a_stride_k3, a_stride_k2,
+        reinterpret_cast<const uint8_t*>(a),
+        /*C_stride_m=*/0, reinterpret_cast<int32_t*>(c));
+  } else {
+    tiled_reduce<sum_accumulator_x32<s32x4, 16, Square>, uint8_t, int32_t>(
         n, k3, k2, k1, a_stride_n, a_stride_k3, a_stride_k2,
         reinterpret_cast<const uint8_t*>(a), /*C_stride_m=*/0,
         reinterpret_cast<int32_t*>(c));

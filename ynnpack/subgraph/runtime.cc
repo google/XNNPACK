@@ -116,6 +116,7 @@ std::unique_ptr<ynn::scheduling_info> ynn_runtime::make_schedule(
 
   for (int index_d = 0; index_d < rank; ++index_d) {
     int d = get_loop_dim(index_d);
+    assert(d < output_extents.size());
     if (!output_extents[d].defined()) continue;
     if (d < given_splits.size()) {
       splits[d] = given_splits[d];

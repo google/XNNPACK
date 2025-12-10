@@ -450,9 +450,6 @@ YNN_ALWAYS_INLINE s16x8 operator^(s16x8 a, s16x8 b) {
 YNN_ALWAYS_INLINE f32x4 min(f32x4 a, f32x4 b) {
   return f32x4{_mm_min_ps(a.v, b.v)};
 }
-YNN_ALWAYS_INLINE s32x4 min(s32x4 a, s32x4 b) {
-  return s32x4{_mm_min_epi32(a.v, b.v)};
-}
 YNN_ALWAYS_INLINE s16x8 min(s16x8 a, s16x8 b) {
   return s16x8{_mm_min_epi16(a.v, b.v)};
 }
@@ -462,9 +459,6 @@ YNN_ALWAYS_INLINE u8x16 min(u8x16 a, u8x16 b) {
 
 YNN_ALWAYS_INLINE f32x4 max(f32x4 a, f32x4 b) {
   return f32x4{_mm_max_ps(a.v, b.v)};
-}
-YNN_ALWAYS_INLINE s32x4 max(s32x4 a, s32x4 b) {
-  return s32x4{_mm_max_epi32(a.v, b.v)};
 }
 YNN_ALWAYS_INLINE s16x8 max(s16x8 a, s16x8 b) {
   return s16x8{_mm_max_epi16(a.v, b.v)};
@@ -482,15 +476,6 @@ YNN_ALWAYS_INLINE float horizontal_min(f32x4 a) {
   const __m128 min_lanes = _mm_min_ps(a.v, _mm_movehl_ps(a.v, a.v));
   return _mm_cvtss_f32(
       _mm_min_ss(min_lanes, _mm_shuffle_ps(min_lanes, min_lanes, 1)));
-}
-
-YNN_ALWAYS_INLINE int32_t horizontal_max(s32x4 a) {
-  const __m128i max4 = _mm_max_epi32(a.v, _mm_srli_si128(a.v, 8));
-  return _mm_cvtsi128_si32(_mm_max_epi32(max4, _mm_srli_si128(max4, 4)));
-}
-YNN_ALWAYS_INLINE int32_t horizontal_min(s32x4 a) {
-  const __m128i min4 = _mm_min_epi32(a.v, _mm_srli_si128(a.v, 8));
-  return _mm_cvtsi128_si32(_mm_min_epi32(min4, _mm_srli_si128(min4, 4)));
 }
 
 YNN_ALWAYS_INLINE int16_t horizontal_max(s16x8 a) {

@@ -16,10 +16,13 @@
 
 namespace ynn {
 
+#ifdef YNN_ARCH_X86
+#ifndef MEMORY_SANITIZER  // TODO(453518173, 458235638)
+
 // Enable us to refer to kernels by name instead of by function pointer.
 std::map<dot_kernel_fn, std::string> kernels = {
-#define YNN_DOT_KERNEL(arch_flags, kernel, block_m, block_n, block_k, tile_n, \
-                       tile_k, flags, a_type, b_type, c_type)                 \
+#define YNN_DOT_KERNEL(arch_flags, kernel, block_m, block_n, block_k, tile_m, \
+                       tile_n, tile_k, flags, a_type, b_type, c_type)         \
   {kernel, #kernel},
 #include "ynnpack/kernels/dot/kernels.inc"
 #undef YNN_DOT_KERNEL
@@ -37,9 +40,6 @@ const std::string& get_dot_kernel_name(
 // We use a large highly composite value when we want to test large shapes, so
 // it is unlikely that block shapes do not divide this extent.
 const int large_shape = 3 * 5 * 7 * 64;
-
-#ifdef YNN_ARCH_X86
-#ifndef MEMORY_SANITIZER  // TODO(453518173, 458235638)
 
 constexpr uint64_t arch_flags_sse2 = arch_flag::sse2;
 constexpr uint64_t arch_flags_avx = arch_flag::avx | arch_flags_sse2;

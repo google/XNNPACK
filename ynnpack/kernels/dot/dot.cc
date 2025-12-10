@@ -304,12 +304,10 @@ dot_kernel get_dot_kernel(const dot_shape& shape,
       transpose_a,
       arch_flags,
   };
-  // TODO(dsharlet): If we ever have any tile_m != 1 kernels, we need to plumb
-  // it out and handle it.
-  constexpr int tile_m = 1;
+
 // TODO: Limit this to only a subset of the "prod" kernels.
-#define YNN_DOT_KERNEL(arch, name, block_m, block_n, block_k, tile_n, tile_k, \
-                       flags, a_type, b_type, c_type)                         \
+#define YNN_DOT_KERNEL(arch, name, block_m, block_n, block_k, tile_m, tile_n, \
+                       tile_k, flags, a_type, b_type, c_type)                 \
   if (std::is_same<A, a_type>::value && std::is_same<B, b_type>::value &&     \
       std::is_same<C, c_type>::value) {                                       \
     optimizer(arch, block_m, block_n, block_k, tile_m, tile_n, tile_k, flags, \
@@ -318,9 +316,14 @@ dot_kernel get_dot_kernel(const dot_shape& shape,
 #include "ynnpack/kernels/dot/kernels.inc"
 #undef YNN_DOT_KERNEL
   if (!packed_shape) {
-    YNN_LOG_INFO() << "Using dot kernel " << optimizer.kernel_used
-                   << " for dot " << shape.m << "x" << shape.n << "x"
-                   << shape.k1;
+    if (optimizer.result.kernel) {
+      YNN_LOG_INFO() << "Using dot kernel " << optimizer.kernel_used
+                     << " for dot " << shape.m << "x" << shape.n << "x"
+                     << shape.k1;
+    } else {
+      YNN_LOG_WARNING() << "No dot kernel found for dot " << shape.m << "x"
+                        << shape.n << "x" << shape.k1;
+    }
   }
   return optimizer.result;
 }
