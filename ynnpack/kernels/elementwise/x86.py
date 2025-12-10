@@ -547,8 +547,8 @@ YNN_INTRINSIC __m128i saturating_cast_f32_to_uint8(__m128 f0, __m128 f1, __m128 
   const __m128i i1 = _mm_cvtps_epi32(f1);
   const __m128i i2 = _mm_cvtps_epi32(f2);
   const __m128i i3 = _mm_cvtps_epi32(f3);
-  const __m128i i01_16 = _mm_packus_epi32(i0, i1);
-  const __m128i i23_16 = _mm_packus_epi32(i2, i3);
+  const __m128i i01_16 = _mm_packs_epi32(i0, i1);
+  const __m128i i23_16 = _mm_packs_epi32(i2, i3);
   return _mm_packus_epi16(i01_16, i23_16);
 }
 
