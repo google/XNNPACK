@@ -84,6 +84,9 @@ std::array<vec<T, 4>, 4> transpose(std::array<vec<T, 4>, 4> x);
 template <int Index, typename T, typename SliceT>
 SliceT extract(T, SliceT);
 
+template<typename ToType, typename FromType>
+ToType convert(FromType from_type, ToType) = delete;
+
 namespace internal {
 
 template <typename T, size_t N>

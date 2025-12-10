@@ -17,6 +17,7 @@
 #include "ynnpack/base/base.h"
 #include "ynnpack/base/bfloat16.h"
 #include "ynnpack/base/half.h"
+#include "ynnpack/base/simd/multi_vec.h"
 #include "ynnpack/base/simd/vec.h"
 #include "ynnpack/base/simd/x86_sse41.h"  // IWYU pragma: export
 
@@ -386,6 +387,11 @@ YNN_ALWAYS_INLINE f32x4 extract(f32x8 x, f32x4) {
   return f32x4{_mm256_extractf128_ps(x.v, Index)};
 }
 template <int Index>
+YNN_ALWAYS_INLINE bf16x8 extract(bf16x16 x, bf16x8) {
+  return bf16x8{
+      _mm_castps_si128(_mm256_extractf128_ps(_mm256_castsi256_ps(x.v), Index))};
+}
+template <int Index>
 YNN_ALWAYS_INLINE f16x8 extract(f16x16 x, f16x8) {
   return f16x8{
       _mm_castps_si128(_mm256_extractf128_ps(_mm256_castsi256_ps(x.v), Index))};
@@ -399,6 +405,33 @@ template <int Index>
 YNN_ALWAYS_INLINE u8x16 extract(u8x32 x, u8x16) {
   return u8x16{
       _mm_castps_si128(_mm256_extractf128_ps(_mm256_castsi256_ps(x.v), Index))};
+}
+
+YNN_ALWAYS_INLINE f32x8 convert(bf16x8 a, float) {
+  return f32x8{_mm256_castsi256_ps(_mm256_slli_epi32(_mm256_cvtepu16_epi32(a.v),
+      16))};
+}
+
+using s32x8x4 = multi_vec<s32x8, 4>;
+YNN_ALWAYS_INLINE s32x8x4 convert(s8x32 a, int32_t) {
+  s32x8x4 result;
+  s8x16 lo = extract<0>(a, s8x16{});
+  s8x16 hi = extract<1>(a, s8x16{});
+  result.v[0].v = _mm256_cvtepi8_epi32(lo.v);
+  result.v[1].v = _mm256_cvtepi8_epi32(_mm_srli_si128(lo.v, 8));
+  result.v[2].v = _mm256_cvtepi8_epi32(hi.v);
+  result.v[3].v = _mm256_cvtepi8_epi32(_mm_srli_si128(hi.v, 8));
+  return result;
+}
+YNN_ALWAYS_INLINE s32x8x4 convert(u8x32 a, int32_t) {
+  s32x8x4 result;
+  u8x16 lo = extract<0>(a, u8x16{});
+  u8x16 hi = extract<1>(a, u8x16{});
+  result.v[0].v = _mm256_cvtepu8_epi32(lo.v);
+  result.v[1].v = _mm256_cvtepu8_epi32(_mm_srli_si128(lo.v, 8));
+  result.v[2].v = _mm256_cvtepu8_epi32(hi.v);
+  result.v[3].v = _mm256_cvtepu8_epi32(_mm_srli_si128(hi.v, 8));
+  return result;
 }
 
 }  // namespace simd

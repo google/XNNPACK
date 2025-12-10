@@ -21,6 +21,7 @@ cc_library(
             "x86_avx512bw.h",
             "x86_avx512f.h",
             "x86_sse2.h",
+            "x86_sse2_only.h",
             "x86_sse41.h",
         ],
         "//ynnpack:arm": ["arm_neon.h"],

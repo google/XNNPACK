@@ -49,7 +49,7 @@ static s32x16x4& operator+=(s32x16x4& a, u8x64 b) {
 }
 
 static f32x16& operator+=(f32x16& a, f16x16 b) {
-  return a += f32x16{_mm512_cvtph_ps(b.v)};
+  return a += convert(b, float{});
 }
 
 static f32x16x16& operator+=(f32x16x16& a, f16x32x8 b) {
@@ -122,10 +122,8 @@ static f32x16x16 reduce_add(
     std::integral_constant<size_t, 1> /*horizontal_factor*/) {
   YNN_UNROLL
   for (int i = 0; i < 8; ++i) {
-    __m512i lo = _mm512_cvtepu16_epi32(_mm512_castsi512_si256(b.v[i].v));
-    __m512i hi = _mm512_cvtepu16_epi32(_mm512_extracti64x4_epi64(b.v[i].v, 1));
-    a.v[2 * i + 0] += f32x16{_mm512_castsi512_ps(_mm512_slli_epi32(lo, 16))};
-    a.v[2 * i + 1] += f32x16{_mm512_castsi512_ps(_mm512_slli_epi32(hi, 16))};
+    a.v[2 * i + 0] += convert(extract<0>(b.v[i], bf16x16{}), float{});
+    a.v[2 * i + 1] += convert(extract<1>(b.v[i], bf16x16{}), float{});
   }
 
   return a;
@@ -148,13 +146,11 @@ static f32x16x16 reduce_add(
     std::integral_constant<size_t, 1> /*horizontal_factor*/) {
   YNN_UNROLL
   for (int i = 0; i < 8; ++i) {
-    __m512 lo = _mm512_castsi512_ps(_mm512_slli_epi32(
-        _mm512_cvtepu16_epi32(_mm512_castsi512_si256(b.v[i].v)), 16));
-    __m512 hi = _mm512_castsi512_ps(_mm512_slli_epi32(
-        _mm512_cvtepu16_epi32(_mm512_extracti64x4_epi64(b.v[i].v, 1)), 16));
+    f32x16 b_lo = convert(extract<0>(b.v[i], bf16x16{}), float{});
+    f32x16 b_hi = convert(extract<1>(b.v[i], bf16x16{}), float{});
 
-    a.v[2 * i + 0].v = _mm512_fmadd_ps(lo, lo, a.v[2 * i + 0].v);
-    a.v[2 * i + 1].v = _mm512_fmadd_ps(hi, hi, a.v[2 * i + 1].v);
+    a.v[2 * i + 0].v = _mm512_fmadd_ps(b_lo.v, b_lo.v, a.v[2 * i + 0].v);
+    a.v[2 * i + 1].v = _mm512_fmadd_ps(b_hi.v, b_hi.v, a.v[2 * i + 1].v);
   }
 
   return a;
@@ -177,10 +173,10 @@ static f32x16x16 reduce_add(
     std::integral_constant<size_t, 1> /*horizontal_factor*/) {
   YNN_UNROLL
   for (size_t i = 0; i < 8; ++i) {
-    __m512 lo = _mm512_cvtph_ps(extract<0>(b.v[i], f16x16{}).v);
-    __m512 hi = _mm512_cvtph_ps(extract<1>(b.v[i], f16x16{}).v);
-    a.v[2 * i + 0].v = _mm512_fmadd_ps(lo, lo, a.v[2 * i + 0].v);
-    a.v[2 * i + 1].v = _mm512_fmadd_ps(hi, hi, a.v[2 * i + 1].v);
+    f32x16 lo = convert(extract<0>(b.v[i], f16x16{}), float{});
+    f32x16 hi = convert(extract<1>(b.v[i], f16x16{}), float{});
+    a.v[2 * i + 0].v = _mm512_fmadd_ps(lo.v, lo.v, a.v[2 * i + 0].v);
+    a.v[2 * i + 1].v = _mm512_fmadd_ps(hi.v, hi.v, a.v[2 * i + 1].v);
   }
   return a;
 }
@@ -188,8 +184,8 @@ static f32x16x16 reduce_add(
 static f32x16 reduce_add(
     f32x16 a, f16x16 b, Square /*map_fn*/,
     std::integral_constant<size_t, 1> /*horizontal_factor*/) {
-  __m512 b_f32 = _mm512_cvtph_ps(b.v);
-  a.v = _mm512_fmadd_ps(b_f32, b_f32, a.v);
+  f32x16 b_f32 = convert(b, float{});
+  a.v = _mm512_fmadd_ps(b_f32.v, b_f32.v, a.v);
   return a;
 }
 

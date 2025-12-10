@@ -8,20 +8,16 @@
 
 #include <immintrin.h>
 
-#include <array>
 #include <cassert>
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
-#include <type_traits>
 
 #include "ynnpack/base/base.h"
 #include "ynnpack/base/bfloat16.h"
 #include "ynnpack/base/half.h"
 #include "ynnpack/base/simd/vec.h"
-#include "ynnpack/base/simd/x86_avx.h"
 #include "ynnpack/base/simd/x86_avx512f.h"  // IWYU pragma: export
-#include "ynnpack/base/simd/x86_sse2.h"
 
 namespace ynn {
 

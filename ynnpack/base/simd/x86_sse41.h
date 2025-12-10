@@ -12,6 +12,7 @@
 #include <cstdint>
 
 #include "ynnpack/base/base.h"
+#include "ynnpack/base/simd/multi_vec.h"
 #include "ynnpack/base/simd/x86_sse2.h"  // IWYU pragma: export
 
 namespace ynn {
@@ -36,6 +37,25 @@ YNN_ALWAYS_INLINE s32x4 min(s32x4 a, s32x4 b) {
 }
 YNN_ALWAYS_INLINE s32x4 max(s32x4 a, s32x4 b) {
   return s32x4{_mm_max_epi32(a.v, b.v)};
+}
+
+using s32x4x4 = multi_vec<s32x4, 4>;
+YNN_ALWAYS_INLINE s32x4x4 convert(s8x16 a, int32_t) {
+  s32x4x4 result;
+  result.v[0].v = _mm_cvtepi8_epi32(a.v);
+  result.v[1].v = _mm_cvtepi8_epi32(_mm_srli_si128(a.v, 4));
+  result.v[2].v = _mm_cvtepi8_epi32(_mm_srli_si128(a.v, 8));
+  result.v[3].v = _mm_cvtepi8_epi32(_mm_srli_si128(a.v, 12));
+  return result;
+}
+
+YNN_ALWAYS_INLINE s32x4x4 convert(u8x16 a, int32_t) {
+  s32x4x4 result;
+  result.v[0].v = _mm_cvtepu8_epi32(a.v);
+  result.v[1].v = _mm_cvtepu8_epi32(_mm_srli_si128(a.v, 4));
+  result.v[2].v = _mm_cvtepu8_epi32(_mm_srli_si128(a.v, 8));
+  result.v[3].v = _mm_cvtepu8_epi32(_mm_srli_si128(a.v, 12));
+  return result;
 }
 
 YNN_ALWAYS_INLINE int8_t horizontal_max(s8x16 a) {

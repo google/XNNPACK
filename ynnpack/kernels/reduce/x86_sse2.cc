@@ -18,6 +18,7 @@
 #include "ynnpack/base/simd/multi_vec.h"
 #include "ynnpack/base/simd/vec.h"
 #include "ynnpack/base/simd/x86_sse2.h"
+#include "ynnpack/base/simd/x86_sse2_only.h"
 #include "ynnpack/kernels/reduce/generic.h"
 #include "ynnpack/kernels/reduce/min_max_accumulator.h"
 #include "ynnpack/kernels/reduce/reduce.h"
@@ -27,40 +28,16 @@ namespace ynn {
 
 namespace simd {
 
-using s32x4x4 = multi_vec<s32x4, 4>;
 using f32x4x8 = multi_vec<f32x4, 8>;
 using bf16x8x4 = multi_vec<bf16x8, 4>;
 
 static s32x4x4& operator+=(s32x4x4& a, s8x16 b) {
-  __m128i i8_lo = _mm_unpacklo_epi8(b.v, b.v);
-  __m128i i8_hi = _mm_unpackhi_epi8(b.v, b.v);
-
-  s32x4 b_0(_mm_srai_epi32(_mm_unpacklo_epi16(i8_lo, i8_lo), 24));
-  s32x4 b_1(_mm_srai_epi32(_mm_unpackhi_epi16(i8_lo, i8_lo), 24));
-  s32x4 b_2(_mm_srai_epi32(_mm_unpacklo_epi16(i8_hi, i8_hi), 24));
-  s32x4 b_3(_mm_srai_epi32(_mm_unpackhi_epi16(i8_hi, i8_hi), 24));
-
-  a.v[0] += b_0;
-  a.v[1] += b_1;
-  a.v[2] += b_2;
-  a.v[3] += b_3;
+  a += convert(b, int32_t{});
   return a;
 }
 
 static s32x4x4& operator+=(s32x4x4& a, u8x16 b) {
-  const __m128i zero = _mm_setzero_si128();
-  __m128i i16_lo = _mm_unpacklo_epi8(b.v, zero);
-  __m128i i16_hi = _mm_unpackhi_epi8(b.v, zero);
-
-  s32x4 b_0(_mm_unpacklo_epi16(i16_lo, zero));
-  s32x4 b_1(_mm_unpackhi_epi16(i16_lo, zero));
-  s32x4 b_2(_mm_unpacklo_epi16(i16_hi, zero));
-  s32x4 b_3(_mm_unpackhi_epi16(i16_hi, zero));
-
-  a.v[0] += b_0;
-  a.v[1] += b_1;
-  a.v[2] += b_2;
-  a.v[3] += b_3;
+  a += convert(b, int32_t{});
   return a;
 }
 
@@ -89,18 +66,12 @@ static s32x4 reduce_add(
 static f32x4x8 reduce_add(
     f32x4x8 a, bf16x8x4 b, Identity /*map_fn*/,
     std::integral_constant<size_t, 1> /*horizontal_factor*/) {
-  __m128i zero = _mm_setzero_si128();
-
   YNN_UNROLL
   for (int i = 0; i < 4; ++i) {
-    __m128i src = b.v[i].v;
-    __m128i lo_u32 = _mm_unpacklo_epi16(src, zero);
-    __m128i hi_u32 = _mm_unpackhi_epi16(src, zero);
-    f32x4 lo_f32(_mm_castsi128_ps(_mm_slli_epi32(lo_u32, 16)));
-    f32x4 hi_f32(_mm_castsi128_ps(_mm_slli_epi32(hi_u32, 16)));
+    f32x4x2 b_f32 = convert(b.v[i], float{});
 
-    a.v[2 * i + 0] += lo_f32;
-    a.v[2 * i + 1] += hi_f32;
+    a.v[2 * i + 0] += extract<0>(b_f32, f32x4{});
+    a.v[2 * i + 1] += extract<1>(b_f32, f32x4{});
   }
 
   return a;
@@ -121,20 +92,14 @@ static f32x4 reduce_add(
 static f32x4x8 reduce_add(
     f32x4x8 a, bf16x8x4 b, Square /*map_fn*/,
     std::integral_constant<size_t, 1> /*horizontal_factor*/) {
-  __m128i zero = _mm_setzero_si128();
-
   YNN_UNROLL
   for (int i = 0; i < 4; ++i) {
-    __m128i src = b.v[i].v;
+    f32x4x2 b_f32 = convert(b.v[i], float{});
+    f32x4 b_lo = extract<0>(b_f32, f32x4{});
+    f32x4 b_hi = extract<1>(b_f32, f32x4{});
 
-    __m128i lo_u32 = _mm_unpacklo_epi16(src, zero);
-    __m128i hi_u32 = _mm_unpackhi_epi16(src, zero);
-
-    f32x4 lo_f32{_mm_castsi128_ps(_mm_slli_epi32(lo_u32, 16))};
-    f32x4 hi_f32{_mm_castsi128_ps(_mm_slli_epi32(hi_u32, 16))};
-
-    a.v[2 * i + 0] += lo_f32 * lo_f32;
-    a.v[2 * i + 1] += hi_f32 * hi_f32;
+    a.v[2 * i + 0] += b_lo * b_lo;
+    a.v[2 * i + 1] += b_hi * b_hi;
   }
 
   return a;

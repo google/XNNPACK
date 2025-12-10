@@ -23,28 +23,12 @@ using s32x4x2 = multi_vec<s32x4, 2>;
 using s32x4x4 = multi_vec<s32x4, 4>;
 
 s32x4x4& operator+=(s32x4x4& a, s8x16 b) {
-  s32x4 b_0(_mm_cvtepi8_epi32(b.v));
-  s32x4 b_1(_mm_cvtepi8_epi32(_mm_srli_si128(b.v, 4)));
-  s32x4 b_2(_mm_cvtepi8_epi32(_mm_srli_si128(b.v, 8)));
-  s32x4 b_3(_mm_cvtepi8_epi32(_mm_srli_si128(b.v, 12)));
-
-  a.v[0] += b_0;
-  a.v[1] += b_1;
-  a.v[2] += b_2;
-  a.v[3] += b_3;
+  a += convert(b, int32_t{});
   return a;
 }
 
 s32x4x4& operator+=(s32x4x4& a, u8x16 b) {
-  s32x4 b_0(_mm_cvtepu8_epi32(b.v));
-  s32x4 b_1(_mm_cvtepu8_epi32(_mm_srli_si128(b.v, 4)));
-  s32x4 b_2(_mm_cvtepu8_epi32(_mm_srli_si128(b.v, 8)));
-  s32x4 b_3(_mm_cvtepu8_epi32(_mm_srli_si128(b.v, 12)));
-
-  a.v[0] += b_0;
-  a.v[1] += b_1;
-  a.v[2] += b_2;
-  a.v[3] += b_3;
+  a += convert(b, int32_t{});
   return a;
 }
 
@@ -52,18 +36,14 @@ static s32x4x4 reduce_add(
     s32x4x4 a, s8x16 b, Square /*map_fn*/,
     std::integral_constant<size_t, 1> /*horizontal_factor*/) {
   // Convert int8 -> uint8 via abs first.
-  __m128i abs_b = _mm_abs_epi8(b.v);
-
-  __m128i b_0 = _mm_cvtepu8_epi32(abs_b);
-  __m128i b_1 = _mm_cvtepu8_epi32(_mm_srli_si128(abs_b, 4));
-  __m128i b_2 = _mm_cvtepu8_epi32(_mm_srli_si128(abs_b, 8));
-  __m128i b_3 = _mm_cvtepu8_epi32(_mm_srli_si128(abs_b, 12));
+  s8x16 abs_b(_mm_abs_epi8(b.v));
+  s32x4x4 b_s32 = convert(abs_b, int32_t{});
 
   // madd_epi16 works due to extra zeros from uint8 -> int32 conversion.
-  a.v[0] += s32x4{_mm_madd_epi16(b_0, b_0)};
-  a.v[1] += s32x4{_mm_madd_epi16(b_1, b_1)};
-  a.v[2] += s32x4{_mm_madd_epi16(b_2, b_2)};
-  a.v[3] += s32x4{_mm_madd_epi16(b_3, b_3)};
+  a.v[0] += s32x4{_mm_madd_epi16(b_s32.v[0].v, b_s32.v[0].v)};
+  a.v[1] += s32x4{_mm_madd_epi16(b_s32.v[1].v, b_s32.v[1].v)};
+  a.v[2] += s32x4{_mm_madd_epi16(b_s32.v[2].v, b_s32.v[2].v)};
+  a.v[3] += s32x4{_mm_madd_epi16(b_s32.v[3].v, b_s32.v[3].v)};
 
   return a;
 }
@@ -71,16 +51,13 @@ static s32x4x4 reduce_add(
 static s32x4x4 reduce_add(
     s32x4x4 a, u8x16 b, Square /*map_fn*/,
     std::integral_constant<size_t, 1> /*horizontal_factor*/) {
-  __m128i b_0 = _mm_cvtepu8_epi32(b.v);
-  __m128i b_1 = _mm_cvtepu8_epi32(_mm_srli_si128(b.v, 4));
-  __m128i b_2 = _mm_cvtepu8_epi32(_mm_srli_si128(b.v, 8));
-  __m128i b_3 = _mm_cvtepu8_epi32(_mm_srli_si128(b.v, 12));
+  s32x4x4 b_s32 = convert(b, int32_t{});
 
   // madd_epi16 works due to extra zeros from uint8 -> int32 conversion.
-  a.v[0] += s32x4{_mm_madd_epi16(b_0, b_0)};
-  a.v[1] += s32x4{_mm_madd_epi16(b_1, b_1)};
-  a.v[2] += s32x4{_mm_madd_epi16(b_2, b_2)};
-  a.v[3] += s32x4{_mm_madd_epi16(b_3, b_3)};
+  a.v[0] += s32x4{_mm_madd_epi16(b_s32.v[0].v, b_s32.v[0].v)};
+  a.v[1] += s32x4{_mm_madd_epi16(b_s32.v[1].v, b_s32.v[1].v)};
+  a.v[2] += s32x4{_mm_madd_epi16(b_s32.v[2].v, b_s32.v[2].v)};
+  a.v[3] += s32x4{_mm_madd_epi16(b_s32.v[3].v, b_s32.v[3].v)};
 
   return a;
 }
