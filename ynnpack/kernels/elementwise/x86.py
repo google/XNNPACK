@@ -597,15 +597,11 @@ YNN_INTRINSIC void partial_store_8x(float* output, size_t num_elements, __m256 v
 }
 
 YNN_INTRINSIC __m256i partial_load_8x(const int32_t* ptr, size_t num_elements) {
-  __m256i mask = _mm256_loadu_si256(
-            (const __m256i*)(&mask_table_avx_f32[8] - num_elements));
-  return _mm256_maskload_epi32(ptr, mask);
+  return _mm256_castps_si256(partial_load_8x(reinterpret_cast<const float*>(ptr), num_elements));
 }
 
 YNN_INTRINSIC void partial_store_8x(int32_t* output, size_t num_elements, __m256i v) {
-  __m256i mask = _mm256_loadu_si256(
-            (const __m256i*)(&mask_table_avx_f32[8] - num_elements));
-  _mm256_maskstore_epi32(output, mask, v);
+  partial_store_8x(reinterpret_cast<float*>(output), num_elements, _mm256_castsi256_ps(v));
 }
 
 template <typename T>
@@ -658,27 +654,6 @@ YNN_INTRINSIC __m256i saturating_cast_int16_to_int8(__m256i a, __m256i b) {
   return _mm256_permute4x64_epi64(r, (0 << 0) + (2 << 2) + (1 << 4) + (3 << 6));
 }
 
-YNN_INTRINSIC __m256i saturating_cast_int16_to_uint8(__m256i a, __m256i b) {
-  const __m256i r = _mm256_packus_epi16(a, b);
-  return _mm256_permute4x64_epi64(r, (0 << 0) + (2 << 2) + (1 << 4) + (3 << 6));
-}
-
-YNN_INTRINSIC __m256i saturating_cast_f32_to_uint8(__m256 f0, __m256 f1, __m256 f2, __m256 f3) {
-  const __m256 max_uint16 = _mm256_set1_ps((1 << 16) - 1);
-  f0 = _mm256_min_ps(f0, max_uint16);
-  f1 = _mm256_min_ps(f1, max_uint16);
-  f2 = _mm256_min_ps(f2, max_uint16);
-  f3 = _mm256_min_ps(f3, max_uint16);
-  const __m256i i0 = _mm256_cvtps_epi32(f0);
-  const __m256i i1 = _mm256_cvtps_epi32(f1);
-  const __m256i i2 = _mm256_cvtps_epi32(f2);
-  const __m256i i3 = _mm256_cvtps_epi32(f3);
-  const __m256i i01_16 = _mm256_packus_epi32(i0, i1);
-  const __m256i i23_16 = _mm256_packus_epi32(i2, i3);
-  const __m256i r = _mm256_packus_epi16(i01_16, i23_16);
-  return _mm256_permutevar8x32_epi32(r, _mm256_setr_epi32(0, 4, 1, 5, 2, 6, 3, 7));
-}
-
 YNN_INTRINSIC __m256 bitwise_not(__m256 val) {
   __m256 all_ones = _mm256_castsi256_ps(_mm256_set1_epi32(-1));
   return _mm256_xor_ps(val, all_ones);
@@ -712,6 +687,33 @@ YNN_INTRINSIC __m256 greater_than(__m256 a, __m256 b) {
     self.patterns += make_x86_integer_patterns(256, "_mm256_")
     self.patterns += make_x86_integer_min_max_patterns(256, "_mm256_")
     self.patterns += make_x86_cast_patterns(256, "_mm256_")
+
+    self.header += """
+namespace {
+
+YNN_INTRINSIC __m256i saturating_cast_int16_to_uint8(__m256i a, __m256i b) {
+  const __m256i r = _mm256_packus_epi16(a, b);
+  return _mm256_permute4x64_epi64(r, (0 << 0) + (2 << 2) + (1 << 4) + (3 << 6));
+}
+
+YNN_INTRINSIC __m256i saturating_cast_f32_to_uint8(__m256 f0, __m256 f1, __m256 f2, __m256 f3) {
+  const __m256 max_uint16 = _mm256_set1_ps((1 << 16) - 1);
+  f0 = _mm256_min_ps(f0, max_uint16);
+  f1 = _mm256_min_ps(f1, max_uint16);
+  f2 = _mm256_min_ps(f2, max_uint16);
+  f3 = _mm256_min_ps(f3, max_uint16);
+  const __m256i i0 = _mm256_cvtps_epi32(f0);
+  const __m256i i1 = _mm256_cvtps_epi32(f1);
+  const __m256i i2 = _mm256_cvtps_epi32(f2);
+  const __m256i i3 = _mm256_cvtps_epi32(f3);
+  const __m256i i01_16 = _mm256_packs_epi32(i0, i1);
+  const __m256i i23_16 = _mm256_packs_epi32(i2, i3);
+  const __m256i r = _mm256_packus_epi16(i01_16, i23_16);
+  return _mm256_permutevar8x32_epi32(r, _mm256_setr_epi32(0, 4, 1, 5, 2, 6, 3, 7));
+}
+
+}  // namespace
+"""
 
   def update_for_fma3(self):
     """Updates the target for FMA3 support."""
