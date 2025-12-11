@@ -612,9 +612,18 @@
 # ARM SME2
 - name: xnn_pqs8_qc8w_igemm_minmax_fp32_ukernel_32x32c4__neonsme2
   init: xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params
-  pack-lh-fn: xnn_x8_pack_lh_ukernel__igemm_neonsme2
-  pack-lh-size-fn: xnn_x8_pack_lh_size__igemm_neonsme2
-  pack: xnn_pack_kai_qs8_conv_goki_w_sme2
+  pack-lh-fn: xnn_x8_pack_lh_ukernel__igemm_neonsme
+  pack-lh-size-fn: xnn_x8_pack_lh_size__igemm_neonsme
+  pack: xnn_pack_kai_qs8_conv_goki_w_sme
+  k-block: 4
+  cpp-check: XNN_ENABLE_KLEIDIAI
+
+# ARM SME
+- name: xnn_pqs8_qc8w_igemm_minmax_fp32_ukernel_32x32c4__neonsme
+  init: xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params
+  pack-lh-fn: xnn_x8_pack_lh_ukernel__igemm_neonsme
+  pack-lh-size-fn: xnn_x8_pack_lh_size__igemm_neonsme
+  pack: xnn_pack_kai_qs8_conv_goki_w_sme
   k-block: 4
   cpp-check: XNN_ENABLE_KLEIDIAI
 

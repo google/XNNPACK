@@ -2360,7 +2360,7 @@ void xnn_pack_kai_qs4_weights_and_biases(
   }
 }
 
-size_t xnn_packed_stride_kai_qs8_qc8w_weights_and_biases_sme2(
+size_t xnn_packed_stride_kai_qs8_qc8w_weights_and_biases_sme(
     const struct xnn_gemm_config* gemm_config, size_t k,
     size_t unused_block_size, size_t unused_k_stride, size_t extra_bytes) {
   size_t ret_val =
@@ -2388,7 +2388,7 @@ static void transpose_weights_x16(const uint16_t* in, uint16_t* out,
   }
 }
 
-void xnn_pack_kai_qs8_qc8w_weights_and_biases_sme2(
+void xnn_pack_kai_qs8_qc8w_weights_and_biases_sme(
     uint32_t flags, const struct xnn_gemm_config* gemm_config,
     size_t input_channels, size_t output_channels, size_t groups,
     size_t unused_block_size, size_t k_stride, const void* accumulator_init,
@@ -2826,7 +2826,7 @@ size_t xnn_packed_size_kai_f16_conv_goki_w(size_t nc, size_t ks, size_t kc) {
       nc, ks, kc);
 }
 
-void xnn_pack_kai_qs8_conv_goki_w_sme2(
+void xnn_pack_kai_qs8_conv_goki_w_sme(
     size_t g, size_t nc, size_t ks, size_t kc, size_t nr, size_t kr, size_t sr,
     const int8_t* k, const int32_t* b, const float* scale, void* packed_weights,
     size_t extra_bytes, const struct xnn_qs8_packing_params* params) {
