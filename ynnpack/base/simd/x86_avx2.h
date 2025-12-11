@@ -113,6 +113,11 @@ YNN_ALWAYS_INLINE u8x32 max(u8x32 a, u8x32 b) {
   return u8x32{_mm256_max_epu8(a.v, b.v)};
 }
 
+YNN_ALWAYS_INLINE f32x8 convert(bf16x8 a, float) {
+  return f32x8{_mm256_castsi256_ps(_mm256_slli_epi32(_mm256_cvtepu16_epi32(a.v),
+      16))};
+}
+
 YNN_ALWAYS_INLINE int16_t horizontal_max(s16x16 a) {
   const __m128i max8_vals = _mm_max_epi16(_mm256_castsi256_si128(a.v),
                                           _mm256_extracti128_si256(a.v, 1));

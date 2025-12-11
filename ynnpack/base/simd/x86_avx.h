@@ -386,6 +386,11 @@ YNN_ALWAYS_INLINE f32x4 extract(f32x8 x, f32x4) {
   return f32x4{_mm256_extractf128_ps(x.v, Index)};
 }
 template <int Index>
+YNN_ALWAYS_INLINE bf16x8 extract(bf16x16 x, bf16x8) {
+  return bf16x8{
+      _mm_castps_si128(_mm256_extractf128_ps(_mm256_castsi256_ps(x.v), Index))};
+}
+template <int Index>
 YNN_ALWAYS_INLINE f16x8 extract(f16x16 x, f16x8) {
   return f16x8{
       _mm_castps_si128(_mm256_extractf128_ps(_mm256_castsi256_ps(x.v), Index))};
