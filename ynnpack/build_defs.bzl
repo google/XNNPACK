@@ -203,32 +203,18 @@ _YNN_PARAMS_FOR_ARCH = {
 def _map_copts_to_msvc(copts):
     """Maps GNU-style compiler options to Microsoft Visual Studio compiler options."""
 
-    to_msvc = {
-        "-msse2": "/arch:SSE2",
-        "-mssse3": "/arch:SSE2",
-        "-msse4.1": "/arch:SSE2",
-        "-mavx": "/arch:AVX",
-        "-mavx2": "/arch:AVX2",
-        "-mavx512f": "/arch:AVX512",
-        "-mavx512bw": "/arch:AVX512",
-        "-mavx512dq": "/arch:AVX512",
-        "-mavx512bf16": "/arch:AVX512",
-        "-mavx512fp16": "/arch:AVX512",
-        "-mavx512vl": "/arch:AVX512",
-        "-mavx512vnni": "/arch:AVX512",
-        "-mfma": "/arch:AVX",
-        "-mf16c": "/arch:AVX",
-        "-mamx-tile": "/arch:AVX512",
-    }
-
-    # Here we use a dictionary to implement a set. We don't care about the values.
-    msvc_copts = {}
-    for c in copts:
-        to = to_msvc.get(c, "")
-        if to:
-            msvc_copts[to] = ""
-
-    return list(msvc_copts.keys())
+    if any([c.startswith("-mavx512") or c.startswith("-mamx") for c in copts]):
+        return ["/arch:AVX512"]
+    elif any([c in ["-mavx2", "-mfma", "-mf16c"] for c in copts]):
+        return ["/arch:AVX2"]
+    elif any([c in ["-mavx"] for c in copts]):
+        return ["/arch:AVX"]
+    elif any([c in ["-mssse3", "-msse4.1"] for c in copts]):
+        return ["/arch:SSE4.2"]
+    elif any([c in ["-msse2"] for c in copts]):
+        return ["/arch:SSE2"]
+    else:
+        return []
 
 def ynn_kernel_copts(unroll_loops = True):
     return select({
