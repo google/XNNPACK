@@ -549,9 +549,9 @@ static enum xnn_status create_fully_connected_operator(
           /*input_stride=*/input_channels,
           /*output_stride=*/output_channels,
           filter_value->quantization.channelwise_zero_point,
-          filter_value->quantization.channelwise_scale, kernel_data,
-          bias_data, node->activation.output_min, node->activation.output_max,
-          node->flags, weights_cache, fully_connected_op_ptr);
+          filter_value->quantization.channelwise_scale, kernel_data, bias_data,
+          node->activation.output_min, node->activation.output_max, node->flags,
+          weights_cache, fully_connected_op_ptr);
       break;
     case fc_type_qp8_f32_qb4w:
       switch (filter_value->quantization.scale_type) {

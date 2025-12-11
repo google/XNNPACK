@@ -2926,7 +2926,8 @@ void xnn_pack_kai_pf32_conv_goki_w_sme(
 #endif  // XNN_ENABLE_KLEIDIAI
 
 size_t xnn_packed_stride_qc2w_weights_and_biases(
-    const struct xnn_gemm_config* gemm_config, size_t k, size_t unused_k_stride,
+    const struct xnn_gemm_config* gemm_config, size_t k,
+    size_t unused_block_size, size_t unused_k_stride,
     size_t unused_extra_bytes) {
   // Extract some useful constants.
   const uint32_t kr = UINT32_C(1) << gemm_config->log2_kr;
@@ -2956,7 +2957,8 @@ void xnn_pack_qc2w_weights_and_biases(
   const uint32_t sr = UINT32_C(1) << gemm_config->log2_sr;
 
   const size_t packed_stride = xnn_packed_stride_qc2w_weights_and_biases(
-      gemm_config, input_channels, k_stride, /*unused_extra_bytes=*/0);
+      gemm_config, input_channels, unused_block_size, k_stride,
+      /*unused_extra_bytes=*/0);
 
   if (flags & XNN_FLAG_TRANSPOSE_WEIGHTS) {
     xnn_pack_qs8_qc2w_gemm_gio_w(

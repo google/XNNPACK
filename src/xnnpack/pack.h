@@ -571,7 +571,8 @@ XNN_INTERNAL size_t xnn_packed_size_kai_f16_conv_goki_w(size_t nc,  //
 #endif  // XNN_ENABLE_KLEIDIAI
 
 XNN_INTERNAL size_t xnn_packed_stride_qc2w_weights_and_biases(
-    const struct xnn_gemm_config* gemm_config, size_t k, size_t unused_k_stride,
+    const struct xnn_gemm_config* gemm_config, size_t k,
+    size_t unused_block_size, size_t unused_k_stride,
     size_t unused_extra_bytes);
 
 XNN_INTERNAL void xnn_pack_qc2w_weights_and_biases(
