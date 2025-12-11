@@ -58,7 +58,7 @@ Tensor<T> pack_b(Tensor<T> b, size_t tile_k, size_t tile_n) {
 }
 
 template <typename T>
-Tensor<T> transpose_a(Tensor<T> a, size_t tile_k) {
+Tensor<T> transpose_a(Tensor<T> a, size_t tile_m, size_t tile_k) {
   const size_t elem_count = type_element_count(type_of<T>());
   const size_t elem_size_bits = sizeof(T) * 8 / elem_count;
 
@@ -77,11 +77,12 @@ Tensor<T> transpose_a(Tensor<T> a, size_t tile_k) {
 
   // Add the new transposed dimensions.
   extents.push_back(ceil_div(k, tile_k));
-  extents.push_back(m * tile_k);
+  extents.push_back(align_up(m, tile_m) * tile_k);
 
   // Make the result.
   Tensor<T> result(extents);
-  packer p(/*transpose=*/true, elem_size_bits, tile_k, m * tile_k);
+  packer p(/*transpose=*/true, elem_size_bits, tile_k,
+           align_up(m, tile_m) * tile_k);
   for (const auto& i : EnumerateIndices(batch_extents)) {
     p.pack(k, m, a.stride(a.rank() - 2) * sizeof(T), a.slice_leading(i).base(),
            result.stride(result.rank() - 2) * sizeof(T), 0,

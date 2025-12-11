@@ -34,7 +34,7 @@ static f32x16x8& operator+=(f32x16x8& a, bf16x32x4 b) {
     __m512bh hi = reinterpret_cast<__m512bh>(
         _mm512_cvtepu16_epi32(_mm512_extracti64x4_epi64(b_bits, 1)));
 
-    a.v[2 * i].v = _mm512_dpbf16_ps(a.v[2 * i].v, lo, ones);
+    a.v[2 * i + 0].v = _mm512_dpbf16_ps(a.v[2 * i + 0].v, lo, ones);
     a.v[2 * i + 1].v = _mm512_dpbf16_ps(a.v[2 * i + 1].v, hi, ones);
   }
 

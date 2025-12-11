@@ -21,7 +21,8 @@ void define_binary(ynn_subgraph& subgraph, ynn_node& node, uint32_t input_a_id,
                    init_binary_params_fn init_params = nullptr);
 void define_ternary(ynn_subgraph& subgraph, ynn_node& node, uint32_t input_a_id,
                     uint32_t input_b_id, uint32_t input_c_id,
-                    uint32_t output_id, ternary_kernel_fn kernel);
+                    uint32_t output_id, ternary_op op,
+                    ternary_kernel_fn kernel);
 
 }  // namespace ynn
 

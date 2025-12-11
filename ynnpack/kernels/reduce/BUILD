@@ -53,7 +53,6 @@ ynn_cc_library(
         "x86_avx512bw": ["x86_avx512bw.cc"],
         "x86_avx512f": ["x86_avx512f.cc"],
         "x86_f16c": ["x86_f16c.cc"],
-        "x86_avx512fp16": ["x86_avx512fp16.cc"],
         "x86_avx2": ["x86_avx2.cc"],
         "x86_avx2_fma3": ["x86_avx2_fma3.cc"],
     },
@@ -72,6 +71,7 @@ cc_test(
     srcs = ["test.cc"],
     linkopts = ynn_binary_linkopts(),
     malloc = ynn_binary_malloc(),
+    shard_count = 10,
     deps = [
         ":reduce",
         "//ynnpack/base",

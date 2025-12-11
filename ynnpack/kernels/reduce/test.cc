@@ -61,6 +61,38 @@ float Tolerance(ReduceOp op, size_t k, float max_abs_value) {
 }
 
 template <typename AT, typename CT>
+YNN_ALWAYS_INLINE void ReduceRow(ReduceOp op, CT* c_0, CT* c_1, const AT* a,
+                                 size_t N, size_t K1, size_t a_stride_n) {
+  for (size_t j = 0; j < N; ++j) {
+    for (size_t k1 = 0; k1 < K1; ++k1) {
+      CT a_j = static_cast<CT>(a[k1]);
+
+      switch (op) {
+        case ReduceOp::kSum:
+          c_0[j] = c_0[j] + a_j;
+          break;
+        case ReduceOp::kSumSquared:
+          c_0[j] = c_0[j] + a_j * a_j;
+          break;
+        case ReduceOp::kMin:
+          c_0[j] = std::min(c_0[j], a_j);
+          break;
+        case ReduceOp::kMax:
+          c_0[j] = std::max(c_0[j], a_j);
+          break;
+        case ReduceOp::kMinMax:
+          c_0[j] = std::min(c_0[j], a_j);
+          c_1[j] = std::max(c_1[j], a_j);
+          break;
+        default:
+          YNN_UNREACHABLE;
+      }
+    }
+    a += a_stride_n;
+  }
+}
+
+template <typename AT, typename CT>
 void Reference(Tensor<AT> a, Tensor<CT> c, ReduceOp op) {
   // This helper allows omitting 2 of the 3 k dimensions. Canonicalize to 3 k
   // dimensions here.
@@ -69,44 +101,27 @@ void Reference(Tensor<AT> a, Tensor<CT> c, ReduceOp op) {
   }
 
   ASSERT_EQ(a.extent(0), c.extent(1));
-  size_t K3 = a.extent(1);
-  size_t K2 = a.extent(2);
-  size_t K1 = a.extent(3);
-  size_t N = c.extent(1);
+  const size_t a_stride_n = a.stride(0);
+  const size_t a_stride_k1 = a.stride(3);
+  const size_t K3 = a.extent(1);
+  const size_t K2 = a.extent(2);
+  const size_t K1 = a.extent(3);
+  const size_t N = c.extent(1);
   CT* c_0 = &c(0, 0);
   CT* c_1 = &c(1, 0);
   for (size_t k3 = 0; k3 < K3; ++k3) {
     for (size_t k2 = 0; k2 < K2; ++k2) {
-      for (size_t j = 0; j < N; ++j) {
-        const AT* a_jk = &a(j, k3, k2, 0);
+      if (a_stride_n == 1) {
+        // Move the loop over k1 outside the loop over n (and call the "kernel"
+        // with K1=1).
+        const AT* a_k1 = &a(0, k3, k2, 0);
         for (size_t k1 = 0; k1 < K1; ++k1) {
-          CT a_j = static_cast<CT>(a_jk[k1]);
-
-          // Let us find bfloat/half overload of min/max.
-          using std::max;
-          using std::min;
-
-          switch (op) {
-            case ReduceOp::kSum:
-              c_0[j] = c_0[j] + a_j;
-              break;
-            case ReduceOp::kSumSquared:
-              c_0[j] = c_0[j] + a_j * a_j;
-              break;
-            case ReduceOp::kMin:
-              c_0[j] = min(c_0[j], a_j);
-              break;
-            case ReduceOp::kMax:
-              c_0[j] = max(c_0[j], a_j);
-              break;
-            case ReduceOp::kMinMax:
-              c_0[j] = min(c_0[j], a_j);
-              c_1[j] = max(c_1[j], a_j);
-              break;
-            default:
-              YNN_UNREACHABLE;
-          }
+          ReduceRow(op, c_0, c_1, a_k1, N, /*K1=*/1,
+                    /*a_stride_n=*/1);
+          a_k1 += a_stride_k1;
         }
+      } else {
+        ReduceRow(op, c_0, c_1, &a(0, k3, k2, 0), N, K1, a_stride_n);
       }
     }
   }

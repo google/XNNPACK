@@ -9,6 +9,7 @@
 
 #include <gtest/gtest.h>
 #include "ynnpack/include/ynnpack.h"
+#include "ynnpack/kernels/ternary/ternary.h"
 #include "ynnpack/subgraph/subgraph.h"
 #include "ynnpack/subgraph/test/subgraph_builder.h"
 
@@ -22,6 +23,18 @@ int valid_value_count(ynn_subgraph_t subgraph) {
 int valid_node_count(ynn_subgraph_t subgraph) {
   return std::count_if(subgraph->nodes.begin(), subgraph->nodes.end(),
                        [](const ynn_node& node) { return node.is_valid(); });
+}
+
+bool is_binary(const ynn_node& node, ynn_binary_operator op) {
+  const ynn_node::binary_elementwise* binary =
+      std::get_if<ynn_node::binary_elementwise>(&node.op);
+  return binary && binary->op == op;
+}
+
+bool is_ternary(const ynn_node& node, ternary_op op) {
+  const ynn_node::ternary_elementwise* ternary =
+      std::get_if<ynn_node::ternary_elementwise>(&node.op);
+  return ternary && ternary->op == op;
 }
 
 TEST(fusion, multiply_add) {
@@ -50,7 +63,7 @@ TEST(fusion, multiply_add) {
   const ynn_node* output = subgraph.get_producer(x_id);
   ASSERT_NE(output, nullptr);
   ASSERT_EQ(output->inputs.size(), 3);
-  ASSERT_TRUE(std::get_if<ynn_node::opaque>(&output->op));
+  ASSERT_TRUE(is_ternary(*output, ternary_op::multiply_add));
 }
 
 TEST(fusion, negate_multiply) {
@@ -77,7 +90,7 @@ TEST(fusion, negate_multiply) {
   const ynn_node* output = subgraph.get_producer(x_id);
   ASSERT_NE(output, nullptr);
   ASSERT_EQ(output->inputs.size(), 3);
-  ASSERT_TRUE(std::get_if<ynn_node::opaque>(&output->op));
+  ASSERT_TRUE(is_ternary(*output, ternary_op::subtract_multiply));
 }
 
 TEST(fusion, subtract_multiply) {
@@ -106,7 +119,7 @@ TEST(fusion, subtract_multiply) {
   const ynn_node* output = subgraph.get_producer(x_id);
   ASSERT_NE(output, nullptr);
   ASSERT_EQ(output->inputs.size(), 3);
-  ASSERT_TRUE(std::get_if<ynn_node::opaque>(&output->op));
+  ASSERT_TRUE(is_ternary(*output, ternary_op::subtract_multiply));
 }
 
 TEST(fusion, convert_int32_to_fp32_binary) {
@@ -129,7 +142,7 @@ TEST(fusion, convert_int32_to_fp32_binary) {
   const ynn_node* output = subgraph.get_producer(x_id);
   ASSERT_NE(output, nullptr);
   ASSERT_EQ(output->inputs.size(), 2);
-  ASSERT_TRUE(std::get_if<ynn_node::binary_elementwise>(&output->op));
+  ASSERT_TRUE(is_binary(*output, ynn_binary_multiply));
 }
 
 TEST(fusion, convert_int32_to_fp32_ternary) {
@@ -159,7 +172,7 @@ TEST(fusion, convert_int32_to_fp32_ternary) {
   const ynn_node* output = subgraph.get_producer(x_id);
   ASSERT_NE(output, nullptr);
   ASSERT_EQ(output->inputs.size(), 3);
-  ASSERT_TRUE(std::get_if<ynn_node::opaque>(&output->op));
+  ASSERT_TRUE(is_ternary(*output, ternary_op::multiply));
 }
 
 TEST(fusion, convert_fp32_to_int8_ternary) {
@@ -185,7 +198,7 @@ TEST(fusion, convert_fp32_to_int8_ternary) {
   const ynn_node* output = subgraph.get_producer(x_id);
   ASSERT_NE(output, nullptr);
   ASSERT_EQ(output->inputs.size(), 3);
-  ASSERT_TRUE(std::get_if<ynn_node::opaque>(&output->op));
+  ASSERT_TRUE(is_ternary(*output, ternary_op::quantize_int8));
 }
 
 TEST(fusion, convert_fp32_to_uint8_ternary) {
@@ -211,7 +224,7 @@ TEST(fusion, convert_fp32_to_uint8_ternary) {
   const ynn_node* output = subgraph.get_producer(x_id);
   ASSERT_NE(output, nullptr);
   ASSERT_EQ(output->inputs.size(), 3);
-  ASSERT_TRUE(std::get_if<ynn_node::opaque>(&output->op));
+  ASSERT_TRUE(is_ternary(*output, ternary_op::quantize_uint8));
 }
 
 TEST(fusion, clamp_min_max) {
@@ -243,7 +256,7 @@ TEST(fusion, clamp_min_max) {
   ASSERT_EQ(output->inputs[0], a_id);
   ASSERT_EQ(output->inputs[1], b_id);
   ASSERT_EQ(output->inputs[2], c_id);
-  ASSERT_TRUE(std::get_if<ynn_node::opaque>(&output->op));
+  ASSERT_TRUE(is_ternary(*output, ternary_op::clamp));
 }
 
 TEST(fusion, broadcast_of_static) {

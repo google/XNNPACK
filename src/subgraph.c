@@ -4103,6 +4103,9 @@ enum xnn_status xnn_subgraph_optimize_packed_lhs(xnn_subgraph_t subgraph,
 }
 
 enum xnn_status xnn_subgraph_rewrite_for_row_sum(xnn_subgraph_t subgraph) {
+  // Count the number of consumers for each value.
+  xnn_subgraph_analyze_consumers_and_producers(subgraph);
+
   // Loop over the nodes in the subgraph.
   for (uint32_t node_id = 0; node_id < subgraph->num_nodes; node_id++) {
     struct xnn_node* node = &subgraph->nodes[node_id];

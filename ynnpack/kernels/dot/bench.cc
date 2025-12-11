@@ -52,8 +52,8 @@ Shape shape = {240, 240, 240};
 
 template <typename TA, typename TB, typename TC>
 void dot(benchmark::State& state, uint64_t arch_flags, dot_kernel_fn kernel,
-         size_t block_m, size_t block_n, size_t tile_n, size_t tile_k,
-         uint32_t flags, TA, TB, TC) {
+         size_t block_m, size_t block_n, size_t tile_m, size_t tile_n,
+         size_t tile_k, uint32_t flags, TA, TB, TC) {
   if (!is_arch_supported(arch_flags)) {
     state.SkipWithMessage("Unsupported hardware");
     return;
@@ -73,7 +73,7 @@ void dot(benchmark::State& state, uint64_t arch_flags, dot_kernel_fn kernel,
 
   const bool transpose_a = flags & dot_flag::transpose_a;
 
-  Tensor<TA> a({m, k / a_elem_count});
+  Tensor<TA> a({align_up(m, tile_m), k / a_elem_count});
   Tensor<TB> b({k, align_up(n, tile_n) / b_elem_count},
                Alignment{.bytes = tile_n * tile_k * sizeof(TB)});
   Tensor<TC> c({m, n});
@@ -109,10 +109,10 @@ void dot(benchmark::State& state, uint64_t arch_flags, dot_kernel_fn kernel,
       benchmark::Counter(state.iterations() * ops, benchmark::Counter::kIsRate);
 }
 
-#define YNN_DOT_KERNEL(arch_flags, kernel, block_m, block_n, block_k, tile_n,  \
-                       tile_k, flags, a_type, b_type, c_type)                  \
-  BENCHMARK_CAPTURE(dot, kernel, arch_flags, kernel, block_m, block_n, tile_n, \
-                    tile_k, flags, a_type(), b_type(), c_type())               \
+#define YNN_DOT_KERNEL(arch_flags, kernel, block_m, block_n, block_k, tile_m,  \
+                       tile_n, tile_k, flags, a_type, b_type, c_type)          \
+  BENCHMARK_CAPTURE(dot, kernel, arch_flags, kernel, block_m, block_n, tile_m, \
+                    tile_n, tile_k, flags, a_type(), b_type(), c_type())       \
       ->UseRealTime();
 #include "ynnpack/kernels/dot/kernels.inc"
 #undef YNN_DOT_KERNEL

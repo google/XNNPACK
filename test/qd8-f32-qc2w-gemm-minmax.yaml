@@ -9,9 +9,85 @@
   pack: xnn_pack_qs8_qc2w_gemm_goi_w
   k-block: 8
   planes: 4
-
+- name: xnn_qd8_f32_qc2w_gemm_minmax_ukernel_1x8c4__neondot
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_qs8_qc2w_gemm_goi_w
+  k-block: 8
+  planes: 4
+- name: xnn_qd8_f32_qc2w_gemm_minmax_ukernel_2x16c4__neondot
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_qs8_qc2w_gemm_goi_w
+  k-block: 8
+  planes: 4
+- name: xnn_qd8_f32_qc2w_gemm_minmax_ukernel_2x8c4__neondot
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_qs8_qc2w_gemm_goi_w
+  k-block: 8
+  planes: 4
+- name: xnn_qd8_f32_qc2w_gemm_minmax_ukernel_3x16c4__neondot
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_qs8_qc2w_gemm_goi_w
+  k-block: 8
+  planes: 4
 - name: xnn_qd8_f32_qc2w_gemm_minmax_ukernel_4x16c4__neondot
   init: xnn_init_f32_minmax_scalar_params
   pack: xnn_pack_qs8_qc2w_gemm_goi_w
   k-block: 8
+  planes: 4
+- name: xnn_qd8_f32_qc2w_gemm_minmax_ukernel_4x8c4__neondot
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_qs8_qc2w_gemm_goi_w
+  k-block: 8
+  planes: 4
+- name: xnn_qd8_f32_qc2w_gemm_minmax_ukernel_6x16c4__neondot
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_qs8_qc2w_gemm_goi_w
+  k-block: 8
+  planes: 4
+- name: xnn_qd8_f32_qc2w_gemm_minmax_ukernel_6x8c4__neondot
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_qs8_qc2w_gemm_goi_w
+  k-block: 8
+  planes: 4
+
+# Scalar
+- name: xnn_qd8_f32_qc2w_gemm_minmax_ukernel_1x1__scalar
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_qs8_qc2w_gemm_goi_w
+  k-block: 2
+  planes: 4
+- name: xnn_qd8_f32_qc2w_gemm_minmax_ukernel_1x2__scalar
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_qs8_qc2w_gemm_goi_w
+  k-block: 2
+  planes: 4
+- name: xnn_qd8_f32_qc2w_gemm_minmax_ukernel_1x4__scalar
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_qs8_qc2w_gemm_goi_w
+  k-block: 2
+  planes: 4
+- name: xnn_qd8_f32_qc2w_gemm_minmax_ukernel_1x8__scalar
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_qs8_qc2w_gemm_goi_w
+  k-block: 2
+  planes: 4
+- name: xnn_qd8_f32_qc2w_gemm_minmax_ukernel_2x2__scalar
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_qs8_qc2w_gemm_goi_w
+  k-block: 2
+  planes: 4
+- name: xnn_qd8_f32_qc2w_gemm_minmax_ukernel_2x4__scalar
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_qs8_qc2w_gemm_goi_w
+  k-block: 2
+  planes: 4
+- name: xnn_qd8_f32_qc2w_gemm_minmax_ukernel_2x8__scalar
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_qs8_qc2w_gemm_goi_w
+  k-block: 2
+  planes: 4
+- name: xnn_qd8_f32_qc2w_gemm_minmax_ukernel_4x4__scalar
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_qs8_qc2w_gemm_goi_w
+  k-block: 2
   planes: 4

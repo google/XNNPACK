@@ -11,6 +11,14 @@
 namespace ynn {
 namespace simd {
 
+TEST_BROADCAST(x86_avx, u8x32, arch_flag::avx);
+TEST_BROADCAST(x86_avx, s8x32, arch_flag::avx);
+TEST_BROADCAST(x86_avx, s16x16, arch_flag::avx);
+TEST_BROADCAST(x86_avx, f16x16, arch_flag::avx);
+TEST_BROADCAST(x86_avx, bf16x16, arch_flag::avx);
+TEST_BROADCAST(x86_avx, f32x8, arch_flag::avx);
+TEST_BROADCAST(x86_avx, s32x8, arch_flag::avx);
+
 TEST_LOAD_STORE(x86_avx, u8x32, arch_flag::avx);
 TEST_LOAD_STORE(x86_avx, s8x32, arch_flag::avx);
 TEST_LOAD_STORE(x86_avx, s16x16, arch_flag::avx);

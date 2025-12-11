@@ -19,6 +19,25 @@ namespace ynn {
 namespace simd {
 
 template <typename vector>
+void test_broadcast(uint32_t arch_flags) {
+  if (!is_arch_supported(arch_flags)) {
+    GTEST_SKIP() << "Unsupported architecture";
+  }
+  using scalar = typename vector::value_type;
+
+  for (scalar value : {1, 2, 3}) {
+    scalar dst[vector::N];
+    store(dst, vector{value});
+    for (size_t i = 0; i < vector::N; ++i) {
+      ASSERT_EQ(dst[i], value);
+    }
+  }
+}
+
+#define TEST_BROADCAST(test_class, type, arch_flags) \
+  TEST(test_class, broadcast_##type) { test_broadcast<type>(arch_flags); }
+
+template <typename vector>
 void test_load_store(uint32_t arch_flags) {
   if (!is_arch_supported(arch_flags)) {
     GTEST_SKIP() << "Unsupported architecture";
@@ -26,16 +45,21 @@ void test_load_store(uint32_t arch_flags) {
   using scalar = typename vector::value_type;
   static constexpr size_t N = vector::N;
 
-  scalar src[N];
-  for (size_t i = 0; i < N; ++i) {
-    src[i] = static_cast<scalar>(i);
+  scalar src_aligned[N * 2];
+  scalar dst_aligned[N * 2];
+  for (size_t i = 0; i < N * 2; ++i) {
+    src_aligned[i] = static_cast<scalar>(i);
   }
-  vector v = load(src, vector{});
+  for (size_t align = 0; align < N; ++align) {
+    // Use a different alignment for src and dst.
+    scalar* src = &src_aligned[align];
+    scalar* dst = &dst_aligned[N - align];
+    vector v = load(src, vector{});
 
-  scalar dst[N];
-  store(dst, v);
-  for (size_t i = 0; i < N; ++i) {
-    ASSERT_EQ(dst[i], src[i]);
+    store(dst, v);
+    for (size_t i = 0; i < N; ++i) {
+      ASSERT_EQ(dst[i], src[i]);
+    }
   }
 }
 
@@ -69,31 +93,75 @@ void test_aligned_load_store(uint32_t arch_flags) {
   }
 
 template <typename vector>
-void test_partial_load_store(uint32_t arch_flags) {
+void test_partial_load(uint32_t arch_flags) {
   if (!is_arch_supported(arch_flags)) {
     GTEST_SKIP() << "Unsupported architecture";
   }
   using scalar = typename vector::value_type;
   static constexpr size_t N = vector::N;
 
-  for (size_t n = 1; n < N; ++n) {
-    std::vector<scalar> src(n);
-    for (size_t i = 0; i < n; ++i) {
-      src[i] = static_cast<scalar>(i);
-    }
-    vector v = load(src.data(), vector{}, n);
+  scalar dst[N];
+  scalar init[N];
+  scalar src_aligned[N * 2];
+  for (size_t i = 0; i < N; ++i) {
+    init[i] = static_cast<scalar>(i * 2 + 1);
+  }
+  for (size_t i = 0; i < N * 2; ++i) {
+    src_aligned[i] = static_cast<scalar>(i);
+  }
+  for (int align = 0; align < N; ++align) {
+    for (size_t n = 1; n < N; ++n) {
+      scalar* src = &src_aligned[N + align - n];
+      vector v = load(src, load(init, vector{}), n);
 
-    std::vector<scalar> dst(n);
-    store(dst.data(), v, n);
-    for (size_t i = 0; i < n; ++i) {
-      ASSERT_EQ(dst[i], src[i]);
+      store(dst, v);
+      for (size_t i = 0; i < n; ++i) {
+        ASSERT_EQ(dst[i], src[i]);
+      }
+      for (size_t i = n; i < N; ++i) {
+        ASSERT_EQ(dst[i], init[i]);
+      }
+    }
+  }
+}
+
+template <typename vector>
+void test_partial_store(uint32_t arch_flags) {
+  if (!is_arch_supported(arch_flags)) {
+    GTEST_SKIP() << "Unsupported architecture";
+  }
+  using scalar = typename vector::value_type;
+  static constexpr size_t N = vector::N;
+
+  scalar src[N];
+  for (size_t i = 0; i < N; ++i) {
+    src[i] = static_cast<scalar>(i);
+  }
+  scalar dst_aligned[N * 2];
+  for (size_t align = 0; align < N; ++align) {
+    scalar* dst = &dst_aligned[align];
+    for (size_t i = 0; i < N; ++i) {
+      dst[i] = static_cast<scalar>(i + 5);
+    }
+    vector v = load(src, vector{});
+    for (size_t n = 1; n < N; ++n) {
+      store(dst, v, n);
+      for (size_t i = 0; i < n; ++i) {
+        ASSERT_EQ(dst[i], src[i]);
+      }
+      for (size_t i = n; i < N; ++i) {
+        ASSERT_EQ(dst[i], static_cast<scalar>(i + 5));
+      }
     }
   }
 }
 
 #define TEST_PARTIAL_LOAD_STORE(test_class, type, arch_flags) \
-  TEST(test_class, partial_load_store_##type) {               \
-    test_partial_load_store<type>(arch_flags);                \
+  TEST(test_class, partial_load_##type) {                     \
+    test_partial_load<type>(arch_flags);                      \
+  }                                                           \
+  TEST(test_class, partial_store_##type) {                    \
+    test_partial_store<type>(arch_flags);                     \
   }
 
 template <typename T, template <typename> typename Op>

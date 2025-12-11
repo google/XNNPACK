@@ -163,7 +163,7 @@ cc_library(
     testonly = True,
     srcs = ["reference.cc"],
     hdrs = ["reference.h"],
-    visibility = ["//ynnpack:__subpackages__"],
+    visibility = ["//visibility:private"],
     deps = [
         "//ynnpack:ynnpack_h",
         "//ynnpack/base",

@@ -4113,7 +4113,38 @@ DECLARE_QP8_F32_QB4W_GEMM_MINMAX_UKERNEL_FUNCTION(
 DECLARE_QD8_F32_QC2W_GEMM_MINMAX_UKERNEL_FUNCTION(
     xnn_qd8_f32_qc2w_gemm_minmax_ukernel_1x16c4__neondot)
 DECLARE_QD8_F32_QC2W_GEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_qd8_f32_qc2w_gemm_minmax_ukernel_2x16c4__neondot)
+DECLARE_QD8_F32_QC2W_GEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_qd8_f32_qc2w_gemm_minmax_ukernel_1x8c4__neondot)
+DECLARE_QD8_F32_QC2W_GEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_qd8_f32_qc2w_gemm_minmax_ukernel_2x8c4__neondot)
+DECLARE_QD8_F32_QC2W_GEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_qd8_f32_qc2w_gemm_minmax_ukernel_3x16c4__neondot)
+DECLARE_QD8_F32_QC2W_GEMM_MINMAX_UKERNEL_FUNCTION(
     xnn_qd8_f32_qc2w_gemm_minmax_ukernel_4x16c4__neondot)
+DECLARE_QD8_F32_QC2W_GEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_qd8_f32_qc2w_gemm_minmax_ukernel_4x8c4__neondot)
+DECLARE_QD8_F32_QC2W_GEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_qd8_f32_qc2w_gemm_minmax_ukernel_6x16c4__neondot)
+DECLARE_QD8_F32_QC2W_GEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_qd8_f32_qc2w_gemm_minmax_ukernel_6x8c4__neondot)
+
+DECLARE_QD8_F32_QC2W_GEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_qd8_f32_qc2w_gemm_minmax_ukernel_1x1__scalar)
+DECLARE_QD8_F32_QC2W_GEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_qd8_f32_qc2w_gemm_minmax_ukernel_1x2__scalar)
+DECLARE_QD8_F32_QC2W_GEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_qd8_f32_qc2w_gemm_minmax_ukernel_1x4__scalar)
+DECLARE_QD8_F32_QC2W_GEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_qd8_f32_qc2w_gemm_minmax_ukernel_1x8__scalar)
+DECLARE_QD8_F32_QC2W_GEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_qd8_f32_qc2w_gemm_minmax_ukernel_2x2__scalar)
+DECLARE_QD8_F32_QC2W_GEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_qd8_f32_qc2w_gemm_minmax_ukernel_2x4__scalar)
+DECLARE_QD8_F32_QC2W_GEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_qd8_f32_qc2w_gemm_minmax_ukernel_2x8__scalar)
+DECLARE_QD8_F32_QC2W_GEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_qd8_f32_qc2w_gemm_minmax_ukernel_4x4__scalar)
 
 #define DECLARE_QD8_F16_QC8W_GEMM_MINMAX_UKERNEL_FUNCTION(fn_name)       \
   XNN_INTERNAL void fn_name(                                             \

@@ -44,11 +44,11 @@ static f32x8 reduce_add(
     f32x8 a, bf16x16 b, Identity /*map_fn*/,
     std::integral_constant<size_t, 2> /*horizontal_factor*/) {
   __m256 mask = _mm256_castsi256_ps(_mm256_set1_epi32(0xFFFF0000));
-  __m256 evens = _mm256_castsi256_ps(_mm256_slli_epi32(b.v, 16));
-  __m256 odds = _mm256_and_ps(_mm256_castsi256_ps(b.v), mask);
+  f32x8 evens(_mm256_castsi256_ps(_mm256_slli_epi32(b.v, 16)));
+  f32x8 odds(_mm256_and_ps(_mm256_castsi256_ps(b.v), mask));
 
-  a += f32x8{odds};
-  a += f32x8{evens};
+  a += odds;
+  a += evens;
   return a;
 }
 
