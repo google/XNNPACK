@@ -209,10 +209,9 @@ void TestConv2D(AT, BT, CT, const KernelInfo& kernel) {
     Tensor<AT> packed_a = pack_a ? transpose_a(a, tile_m, tile_k) : a;
 
     if (pack_a) {
-      // When we transpose, we tile_k, making the kw dimension tile_k times
-      // bigger, which also dilates the kernel.
-      // [kh, ci/tile_k, wkw*tile_k] -> [kh, ci/tile_k, kw*tile_k, w]
-      packed_a = make_stencil_dim(packed_a, 2, kw * tile_k, /*stride=*/1,
+      // When we transpose, we tile k, which also dilates the kernel.
+      // [kh, ci/tile_k, wkw*tile_k] -> [kh, ci/tile_k, kw, w*tile_k]
+      packed_a = make_stencil_dim(packed_a, 2, kw, /*stride=*/1,
                                   /*dilation=*/tile_k);
 
       // [kh, ci/tile_k, kw*tile_k, w] -> [ci/tile_k, kh, kw*tile_k, w]
