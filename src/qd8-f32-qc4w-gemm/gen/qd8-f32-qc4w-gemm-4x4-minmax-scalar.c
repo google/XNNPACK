@@ -17,6 +17,7 @@
 #include "src/xnnpack/math.h"
 #include "src/xnnpack/microparams.h"
 
+#include "src/xnnpack/unaligned.h"
 
 
 void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_4x4__scalar(
@@ -61,10 +62,11 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_4x4__scalar(
 
   kc = round_up_po2(kc, 2);
   do {
-    const int32_t vksum0 = ((const int32_t*) w)[0];
-    const int32_t vksum1 = ((const int32_t*) w)[1];
-    const int32_t vksum2 = ((const int32_t*) w)[2];
-    const int32_t vksum3 = ((const int32_t*) w)[3];
+    const int32_t vksum0 = unaligned_indexed_load_s32(w, 0);
+    const int32_t vksum1 = unaligned_indexed_load_s32(w, 1);
+    const int32_t vksum2 = unaligned_indexed_load_s32(w, 2);
+    const int32_t vksum3 = unaligned_indexed_load_s32(w, 3);
+
     const int32_t vinput_zero_point0 = quantization_params[0].zero_point;
     int32_t vacc0x0 = vksum0 * vinput_zero_point0;
     int32_t vacc0x1 = vksum1 * vinput_zero_point0;
@@ -188,43 +190,43 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_4x4__scalar(
     vout3x2 *= vinput_scale3;
     vout3x3 *= vinput_scale3;
 
-    const float vfilter_output_scale0 = ((const float*) w)[0];
+    const float vfilter_output_scale0 = unaligned_indexed_load_f32(w, 0);
     vout0x0 *= vfilter_output_scale0;
     vout1x0 *= vfilter_output_scale0;
     vout2x0 *= vfilter_output_scale0;
     vout3x0 *= vfilter_output_scale0;
-    const float vfilter_output_scale1 = ((const float*) w)[1];
+    const float vfilter_output_scale1 = unaligned_indexed_load_f32(w, 1);
     vout0x1 *= vfilter_output_scale1;
     vout1x1 *= vfilter_output_scale1;
     vout2x1 *= vfilter_output_scale1;
     vout3x1 *= vfilter_output_scale1;
-    const float vfilter_output_scale2 = ((const float*) w)[2];
+    const float vfilter_output_scale2 = unaligned_indexed_load_f32(w, 2);
     vout0x2 *= vfilter_output_scale2;
     vout1x2 *= vfilter_output_scale2;
     vout2x2 *= vfilter_output_scale2;
     vout3x2 *= vfilter_output_scale2;
-    const float vfilter_output_scale3 = ((const float*) w)[3];
+    const float vfilter_output_scale3 = unaligned_indexed_load_f32(w, 3);
     vout0x3 *= vfilter_output_scale3;
     vout1x3 *= vfilter_output_scale3;
     vout2x3 *= vfilter_output_scale3;
     vout3x3 *= vfilter_output_scale3;
 
-    const float vbias0 = ((const float*) w)[4];
+    const float vbias0 = unaligned_indexed_load_f32(w, 4);
     vout0x0 += vbias0;
     vout1x0 += vbias0;
     vout2x0 += vbias0;
     vout3x0 += vbias0;
-    const float vbias1 = ((const float*) w)[5];
+    const float vbias1 = unaligned_indexed_load_f32(w, 5);
     vout0x1 += vbias1;
     vout1x1 += vbias1;
     vout2x1 += vbias1;
     vout3x1 += vbias1;
-    const float vbias2 = ((const float*) w)[6];
+    const float vbias2 = unaligned_indexed_load_f32(w, 6);
     vout0x2 += vbias2;
     vout1x2 += vbias2;
     vout2x2 += vbias2;
     vout3x2 += vbias2;
-    const float vbias3 = ((const float*) w)[7];
+    const float vbias3 = unaligned_indexed_load_f32(w, 7);
     vout0x3 += vbias3;
     vout1x3 += vbias3;
     vout2x3 += vbias3;

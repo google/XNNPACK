@@ -17,6 +17,7 @@
 #include "src/xnnpack/math.h"
 #include "src/xnnpack/microparams.h"
 
+#include "src/xnnpack/unaligned.h"
 
 
 void xnn_qd8_f16_qb4w_gemm_minmax_ukernel_1x4__scalar(
@@ -47,10 +48,11 @@ void xnn_qd8_f16_qb4w_gemm_minmax_ukernel_1x4__scalar(
 
   kc = round_up_po2(kc, 2);
   do {
-    const float vksum0 = ((const float*) w)[0];
-    const float vksum1 = ((const float*) w)[1];
-    const float vksum2 = ((const float*) w)[2];
-    const float vksum3 = ((const float*) w)[3];
+    const float vksum0 = unaligned_indexed_load_f32(w, 0);
+    const float vksum1 = unaligned_indexed_load_f32(w, 1);
+    const float vksum2 = unaligned_indexed_load_f32(w, 2);
+    const float vksum3 = unaligned_indexed_load_f32(w, 3);
+
     const float vinput_zero_point0 = (const float) quantization_params[0].zero_point;
     float vout0x0 = vksum0 * vinput_zero_point0;
     float vout0x1 = vksum1 * vinput_zero_point0;
@@ -94,13 +96,13 @@ void xnn_qd8_f16_qb4w_gemm_minmax_ukernel_1x4__scalar(
     }
     // accumulate in float
       float vf0x0 = vacc0x0;
-      const float vfilter_output_scale0 = math_cvt_fp32_bf16(((const uint16_t*) w)[0]);
+      const float vfilter_output_scale0 = math_cvt_fp32_bf16(unaligned_indexed_load_u16(w, 0));
       float vf0x1 = vacc0x1;
-      const float vfilter_output_scale1 = math_cvt_fp32_bf16(((const uint16_t*) w)[1]);
+      const float vfilter_output_scale1 = math_cvt_fp32_bf16(unaligned_indexed_load_u16(w, 1));
       float vf0x2 = vacc0x2;
-      const float vfilter_output_scale2 = math_cvt_fp32_bf16(((const uint16_t*) w)[2]);
+      const float vfilter_output_scale2 = math_cvt_fp32_bf16(unaligned_indexed_load_u16(w, 2));
       float vf0x3 = vacc0x3;
-      const float vfilter_output_scale3 = math_cvt_fp32_bf16(((const uint16_t*) w)[3]);
+      const float vfilter_output_scale3 = math_cvt_fp32_bf16(unaligned_indexed_load_u16(w, 3));
 
       vf0x0 *= vfilter_output_scale0;
       vout0x0 += vf0x0;
@@ -121,13 +123,13 @@ void xnn_qd8_f16_qb4w_gemm_minmax_ukernel_1x4__scalar(
     vout0x3 *= vinput_scale0;
 
 
-    const float vbias0 = ((const float*) w)[0];
+    const float vbias0 = unaligned_indexed_load_f32(w, 0);
     vout0x0 += vbias0;
-    const float vbias1 = ((const float*) w)[1];
+    const float vbias1 = unaligned_indexed_load_f32(w, 1);
     vout0x1 += vbias1;
-    const float vbias2 = ((const float*) w)[2];
+    const float vbias2 = unaligned_indexed_load_f32(w, 2);
     vout0x2 += vbias2;
-    const float vbias3 = ((const float*) w)[3];
+    const float vbias3 = unaligned_indexed_load_f32(w, 3);
     vout0x3 += vbias3;
 
     w = (const float*) w + 4;

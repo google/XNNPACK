@@ -17,8 +17,7 @@ $if VARIANT == "LRINTF":
 #include "src/xnnpack/math.h"
 #include "src/xnnpack/microparams.h"
 
-$if NR % 4 != 0:
-  #include "src/xnnpack/unaligned.h"
+#include "src/xnnpack/unaligned.h"
 
 $#
 $INDENT = 0
@@ -49,7 +48,7 @@ $XINT8_T = "uint8_t" if DATATYPE == "QU8" else "int8_t"
 $OUT_T = {"QC8": "int8_t", "QS8_QC4": "int8_t", "QS8": "int8_t", "QU8": "uint8_t", "QB4_F16": "xnn_float16", "QD8": "float", "QC4": "float", "QC2": "float", "QB4_F32": "float"}[DATATYPE]
 $MIN_F32 = "__builtin_wasm_min_f32" if WASM else "math_min_f32"
 $MAX_F32 = "__builtin_wasm_max_f32" if WASM else "math_max_f32"
-$BLOCKWISE = True if DATATYPE in ["QB4_F16", "QB4_F32"] else False
+$BLOCKWISE = DATATYPE in ["QB4_F16", "QB4_F32"]
 void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}__${"wasm" if WASM else "scalar"}${VARIANT_SPEC}(
     size_t mr,
     size_t nc,
@@ -138,24 +137,15 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}_
     kc = round_up_po2(kc, 4);
   do {
     $if DATATYPE in ["QD8", "QC4", "QC2", "QB4_F16", "QB4_F32"]:
-      $if NR % 4 != 0:
-        $for N in range(NR):
-          $if BLOCKWISE:
-            const float vksum${N} = unaligned_indexed_load_f32(w, ${N});
-          $else:
-            const int32_t vksum${N} = unaligned_indexed_load_s32(w, ${N});
-        $for N in range(NR):
-          $if DATATYPE in ["QC2"]:
-            const float vkernel_zero_point${N} = unaligned_indexed_load_f32(w, ${NR + N});
-      $else:
-        $for N in range(NR):
-          $if BLOCKWISE:
-            const float vksum${N} = ((const float*) w)[${N}];
-          $else:
-            const int32_t vksum${N} = ((const int32_t*) w)[${N}];
-        $for N in range(NR):
-          $if DATATYPE in ["QC2"]:
-            const float vkernel_zero_point${N} = ((const float*) w)[${NR + N}];
+      $for N in range(NR):
+        $if BLOCKWISE:
+          const float vksum${N} = unaligned_indexed_load_f32(w, ${N});
+        $else:
+          const int32_t vksum${N} = unaligned_indexed_load_s32(w, ${N});
+      $for N in range(NR):
+        $if DATATYPE in ["QC2"]:
+          const float vkernel_zero_point${N} = unaligned_indexed_load_f32(w, ${NR + N});
+
       $for M in range(MR):
         $if BLOCKWISE:
           const float vinput_zero_point${M} = (const float) quantization_params[${M}].zero_point;
@@ -168,10 +158,7 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}_
             int32_t vacc${M}x${N} = vksum${N} * vinput_zero_point${M};
     $else:
       $for N in range(NR):
-        $if NR % 4 != 0:
-          int32_t vacc0x${N} = unaligned_indexed_load_s32(w, ${N});
-        $else:
-          int32_t vacc0x${N} = ((const int32_t*) w)[${N}];
+        int32_t vacc0x${N} = unaligned_indexed_load_s32(w, ${N});
       $for M in range(1, MR):
         $for N in range(NR):
           int32_t vacc${M}x${N} = vacc0x${N};
@@ -271,10 +258,7 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}_
           $for N in range(NR):
             float vf${M}x${N} = vacc${M}x${N};
             $if M == 0:
-              $if NR % 4 != 0:
-                const float vfilter_output_scale${N} = math_cvt_fp32_bf16(unaligned_indexed_load_u16(w, ${N}));
-              $else:
-                const float vfilter_output_scale${N} = math_cvt_fp32_bf16(((const uint16_t*) w)[${N}]);
+              const float vfilter_output_scale${N} = math_cvt_fp32_bf16(unaligned_indexed_load_u16(w, ${N}));
 
         $for M in range(MR):
           $for N in range(NR):
@@ -303,27 +287,18 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}_
 
       $if not BLOCKWISE:
         $for N in range(NR):
-          $if NR % 4 != 0:
-            const float vfilter_output_scale${N} = unaligned_indexed_load_f32(w, ${N});
-          $else:
-            const float vfilter_output_scale${N} = ((const float*) w)[${N}];
+          const float vfilter_output_scale${N} = unaligned_indexed_load_f32(w, ${N});
           $for M in range(MR):
             vout${M}x${N} *= vfilter_output_scale${N};
 
       $if BLOCKWISE:
         $for N in range(NR):
-          $if NR % 4 != 0:
-            const float vbias${N} = unaligned_indexed_load_f32(w, ${N});
-          $else:
-            const float vbias${N} = ((const float*) w)[${N}];
+          const float vbias${N} = unaligned_indexed_load_f32(w, ${N});
           $for M in range(MR):
             vout${M}x${N} += vbias${N};
       $else:
         $for N in range(NR):
-          $if NR % 4 != 0:
-            const float vbias${N} = unaligned_indexed_load_f32(w, ${NR + N});
-          $else:
-            const float vbias${N} = ((const float*) w)[${NR + N}];
+          const float vbias${N} = unaligned_indexed_load_f32(w, ${NR + N});
           $for M in range(MR):
             vout${M}x${N} += vbias${N};
 
@@ -393,16 +368,10 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}_
               float vfpacc${M}x${N} = (float) vacc${M}x${N};
 
         $if DATATYPE in ["QC8", "QS8_QC4"]:
-          $if NR % 4 != 0:
-            $for N in range(NR):
-              const float vscale${N} = unaligned_indexed_load_f32(w, ${N});
-              $for M in range(MR):
-                vfpacc${M}x${N} *= vscale${N};
-          $else:
-            $for N in range(NR):
-              const float vscale${N} = ((const float*) w)[${N}];
-              $for M in range(MR):
-                vfpacc${M}x${N} *= vscale${N};
+          $for N in range(NR):
+            const float vscale${N} = unaligned_indexed_load_f32(w, ${N});
+            $for M in range(MR):
+              vfpacc${M}x${N} *= vscale${N};
           w = (const void*) ((const float*) w + ${NR});
         $else:
           $for M in range(MR):

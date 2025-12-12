@@ -17,6 +17,7 @@
 #include "src/xnnpack/math.h"
 #include "src/xnnpack/microparams.h"
 
+#include "src/xnnpack/unaligned.h"
 
 
 void xnn_qu8_gemm_minmax_rndnu_ukernel_1x4__scalar(
@@ -48,10 +49,10 @@ void xnn_qu8_gemm_minmax_rndnu_ukernel_1x4__scalar(
 
   const int32_t vb_zero_point = params->rndnu_scalar.kernel_zero_point;
   do {
-    int32_t vacc0x0 = ((const int32_t*) w)[0];
-    int32_t vacc0x1 = ((const int32_t*) w)[1];
-    int32_t vacc0x2 = ((const int32_t*) w)[2];
-    int32_t vacc0x3 = ((const int32_t*) w)[3];
+    int32_t vacc0x0 = unaligned_indexed_load_s32(w, 0);
+    int32_t vacc0x1 = unaligned_indexed_load_s32(w, 1);
+    int32_t vacc0x2 = unaligned_indexed_load_s32(w, 2);
+    int32_t vacc0x3 = unaligned_indexed_load_s32(w, 3);
     w = (const int32_t*) w + 4;
 
     size_t k = kc;
