@@ -56,6 +56,7 @@ void xnn_qd8_f32_qb4w_gemm_minmax_ukernel_2x2__scalar(
   do {
     const float vksum0 = unaligned_indexed_load_f32(w, 0);
     const float vksum1 = unaligned_indexed_load_f32(w, 1);
+
     const float vinput_zero_point0 = (const float) quantization_params[0].zero_point;
     float vout0x0 = vksum0 * vinput_zero_point0;
     float vout0x1 = vksum1 * vinput_zero_point0;

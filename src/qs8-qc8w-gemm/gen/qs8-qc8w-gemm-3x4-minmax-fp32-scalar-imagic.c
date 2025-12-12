@@ -17,6 +17,7 @@
 #include "src/xnnpack/math.h"
 #include "src/xnnpack/microparams.h"
 
+#include "src/xnnpack/unaligned.h"
 
 
 void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_3x4__scalar_imagic(
@@ -59,10 +60,10 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_3x4__scalar_imagic(
   const int32_t vmagic_bias_less_zero_point = INT32_C(0x4B400000) - (int32_t) params->fp32_scalar.output_zero_point;
 
   do {
-    int32_t vacc0x0 = ((const int32_t*) w)[0];
-    int32_t vacc0x1 = ((const int32_t*) w)[1];
-    int32_t vacc0x2 = ((const int32_t*) w)[2];
-    int32_t vacc0x3 = ((const int32_t*) w)[3];
+    int32_t vacc0x0 = unaligned_indexed_load_s32(w, 0);
+    int32_t vacc0x1 = unaligned_indexed_load_s32(w, 1);
+    int32_t vacc0x2 = unaligned_indexed_load_s32(w, 2);
+    int32_t vacc0x3 = unaligned_indexed_load_s32(w, 3);
     int32_t vacc1x0 = vacc0x0;
     int32_t vacc1x1 = vacc0x1;
     int32_t vacc1x2 = vacc0x2;
@@ -114,19 +115,19 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_3x4__scalar_imagic(
     float vfpacc2x2 = (float) vacc2x2;
     float vfpacc2x3 = (float) vacc2x3;
 
-    const float vscale0 = ((const float*) w)[0];
+    const float vscale0 = unaligned_indexed_load_f32(w, 0);
     vfpacc0x0 *= vscale0;
     vfpacc1x0 *= vscale0;
     vfpacc2x0 *= vscale0;
-    const float vscale1 = ((const float*) w)[1];
+    const float vscale1 = unaligned_indexed_load_f32(w, 1);
     vfpacc0x1 *= vscale1;
     vfpacc1x1 *= vscale1;
     vfpacc2x1 *= vscale1;
-    const float vscale2 = ((const float*) w)[2];
+    const float vscale2 = unaligned_indexed_load_f32(w, 2);
     vfpacc0x2 *= vscale2;
     vfpacc1x2 *= vscale2;
     vfpacc2x2 *= vscale2;
-    const float vscale3 = ((const float*) w)[3];
+    const float vscale3 = unaligned_indexed_load_f32(w, 3);
     vfpacc0x3 *= vscale3;
     vfpacc1x3 *= vscale3;
     vfpacc2x3 *= vscale3;

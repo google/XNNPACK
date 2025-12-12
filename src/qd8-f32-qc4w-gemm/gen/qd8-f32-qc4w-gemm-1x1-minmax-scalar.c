@@ -45,6 +45,7 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x1__scalar(
   kc = round_up_po2(kc, 2);
   do {
     const int32_t vksum0 = unaligned_indexed_load_s32(w, 0);
+
     const int32_t vinput_zero_point0 = quantization_params[0].zero_point;
     int32_t vacc0x0 = vksum0 * vinput_zero_point0;
     w = (const int32_t*) w + 1;
