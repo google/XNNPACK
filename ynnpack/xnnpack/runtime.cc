@@ -157,9 +157,6 @@ xnn_status xnn_update_runtime_with_threadpool(xnn_runtime_t runtime,
   return xnn_status_success;
 }
 
-// TODO(dsharlet): Find a way to make this flag visible.
-#define XNN_FLAG_SLINKY_USE_XLA_THREAD_POOL 1
-
 xnn_status xnn_create_threadpool_v2(xnn_scheduler_v2 scheduler,
                                     void* scheduler_context, uint32_t flags,
                                     xnn_threadpool_t* threadpool_out) {
