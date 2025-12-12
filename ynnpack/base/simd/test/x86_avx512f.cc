@@ -6,6 +6,9 @@
 #include "ynnpack/base/simd/x86_avx512f.h"
 
 #include "ynnpack/base/arch.h"
+
+#include "ynnpack/base/half.h"
+#include "ynnpack/base/bfloat16.h"
 #include "ynnpack/base/simd/test/generic.h"
 
 namespace ynn {
@@ -52,6 +55,9 @@ TEST_MIN(x86_avx512f, s32x16, arch_flag::avx512f);
 
 TEST_MAX(x86_avx512f, f32x16, arch_flag::avx512f);
 TEST_MAX(x86_avx512f, s32x16, arch_flag::avx512f);
+
+TEST_CONVERT(x86_avx512f, float, bfloat16, 16, arch_flag::avx512f);
+TEST_CONVERT(x86_avx512f, float, half, 16, arch_flag::avx512f);
 
 TEST_HORIZONTAL_MIN(x86_avx512f, u8x64, arch_flag::avx512f);
 TEST_HORIZONTAL_MIN(x86_avx512f, s8x64, arch_flag::avx512f);
