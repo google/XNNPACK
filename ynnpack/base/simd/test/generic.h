@@ -10,8 +10,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
-#include <type_traits>
-#include <vector>
+#include <utility>
 
 #include <gtest/gtest.h>
 #include "ynnpack/base/arch.h"
@@ -222,6 +221,43 @@ struct max_op {
   TEST(test_class, and_##type) { test_op<type, min_op>(arch_flags); }
 #define TEST_OR(test_class, type, arch_flags) \
   TEST(test_class, or_##type) { test_op<type, max_op>(arch_flags); }
+
+template <typename To, typename From, size_t... Is>
+void test_extract_impl(std::index_sequence<Is...>, From from_v,
+                       typename From::value_type* src) {
+  (([&]() {
+    constexpr size_t i = Is;
+    To to_v = extract<i>(from_v, To{});
+    typename To::value_type dst[To::N];
+    store(dst, to_v);
+    for (size_t j = 0; j < To::N; ++j) {
+      ASSERT_EQ(dst[j], src[i * To::N + j]);
+    }
+  }()), ...);
+}
+
+template <typename To, typename From>
+void test_extract(uint32_t arch_flags) {
+  if (!is_arch_supported(arch_flags)) {
+    GTEST_SKIP() << "Unsupported architecture";
+  }
+  ASSERT_EQ(From::N % To::N, 0);
+  using FromScalar = typename From::value_type;
+
+  FromScalar src[From::N];
+  for (size_t i = 0; i < From::N; ++i) {
+    src[i] = static_cast<FromScalar>(i);
+  }
+  From from_v = load(src, From{});
+
+  test_extract_impl<To, From>(std::make_index_sequence<From::N / To::N>{},
+                              from_v, src);
+}
+
+#define TEST_EXTRACT(test_class, to, from, arch_flags) \
+  TEST(test_class, extract_##to##_##from) {            \
+    test_extract<to, from>(arch_flags);                \
+  }
 
 template <typename To, typename From, size_t N>
 void test_convert(uint32_t arch_flags) {

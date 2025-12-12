@@ -3,13 +3,13 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include "ynnpack/base/simd/x86_avx512f.h"
-
 #include "ynnpack/base/arch.h"
 
 #include "ynnpack/base/half.h"
 #include "ynnpack/base/bfloat16.h"
 #include "ynnpack/base/simd/test/generic.h"
+
+#include "ynnpack/base/simd/x86_avx512f.h"
 
 namespace ynn {
 namespace simd {
@@ -55,6 +55,16 @@ TEST_MIN(x86_avx512f, s32x16, arch_flag::avx512f);
 
 TEST_MAX(x86_avx512f, f32x16, arch_flag::avx512f);
 TEST_MAX(x86_avx512f, s32x16, arch_flag::avx512f);
+
+TEST_EXTRACT(x86_avx512f, s32x4, s32x16, arch_flag::avx512f);
+TEST_EXTRACT(x86_avx512f, f32x4, f32x16, arch_flag::avx512f);
+TEST_EXTRACT(x86_avx512f, s8x16, s8x64, arch_flag::avx512f);
+TEST_EXTRACT(x86_avx512f, u8x16, u8x64, arch_flag::avx512f);
+
+TEST_EXTRACT(x86_avx512f, bf16x16, bf16x32, arch_flag::avx512f);
+TEST_EXTRACT(x86_avx512f, f16x16, f16x32, arch_flag::avx512f);
+TEST_EXTRACT(x86_avx512f, s8x32, s8x64, arch_flag::avx512f);
+TEST_EXTRACT(x86_avx512f, u8x32, u8x64, arch_flag::avx512f);
 
 TEST_CONVERT(x86_avx512f, float, bfloat16, 16, arch_flag::avx512f);
 TEST_CONVERT(x86_avx512f, float, half, 16, arch_flag::avx512f);

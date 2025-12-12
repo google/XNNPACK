@@ -18,8 +18,9 @@
 #include "ynnpack/base/bfloat16.h"
 #include "ynnpack/base/half.h"
 #include "ynnpack/base/simd/vec.h"
-#include "ynnpack/base/simd/x86_avx.h"  // IWYU pragma:export
-#include "ynnpack/base/simd/x86_sse2.h"  // IWYU pragma:export
+#include "ynnpack/base/simd/x86_avx.h"  // IWYU pragma: export
+#include "ynnpack/base/simd/x86_avx2.h"  // IWYU pragma: export
+#include "ynnpack/base/simd/x86_sse2.h"  // IWYU pragma: export
 
 namespace ynn {
 
