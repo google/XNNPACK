@@ -1980,7 +1980,7 @@ void xnn_compute_f32_qx8_convert(
     // Compute and store the row sum of the quantized output.
     const size_t num_bytes = n / sizeof(float) * sizeof(int8_t);
     int32_t row_sum = 0;
-    struct xnn_qs8_rsum_params rsum_params;
+    struct xnn_qs8_rsum_params rsum_params = {0,};
     context->rsum_ukernel(num_bytes, output, &row_sum, &rsum_params);
     context->row_sum[batch_index] = (float)row_sum;
   }
