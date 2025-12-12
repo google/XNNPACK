@@ -79,9 +79,6 @@ selects.config_setting_group(
 selects.config_setting_group(
     name = "msvc",
     match_any = [
-        # We need both of these clang-cl constraints, because a downstream dependency could use
-        # either one.
-        "@bazel_tools//tools/cpp:clang-cl",
         "@rules_cc//cc/compiler:clang-cl",
         "@rules_cc//cc/compiler:msvc-cl",
     ],
