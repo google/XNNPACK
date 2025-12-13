@@ -66,8 +66,8 @@ TEST_EXTRACT(x86_avx512f, f16x16, f16x32, arch_flag::avx512f);
 TEST_EXTRACT(x86_avx512f, s8x32, s8x64, arch_flag::avx512f);
 TEST_EXTRACT(x86_avx512f, u8x32, u8x64, arch_flag::avx512f);
 
-TEST_CONVERT(x86_avx512f, float, bfloat16, 16, arch_flag::avx512f);
-TEST_CONVERT(x86_avx512f, float, half, 16, arch_flag::avx512f);
+TEST_CONVERT(x86_avx512f, float, bfloat16, 16, 1, arch_flag::avx512f);
+TEST_CONVERT(x86_avx512f, float, half, 16, 1, arch_flag::avx512f);
 
 TEST_HORIZONTAL_MIN(x86_avx512f, u8x64, arch_flag::avx512f);
 TEST_HORIZONTAL_MIN(x86_avx512f, s8x64, arch_flag::avx512f);
