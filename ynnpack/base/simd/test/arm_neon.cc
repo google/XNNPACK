@@ -69,6 +69,8 @@ TEST_MAX(arm_neon, s16x8, /*arch_flags=*/0);
 TEST_MAX(arm_neon, f32x4, /*arch_flags=*/0);
 TEST_MAX(arm_neon, s32x4, /*arch_flags=*/0);
 
+TEST_CONVERT(arm_neon, float, bfloat16, 8, 2, /*arch_flags=*/0);
+
 TEST_HORIZONTAL_MIN(arm_neon, u8x16, /*arch_flags=*/0);
 TEST_HORIZONTAL_MIN(arm_neon, s8x16, /*arch_flags=*/0);
 TEST_HORIZONTAL_MIN(arm_neon, s16x8, /*arch_flags=*/0);

@@ -32,7 +32,7 @@ TEST_MAX(x86_avx2, s8x32, arch_flag::avx2);
 TEST_MAX(x86_avx2, s16x16, arch_flag::avx2);
 TEST_MAX(x86_avx2, s32x8, arch_flag::avx2);
 
-TEST_CONVERT(x86_avx2, float, bfloat16, 8, arch_flag::avx2);
+TEST_CONVERT(x86_avx2, float, bfloat16, 8, 1, arch_flag::avx2);
 
 TEST_HORIZONTAL_MIN(x86_avx2, u8x32, arch_flag::avx2);
 TEST_HORIZONTAL_MIN(x86_avx2, s8x32, arch_flag::avx2);

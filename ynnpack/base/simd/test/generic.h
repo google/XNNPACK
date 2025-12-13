@@ -14,6 +14,7 @@
 
 #include <gtest/gtest.h>
 #include "ynnpack/base/arch.h"
+#include "ynnpack/base/simd/multi_vec.h"
 #include "ynnpack/base/simd/vec.h"
 
 namespace ynn {
@@ -259,7 +260,7 @@ void test_extract(uint32_t arch_flags) {
     test_extract<to, from>(arch_flags);                \
   }
 
-template <typename To, typename From, size_t N>
+template <typename To, typename From, size_t N, size_t M>
 void test_convert(uint32_t arch_flags) {
   if (!is_arch_supported(arch_flags)) {
     GTEST_SKIP() << "Unsupported architecture";
@@ -269,19 +270,30 @@ void test_convert(uint32_t arch_flags) {
   for (size_t i = 0; i < N; ++i) {
     src[i] = static_cast<From>(i);
   }
-  vec<From, N> from_v = load(src, vec<From, N>{});
-  vec<To, N> to_v = convert(from_v, To{});
 
-  To dst[N];
-  store(dst, to_v);
-  for (size_t i = 0; i < N; ++i) {
-    ASSERT_EQ(dst[i], static_cast<To>(src[i]));
+  if constexpr (M == 1) {
+    vec<From, N> from_v = load(src, vec<From, N>{});
+    vec<To, N> to_v = convert(from_v, To{});
+    To dst[N];
+    store(dst, to_v);
+    for (size_t i = 0; i < N; ++i) {
+      ASSERT_EQ(dst[i], static_cast<To>(src[i]));
+    }
+  } else {
+    using ToVec = multi_vec<vec<To, N / M>, M>;
+    vec<From, N> from_v = load(src, vec<From, N>{});
+    ToVec to_v = convert(from_v, To{});
+    To dst[ToVec::N];
+    store(dst, to_v, ToVec::N);
+    for (size_t i = 0; i < ToVec::N; ++i) {
+      ASSERT_EQ(dst[i], static_cast<To>(src[i]));
+    }
   }
 }
 
-#define TEST_CONVERT(test_class, to, from, N, arch_flags) \
-  TEST(test_class, convert_##to##_##from) {               \
-    test_convert<to, from, N>(arch_flags);                \
+#define TEST_CONVERT(test_class, to, from, N, M, arch_flags) \
+  TEST(test_class, convert_##to##_##from) {                  \
+    test_convert<to, from, N, M>(arch_flags);                \
   }
 
 // This function has a max of n at n, and descends to 0 at either 0 or 2*n - 1.

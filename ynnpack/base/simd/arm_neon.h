@@ -3,8 +3,8 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#ifndef XNNPACK_YNNPACK_BASE_SIMD_ARM_H_
-#define XNNPACK_YNNPACK_BASE_SIMD_ARM_H_
+#ifndef XNNPACK_YNNPACK_BASE_SIMD_ARM_NEON_H_
+#define XNNPACK_YNNPACK_BASE_SIMD_ARM_NEON_H_
 
 #include <arm_neon.h>
 
@@ -18,6 +18,7 @@
 #include "ynnpack/base/base.h"
 #include "ynnpack/base/bfloat16.h"
 #include "ynnpack/base/half.h"
+#include "ynnpack/base/simd/multi_vec.h"
 #include "ynnpack/base/simd/vec.h"
 
 namespace ynn {
@@ -467,6 +468,14 @@ YNN_ALWAYS_INLINE s8x16 max(s8x16 a, s8x16 b) {
   return s8x16{vmaxq_s8(a.v, b.v)};
 }
 
+using f32x4x2 = multi_vec<f32x4, 2>;
+YNN_ALWAYS_INLINE f32x4x2 convert(bf16x8 a, float) {
+  f32x4x2 result;
+  result.v[0].v = vreinterpretq_f32_u32(vshll_n_u16(vget_low_u16(a.v), 16));
+  result.v[1].v = vreinterpretq_f32_u32(vshll_n_u16(vget_high_u16(a.v), 16));
+  return result;
+}
+
 #ifdef YNN_ARCH_ARM32
 YNN_ALWAYS_INLINE float vmaxvq_f32(float32x4_t a) {
   float32x2_t max_halves = vmax_f32(vget_low_f32(a), vget_high_f32(a));
@@ -562,4 +571,4 @@ YNN_ALWAYS_INLINE std::array<vec<T, 4>, 4> transpose(
 
 }  // namespace ynn
 
-#endif  // XNNPACK_YNNPACK_BASE_SIMD_ARM_H_
+#endif  // XNNPACK_YNNPACK_BASE_SIMD_ARM_NEON_H_
