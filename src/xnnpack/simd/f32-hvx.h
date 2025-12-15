@@ -43,12 +43,20 @@ static XNN_INLINE xnn_simd_f32_t xnn_zero_f32() { return Q6_V_vzero(); }
 
 static XNN_INLINE xnn_simd_f32_t xnn_add_f32(xnn_simd_f32_t a,
                                              xnn_simd_f32_t b) {
+#if __HVX_ARCH__ >= 81
+  return Q6_Vsf_vadd_VsfVsf(a, b);
+#else
   return Q6_Vsf_equals_Vqf32(Q6_Vqf32_vadd_VsfVsf(a, b));
+#endif
 }
 
 static XNN_INLINE xnn_simd_f32_t xnn_mul_f32(xnn_simd_f32_t a,
                                              xnn_simd_f32_t b) {
+#if __HVX_ARCH__ >= 81
+  return Q6_Vsf_vmpy_VsfVsf(a, b);
+#else
   return Q6_Vsf_equals_Vqf32(Q6_Vqf32_vmpy_VsfVsf(a, b));
+#endif
 }
 
 static XNN_INLINE xnn_simd_f32_t xnn_rcp_f32(xnn_simd_f32_t a) {
@@ -57,34 +65,51 @@ static XNN_INLINE xnn_simd_f32_t xnn_rcp_f32(xnn_simd_f32_t a) {
 
 static XNN_INLINE xnn_simd_f32_t xnn_div_f32(xnn_simd_f32_t a,
                                              xnn_simd_f32_t b) {
+#if __HVX_ARCH__ >= 81
+  return Q6_Vsf_vmpy_VsfVsf(a, xnn_rcp_f32(b));
+#else
   return Q6_Vsf_equals_Vqf32(Q6_Vqf32_vmpy_VsfVsf(a, xnn_rcp_f32(b)));
+#endif
 }
 
 static XNN_INLINE xnn_simd_f32_t xnn_fmadd_f32(xnn_simd_f32_t a,
                                                xnn_simd_f32_t b,
                                                xnn_simd_f32_t c) {
-  return Q6_Vsf_equals_Vqf32(
-      Q6_Vqf32_vadd_Vqf32Vsf(Q6_Vqf32_vmpy_VsfVsf(a, b), c));
+#if __HVX_ARCH__ >= 81
+  return Q6_Vsf_vadd_VsfVsf(Q6_Vsf_vmpy_VsfVsf(a, b), c);
+#else
+  return Q6_Vsf_equals_Vqf32(Q6_Vqf32_vadd_Vqf32Vsf(Q6_Vqf32_vmpy_VsfVsf(a, b), c));
+#endif
 }
 
 // c - a*b -> c + -(a*b)
 static XNN_INLINE xnn_simd_f32_t xnn_fnmadd_f32(xnn_simd_f32_t a,
                                                 xnn_simd_f32_t b,
                                                 xnn_simd_f32_t c) {
-  return Q6_Vsf_equals_Vqf32(Q6_Vqf32_vadd_Vqf32Vsf(
-      Q6_Vqf32_vsub_Vqf32Vqf32(Q6_V_vzero(), Q6_Vqf32_vmpy_VsfVsf(a, b)), c));
+#if __HVX_ARCH__ >= 81
+  return Q6_Vsf_vsub_VsfVsf(c, Q6_Vsf_vmpy_VsfVsf(a, b));
+#else
+  return Q6_Vsf_equals_Vqf32(Q6_Vqf32_vadd_Vqf32Vsf(Q6_Vqf32_vsub_Vqf32Vqf32(Q6_V_vzero(), Q6_Vqf32_vmpy_VsfVsf(a, b)), c));
+#endif
 }
 
 static XNN_INLINE xnn_simd_f32_t xnn_fmsub_f32(xnn_simd_f32_t a,
                                                xnn_simd_f32_t b,
                                                xnn_simd_f32_t c) {
-  return Q6_Vsf_equals_Vqf32(
-      Q6_Vqf32_vsub_Vqf32Vsf(Q6_Vqf32_vmpy_VsfVsf(a, b), c));
+#if __HVX_ARCH__ >= 81
+  return Q6_Vsf_vsub_VsfVsf(Q6_Vsf_vmpy_VsfVsf(a, b), c);
+#else
+  return Q6_Vsf_equals_Vqf32(Q6_Vqf32_vsub_Vqf32Vsf(Q6_Vqf32_vmpy_VsfVsf(a, b), c));
+#endif
 }
 
 static XNN_INLINE xnn_simd_f32_t xnn_sub_f32(xnn_simd_f32_t a,
                                              xnn_simd_f32_t b) {
+#if __HVX_ARCH__ >= 81
+  return Q6_Vsf_vsub_VsfVsf(a, b);
+#else
   return Q6_Vsf_equals_Vqf32(Q6_Vqf32_vsub_VsfVsf(a, b));
+#endif
 }
 
 static XNN_INLINE xnn_simd_f32_t xnn_max_f32(xnn_simd_f32_t a,
@@ -105,6 +130,7 @@ static XNN_INLINE xnn_simd_f32_t xnn_neg_f32(xnn_simd_f32_t a) {
   return Q6_V_vxor_VV(a, Q6_V_vsplat_R(0x80000000));
 }
 
+// todo: v81 use rnd
 #if __HVX_ARCH__ >= 73
 static XNN_INLINE xnn_simd_f32_t xnn_round_f32(xnn_simd_f32_t a) {
   const HVX_Vector vabs_a = Q6_V_vand_VV(a, Q6_V_vsplat_R(0x7FFFFFFF));
@@ -293,7 +319,13 @@ static XNN_INLINE float xnn_reduce_min_f32(xnn_simd_f32_t v) {
 
 #define XNN_SIMD_HAVE_REDUCE_ADD_F32 1
 static XNN_INLINE float xnn_reduce_add_f32(xnn_simd_f32_t v) {
-#if __HVX_ARCH__ >= 79
+#if __HVX_ARCH__ >= 81
+  v = Q6_Vsf_vadd_VsfVsf(v, Q6_V_vror_VR(v, 64));
+  v = Q6_Vsf_vadd_VsfVsf(v, Q6_V_vror_VR(v, 32));
+  v = Q6_Vsf_vadd_VsfVsf(v, Q6_V_vror_VR(v, 16));
+  v = Q6_Vsf_vadd_VsfVsf(v, Q6_V_vror_VR(v, 8));
+  v = Q6_Vsf_vadd_VsfVsf(v, Q6_V_vror_VR(v, 4));
+#elif __HVX_ARCH__ >= 79
   v = Q6_Vsf_equals_Vqf32(Q6_Vqf32_vadd_VsfVsf(v, Q6_V_vror_VR(v, 64)));
   v = Q6_Vsf_equals_Vqf32(Q6_Vqf32_vadd_VsfVsf(v, Q6_V_vror_VR(v, 32)));
   v = Q6_Vsf_equals_Vqf32(Q6_Vqf32_vadd_VsfVsf(v, Q6_V_vror_VR(v, 16)));
