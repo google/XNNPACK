@@ -106,7 +106,7 @@ auto make_dot_impl(dot_type type, bool consistent_arithmetic, bool transposed_a,
     // this stride is a lie: it is only valid to increment b pointers by
     // `block_n` values at a time.
     assert(pack_b ? b_no.extent() == 1 || b_no.stride() % b_ni.extent() == 0
-                  : b_ni.stride() == b.elem_size);
+                  : b_ni.extent() == 1 || b_ni.stride() == b.elem_size);
     const index_t b_stride_n =
         pack_b ? b_no.stride() / b_ni.extent() : b_ni.stride();
     const index_t c_stride_m = c_m.stride();
