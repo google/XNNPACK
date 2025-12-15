@@ -156,15 +156,6 @@ static inline bool xnn_is_bf16_compatible_config(
 #endif
 }
 
-static inline bool xnn_is_qc2w_compatible_config(
-    const struct xnn_hardware_config* hardware_config) {
-#if (XNN_ARCH_ARM || XNN_ARCH_ARM64)
-  return (hardware_config->arch_flags & xnn_arch_arm_neon_dot);
-#else
-  return false;
-#endif
-}
-
 static inline bool xnn_is_f16_compatible_config(
     const struct xnn_hardware_config* hardware_config) {
 #if (XNN_ARCH_ARM && XNN_ENABLE_ARM_FP16_VECTOR && \
