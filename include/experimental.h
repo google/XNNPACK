@@ -116,6 +116,9 @@ enum xnn_status xnn_check_fingerprint(struct xnn_fingerprint fingerprint);
 /// set.
 const struct xnn_fingerprint* xnn_get_fingerprint(uint32_t id);
 
+/// Return the `idx`_th fingerprint or NULL if it wasn't set.
+const struct xnn_fingerprint* xnn_get_fingerprint_by_idx(uint32_t idx);
+
 /// Set the given fingerprint.
 void xnn_set_fingerprint(struct xnn_fingerprint fingerprint);
 
