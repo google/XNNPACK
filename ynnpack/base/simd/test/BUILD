@@ -14,17 +14,23 @@ ynn_cc_library(
     hdrs = ["generic.h"],
     per_arch_srcs = {
         # This test defines different tests depending on which architecture is being compiled.
+        "arm_neon": ["arm_neon.cc"],
+        "arm_neonfp16": ["arm_neonfp16.cc"],
+        "arm_neonfma": ["arm_neonfma.cc"],
         "x86_sse2": ["x86_sse2.cc"],
         "x86_sse41": ["x86_sse41.cc"],
         "x86_avx": ["x86_avx.cc"],
         "x86_avx2": ["x86_avx2.cc"],
         "x86_avx512f": ["x86_avx512f.cc"],
         "x86_avx512bw": ["x86_avx512bw.cc"],
-        "arm_neon": ["arm_neon.cc"],
+        "x86_f16c": ["x86_f16c.cc"],
+        "x86_fma3": ["x86_fma3.cc"],
     },
     deps = [
         "//ynnpack/base",  # buildcleaner:keep
         "//ynnpack/base/simd",  # buildcleaner:keep
+        "//ynnpack/base/test:fuzz_test",
+        "//ynnpack/base/test:random",
         "@com_google_googletest//:gtest",
     ],
     alwayslink = True,

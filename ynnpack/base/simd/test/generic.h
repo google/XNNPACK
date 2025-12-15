@@ -7,6 +7,7 @@
 #define XNNPACK_YNNPACK_BASE_SIMD_TEST_GENERIC_H_
 
 #include <algorithm>
+#include <chrono>
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
@@ -15,6 +16,8 @@
 #include <gtest/gtest.h>
 #include "ynnpack/base/arch.h"
 #include "ynnpack/base/simd/vec.h"
+#include "ynnpack/base/test/fuzz_test.h"
+#include "ynnpack/base/test/random.h"
 
 namespace ynn {
 
@@ -205,6 +208,14 @@ struct max_op {
   }
 };
 
+template <typename T>
+struct copysign_op {
+  T operator()(T a, T b) {
+    using std::copysign;
+    return copysign(a, b);
+  }
+};
+
 #define TEST_ADD(test_class, type, arch_flags) \
   TEST(test_class, add_##type) { test_op<type, std::plus>(arch_flags); }
 #define TEST_SUBTRACT(test_class, type, arch_flags) \
@@ -213,6 +224,8 @@ struct max_op {
   TEST(test_class, multiply_##type) {               \
     test_op<type, std::multiplies>(arch_flags);     \
   }
+#define TEST_COPYSIGN(test_class, type, arch_flags) \
+  TEST(test_class, copysign_##type) { test_op<type, copysign_op>(arch_flags); }
 #define TEST_MIN(test_class, type, arch_flags) \
   TEST(test_class, min_##type) { test_op<type, min_op>(arch_flags); }
 #define TEST_MAX(test_class, type, arch_flags) \
@@ -259,29 +272,56 @@ void test_extract(uint32_t arch_flags) {
     test_extract<to, from>(arch_flags);                \
   }
 
-template <typename To, typename From, size_t N>
+template <typename vector>
+void test_concat(uint32_t arch_flags) {
+  if (!is_arch_supported(arch_flags)) {
+    GTEST_SKIP() << "Unsupported architecture";
+  }
+  using scalar = typename vector::value_type;
+  constexpr size_t N = vector::N;
+
+  scalar src[N * 2];
+  for (size_t i = 0; i < N * 2; ++i) {
+    src[i] = static_cast<scalar>(i);
+  }
+  scalar dst[N * 2];
+  store(dst, concat(load(src, vector{}), load(src + N, vector{})));
+
+  for (size_t i = 0; i < N * 2; ++i) {
+    ASSERT_EQ(dst[i], src[i]);
+  }
+}
+
+#define TEST_CONCAT(test_class, vector, arch_flags) \
+  TEST(test_class, concat_##vector) { test_concat<vector>(arch_flags); }
+
+template <typename To, typename From>
 void test_convert(uint32_t arch_flags) {
   if (!is_arch_supported(arch_flags)) {
     GTEST_SKIP() << "Unsupported architecture";
   }
 
-  From src[N];
-  for (size_t i = 0; i < N; ++i) {
-    src[i] = static_cast<From>(i);
-  }
-  vec<From, N> from_v = load(src, vec<From, N>{});
-  vec<To, N> to_v = convert(from_v, To{});
+  using FromScalar = typename From::value_type;
+  using ToScalar = typename To::value_type;
+  static constexpr size_t N = To::N;
 
-  To dst[N];
+  FromScalar src[N];
+  for (size_t i = 0; i < N; ++i) {
+    src[i] = static_cast<FromScalar>(i);
+  }
+  From from_v = load(src, From{});
+  To to_v = convert(from_v, ToScalar{});
+
+  ToScalar dst[N];
   store(dst, to_v);
   for (size_t i = 0; i < N; ++i) {
-    ASSERT_EQ(dst[i], static_cast<To>(src[i]));
+    ASSERT_EQ(dst[i], static_cast<ToScalar>(src[i]));
   }
 }
 
-#define TEST_CONVERT(test_class, to, from, N, arch_flags) \
-  TEST(test_class, convert_##to##_##from) {               \
-    test_convert<to, from, N>(arch_flags);                \
+#define TEST_CONVERT(test_class, to, from, arch_flags) \
+  TEST(test_class, convert_##to##_##from) {            \
+    test_convert<to, from>(arch_flags);                \
   }
 
 // This function has a max of n at n, and descends to 0 at either 0 or 2*n - 1.
@@ -327,6 +367,45 @@ void test_horizontal_max(uint32_t arch_flags) {
   TEST(test_class, horizontal_max_##type) {               \
     test_horizontal_max<type>(arch_flags);                \
   }
+
+template <typename vector>
+void test_fma(uint32_t arch_flags) {
+  if (!is_arch_supported(arch_flags)) {
+    GTEST_SKIP() << "Unsupported architecture";
+  }
+  using scalar = typename vector::value_type;
+  constexpr size_t N = vector::N;
+
+  ReplicableRandomDevice rng;
+  TypeGenerator<scalar> gen;
+  for (auto _ : FuzzTest(std::chrono::milliseconds(100))) {
+    scalar a[N];
+    scalar b[N];
+    scalar acc[N];
+    scalar expected[N];
+    for (size_t i = 0; i < N; ++i) {
+      a[i] = gen(rng);
+      b[i] = gen(rng);
+      acc[i] = gen(rng);
+      expected[i] = std::fma(a[i], b[i], acc[i]);
+    }
+    scalar result[N];
+    store(result,
+          fma(load(a, vector{}), load(b, vector{}), load(acc, vector{})));
+    for (size_t i = 0; i < N; ++i) {
+#ifdef YNN_ARCH_ARM32
+      if (std::abs(expected[i]) < type_info<scalar>::smallest_normal()) {
+        // ARM32 flushes denormals to 0(?).
+        continue;
+      }
+#endif  // YNN_ARCH_ARM32
+      ASSERT_EQ(result[i], expected[i]);
+    }
+  }
+}
+
+#define TEST_FMA(test_class, type, arch_flags) \
+  TEST(test_class, fma_##type) { test_fma<type>(arch_flags); }
 
 }  // namespace simd
 

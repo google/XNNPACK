@@ -7,11 +7,8 @@
 
 #include <arm_neon.h>
 
-#include <array>
-#include <cassert>
 #include <cstddef>
 #include <cstdint>
-#include <cstring>
 #include <type_traits>
 
 #include "ynnpack/base/arithmetic.h"
@@ -26,22 +23,7 @@ namespace ynn {
 namespace simd {
 
 using bf16x8x8 = multi_vec<bf16x8, 8>;
-using f32x4x16 = multi_vec<f32x4, 16>;
-
-static f32x4x16 reduce_add(
-    f32x4x16 a, bf16x8x8 b, Identity /*map_fn*/,
-    std::integral_constant<size_t, 1> /*horizontal_factor*/) {
-  YNN_UNROLL
-  for (int i = 0; i < 8; ++i) {
-    f32x4 lo(vreinterpretq_f32_u32(vshll_n_u16(vget_low_u16(b.v[i].v), 16)));
-    f32x4 hi(vreinterpretq_f32_u32(vshll_n_u16(vget_high_u16(b.v[i].v), 16)));
-
-    a.v[2 * i + 0] += lo;
-    a.v[2 * i + 1] += hi;
-  }
-
-  return a;
-}
+using f32x8x8 = multi_vec<f32x8, 8>;
 
 static f32x4 reduce_add(
     f32x4 a, bf16x8 b, Identity /*map_fn*/,
@@ -55,42 +37,26 @@ static f32x4 reduce_add(
   return a;
 }
 
-static f32x4x16 reduce_add(
-    f32x4x16 a, bf16x8x8 b, Square /*map_fn*/,
-    std::integral_constant<size_t, 1> /*horizontal_factor*/) {
-  YNN_UNROLL
-  for (int i = 0; i < 8; ++i) {
-    float32x4_t lo =
-        vreinterpretq_f32_u32(vshll_n_u16(vget_low_u16(b.v[i].v), 16));
-    float32x4_t hi =
-        vreinterpretq_f32_u32(vshll_n_u16(vget_high_u16(b.v[i].v), 16));
-    a.v[2 * i + 0].v = vmlaq_f32(a.v[2 * i + 0].v, lo, lo);
-    a.v[2 * i + 1].v = vmlaq_f32(a.v[2 * i + 1].v, hi, hi);
-  }
-
-  return a;
-}
-
 static f32x4 reduce_add(
     f32x4 a, bf16x8 b, Square /*map_fn*/,
     std::integral_constant<size_t, 2> /*horizontal_factor*/) {
   uint32x4_t pairs = vreinterpretq_u32_u16(b.v);
-  float32x4_t even = vreinterpretq_f32_u32(vshlq_n_u32(pairs, 16));
-  float32x4_t odd =
-      vreinterpretq_f32_u32(vandq_u32(pairs, vdupq_n_u32(0xFFFF0000)));
+  f32x4 even(vreinterpretq_f32_u32(vshlq_n_u32(pairs, 16)));
+  f32x4 odd(vreinterpretq_f32_u32(vandq_u32(pairs, vdupq_n_u32(0xFFFF0000))));
 
-  a.v = vmlaq_f32(a.v, odd, odd);
-  a.v = vmlaq_f32(a.v, even, even);
+  a += odd * odd;
+  a += even * even;
   return a;
 }
 
 }  // namespace simd
 
-using simd::f32x4;
-using simd::f32x4x16;
 using simd::bf16x8;
 using simd::bf16x8x8;
 using simd::f16x8;
+using simd::f32x4;
+using simd::f32x8;
+using simd::f32x8x8;
 using simd::s16x8;
 using simd::s8x16;
 using simd::u8x16;
@@ -121,7 +87,7 @@ void sum_bf16_fp32_neon(size_t n, size_t k3, size_t k2, size_t k1,
                         size_t a_stride_k2, const void* a, size_t,
                         void* c) {
   if (k1 == 1 && a_stride_n == sizeof(bfloat16)) {
-    tiled_reduce<sum_accumulator_k1_1<bf16x8x8, f32x4x16>, bfloat16, float>(
+    tiled_reduce<sum_accumulator_k1_1<bf16x8x8, f32x8x8>, bfloat16, float>(
         n, k3, k2, a_stride_k3, a_stride_k2,
         reinterpret_cast<const bfloat16*>(a), /*C_stride_m=*/0,
         reinterpret_cast<float*>(c));
@@ -138,11 +104,10 @@ void sum_squared_bf16_fp32_neon(size_t n, size_t k3, size_t k2, size_t k1,
                                 size_t a_stride_k2, const void* a, size_t,
                                 void* c) {
   if (k1 == 1 && a_stride_n == sizeof(bfloat16)) {
-    tiled_reduce<sum_accumulator_k1_1<bf16x8x8, f32x4x16, Square>, bfloat16,
-      float>(
-        n, k3, k2, a_stride_k3, a_stride_k2,
-        reinterpret_cast<const bfloat16*>(a), /*C_stride_m=*/0,
-        reinterpret_cast<float*>(c));
+    tiled_reduce<sum_accumulator_k1_1<bf16x8x8, f32x8x8, Square>, bfloat16,
+                 float>(n, k3, k2, a_stride_k3, a_stride_k2,
+                        reinterpret_cast<const bfloat16*>(a), /*C_stride_m=*/0,
+                        reinterpret_cast<float*>(c));
   } else {
     tiled_reduce<sum_accumulator_x32<f32x4, 8, Square>, bfloat16, float>(
         n, k3, k2, k1, a_stride_n, a_stride_k3, a_stride_k2,

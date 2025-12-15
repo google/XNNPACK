@@ -13,7 +13,7 @@
 #include <type_traits>
 
 #include "ynnpack/base/arithmetic.h"
-#include "ynnpack/base/simd/arm_neon.h"
+#include "ynnpack/base/simd/arm_neonfp16.h"
 #include "ynnpack/base/simd/multi_vec.h"
 #include "ynnpack/kernels/reduce/generic.h"
 #include "ynnpack/kernels/reduce/min_max_accumulator.h"
@@ -22,82 +22,20 @@
 
 namespace ynn {
 
-namespace simd {
-
-using f16x8x8 = multi_vec<f16x8, 8>;
-using f32x4x16 = multi_vec<f32x4, 16>;
-using f32x4x2 = multi_vec<f32x4, 2>;
-
-YNN_ALWAYS_INLINE f32x4x2& operator+=(f32x4x2& a, f16x8 b) {
-  f32x4 b_0(vcvt_f32_f16(vget_low_f16(reinterpret_cast<float16x8_t>(b.v))));
-  f32x4 b_1(vcvt_f32_f16(vget_high_f16(reinterpret_cast<float16x8_t>(b.v))));
-
-  a.v[0] += b_0;
-  a.v[1] += b_1;
-
-  return a;
-}
-
-static f32x4x16& operator+=(f32x4x16& a, f16x8x8 b) {
-  YNN_UNROLL
-  for (size_t i = 0; i < 8; ++i) {
-    f32x4 b_0(vcvt_f32_f16(vget_low_f16(
-        reinterpret_cast<float16x8_t>(b.v[i].v))));
-    f32x4 b_1(vcvt_f32_f16(vget_high_f16(
-        reinterpret_cast<float16x8_t>(b.v[i].v))));
-
-    a.v[2 * i + 0] += b_0;
-    a.v[2 * i + 1] += b_1;
-  }
-
-  return a;
-}
-
-static f32x4x2 reduce_add(
-    f32x4x2 a, f16x8 b, Square /*map_fn*/,
-    std::integral_constant<size_t, 1> /*horizontal_factor*/) {
-  f32x4 b_0(vcvt_f32_f16(vget_low_f16(reinterpret_cast<float16x8_t>(b.v))));
-  f32x4 b_1(vcvt_f32_f16(vget_high_f16(reinterpret_cast<float16x8_t>(b.v))));
-
-  a.v[0] += b_0 * b_0;
-  a.v[1] += b_1 * b_1;
-
-  return a;
-}
-
-static f32x4x16 reduce_add(
-    f32x4x16 a, f16x8x8 b, Square /*map_fn*/,
-    std::integral_constant<size_t, 1> /*horizontal_factor*/) {
-  YNN_UNROLL
-  for (size_t i = 0; i < 8; ++i) {
-    f32x4 b_0(vcvt_f32_f16(vget_low_f16(
-        reinterpret_cast<float16x8_t>(b.v[i].v))));
-    f32x4 b_1(vcvt_f32_f16(vget_high_f16(
-        reinterpret_cast<float16x8_t>(b.v[i].v))));
-
-    a.v[2 * i + 0] += b_0 * b_0;
-    a.v[2 * i + 1] += b_1 * b_1;
-  }
-
-  return a;
-}
-
-}  // namespace simd
-
-using simd::f32x4x2;
-using simd::f32x4x16;
-using simd::f16x8x8;
+using simd::f32x8;
+using f16x8x8 = simd::multi_vec<simd::f16x8, 8>;
+using f32x8x8 = simd::multi_vec<simd::f32x8, 8>;
 
 void sum_fp16_fp32_neonfp16arith(size_t n, size_t k3, size_t k2, size_t k1,
                                  size_t a_stride_n, size_t a_stride_k3,
                                  size_t a_stride_k2, const void* a, size_t,
                                  void* c) {
   if (k1 == 1 && a_stride_n == sizeof(half)) {
-    tiled_reduce<sum_accumulator_k1_1<f16x8x8, f32x4x16>, half, float>(
+    tiled_reduce<sum_accumulator_k1_1<f16x8x8, f32x8x8>, half, float>(
         n, k3, k2, a_stride_k3, a_stride_k2, reinterpret_cast<const half*>(a),
         /*C_stride_m=*/0, reinterpret_cast<float*>(c));
   } else {
-    tiled_reduce<sum_accumulator_x32<f32x4x2, 8>, half, float>(
+    tiled_reduce<sum_accumulator_x32<f32x8, 8>, half, float>(
         n, k3, k2, k1, a_stride_n, a_stride_k3, a_stride_k2,
         reinterpret_cast<const half*>(a), /*C_stride_m=*/0,
         reinterpret_cast<float*>(c));
@@ -109,11 +47,11 @@ void sum_squared_fp16_fp32_neonfp16arith(size_t n, size_t k3, size_t k2,
                                          size_t a_stride_k3, size_t a_stride_k2,
                                          const void* a, size_t, void* c) {
   if (k1 == 1 && a_stride_n == sizeof(half)) {
-    tiled_reduce<sum_accumulator_k1_1<f16x8x8, f32x4x16, Square>, half, float>(
+    tiled_reduce<sum_accumulator_k1_1<f16x8x8, f32x8x8, Square>, half, float>(
         n, k3, k2, a_stride_k3, a_stride_k2, reinterpret_cast<const half*>(a),
         /*C_stride_m=*/0, reinterpret_cast<float*>(c));
   } else {
-    tiled_reduce<sum_accumulator_x32<f32x4x2, 8, Square>, half, float>(
+    tiled_reduce<sum_accumulator_x32<f32x8, 8, Square>, half, float>(
         n, k3, k2, k1, a_stride_n, a_stride_k3, a_stride_k2,
         reinterpret_cast<const half*>(a), /*C_stride_m=*/0,
         reinterpret_cast<float*>(c));

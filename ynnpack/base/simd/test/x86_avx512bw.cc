@@ -34,5 +34,10 @@ TEST_MAX(x86_avx512bw, u8x64, arch_flag::avx512bw);
 TEST_MAX(x86_avx512bw, s8x64, arch_flag::avx512bw);
 TEST_MAX(x86_avx512bw, s16x32, arch_flag::avx512bw);
 
+TEST_CONVERT(x86_avx512bw, s32x16, s8x16, arch_flag::avx512bw);
+TEST_CONVERT(x86_avx512bw, s32x16, u8x16, arch_flag::avx512bw);
+TEST_CONVERT(x86_avx512bw, s32x32, s8x32, arch_flag::avx512bw);
+TEST_CONVERT(x86_avx512bw, s32x32, u8x32, arch_flag::avx512bw);
+
 }  // namespace simd
 }  // namespace ynn

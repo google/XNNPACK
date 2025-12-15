@@ -73,5 +73,9 @@ TEST_HORIZONTAL_MAX(x86_sse2, u8x16, arch_flag::sse2);
 TEST_HORIZONTAL_MAX(x86_sse2, s16x8, arch_flag::sse2);
 TEST_HORIZONTAL_MAX(x86_sse2, f32x4, arch_flag::sse2);
 
+TEST_CONVERT(x86_sse2, f32x8, bf16x8, arch_flag::sse2);
+TEST_CONVERT(x86_sse2, s32x16, u8x16, arch_flag::sse2);
+TEST_CONVERT(x86_sse2, s32x16, s8x16, arch_flag::sse2);
+
 }  // namespace simd
 }  // namespace ynn

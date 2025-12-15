@@ -36,13 +36,14 @@ enum {
 #endif  // YNN_ARCH_X86
 #ifdef YNN_ARCH_ARM
   neon = 1 << 0,
-  neondot = 1 << 1,
-  neonfp16 = 1 << 2,
-  neonfp16arith = 1 << 3,
-  neonbf16 = 1 << 4,
-  neoni8mm = 1 << 5,
-  sme = 1 << 6,
-  sme2 = 1 << 7,
+  neonfma = 1 << 1,
+  neondot = 1 << 2,
+  neonfp16 = 1 << 3,
+  neonfp16arith = 1 << 4,
+  neonbf16 = 1 << 5,
+  neoni8mm = 1 << 6,
+  sme = 1 << 7,
+  sme2 = 1 << 8,
 #endif
 };
 

@@ -12,12 +12,12 @@
 #include <cassert>
 #include <cstddef>
 #include <cstdint>
-#include <cstring>
 #include <type_traits>
 
 #include "ynnpack/base/base.h"
 #include "ynnpack/base/bfloat16.h"
 #include "ynnpack/base/half.h"
+#include "ynnpack/base/simd/multi_vec.h"
 #include "ynnpack/base/simd/vec.h"
 
 namespace ynn {
@@ -556,6 +556,64 @@ YNN_ALWAYS_INLINE std::array<vec<T, 4>, 4> transpose(
       vec<T, 4>{vcombine(vget_high(t01.val[0]), vget_high(t23.val[0]))},
       vec<T, 4>{vcombine(vget_high(t01.val[1]), vget_high(t23.val[1]))},
   }};
+}
+
+using f32x8 = multi_vec<f32x4, 2>;
+using s32x8 = multi_vec<s32x4, 2>;
+using s16x16 = multi_vec<s16x8, 2>;
+using s32x16 = multi_vec<s32x4, 4>;
+
+YNN_ALWAYS_INLINE f32x8 convert(bf16x8 a, float) {
+  uint16x8x2_t a_u32 = vzipq_u16(vdupq_n_u16(0), a.v);
+  return {
+      f32x4{vreinterpretq_f32_u32(vreinterpretq_u32_u16(a_u32.val[0]))},
+      f32x4{vreinterpretq_f32_u32(vreinterpretq_u32_u16(a_u32.val[1]))},
+  };
+}
+
+YNN_ALWAYS_INLINE s16x16 convert(s8x16 b, int16_t) {
+  return {
+      s16x8{vmovl_s8(vget_low_s8(b.v))},
+      s16x8{vmovl_s8(vget_high_s8(b.v))},
+  };
+}
+
+YNN_ALWAYS_INLINE s16x16 convert(u8x16 b, int16_t) {
+  return {
+      s16x8{vreinterpretq_s16_u16(vmovl_u8(vget_low_u8(b.v)))},
+      s16x8{vreinterpretq_s16_u16(vmovl_u8(vget_high_u8(b.v)))},
+  };
+}
+
+YNN_ALWAYS_INLINE s32x8 convert(s16x8 b, int32_t) {
+  return {
+      s32x4{vmovl_s16(vget_low_s16(b.v))},
+      s32x4{vmovl_s16(vget_high_s16(b.v))},
+  };
+}
+
+YNN_ALWAYS_INLINE s32x16 convert(s8x16 b, int32_t) {
+  s16x16 b_s16 = convert(b, int16_t{});
+  s32x8 lo = convert(extract<0>(b_s16, s16x8{}), int32_t{});
+  s32x8 hi = convert(extract<1>(b_s16, s16x8{}), int32_t{});
+  return {
+      extract<0>(lo, s32x4{}),
+      extract<1>(lo, s32x4{}),
+      extract<0>(hi, s32x4{}),
+      extract<1>(hi, s32x4{}),
+  };
+}
+
+YNN_ALWAYS_INLINE s32x16 convert(u8x16 b, int32_t) {
+  s16x16 b_s16 = convert(b, int16_t{});
+  s32x8 lo = convert(extract<0>(b_s16, s16x8{}), int32_t{});
+  s32x8 hi = convert(extract<1>(b_s16, s16x8{}), int32_t{});
+  return {
+      extract<0>(lo, s32x4{}),
+      extract<1>(lo, s32x4{}),
+      extract<0>(hi, s32x4{}),
+      extract<1>(hi, s32x4{}),
+  };
 }
 
 }  // namespace simd

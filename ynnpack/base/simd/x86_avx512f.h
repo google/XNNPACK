@@ -11,16 +11,14 @@
 #include <cassert>
 #include <cstddef>
 #include <cstdint>
-#include <cstring>
 #include <type_traits>
 
 #include "ynnpack/base/base.h"
 #include "ynnpack/base/bfloat16.h"
 #include "ynnpack/base/half.h"
+#include "ynnpack/base/simd/multi_vec.h"
 #include "ynnpack/base/simd/vec.h"
-#include "ynnpack/base/simd/x86_avx.h"  // IWYU pragma: export
-#include "ynnpack/base/simd/x86_avx2.h"  // IWYU pragma: export
-#include "ynnpack/base/simd/x86_sse2.h"  // IWYU pragma: export
+#include "ynnpack/base/simd/x86_avx2_base.h"  // IWYU pragma: export
 
 namespace ynn {
 
@@ -323,6 +321,10 @@ YNN_ALWAYS_INLINE s16x32 operator^(s16x32 a, s16x32 b) {
   return s16x32{_mm512_xor_si512(a.v, b.v)};
 }
 
+YNN_ALWAYS_INLINE f32x16 fma(f32x16 a, f32x16 b, f32x16 acc) {
+  return f32x16{_mm512_fmadd_ps(a.v, b.v, acc.v)};
+}
+
 YNN_ALWAYS_INLINE f32x16 min(f32x16 a, f32x16 b) {
   return f32x16{_mm512_min_ps(a.v, b.v)};
 }
@@ -506,6 +508,29 @@ YNN_ALWAYS_INLINE f16x16 extract(f16x32 x, f16x16) {
       _mm512_extractf64x4_pd(_mm512_castsi512_pd(x.v), Index))};
 }
 
+YNN_ALWAYS_INLINE f32x16 concat(f32x8 x, f32x8 y) {
+  return f32x16{_mm512_castpd_ps(
+      _mm512_insertf64x4(_mm512_castps_pd(_mm512_castps256_ps512(x.v)),
+                         _mm256_castps_pd(y.v), 1))};
+}
+YNN_ALWAYS_INLINE s32x16 concat(s32x8 x, s32x8 y) {
+  return s32x16{_mm512_inserti64x4(_mm512_castsi256_si512(x.v), y.v, 1)};
+}
+YNN_ALWAYS_INLINE bf16x32 concat(bf16x16 x, bf16x16 y) {
+  return bf16x32{_mm512_inserti64x4(_mm512_castsi256_si512(x.v), y.v, 1)};
+}
+YNN_ALWAYS_INLINE f16x32 concat(f16x16 x, f16x16 y) {
+  return f16x32{_mm512_inserti64x4(_mm512_castsi256_si512(x.v), y.v, 1)};
+}
+YNN_ALWAYS_INLINE s8x64 concat(s8x32 x, s8x32 y) {
+  return s8x64{_mm512_inserti64x4(_mm512_castsi256_si512(x.v), y.v, 1)};
+}
+YNN_ALWAYS_INLINE u8x64 concat(u8x32 x, u8x32 y) {
+  return u8x64{_mm512_inserti64x4(_mm512_castsi256_si512(x.v), y.v, 1)};
+}
+
+using f32x32 = multi_vec<f32x16, 2>;
+
 YNN_ALWAYS_INLINE f32x16 convert(f16x16 x, float) {
   return f32x16{_mm512_cvtph_ps(x.v)};
 }
@@ -513,6 +538,20 @@ YNN_ALWAYS_INLINE f32x16 convert(f16x16 x, float) {
 YNN_ALWAYS_INLINE f32x16 convert(bf16x16 a, float) {
   return f32x16{_mm512_castsi512_ps(_mm512_slli_epi32(
       _mm512_cvtepu16_epi32(a.v), 16))};
+}
+
+YNN_ALWAYS_INLINE f32x32 convert(f16x32 a, float) {
+  return {
+      convert(extract<0>(a, f16x16{}), float{}),
+      convert(extract<1>(a, f16x16{}), float{}),
+  };
+}
+
+YNN_ALWAYS_INLINE f32x32 convert(bf16x32 a, float) {
+  return {
+      convert(extract<0>(a, bf16x16{}), float{}),
+      convert(extract<1>(a, bf16x16{}), float{}),
+  };
 }
 
 }  // namespace simd

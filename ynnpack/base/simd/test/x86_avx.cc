@@ -56,6 +56,13 @@ TEST_EXTRACT(x86_avx, f16x8, f16x16, arch_flag::avx);
 TEST_EXTRACT(x86_avx, s8x16, s8x32, arch_flag::avx);
 TEST_EXTRACT(x86_avx, u8x16, u8x32, arch_flag::avx);
 
+TEST_CONCAT(x86_avx, s32x4, arch_flag::avx);
+TEST_CONCAT(x86_avx, f32x4, arch_flag::avx);
+TEST_CONCAT(x86_avx, bf16x8, arch_flag::avx);
+TEST_CONCAT(x86_avx, f16x8, arch_flag::avx);
+TEST_CONCAT(x86_avx, s8x16, arch_flag::avx);
+TEST_CONCAT(x86_avx, u8x16, arch_flag::avx);
+
 TEST_HORIZONTAL_MIN(x86_avx, f32x8, arch_flag::avx);
 TEST_HORIZONTAL_MAX(x86_avx, f32x8, arch_flag::avx);
 

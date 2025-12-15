@@ -5,14 +5,11 @@
 
 #include <immintrin.h>
 
-#include <cassert>
 #include <cstddef>
 #include <cstdint>
-#include <cstring>
 #include <type_traits>
 
 #include "ynnpack/base/arithmetic.h"
-#include "ynnpack/base/base.h"
 #include "ynnpack/base/bfloat16.h"
 #include "ynnpack/base/half.h"
 #include "ynnpack/base/simd/multi_vec.h"
@@ -26,43 +23,6 @@
 namespace ynn {
 
 namespace simd {
-
-using s32x4x4 = multi_vec<s32x4, 4>;
-using f32x4x8 = multi_vec<f32x4, 8>;
-using bf16x8x4 = multi_vec<bf16x8, 4>;
-
-static s32x4x4& operator+=(s32x4x4& a, s8x16 b) {
-  __m128i i8_lo = _mm_unpacklo_epi8(b.v, b.v);
-  __m128i i8_hi = _mm_unpackhi_epi8(b.v, b.v);
-
-  s32x4 b_0(_mm_srai_epi32(_mm_unpacklo_epi16(i8_lo, i8_lo), 24));
-  s32x4 b_1(_mm_srai_epi32(_mm_unpackhi_epi16(i8_lo, i8_lo), 24));
-  s32x4 b_2(_mm_srai_epi32(_mm_unpacklo_epi16(i8_hi, i8_hi), 24));
-  s32x4 b_3(_mm_srai_epi32(_mm_unpackhi_epi16(i8_hi, i8_hi), 24));
-
-  a.v[0] += b_0;
-  a.v[1] += b_1;
-  a.v[2] += b_2;
-  a.v[3] += b_3;
-  return a;
-}
-
-static s32x4x4& operator+=(s32x4x4& a, u8x16 b) {
-  const __m128i zero = _mm_setzero_si128();
-  __m128i i16_lo = _mm_unpacklo_epi8(b.v, zero);
-  __m128i i16_hi = _mm_unpackhi_epi8(b.v, zero);
-
-  s32x4 b_0(_mm_unpacklo_epi16(i16_lo, zero));
-  s32x4 b_1(_mm_unpackhi_epi16(i16_lo, zero));
-  s32x4 b_2(_mm_unpacklo_epi16(i16_hi, zero));
-  s32x4 b_3(_mm_unpackhi_epi16(i16_hi, zero));
-
-  a.v[0] += b_0;
-  a.v[1] += b_1;
-  a.v[2] += b_2;
-  a.v[3] += b_3;
-  return a;
-}
 
 // Use psadbw to compute the absolute difference of a and 0, summing 8 of them
 // and producing an int64 in their place. We reinterpret the result to be 4
@@ -86,69 +46,15 @@ static s32x4 reduce_add(
   return a += b_s32;
 }
 
-static f32x4x8 reduce_add(
-    f32x4x8 a, bf16x8x4 b, Identity /*map_fn*/,
-    std::integral_constant<size_t, 1> /*horizontal_factor*/) {
-  __m128i zero = _mm_setzero_si128();
-
-  YNN_UNROLL
-  for (int i = 0; i < 4; ++i) {
-    __m128i src = b.v[i].v;
-    __m128i lo_u32 = _mm_unpacklo_epi16(src, zero);
-    __m128i hi_u32 = _mm_unpackhi_epi16(src, zero);
-    f32x4 lo_f32(_mm_castsi128_ps(_mm_slli_epi32(lo_u32, 16)));
-    f32x4 hi_f32(_mm_castsi128_ps(_mm_slli_epi32(hi_u32, 16)));
-
-    a.v[2 * i + 0] += lo_f32;
-    a.v[2 * i + 1] += hi_f32;
-  }
-
-  return a;
-}
-
+template <typename MapFn>
 static f32x4 reduce_add(
-    f32x4 a, bf16x8 b, Identity /*map_fn*/,
+    f32x4 a, bf16x8 b, MapFn map_fn,
     std::integral_constant<size_t, 2> /*horizontal_factor*/) {
   __m128 mask = _mm_castsi128_ps(_mm_set1_epi32(0xFFFF0000));
   f32x4 evens(_mm_castsi128_ps(_mm_slli_epi32(b.v, 16)));
   f32x4 odds(_mm_and_ps(_mm_castsi128_ps(b.v), mask));
-
-  a += odds;
-  a += evens;
-  return a;
-}
-
-static f32x4x8 reduce_add(
-    f32x4x8 a, bf16x8x4 b, Square /*map_fn*/,
-    std::integral_constant<size_t, 1> /*horizontal_factor*/) {
-  __m128i zero = _mm_setzero_si128();
-
-  YNN_UNROLL
-  for (int i = 0; i < 4; ++i) {
-    __m128i src = b.v[i].v;
-
-    __m128i lo_u32 = _mm_unpacklo_epi16(src, zero);
-    __m128i hi_u32 = _mm_unpackhi_epi16(src, zero);
-
-    f32x4 lo_f32{_mm_castsi128_ps(_mm_slli_epi32(lo_u32, 16))};
-    f32x4 hi_f32{_mm_castsi128_ps(_mm_slli_epi32(hi_u32, 16))};
-
-    a.v[2 * i + 0] += lo_f32 * lo_f32;
-    a.v[2 * i + 1] += hi_f32 * hi_f32;
-  }
-
-  return a;
-}
-
-static f32x4 reduce_add(
-    f32x4 a, bf16x8 b, Square /*map_fn*/,
-    std::integral_constant<size_t, 2> /*horizontal_factor*/) {
-  __m128 mask = _mm_castsi128_ps(_mm_set1_epi32(0xFFFF0000));
-  f32x4 evens{_mm_castsi128_ps(_mm_slli_epi32(b.v, 16))};
-  f32x4 odds{_mm_and_ps(_mm_castsi128_ps(b.v), mask)};
-
-  a += odds * odds;
-  a += evens * evens;
+  a += map_fn(odds);
+  a += map_fn(evens);
   return a;
 }
 
@@ -156,16 +62,17 @@ static f32x4 reduce_add(
 
 namespace {
 
-using simd::s32x4;
-using simd::s32x4x4;
-using simd::f32x4;
-using simd::f32x4x8;
 using simd::bf16x8;
-using simd::bf16x8x4;
 using simd::f16x8;
+using simd::f32x4;
+using simd::f32x8;
 using simd::s16x8;
+using simd::s32x16;
+using simd::s32x4;
 using simd::s8x16;
 using simd::u8x16;
+using f32x8x4 = simd::multi_vec<f32x8, 4>;
+using bf16x8x4 = simd::multi_vec<bf16x8, 4>;
 
 using f16x8_rvar = float16_wrapper<f16x8, s16x8>;
 using bf16x8_rvar = float16_wrapper<bf16x8, s16x8>;
@@ -238,9 +145,8 @@ void sum_int8_int32_sse2(size_t n, size_t k3, size_t k2, size_t k1,
                          size_t a_stride_n, size_t a_stride_k3,
                          size_t a_stride_k2, const void* a, size_t, void* c) {
   if (k1 == 1 && a_stride_n == sizeof(int8_t)) {
-    tiled_reduce<sum_accumulator_k1_1<s8x16, s32x4x4>, int8_t, int32_t>(
-        n, k3, k2, a_stride_k3, a_stride_k2,
-        reinterpret_cast<const int8_t*>(a),
+    tiled_reduce<sum_accumulator_k1_1<s8x16, s32x16>, int8_t, int32_t>(
+        n, k3, k2, a_stride_k3, a_stride_k2, reinterpret_cast<const int8_t*>(a),
         /*C_stride_m=*/0, reinterpret_cast<int32_t*>(c));
   } else {
     tiled_reduce<nonzero_identity_sum_accumulator_int32, int8_t, int32_t>(
@@ -254,7 +160,7 @@ void sum_uint8_int32_sse2(size_t n, size_t k3, size_t k2, size_t k1,
                           size_t a_stride_n, size_t a_stride_k3,
                           size_t a_stride_k2, const void* a, size_t, void* c) {
   if (k1 == 1 && a_stride_n == sizeof(uint8_t)) {
-    tiled_reduce<sum_accumulator_k1_1<u8x16, s32x4x4>, uint8_t, int32_t>(
+    tiled_reduce<sum_accumulator_k1_1<u8x16, s32x16>, uint8_t, int32_t>(
         n, k3, k2, a_stride_k3, a_stride_k2,
         reinterpret_cast<const uint8_t*>(a),
         /*C_stride_m=*/0, reinterpret_cast<int32_t*>(c));
@@ -270,7 +176,7 @@ void sum_bf16_fp32_sse2(size_t n, size_t k3, size_t k2, size_t k1,
                         size_t a_stride_n, size_t a_stride_k3,
                         size_t a_stride_k2, const void* a, size_t, void* c) {
   if (k1 == 1 && a_stride_n == sizeof(bfloat16)) {
-    tiled_reduce<sum_accumulator_k1_1<bf16x8x4, f32x4x8>, bfloat16, float>(
+    tiled_reduce<sum_accumulator_k1_1<bf16x8x4, f32x8x4>, bfloat16, float>(
         n, k3, k2, a_stride_k3, a_stride_k2,
         reinterpret_cast<const bfloat16*>(a), /*C_stride_m=*/0,
         reinterpret_cast<float*>(c));
@@ -287,11 +193,10 @@ void sum_squared_bf16_fp32_sse2(size_t n, size_t k3, size_t k2, size_t k1,
                                 size_t a_stride_k2, const void* a, size_t,
                                 void* c) {
   if (k1 == 1 && a_stride_n == sizeof(bfloat16)) {
-    tiled_reduce<sum_accumulator_k1_1<bf16x8x4, f32x4x8, Square>, bfloat16,
-      float>(
-        n, k3, k2, a_stride_k3, a_stride_k2,
-        reinterpret_cast<const bfloat16*>(a), /*C_stride_m=*/0,
-        reinterpret_cast<float*>(c));
+    tiled_reduce<sum_accumulator_k1_1<bf16x8x4, f32x8x4, Square>, bfloat16,
+                 float>(n, k3, k2, a_stride_k3, a_stride_k2,
+                        reinterpret_cast<const bfloat16*>(a), /*C_stride_m=*/0,
+                        reinterpret_cast<float*>(c));
   } else {
     tiled_reduce<sum_accumulator_x32<f32x4, 8, Square>, bfloat16, float>(
         n, k3, k2, k1, a_stride_n, a_stride_k3, a_stride_k2,

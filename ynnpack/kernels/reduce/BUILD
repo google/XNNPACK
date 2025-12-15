@@ -92,7 +92,6 @@ cc_test(
     deps = [
         ":reduce",
         "//ynnpack/base",
-        "//ynnpack/base/test:buffer",
         "//ynnpack/base/test:tensor",
         "@com_google_benchmark//:benchmark",
     ],

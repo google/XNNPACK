@@ -12,8 +12,6 @@
 #include <string>
 
 #include "ynnpack/base/arch.h"  // IWYU pragma: keep
-#include "ynnpack/base/arithmetic.h"
-#include "ynnpack/base/test/buffer.h"
 #include "ynnpack/base/test/tensor.h"
 #include "ynnpack/kernels/reduce/reduce.h"
 #include <benchmark/benchmark.h>

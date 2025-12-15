@@ -68,6 +68,17 @@ _YNN_PARAMS_FOR_ARCH = {
             "//conditions:default": [],
         }),
     },
+    "arm_neonfma": {
+        "cond": "//ynnpack:ynn_enable_arm_neonfma",
+        "arch_copts": select({
+            "//ynnpack:arm32": [
+                "-marm",
+                "-march=armv7-a",
+                "-mfpu=neon-vfpv4",
+            ],
+            "//conditions:default": [],
+        }),
+    },
     "arm_neonfp16": {
         "cond": "//ynnpack:ynn_enable_arm_neonfp16",
         "arch_copts": select({

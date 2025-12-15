@@ -12,6 +12,8 @@
 #include <cstring>
 #include <type_traits>
 
+#include "ynnpack/base/base.h"
+
 namespace ynn {
 
 namespace simd {
@@ -81,11 +83,23 @@ vec<T, N> max(vec<T, N> a, vec<T, N> b);
 
 template <typename T>
 std::array<vec<T, 4>, 4> transpose(std::array<vec<T, 4>, 4> x);
-template <int Index, typename T, typename SliceT>
-SliceT extract(T, SliceT);
+template <int Index, typename Vec, typename Slice>
+Slice extract(Vec, Slice);
 
-template<typename To, typename From, size_t N>
-vec<To, N> convert(vec<From, N> from_type, To) = delete;
+template <typename To, typename From, size_t N>
+vec<To, N> convert(vec<From, N> from, To);
+
+// Provide the no-op extract and convert.
+template <int Index, typename Vec>
+YNN_ALWAYS_INLINE Vec extract(Vec x, Vec) {
+  static_assert(Index == 0, "");
+  return x;
+}
+
+template <typename T, size_t N>
+YNN_ALWAYS_INLINE vec<T, N> convert(vec<T, N> from, T) {
+  return from;
+}
 
 namespace internal {
 

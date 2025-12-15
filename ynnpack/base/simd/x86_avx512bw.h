@@ -11,11 +11,11 @@
 #include <cassert>
 #include <cstddef>
 #include <cstdint>
-#include <cstring>
 
 #include "ynnpack/base/base.h"
 #include "ynnpack/base/bfloat16.h"
 #include "ynnpack/base/half.h"
+#include "ynnpack/base/simd/multi_vec.h"
 #include "ynnpack/base/simd/vec.h"
 #include "ynnpack/base/simd/x86_avx512f.h"  // IWYU pragma: export
 
@@ -180,6 +180,40 @@ YNN_ALWAYS_INLINE s8x64 max(s8x64 a, s8x64 b) {
 }
 YNN_ALWAYS_INLINE u8x64 max(u8x64 a, u8x64 b) {
   return u8x64{_mm512_max_epu8(a.v, b.v)};
+}
+
+YNN_ALWAYS_INLINE s32x16 convert(s8x16 a, int32_t) {
+  return s32x16{_mm512_cvtepi8_epi32(a.v)};
+}
+YNN_ALWAYS_INLINE s32x16 convert(u8x16 a, int32_t) {
+  return s32x16{_mm512_cvtepu8_epi32(a.v)};
+}
+
+using s32x32 = multi_vec<s32x16, 2>;
+using s32x64 = multi_vec<s32x16, 4>;
+
+YNN_ALWAYS_INLINE s32x32 convert(s8x32 a, int32_t) {
+  return {
+      convert(extract<0>(a, s8x16{}), int32_t{}),
+      convert(extract<1>(a, s8x16{}), int32_t{}),
+  };
+}
+YNN_ALWAYS_INLINE s32x32 convert(u8x32 a, int32_t) {
+  return {
+      convert(extract<0>(a, u8x16{}), int32_t{}),
+      convert(extract<1>(a, u8x16{}), int32_t{}),
+  };
+}
+
+YNN_ALWAYS_INLINE s32x64 convert(s8x64 a, int32_t) {
+  s32x32 lo = convert(extract<0>(a, s8x32{}), int32_t{});
+  s32x32 hi = convert(extract<1>(a, s8x32{}), int32_t{});
+  return {lo[0], lo[1], hi[0], hi[1]};
+}
+YNN_ALWAYS_INLINE s32x64 convert(u8x64 a, int32_t) {
+  s32x32 lo = convert(extract<0>(a, u8x32{}), int32_t{});
+  s32x32 hi = convert(extract<1>(a, u8x32{}), int32_t{});
+  return {lo[0], lo[1], hi[0], hi[1]};
 }
 
 }  // namespace simd

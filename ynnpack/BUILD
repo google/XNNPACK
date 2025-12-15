@@ -103,6 +103,11 @@ define_build_option(
 )
 
 define_build_option(
+    name = "ynn_enable_arm_neonfma",
+    default_all = [":ynn_enable_arm_neon"],
+)
+
+define_build_option(
     name = "ynn_enable_arm_neonfp16",
     default_all = [":ynn_enable_arm_neon"],
 )

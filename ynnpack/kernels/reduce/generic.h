@@ -8,7 +8,6 @@
 
 #include <cstddef>
 #include <cstdint>
-#include <limits>
 
 #include "ynnpack/base/arithmetic.h"
 #include "ynnpack/base/bfloat16.h"

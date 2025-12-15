@@ -8,6 +8,7 @@
 
 #include "ynnpack/base/arithmetic.h"
 #include "ynnpack/base/base.h"
+#include "ynnpack/base/simd/vec.h"
 
 namespace ynn {
 
@@ -27,56 +28,52 @@ struct multi_vec {
       v[i] = Vec(x);
     }
   }
+  template <typename... Args>
+  multi_vec(Vec v0, Vec v1, Args... args) : v{v0, v1, args...} {}
 
-  YNN_ALWAYS_INLINE multi_vec operator+(multi_vec a) const {
-    multi_vec res;
+  YNN_ALWAYS_INLINE Vec& operator[](size_t i) { return v[i]; }
+  YNN_ALWAYS_INLINE Vec operator[](size_t i) const { return v[i]; }
 
+  YNN_ALWAYS_INLINE multi_vec& operator+=(multi_vec a) {
     YNN_UNROLL
     for (size_t i = 0; i < M; ++i) {
-      res.v[i] = this->v[i] + a.v[i];
+      v[i] = v[i] + a[i];
     }
 
+    return *this;
+  }
+
+  YNN_ALWAYS_INLINE multi_vec& operator*=(multi_vec a) {
+    YNN_UNROLL
+    for (size_t i = 0; i < M; ++i) {
+      v[i] = v[i] * a[i];
+    }
+
+    return *this;
+  }
+
+  YNN_ALWAYS_INLINE multi_vec operator+(multi_vec a) const {
+    multi_vec res(*this);
+    res += a;
     return res;
   }
 
   YNN_ALWAYS_INLINE multi_vec operator*(multi_vec a) const {
-    multi_vec res;
-
-    YNN_UNROLL
-    for (size_t i = 0; i < M; ++i) {
-      res.v[i] = this->v[i] * a.v[i];
-    }
-
+    multi_vec res(*this);
+    res *= a;
     return res;
-  }
-
-  YNN_ALWAYS_INLINE multi_vec operator+=(multi_vec a) {
-    YNN_UNROLL
-    for (size_t i = 0; i < M; ++i) {
-      this->v[i] = this->v[i] + a.v[i];
-    }
-
-    return *this;
-  }
-
-  YNN_ALWAYS_INLINE multi_vec operator*=(multi_vec a) {
-    YNN_UNROLL
-    for (size_t i = 0; i < M; ++i) {
-      this->v[i] = this->v[i] * a.v[i];
-    }
-
-    return *this;
   }
 };
 
 template <typename Vec, size_t M>
 YNN_ALWAYS_INLINE multi_vec<Vec, M> load(const typename Vec::value_type* ptr,
-    multi_vec<Vec, M>, decltype(multi_vec<Vec, M>::N)) {
+                                         multi_vec<Vec, M>,
+                                         decltype(multi_vec<Vec, M>::N) = {}) {
   multi_vec<Vec, M> x;
 
   YNN_UNROLL
   for (size_t i = 0; i < M; ++i) {
-    x.v[i] = load(ptr + i * Vec::N, Vec{});
+    x[i] = load(ptr + i * Vec::N, Vec{});
   }
 
   return x;
@@ -91,9 +88,9 @@ YNN_ALWAYS_INLINE multi_vec<Vec, M> load(const typename Vec::value_type* ptr,
   YNN_UNROLL
   for (size_t i = 0; i < M; ++i) {
     if (Vec::N <= n) {
-      x.v[i] = load(ptr + i * Vec::N, Vec{});
+      x[i] = load(ptr + i * Vec::N, Vec{});
     } else if (n > 0) {
-      x.v[i] = load(ptr + i * Vec::N, zero, n);
+      x[i] = load(ptr + i * Vec::N, zero, n);
     }
     n = sub_sat(n, Vec::N);
   }
@@ -102,11 +99,11 @@ YNN_ALWAYS_INLINE multi_vec<Vec, M> load(const typename Vec::value_type* ptr,
 }
 
 template <typename Vec, size_t M>
-YNN_ALWAYS_INLINE void store(typename Vec::value_type* ptr,
-    multi_vec<Vec, M> b, decltype(multi_vec<Vec, M>::N)) {
+YNN_ALWAYS_INLINE void store(typename Vec::value_type* ptr, multi_vec<Vec, M> b,
+                             decltype(multi_vec<Vec, M>::N) = {}) {
   YNN_UNROLL
   for (size_t i = 0; i < M; ++i) {
-    store(ptr + i * Vec::N, b.v[i]);
+    store(ptr + i * Vec::N, b[i]);
   }
 }
 
@@ -116,26 +113,54 @@ YNN_ALWAYS_INLINE void store(typename Vec::value_type* ptr,
   YNN_UNROLL
   for (size_t i = 0; i < M; ++i) {
     if (Vec::N <= n) {
-      store(ptr + i * Vec::N, b.v[i]);
+      store(ptr + i * Vec::N, b[i]);
     } else if (n > 0) {
-      store(ptr + i * Vec::N, b.v[i], n % Vec::N);
+      store(ptr + i * Vec::N, b[i], n % Vec::N);
     }
     n = sub_sat(n, Vec::N);
   }
 }
 
-template <int Index, typename Vec>
-Vec extract(Vec x, Vec) {
-  static_assert(Index == 0, "");
-  return x;
+template <typename Vec, size_t M>
+YNN_ALWAYS_INLINE multi_vec<Vec, M> fma(multi_vec<Vec, M> a,
+                                        multi_vec<Vec, M> b,
+                                        multi_vec<Vec, M> acc) {
+  YNN_UNROLL
+  for (size_t i = 0; i < M; ++i) {
+    acc[i] = fma(a[i], b[i], acc[i]);
+  }
+  return acc;
 }
 
 template <int Index, typename Vec, typename ResultVec, size_t M>
-ResultVec extract(multi_vec<Vec, M> b, ResultVec) {
+YNN_ALWAYS_INLINE ResultVec extract(multi_vec<Vec, M> b, ResultVec) {
   static_assert(Index * ResultVec::N < M * Vec::N);
 
   return extract<Index % (Vec::N / ResultVec::N)>(
-      b.v[(Index * ResultVec::N) / Vec::N], ResultVec{});
+      b[(Index * ResultVec::N) / Vec::N], ResultVec{});
+}
+
+template <typename T, size_t N, typename... Args>
+YNN_ALWAYS_INLINE multi_vec<vec<T, N>, sizeof...(Args) + 2> concat(
+    vec<T, N> x, vec<T, N> y, Args... args) {
+  return {x, y, args...};
+}
+
+template <typename To, typename Vec, size_t M>
+auto convert(multi_vec<Vec, M> x, To) {
+  using ResultVec = decltype(convert(x[0], To{}));
+  multi_vec<ResultVec, M> result;
+  YNN_UNROLL
+  for (size_t i = 0; i < M; ++i) {
+    result[i] = convert(x[i], To{});
+  }
+  return result;
+}
+
+template <typename T, size_t N, size_t M>
+YNN_ALWAYS_INLINE multi_vec<vec<T, N>, M> convert(multi_vec<vec<T, N>, M> x,
+                                                  T) {
+  return x;
 }
 
 }  // namespace simd

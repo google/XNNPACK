@@ -23,5 +23,8 @@ TEST_HORIZONTAL_MIN(x86_sse41, s32x4, arch_flag::sse41);
 
 TEST_HORIZONTAL_MAX(x86_sse41, s32x4, arch_flag::sse41);
 
+TEST_CONVERT(x86_sse41, s32x16, u8x16, arch_flag::sse41);
+TEST_CONVERT(x86_sse41, s32x16, s8x16, arch_flag::sse41);
+
 }  // namespace simd
 }  // namespace ynn

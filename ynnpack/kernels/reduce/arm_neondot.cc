@@ -5,11 +5,8 @@
 
 #include <arm_neon.h>
 
-#include <array>
-#include <cassert>
 #include <cstddef>
 #include <cstdint>
-#include <cstring>
 #include <type_traits>
 
 #include "ynnpack/base/arithmetic.h"
@@ -24,40 +21,6 @@ namespace ynn {
 namespace simd {
 
 using s32x4x4 = multi_vec<s32x4, 4>;
-
-static s32x4x4& operator+=(s32x4x4& a, s8x16 b) {
-  int16x8_t b_lo = vmovl_s8(vget_low_s8(b.v));
-  int16x8_t b_hi = vmovl_s8(vget_high_s8(b.v));
-
-  s32x4 b_0(vmovl_s16(vget_low_s16(b_lo)));
-  s32x4 b_1(vmovl_s16(vget_high_s16(b_lo)));
-  s32x4 b_2(vmovl_s16(vget_low_s16(b_hi)));
-  s32x4 b_3(vmovl_s16(vget_high_s16(b_hi)));
-
-  a.v[0] += b_0;
-  a.v[1] += b_1;
-  a.v[2] += b_2;
-  a.v[3] += b_3;
-
-  return a;
-}
-
-static s32x4x4& operator+=(s32x4x4& a, u8x16 b) {
-  int16x8_t b_lo = vreinterpretq_s16_u16(vmovl_u8(vget_low_u8(b.v)));
-  int16x8_t b_hi = vreinterpretq_s16_u16(vmovl_u8(vget_high_u8(b.v)));
-
-  s32x4 b_0(vmovl_s16(vget_low_s16(b_lo)));
-  s32x4 b_1(vmovl_s16(vget_high_s16(b_lo)));
-  s32x4 b_2(vmovl_s16(vget_low_s16(b_hi)));
-  s32x4 b_3(vmovl_s16(vget_high_s16(b_hi)));
-
-  a.v[0] += b_0;
-  a.v[1] += b_1;
-  a.v[2] += b_2;
-  a.v[3] += b_3;
-
-  return a;
-}
 
 static s32x4 reduce_add(
     s32x4 a, s8x16 b, Identity /*map_fn*/,
@@ -83,10 +46,10 @@ static s32x4x4 reduce_add(
   int16x8_t sq_lo = vmull_s8(b_lo_s8, b_lo_s8);
   int16x8_t sq_hi = vmull_s8(b_hi_s8, b_hi_s8);
 
-  a.v[0].v = vaddw_s16(a.v[0].v, vget_low_s16(sq_lo));
-  a.v[1].v = vaddw_s16(a.v[1].v, vget_high_s16(sq_lo));
-  a.v[2].v = vaddw_s16(a.v[2].v, vget_low_s16(sq_hi));
-  a.v[3].v = vaddw_s16(a.v[3].v, vget_high_s16(sq_hi));
+  a[0].v = vaddw_s16(a[0].v, vget_low_s16(sq_lo));
+  a[1].v = vaddw_s16(a[1].v, vget_high_s16(sq_lo));
+  a[2].v = vaddw_s16(a[2].v, vget_low_s16(sq_hi));
+  a[3].v = vaddw_s16(a[3].v, vget_high_s16(sq_hi));
 
   return a;
 }
@@ -99,14 +62,14 @@ static s32x4x4 reduce_add(
   uint16x8_t sq_lo = vmull_u8(b_lo_s8, b_lo_s8);
   uint16x8_t sq_hi = vmull_u8(b_hi_s8, b_hi_s8);
 
-  a.v[0].v = vreinterpretq_s32_u32(vaddw_u16(vreinterpretq_u32_s32(a.v[0].v),
-                                             vget_low_u16(sq_lo)));
-  a.v[1].v = vreinterpretq_s32_u32(vaddw_u16(vreinterpretq_u32_s32(a.v[1].v),
-                                             vget_high_u16(sq_lo)));
-  a.v[2].v = vreinterpretq_s32_u32(vaddw_u16(vreinterpretq_u32_s32(a.v[2].v),
-                                             vget_low_u16(sq_hi)));
-  a.v[3].v = vreinterpretq_s32_u32(vaddw_u16(vreinterpretq_u32_s32(a.v[3].v),
-                                             vget_high_u16(sq_hi)));
+  a[0].v = vreinterpretq_s32_u32(
+      vaddw_u16(vreinterpretq_u32_s32(a[0].v), vget_low_u16(sq_lo)));
+  a[1].v = vreinterpretq_s32_u32(
+      vaddw_u16(vreinterpretq_u32_s32(a[1].v), vget_high_u16(sq_lo)));
+  a[2].v = vreinterpretq_s32_u32(
+      vaddw_u16(vreinterpretq_u32_s32(a[2].v), vget_low_u16(sq_hi)));
+  a[3].v = vreinterpretq_s32_u32(
+      vaddw_u16(vreinterpretq_u32_s32(a[3].v), vget_high_u16(sq_hi)));
 
   return a;
 }
