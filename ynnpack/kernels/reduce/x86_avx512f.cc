@@ -3,27 +3,46 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+#include "ynnpack/base/simd/x86_avx512f.h"
+
 #include <immintrin.h>
 
 #include <cassert>
 #include <cstddef>
-#include <cstring>
+#include <type_traits>
 
 #include "ynnpack/base/simd/multi_vec.h"
-#include "ynnpack/base/simd/x86_avx512f.h"
 #include "ynnpack/kernels/reduce/generic.h"
 #include "ynnpack/kernels/reduce/min_max_accumulator.h"
 #include "ynnpack/kernels/reduce/sum_accumulator.h"
 
 namespace ynn {
 
+namespace simd {
+
+using f32x16x16 = multi_vec<f32x16, 16>;
+
+static f32x16x16 reduce_add(
+    f32x16x16 a, f32x16x16 b, Square /*map_fn*/,
+    std::integral_constant<size_t, 1> /*horizontal_factor*/) {
+  return fma(b, b, a);
+}
+
+static f32x16 reduce_add(
+    f32x16 a, f32x16 b, Square /*map_fn*/,
+    std::integral_constant<size_t, 1> /*horizontal_factor*/) {
+  return fma(b, b, a);
+}
+
+}  // namespace simd
+
 using simd::f32x16;
+using simd::f32x16x16;
 
 MIN_MAX_KERNEL(min_max_fp32_4x16_avx512f, f32x16, f32x16, float, 16);
 MIN_MAX_KERNEL(min_fp32_4x16_avx512f, f32x16, dummy_t, float, 16);
 MIN_MAX_KERNEL(max_fp32_4x16_avx512f, dummy_t, f32x16, float, 16);
 
-using f32x16x16 = simd::multi_vec<f32x16, 16>;
 
 void sum_fp32_avx512f(size_t n, size_t k3, size_t k2, size_t k1,
                       size_t a_stride_n, size_t a_stride_k3,

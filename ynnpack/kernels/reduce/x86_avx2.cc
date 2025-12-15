@@ -106,20 +106,17 @@ using bf16x16x8 = simd::multi_vec<simd::bf16x16, 8>;
 using f16x16_rvar = float16_wrapper<f16x16, s16x16>;
 using bf16x16_rvar = float16_wrapper<bf16x16, s16x16>;
 
-MIN_MAX_KERNEL(min_max_fp32_4x8_avx2, f32x8, f32x8, float, 8);
 MIN_MAX_KERNEL(min_max_bf16_4x16_avx2, bf16x16_rvar, bf16x16_rvar, bfloat16,
                16);
 MIN_MAX_KERNEL(min_max_fp16_4x16_avx2, f16x16_rvar, f16x16_rvar, half, 16);
 MIN_MAX_KERNEL(min_max_uint8_4x32_avx2, u8x32, u8x32, uint8_t, 32);
 MIN_MAX_KERNEL(min_max_int8_4x32_avx2, s8x32, s8x32, int8_t, 32);
 
-MIN_MAX_KERNEL(min_fp32_4x8_avx2, f32x8, dummy_t, float, 8);
 MIN_MAX_KERNEL(min_bf16_4x16_avx2, bf16x16_rvar, dummy_t, bfloat16, 16);
 MIN_MAX_KERNEL(min_fp16_4x16_avx2, f16x16_rvar, dummy_t, half, 16);
 MIN_MAX_KERNEL(min_uint8_4x32_avx2, u8x32, dummy_t, uint8_t, 32);
 MIN_MAX_KERNEL(min_int8_4x32_avx2, s8x32, dummy_t, int8_t, 32);
 
-MIN_MAX_KERNEL(max_fp32_4x8_avx2, dummy_t, f32x8, float, 8);
 MIN_MAX_KERNEL(max_bf16_4x16_avx2, dummy_t, bf16x16_rvar, bfloat16, 16);
 MIN_MAX_KERNEL(max_fp16_4x16_avx2, dummy_t, f16x16_rvar, half, 16);
 MIN_MAX_KERNEL(max_uint8_4x32_avx2, dummy_t, u8x32, uint8_t, 32);
@@ -153,21 +150,6 @@ void sum_uint8_int32_avx2(size_t n, size_t k3, size_t k2, size_t k1,
         n, k3, k2, k1, a_stride_n, a_stride_k3, a_stride_k2,
         reinterpret_cast<const uint8_t*>(a), /*C_stride_m=*/0,
         reinterpret_cast<int32_t*>(c));
-  }
-}
-
-void sum_fp32_avx2(size_t n, size_t k3, size_t k2, size_t k1,
-                   size_t a_stride_n, size_t a_stride_k3, size_t a_stride_k2,
-                   const void* a, size_t, void* c) {
-  if (k1 == 1 && a_stride_n == sizeof(float)) {
-    tiled_reduce<sum_accumulator_k1_1<f32x8x8, f32x8x8>, float, float>(
-        n, k3, k2, a_stride_k3, a_stride_k2, reinterpret_cast<const float*>(a),
-        /*C_stride_m=*/0, reinterpret_cast<float*>(c));
-  } else {
-    tiled_reduce<sum_accumulator_x32<f32x8, 8>, float, float>(
-      n, k3, k2, k1, a_stride_n, a_stride_k3, a_stride_k2,
-      reinterpret_cast<const float*>(a), /*C_stride_m=*/0,
-      reinterpret_cast<float*>(c));
   }
 }
 
@@ -236,22 +218,6 @@ void sum_squared_bf16_fp32_avx2(size_t n, size_t k3, size_t k2, size_t k1,
         n, k3, k2, k1, a_stride_n, a_stride_k3, a_stride_k2,
         reinterpret_cast<const bfloat16*>(a), /*C_stride_m=*/0,
         reinterpret_cast<float*>(c));
-  }
-}
-
-void sum_squared_fp32_avx2(size_t n, size_t k3, size_t k2, size_t k1,
-                           size_t a_stride_n, size_t a_stride_k3,
-                           size_t a_stride_k2, const void* a, size_t, void* c) {
-  if (k1 == 1 && a_stride_n == sizeof(float)) {
-    tiled_reduce<sum_accumulator_k1_1<f32x8x8, f32x8x8, Square>, float,
-                 float>(
-        n, k3, k2, a_stride_k3, a_stride_k2, reinterpret_cast<const float*>(a),
-        /*C_stride_m=*/0, reinterpret_cast<float*>(c));
-  } else {
-    tiled_reduce<sum_accumulator_x32<f32x8, 8, Square>, float, float>(
-      n, k3, k2, k1, a_stride_n, a_stride_k3, a_stride_k2,
-      reinterpret_cast<const float*>(a), /*C_stride_m=*/0,
-      reinterpret_cast<float*>(c));
   }
 }
 
