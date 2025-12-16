@@ -40,36 +40,18 @@ T compute_same_padding_min(const ynn_node::stencil_copy::stencil& stencil,
 
 }  // namespace
 
-extern "C" {
-
 using stencil_info = ynn_node::stencil_copy::stencil;
 
-ynn_status ynn_define_stencil_copy(ynn_subgraph_t subgraph, size_t num_stencils,
-                                   const int32_t* stencil_axes,
-                                   const int32_t* new_axes,
-                                   const size_t* stencil_dims,
-                                   const size_t* stencil_strides,
-                                   const size_t* stencil_dilations,
-                                   uint32_t input_id, uint32_t padding_id,
-                                   uint32_t* output_id, uint32_t flags) {
+void define_stencil_copy(ynn_subgraph_t subgraph, ynn_node& node,
+                         const ynn_node::stencil_copy& op_data,
+                         uint32_t input_id, uint32_t padding_id,
+                         uint32_t* output_id, uint32_t flags) {
   // Validate arguments.
   assert(subgraph);
   assert(subgraph->is_valid_value(input_id));
-  assert(num_stencils == 0 || stencil_axes);
-  assert(num_stencils == 0 || stencil_dims);
-  assert(num_stencils == 0 || stencil_strides);
-  assert(num_stencils == 0 || stencil_dilations);
   const ynn_value& input = subgraph->value(input_id);
 
-  ynn_node::stencil_copy op;
-  op.stencils.reserve(num_stencils);
-  for (size_t i = 0; i < num_stencils; ++i) {
-    assert(stencil_axes[i] >= 0);
-    op.stencils.push_back(
-        {axis_to_slinky_dim(input.rank(), stencil_axes[i]),
-         axis_to_slinky_dim(input.rank() + num_stencils, new_axes[i]),
-         stencil_dims[i], stencil_strides[i], stencil_dilations[i]});
-  }
+  ynn_node::stencil_copy op(op_data);
   // Sort the stencils so we can insert and remove the new axes while
   // understanding the axis indices.
   std::sort(op.stencils.begin(), op.stencils.end(),
@@ -98,8 +80,7 @@ ynn_status ynn_define_stencil_copy(ynn_subgraph_t subgraph, size_t num_stencils,
                           static_cast<slinky::index_t>(stencil.extent));
   }
 
-  // Make the node.
-  ynn_node node;
+  // Update the node.
   node.inputs = {input_id, padding_id};
   node.outputs = {output.id};
   node.op = std::move(op);
@@ -172,6 +153,41 @@ ynn_status ynn_define_stencil_copy(ynn_subgraph_t subgraph, size_t num_stencils,
     runtime.funcs.push_back(std::move(func));
     return ynn_status_success;
   };
+}
+
+extern "C" {
+
+ynn_status ynn_define_stencil_copy(ynn_subgraph_t subgraph, size_t num_stencils,
+                                   const int32_t* stencil_axes,
+                                   const int32_t* new_axes,
+                                   const size_t* stencil_dims,
+                                   const size_t* stencil_strides,
+                                   const size_t* stencil_dilations,
+                                   uint32_t input_id, uint32_t padding_id,
+                                   uint32_t* output_id, uint32_t flags) {
+  assert(num_stencils == 0 || stencil_axes);
+  assert(num_stencils == 0 || stencil_dims);
+  assert(num_stencils == 0 || stencil_strides);
+  assert(num_stencils == 0 || stencil_dilations);
+
+  ynn_node node;
+  const ynn_value& input = subgraph->value(input_id);
+  ynn_node::stencil_copy op_data;
+  op_data.stencils.reserve(num_stencils);
+  for (size_t i = 0; i < num_stencils; ++i) {
+    op_data.stencils.push_back({
+        // Swap the axes to get the slinky dimensions.
+        .axis = axis_to_slinky_dim(input.rank(), stencil_axes[i]),
+        .new_axis =
+            axis_to_slinky_dim(input.rank() + num_stencils, new_axes[i]),
+        .extent = stencil_dims[i],
+        .stride = stencil_strides[i],
+        .dilation = stencil_dilations[i],
+    });
+  }
+
+  ynn::define_stencil_copy(subgraph, node, op_data, input_id, padding_id,
+                           output_id, flags);
   subgraph->add_node(std::move(node));
   return ynn_status_success;
 }
