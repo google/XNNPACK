@@ -104,7 +104,9 @@ static enum xnn_status create_fully_connected_nc(
     const struct gemm_fused_ukernels* gemm_ukernels,
     const enum xnn_operator_type operator_type,
     xnn_weights_cache_t weights_cache, enum xnn_fingerprint_id fingerprint_id,
-    xnn_operator_t* fully_connected_op_out) {
+    xnn_operator_t* fully_connected_op_out,
+    const void* original_kernel_for_cache_key,
+    const void* original_bias_for_cache_key) {
   xnn_operator_t fully_connected_op = NULL;
   enum xnn_status status = xnn_status_uninitialized;
   assert(gemm_config);
@@ -266,8 +268,10 @@ static enum xnn_status create_fully_connected_nc(
   size_t cache_offset = XNN_CACHE_NOT_FOUND;
   struct xnn_weights_cache_look_up_key cache_key;
   cache_key.seed = cache_seed;
-  cache_key.kernel = kernel;
-  cache_key.bias = bias;
+  cache_key.kernel =
+      original_kernel_for_cache_key ? original_kernel_for_cache_key : kernel;
+  cache_key.bias =
+      original_bias_for_cache_key ? original_bias_for_cache_key : bias;
   cache_key.fingerprint_id = fingerprint_id;
   if (use_weights_cache(fully_connected_op)) {
     cache_offset = xnn_weights_cache_look_up(fully_connected_op->weights_cache,
@@ -465,6 +469,14 @@ struct fc_context {
     float* f32;
   } requantization_scale;
 
+  // These pointers are used to keep track of the original data address when
+  // doing on-the-fly conversions (for instance to fp16) within the create
+  // functions.
+  //
+  // They are used to compute the cache_key to recover the link of the original
+  // buffer in the cache.
+  const void* original_kernel;
+  const void* original_bias;
 
   void* fingerprint_data_to_release;
   void* requantization_scale_to_release;
@@ -1548,7 +1560,8 @@ static enum xnn_status create_fully_connected_nc_helper(
           context->kernel_scale_params, &context->params, context->params_size,
           context->gemm_config, &context->gemm_config->minmax,
           context->operator_type, context->weights_cache,
-          context->fingerprint_id, context->fully_connected_op_out));
+          context->fingerprint_id, context->fully_connected_op_out,
+          context->original_kernel, context->original_bias));
 error:
   cleanup_context(variant, context);
   return status;
@@ -2116,26 +2129,43 @@ enum xnn_status xnn_create_fully_connected_nc_f32_f16(
   float* fp32_kernel_buffer = (float*)xnn_allocate_memory(
       input_channels * output_channels * sizeof(float));
   float* fp32_bias_buffer = NULL;
+  float* fp32_bias_buffer_to_release = NULL;
   const xnn_float16* f16_kernel = (const xnn_float16*)kernel;
   const xnn_float16* f16_bias = (const xnn_float16*)bias;
   for (size_t i = 0; i < input_channels * output_channels; ++i) {
     fp32_kernel_buffer[i] = xnn_float16_to_float(f16_kernel[i]);
   }
   if (bias && !(flags & XNN_FLAG_FP32_STATIC_BIASES)) {
-    fp32_bias_buffer =
+    fp32_bias_buffer_to_release =
         (float*)xnn_allocate_memory(output_channels * sizeof(float));
+    fp32_bias_buffer = fp32_bias_buffer_to_release;
     for (size_t i = 0; i < output_channels; ++i) {
       fp32_bias_buffer[i] = xnn_float16_to_float(f16_bias[i]);
     }
-    bias = fp32_bias_buffer;
+  } else {
+    fp32_bias_buffer = (float*)(uintptr_t)bias;
   }
   // Fingerprinting is done by xnn_create_fully_connected_nc_f32.
-  enum xnn_status status = xnn_create_fully_connected_nc_f32(
-      input_channels, output_channels, input_stride, output_stride,
-      fp32_kernel_buffer, bias, output_min, output_max, flags, weights_cache,
-      fully_connected_op_out);
+  struct fc_context context = {
+      .input_channels = input_channels,
+      .output_channels = output_channels,
+      .input_stride = input_stride,
+      .output_stride = output_stride,
+      .kernel = fp32_kernel_buffer,
+      .bias = fp32_bias_buffer,
+      .output_min = output_min,
+      .output_max = output_max,
+      .flags = flags,
+      .weights_cache = weights_cache,
+      .operator_type = xnn_operator_type_fully_connected_nc_f32,
+      .fully_connected_op_out = fully_connected_op_out,
+      .should_fingerprint = true,
+      .original_kernel = kernel,
+      .original_bias = bias,
+  };
+  enum xnn_status status = create_fully_connected_nc_helper(&context);
   xnn_release_memory(fp32_kernel_buffer);
-  xnn_release_memory(fp32_bias_buffer);
+  xnn_release_memory(fp32_bias_buffer_to_release);
   return status;
 }
 
