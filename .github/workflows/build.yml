@@ -23,7 +23,7 @@ jobs:
     runs-on: 'ubuntu-24.04-8core'
     timeout-minutes: 60
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Update apt
         run: |
           echo 'set man-db/auto-update false' | sudo debconf-communicate >/dev/null
@@ -49,7 +49,7 @@ jobs:
     runs-on: arm-ubuntu-arm-22.04-8core
     timeout-minutes: 60
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Update apt
         run: |
           echo 'set man-db/auto-update false' | sudo debconf-communicate >/dev/null
@@ -75,7 +75,7 @@ jobs:
     runs-on: arm-ubuntu-arm-22.04-8core
     timeout-minutes: 60
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Update apt
         run: |
           echo 'set man-db/auto-update false' | sudo debconf-communicate >/dev/null
@@ -107,7 +107,7 @@ jobs:
     runs-on: 'ubuntu-24.04-16core'
     timeout-minutes: 60
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Update apt
         run: |
           echo 'set man-db/auto-update false' | sudo debconf-communicate >/dev/null
@@ -137,7 +137,7 @@ jobs:
     runs-on: 'ubuntu-24.04-16core'
     timeout-minutes: 60
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Update apt
         run: |
           echo 'set man-db/auto-update false' | sudo debconf-communicate >/dev/null
@@ -158,7 +158,7 @@ jobs:
           save: ${{ inputs.update-caches }}
       - name: Check for cached qemu build
         id: cached-qemu
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ${{ github.workspace }}/bin/qemu-riscv64
           key: ${{ runner.os }}-qemu-riscv64
@@ -192,7 +192,7 @@ jobs:
     runs-on: windows-2022-32core
     timeout-minutes: 60
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Setup ccache
         uses: hendrikmuhs/ccache-action@v1.2
         with:
@@ -217,7 +217,7 @@ jobs:
     runs-on: windows-2022-32core
     timeout-minutes: 60
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Setup ccache
         uses: hendrikmuhs/ccache-action@v1.2
         with:
@@ -246,7 +246,7 @@ jobs:
     runs-on: windows-2022-32core
     timeout-minutes: 60
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Setup ccache
         uses: hendrikmuhs/ccache-action@v1.2
         with:
@@ -275,7 +275,7 @@ jobs:
     runs-on: macos-latest
     timeout-minutes: 60
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Install ninja
         run: brew install ninja
       - name: Create output directory
@@ -311,7 +311,7 @@ jobs:
     runs-on: 'ubuntu-24.04-8core'
     timeout-minutes: 60
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Update apt
         run: |
           echo 'set man-db/auto-update false' | sudo debconf-communicate >/dev/null
@@ -350,7 +350,7 @@ jobs:
     runs-on: macos-latest
     timeout-minutes: 60
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Create output directory
         run: mkdir -p build/ios/arm64
         working-directory: ${{ github.workspace }}
@@ -365,7 +365,7 @@ jobs:
     runs-on: macos-latest
     timeout-minutes: 60
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Create output directory
         run: mkdir -p build/ios/x86_64
         working-directory: ${{ github.workspace }}
@@ -380,7 +380,7 @@ jobs:
     runs-on: 'ubuntu-24.04-8core'
     timeout-minutes: 60
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Update apt
         run: |
           echo 'set man-db/auto-update false' | sudo debconf-communicate >/dev/null
@@ -452,7 +452,7 @@ jobs:
         --define=ynn_enable_x86_avx512fp16=false
         --define=ynn_enable_x86_avx512bf16=false
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Update apt
         run: |
           echo 'set man-db/auto-update false' | sudo debconf-communicate >/dev/null
@@ -504,7 +504,7 @@ jobs:
     runs-on: arm-ubuntu-arm-22.04-8core
     timeout-minutes: 60
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Update apt
         run: |
           echo 'set man-db/auto-update false' | sudo debconf-communicate >/dev/null
@@ -569,7 +569,7 @@ jobs:
         --define=ynn_enable_arm64_sme=false
         --define=ynn_enable_arm_neonbf16=false
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Add repository ppa:ubuntu-toolchain-r/test for gcc-13 and g++-13
         working-directory: ${{ github.workspace }}
         run: |
@@ -625,7 +625,7 @@ jobs:
     env:
       QEMU_ARGS: -cpu max
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Update apt
         run: |
           echo 'set man-db/auto-update false' | sudo debconf-communicate >/dev/null
@@ -756,7 +756,7 @@ jobs:
             --local_test_jobs=$(nproc)
         working-directory: ${{ github.workspace }}
       - name: Upload binary artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: binaries
           path: |
@@ -766,7 +766,7 @@ jobs:
             !${{ github.workspace }}/bazel-bin/test/**/_objs
           overwrite: true
       - name: Upload log artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: test_logs
           path:  ~/.cache/bazel/**/test.log
