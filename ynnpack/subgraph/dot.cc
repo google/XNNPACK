@@ -514,26 +514,24 @@ auto make_transpose_a_impl(index_t tile_k) {
       };
 }
 
+}  // namespace
+
 // Packing means transposing
 // a(k, m, ...) => a([0, tile_k), m, k/tile_k, ...)
-uint32_t define_transpose_a(ynn_subgraph& subgraph, index_t tile_k,
-                            uint32_t input_a_id) {
+void define_transpose_a(ynn_subgraph& subgraph, ynn_node& node, index_t tile_k,
+                        uint32_t input_a_id, uint32_t output_id) {
   const ynn_value& a = subgraph.value(input_a_id);
-
-  ynn_value& packed_a = subgraph.new_internal_value();
-  packed_a.type = a.type;
-  uint32_t packed_a_id = packed_a.id;
+  ynn_value& output = subgraph.get_output_value(&output_id, a.type);
+  output.type = a.type;
 
   slinky::expr k = a.extent(0);
   slinky::expr m = a.extent(1);
+  output.extents = {slinky::ceil_div<slinky::expr>(k, tile_k), m};
+  output.extents.insert(output.extents.end(), a.extents.begin() + 2,
+                        a.extents.end());
 
-  packed_a.extents = {slinky::ceil_div<slinky::expr>(k, tile_k), m};
-  packed_a.extents.insert(packed_a.extents.end(), a.extents.begin() + 2,
-                          a.extents.end());
-
-  ynn_node node;
   node.inputs = {input_a_id};
-  node.outputs = {packed_a_id};
+  node.outputs = {output.id};
   node.op = ynn_node::transpose_a{};
   node.create = [tile_k](const ynn_node& node, ynn_runtime& runtime) {
     const ynn_runtime_value& input = runtime.value(node.inputs[0]);
@@ -573,8 +571,17 @@ uint32_t define_transpose_a(ynn_subgraph& subgraph, index_t tile_k,
     runtime.funcs.push_back(std::move(func));
     return ynn_status_success;
   };
+}
+
+namespace {
+
+uint32_t define_transpose_a(ynn_subgraph& subgraph, index_t tile_k,
+                            uint32_t input_a_id) {
+  ynn_node node;
+  ynn_value& output = subgraph.new_internal_value();
+  ynn::define_transpose_a(subgraph, node, tile_k, input_a_id, output.id);
   subgraph.add_node(std::move(node));
-  return packed_a_id;
+  return output.id;
 }
 
 std::tuple<slinky::expr, slinky::expr> choose_split_factors(
