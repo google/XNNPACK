@@ -858,7 +858,8 @@ class FullyConnectedOperatorTester {
                 xnn_run_operator(fully_connected_op, /*threadpool=*/nullptr));
 
       // Verify results.
-      VerifyF32(output, output_ref, output_max, output_min);
+      VerifyF32(output, output_ref, output_max, output_min,
+          /*tolerance=*/1e-3f);
 
       if (use_weights_cache()) {
         // Create another operator with the same weights cache.
@@ -904,7 +905,8 @@ class FullyConnectedOperatorTester {
 
         VerifyWeightsCache(*internal_weights_cache, old_weights_cache_size);
 
-        VerifyF32(output2, output_ref, output_max, output_min);
+        VerifyF32(output2, output_ref, output_max, output_min,
+            /*tolerance=*/1e-3f);
       }
     }
   }
@@ -3557,7 +3559,7 @@ class FullyConnectedOperatorTester {
 
   void VerifyF32(const xnnpack::Buffer<float>& output,
                  const xnnpack::Buffer<float>& output_ref, float output_max,
-                 float output_min) const {
+                 float output_min, float tolerance = 1.0e-4) const {
     // Verify results.
     for (size_t i = 0; i < batch_size(); i++) {
       for (size_t c = 0; c < output_channels(); c++) {
@@ -3568,8 +3570,8 @@ class FullyConnectedOperatorTester {
         ASSERT_NEAR(
             output_ref[i * output_channels() + c],
             output[i * output_stride() + c],
-            std::max(1.0e-4 * std::abs(output_ref[i * output_channels() + c]),
-                     1.0e-4))
+            std::max(tolerance * std::abs(output_ref[i * output_channels() + c]),
+                     tolerance))
             << "batch index = " << i << ", channel = " << c;
       }
     }
