@@ -32,6 +32,13 @@ bool allow_in_place(uint32_t input_id, uint32_t output_id,
     return false;
   }
 
+  if (x.is_external_output()) {
+    // If the output is an external output, we can't compute it in-place because
+    // it might alias an input to the subgraph.
+    // TODO(dsharlet): I think we could relax this constraint somewhat.
+    return false;
+  }
+
   if (type_size_bytes(a.type) != type_size_bytes(x.type) ||
       type_element_count(a.type) != type_element_count(x.type)) {
     // The types are not the same size, we can't compute in place.
