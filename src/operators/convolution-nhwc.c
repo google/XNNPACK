@@ -40,6 +40,109 @@
 #include "src/xnnpack/params.h"
 #include <pthreadpool.h>
 
+// Helper state structure that holds:
+// - the parameters that are passed to the top-level create function;
+// - an internal state that may be used by the case specific initialization
+//   helpers;
+// - the final parameters that will be passed to the underlying create function.
+struct convolution2d_nhwc_context {
+  // Parameters to the top-level create function.
+  uint32_t input_padding_top;
+  uint32_t input_padding_right;
+  uint32_t input_padding_bottom;
+  uint32_t input_padding_left;
+  uint32_t kernel_height;
+  uint32_t kernel_width;
+  uint32_t subsampling_height;
+  uint32_t subsampling_width;
+  uint32_t dilation_height;
+  uint32_t dilation_width;
+  uint32_t groups;
+  size_t group_input_channels;
+  size_t group_output_channels;
+  size_t input_channel_stride;
+  size_t output_channel_stride;
+  int8_t input_zero_point;
+  float input_scale;
+  int8_t kernel_zero_point;
+  const void* kernel_scale;
+  float kernel_scale_value;
+  const void* kernel;
+  const void* bias;
+  int8_t output_zero_point;
+  float output_scale;
+  float output_min;
+  float output_max;
+  uint32_t flags;
+  xnn_weights_cache_t weights_cache;
+  const struct xnn_gemm_config* gemm_config;
+  enum xnn_operator_type operator_type;
+
+  const void* kernel_for_cache_key;
+  const void* bias_for_cache_key;
+
+  // State
+  union {
+    struct xnn_qs8_packing_params qs8;
+    struct xnn_qu8_packing_params qu8;
+  } packing_params;
+  union {
+    struct xnn_f16_minmax_params f16;
+    struct xnn_f32_minmax_params f32;
+    union xnn_qu8_conv_minmax_params qu8;
+    union xnn_qs8_qc8w_conv_minmax_params qs8_qc8w;
+  } gemm_params;
+  union {
+    struct xnn_f16_minmax_params f16;
+    struct xnn_f32_minmax_params f32;
+    union xnn_qu8_conv_minmax_params qu8;
+    union xnn_qs8_qc8w_conv_minmax_params qs8_qc8w;
+  } dwconv_params;
+  union {
+    struct xnn_f16_minmax_params f16;
+    struct xnn_f32_minmax_params f32;
+  } vmuladdc_params;
+  xnn_float16 fp16_output_min;
+  xnn_float16 fp16_output_max;
+  void* requantization_scale;
+  float requantization_scale_value;
+  enum xnn_microkernel_type microkernel_type;
+
+  // `create_helper` implementation parameters.
+  xnn_pack_vmulcaddc_w_fn pack_vmulcaddc_w;
+  xnn_pack_dwconv_hwg_w_fn pack_dwconv_hwg_w;
+  xnn_pack_dwconv_ghw_w_fn pack_dwconv_ghw_w;
+  xnn_pack_conv_kgo_w_fn pack_conv_kgo_w;
+  xnn_pack_conv_goki_w_fn pack_conv_goki_w;
+  void* packing_params_ptr;
+  size_t gemm_params_size;
+  void* gemm_params_ptr;
+  size_t dwconv_params_size;
+  void* dwconv_params_ptr;
+  const float* scale_params;
+  const float* kernel_scale_params;
+  size_t input_padding_bytes;
+  size_t vmulcaddc_params_size;
+  void* vmulcaddc_params_ptr;
+  const struct xnn_dwconv_config* dwconv_ukernel;
+  const struct xnn_vmulcaddc_config* vmulcaddc_config;
+  bool linear_activation;
+  bool relu_activation;
+  enum xnn_fingerprint_id fingerprint_id;
+};
+
+static inline const void* get_kernel_for_cache_key(
+    const struct convolution2d_nhwc_context* const context) {
+  return context->kernel_for_cache_key ? context->kernel_for_cache_key
+                                       : context->kernel;
+}
+
+static inline const void* get_bias_for_cache_key(
+    const struct convolution2d_nhwc_context* const context) {
+  return context->bias_for_cache_key ? context->bias_for_cache_key
+                                     : context->bias;
+}
+
 static inline size_t compute_output_dimension_with_tf_same_padding(
     size_t input_dimension, size_t subsampling_dimension) {
   return divide_round_up(input_dimension, subsampling_dimension);
@@ -73,7 +176,8 @@ static enum xnn_status create_vmulcaddc_path(
     const void* vmulcaddc_params, size_t vmulcaddc_params_size,
     const struct xnn_vmulcaddc_config* vmulcaddc_config,
     enum xnn_fingerprint_id fingerprint_id,
-    enum xnn_operator_type operator_type, xnn_operator_t convolution_op) {
+    enum xnn_operator_type operator_type, xnn_operator_t convolution_op,
+    const struct convolution2d_nhwc_context* context) {
   assert(vmulcaddc_config != NULL);
   assert(vmulcaddc_params != NULL);
 
@@ -103,8 +207,8 @@ static enum xnn_status create_vmulcaddc_path(
 
   const struct xnn_weights_cache_look_up_key cache_key = {
     .seed = groups ^ vmulcaddc_config->channel_tile,
-    .kernel = kernel,
-    .bias = bias,
+    .kernel = get_kernel_for_cache_key(context),
+    .bias = get_bias_for_cache_key(context),
     .fingerprint_id = fingerprint_id,
   };
   if (use_weights_cache(convolution_op)) {
@@ -138,7 +242,8 @@ static enum xnn_status create_dwconv_path(
     size_t dwconv_params_size, const struct xnn_dwconv_config* dwconv_ukernel,
     bool linear_activation, enum xnn_fingerprint_id fingerprint_id,
     enum xnn_operator_type operator_type, size_t* zero_size,
-    xnn_operator_t convolution_op) {
+    xnn_operator_t convolution_op,
+    const struct convolution2d_nhwc_context* context) {
   assert(dwconv_ukernel != NULL);
   enum xnn_status status = xnn_status_out_of_memory;
   const uint8_t primary_tile = dwconv_ukernel->primary_tile;
@@ -208,10 +313,10 @@ static enum xnn_status create_dwconv_path(
   }
   if (use_weights_cache(convolution_op)) {
     struct xnn_weights_cache_look_up_key cache_key = {
-      .seed = cache_seed,
-      .kernel = kernel,
-      .bias = bias,
-      .fingerprint_id = fingerprint_id,
+        .seed = cache_seed,
+        .kernel = get_kernel_for_cache_key(context),
+        .bias = get_bias_for_cache_key(context),
+        .fingerprint_id = fingerprint_id,
     };
     convolution_op->packed_weights.offset = xnn_look_up_or_insert_weights_cache(
         convolution_op->weights_cache, &cache_key, weights_ptr,
@@ -251,7 +356,7 @@ static enum xnn_status create_igemm(
     bool linear_activation, bool relu_activation,
     enum xnn_fingerprint_id fingerprint_id,
     enum xnn_operator_type operator_type, xnn_operator_t convolution_op,
-    size_t* zero_size) {
+    size_t* zero_size, const struct convolution2d_nhwc_context* context) {
   enum xnn_status status = xnn_status_out_of_memory;
   const uint32_t nr = gemm_config->nr;
   const uint32_t kr = UINT32_C(1) << gemm_config->log2_kr;
@@ -265,8 +370,8 @@ static enum xnn_status create_igemm(
 
   const struct xnn_weights_cache_look_up_key cache_key = {
     .seed = cache_seed,
-    .kernel = kernel,
-    .bias = bias,
+    .kernel = get_kernel_for_cache_key(context),
+    .bias = get_bias_for_cache_key(context),
     .fingerprint_id = fingerprint_id,
   };
   if (use_weights_cache(convolution_op)) {
@@ -412,94 +517,6 @@ static enum xnn_status create_igemm(
 error:
   return status;
 }
-
-// Helper state structure that holds:
-// - the parameters that are passed to the top-level create function;
-// - an internal state that may be used by the case specific initialization
-//   helpers;
-// - the final parameters that will be passed to the underlying create function.
-struct convolution2d_nhwc_context {
-  // Parameters to the top-level create function.
-  uint32_t input_padding_top;
-  uint32_t input_padding_right;
-  uint32_t input_padding_bottom;
-  uint32_t input_padding_left;
-  uint32_t kernel_height;
-  uint32_t kernel_width;
-  uint32_t subsampling_height;
-  uint32_t subsampling_width;
-  uint32_t dilation_height;
-  uint32_t dilation_width;
-  uint32_t groups;
-  size_t group_input_channels;
-  size_t group_output_channels;
-  size_t input_channel_stride;
-  size_t output_channel_stride;
-  int8_t input_zero_point;
-  float input_scale;
-  int8_t kernel_zero_point;
-  const void* kernel_scale;
-  float kernel_scale_value;
-  const void* kernel;
-  const void* bias;
-  int8_t output_zero_point;
-  float output_scale;
-  float output_min;
-  float output_max;
-  uint32_t flags;
-  xnn_weights_cache_t weights_cache;
-  const struct xnn_gemm_config* gemm_config;
-  enum xnn_operator_type operator_type;
-
-  // State
-  union {
-    struct xnn_qs8_packing_params qs8;
-    struct xnn_qu8_packing_params qu8;
-  } packing_params;
-  union {
-    struct xnn_f16_minmax_params f16;
-    struct xnn_f32_minmax_params f32;
-    union xnn_qu8_conv_minmax_params qu8;
-    union xnn_qs8_qc8w_conv_minmax_params qs8_qc8w;
-  } gemm_params;
-  union {
-    struct xnn_f16_minmax_params f16;
-    struct xnn_f32_minmax_params f32;
-    union xnn_qu8_conv_minmax_params qu8;
-    union xnn_qs8_qc8w_conv_minmax_params qs8_qc8w;
-  } dwconv_params;
-  union {
-    struct xnn_f16_minmax_params f16;
-    struct xnn_f32_minmax_params f32;
-  } vmuladdc_params;
-  xnn_float16 fp16_output_min;
-  xnn_float16 fp16_output_max;
-  void* requantization_scale;
-  float requantization_scale_value;
-  enum xnn_microkernel_type microkernel_type;
-
-  // `create_helper` implementation parameters.
-  xnn_pack_vmulcaddc_w_fn pack_vmulcaddc_w;
-  xnn_pack_dwconv_hwg_w_fn pack_dwconv_hwg_w;
-  xnn_pack_dwconv_ghw_w_fn pack_dwconv_ghw_w;
-  xnn_pack_conv_kgo_w_fn pack_conv_kgo_w;
-  xnn_pack_conv_goki_w_fn pack_conv_goki_w;
-  void* packing_params_ptr;
-  size_t gemm_params_size;
-  void* gemm_params_ptr;
-  size_t dwconv_params_size;
-  void* dwconv_params_ptr;
-  const float* scale_params;
-  const float* kernel_scale_params;
-  size_t input_padding_bytes;
-  size_t vmulcaddc_params_size;
-  void* vmulcaddc_params_ptr;
-  const struct xnn_dwconv_config* dwconv_ukernel;
-  const struct xnn_vmulcaddc_config* vmulcaddc_config;
-  bool linear_activation;
-  bool relu_activation;
-  enum xnn_fingerprint_id fingerprint_id;
-};
 
 struct convolution2d_nhwc_variant;
 
@@ -717,7 +734,7 @@ static enum xnn_status create_convolution2d_nhwc(
           context->gemm_config->bias_element_size, context->pack_vmulcaddc_w,
           context->packing_params_ptr, context->vmulcaddc_params_ptr,
           context->vmulcaddc_params_size, context->vmulcaddc_config,
-          context->fingerprint_id, context->operator_type, convolution_op);
+          context->fingerprint_id, context->operator_type, convolution_op, context);
       if (status != xnn_status_success) {
         goto error;
       }
@@ -743,7 +760,7 @@ static enum xnn_status create_convolution2d_nhwc(
           context->scale_params, context->dwconv_params_ptr,
           context->dwconv_params_size, context->dwconv_ukernel,
           context->linear_activation, context->fingerprint_id,
-          context->operator_type, &zero_size, convolution_op);
+          context->operator_type, &zero_size, convolution_op, context);
       if (status != xnn_status_success) {
         goto error;
       }
@@ -772,7 +789,7 @@ static enum xnn_status create_convolution2d_nhwc(
           context->gemm_params_size, context->gemm_config,
           context->linear_activation, context->relu_activation,
           context->fingerprint_id, context->operator_type, convolution_op,
-          &zero_size);
+          &zero_size, context);
       if (status != xnn_status_success) {
         goto error;
       }
@@ -2403,6 +2420,7 @@ enum xnn_status xnn_create_convolution2d_nhwc_f32_f16(
                                     kernel_height;
   float* fp32_kernel_buffer =
       (float*)xnn_allocate_memory(num_kernel_entries * sizeof(float));
+  const void* bias_buffer = NULL;
   float* fp32_bias_buffer = NULL;
   const xnn_float16* f16_kernel = (const xnn_float16*)kernel;
   const xnn_float16* f16_bias = (const xnn_float16*)bias;
@@ -2412,20 +2430,43 @@ enum xnn_status xnn_create_convolution2d_nhwc_f32_f16(
   if (bias && !(flags & XNN_FLAG_FP32_STATIC_BIASES)) {
     fp32_bias_buffer = (float*)xnn_allocate_memory(
         groups * group_output_channels * sizeof(float));
+    bias_buffer = fp32_bias_buffer;
     for (size_t i = 0; i < groups * group_output_channels; ++i) {
       fp32_bias_buffer[i] = xnn_float16_to_float(f16_bias[i]);
     }
-    bias = fp32_bias_buffer;
+  } else {
+    bias_buffer = bias;
   }
 
   // Delegate creation to the `f32` operator.
-  enum xnn_status status = xnn_create_convolution2d_nhwc_f32(
-      input_padding_top, input_padding_right, input_padding_bottom,
-      input_padding_left, kernel_height, kernel_width, subsampling_height,
-      subsampling_width, dilation_height, dilation_width, groups,
-      group_input_channels, group_output_channels, input_channel_stride,
-      output_channel_stride, fp32_kernel_buffer, bias, output_min, output_max,
-      flags, weights_cache, convolution_op_out);
+  struct convolution2d_nhwc_context context = {
+      .input_padding_top = input_padding_top,
+      .input_padding_right = input_padding_right,
+      .input_padding_bottom = input_padding_bottom,
+      .input_padding_left = input_padding_left,
+      .kernel_height = kernel_height,
+      .kernel_width = kernel_width,
+      .subsampling_height = subsampling_height,
+      .subsampling_width = subsampling_width,
+      .dilation_height = dilation_height,
+      .dilation_width = dilation_width,
+      .groups = groups,
+      .group_input_channels = group_input_channels,
+      .group_output_channels = group_output_channels,
+      .input_channel_stride = input_channel_stride,
+      .output_channel_stride = output_channel_stride,
+      .kernel = fp32_kernel_buffer,
+      .bias = bias_buffer,
+      .output_min = output_min,
+      .output_max = output_max,
+      .flags = flags,
+      .weights_cache = weights_cache,
+      .operator_type = xnn_operator_type_convolution_nhwc_f32,
+      .kernel_for_cache_key = kernel,
+      .bias_for_cache_key = bias,
+  };
+  enum xnn_status status = create_convolution2d_nhwc_helper(
+      &f32_variant, &context, convolution_op_out);
 
   // Release temporary `f32` buffers.
   xnn_release_memory(fp32_kernel_buffer);
