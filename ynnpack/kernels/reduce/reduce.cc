@@ -108,30 +108,15 @@ struct accumulator_k1_1 {
   static constexpr std::integral_constant<size_t, N_> N = {};
   static constexpr std::integral_constant<size_t, 1> K2 = {};
 
-  AccT acc[N];
-
-  accumulator_k1_1() = default;
-
-  YNN_ALWAYS_INLINE explicit accumulator_k1_1(size_t) {
-    std::fill_n(acc, N, static_cast<AccT>(ReduceOp::identity));
-  }
-
   template <typename AT, typename NT, typename K2T>
-  YNN_ALWAYS_INLINE void reduce(const AT* __restrict A, NT n,
-                                size_t /*A_stride_k2*/, K2T) {
+  YNN_ALWAYS_INLINE void reduce_accumulate(const AT* __restrict A, NT n,
+                                           size_t /*A_stride_k2*/, K2T,
+                                           size_t /*C_stride_m*/,
+                                           T* __restrict C) {
     ReduceOp op;
     F f;
     for (size_t i = 0; i < n; ++i) {
-      acc[i] = op(acc[i], f(A[i]));
-    }
-  }
-
-  template <typename NT>
-  YNN_ALWAYS_INLINE void accumulate(size_t /*C_stride_m*/, T* __restrict C,
-                                    NT n) {
-    ReduceOp op;
-    for (size_t i = 0; i < n; ++i) {
-      C[i] = op(static_cast<AccT>(C[i]), acc[i]);
+      C[i] = op(static_cast<AccT>(C[i]), f(A[i]));
     }
   }
 };
@@ -219,36 +204,17 @@ struct min_max_accumulator_k1_1 {
   static constexpr std::integral_constant<size_t, N_> N = {};
   static constexpr std::integral_constant<size_t, 1> K2 = {};
 
-  AccT acc_min[N];
-  AccT acc_max[N];
-
-  min_max_accumulator_k1_1() = default;
-
-  YNN_ALWAYS_INLINE explicit min_max_accumulator_k1_1(size_t) {
-    std::fill_n(acc_min, N, static_cast<AccT>(Min::identity));
-    std::fill_n(acc_max, N, static_cast<AccT>(Max::identity));
-  }
-
   template <typename AT, typename N, typename K2T>
-  YNN_ALWAYS_INLINE void reduce(const AT* __restrict A, N n,
-                                size_t /*A_stride_k2*/, K2T) {
-    Min min;
-    Max max;
-    for (size_t i = 0; i < n; ++i) {
-      acc_min[i] = min(acc_min[i], static_cast<AccT>(A[i]));
-      acc_max[i] = max(acc_max[i], static_cast<AccT>(A[i]));
-    }
-  }
-
-  template <typename NT>
-  YNN_ALWAYS_INLINE void accumulate(size_t C_stride_m, T* __restrict C, NT n) {
+  YNN_ALWAYS_INLINE void reduce_accumulate(const AT* __restrict A, N n,
+                                           size_t /*A_stride_k2*/, K2T,
+                                           size_t C_stride_m, T* __restrict C) {
     Min min;
     Max max;
     T* __restrict C_min = offset_bytes(C, 0 * C_stride_m);
     T* __restrict C_max = offset_bytes(C, 1 * C_stride_m);
     for (size_t i = 0; i < n; ++i) {
-      C_min[i] = min(static_cast<AccT>(C_min[i]), acc_min[i]);
-      C_max[i] = max(static_cast<AccT>(C_max[i]), acc_max[i]);
+      C_min[i] = min(static_cast<AccT>(C_min[i]), static_cast<AccT>(A[i]));
+      C_max[i] = max(static_cast<AccT>(C_max[i]), static_cast<AccT>(A[i]));
     }
   }
 };
@@ -294,9 +260,9 @@ void reduce(size_t N, size_t K3, size_t K2, size_t K1, size_t A_stride_n,
             size_t A_stride_k3, size_t A_stride_k2, const AT* A, CT* C,
             ReduceOp = ReduceOp{}, F = F{}) {
   if (K1 == 1 && A_stride_n == sizeof(AT)) {
-    tiled_reduce<accumulator_k1_1<AccT, CT, 128 / sizeof(AccT), ReduceOp, F>,
-                 AT, CT>(N, K3, K2, A_stride_k3, A_stride_k2, A,
-                         /*C_stride_m=*/0, C);
+    stream_reduce<accumulator_k1_1<AccT, CT, 128 / sizeof(AccT), ReduceOp, F>,
+                  AT, CT>(N, K3, K2, A_stride_k3, A_stride_k2, A,
+                          /*C_stride_m=*/0, C);
   } else {
     tiled_reduce<accumulator<AccT, CT, 1, 128 / sizeof(AccT), ReduceOp, F>, AT,
                  CT>(N, K3, K2, K1, A_stride_n, A_stride_k3, A_stride_k2, A,
@@ -309,8 +275,9 @@ void min_max(size_t N, size_t K3, size_t K2, size_t K1, size_t A_stride_n,
              size_t A_stride_k3, size_t A_stride_k2, const T* A,
              size_t C_stride_m, T* C, Min, Max) {
   if (K1 == 1 && A_stride_n == sizeof(T)) {
-    tiled_reduce<min_max_accumulator_k1_1<AccT, T, 64 / sizeof(AccT), Min, Max>,
-                 T, T>(N, K3, K2, A_stride_k3, A_stride_k2, A, C_stride_m, C);
+    stream_reduce<
+        min_max_accumulator_k1_1<AccT, T, 64 / sizeof(AccT), Min, Max>, T, T>(
+        N, K3, K2, A_stride_k3, A_stride_k2, A, C_stride_m, C);
   } else {
     tiled_reduce<min_max_accumulator<AccT, T, 1, 64 / sizeof(AccT), Min, Max>,
                  T, T>(N, K3, K2, K1, A_stride_n, A_stride_k3, A_stride_k2, A,

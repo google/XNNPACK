@@ -20,8 +20,6 @@ namespace ynn {
 
 namespace simd {
 
-using s32x4x4 = multi_vec<s32x4, 4>;
-
 static s32x4 reduce_add(
     s32x4 a, s8x16 b, Identity /*map_fn*/,
     std::integral_constant<size_t, 4> /*horizontal_factor*/) {
@@ -38,8 +36,8 @@ static s32x4 reduce_add(
   return a;
 }
 
-static s32x4x4 reduce_add(
-    s32x4x4 a, s8x16 b, Square /*map_fn*/,
+static s32x16 reduce_add(
+    s32x16 a, s8x16 b, Square /*map_fn*/,
     std::integral_constant<size_t, 1> /*horizontal_factor*/) {
   int8x8_t b_lo_s8 = vget_low_s8(b.v);
   int8x8_t b_hi_s8 = vget_high_s8(b.v);
@@ -54,8 +52,8 @@ static s32x4x4 reduce_add(
   return a;
 }
 
-static s32x4x4 reduce_add(
-    s32x4x4 a, u8x16 b, Square /*map_fn*/,
+static s32x16 reduce_add(
+    s32x16 a, u8x16 b, Square /*map_fn*/,
     std::integral_constant<size_t, 1> /*horizontal_factor*/) {
   uint8x8_t b_lo_s8 = vget_low_u8(b.v);
   uint8x8_t b_hi_s8 = vget_high_u8(b.v);
@@ -92,7 +90,7 @@ static s32x4 reduce_add(
 }  // namespace simd
 
 using simd::s32x4;
-using simd::s32x4x4;
+using simd::s32x16;
 using simd::s8x16;
 using simd::u8x16;
 
@@ -101,7 +99,7 @@ void sum_int8_int32_neondot(size_t n, size_t k3, size_t k2, size_t k1,
                             size_t a_stride_k2, const void* a, size_t,
                             void* c) {
   if (k1 == 1 && a_stride_n == sizeof(int8_t)) {
-    tiled_reduce<sum_accumulator_k1_1<s8x16, s32x4x4>, int8_t, int32_t>(
+    stream_reduce<sum_accumulator_k1_1<s8x16, s32x16>, int8_t, int32_t>(
         n, k3, k2, a_stride_k3, a_stride_k2, reinterpret_cast<const int8_t*>(a),
         /*C_stride_m=*/0, reinterpret_cast<int32_t*>(c));
   } else {
@@ -117,7 +115,7 @@ void sum_uint8_int32_neondot(size_t n, size_t k3, size_t k2, size_t k1,
                              size_t a_stride_k2, const void* a, size_t,
                              void* c) {
   if (k1 == 1 && a_stride_n == sizeof(uint8_t)) {
-    tiled_reduce<sum_accumulator_k1_1<u8x16, s32x4x4>, uint8_t, int32_t>(
+    stream_reduce<sum_accumulator_k1_1<u8x16, s32x16>, uint8_t, int32_t>(
         n, k3, k2, a_stride_k3, a_stride_k2,
         reinterpret_cast<const uint8_t*>(a),
         /*C_stride_m=*/0, reinterpret_cast<int32_t*>(c));
@@ -134,9 +132,10 @@ void sum_squared_int8_int32_neondot(size_t n, size_t k3, size_t k2, size_t k1,
                                     size_t a_stride_k2, const void* a, size_t,
                                     void* c) {
   if (k1 == 1 && a_stride_n == sizeof(int8_t)) {
-    tiled_reduce<sum_accumulator_k1_1<s8x16, s32x4x4, Square>, int8_t, int32_t>(
-        n, k3, k2, a_stride_k3, a_stride_k2, reinterpret_cast<const int8_t*>(a),
-        /*C_stride_m=*/0, reinterpret_cast<int32_t*>(c));
+    stream_reduce<sum_accumulator_k1_1<s8x16, s32x16, Square>, int8_t,
+                  int32_t>(n, k3, k2, a_stride_k3, a_stride_k2,
+                           reinterpret_cast<const int8_t*>(a),
+                           /*C_stride_m=*/0, reinterpret_cast<int32_t*>(c));
   } else {
     tiled_reduce<sum_accumulator_x32<s32x4, 16, Square>, int8_t, int32_t>(
         n, k3, k2, k1, a_stride_n, a_stride_k3, a_stride_k2,
@@ -150,11 +149,10 @@ void sum_squared_uint8_int32_neondot(size_t n, size_t k3, size_t k2, size_t k1,
                                      size_t a_stride_k2, const void* a, size_t,
                                      void* c) {
   if (k1 == 1 && a_stride_n == sizeof(uint8_t)) {
-    tiled_reduce<sum_accumulator_k1_1<u8x16, s32x4x4, Square>, uint8_t,
-      int32_t>(
-        n, k3, k2, a_stride_k3, a_stride_k2,
-        reinterpret_cast<const uint8_t*>(a),
-        /*C_stride_m=*/0, reinterpret_cast<int32_t*>(c));
+    stream_reduce<sum_accumulator_k1_1<u8x16, s32x16, Square>, uint8_t,
+                  int32_t>(n, k3, k2, a_stride_k3, a_stride_k2,
+                           reinterpret_cast<const uint8_t*>(a),
+                           /*C_stride_m=*/0, reinterpret_cast<int32_t*>(c));
   } else {
     tiled_reduce<sum_accumulator_x32<s32x4, 16, Square>, uint8_t, int32_t>(
         n, k3, k2, k1, a_stride_n, a_stride_k3, a_stride_k2,

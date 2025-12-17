@@ -131,45 +131,29 @@ struct sum_accumulator_k1_1 {
   static constexpr std::integral_constant<size_t, AccT::N> N = {};
   static constexpr std::integral_constant<size_t, 1> horizontal_factor = {};
 
-  AccT acc[K2];
   MapFn map_fn;
 
-  sum_accumulator_k1_1() = default;
-
-  YNN_ALWAYS_INLINE explicit sum_accumulator_k1_1(size_t) {
-    AccT zero(0);
-    for (size_t i = 0; i < K2; ++i) {
-      acc[i] = zero;
-    }
-  }
-
   template <typename NT, typename K2T>
-  YNN_ALWAYS_INLINE void reduce(const typename InVT::value_type* A, NT n,
-                                size_t A_stride_k2, K2T k2) {
+  YNN_ALWAYS_INLINE void reduce_accumulate(
+      const typename InVT::value_type* __restrict A, NT n, size_t A_stride_k2,
+      K2T k2, size_t /*C_stride_m*/, typename AccT::value_type* __restrict C) {
     assert(k2 <= K2);
     assert(n <= N);
     assert(n > 0);
 
-    const InVT zero(0);
+    InVT zero(static_cast<typename InVT::value_type>(0));
     auto a_0 = load(offset_bytes(A, 0 * A_stride_k2), zero, n);
     auto a_1 = 1 < k2 ? load(offset_bytes(A, 1 * A_stride_k2), zero, n) : zero;
     auto a_2 = 2 < k2 ? load(offset_bytes(A, 2 * A_stride_k2), zero, n) : zero;
     auto a_3 = 3 < k2 ? load(offset_bytes(A, 3 * A_stride_k2), zero, n) : zero;
 
-    acc[0] = reduce_add(acc[0], a_0, map_fn, horizontal_factor);
-    acc[1] = reduce_add(acc[1], a_1, map_fn, horizontal_factor);
-    acc[2] = reduce_add(acc[2], a_2, map_fn, horizontal_factor);
-    acc[3] = reduce_add(acc[3], a_3, map_fn, horizontal_factor);;
-  }
+    AccT acc = convert(zero, typename AccT::value_type{});
+    acc = reduce_add(acc, a_0, map_fn, horizontal_factor);
+    acc = reduce_add(acc, a_1, map_fn, horizontal_factor);
+    acc = reduce_add(acc, a_2, map_fn, horizontal_factor);
+    acc = reduce_add(acc, a_3, map_fn, horizontal_factor);
 
-  template <typename T, typename NT>
-  YNN_ALWAYS_INLINE void accumulate(size_t /*C_stride_m*/, T* __restrict C,
-                                    NT n) {
-    assert(n <= N);
-    assert(n > 0);
-
-    acc[0] = (acc[0] + acc[1]) + (acc[2] + acc[3]);
-    store(C, load(C, AccT{}, n) + acc[0], n);
+    store(C, load(C, AccT{}, n) + acc, n);
   }
 };
 

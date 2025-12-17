@@ -182,21 +182,22 @@ struct min_max_accumulator_k1_1 {
   static constexpr std::integral_constant<size_t, 4> K2 = {};
   static constexpr std::integral_constant<size_t, N_> N = {};
 
-  AccMinT acc_min[K2];
-  AccMaxT acc_max[K2];
+  template <typename NT>
+  void accumulate_min(T* __restrict C, const AccMinT& acc, NT n) {
+    AccMinT id_min(type_info<AccMinT>::min_identity());
+    store(C, min(acc, load(C, id_min, n)), n);
+  }
 
-  min_max_accumulator_k1_1() = default;
-
-  YNN_ALWAYS_INLINE explicit min_max_accumulator_k1_1(size_t) {
-    for (size_t i = 0; i < K2; ++i) {
-      acc_min[i] = type_info<AccMinT>::min_identity();
-      acc_max[i] = type_info<AccMaxT>::max_identity();
-    }
+  template <typename NT>
+  void accumulate_max(T* __restrict C, const AccMaxT& acc, NT n) {
+    AccMaxT id_max(type_info<AccMaxT>::max_identity());
+    store(C, max(acc, load(C, id_max, n)), n);
   }
 
   template <typename AT, typename NT, typename K2T>
-  YNN_ALWAYS_INLINE void reduce(const AT* A, NT n, size_t A_stride_k2,
-                                K2T k2) {
+  YNN_ALWAYS_INLINE void reduce_accumulate(const AT* __restrict A, NT n,
+                                           size_t A_stride_k2, K2T k2,
+                                           size_t C_stride_m, T* __restrict C) {
     assert(k2 <= K2);
     assert(n <= N);
     AccMaxT id_max(type_info<AccMaxT>::max_identity());
@@ -217,58 +218,40 @@ struct min_max_accumulator_k1_1 {
     auto a_3_max =
         3 < k2 ? load(offset_bytes(A, 3 * A_stride_k2), id_max, n) : a_0_max;
 
-    acc_min[0] = min(acc_min[0], a_0_min);
-    acc_max[0] = max(acc_max[0], a_0_max);
-    acc_min[1] = min(acc_min[1], a_1_min);
-    acc_max[1] = max(acc_max[1], a_1_max);
-    acc_min[2] = min(acc_min[2], a_2_min);
-    acc_max[2] = max(acc_max[2], a_2_max);
-    acc_min[3] = min(acc_min[3], a_3_min);
-    acc_max[3] = max(acc_max[3], a_3_max);
-  }
+    AccMinT acc_min = static_cast<AccMinT>(a_0_min);
+    AccMaxT acc_max = static_cast<AccMaxT>(a_0_max);
 
-  template <typename NT>
-  void accumulate_min(T* __restrict C, const AccMinT& acc, NT n) {
-    AccMinT id_min(type_info<AccMinT>::min_identity());
-    store(C, min(acc, load(C, id_min, n)), n);
-  }
+    acc_min = min(acc_min, a_1_min);
+    acc_max = max(acc_max, a_1_max);
+    acc_min = min(acc_min, a_2_min);
+    acc_max = max(acc_max, a_2_max);
+    acc_min = min(acc_min, a_3_min);
+    acc_max = max(acc_max, a_3_max);
 
-  template <typename NT>
-  void accumulate_max(T* __restrict C, const AccMaxT& acc, NT n) {
-    AccMaxT id_max(type_info<AccMaxT>::max_identity());
-    store(C, max(acc, load(C, id_max, n)), n);
-  }
-
-  template <typename NT>
-  YNN_ALWAYS_INLINE void accumulate(size_t C_stride_m, T* __restrict C, NT n) {
-    assert(n <= N);
-    acc_min[0] = min(min(acc_min[0], acc_min[1]), min(acc_min[2], acc_min[3]));
-    acc_max[0] = max(max(acc_max[0], acc_max[1]), max(acc_max[2], acc_max[3]));
-
-    accumulate_min(C, acc_min[0], n);
+    accumulate_min(C, acc_min, n);
     if (!std::is_same<AccMinT, dummy_t>::value) {
       // The min was not a dummy, move to the next row.
       C = offset_bytes(C, C_stride_m);
     }
-    accumulate_max(C, acc_max[0], n);
+    accumulate_max(C, acc_max, n);
   }
 };
 
-#define MIN_MAX_KERNEL(name, acc_min, acc_max, scalar, N)                     \
-  void name(size_t n, size_t k3, size_t k2, size_t k1, size_t a_stride_n,     \
-            size_t a_stride_k3, size_t a_stride_k2, const void* a,            \
-            size_t c_stride_m, void* c) {                                     \
-    if (k1 == 1 && (a_stride_n == sizeof(scalar))) {                          \
-      tiled_reduce<min_max_accumulator_k1_1<acc_min, acc_max, scalar, N>,     \
-                   scalar, scalar>(n, k3, k2, a_stride_k3, a_stride_k2,       \
-                           reinterpret_cast<const scalar*>(a), c_stride_m,    \
-                           reinterpret_cast<scalar*>(c));                     \
-    } else {                                                                  \
-      tiled_reduce<min_max_accumulator<acc_min, acc_max, scalar, N>, scalar,  \
-                   scalar>(n, k3, k2, k1, a_stride_n, a_stride_k3,            \
-                           a_stride_k2, reinterpret_cast<const scalar*>(a),   \
-                           c_stride_m, reinterpret_cast<scalar*>(c));         \
-    }                                                                         \
+#define MIN_MAX_KERNEL(name, acc_min, acc_max, scalar, N)                      \
+  void name(size_t n, size_t k3, size_t k2, size_t k1, size_t a_stride_n,      \
+            size_t a_stride_k3, size_t a_stride_k2, const void* a,             \
+            size_t c_stride_m, void* c) {                                      \
+    if (k1 == 1 && (a_stride_n == sizeof(scalar))) {                           \
+      stream_reduce<min_max_accumulator_k1_1<acc_min, acc_max, scalar, N>,     \
+                    scalar, scalar>(n, k3, k2, a_stride_k3, a_stride_k2,       \
+                                    reinterpret_cast<const scalar*>(a),        \
+                                    c_stride_m, reinterpret_cast<scalar*>(c)); \
+    } else {                                                                   \
+      tiled_reduce<min_max_accumulator<acc_min, acc_max, scalar, N>, scalar,   \
+                   scalar>(n, k3, k2, k1, a_stride_n, a_stride_k3,             \
+                           a_stride_k2, reinterpret_cast<const scalar*>(a),    \
+                           c_stride_m, reinterpret_cast<scalar*>(c));          \
+    }                                                                          \
   }
 
 }  // namespace ynn

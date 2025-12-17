@@ -23,13 +23,21 @@ struct multi_vec {
   static constexpr std::integral_constant<size_t, M * Vec::N> N = {};
 
   multi_vec() = default;
-  explicit multi_vec(value_type x) {
+  YNN_ALWAYS_INLINE explicit multi_vec(Vec x) {
     for (size_t i = 0; i < M; ++i) {
-      v[i] = Vec(x);
+      v[i] = x;
     }
   }
   template <typename... Args>
-  multi_vec(Vec v0, Vec v1, Args... args) : v{v0, v1, args...} {}
+  YNN_ALWAYS_INLINE multi_vec(Vec v0, Vec v1, Args... args)
+      : v{v0, v1, args...} {}
+
+  YNN_ALWAYS_INLINE multi_vec& operator=(Vec x) {
+    for (size_t i = 0; i < M; ++i) {
+      v[i] = x;
+    }
+    return *this;
+  }
 
   YNN_ALWAYS_INLINE Vec& operator[](size_t i) { return v[i]; }
   YNN_ALWAYS_INLINE Vec operator[](size_t i) const { return v[i]; }

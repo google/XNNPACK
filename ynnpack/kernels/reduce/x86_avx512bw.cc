@@ -159,7 +159,7 @@ void sum_int8_int32_avx512bw(size_t n, size_t k3, size_t k2, size_t k1,
                              size_t a_stride_k2, const void* a, size_t,
                              void* c) {
   if (k1 == 1 && a_stride_n == sizeof(int8_t)) {
-    tiled_reduce<sum_accumulator_k1_1<s8x64, s32x64>, int8_t, int32_t>(
+    stream_reduce<sum_accumulator_k1_1<s8x64, s32x64>, int8_t, int32_t>(
         n, k3, k2, a_stride_k3, a_stride_k2, reinterpret_cast<const int8_t*>(a),
         /*C_stride_m=*/0, reinterpret_cast<int32_t*>(c));
   } else {
@@ -175,7 +175,7 @@ void sum_uint8_int32_avx512bw(size_t n, size_t k3, size_t k2, size_t k1,
                               size_t a_stride_k2, const void* a, size_t,
                               void* c) {
   if (k1 == 1 && a_stride_n == sizeof(uint8_t)) {
-    tiled_reduce<sum_accumulator_k1_1<u8x64, s32x64>, uint8_t, int32_t>(
+    stream_reduce<sum_accumulator_k1_1<u8x64, s32x64>, uint8_t, int32_t>(
         n, k3, k2, a_stride_k3, a_stride_k2,
         reinterpret_cast<const uint8_t*>(a),
         /*C_stride_m=*/0, reinterpret_cast<int32_t*>(c));
@@ -192,11 +192,10 @@ void sum_squared_int8_int32_avx512bw(size_t n, size_t k3, size_t k2, size_t k1,
                                      size_t a_stride_k2, const void* a, size_t,
                                      void* c) {
   if (k1 == 1 && a_stride_n == sizeof(int8_t)) {
-    tiled_reduce<sum_accumulator_k1_1<s8x32, s32x16x2, Square>, int8_t,
-      int32_t>(
-        n, k3, k2, a_stride_k3, a_stride_k2,
-        reinterpret_cast<const int8_t*>(a),
-        /*C_stride_m=*/0, reinterpret_cast<int32_t*>(c));
+    stream_reduce<sum_accumulator_k1_1<s8x32, s32x16x2, Square>, int8_t,
+                  int32_t>(n, k3, k2, a_stride_k3, a_stride_k2,
+                           reinterpret_cast<const int8_t*>(a),
+                           /*C_stride_m=*/0, reinterpret_cast<int32_t*>(c));
   } else {
     tiled_reduce<sum_accumulator_x32<s32x16, 32, Square>, int8_t, int32_t>(
         n, k3, k2, k1, a_stride_n, a_stride_k3, a_stride_k2,
@@ -210,11 +209,10 @@ void sum_squared_uint8_int32_avx512bw(size_t n, size_t k3, size_t k2, size_t k1,
                                       size_t a_stride_k2, const void* a, size_t,
                                       void* c) {
   if (k1 == 1 && a_stride_n == sizeof(uint8_t)) {
-    tiled_reduce<sum_accumulator_k1_1<u8x32, s32x16x2, Square>, uint8_t,
-      int32_t>(
-        n, k3, k2, a_stride_k3, a_stride_k2,
-        reinterpret_cast<const uint8_t*>(a),
-        /*C_stride_m=*/0, reinterpret_cast<int32_t*>(c));
+    stream_reduce<sum_accumulator_k1_1<u8x32, s32x16x2, Square>, uint8_t,
+                  int32_t>(n, k3, k2, a_stride_k3, a_stride_k2,
+                           reinterpret_cast<const uint8_t*>(a),
+                           /*C_stride_m=*/0, reinterpret_cast<int32_t*>(c));
   } else {
     tiled_reduce<sum_accumulator_x32<s32x16, 32, Square>, uint8_t, int32_t>(
         n, k3, k2, k1, a_stride_n, a_stride_k3, a_stride_k2,
@@ -228,7 +226,7 @@ void sum_bf16_fp32_avx512bw(size_t n, size_t k3, size_t k2, size_t k1,
                             size_t a_stride_k2, const void* a, size_t,
                             void* c) {
   if (k1 == 1 && a_stride_n == sizeof(bfloat16)) {
-    tiled_reduce<sum_accumulator_k1_1<bf16x32, f32x32>, bfloat16, float>(
+    stream_reduce<sum_accumulator_k1_1<bf16x32, f32x32>, bfloat16, float>(
         n, k3, k2, a_stride_k3, a_stride_k2,
         reinterpret_cast<const bfloat16*>(a), /*C_stride_m=*/0,
         reinterpret_cast<float*>(c));
@@ -245,10 +243,10 @@ void sum_squared_bf16_fp32_avx512bw(size_t n, size_t k3, size_t k2, size_t k1,
                                     size_t a_stride_k2, const void* a, size_t,
                                     void* c) {
   if (k1 == 1 && a_stride_n == sizeof(bfloat16)) {
-    tiled_reduce<sum_accumulator_k1_1<bf16x32, f32x32, Square>, bfloat16,
-                 float>(n, k3, k2, a_stride_k3, a_stride_k2,
-                        reinterpret_cast<const bfloat16*>(a), /*C_stride_m=*/0,
-                        reinterpret_cast<float*>(c));
+    stream_reduce<sum_accumulator_k1_1<bf16x32, f32x32, Square>, bfloat16,
+                  float>(n, k3, k2, a_stride_k3, a_stride_k2,
+                         reinterpret_cast<const bfloat16*>(a), /*C_stride_m=*/0,
+                         reinterpret_cast<float*>(c));
   } else {
     tiled_reduce<sum_accumulator_x32<f32x16, 32, Square>, bfloat16, float>(
         n, k3, k2, k1, a_stride_n, a_stride_k3, a_stride_k2,
@@ -262,7 +260,7 @@ void sum_fp16_fp32_avx512bw(size_t n, size_t k3, size_t k2, size_t k1,
                             size_t a_stride_k2, const void* a, size_t,
                             void* c) {
   if (k1 == 1 && a_stride_n == sizeof(half)) {
-    tiled_reduce<sum_accumulator_k1_1<f16x32, f32x32>, half, float>(
+    stream_reduce<sum_accumulator_k1_1<f16x32, f32x32>, half, float>(
         n, k3, k2, a_stride_k3, a_stride_k2, reinterpret_cast<const half*>(a),
         /*C_stride_m=*/0, reinterpret_cast<float*>(c));
   } else {
@@ -278,7 +276,7 @@ void sum_squared_fp16_fp32_avx512bw(size_t n, size_t k3, size_t k2, size_t k1,
                                     size_t a_stride_k2, const void* a, size_t,
                                     void* c) {
   if (k1 == 1 && a_stride_n == sizeof(half)) {
-    tiled_reduce<sum_accumulator_k1_1<f16x32, f32x32, Square>, half, float>(
+    stream_reduce<sum_accumulator_k1_1<f16x32, f32x32, Square>, half, float>(
         n, k3, k2, a_stride_k3, a_stride_k2, reinterpret_cast<const half*>(a),
         /*C_stride_m=*/0, reinterpret_cast<float*>(c));
   } else {
