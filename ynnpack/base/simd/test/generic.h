@@ -11,7 +11,6 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
-#include <type_traits>
 #include <utility>
 
 #include <gtest/gtest.h>
@@ -26,9 +25,6 @@ namespace simd {
 
 template <typename vector>
 void test_broadcast(uint32_t arch_flags) {
-  if (!is_arch_supported(arch_flags)) {
-    GTEST_SKIP() << "Unsupported architecture";
-  }
   using scalar = typename vector::value_type;
 
   for (scalar value : {1, 2, 3}) {
@@ -45,9 +41,6 @@ void test_broadcast(uint32_t arch_flags) {
 
 template <typename vector>
 void test_load_store(uint32_t arch_flags) {
-  if (!is_arch_supported(arch_flags)) {
-    GTEST_SKIP() << "Unsupported architecture";
-  }
   using scalar = typename vector::value_type;
   static constexpr size_t N = vector::N;
 
@@ -74,9 +67,6 @@ void test_load_store(uint32_t arch_flags) {
 
 template <typename vector>
 void test_aligned_load_store(uint32_t arch_flags) {
-  if (!is_arch_supported(arch_flags)) {
-    GTEST_SKIP() << "Unsupported architecture";
-  }
   using scalar = typename vector::value_type;
   static constexpr size_t N = vector::N;
 
@@ -100,9 +90,6 @@ void test_aligned_load_store(uint32_t arch_flags) {
 
 template <typename vector>
 void test_partial_load(uint32_t arch_flags) {
-  if (!is_arch_supported(arch_flags)) {
-    GTEST_SKIP() << "Unsupported architecture";
-  }
   using scalar = typename vector::value_type;
   static constexpr size_t N = vector::N;
 
@@ -133,9 +120,6 @@ void test_partial_load(uint32_t arch_flags) {
 
 template <typename vector>
 void test_partial_store(uint32_t arch_flags) {
-  if (!is_arch_supported(arch_flags)) {
-    GTEST_SKIP() << "Unsupported architecture";
-  }
   using scalar = typename vector::value_type;
   static constexpr size_t N = vector::N;
 
@@ -172,9 +156,6 @@ void test_partial_store(uint32_t arch_flags) {
 
 template <typename T, template <typename> typename Op>
 void test_op(uint32_t arch_flags) {
-  if (!is_arch_supported(arch_flags)) {
-    GTEST_SKIP() << "Unsupported architecture";
-  }
   typename T::value_type a[T::N];
   typename T::value_type b[T::N];
   for (size_t i = 0; i < T::N; ++i) {
@@ -252,9 +233,6 @@ void test_extract_impl(std::index_sequence<Is...>, From from_v,
 
 template <typename To, typename From>
 void test_extract(uint32_t arch_flags) {
-  if (!is_arch_supported(arch_flags)) {
-    GTEST_SKIP() << "Unsupported architecture";
-  }
   ASSERT_EQ(From::N % To::N, 0);
   using FromScalar = typename From::value_type;
 
@@ -275,9 +253,6 @@ void test_extract(uint32_t arch_flags) {
 
 template <typename vector>
 void test_concat(uint32_t arch_flags) {
-  if (!is_arch_supported(arch_flags)) {
-    GTEST_SKIP() << "Unsupported architecture";
-  }
   using scalar = typename vector::value_type;
   constexpr size_t N = vector::N;
 
@@ -298,10 +273,6 @@ void test_concat(uint32_t arch_flags) {
 
 template <typename To, typename From>
 void test_convert(uint32_t arch_flags) {
-  if (!is_arch_supported(arch_flags)) {
-    GTEST_SKIP() << "Unsupported architecture";
-  }
-
   using FromScalar = typename From::value_type;
   using ToScalar = typename To::value_type;
   static constexpr size_t N = To::N;
@@ -332,9 +303,6 @@ inline int tent(int x, int n) { return std::min(x, 2 * n - 1 - x); }
 
 template <typename vector>
 void test_horizontal_min(uint32_t arch_flags) {
-  if (!is_arch_supported(arch_flags)) {
-    GTEST_SKIP() << "Unsupported architecture";
-  }
   constexpr int N = vector::N;
   typename vector::value_type a[N * 2 - 1];
   for (int i = 0; i < N * 2 - 1; ++i) {
@@ -347,9 +315,6 @@ void test_horizontal_min(uint32_t arch_flags) {
 
 template <typename vector>
 void test_horizontal_max(uint32_t arch_flags) {
-  if (!is_arch_supported(arch_flags)) {
-    GTEST_SKIP() << "Unsupported architecture";
-  }
   constexpr int N = vector::N;
   typename vector::value_type a[N * 2 - 1];
   for (int i = 0; i < N * 2 - 1; ++i) {
@@ -371,23 +336,19 @@ void test_horizontal_max(uint32_t arch_flags) {
 
 template <typename vector>
 void test_fma(uint32_t arch_flags) {
-  if (!is_arch_supported(arch_flags)) {
-    GTEST_SKIP() << "Unsupported architecture";
-  }
   using scalar = typename vector::value_type;
   constexpr size_t N = vector::N;
 
   ReplicableRandomDevice rng;
-  TypeGenerator<scalar> gen;
   for (auto _ : FuzzTest(std::chrono::milliseconds(100))) {
     scalar a[N];
     scalar b[N];
     scalar acc[N];
     scalar expected[N];
     for (size_t i = 0; i < N; ++i) {
-      a[i] = gen(rng);
-      b[i] = gen(rng);
-      acc[i] = gen(rng);
+      a[i] = random_normal_float<scalar>(rng);
+      b[i] = random_normal_float<scalar>(rng);
+      acc[i] = random_normal_float<scalar>(rng);
       expected[i] = std::fma(a[i], b[i], acc[i]);
     }
     scalar result[N];

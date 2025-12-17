@@ -89,6 +89,30 @@ quantization_params random_quantization(quantized<T>, Rng& rng,
   return {T_dist(rng), scale_dist(rng)};
 }
 
+// Bitcast a random number generator to type T.
+template <typename T, typename Rng>
+T random_bits(Rng& rng) {
+  static_assert(Rng::min() == 0, "");
+  static_assert(Rng::max() >= (1ull << (sizeof(T) * 8)) - 1, "");
+  auto bits = rng();
+  T result;
+  static_assert(sizeof(result) <= sizeof(bits), "");
+  memcpy(&result, &bits, sizeof(T));
+  return result;
+}
+
+// Make a bitcasted random float, and then flush it to 0 if it is denormal (or
+// Nan).
+template <typename T, typename Rng>
+T random_normal_float(Rng& rng) {
+  T result = random_bits<T>(rng);
+  if (std::abs(static_cast<float>(result)) >= type_info<T>::smallest_normal()) {
+    return result;
+  } else {
+    return static_cast<T>(0.0f);
+  }
+}
+
 // Make a generator of random values of a type T, suitable for use with
 // std::generate/std::generate_n or similar.
 template <typename T>
@@ -119,18 +143,7 @@ class TypeGenerator {
   template <typename Rng>
   T operator()(Rng& rng) {
     if (reinterpret_) {
-      static_assert(Rng::min() == 0, "");
-      static_assert(Rng::max() >= (1ull << (sizeof(T) * 8)) - 1, "");
-      auto bits = rng();
-      T result;
-      memcpy(&result, &bits, sizeof(T));
-      if (std::abs(static_cast<float>(result)) >=
-          type_info<T>::smallest_normal()) {
-        return result;
-      } else {
-        // Flush denormals (and NaN) to 0.
-        return static_cast<T>(0.0f);
-      }
+      return random_normal_float<T>(rng);
     } else {
       return dist_(rng);
     }

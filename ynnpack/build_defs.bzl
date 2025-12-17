@@ -44,173 +44,6 @@ def define_build_option(name, default_all = [], default_any = []):
         }),
     )
 
-_YNN_PARAMS_FOR_ARCH = {
-    "arm_neon": {
-        "cond": "//ynnpack:ynn_enable_arm_neon",
-        "arch_copts": select({
-            "//ynnpack:arm32": [
-                "-marm",
-                "-march=armv7-a",
-                "-mfpu=neon",
-            ],
-            "//conditions:default": [],
-        }),
-    },
-    "arm_neondot": {
-        "cond": "//ynnpack:ynn_enable_arm_neondot",
-        "arch_copts": select({
-            "//ynnpack:arm32": [
-                "-marm",
-                "-march=armv8.2-a+dotprod",
-                "-mfpu=neon-fp-armv8",
-            ],
-            "//ynnpack:arm64": ["-march=armv8.2-a+dotprod"],
-            "//conditions:default": [],
-        }),
-    },
-    "arm_neonfma": {
-        "cond": "//ynnpack:ynn_enable_arm_neonfma",
-        "arch_copts": select({
-            "//ynnpack:arm32": [
-                "-marm",
-                "-march=armv7-a",
-                "-mfpu=neon-vfpv4",
-            ],
-            "//conditions:default": [],
-        }),
-    },
-    "arm_neonfp16": {
-        "cond": "//ynnpack:ynn_enable_arm_neonfp16",
-        "arch_copts": select({
-            "//ynnpack:arm32": [
-                "-marm",
-                "-march=armv7-a",
-                "-mfpu=neon-fp16",
-            ],
-            "//conditions:default": [],
-        }),
-    },
-    "arm_neonfp16arith": {
-        "cond": "//ynnpack:ynn_enable_arm_neonfp16arith",
-        "arch_copts": select({
-            "//ynnpack:arm32": [
-                "-marm",
-                "-march=armv8.2-a+fp16",
-                "-mfpu=neon-fp-armv8",
-            ],
-            "//ynnpack:arm64": ["-march=armv8.2-a+fp16"],
-            "//conditions:default": [],
-        }),
-    },
-    "arm_neonbf16": {
-        "cond": "//ynnpack:ynn_enable_arm_neonbf16",
-        "arch_copts": select({
-            "//ynnpack:arm32": [
-                "-marm",
-                "-march=armv8.2-a+bf16",
-                "-mfpu=neon-fp-armv8",
-            ],
-            "//ynnpack:arm64": ["-march=armv8.2-a+bf16"],
-            "//conditions:default": [],
-        }),
-    },
-    "arm64_neoni8mm": {
-        "cond": "//ynnpack:ynn_enable_arm64_neoni8mm",
-        "arch_copts": ["-march=armv8.2-a+i8mm"],
-    },
-    "arm64": {
-        "cond": "//ynnpack:ynn_enable_arm64",
-    },
-    # TODO(dsharlet): This is the same as above, should we just assume neon exists for arm64?
-    "arm64_neon": {
-        "cond": "//ynnpack:ynn_enable_arm64_neon",
-    },
-    "arm64_sme": {
-        "cond": "//ynnpack:ynn_enable_arm64_sme",
-        "arch_copts": select({
-            # Apple's Clang generates code that crashes with -msve (and works without it), while
-            # other compilers can't compile this code without it.
-            "//ynnpack:apple_clang": ["-march=armv8.2-a+sme"],
-            "//conditions:default": ["-march=armv8.2-a+sve+sme"],
-        }),
-    },
-    "arm64_sme2": {
-        "cond": "//ynnpack:ynn_enable_arm64_sme2",
-        "arch_copts": select({
-            "//ynnpack:apple_clang": ["-march=armv8.2-a+sme2"],
-            "//conditions:default": ["-march=armv8.2-a+sve+sme2"],
-        }),
-    },
-    "x86_sse2": {
-        "cond": "//ynnpack:ynn_enable_x86_sse2",
-        "arch_copts": ["-msse2", "-mno-ssse3"],
-    },
-    "x86_ssse3": {
-        "cond": "//ynnpack:ynn_enable_x86_ssse3",
-        "arch_copts": ["-mssse3", "-mno-sse4.1"],
-    },
-    "x86_sse41": {
-        "cond": "//ynnpack:ynn_enable_x86_sse41",
-        "arch_copts": ["-msse4.1", "-mno-sse4.2"],
-    },
-    "x86_avx": {
-        "cond": "//ynnpack:ynn_enable_x86_avx",
-        "arch_copts": ["-mavx", "-mno-avx2", "-mno-f16c", "-mno-fma"],
-    },
-    "x86_f16c": {
-        "cond": "//ynnpack:ynn_enable_x86_f16c",
-        "arch_copts": ["-mf16c"],
-    },
-    "x86_f16c_fma3": {
-        "cond": "//ynnpack:ynn_enable_x86_f16c_fma3",
-        "arch_copts": ["-mf16c", "-mavx", "-mfma", "-mno-avx2"],
-    },
-    "x86_avx2": {
-        "cond": "//ynnpack:ynn_enable_x86_avx2",
-        "arch_copts": ["-mavx2"],
-    },
-    "x86_fma3": {
-        "cond": "//ynnpack:ynn_enable_x86_fma3",
-        "arch_copts": ["-mavx", "-mfma", "-mno-avx2"],
-    },
-    "x86_avx2_fma3": {
-        "cond": "//ynnpack:ynn_enable_x86_avx2_fma3",
-        "arch_copts": ["-mavx2", "-mfma"],
-    },
-    "x86_avx512f": {
-        "cond": "//ynnpack:ynn_enable_x86_avx512f",
-        "arch_copts": ["-mavx512f"],
-    },
-    "x86_avx512bw": {
-        "cond": "//ynnpack:ynn_enable_x86_avx512bw",
-        "arch_copts": ["-mavx512bw"],
-    },
-    "x86_avx512bf16": {
-        "cond": "//ynnpack:ynn_enable_x86_avx512bf16",
-        "arch_copts": ["-mavx512bf16", "-mavx512dq"],
-    },
-    "x86_avx512fp16": {
-        "cond": "//ynnpack:ynn_enable_x86_avx512fp16",
-        "arch_copts": ["-mavx512fp16", "-mavx512vl"],
-    },
-    "x86_avx512vnni": {
-        "cond": "//ynnpack:ynn_enable_x86_avx512vnni",
-        "arch_copts": ["-mavx512vnni"],
-    },
-    "x86_amxbf16": {
-        "cond": "//ynnpack:ynn_enable_x86_amxbf16",
-        "arch_copts": ["-mamx-tile", "-mamx-bf16"],
-    },
-    "x86_amxfp16": {
-        "cond": "//ynnpack:ynn_enable_x86_amxfp16",
-        "arch_copts": ["-mamx-tile", "-mamx-fp16"],
-    },
-    "x86_amxint8": {
-        "cond": "//ynnpack:ynn_enable_x86_amxint8",
-        "arch_copts": ["-mamx-tile", "-mamx-int8"],
-    },
-}
-
 def _map_arch_copts_to_msvc(copts):
     """Maps GNU-style target architecture compiler options to Microsoft Visual Studio compiler options."""
 
@@ -224,6 +57,219 @@ def _map_arch_copts_to_msvc(copts):
         return ["/arch:SSE2"]
     else:
         return []
+
+def _copts_for_compiler(copts):
+    return select({
+        "@rules_cc//cc/compiler:clang-cl": ["/clang:" + i for i in copts],
+        "@rules_cc//cc/compiler:msvc-cl": _map_arch_copts_to_msvc(copts),
+        "//conditions:default": copts,
+    })
+
+_YNN_PARAMS_FOR_ARCH = {
+    "arm_neon": {
+        "cond": "//ynnpack:ynn_enable_arm_neon",
+        "arch_copts": select({
+            "//ynnpack:arm32": [
+                "-marm",
+                "-march=armv7-a",
+                "-mfpu=neon",
+            ],
+            "//conditions:default": [],
+        }),
+        "arch_flag": "neon",
+    },
+    "arm_neondot": {
+        "cond": "//ynnpack:ynn_enable_arm_neondot",
+        "arch_copts": select({
+            "//ynnpack:arm32": [
+                "-marm",
+                "-march=armv8.2-a+dotprod",
+                "-mfpu=neon-fp-armv8",
+            ],
+            "//ynnpack:arm64": ["-march=armv8.2-a+dotprod"],
+            "//conditions:default": [],
+        }),
+        "arch_flag": "neondot",
+    },
+    "arm_neonfma": {
+        "cond": "//ynnpack:ynn_enable_arm_neonfma",
+        "arch_copts": select({
+            "//ynnpack:arm32": [
+                "-marm",
+                "-march=armv7-a",
+                "-mfpu=neon-vfpv4",
+            ],
+            "//conditions:default": [],
+        }),
+        "arch_flag": "neonfma",
+    },
+    "arm_neonfp16": {
+        "cond": "//ynnpack:ynn_enable_arm_neonfp16",
+        "arch_copts": select({
+            "//ynnpack:arm32": [
+                "-marm",
+                "-march=armv7-a",
+                "-mfpu=neon-fp16",
+            ],
+            "//conditions:default": [],
+        }),
+        "arch_flag": "neonfp16",
+    },
+    "arm_neonfp16arith": {
+        "cond": "//ynnpack:ynn_enable_arm_neonfp16arith",
+        "arch_copts": select({
+            "//ynnpack:arm32": [
+                "-marm",
+                "-march=armv8.2-a+fp16",
+                "-mfpu=neon-fp-armv8",
+            ],
+            "//ynnpack:arm64": ["-march=armv8.2-a+fp16"],
+            "//conditions:default": [],
+        }),
+        "arch_flag": "neonfp16arith",
+    },
+    "arm_neonbf16": {
+        "cond": "//ynnpack:ynn_enable_arm_neonbf16",
+        "arch_copts": select({
+            "//ynnpack:arm32": [
+                "-marm",
+                "-march=armv8.2-a+bf16",
+                "-mfpu=neon-fp-armv8",
+            ],
+            "//ynnpack:arm64": ["-march=armv8.2-a+bf16"],
+            "//conditions:default": [],
+        }),
+        "arch_flag": "neonbf16",
+    },
+    "arm64_neoni8mm": {
+        "cond": "//ynnpack:ynn_enable_arm64_neoni8mm",
+        "arch_copts": ["-march=armv8.2-a+i8mm"],
+        "arch_flag": "neoni8mm",
+    },
+    "arm64": {
+        "cond": "//ynnpack:ynn_enable_arm64",
+    },
+    # TODO(dsharlet): This is the same as above, should we just assume neon exists for arm64?
+    "arm64_neon": {
+        "cond": "//ynnpack:ynn_enable_arm64_neon",
+        "arch_flag": "neon",
+    },
+    "arm64_sme": {
+        "cond": "//ynnpack:ynn_enable_arm64_sme",
+        "arch_copts": select({
+            # Apple's Clang generates code that crashes with -msve (and works without it), while
+            # other compilers can't compile this code without it.
+            "//ynnpack:apple_clang": ["-march=armv8.2-a+sme"],
+            "//conditions:default": ["-march=armv8.2-a+sve+sme"],
+        }),
+        "arch_flag": "sme",
+    },
+    "arm64_sme2": {
+        "cond": "//ynnpack:ynn_enable_arm64_sme2",
+        "arch_copts": select({
+            "//ynnpack:apple_clang": ["-march=armv8.2-a+sme2"],
+            "//conditions:default": ["-march=armv8.2-a+sve+sme2"],
+        }),
+        "arch_flag": "sme2",
+    },
+    "x86_sse2": {
+        "cond": "//ynnpack:ynn_enable_x86_sse2",
+        "arch_copts": _copts_for_compiler(["-msse2", "-mno-ssse3"]),
+        "arch_flag": "sse2",
+    },
+    "x86_ssse3": {
+        "cond": "//ynnpack:ynn_enable_x86_ssse3",
+        "arch_copts": _copts_for_compiler(["-mssse3", "-mno-sse4.1"]),
+        "arch_flag": "ssse3",
+    },
+    "x86_sse41": {
+        "cond": "//ynnpack:ynn_enable_x86_sse41",
+        "arch_copts": _copts_for_compiler(["-msse4.1", "-mno-sse4.2"]),
+        "arch_flag": "sse41",
+    },
+    "x86_avx": {
+        "cond": "//ynnpack:ynn_enable_x86_avx",
+        "arch_copts": _copts_for_compiler(["-mavx", "-mno-avx2", "-mno-f16c", "-mno-fma"]),
+        "arch_flag": "avx",
+    },
+    "x86_f16c": {
+        "cond": "//ynnpack:ynn_enable_x86_f16c",
+        "arch_copts": _copts_for_compiler(["-mf16c"]),
+        "arch_flag": "f16c",
+    },
+    "x86_f16c_fma3": {
+        "cond": "//ynnpack:ynn_enable_x86_f16c_fma3",
+        "arch_copts": _copts_for_compiler(["-mf16c", "-mavx", "-mfma", "-mno-avx2"]),
+        "arch_flag": "f16c_fma3",
+    },
+    "x86_avx2": {
+        "cond": "//ynnpack:ynn_enable_x86_avx2",
+        "arch_copts": _copts_for_compiler(["-mavx2"]),
+        "arch_flag": "avx2",
+    },
+    "x86_fma3": {
+        "cond": "//ynnpack:ynn_enable_x86_fma3",
+        "arch_copts": _copts_for_compiler(["-mavx", "-mfma", "-mno-avx2"]),
+        "arch_flag": "fma3",
+    },
+    "x86_avx2_fma3": {
+        "cond": "//ynnpack:ynn_enable_x86_avx2_fma3",
+        "arch_copts": _copts_for_compiler(["-mavx2", "-mfma"]),
+        "arch_flag": "avx2_fma3",
+    },
+    "x86_avx512f": {
+        "cond": "//ynnpack:ynn_enable_x86_avx512f",
+        "arch_copts": _copts_for_compiler(["-mavx512f"]),
+        "arch_flag": "avx512f",
+    },
+    "x86_avx512bw": {
+        "cond": "//ynnpack:ynn_enable_x86_avx512bw",
+        "arch_copts": _copts_for_compiler(["-mavx512bw"]),
+        "arch_flag": "avx512bw",
+    },
+    "x86_avx512bf16": {
+        "cond": "//ynnpack:ynn_enable_x86_avx512bf16",
+        "arch_copts": _copts_for_compiler(["-mavx512bf16", "-mavx512dq"]),
+        "arch_flag": "avx512bf16",
+    },
+    "x86_avx512fp16": {
+        "cond": "//ynnpack:ynn_enable_x86_avx512fp16",
+        "arch_copts": _copts_for_compiler(["-mavx512fp16", "-mavx512vl"]),
+        "arch_flag": "avx512fp16",
+    },
+    "x86_avx512vnni": {
+        "cond": "//ynnpack:ynn_enable_x86_avx512vnni",
+        "arch_copts": _copts_for_compiler(["-mavx512vnni"]),
+        "arch_flag": "avx512vnni",
+    },
+    "x86_amxbf16": {
+        "cond": "//ynnpack:ynn_enable_x86_amxbf16",
+        "arch_copts": _copts_for_compiler(["-mamx-tile", "-mamx-bf16"]),
+        "arch_flag": "amxbf16",
+    },
+    "x86_amxfp16": {
+        "cond": "//ynnpack:ynn_enable_x86_amxfp16",
+        "arch_copts": _copts_for_compiler(["-mamx-tile", "-mamx-fp16"]),
+        "arch_flag": "amxfp16",
+    },
+    "x86_amxint8": {
+        "cond": "//ynnpack:ynn_enable_x86_amxint8",
+        "arch_copts": _copts_for_compiler(["-mamx-tile", "-mamx-int8"]),
+        "arch_flag": "amxint8",
+    },
+}
+
+def ynn_if_arch(arch, if_true, if_false = []):
+    return select({
+        _YNN_PARAMS_FOR_ARCH[arch]["cond"]: if_true,
+        "//conditions:default": if_false,
+    })
+
+def ynn_arch_copts(arch):
+    return _YNN_PARAMS_FOR_ARCH[arch].get("arch_copts", [])
+
+def ynn_arch_flag(arch):
+    return _YNN_PARAMS_FOR_ARCH[arch].get("arch_flag", "")
 
 def ynn_kernel_copts(unroll_loops = True):
     return select({
@@ -278,24 +324,11 @@ def ynn_cc_library(
     deps_plus_arch_deps = deps
     for arch, arch_srcs in per_arch_srcs.items():
         arch_params = _YNN_PARAMS_FOR_ARCH[arch]
-        arch_cond = arch_params["cond"]
-        arch_copts = arch_params.get("arch_copts", [])
-        if type(arch_copts) == "list":
-            arch_copts = select({
-                "@rules_cc//cc/compiler:clang-cl": ["/clang:" + i for i in arch_copts],
-                "@rules_cc//cc/compiler:msvc-cl": _map_arch_copts_to_msvc(arch_copts),
-                "//conditions:default": arch_copts,
-            })
-        else:
-            # The arch_params should have handled this.
-            pass
+        arch_copts = ynn_arch_copts(arch)
 
         cc_library(
             name = name + "_" + arch,
-            srcs = select({
-                arch_cond: arch_srcs,
-                "//conditions:default": [],
-            }),
+            srcs = ynn_if_arch(arch, arch_srcs, []),
             defines = defines + ["YNN_ARCH_" + arch.upper()],
             local_defines = local_defines + ["ARCH=" + arch],
             copts = copts + arch_copts,
@@ -310,10 +343,7 @@ def ynn_cc_library(
             **kwargs
         )
 
-        deps_plus_arch_deps += select({
-            arch_cond: [":" + name + "_" + arch],
-            "//conditions:default": [],
-        })
+        deps_plus_arch_deps += ynn_if_arch(arch, [":" + name + "_" + arch], [])
 
     cc_library(
         name = name,
