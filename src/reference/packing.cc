@@ -588,7 +588,9 @@ void xnn_pack_qs8_qc2w_gemm_goi_w(
            ++nr_block_offset) {
         unaligned_store_f32(
             packed_weights,
-            params->kernel_zero_point[nr_block_start + nr_block_offset]);
+            params->kernel_zero_point == nullptr
+                ? 0.0f
+                : params->kernel_zero_point[nr_block_start + nr_block_offset]);
         packed_weights = static_cast<float*>(packed_weights) + 1;
       }
       packed_weights =
@@ -687,7 +689,9 @@ void xnn_pack_qs8_qc2w_gemm_gio_w(
            ++nr_block_offset) {
         unaligned_store_f32(
             packed_weights,
-            params->kernel_zero_point[nr_block_start + nr_block_offset]);
+            params->kernel_zero_point == nullptr
+                ? 0.0f
+                : params->kernel_zero_point[nr_block_start + nr_block_offset]);
         packed_weights = static_cast<float*>(packed_weights) + 1;
       }
       packed_weights =
