@@ -87,9 +87,11 @@ static f32x8 reduce_add(
 
 }  // namespace simd
 
+using simd::bf16x8;
 using simd::bf16x16;
 using simd::f16x16;
 using simd::f32x8;
+using simd::f32x16;
 using simd::s16x16;
 using simd::s32x16;
 using simd::s32x32;
@@ -99,9 +101,6 @@ using simd::s8x16;
 using simd::s8x32;
 using simd::u8x16;
 using simd::u8x32;
-using f32x8x8 = simd::multi_vec<simd::f32x8, 8>;
-using f32x16x8 = simd::multi_vec<simd::f32x16, 8>;
-using bf16x16x8 = simd::multi_vec<simd::bf16x16, 8>;
 
 using f16x16_rvar = float16_wrapper<f16x16, s16x16>;
 using bf16x16_rvar = float16_wrapper<bf16x16, s16x16>;
@@ -192,7 +191,7 @@ void sum_bf16_fp32_avx2(size_t n, size_t k3, size_t k2, size_t k1,
                         size_t a_stride_n, size_t a_stride_k3,
                         size_t a_stride_k2, const void* a, size_t, void* c) {
   if (k1 == 1 && a_stride_n == sizeof(bfloat16)) {
-    tiled_reduce<sum_accumulator_k1_1<bf16x16x8, f32x16x8>, bfloat16, float>(
+    tiled_reduce<sum_accumulator_k1_1<bf16x8, f32x8>, bfloat16, float>(
         n, k3, k2, a_stride_k3, a_stride_k2,
         reinterpret_cast<const bfloat16*>(a), /*C_stride_m=*/0,
         reinterpret_cast<float*>(c));
@@ -209,7 +208,7 @@ void sum_squared_bf16_fp32_avx2(size_t n, size_t k3, size_t k2, size_t k1,
                                 size_t a_stride_k2, const void* a, size_t,
                                 void* c) {
   if (k1 == 1 && a_stride_n == sizeof(bfloat16)) {
-    tiled_reduce<sum_accumulator_k1_1<bf16x16x8, f32x16x8, Square>, bfloat16,
+    tiled_reduce<sum_accumulator_k1_1<bf16x8, f32x8, Square>, bfloat16,
                  float>(n, k3, k2, a_stride_k3, a_stride_k2,
                         reinterpret_cast<const bfloat16*>(a), /*C_stride_m=*/0,
                         reinterpret_cast<float*>(c));

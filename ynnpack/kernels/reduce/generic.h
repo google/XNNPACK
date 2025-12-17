@@ -98,41 +98,47 @@ template <typename Accumulator, typename AT, typename CT>
 static void tiled_reduce(size_t N, size_t K3, size_t K2, size_t A_stride_k3,
                          size_t A_stride_k2, const AT* A, size_t C_stride_m,
                          CT* C) {
-  Accumulator acc;
-  while (N >= Accumulator::N) {
-    acc = Accumulator(K3 * K2);
-    for (size_t k3 = 0; k3 < K3; ++k3) {
-      const AT* A_k2 = offset_bytes(A, k3 * A_stride_k3);
-      size_t k2 = K2;
-      while (k2 >= Accumulator::K2) {
-        acc.reduce(A_k2, Accumulator::N, A_stride_k2, Accumulator::K2);
-        k2 -= Accumulator::K2;
-        A_k2 = offset_bytes(A_k2, Accumulator::K2 * A_stride_k2);
+  for (size_t k3 = 0; k3 < K3; ++k3) {
+    const AT* a_k3 = offset_bytes(A, k3 * A_stride_k3);
+    size_t k2 = K2;
+    while (k2 >= Accumulator::K2) {
+      const AT* a = a_k3;
+      CT* c = C;
+      size_t n = N;
+      while (n >= Accumulator::N) {
+        Accumulator acc(Accumulator::K2);
+        acc.reduce(a, Accumulator::N, A_stride_k2, Accumulator::K2);
+        acc.accumulate(C_stride_m, c, Accumulator::N);
+        a = offset_bytes(a, Accumulator::N * sizeof(AT));
+        c = offset_bytes(c, Accumulator::N * sizeof(CT));
+        n -= Accumulator::N;
       }
-      if (k2 > 0) {
-        acc.reduce(A_k2, Accumulator::N, A_stride_k2, k2);
+      if (n > 0) {
+        Accumulator acc(Accumulator::K2);
+        acc.reduce(a, n, A_stride_k2, Accumulator::K2);
+        acc.accumulate(C_stride_m, c, n);
+      }
+      a_k3 = offset_bytes(a_k3, Accumulator::K2 * A_stride_k2);
+      k2 -= Accumulator::K2;
+    }
+    if (k2 > 0) {
+      const AT* a = a_k3;
+      CT* c = C;
+      size_t n = N;
+      while (n >= Accumulator::N) {
+        Accumulator acc(k2);
+        acc.reduce(a, Accumulator::N, A_stride_k2, k2);
+        acc.accumulate(C_stride_m, c, Accumulator::N);
+        a = offset_bytes(a, Accumulator::N * sizeof(AT));
+        c = offset_bytes(c, Accumulator::N * sizeof(CT));
+        n -= Accumulator::N;
+      }
+      if (n > 0) {
+        Accumulator acc(k2);
+        acc.reduce(a, n, A_stride_k2, k2);
+        acc.accumulate(C_stride_m, c, n);
       }
     }
-    acc.accumulate(C_stride_m, C, Accumulator::N);
-    C = offset_bytes(C, Accumulator::N * sizeof(CT));
-    A = offset_bytes(A, Accumulator::N * sizeof(AT));
-    N -= Accumulator::N;
-  }
-  if (N > 0) {
-    Accumulator acc(K3 * K2);
-    for (size_t k3 = 0; k3 < K3; ++k3) {
-      const AT* A_k2 = offset_bytes(A, k3 * A_stride_k3);
-      size_t k2 = K2;
-      while (k2 >= Accumulator::K2) {
-        acc.reduce(A_k2, N, A_stride_k2, Accumulator::K2);
-        k2 -= Accumulator::K2;
-        A_k2 = offset_bytes(A_k2, Accumulator::K2 * A_stride_k2);
-      }
-      if (k2 > 0) {
-        acc.reduce(A_k2, N, A_stride_k2, k2);
-      }
-    }
-    acc.accumulate(C_stride_m, C, N);
   }
 }
 

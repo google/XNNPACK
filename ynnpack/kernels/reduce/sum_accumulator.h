@@ -93,7 +93,7 @@ struct sum_accumulator_x32 {
   sum_accumulator_x32() = default;
 
   YNN_ALWAYS_INLINE explicit sum_accumulator_x32(size_t) {
-    AccT zero(0);
+    const AccT zero(0);
 
     for (size_t i = 0; i < N; ++i) {
       acc[i] = zero;
@@ -127,17 +127,20 @@ struct sum_accumulator_x32 {
 
 template <typename InVT, typename AccT, typename MapFn = Identity>
 struct sum_accumulator_k1_1 {
-  static constexpr std::integral_constant<size_t, 1> K2 = {};
+  static constexpr std::integral_constant<size_t, 4> K2 = {};
   static constexpr std::integral_constant<size_t, AccT::N> N = {};
   static constexpr std::integral_constant<size_t, 1> horizontal_factor = {};
 
-  AccT acc;
+  AccT acc[K2];
   MapFn map_fn;
 
   sum_accumulator_k1_1() = default;
 
   YNN_ALWAYS_INLINE explicit sum_accumulator_k1_1(size_t) {
-    acc = AccT(0);
+    AccT zero(0);
+    for (size_t i = 0; i < K2; ++i) {
+      acc[i] = zero;
+    }
   }
 
   template <typename NT, typename K2T>
@@ -147,9 +150,16 @@ struct sum_accumulator_k1_1 {
     assert(n <= N);
     assert(n > 0);
 
-    acc = reduce_add(
-        acc, load(offset_bytes(A, 0 * A_stride_k2), InVT(0), n),
-        map_fn, horizontal_factor);
+    const InVT zero(0);
+    auto a_0 = load(offset_bytes(A, 0 * A_stride_k2), zero, n);
+    auto a_1 = 1 < k2 ? load(offset_bytes(A, 1 * A_stride_k2), zero, n) : zero;
+    auto a_2 = 2 < k2 ? load(offset_bytes(A, 2 * A_stride_k2), zero, n) : zero;
+    auto a_3 = 3 < k2 ? load(offset_bytes(A, 3 * A_stride_k2), zero, n) : zero;
+
+    acc[0] = reduce_add(acc[0], a_0, map_fn, horizontal_factor);
+    acc[1] = reduce_add(acc[1], a_1, map_fn, horizontal_factor);
+    acc[2] = reduce_add(acc[2], a_2, map_fn, horizontal_factor);
+    acc[3] = reduce_add(acc[3], a_3, map_fn, horizontal_factor);;
   }
 
   template <typename T, typename NT>
@@ -158,7 +168,8 @@ struct sum_accumulator_k1_1 {
     assert(n <= N);
     assert(n > 0);
 
-    store(C, load(C, AccT{}, n) + acc, n);
+    acc[0] = (acc[0] + acc[1]) + (acc[2] + acc[3]);
+    store(C, load(C, AccT{}, n) + acc[0], n);
   }
 };
 

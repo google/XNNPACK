@@ -12,7 +12,6 @@
 #include "ynnpack/base/arithmetic.h"
 #include "ynnpack/base/bfloat16.h"
 #include "ynnpack/base/half.h"
-#include "ynnpack/base/simd/multi_vec.h"
 #include "ynnpack/base/simd/vec.h"
 #include "ynnpack/base/simd/x86_sse2.h"
 #include "ynnpack/kernels/reduce/generic.h"
@@ -71,8 +70,6 @@ using simd::s32x16;
 using simd::s32x4;
 using simd::s8x16;
 using simd::u8x16;
-using f32x8x4 = simd::multi_vec<f32x8, 4>;
-using bf16x8x4 = simd::multi_vec<bf16x8, 4>;
 
 using f16x8_rvar = float16_wrapper<f16x8, s16x8>;
 using bf16x8_rvar = float16_wrapper<bf16x8, s16x8>;
@@ -176,7 +173,7 @@ void sum_bf16_fp32_sse2(size_t n, size_t k3, size_t k2, size_t k1,
                         size_t a_stride_n, size_t a_stride_k3,
                         size_t a_stride_k2, const void* a, size_t, void* c) {
   if (k1 == 1 && a_stride_n == sizeof(bfloat16)) {
-    tiled_reduce<sum_accumulator_k1_1<bf16x8x4, f32x8x4>, bfloat16, float>(
+    tiled_reduce<sum_accumulator_k1_1<bf16x8, f32x8>, bfloat16, float>(
         n, k3, k2, a_stride_k3, a_stride_k2,
         reinterpret_cast<const bfloat16*>(a), /*C_stride_m=*/0,
         reinterpret_cast<float*>(c));
@@ -193,10 +190,10 @@ void sum_squared_bf16_fp32_sse2(size_t n, size_t k3, size_t k2, size_t k1,
                                 size_t a_stride_k2, const void* a, size_t,
                                 void* c) {
   if (k1 == 1 && a_stride_n == sizeof(bfloat16)) {
-    tiled_reduce<sum_accumulator_k1_1<bf16x8x4, f32x8x4, Square>, bfloat16,
-                 float>(n, k3, k2, a_stride_k3, a_stride_k2,
-                        reinterpret_cast<const bfloat16*>(a), /*C_stride_m=*/0,
-                        reinterpret_cast<float*>(c));
+    tiled_reduce<sum_accumulator_k1_1<bf16x8, f32x8, Square>, bfloat16, float>(
+        n, k3, k2, a_stride_k3, a_stride_k2,
+        reinterpret_cast<const bfloat16*>(a), /*C_stride_m=*/0,
+        reinterpret_cast<float*>(c));
   } else {
     tiled_reduce<sum_accumulator_x32<f32x4, 8, Square>, bfloat16, float>(
         n, k3, k2, k1, a_stride_n, a_stride_k3, a_stride_k2,
@@ -205,13 +202,11 @@ void sum_squared_bf16_fp32_sse2(size_t n, size_t k3, size_t k2, size_t k1,
   }
 }
 
-using f32x4x4 = simd::multi_vec<f32x4, 4>;
-
 void sum_fp32_sse2(size_t n, size_t k3, size_t k2, size_t k1,
                    size_t a_stride_n, size_t a_stride_k3, size_t a_stride_k2,
                    const void* a, size_t, void* c) {
   if (k1 == 1 && a_stride_n == sizeof(float)) {
-    tiled_reduce<sum_accumulator_k1_1<f32x4x4, f32x4x4>, float, float>(
+    tiled_reduce<sum_accumulator_k1_1<f32x4, f32x4>, float, float>(
         n, k3, k2, a_stride_k3, a_stride_k2, reinterpret_cast<const float*>(a),
         /*C_stride_m=*/0, reinterpret_cast<float*>(c));
   } else {
@@ -226,7 +221,7 @@ void sum_squared_fp32_sse2(size_t n, size_t k3, size_t k2, size_t k1,
                            size_t a_stride_n, size_t a_stride_k3,
                            size_t a_stride_k2, const void* a, size_t, void* c) {
   if (k1 == 1 && a_stride_n == sizeof(float)) {
-    tiled_reduce<sum_accumulator_k1_1<f32x4x4, f32x4x4, Square>, float, float>(
+    tiled_reduce<sum_accumulator_k1_1<f32x4, f32x4, Square>, float, float>(
         n, k3, k2, a_stride_k3, a_stride_k2, reinterpret_cast<const float*>(a),
         /*C_stride_m=*/0, reinterpret_cast<float*>(c));
   } else {

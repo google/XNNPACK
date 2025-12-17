@@ -40,7 +40,7 @@ ynn_cc_library(
         "sum_squared.inc",
     ],
     compatible_with = _COMPATIBLE_WITH,
-    copts = ynn_kernel_copts(unroll_loops = False),
+    copts = ynn_kernel_copts(),
     per_arch_srcs = {
         "arm_neonfp16": ["arm_neonfp16.cc"],
         "arm_neonbf16": ["arm_neonbf16.cc"],

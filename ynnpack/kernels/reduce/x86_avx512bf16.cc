@@ -8,7 +8,6 @@
 #include <cstddef>
 #include <type_traits>
 
-#include "ynnpack/base/base.h"
 #include "ynnpack/base/bfloat16.h"
 #include "ynnpack/base/simd/multi_vec.h"
 #include "ynnpack/base/simd/x86_avx512bw.h"
@@ -19,46 +18,32 @@ namespace ynn {
 
 namespace simd {
 
-using f32x32x4 = multi_vec<f32x32, 4>;
-using bf16x32x4 = multi_vec<bf16x32, 4>;
-
-static f32x32x4 reduce_add(
-    f32x32x4 a, bf16x32x4 b, Identity /*map_fn*/,
+static f32x32 reduce_add(
+    f32x32 a, bf16x32 b, Identity /*map_fn*/,
     std::integral_constant<size_t, 1> /*horizontal_factor*/) {
   __m512bh ones = reinterpret_cast<__m512bh>(_mm512_set1_epi32(0x00003F80));
-  YNN_UNROLL
-  for (int i = 0; i < 4; ++i) {
-    __m512i b_bits = reinterpret_cast<__m512i>(b[i].v);
-    __m512bh lo = reinterpret_cast<__m512bh>(
-        _mm512_cvtepu16_epi32(_mm512_castsi512_si256(b_bits)));
-    __m512bh hi = reinterpret_cast<__m512bh>(
-        _mm512_cvtepu16_epi32(_mm512_extracti64x4_epi64(b_bits, 1)));
+  __m512i b_bits = reinterpret_cast<__m512i>(b.v);
+  __m512bh lo = reinterpret_cast<__m512bh>(
+      _mm512_cvtepu16_epi32(_mm512_castsi512_si256(b_bits)));
+  __m512bh hi = reinterpret_cast<__m512bh>(
+      _mm512_cvtepu16_epi32(_mm512_extracti64x4_epi64(b_bits, 1)));
 
-    a[i] = concat(
-        f32x16{_mm512_dpbf16_ps(extract<0>(a[i], f32x16{}).v, lo, ones)},
-        f32x16{_mm512_dpbf16_ps(extract<1>(a[i], f32x16{}).v, hi, ones)});
-  }
-
-  return a;
+  return concat(
+      f32x16{_mm512_dpbf16_ps(extract<0>(a, f32x16{}).v, lo, ones)},
+      f32x16{_mm512_dpbf16_ps(extract<1>(a, f32x16{}).v, hi, ones)});
 }
 
-static f32x32x4 reduce_add(
-    f32x32x4 a, bf16x32x4 b, Square /*map_fn*/,
+static f32x32 reduce_add(
+    f32x32 a, bf16x32 b, Square /*map_fn*/,
     std::integral_constant<size_t, 1> /*horizontal_factor*/) {
-  YNN_UNROLL
-  for (int i = 0; i < 4; ++i) {
-    __m512i b_bits = reinterpret_cast<__m512i>(b[i].v);
-    __m512bh lo = reinterpret_cast<__m512bh>(
-        _mm512_cvtepu16_epi32(_mm512_castsi512_si256(b_bits)));
-    __m512bh hi = reinterpret_cast<__m512bh>(
-        _mm512_cvtepu16_epi32(_mm512_extracti64x4_epi64(b_bits, 1)));
+  __m512i b_bits = reinterpret_cast<__m512i>(b.v);
+  __m512bh lo = reinterpret_cast<__m512bh>(
+      _mm512_cvtepu16_epi32(_mm512_castsi512_si256(b_bits)));
+  __m512bh hi = reinterpret_cast<__m512bh>(
+      _mm512_cvtepu16_epi32(_mm512_extracti64x4_epi64(b_bits, 1)));
 
-    a[i] =
-        concat(f32x16{_mm512_dpbf16_ps(extract<0>(a[i], f32x16{}).v, lo, lo)},
-               f32x16{_mm512_dpbf16_ps(extract<1>(a[i], f32x16{}).v, hi, hi)});
-  }
-
-  return a;
+  return concat(f32x16{_mm512_dpbf16_ps(extract<0>(a, f32x16{}).v, lo, lo)},
+                f32x16{_mm512_dpbf16_ps(extract<1>(a, f32x16{}).v, hi, hi)});
 }
 
 static f32x16 reduce_add(
@@ -78,16 +63,16 @@ static f32x16 reduce_add(
 
 }  // namespace simd
 
-using simd::bf16x32x4;
+using simd::bf16x32;
 using simd::f32x16;
-using simd::f32x32x4;
+using simd::f32x32;
 
 void sum_bf16_fp32_avx512bf16(size_t n, size_t k3, size_t k2, size_t k1,
                               size_t a_stride_n, size_t a_stride_k3,
                               size_t a_stride_k2, const void* a, size_t,
                               void* c) {
   if (k1 == 1 && a_stride_n == sizeof(bfloat16)) {
-    tiled_reduce<sum_accumulator_k1_1<bf16x32x4, f32x32x4>, bfloat16, float>(
+    tiled_reduce<sum_accumulator_k1_1<bf16x32, f32x32>, bfloat16, float>(
         n, k3, k2, a_stride_k3, a_stride_k2,
         reinterpret_cast<const bfloat16*>(a), /*C_stride_m=*/0,
         reinterpret_cast<float*>(c));
@@ -104,7 +89,7 @@ void sum_squared_bf16_fp32_avx512bf16(size_t n, size_t k3, size_t k2, size_t k1,
                                       size_t a_stride_k2, const void* a, size_t,
                                       void* c) {
   if (k1 == 1 && a_stride_n == sizeof(bfloat16)) {
-    tiled_reduce<sum_accumulator_k1_1<bf16x32x4, f32x32x4, Square>, bfloat16,
+    tiled_reduce<sum_accumulator_k1_1<bf16x32, f32x32, Square>, bfloat16,
                  float>(n, k3, k2, a_stride_k3, a_stride_k2,
                         reinterpret_cast<const bfloat16*>(a), /*C_stride_m=*/0,
                         reinterpret_cast<float*>(c));
