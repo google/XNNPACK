@@ -227,6 +227,11 @@ _YNN_PARAMS_FOR_ARCH = {
         "arch_copts": _copts_for_compiler(["-mavx512bw"]),
         "arch_flag": "avx512bw",
     },
+    "x86_avx512bwvldq": {
+        "cond": "//ynnpack:ynn_enable_x86_avx512bwvldq",
+        "arch_copts": _copts_for_compiler(["-mavx512f", "-mavx512bw", "-mavx512vl", "-mavx512dq"]),
+        "arch_flag": "avx512bwvldq",
+    },
     "x86_avx512bf16": {
         "cond": "//ynnpack:ynn_enable_x86_avx512bf16",
         "arch_copts": _copts_for_compiler(["-mavx512bf16", "-mavx512dq"]),

@@ -46,6 +46,14 @@ TEST_PARTIAL_LOAD_STORE(x86_avx, bfloat16, 16);
 TEST_PARTIAL_LOAD_STORE(x86_avx, float, 8);
 TEST_PARTIAL_LOAD_STORE(x86_avx, int32_t, 8);
 
+TEST_PARTIAL_LOAD_STORE(x86_avx, uint8_t, 16);
+TEST_PARTIAL_LOAD_STORE(x86_avx, int8_t, 16);
+TEST_PARTIAL_LOAD_STORE(x86_avx, int16_t, 8);
+TEST_PARTIAL_LOAD_STORE(x86_avx, half, 8);
+TEST_PARTIAL_LOAD_STORE(x86_avx, bfloat16, 8);
+TEST_PARTIAL_LOAD_STORE(x86_avx, float, 4);
+TEST_PARTIAL_LOAD_STORE(x86_avx, int32_t, 4);
+
 TEST_ADD(x86_avx, float, 8);
 TEST_SUBTRACT(x86_avx, float, 8);
 TEST_MULTIPLY(x86_avx, float, 8);
