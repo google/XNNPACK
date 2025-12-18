@@ -100,7 +100,7 @@ void MatrixVectorMultiplyInt2(const Input* input, const Tensor<Filter>& filter,
         float filter_ic = dequantize(
             filter(oc, ic)[p],
             filter_scale(oc, (ic * 4 + p) / filter_ic_block_size),
-            filter_zero_point[oc]);
+            filter_zero_point == nullptr ? 0 : filter_zero_point[oc]);
         output_ic += input_ic * filter_ic;
       }
     }
@@ -206,7 +206,8 @@ void TestStaticB(xnn_datatype convert_to = xnn_datatype_invalid,
                  size_t block_size = no_blockwise) {
   const bool channelwise_quantization =
       xnn_datatype_is_channelwise_quantized(datatype_of<Filter>());
-  const bool is_qc2w = std::is_same<Filter, qcint2>::value;
+  const bool is_qd8_qc2w = (std::is_same<Filter, qcint2>::value &&
+                            convert_to == xnn_datatype_qdint8);
   // If the filter datatype is sub-byte, we have more than one filter element
   // per value.
   const size_t filter_channel_factor =
@@ -275,7 +276,7 @@ void TestStaticB(xnn_datatype convert_to = xnn_datatype_invalid,
         random_quantization(datatype_of<Filter>(), rng, 0.001f, 2.0f);
     Tensor<Scale> filter_scale({channelwise_quantization ? output_channels : 1,
                                 divide_round_up(input_channels, block_size)});
-    // Needed for qc2w only.
+    // Needed for qd8_qc2w only.
     std::vector<float> channelwise_zero_point(output_channels);
     std::generate(channelwise_zero_point.begin(), channelwise_zero_point.end(),
                   [&]() { return zero_point_dist(rng); });
@@ -360,7 +361,7 @@ void TestStaticB(xnn_datatype convert_to = xnn_datatype_invalid,
               /*channel_dim=*/0, block_size, filter_dims.data(), filter.data(),
               filter_id, /*flags=*/0, datatype_of<Scale>(), &id));
       ASSERT_EQ(id, filter_id);
-    } else if (is_qc2w) {
+    } else if (is_qd8_qc2w) {
       uint32_t id = XNN_INVALID_VALUE_ID;
       ASSERT_EQ(
           xnn_status_success,
@@ -445,7 +446,7 @@ void TestStaticB(xnn_datatype convert_to = xnn_datatype_invalid,
       }
       Tensor<float> expected = ReferenceImpl(
           input, filter, bias, input_quantization,
-          is_qc2w ? channelwise_zero_point.data() : nullptr,
+          is_qd8_qc2w ? channelwise_zero_point.data() : nullptr,
           filter_quantization.zero_point,
           filter_scale, block_size, bias_zero_point, bias_scale, flags);
 
@@ -494,6 +495,7 @@ TEST(FullyConnectedQU8, static_b) { TestStaticB<quint8, quint8, qint32>(); }
 #endif  // XNNPACK_USE_YNNPACK
 
 TEST(FullyConnectedQS8QC8W, static_b) { TestStaticB<qint8, qcint8, qcint32>(); }
+TEST(FullyConnectedQS8QC2W, static_b) { TestStaticB<qint8, qcint2, qcint32>(); }
 #ifndef XNNPACK_USE_YNNPACK
 TEST(FullyConnectedQS8QC4W, static_b) { TestStaticB<qint8, qcint4, qcint32>(); }
 #endif  // XNNPACK_USE_YNNPACK

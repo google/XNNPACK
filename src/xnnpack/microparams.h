@@ -567,10 +567,16 @@ struct xnn_qs8_packw_params {
   int8_t input_zero_point;
 };
 
-struct xnn_qs8_qc2w_packing_params {
+struct xnn_qd8_qc2w_packing_params {
   int8_t input_zero_point;
   const float* kernel_zero_point;
 };
+
+struct xnn_qs8_qc2w_packing_params {
+  int8_t input_zero_point;
+  float kernel_zero_point;
+};
+
 
 struct xnn_qs8_qc4w_packing_params {
   int8_t input_zero_point;

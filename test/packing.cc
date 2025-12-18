@@ -18,13 +18,85 @@
 #include "src/xnnpack/microparams-init.h"
 #include "src/xnnpack/pack.h"
 
-// QD8-F32-QC2W GEMM packing tests.
-
 namespace {
 
 using testing::ElementsAreArray;
 using testing::Matcher;
 using testing::_;
+
+// QS8-QC2W GEMM packing tests.
+
+TEST(PACK_QS8_F32_QC2W_GEMM_GOI_W, kr_eq_4) {
+  size_t g = 1;
+  size_t nc = 1;
+  size_t kc = 16;
+  size_t nr = 1;
+  size_t kr = 4;
+  size_t sr = 1;
+
+  std::vector<int32_t> b(g * nc);
+  std::iota(b.begin(), b.end(), 0);
+  float kernel_zero_point = 0;
+  std::vector<uint8_t> k(g * nc * kc / 4);
+  k[0] = 0x00;
+  k[1] = 0x55;
+  k[2] = 0xAA;
+  k[3] = 0xFF;
+  xnnpack::Buffer<uint8_t> packed_weights(
+      g * round_up(nc, nr) *
+      (sizeof(float) + round_up_po2(kc, kr * sr) / 4));
+  auto a = xnn_qs8_qc2w_packing_params{ 1, kernel_zero_point };
+  xnn_pack_qs8_qc2w_gemm_goi_w(/*groups=*/g, /*output_channels=*/nc,
+    /*input_channels=*/kc, nr, kr, sr, k.data(), b.data(),
+    /*scale=*/nullptr, packed_weights.data(), /*extra_bytes=*/0, /*params=*/&a);
+
+  const std::vector<uint8_t> expected = {
+    // 1 bias.
+    0x00, 0x00, 0x00, 0x00,
+    // weights
+    0xE4, 0xE4, 0xE4, 0xE4,
+  };
+  int* i2_ptr = (int*)expected.data();
+  i2_ptr[0] = 8;
+  EXPECT_THAT(packed_weights, ElementsAreArray(expected));
+}
+
+TEST(PACK_QS8_F32_QC2W_GEMM_GIO_W, kr_eq_4) {
+  size_t g = 1;
+  size_t nc = 1;
+  size_t kc = 16;
+  size_t nr = 1;
+  size_t kr = 4;
+  size_t sr = 1;
+
+  std::vector<int32_t> b(g * nc);
+  std::iota(b.begin(), b.end(), 0);
+  float kernel_zero_point = 0;
+  std::vector<uint8_t> k(g * nc * kc / 4);
+  k[0] = 0x00;
+  k[1] = 0x55;
+  k[2] = 0xAA;
+  k[3] = 0xFF;
+  xnnpack::Buffer<uint8_t> packed_weights(
+      g * round_up(nc, nr) *
+      (sizeof(float) + round_up_po2(kc, kr * sr) / 4));
+  auto a = xnn_qs8_qc2w_packing_params{ 1, kernel_zero_point };
+  xnn_pack_qs8_qc2w_gemm_gio_w(/*groups=*/g, /*output_channels=*/nc,
+    /*input_channels=*/kc, nr, kr, sr, nc, k.data(), b.data(),
+    /*scale=*/nullptr, packed_weights.data(), /*extra_bytes=*/0, /*params=*/&a);
+
+  const std::vector<uint8_t> expected = {
+    // 1 bias.
+    0x00, 0x00, 0x00, 0x00,
+    // weights
+    0xE4, 0xE4, 0xE4, 0xE4,
+  };
+  int* i2_ptr = (int*)expected.data();
+  i2_ptr[0] = 8;
+  EXPECT_THAT(packed_weights, ElementsAreArray(expected));
+}
+
+// QD8-F32-QC2W GEMM packing tests.
 
 TEST(PACK_QD8_F32_QC2W_GEMM_GOI_W, kr_eq_4) {
   size_t g = 1;
@@ -46,8 +118,8 @@ TEST(PACK_QD8_F32_QC2W_GEMM_GOI_W, kr_eq_4) {
   xnnpack::Buffer<uint8_t> packed_weights(
       g * round_up(nc, nr) *
       (sizeof(float) * 2 + round_up_po2(kc, kr * sr) / 4));
-  auto a = xnn_qs8_qc2w_packing_params{ 1, kernel_zero_point.data() };
-  xnn_pack_qs8_qc2w_gemm_goi_w(/*groups=*/g, /*output_channels=*/nc,
+  auto a = xnn_qd8_qc2w_packing_params{ 1, kernel_zero_point.data() };
+  xnn_pack_qd8_qc2w_gemm_goi_w(/*groups=*/g, /*output_channels=*/nc,
     /*input_channels=*/kc, nr, kr, sr, k.data(), b.data(),
     /*scale=*/nullptr, packed_weights.data(), /*extra_bytes=*/0, /*params=*/&a);
 
@@ -84,8 +156,8 @@ TEST(PACK_QD8_F32_QC2W_GEMM_GOI_W, kernel_zero_point_zero) {
   xnnpack::Buffer<uint8_t> packed_weights(
       g * round_up(nc, nr) *
       (sizeof(float) * 2 + round_up_po2(kc, kr * sr) / 4));
-  auto a = xnn_qs8_qc2w_packing_params{ 1, nullptr };
-  xnn_pack_qs8_qc2w_gemm_goi_w(/*groups=*/g, /*output_channels=*/nc,
+  auto a = xnn_qd8_qc2w_packing_params{ 1, nullptr };
+  xnn_pack_qd8_qc2w_gemm_goi_w(/*groups=*/g, /*output_channels=*/nc,
     /*input_channels=*/kc, nr, kr, sr, k.data(), b.data(),
     /*scale=*/nullptr, packed_weights.data(), /*extra_bytes=*/0, /*params=*/&a);
 
@@ -122,8 +194,8 @@ TEST(PACK_QD8_F32_QC2W_GEMM_GIO_W, kernel_zero_point_zero) {
   xnnpack::Buffer<uint8_t> packed_weights(
       g * round_up(nc, nr) *
       (sizeof(float) * 2 + round_up_po2(kc, kr * sr) / 4));
-  auto a = xnn_qs8_qc2w_packing_params{ 1, nullptr };
-  xnn_pack_qs8_qc2w_gemm_gio_w(/*groups=*/g, /*output_channels=*/nc,
+  auto a = xnn_qd8_qc2w_packing_params{ 1, nullptr };
+  xnn_pack_qd8_qc2w_gemm_gio_w(/*groups=*/g, /*output_channels=*/nc,
     /*input_channels=*/kc, nr, kr, sr, nc, k.data(), b.data(),
     /*scale=*/nullptr, packed_weights.data(), /*extra_bytes=*/0, /*params=*/&a);
 
@@ -162,8 +234,8 @@ TEST(PACK_QD8_F32_QC2W_GEMM_GIO_W, kr_eq_4) {
   xnnpack::Buffer<uint8_t> packed_weights(
       g * round_up(nc, nr) *
       (sizeof(float) * 2 + round_up_po2(kc, kr * sr) / 4));
-  auto a = xnn_qs8_qc2w_packing_params{ 1, kernel_zero_point.data() };
-  xnn_pack_qs8_qc2w_gemm_gio_w(/*groups=*/g, /*output_channels=*/nc,
+  auto a = xnn_qd8_qc2w_packing_params{ 1, kernel_zero_point.data() };
+  xnn_pack_qd8_qc2w_gemm_gio_w(/*groups=*/g, /*output_channels=*/nc,
     /*input_channels=*/kc, nr, kr, sr, nc, k.data(), b.data(),
     /*scale=*/nullptr, packed_weights.data(), /*extra_bytes=*/0, /*params=*/&a);
 
