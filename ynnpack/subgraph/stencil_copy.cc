@@ -42,19 +42,17 @@ T compute_same_padding_min(const ynn_node::stencil_copy::stencil& stencil,
 
 using stencil_info = ynn_node::stencil_copy::stencil;
 
-void define_stencil_copy(ynn_subgraph_t subgraph, ynn_node& node,
-                         const ynn_node::stencil_copy& op_data,
-                         uint32_t input_id, uint32_t padding_id,
-                         uint32_t* output_id, uint32_t flags) {
+void define_stencil_copy(ynn_subgraph& subgraph, ynn_node& node,
+                         ynn_node::stencil_copy op_data, uint32_t input_id,
+                         uint32_t padding_id, uint32_t* output_id,
+                         uint32_t flags) {
   // Validate arguments.
-  assert(subgraph);
-  assert(subgraph->is_valid_value(input_id));
-  const ynn_value& input = subgraph->value(input_id);
+  assert(subgraph.is_valid_value(input_id));
+  const ynn_value& input = subgraph.value(input_id);
 
-  ynn_node::stencil_copy op(op_data);
   // Sort the stencils so we can insert and remove the new axes while
   // understanding the axis indices.
-  std::sort(op.stencils.begin(), op.stencils.end(),
+  std::sort(op_data.stencils.begin(), op_data.stencils.end(),
             [](const stencil_info& a, const stencil_info& b) {
               return a.new_axis < b.new_axis;
             });
@@ -62,11 +60,11 @@ void define_stencil_copy(ynn_subgraph_t subgraph, ynn_node& node,
   const bool same_padding = padding_id != YNN_INVALID_VALUE_ID;
 
   // Propagate shape.
-  ynn_value& output = subgraph->get_output_value(output_id, input);
+  ynn_value& output = subgraph.get_output_value(output_id, input);
   output.extents = input.extents;
 
   // Reduce the extents to avoid going out of bounds.
-  for (const stencil_info& stencil : op.stencils) {
+  for (const stencil_info& stencil : op_data.stencils) {
     slinky::index_t padding =
         same_padding ? 0 : dilated_kernel_size(stencil) - 1;
     output.extents[stencil.axis] =
@@ -75,7 +73,7 @@ void define_stencil_copy(ynn_subgraph_t subgraph, ynn_node& node,
   }
 
   // Insert the new stencil dimensions.
-  for (const stencil_info& stencil : op.stencils) {
+  for (const stencil_info& stencil : op_data.stencils) {
     output.extents.insert(output.extents.begin() + stencil.new_axis,
                           static_cast<slinky::index_t>(stencil.extent));
   }
@@ -83,7 +81,7 @@ void define_stencil_copy(ynn_subgraph_t subgraph, ynn_node& node,
   // Update the node.
   node.inputs = {input_id, padding_id};
   node.outputs = {output.id};
-  node.op = std::move(op);
+  node.op = std::move(op_data);
   node.create = [](const ynn_node& node, ynn_runtime& runtime) {
     const ynn_node::stencil_copy& op =
         std::get<ynn_node::stencil_copy>(node.op);
@@ -165,6 +163,7 @@ ynn_status ynn_define_stencil_copy(ynn_subgraph_t subgraph, size_t num_stencils,
                                    const size_t* stencil_dilations,
                                    uint32_t input_id, uint32_t padding_id,
                                    uint32_t* output_id, uint32_t flags) {
+  assert(subgraph);
   assert(num_stencils == 0 || stencil_axes);
   assert(num_stencils == 0 || stencil_dims);
   assert(num_stencils == 0 || stencil_strides);
@@ -186,8 +185,8 @@ ynn_status ynn_define_stencil_copy(ynn_subgraph_t subgraph, size_t num_stencils,
     });
   }
 
-  ynn::define_stencil_copy(subgraph, node, op_data, input_id, padding_id,
-                           output_id, flags);
+  ynn::define_stencil_copy(*subgraph, node, std::move(op_data), input_id,
+                           padding_id, output_id, flags);
   subgraph->add_node(std::move(node));
   return ynn_status_success;
 }
