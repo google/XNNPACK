@@ -89,16 +89,15 @@ YNN_ALWAYS_INLINE multi_vec<Vec, M> load(const typename Vec::value_type* ptr,
 
 template <typename Vec, size_t M>
 YNN_ALWAYS_INLINE multi_vec<Vec, M> load(const typename Vec::value_type* ptr,
-    multi_vec<Vec, M>, size_t n) {
+    multi_vec<Vec, M> src, size_t n) {
   multi_vec<Vec, M> x;
 
-  Vec zero(0);
   YNN_UNROLL
   for (size_t i = 0; i < M; ++i) {
     if (Vec::N <= n) {
       x[i] = load(ptr + i * Vec::N, Vec{});
     } else if (n >= 0) {
-      x[i] = load(ptr + i * Vec::N, zero, n);
+      x[i] = load(ptr + i * Vec::N, src[i], n);
     }
     n = sub_sat(n, Vec::N);
   }

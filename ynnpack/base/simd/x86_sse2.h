@@ -18,6 +18,7 @@ namespace simd {
 
 using f32x8 = multi_vec<f32x4, 2>;
 using s32x8 = multi_vec<s32x4, 2>;
+using s16x16 = multi_vec<s16x8, 2>;
 using bf16x16 = multi_vec<bf16x8, 2>;
 using f16x16 = multi_vec<f16x8, 2>;
 using s8x32 = multi_vec<s8x16, 2>;
