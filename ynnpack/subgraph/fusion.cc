@@ -369,11 +369,6 @@ bool rewrite_transpose_stencil_copy(ynn_subgraph& subgraph, ynn_node& node,
     }
   }
 
-  if (transpose_a->tile_k != 1) {
-    // We do not support tile_k > 1 yet.
-    return false;
-  }
-
   YNN_LOG_DEBUG() << "Rewriting transpose_a(stencil_copy(x)) to "
                      "stencil_copy(transpose_a(x))";
 
@@ -394,6 +389,16 @@ bool rewrite_transpose_stencil_copy(ynn_subgraph& subgraph, ynn_node& node,
                                     const ynn_node::stencil_copy::stencil& i) {
                                   return i.new_axis < m_dim;
                                 });
+
+  if (transpose_a->tile_k > 1) {
+    for (ynn_node::stencil_copy::stencil& stencil : stencil_op_data.stencils) {
+      if (stencil.axis == new_m_dim) {
+        // `transpose_a` packs elements `tile_k` at a time. The stencil must
+        // account for this by dilating its kernel dimension by `tile_k`.
+        stencil.dilation *= transpose_a->tile_k;
+      }
+    }
+  }
 
   // Replace stencil_copy(x) with transpose_a'(x), reusing the stencil_node's x
   // input and y output.

@@ -129,7 +129,7 @@ void define_stencil_copy(ynn_subgraph& subgraph, ynn_node& node,
       input_buffer = padded;
     }
 
-    output.make_buffer(runtime);
+    output.make_buffer(runtime, input.buffer->elem_size());
 
     std::vector<slinky::var> dims =
         make_dims(output.buffer->rank(), runtime.symbols);
