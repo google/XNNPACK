@@ -232,7 +232,10 @@ struct ynn_node {
     size_t num_k_dims;
   };
   struct pack_b {};
-  struct transpose_a {};
+  struct transpose_a {
+    size_t tile_k;
+    int32_t m_dim;
+  };
   struct get_tensor_shape {
     std::vector<int32_t> axes;
     bool reshape_1d;

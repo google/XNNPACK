@@ -711,7 +711,9 @@ void print(std::ostream& os, const ynn_node::dot& op) {
 }
 
 void print(std::ostream& os, const ynn_node::pack_b& op) {}
-void print(std::ostream& os, const ynn_node::transpose_a& op) {}
+void print(std::ostream& os, const ynn_node::transpose_a& op) {
+  os << "tile_k=" << op.tile_k << " m_dim=" << op.m_dim;
+}
 
 void print(std::ostream& os, const ynn_node::get_tensor_shape& op) {
   os << "axes=" << op.axes;

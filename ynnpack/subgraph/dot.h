@@ -14,8 +14,8 @@
 namespace ynn {
 
 void define_transpose_a(ynn_subgraph& subgraph, ynn_node& node,
-                        slinky::index_t tile_k, uint32_t input_a_id,
-                        uint32_t output_id);
+                        slinky::index_t tile_k, int32_t m_dim,
+                        uint32_t input_a_id, uint32_t output_id);
 
 }  // namespace ynn
 
