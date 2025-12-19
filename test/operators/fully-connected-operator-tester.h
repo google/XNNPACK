@@ -2664,9 +2664,10 @@ class FullyConnectedOperatorTester {
         -std::numeric_limits<int8_t>::max(),
         std::numeric_limits<int8_t>::max());
 
+    const size_t k4 =
+        round_up(input_channels(), 4);  // tester assumes byte aligned rows.
     xnnpack::Buffer<int8_t> input(
-        (batch_size() - 1) * input_stride() + input_channels(),
-        xnnpack::XnnExtraBytes);
+        (batch_size() - 1) * input_stride() + k4, xnnpack::XnnExtraBytes);
     const size_t kernel_stride = (input_channels() + 3) / 4;
     xnnpack::Buffer<int8_t> kernel(output_channels() * kernel_stride);
     xnnpack::Buffer<int32_t> bias(output_channels());
@@ -3291,8 +3292,8 @@ class FullyConnectedOperatorTester {
 
   void VerifyQC8(const xnnpack::Buffer<int8_t>& output,
                  const xnnpack::Buffer<double>& output_ref) const {
-    for (size_t i = 0; i < batch_size(); i++) {
-      for (size_t c = 0; c < output_channels(); c++) {
+    for (size_t i = 0; i < batch_size(); ++i) {
+      for (size_t c = 0; c < output_channels(); ++c) {
         ASSERT_LE(static_cast<int32_t>(output[i * output_stride() + c]),
                   static_cast<int32_t>(qmax() - 0x80))
             << "batch index = " << i << ", channel = " << c;
