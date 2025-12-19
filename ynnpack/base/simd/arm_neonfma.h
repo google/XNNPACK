@@ -23,4 +23,6 @@ YNN_ALWAYS_INLINE f32x4 fma(f32x4 a, f32x4 b, f32x4 acc) {
 
 }  // namespace ynn
 
+#include "ynnpack/base/simd/generic.inc"  // IWYU pragma: export
+
 #endif  // XNNPACK_YNNPACK_BASE_SIMD_ARM_NEONFMA_H_

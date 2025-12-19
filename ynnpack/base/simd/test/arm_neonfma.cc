@@ -10,7 +10,7 @@
 namespace ynn {
 namespace simd {
 
-TEST_FMA(arm_neonfma, f32x4, arch_flag::neonfma);
+TEST_FMA(arm_neonfma, float, 4);
 
 }  // namespace simd
 }  // namespace ynn

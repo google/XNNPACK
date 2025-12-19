@@ -9,12 +9,11 @@
 #include <algorithm>
 #include <chrono>
 #include <cstddef>
-#include <cstdint>
 #include <cstring>
+#include <type_traits>
 #include <utility>
 
 #include <gtest/gtest.h>
-#include "ynnpack/base/arch.h"
 #include "ynnpack/base/simd/vec.h"
 #include "ynnpack/base/test/fuzz_test.h"
 #include "ynnpack/base/test/random.h"
@@ -23,27 +22,22 @@ namespace ynn {
 
 namespace simd {
 
-template <typename vector>
-void test_broadcast(uint32_t arch_flags) {
-  using scalar = typename vector::value_type;
-
+template <typename scalar, size_t N>
+void test_broadcast() {
   for (scalar value : {1, 2, 3}) {
-    scalar dst[vector::N];
-    store(dst, vector{value});
-    for (size_t i = 0; i < vector::N; ++i) {
+    scalar dst[N];
+    store(dst, broadcast<N>(value));
+    for (size_t i = 0; i < N; ++i) {
       ASSERT_EQ(dst[i], value);
     }
   }
 }
 
-#define TEST_BROADCAST(test_class, type, arch_flags) \
-  TEST(test_class, broadcast_##type) { test_broadcast<type>(arch_flags); }
+#define TEST_BROADCAST(test_class, type, N) \
+  TEST(test_class, broadcast_##type##x##N) { test_broadcast<type, N>(); }
 
-template <typename vector>
-void test_load_store(uint32_t arch_flags) {
-  using scalar = typename vector::value_type;
-  static constexpr size_t N = vector::N;
-
+template <typename scalar, size_t N>
+void test_load_store() {
   scalar src_aligned[N * 2];
   scalar dst_aligned[N * 2];
   for (size_t i = 0; i < N * 2; ++i) {
@@ -51,9 +45,9 @@ void test_load_store(uint32_t arch_flags) {
   }
   for (size_t align = 0; align < N; ++align) {
     // Use a different alignment for src and dst.
-    scalar* src = &src_aligned[align];
+    const scalar* src = &src_aligned[align];
     scalar* dst = &dst_aligned[N - align];
-    vector v = load(src, vector{});
+    auto v = load(src, std::integral_constant<size_t, N>{});
 
     store(dst, v);
     for (size_t i = 0; i < N; ++i) {
@@ -62,19 +56,18 @@ void test_load_store(uint32_t arch_flags) {
   }
 }
 
-#define TEST_LOAD_STORE(test_class, type, arch_flags) \
-  TEST(test_class, load_store_##type) { test_load_store<type>(arch_flags); }
+#define TEST_LOAD_STORE(test_class, type, N) \
+  TEST(test_class, load_store_##type##x##N) { test_load_store<type, N>(); }
 
-template <typename vector>
-void test_aligned_load_store(uint32_t arch_flags) {
-  using scalar = typename vector::value_type;
-  static constexpr size_t N = vector::N;
+template <typename scalar, size_t N>
+void test_aligned_load_store() {
+  using vector = vec<scalar, N>;
 
   alignas(vector) scalar src[N];
   for (size_t i = 0; i < N; ++i) {
     src[i] = static_cast<scalar>(i);
   }
-  vector v = load_aligned(src, vector{});
+  vector v = load_aligned(src, vector::N);
 
   alignas(vector) scalar dst[N];
   store_aligned(dst, v);
@@ -83,15 +76,14 @@ void test_aligned_load_store(uint32_t arch_flags) {
   }
 }
 
-#define TEST_ALIGNED_LOAD_STORE(test_class, type, arch_flags) \
-  TEST(test_class, aligned_load_store_##type) {               \
-    test_aligned_load_store<type>(arch_flags);                \
+#define TEST_ALIGNED_LOAD_STORE(test_class, type, N)  \
+  TEST(test_class, aligned_load_store_##type##x##N) { \
+    test_aligned_load_store<type, N>();               \
   }
 
-template <typename vector>
-void test_partial_load(uint32_t arch_flags) {
-  using scalar = typename vector::value_type;
-  static constexpr size_t N = vector::N;
+template <typename scalar, size_t N>
+void test_partial_load() {
+  using vector = vec<scalar, N>;
 
   scalar dst[N];
   scalar init[N];
@@ -105,7 +97,7 @@ void test_partial_load(uint32_t arch_flags) {
   for (int align = 0; align < N; ++align) {
     for (size_t n = 1; n < N; ++n) {
       scalar* src = &src_aligned[N + align - n];
-      vector v = load(src, load(init, vector{}), n);
+      vector v = load(src, n, load(init, vector::N));
 
       store(dst, v);
       for (size_t i = 0; i < n; ++i) {
@@ -118,10 +110,9 @@ void test_partial_load(uint32_t arch_flags) {
   }
 }
 
-template <typename vector>
-void test_partial_store(uint32_t arch_flags) {
-  using scalar = typename vector::value_type;
-  static constexpr size_t N = vector::N;
+template <typename scalar, size_t N>
+void test_partial_store() {
+  using vector = vec<scalar, N>;
 
   scalar src[N];
   for (size_t i = 0; i < N; ++i) {
@@ -133,7 +124,7 @@ void test_partial_store(uint32_t arch_flags) {
     for (size_t i = 0; i < N; ++i) {
       dst[i] = static_cast<scalar>(i + 5);
     }
-    vector v = load(src, vector{});
+    vector v = load(src, vector::N);
     for (size_t n = 1; n < N; ++n) {
       store(dst, v, n);
       for (size_t i = 0; i < n; ++i) {
@@ -146,30 +137,32 @@ void test_partial_store(uint32_t arch_flags) {
   }
 }
 
-#define TEST_PARTIAL_LOAD_STORE(test_class, type, arch_flags) \
-  TEST(test_class, partial_load_##type) {                     \
-    test_partial_load<type>(arch_flags);                      \
-  }                                                           \
-  TEST(test_class, partial_store_##type) {                    \
-    test_partial_store<type>(arch_flags);                     \
+#define TEST_PARTIAL_LOAD_STORE(test_class, type, N) \
+  TEST(test_class, partial_load_##type##x##N) {      \
+    test_partial_load<type, N>();                    \
+  }                                                  \
+  TEST(test_class, partial_store_##type##x##N) {     \
+    test_partial_store<type, N>();                   \
   }
 
-template <typename T, template <typename> typename Op>
-void test_op(uint32_t arch_flags) {
-  typename T::value_type a[T::N];
-  typename T::value_type b[T::N];
-  for (size_t i = 0; i < T::N; ++i) {
+template <typename scalar, size_t N, template <typename> typename Op>
+void test_op() {
+  using vector = vec<scalar, N>;
+
+  scalar a[vector::N];
+  scalar b[vector::N];
+  for (size_t i = 0; i < vector::N; ++i) {
     a[i] = i * 2;
-    b[i] = T::N / 2 - i;
+    b[i] = vector::N / 2 - i;
   }
 
-  typename T::value_type result[T::N];
+  scalar result[vector::N];
 
-  Op<T> vector_op;
-  Op<typename T::value_type> scalar_op;
+  Op<vector> vector_op;
+  Op<scalar> scalar_op;
 
-  store(result, vector_op(load(a, T{}), load(b, T{})));
-  for (size_t i = 0; i < T::N; ++i) {
+  store(result, vector_op(load(a, vector::N), load(b, vector::N)));
+  for (size_t i = 0; i < vector::N; ++i) {
     ASSERT_EQ(result[i], scalar_op(a[i], b[i]));
   }
 }
@@ -198,61 +191,59 @@ struct copysign_op {
   }
 };
 
-#define TEST_ADD(test_class, type, arch_flags) \
-  TEST(test_class, add_##type) { test_op<type, std::plus>(arch_flags); }
-#define TEST_SUBTRACT(test_class, type, arch_flags) \
-  TEST(test_class, subtract_##type) { test_op<type, std::minus>(arch_flags); }
-#define TEST_MULTIPLY(test_class, type, arch_flags) \
-  TEST(test_class, multiply_##type) {               \
-    test_op<type, std::multiplies>(arch_flags);     \
+#define TEST_ADD(test_class, type, N) \
+  TEST(test_class, add_##type##x##N) { test_op<type, N, std::plus>(); }
+#define TEST_SUBTRACT(test_class, type, N) \
+  TEST(test_class, subtract_##type##x##N) { test_op<type, N, std::minus>(); }
+#define TEST_MULTIPLY(test_class, type, N)  \
+  TEST(test_class, multiply_##type##x##N) { \
+    test_op<type, N, std::multiplies>();    \
   }
-#define TEST_COPYSIGN(test_class, type, arch_flags) \
-  TEST(test_class, copysign_##type) { test_op<type, copysign_op>(arch_flags); }
-#define TEST_MIN(test_class, type, arch_flags) \
-  TEST(test_class, min_##type) { test_op<type, min_op>(arch_flags); }
-#define TEST_MAX(test_class, type, arch_flags) \
-  TEST(test_class, max_##type) { test_op<type, max_op>(arch_flags); }
-#define TEST_AND(test_class, type, arch_flags) \
-  TEST(test_class, and_##type) { test_op<type, min_op>(arch_flags); }
-#define TEST_OR(test_class, type, arch_flags) \
-  TEST(test_class, or_##type) { test_op<type, max_op>(arch_flags); }
+#define TEST_COPYSIGN(test_class, type, N) \
+  TEST(test_class, copysign_##type##x##N) { test_op<type, N, copysign_op>(); }
+#define TEST_MIN(test_class, type, N) \
+  TEST(test_class, min_##type##x##N) { test_op<type, N, min_op>(); }
+#define TEST_MAX(test_class, type, N) \
+  TEST(test_class, max_##type##x##N) { test_op<type, N, max_op>(); }
+#define TEST_AND(test_class, type, N) \
+  TEST(test_class, and_##type##x##N) { test_op<type, N, min_op>(); }
+#define TEST_OR(test_class, type, N) \
+  TEST(test_class, or_##type##x##N) { test_op<type, N, max_op>(); }
 
-template <typename To, typename From, size_t... Is>
+template <size_t Lanes, typename From, size_t... Is>
 void test_extract_impl(std::index_sequence<Is...>, From from_v,
                        typename From::value_type* src) {
   (([&]() {
     constexpr size_t i = Is;
-    To to_v = extract<i>(from_v, To{});
-    typename To::value_type dst[To::N];
+    auto to_v = extract<i>(from_v, std::integral_constant<size_t, Lanes>());
+    typename From::value_type dst[Lanes];
     store(dst, to_v);
-    for (size_t j = 0; j < To::N; ++j) {
-      ASSERT_EQ(dst[j], src[i * To::N + j]);
+    for (size_t j = 0; j < Lanes; ++j) {
+      ASSERT_EQ(dst[j], src[i * Lanes + j]);
     }
   }()), ...);
 }
 
-template <typename To, typename From>
-void test_extract(uint32_t arch_flags) {
-  ASSERT_EQ(From::N % To::N, 0);
+template <typename From, size_t Lanes>
+void test_extract() {
+  ASSERT_EQ(From::N % Lanes, 0);
   using FromScalar = typename From::value_type;
 
   FromScalar src[From::N];
   for (size_t i = 0; i < From::N; ++i) {
     src[i] = static_cast<FromScalar>(i);
   }
-  From from_v = load(src, From{});
+  From from_v = load(src, From::N);
 
-  test_extract_impl<To, From>(std::make_index_sequence<From::N / To::N>{},
-                              from_v, src);
+  test_extract_impl<Lanes, From>(std::make_index_sequence<From::N / Lanes>{},
+                                 from_v, src);
 }
 
-#define TEST_EXTRACT(test_class, to, from, arch_flags) \
-  TEST(test_class, extract_##to##_##from) {            \
-    test_extract<to, from>(arch_flags);                \
-  }
+#define TEST_EXTRACT(test_class, from, lanes) \
+  TEST(test_class, extract_##from##_##lanes) { test_extract<from, lanes>(); }
 
 template <typename vector>
-void test_concat(uint32_t arch_flags) {
+void test_concat() {
   using scalar = typename vector::value_type;
   constexpr size_t N = vector::N;
 
@@ -261,83 +252,81 @@ void test_concat(uint32_t arch_flags) {
     src[i] = static_cast<scalar>(i);
   }
   scalar dst[N * 2];
-  store(dst, concat(load(src, vector{}), load(src + N, vector{})));
+  store(dst, concat(load(src, vector::N), load(src + N, vector::N)));
 
   for (size_t i = 0; i < N * 2; ++i) {
     ASSERT_EQ(dst[i], src[i]);
   }
 }
 
-#define TEST_CONCAT(test_class, vector, arch_flags) \
-  TEST(test_class, concat_##vector) { test_concat<vector>(arch_flags); }
+#define TEST_CONCAT(test_class, vector) \
+  TEST(test_class, concat_##vector) { test_concat<vector>(); }
 
 template <typename To, typename From>
-void test_convert(uint32_t arch_flags) {
+void test_convert() {
   using FromScalar = typename From::value_type;
-  using ToScalar = typename To::value_type;
-  static constexpr size_t N = To::N;
+  static constexpr size_t N = From::N;
 
   FromScalar src[N];
   for (size_t i = 0; i < N; ++i) {
     src[i] = static_cast<FromScalar>(i);
   }
-  From from_v = load(src, From{});
-  To to_v = convert(from_v, ToScalar{});
+  From from_v = load(src, From::N);
+  auto to_v = convert(from_v, To{});
 
-  ToScalar dst[N];
+  To dst[N];
   store(dst, to_v);
   for (size_t i = 0; i < N; ++i) {
-    ASSERT_EQ(dst[i], static_cast<ToScalar>(src[i]));
+    ASSERT_EQ(dst[i], static_cast<To>(src[i]));
   }
 }
 
-#define TEST_CONVERT(test_class, to, from, arch_flags) \
-  TEST(test_class, convert_##to##_##from) {            \
-    test_convert<to, from>(arch_flags);                \
-  }
+#define TEST_CONVERT(test_class, to, from) \
+  TEST(test_class, convert_##to##_##from) { test_convert<to, from>(); }
 
 // This function has a max of n at n, and descends to 0 at either 0 or 2*n - 1.
 // This allows us to test a horizontal min/max reduction where any one of n
 // lanes is the min or max.
 inline int tent(int x, int n) { return std::min(x, 2 * n - 1 - x); }
 
-template <typename vector>
-void test_horizontal_min(uint32_t arch_flags) {
-  constexpr int N = vector::N;
-  typename vector::value_type a[N * 2 - 1];
+template <typename scalar, size_t N>
+void test_horizontal_min() {
+  using vector = vec<scalar, N>;
+
+  scalar a[N * 2 - 1];
   for (int i = 0; i < N * 2 - 1; ++i) {
     a[i] = N - tent(i, N);
   }
   for (int i = 0; i < N - 1; ++i) {
-    ASSERT_EQ(N - tent(N, N), horizontal_min(load(&a[i], vector{})));
+    ASSERT_EQ(N - tent(N, N), horizontal_min(load(&a[i], vector::N)));
   }
 }
 
-template <typename vector>
-void test_horizontal_max(uint32_t arch_flags) {
-  constexpr int N = vector::N;
-  typename vector::value_type a[N * 2 - 1];
+template <typename scalar, size_t N>
+void test_horizontal_max() {
+  using vector = vec<scalar, N>;
+
+  scalar a[N * 2 - 1];
   for (int i = 0; i < N * 2 - 1; ++i) {
     a[i] = tent(i, N);
   }
   for (int i = 0; i < N - 1; ++i) {
-    ASSERT_EQ(tent(N, N), horizontal_max(load(&a[i], vector{})));
+    ASSERT_EQ(tent(N, N), horizontal_max(load(&a[i], vector::N)));
   }
 }
 
-#define TEST_HORIZONTAL_MIN(test_class, type, arch_flags) \
-  TEST(test_class, horizontal_min_##type) {               \
-    test_horizontal_min<type>(arch_flags);                \
+#define TEST_HORIZONTAL_MIN(test_class, type, N)  \
+  TEST(test_class, horizontal_min_##type##x##N) { \
+    test_horizontal_min<type, N>();               \
   }
-#define TEST_HORIZONTAL_MAX(test_class, type, arch_flags) \
-  TEST(test_class, horizontal_max_##type) {               \
-    test_horizontal_max<type>(arch_flags);                \
+#define TEST_HORIZONTAL_MAX(test_class, type, N)  \
+  TEST(test_class, horizontal_max_##type##x##N) { \
+    test_horizontal_max<type, N>();               \
   }
 
-template <typename vector>
-void test_fma(uint32_t arch_flags) {
-  using scalar = typename vector::value_type;
-  constexpr size_t N = vector::N;
+template <typename scalar, size_t N>
+void test_fma() {
+  using vector = vec<scalar, N>;
 
   ReplicableRandomDevice rng;
   for (auto _ : FuzzTest(std::chrono::milliseconds(100))) {
@@ -353,7 +342,7 @@ void test_fma(uint32_t arch_flags) {
     }
     scalar result[N];
     store(result,
-          fma(load(a, vector{}), load(b, vector{}), load(acc, vector{})));
+          fma(load(a, vector::N), load(b, vector::N), load(acc, vector::N)));
     for (size_t i = 0; i < N; ++i) {
 #ifdef YNN_ARCH_ARM32
       if (std::abs(expected[i]) < type_info<scalar>::smallest_normal()) {
@@ -366,8 +355,8 @@ void test_fma(uint32_t arch_flags) {
   }
 }
 
-#define TEST_FMA(test_class, type, arch_flags) \
-  TEST(test_class, fma_##type) { test_fma<type>(arch_flags); }
+#define TEST_FMA(test_class, type, N) \
+  TEST(test_class, fma_##type##x##N) { test_fma<type, N>(); }
 
 }  // namespace simd
 

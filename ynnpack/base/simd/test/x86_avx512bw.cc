@@ -5,39 +5,42 @@
 
 #include "ynnpack/base/simd/x86_avx512bw.h"
 
-#include "ynnpack/base/arch.h"
+#include <cstdint>
+
+#include "ynnpack/base/bfloat16.h"
+#include "ynnpack/base/half.h"
 #include "ynnpack/base/simd/test/generic.h"
 
 namespace ynn {
 namespace simd {
 
-TEST_PARTIAL_LOAD_STORE(x86_avx512bw, u8x64, arch_flag::avx512bw);
-TEST_PARTIAL_LOAD_STORE(x86_avx512bw, s8x64, arch_flag::avx512bw);
-TEST_PARTIAL_LOAD_STORE(x86_avx512bw, s16x32, arch_flag::avx512bw);
-TEST_PARTIAL_LOAD_STORE(x86_avx512bw, f16x32, arch_flag::avx512bw);
-TEST_PARTIAL_LOAD_STORE(x86_avx512bw, bf16x32, arch_flag::avx512bw);
+TEST_PARTIAL_LOAD_STORE(x86_avx512bw, uint8_t, 64);
+TEST_PARTIAL_LOAD_STORE(x86_avx512bw, int8_t, 64);
+TEST_PARTIAL_LOAD_STORE(x86_avx512bw, int16_t, 32);
+TEST_PARTIAL_LOAD_STORE(x86_avx512bw, half, 32);
+TEST_PARTIAL_LOAD_STORE(x86_avx512bw, bfloat16, 32);
 
-TEST_ADD(x86_avx512bw, u8x64, arch_flag::avx512bw);
-TEST_ADD(x86_avx512bw, s8x64, arch_flag::avx512bw);
+TEST_ADD(x86_avx512bw, uint8_t, 64);
+TEST_ADD(x86_avx512bw, int8_t, 64);
 
-TEST_SUBTRACT(x86_avx512bw, u8x64, arch_flag::avx512bw);
-TEST_SUBTRACT(x86_avx512bw, s8x64, arch_flag::avx512bw);
+TEST_SUBTRACT(x86_avx512bw, uint8_t, 64);
+TEST_SUBTRACT(x86_avx512bw, int8_t, 64);
 
-TEST_MULTIPLY(x86_avx512bw, f32x16, arch_flag::avx512bw);
-TEST_MULTIPLY(x86_avx512bw, s32x16, arch_flag::avx512bw);
+TEST_MULTIPLY(x86_avx512bw, float, 16);
+TEST_MULTIPLY(x86_avx512bw, int32_t, 16);
 
-TEST_MIN(x86_avx512bw, u8x64, arch_flag::avx512bw);
-TEST_MIN(x86_avx512bw, s8x64, arch_flag::avx512bw);
-TEST_MIN(x86_avx512bw, s16x32, arch_flag::avx512bw);
+TEST_MIN(x86_avx512bw, uint8_t, 64);
+TEST_MIN(x86_avx512bw, int8_t, 64);
+TEST_MIN(x86_avx512bw, int16_t, 32);
 
-TEST_MAX(x86_avx512bw, u8x64, arch_flag::avx512bw);
-TEST_MAX(x86_avx512bw, s8x64, arch_flag::avx512bw);
-TEST_MAX(x86_avx512bw, s16x32, arch_flag::avx512bw);
+TEST_MAX(x86_avx512bw, uint8_t, 64);
+TEST_MAX(x86_avx512bw, int8_t, 64);
+TEST_MAX(x86_avx512bw, int16_t, 32);
 
-TEST_CONVERT(x86_avx512bw, s32x16, s8x16, arch_flag::avx512bw);
-TEST_CONVERT(x86_avx512bw, s32x16, u8x16, arch_flag::avx512bw);
-TEST_CONVERT(x86_avx512bw, s32x32, s8x32, arch_flag::avx512bw);
-TEST_CONVERT(x86_avx512bw, s32x32, u8x32, arch_flag::avx512bw);
+TEST_CONVERT(x86_avx512bw, int32_t, s8x16);
+TEST_CONVERT(x86_avx512bw, int32_t, u8x16);
+TEST_CONVERT(x86_avx512bw, int32_t, s8x32);
+TEST_CONVERT(x86_avx512bw, int32_t, u8x32);
 
 }  // namespace simd
 }  // namespace ynn

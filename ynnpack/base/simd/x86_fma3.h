@@ -23,4 +23,6 @@ YNN_ALWAYS_INLINE f32x8 fma(f32x8 a, f32x8 b, f32x8 acc) {
 
 }  // namespace ynn
 
+#include "ynnpack/base/simd/generic.inc"  // IWYU pragma: export
+
 #endif  // XNNPACK_YNNPACK_BASE_SIMD_X86_FMA3_H_

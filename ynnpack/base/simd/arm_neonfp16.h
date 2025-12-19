@@ -9,13 +9,13 @@
 #include <arm_neon.h>
 
 #include "ynnpack/base/simd/arm_neon.h"  // IWYU pragma: export
-#include "ynnpack/base/simd/multi_vec.h"
+#include "ynnpack/base/simd/vec.h"
 
 namespace ynn {
 
 namespace simd {
 
-using f32x8 = multi_vec<f32x4, 2>;
+using f32x8 = vec<float, 8>;
 
 YNN_ALWAYS_INLINE f32x8 convert(f16x8 a, float) {
   return {
@@ -27,5 +27,7 @@ YNN_ALWAYS_INLINE f32x8 convert(f16x8 a, float) {
 }  // namespace simd
 
 }  // namespace ynn
+
+#include "ynnpack/base/simd/generic.inc"  // IWYU pragma: export
 
 #endif  // XNNPACK_YNNPACK_BASE_SIMD_ARM_NEONFP16_H_

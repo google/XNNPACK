@@ -42,15 +42,15 @@ AccT reduce_add(AccT acc, AT a,
 
 template <typename AccT>
 auto sum_rows(AccT acc[4], std::integral_constant<size_t, 16> /*K*/) {
-  using OutAccT = simd::vec<typename AccT::value_type, 4>;
-  auto v_0 = (extract<0>(acc[0], OutAccT{}) + extract<1>(acc[0], OutAccT{})) +
-             (extract<2>(acc[0], OutAccT{}) + extract<3>(acc[0], OutAccT{}));
-  auto v_1 = (extract<0>(acc[1], OutAccT{}) + extract<1>(acc[1], OutAccT{})) +
-             (extract<2>(acc[1], OutAccT{}) + extract<3>(acc[1], OutAccT{}));
-  auto v_2 = (extract<0>(acc[2], OutAccT{}) + extract<1>(acc[2], OutAccT{})) +
-             (extract<2>(acc[2], OutAccT{}) + extract<3>(acc[2], OutAccT{}));
-  auto v_3 = (extract<0>(acc[3], OutAccT{}) + extract<1>(acc[3], OutAccT{})) +
-             (extract<2>(acc[3], OutAccT{}) + extract<3>(acc[3], OutAccT{}));
+  std::integral_constant<size_t, 4> cols = {};
+  auto v_0 = (extract<0>(acc[0], cols) + extract<1>(acc[0], cols)) +
+             (extract<2>(acc[0], cols) + extract<3>(acc[0], cols));
+  auto v_1 = (extract<0>(acc[1], cols) + extract<1>(acc[1], cols)) +
+             (extract<2>(acc[1], cols) + extract<3>(acc[1], cols));
+  auto v_2 = (extract<0>(acc[2], cols) + extract<1>(acc[2], cols)) +
+             (extract<2>(acc[2], cols) + extract<3>(acc[2], cols));
+  auto v_3 = (extract<0>(acc[3], cols) + extract<1>(acc[3], cols)) +
+             (extract<2>(acc[3], cols) + extract<3>(acc[3], cols));
 
   auto t = transpose<typename AccT::value_type>(
       {{v_0, v_1, v_2, v_3}});
@@ -59,17 +59,14 @@ auto sum_rows(AccT acc[4], std::integral_constant<size_t, 16> /*K*/) {
 
 template <typename AccT>
 auto sum_rows(AccT acc[4], std::integral_constant<size_t, 8> /*K*/) {
-  using OutAccT = simd::vec<typename AccT::value_type, 4>;
-  auto low = transpose<typename AccT::value_type>({{
-      extract<0>(acc[0], OutAccT{}), extract<0>(acc[1], OutAccT{}),
-      extract<0>(acc[2], OutAccT{}), extract<0>(acc[3], OutAccT{}),
-  }});
-  auto high = transpose<typename OutAccT::value_type>({{
-      extract<1>(acc[0], OutAccT{}), extract<1>(acc[1], OutAccT{}),
-      extract<1>(acc[2], OutAccT{}), extract<1>(acc[3], OutAccT{}),
-  }});
-  return ((low[0] + high[0]) + (low[1] + high[1])) +
-      ((low[2] + high[2]) + (low[3] + high[3]));
+  std::integral_constant<size_t, 4> cols = {};
+  auto v_0 = (extract<0>(acc[0], cols) + extract<1>(acc[0], cols));
+  auto v_1 = (extract<0>(acc[1], cols) + extract<1>(acc[1], cols));
+  auto v_2 = (extract<0>(acc[2], cols) + extract<1>(acc[2], cols));
+  auto v_3 = (extract<0>(acc[3], cols) + extract<1>(acc[3], cols));
+
+  auto t = transpose<typename AccT::value_type>({{v_0, v_1, v_2, v_3}});
+  return (t[0] + t[1]) + (t[2] + t[3]);
 }
 
 template <typename AccT>
@@ -104,10 +101,10 @@ struct sum_accumulator_x32 {
   YNN_ALWAYS_INLINE void reduce(const AT* A, size_t A_stride_n,
                                 NT n, KT k) {
     const simd::vec<AT, K> zero(0);
-    auto a_0 = load(offset_bytes(A, 0 * A_stride_n), zero, k);
-    auto a_1 = 1 < n ? load(offset_bytes(A, 1 * A_stride_n), zero, k) : zero;
-    auto a_2 = 2 < n ? load(offset_bytes(A, 2 * A_stride_n), zero, k) : zero;
-    auto a_3 = 3 < n ? load(offset_bytes(A, 3 * A_stride_n), zero, k) : zero;
+    auto a_0 = load(offset_bytes(A, 0 * A_stride_n), k, zero);
+    auto a_1 = 1 < n ? load(offset_bytes(A, 1 * A_stride_n), k, zero) : zero;
+    auto a_2 = 2 < n ? load(offset_bytes(A, 2 * A_stride_n), k, zero) : zero;
+    auto a_3 = 3 < n ? load(offset_bytes(A, 3 * A_stride_n), k, zero) : zero;
 
     acc[0] = reduce_add(acc[0], a_0, map_fn, horizontal_factor);
     acc[1] = reduce_add(acc[1], a_1, map_fn, horizontal_factor);
@@ -121,11 +118,11 @@ struct sum_accumulator_x32 {
     static_assert(N == 4);
     using OutAccT = simd::vec<T, N>;
 
-    store(C, load(C, OutAccT{}, n) + sum_rows<AccT>(acc, AccT::N), n);
+    store(C, load(C, n, OutAccT{}) + sum_rows<AccT>(acc, AccT::N), n);
   }
 };
 
-template <typename InVT, typename AccT, typename MapFn = Identity>
+template <typename AccT, typename MapFn = Identity>
 struct sum_accumulator_k1_1 {
   static constexpr std::integral_constant<size_t, 4> K2 = {};
   static constexpr std::integral_constant<size_t, AccT::N> N = {};
@@ -133,27 +130,27 @@ struct sum_accumulator_k1_1 {
 
   MapFn map_fn;
 
-  template <typename NT, typename K2T>
+  template <typename NT, typename K2T, typename AT>
   YNN_ALWAYS_INLINE void reduce_accumulate(
-      const typename InVT::value_type* __restrict A, NT n, size_t A_stride_k2,
-      K2T k2, size_t /*C_stride_m*/, typename AccT::value_type* __restrict C) {
+      const AT* __restrict A, NT n, size_t A_stride_k2, K2T k2,
+      size_t /*C_stride_m*/, typename AccT::value_type* __restrict C) {
     assert(k2 <= K2);
     assert(n <= N);
     assert(n > 0);
 
-    InVT zero(static_cast<typename InVT::value_type>(0));
-    auto a_0 = load(offset_bytes(A, 0 * A_stride_k2), zero, n);
-    auto a_1 = 1 < k2 ? load(offset_bytes(A, 1 * A_stride_k2), zero, n) : zero;
-    auto a_2 = 2 < k2 ? load(offset_bytes(A, 2 * A_stride_k2), zero, n) : zero;
-    auto a_3 = 3 < k2 ? load(offset_bytes(A, 3 * A_stride_k2), zero, n) : zero;
+    const simd::vec<AT, N> zero{0};
+    auto a_0 = load(offset_bytes(A, 0 * A_stride_k2), n, zero);
+    auto a_1 = 1 < k2 ? load(offset_bytes(A, 1 * A_stride_k2), n, zero) : zero;
+    auto a_2 = 2 < k2 ? load(offset_bytes(A, 2 * A_stride_k2), n, zero) : zero;
+    auto a_3 = 3 < k2 ? load(offset_bytes(A, 3 * A_stride_k2), n, zero) : zero;
 
-    AccT acc = convert(zero, typename AccT::value_type{});
+    AccT acc{0};
     acc = reduce_add(acc, a_0, map_fn, horizontal_factor);
     acc = reduce_add(acc, a_1, map_fn, horizontal_factor);
     acc = reduce_add(acc, a_2, map_fn, horizontal_factor);
     acc = reduce_add(acc, a_3, map_fn, horizontal_factor);
 
-    store(C, load(C, AccT{}, n) + acc, n);
+    store(C, load(C, n, AccT{}) + acc, n);
   }
 };
 

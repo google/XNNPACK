@@ -48,7 +48,7 @@ dummy_t max(dummy_t, T) {
   return {};
 }
 template <typename N>
-dummy_t load(const void* ptr, dummy_t, N) {
+dummy_t load(const void* ptr, N, dummy_t) {
   return {};
 }
 template <typename N>
@@ -82,12 +82,11 @@ struct min_max_accumulator {
   template <typename AT, typename NT>
   YNN_ALWAYS_INLINE void reduce(const AT* A, size_t A_stride_n, NT n,
                                 decltype(K)) {
-    using vec_a = simd::vec<AT, K>;
-
-    auto a_0 = load(offset_bytes(A, 0 * A_stride_n), vec_a{});
-    auto a_1 = 1 < n ? load(offset_bytes(A, 1 * A_stride_n), vec_a{}) : a_0;
-    auto a_2 = 2 < n ? load(offset_bytes(A, 2 * A_stride_n), vec_a{}) : a_1;
-    auto a_3 = 3 < n ? load(offset_bytes(A, 3 * A_stride_n), vec_a{}) : a_2;
+    simd::vec<AT, K> undef{};
+    auto a_0 = load(offset_bytes(A, 0 * A_stride_n), K, undef);
+    auto a_1 = 1 < n ? load(offset_bytes(A, 1 * A_stride_n), K, undef) : a_0;
+    auto a_2 = 2 < n ? load(offset_bytes(A, 2 * A_stride_n), K, undef) : a_1;
+    auto a_3 = 3 < n ? load(offset_bytes(A, 3 * A_stride_n), K, undef) : a_2;
     acc_min[0] = min(acc_min[0], a_0);
     acc_min[1] = min(acc_min[1], a_1);
     acc_min[2] = min(acc_min[2], a_2);
@@ -104,20 +103,20 @@ struct min_max_accumulator {
     AccMaxT id_max(type_info<AccMaxT>::max_identity());
     AccMinT id_min(type_info<AccMinT>::min_identity());
 
-    auto a_0_min = load(offset_bytes(A, 0 * A_stride_n), id_min, k);
-    auto a_0_max = load(offset_bytes(A, 0 * A_stride_n), id_max, k);
+    auto a_0_min = load(offset_bytes(A, 0 * A_stride_n), k, id_min);
+    auto a_0_max = load(offset_bytes(A, 0 * A_stride_n), k, id_max);
     auto a_1_min =
-        1 < n ? load(offset_bytes(A, 1 * A_stride_n), id_min, k) : a_0_min;
+        1 < n ? load(offset_bytes(A, 1 * A_stride_n), k, id_min) : a_0_min;
     auto a_1_max =
-        1 < n ? load(offset_bytes(A, 1 * A_stride_n), id_max, k) : a_0_max;
+        1 < n ? load(offset_bytes(A, 1 * A_stride_n), k, id_max) : a_0_max;
     auto a_2_min =
-        2 < n ? load(offset_bytes(A, 2 * A_stride_n), id_min, k) : a_0_min;
+        2 < n ? load(offset_bytes(A, 2 * A_stride_n), k, id_min) : a_0_min;
     auto a_2_max =
-        2 < n ? load(offset_bytes(A, 2 * A_stride_n), id_max, k) : a_0_max;
+        2 < n ? load(offset_bytes(A, 2 * A_stride_n), k, id_max) : a_0_max;
     auto a_3_min =
-        3 < n ? load(offset_bytes(A, 3 * A_stride_n), id_min, k) : a_0_min;
+        3 < n ? load(offset_bytes(A, 3 * A_stride_n), k, id_min) : a_0_min;
     auto a_3_max =
-        3 < n ? load(offset_bytes(A, 3 * A_stride_n), id_max, k) : a_0_max;
+        3 < n ? load(offset_bytes(A, 3 * A_stride_n), k, id_max) : a_0_max;
 
     acc_min[0] = min(acc_min[0], a_0_min);
     acc_max[0] = max(acc_max[0], a_0_max);
@@ -185,13 +184,13 @@ struct min_max_accumulator_k1_1 {
   template <typename NT>
   void accumulate_min(T* __restrict C, const AccMinT& acc, NT n) {
     AccMinT id_min(type_info<AccMinT>::min_identity());
-    store(C, min(acc, load(C, id_min, n)), n);
+    store(C, min(acc, load(C, n, id_min)), n);
   }
 
   template <typename NT>
   void accumulate_max(T* __restrict C, const AccMaxT& acc, NT n) {
     AccMaxT id_max(type_info<AccMaxT>::max_identity());
-    store(C, max(acc, load(C, id_max, n)), n);
+    store(C, max(acc, load(C, n, id_max)), n);
   }
 
   template <typename AT, typename NT, typename K2T>
@@ -203,20 +202,20 @@ struct min_max_accumulator_k1_1 {
     AccMaxT id_max(type_info<AccMaxT>::max_identity());
     AccMinT id_min(type_info<AccMinT>::min_identity());
 
-    auto a_0_min = load(offset_bytes(A, 0 * A_stride_k2), id_min, n);
-    auto a_0_max = load(offset_bytes(A, 0 * A_stride_k2), id_max, n);
+    auto a_0_min = load(offset_bytes(A, 0 * A_stride_k2), n, id_min);
+    auto a_0_max = load(offset_bytes(A, 0 * A_stride_k2), n, id_max);
     auto a_1_min =
-        1 < k2 ? load(offset_bytes(A, 1 * A_stride_k2), id_min, n) : a_0_min;
+        1 < k2 ? load(offset_bytes(A, 1 * A_stride_k2), n, id_min) : a_0_min;
     auto a_1_max =
-        1 < k2 ? load(offset_bytes(A, 1 * A_stride_k2), id_max, n) : a_0_max;
+        1 < k2 ? load(offset_bytes(A, 1 * A_stride_k2), n, id_max) : a_0_max;
     auto a_2_min =
-        2 < k2 ? load(offset_bytes(A, 2 * A_stride_k2), id_min, n) : a_0_min;
+        2 < k2 ? load(offset_bytes(A, 2 * A_stride_k2), n, id_min) : a_0_min;
     auto a_2_max =
-        2 < k2 ? load(offset_bytes(A, 2 * A_stride_k2), id_max, n) : a_0_max;
+        2 < k2 ? load(offset_bytes(A, 2 * A_stride_k2), n, id_max) : a_0_max;
     auto a_3_min =
-        3 < k2 ? load(offset_bytes(A, 3 * A_stride_k2), id_min, n) : a_0_min;
+        3 < k2 ? load(offset_bytes(A, 3 * A_stride_k2), n, id_min) : a_0_min;
     auto a_3_max =
-        3 < k2 ? load(offset_bytes(A, 3 * A_stride_k2), id_max, n) : a_0_max;
+        3 < k2 ? load(offset_bytes(A, 3 * A_stride_k2), n, id_max) : a_0_max;
 
     AccMinT acc_min = static_cast<AccMinT>(a_0_min);
     AccMaxT acc_max = static_cast<AccMaxT>(a_0_max);

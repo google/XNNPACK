@@ -5,26 +5,25 @@
 
 #include "ynnpack/base/simd/x86_sse41.h"
 
-#include "ynnpack/base/arch.h"
 #include "ynnpack/base/simd/test/generic.h"
 
 namespace ynn {
 namespace simd {
 
-TEST_MULTIPLY(x86_sse41, s32x4, arch_flag::sse41);
+TEST_MULTIPLY(x86_sse41, int32_t, 4);
 
-TEST_MIN(x86_sse41, s8x16, arch_flag::sse41);
-TEST_MIN(x86_sse41, s32x4, arch_flag::sse41);
+TEST_MIN(x86_sse41, int8_t, 16);
+TEST_MIN(x86_sse41, int32_t, 4);
 
-TEST_MAX(x86_sse41, s8x16, arch_flag::sse41);
-TEST_MAX(x86_sse41, s32x4, arch_flag::sse41);
+TEST_MAX(x86_sse41, int8_t, 16);
+TEST_MAX(x86_sse41, int32_t, 4);
 
-TEST_HORIZONTAL_MIN(x86_sse41, s32x4, arch_flag::sse41);
+TEST_HORIZONTAL_MIN(x86_sse41, int32_t, 4);
 
-TEST_HORIZONTAL_MAX(x86_sse41, s32x4, arch_flag::sse41);
+TEST_HORIZONTAL_MAX(x86_sse41, int32_t, 4);
 
-TEST_CONVERT(x86_sse41, s32x16, u8x16, arch_flag::sse41);
-TEST_CONVERT(x86_sse41, s32x16, s8x16, arch_flag::sse41);
+TEST_CONVERT(x86_sse41, int32_t, u8x16);
+TEST_CONVERT(x86_sse41, int32_t, s8x16);
 
 }  // namespace simd
 }  // namespace ynn

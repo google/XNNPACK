@@ -10,7 +10,7 @@
 namespace ynn {
 namespace simd {
 
-TEST_CONVERT(arm_neonfp16, f32x8, f16x8, arch_flag::neonfp16);
+TEST_CONVERT(arm_neonfp16, float, f16x8);
 
 }  // namespace simd
 }  // namespace ynn

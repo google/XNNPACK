@@ -5,77 +5,80 @@
 
 #include "ynnpack/base/simd/x86_sse2.h"
 
-#include "ynnpack/base/arch.h"
+#include <cstdint>
+
+#include "ynnpack/base/bfloat16.h"
+#include "ynnpack/base/half.h"
 #include "ynnpack/base/simd/test/generic.h"
 
 namespace ynn {
 namespace simd {
 
-TEST_BROADCAST(x86_sse2, u8x16, arch_flag::sse2);
-TEST_BROADCAST(x86_sse2, s8x16, arch_flag::sse2);
-TEST_BROADCAST(x86_sse2, s16x8, arch_flag::sse2);
-TEST_BROADCAST(x86_sse2, f16x8, arch_flag::sse2);
-TEST_BROADCAST(x86_sse2, bf16x8, arch_flag::sse2);
-TEST_BROADCAST(x86_sse2, f32x4, arch_flag::sse2);
-TEST_BROADCAST(x86_sse2, s32x4, arch_flag::sse2);
+TEST_BROADCAST(x86_sse2, uint8_t, 16);
+TEST_BROADCAST(x86_sse2, int8_t, 16);
+TEST_BROADCAST(x86_sse2, int16_t, 8);
+TEST_BROADCAST(x86_sse2, half, 8);
+TEST_BROADCAST(x86_sse2, bfloat16, 8);
+TEST_BROADCAST(x86_sse2, float, 4);
+TEST_BROADCAST(x86_sse2, int32_t, 4);
 
-TEST_LOAD_STORE(x86_sse2, u8x16, arch_flag::sse2);
-TEST_LOAD_STORE(x86_sse2, s8x16, arch_flag::sse2);
-TEST_LOAD_STORE(x86_sse2, s16x8, arch_flag::sse2);
-TEST_LOAD_STORE(x86_sse2, f16x8, arch_flag::sse2);
-TEST_LOAD_STORE(x86_sse2, bf16x8, arch_flag::sse2);
-TEST_LOAD_STORE(x86_sse2, f32x4, arch_flag::sse2);
-TEST_LOAD_STORE(x86_sse2, s32x4, arch_flag::sse2);
+TEST_LOAD_STORE(x86_sse2, uint8_t, 16);
+TEST_LOAD_STORE(x86_sse2, int8_t, 16);
+TEST_LOAD_STORE(x86_sse2, int16_t, 8);
+TEST_LOAD_STORE(x86_sse2, half, 8);
+TEST_LOAD_STORE(x86_sse2, bfloat16, 8);
+TEST_LOAD_STORE(x86_sse2, float, 4);
+TEST_LOAD_STORE(x86_sse2, int32_t, 4);
 
-TEST_ALIGNED_LOAD_STORE(x86_sse2, u8x16, arch_flag::sse2);
-TEST_ALIGNED_LOAD_STORE(x86_sse2, s8x16, arch_flag::sse2);
-TEST_ALIGNED_LOAD_STORE(x86_sse2, s16x8, arch_flag::sse2);
-TEST_ALIGNED_LOAD_STORE(x86_sse2, f16x8, arch_flag::sse2);
-TEST_ALIGNED_LOAD_STORE(x86_sse2, bf16x8, arch_flag::sse2);
-TEST_ALIGNED_LOAD_STORE(x86_sse2, f32x4, arch_flag::sse2);
-TEST_ALIGNED_LOAD_STORE(x86_sse2, s32x4, arch_flag::sse2);
+TEST_ALIGNED_LOAD_STORE(x86_sse2, uint8_t, 16);
+TEST_ALIGNED_LOAD_STORE(x86_sse2, int8_t, 16);
+TEST_ALIGNED_LOAD_STORE(x86_sse2, int16_t, 8);
+TEST_ALIGNED_LOAD_STORE(x86_sse2, half, 8);
+TEST_ALIGNED_LOAD_STORE(x86_sse2, bfloat16, 8);
+TEST_ALIGNED_LOAD_STORE(x86_sse2, float, 4);
+TEST_ALIGNED_LOAD_STORE(x86_sse2, int32_t, 4);
 
-TEST_PARTIAL_LOAD_STORE(x86_sse2, u8x16, arch_flag::sse2);
-TEST_PARTIAL_LOAD_STORE(x86_sse2, s8x16, arch_flag::sse2);
-TEST_PARTIAL_LOAD_STORE(x86_sse2, s16x8, arch_flag::sse2);
-TEST_PARTIAL_LOAD_STORE(x86_sse2, f16x8, arch_flag::sse2);
-TEST_PARTIAL_LOAD_STORE(x86_sse2, bf16x8, arch_flag::sse2);
-TEST_PARTIAL_LOAD_STORE(x86_sse2, f32x4, arch_flag::sse2);
-TEST_PARTIAL_LOAD_STORE(x86_sse2, s32x4, arch_flag::sse2);
+TEST_PARTIAL_LOAD_STORE(x86_sse2, uint8_t, 16);
+TEST_PARTIAL_LOAD_STORE(x86_sse2, int8_t, 16);
+TEST_PARTIAL_LOAD_STORE(x86_sse2, int16_t, 8);
+TEST_PARTIAL_LOAD_STORE(x86_sse2, half, 8);
+TEST_PARTIAL_LOAD_STORE(x86_sse2, bfloat16, 8);
+TEST_PARTIAL_LOAD_STORE(x86_sse2, float, 4);
+TEST_PARTIAL_LOAD_STORE(x86_sse2, int32_t, 4);
 
-TEST_ADD(x86_sse2, u8x16, arch_flag::sse2);
-TEST_ADD(x86_sse2, s8x16, arch_flag::sse2);
-TEST_ADD(x86_sse2, s16x8, arch_flag::sse2);
-TEST_ADD(x86_sse2, f32x4, arch_flag::sse2);
-TEST_ADD(x86_sse2, s32x4, arch_flag::sse2);
+TEST_ADD(x86_sse2, uint8_t, 16);
+TEST_ADD(x86_sse2, int8_t, 16);
+TEST_ADD(x86_sse2, int16_t, 8);
+TEST_ADD(x86_sse2, float, 4);
+TEST_ADD(x86_sse2, int32_t, 4);
 
-TEST_SUBTRACT(x86_sse2, u8x16, arch_flag::sse2);
-TEST_SUBTRACT(x86_sse2, s8x16, arch_flag::sse2);
-TEST_SUBTRACT(x86_sse2, s16x8, arch_flag::sse2);
-TEST_SUBTRACT(x86_sse2, f32x4, arch_flag::sse2);
-TEST_SUBTRACT(x86_sse2, s32x4, arch_flag::sse2);
+TEST_SUBTRACT(x86_sse2, uint8_t, 16);
+TEST_SUBTRACT(x86_sse2, int8_t, 16);
+TEST_SUBTRACT(x86_sse2, int16_t, 8);
+TEST_SUBTRACT(x86_sse2, float, 4);
+TEST_SUBTRACT(x86_sse2, int32_t, 4);
 
-TEST_MULTIPLY(x86_sse2, f32x4, arch_flag::sse2);
+TEST_MULTIPLY(x86_sse2, float, 4);
 
-TEST_MIN(x86_sse2, u8x16, arch_flag::sse2);
-TEST_MIN(x86_sse2, s16x8, arch_flag::sse2);
-TEST_MIN(x86_sse2, f32x4, arch_flag::sse2);
+TEST_MIN(x86_sse2, uint8_t, 16);
+TEST_MIN(x86_sse2, int16_t, 8);
+TEST_MIN(x86_sse2, float, 4);
 
-TEST_MAX(x86_sse2, u8x16, arch_flag::sse2);
-TEST_MAX(x86_sse2, s16x8, arch_flag::sse2);
-TEST_MAX(x86_sse2, f32x4, arch_flag::sse2);
+TEST_MAX(x86_sse2, uint8_t, 16);
+TEST_MAX(x86_sse2, int16_t, 8);
+TEST_MAX(x86_sse2, float, 4);
 
-TEST_HORIZONTAL_MIN(x86_sse2, u8x16, arch_flag::sse2);
-TEST_HORIZONTAL_MIN(x86_sse2, s16x8, arch_flag::sse2);
-TEST_HORIZONTAL_MIN(x86_sse2, f32x4, arch_flag::sse2);
+TEST_HORIZONTAL_MIN(x86_sse2, uint8_t, 16);
+TEST_HORIZONTAL_MIN(x86_sse2, int16_t, 8);
+TEST_HORIZONTAL_MIN(x86_sse2, float, 4);
 
-TEST_HORIZONTAL_MAX(x86_sse2, u8x16, arch_flag::sse2);
-TEST_HORIZONTAL_MAX(x86_sse2, s16x8, arch_flag::sse2);
-TEST_HORIZONTAL_MAX(x86_sse2, f32x4, arch_flag::sse2);
+TEST_HORIZONTAL_MAX(x86_sse2, uint8_t, 16);
+TEST_HORIZONTAL_MAX(x86_sse2, int16_t, 8);
+TEST_HORIZONTAL_MAX(x86_sse2, float, 4);
 
-TEST_CONVERT(x86_sse2, f32x8, bf16x8, arch_flag::sse2);
-TEST_CONVERT(x86_sse2, s32x16, u8x16, arch_flag::sse2);
-TEST_CONVERT(x86_sse2, s32x16, s8x16, arch_flag::sse2);
+TEST_CONVERT(x86_sse2, float, bf16x8);
+TEST_CONVERT(x86_sse2, int32_t, u8x16);
+TEST_CONVERT(x86_sse2, int32_t, s8x16);
 
 }  // namespace simd
 }  // namespace ynn

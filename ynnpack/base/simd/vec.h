@@ -39,26 +39,47 @@ namespace simd {
 // places, it may make sense to promote it to be a globally visible wrapper
 // here.
 
-// This is intended to be a minimal strongly typed wrapper for SIMD types.
-// It should have the following members:
-// - `N`: a strongly typed (i.e. `std::integral_constant<size_t, N>` or similar)
-// value indicating the number of elements in the type.
-// - `value_type`: type of one element.
-// - broadcasting constructor from a single instance of T.
+// This represents a vector of N elements of type T. By default, it is
+// implemented by splitting into two halves of N/2 elements each. The recursive
+// nature of this implementation enables users of this type to write SIMD code
+// that is portable to many SIMD instruction sets.
 template <typename T, size_t N_>
-struct vec;
+struct vec {
+  static constexpr std::integral_constant<size_t, N_> N = {};
+  using subvec = vec<T, N_ / 2>;
+  using value_type = typename subvec::value_type;
+
+  subvec v[2];
+
+  subvec& lo() { return v[0]; }
+  const subvec& lo() const { return v[0]; }
+  subvec& hi() { return v[1]; }
+  const subvec& hi() const { return v[1]; }
+
+  vec() = default;
+  YNN_ALWAYS_INLINE explicit vec(value_type x) : v{subvec{x}, subvec{x}} {}
+  YNN_ALWAYS_INLINE vec(subvec v0, subvec v1) : v{v0, v1} {}
+
+  YNN_ALWAYS_INLINE subvec& operator[](size_t i) { return v[i]; }
+  YNN_ALWAYS_INLINE const subvec& operator[](size_t i) const { return v[i]; }
+};
+
+template <size_t N, typename T>
+YNN_ALWAYS_INLINE vec<T, N> broadcast(T x) {
+  return vec<T, N>{x};
+}
 
 // Load `n` elements of `T` from `ptr`. Values not loaded from `ptr` are taken
 // from `src` instead. When `n` is the constant value `N`, the value from
 // `src` is unused.
 template <typename T, size_t N>
-vec<T, N> load(const T* ptr, vec<T, N> src,
-               std::integral_constant<size_t, N> n = {});
+vec<T, N> load(const T* ptr, std::integral_constant<size_t, N> n,
+               vec<T, N> = {});
 template <typename T, size_t N>
-vec<T, N> load_aligned(const T* ptr, vec<T, N> src,
-                       std::integral_constant<size_t, N> n = {});
+vec<T, N> load_aligned(const T* ptr, std::integral_constant<size_t, N> n,
+                       vec<T, N> = {});
 template <typename T, size_t N>
-vec<T, N> load(const T* ptr, vec<T, N> src, size_t n);
+vec<T, N> load(const T* ptr, size_t n, vec<T, N> src);
 
 // Store `N` elements of `T` to `ptr`.
 template <typename T, size_t N>
@@ -83,23 +104,11 @@ vec<T, N> max(vec<T, N> a, vec<T, N> b);
 
 template <typename T>
 std::array<vec<T, 4>, 4> transpose(std::array<vec<T, 4>, 4> x);
-template <int Index, typename Vec, typename Slice>
-Slice extract(Vec, Slice);
+template <int Index, typename T, size_t N, typename SliceN>
+auto extract(vec<T, N>, SliceN);
 
 template <typename To, typename From, size_t N>
 vec<To, N> convert(vec<From, N> from, To);
-
-// Provide the no-op extract and convert.
-template <int Index, typename Vec>
-YNN_ALWAYS_INLINE Vec extract(Vec x, Vec) {
-  static_assert(Index == 0, "");
-  return x;
-}
-
-template <typename T, size_t N>
-YNN_ALWAYS_INLINE vec<T, N> convert(vec<T, N> from, T) {
-  return from;
-}
 
 namespace internal {
 

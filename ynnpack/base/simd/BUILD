@@ -23,18 +23,17 @@ cc_library(
 
 cc_library(
     name = "simd",
-    hdrs = [
-        "multi_vec.h",
-        "vec.h",
-    ],
+    hdrs = ["vec.h"],
     compatible_with = _COMPATIBLE_WITH,
     # These headers need to be textual because we can't compile them with the appropriate copts.
     textual_hdrs = [
         # These headers should not be directly included.
         "x86_avx2_base.h",
+        "x86_avx512f_base.h",
         "x86_avx_base.h",
         "x86_sse2_base.h",
         "x86_sse41_base.h",
+        "generic.inc",
         # For the most part, only one of these headers should be included. Multiple of these headers
         # may define the same operation and type, using a different implementation, depending on the
         # target. For example, f32x16 is provided by both avx512f as a single 512-bit vector, and

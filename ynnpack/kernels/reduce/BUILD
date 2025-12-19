@@ -25,12 +25,7 @@ cc_library(
 
 ynn_cc_library(
     name = "reduce",
-    srcs = [
-        "generic.h",
-        "min_max_accumulator.h",
-        "reduce.cc",
-        "sum_accumulator.h",
-    ],
+    srcs = ["reduce.cc"],
     hdrs = [
         "max.inc",
         "min.inc",

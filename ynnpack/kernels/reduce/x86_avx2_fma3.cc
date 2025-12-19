@@ -47,7 +47,7 @@ void sum_squared_bf16_fp32_avx2_fma3(size_t n, size_t k3, size_t k2, size_t k1,
                                      size_t a_stride_k2, const void* a, size_t,
                                      void* c) {
   if (k1 == 1 && a_stride_n == sizeof(bfloat16)) {
-    stream_reduce<sum_accumulator_k1_1<bf16x8, f32x8, Square>, bfloat16, float>(
+    stream_reduce<sum_accumulator_k1_1<f32x8, Square>, bfloat16, float>(
         n, k3, k2, a_stride_k3, a_stride_k2,
         reinterpret_cast<const bfloat16*>(a), /*C_stride_m=*/0,
         reinterpret_cast<float*>(c));

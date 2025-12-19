@@ -17,7 +17,6 @@
 #include "ynnpack/base/base.h"
 #include "ynnpack/base/bfloat16.h"
 #include "ynnpack/base/half.h"
-#include "ynnpack/base/simd/multi_vec.h"
 #include "ynnpack/base/simd/vec.h"
 
 namespace ynn {
@@ -162,32 +161,32 @@ YNN_ALWAYS_INLINE void vst1_lane(float* ptr, float32x2_t v) {
 
 }  // namespace internal
 
-YNN_ALWAYS_INLINE f32x4 load_aligned(const float* ptr, f32x4,
-                                     decltype(f32x4::N) = {}) {
+YNN_ALWAYS_INLINE f32x4 load_aligned(const float* ptr, decltype(f32x4::N),
+                                     f32x4 = {}) {
   return f32x4{vld1q_f32(ptr)};
 }
-YNN_ALWAYS_INLINE s32x4 load_aligned(const int32_t* ptr, s32x4,
-                                     decltype(s32x4::N) = {}) {
+YNN_ALWAYS_INLINE s32x4 load_aligned(const int32_t* ptr, decltype(s32x4::N),
+                                     s32x4 = {}) {
   return s32x4{vld1q_s32(ptr)};
 }
-YNN_ALWAYS_INLINE bf16x8 load_aligned(const bfloat16* ptr, bf16x8,
-                                      decltype(bf16x8::N) = {}) {
+YNN_ALWAYS_INLINE bf16x8 load_aligned(const bfloat16* ptr, decltype(bf16x8::N),
+                                      bf16x8 = {}) {
   return bf16x8{vld1q_u16(reinterpret_cast<const uint16_t*>(ptr))};
 }
-YNN_ALWAYS_INLINE f16x8 load_aligned(const half* ptr, f16x8,
-                                     decltype(f16x8::N) = {}) {
+YNN_ALWAYS_INLINE f16x8 load_aligned(const half* ptr, decltype(f16x8::N),
+                                     f16x8 = {}) {
   return f16x8{vld1q_u16(reinterpret_cast<const uint16_t*>(ptr))};
 }
-YNN_ALWAYS_INLINE s16x8 load_aligned(const int16_t* ptr, s16x8,
-                                     decltype(s16x8::N) = {}) {
+YNN_ALWAYS_INLINE s16x8 load_aligned(const int16_t* ptr, decltype(s16x8::N),
+                                     s16x8 = {}) {
   return s16x8{vld1q_s16(ptr)};
 }
-YNN_ALWAYS_INLINE u8x16 load_aligned(const uint8_t* ptr, u8x16,
-                                     decltype(u8x16::N) = {}) {
+YNN_ALWAYS_INLINE u8x16 load_aligned(const uint8_t* ptr, decltype(u8x16::N),
+                                     u8x16 = {}) {
   return u8x16{vld1q_u8(ptr)};
 }
-YNN_ALWAYS_INLINE s8x16 load_aligned(const int8_t* ptr, s8x16,
-                                     decltype(s8x16::N) = {}) {
+YNN_ALWAYS_INLINE s8x16 load_aligned(const int8_t* ptr, decltype(s8x16::N),
+                                     s8x16 = {}) {
   return s8x16{vld1q_s8(ptr)};
 }
 
@@ -220,30 +219,30 @@ YNN_ALWAYS_INLINE void store_aligned(int8_t* ptr, s8x16 b,
   vst1q_s8(ptr, b.v);
 }
 
-YNN_ALWAYS_INLINE f32x4 load(const float* ptr, f32x4, decltype(f32x4::N) = {}) {
+YNN_ALWAYS_INLINE f32x4 load(const float* ptr, decltype(f32x4::N), f32x4 = {}) {
   return f32x4{vld1q_f32(ptr)};
 }
-YNN_ALWAYS_INLINE s32x4 load(const int32_t* ptr, s32x4,
-                             decltype(s32x4::N) = {}) {
+YNN_ALWAYS_INLINE s32x4 load(const int32_t* ptr, decltype(s32x4::N),
+                             s32x4 = {}) {
   return s32x4{vld1q_s32(ptr)};
 }
-YNN_ALWAYS_INLINE bf16x8 load(const bfloat16* ptr, bf16x8,
-                              decltype(f16x8::N) = {}) {
+YNN_ALWAYS_INLINE bf16x8 load(const bfloat16* ptr, decltype(f16x8::N),
+                              bf16x8 = {}) {
   return bf16x8{vld1q_u16(reinterpret_cast<const uint16_t*>(ptr))};
 }
-YNN_ALWAYS_INLINE f16x8 load(const half* ptr, f16x8, decltype(f16x8::N) = {}) {
+YNN_ALWAYS_INLINE f16x8 load(const half* ptr, decltype(f16x8::N), f16x8 = {}) {
   return f16x8{vld1q_u16(reinterpret_cast<const uint16_t*>(ptr))};
 }
-YNN_ALWAYS_INLINE s16x8 load(const int16_t* ptr, s16x8,
-                             decltype(s16x8::N) = {}) {
+YNN_ALWAYS_INLINE s16x8 load(const int16_t* ptr, decltype(s16x8::N),
+                             s16x8 = {}) {
   return s16x8{vld1q_s16(ptr)};
 }
-YNN_ALWAYS_INLINE u8x16 load(const uint8_t* ptr, u8x16,
-                             decltype(u8x16::N) = {}) {
+YNN_ALWAYS_INLINE u8x16 load(const uint8_t* ptr, decltype(u8x16::N),
+                             u8x16 = {}) {
   return u8x16{vld1q_u8(ptr)};
 }
-YNN_ALWAYS_INLINE s8x16 load(const int8_t* ptr, s8x16,
-                             decltype(s8x16::N) = {}) {
+YNN_ALWAYS_INLINE s8x16 load(const int8_t* ptr, decltype(s8x16::N),
+                             s8x16 = {}) {
   return s8x16{vld1q_s8(ptr)};
 }
 
@@ -291,7 +290,7 @@ inline vec<T, 4> partial_load_lanes_x4(const T* ptr, vec<T, 4> src, size_t n) {
     default:
       break;
   }
-  return load_aligned(lanes, vec<T, 4>{});
+  return load_aligned(lanes, std::integral_constant<size_t, 4>{});
 }
 template <typename T>
 inline void partial_store_x32x4(T* ptr, vec<T, 4> b, size_t n) {
@@ -313,10 +312,10 @@ inline void partial_store_x32x4(T* ptr, vec<T, 4> b, size_t n) {
 
 }  // namespace internal
 
-YNN_ALWAYS_INLINE f32x4 load(const float* ptr, f32x4 src, size_t n) {
+YNN_ALWAYS_INLINE f32x4 load(const float* ptr, size_t n, f32x4 src) {
   return internal::partial_load_lanes_x4(ptr, src, n);
 }
-YNN_ALWAYS_INLINE s32x4 load(const int32_t* ptr, s32x4 src, size_t n) {
+YNN_ALWAYS_INLINE s32x4 load(const int32_t* ptr, size_t n, s32x4 src) {
   return internal::partial_load_lanes_x4(ptr, src, n);
 }
 YNN_ALWAYS_INLINE void store(float* ptr, f32x4 b, size_t n) {
@@ -326,13 +325,13 @@ YNN_ALWAYS_INLINE void store(int32_t* ptr, s32x4 b, size_t n) {
   internal::partial_store_x32x4(ptr, b, n);
 }
 
-YNN_ALWAYS_INLINE bf16x8 load(const bfloat16* ptr, bf16x8 src, size_t n) {
+YNN_ALWAYS_INLINE bf16x8 load(const bfloat16* ptr, size_t n, bf16x8 src) {
   return internal::partial_load_memcpy(ptr, src, n);
 }
-YNN_ALWAYS_INLINE f16x8 load(const half* ptr, f16x8 src, size_t n) {
+YNN_ALWAYS_INLINE f16x8 load(const half* ptr, size_t n, f16x8 src) {
   return internal::partial_load_memcpy(ptr, src, n);
 }
-YNN_ALWAYS_INLINE s16x8 load(const int16_t* ptr, s16x8 src, size_t n) {
+YNN_ALWAYS_INLINE s16x8 load(const int16_t* ptr, size_t n, s16x8 src) {
   return internal::partial_load_memcpy(ptr, src, n);
 }
 YNN_ALWAYS_INLINE void store(bfloat16* ptr, bf16x8 value, size_t n) {
@@ -345,10 +344,10 @@ YNN_ALWAYS_INLINE void store(int16_t* ptr, s16x8 value, size_t n) {
   internal::partial_store_memcpy(ptr, value, n);
 }
 
-YNN_ALWAYS_INLINE u8x16 load(const uint8_t* ptr, u8x16 src, size_t n) {
+YNN_ALWAYS_INLINE u8x16 load(const uint8_t* ptr, size_t n, u8x16 src) {
   return internal::partial_load_memcpy(ptr, src, n);
 }
-YNN_ALWAYS_INLINE s8x16 load(const int8_t* ptr, s8x16 src, size_t n) {
+YNN_ALWAYS_INLINE s8x16 load(const int8_t* ptr, size_t n, s8x16 src) {
   return internal::partial_load_memcpy(ptr, src, n);
 }
 
@@ -558,10 +557,10 @@ YNN_ALWAYS_INLINE std::array<vec<T, 4>, 4> transpose(
   }};
 }
 
-using f32x8 = multi_vec<f32x4, 2>;
-using s32x8 = multi_vec<s32x4, 2>;
-using s16x16 = multi_vec<s16x8, 2>;
-using s32x16 = multi_vec<s32x4, 4>;
+using f32x8 = vec<float, 8>;
+using s32x8 = vec<int32_t, 8>;
+using s16x16 = vec<int16_t, 16>;
+using s32x16 = vec<int32_t, 16>;
 
 YNN_ALWAYS_INLINE f32x8 convert(bf16x8 a, float) {
   uint16x8x2_t a_u32 = vzipq_u16(vdupq_n_u16(0), a.v);
@@ -593,31 +592,17 @@ YNN_ALWAYS_INLINE s32x8 convert(s16x8 b, int32_t) {
 }
 
 YNN_ALWAYS_INLINE s32x16 convert(s8x16 b, int32_t) {
-  s16x16 b_s16 = convert(b, int16_t{});
-  s32x8 lo = convert(extract<0>(b_s16, s16x8{}), int32_t{});
-  s32x8 hi = convert(extract<1>(b_s16, s16x8{}), int32_t{});
-  return {
-      extract<0>(lo, s32x4{}),
-      extract<1>(lo, s32x4{}),
-      extract<0>(hi, s32x4{}),
-      extract<1>(hi, s32x4{}),
-  };
+  return convert(convert(b, int16_t{}), int32_t{});
 }
 
 YNN_ALWAYS_INLINE s32x16 convert(u8x16 b, int32_t) {
-  s16x16 b_s16 = convert(b, int16_t{});
-  s32x8 lo = convert(extract<0>(b_s16, s16x8{}), int32_t{});
-  s32x8 hi = convert(extract<1>(b_s16, s16x8{}), int32_t{});
-  return {
-      extract<0>(lo, s32x4{}),
-      extract<1>(lo, s32x4{}),
-      extract<0>(hi, s32x4{}),
-      extract<1>(hi, s32x4{}),
-  };
+  return convert(convert(b, int16_t{}), int32_t{});
 }
 
 }  // namespace simd
 
 }  // namespace ynn
+
+#include "ynnpack/base/simd/generic.inc"  // IWYU pragma: export
 
 #endif  // XNNPACK_YNNPACK_BASE_SIMD_ARM_H_
