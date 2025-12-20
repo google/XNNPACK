@@ -141,14 +141,17 @@ void TestMatMul(AT, BT, CT, size_t k) {
 
     if (c.base()) {
       int finite = 0;
-      for (const auto& i : EnumerateIndices({m, n})) {
-        bool c_finite = std::isfinite(static_cast<float>(c(i)));
-        bool kernel_c_finite = std::isfinite(static_cast<float>(kernel_c(i)));
-        if (c_finite && kernel_c_finite) {
-          ASSERT_EQ(c(i), kernel_c(i));
-          finite++;
-        } else {
-          ASSERT_EQ(c_finite, kernel_c_finite);
+      for (size_t i = 0; i < m; ++i) {
+        for (size_t j = 0; j < n; ++j) {
+          bool c_finite = std::isfinite(static_cast<float>(c(i, j)));
+          bool kernel_c_finite =
+              std::isfinite(static_cast<float>(kernel_c(i, j)));
+          if (c_finite && kernel_c_finite) {
+            ASSERT_EQ(c(i, j), kernel_c(i, j));
+            finite++;
+          } else {
+            ASSERT_EQ(c_finite, kernel_c_finite);
+          }
         }
       }
       // Make sure the result wasn't entirely Inf/NaN.
