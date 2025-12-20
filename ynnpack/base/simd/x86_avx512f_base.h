@@ -65,8 +65,8 @@ struct vec<int32_t, 16> {
 
   __m512i v;
 
-  YNN_ALWAYS_INLINE s16x16 lo() const { return s16x16{internal::lo(v)}; }
-  YNN_ALWAYS_INLINE s16x16 hi() const { return s16x16{internal::hi(v)}; }
+  YNN_ALWAYS_INLINE s32x8 lo() const { return s32x8{internal::lo(v)}; }
+  YNN_ALWAYS_INLINE s32x8 hi() const { return s32x8{internal::hi(v)}; }
 };
 
 template <>
