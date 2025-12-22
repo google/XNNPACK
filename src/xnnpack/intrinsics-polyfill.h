@@ -356,9 +356,9 @@ static XNN_INTRINSIC uint8x16x4_t vld1q_u8_x4(const uint8_t* address) {
 // - n: number of bytes (n <= 128)
 // - vin: input
 static XNN_INTRINSIC void Q6_V_vstu_variable(void* addr, uint32_t n,
-                                             HVX_Vector vin) {
+                                             const HVX_Vector vin) {
   // Rotate as needed.
-  vin = Q6_V_vlalign_VVR(vin, vin, (size_t)addr);
+  HVX_Vector vout = Q6_V_vlalign_VVR(vin, vin, (size_t)addr);
 
   uint32_t left_off = (size_t)addr & 127;
   uint32_t right_off = left_off + n;
@@ -367,44 +367,13 @@ static XNN_INTRINSIC void Q6_V_vstu_variable(void* addr, uint32_t n,
   HVX_VectorPred qr = Q6_Q_vsetq2_R(right_off);
 
   if (right_off > 128) {
-    Q6_vmem_QRIV(qr, (HVX_Vector*)addr + 1, vin);
+    Q6_vmem_QRIV(qr, (HVX_Vector*)addr + 1, vout);
     // all 1's
-    qr = Q6_Q_vcmp_eq_VbVb(vin, vin);
+    qr = Q6_Q_vcmp_eq_VbVb(vout, vout);
   }
 
   ql_not = Q6_Q_or_QQn(ql_not, qr);
-  Q6_vmem_QnRIV(ql_not, (HVX_Vector*)addr, vin);
-}
-
-// 32x16 Integer Multiplication:
-// - multiplier: 32-bit integer
-// - vin: 16-bit signed integer
-// - Return 'HVX_VectorPair' keeping the same order as vin
-//   but with elements widened to 32-bit.
-static XNN_INTRINSIC HVX_VectorPair Q6_Vw_vmpyi_VwVh(HVX_Vector multiplier,
-                                                     HVX_Vector vin) {
-  vin = Q6_Vh_vshuffe_VhVh(vin, vin);
-  HVX_Vector mul_e = Q6_Vw_vmpyio_VwVh(multiplier, vin);
-  HVX_Vector mul_o = Q6_Vw_vmpyio_VwVh(multiplier, vin);
-
-  return Q6_W_vshuff_VVR(mul_o, mul_e, -4);
-}
-
-// 32x16 Integer Multiplication of even elements in the 'vin':
-// multiplier_hi: upper part of 32-bit integer multiplier
-// multiplier_lo: lower part of 32-bit integer multiplier
-// vin: 16-bit signed integer
-// - Return 'vout' in the HVX_Vector format,
-//   containing only the multiplication results of the even elements from 'vin'
-//   and widened to 32-bit.
-static XNN_INTRINSIC HVX_Vector Q6_Vw_vmpyie_VwVh(HVX_Vector multiplier_lo,
-                                                  HVX_Vector multiplier_hi,
-                                                  HVX_Vector vin) {
-  multiplier_hi = Q6_Vh_vshuffe_VhVh(multiplier_hi, multiplier_hi);
-  HVX_Vector vout = Q6_Vw_vmpyieo_VhVh(vin, multiplier_hi);
-  vout = Q6_Vw_vmpyieacc_VwVwVh(vout, multiplier_lo, vin);
-
-  return vout;
+  Q6_vmem_QnRIV(ql_not, (HVX_Vector*)addr, vout);
 }
 
 // DIV implementation using Newton-Raphson reciprocal approximation
@@ -456,12 +425,6 @@ static XNN_INTRINSIC HVX_Vector fast_inverse__vsf(HVX_Vector vin) {
 
   vout = Q6_Vsf_equals_Vqf32(vout);  // convert output back to IEEE sf
   return vout;
-}
-
-static XNN_INTRINSIC HVX_Vector Q6_Vsf_vdiv_VsfVsf(HVX_Vector vin1,
-                                                   HVX_Vector vin2) {
-  return Q6_Vsf_equals_Vqf32(
-      Q6_Vqf32_vmpy_VsfVsf(vin1, fast_inverse__vsf(vin2)));
 }
 
 #endif  // XNN_ARCH_HEXAGON
