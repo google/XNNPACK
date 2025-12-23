@@ -8,6 +8,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <functional>
+#include <memory>
 #include <utility>
 #include <vector>
 
@@ -150,7 +151,17 @@ void define_stencil_copy(ynn_subgraph& subgraph, ynn_node& node,
 
     auto func = slinky::func::make_copy({input_buffer, std::move(bounds)},
                                         {output.buffer, std::move(dims)});
+
+    auto sched = std::make_unique<ynn::scheduling_info>();
+    // Store at the innermost level.
+    ynn::scheduled_buffer sched_output_buffer = {output.buffer, 0};
+    sched->scheduled_buffers.push_back(std::move(sched_output_buffer));
+
+    func.user_data() = sched.get();
+    runtime.scheduling_info_storage.push_back(std::move(sched));
+
     runtime.funcs.push_back(std::move(func));
+
     return ynn_status_success;
   };
 }
