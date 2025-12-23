@@ -351,63 +351,67 @@ static XNN_INTRINSIC uint8x16x4_t vld1q_u8_x4(const uint8_t* address) {
 #include <hexagon_types.h>
 #include <hvx_hexagon_protos.h>
 
+// Force the correct vector type for the toolchain
+typedef int xnn_hvx_vector_t __attribute__((__vector_size__(128)));  // HVX_Vector
+typedef int xnn_hvx_vectorpred_t __attribute__((__vector_size__(128)));  // HVX_VectorPred
+
 // Variable Sized Store:
 // - addr: destination pointer (unaligned)
 // - n: number of bytes (n <= 128)
 // - vin: input
 static XNN_INTRINSIC void Q6_V_vstu_variable(void* addr, uint32_t n,
-                                             const HVX_Vector vin) {
+                                             const xnn_hvx_vector_t vin) {
   // Rotate as needed.
-  HVX_Vector vout = Q6_V_vlalign_VVR(vin, vin, (size_t)addr);
+  xnn_hvx_vector_t vout = Q6_V_vlalign_VVR(vin, vin, (size_t)addr);
 
   uint32_t left_off = (size_t)addr & 127;
   uint32_t right_off = left_off + n;
 
-  HVX_VectorPred ql_not = Q6_Q_vsetq_R((size_t)addr);
-  HVX_VectorPred qr = Q6_Q_vsetq2_R(right_off);
+  xnn_hvx_vectorpred_t ql_not = Q6_Q_vsetq_R((size_t)addr);
+  xnn_hvx_vectorpred_t qr = Q6_Q_vsetq2_R(right_off);
 
   if (right_off > 128) {
-    Q6_vmem_QRIV(qr, (HVX_Vector*)addr + 1, vout);
+    Q6_vmem_QRIV(qr, (xnn_hvx_vector_t*)addr + 1, vout);
     // all 1's
     qr = Q6_Q_vcmp_eq_VbVb(vout, vout);
   }
 
   ql_not = Q6_Q_or_QQn(ql_not, qr);
-  Q6_vmem_QnRIV(ql_not, (HVX_Vector*)addr, vout);
+  Q6_vmem_QnRIV(ql_not, (xnn_hvx_vector_t*)addr, vout);
 }
 
 // DIV implementation using Newton-Raphson reciprocal approximation
 // Implementation comes from Halide project
 // a/b = a * fast_inverse__vsf(b)
-static XNN_INTRINSIC HVX_Vector fast_inverse__vsf(HVX_Vector vin) {
+static XNN_INTRINSIC HVX_Vector fast_inverse__vsf(xnn_hvx_vector_t vin) {
   const uint32_t fp_exp_norm = 0x7F000000;  // IEEE sf: sign=0, exp=254, mant=0
   const uint32_t fp_exp_mask = 0xFF800000;  // mask for IEEE sf exp
   const uint32_t nr_T1 = 0x5a5a5a7f;   // Newton Raphson T1=24.0/17.0 (qf32)
   const uint32_t nr_T2 = 0x8787877d;   // Newton Raphson T2=-8.0/17.0 (qf32)
   const uint32_t qf_one = 0x4000007F;  // 1.0 (qf32)
 
-  HVX_Vector vfp_exp_norm = Q6_V_vsplat_R(fp_exp_norm);
-  HVX_Vector vfp_exp_mask = Q6_V_vsplat_R(fp_exp_mask);
+  xnn_hvx_vector_t vfp_exp_norm = Q6_V_vsplat_R(fp_exp_norm);
+  xnn_hvx_vector_t vfp_exp_mask = Q6_V_vsplat_R(fp_exp_mask);
 
-  HVX_Vector vnr_T1 = Q6_V_vsplat_R(nr_T1);
-  HVX_Vector vnr_T2 = Q6_V_vsplat_R(nr_T2);
+  xnn_hvx_vector_t vnr_T1 = Q6_V_vsplat_R(nr_T1);
+  xnn_hvx_vector_t vnr_T2 = Q6_V_vsplat_R(nr_T2);
 
-  HVX_Vector vone = Q6_V_vsplat_R(qf_one);
-  HVX_Vector vzero = Q6_V_vzero();
+  xnn_hvx_vector_t vone = Q6_V_vsplat_R(qf_one);
+  xnn_hvx_vector_t vzero = Q6_V_vzero();
 
   // IEEE sf: sign[i] = sign(den[i]), exp[i] = exp(den[i]), mant = 0
-  HVX_Vector vfp_exp = Q6_V_vand_VV(vin, vfp_exp_mask);
+  xnn_hvx_vector_t vfp_exp = Q6_V_vand_VV(vin, vfp_exp_mask);
 
   // normalization factor in IEEE sf:
   //   sign[i] = sign(den[i]), exp[i] = 254 - exp(den[i]), mant = 0
-  HVX_Vector vfp_norm = Q6_Vw_vsub_VwVw(vfp_exp_norm, vfp_exp);
-  HVX_Vector vnorm = Q6_Vqf32_vadd_VsfVsf(vfp_norm, vzero);  // qf32
+  xnn_hvx_vector_t vfp_norm = Q6_Vw_vsub_VwVw(vfp_exp_norm, vfp_exp);
+  xnn_hvx_vector_t vnorm = Q6_Vqf32_vadd_VsfVsf(vfp_norm, vzero);  // qf32
 
-  HVX_Vector vout = Q6_Vqf32_vmpy_VsfVsf(vin, vfp_norm);  // normalize den[i]
+  xnn_hvx_vector_t vout = Q6_Vqf32_vmpy_VsfVsf(vin, vfp_norm);  // normalize den[i]
 
   // initial estimate X0[i] = T1 + (T2 * den[i])
-  HVX_Vector vtmp = Q6_Vqf32_vmpy_Vqf32Vqf32(vnr_T2, vout);
-  HVX_Vector vX0 = Q6_Vqf32_vadd_Vqf32Vqf32(vnr_T1, vtmp);
+  xnn_hvx_vector_t vtmp = Q6_Vqf32_vmpy_Vqf32Vqf32(vnr_T2, vout);
+  xnn_hvx_vector_t vX0 = Q6_Vqf32_vadd_Vqf32Vqf32(vnr_T1, vtmp);
 
 #pragma clang loop unroll(enable)
   for (int newtRaph = 0; newtRaph < 3; newtRaph++) {
@@ -424,7 +428,7 @@ static XNN_INTRINSIC HVX_Vector fast_inverse__vsf(HVX_Vector vin) {
   vout = Q6_Vqf32_vmpy_Vqf32Vqf32(vX0, vnorm);
 
   vout = Q6_Vsf_equals_Vqf32(vout);  // convert output back to IEEE sf
-  return vout;
+  return (HVX_Vector)vout;
 }
 
 #endif  // XNN_ARCH_HEXAGON
