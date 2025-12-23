@@ -65,6 +65,22 @@ ynn_cc_library(
 )
 
 cc_test(
+    name = "consistent_reduce_test",
+    srcs = ["consistent_reduce_test.cc"],
+    linkopts = ynn_binary_linkopts(),
+    malloc = ynn_binary_malloc(),
+    deps = [
+        ":reduce",
+        "//ynnpack:ynnpack_h",
+        "//ynnpack/base",
+        "//ynnpack/base/test:fuzz_test",
+        "//ynnpack/base/test:random",
+        "//ynnpack/base/test:tensor",
+        "//ynnpack/base/test:util",
+    ] + ynn_test_deps(),
+)
+
+cc_test(
     name = "test",
     srcs = ["test.cc"],
     linkopts = ynn_binary_linkopts(),

@@ -34,14 +34,15 @@ struct Square {
 };
 
 template <typename AccT, typename AT, typename MapFn>
-AccT reduce_add(AccT acc, AT a,
-                MapFn map_fn,
-                std::integral_constant<size_t, 1>/*horizontal_factor*/) {
+YNN_ALWAYS_INLINE AccT
+reduce_add(AccT acc, AT a, MapFn map_fn,
+           std::integral_constant<size_t, 1> /*horizontal_factor*/) {
   return acc += map_fn(convert(a, typename AccT::value_type{}));
 }
 
 template <typename AccT>
-auto sum_rows(AccT acc[4], std::integral_constant<size_t, 16> /*K*/) {
+YNN_ALWAYS_INLINE auto sum_rows(AccT acc[4],
+                                std::integral_constant<size_t, 16> /*K*/) {
   std::integral_constant<size_t, 4> cols = {};
   auto v_0 = (extract<0>(acc[0], cols) + extract<1>(acc[0], cols)) +
              (extract<2>(acc[0], cols) + extract<3>(acc[0], cols));
@@ -58,7 +59,8 @@ auto sum_rows(AccT acc[4], std::integral_constant<size_t, 16> /*K*/) {
 }
 
 template <typename AccT>
-auto sum_rows(AccT acc[4], std::integral_constant<size_t, 8> /*K*/) {
+YNN_ALWAYS_INLINE auto sum_rows(AccT acc[4],
+                                std::integral_constant<size_t, 8> /*K*/) {
   std::integral_constant<size_t, 4> cols = {};
   auto v_0 = (extract<0>(acc[0], cols) + extract<1>(acc[0], cols));
   auto v_1 = (extract<0>(acc[1], cols) + extract<1>(acc[1], cols));
@@ -70,12 +72,17 @@ auto sum_rows(AccT acc[4], std::integral_constant<size_t, 8> /*K*/) {
 }
 
 template <typename AccT>
-auto sum_rows(AccT acc[4], std::integral_constant<size_t, 4>/*K*/) {
+YNN_ALWAYS_INLINE auto sum_rows(AccT acc[4],
+                                std::integral_constant<size_t, 4> /*K*/) {
   auto t = transpose<typename AccT::value_type>(
       {acc[0], acc[1], acc[2], acc[3]});
 
   return (t[0] + t[1]) + (t[2] + t[3]);
 }
+
+// All floating point sum kernels should use this value of K, to ensure that the
+// reduction associativity is consistent.
+constexpr size_t consistent_tile_k = 16;
 
 template <typename AccT, size_t K_, typename MapFn = Identity>
 struct sum_accumulator_x32 {
