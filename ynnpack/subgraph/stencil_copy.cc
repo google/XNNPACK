@@ -69,7 +69,7 @@ void define_stencil_copy(ynn_subgraph& subgraph, ynn_node& node,
         same_padding ? 0 : dilated_kernel_size(stencil) - 1;
     output.extents[stencil.axis] =
         slinky::simplify(slinky::ceil_div<slinky::expr>(
-            input.extents[stencil.axis] - padding, stencil.stride));
+            output.extents[stencil.axis] - padding, stencil.stride));
   }
 
   // Insert the new stencil dimensions.
