@@ -141,9 +141,11 @@ void define_stencil_copy(ynn_subgraph& subgraph, ynn_node& node,
 
     slinky::box_expr bounds =
         make_elementwise_bounds(input_dims, input.extents);
-    for (const stencil_info& stencil : op.stencils) {
-      bounds[stencil.axis] = point(dims[stencil.new_axis] * stencil.dilation +
-                                   input_dims[stencil.axis] * stencil.stride);
+    for (const stencil_info& i : op.stencils) {
+      bounds[i.axis] *= i.stride;
+    }
+    for (const stencil_info& i : op.stencils) {
+      bounds[i.axis] += i.dilation * dims[i.new_axis];
     }
 
     auto func = slinky::func::make_copy({input_buffer, std::move(bounds)},
