@@ -23,20 +23,18 @@ YNN_DOT_KERNEL(arch_flag::amxint8, dot_uint8_int8_int32_16x64x64_16x16x4_amxint8
 #include "ynnpack/kernels/dot/x86_avx512vnni_uint8_int8_int32.inc"
 #include "ynnpack/kernels/dot/x86_avx512vnni_uint8_int8_int32_k16.inc"
 #endif  // YNN_ARCH_X86_AVX512VNNI
-#ifdef YNN_ARCH_X86_AVX512BW
-#include "ynnpack/kernels/dot/x86_avx512bw_int8_int8_int32.inc"
-#include "ynnpack/kernels/dot/x86_avx512bw_int8_int8_int32_k16.inc"
-#endif  // YNN_ARCH_X86_AVX512BW
 #ifdef YNN_ARCH_X86_AVX512BF16
 #include "ynnpack/kernels/dot/x86_avx512bf16_bf16_bf16_fp32.inc"
 #endif  // YNN_ARCH_X86_AVX512BF16
-#ifdef YNN_ARCH_X86_AVX512F
+#ifdef YNN_ARCH_X86_AVX512
+#include "ynnpack/kernels/dot/x86_avx512bw_int8_int8_int32.inc"
+#include "ynnpack/kernels/dot/x86_avx512bw_int8_int8_int32_k16.inc"
 #include "ynnpack/kernels/dot/x86_avx512f_fp32.inc"
 #include "ynnpack/kernels/dot/x86_avx512f_fp32_k2.inc"
 #include "ynnpack/kernels/dot/x86_avx512f_fp32_k4.inc"
 #include "ynnpack/kernels/dot/x86_avx512f_bf16_bf16_fp32.inc"
 #include "ynnpack/kernels/dot/x86_avx512f_fp16_fp16_fp32.inc"
-#endif  // YNN_ARCH_X86_AVX512F
+#endif  // YNN_ARCH_X86_AVX512
 #ifdef YNN_ARCH_X86_AVX2
 #include "ynnpack/kernels/dot/x86_avx2_int8_int8_int32.inc"
 #endif  // YNN_ARCH_X86_AVX2

@@ -1,8 +1,8 @@
 // clang-format off
 
-#ifdef YNN_ARCH_X86_AVX512F
+#ifdef YNN_ARCH_X86_AVX512
 #include "ynnpack/kernels/unary/x86_avx512f.inc"
-#endif  // YNN_ARCH_X86_AVX512F
+#endif  // YNN_ARCH_X86_AVX512
 #ifdef YNN_ARCH_X86_FMA3
 #include "ynnpack/kernels/unary/x86_fma3.inc"
 #endif  // YNN_ARCH_X86_FMA3
