@@ -6,13 +6,19 @@
 #ifndef XNNPACK_YNNPACK_BASE_SIMD_X86_SSE2_H_
 #define XNNPACK_YNNPACK_BASE_SIMD_X86_SSE2_H_
 
+#include <immintrin.h>
+
+#include <cassert>
+#include <cstddef>
 #include <cstdint>
+#include <type_traits>
 
 #include "ynnpack/base/base.h"
 #include "ynnpack/base/bfloat16.h"
 #include "ynnpack/base/half.h"
 #include "ynnpack/base/simd/vec.h"
 #include "ynnpack/base/simd/x86_sse2_base.h"  // IWYU pragma: export
+#include "ynnpack/base/simd/x86_sse_base.h"  // IWYU pragma: export
 
 namespace ynn {
 
