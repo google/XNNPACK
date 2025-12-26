@@ -208,10 +208,10 @@ auto make_dot_impl(dot_type type, bool consistent_arithmetic, bool transposed_a,
     // hopes of making i bigger, which should improve performance in cases where
     // block_m does not divide c_m.extent()
 
-    // One of these strides is one tile_k, the other is the distance between
-    // rows, depending on whether it is transposed. In either case, the stride
-    // the kernel wants is the bigger stride.
-    const index_t a_stride = std::max(a_stride_k1, a_stride_m);
+    const index_t a_stride = transposed_a ? a_stride_k1 : a_stride_m;
+    // The kernels assume that the column dimension of a is stride 1 element.
+    assert(transposed_a ? (a_m.extent() == 1 || a_stride_m == a.elem_size)
+                        : (a_k1.extent() == 1 || a_stride_k1 == a.elem_size));
 
     auto call_kernel = [=, kernel = kernel.kernel](
                            index_t m, index_t n, index_t k1, const void* a,
@@ -486,7 +486,7 @@ auto make_transpose_a_impl(index_t tile_k, int m_dim) {
     const slinky::dim& output_m = output.dim(m_dim);
 
     const index_t elem_size = input.elem_size;
-    assert(output_m.stride() == elem_size * tile_k);
+    assert(output_m.extent() == 1 || output_m.stride() == elem_size * tile_k);
     (void)output_m;
 
     // We need the intersection of the input and output bounds.
@@ -542,10 +542,14 @@ void define_transpose_a(ynn_subgraph& subgraph, ynn_node& node, index_t tile_k,
     const ynn_runtime_value& input = runtime.value(node.inputs[0]);
     ynn_runtime_value& output = runtime.value(node.outputs[0]);
 
-    output.make_buffer(runtime, input.buffer->elem_size() * tile_k);
-    output.buffer->dim(m_dim).stride = output.buffer->elem_size();
+    slinky::expr elem_size = input.buffer->elem_size() * tile_k;
+    output.make_buffer(runtime, elem_size);
+    output.buffer->dim(m_dim).stride = elem_size;
     output.buffer->dim(0).stride =
-        output.buffer->dim(m_dim).stride * output.buffer->dim(m_dim).extent();
+        elem_size * output.buffer->dim(m_dim).extent();
+    // Don't allow folding of dimensions we transpose.
+    output.buffer->dim(m_dim).fold_factor = slinky::dim::unfolded;
+    output.buffer->dim(0).fold_factor = slinky::dim::unfolded;
 
     // Split + Transpose
     std::vector<slinky::var> dims =
