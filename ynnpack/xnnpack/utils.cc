@@ -460,7 +460,6 @@ ynn_status define_xnn_dot_quantized(ynn_subgraph_t subgraph, size_t num_k_dims,
                                     uint32_t a_id, uint32_t b_id,
                                     uint32_t bias_id, uint32_t output_id) {
   // 1. Convert input types to match.
-  assert(type_of_value(subgraph, a_id) == ynn_type_int8);
   if (type_of_value(subgraph, b_id) == ynn_type_uint8) {
     ynn_status status = define_convert_uint8_to_int8(subgraph, &b_id);
     if (status != ynn_status_success) return status;
