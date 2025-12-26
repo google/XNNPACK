@@ -156,13 +156,9 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c
         const int32x4_t vinput_zero_point${M} = vld1q_dup_s32(&quantization_params[${M}].zero_point);
         $for N in range(0, NR, 4):
           int32x4_t vacc${M}x${ABC[N:N+4]} = vmulq_s32(vksum${ABC[N:N+4]}, vinput_zero_point${M});
-
-      $for M in range(MR):
-        const float32x4_t lh_row_sum_${M} = vld1q_dup_f32(&row_sum[${M}]);
-
-      $for N in range(0, NR, 4):
-        const float32x4_t rh_zero_points_${ABC[N:N+4]} = vld1q_f32(w);
-        w = (const float*)w + 4;
+      // TODO: move kernel zero point after weights
+      const void* kzp = w;
+      w = (const float*)w + ${NR};
     $else:
       // Initialize accumulators with bias. ${NR} bias values are loaded from the
       // weight matrix, at the start of the group of ${NR} columns.
@@ -189,16 +185,6 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c
     $else:
       size_t k = kc;
     $if DATATYPE in ["QC2_F32"]:
-
-      ${_}// Compensation for uint2 compute: -2 row_sum.
-      ${_}const float32x4_t vtwo = vdupq_n_f32(2.0f);
-      $for N in range(0, NR, 4):
-        ${_}const float32x4_t biased_rh_zero_points_${ABC[N:N+4]} = vaddq_f32(rh_zero_points_${ABC[N:N+4]}, vtwo);
-
-      $for M in range(MR):
-        $for N in range(0, NR, 4):
-          ${_}const float32x4_t scaled_lh_row_sum_${M}x${ABC[N:N+4]} =
-              vmulq_f32(biased_rh_zero_points_${ABC[N:N+4]}, lh_row_sum_${M});
 
       ${_}// 4x partial unrolled loop to load 8 bytes at a time.
       ${_}while (k >= 16 * sizeof(int8_t)) {
@@ -371,11 +357,16 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c
           $elif not BLOCKWISE:
             float32x4_t vout${M}x${ABC[N:N+4]} = vcvtq_f32_s32(vacc${M}x${ABC[N:N+4]});
       $if DATATYPE in ["QC2_F32"]:
+        const float32x4_t vtwo = vdupq_n_f32(2.0f);
+        $for N in range(0, NR, 4):
+          const float32x4_t rh_zero_points_${ABC[N:N+4]} = vld1q_f32(kzp); kzp = (const float*)kzp + 4;
+          const float32x4_t biased_rh_zero_points_${ABC[N:N+4]} = vaddq_f32(rh_zero_points_${ABC[N:N+4]}, vtwo);
 
         // Subtract out the scaled left-hand row sums.
         $for M in range(MR):
+          const float32x4_t lh_row_sum_${M} = vld1q_dup_f32(&row_sum[${M}]);
           $for N in range(0, NR, 4):
-            vout${M}x${ABC[N:N+4]} = vsubq_f32(vout${M}x${ABC[N:N+4]}, scaled_lh_row_sum_${M}x${ABC[N:N+4]});
+            vout${M}x${ABC[N:N+4]} = vfmsq_f32(vout${M}x${ABC[N:N+4]}, biased_rh_zero_points_${ABC[N:N+4]}, lh_row_sum_${M});
 
         // Add the product of left/right-hand zero points and `kc`.
         $for M in range(MR):
