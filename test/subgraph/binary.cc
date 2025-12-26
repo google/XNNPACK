@@ -339,24 +339,32 @@ const xnn_binary_operator all_integer_ops[] = {
     xnn_binary_minimum,
     xnn_binary_multiply,
     xnn_binary_subtract,
+#ifndef XNNPACK_USE_YNNPACK
     xnn_binary_modulus,
+#endif
     xnn_binary_pow,
+#ifndef XNNPACK_USE_YNNPACK
     xnn_binary_bitwise_and,
     xnn_binary_bitwise_or,
     xnn_binary_bitwise_xor,
     xnn_binary_shift_left,
     xnn_binary_shift_right_logical,
     xnn_binary_shift_right_arithmetic,
+#endif
 };
 
 const xnn_binary_operator all_real_ops[] = {
     xnn_binary_add,
+#ifndef XNNPACK_USE_YNNPACK
     xnn_binary_atan2,
+#endif
     xnn_binary_copysign,
     xnn_binary_divide,
     xnn_binary_maximum,
     xnn_binary_minimum,
+#ifndef XNNPACK_USE_YNNPACK
     xnn_binary_modulus,
+#endif
     xnn_binary_multiply,
     xnn_binary_pow,
     xnn_binary_prelu,

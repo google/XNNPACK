@@ -291,9 +291,11 @@ const xnn_unary_operator all_integer_ops[] = {
     xnn_unary_abs,
     xnn_unary_negate,
     xnn_unary_square,
+#ifndef XNNPACK_USE_YNNPACK
     xnn_unary_count_leading_zeros,
     xnn_unary_bitwise_not,
     xnn_unary_popcount,
+#endif
     xnn_unary_sign,
 };
 
@@ -302,12 +304,16 @@ const xnn_unary_operator all_real_ops[] = {
     xnn_unary_abs,
     xnn_unary_bankers_rounding,
     xnn_unary_ceiling,
+#ifndef XNNPACK_USE_YNNPACK
     xnn_unary_elu,
+#endif
     xnn_unary_exp,
     xnn_unary_floor,
-    xnn_unary_gelu,
+#ifndef XNNPACK_USE_YNNPACK
+    xnn_unary_gelu,  // b/471308199
     xnn_unary_hardswish,
-    xnn_unary_leaky_relu,
+    xnn_unary_leaky_relu,  // b/471308199
+#endif
     xnn_unary_log,
     xnn_unary_negate,
     xnn_unary_sigmoid,
