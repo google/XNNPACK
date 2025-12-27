@@ -18,6 +18,7 @@
 #include "ynnpack/base/base.h"
 #include "ynnpack/base/type.h"
 #include "ynnpack/include/ynnpack.h"
+#include "ynnpack/subgraph/reduce.h"
 #include "ynnpack/subgraph/runtime.h"
 #include "ynnpack/subgraph/slinky.h"
 #include "ynnpack/subgraph/subgraph.h"
@@ -250,90 +251,22 @@ uint32_t get_reduce_identity_value(ynn_subgraph_t subgraph,
 
 }  // namespace
 
-extern "C" {
-
-ynn_status ynn_define_reduce(ynn_subgraph_t subgraph,
-                             enum ynn_reduce_operator op, size_t num_axes,
-                             const int32_t* axes, uint32_t input_a_id,
-                             uint32_t input_b_id, uint32_t* output_id,
-                             uint32_t flags) {
-  // Validate arguments.
-  assert(subgraph);
-  assert(subgraph->is_valid_value(input_a_id));
-  const ynn_value& a = subgraph->value(input_a_id);
-
-  ynn_node::reduce reduce;
-  reduce.op = op;
-  for (size_t i = 0; i < num_axes; ++i) {
-    reduce.k_dims[axis_to_slinky_dim(a.rank(), axes[i])] = true;
-  }
-  reduce.keep_dims = flags & YNN_NODE_FLAG_KEEP_DIMS;
-
-  assert(output_id);
-  if (*output_id == YNN_INVALID_VALUE_ID) {
-    // Make the output for this reduction.
-    ynn_type output_type = get_accumulator_type(op, a.type);
-    ynn_value& output = subgraph->new_internal_value(output_type);
-    uint32_t reduce_size_id = YNN_INVALID_VALUE_ID;
-    switch (op) {
-      case ynn_reduce_sum:
-      case ynn_reduce_sum_squared:
-        if (a.zero_point_id != YNN_INVALID_VALUE_ID) {
-          // When computing a sum, the zero point gets multiplied by the number
-          // of elements in the reduction.
-          ynn_define_get_tensor_shape(subgraph, num_axes, axes, ynn_type_int32,
-                                      /*rank=*/0, input_a_id, &reduce_size_id,
-                                      /*flags=*/YNN_NODE_FLAG_RESHAPE_1D);
-          ynn_define_binary(subgraph, ynn_binary_multiply, a.zero_point_id,
-                            reduce_size_id, &output.zero_point_id,
-                            /*flags=*/0);
-        }
-        output.scale_id = a.scale_id;
-        break;
-      case ynn_reduce_max:
-      case ynn_reduce_min:
-      case ynn_reduce_min_max:
-        output.zero_point_id = a.zero_point_id;
-        output.scale_id = a.scale_id;
-        break;
-      default:
-        YNN_UNREACHABLE;
-    }
-
-    *output_id = output.id;
-  }
-
-  // Propagate shape
-  ynn_value& output = subgraph->value(*output_id);
-  output.extents = a.extents;
-  for (int i = static_cast<int>(output.extents.size()) - 1; i >= 0; --i) {
-    if (reduce.k_dims[i]) {
-      if (reduce.keep_dims) {
-        output.extents[i] = {};
-      } else {
-        output.extents.erase(output.extents.begin() + i);
-      }
-    }
-  }
-
-  if (op == ynn_reduce_min_max) {
-    // This reduction adds a dimension for the min/max index.
-    output.extents.push_back(2);
-  }
-
-  if (input_b_id == YNN_INVALID_VALUE_ID) {
-    input_b_id = get_reduce_identity_value(subgraph, output, op);
-  }
+void define_reduce(ynn_subgraph& subgraph, ynn_node& node,
+                   ynn_reduce_operator op, const ynn::axes_set& k_dims,
+                   uint32_t input_a_id, uint32_t input_b_id, uint32_t output_id,
+                   bool keep_dims) {
+  assert(subgraph.is_valid_value(input_a_id));
+  assert(subgraph.is_valid_value(output_id));
+  const ynn_value& a = subgraph.value(input_a_id);
+  const ynn_value& output = subgraph.value(output_id);
 
   // Get the reduce kernel we are going to use.
   unary_reduce_kernel_fn kernel = get_reduce_kernel(op, a.type, output.type);
   assert(kernel);
 
-  // Make the node.
-  ynn_node node;
   node.inputs = {input_a_id, input_b_id};
-  node.outputs = {*output_id};
-  node.op = std::move(reduce);
+  node.outputs = {output_id};
+  node.op = ynn_node::reduce{k_dims, op, keep_dims};
 
   node.create = [kernel](const ynn_node& node, ynn_runtime& runtime) {
     const ynn_node::reduce& op = std::get<ynn_node::reduce>(node.op);
@@ -404,6 +337,86 @@ ynn_status ynn_define_reduce(ynn_subgraph_t subgraph,
     runtime.funcs.push_back(std::move(func));
     return ynn_status_success;
   };
+}
+
+extern "C" {
+
+ynn_status ynn_define_reduce(ynn_subgraph_t subgraph,
+                             enum ynn_reduce_operator op, size_t num_axes,
+                             const int32_t* axes, uint32_t input_a_id,
+                             uint32_t input_b_id, uint32_t* output_id,
+                             uint32_t flags) {
+  // Validate arguments.
+  assert(subgraph);
+  assert(subgraph->is_valid_value(input_a_id));
+  const ynn_value& a = subgraph->value(input_a_id);
+
+  ynn::axes_set k_dims;
+  for (size_t i = 0; i < num_axes; ++i) {
+    k_dims[axis_to_slinky_dim(a.rank(), axes[i])] = true;
+  }
+  bool keep_dims = flags & YNN_NODE_FLAG_KEEP_DIMS;
+
+  assert(output_id);
+  if (*output_id == YNN_INVALID_VALUE_ID) {
+    // Make the output for this reduction.
+    ynn_type output_type = get_accumulator_type(op, a.type);
+    ynn_value& output = subgraph->new_internal_value(output_type);
+    uint32_t reduce_size_id = YNN_INVALID_VALUE_ID;
+    switch (op) {
+      case ynn_reduce_sum:
+      case ynn_reduce_sum_squared:
+        if (a.zero_point_id != YNN_INVALID_VALUE_ID) {
+          // When computing a sum, the zero point gets multiplied by the number
+          // of elements in the reduction.
+          ynn_define_get_tensor_shape(subgraph, num_axes, axes, ynn_type_int32,
+                                      /*rank=*/0, input_a_id, &reduce_size_id,
+                                      /*flags=*/YNN_NODE_FLAG_RESHAPE_1D);
+          ynn_define_binary(subgraph, ynn_binary_multiply, a.zero_point_id,
+                            reduce_size_id, &output.zero_point_id,
+                            /*flags=*/0);
+        }
+        output.scale_id = a.scale_id;
+        break;
+      case ynn_reduce_max:
+      case ynn_reduce_min:
+      case ynn_reduce_min_max:
+        output.zero_point_id = a.zero_point_id;
+        output.scale_id = a.scale_id;
+        break;
+      default:
+        YNN_UNREACHABLE;
+    }
+
+    *output_id = output.id;
+  }
+
+  // Propagate shape
+  ynn_value& output = subgraph->value(*output_id);
+  output.extents = a.extents;
+  for (int i = static_cast<int>(output.extents.size()) - 1; i >= 0; --i) {
+    if (k_dims[i]) {
+      if (keep_dims) {
+        output.extents[i] = {};
+      } else {
+        output.extents.erase(output.extents.begin() + i);
+      }
+    }
+  }
+
+  if (op == ynn_reduce_min_max) {
+    // This reduction adds a dimension for the min/max index.
+    output.extents.push_back(2);
+  }
+
+  if (input_b_id == YNN_INVALID_VALUE_ID) {
+    input_b_id = get_reduce_identity_value(subgraph, output, op);
+  }
+
+  // Make the node.
+  ynn_node node;
+  define_reduce(*subgraph, node, op, k_dims, input_a_id, input_b_id, *output_id,
+                keep_dims);
   subgraph->add_node(std::move(node));
   return ynn_status_success;
 }

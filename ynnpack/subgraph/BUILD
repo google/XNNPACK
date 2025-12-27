@@ -60,6 +60,7 @@ cc_library(
         "fusion.cc",
         "get_tensor_shape.cc",
         "reduce.cc",
+        "reduce.h",
         "runtime.cc",
         "slinky.cc",
         "stack.cc",
