@@ -64,7 +64,7 @@ static void GEMMBenchmark(
                                nr * sizeof(float), /*params=*/nullptr);
   xnnpack::Buffer<float> c(c_elements * num_buffers);
 
-  xnn_f32_qc4w_minmax_params params;
+  xnn_f32_minmax_params params;
   init_params(&params, -std::numeric_limits<float>::infinity(),
               +std::numeric_limits<float>::infinity(), 0);
 

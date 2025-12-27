@@ -108,6 +108,7 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_1x8c8__avx256vnni_prfm(
 
     __m256 vout0x01234567 = _mm256_cvtepi32_ps(vacc0x01234567);
 
+
     vout0x01234567 = _mm256_mul_ps(vout0x01234567, _mm256_set1_ps(quantization_params[0].inv_scale));
 
     const __m256 vfilter_output_scale01234567 = _mm256_load_ps((const float*) w);
