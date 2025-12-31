@@ -186,7 +186,7 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c
       size_t k = kc;
     $if DATATYPE in ["QC2_F32"]:
 
-      ${_}// 4x partial unrolled loop to load 8 bytes at a time.
+      ${_}// 4x partial unrolled loop to load 16 bytes at a time.
       ${_}while (k >= 16 * sizeof(int8_t)) {
         ${_}// Load a ${MR}x16 block of activations.
         $for M in range(MR):

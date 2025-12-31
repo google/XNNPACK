@@ -71,7 +71,7 @@ void xnn_qd8_f32_qc2w_gemm_minmax_ukernel_2x8c4__neondot(
     // Inner accumulation loop along the 8 columns.
     size_t k = kc;
 
-    // 4x partial unrolled loop to load 8 bytes at a time.
+    // 4x partial unrolled loop to load 16 bytes at a time.
     while (k >= 16 * sizeof(int8_t)) {
       // Load a 2x16 block of activations.
       const int8x16_t va_0x16 = vld1q_s8(a0); a0 += 16;
