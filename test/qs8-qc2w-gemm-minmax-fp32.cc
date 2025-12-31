@@ -333,8 +333,8 @@ std::vector<GemmTestParams> CreateTests1(
 INSTANTIATE_TEST_SUITE_P(
     QS8_QC2W_GEMM_MINMAX_FP32_1X2__SCALAR_LRINTF, GemmTest,
     testing::ValuesIn(CreateTests1(
-        /*k_block=*/2,
-        /*adj_k_block=*/2,
+        /*k_block=*/4,
+        /*adj_k_block=*/4,
         /*mr=*/1, /*nr=*/2, /*kr=*/1, /*sr=*/1,
         /*is_igemm=*/false,
         /*unsigned_inputs=*/false,
@@ -354,8 +354,8 @@ INSTANTIATE_TEST_SUITE_P(
 INSTANTIATE_TEST_SUITE_P(
     QS8_QC2W_GEMM_MINMAX_FP32_1X2__SCALAR_FMAGIC, GemmTest,
     testing::ValuesIn(CreateTests1(
-        /*k_block=*/2,
-        /*adj_k_block=*/2,
+        /*k_block=*/4,
+        /*adj_k_block=*/4,
         /*mr=*/1, /*nr=*/2, /*kr=*/1, /*sr=*/1,
         /*is_igemm=*/false,
         /*unsigned_inputs=*/false,
@@ -375,8 +375,8 @@ INSTANTIATE_TEST_SUITE_P(
 INSTANTIATE_TEST_SUITE_P(
     QS8_QC2W_GEMM_MINMAX_FP32_1X4__SCALAR_FMAGIC, GemmTest,
     testing::ValuesIn(CreateTests1(
-        /*k_block=*/2,
-        /*adj_k_block=*/2,
+        /*k_block=*/4,
+        /*adj_k_block=*/4,
         /*mr=*/1, /*nr=*/4, /*kr=*/1, /*sr=*/1,
         /*is_igemm=*/false,
         /*unsigned_inputs=*/false,
@@ -396,8 +396,8 @@ INSTANTIATE_TEST_SUITE_P(
 INSTANTIATE_TEST_SUITE_P(
     QS8_QC2W_GEMM_MINMAX_FP32_2X4__SCALAR_FMAGIC, GemmTest,
     testing::ValuesIn(CreateTests1(
-        /*k_block=*/2,
-        /*adj_k_block=*/2,
+        /*k_block=*/4,
+        /*adj_k_block=*/4,
         /*mr=*/2, /*nr=*/4, /*kr=*/1, /*sr=*/1,
         /*is_igemm=*/false,
         /*unsigned_inputs=*/false,
@@ -417,8 +417,8 @@ INSTANTIATE_TEST_SUITE_P(
 INSTANTIATE_TEST_SUITE_P(
     QS8_QC2W_GEMM_MINMAX_FP32_3X4__SCALAR_FMAGIC, GemmTest,
     testing::ValuesIn(CreateTests1(
-        /*k_block=*/2,
-        /*adj_k_block=*/2,
+        /*k_block=*/4,
+        /*adj_k_block=*/4,
         /*mr=*/3, /*nr=*/4, /*kr=*/1, /*sr=*/1,
         /*is_igemm=*/false,
         /*unsigned_inputs=*/false,
@@ -438,8 +438,8 @@ INSTANTIATE_TEST_SUITE_P(
 INSTANTIATE_TEST_SUITE_P(
     QS8_QC2W_GEMM_MINMAX_FP32_4X4__SCALAR_FMAGIC, GemmTest,
     testing::ValuesIn(CreateTests1(
-        /*k_block=*/2,
-        /*adj_k_block=*/2,
+        /*k_block=*/4,
+        /*adj_k_block=*/4,
         /*mr=*/4, /*nr=*/4, /*kr=*/1, /*sr=*/1,
         /*is_igemm=*/false,
         /*unsigned_inputs=*/false,
