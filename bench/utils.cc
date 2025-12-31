@@ -17,6 +17,10 @@
 
 #include "include/experimental.h"
 
+#if defined(__APPLE__)
+#include <sys/types.h>
+#include <sys/sysctl.h>
+#endif
 #ifdef __linux__
 #include <sched.h>
 #else
@@ -319,6 +323,24 @@ uint64_t GetCurrentCpuFrequency() {
   HAP_power_response_t response = {.type = HAP_power_get_clk_Freq};
   if (HAP_power_get(NULL, &response) == AEE_SUCCESS) {
     return static_cast<uint64_t>(response.clkFreqHz);
+  }
+#elif defined(__APPLE__)
+  uint64_t freq = 0;
+  size_t freq_len = sizeof(freq);
+
+  // On x86 return hw.cpufrequency
+  if (sysctlbyname("hw.cpufrequency", &freq, &freq_len, NULL, 0) >= 0) {
+    return freq;
+  }
+  // Retrieve the time base frequency (e.g., 24,000,000 Hz on M1/M2/M3/M4)
+  if (sysctlbyname("hw.tbfrequency", &freq, &freq_len, NULL, 0) >= 0) {
+    struct clockinfo clockrate;
+    size_t clock_len = sizeof(clockrate);
+    // Retrieve kernel clock information, including the 'hz' (system clock rate)
+    if (sysctlbyname("kern.clockrate", &clockrate, &clock_len, NULL, 0) >= 0) {
+      // Typical calculation used in some system monitoring tools
+      return freq * clockrate.hz;
+    }
   }
 #endif
   return 0;
