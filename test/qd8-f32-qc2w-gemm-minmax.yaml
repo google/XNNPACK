@@ -4,22 +4,53 @@
 # LICENSE file in the root directory of this source tree.
 
 # ARM NEONDOT
-- name: xnn_qd8_f32_qc2w_gemm_minmax_ukernel_1x16c4__neondot
-  init: xnn_init_f32_minmax_scalar_params
-  pack: xnn_pack_qd8_qc2w_gemm_goi_w
-  k-block: 16
-  planes: 4
 - name: xnn_qd8_f32_qc2w_gemm_minmax_ukernel_1x8c4__neondot
   init: xnn_init_f32_minmax_scalar_params
   pack: xnn_pack_qd8_qc2w_gemm_goi_w
   k-block: 16
   planes: 4
-- name: xnn_qd8_f32_qc2w_gemm_minmax_ukernel_2x16c4__neondot
+- name: xnn_qd8_f32_qc2w_gemm_minmax_ukernel_2x8c4__neondot
   init: xnn_init_f32_minmax_scalar_params
   pack: xnn_pack_qd8_qc2w_gemm_goi_w
   k-block: 16
   planes: 4
-- name: xnn_qd8_f32_qc2w_gemm_minmax_ukernel_2x8c4__neondot
+- name: xnn_qd8_f32_qc2w_gemm_minmax_ukernel_3x8c4__neondot
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_qd8_qc2w_gemm_goi_w
+  k-block: 16
+  planes: 4
+- name: xnn_qd8_f32_qc2w_gemm_minmax_ukernel_4x8c4__neondot
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_qd8_qc2w_gemm_goi_w
+  k-block: 16
+  planes: 4
+- name: xnn_qd8_f32_qc2w_gemm_minmax_ukernel_5x8c4__neondot
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_qd8_qc2w_gemm_goi_w
+  k-block: 16
+  planes: 4
+- name: xnn_qd8_f32_qc2w_gemm_minmax_ukernel_6x8c4__neondot
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_qd8_qc2w_gemm_goi_w
+  k-block: 16
+  planes: 4
+- name: xnn_qd8_f32_qc2w_gemm_minmax_ukernel_7x8c4__neondot
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_qd8_qc2w_gemm_goi_w
+  k-block: 16
+  planes: 4
+- name: xnn_qd8_f32_qc2w_gemm_minmax_ukernel_8x8c4__neondot
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_qd8_qc2w_gemm_goi_w
+  k-block: 16
+  planes: 4
+
+- name: xnn_qd8_f32_qc2w_gemm_minmax_ukernel_1x16c4__neondot
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_qd8_qc2w_gemm_goi_w
+  k-block: 16
+  planes: 4
+- name: xnn_qd8_f32_qc2w_gemm_minmax_ukernel_2x16c4__neondot
   init: xnn_init_f32_minmax_scalar_params
   pack: xnn_pack_qd8_qc2w_gemm_goi_w
   k-block: 16
@@ -34,7 +65,7 @@
   pack: xnn_pack_qd8_qc2w_gemm_goi_w
   k-block: 16
   planes: 4
-- name: xnn_qd8_f32_qc2w_gemm_minmax_ukernel_4x8c4__neondot
+- name: xnn_qd8_f32_qc2w_gemm_minmax_ukernel_5x16c4__neondot
   init: xnn_init_f32_minmax_scalar_params
   pack: xnn_pack_qd8_qc2w_gemm_goi_w
   k-block: 16
@@ -44,7 +75,12 @@
   pack: xnn_pack_qd8_qc2w_gemm_goi_w
   k-block: 16
   planes: 4
-- name: xnn_qd8_f32_qc2w_gemm_minmax_ukernel_6x8c4__neondot
+- name: xnn_qd8_f32_qc2w_gemm_minmax_ukernel_7x16c4__neondot
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_qd8_qc2w_gemm_goi_w
+  k-block: 16
+  planes: 4
+- name: xnn_qd8_f32_qc2w_gemm_minmax_ukernel_8x16c4__neondot
   init: xnn_init_f32_minmax_scalar_params
   pack: xnn_pack_qd8_qc2w_gemm_goi_w
   k-block: 16

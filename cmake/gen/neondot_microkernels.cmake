@@ -12,8 +12,9 @@
 SET(PROD_NEONDOT_MICROKERNEL_SRCS
   src/qd8-f32-qb4w-gemm/gen/qd8-f32-qb4w-gemm-1x16c4-minmax-neondot.c
   src/qd8-f32-qb4w-gemm/gen/qd8-f32-qb4w-gemm-4x16c4-minmax-neondot.c
-  src/qd8-f32-qc2w-gemm/gen/qd8-f32-qc2w-gemm-1x16c4-minmax-neondot.c
-  src/qd8-f32-qc2w-gemm/gen/qd8-f32-qc2w-gemm-4x16c4-minmax-neondot.c
+  src/qd8-f32-qc2w-gemm/gen/qd8-f32-qc2w-gemm-1x8c4-minmax-neondot.c
+  src/qd8-f32-qc2w-gemm/gen/qd8-f32-qc2w-gemm-4x8c4-minmax-neondot.c
+  src/qd8-f32-qc2w-gemm/gen/qd8-f32-qc2w-gemm-8x8c4-minmax-neondot.c
   src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-1x16c4-minmax-neondot.c
   src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-4x16c4-minmax-neondot.c
   src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-1x8c4-minmax-neondot.c
@@ -45,13 +46,19 @@ SET(NON_PROD_NEONDOT_MICROKERNEL_SRCS
   src/qd8-f32-qb4w-gemm/gen/qd8-f32-qb4w-gemm-5x16c4-minmax-neondot.c
   src/qd8-f32-qb4w-gemm/gen/qd8-f32-qb4w-gemm-6x8c4-minmax-neondot.c
   src/qd8-f32-qb4w-gemm/gen/qd8-f32-qb4w-gemm-6x16c4-minmax-neondot.c
-  src/qd8-f32-qc2w-gemm/gen/qd8-f32-qc2w-gemm-1x8c4-minmax-neondot.c
+  src/qd8-f32-qc2w-gemm/gen/qd8-f32-qc2w-gemm-1x16c4-minmax-neondot.c
   src/qd8-f32-qc2w-gemm/gen/qd8-f32-qc2w-gemm-2x8c4-minmax-neondot.c
   src/qd8-f32-qc2w-gemm/gen/qd8-f32-qc2w-gemm-2x16c4-minmax-neondot.c
+  src/qd8-f32-qc2w-gemm/gen/qd8-f32-qc2w-gemm-3x8c4-minmax-neondot.c
   src/qd8-f32-qc2w-gemm/gen/qd8-f32-qc2w-gemm-3x16c4-minmax-neondot.c
-  src/qd8-f32-qc2w-gemm/gen/qd8-f32-qc2w-gemm-4x8c4-minmax-neondot.c
+  src/qd8-f32-qc2w-gemm/gen/qd8-f32-qc2w-gemm-4x16c4-minmax-neondot.c
+  src/qd8-f32-qc2w-gemm/gen/qd8-f32-qc2w-gemm-5x8c4-minmax-neondot.c
+  src/qd8-f32-qc2w-gemm/gen/qd8-f32-qc2w-gemm-5x16c4-minmax-neondot.c
   src/qd8-f32-qc2w-gemm/gen/qd8-f32-qc2w-gemm-6x8c4-minmax-neondot.c
   src/qd8-f32-qc2w-gemm/gen/qd8-f32-qc2w-gemm-6x16c4-minmax-neondot.c
+  src/qd8-f32-qc2w-gemm/gen/qd8-f32-qc2w-gemm-7x8c4-minmax-neondot.c
+  src/qd8-f32-qc2w-gemm/gen/qd8-f32-qc2w-gemm-7x16c4-minmax-neondot.c
+  src/qd8-f32-qc2w-gemm/gen/qd8-f32-qc2w-gemm-8x16c4-minmax-neondot.c
   src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-1x8c4-minmax-neondot.c
   src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-2x8c4-minmax-neondot.c
   src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-2x16c4-minmax-neondot.c
