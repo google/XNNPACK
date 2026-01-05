@@ -75,9 +75,9 @@ def exp_fp32(a, x):
 @operator_name("erf")
 def erf_fp32(a, x):
   # Cap the inputs to this value as `erf(x)` will always be `+/-1.0f`
-  # beyond this point. This value is chosen as the first floating point
+  # beyond this point. This value is chosen roughly as the first floating point
   # number as of which the interpolation returns +/-1.0f.
-  vmax_abs_x = 3.65137805943
+  vmax_abs_x = 3.8
 
   # The monomial coefficients of the numerator polynomial (`valpha_0` = 0.0).
   valpha_1 = 1.1283791149e00
