@@ -66,6 +66,9 @@ ynn_status define_binary_with_broadcasting(
 ynn_status implement_gelu(ynn_subgraph_t subgraph, uint32_t input_id,
                           uint32_t output_id);
 
+ynn_status implement_leaky_relu(ynn_subgraph_t subgraph, uint32_t input_id,
+                                uint32_t output_id, float alpha);
+
 // Make a clamp operation.
 ynn_status define_clamp(ynn_subgraph_t subgraph, float min, float max,
                         uint32_t input_id, uint32_t* output_id);

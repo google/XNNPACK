@@ -319,9 +319,7 @@ struct ynn_subgraph {
   }
 
   // Returns a newly allocated internal value.
-  ynn_value& new_internal_value();
-  ynn_value& new_internal_value(ynn_type type);
-  ynn_value& new_internal_value(const ynn_value& template_value);
+  ynn_value& new_internal_value(ynn_type type = ynn_type_invalid);
   void add_node(ynn_node node);
 
   // Find the node that produces `id`.
@@ -333,6 +331,8 @@ struct ynn_subgraph {
   ynn_value& get_output_value(uint32_t* output_id,
                               const ynn_value& template_value);
   ynn_value& get_output_value(uint32_t* output_id, ynn_type type);
+  ynn_value& get_output_value(uint32_t* output_id, ynn_type type,
+                              uint32_t zero_point_id, uint32_t scale_id);
 
   // Get a scalar value of the given type and quantization parameters.
   uint32_t get_scalar_value_id(ynn_type type, uint32_t zero_point_id,

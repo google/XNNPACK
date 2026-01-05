@@ -145,9 +145,8 @@ xnn_status xnn_define_unary(xnn_subgraph_t subgraph, xnn_unary_operator type,
     }
   }
   if (type == xnn_unary_leaky_relu) {
-    return ynn::xnn_status_from_ynn(ynn::define_binary_scalar_b(
-        subgraph->ynn, ynn_binary_leaky_relu, input_id,
-        params->leaky_relu.negative_slope, &output_id));
+    return ynn::xnn_status_from_ynn(ynn::implement_leaky_relu(
+        subgraph->ynn, input_id, output_id, params->leaky_relu.negative_slope));
   } else if (type == xnn_unary_clamp) {
     return ynn::xnn_status_from_ynn(
         ynn::define_clamp(subgraph->ynn, params->clamp.min, params->clamp.max,

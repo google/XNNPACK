@@ -312,8 +312,8 @@ const xnn_unary_operator all_real_ops[] = {
     xnn_unary_gelu,
 #ifndef XNNPACK_USE_YNNPACK
     xnn_unary_hardswish,
-    xnn_unary_leaky_relu,  // b/471308199
 #endif
+    xnn_unary_leaky_relu,
     xnn_unary_log,
     xnn_unary_negate,
     xnn_unary_sigmoid,

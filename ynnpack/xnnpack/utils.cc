@@ -354,17 +354,9 @@ ynn_status convert_to(ynn_subgraph_t subgraph, uint32_t* value_id,
   }
 
   uint32_t converted_id = YNN_INVALID_VALUE_ID;
-  ynn_status status =
-      ynn_define_tensor_value(subgraph, type, /*rank=*/0,
-                              /*dims=*/nullptr, /*data=*/nullptr,
-                              /*zero_point_id=*/YNN_INVALID_VALUE_ID,
-                              /*scale_id=*/YNN_INVALID_VALUE_ID,
-                              /*flags=*/0, &converted_id);
-  if (status != ynn_status_success) {
-    return status;
-  }
-  status = ynn_define_unary(subgraph, ynn_unary_convert, *value_id,
-                            &converted_id, /*flags=*/0);
+  ynn_status status = ynn_define_convert(
+      subgraph, *value_id, type, /*zero_point_id=*/YNN_INVALID_VALUE_ID,
+      /*scale_id=*/YNN_INVALID_VALUE_ID, &converted_id, /*lags=*/0);
   *value_id = converted_id;
   return status;
 }
@@ -432,16 +424,10 @@ ynn_status define_convert_uint8_to_int8(ynn_subgraph_t subgraph,
   }
 
   uint32_t input_int8_id = YNN_INVALID_VALUE_ID;
-  status = ynn_define_tensor_value(
-      subgraph, ynn_type_int8, /*rank=*/0, /*dims=*/nullptr, /*data=*/nullptr,
-      zero_point_id, input.scale_id, /*flags=*/0, &input_int8_id);
-  if (status != ynn_status_success) return status;
-
-  status = ynn_define_unary(subgraph, ynn_unary_convert, *input_id,
-                            &input_int8_id, /*flags=*/0);
-  if (status != ynn_status_success) return status;
+  status = ynn_define_convert(subgraph, *input_id, ynn_type_int8, zero_point_id,
+                              input.scale_id, &input_int8_id, /*flags=*/0);
   *input_id = input_int8_id;
-  return ynn_status_success;
+  return status;
 }
 
 }  // namespace
@@ -497,16 +483,10 @@ ynn_status define_xnn_dot_quantized(ynn_subgraph_t subgraph, size_t num_k_dims,
     // accumulator_id.
     if (type_is_integral(type_of_value(subgraph, accumulator_id))) {
       uint32_t float_val_id = YNN_INVALID_VALUE_ID;
-      status = ynn_define_tensor_value(subgraph, ynn_type_fp32,
-                                       rank_of_value(subgraph, accumulator_id),
-                                       /*dims=*/nullptr, /*data=*/nullptr,
-                                       /*zero_point_id=*/YNN_INVALID_VALUE_ID,
-                                       /*scale_id=*/YNN_INVALID_VALUE_ID,
-                                       /*flags=*/0, &float_val_id);
-      if (status != ynn_status_success) return status;
-
-      status = ynn_define_unary(subgraph, ynn_unary_convert, accumulator_id,
-                                &float_val_id, /*flags=*/0);
+      status = ynn_define_convert(subgraph, accumulator_id, ynn_type_fp32,
+                                  /*zero_point_id=*/YNN_INVALID_VALUE_ID,
+                                  /*scale_id=*/YNN_INVALID_VALUE_ID,
+                                  &float_val_id, /*flags=*/0);
       if (status != ynn_status_success) return status;
 
       dot_result_as_float_id = float_val_id;
@@ -642,16 +622,10 @@ ynn_status implement_gelu(ynn_subgraph_t subgraph, uint32_t input_id,
     // Convert quantized inputs to float. We'll just convert this whole subgraph
     // into a LUT anyways.
     uint32_t input_float_id = YNN_INVALID_VALUE_ID;
-    ynn_status status = ynn_define_tensor_value(
-        subgraph, ynn_type_fp32, rank_of_value(subgraph, input_id),
-        /*dims=*/nullptr, /*data=*/nullptr,
+    ynn_status status = ynn_define_convert(
+        subgraph, input_id, ynn_type_fp32,
         /*zero_point_id=*/YNN_INVALID_VALUE_ID,
-        /*scale_id=*/YNN_INVALID_VALUE_ID, /*flags=*/0, &input_float_id);
-    if (status != ynn_status_success) {
-      return status;
-    }
-    status = ynn_define_unary(subgraph, ynn_unary_convert, input_id,
-                              &input_float_id, /*flags=*/0);
+        /*scale_id=*/YNN_INVALID_VALUE_ID, &input_float_id, /*flags=*/0);
     if (status != ynn_status_success) {
       return status;
     }
@@ -709,6 +683,35 @@ ynn_status implement_gelu(ynn_subgraph_t subgraph, uint32_t input_id,
     }
   }
   return ynn_status_success;
+}
+
+ynn_status implement_leaky_relu(ynn_subgraph_t subgraph, uint32_t input_id,
+                                uint32_t output_id, float alpha) {
+  if (ynn::type_is_integral(ynn::type_of_value(subgraph, output_id))) {
+    uint32_t input_dequantized_id = YNN_INVALID_VALUE_ID;
+    ynn_status status = ynn_define_convert(
+        subgraph, input_id, ynn_type_fp32,
+        /*zero_point_id=*/YNN_INVALID_VALUE_ID,
+        /*scale_id=*/YNN_INVALID_VALUE_ID, &input_dequantized_id,
+        /*flags=*/0);
+    if (status != ynn_status_success) {
+      return status;
+    }
+
+    uint32_t output_dequantized_id = YNN_INVALID_VALUE_ID;
+    status = define_binary_scalar_b(subgraph, ynn_binary_leaky_relu,
+                                    input_dequantized_id, alpha,
+                                    &output_dequantized_id);
+    if (status != ynn_status_success) {
+      return status;
+    }
+
+    return ynn_define_unary(subgraph, ynn_unary_convert, output_dequantized_id,
+                            &output_id, /*flags=*/0);
+  } else {
+    return define_binary_scalar_b(subgraph, ynn_binary_leaky_relu, input_id,
+                                  alpha, &output_id);
+  }
 }
 
 ynn_status define_clamp(ynn_subgraph_t subgraph, float min, float max,

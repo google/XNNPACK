@@ -29,14 +29,11 @@ ynn_status ynn_define_even_split(ynn_subgraph_t subgraph, int32_t axis,
   // Validate arguments.
   assert(subgraph);
   assert(subgraph->is_valid_value(input_id));
+  const ynn_value& input = subgraph->value(input_id);
   for (size_t i = 0; i < num_outputs; ++i) {
-    if (output_ids[i] == YNN_INVALID_VALUE_ID) {
-      output_ids[i] =
-          subgraph->new_internal_value(subgraph->value(input_id)).id;
-    }
+    subgraph->get_output_value(&output_ids[i], input);
   }
 
-  const ynn_value& input = subgraph->value(input_id);
   axis = ynn::axis_to_slinky_dim(input.rank(), axis);
 
   ynn_node node;

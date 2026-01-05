@@ -563,6 +563,19 @@ ynn_status ynn_define_unary(ynn_subgraph_t subgraph, ynn_unary_operator op,
   return ynn_status_success;
 }
 
+ynn_status ynn_define_convert(ynn_subgraph_t subgraph, uint32_t input_id,
+                              ynn_type output_type, uint32_t zero_point_id,
+                              uint32_t scale_id, uint32_t* output_id,
+                              uint32_t flags) {
+  // Validate arguments.
+  assert(subgraph);
+  assert(subgraph->is_valid_value(input_id));
+  assert(output_id);
+  subgraph->get_output_value(output_id, output_type, zero_point_id, scale_id);
+  return ynn_define_unary(subgraph, ynn_unary_convert, input_id, output_id,
+                          flags);
+}
+
 ynn_status ynn_define_binary(ynn_subgraph_t subgraph, ynn_binary_operator op,
                              uint32_t input_a_id, uint32_t input_b_id,
                              uint32_t* output_id, uint32_t flags) {

@@ -137,29 +137,25 @@ ynn_subgraph::ynn_subgraph(uint32_t external_value_ids, uint32_t flags)
   }
 }
 
-ynn_value& ynn_subgraph::new_internal_value() {
-  values.push_back(ynn_value(values.size()));
-  return values.back();
-}
-
 ynn_value& ynn_subgraph::new_internal_value(ynn_type type) {
-  ynn_value& value = new_internal_value();
+  ynn_value value;
+  value.id = values.size();
   value.type = type;
-  return value;
-}
-
-ynn_value& ynn_subgraph::new_internal_value(const ynn_value& template_value) {
-  ynn_value& value = new_internal_value();
-  value.type = template_value.type;
-  value.scale_id = template_value.scale_id;
-  value.zero_point_id = template_value.zero_point_id;
-  return value;
+  values.push_back(std::move(value));
+  return values.back();
 }
 
 ynn_value& ynn_subgraph::get_output_value(uint32_t* output_id,
                                           const ynn_value& template_value) {
+  return get_output_value(output_id, template_value.type,
+                          template_value.zero_point_id,
+                          template_value.scale_id);
+}
+
+ynn_value& ynn_subgraph::get_output_value(uint32_t* output_id, ynn_type type) {
   if (*output_id == YNN_INVALID_VALUE_ID) {
-    ynn_value& new_output = new_internal_value(template_value);
+    ynn_value& new_output = new_internal_value();
+    new_output.type = type;
     *output_id = new_output.id;
     return new_output;
   } else {
@@ -167,9 +163,14 @@ ynn_value& ynn_subgraph::get_output_value(uint32_t* output_id,
   }
 }
 
-ynn_value& ynn_subgraph::get_output_value(uint32_t* output_id, ynn_type type) {
+ynn_value& ynn_subgraph::get_output_value(uint32_t* output_id, ynn_type type,
+                                          uint32_t zero_point_id,
+                                          uint32_t scale_id) {
   if (*output_id == YNN_INVALID_VALUE_ID) {
-    ynn_value& new_output = new_internal_value(type);
+    ynn_value& new_output = new_internal_value();
+    new_output.type = type;
+    new_output.zero_point_id = zero_point_id;
+    new_output.scale_id = scale_id;
     *output_id = new_output.id;
     return new_output;
   } else {
