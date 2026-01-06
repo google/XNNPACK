@@ -196,12 +196,10 @@ void xnn_qd8_f32_qc2w_gemm_minmax_ukernel_2x16c4__neondot(
 
         k -= 8 * sizeof(int8_t);
 
-        if XNN_UNLIKELY(k > 0) {
-          vb0123x16 = vshrq_n_s8(vb0123x16, 4);
-          vb4567x16 = vshrq_n_s8(vb4567x16, 4);
-          vb89ABx16 = vshrq_n_s8(vb89ABx16, 4);
-          vbCDEFx16 = vshrq_n_s8(vbCDEFx16, 4);
-        }
+        vb0123x16 = vshrq_n_s8(vb0123x16, 4);
+        vb4567x16 = vshrq_n_s8(vb4567x16, 4);
+        vb89ABx16 = vshrq_n_s8(vb89ABx16, 4);
+        vbCDEFx16 = vshrq_n_s8(vbCDEFx16, 4);
       }
 
       // Handle up to 4 final positions of `k`.

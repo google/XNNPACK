@@ -282,10 +282,8 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c
 
           ${_}k -= 8 * sizeof(int8_t);
 
-          ${_}if XNN_UNLIKELY(k > 0) {
-            $for N in range(0, NR, 4):
-              ${_}vb${ABC[N:N+4]}x16 = vshrq_n_s8(vb${ABC[N:N+4]}x16, 4);
-          ${_}}
+          $for N in range(0, NR, 4):
+            ${_}vb${ABC[N:N+4]}x16 = vshrq_n_s8(vb${ABC[N:N+4]}x16, 4);
         ${_}}
 
         ${_}// Handle up to 4 final positions of `k`.

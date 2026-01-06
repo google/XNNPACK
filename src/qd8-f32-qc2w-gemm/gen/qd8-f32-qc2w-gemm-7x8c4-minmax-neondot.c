@@ -285,10 +285,8 @@ void xnn_qd8_f32_qc2w_gemm_minmax_ukernel_7x8c4__neondot(
 
         k -= 8 * sizeof(int8_t);
 
-        if XNN_UNLIKELY(k > 0) {
-          vb0123x16 = vshrq_n_s8(vb0123x16, 4);
-          vb4567x16 = vshrq_n_s8(vb4567x16, 4);
-        }
+        vb0123x16 = vshrq_n_s8(vb0123x16, 4);
+        vb4567x16 = vshrq_n_s8(vb4567x16, 4);
       }
 
       // Handle up to 4 final positions of `k`.
