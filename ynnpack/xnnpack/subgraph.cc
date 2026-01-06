@@ -152,7 +152,8 @@ xnn_status xnn_define_unary(xnn_subgraph_t subgraph, xnn_unary_operator type,
         ynn::define_clamp(subgraph->ynn, params->clamp.min, params->clamp.max,
                           input_id, &output_id));
   } else if (type == xnn_unary_elu) {
-    // return x < 0 ? alpha * expm1(x) : x;
+    return ynn::xnn_status_from_ynn(ynn::implement_elu(
+        subgraph->ynn, input_id, params->elu.alpha, output_id));
   } else if (type == xnn_unary_gelu) {
     return ynn::xnn_status_from_ynn(
         ynn::implement_gelu(subgraph->ynn, input_id, output_id));

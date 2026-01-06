@@ -304,9 +304,7 @@ const xnn_unary_operator all_real_ops[] = {
     xnn_unary_abs,
     xnn_unary_bankers_rounding,
     xnn_unary_ceiling,
-#ifndef XNNPACK_USE_YNNPACK
     xnn_unary_elu,
-#endif
     xnn_unary_exp,
     xnn_unary_floor,
     xnn_unary_gelu,

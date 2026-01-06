@@ -685,6 +685,81 @@ ynn_status implement_gelu(ynn_subgraph_t subgraph, uint32_t input_id,
   return ynn_status_success;
 }
 
+// Implements elu(x) = select(x < 0, alpha * expm1(x), x)
+ynn_status implement_elu(ynn_subgraph_t subgraph, uint32_t input_id,
+                         float alpha, uint32_t output_id) {
+  ynn_type input_type = type_of_value(subgraph, input_id);
+
+  if (ynn::type_is_integral(input_type)) {
+    // Convert quantized inputs to float. We'll just convert this whole subgraph
+    // into a LUT anyways.
+    uint32_t input_float_id = YNN_INVALID_VALUE_ID;
+    ynn_status status = ynn_define_tensor_value(
+        subgraph, ynn_type_fp32, rank_of_value(subgraph, input_id),
+        /*dims=*/nullptr, /*data=*/nullptr,
+        /*zero_point_id=*/YNN_INVALID_VALUE_ID,
+        /*scale_id=*/YNN_INVALID_VALUE_ID, /*flags=*/0, &input_float_id);
+    if (status != ynn_status_success) {
+      return status;
+    }
+    status = ynn_define_unary(subgraph, ynn_unary_convert, input_id,
+                              &input_float_id, /*flags=*/0);
+    if (status != ynn_status_success) {
+      return status;
+    }
+    input_id = input_float_id;
+  }
+
+  // We implement this using min/max instead:
+  //
+  // elu(x) = max(alpha*expm1(min(x, 0)), x)
+  //
+  // We currently don't have select, and this might actually be better than a
+  // select implementation, which would require a binary + ternary op, instead
+  // of two binary ops.
+  uint32_t min_x_0_id = YNN_INVALID_VALUE_ID;
+  ynn_status status = define_binary_scalar_b(subgraph, ynn_binary_min, input_id,
+                                             0.0f, &min_x_0_id);
+  if (status != ynn_status_success) {
+    return status;
+  }
+
+  uint32_t expm1_x_id = YNN_INVALID_VALUE_ID;
+  status = ynn_define_unary(subgraph, ynn_unary_expm1, min_x_0_id, &expm1_x_id,
+                            /*flags=*/0);
+  if (status != ynn_status_success) {
+    return status;
+  }
+
+  uint32_t alpha_times_expm1_x_id = YNN_INVALID_VALUE_ID;
+  status = define_binary_scalar_b(subgraph, ynn_binary_multiply, expm1_x_id,
+                                  alpha, &alpha_times_expm1_x_id);
+  if (status != ynn_status_success) {
+    return status;
+  }
+
+  uint32_t output_float_id = output_id;
+  if (ynn::type_is_integral(input_type)) {
+    output_float_id = YNN_INVALID_VALUE_ID;
+  }
+
+  status = ynn_define_binary(subgraph, ynn_binary_max, alpha_times_expm1_x_id,
+                             input_id, &output_float_id,
+                             /*flags=*/0);
+  if (status != ynn_status_success) {
+    return status;
+  }
+
+  if (ynn::type_is_integral(input_type)) {
+    status = ynn_define_unary(subgraph, ynn_unary_convert, output_float_id,
+                              &output_id, /*flags=*/0);
+    if (status != ynn_status_success) {
+      return status;
+    }
+  }
+  return ynn_status_success;
+}
+
 ynn_status implement_leaky_relu(ynn_subgraph_t subgraph, uint32_t input_id,
                                 uint32_t output_id, float alpha) {
   if (ynn::type_is_integral(ynn::type_of_value(subgraph, output_id))) {
