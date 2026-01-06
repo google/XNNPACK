@@ -2367,9 +2367,9 @@ static void init_qd8_f32_qc2w_gemm_config(void) {
             XNN_INIT_HMP_DQGEMM_UKERNEL(xnn_qd8_f32_qc2w_gemm_minmax_ukernel_8x8c4__neondot);
         qd8_f32_qc2w_gemm_config.mr = 8;
       #else
-        qd8_f32_qc2w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(4)] =
-            XNN_INIT_HMP_DQGEMM_UKERNEL(xnn_qd8_f32_qc2w_gemm_minmax_ukernel_4x8c4__neondot);
-        qd8_f32_qc2w_gemm_config.mr = 4;
+        qd8_f32_qc2w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(2)] =
+            XNN_INIT_HMP_DQGEMM_UKERNEL(xnn_qd8_f32_qc2w_gemm_minmax_ukernel_2x8c4__neondot);
+        qd8_f32_qc2w_gemm_config.mr = 2;
       #endif
       qd8_f32_qc2w_gemm_config.nr = 8;
       qd8_f32_qc2w_gemm_config.log2_kr = 2;
