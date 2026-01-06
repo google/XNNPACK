@@ -760,6 +760,74 @@ ynn_status implement_elu(ynn_subgraph_t subgraph, uint32_t input_id,
   return ynn_status_success;
 }
 
+ynn_status implement_hardswish(ynn_subgraph_t subgraph, uint32_t input_id,
+                               uint32_t output_id) {
+  ynn_type input_type = type_of_value(subgraph, input_id);
+
+  if (ynn::type_is_integral(input_type)) {
+    // Convert quantized inputs to float. We'll just convert this whole subgraph
+    // into a LUT anyways.
+    uint32_t input_float_id = YNN_INVALID_VALUE_ID;
+    ynn_status status = ynn_define_convert(
+        subgraph, input_id, ynn_type_fp32,
+        /*zero_point_id=*/YNN_INVALID_VALUE_ID,
+        /*scale_id=*/YNN_INVALID_VALUE_ID, &input_float_id, /*flags=*/0);
+    if (status != ynn_status_success) {
+      return status;
+    }
+    input_id = input_float_id;
+  }
+
+  uint32_t x_div_6_id = YNN_INVALID_VALUE_ID;
+  ynn_status status = define_binary_scalar_b(
+      subgraph, ynn_binary_multiply, input_id, 1.0f / 6.0f, &x_div_6_id);
+  if (status != ynn_status_success) {
+    return status;
+  }
+
+  uint32_t x_div_6_plus_0_5_id = YNN_INVALID_VALUE_ID;
+  status = define_binary_scalar_b(subgraph, ynn_binary_add, x_div_6_id, 0.5f,
+                                  &x_div_6_plus_0_5_id);
+  if (status != ynn_status_success) {
+    return status;
+  }
+
+  uint32_t max_id = YNN_INVALID_VALUE_ID;
+  status = define_binary_scalar_b(subgraph, ynn_binary_max, x_div_6_plus_0_5_id,
+                                  0.0f, &max_id);
+  if (status != ynn_status_success) {
+    return status;
+  }
+
+  uint32_t relu6_id = YNN_INVALID_VALUE_ID;
+  status =
+      define_binary_scalar_b(subgraph, ynn_binary_min, max_id, 1.0f, &relu6_id);
+  if (status != ynn_status_success) {
+    return status;
+  }
+
+  uint32_t output_float_id = output_id;
+  if (ynn::type_is_integral(input_type)) {
+    output_float_id = YNN_INVALID_VALUE_ID;
+  }
+
+  status = ynn_define_binary(subgraph, ynn_binary_multiply, input_id, relu6_id,
+                             &output_float_id,
+                             /*flags=*/0);
+  if (status != ynn_status_success) {
+    return status;
+  }
+
+  if (ynn::type_is_integral(input_type)) {
+    status = ynn_define_unary(subgraph, ynn_unary_convert, output_float_id,
+                              &output_id, /*flags=*/0);
+    if (status != ynn_status_success) {
+      return status;
+    }
+  }
+  return ynn_status_success;
+}
+
 ynn_status implement_leaky_relu(ynn_subgraph_t subgraph, uint32_t input_id,
                                 uint32_t output_id, float alpha) {
   if (ynn::type_is_integral(ynn::type_of_value(subgraph, output_id))) {

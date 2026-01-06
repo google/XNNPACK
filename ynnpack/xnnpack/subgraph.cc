@@ -157,6 +157,9 @@ xnn_status xnn_define_unary(xnn_subgraph_t subgraph, xnn_unary_operator type,
   } else if (type == xnn_unary_gelu) {
     return ynn::xnn_status_from_ynn(
         ynn::implement_gelu(subgraph->ynn, input_id, output_id));
+  } else if (type == xnn_unary_hardswish) {
+    return ynn::xnn_status_from_ynn(
+        ynn::implement_hardswish(subgraph->ynn, input_id, output_id));
   } else if (type == xnn_unary_approxgelu) {
     // return (x / 2) * (1 + tanh(sqrt(2.0 / pi) * x * (1 + 0.044715 * x *
     // x))));
