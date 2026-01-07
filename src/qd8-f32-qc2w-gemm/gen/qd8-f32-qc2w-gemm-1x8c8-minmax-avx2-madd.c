@@ -22,7 +22,7 @@
 #include "src/xnnpack/unaligned.h"
 
 
-void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x8c8__avx256skx_madd(
+void xnn_qd8_f32_qc2w_gemm_minmax_ukernel_1x8c8__avx2_madd(
     size_t mr,
     size_t nc,
     size_t kc,
@@ -32,7 +32,8 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x8c8__avx256skx_madd(
     float* restrict c,
     size_t cm_stride,
     size_t cn_stride,
-    const struct xnn_f32_qc4w_minmax_params* restrict params,
+    const struct xnn_f32_minmax_params* restrict params,
+    const float* row_sum,
     const struct xnn_qd8_quantization_params* restrict quantization_params) XNN_OOB_READS
 {
   assert(mr != 0);
@@ -53,8 +54,7 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x8c8__avx256skx_madd(
   const __m256 voutput_max = _mm256_set1_ps(params->scalar.max);
   // XNN_FORCE_REALIZATION(voutput_min);
   // XNN_FORCE_REALIZATION(voutput_max);
-  const __m256i vmask = _mm256_set1_epi8(0x0F);
-  XNN_FORCE_REALIZATION(vmask);
+  const __m256i vmask = _mm256_set1_epi8(0x03);
   do {
     const __m256i vksum01234567 = _mm256_load_si256(w);
     __m256i vsum0x01234567 = _mm256_mullo_epi32(vksum01234567, vinput_zero_point0);
@@ -63,6 +63,9 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x8c8__avx256skx_madd(
     __m256i vacc1x0x0123 = _mm256_setzero_si256();
     __m256i vacc1x0x4567 = _mm256_setzero_si256();
     w = (const int32_t*) w + 8;
+    // TODO: move kernel zero point after weights
+    const void* kzp = w;
+    w = (const float*)w + 16;
 
     size_t k = kc;
     while (k >= 16 * sizeof(int8_t)) {
@@ -70,6 +73,7 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x8c8__avx256skx_madd(
       const __m256i va0x89ABCDEF = _mm256_set1_epi64x((int64_t) unaligned_load_u64(a0 + 8));
       a0 += 16;
 
+      // 2 planes of 4 bit.  adapt to 4 planes or 2 at a time
       const __m256i vbb01234567x01234567 = _mm256_load_si256(w);
       const __m256i vbb89ABCDEFx01234567 = _mm256_load_si256((const __m256i*) ((const int8_t*) w + 32));
       const __m256i vbs01234567x4567 = _mm256_srli_epi32(vbb01234567x01234567, 4);
@@ -92,6 +96,7 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x8c8__avx256skx_madd(
       const __m256i va0x01234567 = _mm256_set1_epi64x((int64_t) unaligned_load_u64(a0));
       a0 += 8;
 
+      // 1 plane of 2 bit.
       const __m256i vbb01234567x01234567 = _mm256_load_si256(w);
       const __m256i vbb89ABCDEFx01234567 = _mm256_load_si256((const __m256i*) ((const int8_t*) w + 32));
       const __m256i vb01234567x0123 = _mm256_and_si256(vbb01234567x01234567, vmask);
@@ -103,6 +108,8 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x8c8__avx256skx_madd(
       w = (const int8_t*) w + 64;
       k -= 8 * sizeof(int8_t);
     }
+    // Make sure there were no leftovers.
+    assert(k == 0);
     vacc0x0123 = _mm256_add_epi32(vacc0x0123, vacc1x0x0123);
     vacc0x4567 = _mm256_add_epi32(vacc0x4567, vacc1x0x4567);
 
@@ -112,6 +119,25 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x8c8__avx256skx_madd(
 
     __m256 vout0x01234567 = _mm256_cvtepi32_ps(vacc0x01234567);
 
+    const __m256 vtwo = _mm256_set1_ps(2.0f);
+    const __m256 rh_zero_points_01234567 = _mm256_load_ps((const float*) kzp);
+    kzp = (const float*)kzp + 8;
+    const __m256 biased_rh_zero_points_01234567 = _mm256_add_ps(rh_zero_points_01234567, vtwo);
+
+    // Subtract out the scaled left-hand row sums.
+    const __m256 lh_row_sum_0 = _mm256_set1_ps(row_sum[0]);
+    #ifdef __FMA__
+      vout0x01234567 = _mm256_fnmadd_ps(biased_rh_zero_points_01234567, lh_row_sum_0, vout0x01234567);
+    #else
+      #error __FMA__ required
+    #endif
+    // Add the product of left/right-hand zero points and `kc`.
+    const __m256 vscaled_lh_zero_point_0 = _mm256_set1_ps((float)kc * quantization_params[0].zero_point);
+    #ifdef __FMA__
+      vout0x01234567 = _mm256_fmadd_ps(rh_zero_points_01234567, vscaled_lh_zero_point_0, vout0x01234567);
+    #else
+      #error __FMA__ required
+    #endif
 
     vout0x01234567 = _mm256_mul_ps(vout0x01234567, _mm256_set1_ps(quantization_params[0].inv_scale));
 
@@ -131,9 +157,20 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x8c8__avx256skx_madd(
       c0 = (float*) ((uintptr_t) c0 + cn_stride);
       nc -= 8;
     } else {
-      // Prepare mask for valid 32-bit elements (depends on nc).
-      const __mmask16 vmask = _cvtu32_mask16((UINT32_C(1) << nc) - 1);
-      _mm256_mask_storeu_ps(c0, vmask, vout0x01234567);
+      __m128 vout0x0123 = _mm256_castps256_ps128(vout0x01234567);
+      if (nc & 4) {
+        _mm_storeu_ps(c0, vout0x0123);
+        c0 += 4;
+        vout0x0123 = _mm256_extractf128_ps(vout0x01234567, 1);
+      }
+      if (nc & 2) {
+        _mm_storel_pi((__m64*) c0, vout0x0123);
+        c0 += 2;
+        vout0x0123 = _mm_movehl_ps(vout0x0123, vout0x0123);
+      }
+      if (nc & 1) {
+        _mm_store_ss(c0, vout0x0123);
+      }
       nc = 0;
     }
   } while (nc != 0);
