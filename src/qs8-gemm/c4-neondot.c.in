@@ -254,7 +254,7 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c
         ${_}k -= 8 * sizeof(int8_t);
     ${_}}
     $if DATATYPE in ["QC2_F32"]:
-      ${_}// Handle 4, 8, or 12 final positions of `k`.
+      ${_}// Handle up to 8 final positions of `k`.
       ${_}if XNN_UNLIKELY(k > 0) {
         $for K in range(0, 8, 8):
           $for N in range(0, NR, 4):
@@ -272,7 +272,7 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c
           $for N in range(0, NR, 4):
             ${_}const int8x16_t vb${ABC[N:N+4]}x${ABC[4:8]} = vandq_s8(vshrq_n_s8(vb${ABC[N:N+4]}x16, 2), vmask);
 
-          ${_}// Multiply-accumulate: 1x${MR} * ${MR}x16 --> 1x16.
+          ${_}// Multiply-accumulate: ${MR}x8 * 8x${NR} --> ${MR}x${NR}.
           $for M in range(MR):
             $for N in range(0, NR, 4):
               ${_}vacc${M}x${ABC[N:N+4]} = vdotq_lane_s32(vacc${M}x${ABC[N:N+4]}, vb${ABC[N:N+4]}x${ABC[0:4]}, va${M}x8, 0);
@@ -288,11 +288,9 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c
 
         ${_}// Handle up to 4 final positions of `k`.
         ${_}if XNN_UNLIKELY(k >= 4 * sizeof(int8_t)) {
-          ${_}// Load a 1x4 block of activations.
+        ${_}// Load a ${MR}x4 block of activations.
           $for M in range(MR):
-            ${_}const int8x8_t va${M}x0123 = vreinterpret_s8_u32(
-              ${_}vld1_lane_u32((const uint32_t*)a${M}, vmov_n_u32(0), 0));
-            ${_}a${M} += 4;
+            ${_}const int8x8_t va${M}x0123 = vreinterpret_s8_s32(vld1_dup_s32((const int32_t*)a${M})); a${M} += 4;
 
           ${_}// First crumb.
           $for N in range(0, NR, 4):
@@ -310,7 +308,7 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c
       ${_}if XNN_UNLIKELY(k != 0) {
         ${_}// Load a ${MR}x4 block of activations.
         $for M in range(MR):
-          ${_}const int8x8_t va${M}x01234567 = vld1_s8(a${M}); a${M} += 4;
+          ${_}const int8x8_t va${M}x0123 = vreinterpret_s8_s32(vld1_dup_s32((const int32_t*)a${M})); a${M} += 4;
 
         ${_}// Load a 4x${NR} block of weights.
         $if DATATYPE in ["QC4_F16", "QC4_F32"]:
@@ -325,7 +323,7 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c
         ${_}// Multiply-accumulate: ${MR}x4 * 4x${NR} --> ${MR}x${NR}.
         $for M in range(MR):
           $for N in range(0, NR, 4):
-            ${_}vacc${M}x${ABC[N:N+4]} = vdotq_lane_s32(vacc${M}x${ABC[N:N+4]}, vb0123x${ABC[N:N+4]}, va${M}x01234567, 0);
+            ${_}vacc${M}x${ABC[N:N+4]} = vdotq_lane_s32(vacc${M}x${ABC[N:N+4]}, vb0123x${ABC[N:N+4]}, va${M}x0123, 0);
     ${_}}
     $if DATATYPE in ["QC2_F32"]:
       // Make sure there were no leftovers.

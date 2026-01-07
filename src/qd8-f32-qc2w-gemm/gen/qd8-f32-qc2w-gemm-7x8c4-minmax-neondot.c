@@ -224,7 +224,7 @@ void xnn_qd8_f32_qc2w_gemm_minmax_ukernel_7x8c4__neondot(
 
       k -= 16 * sizeof(int8_t);
     }
-    // Handle 4, 8, or 12 final positions of `k`.
+    // Handle up to 8 final positions of `k`.
     if XNN_UNLIKELY(k > 0) {
       int8x16_t vb0123x16 = vld1q_s8(w); w = (const int8_t*) w + 16;
       int8x16_t vb4567x16 = vld1q_s8(w); w = (const int8_t*) w + 16;
@@ -246,7 +246,7 @@ void xnn_qd8_f32_qc2w_gemm_minmax_ukernel_7x8c4__neondot(
         const int8x16_t vb0123x4567 = vandq_s8(vshrq_n_s8(vb0123x16, 2), vmask);
         const int8x16_t vb4567x4567 = vandq_s8(vshrq_n_s8(vb4567x16, 2), vmask);
 
-        // Multiply-accumulate: 1x7 * 7x16 --> 1x16.
+        // Multiply-accumulate: 7x8 * 8x8 --> 7x8.
         vacc0x0123 = vdotq_lane_s32(vacc0x0123, vb0123x0123, va0x8, 0);
         vacc0x4567 = vdotq_lane_s32(vacc0x4567, vb4567x0123, va0x8, 0);
 
@@ -291,28 +291,14 @@ void xnn_qd8_f32_qc2w_gemm_minmax_ukernel_7x8c4__neondot(
 
       // Handle up to 4 final positions of `k`.
       if XNN_UNLIKELY(k >= 4 * sizeof(int8_t)) {
-        // Load a 1x4 block of activations.
-        const int8x8_t va0x0123 = vreinterpret_s8_u32(
-          vld1_lane_u32((const uint32_t*)a0, vmov_n_u32(0), 0));
-        a0 += 4;
-        const int8x8_t va1x0123 = vreinterpret_s8_u32(
-          vld1_lane_u32((const uint32_t*)a1, vmov_n_u32(0), 0));
-        a1 += 4;
-        const int8x8_t va2x0123 = vreinterpret_s8_u32(
-          vld1_lane_u32((const uint32_t*)a2, vmov_n_u32(0), 0));
-        a2 += 4;
-        const int8x8_t va3x0123 = vreinterpret_s8_u32(
-          vld1_lane_u32((const uint32_t*)a3, vmov_n_u32(0), 0));
-        a3 += 4;
-        const int8x8_t va4x0123 = vreinterpret_s8_u32(
-          vld1_lane_u32((const uint32_t*)a4, vmov_n_u32(0), 0));
-        a4 += 4;
-        const int8x8_t va5x0123 = vreinterpret_s8_u32(
-          vld1_lane_u32((const uint32_t*)a5, vmov_n_u32(0), 0));
-        a5 += 4;
-        const int8x8_t va6x0123 = vreinterpret_s8_u32(
-          vld1_lane_u32((const uint32_t*)a6, vmov_n_u32(0), 0));
-        a6 += 4;
+      // Load a 7x4 block of activations.
+        const int8x8_t va0x0123 = vreinterpret_s8_s32(vld1_dup_s32((const int32_t*)a0)); a0 += 4;
+        const int8x8_t va1x0123 = vreinterpret_s8_s32(vld1_dup_s32((const int32_t*)a1)); a1 += 4;
+        const int8x8_t va2x0123 = vreinterpret_s8_s32(vld1_dup_s32((const int32_t*)a2)); a2 += 4;
+        const int8x8_t va3x0123 = vreinterpret_s8_s32(vld1_dup_s32((const int32_t*)a3)); a3 += 4;
+        const int8x8_t va4x0123 = vreinterpret_s8_s32(vld1_dup_s32((const int32_t*)a4)); a4 += 4;
+        const int8x8_t va5x0123 = vreinterpret_s8_s32(vld1_dup_s32((const int32_t*)a5)); a5 += 4;
+        const int8x8_t va6x0123 = vreinterpret_s8_s32(vld1_dup_s32((const int32_t*)a6)); a6 += 4;
 
         // First crumb.
         const int8x16_t vb0123x0123 = vandq_s8(vb0123x16, vmask);
