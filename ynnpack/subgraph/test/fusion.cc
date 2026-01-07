@@ -282,4 +282,72 @@ TEST(fusion, broadcast_of_static) {
   ASSERT_EQ(valid_value_count(&subgraph), 3);
 }
 
+TEST(fusion, transpose_stencil_copy) {
+  // rewrite transpose_a(stencil_copy(x)) -> stencil_copy(transpose_a(x))
+  const uint32_t x_id = 0;
+  uint32_t y_id = 1;
+  const uint32_t z_id = 2;
+  SubgraphBuilder builder(3);
+
+  builder.AddInput(ynn_type_fp32, {10, 20}, x_id)
+      .AddTensor(ynn_type_fp32, {1, 10, 20}, y_id)
+      .AddOutput(ynn_type_fp32, {1, 10, 20}, z_id);
+
+  // stencil_copy: x -> y. Insert dim at axis 0.
+  // x: [10, 20]. y: [1, 10, 20].
+  builder.AddStencilCopy(
+      /*stencil_axes=*/{0},
+      /*new_axes=*/{0},
+      /*stencil_dims=*/{1},
+      /*stencil_strides=*/{1},
+      /*stencil_dilations=*/{1}, x_id,
+      /*padding_id=*/YNN_INVALID_VALUE_ID, y_id);
+
+  ynn_subgraph& subgraph = *builder.GetSubgraph();
+
+  // transpose_a: y -> z.
+  // m_dim = 1. (Dimension of size 10).
+  ynn_node transpose_node;
+  transpose_node.op = ynn_node::transpose_a{
+      .tile_k = 4,
+      .m_dim = 1,
+  };
+  transpose_node.inputs = {y_id};
+  transpose_node.outputs = {z_id};
+  subgraph.add_node(transpose_node);
+
+  subgraph.fusion();
+  subgraph.invalidate_dead_values();
+
+  ASSERT_EQ(valid_node_count(&subgraph), 2);
+
+  // Check z is produced by stencil_copy.
+  const ynn_node* z_producer = subgraph.get_producer(z_id);
+  ASSERT_NE(z_producer, nullptr);
+  const auto* stencil_op = std::get_if<ynn_node::stencil_copy>(&z_producer->op);
+  ASSERT_NE(stencil_op, nullptr);
+
+  // stencil_copy input should be y (which is now output of transpose_a)
+  ASSERT_EQ(z_producer->inputs[0], y_id);
+
+  // Check y is produced by transpose_a
+  const ynn_node* y_producer = subgraph.get_producer(y_id);
+  ASSERT_NE(y_producer, nullptr);
+  const auto* transpose_op =
+      std::get_if<ynn_node::transpose_a>(&y_producer->op);
+  ASSERT_NE(transpose_op, nullptr);
+
+  // transpose_a input should be x
+  ASSERT_EQ(y_producer->inputs[0], x_id);
+
+  // Check transposed m_dim. Original was 1. Inserted dim at 0.
+  // Note: YNNPACK uses Slinky dimension ordering (innermost first).
+  // Input [10, 20]. Slinky dims: 0->20, 1->10.
+  // Output [1, 10, 20]. Slinky dims: 0->20, 1->10, 2->1.
+  // Insertion at API 0 corresponds to Slinky dim 2.
+  // m_dim was 1 (size 10).
+  // new_axis (2) > m_dim (1), so m_dim is not decremented.
+  ASSERT_EQ(transpose_op->m_dim, 1);
+}
+
 }  // namespace ynn
