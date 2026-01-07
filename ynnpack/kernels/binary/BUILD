@@ -126,7 +126,7 @@ ynn_cc_library(
         "arm_neon": ["arm_neon.cc"],
         "x86_sse2": ["x86_sse2.cc"],
         "x86_avx": ["x86_avx.cc"],
-        "x86_avx512f": ["x86_avx512f.cc"],
+        "x86_avx512": ["x86_avx512f.cc"],
         "x86_avx2": ["x86_avx2.cc"],
     },
     visibility = ["//ynnpack:__subpackages__"],
