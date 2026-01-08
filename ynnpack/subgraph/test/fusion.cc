@@ -37,6 +37,11 @@ bool is_ternary(const ynn_node& node, ternary_op op) {
   return ternary && ternary->op == op;
 }
 
+bool is_reduce(const ynn_node& node, ynn_reduce_operator op) {
+  const ynn_node::reduce* reduce = std::get_if<ynn_node::reduce>(&node.op);
+  return reduce && reduce->op == op;
+}
+
 TEST(fusion, multiply_add) {
   // rewrite add(multiply(a, b), c) -> multiply_add(a, b, c)
   const uint32_t a_id = 0;
@@ -348,6 +353,49 @@ TEST(fusion, transpose_stencil_copy) {
   // m_dim was 1 (size 10).
   // new_axis (2) > m_dim (1), so m_dim is not decremented.
   ASSERT_EQ(transpose_op->m_dim, 1);
+}
+
+namespace {
+
+void TestReduceSumOfConvert(ynn_type input_type) {
+  const uint32_t x_id = 0;
+  uint32_t converted_x_id = 1;
+  const uint32_t y_id = 2;
+  SubgraphBuilder builder(3);
+  builder.AddInput(input_type, 2, x_id)
+      .AddTensor(ynn_type_fp32, 2, converted_x_id)
+      .AddOutput(ynn_type_fp32, 1, y_id);
+  builder.AddUnary(ynn_unary_convert, x_id, converted_x_id)
+      .AddReduce(ynn_reduce_sum, {1}, converted_x_id, YNN_INVALID_VALUE_ID,
+                 y_id, 0);
+
+  ynn_subgraph& subgraph = *builder.GetSubgraph();
+
+  subgraph.fusion();
+  subgraph.invalidate_dead_values();
+
+  ASSERT_EQ(valid_node_count(&subgraph), 1);
+  ASSERT_TRUE(subgraph.value(x_id).is_valid());
+  ASSERT_TRUE(subgraph.value(y_id).is_valid());
+  ASSERT_FALSE(subgraph.value(converted_x_id).is_valid());
+
+  const ynn_node* output = subgraph.get_producer(y_id);
+  ASSERT_NE(output, nullptr);
+  ASSERT_EQ(output->inputs.size(), 2);
+  ASSERT_EQ(output->inputs[0], x_id);
+  ASSERT_TRUE(is_reduce(*output, ynn_reduce_sum));
+}
+
+}  // namespace
+
+TEST(fusion, reduce_sum_of_convert_fp16) {
+  // reduce_sum(convert_fp32(x_fp16)) -> reduce_sum(x_fp16)
+  TestReduceSumOfConvert(ynn_type_fp16);
+}
+
+TEST(fusion, reduce_sum_of_convert_bf16) {
+  // reduce_sum(convert_fp32(x_bf16)) -> reduce_sum(x_bf16)
+  TestReduceSumOfConvert(ynn_type_bf16);
 }
 
 }  // namespace ynn
