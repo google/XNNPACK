@@ -357,7 +357,7 @@ TEST(fusion, transpose_stencil_copy) {
 
 namespace {
 
-void TestReduceSumOfConvert(ynn_type input_type) {
+void TestReduceSumOfConvert(ynn_type input_type, ynn_reduce_operator op) {
   const uint32_t x_id = 0;
   uint32_t converted_x_id = 1;
   const uint32_t y_id = 2;
@@ -366,8 +366,7 @@ void TestReduceSumOfConvert(ynn_type input_type) {
       .AddTensor(ynn_type_fp32, 2, converted_x_id)
       .AddOutput(ynn_type_fp32, 1, y_id);
   builder.AddUnary(ynn_unary_convert, x_id, converted_x_id)
-      .AddReduce(ynn_reduce_sum, {1}, converted_x_id, YNN_INVALID_VALUE_ID,
-                 y_id, 0);
+      .AddReduce(op, {1}, converted_x_id, YNN_INVALID_VALUE_ID, y_id, 0);
 
   ynn_subgraph& subgraph = *builder.GetSubgraph();
 
@@ -383,19 +382,29 @@ void TestReduceSumOfConvert(ynn_type input_type) {
   ASSERT_NE(output, nullptr);
   ASSERT_EQ(output->inputs.size(), 2);
   ASSERT_EQ(output->inputs[0], x_id);
-  ASSERT_TRUE(is_reduce(*output, ynn_reduce_sum));
+  ASSERT_TRUE(is_reduce(*output, op));
 }
 
 }  // namespace
 
 TEST(fusion, reduce_sum_of_convert_fp16) {
   // reduce_sum(convert_fp32(x_fp16)) -> reduce_sum(x_fp16)
-  TestReduceSumOfConvert(ynn_type_fp16);
+  TestReduceSumOfConvert(ynn_type_fp16, ynn_reduce_sum);
 }
 
 TEST(fusion, reduce_sum_of_convert_bf16) {
   // reduce_sum(convert_fp32(x_bf16)) -> reduce_sum(x_bf16)
-  TestReduceSumOfConvert(ynn_type_bf16);
+  TestReduceSumOfConvert(ynn_type_bf16, ynn_reduce_sum);
+}
+
+TEST(fusion, reduce_sum_squared_of_convert_fp16) {
+  // reduce_sum_squared(convert_fp32(x_fp16)) -> reduce_sum_squared(x_fp16)
+  TestReduceSumOfConvert(ynn_type_fp16, ynn_reduce_sum_squared);
+}
+
+TEST(fusion, reduce_sum_squared_of_convert_bf16) {
+  // reduce_sum_squared(convert_fp32(x_bf16)) -> reduce_sum_squared(x_bf16)
+  TestReduceSumOfConvert(ynn_type_bf16, ynn_reduce_sum_squared);
 }
 
 }  // namespace ynn

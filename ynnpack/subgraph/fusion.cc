@@ -444,6 +444,46 @@ bool rewrite_reduce_sum_convert(ynn_subgraph& subgraph, ynn_node& node,
   return true;
 }
 
+// Rewrites ynn_reduce_sum_squared of convert to ynn_reduce_sum_squared of
+// convert's input. Specifically:
+//   ynn_reduce_sum_squared(f32(x_fp16)) -> ynn_reduce_sum_squared(x_fp16)
+//   ynn_reduce_sum_squared(f32(x_bf16)) -> ynn_reduce_sum_squared(x_bf16)
+bool rewrite_reduce_sum_squared_convert(ynn_subgraph& subgraph, ynn_node& node,
+                                        subgraph_analysis& analysis) {
+  const ynn_node::reduce* reduce_op = std::get_if<ynn_node::reduce>(&node.op);
+  if (reduce_op == nullptr || reduce_op->op != ynn_reduce_sum_squared) {
+    return false;
+  }
+
+  auto producer = analysis.producers.find(node.inputs[0]);
+  if (producer == analysis.producers.end()) {
+    return false;
+  }
+
+  ynn_node* convert_node = producer->second;
+  if (!is_unary_node(*convert_node, ynn_unary_convert)) {
+    return false;
+  }
+
+  const ynn_value& x = subgraph.value(convert_node->inputs[0]);
+  const ynn_value& converted_x = subgraph.value(convert_node->outputs[0]);
+
+  if (converted_x.type != ynn_type_fp32) {
+    return false;
+  }
+
+  if (x.type != ynn_type_fp16 && x.type != ynn_type_bf16) {
+    return false;
+  }
+
+  YNN_LOG_DEBUG() << "Rewriting reduce_sum_squared(convert(x)) to "
+                     "reduce_sum_squared(x)";
+  ynn::define_reduce(subgraph, node, ynn_reduce_sum_squared, reduce_op->k_dims,
+                     x.id, node.inputs[1], node.outputs[0],
+                     reduce_op->keep_dims);
+  return true;
+}
+
 }  // namespace
 
 ynn_status ynn_subgraph::fusion() {
@@ -459,7 +499,8 @@ ynn_status ynn_subgraph::fusion() {
         rewrite_convert_to_quantize(*this, node, analysis) ||
         remove_broadcast(*this, node, analysis) ||
         rewrite_transpose_stencil_copy(*this, node, analysis) ||
-        rewrite_reduce_sum_convert(*this, node, analysis);
+        rewrite_reduce_sum_convert(*this, node, analysis) ||
+        rewrite_reduce_sum_squared_convert(*this, node, analysis);
   }
 
   return ynn_status_success;
