@@ -407,4 +407,83 @@ TEST(fusion, reduce_sum_squared_of_convert_bf16) {
   TestReduceSumOfConvert(ynn_type_bf16, ynn_reduce_sum_squared);
 }
 
+TEST(fusion, reduce_sum_of_squared_f32) {
+  // reduce_sum(multiply(x, x)) -> reduce_sum_squared(x)
+  const uint32_t x_id = 0;
+  const uint32_t y_id = 1;
+  SubgraphBuilder builder(2);
+  uint32_t sq_id = YNN_INVALID_VALUE_ID;
+  builder.AddInput(ynn_type_fp32, 2, x_id)
+      .AddOutput(ynn_type_fp32, 1, y_id)
+      .AddTensor(ynn_type_fp32, 2, sq_id);
+  builder.AddBinary(ynn_binary_multiply, x_id, x_id, sq_id)
+      .AddReduce(ynn_reduce_sum, {1}, sq_id, YNN_INVALID_VALUE_ID, y_id, 0);
+
+  ynn_subgraph& subgraph = *builder.GetSubgraph();
+
+  subgraph.fusion();
+  subgraph.invalidate_dead_values();
+
+  ASSERT_EQ(valid_node_count(&subgraph), 1);
+  // x and y should be valid, sq should be invalid/removed.
+  ASSERT_TRUE(subgraph.value(x_id).is_valid());
+  ASSERT_TRUE(subgraph.value(y_id).is_valid());
+  ASSERT_FALSE(subgraph.value(sq_id).is_valid());
+
+  const ynn_node* output = subgraph.get_producer(y_id);
+  ASSERT_NE(output, nullptr);
+  ASSERT_EQ(output->inputs.size(), 2);
+  ASSERT_EQ(output->inputs[0], x_id);
+  ASSERT_TRUE(is_reduce(*output, ynn_reduce_sum_squared));
+}
+
+namespace {
+
+void TestReduceSumOfSquared(ynn_type input_type) {
+  const uint32_t x_id = 0;
+  uint32_t converted_x_id = 1;
+  const uint32_t y_id = 2;
+  SubgraphBuilder builder(4);
+  uint32_t sq_id = YNN_INVALID_VALUE_ID;
+  builder.AddInput(input_type, 2, x_id)
+      .AddTensor(ynn_type_fp32, 2, converted_x_id)
+      .AddOutput(ynn_type_fp32, 1, y_id)
+      .AddTensor(ynn_type_fp32, 2, sq_id);
+  builder.AddUnary(ynn_unary_convert, x_id, converted_x_id)
+      .AddBinary(ynn_binary_multiply, converted_x_id, converted_x_id, sq_id)
+      .AddReduce(ynn_reduce_sum, {1}, sq_id, YNN_INVALID_VALUE_ID, y_id, 0);
+
+  ynn_subgraph& subgraph = *builder.GetSubgraph();
+
+  subgraph.fusion();
+  subgraph.invalidate_dead_values();
+
+  ASSERT_EQ(valid_node_count(&subgraph), 1);
+  // x and y should be valid. converted_x and sq should be invalid/removed.
+  ASSERT_TRUE(subgraph.value(x_id).is_valid());
+  ASSERT_TRUE(subgraph.value(y_id).is_valid());
+  ASSERT_FALSE(subgraph.value(converted_x_id).is_valid());
+  ASSERT_FALSE(subgraph.value(sq_id).is_valid());
+
+  const ynn_node* output = subgraph.get_producer(y_id);
+  ASSERT_NE(output, nullptr);
+  ASSERT_EQ(output->inputs.size(), 2);
+  ASSERT_EQ(output->inputs[0], x_id);
+  ASSERT_TRUE(is_reduce(*output, ynn_reduce_sum_squared));
+}
+
+}  // namespace
+
+TEST(fusion, reduce_sum_of_squared_with_convert_fp16) {
+  // reduce_sum(multiply(convert_fp32(x_fp16), convert_fp32(x_fp16)) ->
+  // reduce_sum_squared(x_fp16)
+  TestReduceSumOfSquared(ynn_type_fp16);
+}
+
+TEST(fusion, reduce_sum_of_squared_with_convert_bf16) {
+  // reduce_sum(multiply(convert_fp32(x_bf16), convert_fp32(x_bf16)) ->
+  // reduce_sum_squared(x_bf16)
+  TestReduceSumOfSquared(ynn_type_bf16);
+}
+
 }  // namespace ynn

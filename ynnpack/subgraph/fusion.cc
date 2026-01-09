@@ -406,6 +406,44 @@ bool rewrite_transpose_stencil_copy(ynn_subgraph& subgraph, ynn_node& node,
   return true;
 }
 
+// Rewrites ynn_reduce_sum(x*x) to ynn_reduce_sum_squared(x).
+bool rewrite_reduce_sum_of_squared(ynn_subgraph& subgraph, ynn_node& node,
+                                   subgraph_analysis& analysis) {
+  const ynn_node::reduce* reduce_op = std::get_if<ynn_node::reduce>(&node.op);
+  if (reduce_op == nullptr || reduce_op->op != ynn_reduce_sum) {
+    return false;
+  }
+
+  auto producer = analysis.producers.find(node.inputs[0]);
+  if (producer == analysis.producers.end()) {
+    return false;
+  }
+
+  ynn_node* mul_node = producer->second;
+  if (!is_binary_node(*mul_node, ynn_binary_multiply)) {
+    return false;
+  }
+
+  if (mul_node->inputs[0] != mul_node->inputs[1]) {
+    return false;
+  }
+
+  uint32_t x_id = mul_node->inputs[0];
+  const ynn_value* x = &subgraph.value(x_id);
+
+  if (x->type != ynn_type_fp16 && x->type != ynn_type_fp32 &&
+      x->type != ynn_type_bf16) {
+    return false;
+  }
+
+  YNN_LOG_DEBUG() << "Rewriting reduce_sum(x*x) to reduce_sum_squared(x)";
+  ynn::define_reduce(subgraph, node, ynn_reduce_sum_squared, reduce_op->k_dims,
+                     x_id, node.inputs[1], node.outputs[0],
+                     reduce_op->keep_dims);
+
+  return true;
+}
+
 // Rewrites ynn_reduce_sum of convert to ynn_reduce_sum of convert's input.
 // Specifically:
 //   ynn_reduce_sum(f32(x_fp16)) -> ynn_reduce_sum(x_fp16)
@@ -487,21 +525,25 @@ bool rewrite_reduce_sum_squared_convert(ynn_subgraph& subgraph, ynn_node& node,
 }  // namespace
 
 ynn_status ynn_subgraph::fusion() {
-  subgraph_analysis analysis(*this);
+  bool changed;
+  do {
+    subgraph_analysis analysis(*this);
+    changed = false;
+    for (ynn_node& node : nodes) {
+      if (!node.is_valid()) continue;
 
-  for (ynn_node& node : nodes) {
-    if (!node.is_valid()) continue;
-
-    false || rewrite_multiply_add(*this, node, analysis) ||
-        rewrite_subtract_multiply(*this, node, analysis) ||
-        rewrite_convert_to_multiply(*this, node, analysis) ||
-        rewrite_clamp(*this, node, analysis) ||
-        rewrite_convert_to_quantize(*this, node, analysis) ||
-        remove_broadcast(*this, node, analysis) ||
-        rewrite_transpose_stencil_copy(*this, node, analysis) ||
-        rewrite_reduce_sum_convert(*this, node, analysis) ||
-        rewrite_reduce_sum_squared_convert(*this, node, analysis);
-  }
+      changed = changed || rewrite_multiply_add(*this, node, analysis) ||
+                rewrite_subtract_multiply(*this, node, analysis) ||
+                rewrite_convert_to_multiply(*this, node, analysis) ||
+                rewrite_clamp(*this, node, analysis) ||
+                rewrite_convert_to_quantize(*this, node, analysis) ||
+                remove_broadcast(*this, node, analysis) ||
+                rewrite_transpose_stencil_copy(*this, node, analysis) ||
+                rewrite_reduce_sum_of_squared(*this, node, analysis) ||
+                rewrite_reduce_sum_convert(*this, node, analysis) ||
+                rewrite_reduce_sum_squared_convert(*this, node, analysis);
+    }
+  } while (changed);
 
   return ynn_status_success;
 }
