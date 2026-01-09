@@ -217,6 +217,7 @@ bool rewrite_convert_to_quantize(ynn_subgraph& subgraph, ynn_node& node,
     YNN_LOG_DEBUG() << "Rewriting convert to quantize";
     ynn::define_ternary(subgraph, node, node.inputs[0], output.scale_id,
                         output.zero_point_id, node.outputs[0], op, kernel);
+    return true;
   }
   return false;
 }
