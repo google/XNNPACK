@@ -6,7 +6,7 @@
 #ifndef XNNPACK_YNNPACK_BASE_SIMD_X86_AVX512F_H_
 #define XNNPACK_YNNPACK_BASE_SIMD_X86_AVX512F_H_
 
-#include "ynnpack/base/simd/generic.inc"  // IWYU pragma: export
 #include "ynnpack/base/simd/x86_avx512f_base.h"  // IWYU pragma: export
+#include "ynnpack/base/simd/generic.inc"  // IWYU pragma: export
 
 #endif  // XNNPACK_YNNPACK_BASE_SIMD_X86_AVX512F_H_

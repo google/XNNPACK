@@ -151,13 +151,14 @@ struct sum_accumulator_k1_1 {
     auto a_2 = 2 < k2 ? load(offset_bytes(A, 2 * A_stride_k2), n, zero) : zero;
     auto a_3 = 3 < k2 ? load(offset_bytes(A, 3 * A_stride_k2), n, zero) : zero;
 
-    AccT acc{0};
+    AccT acc = load(C, n, AccT{});
+
     acc = reduce_add(acc, a_0, map_fn, horizontal_factor);
     acc = reduce_add(acc, a_1, map_fn, horizontal_factor);
     acc = reduce_add(acc, a_2, map_fn, horizontal_factor);
     acc = reduce_add(acc, a_3, map_fn, horizontal_factor);
 
-    store(C, load(C, n, AccT{}) + acc, n);
+    store(C, acc, n);
   }
 };
 
