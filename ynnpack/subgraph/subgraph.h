@@ -161,6 +161,7 @@ struct ynn_node {
     ynn::ternary_op op;
   };
   struct copy {};
+  struct lut {};
   struct fuse_dim {
     // Fuse `axes_count` dimensions starting at `axis` into one dimension.
     int32_t axis;
@@ -253,7 +254,7 @@ struct ynn_node {
   std::variant<invalid, opaque, broadcast, broadcast_like, concatenate,
                even_split, copy, split_dim, fuse_dim, fuse_dims, split_dims,
                stack, static_reshape, static_broadcast, static_expand_dims,
-               static_pad, static_slice, static_transpose, stencil_copy,
+               static_pad, static_slice, static_transpose, stencil_copy, lut,
                unary_elementwise, binary_elementwise, ternary_elementwise, dot,
                pack_b, transpose_a, get_tensor_shape, reduce>
       op;

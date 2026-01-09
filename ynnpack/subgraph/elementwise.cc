@@ -387,6 +387,61 @@ const ynn_runtime_value& value_or(const ynn_runtime& runtime, uint32_t id,
 
 // Make a node in the graph that calls the kernel's `init_params` function for
 // each element of the input and output quantization data.
+auto make_lut_impl() {
+  return [](slinky::raw_buffer a, slinky::raw_buffer table,
+            slinky::raw_buffer x) -> slinky::index_t {
+    slinky::dim a_dims[2], x_dims[2];
+
+    fuse_and_slice_leading_dims<2>(&x_dims[0], x, &a_dims[0], a);
+
+    assert(table.rank == 1);
+    assert(table.elem_size == x.elem_size);
+    const uint8_t* table_ptr = (const uint8_t*)table.base;
+
+    slinky::for_each_element(
+        [&](void* x_ptr, const void* a_ptr) {
+          uint8_t idx = *(const uint8_t*)a_ptr;
+          *(uint8_t*)x_ptr = table_ptr[idx];
+        },
+        x, a);
+    return 0;
+  };
+}
+
+ynn_status create_lut(const ynn_node& node, ynn_runtime& runtime) {
+  assert(node.inputs.size() == 2);
+  assert(node.outputs.size() == 1);
+
+  const ynn_runtime_value& a = runtime.value(node.inputs[0]);
+  const ynn_runtime_value& table = runtime.value(node.inputs[1]);
+  ynn_runtime_value& x = runtime.value(node.outputs[0]);
+
+  x.make_buffer(runtime);
+
+  slinky::call_stmt::attributes attrs;
+  attrs.name = "lut";
+  attrs.allow_in_place = compute_allow_in_place(node, runtime.subgraph);
+
+  std::vector<slinky::var> dims = make_dims(x.rank(), runtime.symbols);
+  slinky::box_expr a_bounds = make_elementwise_bounds(dims, a.extents);
+  a_bounds.resize(a.rank());
+  // table bounds are just its size. It's not elementwise with respect to x.
+  slinky::box_expr table_bounds;
+  table_bounds.emplace_back(0, 256);
+
+  auto func = slinky::func::make(make_lut_impl(),
+                                 {{a.buffer, std::move(a_bounds)},
+                                  {table.buffer, std::move(table_bounds)}},
+                                 {{x.buffer, dims}}, std::move(attrs));
+
+  auto sched = runtime.make_schedule(dims, x.buffer, node.outputs[0]);
+  func.user_data() = sched.get();
+  runtime.scheduling_info_storage.push_back(std::move(sched));
+  runtime.funcs.push_back(std::move(func));
+
+  return ynn_status_success;
+}
+
 ynn_status define_make_unary_params(ynn_subgraph_t subgraph,
                                     init_unary_params_fn init_params,
                                     uint32_t input_a_id, uint32_t output_id,
@@ -620,6 +675,34 @@ ynn_status ynn_define_binary(ynn_subgraph_t subgraph, ynn_binary_operator op,
   node.create = [kernel](const ynn_node& node, ynn_runtime& runtime) {
     return create_binary(node, runtime, kernel->op, kernel->init_params);
   };
+  subgraph->add_node(std::move(node));
+  return ynn_status_success;
+}
+
+ynn_status ynn_define_lut(ynn_subgraph_t subgraph, uint32_t input_id,
+                          uint32_t table_id, uint32_t* output_id,
+                          uint32_t flags) {
+  assert(subgraph);
+  assert(subgraph->is_valid_value(input_id));
+  assert(subgraph->is_valid_value(table_id));
+  assert(output_id);
+
+  const ynn_value& input = subgraph->value(input_id);
+  const ynn_value& table = subgraph->value(table_id);
+
+  if (table.rank() != 1) {
+    YNN_LOG_ERROR() << "LUT table must be rank 1";
+    return ynn_status_invalid_parameter;
+  }
+
+  ynn_value& output = subgraph->get_output_value(output_id, input);
+  output.extents = input.extents;
+
+  ynn_node node;
+  node.inputs = {input_id, table_id};
+  node.outputs = {*output_id};
+  node.op = ynn_node::lut{};
+  node.create = create_lut;
   subgraph->add_node(std::move(node));
   return ynn_status_success;
 }

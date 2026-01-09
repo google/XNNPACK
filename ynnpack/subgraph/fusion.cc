@@ -9,6 +9,7 @@
 #include <cstdint>
 #include <initializer_list>
 #include <map>
+#include <numeric>
 #include <utility>
 #include <variant>
 #include <vector>
@@ -21,6 +22,7 @@
 #include "ynnpack/subgraph/dot.h"
 #include "ynnpack/subgraph/elementwise.h"
 #include "ynnpack/subgraph/reduce.h"
+#include "ynnpack/subgraph/runtime.h"
 #include "ynnpack/subgraph/stencil_copy.h"
 #include "ynnpack/subgraph/subgraph.h"
 
@@ -32,6 +34,7 @@ struct subgraph_analysis {
 
   explicit subgraph_analysis(ynn_subgraph& subgraph) {
     for (ynn_node& node : subgraph.nodes) {
+      if (!node.is_valid()) continue;
       for (uint32_t input : node.inputs) {
         consumers[input].push_back(&node);
       }
@@ -217,6 +220,7 @@ bool rewrite_convert_to_quantize(ynn_subgraph& subgraph, ynn_node& node,
     YNN_LOG_DEBUG() << "Rewriting convert to quantize";
     ynn::define_ternary(subgraph, node, node.inputs[0], output.scale_id,
                         output.zero_point_id, node.outputs[0], op, kernel);
+    return true;
   }
   return false;
 }
@@ -522,6 +526,222 @@ bool rewrite_reduce_sum_squared_convert(ynn_subgraph& subgraph, ynn_node& node,
   return true;
 }
 
+bool is_quantized_8bit(const ynn_value& v) {
+  return v.type == ynn_type_int8 || v.type == ynn_type_uint8;
+}
+
+bool is_pure_unary_elementwise(const ynn_node& node,
+                               const ynn_subgraph& subgraph) {
+  if (std::get_if<ynn_node::unary_elementwise>(&node.op)) return true;
+
+  if (std::get_if<ynn_node::binary_elementwise>(&node.op)) {
+    const ynn_value& a = subgraph.value(node.inputs[0]);
+    const ynn_value& b = subgraph.value(node.inputs[1]);
+    if (a.is_static() || b.is_static()) return true;
+  }
+
+  if (const auto* ternary =
+          std::get_if<ynn_node::ternary_elementwise>(&node.op)) {
+    if (ternary->op == ynn::ternary_op::clamp ||
+        ternary->op == ynn::ternary_op::quantize_int8 ||
+        ternary->op == ynn::ternary_op::quantize_uint8) {
+      const ynn_value& input1 = subgraph.value(node.inputs[1]);
+      const ynn_value& input2 = subgraph.value(node.inputs[2]);
+      if (input1.is_static() && input2.is_static()) return true;
+    }
+  }
+
+  return false;
+}
+
+bool generate_lut(const ynn_subgraph& subgraph,
+                  const std::vector<ynn_node*>& chain, uint8_t* lut_data) {
+  uint32_t chain_input_id = chain.front()->inputs[0];
+  uint32_t chain_output_id = chain.back()->outputs[0];
+
+  ynn_subgraph temp_subgraph(1, 0);
+  ynn_value& input_val = temp_subgraph.values[0];
+  input_val.flags |= YNN_VALUE_FLAG_EXTERNAL_INPUT;
+  input_val.type = subgraph.value(chain_input_id).type;
+  input_val.extents.resize(1);
+
+  std::map<uint32_t, uint32_t> id_map;
+
+  std::function<uint32_t(uint32_t)> copy_value =
+      [&](uint32_t old_id) -> uint32_t {
+    if (old_id == YNN_INVALID_VALUE_ID) return YNN_INVALID_VALUE_ID;
+    if (id_map.count(old_id)) return id_map[old_id];
+
+    const ynn_value& old_val = subgraph.value(old_id);
+    if (old_id == chain_input_id) {
+      id_map[old_id] = 0;
+      temp_subgraph.values[0].type = old_val.type;
+      temp_subgraph.values[0].zero_point_id = copy_value(old_val.zero_point_id);
+      temp_subgraph.values[0].scale_id = copy_value(old_val.scale_id);
+      return 0;
+    }
+
+    ynn_value& new_val = temp_subgraph.new_internal_value(old_val.type);
+    id_map[old_id] = new_val.id;
+
+    if (old_val.is_static()) {
+      new_val.data = old_val.data;
+      new_val.extents = old_val.extents;
+    } else {
+      const ynn_node* producer = subgraph.get_producer(old_id);
+      if (producer) {
+        bool in_chain =
+            std::find(chain.begin(), chain.end(), producer) != chain.end();
+        if (!in_chain) {
+          ynn_node new_node = *producer;
+          for (uint32_t& id : new_node.inputs) id = copy_value(id);
+          for (uint32_t& id : new_node.outputs) id = copy_value(id);
+          new_node.checks.clear();
+
+          if (const auto* op = std::get_if<ynn_node::opaque>(&new_node.op);
+              op && op->name && std::string(op->name) == "make_unary_params") {
+            for (int i = 0; i < 4; ++i) {
+              if (new_node.inputs.size() > i &&
+                  new_node.inputs[i] != YNN_INVALID_VALUE_ID) {
+                uint32_t input_id = new_node.inputs[i];
+                if (temp_subgraph.is_valid_value(input_id)) {
+                  ynn_type type = temp_subgraph.value(input_id).type;
+                  bool expected_int = (i % 2 == 1);
+                  if (expected_int && type != ynn_type_int32) {
+                    new_node.inputs[i] = YNN_INVALID_VALUE_ID;
+                  } else if (!expected_int && type != ynn_type_fp32) {
+                    new_node.inputs[i] = YNN_INVALID_VALUE_ID;
+                  }
+                }
+              }
+            }
+          }
+
+          temp_subgraph.add_node(std::move(new_node));
+        }
+      }
+    }
+
+    new_val.zero_point_id = copy_value(old_val.zero_point_id);
+    new_val.scale_id = copy_value(old_val.scale_id);
+
+    if (!ynn::type_is_integral(new_val.type)) {
+      new_val.zero_point_id = YNN_INVALID_VALUE_ID;
+      new_val.scale_id = YNN_INVALID_VALUE_ID;
+    }
+
+    return new_val.id;
+  };
+
+  copy_value(chain_input_id);
+
+  for (ynn_node* node : chain) {
+    ynn_node new_node = *node;
+    for (uint32_t& id : new_node.inputs) id = copy_value(id);
+    for (uint32_t& id : new_node.outputs) id = copy_value(id);
+    new_node.checks.clear();
+    temp_subgraph.add_node(std::move(new_node));
+  }
+
+  uint32_t temp_output_id = id_map[chain_output_id];
+  temp_subgraph.values[temp_output_id].flags |= YNN_VALUE_FLAG_EXTERNAL_OUTPUT;
+
+  ynn_runtime runtime(temp_subgraph, nullptr, 0);
+  if (runtime.build() != ynn_status_success) return false;
+
+  size_t input_dims = 256;
+  if (ynn_set_external_value_shape(&runtime, 0, 1, &input_dims) !=
+      ynn_status_success)
+    return false;
+  if (runtime.reshape() != ynn_status_success) return false;
+
+  std::vector<uint8_t> input_data(256);
+  std::iota(input_data.begin(), input_data.end(), 0);
+  if (ynn_set_external_value_data(&runtime, 0, input_data.data()) !=
+      ynn_status_success)
+    return false;
+
+  if (ynn_set_external_value_data(&runtime, temp_output_id, lut_data) !=
+      ynn_status_success)
+    return false;
+
+  if (runtime.setup() != ynn_status_success) return false;
+  if (runtime.invoke() != ynn_status_success) return false;
+
+  return true;
+}
+
+bool rewrite_unary_quantized_to_lut(ynn_subgraph& subgraph, ynn_node& node,
+                                    subgraph_analysis& analysis) {
+  if (!is_pure_unary_elementwise(node, subgraph)) return false;
+
+  uint32_t input_id = node.inputs[0];
+  const ynn_value& input = subgraph.value(input_id);
+  if (!is_quantized_8bit(input)) return false;
+
+  std::vector<ynn_node*> chain;
+  chain.push_back(&node);
+
+  ynn_node* current_node = &node;
+  while (true) {
+    uint32_t output_id = current_node->outputs[0];
+    const auto& consumers = analysis.consumers[output_id];
+    if (consumers.size() != 1 || subgraph.value(output_id).is_external_output())
+      break;
+    ynn_node* consumer = consumers[0];
+
+    if (!is_pure_unary_elementwise(*consumer, subgraph)) break;
+
+    chain.push_back(consumer);
+    current_node = consumer;
+  }
+
+  uint32_t final_output_id = chain.back()->outputs[0];
+  const ynn_value& final_output = subgraph.value(final_output_id);
+  if (!is_quantized_8bit(final_output)) return false;
+
+  if (chain.size() == 1 && is_unary_node(node, ynn_unary_convert)) {
+    return false;
+  }
+
+  // Add heuristic to only rewrite if the chain is sufficiently large.
+  if (chain.size() < 3) {
+    return false;
+  }
+
+  std::vector<uint8_t> lut_data(256);
+  if (!generate_lut(subgraph, chain, lut_data.data())) return false;
+
+  size_t dim = 256;
+  float float_lut[256];
+  for (int i = 0; i < 256; ++i) float_lut[i] = (float)lut_data[i];
+
+  // We need to define the tensor directly because it's uint8/int8 not float.
+  // get_static_value_id expects float and quantizes it. But we already have the
+  // bytes.
+
+  uint32_t lut_table_id = YNN_INVALID_VALUE_ID;
+  ynn_define_tensor_value(&subgraph, final_output.type, 1, &dim,
+                          lut_data.data(), YNN_INVALID_VALUE_ID,
+                          YNN_INVALID_VALUE_ID, YNN_VALUE_FLAG_COPY_DATA,
+                          &lut_table_id);
+
+  YNN_LOG_DEBUG() << "Rewriting chain of " << chain.size()
+                  << " unary ops to LUT";
+
+  // Replace chain with LUT node.
+  // We need to fix the input of the first node if we reuse the output ID?
+  // ynn_define_lut takes output_id pointer. If it points to existing id, it
+  // reuses it. We want to reuse final_output_id so consumers don't need update.
+
+  ynn_define_lut(&subgraph, input_id, lut_table_id, &final_output_id, 0);
+
+  // Invalidate old nodes.
+  for (auto* n : chain) n->invalidate();
+
+  return true;
+}
+
 }  // namespace
 
 ynn_status ynn_subgraph::fusion() {
@@ -532,16 +752,24 @@ ynn_status ynn_subgraph::fusion() {
     for (ynn_node& node : nodes) {
       if (!node.is_valid()) continue;
 
-      changed = changed || rewrite_multiply_add(*this, node, analysis) ||
-                rewrite_subtract_multiply(*this, node, analysis) ||
-                rewrite_convert_to_multiply(*this, node, analysis) ||
-                rewrite_clamp(*this, node, analysis) ||
-                rewrite_convert_to_quantize(*this, node, analysis) ||
-                remove_broadcast(*this, node, analysis) ||
-                rewrite_transpose_stencil_copy(*this, node, analysis) ||
-                rewrite_reduce_sum_of_squared(*this, node, analysis) ||
-                rewrite_reduce_sum_convert(*this, node, analysis) ||
-                rewrite_reduce_sum_squared_convert(*this, node, analysis);
+      bool node_changed =
+          // This pass must always run before rewrite_convert_to_quantize.
+          rewrite_unary_quantized_to_lut(*this, node, analysis) ||
+          rewrite_multiply_add(*this, node, analysis) ||
+          rewrite_subtract_multiply(*this, node, analysis) ||
+          rewrite_convert_to_multiply(*this, node, analysis) ||
+          rewrite_clamp(*this, node, analysis) ||
+          rewrite_convert_to_quantize(*this, node, analysis) ||
+          remove_broadcast(*this, node, analysis) ||
+          rewrite_transpose_stencil_copy(*this, node, analysis) ||
+          rewrite_reduce_sum_of_squared(*this, node, analysis) ||
+          rewrite_reduce_sum_convert(*this, node, analysis) ||
+          rewrite_reduce_sum_squared_convert(*this, node, analysis);
+
+      if (node_changed) {
+        changed = true;
+        break;
+      }
     }
   } while (changed);
 
