@@ -38,10 +38,9 @@ xnn_subgraph_t FullyConnected(size_t batch_size, size_t m, size_t k, size_t n,
   xnnpack::ReplicableRandomDevice rng;
 
   xnn_status status;
-  xnn_subgraph_t subgraph = nullptr;
-  status = xnn_create_subgraph(/*num_external_values=*/static_rhs ? 2 : 3, 0,
-                               &subgraph);
-  if (status != xnn_status_success) {
+  auto subgraph = xnnpack::CreateUniqueSubgraph(
+      /*num_external_values=*/static_rhs ? 2 : 3, 0);
+  if (!subgraph) {
     std::cerr << "failed to create subgrpah" << std::endl;
     return nullptr;
   }
@@ -51,7 +50,7 @@ xnn_subgraph_t FullyConnected(size_t batch_size, size_t m, size_t k, size_t n,
   std::array<size_t, 3> dims_out = {{batch_size, m, n}};
 
   uint32_t input_id = XNN_INVALID_VALUE_ID;
-  status = xnn_define_tensor_value(subgraph, datatype_in, dims_in.size(),
+  status = xnn_define_tensor_value(subgraph.get(), datatype_in, dims_in.size(),
                                    dims_in.data(),
                                    /*data=*/nullptr, /*external_id=*/0,
                                    XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id);
@@ -62,7 +61,7 @@ xnn_subgraph_t FullyConnected(size_t batch_size, size_t m, size_t k, size_t n,
 
   uint32_t output_id = XNN_INVALID_VALUE_ID;
   status = xnn_define_tensor_value(
-      subgraph, datatype_out, dims_out.size(), dims_out.data(),
+      subgraph.get(), datatype_out, dims_out.size(), dims_out.data(),
       /*data=*/nullptr, /*external_id=*/1,
       /*flags=*/XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id);
   if (status != xnn_status_success) {
@@ -83,25 +82,25 @@ xnn_subgraph_t FullyConnected(size_t batch_size, size_t m, size_t k, size_t n,
       w1_scale.resize(n);
       std::fill(w1_scale.begin(), w1_scale.end(), 1.0f);
       status = xnn_define_channelwise_quantized_tensor_value(
-          subgraph, datatype_w, /*scale=*/w1_scale.data(), dims_w.size(),
+          subgraph.get(), datatype_w, /*scale=*/w1_scale.data(), dims_w.size(),
           /*channel_dim=*/0, dims_w.data(),
           /*data=*/w1_data.data(), /*external_id=*/XNN_INVALID_VALUE_ID,
           /*flags=*/0, &weights_id);
     } else if (xnn_datatype_is_quantized(datatype_w)) {
       status = xnn_define_quantized_tensor_value(
-          subgraph, datatype_w, /*zero_point=*/0, /*scale=*/1.0f, dims_w.size(),
-          dims_w.data(),
+          subgraph.get(), datatype_w, /*zero_point=*/0, /*scale=*/1.0f,
+          dims_w.size(), dims_w.data(),
           /*data=*/w1_data.data(), /*external_id=*/XNN_INVALID_VALUE_ID,
           /*flags=*/0, &weights_id);
     } else {
       status = xnn_define_tensor_value(
-          subgraph, datatype_w, dims_w.size(), dims_w.data(),
+          subgraph.get(), datatype_w, dims_w.size(), dims_w.data(),
           /*data=*/w1_data.data(), XNN_INVALID_VALUE_ID, /*flags=*/0,
           &weights_id);
     }
   } else {
     status = xnn_define_tensor_value(
-        subgraph, datatype_w, dims_w.size(), dims_w.data(),
+        subgraph.get(), datatype_w, dims_w.size(), dims_w.data(),
         /*data=*/nullptr, /*external_id=*/2, XNN_VALUE_FLAG_EXTERNAL_INPUT,
         &weights_id);
   }
@@ -113,7 +112,7 @@ xnn_subgraph_t FullyConnected(size_t batch_size, size_t m, size_t k, size_t n,
   if (dynamically_quantize_lhs) {
     uint32_t quantized_input_id = XNN_INVALID_VALUE_ID;
     status = xnn_define_dynamically_quantized_tensor_value(
-        subgraph, xnn_datatype_qdint8, /*num_dims=*/dims_in.size(),
+        subgraph.get(), xnn_datatype_qdint8, /*num_dims=*/dims_in.size(),
         /*num_non_batch_dims=*/1, /*dims=*/dims_in.data(),
         /*external_id=*/XNN_INVALID_VALUE_ID,
         /*flags=*/0, &quantized_input_id);
@@ -123,9 +122,10 @@ xnn_subgraph_t FullyConnected(size_t batch_size, size_t m, size_t k, size_t n,
       return nullptr;
     }
 
-    status = xnn_define_unary(subgraph, xnn_unary_convert, /*params=*/nullptr,
-                              input_id, /*output_id=*/quantized_input_id,
-                              /*flags=*/0);
+    status =
+        xnn_define_unary(subgraph.get(), xnn_unary_convert, /*params=*/nullptr,
+                         input_id, /*output_id=*/quantized_input_id,
+                         /*flags=*/0);
     if (status != xnn_status_success) {
       std::cerr << "failed to create create convert " << std::endl;
       return nullptr;
@@ -134,7 +134,7 @@ xnn_subgraph_t FullyConnected(size_t batch_size, size_t m, size_t k, size_t n,
   }
 
   status = xnn_define_fully_connected(
-      subgraph,
+      subgraph.get(),
       /*output_min=*/-std::numeric_limits<float>::infinity(),
       /*output_max=*/std::numeric_limits<float>::infinity(),
       /*input_id=*/input_id,
@@ -147,7 +147,7 @@ xnn_subgraph_t FullyConnected(size_t batch_size, size_t m, size_t k, size_t n,
     return nullptr;
   }
 
-  return subgraph;
+  return subgraph.release();
 }
 
 }  // namespace models

@@ -38,9 +38,8 @@ struct QD8AttentionWeights {
 
 xnn_subgraph_t FP32Attention(size_t b, size_t t, size_t h, size_t n, size_t s) {
   xnn_status status;
-  xnn_subgraph_t subgraph = nullptr;
-  status = xnn_create_subgraph(/*num_external_values=*/4, 0, &subgraph);
-  if (status != xnn_status_success) {
+  auto subgraph = xnnpack::CreateUniqueSubgraph(/*num_external_values=*/4, 0);
+  if (!subgraph) {
     std::cerr << "failed to create subgrpah" << std::endl;
     return nullptr;
   }
@@ -50,7 +49,7 @@ xnn_subgraph_t FP32Attention(size_t b, size_t t, size_t h, size_t n, size_t s) {
   uint32_t v0 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> v0_dims = {{b, s, n, t}};
   status = xnn_define_tensor_value(
-      subgraph, xnn_datatype_fp32, v0_dims.size(), v0_dims.data(),
+      subgraph.get(), xnn_datatype_fp32, v0_dims.size(), v0_dims.data(),
       /*data=*/nullptr, 0, XNN_VALUE_FLAG_EXTERNAL_INPUT, &v0);
   if (status != xnn_status_success) {
     std::cerr << "failed to create tensor v0" << std::endl;
@@ -60,7 +59,7 @@ xnn_subgraph_t FP32Attention(size_t b, size_t t, size_t h, size_t n, size_t s) {
   uint32_t v1 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> v1_dims = {{b, t, n, h}};
   status = xnn_define_tensor_value(
-      subgraph, xnn_datatype_fp32, v1_dims.size(), v1_dims.data(),
+      subgraph.get(), xnn_datatype_fp32, v1_dims.size(), v1_dims.data(),
       /*data=*/nullptr, 1, XNN_VALUE_FLAG_EXTERNAL_INPUT, &v1);
   if (status != xnn_status_success) {
     std::cerr << "failed to create tensor v1" << std::endl;
@@ -70,7 +69,7 @@ xnn_subgraph_t FP32Attention(size_t b, size_t t, size_t h, size_t n, size_t s) {
   uint32_t v2 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> v2_dims = {{b, s, n, h}};
   status = xnn_define_tensor_value(
-      subgraph, xnn_datatype_fp32, v2_dims.size(), v2_dims.data(),
+      subgraph.get(), xnn_datatype_fp32, v2_dims.size(), v2_dims.data(),
       /*data=*/nullptr, 2, XNN_VALUE_FLAG_EXTERNAL_INPUT, &v2);
   if (status != xnn_status_success) {
     std::cerr << "failed to create tensor v2" << std::endl;
@@ -80,7 +79,7 @@ xnn_subgraph_t FP32Attention(size_t b, size_t t, size_t h, size_t n, size_t s) {
   uint32_t v3 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> v3_dims = {{b, t, n, h}};
   status = xnn_define_tensor_value(
-      subgraph, xnn_datatype_fp32, v3_dims.size(), v3_dims.data(),
+      subgraph.get(), xnn_datatype_fp32, v3_dims.size(), v3_dims.data(),
       /*data=*/nullptr, XNN_INVALID_VALUE_ID, /*flags=*/0, &v3);
   if (status != xnn_status_success) {
     std::cerr << "failed to create tensor v3" << std::endl;
@@ -90,7 +89,7 @@ xnn_subgraph_t FP32Attention(size_t b, size_t t, size_t h, size_t n, size_t s) {
   uint32_t v4 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> v4_dims = {{b, n, t, h}};
   status = xnn_define_tensor_value(
-      subgraph, xnn_datatype_fp32, v4_dims.size(), v4_dims.data(),
+      subgraph.get(), xnn_datatype_fp32, v4_dims.size(), v4_dims.data(),
       /*data=*/nullptr, XNN_INVALID_VALUE_ID, /*flags=*/0, &v4);
   if (status != xnn_status_success) {
     std::cerr << "failed to create tensor v4" << std::endl;
@@ -100,7 +99,7 @@ xnn_subgraph_t FP32Attention(size_t b, size_t t, size_t h, size_t n, size_t s) {
   uint32_t v5 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> v5_dims = {{b, n, s, h}};
   status = xnn_define_tensor_value(
-      subgraph, xnn_datatype_fp32, v5_dims.size(), v5_dims.data(),
+      subgraph.get(), xnn_datatype_fp32, v5_dims.size(), v5_dims.data(),
       /*data=*/nullptr, XNN_INVALID_VALUE_ID, /*flags=*/0, &v5);
   if (status != xnn_status_success) {
     std::cerr << "failed to create tensor v5" << std::endl;
@@ -110,7 +109,7 @@ xnn_subgraph_t FP32Attention(size_t b, size_t t, size_t h, size_t n, size_t s) {
   uint32_t v6 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> v6_dims = {{b, n, t, s}};
   status = xnn_define_tensor_value(
-      subgraph, xnn_datatype_fp32, v6_dims.size(), v6_dims.data(),
+      subgraph.get(), xnn_datatype_fp32, v6_dims.size(), v6_dims.data(),
       /*data=*/nullptr, XNN_INVALID_VALUE_ID, /*flags=*/0, &v6);
   if (status != xnn_status_success) {
     std::cerr << "failed to create tensor v6" << std::endl;
@@ -120,7 +119,7 @@ xnn_subgraph_t FP32Attention(size_t b, size_t t, size_t h, size_t n, size_t s) {
   uint32_t v7 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> v7_dims = {{b, n, t, s}};
   status = xnn_define_tensor_value(
-      subgraph, xnn_datatype_fp32, v7_dims.size(), v7_dims.data(),
+      subgraph.get(), xnn_datatype_fp32, v7_dims.size(), v7_dims.data(),
       /*data=*/nullptr, XNN_INVALID_VALUE_ID, /*flags=*/0, &v7);
   if (status != xnn_status_success) {
     std::cerr << "failed to create tensor v7" << std::endl;
@@ -130,7 +129,7 @@ xnn_subgraph_t FP32Attention(size_t b, size_t t, size_t h, size_t n, size_t s) {
   uint32_t v8 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> v8_dims = {{b, n, t, s}};
   status = xnn_define_tensor_value(
-      subgraph, xnn_datatype_fp32, v8_dims.size(), v8_dims.data(),
+      subgraph.get(), xnn_datatype_fp32, v8_dims.size(), v8_dims.data(),
       /*data=*/nullptr, XNN_INVALID_VALUE_ID, /*flags=*/0, &v8);
   if (status != xnn_status_success) {
     std::cerr << "failed to create tensor v8" << std::endl;
@@ -140,7 +139,7 @@ xnn_subgraph_t FP32Attention(size_t b, size_t t, size_t h, size_t n, size_t s) {
   uint32_t v9 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> v9_dims = {{b, n, t, s}};
   status = xnn_define_tensor_value(
-      subgraph, xnn_datatype_fp32, v9_dims.size(), v9_dims.data(),
+      subgraph.get(), xnn_datatype_fp32, v9_dims.size(), v9_dims.data(),
       /*data=*/nullptr, XNN_INVALID_VALUE_ID, /*flags=*/0, &v9);
   if (status != xnn_status_success) {
     std::cerr << "failed to create tensor v9" << std::endl;
@@ -150,7 +149,7 @@ xnn_subgraph_t FP32Attention(size_t b, size_t t, size_t h, size_t n, size_t s) {
   uint32_t v10 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> v10_dims = {{b, n, t, s}};
   status = xnn_define_tensor_value(
-      subgraph, xnn_datatype_fp32, v10_dims.size(), v10_dims.data(),
+      subgraph.get(), xnn_datatype_fp32, v10_dims.size(), v10_dims.data(),
       /*data=*/nullptr, XNN_INVALID_VALUE_ID, /*flags=*/0, &v10);
   if (status != xnn_status_success) {
     std::cerr << "failed to create tensor v10" << std::endl;
@@ -160,7 +159,7 @@ xnn_subgraph_t FP32Attention(size_t b, size_t t, size_t h, size_t n, size_t s) {
   uint32_t v11 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> v11_dims = {{b, n, t, t}};
   status = xnn_define_tensor_value(
-      subgraph, xnn_datatype_fp32, v11_dims.size(), v11_dims.data(),
+      subgraph.get(), xnn_datatype_fp32, v11_dims.size(), v11_dims.data(),
       /*data=*/nullptr, XNN_INVALID_VALUE_ID, /*flags=*/0, &v11);
   if (status != xnn_status_success) {
     std::cerr << "failed to create tensor v11" << std::endl;
@@ -170,7 +169,7 @@ xnn_subgraph_t FP32Attention(size_t b, size_t t, size_t h, size_t n, size_t s) {
   uint32_t v12 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> v12_dims = {{b, t, n, t}};
   status = xnn_define_tensor_value(
-      subgraph, xnn_datatype_fp32, v12_dims.size(), v12_dims.data(),
+      subgraph.get(), xnn_datatype_fp32, v12_dims.size(), v12_dims.data(),
       /*data=*/nullptr, 3, XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &v12);
   if (status != xnn_status_success) {
     std::cerr << "failed to create tensor v12" << std::endl;
@@ -181,7 +180,7 @@ xnn_subgraph_t FP32Attention(size_t b, size_t t, size_t h, size_t n, size_t s) {
   uint32_t w13 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 1> w13_dims = {{1}};
   status = xnn_define_tensor_value(
-      subgraph, xnn_datatype_fp32, w13_dims.size(), w13_dims.data(),
+      subgraph.get(), xnn_datatype_fp32, w13_dims.size(), w13_dims.data(),
       /*data=*/w13_data.data(), XNN_INVALID_VALUE_ID, /*flags=*/0, &w13);
   if (status != xnn_status_success) {
     std::cerr << "failed to create tensor w13" << std::endl;
@@ -197,7 +196,7 @@ xnn_subgraph_t FP32Attention(size_t b, size_t t, size_t h, size_t n, size_t s) {
   uint32_t w14 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 1> w14_dims = {{4}};
   status = xnn_define_tensor_value(
-      subgraph, xnn_datatype_int32, w14_dims.size(), w14_dims.data(),
+      subgraph.get(), xnn_datatype_int32, w14_dims.size(), w14_dims.data(),
       /*data=*/w14_data.data(), XNN_INVALID_VALUE_ID, /*flags=*/0, &w14);
   if (status != xnn_status_success) {
     std::cerr << "failed to create tensor w14" << std::endl;
@@ -208,7 +207,7 @@ xnn_subgraph_t FP32Attention(size_t b, size_t t, size_t h, size_t n, size_t s) {
   uint32_t w15 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 1> w15_dims = {{1}};
   status = xnn_define_tensor_value(
-      subgraph, xnn_datatype_fp32, w15_dims.size(), w15_dims.data(),
+      subgraph.get(), xnn_datatype_fp32, w15_dims.size(), w15_dims.data(),
       /*data=*/w15_data.data(), XNN_INVALID_VALUE_ID, /*flags=*/0, &w15);
   if (status != xnn_status_success) {
     std::cerr << "failed to create tensor w15" << std::endl;
@@ -224,7 +223,7 @@ xnn_subgraph_t FP32Attention(size_t b, size_t t, size_t h, size_t n, size_t s) {
   uint32_t w16 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 1> w16_dims = {{4}};
   status = xnn_define_tensor_value(
-      subgraph, xnn_datatype_int32, w16_dims.size(), w16_dims.data(),
+      subgraph.get(), xnn_datatype_int32, w16_dims.size(), w16_dims.data(),
       /*data=*/w16_data.data(), XNN_INVALID_VALUE_ID, /*flags=*/0, &w16);
   if (status != xnn_status_success) {
     std::cerr << "failed to create tensor w16" << std::endl;
@@ -238,9 +237,9 @@ xnn_subgraph_t FP32Attention(size_t b, size_t t, size_t h, size_t n, size_t s) {
 
   xnn_binary_params v3_params = {-std::numeric_limits<float>::infinity(),
                                  std::numeric_limits<float>::infinity()};
-  status =
-      xnn_define_binary(subgraph, xnn_binary_multiply, &v3_params, v1, w13, v3,
-                        /*flags=*/0);
+  status = xnn_define_binary(subgraph.get(), xnn_binary_multiply, &v3_params,
+                             v1, w13, v3,
+                             /*flags=*/0);
   if (status != xnn_status_success) {
     std::cerr << "failed to create node #0" << std::endl;
     return nullptr;
@@ -250,7 +249,7 @@ xnn_subgraph_t FP32Attention(size_t b, size_t t, size_t h, size_t n, size_t s) {
       (size_t)w14_data[0], (size_t)w14_data[1], (size_t)w14_data[2],
       (size_t)w14_data[3]};
   status =
-      xnn_define_static_transpose(subgraph,
+      xnn_define_static_transpose(subgraph.get(),
                                   /*num_dims=*/perm_v3_w14_v4.size(),
                                   /*perm=*/perm_v3_w14_v4.data(), v3, v4, 0);
   if (status != xnn_status_success) {
@@ -262,7 +261,7 @@ xnn_subgraph_t FP32Attention(size_t b, size_t t, size_t h, size_t n, size_t s) {
       (size_t)w14_data[0], (size_t)w14_data[1], (size_t)w14_data[2],
       (size_t)w14_data[3]};
   status =
-      xnn_define_static_transpose(subgraph,
+      xnn_define_static_transpose(subgraph.get(),
                                   /*num_dims=*/perm_v2_w14_v5.size(),
                                   /*perm=*/perm_v2_w14_v5.data(), v2, v5, 0);
   if (status != xnn_status_success) {
@@ -270,7 +269,7 @@ xnn_subgraph_t FP32Attention(size_t b, size_t t, size_t h, size_t n, size_t s) {
     return nullptr;
   }
 
-  status = xnn_define_batch_matrix_multiply(subgraph, v4, v5, v6,
+  status = xnn_define_batch_matrix_multiply(subgraph.get(), v4, v5, v6,
                                             XNN_FLAG_TRANSPOSE_B);
   if (status != xnn_status_success) {
     std::cerr << "failed to create node #3" << std::endl;
@@ -279,22 +278,22 @@ xnn_subgraph_t FP32Attention(size_t b, size_t t, size_t h, size_t n, size_t s) {
 
   xnn_binary_params v7_params = {-std::numeric_limits<float>::infinity(),
                                  std::numeric_limits<float>::infinity()};
-  status =
-      xnn_define_binary(subgraph, xnn_binary_multiply, &v7_params, v6, w15, v7,
-                        /*flags=*/0);
+  status = xnn_define_binary(subgraph.get(), xnn_binary_multiply, &v7_params,
+                             v6, w15, v7,
+                             /*flags=*/0);
   if (status != xnn_status_success) {
     std::cerr << "failed to create node #4" << std::endl;
     return nullptr;
   }
 
-  status = xnn_define_unary(subgraph, xnn_unary_tanh,
+  status = xnn_define_unary(subgraph.get(), xnn_unary_tanh,
                             /*params=*/nullptr, v7, v8, 0);
   if (status != xnn_status_success) {
     std::cerr << "failed to create node #5" << std::endl;
     return nullptr;
   }
 
-  status = xnn_define_softmax(subgraph, v8, v9,
+  status = xnn_define_softmax(subgraph.get(), v8, v9,
                               /*flags=*/0);
   if (status != xnn_status_success) {
     std::cerr << "failed to create node #6" << std::endl;
@@ -305,7 +304,7 @@ xnn_subgraph_t FP32Attention(size_t b, size_t t, size_t h, size_t n, size_t s) {
       (size_t)w16_data[0], (size_t)w16_data[1], (size_t)w16_data[2],
       (size_t)w16_data[3]};
   status =
-      xnn_define_static_transpose(subgraph,
+      xnn_define_static_transpose(subgraph.get(),
                                   /*num_dims=*/perm_v0_w16_v10.size(),
                                   /*perm=*/perm_v0_w16_v10.data(), v0, v10, 0);
   if (status != xnn_status_success) {
@@ -313,7 +312,7 @@ xnn_subgraph_t FP32Attention(size_t b, size_t t, size_t h, size_t n, size_t s) {
     return nullptr;
   }
 
-  status = xnn_define_batch_matrix_multiply(subgraph, v9, v10, v11,
+  status = xnn_define_batch_matrix_multiply(subgraph.get(), v9, v10, v11,
                                             XNN_FLAG_TRANSPOSE_B);
   if (status != xnn_status_success) {
     std::cerr << "failed to create node #8" << std::endl;
@@ -323,7 +322,7 @@ xnn_subgraph_t FP32Attention(size_t b, size_t t, size_t h, size_t n, size_t s) {
   std::array<size_t, 4> perm_v11_w14_v12 = {
       (size_t)w14_data[0], (size_t)w14_data[1], (size_t)w14_data[2],
       (size_t)w14_data[3]};
-  status = xnn_define_static_transpose(subgraph,
+  status = xnn_define_static_transpose(subgraph.get(),
                                        /*num_dims=*/perm_v11_w14_v12.size(),
                                        /*perm=*/perm_v11_w14_v12.data(), v11,
                                        v12, 0);
@@ -332,16 +331,15 @@ xnn_subgraph_t FP32Attention(size_t b, size_t t, size_t h, size_t n, size_t s) {
     return nullptr;
   }
 
-  return subgraph;
+  return subgraph.release();
 }
 
 xnn_subgraph_t QD8Attention(size_t batch_size, size_t seq_len,
                             size_t embedding_dim, size_t num_heads,
                             size_t head_dim, QD8AttentionWeights& weights) {
   xnn_status status;
-  xnn_subgraph_t subgraph = nullptr;
-  status = xnn_create_subgraph(/*num_external_values=*/2, 0, &subgraph);
-  if (status != xnn_status_success) {
+  auto subgraph = xnnpack::CreateUniqueSubgraph(/*num_external_values=*/2, 0);
+  if (!subgraph) {
     std::cerr << "failed to create subgrpah" << std::endl;
     return nullptr;
   }
@@ -357,7 +355,7 @@ xnn_subgraph_t QD8Attention(size_t batch_size, size_t seq_len,
   uint32_t input_id = XNN_INVALID_VALUE_ID;
   std::array<size_t, 3> input_dims = {{batch_size, seq_len, embedding_dim}};
   status = xnn_define_tensor_value(
-      subgraph, xnn_datatype_fp32, input_dims.size(), input_dims.data(),
+      subgraph.get(), xnn_datatype_fp32, input_dims.size(), input_dims.data(),
       /*data=*/nullptr, /*external_id=*/0,
       /*flags=*/XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id);
   if (status != xnn_status_success) {
@@ -367,7 +365,7 @@ xnn_subgraph_t QD8Attention(size_t batch_size, size_t seq_len,
 
   uint32_t quantized_input_id = XNN_INVALID_VALUE_ID;
   status = xnn_define_dynamically_quantized_tensor_value(
-      subgraph, xnn_datatype_qdint8, input_dims.size(),
+      subgraph.get(), xnn_datatype_qdint8, input_dims.size(),
       /*num_non_batch_dims=*/1, input_dims.data(), XNN_INVALID_VALUE_ID,
       /*flags=*/0, &quantized_input_id);
   if (status != xnn_status_success) {
@@ -376,8 +374,9 @@ xnn_subgraph_t QD8Attention(size_t batch_size, size_t seq_len,
     return nullptr;
   }
 
-  status = xnn_define_unary(subgraph, xnn_unary_convert, /*params=*/nullptr,
-                            input_id, quantized_input_id, /*flags=*/0);
+  status =
+      xnn_define_unary(subgraph.get(), xnn_unary_convert, /*params=*/nullptr,
+                       input_id, quantized_input_id, /*flags=*/0);
   if (status != xnn_status_success) {
     std::cerr << "failed to create create convert " << std::endl;
     return nullptr;
@@ -386,7 +385,7 @@ xnn_subgraph_t QD8Attention(size_t batch_size, size_t seq_len,
   uint32_t output_id = XNN_INVALID_VALUE_ID;
   std::array<size_t, 3> output_dims = {{batch_size, seq_len, embedding_dim}};
   status = xnn_define_tensor_value(
-      subgraph, xnn_datatype_fp32, output_dims.size(), output_dims.data(),
+      subgraph.get(), xnn_datatype_fp32, output_dims.size(), output_dims.data(),
       /*data=*/nullptr, /*external_id=*/1,
       /*flags=*/XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id);
   if (status != xnn_status_success) {
@@ -404,7 +403,7 @@ xnn_subgraph_t QD8Attention(size_t batch_size, size_t seq_len,
   std::generate(weights.value_data.begin(), weights.value_data.end(),
                 std::ref(i8rng));
   status = xnn_define_channelwise_quantized_tensor_value(
-      subgraph, xnn_datatype_qcint8, weights.value_scale.data(),
+      subgraph.get(), xnn_datatype_qcint8, weights.value_scale.data(),
       value_dims.size(), value_dims.size() - 2, value_dims.data(),
       weights.value_data.data(), XNN_INVALID_VALUE_ID, /*flags=*/0, &value_id);
   if (status != xnn_status_success) {
@@ -421,7 +420,7 @@ xnn_subgraph_t QD8Attention(size_t batch_size, size_t seq_len,
   std::generate(weights.query_data.begin(), weights.query_data.end(),
                 std::ref(i8rng));
   status = xnn_define_channelwise_quantized_tensor_value(
-      subgraph, xnn_datatype_qcint8, weights.query_scale.data(),
+      subgraph.get(), xnn_datatype_qcint8, weights.query_scale.data(),
       query_dims.size(), query_dims.size() - 2, query_dims.data(),
       weights.query_data.data(), XNN_INVALID_VALUE_ID, /*flags=*/0, &query_id);
   if (status != xnn_status_success) {
@@ -438,9 +437,9 @@ xnn_subgraph_t QD8Attention(size_t batch_size, size_t seq_len,
   std::generate(weights.key_data.begin(), weights.key_data.end(),
                 std::ref(i8rng));
   status = xnn_define_channelwise_quantized_tensor_value(
-      subgraph, xnn_datatype_qcint8, weights.key_scale.data(), key_dims.size(),
-      key_dims.size() - 2, key_dims.data(), weights.key_data.data(),
-      XNN_INVALID_VALUE_ID, /*flags=*/0, &key_id);
+      subgraph.get(), xnn_datatype_qcint8, weights.key_scale.data(),
+      key_dims.size(), key_dims.size() - 2, key_dims.data(),
+      weights.key_data.data(), XNN_INVALID_VALUE_ID, /*flags=*/0, &key_id);
   if (status != xnn_status_success) {
     std::cerr << "failed to create tensor key" << std::endl;
     return nullptr;
@@ -450,7 +449,7 @@ xnn_subgraph_t QD8Attention(size_t batch_size, size_t seq_len,
   std::array<size_t, 3> query_proj_dims = {
       {batch_size, seq_len, num_heads * head_dim}};
   status = xnn_define_tensor_value(
-      subgraph, xnn_datatype_fp32, query_proj_dims.size(),
+      subgraph.get(), xnn_datatype_fp32, query_proj_dims.size(),
       query_proj_dims.data(),
       /*data=*/nullptr, XNN_INVALID_VALUE_ID, /*flags=*/0, &query_proj_id);
   if (status != xnn_status_success) {
@@ -460,9 +459,10 @@ xnn_subgraph_t QD8Attention(size_t batch_size, size_t seq_len,
 
   uint32_t key_proj_id = XNN_INVALID_VALUE_ID;
   std::array<size_t, 2> key_proj_dims = {{seq_len, head_dim}};
-  status = xnn_define_tensor_value(
-      subgraph, xnn_datatype_fp32, key_proj_dims.size(), key_proj_dims.data(),
-      /*data=*/nullptr, XNN_INVALID_VALUE_ID, /*flags=*/0, &key_proj_id);
+  status = xnn_define_tensor_value(subgraph.get(), xnn_datatype_fp32,
+                                   key_proj_dims.size(), key_proj_dims.data(),
+                                   /*data=*/nullptr, XNN_INVALID_VALUE_ID,
+                                   /*flags=*/0, &key_proj_id);
   if (status != xnn_status_success) {
     std::cerr << "failed to create tensor key proj" << std::endl;
     return nullptr;
@@ -471,7 +471,7 @@ xnn_subgraph_t QD8Attention(size_t batch_size, size_t seq_len,
   uint32_t value_proj_id = XNN_INVALID_VALUE_ID;
   std::array<size_t, 2> value_proj_dims = {{seq_len, head_dim}};
   status = xnn_define_tensor_value(
-      subgraph, xnn_datatype_fp32, value_proj_dims.size(),
+      subgraph.get(), xnn_datatype_fp32, value_proj_dims.size(),
       value_proj_dims.data(),
       /*data=*/nullptr, XNN_INVALID_VALUE_ID, /*flags=*/0, &value_proj_id);
   if (status != xnn_status_success) {
@@ -483,7 +483,7 @@ xnn_subgraph_t QD8Attention(size_t batch_size, size_t seq_len,
   const float output_max = std::numeric_limits<float>::infinity();
 
   status = xnn_define_fully_connected(
-      subgraph, output_min, output_max, quantized_input_id, query_id,
+      subgraph.get(), output_min, output_max, quantized_input_id, query_id,
       XNN_INVALID_VALUE_ID, query_proj_id, /*flags=*/0);
   if (status != xnn_status_success) {
     std::cerr << "failed to create FC node" << std::endl;
@@ -491,7 +491,7 @@ xnn_subgraph_t QD8Attention(size_t batch_size, size_t seq_len,
   }
 
   status = xnn_define_fully_connected(
-      subgraph, output_min, output_max, quantized_input_id, key_id,
+      subgraph.get(), output_min, output_max, quantized_input_id, key_id,
       XNN_INVALID_VALUE_ID, key_proj_id, /*flags=*/0);
   if (status != xnn_status_success) {
     std::cerr << "failed to create FC node" << std::endl;
@@ -499,7 +499,7 @@ xnn_subgraph_t QD8Attention(size_t batch_size, size_t seq_len,
   }
 
   status = xnn_define_fully_connected(
-      subgraph, output_min, output_max, quantized_input_id, value_id,
+      subgraph.get(), output_min, output_max, quantized_input_id, value_id,
       XNN_INVALID_VALUE_ID, value_proj_id, /*flags=*/0);
   if (status != xnn_status_success) {
     std::cerr << "failed to create FC node" << std::endl;
@@ -510,7 +510,7 @@ xnn_subgraph_t QD8Attention(size_t batch_size, size_t seq_len,
   std::array<size_t, 4> query_reshaped_dims = {
       {batch_size, seq_len, num_heads, head_dim}};
   status = xnn_define_tensor_value(
-      subgraph, xnn_datatype_fp32, query_reshaped_dims.size(),
+      subgraph.get(), xnn_datatype_fp32, query_reshaped_dims.size(),
       query_reshaped_dims.data(),
       /*data=*/nullptr, XNN_INVALID_VALUE_ID, /*flags=*/0, &query_reshaped_id);
   if (status != xnn_status_success) {
@@ -518,7 +518,7 @@ xnn_subgraph_t QD8Attention(size_t batch_size, size_t seq_len,
     return nullptr;
   }
 
-  status = xnn_define_static_reshape(subgraph, query_reshaped_dims.size(),
+  status = xnn_define_static_reshape(subgraph.get(), query_reshaped_dims.size(),
                                      query_reshaped_dims.data(), query_proj_id,
                                      query_reshaped_id, /*flags=*/0);
   if (status != xnn_status_success) {
@@ -530,7 +530,7 @@ xnn_subgraph_t QD8Attention(size_t batch_size, size_t seq_len,
   std::array<size_t, 4> key_reshaped_dims = {
       {batch_size, 1, seq_len, head_dim}};
   status = xnn_define_tensor_value(
-      subgraph, xnn_datatype_fp32, key_reshaped_dims.size(),
+      subgraph.get(), xnn_datatype_fp32, key_reshaped_dims.size(),
       key_reshaped_dims.data(),
       /*data=*/nullptr, XNN_INVALID_VALUE_ID, /*flags=*/0, &key_reshaped_id);
   if (status != xnn_status_success) {
@@ -538,7 +538,7 @@ xnn_subgraph_t QD8Attention(size_t batch_size, size_t seq_len,
     return nullptr;
   }
 
-  status = xnn_define_static_reshape(subgraph, key_reshaped_dims.size(),
+  status = xnn_define_static_reshape(subgraph.get(), key_reshaped_dims.size(),
                                      key_reshaped_dims.data(), key_proj_id,
                                      key_reshaped_id, /*flags=*/0);
   if (status != xnn_status_success) {
@@ -550,14 +550,14 @@ xnn_subgraph_t QD8Attention(size_t batch_size, size_t seq_len,
   std::array<size_t, 4> logits_dims = {
       {batch_size, seq_len, num_heads, seq_len}};
   status = xnn_define_tensor_value(
-      subgraph, xnn_datatype_fp32, logits_dims.size(), logits_dims.data(),
+      subgraph.get(), xnn_datatype_fp32, logits_dims.size(), logits_dims.data(),
       /*data=*/nullptr, XNN_INVALID_VALUE_ID, /*flags=*/0, &logits_id);
   if (status != xnn_status_success) {
     std::cerr << "failed to create tensor logits" << std::endl;
     return nullptr;
   }
 
-  status = xnn_define_batch_matrix_multiply(subgraph, query_reshaped_id,
+  status = xnn_define_batch_matrix_multiply(subgraph.get(), query_reshaped_id,
                                             key_reshaped_id, logits_id,
                                             /*flags=*/XNN_FLAG_TRANSPOSE_B);
   if (status != xnn_status_success) {
@@ -569,14 +569,14 @@ xnn_subgraph_t QD8Attention(size_t batch_size, size_t seq_len,
   std::array<size_t, 4> probs_dims = {
       {batch_size, seq_len, num_heads, seq_len}};
   status = xnn_define_tensor_value(
-      subgraph, xnn_datatype_fp32, probs_dims.size(), probs_dims.data(),
+      subgraph.get(), xnn_datatype_fp32, probs_dims.size(), probs_dims.data(),
       /*data=*/nullptr, XNN_INVALID_VALUE_ID, /*flags=*/0, &probs_id);
   if (status != xnn_status_success) {
     std::cerr << "failed to create tensor probs" << std::endl;
     return nullptr;
   }
 
-  status = xnn_define_softmax(subgraph, logits_id, probs_id, /*flags=*/0);
+  status = xnn_define_softmax(subgraph.get(), logits_id, probs_id, /*flags=*/0);
   if (status != xnn_status_success) {
     std::cerr << "failed to create softmax" << std::endl;
     return nullptr;
@@ -585,16 +585,17 @@ xnn_subgraph_t QD8Attention(size_t batch_size, size_t seq_len,
   uint32_t outcome_id = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> outcome_dims = {
       {batch_size, seq_len, num_heads, head_dim}};
-  status = xnn_define_tensor_value(
-      subgraph, xnn_datatype_fp32, outcome_dims.size(), outcome_dims.data(),
-      /*data=*/nullptr, XNN_INVALID_VALUE_ID, /*flags=*/0, &outcome_id);
+  status = xnn_define_tensor_value(subgraph.get(), xnn_datatype_fp32,
+                                   outcome_dims.size(), outcome_dims.data(),
+                                   /*data=*/nullptr, XNN_INVALID_VALUE_ID,
+                                   /*flags=*/0, &outcome_id);
   if (status != xnn_status_success) {
     std::cerr << "failed to create tensor outcome" << std::endl;
     return nullptr;
   }
 
-  status = xnn_define_batch_matrix_multiply(subgraph, probs_id, value_proj_id,
-                                            outcome_id, /*flags=*/0);
+  status = xnn_define_batch_matrix_multiply(
+      subgraph.get(), probs_id, value_proj_id, outcome_id, /*flags=*/0);
   if (status != xnn_status_success) {
     std::cerr << "failed to create batch matrix multiply" << std::endl;
     return nullptr;
@@ -603,7 +604,7 @@ xnn_subgraph_t QD8Attention(size_t batch_size, size_t seq_len,
   uint32_t outcome_reshaped_id = XNN_INVALID_VALUE_ID;
   std::array<size_t, 3> outcome_reshaped_dims = {
       {batch_size, seq_len, num_heads * head_dim}};
-  status = xnn_define_tensor_value(subgraph, xnn_datatype_fp32,
+  status = xnn_define_tensor_value(subgraph.get(), xnn_datatype_fp32,
                                    outcome_reshaped_dims.size(),
                                    outcome_reshaped_dims.data(),
                                    /*data=*/nullptr, XNN_INVALID_VALUE_ID,
@@ -613,9 +614,10 @@ xnn_subgraph_t QD8Attention(size_t batch_size, size_t seq_len,
     return nullptr;
   }
 
-  status = xnn_define_static_reshape(subgraph, outcome_reshaped_dims.size(),
-                                     outcome_reshaped_dims.data(), outcome_id,
-                                     outcome_reshaped_id, /*flags=*/0);
+  status =
+      xnn_define_static_reshape(subgraph.get(), outcome_reshaped_dims.size(),
+                                outcome_reshaped_dims.data(), outcome_id,
+                                outcome_reshaped_id, /*flags=*/0);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape outcome" << std::endl;
     return nullptr;
@@ -632,7 +634,7 @@ xnn_subgraph_t QD8Attention(size_t batch_size, size_t seq_len,
   std::generate(weights.post_proj_data.begin(), weights.post_proj_data.end(),
                 std::ref(i8rng));
   status = xnn_define_channelwise_quantized_tensor_value(
-      subgraph, xnn_datatype_qcint8, weights.post_proj_scale.data(),
+      subgraph.get(), xnn_datatype_qcint8, weights.post_proj_scale.data(),
       post_proj_dims.size(), post_proj_dims.size() - 2, post_proj_dims.data(),
       weights.post_proj_data.data(), XNN_INVALID_VALUE_ID, /*flags=*/0,
       &post_proj_weights_id);
@@ -643,7 +645,7 @@ xnn_subgraph_t QD8Attention(size_t batch_size, size_t seq_len,
 
   uint32_t quantized_outcome_id = XNN_INVALID_VALUE_ID;
   status = xnn_define_dynamically_quantized_tensor_value(
-      subgraph, xnn_datatype_qdint8, outcome_reshaped_dims.size(),
+      subgraph.get(), xnn_datatype_qdint8, outcome_reshaped_dims.size(),
       /*num_non_batch_dims=*/1, outcome_reshaped_dims.data(),
       XNN_INVALID_VALUE_ID,
       /*flags=*/0, &quantized_outcome_id);
@@ -653,23 +655,24 @@ xnn_subgraph_t QD8Attention(size_t batch_size, size_t seq_len,
     return nullptr;
   }
 
-  status = xnn_define_unary(subgraph, xnn_unary_convert, /*params=*/nullptr,
-                            outcome_reshaped_id, quantized_outcome_id,
-                            /*flags=*/0);
+  status =
+      xnn_define_unary(subgraph.get(), xnn_unary_convert, /*params=*/nullptr,
+                       outcome_reshaped_id, quantized_outcome_id,
+                       /*flags=*/0);
   if (status != xnn_status_success) {
     std::cerr << "failed to create create convert " << std::endl;
     return nullptr;
   }
 
   status = xnn_define_fully_connected(
-      subgraph, output_min, output_max, quantized_outcome_id,
+      subgraph.get(), output_min, output_max, quantized_outcome_id,
       post_proj_weights_id, XNN_INVALID_VALUE_ID, output_id, /*flags=*/0);
   if (status != xnn_status_success) {
     std::cerr << "failed to create FC node" << std::endl;
     return nullptr;
   }
 
-  return subgraph;
+  return subgraph.release();
 }
 
 }  // namespace models

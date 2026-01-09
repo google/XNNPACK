@@ -17,9 +17,8 @@ namespace models {
 xnn_subgraph_t FP32Elementwise(size_t batch_size, size_t num_elements,
                                size_t depth) {
   xnn_status status;
-  xnn_subgraph_t subgraph = nullptr;
-  status = xnn_create_subgraph(/*num_external_values=*/3, 0, &subgraph);
-  if (status != xnn_status_success) {
+  auto subgraph = xnnpack::CreateUniqueSubgraph(/*num_external_values=*/3, 0);
+  if (!subgraph) {
     std::cerr << "failed to create subgrpah" << std::endl;
     return nullptr;
   }
@@ -28,7 +27,7 @@ xnn_subgraph_t FP32Elementwise(size_t batch_size, size_t num_elements,
 
   uint32_t v0 = XNN_INVALID_VALUE_ID;
   status = xnn_define_tensor_value(
-      subgraph, xnn_datatype_fp32, dims.size(), dims.data(),
+      subgraph.get(), xnn_datatype_fp32, dims.size(), dims.data(),
       /*data=*/nullptr, 0, XNN_VALUE_FLAG_EXTERNAL_INPUT, &v0);
   if (status != xnn_status_success) {
     std::cerr << "failed to create tensor v0" << std::endl;
@@ -37,7 +36,7 @@ xnn_subgraph_t FP32Elementwise(size_t batch_size, size_t num_elements,
 
   uint32_t v1 = XNN_INVALID_VALUE_ID;
   status = xnn_define_tensor_value(
-      subgraph, xnn_datatype_fp32, dims.size(), dims.data(),
+      subgraph.get(), xnn_datatype_fp32, dims.size(), dims.data(),
       /*data=*/nullptr, 1, XNN_VALUE_FLAG_EXTERNAL_INPUT, &v1);
   if (status != xnn_status_success) {
     std::cerr << "failed to create tensor v1" << std::endl;
@@ -46,7 +45,7 @@ xnn_subgraph_t FP32Elementwise(size_t batch_size, size_t num_elements,
 
   uint32_t output = XNN_INVALID_VALUE_ID;
   status = xnn_define_tensor_value(
-      subgraph, xnn_datatype_fp32, dims.size(), dims.data(),
+      subgraph.get(), xnn_datatype_fp32, dims.size(), dims.data(),
       /*data=*/nullptr, 2, /*flags=*/XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output);
   if (status != xnn_status_success) {
     std::cerr << "failed to create tensor output" << std::endl;
@@ -60,16 +59,16 @@ xnn_subgraph_t FP32Elementwise(size_t batch_size, size_t num_elements,
   for (int i = 0; i < depth; ++i) {
     uint32_t new_add = XNN_INVALID_VALUE_ID;
     status = xnn_define_tensor_value(
-        subgraph, xnn_datatype_fp32, dims.size(), dims.data(),
+        subgraph.get(), xnn_datatype_fp32, dims.size(), dims.data(),
         /*data=*/nullptr, XNN_INVALID_VALUE_ID, /*flags=*/0, &new_add);
     if (status != xnn_status_success) {
       std::cerr << "failed to create tensor add" << std::endl;
       return nullptr;
     }
 
-    status =
-        xnn_define_binary(subgraph, xnn_binary_add, &params, mul, add, new_add,
-                          /*flags=*/0);
+    status = xnn_define_binary(subgraph.get(), xnn_binary_add, &params, mul,
+                               add, new_add,
+                               /*flags=*/0);
     if (status != xnn_status_success) {
       std::cerr << "failed to create node #0" << std::endl;
       return nullptr;
@@ -78,15 +77,15 @@ xnn_subgraph_t FP32Elementwise(size_t batch_size, size_t num_elements,
 
     mul = XNN_INVALID_VALUE_ID;
     status = xnn_define_tensor_value(
-        subgraph, xnn_datatype_fp32, dims.size(), dims.data(),
+        subgraph.get(), xnn_datatype_fp32, dims.size(), dims.data(),
         /*data=*/nullptr, XNN_INVALID_VALUE_ID, /*flags=*/0, &mul);
     if (status != xnn_status_success) {
       std::cerr << "failed to create tensor mul" << std::endl;
       return nullptr;
     }
 
-    status = xnn_define_binary(subgraph, xnn_binary_multiply, &params, new_add,
-                               new_add, mul,
+    status = xnn_define_binary(subgraph.get(), xnn_binary_multiply, &params,
+                               new_add, new_add, mul,
                                /*flags=*/0);
     if (status != xnn_status_success) {
       std::cerr << "failed to create node #0" << std::endl;
@@ -94,15 +93,15 @@ xnn_subgraph_t FP32Elementwise(size_t batch_size, size_t num_elements,
     }
   }
 
-  status =
-      xnn_define_binary(subgraph, xnn_binary_subtract, &params, mul, v0, output,
-                        /*flags=*/0);
+  status = xnn_define_binary(subgraph.get(), xnn_binary_subtract, &params, mul,
+                             v0, output,
+                             /*flags=*/0);
   if (status != xnn_status_success) {
     std::cerr << "failed to create node #0" << std::endl;
     return nullptr;
   }
 
-  return subgraph;
+  return subgraph.release();
 }
 
 }  // namespace models

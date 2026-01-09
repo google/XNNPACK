@@ -24,15 +24,15 @@ xnn_subgraph_t StaticReduce(xnn_reduce_operator op_type,
   const xnn_datatype datatype = xnn_datatype_of<T>();
 
   xnn_status status;
-  xnn_subgraph_t subgraph = nullptr;
-  status = xnn_create_subgraph(/*num_external_values=*/2, 0, &subgraph);
-  if (status != xnn_status_success) {
+  auto subgraph = xnnpack::CreateUniqueSubgraph(/*num_external_values=*/2, 0);
+  if (!subgraph) {
     std::cerr << "failed to create subgrpah" << std::endl;
     return nullptr;
   }
 
   uint32_t input_id = XNN_INVALID_VALUE_ID;
-  status = xnn_define_tensor_value(subgraph, datatype, dims.size(), dims.data(),
+  status = xnn_define_tensor_value(subgraph.get(), datatype, dims.size(),
+                                   dims.data(),
                                    /*data=*/nullptr, /*external_id=*/0,
                                    XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id);
   if (status != xnn_status_success) {
@@ -46,26 +46,25 @@ xnn_subgraph_t StaticReduce(xnn_reduce_operator op_type,
   }
 
   uint32_t output_id = XNN_INVALID_VALUE_ID;
-  status =
-      xnn_define_tensor_value(subgraph, datatype, output_dims.size(),
-                              output_dims.data(),
-                              /*data=*/nullptr, /*external_id=*/1,
-                              /*flags=*/XNN_VALUE_FLAG_EXTERNAL_OUTPUT,
-                              &output_id);
+  status = xnn_define_tensor_value(
+      subgraph.get(), datatype, output_dims.size(), output_dims.data(),
+      /*data=*/nullptr, /*external_id=*/1,
+      /*flags=*/XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id);
   if (status != xnn_status_success) {
     std::cerr << "failed to create output tensor" << std::endl;
     return nullptr;
   }
 
-  status = xnn_define_static_reduce(subgraph, op_type, axes.size(), axes.data(),
-                                    input_id, output_id, /*flags=*/0);
+  status =
+      xnn_define_static_reduce(subgraph.get(), op_type, axes.size(),
+                               axes.data(), input_id, output_id, /*flags=*/0);
 
   if (status != xnn_status_success) {
     std::cerr << "failed to create node #0" << std::endl;
     return nullptr;
   }
 
-  return subgraph;
+  return subgraph.release();
 }
 
 }  // namespace models

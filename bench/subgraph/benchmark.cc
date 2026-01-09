@@ -28,6 +28,18 @@
 
 namespace xnnpack {
 
+unique_subgraph_ptr CreateUniqueSubgraph(uint32_t num_external_values,
+                                         uint32_t external_value_flags) {
+  xnn_subgraph_t subgraph = nullptr;
+  xnn_status status =
+      xnn_create_subgraph(num_external_values, external_value_flags, &subgraph);
+  if (status != xnn_status_success) {
+    std::cerr << "failed to create subgraph" << std::endl;
+    assert(!subgraph);
+  }
+  return unique_subgraph_ptr(subgraph, xnn_delete_subgraph);
+}
+
 namespace {
 
 // Base class for loading and running models with XNNPACK.
