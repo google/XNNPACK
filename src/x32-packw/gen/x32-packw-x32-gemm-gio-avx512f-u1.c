@@ -45,6 +45,7 @@ void xnn_x32_packw_gemm_gio_ukernel_x32__avx512f_u1(
   assert(k_stride != 0);
   assert(weights != NULL);
   assert(packed_weights != NULL);
+  assert((intptr_t)packed_weights % 64 == 0);  // Alignment requirement for `_mm512_stream_ps`.
 
   const __m512 vzero = _mm512_setzero_ps();
   const float* b = (const float*) bias;
@@ -58,12 +59,12 @@ void xnn_x32_packw_gemm_gio_ukernel_x32__avx512f_u1(
       if XNN_LIKELY(b != NULL) {
         const __m512 vb0 = _mm512_loadu_ps(b + 0);
         const __m512 vb1 = _mm512_loadu_ps(b + 16);
-        _mm512_store_ps(packed_w + 0, vb0);
-        _mm512_store_ps(packed_w + 16, vb1);
+        _mm512_stream_ps(packed_w + 0, vb0);
+        _mm512_stream_ps(packed_w + 16, vb1);
         b += 32;
       } else {
-        _mm512_store_ps(packed_w + 0, vzero);
-        _mm512_store_ps(packed_w + 16, vzero);
+        _mm512_stream_ps(packed_w + 0, vzero);
+        _mm512_stream_ps(packed_w + 16, vzero);
       }
       packed_w += 32;
 
@@ -73,8 +74,8 @@ void xnn_x32_packw_gemm_gio_ukernel_x32__avx512f_u1(
       for (; k > 0; --k) {
         const __m512 v0 = _mm512_loadu_ps(w + 0);
         const __m512 v1 = _mm512_loadu_ps(w + 16);
-        _mm512_store_ps(packed_w + 0, v0);
-        _mm512_store_ps(packed_w + 16, v1);
+        _mm512_stream_ps(packed_w + 0, v0);
+        _mm512_stream_ps(packed_w + 16, v1);
         w += k_stride;
         packed_w += 32;
       }
@@ -93,12 +94,12 @@ void xnn_x32_packw_gemm_gio_ukernel_x32__avx512f_u1(
       if XNN_LIKELY(b != NULL) {
         const __m512 vb0 = _mm512_maskz_loadu_ps(vmask0, b + 0);
         const __m512 vb1 = _mm512_maskz_loadu_ps(vmask1, b + 16);
-        _mm512_store_ps(packed_w + 0, vb0);
-        _mm512_store_ps(packed_w + 16, vb1);
+        _mm512_stream_ps(packed_w + 0, vb0);
+        _mm512_stream_ps(packed_w + 16, vb1);
         b += n;
       } else {
-        _mm512_store_ps(packed_w + 0, vzero);
-        _mm512_store_ps(packed_w + 16, vzero);
+        _mm512_stream_ps(packed_w + 0, vzero);
+        _mm512_stream_ps(packed_w + 16, vzero);
       }
       packed_w += 32;
 
@@ -106,8 +107,8 @@ void xnn_x32_packw_gemm_gio_ukernel_x32__avx512f_u1(
       for (size_t k = kc; k > 0; --k) {
         const __m512 v0 = _mm512_maskz_loadu_ps(vmask0, w + 0);
         const __m512 v1 = _mm512_maskz_loadu_ps(vmask1, w + 16);
-        _mm512_store_ps(packed_w + 0, v0);
-        _mm512_store_ps(packed_w + 16, v1);
+        _mm512_stream_ps(packed_w + 0, v0);
+        _mm512_stream_ps(packed_w + 16, v1);
         w += k_stride;
         packed_w += 32;
       }
