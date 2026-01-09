@@ -12,6 +12,7 @@ XNNPACK is a highly optimized solution for neural network inference on ARM, x86,
 - WebAssembly SIMD
 - [WebAssembly Relaxed SIMD](https://github.com/WebAssembly/relaxed-simd) (experimental)
 - RISC-V (RV32GC and RV64GC)
+- Hexagon (with HVX)
 
 ## Operator Coverage
 
