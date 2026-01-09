@@ -396,7 +396,8 @@ TEST(CONSTANT_PAD_THEN_CONVOLUTION, fusion_quantized_int8) {
   xnnpack::Buffer<qint32> bias_data(bias_dims.NumElements(), 21);
   xnn_quantization_params bias_quantization = {0, 0.000020546303858282045};
   const TensorShape input_dims = {1, 254, 254, 3};
-  xnnpack::Buffer<qint8> input_data(input_dims.NumElements(), 127);
+  xnnpack::Buffer<qint8> input_data(input_dims.NumElements(), 127,
+                                    XnnExtraBytes);
 
   tester.AddInputTensor<qint8>({1, 254, 254, 3}, input_data.data(), input_quantization, input_id)
       .AddDynamicTensor<qint8>({1, 262, 266, 3}, intermediate_id, input_quantization)
