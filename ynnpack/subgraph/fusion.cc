@@ -408,6 +408,9 @@ bool rewrite_transpose_stencil_copy(ynn_subgraph& subgraph, ynn_node& node,
 }
 
 // Rewrites ynn_reduce_sum(x*x) to ynn_reduce_sum_squared(x).
+// Specifically:
+//   ynn_reduce_sum(fp32 * fp32) -> ynn_reduce_sum_squared(fp32)
+//   ynn_reduce_sum(int32 * int32) -> ynn_reduce_sum_squared(int32)
 bool rewrite_reduce_sum_of_squared(ynn_subgraph& subgraph, ynn_node& node,
                                    subgraph_analysis& analysis) {
   const ynn_node::reduce* reduce_op = std::get_if<ynn_node::reduce>(&node.op);
@@ -432,8 +435,7 @@ bool rewrite_reduce_sum_of_squared(ynn_subgraph& subgraph, ynn_node& node,
   uint32_t x_id = mul_node->inputs[0];
   const ynn_value* x = &subgraph.value(x_id);
 
-  if (x->type != ynn_type_fp16 && x->type != ynn_type_fp32 &&
-      x->type != ynn_type_bf16) {
+  if (x->type != ynn_type_fp32 && x->type != ynn_type_int32) {
     return false;
   }
 
@@ -449,6 +451,7 @@ bool rewrite_reduce_sum_of_squared(ynn_subgraph& subgraph, ynn_node& node,
 // Specifically:
 //   ynn_reduce_sum(f32(x_fp16)) -> ynn_reduce_sum(x_fp16)
 //   ynn_reduce_sum(f32(x_bf16)) -> ynn_reduce_sum(x_bf16)
+//   ynn_reduce_sum(int32(x_int8)) -> ynn_reduce_sum(x_int8)
 bool rewrite_reduce_sum_convert(ynn_subgraph& subgraph, ynn_node& node,
                                 subgraph_analysis& analysis) {
   const ynn_node::reduce* reduce_op = std::get_if<ynn_node::reduce>(&node.op);
@@ -469,11 +472,19 @@ bool rewrite_reduce_sum_convert(ynn_subgraph& subgraph, ynn_node& node,
   const ynn_value& x = subgraph.value(convert_node->inputs[0]);
   const ynn_value& converted_x = subgraph.value(convert_node->outputs[0]);
 
-  if (converted_x.type != ynn_type_fp32) {
-    return false;
-  }
-
-  if (x.type != ynn_type_fp16 && x.type != ynn_type_bf16) {
+  if (converted_x.type == ynn_type_fp32) {
+    if (!ynn::type_is_floating_point(x.type)) {
+      return false;
+    }
+  } else if (converted_x.type == ynn_type_int32) {
+    if (!ynn::type_is_integral(x.type)) {
+      return false;
+    }
+    if (x.scale_id != YNN_INVALID_VALUE_ID ||
+        x.zero_point_id != YNN_INVALID_VALUE_ID) {
+      return false;
+    }
+  } else {
     return false;
   }
 
@@ -487,6 +498,7 @@ bool rewrite_reduce_sum_convert(ynn_subgraph& subgraph, ynn_node& node,
 // convert's input. Specifically:
 //   ynn_reduce_sum_squared(f32(x_fp16)) -> ynn_reduce_sum_squared(x_fp16)
 //   ynn_reduce_sum_squared(f32(x_bf16)) -> ynn_reduce_sum_squared(x_bf16)
+//   ynn_reduce_sum_squared(int32(x_int8)) -> ynn_reduce_sum_squared(x_int8)
 bool rewrite_reduce_sum_squared_convert(ynn_subgraph& subgraph, ynn_node& node,
                                         subgraph_analysis& analysis) {
   const ynn_node::reduce* reduce_op = std::get_if<ynn_node::reduce>(&node.op);
@@ -507,11 +519,19 @@ bool rewrite_reduce_sum_squared_convert(ynn_subgraph& subgraph, ynn_node& node,
   const ynn_value& x = subgraph.value(convert_node->inputs[0]);
   const ynn_value& converted_x = subgraph.value(convert_node->outputs[0]);
 
-  if (converted_x.type != ynn_type_fp32) {
-    return false;
-  }
-
-  if (x.type != ynn_type_fp16 && x.type != ynn_type_bf16) {
+  if (converted_x.type == ynn_type_fp32) {
+    if (!ynn::type_is_floating_point(x.type)) {
+      return false;
+    }
+  } else if (converted_x.type == ynn_type_int32) {
+    if (!ynn::type_is_integral(x.type)) {
+      return false;
+    }
+    if (x.scale_id != YNN_INVALID_VALUE_ID ||
+        x.zero_point_id != YNN_INVALID_VALUE_ID) {
+      return false;
+    }
+  } else {
     return false;
   }
 

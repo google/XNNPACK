@@ -357,14 +357,15 @@ TEST(fusion, transpose_stencil_copy) {
 
 namespace {
 
-void TestReduceSumOfConvert(ynn_type input_type, ynn_reduce_operator op) {
+void TestReduceSumOfConvert(ynn_type input_type, ynn_type intermediate_type,
+                            ynn_reduce_operator op) {
   const uint32_t x_id = 0;
   uint32_t converted_x_id = 1;
   const uint32_t y_id = 2;
   SubgraphBuilder builder(3);
   builder.AddInput(input_type, 2, x_id)
-      .AddTensor(ynn_type_fp32, 2, converted_x_id)
-      .AddOutput(ynn_type_fp32, 1, y_id);
+      .AddTensor(intermediate_type, 2, converted_x_id)
+      .AddOutput(intermediate_type, 1, y_id);
   builder.AddUnary(ynn_unary_convert, x_id, converted_x_id)
       .AddReduce(op, {1}, converted_x_id, YNN_INVALID_VALUE_ID, y_id, 0);
 
@@ -385,37 +386,115 @@ void TestReduceSumOfConvert(ynn_type input_type, ynn_reduce_operator op) {
   ASSERT_TRUE(is_reduce(*output, op));
 }
 
+void TestReduceSumOfConvertQuantized(ynn_reduce_operator reduce_op) {
+  const uint32_t x_id = 0;
+  uint32_t converted_x_id = 1;
+  const uint32_t y_id = 2;
+  uint32_t scale_id = 3;
+  uint32_t zero_point_id = 4;
+  SubgraphBuilder builder(5);
+
+  // Define scale and zero point.
+  builder.AddTensor(ynn_type_fp32, {1}, scale_id, /*data=*/nullptr)
+      .AddTensor(ynn_type_int32, {1}, zero_point_id, /*data=*/nullptr);
+
+  // Input with quantization params.
+  builder.AddInput(ynn_type_int8, 2, x_id, zero_point_id, scale_id);
+
+  builder.AddTensor(ynn_type_int32, 2, converted_x_id)
+      .AddOutput(ynn_type_int32, 1, y_id);
+  builder.AddUnary(ynn_unary_convert, x_id, converted_x_id);
+
+  ynn_node reduce_node;
+  reduce_node.op = ynn_node::reduce{
+      .k_dims = ynn::axes_set(2),  // Reduce axis 1.
+      .op = reduce_op,
+      .keep_dims = false,
+  };
+  reduce_node.inputs = {converted_x_id, YNN_INVALID_VALUE_ID};
+  reduce_node.outputs = {y_id};
+
+  ynn_subgraph& subgraph = *builder.GetSubgraph();
+  subgraph.add_node(reduce_node);
+
+  subgraph.fusion();
+  subgraph.invalidate_dead_values();
+
+  // Should NOT fuse.
+  // We expect the reduce node to still consume converted_x_id, not x_id.
+  const ynn_node* output = subgraph.get_producer(y_id);
+  ASSERT_NE(output, nullptr);
+  ASSERT_EQ(output->inputs[0], converted_x_id);
+
+  const ynn_node* convert_node = subgraph.get_producer(converted_x_id);
+  ASSERT_NE(convert_node, nullptr);
+  ASSERT_EQ(convert_node->inputs[0], x_id);
+
+  ASSERT_TRUE(subgraph.value(x_id).is_valid());
+  ASSERT_TRUE(subgraph.value(y_id).is_valid());
+  ASSERT_TRUE(subgraph.value(converted_x_id).is_valid());
+}
+
 }  // namespace
+
+// reduce_sum tests.
 
 TEST(fusion, reduce_sum_of_convert_fp16) {
   // reduce_sum(convert_fp32(x_fp16)) -> reduce_sum(x_fp16)
-  TestReduceSumOfConvert(ynn_type_fp16, ynn_reduce_sum);
+  TestReduceSumOfConvert(ynn_type_fp16, ynn_type_fp32, ynn_reduce_sum);
 }
 
 TEST(fusion, reduce_sum_of_convert_bf16) {
   // reduce_sum(convert_fp32(x_bf16)) -> reduce_sum(x_bf16)
-  TestReduceSumOfConvert(ynn_type_bf16, ynn_reduce_sum);
+  TestReduceSumOfConvert(ynn_type_bf16, ynn_type_fp32, ynn_reduce_sum);
 }
+
+TEST(fusion, reduce_sum_of_convert_int8) {
+  // reduce_sum(convert_int32(x_int8)) -> reduce_sum(x_int8)
+  TestReduceSumOfConvert(ynn_type_int8, ynn_type_int32, ynn_reduce_sum);
+}
+
+TEST(fusion, reduce_sum_of_convert_int8_quantized) {
+  // reduce_sum(convert_int32(x_int8)) -> NO CHANGE if x_int8 has
+  // quantization params.
+  TestReduceSumOfConvertQuantized(ynn_reduce_sum);
+}
+
+// reduce_sum_squared tests.
 
 TEST(fusion, reduce_sum_squared_of_convert_fp16) {
   // reduce_sum_squared(convert_fp32(x_fp16)) -> reduce_sum_squared(x_fp16)
-  TestReduceSumOfConvert(ynn_type_fp16, ynn_reduce_sum_squared);
+  TestReduceSumOfConvert(ynn_type_fp16, ynn_type_fp32, ynn_reduce_sum_squared);
 }
 
 TEST(fusion, reduce_sum_squared_of_convert_bf16) {
   // reduce_sum_squared(convert_fp32(x_bf16)) -> reduce_sum_squared(x_bf16)
-  TestReduceSumOfConvert(ynn_type_bf16, ynn_reduce_sum_squared);
+  TestReduceSumOfConvert(ynn_type_bf16, ynn_type_fp32, ynn_reduce_sum_squared);
 }
 
-TEST(fusion, reduce_sum_of_squared_f32) {
-  // reduce_sum(multiply(x, x)) -> reduce_sum_squared(x)
+TEST(fusion, reduce_sum_squared_of_convert_int8) {
+  // reduce_sum_squared(convert_int32(x_int8)) -> reduce_sum_squared(x_int8)
+  TestReduceSumOfConvert(ynn_type_int8, ynn_type_int32, ynn_reduce_sum_squared);
+}
+
+TEST(fusion, reduce_sum_squared_of_convert_int8_quantized) {
+  // reduce_sum_squared(convert_int32(x_int8)) -> NO CHANGE if x_int8 has
+  // quantization params.
+  TestReduceSumOfConvertQuantized(ynn_reduce_sum_squared);
+}
+
+// reduce_sum -> reduce_sum_squared tests.
+
+namespace {
+
+void TestReduceSumOfSquared(ynn_type type) {
   const uint32_t x_id = 0;
   const uint32_t y_id = 1;
   SubgraphBuilder builder(2);
   uint32_t sq_id = YNN_INVALID_VALUE_ID;
-  builder.AddInput(ynn_type_fp32, 2, x_id)
-      .AddOutput(ynn_type_fp32, 1, y_id)
-      .AddTensor(ynn_type_fp32, 2, sq_id);
+  builder.AddInput(type, 2, x_id)
+      .AddOutput(type, 1, y_id)
+      .AddTensor(type, 2, sq_id);
   builder.AddBinary(ynn_binary_multiply, x_id, x_id, sq_id)
       .AddReduce(ynn_reduce_sum, {1}, sq_id, YNN_INVALID_VALUE_ID, y_id, 0);
 
@@ -437,21 +516,39 @@ TEST(fusion, reduce_sum_of_squared_f32) {
   ASSERT_TRUE(is_reduce(*output, ynn_reduce_sum_squared));
 }
 
+}  // namespace
+
+TEST(fusion, reduce_sum_of_squared_f32) {
+  // reduce_sum(x_f32 * x_f32) -> reduce_sum_squared(x_f32)
+  TestReduceSumOfSquared(ynn_type_fp32);
+}
+
+TEST(fusion, reduce_sum_of_squared_int32) {
+  // reduce_sum(x_int32 * x_int32) -> reduce_sum_squared(x_int32)
+  TestReduceSumOfSquared(ynn_type_int32);
+}
+
 namespace {
 
-void TestReduceSumOfSquared(ynn_type input_type) {
+void TestReduceSumOfSquaredWithConvert(ynn_type input_type,
+                                       ynn_type intermediate_type) {
   const uint32_t x_id = 0;
-  uint32_t converted_x_id = 1;
-  const uint32_t y_id = 2;
+  const uint32_t y_id = 1;
+  uint32_t intermediate1_id = 2;
+  uint32_t intermediate2_id = 3;
+
   SubgraphBuilder builder(4);
-  uint32_t sq_id = YNN_INVALID_VALUE_ID;
-  builder.AddInput(input_type, 2, x_id)
-      .AddTensor(ynn_type_fp32, 2, converted_x_id)
-      .AddOutput(ynn_type_fp32, 1, y_id)
-      .AddTensor(ynn_type_fp32, 2, sq_id);
-  builder.AddUnary(ynn_unary_convert, x_id, converted_x_id)
-      .AddBinary(ynn_binary_multiply, converted_x_id, converted_x_id, sq_id)
-      .AddReduce(ynn_reduce_sum, {1}, sq_id, YNN_INVALID_VALUE_ID, y_id, 0);
+  builder.AddInput(input_type, 2, x_id).AddOutput(intermediate_type, 1, y_id);
+
+  // x_id -> (convert) -> intermediate1_id -> (multiply) -> intermediate2_id
+  // -> (reduce) -> y_id.
+  builder.AddTensor(intermediate_type, 2, intermediate1_id)
+      .AddTensor(intermediate_type, 2, intermediate2_id);
+  builder.AddUnary(ynn_unary_convert, x_id, intermediate1_id)
+      .AddBinary(ynn_binary_multiply, intermediate1_id, intermediate1_id,
+                 intermediate2_id)
+      .AddReduce(ynn_reduce_sum, {1}, intermediate2_id, YNN_INVALID_VALUE_ID,
+                 y_id, 0);
 
   ynn_subgraph& subgraph = *builder.GetSubgraph();
 
@@ -459,11 +556,11 @@ void TestReduceSumOfSquared(ynn_type input_type) {
   subgraph.invalidate_dead_values();
 
   ASSERT_EQ(valid_node_count(&subgraph), 1);
-  // x and y should be valid. converted_x and sq should be invalid/removed.
+  // x and y should be valid. Intermediate values should be invalid/removed.
   ASSERT_TRUE(subgraph.value(x_id).is_valid());
   ASSERT_TRUE(subgraph.value(y_id).is_valid());
-  ASSERT_FALSE(subgraph.value(converted_x_id).is_valid());
-  ASSERT_FALSE(subgraph.value(sq_id).is_valid());
+  ASSERT_FALSE(subgraph.value(intermediate1_id).is_valid());
+  ASSERT_FALSE(subgraph.value(intermediate2_id).is_valid());
 
   const ynn_node* output = subgraph.get_producer(y_id);
   ASSERT_NE(output, nullptr);
@@ -475,15 +572,18 @@ void TestReduceSumOfSquared(ynn_type input_type) {
 }  // namespace
 
 TEST(fusion, reduce_sum_of_squared_with_convert_fp16) {
-  // reduce_sum(multiply(convert_fp32(x_fp16), convert_fp32(x_fp16)) ->
-  // reduce_sum_squared(x_fp16)
-  TestReduceSumOfSquared(ynn_type_fp16);
+  // reduce_sum(fp32(x_fp16) * fp32(x_fp16)) -> reduce_sum_squared(x_fp16).
+  TestReduceSumOfSquaredWithConvert(ynn_type_fp16, ynn_type_fp32);
 }
 
 TEST(fusion, reduce_sum_of_squared_with_convert_bf16) {
-  // reduce_sum(multiply(convert_fp32(x_bf16), convert_fp32(x_bf16)) ->
-  // reduce_sum_squared(x_bf16)
-  TestReduceSumOfSquared(ynn_type_bf16);
+  // reduce_sum(fp32(x_bf16) * fp32(x_bf16)) -> reduce_sum_squared(x_bf16).
+  TestReduceSumOfSquaredWithConvert(ynn_type_bf16, ynn_type_fp32);
+}
+
+TEST(fusion, reduce_sum_of_squared_with_convert_int8) {
+  // reduce_sum(int32(x_int8) * int32(x_int8)) -> reduce_sum_squared(x_int8).
+  TestReduceSumOfSquaredWithConvert(ynn_type_int8, ynn_type_int32);
 }
 
 }  // namespace ynn

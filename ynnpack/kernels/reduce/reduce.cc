@@ -311,6 +311,14 @@ void sum_fp16_fp32(size_t n, size_t k3, size_t k2, size_t k1, size_t a_stride_n,
                 sum_op<float>());
 }
 
+void sum_int32(size_t n, size_t k3, size_t k2, size_t k1, size_t a_stride_n,
+               size_t a_stride_k3, size_t a_stride_k2, const void* a, size_t,
+               void* c) {
+  reduce<int32_t>(n, k3, k2, k1, a_stride_n, a_stride_k3, a_stride_k2,
+                  static_cast<const int32_t*>(a), static_cast<int32_t*>(c),
+                  sum_op<int32_t>());
+}
+
 void sum_int8_int32(size_t n, size_t k3, size_t k2, size_t k1,
                     size_t a_stride_n, size_t a_stride_k3, size_t a_stride_k2,
                     const void* a, size_t, void* c) {
@@ -349,6 +357,14 @@ void sum_squared_fp16_fp32(size_t n, size_t k3, size_t k2, size_t k1,
   reduce<float>(n, k3, k2, k1, a_stride_n, a_stride_k3, a_stride_k2,
                 static_cast<const half*>(a), static_cast<float*>(c),
                 sum_op<float>(), square_op<float, half>());
+}
+
+void sum_squared_int32(size_t n, size_t k3, size_t k2, size_t k1,
+                       size_t a_stride_n, size_t a_stride_k3,
+                       size_t a_stride_k2, const void* a, size_t, void* c) {
+  reduce<int32_t>(n, k3, k2, k1, a_stride_n, a_stride_k3, a_stride_k2,
+                  static_cast<const int32_t*>(a), static_cast<int32_t*>(c),
+                  sum_op<int32_t>(), square_op<int32_t, int32_t>());
 }
 
 void sum_squared_int8_int32(size_t n, size_t k3, size_t k2, size_t k1,
