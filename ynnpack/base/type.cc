@@ -33,6 +33,26 @@ bool type_is_integral(ynn_type t) {
   return false;
 }
 
+bool type_is_floating_point(ynn_type t) {
+  switch (t) {
+    case ynn_type_fp32:
+    case ynn_type_fp16:
+    case ynn_type_bf16:
+      return true;
+    case ynn_type_int2:
+    case ynn_type_int4:
+    case ynn_type_uint4:
+    case ynn_type_int8:
+    case ynn_type_uint8:
+    case ynn_type_int32:
+    case ynn_type_opaque:
+    case ynn_type_invalid:
+      return false;
+  }
+  YNN_UNREACHABLE;
+  return false;
+}
+
 size_t type_size_bytes(ynn_type t) {
   switch (t) {
     case ynn_type_int2:

@@ -32,6 +32,9 @@ using float32x1_t = float;
 // Returns true if the type is an integer type.
 bool type_is_integral(ynn_type t);
 
+// Returns true if the type is a floating point type.
+bool type_is_floating_point(ynn_type t);
+
 // Returns the size of an element of the type.
 size_t type_size_bytes(ynn_type t);
 
