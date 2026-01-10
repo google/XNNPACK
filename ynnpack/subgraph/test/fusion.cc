@@ -5,6 +5,7 @@
 
 #include <algorithm>
 #include <cstdint>
+#include <iostream>
 #include <variant>
 
 #include <gtest/gtest.h>
@@ -584,6 +585,53 @@ TEST(fusion, reduce_sum_of_squared_with_convert_bf16) {
 TEST(fusion, reduce_sum_of_squared_with_convert_int8) {
   // reduce_sum(int32(x_int8) * int32(x_int8)) -> reduce_sum_squared(x_int8).
   TestReduceSumOfSquaredWithConvert(ynn_type_int8, ynn_type_int32);
+}
+
+TEST(fusion, fuse_unary_to_lut) {
+  // convert(a) -> sigmoid(a) -> convert(a).
+  // Input: int8. Output: int8.
+  // Should be fused to LUT.
+  uint32_t a_id = 0;
+  uint32_t convert1_id = 1;
+  uint32_t sigmoid_id = 2;
+  uint32_t x_id = 3;
+  uint32_t scale_id = 4;
+  uint32_t zp_id = 5;
+
+  SubgraphBuilder builder(10);
+
+  static float scale = 1.0f;
+  static int32_t zp = 0;
+
+  builder.AddTensor(ynn_type_fp32, {}, scale_id, &scale, {});
+  builder.AddTensor(ynn_type_int32, {}, zp_id, &zp, {});
+
+  // Input: int8.
+  builder.AddInput(ynn_type_int8, 2, a_id, zp_id, scale_id);
+  builder.AddTensor(ynn_type_fp32, 2, convert1_id, nullptr, {});
+  builder.AddTensor(ynn_type_fp32, 2, sigmoid_id, nullptr, {});
+  builder.AddOutput(ynn_type_int8, 2, x_id, zp_id, scale_id);
+
+  builder.AddUnary(ynn_unary_convert, a_id, convert1_id);
+  builder.AddUnary(ynn_unary_sigmoid, convert1_id, sigmoid_id);
+  builder.AddUnary(ynn_unary_convert, sigmoid_id, x_id);
+
+  ynn_subgraph& subgraph = *builder.GetSubgraph();
+
+  std::cout << "Before fusion:\n";
+  subgraph.dump(std::cout);
+
+  subgraph.fusion();
+  subgraph.invalidate_dead_values();
+
+  std::cout << "After fusion:\n";
+  subgraph.dump(std::cout);
+
+  ASSERT_EQ(valid_node_count(&subgraph), 1);
+  const ynn_node* output = subgraph.get_producer(x_id);
+  ASSERT_NE(output, nullptr);
+  // Check if it is LUT.
+  ASSERT_TRUE(std::holds_alternative<ynn_node::lut>(output->op));
 }
 
 }  // namespace ynn

@@ -281,6 +281,11 @@ enum ynn_status ynn_define_static_slice(
     const int64_t* begins, const int64_t* ends, const int64_t* strides,
     uint32_t input_id, uint32_t* output_id, uint32_t flags);
 
+// Copy the input to the output, replacing the value with a lookup in a table.
+enum ynn_status ynn_define_lut(ynn_subgraph_t subgraph, uint32_t input_id,
+                               uint32_t table_id, uint32_t* output_id,
+                               uint32_t flags);
+
 // Copy the input to the output, using a permutation to select the dimensions of
 // the input.
 enum ynn_status ynn_define_static_transpose(

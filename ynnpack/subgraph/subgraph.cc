@@ -524,6 +524,7 @@ const char* name_of(const ynn_node::concatenate&) { return "concatenate"; }
 const char* name_of(const ynn_node::stack&) { return "stack"; }
 const char* name_of(const ynn_node::even_split&) { return "even_split"; }
 const char* name_of(const ynn_node::copy&) { return "copy"; }
+const char* name_of(const ynn_node::lut&) { return "lut"; }
 const char* name_of(const ynn_node::fuse_dim&) { return "fuse_dim"; }
 const char* name_of(const ynn_node::fuse_dims&) { return "fuse_dims"; }
 const char* name_of(const ynn_node::split_dim&) { return "split_dim"; }
@@ -646,6 +647,8 @@ void print(std::ostream& os, const ynn_node::even_split& op) {
 }
 
 void print(std::ostream& os, const ynn_node::copy& op) { os << "copy"; }
+
+void print(std::ostream& os, const ynn_node::lut& op) { os << "lut"; }
 
 void print(std::ostream& os, const ynn_node::fuse_dim& op) {
   os << "axis=" << op.axis << " axes_count=" << op.axes_count;
