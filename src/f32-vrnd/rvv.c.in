@@ -36,12 +36,14 @@ void xnn_f32_v${OP.lower()}_ukernel__rvv_u${LMUL}v(
   do {
     const size_t n = __riscv_vsetvl_e32m${LMUL}(batch);
     vfloat32m${LMUL}_t x_f32v = __riscv_vle32_v_f32m${LMUL}(input, n); input += n;
-    // We need to remember which values are infinity, so we can preserve them
-    // after rounding.
-    // TODO: We should also preserve NaN.
-    vbool${32//LMUL}_t inf_bv = __riscv_vmfeq_vf_f32m${LMUL}_b${32//LMUL}(x_f32v, INFINITY, n);
-    vbool${32//LMUL}_t ninf_bv = __riscv_vmfeq_vf_f32m${LMUL}_b${32//LMUL}(x_f32v, -INFINITY, n);
-    vbool${32//LMUL}_t mask_bv = __riscv_vmor_mm_b${32//LMUL}(inf_bv, ninf_bv, n);
+
+    // preserve NaN
+    vbool${32//LMUL}_t nan_bv = __riscv_vmfeq_vv_f32m${LMUL}_b${32//LMUL}(x_f32v, x_f32v, n);
+    // magnitude < (1 << FLT_MANT_DIG)
+    vfloat32m${LMUL}_t mag = __riscv_vfabs_v_f32m${LMUL}(x_f32v, n);
+    vbool${32//LMUL}_t mag_bv = __riscv_vmflt_vf_f32m${LMUL}_b${32//LMUL}(mag, (1 << __FLT_MANT_DIG__), n);
+    vbool${32//LMUL}_t mask_bv = __riscv_vmnand_mm_b${32//LMUL}(nan_bv, mag_bv, n);
+
     vint32m${LMUL}_t x_rnd_i32v = __riscv_vfcvt_x_f_v_i32m${LMUL}_rm(x_f32v, ${ROUND_MODE}, n);
     vfloat32m${LMUL}_t out_f32v = __riscv_vfcvt_f_x_v_f32m${LMUL}(x_rnd_i32v, n);
     out_f32v = __riscv_vmerge_vvm_f32m${LMUL}(out_f32v, x_f32v, mask_bv, n);

@@ -33,12 +33,14 @@ void xnn_f32_vrndd_ukernel__rvv_u8v(
   do {
     const size_t n = __riscv_vsetvl_e32m8(batch);
     vfloat32m8_t x_f32v = __riscv_vle32_v_f32m8(input, n); input += n;
-    // We need to remember which values are infinity, so we can preserve them
-    // after rounding.
-    // TODO: We should also preserve NaN.
-    vbool4_t inf_bv = __riscv_vmfeq_vf_f32m8_b4(x_f32v, INFINITY, n);
-    vbool4_t ninf_bv = __riscv_vmfeq_vf_f32m8_b4(x_f32v, -INFINITY, n);
-    vbool4_t mask_bv = __riscv_vmor_mm_b4(inf_bv, ninf_bv, n);
+
+    // preserve NaN
+    vbool4_t nan_bv = __riscv_vmfeq_vv_f32m8_b4(x_f32v, x_f32v, n);
+    // magnitude < (1 << FLT_MANT_DIG)
+    vfloat32m8_t mag = __riscv_vfabs_v_f32m8(x_f32v, n);
+    vbool4_t mag_bv = __riscv_vmflt_vf_f32m8_b4(mag, (1 << __FLT_MANT_DIG__), n);
+    vbool4_t mask_bv = __riscv_vmnand_mm_b4(nan_bv, mag_bv, n);
+
     vint32m8_t x_rnd_i32v = __riscv_vfcvt_x_f_v_i32m8_rm(x_f32v, __RISCV_FRM_RDN, n);
     vfloat32m8_t out_f32v = __riscv_vfcvt_f_x_v_f32m8(x_rnd_i32v, n);
     out_f32v = __riscv_vmerge_vvm_f32m8(out_f32v, x_f32v, mask_bv, n);
