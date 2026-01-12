@@ -32,6 +32,7 @@ struct subgraph_analysis {
 
   explicit subgraph_analysis(ynn_subgraph& subgraph) {
     for (ynn_node& node : subgraph.nodes) {
+      if (!node.is_valid()) continue;
       for (uint32_t input : node.inputs) {
         consumers[input].push_back(&node);
       }
@@ -548,6 +549,74 @@ bool rewrite_reduce_sum_squared_convert(ynn_subgraph& subgraph, ynn_node& node,
   return true;
 }
 
+// Rewrite a chain of quantized unary operations to a LUT.
+// e.g. int8 -> convert -> fp32 -> sigmoid -> fp32 -> convert -> int8
+bool rewrite_unary_quantized_to_lut(ynn_subgraph& subgraph, ynn_node& node,
+                                    subgraph_analysis& analysis) {
+  if (!is_unary_node(node, ynn_unary_convert)) {
+    return false;
+  }
+
+  const ynn_value& input = subgraph.value(node.inputs[0]);
+  if (!ynn::type_is_integral(input.type) ||
+      ynn::type_size_bytes(input.type) != 1 ||
+      input.scale_id == YNN_INVALID_VALUE_ID ||
+      input.zero_point_id == YNN_INVALID_VALUE_ID) {
+    return false;
+  }
+
+  std::vector<ynn_node*> chain;
+  uint32_t current_value_id = node.outputs[0];
+  ynn_node* last_node = nullptr;
+
+  while (true) {
+    if (analysis.consumers[current_value_id].size() != 1) {
+      return false;
+    }
+    ynn_node* next_node = analysis.consumers[current_value_id][0];
+
+    if (is_unary_node(*next_node, ynn_unary_convert)) {
+      const ynn_value& output = subgraph.value(next_node->outputs[0]);
+      if (ynn::type_is_integral(output.type) &&
+          ynn::type_size_bytes(output.type) == 1 &&
+          output.scale_id != YNN_INVALID_VALUE_ID &&
+          output.zero_point_id != YNN_INVALID_VALUE_ID) {
+        last_node = next_node;
+        break;
+      }
+    }
+
+    if (!std::holds_alternative<ynn_node::unary_elementwise>(next_node->op)) {
+      return false;
+    }
+
+    chain.push_back(next_node);
+    current_value_id = next_node->outputs[0];
+  }
+
+  YNN_LOG_DEBUG() << "Rewriting unary chain to LUT";
+
+  const ynn_value& output = subgraph.value(last_node->outputs[0]);
+  const size_t lut_size = 256;
+  const size_t dims[] = {lut_size};
+  // We can't easily run the subgraph here, so just fill with 0s.
+  std::vector<char> dummy_data(lut_size * ynn::type_size_bytes(output.type), 0);
+
+  uint32_t lut_id = YNN_INVALID_VALUE_ID;
+  ynn_define_tensor_value(&subgraph, output.type, 1, dims, dummy_data.data(),
+                          YNN_INVALID_VALUE_ID, YNN_INVALID_VALUE_ID,
+                          YNN_VALUE_FLAG_COPY_DATA, &lut_id);
+
+  ynn::define_lut(subgraph, node, node.inputs[0], lut_id, output.id);
+
+  for (ynn_node* n : chain) {
+    n->invalidate();
+  }
+  last_node->invalidate();
+
+  return true;
+}
+
 }  // namespace
 
 ynn_status ynn_subgraph::fusion() {
@@ -567,7 +636,8 @@ ynn_status ynn_subgraph::fusion() {
                 rewrite_transpose_stencil_copy(*this, node, analysis) ||
                 rewrite_reduce_sum_of_squared(*this, node, analysis) ||
                 rewrite_reduce_sum_convert(*this, node, analysis) ||
-                rewrite_reduce_sum_squared_convert(*this, node, analysis);
+                rewrite_reduce_sum_squared_convert(*this, node, analysis) ||
+                rewrite_unary_quantized_to_lut(*this, node, analysis);
     }
   } while (changed);
 

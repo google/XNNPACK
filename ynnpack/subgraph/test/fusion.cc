@@ -653,4 +653,48 @@ TEST(fusion, reduce_sum_of_squared_with_convert_int8) {
   TestReduceSumOfSquaredWithConvert(ynn_type_int8, ynn_type_int32);
 }
 
+TEST(fusion, unary_quantized_to_lut) {
+  // int8 -> convert -> fp32 -> sigmoid -> fp32 -> convert -> int8
+  // should be replaced with a int8 -> lut -> int8.
+  const uint32_t x_id = 0;
+  const uint32_t y_id = 1;
+  uint32_t convert_x_id = YNN_INVALID_VALUE_ID;
+  uint32_t sigmoid_output_id = YNN_INVALID_VALUE_ID;
+
+  SubgraphBuilder builder(2);
+
+  // Define quantization params (using static scalars for simplicity in test)
+  uint32_t x_scale_id = YNN_INVALID_VALUE_ID;
+  uint32_t x_zp_id = YNN_INVALID_VALUE_ID;
+  uint32_t y_scale_id = YNN_INVALID_VALUE_ID;
+  uint32_t y_zp_id = YNN_INVALID_VALUE_ID;
+  builder.AddTensor(ynn_type_fp32, {1}, x_scale_id)
+      .AddTensor(ynn_type_int32, {1}, x_zp_id)
+      .AddTensor(ynn_type_fp32, {1}, y_scale_id)
+      .AddTensor(ynn_type_int32, {1}, y_zp_id);
+
+  TensorShape shape = {10, 10};
+  builder.AddInput(ynn_type_int8, shape, x_id, x_zp_id, x_scale_id);
+  builder.AddOutput(ynn_type_int8, shape, y_id, y_zp_id, y_scale_id);
+  builder.AddTensor(ynn_type_fp32, shape, convert_x_id)
+      .AddTensor(ynn_type_fp32, shape, sigmoid_output_id);
+  builder.AddUnary(ynn_unary_convert, x_id, convert_x_id)
+      .AddUnary(ynn_unary_sigmoid, convert_x_id, sigmoid_output_id)
+      .AddUnary(ynn_unary_convert, sigmoid_output_id, y_id);
+
+  ynn_subgraph& subgraph = *builder.GetSubgraph();
+
+  subgraph.fusion();
+  subgraph.invalidate_dead_values();
+
+  // Should be fused into a single LUT node.
+  ASSERT_EQ(valid_node_count(&subgraph), 1);
+
+  const ynn_node* output = subgraph.get_producer(y_id);
+  ASSERT_NE(output, nullptr);
+  ASSERT_TRUE(std::holds_alternative<ynn_node::lut>(output->op));
+  ASSERT_EQ(output->inputs.size(), 2);
+  ASSERT_EQ(output->inputs[0], x_id);
+}
+
 }  // namespace ynn
