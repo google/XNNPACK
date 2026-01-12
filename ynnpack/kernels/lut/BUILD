@@ -18,7 +18,7 @@ cc_library(
     ],
     compatible_with = _COMPATIBLE_WITH,
     copts = ynn_kernel_copts(),
-    visibility = ["//visibility:private"],
+    visibility = ["//ynnpack:__subpackages__"],
     deps = [
         "//ynnpack:ynnpack_h",
         "//ynnpack/base",
