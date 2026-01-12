@@ -92,6 +92,7 @@ cc_library(
         "//ynnpack/kernels/dot",
         "//ynnpack/kernels/dot:pack",
         "//ynnpack/kernels/dot:schedule",
+        "//ynnpack/kernels/lut",
         "//ynnpack/kernels/reduce",
         "//ynnpack/kernels/ternary",
         "//ynnpack/kernels/transpose",

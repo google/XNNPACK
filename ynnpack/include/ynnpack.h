@@ -190,6 +190,12 @@ enum ynn_status ynn_define_binary(ynn_subgraph_t subgraph,
                                   uint32_t input_a_id, uint32_t input_b_id,
                                   uint32_t* output_id, uint32_t flags);
 
+// Defines a lookup table operation. `output_id` will have the same shape as
+// `input_id`.
+enum ynn_status ynn_define_lut(ynn_subgraph_t subgraph, uint32_t input_id,
+                               uint32_t lut_id, uint32_t* output_id,
+                               uint32_t flags);
+
 // Changes the shape of `input_id` to have the shape `new_dims`, by broadcasting
 // extent 1 dimensions. If `new_dims[d]` is zero, dimension `d` is passed
 // through unchanged. If the rank of `input_id` is less than `rank`,

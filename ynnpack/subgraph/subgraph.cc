@@ -509,6 +509,7 @@ const char* name_of(const ynn_node::opaque&) { return "opaque"; }
 const char* name_of(const ynn_node::unary_elementwise&) {
   return "unary_elementwise";
 }
+const char* name_of(const ynn_node::lut&) { return "lut"; }
 const char* name_of(const ynn_node::binary_elementwise&) {
   return "binary_elementwise";
 }
@@ -609,6 +610,8 @@ void print(std::ostream& os, const ynn_node::opaque& op) {
 void print(std::ostream& os, const ynn_node::unary_elementwise& op) {
   os << "op=" << op.op;
 }
+
+void print(std::ostream& os, const ynn_node::lut& op) {}
 
 void print(std::ostream& os, const ynn_node::binary_elementwise& op) {
   os << "op=" << op.op;

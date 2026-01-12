@@ -154,6 +154,7 @@ struct ynn_node {
   struct unary_elementwise {
     ynn_unary_operator op;
   };
+  struct lut {};
   struct binary_elementwise {
     ynn_binary_operator op;
   };
@@ -254,8 +255,8 @@ struct ynn_node {
                even_split, copy, split_dim, fuse_dim, fuse_dims, split_dims,
                stack, static_reshape, static_broadcast, static_expand_dims,
                static_pad, static_slice, static_transpose, stencil_copy,
-               unary_elementwise, binary_elementwise, ternary_elementwise, dot,
-               pack_b, transpose_a, get_tensor_shape, reduce>
+               unary_elementwise, lut, binary_elementwise, ternary_elementwise,
+               dot, pack_b, transpose_a, get_tensor_shape, reduce>
       op;
 
   const char* name() const;

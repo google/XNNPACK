@@ -18,6 +18,7 @@
 #include "ynnpack/base/type.h"
 #include "ynnpack/include/ynnpack.h"
 #include "ynnpack/kernels/binary/binary.h"
+#include "ynnpack/kernels/lut/lut.h"
 #include "ynnpack/kernels/ternary/ternary.h"
 #include "ynnpack/kernels/unary/unary.h"
 #include "ynnpack/subgraph/runtime.h"
@@ -126,6 +127,28 @@ auto make_unary_elementwise_impl(unary_kernel_fn kernel) {
             x, a);
         return 0;
       };
+}
+
+// Call a lut kernel.
+auto make_lut_impl(lut_kernel_fn kernel) {
+  return [kernel](slinky::raw_buffer a, slinky::raw_buffer lut,
+                  slinky::raw_buffer x) -> slinky::index_t {
+    slinky::dim a_dims[2], x_dims[2];
+
+    fuse_and_slice_leading_dims<2>(&x_dims[0], x, &a_dims[0], a);
+
+    // We don't support broadcasting of `a` here in the innermost
+    // dimension (and it would waste computation).
+    assert(is_continguous(a_dims[0], a.elem_size));
+    assert(is_continguous(x_dims[0], x.elem_size));
+
+    const slinky::dim& x_n = x_dims[0];
+
+    slinky::for_each_element(
+        [&](void* x, const void* a) { kernel(x_n.extent(), a, lut.base, x); },
+        x, a);
+    return 0;
+  };
 }
 
 // Binary kernels only support a single global params object, i.e. it must be
@@ -249,6 +272,39 @@ ynn_status create_unary(const ynn_node& node, ynn_runtime& runtime,
   runtime.scheduling_info_storage.push_back(std::move(sched));
 
   runtime.funcs.push_back(std::move(func));
+  return ynn_status_success;
+}
+
+ynn_status create_lut(const ynn_node& node, ynn_runtime& runtime,
+                      lut_kernel_fn kernel) {
+  assert(node.inputs.size() == 2);
+  assert(node.outputs.size() == 1);
+
+  const ynn_runtime_value& a = runtime.value(node.inputs[0]);
+  const ynn_runtime_value& lut = runtime.value(node.inputs[1]);
+  ynn_runtime_value& x = runtime.value(node.outputs[0]);
+
+  x.make_buffer(runtime);
+  std::vector<slinky::var> dims = make_dims(x.rank(), runtime.symbols);
+  slinky::box_expr bounds = make_elementwise_bounds(dims, a.extents);
+
+  slinky::box_expr lut_bounds = {
+      slinky::interval_expr(0, 1 << type_size_bytes(a.type))};
+
+  slinky::call_stmt::attributes attrs;
+  attrs.name = "lut";
+  attrs.allow_in_place = compute_allow_in_place(node, runtime.subgraph);
+
+  auto func = slinky::func::make(
+      make_lut_impl(kernel),
+      {{a.buffer, std::move(bounds)}, {lut.buffer, std::move(lut_bounds)}},
+      {{x.buffer, dims}}, std::move(attrs));
+
+  auto sched = runtime.make_schedule(dims, x.buffer, node.outputs[0]);
+  func.user_data() = sched.get();
+  runtime.scheduling_info_storage.push_back(std::move(sched));
+  runtime.funcs.push_back(std::move(func));
+
   return ynn_status_success;
 }
 
@@ -619,6 +675,60 @@ ynn_status ynn_define_binary(ynn_subgraph_t subgraph, ynn_binary_operator op,
   infer_shape(node, *subgraph);
   node.create = [kernel](const ynn_node& node, ynn_runtime& runtime) {
     return create_binary(node, runtime, kernel->op, kernel->init_params);
+  };
+  subgraph->add_node(std::move(node));
+  return ynn_status_success;
+}
+
+ynn_status ynn_define_lut(ynn_subgraph_t subgraph, uint32_t input_id,
+                          uint32_t lut_id, uint32_t* output_id,
+                          uint32_t flags) {
+  assert(subgraph);
+  assert(subgraph->is_valid_value(input_id));
+  assert(subgraph->is_valid_value(lut_id));
+  assert(output_id);
+
+  const ynn_value& a = subgraph->value(input_id);
+  const ynn_value& lut = subgraph->value(lut_id);
+
+  if (!ynn::type_is_integral(a.type)) {
+    YNN_LOG_ERROR() << "Input must be integral, got " << a.type;
+    return ynn_status_invalid_parameter;
+  }
+  if (!ynn::type_is_integral(lut.type)) {
+    YNN_LOG_ERROR() << "lut input must be uint8 or int8, got " << lut.type;
+    return ynn_status_invalid_parameter;
+  }
+  if (lut.rank() != 1) {
+    YNN_LOG_ERROR() << "lut input must be 1D, got " << lut.rank();
+    return ynn_status_invalid_parameter;
+  }
+
+  // Propagate rank.
+  ynn_value& x = subgraph->get_output_value(output_id, a);
+
+  // Find kernel.
+  lut_kernel_fn kernel = get_lut_kernel(a.type, x.type);
+  if (!kernel) {
+    YNN_LOG_ERROR() << "unsupported lut operator for input type " << a.type
+                    << " and output type " << x.type;
+    return ynn_status_unsupported_parameter;
+  }
+
+  ynn_node node;
+  node.inputs = {input_id, lut_id};
+  node.outputs = {*output_id};
+  node.op = ynn_node::lut{};
+
+  // Propagate shape from A only.
+  x.extents.resize(a.rank());
+  for (size_t d = 0; d < x.rank(); ++d) {
+    subgraph->infer_elementwise_shape(node, /*input_idx=*/0, /*output_idx=*/0,
+                                      /*input_dim=*/d, /*output_dim=*/d);
+  }
+
+  node.create = [kernel](const ynn_node& node, ynn_runtime& runtime) {
+    return create_lut(node, runtime, kernel);
   };
   subgraph->add_node(std::move(node));
   return ynn_status_success;
