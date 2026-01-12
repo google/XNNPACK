@@ -335,6 +335,8 @@ bool rewrite_transpose_stencil_copy(ynn_subgraph& subgraph, ynn_node& node,
   if (transpose_a == nullptr) {
     return false;
   }
+  const int tile_k = transpose_a->tile_k;
+  const int m_dim = transpose_a->m_dim;
 
   auto producer_it = analysis.producers.find(node.inputs[0]);
   if (producer_it == analysis.producers.end()) {
@@ -342,11 +344,12 @@ bool rewrite_transpose_stencil_copy(ynn_subgraph& subgraph, ynn_node& node,
   }
 
   ynn_node* stencil_node = producer_it->second;
-  const ynn_node::stencil_copy* stencil_copy =
+  const ynn_node::stencil_copy* stencil_copy_ptr =
       std::get_if<ynn_node::stencil_copy>(&stencil_node->op);
-  if (stencil_copy == nullptr) {
+  if (stencil_copy_ptr == nullptr) {
     return false;
   }
+  ynn_node::stencil_copy stencil_copy = *stencil_copy_ptr;
 
   const uint32_t y_id = stencil_node->outputs[0];
   if (analysis.consumers[y_id].size() != 1 ||
@@ -362,11 +365,25 @@ bool rewrite_transpose_stencil_copy(ynn_subgraph& subgraph, ynn_node& node,
     return false;
   }
 
-  for (const ynn_node::stencil_copy::stencil& stencil :
-       stencil_copy->stencils) {
+  // `stencil_copy` inserts a dimension at each `new_axis` position, so
+  // `stencil_copy` caused `m_dim` to increase by 1 for each new dimension
+  // before `m_dim`. We restore `m_dim` to its original value.
+  int new_m_dim = m_dim;
+  for (const ynn_node::stencil_copy::stencil& stencil : stencil_copy.stencils) {
     // We do not support stencils with stride > 1 yet.
     if (stencil.stride != 1) {
       YNN_LOG_DEBUG() << "Stencil node has stride > 1.";
+      return false;
+    }
+
+    if (stencil.new_axis < m_dim) {
+      new_m_dim--;
+    } else if (stencil.new_axis == m_dim) {
+      // The transposed dimension is one of the new dimensions.
+      YNN_LOG_DEBUG() << "Transposed dimension is a new dimension.";
+
+      // We could handle this in some cases, if the extent and dilation of
+      // all dimensions is divided evenly by tile_k.
       return false;
     }
   }
@@ -374,33 +391,21 @@ bool rewrite_transpose_stencil_copy(ynn_subgraph& subgraph, ynn_node& node,
   YNN_LOG_DEBUG() << "Rewriting transpose_a(stencil_copy(x)) to "
                      "stencil_copy(transpose_a(x))";
 
-  ynn_node::stencil_copy stencil_op_data = *stencil_copy;
   uint32_t stencil_input_id = stencil_node->inputs[0];
   uint32_t stencil_padding_id = stencil_node->inputs.size() > 1
                                     ? stencil_node->inputs[1]
                                     : YNN_INVALID_VALUE_ID;
   uint32_t stencil_output_id = stencil_node->outputs[0];
 
-  // `stencil_copy` inserts a dimension at each `new_axis` position, so
-  // `stencil_copy` caused `m_dim` to increase by 1 for each new dimension
-  // before `m_dim`. We restore `m_dim` to its original value.
-  int new_m_dim = transpose_a->m_dim -
-                  std::count_if(stencil_copy->stencils.begin(),
-                                stencil_copy->stencils.end(),
-                                [m_dim = transpose_a->m_dim](
-                                    const ynn_node::stencil_copy::stencil& i) {
-                                  return i.new_axis < m_dim;
-                                });
-
   // Replace stencil_copy(x) with transpose_a'(x), reusing the stencil_node's x
   // input and y output.
-  ynn::define_transpose_a(subgraph, *stencil_node, transpose_a->tile_k,
-                          new_m_dim, stencil_input_id, stencil_output_id);
+  ynn::define_transpose_a(subgraph, *stencil_node, tile_k, new_m_dim,
+                          stencil_input_id, stencil_output_id);
 
   uint32_t output_id = node.outputs[0];
   // Replace transpose_a(x) with stencil_copy'(transpose_a'(x)), reusing
   // transpose_a's output.
-  ynn::define_stencil_copy(subgraph, node, std::move(stencil_op_data),
+  ynn::define_stencil_copy(subgraph, node, std::move(stencil_copy),
                            stencil_output_id, stencil_padding_id, &output_id,
                            /*flags=*/0);
 
