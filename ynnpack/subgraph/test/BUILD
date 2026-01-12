@@ -152,6 +152,7 @@ cc_test(
     "concatenate",
     "errors",
     "get_tensor_shape",
+    "lut",
     "reduce",
     "even_split",
     "runtime",
