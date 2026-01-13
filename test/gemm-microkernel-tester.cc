@@ -2999,6 +2999,7 @@ void GemmMicrokernelTester::Test_PQS8(
        /*extra_data1_size=*/sizeof(float),
        /*packed_weights_ptr=*/packed_w.data(), &params);
 
+
   union xnn_qs8_qc8w_conv_minmax_params minmax_params;
   init_minmax_params(&minmax_params, c_zero_point,
                      static_cast<int8_t>(qmin() - 0x80),
