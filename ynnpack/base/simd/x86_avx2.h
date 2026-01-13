@@ -11,7 +11,6 @@
 #include "ynnpack/base/base.h"
 #include "ynnpack/base/simd/vec.h"
 #include "ynnpack/base/simd/x86_avx2_base.h"  // IWYU pragma: export
-#include "ynnpack/base/simd/x86_avx_base.h"  // IWYU pragma: export
 
 namespace ynn {
 
@@ -39,6 +38,6 @@ YNN_ALWAYS_INLINE s32x16 convert(u8x16 a, int32_t) {
 
 }  // namespace ynn
 
-#include "ynnpack/base/simd/generic.inc"  // IWYU pragma: export
+#include "ynnpack/base/simd/x86_avx.h"  // IWYU pragma: export
 
 #endif  // XNNPACK_YNNPACK_BASE_SIMD_X86_AVX2_H_
