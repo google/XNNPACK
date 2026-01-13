@@ -31,6 +31,7 @@ py_library(
         "generate_qs8_qc4w_gemm_microkernels.py",
         "generate_qs8_qc8w_gemm_microkernels.py",
     ],
+    strict_deps = False,
     deps = [
         ":arm_isa_templates",
         ":base_architecture",
@@ -46,6 +47,7 @@ py_library(
         "avx512vnni_template.py",
         "fma3_template.py",
     ],
+    strict_deps = False,
     deps = [":x64_arch_template"],
 )
 
@@ -54,6 +56,7 @@ py_library(
     srcs = [
         "x64_template.py",
     ],
+    strict_deps = False,
     deps = [
         ":base_architecture",
     ],
@@ -66,6 +69,7 @@ py_library(
         "neonfma_template.py",
         "neonmlal_aarch32_template.py",
     ],
+    strict_deps = False,
     deps = [":arm_arch_template"],
 )
 
@@ -76,6 +80,7 @@ py_library(
         "aarch64_template.py",
         "arm_template.py",
     ],
+    strict_deps = False,
     deps = [
         ":base_architecture",
     ],
@@ -86,4 +91,5 @@ py_library(
     srcs = [
         "base_architecture.py",
     ],
+    strict_deps = False,
 )
