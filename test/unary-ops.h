@@ -332,7 +332,7 @@ struct RoundToNearestEven : public UnaryOpInfo {
     return std::nearbyint(x);
   }
 
-#if XNN_ARCH_RISCV
+#if XNN_ARCH_HEXAGON
   bool IsInSupportedRange(float y) const override {
     // TODO(#8087): These ops are broken for large inputs on RISCV.
     return std::abs(y) < 1e6f;
@@ -345,7 +345,7 @@ struct RoundTowardsZero : public UnaryOpInfo {
     return std::trunc(x);
   }
 
-#if XNN_ARCH_RISCV
+#if XNN_ARCH_HEXAGON
   bool IsInSupportedRange(float y) const override {
     // TODO(#8087): These ops are broken for large inputs on RISCV.
     return std::abs(y) < 1e6f;
@@ -358,7 +358,7 @@ struct RoundUp : public UnaryOpInfo {
     return std::ceil(x);
   }
 
-#if XNN_ARCH_RISCV
+#if XNN_ARCH_HEXAGON
   bool IsInSupportedRange(float y) const override {
     // TODO(#8087): These ops are broken for large inputs on RISCV.
     return std::abs(y) < 1e6f;
@@ -371,7 +371,7 @@ struct RoundDown : public UnaryOpInfo {
     return std::floor(x);
   }
 
-#if XNN_ARCH_RISCV
+#if XNN_ARCH_HEXAGON
   bool IsInSupportedRange(float y) const override {
     // TODO(#8087): These ops are broken for large inputs on RISCV.
     return std::abs(y) < 1e6f;
