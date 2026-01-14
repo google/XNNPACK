@@ -23,6 +23,8 @@ void define_ternary(ynn_subgraph& subgraph, ynn_node& node, uint32_t input_a_id,
                     uint32_t input_b_id, uint32_t input_c_id,
                     uint32_t output_id, ternary_op op,
                     ternary_kernel_fn kernel);
+ynn_status define_lut(ynn_subgraph& subgraph, ynn_node& node, uint32_t input_id,
+                      uint32_t lut_id, uint32_t output_id);
 
 }  // namespace ynn
 

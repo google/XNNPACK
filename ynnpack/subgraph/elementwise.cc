@@ -544,6 +544,50 @@ void define_ternary(ynn_subgraph& subgraph, ynn_node& node, uint32_t input_a_id,
   };
 }
 
+ynn_status define_lut(ynn_subgraph& subgraph, ynn_node& node, uint32_t input_id,
+                      uint32_t lut_id, uint32_t output_id) {
+  node.inputs = {input_id, lut_id};
+  node.outputs = {output_id};
+  node.op = ynn_node::lut{};
+
+  const ynn_value& a = subgraph.value(input_id);
+  const ynn_value& lut = subgraph.value(lut_id);
+  ynn_value& x = subgraph.value(output_id);
+
+  if (!ynn::type_is_integral(a.type)) {
+    YNN_LOG_ERROR() << "Input must be integral, got " << a.type;
+    return ynn_status_invalid_parameter;
+  }
+  if (!ynn::type_is_integral(lut.type)) {
+    YNN_LOG_ERROR() << "lut input must be uint8 or int8, got " << lut.type;
+    return ynn_status_invalid_parameter;
+  }
+  if (lut.rank() != 1) {
+    YNN_LOG_ERROR() << "lut input must be 1D, got " << lut.rank();
+    return ynn_status_invalid_parameter;
+  }
+
+  // Find kernel.
+  lut_kernel_fn kernel = get_lut_kernel(a.type, x.type);
+  if (!kernel) {
+    YNN_LOG_ERROR() << "unsupported lut operator for input type " << a.type
+                    << " and output type " << x.type;
+    return ynn_status_unsupported_parameter;
+  }
+
+  // Propagate shape from A only.
+  x.extents.resize(a.rank());
+  for (size_t d = 0; d < x.rank(); ++d) {
+    subgraph.infer_elementwise_shape(node, /*input_idx=*/0, /*output_idx=*/0,
+                                     /*input_dim=*/d, /*output_dim=*/d);
+  }
+
+  node.create = [kernel](const ynn_node& node, ynn_runtime& runtime) {
+    return create_lut(node, runtime, kernel);
+  };
+  return ynn_status_success;
+}
+
 extern "C" {
 
 ynn_status ynn_define_unary(ynn_subgraph_t subgraph, ynn_unary_operator op,
@@ -688,48 +732,11 @@ ynn_status ynn_define_lut(ynn_subgraph_t subgraph, uint32_t input_id,
   assert(subgraph->is_valid_value(lut_id));
   assert(output_id);
 
-  const ynn_value& a = subgraph->value(input_id);
-  const ynn_value& lut = subgraph->value(lut_id);
-
-  if (!ynn::type_is_integral(a.type)) {
-    YNN_LOG_ERROR() << "Input must be integral, got " << a.type;
-    return ynn_status_invalid_parameter;
-  }
-  if (!ynn::type_is_integral(lut.type)) {
-    YNN_LOG_ERROR() << "lut input must be uint8 or int8, got " << lut.type;
-    return ynn_status_invalid_parameter;
-  }
-  if (lut.rank() != 1) {
-    YNN_LOG_ERROR() << "lut input must be 1D, got " << lut.rank();
-    return ynn_status_invalid_parameter;
-  }
-
-  // Propagate rank.
-  ynn_value& x = subgraph->get_output_value(output_id, a);
-
-  // Find kernel.
-  lut_kernel_fn kernel = get_lut_kernel(a.type, x.type);
-  if (!kernel) {
-    YNN_LOG_ERROR() << "unsupported lut operator for input type " << a.type
-                    << " and output type " << x.type;
-    return ynn_status_unsupported_parameter;
-  }
-
   ynn_node node;
-  node.inputs = {input_id, lut_id};
-  node.outputs = {*output_id};
-  node.op = ynn_node::lut{};
-
-  // Propagate shape from A only.
-  x.extents.resize(a.rank());
-  for (size_t d = 0; d < x.rank(); ++d) {
-    subgraph->infer_elementwise_shape(node, /*input_idx=*/0, /*output_idx=*/0,
-                                      /*input_dim=*/d, /*output_dim=*/d);
+  ynn_status status = define_lut(*subgraph, node, input_id, lut_id, *output_id);
+  if (status != ynn_status_success) {
+    return status;
   }
-
-  node.create = [kernel](const ynn_node& node, ynn_runtime& runtime) {
-    return create_lut(node, runtime, kernel);
-  };
   subgraph->add_node(std::move(node));
   return ynn_status_success;
 }
