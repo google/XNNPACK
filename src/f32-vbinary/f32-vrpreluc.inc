@@ -47,6 +47,11 @@ XNN_UKERNEL(xnn_arch_hvx, xnn_f32_vrpreluc_ukernel__hvx_u64, 64, false, float, s
 XNN_UKERNEL(xnn_arch_hvx, xnn_f32_vrpreluc_ukernel__hvx_u128, 128, false, float, struct xnn_f32_default_params, ((xnn_init_f32_default_params_fn) NULL))
 #endif  // XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
 
+#if XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
+XNN_UKERNEL(xnn_arch_riscv_vector, xnn_f32_vrpreluc_ukernel__rvv_u4v, 4, true, float, struct xnn_f32_default_params, ((xnn_init_f32_default_params_fn) NULL))
+XNN_UKERNEL(xnn_arch_riscv_vector, xnn_f32_vrpreluc_ukernel__rvv_u8v, 8, true, float, struct xnn_f32_default_params, ((xnn_init_f32_default_params_fn) NULL))
+#endif  // XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
+
 XNN_UKERNEL(xnn_arch_none, xnn_f32_vrpreluc_ukernel__scalar_u1, 1, false, float, struct xnn_f32_default_params, ((xnn_init_f32_default_params_fn) NULL))
 XNN_UKERNEL(xnn_arch_none, xnn_f32_vrpreluc_ukernel__scalar_u2, 2, false, float, struct xnn_f32_default_params, ((xnn_init_f32_default_params_fn) NULL))
 XNN_UKERNEL(xnn_arch_none, xnn_f32_vrpreluc_ukernel__scalar_u4, 4, false, float, struct xnn_f32_default_params, ((xnn_init_f32_default_params_fn) NULL))
