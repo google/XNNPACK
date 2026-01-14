@@ -72,6 +72,8 @@ class Xoshiro128Plus {
 
 }  // namespace internal
 
+using RandomDevice = internal::Xoshiro128Plus;
+
 // Wraps a random generator such that on construction, the random generator is
 // seeded with the underlying `UnitTest`'s random seed, which can be coerced on
 // the command line.
@@ -91,16 +93,6 @@ class ReplicableRandomDevice {
                       "To replicate this failure, re-run the test with "
                       "`--gtest_random_seed=" +
                           std::to_string(random_seed_) + "`.") {
-    static bool is_set = false;
-    static int last_seed = 0;
-    if (!is_set || last_seed != random_seed_) {
-      std::cout
-          << "Creating a random device for testing, to replicate it re-run the "
-             "test with  `--gtest_random_seed="
-          << random_seed_ << "`." << std::endl;
-      is_set = true;
-      last_seed = random_seed_;
-    }
   }
 
   // Wrapped methods from `BaseRandomDevice`.
