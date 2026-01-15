@@ -4,7 +4,7 @@
 // LICENSE file in the root directory of this source tree.
 
 $assert REQUANTIZATION == "FP32" or not REQUANTIZATION
-$assert DATATYPE in ["QC8", "QD8_F16", "QD8_F32", "QC4_F16", "QC4_F32", "QS8_QC4"]
+$assert DATATYPE in ["QC8", "QD8_F16", "QD8_F32", "QC4_F16", "QC4_F32", "QC2_F32", "QS8_QC4"]
 #include <assert.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -21,12 +21,13 @@ $if PREFETCH:
 #include "src/xnnpack/unaligned.h"
 
 
-$DATATYPE_SPEC = {"QC8": "qs8_qc8w", "QS8_QC4": "qs8_qc4w", "QD8_F16" : "qd8_f16_qc8w", "QD8_F32": "qd8_f32_qc8w", "QC4_F16": "qd8_f16_qc4w", "QC4_F32": "qd8_f32_qc4w"}[DATATYPE]
+$NR = 8
+$DATATYPE_SPEC = {"QC8": "qs8_qc8w", "QS8_QC4": "qs8_qc4w", "QD8_F16" : "qd8_f16_qc8w", "QD8_F32": "qd8_f32_qc8w", "QC4_F16": "qd8_f16_qc4w", "QC4_F32": "qd8_f32_qc4w", "QC2_F32": "qd8_f32_qc2w"}[DATATYPE]
 $REQUANTIZATION_SPEC = "_" + REQUANTIZATION.lower() if REQUANTIZATION else ""
 $PARAMS_STRUCT = REQUANTIZATION.lower() + "_scalar" if REQUANTIZATION else "scalar"
-$PARAMS_TYPE = {"QC8": "union xnn_qs8_qc8w_conv_minmax_params", "QS8_QC4": "union xnn_qs8_qc8w_conv_minmax_params", "QD8_F16": "struct xnn_f16_minmax_params", "QD8_F32": "struct xnn_f32_minmax_params", "QC4_F16": "struct xnn_f16_qc4w_minmax_params", "QC4_F32": "struct xnn_f32_qc4w_minmax_params"}[DATATYPE]
-$OUT_T = {"QC8": "int8_t", "QS8_QC4": "int8_t", "QD8_F16": "xnn_float16", "QD8_F32": "float", "QC4_F16": "xnn_float16", "QC4_F32": "float"}[DATATYPE]
-$_MM256_DPBUSD_EPI32 = "_mm256_dpbusd_epi32_madd" if VARIANT == "MADD" else "_mm256_dpbssd_epi32" if VARIANT == "AVXVNNIINT8" else "_mm256_dpbusd_avx_epi32" if AVX == 2 else "_mm256_dpbusd_epi32"
+$PARAMS_TYPE = {"QC8": "union xnn_qs8_qc8w_conv_minmax_params", "QS8_QC4": "union xnn_qs8_qc8w_conv_minmax_params", "QD8_F16": "struct xnn_f16_minmax_params", "QD8_F32": "struct xnn_f32_minmax_params", "QC4_F16": "struct xnn_f16_qc4w_minmax_params", "QC4_F32": "struct xnn_f32_qc4w_minmax_params", "QC2_F32": "struct xnn_f32_minmax_params",}[DATATYPE]
+$OUT_T = {"QC8": "int8_t", "QS8_QC4": "int8_t", "QD8_F16": "xnn_float16", "QD8_F32": "float", "QC4_F16": "xnn_float16", "QC4_F32": "float", "QC2_F32": "float"}[DATATYPE]
+$_MM256_DPBUSD_EPI32 = "_mm256_dpbusd_offset_epi32_madd" if VARIANT == "MADD" and DATATYPE in ["QC2_F32"] else "_mm256_dpbusd_epi32_madd" if VARIANT == "MADD" else "_mm256_dpbssd_epi32" if VARIANT == "AVXVNNIINT8" else "_mm256_dpbusd_avx_epi32" if AVX == 2 else "_mm256_dpbusd_epi32"
 $ISA = "avx2" if (VARIANT == "MADD" and AVX == 2) else "avx256skx" if (VARIANT == "MADD" and AVX == 10) else "avxvnniint8" if (VARIANT == "AVXVNNIINT8" and AVX == 2) else "avxvnni" if AVX == 2 else "avx256vnnigfni" if GFNI else "avx256vnni"
 void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x8c8__${ISA}${"_madd" if VARIANT == "MADD" else ""}${"_prfm" if PREFETCH else ""}(
     size_t mr,
@@ -38,8 +39,10 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x8c8__$
     ${OUT_T}* restrict c,
     size_t cm_stride,
     size_t cn_stride,
-    $if DATATYPE in ["QD8_F16", "QD8_F32", "QC4_F16", "QC4_F32"]:
+    $if DATATYPE in ["QD8_F16", "QD8_F32", "QC4_F16", "QC4_F32", "QC2_F32", "QC2_F32"]:
       const ${PARAMS_TYPE}* restrict params,
+      $if DATATYPE in ["QC2_F32"]:
+        const float* row_sum,
       const struct xnn_qd8_quantization_params* restrict quantization_params) XNN_OOB_READS
     $else:
       const ${PARAMS_TYPE}* restrict params) XNN_OOB_READS
@@ -53,6 +56,8 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x8c8__$
   assert(w != NULL);
   assert(c != NULL);
 
+  $if DATATYPE in ["QC2_F32"]:
+    size_t original_kc = kc;
   kc = round_up_po2(kc, 8 * sizeof(int8_t));
   const int8_t* a0 = a;
   $if DATATYPE in ["QD8_F16", "QC4_F16"]:
@@ -81,7 +86,7 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x8c8__$
         c${M} = c${M-1};
       }
 
-  $if DATATYPE in ["QD8_F16", "QD8_F32", "QC4_F16", "QC4_F32"]:
+  $if DATATYPE in ["QD8_F16", "QD8_F32", "QC4_F16", "QC4_F32", "QC2_F32"]:
     $for M in range(MR):
       const __m256i vinput_zero_point${M} = _mm256_set1_epi32((int) quantization_params[${M}].zero_point);
     $if "F16" in DATATYPE:
@@ -111,13 +116,19 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x8c8__$
     $if GFNI:
       const __m256i vshl4 = _mm256_set1_epi64x(0x01020408);
       XNN_FORCE_REALIZATION(vshl4);
+  $elif DATATYPE in ["QC2_F32"]:
+    const __m256i vmask = _mm256_set1_epi8(0x03);
   do {
-    $if DATATYPE in ["QD8_F16", "QD8_F32", "QC4_F16", "QC4_F32"]:
+    $if DATATYPE in ["QD8_F16", "QD8_F32", "QC4_F16", "QC4_F32", "QC2_F32"]:
       const __m256i vksum01234567 = _mm256_load_si256(w);
       $for M in range(MR):
         __m256i vsum${M}x01234567 = _mm256_mullo_epi32(vksum01234567, vinput_zero_point${M});
-        __m256i vacc${M}x0123 = _mm256_cvtepu32_epi64(_mm256_extracti128_si256(vsum${M}x01234567, 0));
-        __m256i vacc${M}x4567 = _mm256_cvtepu32_epi64(_mm256_extracti128_si256(vsum${M}x01234567, 1));
+        $if DATATYPE in ["QC2_F32"]:
+          __m256i vacc${M}x0 = _mm256_setzero_si256();
+          __m256i vacc${M}x1 = _mm256_setzero_si256();
+        $else:
+          __m256i vacc${M}x0123 = _mm256_cvtepu32_epi64(_mm256_extracti128_si256(vsum${M}x01234567, 0));
+          __m256i vacc${M}x4567 = _mm256_cvtepu32_epi64(_mm256_extracti128_si256(vsum${M}x01234567, 1));
     $else:
       __m256i vacc0x0123 = _mm256_cvtepu32_epi64(_mm_load_si128((const __m128i*) w));
       __m256i vacc0x4567 = _mm256_cvtepu32_epi64(_mm_load_si128((const __m128i*) ((const int32_t*) w + 4)));
@@ -126,22 +137,42 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x8c8__$
         __m256i vacc${M}x4567 = vacc0x4567;
     $if MR < 3:
       $for M in range(MR):
-        __m256i vacc1x${M}x0123 = _mm256_setzero_si256();
-        __m256i vacc1x${M}x4567 = _mm256_setzero_si256();
+        $if DATATYPE in ["QC2_F32"]:
+          __m256i vacc1x${M}x0 = _mm256_setzero_si256();
+          __m256i vacc1x${M}x1 = _mm256_setzero_si256();
+        $else:
+          __m256i vacc1x${M}x0123 = _mm256_setzero_si256();
+          __m256i vacc1x${M}x4567 = _mm256_setzero_si256();
     w = (const int32_t*) w + 8;
+    $if DATATYPE in ["QC2_F32"]:
+      // TODO: move kernel zero point after weights
+      const void* kzp = w;
+      w = (const float*)w + ${NR};
 
     size_t k = kc;
-    while (k >= 16 * sizeof(int8_t)) {
+    $if DATATYPE in ["QC2_F32"]:
+      $K_FACTOR = 2
+    $else:
+      $K_FACTOR = 1
+    while (k >= ${16 * K_FACTOR} * sizeof(int8_t)) {
       $for M in range(MR):
         $if VARIANT == "AVXVNNIINT8" or DATATYPE in ["QD8_F16", "QD8_F32", "QC4_F16", "QC4_F32"]:
           const __m256i va${M}x01234567 = _mm256_set1_epi64x((int64_t) unaligned_load_u64(a${M}));
           const __m256i va${M}x89ABCDEF = _mm256_set1_epi64x((int64_t) unaligned_load_u64(a${M} + 8));
+        $elif DATATYPE in ["QC2_F32"]:
+          const __m256i va${M}_0 = _mm256_set1_epi64x((int64_t) unaligned_load_u64(a${M}));
+          const __m256i va${M}_1 = _mm256_set1_epi64x((int64_t) unaligned_load_u64(a${M} + 8));
+          const __m256i va${M}_2 = _mm256_set1_epi64x((int64_t) unaligned_load_u64(a${M} + 16));
+          const __m256i va${M}_3 = _mm256_set1_epi64x((int64_t) unaligned_load_u64(a${M} + 24));
         $else:
           const __m256i va${M}x01234567 = _mm256_xor_si256(_mm256_set1_epi64x((int64_t) unaligned_load_u64(a${M})), vsign_mask);
           const __m256i va${M}x89ABCDEF = _mm256_xor_si256(_mm256_set1_epi64x((int64_t) unaligned_load_u64(a${M} + 8)), vsign_mask);
-        a${M} += 16;
+        a${M} += ${16 * K_FACTOR};
 
-      $if DATATYPE in ["QC4_F16", "QC4_F32", "QS8_QC4"]:
+      $if DATATYPE in ["QC2_F32"]:
+        const __m256i vw_lo = _mm256_loadu_si256((const __m256i*)w);
+        const __m256i vw_hi = _mm256_loadu_si256((const __m256i*)((const int8_t*) w + 32));
+      $elif DATATYPE in ["QC4_F16", "QC4_F32", "QS8_QC4"]:
         const __m256i vbb01234567x01234567 = _mm256_load_si256(w);
         const __m256i vbb89ABCDEFx01234567 = _mm256_load_si256((const __m256i*) ((const int8_t*) w + 32));
         $if GFNI:
@@ -172,34 +203,56 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x8c8__$
           xnn_prefetch_to_l1((const int8_t*) w + 896);
 
       $for M in range(MR):
-        vacc${M}x0123 = ${_MM256_DPBUSD_EPI32}(vacc${M}x0123, va${M}x01234567, vb01234567x0123);
-        vacc${M}x4567 = ${_MM256_DPBUSD_EPI32}(vacc${M}x4567, va${M}x01234567, vb89ABCDEFx0123);
+        $if DATATYPE in ["QC2_F32"]:
+          vacc${M}x0 = ${_MM256_DPBUSD_EPI32}(vacc${M}x0, va${M}_0, _mm256_and_si256(vw_lo, vmask), 2);
+          vacc${M}x1 = ${_MM256_DPBUSD_EPI32}(vacc${M}x1, va${M}_0, _mm256_and_si256(vw_hi, vmask), 2);
+          vacc${M}x0 = ${_MM256_DPBUSD_EPI32}(vacc${M}x0, va${M}_1, _mm256_and_si256(_mm256_srli_epi32(vw_lo, 2), vmask), 2);
+          vacc${M}x1 = ${_MM256_DPBUSD_EPI32}(vacc${M}x1, va${M}_1, _mm256_and_si256(_mm256_srli_epi32(vw_hi, 2), vmask), 2);
+        $else:
+          vacc${M}x0123 = ${_MM256_DPBUSD_EPI32}(vacc${M}x0123, va${M}x01234567, vb01234567x0123);
+          vacc${M}x4567 = ${_MM256_DPBUSD_EPI32}(vacc${M}x4567, va${M}x01234567, vb89ABCDEFx0123);
       $if PREFETCH:
         xnn_prefetch_to_l1((const int8_t*) w + 960);
       $for M in range(MR):
         $if MR < 3:
-          vacc1x${M}x0123 = ${_MM256_DPBUSD_EPI32}(vacc1x${M}x0123, va${M}x89ABCDEF, vb01234567x4567);
-          vacc1x${M}x4567 = ${_MM256_DPBUSD_EPI32}(vacc1x${M}x4567, va${M}x89ABCDEF, vb89ABCDEFx4567);
+          $if DATATYPE in ["QC2_F32"]:
+            vacc1x${M}x0 = ${_MM256_DPBUSD_EPI32}(vacc1x${M}x0, va${M}_2, _mm256_and_si256(_mm256_srli_epi32(vw_lo, 4), vmask), 2);
+            vacc1x${M}x1 = ${_MM256_DPBUSD_EPI32}(vacc1x${M}x1, va${M}_2, _mm256_and_si256(_mm256_srli_epi32(vw_hi, 4), vmask), 2);
+            vacc1x${M}x0 = ${_MM256_DPBUSD_EPI32}(vacc1x${M}x0, va${M}_3, _mm256_and_si256(_mm256_srli_epi32(vw_lo, 6), vmask), 2);
+            vacc1x${M}x1 = ${_MM256_DPBUSD_EPI32}(vacc1x${M}x1, va${M}_3, _mm256_and_si256(_mm256_srli_epi32(vw_hi, 6), vmask), 2);
+          $else:
+            vacc1x${M}x0123 = ${_MM256_DPBUSD_EPI32}(vacc1x${M}x0123, va${M}x89ABCDEF, vb01234567x4567);
+            vacc1x${M}x4567 = ${_MM256_DPBUSD_EPI32}(vacc1x${M}x4567, va${M}x89ABCDEF, vb89ABCDEFx4567);
         $else:
-          vacc${M}x0123 = ${_MM256_DPBUSD_EPI32}(vacc${M}x0123, va${M}x89ABCDEF, vb01234567x4567);
-          vacc${M}x4567 = ${_MM256_DPBUSD_EPI32}(vacc${M}x4567, va${M}x89ABCDEF, vb89ABCDEFx4567);
+          $if DATATYPE in ["QC2_F32"]:
+            vacc${M}x0 = ${_MM256_DPBUSD_EPI32}(vacc${M}x0, va${M}_2, _mm256_and_si256(_mm256_srli_epi32(vw_lo, 4), vmask), 2);
+            vacc${M}x1 = ${_MM256_DPBUSD_EPI32}(vacc${M}x1, va${M}_2, _mm256_and_si256(_mm256_srli_epi32(vw_hi, 4), vmask), 2);
+            vacc${M}x0 = ${_MM256_DPBUSD_EPI32}(vacc${M}x0, va${M}_3, _mm256_and_si256(_mm256_srli_epi32(vw_lo, 6), vmask), 2);
+            vacc${M}x1 = ${_MM256_DPBUSD_EPI32}(vacc${M}x1, va${M}_3, _mm256_and_si256(_mm256_srli_epi32(vw_hi, 6), vmask), 2);
+          $else:
+            vacc${M}x0123 = ${_MM256_DPBUSD_EPI32}(vacc${M}x0123, va${M}x89ABCDEF, vb01234567x4567);
+            vacc${M}x4567 = ${_MM256_DPBUSD_EPI32}(vacc${M}x4567, va${M}x89ABCDEF, vb89ABCDEFx4567);
 
-      $if DATATYPE in ["QC4_F16", "QC4_F32", "QS8_QC4"]:
+      $if DATATYPE in ["QC4_F16", "QC4_F32", "QS8_QC4", "QC2_F32"]:
         w = (const int8_t*) w + 64;
       $else:
         w = (const int8_t*) w + 128;
-      k -= 16 * sizeof(int8_t);
+      k -= ${16 * K_FACTOR} * sizeof(int8_t);
     }
 
     if (k != 0) {
-      $for M in range(MR):
-        $if VARIANT == "AVXVNNIINT8" or DATATYPE in ["QD8_F16", "QD8_F32", "QC4_F16", "QC4_F32"]:
-          const __m256i va${M}x01234567 = _mm256_set1_epi64x((int64_t) unaligned_load_u64(a${M}));
-        $else:
-          const __m256i va${M}x01234567 = _mm256_xor_si256(_mm256_set1_epi64x((int64_t) unaligned_load_u64(a${M})), vsign_mask);
-        a${M} += 8;
+      $if DATATYPE not in ["QC2_F32"]:
+        $for M in range(MR):
+          $if VARIANT == "AVXVNNIINT8" or DATATYPE in ["QD8_F16", "QD8_F32", "QC4_F16", "QC4_F32"]:
+            const __m256i va${M}x01234567 = _mm256_set1_epi64x((int64_t) unaligned_load_u64(a${M}));
+          $else:
+            const __m256i va${M}x01234567 = _mm256_xor_si256(_mm256_set1_epi64x((int64_t) unaligned_load_u64(a${M})), vsign_mask);
+          a${M} += 8;
 
-      $if DATATYPE in ["QC4_F16", "QC4_F32", "QS8_QC4"]:
+      $if DATATYPE in ["QC2_F32"]:
+        const __m256i vw_lo = _mm256_loadu_si256((const __m256i*)w);
+        const __m256i vw_hi = _mm256_loadu_si256((const __m256i*)((const int8_t*) w + 32));
+      $elif DATATYPE in ["QC4_F16", "QC4_F32", "QS8_QC4"]:
         const __m256i vbb01234567x01234567 = _mm256_load_si256(w);
         const __m256i vbb89ABCDEFx01234567 = _mm256_load_si256((const __m256i*) ((const int8_t*) w + 32));
         $if GFNI:
@@ -216,31 +269,83 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x8c8__$
         const __m256i vb89ABCDEFx0123 = _mm256_load_si256((const __m256i*) ((const int8_t*) w + 32));
 
       $for M in range(MR):
-        vacc${M}x0123 = ${_MM256_DPBUSD_EPI32}(vacc${M}x0123, va${M}x01234567, vb01234567x0123);
-        vacc${M}x4567 = ${_MM256_DPBUSD_EPI32}(vacc${M}x4567, va${M}x01234567, vb89ABCDEFx0123);
+        $if DATATYPE in ["QC2_F32"]:
+          __m256i va = _mm256_set1_epi64x((int64_t) unaligned_load_u64(a${M}));
+          a${M} += 8;
+
+          if (k != 0) {
+            vacc${M}x0= ${_MM256_DPBUSD_EPI32}(vacc${M}x0, va, _mm256_and_si256(vw_lo, vmask), 2);
+            vacc${M}x1 = ${_MM256_DPBUSD_EPI32}(vacc${M}x1, va, _mm256_and_si256(vw_hi, vmask), 2);
+            k -= 8;
+          }
+
+          if (k != 0) {
+            va = _mm256_set1_epi64x((int64_t) unaligned_load_u64(a${M}));
+            a${M} += 8;
+            vacc${M}x0= ${_MM256_DPBUSD_EPI32}(vacc${M}x0, va, _mm256_and_si256(_mm256_srli_epi32(vw_lo, 2), vmask), 2);
+            vacc${M}x1 = ${_MM256_DPBUSD_EPI32}(vacc${M}x1, va, _mm256_and_si256(_mm256_srli_epi32(vw_hi, 2), vmask), 2);
+            k -= 8;
+          }
+
+          if (k != 0) {
+            va = _mm256_set1_epi64x((int64_t) unaligned_load_u64(a${M}));
+            a${M} += 8;
+            vacc${M}x0= ${_MM256_DPBUSD_EPI32}(vacc${M}x0, va, _mm256_and_si256(_mm256_srli_epi32(vw_lo, 4), vmask), 2);
+            vacc${M}x1 = ${_MM256_DPBUSD_EPI32}(vacc${M}x1, va, _mm256_and_si256(_mm256_srli_epi32(vw_hi, 4), vmask), 2);
+            k -= 8;
+          }
+        $else:
+          vacc${M}x0123 = ${_MM256_DPBUSD_EPI32}(vacc${M}x0123, va${M}x01234567, vb01234567x0123);
+          vacc${M}x4567 = ${_MM256_DPBUSD_EPI32}(vacc${M}x4567, va${M}x01234567, vb89ABCDEFx0123);
       $if PREFETCH:
         xnn_prefetch_to_l1((const int8_t*) w + 960);
 
       w = (const int8_t*) w + 64;
-      k -= 8 * sizeof(int8_t);
+      $if DATATYPE not in ["QC2_F32"]:
+        k -= 8 * sizeof(int8_t);
     }
+    $if DATATYPE in ["QC2_F32"]:
+      // Make sure there were no leftovers.
+      assert(k == 0);
     $if MR < 3:
       $for M in range(MR):
-        vacc${M}x0123 = _mm256_add_epi32(vacc${M}x0123, vacc1x${M}x0123);
-        vacc${M}x4567 = _mm256_add_epi32(vacc${M}x4567, vacc1x${M}x4567);
+        $if DATATYPE in ["QC2_F32"]:
+          vacc${M}x0 = _mm256_add_epi32(vacc${M}x0, vacc1x${M}x0);
+          vacc${M}x1 = _mm256_add_epi32(vacc${M}x1, vacc1x${M}x1);
+        $else:
+          vacc${M}x0123 = _mm256_add_epi32(vacc${M}x0123, vacc1x${M}x0123);
+          vacc${M}x4567 = _mm256_add_epi32(vacc${M}x4567, vacc1x${M}x4567);
 
     // Add adjacent pairs
     $for M in range(MR):
-      const __m256i vsum${M}x02134657 = _mm256_hadd_epi32(vacc${M}x0123, vacc${M}x4567);
+      $if DATATYPE in ["QC2_F32"]:
+        const __m256i vsum${M}x02134657 = _mm256_hadd_epi32(vacc${M}x0, vacc${M}x1);
+      $else:
+        const __m256i vsum${M}x02134657 = _mm256_hadd_epi32(vacc${M}x0123, vacc${M}x4567);
       __m256i vacc${M}x01234567 = _mm256_permute4x64_epi64(vsum${M}x02134657, _MM_SHUFFLE(3, 1, 2, 0));
 
+    $if DATATYPE in ["QC2_F32"]:
+      $for M in range(MR):
+        vacc${M}x01234567 = _mm256_add_epi32(vacc${M}x01234567, vsum${M}x01234567);
     $if DATATYPE in ["QC4_F16", "QC4_F32", "QS8_QC4"] and VARIANT != "MADD":
       $for M in range(MR):
         vacc${M}x01234567 = _mm256_srai_epi32(vacc${M}x01234567, 4);
     $for M in range(MR):
       __m256 vout${M}x01234567 = _mm256_cvtepi32_ps(vacc${M}x01234567);
 
-    $if DATATYPE in ["QD8_F16", "QD8_F32", "QC4_F16", "QC4_F32"]:
+    $if DATATYPE in ["QD8_F16", "QD8_F32", "QC4_F16", "QC4_F32", "QC2_F32"]:
+      $if DATATYPE in ["QC2_F32"]:
+        const __m256 rh_zero_points_01234567 = _mm256_load_ps((const float*) kzp);
+        kzp = (const float*)kzp + 8;
+
+        // Subtract out the scaled left-hand row sums.
+        $for M in range(MR):
+          const __m256 lh_row_sum_${M} = _mm256_set1_ps(row_sum[${M}]);
+        // Add the product of left/right-hand zero points and `kc`.
+        $for M in range(MR):
+          const __m256 vscaled_lh_zero_point_${M} = _mm256_set1_ps((float)original_kc * quantization_params[${M}].zero_point);
+        $for M in range(MR):
+          vout${M}x01234567 = _mm256_fmadd_ps(rh_zero_points_01234567, _mm256_sub_ps(vscaled_lh_zero_point_${M}, lh_row_sum_${M}), vout${M}x01234567);
       $for M in range(MR):
         vout${M}x01234567 = _mm256_mul_ps(vout${M}x01234567, _mm256_set1_ps(quantization_params[${M}].inv_scale));
 

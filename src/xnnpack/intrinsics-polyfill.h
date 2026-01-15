@@ -202,16 +202,26 @@ static XNN_INTRINSIC __m512i _mm512_dpbusd_epi32_madd(__m512i i32,
 #ifdef __AVX2__
 
 // AVXVNNI replacement that uses vpmaddubsw.
+// u4 is uint4 in lower 4 bits. Offset can be used to use u2 or i2 instead of
+// u4.
+static XNN_INTRINSIC __m256i _mm256_dpbusd_offset_epi32_madd(__m256i i32,
+                                                             const __m256i u8,
+                                                             const __m256i i4,
+                                                             int offset) {
+  const __m256i vzero_point = _mm256_set1_epi8(offset);
+  const __m256i vone = _mm256_set1_epi16(1);
+  const __m256i biased_i4 = _mm256_sub_epi8(i4, vzero_point);  // offset i4
+  const __m256i i12 = _mm256_maddubs_epi16(u8, biased_i4);     // u8 * i4 = i12
+  const __m256i v = _mm256_madd_epi16(i12, vone);  // convert 16 bits to 32 bits
+  return _mm256_add_epi32(i32, v);
+}
+
+// AVXVNNI replacement that uses vpmaddubsw.
 // u4 is uint4 in lower 4 bits.
 static XNN_INTRINSIC __m256i _mm256_dpbusd_epi32_madd(__m256i i32,
                                                       const __m256i u8,
                                                       const __m256i u4) {
-  const __m256i vzero_point = _mm256_set1_epi8(8);
-  const __m256i vone = _mm256_set1_epi16(1);
-  const __m256i i4 = _mm256_sub_epi8(u4, vzero_point);  // convert uint4 to int4
-  const __m256i i12 = _mm256_maddubs_epi16(u8, i4);     // u8 * i4 = i12
-  const __m256i v = _mm256_madd_epi16(i12, vone);  // convert 16 bits to 32 bits
-  return _mm256_add_epi32(i32, v);
+  return _mm256_dpbusd_offset_epi32_madd(i32, u8, u4, 8);
 }
 
 #endif  // __AVX2__

@@ -203,6 +203,20 @@
 #endif  // XNN_ENABLE_ARM_DOTPROD && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 
 
+#if XNN_ENABLE_AVX2 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+  static void qd8_f32_qc2w_gemm_minmax_ukernel_1x8c8__avx2_madd(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state,
+      xnn_qd8_f32_qc2w_gemm_minmax_ukernel_1x8c8__avx2_madd,
+      xnn_init_f32_minmax_scalar_params,
+      xnn_pack_qd8_qc2w_gemm_goi_w,
+      /*mr=*/1, /*nr=*/8, /*kr=*/8, /*sr=*/1,
+      /*arch_flags=*/xnn_arch_x86_avx2);
+  }
+
+  BENCHMARK_GEMM(qd8_f32_qc2w_gemm_minmax_ukernel_1x8c8__avx2_madd)
+#endif  // XNN_ENABLE_AVX2 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+
+
 static void qd8_f32_qc2w_gemm_minmax_ukernel_1x1__scalar(benchmark::State& state, const char* net) {
   GEMMBenchmark(state,
     xnn_qd8_f32_qc2w_gemm_minmax_ukernel_1x1__scalar,
