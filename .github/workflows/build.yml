@@ -570,10 +570,10 @@ jobs:
         --define=ynn_enable_arm_neonbf16=false
     steps:
       - uses: actions/checkout@v6
-      - name: Add repository ppa:ubuntu-toolchain-r/test for gcc-13 and g++-13
-        working-directory: ${{ github.workspace }}
+      - name: Update apt
         run: |
-          sudo add-apt-repository ppa:ubuntu-toolchain-r/test
+          echo 'set man-db/auto-update false' | sudo debconf-communicate >/dev/null
+          sudo dpkg-reconfigure man-db
           sudo apt update
       - name: Install gcc-13 (cached)
         uses: awalsh128/cache-apt-pkgs-action@v1.4.3
