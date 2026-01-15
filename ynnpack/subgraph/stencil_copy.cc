@@ -98,12 +98,11 @@ void define_stencil_copy(ynn_subgraph& subgraph, ynn_node& node,
       // instead of one (both copies have the possibility of aliasing, but with
       // different operations).
       const ynn_runtime_value& padding = runtime.value(padding_id);
-      slinky::buffer_expr_ptr padded =
-          make_buffer_expr(runtime.symbols, "padded", input_buffer->rank(),
-                           input_buffer->elem_size());
+      slinky::buffer_expr_ptr padded = runtime.globals.make_buffer_expr(
+          "padded", input_buffer->rank(), input_buffer->elem_size());
 
       const int rank = input.rank();
-      std::vector<slinky::var> dims = make_dims(rank, runtime.symbols);
+      std::vector<slinky::var> dims = runtime.globals.make_dims(rank);
       slinky::func::input func_input{
           input_buffer, make_elementwise_bounds(dims, input.extents)};
       slinky::func::input func_padding{
@@ -133,7 +132,7 @@ void define_stencil_copy(ynn_subgraph& subgraph, ynn_node& node,
     output.make_buffer(runtime, input.buffer->elem_size());
 
     std::vector<slinky::var> dims =
-        make_dims(output.buffer->rank(), runtime.symbols);
+        runtime.globals.make_dims(output.buffer->rank());
 
     std::vector<slinky::var> input_dims = dims;
     for (auto i = op.stencils.rbegin(); i != op.stencils.rend(); ++i) {

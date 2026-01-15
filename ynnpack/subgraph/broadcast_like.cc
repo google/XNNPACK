@@ -79,7 +79,7 @@ ynn_status ynn_define_broadcast_like(ynn_subgraph_t subgraph, size_t num_axes,
       // We know the output extent is one, just use the template.
       output_extent = template_extent;
     } else {
-      output_extent = subgraph->make_global_variable(
+      output_extent = subgraph->globals.get(
           select(template_extent > 1, template_extent, output_extent), "b");
 
       node.checks.push_back({
@@ -119,7 +119,7 @@ ynn_status ynn_define_broadcast_like(ynn_subgraph_t subgraph, size_t num_axes,
 
     output.make_buffer(runtime, input.buffer->elem_size());
 
-    std::vector<slinky::var> dims = make_dims(output.rank(), runtime.symbols);
+    std::vector<slinky::var> dims = runtime.globals.make_dims(output.rank());
     slinky::box_expr bounds = make_elementwise_bounds(dims, input.extents);
 
     for (size_t i = 0; i < axes.size(); ++i) {

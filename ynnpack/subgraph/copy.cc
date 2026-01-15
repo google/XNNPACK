@@ -74,7 +74,7 @@ void deduce_reshape_extent(ynn_node& node, int input_idx,
       // This ends up being a pretty complicated expression, so hoist it into
       // a global variable.
       output_extents[deduce_dim] =
-          subgraph.make_global_variable(deduced_extent, "deduced_extent");
+          subgraph.globals.get(deduced_extent, "deduced_extent");
     }
 
     node.checks.push_back({
@@ -94,7 +94,7 @@ slinky::func make_reshape(ynn_runtime& runtime,
   const size_t out_rank = output_extents.size();
   assert(out_rank == output_buf->rank());
 
-  std::vector<slinky::var> dims = make_dims(out_rank, runtime.symbols);
+  std::vector<slinky::var> dims = runtime.globals.make_dims(out_rank);
   slinky::box_expr bounds(in_rank);
 
   // Compute the "flat" index of the coordinates in the output.
@@ -198,7 +198,7 @@ ynn_status ynn_define_copy(ynn_subgraph_t subgraph, uint32_t input_id,
     ynn_runtime_value& output = runtime.value(node.outputs[0]);
 
     output.make_buffer(runtime, input.buffer->elem_size());
-    std::vector<slinky::var> dims = make_dims(output.rank(), runtime.symbols);
+    std::vector<slinky::var> dims = runtime.globals.make_dims(output.rank());
     slinky::box_expr bounds = make_elementwise_bounds(dims, input.extents);
     auto func = slinky::func::make_copy({input.buffer, std::move(bounds)},
                                         {output.buffer, std::move(dims)});
@@ -292,7 +292,7 @@ ynn_status ynn_define_static_broadcast(ynn_subgraph_t subgraph, size_t rank,
     const ynn_runtime_value& input = runtime.value(input_id);
     ynn_runtime_value& output = runtime.value(node.outputs[0]);
 
-    std::vector<slinky::var> dims = make_dims(output.rank(), runtime.symbols);
+    std::vector<slinky::var> dims = runtime.globals.make_dims(output.rank());
     slinky::box_expr bounds =
         make_broadcast_bounds(dims, input.extents, output.extents);
 
@@ -348,7 +348,7 @@ ynn_status ynn_define_static_expand_dims(ynn_subgraph_t subgraph,
     assert(input.rank() == input.extents.size());
     assert(output.rank() == input.rank() + new_axes.count());
 
-    std::vector<slinky::var> dims = make_dims(output.rank(), runtime.symbols);
+    std::vector<slinky::var> dims = runtime.globals.make_dims(output.rank());
     slinky::box_expr bounds(input.rank());
 
     auto bounds_d = bounds.begin();

@@ -13,7 +13,10 @@
 
 #include <cassert>
 #include <cstddef>
+#include <cstdint>
+#include <limits>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "slinky/builder/pipeline.h"
@@ -25,14 +28,32 @@
 
 namespace ynn {
 
+class slinky_globals {
+ public:
+  // Make a global variable for the given expression. Deduplicates identical
+  // expressions to the same variable.
+  slinky::expr get(slinky::expr value, const char* prefix);
+
+  // Make an array of dimensions that is begin, 1, ... end - 1.
+  std::vector<slinky::var> make_dims(int begin, int end);
+  std::vector<slinky::var> make_dims(int rank);
+
+  slinky::buffer_expr_ptr make_buffer_expr(const std::string& name, int rank,
+                                           slinky::expr elem_size);
+
+  // Symbols we've named in Slinky.
+  slinky::node_context symbols;
+
+  // This is a list of global variables and their (symbolic) value that will be
+  // lifted out of the pipeline.
+  std::vector<std::pair<slinky::var, slinky::expr>> lets;
+};
+
 inline int axis_to_slinky_dim(int rank, int axis) {
   return axis < 0 ? -(axis + 1) : rank - (axis + 1);
 }
 
 slinky::buffer_expr_ptr make_buffer_expr(slinky::var sym, int rank,
-                                         slinky::expr elem_size);
-slinky::buffer_expr_ptr make_buffer_expr(slinky::node_context& ctx,
-                                         const std::string& name, int rank,
                                          slinky::expr elem_size);
 
 // Constrain the strides of the first `dims` dimensions of a buffer such that
@@ -40,11 +61,6 @@ slinky::buffer_expr_ptr make_buffer_expr(slinky::node_context& ctx,
 // XNNPACK/TFlite expect.
 void require_contiguous(slinky::buffer_expr& buf,
                         size_t dims = std::numeric_limits<size_t>::max());
-
-// Make an array of dimensions that is begin, 1, ... end - 1.
-std::vector<slinky::var> make_dims(int begin, int end,
-                                   slinky::node_context& ctx);
-std::vector<slinky::var> make_dims(int rank, slinky::node_context& ctx);
 
 // Get bounds for an elementwise dimension, allowing for the possibility of a
 // broadcast.

@@ -276,7 +276,7 @@ void define_reduce(ynn_subgraph& subgraph, ynn_node& node,
 
     output.make_buffer(runtime);
 
-    std::vector<slinky::var> dims = make_dims(input_a.rank(), runtime.symbols);
+    std::vector<slinky::var> dims = runtime.globals.make_dims(input_a.rank());
     slinky::box_expr a_bounds = make_elementwise_bounds(dims, input_a.extents);
     slinky::box_expr c_bounds = make_elementwise_bounds(dims, input_c.extents);
 

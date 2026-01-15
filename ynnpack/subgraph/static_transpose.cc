@@ -160,7 +160,7 @@ ynn_status define_static_transpose(ynn_subgraph_t subgraph,
 
     int rank = op.permutation.size();
 
-    std::vector<slinky::var> input_dims = make_dims(rank, runtime.symbols);
+    std::vector<slinky::var> input_dims = runtime.globals.make_dims(rank);
     std::vector<slinky::var> output_dims(input_dims);
     slinky::func::input func_input{
         input.buffer, make_elementwise_bounds(input_dims, input.extents)};

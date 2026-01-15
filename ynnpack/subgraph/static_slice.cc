@@ -122,7 +122,7 @@ ynn_status ynn_define_static_slice(ynn_subgraph_t subgraph, size_t num_axes,
     output.make_buffer(runtime, input.buffer->elem_size());
 
     const int rank = input.rank();
-    std::vector<slinky::var> dims = make_dims(rank, runtime.symbols);
+    std::vector<slinky::var> dims = runtime.globals.make_dims(rank);
     slinky::func::input func_input{
         input.buffer, make_elementwise_bounds(dims, input.extents)};
     if (!op.slice_dims) {

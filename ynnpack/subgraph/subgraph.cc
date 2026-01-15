@@ -39,6 +39,7 @@
 #include "slinky/runtime/buffer.h"
 #include "slinky/runtime/evaluate.h"
 #include "slinky/runtime/expr.h"
+#include "slinky/runtime/print.h"
 
 std::string ynn_value::name() const {
   return name_prefix() + std::to_string(id);
@@ -313,22 +314,6 @@ void ynn_subgraph::infer_elementwise_shape(ynn_node& node, int input_idx,
     // constant?
     output_i = input_i;
     if (input_type_element_count != 1) output_i /= output_type_element_count;
-  }
-}
-
-slinky::var ynn_subgraph::make_global_variable(slinky::expr value,
-                                               const char* prefix) {
-  value = slinky::simplify(value);
-  assert(value.defined());
-
-  auto i = std::find_if(globals.begin(), globals.end(),
-                        [&](const auto& j) { return match(j.second, value); });
-  if (i == globals.end()) {
-    slinky::var r = symbols.insert_unique(prefix);
-    globals.push_back(std::make_pair(r, value));
-    return r;
-  } else {
-    return i->first;
   }
 }
 
@@ -802,6 +787,19 @@ void ynn_subgraph::dump(std::ostream& os) const {
         os << "value=" << *v;
       }
     }
+    os << "extents={";
+    for (const slinky::expr& i : value.extents) {
+      if (!i.defined()) {
+        os << 1;
+      } else if (const auto v = as_constant(i)) {
+        os << *v;
+      } else {
+        os << i;
+        // os << "?";
+      }
+      os << ",";
+    }
+    os << "}";
     os << std::endl;
     ++values_count;
   }

@@ -61,7 +61,7 @@ ynn_status ynn_define_static_pad(ynn_subgraph_t subgraph, size_t num_axes,
     ynn_runtime_value& output = runtime.value(node.outputs[0]);
 
     const int rank = output.rank();
-    std::vector<slinky::var> dims = make_dims(rank, runtime.symbols);
+    std::vector<slinky::var> dims = runtime.globals.make_dims(rank);
 
     output.make_buffer(runtime, input.buffer->elem_size());
 

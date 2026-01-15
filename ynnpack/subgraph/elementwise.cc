@@ -243,7 +243,7 @@ ynn_status create_unary(const ynn_node& node, ynn_runtime& runtime,
   const ynn_runtime_value& a = runtime.value(node.inputs[0]);
   ynn_runtime_value& x = runtime.value(node.outputs[0]);
   x.make_buffer(runtime);
-  std::vector<slinky::var> dims = make_dims(x.rank(), runtime.symbols);
+  std::vector<slinky::var> dims = runtime.globals.make_dims(x.rank());
   slinky::box_expr bounds = make_elementwise_bounds(dims, a.extents);
 
   slinky::call_stmt::attributes attrs;
@@ -285,7 +285,7 @@ ynn_status create_lut(const ynn_node& node, ynn_runtime& runtime,
   ynn_runtime_value& x = runtime.value(node.outputs[0]);
 
   x.make_buffer(runtime);
-  std::vector<slinky::var> dims = make_dims(x.rank(), runtime.symbols);
+  std::vector<slinky::var> dims = runtime.globals.make_dims(x.rank());
   slinky::box_expr bounds = make_elementwise_bounds(dims, a.extents);
 
   slinky::box_expr lut_bounds = {
@@ -341,7 +341,7 @@ ynn_status create_binary(const ynn_node& node, ynn_runtime& runtime,
 
   // Make the dims and bounds for this operation (does not depend on the
   // specific operation.)
-  std::vector<slinky::var> dims = make_dims(x.rank(), runtime.symbols);
+  std::vector<slinky::var> dims = runtime.globals.make_dims(x.rank());
   slinky::box_expr a_bounds = make_elementwise_bounds(dims, a.extents);
   slinky::box_expr b_bounds = make_elementwise_bounds(dims, b.extents);
   a_bounds.resize(a.rank());
@@ -377,7 +377,7 @@ ynn_status create_ternary(const ynn_node& node, ynn_runtime& runtime,
 
   // Make the dims and bounds for this operation (does not depend on the
   // specific operation.)
-  std::vector<slinky::var> dims = make_dims(x.rank(), runtime.symbols);
+  std::vector<slinky::var> dims = runtime.globals.make_dims(x.rank());
   slinky::box_expr a_bounds = make_elementwise_bounds(dims, a.extents);
   slinky::box_expr b_bounds = make_elementwise_bounds(dims, b.extents);
   slinky::box_expr c_bounds = make_elementwise_bounds(dims, c.extents);
@@ -470,18 +470,18 @@ ynn_status define_make_unary_params(ynn_subgraph_t subgraph,
     params.make_buffer(runtime, sizeof(unary_params));
 
     ynn_runtime_value one;
-    one.buffer =
-        slinky::buffer_expr::make_scalar<float>(runtime.symbols, "one", 1.0f);
+    one.buffer = slinky::buffer_expr::make_scalar<float>(
+        runtime.globals.symbols, "one", 1.0f);
     ynn_runtime_value zero;
-    zero.buffer =
-        slinky::buffer_expr::make_scalar<int32_t>(runtime.symbols, "zero", 0);
+    zero.buffer = slinky::buffer_expr::make_scalar<int32_t>(
+        runtime.globals.symbols, "zero", 0);
     const auto& a_scale = value_or(runtime, node.inputs[0], one);
     const auto& a_zero_point = value_or(runtime, node.inputs[1], zero);
     const auto& x_scale = value_or(runtime, node.inputs[2], one);
     const auto& x_zero_point = value_or(runtime, node.inputs[3], zero);
 
     // This is elementwise, but we allow implicit broadcasting from lower rank.
-    std::vector<slinky::var> dims = make_dims(params.rank(), runtime.symbols);
+    std::vector<slinky::var> dims = runtime.globals.make_dims(params.rank());
     slinky::box_expr a_scale_bounds =
         make_elementwise_bounds(dims, a_scale.extents);
     slinky::box_expr a_zero_point_bounds =

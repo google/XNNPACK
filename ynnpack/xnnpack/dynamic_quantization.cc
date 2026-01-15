@@ -145,7 +145,7 @@ ynn_status define_qd8_params(ynn_subgraph_t subgraph, size_t num_nonbatch_axes,
     scale.make_buffer(runtime);
     zero_point.make_buffer(runtime);
 
-    std::vector<slinky::var> dims = make_dims(scale.rank(), runtime.symbols);
+    std::vector<slinky::var> dims = runtime.globals.make_dims(scale.rank());
     slinky::box_expr min_max_bounds =
         make_elementwise_bounds(dims, min_max.extents);
     min_max_bounds.push_back(slinky::min_extent(0, 2));

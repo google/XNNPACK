@@ -124,7 +124,7 @@ ynn_status ynn_define_tensor_value(ynn_subgraph_t subgraph, enum ynn_type type,
     value->flags &=
         ~(YNN_VALUE_FLAG_EXTERNAL_INPUT | YNN_VALUE_FLAG_EXTERNAL_OUTPUT);
   } else if (value->is_external_input()) {
-    value->symbol = subgraph->symbols.insert_unique(value->name());
+    value->symbol = subgraph->globals.symbols.insert_unique(value->name());
     value->extents.resize(rank);
     // Replace any constant 0 dimensions with dynamic extents.
     for (size_t d = 0; d < rank; ++d) {

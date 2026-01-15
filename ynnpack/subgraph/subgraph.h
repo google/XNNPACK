@@ -16,13 +16,13 @@
 #include <optional>
 #include <ostream>
 #include <string>
-#include <utility>
 #include <variant>
 #include <vector>
 
 #include "ynnpack/base/type.h"
 #include "ynnpack/include/ynnpack.h"
 #include "ynnpack/kernels/ternary/ternary.h"
+#include "ynnpack/subgraph/slinky.h"
 #include "slinky/runtime/buffer.h"
 #include "slinky/runtime/evaluate.h"
 #include "slinky/runtime/expr.h"
@@ -305,8 +305,7 @@ struct ynn_subgraph {
   std::deque<ynn_value> values;
   std::deque<ynn_node> nodes;
 
-  // Symbols we've named in Slinky.
-  slinky::node_context symbols;
+  ynn::slinky_globals globals;
 
   bool is_valid_value(uint32_t id) const { return id < values.size(); }
 
@@ -349,14 +348,6 @@ struct ynn_subgraph {
                                /*zero_point_id=*/YNN_INVALID_VALUE_ID,
                                /*scale_id=*/YNN_INVALID_VALUE_ID, value);
   }
-
-  // This is a list of global variables and their (symbolic) value that will be
-  // lifted out of the pipeline.
-  std::vector<std::pair<slinky::var, slinky::expr>> globals;
-
-  // Make a global variable for the given expression. Deduplicates identical
-  // expressions to the same variable.
-  slinky::var make_global_variable(slinky::expr value, const char* prefix);
 
   void infer_elementwise_shape(ynn_node& node, int input_idx, int output_idx,
                                int input_dim, int output_dim,
