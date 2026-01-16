@@ -1,0 +1,16 @@
+Name: pthreadpool
+Short Name: pthreadpool
+URL: https://github.com/google/pthreadpool
+Version: N/A
+Revision: d90cd6f1493e09d12c407243f7f331a8cda55efb
+Update Mechanism: Autoroll
+License: BSD-2-Clause
+License File: src/LICENSE
+Security Critical: Yes
+Shipped: no
+
+
+Description:
+pthreadpool is a portable and efficient thread pool implementation. It provides
+similar functionality to #pragma omp parallel for, but with additional features.
+This library supports XNNPACK.
