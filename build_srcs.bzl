@@ -6,10 +6,10 @@
 # Description:
 #   XNNPACK - optimized floating-point neural network operators library
 
-"""Build sources for XNNPACK.
-
-Lists of target-specific sources used to build XNNPACK.
-"""
+# Build sources for XNNPACK.
+#
+# Lists of target-specific sources used to build XNNPACK.
+#
 
 OPERATOR_SRCS = [
     "src/operator-run.c",
