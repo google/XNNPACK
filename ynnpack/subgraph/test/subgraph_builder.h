@@ -227,7 +227,7 @@ class SubgraphBuilder {
 class Runtime {
  public:
   Runtime(ynn_subgraph_t subgraph, TestScheduler* scheduler = nullptr,
-          uint32_t flags = 0);
+          uint32_t flags = 0, bool optimize = true);
 
   Runtime& ReshapeExternalTensor(const TensorShape& shape, void* data,
                                  uint32_t id);

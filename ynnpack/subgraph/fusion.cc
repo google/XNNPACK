@@ -3,12 +3,16 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+#include "ynnpack/subgraph/fusion.h"
+
 #include <algorithm>
 #include <cassert>
 #include <cstddef>
 #include <cstdint>
 #include <initializer_list>
 #include <map>
+#include <memory>
+#include <unordered_set>
 #include <utility>
 #include <variant>
 #include <vector>
@@ -21,25 +25,22 @@
 #include "ynnpack/subgraph/dot.h"
 #include "ynnpack/subgraph/elementwise.h"
 #include "ynnpack/subgraph/reduce.h"
+#include "ynnpack/subgraph/runtime.h"
 #include "ynnpack/subgraph/stencil_copy.h"
 #include "ynnpack/subgraph/subgraph.h"
+#include "ynnpack/subgraph/utils.h"
+
+subgraph_analysis::subgraph_analysis(ynn_subgraph& subgraph) {
+  for (ynn_node& node : subgraph.nodes) {
+    for (uint32_t input : node.inputs) {
+      consumers[input].push_back(&node);
+    }
+    assert(producers.find(node.outputs[0]) == producers.end());
+    producers[node.outputs[0]] = &node;
+  }
+}
 
 namespace {
-
-struct subgraph_analysis {
-  std::map<uint32_t, ynn_node*> producers;
-  std::map<uint32_t, std::vector<ynn_node*>> consumers;
-
-  explicit subgraph_analysis(ynn_subgraph& subgraph) {
-    for (ynn_node& node : subgraph.nodes) {
-      for (uint32_t input : node.inputs) {
-        consumers[input].push_back(&node);
-      }
-      assert(producers.find(node.outputs[0]) == producers.end());
-      producers[node.outputs[0]] = &node;
-    }
-  }
-};
 
 bool is_unary_node(const ynn_node& node, ynn_unary_operator op) {
   const ynn_node::unary_elementwise* unary =
@@ -548,9 +549,285 @@ bool rewrite_reduce_sum_squared_convert(ynn_subgraph& subgraph, ynn_node& node,
   return true;
 }
 
+// Returns the set of inputs to `n` that are not static.
+std::unordered_set<uint32_t> get_variable_inputs(const ynn_subgraph& subgraph,
+                                                 const ynn_node& n) {
+  std::unordered_set<uint32_t> inputs;
+  if (std::get_if<ynn_node::unary_elementwise>(&n.op)) {
+    inputs.insert(n.inputs[0]);
+  } else if (std::get_if<ynn_node::binary_elementwise>(&n.op)) {
+    for (uint32_t id : n.inputs) {
+      if (!subgraph.value(id).is_static()) {
+        inputs.insert(id);
+      }
+    }
+  } else if (std::get_if<ynn_node::ternary_elementwise>(&n.op)) {
+    for (uint32_t id : n.inputs) {
+      if (!subgraph.value(id).is_static()) {
+        inputs.insert(id);
+      }
+    }
+  }
+  return inputs;
+}
+
+bool should_lut_single_node(const ynn_node& node) {
+  bool supported = false;
+  if (auto unary = std::get_if<ynn_node::unary_elementwise>(&node.op)) {
+    switch (unary->op) {
+      case ynn_unary_cosine:
+      case ynn_unary_cube_root:
+      case ynn_unary_erf:
+      case ynn_unary_exp:
+      case ynn_unary_expm1:
+      case ynn_unary_hardswish:
+      case ynn_unary_log:
+      case ynn_unary_log1p:
+      case ynn_unary_reciprocal_square_root:
+      case ynn_unary_sigmoid:
+      case ynn_unary_sine:
+      case ynn_unary_square:
+      case ynn_unary_square_root:
+      case ynn_unary_tanh:
+        supported = true;
+        break;
+      default:
+        break;
+    }
+  } else if (auto binary =
+                 std::get_if<ynn_node::binary_elementwise>(&node.op)) {
+    switch (binary->op) {
+      case ynn_binary_leaky_relu:
+      case ynn_binary_squared_difference:
+        supported = true;
+        break;
+      default:
+        break;
+    }
+  }
+  return supported;
+}
+
+bool rewrite_subgraph_for_unary_lut(ynn_subgraph& subgraph,
+                                    subgraph_analysis& analysis) {
+  // Find the longest subgraph that can be optimized with a unary LUT.
+  // We iterate through the nodes in reverse order since
+  // `find_subgraph_for_unary_lut` traverses the nodes in reverse order.
+  subgraph_candidate best_candidate;
+  for (auto it = subgraph.nodes.rbegin(); it != subgraph.nodes.rend(); ++it) {
+    ynn_node& node = *it;
+    if (!node.is_valid()) continue;
+    subgraph_candidate candidate =
+        find_subgraph_for_unary_lut(subgraph, node, analysis);
+    if (candidate.size > best_candidate.size) {
+      best_candidate = candidate;
+    }
+  }
+
+  if (best_candidate.size == 0) {
+    return false;
+  }
+
+  // If candidate is a single node, check if it is worth replacing with a lut.
+  if (best_candidate.size == 1) {
+    const ynn_node& node = **best_candidate.nodes.begin();
+    if (!should_lut_single_node(node)) {
+      return false;
+    }
+  }
+
+  YNN_LOG_DEBUG() << "Found candidate of size " << best_candidate.size;
+
+  // 1. Clone the subgraph in `candidate` by using clone_subgraph_subset() in
+  // utils.h.
+  uint32_t lut_input_id = YNN_INVALID_VALUE_ID;
+  uint32_t lut_output_id = YNN_INVALID_VALUE_ID;
+  std::unique_ptr<ynn_subgraph> lut_subgraph = ynn::clone_subgraph_subset(
+      subgraph, best_candidate.input_id, best_candidate.output_id, lut_input_id,
+      lut_output_id);
+  if (!lut_subgraph) {
+    return false;
+  }
+
+  // 2. Create a lut table with the same type as the output type.
+  // 3. Modify the cloned subgraph to have an input size that covers the entire
+  // range of the input type.
+  const ynn_value& input_value = subgraph.value(best_candidate.input_id);
+  const size_t range = 256;
+
+  for (ynn_value& value : lut_subgraph->values) {
+    if (value.is_valid() && !value.is_static()) {
+      value.extents.resize(1);
+      value.extents[0] = static_cast<slinky::index_t>(range);
+      value.data = nullptr;
+    }
+  }
+
+  for (ynn_node& node : lut_subgraph->nodes) {
+    node.checks.clear();
+  }
+
+  std::vector<int8_t> input_data(range);
+  if (input_value.type == ynn_type_int8) {
+    for (int i = 0; i < range; ++i) {
+      input_data[i] = static_cast<int8_t>(i - 128);
+    }
+  } else if (input_value.type == ynn_type_uint8) {
+    for (int i = 0; i < range; ++i) {
+      input_data[i] = static_cast<int8_t>(i);
+    }
+  } else {
+    return false;
+  }
+
+  // 4. Run the cloned subgraph.
+  ynn_runtime runtime(*lut_subgraph, nullptr, 0);
+  if (runtime.build() != ynn_status_success) {
+    return false;
+  }
+
+  size_t input_dims = range;
+  if (ynn_set_external_value_shape(&runtime, lut_input_id, 1, &input_dims) !=
+      ynn_status_success) {
+    return false;
+  }
+  if (ynn_set_external_value_data(&runtime, lut_input_id, input_data.data()) !=
+      ynn_status_success) {
+    return false;
+  }
+
+  const ynn_value& output_value = subgraph.value(best_candidate.output_id);
+  std::vector<uint8_t> output_data(range *
+                                   ynn::type_size_bytes(output_value.type));
+  if (ynn_set_external_value_data(&runtime, lut_output_id,
+                                  output_data.data()) != ynn_status_success) {
+    return false;
+  }
+
+  if (runtime.reshape() != ynn_status_success ||
+      runtime.setup() != ynn_status_success ||
+      runtime.invoke() != ynn_status_success) {
+    return false;
+  }
+
+  // 5. Create a new LUT node using ynn::define_lut().
+  uint32_t lut_id = YNN_INVALID_VALUE_ID;
+  size_t lut_dims[] = {range};
+  if (ynn_define_tensor_value(&subgraph, output_value.type, 1, lut_dims,
+                              output_data.data(), YNN_INVALID_VALUE_ID,
+                              YNN_INVALID_VALUE_ID, YNN_VALUE_FLAG_COPY_DATA,
+                              &lut_id) != ynn_status_success) {
+    return false;
+  }
+
+  // 6. Replace and invalidate all nodes in `candidate` with the new LUT node.
+  ynn_node* output_node = analysis.producers[best_candidate.output_id];
+  for (const ynn_node* node : best_candidate.nodes) {
+    if (node != output_node) {
+      const_cast<ynn_node*>(node)->invalidate();
+    }
+  }
+
+  ynn::define_lut(subgraph, *output_node, best_candidate.input_id, lut_id,
+                  best_candidate.output_id);
+  return true;
+}
+
 }  // namespace
 
+subgraph_candidate find_subgraph_for_unary_lut(ynn_subgraph& subgraph,
+                                               ynn_node& node,
+                                               subgraph_analysis& analysis) {
+  subgraph_candidate candidate;
+  if (node.outputs.empty()) {
+    return candidate;
+  }
+  const ynn_value& output = subgraph.value(node.outputs[0]);
+  if (output.type != ynn_type_int8 && output.type != ynn_type_uint8) {
+    return candidate;
+  }
+  std::unordered_set<uint32_t> inputs = get_variable_inputs(subgraph, node);
+  if (inputs.empty()) {
+    return candidate;
+  }
+
+  std::unordered_set<uint32_t> frontier(inputs.begin(), inputs.end());
+  candidate.size = 1;
+  candidate.output_id = node.outputs[0];
+  candidate.nodes.insert(&node);
+
+  subgraph_candidate best_candidate;
+  if (frontier.size() == 1) {
+    uint32_t in_id = *frontier.begin();
+    if (subgraph.value(in_id).type == ynn_type_int8 ||
+        subgraph.value(in_id).type == ynn_type_uint8) {
+      best_candidate = candidate;
+      best_candidate.input_id = in_id;
+    }
+  }
+
+  while (!frontier.empty()) {
+    uint32_t expand_id = YNN_INVALID_VALUE_ID;
+    ynn_node* producer = nullptr;
+
+    // Find a value in the frontier that is ready to be expanded (all consumers
+    // are in the subgraph).
+    for (uint32_t id : frontier) {
+      bool all_consumers_in_subgraph = true;
+      for (const ynn_node* consumer : analysis.consumers[id]) {
+        if (candidate.nodes.find(const_cast<ynn_node*>(consumer)) ==
+            candidate.nodes.end()) {
+          all_consumers_in_subgraph = false;
+          break;
+        }
+      }
+
+      if (all_consumers_in_subgraph) {
+        auto producer_it = analysis.producers.find(id);
+        if (producer_it != analysis.producers.end()) {
+          std::unordered_set<uint32_t> next_inputs =
+              get_variable_inputs(subgraph, *producer_it->second);
+          if (!next_inputs.empty()) {
+            expand_id = id;
+            producer = producer_it->second;
+            break;
+          }
+        }
+      }
+    }
+
+    if (expand_id == YNN_INVALID_VALUE_ID) {
+      break;
+    }
+
+    frontier.erase(expand_id);
+    candidate.values.insert(expand_id);
+    candidate.nodes.insert(producer);
+    candidate.size++;
+
+    std::unordered_set<uint32_t> producer_inputs =
+        get_variable_inputs(subgraph, *producer);
+    for (uint32_t id : producer_inputs) {
+      if (candidate.values.find(id) == candidate.values.end()) {
+        frontier.insert(id);
+      }
+    }
+
+    if (frontier.size() == 1) {
+      uint32_t in_id = *frontier.begin();
+      if (subgraph.value(in_id).type == ynn_type_int8 ||
+          subgraph.value(in_id).type == ynn_type_uint8) {
+        best_candidate = candidate;
+        best_candidate.input_id = in_id;
+      }
+    }
+  }
+
+  return best_candidate;
+}
+
 ynn_status ynn_subgraph::fusion() {
+  // Fuse graph as much as possible before unary LUT optimization.
   bool changed;
   do {
     subgraph_analysis analysis(*this);
@@ -569,6 +846,11 @@ ynn_status ynn_subgraph::fusion() {
                 rewrite_reduce_sum_convert(*this, node, analysis) ||
                 rewrite_reduce_sum_squared_convert(*this, node, analysis);
     }
+  } while (changed);
+
+  do {
+    subgraph_analysis analysis(*this);
+    changed = rewrite_subgraph_for_unary_lut(*this, analysis);
   } while (changed);
 
   return ynn_status_success;
