@@ -35,8 +35,8 @@
 #include "slinky/base/arithmetic.h"
 #include "slinky/base/span.h"
 #include "slinky/base/thread_pool.h"
-#include "slinky/builder/pipeline.h"
 #include "slinky/builder/node_mutator.h"
+#include "slinky/builder/pipeline.h"
 #include "slinky/builder/simplify.h"
 #include "slinky/builder/substitute.h"
 #include "slinky/runtime/buffer.h"
@@ -110,6 +110,12 @@ std::unique_ptr<ynn::scheduling_info> ynn_runtime::make_schedule(
           1, slinky::min(tile_area / tile_area_so_far, output_extents[d])));
       s = globals.get(s, "s");
       splits[d] = s;
+    }
+    if (splits[d].defined() &&
+        slinky::prove_true(splits[d] >= output_extents[d])) {
+      // TODO(b/458542243): We should not need to do this optimization
+      // ourselves.
+      splits[d] = {};
     }
     if (splits[d].defined()) {
       tile_area_so_far = slinky::simplify(tile_area_so_far * splits[d]);
@@ -556,6 +562,14 @@ ynn_runtime::ynn_runtime(const ynn_subgraph& subgraph,
           slinky::buffer_expr::make_constant(value.symbol, value.data);
     } else if (value.is_external_input()) {
       value.make_buffer(*this);
+
+      for (size_t d = 0; d < value.extents.size(); ++d) {
+        if (!value.extents[d].defined()) {
+          value.buffer->dim(d).bounds = slinky::point(0);
+        } else if (const auto v = as_constant(value.extents[d])) {
+          value.buffer->dim(d).bounds = slinky::min_extent(0, *v);
+        }
+      }
 
       if (!value.data) {
         value.data =
