@@ -46,6 +46,12 @@ tools/xngen src/f32-rsum/simd.c.in -D ARCH=scalar -D SIMD_SIZE=1 -D BATCH_TILE=3
 tools/xngen src/f32-rsum/simd.c.in -D ARCH=scalar -D SIMD_SIZE=1 -D BATCH_TILE=4 -D ACCUMULATORS=2 -o src/f32-rsum/gen/f32-rsum-scalar-u4-acc2.c &
 tools/xngen src/f32-rsum/simd.c.in -D ARCH=scalar -D SIMD_SIZE=1 -D BATCH_TILE=4 -D ACCUMULATORS=4 -o src/f32-rsum/gen/f32-rsum-scalar-u4-acc4.c &
 
+################################## RISC-V Vector ##############################
+tools/xngen src/f32-rsum/rvv.c.in -D LMUL=1 -o src/f32-rsum/gen/f32-rsum-rvv-u1v.c &
+tools/xngen src/f32-rsum/rvv.c.in -D LMUL=2 -o src/f32-rsum/gen/f32-rsum-rvv-u2v.c &
+tools/xngen src/f32-rsum/rvv.c.in -D LMUL=4 -o src/f32-rsum/gen/f32-rsum-rvv-u4v.c &
+tools/xngen src/f32-rsum/rvv.c.in -D LMUL=8 -o src/f32-rsum/gen/f32-rsum-rvv-u8v.c &
+
 ################################## Hexagon HVX ################################
 tools/xngen src/f32-rsum/hvx.c.in -D BATCH_TILE=32 -D ACCUMULATORS=1 -o src/f32-rsum/gen/f32-rsum-hvx-u32.c &
 tools/xngen src/f32-rsum/hvx.c.in -D BATCH_TILE=64 -D ACCUMULATORS=2 -o src/f32-rsum/gen/f32-rsum-hvx-u64-acc2.c &
