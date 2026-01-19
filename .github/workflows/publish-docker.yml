@@ -1,0 +1,32 @@
+name: Docker Images
+
+on:
+  push:
+    branches: [ master ]
+    paths: [ 'docker/Dockerfile.standard' ]
+  workflow_dispatch:
+
+permissions:
+  packages: write
+  contents: read
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Standard Image
+        uses: docker/build-push-action@v5
+        with:
+          context: docker/
+          file: docker/Dockerfile.standard
+          push: true
+          tags: ghcr.io/${{ github.repository }}/standard:latest
