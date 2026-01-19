@@ -1,0 +1,33 @@
+FROM ubuntu:24.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update && apt-get install -y \
+    software-properties-common \
+    wget \
+    gnupg \
+    && add-apt-repository -y ppa:ubuntu-toolchain-r/test \
+    && apt-get update
+
+RUN apt-get install -y \
+    build-essential \
+    git \
+    cmake \
+    ninja-build \
+    python3 \
+    python3-pip \
+    ccache \
+    gcc-9 g++-9 \
+    gcc-13 g++-13 \
+    crossbuild-essential-armhf \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN wget https://apt.llvm.org/llvm.sh && \
+    chmod +x llvm.sh && \
+    ./llvm.sh 18 && \
+    rm llvm.sh
+
+RUN wget -O /usr/local/bin/bazel https://github.com/bazelbuild/bazelisk/releases/download/v1.19.0/bazelisk-linux-amd64 && \
+    chmod +x /usr/local/bin/bazel
+
+RUN ln -sf /usr/bin/python3 /usr/bin/python
