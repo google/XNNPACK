@@ -40,7 +40,7 @@ template <typename Result>
 Result round_float_to_int(float x) {
   using Unwrapped = typename unwrap_quantized<Result>::type;
   x = std::isnan(x) ? 0.0f : x;
-  x = std::round(x);
+  x = std::nearbyint(x);
   x = clamp_float_to_int<Result>(x);
   return static_cast<Unwrapped>(x);
 }
@@ -80,7 +80,7 @@ void quantize(const float* in, T* out, size_t n,
 }
 
 inline float fake_quantize(float x, float inv_scale, float zero_point) {
-  return std::round(x * inv_scale + zero_point);
+  return std::nearbyint(x * inv_scale + zero_point);
 }
 inline float fake_quantize(float x, const quantization_params& params) {
   return fake_quantize(x, 1.0f / params.scale, params.zero_point);

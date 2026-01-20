@@ -99,7 +99,7 @@ void check_results(const OpInfo& op, const Tensor<A>& a, const Tensor<B>& b,
     if (std::is_integral<X>::value) {
       const int32_t expected = op(a(i), b(i), c(i));
       const int32_t tolerance =
-        std::round(op.tolerance(a(i), b(i), c(i), type_of<X>()));
+          std::nearbyint(op.tolerance(a(i), b(i), c(i), type_of<X>()));
       ASSERT_NEAR(expected, x(i), tolerance)
           << "i = " << index_to_string(i) << ", a(i) = " << a(i)
           << ", b(i) = " << b(i) << ", c(i) = " << c(i);
