@@ -1,0 +1,790 @@
+# Copyright 2025 Google LLC
+#
+# This source code is licensed under the BSD-style license found in the
+# LICENSE file in the root directory of this source tree.
+
+# Import argument definitions
+
+import("//build/buildflag_header.gni")
+import("//build/config/android/config.gni")
+import("//build/config/arm.gni")
+import("//build/config/coverage/coverage.gni")
+import("//build/config/dcheck_always_on.gni")
+import("//build/config/features.gni")
+import("//build/config/host_byteorder.gni")
+import("//build/config/mips.gni")
+import("//build/config/riscv.gni")
+import("//build/config/rust.gni")
+import("//build_overrides/build.gni")
+import("//testing/test.gni")
+
+if (is_clang) {
+  import("//build/config/clang/clang.gni")
+}
+
+# Import outputs of tools/update-microkernels.py
+# These are generated lists of files that contains XNNPACK's various
+# compute kernels. These are technically Bazel-format files, but they
+# can be read with GN too.
+import("//gen/scalar_microkernels.bzl")
+
+import("//gen/aarch64_microkernels.bzl")
+import("//gen/neon_aarch64_microkernels.bzl")
+import("//gen/neon_microkernels.bzl")
+import("//gen/neonbf16_microkernels.bzl")
+import("//gen/neondot_aarch64_microkernels.bzl")
+import("//gen/neondot_microkernels.bzl")
+import("//gen/neondotfp16arith_microkernels.bzl")
+import("//gen/neonfma_aarch64_microkernels.bzl")
+import("//gen/neonfma_microkernels.bzl")
+import("//gen/neonfp16_microkernels.bzl")
+import("//gen/neonfp16arith_aarch64_microkernels.bzl")
+import("//gen/neonfp16arith_microkernels.bzl")
+import("//gen/neoni8mm_microkernels.bzl")
+import("//gen/neonsme2_microkernels.bzl")
+import("//gen/neonsme_microkernels.bzl")
+import("//gen/neonv8_microkernels.bzl")
+
+import("//gen/amd64_microkernels.bzl")
+import("//gen/avx256skx_microkernels.bzl")
+import("//gen/avx256vnni_microkernels.bzl")
+import("//gen/avx256vnnigfni_microkernels.bzl")
+import("//gen/avx2_microkernels.bzl")
+import("//gen/avx512amx_microkernels.bzl")
+import("//gen/avx512f_microkernels.bzl")
+import("//gen/avx512fp16_microkernels.bzl")
+import("//gen/avx512skx_microkernels.bzl")
+import("//gen/avx512vbmi_microkernels.bzl")
+import("//gen/avx512vnni_microkernels.bzl")
+import("//gen/avx512vnnigfni_microkernels.bzl")
+import("//gen/avx_microkernels.bzl")
+import("//gen/avxvnni_microkernels.bzl")
+import("//gen/avxvnniint8_microkernels.bzl")
+import("//gen/f16c_microkernels.bzl")
+import("//gen/fma3_microkernels.bzl")
+import("//gen/sse2_microkernels.bzl")
+import("//gen/sse2fma_microkernels.bzl")
+import("//gen/sse41_microkernels.bzl")
+import("//gen/sse_microkernels.bzl")
+import("//gen/sse_microkernels.bzl")
+import("//gen/ssse3_microkernels.bzl")
+
+# Other code from Bazel covering the raw sources
+import("//build_srcs.bzl")
+
+# Argument declarations for XNNPACK. This will expand to offer
+# more granular support for each architecture, as appropriate.
+# The values (and what they're currently set to) can be viewed with
+# `gn args --list out/Default`
+declare_args() {
+  # Enables SSE4.1 support for x86 processors
+  xnnpack_enable_sse41 = target_cpu == "x64" || target_cpu == "x86"
+
+  # Enables F16C support for x86 processors
+  xnnpack_enable_f16c = target_cpu == "x64" || target_cpu == "x86"
+
+  # Enables FMA3 support for x86 processors
+  xnnpack_enable_fma3 = target_cpu == "x64" || target_cpu == "x86"
+
+  # Enables AVX support for x86 processors
+  xnnpack_enable_avx = target_cpu == "x64" || target_cpu == "x86"
+
+  # Enables AVX2 support for x86 processors
+  xnnpack_enable_avx2 = target_cpu == "x64" || target_cpu == "x86"
+
+  # Enables AVX512 support for x86 processors
+  xnnpack_enable_avx512 = target_cpu == "x64" || target_cpu == "x86"
+
+  # Enables VNNI extensions, which are separate from AVX512-VNNI
+  xnnpack_enable_avx_vnni = target_cpu == "x64" || target_cpu == "x86"
+  xnnpack_enable_avx_vnni_int8 = target_cpu == "x64" || target_cpu == "x86"
+
+  # If enabled, builds XNNPACK's tests and benchmarks. Switched off on Android for
+  # now because of the nest of Java dependencies it brings in.
+  # TODO: fix this and remove the flag
+  xnnpack_build_tests = !is_android || build_with_chromium
+}
+
+assert(target_cpu == "arm64" || target_cpu == "x64" || target_cpu == "x86",
+       "Unsupported target_cpu '${target_cpu}'.")
+
+# Various #defines and cflags that should stay internal to XNNPACK.
+config("xnnpack_private_config") {
+  # Only targets in this file and subdirs can see this
+  visibility = [ "./*" ]
+  cflags = [
+    "-Wno-unused-function",
+    "-Wno-deprecated-comma-subscript",
+    "-Wno-extra-semi",
+    "-Wno-sign-compare",
+    "-Wno-unreachable-code-break",
+    "-Wno-unused-function",
+    "-Wno-shadow",
+    "-Wno-gcc-compat",
+  ]
+
+  if (target_cpu == "x86" || target_cpu == "x64") {
+    cflags += [ "-mssse3" ]
+  }
+  configs = [ ":xnnpack_public_config" ]
+}
+
+config("xnnpack_public_config") {
+  include_dirs = [
+    # TODO: may wish to trim some of these
+    "//third_party/pthreadpool/src/include",
+    "src/deps/clog/include",
+    "src/include",
+    "src/src",
+    "include",
+    "src",
+  ]
+
+  defines = [
+    # Always enable XNNPACK's assembly kernels
+    "XNN_ENABLE_ASSEMBLY=1",
+
+    # TODO: decide if we want to always enable this, or parameterize it
+    "XNN_ENABLE_SPARSE=0",
+
+    # Always enable cpuinfo feature detection
+    "XNN_ENABLE_CPUINFO=1",
+  ]
+
+  # Define support for all features on every platform possible,
+  # unless there's a good reason to switch them off.
+  if (target_cpu == "arm64") {
+    # Define the core Armv8
+    defines += [
+      "XNN_ENABLE_ARM_DOTPROD=1",
+      "XNN_ENABLE_ARM_BF16=1",
+      "XNN_ENABLE_ARM_I8MM=1",
+      "XNN_ENABLE_ASSEMBLY=1",
+      "XNN_ENABLE_ARM_FP16_VECTOR=1",
+    ]
+  } else if (target_cpu == "x64" || target_cpu == "x86") {
+    # x64 support baseline, which is SSSE3 and below to match Chromium.
+    defines += [
+      "XNN_ENABLE_SSE=1",
+      "XNN_ENABLE_SSE2=1",
+      "XNN_ENABLE_SSSE3=1",
+    ]
+    cflags = [ "-mssse3" ]
+
+    if (xnnpack_enable_avx) {
+      defines += [ "XNN_ENABLE_AVX=1" ]
+    } else {
+      defines += [ "XNN_ENABLE_AVX=0" ]
+    }
+    if (xnnpack_enable_avx2) {
+      defines += [ "XNN_ENABLE_AVX2=1" ]
+    } else {
+      defines += [ "XNN_ENABLE_AVX2=0" ]
+    }
+    if (xnnpack_enable_sse41) {
+      defines += [ "XNN_ENABLE_SSE41=1" ]
+    } else {
+      defines += [ "XNN_ENABLE_SSE41=0" ]
+    }
+    if (xnnpack_enable_f16c) {
+      defines += [ "XNN_ENABLE_F16C=1" ]
+    } else {
+      defines += [ "XNN_ENABLE_F16C=0" ]
+    }
+    if (xnnpack_enable_fma3) {
+      defines += [ "XNN_ENABLE_FMA3=1" ]
+    } else {
+      defines += [ "XNN_ENABLE_FMA3=0" ]
+    }
+
+    if (xnnpack_enable_avx_vnni) {
+      defines += [ "XNN_ENABLE_AVXVNNI=1" ]
+    } else {
+      defines += [ "XNN_ENABLE_AVXVNNI=0" ]
+    }
+
+    if (xnnpack_enable_avx_vnni_int8) {
+      defines += [ "XNN_ENABLE_AVXVNNIINT8=1" ]
+    } else {
+      defines += [ "XNN_ENABLE_AVXVNNIINT8=0" ]
+    }
+
+    if (xnnpack_enable_avx512) {
+      defines += [
+        "XNN_ENABLE_AVX512F=1",
+        "XNN_ENABLE_AVX256SKX=1",
+        "XNN_ENABLE_AVX256VNNI=1",
+        "XNN_ENABLE_AVX256VNNIGFNI=1",
+        "XNN_ENABLE_AVX512SKX=1",
+        "XNN_ENABLE_AVX512VBMI=1",
+        "XNN_ENABLE_AVX512VNNI=1",
+        "XNN_ENABLE_AVX512VNNIGFNI=1",
+        "XNN_ENABLE_AVX512AMX=1",
+        "XNN_ENABLE_AVX512FP16=1",
+        "XNN_ENABLE_AVX512BF16=1",
+      ]
+    } else {
+      defines += [
+        "XNN_ENABLE_AVX512F=0",
+        "XNN_ENABLE_AVX256SKX=0",
+        "XNN_ENABLE_AVX256VNNI=0",
+        "XNN_ENABLE_AVX256VNNIGFNI=0",
+        "XNN_ENABLE_AVX512SKX=0",
+        "XNN_ENABLE_AVX512VBMI=0",
+        "XNN_ENABLE_AVX512VNNI=0",
+        "XNN_ENABLE_AVX512VNNIGFNI=0",
+        "XNN_ENABLE_AVX512AMX=0",
+        "XNN_ENABLE_AVX512FP16=0",
+        "XNN_ENABLE_AVX512BF16=0",
+      ]
+    }
+  }
+
+  # Define some logging if we're in DEBUG or DCHECK mode.
+  if (is_debug) {
+    defines += [ "XNN_LOG_LEVEL=5" ]
+    # TODO: There's an intermediate level
+  } else if (dcheck_always_on) {
+    defines += [ "XNN_LOG_LEVEL=3" ]
+  } else {
+    # Release build
+    defines += [ "XNN_LOG_LEVEL=0" ]
+  }
+
+  if ((is_android || is_linux) && current_cpu == "arm64") {
+    # Mark assembly files with BTI support
+    asmflags = [ "-mmark-bti-property" ]
+  }
+
+  configs = [ "//build/config/compiler:no_chromium_code" ]
+  configs += [ "//build/config/sanitizers:cfi_icall_generalize_pointers" ]
+}
+
+source_set("xnnpack_headers") {
+  # XNNPACK's global header that's re-used by various sub-targets
+  sources = [ "include/xnnpack.h" ]
+}
+
+source_set("configs") {
+  configs += [
+    ":xnnpack_private_config",
+    ":xnnpack_public_config",
+    "//build/config/compiler:no_chromium_code",
+  ]
+  deps = [
+    ":microkernel_headers",
+    ":xnnpack_headers",
+    "//third_party/cpuinfo",
+  ]
+
+  # From build_srcs.bzl
+  sources = [
+    "src/configs/argmaxpool-config.c",
+    "src/configs/avgpool-config.c",
+    "src/configs/binary-elementwise-config.c",
+    "src/configs/cmul-config.c",
+    "src/configs/conv-hwc2chw-config.c",
+    "src/configs/dwconv-config.c",
+    "src/configs/dwconv2d-chw-config.c",
+    "src/configs/gemm-config.c",
+    "src/configs/hardware-config.c",
+    "src/configs/ibilinear-chw-config.c",
+    "src/configs/ibilinear-config.c",
+    "src/configs/lut32norm-config.c",
+    "src/configs/maxpool-config.c",
+    "src/configs/pack-lh-config.c",
+    "src/configs/raddstoreexpminusmax-config.c",
+    "src/configs/reduce-config.c",
+    "src/configs/spmm-config.c",
+    "src/configs/transpose-config.c",
+    "src/configs/unary-elementwise-config.c",
+    "src/configs/unpool-config.c",
+    "src/configs/vmulcaddc-config.c",
+    "src/configs/x8-lut-config.c",
+    "src/configs/xx-fill-config.c",
+    "src/configs/xx-pad-config.c",
+  ]
+}
+
+source_set("operators") {
+  configs += [
+    ":xnnpack_private_config",
+    "//build/config/compiler:no_chromium_code",
+  ]
+  public_configs = [ ":xnnpack_public_config" ]
+  deps = [
+    ":microkernel_headers",
+    ":xnnpack_headers",
+  ]
+
+  # From build_srcs.bzl
+  sources = OPERATOR_SRCS
+}
+
+source_set("subgraph") {
+  configs += [
+    ":xnnpack_private_config",
+    "//build/config/compiler:no_chromium_code",
+  ]
+  public_configs = [ ":xnnpack_public_config" ]
+  deps = [
+    ":microkernel_headers",
+    ":xnnpack_headers",
+  ]
+
+  # From build_srcs.bzl
+  sources = SUBGRAPH_SRCS
+}
+
+source_set("table") {
+  configs += [
+    ":xnnpack_private_config",
+    "//build/config/compiler:no_chromium_code",
+  ]
+  public_configs = [ ":xnnpack_public_config" ]
+  deps = [
+    ":microkernel_headers",
+    ":xnnpack_headers",
+  ]
+
+  # From build_srcs.bzl
+  sources = TABLE_SRCS
+}
+
+source_set("logging") {
+  configs += [
+    ":xnnpack_private_config",
+    "//build/config/compiler:no_chromium_code",
+  ]
+  public_configs = [ ":xnnpack_public_config" ]
+  deps = [
+    ":microkernel_headers",
+    ":xnnpack_headers",
+  ]
+
+  # From build_srcs.bzl
+  sources = LOGGING_SRCS
+}
+
+source_set("microkernel_headers") {
+  configs += [
+    ":xnnpack_private_config",
+    "//build/config/compiler:no_chromium_code",
+  ]
+  public_configs = [ ":xnnpack_public_config" ]
+
+  # From build_srcs.bzl
+  sources = MICROKERNEL_HDRS
+  deps = [ ":microkernel_defs" ]
+}
+
+source_set("microkernel_defs") {
+  configs += [ ":xnnpack_private_config" ]
+  public_configs = [ ":xnnpack_public_config" ]
+
+  # From build_srcs.bzl
+  sources = MICROKERNEL_DEFS
+}
+
+if (target_cpu == "arm64") {
+  source_set("neon_asm_microkernels") {
+    configs += [
+      ":xnnpack_private_config",
+      "//build/config/compiler:no_chromium_code",
+    ]
+    public_configs = [ ":xnnpack_public_config" ]
+    deps = [
+      ":microkernel_defs",
+      ":microkernel_headers",
+    ]
+    sources = AARCH64_ASM_MICROKERNEL_SRCS
+    asmflags = [ "-march=armv8.2-a+dotprod+fp16" ]
+  }
+
+  source_set("neon_dotprod_microkernels") {
+    configs += [
+      ":xnnpack_private_config",
+      "//build/config/compiler:no_chromium_code",
+    ]
+    public_configs = [ ":xnnpack_public_config" ]
+    deps = [
+      ":microkernel_defs",
+      ":microkernel_headers",
+    ]
+    sources = ALL_NEONDOT_MICROKERNEL_SRCS
+    sources += ALL_NEONDOT_AARCH64_MICROKERNEL_SRCS
+    cflags = [
+      "-Xclang",
+      "-target-feature",
+      "-Xclang",
+      "+dotprod",
+    ]
+  }
+
+  source_set("neon_bf16_microkernels") {
+    configs += [
+      ":xnnpack_private_config",
+      "//build/config/compiler:no_chromium_code",
+    ]
+    public_configs = [ ":xnnpack_public_config" ]
+    deps = [
+      ":microkernel_defs",
+      ":microkernel_headers",
+    ]
+    sources = ALL_NEONBF16_MICROKERNEL_SRCS
+    cflags = [
+      "-Xclang",
+      "-target-feature",
+      "-Xclang",
+      "+dotprod",
+      "-Xclang",
+      "-target-feature",
+      "-Xclang",
+      "+fullfp16",
+    ]
+    cflags += [ "-march=armv8-a+bf16" ]
+  }
+
+  source_set("neon_dotprodfp16arith_microkernels") {
+    configs += [
+      ":xnnpack_private_config",
+      "//build/config/compiler:no_chromium_code",
+    ]
+    public_configs = [ ":xnnpack_public_config" ]
+    deps = [
+      ":microkernel_defs",
+      ":microkernel_headers",
+    ]
+    sources = ALL_NEONDOTFP16ARITH_MICROKERNEL_SRCS
+    cflags = [
+      "-Xclang",
+      "-target-feature",
+      "-Xclang",
+      "+dotprod",
+      "-Xclang",
+      "-target-feature",
+      "-Xclang",
+      "+fullfp16",
+    ]
+    asmflags = [ "-march=armv8.2-a+dotprod+fp16" ]
+  }
+
+  source_set("neon_fullfp16_microkernels") {
+    configs += [
+      ":xnnpack_private_config",
+      "//build/config/compiler:no_chromium_code",
+    ]
+    public_configs = [ ":xnnpack_public_config" ]
+    deps = [
+      ":microkernel_defs",
+      ":microkernel_headers",
+    ]
+    sources = ALL_NEONFP16_MICROKERNEL_SRCS
+    sources += ALL_NEONFP16ARITH_AARCH64_MICROKERNEL_SRCS
+    sources += ALL_NEONFP16ARITH_MICROKERNEL_SRCS
+
+    cflags = [
+      "-Xclang",
+      "-target-feature",
+      "-Xclang",
+      "+fullfp16",
+    ]
+  }
+
+  source_set("neon_i8mm_microkernels") {
+    configs += [
+      ":xnnpack_private_config",
+      "//build/config/compiler:no_chromium_code",
+    ]
+    public_configs = [ ":xnnpack_public_config" ]
+    deps = [
+      ":microkernel_defs",
+      ":microkernel_headers",
+    ]
+    sources = ALL_NEONI8MM_MICROKERNEL_SRCS
+
+    cflags = [
+      "-Xclang",
+      "-target-feature",
+      "-Xclang",
+      "+i8mm",
+      "-Xclang",
+      "-target-feature",
+      "-Xclang",
+      "+fullfp16",
+    ]
+  }
+}
+
+if (target_cpu == "x64" || target_cpu == "x86") {
+  source_set("avxvnni_microkernels") {
+    configs += [
+      ":xnnpack_private_config",
+      "//build/config/compiler:no_chromium_code",
+    ]
+    public_configs = [ ":xnnpack_public_config" ]
+    deps = [
+      ":microkernel_defs",
+      ":microkernel_headers",
+    ]
+    sources = ALL_AVXVNNI_MICROKERNEL_SRCS
+    cflags = [
+      "-mavxvnni",
+      "-mf16c",
+      "-mfma",
+      "-mavx",
+      "-mgfni",
+    ]
+  }
+
+  source_set("avxvnniint8_microkernels") {
+    configs += [
+      ":xnnpack_private_config",
+      "//build/config/compiler:no_chromium_code",
+    ]
+    public_configs = [ ":xnnpack_public_config" ]
+    deps = [
+      ":microkernel_defs",
+      ":microkernel_headers",
+    ]
+    sources = ALL_AVXVNNIINT8_MICROKERNEL_SRCS
+    cflags = [
+      "-mavxvnniint8",
+      "-mf16c",
+      "-mfma",
+      "-mavx",
+      "-mgfni",
+    ]
+  }
+
+  source_set("avx512_microkernels") {
+    configs += [
+      ":xnnpack_private_config",
+      "//build/config/compiler:no_chromium_code",
+    ]
+    public_configs = [ ":xnnpack_public_config" ]
+    deps = [
+      ":microkernel_defs",
+      ":microkernel_headers",
+    ]
+
+    # TODO: we do not currently distinguish between AVX256 and AVX512
+    # Perhaps we should?
+    sources = ALL_AVX256SKX_MICROKERNEL_SRCS
+    sources += ALL_AVX512F_MICROKERNEL_SRCS
+    sources += ALL_AVX512FP16_MICROKERNEL_SRCS
+    sources += ALL_AVX512AMX_MICROKERNEL_SRCS
+    sources += ALL_AVX512SKX_MICROKERNEL_SRCS
+    sources += ALL_AVX512VBMI_MICROKERNEL_SRCS
+
+    if (target_cpu == "x64") {
+      # VNNI extensions are only supported for x64
+      sources += ALL_AVX256VNNI_MICROKERNEL_SRCS
+      sources += ALL_AVX256VNNIGFNI_MICROKERNEL_SRCS
+      sources += ALL_AVX512VNNI_MICROKERNEL_SRCS
+      sources += ALL_AVX512VNNIGFNI_MICROKERNEL_SRCS
+    }
+
+    cflags = [
+      "-mavx512f",
+      "-mavx512bw",
+      "-mavx512fp16",
+      "-mavx512vl",
+      "-mavx512dq",
+      "-mamx-int8",
+      "-mgfni",
+      "-mavx512vbmi",
+    ]
+    if (target_cpu == "x64") {
+      cflags += [
+        "-mavxvnniint8",
+        "-mavxvnni",
+        "-mavx512vnni",
+      ]
+    }
+  }
+  source_set("avx_microkernels") {
+    configs += [
+      ":xnnpack_private_config",
+      "//build/config/compiler:no_chromium_code",
+    ]
+    public_configs = [ ":xnnpack_public_config" ]
+    deps = [
+      ":microkernel_defs",
+      ":microkernel_headers",
+    ]
+    sources = ALL_AVX_MICROKERNEL_SRCS
+    cflags = [ "-mavx" ]
+  }
+
+  source_set("avx2_microkernels") {
+    configs += [
+      ":xnnpack_private_config",
+      "//build/config/compiler:no_chromium_code",
+    ]
+    public_configs = [ ":xnnpack_public_config" ]
+    deps = [
+      ":microkernel_defs",
+      ":microkernel_headers",
+    ]
+    sources = ALL_AVX2_MICROKERNEL_SRCS
+    cflags = [
+      "-mavx2",
+      "-mfma",
+      "-mf16c",
+    ]
+  }
+
+  source_set("sse41_microkernels") {
+    configs += [
+      ":xnnpack_private_config",
+      "//build/config/compiler:no_chromium_code",
+    ]
+    public_configs = [ ":xnnpack_public_config" ]
+    deps = [
+      ":microkernel_defs",
+      ":microkernel_headers",
+    ]
+    sources = ALL_SSE41_MICROKERNEL_SRCS
+    cflags = [ "-msse4.1" ]
+  }
+
+  source_set("f16c_microkernels") {
+    configs += [
+      ":xnnpack_private_config",
+      "//build/config/compiler:no_chromium_code",
+    ]
+    public_configs = [ ":xnnpack_public_config" ]
+    deps = [
+      ":microkernel_defs",
+      ":microkernel_headers",
+    ]
+    sources = ALL_F16C_MICROKERNEL_SRCS
+    cflags = [ "-mf16c" ]
+  }
+
+  source_set("fma3_microkernels") {
+    configs += [
+      ":xnnpack_private_config",
+      "//build/config/compiler:no_chromium_code",
+    ]
+    public_configs = [ ":xnnpack_public_config" ]
+    deps = [
+      ":microkernel_defs",
+      ":microkernel_headers",
+    ]
+    sources = ALL_FMA3_MICROKERNEL_SRCS
+    cflags = [
+      "-mfma",
+      "-mf16c",
+    ]
+  }
+}
+
+source_set("scalar_microkernels") {
+  configs += [
+    ":xnnpack_private_config",
+    "//build/config/compiler:no_chromium_code",
+  ]
+  public_configs = [ ":xnnpack_public_config" ]
+  deps = [
+    ":microkernel_defs",
+    ":microkernel_headers",
+    "//third_party/fxdiv",
+  ]
+  sources = ALL_SCALAR_MICROKERNEL_SRCS
+}
+
+source_set("xnnpack") {
+  # The core set of C/C++ files and kernels
+  configs += [
+    ":xnnpack_private_config",
+    "//build/config/compiler:no_chromium_code",
+  ]
+  public_configs = [ ":xnnpack_public_config" ]
+  sources = [
+    "src/allocator.c",
+    "src/cache.c",
+    "src/datatype.c",
+    "src/indirection.c",
+    "src/init.c",
+    "src/memory.c",
+    "src/microkernel-utils.c",
+    "src/microparams-init.c",
+    "src/mutex.c",
+    "src/normalization.c",
+    "src/operator-delete.c",
+    "src/operator-utils.c",
+    "src/operators/fingerprint_cache.c",
+    "src/operators/fingerprint_cache.h",
+    "src/operators/fingerprint_id.c",
+    "src/operators/fingerprint_id.h",
+    "src/pack-lh.cc",
+    "src/params.c",
+    "src/reference/binary-elementwise.cc",
+    "src/reference/packing.cc",
+    "src/reference/unary-elementwise.cc",
+    "src/sanitizers.c",
+  ]
+  public_deps = [ ":xnnpack_headers" ]
+  deps = [
+    ":configs",
+    ":logging",
+    ":microkernel_defs",
+    ":microkernel_headers",
+    ":operators",
+    ":subgraph",
+    ":table",
+    "//third_party/fxdiv",
+    "//third_party/pthreadpool:pthreadpool_standalone",
+  ]
+  use_libcxx_modules = false
+  cflags = []
+  if (target_cpu == "arm64") {
+    sources += ALL_NEON_AARCH64_MICROKERNEL_SRCS
+    sources += ALL_NEON_MICROKERNEL_SRCS
+    sources += ALL_NEONFMA_AARCH64_MICROKERNEL_SRCS
+    sources += ALL_NEONFMA_MICROKERNEL_SRCS
+    sources += ALL_NEONV8_MICROKERNEL_SRCS
+    deps += [
+      ":neon_asm_microkernels",
+      ":neon_bf16_microkernels",
+      ":neon_dotprod_microkernels",
+      ":neon_dotprodfp16arith_microkernels",
+      ":neon_fullfp16_microkernels",
+      ":neon_i8mm_microkernels",
+    ]
+  } else if (target_cpu == "x64" || target_cpu == "x86") {
+    if (xnnpack_enable_avx) {
+      deps += [ ":avx_microkernels" ]
+    }
+    if (xnnpack_enable_avx2) {
+      deps += [ ":avx2_microkernels" ]
+    }
+    if (xnnpack_enable_avx_vnni) {
+      deps += [ ":avxvnni_microkernels" ]
+    }
+    if (xnnpack_enable_avx_vnni_int8) {
+      deps += [ ":avxvnniint8_microkernels" ]
+    }
+    if (xnnpack_enable_avx512) {
+      deps += [ ":avx512_microkernels" ]
+    }
+    if (target_cpu == "x64") {
+      sources += AMD64_ASM_MICROKERNEL_SRCS
+    }
+    sources += ALL_SSE_MICROKERNEL_SRCS
+    sources += ALL_SSE2_MICROKERNEL_SRCS
+    sources += ALL_SSE2FMA_MICROKERNEL_SRCS
+    sources += ALL_SSSE3_MICROKERNEL_SRCS
+    if (xnnpack_enable_sse41) {
+      deps += [ ":sse41_microkernels" ]
+    }
+    if (xnnpack_enable_f16c) {
+      deps += [ ":f16c_microkernels" ]
+    }
+    if (xnnpack_enable_fma3) {
+      deps += [ ":fma3_microkernels" ]
+    }
+  }
+}

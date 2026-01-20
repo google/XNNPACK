@@ -121,13 +121,16 @@ CC=clang-19 CXX=clang++-19 bazel test -c fastbuild --local_test_jobs=HOST_CPUS /
 ## Building with GN
 
 * GN is the build system used by the Chromium project.
-* GN support is incomplete and experimental as of November 2025 and is not
+* GN support is incomplete and experimental as of January 2026 and is not
   automatically tested yet. If these instructions do not work for you,
   [open an issue.](https://github.com/google/XNNPACK/issues)
+* For more information on how GN works, see the 
+  [upstream quick start guide.](https://gn.googlesource.com/gn/+/HEAD/docs/quick_start.md)
 
 ### Getting the code
-When building with GN, XNNPACK uses Chromium's `depot_tools` to fetch some
-dependencies. To check out the code:
+
+XNNPACK uses Chromium's `depot_tools` to manage dependencies when building with
+GN. To check out the code:
 
 1. Install `depot_tools` according to the [upstream instructions.](https://commondatastorage.googleapis.com/chrome-infra-docs/flat/depot_tools/docs/html/depot_tools_tutorial.html#_setting_up)
 2. Create an enter a new directory for XNNPACK with
@@ -146,5 +149,64 @@ dependencies. To check out the code:
        "custom_vars": {},
      },
    ]
+   # Optionally, set target_os to include dependencies for an Android build
+   target_os = ["android"]
    ```
 4. Run `gclient sync` to get the source.
+
+### Configuring a build
+
+To set up a build for the first time, run `gn args out/Default`. `gn` will open
+a text editor for configuring the build. Build arguments are given like this:
+
+```
+# Sample build configuration
+
+# "x64", "x86" (32-bit), and "arm64" are supported
+target_cpu = "x64"
+# Asks for a release-optimized build
+is_debug = false
+# Enables assertions and some logging, but otherwise builds with release optimization
+dcheck_always_on = true
+# Retain some symbol information for profiling
+symbol_level = 1
+
+# Support for some instruction set extensions can be configured like this
+# like this
+xnnpack_enable_avx512 = true
+
+# [Googlers-only], use Siso and Bazel remote execution to build faster
+use_siso = true
+use_remoteexec = true
+```
+
+After saving and exiting, GN will generate the build files.
+
+To regenerate the build files after manually editing `out/Default/args.gn`,
+run `gn gen out/Default`.
+
+To see the available build arguments and what they're set to, use
+`gn args --list out/Default`. Since many build arguments are shared
+with the Chromium project, not all of them will affect XNNPACK.
+
+You can have any number of build directories with different configurations
+under the `out/` directory.
+
+### Building
+
+After configuring the build, run `autoninja -C out/Default` to build all XNNPACK
+tests and benchmarks.
+
+### Supported configurations
+
+
+| `target_os` | `target_cpu` | Works | Supported  | Notes |
+| ----------- | ------------ | ----- | ---------- | ----- |
+| `linux`     | `x64`        |  ✅   |   ❌       |       |
+| `linux`     | `x86`        |  ✅   |   ❌       |       |
+| `linux`     | `arm64`      |  ✅   |   ❌       |       |
+| `linux`     | `arm64`      |  ✅   |   ❌       | [1]   |
+| `macos`     | `arm64`      |  ✅   |   ❌       |       |
+
+[1] Building unit tests and benchmarks is not supported just yet.
+
