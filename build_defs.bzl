@@ -1,5 +1,8 @@
 """Build definitions and rules for XNNPACK."""
 
+load("@rules_cc//cc:cc_binary.bzl", "cc_binary")
+load("@rules_cc//cc:cc_library.bzl", "cc_library")
+load("@rules_cc//cc:cc_test.bzl", "cc_test")
 load("//:emscripten.bzl", "xnnpack_emscripten_benchmark_linkopts", "xnnpack_emscripten_deps", "xnnpack_emscripten_minimal_linkopts", "xnnpack_emscripten_test_linkopts")
 
 def xnnpack_select_if(cond = None, val_true = [], val_false = []):
@@ -335,7 +338,7 @@ def xnnpack_cc_library(
     # Set the default defines.
     defines = defines or xnnpack_configurable_defines()
 
-    native.cc_library(
+    cc_library(
         name = name,
         srcs = srcs + select({
             "//build_config:aarch32": aarch32_srcs,
@@ -441,7 +444,7 @@ def xnnpack_unit_test(name, srcs, copts = [], mingw_copts = [], msys_copts = [],
     # Set the default defines.
     defines = defines or xnnpack_configurable_defines()
 
-    native.cc_test(
+    cc_test(
         name = name,
         srcs = srcs,
         copts = xnnpack_std_cxxopts() + select({
@@ -484,7 +487,7 @@ def xnnpack_binary(name, srcs, copts = [], deps = [], linkopts = []):
       deps: The list of libraries to be linked.
       linkopts: The list of additional linker options
     """
-    native.cc_binary(
+    cc_binary(
         name = name,
         srcs = srcs,
         copts = copts,
@@ -513,7 +516,7 @@ def xnnpack_benchmark(name, srcs, copts = [], deps = [], tags = [], defines = []
     # Set the default defines.
     defines = defines or xnnpack_configurable_defines()
 
-    native.cc_test(
+    cc_test(
         name = name,
         srcs = srcs,
         copts = xnnpack_std_cxxopts() + select({

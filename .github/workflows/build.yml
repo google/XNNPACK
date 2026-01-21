@@ -404,6 +404,7 @@ jobs:
         env:
           CC: clang-18
           CXX: clang++-18
+          USE_BAZEL_VERSION: 8.5.1
         run: |
             bazel build \
               --test_output=errors \
@@ -415,6 +416,7 @@ jobs:
         env:
           CC: clang-18
           CXX: clang++-18
+          USE_BAZEL_VERSION: 8.5.1
         run: |
             bazel test \
               --test_output=errors \
@@ -441,6 +443,7 @@ jobs:
     env:
       CC: gcc-9
       CXX: g++-9
+      USE_BAZEL_VERSION: 8.5.1
       BAZEL_DEFINES: |
         --define=xnn_enable_avxvnni=false
         --define=xnn_enable_avx256vnni=false
@@ -528,6 +531,7 @@ jobs:
         env:
           CC: clang-18
           CXX: clang++-18
+          USE_BAZEL_VERSION: 8.5.1
         run: |
             bazel build \
               //test/... \
@@ -538,6 +542,7 @@ jobs:
         env:
           CC: clang-18
           CXX: clang++-18
+          USE_BAZEL_VERSION: 8.5.1
         run: |
           bazel test \
             --test_output=errors \
@@ -565,6 +570,7 @@ jobs:
     env:
       CC: gcc-13
       CXX: g++-13
+      USE_BAZEL_VERSION: 8.5.1
       BAZEL_DEFINES: |
         --define=ynn_enable_arm64_sme=false
         --define=ynn_enable_arm_neonbf16=false
@@ -689,6 +695,7 @@ jobs:
         env:
           CC: clang-20
           CXX: clang++-20
+          USE_BAZEL_VERSION: 8.5.1
         run: |
           bazel build \
             -c opt \
@@ -712,6 +719,7 @@ jobs:
         env:
           CC: clang-20
           CXX: clang++-20
+          USE_BAZEL_VERSION: 8.5.1
         run: |
           bazel test \
             -c opt \
@@ -738,6 +746,7 @@ jobs:
         env:
           CC: clang-20
           CXX: clang++-20
+          USE_BAZEL_VERSION: 8.5.1
         run: |
           bazel test \
             -c opt \
