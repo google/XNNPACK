@@ -15,6 +15,7 @@ py_library(
         "generator.py",
         "x86.py",
     ],
+    strict_deps = False,
     tags = ["manual"],
     visibility = [
         "//ynnpack/kernels/binary:__pkg__",
