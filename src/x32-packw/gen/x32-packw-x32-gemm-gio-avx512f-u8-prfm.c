@@ -46,6 +46,7 @@ void xnn_x32_packw_gemm_gio_ukernel_x32__avx512f_u8_prfm(
   assert(k_stride != 0);
   assert(weights != NULL);
   assert(packed_weights != NULL);
+  assert((intptr_t)packed_weights % 64 == 0);  // Alignment requirement for `_mm512_stream_ps`.
 
   const __m512 vzero = _mm512_setzero_ps();
   const float* b = (const float*) bias;
@@ -59,12 +60,12 @@ void xnn_x32_packw_gemm_gio_ukernel_x32__avx512f_u8_prfm(
       if XNN_LIKELY(b != NULL) {
         const __m512 vb0 = _mm512_loadu_ps(b + 0);
         const __m512 vb1 = _mm512_loadu_ps(b + 16);
-        _mm512_store_ps(packed_w + 0, vb0);
-        _mm512_store_ps(packed_w + 16, vb1);
+        _mm512_stream_ps(packed_w + 0, vb0);
+        _mm512_stream_ps(packed_w + 16, vb1);
         b += 32;
       } else {
-        _mm512_store_ps(packed_w + 0, vzero);
-        _mm512_store_ps(packed_w + 16, vzero);
+        _mm512_stream_ps(packed_w + 0, vzero);
+        _mm512_stream_ps(packed_w + 16, vzero);
       }
       packed_w += 32;
 
@@ -95,22 +96,22 @@ void xnn_x32_packw_gemm_gio_ukernel_x32__avx512f_u8_prfm(
         xnn_prefetch_to_l1((const int8_t*) w + 960 + 5 * k_stride);
         xnn_prefetch_to_l1((const int8_t*) w + 960 + 6 * k_stride);
         xnn_prefetch_to_l1((const int8_t*) w + 960 + 7 * k_stride);
-        _mm512_store_ps(packed_w + 0, v0_0);
-        _mm512_store_ps(packed_w + 16, v1_0);
-        _mm512_store_ps(packed_w + 32, v0_1);
-        _mm512_store_ps(packed_w + 48, v1_1);
-        _mm512_store_ps(packed_w + 64, v0_2);
-        _mm512_store_ps(packed_w + 80, v1_2);
-        _mm512_store_ps(packed_w + 96, v0_3);
-        _mm512_store_ps(packed_w + 112, v1_3);
-        _mm512_store_ps(packed_w + 128, v0_4);
-        _mm512_store_ps(packed_w + 144, v1_4);
-        _mm512_store_ps(packed_w + 160, v0_5);
-        _mm512_store_ps(packed_w + 176, v1_5);
-        _mm512_store_ps(packed_w + 192, v0_6);
-        _mm512_store_ps(packed_w + 208, v1_6);
-        _mm512_store_ps(packed_w + 224, v0_7);
-        _mm512_store_ps(packed_w + 240, v1_7);
+        _mm512_stream_ps(packed_w + 0, v0_0);
+        _mm512_stream_ps(packed_w + 16, v1_0);
+        _mm512_stream_ps(packed_w + 32, v0_1);
+        _mm512_stream_ps(packed_w + 48, v1_1);
+        _mm512_stream_ps(packed_w + 64, v0_2);
+        _mm512_stream_ps(packed_w + 80, v1_2);
+        _mm512_stream_ps(packed_w + 96, v0_3);
+        _mm512_stream_ps(packed_w + 112, v1_3);
+        _mm512_stream_ps(packed_w + 128, v0_4);
+        _mm512_stream_ps(packed_w + 144, v1_4);
+        _mm512_stream_ps(packed_w + 160, v0_5);
+        _mm512_stream_ps(packed_w + 176, v1_5);
+        _mm512_stream_ps(packed_w + 192, v0_6);
+        _mm512_stream_ps(packed_w + 208, v1_6);
+        _mm512_stream_ps(packed_w + 224, v0_7);
+        _mm512_stream_ps(packed_w + 240, v1_7);
         w += k_stride * 8;
         packed_w += 256;
       }
@@ -120,8 +121,8 @@ void xnn_x32_packw_gemm_gio_ukernel_x32__avx512f_u8_prfm(
         const __m512 v0 = _mm512_loadu_ps(w + 0);
         const __m512 v1 = _mm512_loadu_ps(w + 16);
         xnn_prefetch_to_l1((const int8_t*) w + 960);
-        _mm512_store_ps(packed_w + 0, v0);
-        _mm512_store_ps(packed_w + 16, v1);
+        _mm512_stream_ps(packed_w + 0, v0);
+        _mm512_stream_ps(packed_w + 16, v1);
         w += k_stride;
         packed_w += 32;
       }
@@ -140,12 +141,12 @@ void xnn_x32_packw_gemm_gio_ukernel_x32__avx512f_u8_prfm(
       if XNN_LIKELY(b != NULL) {
         const __m512 vb0 = _mm512_maskz_loadu_ps(vmask0, b + 0);
         const __m512 vb1 = _mm512_maskz_loadu_ps(vmask1, b + 16);
-        _mm512_store_ps(packed_w + 0, vb0);
-        _mm512_store_ps(packed_w + 16, vb1);
+        _mm512_stream_ps(packed_w + 0, vb0);
+        _mm512_stream_ps(packed_w + 16, vb1);
         b += n;
       } else {
-        _mm512_store_ps(packed_w + 0, vzero);
-        _mm512_store_ps(packed_w + 16, vzero);
+        _mm512_stream_ps(packed_w + 0, vzero);
+        _mm512_stream_ps(packed_w + 16, vzero);
       }
       packed_w += 32;
 
@@ -153,8 +154,8 @@ void xnn_x32_packw_gemm_gio_ukernel_x32__avx512f_u8_prfm(
       for (size_t k = kc; k > 0; --k) {
         const __m512 v0 = _mm512_maskz_loadu_ps(vmask0, w + 0);
         const __m512 v1 = _mm512_maskz_loadu_ps(vmask1, w + 16);
-        _mm512_store_ps(packed_w + 0, v0);
-        _mm512_store_ps(packed_w + 16, v1);
+        _mm512_stream_ps(packed_w + 0, v0);
+        _mm512_stream_ps(packed_w + 16, v1);
         w += k_stride;
         packed_w += 32;
       }

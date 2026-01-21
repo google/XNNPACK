@@ -43,6 +43,7 @@ void xnn_x32_packw_gemm_gio_ukernel_x4__wasmsimd_u2(
   assert(k_stride != 0);
   assert(weights != NULL);
   assert(packed_weights != NULL);
+  assert((intptr_t)packed_weights % xnn_simd_bytes_s32 == 0);  // Alignment requirement for `xnn_stream_s32`.
 
   const xnn_simd_s32_t vzero = xnn_set1_s32(0);
   const int32_t* b = (const int32_t*) bias;
@@ -55,10 +56,10 @@ void xnn_x32_packw_gemm_gio_ukernel_x4__wasmsimd_u2(
     for (; n >= 4; n -= 4) {
       if XNN_LIKELY(b != NULL) {
         const xnn_simd_s32_t vb0 = xnn_loadu_s32(b + 0);
-        xnn_store_s32(packed_w + 0, vb0);
+        xnn_stream_s32(packed_w + 0, vb0);
         b += 4;
       } else {
-        xnn_store_s32(packed_w + 0, vzero);
+        xnn_stream_s32(packed_w + 0, vzero);
       }
       packed_w += 4;
 
@@ -67,8 +68,8 @@ void xnn_x32_packw_gemm_gio_ukernel_x4__wasmsimd_u2(
       for (; k >= 2; k -= 2) {
         const xnn_simd_s32_t v0_0 = xnn_loadu_s32(w + 0 + 0 * k_stride);
         const xnn_simd_s32_t v0_1 = xnn_loadu_s32(w + 0 + 1 * k_stride);
-        xnn_store_s32(packed_w + 0, v0_0);
-        xnn_store_s32(packed_w + 4, v0_1);
+        xnn_stream_s32(packed_w + 0, v0_0);
+        xnn_stream_s32(packed_w + 4, v0_1);
         w += k_stride * 2;
         packed_w += 8;
       }
@@ -76,7 +77,7 @@ void xnn_x32_packw_gemm_gio_ukernel_x4__wasmsimd_u2(
       // KC remainder loop
       for (; k > 0; --k) {
         const xnn_simd_s32_t v0 = xnn_loadu_s32(w + 0);
-        xnn_store_s32(packed_w + 0, v0);
+        xnn_stream_s32(packed_w + 0, v0);
         w += k_stride;
         packed_w += 4;
       }
@@ -90,17 +91,17 @@ void xnn_x32_packw_gemm_gio_ukernel_x4__wasmsimd_u2(
 
       if XNN_LIKELY(b != NULL) {
         const xnn_simd_s32_t vb0 = xnn_load_tail_safe_s32(b + 0, vcount0);
-        xnn_store_s32(packed_w + 0, vb0);
+        xnn_stream_s32(packed_w + 0, vb0);
         b += n;
       } else {
-        xnn_store_s32(packed_w + 0, vzero);
+        xnn_stream_s32(packed_w + 0, vzero);
       }
       packed_w += 4;
 
       // KC main loop
       for (size_t k = kc; k > 0; --k) {
         const xnn_simd_s32_t v0 = xnn_load_tail_safe_s32(w + 0, vcount0);
-        xnn_store_s32(packed_w + 0, v0);
+        xnn_stream_s32(packed_w + 0, v0);
         w += k_stride;
         packed_w += 4;
       }
@@ -134,6 +135,7 @@ void xnn_x32_packw_gemm_gio_ukernel_x8__wasmsimd_u2(
   assert(k_stride != 0);
   assert(weights != NULL);
   assert(packed_weights != NULL);
+  assert((intptr_t)packed_weights % xnn_simd_bytes_s32 == 0);  // Alignment requirement for `xnn_stream_s32`.
 
   const xnn_simd_s32_t vzero = xnn_set1_s32(0);
   const int32_t* b = (const int32_t*) bias;
@@ -147,12 +149,12 @@ void xnn_x32_packw_gemm_gio_ukernel_x8__wasmsimd_u2(
       if XNN_LIKELY(b != NULL) {
         const xnn_simd_s32_t vb0 = xnn_loadu_s32(b + 0);
         const xnn_simd_s32_t vb1 = xnn_loadu_s32(b + 4);
-        xnn_store_s32(packed_w + 0, vb0);
-        xnn_store_s32(packed_w + 4, vb1);
+        xnn_stream_s32(packed_w + 0, vb0);
+        xnn_stream_s32(packed_w + 4, vb1);
         b += 8;
       } else {
-        xnn_store_s32(packed_w + 0, vzero);
-        xnn_store_s32(packed_w + 4, vzero);
+        xnn_stream_s32(packed_w + 0, vzero);
+        xnn_stream_s32(packed_w + 4, vzero);
       }
       packed_w += 8;
 
@@ -163,10 +165,10 @@ void xnn_x32_packw_gemm_gio_ukernel_x8__wasmsimd_u2(
         const xnn_simd_s32_t v1_0 = xnn_loadu_s32(w + 4 + 0 * k_stride);
         const xnn_simd_s32_t v0_1 = xnn_loadu_s32(w + 0 + 1 * k_stride);
         const xnn_simd_s32_t v1_1 = xnn_loadu_s32(w + 4 + 1 * k_stride);
-        xnn_store_s32(packed_w + 0, v0_0);
-        xnn_store_s32(packed_w + 4, v1_0);
-        xnn_store_s32(packed_w + 8, v0_1);
-        xnn_store_s32(packed_w + 12, v1_1);
+        xnn_stream_s32(packed_w + 0, v0_0);
+        xnn_stream_s32(packed_w + 4, v1_0);
+        xnn_stream_s32(packed_w + 8, v0_1);
+        xnn_stream_s32(packed_w + 12, v1_1);
         w += k_stride * 2;
         packed_w += 16;
       }
@@ -175,8 +177,8 @@ void xnn_x32_packw_gemm_gio_ukernel_x8__wasmsimd_u2(
       for (; k > 0; --k) {
         const xnn_simd_s32_t v0 = xnn_loadu_s32(w + 0);
         const xnn_simd_s32_t v1 = xnn_loadu_s32(w + 4);
-        xnn_store_s32(packed_w + 0, v0);
-        xnn_store_s32(packed_w + 4, v1);
+        xnn_stream_s32(packed_w + 0, v0);
+        xnn_stream_s32(packed_w + 4, v1);
         w += k_stride;
         packed_w += 8;
       }
@@ -192,12 +194,12 @@ void xnn_x32_packw_gemm_gio_ukernel_x8__wasmsimd_u2(
       if XNN_LIKELY(b != NULL) {
         const xnn_simd_s32_t vb0 = xnn_load_tail_safe_s32(b + 0, vcount0);
         const xnn_simd_s32_t vb1 = xnn_load_tail_safe_s32(b + 4, vcount1);
-        xnn_store_s32(packed_w + 0, vb0);
-        xnn_store_s32(packed_w + 4, vb1);
+        xnn_stream_s32(packed_w + 0, vb0);
+        xnn_stream_s32(packed_w + 4, vb1);
         b += n;
       } else {
-        xnn_store_s32(packed_w + 0, vzero);
-        xnn_store_s32(packed_w + 4, vzero);
+        xnn_stream_s32(packed_w + 0, vzero);
+        xnn_stream_s32(packed_w + 4, vzero);
       }
       packed_w += 8;
 
@@ -205,8 +207,8 @@ void xnn_x32_packw_gemm_gio_ukernel_x8__wasmsimd_u2(
       for (size_t k = kc; k > 0; --k) {
         const xnn_simd_s32_t v0 = xnn_load_tail_safe_s32(w + 0, vcount0);
         const xnn_simd_s32_t v1 = xnn_load_tail_safe_s32(w + 4, vcount1);
-        xnn_store_s32(packed_w + 0, v0);
-        xnn_store_s32(packed_w + 4, v1);
+        xnn_stream_s32(packed_w + 0, v0);
+        xnn_stream_s32(packed_w + 4, v1);
         w += k_stride;
         packed_w += 8;
       }
@@ -240,6 +242,7 @@ void xnn_x32_packw_gemm_gio_ukernel_x12__wasmsimd_u2(
   assert(k_stride != 0);
   assert(weights != NULL);
   assert(packed_weights != NULL);
+  assert((intptr_t)packed_weights % xnn_simd_bytes_s32 == 0);  // Alignment requirement for `xnn_stream_s32`.
 
   const xnn_simd_s32_t vzero = xnn_set1_s32(0);
   const int32_t* b = (const int32_t*) bias;
@@ -254,14 +257,14 @@ void xnn_x32_packw_gemm_gio_ukernel_x12__wasmsimd_u2(
         const xnn_simd_s32_t vb0 = xnn_loadu_s32(b + 0);
         const xnn_simd_s32_t vb1 = xnn_loadu_s32(b + 4);
         const xnn_simd_s32_t vb2 = xnn_loadu_s32(b + 8);
-        xnn_store_s32(packed_w + 0, vb0);
-        xnn_store_s32(packed_w + 4, vb1);
-        xnn_store_s32(packed_w + 8, vb2);
+        xnn_stream_s32(packed_w + 0, vb0);
+        xnn_stream_s32(packed_w + 4, vb1);
+        xnn_stream_s32(packed_w + 8, vb2);
         b += 12;
       } else {
-        xnn_store_s32(packed_w + 0, vzero);
-        xnn_store_s32(packed_w + 4, vzero);
-        xnn_store_s32(packed_w + 8, vzero);
+        xnn_stream_s32(packed_w + 0, vzero);
+        xnn_stream_s32(packed_w + 4, vzero);
+        xnn_stream_s32(packed_w + 8, vzero);
       }
       packed_w += 12;
 
@@ -274,12 +277,12 @@ void xnn_x32_packw_gemm_gio_ukernel_x12__wasmsimd_u2(
         const xnn_simd_s32_t v0_1 = xnn_loadu_s32(w + 0 + 1 * k_stride);
         const xnn_simd_s32_t v1_1 = xnn_loadu_s32(w + 4 + 1 * k_stride);
         const xnn_simd_s32_t v2_1 = xnn_loadu_s32(w + 8 + 1 * k_stride);
-        xnn_store_s32(packed_w + 0, v0_0);
-        xnn_store_s32(packed_w + 4, v1_0);
-        xnn_store_s32(packed_w + 8, v2_0);
-        xnn_store_s32(packed_w + 12, v0_1);
-        xnn_store_s32(packed_w + 16, v1_1);
-        xnn_store_s32(packed_w + 20, v2_1);
+        xnn_stream_s32(packed_w + 0, v0_0);
+        xnn_stream_s32(packed_w + 4, v1_0);
+        xnn_stream_s32(packed_w + 8, v2_0);
+        xnn_stream_s32(packed_w + 12, v0_1);
+        xnn_stream_s32(packed_w + 16, v1_1);
+        xnn_stream_s32(packed_w + 20, v2_1);
         w += k_stride * 2;
         packed_w += 24;
       }
@@ -289,9 +292,9 @@ void xnn_x32_packw_gemm_gio_ukernel_x12__wasmsimd_u2(
         const xnn_simd_s32_t v0 = xnn_loadu_s32(w + 0);
         const xnn_simd_s32_t v1 = xnn_loadu_s32(w + 4);
         const xnn_simd_s32_t v2 = xnn_loadu_s32(w + 8);
-        xnn_store_s32(packed_w + 0, v0);
-        xnn_store_s32(packed_w + 4, v1);
-        xnn_store_s32(packed_w + 8, v2);
+        xnn_stream_s32(packed_w + 0, v0);
+        xnn_stream_s32(packed_w + 4, v1);
+        xnn_stream_s32(packed_w + 8, v2);
         w += k_stride;
         packed_w += 12;
       }
@@ -309,14 +312,14 @@ void xnn_x32_packw_gemm_gio_ukernel_x12__wasmsimd_u2(
         const xnn_simd_s32_t vb0 = xnn_load_tail_safe_s32(b + 0, vcount0);
         const xnn_simd_s32_t vb1 = xnn_load_tail_safe_s32(b + 4, vcount1);
         const xnn_simd_s32_t vb2 = xnn_load_tail_safe_s32(b + 8, vcount2);
-        xnn_store_s32(packed_w + 0, vb0);
-        xnn_store_s32(packed_w + 4, vb1);
-        xnn_store_s32(packed_w + 8, vb2);
+        xnn_stream_s32(packed_w + 0, vb0);
+        xnn_stream_s32(packed_w + 4, vb1);
+        xnn_stream_s32(packed_w + 8, vb2);
         b += n;
       } else {
-        xnn_store_s32(packed_w + 0, vzero);
-        xnn_store_s32(packed_w + 4, vzero);
-        xnn_store_s32(packed_w + 8, vzero);
+        xnn_stream_s32(packed_w + 0, vzero);
+        xnn_stream_s32(packed_w + 4, vzero);
+        xnn_stream_s32(packed_w + 8, vzero);
       }
       packed_w += 12;
 
@@ -325,9 +328,9 @@ void xnn_x32_packw_gemm_gio_ukernel_x12__wasmsimd_u2(
         const xnn_simd_s32_t v0 = xnn_load_tail_safe_s32(w + 0, vcount0);
         const xnn_simd_s32_t v1 = xnn_load_tail_safe_s32(w + 4, vcount1);
         const xnn_simd_s32_t v2 = xnn_load_tail_safe_s32(w + 8, vcount2);
-        xnn_store_s32(packed_w + 0, v0);
-        xnn_store_s32(packed_w + 4, v1);
-        xnn_store_s32(packed_w + 8, v2);
+        xnn_stream_s32(packed_w + 0, v0);
+        xnn_stream_s32(packed_w + 4, v1);
+        xnn_stream_s32(packed_w + 8, v2);
         w += k_stride;
         packed_w += 12;
       }
@@ -361,6 +364,7 @@ void xnn_x32_packw_gemm_gio_ukernel_x16__wasmsimd_u2(
   assert(k_stride != 0);
   assert(weights != NULL);
   assert(packed_weights != NULL);
+  assert((intptr_t)packed_weights % xnn_simd_bytes_s32 == 0);  // Alignment requirement for `xnn_stream_s32`.
 
   const xnn_simd_s32_t vzero = xnn_set1_s32(0);
   const int32_t* b = (const int32_t*) bias;
@@ -376,16 +380,16 @@ void xnn_x32_packw_gemm_gio_ukernel_x16__wasmsimd_u2(
         const xnn_simd_s32_t vb1 = xnn_loadu_s32(b + 4);
         const xnn_simd_s32_t vb2 = xnn_loadu_s32(b + 8);
         const xnn_simd_s32_t vb3 = xnn_loadu_s32(b + 12);
-        xnn_store_s32(packed_w + 0, vb0);
-        xnn_store_s32(packed_w + 4, vb1);
-        xnn_store_s32(packed_w + 8, vb2);
-        xnn_store_s32(packed_w + 12, vb3);
+        xnn_stream_s32(packed_w + 0, vb0);
+        xnn_stream_s32(packed_w + 4, vb1);
+        xnn_stream_s32(packed_w + 8, vb2);
+        xnn_stream_s32(packed_w + 12, vb3);
         b += 16;
       } else {
-        xnn_store_s32(packed_w + 0, vzero);
-        xnn_store_s32(packed_w + 4, vzero);
-        xnn_store_s32(packed_w + 8, vzero);
-        xnn_store_s32(packed_w + 12, vzero);
+        xnn_stream_s32(packed_w + 0, vzero);
+        xnn_stream_s32(packed_w + 4, vzero);
+        xnn_stream_s32(packed_w + 8, vzero);
+        xnn_stream_s32(packed_w + 12, vzero);
       }
       packed_w += 16;
 
@@ -400,14 +404,14 @@ void xnn_x32_packw_gemm_gio_ukernel_x16__wasmsimd_u2(
         const xnn_simd_s32_t v1_1 = xnn_loadu_s32(w + 4 + 1 * k_stride);
         const xnn_simd_s32_t v2_1 = xnn_loadu_s32(w + 8 + 1 * k_stride);
         const xnn_simd_s32_t v3_1 = xnn_loadu_s32(w + 12 + 1 * k_stride);
-        xnn_store_s32(packed_w + 0, v0_0);
-        xnn_store_s32(packed_w + 4, v1_0);
-        xnn_store_s32(packed_w + 8, v2_0);
-        xnn_store_s32(packed_w + 12, v3_0);
-        xnn_store_s32(packed_w + 16, v0_1);
-        xnn_store_s32(packed_w + 20, v1_1);
-        xnn_store_s32(packed_w + 24, v2_1);
-        xnn_store_s32(packed_w + 28, v3_1);
+        xnn_stream_s32(packed_w + 0, v0_0);
+        xnn_stream_s32(packed_w + 4, v1_0);
+        xnn_stream_s32(packed_w + 8, v2_0);
+        xnn_stream_s32(packed_w + 12, v3_0);
+        xnn_stream_s32(packed_w + 16, v0_1);
+        xnn_stream_s32(packed_w + 20, v1_1);
+        xnn_stream_s32(packed_w + 24, v2_1);
+        xnn_stream_s32(packed_w + 28, v3_1);
         w += k_stride * 2;
         packed_w += 32;
       }
@@ -418,10 +422,10 @@ void xnn_x32_packw_gemm_gio_ukernel_x16__wasmsimd_u2(
         const xnn_simd_s32_t v1 = xnn_loadu_s32(w + 4);
         const xnn_simd_s32_t v2 = xnn_loadu_s32(w + 8);
         const xnn_simd_s32_t v3 = xnn_loadu_s32(w + 12);
-        xnn_store_s32(packed_w + 0, v0);
-        xnn_store_s32(packed_w + 4, v1);
-        xnn_store_s32(packed_w + 8, v2);
-        xnn_store_s32(packed_w + 12, v3);
+        xnn_stream_s32(packed_w + 0, v0);
+        xnn_stream_s32(packed_w + 4, v1);
+        xnn_stream_s32(packed_w + 8, v2);
+        xnn_stream_s32(packed_w + 12, v3);
         w += k_stride;
         packed_w += 16;
       }
@@ -441,16 +445,16 @@ void xnn_x32_packw_gemm_gio_ukernel_x16__wasmsimd_u2(
         const xnn_simd_s32_t vb1 = xnn_load_tail_safe_s32(b + 4, vcount1);
         const xnn_simd_s32_t vb2 = xnn_load_tail_safe_s32(b + 8, vcount2);
         const xnn_simd_s32_t vb3 = xnn_load_tail_safe_s32(b + 12, vcount3);
-        xnn_store_s32(packed_w + 0, vb0);
-        xnn_store_s32(packed_w + 4, vb1);
-        xnn_store_s32(packed_w + 8, vb2);
-        xnn_store_s32(packed_w + 12, vb3);
+        xnn_stream_s32(packed_w + 0, vb0);
+        xnn_stream_s32(packed_w + 4, vb1);
+        xnn_stream_s32(packed_w + 8, vb2);
+        xnn_stream_s32(packed_w + 12, vb3);
         b += n;
       } else {
-        xnn_store_s32(packed_w + 0, vzero);
-        xnn_store_s32(packed_w + 4, vzero);
-        xnn_store_s32(packed_w + 8, vzero);
-        xnn_store_s32(packed_w + 12, vzero);
+        xnn_stream_s32(packed_w + 0, vzero);
+        xnn_stream_s32(packed_w + 4, vzero);
+        xnn_stream_s32(packed_w + 8, vzero);
+        xnn_stream_s32(packed_w + 12, vzero);
       }
       packed_w += 16;
 
@@ -460,10 +464,10 @@ void xnn_x32_packw_gemm_gio_ukernel_x16__wasmsimd_u2(
         const xnn_simd_s32_t v1 = xnn_load_tail_safe_s32(w + 4, vcount1);
         const xnn_simd_s32_t v2 = xnn_load_tail_safe_s32(w + 8, vcount2);
         const xnn_simd_s32_t v3 = xnn_load_tail_safe_s32(w + 12, vcount3);
-        xnn_store_s32(packed_w + 0, v0);
-        xnn_store_s32(packed_w + 4, v1);
-        xnn_store_s32(packed_w + 8, v2);
-        xnn_store_s32(packed_w + 12, v3);
+        xnn_stream_s32(packed_w + 0, v0);
+        xnn_stream_s32(packed_w + 4, v1);
+        xnn_stream_s32(packed_w + 8, v2);
+        xnn_stream_s32(packed_w + 12, v3);
         w += k_stride;
         packed_w += 16;
       }

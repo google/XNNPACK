@@ -46,6 +46,7 @@ void xnn_x32_packw_gemm_gio_ukernel_x${NR}__avx512f_u${KBLOCK}${"_prfm" if PREFE
   assert(k_stride != 0);
   assert(weights != NULL);
   assert(packed_weights != NULL);
+  assert((intptr_t)packed_weights % 64 == 0);  // Alignment requirement for `_mm512_stream_ps`.
 
   const __m512 vzero = _mm512_setzero_ps();
   const float* b = (const float*) bias;
@@ -60,11 +61,11 @@ void xnn_x32_packw_gemm_gio_ukernel_x${NR}__avx512f_u${KBLOCK}${"_prfm" if PREFE
         $for N in range(SIMD_TILE):
           const __m512 vb${N} = _mm512_loadu_ps(b + ${N*SIMD_SIZE});
         $for N in range(SIMD_TILE):
-          _mm512_store_ps(packed_w + ${N*SIMD_SIZE}, vb${N});
+          _mm512_stream_ps(packed_w + ${N*SIMD_SIZE}, vb${N});
         b += ${NR};
       } else {
         $for N in range(SIMD_TILE):
-          _mm512_store_ps(packed_w + ${N*SIMD_SIZE}, vzero);
+          _mm512_stream_ps(packed_w + ${N*SIMD_SIZE}, vzero);
       }
       packed_w += ${NR};
 
@@ -81,7 +82,7 @@ void xnn_x32_packw_gemm_gio_ukernel_x${NR}__avx512f_u${KBLOCK}${"_prfm" if PREFE
                 xnn_prefetch_to_l1((const int8_t*) w + ${N+960} + ${K} * k_stride);
           $for K in range(KBLOCK):
             $for N in range(SIMD_TILE):
-              _mm512_store_ps(packed_w + ${N*SIMD_SIZE+K*NR}, v${N}_${K});
+              _mm512_stream_ps(packed_w + ${N*SIMD_SIZE+K*NR}, v${N}_${K});
           w += k_stride * ${KBLOCK};
           packed_w += ${NR*KBLOCK};
         }
@@ -94,7 +95,7 @@ void xnn_x32_packw_gemm_gio_ukernel_x${NR}__avx512f_u${KBLOCK}${"_prfm" if PREFE
           $for N in range(0,SIMD_TILE*SIMD_SIZE,64):
             xnn_prefetch_to_l1((const int8_t*) w + ${N+960});
         $for N in range(SIMD_TILE):
-          _mm512_store_ps(packed_w + ${N*SIMD_SIZE}, v${N});
+          _mm512_stream_ps(packed_w + ${N*SIMD_SIZE}, v${N});
         w += k_stride;
         packed_w += ${NR};
       }
@@ -114,11 +115,11 @@ void xnn_x32_packw_gemm_gio_ukernel_x${NR}__avx512f_u${KBLOCK}${"_prfm" if PREFE
         $for N in range(SIMD_TILE):
           const __m512 vb${N} = _mm512_maskz_loadu_ps(vmask${N}, b + ${N*SIMD_SIZE});
         $for N in range(SIMD_TILE):
-          _mm512_store_ps(packed_w + ${N*SIMD_SIZE}, vb${N});
+          _mm512_stream_ps(packed_w + ${N*SIMD_SIZE}, vb${N});
         b += n;
       } else {
         $for N in range(SIMD_TILE):
-          _mm512_store_ps(packed_w + ${N*SIMD_SIZE}, vzero);
+          _mm512_stream_ps(packed_w + ${N*SIMD_SIZE}, vzero);
       }
       packed_w += ${NR};
 
@@ -127,7 +128,7 @@ void xnn_x32_packw_gemm_gio_ukernel_x${NR}__avx512f_u${KBLOCK}${"_prfm" if PREFE
         $for N in range(SIMD_TILE):
           const __m512 v${N} = _mm512_maskz_loadu_ps(vmask${N}, w + ${N*SIMD_SIZE});
         $for N in range(SIMD_TILE):
-          _mm512_store_ps(packed_w + ${N*SIMD_SIZE}, v${N});
+          _mm512_stream_ps(packed_w + ${N*SIMD_SIZE}, v${N});
         w += k_stride;
         packed_w += ${NR};
       }

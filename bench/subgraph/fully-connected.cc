@@ -179,6 +179,24 @@ static void QD8FullyConnected(benchmark::State& state) {
   });
 }
 
+static void FP32DynamicFullyConnected(benchmark::State& state) {
+  xnnpack::RunBenchmark(state, [&state]() {
+    return models::FullyConnected<float>(
+        FLAGS_batch_size,
+        /*m=*/state.range(0), /*k=*/state.range(1), /*n=*/state.range(2),
+      /*dynamically_quantize_lhs=*/false, /*static_rhs=*/false);
+  });
+}
+
+static void FP16DynamicFullyConnected(benchmark::State& state) {
+  xnnpack::RunBenchmark(state, [&state]() {
+    return models::FullyConnected<xnn_float16>(
+        FLAGS_batch_size,
+        /*m=*/state.range(0), /*k=*/state.range(1), /*n=*/state.range(2),
+      /*dynamically_quantize_lhs=*/false, /*static_rhs=*/false);
+  });
+}
+
 static void FullyConnectedArgs(benchmark::internal::Benchmark* b);
 
 BENCHMARK(FP32FullyConnected)
@@ -194,6 +212,18 @@ BENCHMARK(FP16FullyConnected)
     ->Apply(FullyConnectedArgs);
 
 BENCHMARK(QD8FullyConnected)
+    ->Unit(benchmark::kMicrosecond)
+    ->MeasureProcessCPUTime()
+    ->UseRealTime()
+    ->Apply(FullyConnectedArgs);
+
+BENCHMARK(FP32DynamicFullyConnected)
+    ->Unit(benchmark::kMicrosecond)
+    ->MeasureProcessCPUTime()
+    ->UseRealTime()
+    ->Apply(FullyConnectedArgs);
+
+BENCHMARK(FP16DynamicFullyConnected)
     ->Unit(benchmark::kMicrosecond)
     ->MeasureProcessCPUTime()
     ->UseRealTime()

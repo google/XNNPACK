@@ -44,6 +44,7 @@ $for NR in BATCH_TILES:
     assert(k_stride != 0);
     assert(weights != NULL);
     assert(packed_weights != NULL);
+    assert((intptr_t)packed_weights % xnn_simd_bytes_s32 == 0);  // Alignment requirement for `xnn_stream_s32`.
 
     const xnn_simd_s32_t vzero = xnn_set1_s32(0);
     const int32_t* b = (const int32_t*) bias;
@@ -58,11 +59,11 @@ $for NR in BATCH_TILES:
           $for N in range(SIMD_TILE):
             const xnn_simd_s32_t vb${N} = xnn_loadu_s32(b + ${N*SIMD_SIZE});
           $for N in range(SIMD_TILE):
-            xnn_store_s32(packed_w + ${N*SIMD_SIZE}, vb${N});
+            xnn_stream_s32(packed_w + ${N*SIMD_SIZE}, vb${N});
           b += ${NR};
         } else {
           $for N in range(SIMD_TILE):
-            xnn_store_s32(packed_w + ${N*SIMD_SIZE}, vzero);
+            xnn_stream_s32(packed_w + ${N*SIMD_SIZE}, vzero);
         }
         packed_w += ${NR};
 
@@ -79,7 +80,7 @@ $for NR in BATCH_TILES:
                   xnn_prefetch_to_l1((const int8_t*) w + ${N*4+960});
             $for K in range(KBLOCK):
               $for N in range(SIMD_TILE):
-                xnn_store_s32(packed_w + ${N*SIMD_SIZE+K*NR}, v${N}_${K});
+                xnn_stream_s32(packed_w + ${N*SIMD_SIZE+K*NR}, v${N}_${K});
             w += k_stride * ${KBLOCK};
             packed_w += ${NR*KBLOCK};
           }
@@ -92,7 +93,7 @@ $for NR in BATCH_TILES:
             $for N in range(SIMD_TILE):
               xnn_prefetch_to_l1((const int8_t*) w + ${N*4+960});
           $for N in range(SIMD_TILE):
-            xnn_store_s32(packed_w + ${N*SIMD_SIZE}, v${N});
+            xnn_stream_s32(packed_w + ${N*SIMD_SIZE}, v${N});
           w += k_stride;
           packed_w += ${NR};
         }
@@ -112,11 +113,11 @@ $for NR in BATCH_TILES:
           $for N in range(SIMD_TILE):
             const xnn_simd_s32_t vb${N} = xnn_load_tail_safe_s32(b + ${N*SIMD_SIZE}, vcount${N});
           $for N in range(SIMD_TILE):
-            xnn_store_s32(packed_w + ${N*SIMD_SIZE}, vb${N});
+            xnn_stream_s32(packed_w + ${N*SIMD_SIZE}, vb${N});
           b += n;
         } else {
           $for N in range(SIMD_TILE):
-            xnn_store_s32(packed_w + ${N*SIMD_SIZE}, vzero);
+            xnn_stream_s32(packed_w + ${N*SIMD_SIZE}, vzero);
         }
         packed_w += ${NR};
 
@@ -125,7 +126,7 @@ $for NR in BATCH_TILES:
           $for N in range(SIMD_TILE):
             const xnn_simd_s32_t v${N} = xnn_load_tail_safe_s32(w + ${N*SIMD_SIZE}, vcount${N});
           $for N in range(SIMD_TILE):
-            xnn_store_s32(packed_w + ${N*SIMD_SIZE}, v${N});
+            xnn_stream_s32(packed_w + ${N*SIMD_SIZE}, v${N});
           w += k_stride;
           packed_w += ${NR};
         }

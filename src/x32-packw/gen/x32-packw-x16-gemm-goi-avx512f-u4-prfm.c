@@ -43,6 +43,7 @@ void xnn_x32_packw_gemm_goi_ukernel_x16__avx512f_u4_prfm(
   assert(sr == 1);
   assert(weights != NULL);
   assert(packed_weights != NULL);
+  assert((intptr_t)packed_weights % 64 == 0);  // Alignment requirement for `_mm512_stream_ps`.
 
   const float* b = (const float*) bias;
   float* packed_w = (float*) packed_weights;
@@ -54,11 +55,11 @@ void xnn_x32_packw_gemm_goi_ukernel_x16__avx512f_u4_prfm(
     for (; n >= 16; n -= 16) {
       if XNN_LIKELY(b != NULL) {
         const __m512 vb0 = _mm512_loadu_ps(b);
-        _mm512_store_ps(packed_w, vb0);
+        _mm512_stream_ps(packed_w, vb0);
         b += 16;
       } else {
         const __m512 vzero = _mm512_setzero_ps();
-        _mm512_store_ps(packed_w, vzero);
+        _mm512_stream_ps(packed_w, vzero);
       }
       packed_w += 16;
 
@@ -180,10 +181,10 @@ void xnn_x32_packw_gemm_goi_ukernel_x16__avx512f_u4_prfm(
         v2x0123 = _mm512_castpd_ps(_mm512_unpacklo_pd(_mm512_castps_pd(vtmp2x0123), _mm512_castps_pd(vtmp3x0123)));  // c g k o   from row 2, 3
         v3x0123 = _mm512_castpd_ps(_mm512_unpackhi_pd(_mm512_castps_pd(vtmp2x0123), _mm512_castps_pd(vtmp3x0123)));  // d h l p   from row 2, 3
 
-        _mm512_store_ps(packed_w, v0x0123);
-        _mm512_store_ps(packed_w + 16, v1x0123);
-        _mm512_store_ps(packed_w + 32, v2x0123);
-        _mm512_store_ps(packed_w + 48, v3x0123);
+        _mm512_stream_ps(packed_w, v0x0123);
+        _mm512_stream_ps(packed_w + 16, v1x0123);
+        _mm512_stream_ps(packed_w + 32, v2x0123);
+        _mm512_stream_ps(packed_w + 48, v3x0123);
         packed_w += 64;
       }
 
@@ -255,14 +256,14 @@ void xnn_x32_packw_gemm_goi_ukernel_x16__avx512f_u4_prfm(
           v12 = _mm_castpd_ps(_mm_unpacklo_pd(_mm_castps_pd(vtmp12), _mm_castps_pd(vtmp13)));  // a c e g   from row 0, 1
           v13 = _mm_castpd_ps(_mm_unpackhi_pd(_mm_castps_pd(vtmp12), _mm_castps_pd(vtmp13)));  // b d f h   from row 0, 1
 
-          _mm_store_ps(packed_w, v0);
-          _mm_store_ps(packed_w + 4, v4);
-          _mm_store_ps(packed_w + 8, v8);
-          _mm_store_ps(packed_w + 12, v12);
-          _mm_store_ps(packed_w + 16, v1);
-          _mm_store_ps(packed_w + 20, v5);
-          _mm_store_ps(packed_w + 24, v9);
-          _mm_store_ps(packed_w + 28, v13);
+          _mm_stream_ps(packed_w, v0);
+          _mm_stream_ps(packed_w + 4, v4);
+          _mm_stream_ps(packed_w + 8, v8);
+          _mm_stream_ps(packed_w + 12, v12);
+          _mm_stream_ps(packed_w + 16, v1);
+          _mm_stream_ps(packed_w + 20, v5);
+          _mm_stream_ps(packed_w + 24, v9);
+          _mm_stream_ps(packed_w + 28, v13);
           packed_w += 32;
         }
         if (k & 1) {
@@ -325,10 +326,10 @@ void xnn_x32_packw_gemm_goi_ukernel_x16__avx512f_u4_prfm(
           // Transpose 4x4
           v12 = _mm_castpd_ps(_mm_unpacklo_pd(_mm_castps_pd(vtmp12), _mm_castps_pd(vtmp13)));  // a b c d   from row 0, 1
 
-          _mm_store_ps(packed_w, v0);
-          _mm_store_ps(packed_w + 4, v4);
-          _mm_store_ps(packed_w + 8, v8);
-          _mm_store_ps(packed_w + 12, v12);
+          _mm_stream_ps(packed_w, v0);
+          _mm_stream_ps(packed_w + 4, v4);
+          _mm_stream_ps(packed_w + 8, v8);
+          _mm_stream_ps(packed_w + 12, v12);
           packed_w += 16;
         }
       }
@@ -348,7 +349,7 @@ void xnn_x32_packw_gemm_goi_ukernel_x16__avx512f_u4_prfm(
         packed_w += (16 - n);
       } else {
         const __m512 vzero = _mm512_setzero_ps();
-        _mm512_store_ps(packed_w, vzero);
+        _mm512_stream_ps(packed_w, vzero);
         packed_w += 16;
       }
 
@@ -479,10 +480,10 @@ void xnn_x32_packw_gemm_goi_ukernel_x16__avx512f_u4_prfm(
         v2x0123 = _mm512_castpd_ps(_mm512_unpacklo_pd(_mm512_castps_pd(vtmp2x0123), _mm512_castps_pd(vtmp3x0123)));  // c g k o   from row 2, 3
         v3x0123 = _mm512_castpd_ps(_mm512_unpackhi_pd(_mm512_castps_pd(vtmp2x0123), _mm512_castps_pd(vtmp3x0123)));  // d h l p   from row 2, 3
 
-        _mm512_store_ps(packed_w, v0x0123);
-        _mm512_store_ps(packed_w + 16, v1x0123);
-        _mm512_store_ps(packed_w + 32, v2x0123);
-        _mm512_store_ps(packed_w + 48, v3x0123);
+        _mm512_stream_ps(packed_w, v0x0123);
+        _mm512_stream_ps(packed_w + 16, v1x0123);
+        _mm512_stream_ps(packed_w + 32, v2x0123);
+        _mm512_stream_ps(packed_w + 48, v3x0123);
         packed_w += 64;
       }
 
@@ -552,14 +553,14 @@ void xnn_x32_packw_gemm_goi_ukernel_x16__avx512f_u4_prfm(
           v12 = _mm_castpd_ps(_mm_unpacklo_pd(_mm_castps_pd(vtmp12), _mm_castps_pd(vtmp13)));  // a c e g   from row 0, 1
           v13 = _mm_castpd_ps(_mm_unpackhi_pd(_mm_castps_pd(vtmp12), _mm_castps_pd(vtmp13)));  // b d f h   from row 0, 1
 
-          _mm_store_ps(packed_w, v0);
-          _mm_store_ps(packed_w + 4, v4);
-          _mm_store_ps(packed_w + 8, v8);
-          _mm_store_ps(packed_w + 12, v12);
-          _mm_store_ps(packed_w + 16, v1);
-          _mm_store_ps(packed_w + 20, v5);
-          _mm_store_ps(packed_w + 24, v9);
-          _mm_store_ps(packed_w + 28, v13);
+          _mm_stream_ps(packed_w, v0);
+          _mm_stream_ps(packed_w + 4, v4);
+          _mm_stream_ps(packed_w + 8, v8);
+          _mm_stream_ps(packed_w + 12, v12);
+          _mm_stream_ps(packed_w + 16, v1);
+          _mm_stream_ps(packed_w + 20, v5);
+          _mm_stream_ps(packed_w + 24, v9);
+          _mm_stream_ps(packed_w + 28, v13);
           packed_w += 32;
         }
         if (k & 1) {
@@ -620,10 +621,10 @@ void xnn_x32_packw_gemm_goi_ukernel_x16__avx512f_u4_prfm(
           // Transpose 4x4
           v12 = _mm_castpd_ps(_mm_unpacklo_pd(_mm_castps_pd(vtmp12), _mm_castps_pd(vtmp13)));  // a b c d   from row 0, 1
 
-          _mm_store_ps(packed_w, v0);
-          _mm_store_ps(packed_w + 4, v4);
-          _mm_store_ps(packed_w + 8, v8);
-          _mm_store_ps(packed_w + 12, v12);
+          _mm_stream_ps(packed_w, v0);
+          _mm_stream_ps(packed_w + 4, v4);
+          _mm_stream_ps(packed_w + 8, v8);
+          _mm_stream_ps(packed_w + 12, v12);
           packed_w += 16;
         }
       }

@@ -43,6 +43,7 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}__avx_u${KBLOCK}${"_prfm" if PREFETCH 
   assert(sr == 1);
   assert(weights != NULL);
   assert(packed_weights != NULL);
+  assert((intptr_t)packed_weights % 32 == 0);  // Alignment requirement for `_mm256_stream_ps`.
 
   const float* b = (const float*) bias;
   float* packed_w = (float*) packed_weights;
@@ -56,15 +57,15 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}__avx_u${KBLOCK}${"_prfm" if PREFETCH 
         const __m256 vb0 = _mm256_loadu_ps(b);
         $for N in range(8,NR,8):
           const __m256 vb${N} = _mm256_loadu_ps(b + ${N});
-        _mm256_store_ps(packed_w, vb0);
+        _mm256_stream_ps(packed_w, vb0);
         $for N in range(8,NR,8):
-          _mm256_store_ps(packed_w + ${N}, vb${N});
+          _mm256_stream_ps(packed_w + ${N}, vb${N});
         b += ${NR};
       } else {
         const __m256 vzero = _mm256_setzero_ps();
-        _mm256_store_ps(packed_w, vzero);
+        _mm256_stream_ps(packed_w, vzero);
         $for N in range(8,NR,8):
-          _mm256_store_ps(packed_w + ${N}, vzero);
+          _mm256_stream_ps(packed_w + ${N}, vzero);
       }
       packed_w += ${NR};
 
@@ -116,11 +117,11 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}__avx_u${KBLOCK}${"_prfm" if PREFETCH 
             v${N+2}x${ABC[K:K+4]} = _mm256_castpd_ps(_mm256_unpacklo_pd(_mm256_castps_pd(vtmp${N+2}x${ABC[K:K+4]}), _mm256_castps_pd(vtmp${N+3}x${ABC[K:K+4]})));  // c g k o   from row 2, 3
             v${N+3}x${ABC[K:K+4]} = _mm256_castpd_ps(_mm256_unpackhi_pd(_mm256_castps_pd(vtmp${N+2}x${ABC[K:K+4]}), _mm256_castps_pd(vtmp${N+3}x${ABC[K:K+4]})));  // d h l p   from row 2, 3
 
-        _mm256_store_ps(packed_w, v0x0123);
+        _mm256_stream_ps(packed_w, v0x0123);
         $for K in range(KBLOCK):
           $for N in range(0,NR,8):
             $if N != 0 or K != 0:
-              _mm256_store_ps(packed_w + ${N+K*NR}, v${N+K}x${ABC[K//4*4:K//4*4+4]});
+              _mm256_stream_ps(packed_w + ${N+K*NR}, v${N+K}x${ABC[K//4*4:K//4*4+4]});
         packed_w += ${NR*KBLOCK};
       }
 
@@ -146,11 +147,11 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}__avx_u${KBLOCK}${"_prfm" if PREFETCH 
             v${N+0} = _mm_castpd_ps(_mm_unpacklo_pd(_mm_castps_pd(vtmp${N+0}), _mm_castps_pd(vtmp${N+1})));  // a c e g   from row 0, 1
             v${N+1} = _mm_castpd_ps(_mm_unpackhi_pd(_mm_castps_pd(vtmp${N+0}), _mm_castps_pd(vtmp${N+1})));  // b d f h   from row 0, 1
 
-          _mm_store_ps(packed_w, v0);
+          _mm_stream_ps(packed_w, v0);
           $for K in range(2):
             $for N in range(0,NR,4):
               $if N != 0 or K != 0:
-                _mm_store_ps(packed_w + ${N//4*4+K*NR}, v${N+K});
+                _mm_stream_ps(packed_w + ${N//4*4+K*NR}, v${N+K});
           packed_w += ${NR*2};
         }
         if (k & 1) {
@@ -169,9 +170,9 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}__avx_u${KBLOCK}${"_prfm" if PREFETCH 
             // Transpose 4x4
             v${N+0} = _mm_castpd_ps(_mm_unpacklo_pd(_mm_castps_pd(vtmp${N+0}), _mm_castps_pd(vtmp${N+1})));  // a b c d   from row 0, 1
 
-          _mm_store_ps(packed_w, v0);
+          _mm_stream_ps(packed_w, v0);
           $for N in range(4,NR,4):
-            _mm_store_ps(packed_w + ${N//4*4}, v${N});
+            _mm_stream_ps(packed_w + ${N//4*4}, v${N});
           packed_w += ${NR};
         }
       }
@@ -191,9 +192,9 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}__avx_u${KBLOCK}${"_prfm" if PREFETCH 
         packed_w += (${NR} - n);
       } else {
         const __m256 vzero = _mm256_setzero_ps();
-        _mm256_store_ps(packed_w, vzero);
+        _mm256_stream_ps(packed_w, vzero);
         $for N in range(8,NR,8):
-          _mm256_store_ps(packed_w + ${N}, vzero);
+          _mm256_stream_ps(packed_w + ${N}, vzero);
         packed_w += ${NR};
       }
 
@@ -260,11 +261,11 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}__avx_u${KBLOCK}${"_prfm" if PREFETCH 
             v${N+2}x${ABC[K:K+4]} = _mm256_castpd_ps(_mm256_unpacklo_pd(_mm256_castps_pd(vtmp${N+2}x${ABC[K:K+4]}), _mm256_castps_pd(vtmp${N+3}x${ABC[K:K+4]})));  // c g k o   from row 2, 3
             v${N+3}x${ABC[K:K+4]} = _mm256_castpd_ps(_mm256_unpackhi_pd(_mm256_castps_pd(vtmp${N+2}x${ABC[K:K+4]}), _mm256_castps_pd(vtmp${N+3}x${ABC[K:K+4]})));  // d h l p   from row 2, 3
 
-        _mm256_store_ps(packed_w, v0x0123);
+        _mm256_stream_ps(packed_w, v0x0123);
         $for K in range(KBLOCK):
           $for N in range(0,NR,8):
             $if N != 0 or K != 0:
-              _mm256_store_ps(packed_w + ${N+K*NR}, v${N+K}x${ABC[K//4*4:K//4*4+4]});
+              _mm256_stream_ps(packed_w + ${N+K*NR}, v${N+K}x${ABC[K//4*4:K//4*4+4]});
         packed_w += ${NR*KBLOCK};
       }
 
@@ -290,11 +291,11 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}__avx_u${KBLOCK}${"_prfm" if PREFETCH 
             v${N+0} = _mm_castpd_ps(_mm_unpacklo_pd(_mm_castps_pd(vtmp${N+0}), _mm_castps_pd(vtmp${N+1})));  // a c e g   from row 0, 1
             v${N+1} = _mm_castpd_ps(_mm_unpackhi_pd(_mm_castps_pd(vtmp${N+0}), _mm_castps_pd(vtmp${N+1})));  // b d f h   from row 0, 1
 
-          _mm_store_ps(packed_w, v0);
+          _mm_stream_ps(packed_w, v0);
           $for K in range(2):
             $for N in range(0,NR,4):
               $if N != 0 or K != 0:
-                _mm_store_ps(packed_w + ${N//4*4+K*NR}, v${N+K});
+                _mm_stream_ps(packed_w + ${N//4*4+K*NR}, v${N+K});
           packed_w += ${NR*2};
         }
         if (k & 1) {
@@ -313,9 +314,9 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}__avx_u${KBLOCK}${"_prfm" if PREFETCH 
             // Transpose 4x4
             v${N+0} = _mm_castpd_ps(_mm_unpacklo_pd(_mm_castps_pd(vtmp${N+0}), _mm_castps_pd(vtmp${N+1})));  // a b c d   from row 0, 1
 
-          _mm_store_ps(packed_w, v0);
+          _mm_stream_ps(packed_w, v0);
           $for N in range(4,NR,4):
-            _mm_store_ps(packed_w + ${N//4*4}, v${N});
+            _mm_stream_ps(packed_w + ${N//4*4}, v${N});
           packed_w += ${NR};
         }
       }

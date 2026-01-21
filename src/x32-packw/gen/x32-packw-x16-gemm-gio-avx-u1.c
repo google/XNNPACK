@@ -3,7 +3,7 @@
 //   Template: src/x32-packw/gio-avx.c.in
 //   Generator: tools/xngen
 //
-// Copyright 2024 Google LLC
+// Copyright 2024-2025 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
@@ -42,6 +42,8 @@ void xnn_x32_packw_gemm_gio_ukernel_x16__avx_u1(
   assert(k_stride != 0);
   assert(weights != NULL);
   assert(packed_weights != NULL);
+  assert((intptr_t)packed_weights % 32 == 0);  // Alignment requirement for `_mm256_stream_ps`.
+
   static const int32_t mask_table[32] = {
     -1, -1, -1, -1, -1, -1, -1, -1,
     -1, -1, -1, -1, -1, -1, -1, -1,
@@ -61,12 +63,12 @@ void xnn_x32_packw_gemm_gio_ukernel_x16__avx_u1(
       if XNN_LIKELY(b != NULL) {
         const __m256 vb0 = _mm256_loadu_ps(b + 0);
         const __m256 vb1 = _mm256_loadu_ps(b + 8);
-        _mm256_store_ps(packed_w + 0, vb0);
-        _mm256_store_ps(packed_w + 8, vb1);
+        _mm256_stream_ps(packed_w + 0, vb0);
+        _mm256_stream_ps(packed_w + 8, vb1);
         b += 16;
       } else {
-        _mm256_store_ps(packed_w + 0, vzero);
-        _mm256_store_ps(packed_w + 8, vzero);
+        _mm256_stream_ps(packed_w + 0, vzero);
+        _mm256_stream_ps(packed_w + 8, vzero);
       }
       packed_w += 16;
 
@@ -76,8 +78,8 @@ void xnn_x32_packw_gemm_gio_ukernel_x16__avx_u1(
       for (; k > 0; --k) {
         const __m256 v0 = _mm256_loadu_ps(w + 0);
         const __m256 v1 = _mm256_loadu_ps(w + 8);
-        _mm256_store_ps(packed_w + 0, v0);
-        _mm256_store_ps(packed_w + 8, v1);
+        _mm256_stream_ps(packed_w + 0, v0);
+        _mm256_stream_ps(packed_w + 8, v1);
         w += k_stride;
         packed_w += 16;
       }
@@ -94,12 +96,12 @@ void xnn_x32_packw_gemm_gio_ukernel_x16__avx_u1(
       if XNN_LIKELY(b != NULL) {
         const __m256 vb0 = _mm256_maskload_ps(b + 0, vmask0);
         const __m256 vb1 = _mm256_maskload_ps(b + 8, vmask1);
-        _mm256_store_ps(packed_w + 0, vb0);
-        _mm256_store_ps(packed_w + 8, vb1);
+        _mm256_stream_ps(packed_w + 0, vb0);
+        _mm256_stream_ps(packed_w + 8, vb1);
         b += n;
       } else {
-        _mm256_store_ps(packed_w + 0, vzero);
-        _mm256_store_ps(packed_w + 8, vzero);
+        _mm256_stream_ps(packed_w + 0, vzero);
+        _mm256_stream_ps(packed_w + 8, vzero);
       }
       packed_w += 16;
 
@@ -107,8 +109,8 @@ void xnn_x32_packw_gemm_gio_ukernel_x16__avx_u1(
       for (size_t k = kc; k > 0; --k) {
         const __m256 v0 = _mm256_maskload_ps(w + 0, vmask0);
         const __m256 v1 = _mm256_maskload_ps(w + 8, vmask1);
-        _mm256_store_ps(packed_w + 0, v0);
-        _mm256_store_ps(packed_w + 8, v1);
+        _mm256_stream_ps(packed_w + 0, v0);
+        _mm256_stream_ps(packed_w + 8, v1);
         w += k_stride;
         packed_w += 16;
       }
