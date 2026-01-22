@@ -2368,6 +2368,13 @@ struct xnn_weights_cache_provider {
 /// Weights cache is a cache for packed weights. It can be reused between runtimes.
 typedef struct xnn_weights_cache_provider* xnn_weights_cache_t;
 
+/// Returns a version number corresponding to the current caching.
+///
+/// The version number will change every time caching is introduced for an
+/// operation. Cache implementations that can reload data from previous runs
+/// should check that this version hasn't changed.
+size_t xnn_caching_strategy_version();
+
 /// Create a weights cache object specifying the initial size of weights cache (in bytes).
 ///
 /// @param[in] size - initial capacity of the weights cache (in bytes), i.e. it can hold size bytes without growing.
