@@ -1,0 +1,52 @@
+FROM ubuntu:24.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+ENV USE_BAZEL_VERSION=8.5.1
+
+RUN apt-get update && apt-get install -y \
+    software-properties-common wget gnupg && \
+    add-apt-repository -y ppa:ubuntu-toolchain-r/test && \
+    apt-get update
+
+RUN apt-get install -y \
+    build-essential \
+    git \
+    cmake \
+    ninja-build \
+    python3 \
+    python3-pip \
+    ccache \
+    gcc-9 g++-9 \
+    gcc-13 g++-13 \
+    crossbuild-essential-armhf \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN ln -s /usr/arm-linux-gnueabihf/lib/ld-linux-armhf.so.3 /usr/lib/ld-linux-armhf.so.3
+ENV LD_LIBRARY_PATH=/usr/arm-linux-gnueabihf/lib:${LD_LIBRARY_PATH}
+
+RUN wget https://apt.llvm.org/llvm.sh && \
+    chmod +x llvm.sh && \
+    ./llvm.sh 18 && \
+    rm llvm.sh
+
+ARG TARGETARCH
+RUN if [ "$TARGETARCH" = "arm64" ]; then \
+      wget -O /usr/local/bin/bazel https://github.com/bazelbuild/bazelisk/releases/download/v1.19.0/bazelisk-linux-arm64; \
+    else \
+      wget -O /usr/local/bin/bazel https://github.com/bazelbuild/bazelisk/releases/download/v1.19.0/bazelisk-linux-amd64; \
+    fi && \
+    chmod +x /usr/local/bin/bazel
+
+RUN ln -sf /usr/bin/python3 /usr/bin/python
+
+ARG USERNAME=xnnpack
+ARG USER_UID=1001
+ARG USER_GID=$USER_UID
+
+RUN groupadd --gid $USER_GID $USERNAME
+RUN useradd --uid $USER_UID --gid $USER_GID -m $USERNAME
+
+RUN mkdir -p /home/$USERNAME/.cache/bazel
+RUN chown -R $USERNAME:$USERNAME /home/$USERNAME
+
+USER $USERNAME
