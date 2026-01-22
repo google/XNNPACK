@@ -22,29 +22,34 @@ jobs:
   cmake-linux-x86_64:
     runs-on: 'ubuntu-24.04-8core'
     timeout-minutes: 60
+    container:
+      image: ghcr.io/google/xnnpack/standard:latest
+    env:
+      CMAKE_C_COMPILER_LAUNCHER: ccache
+      CMAKE_CXX_COMPILER_LAUNCHER: ccache
+      CCACHE_DIR: /home/xnnpack/.ccache
     steps:
-      - uses: actions/checkout@v6
-      - name: Update apt
-        run: |
-          echo 'set man-db/auto-update false' | sudo debconf-communicate >/dev/null
-          sudo dpkg-reconfigure man-db
-          sudo apt update
-      - name: Install ninja
-        run: sudo apt install ninja-build
-      - name: Setup ccache
-        uses: hendrikmuhs/ccache-action@v1.2
+      - uses: actions/checkout@v4
+
+      - name: Mount ccache
+        uses: actions/cache@v4
         with:
-          key: ${{ github.job }}
-          max-size: "500M"
-          save: ${{ inputs.update-caches }}
+          path: /home/xnnpack/.ccache
+          key: ccache-${{ runner.os }}-${{ github.job }}-${{ github.run_id }}
+          restore-keys: |
+            ccache-${{ runner.os }}-${{ github.job }}-
+      - name: Configure ccache limit
+        run: |
+          ccache -M 500M
+          ccache -z
       - name: Configure and build
         run: scripts/build-local.sh
-        working-directory: ${{ github.workspace }}
       - name: Run tests
         if: ${{ inputs.run-tests }}
         run: ctest --output-on-failure --parallel $(nproc)
-        working-directory: ${{ github.workspace }}/build/local
-
+        working-directory: build/local
+      - name: Print ccache stats
+        run: ccache -s
   cmake-linux-aarch64:
     runs-on: arm-ubuntu-arm-22.04-8core
     timeout-minutes: 60
