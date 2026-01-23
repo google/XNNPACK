@@ -29,10 +29,10 @@ jobs:
       CMAKE_CXX_COMPILER_LAUNCHER: ccache
       CCACHE_DIR: /home/xnnpack/.ccache
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Mount ccache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: /home/xnnpack/.ccache
           key: ccache-${{ runner.os }}-${{ github.job }}-${{ github.run_id }}
