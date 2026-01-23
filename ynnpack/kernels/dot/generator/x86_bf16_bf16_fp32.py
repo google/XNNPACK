@@ -25,7 +25,7 @@ struct bfloat16 {{
   std::uint16_t value;
 }};
 
-YNN_INTRINSIC __m{self.bits}i unaligned_load_broadcast_bf32x2(const bfloat16* ptr) {{
+YNN_INTRINSIC __m{self.bits}i unaligned_load_broadcast_bf16x2(const bfloat16* ptr) {{
     int32_t value;
     memcpy(&value, ptr, sizeof(int32_t));
     return {self._mm()}_set1_epi32(value);
@@ -44,7 +44,7 @@ YNN_INTRINSIC __m{self.bits}i unaligned_load_broadcast_bf32x2(const bfloat16* pt
     cast = f"{self._mm()}_castsi{bits}_ps"
     a_ik = f"a_{i}_{k}_k2"
     return f"""
-__m{bits}i {a_ik} = unaligned_load_broadcast_bf32x2({ptr});
+__m{bits}i {a_ik} = unaligned_load_broadcast_bf16x2({ptr});
 __m{bits} a_{i}_{k+0} = {cast}({self._mm()}_slli_epi32({a_ik}, 16));
 __m{bits} a_{i}_{k+1} = {cast}({self._mm()}_and_si{bits}({a_ik}, {mask}));
 """
