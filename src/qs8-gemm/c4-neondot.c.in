@@ -355,23 +355,23 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c
       $if DATATYPE in ["QC2_F32"]:
         const float32x4_t vtwo = vdupq_n_f32(2.0f);
         $for N in range(0, NR, 4):
-          const float32x4_t rh_zero_points_${ABC[N:N+4]} = vld1q_f32(kzp); kzp = (const float*)kzp + 4;
-          const float32x4_t biased_rh_zero_points_${ABC[N:N+4]} = vaddq_f32(rh_zero_points_${ABC[N:N+4]}, vtwo);
+          const float32x4_t kernel_zero_points_${ABC[N:N+4]} = vld1q_f32(kzp); kzp = (const float*)kzp + 4;
+          const float32x4_t biased_kernel_zero_points_${ABC[N:N+4]} = vaddq_f32(kernel_zero_points_${ABC[N:N+4]}, vtwo);
 
         // Subtract out the scaled left-hand row sums.
         $for M in range(MR):
           const float32x4_t lh_row_sum_${M} = vld1q_dup_f32(&row_sum[${M}]);
           $for N in range(0, NR, 4):
-            vout${M}x${ABC[N:N+4]} = vfmsq_f32(vout${M}x${ABC[N:N+4]}, biased_rh_zero_points_${ABC[N:N+4]}, lh_row_sum_${M});
+            vout${M}x${ABC[N:N+4]} = vfmsq_f32(vout${M}x${ABC[N:N+4]}, biased_kernel_zero_points_${ABC[N:N+4]}, lh_row_sum_${M});
 
         // Add the product of left/right-hand zero points and `kc`.
         $for M in range(MR):
-          const float32x4_t vscaled_lh_zero_point_${M} =
+          const float32x4_t vscaled_input_zero_point_${M} =
             vdupq_n_f32((float)kc * quantization_params[${M}].zero_point);
         $for M in range(MR):
           $for N in range(0, NR, 4):
             vout${M}x${ABC[N:N+4]} =
-              vmlaq_f32(vout${M}x${ABC[N:N+4]}, rh_zero_points_${ABC[N:N+4]}, vscaled_lh_zero_point_${M});
+              vmlaq_f32(vout${M}x${ABC[N:N+4]}, kernel_zero_points_${ABC[N:N+4]}, vscaled_input_zero_point_${M});
       $for M in range(0, MR, 2):
         $if M + 1 == MR:
           const float32x4_t vinput_scale${M} = vld1q_dup_f32(&quantization_params[${M}].inv_scale);
