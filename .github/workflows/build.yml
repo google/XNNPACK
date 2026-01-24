@@ -567,9 +567,9 @@ jobs:
           path: |
             /home/xnnpack/.cache/bazel/disk_cache
             /home/xnnpack/.cache/bazel/repo_cache
-          key: bazel-gcc9-${{ runner.os }}-${{ github.job }}-${{ github.run_id }}
+          key: bazel-gcc13-${{ runner.os }}-${{ github.job }}-${{ github.run_id }}
           restore-keys: |
-            bazel-gcc9-${{ runner.os }}-${{ github.job }}-
+            bazel-gcc13-${{ runner.os }}-${{ github.job }}-
 
       - name: Build tests
         if: ${{ !inputs.run-tests }}
