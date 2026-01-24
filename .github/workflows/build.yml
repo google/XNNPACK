@@ -395,71 +395,59 @@ jobs:
   bazel-linux-x86_64-clang-18:
     runs-on: 'ubuntu-24.04-8core'
     timeout-minutes: 60
+    container:
+      image: ghcr.io/google/xnnpack/standard:latest
+    env:
+      CC: clang-18
+      CXX: clang++-18
     steps:
-      - uses: actions/checkout@v6
-      - name: Update apt
-        run: |
-          echo 'set man-db/auto-update false' | sudo debconf-communicate >/dev/null
-          sudo dpkg-reconfigure man-db
-          sudo apt update
-      - name: Install clang-18
-        working-directory: ${{ github.workspace }}
-        run: |
-          wget https://apt.llvm.org/llvm.sh
-          chmod +x llvm.sh
-          sudo ./llvm.sh 18
-      - name: Restore bazel cache
-        uses: actions/cache/restore@v4
+      - uses: actions/checkout@v4
+      - name: Mount Bazel Cache
+        uses: actions/cache@v4
         with:
-          path: "/home/runner/.cache/bazel"
-          key: ${{ github.job }}
+          path: |
+            /home/xnnpack/.cache/bazel/disk_cache
+            /home/xnnpack/.cache/bazel/repo_cache
+          key: bazel-clang18-${{ runner.os }}-${{ github.job }}-${{ github.run_id }}
           restore-keys: |
-            ${{ github.job }}-
+            bazel-clang18-${{ runner.os }}-${{ github.job }}-
+
       - name: Build tests
         if: ${{ !inputs.run-tests }}
-        env:
-          CC: clang-18
-          CXX: clang++-18
-          USE_BAZEL_VERSION: 8.5.1
         run: |
             bazel build \
+              --disk_cache=/home/xnnpack/.cache/bazel/disk_cache \
+              --repository_cache=/home/xnnpack/.cache/bazel/repo_cache \
               --test_output=errors \
               //test/... \
               //bench/...
-        working-directory: ${{ github.workspace }}
+
       - name: Build and run tests
         if: ${{ inputs.run-tests }}
-        env:
-          CC: clang-18
-          CXX: clang++-18
-          USE_BAZEL_VERSION: 8.5.1
         run: |
             bazel test \
+              --disk_cache=/home/xnnpack/.cache/bazel/disk_cache \
+              --repository_cache=/home/xnnpack/.cache/bazel/repo_cache \
               --test_output=errors \
               --local_test_jobs=HOST_CPUS \
               //test/... \
               //bench/... \
               //ynnpack/...
-        working-directory: ${{ github.workspace }}
+
       - name: Compress disk cache
-        # Bazel's `--disk-cache` currently grows without bounds, so we remove files
-        # that haven't been accessed in 7+ days manually.
         if: ${{ inputs.update-caches }}
-        run: find $HOME/.cache/bazel -type f -atime +7 -delete
-      - name: Save bazel cache
-        if: ${{ inputs.update-caches }}
-        uses: actions/cache/save@v4
-        with:
-          path: "/home/runner/.cache/bazel"
-          key: ${{ github.job }}-${{ github.sha }}
+        run: |
+          mkdir -p /home/xnnpack/.cache/bazel/disk_cache
+          find /home/xnnpack/.cache/bazel/disk_cache -type f -atime +7 -delete
 
   bazel-linux-x86_64-gcc-9:
     runs-on: 'ubuntu-24.04-8core'
     timeout-minutes: 60
+    container:
+      image: ghcr.io/google/xnnpack/standard:latest
     env:
       CC: gcc-9
       CXX: g++-9
-      USE_BAZEL_VERSION: 8.5.1
       BAZEL_DEFINES: |
         --define=xnn_enable_avxvnni=false
         --define=xnn_enable_avx256vnni=false
@@ -471,175 +459,146 @@ jobs:
         --define=ynn_enable_x86_avx512fp16=false
         --define=ynn_enable_x86_avx512bf16=false
     steps:
-      - uses: actions/checkout@v6
-      - name: Update apt
-        run: |
-          echo 'set man-db/auto-update false' | sudo debconf-communicate >/dev/null
-          sudo dpkg-reconfigure man-db
-          sudo apt update
-      - name: Install gcc-9
-        working-directory: ${{ github.workspace }}
-        run: |
-          sudo apt install gcc-9 g++-9
-      - name: Restore bazel cache
-        uses: actions/cache/restore@v4
+      - uses: actions/checkout@v4
+      - name: Mount Bazel Cache
+        uses: actions/cache@v4
         with:
-          path: "/home/runner/.cache/bazel"
-          key: ${{ github.job }}
+          path: |
+            /home/xnnpack/.cache/bazel/disk_cache
+            /home/xnnpack/.cache/bazel/repo_cache
+          key: bazel-gcc9-${{ runner.os }}-${{ github.job }}-${{ github.run_id }}
           restore-keys: |
-            ${{ github.job }}-
+            bazel-gcc9-${{ runner.os }}-${{ github.job }}-
+
       - name: Build tests
         if: ${{ !inputs.run-tests }}
         run: |
             bazel build \
+              --disk_cache=/home/xnnpack/.cache/bazel/disk_cache \
+              --repository_cache=/home/xnnpack/.cache/bazel/repo_cache \
               ${BAZEL_DEFINES} \
               //test/... \
               //bench/...
-        working-directory: ${{ github.workspace }}
+
       - name: Build and run tests
         if: ${{ inputs.run-tests }}
         run: |
             bazel test \
+              --disk_cache=/home/xnnpack/.cache/bazel/disk_cache \
+              --repository_cache=/home/xnnpack/.cache/bazel/repo_cache \
               --test_output=errors \
               --local_test_jobs=HOST_CPUS \
               ${BAZEL_DEFINES} \
               //test/... \
               //bench/... \
               //ynnpack/...
-        working-directory: ${{ github.workspace }}
+
       - name: Compress disk cache
-        # Bazel's `--disk-cache` currently grows without bounds, so we remove files
-        # that haven't been accessed in 7+ days manually.
         if: ${{ inputs.update-caches }}
-        run: find $HOME/.cache/bazel -type f -atime +7 -delete
-      - name: Save bazel cache
-        if: ${{ inputs.update-caches }}
-        uses: actions/cache/save@v4
-        with:
-          path: "/home/runner/.cache/bazel"
-          key: ${{ github.job }}-${{ github.sha }}
+        run: |
+          mkdir -p /home/xnnpack/.cache/bazel/disk_cache
+          find /home/xnnpack/.cache/bazel/disk_cache -type f -atime +7 -delete
 
   bazel-linux-aarch64-clang18:
-    runs-on: arm-ubuntu-arm-22.04-8core
+    runs-on: 'arm-ubuntu-arm-22.04-8core'
     timeout-minutes: 60
+    container:
+      image: ghcr.io/google/xnnpack/standard:latest
+    env:
+      CC: clang-18
+      CXX: clang++-18
     steps:
-      - uses: actions/checkout@v6
-      - name: Update apt
-        run: |
-          echo 'set man-db/auto-update false' | sudo debconf-communicate >/dev/null
-          sudo dpkg-reconfigure man-db
-          sudo apt update
-      - name: Install clang-18
-        working-directory: ${{ github.workspace }}
-        run: |
-          wget https://apt.llvm.org/llvm.sh
-          chmod +x llvm.sh
-          sudo ./llvm.sh 18
-      - name: Restore bazel cache
-        uses: actions/cache/restore@v4
+      - uses: actions/checkout@v4
+      - name: Mount Bazel Cache
+        uses: actions/cache@v4
         with:
-          path: "/home/runner/.cache/bazel"
-          key: ${{ github.job }}
+          path: |
+            /home/xnnpack/.cache/bazel/disk_cache
+            /home/xnnpack/.cache/bazel/repo_cache
+          key: bazel-clang18-${{ runner.os }}-${{ github.job }}-${{ github.run_id }}
           restore-keys: |
-            ${{ github.job }}-
+            bazel-clang18-${{ runner.os }}-${{ github.job }}-
+
       - name: Build tests
         if: ${{ !inputs.run-tests }}
-        env:
-          CC: clang-18
-          CXX: clang++-18
-          USE_BAZEL_VERSION: 8.5.1
         run: |
             bazel build \
+              --disk_cache=/home/xnnpack/.cache/bazel/disk_cache \
+              --repository_cache=/home/xnnpack/.cache/bazel/repo_cache \
+              --test_output=errors \
               //test/... \
               //bench/...
-        working-directory: ${{ github.workspace }}
+
       - name: Build and run tests
         if: ${{ inputs.run-tests }}
-        env:
-          CC: clang-18
-          CXX: clang++-18
-          USE_BAZEL_VERSION: 8.5.1
         run: |
-          bazel test \
-            --test_output=errors \
-            --local_test_jobs=HOST_CPUS \
-            //test/... \
-            //bench/... \
-            //ynnpack/...
-        working-directory: ${{ github.workspace }}
+            bazel test \
+              --disk_cache=/home/xnnpack/.cache/bazel/disk_cache \
+              --repository_cache=/home/xnnpack/.cache/bazel/repo_cache \
+              --test_output=errors \
+              --local_test_jobs=HOST_CPUS \
+              //test/... \
+              //bench/... \
+              //ynnpack/...
+
       - name: Compress disk cache
-        # Bazel's `--disk-cache` currently grows without bounds, so we remove files
-        # that haven't been accessed in 7+ days manually.
         if: ${{ inputs.update-caches }}
-        run: find $HOME/.cache/bazel -type f -atime +7 -delete
-      - name: Save bazel cache
-        if: ${{ inputs.update-caches }}
-        uses: actions/cache/save@v4
-        with:
-          path: "/home/runner/.cache/bazel"
-          key: ${{ github.job }}-${{ github.sha }}
+        run: |
+          mkdir -p /home/xnnpack/.cache/bazel/disk_cache
+          find /home/xnnpack/.cache/bazel/disk_cache -type f -atime +7 -delete
 
   bazel-linux-aarch64-gcc13:
     # This ensures we have solid test coverage for _Float16
-    runs-on: arm-ubuntu-arm-22.04-8core
+    runs-on: 'arm-ubuntu-arm-22.04-8core'
     timeout-minutes: 60
+    container:
+      image: ghcr.io/google/xnnpack/standard:latest
     env:
       CC: gcc-13
       CXX: g++-13
-      USE_BAZEL_VERSION: 8.5.1
       BAZEL_DEFINES: |
         --define=ynn_enable_arm64_sme=false
         --define=ynn_enable_arm_neonbf16=false
     steps:
-      - uses: actions/checkout@v6
-      - name: Update apt
-        run: |
-          echo 'set man-db/auto-update false' | sudo debconf-communicate >/dev/null
-          sudo dpkg-reconfigure man-db
-          sudo apt update
-      - name: Install gcc-13 (cached)
-        uses: awalsh128/cache-apt-pkgs-action@v1.4.3
+      - uses: actions/checkout@v4
+      - name: Mount Bazel Cache
+        uses: actions/cache@v4
         with:
-          packages: gcc-13 g++-13
-          version: 1.0
-      - name: Restore bazel cache
-        uses: actions/cache/restore@v4
-        with:
-          path: "/home/runner/.cache/bazel"
-          key: ${{ github.job }}
+          path: |
+            /home/xnnpack/.cache/bazel/disk_cache
+            /home/xnnpack/.cache/bazel/repo_cache
+          key: bazel-gcc9-${{ runner.os }}-${{ github.job }}-${{ github.run_id }}
           restore-keys: |
-            ${{ github.job }}-
+            bazel-gcc9-${{ runner.os }}-${{ github.job }}-
+
       - name: Build tests
         if: ${{ !inputs.run-tests }}
         run: |
             bazel build \
+              --disk_cache=/home/xnnpack/.cache/bazel/disk_cache \
+              --repository_cache=/home/xnnpack/.cache/bazel/repo_cache \
+              ${BAZEL_DEFINES} \
+              //test/... \
+              //bench/...
+
+      - name: Build and run tests
+        if: ${{ inputs.run-tests }}
+        run: |
+            bazel test \
+              --disk_cache=/home/xnnpack/.cache/bazel/disk_cache \
+              --repository_cache=/home/xnnpack/.cache/bazel/repo_cache \
+              --test_output=errors \
+              --local_test_jobs=HOST_CPUS \
               ${BAZEL_DEFINES} \
               //test/... \
               //bench/... \
               //ynnpack/...
-        working-directory: ${{ github.workspace }}
-      - name: Build and run tests
-        if: ${{ inputs.run-tests }}
-        run: |
-          bazel test \
-            --test_output=errors \
-            --local_test_jobs=HOST_CPUS \
-            ${BAZEL_DEFINES} \
-            //test/... \
-            //bench/... \
-            //ynnpack/...
-        working-directory: ${{ github.workspace }}
+
       - name: Compress disk cache
-        # Bazel's `--disk-cache` currently grows without bounds, so we remove files
-        # that haven't been accessed in 7+ days manually.
         if: ${{ inputs.update-caches }}
-        run: find $HOME/.cache/bazel -type f -atime +7 -delete
-      - name: Save bazel cache
-        if: ${{ inputs.update-caches }}
-        uses: actions/cache/save@v4
-        with:
-          path: "/home/runner/.cache/bazel"
-          key: ${{ github.job }}-${{ github.sha }}
+        run: |
+          mkdir -p /home/xnnpack/.cache/bazel/disk_cache
+          find /home/xnnpack/.cache/bazel/disk_cache -type f -atime +7 -delete
 
   bazel-linux-aarch64-sme2-qemu:
     runs-on: "arm-ubuntu-arm-22.04-8core"
