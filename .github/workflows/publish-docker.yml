@@ -3,7 +3,9 @@ name: Docker Images
 on:
   push:
     branches: [ master ]
-    paths: [ 'docker/Dockerfile.standard' ]
+    paths:
+      - 'docker/Dockerfile.standard'
+      - 'docker/Dockerfile.riscv'
   workflow_dispatch:
 
 permissions:
@@ -15,7 +17,11 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        image: [standard]
+        include:
+          - image: standard
+            platforms: linux/amd64,linux/arm64
+          - image: riscv
+            platforms: linux/amd64
     steps:
       - uses: actions/checkout@v4
       - name: Set up QEMU
@@ -36,10 +42,9 @@ jobs:
         with:
           context: .
           file: docker/Dockerfile.${{ matrix.image }}
-          platforms: linux/amd64,linux/arm64
+          platforms: ${{ matrix.platforms }}
           push: true
           tags: |
             ghcr.io/google/xnnpack/${{ matrix.image }}:latest
             ghcr.io/google/xnnpack/${{ matrix.image }}:${{ github.sha }}
-
 

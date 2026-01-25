@@ -1,0 +1,61 @@
+FROM ubuntu:24.04 AS qemu-builder
+
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && apt-get install -y \
+    wget \
+    build-essential \
+    python3 \
+    python3-pip \
+    python3-venv \
+    ninja-build \
+    libglib2.0-dev \
+    libpixman-1-dev \
+    flex \
+    bison
+
+WORKDIR /src
+RUN wget -nv https://download.qemu.org/qemu-9.2.2.tar.xz && \
+    tar xJf qemu-9.2.2.tar.xz
+
+WORKDIR /src/qemu-9.2.2
+RUN ./configure --target-list=riscv64-linux-user --static --disable-tools --disable-system --disable-docs
+RUN make -j$(nproc)
+
+FROM ubuntu:24.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update && apt-get install -y \
+    software-properties-common \
+    wget \
+    gnupg \
+    build-essential \
+    git \
+    vim \
+    cmake \
+    ninja-build \
+    python3 \
+    python3-pip \
+    ccache \
+    crossbuild-essential-riscv64 \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /opt
+RUN wget -nv https://github.com/riscv-collab/riscv-gnu-toolchain/releases/download/2025.01.20/riscv64-glibc-ubuntu-24.04-llvm-nightly-2025.01.20-nightly.tar.xz && \
+    tar xJf riscv64-glibc-ubuntu-24.04-llvm-nightly-2025.01.20-nightly.tar.xz && \
+    rm riscv64-glibc-ubuntu-24.04-llvm-nightly-2025.01.20-nightly.tar.xz
+
+WORKDIR /opt/qemu/bin
+COPY --from=qemu-builder /src/qemu-9.2.2/build/qemu-riscv64 .
+ENV PATH="/opt/qemu/bin:${PATH}"
+
+ARG USERNAME=xnnpack
+ARG USER_UID=1001
+ARG USER_GID=$USER_UID
+
+RUN groupadd --gid $USER_GID $USERNAME
+RUN useradd --uid $USER_UID --gid $USER_GID -m $USERNAME
+RUN mkdir -p /home/$USERNAME/.ccache && chown -R $USERNAME:$USERNAME /home/$USERNAME
+
+USER $USERNAME
+WORKDIR /home/$USERNAME
