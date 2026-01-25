@@ -122,87 +122,80 @@ jobs:
   cmake-linux-riscv64:
     runs-on: 'ubuntu-24.04-16core'
     timeout-minutes: 60
+    container:
+      image: ghcr.io/google/xnnpack/riscv:latest
+    env:
+      CMAKE_C_COMPILER_LAUNCHER: ccache
+      CMAKE_CXX_COMPILER_LAUNCHER: ccache
+      CCACHE_DIR: /home/xnnpack/.ccache
     steps:
-      - uses: actions/checkout@v6
-      - name: Update apt
-        run: |
-          echo 'set man-db/auto-update false' | sudo debconf-communicate >/dev/null
-          sudo dpkg-reconfigure man-db
-          sudo apt update
-      - name: Install ninja
-        run: sudo apt install ninja-build
-      - name: Install riscv64 cross-toolchain
-        run: sudo apt install crossbuild-essential-riscv64
-      - name: Install qemu-riscv64
-        run: sudo apt install qemu-user
-      - name: Setup ccache
-        uses: hendrikmuhs/ccache-action@v1.2
+      - uses: actions/checkout@v4
+
+      - name: Mount ccache
+        uses: actions/cache@v4
         with:
-          key: ${{ github.job }}
-          max-size: "500M"
-          save: ${{ inputs.update-caches }}
+          path: /home/xnnpack/.ccache
+          key: ccache-riscv64-${{ runner.os }}-${{ github.job }}-${{ github.run_id }}
+          restore-keys: |
+            ccache-riscv64-${{ runner.os }}-${{ github.job }}-
+
+      - name: Configure ccache limit
+        run: |
+          ccache -M 500M
+          ccache -z
+
       - name: Configure and build
         run: scripts/build-linux-riscv64.sh -DCMAKE_BUILD_TYPE=Release -DXNNPACK_ENABLE_RISCV_VECTOR=OFF
-        working-directory: ${{ github.workspace }}
+
       - name: Run tests
         if: ${{ inputs.run-tests }}
         run: ctest --output-on-failure --parallel $(nproc)
-        working-directory: ${{ github.workspace }}/build/linux/riscv64
+        working-directory: build/linux/riscv64
+
+      - name: Print ccache stats
+        run: ccache -s
 
   cmake-linux-riscv64-rvv:
     runs-on: 'ubuntu-24.04-16core'
     timeout-minutes: 60
+    container:
+      image: ghcr.io/google/xnnpack/riscv:latest
+    env:
+      CMAKE_C_COMPILER_LAUNCHER: ccache
+      CMAKE_CXX_COMPILER_LAUNCHER: ccache
+      CCACHE_DIR: /home/xnnpack/.ccache
     steps:
-      - uses: actions/checkout@v6
-      - name: Update apt
-        run: |
-          echo 'set man-db/auto-update false' | sudo debconf-communicate >/dev/null
-          sudo dpkg-reconfigure man-db
-          sudo apt update
-      - name: Install ninja
-        run: sudo apt install ninja-build
-      - name: Download and Install riscv64 cross-toolchain tarball
-        run: |
-          wget -nv https://github.com/riscv-collab/riscv-gnu-toolchain/releases/download/2025.01.20/riscv64-glibc-ubuntu-24.04-llvm-nightly-2025.01.20-nightly.tar.xz
-          tar xJf riscv64-glibc-ubuntu-24.04-llvm-nightly-2025.01.20-nightly.tar.xz
-        working-directory: ${{ github.workspace }}
-      - name: Setup ccache
-        uses: hendrikmuhs/ccache-action@v1.2
+      - uses: actions/checkout@v4
+
+      - name: Mount ccache
+        uses: actions/cache@v4
         with:
-          key: ${{ github.job }}
-          max-size: "500M"
-          save: ${{ inputs.update-caches }}
-      - name: Check for cached qemu build
-        id: cached-qemu
-        uses: actions/cache@v5
-        with:
-          path: ${{ github.workspace }}/bin/qemu-riscv64
-          key: ${{ runner.os }}-qemu-riscv64
-      - name: Download and build qemu-riscv64
-        if: steps.cached-qemu.outputs.cache-hit != 'true'
+          path: /home/xnnpack/.ccache
+          key: ccache-riscv64-rvv-${{ runner.os }}-${{ github.job }}-${{ github.run_id }}
+          restore-keys: |
+            ccache-riscv64-rvv-${{ runner.os }}-${{ github.job }}-
+
+      - name: Configure ccache limit
         run: |
-          sudo apt install libglib2.0-dev
-          mkdir bin
-          wget -nv https://download.qemu.org/qemu-9.2.2.tar.xz
-          tar xJf qemu-9.2.2.tar.xz
-          cd qemu-9.2.2
-          ./configure --target-list=riscv64-linux-user --static
-          make -j $(nproc)
-          cp build/qemu-riscv64 ../bin/
-        working-directory: ${{ github.workspace }}
+          ccache -M 500M
+          ccache -z
+
       - name: Configure and build
         run: |
           scripts/build-linux-riscv64.sh \
             -DCMAKE_BUILD_TYPE=Release \
             -DXNNPACK_ENABLE_RISCV_VECTOR=ON \
             -DUSE_GNU_SOURCE=ON \
-            -DRISCV_TOOLCHAIN_ROOT=${{ github.workspace }}/riscv/ \
-            -DRISCV_QEMU_ROOT=${{ github.workspace }}
-        working-directory: ${{ github.workspace }}
+            -DRISCV_TOOLCHAIN_ROOT=/opt/riscv \
+            -DRISCV_QEMU_ROOT=/opt/qemu
+
       - name: Run tests (no operator tests)
         if: ${{ inputs.run-tests }}
         run: ctest --output-on-failure --label-exclude operator --parallel $(nproc)
-        working-directory: ${{ github.workspace }}/build/linux/riscv64
+        working-directory: build/linux/riscv64
+
+      - name: Print ccache stats
+        run: ccache -s
 
   cmake-windows-arm64:
     runs-on: windows-2022-32core
