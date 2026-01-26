@@ -82,7 +82,11 @@ void TestMatMul(AT, BT, CT, size_t k) {
   ReplicableRandomDevice rng;
   // We want a large range, but not so large that our outputs are likely to be
   // Inf/NaN.
-  const float max_abs_value = std::sqrt(type_info<CT>::max()) / (k / 4);
+  const float max_abs_a_value = static_cast<float>(type_info<AT>::max());
+  const float max_abs_b_value = static_cast<float>(type_info<BT>::max());
+  const float max_abs_value =
+      std::min({0.95f * max_abs_a_value, 0.95f * max_abs_b_value,
+                static_cast<float>(std::sqrt(type_info<CT>::max()) / (k / 4))});
   TypeGenerator<AT> a_gen(-max_abs_value, max_abs_value);
   TypeGenerator<BT> b_gen(-max_abs_value, max_abs_value);
   TypeGenerator<CT> c_gen(-max_abs_value, max_abs_value);
