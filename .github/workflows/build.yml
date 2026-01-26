@@ -393,14 +393,15 @@ jobs:
           path: |
             /home/xnnpack/.cache/bazel/disk_cache
             /home/xnnpack/.cache/bazel/repo_cache
-          key: bazel-clang18-${{ runner.os }}-${{ github.job }}-${{ github.run_id }}
+          key: bazel-clang18-opt-${{ runner.os }}-${{ github.job }}-${{ github.run_id }}
           restore-keys: |
-            bazel-clang18-${{ runner.os }}-${{ github.job }}-
+            bazel-clang18-opt-${{ runner.os }}-${{ github.job }}-
 
       - name: Build tests
         if: ${{ !inputs.run-tests }}
         run: |
             bazel build \
+              -c opt \
               --disk_cache=/home/xnnpack/.cache/bazel/disk_cache \
               --repository_cache=/home/xnnpack/.cache/bazel/repo_cache \
               --test_output=errors \
@@ -411,6 +412,7 @@ jobs:
         if: ${{ inputs.run-tests }}
         run: |
             bazel test \
+              -c opt \
               --disk_cache=/home/xnnpack/.cache/bazel/disk_cache \
               --repository_cache=/home/xnnpack/.cache/bazel/repo_cache \
               --test_output=errors \
@@ -451,14 +453,15 @@ jobs:
           path: |
             /home/xnnpack/.cache/bazel/disk_cache
             /home/xnnpack/.cache/bazel/repo_cache
-          key: bazel-gcc9-${{ runner.os }}-${{ github.job }}-${{ github.run_id }}
+          key: bazel-gcc9-opt-${{ runner.os }}-${{ github.job }}-${{ github.run_id }}
           restore-keys: |
-            bazel-gcc9-${{ runner.os }}-${{ github.job }}-
+            bazel-gcc9-opt-${{ runner.os }}-${{ github.job }}-
 
       - name: Build tests
         if: ${{ !inputs.run-tests }}
         run: |
             bazel build \
+              -c opt \
               --disk_cache=/home/xnnpack/.cache/bazel/disk_cache \
               --repository_cache=/home/xnnpack/.cache/bazel/repo_cache \
               ${BAZEL_DEFINES} \
@@ -469,6 +472,7 @@ jobs:
         if: ${{ inputs.run-tests }}
         run: |
             bazel test \
+              -c opt \
               --disk_cache=/home/xnnpack/.cache/bazel/disk_cache \
               --repository_cache=/home/xnnpack/.cache/bazel/repo_cache \
               --test_output=errors \
@@ -500,14 +504,15 @@ jobs:
           path: |
             /home/xnnpack/.cache/bazel/disk_cache
             /home/xnnpack/.cache/bazel/repo_cache
-          key: bazel-clang18-${{ runner.os }}-${{ github.job }}-${{ github.run_id }}
+          key: bazel-clang18-opt-${{ runner.os }}-${{ github.job }}-${{ github.run_id }}
           restore-keys: |
-            bazel-clang18-${{ runner.os }}-${{ github.job }}-
+            bazel-clang18-opt-${{ runner.os }}-${{ github.job }}-
 
       - name: Build tests
         if: ${{ !inputs.run-tests }}
         run: |
             bazel build \
+              -c opt \
               --disk_cache=/home/xnnpack/.cache/bazel/disk_cache \
               --repository_cache=/home/xnnpack/.cache/bazel/repo_cache \
               --test_output=errors \
@@ -518,6 +523,7 @@ jobs:
         if: ${{ inputs.run-tests }}
         run: |
             bazel test \
+              -c opt \
               --disk_cache=/home/xnnpack/.cache/bazel/disk_cache \
               --repository_cache=/home/xnnpack/.cache/bazel/repo_cache \
               --test_output=errors \
@@ -552,14 +558,15 @@ jobs:
           path: |
             /home/xnnpack/.cache/bazel/disk_cache
             /home/xnnpack/.cache/bazel/repo_cache
-          key: bazel-gcc13-${{ runner.os }}-${{ github.job }}-${{ github.run_id }}
+          key: bazel-gcc13-opt-${{ runner.os }}-${{ github.job }}-${{ github.run_id }}
           restore-keys: |
-            bazel-gcc13-${{ runner.os }}-${{ github.job }}-
+            bazel-gcc13-opt-${{ runner.os }}-${{ github.job }}-
 
       - name: Build tests
         if: ${{ !inputs.run-tests }}
         run: |
             bazel build \
+              -c opt \
               --disk_cache=/home/xnnpack/.cache/bazel/disk_cache \
               --repository_cache=/home/xnnpack/.cache/bazel/repo_cache \
               ${BAZEL_DEFINES} \
@@ -570,6 +577,7 @@ jobs:
         if: ${{ inputs.run-tests }}
         run: |
             bazel test \
+              -c opt \
               --disk_cache=/home/xnnpack/.cache/bazel/disk_cache \
               --repository_cache=/home/xnnpack/.cache/bazel/repo_cache \
               --test_output=errors \
@@ -659,7 +667,7 @@ jobs:
         run: |
           bazel build \
             -c opt \
-            --copt=-g \
+            --copt=-g1 \
             --copt=-DGOOGLE_COMMANDLINEFLAGS_FULL_API=1 \
             --platforms=//build_config:aarch64_linux \
             --run_under="${PWD}/bin/qemu-aarch64 ${QEMU_ARGS} " \
@@ -683,7 +691,7 @@ jobs:
         run: |
           bazel test \
             -c opt \
-            --copt=-g \
+            --copt=-g1 \
             --copt=-DGOOGLE_COMMANDLINEFLAGS_FULL_API=1 \
             --platforms=//build_config:aarch64_linux \
             --run_under="${PWD}/bin/qemu-aarch64 ${QEMU_ARGS} " \
@@ -710,7 +718,7 @@ jobs:
         run: |
           bazel test \
             -c opt \
-            --copt=-g \
+            --copt=-g1 \
             --copt=-DGOOGLE_COMMANDLINEFLAGS_FULL_API=1 \
             --platforms=//build_config:aarch64_linux \
             --run_under="${PWD}/bin/qemu-aarch64 ${QEMU_ARGS} " \
