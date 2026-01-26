@@ -3,8 +3,16 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include <assert.h>
+#if defined(__GNUC__) && !defined(__clang__)
+// This warning has a ton of false positives, including in GCC's own headers, so
+// we need to disable this warning before including those. Furthermore, it is
+// impossible to disable in the build, because it only exists in new versions of
+// GCC, old/other compilers error if you try to disable it via the command line,
+// and we can't detect compiler versions in bazel.
+#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
+#endif
 
+#include <assert.h>
 #include <arm_neon.h>
 
 #include "src/xnnpack/common.h"
