@@ -1004,6 +1004,12 @@ static void init_f32_vprelu_config(void) {
     f32_vprelu_config.opc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f32_vpreluc_ukernel__wasmsimd_u16);
     f32_vprelu_config.ropc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f32_vrpreluc_ukernel__wasmsimd_u16);
     f32_vprelu_config.element_tile = 16;
+  #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
+    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    f32_vprelu_config.op_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f32_vprelu_ukernel__rvv_u8v);
+    f32_vprelu_config.opc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f32_vpreluc_ukernel__rvv_u8v);
+    f32_vprelu_config.ropc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f32_vrpreluc_ukernel__rvv_u8v);
+    f32_vprelu_config.element_tile = 8 * hardware_config->vlenb / sizeof(float);
   #elif XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
