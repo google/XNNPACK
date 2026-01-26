@@ -319,41 +319,33 @@ jobs:
         arch: [arm64, armv7, x86]
     runs-on: 'ubuntu-24.04-8core'
     timeout-minutes: 60
+    container:
+      image: ghcr.io/google/xnnpack/android:latest
+    env:
+      CMAKE_C_COMPILER_LAUNCHER: ccache
+      CMAKE_CXX_COMPILER_LAUNCHER: ccache
+      CCACHE_DIR: /home/xnnpack/.ccache
     steps:
-      - uses: actions/checkout@v6
-      - name: Update apt
-        run: |
-          echo 'set man-db/auto-update false' | sudo debconf-communicate >/dev/null
-          sudo dpkg-reconfigure man-db
-          sudo apt update
-      - name: Install ninja
-        run: sudo apt install ninja-build
-      - name: Setup Android NDK
-        id: setup-ndk
-        uses: nttld/setup-ndk@v1
+      - uses: actions/checkout@v4
+
+      - name: Mount ccache
+        uses: actions/cache@v4
         with:
-          ndk-version: r26d
-          add-to-path: false
-      - name: Setup ccache
-        uses: hendrikmuhs/ccache-action@v1.2
-        with:
-          key: ${{ github.job }}-${{ matrix.arch }}
-          max-size: "500M"
-          save: ${{ inputs.update-caches }}
-      - name: Force compiler binary mtime
-        # The nttld/setup-ndk action downloads the compiler binaries and copies them to the
-        # tools-cache, where their mtimes are set to the current time. This is bad since ccache
-        # uses the compiler binary mtime to determine whether two compilations match. We solve
-        # this problem by coercing the mtime of the compiler binaries to a fixed value. Note that
-        # if the compiler does indeed change, this will also cause the path to change as it would
-        # imply using a different NDK version.
+          path: /home/xnnpack/.ccache
+          key: ccache-android-${{ matrix.arch }}-${{ github.sha }}
+          restore-keys: |
+            ccache-android-${{ matrix.arch }}-
+
+      - name: Configure ccache limit
         run: |
-          find ${{ steps.setup-ndk.outputs.ndk-path }} -wholename '*/bin/clang*' -executable -type f,l -exec touch -h -t 202408130000 {} +
+          ccache -M 500M
+          ccache -z
+
       - name: Configure and build
         run: scripts/build-android-${{ matrix.arch }}.sh
-        working-directory: ${{ github.workspace }}
-        env:
-          ANDROID_NDK: ${{ steps.setup-ndk.outputs.ndk-path }}
+
+      - name: Print ccache stats
+        run: ccache -s
 
   cmake-ios-arm64:
     runs-on: macos-latest
