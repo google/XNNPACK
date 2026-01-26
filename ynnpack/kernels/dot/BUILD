@@ -619,6 +619,22 @@ ynn_cc_library(
     compatible_with = _COMPATIBLE_WITH,
     copts = ynn_kernel_copts(unroll_loops = False),
     per_arch_srcs = {
+        "arm64_neon": [
+            "arm64_neon_fp32.cc",
+            "arm64_neon_bf16_bf16_fp32.cc",
+        ],
+        "arm64_neoni8mm": ["arm64_neoni8mm_int8_int8_int32.cc"],
+        "arm64_sme": [
+            "arm64_sme.cc",
+            "arm64_sme_internal.h",
+        ],
+        "arm64_sme2": [
+            "arm64_sme2.cc",
+            "arm64_sme_internal.h",
+        ],
+        "arm_neon": ["arm_neon_int8_int8_int32.cc"],
+        "arm_neonbf16": ["arm_neonbf16_bf16_bf16_fp32_k2.cc"],
+        "arm_neondot": ["arm_neondot_int8_int8_int32.cc"],
         "x86_sse2": ["x86_sse2_fp32.cc"],
         "x86_avx": ["x86_avx_fp32.cc"],
         "x86_f16c": ["x86_f16c_fp16_fp16_fp32.cc"],
@@ -632,18 +648,20 @@ ynn_cc_library(
             "x86_avx2_fma3_bf16_bf16_fp32.cc",
             "x86_avx2_fma3_fp32_k2.cc",
         ],
-        "x86_avx512f": [
+        "x86_avx512": [
+            "x86_avx512bw_int8_int8_int32.cc",
+            "x86_avx512bw_int8_int8_int32_k16.cc",
+            "x86_avx512f_bf16_bf16_fp32.cc",
+            "x86_avx512f_fp16_fp16_fp32.cc",
             "x86_avx512f_fp32.cc",
             "x86_avx512f_fp32_k2.cc",
             "x86_avx512f_fp32_k4.cc",
-            "x86_avx512f_bf16_bf16_fp32.cc",
-            "x86_avx512f_fp16_fp16_fp32.cc",
-        ],
-        "x86_avx512bw": [
-            "x86_avx512bw_int8_int8_int32.cc",
-            "x86_avx512bw_int8_int8_int32_k16.cc",
         ],
         "x86_avx512bf16": ["x86_avx512bf16_bf16_bf16_fp32.cc"],
+        "x86_avx512vnni": [
+            "x86_avx512vnni_uint8_int8_int32.cc",
+            "x86_avx512vnni_uint8_int8_int32_k16.cc",
+        ],
         "x86_amxbf16": [
             "x86_amxbf16.cc",
             "x86_amx.h",
@@ -655,26 +673,6 @@ ynn_cc_library(
         "x86_amxint8": [
             "x86_amxint8.cc",
             "x86_amx.h",
-        ],
-        "x86_avx512vnni": [
-            "x86_avx512vnni_uint8_int8_int32.cc",
-            "x86_avx512vnni_uint8_int8_int32_k16.cc",
-        ],
-        "arm64_neon": [
-            "arm64_neon_fp32.cc",
-            "arm64_neon_bf16_bf16_fp32.cc",
-        ],
-        "arm_neon": ["arm_neon_int8_int8_int32.cc"],
-        "arm_neonbf16": ["arm_neonbf16_bf16_bf16_fp32_k2.cc"],
-        "arm_neondot": ["arm_neondot_int8_int8_int32.cc"],
-        "arm64_neoni8mm": ["arm64_neoni8mm_int8_int8_int32.cc"],
-        "arm64_sme": [
-            "arm64_sme.cc",
-            "arm64_sme_internal.h",
-        ],
-        "arm64_sme2": [
-            "arm64_sme2.cc",
-            "arm64_sme_internal.h",
         ],
     },
     visibility = ["//ynnpack:__subpackages__"],

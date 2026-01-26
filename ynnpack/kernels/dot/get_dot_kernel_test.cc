@@ -45,8 +45,8 @@ constexpr uint64_t arch_flags_avx = arch_flag::avx | arch_flags_sse2;
 constexpr uint64_t arch_flags_avx2 = arch_flag::avx2 | arch_flags_avx;
 constexpr uint64_t arch_flags_fma3 = arch_flag::fma3 | arch_flags_avx;
 constexpr uint64_t arch_flags_avx2_fma3 = arch_flags_avx2 | arch_flags_fma3;
-constexpr uint64_t arch_flags_avx512f =
-    arch_flag::avx512f | arch_flags_fma3 | arch_flags_avx2;
+constexpr uint64_t arch_flags_avx512 =
+    arch_flag::avx512 | arch_flags_fma3 | arch_flags_avx2;
 
 TEST(get_dot_kernel, small_m) {
   dot_type fp32 = {ynn_type_fp32, ynn_type_fp32, ynn_type_fp32};
@@ -74,27 +74,27 @@ TEST(get_dot_kernel, small_m) {
   ASSERT_EQ(fp32_1x(arch_flags_sse2), "dot_fp32_1x16x1_1x4x1_sse2");
   ASSERT_EQ(fp32_1x(arch_flags_avx), "dot_fp32_1x32x1_1x8x1_avx");
   ASSERT_EQ(fp32_1x(arch_flags_fma3), "dot_fp32_1x32x1_1x8x1_fma3");
-  ASSERT_EQ(fp32_1x(arch_flags_avx512f), "dot_fp32_1x32x4_1x4x4_avx512f");
+  ASSERT_EQ(fp32_1x(arch_flags_avx512), "dot_fp32_1x32x4_1x4x4_avx512f");
   ASSERT_EQ(fp32_2x(arch_flags_sse2), "dot_fp32_2x16x1_1x4x1_sse2");
   ASSERT_EQ(fp32_2x(arch_flags_avx), "dot_fp32_2x32x1_1x8x1_avx");
   ASSERT_EQ(fp32_2x(arch_flags_fma3), "dot_fp32_2x32x1_1x8x1_fma3");
-  ASSERT_EQ(fp32_2x(arch_flags_avx512f), "dot_fp32_2x32x4_1x4x4_avx512f");
+  ASSERT_EQ(fp32_2x(arch_flags_avx512), "dot_fp32_2x32x4_1x4x4_avx512f");
   ASSERT_EQ(fp32_3x(arch_flags_sse2), "dot_fp32_3x16x1_1x4x1_sse2");
   ASSERT_EQ(fp32_3x(arch_flags_avx), "dot_fp32_3x16x1_1x8x1_avx");
   ASSERT_EQ(fp32_3x(arch_flags_fma3), "dot_fp32_3x16x1_1x8x1_fma3");
-  ASSERT_EQ(fp32_3x(arch_flags_avx512f), "dot_fp32_3x64x1_1x16x1_avx512f");
+  ASSERT_EQ(fp32_3x(arch_flags_avx512), "dot_fp32_3x64x1_1x16x1_avx512f");
   ASSERT_EQ(fp32_4x(arch_flags_sse2), "dot_fp32_4x8x1_1x4x1_sse2");
   ASSERT_EQ(fp32_4x(arch_flags_avx), "dot_fp32_4x16x1_1x8x1_avx");
   ASSERT_EQ(fp32_4x(arch_flags_fma3), "dot_fp32_4x16x1_1x8x1_fma3");
-  ASSERT_EQ(fp32_4x(arch_flags_avx512f), "dot_fp32_4x64x1_1x16x1_avx512f");
+  ASSERT_EQ(fp32_4x(arch_flags_avx512), "dot_fp32_4x64x1_1x16x1_avx512f");
   ASSERT_EQ(fp32_6x(arch_flags_sse2), "dot_fp32_3x16x1_1x4x1_sse2");
   ASSERT_EQ(fp32_6x(arch_flags_avx), "dot_fp32_3x16x1_1x8x1_avx");
   ASSERT_EQ(fp32_6x(arch_flags_fma3), "dot_fp32_6x16x1_1x8x1_fma3");
-  ASSERT_EQ(fp32_6x(arch_flags_avx512f), "dot_fp32_6x8x4_1x4x4_avx512f");
+  ASSERT_EQ(fp32_6x(arch_flags_avx512), "dot_fp32_6x8x4_1x4x4_avx512f");
   ASSERT_EQ(fp32_8x(arch_flags_sse2), "dot_fp32_3x16x1_1x4x1_sse2");
   ASSERT_EQ(fp32_8x(arch_flags_avx), "dot_fp32_4x16x1_1x8x1_avx");
   ASSERT_EQ(fp32_8x(arch_flags_fma3), "dot_fp32_4x16x1_1x8x1_fma3");
-  ASSERT_EQ(fp32_8x(arch_flags_avx512f), "dot_fp32_4x64x1_1x16x1_avx512f");
+  ASSERT_EQ(fp32_8x(arch_flags_avx512), "dot_fp32_4x64x1_1x16x1_avx512f");
 }
 
 TEST(get_dot_kernel, small_n) {
@@ -122,27 +122,27 @@ TEST(get_dot_kernel, small_n) {
   ASSERT_EQ(fp32_x1(arch_flags_sse2), "dot_fp32_8x4x1_1x4x1_sse2");
   ASSERT_EQ(fp32_x1(arch_flags_avx2), "dot_fp32_8x4x2_1x4x2_avx2");
   ASSERT_EQ(fp32_x1(arch_flags_avx2_fma3), "dot_fp32_8x4x2_1x4x2_avx2_fma3");
-  ASSERT_EQ(fp32_x1(arch_flags_avx512f), "dot_fp32_12x4x4_1x4x4_avx512f");
+  ASSERT_EQ(fp32_x1(arch_flags_avx512), "dot_fp32_12x4x4_1x4x4_avx512f");
   ASSERT_EQ(fp32_x2(arch_flags_sse2), "dot_fp32_8x4x1_1x4x1_sse2");
   ASSERT_EQ(fp32_x2(arch_flags_avx2), "dot_fp32_8x4x2_1x4x2_avx2");
   ASSERT_EQ(fp32_x2(arch_flags_avx2_fma3), "dot_fp32_8x4x2_1x4x2_avx2_fma3");
-  ASSERT_EQ(fp32_x2(arch_flags_avx512f), "dot_fp32_12x4x4_1x4x4_avx512f");
+  ASSERT_EQ(fp32_x2(arch_flags_avx512), "dot_fp32_12x4x4_1x4x4_avx512f");
   ASSERT_EQ(fp32_x3(arch_flags_sse2), "dot_fp32_8x4x1_1x4x1_sse2");
   ASSERT_EQ(fp32_x3(arch_flags_avx2), "dot_fp32_8x4x2_1x4x2_avx2");
   ASSERT_EQ(fp32_x3(arch_flags_avx2_fma3), "dot_fp32_8x4x2_1x4x2_avx2_fma3");
-  ASSERT_EQ(fp32_x3(arch_flags_avx512f), "dot_fp32_12x4x4_1x4x4_avx512f");
+  ASSERT_EQ(fp32_x3(arch_flags_avx512), "dot_fp32_12x4x4_1x4x4_avx512f");
   ASSERT_EQ(fp32_x4(arch_flags_sse2), "dot_fp32_8x4x1_1x4x1_sse2");
   ASSERT_EQ(fp32_x4(arch_flags_avx2), "dot_fp32_8x4x2_1x4x2_avx2");
   ASSERT_EQ(fp32_x4(arch_flags_avx2_fma3), "dot_fp32_8x4x2_1x4x2_avx2_fma3");
-  ASSERT_EQ(fp32_x4(arch_flags_avx512f), "dot_fp32_12x4x4_1x4x4_avx512f");
+  ASSERT_EQ(fp32_x4(arch_flags_avx512), "dot_fp32_12x4x4_1x4x4_avx512f");
   ASSERT_EQ(fp32_x6(arch_flags_sse2), "dot_fp32_4x8x1_1x4x1_sse2");
   ASSERT_EQ(fp32_x6(arch_flags_avx), "dot_fp32_8x8x1_1x8x1_avx");
   ASSERT_EQ(fp32_x6(arch_flags_fma3), "dot_fp32_8x8x1_1x8x1_fma3");
-  ASSERT_EQ(fp32_x6(arch_flags_avx512f), "dot_fp32_6x8x4_1x4x4_avx512f");
+  ASSERT_EQ(fp32_x6(arch_flags_avx512), "dot_fp32_6x8x4_1x4x4_avx512f");
   ASSERT_EQ(fp32_x8(arch_flags_sse2), "dot_fp32_4x8x1_1x4x1_sse2");
   ASSERT_EQ(fp32_x8(arch_flags_avx), "dot_fp32_8x8x1_1x8x1_avx");
   ASSERT_EQ(fp32_x8(arch_flags_fma3), "dot_fp32_8x8x1_1x8x1_fma3");
-  ASSERT_EQ(fp32_x8(arch_flags_avx512f), "dot_fp32_6x8x4_1x4x4_avx512f");
+  ASSERT_EQ(fp32_x8(arch_flags_avx512), "dot_fp32_6x8x4_1x4x4_avx512f");
 }
 
 TEST(get_dot_kernel, large) {
@@ -154,7 +154,7 @@ TEST(get_dot_kernel, large) {
   ASSERT_EQ(fp32_large(arch_flags_sse2), "dot_fp32_3x16x1_1x4x1_sse2");
   ASSERT_EQ(fp32_large(arch_flags_avx), "dot_fp32_4x16x1_1x8x1_avx");
   ASSERT_EQ(fp32_large(arch_flags_fma3), "dot_fp32_6x16x1_1x8x1_fma3");
-  ASSERT_EQ(fp32_large(arch_flags_avx512f), "dot_fp32_5x64x1_1x16x1_avx512f");
+  ASSERT_EQ(fp32_large(arch_flags_avx512), "dot_fp32_5x64x1_1x16x1_avx512f");
 }
 
 TEST(get_dot_kernel, small_n_tile_k_1) {
@@ -169,7 +169,7 @@ TEST(get_dot_kernel, small_n_tile_k_1) {
   ASSERT_EQ(fp32_x4(arch_flags_sse2), "dot_fp32_8x4x1_1x4x1_sse2");
   ASSERT_EQ(fp32_x4(arch_flags_avx2), "dot_fp32_8x8x1_1x8x1_avx");
   ASSERT_EQ(fp32_x4(arch_flags_avx2_fma3), "dot_fp32_8x8x1_1x8x1_fma3");
-  ASSERT_EQ(fp32_x4(arch_flags_avx512f), "dot_fp32_8x8x1_1x8x1_fma3");
+  ASSERT_EQ(fp32_x4(arch_flags_avx512), "dot_fp32_8x8x1_1x8x1_fma3");
 }
 
 TEST(get_dot_kernel, large_tile_k_1) {
@@ -184,7 +184,7 @@ TEST(get_dot_kernel, large_tile_k_1) {
   ASSERT_EQ(fp32_large(arch_flags_sse2), "dot_fp32_3x16x1_1x4x1_sse2");
   ASSERT_EQ(fp32_large(arch_flags_avx2), "dot_fp32_4x16x1_1x8x1_avx");
   ASSERT_EQ(fp32_large(arch_flags_avx2_fma3), "dot_fp32_6x16x1_1x8x1_fma3");
-  ASSERT_EQ(fp32_large(arch_flags_avx512f), "dot_fp32_5x64x1_1x16x1_avx512f");
+  ASSERT_EQ(fp32_large(arch_flags_avx512), "dot_fp32_5x64x1_1x16x1_avx512f");
 }
 
 #endif  // YNN_ARCH_X86
