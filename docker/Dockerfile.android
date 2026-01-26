@@ -1,0 +1,35 @@
+FROM ubuntu:24.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update && apt-get install -y \
+    wget \
+    unzip \
+    bzip2 \
+    build-essential \
+    vim \
+    git \
+    cmake \
+    ninja-build \
+    python3 \
+    python3-pip \
+    ccache \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /opt/android
+RUN wget -nv https://dl.google.com/android/repository/android-ndk-r26b-linux.zip && \
+    unzip -q android-ndk-r26b-linux.zip && \
+    rm android-ndk-r26b-linux.zip
+
+ENV ANDROID_NDK=/opt/android/android-ndk-r26b
+ENV PATH=$ANDROID_NDK:$PATH
+
+ARG USERNAME=xnnpack
+ARG USER_UID=1001
+ARG USER_GID=$USER_UID
+
+RUN groupadd --gid $USER_GID $USERNAME && \
+    useradd --uid $USER_UID --gid $USER_GID -m $USERNAME
+
+USER $USERNAME
+WORKDIR /home/$USERNAME
