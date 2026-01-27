@@ -1,0 +1,69 @@
+FROM ubuntu:24.04 AS qemu-builder
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update && apt-get install -y \
+    wget \
+    build-essential \
+    python3 \
+    python3-pip \
+    python3-venv \
+    ninja-build \
+    clang \
+    libglib2.0-dev \
+    libpixman-1-dev \
+    flex \
+    bison
+
+WORKDIR /src
+RUN wget -nv https://download.qemu.org/qemu-9.2.2.tar.xz && tar xJf qemu-9.2.2.tar.xz
+WORKDIR /src/qemu-9.2.2
+RUN ./configure \
+    --cc=clang \
+    --cxx=clang++ \
+    --host-cc=clang \
+    --target-list=aarch64-linux-user \
+    --static \
+    --disable-tools \
+    --disable-system \
+    --disable-docs
+RUN make -j$(nproc)
+
+FROM ubuntu:24.04
+ENV DEBIAN_FRONTEND=noninteractive
+ENV USE_BAZEL_VERSION=8.5.1
+
+RUN apt-get update && apt-get install -y \
+    software-properties-common \
+    build-essential \
+    vim \
+    git \
+    cmake \
+    ninja-build \
+    python3 \
+    python3-pip \
+    wget \
+    gnupg \
+    zip \
+    unzip \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN wget https://apt.llvm.org/llvm.sh && \
+    chmod +x llvm.sh && \
+    ./llvm.sh 20 && \
+    rm llvm.sh
+
+RUN update-alternatives --install /usr/bin/clang clang /usr/bin/clang-20 100 && \
+    update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-20 100
+
+RUN wget -nv https://github.com/bazelbuild/bazelisk/releases/download/v1.19.0/bazelisk-linux-arm64 -O /usr/local/bin/bazel && \
+    chmod +x /usr/local/bin/bazel
+
+COPY --from=qemu-builder /src/qemu-9.2.2/build/qemu-aarch64 /usr/local/bin/qemu-aarch64
+
+ARG USERNAME=xnnpack
+ARG USER_UID=1001
+ARG USER_GID=$USER_UID
+RUN groupadd --gid $USER_GID $USERNAME && \
+    useradd --uid $USER_UID --gid $USER_GID -m $USERNAME
+USER $USERNAME
+WORKDIR /home/$USERNAME

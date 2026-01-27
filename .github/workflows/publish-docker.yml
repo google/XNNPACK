@@ -7,6 +7,7 @@ on:
       - 'docker/Dockerfile.standard'
       - 'docker/Dockerfile.riscv'
       - 'docker/Dockerfile.android'
+      - 'docker/Dockerfile.sme2'
   workflow_dispatch:
 
 permissions:
@@ -25,8 +26,10 @@ jobs:
             platforms: linux/amd64
           - image: android
             platforms: linux/amd64
+          - image: sme2
+            platforms: linux/arm64
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
 

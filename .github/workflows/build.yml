@@ -29,10 +29,10 @@ jobs:
       CMAKE_CXX_COMPILER_LAUNCHER: ccache
       CCACHE_DIR: /home/xnnpack/.ccache
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Mount ccache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: /home/xnnpack/.ccache
           key: ccache-${{ runner.os }}-${{ github.job }}-${{ github.run_id }}
@@ -61,10 +61,10 @@ jobs:
       CMAKE_CXX_COMPILER_LAUNCHER: ccache
       CCACHE_DIR: /home/xnnpack/.ccache
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Mount ccache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: /home/xnnpack/.ccache
           key: ccache-${{ runner.os }}-${{ github.job }}-${{ github.run_id }}
@@ -93,10 +93,10 @@ jobs:
       CMAKE_CXX_COMPILER_LAUNCHER: ccache
       CCACHE_DIR: /home/xnnpack/.ccache
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Mount ccache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: /home/xnnpack/.ccache
           key: ccache-armhf-${{ runner.os }}-${{ github.job }}-${{ github.run_id }}
@@ -129,10 +129,10 @@ jobs:
       CMAKE_CXX_COMPILER_LAUNCHER: ccache
       CCACHE_DIR: /home/xnnpack/.ccache
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Mount ccache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: /home/xnnpack/.ccache
           key: ccache-riscv64-${{ runner.os }}-${{ github.job }}-${{ github.run_id }}
@@ -165,10 +165,10 @@ jobs:
       CMAKE_CXX_COMPILER_LAUNCHER: ccache
       CCACHE_DIR: /home/xnnpack/.ccache
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Mount ccache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: /home/xnnpack/.ccache
           key: ccache-riscv64-rvv-${{ runner.os }}-${{ github.job }}-${{ github.run_id }}
@@ -326,10 +326,10 @@ jobs:
       CMAKE_CXX_COMPILER_LAUNCHER: ccache
       CCACHE_DIR: /home/xnnpack/.ccache
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Mount ccache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: /home/xnnpack/.ccache
           key: ccache-android-${{ matrix.arch }}-${{ github.sha }}
@@ -386,9 +386,9 @@ jobs:
       CC: clang-18
       CXX: clang++-18
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Mount Bazel Cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             /home/xnnpack/.cache/bazel/disk_cache
@@ -446,9 +446,9 @@ jobs:
         --define=ynn_enable_x86_avx512fp16=false
         --define=ynn_enable_x86_avx512bf16=false
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Mount Bazel Cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             /home/xnnpack/.cache/bazel/disk_cache
@@ -497,9 +497,9 @@ jobs:
       CC: clang-18
       CXX: clang++-18
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Mount Bazel Cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             /home/xnnpack/.cache/bazel/disk_cache
@@ -551,9 +551,9 @@ jobs:
         --define=ynn_enable_arm64_sme=false
         --define=ynn_enable_arm_neonbf16=false
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Mount Bazel Cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             /home/xnnpack/.cache/bazel/disk_cache
