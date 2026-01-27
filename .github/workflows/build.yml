@@ -596,84 +596,36 @@ jobs:
   bazel-linux-aarch64-sme2-qemu:
     runs-on: "arm-ubuntu-arm-22.04-8core"
     timeout-minutes: 60
+    container:
+      image: ghcr.io/google/xnnpack/sme2:latest
     env:
+      CC: clang-20
+      CXX: clang++-20
       QEMU_ARGS: -cpu max
     steps:
       - uses: actions/checkout@v6
-      - name: Update apt
-        run: |
-          echo 'set man-db/auto-update false' | sudo debconf-communicate >/dev/null
-          sudo dpkg-reconfigure man-db
-          sudo apt update
-      - name: Install clang-20
-        working-directory: ${{ github.workspace }}
-        run: |
-          wget https://apt.llvm.org/llvm.sh
-          chmod +x llvm.sh
-          sudo ./llvm.sh 20
-          clang-20 --version
-      - name: Restore bazel cache
-        uses: actions/cache/restore@v4
+
+      - name: Mount bazel cache
+        uses: actions/cache@v5
         with:
-          path: "/home/runner/.cache/bazel"
-          key: ${{ github.job }}
-          restore-keys: |
-            ${{ github.job }}-
-      - name: Check for cached qemu build
-        id: cached-qemu-restore
-        uses: actions/cache/restore@v4
-        with:
-          path: |
-            ${{ github.workspace }}/bin/qemu-aarch64
-            ${{ github.workspace }}/qemu-master.tar.bz2.sha256
-          key: ${{ runner.os }}-qemu-aarch64
-      - name: Download and build qemu-aarch64 (if newer)
-        id: build-qemu
-        env:
-          CC: clang-20
-          CXX: clang++-20
-        run: |
-          mkdir -p bin
-          wget -Snv https://gitlab.com/qemu-project/qemu/-/archive/master/qemu-master.tar.bz2
-          if [ ! -f qemu-master.tar.bz2.sha256 ] || [[ $(sha256sum -c qemu-master.tar.bz2.sha256) && $? -eq 1 ]]; then
-            echo " "
-            echo "Rebuilding qemu-aarch64 from latest commit!"
-            echo " "
-            echo "save=true" >> "$GITHUB_OUTPUT"
-            sha256sum qemu-master.tar.bz2 > qemu-master.tar.bz2.sha256
-            sudo apt-get install libglib2.0-dev libfdt-dev libpixman-1-dev zlib1g-dev ninja-build
-            tar xjf qemu-master.tar.bz2
-            cd $(ls -dt qemu-* | tail -1)
-            ./configure --target-list=aarch64-linux-user
-            make -j $(nproc)
-            cp -f build/qemu-aarch64 ../bin/
-          fi
-        working-directory: ${{ github.workspace }}
-      - name: Save cached qemu build
-        id: cached-qemu-save
-        if: ${{ steps.build-qemu.outputs.save }}
-        uses: actions/cache/save@v4
-        with:
-          path: |
-            ${{ github.workspace }}/bin/qemu-aarch64
-            ${{ github.workspace }}/qemu-master.tar.bz2.sha256
-          key: ${{ runner.os }}-qemu-aarch64
+          path: "/home/xnnpack/.cache/bazel"
+          key: bazel-clang20-opt-sme2-${{ runner.os }}-${{ github.job }}-${{ github.run_id }}
+          restore-keys: bazel-clang20-opt-sme2-${{ runner.os }}-${{ github.job }}-
+
       - name: Build microkernel and subgraph tests
         if: ${{ !inputs.run-tests }}
-        env:
-          CC: clang-20
-          CXX: clang++-20
-          USE_BAZEL_VERSION: 8.5.1
         run: |
           bazel build \
             -c opt \
             --copt=-g1 \
             --copt=-DGOOGLE_COMMANDLINEFLAGS_FULL_API=1 \
             --platforms=//build_config:aarch64_linux \
-            --run_under="${PWD}/bin/qemu-aarch64 ${QEMU_ARGS} " \
+            --run_under="qemu-aarch64 ${QEMU_ARGS} " \
             --define xnn_enable_arm_sme2=true \
             --dynamic_mode=off \
             --features=fully_static_link \
+            --disk_cache=/home/xnnpack/.cache/bazel/disk_cache \
+            --repository_cache=/home/xnnpack/.cache/bazel/repo_cache \
             //test:qs8_qc8w_igemm_minmax_fp32_test \
             //test:qp8_f32_qc4w_gemm_minmax_test \
             //test:pf32_gemm_minmax_test \
@@ -682,22 +634,21 @@ jobs:
             //test/subgraph/... \
             //ynnpack/...
         working-directory: ${{ github.workspace }}
+
       - name: Build and run microkernel tests
         if: ${{ inputs.run-tests }}
-        env:
-          CC: clang-20
-          CXX: clang++-20
-          USE_BAZEL_VERSION: 8.5.1
         run: |
           bazel test \
             -c opt \
             --copt=-g1 \
             --copt=-DGOOGLE_COMMANDLINEFLAGS_FULL_API=1 \
             --platforms=//build_config:aarch64_linux \
-            --run_under="${PWD}/bin/qemu-aarch64 ${QEMU_ARGS} " \
+            --run_under="qemu-aarch64 ${QEMU_ARGS} " \
             --define xnn_enable_arm_sme2=true \
             --dynamic_mode=off \
             --features=fully_static_link \
+            --disk_cache=/home/xnnpack/.cache/bazel/disk_cache \
+            --repository_cache=/home/xnnpack/.cache/bazel/repo_cache \
             //test:qs8_qc8w_igemm_minmax_fp32_test \
             //test:qp8_f32_qc4w_gemm_minmax_test \
             //test:pf32_gemm_minmax_test \
@@ -708,56 +659,29 @@ jobs:
             --test_output=errors \
             --test_timeout=600 \
             --local_test_jobs=$(nproc)
-        working-directory: ${{ github.workspace }}
+
       - name: Build and run subgraph tests
         if: ${{ inputs.run-tests }}
-        env:
-          CC: clang-20
-          CXX: clang++-20
-          USE_BAZEL_VERSION: 8.5.1
         run: |
           bazel test \
             -c opt \
             --copt=-g1 \
             --copt=-DGOOGLE_COMMANDLINEFLAGS_FULL_API=1 \
             --platforms=//build_config:aarch64_linux \
-            --run_under="${PWD}/bin/qemu-aarch64 ${QEMU_ARGS} " \
+            --run_under="qemu-aarch64 ${QEMU_ARGS} " \
             --define xnn_enable_arm_sme2=true \
             --dynamic_mode=off \
             --features=fully_static_link \
+            --disk_cache=/home/xnnpack/.cache/bazel/disk_cache \
+            --repository_cache=/home/xnnpack/.cache/bazel/repo_cache \
             //test/subgraph/... \
             //ynnpack/... \
             --cache_test_results=no \
             --test_output=errors \
             --test_timeout=600 \
             --local_test_jobs=$(nproc)
-        working-directory: ${{ github.workspace }}
-      - name: Upload binary artifacts
-        uses: actions/upload-artifact@v6
-        with:
-          name: binaries
-          path: |
-            ${{ github.workspace }}/bin/qemu-aarch64
-            ${{ github.workspace }}/bazel-bin/test/**/*_test
-            !${{ github.workspace }}/bazel-bin/test/**/*.runfiles
-            !${{ github.workspace }}/bazel-bin/test/**/_objs
-          overwrite: true
-      - name: Upload log artifacts
-        uses: actions/upload-artifact@v6
-        with:
-          name: test_logs
-          path:  ~/.cache/bazel/**/test.log
-          include-hidden-files: true
-          overwrite: true
+
       - name: Compress disk cache
-        # Bazel's `--disk-cache` currently grows without bounds, so we remove files
-        # that haven't been accessed in 7+ days manually.
         if: ${{ inputs.update-caches }}
-        run: find $HOME/.cache/bazel -type f -atime +7 -delete
-      - name: Save bazel cache
-        if: ${{ inputs.update-caches }}
-        uses: actions/cache/save@v4
-        with:
-          path: "/home/runner/.cache/bazel"
-          key: ${{ github.job }}-${{ github.sha }}
+        run: find "/home/xnnpack/.cache/bazel" -type f -atime +7 -delete
 
