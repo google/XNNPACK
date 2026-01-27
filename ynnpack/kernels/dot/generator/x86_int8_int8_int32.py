@@ -69,6 +69,7 @@ class x86_avx512bw_int8_int8_int32(x86_avx512f):
     super().__init__(arch, "int8_int8_int32", "int32_t", vector_bits, tile_shape=(1, 16, 4))
     self.a_type = "int8_t"
     self.b_type = "int8_t"
+    self.flags += ["dot_flag::consistent_arithmetic"]
     # This kernel already has 2 accumulators per tile.
     self.min_tiles = max(1, self.min_tiles // 2)
 
