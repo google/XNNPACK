@@ -24,6 +24,7 @@ py_binary(
         "x86_fp32_k2.py",
         "x86_fp32_k4.py",
         "x86_int8_int8_int32.py",
+        "x86_int8_int8_int32_k1.py",
         "x86_int8_int8_int32_k16.py",
         "x86_uint8_int8_int32.py",
         "x86_uint8_int8_int32_k16.py",

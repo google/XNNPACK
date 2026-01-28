@@ -25,6 +25,8 @@ from ynnpack.kernels.dot.generator.x86_fp32_k2 import x86_avx512f_fp32_k2
 from ynnpack.kernels.dot.generator.x86_fp32_k4 import x86_avx512f_fp32_k4
 from ynnpack.kernels.dot.generator.x86_int8_int8_int32 import x86_avx2_int8_int8_int32
 from ynnpack.kernels.dot.generator.x86_int8_int8_int32 import x86_avx512bw_int8_int8_int32
+from ynnpack.kernels.dot.generator.x86_int8_int8_int32_k1 import x86_avx2_int8_int8_int32_k1
+from ynnpack.kernels.dot.generator.x86_int8_int8_int32_k1 import x86_avx512bw_int8_int8_int32_k1
 from ynnpack.kernels.dot.generator.x86_int8_int8_int32_k16 import x86_avx512bw_int8_int8_int32_k16
 from ynnpack.kernels.dot.generator.x86_uint8_int8_int32 import x86_avx512vnni_uint8_int8_int32
 from ynnpack.kernels.dot.generator.x86_uint8_int8_int32_k16 import x86_avx512vnni_uint8_int8_int32_k16
@@ -45,6 +47,8 @@ arch_to_generator = {
     "x86_avx512f_bf16_bf16_fp32": x86_avx512f_bf16_bf16_fp32(),
     "x86_avx512bf16_bf16_bf16_fp32": x86_avx512bf16_bf16_bf16_fp32(),
     "x86_avx2_int8_int8_int32": x86_avx2_int8_int8_int32(),
+    "x86_avx2_int8_int8_int32_k1": x86_avx2_int8_int8_int32_k1(),
+    "x86_avx512bw_int8_int8_int32_k1": x86_avx512bw_int8_int8_int32_k1(),
     "x86_avx512bw_int8_int8_int32": x86_avx512bw_int8_int8_int32(),
     "x86_avx512bw_int8_int8_int32_k16": x86_avx512bw_int8_int8_int32_k16(),
     "x86_avx512vnni_uint8_int8_int32": x86_avx512vnni_uint8_int8_int32(),
@@ -59,6 +63,7 @@ arch_to_generator = {
     "arm64_neon_bf16_bf16_fp32": arm64_neon_bf16_bf16_fp32(),
 }
 
+
 def main(argv: Sequence[str]) -> None:
 
   output_src = argv[1]
@@ -67,7 +72,6 @@ def main(argv: Sequence[str]) -> None:
   gen = arch_to_generator[argv[3]]
   src = gen.header()
   inc = ""
-
 
   for i in argv[4:]:
     args = i.split(",")
