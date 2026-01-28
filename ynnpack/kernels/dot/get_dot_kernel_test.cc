@@ -162,14 +162,14 @@ TEST(get_dot_kernel, small_n_tile_k_1) {
 
   dot_type fp32 = {ynn_type_fp32, ynn_type_fp32, ynn_type_fp32};
 
-  auto fp32_x4 = [=](uint64_t arch_flags) {
-    return get_dot_kernel_name(fp32, {large_shape, 4, large_shape}, arch_flags,
+  auto fp32_x8 = [=](uint64_t arch_flags) {
+    return get_dot_kernel_name(fp32, {large_shape, 8, large_shape}, arch_flags,
                                &no_tile_k);
   };
-  ASSERT_EQ(fp32_x4(arch_flags_sse2), "dot_fp32_8x4x1_1x4x1_sse2");
-  ASSERT_EQ(fp32_x4(arch_flags_avx2), "dot_fp32_8x8x1_1x8x1_avx");
-  ASSERT_EQ(fp32_x4(arch_flags_avx2_fma3), "dot_fp32_8x8x1_1x8x1_fma3");
-  ASSERT_EQ(fp32_x4(arch_flags_avx512f), "dot_fp32_8x8x1_1x8x1_fma3");
+  ASSERT_EQ(fp32_x8(arch_flags_sse2), "dot_fp32_4x8x1_1x4x1_sse2");
+  ASSERT_EQ(fp32_x8(arch_flags_avx2), "dot_fp32_8x8x1_1x8x1_avx");
+  ASSERT_EQ(fp32_x8(arch_flags_avx2_fma3), "dot_fp32_8x8x1_1x8x1_fma3");
+  ASSERT_EQ(fp32_x8(arch_flags_avx512f), "dot_fp32_8x8x1_1x8x1_fma3");
 }
 
 TEST(get_dot_kernel, large_tile_k_1) {
