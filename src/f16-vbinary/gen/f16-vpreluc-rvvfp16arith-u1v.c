@@ -1,0 +1,50 @@
+// clang-format off
+// Auto-generated file. Do not edit!
+//   Template: src/f16-vbinary/vopc-rvvfp16arith.c.in
+//   Generator: tools/xngen
+//
+// Copyright 2026 Google
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+#include <assert.h>
+
+#include <riscv_vector.h>
+
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/vbinary.h"
+
+
+void xnn_f16_vpreluc_ukernel__rvvfp16arith_u1v(
+    size_t batch,
+    const xnn_float16* input_a,
+    const xnn_float16* input_b,
+    xnn_float16* output,
+    const struct xnn_f16_default_params* restrict params)
+{
+  assert(batch != 0);
+  assert(batch % sizeof(uint16_t) == 0);
+  assert(input_a != NULL);
+  assert(input_b != NULL);
+  assert(output != NULL);
+
+  const uint16_t* a = (const uint16_t*) input_a;
+  const _Float16 b = *(const _Float16*) input_b;
+  uint16_t* o = (uint16_t*) output;
+
+  size_t n = batch >> XNN_LOG2_SIZEOF_FLOAT16;
+
+
+  do {
+    size_t vl = __riscv_vsetvl_e16m1(n);
+    n -= vl;
+    vfloat16m1_t va = __riscv_vle16_v_f16m1((const void *) a, vl);
+    a += vl;
+    vfloat16m1_t vacc = __riscv_vfmul_vf_f16m1(va, b, vl);
+    vbool16_t vmask = __riscv_vmflt_vf_f16m1_b16(va, 0.0f, vl);
+    vacc = __riscv_vmerge_vvm_f16m1(va, vacc, vmask, vl);
+    __riscv_vse16_v_f16m1((void *) o, vacc, vl);
+    o += vl;
+  } while (n > 0);
+}
