@@ -38,6 +38,9 @@ bool type_is_floating_point(ynn_type t);
 // Returns the size of an element of the type.
 size_t type_size_bytes(ynn_type t);
 
+// Returns the size of an element of the type in bits.
+size_t type_size_bits(ynn_type t);
+
 // Returns how many elements are contained in one instance of the type. We
 // assume that datatypes with a non-integer number of bytes per element can be
 // represented by a struct that contains multiple elements. `type_size_bytes`

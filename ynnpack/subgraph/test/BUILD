@@ -128,6 +128,14 @@ cc_test(
 )
 
 cc_test(
+    name = "fusion_lut",
+    srcs = ["fusion_lut.cc"],
+    deps = TEST_DEPS + [
+        "//ynnpack/subgraph",
+    ],
+)
+
+cc_test(
     name = "subgraphs",
     srcs = ["subgraphs.cc"],
     linkopts = ynn_binary_linkopts(),
@@ -162,3 +170,11 @@ cc_test(
     "static_pad",
     "stencil_copy",
 ]]
+
+cc_test(
+    name = "utils",
+    srcs = ["utils.cc"],
+    linkopts = ynn_binary_linkopts(),
+    malloc = ynn_binary_malloc(),
+    deps = TEST_DEPS + ["//ynnpack/subgraph"],
+)

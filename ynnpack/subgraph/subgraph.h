@@ -84,6 +84,10 @@ struct ynn_value {
 
   bool is_static() const { return !is_external() && data && data->base; }
 
+  bool is_static_scalar() const {
+    return is_static() && data->size_bytes() == data->elem_size;
+  }
+
   bool is_valid() const {
     return id != YNN_INVALID_VALUE_ID && type != ynn_type_invalid;
   }
