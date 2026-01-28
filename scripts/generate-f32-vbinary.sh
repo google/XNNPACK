@@ -410,6 +410,8 @@ tools/xngen src/f32-vbinary/vop-rvv.c.in -D OP=SQRDIFF   -D LMUL=4 -D -o src/f32
 tools/xngen src/f32-vbinary/vop-rvv.c.in -D OP=SQRDIFF   -D LMUL=8 -D -o src/f32-vbinary/gen/f32-vsqrdiff-rvv-u8v.c &
 tools/xngen src/f32-vbinary/vop-rvv.c.in -D OP=SUB       -D LMUL=4 -D -o src/f32-vbinary/gen/f32-vsub-rvv-u4v.c &
 tools/xngen src/f32-vbinary/vop-rvv.c.in -D OP=SUB       -D LMUL=8 -D -o src/f32-vbinary/gen/f32-vsub-rvv-u8v.c &
+tools/xngen src/f32-vbinary/vop-rvv.c.in -D OP=PRELU     -D LMUL=4 -D -o src/f32-vbinary/gen/f32-vprelu-rvv-u4v.c &
+tools/xngen src/f32-vbinary/vop-rvv.c.in -D OP=PRELU     -D LMUL=8 -D -o src/f32-vbinary/gen/f32-vprelu-rvv-u8v.c &
 
 tools/xngen src/f32-vbinary/vopc-rvv.c.in -D OP=ADD      -D LMUL=4 -D -o src/f32-vbinary/gen/f32-vaddc-rvv-u4v.c &
 tools/xngen src/f32-vbinary/vopc-rvv.c.in -D OP=ADD      -D LMUL=8 -D -o src/f32-vbinary/gen/f32-vaddc-rvv-u8v.c &
@@ -429,5 +431,9 @@ tools/xngen src/f32-vbinary/vopc-rvv.c.in -D OP=SQRDIFF  -D LMUL=4 -D -o src/f32
 tools/xngen src/f32-vbinary/vopc-rvv.c.in -D OP=SQRDIFF  -D LMUL=8 -D -o src/f32-vbinary/gen/f32-vsqrdiffc-rvv-u8v.c &
 tools/xngen src/f32-vbinary/vopc-rvv.c.in -D OP=SUB      -D LMUL=4 -D -o src/f32-vbinary/gen/f32-vsubc-rvv-u4v.c &
 tools/xngen src/f32-vbinary/vopc-rvv.c.in -D OP=SUB      -D LMUL=8 -D -o src/f32-vbinary/gen/f32-vsubc-rvv-u8v.c &
+tools/xngen src/f32-vbinary/vopc-rvv.c.in -D OP=PRELU    -D LMUL=4 -D -o src/f32-vbinary/gen/f32-vpreluc-rvv-u4v.c &
+tools/xngen src/f32-vbinary/vopc-rvv.c.in -D OP=PRELU    -D LMUL=8 -D -o src/f32-vbinary/gen/f32-vpreluc-rvv-u8v.c &
+tools/xngen src/f32-vbinary/vopc-rvv.c.in -D OP=RPRELU   -D LMUL=4 -D -o src/f32-vbinary/gen/f32-vrpreluc-rvv-u4v.c &
+tools/xngen src/f32-vbinary/vopc-rvv.c.in -D OP=RPRELU   -D LMUL=8 -D -o src/f32-vbinary/gen/f32-vrpreluc-rvv-u8v.c &
 
 wait
