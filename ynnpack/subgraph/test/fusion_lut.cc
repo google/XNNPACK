@@ -90,7 +90,6 @@ void RunFuseCompare(
 
 TEST(fusion_lut, single_node_unsupported) {
   // y = negate(x). Negate is not supported for single-node LUT replacement.
-  // TODO(mariewhite): Update this test once b/476235189 is fixed.
   uint32_t x_id = 0;
   uint32_t y_id = 1;
   uint32_t scale_id = 2;
@@ -125,7 +124,6 @@ TEST(fusion_lut, single_node_unsupported) {
 
 TEST(fusion_lut, single_node_simple) {
   // y_int8 = sigmoid(x_int8).
-  // TODO(mariewhite): Update this test once b/476235189 is fixed.
   uint32_t x_id = 0;
   uint32_t y_id = 1;
   uint32_t x_scale_id = 2;
@@ -193,13 +191,16 @@ TEST(fusion_lut, single_node) {
   builder.AddTensor(ynn_type_fp32, {1}, scale_id, scale_val)
       .AddTensor(ynn_type_int32, {1}, zero_point_id, zero_point_val);
 
-  builder.AddInput(ynn_type_int8, {256}, a_id)
-      .AddInput(ynn_type_int8, {256}, b_id)
-      .AddInput(ynn_type_int8, {256}, c_id)
+  builder.AddInput(ynn_type_int8, {256}, a_id, zero_point_id, scale_id)
+      .AddInput(ynn_type_int8, {256}, b_id, zero_point_id, scale_id)
+      .AddInput(ynn_type_int8, {256}, c_id, zero_point_id, scale_id)
       .AddOutput(ynn_type_int8, {256}, d_id, zero_point_id, scale_id);
 
-  builder.AddTensor(ynn_type_int8, {256}, x_id)
-      .AddTensor(ynn_type_int8, {256}, y_id);
+  builder
+      .AddTensor(ynn_type_int8, {256}, x_id, /*data=*/nullptr, zero_point_id,
+                 scale_id)
+      .AddTensor(ynn_type_int8, {256}, y_id, /*data=*/nullptr, zero_point_id,
+                 scale_id);
 
   builder.AddBinary(ynn_binary_multiply, a_id, b_id, x_id)
       .AddUnary(ynn_unary_sigmoid, x_id, y_id)

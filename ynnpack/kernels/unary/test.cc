@@ -190,12 +190,15 @@ const ynn_type all_integer_types[] = {
     ynn_type_int32,
 };
 
-const ynn_type all_real_types[] = {
-    ynn_type_int8,
-    ynn_type_uint8,
+const ynn_type all_float_types[] = {
     ynn_type_fp16,
     ynn_type_bf16,
     ynn_type_fp32,
+};
+
+const ynn_type all_quantized_types[] = {
+    ynn_type_int8,
+    ynn_type_uint8,
 };
 
 std::pair<ynn_type, bool> all_convert_types[] = {
@@ -215,7 +218,7 @@ const ynn_unary_operator all_integer_ops[] = {
     ynn_unary_sign,
 };
 
-const ynn_unary_operator all_real_ops[] = {
+const ynn_unary_operator all_unary_ops[] = {
     ynn_unary_abs,
     ynn_unary_floor,
     ynn_unary_ceil,
@@ -236,6 +239,15 @@ const ynn_unary_operator all_real_ops[] = {
     ynn_unary_cosine,
     ynn_unary_sigmoid,
     ynn_unary_hardswish,
+};
+
+const ynn_unary_operator quantized_supported_ops[] = {
+    ynn_unary_abs,
+    ynn_unary_floor,
+    ynn_unary_ceil,
+    ynn_unary_round,
+    ynn_unary_negate,
+    ynn_unary_sign,
 };
 // clang-format on
 
@@ -259,8 +271,14 @@ INSTANTIATE_TEST_SUITE_P(UnaryTest, IntegerOps,
                          test_param_to_string<IntegerOps::ParamType>);
 
 INSTANTIATE_TEST_SUITE_P(UnaryTest, RealOps,
-                         Combine(ValuesIn(all_real_types),
-                                 ValuesIn(all_real_ops),
+                         Combine(ValuesIn(all_float_types),
+                                 ValuesIn(all_unary_ops),
+                                 ValuesIn(reference_shapes)),
+                         test_param_to_string<RealOps::ParamType>);
+
+INSTANTIATE_TEST_SUITE_P(QuantizedTest, RealOps,
+                         Combine(ValuesIn(all_quantized_types),
+                                 ValuesIn(quantized_supported_ops),
                                  ValuesIn(reference_shapes)),
                          test_param_to_string<RealOps::ParamType>);
 
