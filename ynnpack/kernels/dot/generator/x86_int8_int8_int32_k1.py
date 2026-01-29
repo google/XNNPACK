@@ -25,7 +25,7 @@ class x86_int8_int8_int32_k1(x86):
 
   def load_b_tile(self, k, j):
     b_kj = self.b_ptr(k, j, f"__m{self.bits//4}i")
-    b_kj = f"{self._mm(self.bits//4)}_load_si{self.bits//4}({b_kj})"
+    b_kj = f"{self._mm(self.bits//4)}_loadu_si{self.bits//4}({b_kj})"
     mm = self._mm()
     bits = self.bits
     # We are using madd_epi16, which is a 2-way int16 dot product. We need to
@@ -57,10 +57,6 @@ class x86_avx2_int8_int8_int32_k1(x86_avx, x86_int8_int8_int32_k1):
 
   def header(self):
     return super().header() + """
-__m128i _mm64_load_si64(const void* ptr) {
-    return _mm_loadl_epi64(reinterpret_cast<const __m128i*>(ptr));
-}
-
 using __m64i = void;
 """
 

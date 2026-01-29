@@ -36,6 +36,7 @@ YNN_DOT_KERNEL(arch_flag::amxint8, dot_uint8_int8_int32_16x64x64_16x16x4_amxint8
 #include "ynnpack/kernels/dot/x86_avx512f_fp32_k2.inc"
 #include "ynnpack/kernels/dot/x86_avx512f_fp32_k4.inc"
 #include "ynnpack/kernels/dot/x86_avx512f_bf16_bf16_fp32.inc"
+#include "ynnpack/kernels/dot/x86_avx512f_bf16_bf16_fp32_k1.inc"
 #include "ynnpack/kernels/dot/x86_avx512f_fp16_fp16_fp32.inc"
 #endif  // YNN_ARCH_X86_AVX512F
 #ifdef YNN_ARCH_X86_AVX2
@@ -47,6 +48,7 @@ YNN_DOT_KERNEL(arch_flag::amxint8, dot_uint8_int8_int32_16x64x64_16x16x4_amxint8
 #endif  // YNN_ARCH_X86_FMA3
 #ifdef YNN_ARCH_X86_AVX2_FMA3
 #include "ynnpack/kernels/dot/x86_avx2_fma3_bf16_bf16_fp32.inc"
+#include "ynnpack/kernels/dot/x86_avx2_fma3_bf16_bf16_fp32_k1.inc"
 #include "ynnpack/kernels/dot/x86_avx2_fma3_fp32_k2.inc"
 #endif  // YNN_ARCH_X86_AVX2_FMA3
 #ifdef YNN_ARCH_X86_AVX

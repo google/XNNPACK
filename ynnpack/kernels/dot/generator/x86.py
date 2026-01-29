@@ -22,7 +22,7 @@ class x86(dot_base):
   def _mm(self, bits=0):
     if bits == 0:
       bits = self.bits
-    if bits == 128:
+    if bits <= 128:
       return "_mm"
     else:
       return f"_mm{bits}"

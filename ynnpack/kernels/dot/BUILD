@@ -164,6 +164,25 @@ ynn_generate_src_hdr(
 )
 
 ynn_generate_src_hdr(
+    name = "x86_avx2_fma3_bf16_bf16_fp32_k1",
+    compatible_with = _COMPATIBLE_WITH,
+    generator = "//ynnpack/kernels/dot/generator",
+    generator_args = [
+        "x86_avx2_fma3_bf16_bf16_fp32_k1",
+        "dot,1x32x1",
+        "dot,2x32x1",
+        "dot,2x16x1",
+        "dot,3x16x1",
+        "dot,4x16x1",
+        "dot,5x16x1",
+        "dot,8x8x1",
+        "dot,10x8x1",
+    ],
+    output_hdr = "x86_avx2_fma3_bf16_bf16_fp32_k1.inc",
+    output_src = "x86_avx2_fma3_bf16_bf16_fp32_k1.cc",
+)
+
+ynn_generate_src_hdr(
     name = "x86_avx512f_bf16_bf16_fp32",
     compatible_with = _COMPATIBLE_WITH,
     generator = "//ynnpack/kernels/dot/generator",
@@ -186,6 +205,31 @@ ynn_generate_src_hdr(
     ],
     output_hdr = "x86_avx512f_bf16_bf16_fp32.inc",
     output_src = "x86_avx512f_bf16_bf16_fp32.cc",
+)
+
+ynn_generate_src_hdr(
+    name = "x86_avx512f_bf16_bf16_fp32_k1",
+    compatible_with = _COMPATIBLE_WITH,
+    generator = "//ynnpack/kernels/dot/generator",
+    generator_args = [
+        "x86_avx512f_bf16_bf16_fp32_k1",
+        "dot,1x64x1",
+        "dot,2x64x1",
+        "dot,3x64x1",
+        "dot,4x64x1",
+        "dot,5x64x1",
+        "dot,2x32x1",
+        "dot,3x32x1",
+        "dot,4x32x1",
+        "dot,5x32x1",
+        "dot,6x32x1",
+        "dot,8x32x1",
+        "dot,10x32x1",
+        "dot,12x32x1",
+        "dot,16x16x1",
+    ],
+    output_hdr = "x86_avx512f_bf16_bf16_fp32_k1.inc",
+    output_src = "x86_avx512f_bf16_bf16_fp32_k1.cc",
 )
 
 ynn_generate_src_hdr(
@@ -633,6 +677,7 @@ ynn_cc_library(
         "dot.h",
         "kernels.inc",
         "x86_avx2_fma3_bf16_bf16_fp32.inc",
+        "x86_avx2_fma3_bf16_bf16_fp32_k1.inc",
         "x86_avx2_fma3_fp32_k2.inc",
         "x86_avx2_fp32_k2.inc",
         "x86_avx2_int8_int8_int32.inc",
@@ -642,6 +687,7 @@ ynn_cc_library(
         "x86_avx512bw_int8_int8_int32_k1.inc",
         "x86_avx512bw_int8_int8_int32_k16.inc",
         "x86_avx512f_bf16_bf16_fp32.inc",
+        "x86_avx512f_bf16_bf16_fp32_k1.inc",
         "x86_avx512f_fp16_fp16_fp32.inc",
         "x86_avx512f_fp32.inc",
         "x86_avx512f_fp32_k2.inc",
@@ -669,6 +715,7 @@ ynn_cc_library(
         ],
         "x86_avx2_fma3": [
             "x86_avx2_fma3_bf16_bf16_fp32.cc",
+            "x86_avx2_fma3_bf16_bf16_fp32_k1.cc",
             "x86_avx2_fma3_fp32_k2.cc",
         ],
         "x86_avx512f": [
@@ -676,6 +723,7 @@ ynn_cc_library(
             "x86_avx512f_fp32_k2.cc",
             "x86_avx512f_fp32_k4.cc",
             "x86_avx512f_bf16_bf16_fp32.cc",
+            "x86_avx512f_bf16_bf16_fp32_k1.cc",
             "x86_avx512f_fp16_fp16_fp32.cc",
         ],
         "x86_avx512bw": [

@@ -19,6 +19,7 @@ py_binary(
         "generator.py",
         "x86.py",
         "x86_bf16_bf16_fp32.py",
+        "x86_bf16_bf16_fp32_k1.py",
         "x86_fp16_fp16_fp32.py",
         "x86_fp32.py",
         "x86_fp32_k2.py",

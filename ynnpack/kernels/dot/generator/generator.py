@@ -12,6 +12,8 @@ from ynnpack.kernels.dot.generator.arm_int8_int8_int32 import arm_neoni8mm_int8_
 from ynnpack.kernels.dot.generator.x86_bf16_bf16_fp32 import x86_avx2_fma3_bf16_bf16_fp32
 from ynnpack.kernels.dot.generator.x86_bf16_bf16_fp32 import x86_avx512bf16_bf16_bf16_fp32
 from ynnpack.kernels.dot.generator.x86_bf16_bf16_fp32 import x86_avx512f_bf16_bf16_fp32
+from ynnpack.kernels.dot.generator.x86_bf16_bf16_fp32_k1 import x86_avx2_fma3_bf16_bf16_fp32_k1
+from ynnpack.kernels.dot.generator.x86_bf16_bf16_fp32_k1 import x86_avx512f_bf16_bf16_fp32_k1
 from ynnpack.kernels.dot.generator.x86_fp16_fp16_fp32 import x86_avx512f_fp16_fp16_fp32
 from ynnpack.kernels.dot.generator.x86_fp16_fp16_fp32 import x86_f16c_fma3_fp16_fp16_fp32
 from ynnpack.kernels.dot.generator.x86_fp16_fp16_fp32 import x86_f16c_fp16_fp16_fp32
@@ -44,7 +46,9 @@ arch_to_generator = {
     "x86_f16c_fma3_fp16_fp16_fp32": x86_f16c_fma3_fp16_fp16_fp32(),
     "x86_avx512f_fp16_fp16_fp32": x86_avx512f_fp16_fp16_fp32(),
     "x86_avx2_fma3_bf16_bf16_fp32": x86_avx2_fma3_bf16_bf16_fp32(),
+    "x86_avx2_fma3_bf16_bf16_fp32_k1": x86_avx2_fma3_bf16_bf16_fp32_k1(),
     "x86_avx512f_bf16_bf16_fp32": x86_avx512f_bf16_bf16_fp32(),
+    "x86_avx512f_bf16_bf16_fp32_k1": x86_avx512f_bf16_bf16_fp32_k1(),
     "x86_avx512bf16_bf16_bf16_fp32": x86_avx512bf16_bf16_bf16_fp32(),
     "x86_avx2_int8_int8_int32": x86_avx2_int8_int8_int32(),
     "x86_avx2_int8_int8_int32_k1": x86_avx2_int8_int8_int32_k1(),
