@@ -2285,21 +2285,30 @@ static void swap_value_pointers(struct xnn_value** a, struct xnn_value** b) {
 }
 
 static float get_scalar_value_as_float(struct xnn_value* val) {
+  union {
+    float fp32;
+    xnn_float16 fp16;
+    xnn_bfloat16 bf16;
+    int32_t int32;
+    int8_t int8;
+    uint8_t uint8;
+  } data;
+  memcpy(&data, val->data, xnn_datatype_size_bytes(val->datatype));
+
   switch (val->datatype) {
     case xnn_datatype_fp32:
-      return *(const float*)val->data;
+      return data.fp32;
     case xnn_datatype_fp16:
-      return xnn_float16_to_float(*(const xnn_float16*)val->data);
+      return xnn_float16_to_float(data.fp16);
     case xnn_datatype_bf16:
-      return xnn_bfloat16_to_float(*(const xnn_bfloat16*)val->data);
+      return xnn_bfloat16_to_float(data.bf16);
     case xnn_datatype_int32:
-      return *(const int32_t*)val->data;
+      return data.int32;
     case xnn_datatype_qint8:
-      return ((float)*(const int8_t*)val->data - val->quantization.zero_point) *
+      return ((float)data.int8 - val->quantization.zero_point) *
              val->quantization.scale;
     case xnn_datatype_quint8:
-      return ((float)*(const uint8_t*)val->data -
-              val->quantization.zero_point) *
+      return ((float)data.uint8 - val->quantization.zero_point) *
              val->quantization.scale;
     default:
       return NAN;
