@@ -563,8 +563,6 @@ uint32_t xnn_subgraph_get_num_values(xnn_subgraph_t subgraph);
 size_t xnn_tensor_get_size(const struct xnn_value* value);
 size_t xnn_runtime_tensor_get_size(const struct xnn_runtime_value* value);
 
-size_t xnn_tensor_get_size_by_id(xnn_subgraph_t subgraph, uint32_t value_id);
-
 XNN_INLINE static size_t xnn_get_rounded_size(size_t size) {
   // We round it to XNN_EXTRA_BYTES to ensure that we can read more than the
   // actual size of the tensor, and round it to allocation alignment to ensure

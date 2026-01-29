@@ -1160,7 +1160,7 @@ bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph) {
       if (xnn_value_is_static(value->allocation_type)) {
         assert(value->producer == XNN_INVALID_NODE_ID);
         const size_t fp16_size =
-            xnn_tensor_get_size_by_id(subgraph, n) / 2 + XNN_EXTRA_BYTES;
+            xnn_tensor_get_size(value) / 2 + XNN_EXTRA_BYTES;
         value->fp16_temp_data = xnn_allocate_zero_memory(fp16_size);
         if (value->fp16_temp_data == NULL) {
           xnn_log_error("failed to allocate %zu bytes for fp16 tensor data",
