@@ -203,6 +203,7 @@ ynn_generate_src_hdr(
         "dot,3x32x1",
         "dot,4x32x1",
         "dot,5x32x1",
+        "dot,7x32x1",
         # The kernels which are commented out should be good, but for some
         # reason they don't perform well. They don't seem to spill, so keeping them
         # until we understand why are they slower.
