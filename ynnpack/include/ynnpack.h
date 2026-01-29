@@ -25,6 +25,10 @@ extern "C" {
 // other codepath that could be used in the same compiled YNNPACK library.
 #define YNN_FLAG_CONSISTENT_ARITHMETIC (1 << 1)
 
+// This flag indicates that the dot operation should be rewritten to use 3
+// BF16 dot operations to approximate F32 precision.
+#define YNN_FLAG_DOT_BF16_X3 (1 << 2)
+
 #ifdef __GNUC__
 #define YNN_DEPRECATED __attribute__((deprecated))
 #else
