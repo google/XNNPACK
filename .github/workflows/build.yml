@@ -399,9 +399,13 @@ jobs:
           EOF
       - name: Sync to commit and run hooks
         run: gclient sync -vv --revision $GITHUB_SHA
+      - name: Check formatting
+        run: |
+          git cl format --presubmit --no-clang-format --no-python --diff
+        working-directory: ${{ github.workspace }}/xnnpack
       - name: Generate build files
         run: |
-          gn gen --args="is_debug=true target_cpu=\"x64\" use_siso=true" out/Debug
+          gn gen --check --args="is_debug=true target_cpu=\"x64\" use_siso=true" out/Debug
         working-directory: ${{ github.workspace }}/xnnpack
       - name: Build all targets (Debug)
         run: |
