@@ -69,6 +69,7 @@ cc_test(
     srcs = ["consistent_reduce_test.cc"],
     linkopts = ynn_binary_linkopts(),
     malloc = ynn_binary_malloc(),
+    tags = ["not_run:arm"],  # we only attempt to provide consistency on x86_64.
     deps = [
         ":reduce",
         "//ynnpack:ynnpack_h",

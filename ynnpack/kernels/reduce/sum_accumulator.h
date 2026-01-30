@@ -41,8 +41,9 @@ reduce_add(AccT acc, AT a, MapFn map_fn,
 }
 
 template <typename AccT>
-YNN_ALWAYS_INLINE auto sum_rows(AccT acc[4],
-                                std::integral_constant<size_t, 16> /*K*/) {
+YNN_ALWAYS_INLINE auto sum_rows(const AccT* acc,
+                                std::integral_constant<size_t, 16> /*K*/,
+                                std::integral_constant<size_t, 4> /*N*/) {
   std::integral_constant<size_t, 4> cols = {};
   auto v_0 = (extract<0>(acc[0], cols) + extract<1>(acc[0], cols)) +
              (extract<2>(acc[0], cols) + extract<3>(acc[0], cols));
@@ -59,8 +60,24 @@ YNN_ALWAYS_INLINE auto sum_rows(AccT acc[4],
 }
 
 template <typename AccT>
-YNN_ALWAYS_INLINE auto sum_rows(AccT acc[4],
-                                std::integral_constant<size_t, 8> /*K*/) {
+YNN_ALWAYS_INLINE auto sum_rows(const AccT* acc,
+                                std::integral_constant<size_t, 16> /*K*/,
+                                std::integral_constant<size_t, 2> /*N*/) {
+  std::integral_constant<size_t, 4> cols = {};
+  auto v_0 = (extract<0>(acc[0], cols) + extract<1>(acc[0], cols)) +
+             (extract<2>(acc[0], cols) + extract<3>(acc[0], cols));
+  auto v_1 = (extract<0>(acc[1], cols) + extract<1>(acc[1], cols)) +
+             (extract<2>(acc[1], cols) + extract<3>(acc[1], cols));
+
+  auto zero = decltype(v_0)(0);
+  auto t = transpose<typename AccT::value_type>({{v_0, v_1, zero, zero}});
+  return (t[0] + t[1]) + (t[2] + t[3]);
+}
+
+template <typename AccT>
+YNN_ALWAYS_INLINE auto sum_rows(const AccT* acc,
+                                std::integral_constant<size_t, 8> /*K*/,
+                                std::integral_constant<size_t, 4> /*N*/) {
   std::integral_constant<size_t, 4> cols = {};
   auto v_0 = (extract<0>(acc[0], cols) + extract<1>(acc[0], cols));
   auto v_1 = (extract<0>(acc[1], cols) + extract<1>(acc[1], cols));
@@ -72,8 +89,9 @@ YNN_ALWAYS_INLINE auto sum_rows(AccT acc[4],
 }
 
 template <typename AccT>
-YNN_ALWAYS_INLINE auto sum_rows(AccT acc[4],
-                                std::integral_constant<size_t, 4> /*K*/) {
+YNN_ALWAYS_INLINE auto sum_rows(const AccT* acc,
+                                std::integral_constant<size_t, 4> /*K*/,
+                                std::integral_constant<size_t, 4> /*N*/) {
   auto t = transpose<typename AccT::value_type>(
       {acc[0], acc[1], acc[2], acc[3]});
 
@@ -84,9 +102,9 @@ YNN_ALWAYS_INLINE auto sum_rows(AccT acc[4],
 // reduction associativity is consistent.
 constexpr size_t consistent_tile_k = 16;
 
-template <typename AccT, size_t K_, typename MapFn = Identity>
+template <typename AccT, size_t K_, typename MapFn = Identity, size_t N_ = 4>
 struct sum_accumulator_x32 {
-  static constexpr std::integral_constant<size_t, 4> N = {};
+  static constexpr std::integral_constant<size_t, N_> N = {};
   static constexpr std::integral_constant<size_t, K_> K = {};
   static constexpr std::integral_constant<size_t, K / AccT::N>
       horizontal_factor = {};
@@ -110,22 +128,23 @@ struct sum_accumulator_x32 {
     const simd::vec<AT, K> zero(0);
     auto a_0 = load(offset_bytes(A, 0 * A_stride_n), k, zero);
     auto a_1 = 1 < n ? load(offset_bytes(A, 1 * A_stride_n), k, zero) : zero;
-    auto a_2 = 2 < n ? load(offset_bytes(A, 2 * A_stride_n), k, zero) : zero;
-    auto a_3 = 3 < n ? load(offset_bytes(A, 3 * A_stride_n), k, zero) : zero;
-
     acc[0] = reduce_add(acc[0], a_0, map_fn, horizontal_factor);
     acc[1] = reduce_add(acc[1], a_1, map_fn, horizontal_factor);
-    acc[2] = reduce_add(acc[2], a_2, map_fn, horizontal_factor);
-    acc[3] = reduce_add(acc[3], a_3, map_fn, horizontal_factor);
+
+    if constexpr (N == 4) {
+      auto a_2 = 2 < n ? load(offset_bytes(A, 2 * A_stride_n), k, zero) : zero;
+      auto a_3 = 3 < n ? load(offset_bytes(A, 3 * A_stride_n), k, zero) : zero;
+      acc[2] = reduce_add(acc[2], a_2, map_fn, horizontal_factor);
+      acc[3] = reduce_add(acc[3], a_3, map_fn, horizontal_factor);
+    }
   }
 
   template <typename T, typename NT>
   YNN_ALWAYS_INLINE void accumulate(size_t /*C_stride_m*/, T* __restrict C,
                                     NT n) {
-    static_assert(N == 4);
-    using OutAccT = simd::vec<T, N>;
-
-    store(C, load(C, n, OutAccT{}) + sum_rows<AccT>(acc, AccT::N), n);
+    static_assert(N <= 4);
+    using OutAccT = simd::vec<T, 4>;
+    store(C, load(C, n, OutAccT{}) + sum_rows<AccT>(acc, AccT::N, N), n);
   }
 };
 
