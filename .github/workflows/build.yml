@@ -377,6 +377,37 @@ jobs:
         run: cmake --build build/ios/x86_64 --parallel $(sysctl -n hw.ncpu) -- -sdk iphonesimulator -quiet
         working-directory: ${{ github.workspace }}
 
+  gn-linux-x86_64:
+    runs-on: 'ubuntu-24.04-8core'
+    timeout-minutes: 10
+    steps:
+      - name: Install Depot Tools
+        uses: newkdev/setup-depot-tools@v1.0.1
+      - name: Write .gclient
+        run: |
+          cat <<EOF > .gclient
+          solutions = [
+            { "name"        : 'xnnpack',
+              "url"         : 'https://github.com/google/XNNPACK',
+              "deps_file"   : 'DEPS',
+              "managed"     : False,
+              "custom_deps" : {
+            },
+            "custom_vars": {},
+            },
+          ]
+          EOF
+      - name: Sync to commit and run hooks
+        run: gclient sync -vv --revision $GITHUB_SHA
+      - name: Generate build files
+        run: |
+          gn gen --args="is_debug=true target_cpu=\"x64\" use_siso=true" out/Debug
+        working-directory: ${{ github.workspace }}/xnnpack
+      - name: Build all targets (Debug)
+        run: |
+          autoninja -C out/Debug
+        working-directory: ${{ github.workspace }}/xnnpack
+
   bazel-linux-x86_64-clang-18:
     runs-on: 'ubuntu-24.04-8core'
     timeout-minutes: 60

@@ -49,7 +49,7 @@ vars = {
   # different from the project used in 'rbe_instance'
   'rewrapper_cfg_project': Str(''),
   # Fetch configuration files required for the 'use_remoteexec' gn arg
-  'download_remoteexec_cfg': True,
+  'download_remoteexec_cfg': False,
   # reclient CIPD package version
   'reclient_version': 're_client_version:0.185.0.db415f21-gomaip',
 
