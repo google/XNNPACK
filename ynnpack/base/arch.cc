@@ -78,6 +78,9 @@ uint64_t get_supported_arch_flags() {
     if (cpuinfo_has_arm_sme2()) result |= arch_flag::sme2;
 #endif  // YNN_ARCH_ARM
 #endif  // YNN_ENABLE_CPUINFO
+#ifdef YNN_ARCH_HEXAGON
+    result |= arch_flag::hvx;
+#endif  // YNN_ARCH_HEXAGON
     return result;
   }();
   return flags;
