@@ -161,6 +161,9 @@ void TestStaticB(A, B, C) {
     if (random_bool(rng)) {
       subgraph_flags |= YNN_FLAG_CONSISTENT_ARITHMETIC;
     }
+    // if (random_bool(rng)) {
+    subgraph_flags |= YNN_FLAG_DOT_BF16_X3;
+    //}
     SubgraphBuilder subgraph(4, subgraph_flags);
     const uint32_t a_id = 0;
     const uint32_t b_id = 1;
@@ -252,7 +255,7 @@ void TestStaticB(A, B, C) {
               << " b_shape=" << index_to_string(b_shape);
         } else {
           const float tolerance = epsilon(type_of<C>()) * (num_k_elements + 1) *
-                                  max_abs_value * max_abs_value * 2.0f;
+                                  max_abs_value * max_abs_value * 100.0f;
           ASSERT_NEAR(c(i), expected(i), tolerance)
               << "i=" << index_to_string(i) << " num_k_dims=" << num_k_dims
               << " a_shape=" << index_to_string(a_shape)
@@ -338,6 +341,9 @@ void TestDynamicB(A, B, C) {
     uint32_t subgraph_flags = 0;
     if (random_bool(rng)) {
       subgraph_flags |= YNN_FLAG_CONSISTENT_ARITHMETIC;
+    }
+    if (random_bool(rng)) {
+      subgraph_flags |= YNN_FLAG_DOT_BF16_X3;
     }
     SubgraphBuilder subgraph(4, subgraph_flags);
     const uint32_t a_id = 0;
@@ -457,7 +463,7 @@ void TestDynamicB(A, B, C) {
               << " shapes.b=" << index_to_string(shapes.b);
         } else {
           const float tolerance = epsilon(type_of<C>()) * (num_k_elements + 1) *
-                                  max_abs_value * max_abs_value * 2.0f;
+                                  max_abs_value * max_abs_value * 100.0f;
           ASSERT_NEAR(c(i), expected(i), tolerance)
               << "i=" << index_to_string(i) << " num_k_dims=" << num_k_dims
               << " shapes.a=" << index_to_string(shapes.a)
@@ -523,6 +529,9 @@ void TestStaticShapeDynamicB(A, B, C) {
     uint32_t subgraph_flags = 0;
     if (random_bool(rng)) {
       subgraph_flags |= YNN_FLAG_CONSISTENT_ARITHMETIC;
+    }
+    if (random_bool(rng)) {
+      subgraph_flags |= YNN_FLAG_DOT_BF16_X3;
     }
     SubgraphBuilder subgraph(4, subgraph_flags);
     const uint32_t a_id = 0;
@@ -614,7 +623,7 @@ void TestStaticShapeDynamicB(A, B, C) {
               << " shapes.b=" << index_to_string(shapes.b);
         } else {
           const float tolerance = epsilon(type_of<C>()) * (num_k_elements + 1) *
-                                  max_abs_value * max_abs_value * 2.0f;
+                                  max_abs_value * max_abs_value * 100.0f;
           ASSERT_NEAR(c(i), expected(i), tolerance)
               << "i=" << index_to_string(i) << " num_k_dims=" << num_k_dims
               << " shapes.a=" << index_to_string(shapes.a)

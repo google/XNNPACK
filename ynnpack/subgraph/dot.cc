@@ -763,6 +763,30 @@ bool should_pack_b(const ynn_subgraph& subgraph, size_t num_k_dims,
   return true;
 }
 
+ynn_status define_split_f32_to_bf16(ynn_subgraph_t subgraph, uint32_t input_id,
+                                    uint32_t* high_bf16_id,
+                                    uint32_t* low_bf16_id, uint32_t flags) {
+  uint32_t high_id = YNN_INVALID_VALUE_ID;
+  ynn_status status = ynn_define_convert(
+      subgraph, input_id, ynn_type_bf16, YNN_INVALID_VALUE_ID,
+      YNN_INVALID_VALUE_ID, high_bf16_id, flags);
+  if (status != ynn_status_success) return status;
+
+  status = ynn_define_convert(subgraph, *high_bf16_id, ynn_type_fp32,
+                              YNN_INVALID_VALUE_ID, YNN_INVALID_VALUE_ID,
+                              &high_id, flags);
+  if (status != ynn_status_success) return status;
+
+  uint32_t low_id = YNN_INVALID_VALUE_ID;
+  status = ynn_define_binary(subgraph, ynn_binary_subtract, input_id, high_id,
+                             &low_id, flags);
+  if (status != ynn_status_success) return status;
+
+  return ynn_define_convert(subgraph, low_id, ynn_type_bf16,
+                            YNN_INVALID_VALUE_ID, YNN_INVALID_VALUE_ID,
+                            low_bf16_id, flags);
+}
+
 }  // namespace
 
 extern "C" {
@@ -778,6 +802,55 @@ ynn_status ynn_define_dot(ynn_subgraph_t subgraph, size_t num_k_dims,
   // TODO: We can handle more than this, with loops outside of dot kernels.
   assert(num_k_dims <= 3);
   assert(num_k_dims > 0);
+
+  if (subgraph->flags & YNN_FLAG_DOT_BF16_X3) {
+    const ynn_value& a = subgraph->value(input_a_id);
+    const ynn_value& b = subgraph->value(input_b_id);
+    if (a.type == ynn_type_fp32 && b.type == ynn_type_fp32) {
+      uint32_t a_high_bf16 = YNN_INVALID_VALUE_ID;
+      uint32_t a_low_bf16 = YNN_INVALID_VALUE_ID;
+      ynn_status status = define_split_f32_to_bf16(
+          subgraph, input_a_id, &a_high_bf16, &a_low_bf16, flags);
+      if (status != ynn_status_success) return status;
+
+      uint32_t b_high_bf16 = YNN_INVALID_VALUE_ID;
+      uint32_t b_low_bf16 = YNN_INVALID_VALUE_ID;
+      status = define_split_f32_to_bf16(subgraph, input_b_id, &b_high_bf16,
+                                        &b_low_bf16, flags);
+      if (status != ynn_status_success) return status;
+
+      // We need to disable the rewrite flag for the sub-dots, otherwise we'll
+      // recurse infinitely.
+      const uint32_t sub_flags = flags & ~YNN_FLAG_DOT_BF16_X3;
+
+      uint32_t low_high_dot = YNN_INVALID_VALUE_ID;
+      status = ynn_define_dot(subgraph, num_k_dims, a_low_bf16, b_high_bf16,
+                              YNN_INVALID_VALUE_ID, &low_high_dot, sub_flags);
+      if (status != ynn_status_success) return status;
+
+      uint32_t high_low_dot = YNN_INVALID_VALUE_ID;
+      status = ynn_define_dot(subgraph, num_k_dims, a_high_bf16, b_low_bf16,
+                              YNN_INVALID_VALUE_ID, &high_low_dot, sub_flags);
+      if (status != ynn_status_success) return status;
+
+      uint32_t high_high_dot = YNN_INVALID_VALUE_ID;
+      // Pass input_c_id to the largest dot product.
+      status = ynn_define_dot(subgraph, num_k_dims, a_high_bf16, b_high_bf16,
+                              input_c_id, &high_high_dot, sub_flags);
+      if (status != ynn_status_success) return status;
+
+      uint32_t low_sum = YNN_INVALID_VALUE_ID;
+      status = ynn_define_binary(subgraph, ynn_binary_add, low_high_dot,
+                                 high_low_dot, &low_sum, sub_flags);
+      if (status != ynn_status_success) return status;
+
+      // result = low_sum + high_high_dot.
+      // We pass output_id here so the final result goes where the caller
+      // wanted.
+      return ynn_define_binary(subgraph, ynn_binary_add, low_sum, high_high_dot,
+                               output_id, sub_flags);
+    }
+  }
 
   const bool b_transposed =
       always_alias_transpose(*subgraph, input_b_id) == ynn_status_success;
