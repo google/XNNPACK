@@ -24,6 +24,20 @@
 
 
 
+#if XNN_ENABLE_ARM_DOTPROD && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+  static void qs8_qc2w_gemm_minmax_fp32_ukernel_1x8c4__neondot(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state,
+      xnn_qs8_qc2w_gemm_minmax_fp32_ukernel_1x8c4__neondot,
+      xnn_init_qs8_qc8w_conv_minmax_fp32_neonv8_params,
+      xnn_pack_qs8_qc2w_gemm_goi_w,
+      /*mr=*/1, /*nr=*/8, /*kr=*/4, /*sr=*/1,
+      /*arch_flags=*/xnn_arch_arm_neon_dot);
+  }
+
+  BENCHMARK_GEMM(qs8_qc2w_gemm_minmax_fp32_ukernel_1x8c4__neondot)
+#endif  // XNN_ENABLE_ARM_DOTPROD && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+
+
 static void qs8_qc2w_gemm_minmax_fp32_ukernel_1x2__scalar_lrintf(benchmark::State& state, const char* net) {
   GEMMBenchmark(state,
     xnn_qs8_qc2w_gemm_minmax_fp32_ukernel_1x2__scalar_lrintf,
