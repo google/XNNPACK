@@ -183,7 +183,7 @@ def xnnpack_std_copts():
 
 def xnnpack_std_cxxopts():
     """Compiler flags to specify language standard for C++ sources."""
-    return ["-std=gnu++14"]
+    return ["-std=c++17"]
 
 def xnnpack_std_c_defines():
     """Default defines used throughout the C sources.

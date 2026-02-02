@@ -4,9 +4,7 @@ build --enable_bzlmod
 
 # Basic build settings
 build --jobs 128
-build --cxxopt='-std=gnu++14'
-build --per_file_copt=ynnpack/.*@-std=c++17
-build --per_file_copt=external/.*slinky.*@-std=c++17
+build --cxxopt='-std=c++17'
 
 # Don't let the compiler generate fmas unless we do so explicitly.
 build --copt='-ffp-contract=off'
