@@ -178,3 +178,17 @@ cc_test(
     malloc = ynn_binary_malloc(),
     deps = TEST_DEPS + ["//ynnpack/subgraph"],
 )
+
+cc_test(
+    name = "dot_bench",
+    srcs = ["dot_bench.cc"],
+    args = ["--benchmark_min_time=1x"],
+    linkopts = ynn_binary_linkopts(),
+    malloc = ynn_binary_malloc(),
+    deps = [
+        ":scheduler",
+        "//ynnpack",
+        "//ynnpack/base",
+        "@com_google_benchmark//:benchmark",
+    ],
+)
