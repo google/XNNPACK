@@ -793,30 +793,29 @@ void xnn_pack_qd8_qc2w_gemm_goi_w(
             const size_t k_offset =
                 (nr_block_start + nr_block_offset) * kc + kc_idx;
 
-            int8_t kv_0 = 0, kv_1 = 0, kv_2 = 0, kv_3 = 0;
+            int8_t kv_0 = 0x2, kv_1 = 0x2, kv_2 = 0x2, kv_3 = 0x2;
 
             if (kc_idx < kc) {
               kv_0 = (k[k_offset >> 2] >> ((k_offset & 3) * 2)) & 0x3;
+              ksum += sign_extend_int2(kv_0);
             }
             if (kc_idx + kr < kc) {
               const size_t offset = k_offset + kr;
               kv_1 = (k[offset >> 2] >> ((offset & 3) * 2)) & 0x3;
+              ksum += sign_extend_int2(kv_1);
             }
             if (kc_idx + 2 * kr < kc) {
               const size_t offset = k_offset + 2 * kr;
               kv_2 = (k[offset >> 2] >> ((offset & 3) * 2)) & 0x3;
+              ksum += sign_extend_int2(kv_2);
             }
             if (kc_idx + 3 * kr < kc) {
               const size_t offset = k_offset + 3 * kr;
               kv_3 = (k[offset >> 2] >> ((offset & 3) * 2)) & 0x3;
+              ksum += sign_extend_int2(kv_3);
             }
             const int8_t kv = (kv_0 | (kv_1 << 2) | (kv_2 << 4) | (kv_3 << 6));
-            kv_0 = sign_extend_int2(kv_0);
-            kv_1 = sign_extend_int2(kv_1);
-            kv_2 = sign_extend_int2(kv_2);
-            kv_3 = sign_extend_int2(kv_3);
 
-            ksum += kv_0 + kv_1 + kv_2 + kv_3;
             static_cast<int8_t*>(packed_weights)[kr_block_offset] = kv ^ 0xAA;
           }
 
@@ -893,35 +892,34 @@ void xnn_pack_qd8_qc2w_gemm_gio_w(
                  (skr - 1));
             const size_t oc = nr_block_start + nr_block_offset;
 
-            int8_t kv_0 = 0, kv_1 = 0, kv_2 = 0, kv_3 = 0;
+            int8_t kv_0 = 0x2, kv_1 = 0x2, kv_2 = 0x2, kv_3 = 0x2;
 
             if (kc_idx < kc) {
               const size_t k_element_offset = kc_idx * k_stride + oc;
               const int crumb_shift = (k_element_offset & 3) * 2;
               kv_0 = (k[k_element_offset >> 2] >> crumb_shift) & 0x3;
+              ksum += sign_extend_int2(kv_0);
             }
             if (kc_idx + kr < kc) {
               const size_t k_element_offset = (kc_idx + kr) * k_stride + oc;
               const int crumb_shift = (k_element_offset & 3) * 2;
               kv_1 = (k[k_element_offset >> 2] >> crumb_shift) & 0x3;
+              ksum += sign_extend_int2(kv_1);
             }
             if (kc_idx + 2 * kr < kc) {
               const size_t k_element_offset = (kc_idx + 2 * kr) * k_stride + oc;
               const int crumb_shift = (k_element_offset & 3) * 2;
               kv_2 = (k[k_element_offset >> 2] >> crumb_shift) & 0x3;
+              ksum += sign_extend_int2(kv_2);
             }
             if (kc_idx + 3 * kr < kc) {
               const size_t k_element_offset = (kc_idx + 3 * kr) * k_stride + oc;
               const int crumb_shift = (k_element_offset & 3) * 2;
               kv_3 = (k[k_element_offset >> 2] >> crumb_shift) & 0x3;
+              ksum += sign_extend_int2(kv_3);
             }
             const int8_t kv = (kv_0 | (kv_1 << 2) | (kv_2 << 4) | (kv_3 << 6));
-            kv_0 = sign_extend_int2(kv_0);
-            kv_1 = sign_extend_int2(kv_1);
-            kv_2 = sign_extend_int2(kv_2);
-            kv_3 = sign_extend_int2(kv_3);
 
-            ksum += kv_0 + kv_1 + kv_2 + kv_3;
             static_cast<int8_t*>(packed_weights)[kr_block_offset] = kv ^ 0xAA;
           }
 
