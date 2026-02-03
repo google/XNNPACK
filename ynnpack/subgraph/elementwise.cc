@@ -708,7 +708,8 @@ ynn_status ynn_define_binary(ynn_subgraph_t subgraph, ynn_binary_operator op,
                             b.zero_point_id != YNN_INVALID_VALUE_ID ||
                             x.scale_id != YNN_INVALID_VALUE_ID ||
                             x.zero_point_id != YNN_INVALID_VALUE_ID;
-  const binary_kernel* kernel = get_binary_kernel(op, x.type, is_quantized);
+  const binary_kernel* kernel =
+      get_binary_kernel(op, a.type, b.type, x.type, is_quantized);
   if (!kernel) {
     YNN_LOG_ERROR() << "unsupported binary operator " << op
                     << " for input types " << a.type << ", " << b.type

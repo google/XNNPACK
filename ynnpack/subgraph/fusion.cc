@@ -157,14 +157,15 @@ bool rewrite_convert_to_multiply(ynn_subgraph& subgraph, ynn_node& node,
       }
     }
   }
-  ynn::binary_kernel_fn kernel = ynn::get_binary_multiply_kernel(
-      input.type, subgraph.value(input.scale_id).type, output.type);
+  const ynn::binary_kernel* kernel =
+      ynn::get_binary_kernel(ynn_binary_multiply, input.type,
+                             subgraph.value(input.scale_id).type, output.type);
   if (kernel != nullptr) {
     // This is a binary integer*float multiply, and we have a kernel that
     // matches the types we have.
     YNN_LOG_DEBUG() << "Rewriting convert to binary multiply";
     ynn::define_binary(subgraph, node, node.inputs[0], input.scale_id,
-                       node.outputs[0], ynn_binary_multiply, kernel);
+                       node.outputs[0], ynn_binary_multiply, kernel->op);
   }
   return false;
 }
