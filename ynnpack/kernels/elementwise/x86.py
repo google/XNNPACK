@@ -23,6 +23,61 @@ def make_x86_cast_patterns(vector_bits, prefix):
   ] + add_saturating_cast_rules(vector_bits)
 
 
+def make_x86_bf16_patterns(vector_bits):
+  """Adds x86 bfloat16 patterns.
+
+  Args:
+    vector_bits: The number of vector bits.
+
+  Returns:
+    A list of rules for bfloat16 patterns.
+  """
+  rules = []
+  if vector_bits == 256:
+    rules.append(
+        Rule(
+            cast(
+                BFloat(16, vector_bits // 16),
+                combine_vectors([
+                    f32_a.with_lanes(vector_bits // 32),
+                    f32_b.with_lanes(vector_bits // 32),
+                ]),
+            ),
+            Op(
+                BFloat(16, vector_bits // 16),
+                "convert_fp32_to_bf16_avx2",
+                [
+                    f32_a.with_lanes(vector_bits // 32),
+                    f32_b.with_lanes(vector_bits // 32),
+                ],
+            ),
+            features=["AVX2"],
+        )
+    )
+  if vector_bits == 512:
+    rules.append(
+        Rule(
+            cast(
+                BFloat(16, vector_bits // 16),
+                combine_vectors([
+                    f32_a.with_lanes(vector_bits // 32),
+                    f32_b.with_lanes(vector_bits // 32),
+                ]),
+            ),
+            Op(
+                BFloat(16, vector_bits // 16),
+                "convert_fp32_to_bf16_avx512",
+                [
+                    f32_a.with_lanes(vector_bits // 32),
+                    f32_b.with_lanes(vector_bits // 32),
+                ],
+            ),
+            features=["AVX512BF16"],
+        )
+    )
+  return rules
+
+
 def make_x86_reinterpret_cast_patterns(vector_bits, prefix):
   return [
       i.vectorize(vector_bits)
@@ -180,6 +235,15 @@ def make_x86_integer_patterns(vector_bits, prefix):
               Int(32, vector_bits // 32),
               prefix + "slli_epi32",
               [i32_a.with_lanes(vector_bits // 32), i32_b],
+          ),
+      ),
+      Rule(
+          u32_a.with_lanes(vector_bits // 32)
+          >> broadcast(u32_b, vector_bits // 32),
+          Op(
+              UInt(32, vector_bits // 32),
+              prefix + "srli_epi32",
+              [u32_a.with_lanes(vector_bits // 32), u32_b],
           ),
       ),
   ]
@@ -451,6 +515,9 @@ class X86(Target):
     self.load_intrinsics[Float(16, vector_bits // 16)] = (
         "wrapper" + prefix + "loadu_si" + str(vector_bits)
     )
+    self.load_intrinsics[BFloat(16, vector_bits // 16)] = (
+        "wrapper" + prefix + "loadu_si" + str(vector_bits)
+    )
     self.load_intrinsics[Float(32, vector_bits // 32)] = prefix + "loadu_ps"
 
   def add_store_intrinsics(self, vector_bits, prefix):
@@ -464,6 +531,9 @@ class X86(Target):
         "wrapper" + prefix + "storeu_si" + str(vector_bits)
     )
     self.store_intrinsics[Float(16, vector_bits // 16)] = (
+        "wrapper" + prefix + "storeu_si" + str(vector_bits)
+    )
+    self.store_intrinsics[BFloat(16, vector_bits // 16)] = (
         "wrapper" + prefix + "storeu_si" + str(vector_bits)
     )
     self.store_intrinsics[Float(32, vector_bits // 32)] = prefix + "storeu_ps"
@@ -639,6 +709,8 @@ YNN_INTRINSIC __m256 greater_than(__m256 a, __m256 b) {
         UInt(8, 32): "__m256i",
         UInt(16, 16): "__m256i",
         UInt(32, 8): "__m256i",
+        BFloat(16, 16): "__m256i",
+        BFloat(16, 8): "__m128i",
     })
     self.add_load_intrinsics(256, "_mm256_")
     self.add_store_intrinsics(256, "_mm256_")
@@ -651,9 +723,22 @@ YNN_INTRINSIC __m256 greater_than(__m256 a, __m256 b) {
     self.patterns += make_x86_integer_patterns(256, "_mm256_")
     self.patterns += make_x86_integer_min_max_patterns(256, "_mm256_")
     self.patterns += make_x86_cast_patterns(256, "_mm256_")
+    self.patterns += make_x86_bf16_patterns(256)
 
     self.header += """
 namespace {
+
+YNN_INTRINSIC __m256i convert_fp32_to_bf16_avx2(__m256 a, __m256 b) {
+  const __m256 rounding_multiplier = _mm256_set1_ps(1.0f + 0.5f / 128.0f);
+  a = _mm256_mul_ps(a, rounding_multiplier);
+  b = _mm256_mul_ps(b, rounding_multiplier);
+  const __m256i ai = _mm256_castps_si256(a);
+  const __m256i bi = _mm256_castps_si256(b);
+  const __m256i as = _mm256_srli_epi32(ai, 16);
+  const __m256i bs = _mm256_srli_epi32(bi, 16);
+  const __m256i r = _mm256_packus_epi32(as, bs);
+  return _mm256_permute4x64_epi64(r, _MM_SHUFFLE(3, 1, 2, 0));
+}
 
 YNN_INTRINSIC __m256i saturating_cast_f32_to_int8(__m256 f0, __m256 f1, __m256 f2, __m256 f3) {
   const __m256 max_int16 = _mm256_set1_ps((1 << 15) - 1);
@@ -800,6 +885,27 @@ YNN_INTRINSIC __m512i bitwise_not(__m512i val) {
     self.patterns += make_x86_integer_min_max_patterns(512, "_mm512_")
     self.patterns += make_x86_cast_patterns(512, "_mm512_")
 
+  def update_for_avx512bf16(self):
+    """Updates the target for AVX512BF16 support."""
+    self.header += """
+namespace {
+
+YNN_INTRINSIC __m512i convert_fp32_to_bf16_avx512(__m512 a, __m512 b) {
+  return (__m512i)_mm512_cvtne2ps_pbh(b, a);
+}
+
+YNN_INTRINSIC void partial_store_32x(bfloat16* output, size_t num_elements, __m512i v) {
+  partial_store_32x((int16_t*)output, num_elements, v);
+}
+
+} // namespace
+
+"""
+    self.types.update({
+        BFloat(16, 32): "__m512i",
+    })
+    self.patterns += make_x86_bf16_patterns(512)
+
   def update_for_avx512bw(self):
     """Updates the target for AVX512BW support."""
     self.header += """
@@ -898,6 +1004,7 @@ YNN_INTRINSIC __m512i saturating_cast_int16_to_uint8(__m512i a, __m512i b) {
         "FMA3": ["AVX"],
         "AVX512F": ["AVX2", "FMA3"],
         "AVX512BW": ["AVX512F"],
+        "AVX512BF16": ["AVX512BW"],
     }
     all_features = []
     self.compute_all_features(features, implied_features, all_features)
@@ -913,6 +1020,7 @@ YNN_INTRINSIC __m512i saturating_cast_int16_to_uint8(__m512i a, __m512i b) {
         "F16C",
         "AVX512F",
         "AVX512BW",
+        "AVX512BF16",
     ]
     for feature in all_features:
       if feature not in known_features:
@@ -930,6 +1038,8 @@ YNN_INTRINSIC __m512i saturating_cast_int16_to_uint8(__m512i a, __m512i b) {
 
     if "AVX512BW" in all_features:
       self.update_for_avx512bw()
+    if "AVX512BF16" in all_features:
+      self.update_for_avx512bf16()
     if "AVX512F" in all_features:
       self.update_for_avx512f()
     if "FMA3" in all_features:

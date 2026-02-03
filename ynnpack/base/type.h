@@ -27,6 +27,7 @@ using uint16x1_t = uint16_t;
 using int32x1_t = int32_t;
 using uint32x1_t = uint32_t;
 using float16x1_t = half;
+using bfloat16x1_t = bfloat16;
 using float32x1_t = float;
 
 // Returns true if the type is an integer type.
