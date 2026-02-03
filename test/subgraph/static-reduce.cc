@@ -408,8 +408,10 @@ void TestSubgraphRewrite(const Param& p) {
 
       // Verify results, tolerance is computed with 2x the number of elements
       // since we have both a multiply and an add.
+      // A further 2x is needed in support of implementations with more
+      // reassociation in the reduction (e.g RVV).
       const float tolerance =
-          NumericLimits<T>::epsilon() * 2.0f * reduced_elements;
+          NumericLimits<T>::epsilon() * 4.0f * reduced_elements;
       ASSERT_THAT(output_rewritten,
                   testing::Pointwise(testing::NanSensitiveFloatNear(tolerance),
                                      output_original))
