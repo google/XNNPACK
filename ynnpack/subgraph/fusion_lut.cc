@@ -27,26 +27,26 @@ constexpr size_t kLog2MaxLutInputSize = 8;
 const std::array<int8_t, 256>& get_int8_lut_data() {
   static const auto data = [] {
     std::array<int8_t, 256> result;
-    for (int i = 0; i < 256; ++i) {
-      result[i] = static_cast<int8_t>(i - 128);
+    for (int i = -128; i < 128; ++i) {
+      result[static_cast<uint8_t>(i)] = i;
     }
     return result;
   }();
   return data;
 }
 
-const std::array<int8_t, 256>& get_uint8_lut_data() {
+const std::array<uint8_t, 256>& get_uint8_lut_data() {
   static const auto data = [] {
-    std::array<int8_t, 256> result;
+    std::array<uint8_t, 256> result;
     for (int i = 0; i < 256; ++i) {
-      result[i] = static_cast<int8_t>(i);
+      result[i] = static_cast<uint8_t>(i);
     }
     return result;
   }();
   return data;
 }
 
-const int8_t* get_lut_input_data(ynn_type type) {
+const void* get_lut_input_data(ynn_type type) {
   if (type == ynn_type_int8) {
     return get_int8_lut_data().data();
   } else if (type == ynn_type_uint8) {
@@ -297,7 +297,7 @@ bool rewrite_subgraph_for_unary_lut(ynn_subgraph& subgraph,
   }
 
   const ynn_value& input_value = lut_subgraph->value(lut_input_id);
-  const int8_t* input_data = get_lut_input_data(input_value.type);
+  const void* input_data = get_lut_input_data(input_value.type);
 
   // Run the cloned subgraph.
   ynn_runtime runtime(*lut_subgraph, nullptr, 0);

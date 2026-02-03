@@ -33,17 +33,9 @@ void lut_u8(size_t n, const void* a, const void* lut, void* x) {
            reinterpret_cast<uint8_t*>(x));
 }
 
-void lut_s8(size_t n, const void* a, const void* lut, void* x) {
-  lut_impl(n, reinterpret_cast<const int8_t*>(a),
-           reinterpret_cast<const int8_t*>(lut), reinterpret_cast<int8_t*>(x));
-}
-
 lut_kernel_fn get_lut_kernel(ynn_type type_a, ynn_type type_x) {
-  if (type_a == ynn_type_uint8 && type_x == ynn_type_uint8) {
+  if (type_size_bits(type_a) == 8 && type_size_bits(type_x) == 8) {
     return lut_u8;
-  }
-  if (type_a == ynn_type_int8 && type_x == ynn_type_int8) {
-    return lut_s8;
   }
   return nullptr;
 }

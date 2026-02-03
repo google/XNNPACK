@@ -24,7 +24,7 @@
 namespace ynn {
 namespace {
 
-template <typename A, typename X>
+template <typename A, typename X, typename Index>
 void TestLut() {
   ReplicableRandomDevice rng;
   std::uniform_int_distribution<size_t> rank_dist(1, YNN_MAX_TENSOR_RANK);
@@ -77,16 +77,16 @@ void TestLut() {
       runtime.SetupExternalTensor(output.data(), output_id).InvokeRuntime();
 
       for (size_t i = 0; i < a.size(); ++i) {
-        size_t index = static_cast<int>(a.data()[i]) - type_info<A>::min();
+        size_t index = static_cast<Index>(a.data()[i]);
         ASSERT_EQ(output.data()[i], lut_data[index]);
       }
     }
   }
 }
 
-TEST(LutTest, LutUint8) { TestLut<uint8_t, uint8_t>(); }
+TEST(LutTest, LutUint8) { TestLut<uint8_t, uint8_t, uint8_t>(); }
 
-TEST(LutTest, LutInt8) { TestLut<int8_t, int8_t>(); }
+TEST(LutTest, LutInt8) { TestLut<int8_t, int8_t, uint8_t>(); }
 
 }  // namespace
 }  // namespace ynn
