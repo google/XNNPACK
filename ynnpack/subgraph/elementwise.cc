@@ -133,9 +133,9 @@ auto make_unary_elementwise_impl(unary_kernel_fn kernel) {
 auto make_lut_impl(lut_kernel_fn kernel) {
   return [kernel](slinky::raw_buffer a, slinky::raw_buffer lut,
                   slinky::raw_buffer x) -> slinky::index_t {
-    slinky::dim a_dims[2], x_dims[2];
+    slinky::dim a_dims[1], x_dims[1];
 
-    fuse_and_slice_leading_dims<2>(&x_dims[0], x, &a_dims[0], a);
+    fuse_and_slice_leading_dims<1>(&x_dims[0], x, &a_dims[0], a);
 
     // We don't support broadcasting of `a` here in the innermost
     // dimension (and it would waste computation).
