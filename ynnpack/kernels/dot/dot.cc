@@ -260,6 +260,9 @@ struct optimizer {
     assert(block_k > 0);
     assert(tile_n > 0);
     assert(tile_k > 0);
+    if (tile_k > k) {
+      return;
+    }
     if ((required_tile_k && tile_k != required_tile_k) ||
         ((flags & dot_flag::unaligned_b) == 0 &&
          (required_block_n % tile_n != 0))) {
