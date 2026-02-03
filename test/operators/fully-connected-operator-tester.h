@@ -3789,8 +3789,8 @@ class FullyConnectedOperatorTester {
     xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32idist(0.1f, 1.0f);
     std::uniform_real_distribution<float> f32wdist(-1.0f, 1.0f);
-    std::uniform_int_distribution<uint32_t> i8wdist(
-        -1, std::numeric_limits<uint8_t>::max());
+    std::uniform_int_distribution<int32_t> i8wdist(
+        0, std::numeric_limits<uint8_t>::max());
 
     xnnpack::Buffer<float> input(
         (batch_size() - 1) * input_stride() + input_channels(),
