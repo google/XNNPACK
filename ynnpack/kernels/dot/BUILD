@@ -277,7 +277,6 @@ ynn_generate_src_hdr(
         "dot,6x8x4",
         "dot,4x4x4",
         "dot,8x4x4",
-        "dot,12x4x4",
     ],
     output_hdr = "x86_avx512f_fp32_k4.inc",
     output_src = "x86_avx512f_fp32_k4.cc",
