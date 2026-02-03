@@ -30,7 +30,6 @@ RUN make -j$(nproc)
 
 FROM ubuntu:24.04
 ENV DEBIAN_FRONTEND=noninteractive
-ENV USE_BAZEL_VERSION=8.5.1
 
 RUN apt-get update && apt-get install -y \
     software-properties-common \
