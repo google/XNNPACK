@@ -22,6 +22,8 @@
 #include "src/xnnpack/pack.h"
 #include "src/xnnpack/packw.h"
 
+namespace {
+
 
 
 #if XNN_ENABLE_ARM_DOTPROD && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
@@ -290,6 +292,8 @@ static void qd8_f32_qc2w_gemm_minmax_ukernel_4x4__scalar(benchmark::State& state
 }
 
 BENCHMARK_GEMM(qd8_f32_qc2w_gemm_minmax_ukernel_4x4__scalar)
+
+}  // namespace
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
 XNN_BENCHMARK_MAIN();

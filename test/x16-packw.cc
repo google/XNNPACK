@@ -36,8 +36,6 @@ const XnnTestParam xnn_test_params[] = {
 
 #undef XNN_UKERNEL
 
-}  // namespace
-
 TEST_P(XnnTest, k_eq_kblock) {
   TEST_REQUIRES_ARCH_FLAGS(GetParam().arch_flags);
   PackWMicrokernelTester()
@@ -250,3 +248,5 @@ TEST_P(XnnTest, null_bias) {
 }
 INSTANTIATE_TEST_SUITE_P(x16_packw, XnnTest, testing::ValuesIn(xnn_test_params),
                          GetTestName);
+
+}  // namespace

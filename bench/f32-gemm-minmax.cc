@@ -22,6 +22,8 @@
 #include "src/xnnpack/pack.h"
 #include "src/xnnpack/packw.h"
 
+namespace {
+
 
 
 #if XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
@@ -4291,6 +4293,8 @@ static void f32_gemm_minmax_ukernel_4x4__scalar(benchmark::State& state, const c
 }
 
 BENCHMARK_GEMM(f32_gemm_minmax_ukernel_4x4__scalar)
+
+}  // namespace
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
 XNN_BENCHMARK_MAIN();

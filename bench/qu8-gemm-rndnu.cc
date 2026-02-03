@@ -22,6 +22,8 @@
 #include "src/xnnpack/pack.h"
 #include "src/xnnpack/packw.h"
 
+namespace {
+
 
 
 #if XNN_ARCH_ARM && XNN_ENABLE_ASSEMBLY
@@ -406,6 +408,8 @@ static void qu8_gemm_minmax_rndnu_ukernel_4x4__scalar(benchmark::State& state, c
 }
 
 BENCHMARK_GEMM(qu8_gemm_minmax_rndnu_ukernel_4x4__scalar)
+
+}  // namespace
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
 XNN_BENCHMARK_MAIN();

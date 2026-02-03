@@ -22,6 +22,8 @@
 #include "src/xnnpack/pack.h"
 #include "src/xnnpack/packw.h"
 
+namespace {
+
 
 
 #if XNN_ARCH_WASMRELAXEDSIMD
@@ -588,6 +590,8 @@
   BENCHMARK_GEMM(f16_gemm_minmax_ukernel_8x16__neonfp16arith_ld64)
 #endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 
+
+}  // namespace
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
 XNN_BENCHMARK_MAIN();

@@ -45,8 +45,6 @@ struct ConstantOrFunction {
   operator size_t() const { return fn(); }  //NOLINT
 };
 
-}  // namespace
-
 
 namespace {
 
@@ -1731,3 +1729,5 @@ INSTANTIATE_TEST_SUITE_P(
       return info.param.test_name;
     });
 
+
+}  // namespace
