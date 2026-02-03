@@ -88,6 +88,7 @@ ynn_generate_src_hdr(
     generator = ":generator",
     generator_args = [
         "x86_avx2",
+        "convert_bf16_to_fp32,16x1",
         "convert_fp32_to_bf16,16x1",
         "exp_fp32,16x1",
         "sigmoid_fp32,16x1",
@@ -157,6 +158,7 @@ ynn_generate_src_hdr(
     generator = ":generator",
     generator_args = [
         "x86_avx512bf16",
+        "convert_bf16_to_fp32,32x1",
         "convert_fp32_to_bf16,32x1",
     ],
     output_hdr = "x86_avx512bf16.inc",

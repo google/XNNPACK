@@ -32,6 +32,8 @@ def make_x86_bf16_patterns(vector_bits):
   Returns:
     A list of rules for bfloat16 patterns.
   """
+  bf16_a = Var("a", BFloat(16))
+
   rules = []
   if vector_bits == 256:
     rules.append(
@@ -50,6 +52,20 @@ def make_x86_bf16_patterns(vector_bits):
                     f32_a.with_lanes(vector_bits // 32),
                     f32_b.with_lanes(vector_bits // 32),
                 ],
+            ),
+            features=["AVX2"],
+        )
+    )
+    rules.append(
+        Rule(
+            cast(
+                Float(32, vector_bits // 32),
+                bf16_a.with_lanes(vector_bits // 32),
+            ),
+            Op(
+                Float(32, vector_bits // 32),
+                "convert_bf16_to_fp32_avx2",
+                [bf16_a.with_lanes(vector_bits // 32)],
             ),
             features=["AVX2"],
         )
@@ -73,6 +89,20 @@ def make_x86_bf16_patterns(vector_bits):
                 ],
             ),
             features=["AVX512BF16"],
+        )
+    )
+    rules.append(
+        Rule(
+            cast(
+                Float(32, vector_bits // 32),
+                bf16_a.with_lanes(vector_bits // 32),
+            ),
+            Op(
+                Float(32, vector_bits // 32),
+                "convert_bf16_to_fp32_avx512",
+                [bf16_a.with_lanes(vector_bits // 32)],
+            ),
+            features=["AVX512F"],
         )
     )
   return rules
@@ -740,6 +770,12 @@ YNN_INTRINSIC __m256i convert_fp32_to_bf16_avx2(__m256 a, __m256 b) {
   return _mm256_permute4x64_epi64(r, _MM_SHUFFLE(3, 1, 2, 0));
 }
 
+YNN_INTRINSIC __m256 convert_bf16_to_fp32_avx2(__m128i a) {
+  const __m256i fp32_integers = _mm256_cvtepu16_epi32(a);
+  const __m256i shifted = _mm256_slli_epi32(fp32_integers, 16);
+  return _mm256_castsi256_ps(shifted);
+}
+
 YNN_INTRINSIC __m256i saturating_cast_f32_to_int8(__m256 f0, __m256 f1, __m256 f2, __m256 f3) {
   const __m256 max_int16 = _mm256_set1_ps((1 << 15) - 1);
   f0 = _mm256_min_ps(f0, max_int16);
@@ -843,6 +879,11 @@ YNN_INTRINSIC void partial_store_16x(int32_t* output, size_t num_elements, __m51
   _mm512_mask_storeu_epi32(output, mask, v);
 }
 
+YNN_INTRINSIC __m256i partial_load_16x(const uint16_t* ptr, size_t num_elements) {
+  __mmask32 mask = _cvtu32_mask32((uint32_t)((1U << num_elements) - 1U));
+  return _mm512_castsi512_si256(_mm512_maskz_loadu_epi16(mask, ptr));
+}
+
 template <typename T>
 YNN_INTRINSIC __m512i wrapper_mm512_loadu_si512(const T* ptr) {
   return _mm512_loadu_si512((const __m512i*)ptr);
@@ -860,6 +901,12 @@ YNN_INTRINSIC __m512 round(__m512 x) {
 YNN_INTRINSIC __m512i bitwise_not(__m512i val) {
   __m512i all_ones = _mm512_set1_epi32(-1);
   return _mm512_xor_si512(val, all_ones);
+}
+
+YNN_INTRINSIC __m512 convert_bf16_to_fp32_avx512(__m256i a) {
+  const __m512i fp32_integers = _mm512_cvtepu16_epi32(a);
+  const __m512i shifted = _mm512_slli_epi32(fp32_integers, 16);
+  return _mm512_castsi512_ps(shifted);
 }
 
 } // namespace
