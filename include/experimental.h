@@ -22,20 +22,6 @@
 extern "C" {
 #endif
 
-/// Enable Slinky (if available).
-#define XNN_FLAG_SLINKY_ENABLED 0x00008000
-
-/// If Slinky is enabled, disable any scheduling.
-#define XNN_FLAG_SLINKY_NO_SCHEDULE 0x00010000
-
-/// If Slinky is enabled, assume shapes are concrete (and rebuild pipeline in
-/// reshape). This makes reshaping more expensive, but may reduce overhead in
-/// some cases.
-#define XNN_FLAG_SLINKY_STATIC_BOUNDS 0x00020000
-
-/// Deprecated.
-#define XNN_FLAG_SLINKY_NO_CHECKS 0x00040000
-
 #define XNN_FLAG_RUNTIME_OWNS_THREADPOOL 0x00080000
 
 typedef struct xnn_threadpool* xnn_threadpool_t;
@@ -77,8 +63,7 @@ enum xnn_status xnn_delete_threadpool(xnn_threadpool_t threadpool);
 ///                    workspace is NULL, there will be no sharing: each runtime has its own workspace.
 /// @param threadpool - Threadpool object to to implement parallel operations.
 /// @param flags - binary features of the runtime. The only currently supported values are
-///                XNN_FLAG_HINT_SPARSE_INFERENCE, XNN_FLAG_HINT_FP16_INFERENCE, XNN_FLAG_FORCE_FP16_INFERENCE,
-///                XNN_FLAG_SLINKY_STATIC_BOUNDS, and XNN_FLAG_SLINKY_NO_SCHEDULE.
+///                XNN_FLAG_HINT_SPARSE_INFERENCE, XNN_FLAG_HINT_FP16_INFERENCE, XNN_FLAG_FORCE_FP16_INFERENCE
 /// @param runtime_out - pointer to the variable that will be initialized with a handle to the Runtime object upon
 ///                      successful return. Once constructed, the Runtime object is independent of the Subgraph object
 ///                      used to create it.

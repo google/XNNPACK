@@ -61,18 +61,6 @@
 extern "C" {
 #endif
 
-#ifdef XNN_SLINKY_ENABLED
-/// Slinky interface -- unused unless XNN_FLAG_SLINKY_ENABLED is set
-struct slinky_pipeline;
-typedef struct slinky_pipeline* slinky_pipeline_t;
-
-enum xnn_status slinky_init_pipeline(xnn_runtime_t runtime);
-void slinky_setup_pipeline(xnn_runtime_t runtime);
-void slinky_destroy_pipeline(xnn_runtime_t runtime);
-enum xnn_status slinky_reshape_pipeline(xnn_runtime_t runtime);
-enum xnn_status slinky_invoke_pipeline(xnn_runtime_t runtime);
-#endif  // XNN_SLINKY_ENABLED
-
 struct xnn_shape {
   size_t num_dims;
   size_t dim[XNN_MAX_TENSOR_DIMS];
@@ -530,12 +518,6 @@ struct xnn_runtime {
   // inside of opdata need to be updated if workspace changes.
   bool has_been_setup;
   bool memory_planned;
-
-#ifdef XNN_SLINKY_ENABLED
-  // Fields used by Slinky -- unused unless XNN_FLAG_SLINKY_ENABLED is set
-  slinky_pipeline_t slinky_pipeline;
-  xnn_threadpool_t xnn_threadpool;
-#endif  // XNN_SLINKY_ENABLED
 };
 
 enum xnn_status xnn_insert_clamp_node(xnn_subgraph_t subgraph, float output_min,
