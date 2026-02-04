@@ -12,9 +12,9 @@ module(
 )
 
 # Bazel rule definitions
-bazel_dep(name = "rules_cc", version = "0.0.15")
+bazel_dep(name = "rules_cc", version = "0.2.14")
 bazel_dep(name = "rules_license", version = "1.0.0")
-bazel_dep(name = "rules_python", version = "1.0.0")
+bazel_dep(name = "rules_python", version = "1.7.0")
 
 pip = use_extension("@rules_python//python/extensions:pip.bzl", "pip")
 pip.parse(
@@ -25,10 +25,10 @@ pip.parse(
 use_repo(pip, "pip")
 
 # Bazel Skylib.
-bazel_dep(name = "bazel_skylib", version = "1.7.1")
+bazel_dep(name = "bazel_skylib", version = "1.8.2")
 
 # Bazel Platforms
-bazel_dep(name = "platforms", version = "0.0.10")
+bazel_dep(name = "platforms", version = "1.0.0")
 
 # TODO: some (most? all?) of the http_archive() calls below could become bazel_dep() calls,
 # but it would require verifying that the semver provided by the Bazel registry matches the hash
