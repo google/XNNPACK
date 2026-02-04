@@ -171,11 +171,10 @@ ynn_type parse(const char* str, ynn_type) {
 
 template <typename T>
 void parse_list(const char* str, std::vector<T>& result) {
-  while (true) {
-    const char* comma = strchr(str, ',');
-    result.push_back(parse(str, T{}));
-    if (comma == nullptr) break;
-    str = comma + 1;
+  std::stringstream ss(str);
+  std::string segment;
+  while (std::getline(ss, segment, ',')) {
+    result.push_back(parse(segment.c_str(), T{}));
   }
 }
 
@@ -210,8 +209,7 @@ int main(int argc, char** argv) {
   std::vector<int> ns;
   std::vector<int> ks;
   std::vector<std::array<int, 3>> shapes;
-  std::vector<ynn_type> types = {ynn_type_int8, ynn_type_bf16, ynn_type_fp16,
-                                 ynn_type_fp32};
+  std::vector<ynn_type> types;
   benchmark::Initialize(&argc, argv);
 
   for (int i = 1; i < argc;) {
@@ -227,9 +225,9 @@ int main(int argc, char** argv) {
       parse_list(argv[i] + 3, ks);
       std::copy(argv + i + 1, argv + argc, argv + i);
       argc -= 1;
-    } else if (strncmp(argv[i], "--shape=", 9) == 0) {
+    } else if (strncmp(argv[i], "--shape=", 8) == 0) {
       std::vector<int> shape;
-      parse_list(argv[i] + 9, shape);
+      parse_list(argv[i] + 8, shape);
       if (shape.size() != 3) {
         usage(argv[0]);
         return -1;
@@ -237,8 +235,8 @@ int main(int argc, char** argv) {
       shapes.push_back({shape[0], shape[1], shape[2]});
       std::copy(argv + i + 1, argv + argc, argv + i);
       argc -= 1;
-    } else if (strncmp(argv[i], "--type=", 8) == 0) {
-      parse_list(argv[i] + 8, types);
+    } else if (strncmp(argv[i], "--type=", 7) == 0) {
+      parse_list(argv[i] + 7, types);
       std::copy(argv + i + 1, argv + argc, argv + i);
       argc -= 1;
     } else if (strncmp(argv[i], "--thread_count=", 15) == 0) {
@@ -251,7 +249,11 @@ int main(int argc, char** argv) {
     }
   }
 
-  if (types.empty() || thread_count < 1) {
+  if (types.empty()) {
+    types = {ynn_type_int8, ynn_type_bf16, ynn_type_fp16, ynn_type_fp32};
+  }
+
+  if (thread_count < 1) {
     usage(argv[0]);
     return -1;
   }
