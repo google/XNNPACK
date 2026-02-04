@@ -21,6 +21,7 @@ py_binary(
         "sine_cosine.py",
         "tanh.py",
     ],
+    strict_deps = False,
     tags = ["manual"],
     deps = ["//ynnpack/kernels/elementwise:generator"],
 )

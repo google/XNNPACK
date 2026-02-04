@@ -11,6 +11,7 @@ py_binary(
         "update-microkernels.py",
     ],
     main = "update-microkernels.py",
+    strict_deps = False,
     tags = [
         "nobuilder",
         "notap",
