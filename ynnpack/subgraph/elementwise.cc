@@ -133,9 +133,9 @@ auto make_unary_elementwise_impl(unary_kernel_fn kernel) {
 auto make_lut_impl(lut_kernel_fn kernel) {
   return [kernel](slinky::raw_buffer a, slinky::raw_buffer lut,
                   slinky::raw_buffer x) -> slinky::index_t {
-    slinky::dim a_dims[2], x_dims[2];
+    slinky::dim a_dims[1], x_dims[1];
 
-    fuse_and_slice_leading_dims<2>(&x_dims[0], x, &a_dims[0], a);
+    fuse_and_slice_leading_dims<1>(&x_dims[0], x, &a_dims[0], a);
 
     // We don't support broadcasting of `a` here in the innermost
     // dimension (and it would waste computation).
@@ -597,7 +597,30 @@ ynn_status ynn_define_unary(ynn_subgraph_t subgraph, ynn_unary_operator op,
   const unary_kernel* kernel =
       get_unary_kernel(op, a.type, a_is_quantized, x.type, x_is_quantized);
   if (!kernel) {
-    YNN_LOG_ERROR() << "unsupported unary operator " << op << " for input type "
+    const unary_kernel* float_kernel =
+        get_unary_kernel(op, ynn_type_fp32, /*a_quantized=*/false,
+                         ynn_type_fp32, /*x_quantized=*/false);
+    if (float_kernel) {
+      uint32_t a_float_id = YNN_INVALID_VALUE_ID;
+      ynn_status status =
+          ynn_define_convert(subgraph, input_a_id, ynn_type_fp32,
+                             a.zero_point_id, a.scale_id, &a_float_id,
+                             /*flags=*/0);
+      if (status != ynn_status_success) {
+        return status;
+      }
+
+      uint32_t x_float_id = YNN_INVALID_VALUE_ID;
+      status = ynn_define_unary(subgraph, op, a_float_id, &x_float_id, flags);
+      if (status != ynn_status_success) {
+        return status;
+      }
+
+      return ynn_define_convert(subgraph, x_float_id, x.type, x.zero_point_id,
+                                x.scale_id, output_id, /*flags=*/0);
+    }
+
+    YNN_LOG_ERROR() << "Unsupported unary operator " << op << " for input type "
                     << a.type << " and output type " << x.type;
     return ynn_status_unsupported_parameter;
   }
@@ -685,7 +708,8 @@ ynn_status ynn_define_binary(ynn_subgraph_t subgraph, ynn_binary_operator op,
                             b.zero_point_id != YNN_INVALID_VALUE_ID ||
                             x.scale_id != YNN_INVALID_VALUE_ID ||
                             x.zero_point_id != YNN_INVALID_VALUE_ID;
-  const binary_kernel* kernel = get_binary_kernel(op, x.type, is_quantized);
+  const binary_kernel* kernel =
+      get_binary_kernel(op, a.type, b.type, x.type, is_quantized);
   if (!kernel) {
     YNN_LOG_ERROR() << "unsupported binary operator " << op
                     << " for input types " << a.type << ", " << b.type

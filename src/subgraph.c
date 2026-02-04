@@ -1160,7 +1160,7 @@ bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph) {
       if (xnn_value_is_static(value->allocation_type)) {
         assert(value->producer == XNN_INVALID_NODE_ID);
         const size_t fp16_size =
-            xnn_tensor_get_size_by_id(subgraph, n) / 2 + XNN_EXTRA_BYTES;
+            xnn_tensor_get_size(value) / 2 + XNN_EXTRA_BYTES;
         value->fp16_temp_data = xnn_allocate_zero_memory(fp16_size);
         if (value->fp16_temp_data == NULL) {
           xnn_log_error("failed to allocate %zu bytes for fp16 tensor data",
@@ -2285,21 +2285,30 @@ static void swap_value_pointers(struct xnn_value** a, struct xnn_value** b) {
 }
 
 static float get_scalar_value_as_float(struct xnn_value* val) {
+  union {
+    float fp32;
+    xnn_float16 fp16;
+    xnn_bfloat16 bf16;
+    int32_t int32;
+    int8_t int8;
+    uint8_t uint8;
+  } data;
+  memcpy(&data, val->data, xnn_datatype_size_bytes(val->datatype));
+
   switch (val->datatype) {
     case xnn_datatype_fp32:
-      return *(const float*)val->data;
+      return data.fp32;
     case xnn_datatype_fp16:
-      return xnn_float16_to_float(*(const xnn_float16*)val->data);
+      return xnn_float16_to_float(data.fp16);
     case xnn_datatype_bf16:
-      return xnn_bfloat16_to_float(*(const xnn_bfloat16*)val->data);
+      return xnn_bfloat16_to_float(data.bf16);
     case xnn_datatype_int32:
-      return *(const int32_t*)val->data;
+      return data.int32;
     case xnn_datatype_qint8:
-      return ((float)*(const int8_t*)val->data - val->quantization.zero_point) *
+      return ((float)data.int8 - val->quantization.zero_point) *
              val->quantization.scale;
     case xnn_datatype_quint8:
-      return ((float)*(const uint8_t*)val->data -
-              val->quantization.zero_point) *
+      return ((float)data.uint8 - val->quantization.zero_point) *
              val->quantization.scale;
     default:
       return NAN;
@@ -3708,12 +3717,8 @@ static enum xnn_status optimize_common_subgraphs_iter(
         break;
 
       case xnn_node_type_static_broadcast:
-        if (!(optimization_flags & XNN_FLAG_SLINKY_ENABLED)) {
-          // XNNPACK doesn't need explicit braodcasting for binary and
-          // batch_matrix_multiply nodes, so check if it can be elided.
-          XNN_RETURN_IF_ERROR(
-              optimize_common_subgraphs_broadcast(subgraph, node_id, changes));
-        }
+        XNN_RETURN_IF_ERROR(
+            optimize_common_subgraphs_broadcast(subgraph, node_id, changes));
         break;
 
       case xnn_node_type_static_reshape:
@@ -4319,22 +4324,6 @@ enum xnn_status xnn_subgraph_optimize(xnn_subgraph_t subgraph,
     xnn_subgraph_rewrite_for_nchw(subgraph);
   }
 #endif
-
-#ifdef XNN_USE_SLINKY
-  // If compiling with XNN_USE_SLINKY defined, assume we always
-  // want Slinky enabled, regardless of the runtime flag
-  const bool use_slinky = true;
-#else
-  const bool use_slinky = optimization_flags & XNN_FLAG_SLINKY_ENABLED;
-#endif
-  // If we're using Slinky, don't inline packing functions as Slinky does that
-  // automatically.
-  if (use_slinky) {
-    xnn_log_info(
-        "disabling inlined LHS packing because `XNN_FLAG_SLINKY_ENABLED` is "
-        "set.");
-    optimization_flags |= XNN_FLAG_NO_INLINED_LHS_PACKING;
-  }
 
   XNN_RETURN_IF_ERROR(
       xnn_subgraph_optimize_packed_lhs(subgraph, optimization_flags));

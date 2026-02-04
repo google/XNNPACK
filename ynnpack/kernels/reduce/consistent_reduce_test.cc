@@ -99,7 +99,7 @@ void TestReduce(AT, CT, ynn_reduce_operator op) {
 
       // TODO(b/460621873): Make the remaining kernels consistent with
       // AVX/AVX512.
-      if (strstr(kernel.name, "sum_fp32_avx") == nullptr) {
+      if (strstr(kernel.name, "sum_fp32") == nullptr) {
         continue;
       }
 

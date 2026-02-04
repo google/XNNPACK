@@ -22,6 +22,8 @@
 #include "src/xnnpack/pack.h"
 #include "src/xnnpack/packw.h"
 
+namespace {
+
 
 
 static void qs8_qc2w_gemm_minmax_fp32_ukernel_1x2__scalar_lrintf(benchmark::State& state, const char* net) {
@@ -89,6 +91,8 @@ static void qs8_qc2w_gemm_minmax_fp32_ukernel_4x4__scalar_fmagic(benchmark::Stat
 }
 
 BENCHMARK_GEMM(qs8_qc2w_gemm_minmax_fp32_ukernel_4x4__scalar_fmagic)
+
+}  // namespace
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
 XNN_BENCHMARK_MAIN();

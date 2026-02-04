@@ -1832,7 +1832,7 @@ void GemmMicrokernelTester::Test(
   auto w8rng = std::bind(std::uniform_int_distribution<int32_t>(
                              0, std::numeric_limits<uint8_t>::max()),
                          std::ref(rng));
-  const float max_abs_product = 1.0f * 16.0f * 2.0f;
+  const float max_abs_product = 1.0f * 4.0f * 2.0f;
 
   // 2 bit is 4 planes - four 2-bit values (crumbs) per byte
   const size_t k4 = round_up_po2(k(), 4);  // tester assumes byte aligned rows
@@ -1852,7 +1852,6 @@ void GemmMicrokernelTester::Test(
       packed_n() * packed_k_bytes +
       packed_n() * (sizeof(int32_t) + sizeof(float) * 3));
   xnnpack::Buffer<float> c((m() - 1) * cm_stride() + n());
-  xnnpack::Buffer<int32_t> acc(m() * n());
   xnnpack::Buffer<float> c_ref(m() * n());
   xnnpack::Buffer<float> row_sum(mr());
 
@@ -1965,6 +1964,26 @@ void GemmMicrokernelTester::Test(
     }
   }
 
+  if (unsigned_inputs()) {
+    for (int i = 0; i < quantization_params.size(); ++i) {
+      quantization_params[i].zero_point += 128;
+    }
+    for (int i = 0; i < a.size(); ++i) {
+      a[i] ^= 0x80;
+    }
+    for (size_t i = 0; i < m(); ++i) {
+      int32_t a_row_sum = 0;
+      for (size_t j = 0; j < k4; ++j) {
+        a_row_sum += static_cast<uint8_t>(a[i * a_stride() + j]);
+      }
+      row_sum[i] = a_row_sum;
+    }
+
+    for (size_t i = m(); i < mr(); ++i) {
+      row_sum[i] = row_sum[m() - 1];
+    }
+  }
+
   gemm(m(), n(), k4, a.data(), a_stride() * sizeof(int8_t),
        static_cast<const void*>(packed_w.data()), c.data(),
        cm_stride() * sizeof(float), nr() * sizeof(float), &params,
@@ -1979,8 +1998,7 @@ void GemmMicrokernelTester::Test(
     for (size_t j = 0; j < n(); j++) {
       ASSERT_NEAR(c[i * cm_stride() + j], c_ref[i * n() + j], tolerance)
           << "at " << i << ", " << j << ": reference = " << c_ref[i * n() + j]
-          << " (accumulator = " << acc[i * n() + j]
-          << "), optimized = " << c[i * cm_stride() + j]
+          << ", optimized = " << c[i * cm_stride() + j]
           << ", Mr x Nr x Kr = " << mr() << " x " << nr() << " x " << kr()
           << ", M x N x K = " << m() << " x " << n() << " x " << k4;
     }

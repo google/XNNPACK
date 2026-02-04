@@ -274,7 +274,7 @@ SubgraphBuilder& SubgraphBuilder::AddGetTensorShape(
 }
 
 Runtime::Runtime(ynn_subgraph_t subgraph, TestScheduler* scheduler,
-                 uint32_t flags)
+                 uint32_t flags, bool optimize)
     : runtime_(nullptr, ynn_delete_runtime),
       threadpool_(nullptr, ynn_delete_threadpool) {
   ynn_runtime_t runtime;
@@ -291,9 +291,11 @@ Runtime::Runtime(ynn_subgraph_t subgraph, TestScheduler* scheduler,
             threadpool, ynn_delete_threadpool);
   }
 
-  status_ = ynn_optimize_subgraph(subgraph, threadpool_.get(), 0);
-  if (status_ != ynn_status_success) {
-    return;
+  if (optimize) {
+    status_ = ynn_optimize_subgraph(subgraph, threadpool_.get(), 0);
+    if (status_ != ynn_status_success) {
+      return;
+    }
   }
 
   status_ = ynn_create_runtime(subgraph, threadpool_.get(), flags, &runtime);

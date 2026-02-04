@@ -36,7 +36,7 @@ class Type:
     return self.type_class == "uint"
 
   def is_float(self):
-    return self.type_class == "float"
+    return self.type_class in ("float", "bfloat")
 
   def __str__(self):
     return f"{self.type_class}{self.size}x{self.lanes}_t"
@@ -111,6 +111,10 @@ def UInt(size=0, lanes=1):
 
 def Float(size, lanes=1):
   return Type("float", size, lanes)
+
+
+def BFloat(size, lanes=1):  # pylint: disable=invalid-name
+  return Type("bfloat", size, lanes)
 
 
 fn_ops = []
@@ -717,6 +721,8 @@ header = """
 #include <cstring>
 #include <cstdio>
 
+using bfloat16 = uint16_t;
+
 #if !defined(__has_attribute)
 #define YNN_COMPILER_HAS_ATTRIBUTE(x) 0
 #else
@@ -935,6 +941,7 @@ class Target:
         UInt(32, 1): "uint32_t",
         Float(16, 1): "half",
         Float(32, 1): "float",
+        BFloat(16, 1): "uint16_t",
     }
     self.features = []
     self.load_intrinsics = {}

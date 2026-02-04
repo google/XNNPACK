@@ -285,6 +285,8 @@ def main(args):
 #include "src/xnnpack/requantization.h"
 #include "test/dwconv-microkernel-tester.h"
 #include "test/next_prime.h"
+
+namespace {{
 """.format(ukernel=ukernel, generator=sys.argv[0])
 
   test_cases = ""
@@ -306,9 +308,7 @@ def main(args):
   }
   create_tests = xngen.preprocess(DWCONV_CREATE_TESTS_CODE, create_tests_args)
 
-  create_tests = (
-      "namespace {\n\n" + "\n".join([create_tests]) + "\n}  // namespace\n"
-  )
+  create_tests = "\n".join([create_tests]) + "\n"
   tests = test_header + "\n" + create_tests + "\n" + test_cases
 
   test_args = ["ukernel", "init_params"]
@@ -331,6 +331,10 @@ def main(args):
       f'#include "src/{folder}/{options.ukernel}.inc"\n'
   )
   tests += "#undef XNN_UKERNEL\n"
+
+  tests += """
+}  // namespace
+"""
 
   xnncommon.overwrite_if_changed(options.output, tests)
 

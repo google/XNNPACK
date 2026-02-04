@@ -43,7 +43,7 @@ slinky::span<dot_loop> schedule_dot(slinky::span<const size_t> cache_sizes,
     // TODO(b/447988052): We can be way smarter about this than we are now.
     make_k_loop(
         floor_div(cache_size, k2 * k3 * block_n * b_elem_size * block_k));
-    if (k1 * k2 * k3 * n * b_elem_size <= m * k1 * k2 * k3 * a_elem_size) {
+    if (n * b_elem_size <= m * a_elem_size) {
       // Tiles of B are smaller than tiles of A, we should assume B fits in
       // cache.
       make_m_loop(1);

@@ -117,9 +117,6 @@ static xnn_status create_runtime_impl(xnn_subgraph_t subgraph,
                                       uint32_t flags,
                                       xnn_runtime_t* runtime_out) {
   uint32_t ynn_flags = 0;
-  if (flags & XNN_FLAG_SLINKY_NO_SCHEDULE) {
-    ynn_flags |= YNN_RUNTIME_FLAG_NO_SCHEDULE;
-  }
   if (flags & XNN_FLAG_SLOW_CONSISTENT_ARITHMETIC) {
     YNN_LOG_WARNING()
         << "XNN_FLAG_SLOW_CONSISTENT_ARITHMETIC flag is not supported by the "

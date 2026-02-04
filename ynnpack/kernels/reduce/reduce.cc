@@ -18,6 +18,7 @@
 #include "ynnpack/base/type.h"
 #include "ynnpack/include/ynnpack.h"
 #include "ynnpack/kernels/reduce/generic.h"
+#include "ynnpack/kernels/reduce/sum_accumulator.h"
 
 namespace ynn {
 
@@ -85,16 +86,28 @@ struct accumulator {
         }
       }
     } else {
-      // For numerical consistency, always do the final k reduction as a binary
-      // tree.
-      size_t k = K / 2;
-      while (k >= 1) {
+      if (K == 16) {
+        // Match the reduction order of sum_accumulator_x32 with
+        // consistent_tile_k=16.
         for (size_t i = 0; i < N; ++i) {
-          for (size_t j = 0; j < k; ++j) {
-            acc[i][j] = op(acc[i][j], acc[i][j + k]);
+          for (size_t j = 0; j < 4; ++j) {
+            acc[i][j] = op(op(acc[i][j], acc[i][j + 4]),
+                           op(acc[i][j + 8], acc[i][j + 12]));
           }
+          acc[i][0] = op(op(acc[i][0], acc[i][1]), op(acc[i][2], acc[i][3]));
         }
-        k /= 2;
+      } else {
+        // For numerical consistency, always do the final k reduction as a
+        // binary tree.
+        size_t k = K / 2;
+        while (k >= 1) {
+          for (size_t i = 0; i < N; ++i) {
+            for (size_t j = 0; j < k; ++j) {
+              acc[i][j] = op(acc[i][j], acc[i][j + k]);
+            }
+          }
+          k /= 2;
+        }
       }
     }
     for (size_t i = 0; i < n; ++i) {
@@ -264,9 +277,11 @@ void reduce(size_t N, size_t K3, size_t K2, size_t K1, size_t A_stride_n,
                   AT, CT>(N, K3, K2, A_stride_k3, A_stride_k2, A,
                           /*C_stride_m=*/0, C);
   } else {
-    tiled_reduce<accumulator<AccT, CT, 1, 128 / sizeof(AccT), ReduceOp, F>, AT,
-                 CT>(N, K3, K2, K1, A_stride_n, A_stride_k3, A_stride_k2, A,
-                     /*C_stride_m=*/0, C);
+    constexpr size_t K = std::is_same<AccT, float>::value ? consistent_tile_k
+                                                          : 128 / sizeof(AccT);
+    tiled_reduce<accumulator<AccT, CT, 1, K, ReduceOp, F>, AT, CT>(
+        N, K3, K2, K1, A_stride_n, A_stride_k3, A_stride_k2, A,
+        /*C_stride_m=*/0, C);
   }
 }
 

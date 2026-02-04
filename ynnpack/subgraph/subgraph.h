@@ -84,6 +84,10 @@ struct ynn_value {
 
   bool is_static() const { return !is_external() && data && data->base; }
 
+  bool is_static_scalar() const {
+    return is_static() && data->size_bytes() == data->elem_size;
+  }
+
   bool is_valid() const {
     return id != YNN_INVALID_VALUE_ID && type != ynn_type_invalid;
   }
@@ -116,9 +120,8 @@ struct ynn_value {
   // returns that value.
   template <typename T>
   T static_scalar_value() const {
-    assert(is_static());
+    assert(is_static_scalar());
     assert(sizeof(T) == data->elem_size);
-    assert(data->size_bytes() == data->elem_size);
     T result;
     memcpy(&result, data->base, sizeof(T));
     return result;

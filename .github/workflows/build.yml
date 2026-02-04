@@ -377,6 +377,41 @@ jobs:
         run: cmake --build build/ios/x86_64 --parallel $(sysctl -n hw.ncpu) -- -sdk iphonesimulator -quiet
         working-directory: ${{ github.workspace }}
 
+  gn-linux-x86_64:
+    runs-on: 'ubuntu-24.04-8core'
+    timeout-minutes: 10
+    steps:
+      - name: Install Depot Tools
+        uses: newkdev/setup-depot-tools@v1.0.1
+      - name: Write .gclient
+        run: |
+          cat <<EOF > .gclient
+          solutions = [
+            { "name"        : 'xnnpack',
+              "url"         : 'https://github.com/google/XNNPACK',
+              "deps_file"   : 'DEPS',
+              "managed"     : False,
+              "custom_deps" : {
+            },
+            "custom_vars": {},
+            },
+          ]
+          EOF
+      - name: Sync to commit and run hooks
+        run: gclient sync -vv --revision $GITHUB_SHA
+      - name: Check formatting
+        run: |
+          git cl format --presubmit --no-clang-format --no-python --diff
+        working-directory: ${{ github.workspace }}/xnnpack
+      - name: Generate build files
+        run: |
+          gn gen --check --args="is_debug=true target_cpu=\"x64\" use_siso=true" out/Debug
+        working-directory: ${{ github.workspace }}/xnnpack
+      - name: Build all targets (Debug)
+        run: |
+          autoninja -C out/Debug
+        working-directory: ${{ github.workspace }}/xnnpack
+
   bazel-linux-x86_64-clang-18:
     runs-on: 'ubuntu-24.04-8core'
     timeout-minutes: 60
@@ -528,6 +563,7 @@ jobs:
               --repository_cache=/home/xnnpack/.cache/bazel/repo_cache \
               --test_output=errors \
               --local_test_jobs=HOST_CPUS \
+              --test_tag_filters=-not_run:arm \
               //test/... \
               //bench/... \
               //ynnpack/...
@@ -583,6 +619,7 @@ jobs:
               --test_output=errors \
               --local_test_jobs=HOST_CPUS \
               ${BAZEL_DEFINES} \
+              --test_tag_filters=-not_run:arm \
               //test/... \
               //bench/... \
               //ynnpack/...
@@ -649,6 +686,7 @@ jobs:
             --features=fully_static_link \
             --disk_cache=/home/xnnpack/.cache/bazel/disk_cache \
             --repository_cache=/home/xnnpack/.cache/bazel/repo_cache \
+            --test_tag_filters=-not_run:arm \
             //test:qs8_qc8w_igemm_minmax_fp32_test \
             //test:qp8_f32_qc4w_gemm_minmax_test \
             //test:pf32_gemm_minmax_test \
@@ -674,6 +712,7 @@ jobs:
             --features=fully_static_link \
             --disk_cache=/home/xnnpack/.cache/bazel/disk_cache \
             --repository_cache=/home/xnnpack/.cache/bazel/repo_cache \
+            --test_tag_filters=-not_run:arm \
             //test/subgraph/... \
             //ynnpack/... \
             --cache_test_results=no \

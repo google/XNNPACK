@@ -23,7 +23,6 @@
 
 namespace {
 
-
 struct XnnTestParam {
   const char *name;
   ConvHWCMicrokernelTester::Kernel kernel;
@@ -42,8 +41,6 @@ std::string GetTestName(const testing::TestParamInfo<XnnTest::ParamType>& info) 
 const XnnTestParam xnn_test_params[] = {
 #include "src/f32-conv-hwc/f32-conv-hwc.inc"
 };
-
-}  // namespace
 
 TEST_P(XnnTest, input_width_eq)
 {
@@ -382,3 +379,5 @@ INSTANTIATE_TEST_SUITE_P(conv_hwc,
                          XnnTest,
                          testing::ValuesIn(xnn_test_params),
                          GetTestName);
+
+}  // namespace

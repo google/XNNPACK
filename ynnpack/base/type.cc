@@ -77,6 +77,8 @@ size_t type_size_bytes(ynn_type t) {
   return 0;
 }
 
+size_t type_size_bits(ynn_type t) { return type_size_bytes(t) * 8; }
+
 const char* to_string(ynn_type type) {
   switch (type) {
     case ynn_type_invalid:

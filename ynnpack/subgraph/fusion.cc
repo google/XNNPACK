@@ -20,26 +20,13 @@
 #include "ynnpack/kernels/ternary/ternary.h"
 #include "ynnpack/subgraph/dot.h"
 #include "ynnpack/subgraph/elementwise.h"
+#include "ynnpack/subgraph/fusion_lut.h"
+#include "ynnpack/subgraph/fusion_types.h"
 #include "ynnpack/subgraph/reduce.h"
 #include "ynnpack/subgraph/stencil_copy.h"
 #include "ynnpack/subgraph/subgraph.h"
 
 namespace {
-
-struct subgraph_analysis {
-  std::map<uint32_t, ynn_node*> producers;
-  std::map<uint32_t, std::vector<ynn_node*>> consumers;
-
-  explicit subgraph_analysis(ynn_subgraph& subgraph) {
-    for (ynn_node& node : subgraph.nodes) {
-      for (uint32_t input : node.inputs) {
-        consumers[input].push_back(&node);
-      }
-      assert(producers.find(node.outputs[0]) == producers.end());
-      producers[node.outputs[0]] = &node;
-    }
-  }
-};
 
 bool is_unary_node(const ynn_node& node, ynn_unary_operator op) {
   const ynn_node::unary_elementwise* unary =
@@ -170,14 +157,15 @@ bool rewrite_convert_to_multiply(ynn_subgraph& subgraph, ynn_node& node,
       }
     }
   }
-  ynn::binary_kernel_fn kernel = ynn::get_binary_multiply_kernel(
-      input.type, subgraph.value(input.scale_id).type, output.type);
+  const ynn::binary_kernel* kernel =
+      ynn::get_binary_kernel(ynn_binary_multiply, input.type,
+                             subgraph.value(input.scale_id).type, output.type);
   if (kernel != nullptr) {
     // This is a binary integer*float multiply, and we have a kernel that
     // matches the types we have.
     YNN_LOG_DEBUG() << "Rewriting convert to binary multiply";
     ynn::define_binary(subgraph, node, node.inputs[0], input.scale_id,
-                       node.outputs[0], ynn_binary_multiply, kernel);
+                       node.outputs[0], ynn_binary_multiply, kernel->op);
   }
   return false;
 }
@@ -551,6 +539,7 @@ bool rewrite_reduce_sum_squared_convert(ynn_subgraph& subgraph, ynn_node& node,
 }  // namespace
 
 ynn_status ynn_subgraph::fusion() {
+  // Fuse graph as much as possible before unary LUT optimization.
   bool changed;
   do {
     subgraph_analysis analysis(*this);
@@ -569,6 +558,11 @@ ynn_status ynn_subgraph::fusion() {
                 rewrite_reduce_sum_convert(*this, node, analysis) ||
                 rewrite_reduce_sum_squared_convert(*this, node, analysis);
     }
+  } while (changed);
+
+  do {
+    subgraph_analysis analysis(*this);
+    changed = rewrite_subgraph_for_unary_lut(*this, analysis);
   } while (changed);
 
   return ynn_status_success;

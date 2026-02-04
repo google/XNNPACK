@@ -27,6 +27,7 @@ using uint16x1_t = uint16_t;
 using int32x1_t = int32_t;
 using uint32x1_t = uint32_t;
 using float16x1_t = half;
+using bfloat16x1_t = bfloat16;
 using float32x1_t = float;
 
 // Returns true if the type is an integer type.
@@ -37,6 +38,9 @@ bool type_is_floating_point(ynn_type t);
 
 // Returns the size of an element of the type.
 size_t type_size_bytes(ynn_type t);
+
+// Returns the size of an element of the type in bits.
+size_t type_size_bits(ynn_type t);
 
 // Returns how many elements are contained in one instance of the type. We
 // assume that datatypes with a non-integer number of bytes per element can be

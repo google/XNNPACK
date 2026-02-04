@@ -1,0 +1,33 @@
+# Copyright 2026 Google LLC
+#
+# This source code is licensed under the BSD-style license found in the
+# LICENSE file in the root directory of this source tree.
+
+# This file contains various templates and helpers for XNNPACK's GN build.
+
+# Resolve to the parent GN path
+xnnpack_path_prefix = get_path_info("../", "abspath")
+
+xnnpack_add_configs = [
+  xnnpack_path_prefix + ":xnnpack_public_config",
+  xnnpack_path_prefix + ":xnnpack_private_config",
+  xnnpack_path_prefix + "//build/config/compiler:no_chromium_code",
+]
+
+template("xnnpack_source_set") {
+  target("source_set", target_name) {
+    forward_variables_from(invoker,
+                           "*",
+                           [
+                             "configs",
+                             "remove_configs",
+                           ])
+    configs += xnnpack_add_configs
+    if (defined(invoker.remove_configs)) {
+      configs -= invoker.remove_configs
+    }
+    if (defined(invoker.configs)) {
+      configs += invoker.configs
+    }
+  }
+}

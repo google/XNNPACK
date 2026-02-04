@@ -37,15 +37,12 @@ const XnnTestParam xnn_test_params[] = {
 
 #undef XNN_UKERNEL
 
-}  // namespace
-
-namespace xnnpack {
 
 TEST_P(XnnTest, k_div_kr_m_div_mr) {
   TEST_REQUIRES_ARCH_FLAGS(GetParam().arch_flags);
   for (size_t kr : {1, 2, 4}) {
     for (size_t mr = 1; mr <= 4; mr++) {
-      PackQMicrokernelTester()
+      xnnpack::PackQMicrokernelTester()
           .m(mr * GetParam().unroll * 10)
           .k(kr * GetParam().unroll * 10)
           .mr(mr)
@@ -59,7 +56,7 @@ TEST_P(XnnTest, k_div_kr_m_lt_mr) {
   TEST_REQUIRES_ARCH_FLAGS(GetParam().arch_flags);
   for (size_t kr : {1, 2, 4}) {
     for (size_t mr = 2; mr <= 4; mr++) {
-      PackQMicrokernelTester()
+      xnnpack::PackQMicrokernelTester()
           .m(mr - 1)
           .k(kr * GetParam().unroll * 10)
           .mr(mr)
@@ -72,4 +69,4 @@ TEST_P(XnnTest, k_div_kr_m_lt_mr) {
 INSTANTIATE_TEST_SUITE_P(x8_packq, XnnTest, testing::ValuesIn(xnn_test_params),
                          GetTestName);
 
-}  // namespace xnnpack
+}  // namespace

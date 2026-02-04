@@ -575,9 +575,6 @@ static enum xnn_status create_runtime_impl(
   }
 
   const uint32_t optimization_flags =
-#ifdef XNN_SLINKY_ENABLED
-      XNN_FLAG_SLINKY_ENABLED | XNN_FLAG_SLINKY_STATIC_BOUNDS |
-#endif
       XNN_FLAG_HINT_SPARSE_INFERENCE | XNN_FLAG_HINT_FP16_INFERENCE |
       XNN_FLAG_FORCE_FP16_INFERENCE | XNN_FLAG_NO_OPERATOR_FUSION |
       XNN_FLAG_NO_INLINED_LHS_PACKING | XNN_FLAG_SLOW_CONSISTENT_ARITHMETIC;
@@ -704,9 +701,6 @@ static enum xnn_status create_runtime_impl(
   }
 
   runtime->threadpool = threadpool;
-#ifdef XNN_SLINKY_ENABLED
-  runtime->xnn_threadpool = xnn_threadpool;
-#endif  // XNN_SLINKY_ENABLED
 
   for (uint32_t i = 0; i < runtime->num_values; i++) {
     struct xnn_runtime_value* value = &runtime->values[i];
@@ -758,19 +752,6 @@ enum xnn_status xnn_create_runtime_v4(
                              /*xnn_threadpool=*/NULL, flags, runtime_out);
 }
 
-#ifdef XNN_SLINKY_ENABLED
-static bool use_slinky(uint32_t flags) {
-#ifdef XNN_USE_SLINKY
-  // If compiling with XNN_USE_SLINKY defined, assume we always
-  // want Slinky enabled, regardless of the runtime flag.
-  return true;
-#else
-  return (flags & XNN_FLAG_SLINKY_ENABLED) != 0;
-#endif  // XNN_USE_SLINKY
-}
-#endif  // XNN_SLINKY_ENABLED
-
-#ifndef XNN_SLINKY_ENABLED
 // The xnn_threadpool consists of an `xnn_scheduler_v2` and its context.
 struct xnn_threadpool {
   struct xnn_scheduler_v2 scheduler;
@@ -814,7 +795,6 @@ enum xnn_status xnn_update_runtime_with_threadpool(
   }
   return xnn_status_success;
 }
-#endif  // XNN_SLINKY_ENABLED
 
 enum xnn_status xnn_create_runtime_with_threadpool(
     xnn_subgraph_t subgraph, xnn_weights_cache_t weights_cache,
@@ -822,23 +802,12 @@ enum xnn_status xnn_create_runtime_with_threadpool(
     xnn_runtime_t* runtime_out) {
   pthreadpool_t threadpool = NULL;
   if (xnn_threadpool) {
-#ifdef XNN_SLINKY_ENABLED
-    if (!use_slinky(flags)) {
-      struct pthreadpool_executor executor;
-      executor.num_threads = (int (*)(void*))xnn_threadpool_num_threads;
-      executor.schedule =
-          (void (*)(void*, void*, void (*)(void*)))xnn_threadpool_schedule;
-      threadpool = pthreadpool_create_v2(&executor, xnn_threadpool, 0);
-      flags |= XNN_FLAG_RUNTIME_OWNS_THREADPOOL;
-    }
-#else
     struct pthreadpool_executor executor;
     executor.num_threads = xnn_threadpool->scheduler.num_threads;
     executor.schedule = xnn_threadpool->scheduler.schedule;
     threadpool =
         pthreadpool_create_v2(&executor, xnn_threadpool->scheduler_context, 0);
     flags |= XNN_FLAG_RUNTIME_OWNS_THREADPOOL;
-#endif  // XNN_SLINKY_ENABLED
   }
 
   return create_runtime_impl(subgraph, weights_cache, /*workspace=*/NULL,
@@ -894,19 +863,6 @@ error:
 }
 
 enum xnn_status xnn_reshape_runtime(xnn_runtime_t runtime) {
-#ifdef XNN_SLINKY_ENABLED
-  if (use_slinky(runtime->flags)) {
-    if (!runtime->slinky_pipeline || (runtime->flags & XNN_FLAG_SLINKY_STATIC_BOUNDS) != 0) {
-      enum xnn_status status = slinky_init_pipeline(runtime);
-      if (status != xnn_status_success) {
-        return status;
-      }
-    }
-    slinky_setup_pipeline(runtime);
-    return slinky_reshape_pipeline(runtime);
-  }
-#endif  // XNN_SLINKY_ENABLED
-
   bool reallocation_required = false;
 
   for (uint32_t opdata_id = 0; opdata_id < runtime->num_ops; opdata_id++) {
@@ -1007,13 +963,6 @@ enum xnn_status xnn_setup_runtime(
     return status;
   }
 
-#ifdef XNN_SLINKY_ENABLED
-  if (runtime->slinky_pipeline) {
-    // Slinky reshape also performs setup.
-    return xnn_status_success;
-  }
-#endif  // XNN_SLINKY_ENABLED
-
   return setup_runtime(runtime);
 }
 
@@ -1026,13 +975,6 @@ enum xnn_status xnn_setup_runtime_v2(
   if (status != xnn_status_success) {
     return status;
   }
-
-#ifdef XNN_SLINKY_ENABLED
-  if (runtime->slinky_pipeline) {
-    slinky_setup_pipeline(runtime);
-    return xnn_status_success;
-  }
-#endif  // XNN_SLINKY_ENABLED
 
   return setup_runtime(runtime);
 }
@@ -1188,12 +1130,6 @@ enum xnn_status xnn_get_runtime_profiling_info(xnn_runtime_t runtime,
 enum xnn_status xnn_invoke_runtime(
   xnn_runtime_t runtime)
 {
-#ifdef XNN_SLINKY_ENABLED
-  if (runtime->slinky_pipeline) {
-    return slinky_invoke_pipeline(runtime);
-  }
-#endif  // XNN_SLINKY_ENABLED
-
   if (runtime->profiling) {
     runtime->start_ts = xnn_read_timer();
   }
@@ -1227,10 +1163,6 @@ enum xnn_status xnn_delete_runtime(
   xnn_runtime_t runtime)
 {
   if (runtime != NULL) {
-#ifdef XNN_SLINKY_ENABLED
-    slinky_destroy_pipeline(runtime);
-#endif  // XNN_SLINKY_ENABLED
-
     if (runtime->opdata != NULL) {
       for (size_t i = 0; i < runtime->num_ops; i++) {
         for (size_t j = 0; j < XNN_MAX_OPERATOR_OBJECTS; j++) {

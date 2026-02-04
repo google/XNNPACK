@@ -30,7 +30,6 @@ RUN make -j$(nproc)
 
 FROM ubuntu:24.04
 ENV DEBIAN_FRONTEND=noninteractive
-ENV USE_BAZEL_VERSION=8.5.1
 
 RUN apt-get update && apt-get install -y \
     software-properties-common \
@@ -55,7 +54,12 @@ RUN wget https://apt.llvm.org/llvm.sh && \
 RUN update-alternatives --install /usr/bin/clang clang /usr/bin/clang-20 100 && \
     update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-20 100
 
-RUN wget -nv https://github.com/bazelbuild/bazelisk/releases/download/v1.19.0/bazelisk-linux-arm64 -O /usr/local/bin/bazel && \
+ARG TARGETARCH
+RUN if [ "$TARGETARCH" = "arm64" ]; then \
+      wget -O /usr/local/bin/bazel https://github.com/bazelbuild/bazelisk/releases/download/v1.19.0/bazelisk-linux-arm64; \
+    else \
+      wget -O /usr/local/bin/bazel https://github.com/bazelbuild/bazelisk/releases/download/v1.19.0/bazelisk-linux-amd64; \
+    fi && \
     chmod +x /usr/local/bin/bazel
 
 COPY --from=qemu-builder /src/qemu-9.2.2/build/qemu-aarch64 /usr/local/bin/qemu-aarch64

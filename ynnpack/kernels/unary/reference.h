@@ -37,12 +37,17 @@ static float tol_relative(float y_ref, float rel_tol) {
   // effective absolute difference computed in `float`s. We therefore use
   // the latter form since it is the true difference between two `float`s
   // within the given relative tolerance.
+  if (!std::isfinite(y_ref)) {
+    // If the reference value is infinity, the computation below will produce
+    // NaN. We probably want to compute the tolerance as if the value is the
+    // largest value, not infinity.
+    y_ref = std::nexttoward(y_ref, 0.0f);
+  }
   return std::abs(y_ref * (1.0f + rel_tol)) - std::abs(y_ref);
 }
 
 static float tol_mixed(float y_ref, float abs_tol, float rel_tol) {
-  return std::max(abs_tol,
-                  std::abs(y_ref) * (1.0f + rel_tol) - std::abs(y_ref));
+  return std::max(abs_tol, tol_relative(y_ref, rel_tol));
 }
 
 struct interval {
@@ -117,11 +122,13 @@ struct convert : public unary_op_info {
   int32_t operator()(int32_t x) const override { return x; }
 
   float tolerance(float y_ref, ynn_type type) const override {
-    // The epsilon of a 23-bit integer.
-    constexpr float epsilon_int23 = 1.0f / (1 << 23);
-    return type_is_integral(type)
-               ? tol_relative(y_ref, epsilon_int23)
-               : tol_mixed(y_ref, epsilon(type), epsilon(type));
+    if (type_is_integral(type)) {
+      // The epsilon of a 23-bit integer.
+      constexpr float epsilon_int23 = 1.0f / (1 << 23);
+      return tol_relative(y_ref, epsilon_int23);
+    } else {
+      return tol_mixed(y_ref, epsilon(type), epsilon(type));
+    }
   }
 };
 

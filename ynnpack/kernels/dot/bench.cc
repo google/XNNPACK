@@ -104,8 +104,9 @@ void dot(benchmark::State& state, uint64_t arch_flags, dot_kernel_fn kernel,
     state.SkipWithError("Incorrect result");
   }
 
-  const size_t ops = m * n * k * 2;
-  state.counters["FLOP"] =
+  // Use the original shape to count the ops, so we don't count padding.
+  const size_t ops = shape.m * shape.n * shape.k * 2;
+  state.counters["OP"] =
       benchmark::Counter(state.iterations() * ops, benchmark::Counter::kIsRate);
 }
 

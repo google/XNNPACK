@@ -65,11 +65,9 @@ const binary_kernel* get_binary_reference_kernel(ynn_binary_operator op, T) {
 }
 
 const binary_kernel* get_binary_kernel(
-    ynn_binary_operator op, ynn_type input_type, bool quantized,
+    ynn_binary_operator op, ynn_type type_a, ynn_type type_b, ynn_type type_x,
+    bool is_quantized = false,
     uint64_t supported_arch_flags = get_supported_arch_flags());
-
-binary_kernel_fn get_binary_multiply_kernel(ynn_type type_a, ynn_type type_b,
-                                            ynn_type type_x);
 
 }  // namespace ynn
 
