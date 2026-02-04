@@ -4,6 +4,7 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <array>
+#include <cstdint>
 #include <vector>
 
 #include <gmock/gmock.h>
@@ -20,7 +21,15 @@ using ::testing::NotNull;
 using ::testing::ValuesIn;
 
 struct FingerprintTest : testing::TestWithParam<xnn_fingerprint_id> {
-  xnn_fingerprint_id GetFingerprintId() const { return GetParam(); }
+  xnn_fingerprint_id GetFingerprintId() const {
+    static_assert(sizeof(xnn_fingerprint_id) == sizeof(uint32_t));
+    return GetParam();
+  }
+
+  xnn_fingerprint GetFingerprint() const {
+    return xnn_fingerprint{/*id=*/static_cast<uint32_t>(GetFingerprintId()),
+                           /*value=*/0};
+  }
 };
 
 TEST_P(FingerprintTest, ComputeFingerprint) {
@@ -32,8 +41,7 @@ TEST_P(FingerprintTest, ComputeFingerprint) {
   // Check fingerprint will compute the fingerprint if it hasn't been computed
   // yet (which we expect). The check itself should fail as we pass in a value
   // of 0.
-  xnn_status status =
-      xnn_check_fingerprint({/*id=*/GetFingerprintId(), /*value=*/0});
+  xnn_status status = xnn_check_fingerprint(GetFingerprint());
   if (status == xnn_status_unsupported_hardware) {
     GTEST_SKIP() << "Skipping because hardware doesn't support this operation.";
   }
