@@ -46,7 +46,7 @@ http_archive(
     strip_prefix = "googletest-56efe3983185e3f37e43415d1afa97e3860f187f",
     urls = ["https://github.com/google/googletest/archive/56efe3983185e3f37e43415d1afa97e3860f187f.zip"],
 )
-# LINT.ThenChange(cmake/DownloadGoogleTest.cmake,WORKSPACE:googletest)
+# LINT.ThenChange(cmake/DownloadGoogleTest.cmake)
 
 # LINT.IfChange(benchmark)
 # Google Benchmark library, used in micro-benchmarks.
@@ -56,7 +56,7 @@ http_archive(
     strip_prefix = "benchmark-8d4fdd6e6e003867045e0bb3473b5b423818e4b7",
     urls = ["https://github.com/google/benchmark/archive/8d4fdd6e6e003867045e0bb3473b5b423818e4b7.zip"],
 )
-# LINT.ThenChange(cmake/DownloadGoogleBenchmark.cmake,WORKSPACE:benchmark)
+# LINT.ThenChange(cmake/DownloadGoogleBenchmark.cmake)
 
 # LINT.IfChange(FXdiv)
 # FXdiv library, used for repeated integer division by the same factor
@@ -66,7 +66,7 @@ http_archive(
     strip_prefix = "FXdiv-b408327ac2a15ec3e43352421954f5b1967701d1",
     urls = ["https://github.com/Maratyszcza/FXdiv/archive/b408327ac2a15ec3e43352421954f5b1967701d1.zip"],
 )
-# LINT.ThenChange(cmake/DownloadFXdiv.cmake,WORKSPACE:FXdiv)
+# LINT.ThenChange(cmake/DownloadFXdiv.cmake)
 
 # LINT.IfChange(pthreadpool)
 # pthreadpool library, used for parallelization
@@ -76,7 +76,7 @@ http_archive(
     strip_prefix = "pthreadpool-0e6ca13779b57d397a5ba6bfdcaa8a275bc8ea2e",
     urls = ["https://github.com/google/pthreadpool/archive/0e6ca13779b57d397a5ba6bfdcaa8a275bc8ea2e.zip"],
 )
-# LINT.ThenChange(cmake/DownloadPThreadPool.cmake,WORKSPACE:pthreadpool)
+# LINT.ThenChange(cmake/DownloadPThreadPool.cmake)
 
 # LINT.IfChange(cpuinfo)
 # cpuinfo library, used for detecting processor characteristics
@@ -88,7 +88,7 @@ http_archive(
         "https://github.com/pytorch/cpuinfo/archive/f9a03241f8c3d4ed0c9728f5d70bff873d43d4e0.zip",
     ],
 )
-# LINT.ThenChange(cmake/DownloadCpuinfo.cmake,WORKSPACE:cpuinfo)
+# LINT.ThenChange(cmake/DownloadCpuinfo.cmake)
 
 # LINT.IfChange(kleidiai)
 # KleidiAI library, used for ARM microkernels.
@@ -100,7 +100,7 @@ http_archive(
         "https://github.com/ARM-software/kleidiai/archive/d41219d3db13758074a6440d7b55a87487334c8b.zip",
     ],
 )
-# LINT.ThenChange(cmake/DownloadKleidiAI.cmake,WORKSPACE:kleidiai)
+# LINT.ThenChange(cmake/DownloadKleidiAI.cmake)
 
 # Ruy library, used to benchmark against
 http_archive(

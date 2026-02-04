@@ -1,9 +1,0 @@
-# Copyright 2025 Google LLC
-#
-# This source code is licensed under the BSD-style license found in the
-# LICENSE file in the root directory of this source tree.
-#
-# Description:
-#   XNNPACK - optimized floating-point neural network operators library
-
-# This file intentionally left blank (see https://bazel.build/external/migration#hybrid-mode).
