@@ -631,7 +631,7 @@ jobs:
           find /home/xnnpack/.cache/bazel/disk_cache -type f -atime +7 -delete
 
   bazel-linux-aarch64-sme2-qemu:
-    runs-on: "arm-ubuntu-arm-22.04-8core"
+    runs-on: 'ubuntu-24.04-8core'
     timeout-minutes: 60
     container:
       image: ghcr.io/google/xnnpack/sme2:latest
