@@ -4,10 +4,7 @@ on:
   push:
     branches: [ master ]
     paths:
-      - 'docker/Dockerfile.standard'
-      - 'docker/Dockerfile.riscv'
-      - 'docker/Dockerfile.android'
-      - 'docker/Dockerfile.sme2'
+      - 'docker/**'
   workflow_dispatch:
 
 permissions:
