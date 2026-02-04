@@ -54,12 +54,7 @@ RUN wget https://apt.llvm.org/llvm.sh && \
 RUN update-alternatives --install /usr/bin/clang clang /usr/bin/clang-20 100 && \
     update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-20 100
 
-ARG TARGETARCH
-RUN if [ "$TARGETARCH" = "arm64" ]; then \
-      wget -O /usr/local/bin/bazel https://github.com/bazelbuild/bazelisk/releases/download/v1.19.0/bazelisk-linux-arm64; \
-    else \
-      wget -O /usr/local/bin/bazel https://github.com/bazelbuild/bazelisk/releases/download/v1.19.0/bazelisk-linux-amd64; \
-    fi && \
+RUN wget -nv https://github.com/bazelbuild/bazelisk/releases/download/v1.19.0/bazelisk-linux-arm64 -O /usr/local/bin/bazel && \
     chmod +x /usr/local/bin/bazel
 
 COPY --from=qemu-builder /src/qemu-9.2.2/build/qemu-aarch64 /usr/local/bin/qemu-aarch64
