@@ -73,11 +73,11 @@ void bench(benchmark::State& state, ynn_threadpool_t threadpool, int m, int n,
 
   // If we have static shapes, set them now.
   size_t a_shape[2] = {0, 0};
-  if (m > 0) a_shape[0] = m;
-  if (k > 0) a_shape[1] = k;
   size_t b_shape[2] = {0, 0};
-  if (k > 0) b_shape[0] = k;
-  if (n > 0) b_shape[1] = n;
+  size_t output_shape[2] = {0, 0};
+  if (m > 0) a_shape[0] = output_shape[0] = m;
+  if (n > 0) b_shape[1] = output_shape[1] = n;
+  if (k > 0) a_shape[1] = b_shape[0] = k;
 
   uint32_t a_id = 0;
   uint32_t b_id = 1;
@@ -88,8 +88,9 @@ void bench(benchmark::State& state, ynn_threadpool_t threadpool, int m, int n,
   ynn_define_tensor_value(subgraph.get(), type_of<Input>(), 2, &b_shape[0],
                           nullptr, YNN_INVALID_VALUE_ID, YNN_INVALID_VALUE_ID,
                           /*flags=*/YNN_VALUE_FLAG_EXTERNAL_INPUT, &b_id);
-  ynn_define_tensor_value(subgraph.get(), type_of<Output>(), 2, nullptr,
-                          nullptr, YNN_INVALID_VALUE_ID, YNN_INVALID_VALUE_ID,
+  ynn_define_tensor_value(subgraph.get(), type_of<Output>(), 2,
+                          &output_shape[0], nullptr, YNN_INVALID_VALUE_ID,
+                          YNN_INVALID_VALUE_ID,
                           /*flags=*/YNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id);
 
   ynn_define_dot(subgraph.get(), /*num_k_dims=*/1, a_id, b_id,
