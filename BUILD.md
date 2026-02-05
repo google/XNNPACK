@@ -197,6 +197,25 @@ under the `out/` directory.
 After configuring the build, run `autoninja -C out/Default` to build all XNNPACK
 tests and benchmarks.
 
+### Running tests
+
+All GN-enabled tests are named `xnnpack_*_test`, e.g.
+`out/Default/xnnpack_rminmax_test` and are runnable from the command line.
+
+A helper script runs all the known unit tests:
+
+```sh
+vpython3 scripts/run-gn-tests.py out/Default
+```
+
+To run the tests on Android, they must first be pushed to the device.
+
+```sh
+adb push out/arm64/xnnpack_operators_test /data/local/tmp
+# out/arm64/xnnpack_operators_test: 1 file pushed, 0 skipped. 299.7 MB/s (4525216 bytes in 0.014s)
+adb shell /data/local/tmp/xnnpack_operators_test
+```
+
 ### Supported configurations
 
 
@@ -205,8 +224,11 @@ tests and benchmarks.
 | `linux`     | `x64`        |  ✅   |   ❌       |       |
 | `linux`     | `x86`        |  ✅   |   ❌       |       |
 | `linux`     | `arm64`      |  ✅   |   ❌       |       |
-| `linux`     | `arm64`      |  ✅   |   ❌       | [1]   |
+| `linux`     | `arm64`      |  ✅   |   ❌       |       |
 | `macos`     | `arm64`      |  ✅   |   ❌       |       |
+| `android`   | `arm64`      |  ✅   |   ❌       |  [1]  |
 
-[1] Building unit tests and benchmarks is not supported just yet.
+[1] `target_os=["android"]` must be set in `.gclient` (see above).
+    `is_component_build=true` is not supported.
 
+Tests which involve YNNPACK are not supported yet.

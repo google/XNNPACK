@@ -98,11 +98,6 @@ declare_args() {
   # Enables VNNI extensions, which are separate from AVX512-VNNI
   xnnpack_enable_avx_vnni = target_cpu == "x64" || target_cpu == "x86"
   xnnpack_enable_avx_vnni_int8 = target_cpu == "x64" || target_cpu == "x86"
-
-  # If enabled, builds XNNPACK's tests and benchmarks. Switched off on Android for
-  # now because of the nest of Java dependencies it brings in.
-  # TODO: fix this and remove the flag
-  xnnpack_build_tests = !is_android || build_with_chromium
 }
 
 assert(target_cpu == "arm64" || target_cpu == "x64" || target_cpu == "x86",
@@ -262,7 +257,10 @@ config("xnnpack_public_config") {
 
 source_set("xnnpack_headers") {
   # XNNPACK's global header that's re-used by various sub-targets
-  sources = [ "include/xnnpack.h" ]
+  sources = [
+    "include/xnnpack.h",
+    "src/xnnpack/common.h",
+  ]
 }
 
 xnnpack_source_set("configs") {
@@ -350,12 +348,16 @@ xnnpack_source_set("logging") {
 xnnpack_source_set("microkernel_headers") {
   # From build_srcs.bzl
   sources = MICROKERNEL_HDRS
-  deps = [ ":microkernel_defs" ]
+  public_deps = [
+    ":microkernel_defs",
+    ":xnnpack_headers",
+  ]
 }
 
 xnnpack_source_set("microkernel_defs") {
   # From build_srcs.bzl
   sources = MICROKERNEL_DEFS
+  public_deps = [ ":xnnpack_headers" ]
 }
 
 if (target_cpu == "arm64") {
@@ -613,6 +615,7 @@ xnnpack_source_set("xnnpack") {
     "src/reference/packing.cc",
     "src/reference/unary-elementwise.cc",
     "src/sanitizers.c",
+    "src/xx-pad/xx-pad.inc",
   ]
   public_deps = [ ":xnnpack_headers" ]
   deps = [
@@ -675,4 +678,345 @@ xnnpack_source_set("xnnpack") {
       deps += [ ":fma3_microkernels" ]
     }
   }
+}
+
+xnnpack_source_set("test_support") {
+  testonly = true
+  sources = [
+    "test/next_prime.cc",
+    "test/next_prime.h",
+    "test/replicable_random_device.h",
+  ]
+  deps = [ ":xnnpack_headers" ]
+}
+
+#
+# Unit tests
+#
+R_TESTS = [
+  "rminmax",
+  "rsum",
+  "rsum2",
+  "rdminmax",
+  "rdsum",
+  "rdsum2",
+]
+
+IBILINEAR_TESTS = [
+  "f16_ibilinear_chw",
+  "f16_ibilinear",
+  "f32_ibilinear_chw",
+  "f32_ibilinear",
+  "s8_ibilinear",
+  "u8_ibilinear",
+]
+
+DWCONV_TESTS = [
+  "f16_dwconv_minmax",
+  "f32_dwconv_minmax",
+  "f32_dwconv",
+  "qs8_dwconv_minmax_fp32",
+  "qs8_dwconv_minmax_rndnu",
+  "qs8_qc8w_dwconv_minmax_fp32",
+  "qu8_dwconv_minmax_fp32",
+  "qu8_dwconv_minmax_rndnu",
+]
+
+# These are disambiguated into seperate targets due to link errors
+SUBGRAPH_SEPARATE_TESTS = [
+  "broadcast",
+  "concatenate",
+  "copy",
+  "even_split",
+  "softmax",
+  "space_to_depth_2d",
+  "static_constant_pad",
+  "static_expand_dims",
+  "static_slice",
+  "static_transpose",
+]
+
+PACKW_TESTS = [
+  "qb4_packw",
+  "qs8_packw",
+  "qs8_qc4w_packw",
+  "x16_packw",
+  "x16_x32_packw",
+  "x32_packw",
+  "x8_packw",
+]
+
+GEMM_MICROKERNEL_TESTS = [
+  "test/bf16-gemm-minmax.cc",
+  "test/bf16-f32-gemm-minmax.cc",
+  "test/f16-f32acc-gemm-minmax.cc",
+  "test/f16-gemm-minmax.cc",
+  "test/pf16-gemm-minmax.cc",
+  "test/pf16-f16-igemm-minmax.cc",
+  "test/f16-f32acc-igemm-minmax.cc",
+  "test/f16-igemm-minmax.cc",
+  "test/f32-igemm.cc",
+  "test/f32-igemm-2.cc",
+  "test/f32-igemm-relu.cc",
+  "test/f32-igemm-relu-2.cc",
+  "test/f32-igemm-minmax.cc",
+  "test/f32-igemm-minmax-2.cc",
+  "test/pf32-gemm-minmax.cc",
+  "test/f32-qc8w-gemm.cc",
+  "test/f32-qc8w-gemm-relu.cc",
+  "test/f32-qc4w-gemm-minmax.cc",
+  "test/f32-qc8w-gemm-minmax.cc",
+  "test/f32-ppmm-minmax.cc",
+  "test/qd8-f16-qc8w-gemm-minmax.cc",
+  "test/qd8-f16-qc8w-gemm-minmax-2.cc",
+  "test/qd8-f16-qc8w-gemm-minmax-3.cc",
+  "test/qd8-f16-qc8w-gemm-minmax-4.cc",
+  "test/qd8-f32-qc8w-gemm-minmax.cc",
+  "test/qd8-f32-qc8w-gemm-minmax-2.cc",
+  "test/qd8-f32-qc8w-gemm-minmax-3.cc",
+  "test/qd8-f32-qc8w-gemm-minmax-4.cc",
+  "test/qd8-f16-qc4w-gemm-minmax.cc",
+  "test/qd8-f16-qc4w-gemm-minmax-2.cc",
+  "test/qd8-f16-qc4w-gemm-minmax-3.cc",
+  "test/qd8-f16-qc4w-gemm-minmax-4.cc",
+  "test/qd8-f32-qc2w-gemm-minmax.cc",
+  "test/qd8-f32-qc4w-gemm-minmax.cc",
+  "test/qd8-f32-qc4w-gemm-minmax-2.cc",
+  "test/qd8-f32-qc4w-gemm-minmax-3.cc",
+  "test/qd8-f32-qc4w-gemm-minmax-4.cc",
+  "test/qd8-f16-qb4w-gemm-minmax.cc",
+  "test/qd8-f32-qb4w-gemm-minmax.cc",
+  "test/qp8-f32-qc4w-gemm-minmax.cc",
+  "test/qp8-f32-qb4w-gemm-minmax.cc",
+  "test/qp8-f32-qc8w-gemm-minmax.cc",
+  "test/qs8-qc4w-gemm-minmax-fp32.cc",
+  "test/qs8-qc8w-gemm-minmax-fp32.cc",
+  "test/qs8-qc8w-gemm-minmax-fp32-2.cc",
+  "test/qs8-qc8w-gemm-minmax-fp32-3.cc",
+  "test/pqs8-qc8w-gemm-minmax.cc",
+  "test/qd8-f16-qc8w-igemm-minmax.cc",
+  "test/qd8-f16-qc8w-igemm-minmax-2.cc",
+  "test/qd8-f16-qc8w-igemm-minmax-3.cc",
+  "test/qd8-f16-qc8w-igemm-minmax-4.cc",
+  "test/qd8-f32-qc8w-igemm-minmax.cc",
+  "test/qd8-f32-qc8w-igemm-minmax-2.cc",
+  "test/qd8-f32-qc8w-igemm-minmax-3.cc",
+  "test/qs8-qc8w-igemm-minmax-fp32.cc",
+  "test/qs8-qc8w-igemm-minmax-fp32-2.cc",
+  "test/qs8-qc8w-igemm-minmax-fp32-3.cc",
+  "test/qu8-gemm-minmax-fp32.cc",
+  "test/qu8-gemm-minmax-fp32-2.cc",
+  "test/qu8-gemm-minmax-rndnu.cc",
+  "test/qu8-gemm-minmax-rndnu-2.cc",
+  "test/qu8-igemm-minmax-fp32.cc",
+  "test/qu8-igemm-minmax-fp32-2.cc",
+  "test/qu8-gemm-minmax-rndnu16.cc",
+  "test/qu8-igemm-minmax-rndnu.cc",
+  "test/qu8-igemm-minmax-rndnu-2.cc",
+]
+
+foreach(name, R_TESTS) {
+  xnnpack_test(name) {
+    sources = [ string_join("",
+                            [
+                              "test",
+                              "/",
+                              name,
+                              ".cc",
+                            ]) ]
+  }
+}
+
+foreach(name, IBILINEAR_TESTS) {
+  xnnpack_test(name) {
+    sources = [
+      "test/ibilinear-microkernel-tester.h",
+      string_join("",
+                  [
+                    "test",
+                    "/",
+                    string_replace(name, "_", "-"),
+                    ".cc",
+                  ]),
+    ]
+  }
+}
+
+foreach(subgraph_test, SUBGRAPH_SEPARATE_TESTS) {
+  xnnpack_test("subgraph_" + subgraph_test) {
+    sources = [
+      "test/subgraph/subgraph-tester.cc",
+      "test/subgraph/subgraph-tester.h",
+      "test/subgraph/runtime-flags.cc",
+      "test/subgraph/runtime-flags.h",
+
+      string_join("",
+                  [
+                    "test",
+                    "/",
+                    "subgraph",
+                    "/",
+                    string_replace(subgraph_test, "_", "-"),
+                    ".cc",
+                  ]),
+    ]
+  }
+}
+
+foreach(name, DWCONV_TESTS) {
+  xnnpack_test(name) {
+    sources = [
+      "test/dwconv-microkernel-tester.h",
+      "test/dwconv-microkernel-tester.cc",
+      string_join("",
+                  [
+                    "test",
+                    "/",
+                    string_replace(name, "_", "-"),
+                    ".cc",
+                  ]),
+    ]
+  }
+}
+
+foreach(kernel, PACKW_TESTS) {
+  xnnpack_test(kernel) {
+    sources = [
+      "test/packw-microkernel-tester.h",
+      string_join("",
+                  [
+                    "test",
+                    "/",
+                    string_replace(kernel, "_", "-"),
+                    ".cc",
+                  ]),
+    ]
+  }
+}
+
+xnnpack_test("gemm") {
+  sources = GEMM_MICROKERNEL_TESTS + [
+              "test/gemm-microkernel-tester.cc",
+              "test/gemm-microkernel-tester.h",
+            ]
+}
+
+xnnpack_test("xx_fill") {
+  # Cannot be mixed together with xN-transpose.cc due to
+  # INSTANTIATE_TEST_SUITE_P clashes. TODO: fix this.
+  sources = [ "test/xx-fill.cc" ]
+}
+
+xnnpack_test("xx_pad") {
+  # Cannot be mixed together with xN-transpose.cc due to
+  # INSTANTIATE_TEST_SUITE_P clashes. TODO: fix this.
+  sources = [ "test/xx-pad.cc" ]
+}
+
+xnnpack_test("standalone") {
+  # TODO: fix the tests that need ynnpack
+  deps = [ ":operators" ]
+  sources = [
+    "test/buffer.cc",
+
+    # "test/fingerprint.cc",
+    "test/fingerprint_cache.cc",
+    "test/indirection.cc",
+    "test/microkernel-utils.cc",
+    "test/mutex.cc",
+    "test/pack-microkernel-tester.h",
+
+    # Relies on ynnpack (Unsupported)
+    # "test/build-identifier.cc",
+    "test/packing.cc",
+    "test/weights-cache.cc",
+    "test/x32-packx.cc",
+    "test/x32-unpool.cc",
+    "test/xN-transpose.cc",
+  ]
+}
+
+xnnpack_source_set("xnnpack_operators_test_support") {
+  testonly = true
+  public_deps = [
+    ":test_support",
+    ":xnnpack_headers",
+  ]
+  sources = [
+    "test/operators/constant-pad-operator-tester.h",
+    "test/operators/copy-operator-tester.h",
+    "test/operators/slice-operator-tester.h",
+    "test/operators/transpose-operator-tester.h",
+  ]
+}
+
+xnnpack_test("eager_operators") {
+  deps = [ ":xnnpack_operators_test_support" ]
+  sources = [
+    "test/operators/constant-pad-nd-eager.cc",
+    "test/operators/copy-nc-eager.cc",
+    "test/operators/slice-nd-eager.cc",
+    "test/operators/transpose-nd-eager.cc",
+  ]
+}
+
+xnnpack_test("operators") {
+  deps = [ ":xnnpack_operators_test_support" ]
+  sources = [
+    "test/operators/argmax-pooling-nhwc.cc",
+    "test/operators/argmax-pooling-operator-tester.h",
+    "test/operators/average-pooling-nhwc.cc",
+    "test/operators/average-pooling-operator-tester.h",
+    "test/operators/batch-matrix-multiply-nc.cc",
+    "test/operators/batch-matrix-multiply-operator-tester.h",
+    "test/operators/binary-elementwise-nd.cc",
+    "test/operators/constant-pad-nd.cc",
+    "test/operators/constant-pad-operator-tester.h",
+    "test/operators/convert-nc.cc",
+    "test/operators/convolution-nchw.cc",
+    "test/operators/convolution-nhwc.cc",
+    "test/operators/convolution-operator-tester.h",
+    "test/operators/convolution-test-helpers.cc",
+    "test/operators/convolution-test-helpers.h",
+    "test/operators/copy-nc.cc",
+    "test/operators/copy-operator-tester.h",
+    "test/operators/deconvolution-nhwc-qd8-f32-qc8w.cc",
+    "test/operators/deconvolution-nhwc.cc",
+    "test/operators/deconvolution-operator-tester.h",
+    "test/operators/depth-to-space-nchw2nhwc.cc",
+    "test/operators/depth-to-space-nhwc.cc",
+    "test/operators/depth-to-space-operator-tester.h",
+    "test/operators/dynamic-fully-connected-nc.cc",
+    "test/operators/dynamic-fully-connected-operator-tester.h",
+    "test/operators/fully-connected-nc.cc",
+    "test/operators/fully-connected-operator-tester.h",
+    "test/operators/max-pooling-nhwc.cc",
+    "test/operators/max-pooling-operator-tester.h",
+    "test/operators/operator-test-utils.h",
+    "test/operators/operator-utils.cc",
+    "test/operators/reduce-nd.cc",
+    "test/operators/reduce-normalization-tester.h",
+    "test/operators/reduce-normalization.cc",
+    "test/operators/resize-bilinear-nchw.cc",
+    "test/operators/resize-bilinear-nhwc.cc",
+    "test/operators/resize-bilinear-operator-tester.h",
+    "test/operators/rope-nthc.cc",
+    "test/operators/rope-operator-tester.h",
+    "test/operators/slice-nd.cc",
+    "test/operators/slice-normalization-tester.h",
+    "test/operators/slice-normalization.cc",
+    "test/operators/softmax-nc.cc",
+    "test/operators/softmax-operator-tester.h",
+    "test/operators/space-to-depth-nhwc.cc",
+    "test/operators/space-to-depth-operator-tester.h",
+    "test/operators/transpose-nd.cc",
+    "test/operators/transpose-normalization-tester.h",
+    "test/operators/transpose-normalization.cc",
+    "test/operators/transpose-operator-tester.h",
+    "test/operators/unary-elementwise-nc.cc",
+    "test/operators/unpooling-nhwc.cc",
+    "test/operators/unpooling-operator-tester.h",
+    "test/unary-ops.cc",
+    "test/unary-ops.h",
+  ]
 }

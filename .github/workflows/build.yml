@@ -379,7 +379,7 @@ jobs:
 
   gn-linux-x86_64:
     runs-on: 'ubuntu-24.04-8core'
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - name: Install Depot Tools
         uses: newkdev/setup-depot-tools@v1.0.1
@@ -410,6 +410,10 @@ jobs:
       - name: Build all targets (Debug)
         run: |
           autoninja -C out/Debug
+        working-directory: ${{ github.workspace }}/xnnpack
+      - name: Run tests
+        run: |
+          python3 scripts/run-gn-tests.py out/Debug
         working-directory: ${{ github.workspace }}/xnnpack
 
   bazel-linux-x86_64-clang-18:

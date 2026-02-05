@@ -31,3 +31,42 @@ template("xnnpack_source_set") {
     }
   }
 }
+
+template("xnnpack_test") {
+  target("executable", "xnnpack_" + target_name + "_test") {
+    forward_variables_from(invoker,
+                           "*",
+                           [
+                             "configs",
+                             "remove_configs",
+                             "deps",
+                           ])
+    testonly = true
+    if (defined(invoker.cflags)) {
+      cflags = invoker.cflags
+    } else {
+      cflags = []
+    }
+    configs += xnnpack_add_configs
+    configs -= [ "//build/config/clang:find_bad_constructs" ]
+    if (defined(invoker.remove_configs)) {
+      configs -= invoker.remove_configs
+    }
+    deps = [
+      xnnpack_path_prefix + ":scalar_microkernels",
+      xnnpack_path_prefix + ":microkernel_headers",
+      xnnpack_path_prefix + ":test_support",
+      xnnpack_path_prefix + ":xnnpack",
+      "//third_party/googletest:gmock",
+      "//testing/gtest",
+      "//testing/gtest:gtest_main",
+    ]
+    if (defined(invoker.deps)) {
+      deps += invoker.deps
+    }
+    ldflags = []
+    if (is_android) {
+      ldflags += [ "-llog" ]
+    }
+  }
+}
