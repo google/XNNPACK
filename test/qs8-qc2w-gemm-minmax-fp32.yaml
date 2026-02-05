@@ -3,6 +3,48 @@
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
 
+# ARM NEONDOT
+- name: xnn_qs8_qc2w_gemm_minmax_fp32_ukernel_1x8c4__neondot
+  init: xnn_init_qs8_qc8w_conv_minmax_fp32_neonv8_params
+  pack: xnn_pack_qs8_qc2w_gemm_goi_w
+  k-block: 16
+  planes: 4
+- name: xnn_qs8_qc2w_gemm_minmax_fp32_ukernel_4x8c4__neondot
+  init: xnn_init_qs8_qc8w_conv_minmax_fp32_neonv8_params
+  pack: xnn_pack_qs8_qc2w_gemm_goi_w
+  k-block: 16
+  planes: 4
+- name: xnn_qs8_qc2w_gemm_minmax_fp32_ukernel_6x8c4__neondot
+  init: xnn_init_qs8_qc8w_conv_minmax_fp32_neonv8_params
+  pack: xnn_pack_qs8_qc2w_gemm_goi_w
+  k-block: 16
+  planes: 4
+- name: xnn_qs8_qc2w_gemm_minmax_fp32_ukernel_8x8c4__neondot
+  init: xnn_init_qs8_qc8w_conv_minmax_fp32_neonv8_params
+  pack: xnn_pack_qs8_qc2w_gemm_goi_w
+  k-block: 16
+  planes: 4
+- name: xnn_qs8_qc2w_gemm_minmax_fp32_ukernel_1x16c4__neondot
+  init: xnn_init_qs8_qc8w_conv_minmax_fp32_neonv8_params
+  pack: xnn_pack_qs8_qc2w_gemm_goi_w
+  k-block: 16
+  planes: 4
+- name: xnn_qs8_qc2w_gemm_minmax_fp32_ukernel_4x16c4__neondot
+  init: xnn_init_qs8_qc8w_conv_minmax_fp32_neonv8_params
+  pack: xnn_pack_qs8_qc2w_gemm_goi_w
+  k-block: 16
+  planes: 4
+- name: xnn_qs8_qc2w_gemm_minmax_fp32_ukernel_6x16c4__neondot
+  init: xnn_init_qs8_qc8w_conv_minmax_fp32_neonv8_params
+  pack: xnn_pack_qs8_qc2w_gemm_goi_w
+  k-block: 16
+  planes: 4
+- name: xnn_qs8_qc2w_gemm_minmax_fp32_ukernel_8x16c4__neondot
+  init: xnn_init_qs8_qc8w_conv_minmax_fp32_neonv8_params
+  pack: xnn_pack_qs8_qc2w_gemm_goi_w
+  k-block: 16
+  planes: 4
+
 # Scalar
 - name: xnn_qs8_qc2w_gemm_minmax_fp32_ukernel_1x2__scalar_lrintf
   init: xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params

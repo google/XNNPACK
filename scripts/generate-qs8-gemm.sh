@@ -699,6 +699,15 @@ tools/xngen src/qs8-gemm/c4-neondot.c.in -D MR=4 -D NR=16 -D REQUANTIZATION= -D 
 tools/xngen src/qs8-gemm/c4-neondot.c.in -D MR=5 -D NR=16 -D REQUANTIZATION= -D DATATYPE=QB4_F16 -o src/qd8-f16-qb4w-gemm/gen/qd8-f16-qb4w-gemm-5x16c4-minmax-neondotfp16arith.c &
 tools/xngen src/qs8-gemm/c4-neondot.c.in -D MR=6 -D NR=16 -D REQUANTIZATION= -D DATATYPE=QB4_F16 -o src/qd8-f16-qb4w-gemm/gen/qd8-f16-qb4w-gemm-6x16c4-minmax-neondotfp16arith.c &
 
+tools/xngen src/qs8-gemm/c4-neondot.c.in -D MR=1  -D NR=8  -D REQUANTIZATION=FP32  -D DATATYPE=QS8_QC2 -o src/qs8-qc2w-gemm/gen/qs8-qc2w-gemm-1x8c4-minmax-fp32-neondot.c &
+tools/xngen src/qs8-gemm/c4-neondot.c.in -D MR=4  -D NR=8  -D REQUANTIZATION=FP32  -D DATATYPE=QS8_QC2 -o src/qs8-qc2w-gemm/gen/qs8-qc2w-gemm-4x8c4-minmax-fp32-neondot.c &
+tools/xngen src/qs8-gemm/c4-neondot.c.in -D MR=6  -D NR=8  -D REQUANTIZATION=FP32  -D DATATYPE=QS8_QC2 -o src/qs8-qc2w-gemm/gen/qs8-qc2w-gemm-6x8c4-minmax-fp32-neondot.c &
+tools/xngen src/qs8-gemm/c4-neondot.c.in -D MR=8  -D NR=8  -D REQUANTIZATION=FP32  -D DATATYPE=QS8_QC2 -o src/qs8-qc2w-gemm/gen/qs8-qc2w-gemm-8x8c4-minmax-fp32-neondot.c &
+tools/xngen src/qs8-gemm/c4-neondot.c.in -D MR=1  -D NR=16 -D REQUANTIZATION=FP32  -D DATATYPE=QS8_QC2 -o src/qs8-qc2w-gemm/gen/qs8-qc2w-gemm-1x16c4-minmax-fp32-neondot.c &
+tools/xngen src/qs8-gemm/c4-neondot.c.in -D MR=4  -D NR=16 -D REQUANTIZATION=FP32  -D DATATYPE=QS8_QC2 -o src/qs8-qc2w-gemm/gen/qs8-qc2w-gemm-4x16c4-minmax-fp32-neondot.c &
+tools/xngen src/qs8-gemm/c4-neondot.c.in -D MR=6  -D NR=16 -D REQUANTIZATION=FP32  -D DATATYPE=QS8_QC2 -o src/qs8-qc2w-gemm/gen/qs8-qc2w-gemm-6x16c4-minmax-fp32-neondot.c &
+tools/xngen src/qs8-gemm/c4-neondot.c.in -D MR=8  -D NR=16 -D REQUANTIZATION=FP32  -D DATATYPE=QS8_QC2 -o src/qs8-qc2w-gemm/gen/qs8-qc2w-gemm-8x16c4-minmax-fp32-neondot.c &
+
 tools/xngen src/qs8-gemm/c4-neondot.c.in -D MR=1  -D NR=8  -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-1x8c4-minmax-fp32-neondot.c &
 tools/xngen src/qs8-gemm/c4-neondot.c.in -D MR=4  -D NR=8  -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-4x8c4-minmax-fp32-neondot.c &
 tools/xngen src/qs8-gemm/c4-neondot.c.in -D MR=6  -D NR=8  -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-6x8c4-minmax-fp32-neondot.c &

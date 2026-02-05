@@ -1832,7 +1832,7 @@ void GemmMicrokernelTester::Test(
   auto w8rng = std::bind(std::uniform_int_distribution<int32_t>(
                              0, std::numeric_limits<uint8_t>::max()),
                          std::ref(rng));
-  const float max_abs_product = 1.0f * 4.0f * 2.0f;
+  const float max_abs_product = 1.0f * 16.0f * 2.0f;
 
   // 2 bit is 4 planes - four 2-bit values (crumbs) per byte
   const size_t k4 = round_up_po2(k(), 4);  // tester assumes byte aligned rows
