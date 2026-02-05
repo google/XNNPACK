@@ -630,97 +630,97 @@ jobs:
           mkdir -p /home/xnnpack/.cache/bazel/disk_cache
           find /home/xnnpack/.cache/bazel/disk_cache -type f -atime +7 -delete
 
-  #bazel-linux-aarch64-sme2-qemu:
-  #  runs-on: "arm-ubuntu-arm-22.04-8core"
-  #  timeout-minutes: 60
-  #  container:
-  #    image: ghcr.io/google/xnnpack/sme2:latest
-  #  env:
-  #    CC: clang-20
-  #    CXX: clang++-20
-  #    QEMU_ARGS: -cpu max
-  #  steps:
-  #    - uses: actions/checkout@v6
+  bazel-linux-aarch64-sme2-qemu:
+    runs-on: "arm-ubuntu-arm-22.04-8core"
+    timeout-minutes: 60
+    container:
+      image: ghcr.io/google/xnnpack/sme2:latest
+    env:
+      CC: clang-20
+      CXX: clang++-20
+      QEMU_ARGS: -cpu max
+    steps:
+      - uses: actions/checkout@v6
 
-  #    - name: Mount bazel cache
-  #      uses: actions/cache@v5
-  #      with:
-  #        path: "/home/xnnpack/.cache/bazel"
-  #        key: bazel-clang20-opt-sme2-${{ runner.os }}-${{ github.job }}-${{ github.run_id }}
-  #        restore-keys: bazel-clang20-opt-sme2-${{ runner.os }}-${{ github.job }}-
+      - name: Mount bazel cache
+        uses: actions/cache@v5
+        with:
+          path: "/home/xnnpack/.cache/bazel"
+          key: bazel-clang20-opt-sme2-${{ runner.os }}-${{ github.job }}-${{ github.run_id }}
+          restore-keys: bazel-clang20-opt-sme2-${{ runner.os }}-${{ github.job }}-
 
-  #    - name: Build microkernel and subgraph tests
-  #      if: ${{ !inputs.run-tests }}
-  #      run: |
-  #        bazel build \
-  #          -c opt \
-  #          --copt=-g1 \
-  #          --copt=-DGOOGLE_COMMANDLINEFLAGS_FULL_API=1 \
-  #          --platforms=//build_config:aarch64_linux \
-  #          --run_under="qemu-aarch64 ${QEMU_ARGS} " \
-  #          --define xnn_enable_arm_sme2=true \
-  #          --dynamic_mode=off \
-  #          --features=fully_static_link \
-  #          --disk_cache=/home/xnnpack/.cache/bazel/disk_cache \
-  #          --repository_cache=/home/xnnpack/.cache/bazel/repo_cache \
-  #          //test:qs8_qc8w_igemm_minmax_fp32_test \
-  #          //test:qp8_f32_qc4w_gemm_minmax_test \
-  #          //test:pf32_gemm_minmax_test \
-  #          //test:pf16_gemm_minmax_test \
-  #          //test:pqs8_qc8w_gemm_minmax_test \
-  #          //test/subgraph/... \
-  #          //ynnpack/...
-  #      working-directory: ${{ github.workspace }}
+      #- name: Build microkernel and subgraph tests
+      #  if: ${{ !inputs.run-tests }}
+      #  run: |
+      #    bazel build \
+      #      -c opt \
+      #      --copt=-g1 \
+      #      --copt=-DGOOGLE_COMMANDLINEFLAGS_FULL_API=1 \
+      #      --platforms=//build_config:aarch64_linux \
+      #      --run_under="qemu-aarch64 ${QEMU_ARGS} " \
+      #      --define xnn_enable_arm_sme2=true \
+      #      --dynamic_mode=off \
+      #      --features=fully_static_link \
+      #      --disk_cache=/home/xnnpack/.cache/bazel/disk_cache \
+      #      --repository_cache=/home/xnnpack/.cache/bazel/repo_cache \
+      #      //test:qs8_qc8w_igemm_minmax_fp32_test \
+      #      //test:qp8_f32_qc4w_gemm_minmax_test \
+      #      //test:pf32_gemm_minmax_test \
+      #      //test:pf16_gemm_minmax_test \
+      #      //test:pqs8_qc8w_gemm_minmax_test \
+      #      //test/subgraph/... \
+      #      //ynnpack/...
+      #  working-directory: ${{ github.workspace }}
 
-  #    - name: Build and run microkernel tests
-  #      if: ${{ inputs.run-tests }}
-  #      run: |
-  #        bazel test \
-  #          -c opt \
-  #          --copt=-g1 \
-  #          --copt=-DGOOGLE_COMMANDLINEFLAGS_FULL_API=1 \
-  #          --platforms=//build_config:aarch64_linux \
-  #          --run_under="qemu-aarch64 ${QEMU_ARGS} " \
-  #          --define xnn_enable_arm_sme2=true \
-  #          --dynamic_mode=off \
-  #          --features=fully_static_link \
-  #          --disk_cache=/home/xnnpack/.cache/bazel/disk_cache \
-  #          --repository_cache=/home/xnnpack/.cache/bazel/repo_cache \
-  #          --test_tag_filters=-not_run:arm \
-  #          //test:qs8_qc8w_igemm_minmax_fp32_test \
-  #          //test:qp8_f32_qc4w_gemm_minmax_test \
-  #          //test:pf32_gemm_minmax_test \
-  #          //test:pf16_gemm_minmax_test \
-  #          //test:pqs8_qc8w_gemm_minmax_test \
-  #          --cache_test_results=no \
-  #          --test_filter="*NEONSME2*" \
-  #          --test_output=errors \
-  #          --test_timeout=600 \
-  #          --local_test_jobs=$(nproc)
+      #- name: Build and run microkernel tests
+      #  if: ${{ inputs.run-tests }}
+      #  run: |
+      #    bazel test \
+      #      -c opt \
+      #      --copt=-g1 \
+      #      --copt=-DGOOGLE_COMMANDLINEFLAGS_FULL_API=1 \
+      #      --platforms=//build_config:aarch64_linux \
+      #      --run_under="qemu-aarch64 ${QEMU_ARGS} " \
+      #      --define xnn_enable_arm_sme2=true \
+      #      --dynamic_mode=off \
+      #      --features=fully_static_link \
+      #      --disk_cache=/home/xnnpack/.cache/bazel/disk_cache \
+      #      --repository_cache=/home/xnnpack/.cache/bazel/repo_cache \
+      #      --test_tag_filters=-not_run:arm \
+      #      //test:qs8_qc8w_igemm_minmax_fp32_test \
+      #      //test:qp8_f32_qc4w_gemm_minmax_test \
+      #      //test:pf32_gemm_minmax_test \
+      #      //test:pf16_gemm_minmax_test \
+      #      //test:pqs8_qc8w_gemm_minmax_test \
+      #      --cache_test_results=no \
+      #      --test_filter="*NEONSME2*" \
+      #      --test_output=errors \
+      #      --test_timeout=600 \
+      #      --local_test_jobs=$(nproc)
 
-  #    - name: Build and run subgraph tests
-  #      if: ${{ inputs.run-tests }}
-  #      run: |
-  #        bazel test \
-  #          -c opt \
-  #          --copt=-g1 \
-  #          --copt=-DGOOGLE_COMMANDLINEFLAGS_FULL_API=1 \
-  #          --platforms=//build_config:aarch64_linux \
-  #          --run_under="qemu-aarch64 ${QEMU_ARGS} " \
-  #          --define xnn_enable_arm_sme2=true \
-  #          --dynamic_mode=off \
-  #          --features=fully_static_link \
-  #          --disk_cache=/home/xnnpack/.cache/bazel/disk_cache \
-  #          --repository_cache=/home/xnnpack/.cache/bazel/repo_cache \
-  #          --test_tag_filters=-not_run:arm \
-  #          //test/subgraph/... \
-  #          //ynnpack/... \
-  #          --cache_test_results=no \
-  #          --test_output=errors \
-  #          --test_timeout=600 \
-  #          --local_test_jobs=$(nproc)
+      #- name: Build and run subgraph tests
+      #  if: ${{ inputs.run-tests }}
+      #  run: |
+      #    bazel test \
+      #      -c opt \
+      #      --copt=-g1 \
+      #      --copt=-DGOOGLE_COMMANDLINEFLAGS_FULL_API=1 \
+      #      --platforms=//build_config:aarch64_linux \
+      #      --run_under="qemu-aarch64 ${QEMU_ARGS} " \
+      #      --define xnn_enable_arm_sme2=true \
+      #      --dynamic_mode=off \
+      #      --features=fully_static_link \
+      #      --disk_cache=/home/xnnpack/.cache/bazel/disk_cache \
+      #      --repository_cache=/home/xnnpack/.cache/bazel/repo_cache \
+      #      --test_tag_filters=-not_run:arm \
+      #      //test/subgraph/... \
+      #      //ynnpack/... \
+      #      --cache_test_results=no \
+      #      --test_output=errors \
+      #      --test_timeout=600 \
+      #      --local_test_jobs=$(nproc)
 
-  #    - name: Compress disk cache
-  #      if: ${{ inputs.update-caches }}
-  #      run: find "/home/xnnpack/.cache/bazel" -type f -atime +7 -delete
+      - name: Compress disk cache
+        if: ${{ inputs.update-caches }}
+        run: find "/home/xnnpack/.cache/bazel" -type f -atime +7 -delete
 
