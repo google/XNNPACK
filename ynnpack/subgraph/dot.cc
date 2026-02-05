@@ -418,7 +418,7 @@ uint32_t define_pack_b(ynn_subgraph_t subgraph, const dot_type& type,
   node.inputs = {input_b_id};
   node.outputs = {packed_b_id};
   node.op = ynn_node::pack_b{};
-  node.create = [](const ynn_node& node, ynn_runtime& runtime) {
+  node.create = [num_k_dims](const ynn_node& node, ynn_runtime& runtime) {
     const ynn_runtime_value& input = runtime.value(node.inputs[0]);
     ynn_runtime_value& output = runtime.value(node.outputs[0]);
 
@@ -464,6 +464,12 @@ uint32_t define_pack_b(ynn_subgraph_t subgraph, const dot_type& type,
     ynn::scheduled_buffer sched_output_buffer = {output.buffer, 1};
     sched->scheduled_buffers.push_back(std::move(sched_output_buffer));
 
+    // TODO(vksnk): This is a temporary workaround to avoid recomputing packed
+    // buffer. The proper fix would probably involve adding a loop splits for
+    // the packing function and making scheduler match it.
+    if (num_k_dims > 1) {
+      sched->force_root = true;
+    }
     func.user_data() = sched.get();
     runtime.scheduling_info_storage.push_back(std::move(sched));
 
