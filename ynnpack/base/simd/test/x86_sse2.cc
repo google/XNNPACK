@@ -7,12 +7,16 @@
 
 #include <cstdint>
 
+#include <gtest/gtest.h>
 #include "ynnpack/base/bfloat16.h"
 #include "ynnpack/base/half.h"
 #include "ynnpack/base/simd/test/generic.h"
 
 namespace ynn {
 namespace simd {
+
+// We assume we can always use sse2.
+class x86_sse2 : public ::testing::Test {};
 
 TEST_BROADCAST(x86_sse2, uint8_t, 16);
 TEST_BROADCAST(x86_sse2, int8_t, 16);

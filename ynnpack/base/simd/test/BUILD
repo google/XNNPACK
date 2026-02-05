@@ -14,7 +14,6 @@ package(default_visibility = ["//ynnpack:__subpackages__"])
         arch,
         [
             "generic.h",
-            "main.cc",
             arch + ".cc",
         ],
     ),
@@ -27,7 +26,6 @@ package(default_visibility = ["//ynnpack:__subpackages__"])
     local_defines = ynn_if_arch(
         arch,
         ["YNN_ARCH=" + ynn_arch_flag(arch)],
-        ["YNN_UNSUPPORTED_ARCH"],
     ),
     malloc = ynn_binary_malloc(),
     deps = [
@@ -35,7 +33,6 @@ package(default_visibility = ["//ynnpack:__subpackages__"])
         "//ynnpack/base/simd",  # buildcleaner:keep
         "//ynnpack/base/test:fuzz_test",
         "//ynnpack/base/test:random",
-        "@com_google_googletest//:gtest",
     ] + ynn_test_deps(),
 ) for arch in [
     "arm_neon",
@@ -57,7 +54,6 @@ cc_test(
         "x86_sse2",
         [
             "generic.h",
-            "main.cc",
             "multi_vec.cc",
         ],
     ),
@@ -70,7 +66,6 @@ cc_test(
     local_defines = ynn_if_arch(
         "x86_sse2",
         ["YNN_ARCH=" + ynn_arch_flag("x86_sse2")],
-        ["YNN_UNSUPPORTED_ARCH"],
     ),
     malloc = ynn_binary_malloc(),
     deps = [

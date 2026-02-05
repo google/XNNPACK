@@ -5,12 +5,24 @@
 
 #include "ynnpack/base/simd/arm_neon.h"
 
+#include <cstdint>
+
+#include <gtest/gtest.h>
+#include "ynnpack/base/arch.h"
 #include "ynnpack/base/bfloat16.h"
 #include "ynnpack/base/half.h"
 #include "ynnpack/base/simd/test/generic.h"
 
 namespace ynn {
 namespace simd {
+
+class arm_neon : public ::testing::Test {
+  void SetUp() override {
+    if (!is_arch_supported(arch_flag::neon)) {
+      GTEST_SKIP() << "neon not supported on this hardware";
+    }
+  }
+};
 
 TEST_BROADCAST(arm_neon, uint8_t, 16);
 TEST_BROADCAST(arm_neon, int8_t, 16);

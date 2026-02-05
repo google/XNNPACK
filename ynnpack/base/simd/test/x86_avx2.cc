@@ -7,10 +7,20 @@
 
 #include <cstdint>
 
+#include <gtest/gtest.h>
+#include "ynnpack/base/arch.h"
 #include "ynnpack/base/simd/test/generic.h"
 
 namespace ynn {
 namespace simd {
+
+class x86_avx2 : public ::testing::Test {
+  void SetUp() override {
+    if (!is_arch_supported(arch_flag::avx2)) {
+      GTEST_SKIP() << "avx2 not supported on this hardware";
+    }
+  }
+};
 
 TEST_ADD(x86_avx2, uint8_t, 32);
 TEST_ADD(x86_avx2, int8_t, 32);

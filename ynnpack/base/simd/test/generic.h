@@ -34,7 +34,7 @@ void test_broadcast() {
 }
 
 #define TEST_BROADCAST(test_class, type, N) \
-  TEST(test_class, broadcast_##type##x##N) { test_broadcast<type, N>(); }
+  TEST_F(test_class, broadcast_##type##x##N) { test_broadcast<type, N>(); }
 
 template <typename scalar, size_t N>
 void test_load_store() {
@@ -57,7 +57,7 @@ void test_load_store() {
 }
 
 #define TEST_LOAD_STORE(test_class, type, N) \
-  TEST(test_class, load_store_##type##x##N) { test_load_store<type, N>(); }
+  TEST_F(test_class, load_store_##type##x##N) { test_load_store<type, N>(); }
 
 template <typename scalar, size_t N>
 void test_aligned_load_store() {
@@ -77,7 +77,7 @@ void test_aligned_load_store() {
 }
 
 #define TEST_ALIGNED_LOAD_STORE(test_class, type, N)  \
-  TEST(test_class, aligned_load_store_##type##x##N) { \
+  TEST_F(test_class, aligned_load_store_##type##x##N) { \
     test_aligned_load_store<type, N>();               \
   }
 
@@ -138,10 +138,10 @@ void test_partial_store() {
 }
 
 #define TEST_PARTIAL_LOAD_STORE(test_class, type, N) \
-  TEST(test_class, partial_load_##type##x##N) {      \
+  TEST_F(test_class, partial_load_##type##x##N) {      \
     test_partial_load<type, N>();                    \
   }                                                  \
-  TEST(test_class, partial_store_##type##x##N) {     \
+  TEST_F(test_class, partial_store_##type##x##N) {     \
     test_partial_store<type, N>();                   \
   }
 
@@ -192,23 +192,23 @@ struct copysign_op {
 };
 
 #define TEST_ADD(test_class, type, N) \
-  TEST(test_class, add_##type##x##N) { test_op<type, N, std::plus>(); }
+  TEST_F(test_class, add_##type##x##N) { test_op<type, N, std::plus>(); }
 #define TEST_SUBTRACT(test_class, type, N) \
-  TEST(test_class, subtract_##type##x##N) { test_op<type, N, std::minus>(); }
+  TEST_F(test_class, subtract_##type##x##N) { test_op<type, N, std::minus>(); }
 #define TEST_MULTIPLY(test_class, type, N)  \
-  TEST(test_class, multiply_##type##x##N) { \
+  TEST_F(test_class, multiply_##type##x##N) { \
     test_op<type, N, std::multiplies>();    \
   }
 #define TEST_COPYSIGN(test_class, type, N) \
-  TEST(test_class, copysign_##type##x##N) { test_op<type, N, copysign_op>(); }
+  TEST_F(test_class, copysign_##type##x##N) { test_op<type, N, copysign_op>(); }
 #define TEST_MIN(test_class, type, N) \
-  TEST(test_class, min_##type##x##N) { test_op<type, N, min_op>(); }
+  TEST_F(test_class, min_##type##x##N) { test_op<type, N, min_op>(); }
 #define TEST_MAX(test_class, type, N) \
-  TEST(test_class, max_##type##x##N) { test_op<type, N, max_op>(); }
+  TEST_F(test_class, max_##type##x##N) { test_op<type, N, max_op>(); }
 #define TEST_AND(test_class, type, N) \
-  TEST(test_class, and_##type##x##N) { test_op<type, N, min_op>(); }
+  TEST_F(test_class, and_##type##x##N) { test_op<type, N, min_op>(); }
 #define TEST_OR(test_class, type, N) \
-  TEST(test_class, or_##type##x##N) { test_op<type, N, max_op>(); }
+  TEST_F(test_class, or_##type##x##N) { test_op<type, N, max_op>(); }
 
 template <size_t Lanes, typename From, size_t... Is>
 void test_extract_impl(std::index_sequence<Is...>, From from_v,
@@ -240,7 +240,7 @@ void test_extract() {
 }
 
 #define TEST_EXTRACT(test_class, from, lanes) \
-  TEST(test_class, extract_##from##_##lanes) { test_extract<from, lanes>(); }
+  TEST_F(test_class, extract_##from##_##lanes) { test_extract<from, lanes>(); }
 
 template <typename vector>
 void test_concat() {
@@ -260,7 +260,7 @@ void test_concat() {
 }
 
 #define TEST_CONCAT(test_class, vector) \
-  TEST(test_class, concat_##vector) { test_concat<vector>(); }
+  TEST_F(test_class, concat_##vector) { test_concat<vector>(); }
 
 template <typename To, typename From>
 void test_convert() {
@@ -282,7 +282,7 @@ void test_convert() {
 }
 
 #define TEST_CONVERT(test_class, to, from) \
-  TEST(test_class, convert_##to##_##from) { test_convert<to, from>(); }
+  TEST_F(test_class, convert_##to##_##from) { test_convert<to, from>(); }
 
 // This function has a max of n at n, and descends to 0 at either 0 or 2*n - 1.
 // This allows us to test a horizontal min/max reduction where any one of n
@@ -316,11 +316,11 @@ void test_horizontal_max() {
 }
 
 #define TEST_HORIZONTAL_MIN(test_class, type, N)  \
-  TEST(test_class, horizontal_min_##type##x##N) { \
+  TEST_F(test_class, horizontal_min_##type##x##N) { \
     test_horizontal_min<type, N>();               \
   }
 #define TEST_HORIZONTAL_MAX(test_class, type, N)  \
-  TEST(test_class, horizontal_max_##type##x##N) { \
+  TEST_F(test_class, horizontal_max_##type##x##N) { \
     test_horizontal_max<type, N>();               \
   }
 
@@ -356,7 +356,7 @@ void test_fma() {
 }
 
 #define TEST_FMA(test_class, type, N) \
-  TEST(test_class, fma_##type##x##N) { test_fma<type, N>(); }
+  TEST_F(test_class, fma_##type##x##N) { test_fma<type, N>(); }
 
 }  // namespace simd
 

@@ -5,6 +5,7 @@
 
 #include <cstdint>
 
+#include <gtest/gtest.h>
 #include "ynnpack/base/bfloat16.h"
 #include "ynnpack/base/half.h"
 #include "ynnpack/base/simd/x86_sse2.h"
@@ -15,6 +16,8 @@
 
 namespace ynn {
 namespace simd {
+
+class multi_vec : public ::testing::Test {};
 
 TEST_BROADCAST(multi_vec, uint8_t, 32);
 TEST_BROADCAST(multi_vec, int8_t, 32);

@@ -7,12 +7,22 @@
 
 #include <cstdint>
 
+#include <gtest/gtest.h>
+#include "ynnpack/base/arch.h"
 #include "ynnpack/base/bfloat16.h"
 #include "ynnpack/base/half.h"
 #include "ynnpack/base/simd/test/generic.h"
 
 namespace ynn {
 namespace simd {
+
+class x86_avx512f : public ::testing::Test {
+  void SetUp() override {
+    if (!is_arch_supported(arch_flag::avx512f)) {
+      GTEST_SKIP() << "avx512f not supported on this hardware";
+    }
+  }
+};
 
 TEST_BROADCAST(x86_avx512f, uint8_t, 64);
 TEST_BROADCAST(x86_avx512f, int8_t, 64);

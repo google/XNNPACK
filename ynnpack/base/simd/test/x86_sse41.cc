@@ -5,10 +5,22 @@
 
 #include "ynnpack/base/simd/x86_sse41.h"
 
+#include <cstdint>
+
+#include <gtest/gtest.h>
+#include "ynnpack/base/arch.h"
 #include "ynnpack/base/simd/test/generic.h"
 
 namespace ynn {
 namespace simd {
+
+class x86_sse41 : public ::testing::Test {
+  void SetUp() override {
+    if (!is_arch_supported(arch_flag::sse41)) {
+      GTEST_SKIP() << "sse41 not supported on this hardware";
+    }
+  }
+};
 
 TEST_MULTIPLY(x86_sse41, int32_t, 4);
 
