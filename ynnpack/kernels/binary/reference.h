@@ -16,6 +16,7 @@
 #include <gtest/gtest.h>
 #include "ynnpack/base/arithmetic.h"
 #include "ynnpack/base/base.h"
+#include "ynnpack/base/bfloat16.h"
 #include "ynnpack/base/test/tensor.h"
 #include "ynnpack/base/type.h"
 #include "ynnpack/include/ynnpack.h"
@@ -48,6 +49,7 @@ struct subtract : public binary_op_info {
   int32_t operator()(int32_t a, int32_t b) const override {
     return static_cast<int32_t>(widen(a) - widen(b));
   }
+  bfloat16 operator()(float a, bfloat16 b) const { return bfloat16(a - b); }
 };
 
 struct multiply : public binary_op_info {

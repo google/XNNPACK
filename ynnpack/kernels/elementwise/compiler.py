@@ -1075,7 +1075,7 @@ class Target:
     if isinstance(expr, Op):
       args = [self.optimize_slices(arg, cache) for arg in expr.args]
       if expr.name == "slice":
-        if args[0].name == "combine":
+        if isinstance(args[0], Op) and args[0].name == "combine":
           comb = args[0]
           slice_index = args[1].value
           total_slices = args[2].value
@@ -1091,7 +1091,7 @@ class Target:
             cache[expr] = mutated
             return mutated
 
-        elif args[0].name == "broadcast":
+        elif isinstance(args[0], Op) and args[0].name == "broadcast":
           bc = args[0]
           mutated = broadcast(bc.args[0], expr.ty.lanes)
           cache[expr] = mutated
@@ -1301,8 +1301,8 @@ class Target:
           self.result += (
               f"{self.indent()}{b.name}_broadcasted[{i}] ="
               f" {broadcast_op.name}(((const"
-              f" {b.ty}*)offset_bytes({prefix_after}{b.name}, min({i}, m - i"
-              f" - 1) * stride_{b.name}_m))[0]);\n"
+              f" {self.legalize_type(b.ty, True)}*)offset_bytes({prefix_after}{b.name},"
+              f" min({i}, m - i - 1) * stride_{b.name}_m))[0]);\n"
           )
 
         if b.broadcast_mode == BroadcastMode.LOCAL_VAR:
@@ -1777,6 +1777,8 @@ f32_a = Var("a", Float(32))
 f32_b = Var("b", Float(32))
 f32_c = Var("c", Float(32))
 f32_d = Var("d", Float(32))
+bf16_a = Var("a", BFloat(16))
+bf16_b = Var("b", BFloat(16))
 
 
 class Rule:
