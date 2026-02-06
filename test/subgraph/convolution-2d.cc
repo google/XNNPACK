@@ -355,9 +355,7 @@ using qcint8 = quantized<int8_t, channelwise>;
 using qint32 = quantized<int32_t>;
 
 TEST(Convolution2DQC8, test) { TestImpl<qint8, qcint8, qcint32>(); }
-#ifndef XNNPACK_USE_YNNPACK
 TEST(Convolution2DQU8, test) { TestImpl<quint8, quint8, qint32>(); }
-#endif  // XNNPACK_USE_YNNPACK
 TEST(Convolution2DQS8, test) { TestImpl<qint8, qint8, qint32>(); }
 TEST(Convolution2DF16, test) { TestImpl<xnn_float16, float, float>(); }
 TEST(Convolution2DF32, test) { TestImpl<float, float, float>(); }
