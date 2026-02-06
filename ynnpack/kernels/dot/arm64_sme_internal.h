@@ -95,6 +95,20 @@ YNN_ALWAYS_INLINE svcount_t svctrue(int8_t) YNN_SME_HELPER {
   return svptrue_c8();
 }
 
+// Helpers to call SME2 multi-vector loads and creations via overloading.
+YNN_ALWAYS_INLINE svfloat32x4_t svld1_x4_impl(svcount_t c, const float* p) YNN_SME_HELPER {
+  return svld1_x4(c, p);
+}
+YNN_ALWAYS_INLINE svbfloat16x4_t svld1_x4_impl(svcount_t c, const bfloat16_t* p) YNN_SME_HELPER {
+  return svld1_x4(c, p);
+}
+YNN_ALWAYS_INLINE svfloat16x4_t svld1_x4_impl(svcount_t c, const float16_t* p) YNN_SME_HELPER {
+  return svld1_x4(c, p);
+}
+YNN_ALWAYS_INLINE svint8x4_t svld1_x4_impl(svcount_t c, const int8_t* p) YNN_SME_HELPER {
+  return svld1_x4(c, p);
+}
+
 }  // namespace ynn
 
 #endif  // XNNPACK_YNNPACK_KERNELS_DOT_ARM64_SME_INTERNAL_H_

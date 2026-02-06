@@ -16,6 +16,7 @@
 #include <optional>
 #include <sstream>
 #include <string>
+#include <vector>
 
 #include "ynnpack/base/arch.h"  // IWYU pragma: keep
 #include "ynnpack/base/arithmetic.h"
@@ -64,15 +65,13 @@ void dot(benchmark::State& state, uint64_t arch_flags, dot_kernel_fn kernel,
 
   const size_t m = shape.m;
   const size_t n = shape.n;
-  // If k gets aligned up, that means this kernel would have needed to pad the
-  // input with zeros up to a multiple of tile_k. To make checking correctness
-  // easier, let's just round k up, it should be computationally equivalent.
   const size_t k = align_up<size_t>(shape.k, tile_k);
   state.SetLabel(std::to_string(m) + "x" + std::to_string(n) + "x" +
                  std::to_string(k));
 
   const bool transpose_a = flags & dot_flag::transpose_a;
 
+  // Initial setup
   Tensor<TA> a({align_up(m, tile_m), k / a_elem_count});
   Tensor<TB> b({k, align_up(n, tile_n) / b_elem_count},
                Alignment{.bytes = tile_n * tile_k * sizeof(TB)});
@@ -82,29 +81,72 @@ void dot(benchmark::State& state, uint64_t arch_flags, dot_kernel_fn kernel,
   c.fill(0);
   b = b.crop_padding({0, 0}, {b.extent(0) - k, b.extent(1) - n});
 
+  // Panel Packing for A if transpose_a is requested.
+  // This simulates the optimal memory layout where A is stored in vertical strips of width `tile_m`.
+  // This ensures that the stride within a strip is exactly `tile_m`, enabling svld1_x4.
+  std::vector<TA> a_packed_buffer;
   if (transpose_a) {
-    // This mangles the data, but we don't care here.
-    a = a.reshape({k / tile_k, m * tile_k});
+    size_t m_aligned = align_up(m, tile_m);
+    a_packed_buffer.resize(m_aligned * k);
+    
+    // Pack into panels: [Number_of_Panels, K, Tile_M]
+    // But flattened, so we access it via pointer arithmetic.
+    for (size_t panel_start = 0; panel_start < m; panel_start += tile_m) {
+        size_t current_tile_m = std::min(tile_m, m - panel_start);
+        TA* panel_ptr = a_packed_buffer.data() + panel_start * k;
+        
+        for (size_t row = 0; row < k; ++row) {
+            for (size_t col = 0; col < current_tile_m; ++col) {
+                // Determine source index. Original a is [M, K].
+                // a(row, col) accesses usually [row, col] -> M, K?
+                // Tensor `a` was init as {M, K}.
+                // a(i, k) is row i, col k.
+                size_t src_m = panel_start + col;
+                size_t src_k = row;
+                
+                // Destination: Panel is dense [K, Tile_M].
+                // Offset = row * tile_m + col
+                panel_ptr[row * tile_m + col] = a(src_m, src_k);
+            }
+            // Pad the rest of the tile width with 0 if boundary
+            for (size_t col = current_tile_m; col < tile_m; ++col) {
+                panel_ptr[row * tile_m + col] = 0;
+            }
+        }
+    }
   }
 
   for (auto _ : state) {
     for (size_t i = 0; i < m; i += block_m) {
       size_t m_i = std::min(block_m, m - i);
-      const void* a_i = transpose_a ? &a(0, i * tile_k) : &a(i, 0);
-      kernel(m_i, n, 1, 1, k, a.stride(0) * sizeof(TA), 0, 0, a_i, 0, 0,
+      
+      const void* a_i = nullptr;
+      size_t a_stride = 0;
+
+      if (transpose_a) {
+          // Point to the start of the panel corresponding to row `i`.
+          // Since we packed in blocks of `tile_m` (which matches `block_m` usually),
+          // we just offset by K * i.
+          // Note: i must be aligned to block_m/tile_m for this to work perfectly 
+          // without partial panel logic, but dot kernel loops aligned.
+          a_i = a_packed_buffer.data() + i * k;
+          // Stride is exactly tile_m because we packed it that way!
+          a_stride = tile_m * sizeof(TA);
+      } else {
+          a_i = &a(i, 0);
+          a_stride = a.stride(0) * sizeof(TA);
+      }
+
+      kernel(m_i, n, 1, 1, k, a_stride, 0, 0, a_i, 0, 0,
              b.stride(0) * sizeof(TB), b.base(), /*init_c_stride_m=*/0, nullptr,
              c.stride(0) * sizeof(TC), &c(i, 0));
     }
   }
 
-  // Check that the kernel didn't compute the wrong thing. We assume the kernel
-  // is correct, but we have some logic here that needs validation too. We
-  // filled a and b with 1, so the result should be k everywhere.
   if (!std::all_of(c.begin(), c.end(), [=](TC x) { return x == k; })) {
     state.SkipWithError("Incorrect result");
   }
 
-  // Use the original shape to count the ops, so we don't count padding.
   const size_t ops = shape.m * shape.n * shape.k * 2;
   state.counters["OP"] =
       benchmark::Counter(state.iterations() * ops, benchmark::Counter::kIsRate);
@@ -137,10 +179,7 @@ void get_dot_kernel(benchmark::State& state, A, B, C) {
 }
 
 void get_dot_kernel_args(benchmark::internal::Benchmark* b) {
-  // We use a large highly composite value when we want to test large shapes, so
-  // it is unlikely that block shapes do not divide this extent.
   const int large_shape = 3 * 5 * 7 * 64;
-
   b->ArgNames({"M", "N", "K", "TileK", "BlockN"});
   b->Args({large_shape, large_shape, large_shape, 0, 0});
   b->Args({large_shape, large_shape, large_shape, 1, 16});

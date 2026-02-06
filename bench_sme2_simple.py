@@ -17,7 +17,6 @@ BAZEL_FLAGS = [
 ]
 
 TARGET = "ynnpack/kernels/dot:bench"
-# Path to the binary after bazel build -c opt
 BINARY_PATH = "bazel-bin/ynnpack/kernels/dot/bench"
 
 def build():
@@ -31,7 +30,6 @@ def build():
 
 def run_benchmark(size):
     print(f"[-] Benchmarking size {size}...", end="", flush=True)
-    # Execute binary directly to avoid bazel log noise on stdout
     cmd = [
         BINARY_PATH,
         "--benchmark_filter=dot_fp32_sme2",
@@ -44,10 +42,15 @@ def run_benchmark(size):
     
     try:
         result = subprocess.run(cmd, capture_output=True, text=True, check=True)
-        print(" Done.")
-        return json.loads(result.stdout)
+        # Find the start of JSON output (to skip any potential binary preamble)
+        stdout = result.stdout
+        start_idx = stdout.find("{")
+        if start_idx == -1:
+            print(f" No JSON found in output: {stdout}")
+            return None
+        return json.loads(stdout[start_idx:])
     except Exception as e:
-        print(f" Failed! {e}")
+        print(f" Error: {e}")
         return None
 
 def analyze(data):
@@ -55,6 +58,9 @@ def analyze(data):
     t_orig, t_opt = [], []
     for b in data.get("benchmarks", []):
         if "aggregate_name" in b: continue
+        if "error_occurred" in b and b["error_occurred"]:
+            print(f"\n[!] Benchmark error for {b['name']}: {b.get('error_message', 'Unknown')}")
+            return "RESULT_ERROR"
         if "dot_fp32_sme2_opt" in b["name"]: t_opt.append(b["real_time"])
         elif "dot_fp32_sme2" in b["name"]: t_orig.append(b["real_time"])
     
@@ -74,9 +80,11 @@ def main():
     results = []
     for s in SIZES:
         data = run_benchmark(s)
-        stats = analyze(data)
-        if stats:
-            m_orig, m_opt, speedup = stats
+        res = analyze(data)
+        if res == "RESULT_ERROR":
+            print(f"{s:<6} | {'INVALID':<10} | {'INVALID':<10} | {'N/A':<8} |")
+        elif res:
+            m_orig, m_opt, speedup = res
             bar = "#" * int(max(0, (speedup - 0.95) * 40)) if speedup > 0.95 else ""
             print(f"{s:<6} | {m_orig/1e6:<10.3f} | {m_opt/1e6:<10.3f} | {speedup:<8.3f} | {bar}")
             results.append((s, speedup))
