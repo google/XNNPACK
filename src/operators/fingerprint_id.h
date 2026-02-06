@@ -206,8 +206,7 @@ enum xnn_fingerprint_id xnn_compute_fingerprint_id_value(
     enum xnn_fingerprint_id_helper op, enum xnn_fingerprint_id_helper in,
     enum xnn_fingerprint_id_helper out, uint32_t weights, ...);
 
-const char* xnn_fingerprint_id_to_string(
-    enum xnn_fingerprint_id fingerprint_id);
+const char* xnn_fingerprint_id_to_string(uint32_t fingerprint_id);
 
 #ifdef __cplusplus
 }  // extern "C"

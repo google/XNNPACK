@@ -92,6 +92,9 @@ struct xnn_fingerprint {
   uint32_t value;
 };
 
+/// Return a string corresponding to the fingerprint id.
+const char* xnn_fingerprint_id_to_string(uint32_t fingerprint_id);
+
 /// Check whether the given configuration matches one that is currently in use.
 ///
 /// @returns `xnn_status_success` if the configuration matches.

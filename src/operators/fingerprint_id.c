@@ -25,8 +25,8 @@ enum xnn_fingerprint_id xnn_compute_fingerprint_id_value(
 }
 
 const char* xnn_fingerprint_id_to_string(
-    const enum xnn_fingerprint_id fingerprint_id) {
-  switch (fingerprint_id) {
+    const uint32_t fingerprint_id) {
+  switch ((enum xnn_fingerprint_id)fingerprint_id) {
 #define XNN_STRINGIFY__(x) #x
 #define XNN_STRINGIFY_(x) XNN_EXPAND(XNN_STRINGIFY__(x))
 #define XNN_STRINGIFY(x) XNN_STRINGIFY_(x)
