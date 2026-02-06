@@ -285,6 +285,18 @@ void test_convert() {
 #define TEST_CONVERT(test_class, to, from) \
   TEST_F(test_class, convert_##to##_##from) { test_convert<to, from>(); }
 
+template <typename scalar, size_t N>
+void test_horizontal_sum() {
+  using vector = vec<scalar, N>;
+
+  scalar a[N * 2] = {};
+  std::fill_n(&a[N], N, static_cast<scalar>(1));
+  // Note we test N + 1 values here, so we cover both the all 0 and all 1 cases.
+  for (int i = 0; i <= N; ++i) {
+    ASSERT_EQ(i, horizontal_sum(load(&a[i], vector::N)));
+  }
+}
+
 // This function has a max of n at n, and descends to 0 at either 0 or 2*n - 1.
 // This allows us to test a horizontal min/max reduction where any one of n
 // lanes is the min or max.
@@ -316,6 +328,10 @@ void test_horizontal_max() {
   }
 }
 
+#define TEST_HORIZONTAL_SUM(test_class, type, N)  \
+  TEST_F(test_class, horizontal_sum_##type##x##N) { \
+    test_horizontal_sum<type, N>();               \
+  }
 #define TEST_HORIZONTAL_MIN(test_class, type, N)  \
   TEST_F(test_class, horizontal_min_##type##x##N) { \
     test_horizontal_min<type, N>();               \

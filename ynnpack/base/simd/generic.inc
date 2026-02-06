@@ -156,6 +156,10 @@ YNN_ALWAYS_INLINE vec<To, N> convert(vec<From, N> from, To) {
 }
 
 template <typename T, size_t N>
+YNN_ALWAYS_INLINE T horizontal_sum(vec<T, N> x) {
+  return horizontal_sum(x.lo() + x.hi());
+}
+template <typename T, size_t N>
 YNN_ALWAYS_INLINE T horizontal_min(vec<T, N> x) {
   return horizontal_min(min(x.lo(), x.hi()));
 }

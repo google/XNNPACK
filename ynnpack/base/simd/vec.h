@@ -191,16 +191,29 @@ YNN_ALWAYS_INLINE vec<T, 1>& operator*=(vec<T, 1>& a, vec<T, 1> b) {
 }
 template <typename T>
 YNN_ALWAYS_INLINE vec<T, 1> min(vec<T, 1> a, vec<T, 1> b) {
-  return std::min(a.v, b.v);
+  return vec<T, 1>{std::min(a.v, b.v)};
 }
 template <typename T>
 YNN_ALWAYS_INLINE vec<T, 1> max(vec<T, 1> a, vec<T, 1> b) {
-  return std::max(a.v, b.v);
+  return vec<T, 1>{std::max(a.v, b.v)};
 }
 
 template <typename To, typename From>
 YNN_ALWAYS_INLINE vec<To, 1> convert(vec<From, 1> from, To) {
-  return static_cast<To>(from.v);
+  return vec<To, 1>{static_cast<To>(from.v)};
+}
+
+template <typename T>
+YNN_ALWAYS_INLINE T horizontal_sum(vec<T, 1> x) {
+  return x.v;
+}
+template <typename T>
+YNN_ALWAYS_INLINE T horizontal_min(vec<T, 1> x) {
+  return x.v;
+}
+template <typename T>
+YNN_ALWAYS_INLINE T horizontal_max(vec<T, 1> x) {
+  return x.v;
 }
 
 }  // namespace simd

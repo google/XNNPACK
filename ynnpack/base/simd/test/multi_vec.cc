@@ -81,5 +81,23 @@ TEST_CONCAT(multi_vec, f16x4);
 TEST_CONCAT(multi_vec, s8x8);
 TEST_CONCAT(multi_vec, u8x8);
 
+TEST_HORIZONTAL_SUM(multi_vec, uint8_t, 16);
+TEST_HORIZONTAL_SUM(multi_vec, int8_t, 16);
+TEST_HORIZONTAL_SUM(multi_vec, int16_t, 8);
+TEST_HORIZONTAL_SUM(multi_vec, float, 4);
+TEST_HORIZONTAL_SUM(multi_vec, int32_t, 4);
+
+TEST_HORIZONTAL_MIN(multi_vec, uint8_t, 16);
+TEST_HORIZONTAL_MIN(multi_vec, int8_t, 16);
+TEST_HORIZONTAL_MIN(multi_vec, int16_t, 8);
+TEST_HORIZONTAL_MIN(multi_vec, float, 4);
+TEST_HORIZONTAL_MIN(multi_vec, int32_t, 4);
+
+TEST_HORIZONTAL_MAX(multi_vec, uint8_t, 16);
+TEST_HORIZONTAL_MAX(multi_vec, int8_t, 16);
+TEST_HORIZONTAL_MAX(multi_vec, int16_t, 8);
+TEST_HORIZONTAL_MAX(multi_vec, float, 4);
+TEST_HORIZONTAL_MAX(multi_vec, int32_t, 4);
+
 }  // namespace simd
 }  // namespace ynn
