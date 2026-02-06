@@ -76,6 +76,7 @@ ynn_status ynn_define_static_pad(ynn_subgraph_t subgraph, size_t num_axes,
       }
     }
 
+    slinky::func f;
     if (node.inputs[1] != YNN_INVALID_VALUE_ID) {
       const ynn_runtime_value& padding_value = runtime.value(node.inputs[1]);
       slinky::func::input padding{
@@ -85,15 +86,23 @@ ynn_status ynn_define_static_pad(ynn_subgraph_t subgraph, size_t num_axes,
         padding.bounds[p.axis] -= p.pre_padding;
       }
 
-      auto func = slinky::func::make_copy(std::move(func_input),
-                                          {output.buffer, std::move(dims)},
-                                          std::move(padding));
-      runtime.funcs.push_back(std::move(func));
+      f = slinky::func::make_copy(std::move(func_input),
+                                  {output.buffer, std::move(dims)},
+                                  std::move(padding));
     } else {
-      auto func = slinky::func::make_copy(std::move(func_input),
-                                          {output.buffer, std::move(dims)});
-      runtime.funcs.push_back(std::move(func));
+      f = slinky::func::make_copy(std::move(func_input),
+                                  {output.buffer, std::move(dims)});
     }
+
+    auto sched = std::make_unique<ynn::scheduling_info>();
+    // Store at the innermost level.
+    ynn::scheduled_buffer sched_output_buffer = {output.buffer, 0};
+    sched->scheduled_buffers.push_back(std::move(sched_output_buffer));
+
+    f.user_data() = sched.get();
+    runtime.scheduling_info_storage.push_back(std::move(sched));
+    runtime.funcs.push_back(std::move(f));
+
     return ynn_status_success;
   };
   subgraph->add_node(std::move(node));
