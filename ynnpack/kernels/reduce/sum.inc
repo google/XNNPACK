@@ -53,9 +53,18 @@ YNN_UNARY_REDUCE_KERNEL(arch_flag::ssse3, sum_uint8_int32_ssse3, uint8_t, int32_
 YNN_UNARY_REDUCE_KERNEL(arch_flag::ssse3, sum_int8_int32_ssse3, int8_t, int32_t)
 #endif  // YNN_ARCH_X86_SSSE3
 
+// We can assume that SSE2 exists on any x86 CPU we will run on, so we don't
+// need to include these kernels. Reasons to do this:
+// - Saves a little code size to not include kernels we will never need.
+// - consistent_reduce_test will assert that all available kernels produce
+//   arithmetically consistent results, which is not true for these kernels,
+//   especially bf16, because most bf16 kernels do a pairwise reduction as the
+//   "innermost" reduction step.
+#if !defined(YNN_ARCH_X86_SSE2)
 YNN_UNARY_REDUCE_KERNEL(arch_flag::none, sum_fp32, float, float)
-YNN_UNARY_REDUCE_KERNEL(arch_flag::none, sum_fp16_fp32, half, float)
 YNN_UNARY_REDUCE_KERNEL(arch_flag::none, sum_bf16_fp32, bfloat16, float)
+#endif  // !defined(YNN_ARCH_X86_SSE2)
+YNN_UNARY_REDUCE_KERNEL(arch_flag::none, sum_fp16_fp32, half, float)
 YNN_UNARY_REDUCE_KERNEL(arch_flag::none, sum_int8_int32, int8_t, int32_t)
 YNN_UNARY_REDUCE_KERNEL(arch_flag::none, sum_uint8_int32, uint8_t, int32_t)
 YNN_UNARY_REDUCE_KERNEL(arch_flag::none, sum_int32, int32_t, int32_t)

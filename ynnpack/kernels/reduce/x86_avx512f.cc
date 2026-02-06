@@ -9,23 +9,12 @@
 
 #include <cassert>
 #include <cstddef>
-#include <type_traits>
 
 #include "ynnpack/kernels/reduce/generic.h"
 #include "ynnpack/kernels/reduce/min_max_accumulator.h"
 #include "ynnpack/kernels/reduce/sum_accumulator.h"
 
 namespace ynn {
-
-namespace simd {
-
-static f32x16 reduce_add(
-    f32x16 a, f32x16 b, Square /*map_fn*/,
-    std::integral_constant<size_t, 1> /*horizontal_factor*/) {
-  return fma(b, b, a);
-}
-
-}  // namespace simd
 
 using simd::f32x16;
 
@@ -42,11 +31,10 @@ void sum_fp32_avx512f(size_t n, size_t k3, size_t k2, size_t k1,
         n, k3, k2, a_stride_k3, a_stride_k2, reinterpret_cast<const float*>(a),
         /*C_stride_m=*/0, reinterpret_cast<float*>(c));
   } else {
-    tiled_reduce<sum_accumulator_x32<simd::vec<float, consistent_tile_k>,
-                                     consistent_tile_k>,
-                 float, float>(n, k3, k2, k1, a_stride_n, a_stride_k3,
-                               a_stride_k2, reinterpret_cast<const float*>(a),
-                               /*C_stride_m=*/0, reinterpret_cast<float*>(c));
+    tiled_reduce<sum_accumulator_fp32<>, float, float>(
+        n, k3, k2, k1, a_stride_n, a_stride_k3, a_stride_k2,
+        reinterpret_cast<const float*>(a),
+        /*C_stride_m=*/0, reinterpret_cast<float*>(c));
   }
 }
 
@@ -59,7 +47,7 @@ void sum_squared_fp32_avx512f(size_t n, size_t k3, size_t k2, size_t k1,
         n, k3, k2, a_stride_k3, a_stride_k2, reinterpret_cast<const float*>(a),
         /*C_stride_m=*/0, reinterpret_cast<float*>(c));
   } else {
-    tiled_reduce<sum_accumulator_x32<f32x16, 16, Square>, float, float>(
+    tiled_reduce<sum_accumulator_fp32<1, Square>, float, float>(
         n, k3, k2, k1, a_stride_n, a_stride_k3, a_stride_k2,
         reinterpret_cast<const float*>(a), /*C_stride_m=*/0,
         reinterpret_cast<float*>(c));

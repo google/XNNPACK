@@ -3,8 +3,11 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+#include "ynnpack/base/simd/x86_sse2.h"
+
 #include <immintrin.h>
 
+#include <array>
 #include <cstddef>
 #include <cstdint>
 #include <type_traits>
@@ -13,7 +16,6 @@
 #include "ynnpack/base/bfloat16.h"
 #include "ynnpack/base/half.h"
 #include "ynnpack/base/simd/vec.h"
-#include "ynnpack/base/simd/x86_sse2.h"
 #include "ynnpack/kernels/reduce/generic.h"
 #include "ynnpack/kernels/reduce/min_max_accumulator.h"
 #include "ynnpack/kernels/reduce/reduce.h"
@@ -48,13 +50,31 @@ static s32x4 reduce_add(
 template <typename MapFn>
 static f32x4 reduce_add(
     f32x4 a, bf16x8 b, MapFn map_fn,
-    std::integral_constant<size_t, 2> /*horizontal_factor*/) {
+    std::integral_constant<size_t, 2> /*horizontal_factor*/ = {}) {
   __m128 mask = _mm_castsi128_ps(_mm_set1_epi32(0xFFFF0000));
   f32x4 evens(_mm_castsi128_ps(_mm_slli_epi32(b.v, 16)));
   f32x4 odds(_mm_and_ps(_mm_castsi128_ps(b.v), mask));
   a += map_fn(odds);
   a += map_fn(evens);
   return a;
+}
+
+using f32x16 = simd::vec<float, 16>;
+using bf16x32 = simd::vec<bfloat16, 32>;
+
+template <typename MapFn>
+static f32x16 reduce_add(
+    f32x16 a, bf16x32 b, MapFn map_fn,
+    std::integral_constant<size_t, 2> /*horizontal_factor*/) {
+  f32x4 a0 =
+      reduce_add(extract<0>(a, f32x4::N), extract<0>(b, bf16x8::N), map_fn);
+  f32x4 a1 =
+      reduce_add(extract<1>(a, f32x4::N), extract<1>(b, bf16x8::N), map_fn);
+  f32x4 a2 =
+      reduce_add(extract<2>(a, f32x4::N), extract<2>(b, bf16x8::N), map_fn);
+  f32x4 a3 =
+      reduce_add(extract<3>(a, f32x4::N), extract<3>(b, bf16x8::N), map_fn);
+  return {{a0, a1}, {a2, a3}};
 }
 
 }  // namespace simd
@@ -178,7 +198,7 @@ void sum_bf16_fp32_sse2(size_t n, size_t k3, size_t k2, size_t k1,
         reinterpret_cast<const bfloat16*>(a), /*C_stride_m=*/0,
         reinterpret_cast<float*>(c));
   } else {
-    tiled_reduce<sum_accumulator_x32<f32x4, 8>, bfloat16, float>(
+    tiled_reduce<sum_accumulator_fp32<2, Identity, 2>, bfloat16, float>(
         n, k3, k2, k1, a_stride_n, a_stride_k3, a_stride_k2,
         reinterpret_cast<const bfloat16*>(a), /*C_stride_m=*/0,
         reinterpret_cast<float*>(c));
@@ -195,7 +215,7 @@ void sum_squared_bf16_fp32_sse2(size_t n, size_t k3, size_t k2, size_t k1,
         reinterpret_cast<const bfloat16*>(a), /*C_stride_m=*/0,
         reinterpret_cast<float*>(c));
   } else {
-    tiled_reduce<sum_accumulator_x32<f32x4, 8, Square>, bfloat16, float>(
+    tiled_reduce<sum_accumulator_fp32<2, Square, 2>, bfloat16, float>(
         n, k3, k2, k1, a_stride_n, a_stride_k3, a_stride_k2,
         reinterpret_cast<const bfloat16*>(a), /*C_stride_m=*/0,
         reinterpret_cast<float*>(c));
@@ -210,11 +230,10 @@ void sum_fp32_sse2(size_t n, size_t k3, size_t k2, size_t k1,
         n, k3, k2, a_stride_k3, a_stride_k2, reinterpret_cast<const float*>(a),
         /*C_stride_m=*/0, reinterpret_cast<float*>(c));
   } else {
-    tiled_reduce<sum_accumulator_x32<simd::vec<float, consistent_tile_k>,
-                                     consistent_tile_k, Identity, 2>,
-                 float, float>(n, k3, k2, k1, a_stride_n, a_stride_k3,
-                               a_stride_k2, reinterpret_cast<const float*>(a),
-                               /*C_stride_m=*/0, reinterpret_cast<float*>(c));
+    tiled_reduce<sum_accumulator_fp32<1, Identity, 2>, float, float>(
+        n, k3, k2, k1, a_stride_n, a_stride_k3, a_stride_k2,
+        reinterpret_cast<const float*>(a),
+        /*C_stride_m=*/0, reinterpret_cast<float*>(c));
   }
 }
 
@@ -226,7 +245,7 @@ void sum_squared_fp32_sse2(size_t n, size_t k3, size_t k2, size_t k1,
         n, k3, k2, a_stride_k3, a_stride_k2, reinterpret_cast<const float*>(a),
         /*C_stride_m=*/0, reinterpret_cast<float*>(c));
   } else {
-    tiled_reduce<sum_accumulator_x32<f32x4, 4, Square>, float, float>(
+    tiled_reduce<sum_accumulator_fp32<1, Square, 2>, float, float>(
         n, k3, k2, k1, a_stride_n, a_stride_k3, a_stride_k2,
         reinterpret_cast<const float*>(a), /*C_stride_m=*/0,
         reinterpret_cast<float*>(c));

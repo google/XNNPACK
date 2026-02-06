@@ -98,10 +98,6 @@ YNN_ALWAYS_INLINE auto sum_rows(const AccT* acc,
   return (t[0] + t[1]) + (t[2] + t[3]);
 }
 
-// All floating point sum kernels should use this value of K, to ensure that the
-// reduction associativity is consistent.
-constexpr size_t consistent_tile_k = 16;
-
 template <typename AccT, size_t K_, typename MapFn = Identity, size_t N_ = 4>
 struct sum_accumulator_x32 {
   static constexpr std::integral_constant<size_t, N_> N = {};
@@ -147,6 +143,17 @@ struct sum_accumulator_x32 {
     store(C, load(C, n, OutAccT{}) + sum_rows<AccT>(acc, AccT::N, N), n);
   }
 };
+
+// We attempt to make all reductions numerically consistent across all x86
+// instruction sets (SSE, AVX, AVX512). We do this by always reassociating
+// reductions with the same tile size, and using multiple vectors when required.
+constexpr size_t consistent_tile_k = 16;
+
+template <size_t horizontal_factor = 1, typename MapFn = Identity,
+          size_t N_ = 4>
+using sum_accumulator_fp32 =
+    sum_accumulator_x32<simd::vec<float, consistent_tile_k>,
+                        consistent_tile_k * horizontal_factor, MapFn, N_>;
 
 template <typename AccT, typename MapFn = Identity>
 struct sum_accumulator_k1_1 {

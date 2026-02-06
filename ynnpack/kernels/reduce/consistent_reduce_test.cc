@@ -3,7 +3,6 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include <algorithm>
 #include <cassert>
 #include <cmath>
 #include <cstddef>
@@ -14,7 +13,6 @@
 #include <set>
 #include <string>
 #include <tuple>
-#include <vector>
 
 #include <gtest/gtest.h>
 #include "ynnpack/base/arch.h"
@@ -55,94 +53,98 @@ KernelInfo all_kernels[] = {
              multi_type_of(type_a(), type_c())},
 #include "ynnpack/kernels/reduce/sum.inc"
 #undef YNN_UNARY_REDUCE_KERNEL
+
+#define YNN_UNARY_REDUCE_KERNEL(arch_flags, name, type_a, type_c) \
+  KernelInfo{arch_flags, name, #name, ynn_reduce_sum_squared,     \
+             multi_type_of(type_a(), type_c())},
+#include "ynnpack/kernels/reduce/sum_squared.inc"
+#undef YNN_UNARY_REDUCE_KERNEL
 };
 
 template <typename AT, typename CT>
-void TestReduce(AT, CT, ynn_reduce_operator op) {
+void TestReduce(AT, CT, ynn_reduce_operator op, size_t n, size_t k3, size_t k2,
+                size_t k1) {
   ReplicableRandomDevice rng;
 
-  constexpr ReduceShape shapes[] = {
-      {256, 16, 16, 1},
-      {256, 1, 1, 256},
-      {256, 1, 4, 256},
-  };
+  const size_t k = k3 * k2 * k1;
 
-  for (const ReduceShape& shape : shapes) {
-    const size_t n = shape.n;
-    const size_t k1 = shape.k1;
-    const size_t k2 = shape.k2;
-    const size_t k3 = shape.k3;
+  // Choose the range of values in a and c such that infinite results should be
+  // rare.
+  const float max_abs_value = type_info<CT>::max() / k;
+  const float max_abs_a_value =
+      op == ynn_reduce_sum_squared ? std::sqrt(max_abs_value) : max_abs_value;
+  TypeGenerator<AT> a_gen(-max_abs_a_value, max_abs_a_value);
+  TypeGenerator<CT> c_gen(-max_abs_value, max_abs_value);
 
-    const size_t k = k3 * k2 * k1;
-    const float max_abs_value = type_info<CT>::max() / (k / 4);
-    TypeGenerator<AT> a_gen(-max_abs_value, max_abs_value);
-    TypeGenerator<CT> c_gen(-max_abs_value, max_abs_value);
+  Tensor<AT> a({n, k3, k2, k1});
+  Tensor<CT> init_c({n});
 
-    Tensor<AT> a({n, k3, k2, k1});
-    Tensor<CT> init_c({n});
+  a.generate([&]() { return a_gen(rng); });
+  init_c.generate([&]() { return c_gen(rng); });
 
-    a.generate([&]() { return a_gen(rng); });
-    init_c.generate([&]() { return c_gen(rng); });
+  Tensor<CT> c;
+  const char* reference_kernel_name = nullptr;
+  for (const KernelInfo& kernel : all_kernels) {
+    if (kernel.op != op) {
+      continue;
+    }
+    if (kernel.type != multi_type_of(AT(), CT())) {
+      continue;
+    }
+    if (!is_arch_supported(kernel.arch_flags)) {
+      continue;
+    }
 
-    Tensor<CT> c;
-    const char* reference_kernel_name = nullptr;
-    for (const KernelInfo& kernel : all_kernels) {
-      if (kernel.op != op) {
-        continue;
-      }
-      if (kernel.type != multi_type_of(AT(), CT())) {
-        continue;
-      }
-      if (!is_arch_supported(kernel.arch_flags)) {
-        continue;
-      }
+    Tensor<CT> kernel_c = init_c.deep_copy();
 
-      // TODO(b/460621873): Make the remaining kernels consistent with
-      // AVX/AVX512.
-      if (strstr(kernel.name, "sum_fp32") == nullptr) {
-        continue;
-      }
+    kernel.kernel(n, k3, k2, k1, a.stride(0) * sizeof(AT),
+                  a.stride(1) * sizeof(AT), a.stride(2) * sizeof(AT), a.base(),
+                  0, kernel_c.base());
 
-      Tensor<CT> kernel_c = init_c.deep_copy();
-
-      kernel.kernel(n, k3, k2, k1, a.stride(0) * sizeof(AT),
-                    a.stride(1) * sizeof(AT), a.stride(2) * sizeof(AT),
-                    a.base(), 0, kernel_c.base());
-
-      if (c.base()) {
-        int finite = 0;
-        for (size_t i = 0; i < n; ++i) {
-          bool c_finite = std::isfinite(static_cast<float>(c(i)));
-          bool kernel_c_finite = std::isfinite(static_cast<float>(kernel_c(i)));
-          if (c_finite && kernel_c_finite) {
-            ASSERT_EQ(c(i), kernel_c(i))
-                << "Mismatch between " << reference_kernel_name << " and "
-                << kernel.name << " at index " << i << " shape=" << shape;
-            ++finite;
-          } else {
-            ASSERT_EQ(c_finite, kernel_c_finite)
-                << "Mismatch between " << reference_kernel_name << " and "
-                << kernel.name << " at index " << i << " shape=" << shape;
-          }
+    if (c.base()) {
+      int finite = 0;
+      for (size_t i = 0; i < n; ++i) {
+        bool c_finite = std::isfinite(static_cast<float>(c(i)));
+        bool kernel_c_finite = std::isfinite(static_cast<float>(kernel_c(i)));
+        if (c_finite && kernel_c_finite) {
+          ASSERT_EQ(c(i), kernel_c(i))
+              << "Mismatch between " << reference_kernel_name << " and "
+              << kernel.name << " at index " << i << " shape=" << n << "x" << k3
+              << "x" << k2 << "x" << k1;
+          ++finite;
+        } else {
+          ASSERT_EQ(c_finite, kernel_c_finite)
+              << "Mismatch between " << reference_kernel_name << " and "
+              << kernel.name << " at index " << i << " shape=" << n << "x" << k3
+              << "x" << k2 << "x" << k1;
         }
-        // Make sure the result wasn't entirely Inf/NaN.
-        ASSERT_GE(2 * finite, n);
-      } else {
-        c = kernel_c;
-        reference_kernel_name = kernel.name;
       }
+      // Make sure the result wasn't entirely Inf/NaN.
+      ASSERT_GE(2 * finite, n);
+    } else {
+      c = kernel_c;
+      reference_kernel_name = kernel.name;
     }
   }
 }
 
-class Sum : public ::testing::TestWithParam<
-                std::tuple<ynn_reduce_operator, multi_type>> {};
+class Reduce : public ::testing::TestWithParam<
+                   std::tuple<ynn_reduce_operator, multi_type>> {};
 
-TEST_P(Sum, Consistent) {
+TEST_P(Reduce, Consistent_k1) {
   ynn_reduce_operator op = std::get<0>(GetParam());
   multi_type type = std::get<1>(GetParam());
-  SwitchTwoTypes(
-      type, [&](auto a_type, auto c_type) { TestReduce(a_type, c_type, op); });
+  SwitchTwoTypes(type, [&](auto a_type, auto c_type) {
+    TestReduce(a_type, c_type, op, 4096, 1, 1, 256);
+  });
+}
+
+TEST_P(Reduce, Consistent_k2k3) {
+  ynn_reduce_operator op = std::get<0>(GetParam());
+  multi_type type = std::get<1>(GetParam());
+  SwitchTwoTypes(type, [&](auto a_type, auto c_type) {
+    TestReduce(a_type, c_type, op, 4096, 16, 16, 1);
+  });
 }
 
 std::set<std::tuple<ynn_reduce_operator, multi_type>> get_kernel_types() {
@@ -154,8 +156,8 @@ std::set<std::tuple<ynn_reduce_operator, multi_type>> get_kernel_types() {
 }
 
 INSTANTIATE_TEST_SUITE_P(
-    Sum, Sum, testing::ValuesIn(get_kernel_types()),
-    [](const testing::TestParamInfo<Sum::ParamType>& info) {
+    Reduce, Reduce, testing::ValuesIn(get_kernel_types()),
+    [](const testing::TestParamInfo<Reduce::ParamType>& info) {
       return std::string(to_string(std::get<0>(info.param))) + "_" +
              std::string(to_string(std::get<1>(info.param)));
     });

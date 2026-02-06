@@ -240,7 +240,7 @@ void sum_bf16_fp32_avx512bw(size_t n, size_t k3, size_t k2, size_t k1,
         reinterpret_cast<const bfloat16*>(a), /*C_stride_m=*/0,
         reinterpret_cast<float*>(c));
   } else {
-    tiled_reduce<sum_accumulator_x32<f32x16, 32>, bfloat16, float>(
+    tiled_reduce<sum_accumulator_fp32<2>, bfloat16, float>(
         n, k3, k2, k1, a_stride_n, a_stride_k3, a_stride_k2,
         reinterpret_cast<const bfloat16*>(a), /*C_stride_m=*/0,
         reinterpret_cast<float*>(c));
@@ -257,7 +257,7 @@ void sum_squared_bf16_fp32_avx512bw(size_t n, size_t k3, size_t k2, size_t k1,
         reinterpret_cast<const bfloat16*>(a), /*C_stride_m=*/0,
         reinterpret_cast<float*>(c));
   } else {
-    tiled_reduce<sum_accumulator_x32<f32x16, 32, Square>, bfloat16, float>(
+    tiled_reduce<sum_accumulator_fp32<2, Square>, bfloat16, float>(
         n, k3, k2, k1, a_stride_n, a_stride_k3, a_stride_k2,
         reinterpret_cast<const bfloat16*>(a), /*C_stride_m=*/0,
         reinterpret_cast<float*>(c));
@@ -273,7 +273,7 @@ void sum_fp16_fp32_avx512bw(size_t n, size_t k3, size_t k2, size_t k1,
         n, k3, k2, a_stride_k3, a_stride_k2, reinterpret_cast<const half*>(a),
         /*C_stride_m=*/0, reinterpret_cast<float*>(c));
   } else {
-    tiled_reduce<sum_accumulator_x32<f32x16, 16>, half, float>(
+    tiled_reduce<sum_accumulator_fp32<>, half, float>(
         n, k3, k2, k1, a_stride_n, a_stride_k3, a_stride_k2,
         reinterpret_cast<const half*>(a), /*C_stride_m=*/0,
         reinterpret_cast<float*>(c));
@@ -289,7 +289,7 @@ void sum_squared_fp16_fp32_avx512bw(size_t n, size_t k3, size_t k2, size_t k1,
         n, k3, k2, a_stride_k3, a_stride_k2, reinterpret_cast<const half*>(a),
         /*C_stride_m=*/0, reinterpret_cast<float*>(c));
   } else {
-    tiled_reduce<sum_accumulator_x32<f32x16, 16, Square>, half, float>(
+    tiled_reduce<sum_accumulator_fp32<1, Square>, half, float>(
         n, k3, k2, k1, a_stride_n, a_stride_k3, a_stride_k2,
         reinterpret_cast<const half*>(a), /*C_stride_m=*/0,
         reinterpret_cast<float*>(c));
