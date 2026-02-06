@@ -761,6 +761,7 @@ ynn_cc_library(
         ],
         "arm64_sme2": [
             "arm64_sme2.cc",
+            "arm64_sme2_opt.cc",
             "arm64_sme_internal.h",
         ],
     },

@@ -69,6 +69,10 @@ YNN_DOT_KERNEL(arch_flag::amxint8, dot_uint8_int8_int32_16x64x64_16x16x4_amxint8
 
 #ifndef YNN_DISABLE_SME
 #ifdef YNN_ARCH_ARM64_SME2
+YNN_DOT_KERNEL(arch_flag::sme2, dot_fp32_sme2_opt,
+               sme_vl(float{}), 4 * sme_vl(float{}), 1, sme_vl(float{}), 4 * sme_vl(float{}), 1,
+               dot_flag::transpose_a | dot_flag::consistent_arithmetic,
+               float, float, float)
 YNN_DOT_KERNEL(arch_flag::sme2, dot_fp32_sme2,
                sme_vl(float{}), 4 * sme_vl(float{}), 1, 1, sme_vl(float{}), 1,
                dot_flag::transpose_a | dot_flag::consistent_arithmetic,
