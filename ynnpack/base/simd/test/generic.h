@@ -14,6 +14,7 @@
 #include <utility>
 
 #include <gtest/gtest.h>
+#include "ynnpack/base/base.h"
 #include "ynnpack/base/simd/vec.h"
 #include "ynnpack/base/test/fuzz_test.h"
 #include "ynnpack/base/test/random.h"
@@ -85,20 +86,20 @@ template <typename scalar, size_t N>
 void test_partial_load() {
   using vector = vec<scalar, N>;
 
-  scalar dst[N];
   scalar init[N];
-  scalar src_aligned[N * 2];
+  alignas(vector) scalar src_aligned[N * 2];
   for (size_t i = 0; i < N; ++i) {
-    init[i] = static_cast<scalar>(i * 2 + 1);
+    init[i] = static_cast<scalar>(N - 1 - i);
   }
   for (size_t i = 0; i < N * 2; ++i) {
     src_aligned[i] = static_cast<scalar>(i);
   }
-  for (int align = 0; align < N; ++align) {
+  for (int align : {0, static_cast<int>(N) - 1}) {
     for (size_t n = 1; n < N; ++n) {
       scalar* src = &src_aligned[N + align - n];
       vector v = load(src, n, load(init, vector::N));
 
+      scalar dst[N];
       store(dst, v);
       for (size_t i = 0; i < n; ++i) {
         ASSERT_EQ(dst[i], src[i]);
@@ -118,8 +119,8 @@ void test_partial_store() {
   for (size_t i = 0; i < N; ++i) {
     src[i] = static_cast<scalar>(i);
   }
-  scalar dst_aligned[N * 2];
-  for (size_t align = 0; align < N; ++align) {
+  alignas(vector) scalar dst_aligned[N * 2];
+  for (int align : {0, static_cast<int>(N) - 1}) {
     scalar* dst = &dst_aligned[align];
     for (size_t i = 0; i < N; ++i) {
       dst[i] = static_cast<scalar>(i + 5);

@@ -25,16 +25,16 @@ namespace simd {
 template <typename T, size_t N>
 YNN_ALWAYS_INLINE vec<T, N> load(const T* ptr,
                                  std::integral_constant<size_t, N> n,
-                                 vec<T, N>) {
+                                 vec<T, N> src) {
   std::integral_constant<size_t, N / 2> n2 = {};
-  return {load(ptr, n2), load(ptr + n2, n2)};
+  return {load(ptr, n2, src.lo()), load(ptr + n2, n2, src.hi())};
 }
 template <typename T, size_t N>
 YNN_ALWAYS_INLINE vec<T, N> load_aligned(const T* ptr,
                                          std::integral_constant<size_t, N> n,
-                                         vec<T, N>) {
+                                         vec<T, N> src) {
   std::integral_constant<size_t, N / 2> n2 = {};
-  return {load_aligned(ptr, n2), load_aligned(ptr + n2, n2)};
+  return {load_aligned(ptr, n2, src.lo()), load_aligned(ptr + n2, n2, src.hi())};
 }
 template <typename T, size_t N>
 YNN_ALWAYS_INLINE vec<T, N> load(const T* ptr, size_t n, vec<T, N> src) {
@@ -42,7 +42,7 @@ YNN_ALWAYS_INLINE vec<T, N> load(const T* ptr, size_t n, vec<T, N> src) {
   if (n < n2) {
     return {load(ptr, n, src.lo()), src.hi()};
   } else {
-    return {load(ptr, n2), load(ptr + n2, n - n2, src.hi())};
+    return {load(ptr, n2, src.lo()), load(ptr + n2, n - n2, src.hi())};
   }
 }
 
@@ -50,22 +50,25 @@ YNN_ALWAYS_INLINE vec<T, N> load(const T* ptr, size_t n, vec<T, N> src) {
 template <typename T, size_t N>
 YNN_ALWAYS_INLINE void store(T* ptr, vec<T, N> value,
                              std::integral_constant<size_t, N> n) {
-  store(ptr, value.lo());
-  store(ptr + N / 2, value.hi());
+  std::integral_constant<size_t, N / 2> n2 = {};
+  store(ptr, value.lo(), n2);
+  store(ptr + n2, value.hi(), n2);
 }
 template <typename T, size_t N>
 YNN_ALWAYS_INLINE void store_aligned(T* ptr, vec<T, N> value,
                                      std::integral_constant<size_t, N> n) {
-  store_aligned(ptr, value.lo());
-  store_aligned(ptr + N / 2, value.hi());
+  std::integral_constant<size_t, N / 2> n2 = {};
+  store_aligned(ptr, value.lo(), n2);
+  store_aligned(ptr + n2, value.hi(), n2);
 }
 template <typename T, size_t N>
 YNN_ALWAYS_INLINE void store(T* ptr, vec<T, N> value, size_t n) {
-  if (n < N / 2) {
+  std::integral_constant<size_t, N / 2> n2 = {};
+  if (n < n2) {
     store(ptr, value.lo(), n);
   } else {
-    store(ptr, value.lo());
-    store(ptr + N / 2, value.hi(), n - N / 2);
+    store(ptr, value.lo(), n2);
+    store(ptr + n2, value.hi(), n - n2);
   }
 }
 

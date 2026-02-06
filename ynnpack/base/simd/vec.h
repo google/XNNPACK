@@ -6,6 +6,7 @@
 #ifndef XNNPACK_YNNPACK_BASE_SIMD_VEC_H_
 #define XNNPACK_YNNPACK_BASE_SIMD_VEC_H_
 
+#include <algorithm>
 #include <array>
 #include <cassert>
 #include <cstddef>
@@ -126,6 +127,81 @@ void partial_store_memcpy(T* ptr, vec<T, N> value, size_t n) {
 }
 
 }  // namespace internal
+
+// Here we provide a scalar implementation of `vec` above.
+template <typename T>
+struct vec<T, 1> {
+  static constexpr std::integral_constant<size_t, 1> N = {};
+  using value_type = T;
+
+  T v;
+
+  vec() = default;
+  YNN_ALWAYS_INLINE explicit vec(value_type x) : v{x} {}
+};
+
+template <typename T>
+YNN_ALWAYS_INLINE vec<T, 1> load(const T* ptr,
+                                 std::integral_constant<size_t, 1> n,
+                                 vec<T, 1>) {
+  return vec<T, 1>{*ptr};
+}
+template <typename T>
+YNN_ALWAYS_INLINE vec<T, 1> load_aligned(const T* ptr,
+                                         std::integral_constant<size_t, 1> n,
+                                         vec<T, 1>) {
+  return vec<T, 1>{*ptr};
+}
+template <typename T>
+YNN_ALWAYS_INLINE vec<T, 1> load(const T* ptr, size_t n, vec<T, 1> src) {
+  assert(n <= 1);
+  return n ? vec<T, 1>{*ptr} : src;
+}
+
+template <typename T>
+YNN_ALWAYS_INLINE void store(T* ptr, vec<T, 1> value,
+                             std::integral_constant<size_t, 1> n) {
+  *ptr = value.v;
+}
+template <typename T>
+YNN_ALWAYS_INLINE void store_aligned(T* ptr, vec<T, 1> value,
+                                     std::integral_constant<size_t, 1> n) {
+  *ptr = value.v;
+}
+template <typename T>
+YNN_ALWAYS_INLINE void store(T* ptr, vec<T, 1> value, size_t n) {
+  assert(n <= 1);
+  if (n) *ptr = value.v;
+}
+
+template <typename T>
+YNN_ALWAYS_INLINE vec<T, 1>& operator+=(vec<T, 1>& a, vec<T, 1> b) {
+  a.v += b.v;
+  return a;
+}
+template <typename T>
+YNN_ALWAYS_INLINE vec<T, 1>& operator-=(vec<T, 1>& a, vec<T, 1> b) {
+  a.v -= b.v;
+  return a;
+}
+template <typename T>
+YNN_ALWAYS_INLINE vec<T, 1>& operator*=(vec<T, 1>& a, vec<T, 1> b) {
+  a.v *= b.v;
+  return a;
+}
+template <typename T>
+YNN_ALWAYS_INLINE vec<T, 1> min(vec<T, 1> a, vec<T, 1> b) {
+  return std::min(a.v, b.v);
+}
+template <typename T>
+YNN_ALWAYS_INLINE vec<T, 1> max(vec<T, 1> a, vec<T, 1> b) {
+  return std::max(a.v, b.v);
+}
+
+template <typename To, typename From>
+YNN_ALWAYS_INLINE vec<To, 1> convert(vec<From, 1> from, To) {
+  return static_cast<To>(from.v);
+}
 
 }  // namespace simd
 

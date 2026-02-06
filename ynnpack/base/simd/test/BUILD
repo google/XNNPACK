@@ -50,29 +50,20 @@ package(default_visibility = ["//ynnpack:__subpackages__"])
 
 cc_test(
     name = "multi_vec",
-    srcs = ynn_if_arch(
-        "x86_sse2",
-        [
-            "generic.h",
-            "multi_vec.cc",
-        ],
-    ),
-    copts = ynn_arch_copts("x86_sse2"),
+    srcs = [
+        "generic.h",
+        "multi_vec.cc",
+    ],
     features = [
         # We can't use copts with header modules...?
         "-use_header_modules",
     ],
     linkopts = ynn_binary_linkopts(),
-    local_defines = ynn_if_arch(
-        "x86_sse2",
-        ["YNN_ARCH=" + ynn_arch_flag("x86_sse2")],
-    ),
     malloc = ynn_binary_malloc(),
     deps = [
         "//ynnpack/base",  # buildcleaner:keep
         "//ynnpack/base/simd",  # buildcleaner:keep
         "//ynnpack/base/test:fuzz_test",
         "//ynnpack/base/test:random",
-        "@com_google_googletest//:gtest",
     ] + ynn_test_deps(),
 )
