@@ -73,6 +73,14 @@ YNN_DOT_KERNEL(arch_flag::sme2, dot_fp32_sme2_opt,
                sme_vl(float{}), 4 * sme_vl(float{}), 1, sme_vl(float{}), 4 * sme_vl(float{}), 1,
                dot_flag::transpose_a | dot_flag::consistent_arithmetic,
                float, float, float)
+YNN_DOT_KERNEL(arch_flag::sme2, dot_bf16_bf16_fp32_sme2_opt,
+               sme_vl(float{}), 4 * sme_vl(float{}), 2, sme_vl(float{}), 4 * sme_vl(float{}), 2,
+               dot_flag::transpose_a,
+               bfloat16, bfloat16, float)
+YNN_DOT_KERNEL(arch_flag::sme2, dot_fp16_fp16_fp32_sme2_opt,
+               sme_vl(float{}), 4 * sme_vl(float{}), 2, sme_vl(float{}), 4 * sme_vl(float{}), 2,
+               dot_flag::transpose_a,
+               half, half, float)
 YNN_DOT_KERNEL(arch_flag::sme2, dot_fp32_sme2,
                sme_vl(float{}), 4 * sme_vl(float{}), 1, 1, sme_vl(float{}), 1,
                dot_flag::transpose_a | dot_flag::consistent_arithmetic,

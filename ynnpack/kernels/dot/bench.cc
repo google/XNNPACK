@@ -83,34 +83,28 @@ void dot(benchmark::State& state, uint64_t arch_flags, dot_kernel_fn kernel,
 
   // Panel Packing for A if transpose_a is requested.
   // This simulates the optimal memory layout where A is stored in vertical strips of width `tile_m`.
-  // This ensures that the stride within a strip is exactly `tile_m`, enabling svld1_x4.
+  // For widening kernels (tile_k > 1), we must interleave tile_k elements of K.
   std::vector<TA> a_packed_buffer;
   if (transpose_a) {
     size_t m_aligned = align_up(m, tile_m);
     a_packed_buffer.resize(m_aligned * k);
     
-    // Pack into panels: [Number_of_Panels, K, Tile_M]
-    // But flattened, so we access it via pointer arithmetic.
     for (size_t panel_start = 0; panel_start < m; panel_start += tile_m) {
-        size_t current_tile_m = std::min(tile_m, m - panel_start);
         TA* panel_ptr = a_packed_buffer.data() + panel_start * k;
         
-        for (size_t row = 0; row < k; ++row) {
-            for (size_t col = 0; col < current_tile_m; ++col) {
-                // Determine source index. Original a is [M, K].
-                // a(row, col) accesses usually [row, col] -> M, K?
-                // Tensor `a` was init as {M, K}.
-                // a(i, k) is row i, col k.
-                size_t src_m = panel_start + col;
-                size_t src_k = row;
-                
-                // Destination: Panel is dense [K, Tile_M].
-                // Offset = row * tile_m + col
-                panel_ptr[row * tile_m + col] = a(src_m, src_k);
-            }
-            // Pad the rest of the tile width with 0 if boundary
-            for (size_t col = current_tile_m; col < tile_m; ++col) {
-                panel_ptr[row * tile_m + col] = 0;
+        for (size_t row_block = 0; row_block < k; row_block += tile_k) {
+            for (size_t col = 0; col < tile_m; ++col) {
+                for (size_t k_sub = 0; k_sub < tile_k; ++k_sub) {
+                    size_t src_m = panel_start + col;
+                    size_t src_k = row_block + k_sub;
+                    
+                    TA val = 0;
+                    if (src_m < m && src_k < k) {
+                        val = a(src_m, src_k);
+                    }
+                    // Layout: [K/tile_k, Tile_M, Tile_K]
+                    panel_ptr[row_block * tile_m + col * tile_k + k_sub] = val;
+                }
             }
         }
     }
@@ -124,14 +118,10 @@ void dot(benchmark::State& state, uint64_t arch_flags, dot_kernel_fn kernel,
       size_t a_stride = 0;
 
       if (transpose_a) {
-          // Point to the start of the panel corresponding to row `i`.
-          // Since we packed in blocks of `tile_m` (which matches `block_m` usually),
-          // we just offset by K * i.
-          // Note: i must be aligned to block_m/tile_m for this to work perfectly 
-          // without partial panel logic, but dot kernel loops aligned.
           a_i = a_packed_buffer.data() + i * k;
-          // Stride is exactly tile_m because we packed it that way!
-          a_stride = tile_m * sizeof(TA);
+          // Stride is the distance between [k, k+1] block and [k+tile_k, k+tile_k+1] block.
+          // In our layout [K/tile_k, Tile_M, Tile_K], this is Tile_M * Tile_K elements.
+          a_stride = tile_m * tile_k * sizeof(TA);
       } else {
           a_i = &a(i, 0);
           a_stride = a.stride(0) * sizeof(TA);

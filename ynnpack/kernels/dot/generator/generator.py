@@ -62,7 +62,7 @@ arch_to_generator = {
     "arm_neon_int8_int8_int32": arm_neon_int8_int8_int32(),
     "arm_neonbf16_bf16_bf16_fp32_k2": arm_neonbf16_bf16_bf16_fp32_k2(),
     "arm_neondot_int8_int8_int32": arm_neondot_int8_int8_int32(),
-    "arm_neoni8mm_int8_int8_int32": arm_neoni8mm_int8_int8_int32(),
+    "arm64_neoni8mm_int8_int8_int32": arm_neoni8mm_int8_int8_int32(),
     "arm64_neon_fp32": arm64_neon_fp32(),
     "arm64_neon_bf16_bf16_fp32": arm64_neon_bf16_bf16_fp32(),
 }
