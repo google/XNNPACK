@@ -76,8 +76,7 @@ def main():
     build()
     
     header = f"{'Type':<6} | {'Size':<6} | {'Orig (ms)':<15} | {'Opt (ms)':<15} | {'Speedup'}"
-    print(f"
-{header}")
+    print(f"\n{header}")
     print("-" * 75)
     
     for t in TYPES:
