@@ -51,6 +51,7 @@ cc_library(
         "arm_neonfma.h",
         "arm_neonfp16.h",
         "scalar.h",
+        "hvx.h",
     ],
     deps = ["//ynnpack/base"],
 )

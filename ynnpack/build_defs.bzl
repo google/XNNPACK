@@ -257,6 +257,11 @@ _YNN_PARAMS_FOR_ARCH = {
         "arch_copts": _copts_for_compiler(["-mamx-tile", "-mamx-int8"]),
         "arch_flag": "amxint8",
     },
+    "hvx": {
+        "cond": "//ynnpack:ynn_enable_hvx",
+        "arch_copts": ["-mhvx"],
+        "arch_flag": "hvx",
+    },
 }
 
 def ynn_if_arch(arch, if_true, if_false = []):
@@ -279,23 +284,30 @@ def ynn_kernel_copts(unroll_loops = True):
 
 def ynn_binary_linkopts():
     return select({
+        "//ynnpack:hexagon": [
+            "-shared",
+            "-Wno-unused-command-line-argument",
+        ],
         "//conditions:default": [],
     })
 
 def ynn_binary_malloc():
     return select({
+        "//ynnpack:hexagon": "@bazel_tools//tools/cpp:malloc",
         "//conditions:default": "@bazel_tools//tools/cpp:malloc",
     })
 
 def ynn_test_deps():
     return select({
+        "//ynnpack:hexagon": [
+            "@com_google_googletest//:gtest",
+            "//ynnpack/base/hexagon:test_main",
+        ],
         "//conditions:default": ["@com_google_googletest//:gtest_main"],
     })
 
 def ynn_benchmark_deps():
-    return select({
-        "//conditions:default": ["@com_google_benchmark//:benchmark_main"],
-    })
+    return ["@com_google_benchmark//:benchmark_main"]
 
 def ynn_cc_library(
         name,
