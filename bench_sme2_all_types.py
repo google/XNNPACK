@@ -6,7 +6,13 @@ import sys
 import math
 
 # --- Configuration ---
-SIZES = [240, 1158, 1957, 4096]
+SHAPES = [
+    "240x240x240",      # Small Cubic
+    "4096x4096x4096",  # Large Cubic
+    "1x4096x4096",      # GEMV-like (Latency stress)
+    "128x1024x1024",    # Batch Processing
+    "16x16x16384"       # Reduction-heavy (K-loop stress)
+]
 TYPES = ["fp32", "bf16", "fp16", "int8"]
 NUM_REPETITIONS = 10 
 
@@ -30,11 +36,11 @@ def build():
         sys.exit(1)
     print(" Done.")
 
-def run_benchmark(size, type_filter):
+def run_benchmark(shape, type_filter):
     cmd = [
         BINARY_PATH,
         f"--benchmark_filter=dot_.*{type_filter}.*sme2",
-        f"--shape={size}x{size}x{size}",
+        f"--shape={shape}",
         f"--benchmark_repetitions={NUM_REPETITIONS}",
         "--benchmark_format=json",
         "--benchmark_min_time=0.05s",
@@ -75,14 +81,14 @@ def analyze(data, type_str):
 def main():
     build()
     
-    header = f"{'Type':<6} | {'Size':<6} | {'Orig (ms)':<15} | {'Opt (ms)':<15} | {'Speedup'}"
+    header = f"{'Type':<6} | {'Shape':<15} | {'Orig (ms)':<15} | {'Opt (ms)':<15} | {'Speedup'}"
     print(f"\n{header}")
-    print("-" * 75)
+    print("-" * 85)
     
     for t in TYPES:
-        for s in SIZES:
+        for s in SHAPES:
             type_filter = t if t in ["fp32", "int8"] else f"{t}_{t}_fp32"
-            print(f"{t:<6} | {s:<6} | ", end="", flush=True)
+            print(f"{t:<6} | {s:<15} | ", end="", flush=True)
             data = run_benchmark(s, type_filter)
             res = analyze(data, type_filter)
             
