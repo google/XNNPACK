@@ -160,12 +160,12 @@ YNN_ALWAYS_INLINE vec<T, 1> load(const T* ptr, size_t n, vec<T, 1> src) {
 
 template <typename T>
 YNN_ALWAYS_INLINE void store(T* ptr, vec<T, 1> value,
-                             std::integral_constant<size_t, 1> n) {
+                             std::integral_constant<size_t, 1> n = {}) {
   *ptr = value.v;
 }
 template <typename T>
 YNN_ALWAYS_INLINE void store_aligned(T* ptr, vec<T, 1> value,
-                                     std::integral_constant<size_t, 1> n) {
+                                     std::integral_constant<size_t, 1> n = {}) {
   *ptr = value.v;
 }
 template <typename T>

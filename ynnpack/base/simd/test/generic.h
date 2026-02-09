@@ -303,7 +303,13 @@ void test_horizontal_sum() {
   std::fill_n(&a[N], N, static_cast<scalar>(1));
   // Note we test N + 1 values here, so we cover both the all 0 and all 1 cases.
   for (int i = 0; i <= N; ++i) {
+#ifdef YNN_ARCH_HEXAGON
+    // Hexagon does this reduction with qfloats, which do not compute this
+    // exactly.
+    ASSERT_NEAR(i, horizontal_sum(load(&a[i], vector::N)), 1e-5f);
+#else
     ASSERT_EQ(i, horizontal_sum(load(&a[i], vector::N)));
+#endif  // YNN_ARCH_HEXAGON
   }
 }
 

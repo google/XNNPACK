@@ -98,6 +98,17 @@ YNN_ALWAYS_INLINE auto sum_rows(const AccT* acc,
   return (t[0] + t[1]) + (t[2] + t[3]);
 }
 
+template <typename AccT, size_t K, size_t N>
+YNN_ALWAYS_INLINE auto sum_rows(const AccT* acc,
+                                std::integral_constant<size_t, K> /*K*/,
+                                std::integral_constant<size_t, N> /*N*/) {
+  typename AccT::value_type result[N];
+  for (size_t i = 0; i < N; ++i) {
+    result[i] = simd::horizontal_sum(acc[i]);
+  }
+  return simd::load(result, std::integral_constant<size_t, N>{});
+}
+
 template <typename AccT, size_t K_, typename MapFn = Identity, size_t N_ = 4>
 struct sum_accumulator_x32 {
   static constexpr std::integral_constant<size_t, N_> N = {};
@@ -123,11 +134,12 @@ struct sum_accumulator_x32 {
                                 NT n, KT k) {
     const simd::vec<AT, K> zero(0);
     auto a_0 = load(offset_bytes(A, 0 * A_stride_n), k, zero);
-    auto a_1 = 1 < n ? load(offset_bytes(A, 1 * A_stride_n), k, zero) : zero;
     acc[0] = reduce_add(acc[0], a_0, map_fn, horizontal_factor);
-    acc[1] = reduce_add(acc[1], a_1, map_fn, horizontal_factor);
-
-    if constexpr (N == 4) {
+    if constexpr (N >= 2) {
+      auto a_1 = 1 < n ? load(offset_bytes(A, 1 * A_stride_n), k, zero) : zero;
+      acc[1] = reduce_add(acc[1], a_1, map_fn, horizontal_factor);
+    }
+    if constexpr (N >= 4) {
       auto a_2 = 2 < n ? load(offset_bytes(A, 2 * A_stride_n), k, zero) : zero;
       auto a_3 = 3 < n ? load(offset_bytes(A, 3 * A_stride_n), k, zero) : zero;
       acc[2] = reduce_add(acc[2], a_2, map_fn, horizontal_factor);
@@ -138,8 +150,7 @@ struct sum_accumulator_x32 {
   template <typename T, typename NT>
   YNN_ALWAYS_INLINE void accumulate(size_t /*C_stride_m*/, T* __restrict C,
                                     NT n) {
-    static_assert(N <= 4);
-    using OutAccT = simd::vec<T, 4>;
+    using OutAccT = simd::vec<T, N>;
     store(C, load(C, n, OutAccT{}) + sum_rows<AccT>(acc, AccT::N, N), n);
   }
 };
