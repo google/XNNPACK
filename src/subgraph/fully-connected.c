@@ -45,19 +45,20 @@ enum fully_connected_op_type {
   fc_type_qp8_f32_qb4w = 20,
   fc_type_pf32_f32_f32 = 21,
   fc_type_f32_f16_f32 = 22,
-  fc_type_qdu8_f16_qc8w = 23,
-  fc_type_qdu8_f32_qc8w = 24,
-  fc_type_qdu8_f32_qc4w = 25,
-  fc_type_qdu8_f32_qb4w = 26,
-  fc_type_qdu8_f16_qc4w = 27,
-  fc_type_qp8_f32_qc8w = 28,
-  fc_type_pf16_f16_f16 = 29,
-  fc_type_pqs8_qs8_qc8w = 30,
-  fc_type_bf16_bf16_f32 = 31,
-  fc_type_pf16_f16_f16_dynamic = 32,
-  fc_type_pf32_f32_f32_dynamic = 33,
-  fc_type_qs8_qs8_qc2w = 34,
-  fc_type_qs8_qs8_qc4w = 35,
+  fc_type_pf32_f16_f32 = 23,
+  fc_type_qdu8_f16_qc8w = 24,
+  fc_type_qdu8_f32_qc8w = 25,
+  fc_type_qdu8_f32_qc4w = 26,
+  fc_type_qdu8_f32_qb4w = 27,
+  fc_type_qdu8_f16_qc4w = 28,
+  fc_type_qp8_f32_qc8w = 29,
+  fc_type_pf16_f16_f16 = 30,
+  fc_type_pqs8_qs8_qc8w = 31,
+  fc_type_bf16_bf16_f32 = 32,
+  fc_type_pf16_f16_f16_dynamic = 33,
+  fc_type_pf32_f32_f32_dynamic = 34,
+  fc_type_qs8_qs8_qc2w = 35,
+  fc_type_qs8_qs8_qc4w = 36,
 };
 
 enum fully_connected_op_type get_fully_connected_op_type(
@@ -142,6 +143,8 @@ enum fully_connected_op_type get_fully_connected_op_type(
           switch (input_datatype) {
             case xnn_datatype_fp32:
               return fc_type_f32_f16_f32;
+            case xnn_datatype_pfp32:
+              return fc_type_pf32_f16_f32;
             default:
               XNN_UNREACHABLE;
           }
@@ -544,6 +547,19 @@ static enum xnn_status create_fully_connected_operator(
         flags |= XNN_FLAG_FP32_STATIC_BIASES;
       }
       status = xnn_create_fully_connected_nc_f32_f16(
+          input_channels, output_channels,
+          /*input_stride=*/input_channels,
+          /*output_stride=*/output_channels, kernel_data, bias_data,
+          node->activation.output_min, node->activation.output_max, flags,
+          weights_cache, fully_connected_op_ptr);
+      break;
+    }
+    case fc_type_pf32_f16_f32: {
+      uint32_t flags = node->flags;
+      if (bias_value != NULL && bias_value->datatype == xnn_datatype_fp32) {
+        flags |= XNN_FLAG_FP32_STATIC_BIASES;
+      }
+      status = xnn_create_fully_connected_nc_pf32_f16(
           input_channels, output_channels,
           /*input_stride=*/input_channels,
           /*output_stride=*/output_channels, kernel_data, bias_data,

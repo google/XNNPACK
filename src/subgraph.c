@@ -3860,7 +3860,8 @@ enum xnn_status xnn_subgraph_optimize_packed_lhs(xnn_subgraph_t subgraph,
             break;
           case xnn_datatype_fp32:
             if (input_datatype == output_datatype &&
-                kernel_datatype == xnn_datatype_fp32) {
+                (kernel_datatype == xnn_datatype_fp32 ||
+                  kernel_datatype == xnn_datatype_fp16)) {
               if ((gemm_config = xnn_init_pf32_gemm_config())) {
                 assumed_datatype = xnn_datatype_pfp32;
               }

@@ -2203,6 +2203,54 @@ enum xnn_status xnn_create_fully_connected_nc_f32_f16(
   return status;
 }
 
+enum xnn_status xnn_create_fully_connected_nc_pf32_f16(
+    size_t input_channels, size_t output_channels, size_t input_stride,
+    size_t output_stride, const void* kernel, const void* bias,
+    float output_min, float output_max, uint32_t flags,
+    xnn_weights_cache_t weights_cache, xnn_operator_t* fully_connected_op_out) {
+  float* fp32_kernel_buffer = (float*)xnn_allocate_memory(
+      input_channels * output_channels * sizeof(float));
+  float* fp32_bias_buffer = NULL;
+  float* fp32_bias_buffer_to_release = NULL;
+  const xnn_float16* f16_kernel = (const xnn_float16*)kernel;
+  const xnn_float16* f16_bias = (const xnn_float16*)bias;
+  for (size_t i = 0; i < input_channels * output_channels; ++i) {
+    fp32_kernel_buffer[i] = xnn_float16_to_float(f16_kernel[i]);
+  }
+  if (bias && !(flags & XNN_FLAG_FP32_STATIC_BIASES)) {
+    fp32_bias_buffer_to_release =
+        (float*)xnn_allocate_memory(output_channels * sizeof(float));
+    fp32_bias_buffer = fp32_bias_buffer_to_release;
+    for (size_t i = 0; i < output_channels; ++i) {
+      fp32_bias_buffer[i] = xnn_float16_to_float(f16_bias[i]);
+    }
+  } else {
+    fp32_bias_buffer = (float*)(uintptr_t)bias;
+  }
+  // Fingerprinting is done by xnn_create_fully_connected_nc_pf32.
+  struct fc_context context = {
+      .input_channels = input_channels,
+      .output_channels = output_channels,
+      .input_stride = input_stride,
+      .output_stride = output_stride,
+      .kernel = fp32_kernel_buffer,
+      .bias = fp32_bias_buffer,
+      .output_min = output_min,
+      .output_max = output_max,
+      .flags = flags,
+      .weights_cache = weights_cache,
+      .operator_type = xnn_operator_type_fully_connected_nc_pf32,
+      .fully_connected_op_out = fully_connected_op_out,
+      .should_fingerprint = true,
+      .original_kernel = kernel,
+      .original_bias = bias,
+  };
+  enum xnn_status status = create_fully_connected_nc_helper(&context);
+  xnn_release_memory(fp32_kernel_buffer);
+  xnn_release_memory(fp32_bias_buffer_to_release);
+  return status;
+}
+
 enum xnn_status xnn_create_fully_connected_nc_bf16_f32(
     size_t input_channels, size_t output_channels, size_t input_stride,
     size_t output_stride, const void* kernel, const float* bias,

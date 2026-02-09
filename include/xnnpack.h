@@ -4000,6 +4000,19 @@ enum xnn_status xnn_create_fully_connected_nc_f32_f16(
   xnn_weights_cache_t weights_cache,
   xnn_operator_t* fully_connected_op_out);
 
+enum xnn_status xnn_create_fully_connected_nc_pf32_f16(
+  size_t input_channels,
+  size_t output_channels,
+  size_t input_stride,
+  size_t output_stride,
+  const void* kernel,
+  const void* bias,
+  float output_min,
+  float output_max,
+  uint32_t flags,
+  xnn_weights_cache_t weights_cache,
+  xnn_operator_t* fully_connected_op_out);
+
 enum xnn_status xnn_create_fully_connected_nc_bf16_f32(
   size_t input_channels,
   size_t output_channels,
