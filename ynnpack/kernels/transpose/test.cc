@@ -14,7 +14,6 @@
 
 #include <gtest/gtest.h>
 #include "ynnpack/base/arch.h"  // IWYU pragma: keep
-#include "ynnpack/base/base.h"
 #include "ynnpack/base/test/tensor.h"
 #include "ynnpack/base/test/util.h"
 #include "ynnpack/base/type.h"
@@ -56,6 +55,10 @@ void TestTranspose(T, transpose_fn kernel, std::vector<size_t> ms,
   Tensor<T> output({max_m, max_n / element_count});
   Tensor<T> expected({max_m, max_n / element_count});
   for (size_t m : ms) {
+    for (size_t i = 0; i < max_n; ++i) {
+      fill_ramp(&input(i, 0), m, i, m);
+    }
+
     for (size_t n : ns) {
       if (m % element_count != 0 || n % element_count != 0) continue;
 
@@ -63,20 +66,17 @@ void TestTranspose(T, transpose_fn kernel, std::vector<size_t> ms,
       for (size_t n_input : {m, m - 1, m / 2}) {
         if (n_input % element_count != 0) continue;
 
-        for (size_t i = 0; i < n; ++i) {
-          fill_ramp(&input(i, 0), n_input, i, m);
-        }
-
         kernel(m, n, n_input * sizeof(T) / element_count,
                input.stride(0) * sizeof(T), input.base(),
                output.stride(0) * sizeof(T), output.base());
 
         // Verify results.
         for (size_t i = 0; i < m; ++i) {
+          const T* output_i = &output(i, 0);
           for (size_t j = 0; j < n; ++j) {
             T expected;
             type_info<T>::set(&expected, 0, i < n_input ? i * m + j : 0);
-            ASSERT_EQ(type_info<T>::get(output.base(), i * max_n + j),
+            ASSERT_EQ(type_info<T>::get(output_i, j),
                       type_info<T>::get(&expected, 0));
           }
         }
@@ -91,12 +91,11 @@ void TestInterleave(T type, size_t factor, interleave_kernel_fn kernel) {
   constexpr int max_n = 64;
   Tensor<T> input({factor, max_n / element_count});
   Tensor<T> output({factor * max_n / element_count});
+  for (size_t i = 0; i < factor; ++i) {
+    fill_ramp(&input(i, 0), max_n, i, factor);
+  }
   for (size_t m = 1; m <= factor; ++m) {
     for (size_t n : simd_sizes_up_to(max_n, element_count)) {
-      for (size_t i = 0; i < m; ++i) {
-        fill_ramp(&input(i, 0), n, i, factor);
-      }
-
       kernel(factor, m, n, input.stride(0) * sizeof(T), input.base(),
              output.base());
 
@@ -128,63 +127,81 @@ const char* to_string(const TransposeParam& param) { return ""; }
 
 class Transpose : public ::testing::TestWithParam<TransposeParam> {};
 
-std::vector<size_t> aligned_sizes = {512};
-std::vector<size_t> unaligned_sizes = simd_sizes_up_to(64);
+std::vector<size_t> aligned_sizes(size_t element_size_bits) {
+  return {std::max<size_t>(4, 256 * 8 / element_size_bits)};
+};
+std::vector<size_t> unaligned_sizes(size_t element_size_bits) {
+  return simd_sizes_up_to(std::max<size_t>(4, 32 * 8 / element_size_bits));
+}
 
 TEST_P(Transpose, aligned) {
   TransposeParam kernel = GetParam();
   if (!is_arch_supported(kernel.arch_flags)) GTEST_SKIP();
-  switch_element_size(kernel.element_size_bits, [&](auto type) {
-    TestTranspose(type, kernel.kernel, aligned_sizes, aligned_sizes);
+  const size_t element_size_bits = kernel.element_size_bits;
+  switch_element_size(element_size_bits, [&](auto type) {
+    auto sizes = aligned_sizes(element_size_bits);
+    TestTranspose(type, kernel.kernel, sizes, sizes);
   });
 }
 
 TEST_P(Transpose, mx1) {
   TransposeParam kernel = GetParam();
   if (!is_arch_supported(kernel.arch_flags)) GTEST_SKIP();
-  switch_element_size(kernel.element_size_bits, [&](auto type) {
-    TestTranspose(type, kernel.kernel, unaligned_sizes, {1});
+  const size_t element_size_bits = kernel.element_size_bits;
+  switch_element_size(element_size_bits, [&](auto type) {
+    auto sizes = unaligned_sizes(element_size_bits);
+    TestTranspose(type, kernel.kernel, sizes, {1});
   });
 }
 
 TEST_P(Transpose, 1xn) {
   TransposeParam kernel = GetParam();
   if (!is_arch_supported(kernel.arch_flags)) GTEST_SKIP();
-  switch_element_size(kernel.element_size_bits, [&](auto type) {
-    TestTranspose(type, kernel.kernel, {1}, unaligned_sizes);
+  const size_t element_size_bits = kernel.element_size_bits;
+  switch_element_size(element_size_bits, [&](auto type) {
+    auto sizes = unaligned_sizes(element_size_bits);
+    TestTranspose(type, kernel.kernel, {1}, sizes);
   });
 }
 
 TEST_P(Transpose, aligned_m) {
   TransposeParam kernel = GetParam();
   if (!is_arch_supported(kernel.arch_flags)) GTEST_SKIP();
-  switch_element_size(kernel.element_size_bits, [&](auto type) {
-    TestTranspose(type, kernel.kernel, aligned_sizes, unaligned_sizes);
+  const size_t element_size_bits = kernel.element_size_bits;
+  switch_element_size(element_size_bits, [&](auto type) {
+    TestTranspose(type, kernel.kernel, aligned_sizes(element_size_bits),
+                  unaligned_sizes(element_size_bits));
   });
 }
 
 TEST_P(Transpose, aligned_n) {
   TransposeParam kernel = GetParam();
   if (!is_arch_supported(kernel.arch_flags)) GTEST_SKIP();
-  switch_element_size(kernel.element_size_bits, [&](auto type) {
-    TestTranspose(type, kernel.kernel, unaligned_sizes, aligned_sizes);
+  const size_t element_size_bits = kernel.element_size_bits;
+  switch_element_size(element_size_bits, [&](auto type) {
+    TestTranspose(type, kernel.kernel, unaligned_sizes(element_size_bits),
+                  aligned_sizes(element_size_bits));
   });
 }
 
 TEST_P(Transpose, unaligned) {
   TransposeParam kernel = GetParam();
   if (!is_arch_supported(kernel.arch_flags)) GTEST_SKIP();
-  switch_element_size(kernel.element_size_bits, [&](auto type) {
-    TestTranspose(type, kernel.kernel, unaligned_sizes, unaligned_sizes);
+  const size_t element_size_bits = kernel.element_size_bits;
+  switch_element_size(element_size_bits, [&](auto type) {
+    auto sizes = unaligned_sizes(element_size_bits);
+    TestTranspose(type, kernel.kernel, sizes, sizes);
   });
 }
 
 TEST_P(Transpose, tiled) {
   TransposeParam kernel = GetParam();
   if (!is_arch_supported(kernel.arch_flags)) GTEST_SKIP();
-  switch_element_size(kernel.element_size_bits, [&](auto type) {
-    auto tiled = make_tiled_transpose(kernel.element_size_bits, kernel.kernel);
-    TestTranspose(type, tiled, aligned_sizes, aligned_sizes);
+  const size_t element_size_bits = kernel.element_size_bits;
+  switch_element_size(element_size_bits, [&](auto type) {
+    auto tiled = make_tiled_transpose(element_size_bits, kernel.kernel);
+    auto sizes = aligned_sizes(element_size_bits);
+    TestTranspose(type, tiled, sizes, sizes);
   });
 }
 
@@ -220,8 +237,11 @@ TEST_P(Interleave, test) {
 auto AllFactors(int factor, int elem_size_bits) {
   std::vector<int> result;
   const int element_count = std::max(elem_size_bits, 8) / elem_size_bits;
-  return factor == 0 ? testing::Range(element_count, 17, element_count)
-                     : testing::Values(factor);
+  // If the kernel doesn't require a specific factor, test factors up to this.
+  constexpr int max_factor = 8;
+  return factor == 0
+             ? testing::Range(element_count, max_factor + 1, element_count)
+             : testing::Values(factor);
 }
 
 #define YNN_INTERLEAVE_KERNEL(arch_flags, name, factor, elem_size_bits)       \
