@@ -359,6 +359,7 @@ TEST(Convolution2DQU8, test) { TestImpl<quint8, quint8, qint32>(); }
 TEST(Convolution2DQS8, test) { TestImpl<qint8, qint8, qint32>(); }
 TEST(Convolution2DF16, test) { TestImpl<xnn_float16, float, float>(); }
 TEST(Convolution2DF32, test) { TestImpl<float, float, float>(); }
+TEST(Convolution2DF32F16, test) { TestImpl<float, xnn_float16, xnn_float16>(); }
 TEST(Convolution2DQD8F16QC8W, test) {
   TestImpl<xnn_float16, qcint8, float>(
       /*convert_to=*/xnn_datatype_qdint8);

@@ -2475,6 +2475,86 @@ enum xnn_status xnn_create_convolution2d_nhwc_f32_f16(
   return status;
 }
 
+enum xnn_status xnn_create_convolution2d_nhwc_pf32_f16(
+    uint32_t input_padding_top, uint32_t input_padding_right,
+    uint32_t input_padding_bottom, uint32_t input_padding_left,
+    uint32_t kernel_height, uint32_t kernel_width, uint32_t subsampling_height,
+    uint32_t subsampling_width, uint32_t dilation_height,
+    uint32_t dilation_width, uint32_t groups, size_t group_input_channels,
+    size_t group_output_channels, size_t input_channel_stride,
+    size_t output_channel_stride, const void* kernel, const void* bias,
+    float output_min, float output_max, uint32_t flags,
+    xnn_weights_cache_t weights_cache, xnn_operator_t* convolution_op_out) {
+  // Convert the `f16` kernel and bias to `f32` in temporary buffers.
+  const size_t num_kernel_entries = groups * group_input_channels *
+                                    group_output_channels * kernel_width *
+                                    kernel_height;
+  float* fp32_kernel_buffer =
+      (float*)xnn_allocate_memory(num_kernel_entries * sizeof(float));
+  const void* bias_buffer = NULL;
+  float* fp32_bias_buffer = NULL;
+  const xnn_float16* f16_kernel = (const xnn_float16*)kernel;
+  const xnn_float16* f16_bias = (const xnn_float16*)bias;
+  for (size_t i = 0; i < num_kernel_entries; ++i) {
+    fp32_kernel_buffer[i] = xnn_float16_to_float(f16_kernel[i]);
+  }
+  if (bias && !(flags & XNN_FLAG_FP32_STATIC_BIASES)) {
+    fp32_bias_buffer = (float*)xnn_allocate_memory(
+        groups * group_output_channels * sizeof(float));
+    bias_buffer = fp32_bias_buffer;
+    for (size_t i = 0; i < groups * group_output_channels; ++i) {
+      fp32_bias_buffer[i] = xnn_float16_to_float(f16_bias[i]);
+    }
+  } else {
+    bias_buffer = bias;
+  }
+
+  const struct xnn_gemm_config* gemm_config = xnn_init_pf32_gemm_config();
+  if (gemm_config == NULL) {
+    xnn_log_error(
+        "failed to create %s operator: unsupported hardware configuration",
+        xnn_operator_type_to_string(xnn_operator_type_convolution_nhwc_pf32));
+    return xnn_status_unsupported_hardware;
+  }
+
+  // Delegate creation to the `pf32` operator.
+  struct convolution2d_nhwc_context context = {
+      .input_padding_top = input_padding_top,
+      .input_padding_right = input_padding_right,
+      .input_padding_bottom = input_padding_bottom,
+      .input_padding_left = input_padding_left,
+      .kernel_height = kernel_height,
+      .kernel_width = kernel_width,
+      .subsampling_height = subsampling_height,
+      .subsampling_width = subsampling_width,
+      .dilation_height = dilation_height,
+      .dilation_width = dilation_width,
+      .gemm_config = gemm_config,
+      .groups = groups,
+      .group_input_channels = group_input_channels,
+      .group_output_channels = group_output_channels,
+      .input_channel_stride = input_channel_stride,
+      .output_channel_stride = output_channel_stride,
+      .kernel = fp32_kernel_buffer,
+      .bias = bias_buffer,
+      .output_min = output_min,
+      .output_max = output_max,
+      .flags = flags,
+      .weights_cache = weights_cache,
+      .operator_type = xnn_operator_type_convolution_nhwc_pf32,
+      .kernel_for_cache_key = kernel,
+      .bias_for_cache_key = bias,
+  };
+  enum xnn_status status = create_convolution2d_nhwc_helper(
+      &f32_variant, &context, convolution_op_out);
+
+  // Release temporary `f32` buffers.
+  xnn_release_memory(fp32_kernel_buffer);
+  xnn_release_memory(fp32_bias_buffer);
+
+  return status;
+}
+
 enum xnn_status xnn_create_fused_convolution2d_nhwc_f32(
     uint32_t input_padding_top, uint32_t input_padding_right,
     uint32_t input_padding_bottom, uint32_t input_padding_left,
