@@ -6,6 +6,9 @@
 #ifndef XNNPACK_YNNPACK_BASE_SIMD_SCALAR_H_
 #define XNNPACK_YNNPACK_BASE_SIMD_SCALAR_H_
 
+// clang-format off
+#include "ynnpack/base/simd/vec.h"  // IWYU pragma: export
 #include "ynnpack/base/simd/generic.inc"  // IWYU pragma: export
+// clang-format on
 
 #endif  // XNNPACK_YNNPACK_BASE_SIMD_SCALAR_H_

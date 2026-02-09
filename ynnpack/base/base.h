@@ -32,6 +32,12 @@
 #define YNN_ALWAYS_INLINE inline
 #endif
 
+#if defined(__GNUC__)
+#define YNN_NO_INLINE inline __attribute__((noinline))
+#else
+#define YNN_NO_INLINE
+#endif
+
 #if YNN_COMPILER_HAS_ATTRIBUTE(unused)
 #define YNN_UNUSED __attribute__((unused))
 #else

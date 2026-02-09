@@ -274,7 +274,7 @@ YNN_ALWAYS_INLINE void store(int8_t* ptr, s8x16 b, decltype(s8x16::N) = {}) {
 namespace internal {
 
 template <typename T>
-vec<T, 4> partial_load_switch_x4(const T* ptr, size_t n, vec<T, 4> src) {
+static vec<T, 4> partial_load_sse(const T* ptr, size_t n, vec<T, 4> src) {
   assert(n < 4);
   alignas(sizeof(vec<T, 4>)) T lanes[4];
   store_aligned(lanes, src);
@@ -309,7 +309,7 @@ YNN_ALWAYS_INLINE void store_32(void* ptr, __m128 v) {
 }
 
 template <typename T>
-void partial_store_x32x4(T* ptr, vec<T, 4> b, size_t n) {
+static void partial_store_sse(T* ptr, vec<T, 4> b, size_t n) {
   assert(n < 4);
   if (n & 2) {
     store_64(ptr, b.v);
@@ -324,10 +324,10 @@ void partial_store_x32x4(T* ptr, vec<T, 4> b, size_t n) {
 }  // namespace internal
 
 YNN_ALWAYS_INLINE f32x4 load(const float* ptr, size_t n, f32x4 src) {
-  return internal::partial_load_switch_x4(ptr, n, src);
+  return internal::partial_load_sse(ptr, n, src);
 }
 YNN_ALWAYS_INLINE s32x4 load(const int32_t* ptr, size_t n, s32x4 src) {
-  return internal::partial_load_switch_x4(ptr, n, src);
+  return internal::partial_load_sse(ptr, n, src);
 }
 YNN_ALWAYS_INLINE bf16x8 load(const bfloat16* ptr, size_t n, bf16x8 src) {
   return internal::partial_load_memcpy(ptr, n, src);
@@ -339,10 +339,10 @@ YNN_ALWAYS_INLINE s16x8 load(const int16_t* ptr, size_t n, s16x8 src) {
   return internal::partial_load_memcpy(ptr, n, src);
 }
 YNN_ALWAYS_INLINE void store(float* ptr, f32x4 b, size_t n) {
-  internal::partial_store_x32x4(ptr, b, n);
+  internal::partial_store_sse(ptr, b, n);
 }
 YNN_ALWAYS_INLINE void store(int32_t* ptr, s32x4 b, size_t n) {
-  internal::partial_store_x32x4(ptr, b, n);
+  internal::partial_store_sse(ptr, b, n);
 }
 YNN_ALWAYS_INLINE void store(bfloat16* ptr, bf16x8 b, size_t n) {
   internal::partial_store_memcpy(ptr, b, n);

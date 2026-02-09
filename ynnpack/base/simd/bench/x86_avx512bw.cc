@@ -1,0 +1,18 @@
+// Copyright 2025 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+#include "ynnpack/base/simd/x86_avx512bw.h"
+
+#include "ynnpack/base/arch.h"
+#include "ynnpack/base/simd/bench/generic.h"
+
+namespace ynn {
+namespace simd {
+
+BENCH_PARTIAL_LOAD_STORE(avx512bw, s8, 64);
+BENCH_PARTIAL_LOAD_STORE(avx512bw, s16, 32);
+
+}  // namespace simd
+}  // namespace ynn

@@ -114,14 +114,14 @@ vec<To, N> convert(vec<From, N> from, To);
 namespace internal {
 
 template <typename T, size_t N>
-vec<T, N> partial_load_memcpy(const T* ptr, size_t n, vec<T, N> src) {
+static vec<T, N> partial_load_memcpy(const T* ptr, size_t n, vec<T, N> src) {
   assert(n <= N);
   memcpy(&src, ptr, sizeof(T) * n);
   return src;
 }
 
 template <typename T, size_t N>
-void partial_store_memcpy(T* ptr, vec<T, N> value, size_t n) {
+static void partial_store_memcpy(T* ptr, vec<T, N> value, size_t n) {
   assert(n <= N);
   memcpy(ptr, &value, sizeof(T) * n);
 }
