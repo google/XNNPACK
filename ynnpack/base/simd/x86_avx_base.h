@@ -35,6 +35,14 @@ YNN_ALWAYS_INLINE __m128i hi(__m256i x) {
   return _mm_castps_si128(_mm256_extractf128_ps(_mm256_castsi256_ps(x), 1));
 }
 
+YNN_ALWAYS_INLINE __m256 concat(__m128 lo, __m128 hi) {
+  return _mm256_insertf128_ps(_mm256_castps128_ps256(lo), hi, 1);
+}
+YNN_ALWAYS_INLINE __m256i concat(__m128i lo, __m128i hi) {
+  return _mm256_castps_si256(
+      concat(_mm_castsi128_ps(lo), _mm_castsi128_ps(hi)));
+}
+
 }  // namespace internal
 
 template <>
@@ -44,6 +52,7 @@ struct vec<float, 8> {
 
   vec() = default;
   explicit vec(__m256 v) : v(v) {}
+  vec(f32x4 lo, f32x4 hi) : v(internal::concat(lo.v, hi.v)) {}
   vec(float x) : v(_mm256_set1_ps(x)) {}  // NOLINT
 
   __m256 v;
@@ -59,6 +68,7 @@ struct vec<int32_t, 8> {
 
   vec() = default;
   explicit vec(__m256i v) : v(v) {}
+  vec(s32x4 lo, s32x4 hi) : v(internal::concat(lo.v, hi.v)) {}
   vec(int32_t x) : v(_mm256_set1_epi32(x)) {}  // NOLINT
 
   __m256i v;
@@ -74,6 +84,7 @@ struct vec<bfloat16, 16> {
 
   vec() = default;
   explicit vec(__m256i v) : v(v) {}
+  vec(bf16x8 lo, bf16x8 hi) : v(internal::concat(lo.v, hi.v)) {}
   vec(bfloat16 x) : v(_mm256_set1_epi16(x.to_bits())) {}  // NOLINT
 
   __m256i v;
@@ -89,6 +100,7 @@ struct vec<half, 16> {
 
   vec() = default;
   explicit vec(__m256i v) : v(v) {}
+  vec(f16x8 lo, f16x8 hi) : v(internal::concat(lo.v, hi.v)) {}
   vec(half x) : v(_mm256_set1_epi16(x.to_bits())) {}  // NOLINT
 
   __m256i v;
@@ -104,6 +116,7 @@ struct vec<int16_t, 16> {
 
   vec() = default;
   explicit vec(__m256i v) : v(v) {}
+  vec(s16x8 lo, s16x8 hi) : v(internal::concat(lo.v, hi.v)) {}
   vec(int16_t x) : v(_mm256_set1_epi16(x)) {}  // NOLINT
 
   __m256i v;
@@ -119,6 +132,7 @@ struct vec<uint8_t, 32> {
 
   vec() = default;
   explicit vec(__m256i v) : v(v) {}
+  vec(u8x16 lo, u8x16 hi) : v(internal::concat(lo.v, hi.v)) {}
   vec(uint8_t x) : v(_mm256_set1_epi8(x)) {}  // NOLINT
 
   __m256i v;
@@ -134,6 +148,7 @@ struct vec<int8_t, 32> {
 
   vec() = default;
   explicit vec(__m256i v) : v(v) {}
+  vec(s8x16 lo, s8x16 hi) : v(internal::concat(lo.v, hi.v)) {}
   vec(int8_t x) : v(_mm256_set1_epi8(x)) {}  // NOLINT
 
   __m256i v;
@@ -299,8 +314,8 @@ YNN_ALWAYS_INLINE void maskstore(int32_t* ptr, s32x8 val, __m256i mask) {
 
 // Partial load/store with a non-constant number of elements.
 template <typename T>
-YNN_ALWAYS_INLINE vec<T, 8> partial_load_mask_x32x8(const T* ptr, vec<T, 8> src,
-                                                    size_t n) {
+YNN_ALWAYS_INLINE vec<T, 8> partial_load_mask_x32x8(const T* ptr, size_t n,
+                                                    vec<T, 8> src) {
   assert(n <= 8);
   auto mask =
       _mm256_loadu_si256(reinterpret_cast<const __m256i*>(&mask_table[8 - n]));
@@ -318,25 +333,25 @@ YNN_ALWAYS_INLINE void partial_store_x32x8(T* ptr, vec<T, 8> val, size_t n) {
 }  // namespace internal
 
 YNN_ALWAYS_INLINE f32x8 load(const float* ptr, size_t n, f32x8 src) {
-  return internal::partial_load_mask_x32x8(ptr, src, n);
+  return internal::partial_load_mask_x32x8(ptr, n, src);
 }
 YNN_ALWAYS_INLINE s32x8 load(const int32_t* ptr, size_t n, s32x8 src) {
-  return internal::partial_load_mask_x32x8(ptr, src, n);
+  return internal::partial_load_mask_x32x8(ptr, n, src);
 }
 YNN_ALWAYS_INLINE bf16x16 load(const bfloat16* ptr, size_t n, bf16x16 src) {
-  return internal::partial_load_memcpy(ptr, src, n);
+  return internal::partial_load_memcpy(ptr, n, src);
 }
 YNN_ALWAYS_INLINE f16x16 load(const half* ptr, size_t n, f16x16 src) {
-  return internal::partial_load_memcpy(ptr, src, n);
+  return internal::partial_load_memcpy(ptr, n, src);
 }
 YNN_ALWAYS_INLINE s16x16 load(const int16_t* ptr, size_t n, s16x16 src) {
-  return internal::partial_load_memcpy(ptr, src, n);
+  return internal::partial_load_memcpy(ptr, n, src);
 }
 YNN_ALWAYS_INLINE u8x32 load(const uint8_t* ptr, size_t n, u8x32 src) {
-  return internal::partial_load_memcpy(ptr, src, n);
+  return internal::partial_load_memcpy(ptr, n, src);
 }
 YNN_ALWAYS_INLINE s8x32 load(const int8_t* ptr, size_t n, s8x32 src) {
-  return internal::partial_load_memcpy(ptr, src, n);
+  return internal::partial_load_memcpy(ptr, n, src);
 }
 
 YNN_ALWAYS_INLINE void store(float* ptr, f32x8 val, size_t n) {
@@ -392,34 +407,6 @@ YNN_ALWAYS_INLINE f32x8 min(f32x8 a, f32x8 b) {
 }
 YNN_ALWAYS_INLINE f32x8 max(f32x8 a, f32x8 b) {
   return f32x8{_mm256_max_ps(a.v, b.v)};
-}
-
-namespace internal {
-
-YNN_ALWAYS_INLINE __m256i concat(__m128i x, __m128i y) {
-  return _mm256_castps_si256(_mm256_insertf128_ps(
-      _mm256_castsi256_ps(_mm256_castsi128_si256(x)), _mm_castsi128_ps(y), 1));
-}
-
-}  // namespace internal
-
-YNN_ALWAYS_INLINE f32x8 concat(f32x4 x, f32x4 y) {
-  return f32x8{_mm256_insertf128_ps(_mm256_castps128_ps256(x.v), y.v, 1)};
-}
-YNN_ALWAYS_INLINE s32x8 concat(s32x4 x, s32x4 y) {
-  return s32x8{internal::concat(x.v, y.v)};
-}
-YNN_ALWAYS_INLINE bf16x16 concat(bf16x8 x, bf16x8 y) {
-  return bf16x16{internal::concat(x.v, y.v)};
-}
-YNN_ALWAYS_INLINE f16x16 concat(f16x8 x, f16x8 y) {
-  return f16x16{internal::concat(x.v, y.v)};
-}
-YNN_ALWAYS_INLINE s8x32 concat(s8x16 x, s8x16 y) {
-  return s8x32{internal::concat(x.v, y.v)};
-}
-YNN_ALWAYS_INLINE u8x32 concat(u8x16 x, u8x16 y) {
-  return u8x32{internal::concat(x.v, y.v)};
 }
 
 }  // namespace simd

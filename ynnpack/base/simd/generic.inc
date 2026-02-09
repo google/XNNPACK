@@ -25,16 +25,16 @@ namespace simd {
 template <typename T, size_t N>
 YNN_ALWAYS_INLINE vec<T, N> load(const T* ptr,
                                  std::integral_constant<size_t, N> n,
-                                 vec<T, N> src) {
+                                 vec<T, N>) {
   std::integral_constant<size_t, N / 2> n2 = {};
-  return {load(ptr, n2, src.lo()), load(ptr + n2, n2, src.hi())};
+  return {load(ptr, n2), load(ptr + n2, n2)};
 }
 template <typename T, size_t N>
 YNN_ALWAYS_INLINE vec<T, N> load_aligned(const T* ptr,
                                          std::integral_constant<size_t, N> n,
-                                         vec<T, N> src) {
+                                         vec<T, N>) {
   std::integral_constant<size_t, N / 2> n2 = {};
-  return {load_aligned(ptr, n2, src.lo()), load_aligned(ptr + n2, n2, src.hi())};
+  return {load_aligned(ptr, n2), load_aligned(ptr + n2, n2)};
 }
 template <typename T, size_t N>
 YNN_ALWAYS_INLINE vec<T, N> load(const T* ptr, size_t n, vec<T, N> src) {
@@ -42,7 +42,7 @@ YNN_ALWAYS_INLINE vec<T, N> load(const T* ptr, size_t n, vec<T, N> src) {
   if (n < n2) {
     return {load(ptr, n, src.lo()), src.hi()};
   } else {
-    return {load(ptr, n2, src.lo()), load(ptr + n2, n - n2, src.hi())};
+    return {load(ptr, n2), load(ptr + n2, n - n2, src.hi())};
   }
 }
 

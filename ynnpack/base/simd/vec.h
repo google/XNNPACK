@@ -114,7 +114,7 @@ vec<To, N> convert(vec<From, N> from, To);
 namespace internal {
 
 template <typename T, size_t N>
-vec<T, N> partial_load_memcpy(const T* ptr, vec<T, N> src, size_t n) {
+vec<T, N> partial_load_memcpy(const T* ptr, size_t n, vec<T, N> src) {
   assert(n <= N);
   memcpy(&src, ptr, sizeof(T) * n);
   return src;
@@ -143,13 +143,13 @@ struct vec<T, 1> {
 template <typename T>
 YNN_ALWAYS_INLINE vec<T, 1> load(const T* ptr,
                                  std::integral_constant<size_t, 1> n,
-                                 vec<T, 1>) {
+                                 vec<T, 1> = {}) {
   return vec<T, 1>{*ptr};
 }
 template <typename T>
 YNN_ALWAYS_INLINE vec<T, 1> load_aligned(const T* ptr,
                                          std::integral_constant<size_t, 1> n,
-                                         vec<T, 1>) {
+                                         vec<T, 1> = {}) {
   return vec<T, 1>{*ptr};
 }
 template <typename T>

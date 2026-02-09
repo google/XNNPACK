@@ -37,6 +37,16 @@ YNN_ALWAYS_INLINE __m256i hi(__m512i x) {
   return _mm512_extracti64x4_epi64(x, 1);
 }
 
+YNN_ALWAYS_INLINE __m512 concat(__m256 lo, __m256 hi) {
+  return _mm512_castpd_ps(
+      _mm512_insertf64x4(_mm512_castps_pd(_mm512_castps256_ps512(lo)),
+                         _mm256_castps_pd(hi), 1));
+}
+
+YNN_ALWAYS_INLINE __m512i concat(__m256i lo, __m256i hi) {
+  return _mm512_inserti64x4(_mm512_castsi256_si512(lo), hi, 1);
+}
+
 }  // namespace internal
 
 template <>
@@ -46,6 +56,7 @@ struct vec<float, 16> {
 
   vec() = default;
   explicit vec(__m512 v) : v(v) {}
+  vec(f32x8 lo, f32x8 hi) : v(internal::concat(lo.v, hi.v)) {}
   vec(float x) : v(_mm512_set1_ps(x)) {}  // NOLINT
 
   __m512 v;
@@ -61,6 +72,7 @@ struct vec<int32_t, 16> {
 
   vec() = default;
   explicit vec(__m512i v) : v(v) {}
+  vec(s32x8 lo, s32x8 hi) : v(internal::concat(lo.v, hi.v)) {}
   vec(int32_t x) : v(_mm512_set1_epi32(x)) {}  // NOLINT
 
   __m512i v;
@@ -76,6 +88,7 @@ struct vec<bfloat16, 32> {
 
   vec() = default;
   explicit vec(__m512i v) : v(v) {}
+  vec(bf16x16 lo, bf16x16 hi) : v(internal::concat(lo.v, hi.v)) {}
   vec(bfloat16 x) : v(_mm512_set1_epi16(x.to_bits())) {}  // NOLINT
 
   __m512i v;
@@ -91,6 +104,7 @@ struct vec<half, 32> {
 
   vec() = default;
   explicit vec(__m512i v) : v(v) {}
+  vec(f16x16 lo, f16x16 hi) : v(internal::concat(lo.v, hi.v)) {}
   vec(half x) : v(_mm512_set1_epi16(x.to_bits())) {}  // NOLINT
 
   __m512i v;
@@ -106,6 +120,7 @@ struct vec<int16_t, 32> {
 
   vec() = default;
   explicit vec(__m512i v) : v(v) {}
+  vec(s16x16 lo, s16x16 hi) : v(internal::concat(lo.v, hi.v)) {}
   vec(int16_t x) : v(_mm512_set1_epi16(x)) {}  // NOLINT
 
   __m512i v;
@@ -121,6 +136,7 @@ struct vec<uint8_t, 64> {
 
   vec() = default;
   explicit vec(__m512i v) : v(v) {}
+  vec(u8x32 lo, u8x32 hi) : v(internal::concat(lo.v, hi.v)) {}
   vec(uint8_t x) : v(_mm512_set1_epi8(x)) {}  // NOLINT
 
   __m512i v;
@@ -136,6 +152,7 @@ struct vec<int8_t, 64> {
 
   vec() = default;
   explicit vec(__m512i v) : v(v) {}
+  vec(s8x32 lo, s8x32 hi) : v(internal::concat(lo.v, hi.v)) {}
   vec(int8_t x) : v(_mm512_set1_epi8(x)) {}  // NOLINT
 
   __m512i v;
@@ -282,9 +299,8 @@ YNN_ALWAYS_INLINE void mask_storeu(int32_t* ptr, __mmask16 mask, __m512i val) {
 
 // Partial load/store with a non-constant number of elements.
 template <typename T>
-YNN_ALWAYS_INLINE vec<T, 16> partial_load_mask_x32x16(const T* ptr,
-                                                      vec<T, 16> src,
-                                                      size_t n) {
+YNN_ALWAYS_INLINE vec<T, 16> partial_load_mask_x32x16(const T* ptr, size_t n,
+                                                      vec<T, 16> src) {
   assert(n <= 16);
   __mmask16 mask = _cvtu32_mask16((uint32_t)((1 << n) - 1));
   return vec<T, 16>{mask_loadu(src.v, mask, ptr)};
@@ -301,10 +317,10 @@ YNN_ALWAYS_INLINE void partial_store_mask_x32x16(T* ptr, vec<T, 16> val,
 }  // namespace internal
 
 YNN_ALWAYS_INLINE f32x16 load(const float* ptr, size_t n, f32x16 src) {
-  return internal::partial_load_mask_x32x16(ptr, src, n);
+  return internal::partial_load_mask_x32x16(ptr, n, src);
 }
 YNN_ALWAYS_INLINE s32x16 load(const int32_t* ptr, size_t n, s32x16 src) {
-  return internal::partial_load_mask_x32x16(ptr, src, n);
+  return internal::partial_load_mask_x32x16(ptr, n, src);
 }
 
 YNN_ALWAYS_INLINE void store(float* ptr, f32x16 val, size_t n) {
@@ -390,27 +406,6 @@ YNN_ALWAYS_INLINE s8x16 extract(s8x64 x, decltype(s8x16::N)) {
 template <int Index>
 YNN_ALWAYS_INLINE u8x16 extract(u8x64 x, decltype(u8x16::N)) {
   return u8x16{_mm512_extracti32x4_epi32(x.v, Index)};
-}
-
-YNN_ALWAYS_INLINE f32x16 concat(f32x8 x, f32x8 y) {
-  return f32x16{_mm512_castpd_ps(
-      _mm512_insertf64x4(_mm512_castps_pd(_mm512_castps256_ps512(x.v)),
-                         _mm256_castps_pd(y.v), 1))};
-}
-YNN_ALWAYS_INLINE s32x16 concat(s32x8 x, s32x8 y) {
-  return s32x16{_mm512_inserti64x4(_mm512_castsi256_si512(x.v), y.v, 1)};
-}
-YNN_ALWAYS_INLINE bf16x32 concat(bf16x16 x, bf16x16 y) {
-  return bf16x32{_mm512_inserti64x4(_mm512_castsi256_si512(x.v), y.v, 1)};
-}
-YNN_ALWAYS_INLINE f16x32 concat(f16x16 x, f16x16 y) {
-  return f16x32{_mm512_inserti64x4(_mm512_castsi256_si512(x.v), y.v, 1)};
-}
-YNN_ALWAYS_INLINE s8x64 concat(s8x32 x, s8x32 y) {
-  return s8x64{_mm512_inserti64x4(_mm512_castsi256_si512(x.v), y.v, 1)};
-}
-YNN_ALWAYS_INLINE u8x64 concat(u8x32 x, u8x32 y) {
-  return u8x64{_mm512_inserti64x4(_mm512_castsi256_si512(x.v), y.v, 1)};
 }
 
 using f32x32 = vec<float, 32>;

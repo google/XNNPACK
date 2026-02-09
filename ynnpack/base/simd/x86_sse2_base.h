@@ -121,48 +121,41 @@ namespace internal {
 
 // These overloads are x86-specific helpers for implementing templated
 // interleave/transpose helpers that are not x86-specific.
-YNN_ALWAYS_INLINE f32x4 unpacklo(f32x4 a, f32x4 b) {
-  return f32x4{_mm_unpacklo_ps(a.v, b.v)};
+YNN_ALWAYS_INLINE __m128 unpacklo_x32x4(__m128 a, __m128 b) {
+  return _mm_unpacklo_ps(a, b);
 }
-YNN_ALWAYS_INLINE f32x4 unpackhi(f32x4 a, f32x4 b) {
-  return f32x4{_mm_unpackhi_ps(a.v, b.v)};
-}
-
-YNN_ALWAYS_INLINE s32x4 unpacklo(s32x4 a, s32x4 b) {
-  return s32x4{_mm_unpacklo_epi32(a.v, b.v)};
-}
-YNN_ALWAYS_INLINE s32x4 unpackhi(s32x4 a, s32x4 b) {
-  return s32x4{_mm_unpackhi_epi32(a.v, b.v)};
+YNN_ALWAYS_INLINE __m128 unpackhi_x32x4(__m128 a, __m128 b) {
+  return _mm_unpackhi_ps(a, b);
 }
 
-YNN_ALWAYS_INLINE s8x16 unpacklo(s8x16 a, s8x16 b) {
-  return s8x16{_mm_unpacklo_epi8(a.v, b.v)};
+YNN_ALWAYS_INLINE __m128i unpacklo_x32x4(__m128i a, __m128i b) {
+  return _mm_unpacklo_epi32(a, b);
 }
-YNN_ALWAYS_INLINE s8x16 unpackhi(s8x16 a, s8x16 b) {
-  return s8x16{_mm_unpackhi_epi8(a.v, b.v)};
-}
-
-YNN_ALWAYS_INLINE u8x16 unpacklo(u8x16 a, u8x16 b) {
-  return u8x16{_mm_unpacklo_epi8(a.v, b.v)};
-}
-YNN_ALWAYS_INLINE u8x16 unpackhi(u8x16 a, u8x16 b) {
-  return u8x16{_mm_unpackhi_epi8(a.v, b.v)};
+YNN_ALWAYS_INLINE __m128i unpackhi_x32x4(__m128i a, __m128i b) {
+  return _mm_unpackhi_epi32(a, b);
 }
 
-YNN_ALWAYS_INLINE f32x4 movehl(f32x4 a, f32x4 b) {
-  return f32x4{_mm_movehl_ps(a.v, b.v)};
+YNN_ALWAYS_INLINE __m128i unpacklo_x8x16(__m128i a, __m128i b) {
+  return _mm_unpacklo_epi8(a, b);
 }
-YNN_ALWAYS_INLINE f32x4 movelh(f32x4 a, f32x4 b) {
-  return f32x4{_mm_movelh_ps(a.v, b.v)};
+YNN_ALWAYS_INLINE __m128i unpackhi_x8x16(__m128i a, __m128i b) {
+  return _mm_unpackhi_epi8(a, b);
 }
 
-YNN_ALWAYS_INLINE s32x4 movehl(s32x4 a, s32x4 b) {
-  return s32x4{_mm_castps_si128(
-      _mm_movehl_ps(_mm_castsi128_ps(a.v), _mm_castsi128_ps(b.v)))};
+YNN_ALWAYS_INLINE __m128 movehl(__m128 a, __m128 b) {
+  return _mm_movehl_ps(a, b);
 }
-YNN_ALWAYS_INLINE s32x4 movelh(s32x4 a, s32x4 b) {
-  return s32x4{_mm_castps_si128(
-      _mm_movelh_ps(_mm_castsi128_ps(a.v), _mm_castsi128_ps(b.v)))};
+YNN_ALWAYS_INLINE __m128 movelh(__m128 a, __m128 b) {
+  return _mm_movelh_ps(a, b);
+}
+
+YNN_ALWAYS_INLINE __m128i movehl(__m128i a, __m128i b) {
+  return _mm_castps_si128(
+      _mm_movehl_ps(_mm_castsi128_ps(a), _mm_castsi128_ps(b)));
+}
+YNN_ALWAYS_INLINE __m128i movelh(__m128i a, __m128i b) {
+  return _mm_castps_si128(
+      _mm_movelh_ps(_mm_castsi128_ps(a), _mm_castsi128_ps(b)));
 }
 
 }  // namespace internal
@@ -281,7 +274,7 @@ YNN_ALWAYS_INLINE void store(int8_t* ptr, s8x16 b, decltype(s8x16::N) = {}) {
 namespace internal {
 
 template <typename T>
-vec<T, 4> partial_load_switch_x4(const T* ptr, vec<T, 4> src, size_t n) {
+vec<T, 4> partial_load_switch_x4(const T* ptr, size_t n, vec<T, 4> src) {
   assert(n < 4);
   alignas(sizeof(vec<T, 4>)) T lanes[4];
   store_aligned(lanes, src);
@@ -301,49 +294,49 @@ vec<T, 4> partial_load_switch_x4(const T* ptr, vec<T, 4> src, size_t n) {
   return load_aligned(lanes, std::integral_constant<size_t, 4>{});
 }
 
-YNN_ALWAYS_INLINE void storel(int32_t* ptr, __m128i v) {
+YNN_ALWAYS_INLINE void store_64(void* ptr, __m128i v) {
   _mm_storel_pi(reinterpret_cast<__m64*>(ptr), _mm_castsi128_ps(v));
 }
-YNN_ALWAYS_INLINE void storel(float* ptr, __m128 v) {
+YNN_ALWAYS_INLINE void store_64(void* ptr, __m128 v) {
   _mm_storel_pi(reinterpret_cast<__m64*>(ptr), v);
 }
 
-YNN_ALWAYS_INLINE void store_scalar(int32_t* ptr, __m128i v) {
+YNN_ALWAYS_INLINE void store_32(void* ptr, __m128i v) {
   _mm_store_ss(reinterpret_cast<float*>(ptr), _mm_castsi128_ps(v));
 }
-YNN_ALWAYS_INLINE void store_scalar(float* ptr, __m128 v) {
-  _mm_store_ss(ptr, v);
+YNN_ALWAYS_INLINE void store_32(void* ptr, __m128 v) {
+  _mm_store_ss(reinterpret_cast<float*>(ptr), v);
 }
 
 template <typename T>
 void partial_store_x32x4(T* ptr, vec<T, 4> b, size_t n) {
   assert(n < 4);
   if (n & 2) {
-    storel(ptr, b.v);
+    store_64(ptr, b.v);
     ptr += 2;
-    b = movehl(b, b);
+    b.v = movehl(b.v, b.v);
   }
   if (n & 1) {
-    store_scalar(ptr, b.v);
+    store_32(ptr, b.v);
   }
 }
 
 }  // namespace internal
 
 YNN_ALWAYS_INLINE f32x4 load(const float* ptr, size_t n, f32x4 src) {
-  return internal::partial_load_switch_x4(ptr, src, n);
+  return internal::partial_load_switch_x4(ptr, n, src);
 }
 YNN_ALWAYS_INLINE s32x4 load(const int32_t* ptr, size_t n, s32x4 src) {
-  return internal::partial_load_switch_x4(ptr, src, n);
+  return internal::partial_load_switch_x4(ptr, n, src);
 }
 YNN_ALWAYS_INLINE bf16x8 load(const bfloat16* ptr, size_t n, bf16x8 src) {
-  return internal::partial_load_memcpy(ptr, src, n);
+  return internal::partial_load_memcpy(ptr, n, src);
 }
 YNN_ALWAYS_INLINE f16x8 load(const half* ptr, size_t n, f16x8 src) {
-  return internal::partial_load_memcpy(ptr, src, n);
+  return internal::partial_load_memcpy(ptr, n, src);
 }
 YNN_ALWAYS_INLINE s16x8 load(const int16_t* ptr, size_t n, s16x8 src) {
-  return internal::partial_load_memcpy(ptr, src, n);
+  return internal::partial_load_memcpy(ptr, n, src);
 }
 YNN_ALWAYS_INLINE void store(float* ptr, f32x4 b, size_t n) {
   internal::partial_store_x32x4(ptr, b, n);
@@ -362,10 +355,10 @@ YNN_ALWAYS_INLINE void store(int16_t* ptr, s16x8 b, size_t n) {
 }
 
 YNN_ALWAYS_INLINE u8x16 load(const uint8_t* ptr, size_t n, u8x16 src) {
-  return internal::partial_load_memcpy(ptr, src, n);
+  return internal::partial_load_memcpy(ptr, n, src);
 }
 YNN_ALWAYS_INLINE s8x16 load(const int8_t* ptr, size_t n, s8x16 src) {
-  return internal::partial_load_memcpy(ptr, src, n);
+  return internal::partial_load_memcpy(ptr, n, src);
 }
 
 YNN_ALWAYS_INLINE void store(uint8_t* ptr, u8x16 val, size_t n) {
@@ -508,15 +501,15 @@ YNN_ALWAYS_INLINE uint8_t horizontal_min(u8x16 a) {
 template <typename T>
 YNN_ALWAYS_INLINE std::array<vec<T, 4>, 4> transpose(
     std::array<vec<T, 4>, 4> x) {
-  vec<T, 4> t0 = internal::unpacklo(x[0], x[1]);
-  vec<T, 4> t1 = internal::unpacklo(x[2], x[3]);
-  vec<T, 4> t2 = internal::unpackhi(x[0], x[1]);
-  vec<T, 4> t3 = internal::unpackhi(x[2], x[3]);
+  vec<T, 4> t0{internal::unpacklo_x32x4(x[0].v, x[1].v)};
+  vec<T, 4> t1{internal::unpacklo_x32x4(x[2].v, x[3].v)};
+  vec<T, 4> t2{internal::unpackhi_x32x4(x[0].v, x[1].v)};
+  vec<T, 4> t3{internal::unpackhi_x32x4(x[2].v, x[3].v)};
   return {{
-      {internal::movelh(t0, t1)},
-      {internal::movehl(t1, t0)},
-      {internal::movelh(t2, t3)},
-      {internal::movehl(t3, t2)},
+      vec<T, 4>{internal::movelh(t0.v, t1.v)},
+      vec<T, 4>{internal::movehl(t1.v, t0.v)},
+      vec<T, 4>{internal::movelh(t2.v, t3.v)},
+      vec<T, 4>{internal::movehl(t3.v, t2.v)},
   }};
 }
 
