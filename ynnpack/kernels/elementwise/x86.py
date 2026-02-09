@@ -1143,6 +1143,10 @@ YNN_INTRINSIC __m512i partial_load_32x(const uint16_t* ptr, size_t num_elements)
   def update_for_avx512bw(self):
     """Updates the target for AVX512BW support."""
     self.header += """
+#if defined(__clang__) && defined(_MSC_VER)
+#include <avx512bwintrin.h>
+#endif
+
 namespace {
 
 YNN_INTRINSIC __m512i partial_load_32x(const int16_t* ptr, size_t num_elements) {
@@ -1244,11 +1248,6 @@ YNN_INTRINSIC __m512i saturating_cast_int16_to_uint8(__m512i a, __m512i b) {
     self.compute_all_features(features, implied_features, all_features)
 
     self.header += "#include <immintrin.h>\n"
-    self.header += """
-#if defined(__clang__) && defined(_MSC_VER)
-#include <avx512bwintrin.h>
-#endif
-"""
 
     known_features = [
         "SSE2",
