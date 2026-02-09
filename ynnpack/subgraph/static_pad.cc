@@ -38,8 +38,16 @@ ynn_status ynn_define_static_pad(ynn_subgraph_t subgraph, size_t num_axes,
   ynn_node::static_pad op;
   op.paddings.reserve(num_axes);
   for (size_t i = 0; i < num_axes; ++i) {
-    op.paddings.push_back({ynn::axis_to_slinky_dim(input.rank(), axes[i]),
-                           pre_paddings[i], post_paddings[i]});
+    if (pre_paddings[i] != 0 || post_paddings[i] != 0) {
+      op.paddings.push_back({ynn::axis_to_slinky_dim(input.rank(), axes[i]),
+                             pre_paddings[i], post_paddings[i]});
+    }
+  }
+
+  if (op.paddings.empty() && *output_id == YNN_INVALID_VALUE_ID) {
+    // This node is a no-op, skip it.
+    *output_id = input_id;
+    return ynn_status_success;
   }
 
   // Propagate shape.
@@ -47,8 +55,11 @@ ynn_status ynn_define_static_pad(ynn_subgraph_t subgraph, size_t num_axes,
   output.extents = input.extents;
 
   for (const ynn_node::static_pad::padding& p : op.paddings) {
-    output.extents[p.axis] += static_cast<slinky::index_t>(p.pre_padding) +
-                              static_cast<slinky::index_t>(p.post_padding);
+    if ((p.pre_padding + p.post_padding) != 0) {
+      output.extents[p.axis] = output.extent(p.axis) +
+                               static_cast<slinky::index_t>(p.pre_padding) +
+                               static_cast<slinky::index_t>(p.post_padding);
+    }
   }
 
   ynn_node node;
