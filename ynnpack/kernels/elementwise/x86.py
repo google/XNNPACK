@@ -1244,6 +1244,11 @@ YNN_INTRINSIC __m512i saturating_cast_int16_to_uint8(__m512i a, __m512i b) {
     self.compute_all_features(features, implied_features, all_features)
 
     self.header += "#include <immintrin.h>\n"
+    self.header += """
+#if defined(__clang__) && defined(_MSC_VER)
+#include <avx512bwintrin.h>
+#endif
+"""
 
     known_features = [
         "SSE2",
