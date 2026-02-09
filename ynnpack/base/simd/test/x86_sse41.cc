@@ -5,8 +5,6 @@
 
 #include "ynnpack/base/simd/x86_sse41.h"
 
-#include <cstdint>
-
 #include <gtest/gtest.h>
 #include "ynnpack/base/arch.h"
 #include "ynnpack/base/simd/test/generic.h"
@@ -22,20 +20,20 @@ class x86_sse41 : public ::testing::Test {
   }
 };
 
-TEST_MULTIPLY(x86_sse41, int32_t, 4);
+TEST_MULTIPLY(x86_sse41, s32, 4);
 
-TEST_MIN(x86_sse41, int8_t, 16);
-TEST_MIN(x86_sse41, int32_t, 4);
+TEST_MIN(x86_sse41, s8, 16);
+TEST_MIN(x86_sse41, s32, 4);
 
-TEST_MAX(x86_sse41, int8_t, 16);
-TEST_MAX(x86_sse41, int32_t, 4);
+TEST_MAX(x86_sse41, s8, 16);
+TEST_MAX(x86_sse41, s32, 4);
 
-TEST_HORIZONTAL_MIN(x86_sse41, int32_t, 4);
+TEST_HORIZONTAL_MIN(x86_sse41, s32, 4);
 
-TEST_HORIZONTAL_MAX(x86_sse41, int32_t, 4);
+TEST_HORIZONTAL_MAX(x86_sse41, s32, 4);
 
-TEST_CONVERT(x86_sse41, int32_t, u8x16);
-TEST_CONVERT(x86_sse41, int32_t, s8x16);
+TEST_CONVERT(x86_sse41, s32, u8x16);
+TEST_CONVERT(x86_sse41, s32, s8x16);
 
 }  // namespace simd
 }  // namespace ynn

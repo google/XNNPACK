@@ -5,8 +5,6 @@
 
 #include "ynnpack/base/simd/x86_avx2.h"
 
-#include <cstdint>
-
 #include <gtest/gtest.h>
 #include "ynnpack/base/arch.h"
 #include "ynnpack/base/simd/test/generic.h"
@@ -22,39 +20,39 @@ class x86_avx2 : public ::testing::Test {
   }
 };
 
-TEST_ADD(x86_avx2, uint8_t, 32);
-TEST_ADD(x86_avx2, int8_t, 32);
-TEST_ADD(x86_avx2, int32_t, 8);
+TEST_ADD(x86_avx2, u8, 32);
+TEST_ADD(x86_avx2, s8, 32);
+TEST_ADD(x86_avx2, s32, 8);
 
-TEST_SUBTRACT(x86_avx2, uint8_t, 32);
-TEST_SUBTRACT(x86_avx2, int8_t, 32);
-TEST_SUBTRACT(x86_avx2, int32_t, 8);
+TEST_SUBTRACT(x86_avx2, u8, 32);
+TEST_SUBTRACT(x86_avx2, s8, 32);
+TEST_SUBTRACT(x86_avx2, s32, 8);
 
-TEST_MULTIPLY(x86_avx2, int32_t, 8);
+TEST_MULTIPLY(x86_avx2, s32, 8);
 
-TEST_MIN(x86_avx2, uint8_t, 32);
-TEST_MIN(x86_avx2, int8_t, 32);
-TEST_MIN(x86_avx2, int16_t, 16);
-TEST_MIN(x86_avx2, int32_t, 8);
+TEST_MIN(x86_avx2, u8, 32);
+TEST_MIN(x86_avx2, s8, 32);
+TEST_MIN(x86_avx2, s16, 16);
+TEST_MIN(x86_avx2, s32, 8);
 
-TEST_MAX(x86_avx2, uint8_t, 32);
-TEST_MAX(x86_avx2, int8_t, 32);
-TEST_MAX(x86_avx2, int16_t, 16);
-TEST_MAX(x86_avx2, int32_t, 8);
+TEST_MAX(x86_avx2, u8, 32);
+TEST_MAX(x86_avx2, s8, 32);
+TEST_MAX(x86_avx2, s16, 16);
+TEST_MAX(x86_avx2, s32, 8);
 
-TEST_HORIZONTAL_MIN(x86_avx2, uint8_t, 32);
-TEST_HORIZONTAL_MIN(x86_avx2, int8_t, 32);
-TEST_HORIZONTAL_MIN(x86_avx2, int16_t, 16);
-TEST_HORIZONTAL_MIN(x86_avx2, int32_t, 8);
+TEST_HORIZONTAL_MIN(x86_avx2, u8, 32);
+TEST_HORIZONTAL_MIN(x86_avx2, s8, 32);
+TEST_HORIZONTAL_MIN(x86_avx2, s16, 16);
+TEST_HORIZONTAL_MIN(x86_avx2, s32, 8);
 
-TEST_HORIZONTAL_MAX(x86_avx2, uint8_t, 32);
-TEST_HORIZONTAL_MAX(x86_avx2, int8_t, 32);
-TEST_HORIZONTAL_MAX(x86_avx2, int16_t, 16);
-TEST_HORIZONTAL_MAX(x86_avx2, int32_t, 8);
+TEST_HORIZONTAL_MAX(x86_avx2, u8, 32);
+TEST_HORIZONTAL_MAX(x86_avx2, s8, 32);
+TEST_HORIZONTAL_MAX(x86_avx2, s16, 16);
+TEST_HORIZONTAL_MAX(x86_avx2, s32, 8);
 
-TEST_CONVERT(x86_avx2, float, bf16x8);
-TEST_CONVERT(x86_avx2, int32_t, u8x16);
-TEST_CONVERT(x86_avx2, int32_t, s8x16);
+TEST_CONVERT(x86_avx2, f32, bf16x8);
+TEST_CONVERT(x86_avx2, s32, u8x16);
+TEST_CONVERT(x86_avx2, s32, s8x16);
 
 }  // namespace simd
 }  // namespace ynn

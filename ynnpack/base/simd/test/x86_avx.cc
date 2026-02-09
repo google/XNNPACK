@@ -5,12 +5,8 @@
 
 #include "ynnpack/base/simd/x86_avx.h"
 
-#include <cstdint>
-
 #include <gtest/gtest.h>
 #include "ynnpack/base/arch.h"
-#include "ynnpack/base/bfloat16.h"
-#include "ynnpack/base/half.h"
 #include "ynnpack/base/simd/test/generic.h"
 
 namespace ynn {
@@ -24,43 +20,43 @@ class x86_avx : public ::testing::Test {
   }
 };
 
-TEST_BROADCAST(x86_avx, uint8_t, 32);
-TEST_BROADCAST(x86_avx, int8_t, 32);
-TEST_BROADCAST(x86_avx, int16_t, 16);
-TEST_BROADCAST(x86_avx, half, 16);
-TEST_BROADCAST(x86_avx, bfloat16, 16);
-TEST_BROADCAST(x86_avx, float, 8);
-TEST_BROADCAST(x86_avx, int32_t, 8);
+TEST_BROADCAST(x86_avx, u8, 32);
+TEST_BROADCAST(x86_avx, s8, 32);
+TEST_BROADCAST(x86_avx, s16, 16);
+TEST_BROADCAST(x86_avx, f16, 16);
+TEST_BROADCAST(x86_avx, bf16, 16);
+TEST_BROADCAST(x86_avx, f32, 8);
+TEST_BROADCAST(x86_avx, s32, 8);
 
-TEST_LOAD_STORE(x86_avx, uint8_t, 32);
-TEST_LOAD_STORE(x86_avx, int8_t, 32);
-TEST_LOAD_STORE(x86_avx, int16_t, 16);
-TEST_LOAD_STORE(x86_avx, half, 16);
-TEST_LOAD_STORE(x86_avx, bfloat16, 16);
-TEST_LOAD_STORE(x86_avx, float, 8);
-TEST_LOAD_STORE(x86_avx, int32_t, 8);
+TEST_LOAD_STORE(x86_avx, u8, 32);
+TEST_LOAD_STORE(x86_avx, s8, 32);
+TEST_LOAD_STORE(x86_avx, s16, 16);
+TEST_LOAD_STORE(x86_avx, f16, 16);
+TEST_LOAD_STORE(x86_avx, bf16, 16);
+TEST_LOAD_STORE(x86_avx, f32, 8);
+TEST_LOAD_STORE(x86_avx, s32, 8);
 
-TEST_ALIGNED_LOAD_STORE(x86_avx, uint8_t, 32);
-TEST_ALIGNED_LOAD_STORE(x86_avx, int8_t, 32);
-TEST_ALIGNED_LOAD_STORE(x86_avx, int16_t, 16);
-TEST_ALIGNED_LOAD_STORE(x86_avx, half, 16);
-TEST_ALIGNED_LOAD_STORE(x86_avx, bfloat16, 16);
-TEST_ALIGNED_LOAD_STORE(x86_avx, float, 8);
-TEST_ALIGNED_LOAD_STORE(x86_avx, int32_t, 8);
+TEST_ALIGNED_LOAD_STORE(x86_avx, u8, 32);
+TEST_ALIGNED_LOAD_STORE(x86_avx, s8, 32);
+TEST_ALIGNED_LOAD_STORE(x86_avx, s16, 16);
+TEST_ALIGNED_LOAD_STORE(x86_avx, f16, 16);
+TEST_ALIGNED_LOAD_STORE(x86_avx, bf16, 16);
+TEST_ALIGNED_LOAD_STORE(x86_avx, f32, 8);
+TEST_ALIGNED_LOAD_STORE(x86_avx, s32, 8);
 
-TEST_PARTIAL_LOAD_STORE(x86_avx, uint8_t, 32);
-TEST_PARTIAL_LOAD_STORE(x86_avx, int8_t, 32);
-TEST_PARTIAL_LOAD_STORE(x86_avx, int16_t, 16);
-TEST_PARTIAL_LOAD_STORE(x86_avx, half, 16);
-TEST_PARTIAL_LOAD_STORE(x86_avx, bfloat16, 16);
-TEST_PARTIAL_LOAD_STORE(x86_avx, float, 8);
-TEST_PARTIAL_LOAD_STORE(x86_avx, int32_t, 8);
+TEST_PARTIAL_LOAD_STORE(x86_avx, u8, 32);
+TEST_PARTIAL_LOAD_STORE(x86_avx, s8, 32);
+TEST_PARTIAL_LOAD_STORE(x86_avx, s16, 16);
+TEST_PARTIAL_LOAD_STORE(x86_avx, f16, 16);
+TEST_PARTIAL_LOAD_STORE(x86_avx, bf16, 16);
+TEST_PARTIAL_LOAD_STORE(x86_avx, f32, 8);
+TEST_PARTIAL_LOAD_STORE(x86_avx, s32, 8);
 
-TEST_ADD(x86_avx, float, 8);
-TEST_SUBTRACT(x86_avx, float, 8);
-TEST_MULTIPLY(x86_avx, float, 8);
-TEST_MIN(x86_avx, float, 8);
-TEST_MAX(x86_avx, float, 8);
+TEST_ADD(x86_avx, f32, 8);
+TEST_SUBTRACT(x86_avx, f32, 8);
+TEST_MULTIPLY(x86_avx, f32, 8);
+TEST_MIN(x86_avx, f32, 8);
+TEST_MAX(x86_avx, f32, 8);
 
 TEST_EXTRACT(x86_avx, s32x8, 4);
 TEST_EXTRACT(x86_avx, f32x8, 4);
@@ -76,8 +72,8 @@ TEST_CONCAT(x86_avx, f16x8);
 TEST_CONCAT(x86_avx, s8x16);
 TEST_CONCAT(x86_avx, u8x16);
 
-TEST_HORIZONTAL_MIN(x86_avx, float, 8);
-TEST_HORIZONTAL_MAX(x86_avx, float, 8);
+TEST_HORIZONTAL_MIN(x86_avx, f32, 8);
+TEST_HORIZONTAL_MAX(x86_avx, f32, 8);
 
 }  // namespace simd
 }  // namespace ynn

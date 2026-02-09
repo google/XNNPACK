@@ -22,7 +22,7 @@ class arm_neonfma : public ::testing::Test {
   }
 };
 
-TEST_FMA(arm_neonfma, float, 4);
+TEST_FMA(arm_neonfma, f32, 4);
 
 }  // namespace simd
 }  // namespace ynn

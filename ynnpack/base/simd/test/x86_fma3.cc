@@ -20,7 +20,7 @@ class x86_fma3 : public ::testing::Test {
   }
 };
 
-TEST_FMA(x86_fma3, float, 8);
+TEST_FMA(x86_fma3, f32, 8);
 
 }  // namespace simd
 }  // namespace ynn

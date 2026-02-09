@@ -9,12 +9,14 @@
 #include <algorithm>
 #include <chrono>
 #include <cstddef>
+#include <cstdint>
 #include <cstring>
 #include <type_traits>
 #include <utility>
 
 #include <gtest/gtest.h>
-#include "ynnpack/base/base.h"
+#include "ynnpack/base/bfloat16.h"
+#include "ynnpack/base/half.h"
 #include "ynnpack/base/simd/vec.h"
 #include "ynnpack/base/test/fuzz_test.h"
 #include "ynnpack/base/test/random.h"
@@ -22,6 +24,14 @@
 namespace ynn {
 
 namespace simd {
+
+using u8 = uint8_t;
+using s8 = int8_t;
+using s16 = int16_t;
+using f16 = half;
+using bf16 = bfloat16;
+using f32 = float;
+using s32 = int32_t;
 
 template <typename scalar, size_t N>
 void test_broadcast() {

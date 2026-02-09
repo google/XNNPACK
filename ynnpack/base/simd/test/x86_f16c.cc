@@ -20,8 +20,8 @@ class x86_f16c : public ::testing::Test {
   }
 };
 
-TEST_CONVERT(x86_f16c, float, f16x8);
-TEST_CONVERT(x86_f16c, float, f16x16);
+TEST_CONVERT(x86_f16c, f32, f16x8);
+TEST_CONVERT(x86_f16c, f32, f16x16);
 
 }  // namespace simd
 }  // namespace ynn
