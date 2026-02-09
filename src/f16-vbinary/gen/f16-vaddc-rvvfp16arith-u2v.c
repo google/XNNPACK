@@ -3,7 +3,7 @@
 //   Template: src/f16-vbinary/vopc-rvvfp16arith.c.in
 //   Generator: tools/xngen
 //
-// Copyright 2026 Google
+// Copyright 2026 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
