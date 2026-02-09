@@ -726,5 +726,7 @@ jobs:
 
       - name: Compress disk cache
         if: ${{ inputs.update-caches }}
-        run: find "/home/xnnpack/.cache/bazel" -type f -atime +7 -delete
+        run: |
+          mkdir -p /home/xnnpack/.cache/bazel
+          find "/home/xnnpack/.cache/bazel" -type f -atime +7 -delete
 
