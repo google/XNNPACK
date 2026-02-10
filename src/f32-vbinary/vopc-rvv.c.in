@@ -41,7 +41,6 @@ void xnn_f32_v${OP.lower()}c_ukernel__rvv_u${LMUL}v(
 
   const float b = *input_b;
   size_t n = batch >> 2;
-
   $if OP == "RPRELU":
     if XNN_UNLIKELY(b >= 0.0f) {
       size_t vl = __riscv_vsetvl_e32m${LMUL}(n);

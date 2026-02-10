@@ -31,7 +31,6 @@ void xnn_f32_vrpreluc_ukernel__rvv_u4v(
 
   const float b = *input_b;
   size_t n = batch >> 2;
-
   if XNN_UNLIKELY(b >= 0.0f) {
     size_t vl = __riscv_vsetvl_e32m4(n);
     vfloat32m4_t vacc = __riscv_vfmv_v_f_f32m4(b, vl);

@@ -32,7 +32,6 @@ void xnn_f32_vpreluc_ukernel__rvv_u8v(
   const float b = *input_b;
   size_t n = batch >> 2;
 
-
   do {
     size_t vl = __riscv_vsetvl_e32m8(n);
     n -= vl;
