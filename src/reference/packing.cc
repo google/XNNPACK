@@ -558,10 +558,10 @@ void xnn_pack_qs8_to_qu8_qc4w_gemm_goi_w(
       input_zero_point, params->kernel_zero_point);
 }
 
-void xnn_pack_qs8_qc2w_gemm_gio_w(
+void pack_qs8_qc2w_gemm_gio_w(
     size_t g, size_t nc, size_t kc, size_t nr, size_t kr, size_t sr,
     size_t k_stride, const uint8_t* k, const int32_t* b, const float* scale,
-    void* packed_weights, size_t extra_bytes,
+    void* packed_weights, size_t extra_bytes, uint32_t izp,
     const struct xnn_qs8_qc2w_packing_params* params) {
   assert(g != 0);
   assert(nc != 0);
@@ -576,7 +576,6 @@ void xnn_pack_qs8_qc2w_gemm_gio_w(
 
   // row sums, weights, extra data
   const size_t skr = sr * kr;
-  const int32_t izp = static_cast<int32_t>(params->input_zero_point);
   do {
     size_t nr_block_start = 0;
     do {
@@ -651,10 +650,11 @@ void xnn_pack_qs8_qc2w_gemm_gio_w(
   } while (--g != 0);
 }
 
-void xnn_pack_qs8_qc2w_gemm_goi_w(
+void pack_qs8_qc2w_gemm_goi_w(
     size_t g, size_t nc, size_t kc, size_t nr, size_t kr, size_t sr,
     const uint8_t* k, const int32_t* b, const float* scale,
-    void* packed_weights, size_t extra_bytes,
+    void* packed_weights, size_t extra_bytes, uint32_t izp,
+    bool make_weights_unsigned,
     const struct xnn_qs8_qc2w_packing_params* params) {
   assert(g != 0);
   assert(nc != 0);
@@ -668,7 +668,6 @@ void xnn_pack_qs8_qc2w_gemm_goi_w(
   assert(params->kernel_zero_point == 0);
 
   const size_t skr = sr * kr;
-  const int32_t izp = static_cast<int32_t>(params->input_zero_point);
   do {
     size_t nr_block_start = 0;
     do {
@@ -718,7 +717,11 @@ void xnn_pack_qs8_qc2w_gemm_goi_w(
             kv_3 = sign_extend_int2(kv_3);
 
             ksum += kv_0 + kv_1 + kv_2 + kv_3;
-            static_cast<int8_t*>(packed_weights)[kr_block_offset] = kv;
+            if (make_weights_unsigned) {
+              static_cast<int8_t*>(packed_weights)[kr_block_offset] = kv ^ 0xAA;
+            } else {
+              static_cast<int8_t*>(packed_weights)[kr_block_offset] = kv;
+            }
           }
 
           packed_b[nr_block_offset] = packed_b[nr_block_offset] - ksum * izp;
@@ -737,6 +740,52 @@ void xnn_pack_qs8_qc2w_gemm_goi_w(
       b += nc;
     }
   } while (--g != 0);
+}
+
+void xnn_pack_qs8_qc2w_gemm_gio_w(
+    size_t g, size_t nc, size_t kc, size_t nr, size_t kr, size_t sr,
+    size_t k_stride, const uint8_t* k, const int32_t* b, const float* scale,
+    void* packed_weights, size_t extra_bytes,
+    const struct xnn_qs8_qc2w_packing_params* params) {
+  assert(params != nullptr);
+  pack_qs8_qc2w_gemm_gio_w(
+      g, nc, kc, nr, kr, sr, k_stride, k, b, scale, packed_weights, extra_bytes,
+      params->input_zero_point, params);
+}
+
+void xnn_pack_qs8_qc2w_gemm_goi_w(
+    size_t g, size_t nc, size_t kc, size_t nr, size_t kr, size_t sr,
+    const uint8_t* k, const int32_t* b, const float* scale,
+    void* packed_weights, size_t extra_bytes,
+    const struct xnn_qs8_qc2w_packing_params* params) {
+  assert(params != nullptr);
+  pack_qs8_qc2w_gemm_goi_w(g, nc, kc, nr, kr, sr, k, b, scale, packed_weights,
+                           extra_bytes, params->input_zero_point,
+                           /*make_weights_unsigned=*/false, params);
+}
+
+void xnn_pack_qs8_to_qu8_qc2w_gemm_gio_w(
+    size_t g, size_t nc, size_t kc, size_t nr, size_t kr, size_t sr,
+    size_t k_stride, const uint8_t* k, const int32_t* b, const float* scale,
+    void* packed_weights, size_t extra_bytes,
+    const struct xnn_qs8_qc2w_packing_params* params) {
+  assert(params != nullptr);
+  uint32_t input_zero_point = (int32_t)params->input_zero_point + 0x80;
+  pack_qs8_qc2w_gemm_gio_w(
+      g, nc, kc, nr, kr, sr, k_stride, k, b, scale, packed_weights, extra_bytes,
+      input_zero_point, params);
+}
+
+void xnn_pack_qs8_to_qu8_qc2w_gemm_goi_w(
+    size_t g, size_t nc, size_t kc, size_t nr, size_t kr, size_t sr,
+    const uint8_t* k, const int32_t* b, const float* scale,
+    void* packed_weights, size_t extra_bytes,
+    const struct xnn_qs8_qc2w_packing_params* params) {
+  assert(params != nullptr);
+  uint32_t input_zero_point = (int32_t)params->input_zero_point + 0x80;
+  pack_qs8_qc2w_gemm_goi_w(
+      g, nc, kc, nr, kr, sr, k, b, scale, packed_weights, extra_bytes,
+      input_zero_point, /*make_weights_unsigned=*/true, params);
 }
 
 void xnn_pack_qd8_qc2w_gemm_goi_w(
