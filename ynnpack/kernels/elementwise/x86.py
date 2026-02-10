@@ -1042,8 +1042,9 @@ YNN_INTRINSIC void partial_store_16x(int32_t* output, size_t num_elements, __m51
 }
 
 YNN_INTRINSIC __m256i partial_load_16x(const uint16_t* ptr, size_t num_elements) {
-  __mmask32 mask = _cvtu32_mask32((uint32_t)((1U << num_elements) - 1U));
-  return _mm512_castsi512_si256(_mm512_maskz_loadu_epi16(mask, ptr));
+  __m256i v = _mm256_setzero_si256();
+  memcpy(&v, ptr, num_elements * 2);
+  return v;
 }
 
 template <typename T>
@@ -1143,10 +1144,6 @@ YNN_INTRINSIC __m512i partial_load_32x(const uint16_t* ptr, size_t num_elements)
   def update_for_avx512bw(self):
     """Updates the target for AVX512BW support."""
     self.header += """
-#if defined(__clang__) && defined(_MSC_VER)
-#include <avx512bwintrin.h>
-#endif
-
 namespace {
 
 YNN_INTRINSIC __m512i partial_load_32x(const int16_t* ptr, size_t num_elements) {
