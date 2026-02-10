@@ -10,8 +10,10 @@
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
+#include <cstring>
 #include <functional>
 #include <iomanip>
+#include <map>
 #include <memory>
 #include <numeric>
 #include <optional>
@@ -34,8 +36,6 @@
 #include "ynnpack/subgraph/runtime.h"
 #include "ynnpack/subgraph/tensor.h"
 #include "slinky/base/thread_pool.h"
-#include "slinky/builder/simplify.h"
-#include "slinky/builder/substitute.h"
 #include "slinky/runtime/buffer.h"
 #include "slinky/runtime/evaluate.h"
 #include "slinky/runtime/expr.h"
@@ -468,6 +468,121 @@ void ynn_subgraph::invalidate_dead_values() {
   }
 }
 
+namespace {
+
+bool values_are_equal(const ynn_subgraph& subgraph, uint32_t a_id,
+                      uint32_t b_id) {
+  if (a_id == b_id) return true;
+  if (a_id == YNN_INVALID_VALUE_ID || b_id == YNN_INVALID_VALUE_ID)
+    return false;
+
+  const ynn_value& a = subgraph.value(a_id);
+  const ynn_value& b = subgraph.value(b_id);
+
+  if (a.type != b.type) return false;
+
+  if (a.is_static_scalar() && b.is_static_scalar()) {
+    assert(a.data);
+    assert(b.data);
+    if (a.data->size_bytes() != b.data->size_bytes()) return false;
+    return std::memcmp(a.data->base, b.data->base, a.data->size_bytes()) == 0;
+  }
+  return false;
+}
+
+bool outputs_are_compatible(const ynn_subgraph& subgraph,
+                            const std::vector<uint32_t>& a_outputs,
+                            const std::vector<uint32_t>& b_outputs) {
+  if (a_outputs.size() != b_outputs.size()) {
+    return false;
+  }
+  for (size_t i = 0; i < a_outputs.size(); ++i) {
+    if (a_outputs[i] == YNN_INVALID_VALUE_ID) continue;
+    if (b_outputs[i] == YNN_INVALID_VALUE_ID) continue;
+    const ynn_value& a_output = subgraph.value(a_outputs[i]);
+    const ynn_value& b_output = subgraph.value(b_outputs[i]);
+
+    if (a_output.type != b_output.type) {
+      return false;
+    }
+    if (!values_are_equal(subgraph, a_output.zero_point_id,
+                          b_output.zero_point_id)) {
+      return false;
+    }
+    if (!values_are_equal(subgraph, a_output.scale_id, b_output.scale_id)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+}  // namespace
+
+ynn_status ynn_subgraph::eliminate_common_subgraphs() {
+  // We characterize a node as unique by its combination of inputs and its op.
+  using key_type = std::pair<std::vector<uint32_t>, decltype(ynn_node::op)>;
+  // `seen_ops` keeps track of the nodes we've already seen. Map key is the node
+  // signature, map value is a list of output value ids from previously seen
+  // nodes with the same signature. It is possible for multiple ops to have the
+  // same signature, hence the vector of vectors.
+  std::map<key_type, std::vector<std::vector<uint32_t>>> seen_ops;
+
+  // `replacements` is used to replace the output of a node with the output of
+  // a previously seen node. Initially, every value maps to itself.
+  std::vector<uint32_t> replacements(values.size());
+  std::iota(replacements.begin(), replacements.end(), 0);
+
+  for (ynn_node& node : nodes) {
+    if (!node.is_valid()) continue;
+
+    // If an input to the current node was previously determined redundant,
+    // update it with the replaced value id.
+    for (uint32_t& input : node.inputs) {
+      if (input != YNN_INVALID_VALUE_ID) {
+        input = replacements[input];
+      }
+    }
+
+    // If the node produces an external output, we don't want to replace it in
+    // order to preserve the graph's public interface.
+    const bool produces_external_output = std::any_of(
+        node.outputs.begin(), node.outputs.end(), [this](uint32_t i) {
+          return i != YNN_INVALID_VALUE_ID && values[i].is_external_output();
+        });
+    const key_type key = {node.inputs, node.op};
+    if (produces_external_output) {
+      seen_ops[key].push_back(node.outputs);
+      continue;
+    }
+
+    bool matched = false;
+    // Check if the node matches any previously seen node.
+    // If so, replace the outputs of this node with the outputs of the
+    // existing node.
+    for (const std::vector<uint32_t>& existing_outputs : seen_ops[key]) {
+      assert(existing_outputs.size() == node.outputs.size());
+      if (outputs_are_compatible(*this, node.outputs, existing_outputs)) {
+        // We found a duplicate node. Replace the outputs of this node with
+        // the outputs of the existing node.
+        for (size_t i = 0; i < node.outputs.size(); ++i) {
+          if (node.outputs[i] != YNN_INVALID_VALUE_ID) {
+            replacements[node.outputs[i]] = existing_outputs[i];
+          }
+        }
+        node.invalidate();
+        matched = true;
+        break;
+      }
+    }
+
+    if (!matched) {
+      seen_ops[key].push_back(node.outputs);
+    }
+  }
+
+  return ynn_status_success;
+}
+
 ynn_status ynn_subgraph::optimize(slinky::thread_pool* threadpool) {
   ynn_status status;
 
@@ -477,6 +592,11 @@ ynn_status ynn_subgraph::optimize(slinky::thread_pool* threadpool) {
   }
 
   status = fold_constants(threadpool);
+  if (status != ynn_status_success) {
+    return status;
+  }
+
+  status = eliminate_common_subgraphs();
   if (status != ynn_status_success) {
     return status;
   }

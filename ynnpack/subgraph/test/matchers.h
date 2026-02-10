@@ -203,9 +203,13 @@ MATCHER_P(IsValidValueIn, subgraph, "") {
 }
 
 MATCHER_P(HasValidValueIdsImpl, ids, "") {
+  const ynn_subgraph* subgraph = internal::GetSubgraph(arg, result_listener);
+  if (subgraph == nullptr) {
+    return false;
+  }
   bool all_valid = true;
   for (uint32_t id : ids) {
-    if (!arg.value(id).is_valid()) {
+    if (!subgraph->value(id).is_valid()) {
       if (!all_valid) *result_listener << "; ";
       *result_listener << "value " << id << " is invalid";
       all_valid = false;
