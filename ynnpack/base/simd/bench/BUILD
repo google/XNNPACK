@@ -24,6 +24,8 @@ ynn_cc_library(
         "//ynnpack/base/simd",  # buildcleaner:keep
         "@com_google_benchmark//:benchmark",
     ],
+    # Without this flag, the linker may strip these benchmarks out of the build.
+    alwayslink = True,
 )
 
 cc_test(
