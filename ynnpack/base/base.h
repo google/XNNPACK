@@ -64,14 +64,6 @@
   } while (0)
 #endif
 
-#if defined(__GNUC__)
-#define YNN_ALIGN(alignment) __attribute__((__aligned__(alignment)))
-#elif defined(_MSC_VER)
-#define YNN_ALIGN(alignment) __declspec(align(alignment))
-#else
-#error "Platform-specific implementation of YNN_ALIGN required"
-#endif
-
 // TODO: std::hardware_destructive_interference_size would be better, but it's
 // not defined on ARM?
 #define YNN_CACHE_LINE_SIZE 64
