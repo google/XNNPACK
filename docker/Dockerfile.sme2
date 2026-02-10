@@ -2,6 +2,7 @@ FROM ubuntu:24.04 AS qemu-builder
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update && apt-get install -y \
+    sudo \
     wget \
     build-essential \
     python3 \
@@ -64,5 +65,9 @@ ARG USER_UID=1001
 ARG USER_GID=$USER_UID
 RUN groupadd --gid $USER_GID $USERNAME && \
     useradd --uid $USER_UID --gid $USER_GID -m $USERNAME
+
+RUN echo "$USERNAME ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/$USERNAME
+RUN chmod 0440 /etc/sudoers.d/$USERNAME
+
 USER $USERNAME
 WORKDIR /home/$USERNAME

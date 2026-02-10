@@ -8,6 +8,7 @@ RUN apt-get update && apt-get install -y \
     apt-get update
 
 RUN apt-get install -y \
+    sudo \
     build-essential \
     vim \
     git \
@@ -48,5 +49,8 @@ RUN useradd --uid $USER_UID --gid $USER_GID -m $USERNAME
 
 RUN mkdir -p /home/$USERNAME/.cache/bazel
 RUN chown -R $USERNAME:$USERNAME /home/$USERNAME
+
+RUN echo "$USERNAME ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/$USERNAME
+RUN chmod 0440 /etc/sudoers.d/$USERNAME
 
 USER $USERNAME
