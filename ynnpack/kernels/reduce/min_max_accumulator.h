@@ -174,12 +174,13 @@ struct min_max_accumulator {
 
   YNN_ALWAYS_INLINE void accumulate(size_t C_stride_m, T* __restrict C,
                                     size_t n) {
-    accumulate_min(C, n, acc_min);
     if (!std::is_same<AccMinT, dummy_t>::value) {
-      // The min was not a dummy, move to the next row.
+      accumulate_min(C, n, acc_min);
       C = offset_bytes(C, C_stride_m);
     }
-    accumulate_max(C, n, acc_max);
+    if (!std::is_same<AccMaxT, dummy_t>::value) {
+      accumulate_max(C, n, acc_max);
+    }
   }
 };
 
@@ -232,12 +233,13 @@ struct min_max_accumulator_k1_1 {
     acc_min = min(acc_min, a_3_min);
     acc_max = max(acc_max, a_3_max);
 
-    accumulate_min(C, acc_min, n);
     if (!std::is_same<AccMinT, dummy_t>::value) {
-      // The min was not a dummy, move to the next row.
+      accumulate_min(C, acc_min, n);
       C = offset_bytes(C, C_stride_m);
     }
-    accumulate_max(C, acc_max, n);
+    if (!std::is_same<AccMaxT, dummy_t>::value) {
+      accumulate_max(C, acc_max, n);
+    }
   }
 };
 
