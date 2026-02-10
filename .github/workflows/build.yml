@@ -405,15 +405,15 @@ jobs:
         working-directory: ${{ github.workspace }}/xnnpack
       - name: Generate build files
         run: |
-          gn gen --check --args="is_debug=true target_cpu=\"x64\" use_siso=true" out/Debug
+          gn gen --check --args="is_debug=false dcheck_always_on=true xnnpack_enable_avx512=false target_cpu=\"x64\" use_siso=true" out/x64.dchecks
         working-directory: ${{ github.workspace }}/xnnpack
-      - name: Build all targets (Debug)
+      - name: Build all targets (Release + debug checks)
         run: |
-          autoninja -C out/Debug
+          autoninja -C out/x64.dchecks
         working-directory: ${{ github.workspace }}/xnnpack
       - name: Run tests
         run: |
-          python3 scripts/run-gn-tests.py out/Debug
+          python3 scripts/run-gn-tests.py out/x64.dchecks
         working-directory: ${{ github.workspace }}/xnnpack
 
   bazel-linux-x86_64-clang-18:
