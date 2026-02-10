@@ -19,17 +19,26 @@ import sys
 
 # Add tests that require sharding here.
 LONG_TESTS = frozenset(['xnnpack_operators_test'])
+# A rough limit on the number of lines from each failing test that should be
+# printed. This is to try and ensure that the volume of output doesn't overwhelm
+# the Github Actions UI. We may print more than this to avoid accidentally
+# hiding test failures.
+FAILED_OUTPUT_LINE_LIMIT = 4000
 
 
 @dataclasses.dataclass
 class TestResult:
-  stdout: str
-  stderr: str
+  stdout: list[str]
+  stderr: list[str]
   suite: str
-  success: bool
+  exit_code: int
   duration_seconds: float
   shard: int
   num_shards: int
+
+  @property
+  def success(self) -> bool:
+    return self.exit_code == 0
 
 
 async def run_one_test(
@@ -74,10 +83,10 @@ async def run_one_test(
 
     # Await the exit code, if zero, all's well.
     return TestResult(
-        stdout=stdout.decode('ascii'),
-        stderr=stderr.decode('ascii'),
+        stdout=stdout.decode('ascii').splitlines(),
+        stderr=stderr.decode('ascii').splitlines(),
         suite=os.path.basename(path_to_executable),
-        success=process.returncode == 0,
+        exit_code=process.returncode,
         duration_seconds=duration,
         shard=current_shard,
         num_shards=total_shards,
@@ -89,7 +98,7 @@ async def main() -> None:
   parser = argparse.ArgumentParser(
       'run-gn-tests',
       description="Runs XNNPACK's unit tests on the"
-      + ' current machine, and print a summary.',
+      + ' current machine, and prints a summary.',
   )
   parser.add_argument(
       'out_dir', help='Path to a build directory e.g. out/Default'
@@ -148,10 +157,13 @@ async def main() -> None:
     result = await result
     description = f'{result.suite} ({result.shard + 1}/{result.num_shards})'
     print(description.ljust(60, '.'), end='', flush=True)
+    formatted_duration = f'{result.duration_seconds:.2f} s'
     outcome = (
-        f'PASS ({result.duration_seconds:.2f} s)' if result.success else 'FAIL'
+        f'PASS ({formatted_duration})'
+        if result.success
+        else f'FAIL ({formatted_duration}, exit code: {result.exit_code})'
     )
-    print(outcome.rjust(20, '.'))
+    print(outcome.ljust(10, '.'))
     if args.verbose:
       print(result.stdout)
       if result.stderr:
@@ -161,11 +173,17 @@ async def main() -> None:
       failures.append(result)
 
   # Re-iterate any failures.
+  lines_emitted = 0
   for x in sorted(failures, key=lambda x: x.suite):
+    lines_emitted += len(x.stderr) + len(x.stdout) + 2
     print(x.suite, f'- Shard #{x.shard + 1}', 'stderr:')
-    print(x.stderr)
+    print('\n'.join(x.stderr))
     print('stdout:')
-    print(x.stdout)
+    print('\n'.join(x.stdout))
+    print(f'exit code: {x.exit_code}')
+    if lines_emitted > FAILED_OUTPUT_LINE_LIMIT:
+      print('(any further failures skipped)')
+      break
 
   # Print a final summary and exit.
   if not failures:
