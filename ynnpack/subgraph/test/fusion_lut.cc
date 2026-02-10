@@ -1,38 +1,23 @@
-#include <algorithm>
 #include <cstddef>
 #include <cstdint>
 #include <functional>
 #include <numeric>
-#include <variant>
 #include <vector>
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include "ynnpack/include/ynnpack.h"
 #include "ynnpack/subgraph/subgraph.h"
+#include "ynnpack/subgraph/test/matchers.h"
 #include "ynnpack/subgraph/test/subgraph_builder.h"
-
-using ::testing::ElementsAre;
-using ::testing::ElementsAreArray;
 
 namespace ynn {
 
+using ::testing::AllOf;
+using ::testing::ElementsAreArray;
+using ::testing::Not;
+
 namespace {
-
-int valid_node_count(const ynn_subgraph* subgraph) {
-  return std::count_if(subgraph->nodes.begin(), subgraph->nodes.end(),
-                       [](const ynn_node& node) { return node.is_valid(); });
-}
-
-bool is_lut(const ynn_node& node) {
-  return std::holds_alternative<ynn_node::lut>(node.op);
-}
-
-bool is_binary(const ynn_node& node, ynn_binary_operator op) {
-  const ynn_node::binary_elementwise* binary =
-      std::get_if<ynn_node::binary_elementwise>(&node.op);
-  return binary && binary->op == op;
-}
 
 template <typename A, typename X>
 void RunSubgraph(ynn_subgraph_t subgraph,
@@ -110,15 +95,9 @@ TEST(fusion_lut, single_node_unsupported) {
   FuseAndCheck(builder, [&](const ynn_subgraph& subgraph) {
     // Expect 2 nodes: one for `make_unary_params` (opaque) and one for `negate`
     // (unary).
-    EXPECT_EQ(valid_node_count(&subgraph), 2);
-    const ynn_node* output = subgraph.get_producer(y_id);
-    ASSERT_NE(output, nullptr);
-    ASSERT_FALSE(is_lut(*output));
-
-    const ynn_node::unary_elementwise* unary =
-        std::get_if<ynn_node::unary_elementwise>(&output->op);
-    ASSERT_NE(unary, nullptr);
-    ASSERT_EQ(unary->op, ynn_unary_negate);
+    ASSERT_THAT(subgraph, HasValidNodeCount(2));
+    EXPECT_THAT(ProducerOf(y_id, subgraph),
+                AllOf(Not(IsLut()), IsUnary(ynn_unary_negate)));
   });
 }
 
@@ -151,13 +130,10 @@ TEST(fusion_lut, single_node_simple) {
   RunFuseCompare<int8_t, int8_t>(
       builder, {x_id}, {input_data}, {TensorShape({input_data.size()})}, y_id,
       256, [&](const ynn_subgraph& subgraph) {
-        ASSERT_EQ(valid_node_count(&subgraph), 1);
-        const ynn_node* output = subgraph.get_producer(y_id);
-        ASSERT_NE(output, nullptr);
-        ASSERT_TRUE(is_lut(*output));
-        ASSERT_THAT(output->inputs,
-                    ElementsAre(x_id, testing::Ne(YNN_INVALID_VALUE_ID)));
-        EXPECT_TRUE(subgraph.value(output->inputs[1]).is_valid());
+        ASSERT_THAT(subgraph,
+                    AllOf(HasValidNodeCount(1), HasValidValueIds(x_id, y_id)));
+        EXPECT_THAT(ProducerOf(y_id, subgraph),
+                    AllOf(IsLut(), InputsAre(x_id, IsValidValueIn(subgraph))));
 
         // Check that the rewritten subgraph includes quantization parameters.
         EXPECT_EQ(subgraph.value(x_id).scale_id, x_scale_id);
@@ -216,22 +192,12 @@ TEST(fusion_lut, single_node) {
       {TensorShape({a_data.size()}), TensorShape({b_data.size()}),
        TensorShape({c_data.size()})},
       d_id, 256, [&](const ynn_subgraph& subgraph) {
-        ASSERT_EQ(valid_node_count(&subgraph), 3);
-
-        const ynn_node* x_producer = subgraph.get_producer(x_id);
-        ASSERT_NE(x_producer, nullptr);
-        ASSERT_TRUE(is_binary(*x_producer, ynn_binary_multiply));
-
-        const ynn_node* y_producer = subgraph.get_producer(y_id);
-        ASSERT_NE(y_producer, nullptr);
-        ASSERT_TRUE(is_lut(*y_producer));
-        ASSERT_THAT(y_producer->inputs,
-                    ElementsAre(x_id, testing::Ne(YNN_INVALID_VALUE_ID)));
-        EXPECT_TRUE(subgraph.value(y_producer->inputs[1]).is_valid());
-
-        const ynn_node* d_producer = subgraph.get_producer(d_id);
-        ASSERT_NE(d_producer, nullptr);
-        ASSERT_TRUE(is_binary(*d_producer, ynn_binary_add));
+        ASSERT_THAT(subgraph, AllOf(HasValidNodeCount(3),
+                                    HasValidValueIds(a_id, b_id, c_id, d_id)));
+        EXPECT_THAT(ProducerOf(x_id, subgraph), IsBinary(ynn_binary_multiply));
+        EXPECT_THAT(ProducerOf(y_id, subgraph),
+                    AllOf(IsLut(), InputsAre(x_id, IsValidValueIn(subgraph))));
+        EXPECT_THAT(ProducerOf(d_id, subgraph), IsBinary(ynn_binary_add));
       });
 }
 
@@ -263,13 +229,10 @@ TEST(fusion_lut, multiple_unary_chain) {
   RunFuseCompare<uint8_t, uint8_t>(
       builder, {x_id}, {input_data}, {TensorShape({input_data.size()})}, y_id,
       256, [&](const ynn_subgraph& subgraph) {
-        ASSERT_EQ(valid_node_count(&subgraph), 1);
-        const ynn_node* output = subgraph.get_producer(y_id);
-        ASSERT_NE(output, nullptr);
-        ASSERT_TRUE(is_lut(*output));
-        ASSERT_THAT(output->inputs,
-                    ElementsAre(x_id, testing::Ne(YNN_INVALID_VALUE_ID)));
-        EXPECT_TRUE(subgraph.value(output->inputs[1]).is_valid());
+        ASSERT_THAT(subgraph,
+                    AllOf(HasValidNodeCount(1), HasValidValueIds(x_id, y_id)));
+        EXPECT_THAT(ProducerOf(y_id, subgraph),
+                    AllOf(IsLut(), InputsAre(x_id, IsValidValueIn(subgraph))));
       });
 }
 
@@ -338,14 +301,11 @@ TEST(fusion_lut, elu_chain) {
   RunFuseCompare<uint8_t, uint8_t>(
       builder, {x_id}, {input_data}, {TensorShape({4, 8, 8})}, y_id, 256,
       [&](const ynn_subgraph& subgraph) {
-        ASSERT_EQ(valid_node_count(&subgraph), 1);
-        const ynn_node* output = subgraph.get_producer(y_id);
-        ASSERT_NE(output, nullptr);
-        ASSERT_TRUE(is_lut(*output));
+        ASSERT_THAT(subgraph,
+                    AllOf(HasValidNodeCount(1), HasValidValueIds(x_id, y_id)));
         // LUT inputs: First is index (x), second is table (generated const).
-        ASSERT_THAT(output->inputs,
-                    ElementsAre(x_id, testing::Ne(YNN_INVALID_VALUE_ID)));
-        EXPECT_TRUE(subgraph.value(output->inputs[1]).is_valid());
+        EXPECT_THAT(ProducerOf(y_id, subgraph),
+                    AllOf(IsLut(), InputsAre(x_id, IsValidValueIn(subgraph))));
       });
 }
 
@@ -383,21 +343,13 @@ TEST(fusion_lut, branching_2_luts) {
       .AddUnary(ynn_unary_floor, t_id, z_id);
 
   FuseAndCheck(builder, [&](const ynn_subgraph& subgraph) {
-    EXPECT_EQ(valid_node_count(&subgraph), 2);
-
-    const ynn_node* y_producer = subgraph.get_producer(y_id);
-    ASSERT_NE(y_producer, nullptr);
-    ASSERT_TRUE(is_lut(*y_producer));
-    ASSERT_THAT(y_producer->inputs,
-                ElementsAre(x_id, testing::Ne(YNN_INVALID_VALUE_ID)));
-    EXPECT_TRUE(subgraph.value(y_producer->inputs[1]).is_valid());
-
-    const ynn_node* z_producer = subgraph.get_producer(z_id);
-    ASSERT_NE(z_producer, nullptr);
-    ASSERT_TRUE(is_lut(*z_producer));
-    ASSERT_THAT(z_producer->inputs,
-                ElementsAre(x_id, testing::Ne(YNN_INVALID_VALUE_ID)));
-    EXPECT_TRUE(subgraph.value(z_producer->inputs[1]).is_valid());
+    ASSERT_THAT(subgraph,
+                AllOf(HasValidNodeCount(2), HasValidValueIds(x_id, y_id, z_id),
+                      Not(HasValidValueId(t_id))));
+    EXPECT_THAT(ProducerOf(y_id, subgraph),
+                AllOf(IsLut(), InputsAre(x_id, IsValidValueIn(subgraph))));
+    EXPECT_THAT(ProducerOf(z_id, subgraph),
+                AllOf(IsLut(), InputsAre(x_id, IsValidValueIn(subgraph))));
   });
 }
 
@@ -419,22 +371,11 @@ TEST(fusion_lut, input_type_unsupported) {
   FuseAndCheck(builder, [&](const ynn_subgraph& subgraph) {
     // We expect 3 nodes: `exp`, `convert` and `make_unary_params` node attached
     // to `convert`.
-    EXPECT_EQ(valid_node_count(&subgraph), 3);
-
-    const ynn_node* a_producer = subgraph.get_producer(a_id);
-    ASSERT_NE(a_producer, nullptr);
-    const ynn_node::unary_elementwise* exp_op =
-        std::get_if<ynn_node::unary_elementwise>(&a_producer->op);
-    ASSERT_NE(exp_op, nullptr);
-    EXPECT_EQ(exp_op->op, ynn_unary_exp);
-
-    const ynn_node* y_producer = subgraph.get_producer(y_id);
-    ASSERT_NE(y_producer, nullptr);
-    ASSERT_FALSE(is_lut(*y_producer));
-    const ynn_node::unary_elementwise* convert_op =
-        std::get_if<ynn_node::unary_elementwise>(&y_producer->op);
-    ASSERT_NE(convert_op, nullptr);
-    EXPECT_EQ(convert_op->op, ynn_unary_convert);
+    ASSERT_THAT(subgraph, AllOf(HasValidNodeCount(3),
+                                HasValidValueIds(x_id, a_id, y_id)));
+    EXPECT_THAT(ProducerOf(a_id, subgraph), IsUnary(ynn_unary_exp));
+    EXPECT_THAT(ProducerOf(y_id, subgraph),
+                AllOf(Not(IsLut()), IsUnary(ynn_unary_convert)));
   });
 }
 
@@ -470,13 +411,10 @@ TEST(fusion_lut, binary_scalar_constant) {
   RunFuseCompare<uint8_t, uint8_t>(
       builder, {x_id}, {input_data}, {TensorShape({input_data.size()})}, y_id,
       256, [&](const ynn_subgraph& subgraph) {
-        ASSERT_EQ(valid_node_count(&subgraph), 1);
-        const ynn_node* output = subgraph.get_producer(y_id);
-        ASSERT_NE(output, nullptr);
-        ASSERT_TRUE(is_lut(*output));
-        ASSERT_THAT(output->inputs,
-                    ElementsAre(x_id, testing::Ne(YNN_INVALID_VALUE_ID)));
-        EXPECT_TRUE(subgraph.value(output->inputs[1]).is_valid());
+        ASSERT_THAT(subgraph,
+                    AllOf(HasValidNodeCount(1), HasValidValueIds(x_id, y_id)));
+        EXPECT_THAT(ProducerOf(y_id, subgraph),
+                    AllOf(IsLut(), InputsAre(x_id, IsValidValueIn(subgraph))));
       });
 }
 
@@ -513,17 +451,10 @@ TEST(fusion_lut, binary_nonscalar_constant_unsupported) {
   RunFuseCompare<uint8_t, uint8_t>(
       builder, {x_id}, {input_data}, {TensorShape({input_data.size()})}, y_id,
       256, [&](const ynn_subgraph& subgraph) {
-        const ynn_node* y_producer = subgraph.get_producer(y_id);
-        ASSERT_NE(y_producer, nullptr);
-        ASSERT_FALSE(is_lut(*y_producer));
-        const ynn_node::unary_elementwise* convert_op =
-            std::get_if<ynn_node::unary_elementwise>(&y_producer->op);
-        ASSERT_NE(convert_op, nullptr);
-        EXPECT_EQ(convert_op->op, ynn_unary_convert);
-
-        const ynn_node* b_producer = subgraph.get_producer(b_id);
-        ASSERT_NE(b_producer, nullptr);
-        ASSERT_TRUE(is_binary(*b_producer, ynn_binary_add));
+        ASSERT_THAT(subgraph, HasValidValueIds(x_id, y_id, b_id));
+        EXPECT_THAT(ProducerOf(y_id, subgraph),
+                    AllOf(Not(IsLut()), IsUnary(ynn_unary_convert)));
+        EXPECT_THAT(ProducerOf(b_id, subgraph), IsBinary(ynn_binary_add));
       });
 }
 

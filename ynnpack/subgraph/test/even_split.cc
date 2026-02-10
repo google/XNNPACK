@@ -21,11 +21,9 @@
 #include "ynnpack/include/ynnpack.h"
 #include "ynnpack/subgraph/test/subgraph_builder.h"
 
-using testing::Combine;
-using testing::ValuesIn;
-using ynn::to_string;  // NOLINT(misc-unused-using-decls)
-
 namespace ynn {
+
+using ::ynn::to_string;  // NOLINT(misc-unused-using-decls)
 
 struct Param {
   using TupleT = std::tuple<int, int>;

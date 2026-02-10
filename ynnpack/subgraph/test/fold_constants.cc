@@ -3,32 +3,20 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include <algorithm>
-#include <cstddef>
 #include <cstdint>
-#include <vector>
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include "ynnpack/base/type.h"
 #include "ynnpack/include/ynnpack.h"
 #include "ynnpack/subgraph/subgraph.h"
+#include "ynnpack/subgraph/test/matchers.h"
 #include "ynnpack/subgraph/test/subgraph_builder.h"
-
-using testing::ElementsAre;
 
 namespace ynn {
 
-int valid_node_count(ynn_subgraph_t subgraph) {
-  return std::count_if(subgraph->nodes.begin(), subgraph->nodes.end(),
-                       [](const ynn_node& node) { return node.is_valid(); });
-}
-
-// This should return `std::span` when it is generally available.
-template <typename T>
-std::vector<T> make_span(const T* data, size_t size) {
-  return std::vector<T>(data, data + size);
-}
+using ::testing::ElementsAre;
+using ::testing::Not;
 
 TEST(fold_constants, simple) {
   const uint32_t input_id = 0;
@@ -51,14 +39,13 @@ TEST(fold_constants, simple) {
   subgraph->fold_constants(nullptr);
 
   const ynn_value& constant = subgraph->value(temp_id);
-  ASSERT_TRUE(subgraph->value(constant_id).is_valid());
-  ASSERT_TRUE(constant.is_static());
-  ASSERT_THAT(make_span(constant.data->cast<float>().base(), 4),
-              ElementsAre(1.0f, 2.0f, 3.0f, 4.0f));
-  ASSERT_EQ(valid_node_count(subgraph), 1);
+  ASSERT_THAT(subgraph, HasValidValueId(constant_id));
+  EXPECT_TRUE(constant.is_static());
+  EXPECT_THAT(ValuesIn<float>(constant), ElementsAre(1.0f, 2.0f, 3.0f, 4.0f));
+  ASSERT_THAT(subgraph, HasValidNodeCount(1));
 
   subgraph->invalidate_dead_values();
-  ASSERT_FALSE(subgraph->value(constant_id).is_valid());
+  EXPECT_THAT(subgraph, Not(HasValidValueId(constant_id)));
 }
 
 TEST(fold_constants, transitive) {
@@ -86,15 +73,14 @@ TEST(fold_constants, transitive) {
   subgraph->fold_constants(nullptr);
 
   const ynn_value& constant = subgraph->value(temp_id);
-  ASSERT_TRUE(subgraph->value(constant_id).is_valid());
-  ASSERT_TRUE(constant.is_static());
-  ASSERT_THAT(make_span(constant.data->cast<float>().base(), 4),
-              ElementsAre(1.0f, 3.0f, 5.0f, 7.0f));
-  ASSERT_EQ(valid_node_count(subgraph), 1);
+  ASSERT_THAT(subgraph, HasValidValueId(constant_id));
+  EXPECT_TRUE(constant.is_static());
+  EXPECT_THAT(ValuesIn<float>(constant), ElementsAre(1.0f, 3.0f, 5.0f, 7.0f));
+  ASSERT_THAT(subgraph, HasValidNodeCount(1));
 
   subgraph->invalidate_dead_values();
-  ASSERT_FALSE(subgraph->value(constant_id).is_valid());
-  ASSERT_FALSE(subgraph->value(temp2_id).is_valid());
+  EXPECT_THAT(subgraph, Not(HasValidValueId(constant_id)));
+  EXPECT_THAT(subgraph, Not(HasValidValueId(temp2_id)));
 }
 
 }  // namespace ynn

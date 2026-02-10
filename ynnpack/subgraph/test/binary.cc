@@ -21,11 +21,11 @@
 #include "ynnpack/kernels/binary/reference.h"
 #include "ynnpack/subgraph/test/subgraph_builder.h"
 
-using testing::Combine;
-using testing::ValuesIn;
-using ynn::to_string;  // NOLINT(misc-unused-using-decls)
-
 namespace ynn {
+
+using ::testing::Combine;
+using ::testing::ValuesIn;
+using ::ynn::to_string;  // NOLINT(misc-unused-using-decls)
 
 void update_shape(std::vector<size_t>& shape,
                   const std::vector<size_t>& update) {

@@ -26,11 +26,11 @@
 #include "ynnpack/kernels/unary/reference.h"
 #include "ynnpack/subgraph/test/subgraph_builder.h"
 
-using testing::Combine;
-using testing::ValuesIn;
-using ynn::to_string;  // NOLINT(misc-unused-using-decls)
-
 namespace ynn {
+
+using ::testing::Combine;
+using ::testing::ValuesIn;
+using ::ynn::to_string;  // NOLINT(misc-unused-using-decls)
 
 template <typename A, typename X>
 void TestOp(A, X, const unary_op_info& op_info, ynn_unary_operator op) {

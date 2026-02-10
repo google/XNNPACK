@@ -3,7 +3,6 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include <algorithm>
 #include <cstdint>
 #include <variant>
 #include <vector>
@@ -13,60 +12,13 @@
 #include "ynnpack/include/ynnpack.h"
 #include "ynnpack/kernels/ternary/ternary.h"
 #include "ynnpack/subgraph/subgraph.h"
+#include "ynnpack/subgraph/test/matchers.h"
 #include "ynnpack/subgraph/test/subgraph_builder.h"
-
-using ::testing::ElementsAre;
-using ::testing::IsSupersetOf;
-
-bool operator==(const ynn_node::stencil_copy::stencil& a,
-                const ynn_node::stencil_copy::stencil& b) {
-  return a.axis == b.axis && a.new_axis == b.new_axis && a.extent == b.extent &&
-         a.stride == b.stride && a.dilation == b.dilation;
-}
 
 namespace ynn {
 
-int valid_value_count(ynn_subgraph_t subgraph) {
-  return std::count_if(subgraph->values.begin(), subgraph->values.end(),
-                       [](const ynn_value& value) { return value.is_valid(); });
-}
-
-int valid_node_count(ynn_subgraph_t subgraph) {
-  return std::count_if(subgraph->nodes.begin(), subgraph->nodes.end(),
-                       [](const ynn_node& node) { return node.is_valid(); });
-}
-
-bool is_binary(const ynn_node& node, ynn_binary_operator op) {
-  const ynn_node::binary_elementwise* binary =
-      std::get_if<ynn_node::binary_elementwise>(&node.op);
-  return binary && binary->op == op;
-}
-
-bool is_ternary(const ynn_node& node, ternary_op op) {
-  const ynn_node::ternary_elementwise* ternary =
-      std::get_if<ynn_node::ternary_elementwise>(&node.op);
-  return ternary && ternary->op == op;
-}
-
-bool is_reduce(const ynn_node& node, ynn_reduce_operator op) {
-  const ynn_node::reduce* reduce = std::get_if<ynn_node::reduce>(&node.op);
-  return reduce && reduce->op == op;
-}
-
-bool is_stencil_copy(
-    const ynn_node& node,
-    const std::vector<ynn_node::stencil_copy::stencil>& stencils) {
-  const ynn_node::stencil_copy* stencil_copy =
-      std::get_if<ynn_node::stencil_copy>(&node.op);
-  return stencil_copy && stencil_copy->stencils == stencils;
-}
-
-bool is_transpose_a(const ynn_node& node, int tile_k, int m_dim) {
-  const ynn_node::transpose_a* transpose_a =
-      std::get_if<ynn_node::transpose_a>(&node.op);
-  return transpose_a && transpose_a->tile_k == tile_k &&
-         transpose_a->m_dim == m_dim;
-}
+using ::testing::AllOf;
+using ::testing::Not;
 
 TEST(fusion, multiply_add) {
   // rewrite add(multiply(a, b), c) -> multiply_add(a, b, c)
@@ -89,12 +41,9 @@ TEST(fusion, multiply_add) {
   subgraph.fusion();
   subgraph.invalidate_dead_values();
 
-  ASSERT_EQ(valid_node_count(&subgraph), 1);
-  ASSERT_EQ(valid_value_count(&subgraph), 4);
-  const ynn_node* output = subgraph.get_producer(x_id);
-  ASSERT_NE(output, nullptr);
-  ASSERT_EQ(output->inputs.size(), 3);
-  ASSERT_TRUE(is_ternary(*output, ternary_op::multiply_add));
+  ASSERT_THAT(subgraph, AllOf(HasValidNodeCount(1), HasValidValueCount(4)));
+  EXPECT_THAT(ProducerOf(x_id, subgraph),
+              AllOf(IsTernary(ternary_op::multiply_add), HasInputCount(3)));
 }
 
 TEST(fusion, negate_multiply) {
@@ -116,12 +65,10 @@ TEST(fusion, negate_multiply) {
   subgraph.fusion();
   subgraph.invalidate_dead_values();
 
-  ASSERT_EQ(valid_node_count(&subgraph), 1);
-  ASSERT_EQ(valid_value_count(&subgraph), 4);
-  const ynn_node* output = subgraph.get_producer(x_id);
-  ASSERT_NE(output, nullptr);
-  ASSERT_THAT(output->inputs, IsSupersetOf({a_id, b_id}));
-  ASSERT_TRUE(is_ternary(*output, ternary_op::subtract_multiply));
+  ASSERT_THAT(subgraph, AllOf(HasValidNodeCount(1), HasValidValueCount(4)));
+  EXPECT_THAT(ProducerOf(x_id, subgraph),
+              AllOf(IsTernary(ternary_op::subtract_multiply),
+                    InputsInclude(a_id, b_id)));
 }
 
 TEST(fusion, subtract_multiply) {
@@ -145,12 +92,10 @@ TEST(fusion, subtract_multiply) {
   subgraph.fusion();
   subgraph.invalidate_dead_values();
 
-  ASSERT_EQ(valid_node_count(&subgraph), 1);
-  ASSERT_EQ(valid_value_count(&subgraph), 4);
-  const ynn_node* output = subgraph.get_producer(x_id);
-  ASSERT_NE(output, nullptr);
-  ASSERT_THAT(output->inputs, ElementsAre(a_id, b_id, c_id));
-  ASSERT_TRUE(is_ternary(*output, ternary_op::subtract_multiply));
+  ASSERT_THAT(subgraph, AllOf(HasValidNodeCount(1), HasValidValueCount(4)));
+  EXPECT_THAT(ProducerOf(x_id, subgraph),
+              AllOf(IsTernary(ternary_op::subtract_multiply),
+                    InputsAre(a_id, b_id, c_id)));
 }
 
 TEST(fusion, convert_int32_to_fp32_binary) {
@@ -170,10 +115,8 @@ TEST(fusion, convert_int32_to_fp32_binary) {
   subgraph.fusion();
   subgraph.invalidate_dead_values();
 
-  const ynn_node* output = subgraph.get_producer(x_id);
-  ASSERT_NE(output, nullptr);
-  ASSERT_THAT(output->inputs, ElementsAre(a_id, scale_id));
-  ASSERT_TRUE(is_binary(*output, ynn_binary_multiply));
+  EXPECT_THAT(ProducerOf(x_id, subgraph),
+              AllOf(IsBinary(ynn_binary_multiply), InputsAre(a_id, scale_id)));
 }
 
 TEST(fusion, convert_int32_to_fp32_ternary) {
@@ -198,12 +141,10 @@ TEST(fusion, convert_int32_to_fp32_ternary) {
   subgraph.fusion();
   subgraph.invalidate_dead_values();
 
-  ASSERT_EQ(valid_node_count(&subgraph), 1);
-  ASSERT_EQ(valid_value_count(&subgraph), 4);
-  const ynn_node* output = subgraph.get_producer(x_id);
-  ASSERT_NE(output, nullptr);
-  ASSERT_THAT(output->inputs, ElementsAre(a_id, scale1_id, scale2_id));
-  ASSERT_TRUE(is_ternary(*output, ternary_op::multiply));
+  ASSERT_THAT(subgraph, AllOf(HasValidNodeCount(1), HasValidValueCount(4)));
+  EXPECT_THAT(ProducerOf(x_id, subgraph),
+              AllOf(IsTernary(ternary_op::multiply),
+                    InputsAre(a_id, scale1_id, scale2_id)));
 }
 
 TEST(fusion, convert_fp32_to_int8_ternary) {
@@ -224,12 +165,10 @@ TEST(fusion, convert_fp32_to_int8_ternary) {
   subgraph.fusion();
   subgraph.invalidate_dead_values();
 
-  ASSERT_EQ(valid_node_count(&subgraph), 1);
-  ASSERT_EQ(valid_value_count(&subgraph), 4);
-  const ynn_node* output = subgraph.get_producer(x_id);
-  ASSERT_NE(output, nullptr);
-  ASSERT_THAT(output->inputs, ElementsAre(a_id, scale_id, zero_point_id));
-  ASSERT_TRUE(is_ternary(*output, ternary_op::quantize_int8));
+  ASSERT_THAT(subgraph, AllOf(HasValidNodeCount(1), HasValidValueCount(4)));
+  EXPECT_THAT(ProducerOf(x_id, subgraph),
+              AllOf(IsTernary(ternary_op::quantize_int8),
+                    InputsAre(a_id, scale_id, zero_point_id)));
 }
 
 TEST(fusion, convert_fp32_to_uint8_ternary) {
@@ -250,12 +189,10 @@ TEST(fusion, convert_fp32_to_uint8_ternary) {
   subgraph.fusion();
   subgraph.invalidate_dead_values();
 
-  ASSERT_EQ(valid_node_count(&subgraph), 1);
-  ASSERT_EQ(valid_value_count(&subgraph), 4);
-  const ynn_node* output = subgraph.get_producer(x_id);
-  ASSERT_NE(output, nullptr);
-  ASSERT_THAT(output->inputs, ElementsAre(a_id, scale_id, zero_point_id));
-  ASSERT_TRUE(is_ternary(*output, ternary_op::quantize_uint8));
+  ASSERT_THAT(subgraph, AllOf(HasValidNodeCount(1), HasValidValueCount(4)));
+  EXPECT_THAT(ProducerOf(x_id, subgraph),
+              AllOf(IsTernary(ternary_op::quantize_uint8),
+                    InputsAre(a_id, scale_id, zero_point_id)));
 }
 
 TEST(fusion, clamp_min_max) {
@@ -279,12 +216,9 @@ TEST(fusion, clamp_min_max) {
   subgraph.fusion();
   subgraph.invalidate_dead_values();
 
-  ASSERT_EQ(valid_node_count(&subgraph), 1);
-  ASSERT_EQ(valid_value_count(&subgraph), 4);
-  const ynn_node* output = subgraph.get_producer(x_id);
-  ASSERT_NE(output, nullptr);
-  ASSERT_THAT(output->inputs, ElementsAre(a_id, b_id, c_id));
-  ASSERT_TRUE(is_ternary(*output, ternary_op::clamp));
+  ASSERT_THAT(subgraph, AllOf(HasValidNodeCount(1), HasValidValueCount(4)));
+  EXPECT_THAT(ProducerOf(x_id, subgraph),
+              AllOf(IsTernary(ternary_op::clamp), InputsAre(a_id, b_id, c_id)));
 }
 
 TEST(fusion, broadcast_of_static) {
@@ -306,8 +240,7 @@ TEST(fusion, broadcast_of_static) {
   subgraph.fusion();
   subgraph.invalidate_dead_values();
 
-  ASSERT_EQ(valid_node_count(&subgraph), 1);
-  ASSERT_EQ(valid_value_count(&subgraph), 3);
+  ASSERT_THAT(subgraph, AllOf(HasValidNodeCount(1), HasValidValueCount(3)));
 }
 
 TEST(fusion, transpose_stencil_copy) {
@@ -347,12 +280,11 @@ TEST(fusion, transpose_stencil_copy) {
   subgraph.fusion();
   subgraph.invalidate_dead_values();
 
-  const ynn_node* z_producer = subgraph.get_producer(z_id);
-  ASSERT_NE(z_producer, nullptr);
-  ASSERT_THAT(z_producer->inputs, ElementsAre(y_id, YNN_INVALID_VALUE_ID));
-  ASSERT_TRUE(
-      is_stencil_copy(*z_producer, {{/*axis=*/1, /*new_axis=*/2, /*extent=*/3,
-                                     /*stride=*/1, /*dilation=*/1}}));
+  EXPECT_THAT(ProducerOf(z_id, subgraph),
+              AllOf(IsStencilCopy(std::vector<ynn_node::stencil_copy::stencil>{
+                        {/*axis=*/1, /*new_axis=*/2, /*extent=*/3,
+                         /*stride=*/1, /*dilation=*/1}}),
+                    InputsAre(y_id, YNN_INVALID_VALUE_ID)));
 
   // Check transposed m_dim. Original was 1. Inserted dim at 0.
   // Note: YNNPACK uses Slinky dimension ordering (innermost first).
@@ -361,10 +293,8 @@ TEST(fusion, transpose_stencil_copy) {
   // Insertion at API 0 corresponds to Slinky dim 2.
   // m_dim was 1 (size 10).
   // new_axis (2) > m_dim (1), so m_dim is not decremented.
-  const ynn_node* y_producer = subgraph.get_producer(y_id);
-  ASSERT_NE(y_producer, nullptr);
-  ASSERT_THAT(y_producer->inputs, ElementsAre(x_id));
-  ASSERT_TRUE(is_transpose_a(*y_producer, /*tile_k=*/4, /*m_dim=*/1));
+  EXPECT_THAT(ProducerOf(y_id, subgraph),
+              AllOf(IsTransposeA(/*tile_k=*/4, /*m_dim=*/1), InputsAre(x_id)));
 }
 
 TEST(fusion, transpose_stencil_copy_grouped) {
@@ -407,19 +337,16 @@ TEST(fusion, transpose_stencil_copy_grouped) {
 
   // The rewrite should not be applied in this case, because the transpose is of
   // a dimension that was created by the stencil copy.
-  const ynn_node* z_producer = subgraph.get_producer(z_id);
-  ASSERT_NE(z_producer, nullptr);
-  ASSERT_THAT(z_producer->inputs, ElementsAre(y_id));
-  ASSERT_TRUE(is_transpose_a(*z_producer, /*tile_k=*/4, /*m_dim=*/1));
+  EXPECT_THAT(ProducerOf(z_id, subgraph),
+              AllOf(IsTransposeA(/*tile_k=*/4, /*m_dim=*/1), InputsAre(y_id)));
 
-  const ynn_node* y_producer = subgraph.get_producer(y_id);
-  ASSERT_NE(y_producer, nullptr);
-  ASSERT_THAT(y_producer->inputs, ElementsAre(x_id, YNN_INVALID_VALUE_ID));
-  ASSERT_TRUE(
-      is_stencil_copy(*y_producer, {{/*axis=*/0, /*new_axis=*/1, /*extent=*/1,
-                                     /*stride=*/1, /*dilation=*/1},
-                                    {/*axis=*/1, /*new_axis=*/3, /*extent=*/3,
-                                     /*stride=*/1, /*dilation=*/1}}));
+  EXPECT_THAT(ProducerOf(y_id, subgraph),
+              AllOf(IsStencilCopy(std::vector<ynn_node::stencil_copy::stencil>{
+                        {/*axis=*/0, /*new_axis=*/1, /*extent=*/1,
+                         /*stride=*/1, /*dilation=*/1},
+                        {/*axis=*/1, /*new_axis=*/3, /*extent=*/3,
+                         /*stride=*/1, /*dilation=*/1}}),
+                    InputsAre(x_id, YNN_INVALID_VALUE_ID)));
 }
 
 namespace {
@@ -441,16 +368,12 @@ void TestReduceSumOfConvert(ynn_type input_type, ynn_type intermediate_type,
   subgraph.fusion();
   subgraph.invalidate_dead_values();
 
-  ASSERT_EQ(valid_node_count(&subgraph), 1);
-  ASSERT_TRUE(subgraph.value(x_id).is_valid());
-  ASSERT_TRUE(subgraph.value(y_id).is_valid());
-  ASSERT_FALSE(subgraph.value(converted_x_id).is_valid());
-
-  const ynn_node* output = subgraph.get_producer(y_id);
-  ASSERT_NE(output, nullptr);
-  ASSERT_EQ(output->inputs.size(), 2);
-  ASSERT_EQ(output->inputs[0], x_id);
-  ASSERT_TRUE(is_reduce(*output, op));
+  ASSERT_THAT(subgraph,
+              AllOf(HasValidNodeCount(1), HasValidValueIds(x_id, y_id),
+                    Not(HasValidValueId(converted_x_id))));
+  EXPECT_THAT(ProducerOf(y_id, subgraph),
+              AllOf(IsReduce(op), HasInputCount(2),
+                    InputsAre(x_id, IsValidValueIn(subgraph))));
 }
 
 void TestReduceSumOfConvertQuantized(ynn_reduce_operator reduce_op) {
@@ -489,17 +412,9 @@ void TestReduceSumOfConvertQuantized(ynn_reduce_operator reduce_op) {
 
   // Should NOT fuse.
   // We expect the reduce node to still consume converted_x_id, not x_id.
-  const ynn_node* output = subgraph.get_producer(y_id);
-  ASSERT_NE(output, nullptr);
-  ASSERT_EQ(output->inputs[0], converted_x_id);
-
-  const ynn_node* convert_node = subgraph.get_producer(converted_x_id);
-  ASSERT_NE(convert_node, nullptr);
-  ASSERT_EQ(convert_node->inputs[0], x_id);
-
-  ASSERT_TRUE(subgraph.value(x_id).is_valid());
-  ASSERT_TRUE(subgraph.value(y_id).is_valid());
-  ASSERT_TRUE(subgraph.value(converted_x_id).is_valid());
+  EXPECT_THAT(ProducerOf(y_id, subgraph), InputsInclude(converted_x_id));
+  EXPECT_THAT(ProducerOf(converted_x_id, subgraph), InputsInclude(x_id));
+  EXPECT_THAT(subgraph, HasValidValueIds(x_id, y_id, converted_x_id));
 }
 
 }  // namespace
@@ -570,17 +485,13 @@ void TestReduceSumOfSquared(ynn_type type) {
   subgraph.fusion();
   subgraph.invalidate_dead_values();
 
-  ASSERT_EQ(valid_node_count(&subgraph), 1);
   // x and y should be valid, sq should be invalid/removed.
-  ASSERT_TRUE(subgraph.value(x_id).is_valid());
-  ASSERT_TRUE(subgraph.value(y_id).is_valid());
-  ASSERT_FALSE(subgraph.value(sq_id).is_valid());
-
-  const ynn_node* output = subgraph.get_producer(y_id);
-  ASSERT_NE(output, nullptr);
-  ASSERT_EQ(output->inputs.size(), 2);
-  ASSERT_EQ(output->inputs[0], x_id);
-  ASSERT_TRUE(is_reduce(*output, ynn_reduce_sum_squared));
+  ASSERT_THAT(subgraph,
+              AllOf(HasValidNodeCount(1), HasValidValueIds(x_id, y_id),
+                    Not(HasValidValueIds(sq_id))));
+  EXPECT_THAT(ProducerOf(y_id, subgraph),
+              AllOf(IsReduce(ynn_reduce_sum_squared), HasInputCount(2),
+                    InputsAre(x_id, IsValidValueIn(subgraph))));
 }
 
 }  // namespace
@@ -622,18 +533,13 @@ void TestReduceSumOfSquaredWithConvert(ynn_type input_type,
   subgraph.fusion();
   subgraph.invalidate_dead_values();
 
-  ASSERT_EQ(valid_node_count(&subgraph), 1);
   // x and y should be valid. Intermediate values should be invalid/removed.
-  ASSERT_TRUE(subgraph.value(x_id).is_valid());
-  ASSERT_TRUE(subgraph.value(y_id).is_valid());
-  ASSERT_FALSE(subgraph.value(intermediate1_id).is_valid());
-  ASSERT_FALSE(subgraph.value(intermediate2_id).is_valid());
-
-  const ynn_node* output = subgraph.get_producer(y_id);
-  ASSERT_NE(output, nullptr);
-  ASSERT_EQ(output->inputs.size(), 2);
-  ASSERT_EQ(output->inputs[0], x_id);
-  ASSERT_TRUE(is_reduce(*output, ynn_reduce_sum_squared));
+  ASSERT_THAT(subgraph,
+              AllOf(HasValidNodeCount(1), HasValidValueIds(x_id, y_id),
+                    Not(HasValidValueIds(intermediate1_id, intermediate2_id))));
+  EXPECT_THAT(ProducerOf(y_id, subgraph),
+              AllOf(IsReduce(ynn_reduce_sum_squared), HasInputCount(2),
+                    InputsAre(x_id, IsValidValueIn(subgraph))));
 }
 
 }  // namespace

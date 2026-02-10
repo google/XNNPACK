@@ -33,6 +33,18 @@ cc_library(
     ],
 )
 
+cc_library(
+    name = "matchers",
+    testonly = True,
+    hdrs = ["matchers.h"],
+    deps = [
+        "//ynnpack:ynnpack_h",
+        "//ynnpack/kernels/ternary",
+        "//ynnpack/subgraph",
+        "@com_google_googletest//:gtest",
+    ],
+)
+
 cc_test(
     name = "slinky_thread_pool",
     srcs = ["slinky_thread_pool.cc"],
@@ -50,6 +62,7 @@ cc_test(
     linkopts = ynn_binary_linkopts(),
     malloc = ynn_binary_malloc(),
     deps = [
+        ":matchers",
         ":subgraph_builder",
         "//ynnpack:ynnpack_h",
         "//ynnpack/base",
@@ -63,6 +76,7 @@ cc_test(
     linkopts = ynn_binary_linkopts(),
     malloc = ynn_binary_malloc(),
     deps = [
+        ":matchers",
         ":subgraph_builder",
         "//ynnpack:ynnpack_h",
         "//ynnpack/base",
@@ -71,6 +85,7 @@ cc_test(
 )
 
 TEST_DEPS = [
+    ":matchers",
     ":subgraph_builder",
     ":scheduler",
     "//ynnpack",

@@ -10,17 +10,20 @@
 #include <iostream>
 #include <numeric>
 #include <optional>
-#include <ostream>
-#include <variant>
 #include <vector>
 
+#include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include "ynnpack/include/ynnpack.h"
 #include "ynnpack/subgraph/subgraph.h"
+#include "ynnpack/subgraph/test/matchers.h"
 #include "ynnpack/subgraph/test/scheduler.h"
 #include "ynnpack/subgraph/test/subgraph_builder.h"
 
 namespace ynn {
+
+using ::testing::AllOf;
+
 namespace {
 
 TEST(CloneSubgraphSubset, SimpleChain) {
@@ -60,15 +63,11 @@ TEST(CloneSubgraphSubset, SimpleChain) {
   cloned_subgraph->dump(std::cout);
 
   ASSERT_TRUE(cloned_subgraph.has_value());
-  EXPECT_EQ(cloned_subgraph->values.size(), 2);
-  EXPECT_EQ(cloned_subgraph->nodes.size(), 1);
-  EXPECT_NE(cloned_a_id, YNN_INVALID_VALUE_ID);
-  EXPECT_NE(cloned_b_id, YNN_INVALID_VALUE_ID);
+  EXPECT_THAT(*cloned_subgraph,
+              AllOf(HasValidValueCount(2), HasValidNodeCount(1),
+                    HasValidValueIds(cloned_a_id, cloned_b_id)));
 
-  const auto& node = cloned_subgraph->nodes[0];
-  const auto* op = std::get_if<ynn_node::unary_elementwise>(&node.op);
-  ASSERT_NE(op, nullptr);
-  EXPECT_EQ(op->op, ynn_unary_abs);
+  EXPECT_THAT(cloned_subgraph->nodes[0], IsUnary(ynn_unary_abs));
 
   // Check numerical correctness of the cloned subgraph.
   TestScheduler scheduler(/*thread_count=*/4);
@@ -165,14 +164,11 @@ TEST(CloneSubgraphSubset, MiddleCut) {
   uint32_t cloned_c_id = YNN_INVALID_VALUE_ID;
   auto cloned_subgraph =
       clone_subgraph_subset(original, b_id, c_id, cloned_b_id, cloned_c_id);
-  EXPECT_EQ(cloned_subgraph->nodes.size(), 1);
-  EXPECT_NE(cloned_b_id, YNN_INVALID_VALUE_ID);
-  EXPECT_NE(cloned_c_id, YNN_INVALID_VALUE_ID);
-
-  const auto& node = cloned_subgraph->nodes[0];
-  const auto* op = std::get_if<ynn_node::unary_elementwise>(&node.op);
-  ASSERT_NE(op, nullptr);
-  EXPECT_EQ(op->op, ynn_unary_negate);
+  ASSERT_TRUE(cloned_subgraph.has_value());
+  EXPECT_THAT(*cloned_subgraph,
+              AllOf(HasValidValueCount(2), HasValidNodeCount(1),
+                    HasValidValueIds(cloned_b_id, cloned_c_id)));
+  EXPECT_THAT(cloned_subgraph->nodes[0], IsUnary(ynn_unary_negate));
 
   // Check numerical correctness of the cloned subgraph.
   TestScheduler scheduler(/*thread_count=*/4);
@@ -231,10 +227,12 @@ TEST(CloneSubgraphSubset, QuantizationParams) {
   uint32_t cloned_b_id = YNN_INVALID_VALUE_ID;
   auto cloned_subgraph =
       clone_subgraph_subset(subgraph, a_id, b_id, cloned_a_id, cloned_b_id);
+  ASSERT_TRUE(cloned_subgraph.has_value());
   // Should have a, b and their quantization params.
-  EXPECT_GE(cloned_subgraph->values.size(), 6);
-  EXPECT_NE(cloned_a_id, YNN_INVALID_VALUE_ID);
-  EXPECT_NE(cloned_b_id, YNN_INVALID_VALUE_ID);
+  EXPECT_THAT(*cloned_subgraph,
+              AllOf(HasValidValueCount(7), HasValidNodeCount(2),
+                    HasValidValueIds(cloned_a_id, cloned_b_id)));
+  EXPECT_THAT(cloned_subgraph->nodes[1], IsUnary(ynn_unary_abs));
 
   // Make sure that quantization params are present in the cloned subgraph.
   bool found_a_scale = false;

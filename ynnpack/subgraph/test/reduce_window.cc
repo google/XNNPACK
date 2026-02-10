@@ -3,6 +3,7 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+#include <cstddef>
 #include <cstdint>
 #include <vector>
 
@@ -13,12 +14,12 @@
 #include "ynnpack/include/ynnpack.h"
 #include "ynnpack/subgraph/test/subgraph_builder.h"
 
+namespace ynn {
+
 using ::testing::Each;
+using ::testing::ElementsAreArray;
 using ::testing::FloatNear;
 using ::testing::Pointwise;
-using ::testing::ElementsAreArray;
-
-namespace ynn {
 
 TEST(ReduceWindowTest, ReduceWindow1D) {
   SubgraphBuilder builder(/*external_value_count=*/2);
@@ -64,7 +65,7 @@ TEST(ReduceWindowTest, ReduceWindow1D) {
   runtime.SetupExternalTensor(output.data(), output_id).InvokeRuntime();
 
   const std::vector<float> expected = {3.0f, 3.0f, 3.0f, 1.0f};
-  ASSERT_THAT(output, Pointwise(FloatNear(1e-4f), expected));
+  EXPECT_THAT(output, Pointwise(FloatNear(1e-4f), expected));
 }
 
 TEST(ReduceWindowTest, ReduceWindow2D) {
@@ -111,7 +112,7 @@ TEST(ReduceWindowTest, ReduceWindow2D) {
   Tensor<float> output(output_shape);
   runtime.SetupExternalTensor(output.data(), output_id).InvokeRuntime();
 
-  ASSERT_THAT(output, Each(FloatNear(4.0f, 1e-4f)));
+  EXPECT_THAT(output, Each(FloatNear(4.0f, 1e-4f)));
 }
 
 TEST(ReduceWindowTest, MaxPooling2D) {
@@ -161,7 +162,7 @@ TEST(ReduceWindowTest, MaxPooling2D) {
     3, 4,
   };
   // clang-format on
-  ASSERT_THAT(output, ElementsAreArray(expected));
+  EXPECT_THAT(output, ElementsAreArray(expected));
 }
 
 }  // namespace ynn

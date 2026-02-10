@@ -7,7 +7,6 @@
 #include <chrono>
 #include <cstddef>
 #include <cstdint>
-#include <functional>
 #include <numeric>
 #include <random>
 #include <tuple>
