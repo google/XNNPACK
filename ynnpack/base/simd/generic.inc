@@ -30,6 +30,18 @@ YNN_ALWAYS_INLINE vec<T, N> load(const T* ptr,
   return {load(ptr, n2), load(ptr + n2, n2)};
 }
 template <typename T, size_t N>
+YNN_ALWAYS_INLINE vec<T, N> load(const T* ptr,
+                                 std::integral_constant<size_t, N> n,
+                                 zeros<N>) {
+  return load(ptr, n, vec<T, N>{});
+}
+template <typename T, size_t N>
+YNN_ALWAYS_INLINE vec<T, N> load(const T* ptr,
+                                 std::integral_constant<size_t, N> n,
+                                 undef<N>) {
+  return load(ptr, n, vec<T, N>{});
+}
+template <typename T, size_t N>
 YNN_ALWAYS_INLINE vec<T, N> load_aligned(const T* ptr,
                                          std::integral_constant<size_t, N> n,
                                          vec<T, N>) {
@@ -43,6 +55,24 @@ YNN_ALWAYS_INLINE vec<T, N> load(const T* ptr, size_t n, vec<T, N> src) {
     return {load(ptr, n, src.lo()), src.hi()};
   } else {
     return {load(ptr, n2), load(ptr + n2, n - n2, src.hi())};
+  }
+}
+template <typename T, size_t N>
+YNN_ALWAYS_INLINE vec<T, N> load(const T* ptr, size_t n, zeros<N>) {
+  std::integral_constant<size_t, N / 2> n2 = {};
+  if (n < n2) {
+    return {load(ptr, n, zeros<N / 2>{}), vec<T, N / 2>{T{0}}};
+  } else {
+    return {load(ptr, n2), load(ptr + n2, n - n2, zeros<N / 2>{})};
+  }
+}
+template <typename T, size_t N>
+YNN_ALWAYS_INLINE vec<T, N> load(const T* ptr, size_t n, undef<N>) {
+  std::integral_constant<size_t, N / 2> n2 = {};
+  if (n < n2) {
+    return {load(ptr, n, undef<N / 2>{}), vec<T, N / 2>{}};
+  } else {
+    return {load(ptr, n2), load(ptr + n2, n - n2, undef<N / 2>{})};
   }
 }
 

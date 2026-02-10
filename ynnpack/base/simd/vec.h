@@ -19,6 +19,18 @@ namespace ynn {
 
 namespace simd {
 
+// A type tag indicating a vector of N zeros.
+template <size_t N_>
+struct zeros {
+  static constexpr std::integral_constant<size_t, N_> N = {};
+};
+
+// A type tag indicating a vector of N lanes of undefined value.
+template <size_t N_>
+struct undef {
+  static constexpr std::integral_constant<size_t, N_> N = {};
+};
+
 // The idea here is to provide the minimal wrappers around various platform
 // specific intrinsics that allow overloading behavior based on type and vector
 // length. For example, suppose you want to implement the following generic
@@ -77,10 +89,18 @@ template <typename T, size_t N>
 vec<T, N> load(const T* ptr, std::integral_constant<size_t, N> n,
                vec<T, N> = {});
 template <typename T, size_t N>
+vec<T, N> load(const T* ptr, std::integral_constant<size_t, N> n, zeros<N>);
+template <typename T, size_t N>
+vec<T, N> load(const T* ptr, std::integral_constant<size_t, N> n, undef<N>);
+template <typename T, size_t N>
 vec<T, N> load_aligned(const T* ptr, std::integral_constant<size_t, N> n,
                        vec<T, N> = {});
 template <typename T, size_t N>
 vec<T, N> load(const T* ptr, size_t n, vec<T, N> src);
+template <typename T, size_t N>
+vec<T, N> load(const T* ptr, size_t n, zeros<N>);
+template <typename T, size_t N>
+vec<T, N> load(const T* ptr, size_t n, undef<N>);
 
 // Store `N` elements of `T` to `ptr`.
 template <typename T, size_t N>
@@ -156,6 +176,16 @@ template <typename T>
 YNN_ALWAYS_INLINE vec<T, 1> load(const T* ptr, size_t n, vec<T, 1> src) {
   assert(n <= 1);
   return n ? vec<T, 1>{*ptr} : src;
+}
+template <typename T>
+YNN_ALWAYS_INLINE vec<T, 1> load(const T* ptr, size_t n, zeros<1>) {
+  assert(n <= 1);
+  return vec<T, 1>{n ? *ptr : T{0}};
+}
+template <typename T>
+YNN_ALWAYS_INLINE vec<T, 1> load(const T* ptr, size_t n, undef<1>) {
+  assert(n <= 1);
+  return vec<T, 1>{n ? *ptr : T{0}};
 }
 
 template <typename T>

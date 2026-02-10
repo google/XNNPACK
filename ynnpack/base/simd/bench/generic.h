@@ -30,17 +30,17 @@ using f32 = float;
 using s32 = int32_t;
 
 template <typename T, typename Init>
-YNN_NO_INLINE auto load_no_inline(const T* src, size_t n, Init init) {
+YNN_NO_INLINE static auto load_no_inline(const T* src, size_t n, Init init) {
   return load(src, n, init);
 }
 
 template <typename T, size_t N>
-YNN_NO_INLINE void store_no_inline(T* dst, vec<T, N> v, size_t n) {
+YNN_NO_INLINE static void store_no_inline(T* dst, vec<T, N> v, size_t n) {
   return store(dst, v, n);
 }
 
-template <typename scalar, size_t N>
-void BM_partial_load(benchmark::State& state, uint64_t arch) {
+template <typename scalar, size_t N, typename Init>
+static void BM_partial_load(benchmark::State& state, uint64_t arch) {
   if (!is_arch_supported(arch)) {
     state.SkipWithError("Unsupported hardware");
     return;
@@ -54,15 +54,17 @@ void BM_partial_load(benchmark::State& state, uint64_t arch) {
     src_aligned[i] = static_cast<scalar>(i);
   }
   scalar* src = &src_aligned[N + align - n];
-  vector init = broadcast<N>(scalar{1});
 
+  Init init = {};
+  benchmark::DoNotOptimize(src);
+  benchmark::DoNotOptimize(init);
   for (auto _ : state) {
     benchmark::DoNotOptimize(load_no_inline(src, n, init));
   }
 }
 
 template <typename scalar, size_t N>
-void BM_partial_store(benchmark::State& state, uint64_t arch) {
+static void BM_partial_store(benchmark::State& state, uint64_t arch) {
   if (!is_arch_supported(arch)) {
     state.SkipWithError("Unsupported hardware");
     return;
@@ -74,6 +76,7 @@ void BM_partial_store(benchmark::State& state, uint64_t arch) {
   alignas(vector) scalar dst_aligned[N * 2];
   scalar* dst = &dst_aligned[align];
   vector v = broadcast<N>(scalar{1});
+  benchmark::DoNotOptimize(v);
   for (auto _ : state) {
     store_no_inline(dst, v, n);
     benchmark::DoNotOptimize(dst);
@@ -81,7 +84,7 @@ void BM_partial_store(benchmark::State& state, uint64_t arch) {
 }
 
 template <int N>
-void partial_load_store_params(benchmark::internal::Benchmark* b) {
+static void partial_load_store_params(benchmark::internal::Benchmark* b) {
   b->ArgNames({"n", "offset"});
   for (int offset : {0, 1}) {
     for (int n : {1, N - 1}) {
@@ -90,26 +93,35 @@ void partial_load_store_params(benchmark::internal::Benchmark* b) {
   }
 }
 
-#define BENCH_PARTIAL_LOAD_STORE(arch, type, N)                                \
-  void BM_partial_load_##type##x##N##_##arch(benchmark::State& state) { \
-    BM_partial_load<type, N>(state, arch_flag::arch);                  \
-  }                                                                            \
-  void BM_partial_store_##type##x##N##_##arch(                          \
-      benchmark::State& state) {                                               \
-    BM_partial_store<type, N>(state, arch_flag::arch);                         \
-  }                                                                            \
-  BENCHMARK(BM_partial_load_##type##x##N##_##arch)                             \
-      ->Apply(partial_load_store_params<N>);                                   \
-  BENCHMARK(BM_partial_store_##type##x##N##_##arch)                            \
+#define BENCH_PARTIAL_LOAD_STORE(arch, type, N)                               \
+  void BM_partial_load_##type##x##N##_##arch(benchmark::State& state) {       \
+    BM_partial_load<type, N, vec<type, N>>(state, arch_flag::arch);           \
+  }                                                                           \
+  void BM_partial_load_zero_##type##x##N##_##arch(benchmark::State& state) {  \
+    BM_partial_load<type, N, zeros<N>>(state, arch_flag::arch);               \
+  }                                                                           \
+  void BM_partial_load_undef_##type##x##N##_##arch(benchmark::State& state) { \
+    BM_partial_load<type, N, undef<N>>(state, arch_flag::arch);               \
+  }                                                                           \
+  void BM_partial_store_##type##x##N##_##arch(benchmark::State& state) {      \
+    BM_partial_store<type, N>(state, arch_flag::arch);                        \
+  }                                                                           \
+  BENCHMARK(BM_partial_load_##type##x##N##_##arch)                            \
+      ->Apply(partial_load_store_params<N>);                                  \
+  BENCHMARK(BM_partial_load_zero_##type##x##N##_##arch)                       \
+      ->Apply(partial_load_store_params<N>);                                  \
+  BENCHMARK(BM_partial_load_undef_##type##x##N##_##arch)                      \
+      ->Apply(partial_load_store_params<N>);                                  \
+  BENCHMARK(BM_partial_store_##type##x##N##_##arch)                           \
       ->Apply(partial_load_store_params<N>);
 
 template <typename T>
-YNN_NO_INLINE T fma_no_inline(T a, T b, T acc) {
+YNN_NO_INLINE static T fma_no_inline(T a, T b, T acc) {
   return fma(a, b, acc);
 }
 
 template <typename scalar, size_t N>
-void BM_fma(benchmark::State& state, uint64_t arch) {
+static void BM_fma(benchmark::State& state, uint64_t arch) {
   if (!is_arch_supported(arch)) {
     state.SkipWithError("Unsupported hardware");
     return;

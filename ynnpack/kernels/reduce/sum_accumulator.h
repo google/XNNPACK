@@ -139,8 +139,7 @@ struct sum_accumulator_x32 {
   YNN_ALWAYS_INLINE void accumulate(size_t /*C_stride_m*/, T* __restrict C,
                                     NT n) {
     static_assert(N <= 4);
-    using OutAccT = simd::vec<T, 4>;
-    store(C, load(C, n, OutAccT{}) + sum_rows<AccT>(acc, AccT::N, N), n);
+    store(C, load(C, n, simd::undef<4>{}) + sum_rows<AccT>(acc, AccT::N, N), n);
   }
 };
 
@@ -177,7 +176,7 @@ struct sum_accumulator_k1_1 {
     auto a_2 = 2 < k2 ? load(offset_bytes(A, 2 * A_stride_k2), n, zero) : zero;
     auto a_3 = 3 < k2 ? load(offset_bytes(A, 3 * A_stride_k2), n, zero) : zero;
 
-    AccT acc = load(C, n, AccT{});
+    AccT acc = load(C, n, simd::undef<N>{});
 
     acc = reduce_add(acc, a_0, map_fn, horizontal_factor);
     acc = reduce_add(acc, a_1, map_fn, horizontal_factor);

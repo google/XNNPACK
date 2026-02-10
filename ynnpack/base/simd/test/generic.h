@@ -122,6 +122,53 @@ void test_partial_load() {
 }
 
 template <typename scalar, size_t N>
+void test_partial_load_zero() {
+  using vector = vec<scalar, N>;
+
+  alignas(vector) scalar src_aligned[N * 2];
+  for (size_t i = 0; i < N * 2; ++i) {
+    src_aligned[i] = static_cast<scalar>(i);
+  }
+  for (int align : {0, static_cast<int>(N) - 1}) {
+    for (size_t n = 1; n < N; ++n) {
+      scalar* src = &src_aligned[N + align - n];
+      vector v = load(src, n, zeros<N>{});
+
+      scalar dst[N];
+      store(dst, v);
+      for (size_t i = 0; i < n; ++i) {
+        ASSERT_EQ(dst[i], src[i]) << i << " " << n;
+      }
+      for (size_t i = n; i < N; ++i) {
+        ASSERT_EQ(dst[i], 0);
+      }
+    }
+  }
+}
+
+template <typename scalar, size_t N>
+void test_partial_load_undef() {
+  using vector = vec<scalar, N>;
+
+  alignas(vector) scalar src_aligned[N * 2];
+  for (size_t i = 0; i < N * 2; ++i) {
+    src_aligned[i] = static_cast<scalar>(i);
+  }
+  for (int align : {0, static_cast<int>(N) - 1}) {
+    for (size_t n = 1; n < N; ++n) {
+      scalar* src = &src_aligned[N + align - n];
+      vector v = load(src, n, undef<N>{});
+
+      scalar dst[N];
+      store(dst, v);
+      for (size_t i = 0; i < n; ++i) {
+        ASSERT_EQ(dst[i], src[i]);
+      }
+    }
+  }
+}
+
+template <typename scalar, size_t N>
 void test_partial_store() {
   using vector = vec<scalar, N>;
 
@@ -148,12 +195,18 @@ void test_partial_store() {
   }
 }
 
-#define TEST_PARTIAL_LOAD_STORE(test_class, type, N) \
-  TEST_F(test_class, partial_load_##type##x##N) {      \
-    test_partial_load<type, N>();                    \
-  }                                                  \
-  TEST_F(test_class, partial_store_##type##x##N) {     \
-    test_partial_store<type, N>();                   \
+#define TEST_PARTIAL_LOAD_STORE(test_class, type, N)    \
+  TEST_F(test_class, partial_load_##type##x##N) {       \
+    test_partial_load<type, N>();                       \
+  }                                                     \
+  TEST_F(test_class, partial_load_zero_##type##x##N) {  \
+    test_partial_load_zero<type, N>();                  \
+  }                                                     \
+  TEST_F(test_class, partial_load_undef_##type##x##N) { \
+    test_partial_load_undef<type, N>();                 \
+  }                                                     \
+  TEST_F(test_class, partial_store_##type##x##N) {      \
+    test_partial_store<type, N>();                      \
   }
 
 template <typename scalar, size_t N, template <typename> typename Op>

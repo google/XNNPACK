@@ -191,18 +191,6 @@ class float16_wrapper {
 using half_rvar = float16_wrapper<half, int16_t>;
 using bfloat16_rvar = float16_wrapper<bfloat16, int16_t>;
 
-// Forward type_info for float16_wrapper.
-template <typename Float, typename Int>
-class type_info<float16_wrapper<Float, Int>> {
- public:
-  static constexpr float16_wrapper<Float, Int> min_identity() {
-    return float16_wrapper<Float, Int>(static_cast<Int>(32767));
-  }
-  static constexpr float16_wrapper<Float, Int> max_identity() {
-    return float16_wrapper<Float, Int>(static_cast<Int>(-32768));
-  }
-};
-
 // Forward type_info for simd::vec.
 template <typename T, size_t N>
 class type_info<simd::vec<T, N>> {
@@ -212,6 +200,18 @@ class type_info<simd::vec<T, N>> {
   }
   static constexpr simd::vec<T, N> max_identity() {
     return type_info<T>::max_identity();
+  }
+};
+
+// Forward type_info for float16_wrapper.
+template <typename Float, typename Int>
+class type_info<float16_wrapper<Float, Int>> {
+ public:
+  static constexpr auto min_identity() {
+    return type_info<Float>::min_identity();
+  }
+  static constexpr auto max_identity() {
+    return type_info<Float>::max_identity();
   }
 };
 

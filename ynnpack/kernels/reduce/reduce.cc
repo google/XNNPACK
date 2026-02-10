@@ -236,7 +236,7 @@ template <typename T>
 struct min_op {
   T operator()(T a, T b) { return min(a, b); }
 
-  static constexpr T identity = type_info<T>::min_identity();
+  static constexpr auto identity = type_info<T>::min_identity();
   static constexpr bool is_associative = true;
 };
 
@@ -244,7 +244,7 @@ template <typename T>
 struct max_op {
   T operator()(T a, T b) { return max(a, b); }
 
-  static constexpr T identity = type_info<T>::max_identity();
+  static constexpr auto identity = type_info<T>::max_identity();
   static constexpr bool is_associative = true;
 };
 
@@ -252,7 +252,7 @@ template <typename T>
 struct sum_op {
   T operator()(T a, T b) { return a + b; }
 
-  static constexpr T identity = type_info<T>::sum_identity();
+  static constexpr auto identity = type_info<T>::sum_identity();
   static constexpr bool is_associative = std::is_integral<T>::value;
 };
 

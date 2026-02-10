@@ -11,6 +11,8 @@
 namespace ynn {
 namespace simd {
 
+BENCH_PARTIAL_LOAD_STORE(avx512f, s8, 64);
+BENCH_PARTIAL_LOAD_STORE(avx512f, s16, 32);
 BENCH_PARTIAL_LOAD_STORE(avx512f, s32, 16);
 
 BENCH_FMA(avx512f, f32, 16);
