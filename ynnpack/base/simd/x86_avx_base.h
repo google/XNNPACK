@@ -289,8 +289,9 @@ YNN_ALWAYS_INLINE void store(int8_t* ptr, s8x32 b, decltype(s8x32::N) = {}) {
 
 namespace internal {
 
-static constexpr int32_t mask_table[16] = {-1, -1, -1, -1, -1, -1, -1, -1,
-                                           0,  0,  0,  0,  0,  0,  0,  0};
+// Align this to avoid spanning a cache line.
+alignas(64) static constexpr int32_t mask_table[16] = {
+    -1, -1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0, 0};
 
 YNN_ALWAYS_INLINE f32x8 maskload(const float* ptr, __m256i mask) {
   return f32x8{_mm256_maskload_ps(ptr, mask)};
