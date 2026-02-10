@@ -41,32 +41,52 @@
 #include "src/xnnpack/params.h"
 #include <pthreadpool.h>
 
+struct convolution2d_nchw_context {
+  uint32_t input_padding_top;
+  uint32_t input_padding_right;
+  uint32_t input_padding_bottom;
+  uint32_t input_padding_left;
+  uint32_t kernel_height;
+  uint32_t kernel_width;
+  uint32_t subsampling_height;
+  uint32_t subsampling_width;
+  uint32_t dilation_height;
+  uint32_t dilation_width;
+  uint32_t groups;
+  size_t group_input_channels;
+  size_t group_output_channels;
+  size_t input_channel_stride;
+  size_t output_channel_stride;
+  const void* kernel;
+  const void* bias;
+  float output_min;
+  float output_max;
+  uint32_t flags;
+  enum xnn_operator_type operator_type;
+  enum xnn_fingerprint_id fingerprint_id;
+  xnn_weights_cache_t weights_cache;
+};
+
 static enum xnn_status create_spmm_path(
-    const uint32_t kernel_height,
-    const uint32_t kernel_width,
-    const uint32_t groups,
-    const size_t group_input_channels,
-    const size_t group_output_channels,
-    const void* kernel,
-    const void* bias,
+    struct convolution2d_nchw_context* context,
     const uint32_t log2_filter_element_size,
     const xnn_analyze_spmm_w_fn xnn_analyze_spmm,
     const xnn_pack_spmm_w_fn xnn_pack_spmm,
     const struct xnn_spmm_config* spmm_config,
     const struct xnn_spmm_config* spmm2_config,
     const struct xnn_spmm_config* spmm4_config,
-    const enum xnn_operator_type operator_type,
-    const xnn_operator_t convolution_op)
+    xnn_operator_t convolution_op)
 {
   assert(spmm_config != NULL);
-  assert(kernel_height == 1);
-  assert(kernel_width == 1);
-  assert(groups == 1);
+  assert(context->kernel_height == 1);
+  assert(context->kernel_width == 1);
+  assert(context->groups == 1);
 
   // Count number of non-zero values.
   struct xnn_spmm_packing_params spmm_packing_params;
 
-  xnn_analyze_spmm(group_output_channels, group_input_channels, kernel, &spmm_packing_params);
+  xnn_analyze_spmm(context->group_output_channels, context->group_input_channels, context->kernel,
+                   &spmm_packing_params);
 
   size_t num_nonzeroes = spmm_packing_params.num_nonzeroes;
   size_t num_nonzero_blocks2 = spmm_packing_params.num_nonzero_blocks2;
@@ -76,7 +96,7 @@ static enum xnn_status create_spmm_path(
 
   // Select block encoding when 2 or 4 channels have non-zero values.
   size_t output_channels_block_size = 1;
-  size_t num_output_channel_blocks = group_output_channels;
+  size_t num_output_channel_blocks = context->group_output_channels;
   size_t num_nonzero_values = num_nonzeroes;
   size_t num_nonzero_blocks = num_nonzeroes;
   if (num_block4_nonzeroes * 5 >= num_nonzero_blocks4 * 18 && spmm4_config != NULL && spmm4_config->ukernel != NULL) {
@@ -113,17 +133,17 @@ static enum xnn_status create_spmm_path(
   const size_t packed_weights_size =
     num_nonzero_blocks * 2 * sizeof(int32_t) +
     num_output_channel_blocks * sizeof(uint32_t) +
-    ((group_output_channels + num_nonzero_values) << log2_filter_element_size) + XNN_EXTRA_BYTES;
+    ((context->group_output_channels + num_nonzero_values) << log2_filter_element_size) + XNN_EXTRA_BYTES;
 
   convolution_op->packed_weights.pointer = xnn_allocate_simd_memory(packed_weights_size);
   if (convolution_op->packed_weights.pointer == NULL) {
     xnn_log_error(
       "failed to allocate %zu bytes for %s operator packed weights",
-      packed_weights_size, xnn_operator_type_to_string(operator_type));
+      packed_weights_size, xnn_operator_type_to_string(context->operator_type));
     return xnn_status_out_of_memory;
   }
   xnn_log_debug("allocated %zu bytes for packed weights in %s operator",
-    packed_weights_size, xnn_operator_type_to_string(operator_type));
+    packed_weights_size, xnn_operator_type_to_string(context->operator_type));
 
   convolution_op->conv.num_nonzero_blocks = num_nonzero_blocks;
   convolution_op->conv.num_output_channel_blocks = num_output_channel_blocks;
@@ -137,11 +157,11 @@ static enum xnn_status create_spmm_path(
 
   size_t first_ic = 0;
   enum xnn_status status = xnn_pack_spmm(
-        group_output_channels,
+        context->group_output_channels,
         output_channels_block_size,
-        group_input_channels,
-        kernel,
-        bias,
+        context->group_input_channels,
+        context->kernel,
+        context->bias,
         input_channel_diffs,
         output_channel_nonzeros,
         nonzero_values,
@@ -164,51 +184,45 @@ error:
 }
 
 static enum xnn_status create_conv2d_hwc2chw_path(
-    const uint32_t kernel_height,
-    const uint32_t kernel_width,
-    const uint32_t groups,
-    const size_t group_input_channels,
-    const size_t group_output_channels,
+    struct convolution2d_nchw_context* context,
     const size_t output_height_tile,
     const size_t output_channel_tile,
-    const void* kernel,
-    const void* bias,
     const uint32_t log2_filter_element_size,
     const xnn_pack_dconv_oki_w_fn xnn_pack_dconv_oki_w,
     const xnn_conv_hwc2chw_ukernel_fn conv_hwc2chw_ukernel,
-    const enum xnn_operator_type operator_type,
-    const enum xnn_fingerprint_id fingerprint_id,
     const xnn_operator_t convolution_op)
 {
   assert(conv_hwc2chw_ukernel != NULL);
 
-  const size_t packed_group_output_channels = round_up(group_output_channels, output_channel_tile);
-  const size_t packed_weights_size = (groups * packed_group_output_channels *
-    (group_input_channels * kernel_height * kernel_width + 1 /* bias */)) << log2_filter_element_size;
+  const size_t packed_group_output_channels = round_up(context->group_output_channels, output_channel_tile);
+  const size_t packed_weights_size = (context->groups * packed_group_output_channels *
+                                      (context->group_input_channels * context->kernel_height
+                                       * context->kernel_width + 1 /* bias */))
+      << log2_filter_element_size;
   const size_t aligned_total_weights_size = round_up_po2(packed_weights_size, XNN_ALLOCATION_ALIGNMENT);
   void* weights_ptr = xnn_get_pointer_to_write_weights(convolution_op, aligned_total_weights_size);
   if (weights_ptr == NULL) {
     xnn_log_error("failed to reserve or allocate %zu bytes for %s operator conv2d_hwc2chw packed weights",
                   aligned_total_weights_size,
-                  xnn_operator_type_to_string(operator_type));
+                  xnn_operator_type_to_string(context->operator_type));
     return xnn_status_out_of_memory;
   }
   xnn_log_debug("allocated %zu bytes for packed weights in %s operator",
-    aligned_total_weights_size, xnn_operator_type_to_string(operator_type));
+                aligned_total_weights_size, xnn_operator_type_to_string(context->operator_type));
 
   xnn_pack_dconv_oki_w(
-    group_output_channels,
-    group_input_channels,
-    output_channel_tile,
-    kernel_height, kernel_width,
-    kernel, bias, weights_ptr, NULL);
+      context->group_output_channels,
+      context->group_input_channels,
+      output_channel_tile,
+      context->kernel_height, context->kernel_width,
+      context->kernel, context->bias, weights_ptr, NULL);
 
   if (use_weights_cache(convolution_op)) {
     struct xnn_weights_cache_look_up_key cache_key;
-    cache_key.seed = group_input_channels ^ group_output_channels ^ output_channel_tile;
-    cache_key.kernel = kernel;
-    cache_key.bias = bias;
-    cache_key.fingerprint_id = fingerprint_id;
+    cache_key.seed = context->group_input_channels ^ context->group_output_channels ^ output_channel_tile;
+    cache_key.kernel = context->kernel;
+    cache_key.bias = context->bias;
+    cache_key.fingerprint_id = context->fingerprint_id;
     convolution_op->packed_weights.offset = xnn_look_up_or_insert_weights_cache(
         convolution_op->weights_cache, &cache_key, weights_ptr, aligned_total_weights_size);
   }
@@ -222,53 +236,46 @@ static enum xnn_status create_conv2d_hwc2chw_path(
 }
 
 static enum xnn_status create_dwconv_path(
-    const uint32_t kernel_height,
-    const uint32_t kernel_width,
-    const uint32_t groups,
-    const void* kernel,
-    const void* bias,
-    const uint32_t flags,
+    const struct convolution2d_nchw_context* context,
     const uint32_t log2_filter_element_size,
     const xnn_pack_chw_dwconv_hwg_w_fn pack_chw_dwconv_hwg_w,
     const xnn_pack_chw_dwconv_ghw_w_fn pack_chw_dwconv_ghw_w,
     const size_t output_width_tile,
     const xnn_dwconv2d_chw_ukernel_fn dwconv_ukernel,
-    const enum xnn_operator_type operator_type,
-    const enum xnn_fingerprint_id fingerprint_id,
     const xnn_operator_t convolution_op)
 {
   assert(dwconv_ukernel != NULL);
-
-  const size_t packed_weights_size = (groups * (kernel_height * kernel_width + 1 /* bias */)) << log2_filter_element_size;
+  const size_t packed_weights_size =
+      (context->groups * (context->kernel_height * context->kernel_width + 1 /* bias */)) << log2_filter_element_size;
   const size_t aligned_total_weights_size = round_up_po2(packed_weights_size, XNN_ALLOCATION_ALIGNMENT);
   void* weights_ptr = xnn_get_pointer_to_write_weights(
       convolution_op, aligned_total_weights_size);
   if (weights_ptr == NULL) {
     xnn_log_error("failed to reserve or allocated %zu bytes for %s operator dwconv packed weights",
-                  aligned_total_weights_size, xnn_operator_type_to_string(operator_type));
+                  aligned_total_weights_size, xnn_operator_type_to_string(context->operator_type));
     return xnn_status_out_of_memory;
   }
   xnn_log_debug("allocated %zu bytes for packed weights in %s operator",
-                aligned_total_weights_size, xnn_operator_type_to_string(operator_type));
+                aligned_total_weights_size, xnn_operator_type_to_string(context->operator_type));
 
-  uint32_t cache_seed = kernel_height ^ kernel_width ^ groups;
-  if (flags & XNN_FLAG_DEPTHWISE_CONVOLUTION) {
+  uint32_t cache_seed = context->kernel_height ^ context->kernel_width ^ context->groups;
+  if (context->flags & XNN_FLAG_DEPTHWISE_CONVOLUTION) {
     pack_chw_dwconv_hwg_w(
-      kernel_height * kernel_width, groups,
-      kernel, bias, weights_ptr, NULL);
+        context->kernel_height * context->kernel_width, context->groups,
+        context->kernel, context->bias, weights_ptr, NULL);
   } else {
     cache_seed = ~cache_seed;
     pack_chw_dwconv_ghw_w(
-      kernel_height * kernel_width, groups,
-      kernel, bias, weights_ptr, NULL);
+        context->kernel_height * context->kernel_width, context->groups,
+        context->kernel, context->bias, weights_ptr, NULL);
   }
 
   if (use_weights_cache(convolution_op)) {
     struct xnn_weights_cache_look_up_key cache_key;
     cache_key.seed = cache_seed;
-    cache_key.kernel = kernel;
-    cache_key.bias = bias;
-    cache_key.fingerprint_id = fingerprint_id;
+    cache_key.kernel = context->kernel;
+    cache_key.bias = context->bias;
+    cache_key.fingerprint_id = context->fingerprint_id;
     convolution_op->packed_weights.offset = xnn_look_up_or_insert_weights_cache(
         convolution_op->weights_cache, &cache_key, weights_ptr, aligned_total_weights_size);
   }
@@ -283,7 +290,6 @@ static enum xnn_status create_dwconv_path(
 
 struct conv2d_variant {
   size_t log2_filter_element_size;
-  enum xnn_operator_type operator_type;
   float (*round_float_value)(float);
   const struct xnn_spmm_config* (*init_spmm_config)();
   const struct xnn_spmm_config* (*init_spmm2_config)();
@@ -428,7 +434,6 @@ static void init_dwconv_f16(
 
 static const struct conv2d_variant f16_conv = {
   .log2_filter_element_size = XNN_LOG2_SIZEOF_FLOAT16,
-  .operator_type = xnn_operator_type_convolution_nchw_f16,
   .round_float_value = round_float_value_f16,
   .init_spmm_config = xnn_init_f16_spmm_config,
   .init_spmm2_config = NULL,
@@ -441,7 +446,6 @@ static const struct conv2d_variant f16_conv = {
 
 static const struct conv2d_variant f32_conv = {
   .log2_filter_element_size = XNN_LOG2_SIZEOF_FLOAT,
-  .operator_type = xnn_operator_type_convolution_nchw_f32,
   .round_float_value = round_float_value_f32,
   .init_spmm_config = xnn_init_f32_spmm_config,
   .init_spmm2_config = xnn_init_f32_spmm2_config,
@@ -529,35 +533,14 @@ static enum xnn_status select_convolution2d_ukernel(
 
 static enum xnn_status create_convolution2d_nchw(
     const struct conv2d_variant* variant,
-    uint32_t input_padding_top,
-    uint32_t input_padding_right,
-    uint32_t input_padding_bottom,
-    uint32_t input_padding_left,
-    uint32_t kernel_height,
-    uint32_t kernel_width,
-    uint32_t subsampling_height,
-    uint32_t subsampling_width,
-    uint32_t dilation_height,
-    uint32_t dilation_width,
-    uint32_t groups,
-    size_t group_input_channels,
-    size_t group_output_channels,
-    size_t input_channel_stride,
-    size_t output_channel_stride,
-    const void* kernel,
-    const void* bias,
-    float output_min,
-    float output_max,
-    uint32_t flags,
-    const enum xnn_fingerprint_id fingerprint_id,
-    xnn_weights_cache_t weights_cache,
+    struct convolution2d_nchw_context* context,
     xnn_operator_t* convolution_op_out)
 {
   xnn_operator_t convolution_op = NULL;
   enum xnn_status status = xnn_status_uninitialized;
 
   const size_t log2_filter_element_size = variant->log2_filter_element_size;
-  const enum xnn_operator_type operator_type = variant->operator_type;
+  const enum xnn_operator_type operator_type = context->operator_type;
 
   if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
     xnn_log_error("failed to create %s operator: XNNPACK is not initialized",
@@ -567,86 +550,86 @@ static enum xnn_status create_convolution2d_nchw(
 
   status = xnn_status_invalid_parameter;
 
-  if (kernel_width == 0 || kernel_height == 0) {
+  if (context->kernel_width == 0 || context->kernel_height == 0) {
     xnn_log_error(
       "failed to create %s operator with %" PRIu32 "x%" PRIu32 " kernel: kernel dimensions must be non-zero",
-      xnn_operator_type_to_string(operator_type), kernel_width, kernel_height);
+      xnn_operator_type_to_string(operator_type), context->kernel_width, context->kernel_height);
     goto error;
   }
 
-  if (subsampling_width == 0 || subsampling_height == 0) {
+  if (context->subsampling_width == 0 || context->subsampling_height == 0) {
     xnn_log_error(
       "failed to create %s operator with %" PRIu32 "x%" PRIu32 " subsampling: subsampling dimensions must be non-zero",
-      xnn_operator_type_to_string(operator_type), subsampling_width, subsampling_height);
+      xnn_operator_type_to_string(operator_type), context->subsampling_width, context->subsampling_height);
     goto error;
   }
 
-  if (dilation_width == 0 || dilation_height == 0) {
+  if (context->dilation_width == 0 || context->dilation_height == 0) {
     xnn_log_error(
       "failed to create %s operator with %" PRIu32 "x%" PRIu32 " dilation: dilation dimensions must be non-zero",
-      xnn_operator_type_to_string(operator_type), dilation_width, dilation_height);
+      xnn_operator_type_to_string(operator_type), context->dilation_width, context->dilation_height);
     goto error;
   }
 
-  if (groups == 0) {
+  if (context->groups == 0) {
     xnn_log_error(
       "failed to create %s operator with %" PRIu32 " groups: number of groups must be non-zero",
-      xnn_operator_type_to_string(operator_type), groups);
+      xnn_operator_type_to_string(operator_type), context->groups);
     goto error;
   }
 
-  if (group_input_channels == 0) {
+  if (context->group_input_channels == 0) {
     xnn_log_error(
       "failed to create %s operator with %zu input channels per group: number of channels must be non-zero",
-      xnn_operator_type_to_string(operator_type), group_input_channels);
+      xnn_operator_type_to_string(operator_type), context->group_input_channels);
     goto error;
   }
 
-  if (group_output_channels == 0) {
+  if (context->group_output_channels == 0) {
     xnn_log_error(
       "failed to create %s operator with %zu output channels per group: number of channels must be non-zero",
-      xnn_operator_type_to_string(operator_type), group_output_channels);
+      xnn_operator_type_to_string(operator_type), context->group_output_channels);
     goto error;
   }
 
-  const size_t input_channels = groups * group_input_channels;
-  if (input_channel_stride < input_channels) {
+  const size_t input_channels = context->groups * context->group_input_channels;
+  if (context->input_channel_stride < input_channels) {
     xnn_log_error(
         "failed to create %s operator with input channel stride of %zu: stride "
         "must be at least as large as the number of input channels (%" PRIu32
         "x%zu)",
-        xnn_operator_type_to_string(operator_type), input_channel_stride,
-        groups, group_input_channels);
+        xnn_operator_type_to_string(operator_type), context->input_channel_stride,
+        context->groups, context->group_input_channels);
     goto error;
   }
 
-  const size_t output_channels = groups * group_output_channels;
-  if (output_channel_stride < output_channels) {
+  const size_t output_channels = context->groups * context->group_output_channels;
+  if (context->output_channel_stride < output_channels) {
     xnn_log_error(
         "failed to create %s operator with output channel stride of %zu: "
         "stride must be at least as large as the number of output channels "
         "(%" PRIu32 "x%zu)",
-        xnn_operator_type_to_string(operator_type), output_channel_stride,
-        groups, group_output_channels);
+        xnn_operator_type_to_string(operator_type), context->output_channel_stride,
+        context->groups, context->group_output_channels);
     goto error;
   }
 
-  if (isnan(output_min)) {
+  if (isnan(context->output_min)) {
     xnn_log_error(
       "failed to create %s operator with NaN output lower bound: lower bound must be non-NaN",
       xnn_operator_type_to_string(operator_type));
     goto error;
   }
 
-  if (isnan(output_max)) {
+  if (isnan(context->output_max)) {
     xnn_log_error(
       "failed to create %s operator with NaN output upper bound: upper bound must be non-NaN",
       xnn_operator_type_to_string(operator_type));
     goto error;
   }
 
-  const float rounded_output_min = variant->round_float_value(output_min);
-  const float rounded_output_max = variant->round_float_value(output_max);
+  const float rounded_output_min = variant->round_float_value(context->output_min);
+  const float rounded_output_max = variant->round_float_value(context->output_max);
   if (rounded_output_min > rounded_output_max) {
     xnn_log_error(
       "failed to create %s operator with [%.7g, %.7g] output range: lower bound must be less than or equal to upper bound",
@@ -654,12 +637,12 @@ static enum xnn_status create_convolution2d_nchw(
     goto error;
   }
 
-  if ((flags & XNN_FLAG_DEPTHWISE_CONVOLUTION) != 0 && group_input_channels != 1) {
+  if ((context->flags & XNN_FLAG_DEPTHWISE_CONVOLUTION) != 0 && context->group_input_channels != 1) {
     xnn_log_error(
         "failed to create depthwise %s operator with %zu input channels per "
         "group: depthwise convolution must have exactly 1 input channel per "
         "group",
-        xnn_operator_type_to_string(operator_type), group_input_channels);
+        xnn_operator_type_to_string(operator_type), context->group_input_channels);
     goto error;
   }
 
@@ -701,11 +684,11 @@ static enum xnn_status create_convolution2d_nchw(
   enum xnn_microkernel_type ukernel_type;
   const struct xnn_dwconv2d_chw_parameters* dwconv2d_parameters = NULL;
   status = select_convolution2d_ukernel(
-      &ukernel_type, &dwconv2d_parameters, input_padding_top,
-      input_padding_right, input_padding_bottom, input_padding_left,
-      kernel_height, kernel_width, subsampling_height, subsampling_width,
-      dilation_height, dilation_width, groups, group_input_channels,
-      group_output_channels, flags, dwconv2d_chw_config, operator_type);
+      &ukernel_type, &dwconv2d_parameters, context->input_padding_top,
+      context->input_padding_right, context->input_padding_bottom, context->input_padding_left,
+      context->kernel_height, context->kernel_width, context->subsampling_height, context->subsampling_width,
+      context->dilation_height, context->dilation_width, context->groups, context->group_input_channels,
+      context->group_output_channels, context->flags, dwconv2d_chw_config, operator_type);
   if (status != xnn_status_success) {
     goto error;
   }
@@ -736,7 +719,7 @@ static enum xnn_status create_convolution2d_nchw(
   }
 
   if (ukernel_type != xnn_microkernel_type_spmm) {
-    convolution_op->weights_cache = weights_cache;
+    convolution_op->weights_cache = context->weights_cache;
   }
 
   switch (ukernel_type) {
@@ -744,13 +727,12 @@ static enum xnn_status create_convolution2d_nchw(
       xnn_analyze_spmm_w_fn xnn_analyze_spmm;
       xnn_pack_spmm_w_fn xnn_pack_spmm;
       variant->init_spmm(&xnn_analyze_spmm, &xnn_pack_spmm, convolution_op,
-                        output_min, output_max, flags, spmm_config);
+                        context->output_min, context->output_max, context->flags, spmm_config);
 
       status = create_spmm_path(
-          kernel_height, kernel_width, groups, group_input_channels,
-          group_output_channels, kernel, bias, log2_filter_element_size,
+          context, log2_filter_element_size,
           xnn_analyze_spmm, xnn_pack_spmm, spmm_config, spmm2_config,
-          spmm4_config, operator_type, convolution_op);
+          spmm4_config, convolution_op);
       if (status != xnn_status_success) {
         goto error;
       }
@@ -760,18 +742,17 @@ static enum xnn_status create_convolution2d_nchw(
       xnn_pack_dconv_oki_w_fn xnn_pack_dconv_oki_w;
       const struct xnn_conv_hwc2chw_config* conv_hwc2chw_config;
       status = variant->init_conv_hwc2chw(
-          &xnn_pack_dconv_oki_w, &conv_hwc2chw_config, convolution_op, flags,
-          output_min, output_max, operator_type);
+          &xnn_pack_dconv_oki_w, &conv_hwc2chw_config, convolution_op, context->flags,
+          context->output_min, context->output_max, operator_type);
       if (status != xnn_status_success) {
         goto error;
       }
       status = create_conv2d_hwc2chw_path(
-          kernel_height, kernel_width, groups, group_input_channels,
-          group_output_channels, conv_hwc2chw_config->output_height_tile,
-          conv_hwc2chw_config->output_channel_tile, kernel, bias,
+          context, conv_hwc2chw_config->output_height_tile,
+          conv_hwc2chw_config->output_channel_tile,
           log2_filter_element_size, xnn_pack_dconv_oki_w,
-          conv_hwc2chw_config->ukernel_with_symm_padding, operator_type,
-          fingerprint_id, convolution_op);
+          conv_hwc2chw_config->ukernel_with_symm_padding,
+          convolution_op);
       if (status != xnn_status_success) {
         goto error;
       }
@@ -781,14 +762,12 @@ static enum xnn_status create_convolution2d_nchw(
       xnn_pack_chw_dwconv_hwg_w_fn pack_chw_dwconv_hwg_w;
       xnn_pack_chw_dwconv_ghw_w_fn pack_chw_dwconv_ghw_w;
       variant->init_dwconv(&pack_chw_dwconv_hwg_w, &pack_chw_dwconv_ghw_w,
-                          dwconv2d_parameters, convolution_op, flags,
-                          output_min, output_max);
-      status = create_dwconv_path(kernel_height, kernel_width, groups, kernel,
-                                  bias, flags, log2_filter_element_size,
+                          dwconv2d_parameters, convolution_op, context->flags,
+                          context->output_min, context->output_max);
+      status = create_dwconv_path(context, log2_filter_element_size,
                                   pack_chw_dwconv_hwg_w, pack_chw_dwconv_ghw_w,
                                   dwconv2d_parameters->output_width_tile,
-                                  dwconv2d_parameters->ukernel, operator_type,
-                                  fingerprint_id, convolution_op);
+                                  dwconv2d_parameters->ukernel, convolution_op);
       if (status != xnn_status_success) {
         goto error;
       }
@@ -798,26 +777,26 @@ static enum xnn_status create_convolution2d_nchw(
       XNN_UNREACHABLE;
   }
 
-  convolution_op->convolution_op->padding_top = input_padding_top;
-  convolution_op->convolution_op->padding_right = input_padding_right;
-  convolution_op->convolution_op->padding_bottom = input_padding_bottom;
-  convolution_op->convolution_op->padding_left = input_padding_left;
+  convolution_op->convolution_op->padding_top = context->input_padding_top;
+  convolution_op->convolution_op->padding_right = context->input_padding_right;
+  convolution_op->convolution_op->padding_bottom = context->input_padding_bottom;
+  convolution_op->convolution_op->padding_left = context->input_padding_left;
 
-  convolution_op->convolution_op->kernel_height = kernel_height;
-  convolution_op->convolution_op->kernel_width = kernel_width;
-  convolution_op->convolution_op->stride_height = subsampling_height;
-  convolution_op->convolution_op->stride_width = subsampling_width;
-  convolution_op->convolution_op->dilation_height = dilation_height;
-  convolution_op->convolution_op->dilation_width = dilation_width;
-  convolution_op->convolution_op->groups = groups;
-  convolution_op->convolution_op->group_input_channels = group_input_channels;
-  convolution_op->convolution_op->group_output_channels = group_output_channels;
-  convolution_op->input_pixel_stride = input_channel_stride;
-  convolution_op->output_pixel_stride = output_channel_stride;
+  convolution_op->convolution_op->kernel_height = context->kernel_height;
+  convolution_op->convolution_op->kernel_width = context->kernel_width;
+  convolution_op->convolution_op->stride_height = context->subsampling_height;
+  convolution_op->convolution_op->stride_width = context->subsampling_width;
+  convolution_op->convolution_op->dilation_height = context->dilation_height;
+  convolution_op->convolution_op->dilation_width = context->dilation_width;
+  convolution_op->convolution_op->groups = context->groups;
+  convolution_op->convolution_op->group_input_channels = context->group_input_channels;
+  convolution_op->convolution_op->group_output_channels = context->group_output_channels;
+  convolution_op->input_pixel_stride = context->input_channel_stride;
+  convolution_op->output_pixel_stride = context->output_channel_stride;
 
-  convolution_op->type = operator_type;
+  convolution_op->type = context->operator_type;
   convolution_op->ukernel.type = ukernel_type;
-  convolution_op->flags = flags;
+  convolution_op->flags = context->flags;
 
   convolution_op->state = xnn_run_state_invalid;
   *convolution_op_out = convolution_op;
@@ -828,26 +807,7 @@ error:
   return status;
 }
 
-struct fingerprint_parameters {
-  uint32_t kernel_width;
-  uint32_t kernel_height;
-  uint32_t dilation_height;
-  uint32_t dilation_width;
-  uint32_t subsampling_height;
-  uint32_t subsampling_width;
-  uint32_t input_padding_top;
-  uint32_t input_padding_left;
-  uint32_t input_padding_bottom;
-  uint32_t input_padding_right;
-  uint32_t groups;
-  uint32_t group_input_channels;
-  uint32_t group_output_channels;
-  uint32_t input_channel_stride;
-  uint32_t output_channel_stride;
-  uint32_t flags;
-};
-
-static const struct fingerprint_parameters
+static const struct convolution2d_nchw_context
     fingerprint_parameters_conv2d_hwc2chw = {
         .kernel_width = 3,
         .kernel_height = 3,
@@ -867,7 +827,7 @@ static const struct fingerprint_parameters
         .flags = XNN_FLAG_INPUT_NHWC,
 };
 
-static const struct fingerprint_parameters
+static const struct convolution2d_nchw_context
     fingerprint_parameters_conv2d_hwc2chw_fp32_static_weights = {
         .kernel_width = 3,
         .kernel_height = 3,
@@ -887,7 +847,7 @@ static const struct fingerprint_parameters
         .flags = XNN_FLAG_INPUT_NHWC | XNN_FLAG_FP32_STATIC_WEIGHTS,
 };
 
-static const struct fingerprint_parameters fingerprint_parameters_dwconv = {
+static const struct convolution2d_nchw_context fingerprint_parameters_dwconv = {
     .kernel_width = 3,
     .kernel_height = 3,
     .dilation_height = 1,
@@ -906,7 +866,7 @@ static const struct fingerprint_parameters fingerprint_parameters_dwconv = {
     .flags = 0,
 };
 
-static const struct fingerprint_parameters
+static const struct convolution2d_nchw_context
     fingerprint_parameters_dwconv_fp32_static_weights = {
         .kernel_width = 3,
         .kernel_height = 3,
@@ -942,7 +902,7 @@ static void* get_and_advance_simd_buffer(uint8_t** buffer, size_t bytes) {
 
 static struct fingerprint_buffers generate_fingerprint_data(
     const struct conv2d_variant* const variant,
-    const struct fingerprint_parameters* params) {
+    const struct convolution2d_nchw_context* params) {
   const size_t element_size = (params->flags & XNN_FLAG_FP32_STATIC_WEIGHTS)
                                   ? sizeof(float)
                                   : (1 << variant->log2_filter_element_size);
@@ -963,37 +923,43 @@ static struct fingerprint_buffers generate_fingerprint_data(
 
 enum xnn_status xnn_fingerprint_convolution2d_nchw(
     const enum xnn_fingerprint_id fingerprint_id) {
-  struct fingerprint_parameters params;
+  struct convolution2d_nchw_context params;
   const struct conv2d_variant* variant = NULL;
   switch (fingerprint_id) {
     case xnn_fingerprint_id_no_fingerprint:
       return xnn_status_success;
     case xnn_fingerprint_id_convolution2d_nchw_f16_f16_f16_conv2d_hwc2chw:
       params = fingerprint_parameters_conv2d_hwc2chw;
+      params.operator_type = xnn_operator_type_convolution_nchw_f16;
       variant = &f16_conv;
       break;
     case xnn_fingerprint_id_convolution2d_nchw_f32_f32_f32_conv2d_hwc2chw:
       params = fingerprint_parameters_conv2d_hwc2chw;
+      params.operator_type = xnn_operator_type_convolution_nchw_f32;
       variant = &f32_conv;
       break;
     case xnn_fingerprint_id_convolution2d_nchw_f16_f16_f16_conv2d_hwc2chw_fp32_static_weights:
       params = fingerprint_parameters_conv2d_hwc2chw_fp32_static_weights;
+      params.operator_type = xnn_operator_type_convolution_nchw_f16;
       variant = &f16_conv;
       break;
     case xnn_fingerprint_id_convolution2d_nchw_f16_f16_f16_dwconv:
       params = fingerprint_parameters_dwconv;
+      params.operator_type = xnn_operator_type_convolution_nchw_f16;
       variant = &f16_conv;
       break;
     case xnn_fingerprint_id_convolution2d_nchw_f32_f32_f32_dwconv:
       params = fingerprint_parameters_dwconv;
+      params.operator_type = xnn_operator_type_convolution_nchw_f32;
       variant = &f32_conv;
       break;
     case xnn_fingerprint_id_convolution2d_nchw_f16_f16_f16_dwconv_fp32_static_weights:
       params = fingerprint_parameters_dwconv_fp32_static_weights;
+      params.operator_type = xnn_operator_type_convolution_nchw_f16;
       variant = &f16_conv;
       break;
     default:
-      xnn_log_error("Unknown fingerprint ID for convolution 2D NHWC: %d.", fingerprint_id);
+      xnn_log_error("Unknown fingerprint ID for convolution 2D NCHW: %d.", fingerprint_id);
       return xnn_status_invalid_parameter;
   }
   struct fingerprint_context context =
@@ -1005,36 +971,23 @@ enum xnn_status xnn_fingerprint_convolution2d_nchw(
     return context.status;
   }
   const struct fingerprint_buffers data = generate_fingerprint_data(variant, &params);
-  enum xnn_status status = create_convolution2d_nchw(
-      variant, params.input_padding_top, params.input_padding_right,
-      params.input_padding_bottom, params.input_padding_left,
-      params.kernel_height, params.kernel_width, params.subsampling_height,
-      params.subsampling_width, params.dilation_height, params.dilation_width,
-      params.groups, params.group_input_channels, params.group_output_channels,
-      params.input_channel_stride, params.output_channel_stride, data.kernel,
-      data.bias, /*output_min=*/FLT_MIN, /*output_max=*/FLT_MAX, params.flags,
-      context.fingerprint_id, &context.cache, &context.op);
+
+  params.kernel = data.kernel;
+  params.bias = data.bias;
+  params.output_min = FLT_MIN;
+  params.output_max = FLT_MAX;
+  params.fingerprint_id = context.fingerprint_id;
+  params.weights_cache = &context.cache;
+
+  enum xnn_status status = create_convolution2d_nchw(variant, &params, &context.op);
   finalize_fingerprint_context(&context);
   xnn_release_simd_memory(data.data);
   return status;
 }
 
-static enum xnn_fingerprint_id get_fingerprint_for(
+static enum xnn_fingerprint_id get_fingerprint_id_for(
     const struct conv2d_variant* variant,
-    uint32_t input_padding_top,
-    uint32_t input_padding_right,
-    uint32_t input_padding_bottom,
-    uint32_t input_padding_left,
-    uint32_t kernel_height,
-    uint32_t kernel_width,
-    uint32_t subsampling_height,
-    uint32_t subsampling_width,
-    uint32_t dilation_height,
-    uint32_t dilation_width,
-    uint32_t groups,
-    size_t group_input_channels,
-    size_t group_output_channels,
-    uint32_t flags)
+    const struct convolution2d_nchw_context* context)
 {
   // Get the microkernel type.
   //
@@ -1045,17 +998,17 @@ static enum xnn_fingerprint_id get_fingerprint_for(
     struct xnn_dwconv2d_chw_config dummy_config = {};
     const struct xnn_dwconv2d_chw_parameters* dummy_parameters = NULL;
     select_convolution2d_ukernel(
-        &microkernel_type, &dummy_parameters, input_padding_top,
-        input_padding_right, input_padding_bottom, input_padding_left,
-        kernel_height, kernel_width, subsampling_height, subsampling_width,
-        dilation_height, dilation_width, groups, group_input_channels,
-        group_output_channels, flags, &dummy_config, variant->operator_type);
+        &microkernel_type, &dummy_parameters, context->input_padding_top,
+        context->input_padding_right, context->input_padding_bottom, context->input_padding_left,
+        context->kernel_height, context->kernel_width, context->subsampling_height, context->subsampling_width,
+        context->dilation_height, context->dilation_width, context->groups, context->group_input_channels,
+        context->group_output_channels, context->flags, &dummy_config, context->operator_type);
   }
 
   // Compute the index in a static map of cases.
   uint32_t index = 0;
   // Bit 2: operator type.
-  switch (variant->operator_type) {
+  switch (context->operator_type) {
     case xnn_operator_type_convolution_nchw_f16:
       index |= 0 << 2;
       break;
@@ -1063,7 +1016,7 @@ static enum xnn_fingerprint_id get_fingerprint_for(
       index |= 1 << 2;
       break;
     default:
-      xnn_log_error("Unknown operator type for convolution 2D NHWC: %d.", variant->operator_type);
+      xnn_log_error("Unknown operator type for convolution 2D NCHW: %d.", context->operator_type);
       return xnn_fingerprint_id_unknown;
   }
   // Bit 1: microkernel type.
@@ -1077,11 +1030,11 @@ static enum xnn_fingerprint_id get_fingerprint_for(
     case xnn_microkernel_type_spmm:
       return xnn_fingerprint_id_no_fingerprint;
     default:
-      xnn_log_error("Unknown microkernel type for convolution 2D NHWC: %d.", microkernel_type);
+      xnn_log_error("Unknown microkernel type for convolution 2D NCHW: %d.", microkernel_type);
       return xnn_fingerprint_id_unknown;
   }
   // Bit 0: are the weights provided as f32 for an f16 operator?
-  if (flags & XNN_FLAG_FP32_STATIC_WEIGHTS) {
+  if (context->flags & XNN_FLAG_FP32_STATIC_WEIGHTS) {
     index |= 1 << 0;
   }
 
@@ -1123,24 +1076,37 @@ enum xnn_status xnn_create_convolution2d_nchw_f16(
     xnn_weights_cache_t weights_cache,
     xnn_operator_t* convolution_op_out)
 {
-  const enum xnn_fingerprint_id fingerprint_id = get_fingerprint_for(
-      &f16_conv, input_padding_top, input_padding_right, input_padding_bottom,
-      input_padding_left, kernel_height, kernel_width, subsampling_height,
-      subsampling_width, dilation_height, dilation_width, groups,
-      group_input_channels, group_output_channels, flags);
-  enum xnn_status status = xnn_fingerprint_convolution2d_nchw(fingerprint_id);
+  struct convolution2d_nchw_context context = {
+    .input_padding_top = input_padding_top,
+    .input_padding_right = input_padding_right,
+    .input_padding_bottom = input_padding_bottom,
+    .input_padding_left = input_padding_left,
+    .kernel_height = kernel_height,
+    .kernel_width = kernel_width,
+    .subsampling_height = subsampling_height,
+    .subsampling_width = subsampling_width,
+    .dilation_height = dilation_height,
+    .dilation_width = dilation_width,
+    .groups = groups,
+    .group_input_channels = group_input_channels,
+    .group_output_channels = group_output_channels,
+    .input_channel_stride = input_channel_stride,
+    .output_channel_stride = output_channel_stride,
+    .kernel = kernel,
+    .bias = bias,
+    .output_min = output_min,
+    .output_max = output_max,
+    .flags = flags,
+    .weights_cache = weights_cache,
+    .operator_type = xnn_operator_type_convolution_nchw_f16,
+  };
+  context.fingerprint_id = get_fingerprint_id_for(&f16_conv, &context);
+  enum xnn_status status = xnn_fingerprint_convolution2d_nchw(context.fingerprint_id);
   if (status != xnn_status_success) {
-    xnn_log_error("Failed fingerprinting %s.", xnn_operator_type_to_string(f16_conv.operator_type));
+    xnn_log_error("Failed fingerprinting %s.", xnn_operator_type_to_string(context.operator_type));
     return status;
   }
-
-  return create_convolution2d_nchw(
-      &f16_conv, input_padding_top, input_padding_right, input_padding_bottom,
-      input_padding_left, kernel_height, kernel_width, subsampling_height,
-      subsampling_width, dilation_height, dilation_width, groups,
-      group_input_channels, group_output_channels, input_channel_stride,
-      output_channel_stride, kernel, bias, output_min, output_max, flags,
-      fingerprint_id, weights_cache, convolution_op_out);
+  return create_convolution2d_nchw(&f16_conv, &context, convolution_op_out);
 }
 
 enum xnn_status xnn_create_convolution2d_nchw_f32(
@@ -1167,23 +1133,37 @@ enum xnn_status xnn_create_convolution2d_nchw_f32(
     xnn_weights_cache_t weights_cache,
     xnn_operator_t* convolution_op_out)
 {
-  const enum xnn_fingerprint_id fingerprint_id = get_fingerprint_for(
-      &f32_conv, input_padding_top, input_padding_right, input_padding_bottom,
-      input_padding_left, kernel_height, kernel_width, subsampling_height,
-      subsampling_width, dilation_height, dilation_width, groups,
-      group_input_channels, group_output_channels, flags);
-  enum xnn_status status = xnn_fingerprint_convolution2d_nchw(fingerprint_id);
+  struct convolution2d_nchw_context context = {
+    .input_padding_top = input_padding_top,
+    .input_padding_right = input_padding_right,
+    .input_padding_bottom = input_padding_bottom,
+    .input_padding_left = input_padding_left,
+    .kernel_height = kernel_height,
+    .kernel_width = kernel_width,
+    .subsampling_height = subsampling_height,
+    .subsampling_width = subsampling_width,
+    .dilation_height = dilation_height,
+    .dilation_width = dilation_width,
+    .groups = groups,
+    .group_input_channels = group_input_channels,
+    .group_output_channels = group_output_channels,
+    .input_channel_stride = input_channel_stride,
+    .output_channel_stride = output_channel_stride,
+    .kernel = kernel,
+    .bias = bias,
+    .output_min = output_min,
+    .output_max = output_max,
+    .flags = flags,
+    .weights_cache = weights_cache,
+    .operator_type = xnn_operator_type_convolution_nchw_f32,
+  };
+  context.fingerprint_id = get_fingerprint_id_for(&f32_conv, &context);
+  enum xnn_status status = xnn_fingerprint_convolution2d_nchw(context.fingerprint_id);
   if (status != xnn_status_success) {
-    xnn_log_error("Failed fingerprinting %s.", xnn_operator_type_to_string(f32_conv.operator_type));
+    xnn_log_error("Failed fingerprinting %s.", xnn_operator_type_to_string(context.operator_type));
     return status;
   }
-  return create_convolution2d_nchw(
-      &f32_conv, input_padding_top, input_padding_right, input_padding_bottom,
-      input_padding_left, kernel_height, kernel_width, subsampling_height,
-      subsampling_width, dilation_height, dilation_width, groups,
-      group_input_channels, group_output_channels, input_channel_stride,
-      output_channel_stride, kernel, bias, output_min, output_max, flags,
-      fingerprint_id, weights_cache, convolution_op_out);
+  return create_convolution2d_nchw(&f32_conv, &context, convolution_op_out);
 }
 
 enum xnn_status xnn_create_convolution2d_nchw_f32_f16(
@@ -1218,14 +1198,37 @@ enum xnn_status xnn_create_convolution2d_nchw_f32_f16(
     bias = fp32_bias_buffer;
   }
 
-  // Delegate creation to the `f32` operator.
-  enum xnn_status status = xnn_create_convolution2d_nchw_f32(
-      input_padding_top, input_padding_right, input_padding_bottom,
-      input_padding_left, kernel_height, kernel_width, subsampling_height,
-      subsampling_width, dilation_height, dilation_width, groups,
-      group_input_channels, group_output_channels, input_channel_stride,
-      output_channel_stride, fp32_kernel_buffer, bias, output_min, output_max,
-      flags, weights_cache, convolution_op_out);
+  struct convolution2d_nchw_context context = {
+    .input_padding_top = input_padding_top,
+    .input_padding_right = input_padding_right,
+    .input_padding_bottom = input_padding_bottom,
+    .input_padding_left = input_padding_left,
+    .kernel_height = kernel_height,
+    .kernel_width = kernel_width,
+    .subsampling_height = subsampling_height,
+    .subsampling_width = subsampling_width,
+    .dilation_height = dilation_height,
+    .dilation_width = dilation_width,
+    .groups = groups,
+    .group_input_channels = group_input_channels,
+    .group_output_channels = group_output_channels,
+    .input_channel_stride = input_channel_stride,
+    .output_channel_stride = output_channel_stride,
+    .kernel = fp32_kernel_buffer,
+    .bias = bias,
+    .output_min = output_min,
+    .output_max = output_max,
+    .flags = flags,
+    .weights_cache = weights_cache,
+    .operator_type = xnn_operator_type_convolution_nchw_f32,
+  };
+  context.fingerprint_id = get_fingerprint_id_for(&f32_conv, &context);
+  enum xnn_status status = xnn_fingerprint_convolution2d_nchw(context.fingerprint_id);
+  if (status != xnn_status_success) {
+    xnn_log_error("Failed fingerprinting %s.", xnn_operator_type_to_string(context.operator_type));
+    return status;
+  }
+  status = create_convolution2d_nchw(&f32_conv, &context, convolution_op_out);
 
   // Release temporary `f32` buffers.
   xnn_release_memory(fp32_kernel_buffer);
