@@ -33,6 +33,12 @@ __arm_new("za") __arm_locally_streaming void sme2_dot_opt(
   assert(K3 > 0);
   assert(K2 > 0);
   assert(K1 > 0);
+
+  A = __builtin_assume_aligned(A, 64);
+  B = __builtin_assume_aligned(B, 64);
+  if (C_in) C_in = __builtin_assume_aligned(C_in, 64);
+  C_out = __builtin_assume_aligned(C_out, 64);
+
   const size_t svl_tc = svcnt(TC{});
   assert(M <= svl_tc);
 
@@ -80,55 +86,55 @@ __arm_new("za") __arm_locally_streaming void sme2_dot_opt(
 
         if (a_is_packed) {
             // Unrolled K-loop (4x unroll) for packed A with better interleaving
-            while (k1 >= (ptrdiff_t)(4 * dot_factor)) {
-                // Load 4 slices of A
-                auto a = svld1_x4_impl(n_count_all, reinterpret_cast<const TAB*>(A_k1));
+            if (k1 >= (ptrdiff_t)(4 * dot_factor)) {
+                // Initial preload for pipelining
+                auto b0 = svld1_x4_impl(n_count_all, reinterpret_cast<const TAB*>(B_k1));
+                auto b1 = svld1_x4_impl(n_count_all, reinterpret_cast<const TAB*>(offset_bytes(B_k1, B_stride_k1 * dot_factor)));
+                auto b2 = svld1_x4_impl(n_count_all, reinterpret_cast<const TAB*>(offset_bytes(B_k1, B_stride_k1 * dot_factor * 2)));
+                auto b3 = svld1_x4_impl(n_count_all, reinterpret_cast<const TAB*>(offset_bytes(B_k1, B_stride_k1 * dot_factor * 3)));
                 
-                // Pre-calculate B pointers
-                const void* B_k1_0 = B_k1;
-                const void* B_k1_1 = offset_bytes(B_k1, B_stride_k1 * dot_factor);
-                const void* B_k1_2 = offset_bytes(B_k1_1, B_stride_k1 * dot_factor);
-                const void* B_k1_3 = offset_bytes(B_k1_2, B_stride_k1 * dot_factor);
+                while (k1 >= (ptrdiff_t)(4 * dot_factor)) {
+                    // Load 4 slices of A (Current iteration)
+                    auto a = svld1_x4_impl(n_count_all, reinterpret_cast<const TAB*>(A_k1));
+                    
+                    // Update pointers for NEXT iteration
+                    const void* B_next = offset_bytes(B_k1, B_stride_k1 * dot_factor * 4);
+                    k1 -= 4 * dot_factor;
+                    A_k1 = offset_bytes(A_k1, 4 * A_stride_m);
+                    B_k1 = B_next;
 
-                // Interleaved Loads and MOPAs
-                // Load B0
-                auto b0 = svld1_x4_impl(n_count_all, reinterpret_cast<const TAB*>(B_k1_0));
-                // Load B1
-                auto b1 = svld1_x4_impl(n_count_all, reinterpret_cast<const TAB*>(B_k1_1));
-                
-                // MOPA 0
-                svmopa<0>(m_mask, n_mask_all, svget4(a, 0), svget4(b0, 0));
-                svmopa<1>(m_mask, n_mask_all, svget4(a, 0), svget4(b0, 1));
-                svmopa<2>(m_mask, n_mask_all, svget4(a, 0), svget4(b0, 2));
-                svmopa<3>(m_mask, n_mask_all, svget4(a, 0), svget4(b0, 3));
+                    // Interleaved MOPAs (Current iteration data)
+                    svmopa<0>(m_mask, n_mask_all, svget4(a, 0), svget4(b0, 0));
+                    svmopa<1>(m_mask, n_mask_all, svget4(a, 1), svget4(b1, 0));
+                    svmopa<2>(m_mask, n_mask_all, svget4(a, 2), svget4(b2, 0));
+                    svmopa<3>(m_mask, n_mask_all, svget4(a, 3), svget4(b3, 0));
 
-                // Load B2
-                auto b2 = svld1_x4_impl(n_count_all, reinterpret_cast<const TAB*>(B_k1_2));
+                    if (k1 >= (ptrdiff_t)(4 * dot_factor)) {
+                        // Start loading NEXT iteration's B while computing current MOPAs
+                        b0 = svld1_x4_impl(n_count_all, reinterpret_cast<const TAB*>(B_next));
+                        b1 = svld1_x4_impl(n_count_all, reinterpret_cast<const TAB*>(offset_bytes(B_next, B_stride_k1 * dot_factor)));
+                    }
 
-                // MOPA 1
-                svmopa<0>(m_mask, n_mask_all, svget4(a, 1), svget4(b1, 0));
-                svmopa<1>(m_mask, n_mask_all, svget4(a, 1), svget4(b1, 1));
-                svmopa<2>(m_mask, n_mask_all, svget4(a, 1), svget4(b1, 2));
-                svmopa<3>(m_mask, n_mask_all, svget4(a, 1), svget4(b1, 3));
+                    svmopa<0>(m_mask, n_mask_all, svget4(a, 0), svget4(b0, 1));
+                    svmopa<1>(m_mask, n_mask_all, svget4(a, 1), svget4(b1, 1));
+                    svmopa<2>(m_mask, n_mask_all, svget4(a, 2), svget4(b2, 1));
+                    svmopa<3>(m_mask, n_mask_all, svget4(a, 3), svget4(b3, 1));
 
-                // Load B3
-                auto b3 = svld1_x4_impl(n_count_all, reinterpret_cast<const TAB*>(B_k1_3));
+                    if (k1 >= (ptrdiff_t)(4 * dot_factor)) {
+                        b2 = svld1_x4_impl(n_count_all, reinterpret_cast<const TAB*>(offset_bytes(B_next, B_stride_k1 * dot_factor * 2)));
+                        b3 = svld1_x4_impl(n_count_all, reinterpret_cast<const TAB*>(offset_bytes(B_next, B_stride_k1 * dot_factor * 3)));
+                    }
 
-                // MOPA 2
-                svmopa<0>(m_mask, n_mask_all, svget4(a, 2), svget4(b2, 0));
-                svmopa<1>(m_mask, n_mask_all, svget4(a, 2), svget4(b2, 1));
-                svmopa<2>(m_mask, n_mask_all, svget4(a, 2), svget4(b2, 2));
-                svmopa<3>(m_mask, n_mask_all, svget4(a, 2), svget4(b2, 3));
+                    svmopa<0>(m_mask, n_mask_all, svget4(a, 0), svget4(b0, 2));
+                    svmopa<1>(m_mask, n_mask_all, svget4(a, 1), svget4(b1, 2));
+                    svmopa<2>(m_mask, n_mask_all, svget4(a, 2), svget4(b2, 2));
+                    svmopa<3>(m_mask, n_mask_all, svget4(a, 3), svget4(b3, 2));
 
-                // MOPA 3
-                svmopa<0>(m_mask, n_mask_all, svget4(a, 3), svget4(b3, 0));
-                svmopa<1>(m_mask, n_mask_all, svget4(a, 3), svget4(b3, 1));
-                svmopa<2>(m_mask, n_mask_all, svget4(a, 3), svget4(b3, 2));
-                svmopa<3>(m_mask, n_mask_all, svget4(a, 3), svget4(b3, 3));
-
-                k1 -= 4 * dot_factor;
-                B_k1 = offset_bytes(B_k1_3, B_stride_k1 * dot_factor);
-                A_k1 = offset_bytes(A_k1, 4 * A_stride_m);
+                    svmopa<0>(m_mask, n_mask_all, svget4(a, 0), svget4(b0, 3));
+                    svmopa<1>(m_mask, n_mask_all, svget4(a, 1), svget4(b1, 3));
+                    svmopa<2>(m_mask, n_mask_all, svget4(a, 2), svget4(b2, 3));
+                    svmopa<3>(m_mask, n_mask_all, svget4(a, 3), svget4(b3, 3));
+                }
             }
         } else {
             // Unrolled K-loop (4x unroll) for non-packed A
@@ -227,13 +233,17 @@ __arm_new("za") __arm_locally_streaming void sme2_dot_opt(
     svbool_t n_mask_c2 = svwhilelt(2 * svl_tc, (uint32_t)n_total, TC{});
     svbool_t n_mask_c3 = svwhilelt(3 * svl_tc, (uint32_t)n_total, TC{});
 
+    const bool do_tile_c1 = svany(n_mask_c1);
+    const bool do_tile_c2 = svany(n_mask_c2);
+    const bool do_tile_c3 = svany(n_mask_c3);
+
     if (C_in) {
       for (size_t m = 0; m < M; ++m) {
         const void* C_in_m = offset_bytes(C_in, m * C_in_stride_m);
         svld1_hor_za32(0, m, svpsel_lane_b32(n_mask_c0, m_mask_c, m), offset_bytes(C_in_m, 0 * svl_tc * sizeof(TC)));
-        svld1_hor_za32(1, m, svpsel_lane_b32(n_mask_c1, m_mask_c, m), offset_bytes(C_in_m, 1 * svl_tc * sizeof(TC)));
-        svld1_hor_za32(2, m, svpsel_lane_b32(n_mask_c2, m_mask_c, m), offset_bytes(C_in_m, 2 * svl_tc * sizeof(TC)));
-        svld1_hor_za32(3, m, svpsel_lane_b32(n_mask_c3, m_mask_c, m), offset_bytes(C_in_m, 3 * svl_tc * sizeof(TC)));
+        if (do_tile_c1) svld1_hor_za32(1, m, svpsel_lane_b32(n_mask_c1, m_mask_c, m), offset_bytes(C_in_m, 1 * svl_tc * sizeof(TC)));
+        if (do_tile_c2) svld1_hor_za32(2, m, svpsel_lane_b32(n_mask_c2, m_mask_c, m), offset_bytes(C_in_m, 2 * svl_tc * sizeof(TC)));
+        if (do_tile_c3) svld1_hor_za32(3, m, svpsel_lane_b32(n_mask_c3, m_mask_c, m), offset_bytes(C_in_m, 3 * svl_tc * sizeof(TC)));
       }
     } else {
       svzero_za();
@@ -242,6 +252,9 @@ __arm_new("za") __arm_locally_streaming void sme2_dot_opt(
     const void* B_k3 = B;
     const void* A_k3 = A;
     size_t k3 = K3;
+    const bool do_tile1 = svany(n_mask1);
+    const bool do_tile2 = svany(n_mask2);
+    const bool do_tile3 = svany(n_mask3);
     do {
       const void* B_k2 = B_k3;
       const void* A_k2 = A_k3;
@@ -254,9 +267,9 @@ __arm_new("za") __arm_locally_streaming void sme2_dot_opt(
           auto a = svld1(m_mask, reinterpret_cast<const TAB*>(A_k1));
           
           svmopa<0>(m_mask, n_mask0, a, svld1(n_mask0, reinterpret_cast<const TAB*>(B_k1)));
-          svmopa<1>(m_mask, n_mask1, a, svld1(n_mask1, reinterpret_cast<const TAB*>(offset_bytes(B_k1, 1 * svl_tc * sizeof(TC)))));
-          svmopa<2>(m_mask, n_mask2, a, svld1(n_mask2, reinterpret_cast<const TAB*>(offset_bytes(B_k1, 2 * svl_tc * sizeof(TC)))));
-          svmopa<3>(m_mask, n_mask3, a, svld1(n_mask3, reinterpret_cast<const TAB*>(offset_bytes(B_k1, 3 * svl_tc * sizeof(TC)))));
+          if (do_tile1) svmopa<1>(m_mask, n_mask1, a, svld1(n_mask1, reinterpret_cast<const TAB*>(offset_bytes(B_k1, 1 * svl_tc * sizeof(TC)))));
+          if (do_tile2) svmopa<2>(m_mask, n_mask2, a, svld1(n_mask2, reinterpret_cast<const TAB*>(offset_bytes(B_k1, 2 * svl_tc * sizeof(TC)))));
+          if (do_tile3) svmopa<3>(m_mask, n_mask3, a, svld1(n_mask3, reinterpret_cast<const TAB*>(offset_bytes(B_k1, 3 * svl_tc * sizeof(TC)))));
 
           k1 -= dot_factor;
           B_k1 = offset_bytes(B_k1, B_stride_k1 * dot_factor);
@@ -274,9 +287,9 @@ __arm_new("za") __arm_locally_streaming void sme2_dot_opt(
     for (size_t m = 0; m < M; ++m) {
       void* C_out_m = offset_bytes(C_out, m * C_out_stride_m);
       svst1_hor_za32(0, m, svpsel_lane_b32(n_mask_c0, m_mask_c, m), offset_bytes(C_out_m, 0 * svl_tc * sizeof(TC)));
-      svst1_hor_za32(1, m, svpsel_lane_b32(n_mask_c1, m_mask_c, m), offset_bytes(C_out_m, 1 * svl_tc * sizeof(TC)));
-      svst1_hor_za32(2, m, svpsel_lane_b32(n_mask_c2, m_mask_c, m), offset_bytes(C_out_m, 2 * svl_tc * sizeof(TC)));
-      svst1_hor_za32(3, m, svpsel_lane_b32(n_mask_c3, m_mask_c, m), offset_bytes(C_out_m, 3 * svl_tc * sizeof(TC)));
+      if (do_tile_c1) svst1_hor_za32(1, m, svpsel_lane_b32(n_mask_c1, m_mask_c, m), offset_bytes(C_out_m, 1 * svl_tc * sizeof(TC)));
+      if (do_tile_c2) svst1_hor_za32(2, m, svpsel_lane_b32(n_mask_c2, m_mask_c, m), offset_bytes(C_out_m, 2 * svl_tc * sizeof(TC)));
+      if (do_tile_c3) svst1_hor_za32(3, m, svpsel_lane_b32(n_mask_c3, m_mask_c, m), offset_bytes(C_out_m, 3 * svl_tc * sizeof(TC)));
     }
     
     C_in = C_in ? offset_bytes(C_in, svl_tc * sizeof(TC) * 4) : nullptr;

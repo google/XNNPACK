@@ -82,6 +82,26 @@ YNN_ALWAYS_INLINE svbool_t svptrue(int8_t) YNN_SME_HELPER {
   return svptrue_b8();
 }
 
+YNN_ALWAYS_INLINE bool svany(svbool_t p) YNN_SME_HELPER {
+  return svptest_any(svptrue_b8(), p);
+}
+
+YNN_ALWAYS_INLINE void svprefetch(const float* ptr) YNN_SME_HELPER {
+  svprfw(svptrue_b32(), ptr, SV_PLDL1KEEP);
+}
+YNN_ALWAYS_INLINE void svprefetch(const int32_t* ptr) YNN_SME_HELPER {
+  svprfw(svptrue_b32(), ptr, SV_PLDL1KEEP);
+}
+YNN_ALWAYS_INLINE void svprefetch(const bfloat16_t* ptr) YNN_SME_HELPER {
+  svprfh(svptrue_b16(), ptr, SV_PLDL1KEEP);
+}
+YNN_ALWAYS_INLINE void svprefetch(const float16_t* ptr) YNN_SME_HELPER {
+  svprfh(svptrue_b16(), ptr, SV_PLDL1KEEP);
+}
+YNN_ALWAYS_INLINE void svprefetch(const int8_t* ptr) YNN_SME_HELPER {
+  svprfb(svptrue_b8(), ptr, SV_PLDL1KEEP);
+}
+
 YNN_ALWAYS_INLINE svcount_t svctrue(float) YNN_SME_HELPER {
   return svptrue_c32();
 }
