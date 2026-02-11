@@ -11,46 +11,49 @@
 #include <array>
 #include <cassert>
 #include <cstddef>
+#include <tuple>
 #include <type_traits>
 
 #include "ynnpack/base/arithmetic.h"
 
 namespace ynn {
 
-static std::array<__m128i, 2> interleave(std::integral_constant<size_t, 64>,
-                                         std::array<__m128i, 2> x) {
-  return {_mm_unpacklo_epi64(x[0], x[1]), _mm_unpackhi_epi64(x[0], x[1])};
+using row = __m128i;
+
+static std::tuple<row, row> interleave(std::integral_constant<size_t, 64>,
+                                       row x0, row x1) {
+  return {_mm_unpacklo_epi64(x0, x1), _mm_unpackhi_epi64(x0, x1)};
 }
-static std::array<__m128i, 2> interleave(std::integral_constant<size_t, 32>,
-                                         std::array<__m128i, 2> x) {
-  return {_mm_unpacklo_epi32(x[0], x[1]), _mm_unpackhi_epi32(x[0], x[1])};
+static std::tuple<row, row> interleave(std::integral_constant<size_t, 32>,
+                                       row x0, row x1) {
+  return {_mm_unpacklo_epi32(x0, x1), _mm_unpackhi_epi32(x0, x1)};
 }
-static std::array<__m128i, 2> interleave(std::integral_constant<size_t, 16>,
-                                         std::array<__m128i, 2> x) {
-  return {_mm_unpacklo_epi16(x[0], x[1]), _mm_unpackhi_epi16(x[0], x[1])};
+static std::tuple<row, row> interleave(std::integral_constant<size_t, 16>,
+                                       row x0, row x1) {
+  return {_mm_unpacklo_epi16(x0, x1), _mm_unpackhi_epi16(x0, x1)};
 }
-static std::array<__m128i, 2> interleave(std::integral_constant<size_t, 8>,
-                                         std::array<__m128i, 2> x) {
-  return {_mm_unpacklo_epi8(x[0], x[1]), _mm_unpackhi_epi8(x[0], x[1])};
+static std::tuple<row, row> interleave(std::integral_constant<size_t, 8>,
+                                       row x0, row x1) {
+  return {_mm_unpacklo_epi8(x0, x1), _mm_unpackhi_epi8(x0, x1)};
 }
-static std::array<__m128i, 2> interleave(std::integral_constant<size_t, 4>,
-                                         std::array<__m128i, 2> x) {
-  __m128i even0 = _mm_and_si128(x[0], _mm_set1_epi8(0x0f));
-  __m128i even1 = _mm_and_si128(x[1], _mm_set1_epi8(0x0f));
-  __m128i odd0 = _mm_and_si128(x[0], _mm_set1_epi8(0xf0));
-  __m128i odd1 = _mm_and_si128(x[1], _mm_set1_epi8(0xf0));
+static std::tuple<row, row> interleave(std::integral_constant<size_t, 4>,
+                                       row x0, row x1) {
+  __m128i even0 = _mm_and_si128(x0, _mm_set1_epi8(0x0f));
+  __m128i even1 = _mm_and_si128(x1, _mm_set1_epi8(0x0f));
+  __m128i odd0 = _mm_and_si128(x0, _mm_set1_epi8(0xf0));
+  __m128i odd1 = _mm_and_si128(x1, _mm_set1_epi8(0xf0));
   return interleave(std::integral_constant<size_t, 8>{},
-                    {_mm_or_si128(_mm_slli_epi16(even1, 4), even0),
-                     _mm_or_si128(odd1, _mm_srli_epi16(odd0, 4))});
+                    _mm_or_si128(_mm_slli_epi16(even1, 4), even0),
+                    _mm_or_si128(odd1, _mm_srli_epi16(odd0, 4)));
 }
 
 template <size_t M>
-static std::array<__m128i, M> load(
-    std::array<__m128i, M>, const void* a, size_t stride, size_t m,
+static std::array<row, M> load(
+    std::array<row, M>, const void* a, size_t stride, size_t m,
     std::integral_constant<size_t, 16> /*n_bytes*/) {
   assert(m > 0);
   assert(m <= M);
-  std::array<__m128i, M> x;
+  std::array<row, M> x;
   x[0] = _mm_loadu_si128(reinterpret_cast<const __m128i*>(a));
   for (size_t i = 1; i < M; ++i) {
     x[i] = i < m ? _mm_loadu_si128(reinterpret_cast<const __m128i*>(
@@ -61,7 +64,7 @@ static std::array<__m128i, M> load(
 }
 
 template <size_t M>
-static void store(std::array<__m128i, M> x, void* a, size_t stride, size_t m,
+static void store(std::array<row, M> x, void* a, size_t stride, size_t m,
                   std::integral_constant<size_t, 16> /*n_bytes*/) {
   assert(m > 0);
   assert(m <= M);

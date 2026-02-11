@@ -77,152 +77,143 @@ static void transpose(size_t m, size_t n, size_t n_bytes_a, size_t stride_a,
 // `stride` bytes apart in memory.
 
 template <typename T, size_t ElemSize>
-static std::array<T, 4> interleave(
-    std::integral_constant<size_t, ElemSize> elem_size, std::array<T, 4> x) {
-  std::integral_constant<size_t, ElemSize * 2> elem_size_x2;
-  using t2x2 = std::array<T, 2>;
-
-  // Transpose 2x2
-  t2x2 x2[] = {
-      interleave(elem_size, t2x2{{x[0], x[1]}}),
-      interleave(elem_size, t2x2{{x[2], x[3]}}),
-  };
-
-  // Transpose 2x2 of 2x2
-  t2x2 x4[] = {
-      interleave(elem_size_x2, t2x2{{x2[0][0], x2[1][0]}}),
-      interleave(elem_size_x2, t2x2{{x2[0][1], x2[1][1]}}),
-  };
-
-  return {x4[0][0], x4[0][1], x4[1][0], x4[1][1]};
+static void interleave_in_place(
+    std::integral_constant<size_t, ElemSize> elem_size, std::array<T, 2>& x) {
+  std::tie(x[0], x[1]) = interleave(elem_size, x[0], x[1]);
 }
 
 template <typename T, size_t ElemSize>
-static std::array<T, 8> interleave(
-    std::integral_constant<size_t, ElemSize> elem_size, std::array<T, 8> x) {
+static void interleave_in_place(
+    std::integral_constant<size_t, ElemSize> elem_size, std::array<T, 4>& x) {
+  std::integral_constant<size_t, ElemSize * 2> elem_size_x2;
+
+  // Transpose 2x2
+  T x0, x1, x2, x3;
+  std::tie(x0, x2) = interleave(elem_size, x[0], x[1]);
+  std::tie(x1, x3) = interleave(elem_size, x[2], x[3]);
+
+  // Transpose 2x2 of 2x2
+  std::tie(x[0], x[1]) = interleave(elem_size_x2, x0, x1);
+  std::tie(x[2], x[3]) = interleave(elem_size_x2, x2, x3);
+}
+
+// We need an out-of-place helper for 4-way interleaves.
+template <typename T, size_t ElemSize>
+static std::tuple<T, T, T, T> interleave(
+    std::integral_constant<size_t, ElemSize> elem_size, T x0, T x1, T x2,
+    T x3) {
+  std::array<T, 4> x = {x0, x1, x2, x3};
+  interleave_in_place(elem_size, x);
+  return {x[0], x[1], x[2], x[3]};
+}
+
+template <typename T, size_t ElemSize>
+static void interleave_in_place(
+    std::integral_constant<size_t, ElemSize> elem_size, std::array<T, 8>& x) {
   std::integral_constant<size_t, ElemSize * 4> elem_size_x4;
-  using t2x2 = std::array<T, 2>;
-  using t4x4 = std::array<T, 4>;
+  using t4x4 = std::tuple<T, T, T, T>;
+
+  using std::get;
 
   // Transpose 4x4
   t4x4 x4[] = {
-      interleave(elem_size, t4x4{{x[0], x[1], x[2], x[3]}}),
-      interleave(elem_size, t4x4{{x[4], x[5], x[6], x[7]}}),
+      interleave(elem_size, x[0], x[1], x[2], x[3]),
+      interleave(elem_size, x[4], x[5], x[6], x[7]),
   };
 
   // Transpose 2x2 of 4x4
-  auto x04 = interleave(elem_size_x4, t2x2{{x4[0][0], x4[1][0]}});
-  auto x15 = interleave(elem_size_x4, t2x2{{x4[0][1], x4[1][1]}});
-  auto x26 = interleave(elem_size_x4, t2x2{{x4[0][2], x4[1][2]}});
-  auto x37 = interleave(elem_size_x4, t2x2{{x4[0][3], x4[1][3]}});
-
-  return {x04[0], x04[1], x15[0], x15[1], x26[0], x26[1], x37[0], x37[1]};
+  std::tie(x[0], x[1]) = interleave(elem_size_x4, get<0>(x4[0]), get<0>(x4[1]));
+  std::tie(x[2], x[3]) = interleave(elem_size_x4, get<1>(x4[0]), get<1>(x4[1]));
+  std::tie(x[4], x[5]) = interleave(elem_size_x4, get<2>(x4[0]), get<2>(x4[1]));
+  std::tie(x[6], x[7]) = interleave(elem_size_x4, get<3>(x4[0]), get<3>(x4[1]));
 }
 
 template <typename T, size_t ElemSize>
-static std::array<T, 16> interleave(
-    std::integral_constant<size_t, ElemSize> elem_size, std::array<T, 16> x) {
+static void interleave_in_place(
+    std::integral_constant<size_t, ElemSize> elem_size, std::array<T, 16>& x) {
   std::integral_constant<size_t, ElemSize * 4> elem_size_x4;
-  using t4x4 = std::array<T, 4>;
+  using t4x4 = std::tuple<T, T, T, T>;
+
+  using std::get;
 
   // Transpose 4x4
   t4x4 x4[] = {
-      interleave(elem_size, t4x4{{x[0], x[1], x[2], x[3]}}),
-      interleave(elem_size, t4x4{{x[4], x[5], x[6], x[7]}}),
-      interleave(elem_size, t4x4{{x[8], x[9], x[10], x[11]}}),
-      interleave(elem_size, t4x4{{x[12], x[13], x[14], x[15]}}),
+      interleave(elem_size, x[0], x[1], x[2], x[3]),
+      interleave(elem_size, x[4], x[5], x[6], x[7]),
+      interleave(elem_size, x[8], x[9], x[10], x[11]),
+      interleave(elem_size, x[12], x[13], x[14], x[15]),
   };
 
   // Transpose 4x4 of 4x4
-  t4x4 x16[] = {
-      interleave(elem_size_x4, t4x4{{x4[0][0], x4[1][0], x4[2][0], x4[3][0]}}),
-      interleave(elem_size_x4, t4x4{{x4[0][1], x4[1][1], x4[2][1], x4[3][1]}}),
-      interleave(elem_size_x4, t4x4{{x4[0][2], x4[1][2], x4[2][2], x4[3][2]}}),
-      interleave(elem_size_x4, t4x4{{x4[0][3], x4[1][3], x4[2][3], x4[3][3]}}),
-  };
-
-  return {
-      // clang-format off
-      x16[0][0], x16[0][1], x16[0][2], x16[0][3],
-      x16[1][0], x16[1][1], x16[1][2], x16[1][3],
-      x16[2][0], x16[2][1], x16[2][2], x16[2][3],
-      x16[3][0], x16[3][1], x16[3][2], x16[3][3],
-      // clang-format on
-  };
+  std::tie(x[0], x[1], x[2], x[3]) = interleave(
+      elem_size_x4, get<0>(x4[0]), get<0>(x4[1]), get<0>(x4[2]), get<0>(x4[3]));
+  std::tie(x[4], x[5], x[6], x[7]) = interleave(
+      elem_size_x4, get<1>(x4[0]), get<1>(x4[1]), get<1>(x4[2]), get<1>(x4[3]));
+  std::tie(x[8], x[9], x[10], x[11]) = interleave(
+      elem_size_x4, get<2>(x4[0]), get<2>(x4[1]), get<2>(x4[2]), get<2>(x4[3]));
+  std::tie(x[12], x[13], x[14], x[15]) = interleave(
+      elem_size_x4, get<3>(x4[0]), get<3>(x4[1]), get<3>(x4[2]), get<3>(x4[3]));
 }
 
 template <typename T, size_t ElemSize>
-static std::array<T, 32> interleave(
-    std::integral_constant<size_t, ElemSize> elem_size, std::array<T, 32> x) {
+static void interleave_in_place(
+    std::integral_constant<size_t, ElemSize> elem_size, std::array<T, 32>& x) {
   std::integral_constant<size_t, ElemSize * 4> elem_size_x4;
   std::integral_constant<size_t, ElemSize * 16> elem_size_x16;
-  using t4x4 = std::array<T, 4>;
-  using t2x2 = std::array<T, 2>;
+  using t4x4 = std::tuple<T, T, T, T>;
+
+  using std::get;
+  using std::tie;
 
   // Transpose 4x4
   t4x4 x4[] = {
-      interleave(elem_size, t4x4{{x[0], x[1], x[2], x[3]}}),
-      interleave(elem_size, t4x4{{x[4], x[5], x[6], x[7]}}),
-      interleave(elem_size, t4x4{{x[8], x[9], x[10], x[11]}}),
-      interleave(elem_size, t4x4{{x[12], x[13], x[14], x[15]}}),
-      interleave(elem_size, t4x4{{x[16], x[17], x[18], x[19]}}),
-      interleave(elem_size, t4x4{{x[20], x[21], x[22], x[23]}}),
-      interleave(elem_size, t4x4{{x[24], x[25], x[26], x[27]}}),
-      interleave(elem_size, t4x4{{x[28], x[29], x[30], x[31]}}),
+      interleave(elem_size, x[0], x[1], x[2], x[3]),
+      interleave(elem_size, x[4], x[5], x[6], x[7]),
+      interleave(elem_size, x[8], x[9], x[10], x[11]),
+      interleave(elem_size, x[12], x[13], x[14], x[15]),
+      interleave(elem_size, x[16], x[17], x[18], x[19]),
+      interleave(elem_size, x[20], x[21], x[22], x[23]),
+      interleave(elem_size, x[24], x[25], x[26], x[27]),
+      interleave(elem_size, x[28], x[29], x[30], x[31]),
   };
 
   // Transpose 4x4 of 4x4
-  t4x4 x16[] = {
-      interleave(elem_size_x4, t4x4{{x4[0][0], x4[1][0], x4[2][0], x4[3][0]}}),
-      interleave(elem_size_x4, t4x4{{x4[0][1], x4[1][1], x4[2][1], x4[3][1]}}),
-      interleave(elem_size_x4, t4x4{{x4[0][2], x4[1][2], x4[2][2], x4[3][2]}}),
-      interleave(elem_size_x4, t4x4{{x4[0][3], x4[1][3], x4[2][3], x4[3][3]}}),
-      interleave(elem_size_x4, t4x4{{x4[4][0], x4[5][0], x4[6][0], x4[7][0]}}),
-      interleave(elem_size_x4, t4x4{{x4[4][1], x4[5][1], x4[6][1], x4[7][1]}}),
-      interleave(elem_size_x4, t4x4{{x4[4][2], x4[5][2], x4[6][2], x4[7][2]}}),
-      interleave(elem_size_x4, t4x4{{x4[4][3], x4[5][3], x4[6][3], x4[7][3]}}),
-  };
+  t4x4 x16_0 = interleave(elem_size_x4, get<0>(x4[0]), get<0>(x4[1]),
+                          get<0>(x4[2]), get<0>(x4[3]));
+  t4x4 x16_4 = interleave(elem_size_x4, get<0>(x4[4]), get<0>(x4[5]),
+                          get<0>(x4[6]), get<0>(x4[7]));
+  // Transpose 2x2 of 4x4 of 4x4
+  tie(x[0], x[1]) = interleave(elem_size_x16, get<0>(x16_0), get<0>(x16_4));
+  tie(x[2], x[3]) = interleave(elem_size_x16, get<1>(x16_0), get<1>(x16_4));
+  tie(x[4], x[5]) = interleave(elem_size_x16, get<2>(x16_0), get<2>(x16_4));
+  tie(x[6], x[7]) = interleave(elem_size_x16, get<3>(x16_0), get<3>(x16_4));
 
-  // Transpose 2x2 of 16x16
-  t2x2 x32[] = {
-      interleave(elem_size_x16, t2x2{{x16[0][0], x16[4][0]}}),
-      interleave(elem_size_x16, t2x2{{x16[0][1], x16[4][1]}}),
-      interleave(elem_size_x16, t2x2{{x16[0][2], x16[4][2]}}),
-      interleave(elem_size_x16, t2x2{{x16[0][3], x16[4][3]}}),
-      interleave(elem_size_x16, t2x2{{x16[1][0], x16[5][0]}}),
-      interleave(elem_size_x16, t2x2{{x16[1][1], x16[5][1]}}),
-      interleave(elem_size_x16, t2x2{{x16[1][2], x16[5][2]}}),
-      interleave(elem_size_x16, t2x2{{x16[1][3], x16[5][3]}}),
-      interleave(elem_size_x16, t2x2{{x16[2][0], x16[6][0]}}),
-      interleave(elem_size_x16, t2x2{{x16[2][1], x16[6][1]}}),
-      interleave(elem_size_x16, t2x2{{x16[2][2], x16[6][2]}}),
-      interleave(elem_size_x16, t2x2{{x16[2][3], x16[6][3]}}),
-      interleave(elem_size_x16, t2x2{{x16[3][0], x16[7][0]}}),
-      interleave(elem_size_x16, t2x2{{x16[3][1], x16[7][1]}}),
-      interleave(elem_size_x16, t2x2{{x16[3][2], x16[7][2]}}),
-      interleave(elem_size_x16, t2x2{{x16[3][3], x16[7][3]}}),
-  };
+  t4x4 x16_1 = interleave(elem_size_x4, get<1>(x4[0]), get<1>(x4[1]),
+                          get<1>(x4[2]), get<1>(x4[3]));
+  t4x4 x16_5 = interleave(elem_size_x4, get<1>(x4[4]), get<1>(x4[5]),
+                          get<1>(x4[6]), get<1>(x4[7]));
+  tie(x[8], x[9]) = interleave(elem_size_x16, get<0>(x16_1), get<0>(x16_5));
+  tie(x[10], x[11]) = interleave(elem_size_x16, get<1>(x16_1), get<1>(x16_5));
+  tie(x[12], x[13]) = interleave(elem_size_x16, get<2>(x16_1), get<2>(x16_5));
+  tie(x[14], x[15]) = interleave(elem_size_x16, get<3>(x16_1), get<3>(x16_5));
 
-  return {
-      // clang-format off
-      x32[0][0],  x32[0][1],
-      x32[1][0],  x32[1][1],
-      x32[2][0],  x32[2][1],
-      x32[3][0],  x32[3][1],
-      x32[4][0],  x32[4][1],
-      x32[5][0],  x32[5][1],
-      x32[6][0],  x32[6][1],
-      x32[7][0],  x32[7][1],
-      x32[8][0],  x32[8][1],
-      x32[9][0],  x32[9][1],
-      x32[10][0], x32[10][1],
-      x32[11][0], x32[11][1],
-      x32[12][0], x32[12][1],
-      x32[13][0], x32[13][1],
-      x32[14][0], x32[14][1],
-      x32[15][0], x32[15][1],
-      // clang-format on
-  };
+  t4x4 x16_2 = interleave(elem_size_x4, get<2>(x4[0]), get<2>(x4[1]),
+                          get<2>(x4[2]), get<2>(x4[3]));
+  t4x4 x16_6 = interleave(elem_size_x4, get<2>(x4[4]), get<2>(x4[5]),
+                          get<2>(x4[6]), get<2>(x4[7]));
+  tie(x[16], x[17]) = interleave(elem_size_x16, get<0>(x16_2), get<0>(x16_6));
+  tie(x[18], x[19]) = interleave(elem_size_x16, get<1>(x16_2), get<1>(x16_6));
+  tie(x[20], x[21]) = interleave(elem_size_x16, get<2>(x16_2), get<2>(x16_6));
+  tie(x[22], x[23]) = interleave(elem_size_x16, get<3>(x16_2), get<3>(x16_6));
+
+  t4x4 x16_3 = interleave(elem_size_x4, get<3>(x4[0]), get<3>(x4[1]),
+                          get<3>(x4[2]), get<3>(x4[3]));
+  t4x4 x16_7 = interleave(elem_size_x4, get<3>(x4[4]), get<3>(x4[5]),
+                          get<3>(x4[6]), get<3>(x4[7]));
+  tie(x[24], x[25]) = interleave(elem_size_x16, get<0>(x16_3), get<0>(x16_7));
+  tie(x[26], x[27]) = interleave(elem_size_x16, get<1>(x16_3), get<1>(x16_7));
+  tie(x[28], x[29]) = interleave(elem_size_x16, get<2>(x16_3), get<2>(x16_7));
+  tie(x[30], x[31]) = interleave(elem_size_x16, get<3>(x16_3), get<3>(x16_7));
 }
 
 // These overloads of load/store work on partial tiles
@@ -260,7 +251,7 @@ static void transpose(size_t m, size_t n, size_t n_bytes_a, size_t stride_a,
     while (j >= N) {
       // Handle a full set of M rows x N columns.
       Tile t = load(Tile{}, a_j, stride_a, M, N_bytes);
-      t = interleave(elem_size_bits, t);
+      interleave_in_place(elem_size_bits, t);
       store(t, x_j, stride_x, M, N_bytes);
 
       j -= N;
@@ -270,7 +261,7 @@ static void transpose(size_t m, size_t n, size_t n_bytes_a, size_t stride_a,
     if (j > 0) {
       // Handle a full set of M rows x partial set of j columns.
       Tile t = load(Tile{}, a_j, stride_a, j, N_bytes);
-      t = interleave(elem_size_bits, t);
+      interleave_in_place(elem_size_bits, t);
       store(t, x_j, stride_x, M, j * elem_size_bits / 8);
     }
     m -= M;
@@ -287,7 +278,7 @@ static void transpose(size_t m, size_t n, size_t n_bytes_a, size_t stride_a,
     while (j >= N) {
       // Handle a partial set of m rows x full set of N columns.
       Tile t = load(Tile{}, a_j, stride_a, M, n_bytes);
-      t = interleave(elem_size_bits, t);
+      interleave_in_place(elem_size_bits, t);
       store(t, x_j, stride_x, std::min(m, M), N_bytes);
 
       j -= N;
@@ -297,7 +288,7 @@ static void transpose(size_t m, size_t n, size_t n_bytes_a, size_t stride_a,
     if (j > 0) {
       // Handle a partial set of m rows x j columns.
       Tile t = load(Tile{}, a_j, stride_a, j, n_bytes);
-      t = interleave(elem_size_bits, t);
+      interleave_in_place(elem_size_bits, t);
       store(t, x_j, stride_x, std::min(m, M), j * elem_size_bits / 8);
     }
     m = sub_sat(m, M);
@@ -316,7 +307,7 @@ static void interleave(size_t m, size_t n, size_t stride_a, const void* a,
 
   while (n >= N) {
     Tile t = load(Tile{}, a, stride_a, m, N_bytes);
-    t = interleave(elem_size_bits, t);
+    interleave_in_place(elem_size_bits, t);
     store(t, x, N_bytes, M, N_bytes);
 
     n -= N;
@@ -326,7 +317,7 @@ static void interleave(size_t m, size_t n, size_t stride_a, const void* a,
   if (n > 0) {
     size_t n_bytes = elem_size_bits * n / 8;
     Tile t = load(Tile{}, a, stride_a, m, n_bytes);
-    t = interleave(elem_size_bits, t);
+    interleave_in_place(elem_size_bits, t);
     memcpy(x, &t[0], M * n_bytes);
   }
 }

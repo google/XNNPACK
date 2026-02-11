@@ -11,6 +11,7 @@
 #include <array>
 #include <cstddef>
 #include <cstdint>
+#include <tuple>
 #include <type_traits>
 
 #include "ynnpack/base/arithmetic.h"
@@ -18,68 +19,69 @@
 
 namespace ynn {
 
-static std::array<uint8x16_t, 2> interleave(std::integral_constant<size_t, 64>,
-                                            std::array<uint8x16_t, 2> x) {
-  return {{
-      vcombine_u8(vget_low_u8(x[0]), vget_low_u8(x[1])),
-      vcombine_u8(vget_high_u8(x[0]), vget_high_u8(x[1])),
-  }};
+using u8x16 = uint8x16_t;
+using u8x8 = uint8x8_t;
+
+static std::tuple<u8x16, u8x16> interleave(std::integral_constant<size_t, 64>,
+                                           u8x16 x0, u8x16 x1) {
+  return {
+      vcombine_u8(vget_low_u8(x0), vget_low_u8(x1)),
+      vcombine_u8(vget_high_u8(x0), vget_high_u8(x1)),
+  };
 }
-static std::array<uint8x16_t, 2> interleave(std::integral_constant<size_t, 32>,
-                                            std::array<uint8x16_t, 2> x) {
+static std::tuple<u8x16, u8x16> interleave(std::integral_constant<size_t, 32>,
+                                           u8x16 x0, u8x16 x1) {
   uint32x4x2_t x01 =
-      vzipq_u32(vreinterpretq_u32_u8(x[0]), vreinterpretq_u32_u8(x[1]));
-  return {{vreinterpretq_u8_u32(x01.val[0]), vreinterpretq_u8_u32(x01.val[1])}};
+      vzipq_u32(vreinterpretq_u32_u8(x0), vreinterpretq_u32_u8(x1));
+  return {vreinterpretq_u8_u32(x01.val[0]), vreinterpretq_u8_u32(x01.val[1])};
 }
-static std::array<uint8x16_t, 2> interleave(std::integral_constant<size_t, 16>,
-                                            std::array<uint8x16_t, 2> x) {
+static std::tuple<u8x16, u8x16> interleave(std::integral_constant<size_t, 16>,
+                                           u8x16 x0, u8x16 x1) {
   uint16x8x2_t x01 =
-      vzipq_u16(vreinterpretq_u16_u8(x[0]), vreinterpretq_u16_u8(x[1]));
-  return {{vreinterpretq_u8_u16(x01.val[0]), vreinterpretq_u8_u16(x01.val[1])}};
+      vzipq_u16(vreinterpretq_u16_u8(x0), vreinterpretq_u16_u8(x1));
+  return {vreinterpretq_u8_u16(x01.val[0]), vreinterpretq_u8_u16(x01.val[1])};
 }
-static std::array<uint8x16_t, 2> interleave(std::integral_constant<size_t, 8>,
-                                            std::array<uint8x16_t, 2> x) {
-  uint8x16x2_t x01 = vzipq_u8(x[0], x[1]);
-  return {{x01.val[0], x01.val[1]}};
+static std::tuple<u8x16, u8x16> interleave(std::integral_constant<size_t, 8>,
+                                           u8x16 x0, u8x16 x1) {
+  uint8x16x2_t x01 = vzipq_u8(x0, x1);
+  return {x01.val[0], x01.val[1]};
 }
-static std::array<uint8x16_t, 2> interleave(std::integral_constant<size_t, 4>,
-                                            std::array<uint8x16_t, 2> x) {
+static std::tuple<u8x16, u8x16> interleave(std::integral_constant<size_t, 4>,
+                                           u8x16 x0, u8x16 x1) {
   return interleave(std::integral_constant<size_t, 8>{},
-                    {vbslq_u8(vdupq_n_u8(0xf0), vshlq_n_u8(x[1], 4), x[0]),
-                     vbslq_u8(vdupq_n_u8(0xf0), x[1], vshrq_n_u8(x[0], 4))});
+                    vbslq_u8(vdupq_n_u8(0xf0), vshlq_n_u8(x1, 4), x0),
+                    vbslq_u8(vdupq_n_u8(0xf0), x1, vshrq_n_u8(x0, 4)));
 }
 
-static std::array<uint8x8_t, 2> interleave(std::integral_constant<size_t, 32>,
-                                           std::array<uint8x8_t, 2> x) {
-  uint32x2x2_t x01 =
-      vzip_u32(vreinterpret_u32_u8(x[0]), vreinterpret_u32_u8(x[1]));
-  return {{vreinterpret_u8_u32(x01.val[0]), vreinterpret_u8_u32(x01.val[1])}};
+static std::tuple<u8x8, u8x8> interleave(std::integral_constant<size_t, 32>,
+                                         u8x8 x0, u8x8 x1) {
+  uint32x2x2_t x01 = vzip_u32(vreinterpret_u32_u8(x0), vreinterpret_u32_u8(x1));
+  return {vreinterpret_u8_u32(x01.val[0]), vreinterpret_u8_u32(x01.val[1])};
 }
-static std::array<uint8x8_t, 2> interleave(std::integral_constant<size_t, 16>,
-                                           std::array<uint8x8_t, 2> x) {
-  uint16x4x2_t x01 =
-      vzip_u16(vreinterpret_u16_u8(x[0]), vreinterpret_u16_u8(x[1]));
-  return {{vreinterpret_u8_u16(x01.val[0]), vreinterpret_u8_u16(x01.val[1])}};
+static std::tuple<u8x8, u8x8> interleave(std::integral_constant<size_t, 16>,
+                                         u8x8 x0, u8x8 x1) {
+  uint16x4x2_t x01 = vzip_u16(vreinterpret_u16_u8(x0), vreinterpret_u16_u8(x1));
+  return {vreinterpret_u8_u16(x01.val[0]), vreinterpret_u8_u16(x01.val[1])};
 }
-static std::array<uint8x8_t, 2> interleave(std::integral_constant<size_t, 8>,
-                                           std::array<uint8x8_t, 2> x) {
-  uint8x8x2_t x01 = vzip_u8(x[0], x[1]);
-  return {{x01.val[0], x01.val[1]}};
+static std::tuple<u8x8, u8x8> interleave(std::integral_constant<size_t, 8>,
+                                         u8x8 x0, u8x8 x1) {
+  uint8x8x2_t x01 = vzip_u8(x0, x1);
+  return {x01.val[0], x01.val[1]};
 }
-static std::array<uint8x8_t, 2> interleave(std::integral_constant<size_t, 4>,
-                                           std::array<uint8x8_t, 2> x) {
+static std::tuple<u8x8, u8x8> interleave(std::integral_constant<size_t, 4>,
+                                         u8x8 x0, u8x8 x1) {
   return interleave(std::integral_constant<size_t, 8>{},
-                    {vbsl_u8(vdup_n_u8(0xf0), vshl_n_u8(x[1], 4), x[0]),
-                     vbsl_u8(vdup_n_u8(0xf0), x[1], vshr_n_u8(x[0], 4))});
+                    vbsl_u8(vdup_n_u8(0xf0), vshl_n_u8(x1, 4), x0),
+                    vbsl_u8(vdup_n_u8(0xf0), x1, vshr_n_u8(x0, 4)));
 }
 
 template <size_t M>
-static std::array<uint8x16_t, M> load(
-    std::array<uint8x16_t, M>, const void* a, size_t stride, size_t m,
+static std::array<u8x8, M> load(
+    std::array<u8x8, M>, const void* a, size_t stride, size_t m,
     std::integral_constant<size_t, 16> /*n_bytes*/) {
   assert(m > 0);
   assert(m <= M);
-  std::array<uint8x16_t, M> x;
+  std::array<u8x8, M> x;
   x[0] = vld1q_u8(reinterpret_cast<const uint8_t*>(a));
   for (size_t i = 1; i < M; ++i) {
     x[i] = i < m ? vld1q_u8(reinterpret_cast<const uint8_t*>(
@@ -90,7 +92,7 @@ static std::array<uint8x16_t, M> load(
 }
 
 template <size_t M>
-static void store(std::array<uint8x16_t, M> x, void* a, size_t stride, size_t m,
+static void store(std::array<u8x8, M> x, void* a, size_t stride, size_t m,
                   std::integral_constant<size_t, 16> /*n_bytes*/) {
   assert(m > 0);
   assert(m <= M);
