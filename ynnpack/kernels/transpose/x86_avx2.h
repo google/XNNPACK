@@ -60,23 +60,20 @@ static std::tuple<row, row> interleave(std::integral_constant<size_t, 4>,
 }
 
 template <size_t M>
-static std::array<row, M> load(
-    std::array<row, M>, const void* a, size_t stride, size_t m,
-    std::integral_constant<size_t, 32> /*n_bytes*/) {
+static void load(std::array<row, M>& x, const void* a, size_t stride, size_t m,
+                 std::integral_constant<size_t, 32> /*n_bytes*/) {
   assert(m > 0);
   assert(m <= M);
-  std::array<row, M> x;
   x[0] = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(a));
   for (size_t i = 1; i < M; ++i) {
     x[i] = i < m ? _mm256_loadu_si256(reinterpret_cast<const __m256i*>(
                        offset_bytes(a, i * stride)))
                  : _mm256_setzero_si256();
   }
-  return x;
 }
 
 template <size_t M>
-static void store(std::array<row, M> x, void* a, size_t stride, size_t m,
+static void store(const std::array<row, M>& x, void* a, size_t stride, size_t m,
                   std::integral_constant<size_t, 32> /*n_bytes*/) {
   assert(m > 0);
   assert(m <= M);
@@ -89,18 +86,18 @@ static void store(std::array<row, M> x, void* a, size_t stride, size_t m,
   }
 }
 
-template <typename Tile>
-static Tile load(Tile, const void* a, size_t stride, size_t m, size_t n_bytes) {
-  Tile result;
-  memset(&result, 0, sizeof(Tile));
+template <size_t M>
+static void load(std::array<row, M>& result, const void* a, size_t stride,
+                 size_t m, size_t n_bytes) {
+  memset(&result, 0, sizeof(result));
   for (size_t i = 0; i < m; ++i) {
     memcpy(&result[i], offset_bytes(a, i * stride), n_bytes);
   }
-  return result;
 }
 
-template <typename Tile>
-static void store(Tile tile, void* x, size_t stride, size_t m, size_t n_bytes) {
+template <size_t M>
+static void store(const std::array<row, M>& tile, void* x, size_t stride,
+                  size_t m, size_t n_bytes) {
   for (size_t i = 0; i < m; ++i) {
     memcpy(offset_bytes(x, i * stride), &tile[i], n_bytes);
   }

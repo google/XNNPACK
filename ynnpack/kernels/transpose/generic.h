@@ -15,6 +15,7 @@
 #include <type_traits>
 
 #include "ynnpack/base/arithmetic.h"
+#include "ynnpack/base/base.h"
 
 namespace ynn {
 
@@ -232,7 +233,8 @@ static void transpose(size_t m, size_t n, size_t n_bytes_a, size_t stride_a,
     void* x_j = x;
     while (j >= N) {
       // Handle a full set of M rows x N columns.
-      Tile t = load(Tile{}, a_j, stride_a, M, N_bytes);
+      Tile t;
+      load(t, a_j, stride_a, M, N_bytes);
       interleave_in_place(elem_size_bits, t);
       store(t, x_j, stride_x, M, N_bytes);
 
@@ -242,7 +244,8 @@ static void transpose(size_t m, size_t n, size_t n_bytes_a, size_t stride_a,
     }
     if (j > 0) {
       // Handle a full set of M rows x partial set of j columns.
-      Tile t = load(Tile{}, a_j, stride_a, j, N_bytes);
+      Tile t;
+      load(t, a_j, stride_a, j, N_bytes);
       interleave_in_place(elem_size_bits, t);
       store(t, x_j, stride_x, M, j * elem_size_bits / 8);
     }
@@ -259,7 +262,8 @@ static void transpose(size_t m, size_t n, size_t n_bytes_a, size_t stride_a,
     void* x_j = x;
     while (j >= N) {
       // Handle a partial set of m rows x full set of N columns.
-      Tile t = load(Tile{}, a_j, stride_a, M, n_bytes);
+      Tile t;
+      load(t, a_j, stride_a, M, n_bytes);
       interleave_in_place(elem_size_bits, t);
       store(t, x_j, stride_x, std::min(m, M), N_bytes);
 
@@ -269,7 +273,8 @@ static void transpose(size_t m, size_t n, size_t n_bytes_a, size_t stride_a,
     }
     if (j > 0) {
       // Handle a partial set of m rows x j columns.
-      Tile t = load(Tile{}, a_j, stride_a, j, n_bytes);
+      Tile t;
+      load(t, a_j, stride_a, j, n_bytes);
       interleave_in_place(elem_size_bits, t);
       store(t, x_j, stride_x, std::min(m, M), j * elem_size_bits / 8);
     }
@@ -288,7 +293,8 @@ static void interleave(size_t m, size_t n, size_t stride_a, const void* a,
   constexpr size_t N = N_bytes * 8 / elem_size_bits;
 
   while (n >= N) {
-    Tile t = load(Tile{}, a, stride_a, m, N_bytes);
+    Tile t;
+    load(t, a, stride_a, m, N_bytes);
     interleave_in_place(elem_size_bits, t);
     store(t, x, N_bytes, M, N_bytes);
 
@@ -298,7 +304,8 @@ static void interleave(size_t m, size_t n, size_t stride_a, const void* a,
   }
   if (n > 0) {
     size_t n_bytes = elem_size_bits * n / 8;
-    Tile t = load(Tile{}, a, stride_a, m, n_bytes);
+    Tile t;
+    load(t, a, stride_a, m, n_bytes);
     interleave_in_place(elem_size_bits, t);
     memcpy(x, &t[0], M * n_bytes);
   }

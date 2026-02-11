@@ -76,24 +76,21 @@ static std::tuple<u8x8, u8x8> interleave(std::integral_constant<size_t, 4>,
 }
 
 template <size_t M>
-static std::array<u8x8, M> load(
-    std::array<u8x8, M>, const void* a, size_t stride, size_t m,
-    std::integral_constant<size_t, 16> /*n_bytes*/) {
+static void load(std::array<u8x16, M>& x, const void* a, size_t stride,
+                 size_t m, std::integral_constant<size_t, 16> /*n_bytes*/) {
   assert(m > 0);
   assert(m <= M);
-  std::array<u8x8, M> x;
   x[0] = vld1q_u8(reinterpret_cast<const uint8_t*>(a));
   for (size_t i = 1; i < M; ++i) {
     x[i] = i < m ? vld1q_u8(reinterpret_cast<const uint8_t*>(
                        offset_bytes(a, i * stride)))
                  : vdupq_n_u8(0);
   }
-  return x;
 }
 
 template <size_t M>
-static void store(std::array<u8x8, M> x, void* a, size_t stride, size_t m,
-                  std::integral_constant<size_t, 16> /*n_bytes*/) {
+static void store(const std::array<u8x16, M>& x, void* a, size_t stride,
+                  size_t m, std::integral_constant<size_t, 16> /*n_bytes*/) {
   assert(m > 0);
   assert(m <= M);
   vst1q_u8(reinterpret_cast<uint8_t*>(a), x[0]);
@@ -105,24 +102,21 @@ static void store(std::array<u8x8, M> x, void* a, size_t stride, size_t m,
 }
 
 template <size_t M>
-static std::array<uint8x8_t, M> load(
-    std::array<uint8x8_t, M>, const void* a, size_t stride, size_t m,
-    std::integral_constant<size_t, 8> /*n_bytes*/) {
+static void load(std::array<u8x8, M>& x, const void* a, size_t stride, size_t m,
+                 std::integral_constant<size_t, 8> /*n_bytes*/) {
   assert(m > 0);
   assert(m <= M);
-  std::array<uint8x8_t, M> x;
   x[0] = vld1_u8(reinterpret_cast<const uint8_t*>(a));
   for (size_t i = 1; i < M; ++i) {
     x[i] = i < m ? vld1_u8(reinterpret_cast<const uint8_t*>(
                        offset_bytes(a, i * stride)))
                  : vdup_n_u8(0);
   }
-  return x;
 }
 
 template <size_t M>
-static void store(std::array<uint8x8_t, M> x, void* a, size_t stride, size_t m,
-                  std::integral_constant<size_t, 8> /*n_bytes*/) {
+static void store(const std::array<u8x8, M>& x, void* a, size_t stride,
+                  size_t m, std::integral_constant<size_t, 8> /*n_bytes*/) {
   assert(m > 0);
   assert(m <= M);
   vst1_u8(reinterpret_cast<uint8_t*>(a), x[0]);
@@ -133,18 +127,18 @@ static void store(std::array<uint8x8_t, M> x, void* a, size_t stride, size_t m,
   }
 }
 
-template <typename Tile>
-static Tile load(Tile, const void* a, size_t stride, size_t m, size_t n_bytes) {
-  Tile result;
-  memset(&result, 0, sizeof(Tile));
+template <typename Row, size_t M>
+static void load(std::array<Row, M>& result, const void* a, size_t stride,
+                 size_t m, size_t n_bytes) {
+  memset(&result, 0, sizeof(result));
   for (size_t i = 0; i < m; ++i) {
     memcpy(&result[i], offset_bytes(a, i * stride), n_bytes);
   }
-  return result;
 }
 
-template <typename Tile>
-static void store(Tile tile, void* x, size_t stride, size_t m, size_t n_bytes) {
+template <typename Row, size_t M>
+static void store(const std::array<Row, M>& tile, void* x, size_t stride,
+                  size_t m, size_t n_bytes) {
   for (size_t i = 0; i < m; ++i) {
     memcpy(offset_bytes(x, i * stride), &tile[i], n_bytes);
   }

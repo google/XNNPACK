@@ -31,13 +31,10 @@ static std::tuple<u8x128, u8x128> interleave(ElemSizeBits elem_size_bits,
 }
 
 template <size_t M, typename NBytes>
-YNN_ALWAYS_INLINE static std::array<u8x128, M> load(std::array<u8x128, M>,
-                                                    const void* a,
-                                                    size_t stride, size_t m,
-                                                    NBytes n_bytes) {
+YNN_ALWAYS_INLINE static void load(std::array<u8x128, M>& x, const void* a,
+                                   size_t stride, size_t m, NBytes n_bytes) {
   assert(m > 0);
   assert(m <= M);
-  std::array<u8x128, M> x;
   x[0] =
       simd::load(static_cast<const uint8_t*>(a), n_bytes, simd::zeros<128>{});
   for (size_t i = 1; i < M; ++i) {
@@ -49,11 +46,10 @@ YNN_ALWAYS_INLINE static std::array<u8x128, M> load(std::array<u8x128, M>,
       x[i] = u8x128{Q6_V_vzero()};
     }
   }
-  return x;
 }
 
 template <size_t M, typename NBytes>
-YNN_ALWAYS_INLINE static void store(std::array<u8x128, M> x, void* a,
+YNN_ALWAYS_INLINE static void store(const std::array<u8x128, M>& x, void* a,
                                     size_t stride, size_t m, NBytes n_bytes) {
   assert(m > 0);
   assert(m <= M);
