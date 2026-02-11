@@ -111,7 +111,7 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x8c8__$
     // XNN_FORCE_REALIZATION(voutput_zero_point);
     // XNN_FORCE_REALIZATION(voutput_min);
   $if DATATYPE in ["QC4_F16", "QC4_F32", "QS8_QC4", "QC2_F32", "QS8_QC2"]:
-    if VARIANT == "MADD":
+    $if VARIANT == "MADD":
       $if DATATYPE in ["QC2_F32", "QS8_QC2"]:
         const __m256i vmask = _mm256_set1_epi8(0x03);
       $else:
