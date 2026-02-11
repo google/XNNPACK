@@ -24,6 +24,11 @@ enum xnn_fingerprint_id xnn_compute_fingerprint_id_value(
   return (enum xnn_fingerprint_id)id;
 }
 
+const char* xnn_fingerprint_id_to_string_u32(
+    const enum xnn_fingerprint_id fingerprint_id) {
+  return xnn_fingerprint_id_to_string((enum xnn_fingerprint_id)fingerprint_id);
+}
+
 const char* xnn_fingerprint_id_to_string(
     const enum xnn_fingerprint_id fingerprint_id) {
   switch (fingerprint_id) {
