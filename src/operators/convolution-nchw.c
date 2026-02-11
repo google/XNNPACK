@@ -65,7 +65,22 @@ struct convolution2d_nchw_context {
   enum xnn_operator_type operator_type;
   enum xnn_fingerprint_id fingerprint_id;
   xnn_weights_cache_t weights_cache;
+
+  const void* kernel_for_cache_key;
+  const void* bias_for_cache_key;
 };
+
+static inline const void* get_kernel_for_cache_key(
+    const struct convolution2d_nchw_context* const context) {
+  return context->kernel_for_cache_key ? context->kernel_for_cache_key
+                                       : context->kernel;
+}
+
+static inline const void* get_bias_for_cache_key(
+    const struct convolution2d_nchw_context* const context) {
+  return context->bias_for_cache_key ? context->bias_for_cache_key
+                                     : context->bias;
+}
 
 static enum xnn_status create_spmm_path(
     struct convolution2d_nchw_context* context,
@@ -194,37 +209,45 @@ static enum xnn_status create_conv2d_hwc2chw_path(
 {
   assert(conv_hwc2chw_ukernel != NULL);
 
-  const size_t packed_group_output_channels = round_up(context->group_output_channels, output_channel_tile);
-  const size_t packed_weights_size = (context->groups * packed_group_output_channels *
-                                      (context->group_input_channels * context->kernel_height
-                                       * context->kernel_width + 1 /* bias */))
-      << log2_filter_element_size;
-  const size_t aligned_total_weights_size = round_up_po2(packed_weights_size, XNN_ALLOCATION_ALIGNMENT);
-  void* weights_ptr = xnn_get_pointer_to_write_weights(convolution_op, aligned_total_weights_size);
-  if (weights_ptr == NULL) {
-    xnn_log_error("failed to reserve or allocate %zu bytes for %s operator conv2d_hwc2chw packed weights",
-                  aligned_total_weights_size,
-                  xnn_operator_type_to_string(context->operator_type));
-    return xnn_status_out_of_memory;
-  }
-  xnn_log_debug("allocated %zu bytes for packed weights in %s operator",
-                aligned_total_weights_size, xnn_operator_type_to_string(context->operator_type));
+  const struct xnn_weights_cache_look_up_key cache_key = {
+    .seed = context->group_input_channels ^ context->group_output_channels ^ output_channel_tile,
+    .kernel = get_kernel_for_cache_key(context),
+    .bias = get_bias_for_cache_key(context),
+    .fingerprint_id = context->fingerprint_id,
+  };
 
-  xnn_pack_dconv_oki_w(
-      context->group_output_channels,
-      context->group_input_channels,
-      output_channel_tile,
-      context->kernel_height, context->kernel_width,
-      context->kernel, context->bias, weights_ptr, NULL);
+  convolution_op->packed_weights.offset = use_weights_cache(convolution_op) ?
+      xnn_weights_cache_look_up(convolution_op->weights_cache, &cache_key) :
+      XNN_CACHE_NOT_FOUND;
 
-  if (use_weights_cache(convolution_op)) {
-    struct xnn_weights_cache_look_up_key cache_key;
-    cache_key.seed = context->group_input_channels ^ context->group_output_channels ^ output_channel_tile;
-    cache_key.kernel = context->kernel;
-    cache_key.bias = context->bias;
-    cache_key.fingerprint_id = context->fingerprint_id;
-    convolution_op->packed_weights.offset = xnn_look_up_or_insert_weights_cache(
-        convolution_op->weights_cache, &cache_key, weights_ptr, aligned_total_weights_size);
+  if(convolution_op->packed_weights.offset == XNN_CACHE_NOT_FOUND) {
+    const size_t packed_group_output_channels = round_up(context->group_output_channels, output_channel_tile);
+    const size_t packed_weights_size = (context->groups * packed_group_output_channels *
+                                         (context->group_input_channels * context->kernel_height
+                                          * context->kernel_width + 1 /* bias */))
+                                       << log2_filter_element_size;
+    const size_t aligned_total_weights_size = round_up_po2(packed_weights_size, XNN_ALLOCATION_ALIGNMENT);
+    void* weights_ptr = xnn_get_pointer_to_write_weights(convolution_op, aligned_total_weights_size);
+    if (weights_ptr == NULL) {
+      xnn_log_error("failed to reserve or allocate %zu bytes for %s operator conv2d_hwc2chw packed weights",
+                    aligned_total_weights_size,
+                    xnn_operator_type_to_string(context->operator_type));
+      return xnn_status_out_of_memory;
+    }
+    xnn_log_debug("allocated %zu bytes for packed weights in %s operator",
+                  aligned_total_weights_size, xnn_operator_type_to_string(context->operator_type));
+
+    xnn_pack_dconv_oki_w(
+        context->group_output_channels,
+        context->group_input_channels,
+        output_channel_tile,
+        context->kernel_height, context->kernel_width,
+        context->kernel, context->bias, weights_ptr, NULL);
+
+    if (use_weights_cache(convolution_op)) {
+      convolution_op->packed_weights.offset = xnn_look_up_or_insert_weights_cache(
+          convolution_op->weights_cache, &cache_key, weights_ptr, aligned_total_weights_size);
+    }
   }
 
   convolution_op->ukernel.conv2d = (struct xnn_ukernel_conv2d) {
@@ -245,39 +268,48 @@ static enum xnn_status create_dwconv_path(
     const xnn_operator_t convolution_op)
 {
   assert(dwconv_ukernel != NULL);
-  const size_t packed_weights_size =
-      (context->groups * (context->kernel_height * context->kernel_width + 1 /* bias */)) << log2_filter_element_size;
-  const size_t aligned_total_weights_size = round_up_po2(packed_weights_size, XNN_ALLOCATION_ALIGNMENT);
-  void* weights_ptr = xnn_get_pointer_to_write_weights(
-      convolution_op, aligned_total_weights_size);
-  if (weights_ptr == NULL) {
-    xnn_log_error("failed to reserve or allocated %zu bytes for %s operator dwconv packed weights",
+  // All 1s or 0s to negate the binary representation of the cache key if the
+  // convolution isn't depthwise.
+  const uint32_t use_depthwise_convolution = context->flags & XNN_FLAG_DEPTHWISE_CONVOLUTION ? UINT32_MAX : 0;
+  const struct xnn_weights_cache_look_up_key cache_key = {
+    .seed = context->kernel_height ^ context->kernel_width ^ context->groups ^ ~use_depthwise_convolution,
+    .kernel = get_kernel_for_cache_key(context),
+    .bias = get_bias_for_cache_key(context),
+    .fingerprint_id = context->fingerprint_id,
+  };
+
+  convolution_op->packed_weights.offset = use_weights_cache(convolution_op) ?
+      xnn_weights_cache_look_up(convolution_op->weights_cache, &cache_key) :
+      XNN_CACHE_NOT_FOUND;
+
+  if(convolution_op->packed_weights.offset == XNN_CACHE_NOT_FOUND) {
+    const size_t packed_weights_size =
+        (context->groups * (context->kernel_height * context->kernel_width + 1 /* bias */)) << log2_filter_element_size;
+    const size_t aligned_total_weights_size = round_up_po2(packed_weights_size, XNN_ALLOCATION_ALIGNMENT);
+    void* weights_ptr = xnn_get_pointer_to_write_weights(
+        convolution_op, aligned_total_weights_size);
+    if (weights_ptr == NULL) {
+      xnn_log_error("failed to reserve or allocated %zu bytes for %s operator dwconv packed weights",
+                    aligned_total_weights_size, xnn_operator_type_to_string(context->operator_type));
+      return xnn_status_out_of_memory;
+    }
+    xnn_log_debug("allocated %zu bytes for packed weights in %s operator",
                   aligned_total_weights_size, xnn_operator_type_to_string(context->operator_type));
-    return xnn_status_out_of_memory;
-  }
-  xnn_log_debug("allocated %zu bytes for packed weights in %s operator",
-                aligned_total_weights_size, xnn_operator_type_to_string(context->operator_type));
 
-  uint32_t cache_seed = context->kernel_height ^ context->kernel_width ^ context->groups;
-  if (context->flags & XNN_FLAG_DEPTHWISE_CONVOLUTION) {
-    pack_chw_dwconv_hwg_w(
-        context->kernel_height * context->kernel_width, context->groups,
-        context->kernel, context->bias, weights_ptr, NULL);
-  } else {
-    cache_seed = ~cache_seed;
-    pack_chw_dwconv_ghw_w(
-        context->kernel_height * context->kernel_width, context->groups,
-        context->kernel, context->bias, weights_ptr, NULL);
-  }
+    if (use_depthwise_convolution) {
+      pack_chw_dwconv_hwg_w(
+          context->kernel_height * context->kernel_width, context->groups,
+          context->kernel, context->bias, weights_ptr, NULL);
+    } else {
+      pack_chw_dwconv_ghw_w(
+          context->kernel_height * context->kernel_width, context->groups,
+          context->kernel, context->bias, weights_ptr, NULL);
+    }
 
-  if (use_weights_cache(convolution_op)) {
-    struct xnn_weights_cache_look_up_key cache_key;
-    cache_key.seed = cache_seed;
-    cache_key.kernel = context->kernel;
-    cache_key.bias = context->bias;
-    cache_key.fingerprint_id = context->fingerprint_id;
-    convolution_op->packed_weights.offset = xnn_look_up_or_insert_weights_cache(
-        convolution_op->weights_cache, &cache_key, weights_ptr, aligned_total_weights_size);
+    if (use_weights_cache(convolution_op)) {
+      convolution_op->packed_weights.offset = xnn_look_up_or_insert_weights_cache(
+          convolution_op->weights_cache, &cache_key, weights_ptr, aligned_total_weights_size);
+    }
   }
 
   convolution_op->ukernel.dwconv2d = (struct xnn_ukernel_dwconv2d) {
@@ -1178,6 +1210,8 @@ enum xnn_status xnn_create_convolution2d_nchw_f32_f16(
     xnn_weights_cache_t weights_cache,
     xnn_operator_t* convolution_op_out) {
   // Convert the `f16` kernel and bias to `f32` in temporary buffers.
+  const void* bias_for_cache_key = bias;
+  const void* kernel_for_cache_key = kernel;
   const size_t num_kernel_entries = groups * group_input_channels *
                                     group_output_channels * kernel_width *
                                     kernel_height;
@@ -1220,6 +1254,8 @@ enum xnn_status xnn_create_convolution2d_nchw_f32_f16(
     .output_max = output_max,
     .flags = flags,
     .weights_cache = weights_cache,
+    .kernel_for_cache_key = kernel_for_cache_key,
+    .bias_for_cache_key = bias_for_cache_key,
     .operator_type = xnn_operator_type_convolution_nchw_f32,
   };
   context.fingerprint_id = get_fingerprint_id_for(&f32_conv, &context);
