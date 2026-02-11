@@ -77,13 +77,13 @@ static void transpose(size_t m, size_t n, size_t n_bytes_a, size_t stride_a,
 // `stride` bytes apart in memory.
 
 template <typename T, size_t ElemSize>
-static void interleave_in_place(
+YNN_ALWAYS_INLINE static void interleave_in_place(
     std::integral_constant<size_t, ElemSize> elem_size, std::array<T, 2>& x) {
   std::tie(x[0], x[1]) = interleave(elem_size, x[0], x[1]);
 }
 
 template <typename T, size_t ElemSize>
-static void interleave_in_place(
+YNN_ALWAYS_INLINE static void interleave_in_place(
     std::integral_constant<size_t, ElemSize> elem_size, std::array<T, 4>& x) {
   std::integral_constant<size_t, ElemSize * 2> elem_size_x2;
 
@@ -99,7 +99,7 @@ static void interleave_in_place(
 
 // We need an out-of-place helper for 4-way interleaves.
 template <typename T, size_t ElemSize>
-static std::tuple<T, T, T, T> interleave(
+YNN_ALWAYS_INLINE static std::tuple<T, T, T, T> interleave(
     std::integral_constant<size_t, ElemSize> elem_size, T x0, T x1, T x2,
     T x3) {
   std::array<T, 4> x = {x0, x1, x2, x3};
@@ -108,7 +108,7 @@ static std::tuple<T, T, T, T> interleave(
 }
 
 template <typename T, size_t ElemSize>
-static void interleave_in_place(
+YNN_ALWAYS_INLINE static void interleave_in_place(
     std::integral_constant<size_t, ElemSize> elem_size, std::array<T, 8>& x) {
   std::integral_constant<size_t, ElemSize * 4> elem_size_x4;
   using t4x4 = std::tuple<T, T, T, T>;
@@ -129,7 +129,7 @@ static void interleave_in_place(
 }
 
 template <typename T, size_t ElemSize>
-static void interleave_in_place(
+YNN_ALWAYS_INLINE static void interleave_in_place(
     std::integral_constant<size_t, ElemSize> elem_size, std::array<T, 16>& x) {
   std::integral_constant<size_t, ElemSize * 4> elem_size_x4;
   using t4x4 = std::tuple<T, T, T, T>;
@@ -156,7 +156,7 @@ static void interleave_in_place(
 }
 
 template <typename T, size_t ElemSize>
-static void interleave_in_place(
+YNN_ALWAYS_INLINE static void interleave_in_place(
     std::integral_constant<size_t, ElemSize> elem_size, std::array<T, 32>& x) {
   std::integral_constant<size_t, ElemSize * 4> elem_size_x4;
   std::integral_constant<size_t, ElemSize * 16> elem_size_x16;
@@ -214,24 +214,6 @@ static void interleave_in_place(
   tie(x[26], x[27]) = interleave(elem_size_x16, get<1>(x16_3), get<1>(x16_7));
   tie(x[28], x[29]) = interleave(elem_size_x16, get<2>(x16_3), get<2>(x16_7));
   tie(x[30], x[31]) = interleave(elem_size_x16, get<3>(x16_3), get<3>(x16_7));
-}
-
-// These overloads of load/store work on partial tiles
-template <typename Tile>
-static Tile load(Tile, const void* a, size_t stride, size_t m, size_t n_bytes) {
-  Tile result;
-  memset(&result, 0, sizeof(Tile));
-  for (size_t i = 0; i < m; ++i) {
-    memcpy(&result[i], offset_bytes(a, i * stride), n_bytes);
-  }
-  return result;
-}
-
-template <typename Tile>
-static void store(Tile tile, void* x, size_t stride, size_t m, size_t n_bytes) {
-  for (size_t i = 0; i < m; ++i) {
-    memcpy(offset_bytes(x, i * stride), &tile[i], n_bytes);
-  }
 }
 
 template <typename Tile, typename ElemSize>

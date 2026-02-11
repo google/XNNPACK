@@ -77,6 +77,23 @@ static void store(std::array<row, M> x, void* a, size_t stride, size_t m,
   }
 }
 
+template <typename Tile>
+static Tile load(Tile, const void* a, size_t stride, size_t m, size_t n_bytes) {
+  Tile result;
+  memset(&result, 0, sizeof(Tile));
+  for (size_t i = 0; i < m; ++i) {
+    memcpy(&result[i], offset_bytes(a, i * stride), n_bytes);
+  }
+  return result;
+}
+
+template <typename Tile>
+static void store(Tile tile, void* x, size_t stride, size_t m, size_t n_bytes) {
+  for (size_t i = 0; i < m; ++i) {
+    memcpy(offset_bytes(x, i * stride), &tile[i], n_bytes);
+  }
+}
+
 }  // namespace ynn
 
 #endif  // XNNPACK_YNNPACK_KERNELS_TRANSPOSE_X86_SSE2_H_

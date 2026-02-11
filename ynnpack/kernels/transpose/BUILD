@@ -37,11 +37,16 @@ ynn_cc_library(
             "x86_avx2.h",
             "x86_avx2.cc",
         ],
+        "hexagon_hvx": [
+            "hexagon_hvx.h",
+            "hexagon_hvx.cc",
+        ],
     },
     visibility = ["//ynnpack:__subpackages__"],
     deps = [
         "//ynnpack/base",
         "//ynnpack/base:log",
+        "//ynnpack/base/simd",  # buildcleaner: keep
     ],
 )
 
