@@ -20,9 +20,6 @@ namespace ynn {
 // Helpers to call the right SME intrinsics from overloads based on the type.
 inline size_t svcnt(float) { return svcntsw(); }
 inline size_t svcnt(int32_t) { return svcntsw(); }
-inline size_t svcnt(bfloat16_t) { return svcntsh(); }
-inline size_t svcnt(float16_t) { return svcntsh(); }
-inline size_t svcnt(int8_t) { return svcntsb(); }
 
 template <uint64_t tile>
 YNN_ALWAYS_INLINE void svmopa(svbool_t pn, svbool_t pm, svfloat32_t zn,
@@ -86,22 +83,6 @@ YNN_ALWAYS_INLINE bool svany(svbool_t p) YNN_SME_HELPER {
   return svptest_any(svptrue_b8(), p);
 }
 
-YNN_ALWAYS_INLINE void svprefetch(const float* ptr) YNN_SME_HELPER {
-  svprfw(svptrue_b32(), ptr, SV_PLDL1KEEP);
-}
-YNN_ALWAYS_INLINE void svprefetch(const int32_t* ptr) YNN_SME_HELPER {
-  svprfw(svptrue_b32(), ptr, SV_PLDL1KEEP);
-}
-YNN_ALWAYS_INLINE void svprefetch(const bfloat16_t* ptr) YNN_SME_HELPER {
-  svprfh(svptrue_b16(), ptr, SV_PLDL1KEEP);
-}
-YNN_ALWAYS_INLINE void svprefetch(const float16_t* ptr) YNN_SME_HELPER {
-  svprfh(svptrue_b16(), ptr, SV_PLDL1KEEP);
-}
-YNN_ALWAYS_INLINE void svprefetch(const int8_t* ptr) YNN_SME_HELPER {
-  svprfb(svptrue_b8(), ptr, SV_PLDL1KEEP);
-}
-
 YNN_ALWAYS_INLINE svcount_t svctrue(float) YNN_SME_HELPER {
   return svptrue_c32();
 }
@@ -116,63 +97,6 @@ YNN_ALWAYS_INLINE svcount_t svctrue(float16_t) YNN_SME_HELPER {
 }
 YNN_ALWAYS_INLINE svcount_t svctrue(int8_t) YNN_SME_HELPER {
   return svptrue_c8();
-}
-
-// Helpers for ZA loads/stores
-template <uint32_t tile>
-YNN_ALWAYS_INLINE void svld1_hor_za(uint32_t slice, svbool_t p, const float* ptr) YNN_SME_HELPER {
-  svld1_hor_za32(tile, slice, p, ptr);
-}
-template <uint32_t tile>
-YNN_ALWAYS_INLINE void svld1_hor_za(uint32_t slice, svbool_t p, const int32_t* ptr) YNN_SME_HELPER {
-  svld1_hor_za32(tile, slice, p, ptr);
-}
-template <uint32_t tile>
-YNN_ALWAYS_INLINE void svld1_hor_za(uint32_t slice, svbool_t p, const bfloat16_t* ptr) YNN_SME_HELPER {
-  svld1_hor_za16(tile, slice, p, ptr);
-}
-template <uint32_t tile>
-YNN_ALWAYS_INLINE void svld1_hor_za(uint32_t slice, svbool_t p, const float16_t* ptr) YNN_SME_HELPER {
-  svld1_hor_za16(tile, slice, p, ptr);
-}
-template <uint32_t tile>
-YNN_ALWAYS_INLINE void svld1_hor_za(uint32_t slice, svbool_t p, const int8_t* ptr) YNN_SME_HELPER {
-  svld1_hor_za8(tile, slice, p, ptr);
-}
-
-template <uint32_t tile>
-YNN_ALWAYS_INLINE void svst1_ver_za(uint32_t slice, svbool_t p, void* ptr) YNN_SME_HELPER {
-  svst1_ver_za32(tile, slice, p, ptr);
-}
-template <uint32_t tile>
-YNN_ALWAYS_INLINE void svst1_ver_za(uint32_t slice, svbool_t p, int32_t* ptr) YNN_SME_HELPER {
-  svst1_ver_za32(tile, slice, p, ptr);
-}
-template <uint32_t tile>
-YNN_ALWAYS_INLINE void svst1_ver_za(uint32_t slice, svbool_t p, bfloat16_t* ptr) YNN_SME_HELPER {
-  svst1_ver_za16(tile, slice, p, ptr);
-}
-template <uint32_t tile>
-YNN_ALWAYS_INLINE void svst1_ver_za(uint32_t slice, svbool_t p, float16_t* ptr) YNN_SME_HELPER {
-  svst1_ver_za16(tile, slice, p, ptr);
-}
-template <uint32_t tile>
-YNN_ALWAYS_INLINE void svst1_ver_za(uint32_t slice, svbool_t p, int8_t* ptr) YNN_SME_HELPER {
-  svst1_ver_za8(tile, slice, p, ptr);
-}
-
-// Helpers to call SME2 multi-vector loads and creations via overloading.
-YNN_ALWAYS_INLINE svfloat32x4_t svld1_x4_impl(svcount_t c, const float* p) YNN_SME_HELPER {
-  return svld1_x4(c, p);
-}
-YNN_ALWAYS_INLINE svbfloat16x4_t svld1_x4_impl(svcount_t c, const bfloat16_t* p) YNN_SME_HELPER {
-  return svld1_x4(c, p);
-}
-YNN_ALWAYS_INLINE svfloat16x4_t svld1_x4_impl(svcount_t c, const float16_t* p) YNN_SME_HELPER {
-  return svld1_x4(c, p);
-}
-YNN_ALWAYS_INLINE svint8x4_t svld1_x4_impl(svcount_t c, const int8_t* p) YNN_SME_HELPER {
-  return svld1_x4(c, p);
 }
 
 }  // namespace ynn

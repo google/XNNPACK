@@ -216,6 +216,10 @@ ynn_generate_src_hdr(
         "dot,1x64x1",
         "dot,2x64x1",
         "dot,3x64x1",
+        "dot,4x64x1",
+        "dot,5x64x1",
+        "dot,2x32x1",
+        "dot,3x32x1",
         "dot,4x32x1",
         "dot,5x32x1",
         "dot,6x32x1",
@@ -484,7 +488,7 @@ ynn_generate_src_hdr(
     compatible_with = _COMPATIBLE_WITH,
     generator = "//ynnpack/kernels/dot/generator",
     generator_args = [
-        "arm64_neoni8mm_int8_int8_int32",
+        "arm_neoni8mm_int8_int8_int32",
         "dot,2x32x8",
         "dot,4x16x8",
         "dot,6x16x8",
@@ -696,10 +700,7 @@ ynn_cc_library(
         "x86_sse2_fp32.inc",
     ],
     compatible_with = _COMPATIBLE_WITH,
-    copts = ynn_kernel_copts(unroll_loops = False) + select({
-        "//ynnpack:arm64": ["-march=armv9-a+sme2"],
-        "//conditions:default": [],
-    }),
+    copts = ynn_kernel_copts(unroll_loops = False),
     per_arch_srcs = {
         "x86_sse2": ["x86_sse2_fp32.cc"],
         "x86_avx": ["x86_avx_fp32.cc"],
@@ -864,6 +865,7 @@ cc_test(
     malloc = ynn_binary_malloc(),
     deps = [
         ":dot",
+        ":pack_test_tensor",
         "//ynnpack/base",
         "//ynnpack/base/test:buffer",
         "//ynnpack/base/test:tensor",
