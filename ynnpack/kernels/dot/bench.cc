@@ -25,6 +25,7 @@
 #include "ynnpack/base/test/tensor.h"
 #include "ynnpack/base/type.h"
 #include "ynnpack/kernels/dot/dot.h"
+#include "ynnpack/kernels/dot/pack_test_tensor.h"
 #include <benchmark/benchmark.h>
 
 namespace ynn {
@@ -71,7 +72,7 @@ void dot(benchmark::State& state, uint64_t arch_flags, dot_kernel_fn kernel,
   state.SetLabel(std::to_string(m) + "x" + std::to_string(n) + "x" +
                  std::to_string(k));
 
-  const bool transpose_a = flags & dot_flag::transpose_a;
+  const bool should_transpose_a = flags & dot_flag::transpose_a;
 
   Tensor<TA> a({align_up(m, tile_m), k / a_elem_count});
   Tensor<TB> b({k, align_up(n, tile_n) / b_elem_count},
@@ -82,16 +83,20 @@ void dot(benchmark::State& state, uint64_t arch_flags, dot_kernel_fn kernel,
   c.fill(0);
   b = b.crop_padding({0, 0}, {b.extent(0) - k, b.extent(1) - n});
 
-  if (transpose_a) {
-    // This mangles the data, but we don't care here.
-    a = a.reshape({k / tile_k, m * tile_k});
+  // Pack the A matrix if transpose_a is requested
+  size_t a_step = a.stride(0);
+  size_t a_stride_param = a.stride(0) * sizeof(TA);
+  if (should_transpose_a) {
+    a = transpose_a(a, tile_m, tile_k);
+    a_stride_param = tile_m * tile_k * sizeof(TA);
   }
 
   for (auto _ : state) {
     for (size_t i = 0; i < m; i += block_m) {
       size_t m_i = std::min(block_m, m - i);
-      const void* a_i = transpose_a ? &a(0, i * tile_k) : &a(i, 0);
-      kernel(m_i, n, 1, 1, k, a.stride(0) * sizeof(TA), 0, 0, a_i, 0, 0,
+      const void* a_i = a.data() + i * a_step;
+
+      kernel(m_i, n, 1, 1, k, a_stride_param, 0, 0, a_i, 0, 0,
              b.stride(0) * sizeof(TB), b.base(), /*init_c_stride_m=*/0, nullptr,
              c.stride(0) * sizeof(TC), &c(i, 0));
     }

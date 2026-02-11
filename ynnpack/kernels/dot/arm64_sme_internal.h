@@ -79,6 +79,10 @@ YNN_ALWAYS_INLINE svbool_t svptrue(int8_t) YNN_SME_HELPER {
   return svptrue_b8();
 }
 
+YNN_ALWAYS_INLINE bool svany(svbool_t p) YNN_SME_HELPER {
+  return svptest_any(svptrue_b8(), p);
+}
+
 YNN_ALWAYS_INLINE svcount_t svctrue(float) YNN_SME_HELPER {
   return svptrue_c32();
 }

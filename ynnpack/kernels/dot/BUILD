@@ -761,6 +761,7 @@ ynn_cc_library(
         ],
         "arm64_sme2": [
             "arm64_sme2.cc",
+            "arm64_sme2_opt.cc",
             "arm64_sme_internal.h",
         ],
     },
@@ -864,6 +865,7 @@ cc_test(
     malloc = ynn_binary_malloc(),
     deps = [
         ":dot",
+        ":pack_test_tensor",
         "//ynnpack/base",
         "//ynnpack/base/test:buffer",
         "//ynnpack/base/test:tensor",
