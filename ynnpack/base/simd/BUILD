@@ -39,6 +39,11 @@ cc_library(
         # target. For example, f32x16 is provided by both avx512f as a single 512-bit vector, and
         # avx as two 256-bit vectors, and the `concat` operation of two f32x8 values is implemented
         # appropriately for that type.
+        "arm_neon.h",
+        "arm_neonfma.h",
+        "arm_neonfp16.h",
+        "hexagon_hvx.h",
+        "scalar.h",
         "x86_avx.h",
         "x86_avx2.h",
         "x86_avx512bw.h",
@@ -47,10 +52,6 @@ cc_library(
         "x86_fma3.h",
         "x86_sse2.h",
         "x86_sse41.h",
-        "arm_neon.h",
-        "arm_neonfma.h",
-        "arm_neonfp16.h",
-        "scalar.h",
     ],
     deps = ["//ynnpack/base"],
 )
