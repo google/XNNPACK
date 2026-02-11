@@ -57,7 +57,6 @@ static void BM_partial_load(benchmark::State& state, uint64_t arch) {
 
   Init init = {};
   benchmark::DoNotOptimize(src);
-  benchmark::DoNotOptimize(init);
   for (auto _ : state) {
     benchmark::DoNotOptimize(load_no_inline(src, n, init));
   }
