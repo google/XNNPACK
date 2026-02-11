@@ -1020,3 +1020,108 @@ xnnpack_test("operators") {
     "test/unary-ops.h",
   ]
 }
+
+#
+# Benchmarks
+#
+xnnpack_source_set("benchmark_test_support") {
+  testonly = true
+  deps = [
+    ":microkernel_headers",
+    ":test_support",
+    ":xnnpack_headers",
+    "//third_party/cpuinfo",
+    "//third_party/google_benchmark_chrome:google_benchmark",
+    "//third_party/googletest:gtest",
+    "//third_party/pthreadpool:pthreadpool_standalone",
+  ]
+  sources = [
+    "bench/bgemm.h",
+    "bench/conv.h",
+    "bench/dconv.h",
+    "bench/dwconv.h",
+    "bench/gemm-benchmark.cc",
+    "bench/gemm-benchmark.h",
+    "bench/gemm.h",
+    "bench/packq-benchmark.cc",
+    "bench/packq-benchmark.h",
+    "bench/packw-benchmark.h",
+    "bench/spmm.h",
+    "bench/utils.cc",
+    "bench/utils.h",
+  ]
+}
+
+BENCHMARKS = [
+  "bench/bf16-gemm.cc",
+  "bench/f16-conv-hwc2chw.cc",
+  "bench/f16-dwconv.cc",
+  "bench/f16-dwconv2d-chw.cc",
+  "bench/f16-raddstoreexpminusmax.cc",
+  "bench/f16-vcmul.cc",
+  "bench/f32-conv-hwc.cc",
+  "bench/f32-conv-hwc2chw.cc",
+  "bench/f32-dwconv.cc",
+  "bench/f32-dwconv2d-chw.cc",
+  "bench/f32-raddexpminusmax.cc",
+  "bench/f32-raddextexp.cc",
+  "bench/f32-raddstoreexpminusmax.cc",
+  "bench/f32-softmax.cc",
+  "bench/f32-vcmul.cc",
+  "bench/f32-vscaleexpminusmax.cc",
+  "bench/f32-vscaleextexp.cc",
+  "bench/pf16-gemm-minmax.cc",
+  "bench/pf32-gemm-minmax.cc",
+  "bench/pqs8-qc8w-gemm-minmax.cc",
+  "bench/qb4-packw.cc",
+  "bench/qd8-f16-qb4w-gemm.cc",
+  "bench/qd8-f16-qc4w-gemm.cc",
+  "bench/qd8-f16-qc8w-gemm.cc",
+  "bench/qd8-f32-qb4w-gemm.cc",
+  "bench/qd8-f32-qc2w-gemm.cc",
+  "bench/qd8-f32-qc4w-gemm.cc",
+  "bench/qd8-f32-qc8w-gemm.cc",
+  "bench/qp8-f32-qb4w-gemm.cc",
+  "bench/qp8-f32-qc4w-gemm.cc",
+  "bench/qp8-f32-qc8w-gemm.cc",
+  "bench/qs8-dwconv.cc",
+  "bench/qs8-gemm.cc",
+  "bench/qs8-packw.cc",
+  "bench/qs8-qc2w-gemm-fp32.cc",
+  "bench/qs8-qc4w-gemm-fp32.cc",
+  "bench/qs8-qc4w-packw.cc",
+  "bench/qs8-qc8w-gemm-fp32.cc",
+  "bench/qu8-gemm-fp32.cc",
+  "bench/qu8-gemm-rndnu.cc",
+  "bench/qu8-gemm.cc",
+  "bench/rdminmax.cc",
+  "bench/rdsum.cc",
+  "bench/rdsum2.cc",
+  "bench/rminmax.cc",
+  "bench/rsum.cc",
+  "bench/rsum2.cc",
+  "bench/spmm.cc",
+  "bench/spmm.h",
+  "bench/vbinary.cc",
+  "bench/vunary.cc",
+  "bench/x16-packw.cc",
+  "bench/x16-x32-packw.cc",
+  "bench/x32-packw.cc",
+  "bench/x8-lut.cc",
+  "bench/x8-packq.cc",
+  "bench/x8-packw.cc",
+  "bench/xN-transposec.cc",
+  "bench/xx-transposev.cc",
+]
+
+foreach(benchmark_src, BENCHMARKS) {
+  # Strip the file extension and leading directory, convert '-' to '_'
+  base_name = string_replace(benchmark_src, "bench/", "")
+  bench_name = string_replace(base_name, ".cc", "")
+  name = string_replace(bench_name, "-", "_")
+
+  # Define the benchmark
+  xnnpack_benchmark(name) {
+    sources = [ benchmark_src ]
+  }
+}
