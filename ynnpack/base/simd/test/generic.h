@@ -13,7 +13,9 @@
 #include <cstring>
 #include <type_traits>
 #include <utility>
+#include <vector>
 
+#include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include "ynnpack/base/bfloat16.h"
 #include "ynnpack/base/half.h"
@@ -24,6 +26,18 @@
 namespace ynn {
 
 namespace simd {
+
+using testing::Each;
+using testing::ElementsAreArray;
+
+template <typename T>
+std::vector<T> as_vector(T* array, size_t size) {
+  return std::vector<T>(array, array + size);
+}
+template <typename T>
+std::vector<T> as_vector(T* begin, T* end) {
+  return std::vector<T>(begin, end);
+}
 
 using u8 = uint8_t;
 using s8 = int8_t;
@@ -38,9 +52,7 @@ void test_broadcast() {
   for (scalar value : {1, 2, 3}) {
     scalar dst[N];
     store(dst, broadcast<N>(value));
-    for (size_t i = 0; i < N; ++i) {
-      ASSERT_EQ(dst[i], value);
-    }
+    EXPECT_THAT(dst, Each(value));
   }
 }
 
@@ -61,9 +73,7 @@ void test_load_store() {
     auto v = load(src, std::integral_constant<size_t, N>{});
 
     store(dst, v);
-    for (size_t i = 0; i < N; ++i) {
-      ASSERT_EQ(dst[i], src[i]);
-    }
+    EXPECT_THAT(as_vector(dst, N), ElementsAreArray(src, N));
   }
 }
 
@@ -82,9 +92,7 @@ void test_aligned_load_store() {
 
   alignas(vector) scalar dst[N];
   store_aligned(dst, v);
-  for (size_t i = 0; i < N; ++i) {
-    ASSERT_EQ(dst[i], src[i]);
-  }
+  EXPECT_THAT(dst, ElementsAreArray(src, N));
 }
 
 #define TEST_ALIGNED_LOAD_STORE(test_class, type, N)  \
@@ -111,12 +119,9 @@ void test_partial_load() {
 
       scalar dst[N];
       store(dst, v);
-      for (size_t i = 0; i < n; ++i) {
-        ASSERT_EQ(dst[i], src[i]);
-      }
-      for (size_t i = n; i < N; ++i) {
-        ASSERT_EQ(dst[i], init[i]);
-      }
+      EXPECT_THAT(as_vector(dst, n), ElementsAreArray(src, n));
+      EXPECT_THAT(as_vector(dst + n, dst + N),
+                  ElementsAreArray(init + n, init + N));
     }
   }
 }
@@ -136,12 +141,9 @@ void test_partial_load_zero() {
 
       scalar dst[N];
       store(dst, v);
-      for (size_t i = 0; i < n; ++i) {
-        ASSERT_EQ(dst[i], src[i]) << i << " " << n;
-      }
-      for (size_t i = n; i < N; ++i) {
-        ASSERT_EQ(dst[i], 0);
-      }
+      EXPECT_THAT(as_vector(dst, n), ElementsAreArray(src, n));
+      EXPECT_THAT(as_vector(dst + n, dst + N),
+                  ElementsAreArray(dst + n, dst + N));
     }
   }
 }
@@ -161,9 +163,7 @@ void test_partial_load_undef() {
 
       scalar dst[N];
       store(dst, v);
-      for (size_t i = 0; i < n; ++i) {
-        ASSERT_EQ(dst[i], src[i]);
-      }
+      EXPECT_THAT(as_vector(dst, n), ElementsAreArray(src, n));
     }
   }
 }
@@ -185,9 +185,7 @@ void test_partial_store() {
     vector v = load(src, vector::N);
     for (size_t n = 1; n < N; ++n) {
       store(dst, v, n);
-      for (size_t i = 0; i < n; ++i) {
-        ASSERT_EQ(dst[i], src[i]);
-      }
+      EXPECT_THAT(as_vector(dst, n), ElementsAreArray(src, n));
       for (size_t i = n; i < N; ++i) {
         ASSERT_EQ(dst[i], static_cast<scalar>(i + 5));
       }
@@ -282,9 +280,7 @@ void test_extract_impl(std::index_sequence<Is...>, From from_v,
     auto to_v = extract<i>(from_v, std::integral_constant<size_t, Lanes>());
     typename From::value_type dst[Lanes];
     store(dst, to_v);
-    for (size_t j = 0; j < Lanes; ++j) {
-      ASSERT_EQ(dst[j], src[i * Lanes + j]);
-    }
+    EXPECT_THAT(dst, ElementsAreArray(src + i * Lanes, Lanes));
   }()), ...);
 }
 
@@ -318,9 +314,7 @@ void test_concat() {
   scalar dst[N * 2];
   store(dst, concat(load(src, vector::N), load(src + N, vector::N)));
 
-  for (size_t i = 0; i < N * 2; ++i) {
-    ASSERT_EQ(dst[i], src[i]);
-  }
+  EXPECT_THAT(dst, ElementsAreArray(src, src + N * 2));
 }
 
 #define TEST_CONCAT(test_class, vector) \
