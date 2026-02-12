@@ -6,12 +6,17 @@
 #ifndef XNNPACK_YNNPACK_BASE_SIMD_X86_AVX_H_
 #define XNNPACK_YNNPACK_BASE_SIMD_X86_AVX_H_
 
+#include <cassert>
+#include <cstddef>
 #include <cstdint>
 
+#include "ynnpack/base/base.h"
 #include "ynnpack/base/bfloat16.h"
 #include "ynnpack/base/half.h"
 #include "ynnpack/base/simd/vec.h"
 #include "ynnpack/base/simd/x86_avx_base.h"  // IWYU pragma: export
+#include "ynnpack/base/simd/x86_avx_partial_load_store.h"  // IWYU pragma: export
+#include "ynnpack/base/simd/x86_sse2_partial_load_store.h"  // IWYU pragma: export
 
 namespace ynn {
 

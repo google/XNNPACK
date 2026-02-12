@@ -13,6 +13,7 @@
 #include "ynnpack/base/half.h"
 #include "ynnpack/base/simd/vec.h"
 #include "ynnpack/base/simd/x86_sse2_base.h"  // IWYU pragma: export
+#include "ynnpack/base/simd/x86_sse2_partial_load_store.h"  // IWYU pragma: export
 
 namespace ynn {
 

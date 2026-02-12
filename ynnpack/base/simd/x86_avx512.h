@@ -281,250 +281,296 @@ YNN_ALWAYS_INLINE void store(int8_t* ptr, s8x64 b, decltype(s8x64::N) = {}) {
 
 namespace internal {
 
-YNN_ALWAYS_INLINE __m512 mask_loadu(__m512 src, __mmask16 mask,
-                                    const float* ptr) {
-  return _mm512_mask_loadu_ps(src, mask, ptr);
-}
-YNN_ALWAYS_INLINE __m512i mask_loadu(__m512i src, __mmask16 mask,
-                                     const int32_t* ptr) {
-  return _mm512_mask_loadu_epi32(src, mask, ptr);
-}
-YNN_ALWAYS_INLINE __m512i mask_loadu(__m512i src, __mmask32 mask,
-                                     const bfloat16* ptr) {
-  return _mm512_mask_loadu_epi16(src, mask, ptr);
-}
-YNN_ALWAYS_INLINE __m512i mask_loadu(__m512i src, __mmask32 mask,
-                                     const half* ptr) {
-  return _mm512_mask_loadu_epi16(src, mask, ptr);
-}
-YNN_ALWAYS_INLINE __m512i mask_loadu(__m512i src, __mmask32 mask,
-                                     const int16_t* ptr) {
-  return _mm512_mask_loadu_epi16(src, mask, ptr);
-}
-YNN_ALWAYS_INLINE __m512i mask_loadu(__m512i src, __mmask64 mask,
-                                     const int8_t* ptr) {
-  return _mm512_mask_loadu_epi8(src, mask, ptr);
-}
-YNN_ALWAYS_INLINE __m512i mask_loadu(__m512i src, __mmask64 mask,
-                                     const uint8_t* ptr) {
-  return _mm512_mask_loadu_epi8(src, mask, ptr);
+YNN_ALWAYS_INLINE __mmask8 mask_x4(size_t n) {
+  assert(n <= 4);
+  return _cvtu32_mask8((uint32_t)((1 << n) - 1));
 }
 
-YNN_ALWAYS_INLINE __m512 mask_loadu(__mmask16 mask, const float* ptr) {
-  return _mm512_maskz_loadu_ps(mask, ptr);
-}
-YNN_ALWAYS_INLINE __m512i mask_loadu(__mmask16 mask, const int32_t* ptr) {
-  return _mm512_maskz_loadu_epi32(mask, ptr);
-}
-YNN_ALWAYS_INLINE __m512i mask_loadu(__mmask32 mask, const bfloat16* ptr) {
-  return _mm512_maskz_loadu_epi16(mask, ptr);
-}
-YNN_ALWAYS_INLINE __m512i mask_loadu(__mmask32 mask, const half* ptr) {
-  return _mm512_maskz_loadu_epi16(mask, ptr);
-}
-YNN_ALWAYS_INLINE __m512i mask_loadu(__mmask32 mask, const int16_t* ptr) {
-  return _mm512_maskz_loadu_epi16(mask, ptr);
-}
-YNN_ALWAYS_INLINE __m512i mask_loadu(__mmask64 mask, const int8_t* ptr) {
-  return _mm512_maskz_loadu_epi8(mask, ptr);
-}
-YNN_ALWAYS_INLINE __m512i mask_loadu(__mmask64 mask, const uint8_t* ptr) {
-  return _mm512_maskz_loadu_epi8(mask, ptr);
+YNN_ALWAYS_INLINE __mmask8 mask_x8(size_t n) {
+  assert(n <= 8);
+  return _cvtu32_mask8((uint32_t)((1 << n) - 1));
 }
 
-
-YNN_ALWAYS_INLINE void mask_storeu(float* ptr, __mmask16 mask, __m512 val) {
-  _mm512_mask_storeu_ps(ptr, mask, val);
-}
-YNN_ALWAYS_INLINE void mask_storeu(int32_t* ptr, __mmask16 mask, __m512i val) {
-  _mm512_mask_storeu_epi32(ptr, mask, val);
-}
-YNN_ALWAYS_INLINE void mask_storeu(half* ptr, __mmask32 mask, __m512i val) {
-  _mm512_mask_storeu_epi16(ptr, mask, val);
-}
-YNN_ALWAYS_INLINE void mask_storeu(bfloat16* ptr, __mmask32 mask, __m512i val) {
-  _mm512_mask_storeu_epi16(ptr, mask, val);
-}
-YNN_ALWAYS_INLINE void mask_storeu(int16_t* ptr, __mmask32 mask, __m512i val) {
-  _mm512_mask_storeu_epi16(ptr, mask, val);
-}
-YNN_ALWAYS_INLINE void mask_storeu(int8_t* ptr, __mmask64 mask, __m512i val) {
-  _mm512_mask_storeu_epi8(ptr, mask, val);
-}
-YNN_ALWAYS_INLINE void mask_storeu(uint8_t* ptr, __mmask64 mask, __m512i val) {
-  _mm512_mask_storeu_epi8(ptr, mask, val);
-}
-
-// Partial load/store with a non-constant number of elements.
-template <typename T>
-YNN_ALWAYS_INLINE vec<T, 16> partial_load_mask_x32x16(const T* ptr, size_t n,
-                                                      vec<T, 16> src) {
+YNN_ALWAYS_INLINE __mmask16 mask_x16(size_t n) {
   assert(n <= 16);
-  __mmask16 mask = _cvtu32_mask16((uint32_t)((1 << n) - 1));
-  return vec<T, 16>{mask_loadu(src.v, mask, ptr)};
+  return _cvtu32_mask16((uint32_t)((1 << n) - 1));
 }
 
-template <typename T>
-YNN_ALWAYS_INLINE vec<T, 16> partial_load_mask_x32x16(const T* ptr, size_t n) {
-  assert(n <= 16);
-  __mmask16 mask = _cvtu32_mask16((uint32_t)((1 << n) - 1));
-  return vec<T, 16>{mask_loadu(mask, ptr)};
-}
-
-template <typename T>
-YNN_ALWAYS_INLINE vec<T, 32> partial_load_mask_x16x32(const T* ptr, size_t n,
-                                                      vec<T, 32> src) {
+YNN_ALWAYS_INLINE __mmask32 mask_x32(size_t n) {
   assert(n <= 32);
-  __mmask32 mask = (1ULL << n) - 1;
-  return vec<T, 32>{mask_loadu(src.v, mask, ptr)};
+  return (1ULL << n) - 1;
 }
 
-template <typename T>
-YNN_ALWAYS_INLINE vec<T, 32> partial_load_mask_x16x32(const T* ptr, size_t n) {
-  assert(n <= 32);
-  __mmask32 mask = (1ULL << n) - 1;
-  return vec<T, 32>{mask_loadu(mask, ptr)};
-}
-
-template <typename T>
-YNN_ALWAYS_INLINE vec<T, 64> partial_load_mask_x8x64(const T* ptr, size_t n,
-                                                     vec<T, 64> src) {
-  assert(n < 64);
-  __mmask64 mask = _cvtu64_mask64(((1ull << n) - 1));
-  return vec<T, 64>{mask_loadu(src.v, mask, ptr)};
-}
-
-template <typename T>
-YNN_ALWAYS_INLINE vec<T, 64> partial_load_mask_x8x64(const T* ptr, size_t n) {
-  assert(n < 64);
-  __mmask64 mask = _cvtu64_mask64(((1ull << n) - 1));
-  return vec<T, 64>{mask_loadu(mask, ptr)};
-}
-
-
-template <typename T>
-YNN_ALWAYS_INLINE void partial_store_mask_x32x16(T* ptr, vec<T, 16> val,
-                                                 size_t n) {
-  assert(n <= 16);
-  __mmask16 mask = _cvtu32_mask16((uint32_t)((1 << n) - 1));
-  mask_storeu(ptr, mask, val.v);
-}
-
-template <typename T>
-YNN_ALWAYS_INLINE void partial_store_mask_x16x16(T* ptr, vec<T, 16> val,
-                                                 size_t n) {
-  assert(n <= 16);
-  __mmask16 mask = _cvtu32_mask16((uint32_t)((1 << n) - 1));
-  mask_storeu(ptr, mask, val.v);
-}
-
-template <typename T>
-YNN_ALWAYS_INLINE void partial_store_mask_x16x32(T* ptr, vec<T, 32> val,
-                                                 size_t n) {
-  assert(n <= 32);
-  __mmask32 mask = (1ULL << n) - 1;
-  mask_storeu(ptr, mask, val.v);
-}
-
-template <typename T>
-YNN_ALWAYS_INLINE void partial_store_mask_x8x64(T* ptr, vec<T, 64> val,
-                                                size_t n) {
-  assert(n < 64);
-  __mmask64 mask = _cvtu64_mask64(((1ull << n) - 1));
-  mask_storeu(ptr, mask, val.v);
+YNN_ALWAYS_INLINE __mmask64 mask_x64(size_t n) {
+  assert(n <= 64);
+  return _cvtu64_mask64(((1ull << n) - 1));
 }
 
 }  // namespace internal
 
 YNN_ALWAYS_INLINE f32x16 load(const float* ptr, size_t n, f32x16 src) {
-  return internal::partial_load_mask_x32x16(ptr, n, src);
+  return f32x16{_mm512_mask_loadu_ps(src.v, internal::mask_x16(n), ptr)};
 }
 YNN_ALWAYS_INLINE s32x16 load(const int32_t* ptr, size_t n, s32x16 src) {
-  return internal::partial_load_mask_x32x16(ptr, n, src);
+  return s32x16{_mm512_mask_loadu_epi32(src.v, internal::mask_x16(n), ptr)};
 }
 YNN_ALWAYS_INLINE bf16x32 load(const bfloat16* ptr, size_t n, bf16x32 src) {
-  return internal::partial_load_mask_x16x32(ptr, n, src);
+  return bf16x32{_mm512_mask_loadu_epi16(src.v, internal::mask_x32(n), ptr)};
 }
 YNN_ALWAYS_INLINE f16x32 load(const half* ptr, size_t n, f16x32 src) {
-  return internal::partial_load_mask_x16x32(ptr, n, src);
+  return f16x32{_mm512_mask_loadu_epi16(src.v, internal::mask_x32(n), ptr)};
 }
 YNN_ALWAYS_INLINE s16x32 load(const int16_t* ptr, size_t n, s16x32 src) {
-  return internal::partial_load_mask_x16x32(ptr, n, src);
+  return s16x32{_mm512_mask_loadu_epi16(src.v, internal::mask_x32(n), ptr)};
 }
 YNN_ALWAYS_INLINE u8x64 load(const uint8_t* ptr, size_t n, u8x64 src) {
-  return internal::partial_load_mask_x8x64(ptr, n, src);
+  return u8x64{_mm512_mask_loadu_epi8(src.v, internal::mask_x64(n), ptr)};
 }
 YNN_ALWAYS_INLINE s8x64 load(const int8_t* ptr, size_t n, s8x64 src) {
-  return internal::partial_load_mask_x8x64(ptr, n, src);
+  return s8x64{_mm512_mask_loadu_epi8(src.v, internal::mask_x64(n), ptr)};
 }
 
-YNN_ALWAYS_INLINE f32x16 load(const float* ptr, size_t n, zeros<16> src) {
-  return internal::partial_load_mask_x32x16(ptr, n);
+YNN_ALWAYS_INLINE f32x16 load(const float* ptr, size_t n, zeros<16>) {
+  return f32x16{_mm512_maskz_loadu_ps(internal::mask_x16(n), ptr)};
 }
-YNN_ALWAYS_INLINE s32x16 load(const int32_t* ptr, size_t n, zeros<16> src) {
-  return internal::partial_load_mask_x32x16(ptr, n);
+YNN_ALWAYS_INLINE s32x16 load(const int32_t* ptr, size_t n, zeros<16>) {
+  return s32x16{_mm512_maskz_loadu_epi32(internal::mask_x16(n), ptr)};
 }
-YNN_ALWAYS_INLINE bf16x32 load(const bfloat16* ptr, size_t n, zeros<32> src) {
-  return internal::partial_load_mask_x16x32(ptr, n);
+YNN_ALWAYS_INLINE bf16x32 load(const bfloat16* ptr, size_t n, zeros<32>) {
+  return bf16x32{_mm512_maskz_loadu_epi16(internal::mask_x32(n), ptr)};
 }
-YNN_ALWAYS_INLINE f16x32 load(const half* ptr, size_t n, zeros<32> src) {
-  return internal::partial_load_mask_x16x32(ptr, n);
+YNN_ALWAYS_INLINE f16x32 load(const half* ptr, size_t n, zeros<32>) {
+  return f16x32{_mm512_maskz_loadu_epi16(internal::mask_x32(n), ptr)};
 }
-YNN_ALWAYS_INLINE s16x32 load(const int16_t* ptr, size_t n, zeros<32> src) {
-  return internal::partial_load_mask_x16x32(ptr, n);
+YNN_ALWAYS_INLINE s16x32 load(const int16_t* ptr, size_t n, zeros<32>) {
+  return s16x32{_mm512_maskz_loadu_epi16(internal::mask_x32(n), ptr)};
 }
-YNN_ALWAYS_INLINE u8x64 load(const uint8_t* ptr, size_t n, zeros<64> src) {
-  return internal::partial_load_mask_x8x64(ptr, n);
+YNN_ALWAYS_INLINE u8x64 load(const uint8_t* ptr, size_t n, zeros<64>) {
+  return u8x64{_mm512_maskz_loadu_epi8(internal::mask_x64(n), ptr)};
 }
-YNN_ALWAYS_INLINE s8x64 load(const int8_t* ptr, size_t n, zeros<64> src) {
-  return internal::partial_load_mask_x8x64(ptr, n);
+YNN_ALWAYS_INLINE s8x64 load(const int8_t* ptr, size_t n, zeros<64>) {
+  return s8x64{_mm512_maskz_loadu_epi8(internal::mask_x64(n), ptr)};
 }
 
-
-YNN_ALWAYS_INLINE f32x16 load(const float* ptr, size_t n, undef<16> src) {
-  return internal::partial_load_mask_x32x16(ptr, n);
+YNN_ALWAYS_INLINE f32x16 load(const float* ptr, size_t n, undef<16>) {
+  return f32x16{_mm512_maskz_loadu_ps(internal::mask_x16(n), ptr)};
 }
-YNN_ALWAYS_INLINE s32x16 load(const int32_t* ptr, size_t n, undef<16> src) {
-  return internal::partial_load_mask_x32x16(ptr, n);
+YNN_ALWAYS_INLINE s32x16 load(const int32_t* ptr, size_t n, undef<16>) {
+  return s32x16{_mm512_maskz_loadu_epi32(internal::mask_x16(n), ptr)};
 }
-YNN_ALWAYS_INLINE bf16x32 load(const bfloat16* ptr, size_t n, undef<32> src) {
-  return internal::partial_load_mask_x16x32(ptr, n);
+YNN_ALWAYS_INLINE bf16x32 load(const bfloat16* ptr, size_t n, undef<32>) {
+  return bf16x32{_mm512_maskz_loadu_epi16(internal::mask_x32(n), ptr)};
 }
-YNN_ALWAYS_INLINE f16x32 load(const half* ptr, size_t n, undef<32> src) {
-  return internal::partial_load_mask_x16x32(ptr, n);
+YNN_ALWAYS_INLINE f16x32 load(const half* ptr, size_t n, undef<32>) {
+  return f16x32{_mm512_maskz_loadu_epi16(internal::mask_x32(n), ptr)};
 }
-YNN_ALWAYS_INLINE s16x32 load(const int16_t* ptr, size_t n, undef<32> src) {
-  return internal::partial_load_mask_x16x32(ptr, n);
+YNN_ALWAYS_INLINE s16x32 load(const int16_t* ptr, size_t n, undef<32>) {
+  return s16x32{_mm512_maskz_loadu_epi16(internal::mask_x32(n), ptr)};
 }
-YNN_ALWAYS_INLINE u8x64 load(const uint8_t* ptr, size_t n, undef<64> src) {
-  return internal::partial_load_mask_x8x64(ptr, n);
+YNN_ALWAYS_INLINE u8x64 load(const uint8_t* ptr, size_t n, undef<64>) {
+  return u8x64{_mm512_maskz_loadu_epi8(internal::mask_x64(n), ptr)};
 }
-YNN_ALWAYS_INLINE s8x64 load(const int8_t* ptr, size_t n, undef<64> src) {
-  return internal::partial_load_mask_x8x64(ptr, n);
+YNN_ALWAYS_INLINE s8x64 load(const int8_t* ptr, size_t n, undef<64>) {
+  return s8x64{_mm512_maskz_loadu_epi8(internal::mask_x64(n), ptr)};
 }
 
 YNN_ALWAYS_INLINE void store(float* ptr, f32x16 val, size_t n) {
-  internal::partial_store_mask_x32x16(ptr, val, n);
+  _mm512_mask_storeu_ps(ptr, internal::mask_x16(n), val.v);
 }
 YNN_ALWAYS_INLINE void store(int32_t* ptr, s32x16 val, size_t n) {
-  internal::partial_store_mask_x32x16(ptr, val, n);
+  _mm512_mask_storeu_epi32(ptr, internal::mask_x16(n), val.v);
 }
 YNN_ALWAYS_INLINE void store(bfloat16* ptr, bf16x32 val, size_t n) {
-  internal::partial_store_mask_x16x32(ptr, val, n);
+  _mm512_mask_storeu_epi16(ptr, internal::mask_x32(n), val.v);
 }
 YNN_ALWAYS_INLINE void store(half* ptr, f16x32 val, size_t n) {
-  internal::partial_store_mask_x16x32(ptr, val, n);
+  _mm512_mask_storeu_epi16(ptr, internal::mask_x32(n), val.v);
 }
 YNN_ALWAYS_INLINE void store(int16_t* ptr, s16x32 val, size_t n) {
-  internal::partial_store_mask_x16x32(ptr, val, n);
+  _mm512_mask_storeu_epi16(ptr, internal::mask_x32(n), val.v);
 }
 YNN_ALWAYS_INLINE void store(uint8_t* ptr, u8x64 val, size_t n) {
-  internal::partial_store_mask_x8x64(ptr, val, n);
+  _mm512_mask_storeu_epi8(ptr, internal::mask_x64(n), val.v);
 }
 YNN_ALWAYS_INLINE void store(int8_t* ptr, s8x64 val, size_t n) {
-  internal::partial_store_mask_x8x64(ptr, val, n);
+  _mm512_mask_storeu_epi8(ptr, internal::mask_x64(n), val.v);
 }
 
+YNN_ALWAYS_INLINE f32x8 load(const float* ptr, size_t n, f32x8 src) {
+  return f32x8{_mm256_mask_loadu_ps(src.v, internal::mask_x8(n), ptr)};
+}
+YNN_ALWAYS_INLINE s32x8 load(const int32_t* ptr, size_t n, s32x8 src) {
+  return s32x8{_mm256_mask_loadu_epi32(src.v, internal::mask_x8(n), ptr)};
+}
+YNN_ALWAYS_INLINE bf16x16 load(const bfloat16* ptr, size_t n, bf16x16 src) {
+  return bf16x16{_mm256_mask_loadu_epi16(src.v, internal::mask_x16(n), ptr)};
+}
+YNN_ALWAYS_INLINE f16x16 load(const half* ptr, size_t n, f16x16 src) {
+  return f16x16{_mm256_mask_loadu_epi16(src.v, internal::mask_x16(n), ptr)};
+}
+YNN_ALWAYS_INLINE s16x16 load(const int16_t* ptr, size_t n, s16x16 src) {
+  return s16x16{_mm256_mask_loadu_epi16(src.v, internal::mask_x16(n), ptr)};
+}
+YNN_ALWAYS_INLINE u8x32 load(const uint8_t* ptr, size_t n, u8x32 src) {
+  return u8x32{_mm256_mask_loadu_epi8(src.v, internal::mask_x32(n), ptr)};
+}
+YNN_ALWAYS_INLINE s8x32 load(const int8_t* ptr, size_t n, s8x32 src) {
+  return s8x32{_mm256_mask_loadu_epi8(src.v, internal::mask_x32(n), ptr)};
+}
+
+YNN_ALWAYS_INLINE f32x8 load(const float* ptr, size_t n, zeros<8>) {
+  return f32x8{_mm256_maskz_loadu_ps(internal::mask_x8(n), ptr)};
+}
+YNN_ALWAYS_INLINE s32x8 load(const int32_t* ptr, size_t n, zeros<8>) {
+  return s32x8{_mm256_maskz_loadu_epi32(internal::mask_x8(n), ptr)};
+}
+YNN_ALWAYS_INLINE bf16x16 load(const bfloat16* ptr, size_t n, zeros<16>) {
+  return bf16x16{_mm256_maskz_loadu_epi16(internal::mask_x16(n), ptr)};
+}
+YNN_ALWAYS_INLINE f16x16 load(const half* ptr, size_t n, zeros<16>) {
+  return f16x16{_mm256_maskz_loadu_epi16(internal::mask_x16(n), ptr)};
+}
+YNN_ALWAYS_INLINE s16x16 load(const int16_t* ptr, size_t n, zeros<16>) {
+  return s16x16{_mm256_maskz_loadu_epi16(internal::mask_x16(n), ptr)};
+}
+YNN_ALWAYS_INLINE u8x32 load(const uint8_t* ptr, size_t n, zeros<32>) {
+  return u8x32{_mm256_maskz_loadu_epi8(internal::mask_x32(n), ptr)};
+}
+YNN_ALWAYS_INLINE s8x32 load(const int8_t* ptr, size_t n, zeros<32>) {
+  return s8x32{_mm256_maskz_loadu_epi8(internal::mask_x32(n), ptr)};
+}
+
+YNN_ALWAYS_INLINE f32x8 load(const float* ptr, size_t n, undef<8>) {
+  return f32x8{_mm256_maskz_loadu_ps(internal::mask_x8(n), ptr)};
+}
+YNN_ALWAYS_INLINE s32x8 load(const int32_t* ptr, size_t n, undef<8>) {
+  return s32x8{_mm256_maskz_loadu_epi32(internal::mask_x8(n), ptr)};
+}
+YNN_ALWAYS_INLINE bf16x16 load(const bfloat16* ptr, size_t n, undef<16>) {
+  return bf16x16{_mm256_maskz_loadu_epi16(internal::mask_x16(n), ptr)};
+}
+YNN_ALWAYS_INLINE f16x16 load(const half* ptr, size_t n, undef<16>) {
+  return f16x16{_mm256_maskz_loadu_epi16(internal::mask_x16(n), ptr)};
+}
+YNN_ALWAYS_INLINE s16x16 load(const int16_t* ptr, size_t n, undef<16>) {
+  return s16x16{_mm256_maskz_loadu_epi16(internal::mask_x16(n), ptr)};
+}
+YNN_ALWAYS_INLINE u8x32 load(const uint8_t* ptr, size_t n, undef<32>) {
+  return u8x32{_mm256_maskz_loadu_epi8(internal::mask_x32(n), ptr)};
+}
+YNN_ALWAYS_INLINE s8x32 load(const int8_t* ptr, size_t n, undef<32>) {
+  return s8x32{_mm256_maskz_loadu_epi8(internal::mask_x32(n), ptr)};
+}
+
+YNN_ALWAYS_INLINE void store(float* ptr, f32x8 val, size_t n) {
+  _mm256_mask_storeu_ps(ptr, internal::mask_x8(n), val.v);
+}
+YNN_ALWAYS_INLINE void store(int32_t* ptr, s32x8 val, size_t n) {
+  _mm256_mask_storeu_epi32(ptr, internal::mask_x8(n), val.v);
+}
+YNN_ALWAYS_INLINE void store(bfloat16* ptr, bf16x16 val, size_t n) {
+  _mm256_mask_storeu_epi16(ptr, internal::mask_x16(n), val.v);
+}
+YNN_ALWAYS_INLINE void store(half* ptr, f16x16 val, size_t n) {
+  _mm256_mask_storeu_epi16(ptr, internal::mask_x16(n), val.v);
+}
+YNN_ALWAYS_INLINE void store(int16_t* ptr, s16x16 val, size_t n) {
+  _mm256_mask_storeu_epi16(ptr, internal::mask_x16(n), val.v);
+}
+YNN_ALWAYS_INLINE void store(uint8_t* ptr, u8x32 val, size_t n) {
+  _mm256_mask_storeu_epi8(ptr, internal::mask_x32(n), val.v);
+}
+YNN_ALWAYS_INLINE void store(int8_t* ptr, s8x32 val, size_t n) {
+  _mm256_mask_storeu_epi8(ptr, internal::mask_x32(n), val.v);
+}
+
+YNN_ALWAYS_INLINE f32x4 load(const float* ptr, size_t n, f32x4 src) {
+  return f32x4{_mm_mask_loadu_ps(src.v, internal::mask_x4(n), ptr)};
+}
+YNN_ALWAYS_INLINE s32x4 load(const int32_t* ptr, size_t n, s32x4 src) {
+  return s32x4{_mm_mask_loadu_epi32(src.v, internal::mask_x4(n), ptr)};
+}
+YNN_ALWAYS_INLINE bf16x8 load(const bfloat16* ptr, size_t n, bf16x8 src) {
+  return bf16x8{_mm_mask_loadu_epi16(src.v, internal::mask_x8(n), ptr)};
+}
+YNN_ALWAYS_INLINE f16x8 load(const half* ptr, size_t n, f16x8 src) {
+  return f16x8{_mm_mask_loadu_epi16(src.v, internal::mask_x8(n), ptr)};
+}
+YNN_ALWAYS_INLINE s16x8 load(const int16_t* ptr, size_t n, s16x8 src) {
+  return s16x8{_mm_mask_loadu_epi16(src.v, internal::mask_x8(n), ptr)};
+}
+YNN_ALWAYS_INLINE u8x16 load(const uint8_t* ptr, size_t n, u8x16 src) {
+  return u8x16{_mm_mask_loadu_epi8(src.v, internal::mask_x16(n), ptr)};
+}
+YNN_ALWAYS_INLINE s8x16 load(const int8_t* ptr, size_t n, s8x16 src) {
+  return s8x16{_mm_mask_loadu_epi8(src.v, internal::mask_x16(n), ptr)};
+}
+
+YNN_ALWAYS_INLINE f32x4 load(const float* ptr, size_t n, zeros<4>) {
+  return f32x4{_mm_maskz_loadu_ps(internal::mask_x4(n), ptr)};
+}
+YNN_ALWAYS_INLINE s32x4 load(const int32_t* ptr, size_t n, zeros<4>) {
+  return s32x4{_mm_maskz_loadu_epi32(internal::mask_x4(n), ptr)};
+}
+YNN_ALWAYS_INLINE bf16x8 load(const bfloat16* ptr, size_t n, zeros<8>) {
+  return bf16x8{_mm_maskz_loadu_epi16(internal::mask_x8(n), ptr)};
+}
+YNN_ALWAYS_INLINE f16x8 load(const half* ptr, size_t n, zeros<8>) {
+  return f16x8{_mm_maskz_loadu_epi16(internal::mask_x8(n), ptr)};
+}
+YNN_ALWAYS_INLINE s16x8 load(const int16_t* ptr, size_t n, zeros<8>) {
+  return s16x8{_mm_maskz_loadu_epi16(internal::mask_x8(n), ptr)};
+}
+YNN_ALWAYS_INLINE u8x16 load(const uint8_t* ptr, size_t n, zeros<16>) {
+  return u8x16{_mm_maskz_loadu_epi8(internal::mask_x16(n), ptr)};
+}
+YNN_ALWAYS_INLINE s8x16 load(const int8_t* ptr, size_t n, zeros<16>) {
+  return s8x16{_mm_maskz_loadu_epi8(internal::mask_x16(n), ptr)};
+}
+
+YNN_ALWAYS_INLINE f32x4 load(const float* ptr, size_t n, undef<4>) {
+  return f32x4{_mm_maskz_loadu_ps(internal::mask_x4(n), ptr)};
+}
+YNN_ALWAYS_INLINE s32x4 load(const int32_t* ptr, size_t n, undef<4>) {
+  return s32x4{_mm_maskz_loadu_epi32(internal::mask_x4(n), ptr)};
+}
+YNN_ALWAYS_INLINE bf16x8 load(const bfloat16* ptr, size_t n, undef<8>) {
+  return bf16x8{_mm_maskz_loadu_epi16(internal::mask_x8(n), ptr)};
+}
+YNN_ALWAYS_INLINE f16x8 load(const half* ptr, size_t n, undef<8>) {
+  return f16x8{_mm_maskz_loadu_epi16(internal::mask_x8(n), ptr)};
+}
+YNN_ALWAYS_INLINE s16x8 load(const int16_t* ptr, size_t n, undef<8>) {
+  return s16x8{_mm_maskz_loadu_epi16(internal::mask_x8(n), ptr)};
+}
+YNN_ALWAYS_INLINE u8x16 load(const uint8_t* ptr, size_t n, undef<16>) {
+  return u8x16{_mm_maskz_loadu_epi8(internal::mask_x16(n), ptr)};
+}
+YNN_ALWAYS_INLINE s8x16 load(const int8_t* ptr, size_t n, undef<16>) {
+  return s8x16{_mm_maskz_loadu_epi8(internal::mask_x16(n), ptr)};
+}
+
+YNN_ALWAYS_INLINE void store(float* ptr, f32x4 val, size_t n) {
+  _mm_mask_storeu_ps(ptr, internal::mask_x4(n), val.v);
+}
+YNN_ALWAYS_INLINE void store(int32_t* ptr, s32x4 val, size_t n) {
+  _mm_mask_storeu_epi32(ptr, internal::mask_x4(n), val.v);
+}
+YNN_ALWAYS_INLINE void store(bfloat16* ptr, bf16x8 val, size_t n) {
+  _mm_mask_storeu_epi16(ptr, internal::mask_x8(n), val.v);
+}
+YNN_ALWAYS_INLINE void store(half* ptr, f16x8 val, size_t n) {
+  _mm_mask_storeu_epi16(ptr, internal::mask_x8(n), val.v);
+}
+YNN_ALWAYS_INLINE void store(int16_t* ptr, s16x8 val, size_t n) {
+  _mm_mask_storeu_epi16(ptr, internal::mask_x8(n), val.v);
+}
+YNN_ALWAYS_INLINE void store(uint8_t* ptr, u8x16 val, size_t n) {
+  _mm_mask_storeu_epi8(ptr, internal::mask_x16(n), val.v);
+}
+YNN_ALWAYS_INLINE void store(int8_t* ptr, s8x16 val, size_t n) {
+  _mm_mask_storeu_epi8(ptr, internal::mask_x16(n), val.v);
+}
 
 YNN_ALWAYS_INLINE f32x16& operator+=(f32x16& a, f32x16 b) {
   a.v = _mm512_add_ps(a.v, b.v);
