@@ -4,3 +4,4 @@
 gtest_enable_absl_printers = true
 gtest_include_multiprocess = true
 gtest_include_platform_test = false
+gtest_include_objc_support = false
