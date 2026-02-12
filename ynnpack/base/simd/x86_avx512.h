@@ -11,6 +11,7 @@
 #include <cassert>
 #include <cstddef>
 #include <cstdint>
+#include <tuple>
 #include <type_traits>
 
 #include "ynnpack/base/base.h"
@@ -693,6 +694,57 @@ YNN_ALWAYS_INLINE s8x16 extract(s8x64 x, decltype(s8x16::N)) {
 template <int Index>
 YNN_ALWAYS_INLINE u8x16 extract(u8x64 x, decltype(u8x16::N)) {
   return u8x16{_mm512_extracti32x4_epi32(x.v, Index)};
+}
+
+YNN_ALWAYS_INLINE std::tuple<u8x64, u8x64> interleave(
+    std::integral_constant<size_t, 256>, u8x64 x0, u8x64 x1) {
+  return {u8x64{_mm512_shuffle_i64x2(x0.v, x1.v, 0x44)},
+          u8x64{_mm512_shuffle_i64x2(x0.v, x1.v, 0xEE)}};
+}
+YNN_ALWAYS_INLINE std::tuple<u8x64, u8x64> interleave(
+    std::integral_constant<size_t, 128>, u8x64 x0, u8x64 x1) {
+  const __m512i idx1 = _mm512_set_epi64(11, 10, 3, 2, 9, 8, 1, 0);
+  const __m512i idx2 = _mm512_set_epi64(15, 14, 7, 6, 13, 12, 5, 4);
+  return {u8x64{_mm512_permutex2var_epi64(x0.v, idx1, x1.v)},
+          u8x64{_mm512_permutex2var_epi64(x0.v, idx2, x1.v)}};
+}
+YNN_ALWAYS_INLINE std::tuple<u8x64, u8x64> interleave(
+    std::integral_constant<size_t, 64>, u8x64 x0, u8x64 x1) {
+  const __m512i idx1 = _mm512_set_epi64(11, 3, 10, 2, 9, 1, 8, 0);
+  const __m512i idx2 = _mm512_set_epi64(15, 7, 14, 6, 13, 5, 12, 4);
+  return {u8x64{_mm512_permutex2var_epi64(x0.v, idx1, x1.v)},
+          u8x64{_mm512_permutex2var_epi64(x0.v, idx2, x1.v)}};
+}
+YNN_ALWAYS_INLINE std::tuple<u8x64, u8x64> interleave(
+    std::integral_constant<size_t, 32>, u8x64 x0, u8x64 x1) {
+  const __m512i idx1 =
+      _mm512_set_epi32(23, 7, 22, 6, 21, 5, 20, 4, 19, 3, 18, 2, 17, 1, 16, 0);
+  const __m512i idx2 = _mm512_set_epi32(31, 15, 30, 14, 29, 13, 28, 12, 27, 11,
+                                        26, 10, 25, 9, 24, 8);
+  return {u8x64{_mm512_permutex2var_epi32(x0.v, idx1, x1.v)},
+          u8x64{_mm512_permutex2var_epi32(x0.v, idx2, x1.v)}};
+}
+YNN_ALWAYS_INLINE std::tuple<u8x64, u8x64> interleave(
+    std::integral_constant<size_t, 16>, u8x64 x0, u8x64 x1) {
+  return interleave(std::integral_constant<size_t, 128>{},
+                    u8x64{_mm512_unpacklo_epi16(x0.v, x1.v)},
+                    u8x64{_mm512_unpackhi_epi16(x0.v, x1.v)});
+}
+YNN_ALWAYS_INLINE std::tuple<u8x64, u8x64> interleave(
+    std::integral_constant<size_t, 8>, u8x64 x0, u8x64 x1) {
+  return interleave(std::integral_constant<size_t, 128>{},
+                    u8x64{_mm512_unpacklo_epi8(x0.v, x1.v)},
+                    u8x64{_mm512_unpackhi_epi8(x0.v, x1.v)});
+}
+YNN_ALWAYS_INLINE std::tuple<u8x64, u8x64> interleave(
+    std::integral_constant<size_t, 4>, u8x64 x0, u8x64 x1) {
+  __m512i even0 = _mm512_and_si512(x0.v, _mm512_set1_epi8(0x0f));
+  __m512i even1 = _mm512_and_si512(x1.v, _mm512_set1_epi8(0x0f));
+  __m512i odd0 = _mm512_and_si512(x0.v, _mm512_set1_epi8(0xf0));
+  __m512i odd1 = _mm512_and_si512(x1.v, _mm512_set1_epi8(0xf0));
+  return interleave(std::integral_constant<size_t, 8>{},
+                    u8x64{_mm512_or_si512(_mm512_slli_epi16(even1, 4), even0)},
+                    u8x64{_mm512_or_si512(odd1, _mm512_srli_epi16(odd0, 4))});
 }
 
 using f32x32 = vec<float, 32>;

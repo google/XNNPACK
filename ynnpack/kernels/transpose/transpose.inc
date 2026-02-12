@@ -1,3 +1,12 @@
+#ifdef YNN_ARCH_X86_AVX512
+YNN_TRANSPOSE_KERNEL(arch_flag::avx512, transpose_x4_avx512, 4)
+YNN_TRANSPOSE_KERNEL(arch_flag::avx512, transpose_x8_avx512, 8)
+YNN_TRANSPOSE_KERNEL(arch_flag::avx512, transpose_x16_avx512, 16)
+YNN_TRANSPOSE_KERNEL(arch_flag::avx512, transpose_x32_avx512, 32)
+YNN_TRANSPOSE_KERNEL(arch_flag::avx512, transpose_x64_avx512, 64)
+YNN_TRANSPOSE_KERNEL(arch_flag::avx512, transpose_x128_avx512, 128)
+YNN_TRANSPOSE_KERNEL(arch_flag::avx512, transpose_x256_avx512, 256)
+#endif  // YNN_ARCH_X86_AVX512
 #ifdef YNN_ARCH_X86_AVX2
 YNN_TRANSPOSE_KERNEL(arch_flag::avx2, transpose_x32_avx2, 32)
 YNN_TRANSPOSE_KERNEL(arch_flag::avx2, transpose_x64_avx2, 64)

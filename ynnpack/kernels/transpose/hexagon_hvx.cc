@@ -3,20 +3,21 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include "ynnpack/kernels/transpose/hexagon_hvx.h"
-
-#include <hexagon_types.h>
+#include "ynnpack/base/simd/hexagon_hvx.h"
 
 #include <array>
 #include <cassert>
 #include <cstddef>
 #include <type_traits>
 
+#include "ynnpack/base/base.h"
 #include "ynnpack/kernels/transpose/generic.h"
 #include "ynnpack/kernels/transpose/interleave.h"
 #include "ynnpack/kernels/transpose/transpose.h"
 
 namespace ynn {
+
+using simd::u8x128;
 
 void transpose_x32_hvx(size_t m, size_t n, size_t n_bytes_a, size_t stride_a,
                        const void* a, size_t stride_x, void* x) {

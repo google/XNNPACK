@@ -9,6 +9,9 @@
 #include <immintrin.h>
 
 #include <cassert>
+#include <cstddef>
+#include <tuple>
+#include <type_traits>
 
 #include "ynnpack/base/base.h"
 #include "ynnpack/base/simd/x86_avx_base.h"  // IWYU pragma: export
@@ -16,6 +19,46 @@
 namespace ynn {
 
 namespace simd {
+
+YNN_ALWAYS_INLINE std::tuple<u8x32, u8x32> interleave(
+    std::integral_constant<size_t, 128>, u8x32 x0, u8x32 x1) {
+  return {u8x32{_mm256_permute2x128_si256(x0.v, x1.v, 32)},
+          u8x32{_mm256_permute2x128_si256(x0.v, x1.v, 49)}};
+}
+YNN_ALWAYS_INLINE std::tuple<u8x32, u8x32> interleave(
+    std::integral_constant<size_t, 64>, u8x32 x0, u8x32 x1) {
+  return interleave(std::integral_constant<size_t, 128>{},
+                    u8x32{_mm256_unpacklo_epi64(x0.v, x1.v)},
+                    u8x32{_mm256_unpackhi_epi64(x0.v, x1.v)});
+}
+YNN_ALWAYS_INLINE std::tuple<u8x32, u8x32> interleave(
+    std::integral_constant<size_t, 32>, u8x32 x0, u8x32 x1) {
+  return interleave(std::integral_constant<size_t, 128>{},
+                    u8x32{_mm256_unpacklo_epi32(x0.v, x1.v)},
+                    u8x32{_mm256_unpackhi_epi32(x0.v, x1.v)});
+}
+YNN_ALWAYS_INLINE std::tuple<u8x32, u8x32> interleave(
+    std::integral_constant<size_t, 16>, u8x32 x0, u8x32 x1) {
+  return interleave(std::integral_constant<size_t, 128>{},
+                    u8x32{_mm256_unpacklo_epi16(x0.v, x1.v)},
+                    u8x32{_mm256_unpackhi_epi16(x0.v, x1.v)});
+}
+YNN_ALWAYS_INLINE std::tuple<u8x32, u8x32> interleave(
+    std::integral_constant<size_t, 8>, u8x32 x0, u8x32 x1) {
+  return interleave(std::integral_constant<size_t, 128>{},
+                    u8x32{_mm256_unpacklo_epi8(x0.v, x1.v)},
+                    u8x32{_mm256_unpackhi_epi8(x0.v, x1.v)});
+}
+YNN_ALWAYS_INLINE std::tuple<u8x32, u8x32> interleave(
+    std::integral_constant<size_t, 4>, u8x32 x0, u8x32 x1) {
+  __m256i even0 = _mm256_and_si256(x0.v, _mm256_set1_epi8(0x0f));
+  __m256i even1 = _mm256_and_si256(x1.v, _mm256_set1_epi8(0x0f));
+  __m256i odd0 = _mm256_and_si256(x0.v, _mm256_set1_epi8(0xf0));
+  __m256i odd1 = _mm256_and_si256(x1.v, _mm256_set1_epi8(0xf0));
+  return interleave(std::integral_constant<size_t, 8>{},
+                    u8x32{_mm256_or_si256(_mm256_slli_epi16(even1, 4), even0)},
+                    u8x32{_mm256_or_si256(odd1, _mm256_srli_epi16(odd0, 4))});
+}
 
 YNN_ALWAYS_INLINE s32x8& operator+=(s32x8& a, s32x8 b) {
   a.v = _mm256_add_epi32(a.v, b.v);

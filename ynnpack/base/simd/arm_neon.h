@@ -12,6 +12,7 @@
 #include <cassert>
 #include <cstddef>
 #include <cstdint>
+#include <tuple>
 #include <type_traits>
 
 #include "ynnpack/base/base.h"
@@ -22,6 +23,20 @@
 namespace ynn {
 
 namespace simd {
+
+template <>
+struct vec<uint8_t, 8> {
+  using value_type = uint8_t;
+  static constexpr std::integral_constant<size_t, 8> N = {};
+
+  vec() = default;
+  explicit vec(uint8x8_t v) : v(v) {}
+  vec(uint8_t x) : v(vdup_n_u8(x)) {}  // NOLINT
+
+  uint8x8_t v;
+};
+
+using u8x8 = vec<uint8_t, 8>;
 
 template <>
 struct vec<float, 4> {
@@ -90,7 +105,11 @@ struct vec<uint8_t, 16> {
 
   vec() = default;
   explicit vec(uint8x16_t v) : v(v) {}
+  vec(u8x8 lo, u8x8 hi) : v(vcombine_u8(lo.v, hi.v)) {}
   vec(uint8_t x) : v(vdupq_n_u8(x)) {}  // NOLINT
+
+  u8x8 lo() const { return u8x8{vget_low_u8(v)}; }
+  u8x8 hi() const { return u8x8{vget_high_u8(v)}; }
 
   uint8x16_t v;
 };
@@ -190,6 +209,11 @@ YNN_ALWAYS_INLINE s8x16 load_aligned(const int8_t* ptr, decltype(s8x16::N),
   return s8x16{vld1q_s8(ptr)};
 }
 
+YNN_ALWAYS_INLINE u8x8 load_aligned(const uint8_t* ptr, decltype(u8x8::N),
+                                    u8x8 = {}) {
+  return u8x8{vld1_u8(ptr)};
+}
+
 YNN_ALWAYS_INLINE void store_aligned(float* ptr, f32x4 b,
                                      decltype(f32x4::N) = {}) {
   vst1q_f32(ptr, b.v);
@@ -219,6 +243,11 @@ YNN_ALWAYS_INLINE void store_aligned(int8_t* ptr, s8x16 b,
   vst1q_s8(ptr, b.v);
 }
 
+YNN_ALWAYS_INLINE void store_aligned(uint8_t* ptr, u8x8 b,
+                                     decltype(u8x8::N) = {}) {
+  vst1_u8(ptr, b.v);
+}
+
 YNN_ALWAYS_INLINE f32x4 load(const float* ptr, decltype(f32x4::N), f32x4 = {}) {
   return f32x4{vld1q_f32(ptr)};
 }
@@ -246,6 +275,10 @@ YNN_ALWAYS_INLINE s8x16 load(const int8_t* ptr, decltype(s8x16::N),
   return s8x16{vld1q_s8(ptr)};
 }
 
+YNN_ALWAYS_INLINE u8x8 load(const uint8_t* ptr, decltype(u8x8::N), u8x8 = {}) {
+  return u8x8{vld1_u8(ptr)};
+}
+
 YNN_ALWAYS_INLINE void store(float* ptr, f32x4 b, decltype(f32x4::N) = {}) {
   vst1q_f32(ptr, b.v);
 }
@@ -267,6 +300,10 @@ YNN_ALWAYS_INLINE void store(uint8_t* ptr, u8x16 b, decltype(u8x16::N) = {}) {
 }
 YNN_ALWAYS_INLINE void store(int8_t* ptr, s8x16 b, decltype(s8x16::N) = {}) {
   vst1q_s8(ptr, b.v);
+}
+
+YNN_ALWAYS_INLINE void store(uint8_t* ptr, u8x8 b, decltype(u8x8::N) = {}) {
+  vst1_u8(ptr, b.v);
 }
 
 namespace internal {
@@ -342,6 +379,10 @@ YNN_ALWAYS_INLINE s8x16 load(const int8_t* ptr, size_t n, s8x16 src) {
   return internal::partial_load_memcpy(ptr, n, src);
 }
 
+YNN_ALWAYS_INLINE u8x8 load(const uint8_t* ptr, size_t n, u8x8 src) {
+  return internal::partial_load_memcpy(ptr, n, src);
+}
+
 YNN_ALWAYS_INLINE f32x4 load(const float* ptr, size_t n, zeros<4> src) {
   return internal::partial_load_neon(ptr, n, src);
 }
@@ -362,6 +403,10 @@ YNN_ALWAYS_INLINE u8x16 load(const uint8_t* ptr, size_t n, zeros<16> src) {
 }
 YNN_ALWAYS_INLINE s8x16 load(const int8_t* ptr, size_t n, zeros<16> src) {
   return internal::partial_load_memcpy(ptr, n, s8x16{0});
+}
+
+YNN_ALWAYS_INLINE u8x8 load(const uint8_t* ptr, size_t n, zeros<8> src) {
+  return internal::partial_load_memcpy(ptr, n, u8x8{0});
 }
 
 YNN_ALWAYS_INLINE f32x4 load(const float* ptr, size_t n, undef<4> src) {
@@ -386,6 +431,10 @@ YNN_ALWAYS_INLINE s8x16 load(const int8_t* ptr, size_t n, undef<16> src) {
   return internal::partial_load_memcpy(ptr, n, s8x16{});
 }
 
+YNN_ALWAYS_INLINE u8x8 load(const uint8_t* ptr, size_t n, undef<8> src) {
+  return internal::partial_load_memcpy(ptr, n, u8x8{});
+}
+
 YNN_ALWAYS_INLINE void store(float* ptr, f32x4 b, size_t n) {
   internal::partial_store_neon(ptr, b, n);
 }
@@ -405,6 +454,10 @@ YNN_ALWAYS_INLINE void store(uint8_t* ptr, u8x16 value, size_t n) {
   internal::partial_store_memcpy(ptr, value, n);
 }
 YNN_ALWAYS_INLINE void store(int8_t* ptr, s8x16 value, size_t n) {
+  internal::partial_store_memcpy(ptr, value, n);
+}
+
+YNN_ALWAYS_INLINE void store(uint8_t* ptr, u8x8 value, size_t n) {
   internal::partial_store_memcpy(ptr, value, n);
 }
 
@@ -588,6 +641,66 @@ YNN_ALWAYS_INLINE int32_t horizontal_min(s32x4 a) {
 #endif
 }
 YNN_ALWAYS_INLINE float horizontal_min(f32x4 a) { return vminvq_f32(a.v); }
+
+YNN_ALWAYS_INLINE std::tuple<u8x16, u8x16> interleave(
+    std::integral_constant<size_t, 64>, u8x16 x0, u8x16 x1) {
+  return {
+      u8x16{vcombine_u8(vget_low_u8(x0.v), vget_low_u8(x1.v))},
+      u8x16{vcombine_u8(vget_high_u8(x0.v), vget_high_u8(x1.v))},
+  };
+}
+YNN_ALWAYS_INLINE std::tuple<u8x16, u8x16> interleave(
+    std::integral_constant<size_t, 32>, u8x16 x0, u8x16 x1) {
+  uint32x4x2_t x01 =
+      vzipq_u32(vreinterpretq_u32_u8(x0.v), vreinterpretq_u32_u8(x1.v));
+  return {u8x16{vreinterpretq_u8_u32(x01.val[0])},
+          u8x16{vreinterpretq_u8_u32(x01.val[1])}};
+}
+YNN_ALWAYS_INLINE std::tuple<u8x16, u8x16> interleave(
+    std::integral_constant<size_t, 16>, u8x16 x0, u8x16 x1) {
+  uint16x8x2_t x01 =
+      vzipq_u16(vreinterpretq_u16_u8(x0.v), vreinterpretq_u16_u8(x1.v));
+  return {u8x16{vreinterpretq_u8_u16(x01.val[0])},
+          u8x16{vreinterpretq_u8_u16(x01.val[1])}};
+}
+YNN_ALWAYS_INLINE std::tuple<u8x16, u8x16> interleave(
+    std::integral_constant<size_t, 8>, u8x16 x0, u8x16 x1) {
+  uint8x16x2_t x01 = vzipq_u8(x0.v, x1.v);
+  return {u8x16{x01.val[0]}, u8x16{x01.val[1]}};
+}
+YNN_ALWAYS_INLINE std::tuple<u8x16, u8x16> interleave(
+    std::integral_constant<size_t, 4>, u8x16 x0, u8x16 x1) {
+  return interleave(
+      std::integral_constant<size_t, 8>{},
+      u8x16{vbslq_u8(vdupq_n_u8(0xf0), vshlq_n_u8(x1.v, 4), x0.v)},
+      u8x16{vbslq_u8(vdupq_n_u8(0xf0), x1.v, vshrq_n_u8(x0.v, 4))});
+}
+
+YNN_ALWAYS_INLINE std::tuple<u8x8, u8x8> interleave(
+    std::integral_constant<size_t, 32>, u8x8 x0, u8x8 x1) {
+  uint32x2x2_t x01 =
+      vzip_u32(vreinterpret_u32_u8(x0.v), vreinterpret_u32_u8(x1.v));
+  return {u8x8{vreinterpret_u8_u32(x01.val[0])},
+          u8x8{vreinterpret_u8_u32(x01.val[1])}};
+}
+YNN_ALWAYS_INLINE std::tuple<u8x8, u8x8> interleave(
+    std::integral_constant<size_t, 16>, u8x8 x0, u8x8 x1) {
+  uint16x4x2_t x01 =
+      vzip_u16(vreinterpret_u16_u8(x0.v), vreinterpret_u16_u8(x1.v));
+  return {u8x8{vreinterpret_u8_u16(x01.val[0])},
+          u8x8{vreinterpret_u8_u16(x01.val[1])}};
+}
+YNN_ALWAYS_INLINE std::tuple<u8x8, u8x8> interleave(
+    std::integral_constant<size_t, 8>, u8x8 x0, u8x8 x1) {
+  uint8x8x2_t x01 = vzip_u8(x0.v, x1.v);
+  return {u8x8{x01.val[0]}, u8x8{x01.val[1]}};
+}
+YNN_ALWAYS_INLINE std::tuple<u8x8, u8x8> interleave(
+    std::integral_constant<size_t, 4>, u8x8 x0, u8x8 x1) {
+  return interleave(std::integral_constant<size_t, 8>{},
+                    u8x8{vbsl_u8(vdup_n_u8(0xf0), vshl_n_u8(x1.v, 4), x0.v)},
+                    u8x8{vbsl_u8(vdup_n_u8(0xf0), x1.v, vshr_n_u8(x0.v, 4))});
+}
 
 template <typename T>
 YNN_ALWAYS_INLINE std::array<vec<T, 4>, 4> transpose(

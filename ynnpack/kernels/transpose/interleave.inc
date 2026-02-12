@@ -1,3 +1,12 @@
+#ifdef YNN_ARCH_X86_AVX512
+YNN_INTERLEAVE_KERNEL(arch_flag::avx512, interleave2_x4_avx512, 2, 4)
+YNN_INTERLEAVE_KERNEL(arch_flag::avx512, interleave2_x8_avx512, 2, 8)
+YNN_INTERLEAVE_KERNEL(arch_flag::avx512, interleave2_x16_avx512, 2, 16)
+YNN_INTERLEAVE_KERNEL(arch_flag::avx512, interleave2_x32_avx512, 2, 32)
+YNN_INTERLEAVE_KERNEL(arch_flag::avx512, interleave4_x8_avx512, 4, 8)
+YNN_INTERLEAVE_KERNEL(arch_flag::avx512, interleave4_x16_avx512, 4, 16)
+YNN_INTERLEAVE_KERNEL(arch_flag::avx512, interleave4_x32_avx512, 4, 32)
+#endif  // YNN_ARCH_X86_AVX512
 #ifdef YNN_ARCH_X86_AVX2
 YNN_INTERLEAVE_KERNEL(arch_flag::avx2, interleave2_x4_avx2, 2, 4)
 YNN_INTERLEAVE_KERNEL(arch_flag::avx2, interleave2_x8_avx2, 2, 8)

@@ -24,23 +24,12 @@ ynn_cc_library(
     compatible_with = _COMPATIBLE_WITH,
     copts = ynn_kernel_copts(),
     per_arch_srcs = {
-        "arm_neon": [
-            "arm_neon.h",
-            "arm_neon.cc",
-        ],
-        "x86_sse2": [
-            "x86_sse2.h",
-            "x86_sse2.cc",
-        ],
+        "arm_neon": ["arm_neon.cc"],
+        "x86_sse2": ["x86_sse2.cc"],
         "x86_avx": ["x86_avx.cc"],
-        "x86_avx2": [
-            "x86_avx2.h",
-            "x86_avx2.cc",
-        ],
-        "hexagon_hvx": [
-            "hexagon_hvx.h",
-            "hexagon_hvx.cc",
-        ],
+        "x86_avx2": ["x86_avx2.cc"],
+        "x86_avx512": ["x86_avx512.cc"],
+        "hexagon_hvx": ["hexagon_hvx.cc"],
     },
     visibility = ["//ynnpack:__subpackages__"],
     deps = [

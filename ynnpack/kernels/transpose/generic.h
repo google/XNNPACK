@@ -10,11 +10,14 @@
 #include <array>
 #include <cassert>
 #include <cstddef>
+#include <cstdint>
 #include <cstring>
 #include <tuple>
 #include <type_traits>
 
 #include "ynnpack/base/arithmetic.h"
+#include "ynnpack/base/base.h"
+#include "ynnpack/base/simd/vec.h"
 
 namespace ynn {
 
@@ -214,6 +217,40 @@ YNN_ALWAYS_INLINE static void interleave_in_place(
   tie(x[26], x[27]) = interleave(elem_size_x16, get<1>(x16_3), get<1>(x16_7));
   tie(x[28], x[29]) = interleave(elem_size_x16, get<2>(x16_3), get<2>(x16_7));
   tie(x[30], x[31]) = interleave(elem_size_x16, get<3>(x16_3), get<3>(x16_7));
+}
+
+// These templates support loading simd::vec<uint8_t, N> tiles. These maintain
+// the compile-time constant-ness of `n_bytes`, to appropriately dispatch to
+// the partial or full simd::load/store implementation.
+template <size_t M, size_t N, typename NBytes>
+static std::array<simd::vec<uint8_t, N>, M> load(
+    std::array<simd::vec<uint8_t, N>, M>, const void* a, size_t stride,
+    size_t m, NBytes n_bytes) {
+  assert(m > 0);
+  assert(m <= M);
+  using row = simd::vec<uint8_t, N>;
+  std::array<row, M> x;
+  x[0] = simd::load(reinterpret_cast<const uint8_t*>(a), n_bytes,
+                    simd::zeros<N>{});
+  for (size_t i = 1; i < M; ++i) {
+    x[i] = i < m ? simd::load(reinterpret_cast<const uint8_t*>(a) + i * stride,
+                              n_bytes, simd::zeros<N>{})
+                 : row{0};
+  }
+  return x;
+}
+
+template <size_t M, size_t N, typename NBytes>
+static void store(const std::array<simd::vec<uint8_t, N>, M>& x, void* a,
+                  size_t stride, size_t m, NBytes n_bytes) {
+  assert(m > 0);
+  assert(m <= M);
+  simd::store(reinterpret_cast<uint8_t*>(a), x[0], n_bytes);
+  for (size_t i = 1; i < m; ++i) {
+    if (i < m) {
+      simd::store(reinterpret_cast<uint8_t*>(a) + i * stride, x[i], n_bytes);
+    }
+  }
 }
 
 template <typename Tile, typename ElemSize>

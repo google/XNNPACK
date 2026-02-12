@@ -14,6 +14,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
+#include <tuple>
 #include <type_traits>
 
 #include "ynnpack/base/arithmetic.h"
@@ -642,6 +643,13 @@ YNN_ALWAYS_INLINE s32x128 convert(u8x128 x, int32_t) {
   HVX_VectorPair s16 = Q6_Wuh_vunpack_Vub(x.v);
   return {convert(s16x64{Q6_V_lo_W(s16)}, int32_t{}),
           convert(s16x64{Q6_V_hi_W(s16)}, int32_t{})};
+}
+
+template <typename ElemSizeBits>
+YNN_ALWAYS_INLINE std::tuple<u8x128, u8x128> interleave(
+    ElemSizeBits elem_size_bits, u8x128 x0, u8x128 x1) {
+  HVX_VectorPair x01 = Q6_W_vshuff_VVR(x1.v, x0.v, -(elem_size_bits / 8));
+  return {u8x128{Q6_V_lo_W(x01)}, u8x128{Q6_V_hi_W(x01)}};
 }
 
 }  // namespace simd
