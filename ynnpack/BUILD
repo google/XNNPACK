@@ -223,16 +223,6 @@ define_build_option(
 )
 
 define_build_option(
-    name = "ynn_enable_x86_avx512f",
-    default_all = [":ynn_enable_x86_avx512"],
-)
-
-define_build_option(
-    name = "ynn_enable_x86_avx512bw",
-    default_all = [":ynn_enable_x86_avx512"],
-)
-
-define_build_option(
     name = "ynn_enable_x86_avx512bf16",
     default_all = [
         ":ynn_enable_x86_avx512",

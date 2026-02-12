@@ -226,7 +226,7 @@ ynn_cc_library(
         "x86_avx": ["x86_avx.cc"],
         "x86_avx2": ["x86_avx2.cc"],
         "x86_avx512bf16": ["x86_avx512bf16.cc"],
-        "x86_avx512f": ["x86_avx512f.cc"],
+        "x86_avx512": ["x86_avx512f.cc"],
         "x86_f16c": ["x86_f16c.cc"],
         "x86_fma3": ["x86_fma3.cc"],
         "x86_sse2": ["x86_sse2.cc"],

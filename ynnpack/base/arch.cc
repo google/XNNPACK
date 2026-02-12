@@ -57,6 +57,8 @@ uint64_t get_supported_arch_flags() {
     if (cpuinfo_has_x86_fma3()) result |= arch_flag::fma3;
     if (cpuinfo_has_x86_avx512f()) result |= arch_flag::avx512f;
     if (cpuinfo_has_x86_avx512bw()) result |= arch_flag::avx512bw;
+    if (cpuinfo_has_x86_avx512vl()) result |= arch_flag::avx512vl;
+    if (cpuinfo_has_x86_avx512dq()) result |= arch_flag::avx512dq;
     if (cpuinfo_has_x86_avx512bf16()) result |= arch_flag::avx512bf16;
     if (cpuinfo_has_x86_avx512fp16()) result |= arch_flag::avx512fp16;
     if (cpuinfo_has_x86_avx512vnni()) result |= arch_flag::avx512vnni;

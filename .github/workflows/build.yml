@@ -444,8 +444,10 @@ jobs:
               --disk_cache=/home/xnnpack/.cache/bazel/disk_cache \
               --repository_cache=/home/xnnpack/.cache/bazel/repo_cache \
               --test_output=errors \
+              -- \
               //test/... \
-              //bench/...
+              //bench/... \
+              //ynnpack/...
 
       - name: Build and run tests
         if: ${{ inputs.run-tests }}
@@ -456,6 +458,7 @@ jobs:
               --repository_cache=/home/xnnpack/.cache/bazel/repo_cache \
               --test_output=errors \
               --local_test_jobs=HOST_CPUS \
+              -- \
               //test/... \
               //bench/... \
               //ynnpack/...
@@ -486,8 +489,7 @@ jobs:
         --define=xnn_enable_avx512skx=false
         --define=xnn_enable_avx512f=false
         --define=ynn_enable_x86_amx=false
-        --define=ynn_enable_x86_avx512fp16=false
-        --define=ynn_enable_x86_avx512bf16=false
+        --define=ynn_enable_x86_avx512=false
     steps:
       - uses: actions/checkout@v6
       - name: Mount Bazel Cache
@@ -508,8 +510,10 @@ jobs:
               --disk_cache=/home/xnnpack/.cache/bazel/disk_cache \
               --repository_cache=/home/xnnpack/.cache/bazel/repo_cache \
               ${BAZEL_DEFINES} \
+              -- \
               //test/... \
-              //bench/...
+              //bench/... \
+              //ynnpack/...
 
       - name: Build and run tests
         if: ${{ inputs.run-tests }}
@@ -521,9 +525,11 @@ jobs:
               --test_output=errors \
               --local_test_jobs=HOST_CPUS \
               ${BAZEL_DEFINES} \
+              -- \
               //test/... \
               //bench/... \
-              //ynnpack/...
+              //ynnpack/... \
+              -//ynnpack/kernels/dot:get_dot_kernel_test
 
       - name: Compress disk cache
         if: ${{ inputs.update-caches }}
@@ -559,8 +565,10 @@ jobs:
               --disk_cache=/home/xnnpack/.cache/bazel/disk_cache \
               --repository_cache=/home/xnnpack/.cache/bazel/repo_cache \
               --test_output=errors \
+              -- \
               //test/... \
-              //bench/...
+              //bench/... \
+              //ynnpack/...
 
       - name: Build and run tests
         if: ${{ inputs.run-tests }}
@@ -572,6 +580,7 @@ jobs:
               --test_output=errors \
               --local_test_jobs=HOST_CPUS \
               --test_tag_filters=-not_run:arm \
+              -- \
               //test/... \
               //bench/... \
               //ynnpack/...
@@ -614,8 +623,10 @@ jobs:
               --disk_cache=/home/xnnpack/.cache/bazel/disk_cache \
               --repository_cache=/home/xnnpack/.cache/bazel/repo_cache \
               ${BAZEL_DEFINES} \
+              -- \
               //test/... \
-              //bench/...
+              //bench/... \
+              //ynnpack/...
 
       - name: Build and run tests
         if: ${{ inputs.run-tests }}
@@ -628,6 +639,7 @@ jobs:
               --local_test_jobs=HOST_CPUS \
               ${BAZEL_DEFINES} \
               --test_tag_filters=-not_run:arm \
+              -- \
               //test/... \
               //bench/... \
               //ynnpack/...

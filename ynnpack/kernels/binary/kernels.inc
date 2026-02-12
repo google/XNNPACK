@@ -3,9 +3,9 @@
 #ifdef YNN_ARCH_X86_AVX512BF16
 #include "ynnpack/kernels/binary/x86_avx512bf16.inc"
 #endif  // YNN_ARCH_X86_AVX512BF16
-#ifdef YNN_ARCH_X86_AVX512F
+#ifdef YNN_ARCH_X86_AVX512
 #include "ynnpack/kernels/binary/x86_avx512f.inc"
-#endif  // YNN_ARCH_X86_AVX512F
+#endif  // YNN_ARCH_X86_AVX512
 #ifdef YNN_ARCH_X86_AVX2
 #include "ynnpack/kernels/binary/x86_avx2.inc"
 #endif  // YNN_ARCH_X86_AVX2
