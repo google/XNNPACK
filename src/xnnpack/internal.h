@@ -370,7 +370,7 @@ enum xnn_status xnn_reshape_convert_nc_f32_qdu8(
 // XNN_EXTRA_QUANTIZATION_PARAMS entries.
 enum xnn_status xnn_setup_convert_nc_f32_qdu8(
     xnn_operator_t convert_op, const float* input, uint8_t* output,
-    struct xnn_quantization_params* quantization_params);
+    float* row_sum, struct xnn_quantization_params* quantization_params);
 
 enum xnn_status xnn_create_fully_connected_nc_qdu8_f16_qc8w(
     size_t input_channels, size_t output_channels, size_t input_stride,
