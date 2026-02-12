@@ -161,6 +161,10 @@ void TestStaticB(A, B, C) {
     if (random_bool(rng)) {
       subgraph_flags |= YNN_FLAG_CONSISTENT_ARITHMETIC;
     }
+    uint32_t dot_flags = 0;
+    if (random_bool(rng)) {
+      dot_flags |= YNN_NODE_FLAG_F32_DOT_TO_BF16_X3;
+    }
     SubgraphBuilder subgraph(4, subgraph_flags);
     const uint32_t a_id = 0;
     const uint32_t b_id = 1;
@@ -182,7 +186,7 @@ void TestStaticB(A, B, C) {
       subgraph.AddInput(type_of<C>(), output_rank, c_id);
     }
 
-    subgraph.AddDot(num_k_dims, a_id, b_id, c_id, output_id);
+    subgraph.AddDot(num_k_dims, a_id, b_id, c_id, output_id, dot_flags);
 
     Runtime runtime(subgraph.GetSubgraph(),
                     random_bool(rng) ? &scheduler : nullptr);
@@ -251,7 +255,11 @@ void TestStaticB(A, B, C) {
               << " a_shape=" << index_to_string(a_shape)
               << " b_shape=" << index_to_string(b_shape);
         } else {
-          const float tolerance = epsilon(type_of<C>()) * (num_k_elements + 1) *
+          float tolerance_epsilon = epsilon(type_of<C>());
+          if (dot_flags & YNN_NODE_FLAG_F32_DOT_TO_BF16_X3) {
+            tolerance_epsilon = epsilon(ynn_type_bf16) * epsilon(ynn_type_bf16);
+          }
+          const float tolerance = tolerance_epsilon * (num_k_elements + 1) *
                                   max_abs_value * max_abs_value * 2.0f;
           ASSERT_NEAR(c(i), expected(i), tolerance)
               << "i=" << index_to_string(i) << " num_k_dims=" << num_k_dims
@@ -339,6 +347,10 @@ void TestDynamicB(A, B, C) {
     if (random_bool(rng)) {
       subgraph_flags |= YNN_FLAG_CONSISTENT_ARITHMETIC;
     }
+    uint32_t dot_flags = 0;
+    if (random_bool(rng)) {
+      dot_flags |= YNN_NODE_FLAG_F32_DOT_TO_BF16_X3;
+    }
     SubgraphBuilder subgraph(4, subgraph_flags);
     const uint32_t a_id = 0;
     const uint32_t b_id = 1;
@@ -378,7 +390,7 @@ void TestDynamicB(A, B, C) {
       subgraph.AddInput(type_of<C>(), output_rank, c_id);
     }
 
-    subgraph.AddDot(num_k_dims, a_id, b_tr_id, c_id, output_id);
+    subgraph.AddDot(num_k_dims, a_id, b_tr_id, c_id, output_id, dot_flags);
 
     Runtime runtime(subgraph.GetSubgraph(),
                     random_bool(rng) ? &scheduler : nullptr);
@@ -456,7 +468,11 @@ void TestDynamicB(A, B, C) {
               << " shapes.a=" << index_to_string(shapes.a)
               << " shapes.b=" << index_to_string(shapes.b);
         } else {
-          const float tolerance = epsilon(type_of<C>()) * (num_k_elements + 1) *
+          float tolerance_epsilon = epsilon(type_of<C>());
+          if (dot_flags & YNN_NODE_FLAG_F32_DOT_TO_BF16_X3) {
+            tolerance_epsilon = epsilon(ynn_type_bf16) * epsilon(ynn_type_bf16);
+          }
+          const float tolerance = tolerance_epsilon * (num_k_elements + 1) *
                                   max_abs_value * max_abs_value * 2.0f;
           ASSERT_NEAR(c(i), expected(i), tolerance)
               << "i=" << index_to_string(i) << " num_k_dims=" << num_k_dims
@@ -524,6 +540,10 @@ void TestStaticShapeDynamicB(A, B, C) {
     if (random_bool(rng)) {
       subgraph_flags |= YNN_FLAG_CONSISTENT_ARITHMETIC;
     }
+    uint32_t dot_flags = 0;
+    if (random_bool(rng)) {
+      dot_flags |= YNN_NODE_FLAG_F32_DOT_TO_BF16_X3;
+    }
     SubgraphBuilder subgraph(4, subgraph_flags);
     const uint32_t a_id = 0;
     const uint32_t b_id = 1;
@@ -552,7 +572,7 @@ void TestStaticShapeDynamicB(A, B, C) {
       subgraph.AddTranspose(b_perm, b_id, b_tr_id);
     }
 
-    subgraph.AddDot(num_k_dims, a_id, b_tr_id, c_id, output_id);
+    subgraph.AddDot(num_k_dims, a_id, b_tr_id, c_id, output_id, dot_flags);
 
     Runtime runtime(subgraph.GetSubgraph(),
                     random_bool(rng) ? &scheduler : nullptr);
@@ -613,7 +633,11 @@ void TestStaticShapeDynamicB(A, B, C) {
               << " shapes.a=" << index_to_string(shapes.a)
               << " shapes.b=" << index_to_string(shapes.b);
         } else {
-          const float tolerance = epsilon(type_of<C>()) * (num_k_elements + 1) *
+          float tolerance_epsilon = epsilon(type_of<C>());
+          if (dot_flags & YNN_NODE_FLAG_F32_DOT_TO_BF16_X3) {
+            tolerance_epsilon = epsilon(ynn_type_bf16) * epsilon(ynn_type_bf16);
+          }
+          const float tolerance = tolerance_epsilon * (num_k_elements + 1) *
                                   max_abs_value * max_abs_value * 2.0f;
           ASSERT_NEAR(c(i), expected(i), tolerance)
               << "i=" << index_to_string(i) << " num_k_dims=" << num_k_dims

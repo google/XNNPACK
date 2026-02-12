@@ -339,6 +339,10 @@ enum ynn_status ynn_define_stencil_copy(
     uint32_t input_id, uint32_t padding_id, uint32_t* output_id,
     uint32_t flags);
 
+// This flag indicates that the dot operation should be rewritten to use 3
+// BF16 dot operations to approximate F32 precision.
+#define YNN_NODE_FLAG_F32_DOT_TO_BF16_X3 (1 << 0)
+
 // Performs the operation:
 //
 //   output(batch_dims..., i, j) = c(batch_dims..., i, j)

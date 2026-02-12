@@ -698,8 +698,6 @@ ynn_status ynn_define_binary(ynn_subgraph_t subgraph, ynn_binary_operator op,
 
   // Propagate rank.
   ynn_value& x = subgraph->get_output_value(output_id, a);
-  assert(a.type == b.type);
-  assert(a.type == x.type);
 
   // Find the kernel.
   const bool is_quantized = a.scale_id != YNN_INVALID_VALUE_ID ||
@@ -711,7 +709,42 @@ ynn_status ynn_define_binary(ynn_subgraph_t subgraph, ynn_binary_operator op,
   const binary_kernel* kernel =
       get_binary_kernel(op, a.type, b.type, x.type, is_quantized);
   if (!kernel) {
-    YNN_LOG_ERROR() << "unsupported binary operator " << op
+    if (!(a.type == ynn_type_fp32 && b.type == ynn_type_fp32)) {
+      uint32_t a_fp32_id = YNN_INVALID_VALUE_ID;
+      if (a.type != ynn_type_fp32) {
+        ynn_status status = ynn_define_convert(
+            subgraph, input_a_id, ynn_type_fp32, YNN_INVALID_VALUE_ID,
+            YNN_INVALID_VALUE_ID, &a_fp32_id, /*flags=*/0);
+        if (status != ynn_status_success) return status;
+      } else {
+        a_fp32_id = input_a_id;
+      }
+      uint32_t b_fp32_id = YNN_INVALID_VALUE_ID;
+      if (b.type != ynn_type_fp32) {
+        ynn_status status = ynn_define_convert(
+            subgraph, input_b_id, ynn_type_fp32, YNN_INVALID_VALUE_ID,
+            YNN_INVALID_VALUE_ID, &b_fp32_id, /*flags=*/0);
+        if (status != ynn_status_success) return status;
+      } else {
+        b_fp32_id = input_b_id;
+      }
+
+      if (x.type == ynn_type_fp32) {
+        return ynn_define_binary(subgraph, op, a_fp32_id, b_fp32_id, output_id,
+                                 flags);
+      } else {
+        uint32_t x_fp32_id = YNN_INVALID_VALUE_ID;
+        ynn_status status = ynn_define_binary(subgraph, op, a_fp32_id,
+                                              b_fp32_id, &x_fp32_id, flags);
+        if (status != ynn_status_success) return status;
+
+        return ynn_define_convert(subgraph, x_fp32_id, x.type,
+                                  YNN_INVALID_VALUE_ID, YNN_INVALID_VALUE_ID,
+                                  output_id, /*flags=*/0);
+      }
+    }
+
+    YNN_LOG_ERROR() << "Unsupported binary operator " << op
                     << " for input types " << a.type << ", " << b.type
                     << " and output type " << x.type;
     return ynn_status_unsupported_parameter;

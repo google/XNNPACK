@@ -245,10 +245,10 @@ SubgraphBuilder& SubgraphBuilder::AddPad(
 SubgraphBuilder& SubgraphBuilder::AddDot(size_t num_k_dims, uint32_t input_a_id,
                                          uint32_t input_b_id,
                                          uint32_t input_c_id,
-                                         uint32_t output_id) {
+                                         uint32_t output_id, uint32_t flags) {
   assert(status_ == ynn_status_success);
   status_ = ynn_define_dot(subgraph_.get(), num_k_dims, input_a_id, input_b_id,
-                           input_c_id, &output_id, /*flags=*/0);
+                           input_c_id, &output_id, flags);
   return *this;
 }
 
