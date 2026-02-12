@@ -2875,19 +2875,27 @@ static enum xnn_status optimize_common_subgraphs_min_max_to_clamp(
     return xnn_status_success;
   }
 
-  // Check that `arg_value` is a static scalar value.
+  // One of `input_value` or `arg_value` must be a static scalar value. Swap
+  // them to make that true and prefer making `input_value` the higher-rank one.
   struct xnn_value* input_value = &subgraph->values[node->inputs[0]];
   struct xnn_value* arg_value = &subgraph->values[node->inputs[1]];
-  if (!xnn_value_is_const(arg_value->flags) &&
-      !(xnn_shape_multiply_all_dims(&arg_value->shape) == 1 &&
-        xnn_value_is_static(arg_value->allocation_type))) {
-    if (xnn_value_is_const(input_value->flags) ||
-        (xnn_shape_multiply_all_dims(&input_value->shape) == 1 &&
-         xnn_value_is_static(input_value->allocation_type))) {
+
+  const bool input_is_static_scalar =
+      xnn_value_is_const(input_value->flags) ||
+      (xnn_shape_multiply_all_dims(&input_value->shape) == 1 &&
+       xnn_value_is_static(input_value->allocation_type));
+  const bool arg_is_static_scalar =
+      xnn_value_is_const(arg_value->flags) ||
+      (xnn_shape_multiply_all_dims(&arg_value->shape) == 1 &&
+       xnn_value_is_static(arg_value->allocation_type));
+
+  if (input_is_static_scalar) {
+    if (!arg_is_static_scalar ||
+        input_value->shape.num_dims < arg_value->shape.num_dims) {
       swap_value_pointers(&arg_value, &input_value);
-    } else {
-      return xnn_status_success;
     }
+  } else if (!arg_is_static_scalar) {
+    return xnn_status_success;
   }
 
   // Extract the min/max argument.
