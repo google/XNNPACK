@@ -132,6 +132,9 @@ static void BM_fma(benchmark::State& state, uint64_t arch) {
   vector b{2};
   vector acc{3};
 
+  benchmark::DoNotOptimize(a);
+  benchmark::DoNotOptimize(b);
+  benchmark::DoNotOptimize(acc);
   for (auto _ : state) {
     benchmark::DoNotOptimize(fma_no_inline(a, b, acc));
   }
