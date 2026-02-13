@@ -559,4 +559,140 @@ TEST(fusion, reduce_sum_of_squared_with_convert_int8) {
   TestReduceSumOfSquaredWithConvert(ynn_type_int8, ynn_type_int32);
 }
 
+TEST(fusion, reduce_sum_of_squared_blocked_by_non_copy) {
+  // reduce_sum(stencil_copy(add(x*x, bias))) should NOT be rewritten because
+  // add is not a copy node.
+  const uint32_t x_id = 0;
+  const uint32_t bias_id = 1;
+  const uint32_t y_id = 2;
+  SubgraphBuilder builder(3);
+
+  uint32_t sq_id = YNN_INVALID_VALUE_ID;
+  uint32_t added_id = YNN_INVALID_VALUE_ID;
+  uint32_t stencil_id = YNN_INVALID_VALUE_ID;
+
+  builder.AddInput(ynn_type_fp32, 1, x_id)
+      .AddInput(ynn_type_fp32, 1, bias_id)
+      .AddOutput(ynn_type_fp32, 1, y_id)
+      .AddTensor(ynn_type_fp32, 1, sq_id)
+      .AddTensor(ynn_type_fp32, 1, added_id)
+      .AddTensor(ynn_type_fp32, 2, stencil_id);
+
+  builder.AddBinary(ynn_binary_multiply, x_id, x_id, sq_id)
+      .AddBinary(ynn_binary_add, sq_id, bias_id, added_id)
+      .AddStencilCopy({0}, {1}, {3}, {3}, {1}, added_id, YNN_INVALID_VALUE_ID,
+                      stencil_id)
+      .AddReduce(ynn_reduce_sum, {1}, stencil_id, YNN_INVALID_VALUE_ID, y_id);
+
+  ynn_subgraph& subgraph = *builder.GetSubgraph();
+
+  subgraph.fusion();
+  subgraph.invalidate_dead_values();
+
+  // The reduce should still be reduce_sum (not rewritten).
+  EXPECT_THAT(ProducerOf(y_id, subgraph), IsReduce(ynn_reduce_sum));
+}
+
+TEST(fusion, reduce_sum_of_squared_blocked_by_nontrivial_padding) {
+  // reduce_sum(stencil_copy(static_pad(x*x, 1.0))) should NOT be rewritten
+  // because the padding value is not 0 or 1.
+  const uint32_t x_id = 0;
+  const uint32_t y_id = 1;
+  SubgraphBuilder builder(2);
+
+  uint32_t sq_id = YNN_INVALID_VALUE_ID;
+  uint32_t padded_id = YNN_INVALID_VALUE_ID;
+  uint32_t stencil_id = YNN_INVALID_VALUE_ID;
+  const uint32_t padding_val_id = builder.DefineScalar(2.0f);
+
+  builder.AddInput(ynn_type_fp32, 1, x_id)
+      .AddOutput(ynn_type_fp32, 1, y_id)
+      .AddTensor(ynn_type_fp32, 1, sq_id)
+      .AddTensor(ynn_type_fp32, 1, padded_id)
+      .AddTensor(ynn_type_fp32, 2, stencil_id);
+
+  builder.AddBinary(ynn_binary_multiply, x_id, x_id, sq_id)
+      .AddPad({0}, {0}, {2}, sq_id, padding_val_id, padded_id)
+      .AddStencilCopy({0}, {1}, {3}, {3}, {1}, padded_id, YNN_INVALID_VALUE_ID,
+                      stencil_id)
+      .AddReduce(ynn_reduce_sum, {1}, stencil_id, YNN_INVALID_VALUE_ID, y_id);
+
+  ynn_subgraph& subgraph = *builder.GetSubgraph();
+
+  subgraph.fusion();
+  subgraph.invalidate_dead_values();
+
+  // The reduce should still be reduce_sum (not rewritten).
+  EXPECT_THAT(ProducerOf(y_id, subgraph), IsReduce(ynn_reduce_sum));
+}
+
+TEST(fusion, reduce_sum_of_squared_blocked_by_stencil_copy_nontrivial_padding) {
+  // reduce_sum(stencil_copy(x*x, 1.0)) should NOT be rewritten
+  // because the padding value is not 0 or 1.
+  const uint32_t x_id = 0;
+  const uint32_t y_id = 1;
+  SubgraphBuilder builder(2);
+
+  uint32_t sq_id = YNN_INVALID_VALUE_ID;
+  uint32_t stencil_id = YNN_INVALID_VALUE_ID;
+  const uint32_t padding_val_id = builder.DefineScalar(2.0f);
+
+  builder.AddInput(ynn_type_fp32, 1, x_id)
+      .AddOutput(ynn_type_fp32, 1, y_id)
+      .AddTensor(ynn_type_fp32, 1, sq_id)
+      .AddTensor(ynn_type_fp32, 2, stencil_id);
+
+  builder.AddBinary(ynn_binary_multiply, x_id, x_id, sq_id)
+      .AddStencilCopy({0}, {1}, {3}, {3}, {1}, sq_id, padding_val_id,
+                      stencil_id)
+      .AddReduce(ynn_reduce_sum, {1}, stencil_id, YNN_INVALID_VALUE_ID, y_id);
+
+  ynn_subgraph& subgraph = *builder.GetSubgraph();
+
+  subgraph.fusion();
+  subgraph.invalidate_dead_values();
+
+  // The reduce should still be reduce_sum (not rewritten).
+  EXPECT_THAT(ProducerOf(y_id, subgraph), IsReduce(ynn_reduce_sum));
+}
+
+TEST(fusion, reduce_sum_of_squared_windowed) {
+  // reduce_sum(stencil_copy(static_pad(x*x))) ->
+  //   reduce_sum_squared(stencil_copy(static_pad(x)))
+  const uint32_t x_id = 0;
+  const uint32_t y_id = 1;
+  SubgraphBuilder builder(2);
+
+  uint32_t sq_id = YNN_INVALID_VALUE_ID;
+  uint32_t padded_id = YNN_INVALID_VALUE_ID;
+  uint32_t stencil_id = YNN_INVALID_VALUE_ID;
+  const uint32_t padding_val_id = builder.DefineScalar(0.0f);
+
+  builder.AddInput(ynn_type_fp32, 1, x_id)
+      .AddOutput(ynn_type_fp32, 1, y_id)
+      .AddTensor(ynn_type_fp32, 1, sq_id)
+      .AddTensor(ynn_type_fp32, 1, padded_id)
+      .AddTensor(ynn_type_fp32, 2, stencil_id);
+
+  builder.AddBinary(ynn_binary_multiply, x_id, x_id, sq_id)
+      .AddPad({0}, {0}, {2}, sq_id, padding_val_id, padded_id)
+      .AddStencilCopy({0}, {1}, {3}, {3}, {1}, padded_id, YNN_INVALID_VALUE_ID,
+                      stencil_id)
+      .AddReduce(ynn_reduce_sum, {1}, stencil_id, YNN_INVALID_VALUE_ID, y_id);
+
+  ynn_subgraph& subgraph = *builder.GetSubgraph();
+
+  subgraph.fusion();
+  subgraph.invalidate_dead_values();
+
+  // The multiply node and sq_id should be removed.
+  ASSERT_THAT(subgraph,
+              AllOf(Not(HasValidValueId(sq_id)),
+                    HasValidValueIds(x_id, y_id, padded_id, stencil_id)));
+  // The reduce should now be reduce_sum_squared.
+  EXPECT_THAT(ProducerOf(y_id, subgraph), IsReduce(ynn_reduce_sum_squared));
+  // The pad should now take x_id as input (not sq_id).
+  EXPECT_THAT(ProducerOf(padded_id, subgraph), InputsInclude(x_id));
+}
+
 }  // namespace ynn

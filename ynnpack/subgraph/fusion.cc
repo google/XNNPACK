@@ -400,7 +400,62 @@ bool rewrite_transpose_stencil_copy(ynn_subgraph& subgraph, ynn_node& node,
   return true;
 }
 
+bool is_static_zero(const ynn_value& value) {
+  if (!value.is_static()) {
+    return false;
+  }
+  const char* bytes = static_cast<const char*>(value.data->base);
+  size_t size = value.data->size_bytes();
+  return std::all_of(bytes, bytes + size, [](char c) { return c == 0; });
+}
+
+bool is_copy_node(const ynn_node& node, const ynn_subgraph& subgraph) {
+  if (std::holds_alternative<ynn_node::static_pad>(node.op) ||
+      std::holds_alternative<ynn_node::stencil_copy>(node.op)) {
+    uint32_t padding_id =
+        node.inputs.size() > 1 ? node.inputs[1] : YNN_INVALID_VALUE_ID;
+    return padding_id == YNN_INVALID_VALUE_ID ||
+           is_static_zero(subgraph.value(padding_id));
+  }
+  return false;
+}
+
+// Walks up the producer chain from `start_id`, skipping copy nodes
+// whose outputs have a single non-external consumer. Returns a pointer to the
+// first non-copy producer node, or nullptr if the chain cannot be
+// followed.
+ynn_node* find_non_copy_producer(const ynn_subgraph& subgraph,
+                                 subgraph_analysis& analysis,
+                                 uint32_t start_id) {
+  uint32_t search_id = start_id;
+  while (true) {
+    auto producer = analysis.producers.find(search_id);
+    if (producer == analysis.producers.end()) {
+      return nullptr;
+    }
+
+    ynn_node* producer_node = producer->second;
+    if (!is_copy_node(*producer_node, subgraph)) {
+      return producer_node;
+    }
+
+    // Check that the intermediate output has exactly one consumer
+    // and is not an external output, so it's safe to modify the chain.
+    uint32_t output_id = producer_node->outputs[0];
+    if (analysis.consumers[output_id].size() != 1 ||
+        subgraph.value(output_id).is_external_output()) {
+      return nullptr;
+    }
+    search_id = producer_node->inputs[0];
+  }
+  return nullptr;
+}
+
 // Rewrites ynn_reduce_sum(x*x) to ynn_reduce_sum_squared(x).
+// Also handles the windowed case where copy shape ops (stencil_copy,
+// static_pad) appear between the multiply and the reduce:
+//   reduce_sum(stencil_copy(static_pad(x*x))) ->
+//     reduce_sum_squared(stencil_copy(static_pad(x)))
 // Specifically:
 //   ynn_reduce_sum(fp32 * fp32) -> ynn_reduce_sum_squared(fp32)
 //   ynn_reduce_sum(int32 * int32) -> ynn_reduce_sum_squared(int32)
@@ -411,17 +466,19 @@ bool rewrite_reduce_sum_of_squared(ynn_subgraph& subgraph, ynn_node& node,
     return false;
   }
 
-  auto producer = analysis.producers.find(node.inputs[0]);
-  if (producer == analysis.producers.end()) {
-    return false;
-  }
-
-  ynn_node* mul_node = producer->second;
-  if (!is_binary_node(*mul_node, ynn_binary_multiply)) {
+  ynn_node* mul_node =
+      find_non_copy_producer(subgraph, analysis, node.inputs[0]);
+  if (mul_node == nullptr || !is_binary_node(*mul_node, ynn_binary_multiply)) {
     return false;
   }
 
   if (mul_node->inputs[0] != mul_node->inputs[1]) {
+    return false;
+  }
+
+  uint32_t mul_output_id = mul_node->outputs[0];
+  if (analysis.consumers[mul_output_id].size() != 1 ||
+      subgraph.value(mul_output_id).is_external_output()) {
     return false;
   }
 
@@ -432,9 +489,21 @@ bool rewrite_reduce_sum_of_squared(ynn_subgraph& subgraph, ynn_node& node,
     return false;
   }
 
+  // Rewire multiply's consumers to use x directly. In the simple case
+  // (reduce directly consumes multiply) this updates node.inputs[0] to x_id.
+  // In the windowed case (copy ops in between) this splices out the
+  // multiply from the chain.
+  for (ynn_node* consumer : analysis.consumers[mul_output_id]) {
+    for (uint32_t& inp : consumer->inputs) {
+      if (inp == mul_output_id) {
+        inp = x_id;
+      }
+    }
+  }
+
   YNN_LOG_DEBUG() << "Rewriting reduce_sum(x*x) to reduce_sum_squared(x)";
   ynn::define_reduce(subgraph, node, ynn_reduce_sum_squared, reduce_op->k_dims,
-                     x_id, node.inputs[1], node.outputs[0],
+                     node.inputs[0], node.inputs[1], node.outputs[0],
                      reduce_op->keep_dims);
 
   return true;
