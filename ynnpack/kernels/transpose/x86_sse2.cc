@@ -31,14 +31,6 @@ static std::array<u8x16, M> load(std::array<u8x16, M>, const void* a,
   return result;
 }
 
-template <size_t M>
-static void store(const std::array<u8x16, M>& tile, void* x, size_t stride,
-                  size_t m, size_t n_bytes) {
-  for (size_t i = 0; i < m; ++i) {
-    memcpy(offset_bytes(x, i * stride), &tile[i], n_bytes);
-  }
-}
-
 }  // namespace ynn
 
 #include "ynnpack/kernels/transpose/generic.h"
