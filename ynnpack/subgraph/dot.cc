@@ -1069,6 +1069,11 @@ ynn_status define_dot(ynn_subgraph_t subgraph, size_t num_k_dims,
 
 bool can_convert_f32_to_bf16(ynn_subgraph_t subgraph, uint32_t input_a_id,
                              uint32_t input_b_id, uint32_t flags) {
+  if (!is_constant(*subgraph, input_b_id)) {
+    // TODO(b/475315838): Remove this workaround for a correctness bug when B is
+    // not constant.
+    return false;
+  }
   return (flags & YNN_NODE_FLAG_F32_DOT_TO_BF16_X3) &&
          subgraph->value(input_a_id).type == ynn_type_fp32 &&
          subgraph->value(input_b_id).type == ynn_type_fp32;
