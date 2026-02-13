@@ -461,7 +461,7 @@ void tflite_deconvolution_f32(benchmark::State& state, const char* net) {
 
 // FCN-32 model (PASCAL VOC version).
 // We assume CIF image (352x288) on model input / output.
-static void FCN32(benchmark::internal::Benchmark* b) {
+static void FCN32(benchmark::Benchmark* b) {
   b->ArgNames({"N", "H", "W", "KH", "KW", "PH", "PW", "A", "SH", "SW", "D",
                "Cin", "Cout"});
 
@@ -471,7 +471,7 @@ static void FCN32(benchmark::internal::Benchmark* b) {
 
 // FCN-16 model (PASCAL VOC version).
 // We assume CIF image (352x288) on model input / output.
-static void FCN16(benchmark::internal::Benchmark* b) {
+static void FCN16(benchmark::Benchmark* b) {
   b->ArgNames({"N", "H", "W", "KH", "KW", "PH", "PW", "A", "SH", "SW", "D",
                "Cin", "Cout"});
 
@@ -482,7 +482,7 @@ static void FCN16(benchmark::internal::Benchmark* b) {
 
 // FCN-8 model (PASCAL VOC version).
 // We assume CIF image (352x288) on model input / output.
-static void FCN8(benchmark::internal::Benchmark* b) {
+static void FCN8(benchmark::Benchmark* b) {
   b->ArgNames({"N", "H", "W", "KH", "KW", "PH", "PW", "A", "SH", "SW", "D",
                "Cin", "Cout"});
 
@@ -492,7 +492,7 @@ static void FCN8(benchmark::internal::Benchmark* b) {
   b->Args({1, 36, 44, 16, 16, 0, 0, 0, 8, 8, 1, 21, 21});
 }
 
-static void ENet(benchmark::internal::Benchmark* b) {
+static void ENet(benchmark::Benchmark* b) {
   b->ArgNames({"N", "H", "W", "KH", "KW", "PH", "PW", "A", "SH", "SW", "D",
                "Cin", "Cout"});
 
@@ -507,7 +507,7 @@ static void ENet(benchmark::internal::Benchmark* b) {
   b->Args({1, 256, 256, 2, 2, 0, 0, 0, 2, 2, 1, 16, 12});
 }
 
-static void ESPNet(benchmark::internal::Benchmark* b) {
+static void ESPNet(benchmark::Benchmark* b) {
   b->ArgNames({"N", "H", "W", "KH", "KW", "PH", "PW", "A", "SH", "SW", "D",
                "Cin", "Cout"});
 

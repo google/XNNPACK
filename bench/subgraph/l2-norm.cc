@@ -139,7 +139,7 @@ static void FP32L2Norm(benchmark::State& state) {
   });
 }
 
-static void L2NormArguments(benchmark::internal::Benchmark* b) {
+static void L2NormArguments(benchmark::Benchmark* b) {
   b->ArgNames({"M", "N", "K", "NormMask"});
   for (int norm_mask = 1; norm_mask < 8; norm_mask++) {
     b->Args({128, 256, 512, norm_mask});

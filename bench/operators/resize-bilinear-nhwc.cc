@@ -86,7 +86,7 @@ static void xnnpack_resize_bilinear(benchmark::State& state) {
   }
 }
 
-static void CharacteristicArguments(benchmark::internal::Benchmark* b) {
+static void CharacteristicArguments(benchmark::Benchmark* b) {
   b->ArgNames({"InW", "InH", "OutW", "OutH", "C"});
 
   for (int c : {1, 3, 4}) {

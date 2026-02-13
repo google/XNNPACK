@@ -179,7 +179,7 @@ static void FP32DepthwiseSeparable(benchmark::State& state) {
   });
 }
 
-static void DepthwiseSeparableArguments(benchmark::internal::Benchmark* b) {
+static void DepthwiseSeparableArguments(benchmark::Benchmark* b) {
   b->ArgNames({"W", "H", "KW", "CI", "CO", "IB"});
 
   for (bool transient_indirection_buffer : {false, true}) {

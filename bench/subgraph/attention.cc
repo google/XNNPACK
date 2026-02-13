@@ -705,7 +705,7 @@ static void QD8Attention(benchmark::State& state) {
   });
 }
 
-static void AttentionArguments(benchmark::internal::Benchmark* b) {
+static void AttentionArguments(benchmark::Benchmark* b) {
   b->ArgNames({"T", "H", "N", "S"});
   b->Args({16, 25, 24, 4});
   b->Args({1536, 128, 12, 18});

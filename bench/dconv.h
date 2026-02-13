@@ -22,7 +22,7 @@
 
 
 // ShuffleNet v1/v2.
-inline void ShuffleNetConvArguments(benchmark::internal::Benchmark* b) {
+inline void ShuffleNetConvArguments(benchmark::Benchmark* b) {
   b->ArgNames({"H", "W", "Cout"});
 
   /********* Conv 1 ********/
@@ -31,7 +31,7 @@ inline void ShuffleNetConvArguments(benchmark::internal::Benchmark* b) {
 }
 
 // MobileNet v1/v2.
-inline void MobileNetConvArguments(benchmark::internal::Benchmark* b) {
+inline void MobileNetConvArguments(benchmark::Benchmark* b) {
   b->ArgNames({"H", "W", "Cout"});
 
   /*        H    W   GCout */
@@ -39,7 +39,7 @@ inline void MobileNetConvArguments(benchmark::internal::Benchmark* b) {
 }
 
 // MobileNet v3 Small/Large.
-inline void MobileNetV3ConvArguments(benchmark::internal::Benchmark* b) {
+inline void MobileNetV3ConvArguments(benchmark::Benchmark* b) {
   b->ArgNames({"H", "W", "Cout"});
 
   /******************* Initial Stage *******************/
@@ -48,7 +48,7 @@ inline void MobileNetV3ConvArguments(benchmark::internal::Benchmark* b) {
 }
 
 // SqueezeNet 1.1
-inline void SqueezeNetV11ConvArguments(benchmark::internal::Benchmark* b) {
+inline void SqueezeNetV11ConvArguments(benchmark::Benchmark* b) {
   b->ArgNames({"H", "W", "GCout"});
 
   /*********************** Conv 1 **********************/

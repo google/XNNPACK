@@ -179,7 +179,7 @@ static void QD8FullyConnected(benchmark::State& state) {
   });
 }
 
-static void FullyConnectedArgs(benchmark::internal::Benchmark* b);
+static void FullyConnectedArgs(benchmark::Benchmark* b);
 
 BENCHMARK(FP32FullyConnected)
     ->Unit(benchmark::kMicrosecond)
@@ -199,7 +199,7 @@ BENCHMARK(QD8FullyConnected)
     ->UseRealTime()
     ->Apply(FullyConnectedArgs);
 
-static void FullyConnectedArgs(benchmark::internal::Benchmark* b) {
+static void FullyConnectedArgs(benchmark::Benchmark* b) {
   b->ArgNames({"M", "K", "N"});
 
   static const std::array<int64_t, 17> kDims = {
