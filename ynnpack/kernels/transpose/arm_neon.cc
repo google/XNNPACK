@@ -12,9 +12,27 @@
 #include <cstring>
 
 #include "ynnpack/base/arithmetic.h"
-#include "ynnpack/kernels/transpose/generic.h"
 #include "ynnpack/kernels/transpose/interleave.h"
 #include "ynnpack/kernels/transpose/transpose.h"
+
+namespace ynn {
+
+// TODO(b/450992581): This is faster than using simd::load (the default).
+template <size_t M, size_t N>
+static std::array<simd::vec<uint8_t, N>, M> load(
+    std::array<simd::vec<uint8_t, N>, M>, const void* a, size_t stride,
+    size_t m, size_t n_bytes) {
+  std::array<simd::vec<uint8_t, N>, M> result;
+  memset(&result, 0, sizeof(result));
+  for (size_t i = 0; i < m; ++i) {
+    memcpy(&result[i], offset_bytes(a, i * stride), n_bytes);
+  }
+  return result;
+}
+
+}  // namespace ynn
+
+#include "ynnpack/kernels/transpose/generic.h"
 
 namespace ynn {
 
