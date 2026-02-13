@@ -4,10 +4,12 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <cassert>
+#include <cmath>
 #include <cstddef>
 #include <cstdint>
 
 #include "ynnpack/base/arch.h"  // IWYU pragma: keep
+#include "ynnpack/base/arithmetic.h"
 #include "ynnpack/base/test/tensor.h"
 #include "ynnpack/base/type.h"
 #include "ynnpack/kernels/transpose/interleave.h"
@@ -79,17 +81,32 @@ void bench(benchmark::State& state, uint64_t arch_flags,
   });
 }
 
+template <int ElemSizeBits>
 void TransposeParams(benchmark::internal::Benchmark* b) {
   b->ArgNames({"m", "n"});
-  b->Args({30, 30});
-  b->Args({32, 32});
-  b->Args({64, 64});
-  b->Args({128, 128});
+  // We want to align tiles to 64-bytes (typical cache line size).
+  const int align = ceil_div(64 * 8, ElemSizeBits);
+
+  const int num_elements = ceil_div(8, ElemSizeBits);
+  if (align > num_elements) {
+    b->Args({align, align - num_elements});  // Partial reads
+    b->Args({align - num_elements, align});  // Partial writes
+  }
+
+  // Test aligned sizes on typical L1 and L2 cache sized tiles.
+  constexpr int sizes_bytes[] = {16 * 1024, 128 * 1024};
+  for (int size_bytes : sizes_bytes) {
+    const int num_elements =
+        std::floor(std::sqrt(size_bytes * 8 / ElemSizeBits) / align) * align;
+    if (num_elements > 0) {
+      b->Args({num_elements, num_elements});
+    }
+  }
 }
 
 #define YNN_TRANSPOSE_KERNEL(arch_flags, kernel, elem_size_bits)       \
   BENCHMARK_CAPTURE(bench, kernel, arch_flags, kernel, elem_size_bits) \
-      ->Apply(TransposeParams)                                         \
+      ->Apply(TransposeParams<elem_size_bits>)                         \
       ->UseRealTime();
 #include "ynnpack/kernels/transpose/transpose.inc"
 #undef YNN_TRANSPOSE_KERNEL
