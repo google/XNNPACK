@@ -146,6 +146,7 @@ GN. To check out the code:
         "managed"     : False,
         "custom_deps" : {
        },
+       # Optional: add "checkout_kleidiai": True
        "custom_vars": {},
      },
    ]
@@ -153,6 +154,7 @@ GN. To check out the code:
    target_os = ["android"]
    ```
 4. Run `gclient sync` to get the source.
+
 
 ### Configuring a build
 

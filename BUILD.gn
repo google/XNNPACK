@@ -98,10 +98,34 @@ declare_args() {
   # Enables VNNI extensions, which are separate from AVX512-VNNI
   xnnpack_enable_avx_vnni = target_cpu == "x64" || target_cpu == "x86"
   xnnpack_enable_avx_vnni_int8 = target_cpu == "x64" || target_cpu == "x86"
+
+  # Experimental: import external kernels from KleidiAI
+  xnnpack_enable_arm_kleidiai = false
+
+  # Seperate out some of the architecture features that KleidiAI brings,
+  # so that we can test/bring up each individually. Implicitly enables
+  # the i8mm kernels to start with.
+  # Experimental: use Arm Scalable Matrix Extension (SME)
+  xnnpack_enable_arm_sme = false
+
+  # Experimental: use Arm Scalable Matrix Extension (SME 2)
+  xnnpack_enable_arm_sme2 = false
+
+  # Experimental: use Arm's Neon Dot Product extension
+  xnnpack_enable_arm_dotprod = false
 }
 
 assert(target_cpu == "arm64" || target_cpu == "x64" || target_cpu == "x86",
        "Unsupported target_cpu '${target_cpu}'.")
+
+assert(!xnnpack_enable_arm_kleidiai || target_cpu == "arm64",
+       "xnnpack_enable_arm_kleidiai requires target_cpu='arm64'")
+assert(!xnnpack_enable_arm_sme || xnnpack_enable_arm_kleidiai,
+       "xnnpack_enable_arm_sme requires xnnpack_enable_arm_kleidiai")
+assert(!xnnpack_enable_arm_sme2 || xnnpack_enable_arm_kleidiai,
+       "xnnpack_enable_arm_sme2 requires xnnpack_enable_arm_kleidiai")
+assert(!xnnpack_enable_arm_dotprod || xnnpack_enable_arm_kleidiai,
+       "xnnpack_enable_arm_dotprod requires xnnpack_enable_arm_kleidiai")
 
 # Various #defines and cflags that should stay internal to XNNPACK.
 config("xnnpack_private_config") {
@@ -151,12 +175,31 @@ config("xnnpack_public_config") {
   if (target_cpu == "arm64") {
     # Define the core Armv8
     defines += [
-      "XNN_ENABLE_ARM_DOTPROD=1",
       "XNN_ENABLE_ARM_BF16=1",
       "XNN_ENABLE_ARM_I8MM=1",
       "XNN_ENABLE_ASSEMBLY=1",
       "XNN_ENABLE_ARM_FP16_VECTOR=1",
     ]
+    if (xnnpack_enable_arm_kleidiai) {
+      defines += [ "XNN_ENABLE_KLEIDIAI=1" ]
+    } else {
+      defines += [ "XNN_ENABLE_KLEIDIAI=0" ]
+    }
+    if (xnnpack_enable_arm_dotprod) {
+      defines += [ "XNN_ENABLE_ARM_DOTPROD=1" ]
+    } else {
+      defines += [ "XNN_ENABLE_ARM_DOTPROD=0" ]
+    }
+    if (xnnpack_enable_arm_sme) {
+      defines += [ "XNN_ENABLE_ARM_SME=1" ]
+    } else {
+      defines += [ "XNN_ENABLE_ARM_SME=0" ]
+    }
+    if (xnnpack_enable_arm_sme2) {
+      defines += [ "XNN_ENABLE_ARM_SME2=1" ]
+    } else {
+      defines += [ "XNN_ENABLE_ARM_SME2=0" ]
+    }
   } else if (target_cpu == "x64" || target_cpu == "x86") {
     # x64 support baseline, which is SSSE3 and below to match Chromium.
     defines += [
@@ -375,6 +418,9 @@ if (target_cpu == "arm64") {
       ":microkernel_defs",
       ":microkernel_headers",
     ]
+    if (xnnpack_enable_arm_kleidiai) {
+      deps += [ "//third_party/kleidiai" ]
+    }
     sources = ALL_NEONDOT_MICROKERNEL_SRCS
     sources += ALL_NEONDOT_AARCH64_MICROKERNEL_SRCS
     cflags = [
@@ -445,6 +491,9 @@ if (target_cpu == "arm64") {
       ":microkernel_defs",
       ":microkernel_headers",
     ]
+    if (xnnpack_enable_arm_kleidiai) {
+      deps += [ "//third_party/kleidiai" ]
+    }
     sources = ALL_NEONI8MM_MICROKERNEL_SRCS
 
     cflags = [
@@ -456,6 +505,54 @@ if (target_cpu == "arm64") {
       "-target-feature",
       "-Xclang",
       "+fullfp16",
+    ]
+  }
+
+  source_set("neon_aarch64_microkernels") {
+    deps = [
+      ":microkernel_defs",
+      ":microkernel_headers",
+      "//third_party/pthreadpool:pthreadpool_standalone",
+    ]
+    if (xnnpack_enable_arm_kleidiai) {
+      deps += [ "//third_party/kleidiai" ]
+    }
+    sources = ALL_NEON_AARCH64_MICROKERNEL_SRCS
+  }
+
+  xnnpack_source_set("sme_microkernels") {
+    deps = [
+      ":microkernel_defs",
+      ":microkernel_headers",
+    ]
+    if (xnnpack_enable_arm_kleidiai) {
+      deps += [ "//third_party/kleidiai" ]
+    }
+    sources = ALL_NEONSME_MICROKERNEL_SRCS
+
+    cflags = [
+      "-Xclang",
+      "-target-feature",
+      "-Xclang",
+      "+sme",
+    ]
+  }
+
+  xnnpack_source_set("sme2_microkernels") {
+    deps = [
+      ":microkernel_defs",
+      ":microkernel_headers",
+    ]
+    if (xnnpack_enable_arm_kleidiai) {
+      deps += [ "//third_party/kleidiai" ]
+    }
+    sources = ALL_NEONSME2_MICROKERNEL_SRCS
+
+    cflags = [
+      "-Xclang",
+      "-target-feature",
+      "-Xclang",
+      "+sme2",
     ]
   }
 }
@@ -629,22 +726,35 @@ xnnpack_source_set("xnnpack") {
     "//third_party/fxdiv",
     "//third_party/pthreadpool:pthreadpool_standalone",
   ]
+  if (xnnpack_enable_arm_kleidiai) {
+    deps += [ "//third_party/kleidiai" ]
+  }
   use_libcxx_modules = false
   cflags = []
   if (target_cpu == "arm64") {
-    sources += ALL_NEON_AARCH64_MICROKERNEL_SRCS
     sources += ALL_NEON_MICROKERNEL_SRCS
     sources += ALL_NEONFMA_AARCH64_MICROKERNEL_SRCS
     sources += ALL_NEONFMA_MICROKERNEL_SRCS
     sources += ALL_NEONV8_MICROKERNEL_SRCS
     deps += [
+      ":neon_aarch64_microkernels",
       ":neon_asm_microkernels",
       ":neon_bf16_microkernels",
-      ":neon_dotprod_microkernels",
-      ":neon_dotprodfp16arith_microkernels",
       ":neon_fullfp16_microkernels",
       ":neon_i8mm_microkernels",
     ]
+    if (xnnpack_enable_arm_dotprod) {
+      deps += [
+        ":neon_dotprod_microkernels",
+        ":neon_dotprodfp16arith_microkernels",
+      ]
+    }
+    if (xnnpack_enable_arm_sme) {
+      deps += [ ":sme_microkernels" ]
+    }
+    if (xnnpack_enable_arm_sme2) {
+      deps += [ ":sme2_microkernels" ]
+    }
   } else if (target_cpu == "x64" || target_cpu == "x86") {
     if (xnnpack_enable_avx) {
       deps += [ ":avx_microkernels" ]
