@@ -20,3 +20,9 @@ XNN_UKERNEL(xnn_arch_x86_avx512fp16, xnn_f16_vpreluc_ukernel__avx512fp16_u32, 32
 XNN_UKERNEL(xnn_arch_x86_avx512fp16, xnn_f16_vpreluc_ukernel__avx512fp16_u64, 64, false, uint16_t, struct xnn_f16_default_params, ((xnn_init_f16_default_params_fn) NULL))
 #endif  // XNN_ENABLE_AVX512FP16 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
+#if XNN_ENABLE_RISCV_FP16_VECTOR && (XNN_ARCH_RISCV)
+XNN_UKERNEL(xnn_arch_riscv_vector_fp16_arith, xnn_f16_vpreluc_ukernel__rvvfp16arith_u1v, 1, true, uint16_t, struct xnn_f16_default_params, ((xnn_init_f16_default_params_fn) NULL))
+XNN_UKERNEL(xnn_arch_riscv_vector_fp16_arith, xnn_f16_vpreluc_ukernel__rvvfp16arith_u2v, 2, true, uint16_t, struct xnn_f16_default_params, ((xnn_init_f16_default_params_fn) NULL))
+XNN_UKERNEL(xnn_arch_riscv_vector_fp16_arith, xnn_f16_vpreluc_ukernel__rvvfp16arith_u4v, 4, true, uint16_t, struct xnn_f16_default_params, ((xnn_init_f16_default_params_fn) NULL))
+XNN_UKERNEL(xnn_arch_riscv_vector_fp16_arith, xnn_f16_vpreluc_ukernel__rvvfp16arith_u8v, 8, true, uint16_t, struct xnn_f16_default_params, ((xnn_init_f16_default_params_fn) NULL))
+#endif  // XNN_ENABLE_RISCV_FP16_VECTOR && (XNN_ARCH_RISCV)
