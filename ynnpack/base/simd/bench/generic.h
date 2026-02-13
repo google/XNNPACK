@@ -83,7 +83,7 @@ static void BM_partial_store(benchmark::State& state, uint64_t arch) {
 }
 
 template <int N>
-static void partial_load_store_params(benchmark::internal::Benchmark* b) {
+static void partial_load_store_params(benchmark::Benchmark* b) {
   b->ArgNames({"n", "offset"});
   for (int offset : {0, 1}) {
     for (int n : {1, N - 1}) {

@@ -237,7 +237,7 @@ void tflite_prelu_f32(benchmark::State& state, const char* net) {
 #endif  // BENCHMARK_TENSORFLOW_LITE
 
 // Characteristic arguments for ImageNet classification models
-static void ImageNet(benchmark::internal::Benchmark* b) {
+static void ImageNet(benchmark::Benchmark* b) {
   b->ArgNames({"N", "H", "W", "C"});
 
   int32_t c = 16;

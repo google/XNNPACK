@@ -360,7 +360,7 @@ static void tflite_softmax_f32(benchmark::State& state) {
 }
 #endif  // BENCHMARK_TENSORFLOW_LITE
 
-static void CharacteristicArguments(benchmark::internal::Benchmark* b) {
+static void CharacteristicArguments(benchmark::Benchmark* b) {
   b->ArgNames({"N", "C"});
 
   // CIFAR-10

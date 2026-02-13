@@ -128,7 +128,7 @@ static void FP32Convolution(benchmark::State& state) {
   });
 }
 
-static void ConvolutionArguments(benchmark::internal::Benchmark* b) {
+static void ConvolutionArguments(benchmark::Benchmark* b) {
   b->ArgNames({"W", "H", "KW", "CI", "CO", "IB"});
 
   for (bool transient_indirection_buffer : {false, true}) {

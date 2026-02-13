@@ -136,7 +136,7 @@ void get_dot_kernel(benchmark::State& state, A, B, C) {
   }
 }
 
-void get_dot_kernel_args(benchmark::internal::Benchmark* b) {
+void get_dot_kernel_args(benchmark::Benchmark* b) {
   // We use a large highly composite value when we want to test large shapes, so
   // it is unlikely that block shapes do not divide this extent.
   const int large_shape = 3 * 5 * 7 * 64;

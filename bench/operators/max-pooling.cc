@@ -190,7 +190,7 @@ void max_pooling_f32(benchmark::State& state, const char* net) {
 }
 
 // ShuffleNet v1/v2.
-static void ShuffleNet(benchmark::internal::Benchmark* b) {
+static void ShuffleNet(benchmark::Benchmark* b) {
   b->ArgNames({"N", "H", "W", "K", "P", "S", "C"});
 
   /*       N   H   W    K  P  S   C */
@@ -198,7 +198,7 @@ static void ShuffleNet(benchmark::internal::Benchmark* b) {
 }
 
 // SqueezeNet 1.0
-static void SqueezeNetV10(benchmark::internal::Benchmark* b) {
+static void SqueezeNetV10(benchmark::Benchmark* b) {
   b->ArgNames({"N", "H", "W", "K", "P", "S", "C"});
 
   /*********** MaxPool 1 ************/
@@ -213,7 +213,7 @@ static void SqueezeNetV10(benchmark::internal::Benchmark* b) {
 }
 
 // SqueezeNet 1.1
-static void SqueezeNetV11(benchmark::internal::Benchmark* b) {
+static void SqueezeNetV11(benchmark::Benchmark* b) {
   b->ArgNames({"N", "H", "W", "K", "P", "S", "C"});
 
   /*********** MaxPool 1 ***********/
@@ -227,7 +227,7 @@ static void SqueezeNetV11(benchmark::internal::Benchmark* b) {
   b->Args({1, 13, 13, 3, 0, 2, 256});
 }
 
-static void VGG(benchmark::internal::Benchmark* b) {
+static void VGG(benchmark::Benchmark* b) {
   b->ArgNames({"N", "H", "W", "K", "P", "S", "C"});
 
   /*       N   H    W   K  P  S   C */

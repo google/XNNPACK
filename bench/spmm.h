@@ -27,7 +27,7 @@
 
 
 // ShuffleNet v1 with 1 group.
-static void ShuffleNetV1G1SpmmArguments(benchmark::internal::Benchmark* b) {
+static void ShuffleNetV1G1SpmmArguments(benchmark::Benchmark* b) {
   b->ArgNames({"M", "N", "K"});
 
   /*          M      N    K */
@@ -46,7 +46,7 @@ static void ShuffleNetV1G1SpmmArguments(benchmark::internal::Benchmark* b) {
 }
 
 // ShuffleNet v1 with 2 groups.
-static void ShuffleNetV1G2SpmmArguments(benchmark::internal::Benchmark* b) {
+static void ShuffleNetV1G2SpmmArguments(benchmark::Benchmark* b) {
   b->ArgNames({"M", "N", "K"});
 
   /*          M      N    K */
@@ -65,7 +65,7 @@ static void ShuffleNetV1G2SpmmArguments(benchmark::internal::Benchmark* b) {
 }
 
 // ShuffleNet v1 with 3 groups.
-static void ShuffleNetV1G3SpmmArguments(benchmark::internal::Benchmark* b) {
+static void ShuffleNetV1G3SpmmArguments(benchmark::Benchmark* b) {
   b->ArgNames({"M", "N", "K"});
 
   /*          M      N    K */
@@ -84,7 +84,7 @@ static void ShuffleNetV1G3SpmmArguments(benchmark::internal::Benchmark* b) {
 }
 
 // ShuffleNet v1 with 4 groups.
-static void ShuffleNetV1G4SpmmArguments(benchmark::internal::Benchmark* b) {
+static void ShuffleNetV1G4SpmmArguments(benchmark::Benchmark* b) {
   b->ArgNames({"M", "N", "K"});
 
   /*          M      N    K */
@@ -103,7 +103,7 @@ static void ShuffleNetV1G4SpmmArguments(benchmark::internal::Benchmark* b) {
 }
 
 // ShuffleNet v1 with 8 groups.
-static void ShuffleNetV1G8SpmmArguments(benchmark::internal::Benchmark* b) {
+static void ShuffleNetV1G8SpmmArguments(benchmark::Benchmark* b) {
   b->ArgNames({"M", "N", "K"});
 
   /*          M      N    K */
@@ -122,7 +122,7 @@ static void ShuffleNetV1G8SpmmArguments(benchmark::internal::Benchmark* b) {
 }
 
 // ShuffleNet v2 (0.5X scale)
-static void ShuffleNetV2X05SpmmArguments(benchmark::internal::Benchmark* b) {
+static void ShuffleNetV2X05SpmmArguments(benchmark::Benchmark* b) {
   b->ArgNames({"M", "N", "K"});
 
   /*          M       N    K */
@@ -136,7 +136,7 @@ static void ShuffleNetV2X05SpmmArguments(benchmark::internal::Benchmark* b) {
 }
 
 // ShuffleNet v2 (1.0X scale)
-static void ShuffleNetV2X10SpmmArguments(benchmark::internal::Benchmark* b) {
+static void ShuffleNetV2X10SpmmArguments(benchmark::Benchmark* b) {
   b->ArgNames({"M", "N", "K"});
 
   /*          M       N    K */
@@ -151,7 +151,7 @@ static void ShuffleNetV2X10SpmmArguments(benchmark::internal::Benchmark* b) {
 }
 
 // ShuffleNet v2 (1.5X scale)
-static void ShuffleNetV2X15SpmmArguments(benchmark::internal::Benchmark* b) {
+static void ShuffleNetV2X15SpmmArguments(benchmark::Benchmark* b) {
   b->ArgNames({"M", "N", "K"});
 
   /*          M       N    K */
@@ -166,7 +166,7 @@ static void ShuffleNetV2X15SpmmArguments(benchmark::internal::Benchmark* b) {
 }
 
 // ShuffleNet v2 (2.0X scale)
-static void ShuffleNetV2X20SpmmArguments(benchmark::internal::Benchmark* b) {
+static void ShuffleNetV2X20SpmmArguments(benchmark::Benchmark* b) {
   b->ArgNames({"M", "N", "K"});
 
   /*          M       N    K */
@@ -180,7 +180,7 @@ static void ShuffleNetV2X20SpmmArguments(benchmark::internal::Benchmark* b) {
   b->Args({ 7 *  7, 2048, 976});
 }
 
-static void MobileNetV1SpmmArguments(benchmark::internal::Benchmark* b) {
+static void MobileNetV1SpmmArguments(benchmark::Benchmark* b) {
   b->ArgNames({"M", "N", "K"});
 
   /*           M        N     K */
@@ -195,7 +195,7 @@ static void MobileNetV1SpmmArguments(benchmark::internal::Benchmark* b) {
   b->Args({  7 *   7, 1024, 1024});
 }
 
-static void MobileNetV2SpmmArguments(benchmark::internal::Benchmark* b) {
+static void MobileNetV2SpmmArguments(benchmark::Benchmark* b) {
   b->ArgNames({"M", "N", "K"});
 
   /******** Bottleneck 1 *******/
@@ -235,7 +235,7 @@ static void MobileNetV2SpmmArguments(benchmark::internal::Benchmark* b) {
   b->Args({  7 *   7, 1280, 320});
 }
 
-static void MobileNetV3SmallSpmmArguments(benchmark::internal::Benchmark* b) {
+static void MobileNetV3SmallSpmmArguments(benchmark::Benchmark* b) {
   b->ArgNames({"M", "N", "K"});
 
   /****** Bottleneck 1 ******/
@@ -304,7 +304,7 @@ static void MobileNetV3SmallSpmmArguments(benchmark::internal::Benchmark* b) {
 //b->Args({ 7 *  7, 576,  96});
 }
 
-static void MobileNetV3LargeSpmmArguments(benchmark::internal::Benchmark* b) {
+static void MobileNetV3LargeSpmmArguments(benchmark::Benchmark* b) {
   b->ArgNames({"M", "N", "K"});
 
   /******* Bottleneck 1 *******/

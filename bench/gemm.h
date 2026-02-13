@@ -20,13 +20,13 @@
 
 /*
  * This is a lightweight wrapper around the underlying
- * benchmark::internal::Benchmark class, which handles registration of benchmark
+ * benchmark::Benchmark class, which handles registration of benchmark
  * case args. It provides default values for blocksize and skips
  * blockwise-specific cases for non-blockwise kernels.
  */
 class BenchmarkWrapper {
  public:
-  BenchmarkWrapper(benchmark::internal::Benchmark* benchmark, bool blockwise)
+  BenchmarkWrapper(benchmark::Benchmark* benchmark, bool blockwise)
       : benchmark_(benchmark),
         blockwise_(blockwise),
         last_k_(0),
@@ -76,7 +76,7 @@ class BenchmarkWrapper {
   }
 
  private:
-  benchmark::internal::Benchmark* benchmark_;
+  benchmark::Benchmark* benchmark_;
   bool blockwise_;
 
   int64_t last_k_;
@@ -84,7 +84,7 @@ class BenchmarkWrapper {
   int64_t last_n_;
 };
 
-inline void Configure(benchmark::internal::Benchmark* benchmark,
+inline void Configure(benchmark::Benchmark* benchmark,
                       void(setup_method)(BenchmarkWrapper*), bool blockwise) {
   BenchmarkWrapper wrapper(benchmark, blockwise);
   setup_method(&wrapper);
@@ -93,7 +93,7 @@ inline void Configure(benchmark::internal::Benchmark* benchmark,
 
 #define BENCHMARK_CASE(gemm_fn, test_case_name, name, setup_method, blockwise) \
   BENCHMARK_CAPTURE(gemm_fn, test_case_name, name)                             \
-      ->Apply([](benchmark::internal::Benchmark* b) {                          \
+      ->Apply([](benchmark::Benchmark* b) {                                    \
         return Configure(b, &setup_method, blockwise);                         \
       })                                                                       \
       ->UseRealTime();
@@ -153,7 +153,7 @@ inline void Configure(benchmark::internal::Benchmark* benchmark,
 
 
 // ShuffleNet v1 with 1 group.
-//inline void ShuffleNetV1G1GemmArguments(benchmark::internal::Benchmark* b) {
+//inline void ShuffleNetV1G1GemmArguments(benchmark::Benchmark* b) {
 inline void ShuffleNetV1G1GemmArguments(BenchmarkWrapper* b) {
   b->ArgNames({"M", "N", "K"});
 

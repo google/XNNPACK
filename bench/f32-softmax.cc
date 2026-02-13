@@ -418,7 +418,7 @@ static void TwoPassSoftMax(
       benchmark::Counter::kIsRate);
 }
 
-static void CharacteristicArguments(benchmark::internal::Benchmark* b) {
+static void CharacteristicArguments(benchmark::Benchmark* b) {
   // Size        Iterations  Parameters used by Stable Diffusion
   b->Arg(128);   // 1
   b->Arg(154);   // 421

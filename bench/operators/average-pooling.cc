@@ -252,7 +252,7 @@ void tflite_average_pooling_f32(benchmark::State& state, const char* net) {
 #endif  // BENCHMARK_TENSORFLOW_LITE
 
 // Final global average pooling in ImageNet classification models.
-static void ImageNet(benchmark::internal::Benchmark* b) {
+static void ImageNet(benchmark::Benchmark* b) {
   b->ArgNames({"N", "H", "W", "K", "P", "S", "C"});
 
   /*       N   H   W   K  P  S   C */
@@ -261,7 +261,7 @@ static void ImageNet(benchmark::internal::Benchmark* b) {
 }
 
 // ShuffleNet v1 with 1 group.
-static void ShuffleNetV1G1(benchmark::internal::Benchmark* b) {
+static void ShuffleNetV1G1(benchmark::Benchmark* b) {
   b->ArgNames({"N", "H", "W", "K", "P", "S", "C"});
 
   /*       N   H   W  K  P  S   C */
@@ -272,7 +272,7 @@ static void ShuffleNetV1G1(benchmark::internal::Benchmark* b) {
 }
 
 // ShuffleNet v1 with 2 groups.
-static void ShuffleNetV1G2(benchmark::internal::Benchmark* b) {
+static void ShuffleNetV1G2(benchmark::Benchmark* b) {
   b->ArgNames({"N", "H", "W", "K", "P", "S", "C"});
 
   /*       N   H   W  K  P  S   C */
@@ -283,7 +283,7 @@ static void ShuffleNetV1G2(benchmark::internal::Benchmark* b) {
 }
 
 // ShuffleNet v1 with 3 groups.
-static void ShuffleNetV1G3(benchmark::internal::Benchmark* b) {
+static void ShuffleNetV1G3(benchmark::Benchmark* b) {
   b->ArgNames({"N", "H", "W", "K", "P", "S", "C"});
 
   /*       N   H   W  K  P  S   C */
@@ -294,7 +294,7 @@ static void ShuffleNetV1G3(benchmark::internal::Benchmark* b) {
 }
 
 // ShuffleNet v1 with 4 groups.
-static void ShuffleNetV1G4(benchmark::internal::Benchmark* b) {
+static void ShuffleNetV1G4(benchmark::Benchmark* b) {
   b->ArgNames({"N", "H", "W", "K", "P", "S", "C"});
 
   /*       N   H   W  K  P  S    C */
@@ -305,7 +305,7 @@ static void ShuffleNetV1G4(benchmark::internal::Benchmark* b) {
 }
 
 // ShuffleNet v1 with 8 groups.
-static void ShuffleNetV1G8(benchmark::internal::Benchmark* b) {
+static void ShuffleNetV1G8(benchmark::Benchmark* b) {
   b->ArgNames({"N", "H", "W", "K", "P", "S", "C"});
 
   /*       N   H   W  K  P  S    C */
