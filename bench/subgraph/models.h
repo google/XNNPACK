@@ -8,12 +8,15 @@
 
 #include <cstddef>
 #include <cstdint>
-#include <vector>
 
 #include "include/xnnpack.h"
 
 namespace models {
 
+xnn_subgraph_t FP16MobileNetV1();
+xnn_subgraph_t FP16MobileNetV2();
+xnn_subgraph_t FP16MobileNetV3Large();
+xnn_subgraph_t FP16MobileNetV3Small();
 xnn_subgraph_t FP32MobileNetV1();
 xnn_subgraph_t FP32MobileNetV2();
 xnn_subgraph_t FP32MobileNetV3Large();

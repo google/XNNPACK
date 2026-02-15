@@ -773,18 +773,6 @@ SubgraphTester& SubgraphTester::RewriteForNchw() {
   return *this;
 }
 
-SubgraphTester& SubgraphTester::RewriteForFp16() {
-  EXPECT_TRUE(xnn_subgraph_rewrite_for_fp16(subgraph_.get()));
-
-  return *this;
-}
-
-SubgraphTester& SubgraphTester::RewriteForFp16WithFailure() {
-  EXPECT_FALSE(xnn_subgraph_rewrite_for_fp16(subgraph_.get()));
-
-  return *this;
-}
-
 xnn_status SubgraphTester::CreateRuntime(xnn_weights_cache_t weights_cache,
                                          xnn_workspace_t workspace,
                                          pthreadpool_t threadpool,

@@ -108,11 +108,6 @@ xnn_status xnn_subgraph_rewrite_for_nchw(xnn_subgraph_t subgraph) {
   return xnn_status_deprecated;
 }
 
-xnn_status xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph) {
-  YNN_LOG_ERROR() << "Test-only XNNPACK operation not supported";
-  return xnn_status_deprecated;
-}
-
 xnn_status xnn_define_unary(xnn_subgraph_t subgraph, xnn_unary_operator type,
                             const union xnn_unary_params* params,
                             uint32_t input_id, uint32_t output_id,

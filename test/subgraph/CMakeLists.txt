@@ -23,7 +23,6 @@ IF(XNNPACK_BUILD_LIBRARY)
       fusion
       input-output
       memory-planner
-      subgraph-fp16
       subgraph
       runtime
       subgraph-nchw

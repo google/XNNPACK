@@ -76,6 +76,10 @@ xnnpack_cxx_library(
     name = "models",
     testonly = 1,
     srcs = [
+        "fp16-mobilenet-v1.cc",
+        "fp16-mobilenet-v2.cc",
+        "fp16-mobilenet-v3-large.cc",
+        "fp16-mobilenet-v3-small.cc",
         "fp32-mobilenet-v1.cc",
         "fp32-mobilenet-v2.cc",
         "fp32-mobilenet-v3-large.cc",
@@ -89,6 +93,8 @@ xnnpack_cxx_library(
     ],
     deps = [
         "//:XNNPACK",
+        "//:fp16",
+        "//:math",
         "//test:replicable_random_device",
     ],
 )

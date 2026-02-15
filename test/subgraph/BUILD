@@ -99,6 +99,7 @@ xnnpack_cxx_library(
     deps = xnnpack_test_deps_for_library() + [
         ":runtime_flags",
         ":subgraph_tester",
+        "//:buffer",
         "//:subgraph_h",
         "//:xnnpack_h",
     ],
@@ -322,31 +323,6 @@ xnnpack_unit_test(
         ":subgraph_tester",
         "//:node_type",
         "//:subgraph_h",
-    ],
-)
-
-xnnpack_unit_test(
-    name = "subgraph_fp16_test",
-    srcs = [
-        "mock-allocator.h",
-        "subgraph-fp16.cc",
-    ],
-    tags = ["no_ynnpack"],
-    deps = [
-        ":runtime_flags",
-        ":runtime_tester",
-        ":subgraph_tester",
-        "//:allocation_type",
-        "//:allocator",
-        "//:buffer",
-        "//:math",
-        "//:node_type",
-        "//:operator_h",
-        "//:params",
-        "//:subgraph",
-        "//:subgraph_h",
-        "//:xnnpack_h",
-        "//test:replicable_random_device",
     ],
 )
 
