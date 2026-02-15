@@ -199,6 +199,23 @@ void xnn_pack_lh_f32_qdint8_qc2w(size_t m, size_t k, size_t mr_packed,
       lhs_packed, convert_ukernel, minmax_ukernel, rsum_ukernel);
 }
 
+void xnn_pack_lh_f32_qduint8_qc2w(size_t m, size_t k, size_t mr_packed,
+                                  size_t kr, size_t sr, size_t m_idx_start,
+                                  const void* lhs, size_t lhs_stride,
+                                  void* lhs_packed) {
+  static const xnn_vunary_ukernel_fn convert_ukernel =
+      xnn_init_f32_to_qu8_cvt_config()->ukernel;
+  static const xnn_reduce_ukernel_fn minmax_ukernel =
+      xnn_init_f32_rminmax_config()->ukernel;
+  static const xnn_reduce_ukernel_fn rsum_ukernel =
+      xnn_init_qu8_rsum_config()->ukernel;
+  pack_lh_fx_qd</*InputT=*/float, /*OutputT=*/uint8_t,
+                /*qs8_cvt_params_t=*/struct xnn_f32_qs8_cvt_params,
+                xnn_f32_qdu8_asymmetric_quantization_params>(
+      m, k, mr_packed, kr, sr, m_idx_start, (const float*)lhs, lhs_stride,
+      lhs_packed, convert_ukernel, minmax_ukernel, rsum_ukernel);
+}
+
 void xnn_pack_lh_f32_qduint8(size_t m, size_t k, size_t mr_packed, size_t kr,
                              size_t sr, size_t m_idx_start, const void* lhs,
                              size_t lhs_stride, void* lhs_packed) {
@@ -308,6 +325,26 @@ const xnn_pack_lh_config* xnn_init_f32_qdint8_row_sums_pack_lh_config() {
   static const xnn_pack_lh_config config = []() {
     xnn_pack_lh_config config = {};
     config.pack_lh_fn = (xnn_pack_lh_ukernel_fn)xnn_pack_lh_f32_qdint8_qc2w;
+    config.size_fn =
+        (xnn_pack_lh_size_fn)xnn_pack_lh_fx_qd8_row_sums_packed_size;
+    config.offset_fn =
+        (xnn_pack_lh_offset_fn)xnn_pack_lh_fx_qd8_qc2w_packed_offset;
+    config.log2_input_element_size = XNN_LOG2_SIZEOF_FLOAT;
+    config.log2_packed_element_size = 0;
+    return config;
+  }();
+  return &config;
+}
+
+const xnn_pack_lh_config* xnn_init_f32_qduint8_row_sums_pack_lh_config() {
+  const xnn_hardware_config* hardware_config =
+      xnn_init_hardware_config();
+  if (hardware_config == nullptr) {
+    return nullptr;
+  }
+  static const xnn_pack_lh_config config = []() {
+    xnn_pack_lh_config config = {};
+    config.pack_lh_fn = (xnn_pack_lh_ukernel_fn)xnn_pack_lh_f32_qduint8_qc2w;
     config.size_fn =
         (xnn_pack_lh_size_fn)xnn_pack_lh_fx_qd8_row_sums_packed_size;
     config.offset_fn =

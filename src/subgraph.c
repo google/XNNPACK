@@ -2222,7 +2222,10 @@ static bool convert_gemm_to_qduint8(
   const struct xnn_gemm_config* original_config = NULL;
   const struct xnn_gemm_config* unsigned_config = NULL;
   if (input_datatype == xnn_datatype_fp32) {
-    if (consumer_weights_type == xnn_datatype_qcint4) {
+    if (consumer_weights_type == xnn_datatype_qcint2) {
+      original_config = xnn_init_qd8_f32_qc2w_gemm_config();
+      unsigned_config = xnn_init_qdu8_f32_qc2w_gemm_config();
+    } else if (consumer_weights_type == xnn_datatype_qcint4) {
       original_config = xnn_init_qd8_f32_qc4w_gemm_config();
       unsigned_config = xnn_init_qdu8_f32_qc4w_gemm_config();
     } else if (consumer_weights_type == xnn_datatype_qcint8) {
