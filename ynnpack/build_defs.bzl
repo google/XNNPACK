@@ -174,6 +174,11 @@ _YNN_PARAMS_FOR_ARCH = {
         }),
         "arch_flag": "sme2",
     },
+    "arm64_sve": {
+        "cond": "//ynnpack:ynn_enable_arm64_sve",
+        "arch_copts": ["-march=armv8.2-a+sve"],
+        "arch_flag": "sve",
+    },
     "x86_sse2": {
         "cond": "//ynnpack:ynn_enable_x86_sse2",
         "arch_copts": _copts_for_compiler(["-msse2", "-mno-ssse3"]),
