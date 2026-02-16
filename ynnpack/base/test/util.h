@@ -75,6 +75,9 @@ enum class multi_type {
   int8_int8_int32,
   int8_int4_int32,
   uint8_int8_int32,
+
+  int4_int32,
+  uint4_int32,
 };
 
 inline multi_type multi_type_of(float, float) { return multi_type::fp32; }
@@ -92,6 +95,12 @@ inline multi_type multi_type_of(int8_t, int32_t) {
 }
 inline multi_type multi_type_of(uint8_t, int32_t) {
   return multi_type::uint8_int32;
+}
+inline multi_type multi_type_of(int4x2, int32_t) {
+  return multi_type::int4_int32;
+}
+inline multi_type multi_type_of(uint4x2, int32_t) {
+  return multi_type::uint4_int32;
 }
 
 inline multi_type multi_type_of(float, float, float) {
@@ -137,6 +146,10 @@ constexpr decltype(auto) SwitchTwoTypes(multi_type type, F&& f) {
       return std::forward<F>(f)(int8_t(), int32_t());
     case multi_type::uint8_int32:
       return std::forward<F>(f)(uint8_t(), int32_t());
+    case multi_type::int4_int32:
+      return std::forward<F>(f)(int4x2(), int32_t());
+    case multi_type::uint4_int32:
+      return std::forward<F>(f)(uint4x2(), int32_t());
     default:
       YNN_UNREACHABLE;
   }
@@ -200,6 +213,10 @@ inline const char* to_string(multi_type type) {
       return "uint8_int8_int32";
     case multi_type::int8_int4_int32:
       return "int8_int4_int32";
+    case multi_type::int4_int32:
+      return "int4_int32";
+    case multi_type::uint4_int32:
+      return "uint4_int32";
   }
   YNN_UNREACHABLE;
   return nullptr;
