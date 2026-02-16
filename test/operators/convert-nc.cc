@@ -324,6 +324,81 @@ class ConvertOperatorTester {
     }
   }
 
+  void TestF32toQDU8QC2W() const {
+    xnnpack::ReplicableRandomDevice rng;
+
+    xnnpack::Buffer<float> input(
+        (batch_size() - 1) * input_stride() + channels(),
+        xnnpack::XnnExtraBytes);
+    xnnpack::Buffer<uint8_t> output((batch_size() - 1) * output_stride() +
+                                    channels());
+    xnnpack::Buffer<xnn_quantization_params> quantization_params(
+        batch_size() + XNN_EXTRA_QUANTIZATION_PARAMS);
+    xnnpack::Buffer<float> row_sum(
+        batch_size() + XNN_EXTRA_QUANTIZATION_PARAMS);
+    std::uniform_real_distribution<float> range_dist(-100000, 100000);
+    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+      const float first_val = range_dist(rng);
+      const float second_val = range_dist(rng);
+      std::uniform_real_distribution<float> f32dist(
+          std::min(first_val, second_val), std::max(first_val, second_val));
+      std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
+
+      // Create, setup, run, and destroy Convert operator.
+      ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+      xnn_operator_t convert_op = nullptr;
+
+      ASSERT_EQ(
+          xnn_status_success,
+          xnn_create_convert_nc_f32_qdu8(
+              /*flags=*/XNN_NODE_FLAG_REQUIRES_ROW_SUM, &convert_op));
+      ASSERT_NE(nullptr, convert_op);
+
+      // Smart pointer to automatically delete convert op.
+      std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)>
+          auto_convert_op(convert_op, xnn_delete_operator);
+
+      ASSERT_EQ(xnn_status_success,
+                xnn_reshape_convert_nc_f32_qd8(
+                    convert_op, batch_size(), channels(), input_stride(),
+                    output_stride(), /*threadpool=*/nullptr));
+      ASSERT_EQ(xnn_status_success, xnn_setup_convert_nc_f32_qdu8(
+                                        convert_op, input.data(), output.data(),
+                                        row_sum.data(),
+                                        quantization_params.data()));
+      ASSERT_EQ(xnn_status_success,
+                xnn_run_operator(convert_op, /*threadpool=*/nullptr));
+
+      // Verify results.
+      for (size_t i = 0; i < batch_size(); i++) {
+        const float* input_ptr = &input[i * input_stride()];
+        const auto minmax =
+            std::minmax_element(input_ptr, input_ptr + channels());
+        const float rmin = math_min_f32(0.0f, *minmax.first);
+        const float rmax = math_max_f32(0.0f, *minmax.second);
+        const float max_acceptable_error =
+            0.5001f * (rmax - rmin) / std::numeric_limits<uint8_t>::max();
+        int32_t row_sum_value = 0;
+        for (size_t c = 0; c < channels(); c++) {
+          float expected = input[i * input_stride() + c];
+          int8_t quantized_val = output[i * output_stride() + c];
+          row_sum_value += quantized_val;
+          float dequantized_val =
+              static_cast<float>(static_cast<int>(quantized_val) -
+                                 quantization_params[i].zero_point) *
+              quantization_params[i].scale;
+          ASSERT_NEAR(expected, dequantized_val, max_acceptable_error)
+              << "at batch " << i << " / " << batch_size() << ", channel " << c
+              << " / " << channels() << " scale "
+              << quantization_params[i].scale << " zp "
+              << quantization_params[i].zero_point << " int "
+              << static_cast<int>(quantized_val);
+        }
+        ASSERT_EQ(row_sum_value, row_sum[i]);
+      }
+    }
+  }
+
   void TestF32toQDU8() const {
     xnnpack::ReplicableRandomDevice rng;
 
@@ -362,6 +437,7 @@ class ConvertOperatorTester {
                     output_stride(), /*threadpool=*/nullptr));
       ASSERT_EQ(xnn_status_success, xnn_setup_convert_nc_f32_qdu8(
                                         convert_op, input.data(), output.data(),
+                                        /*row_sum=*/nullptr,
                                         quantization_params.data()));
       ASSERT_EQ(xnn_status_success,
                 xnn_run_operator(convert_op, /*threadpool=*/nullptr));
