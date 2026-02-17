@@ -66,6 +66,8 @@ TEST_SUBTRACT(hvx, int8_t, 128);
 TEST_SUBTRACT(hvx, int16_t, 64);
 TEST_SUBTRACT(hvx, int32_t, 32);
 
+TEST_MULTIPLY(hvx, int32_t, 32);
+
 TEST_MIN(hvx, uint8_t, 128);
 TEST_MIN(hvx, int8_t, 128);
 TEST_MIN(hvx, int16_t, 64);
