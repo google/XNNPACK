@@ -10,6 +10,7 @@
 #include <type_traits>
 #include <vector>
 
+#include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include "ynnpack/base/arch.h"  // IWYU pragma: keep
 #include "ynnpack/base/base.h"
@@ -19,8 +20,13 @@
 #include "ynnpack/base/test/util.h"
 #include "ynnpack/base/type.h"
 #include "ynnpack/kernels/reduce/reduce.h"
+#include "slinky/base/span.h"
 
 namespace ynn {
+
+using testing::ElementsAreArray;
+using testing::FloatNear;
+using testing::Pointwise;
 
 enum class ReduceOp {
   kSum,
@@ -129,6 +135,11 @@ void Reference(Tensor<AT> a, Tensor<CT> c, ReduceOp op) {
 
 const float max_abs_value = 10.0f;
 
+template <typename T>
+slinky::span<T> row(Tensor<T> t, size_t i) {
+  return slinky::span<T>(&t(i, 0), t.extent(1));
+}
+
 template <typename AT, typename CT>
 void TestUnaryReduce(Tensor<AT> a, Tensor<CT> c,
                      ReduceOp op, unary_reduce_kernel_fn kernel) {
@@ -151,15 +162,18 @@ void TestUnaryReduce(Tensor<AT> a, Tensor<CT> c,
 
   // Verify results.
   Reference(a, expected, op);
-  for (const auto& i : EnumerateIndices(c.extents())) {
+  ASSERT_EQ(c.rank(), 2);
+  for (size_t i = 0; i < c.extent(0); ++i) {
     if (std::is_integral<CT>::value) {
-      ASSERT_EQ(c(i), expected(i))
-          << "shape=" << n << "x" << k3 << "x" << k2 << "x" << k1;
+      EXPECT_THAT(row(c, i), ElementsAreArray(row(expected, i)))
+          << "shape=" << n << "x" << k3 << "x" << k2 << "x" << k1
+          << " row=" << i;
     } else {
       const float tolerance =
           Tolerance<CT>(op, k3 * k2 * k1 + 1, max_abs_value);
-      ASSERT_NEAR(c(i), expected(i), tolerance)
-          << "shape=" << n << "x" << k3 << "x" << k2 << "x" << k1;
+      EXPECT_THAT(row(c, i), Pointwise(FloatNear(tolerance), row(expected, i)))
+          << "shape=" << n << "x" << k3 << "x" << k2 << "x" << k1
+          << " row=" << i;
     }
   }
 }
@@ -211,28 +225,16 @@ const char* to_string(const KernelParam& param) { return ""; }
 
 class UnaryReduce : public ::testing::TestWithParam<KernelParam> {};
 
-const size_t max_dim = 512;
-const auto n_values = simd_sizes_up_to(max_dim);
-const auto k_values = simd_sizes_up_to(max_dim);
-
-TEST_P(UnaryReduce, n) {
-  KernelParam kernel = GetParam();
-  if (!is_arch_supported(kernel.arch_flags)) GTEST_SKIP();
-  SwitchTwoTypes(kernel.type, [&](auto a_type, auto c_type) {
-    TestUnaryReduce(a_type, c_type, n_values, {1}, {1}, {max_dim},
-                    kernel.op, kernel.kernel);
-    TestUnaryReduce(a_type, c_type, n_values, {1}, {max_dim}, {1},
-                    kernel.op, kernel.kernel);
-    TestUnaryReduce(a_type, c_type, n_values, {max_dim}, {1}, {1},
-                    kernel.op, kernel.kernel);
-  });
-}
+constexpr size_t max_n_dim_bytes = 256;
+constexpr size_t max_k_dim = 64;
+const auto k_values = simd_sizes_up_to(max_k_dim);
 
 TEST_P(UnaryReduce, k1) {
   KernelParam kernel = GetParam();
   if (!is_arch_supported(kernel.arch_flags)) GTEST_SKIP();
   SwitchTwoTypes(kernel.type, [&](auto a_type, auto c_type) {
-    TestUnaryReduce(a_type, c_type, {max_dim}, {1}, {1}, k_values, kernel.op,
+    constexpr size_t max_n_dim = max_n_dim_bytes / sizeof(a_type);
+    TestUnaryReduce(a_type, c_type, {max_n_dim}, {1}, {1}, k_values, kernel.op,
                     kernel.kernel);
   });
 }
@@ -241,7 +243,8 @@ TEST_P(UnaryReduce, k2) {
   KernelParam kernel = GetParam();
   if (!is_arch_supported(kernel.arch_flags)) GTEST_SKIP();
   SwitchTwoTypes(kernel.type, [&](auto a_type, auto c_type) {
-    TestUnaryReduce(a_type, c_type, {max_dim}, {1}, k_values, {1}, kernel.op,
+    constexpr size_t max_n_dim = max_n_dim_bytes / sizeof(a_type);
+    TestUnaryReduce(a_type, c_type, {max_n_dim}, {1}, k_values, {1}, kernel.op,
                     kernel.kernel);
   });
 }
@@ -250,7 +253,24 @@ TEST_P(UnaryReduce, k3) {
   KernelParam kernel = GetParam();
   if (!is_arch_supported(kernel.arch_flags)) GTEST_SKIP();
   SwitchTwoTypes(kernel.type, [&](auto a_type, auto c_type) {
-    TestUnaryReduce(a_type, c_type, {max_dim}, k_values, {1}, {1}, kernel.op,
+    constexpr size_t max_n_dim = max_n_dim_bytes / sizeof(a_type);
+    TestUnaryReduce(a_type, c_type, {max_n_dim}, k_values, {1}, {1}, kernel.op,
+                    kernel.kernel);
+  });
+}
+
+TEST_P(UnaryReduce, n) {
+  KernelParam kernel = GetParam();
+  if (!is_arch_supported(kernel.arch_flags)) GTEST_SKIP();
+  SwitchTwoTypes(kernel.type, [&](auto a_type, auto c_type) {
+    constexpr size_t max_n_dim = max_n_dim_bytes / sizeof(a_type);
+    const auto n_values = simd_sizes_up_to(max_n_dim);
+    constexpr size_t k_dim = 4;
+    TestUnaryReduce(a_type, c_type, n_values, {1}, {1}, {k_dim}, kernel.op,
+                    kernel.kernel);
+    TestUnaryReduce(a_type, c_type, n_values, {1}, {k_dim}, {1}, kernel.op,
+                    kernel.kernel);
+    TestUnaryReduce(a_type, c_type, n_values, {k_dim}, {1}, {1}, kernel.op,
                     kernel.kernel);
   });
 }

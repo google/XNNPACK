@@ -99,6 +99,7 @@ cc_test(
         "//ynnpack/base/test:random",
         "//ynnpack/base/test:tensor",
         "//ynnpack/base/test:util",
+        "@slinky//slinky/base",
     ] + ynn_test_deps(),
 )
 
