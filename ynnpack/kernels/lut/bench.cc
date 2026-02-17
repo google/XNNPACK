@@ -42,7 +42,7 @@ void bench(benchmark::State& state, uint64_t arch_flags, lut_kernel_fn kernel,
 }
 
 template <typename A, typename X>
-void Params(benchmark::internal::Benchmark* b) {
+void Params(benchmark::Benchmark* b) {
   b->ArgNames({"n"});
   b->Arg(1024 * 1024);
 }

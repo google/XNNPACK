@@ -722,7 +722,7 @@ void tflite_convolution_f32(benchmark::State& state, const char* net) {
 #endif  // BENCHMARK_TENSORFLOW_LITE
 
 // ShuffleNet v1 with 1 group.
-static void ShuffleNetV1G1(benchmark::internal::Benchmark* b) {
+static void ShuffleNetV1G1(benchmark::Benchmark* b) {
   b->ArgNames(
       {"N", "H", "W", "KH", "KW", "PH", "PW", "S", "D", "G", "GCin", "GCout"});
 
@@ -762,7 +762,7 @@ static void ShuffleNetV1G1(benchmark::internal::Benchmark* b) {
 }
 
 // ShuffleNet v1 with 2 groups.
-static void ShuffleNetV1G2(benchmark::internal::Benchmark* b) {
+static void ShuffleNetV1G2(benchmark::Benchmark* b) {
   b->ArgNames(
       {"N", "H", "W", "KH", "KW", "PH", "PW", "S", "D", "G", "GCin", "GCout"});
 
@@ -802,7 +802,7 @@ static void ShuffleNetV1G2(benchmark::internal::Benchmark* b) {
 }
 
 // ShuffleNet v1 with 3 groups.
-static void ShuffleNetV1G3(benchmark::internal::Benchmark* b) {
+static void ShuffleNetV1G3(benchmark::Benchmark* b) {
   b->ArgNames(
       {"N", "H", "W", "KH", "KW", "PH", "PW", "S", "D", "G", "GCin", "GCout"});
 
@@ -842,7 +842,7 @@ static void ShuffleNetV1G3(benchmark::internal::Benchmark* b) {
 }
 
 // ShuffleNet v1 with 4 groups.
-static void ShuffleNetV1G4(benchmark::internal::Benchmark* b) {
+static void ShuffleNetV1G4(benchmark::Benchmark* b) {
   b->ArgNames(
       {"N", "H", "W", "KH", "KW", "PH", "PW", "S", "D", "G", "GCin", "GCout"});
 
@@ -882,7 +882,7 @@ static void ShuffleNetV1G4(benchmark::internal::Benchmark* b) {
 }
 
 // ShuffleNet v1 with 8 groups.
-static void ShuffleNetV1G8(benchmark::internal::Benchmark* b) {
+static void ShuffleNetV1G8(benchmark::Benchmark* b) {
   b->ArgNames(
       {"N", "H", "W", "KH", "KW", "PH", "PW", "S", "D", "G", "GCin", "GCout"});
 
@@ -922,7 +922,7 @@ static void ShuffleNetV1G8(benchmark::internal::Benchmark* b) {
 }
 
 // ShuffleNet v2 (0.5X scale)
-static void ShuffleNetV2X05(benchmark::internal::Benchmark* b) {
+static void ShuffleNetV2X05(benchmark::Benchmark* b) {
   b->ArgNames(
       {"N", "H", "W", "KH", "KW", "PH", "PW", "S", "D", "G", "GCin", "GCout"});
 
@@ -953,7 +953,7 @@ static void ShuffleNetV2X05(benchmark::internal::Benchmark* b) {
 }
 
 // ShuffleNet v2 (1.0X scale)
-static void ShuffleNetV2X10(benchmark::internal::Benchmark* b) {
+static void ShuffleNetV2X10(benchmark::Benchmark* b) {
   b->ArgNames(
       {"N", "H", "W", "KH", "KW", "PH", "PW", "S", "D", "G", "GCin", "GCout"});
 
@@ -986,7 +986,7 @@ static void ShuffleNetV2X10(benchmark::internal::Benchmark* b) {
 }
 
 // ShuffleNet v2 (1.5X scale)
-static void ShuffleNetV2X15(benchmark::internal::Benchmark* b) {
+static void ShuffleNetV2X15(benchmark::Benchmark* b) {
   b->ArgNames(
       {"N", "H", "W", "KH", "KW", "PH", "PW", "S", "D", "G", "GCin", "GCout"});
 
@@ -1019,7 +1019,7 @@ static void ShuffleNetV2X15(benchmark::internal::Benchmark* b) {
 }
 
 // ShuffleNet v2 (2.0X scale)
-static void ShuffleNetV2X20(benchmark::internal::Benchmark* b) {
+static void ShuffleNetV2X20(benchmark::Benchmark* b) {
   b->ArgNames(
       {"N", "H", "W", "KH", "KW", "PH", "PW", "S", "D", "G", "GCin", "GCout"});
 
@@ -1051,7 +1051,7 @@ static void ShuffleNetV2X20(benchmark::internal::Benchmark* b) {
   b->Args({1, 7, 7, 1, 1, 0, 0, 1, 1, 1, 976, 2048});
 }
 
-static void MobileNetV1(benchmark::internal::Benchmark* b) {
+static void MobileNetV1(benchmark::Benchmark* b) {
   b->ArgNames(
       {"N", "H", "W", "KH", "KW", "PH", "PW", "S", "D", "G", "GCin", "GCout"});
 
@@ -1077,7 +1077,7 @@ static void MobileNetV1(benchmark::internal::Benchmark* b) {
   b->Args({1, 7, 7, 1, 1, 0, 0, 1, 1, 1, 1024, 1024});
 }
 
-static void MobileNetV2(benchmark::internal::Benchmark* b) {
+static void MobileNetV2(benchmark::Benchmark* b) {
   b->ArgNames(
       {"N", "H", "W", "KH", "KW", "PH", "PW", "S", "D", "G", "GCin", "GCout"});
 
@@ -1163,7 +1163,7 @@ static void MobileNetV2(benchmark::internal::Benchmark* b) {
   b->Args({1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1280, 1000});
 }
 
-static void MobileNetV3Small(benchmark::internal::Benchmark* b) {
+static void MobileNetV3Small(benchmark::Benchmark* b) {
   b->ArgNames(
       {"N", "H", "W", "KH", "KW", "PH", "PW", "S", "D", "G", "GCin", "GCout"});
 
@@ -1249,7 +1249,7 @@ static void MobileNetV3Small(benchmark::internal::Benchmark* b) {
   b->Args({1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1024, 1001});
 }
 
-static void MobileNetV3Large(benchmark::internal::Benchmark* b) {
+static void MobileNetV3Large(benchmark::Benchmark* b) {
   b->ArgNames(
       {"N", "H", "W", "KH", "KW", "PH", "PW", "S", "D", "G", "GCin", "GCout"});
 
@@ -1352,7 +1352,7 @@ static void MobileNetV3Large(benchmark::internal::Benchmark* b) {
 }
 
 // SqueezeNet 1.0
-static void SqueezeNetV10(benchmark::internal::Benchmark* b) {
+static void SqueezeNetV10(benchmark::Benchmark* b) {
   b->ArgNames(
       {"N", "H", "W", "KH", "KW", "PH", "PW", "S", "D", "G", "GCin", "GCout"});
 
@@ -1405,7 +1405,7 @@ static void SqueezeNetV10(benchmark::internal::Benchmark* b) {
 }
 
 // SqueezeNet 1.1
-static void SqueezeNetV11(benchmark::internal::Benchmark* b) {
+static void SqueezeNetV11(benchmark::Benchmark* b) {
   b->ArgNames(
       {"N", "H", "W", "KH", "KW", "PH", "PW", "S", "D", "G", "GCin", "GCout"});
 
@@ -1457,7 +1457,7 @@ static void SqueezeNetV11(benchmark::internal::Benchmark* b) {
   b->Args({1, 13, 13, 1, 1, 0, 0, 1, 1, 1, 512, 1000});
 }
 
-static void InceptionV3(benchmark::internal::Benchmark* b) {
+static void InceptionV3(benchmark::Benchmark* b) {
   b->ArgNames(
       {"N", "H", "W", "KH", "KW", "PH", "PW", "S", "D", "G", "GCin", "GCout"});
 
@@ -1508,7 +1508,7 @@ static void InceptionV3(benchmark::internal::Benchmark* b) {
   b->Args({1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 2048, 1001});
 }
 
-static void ResNet18(benchmark::internal::Benchmark* b) {
+static void ResNet18(benchmark::Benchmark* b) {
   b->ArgNames(
       {"N", "H", "W", "KH", "KW", "PH", "PW", "S", "D", "G", "GCin", "GCout"});
 
@@ -1535,7 +1535,7 @@ static void ResNet18(benchmark::internal::Benchmark* b) {
   b->Args({1, 14, 14, 1, 1, 0, 0, 2, 1, 1, 256, 512});
 }
 
-static void ResNet50(benchmark::internal::Benchmark* b) {
+static void ResNet50(benchmark::Benchmark* b) {
   b->ArgNames(
       {"N", "H", "W", "KH", "KW", "PH", "PW", "S", "D", "G", "GCin", "GCout"});
 
@@ -1588,7 +1588,7 @@ static void ResNet50(benchmark::internal::Benchmark* b) {
   // b->Args({1,   7,   7,  1,  1,  0,  0, 1, 1, 1,  512, 2048});
 }
 
-static void VGG(benchmark::internal::Benchmark* b) {
+static void VGG(benchmark::Benchmark* b) {
   b->ArgNames(
       {"N", "H", "W", "KH", "KW", "PH", "PW", "S", "D", "G", "GCin", "GCout"});
 
@@ -1635,7 +1635,7 @@ static void VGG(benchmark::internal::Benchmark* b) {
 }
 
 // SRCNN (9-1-5)
-static void SRCNN915(benchmark::internal::Benchmark* b) {
+static void SRCNN915(benchmark::Benchmark* b) {
   b->ArgNames(
       {"N", "H", "W", "KH", "KW", "PH", "PW", "S", "D", "G", "GCin", "GCout"});
 
@@ -1646,7 +1646,7 @@ static void SRCNN915(benchmark::internal::Benchmark* b) {
 }
 
 // SRCNN (9-3-5)
-static void SRCNN935(benchmark::internal::Benchmark* b) {
+static void SRCNN935(benchmark::Benchmark* b) {
   b->ArgNames(
       {"N", "H", "W", "KH", "KW", "PH", "PW", "S", "D", "G", "GCin", "GCout"});
 
@@ -1657,7 +1657,7 @@ static void SRCNN935(benchmark::internal::Benchmark* b) {
 }
 
 // SRCNN (9-5-5)
-static void SRCNN955(benchmark::internal::Benchmark* b) {
+static void SRCNN955(benchmark::Benchmark* b) {
   b->ArgNames(
       {"N", "H", "W", "KH", "KW", "PH", "PW", "S", "D", "G", "GCin", "GCout"});
 

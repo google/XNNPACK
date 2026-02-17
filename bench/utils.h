@@ -75,7 +75,7 @@ uint64_t GetCurrentCpuFrequency();
 size_t GetMaxCacheSize();
 
 template <class InType>
-static void ReduceParameters(benchmark::internal::Benchmark* b) {
+static void ReduceParameters(benchmark::Benchmark* b) {
   b->ArgNames({"channels", "rows"});
   b->Args({1, 512});
   b->Args({1, 1024});
@@ -88,7 +88,7 @@ static void ReduceParameters(benchmark::internal::Benchmark* b) {
 }
 
 template <class InType>
-static void ReduceDiscontiguousParameters(benchmark::internal::Benchmark* b) {
+static void ReduceDiscontiguousParameters(benchmark::Benchmark* b) {
   b->ArgNames({"rows", "channels"});
   b->Args({8, 1024});
   b->Args({16, 1024});
@@ -102,7 +102,7 @@ static void ReduceDiscontiguousParameters(benchmark::internal::Benchmark* b) {
 // - Total memory footprint does not exceed the characteristic cache size for
 //   the architecture.
 template <class InType, class OutType>
-void UnaryElementwiseParameters(benchmark::internal::Benchmark* benchmark) {
+void UnaryElementwiseParameters(benchmark::Benchmark* benchmark) {
   benchmark->ArgName("N");
 
   size_t characteristic_l1 = 32 * 1024;
@@ -123,7 +123,7 @@ void UnaryElementwiseParameters(benchmark::internal::Benchmark* benchmark) {
 // - Total memory footprint does not exceed the characteristic cache size for
 //   the architecture.
 template <class InType, class OutType>
-void BinaryElementwiseParameters(benchmark::internal::Benchmark* benchmark) {
+void BinaryElementwiseParameters(benchmark::Benchmark* benchmark) {
   benchmark->ArgName("N");
 
   size_t characteristic_l1 = 32 * 1024;

@@ -46,7 +46,7 @@ void transpose(benchmark::State& state, uint64_t arch_flags,
   }
 }
 
-static void BenchmarkKernelSize(benchmark::internal::Benchmark* b) {
+static void BenchmarkKernelSize(benchmark::Benchmark* b) {
   b->ArgNames({"height", "width"});
   b->Args({32, 32});
   b->Args({64, 64});

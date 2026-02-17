@@ -57,7 +57,7 @@ static void FP16TransformerBlock(benchmark::State& state) {
       XNN_FLAG_FORCE_FP16_INFERENCE);
 }
 
-static void TransformerBlockArguments(benchmark::internal::Benchmark* b) {
+static void TransformerBlockArguments(benchmark::Benchmark* b) {
   b->ArgNames({"T", "D", "N", "H", "F"});
 
   // GeminiXXS parameters.

@@ -79,7 +79,7 @@ void bench(benchmark::State& state, uint64_t arch_flags,
 }
 
 template <typename A, typename B, typename C, typename X>
-void Params(benchmark::internal::Benchmark* b) {
+void Params(benchmark::Benchmark* b) {
   b->ArgNames({"m", "n", "broadcast_a", "broadcast_b", "broadcast_c"});
   b->Args({1, 4096, 0, 0, 0});
   b->Args({1, 4096, 0, 1, 0});

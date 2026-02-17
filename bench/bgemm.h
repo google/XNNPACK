@@ -29,7 +29,7 @@
   BENCHMARK_CAPTURE(bgemm_fn, name_prefix##llm, "LLM", __VA_ARGS__)->Apply(LLMGemmArguments)->UseRealTime();
 
 
-inline void AlbertBgemmArguments(benchmark::internal::Benchmark* b) {
+inline void AlbertBgemmArguments(benchmark::Benchmark* b) {
   b->ArgNames({"B", "M", "N", "K"});
 
   /*        B   M    N    K  */
@@ -37,7 +37,7 @@ inline void AlbertBgemmArguments(benchmark::internal::Benchmark* b) {
   b->Args({12, 384, 384,  64});
 }
 
-inline void MobilebertBgemmArguments(benchmark::internal::Benchmark* b) {
+inline void MobilebertBgemmArguments(benchmark::Benchmark* b) {
   b->ArgNames({"B", "M", "N", "K"});
 
   /*       B   M    N    K  */
@@ -45,7 +45,7 @@ inline void MobilebertBgemmArguments(benchmark::internal::Benchmark* b) {
   b->Args({4, 384, 384,  32});
 }
 
-inline void SD1XDiffusionBgemmArguments(benchmark::internal::Benchmark* b) {
+inline void SD1XDiffusionBgemmArguments(benchmark::Benchmark* b) {
   b->ArgNames({"B", "M", "N", "K"});
 
   /*       B    M     N     K */
@@ -67,7 +67,7 @@ inline void SD1XDiffusionBgemmArguments(benchmark::internal::Benchmark* b) {
   b->Args({8,   64,  160,   77});
 }
 
-inline void SD1XEncoderDecoderBgemmArguments(benchmark::internal::Benchmark* b) {
+inline void SD1XEncoderDecoderBgemmArguments(benchmark::Benchmark* b) {
   b->ArgNames({"B", "M", "N", "K"});
 
   /*       B    M     N     K */
@@ -75,7 +75,7 @@ inline void SD1XEncoderDecoderBgemmArguments(benchmark::internal::Benchmark* b) 
   b->Args({1,  512, 4096, 4096});
 }
 
-inline void SD1XTextEncoderBgemmArguments(benchmark::internal::Benchmark* b) {
+inline void SD1XTextEncoderBgemmArguments(benchmark::Benchmark* b) {
   b->ArgNames({"B", "M", "N", "K"});
 
   /*       B   M    N   K */
@@ -83,7 +83,7 @@ inline void SD1XTextEncoderBgemmArguments(benchmark::internal::Benchmark* b) {
   b->Args({12, 77, 64, 77});
 }
 
-inline void QD8AttentionBgemmArguments(benchmark::internal::Benchmark* b) {
+inline void QD8AttentionBgemmArguments(benchmark::Benchmark* b) {
   b->ArgNames({"B", "M", "N", "K"});
 
   /*       B      M    N   K */
@@ -105,7 +105,7 @@ inline void QD8AttentionBgemmArguments(benchmark::internal::Benchmark* b) {
 }
 
 // Large Language Model (Generic)
-static void LLMGemmArguments(benchmark::internal::Benchmark* b) {
+static void LLMGemmArguments(benchmark::Benchmark* b) {
   b->ArgNames({"B", "M", "N", "K"});
 
   b->Args({1, 128, 16, 1024});

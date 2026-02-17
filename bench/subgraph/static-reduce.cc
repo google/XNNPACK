@@ -91,7 +91,7 @@ static void FP32Reduce(benchmark::State& state) {
       [&]() { return models::StaticReduce<float>(op_type, dims, axes); });
 }
 
-static void ReduceArguments(benchmark::internal::Benchmark* b) {
+static void ReduceArguments(benchmark::Benchmark* b) {
   static const xnn_reduce_operator reduce_ops[] = {
       xnn_reduce_mean,
       xnn_reduce_max,

@@ -82,7 +82,7 @@ void bench(benchmark::State& state, uint64_t arch_flags,
 }
 
 template <int ElemSizeBits>
-void TransposeParams(benchmark::internal::Benchmark* b) {
+void TransposeParams(benchmark::Benchmark* b) {
   b->ArgNames({"m", "n"});
   // We want to align tiles to 64-bytes (typical cache line size).
   const int align = ceil_div(64 * 8, ElemSizeBits);
@@ -111,7 +111,7 @@ void TransposeParams(benchmark::internal::Benchmark* b) {
 #include "ynnpack/kernels/transpose/transpose.inc"
 #undef YNN_TRANSPOSE_KERNEL
 
-void InterleaveParams(benchmark::internal::Benchmark* b, int factor) {
+void InterleaveParams(benchmark::Benchmark* b, int factor) {
   b->ArgNames({"factor", "m", "n"});
   int size = 65536;
   if (factor == 0) {
@@ -125,11 +125,9 @@ void InterleaveParams(benchmark::internal::Benchmark* b, int factor) {
   }
 }
 
-#define YNN_INTERLEAVE_KERNEL(arch_flags, kernel, factor, elem_size_bits) \
-  BENCHMARK_CAPTURE(bench, kernel, arch_flags, kernel, elem_size_bits)    \
-      ->Apply([](benchmark::internal::Benchmark* b) {                     \
-        InterleaveParams(b, factor);                                      \
-      })                                                                  \
+#define YNN_INTERLEAVE_KERNEL(arch_flags, kernel, factor, elem_size_bits)   \
+  BENCHMARK_CAPTURE(bench, kernel, arch_flags, kernel, elem_size_bits)      \
+      ->Apply([](benchmark::Benchmark* b) { InterleaveParams(b, factor); }) \
       ->UseRealTime();
 #include "ynnpack/kernels/transpose/interleave.inc"
 #undef YNN_INTERLEAVE_KERNEL

@@ -20,13 +20,13 @@
 
 /*
  * This is a lightweight wrapper around the underlying
- * benchmark::internal::Benchmark class, which handles registration of benchmark
+ * benchmark::Benchmark class, which handles registration of benchmark
  * case args. It provides default values for blocksize and skips
  * blockwise-specific cases for non-blockwise kernels.
  */
 class BenchmarkWrapper {
  public:
-  explicit BenchmarkWrapper(benchmark::internal::Benchmark* benchmark)
+  explicit BenchmarkWrapper(benchmark::Benchmark* benchmark)
       : benchmark_(benchmark),
         blockwise_(strstr(benchmark->GetName(), "_qb") != nullptr),
         last_k_(0),
@@ -78,7 +78,7 @@ class BenchmarkWrapper {
   }
 
  private:
-  benchmark::internal::Benchmark* benchmark_;
+  benchmark::Benchmark* benchmark_;
   bool blockwise_;
 
   int64_t last_k_;
@@ -140,8 +140,8 @@ class BenchmarkWrapper {
 
 
 // ShuffleNet v1 with 1 group.
-//inline void ShuffleNetV1G1GemmArguments(benchmark::internal::Benchmark* b) {
-inline void ShuffleNetV1G1GemmArguments(benchmark::internal::Benchmark* unwrapped_b) {
+//inline void ShuffleNetV1G1GemmArguments(benchmark::Benchmark* b) {
+inline void ShuffleNetV1G1GemmArguments(benchmark::Benchmark* unwrapped_b) {
   BenchmarkWrapper b(unwrapped_b);
   b.ArgNames({"M", "N", "K"});
 
@@ -162,7 +162,7 @@ inline void ShuffleNetV1G1GemmArguments(benchmark::internal::Benchmark* unwrappe
 }
 
 // ShuffleNet v1 with 2 groups.
-inline void ShuffleNetV1G2GemmArguments(benchmark::internal::Benchmark* unwrapped_b) {
+inline void ShuffleNetV1G2GemmArguments(benchmark::Benchmark* unwrapped_b) {
   BenchmarkWrapper b(unwrapped_b);
   b.ArgNames({"M", "N", "K"});
 
@@ -183,7 +183,7 @@ inline void ShuffleNetV1G2GemmArguments(benchmark::internal::Benchmark* unwrappe
 }
 
 // ShuffleNet v1 with 3 groups.
-inline void ShuffleNetV1G3GemmArguments(benchmark::internal::Benchmark* unwrapped_b) {
+inline void ShuffleNetV1G3GemmArguments(benchmark::Benchmark* unwrapped_b) {
   BenchmarkWrapper b(unwrapped_b);
   b.ArgNames({"M", "N", "K"});
 
@@ -204,7 +204,7 @@ inline void ShuffleNetV1G3GemmArguments(benchmark::internal::Benchmark* unwrappe
 }
 
 // ShuffleNet v1 with 4 groups.
-inline void ShuffleNetV1G4GemmArguments(benchmark::internal::Benchmark* unwrapped_b) {
+inline void ShuffleNetV1G4GemmArguments(benchmark::Benchmark* unwrapped_b) {
   BenchmarkWrapper b(unwrapped_b);
   b.ArgNames({"M", "N", "K"});
 
@@ -225,7 +225,7 @@ inline void ShuffleNetV1G4GemmArguments(benchmark::internal::Benchmark* unwrappe
 }
 
 // ShuffleNet v1 with 8 groups.
-inline void ShuffleNetV1G8GemmArguments(benchmark::internal::Benchmark* unwrapped_b) {
+inline void ShuffleNetV1G8GemmArguments(benchmark::Benchmark* unwrapped_b) {
   BenchmarkWrapper b(unwrapped_b);
   b.ArgNames({"M", "N", "K"});
 
@@ -246,7 +246,7 @@ inline void ShuffleNetV1G8GemmArguments(benchmark::internal::Benchmark* unwrappe
 }
 
 // ShuffleNet v2 (0.5X scale)
-inline void ShuffleNetV2X05GemmArguments(benchmark::internal::Benchmark* unwrapped_b) {
+inline void ShuffleNetV2X05GemmArguments(benchmark::Benchmark* unwrapped_b) {
   BenchmarkWrapper b(unwrapped_b);
   b.ArgNames({"M", "N", "K"});
 
@@ -262,7 +262,7 @@ inline void ShuffleNetV2X05GemmArguments(benchmark::internal::Benchmark* unwrapp
 }
 
 // ShuffleNet v2 (1.0X scale)
-inline void ShuffleNetV2X10GemmArguments(benchmark::internal::Benchmark* unwrapped_b) {
+inline void ShuffleNetV2X10GemmArguments(benchmark::Benchmark* unwrapped_b) {
   BenchmarkWrapper b(unwrapped_b);
   b.ArgNames({"M", "N", "K"});
 
@@ -279,7 +279,7 @@ inline void ShuffleNetV2X10GemmArguments(benchmark::internal::Benchmark* unwrapp
 }
 
 // ShuffleNet v2 (1.5X scale)
-inline void ShuffleNetV2X15GemmArguments(benchmark::internal::Benchmark* unwrapped_b) {
+inline void ShuffleNetV2X15GemmArguments(benchmark::Benchmark* unwrapped_b) {
   BenchmarkWrapper b(unwrapped_b);
   b.ArgNames({"M", "N", "K"});
 
@@ -296,7 +296,7 @@ inline void ShuffleNetV2X15GemmArguments(benchmark::internal::Benchmark* unwrapp
 }
 
 // ShuffleNet v2 (2.0X scale)
-inline void ShuffleNetV2X20GemmArguments(benchmark::internal::Benchmark* unwrapped_b) {
+inline void ShuffleNetV2X20GemmArguments(benchmark::Benchmark* unwrapped_b) {
   BenchmarkWrapper b(unwrapped_b);
   b.ArgNames({"M", "N", "K"});
 
@@ -312,7 +312,7 @@ inline void ShuffleNetV2X20GemmArguments(benchmark::internal::Benchmark* unwrapp
   b.Args({  7 *   7, 2048, 976 * 1 * 1});
 }
 
-inline void MobileNetV1GemmArguments(benchmark::internal::Benchmark* unwrapped_b) {
+inline void MobileNetV1GemmArguments(benchmark::Benchmark* unwrapped_b) {
   BenchmarkWrapper b(unwrapped_b);
   b.ArgNames({"M", "N", "K"});
 
@@ -329,7 +329,7 @@ inline void MobileNetV1GemmArguments(benchmark::internal::Benchmark* unwrapped_b
   b.Args({  7 *   7, 1024, 1024 * 1 * 1});
 }
 
-inline void MobileNetV2GemmArguments(benchmark::internal::Benchmark* unwrapped_b) {
+inline void MobileNetV2GemmArguments(benchmark::Benchmark* unwrapped_b) {
   BenchmarkWrapper b(unwrapped_b);
   b.ArgNames({"M", "N", "K"});
 
@@ -376,7 +376,7 @@ inline void MobileNetV2GemmArguments(benchmark::internal::Benchmark* unwrapped_b
   b.Args({  1 *   1, 1000, 1280 * 1 * 1});
 }
 
-inline void MobileNetV3SmallGemmArguments(benchmark::internal::Benchmark* unwrapped_b) {
+inline void MobileNetV3SmallGemmArguments(benchmark::Benchmark* unwrapped_b) {
   BenchmarkWrapper b(unwrapped_b);
   b.ArgNames({"M", "N", "K"});
 
@@ -451,7 +451,7 @@ inline void MobileNetV3SmallGemmArguments(benchmark::internal::Benchmark* unwrap
   b.Args({  1 *   1, 1001, 1024 * 1 * 1});
 }
 
-inline void MobileNetV3LargeGemmArguments(benchmark::internal::Benchmark* unwrapped_b) {
+inline void MobileNetV3LargeGemmArguments(benchmark::Benchmark* unwrapped_b) {
   BenchmarkWrapper b(unwrapped_b);
   b.ArgNames({"M", "N", "K"});
 
@@ -541,7 +541,7 @@ inline void MobileNetV3LargeGemmArguments(benchmark::internal::Benchmark* unwrap
 }
 
 // SqueezeNet 1.0
-inline void SqueezeNetV10GemmArguments(benchmark::internal::Benchmark* unwrapped_b) {
+inline void SqueezeNetV10GemmArguments(benchmark::Benchmark* unwrapped_b) {
   BenchmarkWrapper b(unwrapped_b);
   b.ArgNames({"M", "N", "K"});
 
@@ -590,7 +590,7 @@ inline void SqueezeNetV10GemmArguments(benchmark::internal::Benchmark* unwrapped
 }
 
 // SqueezeNet 1.1
-inline void SqueezeNetV11GemmArguments(benchmark::internal::Benchmark* unwrapped_b) {
+inline void SqueezeNetV11GemmArguments(benchmark::Benchmark* unwrapped_b) {
   BenchmarkWrapper b(unwrapped_b);
   b.ArgNames({"M", "N", "K"});
 
@@ -634,7 +634,7 @@ inline void SqueezeNetV11GemmArguments(benchmark::internal::Benchmark* unwrapped
   b.Args({ 13 *  13, 1000, 512 * 1 * 1});
 }
 
-inline void InceptionV3GemmArguments(benchmark::internal::Benchmark* unwrapped_b) {
+inline void InceptionV3GemmArguments(benchmark::Benchmark* unwrapped_b) {
   BenchmarkWrapper b(unwrapped_b);
   /*           M        N          K   */
   b.Args({150 * 150,   32,    3 * 3 * 3});
@@ -683,7 +683,7 @@ inline void InceptionV3GemmArguments(benchmark::internal::Benchmark* unwrapped_b
   b.Args({  3 *   3, 1001, 2048 * 1 * 1});
 }
 
-inline void ResNet18GemmArguments(benchmark::internal::Benchmark* unwrapped_b) {
+inline void ResNet18GemmArguments(benchmark::Benchmark* unwrapped_b) {
   BenchmarkWrapper b(unwrapped_b);
   b.ArgNames({"M", "N", "K"});
 
@@ -701,7 +701,7 @@ inline void ResNet18GemmArguments(benchmark::internal::Benchmark* unwrapped_b) {
   b.Args({  7 *   7, 512, 256 * 1 * 1});
 }
 
-inline void ResNet50GemmArguments(benchmark::internal::Benchmark* unwrapped_b) {
+inline void ResNet50GemmArguments(benchmark::Benchmark* unwrapped_b) {
   BenchmarkWrapper b(unwrapped_b);
   b.ArgNames({"M", "N", "K"});
 
@@ -737,7 +737,7 @@ inline void ResNet50GemmArguments(benchmark::internal::Benchmark* unwrapped_b) {
   b.Args({  7 *   7,  512, 2048 * 1 * 1});
 }
 
-inline void VGGGemmArguments(benchmark::internal::Benchmark* unwrapped_b) {
+inline void VGGGemmArguments(benchmark::Benchmark* unwrapped_b) {
   BenchmarkWrapper b(unwrapped_b);
   b.ArgNames({"M", "N", "K"});
 
@@ -777,7 +777,7 @@ inline void VGGGemmArguments(benchmark::internal::Benchmark* unwrapped_b) {
 }
 
 // SRCNN (9-1-5)
-inline void SRCNN915GemmArguments(benchmark::internal::Benchmark* unwrapped_b) {
+inline void SRCNN915GemmArguments(benchmark::Benchmark* unwrapped_b) {
   BenchmarkWrapper b(unwrapped_b);
   b.ArgNames({"M", "N", "K"});
 
@@ -788,7 +788,7 @@ inline void SRCNN915GemmArguments(benchmark::internal::Benchmark* unwrapped_b) {
 }
 
 // SRCNN (9-3-5)
-inline void SRCNN935GemmArguments(benchmark::internal::Benchmark* unwrapped_b) {
+inline void SRCNN935GemmArguments(benchmark::Benchmark* unwrapped_b) {
   BenchmarkWrapper b(unwrapped_b);
   b.ArgNames({"M", "N", "K"});
 
@@ -799,7 +799,7 @@ inline void SRCNN935GemmArguments(benchmark::internal::Benchmark* unwrapped_b) {
 }
 
 // SRCNN (9-5-5)
-inline void SRCNN955GemmArguments(benchmark::internal::Benchmark* unwrapped_b) {
+inline void SRCNN955GemmArguments(benchmark::Benchmark* unwrapped_b) {
   BenchmarkWrapper b(unwrapped_b);
   b.ArgNames({"M", "N", "K"});
 
@@ -810,7 +810,7 @@ inline void SRCNN955GemmArguments(benchmark::internal::Benchmark* unwrapped_b) {
 }
 
 // Large Language Model (Generic)
-inline void LLMGemmArguments(benchmark::internal::Benchmark* unwrapped_b) {
+inline void LLMGemmArguments(benchmark::Benchmark* unwrapped_b) {
   BenchmarkWrapper b(unwrapped_b);
   b.ArgNames({"M", "N", "K", "Bl"});
 

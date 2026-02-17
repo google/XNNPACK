@@ -247,7 +247,7 @@ static void FP32LayerNorm(benchmark::State& state) {
   });
 }
 
-static void LayerNormArguments(benchmark::internal::Benchmark* b) {
+static void LayerNormArguments(benchmark::Benchmark* b) {
   b->ArgNames({"M", "N", "K", "NormMask"});
   for (int norm_mask = 1; norm_mask < 8; norm_mask++) {
     b->Args({128, 256, 512, norm_mask});

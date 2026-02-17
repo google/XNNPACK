@@ -45,7 +45,7 @@ void transpose(benchmark::State& state, xnn_transposev_ukernel_fn transpose,
   }
 }
 
-static void BenchmarkKernelSize(benchmark::internal::Benchmark* b) {
+static void BenchmarkKernelSize(benchmark::Benchmark* b) {
   b->ArgNames({"height", "width", "element_size"});
   // b->Args({32, 32, 3});
   // b->Args({64, 64, 3});
