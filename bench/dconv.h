@@ -11,14 +11,15 @@
 #ifndef XNNPACK_BENCH_DCONV_H_
 #define XNNPACK_BENCH_DCONV_H_
 
+#include "bench/utils.h"
 #include <benchmark/benchmark.h>
 
 
 #define BENCHMARK_DCONV(conv_fn) \
-  BENCHMARK_CAPTURE(conv_fn, mobilenet_v1, "MobileNet v1/v2")->Apply(MobileNetConvArguments)->UseRealTime(); \
-  BENCHMARK_CAPTURE(conv_fn, mobilenet_v3, "MobileNet v3")->Apply(MobileNetV3ConvArguments)->UseRealTime(); \
-  BENCHMARK_CAPTURE(conv_fn, shufflenet, "ShuffleNet v1/v2")->Apply(ShuffleNetConvArguments)->UseRealTime(); \
-  BENCHMARK_CAPTURE(conv_fn, squeezenet_v11, "SqueezeNet 1.1")->Apply(SqueezeNetV11ConvArguments)->UseRealTime();
+  BENCHMARK_NAMED(conv_fn, mobilenet_v1)->Apply(MobileNetConvArguments)->UseRealTime(); \
+  BENCHMARK_NAMED(conv_fn, mobilenet_v3)->Apply(MobileNetV3ConvArguments)->UseRealTime(); \
+  BENCHMARK_NAMED(conv_fn, shufflenet)->Apply(ShuffleNetConvArguments)->UseRealTime(); \
+  BENCHMARK_NAMED(conv_fn, squeezenet_v11)->Apply(SqueezeNetV11ConvArguments)->UseRealTime();
 
 
 // ShuffleNet v1/v2.

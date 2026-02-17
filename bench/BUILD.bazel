@@ -76,6 +76,7 @@ xnnpack_cc_library(
     name = "conv",
     hdrs = ["conv.h"],
     deps = [
+        ":bench_utils",
         "@com_google_benchmark//:benchmark",
     ],
 )

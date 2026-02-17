@@ -682,23 +682,23 @@ static void x8_packw__reference(size_t batch, size_t dim_n, size_t dim_k,
       static_cast<void*>(packed_weights), extra_bytes, params);
 }
 
-static void x8_packw_x2__reference(benchmark::State& state, const char* net) {
+static void x8_packw_x2__reference(benchmark::State& state) {
   x8_packw(state, x8_packw__reference,
            /*nr=*/2, /*kr=*/1, /*sr=*/1);
 }
-static void x8_packw_x4__reference(benchmark::State& state, const char* net) {
+static void x8_packw_x4__reference(benchmark::State& state) {
   x8_packw(state, x8_packw__reference,
            /*nr=*/4, /*kr=*/1, /*sr=*/1);
 }
-static void x8_packw_x8__reference(benchmark::State& state, const char* net) {
+static void x8_packw_x8__reference(benchmark::State& state) {
   x8_packw(state, x8_packw__reference,
            /*nr=*/8, /*kr=*/1, /*sr=*/1);
 }
-static void x8_packw_x16__reference(benchmark::State& state, const char* net) {
+static void x8_packw_x16__reference(benchmark::State& state) {
   x8_packw(state, x8_packw__reference,
            /*nr=*/16, /*kr=*/1, /*sr=*/1);
 }
-static void x8_packw_x32__reference(benchmark::State& state, const char* net) {
+static void x8_packw_x32__reference(benchmark::State& state) {
   x8_packw(state, x8_packw__reference,
            /*nr=*/32, /*kr=*/1, /*sr=*/1);
 }
@@ -721,34 +721,28 @@ static void x8_packw_gio__reference(size_t batch, size_t dim_n, size_t dim_k,
       static_cast<void*>(packed_weights), extra_bytes, params);
 }
 
-static void x8_packw_gio_x2__reference(benchmark::State& state,
-                                       const char* net) {
+static void x8_packw_gio_x2__reference(benchmark::State& state) {
   x8_packw(state, x8_packw_gio__reference,
            /*nr=*/2, /*kr=*/1, /*sr=*/1);
 }
-static void x8_packw_gio_x4__reference(benchmark::State& state,
-                                       const char* net) {
+static void x8_packw_gio_x4__reference(benchmark::State& state) {
   x8_packw(state, x8_packw_gio__reference,
            /*nr=*/4, /*kr=*/1, /*sr=*/1);
 }
-static void x8_packw_gio_x8__reference(benchmark::State& state,
-                                       const char* net) {
+static void x8_packw_gio_x8__reference(benchmark::State& state) {
   x8_packw(state, x8_packw_gio__reference,
            /*nr=*/8, /*kr=*/1, /*sr=*/1);
 }
-static void x8_packw_gio_x16__reference(benchmark::State& state,
-                                        const char* net) {
+static void x8_packw_gio_x16__reference(benchmark::State& state) {
   x8_packw(state, x8_packw_gio__reference,
            /*nr=*/16, /*kr=*/1, /*sr=*/1);
 }
-static void x8_packw_gio_x32__reference(benchmark::State& state,
-                                        const char* net) {
+static void x8_packw_gio_x32__reference(benchmark::State& state) {
   x8_packw(state, x8_packw_gio__reference,
            /*nr=*/32, /*kr=*/1, /*sr=*/1);
 }
 
-static void x8_packw_gio_x8c8__reference(benchmark::State& state,
-                                         const char* net) {
+static void x8_packw_gio_x8c8__reference(benchmark::State& state) {
   x8_packw(state, x8_packw_gio__reference,
            /*nr=*/8, /*kr=*/8, /*sr=*/1);
 }
@@ -772,23 +766,19 @@ static void qs8_packw__reference(size_t batch, size_t dim_n, size_t dim_k,
       reinterpret_cast<const struct xnn_qs8_packing_params*>(params));
 }
 
-static void qs8_packw_x2c4__reference(benchmark::State& state,
-                                      const char* net) {
+static void qs8_packw_x2c4__reference(benchmark::State& state) {
   qs8_packw(state, qs8_packw__reference,
             /*nr=*/2, /*kr=*/4, /*sr=*/1);
 }
-static void qs8_packw_x8c4__reference(benchmark::State& state,
-                                      const char* net) {
+static void qs8_packw_x8c4__reference(benchmark::State& state) {
   qs8_packw(state, qs8_packw__reference,
             /*nr=*/8, /*kr=*/4, /*sr=*/1);
 }
-static void qs8_packw_x16c4__reference(benchmark::State& state,
-                                       const char* net) {
+static void qs8_packw_x16c4__reference(benchmark::State& state) {
   qs8_packw(state, qs8_packw__reference,
             /*nr=*/16, /*kr=*/4, /*sr=*/1);
 }
-static void qs8_packw_x64c4__reference(benchmark::State& state,
-                                       const char* net) {
+static void qs8_packw_x64c4__reference(benchmark::State& state) {
   qs8_packw(state, qs8_packw__reference,
             /*nr=*/64, /*kr=*/4, /*sr=*/1);
 }
@@ -798,13 +788,11 @@ BENCHMARK_BGEMM(qs8_packw_x8c4__reference)
 BENCHMARK_BGEMM(qs8_packw_x16c4__reference)
 BENCHMARK_BGEMM(qs8_packw_x64c4__reference)
 
-static void qs8_packw_x8c8__reference(benchmark::State& state,
-                                      const char* net) {
+static void qs8_packw_x8c8__reference(benchmark::State& state) {
   qs8_packw(state, qs8_packw__reference,
             /*nr=*/8, /*kr=*/8, /*sr=*/1);
 }
-static void qs8_packw_x16c8__reference(benchmark::State& state,
-                                       const char* net) {
+static void qs8_packw_x16c8__reference(benchmark::State& state) {
   qs8_packw(state, qs8_packw__reference,
             /*nr=*/16, /*kr=*/8, /*sr=*/1);
 }
@@ -825,13 +813,11 @@ static void qs8_packw_gio__reference(size_t batch, size_t dim_n, size_t dim_k,
       reinterpret_cast<const struct xnn_qs8_packing_params*>(params));
 }
 
-static void qs8_packw_gio_x8c8__reference(benchmark::State& state,
-                                          const char* net) {
+static void qs8_packw_gio_x8c8__reference(benchmark::State& state) {
   qs8_packw(state, qs8_packw_gio__reference,
             /*nr=*/8, /*kr=*/8, /*sr=*/1);
 }
-static void qs8_packw_gio_x16c8__reference(benchmark::State& state,
-                                           const char* net) {
+static void qs8_packw_gio_x16c8__reference(benchmark::State& state) {
   qs8_packw(state, qs8_packw_gio__reference,
             /*nr=*/16, /*kr=*/8, /*sr=*/1);
 }
@@ -852,18 +838,15 @@ static void qs8_qc4w_packw__reference(
       reinterpret_cast<const struct xnn_qs8_qc4w_packing_params*>(params));
 }
 
-static void qs8_qc4w_packw_x8c8__reference(benchmark::State& state,
-                                           const char* net) {
+static void qs8_qc4w_packw_x8c8__reference(benchmark::State& state) {
   qs8_qc4w_packw(state, qs8_qc4w_packw__reference,
                  /*nr=*/8, /*kr=*/8, /*sr=*/1);
 }
-static void qs8_qc4w_packw_x16c8__reference(benchmark::State& state,
-                                            const char* net) {
+static void qs8_qc4w_packw_x16c8__reference(benchmark::State& state) {
   qs8_qc4w_packw(state, qs8_qc4w_packw__reference,
                  /*nr=*/16, /*kr=*/8, /*sr=*/1);
 }
-static void qs8_qc4w_packw_x32c8__reference(benchmark::State& state,
-                                            const char* net) {
+static void qs8_qc4w_packw_x32c8__reference(benchmark::State& state) {
   qs8_qc4w_packw(state, qs8_qc4w_packw__reference,
                  /*nr=*/32, /*kr=*/8, /*sr=*/1);
 }
@@ -881,7 +864,7 @@ static void x16_packw__reference(size_t batch, size_t dim_n, size_t dim_k,
                           packed_weights, extra_bytes, params);
 }
 
-static void x16_packw_x8__reference(benchmark::State& state, const char* net) {
+static void x16_packw_x8__reference(benchmark::State& state) {
   x16_packw(state, x16_packw__reference,
             /*nr=*/8, /*kr=*/1, /*sr=*/1);
 }
@@ -899,34 +882,31 @@ static void x32_packw__reference(size_t batch, size_t dim_n, size_t dim_k,
       reinterpret_cast<float*>(packed_weights), extra_bytes, params);
 }
 
-static void x32_packw_x2c4__reference(benchmark::State& state,
-                                      const char* net) {
+static void x32_packw_x2c4__reference(benchmark::State& state) {
   x32_packw(state, x32_packw__reference,
             /*nr=*/2, /*kr=*/4, /*sr=*/1);
 }
-static void x32_packw_x8__reference(benchmark::State& state, const char* net) {
+static void x32_packw_x8__reference(benchmark::State& state) {
   x32_packw(state, x32_packw__reference,
             /*nr=*/8, /*kr=*/1, /*sr=*/1);
 }
-static void x32_packw_x8s4__reference(benchmark::State& state,
-                                      const char* net) {
+static void x32_packw_x8s4__reference(benchmark::State& state) {
   x32_packw(state, x32_packw__reference,
             /*nr=*/8, /*kr=*/1, /*sr=*/4);
 }
-static void x32_packw_x16__reference(benchmark::State& state, const char* net) {
+static void x32_packw_x16__reference(benchmark::State& state) {
   x32_packw(state, x32_packw__reference,
             /*nr=*/16, /*kr=*/1, /*sr=*/1);
 }
-static void x32_packw_x16s4__reference(benchmark::State& state,
-                                       const char* net) {
+static void x32_packw_x16s4__reference(benchmark::State& state) {
   x32_packw(state, x32_packw__reference,
             /*nr=*/16, /*kr=*/1, /*sr=*/4);
 }
-static void x32_packw_x32__reference(benchmark::State& state, const char* net) {
+static void x32_packw_x32__reference(benchmark::State& state) {
   x32_packw(state, x32_packw__reference,
             /*nr=*/32, /*kr=*/1, /*sr=*/1);
 }
-static void x32_packw_x64__reference(benchmark::State& state, const char* net) {
+static void x32_packw_x64__reference(benchmark::State& state) {
   x32_packw(state, x32_packw__reference,
             /*nr=*/64, /*kr=*/1, /*sr=*/1);
 }
@@ -952,23 +932,19 @@ static void x32_packw_gio__reference(size_t batch, size_t dim_n, size_t dim_k,
                           params);
 }
 
-static void x32_packw_x8_gio__reference(benchmark::State& state,
-                                        const char* net) {
+static void x32_packw_x8_gio__reference(benchmark::State& state) {
   x32_packw(state, x32_packw_gio__reference,
             /*nr=*/8, /*kr=*/1, /*sr=*/1);
 }
-static void x32_packw_x16_gio__reference(benchmark::State& state,
-                                         const char* net) {
+static void x32_packw_x16_gio__reference(benchmark::State& state) {
   x32_packw(state, x32_packw_gio__reference,
             /*nr=*/16, /*kr=*/1, /*sr=*/1);
 }
-static void x32_packw_x32_gio__reference(benchmark::State& state,
-                                         const char* net) {
+static void x32_packw_x32_gio__reference(benchmark::State& state) {
   x32_packw(state, x32_packw_gio__reference,
             /*nr=*/32, /*kr=*/1, /*sr=*/1);
 }
-static void x32_packw_x64_gio__reference(benchmark::State& state,
-                                         const char* net) {
+static void x32_packw_x64_gio__reference(benchmark::State& state) {
   x32_packw(state, x32_packw_gio__reference,
             /*nr=*/64, /*kr=*/1, /*sr=*/1);
 }
@@ -994,14 +970,12 @@ static void qb4_packw_goi__reference(size_t batch, size_t dim_n, size_t dim_k,
       reinterpret_cast<const struct xnn_qs8_qc4w_packing_params*>(params));
 }
 
-static void qb4_packw_x16c4_goi__reference(benchmark::State& state,
-                                           const char* net) {
+static void qb4_packw_x16c4_goi__reference(benchmark::State& state) {
   qb4_packw(state, (xnn_qb4_packw_gemm_goi_ukernel_fn)qb4_packw_goi__reference,
             /*nr=*/16, /*kr=*/4, /*sr=*/1, /*bl=*/32, true);
 }
 
-static void qb4_packw_x16c8_goi__reference(benchmark::State& state,
-                                           const char* net) {
+static void qb4_packw_x16c8_goi__reference(benchmark::State& state) {
   qb4_packw(state, (xnn_qb4_packw_gemm_goi_ukernel_fn)qb4_packw_goi__reference,
             /*nr=*/16, /*kr=*/8, /*sr=*/1, /*bl=*/32, true);
 }

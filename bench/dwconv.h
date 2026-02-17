@@ -15,19 +15,19 @@
 
 
 #define BENCHMARK_DWCONV(dwconv_fn) \
-  BENCHMARK_CAPTURE(dwconv_fn, mobilenet_v1, "MobileNet v1")->Apply(MobileNetV1DWConvArguments)->UseRealTime(); \
-  BENCHMARK_CAPTURE(dwconv_fn, mobilenet_v2, "MobileNet v2")->Apply(MobileNetV2DWConvArguments)->UseRealTime(); \
-  BENCHMARK_CAPTURE(dwconv_fn, mobilenet_v3_small, "MobileNet v3 Small")->Apply(MobileNetV3SmallDWConvArguments)->UseRealTime(); \
-  BENCHMARK_CAPTURE(dwconv_fn, mobilenet_v3_large, "MobileNet v3 Large")->Apply(MobileNetV3LargeDWConvArguments)->UseRealTime(); \
-  BENCHMARK_CAPTURE(dwconv_fn, shufflenet_v1_g1, "ShuffleNet v1 (1 group)")->Apply(ShuffleNetV1G1DWConvArguments)->UseRealTime(); \
-  BENCHMARK_CAPTURE(dwconv_fn, shufflenet_v1_g2, "ShuffleNet v1 (2 groups)")->Apply(ShuffleNetV1G2DWConvArguments)->UseRealTime(); \
-  BENCHMARK_CAPTURE(dwconv_fn, shufflenet_v1_g3, "ShuffleNet v1 (3 groups)")->Apply(ShuffleNetV1G3DWConvArguments)->UseRealTime(); \
-  BENCHMARK_CAPTURE(dwconv_fn, shufflenet_v1_g4, "ShuffleNet v1 (4 groups)")->Apply(ShuffleNetV1G4DWConvArguments)->UseRealTime(); \
-  BENCHMARK_CAPTURE(dwconv_fn, shufflenet_v1_g8, "ShuffleNet v1 (8 groups)")->Apply(ShuffleNetV1G8DWConvArguments)->UseRealTime(); \
-  BENCHMARK_CAPTURE(dwconv_fn, shufflenet_v2_x05, "ShuffleNet v2 0.5X")->Apply(ShuffleNetV2X05DWConvArguments)->UseRealTime(); \
-  BENCHMARK_CAPTURE(dwconv_fn, shufflenet_v2_x10, "ShuffleNet v2 1.0X")->Apply(ShuffleNetV2X10DWConvArguments)->UseRealTime(); \
-  BENCHMARK_CAPTURE(dwconv_fn, shufflenet_v2_x15, "ShuffleNet v2 1.5X")->Apply(ShuffleNetV2X15DWConvArguments)->UseRealTime(); \
-  BENCHMARK_CAPTURE(dwconv_fn, shufflenet_v2_x20, "ShuffleNet v2 2.0X")->Apply(ShuffleNetV2X20DWConvArguments)->UseRealTime();
+  BENCHMARK_NAMED(dwconv_fn, mobilenet_v1)->Apply(MobileNetV1DWConvArguments)->UseRealTime(); \
+  BENCHMARK_NAMED(dwconv_fn, mobilenet_v2)->Apply(MobileNetV2DWConvArguments)->UseRealTime(); \
+  BENCHMARK_NAMED(dwconv_fn, mobilenet_v3_small)->Apply(MobileNetV3SmallDWConvArguments)->UseRealTime(); \
+  BENCHMARK_NAMED(dwconv_fn, mobilenet_v3_large)->Apply(MobileNetV3LargeDWConvArguments)->UseRealTime(); \
+  BENCHMARK_NAMED(dwconv_fn, shufflenet_v1_g1)->Apply(ShuffleNetV1G1DWConvArguments)->UseRealTime(); \
+  BENCHMARK_NAMED(dwconv_fn, shufflenet_v1_g2)->Apply(ShuffleNetV1G2DWConvArguments)->UseRealTime(); \
+  BENCHMARK_NAMED(dwconv_fn, shufflenet_v1_g3)->Apply(ShuffleNetV1G3DWConvArguments)->UseRealTime(); \
+  BENCHMARK_NAMED(dwconv_fn, shufflenet_v1_g4)->Apply(ShuffleNetV1G4DWConvArguments)->UseRealTime(); \
+  BENCHMARK_NAMED(dwconv_fn, shufflenet_v1_g8)->Apply(ShuffleNetV1G8DWConvArguments)->UseRealTime(); \
+  BENCHMARK_NAMED(dwconv_fn, shufflenet_v2_x05)->Apply(ShuffleNetV2X05DWConvArguments)->UseRealTime(); \
+  BENCHMARK_NAMED(dwconv_fn, shufflenet_v2_x10)->Apply(ShuffleNetV2X10DWConvArguments)->UseRealTime(); \
+  BENCHMARK_NAMED(dwconv_fn, shufflenet_v2_x15)->Apply(ShuffleNetV2X15DWConvArguments)->UseRealTime(); \
+  BENCHMARK_NAMED(dwconv_fn, shufflenet_v2_x20)->Apply(ShuffleNetV2X20DWConvArguments)->UseRealTime();
 
 
 // ShuffleNet v1 with 1 group.

@@ -11,19 +11,19 @@
 #include <benchmark/benchmark.h>
 
 #define BENCHMARK_SPMM(spmm_fn) \
-  BENCHMARK_CAPTURE(spmm_fn, mobilenet_v1, "MobileNet v1")->Apply(MobileNetV1SpmmArguments)->UseRealTime(); \
-  BENCHMARK_CAPTURE(spmm_fn, mobilenet_v2, "MobileNet v2")->Apply(MobileNetV2SpmmArguments)->UseRealTime(); \
-  BENCHMARK_CAPTURE(spmm_fn, mobilenet_v3_small, "MobileNet v3 Small")->Apply(MobileNetV3SmallSpmmArguments)->UseRealTime(); \
-  BENCHMARK_CAPTURE(spmm_fn, mobilenet_v3_large, "MobileNet v3 Large")->Apply(MobileNetV3LargeSpmmArguments)->UseRealTime(); \
-  BENCHMARK_CAPTURE(spmm_fn, shufflenet_v1_g1, "ShuffleNet v1 (1 group)")->Apply(ShuffleNetV1G1SpmmArguments)->UseRealTime(); \
-  BENCHMARK_CAPTURE(spmm_fn, shufflenet_v1_g2, "ShuffleNet v1 (2 groups)")->Apply(ShuffleNetV1G2SpmmArguments)->UseRealTime(); \
-  BENCHMARK_CAPTURE(spmm_fn, shufflenet_v1_g3, "ShuffleNet v1 (3 groups)")->Apply(ShuffleNetV1G3SpmmArguments)->UseRealTime(); \
-  BENCHMARK_CAPTURE(spmm_fn, shufflenet_v1_g4, "ShuffleNet v1 (4 groups)")->Apply(ShuffleNetV1G4SpmmArguments)->UseRealTime(); \
-  BENCHMARK_CAPTURE(spmm_fn, shufflenet_v1_g8, "ShuffleNet v1 (8 groups)")->Apply(ShuffleNetV1G8SpmmArguments)->UseRealTime(); \
-  BENCHMARK_CAPTURE(spmm_fn, shufflenet_v2_x05, "ShuffleNet v2 0.5X")->Apply(ShuffleNetV2X05SpmmArguments)->UseRealTime(); \
-  BENCHMARK_CAPTURE(spmm_fn, shufflenet_v2_x10, "ShuffleNet v2 1.0X")->Apply(ShuffleNetV2X10SpmmArguments)->UseRealTime(); \
-  BENCHMARK_CAPTURE(spmm_fn, shufflenet_v2_x15, "ShuffleNet v2 1.5X")->Apply(ShuffleNetV2X15SpmmArguments)->UseRealTime(); \
-  BENCHMARK_CAPTURE(spmm_fn, shufflenet_v2_x20, "ShuffleNet v2 2.0X")->Apply(ShuffleNetV2X20SpmmArguments)->UseRealTime();
+  BENCHMARK_NAMED(spmm_fn, mobilenet_v1)->Apply(MobileNetV1SpmmArguments)->UseRealTime(); \
+  BENCHMARK_NAMED(spmm_fn, mobilenet_v2)->Apply(MobileNetV2SpmmArguments)->UseRealTime(); \
+  BENCHMARK_NAMED(spmm_fn, mobilenet_v3_small)->Apply(MobileNetV3SmallSpmmArguments)->UseRealTime(); \
+  BENCHMARK_NAMED(spmm_fn, mobilenet_v3_large)->Apply(MobileNetV3LargeSpmmArguments)->UseRealTime(); \
+  BENCHMARK_NAMED(spmm_fn, shufflenet_v1_g1)->Apply(ShuffleNetV1G1SpmmArguments)->UseRealTime(); \
+  BENCHMARK_NAMED(spmm_fn, shufflenet_v1_g2)->Apply(ShuffleNetV1G2SpmmArguments)->UseRealTime(); \
+  BENCHMARK_NAMED(spmm_fn, shufflenet_v1_g3)->Apply(ShuffleNetV1G3SpmmArguments)->UseRealTime(); \
+  BENCHMARK_NAMED(spmm_fn, shufflenet_v1_g4)->Apply(ShuffleNetV1G4SpmmArguments)->UseRealTime(); \
+  BENCHMARK_NAMED(spmm_fn, shufflenet_v1_g8)->Apply(ShuffleNetV1G8SpmmArguments)->UseRealTime(); \
+  BENCHMARK_NAMED(spmm_fn, shufflenet_v2_x05)->Apply(ShuffleNetV2X05SpmmArguments)->UseRealTime(); \
+  BENCHMARK_NAMED(spmm_fn, shufflenet_v2_x10)->Apply(ShuffleNetV2X10SpmmArguments)->UseRealTime(); \
+  BENCHMARK_NAMED(spmm_fn, shufflenet_v2_x15)->Apply(ShuffleNetV2X15SpmmArguments)->UseRealTime(); \
+  BENCHMARK_NAMED(spmm_fn, shufflenet_v2_x20)->Apply(ShuffleNetV2X20SpmmArguments)->UseRealTime();
 
 
 // ShuffleNet v1 with 1 group.

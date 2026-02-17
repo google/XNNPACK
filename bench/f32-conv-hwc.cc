@@ -117,25 +117,25 @@ static void f32_conv_hwc(
 
 #if XNN_ARCH_ARM64
 static void f32_conv_hwc_3x3s2p1c3x8__aarch64_neonfma_2x1(
-    benchmark::State& state, const char* net) {
+    benchmark::State& state) {
   f32_conv_hwc(state, xnn_f32_conv_hwc_ukernel_3x3s2p1c3x8__aarch64_neonfma_2x1,
                xnn_init_f32_minmax_scalar_params, 8 /* output channel tile */,
                xnn_arch_arm_neon_fma);
 }
 static void f32_conv_hwc_3x3s2p1c3x4__aarch64_neonfma_2x1(
-    benchmark::State& state, const char* net) {
+    benchmark::State& state) {
   f32_conv_hwc(state, xnn_f32_conv_hwc_ukernel_3x3s2p1c3x4__aarch64_neonfma_2x1,
                xnn_init_f32_minmax_scalar_params, 4 /* output channel tile */,
                xnn_arch_arm_neon_fma);
 }
 static void f32_conv_hwc_3x3s2p1c3x8__aarch64_neonfma_2x2(
-    benchmark::State& state, const char* net) {
+    benchmark::State& state) {
   f32_conv_hwc(state, xnn_f32_conv_hwc_ukernel_3x3s2p1c3x8__aarch64_neonfma_2x2,
                xnn_init_f32_minmax_scalar_params, 8 /* output channel tile */,
                xnn_arch_arm_neon_fma);
 }
 static void f32_conv_hwc_3x3s2p1c3x4__aarch64_neonfma_2x2(
-    benchmark::State& state, const char* net) {
+    benchmark::State& state) {
   f32_conv_hwc(state, xnn_f32_conv_hwc_ukernel_3x3s2p1c3x4__aarch64_neonfma_2x2,
                xnn_init_f32_minmax_scalar_params, 4 /* output channel tile */,
                xnn_arch_arm_neon_fma);
@@ -148,26 +148,22 @@ BENCHMARK_DCONV(f32_conv_hwc_3x3s2p1c3x4__aarch64_neonfma_2x2);
 #endif  // XNN_ARCH_ARM64
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
-static void f32_conv_hwc_3x3s2p1c3x8__neon_2x1(benchmark::State& state,
-                                               const char* net) {
+static void f32_conv_hwc_3x3s2p1c3x8__neon_2x1(benchmark::State& state) {
   f32_conv_hwc(state, xnn_f32_conv_hwc_ukernel_3x3s2p1c3x8__neon_2x1,
                xnn_init_f32_minmax_scalar_params, 8 /* output channel tile */,
                xnn_arch_arm_neon);
 }
-static void f32_conv_hwc_3x3s2p1c3x4__neon_2x1(benchmark::State& state,
-                                               const char* net) {
+static void f32_conv_hwc_3x3s2p1c3x4__neon_2x1(benchmark::State& state) {
   f32_conv_hwc(state, xnn_f32_conv_hwc_ukernel_3x3s2p1c3x4__neon_2x1,
                xnn_init_f32_minmax_scalar_params, 4 /* output channel tile */,
                xnn_arch_arm_neon);
 }
-static void f32_conv_hwc_3x3s2p1c3x8__neon_2x2(benchmark::State& state,
-                                               const char* net) {
+static void f32_conv_hwc_3x3s2p1c3x8__neon_2x2(benchmark::State& state) {
   f32_conv_hwc(state, xnn_f32_conv_hwc_ukernel_3x3s2p1c3x8__neon_2x2,
                xnn_init_f32_minmax_scalar_params, 8 /* output channel tile */,
                xnn_arch_arm_neon);
 }
-static void f32_conv_hwc_3x3s2p1c3x4__neon_2x2(benchmark::State& state,
-                                               const char* net) {
+static void f32_conv_hwc_3x3s2p1c3x4__neon_2x2(benchmark::State& state) {
   f32_conv_hwc(state, xnn_f32_conv_hwc_ukernel_3x3s2p1c3x4__neon_2x2,
                xnn_init_f32_minmax_scalar_params, 4 /* output channel tile */,
                xnn_arch_arm_neon);

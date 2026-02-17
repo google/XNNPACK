@@ -118,7 +118,7 @@ static void f16_conv_hwc2chw(
 
 #if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 static void f16_conv_hwc2chw_3x3s2p1c3x4__neonfp16arith_2x2(
-    benchmark::State& state, const char* net) {
+    benchmark::State& state) {
   f16_conv_hwc2chw(
       state, xnn_f16_conv_hwc2chw_ukernel_3x3s2p1c3x4__neonfp16arith_2x2, 4,
       xnn_init_f16_minmax_scalar_params, xnn_arch_arm_neon_fp16_arith);

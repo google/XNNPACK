@@ -156,7 +156,7 @@ static void bench_impl(uint64_t arch_flags, benchmark::State& state,
 
 #define XNN_UKERNEL(arch_flags, ukernel, c_block, is_pipelined, cr, kr, \
                     datatype, weights_type, params_type, init_params)   \
-  static void BM_##ukernel(benchmark::State& state, const char* net) {  \
+  static void BM_##ukernel(benchmark::State& state) {                   \
     bench_impl(arch_flags, state, ukernel, init_params, cr, kr);        \
   }                                                                     \
   BENCHMARK_DWCONV(BM_##ukernel);
