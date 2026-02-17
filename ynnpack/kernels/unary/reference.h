@@ -156,30 +156,11 @@ struct floor : public unary_op_info {
 
 struct sigmoid : public unary_op_info {
   float operator()(float x) const override {
-    if (x > 100) {
-      return 1.0f;
-    } else if (x < -100) {
-      return 0.0f;
-    } else {
-      const double e = std::exp(static_cast<double>(x));
-      return e / (1.0 + e);
-    }
+    return 1.0 / (1.0 + std::exp(static_cast<double>(-x)));
   }
 
   float tolerance(float y_ref, ynn_type type) const override {
-    switch (type) {
-      case ynn_type_fp32:
-        return tol_mixed(y_ref, 5.0e-6f, 1.0e-5f);
-      case ynn_type_fp16:
-        return tol_mixed(y_ref, 1.0e-4f, 5.0e-3f);
-      case ynn_type_bf16:
-        return tol_mixed(y_ref, 1.0e-3f, 1.0e-2f);
-      case ynn_type_int8:
-      case ynn_type_uint8:
-        return 1;
-      default:
-        return tol_exact(y_ref);
-    }
+    return tol_mixed(y_ref, epsilon(type), epsilon(type));
   }
 
   interval domain(ynn_type type) const override {
