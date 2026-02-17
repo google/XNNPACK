@@ -113,56 +113,47 @@ static void f16_gemm(benchmark::State& state,
 }
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-static void f16_f32acc_gemm_1x8__avx2_broadcast(benchmark::State& state,
-                                                const char* net) {
+static void f16_f32acc_gemm_1x8__avx2_broadcast(benchmark::State& state) {
   f16_gemm(state, xnn_f16_f32acc_gemm_minmax_ukernel_1x8__avx2_broadcast, 1, 8,
            1, 1, xnn_init_f16_minmax_scalar_params,
            xnn_arch_x86_avx2);
 }
-static void f16_f32acc_gemm_4x8__avx2_broadcast(benchmark::State& state,
-                                                const char* net) {
+static void f16_f32acc_gemm_4x8__avx2_broadcast(benchmark::State& state) {
   f16_gemm(state, xnn_f16_f32acc_gemm_minmax_ukernel_4x8__avx2_broadcast, 4, 8,
            1, 1, xnn_init_f16_minmax_scalar_params,
            xnn_arch_x86_avx2);
 }
-static void f16_f32acc_gemm_5x8__avx2_broadcast(benchmark::State& state,
-                                                const char* net) {
+static void f16_f32acc_gemm_5x8__avx2_broadcast(benchmark::State& state) {
   f16_gemm(state, xnn_f16_f32acc_gemm_minmax_ukernel_5x8__avx2_broadcast, 5, 8,
            1, 1, xnn_init_f16_minmax_scalar_params,
            xnn_arch_x86_avx2);
 }
-static void f16_f32acc_gemm_6x8__avx2_broadcast(benchmark::State& state,
-                                                const char* net) {
+static void f16_f32acc_gemm_6x8__avx2_broadcast(benchmark::State& state) {
   f16_gemm(state, xnn_f16_f32acc_gemm_minmax_ukernel_6x8__avx2_broadcast, 6, 8,
            1, 1, xnn_init_f16_minmax_scalar_params,
            xnn_arch_x86_avx2);
 }
-static void f16_f32acc_gemm_7x8__avx2_broadcast(benchmark::State& state,
-                                                const char* net) {
+static void f16_f32acc_gemm_7x8__avx2_broadcast(benchmark::State& state) {
   f16_gemm(state, xnn_f16_f32acc_gemm_minmax_ukernel_7x8__avx2_broadcast, 7, 8,
            1, 1, xnn_init_f16_minmax_scalar_params,
            xnn_arch_x86_avx2);
 }
-static void f16_f32acc_gemm_1x16__avx2_broadcast(benchmark::State& state,
-                                                 const char* net) {
+static void f16_f32acc_gemm_1x16__avx2_broadcast(benchmark::State& state) {
   f16_gemm(state, xnn_f16_f32acc_gemm_minmax_ukernel_1x16__avx2_broadcast, 1,
            16, 1, 1, xnn_init_f16_minmax_scalar_params,
            xnn_arch_x86_avx2);
 }
-static void f16_f32acc_gemm_3x16__avx2_broadcast(benchmark::State& state,
-                                                 const char* net) {
+static void f16_f32acc_gemm_3x16__avx2_broadcast(benchmark::State& state) {
   f16_gemm(state, xnn_f16_f32acc_gemm_minmax_ukernel_3x16__avx2_broadcast, 3,
            16, 1, 1, xnn_init_f16_minmax_scalar_params,
            xnn_arch_x86_avx2);
 }
-static void f16_f32acc_gemm_4x16__avx2_broadcast(benchmark::State& state,
-                                                 const char* net) {
+static void f16_f32acc_gemm_4x16__avx2_broadcast(benchmark::State& state) {
   f16_gemm(state, xnn_f16_f32acc_gemm_minmax_ukernel_4x16__avx2_broadcast, 4,
            16, 1, 1, xnn_init_f16_minmax_scalar_params,
            xnn_arch_x86_avx2);
 }
-static void f16_f32acc_gemm_5x16__avx2_broadcast(benchmark::State& state,
-                                                 const char* net) {
+static void f16_f32acc_gemm_5x16__avx2_broadcast(benchmark::State& state) {
   f16_gemm(state, xnn_f16_f32acc_gemm_minmax_ukernel_5x16__avx2_broadcast, 5,
            16, 1, 1, xnn_init_f16_minmax_scalar_params,
            xnn_arch_x86_avx2);

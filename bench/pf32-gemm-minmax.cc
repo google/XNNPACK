@@ -28,7 +28,7 @@ namespace {
 
 #if XNN_ENABLE_ARM_SME2 && XNN_ARCH_ARM64
   #if XNN_ENABLE_KLEIDIAI
-  static void pf32_gemm_minmax_ukernel_1x32__neonsme2(benchmark::State& state, const char* net) {
+  static void pf32_gemm_minmax_ukernel_1x32__neonsme2(benchmark::State& state) {
     GEMMBenchmark(state,
       xnn_pf32_gemm_minmax_ukernel_1x32__neonsme2,
       xnn_init_f32_minmax_scalar_params,
@@ -68,7 +68,7 @@ namespace {
 
   BENCHMARK_GEMM(pf32_gemm_minmax_ukernel_1x32__neonsme2)
 
-  static void pf32_gemm_minmax_ukernel_32x32__neonsme2(benchmark::State& state, const char* net) {
+  static void pf32_gemm_minmax_ukernel_32x32__neonsme2(benchmark::State& state) {
     GEMMBenchmark(state,
       xnn_pf32_gemm_minmax_ukernel_32x32__neonsme2,
       xnn_init_f32_minmax_scalar_params,
@@ -113,7 +113,7 @@ namespace {
 
 #if XNN_ENABLE_ARM_SME && XNN_ARCH_ARM64
   #if XNN_ENABLE_KLEIDIAI
-  static void pf32_gemm_minmax_ukernel_1x32__neonsme(benchmark::State& state, const char* net) {
+  static void pf32_gemm_minmax_ukernel_1x32__neonsme(benchmark::State& state) {
     GEMMBenchmark(state,
       xnn_pf32_gemm_minmax_ukernel_1x32__neonsme,
       xnn_init_f32_minmax_scalar_params,
@@ -153,7 +153,7 @@ namespace {
 
   BENCHMARK_GEMM(pf32_gemm_minmax_ukernel_1x32__neonsme)
 
-  static void pf32_gemm_minmax_ukernel_32x32__neonsme(benchmark::State& state, const char* net) {
+  static void pf32_gemm_minmax_ukernel_32x32__neonsme(benchmark::State& state) {
     GEMMBenchmark(state,
       xnn_pf32_gemm_minmax_ukernel_32x32__neonsme,
       xnn_init_f32_minmax_scalar_params,

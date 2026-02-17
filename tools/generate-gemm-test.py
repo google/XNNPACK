@@ -138,7 +138,7 @@ def split_ukernel_name(name):
 GEMM_BENCH_CODE = """\
 $if CPP_CHECK:
   #if ${CPP_CHECK}
-static void ${UKERNEL_NAME}(benchmark::State& state, const char* net) {
+static void ${UKERNEL_NAME}(benchmark::State& state) {
   GEMMBenchmark(state,
     ${GEMM},
     $if INIT_PARAMS is not None:
@@ -152,10 +152,7 @@ static void ${UKERNEL_NAME}(benchmark::State& state, const char* net) {
       /*mr_packed=*/${MR_PACKED},
     /*arch_flags=*/${ARCH_FLAGS});
 }\n
-$if WEIGHTS_DATATYPE in ['qb4w']:
-  BENCHMARK_GEMM_BL(${UKERNEL_NAME})
-$else:
-  BENCHMARK_GEMM(${UKERNEL_NAME})
+BENCHMARK_GEMM(${UKERNEL_NAME})
 $if CPP_CHECK:
   #endif  // ${CPP_CHECK}
 """
