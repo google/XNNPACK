@@ -4374,6 +4374,8 @@ static void init_qs8_qc2w_gemm_config(void) {
 
   // Arch-specific parameters.
   // TODO(aelphy/fbarchard): add arm support for qc2w and qc4w.
+  // TODO(b/473586040): fix arm compiler and adjust size and add arm.
+  // consider clang21.1 version check
   #if XNN_ARCH_ARM64
     #if XNN_ENABLE_ARM_DOTPROD
       const struct xnn_hardware_config* hardware_config =
@@ -4407,16 +4409,30 @@ static void init_qs8_qc2w_gemm_config(void) {
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     (void) hardware_config;  // May be unused.
-
+    // TODO(fbarchard): add prfm and test on spr.  5x8 is not fastest but there is clang bug causing register spill due to MR
+    // and 5x8 spills by only 1 register so it is less sensitive to memory and uarch.  tune if spill can be fixed.
+    #if XNN_ENABLE_AVX256SKX
+      if (hardware_config->arch_flags & xnn_arch_x86_avx256skx) {
+        qs8_qc2w_gemm_config.arch = xnn_arch_x86_avx256skx;
+        qs8_qc2w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_DQGEMM_UKERNEL(xnn_qs8_qc2w_gemm_minmax_fp32_ukernel_1x8c8__avx256skx_madd);
+        qs8_qc2w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(5)] = XNN_INIT_HMP_DQGEMM_UKERNEL(xnn_qs8_qc2w_gemm_minmax_fp32_ukernel_5x8c8__avx256skx_madd);
+        qs8_qc2w_gemm_config.init.qs8_qc8w = xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params;
+        qs8_qc2w_gemm_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_pack_qs8_to_qu8_qc2w_gemm_goi_w;
+        qs8_qc2w_gemm_config.planes = 4;
+        qs8_qc2w_gemm_config.mr = 5;
+        qs8_qc2w_gemm_config.nr = 8;
+        qs8_qc2w_gemm_config.log2_kr = 3;
+      } else
+    #endif
     #if XNN_ENABLE_AVX2
       if (hardware_config->arch_flags & xnn_arch_x86_avx2) {
         qs8_qc2w_gemm_config.arch = xnn_arch_x86_avx2;
         qs8_qc2w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_DQGEMM_UKERNEL(xnn_qs8_qc2w_gemm_minmax_fp32_ukernel_1x8c8__avx2_madd);
-        qs8_qc2w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(8)] = XNN_INIT_HMP_DQGEMM_UKERNEL(xnn_qs8_qc2w_gemm_minmax_fp32_ukernel_8x8c8__avx2_madd);
+        qs8_qc2w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(5)] = XNN_INIT_HMP_DQGEMM_UKERNEL(xnn_qs8_qc2w_gemm_minmax_fp32_ukernel_5x8c8__avx2_madd);
         qs8_qc2w_gemm_config.init.qs8_qc8w = xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params;
         qs8_qc2w_gemm_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_pack_qs8_to_qu8_qc2w_gemm_goi_w;
         qs8_qc2w_gemm_config.planes = 4;
-        qs8_qc2w_gemm_config.mr = 8;
+        qs8_qc2w_gemm_config.mr = 5;
         qs8_qc2w_gemm_config.nr = 8;
         qs8_qc2w_gemm_config.log2_kr = 3;
       } else
