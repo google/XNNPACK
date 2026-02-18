@@ -15,6 +15,7 @@
 #include <cstring>
 #include <limits>
 #include <random>
+#include <type_traits>
 #include <vector>
 
 #include "ynnpack/base/arithmetic.h"
@@ -115,7 +116,7 @@ T random_normal_float(Rng& rng) {
 
 // Make a generator of random values of a type T, suitable for use with
 // std::generate/std::generate_n or similar.
-template <typename T>
+template <typename T, typename Enable = void>
 class TypeGenerator {
   std::uniform_real_distribution<float> dist_;
   bool reinterpret_ = false;
@@ -150,21 +151,17 @@ class TypeGenerator {
   }
 };
 
-// This specialization for integers doesn't include the lowest negative integer,
-// because testing it is a headache due to undefined behavior when negating it.
-template <>
-class TypeGenerator<int> {
+template <typename T>
+class TypeGenerator<T, std::enable_if_t<std::is_integral_v<T>>> {
   std::uniform_int_distribution<int> dist_;
 
  public:
   TypeGenerator(float min, float max, const quantization_params& = {})
-      : dist_(std::max<int>(round_float_to_int<int>(min),
-                            -std::numeric_limits<int>::max()),
-              std::min<int>(round_float_to_int<int>(max),
-                            std::numeric_limits<int>::max())) {}
+      : dist_(
+            std::max<int>(round_float_to_int<int>(min), type_info<T>::min()),
+            std::min<int>(round_float_to_int<int>(max), type_info<T>::max())) {}
   explicit TypeGenerator(const quantization_params& = {})
-      : dist_(-std::numeric_limits<int>::max(),
-              std::numeric_limits<int>::max()) {}
+      : dist_(type_info<T>::min(), type_info<T>::max()) {}
 
   template <typename Rng>
   int operator()(Rng& rng) {
@@ -186,9 +183,7 @@ class TypeGenerator<quantized<T>> {
   }
   explicit TypeGenerator(const quantization_params& params)
       : TypeGenerator(-1.0f, 1.0f, params) {}
-  TypeGenerator()
-      : TypeGenerator(std::numeric_limits<T>::min(),
-                      std::numeric_limits<T>::max()) {}
+  TypeGenerator() : TypeGenerator(type_info<T>::min(), type_info<T>::max()) {}
 
   template <typename Rng>
   T operator()(Rng& rng) {

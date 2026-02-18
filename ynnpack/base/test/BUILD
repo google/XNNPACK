@@ -64,6 +64,7 @@ cc_test(
     deps = [
         ":fuzz_test",
         ":random",
+        "//ynnpack/base",
     ] + ynn_test_deps(),
 )
 
