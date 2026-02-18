@@ -5,12 +5,8 @@
 
 #include "ynnpack/base/simd/hexagon_hvx.h"
 
-#include <cstdint>
-
 #include <gtest/gtest.h>
 #include "ynnpack/base/arch.h"
-#include "ynnpack/base/bfloat16.h"
-#include "ynnpack/base/half.h"
 #include "ynnpack/base/simd/test/generic.h"
 
 namespace ynn {
@@ -24,85 +20,85 @@ class hvx : public ::testing::Test {
   }
 };
 
-TEST_BROADCAST(hvx, uint8_t, 128);
-TEST_BROADCAST(hvx, int8_t, 128);
-TEST_BROADCAST(hvx, int16_t, 64);
-TEST_BROADCAST(hvx, half, 64);
-TEST_BROADCAST(hvx, bfloat16, 64);
-TEST_BROADCAST(hvx, float, 32);
-TEST_BROADCAST(hvx, int32_t, 32);
+TEST_BROADCAST(hvx, u8, 128);
+TEST_BROADCAST(hvx, s8, 128);
+TEST_BROADCAST(hvx, s16, 64);
+TEST_BROADCAST(hvx, f16, 64);
+TEST_BROADCAST(hvx, bf16, 64);
+TEST_BROADCAST(hvx, f32, 32);
+TEST_BROADCAST(hvx, s32, 32);
 
-TEST_LOAD_STORE(hvx, uint8_t, 128);
-TEST_LOAD_STORE(hvx, int8_t, 128);
-TEST_LOAD_STORE(hvx, int16_t, 64);
-TEST_LOAD_STORE(hvx, half, 64);
-TEST_LOAD_STORE(hvx, bfloat16, 64);
-TEST_LOAD_STORE(hvx, float, 32);
-TEST_LOAD_STORE(hvx, int32_t, 32);
+TEST_LOAD_STORE(hvx, u8, 128);
+TEST_LOAD_STORE(hvx, s8, 128);
+TEST_LOAD_STORE(hvx, s16, 64);
+TEST_LOAD_STORE(hvx, f16, 64);
+TEST_LOAD_STORE(hvx, bf16, 64);
+TEST_LOAD_STORE(hvx, f32, 32);
+TEST_LOAD_STORE(hvx, s32, 32);
 
-TEST_ALIGNED_LOAD_STORE(hvx, uint8_t, 128);
-TEST_ALIGNED_LOAD_STORE(hvx, int8_t, 128);
-TEST_ALIGNED_LOAD_STORE(hvx, int16_t, 64);
-TEST_ALIGNED_LOAD_STORE(hvx, half, 64);
-TEST_ALIGNED_LOAD_STORE(hvx, bfloat16, 64);
-TEST_ALIGNED_LOAD_STORE(hvx, float, 32);
-TEST_ALIGNED_LOAD_STORE(hvx, int32_t, 32);
+TEST_ALIGNED_LOAD_STORE(hvx, u8, 128);
+TEST_ALIGNED_LOAD_STORE(hvx, s8, 128);
+TEST_ALIGNED_LOAD_STORE(hvx, s16, 64);
+TEST_ALIGNED_LOAD_STORE(hvx, f16, 64);
+TEST_ALIGNED_LOAD_STORE(hvx, bf16, 64);
+TEST_ALIGNED_LOAD_STORE(hvx, f32, 32);
+TEST_ALIGNED_LOAD_STORE(hvx, s32, 32);
 
-TEST_PARTIAL_LOAD_STORE(hvx, uint8_t, 128);
-TEST_PARTIAL_LOAD_STORE(hvx, int8_t, 128);
-TEST_PARTIAL_LOAD_STORE(hvx, int16_t, 64);
-TEST_PARTIAL_LOAD_STORE(hvx, half, 64);
-TEST_PARTIAL_LOAD_STORE(hvx, bfloat16, 64);
-TEST_PARTIAL_LOAD_STORE(hvx, float, 32);
-TEST_PARTIAL_LOAD_STORE(hvx, int32_t, 32);
+TEST_PARTIAL_LOAD_STORE(hvx, u8, 128);
+TEST_PARTIAL_LOAD_STORE(hvx, s8, 128);
+TEST_PARTIAL_LOAD_STORE(hvx, s16, 64);
+TEST_PARTIAL_LOAD_STORE(hvx, f16, 64);
+TEST_PARTIAL_LOAD_STORE(hvx, bf16, 64);
+TEST_PARTIAL_LOAD_STORE(hvx, f32, 32);
+TEST_PARTIAL_LOAD_STORE(hvx, s32, 32);
 
-TEST_ADD(hvx, uint8_t, 128);
-TEST_ADD(hvx, int8_t, 128);
-TEST_ADD(hvx, int16_t, 64);
-TEST_ADD(hvx, int32_t, 32);
+TEST_ADD(hvx, u8, 128);
+TEST_ADD(hvx, s8, 128);
+TEST_ADD(hvx, s16, 64);
+TEST_ADD(hvx, s32, 32);
 
-TEST_SUBTRACT(hvx, uint8_t, 128);
-TEST_SUBTRACT(hvx, int8_t, 128);
-TEST_SUBTRACT(hvx, int16_t, 64);
-TEST_SUBTRACT(hvx, int32_t, 32);
+TEST_SUBTRACT(hvx, u8, 128);
+TEST_SUBTRACT(hvx, s8, 128);
+TEST_SUBTRACT(hvx, s16, 64);
+TEST_SUBTRACT(hvx, s32, 32);
 
-TEST_MULTIPLY(hvx, int32_t, 32);
+TEST_MULTIPLY(hvx, s32, 32);
 
-TEST_MIN(hvx, uint8_t, 128);
-TEST_MIN(hvx, int8_t, 128);
-TEST_MIN(hvx, int16_t, 64);
-TEST_MIN(hvx, half, 64);
-TEST_MIN(hvx, float, 32);
+TEST_MIN(hvx, u8, 128);
+TEST_MIN(hvx, s8, 128);
+TEST_MIN(hvx, s16, 64);
+TEST_MIN(hvx, f16, 64);
+TEST_MIN(hvx, f32, 32);
 
-TEST_MAX(hvx, uint8_t, 128);
-TEST_MAX(hvx, int8_t, 128);
-TEST_MAX(hvx, int16_t, 64);
-TEST_MAX(hvx, half, 64);
-TEST_MAX(hvx, float, 32);
+TEST_MAX(hvx, u8, 128);
+TEST_MAX(hvx, s8, 128);
+TEST_MAX(hvx, s16, 64);
+TEST_MAX(hvx, f16, 64);
+TEST_MAX(hvx, f32, 32);
 
-TEST_HORIZONTAL_SUM(hvx, int32_t, 32);
+TEST_HORIZONTAL_SUM(hvx, s32, 32);
 
-TEST_HORIZONTAL_MIN(hvx, uint8_t, 128);
+TEST_HORIZONTAL_MIN(hvx, u8, 128);
 // TODO(dsharlet): HVX vectors are so big that our test for this overflows...
-// TEST_HORIZONTAL_MIN(hvx, int8_t, 128);
-TEST_HORIZONTAL_MIN(hvx, int16_t, 64);
-TEST_HORIZONTAL_MIN(hvx, int32_t, 32);
-TEST_HORIZONTAL_MIN(hvx, half, 64);
-TEST_HORIZONTAL_MIN(hvx, float, 32);
+// TEST_HORIZONTAL_MIN(hvx, s8, 128);
+TEST_HORIZONTAL_MIN(hvx, s16, 64);
+TEST_HORIZONTAL_MIN(hvx, s32, 32);
+TEST_HORIZONTAL_MIN(hvx, f16, 64);
+TEST_HORIZONTAL_MIN(hvx, f32, 32);
 
-TEST_HORIZONTAL_MAX(hvx, uint8_t, 128);
+TEST_HORIZONTAL_MAX(hvx, u8, 128);
 // TODO(dsharlet): HVX vectors are so big that our test for this overflows...
-// TEST_HORIZONTAL_MAX(hvx, int8_t, 128);
-TEST_HORIZONTAL_MAX(hvx, int16_t, 64);
-TEST_HORIZONTAL_MAX(hvx, int32_t, 32);
-TEST_HORIZONTAL_MAX(hvx, half, 64);
-TEST_HORIZONTAL_MAX(hvx, float, 32);
+// TEST_HORIZONTAL_MAX(hvx, s8, 128);
+TEST_HORIZONTAL_MAX(hvx, s16, 64);
+TEST_HORIZONTAL_MAX(hvx, s32, 32);
+TEST_HORIZONTAL_MAX(hvx, f16, 64);
+TEST_HORIZONTAL_MAX(hvx, f32, 32);
 
-TEST_CONVERT(hvx, int32_t, u8x128);
-TEST_CONVERT(hvx, int32_t, s8x128);
-TEST_CONVERT(hvx, int32_t, s16x64);
-TEST_CONVERT(hvx, int16_t, u8x128);
-TEST_CONVERT(hvx, int16_t, s8x128);
+TEST_CONVERT(hvx, s32, u8x128);
+TEST_CONVERT(hvx, s32, s8x128);
+TEST_CONVERT(hvx, s32, s16x64);
+TEST_CONVERT(hvx, s16, u8x128);
+TEST_CONVERT(hvx, s16, s8x128);
 
 }  // namespace simd
 }  // namespace ynn
