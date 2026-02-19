@@ -394,43 +394,6 @@ def make_x86_integer_comparison_patterns(vector_bits, prefix):
   ]
 
 
-def make_x86_broadcast_patterns(vector_bits, prefix):
-  return [
-      Rule(
-          broadcast(i8_a, vector_bits // 8),
-          Op(Int(8, vector_bits // 8), prefix + "set1_epi8", [i8_a]),
-      ),
-      Rule(
-          broadcast(u8_a, vector_bits // 8),
-          Op(UInt(8, vector_bits // 8), prefix + "set1_epi8", [u8_a]),
-      ),
-      Rule(
-          broadcast(i16_a, vector_bits // 16),
-          Op(Int(16, vector_bits // 16), prefix + "set1_epi16", [i16_a]),
-      ),
-      Rule(
-          broadcast(u16_a, vector_bits // 16),
-          Op(UInt(16, vector_bits // 16), prefix + "set1_epi16", [u16_a]),
-      ),
-      Rule(
-          broadcast(i32_a, vector_bits // 32),
-          Op(Int(32, vector_bits // 32), prefix + "set1_epi32", [i32_a]),
-      ),
-      Rule(
-          broadcast(u32_a, vector_bits // 32),
-          Op(UInt(32, vector_bits // 32), prefix + "set1_epi32", [u32_a]),
-      ),
-      Rule(
-          broadcast(f32_a, vector_bits // 32),
-          Op(Float(32, vector_bits // 32), prefix + "set1_ps", [f32_a]),
-      ),
-      Rule(
-          broadcast(bf16_a, vector_bits // 16),
-          Op(BFloat(16, vector_bits // 16), prefix + "set1_epi16", [bf16_a]),
-      ),
-  ]
-
-
 def make_x86_slice_patterns(vector_bits, prefix):
   """Adds x86 slice patterns.
 
@@ -727,7 +690,6 @@ class X86(Target):
     self.patterns += make_x86_integer_patterns(128, "_mm_")
     self.patterns += make_x86_cast_patterns(128, "_mm_")
     self.patterns += make_x86_reinterpret_cast_patterns(128, "_mm_")
-    self.patterns += make_x86_broadcast_patterns(128, "_mm_")
     self.patterns += make_x86_float_comparison_patterns(128, "_mm_")
     self.patterns += make_x86_integer_comparison_patterns(128, "_mm_")
 
@@ -907,7 +869,6 @@ YNN_INTRINSIC __m128 wrapper_mm256_slice_extract_ps256_1(
     self.add_store_intrinsics(256, "_mm256_")
     self.patterns += make_x86_float32_patterns(256, "_mm256_")
     self.patterns += make_x86_reinterpret_cast_patterns(256, "_mm256_")
-    self.patterns += make_x86_broadcast_patterns(256, "_mm256_")
     self.patterns += make_x86_slice_patterns(256, "_mm256_")
 
   def update_for_avx2(self):
@@ -1110,7 +1071,6 @@ YNN_INTRINSIC __m256 wrapper_mm512_slice_extract_ps512_1(
     self.patterns += make_x86_fma_patterns(512, "_mm512_")
     self.patterns += make_x86_float32_patterns(512, "_mm512_")
     self.patterns += make_x86_reinterpret_cast_patterns(512, "_mm512_")
-    self.patterns += make_x86_broadcast_patterns(512, "_mm512_")
     self.patterns += make_x86_integer_patterns(512, "_mm512_")
     self.patterns += make_x86_integer_min_max_patterns(512, "_mm512_")
     self.patterns += make_x86_cast_patterns(512, "_mm512_")
@@ -1125,11 +1085,17 @@ YNN_INTRINSIC __m512i convert_fp32_to_bf16_avx512(__m512 a, __m512 b) {
   return (__m512i)_mm512_cvtne2ps_pbh(b, a);
 }
 
-YNN_INTRINSIC void partial_store_32x(bfloat16* output, size_t num_elements, __m512i v) {
+YNN_INTRINSIC __m256i partial_load_16x(const ynn::bfloat16* ptr, size_t num_elements) {
+  __m256i v = _mm256_setzero_si256();
+  memcpy(&v, ptr, num_elements * 2);
+  return v;
+}
+
+YNN_INTRINSIC void partial_store_32x(ynn::bfloat16* output, size_t num_elements, __m512i v) {
   partial_store_32x((int16_t*)output, num_elements, v);
 }
 
-YNN_INTRINSIC __m512i partial_load_32x(const uint16_t* ptr, size_t num_elements) {
+YNN_INTRINSIC __m512i partial_load_32x(const ynn::bfloat16* ptr, size_t num_elements) {
   return partial_load_32x((const int16_t*)ptr, num_elements);
 }
 
@@ -1276,7 +1242,7 @@ YNN_INTRINSIC __m512i saturating_cast_int16_to_uint8(__m512i a, __m512i b) {
       self.vector_bits = 128
 
     self.header += (
-        f'#include "ynnpack/base/simd/{simd_header}"'
+        f'#include "ynnpack/base/simd/{simd_header}"\n'
     )
 
     if "AVX512BW" in all_features:

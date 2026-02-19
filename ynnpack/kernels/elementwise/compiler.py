@@ -44,6 +44,9 @@ class Type:
   def __repr__(self):
     return str(self)
 
+  def scalar(self):
+    return Type(self.type_class, self.size, 1)
+
   def widen(self):
     return Type(self.type_class, self.size * 2, self.lanes)
 
@@ -721,8 +724,6 @@ header = """
 #include <cstring>
 #include <cstdio>
 
-using bfloat16 = uint16_t;
-
 #if !defined(__has_attribute)
 #define YNN_COMPILER_HAS_ATTRIBUTE(x) 0
 #else
@@ -941,7 +942,7 @@ class Target:
         UInt(32, 1): "uint32_t",
         Float(16, 1): "half",
         Float(32, 1): "float",
-        BFloat(16, 1): "uint16_t",
+        BFloat(16, 1): "bfloat16",
     }
     self.features = []
     self.load_intrinsics = {}
@@ -982,6 +983,14 @@ class Target:
 
   def legalize_type(self, ty, is_const=True):
     return self.types.get(ty, ty.to_c_decl(is_const))
+
+  def legalize_op(self, op):
+    if op.name == "broadcast":
+      return (
+          f"simd::broadcast<{op.ty.lanes},"
+          f" {self.legalize_type(op.ty.scalar())}>"
+      )
+    return op.name
 
   def vectorize(self, expr, lanes, cache):
     if expr in cache:
@@ -1284,7 +1293,8 @@ class Target:
             {},
         )
         self.result += (
-            f"{self.indent()}{self.legalize_type(broadcast_op.ty)} {b.name}_broadcasted[{increment}];\n"
+            f"{self.indent()}{self.legalize_type(broadcast_op.ty)}"
+            f" {b.name}_broadcasted[{increment}];\n"
         )
 
         if b.broadcast_mode == BroadcastMode.LOCAL_VAR:
@@ -1300,9 +1310,9 @@ class Target:
         for i in range(increment):
           self.result += (
               f"{self.indent()}{b.name}_broadcasted[{i}] ="
-              f" {self.legalize_type(broadcast_op.ty)}({broadcast_op.name}(((const"
+              f" {self.legalize_op(broadcast_op)}(((const"
               f" {self.legalize_type(b.ty, True)}*)offset_bytes({prefix_after}{b.name},"
-              f" min({i}, m - i - 1) * stride_{b.name}_m))[0]));\n"
+              f" min({i}, m - i - 1) * stride_{b.name}_m))[0]);\n"
           )
 
         if b.broadcast_mode == BroadcastMode.LOCAL_VAR:
@@ -1340,7 +1350,7 @@ class Target:
       const_type = self.legalize_type(v.ty)
       self.result += (
           f"{self.indent()}const {const_type} {k} ="
-          f"{self.legalize_type(v.ty)}({v.name}({v.args[0]}));\n"
+          f" {self.legalize_op(v)}({v.args[0]});\n"
       )
 
   def emit_op(
@@ -1472,7 +1482,7 @@ class Target:
       elif is_store:
         mem_op = self.store_intrinsics.get(op.ty, "store")
       else:
-        mem_op = op.name
+        mem_op = self.legalize_op(op)
       self.result += f"{result_type}({mem_op}({', '.join(str_args)}));\n"
 
   def emit_inner_loop_body(

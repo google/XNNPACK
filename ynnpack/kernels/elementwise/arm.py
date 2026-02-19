@@ -142,24 +142,6 @@ def make_neon_integer_patterns(vector_bits):
   ]
 
 
-def make_neon_broadcast_patterns(vector_bits):
-  assert vector_bits == 128
-  return [
-      Rule(
-          broadcast(i32_a, 4),
-          Op(Int(32, 4), "vdupq_n_s32", [i32_a]),
-      ),
-      Rule(
-          broadcast(u32_a, 4),
-          Op(UInt(32, 4), "vdupq_n_u32", [u32_a]),
-      ),
-      Rule(
-          broadcast(f32_a, 4),
-          Op(Float(32, 4), "vdupq_n_f32", [f32_a]),
-      ),
-  ]
-
-
 def make_neon_float32_patterns(vector_bits):
   assert vector_bits == 128
   return [
@@ -379,7 +361,6 @@ YNN_INTRINSIC float32x4_t sqrt_f32(float32x4_t a) {
     self.patterns += make_neon_integer_patterns(128)
     self.patterns += make_neon_cast_patterns(128)
     self.patterns += make_neon_reinterpret_cast_patterns(128)
-    self.patterns += make_neon_broadcast_patterns(128)
 
   def update_for_fp16(self):
     self.header += """
