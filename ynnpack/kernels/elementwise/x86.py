@@ -277,46 +277,6 @@ def make_x86_integer_patterns(vector_bits, prefix):
   ]
 
 
-def make_x86_integer_min_max_patterns(vector_bits, prefix):
-  return [
-      i.vectorize(vector_bits)
-      for i in [
-          Rule(
-              min(i8_a, i8_b),
-              Op(Int(8), prefix + "min_epi8", [i8_a, i8_b]),
-          ),
-          Rule(
-              max(i8_a, i8_b),
-              Op(Int(8), prefix + "max_epi8", [i8_a, i8_b]),
-          ),
-          Rule(
-              min(u16_a, u16_b),
-              Op(UInt(16), prefix + "min_epu16", [u16_a, u16_b]),
-          ),
-          Rule(
-              max(u16_a, u16_b),
-              Op(UInt(16), prefix + "max_epu16", [u16_a, u16_b]),
-          ),
-          Rule(
-              min(i32_a, i32_b),
-              Op(Int(32), prefix + "min_epi32", [i32_a, i32_b]),
-          ),
-          Rule(
-              max(i32_a, i32_b),
-              Op(Int(32), prefix + "max_epi32", [i32_a, i32_b]),
-          ),
-          Rule(
-              min(u32_a, u32_b),
-              Op(UInt(32), prefix + "min_epu32", [u32_a, u32_b]),
-          ),
-          Rule(
-              max(u32_a, u32_b),
-              Op(UInt(32), prefix + "max_epu32", [u32_a, u32_b]),
-          ),
-      ]
-  ]
-
-
 # TODO(vksnk): These are only correct for SSE2
 def make_x86_float_comparison_patterns(vector_bits, prefix):
   return [
@@ -541,14 +501,6 @@ def make_x86_float32_patterns(vector_bits, prefix):
           Rule(f32_a - f32_b, Op(Float(32), prefix + "sub_ps", [f32_a, f32_b])),
           Rule(f32_a * f32_b, Op(Float(32), prefix + "mul_ps", [f32_a, f32_b])),
           Rule(f32_a / f32_b, Op(Float(32), prefix + "div_ps", [f32_a, f32_b])),
-          Rule(
-              max(f32_a, f32_b),
-              Op(Float(32), prefix + "max_ps", [f32_a, f32_b]),
-          ),
-          Rule(
-              min(f32_a, f32_b),
-              Op(Float(32), prefix + "min_ps", [f32_a, f32_b]),
-          ),
           Rule(
               ceil(f32_a),
               Op(Float(32), prefix + "ceil_ps", [f32_a]),
@@ -776,7 +728,6 @@ YNN_INTRINSIC __m128 round(__m128 x) {
 
 """
     self.patterns += make_x86_float32_patterns(128, "_mm_")
-    self.patterns += make_x86_integer_min_max_patterns(128, "_mm_")
 
   def update_for_avx(self):
     """Updates the target for AVX support."""
@@ -874,7 +825,6 @@ YNN_INTRINSIC __m128 wrapper_mm256_slice_extract_ps256_1(
   def update_for_avx2(self):
     """Updates the target for AVX2 support."""
     self.patterns += make_x86_integer_patterns(256, "_mm256_")
-    self.patterns += make_x86_integer_min_max_patterns(256, "_mm256_")
     self.patterns += make_x86_cast_patterns(256, "_mm256_")
     self.patterns += make_x86_bf16_patterns(256)
 
@@ -1072,7 +1022,6 @@ YNN_INTRINSIC __m256 wrapper_mm512_slice_extract_ps512_1(
     self.patterns += make_x86_float32_patterns(512, "_mm512_")
     self.patterns += make_x86_reinterpret_cast_patterns(512, "_mm512_")
     self.patterns += make_x86_integer_patterns(512, "_mm512_")
-    self.patterns += make_x86_integer_min_max_patterns(512, "_mm512_")
     self.patterns += make_x86_cast_patterns(512, "_mm512_")
     self.patterns += make_x86_slice_patterns(512, "_mm512_")
 
