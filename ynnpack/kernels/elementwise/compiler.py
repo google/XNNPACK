@@ -981,6 +981,12 @@ class Target:
             implied_features[feature], implied_features, all_features
         )
 
+  def simd_suffix(self, op):
+    simd_ops = {"min", "max"}
+    if op.name in simd_ops:
+      return ""
+    return ".v"
+
   def legalize_type(self, ty, is_const=True):
     return self.types.get(ty, ty.to_c_decl(is_const))
 
@@ -990,6 +996,8 @@ class Target:
           f"simd::broadcast<{op.ty.lanes},"
           f" {self.legalize_type(op.ty.scalar())}>"
       )
+    elif op.name == "min" or op.name == "max":
+      return f"simd::{op.name}"
     return op.name
 
   def vectorize(self, expr, lanes, cache):
@@ -1423,9 +1431,9 @@ class Target:
         if isinstance(arg, Constant):
           str_args.append(f"{arg}")
         elif isinstance(arg, Var) and arg in constants:
-          str_args.append(f"{arg}.v")
+          str_args.append(f"{arg}{self.simd_suffix(op)}")
         else:
-          str_args.append(f"{arg}_{j}_{k}.v")
+          str_args.append(f"{arg}_{j}_{k}{self.simd_suffix(op)}")
 
     offset = op.offset_elements if is_load else 0
     lanes = (

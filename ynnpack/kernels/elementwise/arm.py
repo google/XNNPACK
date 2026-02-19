@@ -150,14 +150,6 @@ def make_neon_float32_patterns(vector_bits):
           Rule(f32_a + f32_b, Op(Float(32), "vaddq_f32", [f32_a, f32_b])),
           Rule(f32_a - f32_b, Op(Float(32), "vsubq_f32", [f32_a, f32_b])),
           Rule(f32_a * f32_b, Op(Float(32), "vmulq_f32", [f32_a, f32_b])),
-          Rule(
-              max(f32_a, f32_b),
-              Op(Float(32), "vmaxq_f32", [f32_a, f32_b]),
-          ),
-          Rule(
-              min(f32_a, f32_b),
-              Op(Float(32), "vminq_f32", [f32_a, f32_b]),
-          ),
           Rule(abs(f32_a), Op(Float(32), "vabsq_f32", [f32_a])),
           Rule(round(f32_a), Op(Float(32), "round_f32", [f32_a])),
           Rule(ceil(f32_a), Op(Float(32), "ceil_f32", [f32_a])),
