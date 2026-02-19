@@ -237,6 +237,7 @@ ynn_cc_library(
         "//ynnpack:ynnpack_h",
         "//ynnpack/base",
         "//ynnpack/base:log",
+        "//ynnpack/base/simd",
     ],
 )
 

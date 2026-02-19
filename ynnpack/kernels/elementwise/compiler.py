@@ -1300,9 +1300,9 @@ class Target:
         for i in range(increment):
           self.result += (
               f"{self.indent()}{b.name}_broadcasted[{i}] ="
-              f" {broadcast_op.name}(((const"
+              f" {self.legalize_type(broadcast_op.ty)}({broadcast_op.name}(((const"
               f" {self.legalize_type(b.ty, True)}*)offset_bytes({prefix_after}{b.name},"
-              f" min({i}, m - i - 1) * stride_{b.name}_m))[0]);\n"
+              f" min({i}, m - i - 1) * stride_{b.name}_m))[0]));\n"
           )
 
         if b.broadcast_mode == BroadcastMode.LOCAL_VAR:
@@ -1337,9 +1337,10 @@ class Target:
 
   def emit_constants(self, constants):
     for k, v in constants.items():
+      const_type = self.legalize_type(v.ty)
       self.result += (
-          f"{self.indent()}const {self.legalize_type(v.ty)} {k} ="
-          f" {v.name}({v.args[0]});\n"
+          f"{self.indent()}const {const_type} {k} ="
+          f"{self.legalize_type(v.ty)}({v.name}({v.args[0]}));\n"
       )
 
   def emit_op(
@@ -1356,10 +1357,10 @@ class Target:
     """Emits a single operation."""
     op = i[1]
     self.result += self.indent()
+    result_type = ""
     if i[0] is not None:
-      self.result += (
-          f"{self.legalize_type(op.ty.with_lanes(op_natural_vector_size))} {i[0]}_{j}_{k}"
-      )
+      result_type = self.legalize_type(op.ty.with_lanes(op_natural_vector_size))
+      self.result += f"{result_type} {i[0]}_{j}_{k}"
 
     is_load = isinstance(op, Load)
     is_store = isinstance(op, Op) and op.name == "store"
@@ -1375,7 +1376,7 @@ class Target:
       # the existing broadcast value.
       b = self.as_buffer(op.index, buffers)
       if b is not None and b.broadcast_mode == BroadcastMode.ALWAYS:
-        self.result += f" = {b.name}_broadcasted[{j}];\n"
+        self.result += f" = {result_type}({b.name}_broadcasted[{j}]);\n"
         return
       # hack
       args = [op.index]
@@ -1409,12 +1410,12 @@ class Target:
             f" ({k * output_lanes}{row_offset} + {offset}))"
         )
       else:
-        if isinstance(arg, Constant) or (
-            isinstance(arg, Var) and arg in constants
-        ):
+        if isinstance(arg, Constant):
           str_args.append(f"{arg}")
+        elif isinstance(arg, Var) and arg in constants:
+          str_args.append(f"{arg}.v")
         else:
-          str_args.append(f"{arg}_{j}_{k}")
+          str_args.append(f"{arg}_{j}_{k}.v")
 
     offset = op.offset_elements if is_load else 0
     lanes = (
@@ -1454,12 +1455,13 @@ class Target:
       else:
         mask_op = "store"
       self.result += (
-          f"partial_{mask_op}_{op_natural_vector_size}x({str_args[0]}, {lanes}"
+          f"{result_type}(partial_{mask_op}_{op_natural_vector_size}x({str_args[0]},"
+          f" {lanes}"
       )
 
       if is_store:
         self.result += f", {str_args[1]}"
-      self.result += ");\n"
+      self.result += "));\n"
     else:
       if not is_store:
         self.result += " = "
@@ -1471,7 +1473,7 @@ class Target:
         mem_op = self.store_intrinsics.get(op.ty, "store")
       else:
         mem_op = op.name
-      self.result += f"{mem_op}({', '.join(str_args)});\n"
+      self.result += f"{result_type}({mem_op}({', '.join(str_args)}));\n"
 
   def emit_inner_loop_body(
       self,

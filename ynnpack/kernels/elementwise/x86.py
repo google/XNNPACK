@@ -712,13 +712,13 @@ class X86(Target):
   def update_for_sse2(self):
     """Updates the target for SSE2 support."""
     self.types.update({
-        Int(8, 16): "__m128i",
-        Int(16, 8): "__m128i",
-        Int(32, 4): "__m128i",
-        UInt(8, 16): "__m128i",
-        UInt(16, 8): "__m128i",
-        UInt(32, 4): "__m128i",
-        Float(32, 4): "__m128",
+        Int(8, 16): "simd::vec<int8_t, 16>",
+        Int(16, 8): "simd::vec<int16_t, 8>",
+        Int(32, 4): "simd::vec<int32_t, 4>",
+        UInt(8, 16): "simd::vec<uint8_t, 16>",
+        UInt(16, 8): "simd::vec<uint16_t, 8>",
+        UInt(32, 4): "simd::vec<uint32_t, 8>",
+        Float(32, 4): "simd::vec<float, 4>",
     })
 
     self.add_load_intrinsics(128, "_mm_")
@@ -892,16 +892,16 @@ YNN_INTRINSIC __m128 wrapper_mm256_slice_extract_ps256_1(
 
 """
     self.types.update({
-        Float(32, 8): "__m256",
-        Float(16, 8): "__m128i",
-        Int(8, 32): "__m256i",
-        Int(16, 16): "__m256i",
-        Int(32, 8): "__m256i",
-        UInt(8, 32): "__m256i",
-        UInt(16, 16): "__m256i",
-        UInt(32, 8): "__m256i",
-        BFloat(16, 16): "__m256i",
-        BFloat(16, 8): "__m128i",
+        Float(32, 8): "simd::vec<float, 8>",
+        Float(16, 8): "simd::vec<half, 8>",
+        Int(8, 32): "simd::vec<int8_t, 32>",
+        Int(16, 16): "simd::vec<int16_t, 16>",
+        Int(32, 8): "simd::vec<int32_t, 8>",
+        UInt(8, 32): "simd::vec<uint8_t, 32>",
+        UInt(16, 16): "simd::vec<uint16_t, 16>",
+        UInt(32, 8): "simd::vec<uint32_t, 8>",
+        BFloat(16, 16): "simd::vec<bfloat16, 16>",
+        BFloat(16, 8): "simd::vec<bfloat16, 8>",
     })
     self.add_load_intrinsics(256, "_mm256_")
     self.add_store_intrinsics(256, "_mm256_")
@@ -1096,14 +1096,14 @@ YNN_INTRINSIC __m256 wrapper_mm512_slice_extract_ps512_1(
 
 """
     self.types.update({
-        Int(8, 64): "__m512i",
-        Int(16, 32): "__m512i",
-        Int(32, 16): "__m512i",
-        UInt(8, 64): "__m512i",
-        UInt(16, 32): "__m512i",
-        UInt(32, 16): "__m512i",
-        Float(32, 16): "__m512",
-        Float(16, 16): "__m256i",
+        Int(8, 64): "simd::vec<int8_t, 64>",
+        Int(16, 32): "simd::vec<int16_t, 32>",
+        Int(32, 16): "simd::vec<int32_t, 16>",
+        UInt(8, 64): "simd::vec<uint8_t, 64>",
+        UInt(16, 32): "simd::vec<uint16_t, 32>",
+        UInt(32, 16): "simd::vec<uint32_t, 16>",
+        Float(32, 16): "simd::vec<float, 16>",
+        Float(16, 16): "simd::vec<half, 16>",
     })
     self.add_load_intrinsics(512, "_mm512_")
     self.add_store_intrinsics(512, "_mm512_")
@@ -1137,7 +1137,7 @@ YNN_INTRINSIC __m512i partial_load_32x(const uint16_t* ptr, size_t num_elements)
 
 """
     self.types.update({
-        BFloat(16, 32): "__m512i",
+        BFloat(16, 32): "simd::vec<bfloat16, 32>",
     })
     self.patterns += make_x86_bf16_patterns(512)
 
@@ -1261,15 +1261,23 @@ YNN_INTRINSIC __m512i saturating_cast_int16_to_uint8(__m512i a, __m512i b) {
       if feature not in known_features:
         raise ValueError(f"Unknown feature: {feature}")
 
+    simd_header = ""
     if "AVX512F" in all_features:
+      simd_header = "x86_avx512.h"
       self.tail_strategy = TailStrategy.MASK
       self.vector_bits = 512
     elif "AVX" in all_features:
+      simd_header = "x86_avx.h"
       self.tail_strategy = TailStrategy.MEMCPY
       self.vector_bits = 256
     elif "SSE2" in all_features:
+      simd_header = "x86_sse2.h"
       self.tail_strategy = TailStrategy.MEMCPY
       self.vector_bits = 128
+
+    self.header += (
+        f'#include "ynnpack/base/simd/{simd_header}"'
+    )
 
     if "AVX512BW" in all_features:
       self.update_for_avx512bw()

@@ -75,6 +75,18 @@ struct vec<bfloat16, 8> {
 };
 
 template <>
+struct vec<half, 4> {
+  using value_type = half;
+  static constexpr std::integral_constant<size_t, 4> N = {};
+
+  vec() = default;
+  explicit vec(uint16x4_t v) : v(v) {}
+  vec(half x) : v(vdup_n_u16(x.to_bits())) {}  // NOLINT
+
+  uint16x4_t v;
+};
+
+template <>
 struct vec<half, 8> {
   using value_type = half;
   static constexpr std::integral_constant<size_t, 8> N = {};
