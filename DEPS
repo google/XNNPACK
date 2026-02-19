@@ -54,23 +54,6 @@ vars = {
   'download_remoteexec_cfg': False,
   # reclient CIPD package version
   'reclient_version': 're_client_version:0.185.0.db415f21-gomaip',
-
-  # Three lines of non-changing comments so that
-  # the commit queue can handle CLs rolling android_sdk_build-tools_version
-  # and whatever else without interference from each other.
-  'android_sdk_build-tools_version': '-jLl4Ibk_WmgTsZaP-ueQwZDhBwkWf5BsQ4UNrkzXF0C',
-  # Three lines of non-changing comments so that
-  # the commit queue can handle CLs rolling android_sdk_emulator_version
-  # and whatever else without interference from each other.
-  'android_sdk_emulator_version': '9lGp8nTUCRRWGMnI_96HcKfzjnxEJKUcfvfwmA3wXNkC',
-  # Three lines of non-changing comments so that
-  # the commit queue can handle CLs rolling android_sdk_platform-tools_version
-  # and whatever else without interference from each other.
-  'android_sdk_platform-tools_version': 'qTD9QdBlBf3dyHsN1lJ0RH6AhHxR42Hmg2Ih-Vj4zIEC',
-  # Three lines of non-changing comments so that
-  # the commit queue can handle CLs rolling android_sdk_platforms_version
-  # and whatever else without interference from each other.
-  'android_sdk_platforms_version': 'gxwLT70eR_ObwZJzKK8UIS-N549yAocNTmc0JHgO7gUC',
 }
 
 deps = {
@@ -80,8 +63,10 @@ deps = {
     Var('chromium_url') + '/chromium/src/build.git' + '@' + '483cecced32ce8b098d65eb08eb77925afa90bec',
   'testing':
     Var('chromium_url') + '/chromium/src/testing' + '@' + '4c3aba1a9edf0b61f30354e124a0cd99e33ecf6d',
-  'third_party/catapult':
-    Var('chromium_url') + '/catapult.git' + '@' + '35fb65a2690af8240566b43e0f5b17db10acbf6f',
+  'third_party/libpfm4':
+    Var('chromium_url') + '/chromium/src/third_party/libpfm4.git' + '@' + '25c29f04c9127e1ca09e6c1181f74850aa7f118b',
+  'third_party/libpfm4/src':
+    Var('chromium_url') + '/external/git.code.sf.net/p/perfmon2/libpfm4.git' + '@' + '964baf9d35d5f88d8422f96d8a82c672042e7064',
   'buildtools/linux64': {
     'packages': [
       {
@@ -112,10 +97,6 @@ deps = {
     'dep_type': 'cipd',
     'condition': 'host_os == "win"',
   },
-  'third_party/libpfm4':
-    Var('chromium_url') + '/chromium/src/third_party/libpfm4.git' + '@' + '25c29f04c9127e1ca09e6c1181f74850aa7f118b',
-  'third_party/libpfm4/src':
-    Var('chromium_url') + '/external/git.code.sf.net/p/perfmon2/libpfm4.git' + '@' + '964baf9d35d5f88d8422f96d8a82c672042e7064',
   'third_party/googletest/src':
     Var('chromium_url') + '/external/github.com/google/googletest.git' + '@' + '4fe3307fb2d9f86d19777c7eb0e4809e9694dde7',
   'third_party/google_benchmark_chrome': {
@@ -141,33 +122,6 @@ deps = {
     Var('chromium_url') + '/external/github.com/pytorch/cpuinfo.git' + '@' + 'f9a03241f8c3d4ed0c9728f5d70bff873d43d4e0',
   'third_party/libunwind/src':
     Var('chromium_url') + '/external/github.com/llvm/llvm-project/libunwind.git' + '@' + 'ba19d93d6d4f467fba11ff20fe2fc7c056f79345',
-
-  'src/third_party/android_sdk/public': {
-      'packages': [
-          {
-              'package': 'chromium/third_party/android_sdk/public/build-tools/36.1.0',
-              'version': Var('android_sdk_build-tools_version'),
-          },
-          {
-              'package': 'chromium/third_party/android_sdk/public/emulator',
-              'version': Var('android_sdk_emulator_version'),
-          },
-          {
-              'package': 'chromium/third_party/android_sdk/public/platform-tools',
-              'version': Var('android_sdk_platform-tools_version'),
-          },
-          {
-              'package': 'chromium/third_party/android_sdk/public/platforms/android-36.1',
-              'version': Var('android_sdk_platforms_version'),
-          },
-          {
-              'package': 'chromium/third_party/android_sdk/public/cmdline-tools/linux',
-              'version': 'LZa8CWNVWS6UUQgQ7IJdFCqRV1Bmx2-alTNqEDJpJkcC',
-          },
-      ],
-      'condition': 'checkout_android',
-      'dep_type': 'cipd',
-  },
   'third_party/android_toolchain/ndk': {
     'packages': [
       {
