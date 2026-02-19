@@ -30,8 +30,8 @@ namespace ynn {
 template <typename T>
 void TestImpl(T, size_t rank) {
   ReplicableRandomDevice rng;
-  TypeGenerator<T> input_gen(type_info<T>::min() / 4.0f,
-                             type_info<T>::max() / 4.0f);
+  const float min = type_info<T>::min() / 4.0f;
+  const float max = type_info<T>::max() / 4.0f;
 
   for (int32_t num_nonbatch_axes = 1; num_nonbatch_axes <= rank;
        ++num_nonbatch_axes) {
@@ -56,7 +56,7 @@ void TestImpl(T, size_t rank) {
       std::vector<size_t> shape = random_shape(rng, rank);
 
       Tensor<T> input(shape);
-      input.generate([&]() { return input_gen(rng); });
+      fill_random(input.data(), input.size(), rng, min, max);
 
       // Check reshaped shape is correct
       std::vector<size_t> params_shape(shape);

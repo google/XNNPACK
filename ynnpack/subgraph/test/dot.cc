@@ -122,9 +122,6 @@ void TestStaticB(A, B, C) {
   ReplicableRandomDevice rng;
 
   const float max_abs_value = 10.0f;
-  TypeGenerator<A> a_gen(-max_abs_value, max_abs_value, quantization_params{});
-  TypeGenerator<B> b_gen(-max_abs_value, max_abs_value, quantization_params{});
-  TypeGenerator<C> c_gen(-max_abs_value, max_abs_value, quantization_params{});
 
   TestScheduler scheduler(3);
 
@@ -155,7 +152,7 @@ void TestStaticB(A, B, C) {
     b_shape = align_logical_shape<B>(b_shape);
 
     Tensor<B> b(to_physical_shape<B>(b_shape));
-    b.generate([&]() { return b_gen(rng); });
+    fill_random(b.data(), b.size(), rng, -max_abs_value, max_abs_value);
 
     uint32_t subgraph_flags = 0;
     if (random_bool(rng)) {
@@ -175,7 +172,9 @@ void TestStaticB(A, B, C) {
 
     uint32_t c_id = 2;
     const bool init_c = random_bool(rng);
-    const C init_value = random_bool(rng) ? c_gen(rng) : static_cast<C>(0);
+    const C init_value =
+        random_bool(rng) ? random_value<C>(rng, -max_abs_value, max_abs_value)
+                         : static_cast<C>(0);
     if (init_c) {
       if (init_value == 0 && random_bool(rng)) {
         c_id = YNN_INVALID_VALUE_ID;
@@ -210,13 +209,13 @@ void TestStaticB(A, B, C) {
       }
 
       Tensor<A> a(a_shape);
-      a.generate([&]() { return a_gen(rng); });
+      fill_random(a.data(), a.size(), rng, -max_abs_value, max_abs_value);
 
       runtime.ReshapeExternalTensor(a_shape, a.data(), a_id);
 
       Tensor<C> c(c_shape);
       if (!init_c) {
-        c.generate([&]() { return c_gen(rng); });
+        fill_random(c.data(), c.size(), rng, -max_abs_value, max_abs_value);
         runtime.ReshapeExternalTensor(c_shape, c.data(), c_id);
       }
       runtime.ReshapeRuntime();
@@ -328,9 +327,6 @@ void TestDynamicB(A, B, C) {
   ReplicableRandomDevice rng;
 
   const float max_abs_value = 10.0f;
-  TypeGenerator<A> a_gen(-max_abs_value, max_abs_value, quantization_params{});
-  TypeGenerator<B> b_gen(-max_abs_value, max_abs_value, quantization_params{});
-  TypeGenerator<C> c_gen(-max_abs_value, max_abs_value, quantization_params{});
 
   TestScheduler scheduler(3);
 
@@ -379,7 +375,9 @@ void TestDynamicB(A, B, C) {
 
     uint32_t c_id = 2;
     const bool init_c = random_bool(rng);
-    const C init_value = random_bool(rng) ? c_gen(rng) : static_cast<C>(0);
+    const C init_value =
+        random_bool(rng) ? random_value<C>(rng, -max_abs_value, max_abs_value)
+                         : static_cast<C>(0);
     if (init_c) {
       if (init_value == 0 && random_bool(rng)) {
         c_id = YNN_INVALID_VALUE_ID;
@@ -408,8 +406,8 @@ void TestDynamicB(A, B, C) {
 
       Tensor<A> a(shapes.a);
       Tensor<B> b(to_physical_shape<B>(shapes.b));
-      a.generate([&]() { return a_gen(rng); });
-      b.generate([&]() { return b_gen(rng); });
+      fill_random(a.data(), a.size(), rng, -max_abs_value, max_abs_value);
+      fill_random(b.data(), b.size(), rng, -max_abs_value, max_abs_value);
 
       Tensor<B> b_tr = b;
       if (b_tr_id != b_id) {
@@ -427,7 +425,7 @@ void TestDynamicB(A, B, C) {
 
       Tensor<C> c(shapes.c);
       if (!init_c) {
-        c.generate([&]() { return c_gen(rng); });
+        fill_random(c.data(), c.size(), rng, -max_abs_value, max_abs_value);
         runtime.ReshapeExternalTensor(shapes.c, c.data(), c_id);
       }
       runtime.ReshapeRuntime();
@@ -489,9 +487,6 @@ void TestStaticShapeDynamicB(A, B, C) {
   ReplicableRandomDevice rng;
 
   const float max_abs_value = 10.0f;
-  TypeGenerator<A> a_gen(-max_abs_value, max_abs_value, quantization_params{});
-  TypeGenerator<B> b_gen(-max_abs_value, max_abs_value, quantization_params{});
-  TypeGenerator<C> c_gen(-max_abs_value, max_abs_value, quantization_params{});
 
   TestScheduler scheduler(3);
 
@@ -554,7 +549,9 @@ void TestStaticShapeDynamicB(A, B, C) {
 
     uint32_t c_id = 2;
     const bool init_c = random_bool(rng);
-    const C init_value = random_bool(rng) ? c_gen(rng) : static_cast<C>(0);
+    const C init_value =
+        random_bool(rng) ? random_value<C>(rng, -max_abs_value, max_abs_value)
+                         : static_cast<C>(0);
     if (init_c) {
       if (init_value == 0 && random_bool(rng)) {
         c_id = YNN_INVALID_VALUE_ID;
@@ -581,15 +578,15 @@ void TestStaticShapeDynamicB(A, B, C) {
     for (int revalue = 0; revalue < 2; ++revalue) {
       Tensor<A> a(shapes.a);
       Tensor<B> b(to_physical_shape<B>(permute(inv_b_perm, shapes.b)));
-      a.generate([&]() { return a_gen(rng); });
-      b.generate([&]() { return b_gen(rng); });
+      fill_random(a.data(), a.size(), rng, -max_abs_value, max_abs_value);
+      fill_random(b.data(), b.size(), rng, -max_abs_value, max_abs_value);
 
       runtime.SetupExternalTensor(a.data(), a_id)
           .SetupExternalTensor(b.data(), b_id);
 
       Tensor<C> c(shapes.c);
       if (!init_c) {
-        c.generate([&]() { return c_gen(rng); });
+        fill_random(c.data(), c.size(), rng, -max_abs_value, max_abs_value);
         runtime.SetupExternalTensor(c.data(), c_id);
       }
 

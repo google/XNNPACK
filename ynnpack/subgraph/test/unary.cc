@@ -62,8 +62,8 @@ void TestOp(A, X, const unary_op_info& op_info, ynn_unary_operator op) {
       Tensor<X> output(shape);
 
       interval domain = op_info.domain(type_of<A>());
-      TypeGenerator<A> a_gen(domain.min, domain.max, a_quantization);
-      a.generate([&]() { return a_gen(rng); });
+      fill_random(a.data(), a.size(), rng, domain.min, domain.max,
+                  a_quantization);
 
       runtime.ReshapeExternalTensor(shape, a.data(), 0).ReshapeRuntime();
 

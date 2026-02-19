@@ -76,8 +76,7 @@ void TestKeepDims(T, size_t rank) {
       }
 
       Tensor<T> input(shape);
-      TypeGenerator<T> generator(quantization);
-      input.generate([&]() { return generator(rng); });
+      fill_random(input.data(), input.size(), rng, quantization);
 
       // Make a deep copy so the expected result is contiguous.
       Tensor<T> expected = input.slice(begins, ends).deep_copy();
@@ -142,8 +141,7 @@ void TestSliceDims(T, size_t rank) {
         }
 
         Tensor<T> input(shape);
-        TypeGenerator<T> generator(quantization);
-        input.generate([&]() { return generator(rng); });
+        fill_random(input.data(), input.size(), rng, quantization);
 
         // Make a deep copy so the expected result is contiguous.
         Tensor<T> expected = input;

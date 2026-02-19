@@ -26,10 +26,8 @@ TEST(bfloat16, is_zero) { test_is_zero<bfloat16>(); }
 TEST(half, round_trip) {
   using info = type_info<half>;
   ReplicableRandomDevice rng;
-  TypeGenerator<float> gen(info::min(), info::max());
-
   for (auto _ : FuzzTest(std::chrono::seconds(1))) {
-    const float f = gen(rng);
+    const float f = random_value<float>(rng, info::min(), info::max());
     const float rounded = static_cast<float>(static_cast<half>(f));
     // We should be within half an epsilon of the original value.
     ASSERT_NEAR(f, rounded, std::abs(f) * info::epsilon() * 0.501f);
@@ -39,13 +37,11 @@ TEST(half, round_trip) {
 TEST(bfloat16, round_trip) {
   using info = type_info<bfloat16>;
   ReplicableRandomDevice rng;
-  TypeGenerator<float> gen;
-
   const float inf = std::numeric_limits<float>::infinity();
   const float float_max = std::numeric_limits<float>::max();
 
   for (auto _ : FuzzTest(std::chrono::seconds(1))) {
-    const float f = gen(rng);
+    const float f = random_value<float>(rng);
     const float rounded = static_cast<float>(static_cast<bfloat16>(f));
     if (std::abs(rounded) == inf) {
       // This float rounded to bf16 overflows.

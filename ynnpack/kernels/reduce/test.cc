@@ -184,9 +184,6 @@ void TestUnaryReduce(AT, CT, std::vector<size_t> ns, std::vector<size_t> k3s,
                      ReduceOp op, unary_reduce_kernel_fn kernel) {
   ReplicableRandomDevice rng;
 
-  TypeGenerator<AT> a_gen(-max_abs_value, max_abs_value, quantization_params{});
-  TypeGenerator<CT> c_gen(-max_abs_value, max_abs_value, quantization_params{});
-
   // Get the max size of the buffer we want to test.
   const size_t max_n = *std::max_element(ns.begin(), ns.end());
   const size_t max_k1 = *std::max_element(k1s.begin(), k1s.end());
@@ -196,10 +193,11 @@ void TestUnaryReduce(AT, CT, std::vector<size_t> ns, std::vector<size_t> k3s,
   // We want n to be contiguous if k1 is 1, so allocate it in that order, and
   // transpose it after.
   Tensor<AT> a_max({max_k3, max_k2, max_n, max_k1});
-  a_max = a_max.transpose({2, 0, 1, 3});
   Tensor<CT> c_max({OutputRows(op), max_n});
-  a_max.generate([&]() { return a_gen(rng); });
-  c_max.generate([&]() { return c_gen(rng); });
+  fill_random(a_max.data(), a_max.size(), rng, -max_abs_value, max_abs_value);
+  fill_random(c_max.data(), c_max.size(), rng, -max_abs_value, max_abs_value);
+
+  a_max = a_max.transpose({2, 0, 1, 3});
 
   for (size_t n : ns) {
     for (size_t k3 : k3s) {

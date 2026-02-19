@@ -95,14 +95,14 @@ void TestImpl(A, X, const KernelInfo& kernel_info, const OpInfo& op_info,
 
   Tensor<A> a({shape.m, shape.n + shape.padding_a});
   Tensor<X> x({shape.m, shape.n + shape.padding_x});
-  a = a.crop_padding({0, 0}, {0, shape.padding_a});
-  x = x.crop_padding({0, 0}, {0, shape.padding_x});
 
   quantization_params a_quantization = random_quantization(A(), rng);
   quantization_params x_quantization = random_quantization(X(), rng);
   interval domain = op_info.domain(type_of<A>());
-  TypeGenerator<A> a_gen(domain.min, domain.max, a_quantization);
-  a.generate([&]() { return a_gen(rng); });
+  fill_random(a.data(), a.size(), rng, domain.min, domain.max, a_quantization);
+
+  a = a.crop_padding({0, 0}, {0, shape.padding_a});
+  x = x.crop_padding({0, 0}, {0, shape.padding_x});
 
   unary_params params;
   if (init_params) {

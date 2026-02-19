@@ -79,10 +79,6 @@ void TestImpl(const KernelInfo& kernel_info, const OpInfo& op_info, size_t m,
   Tensor<B> b({m, b_n + shape.padding_b});
   Tensor<C> c({m, c_n + shape.padding_c});
   Tensor<X> x({m, n + shape.padding_x});
-  a = a.crop_padding({0, 0}, {0, shape.padding_a});
-  b = b.crop_padding({0, 0}, {0, shape.padding_b});
-  c = c.crop_padding({0, 0}, {0, shape.padding_c});
-  x = x.crop_padding({0, 0}, {0, shape.padding_x});
 
   quantization_params a_quantization = random_quantization(A(), rng);
   quantization_params b_quantization = random_quantization(B(), rng);
@@ -90,12 +86,14 @@ void TestImpl(const KernelInfo& kernel_info, const OpInfo& op_info, size_t m,
   quantization_params x_quantization = random_quantization(X(), rng);
   // These kernels are mostly variations of multiply and multiply-add, so
   // testing extreme values is not required, and integer overflow is an issue.
-  TypeGenerator<A> a_gen(-255, 255, a_quantization);
-  TypeGenerator<B> b_gen(-255, 255, b_quantization);
-  TypeGenerator<C> c_gen(-255, 255, c_quantization);
-  a.generate([&]() { return a_gen(rng); });
-  b.generate([&]() { return b_gen(rng); });
-  c.generate([&]() { return c_gen(rng); });
+  fill_random(a.data(), a.size(), rng, -255, 255, a_quantization);
+  fill_random(b.data(), b.size(), rng, -255, 255, b_quantization);
+  fill_random(c.data(), c.size(), rng, -255, 255, c_quantization);
+
+  a = a.crop_padding({0, 0}, {0, shape.padding_a});
+  b = b.crop_padding({0, 0}, {0, shape.padding_b});
+  c = c.crop_padding({0, 0}, {0, shape.padding_c});
+  x = x.crop_padding({0, 0}, {0, shape.padding_x});
 
   broadcast_extent_1(a);
   broadcast_extent_1(b);

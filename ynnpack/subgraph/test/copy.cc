@@ -43,8 +43,7 @@ void TestImpl(T, size_t rank) {
       std::vector<size_t> shape = random_shape(rng, rank);
 
       Tensor<T> input(shape);
-      TypeGenerator<T> generator(quantization);
-      input.generate([&]() { return generator(rng); });
+      fill_random(input.data(), input.size(), rng, quantization);
 
       // Check reshaped shape is correct
       runtime.ReshapeExternalTensor(shape, input.base(), 0).ReshapeRuntime();

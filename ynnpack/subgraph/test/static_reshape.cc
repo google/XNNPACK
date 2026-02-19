@@ -61,8 +61,7 @@ void TestImpl(T) {
 
     Tensor<T> output(random_shape(rng));
     Tensor<T> input(random_reshape(rng, output.size()));
-    TypeGenerator<T> generator(quantization);
-    input.generate([&]() { return generator(rng); });
+    fill_random(input.data(), input.size(), rng, quantization);
 
     std::vector<size_t> dims = output.shape();
 

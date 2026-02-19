@@ -18,83 +18,110 @@
 
 namespace ynn {
 
-struct TypeGeneratorResults {
+struct Stats {
   int inf_count = 0;
+  int nan_count = 0;
+  int subnormal_count = 0;
   float min = std::numeric_limits<float>::infinity();
   float max = -std::numeric_limits<float>::infinity();
 };
 
 constexpr int kSamples = 1000000;
 
-template <typename Gen>
-TypeGeneratorResults RunTypeGenerator(Gen gen) {
+template <typename T, typename... Args>
+Stats RunFillRandom(Args... args) {
   ReplicableRandomDevice rng;
-  TypeGeneratorResults results;
-  for (int i = 0; i < kSamples; ++i) {
-    const float x = gen(rng);
-    results.min = std::min(results.min, x);
-    results.max = std::max(results.max, x);
-    if (std::isinf(x)) ++results.inf_count;
+  Stats results;
+  int n = kSamples;
+  constexpr int chunk_size = 1024;
+  while (n >= chunk_size) {
+    T data[chunk_size];
+    fill_random(data, chunk_size, rng, args...);
+    for (int i = 0; i < std::min(chunk_size, n); ++i) {
+      float x = data[i];
+      results.min = std::min(results.min, x);
+      results.max = std::max(results.max, x);
+
+      switch (std::fpclassify(x)) {
+        case FP_INFINITE:
+          ++results.inf_count;
+          break;
+        case FP_NAN:
+          ++results.nan_count;
+          break;
+        case FP_SUBNORMAL:
+          ++results.subnormal_count;
+          break;
+        default:
+          break;
+      }
+    }
+    n -= chunk_size;
   }
   return results;
 }
 
-template <typename T>
-void TestFloatGenerator(TypeGenerator<T> gen, float min, float max) {
-  TypeGeneratorResults results = RunTypeGenerator(gen);
+template <typename T, typename... Args>
+void TestFillRandomFloats(float min, float max, Args... args) {
+  Stats results = RunFillRandom<T>(args...);
 
   EXPECT_LE(results.min, min);
   EXPECT_GE(results.max, max);
 
   // Don't allow more than 0.1% of samples to be infinity.
   EXPECT_LT(results.inf_count, kSamples / 1000);
+  EXPECT_EQ(results.nan_count, 0);
+  EXPECT_EQ(results.subnormal_count, 0);
 }
 
 template <typename T>
-void TestFloatGenerator() {
-  const float min = -type_info<T>::max();
+void TestFillRandomFloats() {
+  const float min = type_info<T>::min();
   const float max = type_info<T>::max();
 
   // In these cases, we generate floats with a uniformly distributed exponent.
-  TestFloatGenerator<T>(TypeGenerator<T>{}, min * 0.5f, max * 0.5f);
-  TestFloatGenerator<T>(TypeGenerator<T>{min, max}, min * 0.5f, max * 0.5f);
+  TestFillRandomFloats<T>(min * 0.5f, max * 0.5f);
+  TestFillRandomFloats<T>(min * 0.5f, max * 0.5f, min, max);
 
   // In these cases, we generate uniformly distributed values.
-  TestFloatGenerator<T>(TypeGenerator<T>{0.0f, max}, max * 0.01f, max * 0.99f);
-  TestFloatGenerator<T>(TypeGenerator<T>{min, 0.0f}, min * 0.99f, min * 0.01f);
-  TestFloatGenerator<T>(TypeGenerator<T>{-1.0f, 1.0f}, -0.99f, 0.99f);
-  TestFloatGenerator<T>(TypeGenerator<T>{-10.0f, 10.0f}, -9.9f, 9.9f);
+  TestFillRandomFloats<T>(max * 0.01f, max * 0.99f, 0.0f, max);
+  TestFillRandomFloats<T>(min * 0.99f, min * 0.01f, min, 0.0f);
+  TestFillRandomFloats<T>(-0.99f, 0.99f, -1.0f, 1.0f);
+  TestFillRandomFloats<T>(-9.9f, 9.9f, -10.0f, 10.0f);
 }
 
-TEST(TypeGenerator, float) { TestFloatGenerator<float>(); }
-TEST(TypeGenerator, half) { TestFloatGenerator<half>(); }
-TEST(TypeGenerator, bfloat16) { TestFloatGenerator<bfloat16>(); }
+TEST(TypeGenerator, float) { TestFillRandomFloats<float>(); }
+TEST(TypeGenerator, half) { TestFillRandomFloats<half>(); }
+TEST(TypeGenerator, bfloat16) { TestFillRandomFloats<bfloat16>(); }
 
-template <typename T>
-void TestIntGenerator(TypeGenerator<T> gen, int min, int max) {
-  TypeGeneratorResults results = RunTypeGenerator(gen);
+template <typename T, typename... Args>
+void TestFillRandomInts(int min, int max, Args... args) {
+  Stats results = RunFillRandom<T>(args...);
 
-  EXPECT_LE(results.min, min);
-  EXPECT_GE(results.max, max);
+  EXPECT_EQ(results.min, min);
+  EXPECT_EQ(results.max, max);
   EXPECT_EQ(results.inf_count, 0);
+  EXPECT_EQ(results.nan_count, 0);
+  EXPECT_EQ(results.subnormal_count, 0);
 }
 
 TEST(TypeGenerator, int8_t) {
   const int min = -128;
   const int max = 127;
-  TestIntGenerator<int8_t>(TypeGenerator<int8_t>{}, min, max);
-  TestIntGenerator<int8_t>(TypeGenerator<int8_t>{min, max}, min, max);
-  TestIntGenerator<int8_t>(TypeGenerator<int8_t>{0, max}, 0, max);
-  TestIntGenerator<int8_t>(TypeGenerator<int8_t>{min, 0}, min, 0);
-  TestIntGenerator<int8_t>(TypeGenerator<int8_t>{-10, 10}, -10, 10);
+  TestFillRandomInts<int8_t>(min, max);
+  TestFillRandomInts<int8_t>(min, max, min, max);
+  TestFillRandomInts<int8_t>(0, max, 0, max);
+  TestFillRandomInts<int8_t>(min, 0, min, 0);
+  TestFillRandomInts<int8_t>(-10, 10, -10, 10);
 }
 
 TEST(TypeGenerator, uint8_t) {
   const int min = 0;
   const int max = 255;
-  TestIntGenerator<uint8_t>(TypeGenerator<uint8_t>{}, min, max);
-  TestIntGenerator<uint8_t>(TypeGenerator<uint8_t>{min, max}, min, max);
-  TestIntGenerator<uint8_t>(TypeGenerator<uint8_t>{0, 10}, 0, 10);
+  TestFillRandomInts<uint8_t>(min, max);
+  TestFillRandomInts<uint8_t>(min, max, min, max);
+  TestFillRandomInts<uint8_t>(0, max, 0, max);
+  TestFillRandomInts<uint8_t>(0, 100, 0, 100);
 }
 
 }  // namespace ynn

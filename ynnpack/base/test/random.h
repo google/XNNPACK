@@ -13,7 +13,6 @@
 #include <cstdint>
 #include <cstdlib>
 #include <cstring>
-#include <limits>
 #include <random>
 #include <type_traits>
 #include <vector>
@@ -114,125 +113,112 @@ T random_normal_float(Rng& rng) {
   }
 }
 
-// Make a generator of random values of a type T, suitable for use with
-// std::generate/std::generate_n or similar.
-template <typename T, typename Enable = void>
-class TypeGenerator {
-  std::uniform_real_distribution<float> dist_;
-  bool reinterpret_ = false;
-
- public:
-  TypeGenerator(double min, double max, const quantization_params& = {}) {
-    if (min <= type_info<T>::min() && max >= type_info<T>::max()) {
-      // The caller wants a full range of random value. Rather than generate
-      // floats uniformly distributed across the range of floats, where a
-      // negligible fraction of the range contains the "interesting" region near
-      // 0, we generate random bits reinterpreted as a float instead. This
-      // distribution more accurately reflects the numbers we want to test in
-      // typical code.
-      reinterpret_ = true;
+template <typename T>
+void replace_denormals_and_nans(T* data, size_t size) {
+  if (type_info<T>::smallest_normal() <= 0) {
+    // There are no denormals for this type.
+    return;
+  }
+  for (size_t i = 0; i < size; ++i) {
+    if (std::abs(static_cast<float>(data[i])) >=
+        type_info<T>::smallest_normal()) {
+      // This is a normal float, or infinity.
     } else {
-      reinterpret_ = false;
-      min = std::max<double>(min, type_info<T>::min());
-      max = std::min<double>(max, type_info<T>::max());
-      dist_ = std::uniform_real_distribution<float>(min, max);
+      data[i] = static_cast<T>(0);
     }
   }
-  explicit TypeGenerator(const quantization_params& = {})
-      : TypeGenerator(type_info<T>::min(), type_info<T>::max()) {}
+}
 
-  template <typename Rng>
-  T operator()(Rng& rng) {
-    if (reinterpret_) {
-      return random_normal_float<T>(rng);
+inline void replace_denormals_and_nans(int4x2*, size_t) {}
+
+// Fill `[data, data + size)` with uniform random bits, excluding denormals and
+// NaNs for floating point types.
+template <typename T, typename Rng>
+void fill_random(T* data, size_t size, Rng& rng,
+                 const quantization_params& params = {}) {
+  fill_uniform_random_bits(data, size, rng);
+  replace_denormals_and_nans(data, size);
+}
+
+// Fill random values of a type T into the buffer [data, data + size). If [min,
+// max] exceeds the range of T, the data is filled with random bits.
+template <typename T, typename Rng>
+void fill_random(T* data, size_t size, Rng& rng, double min, double max,
+                 const quantization_params& params = {}) {
+  if (min <= type_info<T>::min() && max >= type_info<T>::max()) {
+    // [min, max] exceeds the range of T, just fill it with random bits.
+    fill_random(data, size, rng);
+  } else {
+    if constexpr (std::is_integral_v<T>) {
+      std::uniform_int_distribution<int> dist(
+          std::max<int>(round_float_to_int<int>(min), type_info<T>::min()),
+          std::min<int>(round_float_to_int<int>(max), type_info<T>::max()));
+      for (size_t i = 0; i < size; ++i) {
+        data[i] = static_cast<T>(dist(rng));
+      }
     } else {
-      return dist_(rng);
+      // Floating point types
+      std::uniform_real_distribution<float> dist(static_cast<float>(min),
+                                                 static_cast<float>(max));
+      for (size_t i = 0; i < size; ++i) {
+        data[i] = static_cast<T>(dist(rng));
+      }
     }
   }
-};
+}
 
-template <typename T>
-class TypeGenerator<T, std::enable_if_t<std::is_integral_v<T>>> {
-  std::uniform_int_distribution<int> dist_;
-
- public:
-  TypeGenerator(float min, float max, const quantization_params& = {})
-      : dist_(
-            std::max<int>(round_float_to_int<int>(min), type_info<T>::min()),
-            std::min<int>(round_float_to_int<int>(max), type_info<T>::max())) {}
-  explicit TypeGenerator(const quantization_params& = {})
-      : dist_(type_info<T>::min(), type_info<T>::max()) {}
-
-  template <typename Rng>
-  int operator()(Rng& rng) {
-    return dist_(rng);
+// A specialization of the above for int4x2, which needs to set two values at
+// once.
+template <typename Rng>
+void fill_random(int4x2* data, size_t size, Rng& rng, double min, double max,
+                 const quantization_params& = {}) {
+  if (min <= type_info<int4x2>::min() && max >= type_info<int4x2>::max()) {
+    fill_random(data, size, rng);
+  } else {
+    std::uniform_int_distribution<int> dist(
+        std::max<int>(round_float_to_int<int>(min), type_info<int4x2>::min()),
+        std::min<int>(round_float_to_int<int>(max), type_info<int4x2>::max()));
+    for (size_t i = 0; i < size; ++i) {
+      data[i] = int4x2{static_cast<int8_t>(dist(rng)),
+                       static_cast<int8_t>(dist(rng))};
+    }
   }
-};
+}
 
-template <typename T>
-class TypeGenerator<quantized<T>> {
-  std::uniform_int_distribution<int> dist_;
+// For quantized data, convert the min/max to the unquantized type, and generate
+// that.
+template <typename T, typename Rng>
+void fill_random(quantized<T>* data, size_t size, Rng& rng, double min,
+                 double max, const quantization_params& params) {
+  float q_min = std::ceil(fake_quantize(
+      static_cast<float>(min), 1.0f / params.scale, params.zero_point));
+  float q_max = std::floor(fake_quantize(
+      static_cast<float>(max), 1.0f / params.scale, params.zero_point));
+  using UT = typename unwrap_quantized<T>::type;
+  fill_random(reinterpret_cast<UT*>(data), size, rng, q_min, q_max);
+}
 
- public:
-  TypeGenerator(float min, float max, const quantization_params params = {}) {
-    min = std::ceil(fake_quantize(min, 1.0f / params.scale, params.zero_point));
-    max =
-        std::floor(fake_quantize(max, 1.0f / params.scale, params.zero_point));
-    dist_ = std::uniform_int_distribution<int>(round_float_to_int<T>(min),
-                                               round_float_to_int<T>(max));
-  }
-  explicit TypeGenerator(const quantization_params& params)
-      : TypeGenerator(-1.0f, 1.0f, params) {}
-  TypeGenerator() : TypeGenerator(type_info<T>::min(), type_info<T>::max()) {}
+template <typename T, typename Rng>
+void fill_random(quantized<T>* data, size_t size, Rng& rng,
+                 const quantization_params&) {
+  fill_random(data, size, rng);
+}
 
-  template <typename Rng>
-  T operator()(Rng& rng) {
-    return static_cast<T>(dist_(rng));
-  }
-};
+// Specialization for quantized<int32_t> to avoid values that can't losslessly
+// convert to/from floats.
+template <typename Rng>
+void fill_random(quantized<int32_t>* data, size_t size, Rng& rng,
+                 const quantization_params& params) {
+  fill_random(data, size, rng, -(1 << 15), (1 << 15), params);
+}
 
-// Specialize quantized int32 to avoid huge numbers that cannot losslessly
-// convert to/from float.
-template <>
-class TypeGenerator<quantized<int32_t>> {
-  std::uniform_int_distribution<int32_t> dist_;
-
- public:
-  TypeGenerator(float min, float max, const quantization_params params = {}) {
-    min = std::ceil(fake_quantize(min, 1.0f / params.scale, params.zero_point));
-    max =
-        std::floor(fake_quantize(max, 1.0f / params.scale, params.zero_point));
-    dist_ = std::uniform_int_distribution<int>(
-        round_float_to_int<int32_t>(min), round_float_to_int<int32_t>(max));
-  }
-  explicit TypeGenerator(const quantization_params& params)
-      : TypeGenerator(-1.0f, 1.0f, params) {}
-  TypeGenerator() : TypeGenerator(-(1 << 15), (1 << 15)) {}
-
-  template <typename Rng>
-  int32_t operator()(Rng& rng) {
-    return static_cast<int32_t>(dist_(rng));
-  }
-};
-
-template <>
-class TypeGenerator<int4x2> {
-  std::uniform_int_distribution<int> dist_;
-
- public:
-  TypeGenerator(float min, float max, const quantization_params& = {})
-      : dist_(std::max<int>(round_float_to_int<int>(min),
-                            type_info<int4x2>::min()),
-              std::min<int>(round_float_to_int<int>(max),
-                            type_info<int4x2>::max())) {}
-  explicit TypeGenerator(const quantization_params& = {})
-      : dist_(type_info<int4x2>::min(), type_info<int4x2>::max()) {}
-
-  template <typename Rng>
-  int4x2 operator()(Rng& rng) {
-    return {static_cast<int8_t>(dist_(rng)), static_cast<int8_t>(dist_(rng))};
-  }
-};
+// Return a single random value of type T.
+template <typename T, typename Rng, typename... Args>
+T random_value(Rng& rng, Args&&... args) {
+  T result;
+  fill_random(&result, 1, rng, std::forward<Args>(args)...);
+  return result;
+}
 
 }  // namespace ynn
 

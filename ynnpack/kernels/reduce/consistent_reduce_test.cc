@@ -73,14 +73,11 @@ void TestReduce(AT, CT, ynn_reduce_operator op, size_t n, size_t k3, size_t k2,
   const float max_abs_value = type_info<CT>::max() / k;
   const float max_abs_a_value =
       op == ynn_reduce_sum_squared ? std::sqrt(max_abs_value) : max_abs_value;
-  TypeGenerator<AT> a_gen(-max_abs_a_value, max_abs_a_value);
-  TypeGenerator<CT> c_gen(-max_abs_value, max_abs_value);
-
   Tensor<AT> a({n, k3, k2, k1});
   Tensor<CT> init_c({n});
 
-  a.generate([&]() { return a_gen(rng); });
-  init_c.generate([&]() { return c_gen(rng); });
+  fill_random(a.data(), a.size(), rng, -max_abs_a_value, max_abs_a_value);
+  fill_random(init_c.data(), init_c.size(), rng, -max_abs_value, max_abs_value);
 
   Tensor<CT> c;
   const char* reference_kernel_name = nullptr;

@@ -65,8 +65,7 @@ void TestImpl(T, size_t rank, size_t num_outputs) {
       input_shape[axis] *= num_outputs;
 
       Tensor<T> input(input_shape);
-      TypeGenerator<T> generator(quantization);
-      input.generate([&]() { return generator(rng); });
+      fill_random(input.data(), input.size(), rng, quantization);
 
       // Check reshaped shape is correct
       runtime.ReshapeExternalTensor(input_shape, input.base(), 0)
