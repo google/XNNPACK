@@ -98,6 +98,42 @@ YNN_ALWAYS_INLINE void ReduceRow(ReduceOp op, CT* c_0, CT* c_1, const AT* a,
   }
 }
 
+template <typename X4x2>
+YNN_ALWAYS_INLINE void ReduceRowInt4Sum(ReduceOp op, int32_t* c_0,
+                                        int32_t* /*c_1*/, const X4x2* a,
+                                        size_t N, size_t K1,
+                                        size_t a_stride_n) {
+  for (size_t j = 0; j < N; ++j) {
+    for (size_t k1 = 0; k1 < K1; ++k1) {
+      int32_t v0 = static_cast<int32_t>(a[k1].get(0));
+      int32_t v1 = static_cast<int32_t>(a[k1].get(1));
+      switch (op) {
+        case ReduceOp::kSum:
+          c_0[j] += v0 + v1;
+          break;
+        case ReduceOp::kSumSquared:
+          c_0[j] += v0 * v0 + v1 * v1;
+          break;
+        default:
+          YNN_UNREACHABLE;
+      }
+    }
+    a += a_stride_n;
+  }
+}
+
+YNN_ALWAYS_INLINE void ReduceRow(ReduceOp op, int32_t* c_0, int32_t* c_1,
+                                 const int4x2* a, size_t N, size_t K1,
+                                 size_t a_stride_n) {
+  ReduceRowInt4Sum(op, c_0, c_1, a, N, K1, a_stride_n);
+}
+
+YNN_ALWAYS_INLINE void ReduceRow(ReduceOp op, int32_t* c_0, int32_t* c_1,
+                                 const uint4x2* a, size_t N, size_t K1,
+                                 size_t a_stride_n) {
+  ReduceRowInt4Sum(op, c_0, c_1, a, N, K1, a_stride_n);
+}
+
 template <typename AT, typename CT>
 void Reference(Tensor<AT> a, Tensor<CT> c, ReduceOp op) {
   // This helper allows omitting 2 of the 3 k dimensions. Canonicalize to 3 k

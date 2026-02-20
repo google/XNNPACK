@@ -65,7 +65,11 @@ struct accumulator {
     // below fixed size. To do that, we make a padded copy of A_i, and use a
     // fixed size loop on that.
     AT tail[K];
-    std::fill_n(tail, K, ReduceOp::identity);
+    if constexpr (std::is_same_v<AT, int4x2> || std::is_same_v<AT, uint4x2>) {
+      std::fill_n(tail, K, AT{uint8_t{0}});
+    } else {
+      std::fill_n(tail, K, ReduceOp::identity);
+    }
     for (size_t i = 0; i < n; ++i) {
       const AT* __restrict A_i = offset_bytes(A, i * A_stride_n);
       memcpy(tail, A_i, k * sizeof(AT));
@@ -266,6 +270,22 @@ struct square_op {
   T operator()(A a) { return static_cast<T>(a) * static_cast<T>(a); }
 };
 
+struct int4_unpack_sum {
+  template <typename X4x2>
+  int32_t operator()(X4x2 a) {
+    return static_cast<int32_t>(a.get(0)) + static_cast<int32_t>(a.get(1));
+  }
+};
+
+struct int4_unpack_sum_squared {
+  template <typename X4x2>
+  int32_t operator()(X4x2 a) {
+    int32_t v0 = a.get(0);
+    int32_t v1 = a.get(1);
+    return v0 * v0 + v1 * v1;
+  }
+};
+
 // C(j) = ReduceOp(C(j), F(A(j, k3, k2, k1)))
 template <typename AccT, typename AT, typename CT, typename ReduceOp,
           typename F = cast_op<CT, AT>>
@@ -398,6 +418,40 @@ void sum_squared_uint8_int32(size_t n, size_t k3, size_t k2, size_t k1,
   reduce<int32_t>(n, k3, k2, k1, a_stride_n, a_stride_k3, a_stride_k2,
                   static_cast<const uint8_t*>(a), static_cast<int32_t*>(c),
                   sum_op<int32_t>(), square_op<int32_t, uint8_t>());
+}
+
+void sum_int4_int32(size_t n, size_t k3, size_t k2, size_t k1,
+                    size_t a_stride_n, size_t a_stride_k3, size_t a_stride_k2,
+                    const void* a, size_t, void* c) {
+  reduce<int32_t>(n, k3, k2, k1, a_stride_n, a_stride_k3, a_stride_k2,
+                  static_cast<const int4x2*>(a), static_cast<int32_t*>(c),
+                  sum_op<int32_t>(), int4_unpack_sum());
+}
+
+void sum_uint4_int32(size_t n, size_t k3, size_t k2, size_t k1,
+                     size_t a_stride_n, size_t a_stride_k3, size_t a_stride_k2,
+                     const void* a, size_t, void* c) {
+  reduce<int32_t>(n, k3, k2, k1, a_stride_n, a_stride_k3, a_stride_k2,
+                  static_cast<const uint4x2*>(a), static_cast<int32_t*>(c),
+                  sum_op<int32_t>(), int4_unpack_sum());
+}
+
+void sum_squared_int4_int32(size_t n, size_t k3, size_t k2, size_t k1,
+                            size_t a_stride_n, size_t a_stride_k3,
+                            size_t a_stride_k2, const void* a, size_t,
+                            void* c) {
+  reduce<int32_t>(n, k3, k2, k1, a_stride_n, a_stride_k3, a_stride_k2,
+                  static_cast<const int4x2*>(a), static_cast<int32_t*>(c),
+                  sum_op<int32_t>(), int4_unpack_sum_squared());
+}
+
+void sum_squared_uint4_int32(size_t n, size_t k3, size_t k2, size_t k1,
+                             size_t a_stride_n, size_t a_stride_k3,
+                             size_t a_stride_k2, const void* a, size_t,
+                             void* c) {
+  reduce<int32_t>(n, k3, k2, k1, a_stride_n, a_stride_k3, a_stride_k2,
+                  static_cast<const uint4x2*>(a), static_cast<int32_t*>(c),
+                  sum_op<int32_t>(), int4_unpack_sum_squared());
 }
 
 void min_fp32(size_t n, size_t k3, size_t k2, size_t k1, size_t a_stride_n,

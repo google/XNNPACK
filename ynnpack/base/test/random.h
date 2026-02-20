@@ -220,6 +220,25 @@ T random_value(Rng& rng, Args&&... args) {
   return result;
 }
 
+template <>
+class TypeGenerator<uint4x2> {
+  std::uniform_int_distribution<int> dist_;
+
+ public:
+  TypeGenerator(float min, float max, const quantization_params& = {})
+      : dist_(std::max<int>(round_float_to_int<int>(min),
+                            type_info<uint4x2>::min()),
+              std::min<int>(round_float_to_int<int>(max),
+                            type_info<uint4x2>::max())) {}
+  explicit TypeGenerator(const quantization_params& = {})
+      : dist_(type_info<uint4x2>::min(), type_info<uint4x2>::max()) {}
+
+  template <typename Rng>
+  uint4x2 operator()(Rng& rng) {
+    return {static_cast<uint8_t>(dist_(rng)), static_cast<uint8_t>(dist_(rng))};
+  }
+};
+
 }  // namespace ynn
 
 #endif  // XNNPACK_YNNPACK_BASE_TEST_RANDOM_H_

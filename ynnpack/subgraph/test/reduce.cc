@@ -153,7 +153,13 @@ void TestReduce(A, C, ynn_reduce_operator op) {
       auto op_impl = GetReferenceOp<C>(op);
       broadcast_extent_1(expected);
       for (const auto& i : EnumerateIndices(a_shape)) {
-        expected(i) = op_impl(expected(i), a(i));
+        if constexpr (std::is_same_v<A, int4x2> || std::is_same_v<A, uint4x2>) {
+          auto val = a(i);
+          expected(i) = op_impl(expected(i), static_cast<C>(val.get(0)));
+          expected(i) = op_impl(expected(i), static_cast<C>(val.get(1)));
+        } else {
+          expected(i) = op_impl(expected(i), a(i));
+        }
       }
 
       // Verify results.
