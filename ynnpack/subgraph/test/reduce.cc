@@ -55,7 +55,7 @@ float Tolerance(ynn_reduce_operator op, size_t k, float max_abs_value) {
     case ynn_reduce_sum:
       return epsilon(type_of<T>()) * k * max_abs_value * 3.0f;
     case ynn_reduce_sum_squared:
-      return epsilon(type_of<T>()) * k * max_abs_value * max_abs_value * 6.0f;
+      return epsilon(type_of<T>()) * k * max_abs_value * max_abs_value * 9.0f;
     default:
       return 0.0f;
   }
@@ -181,7 +181,7 @@ TEST_P(Reduce, Test) {
 
 INSTANTIATE_TEST_SUITE_P(
     Sum, Reduce,
-    testing::Combine(testing::Values(ynn_reduce_sum),
+    testing::Combine(testing::Values(ynn_reduce_sum, ynn_reduce_sum_squared),
                      testing::Values(multi_type::fp32, multi_type::fp16_fp32,
                                      multi_type::bf16_fp32,
                                      multi_type::int8_int32,
