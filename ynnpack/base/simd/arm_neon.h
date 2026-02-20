@@ -141,6 +141,7 @@ struct vec<int8_t, 16> {
 using f32x4 = vec<float, 4>;
 using s32x4 = vec<int32_t, 4>;
 using bf16x8 = vec<bfloat16, 8>;
+using f16x4 = vec<half, 4>;
 using f16x8 = vec<half, 8>;
 using s16x8 = vec<int16_t, 8>;
 using u8x16 = vec<uint8_t, 16>;
@@ -221,6 +222,10 @@ YNN_ALWAYS_INLINE s8x16 load_aligned(const int8_t* ptr, decltype(s8x16::N),
   return s8x16{vld1q_s8(ptr)};
 }
 
+YNN_ALWAYS_INLINE f16x4 load_aligned(const half* ptr, decltype(f16x4::N),
+                                     f16x4 = {}) {
+  return f16x4{vld1_u16(reinterpret_cast<const uint16_t*>(ptr))};
+}
 YNN_ALWAYS_INLINE u8x8 load_aligned(const uint8_t* ptr, decltype(u8x8::N),
                                     u8x8 = {}) {
   return u8x8{vld1_u8(ptr)};
@@ -255,6 +260,10 @@ YNN_ALWAYS_INLINE void store_aligned(int8_t* ptr, s8x16 b,
   vst1q_s8(ptr, b.v);
 }
 
+YNN_ALWAYS_INLINE void store_aligned(half* ptr, f16x4 b,
+                                     decltype(f16x4::N) = {}) {
+  vst1_u16(reinterpret_cast<uint16_t*>(ptr), b.v);
+}
 YNN_ALWAYS_INLINE void store_aligned(uint8_t* ptr, u8x8 b,
                                      decltype(u8x8::N) = {}) {
   vst1_u8(ptr, b.v);
@@ -287,6 +296,9 @@ YNN_ALWAYS_INLINE s8x16 load(const int8_t* ptr, decltype(s8x16::N),
   return s8x16{vld1q_s8(ptr)};
 }
 
+YNN_ALWAYS_INLINE f16x4 load(const half* ptr, decltype(f16x4::N), f16x4 = {}) {
+  return f16x4{vld1_u16(reinterpret_cast<const uint16_t*>(ptr))};
+}
 YNN_ALWAYS_INLINE u8x8 load(const uint8_t* ptr, decltype(u8x8::N), u8x8 = {}) {
   return u8x8{vld1_u8(ptr)};
 }
@@ -314,6 +326,9 @@ YNN_ALWAYS_INLINE void store(int8_t* ptr, s8x16 b, decltype(s8x16::N) = {}) {
   vst1q_s8(ptr, b.v);
 }
 
+YNN_ALWAYS_INLINE void store(half* ptr, f16x4 b, decltype(f16x4::N) = {}) {
+  vst1_u16(reinterpret_cast<uint16_t*>(ptr), b.v);
+}
 YNN_ALWAYS_INLINE void store(uint8_t* ptr, u8x8 b, decltype(u8x8::N) = {}) {
   vst1_u8(ptr, b.v);
 }
@@ -398,6 +413,9 @@ YNN_ALWAYS_INLINE s8x16 load(const int8_t* ptr, size_t n, s8x16 src) {
   return internal::partial_load_memcpy(ptr, n, src);
 }
 
+YNN_ALWAYS_INLINE f16x4 load(const half* ptr, size_t n, f16x4 src) {
+  return internal::partial_load_memcpy(ptr, n, src);
+}
 YNN_ALWAYS_INLINE u8x8 load(const uint8_t* ptr, size_t n, u8x8 src) {
   return internal::partial_load_memcpy(ptr, n, src);
 }
@@ -424,6 +442,9 @@ YNN_ALWAYS_INLINE s8x16 load(const int8_t* ptr, size_t n, zeros<16> src) {
   return internal::partial_load_memcpy(ptr, n, s8x16{0});
 }
 
+YNN_ALWAYS_INLINE f16x4 load(const half* ptr, size_t n, zeros<4> src) {
+  return internal::partial_load_memcpy(ptr, n, f16x4{0});
+}
 YNN_ALWAYS_INLINE u8x8 load(const uint8_t* ptr, size_t n, zeros<8> src) {
   return internal::partial_load_memcpy(ptr, n, u8x8{0});
 }
@@ -436,6 +457,9 @@ YNN_ALWAYS_INLINE s32x4 load(const int32_t* ptr, size_t n, undef<4> src) {
 }
 YNN_ALWAYS_INLINE bf16x8 load(const bfloat16* ptr, size_t n, undef<8> src) {
   return internal::partial_load_memcpy(ptr, n, bf16x8{});
+}
+YNN_ALWAYS_INLINE f16x4 load(const half* ptr, size_t n, undef<4> src) {
+  return internal::partial_load_memcpy(ptr, n, f16x4{});
 }
 YNN_ALWAYS_INLINE f16x8 load(const half* ptr, size_t n, undef<8> src) {
   return internal::partial_load_memcpy(ptr, n, f16x8{});
@@ -476,6 +500,9 @@ YNN_ALWAYS_INLINE void store(int8_t* ptr, s8x16 value, size_t n) {
   internal::partial_store_memcpy(ptr, value, n);
 }
 
+YNN_ALWAYS_INLINE void store(half* ptr, f16x4 value, size_t n) {
+  internal::partial_store_memcpy(ptr, value, n);
+}
 YNN_ALWAYS_INLINE void store(uint8_t* ptr, u8x8 value, size_t n) {
   internal::partial_store_memcpy(ptr, value, n);
 }
