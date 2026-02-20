@@ -579,51 +579,6 @@ def make_x86_fma_patterns(vector_bits, prefix):
 class X86(Target):
   """X86 target for elementwise kernels compiler."""
 
-  def add_load_intrinsics(self, vector_bits, prefix):
-    self.load_intrinsics[Int(8, vector_bits // 8)] = (
-        "wrapper" + prefix + "loadu_si" + str(vector_bits)
-    )
-    self.load_intrinsics[UInt(8, vector_bits // 8)] = (
-        "wrapper" + prefix + "loadu_si" + str(vector_bits)
-    )
-    self.load_intrinsics[Int(16, vector_bits // 16)] = (
-        "wrapper" + prefix + "loadu_si" + str(vector_bits)
-    )
-    self.load_intrinsics[UInt(16, vector_bits // 16)] = (
-        "wrapper" + prefix + "loadu_si" + str(vector_bits)
-    )
-    self.load_intrinsics[Int(32, vector_bits // 32)] = (
-        "wrapper" + prefix + "loadu_si" + str(vector_bits)
-    )
-    self.load_intrinsics[UInt(32, vector_bits // 32)] = (
-        "wrapper" + prefix + "loadu_si" + str(vector_bits)
-    )
-    self.load_intrinsics[Float(16, vector_bits // 16)] = (
-        "wrapper" + prefix + "loadu_si" + str(vector_bits)
-    )
-    self.load_intrinsics[BFloat(16, vector_bits // 16)] = (
-        "wrapper" + prefix + "loadu_si" + str(vector_bits)
-    )
-    self.load_intrinsics[Float(32, vector_bits // 32)] = prefix + "loadu_ps"
-
-  def add_store_intrinsics(self, vector_bits, prefix):
-    self.store_intrinsics[Int(8, vector_bits // 8)] = (
-        "wrapper" + prefix + "storeu_si" + str(vector_bits)
-    )
-    self.store_intrinsics[UInt(8, vector_bits // 8)] = (
-        "wrapper" + prefix + "storeu_si" + str(vector_bits)
-    )
-    self.store_intrinsics[Int(32, vector_bits // 32)] = (
-        "wrapper" + prefix + "storeu_si" + str(vector_bits)
-    )
-    self.store_intrinsics[Float(16, vector_bits // 16)] = (
-        "wrapper" + prefix + "storeu_si" + str(vector_bits)
-    )
-    self.store_intrinsics[BFloat(16, vector_bits // 16)] = (
-        "wrapper" + prefix + "storeu_si" + str(vector_bits)
-    )
-    self.store_intrinsics[Float(32, vector_bits // 32)] = prefix + "storeu_ps"
-
   def update_for_sse2(self):
     """Updates the target for SSE2 support."""
     self.types.update({
@@ -636,8 +591,6 @@ class X86(Target):
         Float(32, 4): "simd::vec<float, 4>",
     })
 
-    self.add_load_intrinsics(128, "_mm_")
-    self.add_store_intrinsics(128, "_mm_")
     self.patterns += make_x86_float32_patterns(128, "_mm_")
     self.patterns += make_x86_integer_patterns(128, "_mm_")
     self.patterns += make_x86_cast_patterns(128, "_mm_")
@@ -647,16 +600,6 @@ class X86(Target):
 
     self.header += """
 namespace {
-
-template <typename T>
-YNN_INTRINSIC __m128i wrapper_mm_loadu_si128(const T* ptr) {
-  return _mm_loadu_si128((const __m128i*)ptr);
-}
-
-template <typename T>
-YNN_INTRINSIC void wrapper_mm_storeu_si128(T* ptr, __m128i v) {
-  _mm_storeu_si128((__m128i*)ptr, v);
-}
 
 YNN_INTRINSIC __m128i saturating_cast_f32_to_int8(__m128 f0, __m128 f1, __m128 f2, __m128 f3) {
   const __m128 max_int16 = _mm_set1_ps((1 << 15) - 1);
@@ -734,40 +677,6 @@ YNN_INTRINSIC __m128 round(__m128 x) {
     self.header += """
 namespace {
 
-// Mask table used for partial load/store operations.
-const int32_t mask_table_avx_f32[16] = {-1, -1, -1, -1, -1, -1, -1, -1,
-                                        0,  0,  0,  0,  0,  0,  0, 0};
-
-YNN_INTRINSIC __m256 partial_load_8x(const float* ptr, size_t num_elements) {
-  __m256i mask = _mm256_loadu_si256(
-            (const __m256i*)(&mask_table_avx_f32[8] - num_elements));
-  return _mm256_maskload_ps(ptr, mask);
-}
-
-YNN_INTRINSIC void partial_store_8x(float* output, size_t num_elements, __m256 v) {
-  __m256i mask = _mm256_loadu_si256(
-            (const __m256i*)(&mask_table_avx_f32[8] - num_elements));
-  _mm256_maskstore_ps(output, mask, v);
-}
-
-YNN_INTRINSIC __m256i partial_load_8x(const int32_t* ptr, size_t num_elements) {
-  return _mm256_castps_si256(partial_load_8x(reinterpret_cast<const float*>(ptr), num_elements));
-}
-
-YNN_INTRINSIC void partial_store_8x(int32_t* output, size_t num_elements, __m256i v) {
-  partial_store_8x(reinterpret_cast<float*>(output), num_elements, _mm256_castsi256_ps(v));
-}
-
-template <typename T>
-YNN_INTRINSIC __m256i wrapper_mm256_loadu_si256(const T* ptr) {
-  return _mm256_loadu_si256((const __m256i*)ptr);
-}
-
-template <typename T>
-YNN_INTRINSIC void wrapper_mm256_storeu_si256(T* ptr, __m256i v) {
-  _mm256_storeu_si256((__m256i*)ptr, v);
-}
-
 YNN_INTRINSIC __m256 round(__m256 x) {
   return _mm256_round_ps(x, _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC);
 }
@@ -816,8 +725,6 @@ YNN_INTRINSIC __m128 wrapper_mm256_slice_extract_ps256_1(
         BFloat(16, 16): "simd::vec<bfloat16, 16>",
         BFloat(16, 8): "simd::vec<bfloat16, 8>",
     })
-    self.add_load_intrinsics(256, "_mm256_")
-    self.add_store_intrinsics(256, "_mm256_")
     self.patterns += make_x86_float32_patterns(256, "_mm256_")
     self.patterns += make_x86_reinterpret_cast_patterns(256, "_mm256_")
     self.patterns += make_x86_slice_patterns(256, "_mm256_")
@@ -932,42 +839,6 @@ YNN_INTRINSIC __m128i wrapper_mm256_cvtps_ph(__m256 x) {
     self.header += """
 namespace {
 
-YNN_INTRINSIC __m512 partial_load_16x(const float* ptr, size_t num_elements) {
-  __mmask16 mask = _cvtu32_mask16((uint32_t)((1U << num_elements) - 1U));
-  return _mm512_maskz_loadu_ps(mask, ptr);
-}
-
-YNN_INTRINSIC void partial_store_16x(float* output, size_t num_elements, __m512 v) {
-  __mmask16 mask = _cvtu32_mask16((uint32_t)((1U << num_elements) - 1U));
-  _mm512_mask_storeu_ps(output, mask, v);
-}
-
-YNN_INTRINSIC __m512i partial_load_16x(const int32_t* ptr, size_t num_elements) {
-  __mmask16 mask = _cvtu32_mask16((uint32_t)((1U << num_elements) - 1U));
-  return _mm512_maskz_loadu_epi32(mask, ptr);
-}
-
-YNN_INTRINSIC void partial_store_16x(int32_t* output, size_t num_elements, __m512i v) {
-  __mmask16 mask = _cvtu32_mask16((uint32_t)((1U << num_elements) - 1U));
-  _mm512_mask_storeu_epi32(output, mask, v);
-}
-
-YNN_INTRINSIC __m256i partial_load_16x(const uint16_t* ptr, size_t num_elements) {
-  __m256i v = _mm256_setzero_si256();
-  memcpy(&v, ptr, num_elements * 2);
-  return v;
-}
-
-template <typename T>
-YNN_INTRINSIC __m512i wrapper_mm512_loadu_si512(const T* ptr) {
-  return _mm512_loadu_si512((const __m512i*)ptr);
-}
-
-template <typename T>
-YNN_INTRINSIC void wrapper_mm512_storeu_si512(T* ptr, __m512i v) {
-  _mm512_storeu_si512((__m512i*)ptr, v);
-}
-
 YNN_INTRINSIC __m512 round(__m512 x) {
   return _mm512_roundscale_ps(x, _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC);
 }
@@ -1016,8 +887,6 @@ YNN_INTRINSIC __m256 wrapper_mm512_slice_extract_ps512_1(
         Float(32, 16): "simd::vec<float, 16>",
         Float(16, 16): "simd::vec<half, 16>",
     })
-    self.add_load_intrinsics(512, "_mm512_")
-    self.add_store_intrinsics(512, "_mm512_")
     self.patterns += make_x86_fma_patterns(512, "_mm512_")
     self.patterns += make_x86_float32_patterns(512, "_mm512_")
     self.patterns += make_x86_reinterpret_cast_patterns(512, "_mm512_")
@@ -1034,20 +903,6 @@ YNN_INTRINSIC __m512i convert_fp32_to_bf16_avx512(__m512 a, __m512 b) {
   return (__m512i)_mm512_cvtne2ps_pbh(b, a);
 }
 
-YNN_INTRINSIC __m256i partial_load_16x(const ynn::bfloat16* ptr, size_t num_elements) {
-  __m256i v = _mm256_setzero_si256();
-  memcpy(&v, ptr, num_elements * 2);
-  return v;
-}
-
-YNN_INTRINSIC void partial_store_32x(ynn::bfloat16* output, size_t num_elements, __m512i v) {
-  partial_store_32x((int16_t*)output, num_elements, v);
-}
-
-YNN_INTRINSIC __m512i partial_load_32x(const ynn::bfloat16* ptr, size_t num_elements) {
-  return partial_load_32x((const int16_t*)ptr, num_elements);
-}
-
 } // namespace
 
 """
@@ -1060,26 +915,6 @@ YNN_INTRINSIC __m512i partial_load_32x(const ynn::bfloat16* ptr, size_t num_elem
     """Updates the target for AVX512BW support."""
     self.header += """
 namespace {
-
-YNN_INTRINSIC __m512i partial_load_32x(const int16_t* ptr, size_t num_elements) {
-  __mmask32 mask = _cvtu32_mask32((uint32_t)((1ULL << num_elements) - 1U));
-  return _mm512_maskz_loadu_epi16(mask, ptr);
-}
-
-YNN_INTRINSIC void partial_store_32x(int16_t* output, size_t num_elements, __m512i v) {
-  __mmask32 mask = _cvtu32_mask32((uint32_t)((1ULL << num_elements) - 1U));
-  _mm512_mask_storeu_epi16(output, mask, v);
-}
-
-YNN_INTRINSIC void partial_store_64x(int8_t* output, size_t num_elements, __m512i v) {
-  __mmask64 mask = _cvtu64_mask64((1ULL << num_elements) - 1ULL);
-  _mm512_mask_storeu_epi8(output, mask, v);
-}
-
-YNN_INTRINSIC void partial_store_64x(uint8_t* output, size_t num_elements, __m512i v) {
-  __mmask64 mask = _cvtu64_mask64((1ULL << num_elements) - 1ULL);
-  _mm512_mask_storeu_epi8(output, mask, v);
-}
 
 YNN_INTRINSIC __m512i saturating_cast_f32_to_int8(__m512 f0, __m512 f1, __m512 f2, __m512 f3) {
   const __m512 max_int16 = _mm512_set1_ps((1 << 15) - 1);
@@ -1143,8 +978,7 @@ YNN_INTRINSIC __m512i saturating_cast_int16_to_uint8(__m512i a, __m512i b) {
   def __init__(self, features):
     Target.__init__(self)
     self.features = features
-    self.load_intrinsics = {}
-    self.store_intrinsics = {}
+
     # These are transitive.
     implied_features = {
         "SSE41": ["SSE2"],
@@ -1179,15 +1013,15 @@ YNN_INTRINSIC __m512i saturating_cast_int16_to_uint8(__m512i a, __m512i b) {
     simd_header = ""
     if "AVX512F" in all_features:
       simd_header = "x86_avx512.h"
-      self.tail_strategy = TailStrategy.MASK
+      self.tail_strategy = TailStrategy.VECTOR
       self.vector_bits = 512
     elif "AVX" in all_features:
       simd_header = "x86_avx.h"
-      self.tail_strategy = TailStrategy.MEMCPY
+      self.tail_strategy = TailStrategy.VECTOR
       self.vector_bits = 256
     elif "SSE2" in all_features:
       simd_header = "x86_sse2.h"
-      self.tail_strategy = TailStrategy.MEMCPY
+      self.tail_strategy = TailStrategy.VECTOR
       self.vector_bits = 128
 
     self.header += (

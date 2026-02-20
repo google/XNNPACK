@@ -348,6 +348,7 @@ class Load(Value):
 
   def __init__(self, ty, index, offset_elements):
     Value.__init__(self, ty)
+    self.name = "load"
     self.index = index
     self.offset_elements = offset_elements
 
@@ -862,8 +863,7 @@ def operator_name(name):
 
 class TailStrategy(enum.Enum):
   SCALAR = 1
-  MEMCPY = 2
-  MASK = 3
+  VECTOR = 2
 
 
 def match(pattern, expr, matches):
@@ -945,12 +945,11 @@ class Target:
         BFloat(16, 1): "bfloat16",
     }
     self.features = []
-    self.load_intrinsics = {}
-    self.store_intrinsics = {}
     self.vector_bits = 0
     self.tail_strategy = TailStrategy.SCALAR
     self.result = ""
     self.header = header
+    self.simd_ops = {"min", "max", "load", "store"}
 
   def indent(self):
     return "  " * self.indent_level
@@ -981,9 +980,13 @@ class Target:
             implied_features[feature], implied_features, all_features
         )
 
+  def needs_simd_wrapper(self, op):
+    if op.name in self.simd_ops:
+      return False
+    return True
+
   def simd_suffix(self, op):
-    simd_ops = {"min", "max"}
-    if op.name in simd_ops:
+    if op.name in self.simd_ops:
       return ""
     return ".v"
 
@@ -1444,54 +1447,39 @@ class Target:
     if (
         is_load_store
         and is_rem_width
-        and self.tail_strategy == TailStrategy.MEMCPY
-    ):
-      dst = str_args[0] if is_store else f"(void*)&{i[0]}_{j}_{k}"
-      src = f"(void*)&{str_args[1]}" if is_store else str_args[0]
-
-      if is_load:
-        self.result += f";\n{self.indent()}"
-      # TODO(vksnk): this can be unified with the code below by
-      # adding a separate function (something like memcpy_load).
-      # However, I am not sure if it'd have worse performance.
-      self.result += (
-          f"memcpy({dst}, {src},"
-          # TODO(vksnk): this expression can be simplified once
-          # we switch to while loop for tracking n.
-          f" {lanes} *"
-          f" {i[1].ty.size // 8});\n"
-      )
-    elif (
-        is_load_store
-        and is_rem_width
-        and self.tail_strategy == TailStrategy.MASK
     ):
       mask_op = ""
       if is_load:
         self.result += " = "
-        mask_op = "load"
+        mask_op = "simd::load"
       else:
-        mask_op = "store"
-      self.result += (
-          f"{result_type}(partial_{mask_op}_{op_natural_vector_size}x({str_args[0]},"
-          f" {lanes}"
-      )
+        mask_op = "simd::store"
+      self.result += f"{mask_op}({str_args[0]}"
 
       if is_store:
         self.result += f", {str_args[1]}"
-      self.result += "));\n"
+
+      self.result += f", {lanes}"
+
+      if is_load:
+        self.result += f", simd::undef<{op.ty.lanes}>()"
+      self.result += ");\n"
     else:
       if not is_store:
         self.result += " = "
       mem_op = ""
 
       if is_load:
-        mem_op = self.load_intrinsics.get(op.ty, "load")
+        mem_op = "simd::load"
+        str_args.append(f"{self.legalize_type(op.ty)}::N")
       elif is_store:
-        mem_op = self.store_intrinsics.get(op.ty, "store")
+        mem_op = "simd::store"
       else:
         mem_op = self.legalize_op(op)
-      self.result += f"{result_type}({mem_op}({', '.join(str_args)}));\n"
+      if self.needs_simd_wrapper(op):
+        self.result += f"{result_type}({mem_op}({', '.join(str_args)}));\n"
+      else:
+        self.result += f"{mem_op}({', '.join(str_args)});\n"
 
   def emit_inner_loop_body(
       self,

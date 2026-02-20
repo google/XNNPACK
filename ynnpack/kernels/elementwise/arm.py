@@ -165,34 +165,6 @@ def make_neon_float32_patterns(vector_bits):
 class ARM(Target):
   """NEON target for elementwise kernels compiler."""
 
-  def add_load_intrinsics(self):
-    self.load_intrinsics[Int(8, 16)] = "vld1q_s8"
-    self.load_intrinsics[UInt(8, 16)] = "vld1q_u8"
-    self.load_intrinsics[Int(16, 8)] = "vld1q_s16"
-    self.load_intrinsics[UInt(16, 8)] = "vld1q_u16"
-    self.load_intrinsics[Int(32, 4)] = "vld1q_s32"
-    self.load_intrinsics[UInt(32, 4)] = "vld1q_u32"
-    self.load_intrinsics[Float(32, 4)] = "vld1q_f32"
-    self.load_intrinsics[Float(16, 8)] = "vld1q_f16"
-    self.load_intrinsics[Float(16, 4)] = "load1_f16"
-
-  def add_store_intrinsics(self):
-    self.store_intrinsics[Int(8, 16)] = "vst1q_s8"
-    self.store_intrinsics[UInt(8, 16)] = "vst1q_u8"
-    self.store_intrinsics[Int(16, 8)] = "vst1q_s16"
-    self.store_intrinsics[UInt(16, 8)] = "vst1q_u16"
-    self.store_intrinsics[Int(32, 4)] = "vst1q_s32"
-    self.store_intrinsics[UInt(32, 4)] = "vst1q_u32"
-    self.store_intrinsics[Float(32, 4)] = "vst1q_f32"
-    self.store_intrinsics[Float(16, 8)] = "store1_f16"
-    self.store_intrinsics[Float(16, 4)] = "store1_f16"
-
-  def legalize_type(self, ty, is_const=True):
-    # This is the type which ARM intrinsics expect as argument for pointers.
-    if ty.is_float() and ty.size == 16 and ty.lanes == 1:
-      return "__fp16"
-    return super().legalize_type(ty, is_const)
-
   def update_for_neon(self):
     self.header += """
 
@@ -366,18 +338,6 @@ YNN_INTRINSIC uint16x8_t cast_f32_to_f16(float32x4_t f0, float32x4_t f1) {
   return vreinterpretq_u16_f16(vcombine_f16(vcvt_f16_f32(f0), vcvt_f16_f32(f1)));
 }
 
-YNN_INTRINSIC uint16x4_t load1_f16(const __fp16* ptr) {
-  return vreinterpret_u16_f16(vld1_f16(ptr));
-}
-
-YNN_INTRINSIC void store1_f16(__fp16* ptr, uint16x4_t v) {
-  vst1_f16(ptr, vreinterpret_f16_u16(v));
-}
-
-YNN_INTRINSIC void store1_f16(__fp16* ptr, uint16x8_t v) {
-  vst1q_f16(ptr, vreinterpretq_f16_u16(v));
-}
-
 } // namespace
 """
 
@@ -390,7 +350,7 @@ YNN_INTRINSIC void store1_f16(__fp16* ptr, uint16x8_t v) {
     Target.__init__(self)
     self.features = features
     self.vector_bits = 128
-    self.tail_strategy = TailStrategy.MEMCPY
+    self.tail_strategy = TailStrategy.VECTOR
 
     self.header += "#include <arm_neon.h>\n"
     self.header += (
@@ -409,9 +369,6 @@ YNN_INTRINSIC void store1_f16(__fp16* ptr, uint16x8_t v) {
     for feature in all_features:
       if feature not in known_features:
         raise ValueError(f"Unknown feature: {feature}")
-
-    self.add_load_intrinsics()
-    self.add_store_intrinsics()
 
     if "NEON" in all_features:
       self.update_for_neon()
