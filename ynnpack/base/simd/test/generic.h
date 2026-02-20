@@ -207,60 +207,94 @@ void test_partial_store() {
     test_partial_store<type, N>();                      \
   }
 
-template <typename scalar, size_t N, template <typename> typename Op>
+template <typename scalar, size_t N, typename Op>
 void test_op() {
   using vector = vec<scalar, N>;
 
-  scalar a[vector::N];
-  scalar b[vector::N];
-  for (size_t i = 0; i < vector::N; ++i) {
-    a[i] = i * 2;
-    b[i] = vector::N / 2 - i;
-  }
+  ReplicableRandomDevice rng;
+  TypeGenerator<scalar> gen;
+  Op op;
 
-  scalar result[vector::N];
+  for (size_t i = 0; i < 100; ++i) {
+    scalar a[vector::N];
+    scalar b[vector::N];
+    for (size_t i = 0; i < vector::N; ++i) {
+      a[i] = gen(rng);
+      b[i] = gen(rng);
+    }
 
-  Op<vector> vector_op;
-  Op<scalar> scalar_op;
+    scalar result[vector::N];
 
-  store(result, vector_op(load(a, vector::N), load(b, vector::N)));
-  for (size_t i = 0; i < vector::N; ++i) {
-    ASSERT_EQ(result[i], scalar_op(a[i], b[i]));
+    store(result, op(load(a, vector::N), load(b, vector::N)));
+    for (size_t i = 0; i < vector::N; ++i) {
+      ASSERT_EQ(result[i], op(a[i], b[i]));
+    }
   }
 }
 
-template <typename T>
 struct min_op {
+  template <typename T>
   T operator()(T a, T b) {
     using std::min;
     return min(a, b);
   }
 };
 
-template <typename T>
 struct max_op {
+  template <typename T>
   T operator()(T a, T b) {
     using std::max;
     return max(a, b);
   }
 };
 
-template <typename T>
 struct copysign_op {
+  template <typename T>
   T operator()(T a, T b) {
     using std::copysign;
     return copysign(a, b);
   }
 };
 
-#define TEST_ADD(test_class, type, N) \
-  TEST_F(test_class, add_##type##x##N) { test_op<type, N, std::plus>(); }
-#define TEST_SUBTRACT(test_class, type, N) \
-  TEST_F(test_class, subtract_##type##x##N) { test_op<type, N, std::minus>(); }
-#define TEST_MULTIPLY(test_class, type, N)  \
-  TEST_F(test_class, multiply_##type##x##N) { \
-    test_op<type, N, std::multiplies>();    \
+struct add_op {
+  template <typename T>
+  T operator()(T a, T b) {
+    return a + b;
   }
+  int32_t operator()(int32_t a, int32_t b) {
+    // For integers, don't hit signed integer overflow.
+    return static_cast<int64_t>(a) + static_cast<int64_t>(b);
+  }
+};
+
+struct sub_op {
+  template <typename T>
+  T operator()(T a, T b) {
+    return a - b;
+  }
+  int32_t operator()(int32_t a, int32_t b) {
+    // For integers, don't hit signed integer overflow.
+    return static_cast<int64_t>(a) - static_cast<int64_t>(b);
+  }
+};
+
+struct multiply_op {
+  template <typename T>
+  T operator()(T a, T b) {
+    return a * b;
+  }
+  int32_t operator()(int32_t a, int32_t b) {
+    // For integers, don't hit signed integer overflow.
+    return static_cast<int64_t>(a) * static_cast<int64_t>(b);
+  }
+};
+
+#define TEST_ADD(test_class, type, N) \
+  TEST_F(test_class, add_##type##x##N) { test_op<type, N, add_op>(); }
+#define TEST_SUBTRACT(test_class, type, N) \
+  TEST_F(test_class, subtract_##type##x##N) { test_op<type, N, sub_op>(); }
+#define TEST_MULTIPLY(test_class, type, N) \
+  TEST_F(test_class, multiply_##type##x##N) { test_op<type, N, multiply_op>(); }
 #define TEST_COPYSIGN(test_class, type, N) \
   TEST_F(test_class, copysign_##type##x##N) { test_op<type, N, copysign_op>(); }
 #define TEST_MIN(test_class, type, N) \
