@@ -23,7 +23,7 @@ void xnn_f16_raddstoreexpminusmax_ukernel__avx2_rr1_p2_u72_acc3(
     const xnn_float16* input,
     const xnn_float16* max,
     xnn_float16* output,
-    xnn_float16* sum,
+    float* sum,
     const void* params) XNN_OOB_READS
 {
   assert(batch != 0);
@@ -250,5 +250,6 @@ void xnn_f16_raddstoreexpminusmax_ukernel__avx2_rr1_p2_u72_acc3(
   }
   vacc_lo = _mm_add_ps(vacc_lo, _mm_movehl_ps(vacc_lo, vacc_lo));
   vacc_lo = _mm_add_ss(vacc_lo, _mm_movehdup_ps(vacc_lo));
-  *((uint16_t*) sum) = (uint16_t) _mm_extract_epi16(_mm_cvtps_ph(vacc_lo, _MM_FROUND_TO_NEAREST_INT), 0);
+  int vacc_lo_0 = _mm_extract_ps(vacc_lo, 0);
+  *sum = *(float*) &vacc_lo_0;
 }
