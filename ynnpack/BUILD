@@ -162,6 +162,11 @@ define_build_option(
 )
 
 define_build_option(
+    name = "ynn_enable_arm64_sve",
+    default_all = [":ynn_enable_arm64"],
+)
+
+define_build_option(
     name = "ynn_enable_x86_sse",
     default_all = [":x86"],
 )

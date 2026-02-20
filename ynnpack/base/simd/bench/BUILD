@@ -12,6 +12,7 @@ ynn_cc_library(
     name = "bench_lib",
     per_arch_srcs = {
         "arm_neon": ["arm_neon.cc"],
+        "arm64_sve": ["arm64_sve.cc"],
         "hexagon_hvx": ["hexagon_hvx.cc"],
         "x86_sse2": ["x86_sse2.cc"],
         "x86_avx": ["x86_avx.cc"],

@@ -78,6 +78,7 @@ uint64_t get_supported_arch_flags() {
     if (cpuinfo_has_arm_i8mm()) result |= arch_flag::neoni8mm;
     if (cpuinfo_has_arm_sme()) result |= arch_flag::sme;
     if (cpuinfo_has_arm_sme2()) result |= arch_flag::sme2;
+    if (cpuinfo_has_arm_sve()) result |= arch_flag::sve;
 #endif  // YNN_ARCH_ARM
 #endif  // YNN_ENABLE_CPUINFO
 #ifdef YNN_ARCH_HEXAGON
