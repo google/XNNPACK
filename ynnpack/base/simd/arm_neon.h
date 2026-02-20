@@ -331,7 +331,10 @@ void store_aligned(T* dst, undef<N>) {}
 // Partial load/store with a non-constant number of elements.
 template <typename T, typename Init>
 inline vec<T, 4> partial_load_neon(const T* ptr, size_t n, Init src) {
-  assert(n < 4);
+  assert(n <= 4);
+  if (n == 4) {
+    return load(ptr, std::integral_constant<size_t, 4>{});
+  }
   alignas(vec<T, 4>) T lanes[4];
   store_aligned(lanes, src);
   switch (n) {
@@ -351,7 +354,11 @@ inline vec<T, 4> partial_load_neon(const T* ptr, size_t n, Init src) {
 }
 template <typename T>
 inline void partial_store_neon(T* ptr, vec<T, 4> b, size_t n) {
-  assert(n < 4);
+  assert(n <= 4);
+  if (n == 4) {
+    store(ptr, b);
+    return;
+  }
   switch (n) {
     case 3:
       vst1_lane<0>(&ptr[2], vget_high(b.v));

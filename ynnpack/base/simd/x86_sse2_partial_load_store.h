@@ -29,7 +29,11 @@ namespace internal {
 template <typename T>
 YNN_ALWAYS_INLINE void copy_n_small(const T* src, size_t n, T* dst,
                                     std::integral_constant<size_t, 16>) {
-  assert(n < 16);
+  assert(n <= 16);
+  if (n == 16) {
+    memcpy(dst, src, 16 * sizeof(T));
+    return;
+  }
   if (n & 8) {
     memcpy(dst, src, 8 * sizeof(T));
     dst += 8;
@@ -53,7 +57,11 @@ YNN_ALWAYS_INLINE void copy_n_small(const T* src, size_t n, T* dst,
 template <typename T>
 YNN_ALWAYS_INLINE void copy_n_small(const T* src, size_t n, T* dst,
                                     std::integral_constant<size_t, 8>) {
-  assert(n < 8);
+  assert(n <= 8);
+  if (n == 8) {
+    memcpy(dst, src, 8 * sizeof(T));
+    return;
+  }
   if (n & 4) {
     memcpy(dst, src, 4 * sizeof(T));
     dst += 4;
@@ -72,9 +80,10 @@ YNN_ALWAYS_INLINE void copy_n_small(const T* src, size_t n, T* dst,
 template <typename T>
 YNN_ALWAYS_INLINE void copy_n_small(const T* src, size_t n, T* dst,
                                     std::integral_constant<size_t, 4>) {
-  assert(n < 4);
+  assert(n <= 4);
   switch (n) {
     // clang-format off
+    case 4: dst[3] = src[3]; [[fallthrough]];
     case 3: dst[2] = src[2]; [[fallthrough]];
     case 2: dst[1] = src[1]; [[fallthrough]];
     case 1: dst[0] = src[0];
@@ -123,7 +132,10 @@ YNN_ALWAYS_INLINE __m128 load_32_zero(const float* ptr) {
 // time.
 template <typename T>
 vec<T, 4> partial_load_sse(const T* ptr, size_t n, zeros<4>) {
-  assert(n < 4);
+  assert(n <= 4);
+  if (n == 4) {
+    return load(ptr, std::integral_constant<size_t, 4>{});
+  }
   vec<T, 4> result(T{0});
   switch (n) {
     case 3:
@@ -160,7 +172,11 @@ YNN_ALWAYS_INLINE void store_32(void* ptr, __m128 v) {
 // Use various SSE instructions to do 32- or 64-bit stores.
 template <typename T>
 void partial_store_sse(T* ptr, vec<T, 4> b, size_t n) {
-  assert(n < 4);
+  assert(n <= 4);
+  if (n == 4) {
+    store(ptr, b, std::integral_constant<size_t, 4>{});
+    return;
+  }
   if (n & 2) {
     store_64(ptr, b.v);
     ptr += 2;
@@ -173,7 +189,11 @@ void partial_store_sse(T* ptr, vec<T, 4> b, size_t n) {
 
 template <typename T>
 void partial_store_sse(T* ptr, vec<T, 8> b, size_t n) {
-  assert(n < 8);
+  assert(n <= 8);
+  if (n == 8) {
+    store(ptr, b, std::integral_constant<size_t, 8>{});
+    return;
+  }
   if (n & 4) {
     store_64(ptr, b.v);
     ptr += 4;
@@ -194,7 +214,11 @@ void partial_store_sse(T* ptr, vec<T, 8> b, size_t n) {
 
 template <typename T>
 void partial_store_sse(T* ptr, vec<T, 16> b, size_t n) {
-  assert(n < 16);
+  assert(n <= 16);
+  if (n == 16) {
+    store(ptr, b, std::integral_constant<size_t, 16>{});
+    return;
+  }
   if (n & 8) {
     store_64(ptr, b.v);
     ptr += 8;
