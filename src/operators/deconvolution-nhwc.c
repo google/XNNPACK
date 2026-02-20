@@ -2058,9 +2058,9 @@ static enum xnn_status reshape_subconv2d_path(
         subconvolution_params->scaled_kernel_size =
             mr * subconvolution_params->indirection_x_stride;
         subconvolution_params->slice_width =
-            divide_round_up(output_width - output_x_start, stride_width);
+            divide_round_up(doz(output_width, output_x_start), stride_width);
         subconvolution_params->slice_height =
-            divide_round_up(output_height - output_y_start, stride_height);
+            divide_round_up(doz(output_height, output_y_start), stride_height);
         subconvolution_params->output =
             (void*)((uintptr_t)output +
                     ((output_y_start * output_width + output_x_start) *

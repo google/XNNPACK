@@ -120,14 +120,6 @@ void TestImpl(xnn_datatype convert_to = xnn_datatype_invalid) {
     StencilParams kw = random_stencil_params(rng);
     StencilParams kh = random_stencil_params(rng);
 
-    // TODO: XNNPACK subgraph doesn't support padding for subconv deconvolution.
-    if (kw.dilation == 1 && kh.dilation == 1) {
-      kw.padding_min = 0;
-      kw.padding_max = 0;
-      kh.padding_min = 0;
-      kh.padding_max = 0;
-    }
-
     DeconvolutionParams params = StencilToDeconvolutionParams(kh, kw);
     std::uniform_int_distribution<> channels_dist{1, 10};
     std::uniform_int_distribution<> groups_dist{1, 3};
