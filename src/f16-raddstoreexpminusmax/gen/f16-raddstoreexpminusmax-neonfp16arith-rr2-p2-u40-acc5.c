@@ -23,7 +23,7 @@ void xnn_f16_raddstoreexpminusmax_ukernel__neonfp16arith_rr2_p2_u40_acc5(
     const xnn_float16* input,
     const xnn_float16* max,
     xnn_float16* output,
-    xnn_float16* sum,
+    float* sum,
     const void* params) XNN_OOB_READS
 {
   assert(batch != 0);
@@ -53,11 +53,16 @@ void xnn_f16_raddstoreexpminusmax_ukernel__neonfp16arith_rr2_p2_u40_acc5(
 
   const uint16_t* i = (const uint16_t*) input;
   uint16_t* o = (uint16_t*) output;
-  float16x8_t vacc0 = vreinterpretq_f16_u16(vmovq_n_u16(0));
-  float16x8_t vacc1 = vreinterpretq_f16_u16(vmovq_n_u16(0));
-  float16x8_t vacc2 = vreinterpretq_f16_u16(vmovq_n_u16(0));
-  float16x8_t vacc3 = vreinterpretq_f16_u16(vmovq_n_u16(0));
-  float16x8_t vacc4 = vreinterpretq_f16_u16(vmovq_n_u16(0));
+  float32x4_t vacc0_0 = vdupq_n_f32(0.0f);
+  float32x4_t vacc0_1 = vdupq_n_f32(0.0f);
+  float32x4_t vacc1_0 = vdupq_n_f32(0.0f);
+  float32x4_t vacc1_1 = vdupq_n_f32(0.0f);
+  float32x4_t vacc2_0 = vdupq_n_f32(0.0f);
+  float32x4_t vacc2_1 = vdupq_n_f32(0.0f);
+  float32x4_t vacc3_0 = vdupq_n_f32(0.0f);
+  float32x4_t vacc3_1 = vdupq_n_f32(0.0f);
+  float32x4_t vacc4_0 = vdupq_n_f32(0.0f);
+  float32x4_t vacc4_1 = vdupq_n_f32(0.0f);
   for (; batch >= 40 * sizeof(uint16_t); batch -= 40 * sizeof(uint16_t)) {
     const float16x8_t vi0 = vreinterpretq_f16_u16(vld1q_u16(i)); i += 8;
     const float16x8_t vi1 = vreinterpretq_f16_u16(vld1q_u16(i)); i += 8;
@@ -136,18 +141,27 @@ void xnn_f16_raddstoreexpminusmax_ukernel__neonfp16arith_rr2_p2_u40_acc5(
     vst1q_u16(o, vreinterpretq_u16_f16(vf3)); o += 8;
     vst1q_u16(o, vreinterpretq_u16_f16(vf4)); o += 8;
 
-    vacc0 = vaddq_f16(vacc0, vf0);
-    vacc1 = vaddq_f16(vacc1, vf1);
-    vacc2 = vaddq_f16(vacc2, vf2);
-    vacc3 = vaddq_f16(vacc3, vf3);
-    vacc4 = vaddq_f16(vacc4, vf4);
+    vacc0_0 = vaddq_f32(vacc0_0, vcvt_f32_f16(vget_low_f16(vf0)));
+    vacc0_1 = vaddq_f32(vacc0_1, vcvt_f32_f16(vget_high_f16(vf0)));
+    vacc1_0 = vaddq_f32(vacc1_0, vcvt_f32_f16(vget_low_f16(vf1)));
+    vacc1_1 = vaddq_f32(vacc1_1, vcvt_f32_f16(vget_high_f16(vf1)));
+    vacc2_0 = vaddq_f32(vacc2_0, vcvt_f32_f16(vget_low_f16(vf2)));
+    vacc2_1 = vaddq_f32(vacc2_1, vcvt_f32_f16(vget_high_f16(vf2)));
+    vacc3_0 = vaddq_f32(vacc3_0, vcvt_f32_f16(vget_low_f16(vf3)));
+    vacc3_1 = vaddq_f32(vacc3_1, vcvt_f32_f16(vget_high_f16(vf3)));
+    vacc4_0 = vaddq_f32(vacc4_0, vcvt_f32_f16(vget_low_f16(vf4)));
+    vacc4_1 = vaddq_f32(vacc4_1, vcvt_f32_f16(vget_high_f16(vf4)));
   }
-  vacc0 = vaddq_f16(vacc0, vacc1);
-  vacc2 = vaddq_f16(vacc2, vacc3);
-  vacc0 = vaddq_f16(vacc0, vacc2);
-  vacc0 = vaddq_f16(vacc0, vacc4);
 
-  float16x8_t vacc = vacc0;
+  vacc0_0 = vaddq_f32(vacc0_0, vacc1_0);
+  vacc0_1 = vaddq_f32(vacc0_1, vacc1_1);
+  vacc2_0 = vaddq_f32(vacc2_0, vacc3_0);
+  vacc2_1 = vaddq_f32(vacc2_1, vacc3_1);
+  vacc0_0 = vaddq_f32(vacc0_0, vacc2_0);
+  vacc0_1 = vaddq_f32(vacc0_1, vacc2_1);
+  vacc0_0 = vaddq_f32(vacc0_0, vacc4_0);
+  vacc0_1 = vaddq_f32(vacc0_1, vacc4_1);
+
   for (; batch >= 8 * sizeof(uint16_t); batch -= 8 * sizeof(uint16_t)) {
     const float16x8_t vi = vreinterpretq_f16_u16(vld1q_u16(i)); i += 8;
 
@@ -169,9 +183,12 @@ void xnn_f16_raddstoreexpminusmax_ukernel__neonfp16arith_rr2_p2_u40_acc5(
 
     vst1q_u16(o, vreinterpretq_u16_f16(vf)); o += 8;
 
-    vacc = vaddq_f16(vacc, vf);
+    vacc0_0 = vaddq_f32(vacc0_0, vcvt_f32_f16(vget_low_f16(vf)));
+    vacc0_1 = vaddq_f32(vacc0_1, vcvt_f32_f16(vget_high_f16(vf)));
   }
-  float16x4_t vacc_lo = vadd_f16(vget_low_f16(vacc), vget_high_f16(vacc));
+  vacc0_0 = vaddq_f32(vacc0_0, vacc0_1);
+  float32x2_t vacc_lo = vadd_f32(vget_low_f32(vacc0_0), vget_high_f32(vacc0_0));
+
   if (batch != 0) {
     assert(batch >= 1 * sizeof(uint16_t));
     assert(batch <= 7 * sizeof(uint16_t));
@@ -196,20 +213,21 @@ void xnn_f16_raddstoreexpminusmax_ukernel__neonfp16arith_rr2_p2_u40_acc5(
     float16x4_t vf_lo = vget_low_f16(vf);
     if (batch & (4 * sizeof(uint16_t))) {
       vst1_u16(o, vreinterpret_u16_f16(vf_lo)); o += 4;
-      vacc_lo = vadd_f16(vacc_lo, vf_lo);
+      float32x4_t vf_32 = vcvt_f32_f16(vf_lo);
+      vacc_lo = vadd_f32(vacc_lo, vget_low_f32(vf_32));
+      vacc_lo = vadd_f32(vacc_lo, vget_high_f32(vf_32));
       vf_lo = vget_high_f16(vf);
     }
     if (batch & (2 * sizeof(uint16_t))) {
       vst1_lane_u32((void*) o, vreinterpret_u32_f16(vf_lo), 0); o += 2;
-      vacc_lo = vadd_f16(vacc_lo, vreinterpret_f16_u64(vshl_n_u64(vreinterpret_u64_f16(vf_lo), 32)));
+      vacc_lo = vadd_f32(vacc_lo, vget_low_f32(vcvt_f32_f16(vf_lo)));
       vf_lo = vext_f16(vf_lo, vf_lo, 2);
     }
     if (batch & (1 * sizeof(uint16_t))) {
       vst1_lane_u16(o, vreinterpret_u16_f16(vf_lo), 0);
-      vacc_lo = vadd_f16(vacc_lo, vreinterpret_f16_u64(vshl_n_u64(vreinterpret_u64_f16(vf_lo), 48)));
+      vacc_lo = vadd_f32(vacc_lo, vset_lane_f32(0.0f, vget_low_f32(vcvt_f32_f16(vf_lo)), 1));
     }
   }
-  vacc_lo = vpadd_f16(vacc_lo, vacc_lo);
-  vacc_lo = vpadd_f16(vacc_lo, vacc_lo);
-  vst1_lane_u16((uint16_t*) sum, vreinterpret_u16_f16(vacc_lo), 0);
+  vacc_lo = vpadd_f32(vacc_lo, vacc_lo);
+  vst1_lane_f32(sum, vacc_lo, 0);
 }

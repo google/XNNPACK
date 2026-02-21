@@ -70,7 +70,7 @@ class RAddStoreExpMinusMaxMicrokernelTester {
       }
 
       // Call optimized micro-kernel.
-      xnn_float16 sum;
+      float sum;
       raddstoreexpminusmax(elements() * sizeof(xnn_float16), x.data(),
                            &x_max_as_half, y.data(), &sum, nullptr);
 

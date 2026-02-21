@@ -922,12 +922,12 @@ typedef void (*xnn_u8_rmax_ukernel_fn)(size_t batch, const uint8_t* input,
 typedef void (*xnn_raddstoreexpminusmax_ukernel_fn)(size_t batch,
                                                     const void* input,
                                                     const void* max,
-                                                    void* output, void* sum,
+                                                    void* output, float* sum,
                                                     const void* params);
 
 typedef void (*xnn_f16_raddstoreexpminusmax_ukernel_fn)(
     size_t batch, const xnn_float16* input, const xnn_float16* max,
-    xnn_float16* output, xnn_float16* sum, const void* params);
+    xnn_float16* output, float* sum, const void* params);
 
 typedef void (*xnn_f32_raddstoreexpminusmax_ukernel_fn)(
     size_t batch, const float* input, const float* max, float* output,

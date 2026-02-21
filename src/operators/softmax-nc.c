@@ -516,10 +516,10 @@ static enum xnn_status setup_softmax_nc_floating_point(
 }
 
 static void compute_reciprocal_f16(
-    const xnn_float16* input,
+    const float* input,
     xnn_float16* output)
 {
-  *output = xnn_float16_from_float(1.0f / xnn_float16_to_float(*input));
+  *output = xnn_float16_from_float(1.0f / *input);
 }
 
 enum xnn_status xnn_setup_softmax_nc_f16(
