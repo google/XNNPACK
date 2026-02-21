@@ -84,6 +84,22 @@ static void f16_raddstoreexpminusmax(
 
 #if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 BENCHMARK_CAPTURE(
+    f16_raddstoreexpminusmax, neonfp16arith_rr2_p2_u16,
+    xnn_f16_rmax_ukernel__neonfp16arith_u32_acc4,
+    xnn_f16_raddstoreexpminusmax_ukernel__neonfp16arith_rr2_p2_u16, nullptr,
+    xnn_arch_arm_neon_fp16_arith)
+    ->Apply(
+        benchmark::utils::UnaryElementwiseParameters<xnn_float16, xnn_float16>)
+    ->UseRealTime();
+BENCHMARK_CAPTURE(
+    f16_raddstoreexpminusmax, neonfp16arith_rr2_p2_u16_acc2,
+    xnn_f16_rmax_ukernel__neonfp16arith_u32_acc4,
+    xnn_f16_raddstoreexpminusmax_ukernel__neonfp16arith_rr2_p2_u16_acc2,
+    nullptr, xnn_arch_arm_neon_fp16_arith)
+    ->Apply(
+        benchmark::utils::UnaryElementwiseParameters<xnn_float16, xnn_float16>)
+    ->UseRealTime();
+BENCHMARK_CAPTURE(
     f16_raddstoreexpminusmax, neonfp16arith_rr2_p2_u32,
     xnn_f16_rmax_ukernel__neonfp16arith_u32_acc4,
     xnn_f16_raddstoreexpminusmax_ukernel__neonfp16arith_rr2_p2_u32, nullptr,
@@ -103,150 +119,6 @@ BENCHMARK_CAPTURE(
     f16_raddstoreexpminusmax, neonfp16arith_rr2_p2_u32_acc4,
     xnn_f16_rmax_ukernel__neonfp16arith_u32_acc4,
     xnn_f16_raddstoreexpminusmax_ukernel__neonfp16arith_rr2_p2_u32_acc4,
-    nullptr, xnn_arch_arm_neon_fp16_arith)
-    ->Apply(
-        benchmark::utils::UnaryElementwiseParameters<xnn_float16, xnn_float16>)
-    ->UseRealTime();
-BENCHMARK_CAPTURE(
-    f16_raddstoreexpminusmax, neonfp16arith_rr2_p2_u40,
-    xnn_f16_rmax_ukernel__neonfp16arith_u32_acc4,
-    xnn_f16_raddstoreexpminusmax_ukernel__neonfp16arith_rr2_p2_u40, nullptr,
-    xnn_arch_arm_neon_fp16_arith)
-    ->Apply(
-        benchmark::utils::UnaryElementwiseParameters<xnn_float16, xnn_float16>)
-    ->UseRealTime();
-BENCHMARK_CAPTURE(
-    f16_raddstoreexpminusmax, neonfp16arith_rr2_p2_u40_acc2,
-    xnn_f16_rmax_ukernel__neonfp16arith_u32_acc4,
-    xnn_f16_raddstoreexpminusmax_ukernel__neonfp16arith_rr2_p2_u40_acc2,
-    nullptr, xnn_arch_arm_neon_fp16_arith)
-    ->Apply(
-        benchmark::utils::UnaryElementwiseParameters<xnn_float16, xnn_float16>)
-    ->UseRealTime();
-BENCHMARK_CAPTURE(
-    f16_raddstoreexpminusmax, neonfp16arith_rr2_p2_u40_acc5,
-    xnn_f16_rmax_ukernel__neonfp16arith_u32_acc4,
-    xnn_f16_raddstoreexpminusmax_ukernel__neonfp16arith_rr2_p2_u40_acc5,
-    nullptr, xnn_arch_arm_neon_fp16_arith)
-    ->Apply(
-        benchmark::utils::UnaryElementwiseParameters<xnn_float16, xnn_float16>)
-    ->UseRealTime();
-BENCHMARK_CAPTURE(
-    f16_raddstoreexpminusmax, neonfp16arith_rr2_p2_u48,
-    xnn_f16_rmax_ukernel__neonfp16arith_u32_acc4,
-    xnn_f16_raddstoreexpminusmax_ukernel__neonfp16arith_rr2_p2_u48, nullptr,
-    xnn_arch_arm_neon_fp16_arith)
-    ->Apply(
-        benchmark::utils::UnaryElementwiseParameters<xnn_float16, xnn_float16>)
-    ->UseRealTime();
-BENCHMARK_CAPTURE(
-    f16_raddstoreexpminusmax, neonfp16arith_rr2_p2_u48_acc2,
-    xnn_f16_rmax_ukernel__neonfp16arith_u32_acc4,
-    xnn_f16_raddstoreexpminusmax_ukernel__neonfp16arith_rr2_p2_u48_acc2,
-    nullptr, xnn_arch_arm_neon_fp16_arith)
-    ->Apply(
-        benchmark::utils::UnaryElementwiseParameters<xnn_float16, xnn_float16>)
-    ->UseRealTime();
-BENCHMARK_CAPTURE(
-    f16_raddstoreexpminusmax, neonfp16arith_rr2_p2_u48_acc3,
-    xnn_f16_rmax_ukernel__neonfp16arith_u32_acc4,
-    xnn_f16_raddstoreexpminusmax_ukernel__neonfp16arith_rr2_p2_u48_acc3,
-    nullptr, xnn_arch_arm_neon_fp16_arith)
-    ->Apply(
-        benchmark::utils::UnaryElementwiseParameters<xnn_float16, xnn_float16>)
-    ->UseRealTime();
-BENCHMARK_CAPTURE(
-    f16_raddstoreexpminusmax, neonfp16arith_rr2_p2_u64,
-    xnn_f16_rmax_ukernel__neonfp16arith_u32_acc4,
-    xnn_f16_raddstoreexpminusmax_ukernel__neonfp16arith_rr2_p2_u64, nullptr,
-    xnn_arch_arm_neon_fp16_arith)
-    ->Apply(
-        benchmark::utils::UnaryElementwiseParameters<xnn_float16, xnn_float16>)
-    ->UseRealTime();
-BENCHMARK_CAPTURE(
-    f16_raddstoreexpminusmax, neonfp16arith_rr2_p2_u64_acc2,
-    xnn_f16_rmax_ukernel__neonfp16arith_u32_acc4,
-    xnn_f16_raddstoreexpminusmax_ukernel__neonfp16arith_rr2_p2_u64_acc2,
-    nullptr, xnn_arch_arm_neon_fp16_arith)
-    ->Apply(
-        benchmark::utils::UnaryElementwiseParameters<xnn_float16, xnn_float16>)
-    ->UseRealTime();
-BENCHMARK_CAPTURE(
-    f16_raddstoreexpminusmax, neonfp16arith_rr2_p2_u64_acc4,
-    xnn_f16_rmax_ukernel__neonfp16arith_u32_acc4,
-    xnn_f16_raddstoreexpminusmax_ukernel__neonfp16arith_rr2_p2_u64_acc4,
-    nullptr, xnn_arch_arm_neon_fp16_arith)
-    ->Apply(
-        benchmark::utils::UnaryElementwiseParameters<xnn_float16, xnn_float16>)
-    ->UseRealTime();
-BENCHMARK_CAPTURE(
-    f16_raddstoreexpminusmax, neonfp16arith_rr2_p2_u72,
-    xnn_f16_rmax_ukernel__neonfp16arith_u32_acc4,
-    xnn_f16_raddstoreexpminusmax_ukernel__neonfp16arith_rr2_p2_u72, nullptr,
-    xnn_arch_arm_neon_fp16_arith)
-    ->Apply(
-        benchmark::utils::UnaryElementwiseParameters<xnn_float16, xnn_float16>)
-    ->UseRealTime();
-BENCHMARK_CAPTURE(
-    f16_raddstoreexpminusmax, neonfp16arith_rr2_p2_u72_acc3,
-    xnn_f16_rmax_ukernel__neonfp16arith_u32_acc4,
-    xnn_f16_raddstoreexpminusmax_ukernel__neonfp16arith_rr2_p2_u72_acc3,
-    nullptr, xnn_arch_arm_neon_fp16_arith)
-    ->Apply(
-        benchmark::utils::UnaryElementwiseParameters<xnn_float16, xnn_float16>)
-    ->UseRealTime();
-BENCHMARK_CAPTURE(
-    f16_raddstoreexpminusmax, neonfp16arith_rr2_p2_u80,
-    xnn_f16_rmax_ukernel__neonfp16arith_u32_acc4,
-    xnn_f16_raddstoreexpminusmax_ukernel__neonfp16arith_rr2_p2_u80, nullptr,
-    xnn_arch_arm_neon_fp16_arith)
-    ->Apply(
-        benchmark::utils::UnaryElementwiseParameters<xnn_float16, xnn_float16>)
-    ->UseRealTime();
-BENCHMARK_CAPTURE(
-    f16_raddstoreexpminusmax, neonfp16arith_rr2_p2_u80_acc2,
-    xnn_f16_rmax_ukernel__neonfp16arith_u32_acc4,
-    xnn_f16_raddstoreexpminusmax_ukernel__neonfp16arith_rr2_p2_u80_acc2,
-    nullptr, xnn_arch_arm_neon_fp16_arith)
-    ->Apply(
-        benchmark::utils::UnaryElementwiseParameters<xnn_float16, xnn_float16>)
-    ->UseRealTime();
-BENCHMARK_CAPTURE(
-    f16_raddstoreexpminusmax, neonfp16arith_rr2_p2_u80_acc5,
-    xnn_f16_rmax_ukernel__neonfp16arith_u32_acc4,
-    xnn_f16_raddstoreexpminusmax_ukernel__neonfp16arith_rr2_p2_u80_acc5,
-    nullptr, xnn_arch_arm_neon_fp16_arith)
-    ->Apply(
-        benchmark::utils::UnaryElementwiseParameters<xnn_float16, xnn_float16>)
-    ->UseRealTime();
-BENCHMARK_CAPTURE(
-    f16_raddstoreexpminusmax, neonfp16arith_rr2_p2_u96,
-    xnn_f16_rmax_ukernel__neonfp16arith_u32_acc4,
-    xnn_f16_raddstoreexpminusmax_ukernel__neonfp16arith_rr2_p2_u96, nullptr,
-    xnn_arch_arm_neon_fp16_arith)
-    ->Apply(
-        benchmark::utils::UnaryElementwiseParameters<xnn_float16, xnn_float16>)
-    ->UseRealTime();
-BENCHMARK_CAPTURE(
-    f16_raddstoreexpminusmax, neonfp16arith_rr2_p2_u96_acc2,
-    xnn_f16_rmax_ukernel__neonfp16arith_u32_acc4,
-    xnn_f16_raddstoreexpminusmax_ukernel__neonfp16arith_rr2_p2_u96_acc2,
-    nullptr, xnn_arch_arm_neon_fp16_arith)
-    ->Apply(
-        benchmark::utils::UnaryElementwiseParameters<xnn_float16, xnn_float16>)
-    ->UseRealTime();
-BENCHMARK_CAPTURE(
-    f16_raddstoreexpminusmax, neonfp16arith_rr2_p2_u96_acc3,
-    xnn_f16_rmax_ukernel__neonfp16arith_u32_acc4,
-    xnn_f16_raddstoreexpminusmax_ukernel__neonfp16arith_rr2_p2_u96_acc3,
-    nullptr, xnn_arch_arm_neon_fp16_arith)
-    ->Apply(
-        benchmark::utils::UnaryElementwiseParameters<xnn_float16, xnn_float16>)
-    ->UseRealTime();
-BENCHMARK_CAPTURE(
-    f16_raddstoreexpminusmax, neonfp16arith_rr2_p2_u96_acc6,
-    xnn_f16_rmax_ukernel__neonfp16arith_u32_acc4,
-    xnn_f16_raddstoreexpminusmax_ukernel__neonfp16arith_rr2_p2_u96_acc6,
     nullptr, xnn_arch_arm_neon_fp16_arith)
     ->Apply(
         benchmark::utils::UnaryElementwiseParameters<xnn_float16, xnn_float16>)
@@ -348,69 +220,6 @@ BENCHMARK_CAPTURE(f16_raddstoreexpminusmax, avx2_rr1_p2_u64_acc2,
 BENCHMARK_CAPTURE(f16_raddstoreexpminusmax, avx2_rr1_p2_u64_acc4,
                   xnn_f16_rmax_ukernel__f16c_u32,
                   xnn_f16_raddstoreexpminusmax_ukernel__avx2_rr1_p2_u64_acc4,
-                  nullptr, xnn_arch_x86_avx2)
-    ->Apply(
-        benchmark::utils::UnaryElementwiseParameters<xnn_float16, xnn_float16>)
-    ->UseRealTime();
-BENCHMARK_CAPTURE(f16_raddstoreexpminusmax, avx2_rr1_p2_u72,
-                  xnn_f16_rmax_ukernel__f16c_u32,
-                  xnn_f16_raddstoreexpminusmax_ukernel__avx2_rr1_p2_u72,
-                  nullptr, xnn_arch_x86_avx2)
-    ->Apply(
-        benchmark::utils::UnaryElementwiseParameters<xnn_float16, xnn_float16>)
-    ->UseRealTime();
-BENCHMARK_CAPTURE(f16_raddstoreexpminusmax, avx2_rr1_p2_u72_acc3,
-                  xnn_f16_rmax_ukernel__f16c_u32,
-                  xnn_f16_raddstoreexpminusmax_ukernel__avx2_rr1_p2_u72_acc3,
-                  nullptr, xnn_arch_x86_avx2)
-    ->Apply(
-        benchmark::utils::UnaryElementwiseParameters<xnn_float16, xnn_float16>)
-    ->UseRealTime();
-BENCHMARK_CAPTURE(f16_raddstoreexpminusmax, avx2_rr1_p2_u80,
-                  xnn_f16_rmax_ukernel__f16c_u32,
-                  xnn_f16_raddstoreexpminusmax_ukernel__avx2_rr1_p2_u80,
-                  nullptr, xnn_arch_x86_avx2)
-    ->Apply(
-        benchmark::utils::UnaryElementwiseParameters<xnn_float16, xnn_float16>)
-    ->UseRealTime();
-BENCHMARK_CAPTURE(f16_raddstoreexpminusmax, avx2_rr1_p2_u80_acc2,
-                  xnn_f16_rmax_ukernel__f16c_u32,
-                  xnn_f16_raddstoreexpminusmax_ukernel__avx2_rr1_p2_u80_acc2,
-                  nullptr, xnn_arch_x86_avx2)
-    ->Apply(
-        benchmark::utils::UnaryElementwiseParameters<xnn_float16, xnn_float16>)
-    ->UseRealTime();
-BENCHMARK_CAPTURE(f16_raddstoreexpminusmax, avx2_rr1_p2_u80_acc5,
-                  xnn_f16_rmax_ukernel__f16c_u32,
-                  xnn_f16_raddstoreexpminusmax_ukernel__avx2_rr1_p2_u80_acc5,
-                  nullptr, xnn_arch_x86_avx2)
-    ->Apply(
-        benchmark::utils::UnaryElementwiseParameters<xnn_float16, xnn_float16>)
-    ->UseRealTime();
-BENCHMARK_CAPTURE(f16_raddstoreexpminusmax, avx2_rr1_p2_u96,
-                  xnn_f16_rmax_ukernel__f16c_u32,
-                  xnn_f16_raddstoreexpminusmax_ukernel__avx2_rr1_p2_u96,
-                  nullptr, xnn_arch_x86_avx2)
-    ->Apply(
-        benchmark::utils::UnaryElementwiseParameters<xnn_float16, xnn_float16>)
-    ->UseRealTime();
-BENCHMARK_CAPTURE(f16_raddstoreexpminusmax, avx2_rr1_p2_u96_acc2,
-                  xnn_f16_rmax_ukernel__f16c_u32,
-                  xnn_f16_raddstoreexpminusmax_ukernel__avx2_rr1_p2_u96_acc2,
-                  nullptr, xnn_arch_x86_avx2)
-    ->Apply(
-        benchmark::utils::UnaryElementwiseParameters<xnn_float16, xnn_float16>)
-    ->UseRealTime();
-BENCHMARK_CAPTURE(f16_raddstoreexpminusmax, avx2_rr1_p2_u96_acc3,
-                  xnn_f16_rmax_ukernel__f16c_u32,
-                  xnn_f16_raddstoreexpminusmax_ukernel__avx2_rr1_p2_u96_acc3,
-                  nullptr, xnn_arch_x86_avx2)
-    ->Apply(
-        benchmark::utils::UnaryElementwiseParameters<xnn_float16, xnn_float16>)
-    ->UseRealTime();
-BENCHMARK_CAPTURE(f16_raddstoreexpminusmax, avx2_rr1_p2_u96_acc6,
-                  xnn_f16_rmax_ukernel__f16c_u32,
-                  xnn_f16_raddstoreexpminusmax_ukernel__avx2_rr1_p2_u96_acc6,
                   nullptr, xnn_arch_x86_avx2)
     ->Apply(
         benchmark::utils::UnaryElementwiseParameters<xnn_float16, xnn_float16>)
