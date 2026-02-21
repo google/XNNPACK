@@ -34,24 +34,6 @@
 #include "src/xnnpack/math.h"
 #include "src/xnnpack/reference-utils.h"
 
-#if XNN_COMPILER_HAS_FEATURE(memory_sanitizer)
-#include <sanitizer/msan_interface.h>
-#define XNN_MSAN_POISON(x, size) __msan_poison(x, size)
-#define XNN_MSAN_UNPOISON(x, size) __msan_unpoison(x, size)
-#else
-#define XNN_MSAN_POISON(x, size)
-#define XNN_MSAN_UNPOISON(x, size)
-#endif
-
-#if XNN_COMPILER_HAS_FEATURE(address_sanitizer)
-#include <sanitizer/asan_interface.h>
-#define XNN_ASAN_POISON(x, size) __asan_poison_memory_region(x, size)
-#define XNN_ASAN_UNPOISON(x, size) __asan_unpoison_memory_region(x, size)
-#else
-#define XNN_ASAN_POISON(x, size)
-#define XNN_ASAN_UNPOISON(x, size)
-#endif
-
 namespace xnnpack {
 
 template <typename T>
@@ -177,12 +159,9 @@ class Buffer {
                      std::max<size_t>(guard_bytes, extra_bytes.value)))),
         size_(size),
         name_(name) {
-    // Fill the region before the allocation with the guard bytes, and poison it
-    // for sanitizers.
+    // Fill the region before the allocation with the guard bytes.
     uint8_t* before = reinterpret_cast<uint8_t*>(data_);
     fill_guard_bytes(before);
-    XNN_MSAN_POISON(before, guard_bytes);
-    XNN_ASAN_POISON(before, guard_bytes);
 
     // The actual allocation is after the guard bytes.
     data_ =
@@ -191,12 +170,6 @@ class Buffer {
     // Fill the region after the allocation with the guard bytes.
     uint8_t* after = reinterpret_cast<uint8_t*>(data_ + size_);
     fill_guard_bytes(after);
-    // Here, we only want to poison the memory for sanitizers after the extra
-    // bytes. We want to allow reads past the end to not crash (in asan or
-    // otherwise), but we don't want that memory to be considered initialized by
-    // msan.
-    XNN_ASAN_POISON(after + extra_bytes.value, guard_bytes - extra_bytes.value);
-    XNN_MSAN_POISON(after, guard_bytes);
   }
   Buffer(size_t size, T value, PaddingBytes extra_bytes = {0},
          const char* name = nullptr)
@@ -214,11 +187,8 @@ class Buffer {
   }
   ~Buffer() {
     if (data_) {
-      // Check that the guard bytes after the buffer have not been modified. We
-      // need to unpoison the memory first so we can read it.
+      // Check that the guard bytes after the buffer have not been modified.
       const uint8_t* after = reinterpret_cast<uint8_t*>(data_ + size_);
-      XNN_ASAN_UNPOISON(after, guard_bytes);
-      XNN_MSAN_UNPOISON(after, guard_bytes);
       if (!check_guard_bytes(after)) {
         xnn_log_fatal(
             "Buffer%s%s%s: guard bytes after allocation were corrupted, "
@@ -230,8 +200,6 @@ class Buffer {
 
       // Check that the guard bytes before the buffer have not been modified.
       const uint8_t* before = reinterpret_cast<uint8_t*>(data_);
-      XNN_ASAN_UNPOISON(before, guard_bytes);
-      XNN_MSAN_UNPOISON(before, guard_bytes);
       if (!check_guard_bytes(before)) {
         xnn_log_fatal(
             "Buffer%s%s%s: guard bytes before allocation were corrupted, "
@@ -311,7 +279,14 @@ class Buffer {
   }
 
   // Some compilers can't handle static constexpr member variables.
+#if XNN_COMPILER_HAS_FEATURE(address_sanitizer) || \
+    XNN_COMPILER_HAS_FEATURE(memory_sanitizer)
+  // If we are using msan or asan, just rely on that to detect memory bugs,
+  // rather than our own hack.
+  enum { guard_bytes = 0 };
+#else
   enum { guard_bytes = std::max<size_t>(64, Alignment) };
+#endif
   // This value is chosen such that in the 16 bytes we have:
   // - float32 NaN (upper 32 bits)
   // - float16 NaN (lower 16 bits, the mantissa of the negative float32)
