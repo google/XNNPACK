@@ -321,6 +321,9 @@ auto make_pack_impl(int elem_count) {
 
     const index_t elem_size = output.elem_size;
     const index_t tile_k = output_ki.extent() * elem_count;
+    // If tile_k is 0, then the input is empty, so we can return early.
+    if (tile_k == 0) return 0;
+
     const index_t block_n = output_ni.extent();
     assert(output_ki.min() == 0);
     assert(output_ni.min() == 0);
@@ -418,7 +421,7 @@ uint32_t define_pack_b(ynn_subgraph_t subgraph, const dot_type& type,
   node.inputs = {input_b_id};
   node.outputs = {packed_b_id};
   node.op = ynn_node::pack_b{};
-  node.create = [num_k_dims](const ynn_node& node, ynn_runtime& runtime) {
+  node.create = [](const ynn_node& node, ynn_runtime& runtime) {
     const ynn_runtime_value& input = runtime.value(node.inputs[0]);
     ynn_runtime_value& output = runtime.value(node.outputs[0]);
 
@@ -463,13 +466,12 @@ uint32_t define_pack_b(ynn_subgraph_t subgraph, const dot_type& type,
     // the innermost loop.
     ynn::scheduled_buffer sched_output_buffer = {output.buffer, 1};
     sched->scheduled_buffers.push_back(std::move(sched_output_buffer));
+    sched->force_root = true;
 
-    // TODO(vksnk): This is a temporary workaround to avoid recomputing packed
-    // buffer. The proper fix would probably involve adding a loop splits for
-    // the packing function and making scheduler match it.
-    if (num_k_dims > 1) {
-      sched->force_root = true;
-    }
+    // Make sure the k and n dimensions are split by tile_k and block_n.
+    sched->loop_splits.push_back({ki, tile_k, /*step_is_required=*/true});
+    sched->loop_splits.push_back({ni, block_n, /*step_is_required=*/true});
+
     func.user_data() = sched.get();
     runtime.scheduling_info_storage.push_back(std::move(sched));
 
@@ -1069,11 +1071,6 @@ ynn_status define_dot(ynn_subgraph_t subgraph, size_t num_k_dims,
 
 bool can_convert_f32_to_bf16(ynn_subgraph_t subgraph, uint32_t input_a_id,
                              uint32_t input_b_id, uint32_t flags) {
-  if (!is_constant(*subgraph, input_b_id)) {
-    // TODO(b/475315838): Remove this workaround for a correctness bug when B is
-    // not constant.
-    return false;
-  }
   return (flags & YNN_NODE_FLAG_F32_DOT_TO_BF16_X3) &&
          subgraph->value(input_a_id).type == ynn_type_fp32 &&
          subgraph->value(input_b_id).type == ynn_type_fp32;
