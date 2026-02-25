@@ -177,6 +177,8 @@ static inline bool xnn_is_f16_chw_compatible_config(
      XNN_ENABLE_ARM_FP16_SCALAR) ||                \
     (XNN_ARCH_ARM64 && XNN_ENABLE_ARM_FP16_VECTOR)
   return (hardware_config->arch_flags & xnn_arch_arm_neon_fp16_arith);
+#elif (XNN_ARCH_RISCV && XNN_ENABLE_RISCV_FP16_VECTOR)
+  return (hardware_config->arch_flags & xnn_arch_riscv_vector_fp16_arith);
 #else
   return false;
 #endif

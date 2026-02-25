@@ -789,6 +789,13 @@ DECLARE_F16_IGEMM_MINMAX_UKERNEL_FUNCTION(
 DECLARE_F16_IGEMM_MINMAX_UKERNEL_FUNCTION(
     xnn_f16_igemm_minmax_ukernel_8x64__avx512fp16_broadcast)
 
+DECLARE_F16_IGEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_f16_igemm_minmax_ukernel_1x4v__rvvfp16arith)
+DECLARE_F16_IGEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_f16_igemm_minmax_ukernel_4x4v__rvvfp16arith)
+DECLARE_F16_IGEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_f16_igemm_minmax_ukernel_7x4v__rvvfp16arith)
+
 #define DECLARE_QU8_IGEMM_MINMAX_UKERNEL_FUNCTION(fn_name)                \
   XNN_INTERNAL void fn_name(size_t mr, size_t nc, size_t kc, size_t ks,   \
                             const uint8_t** a, const void* w, uint8_t* c, \
