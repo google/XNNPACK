@@ -93,8 +93,11 @@ declare_args() {
   # Enables AVX2 support for x86 processors
   xnnpack_enable_avx2 = target_cpu == "x64" || target_cpu == "x86"
 
-  # Enables AVX512 support for x86 processors
-  xnnpack_enable_avx512 = target_cpu == "x64" || target_cpu == "x86"
+  # Enables AVX512 support for x86 processors. Temporarily switched
+  # off on Windows because some AVX512 assembly kernels contain unsupported
+  # syntax.
+  xnnpack_enable_avx512 =
+      (target_cpu == "x64" || target_cpu == "x86") && !is_win
 
   # Enables VNNI extensions, which are separate from AVX512-VNNI
   xnnpack_enable_avx_vnni = target_cpu == "x64" || target_cpu == "x86"
@@ -771,7 +774,7 @@ xnnpack_source_set("xnnpack") {
     if (xnnpack_enable_avx512) {
       deps += [ ":avx512_microkernels" ]
     }
-    if (current_cpu == "x64") {
+    if (current_cpu == "x64" && !is_win) {
       sources += AMD64_ASM_MICROKERNEL_SRCS
     }
     sources += ALL_SSE_MICROKERNEL_SRCS

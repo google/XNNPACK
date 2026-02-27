@@ -253,6 +253,95 @@ jobs:
         run: ccache -s
         shell: bash
 
+  gn-windows-x86_64:
+    # Build for all supported CPU architectures on Windows with Chromium's GN.
+    runs-on: 'windows-2022-32core'
+    timeout-minutes: 30
+    env:
+      DEPOT_TOOLS_WIN_TOOLCHAIN: 0
+    steps:
+      - name: Setup ccache
+        uses: hendrikmuhs/ccache-action@v1.2
+        with:
+          key: ${{ github.job }}
+          max-size: "500M"
+          save: ${{ inputs.update-caches }}
+      - name: Install Depot Tools
+        uses: newkdev/setup-depot-tools@v1.0.1
+      - name: Write .gclient
+        shell: powershell
+        run: |
+          Set-Content -Path .gclient -Value "
+          solutions = [
+            { 'name': 'XNNPACK',
+              'url': 'https://github.com/google/XNNPACK',
+              'deps_file': 'DEPS',
+              'managed': False,
+              'custom_deps': {},
+            },
+          ]
+          "
+        working-directory: ${{ github.workspace }}
+      - name: Setup build environment
+        shell: bash
+        run: |
+          echo "VCVARSALL=$(vswhere -products \* -latest -property installationPath)\\VC\\Auxiliary\\Build\\vcvarsall.bat" >> $GITHUB_ENV
+      - name: Sync to commit and run hooks
+        shell: powershell
+        run: gclient sync -vv --revision $env:GITHUB_SHA
+      - name: Write LASTCHANGE files
+        shell: powershell
+        run: |
+          $LastChangeContents = @(
+            "LASTCHANGE=$env:GITHUB_SHA-$env:GITHUB_REF_NAME"
+            "LASTCHANGE_YEAR=$(git log -1 --pretty=%Y)"
+          )
+
+          Set-Content -Path build/util/LASTCHANGE -Value $LastChangeContents
+          $UnixTime = git log -1 --pretty=%ct
+          Set-Content -Path build/util/LASTCHANGE.committime -Value $UnixTime
+        working-directory: ${{ github.workspace }}\XNNPACK
+      # dllexport/dllimports are tricky and often exposed in component builds.
+      # AArch64 is also the most unusual platform, so build both combos here.
+      # We can't run the AArch64 tests here, but all the code is tested elsewhere.
+      # We could theoretically build and run everything on an Arm host, but the
+      # Chrome toolchain is only available for x64 => less efficiency.
+      - name: Generate build files (arm64, component)
+        run: |
+          gn gen --check --args="is_debug=true symbol_level=1 is_component_build=true cc_wrapper=\`"ccache\`" target_cpu=\`"arm64\`"" out/arm64.dchecks
+        working-directory: ${{ github.workspace }}\XNNPACK
+        shell: powershell
+      - name: Generate build files (x64, dchecks)
+        run: |
+          gn gen --check --args="is_debug=false symbol_level=0 dcheck_always_on=true cc_wrapper=\`"ccache\`" target_cpu=\`"x64\`"" out/x64.dchecks
+        working-directory: ${{ github.workspace }}\XNNPACK
+        shell: powershell
+      - name: Generate build files (x86, dchecks)
+        run: |
+          gn gen --check --args="is_debug=false symbol_level=0 dcheck_always_on=true cc_wrapper=\`"ccache\`" target_cpu=\`"x86\`"" out/x86.dchecks
+        working-directory: ${{ github.workspace }}\XNNPACK
+        shell: powershell
+      - name: Build all targets (arm64, component)
+        run: |
+          autoninja -C out/arm64.dchecks
+        working-directory: ${{ github.workspace }}\XNNPACK
+      - name: Build all targets (x64 Release + debug checks)
+        run: |
+          autoninja -C out/x64.dchecks
+        working-directory: ${{ github.workspace }}\XNNPACK
+      - name: Build all targets (x86 Release + debug checks)
+        run: |
+          autoninja -C out/x86.dchecks
+        working-directory: ${{ github.workspace }}\XNNPACK
+      - name: Run tests (x64)
+        run: |
+          python3 scripts/run-gn-tests.py out/x64.dchecks
+        working-directory: ${{ github.workspace }}\XNNPACK
+      - name: Run tests (x86)
+        run: |
+          python3 scripts/run-gn-tests.py out/x86.dchecks
+        working-directory: ${{ github.workspace }}\XNNPACK
+
   cmake-macos-arm64:
     runs-on: macos-latest
     timeout-minutes: 60
