@@ -1025,6 +1025,7 @@ ynn_status define_dot(ynn_subgraph_t subgraph, size_t num_k_dims,
     std::tie(split_n, split_m) =
         choose_split_factors(runtime, m, n, k, block_n);
 
+    split_n = slinky::max(split_n, 64);
     if (slinky::prove_true(n <= block_n)) {
       // We know n is smaller than the side of the area we want to compute,
       // don't split it.
