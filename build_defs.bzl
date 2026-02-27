@@ -171,7 +171,7 @@ def xnnpack_min_size_copts():
 
 def xnnpack_gcc_std_copts():
     """GCC-like compiler flags to specify language standard for C sources."""
-    return ["-std=c99", "-Wimplicit-fallthrough"]
+    return ["-std=c99"]
 
 def xnnpack_msvc_std_copts():
     """MSVC compiler flags to specify language standard for C sources."""
