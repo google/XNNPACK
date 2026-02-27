@@ -63,6 +63,7 @@ enum class multi_type {
   bf16,
   int8,
   uint8,
+  int32,
 
   fp16_fp32,
   bf16_fp32,
@@ -81,6 +82,7 @@ inline multi_type multi_type_of(bfloat16, bfloat16) { return multi_type::bf16; }
 inline multi_type multi_type_of(half, half) { return multi_type::fp16; }
 inline multi_type multi_type_of(int8_t, int8_t) { return multi_type::int8; }
 inline multi_type multi_type_of(uint8_t, uint8_t) { return multi_type::uint8; }
+inline multi_type multi_type_of(int32_t, int32_t) { return multi_type::int32; }
 inline multi_type multi_type_of(bfloat16, float) {
   return multi_type::bf16_fp32;
 }
@@ -125,6 +127,8 @@ constexpr decltype(auto) SwitchTwoTypes(multi_type type, F&& f) {
       return std::forward<F>(f)(int8_t(), int8_t());
     case multi_type::uint8:
       return std::forward<F>(f)(uint8_t(), uint8_t());
+    case multi_type::int32:
+      return std::forward<F>(f)(int32_t(), int32_t());
     case multi_type::fp16_fp32:
       return std::forward<F>(f)(half(), float());
     case multi_type::bf16_fp32:
@@ -176,6 +180,8 @@ inline const char* to_string(multi_type type) {
       return "int8";
     case multi_type::uint8:
       return "uint8";
+    case multi_type::int32:
+      return "int32";
     case multi_type::fp16_fp32:
       return "fp16_fp32";
     case multi_type::bf16_fp32:

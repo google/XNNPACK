@@ -36,13 +36,16 @@ class Type:
     return self.type_class == "uint"
 
   def is_float(self):
-    return self.type_class == "float"
+    return self.type_class in ("float", "bfloat")
 
   def __str__(self):
     return f"{self.type_class}{self.size}x{self.lanes}_t"
 
   def __repr__(self):
     return str(self)
+
+  def scalar(self):
+    return Type(self.type_class, self.size, 1)
 
   def widen(self):
     return Type(self.type_class, self.size * 2, self.lanes)
@@ -111,6 +114,10 @@ def UInt(size=0, lanes=1):
 
 def Float(size, lanes=1):
   return Type("float", size, lanes)
+
+
+def BFloat(size, lanes=1):  # pylint: disable=invalid-name
+  return Type("bfloat", size, lanes)
 
 
 fn_ops = []
@@ -341,6 +348,7 @@ class Load(Value):
 
   def __init__(self, ty, index, offset_elements):
     Value.__init__(self, ty)
+    self.name = "load"
     self.index = index
     self.offset_elements = offset_elements
 
@@ -855,8 +863,7 @@ def operator_name(name):
 
 class TailStrategy(enum.Enum):
   SCALAR = 1
-  MEMCPY = 2
-  MASK = 3
+  VECTOR = 2
 
 
 def match(pattern, expr, matches):
@@ -935,14 +942,14 @@ class Target:
         UInt(32, 1): "uint32_t",
         Float(16, 1): "half",
         Float(32, 1): "float",
+        BFloat(16, 1): "bfloat16",
     }
     self.features = []
-    self.load_intrinsics = {}
-    self.store_intrinsics = {}
     self.vector_bits = 0
     self.tail_strategy = TailStrategy.SCALAR
     self.result = ""
     self.header = header
+    self.simd_ops = {"min", "max", "load", "store"}
 
   def indent(self):
     return "  " * self.indent_level
@@ -973,8 +980,28 @@ class Target:
             implied_features[feature], implied_features, all_features
         )
 
+  def needs_simd_wrapper(self, op):
+    if op.name in self.simd_ops:
+      return False
+    return True
+
+  def simd_suffix(self, op):
+    if op.name in self.simd_ops:
+      return ""
+    return ".v"
+
   def legalize_type(self, ty, is_const=True):
     return self.types.get(ty, ty.to_c_decl(is_const))
+
+  def legalize_op(self, op):
+    if op.name == "broadcast":
+      return (
+          f"simd::broadcast<{op.ty.lanes},"
+          f" {self.legalize_type(op.ty.scalar())}>"
+      )
+    elif op.name == "min" or op.name == "max":
+      return f"simd::{op.name}"
+    return op.name
 
   def vectorize(self, expr, lanes, cache):
     if expr in cache:
@@ -1068,7 +1095,7 @@ class Target:
     if isinstance(expr, Op):
       args = [self.optimize_slices(arg, cache) for arg in expr.args]
       if expr.name == "slice":
-        if args[0].name == "combine":
+        if isinstance(args[0], Op) and args[0].name == "combine":
           comb = args[0]
           slice_index = args[1].value
           total_slices = args[2].value
@@ -1084,7 +1111,7 @@ class Target:
             cache[expr] = mutated
             return mutated
 
-        elif args[0].name == "broadcast":
+        elif isinstance(args[0], Op) and args[0].name == "broadcast":
           bc = args[0]
           mutated = broadcast(bc.args[0], expr.ty.lanes)
           cache[expr] = mutated
@@ -1277,7 +1304,8 @@ class Target:
             {},
         )
         self.result += (
-            f"{self.indent()}{self.legalize_type(broadcast_op.ty)} {b.name}_broadcasted[{increment}];\n"
+            f"{self.indent()}{self.legalize_type(broadcast_op.ty)}"
+            f" {b.name}_broadcasted[{increment}];\n"
         )
 
         if b.broadcast_mode == BroadcastMode.LOCAL_VAR:
@@ -1293,9 +1321,9 @@ class Target:
         for i in range(increment):
           self.result += (
               f"{self.indent()}{b.name}_broadcasted[{i}] ="
-              f" {broadcast_op.name}(((const"
-              f" {b.ty}*)offset_bytes({prefix_after}{b.name}, min({i}, m - i"
-              f" - 1) * stride_{b.name}_m))[0]);\n"
+              f" {self.legalize_op(broadcast_op)}(((const"
+              f" {self.legalize_type(b.ty, True)}*)offset_bytes({prefix_after}{b.name},"
+              f" min({i}, m - i - 1) * stride_{b.name}_m))[0]);\n"
           )
 
         if b.broadcast_mode == BroadcastMode.LOCAL_VAR:
@@ -1330,9 +1358,10 @@ class Target:
 
   def emit_constants(self, constants):
     for k, v in constants.items():
+      const_type = self.legalize_type(v.ty)
       self.result += (
-          f"{self.indent()}const {self.legalize_type(v.ty)} {k} ="
-          f" {v.name}({v.args[0]});\n"
+          f"{self.indent()}const {const_type} {k} ="
+          f" {self.legalize_op(v)}({v.args[0]});\n"
       )
 
   def emit_op(
@@ -1349,10 +1378,10 @@ class Target:
     """Emits a single operation."""
     op = i[1]
     self.result += self.indent()
+    result_type = ""
     if i[0] is not None:
-      self.result += (
-          f"{self.legalize_type(op.ty.with_lanes(op_natural_vector_size))} {i[0]}_{j}_{k}"
-      )
+      result_type = self.legalize_type(op.ty.with_lanes(op_natural_vector_size))
+      self.result += f"{result_type} {i[0]}_{j}_{k}"
 
     is_load = isinstance(op, Load)
     is_store = isinstance(op, Op) and op.name == "store"
@@ -1368,7 +1397,7 @@ class Target:
       # the existing broadcast value.
       b = self.as_buffer(op.index, buffers)
       if b is not None and b.broadcast_mode == BroadcastMode.ALWAYS:
-        self.result += f" = {b.name}_broadcasted[{j}];\n"
+        self.result += f" = {result_type}({b.name}_broadcasted[{j}]);\n"
         return
       # hack
       args = [op.index]
@@ -1402,12 +1431,12 @@ class Target:
             f" ({k * output_lanes}{row_offset} + {offset}))"
         )
       else:
-        if isinstance(arg, Constant) or (
-            isinstance(arg, Var) and arg in constants
-        ):
+        if isinstance(arg, Constant):
           str_args.append(f"{arg}")
+        elif isinstance(arg, Var) and arg in constants:
+          str_args.append(f"{arg}{self.simd_suffix(op)}")
         else:
-          str_args.append(f"{arg}_{j}_{k}")
+          str_args.append(f"{arg}_{j}_{k}{self.simd_suffix(op)}")
 
     offset = op.offset_elements if is_load else 0
     lanes = (
@@ -1418,40 +1447,22 @@ class Target:
     if (
         is_load_store
         and is_rem_width
-        and self.tail_strategy == TailStrategy.MEMCPY
-    ):
-      dst = str_args[0] if is_store else f"(void*)&{i[0]}_{j}_{k}"
-      src = f"(void*)&{str_args[1]}" if is_store else str_args[0]
-
-      if is_load:
-        self.result += f";\n{self.indent()}"
-      # TODO(vksnk): this can be unified with the code below by
-      # adding a separate function (something like memcpy_load).
-      # However, I am not sure if it'd have worse performance.
-      self.result += (
-          f"memcpy({dst}, {src},"
-          # TODO(vksnk): this expression can be simplified once
-          # we switch to while loop for tracking n.
-          f" {lanes} *"
-          f" {i[1].ty.size // 8});\n"
-      )
-    elif (
-        is_load_store
-        and is_rem_width
-        and self.tail_strategy == TailStrategy.MASK
     ):
       mask_op = ""
       if is_load:
         self.result += " = "
-        mask_op = "load"
+        mask_op = "simd::load"
       else:
-        mask_op = "store"
-      self.result += (
-          f"partial_{mask_op}_{op_natural_vector_size}x({str_args[0]}, {lanes}"
-      )
+        mask_op = "simd::store"
+      self.result += f"{mask_op}({str_args[0]}"
 
       if is_store:
         self.result += f", {str_args[1]}"
+
+      self.result += f", {lanes}"
+
+      if is_load:
+        self.result += f", simd::undef<{op.ty.lanes}>()"
       self.result += ");\n"
     else:
       if not is_store:
@@ -1459,12 +1470,16 @@ class Target:
       mem_op = ""
 
       if is_load:
-        mem_op = self.load_intrinsics.get(op.ty, "load")
+        mem_op = "simd::load"
+        str_args.append(f"{self.legalize_type(op.ty)}::N")
       elif is_store:
-        mem_op = self.store_intrinsics.get(op.ty, "store")
+        mem_op = "simd::store"
       else:
-        mem_op = op.name
-      self.result += f"{mem_op}({', '.join(str_args)});\n"
+        mem_op = self.legalize_op(op)
+      if self.needs_simd_wrapper(op):
+        self.result += f"{result_type}({mem_op}({', '.join(str_args)}));\n"
+      else:
+        self.result += f"{mem_op}({', '.join(str_args)});\n"
 
   def emit_inner_loop_body(
       self,
@@ -1770,6 +1785,8 @@ f32_a = Var("a", Float(32))
 f32_b = Var("b", Float(32))
 f32_c = Var("c", Float(32))
 f32_d = Var("d", Float(32))
+bf16_a = Var("a", BFloat(16))
+bf16_b = Var("b", BFloat(16))
 
 
 class Rule:

@@ -18,6 +18,7 @@
 #include "ynnpack/base/type.h"
 #include "ynnpack/include/ynnpack.h"
 #include "ynnpack/kernels/reduce/generic.h"
+#include "ynnpack/kernels/reduce/sum_accumulator.h"
 
 namespace ynn {
 
@@ -85,16 +86,28 @@ struct accumulator {
         }
       }
     } else {
-      // For numerical consistency, always do the final k reduction as a binary
-      // tree.
-      size_t k = K / 2;
-      while (k >= 1) {
+      if (K == 16) {
+        // Match the reduction order of sum_accumulator_x32 with
+        // consistent_tile_k=16.
         for (size_t i = 0; i < N; ++i) {
-          for (size_t j = 0; j < k; ++j) {
-            acc[i][j] = op(acc[i][j], acc[i][j + k]);
+          for (size_t j = 0; j < 4; ++j) {
+            acc[i][j] = op(op(acc[i][j], acc[i][j + 4]),
+                           op(acc[i][j + 8], acc[i][j + 12]));
           }
+          acc[i][0] = op(op(acc[i][0], acc[i][1]), op(acc[i][2], acc[i][3]));
         }
-        k /= 2;
+      } else {
+        // For numerical consistency, always do the final k reduction as a
+        // binary tree.
+        size_t k = K / 2;
+        while (k >= 1) {
+          for (size_t i = 0; i < N; ++i) {
+            for (size_t j = 0; j < k; ++j) {
+              acc[i][j] = op(acc[i][j], acc[i][j + k]);
+            }
+          }
+          k /= 2;
+        }
       }
     }
     for (size_t i = 0; i < n; ++i) {
@@ -108,30 +121,15 @@ struct accumulator_k1_1 {
   static constexpr std::integral_constant<size_t, N_> N = {};
   static constexpr std::integral_constant<size_t, 1> K2 = {};
 
-  AccT acc[N];
-
-  accumulator_k1_1() = default;
-
-  YNN_ALWAYS_INLINE explicit accumulator_k1_1(size_t) {
-    std::fill_n(acc, N, static_cast<AccT>(ReduceOp::identity));
-  }
-
   template <typename AT, typename NT, typename K2T>
-  YNN_ALWAYS_INLINE void reduce(const AT* __restrict A, NT n,
-                                size_t /*A_stride_k2*/, K2T) {
+  YNN_ALWAYS_INLINE void reduce_accumulate(const AT* __restrict A, NT n,
+                                           size_t /*A_stride_k2*/, K2T,
+                                           size_t /*C_stride_m*/,
+                                           T* __restrict C) {
     ReduceOp op;
     F f;
     for (size_t i = 0; i < n; ++i) {
-      acc[i] = op(acc[i], f(A[i]));
-    }
-  }
-
-  template <typename NT>
-  YNN_ALWAYS_INLINE void accumulate(size_t /*C_stride_m*/, T* __restrict C,
-                                    NT n) {
-    ReduceOp op;
-    for (size_t i = 0; i < n; ++i) {
-      C[i] = op(static_cast<AccT>(C[i]), acc[i]);
+      C[i] = op(static_cast<AccT>(C[i]), f(A[i]));
     }
   }
 };
@@ -219,36 +217,17 @@ struct min_max_accumulator_k1_1 {
   static constexpr std::integral_constant<size_t, N_> N = {};
   static constexpr std::integral_constant<size_t, 1> K2 = {};
 
-  AccT acc_min[N];
-  AccT acc_max[N];
-
-  min_max_accumulator_k1_1() = default;
-
-  YNN_ALWAYS_INLINE explicit min_max_accumulator_k1_1(size_t) {
-    std::fill_n(acc_min, N, static_cast<AccT>(Min::identity));
-    std::fill_n(acc_max, N, static_cast<AccT>(Max::identity));
-  }
-
   template <typename AT, typename N, typename K2T>
-  YNN_ALWAYS_INLINE void reduce(const AT* __restrict A, N n,
-                                size_t /*A_stride_k2*/, K2T) {
-    Min min;
-    Max max;
-    for (size_t i = 0; i < n; ++i) {
-      acc_min[i] = min(acc_min[i], static_cast<AccT>(A[i]));
-      acc_max[i] = max(acc_max[i], static_cast<AccT>(A[i]));
-    }
-  }
-
-  template <typename NT>
-  YNN_ALWAYS_INLINE void accumulate(size_t C_stride_m, T* __restrict C, NT n) {
+  YNN_ALWAYS_INLINE void reduce_accumulate(const AT* __restrict A, N n,
+                                           size_t /*A_stride_k2*/, K2T,
+                                           size_t C_stride_m, T* __restrict C) {
     Min min;
     Max max;
     T* __restrict C_min = offset_bytes(C, 0 * C_stride_m);
     T* __restrict C_max = offset_bytes(C, 1 * C_stride_m);
     for (size_t i = 0; i < n; ++i) {
-      C_min[i] = min(static_cast<AccT>(C_min[i]), acc_min[i]);
-      C_max[i] = max(static_cast<AccT>(C_max[i]), acc_max[i]);
+      C_min[i] = min(static_cast<AccT>(C_min[i]), static_cast<AccT>(A[i]));
+      C_max[i] = max(static_cast<AccT>(C_max[i]), static_cast<AccT>(A[i]));
     }
   }
 };
@@ -257,7 +236,7 @@ template <typename T>
 struct min_op {
   T operator()(T a, T b) { return min(a, b); }
 
-  static constexpr T identity = type_info<T>::min_identity();
+  static constexpr auto identity = type_info<T>::min_identity();
   static constexpr bool is_associative = true;
 };
 
@@ -265,7 +244,7 @@ template <typename T>
 struct max_op {
   T operator()(T a, T b) { return max(a, b); }
 
-  static constexpr T identity = type_info<T>::max_identity();
+  static constexpr auto identity = type_info<T>::max_identity();
   static constexpr bool is_associative = true;
 };
 
@@ -273,7 +252,7 @@ template <typename T>
 struct sum_op {
   T operator()(T a, T b) { return a + b; }
 
-  static constexpr T identity = type_info<T>::sum_identity();
+  static constexpr auto identity = type_info<T>::sum_identity();
   static constexpr bool is_associative = std::is_integral<T>::value;
 };
 
@@ -294,13 +273,15 @@ void reduce(size_t N, size_t K3, size_t K2, size_t K1, size_t A_stride_n,
             size_t A_stride_k3, size_t A_stride_k2, const AT* A, CT* C,
             ReduceOp = ReduceOp{}, F = F{}) {
   if (K1 == 1 && A_stride_n == sizeof(AT)) {
-    tiled_reduce<accumulator_k1_1<AccT, CT, 128 / sizeof(AccT), ReduceOp, F>,
-                 AT, CT>(N, K3, K2, A_stride_k3, A_stride_k2, A,
-                         /*C_stride_m=*/0, C);
+    stream_reduce<accumulator_k1_1<AccT, CT, 128 / sizeof(AccT), ReduceOp, F>,
+                  AT, CT>(N, K3, K2, A_stride_k3, A_stride_k2, A,
+                          /*C_stride_m=*/0, C);
   } else {
-    tiled_reduce<accumulator<AccT, CT, 1, 128 / sizeof(AccT), ReduceOp, F>, AT,
-                 CT>(N, K3, K2, K1, A_stride_n, A_stride_k3, A_stride_k2, A,
-                     /*C_stride_m=*/0, C);
+    constexpr size_t K = std::is_same<AccT, float>::value ? consistent_tile_k
+                                                          : 128 / sizeof(AccT);
+    tiled_reduce<accumulator<AccT, CT, 1, K, ReduceOp, F>, AT, CT>(
+        N, K3, K2, K1, A_stride_n, A_stride_k3, A_stride_k2, A,
+        /*C_stride_m=*/0, C);
   }
 }
 
@@ -309,8 +290,9 @@ void min_max(size_t N, size_t K3, size_t K2, size_t K1, size_t A_stride_n,
              size_t A_stride_k3, size_t A_stride_k2, const T* A,
              size_t C_stride_m, T* C, Min, Max) {
   if (K1 == 1 && A_stride_n == sizeof(T)) {
-    tiled_reduce<min_max_accumulator_k1_1<AccT, T, 64 / sizeof(AccT), Min, Max>,
-                 T, T>(N, K3, K2, A_stride_k3, A_stride_k2, A, C_stride_m, C);
+    stream_reduce<
+        min_max_accumulator_k1_1<AccT, T, 64 / sizeof(AccT), Min, Max>, T, T>(
+        N, K3, K2, A_stride_k3, A_stride_k2, A, C_stride_m, C);
   } else {
     tiled_reduce<min_max_accumulator<AccT, T, 1, 64 / sizeof(AccT), Min, Max>,
                  T, T>(N, K3, K2, K1, A_stride_n, A_stride_k3, A_stride_k2, A,
@@ -342,6 +324,14 @@ void sum_fp16_fp32(size_t n, size_t k3, size_t k2, size_t k1, size_t a_stride_n,
   reduce<float>(n, k3, k2, k1, a_stride_n, a_stride_k3, a_stride_k2,
                 static_cast<const half*>(a), static_cast<float*>(c),
                 sum_op<float>());
+}
+
+void sum_int32(size_t n, size_t k3, size_t k2, size_t k1, size_t a_stride_n,
+               size_t a_stride_k3, size_t a_stride_k2, const void* a, size_t,
+               void* c) {
+  reduce<int32_t>(n, k3, k2, k1, a_stride_n, a_stride_k3, a_stride_k2,
+                  static_cast<const int32_t*>(a), static_cast<int32_t*>(c),
+                  sum_op<int32_t>());
 }
 
 void sum_int8_int32(size_t n, size_t k3, size_t k2, size_t k1,
@@ -382,6 +372,14 @@ void sum_squared_fp16_fp32(size_t n, size_t k3, size_t k2, size_t k1,
   reduce<float>(n, k3, k2, k1, a_stride_n, a_stride_k3, a_stride_k2,
                 static_cast<const half*>(a), static_cast<float*>(c),
                 sum_op<float>(), square_op<float, half>());
+}
+
+void sum_squared_int32(size_t n, size_t k3, size_t k2, size_t k1,
+                       size_t a_stride_n, size_t a_stride_k3,
+                       size_t a_stride_k2, const void* a, size_t, void* c) {
+  reduce<int32_t>(n, k3, k2, k1, a_stride_n, a_stride_k3, a_stride_k2,
+                  static_cast<const int32_t*>(a), static_cast<int32_t*>(c),
+                  sum_op<int32_t>(), square_op<int32_t, int32_t>());
 }
 
 void sum_squared_int8_int32(size_t n, size_t k3, size_t k2, size_t k1,

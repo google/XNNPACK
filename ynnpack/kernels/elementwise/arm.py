@@ -29,7 +29,7 @@ def make_neon_cast_patterns(vector_bits):
       + [
           Rule(
               cast(Float(32, vector_bits // 32), vf16_a),
-              Op(Float(32, vector_bits // 32), "vcvt_f32_f16", [vf16_a]),
+              Op(Float(32, vector_bits // 32), "cast_f16_to_f32", [vf16_a]),
           ),
           Rule(
               cast(
@@ -142,24 +142,6 @@ def make_neon_integer_patterns(vector_bits):
   ]
 
 
-def make_neon_broadcast_patterns(vector_bits):
-  assert vector_bits == 128
-  return [
-      Rule(
-          broadcast(i32_a, 4),
-          Op(Int(32, 4), "vdupq_n_s32", [i32_a]),
-      ),
-      Rule(
-          broadcast(u32_a, 4),
-          Op(UInt(32, 4), "vdupq_n_u32", [u32_a]),
-      ),
-      Rule(
-          broadcast(f32_a, 4),
-          Op(Float(32, 4), "vdupq_n_f32", [f32_a]),
-      ),
-  ]
-
-
 def make_neon_float32_patterns(vector_bits):
   assert vector_bits == 128
   return [
@@ -168,14 +150,6 @@ def make_neon_float32_patterns(vector_bits):
           Rule(f32_a + f32_b, Op(Float(32), "vaddq_f32", [f32_a, f32_b])),
           Rule(f32_a - f32_b, Op(Float(32), "vsubq_f32", [f32_a, f32_b])),
           Rule(f32_a * f32_b, Op(Float(32), "vmulq_f32", [f32_a, f32_b])),
-          Rule(
-              max(f32_a, f32_b),
-              Op(Float(32), "vmaxq_f32", [f32_a, f32_b]),
-          ),
-          Rule(
-              min(f32_a, f32_b),
-              Op(Float(32), "vminq_f32", [f32_a, f32_b]),
-          ),
           Rule(abs(f32_a), Op(Float(32), "vabsq_f32", [f32_a])),
           Rule(round(f32_a), Op(Float(32), "round_f32", [f32_a])),
           Rule(ceil(f32_a), Op(Float(32), "ceil_f32", [f32_a])),
@@ -190,34 +164,6 @@ def make_neon_float32_patterns(vector_bits):
 
 class ARM(Target):
   """NEON target for elementwise kernels compiler."""
-
-  def add_load_intrinsics(self):
-    self.load_intrinsics[Int(8, 16)] = "vld1q_s8"
-    self.load_intrinsics[UInt(8, 16)] = "vld1q_u8"
-    self.load_intrinsics[Int(16, 8)] = "vld1q_s16"
-    self.load_intrinsics[UInt(16, 8)] = "vld1q_u16"
-    self.load_intrinsics[Int(32, 4)] = "vld1q_s32"
-    self.load_intrinsics[UInt(32, 4)] = "vld1q_u32"
-    self.load_intrinsics[Float(32, 4)] = "vld1q_f32"
-    self.load_intrinsics[Float(16, 8)] = "vld1q_f16"
-    self.load_intrinsics[Float(16, 4)] = "vld1_f16"
-
-  def add_store_intrinsics(self):
-    self.store_intrinsics[Int(8, 16)] = "vst1q_s8"
-    self.store_intrinsics[UInt(8, 16)] = "vst1q_u8"
-    self.store_intrinsics[Int(16, 8)] = "vst1q_s16"
-    self.store_intrinsics[UInt(16, 8)] = "vst1q_u16"
-    self.store_intrinsics[Int(32, 4)] = "vst1q_s32"
-    self.store_intrinsics[UInt(32, 4)] = "vst1q_u32"
-    self.store_intrinsics[Float(32, 4)] = "vst1q_f32"
-    self.store_intrinsics[Float(16, 8)] = "vst1q_f16"
-    self.store_intrinsics[Float(16, 4)] = "vst1_f16"
-
-  def legalize_type(self, ty, is_const=True):
-    # This is the type which ARM intrinsics expect as argument for pointers.
-    if ty.is_float() and ty.size == 16 and ty.lanes == 1:
-      return "__fp16"
-    return super().legalize_type(ty, is_const)
 
   def update_for_neon(self):
     self.header += """
@@ -366,43 +312,50 @@ YNN_INTRINSIC float32x4_t sqrt_f32(float32x4_t a) {
 """
 
     self.types.update({
-        Int(8, 16): "int8x16_t",
-        Int(16, 8): "int16x8_t",
-        Int(32, 4): "int32x4_t",
-        UInt(8, 16): "uint8x16_t",
-        UInt(16, 8): "uint16x8_t",
-        UInt(32, 4): "uint32x4_t",
-        Float(32, 4): "float32x4_t",
+        Int(8, 16): "simd::vec<int8_t, 16>",
+        Int(16, 8): "simd::vec<int16_t, 8>",
+        Int(32, 4): "simd::vec<int32_t, 4>",
+        UInt(8, 16): "simd::vec<uint8_t, 16>",
+        UInt(16, 8): "simd::vec<uint16_t, 8>",
+        UInt(32, 4): "simd::vec<uint32_t, 4>",
+        Float(32, 4): "simd::vec<float, 4>",
     })
 
     self.patterns += make_neon_float32_patterns(128)
     self.patterns += make_neon_integer_patterns(128)
     self.patterns += make_neon_cast_patterns(128)
     self.patterns += make_neon_reinterpret_cast_patterns(128)
-    self.patterns += make_neon_broadcast_patterns(128)
 
   def update_for_fp16(self):
     self.header += """
 namespace {
 
-YNN_INTRINSIC float16x8_t cast_f32_to_f16(float32x4_t f0, float32x4_t f1) {
-  return vcombine_f16(vcvt_f16_f32(f0), vcvt_f16_f32(f1));
+YNN_INTRINSIC float32x4_t cast_f16_to_f32(uint16x4_t f0) {
+  return vcvt_f32_f16(vreinterpret_f16_u16(f0));
 }
+
+YNN_INTRINSIC uint16x8_t cast_f32_to_f16(float32x4_t f0, float32x4_t f1) {
+  return vreinterpretq_u16_f16(vcombine_f16(vcvt_f16_f32(f0), vcvt_f16_f32(f1)));
+}
+
 } // namespace
 """
 
     self.types.update({
-        Float(16, 4): "float16x4_t",
-        Float(16, 8): "float16x8_t",
+        Float(16, 4): "simd::vec<half, 4>",
+        Float(16, 8): "simd::vec<half, 8>",
     })
 
   def __init__(self, features):
     Target.__init__(self)
     self.features = features
     self.vector_bits = 128
-    self.tail_strategy = TailStrategy.MEMCPY
+    self.tail_strategy = TailStrategy.VECTOR
 
     self.header += "#include <arm_neon.h>\n"
+    self.header += (
+        '#include "ynnpack/base/simd/arm_neon.h"\n'
+    )
 
     # These are transitive.
     implied_features = {
@@ -416,9 +369,6 @@ YNN_INTRINSIC float16x8_t cast_f32_to_f16(float32x4_t f0, float32x4_t f1) {
     for feature in all_features:
       if feature not in known_features:
         raise ValueError(f"Unknown feature: {feature}")
-
-    self.add_load_intrinsics()
-    self.add_store_intrinsics()
 
     if "NEON" in all_features:
       self.update_for_neon()

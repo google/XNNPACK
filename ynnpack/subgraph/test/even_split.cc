@@ -21,9 +21,9 @@
 #include "ynnpack/include/ynnpack.h"
 #include "ynnpack/subgraph/test/subgraph_builder.h"
 
-using testing::Combine;
-using testing::ValuesIn;
-using ynn::to_string;  // NOLINT(misc-unused-using-decls)
+// This needs to be in the global namespace for argument dependent lookup to
+// work.
+using ::ynn::to_string;  // NOLINT(misc-unused-using-decls)
 
 namespace ynn {
 
@@ -67,8 +67,7 @@ void TestImpl(T, size_t rank, size_t num_outputs) {
       input_shape[axis] *= num_outputs;
 
       Tensor<T> input(input_shape);
-      TypeGenerator<T> generator(quantization);
-      input.generate([&]() { return generator(rng); });
+      fill_random(input.data(), input.size(), rng, quantization);
 
       // Check reshaped shape is correct
       runtime.ReshapeExternalTensor(input_shape, input.base(), 0)

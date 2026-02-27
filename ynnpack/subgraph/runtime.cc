@@ -35,8 +35,8 @@
 #include "slinky/base/arithmetic.h"
 #include "slinky/base/span.h"
 #include "slinky/base/thread_pool.h"
-#include "slinky/builder/pipeline.h"
 #include "slinky/builder/node_mutator.h"
+#include "slinky/builder/pipeline.h"
 #include "slinky/builder/simplify.h"
 #include "slinky/builder/substitute.h"
 #include "slinky/runtime/buffer.h"
@@ -46,10 +46,12 @@
 
 void ynn_runtime_value::make_buffer(ynn_runtime& runtime,
                                     slinky::expr elem_size) {
-  if (!buffer) {
-    if (!symbol.defined()) {
-      symbol = runtime.symbols.insert_unique(name());
-    }
+  if (buffer) {
+    assert(buffer->sym() == symbol);
+    return;
+  }
+  if (!symbol.defined()) {
+    symbol = runtime.globals.symbols.insert_unique(name());
   }
   buffer = ynn::make_buffer_expr(symbol, rank(), std::move(elem_size));
   for (size_t i = 0; i < rank(); ++i) {
@@ -57,27 +59,10 @@ void ynn_runtime_value::make_buffer(ynn_runtime& runtime,
       buffer->dim(i) = slinky::dim::broadcast();
     }
   }
-  assert(buffer->sym() == symbol);
 }
 
 void ynn_runtime_value::make_buffer(ynn_runtime& runtime) {
   make_buffer(runtime, ynn::type_size_bytes(type));
-}
-
-slinky::var ynn_runtime::make_global_variable(slinky::expr value,
-                                              const char* prefix) {
-  value = slinky::simplify(value);
-  assert(value.defined());
-
-  auto i = std::find_if(globals.begin(), globals.end(),
-                        [&](const auto& j) { return match(j.second, value); });
-  if (i == globals.end()) {
-    slinky::var r = symbols.insert_unique(prefix);
-    globals.push_back(std::make_pair(r, value));
-    return r;
-  } else {
-    return i->first;
-  }
 }
 
 std::unique_ptr<ynn::scheduling_info> ynn_runtime::make_schedule(
@@ -123,8 +108,14 @@ std::unique_ptr<ynn::scheduling_info> ynn_runtime::make_schedule(
     } else {
       slinky::expr s = slinky::simplify(slinky::max(
           1, slinky::min(tile_area / tile_area_so_far, output_extents[d])));
-      s = make_global_variable(s, "s");
+      s = globals.get(s, "s");
       splits[d] = s;
+    }
+    if (splits[d].defined() &&
+        slinky::prove_true(splits[d] >= output_extents[d])) {
+      // TODO(b/458542243): We should not need to do this optimization
+      // ourselves.
+      splits[d] = {};
     }
     if (splits[d].defined()) {
       tile_area_so_far = slinky::simplify(tile_area_so_far * splits[d]);
@@ -143,7 +134,7 @@ std::unique_ptr<ynn::scheduling_info> ynn_runtime::make_schedule(
     } else if (output_extents[d].defined() && splits[d].defined()) {
       slinky::expr w =
           slinky::ceil_div(slinky::expr(target_task_count), threads_so_far);
-      w = make_global_variable(w, "w");
+      w = globals.get(w, "w");
 
       workers[d] = slinky::simplify(slinky::select::make(
           w > 1, slinky::loop::parallel, slinky::loop::serial));
@@ -427,7 +418,7 @@ void ynn_runtime::schedule() {
 
 slinky::buffer_expr_ptr ynn_runtime::null_buffer() {
   if (!null_buffer_) {
-    slinky::var null(symbols, "null");
+    slinky::var null(globals.symbols, "null");
     null_buffer_ = slinky::buffer_expr::make_constant(
         null, slinky::raw_buffer::make(0, 0));
   }
@@ -519,7 +510,6 @@ ynn_runtime::ynn_runtime(const ynn_subgraph& subgraph,
                          slinky::thread_pool* threadpool, uint32_t flags)
     : subgraph(subgraph),
       flags(flags),
-      symbols(subgraph.symbols),
       globals(subgraph.globals) {
   // Implement our required alignment for heap allocations.
   eval_config.allocate = [](slinky::var sym, slinky::raw_buffer* buffer) {
@@ -558,7 +548,7 @@ ynn_runtime::ynn_runtime(const ynn_subgraph& subgraph,
       continue;
     }
     if (!value.symbol.defined()) {
-      value.symbol = symbols.insert_unique(value.name());
+      value.symbol = globals.symbols.insert_unique(value.name());
     }
     if (value.is_static()) {
       for (size_t d = 0; d < value.extents.size(); ++d) {
@@ -572,6 +562,14 @@ ynn_runtime::ynn_runtime(const ynn_subgraph& subgraph,
           slinky::buffer_expr::make_constant(value.symbol, value.data);
     } else if (value.is_external_input()) {
       value.make_buffer(*this);
+
+      for (size_t d = 0; d < value.extents.size(); ++d) {
+        if (!value.extents[d].defined()) {
+          value.buffer->dim(d).bounds = slinky::point(0);
+        } else if (const auto v = as_constant(value.extents[d])) {
+          value.buffer->dim(d).bounds = slinky::min_extent(0, *v);
+        }
+      }
 
       if (!value.data) {
         value.data =
@@ -653,14 +651,14 @@ ynn_status ynn_runtime::build() {
   options.no_checks = true;
 #endif
 
-  pipeline =
-      slinky::build_pipeline(symbols, {}, inputs, outputs, globals, options);
+  pipeline = slinky::build_pipeline(globals.symbols, {}, inputs, outputs,
+                                    globals.lets, options);
 
   slinky::call_stmt::attributes attrs;
   attrs.name = "ynn_reshape_runtime";
   reshape_impl = slinky::let_stmt::make(
-      globals, slinky::call_stmt::make(make_reshape_impl(this), {}, {}, {},
-                                       std::move(attrs)));
+      globals.lets, slinky::call_stmt::make(make_reshape_impl(this), {}, {}, {},
+                                            std::move(attrs)));
   return ynn_status_success;
 }
 

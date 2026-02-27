@@ -10,14 +10,52 @@
 #include <cstddef>
 #include <optional>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "slinky/builder/pipeline.h"
 #include "slinky/builder/simplify.h"
+#include "slinky/builder/substitute.h"
 #include "slinky/runtime/buffer.h"
 #include "slinky/runtime/expr.h"
 
 namespace ynn {
+
+slinky::expr slinky_globals::get(slinky::expr value, const char* prefix) {
+  value = slinky::simplify(value);
+  assert(value.defined());
+
+  if (as_constant(value) || as_variable(value)) {
+    return value;
+  }
+
+  auto i = std::find_if(lets.begin(), lets.end(),
+                        [&](const auto& j) { return match(j.second, value); });
+  if (i == lets.end()) {
+    slinky::var r = symbols.insert_unique(prefix);
+    lets.push_back(std::make_pair(r, value));
+    return r;
+  } else {
+    return i->first;
+  }
+}
+
+slinky::buffer_expr_ptr slinky_globals::make_buffer_expr(
+    const std::string& name, int rank, slinky::expr elem_size) {
+  return ynn::make_buffer_expr(symbols.insert_unique(name), rank, elem_size);
+}
+
+// Make an array of dimensions that is begin, 1, ... end - 1.
+std::vector<slinky::var> slinky_globals::make_dims(int begin, int end) {
+  std::vector<slinky::var> result(end - begin);
+  for (int i = 0; i < result.size(); ++i) {
+    result[i] = symbols.insert("d" + std::to_string(begin + i));
+  }
+  return result;
+}
+std::vector<slinky::var> slinky_globals::make_dims(int rank) {
+  return make_dims(0, rank);
+}
 
 slinky::buffer_expr_ptr make_buffer_expr(slinky::var sym, int rank,
                                          slinky::expr elem_size) {
@@ -43,12 +81,6 @@ slinky::buffer_expr_ptr make_buffer_expr(slinky::var sym, int rank,
   return buf;
 }
 
-slinky::buffer_expr_ptr make_buffer_expr(slinky::node_context& ctx,
-                                         const std::string& name, int rank,
-                                         slinky::expr elem_size) {
-  return make_buffer_expr(ctx.insert_unique(name), rank, elem_size);
-}
-
 // Constrain the strides of the first `dims` dimensions of a buffer such that
 // the strides are dense (no padding between dimensions) and in the order that
 // XNNPACK/TFlite expect.
@@ -59,19 +91,6 @@ void require_contiguous(slinky::buffer_expr& buf, size_t dims) {
     buf.dim(d).fold_factor = slinky::dim::unfolded;
     stride *= buf.dim(d).extent();
   }
-}
-
-// Make an array of dimensions that is begin, 1, ... end - 1.
-std::vector<slinky::var> make_dims(int begin, int end,
-                                   slinky::node_context& ctx) {
-  std::vector<slinky::var> result(end - begin);
-  for (int i = 0; i < result.size(); ++i) {
-    result[i] = ctx.insert("d" + std::to_string(begin + i));
-  }
-  return result;
-}
-std::vector<slinky::var> make_dims(int rank, slinky::node_context& ctx) {
-  return make_dims(0, rank, ctx);
 }
 
 slinky::interval_expr elementwise_bounds(slinky::var dim,

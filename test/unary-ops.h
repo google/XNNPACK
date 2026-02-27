@@ -332,12 +332,6 @@ struct RoundToNearestEven : public UnaryOpInfo {
     return std::nearbyint(x);
   }
 
-#if XNN_ARCH_RISCV
-  bool IsInSupportedRange(float y) const override {
-    // TODO(#8087): These ops are broken for large inputs on RISCV.
-    return std::abs(y) < 1e6f;
-  }
-#endif
 };
 
 struct RoundTowardsZero : public UnaryOpInfo {
@@ -345,12 +339,6 @@ struct RoundTowardsZero : public UnaryOpInfo {
     return std::trunc(x);
   }
 
-#if XNN_ARCH_RISCV
-  bool IsInSupportedRange(float y) const override {
-    // TODO(#8087): These ops are broken for large inputs on RISCV.
-    return std::abs(y) < 1e6f;
-  }
-#endif
 };
 
 struct RoundUp : public UnaryOpInfo {
@@ -358,12 +346,6 @@ struct RoundUp : public UnaryOpInfo {
     return std::ceil(x);
   }
 
-#if XNN_ARCH_RISCV
-  bool IsInSupportedRange(float y) const override {
-    // TODO(#8087): These ops are broken for large inputs on RISCV.
-    return std::abs(y) < 1e6f;
-  }
-#endif
 };
 
 struct RoundDown : public UnaryOpInfo {
@@ -371,40 +353,16 @@ struct RoundDown : public UnaryOpInfo {
     return std::floor(x);
   }
 
-#if XNN_ARCH_RISCV
-  bool IsInSupportedRange(float y) const override {
-    // TODO(#8087): These ops are broken for large inputs on RISCV.
-    return std::abs(y) < 1e6f;
-  }
-#endif
 };
 
 struct Sigmoid : public UnaryOpInfo {
   float ReferenceImpl(float x, const xnn_unary_params&) const override {
-    if (x > 100) {
-      return 1.0f;
-    } else if (x < -100) {
-      return 0.0f;
-    } else {
-      const double e = std::exp(static_cast<double>(x));
-      return e / (1.0 + e);
-    }
+    return 1.0 / (1.0 + std::exp(static_cast<double>(-x)));
   }
 
   float Tolerance(float y_ref, xnn_datatype datatype) const override {
-    switch (datatype) {
-      case xnn_datatype_fp32:
-        return TolMixed(y_ref, 5.0e-6f, 1.0e-5f);
-      case xnn_datatype_fp16:
-        return TolMixed(y_ref, 1.0e-4f, 5.0e-3f);
-      case xnn_datatype_bf16:
-        return TolMixed(y_ref, 1.0e-3f, 1.0e-2f);
-      case xnn_datatype_qint8:
-      case xnn_datatype_quint8:
-        return 1;
-      default:
-        return TolExact(y_ref);
-    }
+    return TolMixed(y_ref, xnnpack::epsilon(datatype),
+                    xnnpack::epsilon(datatype));
   }
 
   Interval Domain(xnn_datatype datatype) const override {

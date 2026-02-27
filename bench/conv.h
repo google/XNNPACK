@@ -12,35 +12,36 @@
 #define XNNPACK_BENCH_CONV_H_
 
 #include <benchmark/benchmark.h>
+#include "bench/utils.h"
 
 
 #define BENCHMARK_CONV(conv_fn) \
-  BENCHMARK_CAPTURE(conv_fn, mobilenet_v1, "MobileNet v1")->Apply(MobileNetV1ConvArguments)->UseRealTime(); \
-  BENCHMARK_CAPTURE(conv_fn, mobilenet_v2, "MobileNet v2")->Apply(MobileNetV2ConvArguments)->UseRealTime(); \
-  BENCHMARK_CAPTURE(conv_fn, mobilenet_v3_small, "MobileNet v3 Small")->Apply(MobileNetV3SmallConvArguments)->UseRealTime(); \
-  BENCHMARK_CAPTURE(conv_fn, mobilenet_v3_large, "MobileNet v3 Large")->Apply(MobileNetV3LargeConvArguments)->UseRealTime(); \
-  BENCHMARK_CAPTURE(conv_fn, shufflenet_v1_g1, "ShuffleNet v1 (1 group)")->Apply(ShuffleNetV1G1ConvArguments)->UseRealTime(); \
-  BENCHMARK_CAPTURE(conv_fn, shufflenet_v1_g2, "ShuffleNet v1 (2 groups)")->Apply(ShuffleNetV1G2ConvArguments)->UseRealTime(); \
-  BENCHMARK_CAPTURE(conv_fn, shufflenet_v1_g3, "ShuffleNet v1 (3 groups)")->Apply(ShuffleNetV1G3ConvArguments)->UseRealTime(); \
-  BENCHMARK_CAPTURE(conv_fn, shufflenet_v1_g4, "ShuffleNet v1 (4 groups)")->Apply(ShuffleNetV1G4ConvArguments)->UseRealTime(); \
-  BENCHMARK_CAPTURE(conv_fn, shufflenet_v1_g8, "ShuffleNet v1 (8 groups)")->Apply(ShuffleNetV1G8ConvArguments)->UseRealTime(); \
-  BENCHMARK_CAPTURE(conv_fn, shufflenet_v2_x05, "ShuffleNet v2 0.5X")->Apply(ShuffleNetV2X05ConvArguments)->UseRealTime(); \
-  BENCHMARK_CAPTURE(conv_fn, shufflenet_v2_x10, "ShuffleNet v2 1.0X")->Apply(ShuffleNetV2X10ConvArguments)->UseRealTime(); \
-  BENCHMARK_CAPTURE(conv_fn, shufflenet_v2_x15, "ShuffleNet v2 1.5X")->Apply(ShuffleNetV2X15ConvArguments)->UseRealTime(); \
-  BENCHMARK_CAPTURE(conv_fn, shufflenet_v2_x20, "ShuffleNet v2 2.0X")->Apply(ShuffleNetV2X20ConvArguments)->UseRealTime(); \
-  BENCHMARK_CAPTURE(conv_fn, inception_v3, "Inception v3")->Apply(InceptionV3ConvArguments)->UseRealTime(); \
-  BENCHMARK_CAPTURE(conv_fn, resnet18, "ResNet-18")->Apply(ResNet18ConvArguments)->UseRealTime(); \
-  BENCHMARK_CAPTURE(conv_fn, resnet50, "ResNet-50")->Apply(ResNet50ConvArguments)->UseRealTime(); \
-  BENCHMARK_CAPTURE(conv_fn, squeezenet_v10, "SqueezeNet 1.0")->Apply(SqueezeNetV10ConvArguments)->UseRealTime(); \
-  BENCHMARK_CAPTURE(conv_fn, squeezenet_v11, "SqueezeNet 1.1")->Apply(SqueezeNetV11ConvArguments)->UseRealTime(); \
-  BENCHMARK_CAPTURE(conv_fn, vgg, "VGG")->Apply(VGGConvArguments)->UseRealTime(); \
-  BENCHMARK_CAPTURE(conv_fn, srcnn915, "SRCNN (9-1-5)")->Apply(SRCNN915ConvArguments)->UseRealTime(); \
-  BENCHMARK_CAPTURE(conv_fn, srcnn935, "SRCNN (9-3-5)")->Apply(SRCNN935ConvArguments)->UseRealTime(); \
-  BENCHMARK_CAPTURE(conv_fn, srcnn955, "SRCNN (9-5-5)")->Apply(SRCNN955ConvArguments)->UseRealTime();
+  BENCHMARK_NAMED(conv_fn, mobilenet_v1)->Apply(MobileNetV1ConvArguments)->UseRealTime(); \
+  BENCHMARK_NAMED(conv_fn, mobilenet_v2)->Apply(MobileNetV2ConvArguments)->UseRealTime(); \
+  BENCHMARK_NAMED(conv_fn, mobilenet_v3_small)->Apply(MobileNetV3SmallConvArguments)->UseRealTime(); \
+  BENCHMARK_NAMED(conv_fn, mobilenet_v3_large)->Apply(MobileNetV3LargeConvArguments)->UseRealTime(); \
+  BENCHMARK_NAMED(conv_fn, shufflenet_v1_g1)->Apply(ShuffleNetV1G1ConvArguments)->UseRealTime(); \
+  BENCHMARK_NAMED(conv_fn, shufflenet_v1_g2)->Apply(ShuffleNetV1G2ConvArguments)->UseRealTime(); \
+  BENCHMARK_NAMED(conv_fn, shufflenet_v1_g3)->Apply(ShuffleNetV1G3ConvArguments)->UseRealTime(); \
+  BENCHMARK_NAMED(conv_fn, shufflenet_v1_g4)->Apply(ShuffleNetV1G4ConvArguments)->UseRealTime(); \
+  BENCHMARK_NAMED(conv_fn, shufflenet_v1_g8)->Apply(ShuffleNetV1G8ConvArguments)->UseRealTime(); \
+  BENCHMARK_NAMED(conv_fn, shufflenet_v2_x05)->Apply(ShuffleNetV2X05ConvArguments)->UseRealTime(); \
+  BENCHMARK_NAMED(conv_fn, shufflenet_v2_x10)->Apply(ShuffleNetV2X10ConvArguments)->UseRealTime(); \
+  BENCHMARK_NAMED(conv_fn, shufflenet_v2_x15)->Apply(ShuffleNetV2X15ConvArguments)->UseRealTime(); \
+  BENCHMARK_NAMED(conv_fn, shufflenet_v2_x20)->Apply(ShuffleNetV2X20ConvArguments)->UseRealTime(); \
+  BENCHMARK_NAMED(conv_fn, inception_v3)->Apply(InceptionV3ConvArguments)->UseRealTime(); \
+  BENCHMARK_NAMED(conv_fn, resnet18)->Apply(ResNet18ConvArguments)->UseRealTime(); \
+  BENCHMARK_NAMED(conv_fn, resnet50)->Apply(ResNet50ConvArguments)->UseRealTime(); \
+  BENCHMARK_NAMED(conv_fn, squeezenet_v10)->Apply(SqueezeNetV10ConvArguments)->UseRealTime(); \
+  BENCHMARK_NAMED(conv_fn, squeezenet_v11)->Apply(SqueezeNetV11ConvArguments)->UseRealTime(); \
+  BENCHMARK_NAMED(conv_fn, vgg)->Apply(VGGConvArguments)->UseRealTime(); \
+  BENCHMARK_NAMED(conv_fn, srcnn915)->Apply(SRCNN915ConvArguments)->UseRealTime(); \
+  BENCHMARK_NAMED(conv_fn, srcnn935)->Apply(SRCNN935ConvArguments)->UseRealTime(); \
+  BENCHMARK_NAMED(conv_fn, srcnn955)->Apply(SRCNN955ConvArguments)->UseRealTime();
 
 
 // ShuffleNet v1 with 1 group.
-inline void ShuffleNetV1G1ConvArguments(benchmark::internal::Benchmark* b) {
+inline void ShuffleNetV1G1ConvArguments(benchmark::Benchmark* b) {
   b->ArgNames({"H", "W", "KH", "KW", "PH", "PW", "S", "D", "GCin", "GCout"});
 
   /*********************** Conv 1 **********************/
@@ -73,7 +74,7 @@ inline void ShuffleNetV1G1ConvArguments(benchmark::internal::Benchmark* b) {
 }
 
 // ShuffleNet v1 with 2 groups.
-inline void ShuffleNetV1G2ConvArguments(benchmark::internal::Benchmark* b) {
+inline void ShuffleNetV1G2ConvArguments(benchmark::Benchmark* b) {
   b->ArgNames({"H", "W", "KH", "KW", "PH", "PW", "S", "D", "GCin", "GCout"});
 
   /*********************** Conv 1 **********************/
@@ -106,7 +107,7 @@ inline void ShuffleNetV1G2ConvArguments(benchmark::internal::Benchmark* b) {
 }
 
 // ShuffleNet v1 with 3 groups.
-inline void ShuffleNetV1G3ConvArguments(benchmark::internal::Benchmark* b) {
+inline void ShuffleNetV1G3ConvArguments(benchmark::Benchmark* b) {
   b->ArgNames({"H", "W", "KH", "KW", "PH", "PW", "S", "D", "GCin", "GCout"});
 
   /*********************** Conv 1 **********************/
@@ -139,7 +140,7 @@ inline void ShuffleNetV1G3ConvArguments(benchmark::internal::Benchmark* b) {
 }
 
 // ShuffleNet v1 with 4 groups.
-inline void ShuffleNetV1G4ConvArguments(benchmark::internal::Benchmark* b) {
+inline void ShuffleNetV1G4ConvArguments(benchmark::Benchmark* b) {
   b->ArgNames({"H", "W", "KH", "KW", "PH", "PW", "S", "D", "GCin", "GCout"});
 
   /*********************** Conv 1 **********************/
@@ -172,7 +173,7 @@ inline void ShuffleNetV1G4ConvArguments(benchmark::internal::Benchmark* b) {
 }
 
 // ShuffleNet v1 with 8 groups.
-inline void ShuffleNetV1G8ConvArguments(benchmark::internal::Benchmark* b) {
+inline void ShuffleNetV1G8ConvArguments(benchmark::Benchmark* b) {
   b->ArgNames({"H", "W", "KH", "KW", "PH", "PW", "S", "D", "GCin", "GCout"});
 
   /*********************** Conv 1 **********************/
@@ -205,7 +206,7 @@ inline void ShuffleNetV1G8ConvArguments(benchmark::internal::Benchmark* b) {
 }
 
 // ShuffleNet v2 (0.5X scale).
-inline void ShuffleNetV2X05ConvArguments(benchmark::internal::Benchmark* b) {
+inline void ShuffleNetV2X05ConvArguments(benchmark::Benchmark* b) {
   b->ArgNames({"H", "W", "KH", "KW", "PH", "PW", "S", "D", "GCin", "GCout"});
 
   /*********************** Conv 1 **********************/
@@ -229,7 +230,7 @@ inline void ShuffleNetV2X05ConvArguments(benchmark::internal::Benchmark* b) {
 }
 
 // ShuffleNet v2 (1.0X scale).
-inline void ShuffleNetV2X10ConvArguments(benchmark::internal::Benchmark* b) {
+inline void ShuffleNetV2X10ConvArguments(benchmark::Benchmark* b) {
   b->ArgNames({"H", "W", "KH", "KW", "PH", "PW", "S", "D", "GCin", "GCout"});
 
   /*********************** Conv 1 **********************/
@@ -254,7 +255,7 @@ inline void ShuffleNetV2X10ConvArguments(benchmark::internal::Benchmark* b) {
 }
 
 // ShuffleNet v2 (1.5X scale).
-inline void ShuffleNetV2X15ConvArguments(benchmark::internal::Benchmark* b) {
+inline void ShuffleNetV2X15ConvArguments(benchmark::Benchmark* b) {
   b->ArgNames({"H", "W", "KH", "KW", "PH", "PW", "S", "D", "GCin", "GCout"});
 
   /*********************** Conv 1 **********************/
@@ -279,7 +280,7 @@ inline void ShuffleNetV2X15ConvArguments(benchmark::internal::Benchmark* b) {
 }
 
 // ShuffleNet v2 (2.0X scale).
-inline void ShuffleNetV2X20ConvArguments(benchmark::internal::Benchmark* b) {
+inline void ShuffleNetV2X20ConvArguments(benchmark::Benchmark* b) {
   b->ArgNames({"H", "W", "KH", "KW", "PH", "PW", "S", "D", "GCin", "GCout"});
 
   /*********************** Conv 1 **********************/
@@ -303,7 +304,7 @@ inline void ShuffleNetV2X20ConvArguments(benchmark::internal::Benchmark* b) {
   b->Args({  7,   7,  1,  1,  0,  0, 1, 1,  976, 2048});
 }
 
-inline void MobileNetV1ConvArguments(benchmark::internal::Benchmark* b) {
+inline void MobileNetV1ConvArguments(benchmark::Benchmark* b) {
   b->ArgNames({"H", "W", "KH", "KW", "PH", "PW", "S", "D", "GCin", "GCout"});
 
   /*        H    W   KH  KW  PH  PW  S  D  GCin  GCout */
@@ -319,7 +320,7 @@ inline void MobileNetV1ConvArguments(benchmark::internal::Benchmark* b) {
   b->Args({  7,   7,  1,  1,  0,  0, 1, 1, 1024, 1024});
 }
 
-inline void MobileNetV2ConvArguments(benchmark::internal::Benchmark* b) {
+inline void MobileNetV2ConvArguments(benchmark::Benchmark* b) {
   b->ArgNames({"H", "W", "KH", "KW", "PH", "PW", "S", "D", "GCin", "GCout"});
 
   /*        H    W   KH  KW  PH  PW  S  D  GCin  GCout */
@@ -387,7 +388,7 @@ inline void MobileNetV2ConvArguments(benchmark::internal::Benchmark* b) {
   b->Args({  1,   1,  1,  1,  0,  0, 1, 1, 1280, 1000});
 }
 
-inline void MobileNetV3SmallConvArguments(benchmark::internal::Benchmark* b) {
+inline void MobileNetV3SmallConvArguments(benchmark::Benchmark* b) {
   b->ArgNames({"H", "W", "KH", "KW", "PH", "PW", "S", "D", "GCin", "GCout"});
 
   /******************* Initial Stage *******************/
@@ -461,7 +462,7 @@ inline void MobileNetV3SmallConvArguments(benchmark::internal::Benchmark* b) {
   b->Args({  1,   1,  1,  1,  0,  0, 1, 1, 1024, 1001});
 }
 
-inline void MobileNetV3LargeConvArguments(benchmark::internal::Benchmark* b) {
+inline void MobileNetV3LargeConvArguments(benchmark::Benchmark* b) {
   b->ArgNames({"H", "W", "KH", "KW", "PH", "PW", "S", "D", "GCin", "GCout"});
 
   /******************* Initial Stage *******************/
@@ -548,7 +549,7 @@ inline void MobileNetV3LargeConvArguments(benchmark::internal::Benchmark* b) {
 }
 
 // SqueezeNet 1.0
-inline void SqueezeNetV10ConvArguments(benchmark::internal::Benchmark* b) {
+inline void SqueezeNetV10ConvArguments(benchmark::Benchmark* b) {
   b->ArgNames({"H", "W", "KH", "KW", "PH", "PW", "S", "D", "GCin", "GCout"});
 
   /*********************** Conv 1 **********************/
@@ -600,7 +601,7 @@ inline void SqueezeNetV10ConvArguments(benchmark::internal::Benchmark* b) {
 }
 
 // SqueezeNet 1.1
-inline void SqueezeNetV11ConvArguments(benchmark::internal::Benchmark* b) {
+inline void SqueezeNetV11ConvArguments(benchmark::Benchmark* b) {
   b->ArgNames({"H", "W", "KH", "KW", "PH", "PW", "S", "D", "GCin", "GCout"});
 
   /*********************** Conv 1 **********************/
@@ -651,7 +652,7 @@ inline void SqueezeNetV11ConvArguments(benchmark::internal::Benchmark* b) {
   b->Args({ 13,  13,  1,  1,  0,  0, 1, 1,  512, 1000});
 }
 
-inline void InceptionV3ConvArguments(benchmark::internal::Benchmark* b) {
+inline void InceptionV3ConvArguments(benchmark::Benchmark* b) {
   b->ArgNames({"H", "W", "KH", "KW", "PH", "PW", "S", "D", "GCin", "GCout"});
 
   /*        H    W   KH  KW  PH  PW  S  D  GCin  GCout */
@@ -701,7 +702,7 @@ inline void InceptionV3ConvArguments(benchmark::internal::Benchmark* b) {
   b->Args({  1,   1,  1,  1,  0,  0, 1, 1, 2048, 1001});
 }
 
-inline void ResNet18ConvArguments(benchmark::internal::Benchmark* b) {
+inline void ResNet18ConvArguments(benchmark::Benchmark* b) {
   b->ArgNames({"H", "W", "KH", "KW", "PH", "PW", "S", "D", "GCin", "GCout"});
 
   /********************** Conv 1 ***********************/
@@ -727,7 +728,7 @@ inline void ResNet18ConvArguments(benchmark::internal::Benchmark* b) {
   b->Args({ 14,  14,  1,  1,  0,  0, 2, 1,  256,  512});
 }
 
-inline void ResNet50ConvArguments(benchmark::internal::Benchmark* b) {
+inline void ResNet50ConvArguments(benchmark::Benchmark* b) {
   b->ArgNames({"H", "W", "KH", "KW", "PH", "PW", "S", "D", "GCin", "GCout"});
 
   /********************** Conv 1 ***********************/
@@ -779,7 +780,7 @@ inline void ResNet50ConvArguments(benchmark::internal::Benchmark* b) {
 //b->Args({  7,   7,  1,  1,  0,  0, 1, 1,  512, 2048});
 }
 
-inline void VGGConvArguments(benchmark::internal::Benchmark* b) {
+inline void VGGConvArguments(benchmark::Benchmark* b) {
   b->ArgNames({"H", "W", "KH", "KW", "PH", "PW", "S", "D", "GCin", "GCout"});
 
   /********************** Conv 1.1 *********************/
@@ -825,7 +826,7 @@ inline void VGGConvArguments(benchmark::internal::Benchmark* b) {
 }
 
 // SRCNN (9-1-5)
-inline void SRCNN915ConvArguments(benchmark::internal::Benchmark* b) {
+inline void SRCNN915ConvArguments(benchmark::Benchmark* b) {
   b->ArgNames({"H", "W", "KH", "KW", "PH", "PW", "S", "D", "GCin", "GCout"});
 
   /*        H    W   KH  KW  PH  PW  S  D  GCin  GCout */
@@ -835,7 +836,7 @@ inline void SRCNN915ConvArguments(benchmark::internal::Benchmark* b) {
 }
 
 // SRCNN (9-3-5)
-inline void SRCNN935ConvArguments(benchmark::internal::Benchmark* b) {
+inline void SRCNN935ConvArguments(benchmark::Benchmark* b) {
   b->ArgNames({"H", "W", "KH", "KW", "PH", "PW", "S", "D", "GCin", "GCout"});
 
   /*        H    W   KH  KW  PH  PW  S  D  GCin  GCout */
@@ -845,7 +846,7 @@ inline void SRCNN935ConvArguments(benchmark::internal::Benchmark* b) {
 }
 
 // SRCNN (9-5-5)
-inline void SRCNN955ConvArguments(benchmark::internal::Benchmark* b) {
+inline void SRCNN955ConvArguments(benchmark::Benchmark* b) {
   b->ArgNames({"H", "W", "KH", "KW", "PH", "PW", "S", "D", "GCin", "GCout"});
 
   /*        H    W   KH  KW  PH  PW  S  D  GCin  GCout */

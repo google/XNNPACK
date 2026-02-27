@@ -28,7 +28,7 @@ typedef HVX_Vector xnn_simd_s32_t;
 // Arithmetic operations.
 static XNN_INLINE xnn_simd_s32_t xnn_mul_s32(xnn_simd_s32_t a,
                                              xnn_simd_s32_t b) {
-  return Q6_V_lo_W(Q6_W_vmpyoacc_WVwVh(Q6_W_vmpye_VwVuh(a, b), a, b));
+  return Q6_Vw_vmpyieacc_VwVwVuh(Q6_Vw_vmpyieo_VhVh(a, b), a, b);
 }
 
 static XNN_INLINE xnn_simd_s32_t xnn_max_s32(xnn_simd_s32_t a,

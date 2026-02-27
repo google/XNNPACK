@@ -115,9 +115,7 @@ static void RuyBenchmark(benchmark::State& state, size_t threads) {
       benchmark::Counter::kIsRate);
 }
 
-static void ruy_st(benchmark::State& state, const char* net) {
-  RuyBenchmark(state, 1);
-}
+static void ruy_st(benchmark::State& state) { RuyBenchmark(state, 1); }
 BENCHMARK_GEMM(ruy_st)
 
 #endif  // BENCHMARK_RUY

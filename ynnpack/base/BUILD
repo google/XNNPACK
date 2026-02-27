@@ -105,6 +105,9 @@ cc_library(
             "YNN_ARCH_ARM",
             "YNN_ARCH_ARM32",
         ],
+        "//ynnpack:hexagon": [
+            "YNN_ARCH_HEXAGON",
+        ],
         "//conditions:default": [],
     }),
     local_defines = select({

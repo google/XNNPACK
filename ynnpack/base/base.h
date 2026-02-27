@@ -32,6 +32,12 @@
 #define YNN_ALWAYS_INLINE inline
 #endif
 
+#if defined(__GNUC__)
+#define YNN_NO_INLINE inline __attribute__((noinline))
+#else
+#define YNN_NO_INLINE
+#endif
+
 #if YNN_COMPILER_HAS_ATTRIBUTE(unused)
 #define YNN_UNUSED __attribute__((unused))
 #else
@@ -56,14 +62,6 @@
 #define YNN_UNREACHABLE \
   do {                  \
   } while (0)
-#endif
-
-#if defined(__GNUC__)
-#define YNN_ALIGN(alignment) __attribute__((__aligned__(alignment)))
-#elif defined(_MSC_VER)
-#define YNN_ALIGN(alignment) __declspec(align(alignment))
-#else
-#error "Platform-specific implementation of YNN_ALIGN required"
 #endif
 
 // TODO: std::hardware_destructive_interference_size would be better, but it's

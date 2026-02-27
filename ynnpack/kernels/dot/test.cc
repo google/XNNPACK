@@ -100,9 +100,6 @@ void TestMatMul(AT, BT, CT, const DotShape& shape, const KernelInfo& kernel,
   const bool unpacked_b = kernel.flags & dot_flag::unaligned_b;
 
   const float max_abs_value = 10.0f;
-  TypeGenerator<AT> a_gen(-max_abs_value, max_abs_value, quantization_params{});
-  TypeGenerator<BT> b_gen(-max_abs_value, max_abs_value, quantization_params{});
-  TypeGenerator<CT> c_gen(-max_abs_value, max_abs_value, quantization_params{});
 
   Tensor<AT> a({m, k});
   Tensor<BT> b({k, n / B_info::element_count()},
@@ -110,13 +107,13 @@ void TestMatMul(AT, BT, CT, const DotShape& shape, const KernelInfo& kernel,
   Tensor<CT> c({m, n});
   Tensor<CT> expected;
 
-  a.generate([&]() { return a_gen(rng); });
-  b.generate([&]() { return b_gen(rng); });
+  fill_random(a.data(), a.size(), rng, -max_abs_value, max_abs_value);
+  fill_random(b.data(), b.size(), rng, -max_abs_value, max_abs_value);
   if (init_zero) {
     expected = Tensor<CT>({m, n});
     expected.fill(0);
   } else {
-    c.generate([&]() { return c_gen(rng); });
+    fill_random(c.data(), c.size(), rng, -max_abs_value, max_abs_value);
     expected = c.deep_copy();
   }
 
@@ -178,9 +175,6 @@ void TestConv2D(AT, BT, CT, const KernelInfo& kernel) {
   }
 
   const float max_abs_value = 10.0f;
-  TypeGenerator<AT> a_gen(-max_abs_value, max_abs_value, quantization_params{});
-  TypeGenerator<BT> b_gen(-max_abs_value, max_abs_value, quantization_params{});
-  TypeGenerator<CT> c_gen(-max_abs_value, max_abs_value, quantization_params{});
 
   for (const Conv2DShape& shape : shapes) {
     const size_t w = shape.w;
@@ -196,12 +190,12 @@ void TestConv2D(AT, BT, CT, const KernelInfo& kernel) {
                  Alignment{.bytes = tile_n * sizeof(BT)});
     Tensor<CT> c({w, co});
 
-    a.generate([&]() { return a_gen(rng); });
-    b.generate([&]() { return b_gen(rng); });
+    fill_random(a.data(), a.size(), rng, -max_abs_value, max_abs_value);
+    fill_random(b.data(), b.size(), rng, -max_abs_value, max_abs_value);
 
     // Fill the output with some random data, and copy it for the reference
     // result before running the kernel, which updates it in place.
-    c.generate([&]() { return c_gen(rng); });
+    fill_random(c.data(), c.size(), rng, -max_abs_value, max_abs_value);
     Tensor<CT> expected = c.deep_copy();
 
     // We need to transpose before making the stencil, otherwise we "realize"
@@ -209,10 +203,9 @@ void TestConv2D(AT, BT, CT, const KernelInfo& kernel) {
     Tensor<AT> packed_a = pack_a ? transpose_a(a, tile_m, tile_k) : a;
 
     if (pack_a) {
-      // When we transpose, we tile_k, making the kw dimension tile_k times
-      // bigger, which also dilates the kernel.
-      // [kh, ci/tile_k, wkw*tile_k] -> [kh, ci/tile_k, kw*tile_k, w]
-      packed_a = make_stencil_dim(packed_a, 2, kw * tile_k, /*stride=*/1,
+      // When we transpose, we tile k, which also dilates the kernel.
+      // [kh, ci/tile_k, wkw*tile_k] -> [kh, ci/tile_k, kw, w*tile_k]
+      packed_a = make_stencil_dim(packed_a, 2, kw, /*stride=*/1,
                                   /*dilation=*/tile_k);
 
       // [kh, ci/tile_k, kw*tile_k, w] -> [ci/tile_k, kh, kw*tile_k, w]

@@ -106,8 +106,7 @@ void TestImpl(T, size_t rank) {
       std::vector<size_t> shape = random_shape(rng, rank);
 
       Tensor<T> input(shape);
-      TypeGenerator<T> generator(quantization);
-      input.generate([&]() { return generator(rng); });
+      fill_random(input.data(), input.size(), rng, quantization);
 
       std::vector<size_t> output_shape(shape);
       for (size_t i = 0; i < rank; ++i) {

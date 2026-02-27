@@ -107,14 +107,29 @@ xnnpack_cxx_library(
 xnnpack_unit_test(
     name = "unary_test",
     srcs = ["unary.cc"],
+    defines = select({
+        "//ynnpack/xnnpack:use_ynnpack": ["XNNPACK_USE_YNNPACK"],
+        "//conditions:default": [],
+    }),
     deps = SUBGRAPH_TEST_DEPS + ["//test:unary_ops"],
 )
+
+NO_YNNPACK = [
+    "input_output",
+    "rewrites",
+    "static_resize_bilinear_2d",
+]
 
 [xnnpack_unit_test(
     name = "%s_test" % operator,
     srcs = [
         "%s.cc" % operator.replace("_", "-"),
     ],
+    defines = select({
+        "//ynnpack/xnnpack:use_ynnpack": ["XNNPACK_USE_YNNPACK"],
+        "//conditions:default": [],
+    }),
+    tags = ["no_ynnpack"] if operator in NO_YNNPACK else [],
     deps = SUBGRAPH_TEST_DEPS + ["//:subgraph"],
 ) for operator in [
     "binary",
@@ -138,6 +153,7 @@ xnnpack_unit_test(
 xnnpack_unit_test(
     name = "workspace_test",
     srcs = ["workspace.cc"],
+    tags = ["no_ynnpack"],
     deps = SUBGRAPH_TEST_DEPS + [
         "//:allocation_type",
         "//:operators",
@@ -149,6 +165,7 @@ xnnpack_unit_test(
     name = "argmax_pooling_2d_test",
     timeout = "moderate",
     srcs = ["argmax-pooling-2d.cc"],
+    tags = ["no_ynnpack"],
     deps = SUBGRAPH_TEST_DEPS + [":stencil"],
 )
 
@@ -179,12 +196,14 @@ xnnpack_unit_test(
 xnnpack_unit_test(
     name = "deconvolution_2d_test",
     srcs = ["deconvolution-2d.cc"],
+    tags = ["no_ynnpack"],
     deps = SUBGRAPH_TEST_DEPS + [":stencil"],
 )
 
 xnnpack_unit_test(
     name = "depthwise_convolution_2d_test",
     srcs = ["depthwise-convolution-2d.cc"],
+    tags = ["no_ynnpack"],
     deps = SUBGRAPH_TEST_DEPS + [":stencil"],
 )
 
@@ -210,6 +229,7 @@ xnnpack_unit_test(
     name = "rope_test",
     timeout = "moderate",
     srcs = ["rope.cc"],
+    tags = ["no_ynnpack"],
     deps = SUBGRAPH_TEST_DEPS,
 )
 
@@ -231,6 +251,7 @@ xnnpack_unit_test(
 xnnpack_unit_test(
     name = "unpooling_2d_test",
     srcs = ["unpooling-2d.cc"],
+    tags = ["no_ynnpack"],
     deps = SUBGRAPH_TEST_DEPS + [":stencil"],
 )
 
@@ -239,6 +260,7 @@ xnnpack_unit_test(
     srcs = [
         "fusion.cc",
     ],
+    tags = ["no_ynnpack"],
     deps = [
         ":runtime_tester",
         ":subgraph_tester",
@@ -256,6 +278,7 @@ xnnpack_unit_test(
     srcs = [
         "runtime.cc",
     ],
+    tags = ["no_ynnpack"],
     deps = [
         ":runtime_tester",
     ],
@@ -266,6 +289,7 @@ xnnpack_unit_test(
     srcs = [
         "subgraph.cc",
     ],
+    tags = ["no_ynnpack"],
     deps = [
         ":runtime_tester",
         ":subgraph_tester",
@@ -278,6 +302,7 @@ xnnpack_unit_test(
     srcs = [
         "memory-planner.cc",
     ],
+    tags = ["no_ynnpack"],
     deps = [
         ":runtime_flags",
         ":runtime_tester",
@@ -292,6 +317,7 @@ xnnpack_unit_test(
 xnnpack_unit_test(
     name = "subgraph_nchw_test",
     srcs = ["subgraph-nchw.cc"],
+    tags = ["no_ynnpack"],
     deps = [
         ":subgraph_tester",
         "//:node_type",
@@ -305,6 +331,7 @@ xnnpack_unit_test(
         "mock-allocator.h",
         "subgraph-fp16.cc",
     ],
+    tags = ["no_ynnpack"],
     deps = [
         ":runtime_flags",
         ":runtime_tester",

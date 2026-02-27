@@ -30,9 +30,8 @@ void bench(benchmark::State& state, uint64_t arch_flags, lut_kernel_fn kernel,
   Buffer<X> lut(1 << (sizeof(A) * 8));
   std::iota(lut.begin(), lut.end(), 0);
   Buffer<A> a(n);
-  TypeGenerator<A> a_gen;
   std::mt19937 rng;
-  std::generate(a.begin(), a.end(), [&]() { return a_gen(rng); });
+  fill_random(a.data(), a.size(), rng);
 
   Buffer<X> x(n);
 
@@ -42,7 +41,7 @@ void bench(benchmark::State& state, uint64_t arch_flags, lut_kernel_fn kernel,
 }
 
 template <typename A, typename X>
-void Params(benchmark::internal::Benchmark* b) {
+void Params(benchmark::Benchmark* b) {
   b->ArgNames({"n"});
   b->Arg(1024 * 1024);
 }

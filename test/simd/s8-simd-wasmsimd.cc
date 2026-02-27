@@ -35,7 +35,7 @@ class S8SimdWASMSIMDTest : public ::testing::Test {
   void SetUp() override {
     inputs_.resize(3 * xnn_simd_size_s8);
     output_.resize(xnn_simd_size_s8);
-    std::uniform_int_distribution<int8_t> s8(-100, 100);
+    std::uniform_int_distribution<int> s8(-100, 100);
     std::generate(inputs_.begin(), inputs_.end(),
                   [&]() { return s8(rng_); });
   }

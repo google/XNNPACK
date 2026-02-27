@@ -21,11 +21,14 @@
 #include "ynnpack/kernels/binary/reference.h"
 #include "ynnpack/subgraph/test/subgraph_builder.h"
 
-using testing::Combine;
-using testing::ValuesIn;
-using ynn::to_string;  // NOLINT(misc-unused-using-decls)
+// This needs to be in the global namespace for argument dependent lookup to
+// work.
+using ::ynn::to_string;  // NOLINT(misc-unused-using-decls)
 
 namespace ynn {
+
+using ::testing::Combine;
+using ::testing::ValuesIn;
 
 void update_shape(std::vector<size_t>& shape,
                   const std::vector<size_t>& update) {
@@ -102,10 +105,8 @@ void TestOp(T, const binary_op_info& op_info, ynn_binary_operator op) {
       Tensor<T> b(reversed(b_shape));
       Tensor<T> x(reversed(shape));
 
-      TypeGenerator<T> a_gen(a_quantization);
-      TypeGenerator<T> b_gen(b_quantization);
-      a.generate([&]() { return a_gen(rng); });
-      b.generate([&]() { return b_gen(rng); });
+      fill_random(a.data(), a.size(), rng, a_quantization);
+      fill_random(b.data(), b.size(), rng, b_quantization);
 
       runtime.ReshapeExternalTensor(a.extents(), a.data(), 0)
           .ReshapeExternalTensor(b.extents(), b.data(), 1)

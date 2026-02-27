@@ -45,8 +45,6 @@ struct ConstantOrFunction {
   operator size_t() const { return fn(); }  //NOLINT
 };
 
-}  // namespace
-
 
 namespace {
 
@@ -3832,3 +3830,5 @@ INSTANTIATE_TEST_SUITE_P(
       });
 #endif  // XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
 
+
+}  // namespace

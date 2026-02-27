@@ -43,7 +43,7 @@ struct ynn_runtime {
   // Symbols we've named in Slinky. We copy this from the subgraph, so we
   // inherit symbols from the subgraph, but we can add more names here without
   // corrupting the subgraph.
-  slinky::node_context symbols;
+  ynn::slinky_globals globals;
 
   // Keep the slinky funcs and scheduling info alive until we build the pipeline
   // with them.
@@ -52,10 +52,6 @@ struct ynn_runtime {
 
   // This implements the logic to evaluate the symbolic shapes.
   slinky::stmt reshape_impl;
-
-  // This is a list of global variables and their (symbolic) value that will be
-  // lifted out of the pipeline.
-  std::vector<std::pair<slinky::var, slinky::expr>> globals;
 
   // The evaluateable slinky pipeline, and the context to run it.
   slinky::pipeline pipeline;
@@ -70,10 +66,6 @@ struct ynn_runtime {
     return values[id];
   }
 
-  // Make a global variable for the given expression. Deduplicates identical
-  // expressions to the same variable.
-  slinky::var make_global_variable(slinky::expr value,
-                                   const char* prefix = "r");
   std::unique_ptr<ynn::scheduling_info> make_schedule(
       const std::vector<slinky::var>& dims, slinky::buffer_expr_ptr output,
       uint32_t output_value, slinky::span<const slinky::expr> given_splits = {},

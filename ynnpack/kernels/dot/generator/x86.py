@@ -1,7 +1,15 @@
+# Copyright 2025 Google LLC
+#
+# This source code is licensed under the BSD-style license found in the
+# LICENSE file in the root directory of this source tree.
+
 """Base class for x86 dot kernel generators.
 
 Handles accumulating C tiles to the output.
 """
+
+# pylint: disable=missing-class-docstring
+# pylint: disable=invalid-name
 
 from ynnpack.kernels.dot.generator.dot_base import dot_base, indent
 
@@ -22,7 +30,7 @@ class x86(dot_base):
   def _mm(self, bits=0):
     if bits == 0:
       bits = self.bits
-    if bits == 128:
+    if bits <= 128:
       return "_mm"
     else:
       return f"_mm{bits}"
@@ -208,7 +216,8 @@ static const int32_t mask_table[16] = {-1, -1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 
     result += f"N = 0;\n"
     return result
 
-class x86_avx512f(x86):
+
+class x86_avx512(x86):
   def add_c_block_vector_tail(self):
     result = ""
     result += f"assert(N < {self.bits//32});\n"

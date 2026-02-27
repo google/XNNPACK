@@ -22,10 +22,12 @@
 #include "src/xnnpack/pack.h"
 #include "src/xnnpack/packw.h"
 
+namespace {
+
 
 
 #if XNN_ARCH_ARM && XNN_ENABLE_ASSEMBLY
-  static void qu8_gemm_minmax_rndnu_ukernel_1x8__asm_aarch32_neon_mlal_lane_cortex_a7(benchmark::State& state, const char* net) {
+  static void qu8_gemm_minmax_rndnu_ukernel_1x8__asm_aarch32_neon_mlal_lane_cortex_a7(benchmark::State& state) {
     GEMMBenchmark(state,
       xnn_qu8_gemm_minmax_rndnu_ukernel_1x8__asm_aarch32_neon_mlal_lane_cortex_a7,
       xnn_init_qu8_conv_minmax_rndnu_neon_params,
@@ -36,7 +38,7 @@
 
   BENCHMARK_GEMM(qu8_gemm_minmax_rndnu_ukernel_1x8__asm_aarch32_neon_mlal_lane_cortex_a7)
 
-  static void qu8_gemm_minmax_rndnu_ukernel_1x8__asm_aarch32_neon_mlal_lane_cortex_a7_prfm(benchmark::State& state, const char* net) {
+  static void qu8_gemm_minmax_rndnu_ukernel_1x8__asm_aarch32_neon_mlal_lane_cortex_a7_prfm(benchmark::State& state) {
     GEMMBenchmark(state,
       xnn_qu8_gemm_minmax_rndnu_ukernel_1x8__asm_aarch32_neon_mlal_lane_cortex_a7_prfm,
       xnn_init_qu8_conv_minmax_rndnu_neon_params,
@@ -47,7 +49,7 @@
 
   BENCHMARK_GEMM(qu8_gemm_minmax_rndnu_ukernel_1x8__asm_aarch32_neon_mlal_lane_cortex_a7_prfm)
 
-  static void qu8_gemm_minmax_rndnu_ukernel_4x8__asm_aarch32_neon_mlal_lane_cortex_a7(benchmark::State& state, const char* net) {
+  static void qu8_gemm_minmax_rndnu_ukernel_4x8__asm_aarch32_neon_mlal_lane_cortex_a7(benchmark::State& state) {
     GEMMBenchmark(state,
       xnn_qu8_gemm_minmax_rndnu_ukernel_4x8__asm_aarch32_neon_mlal_lane_cortex_a7,
       xnn_init_qu8_conv_minmax_rndnu_neon_params,
@@ -58,7 +60,7 @@
 
   BENCHMARK_GEMM(qu8_gemm_minmax_rndnu_ukernel_4x8__asm_aarch32_neon_mlal_lane_cortex_a7)
 
-  static void qu8_gemm_minmax_rndnu_ukernel_4x8__asm_aarch32_neon_mlal_lane_cortex_a7_prfm(benchmark::State& state, const char* net) {
+  static void qu8_gemm_minmax_rndnu_ukernel_4x8__asm_aarch32_neon_mlal_lane_cortex_a7_prfm(benchmark::State& state) {
     GEMMBenchmark(state,
       xnn_qu8_gemm_minmax_rndnu_ukernel_4x8__asm_aarch32_neon_mlal_lane_cortex_a7_prfm,
       xnn_init_qu8_conv_minmax_rndnu_neon_params,
@@ -69,7 +71,7 @@
 
   BENCHMARK_GEMM(qu8_gemm_minmax_rndnu_ukernel_4x8__asm_aarch32_neon_mlal_lane_cortex_a7_prfm)
 
-  static void qu8_gemm_minmax_rndnu_ukernel_4x8__asm_aarch32_neon_mlal_lane_cortex_a53(benchmark::State& state, const char* net) {
+  static void qu8_gemm_minmax_rndnu_ukernel_4x8__asm_aarch32_neon_mlal_lane_cortex_a53(benchmark::State& state) {
     GEMMBenchmark(state,
       xnn_qu8_gemm_minmax_rndnu_ukernel_4x8__asm_aarch32_neon_mlal_lane_cortex_a53,
       xnn_init_qu8_conv_minmax_rndnu_neon_params,
@@ -80,7 +82,7 @@
 
   BENCHMARK_GEMM(qu8_gemm_minmax_rndnu_ukernel_4x8__asm_aarch32_neon_mlal_lane_cortex_a53)
 
-  static void qu8_gemm_minmax_rndnu_ukernel_4x8__asm_aarch32_neon_mlal_lane_cortex_a53_prfm(benchmark::State& state, const char* net) {
+  static void qu8_gemm_minmax_rndnu_ukernel_4x8__asm_aarch32_neon_mlal_lane_cortex_a53_prfm(benchmark::State& state) {
     GEMMBenchmark(state,
       xnn_qu8_gemm_minmax_rndnu_ukernel_4x8__asm_aarch32_neon_mlal_lane_cortex_a53_prfm,
       xnn_init_qu8_conv_minmax_rndnu_neon_params,
@@ -91,7 +93,7 @@
 
   BENCHMARK_GEMM(qu8_gemm_minmax_rndnu_ukernel_4x8__asm_aarch32_neon_mlal_lane_cortex_a53_prfm)
 
-  static void qu8_gemm_minmax_rndnu_ukernel_4x8__asm_aarch32_neon_mlal_lane_ld64(benchmark::State& state, const char* net) {
+  static void qu8_gemm_minmax_rndnu_ukernel_4x8__asm_aarch32_neon_mlal_lane_ld64(benchmark::State& state) {
     GEMMBenchmark(state,
       xnn_qu8_gemm_minmax_rndnu_ukernel_4x8__asm_aarch32_neon_mlal_lane_ld64,
       xnn_init_qu8_conv_minmax_rndnu_neon_params,
@@ -102,7 +104,7 @@
 
   BENCHMARK_GEMM(qu8_gemm_minmax_rndnu_ukernel_4x8__asm_aarch32_neon_mlal_lane_ld64)
 
-  static void qu8_gemm_minmax_rndnu_ukernel_4x8__asm_aarch32_neon_mlal_lane_ld64_prfm(benchmark::State& state, const char* net) {
+  static void qu8_gemm_minmax_rndnu_ukernel_4x8__asm_aarch32_neon_mlal_lane_ld64_prfm(benchmark::State& state) {
     GEMMBenchmark(state,
       xnn_qu8_gemm_minmax_rndnu_ukernel_4x8__asm_aarch32_neon_mlal_lane_ld64_prfm,
       xnn_init_qu8_conv_minmax_rndnu_neon_params,
@@ -116,7 +118,7 @@
 
 
 #if XNN_ARCH_ARM64 && XNN_ENABLE_ASSEMBLY
-  static void qu8_gemm_minmax_rndnu_ukernel_4x16__asm_aarch64_neon_mlal_lane_cortex_a53(benchmark::State& state, const char* net) {
+  static void qu8_gemm_minmax_rndnu_ukernel_4x16__asm_aarch64_neon_mlal_lane_cortex_a53(benchmark::State& state) {
     GEMMBenchmark(state,
       xnn_qu8_gemm_minmax_rndnu_ukernel_4x16__asm_aarch64_neon_mlal_lane_cortex_a53,
       xnn_init_qu8_conv_minmax_rndnu_neon_params,
@@ -127,7 +129,7 @@
 
   BENCHMARK_GEMM(qu8_gemm_minmax_rndnu_ukernel_4x16__asm_aarch64_neon_mlal_lane_cortex_a53)
 
-  static void qu8_gemm_minmax_rndnu_ukernel_4x16__asm_aarch64_neon_mlal_lane_cortex_a53_prfm(benchmark::State& state, const char* net) {
+  static void qu8_gemm_minmax_rndnu_ukernel_4x16__asm_aarch64_neon_mlal_lane_cortex_a53_prfm(benchmark::State& state) {
     GEMMBenchmark(state,
       xnn_qu8_gemm_minmax_rndnu_ukernel_4x16__asm_aarch64_neon_mlal_lane_cortex_a53_prfm,
       xnn_init_qu8_conv_minmax_rndnu_neon_params,
@@ -138,7 +140,7 @@
 
   BENCHMARK_GEMM(qu8_gemm_minmax_rndnu_ukernel_4x16__asm_aarch64_neon_mlal_lane_cortex_a53_prfm)
 
-  static void qu8_gemm_minmax_rndnu16_ukernel_4x16__asm_aarch64_neon_mlal_lane_cortex_a53_prfm(benchmark::State& state, const char* net) {
+  static void qu8_gemm_minmax_rndnu16_ukernel_4x16__asm_aarch64_neon_mlal_lane_cortex_a53_prfm(benchmark::State& state) {
     GEMMBenchmark(state,
       xnn_qu8_gemm_minmax_rndnu16_ukernel_4x16__asm_aarch64_neon_mlal_lane_cortex_a53_prfm,
       xnn_init_qu8_conv_minmax_rndnu16_scalar_params,
@@ -149,7 +151,7 @@
 
   BENCHMARK_GEMM(qu8_gemm_minmax_rndnu16_ukernel_4x16__asm_aarch64_neon_mlal_lane_cortex_a53_prfm)
 
-  static void qu8_gemm_minmax_rndnu_ukernel_4x16__asm_aarch64_neon_mlal_lane_cortex_a75(benchmark::State& state, const char* net) {
+  static void qu8_gemm_minmax_rndnu_ukernel_4x16__asm_aarch64_neon_mlal_lane_cortex_a75(benchmark::State& state) {
     GEMMBenchmark(state,
       xnn_qu8_gemm_minmax_rndnu_ukernel_4x16__asm_aarch64_neon_mlal_lane_cortex_a75,
       xnn_init_qu8_conv_minmax_rndnu_neon_params,
@@ -160,7 +162,7 @@
 
   BENCHMARK_GEMM(qu8_gemm_minmax_rndnu_ukernel_4x16__asm_aarch64_neon_mlal_lane_cortex_a75)
 
-  static void qu8_gemm_minmax_rndnu_ukernel_4x16__asm_aarch64_neon_mlal_lane_cortex_a75_prfm(benchmark::State& state, const char* net) {
+  static void qu8_gemm_minmax_rndnu_ukernel_4x16__asm_aarch64_neon_mlal_lane_cortex_a75_prfm(benchmark::State& state) {
     GEMMBenchmark(state,
       xnn_qu8_gemm_minmax_rndnu_ukernel_4x16__asm_aarch64_neon_mlal_lane_cortex_a75_prfm,
       xnn_init_qu8_conv_minmax_rndnu_neon_params,
@@ -171,7 +173,7 @@
 
   BENCHMARK_GEMM(qu8_gemm_minmax_rndnu_ukernel_4x16__asm_aarch64_neon_mlal_lane_cortex_a75_prfm)
 
-  static void qu8_gemm_minmax_rndnu_ukernel_4x16__asm_aarch64_neon_mlal_lane_ld64(benchmark::State& state, const char* net) {
+  static void qu8_gemm_minmax_rndnu_ukernel_4x16__asm_aarch64_neon_mlal_lane_ld64(benchmark::State& state) {
     GEMMBenchmark(state,
       xnn_qu8_gemm_minmax_rndnu_ukernel_4x16__asm_aarch64_neon_mlal_lane_ld64,
       xnn_init_qu8_conv_minmax_rndnu_neon_params,
@@ -182,7 +184,7 @@
 
   BENCHMARK_GEMM(qu8_gemm_minmax_rndnu_ukernel_4x16__asm_aarch64_neon_mlal_lane_ld64)
 
-  static void qu8_gemm_minmax_rndnu_ukernel_4x16__asm_aarch64_neon_mlal_lane_ld64_prfm(benchmark::State& state, const char* net) {
+  static void qu8_gemm_minmax_rndnu_ukernel_4x16__asm_aarch64_neon_mlal_lane_ld64_prfm(benchmark::State& state) {
     GEMMBenchmark(state,
       xnn_qu8_gemm_minmax_rndnu_ukernel_4x16__asm_aarch64_neon_mlal_lane_ld64_prfm,
       xnn_init_qu8_conv_minmax_rndnu_neon_params,
@@ -196,7 +198,7 @@
 
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  static void qu8_gemm_minmax_rndnu_ukernel_1x8__neon_mlal_lane(benchmark::State& state, const char* net) {
+  static void qu8_gemm_minmax_rndnu_ukernel_1x8__neon_mlal_lane(benchmark::State& state) {
     GEMMBenchmark(state,
       xnn_qu8_gemm_minmax_rndnu_ukernel_1x8__neon_mlal_lane,
       xnn_init_qu8_conv_minmax_rndnu_neon_params,
@@ -207,7 +209,7 @@
 
   BENCHMARK_GEMM(qu8_gemm_minmax_rndnu_ukernel_1x8__neon_mlal_lane)
 
-  static void qu8_gemm_minmax_rndnu_ukernel_1x16__neon_mlal_lane(benchmark::State& state, const char* net) {
+  static void qu8_gemm_minmax_rndnu_ukernel_1x16__neon_mlal_lane(benchmark::State& state) {
     GEMMBenchmark(state,
       xnn_qu8_gemm_minmax_rndnu_ukernel_1x16__neon_mlal_lane,
       xnn_init_qu8_conv_minmax_rndnu_neon_params,
@@ -218,7 +220,7 @@
 
   BENCHMARK_GEMM(qu8_gemm_minmax_rndnu_ukernel_1x16__neon_mlal_lane)
 
-  static void qu8_gemm_minmax_rndnu16_ukernel_1x16__neon_mlal_lane(benchmark::State& state, const char* net) {
+  static void qu8_gemm_minmax_rndnu16_ukernel_1x16__neon_mlal_lane(benchmark::State& state) {
     GEMMBenchmark(state,
       xnn_qu8_gemm_minmax_rndnu16_ukernel_1x16__neon_mlal_lane,
       xnn_init_qu8_conv_minmax_rndnu16_scalar_params,
@@ -229,7 +231,7 @@
 
   BENCHMARK_GEMM(qu8_gemm_minmax_rndnu16_ukernel_1x16__neon_mlal_lane)
 
-  static void qu8_gemm_minmax_rndnu_ukernel_2x8__neon_mlal_lane(benchmark::State& state, const char* net) {
+  static void qu8_gemm_minmax_rndnu_ukernel_2x8__neon_mlal_lane(benchmark::State& state) {
     GEMMBenchmark(state,
       xnn_qu8_gemm_minmax_rndnu_ukernel_2x8__neon_mlal_lane,
       xnn_init_qu8_conv_minmax_rndnu_neon_params,
@@ -240,7 +242,7 @@
 
   BENCHMARK_GEMM(qu8_gemm_minmax_rndnu_ukernel_2x8__neon_mlal_lane)
 
-  static void qu8_gemm_minmax_rndnu_ukernel_2x16__neon_mlal_lane(benchmark::State& state, const char* net) {
+  static void qu8_gemm_minmax_rndnu_ukernel_2x16__neon_mlal_lane(benchmark::State& state) {
     GEMMBenchmark(state,
       xnn_qu8_gemm_minmax_rndnu_ukernel_2x16__neon_mlal_lane,
       xnn_init_qu8_conv_minmax_rndnu_neon_params,
@@ -251,7 +253,7 @@
 
   BENCHMARK_GEMM(qu8_gemm_minmax_rndnu_ukernel_2x16__neon_mlal_lane)
 
-  static void qu8_gemm_minmax_rndnu_ukernel_3x8__neon_mlal_lane(benchmark::State& state, const char* net) {
+  static void qu8_gemm_minmax_rndnu_ukernel_3x8__neon_mlal_lane(benchmark::State& state) {
     GEMMBenchmark(state,
       xnn_qu8_gemm_minmax_rndnu_ukernel_3x8__neon_mlal_lane,
       xnn_init_qu8_conv_minmax_rndnu_neon_params,
@@ -262,7 +264,7 @@
 
   BENCHMARK_GEMM(qu8_gemm_minmax_rndnu_ukernel_3x8__neon_mlal_lane)
 
-  static void qu8_gemm_minmax_rndnu_ukernel_3x16__neon_mlal_lane(benchmark::State& state, const char* net) {
+  static void qu8_gemm_minmax_rndnu_ukernel_3x16__neon_mlal_lane(benchmark::State& state) {
     GEMMBenchmark(state,
       xnn_qu8_gemm_minmax_rndnu_ukernel_3x16__neon_mlal_lane,
       xnn_init_qu8_conv_minmax_rndnu_neon_params,
@@ -273,7 +275,7 @@
 
   BENCHMARK_GEMM(qu8_gemm_minmax_rndnu_ukernel_3x16__neon_mlal_lane)
 
-  static void qu8_gemm_minmax_rndnu_ukernel_4x8__neon_mlal_lane(benchmark::State& state, const char* net) {
+  static void qu8_gemm_minmax_rndnu_ukernel_4x8__neon_mlal_lane(benchmark::State& state) {
     GEMMBenchmark(state,
       xnn_qu8_gemm_minmax_rndnu_ukernel_4x8__neon_mlal_lane,
       xnn_init_qu8_conv_minmax_rndnu_neon_params,
@@ -284,7 +286,7 @@
 
   BENCHMARK_GEMM(qu8_gemm_minmax_rndnu_ukernel_4x8__neon_mlal_lane)
 
-  static void qu8_gemm_minmax_rndnu_ukernel_4x16__neon_mlal_lane(benchmark::State& state, const char* net) {
+  static void qu8_gemm_minmax_rndnu_ukernel_4x16__neon_mlal_lane(benchmark::State& state) {
     GEMMBenchmark(state,
       xnn_qu8_gemm_minmax_rndnu_ukernel_4x16__neon_mlal_lane,
       xnn_init_qu8_conv_minmax_rndnu_neon_params,
@@ -295,7 +297,7 @@
 
   BENCHMARK_GEMM(qu8_gemm_minmax_rndnu_ukernel_4x16__neon_mlal_lane)
 
-  static void qu8_gemm_minmax_rndnu_ukernel_6x8__neon_mlal_lane(benchmark::State& state, const char* net) {
+  static void qu8_gemm_minmax_rndnu_ukernel_6x8__neon_mlal_lane(benchmark::State& state) {
     GEMMBenchmark(state,
       xnn_qu8_gemm_minmax_rndnu_ukernel_6x8__neon_mlal_lane,
       xnn_init_qu8_conv_minmax_rndnu_neon_params,
@@ -306,7 +308,7 @@
 
   BENCHMARK_GEMM(qu8_gemm_minmax_rndnu_ukernel_6x8__neon_mlal_lane)
 
-  static void qu8_gemm_minmax_rndnu_ukernel_6x16__neon_mlal_lane(benchmark::State& state, const char* net) {
+  static void qu8_gemm_minmax_rndnu_ukernel_6x16__neon_mlal_lane(benchmark::State& state) {
     GEMMBenchmark(state,
       xnn_qu8_gemm_minmax_rndnu_ukernel_6x16__neon_mlal_lane,
       xnn_init_qu8_conv_minmax_rndnu_neon_params,
@@ -319,7 +321,7 @@
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 
-static void qu8_gemm_minmax_rndnu_ukernel_1x2__scalar(benchmark::State& state, const char* net) {
+static void qu8_gemm_minmax_rndnu_ukernel_1x2__scalar(benchmark::State& state) {
   GEMMBenchmark(state,
     xnn_qu8_gemm_minmax_rndnu_ukernel_1x2__scalar,
     xnn_init_qu8_conv_minmax_rndnu_scalar_params,
@@ -330,7 +332,7 @@ static void qu8_gemm_minmax_rndnu_ukernel_1x2__scalar(benchmark::State& state, c
 
 BENCHMARK_GEMM(qu8_gemm_minmax_rndnu_ukernel_1x2__scalar)
 
-static void qu8_gemm_minmax_rndnu_ukernel_1x4__scalar(benchmark::State& state, const char* net) {
+static void qu8_gemm_minmax_rndnu_ukernel_1x4__scalar(benchmark::State& state) {
   GEMMBenchmark(state,
     xnn_qu8_gemm_minmax_rndnu_ukernel_1x4__scalar,
     xnn_init_qu8_conv_minmax_rndnu_scalar_params,
@@ -341,7 +343,7 @@ static void qu8_gemm_minmax_rndnu_ukernel_1x4__scalar(benchmark::State& state, c
 
 BENCHMARK_GEMM(qu8_gemm_minmax_rndnu_ukernel_1x4__scalar)
 
-static void qu8_gemm_minmax_rndnu_ukernel_2x2__scalar(benchmark::State& state, const char* net) {
+static void qu8_gemm_minmax_rndnu_ukernel_2x2__scalar(benchmark::State& state) {
   GEMMBenchmark(state,
     xnn_qu8_gemm_minmax_rndnu_ukernel_2x2__scalar,
     xnn_init_qu8_conv_minmax_rndnu_scalar_params,
@@ -352,7 +354,7 @@ static void qu8_gemm_minmax_rndnu_ukernel_2x2__scalar(benchmark::State& state, c
 
 BENCHMARK_GEMM(qu8_gemm_minmax_rndnu_ukernel_2x2__scalar)
 
-static void qu8_gemm_minmax_rndnu_ukernel_2x4__scalar(benchmark::State& state, const char* net) {
+static void qu8_gemm_minmax_rndnu_ukernel_2x4__scalar(benchmark::State& state) {
   GEMMBenchmark(state,
     xnn_qu8_gemm_minmax_rndnu_ukernel_2x4__scalar,
     xnn_init_qu8_conv_minmax_rndnu_scalar_params,
@@ -363,7 +365,7 @@ static void qu8_gemm_minmax_rndnu_ukernel_2x4__scalar(benchmark::State& state, c
 
 BENCHMARK_GEMM(qu8_gemm_minmax_rndnu_ukernel_2x4__scalar)
 
-static void qu8_gemm_minmax_rndnu_ukernel_3x2__scalar(benchmark::State& state, const char* net) {
+static void qu8_gemm_minmax_rndnu_ukernel_3x2__scalar(benchmark::State& state) {
   GEMMBenchmark(state,
     xnn_qu8_gemm_minmax_rndnu_ukernel_3x2__scalar,
     xnn_init_qu8_conv_minmax_rndnu_scalar_params,
@@ -374,7 +376,7 @@ static void qu8_gemm_minmax_rndnu_ukernel_3x2__scalar(benchmark::State& state, c
 
 BENCHMARK_GEMM(qu8_gemm_minmax_rndnu_ukernel_3x2__scalar)
 
-static void qu8_gemm_minmax_rndnu_ukernel_3x4__scalar(benchmark::State& state, const char* net) {
+static void qu8_gemm_minmax_rndnu_ukernel_3x4__scalar(benchmark::State& state) {
   GEMMBenchmark(state,
     xnn_qu8_gemm_minmax_rndnu_ukernel_3x4__scalar,
     xnn_init_qu8_conv_minmax_rndnu_scalar_params,
@@ -385,7 +387,7 @@ static void qu8_gemm_minmax_rndnu_ukernel_3x4__scalar(benchmark::State& state, c
 
 BENCHMARK_GEMM(qu8_gemm_minmax_rndnu_ukernel_3x4__scalar)
 
-static void qu8_gemm_minmax_rndnu_ukernel_4x2__scalar(benchmark::State& state, const char* net) {
+static void qu8_gemm_minmax_rndnu_ukernel_4x2__scalar(benchmark::State& state) {
   GEMMBenchmark(state,
     xnn_qu8_gemm_minmax_rndnu_ukernel_4x2__scalar,
     xnn_init_qu8_conv_minmax_rndnu_scalar_params,
@@ -396,7 +398,7 @@ static void qu8_gemm_minmax_rndnu_ukernel_4x2__scalar(benchmark::State& state, c
 
 BENCHMARK_GEMM(qu8_gemm_minmax_rndnu_ukernel_4x2__scalar)
 
-static void qu8_gemm_minmax_rndnu_ukernel_4x4__scalar(benchmark::State& state, const char* net) {
+static void qu8_gemm_minmax_rndnu_ukernel_4x4__scalar(benchmark::State& state) {
   GEMMBenchmark(state,
     xnn_qu8_gemm_minmax_rndnu_ukernel_4x4__scalar,
     xnn_init_qu8_conv_minmax_rndnu_scalar_params,
@@ -406,6 +408,8 @@ static void qu8_gemm_minmax_rndnu_ukernel_4x4__scalar(benchmark::State& state, c
 }
 
 BENCHMARK_GEMM(qu8_gemm_minmax_rndnu_ukernel_4x4__scalar)
+
+}  // namespace
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
 XNN_BENCHMARK_MAIN();

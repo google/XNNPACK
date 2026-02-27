@@ -224,31 +224,13 @@ ynn_status subtract_a_times_sum_b(ynn_subgraph_t subgraph, size_t num_k_dims,
 // - The sum of the 3 zero point products have a similar pattern, but with
 //   an add instead of a multiply.
 // - The final product of two zero points also has this pattern.
-//
-// The technique above can also accomodate an addition of the bias:
-//
-//  ((a - a_zp)*a_s).(b - b_zp)*b_s + (bias - bias_zp)*bias_s
-//
-// The scale of the bias is a product of scales of a and b which is an
-// assumption that matched the behavior of XNNPACK.
-//
-//   bias_s = a_s * b_s
-//
-// so
-//
-//   ((a - a_zp)*a_s).(b - b_zp)*b_s + (bias - bias_zp)*a_s*b_s
-//
-// and
-//
-//   (a_s*b_s)*(a.b - a_zp.b - b_zp.a + a_zp.b_zp + bias - bias_zp)
-//
-ynn_status define_xnn_accumulator_for_dot(
+ynn_status define_xnn_accumulator_for_quantized_dot(
     ynn_subgraph_t subgraph, size_t num_k_dims, uint32_t a_id, uint32_t b_id,
     uint32_t* init_output_id, uint32_t* output_id, bool allow_reuse) {
-  const ynn_value& output_value = subgraph->value(*output_id);
   const ynn_value& a = subgraph->value(a_id);
   const ynn_value& b = subgraph->value(b_id);
-  ynn_type type = accumulator_for_type(product_type(a.type, b.type));
+  ynn_type accumulator_type =
+      accumulator_for_type(product_type(a.type, b.type));
 
   // `init_output_id` is strictly used for the quantization offsets calculated
   // below.
@@ -345,43 +327,19 @@ ynn_status define_xnn_accumulator_for_dot(
     scale_id = b_scale_id;
   }
 
-  if (type == output_value.type && allow_reuse) {
+  if (allow_reuse) {
+    assert(type_of_value(subgraph, *output_id) == accumulator_type);
     assert(scale_id == YNN_INVALID_VALUE_ID);
   } else {
     *output_id = YNN_INVALID_VALUE_ID;
     ynn_status status =
-        ynn_define_tensor_value(subgraph, type, /*rank=*/0,
+        ynn_define_tensor_value(subgraph, accumulator_type, /*rank=*/0,
                                 /*dims=*/nullptr, /*data=*/nullptr,
                                 /*zero_point_id=*/YNN_INVALID_VALUE_ID,
                                 /*scale_id=*/scale_id,
                                 /*flags=*/0, output_id);
     if (status != ynn_status_success) {
       return status;
-    }
-  }
-
-  if (*init_output_id != YNN_INVALID_VALUE_ID) {
-    if (type_of_value(subgraph, *init_output_id) != type) {
-      uint32_t converted_init_output_id = YNN_INVALID_VALUE_ID;
-      // The init_output_id we were given does not match the type of the
-      // accumulator we want to use, convert it.
-      ynn_status status = ynn_define_tensor_value(
-          subgraph, type, rank_of_value(subgraph, *init_output_id),
-          /*dims=*/nullptr, /*data=*/nullptr,
-          /*zero_point_id=*/YNN_INVALID_VALUE_ID,
-          /*scale_id=*/scale_id,
-          /*flags=*/0, &converted_init_output_id);
-      if (status != ynn_status_success) {
-        return status;
-      }
-
-      status = ynn_define_unary(subgraph, ynn_unary_convert, *init_output_id,
-                                &converted_init_output_id, /*flags=*/0);
-      if (status != ynn_status_success) {
-        return status;
-      }
-
-      *init_output_id = converted_init_output_id;
     }
   }
 
@@ -396,75 +354,80 @@ ynn_status convert_to(ynn_subgraph_t subgraph, uint32_t* value_id,
   }
 
   uint32_t converted_id = YNN_INVALID_VALUE_ID;
-  ynn_status status =
-      ynn_define_tensor_value(subgraph, type, /*rank=*/0,
-                              /*dims=*/nullptr, /*data=*/nullptr,
-                              /*zero_point_id=*/YNN_INVALID_VALUE_ID,
-                              /*scale_id=*/YNN_INVALID_VALUE_ID,
-                              /*flags=*/0, &converted_id);
-  if (status != ynn_status_success) {
-    return status;
-  }
-  status = ynn_define_unary(subgraph, ynn_unary_convert, *value_id,
-                            &converted_id, /*flags=*/0);
+  ynn_status status = ynn_define_convert(
+      subgraph, *value_id, type, /*zero_point_id=*/YNN_INVALID_VALUE_ID,
+      /*scale_id=*/YNN_INVALID_VALUE_ID, &converted_id, /*lags=*/0);
   *value_id = converted_id;
   return status;
 }
 
-ynn_status define_convert_dot_inputs(ynn_subgraph_t subgraph,
-                                     uint32_t input_a_id, uint32_t* input_b_id,
-                                     uint32_t* bias_id) {
-  if (type_of_value(subgraph, *input_b_id) == ynn_type_uint8) {
-    const ynn_value& b = subgraph->value(*input_b_id);
-    ynn_status status;
-    // Convert uint8 to int8
-    uint32_t zero_point_id = YNN_INVALID_VALUE_ID;
-    if (b.zero_point_id != YNN_INVALID_VALUE_ID) {
-      status =
-          ynn::define_binary_scalar_b(subgraph, ynn_binary_subtract,
-                                      b.zero_point_id, 128.0f, &zero_point_id);
-      if (status != ynn_status_success) {
-        return status;
-      }
-    } else {
-      zero_point_id = subgraph->get_scalar_value_id<int32_t>(-128);
-    }
+ynn_status define_xnn_dot_float(ynn_subgraph_t subgraph, size_t num_k_dims,
+                                uint32_t a_id, uint32_t b_id, uint32_t bias_id,
+                                uint32_t output_id) {
+  // 1. Convert input types to match.
 
-    uint32_t b_int8_id = YNN_INVALID_VALUE_ID;
-    status = ynn_define_tensor_value(subgraph, ynn_type_int8, /*rank=*/0,
-                                     /*dims=*/nullptr, /*data=*/nullptr,
-                                     zero_point_id, b.scale_id, /*flags=*/0,
-                                     &b_int8_id);
-    if (status != ynn_status_success) {
-      return status;
-    }
+  // XNNPACK allows a mix of fp16 and fp32 inputs, and it always converts the
+  // weights and bias to the same type as the input.
+  ynn_type a_type = type_of_value(subgraph, a_id);
+  assert(!type_is_integral(a_type));
 
-    status = ynn_define_unary(subgraph, ynn_unary_convert, *input_b_id,
-                              &b_int8_id, /*flags=*/0);
-    if (status != ynn_status_success) {
-      return status;
-    }
-    *input_b_id = b_int8_id;
-  } else if (!type_is_integral(type_of_value(subgraph, input_a_id))) {
-    // XNNPACK allows a mix of fp16 and fp32 inputs, and it always converts the
-    // weights and bias to the same type as the input.
-    ynn_type a_type = type_of_value(subgraph, input_a_id);
-    // TODO(dsharlet): XNNPACK also supports fp input, quantized weights, but
-    // that support is questionably correct/useful, so leaving it for later.
-    assert(!type_is_integral(type_of_value(subgraph, *input_b_id)));
-    ynn_status status = convert_to(subgraph, input_b_id, a_type);
-    if (status != ynn_status_success) {
-      return status;
-    }
+  // TODO(dsharlet): XNNPACK also supports fp input, quantized weights, but
+  // that support is questionably correct/useful, so leaving it for later.
+  assert(!type_is_integral(type_of_value(subgraph, b_id)));
 
-    // We need biases to be fp32, so we can initialize the accumulators, which
-    // are always fp32 for floating point inputs.
-    status = convert_to(subgraph, bias_id, ynn_type_fp32);
-    if (status != ynn_status_success) {
-      return status;
-    }
+  ynn_status status = convert_to(subgraph, &b_id, a_type);
+  if (status != ynn_status_success) return status;
+
+  // We need biases to be fp32, so we can initialize the accumulators, which
+  // are always fp32 for floating point inputs.
+  if (bias_id != YNN_INVALID_VALUE_ID) {
+    status = convert_to(subgraph, &bias_id, ynn_type_fp32);
+    if (status != ynn_status_success) return status;
+  }
+
+  // 2. Define the dot product.
+
+  // If `output_id` is not fp32, we need to create an accumulator as fp32 and
+  // convert the result to the output type. Otherwise, we can reuse `output_id`
+  // as the accumulator and avoid the conversion.
+  if (type_of_value(subgraph, output_id) != ynn_type_fp32) {
+    uint32_t accumulator_id = YNN_INVALID_VALUE_ID;
+    status = ynn_define_dot(subgraph, num_k_dims, a_id, b_id, bias_id,
+                            &accumulator_id, /*flags=*/0);
+    if (status != ynn_status_success) return status;
+
+    status = ynn_define_unary(subgraph, ynn_unary_convert, accumulator_id,
+                              &output_id, /*flags=*/0);
+    if (status != ynn_status_success) return status;
+  } else {
+    status = ynn_define_dot(subgraph, num_k_dims, a_id, b_id, bias_id,
+                            &output_id, /*flags=*/0);
+    if (status != ynn_status_success) return status;
   }
   return ynn_status_success;
+}
+
+ynn_status define_convert_uint8_to_int8(ynn_subgraph_t subgraph,
+                                        uint32_t* input_id) {
+  assert(type_of_value(subgraph, *input_id) == ynn_type_uint8);
+  ynn_status status;
+
+  uint32_t zero_point_id = YNN_INVALID_VALUE_ID;
+  const ynn_value& input = subgraph->value(*input_id);
+  if (input.zero_point_id != YNN_INVALID_VALUE_ID) {
+    status = ynn::define_binary_scalar_b(subgraph, ynn_binary_subtract,
+                                         input.zero_point_id, 128.0f,
+                                         &zero_point_id);
+    if (status != ynn_status_success) return status;
+  } else {
+    zero_point_id = subgraph->get_scalar_value_id<int32_t>(-128);
+  }
+
+  uint32_t input_int8_id = YNN_INVALID_VALUE_ID;
+  status = ynn_define_convert(subgraph, *input_id, ynn_type_int8, zero_point_id,
+                              input.scale_id, &input_int8_id, /*flags=*/0);
+  *input_id = input_int8_id;
+  return status;
 }
 
 }  // namespace
@@ -477,81 +440,94 @@ ynn_type accumulator_for_type(ynn_type type) {
   }
 }
 
-ynn_status define_xnn_dot(ynn_subgraph_t subgraph, size_t num_k_dims,
-                          uint32_t a_id, uint32_t b_id, uint32_t bias_id,
-                          uint32_t output_id) {
-  uint32_t bias_converted_id = bias_id;
-  ynn_status status =
-      define_convert_dot_inputs(subgraph, a_id, &b_id, &bias_converted_id);
-  if (status != ynn_status_success) {
-    return status;
+namespace {
+
+ynn_status define_xnn_dot_quantized(ynn_subgraph_t subgraph, size_t num_k_dims,
+                                    uint32_t a_id, uint32_t b_id,
+                                    uint32_t bias_id, uint32_t output_id) {
+  // 1. Convert input types to match.
+  if (type_of_value(subgraph, b_id) == ynn_type_uint8) {
+    ynn_status status = define_convert_uint8_to_int8(subgraph, &b_id);
+    if (status != ynn_status_success) return status;
   }
 
+  // 2. Define the dot product.
+
+  // We can reuse the `output_id` as the accumulator to the dot if there is no
+  // bias and the output type matches the accumulator type. Otherwise, let
+  // `define_xnn_accumulator_for_quantized_dot` define the accumulator.
+  bool allow_reuse = bias_id == YNN_INVALID_VALUE_ID &&
+                     type_of_value(subgraph, output_id) ==
+                         accumulator_for_type(type_of_value(subgraph, a_id));
+  uint32_t accumulator_id = allow_reuse ? output_id : YNN_INVALID_VALUE_ID;
   uint32_t init_accumulator_id = YNN_INVALID_VALUE_ID;
-  uint32_t accumulator_id = output_id;
-  // If we have a bias, the dot product creates an intermediate value to
-  // accumulate into instead of reusing `output_id`.
-  const bool allow_reuse = (bias_converted_id == YNN_INVALID_VALUE_ID);
-  status = define_xnn_accumulator_for_dot(subgraph, num_k_dims, a_id, b_id,
-                                          &init_accumulator_id, &accumulator_id,
-                                          allow_reuse);
-  if (status != ynn_status_success) {
-    return status;
-  }
+
+  ynn_status status = define_xnn_accumulator_for_quantized_dot(
+      subgraph, num_k_dims, a_id, b_id, &init_accumulator_id, &accumulator_id,
+      allow_reuse);
+  if (status != ynn_status_success) return status;
 
   status = ynn_define_dot(subgraph, num_k_dims, a_id, b_id, init_accumulator_id,
                           &accumulator_id, /*flags=*/0);
-  if (status != ynn_status_success) {
-    return status;
-  }
+  if (status != ynn_status_success) return status;
 
-  // XNNPACK semantics: output = scale * (dot_result) + bias.
-  // We perform this in fp32 to support arbitrary bias scales and fusing.
+  // 3. Handle the bias, if present.
+  if (bias_id != YNN_INVALID_VALUE_ID) {
+    // XNNPACK semantics: output = scale * (dot_result) + bias.
+    // We perform this in fp32 to support arbitrary bias scales and fusing.
 
-  uint32_t dot_result_as_float_id = accumulator_id;
+    uint32_t dot_result_as_float_id = accumulator_id;
 
-  // If the accumulator is integral (quantized), we must convert it to float.
-  // This conversion implicitly applies the scale_id attached to accumulator_id.
-  if (type_is_integral(type_of_value(subgraph, accumulator_id))) {
-    uint32_t float_val_id = YNN_INVALID_VALUE_ID;
-    status = ynn_define_tensor_value(subgraph, ynn_type_fp32, /*rank=*/0,
-                                     /*dims=*/nullptr, /*data=*/nullptr,
-                                     /*zero_point_id=*/YNN_INVALID_VALUE_ID,
-                                     /*scale_id=*/YNN_INVALID_VALUE_ID,
-                                     /*flags=*/0, &float_val_id);
-    if (status != ynn_status_success) return status;
+    // If the accumulator is integral (quantized), we must convert it to float.
+    // This conversion implicitly applies the scale_id attached to
+    // accumulator_id.
+    if (type_is_integral(type_of_value(subgraph, accumulator_id))) {
+      uint32_t float_val_id = YNN_INVALID_VALUE_ID;
+      status = ynn_define_convert(subgraph, accumulator_id, ynn_type_fp32,
+                                  /*zero_point_id=*/YNN_INVALID_VALUE_ID,
+                                  /*scale_id=*/YNN_INVALID_VALUE_ID,
+                                  &float_val_id, /*flags=*/0);
+      if (status != ynn_status_success) return status;
 
-    status = ynn_define_unary(subgraph, ynn_unary_convert, accumulator_id,
-                              &float_val_id, /*flags=*/0);
-    if (status != ynn_status_success) return status;
-
-    dot_result_as_float_id = float_val_id;
-  }
-
-  uint32_t output_unconverted_id = dot_result_as_float_id;
-  if (bias_converted_id != YNN_INVALID_VALUE_ID) {
-    // Ensure bias is also fp32 for the addition.
-    status = convert_to(subgraph, &bias_converted_id, ynn_type_fp32);
-    if (status != ynn_status_success) return status;
-
-    uint32_t added_id = YNN_INVALID_VALUE_ID;
-    status = define_binary_with_broadcasting(
-        subgraph, ynn_binary_add, dot_result_as_float_id, bias_converted_id,
-        &added_id, /*flags=*/0);
-    if (status != ynn_status_success) return status;
-
-    output_unconverted_id = added_id;
-  }
-
-  if (output_unconverted_id != output_id) {
-    status = ynn_define_unary(subgraph, ynn_unary_convert,
-                              output_unconverted_id, &output_id, /*flags=*/0);
-    if (status != ynn_status_success) {
-      return status;
+      dot_result_as_float_id = float_val_id;
     }
+
+    // Ensure bias is also fp32 for the addition.
+    status = convert_to(subgraph, &bias_id, ynn_type_fp32);
+    if (status != ynn_status_success) return status;
+
+    uint32_t output_unconverted_id = YNN_INVALID_VALUE_ID;
+    status = define_binary_with_broadcasting(
+        subgraph, ynn_binary_add, dot_result_as_float_id, bias_id,
+        &output_unconverted_id, /*flags=*/0);
+    if (status != ynn_status_success) return status;
+
+    if (output_unconverted_id != output_id) {
+      status = ynn_define_unary(subgraph, ynn_unary_convert,
+                                output_unconverted_id, &output_id, /*flags=*/0);
+      if (status != ynn_status_success) return status;
+    }
+  } else if (accumulator_id != output_id) {
+    status = ynn_define_unary(subgraph, ynn_unary_convert, accumulator_id,
+                              &output_id, /*flags=*/0);
+    if (status != ynn_status_success) return status;
   }
 
   return ynn_status_success;
+}
+
+}  // namespace
+
+ynn_status define_xnn_dot(ynn_subgraph_t subgraph, size_t num_k_dims,
+                          uint32_t a_id, uint32_t b_id, uint32_t bias_id,
+                          uint32_t output_id) {
+  if (type_is_integral(type_of_value(subgraph, a_id))) {
+    return define_xnn_dot_quantized(subgraph, num_k_dims, a_id, b_id, bias_id,
+                                    output_id);
+  } else {
+    return define_xnn_dot_float(subgraph, num_k_dims, a_id, b_id, bias_id,
+                                output_id);
+  }
 }
 
 ynn_status define_binary_scalar_a(ynn_subgraph_t subgraph,
@@ -646,16 +622,10 @@ ynn_status implement_gelu(ynn_subgraph_t subgraph, uint32_t input_id,
     // Convert quantized inputs to float. We'll just convert this whole subgraph
     // into a LUT anyways.
     uint32_t input_float_id = YNN_INVALID_VALUE_ID;
-    ynn_status status = ynn_define_tensor_value(
-        subgraph, ynn_type_fp32, rank_of_value(subgraph, input_id),
-        /*dims=*/nullptr, /*data=*/nullptr,
+    ynn_status status = ynn_define_convert(
+        subgraph, input_id, ynn_type_fp32,
         /*zero_point_id=*/YNN_INVALID_VALUE_ID,
-        /*scale_id=*/YNN_INVALID_VALUE_ID, /*flags=*/0, &input_float_id);
-    if (status != ynn_status_success) {
-      return status;
-    }
-    status = ynn_define_unary(subgraph, ynn_unary_convert, input_id,
-                              &input_float_id, /*flags=*/0);
+        /*scale_id=*/YNN_INVALID_VALUE_ID, &input_float_id, /*flags=*/0);
     if (status != ynn_status_success) {
       return status;
     }
@@ -713,6 +683,178 @@ ynn_status implement_gelu(ynn_subgraph_t subgraph, uint32_t input_id,
     }
   }
   return ynn_status_success;
+}
+
+// Implements elu(x) = select(x < 0, alpha * expm1(x), x)
+ynn_status implement_elu(ynn_subgraph_t subgraph, uint32_t input_id,
+                         float alpha, uint32_t output_id) {
+  ynn_type input_type = type_of_value(subgraph, input_id);
+
+  if (ynn::type_is_integral(input_type)) {
+    // Convert quantized inputs to float. We'll just convert this whole subgraph
+    // into a LUT anyways.
+    uint32_t input_float_id = YNN_INVALID_VALUE_ID;
+    ynn_status status = ynn_define_tensor_value(
+        subgraph, ynn_type_fp32, rank_of_value(subgraph, input_id),
+        /*dims=*/nullptr, /*data=*/nullptr,
+        /*zero_point_id=*/YNN_INVALID_VALUE_ID,
+        /*scale_id=*/YNN_INVALID_VALUE_ID, /*flags=*/0, &input_float_id);
+    if (status != ynn_status_success) {
+      return status;
+    }
+    status = ynn_define_unary(subgraph, ynn_unary_convert, input_id,
+                              &input_float_id, /*flags=*/0);
+    if (status != ynn_status_success) {
+      return status;
+    }
+    input_id = input_float_id;
+  }
+
+  // We implement this using min/max instead:
+  //
+  // elu(x) = max(alpha*expm1(min(x, 0)), x)
+  //
+  // We currently don't have select, and this might actually be better than a
+  // select implementation, which would require a binary + ternary op, instead
+  // of two binary ops.
+  uint32_t min_x_0_id = YNN_INVALID_VALUE_ID;
+  ynn_status status = define_binary_scalar_b(subgraph, ynn_binary_min, input_id,
+                                             0.0f, &min_x_0_id);
+  if (status != ynn_status_success) {
+    return status;
+  }
+
+  uint32_t expm1_x_id = YNN_INVALID_VALUE_ID;
+  status = ynn_define_unary(subgraph, ynn_unary_expm1, min_x_0_id, &expm1_x_id,
+                            /*flags=*/0);
+  if (status != ynn_status_success) {
+    return status;
+  }
+
+  uint32_t alpha_times_expm1_x_id = YNN_INVALID_VALUE_ID;
+  status = define_binary_scalar_b(subgraph, ynn_binary_multiply, expm1_x_id,
+                                  alpha, &alpha_times_expm1_x_id);
+  if (status != ynn_status_success) {
+    return status;
+  }
+
+  uint32_t output_float_id = output_id;
+  if (ynn::type_is_integral(input_type)) {
+    output_float_id = YNN_INVALID_VALUE_ID;
+  }
+
+  status = ynn_define_binary(subgraph, ynn_binary_max, alpha_times_expm1_x_id,
+                             input_id, &output_float_id,
+                             /*flags=*/0);
+  if (status != ynn_status_success) {
+    return status;
+  }
+
+  if (ynn::type_is_integral(input_type)) {
+    status = ynn_define_unary(subgraph, ynn_unary_convert, output_float_id,
+                              &output_id, /*flags=*/0);
+    if (status != ynn_status_success) {
+      return status;
+    }
+  }
+  return ynn_status_success;
+}
+
+ynn_status implement_hardswish(ynn_subgraph_t subgraph, uint32_t input_id,
+                               uint32_t output_id) {
+  ynn_type input_type = type_of_value(subgraph, input_id);
+
+  if (ynn::type_is_integral(input_type)) {
+    // Convert quantized inputs to float. We'll just convert this whole subgraph
+    // into a LUT anyways.
+    uint32_t input_float_id = YNN_INVALID_VALUE_ID;
+    ynn_status status = ynn_define_convert(
+        subgraph, input_id, ynn_type_fp32,
+        /*zero_point_id=*/YNN_INVALID_VALUE_ID,
+        /*scale_id=*/YNN_INVALID_VALUE_ID, &input_float_id, /*flags=*/0);
+    if (status != ynn_status_success) {
+      return status;
+    }
+    input_id = input_float_id;
+  }
+
+  uint32_t x_div_6_id = YNN_INVALID_VALUE_ID;
+  ynn_status status = define_binary_scalar_b(
+      subgraph, ynn_binary_multiply, input_id, 1.0f / 6.0f, &x_div_6_id);
+  if (status != ynn_status_success) {
+    return status;
+  }
+
+  uint32_t x_div_6_plus_0_5_id = YNN_INVALID_VALUE_ID;
+  status = define_binary_scalar_b(subgraph, ynn_binary_add, x_div_6_id, 0.5f,
+                                  &x_div_6_plus_0_5_id);
+  if (status != ynn_status_success) {
+    return status;
+  }
+
+  uint32_t max_id = YNN_INVALID_VALUE_ID;
+  status = define_binary_scalar_b(subgraph, ynn_binary_max, x_div_6_plus_0_5_id,
+                                  0.0f, &max_id);
+  if (status != ynn_status_success) {
+    return status;
+  }
+
+  uint32_t relu6_id = YNN_INVALID_VALUE_ID;
+  status =
+      define_binary_scalar_b(subgraph, ynn_binary_min, max_id, 1.0f, &relu6_id);
+  if (status != ynn_status_success) {
+    return status;
+  }
+
+  uint32_t output_float_id = output_id;
+  if (ynn::type_is_integral(input_type)) {
+    output_float_id = YNN_INVALID_VALUE_ID;
+  }
+
+  status = ynn_define_binary(subgraph, ynn_binary_multiply, input_id, relu6_id,
+                             &output_float_id,
+                             /*flags=*/0);
+  if (status != ynn_status_success) {
+    return status;
+  }
+
+  if (ynn::type_is_integral(input_type)) {
+    status = ynn_define_unary(subgraph, ynn_unary_convert, output_float_id,
+                              &output_id, /*flags=*/0);
+    if (status != ynn_status_success) {
+      return status;
+    }
+  }
+  return ynn_status_success;
+}
+
+ynn_status implement_leaky_relu(ynn_subgraph_t subgraph, uint32_t input_id,
+                                uint32_t output_id, float alpha) {
+  if (ynn::type_is_integral(ynn::type_of_value(subgraph, output_id))) {
+    uint32_t input_dequantized_id = YNN_INVALID_VALUE_ID;
+    ynn_status status = ynn_define_convert(
+        subgraph, input_id, ynn_type_fp32,
+        /*zero_point_id=*/YNN_INVALID_VALUE_ID,
+        /*scale_id=*/YNN_INVALID_VALUE_ID, &input_dequantized_id,
+        /*flags=*/0);
+    if (status != ynn_status_success) {
+      return status;
+    }
+
+    uint32_t output_dequantized_id = YNN_INVALID_VALUE_ID;
+    status = define_binary_scalar_b(subgraph, ynn_binary_leaky_relu,
+                                    input_dequantized_id, alpha,
+                                    &output_dequantized_id);
+    if (status != ynn_status_success) {
+      return status;
+    }
+
+    return ynn_define_unary(subgraph, ynn_unary_convert, output_dequantized_id,
+                            &output_id, /*flags=*/0);
+  } else {
+    return define_binary_scalar_b(subgraph, ynn_binary_leaky_relu, input_id,
+                                  alpha, &output_id);
+  }
 }
 
 ynn_status define_clamp(ynn_subgraph_t subgraph, float min, float max,

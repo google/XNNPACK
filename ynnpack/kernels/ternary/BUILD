@@ -145,8 +145,10 @@ ynn_cc_library(
     per_arch_srcs = {
         "arm_neon": ["arm_neon.cc"],
         "x86_avx": ["x86_avx.cc"],
-        "x86_avx512bw": ["x86_avx512bw.cc"],
-        "x86_avx512f": ["x86_avx512f.cc"],
+        "x86_avx512": [
+            "x86_avx512bw.cc",
+            "x86_avx512f.cc",
+        ],
         "x86_avx2": ["x86_avx2.cc"],
         "x86_sse2": ["x86_sse2.cc"],
         "x86_sse41": ["x86_sse41.cc"],
@@ -155,6 +157,7 @@ ynn_cc_library(
     deps = [
         "//ynnpack:ynnpack_h",
         "//ynnpack/base",
+        "//ynnpack/base/simd",
     ],
 )
 
@@ -163,7 +166,7 @@ cc_library(
     testonly = True,
     srcs = ["reference.cc"],
     hdrs = ["reference.h"],
-    visibility = ["//ynnpack:__subpackages__"],
+    visibility = ["//visibility:private"],
     deps = [
         "//ynnpack:ynnpack_h",
         "//ynnpack/base",

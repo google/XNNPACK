@@ -37,8 +37,6 @@ const XnnTestParam xnn_test_qs8_qc4w_params[] = {
 
 #undef XNN_UKERNEL
 
-}  // namespace
-
 TEST_P(XnnTest, null_bias) {
   TEST_REQUIRES_ARCH_FLAGS(GetParam().arch_flags);
   PackWMicrokernelTester()
@@ -181,3 +179,5 @@ TEST_P(XnnTest, n_gt_nr) {
 INSTANTIATE_TEST_SUITE_P(qs8_qc4w_packw, XnnTest,
                          testing::ValuesIn(xnn_test_qs8_qc4w_params),
                          GetTestName);
+
+}  // namespace

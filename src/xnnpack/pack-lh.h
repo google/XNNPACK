@@ -107,6 +107,8 @@ xnn_init_f32_qdint8_pack_lh_config();
 XNN_INTERNAL const struct xnn_pack_lh_config*
 xnn_init_f32_qdint8_row_sums_pack_lh_config();
 XNN_INTERNAL const struct xnn_pack_lh_config*
+xnn_init_f32_qduint8_row_sums_pack_lh_config();
+XNN_INTERNAL const struct xnn_pack_lh_config*
 xnn_init_f32_qduint8_pack_lh_config();
 
 #ifdef __cplusplus

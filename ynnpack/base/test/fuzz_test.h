@@ -136,7 +136,34 @@ class FuzzTest {
   }
 
  private:
+#ifdef YNN_ARCH_HEXAGON
+  // std::chrono::steady_clock::now() can return 0 on some Hexagon devices;
+  // this reads the value of a 56-bit, 19.2MHz hardware counter
+  // and converts it to seconds. Unlike std::chrono, this doesn't
+  // return an absolute time, but since ChronoClockNow() is only used
+  // to compute elapsed time, this shouldn't matter.
+  struct clock {
+    typedef uint64_t rep;
+    // On the simulator this clock runs at 19.2MHz *simulated* rate, which is
+    // a very slow real time rate. Let's speed up the clock a bit...
+    // TODO: We should only be doing this on the simulator (or find a way to get
+    // a real wall clock in the simulator). On real hardware, this is going to
+    // make fuzz tests run for much less time than intended.
+    static constexpr int clock_compression = 100;
+    typedef std::ratio<clock_compression, 19200000> period;
+    typedef std::chrono::duration<rep, period> duration;
+    typedef std::chrono::time_point<clock> time_point;
+    static const bool is_steady = false;
+
+    static time_point now() {
+      unsigned long long count;  // NOLINT
+      asm volatile(" %0 = c31:30 " : "=r"(count));
+      return time_point(static_cast<duration>(count));
+    }
+  };
+#else
   using clock = std::chrono::steady_clock;
+#endif
   clock::time_point expire_at_;
   int min_iters_;
   int max_iters_;

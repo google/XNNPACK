@@ -181,7 +181,7 @@ class SubgraphBuilder {
 
   SubgraphBuilder& AddDot(size_t num_k_dims, uint32_t input_a_id,
                           uint32_t input_b_id, uint32_t input_c_id,
-                          uint32_t output_id);
+                          uint32_t output_id, uint32_t flags = 0);
 
   SubgraphBuilder& AddReduce(ynn_reduce_operator op,
                              const std::vector<int32_t>& reduce_axes,
@@ -227,7 +227,7 @@ class SubgraphBuilder {
 class Runtime {
  public:
   Runtime(ynn_subgraph_t subgraph, TestScheduler* scheduler = nullptr,
-          uint32_t flags = 0);
+          uint32_t flags = 0, bool optimize = true);
 
   Runtime& ReshapeExternalTensor(const TensorShape& shape, void* data,
                                  uint32_t id);

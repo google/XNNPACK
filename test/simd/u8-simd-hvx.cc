@@ -36,7 +36,7 @@ class U8SimdHVXTest : public ::testing::Test {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_hvx);
     inputs_.resize(3 * xnn_simd_size_u8);
     output_.resize(xnn_simd_size_u8);
-    std::uniform_int_distribution<uint8_t> u8(-100, 100);
+    std::uniform_int_distribution<int> u8(-100, 100);
     std::generate(inputs_.begin(), inputs_.end(),
                   [&]() { return u8(rng_); });
   }

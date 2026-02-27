@@ -292,8 +292,11 @@ static void init_hardware_config(void) {
     const bool use_riscv_vector = (hwcap & COMPAT_HWCAP_ISA_V) != 0;
     set_arch_flag(xnn_arch_riscv_vector, use_riscv_vector);
 
-    /* There is no HWCAP for fp16 so disable by default */
-    set_arch_flag(xnn_arch_riscv_vector_fp16_arith, false);
+    /* cpuinfo does not yet support risc-v isa extensions, so enable fp16 if compiled */
+    //set_arch_flag(xnn_arch_riscv_vector_fp16_arith, cpuinfo_has_riscv_zvfh());
+    #if XNN_ENABLE_RISCV_FP16_VECTOR
+    set_arch_flag(xnn_arch_riscv_vector_fp16_arith, use_riscv_vector);
+    #endif
 
     if (use_riscv_vector) {
       register uint32_t vlenb __asm__ ("t0");

@@ -138,7 +138,7 @@ def split_ukernel_name(name):
 GEMM_BENCH_CODE = """\
 $if CPP_CHECK:
   #if ${CPP_CHECK}
-static void ${UKERNEL_NAME}(benchmark::State& state, const char* net) {
+static void ${UKERNEL_NAME}(benchmark::State& state) {
   GEMMBenchmark(state,
     ${GEMM},
     $if INIT_PARAMS is not None:
@@ -152,10 +152,7 @@ static void ${UKERNEL_NAME}(benchmark::State& state, const char* net) {
       /*mr_packed=*/${MR_PACKED},
     /*arch_flags=*/${ARCH_FLAGS});
 }\n
-$if WEIGHTS_DATATYPE in ['qb4w']:
-  BENCHMARK_GEMM_BL(${UKERNEL_NAME})
-$else:
-  BENCHMARK_GEMM(${UKERNEL_NAME})
+BENCHMARK_GEMM(${UKERNEL_NAME})
 $if CPP_CHECK:
   #endif  // ${CPP_CHECK}
 """
@@ -916,8 +913,6 @@ def main(args):
       raise ValueError("expected a list of micro-kernels in the spec")
 
     constant_or_function = """\
-namespace {
-
 struct ConstantOrFunction {
   ConstantOrFunction(size_t x) : fn([x]() { return x; }) {}  //NOLINT
   ConstantOrFunction(int x) : fn([x]() { return x; }) {}  //NOLINT
@@ -928,8 +923,6 @@ struct ConstantOrFunction {
 
   operator size_t() const { return fn(); }  //NOLINT
 };
-
-}  // namespace
 """
 
     tests = """\
@@ -967,6 +960,8 @@ struct ConstantOrFunction {
 #include "test/gemm-microkernel-tester.h"
 #include "test/next_prime.h"
 
+namespace {{
+
 {constant_or_function}
 """.format(specification=options.spec, generator=sys.argv[0], constant_or_function=constant_or_function)
 
@@ -994,6 +989,8 @@ struct ConstantOrFunction {
 #include "src/xnnpack/microparams-init.h"
 #include "src/xnnpack/pack.h"
 #include "src/xnnpack/packw.h"
+
+namespace {{
 
 """.format(specification=options.spec, generator=sys.argv[0])
 
@@ -1102,6 +1099,8 @@ struct ConstantOrFunction {
       bench_outputs += benches[arch_idx]
 
     bench_outputs += """\n
+}  // namespace
+
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
 XNN_BENCHMARK_MAIN();
 #endif
@@ -1142,6 +1141,9 @@ XNN_BENCHMARK_MAIN();
       }
 
     for output_name in options.output_test:
+      test_outputs[output_name] += """
+}  // namespace
+"""
       xnncommon.overwrite_if_changed(output_name, test_outputs[output_name])
 
 

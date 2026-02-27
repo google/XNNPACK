@@ -21,6 +21,14 @@ def subtract_fp32(a, b, x):
 
 
 @const_buffer("a", Float(32))
+@const_buffer("b", BFloat(16))
+@buffer("x", BFloat(16))
+@operator_name("subtract")
+def subtract_fp32_bf16(a, b, x):
+  return store(cast(BFloat(16), load(a) - cast(Float(32), load(b))), x)
+
+
+@const_buffer("a", Float(32))
 @const_buffer("b", Float(32))
 @buffer("x", Float(32))
 @operator_name("multiply")

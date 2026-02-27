@@ -212,7 +212,6 @@ std::vector<DWConvTestParams> CreateTests(
   return tests;
 }
 
-}  // namespace
 
 #define XNN_UKERNEL(arch_flags, ukernel, c_block, is_pipelined, cr, kr, datatype, weights_type, params_type, init_params)\
 INSTANTIATE_TEST_SUITE_P(                                                                                                \
@@ -228,3 +227,5 @@ INSTANTIATE_TEST_SUITE_P(                                                       
     });
 #include "src/qu8-dwconv/qu8-dwconv-minmax-fp32.inc"
 #undef XNN_UKERNEL
+
+}  // namespace

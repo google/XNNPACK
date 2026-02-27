@@ -145,18 +145,21 @@ xnn_status xnn_define_unary(xnn_subgraph_t subgraph, xnn_unary_operator type,
     }
   }
   if (type == xnn_unary_leaky_relu) {
-    return ynn::xnn_status_from_ynn(ynn::define_binary_scalar_b(
-        subgraph->ynn, ynn_binary_leaky_relu, input_id,
-        params->leaky_relu.negative_slope, &output_id));
+    return ynn::xnn_status_from_ynn(ynn::implement_leaky_relu(
+        subgraph->ynn, input_id, output_id, params->leaky_relu.negative_slope));
   } else if (type == xnn_unary_clamp) {
     return ynn::xnn_status_from_ynn(
         ynn::define_clamp(subgraph->ynn, params->clamp.min, params->clamp.max,
                           input_id, &output_id));
   } else if (type == xnn_unary_elu) {
-    // return x < 0 ? alpha * expm1(x) : x;
+    return ynn::xnn_status_from_ynn(ynn::implement_elu(
+        subgraph->ynn, input_id, params->elu.alpha, output_id));
   } else if (type == xnn_unary_gelu) {
     return ynn::xnn_status_from_ynn(
         ynn::implement_gelu(subgraph->ynn, input_id, output_id));
+  } else if (type == xnn_unary_hardswish) {
+    return ynn::xnn_status_from_ynn(
+        ynn::implement_hardswish(subgraph->ynn, input_id, output_id));
   } else if (type == xnn_unary_approxgelu) {
     // return (x / 2) * (1 + tanh(sqrt(2.0 / pi) * x * (1 + 0.044715 * x *
     // x))));
@@ -183,12 +186,32 @@ xnn_status xnn_define_convolution_2d(
     uint32_t output_id, uint32_t flags) {
   ynn_status status;
 
+  // TODO: In order to workaround a subtle copy aliaser bug, the stencil copy is
+  // moved to before the group split. This has a small
+  // performance penalty, because an extra transpose is needed after the split
+  // to align dimensions for the dot product. This extra transpose can be
+  // avoided by folding dim split into stencil copy like it's done in XLA
+  // implementation.
+
+  // Make a stenciled view of the input.
+  // [n, h, w, ci] -> [n, h, w, kh, kw, ci].
+  uint32_t stencil_id = YNN_INVALID_VALUE_ID;
+  status = ynn::define_xnn_stencil(
+      subgraph->ynn, input_padding_top, input_padding_right,
+      input_padding_bottom, input_padding_left, 0.0f, kernel_height,
+      kernel_width, subsampling_height, subsampling_width, dilation_height,
+      dilation_width, input_id, &stencil_id, flags);
+  if (status != ynn_status_success) {
+    return ynn::xnn_status_from_ynn(status);
+  }
+
+  input_id = stencil_id;
   if (groups != 1) {
     uint32_t split_id = YNN_INVALID_VALUE_ID;
 
-    // [n, h, w, ci] -> [n, h, w, g, 1, ci/g].
+    // [n, h, w, kh, kw, ci] -> [n, h, w, kh, kw, g, 1, ci/g].
     const size_t input_split[] = {groups, 1, group_input_channels};
-    status = ynn_define_split_dim(subgraph->ynn, 3, 3, input_split, input_id,
+    status = ynn_define_split_dim(subgraph->ynn, 5, 3, input_split, input_id,
                                   &split_id, /*flags=*/0);
     if (status != ynn_status_success) {
       return ynn::xnn_status_from_ynn(status);
@@ -264,19 +287,16 @@ xnn_status xnn_define_convolution_2d(
       subgraph->ynn->value(input_id).zero_point_id = zero_point_id;
       subgraph->ynn->value(input_id).scale_id = scale_id;
     }
-  }
 
-  // Make a stenciled view of the input.
-  // [n, h, w, ci] -> [n, h, w, kh, kw, ci] or [n, h, w, g, 1, ci] -> [n, h, w,
-  // g, 1, kh, kw, ci] for group convolutions.
-  uint32_t stencil_id = YNN_INVALID_VALUE_ID;
-  status = ynn::define_xnn_stencil(
-      subgraph->ynn, input_padding_top, input_padding_right,
-      input_padding_bottom, input_padding_left, 0.0f, kernel_height,
-      kernel_width, subsampling_height, subsampling_width, dilation_height,
-      dilation_width, input_id, &stencil_id, flags);
-  if (status != ynn_status_success) {
-    return ynn::xnn_status_from_ynn(status);
+    // [n, h, w, kh, kw, g, 1, ci/g] -> [n, h, w, g, 1, kh, kw, ci/g]
+    uint32_t transposed_input_id = YNN_INVALID_VALUE_ID;
+    const int32_t input_perm[] = {0, 1, 2, 5, 6, 3, 4, 7};
+    status = ynn_define_static_transpose(subgraph->ynn, 8, input_perm, input_id,
+                                         &transposed_input_id, /*flags=*/0);
+    if (status != ynn_status_success) {
+      return ynn::xnn_status_from_ynn(status);
+    }
+    input_id = transposed_input_id;
   }
 
   if (bias_id == XNN_INVALID_VALUE_ID) {
@@ -320,9 +340,8 @@ xnn_status xnn_define_convolution_2d(
   // Now we can compute [n, h, w, kh, kw, ci] * [kh, kw, ci, co] or
   // [n, h, w, g, 1, kh, kw, ci/g] * [g, kh, kw, ci, co/g] for group
   // convolutions.
-  status =
-      ynn::define_xnn_dot(subgraph->ynn, 3, stencil_id, transposed_filter_id,
-                          bias_id, output_unfused_id);
+  status = ynn::define_xnn_dot(subgraph->ynn, 3, input_id, transposed_filter_id,
+                               bias_id, output_unfused_id);
   if (status != ynn_status_success) {
     return ynn::xnn_status_from_ynn(status);
   }

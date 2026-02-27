@@ -1,9 +1,17 @@
+# Copyright 2025 Google LLC
+#
+# This source code is licensed under the BSD-style license found in the
+# LICENSE file in the root directory of this source tree.
+
 """Specializations for fp32 x86 dot kernel generators."""
 
 # pylint: disable=invalid-name
 # pylint: disable=missing-class-docstring
 
-from ynnpack.kernels.dot.generator.x86 import x86, x86_avx, x86_avx512f, x86_sse2
+from ynnpack.kernels.dot.generator.x86 import x86
+from ynnpack.kernels.dot.generator.x86 import x86_avx
+from ynnpack.kernels.dot.generator.x86 import x86_avx512
+from ynnpack.kernels.dot.generator.x86 import x86_sse2
 
 
 class x86_fp32(x86):
@@ -73,9 +81,9 @@ class x86_fma3_fp32(x86_avx_fp32):
     return f"c_{i}_{j} = {self._mm()}_fmadd_ps(a_{i}_{k}, b_{k}_{j}, c_{i}_{j});\n"
 
 
-class x86_avx512f_fp32(x86_fp32, x86_avx512f):
+class x86_avx512_fp32(x86_fp32, x86_avx512):
   def __init__(self):
-    super().__init__("avx512f", 512, (1, 16, 1))
+    super().__init__("avx512", 512, (1, 16, 1))
     self.flags += ["dot_flag::consistent_arithmetic"]
     self.flags += ["dot_flag::unaligned_b"]
 

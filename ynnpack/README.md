@@ -131,56 +131,11 @@ others. An incomplete list of the gaps are:
 As this is very much a work in progress, any comments, suggestions, or
 contributions are welcome.
 
-We are continuously running the following tests with YNNPACK enabled:
-
+We are continuously testing XNNPACK subgraph tests and benchmarks that are not
+tagged with the `no_ynnpack` tag:
 ```
-//bench/subgraph:attention
-//bench/subgraph:binary
-//bench/subgraph:convolution
-//bench/subgraph:elementwise
-//bench/subgraph:l2_norm
-//bench/subgraph:layer_norm
-//bench/subgraph:softmax
-//bench/subgraph:transformer
-//bench/subgraph:unary
-//test/subgraph:average_pooling_2d_test
-//test/subgraph:batch_matrix_multiply_test
-//test/subgraph:broadcast_test
-//test/subgraph:concatenate_test
-//test/subgraph:copy_test
-//test/subgraph:depth_to_space_2d_test
-//test/subgraph:even_split_test
-//test/subgraph:max_pooling_2d_test
-//test/subgraph:runtime_test
-//test/subgraph:softmax_test
-//test/subgraph:space_to_depth_2d_test
-//test/subgraph:split_fuse_test
-//test/subgraph:static_constant_pad_test
-//test/subgraph:static_expand_dims_test
-//test/subgraph:static_reduce_test
-//test/subgraph:static_reshape_test
-//test/subgraph:static_slice_test
+bazel test --define xnnpack_use_ynnpack=true --test_tag_filters=-no_ynnpack //test/subgraph/... //bench/subgraph/...
 ```
-
-The following tests work in `//test/subgraph:fully_connected_test`:
-
-```
-FullyConnectedQC8.static_b
-FullyConnectedQS8.static_b
-FullyConnectedQS8QC8W.static_b
-FullyConnectedF16F32F16.static_b
-FullyConnectedF16.static_b
-FullyConnectedF16.dynamic_b
-FullyConnectedF32.static_b
-FullyConnectedF32.dynamic_b
-FullyConnectedF32F16F16.static_b
-FullyConnectedF32F16F32.static_b
-FullyConnectedBF16F32.static_b
-FullyConnectedQD8F16QC8W.static_b
-FullyConnectedQD8F32QC8W.static_b
-```
-
-The set of tests supported by convolution is similar.
 
 ### Goals
 

@@ -10,6 +10,7 @@
 #include <type_traits>
 #include <vector>
 
+#include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include "ynnpack/base/arch.h"  // IWYU pragma: keep
 #include "ynnpack/base/base.h"
@@ -19,8 +20,13 @@
 #include "ynnpack/base/test/util.h"
 #include "ynnpack/base/type.h"
 #include "ynnpack/kernels/reduce/reduce.h"
+#include "slinky/base/span.h"
 
 namespace ynn {
+
+using testing::ElementsAreArray;
+using testing::FloatNear;
+using testing::Pointwise;
 
 enum class ReduceOp {
   kSum,
@@ -129,6 +135,11 @@ void Reference(Tensor<AT> a, Tensor<CT> c, ReduceOp op) {
 
 const float max_abs_value = 10.0f;
 
+template <typename T>
+slinky::span<T> row(Tensor<T> t, size_t i) {
+  return slinky::span<T>(&t(i, 0), t.extent(1));
+}
+
 template <typename AT, typename CT>
 void TestUnaryReduce(Tensor<AT> a, Tensor<CT> c,
                      ReduceOp op, unary_reduce_kernel_fn kernel) {
@@ -151,15 +162,18 @@ void TestUnaryReduce(Tensor<AT> a, Tensor<CT> c,
 
   // Verify results.
   Reference(a, expected, op);
-  for (const auto& i : EnumerateIndices(c.extents())) {
+  ASSERT_EQ(c.rank(), 2);
+  for (size_t i = 0; i < c.extent(0); ++i) {
     if (std::is_integral<CT>::value) {
-      ASSERT_EQ(c(i), expected(i))
-          << "shape=" << n << "x" << k3 << "x" << k2 << "x" << k1;
+      EXPECT_THAT(row(c, i), ElementsAreArray(row(expected, i)))
+          << "shape=" << n << "x" << k3 << "x" << k2 << "x" << k1
+          << " row=" << i;
     } else {
       const float tolerance =
           Tolerance<CT>(op, k3 * k2 * k1 + 1, max_abs_value);
-      ASSERT_NEAR(c(i), expected(i), tolerance)
-          << "shape=" << n << "x" << k3 << "x" << k2 << "x" << k1;
+      EXPECT_THAT(row(c, i), Pointwise(FloatNear(tolerance), row(expected, i)))
+          << "shape=" << n << "x" << k3 << "x" << k2 << "x" << k1
+          << " row=" << i;
     }
   }
 }
@@ -170,9 +184,6 @@ void TestUnaryReduce(AT, CT, std::vector<size_t> ns, std::vector<size_t> k3s,
                      ReduceOp op, unary_reduce_kernel_fn kernel) {
   ReplicableRandomDevice rng;
 
-  TypeGenerator<AT> a_gen(-max_abs_value, max_abs_value, quantization_params{});
-  TypeGenerator<CT> c_gen(-max_abs_value, max_abs_value, quantization_params{});
-
   // Get the max size of the buffer we want to test.
   const size_t max_n = *std::max_element(ns.begin(), ns.end());
   const size_t max_k1 = *std::max_element(k1s.begin(), k1s.end());
@@ -182,10 +193,11 @@ void TestUnaryReduce(AT, CT, std::vector<size_t> ns, std::vector<size_t> k3s,
   // We want n to be contiguous if k1 is 1, so allocate it in that order, and
   // transpose it after.
   Tensor<AT> a_max({max_k3, max_k2, max_n, max_k1});
-  a_max = a_max.transpose({2, 0, 1, 3});
   Tensor<CT> c_max({OutputRows(op), max_n});
-  a_max.generate([&]() { return a_gen(rng); });
-  c_max.generate([&]() { return c_gen(rng); });
+  fill_random(a_max.data(), a_max.size(), rng, -max_abs_value, max_abs_value);
+  fill_random(c_max.data(), c_max.size(), rng, -max_abs_value, max_abs_value);
+
+  a_max = a_max.transpose({2, 0, 1, 3});
 
   for (size_t n : ns) {
     for (size_t k3 : k3s) {
@@ -211,28 +223,16 @@ const char* to_string(const KernelParam& param) { return ""; }
 
 class UnaryReduce : public ::testing::TestWithParam<KernelParam> {};
 
-const size_t max_dim = 512;
-const auto n_values = simd_sizes_up_to(max_dim);
-const auto k_values = simd_sizes_up_to(max_dim);
-
-TEST_P(UnaryReduce, n) {
-  KernelParam kernel = GetParam();
-  if (!is_arch_supported(kernel.arch_flags)) GTEST_SKIP();
-  SwitchTwoTypes(kernel.type, [&](auto a_type, auto c_type) {
-    TestUnaryReduce(a_type, c_type, n_values, {1}, {1}, {max_dim},
-                    kernel.op, kernel.kernel);
-    TestUnaryReduce(a_type, c_type, n_values, {1}, {max_dim}, {1},
-                    kernel.op, kernel.kernel);
-    TestUnaryReduce(a_type, c_type, n_values, {max_dim}, {1}, {1},
-                    kernel.op, kernel.kernel);
-  });
-}
+constexpr size_t max_n_dim_bytes = 256;
+constexpr size_t max_k_dim = 64;
+const auto k_values = simd_sizes_up_to(max_k_dim);
 
 TEST_P(UnaryReduce, k1) {
   KernelParam kernel = GetParam();
   if (!is_arch_supported(kernel.arch_flags)) GTEST_SKIP();
   SwitchTwoTypes(kernel.type, [&](auto a_type, auto c_type) {
-    TestUnaryReduce(a_type, c_type, {max_dim}, {1}, {1}, k_values, kernel.op,
+    constexpr size_t max_n_dim = max_n_dim_bytes / sizeof(a_type);
+    TestUnaryReduce(a_type, c_type, {max_n_dim}, {1}, {1}, k_values, kernel.op,
                     kernel.kernel);
   });
 }
@@ -241,7 +241,8 @@ TEST_P(UnaryReduce, k2) {
   KernelParam kernel = GetParam();
   if (!is_arch_supported(kernel.arch_flags)) GTEST_SKIP();
   SwitchTwoTypes(kernel.type, [&](auto a_type, auto c_type) {
-    TestUnaryReduce(a_type, c_type, {max_dim}, {1}, k_values, {1}, kernel.op,
+    constexpr size_t max_n_dim = max_n_dim_bytes / sizeof(a_type);
+    TestUnaryReduce(a_type, c_type, {max_n_dim}, {1}, k_values, {1}, kernel.op,
                     kernel.kernel);
   });
 }
@@ -250,7 +251,24 @@ TEST_P(UnaryReduce, k3) {
   KernelParam kernel = GetParam();
   if (!is_arch_supported(kernel.arch_flags)) GTEST_SKIP();
   SwitchTwoTypes(kernel.type, [&](auto a_type, auto c_type) {
-    TestUnaryReduce(a_type, c_type, {max_dim}, k_values, {1}, {1}, kernel.op,
+    constexpr size_t max_n_dim = max_n_dim_bytes / sizeof(a_type);
+    TestUnaryReduce(a_type, c_type, {max_n_dim}, k_values, {1}, {1}, kernel.op,
+                    kernel.kernel);
+  });
+}
+
+TEST_P(UnaryReduce, n) {
+  KernelParam kernel = GetParam();
+  if (!is_arch_supported(kernel.arch_flags)) GTEST_SKIP();
+  SwitchTwoTypes(kernel.type, [&](auto a_type, auto c_type) {
+    constexpr size_t max_n_dim = max_n_dim_bytes / sizeof(a_type);
+    const auto n_values = simd_sizes_up_to(max_n_dim);
+    constexpr size_t k_dim = 4;
+    TestUnaryReduce(a_type, c_type, n_values, {1}, {1}, {k_dim}, kernel.op,
+                    kernel.kernel);
+    TestUnaryReduce(a_type, c_type, n_values, {1}, {k_dim}, {1}, kernel.op,
+                    kernel.kernel);
+    TestUnaryReduce(a_type, c_type, n_values, {k_dim}, {1}, {1}, kernel.op,
                     kernel.kernel);
   });
 }

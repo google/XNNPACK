@@ -25,25 +25,33 @@ enum {
   fma3 = 1 << 6,
   avx512f = 1 << 7,
   avx512bw = 1 << 8,
-  avx512bf16 = 1 << 9,
-  avx512fp16 = 1 << 10,
-  avx512vnni = 1 << 11,
-  amxbf16 = 1 << 12,
-  amxfp16 = 1 << 13,
-  amxint8 = 1 << 14,
+  avx512vl = 1 << 9,
+  avx512dq = 1 << 10,
+  avx512bf16 = 1 << 11,
+  avx512fp16 = 1 << 12,
+  avx512vnni = 1 << 13,
+  amxbf16 = 1 << 14,
+  amxfp16 = 1 << 15,
+  amxint8 = 1 << 16,
 
   avx2_fma3 = avx2 | fma3,
+  avx512 = avx512f | avx512bw | avx512vl | avx512dq,
 #endif  // YNN_ARCH_X86
 #ifdef YNN_ARCH_ARM
   neon = 1 << 0,
-  neondot = 1 << 1,
-  neonfp16 = 1 << 2,
-  neonfp16arith = 1 << 3,
-  neonbf16 = 1 << 4,
-  neoni8mm = 1 << 5,
-  sme = 1 << 6,
-  sme2 = 1 << 7,
+  neonfma = 1 << 1,
+  neondot = 1 << 2,
+  neonfp16 = 1 << 3,
+  neonfp16arith = 1 << 4,
+  neonbf16 = 1 << 5,
+  neoni8mm = 1 << 6,
+  sme = 1 << 7,
+  sme2 = 1 << 8,
+  sve = 1 << 9,
 #endif
+#ifdef YNN_ARCH_HEXAGON
+  hvx = 1 << 0,
+#endif  // YNN_ARCH_HEXAGON
 };
 
 }  // namespace arch_flag

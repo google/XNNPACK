@@ -45,8 +45,6 @@ struct ConstantOrFunction {
   operator size_t() const { return fn(); }  //NOLINT
 };
 
-}  // namespace
-
 
 namespace {
 
@@ -4542,3 +4540,5 @@ INSTANTIATE_TEST_SUITE_P(
       });
 #endif  // XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
 
+
+}  // namespace

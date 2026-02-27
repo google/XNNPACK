@@ -1,0 +1,22 @@
+Name: Android SDK
+URL: http://developer.android.com/sdk/index.html
+Version: 36.1
+  Android SDK Build-Tools 36.1.0
+  Android SDK Command-line Tools (auto-rolled)
+  Android SDK Emulator 31.2.10
+  Android SDK Platform-Tools 36.1.0
+  Android SDK Platform API 36.1
+Update Mechanism: Manual
+Security Critical: no
+Shipped: no
+License: Apache-2.0
+License File: LICENSE
+
+Description:
+The Android SDK provide API libraries and developer tools necessary to
+build, test and debug for Android.
+
+Update Instructions:
+* Update //DEPS with the IDs from Chromium
+* Update //DEPS with the latest `build` revision from V8
+* Run `gclient sync` to fetch the updated files.

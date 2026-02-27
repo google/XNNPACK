@@ -96,7 +96,7 @@ ynn_status ynn_define_get_tensor_shape(ynn_subgraph_t subgraph, size_t num_axes,
 
     output.make_buffer(runtime);
 
-    std::vector<slinky::var> dims = make_dims(output.rank(), runtime.symbols);
+    std::vector<slinky::var> dims = runtime.globals.make_dims(output.rank());
 
     std::vector<slinky::expr> extents;
     if (op.reshape_1d) {

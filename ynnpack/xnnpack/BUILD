@@ -44,6 +44,7 @@ cc_library(
     name = "xnnpack",
     srcs = [
         "deprecated.cc",
+        "experimental.cc",
         "operator.cc",
         "runtime.cc",
         "subgraph.cc",

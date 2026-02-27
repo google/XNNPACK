@@ -37,12 +37,17 @@ static float tol_relative(float y_ref, float rel_tol) {
   // effective absolute difference computed in `float`s. We therefore use
   // the latter form since it is the true difference between two `float`s
   // within the given relative tolerance.
+  if (!std::isfinite(y_ref)) {
+    // If the reference value is infinity, the computation below will produce
+    // NaN. We probably want to compute the tolerance as if the value is the
+    // largest value, not infinity.
+    y_ref = std::nexttoward(y_ref, 0.0f);
+  }
   return std::abs(y_ref * (1.0f + rel_tol)) - std::abs(y_ref);
 }
 
 static float tol_mixed(float y_ref, float abs_tol, float rel_tol) {
-  return std::max(abs_tol,
-                  std::abs(y_ref) * (1.0f + rel_tol) - std::abs(y_ref));
+  return std::max(abs_tol, tol_relative(y_ref, rel_tol));
 }
 
 struct interval {
@@ -117,11 +122,13 @@ struct convert : public unary_op_info {
   int32_t operator()(int32_t x) const override { return x; }
 
   float tolerance(float y_ref, ynn_type type) const override {
-    // The epsilon of a 23-bit integer.
-    constexpr float epsilon_int23 = 1.0f / (1 << 23);
-    return type_is_integral(type)
-               ? tol_relative(y_ref, epsilon_int23)
-               : tol_mixed(y_ref, epsilon(type), epsilon(type));
+    if (type_is_integral(type)) {
+      // The epsilon of a 23-bit integer.
+      constexpr float epsilon_int23 = 1.0f / (1 << 23);
+      return tol_relative(y_ref, epsilon_int23);
+    } else {
+      return tol_mixed(y_ref, epsilon(type), epsilon(type));
+    }
   }
 };
 
@@ -149,30 +156,11 @@ struct floor : public unary_op_info {
 
 struct sigmoid : public unary_op_info {
   float operator()(float x) const override {
-    if (x > 100) {
-      return 1.0f;
-    } else if (x < -100) {
-      return 0.0f;
-    } else {
-      const double e = std::exp(static_cast<double>(x));
-      return e / (1.0 + e);
-    }
+    return 1.0 / (1.0 + std::exp(static_cast<double>(-x)));
   }
 
   float tolerance(float y_ref, ynn_type type) const override {
-    switch (type) {
-      case ynn_type_fp32:
-        return tol_mixed(y_ref, 5.0e-6f, 1.0e-5f);
-      case ynn_type_fp16:
-        return tol_mixed(y_ref, 1.0e-4f, 5.0e-3f);
-      case ynn_type_bf16:
-        return tol_mixed(y_ref, 1.0e-3f, 1.0e-2f);
-      case ynn_type_int8:
-      case ynn_type_uint8:
-        return 1;
-      default:
-        return tol_exact(y_ref);
-    }
+    return tol_mixed(y_ref, epsilon(type), epsilon(type));
   }
 
   interval domain(ynn_type type) const override {

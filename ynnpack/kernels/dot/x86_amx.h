@@ -54,7 +54,7 @@ static void load_tile_config(size_t m, size_t n, size_t ktail) {
     std::uint8_t reserved_2[8];
   };
 
-  YNN_ALIGN(64) tile_config config = {0};
+  alignas(64) tile_config config = {0};
   config.palette_id = 1;
 
   // c tiles

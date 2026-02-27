@@ -158,6 +158,13 @@ enum ynn_status ynn_define_unary(ynn_subgraph_t subgraph,
                                  uint32_t input_a_id, uint32_t* output_id,
                                  uint32_t flags);
 
+// A helper for `ynn_define_unary` with `op` = `ynn_unary_convert`, which is
+// capable of defining the output value.
+enum ynn_status ynn_define_convert(ynn_subgraph_t subgraph, uint32_t input_a_id,
+                                   enum ynn_type type, uint32_t zero_point_id,
+                                   uint32_t scale_id, uint32_t* output_id,
+                                   uint32_t flags);
+
 enum ynn_binary_operator {
   ynn_binary_invalid = 0,
 
@@ -182,6 +189,12 @@ enum ynn_status ynn_define_binary(ynn_subgraph_t subgraph,
                                   enum ynn_binary_operator op,
                                   uint32_t input_a_id, uint32_t input_b_id,
                                   uint32_t* output_id, uint32_t flags);
+
+// Defines a lookup table operation. `output_id` will have the same shape as
+// `input_id`.
+enum ynn_status ynn_define_lut(ynn_subgraph_t subgraph, uint32_t input_id,
+                               uint32_t lut_id, uint32_t* output_id,
+                               uint32_t flags);
 
 // Changes the shape of `input_id` to have the shape `new_dims`, by broadcasting
 // extent 1 dimensions. If `new_dims[d]` is zero, dimension `d` is passed
@@ -325,6 +338,10 @@ enum ynn_status ynn_define_stencil_copy(
     const size_t* stencil_strides, const size_t* stencil_dilations,
     uint32_t input_id, uint32_t padding_id, uint32_t* output_id,
     uint32_t flags);
+
+// This flag indicates that the dot operation should be rewritten to use 3
+// BF16 dot operations to approximate F32 precision.
+#define YNN_NODE_FLAG_F32_DOT_TO_BF16_X3 (1 << 0)
 
 // Performs the operation:
 //

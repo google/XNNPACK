@@ -20,21 +20,21 @@ extern "C" {
 #endif
 
 #define DECLARE_F32_IGEMM_UKERNEL_FUNCTION(fn_name)                     \
-  XNN_INTERNAL void fn_name(size_t mr, size_t nr, size_t kc, size_t ks, \
+  XNN_INTERNAL void fn_name(size_t mr, size_t nc, size_t kc, size_t ks, \
                             const float** a, const float* w, float* c,  \
                             size_t cm_stride, size_t cn_stride,         \
                             size_t a_offset, const float* zero,         \
                             const struct xnn_f32_default_params* params);
 
 #define DECLARE_F32_IGEMM_RELU_UKERNEL_FUNCTION(fn_name)                \
-  XNN_INTERNAL void fn_name(size_t mr, size_t nr, size_t kc, size_t ks, \
+  XNN_INTERNAL void fn_name(size_t mr, size_t nc, size_t kc, size_t ks, \
                             const float** a, const float* w, float* c,  \
                             size_t cm_stride, size_t cn_stride,         \
                             size_t a_offset, const float* zero,         \
                             const struct xnn_f32_relu_params* params);
 
 #define DECLARE_F32_IGEMM_MINMAX_UKERNEL_FUNCTION(fn_name)              \
-  XNN_INTERNAL void fn_name(size_t mr, size_t nr, size_t kc, size_t ks, \
+  XNN_INTERNAL void fn_name(size_t mr, size_t nc, size_t kc, size_t ks, \
                             const float** a, const float* w, float* c,  \
                             size_t cm_stride, size_t cn_stride,         \
                             size_t a_offset, const float* zero,         \
@@ -684,7 +684,7 @@ DECLARE_F32_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_f32_igemm_minmax_ukernel_7x128__hv
 DECLARE_F32_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_f32_igemm_minmax_ukernel_8x128__hvx_broadcast)
 
 #define DECLARE_F16_IGEMM_MINMAX_UKERNEL_FUNCTION(fn_name)                    \
-  XNN_INTERNAL void fn_name(size_t mr, size_t nr, size_t kc, size_t ks,       \
+  XNN_INTERNAL void fn_name(size_t mr, size_t nc, size_t kc, size_t ks,       \
                             const xnn_float16** a, const xnn_float16* w,      \
                             xnn_float16*, size_t cm_stride, size_t cn_stride, \
                             size_t a_offset, const xnn_float16* zero,         \
@@ -790,7 +790,7 @@ DECLARE_F16_IGEMM_MINMAX_UKERNEL_FUNCTION(
     xnn_f16_igemm_minmax_ukernel_8x64__avx512fp16_broadcast)
 
 #define DECLARE_QU8_IGEMM_MINMAX_UKERNEL_FUNCTION(fn_name)                \
-  XNN_INTERNAL void fn_name(size_t mr, size_t nr, size_t kc, size_t ks,   \
+  XNN_INTERNAL void fn_name(size_t mr, size_t nc, size_t kc, size_t ks,   \
                             const uint8_t** a, const void* w, uint8_t* c, \
                             size_t cm_stride, size_t cn_stride,           \
                             size_t a_offset, const uint8_t* zero,         \
@@ -1241,7 +1241,7 @@ DECLARE_QU8_IGEMM_MINMAX_UKERNEL_FUNCTION(
 
 #define DECLARE_QD8_F16_QC8W_IGEMM_MINMAX_UKERNEL_FUNCTION(fn_name)          \
   XNN_INTERNAL void fn_name(                                                 \
-      size_t mr, size_t nr, size_t kc, size_t ks, const int8_t** a,          \
+      size_t mr, size_t nc, size_t kc, size_t ks, const int8_t** a,          \
       const void* w, xnn_float16*, size_t cm_stride, size_t cn_stride,       \
       size_t a_offset, const int8_t* zero_sentinel, const int8_t* zero_data, \
       const struct xnn_f16_minmax_params* params,                            \
@@ -1413,7 +1413,7 @@ DECLARE_QD8_F16_QC8W_IGEMM_MINMAX_UKERNEL_FUNCTION(
 
 #define DECLARE_QD8_F32_QC8W_IGEMM_MINMAX_UKERNEL_FUNCTION(fn_name)          \
   XNN_INTERNAL void fn_name(                                                 \
-      size_t mr, size_t nr, size_t kc, size_t ks, const int8_t** a,          \
+      size_t mr, size_t nc, size_t kc, size_t ks, const int8_t** a,          \
       const void* w, float* c, size_t cm_stride, size_t cn_stride,           \
       size_t a_offset, const int8_t* zero_sentinel, const int8_t* zero_data, \
       const struct xnn_f32_minmax_params* params,                            \
@@ -1926,7 +1926,7 @@ DECLARE_QD8_F32_QC8W_IGEMM_MINMAX_UKERNEL_FUNCTION(
 
 #define DECLARE_QS8_QC8W_IGEMM_MINMAX_UKERNEL_FUNCTION(fn_name)     \
   XNN_INTERNAL void fn_name(                                        \
-      size_t mr, size_t nr, size_t kc, size_t ks, const int8_t** a, \
+      size_t mr, size_t nc, size_t kc, size_t ks, const int8_t** a, \
       const void* w, int8_t* c, size_t cm_stride, size_t cn_stride, \
       size_t a_offset, const int8_t* zero,                          \
       const union xnn_qs8_qc8w_conv_minmax_params* params);

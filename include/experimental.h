@@ -22,20 +22,6 @@
 extern "C" {
 #endif
 
-/// Enable Slinky (if available).
-#define XNN_FLAG_SLINKY_ENABLED 0x00008000
-
-/// If Slinky is enabled, disable any scheduling.
-#define XNN_FLAG_SLINKY_NO_SCHEDULE 0x00010000
-
-/// If Slinky is enabled, assume shapes are concrete (and rebuild pipeline in
-/// reshape). This makes reshaping more expensive, but may reduce overhead in
-/// some cases.
-#define XNN_FLAG_SLINKY_STATIC_BOUNDS 0x00020000
-
-/// Deprecated.
-#define XNN_FLAG_SLINKY_NO_CHECKS 0x00040000
-
 #define XNN_FLAG_RUNTIME_OWNS_THREADPOOL 0x00080000
 
 typedef struct xnn_threadpool* xnn_threadpool_t;
@@ -77,8 +63,7 @@ enum xnn_status xnn_delete_threadpool(xnn_threadpool_t threadpool);
 ///                    workspace is NULL, there will be no sharing: each runtime has its own workspace.
 /// @param threadpool - Threadpool object to to implement parallel operations.
 /// @param flags - binary features of the runtime. The only currently supported values are
-///                XNN_FLAG_HINT_SPARSE_INFERENCE, XNN_FLAG_HINT_FP16_INFERENCE, XNN_FLAG_FORCE_FP16_INFERENCE,
-///                XNN_FLAG_SLINKY_STATIC_BOUNDS, and XNN_FLAG_SLINKY_NO_SCHEDULE.
+///                XNN_FLAG_HINT_SPARSE_INFERENCE, XNN_FLAG_HINT_FP16_INFERENCE, XNN_FLAG_FORCE_FP16_INFERENCE
 /// @param runtime_out - pointer to the variable that will be initialized with a handle to the Runtime object upon
 ///                      successful return. Once constructed, the Runtime object is independent of the Subgraph object
 ///                      used to create it.
@@ -107,6 +92,9 @@ struct xnn_fingerprint {
   uint32_t value;
 };
 
+/// Return a string corresponding to the fingerprint id.
+const char* xnn_fingerprint_id_to_string_u32(uint32_t fingerprint_id);
+
 /// Check whether the given configuration matches one that is currently in use.
 ///
 /// @returns `xnn_status_success` if the configuration matches.
@@ -115,6 +103,9 @@ enum xnn_status xnn_check_fingerprint(struct xnn_fingerprint fingerprint);
 /// Return the fingerprint corresponding to the given id or NULL if it wasn't
 /// set.
 const struct xnn_fingerprint* xnn_get_fingerprint(uint32_t id);
+
+/// Return the `idx`_th fingerprint or NULL if it wasn't set.
+const struct xnn_fingerprint* xnn_get_fingerprint_by_idx(uint32_t idx);
 
 /// Set the given fingerprint.
 void xnn_set_fingerprint(struct xnn_fingerprint fingerprint);

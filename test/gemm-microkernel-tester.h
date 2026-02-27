@@ -230,6 +230,10 @@ class GemmMicrokernelTester {
             xnn_init_qu8_conv_minmax_params_fn init_params,
             xnn_pack_qu8_igemm_fn pack, xnn_qu8_requantize_fn requantize);
 
+  void Test(xnn_qs8_qc2w_gemm_minmax_ukernel_fn gemm,
+          xnn_init_qs8_qc8w_conv_minmax_params_fn init_params,
+          xnn_pack_qs8_qc2w_gemm_fn pack, xnn_qs8_requantize_fn requantize);
+
   void Test(xnn_qs8_qc4w_gemm_minmax_ukernel_fn gemm,
             xnn_init_qs8_qc8w_conv_minmax_params_fn init_params,
             xnn_pack_qs8_qc4w_gemm_fn pack, xnn_qs8_requantize_fn requantize);
@@ -264,7 +268,7 @@ class GemmMicrokernelTester {
 
   void Test(xnn_qd8_f32_qc2w_gemm_ukernel_fn gemm,
             xnn_init_f32_minmax_params_fn init_params,
-            xnn_pack_qs8_qc2w_gemm_fn pack) const;
+            xnn_pack_qd8_qc2w_gemm_fn pack) const;
 
   void Test(xnn_qd8_f32_qc4w_gemm_ukernel_fn gemm,
             xnn_init_f32_qc4w_minmax_params_fn init_params,

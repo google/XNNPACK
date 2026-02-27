@@ -85,17 +85,16 @@ void TestImpl(const KernelInfo& kernel_info, const OpInfo& op_info, size_t m,
   Tensor<A> a({m, a_n + shape.padding_a});
   Tensor<B> b({m, b_n + shape.padding_b});
   Tensor<X> x({m, n + shape.padding_x});
-  a = a.crop_padding({0, 0}, {0, shape.padding_a});
-  b = b.crop_padding({0, 0}, {0, shape.padding_b});
-  x = x.crop_padding({0, 0}, {0, shape.padding_x});
 
   quantization_params a_quantization = random_quantization(A(), rng);
   quantization_params b_quantization = random_quantization(B(), rng);
   quantization_params x_quantization = random_quantization(X(), rng);
-  TypeGenerator<A> a_gen(a_quantization);
-  TypeGenerator<B> b_gen(b_quantization);
-  a.generate([&]() { return a_gen(rng); });
-  b.generate([&]() { return b_gen(rng); });
+  fill_random(a.data(), a.size(), rng, a_quantization);
+  fill_random(b.data(), b.size(), rng, b_quantization);
+
+  a = a.crop_padding({0, 0}, {0, shape.padding_a});
+  b = b.crop_padding({0, 0}, {0, shape.padding_b});
+  x = x.crop_padding({0, 0}, {0, shape.padding_x});
 
   broadcast_extent_1(a);
   broadcast_extent_1(b);

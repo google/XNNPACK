@@ -82,11 +82,11 @@ void TestMatMul(AT, BT, CT, size_t k) {
   ReplicableRandomDevice rng;
   // We want a large range, but not so large that our outputs are likely to be
   // Inf/NaN.
-  const float max_abs_value = std::sqrt(type_info<CT>::max()) / (k / 4);
-  TypeGenerator<AT> a_gen(-max_abs_value, max_abs_value);
-  TypeGenerator<BT> b_gen(-max_abs_value, max_abs_value);
-  TypeGenerator<CT> c_gen(-max_abs_value, max_abs_value);
-
+  const float max_abs_a_value = static_cast<float>(type_info<AT>::max());
+  const float max_abs_b_value = static_cast<float>(type_info<BT>::max());
+  const float max_abs_value =
+      std::min({0.95f * max_abs_a_value, 0.95f * max_abs_b_value,
+                static_cast<float>(std::sqrt(type_info<CT>::max()) / (k / 4))});
   // The consistency of a kernel is mostly an issue for:
   // - The reduction order
   // - Whether fma is used or not
@@ -98,9 +98,9 @@ void TestMatMul(AT, BT, CT, size_t k) {
   Tensor<BT> b({k, n / B_info::element_count()},
                Alignment({.bytes = get_max_alignment()}));
   Tensor<CT> init_c({m, n});
-  a.generate([&]() { return a_gen(rng); });
-  b.generate([&]() { return b_gen(rng); });
-  init_c.generate([&]() { return c_gen(rng); });
+  fill_random(a.data(), a.size(), rng, -max_abs_value, max_abs_value);
+  fill_random(b.data(), b.size(), rng, -max_abs_value, max_abs_value);
+  fill_random(init_c.data(), init_c.size(), rng, -max_abs_value, max_abs_value);
 
   Tensor<CT> c;
   int consistent_kernels = 0;
@@ -141,14 +141,17 @@ void TestMatMul(AT, BT, CT, size_t k) {
 
     if (c.base()) {
       int finite = 0;
-      for (const auto& i : EnumerateIndices({m, n})) {
-        bool c_finite = std::isfinite(static_cast<float>(c(i)));
-        bool kernel_c_finite = std::isfinite(static_cast<float>(kernel_c(i)));
-        if (c_finite && kernel_c_finite) {
-          ASSERT_EQ(c(i), kernel_c(i));
-          finite++;
-        } else {
-          ASSERT_EQ(c_finite, kernel_c_finite);
+      for (size_t i = 0; i < m; ++i) {
+        for (size_t j = 0; j < n; ++j) {
+          bool c_finite = std::isfinite(static_cast<float>(c(i, j)));
+          bool kernel_c_finite =
+              std::isfinite(static_cast<float>(kernel_c(i, j)));
+          if (c_finite && kernel_c_finite) {
+            ASSERT_EQ(c(i, j), kernel_c(i, j));
+            finite++;
+          } else {
+            ASSERT_EQ(c_finite, kernel_c_finite);
+          }
         }
       }
       // Make sure the result wasn't entirely Inf/NaN.

@@ -42,8 +42,6 @@ const XnnTestQS8Param xnn_test_qs8_params[] = {
 #undef XNN_QS8_UKERNEL
 #undef XNN_QS8_GIO_UKERNEL
 
-}  // namespace
-
 TEST_P(XnnTestQS8, null_bias) {
   TEST_REQUIRES_ARCH_FLAGS(GetParam().arch_flags);
   PackWMicrokernelTester()
@@ -385,3 +383,6 @@ INSTANTIATE_TEST_SUITE_P(qs8_gio_packw, XnnTestQS8GIO,
                          GetTestQS8GIOName);
 
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+}  // namespace
+

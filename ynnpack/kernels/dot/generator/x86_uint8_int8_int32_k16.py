@@ -1,3 +1,8 @@
+# Copyright 2025 Google LLC
+#
+# This source code is licensed under the BSD-style license found in the
+# LICENSE file in the root directory of this source tree.
+
 """Specializations for uint8 x86 dot kernel generators."""
 
 from ynnpack.kernels.dot.generator.x86 import x86_avx

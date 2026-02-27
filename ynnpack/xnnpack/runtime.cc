@@ -117,9 +117,6 @@ static xnn_status create_runtime_impl(xnn_subgraph_t subgraph,
                                       uint32_t flags,
                                       xnn_runtime_t* runtime_out) {
   uint32_t ynn_flags = 0;
-  if (flags & XNN_FLAG_SLINKY_NO_SCHEDULE) {
-    ynn_flags |= YNN_RUNTIME_FLAG_NO_SCHEDULE;
-  }
   if (flags & XNN_FLAG_SLOW_CONSISTENT_ARITHMETIC) {
     YNN_LOG_WARNING()
         << "XNN_FLAG_SLOW_CONSISTENT_ARITHMETIC flag is not supported by the "
@@ -156,9 +153,6 @@ xnn_status xnn_update_runtime_with_threadpool(xnn_runtime_t runtime,
       reinterpret_cast<slinky::thread_pool*>(threadpool->ynn);
   return xnn_status_success;
 }
-
-// TODO(dsharlet): Find a way to make this flag visible.
-#define XNN_FLAG_SLINKY_USE_XLA_THREAD_POOL 1
 
 xnn_status xnn_create_threadpool_v2(xnn_scheduler_v2 scheduler,
                                     void* scheduler_context, uint32_t flags,

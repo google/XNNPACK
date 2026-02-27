@@ -67,7 +67,7 @@ ynn_status ynn_define_concatenate(ynn_subgraph_t subgraph, int32_t axis,
     output.make_buffer(runtime, input_0.buffer->elem_size());
 
     std::vector<slinky::var> dims =
-        make_dims(output.buffer->rank(), runtime.symbols);
+        runtime.globals.make_dims(output.buffer->rank());
     std::vector<slinky::buffer_expr_ptr> inputs;
     inputs.reserve(node.inputs.size());
     std::vector<slinky::expr> bounds = {0};

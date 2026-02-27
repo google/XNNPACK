@@ -8,6 +8,7 @@
 #include <cstdint>
 #include <numeric>
 #include <tuple>
+#include <type_traits>
 
 #include <gtest/gtest.h>
 #include "ynnpack/base/test/buffer.h"
@@ -42,7 +43,7 @@ void TestImpl(A, X, lut_kernel_fn kernel, size_t n) {
   kernel(n, a.data(), lut.data(), x.data());
 
   for (size_t i = 0; i < n; ++i) {
-    ASSERT_EQ(x[i], lut[a[i]]);
+    ASSERT_EQ(x[i], lut[static_cast<int>(a[i]) - type_info<A>::min()]);
   }
 }
 

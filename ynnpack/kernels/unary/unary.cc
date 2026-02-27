@@ -435,12 +435,21 @@ struct hardswish_op {
       return nullptr;                                                    \
   }
 
-#define DISPATCH_OPERATOR_FOR_INTEGRAL_TYPE(type, op) \
-  switch (type) {                                     \
-    case ynn_type_int32:                              \
-      return &get_kernel<op<int32_t>>(int32_t());     \
-    default:                                          \
-      return nullptr;                                 \
+// Dispatcher for ops where int8/uint8 are not supported.
+// `ynn_type_int8` and `ynn_type_uint8` should return nullptr.
+#define DISPATCH_OPERATOR_FOR_TYPE_NON_LUT(type, is_quantized, op)       \
+  switch (type) {                                                        \
+    case ynn_type_fp32:                                                  \
+      return &get_kernel<op<float>>(float());                            \
+    case ynn_type_fp16:                                                  \
+      return &get_kernel<op<half>>(half());                              \
+    case ynn_type_bf16:                                                  \
+      return &get_kernel<op<bfloat16>>(bfloat16());                      \
+    case ynn_type_int32:                                                 \
+      return is_quantized ? &get_kernel<op<float>>(quantized<int32_t>()) \
+                          : &get_kernel<op<int32_t>>(int32_t());         \
+    default:                                                             \
+      return nullptr;                                                    \
   }
 
 const unary_kernel* get_unary_reference_kernel(ynn_unary_operator op,
@@ -454,39 +463,40 @@ const unary_kernel* get_unary_reference_kernel(ynn_unary_operator op,
     case ynn_unary_ceil:
       DISPATCH_OPERATOR_FOR_TYPE(type, is_quantized, ceil_op);
     case ynn_unary_exp:
-      DISPATCH_OPERATOR_FOR_TYPE(type, is_quantized, exp_op);
+      DISPATCH_OPERATOR_FOR_TYPE_NON_LUT(type, is_quantized, exp_op);
     case ynn_unary_expm1:
-      DISPATCH_OPERATOR_FOR_TYPE(type, is_quantized, expm1_op);
+      DISPATCH_OPERATOR_FOR_TYPE_NON_LUT(type, is_quantized, expm1_op);
     case ynn_unary_erf:
-      DISPATCH_OPERATOR_FOR_TYPE(type, is_quantized, erf_op);
+      DISPATCH_OPERATOR_FOR_TYPE_NON_LUT(type, is_quantized, erf_op);
     case ynn_unary_floor:
       DISPATCH_OPERATOR_FOR_TYPE(type, is_quantized, floor_op);
     case ynn_unary_log:
-      DISPATCH_OPERATOR_FOR_TYPE(type, is_quantized, log_op);
+      DISPATCH_OPERATOR_FOR_TYPE_NON_LUT(type, is_quantized, log_op);
     case ynn_unary_log1p:
-      DISPATCH_OPERATOR_FOR_TYPE(type, is_quantized, log1p_op);
+      DISPATCH_OPERATOR_FOR_TYPE_NON_LUT(type, is_quantized, log1p_op);
     case ynn_unary_negate:
       DISPATCH_OPERATOR_FOR_TYPE(type, is_quantized, negate_op);
     case ynn_unary_square:
-      DISPATCH_OPERATOR_FOR_TYPE(type, is_quantized, square_op);
+      DISPATCH_OPERATOR_FOR_TYPE_NON_LUT(type, is_quantized, square_op);
     case ynn_unary_square_root:
-      DISPATCH_OPERATOR_FOR_TYPE(type, is_quantized, square_root_op);
+      DISPATCH_OPERATOR_FOR_TYPE_NON_LUT(type, is_quantized, square_root_op);
     case ynn_unary_reciprocal_square_root:
-      DISPATCH_OPERATOR_FOR_TYPE(type, is_quantized, reciprocal_square_root_op);
+      DISPATCH_OPERATOR_FOR_TYPE_NON_LUT(type, is_quantized,
+                                         reciprocal_square_root_op);
     case ynn_unary_tanh:
-      DISPATCH_OPERATOR_FOR_TYPE(type, is_quantized, tanh_op);
+      DISPATCH_OPERATOR_FOR_TYPE_NON_LUT(type, is_quantized, tanh_op);
     case ynn_unary_cube_root:
-      DISPATCH_OPERATOR_FOR_TYPE(type, is_quantized, cube_root_op);
+      DISPATCH_OPERATOR_FOR_TYPE_NON_LUT(type, is_quantized, cube_root_op);
     case ynn_unary_sign:
       DISPATCH_OPERATOR_FOR_TYPE(type, is_quantized, sign_op);
     case ynn_unary_sine:
-      DISPATCH_OPERATOR_FOR_TYPE(type, is_quantized, sine_op);
+      DISPATCH_OPERATOR_FOR_TYPE_NON_LUT(type, is_quantized, sine_op);
     case ynn_unary_cosine:
-      DISPATCH_OPERATOR_FOR_TYPE(type, is_quantized, cosine_op);
+      DISPATCH_OPERATOR_FOR_TYPE_NON_LUT(type, is_quantized, cosine_op);
     case ynn_unary_sigmoid:
-      DISPATCH_OPERATOR_FOR_TYPE(type, is_quantized, sigmoid_op);
+      DISPATCH_OPERATOR_FOR_TYPE_NON_LUT(type, is_quantized, sigmoid_op);
     case ynn_unary_hardswish:
-      DISPATCH_OPERATOR_FOR_TYPE(type, is_quantized, hardswish_op);
+      DISPATCH_OPERATOR_FOR_TYPE_NON_LUT(type, is_quantized, hardswish_op);
     default:
       return nullptr;
   }

@@ -45,8 +45,6 @@ struct ConstantOrFunction {
   operator size_t() const { return fn(); }  //NOLINT
 };
 
-}  // namespace
-
 
 namespace {
 
@@ -3613,3 +3611,5 @@ INSTANTIATE_TEST_SUITE_P(
   #endif  // XNN_ENABLE_KLEIDIAI
 #endif  // XNN_ENABLE_ARM_SME2 && XNN_ARCH_ARM64
 
+
+}  // namespace

@@ -9,6 +9,15 @@
 #ifndef XNNPACK_SRC_XNNPACK_COMMON_H_
 #define XNNPACK_SRC_XNNPACK_COMMON_H_
 
+#if defined(__GNUC__) && !defined(__clang__)
+// This warning has a ton of false positives and often requires adding
+// initialization with non-trivial cost to silence it. Furthermore, it is
+// impossible to disable in the build, because it only exists in new versions of
+// GCC, old/other compilers error if you try to disable it via the command line,
+// and we can't detect compiler versions in bazel.
+#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
+#endif
+
 #if defined(__APPLE__)
 #include <TargetConditionals.h>
 #endif

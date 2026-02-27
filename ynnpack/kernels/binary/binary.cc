@@ -299,36 +299,27 @@ const binary_kernel* get_binary_reference_kernel(ynn_binary_operator op,
   return nullptr;
 }
 
-const binary_kernel* get_binary_kernel(ynn_binary_operator op, ynn_type type,
+const binary_kernel* get_binary_kernel(ynn_binary_operator op, ynn_type type_a,
+                                       ynn_type type_b, ynn_type type_x,
                                        bool is_quantized,
                                        uint64_t supported_arch_flags) {
-  // TODO(vksnk): select a better kernel based on the passed size.
-#define YNN_ELEMENTWISE_KERNEL(arch, name, op_type, init_params_fn, A, B, X)  \
-  if (type == type_of<A>() && type == type_of<B>() && type == type_of<X>() && \
-      op == ynn_binary_##op_type &&                                           \
-      is_arch_supported(arch, supported_arch_flags)) {                        \
-    static binary_kernel kernel##name = {&name, nullptr};                     \
-    YNN_LOG_INFO() << "Using binary kernel " << #name;                        \
-    return &kernel##name;                                                     \
-  }
-
-#include "ynnpack/kernels/binary/kernels.inc"
-#undef YNN_ELEMENTWISE_KERNEL
-
-  return get_binary_reference_kernel(op, type, false);
-}
-
-binary_kernel_fn get_binary_multiply_kernel(ynn_type type_a, ynn_type type_b,
-                                            ynn_type type_x) {
-#define YNN_ELEMENTWISE_KERNEL(arch, name, op, init_params_fn, A, B, X)    \
-  if (ynn_binary_##op == ynn_binary_multiply && is_arch_supported(arch)) { \
-    if (type_of<A>() == type_a && type_of<B>() == type_b &&                \
-        type_of<X>() == type_x) {                                          \
-      return name;                                                         \
-    }                                                                      \
+  if (!is_quantized) {
+#define YNN_ELEMENTWISE_KERNEL(arch, name, op_type, init_params_fn, A, B, X) \
+  if (is_arch_supported(arch, supported_arch_flags) &&                       \
+      op == ynn_binary_##op_type) {                                          \
+    if (type_of<A>() == type_a && type_of<B>() == type_b &&                  \
+        type_of<X>() == type_x) {                                            \
+      static binary_kernel kernel##name = {&name, nullptr};                  \
+      YNN_LOG_INFO() << "Using binary kernel " << #name;                     \
+      return &kernel##name;                                                  \
+    }                                                                        \
   }
 #include "ynnpack/kernels/binary/kernels.inc"
 #undef YNN_ELEMENTWISE_KERNEL
+  }
+  if (type_a == type_x && type_b == type_x) {
+    return get_binary_reference_kernel(op, type_x, is_quantized);
+  }
   return nullptr;
 }
 

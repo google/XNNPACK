@@ -57,6 +57,8 @@ uint64_t get_supported_arch_flags() {
     if (cpuinfo_has_x86_fma3()) result |= arch_flag::fma3;
     if (cpuinfo_has_x86_avx512f()) result |= arch_flag::avx512f;
     if (cpuinfo_has_x86_avx512bw()) result |= arch_flag::avx512bw;
+    if (cpuinfo_has_x86_avx512vl()) result |= arch_flag::avx512vl;
+    if (cpuinfo_has_x86_avx512dq()) result |= arch_flag::avx512dq;
     if (cpuinfo_has_x86_avx512bf16()) result |= arch_flag::avx512bf16;
     if (cpuinfo_has_x86_avx512fp16()) result |= arch_flag::avx512fp16;
     if (cpuinfo_has_x86_avx512vnni()) result |= arch_flag::avx512vnni;
@@ -68,6 +70,7 @@ uint64_t get_supported_arch_flags() {
 #endif  // YNN_ARCH_X86
 #ifdef YNN_ARCH_ARM
     if (cpuinfo_has_arm_neon()) result |= arch_flag::neon;
+    if (cpuinfo_has_arm_neon_fma()) result |= arch_flag::neonfma;
     if (cpuinfo_has_arm_neon_dot()) result |= arch_flag::neondot;
     if (cpuinfo_has_arm_neon_fp16()) result |= arch_flag::neonfp16;
     if (cpuinfo_has_arm_neon_fp16_arith()) result |= arch_flag::neonfp16arith;
@@ -75,8 +78,12 @@ uint64_t get_supported_arch_flags() {
     if (cpuinfo_has_arm_i8mm()) result |= arch_flag::neoni8mm;
     if (cpuinfo_has_arm_sme()) result |= arch_flag::sme;
     if (cpuinfo_has_arm_sme2()) result |= arch_flag::sme2;
+    if (cpuinfo_has_arm_sve()) result |= arch_flag::sve;
 #endif  // YNN_ARCH_ARM
 #endif  // YNN_ENABLE_CPUINFO
+#ifdef YNN_ARCH_HEXAGON
+    result |= arch_flag::hvx;
+#endif  // YNN_ARCH_HEXAGON
     return result;
   }();
   return flags;

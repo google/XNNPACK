@@ -49,8 +49,6 @@ const XnnTestParam xnn_test_params[] = {
 
 #undef XNN_UKERNEL
 
-}  // namespace
-
 TEST_P(XnnTest, channels_eq_channel_tile_unipass_fulltile) {
   TEST_REQUIRES_ARCH_FLAGS(GetParam().arch_flags);
   const size_t channel_tile = GetParam().channel_tile;
@@ -594,3 +592,5 @@ TEST_P(XnnTest, few_output_pixels_with_step) {
 
 INSTANTIATE_TEST_SUITE_P(maxpool_minmax, XnnTest,
                          testing::ValuesIn(xnn_test_params), GetTestName);
+
+}  // namespace

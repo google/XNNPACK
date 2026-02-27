@@ -45,8 +45,6 @@ struct ConstantOrFunction {
   operator size_t() const { return fn(); }  //NOLINT
 };
 
-}  // namespace
-
 
 namespace {
 
@@ -834,3 +832,5 @@ INSTANTIATE_TEST_SUITE_P(
       });
 #endif  // XNN_ENABLE_AVX512BF16 && XNN_ARCH_X86_64 && XNN_ENABLE_ASSEMBLY
 
+
+}  // namespace

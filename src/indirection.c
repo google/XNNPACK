@@ -154,7 +154,7 @@ void xnn_indirection_init_subconv2d(
     const size_t output_y_start = subtract_modulo(offset_y, modulo_padding_top, stride_height);
     for (size_t offset_x = 0; offset_x < stride_width; offset_x++) {
       const size_t output_x_start = subtract_modulo(offset_x, modulo_padding_left, stride_width);
-      const size_t sliced_output_width = divide_round_up(output_width - output_x_start, stride_width);
+      const size_t sliced_output_width = divide_round_up(doz(output_width, output_x_start), stride_width);
 
       subconvolution_params->indirection_buffer = indirection_buffer;
       subconvolution_params->indirection_y_stride =

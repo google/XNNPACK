@@ -16,13 +16,15 @@
 #include <optional>
 #include <ostream>
 #include <string>
-#include <utility>
+#include <string_view>
+#include <tuple>
 #include <variant>
 #include <vector>
 
 #include "ynnpack/base/type.h"
 #include "ynnpack/include/ynnpack.h"
 #include "ynnpack/kernels/ternary/ternary.h"
+#include "ynnpack/subgraph/slinky.h"
 #include "slinky/runtime/buffer.h"
 #include "slinky/runtime/evaluate.h"
 #include "slinky/runtime/expr.h"
@@ -32,7 +34,13 @@ namespace ynn {
 // dot packing splits + transposes 2 dimensions.
 constexpr size_t ynn_internal_extra_dims = 2;
 
-using axes_set = std::bitset<YNN_MAX_TENSOR_RANK + ynn_internal_extra_dims>;
+struct axes_set : std::bitset<YNN_MAX_TENSOR_RANK + ynn_internal_extra_dims> {
+  using bitset::bitset;
+};
+
+inline bool operator<(const axes_set& a, const axes_set& b) {
+  return a.to_ulong() < b.to_ulong();
+}
 
 // Define a transpose node, optionally using a slinky copy that may alias even
 // if dimension 0 is not stride 1 in the result.
@@ -84,6 +92,10 @@ struct ynn_value {
 
   bool is_static() const { return !is_external() && data && data->base; }
 
+  bool is_static_scalar() const {
+    return is_static() && data->size_bytes() == data->elem_size;
+  }
+
   bool is_valid() const {
     return id != YNN_INVALID_VALUE_ID && type != ynn_type_invalid;
   }
@@ -116,9 +128,8 @@ struct ynn_value {
   // returns that value.
   template <typename T>
   T static_scalar_value() const {
-    assert(is_static());
+    assert(is_static_scalar());
     assert(sizeof(T) == data->elem_size);
-    assert(data->size_bytes() == data->elem_size);
     T result;
     memcpy(&result, data->base, sizeof(T));
     return result;
@@ -130,79 +141,215 @@ struct ynn_value {
 };
 
 struct ynn_node {
-  struct invalid {};
+  struct invalid {
+    friend bool operator==(const invalid&, const invalid&) { return true; }
+    friend bool operator<(const invalid&, const invalid&) { return false; }
+  };
   struct opaque {
     const char* name = "opaque";
+    friend bool operator==(const opaque& a, const opaque& b) {
+      return std::string_view(a.name) == std::string_view(b.name);
+    }
+    friend bool operator<(const opaque& a, const opaque& b) {
+      return std::string_view(a.name) < std::string_view(b.name);
+    }
   };
   struct broadcast {
     // The dimensions to broadcast.
     ynn::axes_set axes;
+    friend bool operator==(const broadcast& a, const broadcast& b) {
+      return a.axes == b.axes;
+    }
+    friend bool operator<(const broadcast& a, const broadcast& b) {
+      return a.axes < b.axes;
+    }
   };
   struct broadcast_like {
     // The dimensions to attempt to broadcast.
     ynn::axes_set axes;
+    friend bool operator==(const broadcast_like& a, const broadcast_like& b) {
+      return a.axes == b.axes;
+    }
+    friend bool operator<(const broadcast_like& a, const broadcast_like& b) {
+      return a.axes < b.axes;
+    }
   };
   struct concatenate {
     int32_t axis;
+    friend bool operator==(const concatenate& a, const concatenate& b) {
+      return a.axis == b.axis;
+    }
+    friend bool operator<(const concatenate& a, const concatenate& b) {
+      return a.axis < b.axis;
+    }
   };
   struct stack {
     int32_t axis;
+    friend bool operator==(const stack& a, const stack& b) {
+      return a.axis == b.axis;
+    }
+    friend bool operator<(const stack& a, const stack& b) {
+      return a.axis < b.axis;
+    }
   };
   struct even_split {
     int32_t axis;
+    friend bool operator==(const even_split& a, const even_split& b) {
+      return a.axis == b.axis;
+    }
+    friend bool operator<(const even_split& a, const even_split& b) {
+      return a.axis < b.axis;
+    }
   };
   struct unary_elementwise {
     ynn_unary_operator op;
+    friend bool operator==(const unary_elementwise& a,
+                           const unary_elementwise& b) {
+      return a.op == b.op;
+    }
+    friend bool operator<(const unary_elementwise& a,
+                          const unary_elementwise& b) {
+      return a.op < b.op;
+    }
+  };
+  struct lut {
+    friend bool operator==(const lut&, const lut&) { return true; }
+    friend bool operator<(const lut&, const lut&) { return false; }
   };
   struct binary_elementwise {
     ynn_binary_operator op;
+    friend bool operator==(const binary_elementwise& a,
+                           const binary_elementwise& b) {
+      return a.op == b.op;
+    }
+    friend bool operator<(const binary_elementwise& a,
+                          const binary_elementwise& b) {
+      return a.op < b.op;
+    }
   };
   struct ternary_elementwise {
     ynn::ternary_op op;
+    friend bool operator==(const ternary_elementwise& a,
+                           const ternary_elementwise& b) {
+      return a.op == b.op;
+    }
+    friend bool operator<(const ternary_elementwise& a,
+                          const ternary_elementwise& b) {
+      return a.op < b.op;
+    }
   };
-  struct copy {};
+  struct copy {
+    friend bool operator==(const copy&, const copy&) { return true; }
+    friend bool operator<(const copy&, const copy&) { return false; }
+  };
   struct fuse_dim {
     // Fuse `axes_count` dimensions starting at `axis` into one dimension.
     int32_t axis;
     size_t axes_count;
+    friend bool operator==(const fuse_dim& a, const fuse_dim& b) {
+      return a.axis == b.axis && a.axes_count == b.axes_count;
+    }
+    friend bool operator<(const fuse_dim& a, const fuse_dim& b) {
+      return std::tie(a.axis, a.axes_count) < std::tie(b.axis, b.axes_count);
+    }
   };
   struct fuse_dims {
     // Set of dimensions to fuse with the next dimension.
     ynn::axes_set axes;
+    friend bool operator==(const fuse_dims& a, const fuse_dims& b) {
+      return a.axes == b.axes;
+    }
+    friend bool operator<(const fuse_dims& a, const fuse_dims& b) {
+      return a.axes < b.axes;
+    }
   };
   struct split_dim {
     // Split `axis` into new axes of extent `new_dims`.
     int32_t axis;
     std::vector<size_t> new_dims;
+    friend bool operator==(const split_dim& a, const split_dim& b) {
+      return a.axis == b.axis && a.new_dims == b.new_dims;
+    }
+    friend bool operator<(const split_dim& a, const split_dim& b) {
+      return std::tie(a.axis, a.new_dims) < std::tie(b.axis, b.new_dims);
+    }
   };
   struct split_dims {
     struct split {
       // Axis to split.
       int32_t axis;
       size_t factor;
+      friend bool operator==(const split& a, const split& b) {
+        return a.axis == b.axis && a.factor == b.factor;
+      }
+      friend bool operator<(const split& a, const split& b) {
+        return std::tie(a.axis, a.factor) < std::tie(b.axis, b.factor);
+      }
     };
     std::vector<split> splits;
+    friend bool operator==(const split_dims& a, const split_dims& b) {
+      return a.splits == b.splits;
+    }
+    friend bool operator<(const split_dims& a, const split_dims& b) {
+      return a.splits < b.splits;
+    }
   };
   struct static_reshape {
     // Extents of the new dimensions after a reshape. '0' is replaced with the
     // extent that preserves the total number of elements.
     std::vector<size_t> new_dims;
+    friend bool operator==(const static_reshape& a, const static_reshape& b) {
+      return a.new_dims == b.new_dims;
+    }
+    friend bool operator<(const static_reshape& a, const static_reshape& b) {
+      return a.new_dims < b.new_dims;
+    }
   };
   struct static_broadcast {
     // Extents of the new dimensions after a broadcast. '0' is replaced with the
     // original extent of the input.
     std::vector<size_t> new_dims;
+    friend bool operator==(const static_broadcast& a,
+                           const static_broadcast& b) {
+      return a.new_dims == b.new_dims;
+    }
+    friend bool operator<(const static_broadcast& a,
+                          const static_broadcast& b) {
+      return a.new_dims < b.new_dims;
+    }
   };
   struct static_expand_dims {
     ynn::axes_set new_axes;
+    friend bool operator==(const static_expand_dims& a,
+                           const static_expand_dims& b) {
+      return a.new_axes == b.new_axes;
+    }
+    friend bool operator<(const static_expand_dims& a,
+                          const static_expand_dims& b) {
+      return a.new_axes < b.new_axes;
+    }
   };
   struct static_pad {
     struct padding {
       int32_t axis;
       int64_t pre_padding;
       int64_t post_padding;
+      friend bool operator==(const padding& a, const padding& b) {
+        return a.axis == b.axis && a.pre_padding == b.pre_padding &&
+               a.post_padding == b.post_padding;
+      }
+      friend bool operator<(const padding& a, const padding& b) {
+        return std::tie(a.axis, a.pre_padding, a.post_padding) <
+               std::tie(b.axis, b.pre_padding, b.post_padding);
+      }
     };
     std::vector<padding> paddings;
+    friend bool operator==(const static_pad& a, const static_pad& b) {
+      return a.paddings == b.paddings;
+    }
+    friend bool operator<(const static_pad& a, const static_pad& b) {
+      return a.paddings < b.paddings;
+    }
   };
   struct static_slice {
     struct slice {
@@ -210,13 +357,37 @@ struct ynn_node {
       int64_t begin;
       int64_t end;
       int64_t stride;
+      friend bool operator==(const slice& a, const slice& b) {
+        return a.axis == b.axis && a.begin == b.begin && a.end == b.end &&
+               a.stride == b.stride;
+      }
+      friend bool operator<(const slice& a, const slice& b) {
+        return std::tie(a.axis, a.begin, a.end, a.stride) <
+               std::tie(b.axis, b.begin, b.end, b.stride);
+      }
     };
     std::vector<slice> slices;
     bool slice_dims;
+    friend bool operator==(const static_slice& a, const static_slice& b) {
+      return a.slices == b.slices && a.slice_dims == b.slice_dims;
+    }
+    friend bool operator<(const static_slice& a, const static_slice& b) {
+      return std::tie(a.slices, a.slice_dims) <
+             std::tie(b.slices, b.slice_dims);
+    }
   };
   struct static_transpose {
     std::vector<int32_t> permutation;
     bool alias;
+    friend bool operator==(const static_transpose& a,
+                           const static_transpose& b) {
+      return a.permutation == b.permutation && a.alias == b.alias;
+    }
+    friend bool operator<(const static_transpose& a,
+                          const static_transpose& b) {
+      return std::tie(a.permutation, a.alias) <
+             std::tie(b.permutation, b.alias);
+    }
   };
   struct stencil_copy {
     struct stencil {
@@ -225,22 +396,70 @@ struct ynn_node {
       size_t extent;
       size_t stride;
       size_t dilation;
+      friend bool operator==(const stencil& a, const stencil& b) {
+        return a.axis == b.axis && a.new_axis == b.new_axis &&
+               a.extent == b.extent && a.stride == b.stride &&
+               a.dilation == b.dilation;
+      }
+      friend bool operator<(const stencil& a, const stencil& b) {
+        return std::tie(a.axis, a.new_axis, a.extent, a.stride, a.dilation) <
+               std::tie(b.axis, b.new_axis, b.extent, b.stride, b.dilation);
+      }
     };
     std::vector<stencil> stencils;
+    friend bool operator==(const stencil_copy& a, const stencil_copy& b) {
+      return a.stencils == b.stencils;
+    }
+    friend bool operator<(const stencil_copy& a, const stencil_copy& b) {
+      return a.stencils < b.stencils;
+    }
   };
   struct dot {
     size_t num_k_dims;
+    friend bool operator==(const dot& a, const dot& b) {
+      return a.num_k_dims == b.num_k_dims;
+    }
+    friend bool operator<(const dot& a, const dot& b) {
+      return a.num_k_dims < b.num_k_dims;
+    }
   };
-  struct pack_b {};
-  struct transpose_a {};
+  struct pack_b {
+    friend bool operator==(const pack_b&, const pack_b&) { return true; }
+    friend bool operator<(const pack_b&, const pack_b&) { return false; }
+  };
+  struct transpose_a {
+    size_t tile_k;
+    int32_t m_dim;
+    friend bool operator==(const transpose_a& a, const transpose_a& b) {
+      return a.tile_k == b.tile_k && a.m_dim == b.m_dim;
+    }
+    friend bool operator<(const transpose_a& a, const transpose_a& b) {
+      return std::tie(a.tile_k, a.m_dim) < std::tie(b.tile_k, b.m_dim);
+    }
+  };
   struct get_tensor_shape {
     std::vector<int32_t> axes;
     bool reshape_1d;
+    friend bool operator==(const get_tensor_shape& a,
+                           const get_tensor_shape& b) {
+      return a.axes == b.axes && a.reshape_1d == b.reshape_1d;
+    }
+    friend bool operator<(const get_tensor_shape& a,
+                          const get_tensor_shape& b) {
+      return std::tie(a.axes, a.reshape_1d) < std::tie(b.axes, b.reshape_1d);
+    }
   };
   struct reduce {
     ynn::axes_set k_dims;
     ynn_reduce_operator op;
     bool keep_dims;
+    friend bool operator==(const reduce& a, const reduce& b) {
+      return a.k_dims == b.k_dims && a.op == b.op && a.keep_dims == b.keep_dims;
+    }
+    friend bool operator<(const reduce& a, const reduce& b) {
+      return std::tie(a.op, a.keep_dims, a.k_dims) <
+             std::tie(b.op, b.keep_dims, b.k_dims);
+    }
   };
 
   // Value IDs for node inputs and outputs.
@@ -251,8 +470,8 @@ struct ynn_node {
                even_split, copy, split_dim, fuse_dim, fuse_dims, split_dims,
                stack, static_reshape, static_broadcast, static_expand_dims,
                static_pad, static_slice, static_transpose, stencil_copy,
-               unary_elementwise, binary_elementwise, ternary_elementwise, dot,
-               pack_b, transpose_a, get_tensor_shape, reduce>
+               unary_elementwise, lut, binary_elementwise, ternary_elementwise,
+               dot, pack_b, transpose_a, get_tensor_shape, reduce>
       op;
 
   const char* name() const;
@@ -301,8 +520,7 @@ struct ynn_subgraph {
   std::deque<ynn_value> values;
   std::deque<ynn_node> nodes;
 
-  // Symbols we've named in Slinky.
-  slinky::node_context symbols;
+  ynn::slinky_globals globals;
 
   bool is_valid_value(uint32_t id) const { return id < values.size(); }
 
@@ -316,9 +534,7 @@ struct ynn_subgraph {
   }
 
   // Returns a newly allocated internal value.
-  ynn_value& new_internal_value();
-  ynn_value& new_internal_value(ynn_type type);
-  ynn_value& new_internal_value(const ynn_value& template_value);
+  ynn_value& new_internal_value(ynn_type type = ynn_type_invalid);
   void add_node(ynn_node node);
 
   // Find the node that produces `id`.
@@ -330,6 +546,8 @@ struct ynn_subgraph {
   ynn_value& get_output_value(uint32_t* output_id,
                               const ynn_value& template_value);
   ynn_value& get_output_value(uint32_t* output_id, ynn_type type);
+  ynn_value& get_output_value(uint32_t* output_id, ynn_type type,
+                              uint32_t zero_point_id, uint32_t scale_id);
 
   // Get a scalar value of the given type and quantization parameters.
   uint32_t get_scalar_value_id(ynn_type type, uint32_t zero_point_id,
@@ -346,14 +564,6 @@ struct ynn_subgraph {
                                /*scale_id=*/YNN_INVALID_VALUE_ID, value);
   }
 
-  // This is a list of global variables and their (symbolic) value that will be
-  // lifted out of the pipeline.
-  std::vector<std::pair<slinky::var, slinky::expr>> globals;
-
-  // Make a global variable for the given expression. Deduplicates identical
-  // expressions to the same variable.
-  slinky::var make_global_variable(slinky::expr value, const char* prefix);
-
   void infer_elementwise_shape(ynn_node& node, int input_idx, int output_idx,
                                int input_dim, int output_dim,
                                int input_type_element_count = 1,
@@ -364,6 +574,9 @@ struct ynn_subgraph {
 
   // Rewrite parts of the graph that we have optimized patterns for.
   ynn_status fusion();
+
+  // Common subexpression elimination.
+  ynn_status eliminate_common_subgraphs();
 
   // Invalidate unused values.
   void invalidate_dead_values();

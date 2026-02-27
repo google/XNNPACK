@@ -110,8 +110,8 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_2x16c4__neondot(
     // Handle up to 4 final positions of `k`
     if XNN_UNLIKELY(k != 0) {
       // Load a 2x4 block of activations.
-      const int8x8_t va0x01234567 = vld1_s8(a0); a0 += 4;
-      const int8x8_t va1x01234567 = vld1_s8(a1); a1 += 4;
+      const int8x8_t va0x0123 = vreinterpret_s8_s32(vld1_dup_s32((const int32_t*)a0)); a0 += 4;
+      const int8x8_t va1x0123 = vreinterpret_s8_s32(vld1_dup_s32((const int32_t*)a1)); a1 += 4;
 
       // Load a 4x16 block of weights.
       const int8x16_t vb0123x0123 = vld1q_s8(w); w = (const int8_t*) w + 16;
@@ -120,14 +120,14 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_2x16c4__neondot(
       const int8x16_t vb0123xCDEF = vld1q_s8(w); w = (const int8_t*) w + 16;
 
       // Multiply-accumulate: 2x4 * 4x16 --> 2x16.
-      vacc0x0123 = vdotq_lane_s32(vacc0x0123, vb0123x0123, va0x01234567, 0);
-      vacc0x4567 = vdotq_lane_s32(vacc0x4567, vb0123x4567, va0x01234567, 0);
-      vacc0x89AB = vdotq_lane_s32(vacc0x89AB, vb0123x89AB, va0x01234567, 0);
-      vacc0xCDEF = vdotq_lane_s32(vacc0xCDEF, vb0123xCDEF, va0x01234567, 0);
-      vacc1x0123 = vdotq_lane_s32(vacc1x0123, vb0123x0123, va1x01234567, 0);
-      vacc1x4567 = vdotq_lane_s32(vacc1x4567, vb0123x4567, va1x01234567, 0);
-      vacc1x89AB = vdotq_lane_s32(vacc1x89AB, vb0123x89AB, va1x01234567, 0);
-      vacc1xCDEF = vdotq_lane_s32(vacc1xCDEF, vb0123xCDEF, va1x01234567, 0);
+      vacc0x0123 = vdotq_lane_s32(vacc0x0123, vb0123x0123, va0x0123, 0);
+      vacc0x4567 = vdotq_lane_s32(vacc0x4567, vb0123x4567, va0x0123, 0);
+      vacc0x89AB = vdotq_lane_s32(vacc0x89AB, vb0123x89AB, va0x0123, 0);
+      vacc0xCDEF = vdotq_lane_s32(vacc0xCDEF, vb0123xCDEF, va0x0123, 0);
+      vacc1x0123 = vdotq_lane_s32(vacc1x0123, vb0123x0123, va1x0123, 0);
+      vacc1x4567 = vdotq_lane_s32(vacc1x4567, vb0123x4567, va1x0123, 0);
+      vacc1x89AB = vdotq_lane_s32(vacc1x89AB, vb0123x89AB, va1x0123, 0);
+      vacc1xCDEF = vdotq_lane_s32(vacc1xCDEF, vb0123xCDEF, va1x0123, 0);
     }
 
     float32x4_t vout0x0123 = vcvtq_f32_s32(vacc0x0123);

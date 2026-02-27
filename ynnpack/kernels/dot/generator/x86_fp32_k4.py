@@ -1,12 +1,20 @@
+# Copyright 2025 Google LLC
+#
+# This source code is licensed under the BSD-style license found in the
+# LICENSE file in the root directory of this source tree.
+
 """Specializations for fp32 x86 dot kernel generators."""
 
-from ynnpack.kernels.dot.generator.x86 import x86_avx512f
+# pylint: disable=missing-class-docstring
+# pylint: disable=invalid-name
+
+from ynnpack.kernels.dot.generator.x86 import x86_avx512
 
 
-class x86_avx512f_fp32_k4(x86_avx512f):  # pylint: disable=invalid-name
+class x86_avx512_fp32_k4(x86_avx512):
   """Generator for fp32 x86 avx512 for tile_k = 4."""
 
-  def __init__(self, arch="avx512f", bits=512, tile_shape=(1, 4, 4)):
+  def __init__(self, arch="avx512", bits=512, tile_shape=(1, 4, 4)):
     super().__init__(arch, "fp32", "float", bits, tile_shape)
     self.a_type = "float"
     self.b_type = "float"

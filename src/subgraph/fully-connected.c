@@ -24,39 +24,42 @@
 // Format is input_type, weights type, output type, (dynamic)?
 enum fully_connected_op_type {
   fc_type_invalid = 0,
-  fc_type_f16_f16_f16 = 1,
-  fc_type_f16_f16_f16_dynamic = 2,
-  fc_type_f16_f32_f16 = 3,
-  fc_type_qd8_f16_qc4w = 5,
-  fc_type_qd8_f16_qb4w = 6,
-  fc_type_qd8_f16_qc8w = 7,
-  fc_type_f32_f32_f32 = 8,
-  fc_type_f32_f32_f32_dynamic = 9,
-  fc_type_qd8_f32_qc2w = 10,
-  fc_type_qd8_f32_qb4w = 11,
-  fc_type_f32_f32_qc4w = 12,
-  fc_type_qd8_f32_qc4w = 13,
-  fc_type_qp8_f32_qc4w = 14,
-  fc_type_f32_f32_qc8w = 15,
-  fc_type_qd8_f32_qc8w = 16,
-  fc_type_qs8_qs8_qc8w = 17,
-  fc_type_qs8_qs8_qs8 = 18,
-  fc_type_qu8_qu8_qu8 = 19,
-  fc_type_qp8_f32_qb4w = 20,
-  fc_type_pf32_f32_f32 = 21,
-  fc_type_f32_f16_f32 = 22,
-  fc_type_qdu8_f16_qc8w = 23,
-  fc_type_qdu8_f32_qc8w = 24,
-  fc_type_qdu8_f32_qc4w = 25,
-  fc_type_qdu8_f32_qb4w = 26,
-  fc_type_qdu8_f16_qc4w = 27,
-  fc_type_qp8_f32_qc8w = 28,
-  fc_type_pf16_f16_f16 = 29,
-  fc_type_pqs8_qs8_qc8w = 30,
-  fc_type_bf16_bf16_f32 = 31,
-  fc_type_pf16_f16_f16_dynamic = 32,
-  fc_type_pf32_f32_f32_dynamic = 33,
-  fc_type_qs8_qs8_qc4w = 34,
+  fc_type_f16_f16_f16,
+  fc_type_f16_f16_f16_dynamic,
+  fc_type_f16_f32_f16,
+  fc_type_qd8_f16_qc4w,
+  fc_type_qd8_f16_qb4w,
+  fc_type_qd8_f16_qc8w,
+  fc_type_f32_f32_f32,
+  fc_type_f32_f32_f32_dynamic,
+  fc_type_qd8_f32_qc2w,
+  fc_type_qdu8_f32_qc2w,
+  fc_type_qd8_f32_qb4w,
+  fc_type_f32_f32_qc4w,
+  fc_type_qd8_f32_qc4w,
+  fc_type_qp8_f32_qc4w,
+  fc_type_f32_f32_qc8w,
+  fc_type_qd8_f32_qc8w,
+  fc_type_qs8_qs8_qc8w,
+  fc_type_qs8_qs8_qs8,
+  fc_type_qu8_qu8_qu8,
+  fc_type_qp8_f32_qb4w,
+  fc_type_pf32_f32_f32,
+  fc_type_f32_f16_f32,
+  fc_type_pf32_f16_f32,
+  fc_type_qdu8_f16_qc8w,
+  fc_type_qdu8_f32_qc8w,
+  fc_type_qdu8_f32_qc4w,
+  fc_type_qdu8_f32_qb4w,
+  fc_type_qdu8_f16_qc4w,
+  fc_type_qp8_f32_qc8w,
+  fc_type_pf16_f16_f16,
+  fc_type_pqs8_qs8_qc8w,
+  fc_type_bf16_bf16_f32,
+  fc_type_pf16_f16_f16_dynamic,
+  fc_type_pf32_f32_f32_dynamic,
+  fc_type_qs8_qs8_qc2w,
+  fc_type_qs8_qs8_qc4w,
 };
 
 enum fully_connected_op_type get_fully_connected_op_type(
@@ -141,6 +144,8 @@ enum fully_connected_op_type get_fully_connected_op_type(
           switch (input_datatype) {
             case xnn_datatype_fp32:
               return fc_type_f32_f16_f32;
+            case xnn_datatype_pfp32:
+              return fc_type_pf32_f16_f32;
             default:
               XNN_UNREACHABLE;
           }
@@ -179,6 +184,8 @@ enum fully_connected_op_type get_fully_connected_op_type(
           switch (input_datatype) {
             case xnn_datatype_qdint8:
               return fc_type_qd8_f32_qc2w;
+            case xnn_datatype_qduint8:
+              return fc_type_qdu8_f32_qc2w;
             default:
               XNN_UNREACHABLE;
           }
@@ -217,6 +224,13 @@ enum fully_connected_op_type get_fully_connected_op_type(
       break;
     case xnn_datatype_qint8:
       switch (filter_datatype) {
+        case xnn_datatype_qcint2:
+          switch (input_datatype) {
+            case xnn_datatype_qint8:
+              return fc_type_qs8_qs8_qc2w;
+            default:
+              XNN_UNREACHABLE;
+          }
         case xnn_datatype_qcint4:
           switch (input_datatype) {
             case xnn_datatype_qint8:
@@ -543,15 +557,38 @@ static enum xnn_status create_fully_connected_operator(
           weights_cache, fully_connected_op_ptr);
       break;
     }
+    case fc_type_pf32_f16_f32: {
+      uint32_t flags = node->flags;
+      if (bias_value != NULL && bias_value->datatype == xnn_datatype_fp32) {
+        flags |= XNN_FLAG_FP32_STATIC_BIASES;
+      }
+      status = xnn_create_fully_connected_nc_pf32_f16(
+          input_channels, output_channels,
+          /*input_stride=*/input_channels,
+          /*output_stride=*/output_channels, kernel_data, bias_data,
+          node->activation.output_min, node->activation.output_max, flags,
+          weights_cache, fully_connected_op_ptr);
+      break;
+    }
     case fc_type_qd8_f32_qc2w:
       status = xnn_create_fully_connected_nc_qd8_f32_qc2w(
           input_channels, output_channels,
           /*input_stride=*/input_channels,
           /*output_stride=*/output_channels,
           filter_value->quantization.channelwise_zero_point,
-          filter_value->quantization.channelwise_scale, kernel_data,
-          bias_data, node->activation.output_min, node->activation.output_max,
-          node->flags, weights_cache, fully_connected_op_ptr);
+          filter_value->quantization.channelwise_scale, kernel_data, bias_data,
+          node->activation.output_min, node->activation.output_max, node->flags,
+          weights_cache, fully_connected_op_ptr);
+      break;
+    case fc_type_qdu8_f32_qc2w:
+      status = xnn_create_fully_connected_nc_qdu8_f32_qc2w(
+          input_channels, output_channels,
+          /*input_stride=*/input_channels,
+          /*output_stride=*/output_channels,
+          filter_value->quantization.channelwise_zero_point,
+          filter_value->quantization.channelwise_scale, kernel_data, bias_data,
+          node->activation.output_min, node->activation.output_max, node->flags,
+          weights_cache, fully_connected_op_ptr);
       break;
     case fc_type_qp8_f32_qb4w:
       switch (filter_value->quantization.scale_type) {
@@ -661,6 +698,28 @@ static enum xnn_status create_fully_connected_operator(
           node->activation.output_min, node->activation.output_max, node->flags,
           weights_cache, fully_connected_op_ptr);
       break;
+    case fc_type_qs8_qs8_qc2w: {
+      assert(!has_non_static_weights);
+      assert(kernel_data != NULL);
+      assert(filter_value->datatype == xnn_datatype_qcint2);
+      assert(filter_value->quantization.zero_point == 0);
+      const float output_scale = output_value->quantization.scale;
+      const int32_t output_zero_point = output_value->quantization.zero_point;
+      const int8_t output_min = xnn_qs8_quantize(
+          node->activation.output_min, output_scale, output_zero_point);
+      const int8_t output_max = xnn_qs8_quantize(
+          node->activation.output_max, output_scale, output_zero_point);
+      status = xnn_create_fully_connected_nc_qs8_qc2w(
+          input_channels, output_channels,
+          /*input_stride=*/input_channels,
+          /*output_stride=*/output_channels,
+          (int8_t)input_value->quantization.zero_point,
+          input_value->quantization.scale,
+          filter_value->quantization.channelwise_scale, kernel_data, bias_data,
+          (int8_t)output_zero_point, output_scale, output_min, output_max,
+          /*flags=*/node->flags, weights_cache, fully_connected_op_ptr);
+      break;
+    }
     case fc_type_qs8_qs8_qc4w: {
       assert(!has_non_static_weights);
       assert(kernel_data != NULL);
@@ -895,6 +954,10 @@ static enum xnn_status reshape_fully_connected_operator(
       status = xnn_reshape_fully_connected_nc_qd8_f32_qc2w(
           fully_connected_op, batch_size, &opdata->workspace_size, threadpool);
       break;
+    case xnn_operator_type_fully_connected_nc_qdu8_f32_qc2w:
+      status = xnn_reshape_fully_connected_nc_qdu8_f32_qc2w(
+          fully_connected_op, batch_size, &opdata->workspace_size, threadpool);
+      break;
     case xnn_operator_type_fully_connected_nc_qd8_f32_qc4w:
       status = xnn_reshape_fully_connected_nc_qd8_f32_qc4w(
           fully_connected_op, batch_size, &opdata->workspace_size, threadpool);
@@ -954,6 +1017,10 @@ static enum xnn_status reshape_fully_connected_operator(
     case xnn_operator_type_fully_connected_nc_qs8:
       status = xnn_reshape_fully_connected_nc_qs8(fully_connected_op,
                                                   batch_size, threadpool);
+      break;
+    case xnn_operator_type_fully_connected_nc_qs8_qc2w:
+      status = xnn_reshape_fully_connected_nc_qs8_qc2w(fully_connected_op,
+                                                       batch_size, threadpool);
       break;
     case xnn_operator_type_fully_connected_nc_qs8_qc4w:
       status = xnn_reshape_fully_connected_nc_qs8_qc4w(fully_connected_op,
@@ -1101,6 +1168,18 @@ static enum xnn_status setup_fully_connected_operator(
           fully_connected_op, input_data, output_data, workspace, row_sum,
           quantization_params);
     }
+    case xnn_operator_type_fully_connected_nc_qdu8_f32_qc2w: {
+      const void* quantization_params =
+          input_value->quantization.dynamic_params;
+      float* row_sum = input_value->quantization.row_sum;
+      void* workspace = opdata->workspace;
+      assert(kernel_data == NULL);
+      assert(bias_data == NULL);
+      assert(quantization_params != NULL || workspace != NULL);
+      return xnn_setup_fully_connected_nc_qdu8_f32_qc2w(
+          fully_connected_op, input_data, output_data, workspace, row_sum,
+          quantization_params);
+    }
     case xnn_operator_type_fully_connected_nc_qd8_f32_qc4w: {
       const void* quantization_params =
           input_value->quantization.dynamic_params;
@@ -1245,6 +1324,11 @@ static enum xnn_status setup_fully_connected_operator(
       assert(bias_data == NULL);
       return xnn_setup_fully_connected_nc_qs8(fully_connected_op, input_data,
                                               output_data);
+    case xnn_operator_type_fully_connected_nc_qs8_qc2w:
+      assert(kernel_data == NULL);
+      assert(bias_data == NULL);
+      return xnn_setup_fully_connected_nc_qs8_qc2w(fully_connected_op,
+                                                   input_data, output_data);
     case xnn_operator_type_fully_connected_nc_qs8_qc4w:
       assert(kernel_data == NULL);
       assert(bias_data == NULL);
@@ -1314,6 +1398,10 @@ static inline bool validate_datatypes_with_bias(
       if (input_datatype == xnn_datatype_qdint8 &&
           bias_datatype == xnn_datatype_fp32 &&
           output_datatype == xnn_datatype_fp32) {
+        return true;
+      } else if (input_datatype == xnn_datatype_qint8 &&
+                 bias_datatype == xnn_datatype_qcint32 &&
+                 output_datatype == xnn_datatype_qint8) {
         return true;
       }
       break;
@@ -1431,6 +1519,9 @@ static inline bool validate_datatypes_without_bias(
     case xnn_datatype_qcint2:
       if (input_datatype == xnn_datatype_qdint8 &&
           output_datatype == xnn_datatype_fp32) {
+        return true;
+      } else if (input_datatype == xnn_datatype_qint8 &&
+                 output_datatype == xnn_datatype_qint8) {
         return true;
       }
       break;

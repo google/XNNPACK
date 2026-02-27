@@ -15,7 +15,6 @@
 
 #include <gtest/gtest.h>
 #include "ynnpack/base/arithmetic.h"
-#include "ynnpack/base/base.h"
 #include "ynnpack/base/test/tensor.h"
 #include "ynnpack/base/type.h"
 #include "ynnpack/include/ynnpack.h"
@@ -89,6 +88,16 @@ struct quantize_uint8 {
   }
 };
 
+struct dequantize {
+  float operator()(float a, float zero_point, float scale) const {
+    return (a - zero_point) * scale;
+  }
+
+  float tolerance(float a, float b, float c, ynn_type type) const {
+    return epsilon(type);
+  }
+};
+
 // Check that `op(a, b, c)` == x, within tolerances described by `op`.
 template <typename A, typename B, typename C, typename X, typename OpInfo>
 void check_results(const OpInfo& op, const Tensor<A>& a, const Tensor<B>& b,
@@ -99,7 +108,7 @@ void check_results(const OpInfo& op, const Tensor<A>& a, const Tensor<B>& b,
     if (std::is_integral<X>::value) {
       const int32_t expected = op(a(i), b(i), c(i));
       const int32_t tolerance =
-        std::round(op.tolerance(a(i), b(i), c(i), type_of<X>()));
+          std::nearbyint(op.tolerance(a(i), b(i), c(i), type_of<X>()));
       ASSERT_NEAR(expected, x(i), tolerance)
           << "i = " << index_to_string(i) << ", a(i) = " << a(i)
           << ", b(i) = " << b(i) << ", c(i) = " << c(i);

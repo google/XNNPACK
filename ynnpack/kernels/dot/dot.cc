@@ -194,7 +194,15 @@ float estimate_dot_cost(size_t m, size_t n, size_t k, size_t block_m,
   // ARM.
   const size_t loads_a = block_m * block_k / (tile_m * tile_k);
   const size_t loads_b = block_n * block_k / (tile_n * tile_k);
-  const float block_cost = loads_a * 5 + loads_b * 11 + 9;
+
+  // The cost model doesn't understand that padding has a cost beyond just the
+  // extra computation, so it will think that two kernels that both need the
+  // same number of tiles will cost the same. However, in practice, the smaller
+  // tile would be better, so here, we add a small penalty proportional to the
+  // tile size.
+  const size_t tile_cost = tile_m * tile_n * tile_k;
+
+  const float block_cost = loads_a * 5 + loads_b * 11 + 9 + tile_cost * 1e-4f;
 
   return blocks_m * blocks_n * blocks_k * block_cost;
 }
@@ -296,8 +304,7 @@ dot_kernel get_dot_kernel(const dot_shape& shape,
   optimizer<A, B, C> optimizer{
       shape.m.value_or(unknown_dot_extent),
       shape.n.value_or(unknown_dot_extent),
-      shape.k1.value_or(unknown_dot_extent) * shape.k2.value_or(1) *
-          shape.k3.value_or(1),
+      shape.k1.value_or(unknown_dot_extent),
       packed_shape ? packed_shape->tile_k : 0,
       packed_shape ? packed_shape->block_n : 0,
       consistent_arithmetic,

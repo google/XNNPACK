@@ -1,3 +1,8 @@
+# Copyright 2025 Google LLC
+#
+# This source code is licensed under the BSD-style license found in the
+# LICENSE file in the root directory of this source tree.
+
 """Base class for dot kernel generators.
 
 Provides the basic structure and shared logic for generating dot kernels."""

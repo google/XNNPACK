@@ -1,3 +1,8 @@
+# Copyright 2025 Google LLC
+#
+# This source code is licensed under the BSD-style license found in the
+# LICENSE file in the root directory of this source tree.
+
 """Specializations for fp16 x86 dot kernel generators."""
 
 # pylint: disable=invalid-name
@@ -5,7 +10,7 @@
 
 from ynnpack.kernels.dot.generator.x86 import x86
 from ynnpack.kernels.dot.generator.x86 import x86_avx
-from ynnpack.kernels.dot.generator.x86 import x86_avx512f
+from ynnpack.kernels.dot.generator.x86 import x86_avx512
 
 
 class x86_fp16_fp16_fp32(x86):
@@ -71,10 +76,10 @@ class x86_f16c_fma3_fp16_fp16_fp32(x86_fp16_fp16_fp32, x86_avx):
     )
 
 
-class x86_avx512f_fp16_fp16_fp32(x86_fp16_fp16_fp32, x86_avx512f):
+class x86_avx512_fp16_fp16_fp32(x86_fp16_fp16_fp32, x86_avx512):
 
   def __init__(self):
-    super().__init__(arch="avx512f", bits=512, tile_shape=(1, 16, 1))
+    super().__init__(arch="avx512", bits=512, tile_shape=(1, 16, 1))
     self.flags += ["dot_flag::consistent_arithmetic"]
 
   def product(self, i, j, k):

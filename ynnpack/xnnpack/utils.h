@@ -66,6 +66,17 @@ ynn_status define_binary_with_broadcasting(
 ynn_status implement_gelu(ynn_subgraph_t subgraph, uint32_t input_id,
                           uint32_t output_id);
 
+// Implements elu(x) = select(x < 0, alpha * expm1(x), x)
+ynn_status implement_elu(ynn_subgraph_t subgraph, uint32_t input_id,
+                         float alpha, uint32_t output_id);
+
+// Implement x * clamp(x / 6 + 0.5, 0, 1);
+ynn_status implement_hardswish(ynn_subgraph_t subgraph, uint32_t input_id,
+                               uint32_t output_id);
+
+ynn_status implement_leaky_relu(ynn_subgraph_t subgraph, uint32_t input_id,
+                                uint32_t output_id, float alpha);
+
 // Make a clamp operation.
 ynn_status define_clamp(ynn_subgraph_t subgraph, float min, float max,
                         uint32_t input_id, uint32_t* output_id);

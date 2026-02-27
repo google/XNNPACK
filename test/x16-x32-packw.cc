@@ -39,8 +39,6 @@ const XnnTestParam xnn_test_params[] = {
 #undef XNN_UKERNEL
 #undef XNN_GIO_UKERNEL
 
-}  // namespace
-
 TEST_P(XnnTest, k_eq_kblock) {
   TEST_REQUIRES_ARCH_FLAGS(GetParam().arch_flags);
   PackWMicrokernelTester()
@@ -255,8 +253,6 @@ TEST_P(XnnTest, null_bias) {
 INSTANTIATE_TEST_SUITE_P(x16_x32_packw, XnnTest,
                          testing::ValuesIn(xnn_test_params), GetTestName);
 
-namespace {
-
 struct XnnTestGIOParam {
   const char* name;
   xnn_x16_x32_packw_gemm_gio_ukernel_fn ukernel;
@@ -282,8 +278,6 @@ const XnnTestGIOParam xnn_test_gio_params[] = {
 
 #undef XNN_UKERNEL
 #undef XNN_GIO_UKERNEL
-
-}  // namespace
 
 TEST_P(XnnTestGIO, k_eq_kblock) {
   TEST_REQUIRES_ARCH_FLAGS(GetParam().arch_flags);
@@ -499,3 +493,5 @@ TEST_P(XnnTestGIO, null_bias) {
 INSTANTIATE_TEST_SUITE_P(x16_x32_gio_packw, XnnTestGIO,
                          testing::ValuesIn(xnn_test_gio_params),
                          GetGIOTestName);
+
+}  // namespace

@@ -122,9 +122,6 @@ void TestStaticB(A, B, C) {
   ReplicableRandomDevice rng;
 
   const float max_abs_value = 10.0f;
-  TypeGenerator<A> a_gen(-max_abs_value, max_abs_value, quantization_params{});
-  TypeGenerator<B> b_gen(-max_abs_value, max_abs_value, quantization_params{});
-  TypeGenerator<C> c_gen(-max_abs_value, max_abs_value, quantization_params{});
 
   TestScheduler scheduler(3);
 
@@ -155,11 +152,15 @@ void TestStaticB(A, B, C) {
     b_shape = align_logical_shape<B>(b_shape);
 
     Tensor<B> b(to_physical_shape<B>(b_shape));
-    b.generate([&]() { return b_gen(rng); });
+    fill_random(b.data(), b.size(), rng, -max_abs_value, max_abs_value);
 
     uint32_t subgraph_flags = 0;
     if (random_bool(rng)) {
       subgraph_flags |= YNN_FLAG_CONSISTENT_ARITHMETIC;
+    }
+    uint32_t dot_flags = 0;
+    if (random_bool(rng)) {
+      dot_flags |= YNN_NODE_FLAG_F32_DOT_TO_BF16_X3;
     }
     SubgraphBuilder subgraph(4, subgraph_flags);
     const uint32_t a_id = 0;
@@ -171,7 +172,9 @@ void TestStaticB(A, B, C) {
 
     uint32_t c_id = 2;
     const bool init_c = random_bool(rng);
-    const C init_value = random_bool(rng) ? c_gen(rng) : static_cast<C>(0);
+    const C init_value =
+        random_bool(rng) ? random_value<C>(rng, -max_abs_value, max_abs_value)
+                         : static_cast<C>(0);
     if (init_c) {
       if (init_value == 0 && random_bool(rng)) {
         c_id = YNN_INVALID_VALUE_ID;
@@ -182,7 +185,7 @@ void TestStaticB(A, B, C) {
       subgraph.AddInput(type_of<C>(), output_rank, c_id);
     }
 
-    subgraph.AddDot(num_k_dims, a_id, b_id, c_id, output_id);
+    subgraph.AddDot(num_k_dims, a_id, b_id, c_id, output_id, dot_flags);
 
     Runtime runtime(subgraph.GetSubgraph(),
                     random_bool(rng) ? &scheduler : nullptr);
@@ -206,13 +209,13 @@ void TestStaticB(A, B, C) {
       }
 
       Tensor<A> a(a_shape);
-      a.generate([&]() { return a_gen(rng); });
+      fill_random(a.data(), a.size(), rng, -max_abs_value, max_abs_value);
 
       runtime.ReshapeExternalTensor(a_shape, a.data(), a_id);
 
       Tensor<C> c(c_shape);
       if (!init_c) {
-        c.generate([&]() { return c_gen(rng); });
+        fill_random(c.data(), c.size(), rng, -max_abs_value, max_abs_value);
         runtime.ReshapeExternalTensor(c_shape, c.data(), c_id);
       }
       runtime.ReshapeRuntime();
@@ -251,7 +254,11 @@ void TestStaticB(A, B, C) {
               << " a_shape=" << index_to_string(a_shape)
               << " b_shape=" << index_to_string(b_shape);
         } else {
-          const float tolerance = epsilon(type_of<C>()) * (num_k_elements + 1) *
+          float tolerance_epsilon = epsilon(type_of<C>());
+          if (dot_flags & YNN_NODE_FLAG_F32_DOT_TO_BF16_X3) {
+            tolerance_epsilon = epsilon(ynn_type_bf16) * epsilon(ynn_type_bf16);
+          }
+          const float tolerance = tolerance_epsilon * (num_k_elements + 1) *
                                   max_abs_value * max_abs_value * 2.0f;
           ASSERT_NEAR(c(i), expected(i), tolerance)
               << "i=" << index_to_string(i) << " num_k_dims=" << num_k_dims
@@ -320,9 +327,6 @@ void TestDynamicB(A, B, C) {
   ReplicableRandomDevice rng;
 
   const float max_abs_value = 10.0f;
-  TypeGenerator<A> a_gen(-max_abs_value, max_abs_value, quantization_params{});
-  TypeGenerator<B> b_gen(-max_abs_value, max_abs_value, quantization_params{});
-  TypeGenerator<C> c_gen(-max_abs_value, max_abs_value, quantization_params{});
 
   TestScheduler scheduler(3);
 
@@ -338,6 +342,10 @@ void TestDynamicB(A, B, C) {
     uint32_t subgraph_flags = 0;
     if (random_bool(rng)) {
       subgraph_flags |= YNN_FLAG_CONSISTENT_ARITHMETIC;
+    }
+    uint32_t dot_flags = 0;
+    if (random_bool(rng)) {
+      dot_flags |= YNN_NODE_FLAG_F32_DOT_TO_BF16_X3;
     }
     SubgraphBuilder subgraph(4, subgraph_flags);
     const uint32_t a_id = 0;
@@ -367,7 +375,9 @@ void TestDynamicB(A, B, C) {
 
     uint32_t c_id = 2;
     const bool init_c = random_bool(rng);
-    const C init_value = random_bool(rng) ? c_gen(rng) : static_cast<C>(0);
+    const C init_value =
+        random_bool(rng) ? random_value<C>(rng, -max_abs_value, max_abs_value)
+                         : static_cast<C>(0);
     if (init_c) {
       if (init_value == 0 && random_bool(rng)) {
         c_id = YNN_INVALID_VALUE_ID;
@@ -378,7 +388,7 @@ void TestDynamicB(A, B, C) {
       subgraph.AddInput(type_of<C>(), output_rank, c_id);
     }
 
-    subgraph.AddDot(num_k_dims, a_id, b_tr_id, c_id, output_id);
+    subgraph.AddDot(num_k_dims, a_id, b_tr_id, c_id, output_id, dot_flags);
 
     Runtime runtime(subgraph.GetSubgraph(),
                     random_bool(rng) ? &scheduler : nullptr);
@@ -396,8 +406,8 @@ void TestDynamicB(A, B, C) {
 
       Tensor<A> a(shapes.a);
       Tensor<B> b(to_physical_shape<B>(shapes.b));
-      a.generate([&]() { return a_gen(rng); });
-      b.generate([&]() { return b_gen(rng); });
+      fill_random(a.data(), a.size(), rng, -max_abs_value, max_abs_value);
+      fill_random(b.data(), b.size(), rng, -max_abs_value, max_abs_value);
 
       Tensor<B> b_tr = b;
       if (b_tr_id != b_id) {
@@ -415,7 +425,7 @@ void TestDynamicB(A, B, C) {
 
       Tensor<C> c(shapes.c);
       if (!init_c) {
-        c.generate([&]() { return c_gen(rng); });
+        fill_random(c.data(), c.size(), rng, -max_abs_value, max_abs_value);
         runtime.ReshapeExternalTensor(shapes.c, c.data(), c_id);
       }
       runtime.ReshapeRuntime();
@@ -456,7 +466,11 @@ void TestDynamicB(A, B, C) {
               << " shapes.a=" << index_to_string(shapes.a)
               << " shapes.b=" << index_to_string(shapes.b);
         } else {
-          const float tolerance = epsilon(type_of<C>()) * (num_k_elements + 1) *
+          float tolerance_epsilon = epsilon(type_of<C>());
+          if (dot_flags & YNN_NODE_FLAG_F32_DOT_TO_BF16_X3) {
+            tolerance_epsilon = epsilon(ynn_type_bf16) * epsilon(ynn_type_bf16);
+          }
+          const float tolerance = tolerance_epsilon * (num_k_elements + 1) *
                                   max_abs_value * max_abs_value * 2.0f;
           ASSERT_NEAR(c(i), expected(i), tolerance)
               << "i=" << index_to_string(i) << " num_k_dims=" << num_k_dims
@@ -473,9 +487,6 @@ void TestStaticShapeDynamicB(A, B, C) {
   ReplicableRandomDevice rng;
 
   const float max_abs_value = 10.0f;
-  TypeGenerator<A> a_gen(-max_abs_value, max_abs_value, quantization_params{});
-  TypeGenerator<B> b_gen(-max_abs_value, max_abs_value, quantization_params{});
-  TypeGenerator<C> c_gen(-max_abs_value, max_abs_value, quantization_params{});
 
   TestScheduler scheduler(3);
 
@@ -524,6 +535,10 @@ void TestStaticShapeDynamicB(A, B, C) {
     if (random_bool(rng)) {
       subgraph_flags |= YNN_FLAG_CONSISTENT_ARITHMETIC;
     }
+    uint32_t dot_flags = 0;
+    if (random_bool(rng)) {
+      dot_flags |= YNN_NODE_FLAG_F32_DOT_TO_BF16_X3;
+    }
     SubgraphBuilder subgraph(4, subgraph_flags);
     const uint32_t a_id = 0;
     const uint32_t b_id = 1;
@@ -534,7 +549,9 @@ void TestStaticShapeDynamicB(A, B, C) {
 
     uint32_t c_id = 2;
     const bool init_c = random_bool(rng);
-    const C init_value = random_bool(rng) ? c_gen(rng) : static_cast<C>(0);
+    const C init_value =
+        random_bool(rng) ? random_value<C>(rng, -max_abs_value, max_abs_value)
+                         : static_cast<C>(0);
     if (init_c) {
       if (init_value == 0 && random_bool(rng)) {
         c_id = YNN_INVALID_VALUE_ID;
@@ -552,7 +569,7 @@ void TestStaticShapeDynamicB(A, B, C) {
       subgraph.AddTranspose(b_perm, b_id, b_tr_id);
     }
 
-    subgraph.AddDot(num_k_dims, a_id, b_tr_id, c_id, output_id);
+    subgraph.AddDot(num_k_dims, a_id, b_tr_id, c_id, output_id, dot_flags);
 
     Runtime runtime(subgraph.GetSubgraph(),
                     random_bool(rng) ? &scheduler : nullptr);
@@ -561,15 +578,15 @@ void TestStaticShapeDynamicB(A, B, C) {
     for (int revalue = 0; revalue < 2; ++revalue) {
       Tensor<A> a(shapes.a);
       Tensor<B> b(to_physical_shape<B>(permute(inv_b_perm, shapes.b)));
-      a.generate([&]() { return a_gen(rng); });
-      b.generate([&]() { return b_gen(rng); });
+      fill_random(a.data(), a.size(), rng, -max_abs_value, max_abs_value);
+      fill_random(b.data(), b.size(), rng, -max_abs_value, max_abs_value);
 
       runtime.SetupExternalTensor(a.data(), a_id)
           .SetupExternalTensor(b.data(), b_id);
 
       Tensor<C> c(shapes.c);
       if (!init_c) {
-        c.generate([&]() { return c_gen(rng); });
+        fill_random(c.data(), c.size(), rng, -max_abs_value, max_abs_value);
         runtime.SetupExternalTensor(c.data(), c_id);
       }
 
@@ -613,7 +630,11 @@ void TestStaticShapeDynamicB(A, B, C) {
               << " shapes.a=" << index_to_string(shapes.a)
               << " shapes.b=" << index_to_string(shapes.b);
         } else {
-          const float tolerance = epsilon(type_of<C>()) * (num_k_elements + 1) *
+          float tolerance_epsilon = epsilon(type_of<C>());
+          if (dot_flags & YNN_NODE_FLAG_F32_DOT_TO_BF16_X3) {
+            tolerance_epsilon = epsilon(ynn_type_bf16) * epsilon(ynn_type_bf16);
+          }
+          const float tolerance = tolerance_epsilon * (num_k_elements + 1) *
                                   max_abs_value * max_abs_value * 2.0f;
           ASSERT_NEAR(c(i), expected(i), tolerance)
               << "i=" << index_to_string(i) << " num_k_dims=" << num_k_dims

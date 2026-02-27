@@ -45,8 +45,6 @@ struct ConstantOrFunction {
   operator size_t() const { return fn(); }  //NOLINT
 };
 
-}  // namespace
-
 
 namespace {
 
@@ -356,3 +354,5 @@ std::vector<GemmTestParams> CreateTests1(
   #endif  // XNN_ENABLE_ARM_SME && XNN_ENABLE_KLEIDIAI
 #endif  // XNN_ENABLE_ARM_SME && XNN_ARCH_ARM64
 
+
+}  // namespace

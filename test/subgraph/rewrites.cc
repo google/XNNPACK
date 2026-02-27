@@ -620,9 +620,9 @@ TEST_P(RewriteClampsTest, RewritesMinMaxWithStaticArgsToClamp) {
         uint32_t static_min_value_id;
         uint32_t static_max_value_id;
         std::tie(static_min_tensor, static_min_value_id) =
-            add_static_tensor<float>(rng, subgraph, {1});
+            add_static_tensor<float>(rng, subgraph, {});
         std::tie(static_max_tensor, static_max_value_id) =
-            add_static_tensor<float>(rng, subgraph, {1});
+            add_static_tensor<float>(rng, subgraph, {});
 
         // Add the binary `minimum` op.
         uint32_t min_capped_value_id =
@@ -674,9 +674,9 @@ TEST_P(RewriteClampsTest, RewritesMaxMinWithStaticArgsToClamp) {
         uint32_t static_min_value_id;
         uint32_t static_max_value_id;
         std::tie(static_min_tensor, static_min_value_id) =
-            add_static_tensor<float>(rng, subgraph, /*shape=*/{1});
+            add_static_tensor<float>(rng, subgraph, /*shape=*/{});
         std::tie(static_max_tensor, static_max_value_id) =
-            add_static_tensor<float>(rng, subgraph, /*shape=*/{1});
+            add_static_tensor<float>(rng, subgraph, /*shape=*/{});
 
         // Add the binary `maximum` op.
         uint32_t max_capped_value_id =

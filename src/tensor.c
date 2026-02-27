@@ -158,7 +158,7 @@ enum xnn_status xnn_define_tensor_value(
   value->type = xnn_value_type_dense_tensor;
   value->datatype = datatype;
   set_shape(value, num_dims, dims);
-  value->size = xnn_tensor_get_size_by_id(subgraph, value->id);
+  value->size = xnn_tensor_get_size(value);
   value->flags = flags;
   value->data = (void*) (uintptr_t) data;
   set_allocation_type(value);
@@ -214,7 +214,7 @@ enum xnn_status xnn_define_quantized_tensor_value(
   value->quantization.zero_point = zero_point;
   value->quantization.scale = scale;
   set_shape(value, num_dims, dims);
-  value->size = xnn_tensor_get_size_by_id(subgraph, value->id);
+  value->size = xnn_tensor_get_size(value);
   value->flags = flags;
   value->data = (void*) (uintptr_t) data;
   set_allocation_type(value);
@@ -291,7 +291,7 @@ enum xnn_status xnn_define_dynamically_quantized_tensor_value(
   value->datatype = datatype;
   value->quantization.num_nonbatch_dims = num_nonbatch_dims;
   set_shape(value, num_dims, dims);
-  value->size = xnn_tensor_get_size_by_id(subgraph, value->id);
+  value->size = xnn_tensor_get_size(value);
   value->quantization.dynamic_params_size = xnn_tensor_get_dynamic_quant_param_size(value->datatype, &value->shape, value->quantization.num_nonbatch_dims);
   value->quantization.row_sum_size = xnn_tensor_get_row_sum_size(value->datatype, &value->shape, value->quantization.num_nonbatch_dims);
   value->flags = flags;
@@ -459,7 +459,7 @@ enum xnn_status xnn_define_channelwise_quantized_tensor_value_v3(
   }
   value->quantization.channel_dimension = channel_dim;
   set_shape(value, num_dims, dims);
-  value->size = xnn_tensor_get_size_by_id(subgraph, value->id);
+  value->size = xnn_tensor_get_size(value);
   value->flags = flags;
   value->data = (void*) (uintptr_t) data;
   set_allocation_type(value);
@@ -614,7 +614,7 @@ enum xnn_status xnn_define_blockwise_quantized_tensor_value_v2(
   value->quantization.channel_dimension_blockwise = channel_dim;
   value->quantization.block_size = block_size;
   set_shape(value, num_dims, dims);
-  value->size = xnn_tensor_get_size_by_id(subgraph, value->id);
+  value->size = xnn_tensor_get_size(value);
   value->flags = flags;
   value->data = (void*) (uintptr_t) data;
   set_allocation_type(value);
@@ -839,10 +839,3 @@ size_t xnn_tensor_get_row_sum_size(enum xnn_datatype datatype,
   return 0;
 }
 
-size_t xnn_tensor_get_size_by_id(xnn_subgraph_t subgraph, uint32_t value_id)
-{
-  assert(value_id < subgraph->num_values);
-
-  const struct xnn_value* value = subgraph->values + value_id;
-  return xnn_tensor_get_size(value);
-}

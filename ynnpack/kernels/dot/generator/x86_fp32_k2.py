@@ -1,10 +1,18 @@
+# Copyright 2025 Google LLC
+#
+# This source code is licensed under the BSD-style license found in the
+# LICENSE file in the root directory of this source tree.
+
 """Specializations for fp32 x86 dot kernel generators."""
 
+# pylint: disable=missing-class-docstring
+# pylint: disable=invalid-name
+
 from ynnpack.kernels.dot.generator.x86 import x86_avx
-from ynnpack.kernels.dot.generator.x86 import x86_avx512f
+from ynnpack.kernels.dot.generator.x86 import x86_avx512
 
 
-class x86_avx2_fp32_k2(x86_avx):  # pylint: disable=invalid-name
+class x86_avx2_fp32_k2(x86_avx):
   """Generator for fp32 x86 avx2 for tile_k = 2."""
 
   def __init__(self, arch="avx2", bits=256, tile_shape=(1, 4, 2)):
@@ -65,7 +73,7 @@ YNN_INTRINSIC __m256 unaligned_load_broadcast_x2(const float* ptr) {
     )
 
 
-class x86_avx2_fma3_fp32_k2(x86_avx2_fp32_k2):  # pylint: disable=invalid-name
+class x86_avx2_fma3_fp32_k2(x86_avx2_fp32_k2):
   def __init__(self):
     super().__init__("avx2_fma3")
 
@@ -73,10 +81,10 @@ class x86_avx2_fma3_fp32_k2(x86_avx2_fp32_k2):  # pylint: disable=invalid-name
     return f"c_{i}_{j} = _mm256_fmadd_ps(a_{i}_{k}, b_{k}_{j}, c_{i}_{j});\n"
 
 
-class x86_avx512f_fp32_k2(x86_avx512f):  # pylint: disable=invalid-name
+class x86_avx512_fp32_k2(x86_avx512):
   """Generator for fp32 x86 avx512 for tile_k = 2."""
 
-  def __init__(self, arch="avx512f", bits=512, tile_shape=(1, 8, 2)):
+  def __init__(self, arch="avx512", bits=512, tile_shape=(1, 8, 2)):
     super().__init__(arch, "fp32", "float", bits, tile_shape)
     self.a_type = "float"
     self.b_type = "float"

@@ -1,6 +1,15 @@
+# Copyright 2025 Google LLC
+#
+# This source code is licensed under the BSD-style license found in the
+# LICENSE file in the root directory of this source tree.
+
 """Specializations for int8 x86 dot kernel generators."""
 
-from ynnpack.kernels.dot.generator.x86 import x86_avx, x86_avx512f
+# pylint: disable=missing-class-docstring
+# pylint: disable=invalid-name
+
+from ynnpack.kernels.dot.generator.x86 import x86_avx
+from ynnpack.kernels.dot.generator.x86 import x86_avx512
 
 
 class x86_avx2_int8_int8_int32(x86_avx):
@@ -64,11 +73,13 @@ c_{i}_{j+4} = {self._mm()}_add_epi32(c_{i}_{j+4}, {self._mm()}_madd_epi16(a_{i}_
 """
 
 
-class x86_avx512bw_int8_int8_int32(x86_avx512f):
-  def __init__(self, arch="avx512bw", vector_bits=512):
+class x86_avx512_int8_int8_int32(x86_avx512):
+
+  def __init__(self, arch="avx512", vector_bits=512):
     super().__init__(arch, "int8_int8_int32", "int32_t", vector_bits, tile_shape=(1, 16, 4))
     self.a_type = "int8_t"
     self.b_type = "int8_t"
+    self.flags += ["dot_flag::consistent_arithmetic"]
     # This kernel already has 2 accumulators per tile.
     self.min_tiles = max(1, self.min_tiles // 2)
 

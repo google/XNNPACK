@@ -68,8 +68,6 @@ void TestReduce(A, C, ynn_reduce_operator op) {
   std::bernoulli_distribution random_bool(0.5);
 
   const float max_abs_value = 10.0f;
-  TypeGenerator<A> a_gen(-max_abs_value, max_abs_value, quantization_params{});
-  TypeGenerator<C> c_gen(-max_abs_value, max_abs_value, quantization_params{});
 
   for (auto _ : FuzzTest(std::chrono::milliseconds(500))) {
     const bool keep_dims = random_bool(rng);
@@ -94,7 +92,7 @@ void TestReduce(A, C, ynn_reduce_operator op) {
         .AddOutput(type_of<C>(), output_rank, output_id);
 
     const bool init_c = random_bool(rng);
-    const C init_value = c_gen(rng);
+    const C init_value = random_value<C>(rng, -max_abs_value, max_abs_value);
     if (init_c) {
       subgraph.AddScalar<C>(init_value, c_id);
     } else {
@@ -117,7 +115,7 @@ void TestReduce(A, C, ynn_reduce_operator op) {
       }
 
       Tensor<A> a(a_shape);
-      a.generate([&]() { return a_gen(rng); });
+      fill_random(a.data(), a.size(), rng, -max_abs_value, max_abs_value);
 
       runtime.ReshapeExternalTensor(a_shape, a.data(), a_id);
 
@@ -125,7 +123,8 @@ void TestReduce(A, C, ynn_reduce_operator op) {
       if (init_c) {
         expected.fill(init_value);
       } else {
-        expected.generate([&]() { return c_gen(rng); });
+        fill_random(expected.data(), expected.size(), rng, -max_abs_value,
+                    max_abs_value);
       }
 
       std::vector<size_t> expected_shape = c_shape;
@@ -208,7 +207,6 @@ void TestMinMax(T) {
   std::bernoulli_distribution random_bool(0.5);
 
   const float max_abs_value = 10.0f;
-  TypeGenerator<T> t_gen(-max_abs_value, max_abs_value, quantization_params{});
 
   for (auto _ : FuzzTest(std::chrono::milliseconds(500))) {
     const bool keep_dims = random_bool(rng);
@@ -233,7 +231,7 @@ void TestMinMax(T) {
         .AddOutput(type_of<T>(), output_rank, output_id);
 
     const bool init_c = random_bool(rng);
-    const T init_value = t_gen(rng);
+    const T init_value = random_value<T>(rng, -max_abs_value, max_abs_value);
     if (init_c) {
       subgraph.AddScalar<T>(init_value, c_id);
     } else {
@@ -255,7 +253,7 @@ void TestMinMax(T) {
       c_shape.insert(c_shape.begin(), 2);
 
       Tensor<T> a(a_shape);
-      a.generate([&]() { return t_gen(rng); });
+      fill_random(a.data(), a.size(), rng, -max_abs_value, max_abs_value);
 
       runtime.ReshapeExternalTensor(a_shape, a.data(), a_id);
 
@@ -263,7 +261,8 @@ void TestMinMax(T) {
       if (init_c) {
         expected.fill(init_value);
       } else {
-        expected.generate([&]() { return t_gen(rng); });
+        fill_random(expected.data(), expected.size(), rng, -max_abs_value,
+                    max_abs_value);
       }
 
       std::vector<size_t> expected_shape = c_shape;

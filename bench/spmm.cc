@@ -293,22 +293,22 @@ static void f32_spmm(benchmark::State& state, uint64_t arch_flags,
                          benchmark::Counter::kIsRate);
 }
 
-#define XNN_UKERNEL(arch_flags, ukernel, mr, nr, k_block, vector_tile,    \
-                    pipelined, datatype, params_type, init_params)        \
-  static void bench_##ukernel(benchmark::State& state, const char* net) { \
-    f16_spmm(state, arch_flags, ukernel, mr, nr, /*sparsity=*/0.8f,       \
-             init_params);                                                \
-  }                                                                       \
+#define XNN_UKERNEL(arch_flags, ukernel, mr, nr, k_block, vector_tile, \
+                    pipelined, datatype, params_type, init_params)     \
+  static void bench_##ukernel(benchmark::State& state) {               \
+    f16_spmm(state, arch_flags, ukernel, mr, nr, /*sparsity=*/0.8f,    \
+             init_params);                                             \
+  }                                                                    \
   BENCHMARK_SPMM(bench_##ukernel)
 #include "src/f16-spmm/f16-spmm-minmax.inc"
 #undef XNN_UKERNEL
 
-#define XNN_UKERNEL(arch_flags, ukernel, mr, nr, k_block, vector_tile,    \
-                    pipelined, datatype, params_type, init_params)        \
-  static void bench_##ukernel(benchmark::State& state, const char* net) { \
-    f32_spmm(state, arch_flags, ukernel, mr, nr, /*sparsity=*/0.8f,       \
-             init_params);                                                \
-  }                                                                       \
+#define XNN_UKERNEL(arch_flags, ukernel, mr, nr, k_block, vector_tile, \
+                    pipelined, datatype, params_type, init_params)     \
+  static void bench_##ukernel(benchmark::State& state) {               \
+    f32_spmm(state, arch_flags, ukernel, mr, nr, /*sparsity=*/0.8f,    \
+             init_params);                                             \
+  }                                                                    \
   BENCHMARK_SPMM(bench_##ukernel)
 #include "src/f32-spmm/f32-spmm-minmax.inc"
 #undef XNN_UKERNEL

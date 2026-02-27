@@ -291,9 +291,11 @@ const xnn_unary_operator all_integer_ops[] = {
     xnn_unary_abs,
     xnn_unary_negate,
     xnn_unary_square,
+#ifndef XNNPACK_USE_YNNPACK
     xnn_unary_count_leading_zeros,
     xnn_unary_bitwise_not,
     xnn_unary_popcount,
+#endif
     xnn_unary_sign,
 };
 

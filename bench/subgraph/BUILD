@@ -26,6 +26,11 @@ BENCHMARKS_SLOW_LARGE = {
     "unary": (False, True),
 }
 
+NO_YNNPACK = [
+    "mobilenet",
+    "depthwise_separable",
+]
+
 # Enables usage of WASM SIMD AVX-256 revectorization kernels.
 config_setting(
     name = "xnn_benchmark_use_xnn_threadpool",
@@ -109,7 +114,7 @@ xnnpack_cxx_library(
     xnnpack_benchmark(
         name = name,
         srcs = [],
-        tags = xnnpack_slow_benchmark_tags() if is_slow else None,
+        tags = (xnnpack_slow_benchmark_tags() if is_slow else []) + (["no_ynnpack"] if name in NO_YNNPACK else []),
         deps = [
             ":" + name + "_lib",
             ":models",

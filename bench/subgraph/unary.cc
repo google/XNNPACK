@@ -27,16 +27,16 @@ xnn_subgraph_t Unary(int64_t op, size_t d0, size_t d1, size_t d2) {
   const xnn_datatype datatype = xnn_datatype_of<T>();
 
   xnn_status status;
-  xnn_subgraph_t subgraph = nullptr;
-  status = xnn_create_subgraph(/*num_external_values=*/2, 0, &subgraph);
-  if (status != xnn_status_success) {
+  auto subgraph = xnnpack::CreateUniqueSubgraph(/*num_external_values=*/2, 0);
+  if (!subgraph) {
     std::cerr << "failed to create subgrpah" << std::endl;
     return nullptr;
   }
 
   std::array<size_t, 3> dims = {{d0, d1, d2}};
   uint32_t input_id = XNN_INVALID_VALUE_ID;
-  status = xnn_define_tensor_value(subgraph, datatype, dims.size(), dims.data(),
+  status = xnn_define_tensor_value(subgraph.get(), datatype, dims.size(),
+                                   dims.data(),
                                    /*data=*/nullptr, /*external_id=*/0,
                                    XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id);
   if (status != xnn_status_success) {
@@ -45,10 +45,10 @@ xnn_subgraph_t Unary(int64_t op, size_t d0, size_t d1, size_t d2) {
   }
 
   uint32_t output_id = XNN_INVALID_VALUE_ID;
-  status = xnn_define_tensor_value(subgraph, datatype, dims.size(), dims.data(),
-                                   /*data=*/nullptr, /*external_id=*/1,
-                                   /*flags=*/XNN_VALUE_FLAG_EXTERNAL_OUTPUT,
-                                   &output_id);
+  status = xnn_define_tensor_value(
+      subgraph.get(), datatype, dims.size(), dims.data(),
+      /*data=*/nullptr, /*external_id=*/1,
+      /*flags=*/XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id);
   if (status != xnn_status_success) {
     std::cerr << "failed to create output tensor" << std::endl;
     return nullptr;
@@ -62,7 +62,7 @@ xnn_subgraph_t Unary(int64_t op, size_t d0, size_t d1, size_t d2) {
   xnn_unary_params params;
   memset(&params, 0, sizeof(params));
   status =
-      xnn_define_unary(subgraph, static_cast<xnn_unary_operator>(op),
+      xnn_define_unary(subgraph.get(), static_cast<xnn_unary_operator>(op),
                        /*params=*/&params, input_id, /*output_id=*/output_id,
                        /*flags=*/0);
 
@@ -71,7 +71,7 @@ xnn_subgraph_t Unary(int64_t op, size_t d0, size_t d1, size_t d2) {
     return nullptr;
   }
 
-  return subgraph;
+  return subgraph.release();
 }
 
 }  // namespace models

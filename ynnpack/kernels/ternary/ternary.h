@@ -66,8 +66,9 @@ enum class ternary_op {
   multiply_add,       // a*b + c
   subtract_multiply,  // a - b*c
   clamp,              // min(max(a, b), c)
-  quantize_int8,      // i8(a / scale + zero_point)
-  quantize_uint8,     // u8(a / scale + zero_point)
+  quantize_int8,      // i8(a/b + c)
+  quantize_uint8,     // u8(a/b + c)
+  dequantize,         // (a - b)*c
 };
 
 const char* to_string(ternary_op op);

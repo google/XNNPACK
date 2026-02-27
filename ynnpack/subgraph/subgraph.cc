@@ -10,8 +10,10 @@
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
+#include <cstring>
 #include <functional>
 #include <iomanip>
+#include <map>
 #include <memory>
 #include <numeric>
 #include <optional>
@@ -34,11 +36,10 @@
 #include "ynnpack/subgraph/runtime.h"
 #include "ynnpack/subgraph/tensor.h"
 #include "slinky/base/thread_pool.h"
-#include "slinky/builder/simplify.h"
-#include "slinky/builder/substitute.h"
 #include "slinky/runtime/buffer.h"
 #include "slinky/runtime/evaluate.h"
 #include "slinky/runtime/expr.h"
+#include "slinky/runtime/print.h"
 
 std::string ynn_value::name() const {
   return name_prefix() + std::to_string(id);
@@ -104,8 +105,7 @@ ynn_status ynn_value::get_external_shape(size_t* rank, size_t* dims) const {
 }
 
 std::optional<float> ynn_value::as_scalar_float() const {
-  if (!is_static()) return std::nullopt;
-  if (data->elem_size != data->size_bytes()) return std::nullopt;
+  if (!is_static_scalar()) return std::nullopt;
   switch (type) {
     case ynn_type_fp32:
       return static_scalar_value<float>();
@@ -137,29 +137,25 @@ ynn_subgraph::ynn_subgraph(uint32_t external_value_ids, uint32_t flags)
   }
 }
 
-ynn_value& ynn_subgraph::new_internal_value() {
-  values.push_back(ynn_value(values.size()));
-  return values.back();
-}
-
 ynn_value& ynn_subgraph::new_internal_value(ynn_type type) {
-  ynn_value& value = new_internal_value();
+  ynn_value value;
+  value.id = values.size();
   value.type = type;
-  return value;
-}
-
-ynn_value& ynn_subgraph::new_internal_value(const ynn_value& template_value) {
-  ynn_value& value = new_internal_value();
-  value.type = template_value.type;
-  value.scale_id = template_value.scale_id;
-  value.zero_point_id = template_value.zero_point_id;
-  return value;
+  values.push_back(std::move(value));
+  return values.back();
 }
 
 ynn_value& ynn_subgraph::get_output_value(uint32_t* output_id,
                                           const ynn_value& template_value) {
+  return get_output_value(output_id, template_value.type,
+                          template_value.zero_point_id,
+                          template_value.scale_id);
+}
+
+ynn_value& ynn_subgraph::get_output_value(uint32_t* output_id, ynn_type type) {
   if (*output_id == YNN_INVALID_VALUE_ID) {
-    ynn_value& new_output = new_internal_value(template_value);
+    ynn_value& new_output = new_internal_value();
+    new_output.type = type;
     *output_id = new_output.id;
     return new_output;
   } else {
@@ -167,9 +163,14 @@ ynn_value& ynn_subgraph::get_output_value(uint32_t* output_id,
   }
 }
 
-ynn_value& ynn_subgraph::get_output_value(uint32_t* output_id, ynn_type type) {
+ynn_value& ynn_subgraph::get_output_value(uint32_t* output_id, ynn_type type,
+                                          uint32_t zero_point_id,
+                                          uint32_t scale_id) {
   if (*output_id == YNN_INVALID_VALUE_ID) {
-    ynn_value& new_output = new_internal_value(type);
+    ynn_value& new_output = new_internal_value();
+    new_output.type = type;
+    new_output.zero_point_id = zero_point_id;
+    new_output.scale_id = scale_id;
     *output_id = new_output.id;
     return new_output;
   } else {
@@ -312,22 +313,6 @@ void ynn_subgraph::infer_elementwise_shape(ynn_node& node, int input_idx,
     // constant?
     output_i = input_i;
     if (input_type_element_count != 1) output_i /= output_type_element_count;
-  }
-}
-
-slinky::var ynn_subgraph::make_global_variable(slinky::expr value,
-                                               const char* prefix) {
-  value = slinky::simplify(value);
-  assert(value.defined());
-
-  auto i = std::find_if(globals.begin(), globals.end(),
-                        [&](const auto& j) { return match(j.second, value); });
-  if (i == globals.end()) {
-    slinky::var r = symbols.insert_unique(prefix);
-    globals.push_back(std::make_pair(r, value));
-    return r;
-  } else {
-    return i->first;
   }
 }
 
@@ -483,6 +468,121 @@ void ynn_subgraph::invalidate_dead_values() {
   }
 }
 
+namespace {
+
+bool values_are_equal(const ynn_subgraph& subgraph, uint32_t a_id,
+                      uint32_t b_id) {
+  if (a_id == b_id) return true;
+  if (a_id == YNN_INVALID_VALUE_ID || b_id == YNN_INVALID_VALUE_ID)
+    return false;
+
+  const ynn_value& a = subgraph.value(a_id);
+  const ynn_value& b = subgraph.value(b_id);
+
+  if (a.type != b.type) return false;
+
+  if (a.is_static_scalar() && b.is_static_scalar()) {
+    assert(a.data);
+    assert(b.data);
+    if (a.data->size_bytes() != b.data->size_bytes()) return false;
+    return std::memcmp(a.data->base, b.data->base, a.data->size_bytes()) == 0;
+  }
+  return false;
+}
+
+bool outputs_are_compatible(const ynn_subgraph& subgraph,
+                            const std::vector<uint32_t>& a_outputs,
+                            const std::vector<uint32_t>& b_outputs) {
+  if (a_outputs.size() != b_outputs.size()) {
+    return false;
+  }
+  for (size_t i = 0; i < a_outputs.size(); ++i) {
+    if (a_outputs[i] == YNN_INVALID_VALUE_ID) continue;
+    if (b_outputs[i] == YNN_INVALID_VALUE_ID) continue;
+    const ynn_value& a_output = subgraph.value(a_outputs[i]);
+    const ynn_value& b_output = subgraph.value(b_outputs[i]);
+
+    if (a_output.type != b_output.type) {
+      return false;
+    }
+    if (!values_are_equal(subgraph, a_output.zero_point_id,
+                          b_output.zero_point_id)) {
+      return false;
+    }
+    if (!values_are_equal(subgraph, a_output.scale_id, b_output.scale_id)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+}  // namespace
+
+ynn_status ynn_subgraph::eliminate_common_subgraphs() {
+  // We characterize a node as unique by its combination of inputs and its op.
+  using key_type = std::pair<std::vector<uint32_t>, decltype(ynn_node::op)>;
+  // `seen_ops` keeps track of the nodes we've already seen. Map key is the node
+  // signature, map value is a list of output value ids from previously seen
+  // nodes with the same signature. It is possible for multiple ops to have the
+  // same signature, hence the vector of vectors.
+  std::map<key_type, std::vector<std::vector<uint32_t>>> seen_ops;
+
+  // `replacements` is used to replace the output of a node with the output of
+  // a previously seen node. Initially, every value maps to itself.
+  std::vector<uint32_t> replacements(values.size());
+  std::iota(replacements.begin(), replacements.end(), 0);
+
+  for (ynn_node& node : nodes) {
+    if (!node.is_valid()) continue;
+
+    // If an input to the current node was previously determined redundant,
+    // update it with the replaced value id.
+    for (uint32_t& input : node.inputs) {
+      if (input != YNN_INVALID_VALUE_ID) {
+        input = replacements[input];
+      }
+    }
+
+    // If the node produces an external output, we don't want to replace it in
+    // order to preserve the graph's public interface.
+    const bool produces_external_output = std::any_of(
+        node.outputs.begin(), node.outputs.end(), [this](uint32_t i) {
+          return i != YNN_INVALID_VALUE_ID && values[i].is_external_output();
+        });
+    const key_type key = {node.inputs, node.op};
+    if (produces_external_output) {
+      seen_ops[key].push_back(node.outputs);
+      continue;
+    }
+
+    bool matched = false;
+    // Check if the node matches any previously seen node.
+    // If so, replace the outputs of this node with the outputs of the
+    // existing node.
+    for (const std::vector<uint32_t>& existing_outputs : seen_ops[key]) {
+      assert(existing_outputs.size() == node.outputs.size());
+      if (outputs_are_compatible(*this, node.outputs, existing_outputs)) {
+        // We found a duplicate node. Replace the outputs of this node with
+        // the outputs of the existing node.
+        for (size_t i = 0; i < node.outputs.size(); ++i) {
+          if (node.outputs[i] != YNN_INVALID_VALUE_ID) {
+            replacements[node.outputs[i]] = existing_outputs[i];
+          }
+        }
+        node.invalidate();
+        matched = true;
+        break;
+      }
+    }
+
+    if (!matched) {
+      seen_ops[key].push_back(node.outputs);
+    }
+  }
+
+  return ynn_status_success;
+}
+
 ynn_status ynn_subgraph::optimize(slinky::thread_pool* threadpool) {
   ynn_status status;
 
@@ -492,6 +592,11 @@ ynn_status ynn_subgraph::optimize(slinky::thread_pool* threadpool) {
   }
 
   status = fold_constants(threadpool);
+  if (status != ynn_status_success) {
+    return status;
+  }
+
+  status = eliminate_common_subgraphs();
   if (status != ynn_status_success) {
     return status;
   }
@@ -508,6 +613,7 @@ const char* name_of(const ynn_node::opaque&) { return "opaque"; }
 const char* name_of(const ynn_node::unary_elementwise&) {
   return "unary_elementwise";
 }
+const char* name_of(const ynn_node::lut&) { return "lut"; }
 const char* name_of(const ynn_node::binary_elementwise&) {
   return "binary_elementwise";
 }
@@ -608,6 +714,8 @@ void print(std::ostream& os, const ynn_node::opaque& op) {
 void print(std::ostream& os, const ynn_node::unary_elementwise& op) {
   os << "op=" << op.op;
 }
+
+void print(std::ostream& os, const ynn_node::lut& op) {}
 
 void print(std::ostream& os, const ynn_node::binary_elementwise& op) {
   os << "op=" << op.op;
@@ -711,7 +819,9 @@ void print(std::ostream& os, const ynn_node::dot& op) {
 }
 
 void print(std::ostream& os, const ynn_node::pack_b& op) {}
-void print(std::ostream& os, const ynn_node::transpose_a& op) {}
+void print(std::ostream& os, const ynn_node::transpose_a& op) {
+  os << "tile_k=" << op.tile_k << " m_dim=" << op.m_dim;
+}
 
 void print(std::ostream& os, const ynn_node::get_tensor_shape& op) {
   os << "axes=" << op.axes;
@@ -793,9 +903,22 @@ void ynn_subgraph::dump(std::ostream& os) const {
     if (value.is_static()) {
       os << "static ";
       if (std::optional<float> v = value.as_scalar_float()) {
-        os << "value=" << *v;
+        os << "value=" << *v << " ";
       }
     }
+    os << "extents={";
+    for (const slinky::expr& i : value.extents) {
+      if (!i.defined()) {
+        os << 1;
+      } else if (const auto v = as_constant(i)) {
+        os << *v;
+      } else {
+        os << i;
+        // os << "?";
+      }
+      os << ",";
+    }
+    os << "}";
     os << std::endl;
     ++values_count;
   }

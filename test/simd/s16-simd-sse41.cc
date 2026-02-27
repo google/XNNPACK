@@ -37,7 +37,7 @@ class S16SimdSSE41Test : public ::testing::Test {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_sse4_1);
     inputs_.resize(3 * xnn_simd_size_s16);
     output_.resize(xnn_simd_size_s16);
-    std::uniform_int_distribution<int16_t> s16(-100, 100);
+    std::uniform_int_distribution<int> s16(-100, 100);
     std::generate(inputs_.begin(), inputs_.end(),
                   [&]() { return s16(rng_); });
   }
