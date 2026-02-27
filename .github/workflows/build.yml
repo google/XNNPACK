@@ -280,6 +280,48 @@ jobs:
         run: ctest -C Release --output-on-failure --parallel $NUMBER_OF_PROCESSORS
         working-directory: ${{ github.workspace }}/build/windows/x86
 
+  gn-windows-x86_64:
+    runs-on: 'windows-2022-32core'
+    timeout-minutes: 15
+    env:
+      DEPOT_TOOLS_WIN_TOOLCHAIN: 0
+    steps:
+      - name: Install Depot Tools
+        uses: newkdev/setup-depot-tools@v1.0.1
+      - name: Write .gclient
+        shell: powershell
+        run: |
+          Set-Content -Path .gclient -Value "
+          solutions = [
+            { 'name': 'XNNPACK',
+              'url': 'https://github.com/google/XNNPACK',
+              'deps_file': 'DEPS',
+              'managed': False,
+              'custom_deps': {},
+            },
+          ]
+          "
+        working-directory: ${{ github.workspace }}
+      - name: Setup build environment
+        shell: bash
+        run: |
+          echo "VCVARSALL=$(vswhere -products \* -latest -property installationPath)\\VC\\Auxiliary\\Build\\vcvarsall.bat" >> $GITHUB_ENV
+      - name: Sync to commit and run hooks
+        shell: powershell
+        run: gclient sync -vv --revision $env:GITHUB_SHA
+      - name: Generate build files
+        run: |
+          gn gen --check --args="is_debug=false is_official_build=false dcheck_always_on=true use_siso=true" out/x64.dchecks
+        working-directory: ${{ github.workspace }}\XNNPACK
+      - name: Build all targets (Release + debug checks)
+        run: |
+          autoninja -C out/x64.dchecks
+        working-directory: ${{ github.workspace }}\XNNPACK
+      - name: Run tests
+        run: |
+          python3 scripts/run-gn-tests.py out/x64.dchecks
+        working-directory: ${{ github.workspace }}\XNNPACK
+
   cmake-macos-arm64:
     runs-on: macos-latest
     timeout-minutes: 60
