@@ -471,3 +471,10 @@ size_t xnn_weights_cache_look_up(
 {
   return cache->look_up(cache->context, cache_key);
 }
+
+size_t xnn_caching_strategy_version() {
+  // This version number should be increased when:
+  // - caching is added to an operation;
+  // - caching strategies are changed.
+  return 1;
+}
