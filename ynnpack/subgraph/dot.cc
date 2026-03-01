@@ -1069,11 +1069,6 @@ ynn_status define_dot(ynn_subgraph_t subgraph, size_t num_k_dims,
 
 bool can_convert_f32_to_bf16(ynn_subgraph_t subgraph, uint32_t input_a_id,
                              uint32_t input_b_id, uint32_t flags) {
-  if (!is_constant(*subgraph, input_b_id)) {
-    // TODO(b/475315838): Remove this workaround for a correctness bug when B is
-    // not constant.
-    return false;
-  }
   return (flags & YNN_NODE_FLAG_F32_DOT_TO_BF16_X3) &&
          subgraph->value(input_a_id).type == ynn_type_fp32 &&
          subgraph->value(input_b_id).type == ynn_type_fp32;
@@ -1140,18 +1135,13 @@ ynn_status define_bf16_dot_from_f32_inputs(
                       a_residual_b_bf16_dot, &a_bf16_b_residual_dot, flags);
   if (status != ynn_status_success) return status;
 
-  if (input_c_id != YNN_INVALID_VALUE_ID) {
-    uint32_t a_bf16_b_bf16_dot = YNN_INVALID_VALUE_ID;
-    status = define_dot(subgraph, num_k_dims, a_bf16, b_bf16, input_c_id,
-                        &a_bf16_b_bf16_dot, flags);
-    if (status != ynn_status_success) return status;
+  uint32_t a_bf16_b_bf16_dot = YNN_INVALID_VALUE_ID;
+  status = define_dot(subgraph, num_k_dims, a_bf16, b_bf16, input_c_id,
+                      &a_bf16_b_bf16_dot, flags);
+  if (status != ynn_status_success) return status;
 
-    return ynn_define_binary(subgraph, ynn_binary_add, a_bf16_b_bf16_dot,
-                             a_bf16_b_residual_dot, output_id, flags);
-  } else {
-    return define_dot(subgraph, num_k_dims, a_bf16, b_bf16,
-                      a_bf16_b_residual_dot, output_id, flags);
-  }
+  return ynn_define_binary(subgraph, ynn_binary_add, a_bf16_b_bf16_dot,
+                           a_bf16_b_residual_dot, output_id, flags);
 }
 
 }  // namespace
