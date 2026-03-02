@@ -22,7 +22,7 @@
 #include "src/xnnpack/unaligned.h"
 
 
-void xnn_qs8_qc2w_gemm_minmax_fp32_ukernel_7x8c8__avx2_madd(
+void xnn_qs8_qc2w_gemm_minmax_fp32_ukernel_8x8c8__avxvnni(
     size_t mr,
     size_t nc,
     size_t kc,
@@ -35,7 +35,7 @@ void xnn_qs8_qc2w_gemm_minmax_fp32_ukernel_7x8c8__avx2_madd(
     const union xnn_qs8_qc8w_conv_minmax_params* restrict params) XNN_OOB_READS
 {
   assert(mr != 0);
-  assert(mr <= 7);
+  assert(mr <= 8);
   assert(nc != 0);
   assert(kc != 0);
   assert(kc % sizeof(int8_t) == 0);
@@ -82,6 +82,12 @@ void xnn_qs8_qc2w_gemm_minmax_fp32_ukernel_7x8c8__avx2_madd(
     a6 = a5;
     c6 = c5;
   }
+  const int8_t* a7 = (const int8_t*) ((uintptr_t) a6 + a_stride);
+  int8_t* c7 = (int8_t*) ((uintptr_t) c6 + cm_stride);
+  if XNN_UNPREDICTABLE(mr != 8) {
+    a7 = a6;
+    c7 = c6;
+  }
 
   const __m256i vsign_mask = _mm256_set1_epi8(0x80);
   XNN_FORCE_REALIZATION(vsign_mask);
@@ -92,6 +98,7 @@ void xnn_qs8_qc2w_gemm_minmax_fp32_ukernel_7x8c8__avx2_madd(
   // XNN_FORCE_REALIZATION(voutput_zero_point);
   // XNN_FORCE_REALIZATION(voutput_min);
   const __m256i vmask = _mm256_set1_epi8(0x03);
+  const __m256i vtwo = _mm256_set1_epi8(2);  // Subtract 2 (kernel zero point) from unsigned 2 bit to sign extend
   do {
     __m256i vacc0x0123 = _mm256_cvtepu32_epi64(_mm_load_si128((const __m128i*) w));
     __m256i vacc0x4567 = _mm256_cvtepu32_epi64(_mm_load_si128((const __m128i*) ((const int32_t*) w + 4)));
@@ -107,6 +114,8 @@ void xnn_qs8_qc2w_gemm_minmax_fp32_ukernel_7x8c8__avx2_madd(
     __m256i vacc5x4567 = vacc0x4567;
     __m256i vacc6x0123 = vacc0x0123;
     __m256i vacc6x4567 = vacc0x4567;
+    __m256i vacc7x0123 = vacc0x0123;
+    __m256i vacc7x4567 = vacc0x4567;
     w = (const int32_t*) w + 8;
 
     size_t k = kc;
@@ -146,6 +155,11 @@ void xnn_qs8_qc2w_gemm_minmax_fp32_ukernel_7x8c8__avx2_madd(
       const __m256i va6x2 = _mm256_xor_si256(_mm256_set1_epi64x((int64_t) unaligned_load_u64(a6 + 16)), vsign_mask);
       const __m256i va6x3 = _mm256_xor_si256(_mm256_set1_epi64x((int64_t) unaligned_load_u64(a6 + 24)), vsign_mask);
       a6 += 32;
+      const __m256i va7x0 = _mm256_xor_si256(_mm256_set1_epi64x((int64_t) unaligned_load_u64(a7)), vsign_mask);
+      const __m256i va7x1 = _mm256_xor_si256(_mm256_set1_epi64x((int64_t) unaligned_load_u64(a7 + 8)), vsign_mask);
+      const __m256i va7x2 = _mm256_xor_si256(_mm256_set1_epi64x((int64_t) unaligned_load_u64(a7 + 16)), vsign_mask);
+      const __m256i va7x3 = _mm256_xor_si256(_mm256_set1_epi64x((int64_t) unaligned_load_u64(a7 + 24)), vsign_mask);
+      a7 += 32;
 
       const __m256i vbb01234567x0123456789ABCDEF = _mm256_load_si256(w);
       const __m256i vbb89ABCDEFx0123456789ABCDEF = _mm256_load_si256((const __m256i*) ((const int8_t*) w + 32));
@@ -163,63 +177,79 @@ void xnn_qs8_qc2w_gemm_minmax_fp32_ukernel_7x8c8__avx2_madd(
       __m256i vbs89ABCDEFxCDEF = _mm256_srli_epi32(vbb89ABCDEFx0123456789ABCDEF, 6);
       __m256i vb01234567xCDEF = _mm256_and_si256(vbs01234567xCDEF, vmask);
       __m256i vb89ABCDEFxCDEF = _mm256_and_si256(vbs89ABCDEFxCDEF, vmask);
+      vb01234567x0123 = _mm256_sub_epi8(vb01234567x0123, vtwo);
+      vb89ABCDEFx0123 = _mm256_sub_epi8(vb89ABCDEFx0123, vtwo);
+      vb01234567x4567 = _mm256_sub_epi8(vb01234567x4567, vtwo);
+      vb89ABCDEFx4567 = _mm256_sub_epi8(vb89ABCDEFx4567, vtwo);
+      vb01234567x89AB = _mm256_sub_epi8(vb01234567x89AB, vtwo);
+      vb89ABCDEFx89AB = _mm256_sub_epi8(vb89ABCDEFx89AB, vtwo);
+      vb01234567xCDEF = _mm256_sub_epi8(vb01234567xCDEF, vtwo);
+      vb89ABCDEFxCDEF = _mm256_sub_epi8(vb89ABCDEFxCDEF, vtwo);
 
-      vacc0x0123 = _mm256_dpbusd_epi32_madd_kzp2(vacc0x0123, va0x0, vb01234567x0123);
-      vacc0x4567 = _mm256_dpbusd_epi32_madd_kzp2(vacc0x4567, va0x0, vb89ABCDEFx0123);
-      vacc1x0123 = _mm256_dpbusd_epi32_madd_kzp2(vacc1x0123, va1x0, vb01234567x0123);
-      vacc1x4567 = _mm256_dpbusd_epi32_madd_kzp2(vacc1x4567, va1x0, vb89ABCDEFx0123);
-      vacc2x0123 = _mm256_dpbusd_epi32_madd_kzp2(vacc2x0123, va2x0, vb01234567x0123);
-      vacc2x4567 = _mm256_dpbusd_epi32_madd_kzp2(vacc2x4567, va2x0, vb89ABCDEFx0123);
-      vacc3x0123 = _mm256_dpbusd_epi32_madd_kzp2(vacc3x0123, va3x0, vb01234567x0123);
-      vacc3x4567 = _mm256_dpbusd_epi32_madd_kzp2(vacc3x4567, va3x0, vb89ABCDEFx0123);
-      vacc4x0123 = _mm256_dpbusd_epi32_madd_kzp2(vacc4x0123, va4x0, vb01234567x0123);
-      vacc4x4567 = _mm256_dpbusd_epi32_madd_kzp2(vacc4x4567, va4x0, vb89ABCDEFx0123);
-      vacc5x0123 = _mm256_dpbusd_epi32_madd_kzp2(vacc5x0123, va5x0, vb01234567x0123);
-      vacc5x4567 = _mm256_dpbusd_epi32_madd_kzp2(vacc5x4567, va5x0, vb89ABCDEFx0123);
-      vacc6x0123 = _mm256_dpbusd_epi32_madd_kzp2(vacc6x0123, va6x0, vb01234567x0123);
-      vacc6x4567 = _mm256_dpbusd_epi32_madd_kzp2(vacc6x4567, va6x0, vb89ABCDEFx0123);
-      vacc0x0123 = _mm256_dpbusd_epi32_madd_kzp2(vacc0x0123, va0x1, vb01234567x4567);
-      vacc0x4567 = _mm256_dpbusd_epi32_madd_kzp2(vacc0x4567, va0x1, vb89ABCDEFx4567);
-      vacc0x0123 = _mm256_dpbusd_epi32_madd_kzp2(vacc0x0123, va0x2, vb01234567x89AB);
-      vacc0x4567 = _mm256_dpbusd_epi32_madd_kzp2(vacc0x4567, va0x2, vb89ABCDEFx89AB);
-      vacc1x0123 = _mm256_dpbusd_epi32_madd_kzp2(vacc1x0123, va1x1, vb01234567x4567);
-      vacc1x4567 = _mm256_dpbusd_epi32_madd_kzp2(vacc1x4567, va1x1, vb89ABCDEFx4567);
-      vacc1x0123 = _mm256_dpbusd_epi32_madd_kzp2(vacc1x0123, va1x2, vb01234567x89AB);
-      vacc1x4567 = _mm256_dpbusd_epi32_madd_kzp2(vacc1x4567, va1x2, vb89ABCDEFx89AB);
-      vacc2x0123 = _mm256_dpbusd_epi32_madd_kzp2(vacc2x0123, va2x1, vb01234567x4567);
-      vacc2x4567 = _mm256_dpbusd_epi32_madd_kzp2(vacc2x4567, va2x1, vb89ABCDEFx4567);
-      vacc2x0123 = _mm256_dpbusd_epi32_madd_kzp2(vacc2x0123, va2x2, vb01234567x89AB);
-      vacc2x4567 = _mm256_dpbusd_epi32_madd_kzp2(vacc2x4567, va2x2, vb89ABCDEFx89AB);
-      vacc3x0123 = _mm256_dpbusd_epi32_madd_kzp2(vacc3x0123, va3x1, vb01234567x4567);
-      vacc3x4567 = _mm256_dpbusd_epi32_madd_kzp2(vacc3x4567, va3x1, vb89ABCDEFx4567);
-      vacc3x0123 = _mm256_dpbusd_epi32_madd_kzp2(vacc3x0123, va3x2, vb01234567x89AB);
-      vacc3x4567 = _mm256_dpbusd_epi32_madd_kzp2(vacc3x4567, va3x2, vb89ABCDEFx89AB);
-      vacc4x0123 = _mm256_dpbusd_epi32_madd_kzp2(vacc4x0123, va4x1, vb01234567x4567);
-      vacc4x4567 = _mm256_dpbusd_epi32_madd_kzp2(vacc4x4567, va4x1, vb89ABCDEFx4567);
-      vacc4x0123 = _mm256_dpbusd_epi32_madd_kzp2(vacc4x0123, va4x2, vb01234567x89AB);
-      vacc4x4567 = _mm256_dpbusd_epi32_madd_kzp2(vacc4x4567, va4x2, vb89ABCDEFx89AB);
-      vacc5x0123 = _mm256_dpbusd_epi32_madd_kzp2(vacc5x0123, va5x1, vb01234567x4567);
-      vacc5x4567 = _mm256_dpbusd_epi32_madd_kzp2(vacc5x4567, va5x1, vb89ABCDEFx4567);
-      vacc5x0123 = _mm256_dpbusd_epi32_madd_kzp2(vacc5x0123, va5x2, vb01234567x89AB);
-      vacc5x4567 = _mm256_dpbusd_epi32_madd_kzp2(vacc5x4567, va5x2, vb89ABCDEFx89AB);
-      vacc6x0123 = _mm256_dpbusd_epi32_madd_kzp2(vacc6x0123, va6x1, vb01234567x4567);
-      vacc6x4567 = _mm256_dpbusd_epi32_madd_kzp2(vacc6x4567, va6x1, vb89ABCDEFx4567);
-      vacc6x0123 = _mm256_dpbusd_epi32_madd_kzp2(vacc6x0123, va6x2, vb01234567x89AB);
-      vacc6x4567 = _mm256_dpbusd_epi32_madd_kzp2(vacc6x4567, va6x2, vb89ABCDEFx89AB);
-      vacc0x0123 = _mm256_dpbusd_epi32_madd_kzp2(vacc0x0123, va0x3, vb01234567xCDEF);
-      vacc0x4567 = _mm256_dpbusd_epi32_madd_kzp2(vacc0x4567, va0x3, vb89ABCDEFxCDEF);
-      vacc1x0123 = _mm256_dpbusd_epi32_madd_kzp2(vacc1x0123, va1x3, vb01234567xCDEF);
-      vacc1x4567 = _mm256_dpbusd_epi32_madd_kzp2(vacc1x4567, va1x3, vb89ABCDEFxCDEF);
-      vacc2x0123 = _mm256_dpbusd_epi32_madd_kzp2(vacc2x0123, va2x3, vb01234567xCDEF);
-      vacc2x4567 = _mm256_dpbusd_epi32_madd_kzp2(vacc2x4567, va2x3, vb89ABCDEFxCDEF);
-      vacc3x0123 = _mm256_dpbusd_epi32_madd_kzp2(vacc3x0123, va3x3, vb01234567xCDEF);
-      vacc3x4567 = _mm256_dpbusd_epi32_madd_kzp2(vacc3x4567, va3x3, vb89ABCDEFxCDEF);
-      vacc4x0123 = _mm256_dpbusd_epi32_madd_kzp2(vacc4x0123, va4x3, vb01234567xCDEF);
-      vacc4x4567 = _mm256_dpbusd_epi32_madd_kzp2(vacc4x4567, va4x3, vb89ABCDEFxCDEF);
-      vacc5x0123 = _mm256_dpbusd_epi32_madd_kzp2(vacc5x0123, va5x3, vb01234567xCDEF);
-      vacc5x4567 = _mm256_dpbusd_epi32_madd_kzp2(vacc5x4567, va5x3, vb89ABCDEFxCDEF);
-      vacc6x0123 = _mm256_dpbusd_epi32_madd_kzp2(vacc6x0123, va6x3, vb01234567xCDEF);
-      vacc6x4567 = _mm256_dpbusd_epi32_madd_kzp2(vacc6x4567, va6x3, vb89ABCDEFxCDEF);
+      vacc0x0123 = _mm256_dpbusd_avx_epi32(vacc0x0123, va0x0, vb01234567x0123);
+      vacc0x4567 = _mm256_dpbusd_avx_epi32(vacc0x4567, va0x0, vb89ABCDEFx0123);
+      vacc1x0123 = _mm256_dpbusd_avx_epi32(vacc1x0123, va1x0, vb01234567x0123);
+      vacc1x4567 = _mm256_dpbusd_avx_epi32(vacc1x4567, va1x0, vb89ABCDEFx0123);
+      vacc2x0123 = _mm256_dpbusd_avx_epi32(vacc2x0123, va2x0, vb01234567x0123);
+      vacc2x4567 = _mm256_dpbusd_avx_epi32(vacc2x4567, va2x0, vb89ABCDEFx0123);
+      vacc3x0123 = _mm256_dpbusd_avx_epi32(vacc3x0123, va3x0, vb01234567x0123);
+      vacc3x4567 = _mm256_dpbusd_avx_epi32(vacc3x4567, va3x0, vb89ABCDEFx0123);
+      vacc4x0123 = _mm256_dpbusd_avx_epi32(vacc4x0123, va4x0, vb01234567x0123);
+      vacc4x4567 = _mm256_dpbusd_avx_epi32(vacc4x4567, va4x0, vb89ABCDEFx0123);
+      vacc5x0123 = _mm256_dpbusd_avx_epi32(vacc5x0123, va5x0, vb01234567x0123);
+      vacc5x4567 = _mm256_dpbusd_avx_epi32(vacc5x4567, va5x0, vb89ABCDEFx0123);
+      vacc6x0123 = _mm256_dpbusd_avx_epi32(vacc6x0123, va6x0, vb01234567x0123);
+      vacc6x4567 = _mm256_dpbusd_avx_epi32(vacc6x4567, va6x0, vb89ABCDEFx0123);
+      vacc7x0123 = _mm256_dpbusd_avx_epi32(vacc7x0123, va7x0, vb01234567x0123);
+      vacc7x4567 = _mm256_dpbusd_avx_epi32(vacc7x4567, va7x0, vb89ABCDEFx0123);
+      vacc0x0123 = _mm256_dpbusd_avx_epi32(vacc0x0123, va0x1, vb01234567x4567);
+      vacc0x4567 = _mm256_dpbusd_avx_epi32(vacc0x4567, va0x1, vb89ABCDEFx4567);
+      vacc0x0123 = _mm256_dpbusd_avx_epi32(vacc0x0123, va0x2, vb01234567x89AB);
+      vacc0x4567 = _mm256_dpbusd_avx_epi32(vacc0x4567, va0x2, vb89ABCDEFx89AB);
+      vacc1x0123 = _mm256_dpbusd_avx_epi32(vacc1x0123, va1x1, vb01234567x4567);
+      vacc1x4567 = _mm256_dpbusd_avx_epi32(vacc1x4567, va1x1, vb89ABCDEFx4567);
+      vacc1x0123 = _mm256_dpbusd_avx_epi32(vacc1x0123, va1x2, vb01234567x89AB);
+      vacc1x4567 = _mm256_dpbusd_avx_epi32(vacc1x4567, va1x2, vb89ABCDEFx89AB);
+      vacc2x0123 = _mm256_dpbusd_avx_epi32(vacc2x0123, va2x1, vb01234567x4567);
+      vacc2x4567 = _mm256_dpbusd_avx_epi32(vacc2x4567, va2x1, vb89ABCDEFx4567);
+      vacc2x0123 = _mm256_dpbusd_avx_epi32(vacc2x0123, va2x2, vb01234567x89AB);
+      vacc2x4567 = _mm256_dpbusd_avx_epi32(vacc2x4567, va2x2, vb89ABCDEFx89AB);
+      vacc3x0123 = _mm256_dpbusd_avx_epi32(vacc3x0123, va3x1, vb01234567x4567);
+      vacc3x4567 = _mm256_dpbusd_avx_epi32(vacc3x4567, va3x1, vb89ABCDEFx4567);
+      vacc3x0123 = _mm256_dpbusd_avx_epi32(vacc3x0123, va3x2, vb01234567x89AB);
+      vacc3x4567 = _mm256_dpbusd_avx_epi32(vacc3x4567, va3x2, vb89ABCDEFx89AB);
+      vacc4x0123 = _mm256_dpbusd_avx_epi32(vacc4x0123, va4x1, vb01234567x4567);
+      vacc4x4567 = _mm256_dpbusd_avx_epi32(vacc4x4567, va4x1, vb89ABCDEFx4567);
+      vacc4x0123 = _mm256_dpbusd_avx_epi32(vacc4x0123, va4x2, vb01234567x89AB);
+      vacc4x4567 = _mm256_dpbusd_avx_epi32(vacc4x4567, va4x2, vb89ABCDEFx89AB);
+      vacc5x0123 = _mm256_dpbusd_avx_epi32(vacc5x0123, va5x1, vb01234567x4567);
+      vacc5x4567 = _mm256_dpbusd_avx_epi32(vacc5x4567, va5x1, vb89ABCDEFx4567);
+      vacc5x0123 = _mm256_dpbusd_avx_epi32(vacc5x0123, va5x2, vb01234567x89AB);
+      vacc5x4567 = _mm256_dpbusd_avx_epi32(vacc5x4567, va5x2, vb89ABCDEFx89AB);
+      vacc6x0123 = _mm256_dpbusd_avx_epi32(vacc6x0123, va6x1, vb01234567x4567);
+      vacc6x4567 = _mm256_dpbusd_avx_epi32(vacc6x4567, va6x1, vb89ABCDEFx4567);
+      vacc6x0123 = _mm256_dpbusd_avx_epi32(vacc6x0123, va6x2, vb01234567x89AB);
+      vacc6x4567 = _mm256_dpbusd_avx_epi32(vacc6x4567, va6x2, vb89ABCDEFx89AB);
+      vacc7x0123 = _mm256_dpbusd_avx_epi32(vacc7x0123, va7x1, vb01234567x4567);
+      vacc7x4567 = _mm256_dpbusd_avx_epi32(vacc7x4567, va7x1, vb89ABCDEFx4567);
+      vacc7x0123 = _mm256_dpbusd_avx_epi32(vacc7x0123, va7x2, vb01234567x89AB);
+      vacc7x4567 = _mm256_dpbusd_avx_epi32(vacc7x4567, va7x2, vb89ABCDEFx89AB);
+      vacc0x0123 = _mm256_dpbusd_avx_epi32(vacc0x0123, va0x3, vb01234567xCDEF);
+      vacc0x4567 = _mm256_dpbusd_avx_epi32(vacc0x4567, va0x3, vb89ABCDEFxCDEF);
+      vacc1x0123 = _mm256_dpbusd_avx_epi32(vacc1x0123, va1x3, vb01234567xCDEF);
+      vacc1x4567 = _mm256_dpbusd_avx_epi32(vacc1x4567, va1x3, vb89ABCDEFxCDEF);
+      vacc2x0123 = _mm256_dpbusd_avx_epi32(vacc2x0123, va2x3, vb01234567xCDEF);
+      vacc2x4567 = _mm256_dpbusd_avx_epi32(vacc2x4567, va2x3, vb89ABCDEFxCDEF);
+      vacc3x0123 = _mm256_dpbusd_avx_epi32(vacc3x0123, va3x3, vb01234567xCDEF);
+      vacc3x4567 = _mm256_dpbusd_avx_epi32(vacc3x4567, va3x3, vb89ABCDEFxCDEF);
+      vacc4x0123 = _mm256_dpbusd_avx_epi32(vacc4x0123, va4x3, vb01234567xCDEF);
+      vacc4x4567 = _mm256_dpbusd_avx_epi32(vacc4x4567, va4x3, vb89ABCDEFxCDEF);
+      vacc5x0123 = _mm256_dpbusd_avx_epi32(vacc5x0123, va5x3, vb01234567xCDEF);
+      vacc5x4567 = _mm256_dpbusd_avx_epi32(vacc5x4567, va5x3, vb89ABCDEFxCDEF);
+      vacc6x0123 = _mm256_dpbusd_avx_epi32(vacc6x0123, va6x3, vb01234567xCDEF);
+      vacc6x4567 = _mm256_dpbusd_avx_epi32(vacc6x4567, va6x3, vb89ABCDEFxCDEF);
+      vacc7x0123 = _mm256_dpbusd_avx_epi32(vacc7x0123, va7x3, vb01234567xCDEF);
+      vacc7x4567 = _mm256_dpbusd_avx_epi32(vacc7x4567, va7x3, vb89ABCDEFxCDEF);
       w = (const int8_t*) w + 64;
       k -= 32 * sizeof(int8_t);
     }
@@ -245,6 +275,9 @@ void xnn_qs8_qc2w_gemm_minmax_fp32_ukernel_7x8c8__avx2_madd(
       const __m256i va6x01234567 = _mm256_xor_si256(_mm256_set1_epi64x((int64_t) unaligned_load_u64(a6)), vsign_mask);
       const __m256i va6x89ABCDEF = _mm256_xor_si256(_mm256_set1_epi64x((int64_t) unaligned_load_u64(a6 + 8)), vsign_mask);
       a6 += 16;
+      const __m256i va7x01234567 = _mm256_xor_si256(_mm256_set1_epi64x((int64_t) unaligned_load_u64(a7)), vsign_mask);
+      const __m256i va7x89ABCDEF = _mm256_xor_si256(_mm256_set1_epi64x((int64_t) unaligned_load_u64(a7 + 8)), vsign_mask);
+      a7 += 16;
 
       // 2 planes of 2 bit.  potentially 3rd plane handled later
       __m256i vbb01234567x01234567 = _mm256_load_si256(w);
@@ -255,35 +288,43 @@ void xnn_qs8_qc2w_gemm_minmax_fp32_ukernel_7x8c8__avx2_madd(
       __m256i vb89ABCDEFx0123 = _mm256_and_si256(vbb89ABCDEFx01234567, vmask);
       __m256i vb01234567x4567 = _mm256_and_si256(vbs01234567x4567, vmask);
       __m256i vb89ABCDEFx4567 = _mm256_and_si256(vbs89ABCDEFx4567, vmask);
+      vb01234567x0123 = _mm256_sub_epi8(vb01234567x0123, vtwo);
+      vb89ABCDEFx0123 = _mm256_sub_epi8(vb89ABCDEFx0123, vtwo);
+      vb01234567x4567 = _mm256_sub_epi8(vb01234567x4567, vtwo);
+      vb89ABCDEFx4567 = _mm256_sub_epi8(vb89ABCDEFx4567, vtwo);
 
-      vacc0x0123 = _mm256_dpbusd_epi32_madd_kzp2(vacc0x0123, va0x01234567, vb01234567x0123);
-      vacc0x4567 = _mm256_dpbusd_epi32_madd_kzp2(vacc0x4567, va0x01234567, vb89ABCDEFx0123);
-      vacc1x0123 = _mm256_dpbusd_epi32_madd_kzp2(vacc1x0123, va1x01234567, vb01234567x0123);
-      vacc1x4567 = _mm256_dpbusd_epi32_madd_kzp2(vacc1x4567, va1x01234567, vb89ABCDEFx0123);
-      vacc2x0123 = _mm256_dpbusd_epi32_madd_kzp2(vacc2x0123, va2x01234567, vb01234567x0123);
-      vacc2x4567 = _mm256_dpbusd_epi32_madd_kzp2(vacc2x4567, va2x01234567, vb89ABCDEFx0123);
-      vacc3x0123 = _mm256_dpbusd_epi32_madd_kzp2(vacc3x0123, va3x01234567, vb01234567x0123);
-      vacc3x4567 = _mm256_dpbusd_epi32_madd_kzp2(vacc3x4567, va3x01234567, vb89ABCDEFx0123);
-      vacc4x0123 = _mm256_dpbusd_epi32_madd_kzp2(vacc4x0123, va4x01234567, vb01234567x0123);
-      vacc4x4567 = _mm256_dpbusd_epi32_madd_kzp2(vacc4x4567, va4x01234567, vb89ABCDEFx0123);
-      vacc5x0123 = _mm256_dpbusd_epi32_madd_kzp2(vacc5x0123, va5x01234567, vb01234567x0123);
-      vacc5x4567 = _mm256_dpbusd_epi32_madd_kzp2(vacc5x4567, va5x01234567, vb89ABCDEFx0123);
-      vacc6x0123 = _mm256_dpbusd_epi32_madd_kzp2(vacc6x0123, va6x01234567, vb01234567x0123);
-      vacc6x4567 = _mm256_dpbusd_epi32_madd_kzp2(vacc6x4567, va6x01234567, vb89ABCDEFx0123);
-      vacc0x0123 = _mm256_dpbusd_epi32_madd_kzp2(vacc0x0123, va0x89ABCDEF, vb01234567x4567);
-      vacc0x4567 = _mm256_dpbusd_epi32_madd_kzp2(vacc0x4567, va0x89ABCDEF, vb89ABCDEFx4567);
-      vacc1x0123 = _mm256_dpbusd_epi32_madd_kzp2(vacc1x0123, va1x89ABCDEF, vb01234567x4567);
-      vacc1x4567 = _mm256_dpbusd_epi32_madd_kzp2(vacc1x4567, va1x89ABCDEF, vb89ABCDEFx4567);
-      vacc2x0123 = _mm256_dpbusd_epi32_madd_kzp2(vacc2x0123, va2x89ABCDEF, vb01234567x4567);
-      vacc2x4567 = _mm256_dpbusd_epi32_madd_kzp2(vacc2x4567, va2x89ABCDEF, vb89ABCDEFx4567);
-      vacc3x0123 = _mm256_dpbusd_epi32_madd_kzp2(vacc3x0123, va3x89ABCDEF, vb01234567x4567);
-      vacc3x4567 = _mm256_dpbusd_epi32_madd_kzp2(vacc3x4567, va3x89ABCDEF, vb89ABCDEFx4567);
-      vacc4x0123 = _mm256_dpbusd_epi32_madd_kzp2(vacc4x0123, va4x89ABCDEF, vb01234567x4567);
-      vacc4x4567 = _mm256_dpbusd_epi32_madd_kzp2(vacc4x4567, va4x89ABCDEF, vb89ABCDEFx4567);
-      vacc5x0123 = _mm256_dpbusd_epi32_madd_kzp2(vacc5x0123, va5x89ABCDEF, vb01234567x4567);
-      vacc5x4567 = _mm256_dpbusd_epi32_madd_kzp2(vacc5x4567, va5x89ABCDEF, vb89ABCDEFx4567);
-      vacc6x0123 = _mm256_dpbusd_epi32_madd_kzp2(vacc6x0123, va6x89ABCDEF, vb01234567x4567);
-      vacc6x4567 = _mm256_dpbusd_epi32_madd_kzp2(vacc6x4567, va6x89ABCDEF, vb89ABCDEFx4567);
+      vacc0x0123 = _mm256_dpbusd_avx_epi32(vacc0x0123, va0x01234567, vb01234567x0123);
+      vacc0x4567 = _mm256_dpbusd_avx_epi32(vacc0x4567, va0x01234567, vb89ABCDEFx0123);
+      vacc1x0123 = _mm256_dpbusd_avx_epi32(vacc1x0123, va1x01234567, vb01234567x0123);
+      vacc1x4567 = _mm256_dpbusd_avx_epi32(vacc1x4567, va1x01234567, vb89ABCDEFx0123);
+      vacc2x0123 = _mm256_dpbusd_avx_epi32(vacc2x0123, va2x01234567, vb01234567x0123);
+      vacc2x4567 = _mm256_dpbusd_avx_epi32(vacc2x4567, va2x01234567, vb89ABCDEFx0123);
+      vacc3x0123 = _mm256_dpbusd_avx_epi32(vacc3x0123, va3x01234567, vb01234567x0123);
+      vacc3x4567 = _mm256_dpbusd_avx_epi32(vacc3x4567, va3x01234567, vb89ABCDEFx0123);
+      vacc4x0123 = _mm256_dpbusd_avx_epi32(vacc4x0123, va4x01234567, vb01234567x0123);
+      vacc4x4567 = _mm256_dpbusd_avx_epi32(vacc4x4567, va4x01234567, vb89ABCDEFx0123);
+      vacc5x0123 = _mm256_dpbusd_avx_epi32(vacc5x0123, va5x01234567, vb01234567x0123);
+      vacc5x4567 = _mm256_dpbusd_avx_epi32(vacc5x4567, va5x01234567, vb89ABCDEFx0123);
+      vacc6x0123 = _mm256_dpbusd_avx_epi32(vacc6x0123, va6x01234567, vb01234567x0123);
+      vacc6x4567 = _mm256_dpbusd_avx_epi32(vacc6x4567, va6x01234567, vb89ABCDEFx0123);
+      vacc7x0123 = _mm256_dpbusd_avx_epi32(vacc7x0123, va7x01234567, vb01234567x0123);
+      vacc7x4567 = _mm256_dpbusd_avx_epi32(vacc7x4567, va7x01234567, vb89ABCDEFx0123);
+      vacc0x0123 = _mm256_dpbusd_avx_epi32(vacc0x0123, va0x89ABCDEF, vb01234567x4567);
+      vacc0x4567 = _mm256_dpbusd_avx_epi32(vacc0x4567, va0x89ABCDEF, vb89ABCDEFx4567);
+      vacc1x0123 = _mm256_dpbusd_avx_epi32(vacc1x0123, va1x89ABCDEF, vb01234567x4567);
+      vacc1x4567 = _mm256_dpbusd_avx_epi32(vacc1x4567, va1x89ABCDEF, vb89ABCDEFx4567);
+      vacc2x0123 = _mm256_dpbusd_avx_epi32(vacc2x0123, va2x89ABCDEF, vb01234567x4567);
+      vacc2x4567 = _mm256_dpbusd_avx_epi32(vacc2x4567, va2x89ABCDEF, vb89ABCDEFx4567);
+      vacc3x0123 = _mm256_dpbusd_avx_epi32(vacc3x0123, va3x89ABCDEF, vb01234567x4567);
+      vacc3x4567 = _mm256_dpbusd_avx_epi32(vacc3x4567, va3x89ABCDEF, vb89ABCDEFx4567);
+      vacc4x0123 = _mm256_dpbusd_avx_epi32(vacc4x0123, va4x89ABCDEF, vb01234567x4567);
+      vacc4x4567 = _mm256_dpbusd_avx_epi32(vacc4x4567, va4x89ABCDEF, vb89ABCDEFx4567);
+      vacc5x0123 = _mm256_dpbusd_avx_epi32(vacc5x0123, va5x89ABCDEF, vb01234567x4567);
+      vacc5x4567 = _mm256_dpbusd_avx_epi32(vacc5x4567, va5x89ABCDEF, vb89ABCDEFx4567);
+      vacc6x0123 = _mm256_dpbusd_avx_epi32(vacc6x0123, va6x89ABCDEF, vb01234567x4567);
+      vacc6x4567 = _mm256_dpbusd_avx_epi32(vacc6x4567, va6x89ABCDEF, vb89ABCDEFx4567);
+      vacc7x0123 = _mm256_dpbusd_avx_epi32(vacc7x0123, va7x89ABCDEF, vb01234567x4567);
+      vacc7x4567 = _mm256_dpbusd_avx_epi32(vacc7x4567, va7x89ABCDEF, vb89ABCDEFx4567);
 
       w = (const int8_t*) w + 64;
       k -= 16 * sizeof(int8_t);
@@ -303,26 +344,32 @@ void xnn_qs8_qc2w_gemm_minmax_fp32_ukernel_7x8c8__avx2_madd(
         a5 += 8;
         const __m256i va6x3 = _mm256_xor_si256(_mm256_set1_epi64x((int64_t) unaligned_load_u64(a6)), vsign_mask);
         a6 += 8;
+        const __m256i va7x3 = _mm256_xor_si256(_mm256_set1_epi64x((int64_t) unaligned_load_u64(a7)), vsign_mask);
+        a7 += 8;
 
         // mask 3rd plane of 2 bit.
         __m256i vbs01234567x89AB = _mm256_srli_epi32(vbb01234567x01234567, 4);
         __m256i vbs89ABCDEFx89AB = _mm256_srli_epi32(vbb89ABCDEFx01234567, 4);
         __m256i vb01234567x89AB = _mm256_and_si256(vbs01234567x89AB, vmask);
         __m256i vb89ABCDEFx89AB = _mm256_and_si256(vbs89ABCDEFx89AB, vmask);
-        vacc0x0123 = _mm256_dpbusd_epi32_madd_kzp2(vacc0x0123, va0x3, vb01234567x89AB);
-        vacc0x4567 = _mm256_dpbusd_epi32_madd_kzp2(vacc0x4567, va0x3, vb89ABCDEFx89AB);
-        vacc1x0123 = _mm256_dpbusd_epi32_madd_kzp2(vacc1x0123, va1x3, vb01234567x89AB);
-        vacc1x4567 = _mm256_dpbusd_epi32_madd_kzp2(vacc1x4567, va1x3, vb89ABCDEFx89AB);
-        vacc2x0123 = _mm256_dpbusd_epi32_madd_kzp2(vacc2x0123, va2x3, vb01234567x89AB);
-        vacc2x4567 = _mm256_dpbusd_epi32_madd_kzp2(vacc2x4567, va2x3, vb89ABCDEFx89AB);
-        vacc3x0123 = _mm256_dpbusd_epi32_madd_kzp2(vacc3x0123, va3x3, vb01234567x89AB);
-        vacc3x4567 = _mm256_dpbusd_epi32_madd_kzp2(vacc3x4567, va3x3, vb89ABCDEFx89AB);
-        vacc4x0123 = _mm256_dpbusd_epi32_madd_kzp2(vacc4x0123, va4x3, vb01234567x89AB);
-        vacc4x4567 = _mm256_dpbusd_epi32_madd_kzp2(vacc4x4567, va4x3, vb89ABCDEFx89AB);
-        vacc5x0123 = _mm256_dpbusd_epi32_madd_kzp2(vacc5x0123, va5x3, vb01234567x89AB);
-        vacc5x4567 = _mm256_dpbusd_epi32_madd_kzp2(vacc5x4567, va5x3, vb89ABCDEFx89AB);
-        vacc6x0123 = _mm256_dpbusd_epi32_madd_kzp2(vacc6x0123, va6x3, vb01234567x89AB);
-        vacc6x4567 = _mm256_dpbusd_epi32_madd_kzp2(vacc6x4567, va6x3, vb89ABCDEFx89AB);
+        vb01234567x89AB = _mm256_sub_epi8(vb01234567x89AB, vtwo);
+        vb89ABCDEFx89AB = _mm256_sub_epi8(vb89ABCDEFx89AB, vtwo);
+        vacc0x0123 = _mm256_dpbusd_avx_epi32(vacc0x0123, va0x3, vb01234567x89AB);
+        vacc0x4567 = _mm256_dpbusd_avx_epi32(vacc0x4567, va0x3, vb89ABCDEFx89AB);
+        vacc1x0123 = _mm256_dpbusd_avx_epi32(vacc1x0123, va1x3, vb01234567x89AB);
+        vacc1x4567 = _mm256_dpbusd_avx_epi32(vacc1x4567, va1x3, vb89ABCDEFx89AB);
+        vacc2x0123 = _mm256_dpbusd_avx_epi32(vacc2x0123, va2x3, vb01234567x89AB);
+        vacc2x4567 = _mm256_dpbusd_avx_epi32(vacc2x4567, va2x3, vb89ABCDEFx89AB);
+        vacc3x0123 = _mm256_dpbusd_avx_epi32(vacc3x0123, va3x3, vb01234567x89AB);
+        vacc3x4567 = _mm256_dpbusd_avx_epi32(vacc3x4567, va3x3, vb89ABCDEFx89AB);
+        vacc4x0123 = _mm256_dpbusd_avx_epi32(vacc4x0123, va4x3, vb01234567x89AB);
+        vacc4x4567 = _mm256_dpbusd_avx_epi32(vacc4x4567, va4x3, vb89ABCDEFx89AB);
+        vacc5x0123 = _mm256_dpbusd_avx_epi32(vacc5x0123, va5x3, vb01234567x89AB);
+        vacc5x4567 = _mm256_dpbusd_avx_epi32(vacc5x4567, va5x3, vb89ABCDEFx89AB);
+        vacc6x0123 = _mm256_dpbusd_avx_epi32(vacc6x0123, va6x3, vb01234567x89AB);
+        vacc6x4567 = _mm256_dpbusd_avx_epi32(vacc6x4567, va6x3, vb89ABCDEFx89AB);
+        vacc7x0123 = _mm256_dpbusd_avx_epi32(vacc7x0123, va7x3, vb01234567x89AB);
+        vacc7x4567 = _mm256_dpbusd_avx_epi32(vacc7x4567, va7x3, vb89ABCDEFx89AB);
         k -= 8 * sizeof(int8_t);
       }
     }
@@ -342,27 +389,33 @@ void xnn_qs8_qc2w_gemm_minmax_fp32_ukernel_7x8c8__avx2_madd(
       a5 += 8;
       const __m256i va6x01234567 = _mm256_xor_si256(_mm256_set1_epi64x((int64_t) unaligned_load_u64(a6)), vsign_mask);
       a6 += 8;
+      const __m256i va7x01234567 = _mm256_xor_si256(_mm256_set1_epi64x((int64_t) unaligned_load_u64(a7)), vsign_mask);
+      a7 += 8;
 
       // 1 plane of 2 bit.
       const __m256i vbb01234567x01234567 = _mm256_load_si256(w);
       const __m256i vbb89ABCDEFx01234567 = _mm256_load_si256((const __m256i*) ((const int8_t*) w + 32));
       __m256i vb01234567x0123 = _mm256_and_si256(vbb01234567x01234567, vmask);
       __m256i vb89ABCDEFx0123 = _mm256_and_si256(vbb89ABCDEFx01234567, vmask);
+      vb01234567x0123 = _mm256_sub_epi8(vb01234567x0123, vtwo);
+      vb89ABCDEFx0123 = _mm256_sub_epi8(vb89ABCDEFx0123, vtwo);
 
-      vacc0x0123 = _mm256_dpbusd_epi32_madd_kzp2(vacc0x0123, va0x01234567, vb01234567x0123);
-      vacc0x4567 = _mm256_dpbusd_epi32_madd_kzp2(vacc0x4567, va0x01234567, vb89ABCDEFx0123);
-      vacc1x0123 = _mm256_dpbusd_epi32_madd_kzp2(vacc1x0123, va1x01234567, vb01234567x0123);
-      vacc1x4567 = _mm256_dpbusd_epi32_madd_kzp2(vacc1x4567, va1x01234567, vb89ABCDEFx0123);
-      vacc2x0123 = _mm256_dpbusd_epi32_madd_kzp2(vacc2x0123, va2x01234567, vb01234567x0123);
-      vacc2x4567 = _mm256_dpbusd_epi32_madd_kzp2(vacc2x4567, va2x01234567, vb89ABCDEFx0123);
-      vacc3x0123 = _mm256_dpbusd_epi32_madd_kzp2(vacc3x0123, va3x01234567, vb01234567x0123);
-      vacc3x4567 = _mm256_dpbusd_epi32_madd_kzp2(vacc3x4567, va3x01234567, vb89ABCDEFx0123);
-      vacc4x0123 = _mm256_dpbusd_epi32_madd_kzp2(vacc4x0123, va4x01234567, vb01234567x0123);
-      vacc4x4567 = _mm256_dpbusd_epi32_madd_kzp2(vacc4x4567, va4x01234567, vb89ABCDEFx0123);
-      vacc5x0123 = _mm256_dpbusd_epi32_madd_kzp2(vacc5x0123, va5x01234567, vb01234567x0123);
-      vacc5x4567 = _mm256_dpbusd_epi32_madd_kzp2(vacc5x4567, va5x01234567, vb89ABCDEFx0123);
-      vacc6x0123 = _mm256_dpbusd_epi32_madd_kzp2(vacc6x0123, va6x01234567, vb01234567x0123);
-      vacc6x4567 = _mm256_dpbusd_epi32_madd_kzp2(vacc6x4567, va6x01234567, vb89ABCDEFx0123);
+      vacc0x0123 = _mm256_dpbusd_avx_epi32(vacc0x0123, va0x01234567, vb01234567x0123);
+      vacc0x4567 = _mm256_dpbusd_avx_epi32(vacc0x4567, va0x01234567, vb89ABCDEFx0123);
+      vacc1x0123 = _mm256_dpbusd_avx_epi32(vacc1x0123, va1x01234567, vb01234567x0123);
+      vacc1x4567 = _mm256_dpbusd_avx_epi32(vacc1x4567, va1x01234567, vb89ABCDEFx0123);
+      vacc2x0123 = _mm256_dpbusd_avx_epi32(vacc2x0123, va2x01234567, vb01234567x0123);
+      vacc2x4567 = _mm256_dpbusd_avx_epi32(vacc2x4567, va2x01234567, vb89ABCDEFx0123);
+      vacc3x0123 = _mm256_dpbusd_avx_epi32(vacc3x0123, va3x01234567, vb01234567x0123);
+      vacc3x4567 = _mm256_dpbusd_avx_epi32(vacc3x4567, va3x01234567, vb89ABCDEFx0123);
+      vacc4x0123 = _mm256_dpbusd_avx_epi32(vacc4x0123, va4x01234567, vb01234567x0123);
+      vacc4x4567 = _mm256_dpbusd_avx_epi32(vacc4x4567, va4x01234567, vb89ABCDEFx0123);
+      vacc5x0123 = _mm256_dpbusd_avx_epi32(vacc5x0123, va5x01234567, vb01234567x0123);
+      vacc5x4567 = _mm256_dpbusd_avx_epi32(vacc5x4567, va5x01234567, vb89ABCDEFx0123);
+      vacc6x0123 = _mm256_dpbusd_avx_epi32(vacc6x0123, va6x01234567, vb01234567x0123);
+      vacc6x4567 = _mm256_dpbusd_avx_epi32(vacc6x4567, va6x01234567, vb89ABCDEFx0123);
+      vacc7x0123 = _mm256_dpbusd_avx_epi32(vacc7x0123, va7x01234567, vb01234567x0123);
+      vacc7x4567 = _mm256_dpbusd_avx_epi32(vacc7x4567, va7x01234567, vb89ABCDEFx0123);
 
       w = (const int8_t*) w + 64;
       k -= 8 * sizeof(int8_t);
@@ -383,6 +436,8 @@ void xnn_qs8_qc2w_gemm_minmax_fp32_ukernel_7x8c8__avx2_madd(
     __m256i vacc5x01234567 = _mm256_permute4x64_epi64(vsum5x02134657, _MM_SHUFFLE(3, 1, 2, 0));
     const __m256i vsum6x02134657 = _mm256_hadd_epi32(vacc6x0123, vacc6x4567);
     __m256i vacc6x01234567 = _mm256_permute4x64_epi64(vsum6x02134657, _MM_SHUFFLE(3, 1, 2, 0));
+    const __m256i vsum7x02134657 = _mm256_hadd_epi32(vacc7x0123, vacc7x4567);
+    __m256i vacc7x01234567 = _mm256_permute4x64_epi64(vsum7x02134657, _MM_SHUFFLE(3, 1, 2, 0));
 
     __m256 vout0x01234567 = _mm256_cvtepi32_ps(vacc0x01234567);
     __m256 vout1x01234567 = _mm256_cvtepi32_ps(vacc1x01234567);
@@ -391,6 +446,7 @@ void xnn_qs8_qc2w_gemm_minmax_fp32_ukernel_7x8c8__avx2_madd(
     __m256 vout4x01234567 = _mm256_cvtepi32_ps(vacc4x01234567);
     __m256 vout5x01234567 = _mm256_cvtepi32_ps(vacc5x01234567);
     __m256 vout6x01234567 = _mm256_cvtepi32_ps(vacc6x01234567);
+    __m256 vout7x01234567 = _mm256_cvtepi32_ps(vacc7x01234567);
 
     const __m256 vscale01234567 = _mm256_load_ps(w);
     w = (const float*) w + 8;
@@ -401,6 +457,7 @@ void xnn_qs8_qc2w_gemm_minmax_fp32_ukernel_7x8c8__avx2_madd(
     vout4x01234567 = _mm256_mul_ps(vout4x01234567, vscale01234567);
     vout5x01234567 = _mm256_mul_ps(vout5x01234567, vscale01234567);
     vout6x01234567 = _mm256_mul_ps(vout6x01234567, vscale01234567);
+    vout7x01234567 = _mm256_mul_ps(vout7x01234567, vscale01234567);
 
     vout0x01234567 = _mm256_min_ps(vout0x01234567, voutput_max_less_zero_point);
     vout1x01234567 = _mm256_min_ps(vout1x01234567, voutput_max_less_zero_point);
@@ -409,6 +466,7 @@ void xnn_qs8_qc2w_gemm_minmax_fp32_ukernel_7x8c8__avx2_madd(
     vout4x01234567 = _mm256_min_ps(vout4x01234567, voutput_max_less_zero_point);
     vout5x01234567 = _mm256_min_ps(vout5x01234567, voutput_max_less_zero_point);
     vout6x01234567 = _mm256_min_ps(vout6x01234567, voutput_max_less_zero_point);
+    vout7x01234567 = _mm256_min_ps(vout7x01234567, voutput_max_less_zero_point);
 
     vacc0x01234567 = _mm256_cvtps_epi32(vout0x01234567);
     vacc1x01234567 = _mm256_cvtps_epi32(vout1x01234567);
@@ -417,6 +475,7 @@ void xnn_qs8_qc2w_gemm_minmax_fp32_ukernel_7x8c8__avx2_madd(
     vacc4x01234567 = _mm256_cvtps_epi32(vout4x01234567);
     vacc5x01234567 = _mm256_cvtps_epi32(vout5x01234567);
     vacc6x01234567 = _mm256_cvtps_epi32(vout6x01234567);
+    vacc7x01234567 = _mm256_cvtps_epi32(vout7x01234567);
 
     vacc0x01234567 = _mm256_add_epi32(vacc0x01234567, voutput_zero_point);
     vacc1x01234567 = _mm256_add_epi32(vacc1x01234567, voutput_zero_point);
@@ -425,6 +484,7 @@ void xnn_qs8_qc2w_gemm_minmax_fp32_ukernel_7x8c8__avx2_madd(
     vacc4x01234567 = _mm256_add_epi32(vacc4x01234567, voutput_zero_point);
     vacc5x01234567 = _mm256_add_epi32(vacc5x01234567, voutput_zero_point);
     vacc6x01234567 = _mm256_add_epi32(vacc6x01234567, voutput_zero_point);
+    vacc7x01234567 = _mm256_add_epi32(vacc7x01234567, voutput_zero_point);
 
     vacc0x01234567 = _mm256_packs_epi32(vacc0x01234567, _mm256_castsi128_si256(_mm256_extracti128_si256(vacc0x01234567, 1)));
     __m128i voutb0x01234567 = _mm256_castsi256_si128(_mm256_packs_epi16(vacc0x01234567, vacc0x01234567));
@@ -440,6 +500,8 @@ void xnn_qs8_qc2w_gemm_minmax_fp32_ukernel_7x8c8__avx2_madd(
     __m128i voutb5x01234567 = _mm256_castsi256_si128(_mm256_packs_epi16(vacc5x01234567, vacc5x01234567));
     vacc6x01234567 = _mm256_packs_epi32(vacc6x01234567, _mm256_castsi128_si256(_mm256_extracti128_si256(vacc6x01234567, 1)));
     __m128i voutb6x01234567 = _mm256_castsi256_si128(_mm256_packs_epi16(vacc6x01234567, vacc6x01234567));
+    vacc7x01234567 = _mm256_packs_epi32(vacc7x01234567, _mm256_castsi128_si256(_mm256_extracti128_si256(vacc7x01234567, 1)));
+    __m128i voutb7x01234567 = _mm256_castsi256_si128(_mm256_packs_epi16(vacc7x01234567, vacc7x01234567));
 
     voutb0x01234567 = _mm_max_epi8(voutb0x01234567, voutput_min);
     voutb1x01234567 = _mm_max_epi8(voutb1x01234567, voutput_min);
@@ -448,6 +510,7 @@ void xnn_qs8_qc2w_gemm_minmax_fp32_ukernel_7x8c8__avx2_madd(
     voutb4x01234567 = _mm_max_epi8(voutb4x01234567, voutput_min);
     voutb5x01234567 = _mm_max_epi8(voutb5x01234567, voutput_min);
     voutb6x01234567 = _mm_max_epi8(voutb6x01234567, voutput_min);
+    voutb7x01234567 = _mm_max_epi8(voutb7x01234567, voutput_min);
 
     if (nc >= 8) {
       _mm_storel_epi64((__m128i*) c0, voutb0x01234567);
@@ -471,6 +534,9 @@ void xnn_qs8_qc2w_gemm_minmax_fp32_ukernel_7x8c8__avx2_madd(
       _mm_storel_epi64((__m128i*) c6, voutb6x01234567);
       c6 = (int8_t*) ((uintptr_t) c6 + cn_stride);
       a6 = (const int8_t*) ((uintptr_t) a6 - kc);
+      _mm_storel_epi64((__m128i*) c7, voutb7x01234567);
+      c7 = (int8_t*) ((uintptr_t) c7 + cn_stride);
+      a7 = (const int8_t*) ((uintptr_t) a7 - kc);
 
       nc -= 8;
     } else {
@@ -489,6 +555,8 @@ void xnn_qs8_qc2w_gemm_minmax_fp32_ukernel_7x8c8__avx2_madd(
         c5 += 4;
         _mm_storeu_si32(c6, voutb6x01234567);
         c6 += 4;
+        _mm_storeu_si32(c7, voutb7x01234567);
+        c7 += 4;
         voutb0x01234567 = _mm_srli_epi64(voutb0x01234567, 32);
         voutb1x01234567 = _mm_srli_epi64(voutb1x01234567, 32);
         voutb2x01234567 = _mm_srli_epi64(voutb2x01234567, 32);
@@ -496,6 +564,7 @@ void xnn_qs8_qc2w_gemm_minmax_fp32_ukernel_7x8c8__avx2_madd(
         voutb4x01234567 = _mm_srli_epi64(voutb4x01234567, 32);
         voutb5x01234567 = _mm_srli_epi64(voutb5x01234567, 32);
         voutb6x01234567 = _mm_srli_epi64(voutb6x01234567, 32);
+        voutb7x01234567 = _mm_srli_epi64(voutb7x01234567, 32);
       }
       if (nc & 2) {
         unaligned_store_u16(c0, (uint16_t) _mm_extract_epi16(voutb0x01234567, 0));
@@ -512,6 +581,8 @@ void xnn_qs8_qc2w_gemm_minmax_fp32_ukernel_7x8c8__avx2_madd(
         c5 += 2;
         unaligned_store_u16(c6, (uint16_t) _mm_extract_epi16(voutb6x01234567, 0));
         c6 += 2;
+        unaligned_store_u16(c7, (uint16_t) _mm_extract_epi16(voutb7x01234567, 0));
+        c7 += 2;
         voutb0x01234567 = _mm_srli_epi32(voutb0x01234567, 16);
         voutb1x01234567 = _mm_srli_epi32(voutb1x01234567, 16);
         voutb2x01234567 = _mm_srli_epi32(voutb2x01234567, 16);
@@ -519,6 +590,7 @@ void xnn_qs8_qc2w_gemm_minmax_fp32_ukernel_7x8c8__avx2_madd(
         voutb4x01234567 = _mm_srli_epi32(voutb4x01234567, 16);
         voutb5x01234567 = _mm_srli_epi32(voutb5x01234567, 16);
         voutb6x01234567 = _mm_srli_epi32(voutb6x01234567, 16);
+        voutb7x01234567 = _mm_srli_epi32(voutb7x01234567, 16);
       }
       if (nc & 1) {
         *c0 = (int8_t) _mm_extract_epi8(voutb0x01234567, 0);
@@ -528,6 +600,7 @@ void xnn_qs8_qc2w_gemm_minmax_fp32_ukernel_7x8c8__avx2_madd(
         *c4 = (int8_t) _mm_extract_epi8(voutb4x01234567, 0);
         *c5 = (int8_t) _mm_extract_epi8(voutb5x01234567, 0);
         *c6 = (int8_t) _mm_extract_epi8(voutb6x01234567, 0);
+        *c7 = (int8_t) _mm_extract_epi8(voutb7x01234567, 0);
       }
       nc = 0;
     }
