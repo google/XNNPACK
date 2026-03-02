@@ -89,4 +89,9 @@ tools/xngen src/f16-gemm/wasmrelaxedsimd-splat.c.in -D MR=4 -D NR=16 -D -o src/f
 tools/xngen src/f16-gemm/wasmrelaxedsimd-splat.c.in -D MR=6 -D NR=16 -D -o src/f16-gemm/gen/f16-gemm-6x16-minmax-wasmrelaxedsimd-splat.c &
 tools/xngen src/f16-gemm/wasmrelaxedsimd-splat.c.in -D MR=8 -D NR=16 -D -o src/f16-gemm/gen/f16-gemm-8x16-minmax-wasmrelaxedsimd-splat.c &
 
+################################ RISC-V Vector ##############################
+tools/xngen src/f16-gemm/MRxNRv-rvv.c.in -D MR=1 -D NR=m4 -o src/f16-gemm/gen/f16-gemm-1x4v-minmax-rvvfp16arith.c &
+tools/xngen src/f16-gemm/MRxNRv-rvv.c.in -D MR=4 -D NR=m4 -o src/f16-gemm/gen/f16-gemm-4x4v-minmax-rvvfp16arith.c &
+tools/xngen src/f16-gemm/MRxNRv-rvv.c.in -D MR=7 -D NR=m4 -o src/f16-gemm/gen/f16-gemm-7x4v-minmax-rvvfp16arith.c &
+
 wait

@@ -50,6 +50,13 @@ static void init_f16_spmm_config(void) {
       f16_spmm_config.mr = 32;
       f16_spmm_config.nr = 1;
     }
+  #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR && XNN_ENABLE_RISCV_FP16_VECTOR
+    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    assert(hardware_config != NULL);
+    f16_spmm_config.ukernel = XNN_INIT_SPMM_UKERNEL(xnn_f16_spmm_minmax_ukernel_8vx1__rvvfp16arith);
+    f16_spmm_config.init.f16 = xnn_init_f16_minmax_scalar_params;
+    f16_spmm_config.mr = 8 * hardware_config->vlenb / sizeof(xnn_float16);
+    f16_spmm_config.nr = 1;
   #endif
 }
 
@@ -87,6 +94,7 @@ static void init_f32_spmm_config(void) {
     #endif
   #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    assert(hardware_config != NULL);
     f32_spmm_config.ukernel = XNN_INIT_SPMM_UKERNEL(xnn_f32_spmm_minmax_ukernel_8vx1__rvv);
     f32_spmm_config.init.f32 = xnn_init_f32_minmax_scalar_params;
     f32_spmm_config.mr = 8 * hardware_config->vlenb / sizeof(float);

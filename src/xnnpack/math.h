@@ -526,7 +526,7 @@ XNN_INLINE static int32_t math_round_f32_to_s32(float x) {
 #define XNN_HAVE_FLOAT16 1
 #endif
 
-#if defined(__riscv) && defined(__riscv_zvfh) && __clang__ >= 1600
+#if defined(__riscv) && defined(__riscv_zvfh)
 #define XNN_HAVE_FLOAT16 1
 #endif
 

@@ -1,0 +1,70 @@
+// Copyright 2026 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert CHANNEL_TILE in ["m1", "m2", "m4", "m8"]
+$LMUL = int(CHANNEL_TILE[1])
+$assert KERNEL_TILE >= 2
+#include <assert.h>
+#include <riscv_vector.h>
+#include "src/xnnpack/dwconv.h"
+
+void xnn_f16_dwconv_minmax_ukernel_${KERNEL_TILE}p${LMUL}vc__rvvfp16arith(
+    size_t channels,
+    size_t output_width,
+    const xnn_float16** input,
+    const xnn_float16* weights,
+    xnn_float16* output,
+    intptr_t input_stride,
+    size_t output_increment,
+    size_t input_offset,
+    size_t input_pixel_stride,
+    const xnn_float16* zero,
+    const struct xnn_f16_minmax_params* restrict params) XNN_OOB_READS
+{
+  assert(channels != 0);
+  assert(output_width != 0);
+
+  const xnn_float16 vmin = params->scalar.min;
+  const xnn_float16 vmax = params->scalar.max;
+  xnn_float16* o = output;
+
+  do {
+    $for K in range(KERNEL_TILE):
+      const xnn_float16* i${K} = input[${K}];
+      assert(i${K} != NULL);
+      if XNN_UNPREDICTABLE(i${K} != (const xnn_float16*) zero) {
+        i${K} = (const xnn_float16*) ((uintptr_t) i${K} + input_offset);
+      }
+
+    input = (const xnn_float16**) ((uintptr_t) input + input_stride);
+
+    size_t c = channels;
+    const xnn_float16* w = weights;
+    const size_t vlmax = __riscv_vsetvlmax_e16m${LMUL}();
+
+    do {
+      size_t vl = __riscv_vsetvl_e16m${LMUL}(c);
+      vfloat16m${LMUL}_t vacc = __riscv_vle16_v_f16m${LMUL}(w, vl);
+      w += vlmax;
+
+      vfloat16m${LMUL}_t va = __riscv_vundefined_f16m${LMUL}();
+      vfloat16m${LMUL}_t vb = __riscv_vundefined_f16m${LMUL}();
+      $for K in range(KERNEL_TILE):
+        va = __riscv_vle16_v_f16m${LMUL}(i${K}, vl);
+        vb = __riscv_vle16_v_f16m${LMUL}(w, vl);
+        w  += vlmax;
+        i${K} += vlmax;
+        vacc = __riscv_vfmacc_vv_f16m${LMUL}(vacc, va, vb, vl);
+
+      vacc = __riscv_vfmax_vf_f16m${LMUL}(vacc, vmin, vl);
+      vacc = __riscv_vfmin_vf_f16m${LMUL}(vacc, vmax, vl);
+      __riscv_vse16_v_f16m${LMUL}(o, vacc, vl);
+      o += vl;
+      c -= vl;
+    } while(c != 0);
+    input_offset += input_pixel_stride;
+    o = (xnn_float16*) ((uintptr_t) o + output_increment);
+  } while (--output_width != 0);
+}

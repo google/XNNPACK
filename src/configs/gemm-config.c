@@ -308,6 +308,21 @@ static void init_f16_gemm_config(void) {
       f16_gemm_config.mr = 4;
       f16_gemm_config.nr = 16;
     }
+  #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR && XNN_ENABLE_RISCV_FP16_VECTOR
+    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    assert(hardware_config != NULL);
+    (void) hardware_config;  // May be unused.
+    if (hardware_config->arch_flags & xnn_arch_riscv_vector_fp16_arith) {
+      f16_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_f16_gemm_minmax_ukernel_1x4v__rvvfp16arith);
+      f16_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(7)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_f16_gemm_minmax_ukernel_7x4v__rvvfp16arith);
+      f16_gemm_config.minmax.igemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_IGEMM_UKERNEL(xnn_f16_igemm_minmax_ukernel_1x4v__rvvfp16arith);
+      f16_gemm_config.minmax.igemm[XNN_MR_TO_INDEX(7)] = XNN_INIT_HMP_IGEMM_UKERNEL(xnn_f16_igemm_minmax_ukernel_7x4v__rvvfp16arith);
+      f16_gemm_config.init.f16 = xnn_init_f16_minmax_scalar_params;
+      f16_gemm_config.pack_gemm_gio = (xnn_packw_gemm_gio_ukernel_fn) xnn_pack_f16_gemm_gio_w;
+      f16_gemm_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_pack_f16_gemm_goi_w;
+      f16_gemm_config.mr = 7;
+      f16_gemm_config.nr = 4 * hardware_config->vlenb / sizeof(xnn_float16);
+    }
   #endif
   assert(f16_gemm_config.mr <= XNN_MAX_MR);
 }
@@ -1012,8 +1027,7 @@ static void init_f32_gemm_config_impl(struct xnn_gemm_config* f32_gemm_config, b
       f32_gemm_config->pack_gemm_gio = (xnn_packw_gemm_gio_ukernel_fn) xnn_pack_f32_gemm_gio_w;
       f32_gemm_config->pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_x32_packw_gemm_goi_ukernel_x4v__rvv_u8;
       f32_gemm_config->mr = 7;
-      // nr is set to vlen * 4 / sizeof(float) = 4 * VLENB * 8 / 32 = VLENB
-      f32_gemm_config->nr = hardware_config->vlenb;
+      f32_gemm_config->nr = 4 * hardware_config->vlenb / sizeof(float);
     }
   #elif XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
@@ -1515,8 +1529,7 @@ static void init_f32_igemm_config(void) {
       f32_igemm_config.pack_gemm_gio = (xnn_packw_gemm_gio_ukernel_fn) xnn_pack_f32_gemm_gio_w;
       f32_igemm_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_x32_packw_gemm_goi_ukernel_x4v__rvv_u8;
       f32_igemm_config.mr = 7;
-      // nr is set to vlen * 4 / sizeof(float) = 4 * VLENB * 8 / 32 = VLENB
-      f32_igemm_config.nr = hardware_config->vlenb;
+      f32_igemm_config.nr = 4 * hardware_config->vlenb / sizeof(float);
     }
   #elif XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
