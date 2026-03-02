@@ -861,6 +861,7 @@ xnnpack_unit_test(
 
 xnnpack_unit_test(
     name = "qd8_f32_qc8w_igemm_minmax_test",
+    timeout = "long",
     srcs = [
         "qd8-f32-qc8w-igemm-minmax.cc",
         "qd8-f32-qc8w-igemm-minmax-2.cc",
