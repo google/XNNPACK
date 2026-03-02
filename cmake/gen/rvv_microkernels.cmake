@@ -103,7 +103,9 @@ SET(PROD_RVV_MICROKERNEL_SRCS
   src/qu8-vlrelu/gen/qu8-vlrelu-rvv-u2v.c
   src/qu8-vmul/gen/qu8-vmul-minmax-f32-rvv-u2v.c
   src/qu8-vmulc/gen/qu8-vmulc-minmax-f32-rvv-u2v.c
+  src/s8-maxpool/gen/s8-maxpool-9p-minmax-rvv-u2v.c
   src/s8-vclamp/gen/s8-vclamp-rvv-u4v.c
+  src/u8-maxpool/gen/u8-maxpool-9p-minmax-rvv-u2v.c
   src/u8-vclamp/gen/u8-vclamp-rvv-u4v.c
   src/x32-packw/gen/x32-packw-x4v-gemm-goi-rvv-u8.c
   src/x32-transposec/gen/x32-transposec-4x4-rvv.c
@@ -258,9 +260,11 @@ SET(NON_PROD_RVV_MICROKERNEL_SRCS
   src/qu8-vlrelu/gen/qu8-vlrelu-rvv-u1v.c
   src/qu8-vmul/gen/qu8-vmul-minmax-f32-rvv-u1v.c
   src/qu8-vmulc/gen/qu8-vmulc-minmax-f32-rvv-u1v.c
+  src/s8-maxpool/gen/s8-maxpool-9p-minmax-rvv-u1v.c
   src/s8-vclamp/gen/s8-vclamp-rvv-u1v.c
   src/s8-vclamp/gen/s8-vclamp-rvv-u2v.c
   src/s8-vclamp/gen/s8-vclamp-rvv-u8v.c
+  src/u8-maxpool/gen/u8-maxpool-9p-minmax-rvv-u1v.c
   src/u8-vclamp/gen/u8-vclamp-rvv-u1v.c
   src/u8-vclamp/gen/u8-vclamp-rvv-u2v.c
   src/u8-vclamp/gen/u8-vclamp-rvv-u8v.c

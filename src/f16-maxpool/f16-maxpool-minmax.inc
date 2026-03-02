@@ -17,3 +17,7 @@ XNN_UKERNEL(xnn_arch_x86_sse4_1, xnn_f16_maxpool_minmax_ukernel_9p__sse41_u8, 8,
 XNN_UKERNEL(xnn_arch_x86_avx2, xnn_f16_maxpool_minmax_ukernel_9p__avx2_u16, 16, 9, xnn_float16, struct xnn_f16_minmax_params, xnn_init_f16_minmax_scalar_params)
 #endif  // XNN_ENABLE_AVX2 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
+#if XNN_ARCH_RISCV && XNN_ENABLE_RISCV_FP16_VECTOR
+XNN_UKERNEL(xnn_arch_riscv_vector_fp16_arith, xnn_f16_maxpool_minmax_ukernel_9p__rvvfp16arith_u1v, (1*xnn_init_hardware_config()->vlenb/sizeof(xnn_float16)), 9, xnn_float16, struct xnn_f16_minmax_params, xnn_init_f16_minmax_scalar_params)
+XNN_UKERNEL(xnn_arch_riscv_vector_fp16_arith, xnn_f16_maxpool_minmax_ukernel_9p__rvvfp16arith_u2v, (2*xnn_init_hardware_config()->vlenb/sizeof(xnn_float16)), 9, xnn_float16, struct xnn_f16_minmax_params, xnn_init_f16_minmax_scalar_params)
+#endif  // XNN_ARCH_RISCV && XNN_ENABLE_RISCV_FP16_VECTOR
