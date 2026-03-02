@@ -144,6 +144,14 @@ ynn_status ynn_define_tensor_value(ynn_subgraph_t subgraph, enum ynn_type type,
   return ynn_status_success;
 }
 
+ynn_status ynn_define_tensor(ynn_subgraph_t subgraph, enum ynn_type type,
+                             size_t rank, const size_t* dims, const void* data,
+                             uint32_t flags, uint32_t* id_out) {
+  return ynn_define_tensor_value(subgraph, type, rank, dims, data,
+                                 YNN_INVALID_VALUE_ID, YNN_INVALID_VALUE_ID,
+                                 flags, id_out);
+}
+
 }  // extern "C"
 
 }  // namespace ynn

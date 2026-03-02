@@ -196,11 +196,9 @@ class SubgraphBuilder {
   template <typename T>
   uint32_t DefineScalar(T value) {
     uint32_t id = YNN_INVALID_VALUE_ID;
-    status_ = ynn_define_tensor_value(subgraph_.get(), type_of<T>(), 0,
-                                      /*dims=*/nullptr, &value,
-                                      /*zero_point_id=*/YNN_INVALID_VALUE_ID,
-                                      /*scale_id=*/YNN_INVALID_VALUE_ID,
-                                      /*flags=*/YNN_VALUE_FLAG_COPY_DATA, &id);
+    status_ = ynn_define_tensor(subgraph_.get(), type_of<T>(), 0,
+                                /*dims=*/nullptr, &value,
+                                /*flags=*/YNN_VALUE_FLAG_COPY_DATA, &id);
     return id;
   }
 

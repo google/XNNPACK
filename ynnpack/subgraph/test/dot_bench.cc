@@ -82,16 +82,13 @@ void bench(benchmark::State& state, ynn_threadpool_t threadpool, int m, int n,
   uint32_t a_id = 0;
   uint32_t b_id = 1;
   uint32_t output_id = 2;
-  ynn_define_tensor_value(subgraph.get(), type_of<Input>(), 2, &a_shape[0],
-                          nullptr, YNN_INVALID_VALUE_ID, YNN_INVALID_VALUE_ID,
-                          /*flags=*/YNN_VALUE_FLAG_EXTERNAL_INPUT, &a_id);
-  ynn_define_tensor_value(subgraph.get(), type_of<Input>(), 2, &b_shape[0],
-                          nullptr, YNN_INVALID_VALUE_ID, YNN_INVALID_VALUE_ID,
-                          /*flags=*/YNN_VALUE_FLAG_EXTERNAL_INPUT, &b_id);
-  ynn_define_tensor_value(subgraph.get(), type_of<Output>(), 2,
-                          &output_shape[0], nullptr, YNN_INVALID_VALUE_ID,
-                          YNN_INVALID_VALUE_ID,
-                          /*flags=*/YNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id);
+  ynn_define_tensor(subgraph.get(), type_of<Input>(), 2, &a_shape[0], nullptr,
+                    /*flags=*/YNN_VALUE_FLAG_EXTERNAL_INPUT, &a_id);
+  ynn_define_tensor(subgraph.get(), type_of<Input>(), 2, &b_shape[0], nullptr,
+                    /*flags=*/YNN_VALUE_FLAG_EXTERNAL_INPUT, &b_id);
+  ynn_define_tensor(subgraph.get(), type_of<Output>(), 2, &output_shape[0],
+                    nullptr,
+                    /*flags=*/YNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id);
 
   ynn_define_dot(subgraph.get(), /*num_k_dims=*/1, a_id, b_id,
                  YNN_INVALID_VALUE_ID, &output_id, 0);
