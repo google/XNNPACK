@@ -2,16 +2,22 @@
 
 #include <algorithm>
 #include <cmath>
+#include <cstddef>
 #include <cstdint>
+#include <initializer_list>
 #include <vector>
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include "src/xnnpack/common.h"
 #include "test/replicable_random_device.h"
 
 namespace xnnpack {
 
 TEST(Buffer, GuardBytes) {
+#if XNN_COMPILER_HAS_FEATURE(memory_sanitizer)
+  GTEST_SKIP() << "We don't expect msan to catch out of bounds writes.";
+#endif
   // The regex matching of the error message is very limited on some platforms,
   // so we don't bother checking the error (which will vary if running with
   // a sanitizer).
