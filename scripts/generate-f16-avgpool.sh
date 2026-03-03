@@ -10,4 +10,7 @@ tools/xngen src/f32-avgpool/avgpool.c.in -D ARCH=neonfp16arith -D DATATYPE=f16 -
 ##################################### f16c #####################################
 tools/xngen src/f16-avgpool/f16c.c.in -D SIMD_SIZE=8 -o src/f16-avgpool/gen/f16-avgpool-9p-minmax-f16c.c &
 
+################################ RISC-V Vector #################################
+tools/xngen src/f32-avgpool/rvv.c.in -D DATATYPE=f16 -D LMUL=2 -o src/f16-avgpool/gen/f16-avgpool-9p-minmax-rvvfp16arith-u2v.c &
+
 wait

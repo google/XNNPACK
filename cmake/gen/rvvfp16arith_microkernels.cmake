@@ -10,6 +10,7 @@
 
 
 SET(PROD_RVVFP16ARITH_MICROKERNEL_SRCS
+  src/f16-avgpool/gen/f16-avgpool-9p-minmax-rvvfp16arith-u2v.c
   src/f16-dwconv/gen/f16-dwconv-3p8vc-minmax-rvvfp16arith.c
   src/f16-dwconv/gen/f16-dwconv-4p8vc-minmax-rvvfp16arith.c
   src/f16-dwconv/gen/f16-dwconv-9p8vc-minmax-rvvfp16arith.c
@@ -55,7 +56,6 @@ SET(NON_PROD_RVVFP16ARITH_MICROKERNEL_SRCS
   src/f16-f32-vcvt/gen/f16-f32-vcvt-rvvfp16arith-u2v.c
   src/f16-gemm/gen/f16-gemm-4x4v-minmax-rvvfp16arith.c
   src/f16-igemm/gen/f16-igemm-4x4v-minmax-rvvfp16arith.c
-  src/f16-maxpool/gen/f16-maxpool-9p-minmax-rvvfp16arith-u1v.c
   src/f16-spmm/gen/f16-spmm-1vx1-minmax-rvvfp16arith.c
   src/f16-spmm/gen/f16-spmm-2vx1-minmax-rvvfp16arith.c
   src/f16-spmm/gen/f16-spmm-4vx1-minmax-rvvfp16arith.c

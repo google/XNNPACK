@@ -11,7 +11,6 @@ tools/xngen src/f32-maxpool/maxpool.c.in -D DATATYPE=s8 -D ARCH=wasmsimd -D SIMD
 tools/xngen src/f32-maxpool/maxpool.c.in -D DATATYPE=s8 -D ARCH=neon -D SIMD_SIZE=16 -o src/s8-maxpool/gen/s8-maxpool-9p-minmax-neon-u16.c &
 
 ################################ RISC-V Vector #################################
-tools/xngen src/f32-maxpool/rvv.c.in -D DATATYPE=s8 -D LMUL=1 -o src/s8-maxpool/gen/s8-maxpool-9p-minmax-rvv-u1v.c &
 tools/xngen src/f32-maxpool/rvv.c.in -D DATATYPE=s8 -D LMUL=2 -o src/s8-maxpool/gen/s8-maxpool-9p-minmax-rvv-u2v.c &
 
 wait

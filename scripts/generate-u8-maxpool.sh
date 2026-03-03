@@ -11,7 +11,6 @@ tools/xngen src/f32-maxpool/maxpool.c.in -D DATATYPE=u8 -D KERNEL_TILE=9 -D ARCH
 tools/xngen src/f32-maxpool/maxpool.c.in -D DATATYPE=u8 -D KERNEL_TILE=9 -D ARCH=neon -D SIMD_SIZE=16 -o src/u8-maxpool/gen/u8-maxpool-9p-minmax-neon-u16.c &
 
 ################################ RISC-V Vector #################################
-tools/xngen src/f32-maxpool/rvv.c.in -D DATATYPE=u8 -D LMUL=1 -o src/u8-maxpool/gen/u8-maxpool-9p-minmax-rvv-u1v.c &
 tools/xngen src/f32-maxpool/rvv.c.in -D DATATYPE=u8 -D LMUL=2 -o src/u8-maxpool/gen/u8-maxpool-9p-minmax-rvv-u2v.c &
 
 wait

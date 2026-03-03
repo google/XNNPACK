@@ -13,4 +13,7 @@ tools/xngen src/f32-avgpool/avgpool.c.in -D ARCH=avx      -D DATATYPE=f32 -D SIM
 tools/xngen src/f32-avgpool/avgpool.c.in -D ARCH=avx512f  -D DATATYPE=f32 -D SIMD_SIZE=16 -o src/f32-avgpool/gen/f32-avgpool-9p-minmax-avx512f-u16.c &
 tools/xngen src/f32-avgpool/avgpool.c.in -D ARCH=hvx      -D DATATYPE=f32 -D SIMD_SIZE=32 -o src/f32-avgpool/gen/f32-avgpool-9p-minmax-hvx-u32.c &
 
+################################ RISC-V Vector ################################
+tools/xngen src/f32-avgpool/rvv.c.in -D DATATYPE=f32 -D LMUL=2 -o src/f32-avgpool/gen/f32-avgpool-9p-minmax-rvv-u2v.c &
+
 wait
