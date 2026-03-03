@@ -42,6 +42,17 @@ size_t type_size_bytes(ynn_type t);
 // Returns the size of an element of the type in bits.
 size_t type_size_bits(ynn_type t);
 
+// Returns the number of bits in the mantissa of the type, including the implied
+// leading one for float types.
+size_t type_mantissa_bits(ynn_type t);
+
+// Returns the number of bits in the exponent of the type.
+size_t type_exponent_bits(ynn_type t);
+
+// Returns true if converting a value of `from` to `to` can be done without
+// losing information.
+bool is_convert_lossless(ynn_type from, ynn_type to);
+
 // Returns how many elements are contained in one instance of the type. We
 // assume that datatypes with a non-integer number of bytes per element can be
 // represented by a struct that contains multiple elements. `type_size_bytes`

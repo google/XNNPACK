@@ -189,6 +189,22 @@ const T* offset_bytes(const T* ptr, ptrdiff_t offset) {
 // std::sub_sat is in C++26, we can use that in a few decades maybe.
 inline size_t sub_sat(size_t a, size_t b) { return a > b ? a - b : 0; }
 
+// std::saturate_cast is C++26
+template <typename T, typename U>
+constexpr T saturate_cast(U x) noexcept {
+  // Using `std::min`/`std::max`/`std::clamp` here requires choosing a type to
+  // use, which is tricky. Writing it this way is basically using comparisons of
+  // `constexpr` values, hopefully the compiler can choose a reasonable type for
+  // the comparison.
+  if (x > std::numeric_limits<T>::max()) {
+    return std::numeric_limits<T>::max();
+  }
+  if (x < std::numeric_limits<T>::lowest()) {
+    return std::numeric_limits<T>::lowest();
+  }
+  return static_cast<T>(x);
+}
+
 }  // namespace ynn
 
 #endif  // XNNPACK_YNNPACK_BASE_ARITHMETIC_H_

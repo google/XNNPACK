@@ -182,6 +182,11 @@ MATCHER_P(IsStencilCopy, stencils, "") {
   return true;
 }
 
+MATCHER(IsCopy, "") {
+  const ynn_node::copy* copy = std::get_if<ynn_node::copy>(&arg.op);
+  return copy != nullptr;
+}
+
 // Checks that the given value ID is valid in the given subgraph.
 //
 // Example:

@@ -404,44 +404,34 @@ void TestReduceSumOfConvert(ynn_type input_type, ynn_type intermediate_type,
 }
 
 void TestReduceSumOfConvertQuantized(ynn_reduce_operator reduce_op) {
-  const uint32_t x_id = 0;
-  uint32_t converted_x_id = 1;
-  const uint32_t y_id = 2;
-  uint32_t scale_id = 3;
-  uint32_t zero_point_id = 4;
-  SubgraphBuilder builder(5);
+  const uint32_t input_id = 0;
+  const uint32_t output_id = 1;
+  const uint32_t scale_id = 2;
+  const uint32_t zero_point_id = 3;
+  SubgraphBuilder builder(4);
 
   // Define scale and zero point.
-  builder.AddTensor(ynn_type_fp32, {1}, scale_id, /*data=*/nullptr)
-      .AddTensor(ynn_type_int32, {1}, zero_point_id, /*data=*/nullptr);
+  builder.AddInput(ynn_type_fp32, 0, scale_id)
+      .AddInput(ynn_type_int32, 0, zero_point_id)
+      .AddInput(ynn_type_int8, 2, input_id, zero_point_id, scale_id)
+      .AddOutput(ynn_type_fp32, 1, output_id);
 
-  // Input with quantization params.
-  builder.AddInput(ynn_type_int8, 2, x_id, zero_point_id, scale_id);
-
-  builder.AddTensor(ynn_type_int32, 2, converted_x_id)
-      .AddOutput(ynn_type_int32, 1, y_id);
-  builder.AddUnary(ynn_unary_convert, x_id, converted_x_id);
-
-  ynn_node reduce_node;
-  reduce_node.op = ynn_node::reduce{
-      .k_dims = ynn::axes_set(2),  // Reduce axis 1.
-      .op = reduce_op,
-      .keep_dims = false,
-  };
-  reduce_node.inputs = {converted_x_id, YNN_INVALID_VALUE_ID};
-  reduce_node.outputs = {y_id};
+  uint32_t dequantized_x_id = YNN_INVALID_VALUE_ID;
+  builder.AddTensor(ynn_type_fp32, 2, dequantized_x_id);
+  builder.AddUnary(ynn_unary_convert, input_id, dequantized_x_id)
+      .AddReduce(reduce_op, {1}, dequantized_x_id, YNN_INVALID_VALUE_ID,
+                 output_id);
 
   ynn_subgraph& subgraph = *builder.GetSubgraph();
-  subgraph.add_node(reduce_node);
-
   subgraph.fusion();
   subgraph.invalidate_dead_values();
 
   // Should NOT fuse.
   // We expect the reduce node to still consume converted_x_id, not x_id.
-  EXPECT_THAT(ProducerOf(y_id, subgraph), InputsInclude(converted_x_id));
-  EXPECT_THAT(ProducerOf(converted_x_id, subgraph), InputsInclude(x_id));
-  EXPECT_THAT(subgraph, HasValidValueIds(x_id, y_id, converted_x_id));
+  EXPECT_THAT(ProducerOf(output_id, subgraph), InputsInclude(dequantized_x_id));
+  EXPECT_THAT(ProducerOf(dequantized_x_id, subgraph), InputsInclude(input_id));
+  EXPECT_THAT(subgraph,
+              HasValidValueIds(input_id, output_id, dequantized_x_id));
 }
 
 }  // namespace
@@ -720,6 +710,124 @@ TEST(fusion, reduce_sum_of_squared_windowed) {
   EXPECT_THAT(ProducerOf(y_id, subgraph), IsReduce(ynn_reduce_sum_squared));
   // The pad should now take x_id as input (not sq_id).
   EXPECT_THAT(ProducerOf(padded_id, subgraph), InputsInclude(x_id));
+}
+
+TEST(fusion, output_convert_convert) {
+  // rewrite convert(float, convert(half, a)).
+  const uint32_t a_id = 0;
+  const uint32_t x_id = 1;
+  SubgraphBuilder builder(2);
+  uint32_t fp16_id = YNN_INVALID_VALUE_ID;
+  builder.AddInput(ynn_type_fp32, 2, a_id)
+      .AddOutput(ynn_type_fp32, 2, x_id)
+      .AddTensor(ynn_type_fp16, 2, fp16_id);
+  builder.AddUnary(ynn_unary_convert, a_id, fp16_id)
+      .AddUnary(ynn_unary_convert, fp16_id, x_id);
+
+  ynn_subgraph& subgraph = *builder.GetSubgraph();
+
+  subgraph.fusion();
+  subgraph.invalidate_dead_values();
+
+  // We want to rewrite this to be simply `a`, but because a is an input and the
+  // result is an output of the graph, we need to copy the input to the output.
+  ASSERT_THAT(subgraph, AllOf(HasValidNodeCount(1), HasValidValueCount(2)));
+  EXPECT_THAT(ProducerOf(x_id, subgraph), AllOf(IsCopy(), InputsAre(a_id)));
+}
+
+TEST(fusion, convert_convert) {
+  // rewrite convert<fp32>(convert<bf16>(-a_fp32)) to just -a_fp32.
+  const uint32_t a_id = 0;
+  const uint32_t x_id = 1;
+  SubgraphBuilder builder(2);
+  uint32_t b_id = YNN_INVALID_VALUE_ID;
+  uint32_t bf16_id = YNN_INVALID_VALUE_ID;
+  builder.AddInput(ynn_type_fp32, 2, a_id)
+      .AddOutput(ynn_type_fp32, 2, x_id)
+      .AddTensor(ynn_type_fp32, 2, b_id)
+      .AddTensor(ynn_type_bf16, 2, bf16_id);
+  builder.AddUnary(ynn_unary_negate, a_id, b_id)
+      .AddUnary(ynn_unary_convert, b_id, bf16_id)
+      .AddUnary(ynn_unary_convert, bf16_id, x_id);
+
+  ynn_subgraph& subgraph = *builder.GetSubgraph();
+
+  subgraph.fusion();
+  subgraph.invalidate_dead_values();
+
+  ASSERT_THAT(subgraph, AllOf(HasValidNodeCount(1), HasValidValueCount(2)));
+  EXPECT_THAT(ProducerOf(x_id, subgraph),
+              AllOf(IsUnary(ynn_unary_negate), InputsAre(a_id)));
+}
+
+TEST(fusion, dequantize_quantize) {
+  // rewrite dequantize(quantize(a_fp32)) -> a_fp32.
+  const uint32_t a_id = 0;
+  const uint32_t x_id = 1;
+  SubgraphBuilder builder(2);
+  uint32_t b_id = YNN_INVALID_VALUE_ID;
+  uint32_t zero_point_id = builder.DefineScalar(5);
+  uint32_t scale_id = builder.DefineScalar(0.5f);
+  builder.AddInput(ynn_type_fp32, 2, a_id)
+      .AddOutput(ynn_type_fp32, 2, x_id)
+      .AddTensor(ynn_type_int8, 2, b_id, /*data=*/nullptr, zero_point_id,
+                 scale_id);
+  builder.AddUnary(ynn_unary_convert, a_id, b_id)
+      .AddUnary(ynn_unary_convert, b_id, x_id);
+
+  ynn_subgraph& subgraph = *builder.GetSubgraph();
+
+  subgraph.fusion();
+  subgraph.invalidate_dead_values();
+
+  ASSERT_THAT(subgraph, AllOf(HasValidNodeCount(1), HasValidValueCount(2)));
+  EXPECT_THAT(ProducerOf(x_id, subgraph), AllOf(IsCopy(), InputsAre(a_id)));
+}
+
+TEST(fusion, bf16_elementwise) {
+  for (bool consistent_arithmetic : {false, true}) {
+    // We don't have bf16 binary elementwise ops, we will insert converts to
+    // make this work, and then adjacent elementwise ops can be simplified.
+    const uint32_t a_id = 0;
+    const uint32_t b_id = 1;
+    const uint32_t x_id = 2;
+    SubgraphBuilder builder(
+        3, consistent_arithmetic ? YNN_FLAG_CONSISTENT_ARITHMETIC : 0);
+    uint32_t c_id = YNN_INVALID_VALUE_ID;
+    builder.AddInput(ynn_type_bf16, 2, a_id)
+        .AddInput(ynn_type_bf16, 2, b_id)
+        .AddOutput(ynn_type_bf16, 2, x_id)
+        .AddTensor(ynn_type_bf16, 2, c_id);
+    builder.AddBinary(ynn_binary_multiply, a_id, b_id, c_id)
+        .AddBinary(ynn_binary_add, a_id, c_id, x_id);
+
+    ynn_subgraph& subgraph = *builder.GetSubgraph();
+
+    // The graph should be:
+    // c_bf16 = convert<bf16>(convert<fp32>(a_bf16) * convert<fp32>(b_bf16)))
+    // x_bf16 = convert<bf16>(convert<fp32>(a_bf16) + convert<fp32>(c_bf16)))
+    ASSERT_THAT(subgraph, AllOf(HasValidNodeCount(8)));
+
+    subgraph.fusion();
+    subgraph.eliminate_common_subgraphs();
+    subgraph.invalidate_dead_values();
+
+    if (consistent_arithmetic) {
+      // The graph should now be:
+      // a_fp32 = convert<fp32>(a_bf16)
+      // c_bf16 = convert<bf16>(a_fp32 * convert<fp32>(b_bf16))
+      // x_bf16 = convert<bf16>(a_fp32 + convert<fp32>(c_bf16))
+      ASSERT_THAT(subgraph, HasValidNodeCount(7));
+      EXPECT_THAT(ProducerOf(c_id, subgraph), IsUnary(ynn_unary_convert));
+    } else {
+      // The graph should now be:
+      // a_fp32 = convert<fp32>(a_bf16)
+      // c_fp32 = a_fp32 * convert<fp32>(b_bf16)
+      // x_bf16 = convert<bf16>(a_fp32 + c_fp32)
+      ASSERT_THAT(subgraph, HasValidNodeCount(5));
+    }
+    EXPECT_THAT(ProducerOf(x_id, subgraph), IsUnary(ynn_unary_convert));
+  }
 }
 
 }  // namespace ynn

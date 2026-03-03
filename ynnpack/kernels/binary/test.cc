@@ -4,6 +4,7 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <algorithm>
+#include <cassert>
 #include <cstddef>
 #include <cstdint>
 #include <iostream>
@@ -52,20 +53,18 @@ std::string to_string(const Shape& shape) {
 struct KernelInfo {
   uint64_t arch_flags = 0;
   binary_kernel_fn kernel;
-  init_binary_params_fn init_params;
 
   // Constructor for a reference kernel.
-  KernelInfo(ynn_binary_operator op, ynn_type type, bool quantized) {
-    const binary_kernel* kernel =
-        get_binary_reference_kernel(op, type, quantized);
-    this->kernel = kernel->op;
-    init_params = kernel->init_params;
+  KernelInfo(ynn_binary_operator op, ynn_type type) {
+    kernel = get_binary_reference_kernel(op, type);
+    assert(kernel);
   }
 
   // Constructor for a kernel function.
-  KernelInfo(uint64_t arch_flags, binary_kernel_fn kernel,
-             init_binary_params_fn init_params)
-      : arch_flags(arch_flags), kernel(kernel), init_params(init_params) {}
+  KernelInfo(uint64_t arch_flags, binary_kernel_fn kernel)
+      : arch_flags(arch_flags), kernel(kernel) {
+    assert(kernel);
+  }
 };
 
 template <typename A, typename B, typename X, typename OpInfo>
@@ -78,7 +77,6 @@ void TestImpl(const KernelInfo& kernel_info, const OpInfo& op_info, size_t m,
   ReplicableRandomDevice rng;
 
   binary_kernel_fn kernel = kernel_info.kernel;
-  init_binary_params_fn init_params = kernel_info.init_params;
 
   size_t n = std::max(a_n, b_n);
 
@@ -86,11 +84,8 @@ void TestImpl(const KernelInfo& kernel_info, const OpInfo& op_info, size_t m,
   Tensor<B> b({m, b_n + shape.padding_b});
   Tensor<X> x({m, n + shape.padding_x});
 
-  quantization_params a_quantization = random_quantization(A(), rng);
-  quantization_params b_quantization = random_quantization(B(), rng);
-  quantization_params x_quantization = random_quantization(X(), rng);
-  fill_random(a.data(), a.size(), rng, a_quantization);
-  fill_random(b.data(), b.size(), rng, b_quantization);
+  fill_random(a.data(), a.size(), rng);
+  fill_random(b.data(), b.size(), rng);
 
   a = a.crop_padding({0, 0}, {0, shape.padding_a});
   b = b.crop_padding({0, 0}, {0, shape.padding_b});
@@ -99,118 +94,79 @@ void TestImpl(const KernelInfo& kernel_info, const OpInfo& op_info, size_t m,
   broadcast_extent_1(a);
   broadcast_extent_1(b);
 
-  binary_params params;
-  if (init_params) {
-    init_params(a_quantization.scale, a_quantization.zero_point,
-                b_quantization.scale, b_quantization.zero_point,
-                x_quantization.scale, x_quantization.zero_point, params);
-  }
-
   kernel(m, n, a.stride(0) * sizeof(A), a.stride(1) * sizeof(A), a.base(),
          b.stride(0) * sizeof(B), b.stride(1) * sizeof(B), b.base(),
-         x.stride(0) * sizeof(X), x.base(), &params);
+         x.stride(0) * sizeof(X), x.base());
 
-  check_results(op_info, a, b, x, a_quantization, b_quantization,
-                x_quantization);
+  check_results(op_info, a, b, x);
 }
 
 template <typename A, typename B, typename X, typename OpInfo>
 void TestOp(const KernelInfo& kernel_info, const OpInfo& op_info,
-            const Shape& shape) {
+            const Shape& shape, A = {}, B = {}, X = {}) {
   TestImpl<A, B, X>(kernel_info, op_info, shape.m, shape.n, shape.n, shape);
 }
 
 template <typename A, typename B, typename X, typename OpInfo>
 void TestOpBroadcastA(const KernelInfo& kernel_info, const OpInfo& op_info,
-                      const Shape& shape) {
+                      const Shape& shape, A = {}, B = {}, X = {}) {
   TestImpl<A, B, X>(kernel_info, op_info, shape.m, 1, shape.n, shape);
 }
 
 template <typename A, typename B, typename X, typename OpInfo>
 void TestOpBroadcastB(const KernelInfo& kernel_info, const OpInfo& op_info,
-                      const Shape& shape) {
+                      const Shape& shape, A = {}, B = {}, X = {}) {
   TestImpl<A, B, X>(kernel_info, op_info, shape.m, shape.n, 1, shape);
 }
 
-template <typename T>
-void TestOp(T, ynn_binary_operator op, const Shape& shape) {
-  KernelInfo kernel_info(op, type_of<T>(), is_quantized<T>::value);
+class Reference : public testing::TestWithParam<
+                      std::tuple<ynn_type, ynn_binary_operator, Shape>> {};
+
+template <typename Body>
+auto SwitchType(ynn_type type, Body body) {
+  switch (type) {
+    case ynn_type_int32:
+      return body(int32_t{});
+    case ynn_type_fp32:
+      return body(float{});
+    default:
+      break;
+  }
+  YNN_UNREACHABLE;
+}
+
+TEST_P(Reference, no_broadcast) {
+  ynn_type type = std::get<0>(GetParam());
+  ynn_binary_operator op = std::get<1>(GetParam());
+  const Shape& shape = std::get<2>(GetParam());
+  KernelInfo kernel_info(op, type);
   const binary_op_info& op_info = *get_binary_op_info(op);
-  TestImpl<T, T, T>(kernel_info, op_info, shape.m, shape.n, shape.n, shape);
+  SwitchType(type, [&](auto type) {
+    TestOp(kernel_info, op_info, shape, type, type, type);
+  });
 }
-
-template <typename T>
-void TestOpBroadcastA(T, ynn_binary_operator op, const Shape& shape) {
-  KernelInfo kernel_info(op, type_of<T>(), is_quantized<T>::value);
+TEST_P(Reference, op_broadcast_a) {
+  ynn_type type = std::get<0>(GetParam());
+  ynn_binary_operator op = std::get<1>(GetParam());
+  const Shape& shape = std::get<2>(GetParam());
+  KernelInfo kernel_info(op, type);
   const binary_op_info& op_info = *get_binary_op_info(op);
-  TestImpl<T, T, T>(kernel_info, op_info, shape.m, 1, shape.n, shape);
+  SwitchType(type, [&](auto type) {
+    TestOpBroadcastA(kernel_info, op_info, shape, type, type, type);
+  });
 }
-
-template <typename T>
-void TestOpBroadcastB(T, ynn_binary_operator op, const Shape& shape) {
-  KernelInfo kernel_info(op, type_of<T>(), is_quantized<T>::value);
+TEST_P(Reference, op_broadcast_b) {
+  ynn_type type = std::get<0>(GetParam());
+  ynn_binary_operator op = std::get<1>(GetParam());
+  const Shape& shape = std::get<2>(GetParam());
+  KernelInfo kernel_info(op, type);
   const binary_op_info& op_info = *get_binary_op_info(op);
-  TestImpl<T, T, T>(kernel_info, op_info, shape.m, shape.n, 1, shape);
-}
-
-class IntegerOps : public testing::TestWithParam<
-                       std::tuple<ynn_type, ynn_binary_operator, Shape>> {};
-class RealOps : public testing::TestWithParam<
-                    std::tuple<ynn_type, ynn_binary_operator, Shape>> {};
-
-TEST_P(IntegerOps, no_broadcast) {
-  ynn_type type = std::get<0>(GetParam());
-  ynn_binary_operator op = std::get<1>(GetParam());
-  const Shape& shape = std::get<2>(GetParam());
-  SwitchIntegerType(type, [&](auto type) { TestOp(type, op, shape); });
-}
-TEST_P(IntegerOps, op_broadcast_a) {
-  ynn_type type = std::get<0>(GetParam());
-  ynn_binary_operator op = std::get<1>(GetParam());
-  const Shape& shape = std::get<2>(GetParam());
-  SwitchIntegerType(type,
-                    [&](auto type) { TestOpBroadcastA(type, op, shape); });
-}
-TEST_P(IntegerOps, op_broadcast_b) {
-  ynn_type type = std::get<0>(GetParam());
-  ynn_binary_operator op = std::get<1>(GetParam());
-  const Shape& shape = std::get<2>(GetParam());
-  SwitchIntegerType(type,
-                    [&](auto type) { TestOpBroadcastB(type, op, shape); });
-}
-
-TEST_P(RealOps, no_broadcast) {
-  ynn_type type = std::get<0>(GetParam());
-  ynn_binary_operator op = std::get<1>(GetParam());
-  const Shape& shape = std::get<2>(GetParam());
-  SwitchRealType(type, [&](auto type) { TestOp(type, op, shape); });
-}
-TEST_P(RealOps, op_broadcast_a) {
-  ynn_type type = std::get<0>(GetParam());
-  ynn_binary_operator op = std::get<1>(GetParam());
-  const Shape& shape = std::get<2>(GetParam());
-  SwitchRealType(type, [&](auto type) { TestOpBroadcastA(type, op, shape); });
-}
-TEST_P(RealOps, op_broadcast_b) {
-  ynn_type type = std::get<0>(GetParam());
-  ynn_binary_operator op = std::get<1>(GetParam());
-  const Shape& shape = std::get<2>(GetParam());
-  SwitchRealType(type, [&](auto type) { TestOpBroadcastB(type, op, shape); });
+  SwitchType(type, [&](auto type) {
+    TestOpBroadcastB(kernel_info, op_info, shape, type, type, type);
+  });
 }
 
 // clang-format off
-const ynn_type all_integer_types[] = {
-    ynn_type_int32,
-};
-
-const ynn_type all_real_types[] = {
-    ynn_type_int8,
-    ynn_type_uint8,
-    ynn_type_fp16,
-    ynn_type_bf16,
-    ynn_type_fp32,
-};
-
 const ynn_binary_operator all_integer_ops[] = {
     ynn_binary_add,
     ynn_binary_copysign,
@@ -247,17 +203,16 @@ const Shape reference_shapes[] = {
     {256, 4, 0, 0, padding},
 };
 
-INSTANTIATE_TEST_SUITE_P(BinaryTest, IntegerOps,
-                         Combine(ValuesIn(all_integer_types),
+INSTANTIATE_TEST_SUITE_P(RealOps, Reference,
+                         Combine(Values(ynn_type_fp32), ValuesIn(all_real_ops),
+                                 ValuesIn(reference_shapes)),
+                         test_param_to_string<Reference::ParamType>);
+
+INSTANTIATE_TEST_SUITE_P(IntegerOps, Reference,
+                         Combine(Values(ynn_type_int32),
                                  ValuesIn(all_integer_ops),
                                  ValuesIn(reference_shapes)),
-                         test_param_to_string<IntegerOps::ParamType>);
-
-INSTANTIATE_TEST_SUITE_P(BinaryTest, RealOps,
-                         Combine(ValuesIn(all_real_types),
-                                 ValuesIn(all_real_ops),
-                                 ValuesIn(reference_shapes)),
-                         test_param_to_string<RealOps::ParamType>);
+                         test_param_to_string<Reference::ParamType>);
 
 const std::vector<Shape> all_shapes = []() {
   std::vector<Shape> shapes;
@@ -277,19 +232,18 @@ const std::vector<Shape> all_shapes = []() {
   return shapes;
 }();
 
-#define YNN_ELEMENTWISE_KERNEL(arch_flags, kernel, op, init_params_fn, type_a, \
-                               type_b, type_x)                                 \
+#define YNN_ELEMENTWISE_KERNEL(arch_flags, kernel, op, type_a, type_b, type_x) \
   class kernel##_test : public testing::TestWithParam<Shape> {};               \
   TEST_P(kernel##_test, no_broadcast) {                                        \
-    KernelInfo kernel_info(arch_flags, kernel, init_params_fn);                \
+    KernelInfo kernel_info(arch_flags, kernel);                                \
     TestOp<type_a, type_b, type_x>(kernel_info, op{}, GetParam());             \
   }                                                                            \
   TEST_P(kernel##_test, op_broadcast_a) {                                      \
-    KernelInfo kernel_info(arch_flags, kernel, init_params_fn);                \
+    KernelInfo kernel_info(arch_flags, kernel);                                \
     TestOpBroadcastA<type_a, type_b, type_x>(kernel_info, op{}, GetParam());   \
   }                                                                            \
   TEST_P(kernel##_test, op_broadcast_b) {                                      \
-    KernelInfo kernel_info(arch_flags, kernel, init_params_fn);                \
+    KernelInfo kernel_info(arch_flags, kernel);                                \
     TestOpBroadcastB<type_a, type_b, type_x>(kernel_info, op{}, GetParam());   \
   }                                                                            \
   INSTANTIATE_TEST_SUITE_P(test, kernel##_test, ValuesIn(all_shapes),          \

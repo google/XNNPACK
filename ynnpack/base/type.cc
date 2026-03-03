@@ -53,21 +53,22 @@ bool type_is_floating_point(ynn_type t) {
   return false;
 }
 
-size_t type_size_bytes(ynn_type t) {
+size_t type_size_bits(ynn_type t) {
   switch (t) {
     case ynn_type_int2:
+      return 2;
     case ynn_type_int4:
     case ynn_type_uint4:
-      return 1;
+      return 4;
     case ynn_type_int8:
     case ynn_type_uint8:
-      return 1;
+      return 8;
     case ynn_type_fp16:
     case ynn_type_bf16:
-      return 2;
+      return 16;
     case ynn_type_int32:
     case ynn_type_fp32:
-      return 4;
+      return 32;
     case ynn_type_opaque:
       return 0;
     case ynn_type_invalid:
@@ -77,7 +78,39 @@ size_t type_size_bytes(ynn_type t) {
   return 0;
 }
 
-size_t type_size_bits(ynn_type t) { return type_size_bytes(t) * 8; }
+size_t type_size_bytes(ynn_type t) { return (type_size_bits(t) + 7) / 8; }
+
+size_t type_mantissa_bits(ynn_type t) {
+  switch (t) {
+    case ynn_type_fp16:
+      return 11;
+    case ynn_type_bf16:
+      return 8;
+    case ynn_type_fp32:
+      return 24;
+    default:
+      // Treat all bits as mantissa for integers.
+      return type_size_bits(t);
+  }
+}
+
+size_t type_exponent_bits(ynn_type t) {
+  switch (t) {
+    case ynn_type_fp16:
+      return 5;
+    case ynn_type_bf16:
+    case ynn_type_fp32:
+      return 8;
+    default:
+      // Integers don't have an exponent.
+      return 0;
+  }
+}
+
+bool is_convert_lossless(ynn_type from, ynn_type to) {
+  return type_mantissa_bits(from) <= type_mantissa_bits(to) &&
+         type_exponent_bits(from) <= type_exponent_bits(to);
+}
 
 const char* to_string(ynn_type type) {
   switch (type) {

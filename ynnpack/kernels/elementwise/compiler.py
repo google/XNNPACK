@@ -1225,18 +1225,6 @@ class Target:
         f" base_{args[-1].name}"
     )
 
-    if len(args) == 4:
-      args_str.append(
-          f"{self.indent()}const ynn::ternary_params* __restrict params"
-      )
-    if len(args) == 3:
-      args_str.append(
-          f"{self.indent()}const ynn::binary_params* __restrict params"
-      )
-    elif len(args) == 2:
-      args_str.append(
-          f"{self.indent()}const ynn::unary_params* __restrict params"
-      )
     self.result += ",\n".join(args_str)
     self.result += ") {\n"
 
@@ -1756,11 +1744,9 @@ class Target:
       tps.append(str(b.ty))
     types = ", ".join(tps)
 
-    init_params_fn = "nullptr"
-
     inc = (
         f"YNN_ELEMENTWISE_KERNEL({self.arch_flags()}, {func_name}, {op_name},"
-        f" {init_params_fn}, {types})\n"
+        f" {types})\n"
     )
 
     return src, inc

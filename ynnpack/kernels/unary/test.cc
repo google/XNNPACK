@@ -65,21 +65,24 @@ std::string to_string(const Shape& shape) {
 struct KernelInfo {
   uint64_t arch_flags = 0;
   unary_kernel_fn kernel;
-  init_unary_params_fn init_params;
 
   // Constructor for a reference kernel.
-  KernelInfo(ynn_unary_operator op, ynn_type a_type, bool a_quantized,
-             ynn_type x_type, bool x_quantized) {
-    const unary_kernel* kernel = get_unary_reference_kernel(
-        op, a_type, a_quantized, x_type, x_quantized);
-    this->kernel = kernel->op;
-    init_params = kernel->init_params;
+  KernelInfo(ynn_unary_operator op, ynn_type type) {
+    kernel = get_unary_reference_kernel(op, type);
+    assert(kernel);
+  }
+
+  // Constructor for a reference convert op.
+  KernelInfo(ynn_type a_type, ynn_type x_type) {
+    kernel = get_convert_reference_kernel(a_type, x_type);
+    assert(kernel);
   }
 
   // Constructor for a kernel function.
-  KernelInfo(uint64_t arch_flags, unary_kernel_fn kernel,
-             init_unary_params_fn init_params)
-      : arch_flags(arch_flags), kernel(kernel), init_params(init_params) {}
+  KernelInfo(uint64_t arch_flags, unary_kernel_fn kernel)
+      : arch_flags(arch_flags), kernel(kernel) {
+    assert(kernel);
+  }
 };
 
 template <typename A, typename X, typename OpInfo>
@@ -91,42 +94,31 @@ void TestImpl(A, X, const KernelInfo& kernel_info, const OpInfo& op_info,
   ReplicableRandomDevice rng;
 
   unary_kernel_fn kernel = kernel_info.kernel;
-  init_unary_params_fn init_params = kernel_info.init_params;
 
   Tensor<A> a({shape.m, shape.n + shape.padding_a});
   Tensor<X> x({shape.m, shape.n + shape.padding_x});
 
-  quantization_params a_quantization = random_quantization(A(), rng);
-  quantization_params x_quantization = random_quantization(X(), rng);
   interval domain = op_info.domain(type_of<A>());
-  fill_random(a.data(), a.size(), rng, domain.min, domain.max, a_quantization);
+  fill_random(a.data(), a.size(), rng, domain.min, domain.max);
 
   a = a.crop_padding({0, 0}, {0, shape.padding_a});
   x = x.crop_padding({0, 0}, {0, shape.padding_x});
 
-  unary_params params;
-  if (init_params) {
-    init_params(a_quantization.scale, a_quantization.zero_point,
-                x_quantization.scale, x_quantization.zero_point, params);
-  }
   kernel(shape.m, shape.n, a.stride(0) * sizeof(A), a.base(),
-         x.stride(0) * sizeof(X), x.base(), &params);
+         x.stride(0) * sizeof(X), x.base());
 
-  check_results(op_info, a, x, a_quantization, x_quantization);
+  check_results(op_info, a, x);
 }
 
 template <typename F>
-constexpr decltype(auto) SwitchType(ynn_type type, bool is_quantized, F&& f) {
+constexpr decltype(auto) SwitchType(ynn_type type, F&& f) {
   switch (type) {
     case ynn_type_int32:
-      return is_quantized ? std::forward<F>(f)(quantized<int32_t>())
-                          : std::forward<F>(f)(int32_t());
+      return std::forward<F>(f)(int32_t());
     case ynn_type_int8:
-      assert(is_quantized);
-      return std::forward<F>(f)(quantized<int8_t>());
+      return std::forward<F>(f)(int8_t());
     case ynn_type_uint8:
-      assert(is_quantized);
-      return std::forward<F>(f)(quantized<uint8_t>());
+      return std::forward<F>(f)(uint8_t());
     case ynn_type_fp16:
       return std::forward<F>(f)(half());
     case ynn_type_bf16:
@@ -138,87 +130,45 @@ constexpr decltype(auto) SwitchType(ynn_type type, bool is_quantized, F&& f) {
   }
 }
 
-class IntegerOps : public testing::TestWithParam<
-                       std::tuple<ynn_type, ynn_unary_operator, Shape>> {};
-class RealOps : public testing::TestWithParam<
-                    std::tuple<ynn_type, ynn_unary_operator, Shape>> {};
+class Reference : public testing::TestWithParam<
+                      std::tuple<ynn_type, ynn_unary_operator, Shape>> {};
 
-TEST_P(IntegerOps, op) {
+TEST_P(Reference, op) {
   ynn_type type = std::get<0>(GetParam());
   ynn_unary_operator op = std::get<1>(GetParam());
   const Shape& shape = std::get<2>(GetParam());
-  KernelInfo kernel_info(op, type, /*a_quantized=*/false, type,
-                         /*x_quantized=*/false);
   const unary_op_info& op_info = *get_unary_op_info(op);
-  SwitchIntegerType(type, [&](auto type) {
-    TestImpl(type, type, kernel_info, op_info, shape);
-  });
-}
-
-TEST_P(RealOps, op) {
-  ynn_type type = std::get<0>(GetParam());
-  ynn_unary_operator op = std::get<1>(GetParam());
-  const Shape& shape = std::get<2>(GetParam());
-  KernelInfo kernel_info(op, type, /*a_quantized=*/true, type,
-                         /*x_quantized=*/true);
-  const unary_op_info& op_info = *get_unary_op_info(op);
-  SwitchRealType(type, [&](auto type) {
+  KernelInfo kernel_info(op, type);
+  SwitchType(type, [&](auto type) {
     TestImpl(type, type, kernel_info, op_info, shape);
   });
 }
 
 class ReferenceConvert
-    : public testing::TestWithParam<std::tuple<
-          std::pair<ynn_type, bool>, std::pair<ynn_type, bool>, Shape>> {};
+    : public testing::TestWithParam<std::tuple<ynn_type, ynn_type, Shape>> {};
 
 TEST_P(ReferenceConvert, op) {
-  ynn_type a, x;
-  bool a_is_quantized, x_is_quantized;
-  std::tie(a, a_is_quantized) = std::get<0>(GetParam());
-  std::tie(x, x_is_quantized) = std::get<1>(GetParam());
-  KernelInfo kernel_info(ynn_unary_convert, a, a_is_quantized, x,
-                         x_is_quantized);
+  ynn_type a = std::get<0>(GetParam());
+  ynn_type x = std::get<1>(GetParam());
+  KernelInfo kernel_info(a, x);
   const Shape& shape = std::get<2>(GetParam());
-  SwitchType(x, x_is_quantized, [&](auto x) {
-    SwitchType(a, a_is_quantized,
+  SwitchType(x, [&](auto x) {
+    SwitchType(a,
                [&](auto a) { TestImpl(a, x, kernel_info, convert{}, shape); });
   });
 }
 
 // clang-format off
-const ynn_type all_integer_types[] = {
+ynn_type all_convert_types[] = {
+    ynn_type_int8,
+    ynn_type_uint8,
     ynn_type_int32,
-};
-
-const ynn_type all_float_types[] = {
     ynn_type_fp16,
     ynn_type_bf16,
     ynn_type_fp32,
 };
 
-const ynn_type all_quantized_types[] = {
-    ynn_type_int8,
-    ynn_type_uint8,
-};
-
-std::pair<ynn_type, bool> all_convert_types[] = {
-    {ynn_type_int8, true},
-    {ynn_type_uint8, true},
-    {ynn_type_int32, true},
-    {ynn_type_int32, false},
-    {ynn_type_fp16, false},
-    {ynn_type_bf16, false},
-    {ynn_type_fp32, false},
-};
-
-const ynn_unary_operator all_integer_ops[] = {
-    ynn_unary_abs,
-    ynn_unary_negate,
-    ynn_unary_square,
-    ynn_unary_sign,
-};
-
-const ynn_unary_operator all_unary_ops[] = {
+const ynn_unary_operator all_real_ops[] = {
     ynn_unary_abs,
     ynn_unary_floor,
     ynn_unary_ceil,
@@ -241,12 +191,10 @@ const ynn_unary_operator all_unary_ops[] = {
     ynn_unary_hardswish,
 };
 
-const ynn_unary_operator quantized_supported_ops[] = {
+const ynn_unary_operator all_integer_ops[] = {
     ynn_unary_abs,
-    ynn_unary_floor,
-    ynn_unary_ceil,
-    ynn_unary_round,
     ynn_unary_negate,
+    ynn_unary_square,
     ynn_unary_sign,
 };
 // clang-format on
@@ -261,28 +209,17 @@ const Shape reference_shapes[] = {
     {256, 4, 0, padding},
 };
 
-// TODO: Dividing these into integer and real ops doesn't really work, because
-// we can have a mix (e.g. converting qint8 -> int32_t). We need to have the
-// `quantized<T>` decorators in the kernel metadata I think.
-INSTANTIATE_TEST_SUITE_P(UnaryTest, IntegerOps,
-                         Combine(ValuesIn(all_integer_types),
+INSTANTIATE_TEST_SUITE_P(RealOps, Reference,
+                         Combine(Values(ynn_type_fp32), ValuesIn(all_real_ops),
+                                 ValuesIn(reference_shapes)),
+                         test_param_to_string<Reference::ParamType>);
+INSTANTIATE_TEST_SUITE_P(IntegerOps, Reference,
+                         Combine(Values(ynn_type_int32),
                                  ValuesIn(all_integer_ops),
                                  ValuesIn(reference_shapes)),
-                         test_param_to_string<IntegerOps::ParamType>);
+                         test_param_to_string<Reference::ParamType>);
 
-INSTANTIATE_TEST_SUITE_P(UnaryTest, RealOps,
-                         Combine(ValuesIn(all_float_types),
-                                 ValuesIn(all_unary_ops),
-                                 ValuesIn(reference_shapes)),
-                         test_param_to_string<RealOps::ParamType>);
-
-INSTANTIATE_TEST_SUITE_P(QuantizedTest, RealOps,
-                         Combine(ValuesIn(all_quantized_types),
-                                 ValuesIn(quantized_supported_ops),
-                                 ValuesIn(reference_shapes)),
-                         test_param_to_string<RealOps::ParamType>);
-
-INSTANTIATE_TEST_SUITE_P(UnaryTest, ReferenceConvert,
+INSTANTIATE_TEST_SUITE_P(Convert, ReferenceConvert,
                          Combine(ValuesIn(all_convert_types),
                                  ValuesIn(all_convert_types),
                                  ValuesIn(reference_shapes)),
@@ -305,14 +242,13 @@ const std::vector<Shape> all_shapes = []() {
   return shapes;
 }();
 
-#define YNN_ELEMENTWISE_KERNEL(arch_flags, kernel, op, init_params_fn, type_a, \
-                               type_x)                                         \
-  class kernel##_test : public testing::TestWithParam<Shape> {};               \
-  TEST_P(kernel##_test, no_broadcast) {                                        \
-    KernelInfo kernel_info(arch_flags, kernel, init_params_fn);                \
-    TestImpl(type_a{}, type_x{}, kernel_info, op{}, GetParam());               \
-  }                                                                            \
-  INSTANTIATE_TEST_SUITE_P(test, kernel##_test, ValuesIn(all_shapes),          \
+#define YNN_ELEMENTWISE_KERNEL(arch_flags, kernel, op, type_a, type_x) \
+  class kernel##_test : public testing::TestWithParam<Shape> {};       \
+  TEST_P(kernel##_test, no_broadcast) {                                \
+    KernelInfo kernel_info(arch_flags, kernel);                        \
+    TestImpl(type_a{}, type_x{}, kernel_info, op{}, GetParam());       \
+  }                                                                    \
+  INSTANTIATE_TEST_SUITE_P(test, kernel##_test, ValuesIn(all_shapes),  \
                            [](const auto& i) { return to_string(i.param); });
 #include "ynnpack/kernels/unary/kernels.inc"
 #undef YNN_ELEMENTWISE_KERNEL

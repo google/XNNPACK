@@ -72,20 +72,11 @@ std::set<uint32_t> get_variable_inputs(const ynn_subgraph& subgraph,
   if (is_elementwise_node(n)) {
     for (size_t i = 0; i < n.inputs.size(); ++i) {
       const uint32_t id = n.inputs[i];
-      if (id != YNN_INVALID_VALUE_ID) {
-        if (subgraph.value(id).is_static()) {
-          if (!subgraph.value(id).is_static_scalar()) {
-            // A constant that is not a scalar can not be fused.
-            inputs.insert(id);
-          }
-        } else {
-          // For unary elementwise operations, the second input is the
-          // parameters tensor, which we don't want to fuse.
-          if (std::get_if<ynn_node::unary_elementwise>(&n.op) && i == 1) {
-            continue;
-          }
-          inputs.insert(id);
-        }
+      if (id == YNN_INVALID_VALUE_ID) continue;
+      if (!subgraph.value(id).is_static_scalar()) {
+        // A value is variable if it is either non-static, or a static that is
+        // not a scalar value.
+        inputs.insert(id);
       }
     }
   }
@@ -199,35 +190,30 @@ subgraph_candidate find_subgraph_for_unary_lut(
     }
   };
 
-  auto has_path_to_output = [&](uint32_t& value_id, ynn_node& producer) {
+  auto has_path_to_output = [&](uint32_t& value_id) -> const ynn_node* {
     // Find a value in the frontier that is ready to be expanded.
     for (uint32_t id : inputs_to_traverse) {
-      auto producer_it = analysis.producers.find(id);
-      if (producer_it != analysis.producers.end()) {
-        const ynn_node& p = *producer_it->second;
-        std::set<uint32_t> next_inputs = get_variable_inputs(subgraph, p);
+      if (const ynn_node* p = analysis.producer_of(id)) {
+        std::set<uint32_t> next_inputs = get_variable_inputs(subgraph, *p);
         if (!next_inputs.empty()) {
           value_id = id;
-          producer = p;
-          return true;
+          return p;
         }
       }
     }
-    return value_id != YNN_INVALID_VALUE_ID;
+    return nullptr;
   };
 
   maybe_update_best_candidate(candidate);
   while (!inputs_to_traverse.empty()) {
     uint32_t value_id = YNN_INVALID_VALUE_ID;
-    ynn_node producer;
-
-    if (has_path_to_output(value_id, producer)) {
+    if (const ynn_node* producer = has_path_to_output(value_id)) {
       inputs_to_traverse.erase(value_id);
       candidate.add_value(value_id);
-      candidate.add_node(producer);
+      candidate.add_node(*producer);
 
       std::set<uint32_t> producer_inputs =
-          get_variable_inputs(subgraph, producer);
+          get_variable_inputs(subgraph, *producer);
       for (uint32_t id : producer_inputs) {
         if (!candidate.has_value(id)) {
           inputs_to_traverse.insert(id);

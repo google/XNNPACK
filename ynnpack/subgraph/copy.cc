@@ -175,23 +175,16 @@ slinky::func make_reshape(ynn_runtime& runtime,
 
 }  // namespace
 
-extern "C" {
-
-ynn_status ynn_define_copy(ynn_subgraph_t subgraph, uint32_t input_id,
-                           uint32_t* output_id, uint32_t flags) {
-  // Validate arguments.
-  assert(subgraph);
-  assert(subgraph->is_valid_value(input_id));
-  assert(output_id);
-  const ynn_value& input = subgraph->value(input_id);
+void define_copy(ynn_subgraph& subgraph, ynn_node& node, uint32_t input_id,
+                 uint32_t output_id, uint32_t flags) {
+  const ynn_value& input = subgraph.value(input_id);
 
   // Propagate shape.
-  ynn_value& output = subgraph->get_output_value(output_id, input);
+  ynn_value& output = subgraph.get_output_value(&output_id, input);
   output.extents = input.extents;
 
-  ynn_node node;
   node.inputs = {input_id};
-  node.outputs = {*output_id};
+  node.outputs = {output_id};
   node.op = ynn_node::copy{};
   node.create = [](const ynn_node& node, ynn_runtime& runtime) {
     const ynn_runtime_value& input = runtime.value(node.inputs[0]);
@@ -205,6 +198,23 @@ ynn_status ynn_define_copy(ynn_subgraph_t subgraph, uint32_t input_id,
     runtime.funcs.push_back(std::move(func));
     return ynn_status_success;
   };
+}
+
+extern "C" {
+
+ynn_status ynn_define_copy(ynn_subgraph_t subgraph, uint32_t input_id,
+                           uint32_t* output_id, uint32_t flags) {
+  // Validate arguments.
+  assert(subgraph);
+  assert(subgraph->is_valid_value(input_id));
+  assert(output_id);
+  const ynn_value& input = subgraph->value(input_id);
+
+  // Propagate shape.
+  ynn_value& output = subgraph->get_output_value(output_id, input);
+
+  ynn_node node;
+  define_copy(*subgraph, node, input_id, output.id, flags);
   subgraph->add_node(std::move(node));
   return ynn_status_success;
 }

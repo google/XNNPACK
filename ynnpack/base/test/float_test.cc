@@ -8,6 +8,7 @@
 #include "ynnpack/base/test/fuzz_test.h"
 #include "ynnpack/base/test/random.h"
 #include "ynnpack/base/type.h"
+#include "ynnpack/include/ynnpack.h"
 
 namespace ynn {
 
@@ -51,6 +52,39 @@ TEST(bfloat16, round_trip) {
       ASSERT_NEAR(f, rounded, std::abs(f) * info::epsilon() * 0.501f);
     }
   }
+}
+
+TEST(is_convert_lossless, is_convert_lossless) {
+  // Identity
+  EXPECT_TRUE(is_convert_lossless(ynn_type_fp32, ynn_type_fp32));
+  EXPECT_TRUE(is_convert_lossless(ynn_type_fp16, ynn_type_fp16));
+  EXPECT_TRUE(is_convert_lossless(ynn_type_bf16, ynn_type_bf16));
+  EXPECT_TRUE(is_convert_lossless(ynn_type_int8, ynn_type_int8));
+  EXPECT_TRUE(is_convert_lossless(ynn_type_int32, ynn_type_int32));
+
+  // Upcasts
+  EXPECT_TRUE(is_convert_lossless(ynn_type_fp16, ynn_type_fp32));
+  EXPECT_TRUE(is_convert_lossless(ynn_type_bf16, ynn_type_fp32));
+
+  // Downcasts (Lossy)
+  EXPECT_FALSE(is_convert_lossless(ynn_type_fp32, ynn_type_fp16));
+  EXPECT_FALSE(is_convert_lossless(ynn_type_fp32, ynn_type_bf16));
+
+  // Cross-casts (Lossy)
+  EXPECT_FALSE(is_convert_lossless(ynn_type_fp16, ynn_type_bf16));
+  EXPECT_FALSE(is_convert_lossless(ynn_type_bf16, ynn_type_fp16));
+
+  // int8 to floats
+  EXPECT_TRUE(is_convert_lossless(ynn_type_int8, ynn_type_fp16));
+  EXPECT_TRUE(is_convert_lossless(ynn_type_uint8, ynn_type_fp16));
+  EXPECT_TRUE(is_convert_lossless(ynn_type_int8, ynn_type_bf16));
+  EXPECT_TRUE(is_convert_lossless(ynn_type_uint8, ynn_type_bf16));
+
+  EXPECT_TRUE(is_convert_lossless(ynn_type_int4, ynn_type_bf16));
+  EXPECT_TRUE(is_convert_lossless(ynn_type_uint4, ynn_type_bf16));
+
+  // int32 to fp32 (32 bits > 23 bits)
+  EXPECT_FALSE(is_convert_lossless(ynn_type_int32, ynn_type_fp32));
 }
 
 }  // namespace ynn
