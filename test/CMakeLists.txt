@@ -214,6 +214,8 @@ SET(MICROKERNEL_GEMM_UNIT_TESTS
     qd8-f16-qc8w-gemm-minmax
     qd8-f32-qb4w-gemm-minmax
     qd8-f32-qc4w-gemm-minmax
+    qd8-f32-qc2w-gemm-minmax
+    qd8-f16-qc2w-gemm-minmax
     qd8-f32-qc8w-gemm-minmax
     qd8-f32-qc8w-igemm-minmax
     qp8-f32-qb4w-gemm-minmax
@@ -243,6 +245,7 @@ FOREACH(TEST ${MICROKERNEL_GEMM_UNIT_TESTS})
 ENDFOREACH()
 SHARD_TEST(qd8-f16-qc8w-gemm-minmax-test 10)
 SHARD_TEST(qd8-f32-qc4w-gemm-minmax-test 10)
+SHARD_TEST(qd8-f32-qc2w-gemm-minmax-test 10)
 SHARD_TEST(qd8-f32-qc8w-gemm-minmax-test 10)
 SHARD_TEST(qd8-f32-qc8w-igemm-minmax-test 10)
 SHARD_TEST(qs8-qc8w-gemm-minmax-fp32-test 10)
