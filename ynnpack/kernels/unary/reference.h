@@ -125,7 +125,7 @@ struct convert : public unary_op_info {
     if (type_is_integral(type)) {
       // The epsilon of a 23-bit integer.
       constexpr float epsilon_int23 = 1.0f / (1 << 23);
-      return tol_relative(y_ref, epsilon_int23);
+      return tol_mixed(y_ref, /*abs_tol=*/1, epsilon_int23);
     } else {
       return tol_mixed(y_ref, epsilon(type), epsilon(type));
     }
