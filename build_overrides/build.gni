@@ -12,6 +12,9 @@ enable_safe_libstdcxx = true
 # Not relevant for XNNPACK
 enable_java_templates = false
 
+# XNNPACK uses another build fingerprint mechanism.
+use_dummy_lastchange = true
+
 # Use bundled hermetic Xcode installation maintained by Chromium,
 # except for local iOS builds where it is unsupported.
 # Allow for mac cross compile on linux machines (unsupported for XNNPACK.)
