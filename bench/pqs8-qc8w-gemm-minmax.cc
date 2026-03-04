@@ -113,7 +113,7 @@ namespace {
 
 #if XNN_ENABLE_ARM_SME && XNN_ARCH_ARM64
   #if XNN_ENABLE_KLEIDIAI
-  static void pqs8_qc8w_gemm_minmax_ukernel_32x32c4__neonsme(benchmark::State& state, const char* net) {
+  static void pqs8_qc8w_gemm_minmax_ukernel_32x32c4__neonsme(benchmark::State& state) {
     GEMMBenchmark(state,
       xnn_pqs8_qc8w_gemm_minmax_ukernel_32x32c4__neonsme,
       xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params,
@@ -154,6 +154,7 @@ namespace {
   BENCHMARK_GEMM(pqs8_qc8w_gemm_minmax_ukernel_32x32c4__neonsme)
   #endif  // XNN_ENABLE_KLEIDIAI
 #endif  // XNN_ENABLE_ARM_SME && XNN_ARCH_ARM64
+
 
 }  // namespace
 
