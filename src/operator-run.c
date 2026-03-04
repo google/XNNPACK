@@ -1706,10 +1706,7 @@ void xnn_compute_floating_point_softmax(
   context->rmax_ukernel(n, x, &x_max, &context->rmax_params);
 
   // Second pass: reduce-add & store exp(x-x_max)
-  union {
-    float as_float;
-    xnn_float16 as_half;
-  } y_sum;
+  float y_sum;
   context->raddstoreexpminusmax_ukernel(n, x, &x_max, y, &y_sum,
                                         &context->expminus_params);
 
