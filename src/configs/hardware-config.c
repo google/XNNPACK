@@ -293,9 +293,12 @@ static void init_hardware_config(void) {
     set_arch_flag(xnn_arch_riscv_vector, use_riscv_vector);
 
     /* cpuinfo does not yet support risc-v isa extensions, so enable fp16 if compiled */
-    //set_arch_flag(xnn_arch_riscv_vector_fp16_arith, cpuinfo_has_riscv_zvfh());
     #if XNN_ENABLE_RISCV_FP16_VECTOR
-    set_arch_flag(xnn_arch_riscv_vector_fp16_arith, use_riscv_vector);
+      #if XNN_ENABLE_CPUINFO
+        set_arch_flag(xnn_arch_riscv_vector_fp16_arith, cpuinfo_has_riscv_zvfh());
+      #else
+        set_arch_flag(xnn_arch_riscv_vector_fp16_arith, use_riscv_vector);
+      #endif
     #endif
 
     if (use_riscv_vector) {
@@ -468,7 +471,7 @@ static void init_hardware_config(void) {
 }
 
 const struct xnn_hardware_config* xnn_init_hardware_config() {
-  #if !XNN_PLATFORM_WEB && !XNN_ARCH_RISCV && !XNN_ARCH_PPC64 && XNN_ENABLE_CPUINFO
+  #if !XNN_PLATFORM_WEB && !XNN_ARCH_PPC64 && XNN_ENABLE_CPUINFO
     if (!cpuinfo_initialize()) {
       xnn_log_error("failed to initialize cpuinfo");
       return NULL;
