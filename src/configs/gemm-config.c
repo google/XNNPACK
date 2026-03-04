@@ -4455,8 +4455,22 @@ static void init_qs8_qc2w_gemm_config(void) {
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     (void) hardware_config;  // May be unused.
+    #if XNN_ENABLE_AVXVNNI
+      if (hardware_config->arch_flags & xnn_arch_x86_avxvnni) {
+        qs8_qc2w_gemm_config.arch = xnn_arch_x86_avxvnni;
+        qs8_qc2w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_DQGEMM_UKERNEL(xnn_qs8_qc2w_gemm_minmax_fp32_ukernel_1x8c8__avxvnni);
+        qs8_qc2w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(4)] = XNN_INIT_HMP_DQGEMM_UKERNEL(xnn_qs8_qc2w_gemm_minmax_fp32_ukernel_4x8c8__avxvnni);
+        qs8_qc2w_gemm_config.init.qs8_qc8w = xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params;
+        qs8_qc2w_gemm_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_pack_qs8_to_qu8_qc2w_gemm_goi_w;
+        qs8_qc2w_gemm_config.planes = 4;
+        qs8_qc2w_gemm_config.mr = 4;
+        qs8_qc2w_gemm_config.nr = 8;
+        qs8_qc2w_gemm_config.log2_kr = 3;
+      } else
+    #endif
     // TODO(fbarchard): add prfm and test on spr.  5x8 is not fastest but there is clang bug causing register spill due to MR
     // and 5x8 spills by only 1 register so it is less sensitive to memory and uarch.  tune if spill can be fixed.
+    // TODO(fbarchard): use 4x8 for avx256skx as well
     #if XNN_ENABLE_AVX256SKX
       if (hardware_config->arch_flags & xnn_arch_x86_avx256skx) {
         qs8_qc2w_gemm_config.arch = xnn_arch_x86_avx256skx;
