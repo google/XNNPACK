@@ -4147,15 +4147,17 @@ enum xnn_status xnn_subgraph_rewrite_for_row_sum(xnn_subgraph_t subgraph) {
         const enum xnn_datatype output_datatype = output_value->datatype;
 
         switch (input_datatype) {
-          case xnn_datatype_qdint8:
-            if (output_datatype == xnn_datatype_fp32) {
-              const struct xnn_gemm_config* gemm_config = NULL;
+          case xnn_datatype_qdint8: {
+            const struct xnn_gemm_config* gemm_config = NULL;
 
-              switch (kernel_datatype) {
-                case xnn_datatype_qcint2:
-                  if ((gemm_config = xnn_init_qd8_f32_qc2w_gemm_config())) {
-                    struct xnn_node* producer =
-                        &subgraph->nodes[input_value->producer];
+            switch (kernel_datatype) {
+              case xnn_datatype_qcint2: {
+                struct xnn_node* producer =
+                    &subgraph->nodes[input_value->producer];
+                if (((output_datatype == xnn_datatype_fp32) &&
+                     (gemm_config = xnn_init_qd8_f32_qc2w_gemm_config())) ||
+                    ((output_datatype == xnn_datatype_fp16) &&
+                     (gemm_config = xnn_init_qd8_f16_qc2w_gemm_config()))) {
                     if (producer->type != xnn_node_type_convert) {
                       xnn_log_error(
                           "Expected producer node #%u of %s tensor #%u to be of"
@@ -4168,12 +4170,13 @@ enum xnn_status xnn_subgraph_rewrite_for_row_sum(xnn_subgraph_t subgraph) {
                     }
                     producer->flags |= XNN_NODE_FLAG_REQUIRES_ROW_SUM;
                   }
-                  break;
-                default:
-                  break;
-              }
+                }
+                break;
+              default:
+                break;
             }
             break;
+          }
           default:
             // If none of the above happened, do nothing for this node.
             continue;

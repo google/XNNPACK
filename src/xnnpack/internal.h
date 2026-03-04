@@ -350,7 +350,7 @@ enum xnn_status xnn_create_convolution2d_nhwc_pf32(
 // XNN_EXTRA_QUANTIZATION_PARAMS entries.
 enum xnn_status xnn_setup_convert_nc_f16_qdu8(
     xnn_operator_t convert_op, const void* input, uint8_t* output,
-    struct xnn_quantization_params* quantization_params);
+    float* row_sum, struct xnn_quantization_params* quantization_params);
 
 enum xnn_status xnn_create_convert_nc_f16_qdu8(uint32_t flags,
                                                xnn_operator_t* convert_op_out);

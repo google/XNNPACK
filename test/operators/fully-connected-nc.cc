@@ -1554,12 +1554,155 @@ TEST(FULLY_CONNECTED_NC_QD8_F32_QC2W,
       .TestQD8F32QC2W();
 }
 
+TEST(FULLY_CONNECTED_NC_QDU8_F16_QC2W, unit_batch) {
+  FullyConnectedOperatorTester()
+      .batch_size(1)
+      .input_channels(22)
+      .output_channels(19)
+      .TestQDU8F16QC2W();
+}
+
+TEST(FULLY_CONNECTED_NC_QDU8_F16_QC2W, unit_batch_with_qmin) {
+  FullyConnectedOperatorTester()
+      .batch_size(1)
+      .input_channels(22)
+      .output_channels(19)
+      .qmin(128)
+      .TestQDU8F16QC2W();
+}
+
+TEST(FULLY_CONNECTED_NC_QDU8_F16_QC2W, unit_batch_with_qmax) {
+  FullyConnectedOperatorTester()
+      .batch_size(1)
+      .input_channels(22)
+      .output_channels(19)
+      .qmax(128)
+      .TestQDU8F16QC2W();
+}
+
+TEST(FULLY_CONNECTED_NC_QDU8_F16_QC2W, unit_batch_with_input_stride) {
+  FullyConnectedOperatorTester()
+      .batch_size(1)
+      .input_channels(22)
+      .input_stride(28)
+      .output_channels(19)
+      .TestQDU8F16QC2W();
+}
+
+TEST(FULLY_CONNECTED_NC_QDU8_F16_QC2W, unit_batch_with_output_stride) {
+  FullyConnectedOperatorTester()
+      .batch_size(1)
+      .input_channels(22)
+      .output_channels(19)
+      .output_stride(29)
+      .TestQDU8F16QC2W();
+}
+
+TEST(FULLY_CONNECTED_NC_QDU8_F16_QC2W, unit_batch_transpose_weights) {
+  FullyConnectedOperatorTester()
+      .transpose_weights(true)
+      .batch_size(1)
+      .input_channels(22)
+      .output_channels(20)  // legacy requires even number
+      .TestQDU8F16QC2W();
+}
+
+TEST(FULLY_CONNECTED_NC_QDU8_F16_QC2W, unit_batch_without_bias) {
+  FullyConnectedOperatorTester()
+      .has_bias(false)
+      .batch_size(1)
+      .input_channels(22)
+      .output_channels(19)
+      .TestQDU8F16QC2W();
+}
+
+TEST(FULLY_CONNECTED_NC_QDU8_F16_QC2W, small_batch) {
+  FullyConnectedOperatorTester()
+      .batch_size(12)
+      .input_channels(22)
+      .output_channels(19)
+      .TestQDU8F16QC2W();
+}
+
+TEST(FULLY_CONNECTED_NC_QDU8_F16_QC2W, small_batch_with_qmin) {
+  FullyConnectedOperatorTester()
+      .batch_size(12)
+      .input_channels(22)
+      .output_channels(19)
+      .qmin(128)
+      .TestQDU8F16QC2W();
+}
+
+TEST(FULLY_CONNECTED_NC_QDU8_F16_QC2W, small_batch_with_qmax) {
+  FullyConnectedOperatorTester()
+      .batch_size(12)
+      .input_channels(22)
+      .output_channels(19)
+      .qmax(128)
+      .TestQDU8F16QC2W();
+}
+
+TEST(FULLY_CONNECTED_NC_QDU8_F16_QC2W, small_batch_with_input_stride) {
+  FullyConnectedOperatorTester()
+      .batch_size(12)
+      .input_channels(22)
+      .input_stride(29)
+      .output_channels(19)
+      .TestQDU8F16QC2W();
+}
+
+TEST(FULLY_CONNECTED_NC_QDU8_F16_QC2W, small_batch_with_output_stride) {
+  FullyConnectedOperatorTester()
+      .batch_size(12)
+      .input_channels(22)
+      .output_channels(19)
+      .output_stride(29)
+      .TestQDU8F16QC2W();
+}
+
+TEST(FULLY_CONNECTED_NC_QDU8_F16_QC2W, small_batch_transpose_weights) {
+  FullyConnectedOperatorTester()
+      .transpose_weights(true)
+      .batch_size(12)
+      .input_channels(22)
+      .output_channels(20)  // legacy doesn't support odd nc
+      .TestQDU8F16QC2W();
+}
+
+TEST(FULLY_CONNECTED_NC_QDU8_F16_QC2W, small_batch_without_bias) {
+  FullyConnectedOperatorTester()
+      .has_bias(false)
+      .batch_size(12)
+      .input_channels(22)
+      .output_channels(19)
+      .TestQDU8F16QC2W();
+}
+
+TEST(FULLY_CONNECTED_NC_QDU8_F16_QC2W, weights_cache_unit_batch) {
+  FullyConnectedOperatorTester()
+      .batch_size(1)
+      .input_channels(22)
+      .output_channels(19)
+      .use_weights_cache(true)
+      .TestQDU8F16QC2W();
+}
+
+TEST(FULLY_CONNECTED_NC_QDU8_F16_QC2W,
+     weights_cache_unit_batch_transpose_weights) {
+  FullyConnectedOperatorTester()
+      .transpose_weights(true)
+      .batch_size(1)
+      .input_channels(22)
+      .output_channels(20)  // legacy doesn't support odd nc
+      .use_weights_cache(true)
+      .TestQDU8F16QC2W();
+}
+
 TEST(FULLY_CONNECTED_NC_QDU8_F32_QC2W, unit_batch) {
   FullyConnectedOperatorTester()
       .batch_size(1)
       .input_channels(22)
       .output_channels(19)
-      .kernel_zero_point(0)
       .TestQDU8F32QC2W();
 }
 
@@ -1568,7 +1711,6 @@ TEST(FULLY_CONNECTED_NC_QDU8_F32_QC2W, unit_batch_with_qmin) {
       .batch_size(1)
       .input_channels(22)
       .output_channels(19)
-      .kernel_zero_point(0)
       .qmin(128)
       .TestQDU8F32QC2W();
 }
@@ -1578,7 +1720,6 @@ TEST(FULLY_CONNECTED_NC_QDU8_F32_QC2W, unit_batch_with_qmax) {
       .batch_size(1)
       .input_channels(22)
       .output_channels(19)
-      .kernel_zero_point(0)
       .qmax(128)
       .TestQDU8F32QC2W();
 }
@@ -1589,7 +1730,6 @@ TEST(FULLY_CONNECTED_NC_QDU8_F32_QC2W, unit_batch_with_input_stride) {
       .input_channels(22)
       .input_stride(28)
       .output_channels(19)
-      .kernel_zero_point(0)
       .TestQDU8F32QC2W();
 }
 
@@ -1598,7 +1738,6 @@ TEST(FULLY_CONNECTED_NC_QDU8_F32_QC2W, unit_batch_with_output_stride) {
       .batch_size(1)
       .input_channels(22)
       .output_channels(19)
-      .kernel_zero_point(0)
       .output_stride(29)
       .TestQDU8F32QC2W();
 }
@@ -1609,7 +1748,6 @@ TEST(FULLY_CONNECTED_NC_QDU8_F32_QC2W, unit_batch_transpose_weights) {
       .batch_size(1)
       .input_channels(22)
       .output_channels(20)  // legacy requires even number
-      .kernel_zero_point(0)
       .TestQDU8F32QC2W();
 }
 
@@ -1619,7 +1757,6 @@ TEST(FULLY_CONNECTED_NC_QDU8_F32_QC2W, unit_batch_without_bias) {
       .batch_size(1)
       .input_channels(22)
       .output_channels(19)
-      .kernel_zero_point(0)
       .TestQDU8F32QC2W();
 }
 
@@ -1628,7 +1765,6 @@ TEST(FULLY_CONNECTED_NC_QDU8_F32_QC2W, small_batch) {
       .batch_size(12)
       .input_channels(22)
       .output_channels(19)
-      .kernel_zero_point(0)
       .TestQDU8F32QC2W();
 }
 
@@ -2498,6 +2634,141 @@ TEST(FULLY_CONNECTED_NC_QD8_F16_QB4W, bl) {
           .TestQD8F16QB4W();
     }
   }
+}
+
+TEST(FULLY_CONNECTED_NC_QD8_F16_QC2W, unit_batch) {
+  FullyConnectedOperatorTester()
+      .batch_size(1)
+      .input_channels(8)
+      .output_channels(4)
+      .TestQD8F16QC2W();
+}
+
+TEST(FULLY_CONNECTED_NC_QD8_F16_QC2W, unit_batch_with_qmin) {
+  FullyConnectedOperatorTester()
+      .batch_size(1)
+      .input_channels(22)
+      .output_channels(19)
+      .qmin(128)
+      .TestQD8F16QC2W();
+}
+
+TEST(FULLY_CONNECTED_NC_QD8_F16_QC2W, unit_batch_with_qmax) {
+  FullyConnectedOperatorTester()
+      .batch_size(1)
+      .input_channels(22)
+      .output_channels(19)
+      .qmax(128)
+      .TestQD8F16QC2W();
+}
+
+TEST(FULLY_CONNECTED_NC_QD8_F16_QC2W, unit_batch_with_input_stride) {
+  FullyConnectedOperatorTester()
+      .batch_size(1)
+      .input_channels(22)
+      .input_stride(28)
+      .output_channels(19)
+      .TestQD8F16QC2W();
+}
+
+TEST(FULLY_CONNECTED_NC_QD8_F16_QC2W, unit_batch_with_output_stride) {
+  FullyConnectedOperatorTester()
+      .batch_size(1)
+      .input_channels(22)
+      .output_channels(19)
+      .output_stride(29)
+      .TestQD8F16QC2W();
+}
+
+TEST(FULLY_CONNECTED_NC_QD8_F16_QC2W, unit_batch_transpose_weights) {
+  FullyConnectedOperatorTester()
+      .transpose_weights(true)
+      .batch_size(1)
+      .input_channels(22)
+      .output_channels(20)
+      .TestQD8F16QC2W();
+}
+
+TEST(FULLY_CONNECTED_NC_QD8_F16_QC2W, unit_batch_without_bias) {
+  FullyConnectedOperatorTester()
+      .has_bias(false)
+      .batch_size(1)
+      .input_channels(22)
+      .output_channels(19)
+      .TestQD8F16QC2W();
+}
+
+TEST(FULLY_CONNECTED_NC_QD8_F16_QC2W, small_batch) {
+  FullyConnectedOperatorTester()
+      .batch_size(4)
+      .input_channels(2)
+      .output_channels(16)
+      .TestQD8F16QC2W();
+}
+
+TEST(FULLY_CONNECTED_NC_QD8_F16_QC2W, small_batch_with_qmin) {
+  FullyConnectedOperatorTester()
+      .batch_size(12)
+      .input_channels(22)
+      .output_channels(19)
+      .qmin(128)
+      .TestQD8F16QC2W();
+}
+
+TEST(FULLY_CONNECTED_NC_QD8_F16_QC2W, small_batch_with_qmax) {
+  FullyConnectedOperatorTester()
+      .batch_size(12)
+      .input_channels(22)
+      .output_channels(19)
+      .qmax(128)
+      .TestQD8F16QC2W();
+}
+
+TEST(FULLY_CONNECTED_NC_QD8_F16_QC2W, small_batch_with_input_stride) {
+  FullyConnectedOperatorTester()
+      .batch_size(12)
+      .input_channels(22)
+      .input_stride(28)
+      .output_channels(19)
+      .TestQD8F16QC2W();
+}
+
+TEST(FULLY_CONNECTED_NC_QD8_F16_QC2W, small_batch_with_output_stride) {
+  FullyConnectedOperatorTester()
+      .batch_size(12)
+      .input_channels(22)
+      .output_channels(19)
+      .output_stride(29)
+      .TestQD8F16QC2W();
+}
+
+TEST(FULLY_CONNECTED_NC_QD8_F16_QC2W, small_batch_without_bias) {
+  FullyConnectedOperatorTester()
+      .has_bias(false)
+      .batch_size(11)
+      .input_channels(22)
+      .output_channels(19)
+      .TestQD8F16QC2W();
+}
+
+TEST(FULLY_CONNECTED_NC_QD8_F16_QC2W, weights_cache_unit_batch) {
+  FullyConnectedOperatorTester()
+      .batch_size(1)
+      .input_channels(22)
+      .output_channels(19)
+      .use_weights_cache(true)
+      .TestQD8F16QC2W();
+}
+
+TEST(FULLY_CONNECTED_NC_QD8_F16_QC2W,
+     weights_cache_unit_batch_transpose_weights) {
+  FullyConnectedOperatorTester()
+      .transpose_weights(true)
+      .batch_size(1)
+      .input_channels(22)
+      .output_channels(20)
+      .use_weights_cache(true)
+      .TestQD8F16QC2W();
 }
 
 TEST(FULLY_CONNECTED_NC_QD8_F16_QB4W, bl_no_bias) {

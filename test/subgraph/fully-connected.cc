@@ -535,14 +535,16 @@ TEST(FullyConnectedBF16F32, static_b) {
 }
 
 #ifndef XNNPACK_USE_YNNPACK
+TEST(FullyConnectedQD8F16QC2W, static_b) {
+  TestStaticB<xnn_float16, qcint2, float>(/*convert_to=*/xnn_datatype_qdint8);
+}
+
 TEST(FullyConnectedQD8F16QC4W, static_b) {
-  TestStaticB<xnn_float16, qcint4, float>(
-      /*convert_to=*/xnn_datatype_qdint8);
+  TestStaticB<xnn_float16, qcint4, float>(/*convert_to=*/xnn_datatype_qdint8);
 }
 #endif  // XNNPACK_USE_YNNPACK
 TEST(FullyConnectedQD8F16QC8W, static_b) {
-  TestStaticB<xnn_float16, qcint8, float>(
-      /*convert_to=*/xnn_datatype_qdint8);
+  TestStaticB<xnn_float16, qcint8, float>(/*convert_to=*/xnn_datatype_qdint8);
 }
 #ifndef XNNPACK_USE_YNNPACK
 TEST(FullyConnectedQD8F32QC4W, static_b) {

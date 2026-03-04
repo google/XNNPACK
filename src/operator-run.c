@@ -1562,6 +1562,15 @@ void xnn_compute_f16_qx8_convert(
   params.scalar.output_zero_point =
       context->quantization_params[batch_index].zero_point;
   context->convert_ukernel(n, input, output, (union xnn_unary_uparams*)&params);
+
+  if (context->rsum_ukernel) {
+    // Compute and store the row sum of the quantized output.
+    const size_t num_bytes = n / sizeof(xnn_float16) * sizeof(int8_t);
+    int32_t row_sum = 0;
+    struct xnn_qs8_rsum_params rsum_params = {0,};
+    context->rsum_ukernel(num_bytes, output, &row_sum, &rsum_params);
+    context->row_sum[batch_index] = (float)row_sum;
+  }
 }
 
 void xnn_compute_f16_qd8_convert(
