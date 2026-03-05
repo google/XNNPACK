@@ -202,7 +202,10 @@ Notes:
 }
 
 int main(int argc, char** argv) {
-  int thread_count = std::thread::hardware_concurrency();
+  // Our thread pool isn't very good with a large number of threads.
+  constexpr unsigned max_threads = 32;
+  int thread_count =
+      std::min(max_threads, std::thread::hardware_concurrency());
   std::vector<int> ms;
   std::vector<int> ns;
   std::vector<int> ks;
