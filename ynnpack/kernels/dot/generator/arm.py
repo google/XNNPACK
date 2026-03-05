@@ -23,9 +23,21 @@ class arm_neon(dot_base):
 
 """
 
+  def c_bits(self):
+    if self.c_type == "float":
+      return 32
+    elif self.c_type == "double":
+      return 64
+    elif self.c_type == "int32_t":
+      return 32
+    else:
+      raise ValueError(f"Unsupported c_type: {self.c_type}")
+
   def init_c_tile(self, i, j):
     if self.c_type == "float":
       return f"float32x4_t c_{i}_{j} = vdupq_n_f32(0.0f);\n"
+    elif self.c_type == "double":
+      return f"float64x2_t c_{i}_{j} = vdupq_n_f64(0.0);\n"
     elif self.c_type == "int32_t":
       return f"int32x4_t c_{i}_{j} = vdupq_n_s32(0);\n"
     else:
@@ -36,6 +48,11 @@ class arm_neon(dot_base):
       return (
           f"c_{i}_{j} = vaddq_f32(c_{i}_{j},"
           f" vld1q_f32({self.c_in_ptr(i, j)}));\n"
+      )
+    elif self.c_type == "double":
+      return (
+          f"c_{i}_{j} = vaddq_f64(c_{i}_{j},"
+          f" vld1q_f64({self.c_in_ptr(i, j)}));\n"
       )
     elif self.c_type == "int32_t":
       return (
@@ -48,6 +65,8 @@ class arm_neon(dot_base):
   def store_c_tile(self, i, j):
     if self.c_type == "float":
       return f"vst1q_f32({self.c_out_ptr(i, j)}, c_{i}_{j});\n"
+    elif self.c_type == "double":
+      return f"vst1q_f64({self.c_out_ptr(i, j)}, c_{i}_{j});\n"
     elif self.c_type == "int32_t":
       return f"vst1q_s32({self.c_out_ptr(i, j)}, c_{i}_{j});\n"
     else:
@@ -83,49 +102,55 @@ class arm_neon(dot_base):
     for i in range(0, self.block_shape[0]):
       if self.c_type == "float":
         result += f"float32x2_t c_{i}_0_lo = vget_low_f32(c_{i}_0);\n"
+      elif self.c_type == "double":
+        result += f"double c_{i}_0_lo = vgetq_lane_f64(c_{i}_0, 0);\n"
       elif self.c_type == "int32_t":
         result += f"int32x2_t c_{i}_0_lo = vget_low_s32(c_{i}_0);\n"
       else:
         raise ValueError(f"Unsupported c_type: {self.c_type}")
 
-    result += "if (N & 2) {\n"
+    if self.c_bits() == 32:
+      # We only need the half-vector case for 32-bit types.
 
-    add_c_tiles = ""
-    # Load all of the output and add it, before writing anything.
-    for i in range(0, self.block_shape[0]):
-      if self.c_type == "float":
-        add_c_tiles += (
-            f"c_{i}_0_lo = vadd_f32(c_{i}_0_lo,"
-            f" vld1_f32({self.c_in_ptr(i, 0)}));\n"
-        )
-      elif self.c_type == "int32_t":
-        add_c_tiles += (
-            f"c_{i}_0_lo = vadd_s32(c_{i}_0_lo,"
-            f" vld1_s32({self.c_in_ptr(i, 0)}));\n"
-        )
-      else:
-        raise ValueError(f"Unsupported c_type: {self.c_type}")
+      result += "if (N & 2) {\n"
 
-    result += "  if (C_in) {\n"
-    result += indent(add_c_tiles, "    ") + "\n"
-    result += "  }\n"
+      add_c_tiles = ""
+      # Load all of the output and add it, before writing anything.
+      for i in range(0, self.block_shape[0]):
+        if self.c_type == "float":
+          add_c_tiles += (
+              f"c_{i}_0_lo = vadd_f32(c_{i}_0_lo,"
+              f" vld1_f32({self.c_in_ptr(i, 0)}));\n"
+          )
+        elif self.c_type == "int32_t":
+          add_c_tiles += (
+              f"c_{i}_0_lo = vadd_s32(c_{i}_0_lo,"
+              f" vld1_s32({self.c_in_ptr(i, 0)}));\n"
+          )
+        else:
+          raise ValueError(f"Unsupported c_type: {self.c_type}")
 
-    for i in reversed(range(0, self.block_shape[0])):
-      if self.c_type == "float":
-        result += f"  vst1_f32({self.c_out_ptr(i, 0)}, c_{i}_0_lo);\n"
-        result += f"  c_{i}_0_lo = vget_high_f32(c_{i}_0);\n"
-      elif self.c_type == "int32_t":
-        result += f"  vst1_s32({self.c_out_ptr(i, 0)}, c_{i}_0_lo);\n"
-        result += f"  c_{i}_0_lo = vget_high_s32(c_{i}_0);\n"
-      else:
-        raise ValueError(f"Unsupported c_type: {self.c_type}")
+      result += "  if (C_in) {\n"
+      result += indent(add_c_tiles, "    ") + "\n"
+      result += "  }\n"
 
-    result += (
-        f"  C_in = C_in ? offset_bytes(C_in, 2 * sizeof({self.c_type})) :"
-        " nullptr;\n"
-    )
-    result += f"  C_out = offset_bytes(C_out, 2 * sizeof({self.c_type}));\n"
-    result += "}\n"
+      for i in reversed(range(0, self.block_shape[0])):
+        if self.c_type == "float":
+          result += f"  vst1_f32({self.c_out_ptr(i, 0)}, c_{i}_0_lo);\n"
+          result += f"  c_{i}_0_lo = vget_high_f32(c_{i}_0);\n"
+        elif self.c_type == "int32_t":
+          result += f"  vst1_s32({self.c_out_ptr(i, 0)}, c_{i}_0_lo);\n"
+          result += f"  c_{i}_0_lo = vget_high_s32(c_{i}_0);\n"
+        else:
+          raise ValueError(f"Unsupported c_type: {self.c_type}")
+
+      result += (
+          f"  C_in = C_in ? offset_bytes(C_in, 2 * sizeof({self.c_type})) :"
+          " nullptr;\n"
+      )
+      result += f"  C_out = offset_bytes(C_out, 2 * sizeof({self.c_type}));\n"
+      result += "}\n"
+
     result += "if (N & 1) {\n"
 
     add_c_tiles = ""
@@ -136,6 +161,8 @@ class arm_neon(dot_base):
             f"c_{i}_0_lo = vadd_f32(c_{i}_0_lo,"
             f" vdup_n_f32(*{self.c_in_ptr(i, 0)}));\n"
         )
+      elif self.c_type == "double":
+        add_c_tiles += f"c_{i}_0_lo = c_{i}_0_lo + *{self.c_in_ptr(i, 0)};\n"
       elif self.c_type == "int32_t":
         add_c_tiles += (
             f"c_{i}_0_lo = vadd_s32(c_{i}_0_lo,"
@@ -151,6 +178,8 @@ class arm_neon(dot_base):
     for i in reversed(range(0, self.block_shape[0])):
       if self.c_type == "float":
         result += f"  vst1_lane_f32({self.c_out_ptr(i, 0)}, c_{i}_0_lo, 0);\n"
+      elif self.c_type == "double":
+        result += f"  *{self.c_out_ptr(i, 0)} = c_{i}_0_lo;\n"
       elif self.c_type == "int32_t":
         result += f"  vst1_lane_s32({self.c_out_ptr(i, 0)}, c_{i}_0_lo, 0);\n"
       else:

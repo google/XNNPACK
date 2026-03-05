@@ -128,6 +128,16 @@ void replace_denormals_and_nans(T* data, size_t size) {
   }
 }
 
+inline void replace_denormals_and_nans(double* data, size_t size) {
+  for (size_t i = 0; i < size; ++i) {
+    if (std::abs(data[i]) >= type_info<double>::smallest_normal()) {
+      // This is a normal float, or infinity.
+    } else {
+      data[i] = 0.0;
+    }
+  }
+}
+
 inline void replace_denormals_and_nans(int4x2*, size_t) {}
 
 // Fill `[data, data + size)` with uniform random bits, excluding denormals and
@@ -150,15 +160,19 @@ void fill_random(T* data, size_t size, Rng& rng, double min, double max,
   } else {
     if constexpr (std::is_integral_v<T>) {
       std::uniform_int_distribution<int> dist(
-          std::max<int>(round_float_to_int<int>(min), type_info<T>::min()),
-          std::min<int>(round_float_to_int<int>(max), type_info<T>::max()));
+          std::max<int>(round_float_to_int<int>(static_cast<float>(min)),
+                        type_info<T>::min()),
+          std::min<int>(round_float_to_int<int>(static_cast<float>(max)),
+                        type_info<T>::max()));
       for (size_t i = 0; i < size; ++i) {
         data[i] = static_cast<T>(dist(rng));
       }
     } else {
       // Floating point types
-      std::uniform_real_distribution<float> dist(static_cast<float>(min),
-                                                 static_cast<float>(max));
+      using DistT =
+          std::conditional_t<std::is_same_v<T, double>, double, float>;
+      std::uniform_real_distribution<DistT> dist(static_cast<DistT>(min),
+                                                 static_cast<DistT>(max));
       for (size_t i = 0; i < size; ++i) {
         data[i] = static_cast<T>(dist(rng));
       }

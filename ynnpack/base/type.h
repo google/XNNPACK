@@ -197,6 +197,8 @@ ynn_type type_of() {
     return ynn_type_bf16;
   } else if (std::is_same<T, float>::value) {
     return ynn_type_fp32;
+  } else if (std::is_same<T, double>::value) {
+    return ynn_type_fp64;
   } else if (std::is_same<T, int8_t>::value ||
              std::is_same<T, quantized<int8_t>>::value) {
     return ynn_type_int8;

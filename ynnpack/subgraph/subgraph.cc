@@ -107,6 +107,8 @@ ynn_status ynn_value::get_external_shape(size_t* rank, size_t* dims) const {
 std::optional<float> ynn_value::as_scalar_float() const {
   if (!is_static_scalar()) return std::nullopt;
   switch (type) {
+    case ynn_type_fp64:
+      return static_cast<float>(static_scalar_value<double>());
     case ynn_type_fp32:
       return static_scalar_value<float>();
     case ynn_type_fp16:

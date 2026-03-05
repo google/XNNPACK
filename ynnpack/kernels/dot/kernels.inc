@@ -33,6 +33,7 @@ YNN_DOT_KERNEL(arch_flag::amxint8, dot_uint8_int8_int32_16x64x64_16x16x4_amxint8
 #include "ynnpack/kernels/dot/x86_avx512_fp32.inc"
 #include "ynnpack/kernels/dot/x86_avx512_fp32_k2.inc"
 #include "ynnpack/kernels/dot/x86_avx512_fp32_k4.inc"
+#include "ynnpack/kernels/dot/x86_avx512_fp64.inc"
 #include "ynnpack/kernels/dot/x86_avx512_int8_int8_int32.inc"
 #include "ynnpack/kernels/dot/x86_avx512_int8_int8_int32_k1.inc"
 #include "ynnpack/kernels/dot/x86_avx512_int8_int8_int32_k16.inc"
@@ -43,6 +44,7 @@ YNN_DOT_KERNEL(arch_flag::amxint8, dot_uint8_int8_int32_16x64x64_16x16x4_amxint8
 #endif  // YNN_ARCH_X86_AVX2
 #ifdef YNN_ARCH_X86_FMA3
 #include "ynnpack/kernels/dot/x86_fma3_fp32.inc"
+#include "ynnpack/kernels/dot/x86_fma3_fp64.inc"
 #endif  // YNN_ARCH_X86_FMA3
 #ifdef YNN_ARCH_X86_AVX2_FMA3
 #include "ynnpack/kernels/dot/x86_avx2_fma3_bf16_bf16_fp32.inc"
@@ -51,6 +53,7 @@ YNN_DOT_KERNEL(arch_flag::amxint8, dot_uint8_int8_int32_16x64x64_16x16x4_amxint8
 #endif  // YNN_ARCH_X86_AVX2_FMA3
 #ifdef YNN_ARCH_X86_AVX
 #include "ynnpack/kernels/dot/x86_avx_fp32.inc"
+#include "ynnpack/kernels/dot/x86_avx_fp64.inc"
 #endif  // YNN_ARCH_X86_AVX
 #ifdef YNN_ARCH_X86_F16C_FMA3
 #include "ynnpack/kernels/dot/x86_f16c_fma3_fp16_fp16_fp32.inc"
@@ -113,6 +116,7 @@ YNN_DOT_KERNEL(arch_flag::sme, dot_int8_int8_int32_sme,
 #endif  // YNN_ARCH_ARM_NEONBF16
 #ifdef YNN_ARCH_ARM64_NEON
 #include "ynnpack/kernels/dot/arm64_neon_fp32.inc"
+#include "ynnpack/kernels/dot/arm64_neon_fp64.inc"
 #include "ynnpack/kernels/dot/arm64_neon_bf16_bf16_fp32.inc"
 #endif  // YNN_ARCH_ARM64
 
@@ -136,6 +140,10 @@ YNN_DOT_KERNEL(arch_flag::none, dot_fp32_1x128x1_1x1x1,
                1, 128, 1, 1, 1, 1,
                YNN_DOT_KERNEL_CONSISTENT_ARITHMETIC,
                float, float, float)
+YNN_DOT_KERNEL(arch_flag::none, dot_fp64_1x128x1_1x1x1,
+               1, 128, 1, 1, 1, 1,
+               YNN_DOT_KERNEL_CONSISTENT_ARITHMETIC,
+               double, double, double)
 YNN_DOT_KERNEL(arch_flag::none, dot_fp16_fp16_fp32_1x128x1_1x1x1,
                1, 128, 1, 1, 1, 1,
                dot_flag::consistent_arithmetic, half, half, float)

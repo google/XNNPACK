@@ -71,6 +71,7 @@ enum ynn_type {
   ynn_type_fp16,
   ynn_type_bf16,
   ynn_type_fp32,
+  ynn_type_fp64,
 
   // For internal use only.
   ynn_type_opaque,
