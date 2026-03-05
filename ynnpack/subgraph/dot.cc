@@ -644,9 +644,9 @@ std::tuple<slinky::expr, slinky::expr> choose_split_factors(
         }
       }
       // We want to make the tile bigger, figure out which dimension to grow.
-      if ((aspect_ratio * split_n < split_m || split_m >= m) && split_n < n) {
+      if ((aspect_ratio * split_n <= split_m || split_m >= m) && split_n < n) {
         split_n *= 2;
-      } else if ((split_m < aspect_ratio * split_n || split_n >= n) &&
+      } else if ((split_m <= aspect_ratio * split_n || split_n >= n) &&
                  split_m < m) {
         split_m *= 2;
       } else {
