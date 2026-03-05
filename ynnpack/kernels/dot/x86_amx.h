@@ -205,7 +205,7 @@ YNN_ALWAYS_INLINE static void x86_amx_dot_1x4(
     // msan doesn't support amx, avoid false positives.
     for (size_t i = 0; i < M; ++i) {
       __msan_unpoison(offset_bytes(C_out, i * C_out_stride_m),
-                      4 * internal::kAmxTileRowBytes);
+                      4 * internal::tile_row_bytes);
     }
 #endif
     C_in = C_in ? offset_bytes(C_in, 4 * internal::tile_row_bytes) : nullptr;
