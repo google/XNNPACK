@@ -199,9 +199,8 @@ class FullyConnectedOperatorTester {
     const size_t k4 =
         round_up_po2(input_channels(), 4);  // tester assumes byte aligned rows
 
-    xnnpack::Buffer<int8_t> input(
-        (batch_size() - 1) * input_stride() + input_channels(),
-        xnnpack::XnnExtraBytes);
+    xnnpack::Buffer<int8_t> input((batch_size() - 1) * input_stride() + k4,
+                                  xnnpack::XnnExtraBytes);
     const size_t kernel_stride = transpose_weights()
                                      ? (output_channels() + 3) / 4
                                      : (input_channels() + 3) / 4;
@@ -466,9 +465,8 @@ class FullyConnectedOperatorTester {
     const size_t k2 =
         round_up_po2(input_channels(), 2);  // tester assumes byte aligned rows
 
-    xnnpack::Buffer<int8_t> input(
-        (batch_size() - 1) * input_stride() + input_channels(),
-        xnnpack::XnnExtraBytes);
+    xnnpack::Buffer<int8_t> input((batch_size() - 1) * input_stride() + k2,
+                                  xnnpack::XnnExtraBytes);
     const size_t kernel_stride = calc_kernel_stride();
     xnnpack::Buffer<uint8_t> kernel(
         (transpose_weights() ? k2 : output_channels()) * kernel_stride);
@@ -698,9 +696,8 @@ class FullyConnectedOperatorTester {
     const size_t k2 =
         round_up_po2(input_channels(), 2);  // tester assumes byte aligned rows
 
-    xnnpack::Buffer<int8_t> input(
-        (batch_size() - 1) * input_stride() + input_channels(),
-        xnnpack::XnnExtraBytes);
+    xnnpack::Buffer<int8_t> input((batch_size() - 1) * input_stride() + k2,
+                                  xnnpack::XnnExtraBytes);
     const size_t kernel_stride = calc_kernel_stride();
     xnnpack::Buffer<uint8_t> kernel(
         (transpose_weights() ? k2 : output_channels()) * kernel_stride);
@@ -1186,9 +1183,8 @@ class FullyConnectedOperatorTester {
     const size_t k4 =
         round_up_po2(input_channels(), 4);  // tester assumes byte aligned rows
 
-    xnnpack::Buffer<int8_t> input(
-        (batch_size() - 1) * input_stride() + input_channels(),
-        xnnpack::XnnExtraBytes);
+    xnnpack::Buffer<int8_t> input((batch_size() - 1) * input_stride() + k4,
+                                  xnnpack::XnnExtraBytes);
     const size_t kernel_stride = transpose_weights()
         ? (output_channels() + 3) / 4 : (input_channels() + 3) / 4;
     xnnpack::Buffer<uint8_t> kernel(
