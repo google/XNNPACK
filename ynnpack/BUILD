@@ -263,7 +263,7 @@ define_build_option(
 
 define_build_option(
     name = "ynn_enable_x86_amx",
-    default_all = [":x86"],
+    default_all = ["@platforms//cpu:x86_64"],
 )
 
 define_build_option(

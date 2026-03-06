@@ -3,8 +3,10 @@
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
 
+load("@rules_cc//cc:cc_binary.bzl", "cc_binary")
 load("@rules_cc//cc:cc_library.bzl", "cc_library")
 load("@rules_cc//cc:cc_test.bzl", "cc_test")
+load("@rules_shell//shell:sh_test.bzl", "sh_test")
 load("//ynnpack:build_defs.bzl", "ynn_binary_linkopts", "ynn_binary_malloc", "ynn_cc_library", "ynn_generate_src_hdr", "ynn_kernel_copts", "ynn_test_deps")
 
 _COMPATIBLE_WITH = []
@@ -960,4 +962,30 @@ cc_test(
         "//ynnpack/base/test:tensor",
         "@com_google_benchmark//:benchmark",
     ],
+)
+
+cc_binary(
+    name = "schedule_bench",
+    testonly = True,
+    srcs = ["schedule_bench.cc"],
+    linkopts = ynn_binary_linkopts(),
+    malloc = ynn_binary_malloc(),
+    deps = [
+        ":dot",
+        ":schedule",
+        "//ynnpack/base",
+        "//ynnpack/base/test:buffer",
+        "//ynnpack/base/test:tensor",
+        "//ynnpack/base/test:util",
+        "@slinky//slinky/base",
+    ],
+)
+
+sh_test(
+    name = "schedule_bench_test",
+    srcs = ["schedule_bench_test.sh"],
+    args = ["$(rootpath :schedule_bench)"],
+    data = [":schedule_bench"],
+    # This doesn't work with emulators that use --run_under to execute the test.
+    tags = ["noemulator"],
 )
