@@ -3260,7 +3260,6 @@ static void init_qd8_f16_qc8w_gemm_config(void) {
         qd8_f16_qc8w_gemm_config.init.f16 = xnn_init_f16_minmax_scalar_params;
         qd8_f16_qc8w_gemm_config.mr = 7;
         qd8_f16_qc8w_gemm_config.nr = 2 * hardware_config->vlenb / sizeof(xnn_float16);
-        //qd8_f16_qc8w_gemm_config.log2_kr = 1;
     }
   #endif
   assert(qd8_f16_qc8w_gemm_config.mr <= XNN_MAX_MR);
@@ -3615,7 +3614,6 @@ static void init_qd8_f16_qc8w_igemm_config(void) {
         qd8_f16_qc8w_igemm_config.init.f16 = xnn_init_f16_minmax_scalar_params;
         qd8_f16_qc8w_igemm_config.mr = 7;
         qd8_f16_qc8w_igemm_config.nr = 2 * hardware_config->vlenb / sizeof(xnn_float16);
-        //qd8_f16_qc8w_igemm_config.log2_kr = 1;
     }
     #endif
   assert(qd8_f16_qc8w_igemm_config.mr <= XNN_MAX_MR);

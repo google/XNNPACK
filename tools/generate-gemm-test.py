@@ -826,8 +826,6 @@ def generate_test_cases(
 
   output_datatype = init_fn.split("_")[2] if init_fn else output_datatype
 
-  print(f'output_datatype "{output_datatype}" for "{ukernel}".')
-
   nr_scale = ""
   if vector_tile:
     nr_type = {
