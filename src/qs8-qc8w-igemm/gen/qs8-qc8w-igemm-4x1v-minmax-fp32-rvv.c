@@ -15,7 +15,7 @@
 #include "src/xnnpack/math.h"
 #include "src/xnnpack/igemm.h"
 
-void xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_4x4v__rvv(
+void xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_4x1v__rvv(
     size_t mr,
     size_t nc,
     size_t kc,
@@ -108,57 +108,57 @@ void xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_4x4v__rvv(
 
         w = (const void*) ((const int8_t*) w + nr);
 
-        vacc0 = __riscv_vwmacc_vx_i32m4(vacc0, va0, vb0, vl);
-        vacc1 = __riscv_vwmacc_vx_i32m4(vacc1, va1, vb0, vl);
-        vacc2 = __riscv_vwmacc_vx_i32m4(vacc2, va2, vb0, vl);
-        vacc3 = __riscv_vwmacc_vx_i32m4(vacc3, va3, vb0, vl);
+        vacc0 = __riscv_vwmacc(vacc0, va0, vb0, vl);
+        vacc1 = __riscv_vwmacc(vacc1, va1, vb0, vl);
+        vacc2 = __riscv_vwmacc(vacc2, va2, vb0, vl);
+        vacc3 = __riscv_vwmacc(vacc3, va3, vb0, vl);
 
         k -= sizeof(int8_t);
       } while (k != 0);
       p -= 4 * sizeof(void*);
     } while (p != 0);
 
-    vfloat32m4_t vfpacc0 = __riscv_vfcvt_f_x_v_f32m4(vacc0, vl);
-    vfloat32m4_t vfpacc1 = __riscv_vfcvt_f_x_v_f32m4(vacc1, vl);
-    vfloat32m4_t vfpacc2 = __riscv_vfcvt_f_x_v_f32m4(vacc2, vl);
-    vfloat32m4_t vfpacc3 = __riscv_vfcvt_f_x_v_f32m4(vacc3, vl);
+    vfloat32m4_t vfpacc0 = __riscv_vfcvt_f(vacc0, vl);
+    vfloat32m4_t vfpacc1 = __riscv_vfcvt_f(vacc1, vl);
+    vfloat32m4_t vfpacc2 = __riscv_vfcvt_f(vacc2, vl);
+    vfloat32m4_t vfpacc3 = __riscv_vfcvt_f(vacc3, vl);
 
     const vfloat32m4_t vscale = __riscv_vle32_v_f32m4((const float*) w, vl);
-    vfpacc0 = __riscv_vfmul_vv_f32m4(vfpacc0, vscale, vl);
-    vfpacc1 = __riscv_vfmul_vv_f32m4(vfpacc1, vscale, vl);
-    vfpacc2 = __riscv_vfmul_vv_f32m4(vfpacc2, vscale, vl);
-    vfpacc3 = __riscv_vfmul_vv_f32m4(vfpacc3, vscale, vl);
+    vfpacc0 = __riscv_vfmul(vfpacc0, vscale, vl);
+    vfpacc1 = __riscv_vfmul(vfpacc1, vscale, vl);
+    vfpacc2 = __riscv_vfmul(vfpacc2, vscale, vl);
+    vfpacc3 = __riscv_vfmul(vfpacc3, vscale, vl);
 
     w = (const void*) ((const float*) w + nr);
 
-    vfpacc0 = __riscv_vfmax_vf_f32m4(vfpacc0, output_min_less_zero_point, vl);
-    vfpacc1 = __riscv_vfmax_vf_f32m4(vfpacc1, output_min_less_zero_point, vl);
-    vfpacc2 = __riscv_vfmax_vf_f32m4(vfpacc2, output_min_less_zero_point, vl);
-    vfpacc3 = __riscv_vfmax_vf_f32m4(vfpacc3, output_min_less_zero_point, vl);
-    vfpacc0 = __riscv_vfmin_vf_f32m4(vfpacc0, output_max_less_zero_point, vl);
-    vfpacc1 = __riscv_vfmin_vf_f32m4(vfpacc1, output_max_less_zero_point, vl);
-    vfpacc2 = __riscv_vfmin_vf_f32m4(vfpacc2, output_max_less_zero_point, vl);
-    vfpacc3 = __riscv_vfmin_vf_f32m4(vfpacc3, output_max_less_zero_point, vl);
+    vfpacc0 = __riscv_vfmax(vfpacc0, output_min_less_zero_point, vl);
+    vfpacc1 = __riscv_vfmax(vfpacc1, output_min_less_zero_point, vl);
+    vfpacc2 = __riscv_vfmax(vfpacc2, output_min_less_zero_point, vl);
+    vfpacc3 = __riscv_vfmax(vfpacc3, output_min_less_zero_point, vl);
+    vfpacc0 = __riscv_vfmin(vfpacc0, output_max_less_zero_point, vl);
+    vfpacc1 = __riscv_vfmin(vfpacc1, output_max_less_zero_point, vl);
+    vfpacc2 = __riscv_vfmin(vfpacc2, output_max_less_zero_point, vl);
+    vfpacc3 = __riscv_vfmin(vfpacc3, output_max_less_zero_point, vl);
 
     vint16m2_t vout0 = __riscv_vfncvt_x(vfpacc0, vl);
     vint16m2_t vout1 = __riscv_vfncvt_x(vfpacc1, vl);
     vint16m2_t vout2 = __riscv_vfncvt_x(vfpacc2, vl);
     vint16m2_t vout3 = __riscv_vfncvt_x(vfpacc3, vl);
 
-    vout0 = __riscv_vadd_vx_i16m2(vout0, (int16_t) output_zero_point, vl);
-    vout1 = __riscv_vadd_vx_i16m2(vout1, (int16_t) output_zero_point, vl);
-    vout2 = __riscv_vadd_vx_i16m2(vout2, (int16_t) output_zero_point, vl);
-    vout3 = __riscv_vadd_vx_i16m2(vout3, (int16_t) output_zero_point, vl);
+    vout0 = __riscv_vadd(vout0, (int16_t) output_zero_point, vl);
+    vout1 = __riscv_vadd(vout1, (int16_t) output_zero_point, vl);
+    vout2 = __riscv_vadd(vout2, (int16_t) output_zero_point, vl);
+    vout3 = __riscv_vadd(vout3, (int16_t) output_zero_point, vl);
 
-    vint8m1_t vout80 = __riscv_vncvt_x_x_w_i8m1(vout0, vl);
-    vint8m1_t vout81 = __riscv_vncvt_x_x_w_i8m1(vout1, vl);
-    vint8m1_t vout82 = __riscv_vncvt_x_x_w_i8m1(vout2, vl);
-    vint8m1_t vout83 = __riscv_vncvt_x_x_w_i8m1(vout3, vl);
+    vint8m1_t vout80 = __riscv_vncvt_x(vout0, vl);
+    vint8m1_t vout81 = __riscv_vncvt_x(vout1, vl);
+    vint8m1_t vout82 = __riscv_vncvt_x(vout2, vl);
+    vint8m1_t vout83 = __riscv_vncvt_x(vout3, vl);
 
-    __riscv_vse8_v_i8m1(c3, vout83, vl);
-    __riscv_vse8_v_i8m1(c2, vout82, vl);
-    __riscv_vse8_v_i8m1(c1, vout81, vl);
-    __riscv_vse8_v_i8m1(c0, vout80, vl);
+    __riscv_vse8(c3, vout83, vl);
+    __riscv_vse8(c2, vout82, vl);
+    __riscv_vse8(c1, vout81, vl);
+    __riscv_vse8(c0, vout80, vl);
 
     c3 = (int8_t*) ((uintptr_t) c3 + cn_stride);
     c2 = (int8_t*) ((uintptr_t) c2 + cn_stride);
