@@ -826,22 +826,19 @@ def generate_test_cases(
 
   output_datatype = init_fn.split("_")[2] if init_fn else output_datatype
 
+  print(f'output_datatype "{output_datatype}" for "{ukernel}".')
+
   nr_scale = ""
   if vector_tile:
-    accum_type = (
-        accum_type
-        or {
-            "qs8": "int32_t",
-            "qd8": "int32_t",
-            "qp8": "int32_t",
-            "qu8": "int32_t",
-            "f16": "xnn_float16",
-            "f32": "float",
-        }[input_datatype]
-    )
+    nr_type = {
+      "qs8": "int8_t",
+      "qu8": "uint8_t",
+      "f16": "xnn_float16",
+      "f32": "float",
+    }[output_datatype]
     nr_scale = {
-        "rvv": " * xnn_init_hardware_config()->vlenb / sizeof(%s)" % accum_type,
-        "rvvfp16arith": " * xnn_init_hardware_config()->vlenb / sizeof(%s)" % accum_type
+        "rvv": " * xnn_init_hardware_config()->vlenb / sizeof(%s)" % nr_type,
+        "rvvfp16arith": " * xnn_init_hardware_config()->vlenb / sizeof(%s)" % nr_type
     }[isa]
   test_fun_name = "".join(ukernel.split("_")[1:4]).upper()
   if test_fun_name in {"QP8F32QC8W"}:

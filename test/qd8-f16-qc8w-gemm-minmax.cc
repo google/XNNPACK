@@ -307,7 +307,7 @@ std::vector<GemmTestParams> CreateTests1(
     std::string kbs = std::to_string(k_block);
     std::string kb2s = std::to_string(k_block * 2);
     std::string akbs = std::to_string(adj_k_block);
-    nr = nr * xnn_init_hardware_config()->vlenb / sizeof(int32_t);
+    nr = nr * xnn_init_hardware_config()->vlenb / sizeof(xnn_float16);
     std::string nrs = std::to_string(nr);
 
     const GemmMicrokernelTester tester = GemmMicrokernelTester()
@@ -990,16 +990,16 @@ std::vector<GemmTestParams> CreateTests1(
 
 #if XNN_ENABLE_RISCV_FP16_VECTOR && XNN_ARCH_RISCV
   INSTANTIATE_TEST_SUITE_P(
-      QD8_F16_QC8W_GEMM_MINMAX_7X4V__RVVFP16ARITH, GemmTest,
+      QD8_F16_QC8W_GEMM_MINMAX_7X2V__RVVFP16ARITH, GemmTest,
       testing::ValuesIn(CreateTests2(
           /*k_block=*/1,
           /*adj_k_block=*/1,
-          /*mr=*/7, /*nr=*/4, /*kr=*/1, /*sr=*/1,
+          /*mr=*/7, /*nr=*/2, /*kr=*/1, /*sr=*/1,
           /*is_igemm=*/false,
           /*unsigned_inputs=*/false,
           /*planes=*/1,
           [](GemmMicrokernelTester& tester) {
-            tester.Test(xnn_qd8_f16_qc8w_gemm_minmax_ukernel_7x4v__rvvfp16arith,
+            tester.Test(xnn_qd8_f16_qc8w_gemm_minmax_ukernel_7x2v__rvvfp16arith,
                         xnn_init_f16_minmax_scalar_params,
                         xnn_pack_qs8_gemm_goi_w);
           },

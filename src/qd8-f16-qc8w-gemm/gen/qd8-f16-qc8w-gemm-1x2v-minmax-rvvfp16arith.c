@@ -16,7 +16,7 @@
 #include "src/xnnpack/gemm.h"
 #include "src/xnnpack/math.h"
 
-void xnn_qd8_f16_qc8w_gemm_minmax_ukernel_1x4v__rvvfp16arith(
+void xnn_qd8_f16_qc8w_gemm_minmax_ukernel_1x2v__rvvfp16arith(
     size_t mr,
     size_t nc,
     size_t kc,
@@ -48,7 +48,7 @@ void xnn_qd8_f16_qc8w_gemm_minmax_ukernel_1x4v__rvvfp16arith(
 
     vint32m4_t vksum = __riscv_vle32_v_i32m4((const int32_t*)w, vl);
     const int32_t vinput_zero_point0 = quantization_params[0].zero_point;
-    vint32m4_t vacc0 = __riscv_vmul_vx_i32m4(vksum, vinput_zero_point0, vl);
+    vint32m4_t vacc0 = __riscv_vmul(vksum, vinput_zero_point0, vl);
 
     w = (const int32_t*) w + nr;
 
@@ -61,35 +61,35 @@ void xnn_qd8_f16_qc8w_gemm_minmax_ukernel_1x4v__rvvfp16arith(
 
       w = (const int8_t*) w + nr;
 
-      vacc0 = __riscv_vwmacc_vx_i32m4(vacc0, va0, vb0, vl);
+      vacc0 = __riscv_vwmacc(vacc0, va0, vb0, vl);
 
       k -= sizeof(int8_t);
     } while (k != 0);
 
     // i32 -> f32
-    vfloat32m4_t vout0 = __riscv_vfcvt_f_x_v_f32m4(vacc0, vl);
+    vfloat32m4_t vout0 = __riscv_vfcvt_f(vacc0, vl);
 
     // vout * input_scale
     const float vinput_scale0 = quantization_params[0].inv_scale;
-    vout0 = __riscv_vfmul_vf_f32m4(vout0, vinput_scale0, vl);
+    vout0 = __riscv_vfmul(vout0, vinput_scale0, vl);
 
     const vfloat32m4_t vfilter_output_scale = __riscv_vle32_v_f32m4((const float*) w, vl);
     w = (const float*) w + nr;
-    vout0 = __riscv_vfmul_vv_f32m4(vout0, vfilter_output_scale, vl);
+    vout0 = __riscv_vfmul(vout0, vfilter_output_scale, vl);
 
-    const vfloat32m4_t vbias =  __riscv_vle32_v_f32m4((const float*) w, vl);
+    const vfloat32m4_t vbias = __riscv_vle32_v_f32m4((const float*) w, vl);
     w = (const float*) w + nr;
-    vout0 = __riscv_vfadd_vv_f32m4(vout0, vbias, vl);
+    vout0 = __riscv_vfadd(vout0, vbias, vl);
 
-    vfloat16m2_t vfp16out0 = __riscv_vfncvt_f_f_w_f16m2(vout0, vl);
+    vfloat16m2_t vfp16out0 = __riscv_vfncvt_f(vout0, vl);
 
     const xnn_float16 vmin = params->scalar.min;
-    vfp16out0 = __riscv_vfmax_vf_f16m2(vfp16out0, vmin, vl);
+    vfp16out0 = __riscv_vfmax(vfp16out0, vmin, vl);
     const xnn_float16 vmax = params->scalar.max;
-    vfp16out0 = __riscv_vfmin_vf_f16m2(vfp16out0, vmax, vl);
+    vfp16out0 = __riscv_vfmin(vfp16out0, vmax, vl);
 
     // store 1 x vl results to c
-    __riscv_vse16_v_f16m2(c0, vfp16out0, vl);
+    __riscv_vse16(c0, vfp16out0, vl);
     c0 = (xnn_float16*) ((uintptr_t) c0 + cn_stride);
 
     a0 = (const int8_t*) ((uintptr_t) a0 - kc);

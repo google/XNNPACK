@@ -26,6 +26,42 @@ namespace {
 
 
 
+#if XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+  static void qu8_gemm_minmax_fp32_ukernel_1x1v__rvv(benchmark::State& state) {
+    GEMMBenchmark(state,
+      xnn_qu8_gemm_minmax_fp32_ukernel_1x1v__rvv,
+      xnn_init_qu8_conv_minmax_fp32_scalar_params,
+      xnn_pack_qu8_gemm_goi_w,
+      /*mr=*/1, /*nr=*/1 * xnn_init_hardware_config()->vlenb / sizeof(uint8_t), /*kr=*/1, /*sr=*/1,
+      /*arch_flags=*/xnn_arch_riscv_vector);
+  }
+
+  BENCHMARK_GEMM(qu8_gemm_minmax_fp32_ukernel_1x1v__rvv)
+
+  static void qu8_gemm_minmax_fp32_ukernel_4x1v__rvv(benchmark::State& state) {
+    GEMMBenchmark(state,
+      xnn_qu8_gemm_minmax_fp32_ukernel_4x1v__rvv,
+      xnn_init_qu8_conv_minmax_fp32_scalar_params,
+      xnn_pack_qu8_gemm_goi_w,
+      /*mr=*/4, /*nr=*/1 * xnn_init_hardware_config()->vlenb / sizeof(uint8_t), /*kr=*/1, /*sr=*/1,
+      /*arch_flags=*/xnn_arch_riscv_vector);
+  }
+
+  BENCHMARK_GEMM(qu8_gemm_minmax_fp32_ukernel_4x1v__rvv)
+
+  static void qu8_gemm_minmax_fp32_ukernel_7x1v__rvv(benchmark::State& state) {
+    GEMMBenchmark(state,
+      xnn_qu8_gemm_minmax_fp32_ukernel_7x1v__rvv,
+      xnn_init_qu8_conv_minmax_fp32_scalar_params,
+      xnn_pack_qu8_gemm_goi_w,
+      /*mr=*/7, /*nr=*/1 * xnn_init_hardware_config()->vlenb / sizeof(uint8_t), /*kr=*/1, /*sr=*/1,
+      /*arch_flags=*/xnn_arch_riscv_vector);
+  }
+
+  BENCHMARK_GEMM(qu8_gemm_minmax_fp32_ukernel_7x1v__rvv)
+#endif  // XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+
+
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   static void qu8_gemm_minmax_fp32_ukernel_1x4c2__wasmsimd_dot16x2_ld64(benchmark::State& state) {
     GEMMBenchmark(state,

@@ -499,7 +499,7 @@ std::vector<GemmTestParams> CreateTests2(
     std::string kbs = std::to_string(k_block);
     std::string kb2s = std::to_string(k_block * 2);
     std::string akbs = std::to_string(adj_k_block);
-    nr = nr * xnn_init_hardware_config()->vlenb / sizeof(int32_t);
+    nr = nr * xnn_init_hardware_config()->vlenb / sizeof(int8_t);
     std::string nrs = std::to_string(nr);
 
     const GemmMicrokernelTester tester = GemmMicrokernelTester()
@@ -3525,36 +3525,16 @@ INSTANTIATE_TEST_SUITE_P(
 
 #if XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
   INSTANTIATE_TEST_SUITE_P(
-      QS8_QC8W_IGEMM_MINMAX_FP32_1X4V__RVV, GemmTest,
+      QS8_QC8W_IGEMM_MINMAX_FP32_4X1V__RVV, GemmTest,
       testing::ValuesIn(CreateTests3(
           /*k_block=*/1,
           /*adj_k_block=*/1,
-          /*mr=*/1, /*nr=*/4, /*kr=*/1, /*sr=*/1,
+          /*mr=*/4, /*nr=*/1, /*kr=*/1, /*sr=*/1,
           /*is_igemm=*/true,
           /*unsigned_inputs=*/false,
           /*planes=*/1,
           [](GemmMicrokernelTester& tester) {
-            tester.Test(xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_1x4v__rvv,
-                        xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params,
-                        xnn_pack_qs8_conv_goki_w,
-                        xnn_qs8_requantize_fp32);
-          },
-          xnn_arch_riscv_vector)),
-      [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
-        return info.param.test_name;
-      });
-
-  INSTANTIATE_TEST_SUITE_P(
-      QS8_QC8W_IGEMM_MINMAX_FP32_4X4V__RVV, GemmTest,
-      testing::ValuesIn(CreateTests3(
-          /*k_block=*/1,
-          /*adj_k_block=*/1,
-          /*mr=*/4, /*nr=*/4, /*kr=*/1, /*sr=*/1,
-          /*is_igemm=*/true,
-          /*unsigned_inputs=*/false,
-          /*planes=*/1,
-          [](GemmMicrokernelTester& tester) {
-            tester.Test(xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_4x4v__rvv,
+            tester.Test(xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_4x1v__rvv,
                         xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params,
                         xnn_pack_qs8_conv_goki_w,
                         xnn_qs8_requantize_fp32);
