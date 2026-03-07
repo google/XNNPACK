@@ -8,6 +8,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <functional>
+#include <random>
 #include <sstream>
 #include <string>
 #include <tuple>
@@ -131,6 +132,8 @@ void TestImpl(const Param& p) {
   xnn_datatype datatype = xnn_datatype_of<T>();
 
   ReplicableRandomDevice rng;
+  std::bernoulli_distribution empty_shape_dist(0.01f);
+  std::uniform_int_distribution<size_t> empty_shape_dim_dist(0, p.rank - 1);
 
   auto reference_op = get_reference_op(p.reduce_operator);
   const bool is_minmax = (p.reduce_operator == xnn_reduce_min ||
@@ -171,6 +174,9 @@ void TestImpl(const Param& p) {
     // Run several times, with different shapes.
     for (int reshape = 0; reshape < 2; ++reshape) {
       std::vector<size_t> input_shape = random_shape(rng, p.rank);
+      if (empty_shape_dist(rng)) {
+        input_shape[empty_shape_dim_dist(rng)] = 0;
+      }
       std::vector<size_t> output_shape = input_shape;
       size_t reduced_elements = 1;
       for (size_t i = 0; i < p.rank; ++i) {
@@ -218,18 +224,26 @@ void TestImpl(const Param& p) {
       for (const auto& i : EnumerateIndices(input.extents())) {
         reference_op(expected(i), dequantize(input(i), input_quantization));
       }
-      const float scale = (p.reduce_operator == xnn_reduce_mean ||
-                           p.reduce_operator == xnn_reduce_mean_squared)
-                              ? 1.0f / reduced_elements
-                              : 1.0f;
+      const bool is_mean = p.reduce_operator == xnn_reduce_mean ||
+                           p.reduce_operator == xnn_reduce_mean_squared;
+      const float scale = is_mean ? 1.0f / reduced_elements : 1.0f;
 
       // Verify the output matches the reference.
       for (const auto& i : EnumerateIndices(output.extents())) {
         const float reference = expected(i) * scale;
         if (xnn_datatype_is_quantized(datatype)) {
-          ASSERT_NEAR(output(i), quantize<T>(reference, output_quantization), 1)
-              << "input_shape=" << to_string(input_shape)
-              << ", reduction_axes=" << to_string(reduction_axes);
+          if (!is_mean || reduced_elements > 0) {
+            ASSERT_NEAR(output(i), quantize<T>(reference, output_quantization),
+                        1)
+                << "input_shape=" << to_string(input_shape)
+                << ", reduction_axes=" << to_string(reduction_axes);
+          } else {
+            // An empty mean is not well defined (it is 0/0), let's not require
+            // a specific value.
+          }
+        } else if (std::isnan(static_cast<float>(output(i))) &&
+                   std::isnan(static_cast<float>(reference))) {
+          // Both are NaN, but the below ASSERT_NEAR would fail.
         } else {
           ASSERT_NEAR(output(i), reference, 1e-3f * std::abs(reference) + 1e-3f)
               << "input_shape=" << to_string(input_shape)
