@@ -1385,7 +1385,7 @@ class Target:
       # the existing broadcast value.
       b = self.as_buffer(op.index, buffers)
       if b is not None and b.broadcast_mode == BroadcastMode.ALWAYS:
-        self.result += f" = {result_type}({b.name}_broadcasted[{j}]);\n"
+        self.result += f" = {b.name}_broadcasted[{j}];\n"
         return
       # hack
       args = [op.index]
