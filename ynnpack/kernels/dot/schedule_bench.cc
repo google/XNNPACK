@@ -13,6 +13,7 @@
 #include <string>
 #include <vector>
 
+#include "ynnpack/base/arch.h"
 #include "ynnpack/base/arithmetic.h"
 #include "ynnpack/base/test/buffer.h"
 #include "ynnpack/base/test/tensor.h"
@@ -67,6 +68,10 @@ kernel_info get_kernel(const std::string& kernel_name) {
 #define YNN_DOT_KERNEL(arch, name, block_m, block_n, block_k, tile_m, tile_n, \
                        tile_k, flags, a_type, b_type, c_type)                 \
   if (#name == kernel_name) {                                                 \
+    if (!is_arch_supported(arch)) {                                           \
+      std::cerr << "Kernel architecture not supported by this CPU\n";         \
+      return kernel_info{};                                                   \
+    }                                                                         \
     return {#name,   name,                                                    \
             block_m, block_n,                                                 \
             block_k, tile_m,                                                  \
