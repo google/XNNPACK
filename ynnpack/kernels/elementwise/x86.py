@@ -142,47 +142,6 @@ def make_x86_integer_patterns(vector_bits, prefix):
   return [
       i.vectorize(vector_bits)
       for i in [
-          Rule(u8_a + u8_b, Op(UInt(8), prefix + "add_epi8", [u8_a, u8_b])),
-          Rule(i8_a + i8_b, Op(Int(8), prefix + "add_epi8", [i8_a, i8_b])),
-          Rule(
-              u16_a + u16_b, Op(UInt(16), prefix + "add_epi16", [u16_a, u16_b])
-          ),
-          Rule(
-              i16_a + i16_b, Op(Int(16), prefix + "add_epi16", [i16_a, i16_b])
-          ),
-          Rule(
-              u32_a + u32_b, Op(UInt(32), prefix + "add_epi32", [u32_a, u32_b])
-          ),
-          Rule(
-              i32_a + i32_b, Op(Int(32), prefix + "add_epi32", [i32_a, i32_b])
-          ),
-          Rule(u8_a - u8_b, Op(UInt(8), prefix + "sub_epi8", [u8_a, u8_b])),
-          Rule(i8_a - i8_b, Op(Int(8), prefix + "sub_epi8", [i8_a, i8_b])),
-          Rule(
-              u16_a - u16_b, Op(UInt(16), prefix + "sub_epi16", [u16_a, u16_b])
-          ),
-          Rule(
-              i16_a - i16_b, Op(Int(16), prefix + "sub_epi16", [i16_a, i16_b])
-          ),
-          Rule(
-              u32_a - u32_b, Op(UInt(32), prefix + "sub_epi32", [u32_a, u32_b])
-          ),
-          Rule(
-              i32_a - i32_b, Op(Int(32), prefix + "sub_epi32", [i32_a, i32_b])
-          ),
-          Rule(
-              i32_a * i32_b, Op(Int(32), prefix + "mullo_epi32", [i32_a, i32_b])
-          ),
-          Rule(min(u8_a, u8_b), Op(UInt(8), prefix + "min_epu8", [u8_a, u8_b])),
-          Rule(max(u8_a, u8_b), Op(UInt(8), prefix + "max_epu8", [u8_a, u8_b])),
-          Rule(
-              min(i16_a, i16_b),
-              Op(Int(16), prefix + "min_epi16", [i16_a, i16_b]),
-          ),
-          Rule(
-              max(i16_a, i16_b),
-              Op(Int(16), prefix + "max_epi16", [i16_a, i16_b]),
-          ),
           Rule(
               u32_a & u32_b,
               Op(
@@ -497,9 +456,6 @@ def make_x86_float32_patterns(vector_bits, prefix):
   return [
       i.vectorize(vector_bits)
       for i in [
-          Rule(f32_a + f32_b, Op(Float(32), prefix + "add_ps", [f32_a, f32_b])),
-          Rule(f32_a - f32_b, Op(Float(32), prefix + "sub_ps", [f32_a, f32_b])),
-          Rule(f32_a * f32_b, Op(Float(32), prefix + "mul_ps", [f32_a, f32_b])),
           Rule(f32_a / f32_b, Op(Float(32), prefix + "div_ps", [f32_a, f32_b])),
           Rule(
               ceil(f32_a),
@@ -1015,10 +971,18 @@ YNN_INTRINSIC __m512i saturating_cast_int16_to_uint8(__m512i a, __m512i b) {
       simd_header = "x86_avx512.h"
       self.tail_strategy = TailStrategy.VECTOR
       self.vector_bits = 512
+    elif "AVX2" in all_features:
+      simd_header = "x86_avx2.h"
+      self.tail_strategy = TailStrategy.VECTOR
+      self.vector_bits = 256
     elif "AVX" in all_features:
       simd_header = "x86_avx.h"
       self.tail_strategy = TailStrategy.VECTOR
       self.vector_bits = 256
+    elif "SSE41" in all_features:
+      simd_header = "x86_sse41.h"
+      self.tail_strategy = TailStrategy.VECTOR
+      self.vector_bits = 128
     elif "SSE2" in all_features:
       simd_header = "x86_sse2.h"
       self.tail_strategy = TailStrategy.VECTOR

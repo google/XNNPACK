@@ -77,20 +77,6 @@ def make_neon_integer_patterns(vector_bits):
   return [
       i.vectorize(vector_bits)
       for i in [
-          Rule(u8_a + u8_b, Op(UInt(8), "vaddq_u8", [u8_a, u8_b])),
-          Rule(i8_a + i8_b, Op(Int(8), "vaddq_s8", [i8_a, i8_b])),
-          Rule(u16_a + u16_b, Op(UInt(16), "vaddq_u16", [u16_a, u16_b])),
-          Rule(i16_a + i16_b, Op(Int(16), "vaddq_s16", [i16_a, i16_b])),
-          Rule(u32_a + u32_b, Op(UInt(32), "vaddq_u32", [u32_a, u32_b])),
-          Rule(i32_a + i32_b, Op(Int(32), "vaddq_s32", [i32_a, i32_b])),
-          Rule(u8_a - u8_b, Op(UInt(8), "vsubq_u8", [u8_a, u8_b])),
-          Rule(i8_a - i8_b, Op(Int(8), "vsubq_s8", [i8_a, i8_b])),
-          Rule(u16_a - u16_b, Op(UInt(16), "vsubq_u16", [u16_a, u16_b])),
-          Rule(i16_a - i16_b, Op(Int(16), "vsubq_s16", [i16_a, i16_b])),
-          Rule(u32_a - u32_b, Op(UInt(32), "vsubq_u32", [u32_a, u32_b])),
-          Rule(i32_a - i32_b, Op(Int(32), "vsubq_s32", [i32_a, i32_b])),
-          Rule(i16_a * i16_b, Op(Int(16), "vmulq_s16", [i16_a, i16_b])),
-          Rule(i32_a * i32_b, Op(Int(32), "vmulq_s32", [i32_a, i32_b])),
           Rule(u32_a & u32_b, Op(UInt(32), "vandq_u32", [u32_a, u32_b])),
           Rule(i32_a & i32_b, Op(Int(32), "vandq_s32", [i32_a, i32_b])),
           Rule(u32_a | u32_b, Op(UInt(32), "vorrq_u32", [u32_a, u32_b])),
@@ -147,9 +133,6 @@ def make_neon_float32_patterns(vector_bits):
   return [
       i.vectorize(vector_bits)
       for i in [
-          Rule(f32_a + f32_b, Op(Float(32), "vaddq_f32", [f32_a, f32_b])),
-          Rule(f32_a - f32_b, Op(Float(32), "vsubq_f32", [f32_a, f32_b])),
-          Rule(f32_a * f32_b, Op(Float(32), "vmulq_f32", [f32_a, f32_b])),
           Rule(abs(f32_a), Op(Float(32), "vabsq_f32", [f32_a])),
           Rule(round(f32_a), Op(Float(32), "round_f32", [f32_a])),
           Rule(ceil(f32_a), Op(Float(32), "ceil_f32", [f32_a])),

@@ -950,6 +950,11 @@ class Target:
     self.result = ""
     self.header = header
     self.simd_ops = {"min", "max", "load", "store"}
+    self.infix_ops = {
+        "add": "+",
+        "sub": "-",
+        "mul": "*",
+    }
 
   def indent(self):
     return "  " * self.indent_level
@@ -981,12 +986,12 @@ class Target:
         )
 
   def needs_simd_wrapper(self, op):
-    if op.name in self.simd_ops:
+    if op.name in self.simd_ops or op.name in self.infix_ops:
       return False
     return True
 
   def simd_suffix(self, op):
-    if op.name in self.simd_ops:
+    if op.name in self.simd_ops or op.name in self.infix_ops:
       return ""
     return ".v"
 
@@ -1446,10 +1451,14 @@ class Target:
       mem_op = "simd::store"
       if is_rem_width:
         str_args.append(lanes)
+    elif op.name in self.infix_ops:
+      pass
     else:
       mem_op = self.legalize_op(op)
 
-    if self.needs_simd_wrapper(op):
+    if op.name in self.infix_ops:
+      self.result += f"{str_args[0]} {self.infix_ops[op.name]} {str_args[1]};\n"
+    elif self.needs_simd_wrapper(op):
       self.result += f"{result_type}({mem_op}({', '.join(str_args)}));\n"
     else:
       self.result += f"{mem_op}({', '.join(str_args)});\n"
