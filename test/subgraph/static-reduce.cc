@@ -133,7 +133,6 @@ void TestImpl(const Param& p) {
 
   ReplicableRandomDevice rng;
   std::bernoulli_distribution empty_shape_dist(0.01f);
-  std::uniform_int_distribution<size_t> empty_shape_dim_dist(0, p.rank - 1);
 
   auto reference_op = get_reference_op(p.reduce_operator);
   const bool is_minmax = (p.reduce_operator == xnn_reduce_min ||
@@ -174,13 +173,13 @@ void TestImpl(const Param& p) {
     // Run several times, with different shapes.
     for (int reshape = 0; reshape < 2; ++reshape) {
       std::vector<size_t> input_shape = random_shape(rng, p.rank);
-      if (empty_shape_dist(rng)) {
-        input_shape[empty_shape_dim_dist(rng)] = 0;
-      }
       std::vector<size_t> output_shape = input_shape;
       size_t reduced_elements = 1;
       for (size_t i = 0; i < p.rank; ++i) {
         if (mask & (1 << i)) {
+          if (empty_shape_dist(rng)) {
+            input_shape[i] = 0;
+          }
           reduced_elements *= input_shape[i];
           output_shape[i] = 1;
         }
