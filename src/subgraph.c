@@ -231,31 +231,10 @@ void xnn_runtime_value_copy(struct xnn_runtime_value* dst_value,
 }
 
 struct xnn_node* xnn_subgraph_new_node(xnn_subgraph_t subgraph) {
-  struct xnn_node* nodes = subgraph->nodes;
-  const size_t size = subgraph->num_nodes;
-  const size_t capacity = subgraph->num_reserved_nodes;
-
-  if (capacity < size + 1) {
-    const size_t new_capacity =
-        max(min(capacity * 2, capacity + 512), capacity + 64);
-    assert(new_capacity >= size + 1);
-    nodes =
-        xnn_reallocate_memory(nodes, new_capacity * sizeof(struct xnn_node));
-    if (nodes == NULL) {
-      xnn_log_error("failed to allocate %zu bytes for subgraph nodes",
-                    capacity * sizeof(struct xnn_node));
-      return nodes;
-    }
-
-    memset(nodes + size, 0, (new_capacity - size) * sizeof(struct xnn_node));
-    subgraph->num_reserved_nodes = new_capacity;
-    subgraph->nodes = nodes;
+  if (xnn_subgraph_add_nodes(subgraph, 1) != xnn_status_success) {
+    return NULL;
   }
-  subgraph->num_nodes = size + 1;
-  struct xnn_node* new_node = nodes + size;
-  xnn_node_clear(new_node);
-  new_node->id = size;
-  return new_node;
+  return subgraph->nodes + subgraph->num_nodes - 1;
 }
 
 enum xnn_status xnn_subgraph_add_nodes(xnn_subgraph_t subgraph,
