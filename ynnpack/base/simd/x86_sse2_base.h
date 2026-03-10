@@ -378,6 +378,7 @@ YNN_ALWAYS_INLINE f64x2 copysign(f64x2 mag, f64x2 sgn) {
   return f64x2{
       _mm_or_pd(_mm_and_pd(sign_mask, sgn.v), _mm_andnot_pd(sign_mask, mag.v))};
 }
+YNN_ALWAYS_INLINE f32x4 sqrt(f32x4 a) { return f32x4{_mm_sqrt_ps(a.v)}; }
 
 YNN_ALWAYS_INLINE float horizontal_max(f32x4 a) {
   const __m128 max_lanes = _mm_max_ps(a.v, _mm_movehl_ps(a.v, a.v));

@@ -312,6 +312,13 @@ YNN_ALWAYS_INLINE f32x8 min(f32x8 a, f32x8 b) {
 YNN_ALWAYS_INLINE f32x8 max(f32x8 a, f32x8 b) {
   return f32x8{_mm256_max_ps(a.v, b.v)};
 }
+YNN_ALWAYS_INLINE f32x8 floor(f32x8 a) { return f32x8{_mm256_floor_ps(a.v)}; }
+YNN_ALWAYS_INLINE f32x8 ceil(f32x8 a) { return f32x8{_mm256_ceil_ps(a.v)}; }
+YNN_ALWAYS_INLINE f32x8 round(f32x8 a) {
+  return f32x8{
+      _mm256_round_ps(a.v, _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC)};
+}
+YNN_ALWAYS_INLINE f32x8 sqrt(f32x8 a) { return f32x8{_mm256_sqrt_ps(a.v)}; }
 
 }  // namespace simd
 

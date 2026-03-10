@@ -182,6 +182,22 @@ YNN_ALWAYS_INLINE vec<T, N> abs(vec<T, N> a) {
   return {abs(a.lo()), abs(a.hi())};
 }
 template <typename T, size_t N>
+YNN_ALWAYS_INLINE vec<T, N> floor(vec<T, N> a) {
+  return {floor(a.lo()), floor(a.hi())};
+}
+template <typename T, size_t N>
+YNN_ALWAYS_INLINE vec<T, N> ceil(vec<T, N> a) {
+  return {ceil(a.lo()), ceil(a.hi())};
+}
+template <typename T, size_t N>
+YNN_ALWAYS_INLINE vec<T, N> round(vec<T, N> a) {
+  return {round(a.lo()), round(a.hi())};
+}
+template <typename T, size_t N>
+YNN_ALWAYS_INLINE vec<T, N> sqrt(vec<T, N> a) {
+  return {sqrt(a.lo()), sqrt(a.hi())};
+}
+template <typename T, size_t N>
 YNN_ALWAYS_INLINE vec<T, N> fma(vec<T, N> a, vec<T, N> b, vec<T, N> acc) {
   return {fma(a.lo(), b.lo(), acc.lo()), fma(a.hi(), b.hi(), acc.hi())};
 }

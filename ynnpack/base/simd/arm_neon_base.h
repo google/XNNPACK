@@ -413,6 +413,109 @@ YNN_ALWAYS_INLINE s8x16 max(s8x16 a, s8x16 b) {
   return s8x16{vmaxq_s8(a.v, b.v)};
 }
 
+namespace internal {
+YNN_ALWAYS_INLINE float32x4_t and_f32(float32x4_t a, float32x4_t b) {
+  return vreinterpretq_f32_u32(
+      vandq_u32(vreinterpretq_u32_f32(a), vreinterpretq_u32_f32(b)));
+}
+
+YNN_ALWAYS_INLINE float32x4_t or_f32(float32x4_t a, float32x4_t b) {
+  return vreinterpretq_f32_u32(
+      vorrq_u32(vreinterpretq_u32_f32(a), vreinterpretq_u32_f32(b)));
+}
+
+YNN_ALWAYS_INLINE float32x4_t xor_f32(float32x4_t a, float32x4_t b) {
+  return vreinterpretq_f32_u32(
+      veorq_u32(vreinterpretq_u32_f32(a), vreinterpretq_u32_f32(b)));
+}
+
+YNN_ALWAYS_INLINE float32x4_t not_f32(float32x4_t a) {
+  return vreinterpretq_f32_u32(vmvnq_u32(vreinterpretq_u32_f32(a)));
+}
+}  // namespace internal
+
+YNN_ALWAYS_INLINE f32x4 floor(f32x4 a) {
+#if defined(__ARM_ARCH) && __ARM_ARCH < 8
+  float32x4_t max_non_int_val = vdupq_n_f32(8388608.0f);
+  uint32x4_t use_rounding = vcaltq_f32(a.v, max_non_int_val);
+  float32x4_t trunc = vcvtq_f32_s32(vcvtq_s32_f32(a.v));
+  uint32x4_t floor_mask = vcgtq_f32(trunc, a.v);
+  float32x4_t one = vdupq_n_f32(1.0f);
+  float32x4_t floored = vbslq_f32(floor_mask, vsubq_f32(trunc, one), trunc);
+  return f32x4{vbslq_f32(use_rounding, floored, a.v)};
+#else
+  return f32x4{vrndmq_f32(a.v)};
+#endif
+}
+
+YNN_ALWAYS_INLINE f32x4 ceil(f32x4 a) {
+#if defined(__ARM_ARCH) && __ARM_ARCH < 8
+  float32x4_t max_non_int_val = vdupq_n_f32(8388608.0f);
+  uint32x4_t use_rounding = vcaltq_f32(a.v, max_non_int_val);
+  float32x4_t trunc = vcvtq_f32_s32(vcvtq_s32_f32(a.v));
+  uint32x4_t ceil_mask = vcltq_f32(trunc, a.v);
+  float32x4_t one = vdupq_n_f32(1.0f);
+  float32x4_t ceiled = vbslq_f32(ceil_mask, vaddq_f32(trunc, one), trunc);
+  return f32x4{vbslq_f32(use_rounding, ceiled, a.v)};
+#else
+  return f32x4{vrndpq_f32(a.v)};
+#endif
+}
+
+YNN_ALWAYS_INLINE f32x4 round(f32x4 a) {
+#if defined(__ARM_ARCH) && __ARM_ARCH < 8
+  float32x4_t max_non_int_val = vdupq_n_f32(8388608.0f);
+  float32x4_t filter = vreinterpretq_f32_u32(vcaltq_f32(a.v, max_non_int_val));
+  float32x4_t half = vdupq_n_f32(0.5f);
+  float32x4_t sign_mask = vdupq_n_f32(-0.0f);
+  float32x4_t signed_half =
+      internal::or_f32(internal::and_f32(a.v, sign_mask), half);
+  float32x4_t result_away =
+      vcvtq_f32_s32(vcvtq_s32_f32(vaddq_f32(a.v, signed_half)));
+  // vresult_away is round ties away from zero.
+  // We want round ties to even.
+  // If vresult_away is odd, and it was a tie, we need to correct by 1 towards
+  // 0.
+  uint32x4_t tie = vceqq_f32(vabsq_f32(vsubq_f32(result_away, a.v)), half);
+  int32x4_t i_result_away = vcvtq_s32_f32(result_away);
+  uint32x4_t odd =
+      vcgtq_s32(vandq_s32(i_result_away, vdupq_n_s32(1)), vdupq_n_s32(0));
+  uint32x4_t correct_mask = vandq_u32(tie, odd);
+  float32x4_t correction = internal::and_f32(
+      vreinterpretq_f32_u32(correct_mask),
+      internal::or_f32(internal::and_f32(a.v, sign_mask), vdupq_n_f32(1.0f)));
+  float32x4_t result = vsubq_f32(result_away, correction);
+
+  return f32x4{
+      internal::or_f32(internal::and_f32(filter, result),
+                       internal::and_f32(internal::not_f32(filter), a.v))};
+#else
+  return f32x4{vrndnq_f32(a.v)};
+#endif
+}
+
+YNN_ALWAYS_INLINE f32x4 sqrt(f32x4 a) {
+#if not(defined(__aarch64__) || defined(_M_ARM64))
+  // Get the initial low-precision estimate of 1/sqrt(a).
+  float32x4_t rsqrt_estimate = vrsqrteq_f32(a.v);
+
+  // Perform one Newton-Raphson refinement
+  rsqrt_estimate =
+      vmulq_f32(vrsqrtsq_f32(vmulq_f32(a.v, rsqrt_estimate), rsqrt_estimate),
+                rsqrt_estimate);
+  // Perform second Newton-Raphson refinement
+  rsqrt_estimate =
+      vmulq_f32(vrsqrtsq_f32(vmulq_f32(a.v, rsqrt_estimate), rsqrt_estimate),
+                rsqrt_estimate);
+
+  float32x4_t sqrt_result = vmulq_f32(a.v, rsqrt_estimate);
+
+  return f32x4{sqrt_result};
+#else
+  return f32x4{vsqrtq_f32(a.v)};
+#endif
+}
+
 #ifdef YNN_ARCH_ARM32
 YNN_ALWAYS_INLINE float vmaxvq_f32(float32x4_t a) {
   float32x2_t max_halves = vmax_f32(vget_low_f32(a), vget_high_f32(a));

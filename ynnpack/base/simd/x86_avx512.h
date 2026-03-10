@@ -633,6 +633,15 @@ YNN_ALWAYS_INLINE f32x16 max(f32x16 a, f32x16 b) {
 YNN_ALWAYS_INLINE s32x16 max(s32x16 a, s32x16 b) {
   return s32x16{_mm512_max_epi32(a.v, b.v)};
 }
+YNN_ALWAYS_INLINE f32x16 floor(f32x16 a) {
+  return f32x16{_mm512_floor_ps(a.v)};
+}
+YNN_ALWAYS_INLINE f32x16 ceil(f32x16 a) { return f32x16{_mm512_ceil_ps(a.v)}; }
+YNN_ALWAYS_INLINE f32x16 round(f32x16 a) {
+  return f32x16{
+      _mm512_roundscale_ps(a.v, _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC)};
+}
+YNN_ALWAYS_INLINE f32x16 sqrt(f32x16 a) { return f32x16{_mm512_sqrt_ps(a.v)}; }
 
 YNN_ALWAYS_INLINE s16x32 min(s16x32 a, s16x32 b) {
   return s16x32{_mm512_min_epi16(a.v, b.v)};

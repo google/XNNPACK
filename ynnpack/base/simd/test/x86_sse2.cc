@@ -75,6 +75,8 @@ TEST_MAX(x86_sse2, u8, 16);
 TEST_MAX(x86_sse2, s16, 8);
 TEST_MAX(x86_sse2, f32, 4);
 
+TEST_SQRT(x86_sse2, f32, 4);
+
 TEST_HORIZONTAL_MIN(x86_sse2, u8, 16);
 TEST_HORIZONTAL_MIN(x86_sse2, s16, 8);
 TEST_HORIZONTAL_MIN(x86_sse2, f32, 4);
