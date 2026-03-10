@@ -152,29 +152,40 @@ error:
 }
 
 struct xnn_value* xnn_subgraph_new_internal_value(xnn_subgraph_t subgraph) {
+  if (xnn_subgraph_add_internal_values(subgraph, 1) != xnn_status_success) {
+    return NULL;
+  }
+  return subgraph->values + subgraph->num_values - 1;
+}
+
+enum xnn_status xnn_subgraph_add_internal_values(xnn_subgraph_t subgraph,
+                                                 size_t num_values) {
   struct xnn_value* values = subgraph->values;
   const size_t size = subgraph->num_values;
   const size_t capacity = subgraph->num_reserved_values;
-  if (capacity < size + 1) {
+  if (capacity < size + num_values) {
     const size_t new_capacity =
-        max(min(capacity * 2, capacity + 512), capacity + 64);
-    assert(new_capacity >= size + 1);
+        max(min(capacity * 2, capacity + 512), capacity + max(num_values, 64));
+    assert(new_capacity >= size + num_values);
     values =
         xnn_reallocate_memory(values, new_capacity * sizeof(struct xnn_value));
     if (values == NULL) {
       xnn_log_error("failed to allocate %zu bytes for subgraph values",
-                    capacity * sizeof(struct xnn_value));
-      return values;
+                    new_capacity * sizeof(struct xnn_value));
+      return xnn_status_out_of_memory;
     }
 
-    memset(values + size, 0, (new_capacity - size) * sizeof(struct xnn_value));
     subgraph->num_reserved_values = new_capacity;
     subgraph->values = values;
   }
-  subgraph->num_values = size + 1;
-  struct xnn_value* new_value = values + size;
-  new_value->id = size;
-  return new_value;
+  subgraph->num_values = size + num_values;
+  struct xnn_value* new_values = values + size;
+  for (size_t i = 0; i < num_values; i++) {
+    xnn_value_clear(&new_values[i]);
+    new_values[i].id = size + i;
+  }
+
+  return xnn_status_success;
 }
 
 void xnn_node_clear(struct xnn_node* node) {
@@ -251,7 +262,7 @@ enum xnn_status xnn_subgraph_add_nodes(xnn_subgraph_t subgraph,
         xnn_reallocate_memory(nodes, new_capacity * sizeof(struct xnn_node));
     if (nodes == NULL) {
       xnn_log_error("failed to allocate %zu bytes for subgraph nodes",
-                    capacity * sizeof(struct xnn_node));
+                    new_capacity * sizeof(struct xnn_node));
       return xnn_status_out_of_memory;
     }
 
