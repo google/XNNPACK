@@ -7,6 +7,7 @@
 
 #include "ynnpack/base/arch.h"
 #include "ynnpack/base/simd/bench/generic.h"
+#include "ynnpack/base/simd/x86_sse2_fma.h"
 
 namespace ynn {
 namespace simd {
@@ -14,6 +15,8 @@ namespace simd {
 BENCH_PARTIAL_LOAD_STORE(sse2, s8, 16);
 BENCH_PARTIAL_LOAD_STORE(sse2, s16, 8);
 BENCH_PARTIAL_LOAD_STORE(sse2, s32, 4);
+
+BENCH_FMA(sse2, f32, 4);
 
 }  // namespace simd
 }  // namespace ynn

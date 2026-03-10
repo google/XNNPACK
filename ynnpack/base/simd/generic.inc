@@ -174,6 +174,10 @@ YNN_ALWAYS_INLINE vec<T, N> max(vec<T, N> a, vec<T, N> b) {
   return {max(a.lo(), b.lo()), max(a.hi(), b.hi())};
 }
 template <typename T, size_t N>
+YNN_ALWAYS_INLINE vec<T, N> copysign(vec<T, N> mag, vec<T, N> sgn) {
+  return {copysign(mag.lo(), sgn.lo()), copysign(mag.hi(), sgn.hi())};
+};
+template <typename T, size_t N>
 YNN_ALWAYS_INLINE vec<T, N> abs(vec<T, N> a) {
   return {abs(a.lo()), abs(a.hi())};
 }

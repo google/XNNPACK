@@ -46,6 +46,7 @@ using f16 = half;
 using bf16 = bfloat16;
 using f32 = float;
 using s32 = int32_t;
+using f64 = double;
 
 template <typename scalar, size_t N>
 void test_broadcast() {

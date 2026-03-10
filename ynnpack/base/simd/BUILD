@@ -56,6 +56,7 @@ cc_library(
         "x86_f16c.h",
         "x86_fma3.h",
         "x86_sse2.h",
+        "x86_sse2_fma.h",
         "x86_sse41.h",
     ],
     deps = ["//ynnpack/base"],
