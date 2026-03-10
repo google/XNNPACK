@@ -6016,7 +6016,7 @@ const struct xnn_gemm_config* xnn_init_qd8_f16_qb4w_gemm_config() {
     return NULL;
   }
   XNN_INIT_ONCE(qd8_f16_qb4w_gemm);
-  return qd8_f16_qc4w_gemm_config.arch ? &qd8_f16_qb4w_gemm_config : NULL;
+  return qd8_f16_qb4w_gemm_config.arch ? &qd8_f16_qb4w_gemm_config : NULL;
 }
 
 const struct xnn_gemm_config* xnn_init_qd8_f32_qc4w_gemm_config() {
