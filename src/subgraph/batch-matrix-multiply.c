@@ -202,15 +202,6 @@ static enum xnn_status create_batch_matrix_multiply_operator(
                 input_a->quantization.scale * input_b->quantization.scale /
                 output_value->quantization.scale;
 
-          if (input_b->quantization.zero_point != 0) {
-            xnn_log_error(
-                "failed to create %s operator with input_b ID #%" PRIu32
-                ": unsupported non-zero zero-point %d",
-                xnn_node_type_to_string(xnn_node_type_batch_matrix_multiply),
-                input_b_id, input_b->quantization.zero_point);
-            return xnn_status_unsupported_parameter;
-          }
-
           if (xnn_value_is_static(input_b->allocation_type)) {
             status = xnn_create_batch_matrix_multiply_nc_qs8_const_weights(
                 batch_size_b, k, n, input_b->data,
