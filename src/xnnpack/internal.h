@@ -22,10 +22,10 @@
 // by the runtime.
 #define XNN_VALUE_FLAG_NEEDS_CLEANUP 0x00000008
 
+#define XNN_VAR_ARG_HEAD(FIRST, ...) FIRST
 // Macro to check the `enum xnn_status` result of an expression and return it
 // if it is not `xnn_status_success`, followed by an optional string literal and
 // parameters for `xnn_log_error`.
-#define XNN_VAR_ARG_HEAD(FIRST, ...) FIRST
 #define XNN_RETURN_IF_ERROR(expr, ...)                             \
   do {                                                             \
     const enum xnn_status status_ = (expr);                        \
