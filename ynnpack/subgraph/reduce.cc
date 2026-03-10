@@ -141,13 +141,19 @@ auto make_unary_reduce_impl(ynn_reduce_operator op,
     size_t a_stride_k2 = 0;
     for (int i = 0; i < a.rank;) {
       if (k_dims[i + sliced]) {
+        slinky::index_t extent_i = a.dim(i).extent();
+        if (extent_i == 0) {
+          // The reduction is an empty reduction, so we are done after
+          // initializing the output.
+          return 0;
+        }
         if (k2 == 1) {
-          k2 = a.dim(i).extent();
+          k2 = extent_i;
           a_stride_k2 = a.dim(i).stride();
           slice(i);
           continue;
         } else if (k3 == 1) {
-          k3 = a.dim(i).extent();
+          k3 = extent_i;
           a_stride_k3 = a.dim(i).stride();
           slice(i);
           continue;
@@ -157,6 +163,10 @@ auto make_unary_reduce_impl(ynn_reduce_operator op,
         // for the kernel, give it this one.
         if (n == 1 && c.dim(i).stride() == c.elem_size) {
           n = c.dim(i).extent();
+          if (n == 0) {
+            // The output is empty.
+            return 0;
+          }
           a_stride_n = a.dim(i).stride();
           slice(i);
           continue;
