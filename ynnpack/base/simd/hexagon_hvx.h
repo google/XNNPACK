@@ -406,60 +406,39 @@ YNN_ALWAYS_INLINE void store(int8_t* ptr, s8x128 b, size_t n) {
   internal::partial_store(ptr, b.v, n);
 }
 
-YNN_ALWAYS_INLINE s32x32& operator+=(s32x32& a, s32x32 b) {
-  a.v = Q6_Vw_vadd_VwVw(a.v, b.v);
-  return a;
+YNN_ALWAYS_INLINE s32x32 operator+(s32x32 a, s32x32 b) {
+  return s32x32{Q6_Vw_vadd_VwVw(a.v, b.v)};
 }
-YNN_ALWAYS_INLINE s16x64& operator+=(s16x64& a, s16x64 b) {
-  a.v = Q6_Vh_vadd_VhVh(a.v, b.v);
-  return a;
+YNN_ALWAYS_INLINE s16x64 operator+(s16x64 a, s16x64 b) {
+  return s16x64{Q6_Vh_vadd_VhVh(a.v, b.v)};
 }
-YNN_ALWAYS_INLINE s8x128& operator+=(s8x128& a, s8x128 b) {
-  a.v = Q6_Vb_vadd_VbVb(a.v, b.v);
-  return a;
+YNN_ALWAYS_INLINE s8x128 operator+(s8x128 a, s8x128 b) {
+  return s8x128{Q6_Vb_vadd_VbVb(a.v, b.v)};
 }
-YNN_ALWAYS_INLINE u8x128& operator+=(u8x128& a, u8x128 b) {
-  a.v = Q6_Vb_vadd_VbVb(a.v, b.v);
-  return a;
+YNN_ALWAYS_INLINE u8x128 operator+(u8x128 a, u8x128 b) {
+  return u8x128{Q6_Vb_vadd_VbVb(a.v, b.v)};
 }
 
-YNN_ALWAYS_INLINE s32x32& operator-=(s32x32& a, s32x32 b) {
-  a.v = Q6_Vw_vsub_VwVw(a.v, b.v);
-  return a;
+YNN_ALWAYS_INLINE s32x32 operator-(s32x32 a, s32x32 b) {
+  return s32x32{Q6_Vw_vsub_VwVw(a.v, b.v)};
 }
-YNN_ALWAYS_INLINE s16x64& operator-=(s16x64& a, s16x64 b) {
-  a.v = Q6_Vh_vsub_VhVh(a.v, b.v);
-  return a;
+YNN_ALWAYS_INLINE s16x64 operator-(s16x64 a, s16x64 b) {
+  return s16x64{Q6_Vh_vsub_VhVh(a.v, b.v)};
 }
-YNN_ALWAYS_INLINE s8x128& operator-=(s8x128& a, s8x128 b) {
-  a.v = Q6_Vb_vsub_VbVb(a.v, b.v);
-  return a;
+YNN_ALWAYS_INLINE s8x128 operator-(s8x128 a, s8x128 b) {
+  return s8x128{Q6_Vb_vsub_VbVb(a.v, b.v)};
 }
-YNN_ALWAYS_INLINE u8x128& operator-=(u8x128& a, u8x128 b) {
-  a.v = Q6_Vb_vsub_VbVb(a.v, b.v);
-  return a;
+YNN_ALWAYS_INLINE u8x128 operator-(u8x128 a, u8x128 b) {
+  return u8x128{Q6_Vb_vsub_VbVb(a.v, b.v)};
 }
 
-YNN_ALWAYS_INLINE s32x32& operator*=(s32x32& a, s32x32 b) {
+YNN_ALWAYS_INLINE s32x32 operator*(s32x32 a, s32x32 b) {
   // Hexagon doesn't have a 32-bit integer multiply, but it does have two
   // 32-bit x 16-bit multiply instructions that can be used to implement 32-bit
   // multiplication.
   HVX_Vector hi = Q6_Vw_vmpyieo_VhVh(a.v, b.v);
-  a.v = Q6_Vw_vmpyieacc_VwVwVuh(hi, a.v, b.v);
-  return a;
+  return s32x32{Q6_Vw_vmpyieacc_VwVwVuh(hi, a.v, b.v)};
 }
-
-YNN_ALWAYS_INLINE s32x32 operator+(s32x32 a, s32x32 b) { return a += b; }
-YNN_ALWAYS_INLINE s16x64 operator+(s16x64 a, s16x64 b) { return a += b; }
-YNN_ALWAYS_INLINE s8x128 operator+(s8x128 a, s8x128 b) { return a += b; }
-YNN_ALWAYS_INLINE u8x128 operator+(u8x128 a, u8x128 b) { return a += b; }
-
-YNN_ALWAYS_INLINE s32x32 operator-(s32x32 a, s32x32 b) { return a -= b; }
-YNN_ALWAYS_INLINE s16x64 operator-(s16x64 a, s16x64 b) { return a -= b; }
-YNN_ALWAYS_INLINE s8x128 operator-(s8x128 a, s8x128 b) { return a -= b; }
-YNN_ALWAYS_INLINE u8x128 operator-(u8x128 a, u8x128 b) { return a -= b; }
-
-YNN_ALWAYS_INLINE s32x32 operator*(s32x32 a, s32x32 b) { return a *= b; }
 
 YNN_ALWAYS_INLINE s16x64 operator&(s16x64 a, s16x64 b) {
   return s16x64{Q6_V_vand_VV(a.v, b.v)};

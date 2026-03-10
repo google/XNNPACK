@@ -333,66 +333,44 @@ YNN_ALWAYS_INLINE void store(uint8_t* ptr, u8x8 b, decltype(u8x8::N) = {}) {
   vst1_u8(ptr, b.v);
 }
 
-YNN_ALWAYS_INLINE f32x4& operator+=(f32x4& a, f32x4 b) {
-  a.v = vaddq_f32(a.v, b.v);
-  return a;
+YNN_ALWAYS_INLINE f32x4 operator+(f32x4 a, f32x4 b) {
+  return f32x4{vaddq_f32(a.v, b.v)};
 }
-YNN_ALWAYS_INLINE s32x4& operator+=(s32x4& a, s32x4 b) {
-  a.v = vaddq_s32(a.v, b.v);
-  return a;
+YNN_ALWAYS_INLINE s32x4 operator+(s32x4 a, s32x4 b) {
+  return s32x4{vaddq_s32(a.v, b.v)};
 }
-YNN_ALWAYS_INLINE s8x16& operator+=(s8x16& a, s8x16 b) {
-  a.v = vaddq_s8(a.v, b.v);
-  return a;
+YNN_ALWAYS_INLINE u8x16 operator+(u8x16 a, u8x16 b) {
+  return u8x16{vaddq_u8(a.v, b.v)};
 }
-YNN_ALWAYS_INLINE u8x16& operator+=(u8x16& a, u8x16 b) {
-  a.v = vaddq_u8(a.v, b.v);
-  return a;
+YNN_ALWAYS_INLINE s8x16 operator+(s8x16 a, s8x16 b) {
+  return s8x16{vaddq_s8(a.v, b.v)};
 }
 
-YNN_ALWAYS_INLINE f32x4& operator-=(f32x4& a, f32x4 b) {
-  a.v = vsubq_f32(a.v, b.v);
-  return a;
+YNN_ALWAYS_INLINE f32x4 operator-(f32x4 a, f32x4 b) {
+  return f32x4{vsubq_f32(a.v, b.v)};
 }
-YNN_ALWAYS_INLINE s32x4& operator-=(s32x4& a, s32x4 b) {
-  a.v = vsubq_s32(a.v, b.v);
-  return a;
+YNN_ALWAYS_INLINE s32x4 operator-(s32x4 a, s32x4 b) {
+  return s32x4{vsubq_s32(a.v, b.v)};
 }
-YNN_ALWAYS_INLINE s8x16& operator-=(s8x16& a, s8x16 b) {
-  a.v = vsubq_s8(a.v, b.v);
-  return a;
+YNN_ALWAYS_INLINE u8x16 operator-(u8x16 a, u8x16 b) {
+  return u8x16{vsubq_u8(a.v, b.v)};
 }
-YNN_ALWAYS_INLINE u8x16& operator-=(u8x16& a, u8x16 b) {
-  a.v = vsubq_u8(a.v, b.v);
-  return a;
+YNN_ALWAYS_INLINE s8x16 operator-(s8x16 a, s8x16 b) {
+  return s8x16{vsubq_s8(a.v, b.v)};
 }
 
-YNN_ALWAYS_INLINE f32x4& operator*=(f32x4& a, f32x4 b) {
-  a.v = vmulq_f32(a.v, b.v);
-  return a;
+YNN_ALWAYS_INLINE f32x4 operator*(f32x4 a, f32x4 b) {
+  return f32x4{vmulq_f32(a.v, b.v)};
 }
-YNN_ALWAYS_INLINE s32x4& operator*=(s32x4& a, s32x4 b) {
-  a.v = vmulq_s32(a.v, b.v);
-  return a;
+YNN_ALWAYS_INLINE s32x4 operator*(s32x4 a, s32x4 b) {
+  return s32x4{vmulq_s32(a.v, b.v)};
 }
-YNN_ALWAYS_INLINE s8x16& operator*=(s8x16& a, s8x16 b) {
-  a.v = vmulq_s8(a.v, b.v);
-  return a;
+YNN_ALWAYS_INLINE u8x16 operator*(u8x16 a, u8x16 b) {
+  return u8x16{vmulq_u8(a.v, b.v)};
 }
-YNN_ALWAYS_INLINE u8x16& operator*=(u8x16& a, u8x16 b) {
-  a.v = vmulq_u8(a.v, b.v);
-  return a;
+YNN_ALWAYS_INLINE s8x16 operator*(s8x16 a, s8x16 b) {
+  return s8x16{vmulq_s8(a.v, b.v)};
 }
-
-YNN_ALWAYS_INLINE f32x4 operator+(f32x4 a, f32x4 b) { return a += b; }
-YNN_ALWAYS_INLINE s32x4 operator+(s32x4 a, s32x4 b) { return a += b; }
-YNN_ALWAYS_INLINE u8x16 operator+(u8x16 a, u8x16 b) { return a += b; }
-YNN_ALWAYS_INLINE s8x16 operator+(s8x16 a, s8x16 b) { return a += b; }
-
-YNN_ALWAYS_INLINE f32x4 operator-(f32x4 a, f32x4 b) { return a -= b; }
-YNN_ALWAYS_INLINE s32x4 operator-(s32x4 a, s32x4 b) { return a -= b; }
-YNN_ALWAYS_INLINE u8x16 operator-(u8x16 a, u8x16 b) { return a -= b; }
-YNN_ALWAYS_INLINE s8x16 operator-(s8x16 a, s8x16 b) { return a -= b; }
 
 YNN_ALWAYS_INLINE s16x8 operator&(s16x8 a, int b) {
   return s16x8{vandq_s16(a.v, vdupq_n_s16(b))};
@@ -403,12 +381,6 @@ YNN_ALWAYS_INLINE s16x8 operator>>(s16x8 a, int b) {
 YNN_ALWAYS_INLINE s16x8 operator^(s16x8 a, s16x8 b) {
   return s16x8{veorq_s16(a.v, b.v)};
 }
-
-YNN_ALWAYS_INLINE f32x4 operator*(f32x4 a, f32x4 b) { return a *= b; }
-YNN_ALWAYS_INLINE s32x4 operator*(s32x4 a, s32x4 b) { return a *= b; }
-YNN_ALWAYS_INLINE u8x16 operator*(u8x16 a, u8x16 b) { return a *= b; }
-YNN_ALWAYS_INLINE s8x16 operator*(s8x16 a, s8x16 b) { return a *= b; }
-
 YNN_ALWAYS_INLINE f32x4 min(f32x4 a, f32x4 b) {
   return f32x4{vminq_f32(a.v, b.v)};
 }

@@ -60,45 +60,29 @@ YNN_ALWAYS_INLINE std::tuple<u8x32, u8x32> interleave(
                     u8x32{_mm256_or_si256(odd1, _mm256_srli_epi16(odd0, 4))});
 }
 
-YNN_ALWAYS_INLINE s32x8& operator+=(s32x8& a, s32x8 b) {
-  a.v = _mm256_add_epi32(a.v, b.v);
-  return a;
+YNN_ALWAYS_INLINE s32x8 operator+(s32x8 a, s32x8 b) {
+  return s32x8{_mm256_add_epi32(a.v, b.v)};
 }
-YNN_ALWAYS_INLINE s8x32& operator+=(s8x32& a, s8x32 b) {
-  a.v = _mm256_add_epi8(a.v, b.v);
-  return a;
+YNN_ALWAYS_INLINE s8x32 operator+(s8x32 a, s8x32 b) {
+  return s8x32{_mm256_add_epi8(a.v, b.v)};
 }
-YNN_ALWAYS_INLINE u8x32& operator+=(u8x32& a, u8x32 b) {
-  a.v = _mm256_add_epi8(a.v, b.v);
-  return a;
+YNN_ALWAYS_INLINE u8x32 operator+(u8x32 a, u8x32 b) {
+  return u8x32{_mm256_add_epi8(a.v, b.v)};
 }
 
-YNN_ALWAYS_INLINE s32x8& operator-=(s32x8& a, s32x8 b) {
-  a.v = _mm256_sub_epi32(a.v, b.v);
-  return a;
+YNN_ALWAYS_INLINE s32x8 operator-(s32x8 a, s32x8 b) {
+  return s32x8{_mm256_sub_epi32(a.v, b.v)};
 }
-YNN_ALWAYS_INLINE s8x32& operator-=(s8x32& a, s8x32 b) {
-  a.v = _mm256_sub_epi8(a.v, b.v);
-  return a;
+YNN_ALWAYS_INLINE s8x32 operator-(s8x32 a, s8x32 b) {
+  return s8x32{_mm256_sub_epi8(a.v, b.v)};
 }
-YNN_ALWAYS_INLINE u8x32& operator-=(u8x32& a, u8x32 b) {
-  a.v = _mm256_sub_epi8(a.v, b.v);
-  return a;
+YNN_ALWAYS_INLINE u8x32 operator-(u8x32 a, u8x32 b) {
+  return u8x32{_mm256_sub_epi8(a.v, b.v)};
 }
 
-YNN_ALWAYS_INLINE s32x8& operator*=(s32x8& a, s32x8 b) {
-  a.v = _mm256_mullo_epi32(a.v, b.v);
-  return a;
+YNN_ALWAYS_INLINE s32x8 operator*(s32x8 a, s32x8 b) {
+  return s32x8{_mm256_mullo_epi32(a.v, b.v)};
 }
-YNN_ALWAYS_INLINE s32x8 operator+(s32x8 a, s32x8 b) { return a += b; }
-YNN_ALWAYS_INLINE s8x32 operator+(s8x32 a, s8x32 b) { return a += b; }
-YNN_ALWAYS_INLINE u8x32 operator+(u8x32 a, u8x32 b) { return a += b; }
-
-YNN_ALWAYS_INLINE s32x8 operator-(s32x8 a, s32x8 b) { return a -= b; }
-YNN_ALWAYS_INLINE s8x32 operator-(s8x32 a, s8x32 b) { return a -= b; }
-YNN_ALWAYS_INLINE u8x32 operator-(u8x32 a, u8x32 b) { return a -= b; }
-
-YNN_ALWAYS_INLINE s32x8 operator*(s32x8 a, s32x8 b) { return a *= b; }
 
 YNN_ALWAYS_INLINE s16x16 operator>>(s16x16 a, int b) {
   return s16x16{_mm256_srai_epi16(a.v, b)};

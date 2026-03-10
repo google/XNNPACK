@@ -573,61 +573,38 @@ YNN_ALWAYS_INLINE void store(int8_t* ptr, s8x16 val, size_t n) {
   _mm_mask_storeu_epi8(ptr, internal::mask_x16(n), val.v);
 }
 
-YNN_ALWAYS_INLINE f32x16& operator+=(f32x16& a, f32x16 b) {
-  a.v = _mm512_add_ps(a.v, b.v);
-  return a;
+YNN_ALWAYS_INLINE f32x16 operator+(f32x16 a, f32x16 b) {
+  return f32x16{_mm512_add_ps(a.v, b.v)};
 }
-YNN_ALWAYS_INLINE s32x16& operator+=(s32x16& a, s32x16 b) {
-  a.v = _mm512_add_epi32(a.v, b.v);
-  return a;
+YNN_ALWAYS_INLINE s32x16 operator+(s32x16 a, s32x16 b) {
+  return s32x16{_mm512_add_epi32(a.v, b.v)};
 }
-YNN_ALWAYS_INLINE s8x64& operator+=(s8x64& a, s8x64 b) {
-  a.v = _mm512_add_epi8(a.v, b.v);
-  return a;
+YNN_ALWAYS_INLINE s8x64 operator+(s8x64 a, s8x64 b) {
+  return s8x64{_mm512_add_epi8(a.v, b.v)};
 }
-YNN_ALWAYS_INLINE u8x64& operator+=(u8x64& a, u8x64 b) {
-  a.v = _mm512_add_epi8(a.v, b.v);
-  return a;
+YNN_ALWAYS_INLINE u8x64 operator+(u8x64 a, u8x64 b) {
+  return u8x64{_mm512_add_epi8(a.v, b.v)};
 }
 
-YNN_ALWAYS_INLINE f32x16& operator-=(f32x16& a, f32x16 b) {
-  a.v = _mm512_sub_ps(a.v, b.v);
-  return a;
+YNN_ALWAYS_INLINE f32x16 operator-(f32x16 a, f32x16 b) {
+  return f32x16{_mm512_sub_ps(a.v, b.v)};
 }
-YNN_ALWAYS_INLINE s32x16& operator-=(s32x16& a, s32x16 b) {
-  a.v = _mm512_sub_epi32(a.v, b.v);
-  return a;
+YNN_ALWAYS_INLINE s32x16 operator-(s32x16 a, s32x16 b) {
+  return s32x16{_mm512_sub_epi32(a.v, b.v)};
 }
-YNN_ALWAYS_INLINE s8x64& operator-=(s8x64& a, s8x64 b) {
-  a.v = _mm512_sub_epi8(a.v, b.v);
-  return a;
+YNN_ALWAYS_INLINE s8x64 operator-(s8x64 a, s8x64 b) {
+  return s8x64{_mm512_sub_epi8(a.v, b.v)};
 }
-YNN_ALWAYS_INLINE u8x64& operator-=(u8x64& a, u8x64 b) {
-  a.v = _mm512_sub_epi8(a.v, b.v);
-  return a;
+YNN_ALWAYS_INLINE u8x64 operator-(u8x64 a, u8x64 b) {
+  return u8x64{_mm512_sub_epi8(a.v, b.v)};
 }
 
-YNN_ALWAYS_INLINE f32x16& operator*=(f32x16& a, f32x16 b) {
-  a.v = _mm512_mul_ps(a.v, b.v);
-  return a;
+YNN_ALWAYS_INLINE f32x16 operator*(f32x16 a, f32x16 b) {
+  return f32x16{_mm512_mul_ps(a.v, b.v)};
 }
-YNN_ALWAYS_INLINE s32x16& operator*=(s32x16& a, s32x16 b) {
-  a.v = _mm512_mullo_epi32(a.v, b.v);
-  return a;
+YNN_ALWAYS_INLINE s32x16 operator*(s32x16 a, s32x16 b) {
+  return s32x16{_mm512_mullo_epi32(a.v, b.v)};
 }
-
-YNN_ALWAYS_INLINE f32x16 operator+(f32x16 a, f32x16 b) { return a += b; }
-YNN_ALWAYS_INLINE s32x16 operator+(s32x16 a, s32x16 b) { return a += b; }
-YNN_ALWAYS_INLINE s8x64 operator+(s8x64 a, s8x64 b) { return a += b; }
-YNN_ALWAYS_INLINE u8x64 operator+(u8x64 a, u8x64 b) { return a += b; }
-
-YNN_ALWAYS_INLINE f32x16 operator-(f32x16 a, f32x16 b) { return a -= b; }
-YNN_ALWAYS_INLINE s32x16 operator-(s32x16 a, s32x16 b) { return a -= b; }
-YNN_ALWAYS_INLINE s8x64 operator-(s8x64 a, s8x64 b) { return a -= b; }
-YNN_ALWAYS_INLINE u8x64 operator-(u8x64 a, u8x64 b) { return a -= b; }
-
-YNN_ALWAYS_INLINE f32x16 operator*(f32x16 a, f32x16 b) { return a *= b; }
-YNN_ALWAYS_INLINE s32x16 operator*(s32x16 a, s32x16 b) { return a *= b; }
 
 YNN_ALWAYS_INLINE s16x32 operator&(s16x32 a, int b) {
   return s16x32{_mm512_and_si512(a.v, _mm512_set1_epi16(b))};

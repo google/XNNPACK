@@ -228,19 +228,16 @@ inline float mul_no_overflow(float a, float b) {
 }
 
 template <typename T>
-YNN_ALWAYS_INLINE vec<T, 1>& operator+=(vec<T, 1>& a, vec<T, 1> b) {
-  a.v = add_no_overflow(a.v, b.v);
-  return a;
+YNN_ALWAYS_INLINE vec<T, 1> operator+(vec<T, 1> a, vec<T, 1> b) {
+  return vec<T, 1>{static_cast<T>(add_no_overflow(a.v, b.v))};
 }
 template <typename T>
-YNN_ALWAYS_INLINE vec<T, 1>& operator-=(vec<T, 1>& a, vec<T, 1> b) {
-  a.v = sub_no_overflow(a.v, b.v);
-  return a;
+YNN_ALWAYS_INLINE vec<T, 1> operator-(vec<T, 1> a, vec<T, 1> b) {
+  return vec<T, 1>{static_cast<T>(sub_no_overflow(a.v, b.v))};
 }
 template <typename T>
-YNN_ALWAYS_INLINE vec<T, 1>& operator*=(vec<T, 1>& a, vec<T, 1> b) {
-  a.v = mul_no_overflow(a.v, b.v);
-  return a;
+YNN_ALWAYS_INLINE vec<T, 1> operator*(vec<T, 1> a, vec<T, 1> b) {
+  return vec<T, 1>{static_cast<T>(mul_no_overflow(a.v, b.v))};
 }
 template <typename T>
 YNN_ALWAYS_INLINE vec<T, 1> min(vec<T, 1> a, vec<T, 1> b) {

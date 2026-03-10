@@ -287,22 +287,15 @@ YNN_ALWAYS_INLINE void store(int8_t* ptr, s8x32 b, decltype(s8x32::N) = {}) {
   _mm256_storeu_si256(reinterpret_cast<__m256i*>(ptr), b.v);
 }
 
-YNN_ALWAYS_INLINE f32x8& operator+=(f32x8& a, f32x8 b) {
-  a.v = _mm256_add_ps(a.v, b.v);
-  return a;
+YNN_ALWAYS_INLINE f32x8 operator+(f32x8 a, f32x8 b) {
+  return f32x8{_mm256_add_ps(a.v, b.v)};
 }
-YNN_ALWAYS_INLINE f32x8& operator-=(f32x8& a, f32x8 b) {
-  a.v = _mm256_sub_ps(a.v, b.v);
-  return a;
+YNN_ALWAYS_INLINE f32x8 operator-(f32x8 a, f32x8 b) {
+  return f32x8{_mm256_sub_ps(a.v, b.v)};
 }
-YNN_ALWAYS_INLINE f32x8& operator*=(f32x8& a, f32x8 b) {
-  a.v = _mm256_mul_ps(a.v, b.v);
-  return a;
+YNN_ALWAYS_INLINE f32x8 operator*(f32x8 a, f32x8 b) {
+  return f32x8{_mm256_mul_ps(a.v, b.v)};
 }
-
-YNN_ALWAYS_INLINE f32x8 operator+(f32x8 a, f32x8 b) { return a += b; }
-YNN_ALWAYS_INLINE f32x8 operator-(f32x8 a, f32x8 b) { return a -= b; }
-YNN_ALWAYS_INLINE f32x8 operator*(f32x8 a, f32x8 b) { return a *= b; }
 
 YNN_ALWAYS_INLINE s16x16 operator&(s16x16 a, s16x16 b) {
   return s16x16{_mm256_castps_si256(
