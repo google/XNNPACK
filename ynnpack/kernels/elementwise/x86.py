@@ -458,20 +458,6 @@ def make_x86_float32_patterns(vector_bits, prefix):
       for i in [
           Rule(f32_a / f32_b, Op(Float(32), prefix + "div_ps", [f32_a, f32_b])),
           Rule(
-              ceil(f32_a),
-              Op(Float(32), prefix + "ceil_ps", [f32_a]),
-              features=["SSE41"],
-          ),
-          Rule(
-              floor(f32_a),
-              Op(Float(32), prefix + "floor_ps", [f32_a]),
-              features=["SSE41"],
-          ),
-          Rule(
-              sqrt(f32_a),
-              Op(Float(32), prefix + "sqrt_ps", [f32_a]),
-          ),
-          Rule(
               f32_a & f32_b,
               Op(Float(32), prefix + "and_ps", [f32_a, f32_b]),
           ),
@@ -616,26 +602,12 @@ YNN_INTRINSIC __m128 bitwise_not(__m128 val) {
 
   def update_for_sse41(self):
     """Updates the target for SSE41 support."""
-    self.header += """
-namespace {
-
-YNN_INTRINSIC __m128 round(__m128 x) {
-  return _mm_round_ps(x, _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC);
-}
-
-} // namespace
-
-"""
     self.patterns += make_x86_float32_patterns(128, "_mm_")
 
   def update_for_avx(self):
     """Updates the target for AVX support."""
     self.header += """
 namespace {
-
-YNN_INTRINSIC __m256 round(__m256 x) {
-  return _mm256_round_ps(x, _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC);
-}
 
 YNN_INTRINSIC __m256 bitwise_not(__m256 val) {
   __m256 all_ones = _mm256_castsi256_ps(_mm256_set1_epi32(-1));
@@ -794,10 +766,6 @@ YNN_INTRINSIC __m128i wrapper_mm256_cvtps_ph(__m256 x) {
     """Updates the target for AVX512F support."""
     self.header += """
 namespace {
-
-YNN_INTRINSIC __m512 round(__m512 x) {
-  return _mm512_roundscale_ps(x, _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC);
-}
 
 YNN_INTRINSIC __m512i bitwise_not(__m512i val) {
   __m512i all_ones = _mm512_set1_epi32(-1);

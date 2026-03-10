@@ -949,7 +949,16 @@ class Target:
     self.tail_strategy = TailStrategy.SCALAR
     self.result = ""
     self.header = header
-    self.simd_ops = {"min", "max", "load", "store"}
+    self.simd_ops = {
+        "min",
+        "max",
+        "load",
+        "store",
+        "round",
+        "floor",
+        "ceil",
+        "sqrt",
+    }
     self.infix_ops = {
         "add": "+",
         "sub": "-",
