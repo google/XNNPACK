@@ -164,18 +164,19 @@ struct xnn_value {
   uint32_t num_consumers;
   uint32_t num_nchw_compatible_consumers;
   enum xnn_layout_type layout;
+
   /// Set during analysis in xnn_subgraph_rewrite_for_fp16.
-  /// Indicates that this value should be converted to FP16.
-  bool fp16_compatible;
-  /// Set during analysis in xnn_subgraph_rewrite_for_fp16.
-  /// Indicates Value ID of the FP16 variant of this Value.
-  uint32_t fp16_id;
-  /// Set during analysis in xnn_subgraph_rewrite_for_fp16.
-  /// Indicates Value ID of the FP32 variant of this Value.
-  uint32_t fp32_id;
-  /// Used during analysis in xnn_subgraph_rewrite_for_fp16.
-  /// Temporary buffer to convert static data to FP16.
-  void* fp16_temp_data;
+  struct rewrite_for_fp16 {
+    /// Indicates that this value should be converted to FP16.
+    bool fp16_compatible;
+    /// Indicates Value ID of the FP16 variant of this Value.
+    uint32_t fp16_id;
+    /// Indicates Value ID of the FP32 variant of this Value.
+    uint32_t fp32_id;
+    /// Temporary buffer to convert static data to FP16.
+    void* fp16_temp_data;
+  } fp16_rewrite;
+
   // Pointer to a `xnn_gemm_config` if this value is packed for a specific GEMM.
   const struct xnn_gemm_config* gemm_config;
   // Pointer to original fp32 data if this value was converted from fp32 to fp16

@@ -229,7 +229,7 @@ void xnn_runtime_value_copy(struct xnn_runtime_value* dst_value,
   if (src_value->num_consumers == 1) {
     dst_value->flags |= XNN_VALUE_FLAG_ONE_CONSUMER;
   }
-  if (src_value->fp16_compatible) {
+  if (src_value->fp16_rewrite.fp16_compatible) {
     dst_value->flags |= XNN_VALUE_FLAG_FP16_COMPATIBLE;
   }
   if (src_value->layout == xnn_layout_type_nchw) {
@@ -1039,16 +1039,16 @@ bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph) {
       case xnn_node_type_deconvolution_2d:
       case xnn_node_type_depthwise_convolution_2d:
         if (subgraph->values[node->inputs[0]].datatype == xnn_datatype_fp32) {
-          subgraph->values[node->inputs[0]].fp16_compatible = true;
+          subgraph->values[node->inputs[0]].fp16_rewrite.fp16_compatible = true;
         }
-        subgraph->values[node->outputs[0]].fp16_compatible = true;
+        subgraph->values[node->outputs[0]].fp16_rewrite.fp16_compatible = true;
         break;
       case xnn_node_type_convolution_2d:
         if (subgraph->values[node->inputs[0]].datatype == xnn_datatype_qdint8) {
-          subgraph->values[node->outputs[0]].fp16_compatible = true;
+          subgraph->values[node->outputs[0]].fp16_rewrite.fp16_compatible = true;
         } else {
-          subgraph->values[node->inputs[0]].fp16_compatible = true;
-          subgraph->values[node->outputs[0]].fp16_compatible = true;
+          subgraph->values[node->inputs[0]].fp16_rewrite.fp16_compatible = true;
+          subgraph->values[node->outputs[0]].fp16_rewrite.fp16_compatible = true;
         }
         break;
       case xnn_node_type_fully_connected:
@@ -1056,14 +1056,14 @@ bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph) {
             subgraph->values[node->inputs[0]].datatype ==
                 xnn_datatype_qduint8 ||
             subgraph->values[node->inputs[0]].datatype == xnn_datatype_qpint8) {
-          subgraph->values[node->outputs[0]].fp16_compatible = true;
+          subgraph->values[node->outputs[0]].fp16_rewrite.fp16_compatible = true;
         } else if (subgraph->values[node->inputs[0]].datatype ==
                        xnn_datatype_fp32 &&
                    (node->packed_input_datatype == xnn_datatype_qdint8 ||
                     node->packed_input_datatype == xnn_datatype_qduint8 ||
                     node->packed_input_datatype == xnn_datatype_qpint8)) {
-          subgraph->values[node->inputs[0]].fp16_compatible = true;
-          subgraph->values[node->outputs[0]].fp16_compatible = true;
+          subgraph->values[node->inputs[0]].fp16_rewrite.fp16_compatible = true;
+          subgraph->values[node->outputs[0]].fp16_rewrite.fp16_compatible = true;
         } else if ((subgraph->values[node->inputs[0]].datatype ==
                         xnn_datatype_fp32 ||
                     subgraph->values[node->inputs[0]].datatype ==
@@ -1074,18 +1074,18 @@ bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph) {
                         xnn_datatype_fp32) &&
                    subgraph->values[node->outputs[0]].datatype ==
                        xnn_datatype_fp32) {
-          subgraph->values[node->inputs[0]].fp16_compatible = true;
-          subgraph->values[node->outputs[0]].fp16_compatible = true;
+          subgraph->values[node->inputs[0]].fp16_rewrite.fp16_compatible = true;
+          subgraph->values[node->outputs[0]].fp16_rewrite.fp16_compatible = true;
           if (subgraph->values[node->inputs[1]].datatype == xnn_datatype_fp32) {
-            subgraph->values[node->inputs[1]].fp16_compatible = true;
+            subgraph->values[node->inputs[1]].fp16_rewrite.fp16_compatible = true;
           }
           if (node->num_inputs > 2 &&
               subgraph->values[node->inputs[2]].datatype == xnn_datatype_fp32) {
-            subgraph->values[node->inputs[2]].fp16_compatible = true;
+            subgraph->values[node->inputs[2]].fp16_rewrite.fp16_compatible = true;
           }
         } else if (all_values_fp32_or_pfp32(subgraph, node)) {
-          subgraph->values[node->inputs[0]].fp16_compatible = true;
-          subgraph->values[node->outputs[0]].fp16_compatible = true;
+          subgraph->values[node->inputs[0]].fp16_rewrite.fp16_compatible = true;
+          subgraph->values[node->outputs[0]].fp16_rewrite.fp16_compatible = true;
         } else {
           xnn_log_warning(
               "FP16 rewrite aborted: node #%" PRIu32
@@ -1102,15 +1102,15 @@ bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph) {
         break;
       case xnn_node_type_convert:
         if (subgraph->values[node->inputs[0]].datatype == xnn_datatype_fp32) {
-          subgraph->values[node->inputs[0]].fp16_compatible = true;
+          subgraph->values[node->inputs[0]].fp16_rewrite.fp16_compatible = true;
         }
         if (subgraph->values[node->outputs[0]].datatype == xnn_datatype_fp32) {
-          subgraph->values[node->outputs[0]].fp16_compatible = true;
+          subgraph->values[node->outputs[0]].fp16_rewrite.fp16_compatible = true;
         }
         break;
       case xnn_node_type_pack_lh:
         if (subgraph->values[node->inputs[0]].datatype == xnn_datatype_fp32) {
-          subgraph->values[node->inputs[0]].fp16_compatible = true;
+          subgraph->values[node->inputs[0]].fp16_rewrite.fp16_compatible = true;
         }
         break;
       default:
@@ -1118,7 +1118,7 @@ bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph) {
           switch (subgraph->values[node->inputs[i]].datatype) {
             case xnn_datatype_fp32:
             case xnn_datatype_pfp32:
-              subgraph->values[node->inputs[i]].fp16_compatible = true;
+              subgraph->values[node->inputs[i]].fp16_rewrite.fp16_compatible = true;
               break;
             default:
               break;
@@ -1128,7 +1128,7 @@ bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph) {
           switch (subgraph->values[node->outputs[o]].datatype) {
             case xnn_datatype_fp32:
             case xnn_datatype_pfp32:
-              subgraph->values[node->outputs[o]].fp16_compatible = true;
+              subgraph->values[node->outputs[o]].fp16_rewrite.fp16_compatible = true;
               break;
             default:
               break;
@@ -1142,17 +1142,17 @@ bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph) {
   // The FP16 rewrite is cleanly aborted on failure.
   for (uint32_t n = 0; n < num_original_values; n++) {
     struct xnn_value* value = &subgraph->values[n];
-    value->fp16_id = XNN_INVALID_VALUE_ID;
-    value->fp32_id = XNN_INVALID_VALUE_ID;
-    if (value->fp16_compatible) {
+    value->fp16_rewrite.fp16_id = XNN_INVALID_VALUE_ID;
+    value->fp16_rewrite.fp32_id = XNN_INVALID_VALUE_ID;
+    if (value->fp16_rewrite.fp16_compatible) {
       assert(value->datatype == xnn_datatype_fp32 ||
              value->datatype == xnn_datatype_pfp32);
       if (xnn_value_is_static(value->allocation_type)) {
         assert(value->producer == XNN_INVALID_NODE_ID);
         const size_t fp16_size =
             xnn_tensor_get_size(value) / 2 + XNN_EXTRA_BYTES;
-        value->fp16_temp_data = xnn_allocate_zero_memory(fp16_size);
-        if (value->fp16_temp_data == NULL) {
+        value->fp16_rewrite.fp16_temp_data = xnn_allocate_zero_memory(fp16_size);
+        if (value->fp16_rewrite.fp16_temp_data == NULL) {
           xnn_log_error("failed to allocate %zu bytes for fp16 tensor data",
                         (size_t)fp16_size);
           goto error;
@@ -1185,10 +1185,10 @@ bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph) {
           fp16_value->producer = XNN_INVALID_NODE_ID;
           fp16_value->first_consumer = XNN_INVALID_NODE_ID;
           fp16_value->num_consumers = 0;
-          fp16_value->fp16_id = XNN_INVALID_VALUE_ID;
-          fp16_value->fp32_id = value->id;
+          fp16_value->fp16_rewrite.fp16_id = XNN_INVALID_VALUE_ID;
+          fp16_value->fp16_rewrite.fp32_id = value->id;
           fp16_value->allocation_type = xnn_allocation_type_workspace;
-          value->fp16_id = fp16_value->id;
+          value->fp16_rewrite.fp16_id = fp16_value->id;
         }
       } else if (xnn_value_is_internal(value)) {
         // fp16 tensors only need half the memory of fp32 tensors.
@@ -1207,11 +1207,11 @@ bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph) {
         continue;
       }
       const struct xnn_value* value = &subgraph->values[node->inputs[i]];
-      if (value->fp16_id != XNN_INVALID_VALUE_ID &&
+      if (value->fp16_rewrite.fp16_id != XNN_INVALID_VALUE_ID &&
           value->first_consumer == n) {
         assert(value->data == NULL);
         assert(value->datatype == xnn_datatype_fp32);
-        assert(subgraph->values[value->fp16_id].datatype == xnn_datatype_fp16);
+        assert(subgraph->values[value->fp16_rewrite.fp16_id].datatype == xnn_datatype_fp16);
         // This value isn't always an external input, it could be an external
         // output of the current subgraph (due to partition), and be
         // simultaneously consumed by the current node.
@@ -1222,9 +1222,9 @@ bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph) {
     }
     for (uint32_t o = 0; o < node->num_outputs; o++) {
       const struct xnn_value* value = &subgraph->values[node->outputs[o]];
-      if (value->fp16_id != XNN_INVALID_VALUE_ID) {
+      if (value->fp16_rewrite.fp16_id != XNN_INVALID_VALUE_ID) {
         assert(value->datatype == xnn_datatype_fp32);
-        assert(subgraph->values[value->fp16_id].datatype == xnn_datatype_fp16);
+        assert(subgraph->values[value->fp16_rewrite.fp16_id].datatype == xnn_datatype_fp16);
         assert(xnn_value_is_external_output(value->flags));
         num_external_outputs += 1;
       }
@@ -1256,7 +1256,7 @@ bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph) {
   // in-place
   for (uint32_t n = 0; n < num_original_values; n++) {
     struct xnn_value* value = &subgraph->values[n];
-    if (value->fp16_compatible) {
+    if (value->fp16_rewrite.fp16_compatible) {
       if (xnn_value_is_static(value->allocation_type)) {
         assert(value->datatype == xnn_datatype_fp32);
         const size_t num_elements = xnn_shape_multiply_all_dims(&value->shape);
@@ -1264,24 +1264,24 @@ bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph) {
             xnn_unary_convert, xnn_datatype_fp32, xnn_datatype_fp16,
             /*params=*/NULL, /*input_quantization=*/NULL,
             /*output_quantization=*/NULL, 0, num_elements, 1, 1, 1, NULL,
-            value->data, value->fp16_temp_data);
+            value->data, value->fp16_rewrite.fp16_temp_data);
         // Remember pointer to the original fp32 data, nodes like convolution
         // need fp32 weights/biases.
         value->fp32_data = value->data;
-        value->data = value->fp16_temp_data;
-        value->fp16_temp_data = NULL;
+        value->data = value->fp16_rewrite.fp16_temp_data;
+        value->fp16_rewrite.fp16_temp_data = NULL;
         value->datatype = xnn_datatype_fp16;
         xnn_log_debug("FP16 rewrite: converted static FP32 tensor #%" PRIu32
                       " to FP16 in new buffer",
                       n);
       } else if (xnn_value_is_external(value->flags)) {
         assert(value->datatype == xnn_datatype_fp32);
-        assert(value->fp16_id != XNN_INVALID_VALUE_ID);
+        assert(value->fp16_rewrite.fp16_id != XNN_INVALID_VALUE_ID);
         value->producer = XNN_INVALID_NODE_ID;
         value->num_consumers = 0;
         xnn_log_debug("FP16 rewrite: created FP16 tensor #%" PRIu32
                       " for external FP32 tensor #%" PRIu32,
-                      subgraph->values[value->fp16_id].id, n);
+                      subgraph->values[value->fp16_rewrite.fp16_id].id, n);
       } else {
         switch (value->datatype) {
           case xnn_datatype_fp32:
@@ -1344,10 +1344,10 @@ bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph) {
     }
 
     for (uint32_t i = 0; i < node->num_inputs; i++) {
-      const uint32_t fp16_id = subgraph->values[node->inputs[i]].fp16_id;
+      const uint32_t fp16_id = subgraph->values[node->inputs[i]].fp16_rewrite.fp16_id;
       if (fp16_id != XNN_INVALID_VALUE_ID) {
         struct xnn_value* fp16_value = &subgraph->values[fp16_id];
-        assert(fp16_value->fp32_id == node->inputs[i]);
+        assert(fp16_value->fp16_rewrite.fp32_id == node->inputs[i]);
         if (fp16_value->first_consumer == XNN_INVALID_NODE_ID) {
           fp16_value->first_consumer = n;
         }
@@ -1359,12 +1359,12 @@ bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph) {
     }
     for (uint32_t o = 0; o < node->num_outputs; o++) {
       const uint32_t fp32_id = node->outputs[o];
-      const uint32_t fp16_id = subgraph->values[fp32_id].fp16_id;
+      const uint32_t fp16_id = subgraph->values[fp32_id].fp16_rewrite.fp16_id;
       if (fp16_id != XNN_INVALID_VALUE_ID) {
         struct xnn_value* fp16_value = &subgraph->values[fp16_id];
         if (fp16_value->first_consumer == XNN_INVALID_NODE_ID &&
             fp16_value->producer == XNN_INVALID_NODE_ID) {
-          assert(fp16_value->fp32_id == fp32_id);
+          assert(fp16_value->fp16_rewrite.fp32_id == fp32_id);
         } else {
           // Prevent double assignments by creating a new copy of the output
           // value if it has already been written to.
@@ -1372,7 +1372,7 @@ bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph) {
           xnn_value_copy(fp16_value, &subgraph->values[fp16_id]);
           fp16_value->first_consumer = XNN_INVALID_NODE_ID;
           fp16_value->num_consumers = 0;
-          subgraph->values[fp32_id].fp16_id = fp16_value->id;
+          subgraph->values[fp32_id].fp16_rewrite.fp16_id = fp16_value->id;
         }
         node->outputs[o] = fp16_value->id;
         fp16_value->producer = n;
@@ -1386,9 +1386,9 @@ bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph) {
     // Insert Convert nodes for outputs
     for (uint32_t o = 0; o < node->num_outputs; o++) {
       const struct xnn_value* value = &subgraph->values[node->outputs[o]];
-      const uint32_t fp32_id = value->fp32_id;
+      const uint32_t fp32_id = value->fp16_rewrite.fp32_id;
       if (fp32_id != XNN_INVALID_VALUE_ID &&
-          subgraph->values[fp32_id].fp16_id == value->id) {
+          subgraph->values[fp32_id].fp16_rewrite.fp16_id == value->id) {
         xnn_log_debug("Inserted FP16->FP32 Convert Node from tensor #%" PRIu32
                       " to output tensor #%" PRIu32,
                       value->id, fp32_id);
@@ -1414,7 +1414,7 @@ bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph) {
         continue;
       }
       const struct xnn_value* value = &subgraph->values[node->inputs[i]];
-      const uint32_t fp32_id = value->fp32_id;
+      const uint32_t fp32_id = value->fp16_rewrite.fp32_id;
       if (fp32_id != XNN_INVALID_VALUE_ID &&
           subgraph->values[fp32_id].first_consumer == n - 1) {
         // Only insert convert nodes if the value actually is an external input.
@@ -1443,12 +1443,12 @@ error:
   for (uint32_t n = 0; n < subgraph->num_values; n++) {
     struct xnn_value* value = &subgraph->values[n];
     // Deallocate extra memory used during static tensor rewrite.
-    if (value->fp16_temp_data != NULL) {
-      xnn_release_memory(value->fp16_temp_data);
+    if (value->fp16_rewrite.fp16_temp_data != NULL) {
+      xnn_release_memory(value->fp16_rewrite.fp16_temp_data);
     }
     // Revert marking values as FP16-compatible, as xnn_delete_subgraph() may
     // assume ownership of those that are.
-    value->fp16_compatible = false;
+    value->fp16_rewrite.fp16_compatible = false;
   }
 
   // Clear the fp16 values created for external inputs and outputs.
@@ -4376,7 +4376,7 @@ enum xnn_status xnn_delete_subgraph(xnn_subgraph_t subgraph) {
       // subgraph still has ownership of them.
       for (uint32_t i = 0; i < subgraph->num_values; i++) {
         struct xnn_value* value = &subgraph->values[i];
-        if (value->fp16_compatible && value->data != NULL) {
+        if (value->fp16_rewrite.fp16_compatible && value->data != NULL) {
           XNN_PRAGMA_CLANG("clang diagnostic push")
           XNN_PRAGMA_CLANG("clang diagnostic ignored \"-Wcast-qual\"")
           xnn_release_memory((void*)value->data);
