@@ -5,6 +5,8 @@
 # in the future. This is a fairly minimal config for getting GN builds working.
 # Support for DEPS and GN is experimental and may be removed in the future.
 
+# No-op for testing.
+
 # Keeps things together in the XNNPACK directory.
 use_relative_paths = True
 

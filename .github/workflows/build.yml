@@ -380,7 +380,22 @@ jobs:
   gn-linux-x86_64:
     runs-on: 'ubuntu-24.04-8core'
     timeout-minutes: 15
+    env:
+      CCACHE_DIR: /home/xnnpack/.ccache
+      CCACHE_SLOPPINESS: time_macros
     steps:
+      - name: Restore gclient cache
+        uses: actions/cache@v5
+        with:
+          # Cache the source, Git repos, build files, and build artifacts.
+          path: .
+          key: experimental-v4-gclient-linux-${{ github.ref_name }}-${{ github.sha }}
+          restore-keys: |
+            experimental-v4-gclient-linux-${{ github.ref_name }}-
+            experimental-v4-gclient-linux-master-
+            experimental-v4-gclient-linux-
+      - name: Install ccache
+        run: sudo apt-get install ccache
       - name: Install Depot Tools
         uses: newkdev/setup-depot-tools@v1.0.1
       - name: Write .gclient
@@ -398,19 +413,21 @@ jobs:
           ]
           EOF
       - name: Sync to commit and run hooks
-        run: gclient sync -vv --revision $GITHUB_SHA
+        run: gclient sync -vv --force --upstream --revision $GITHUB_SHA
       - name: Check formatting
         run: |
           git cl format --presubmit --no-clang-format --no-python --diff
         working-directory: ${{ github.workspace }}/xnnpack
       - name: Generate build files
         run: |
-          gn gen --check --args="is_debug=false dcheck_always_on=true xnnpack_enable_avx512=false target_cpu=\"x64\" use_siso=true" out/x64.dchecks
+          gn gen --check --args="is_debug=false symbol_level=0 cc_wrapper=\"ccache\" dcheck_always_on=true xnnpack_enable_avx512=false target_cpu=\"x64\" use_siso=true" out/x64.dchecks
         working-directory: ${{ github.workspace }}/xnnpack
       - name: Build all targets (Release + debug checks)
         run: |
           autoninja -C out/x64.dchecks
         working-directory: ${{ github.workspace }}/xnnpack
+      - name: Print ccache stats
+        run: ccache -s
       - name: Run tests
         run: |
           python3 scripts/run-gn-tests.py out/x64.dchecks
