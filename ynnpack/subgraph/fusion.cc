@@ -212,8 +212,11 @@ bool rewrite_clamp(ynn_subgraph& subgraph, ynn_node& node,
 }
 
 bool can_implicitly_broadcast(const ynn_node& node, uint32_t input_id) {
-  if (std::get_if<ynn_node::unary_elementwise>(&node.op) ||
-      std::get_if<ynn_node::binary_elementwise>(&node.op)) {
+  if (std::get_if<ynn_node::binary_elementwise>(&node.op)) {
+    return true;
+  } else if (std::get_if<ynn_node::ternary_elementwise>(&node.op)) {
+    // TODO: b/491453504 - Not all ternary ops can implicitly broadcast all
+    // operands.
     return true;
   }
   return false;
