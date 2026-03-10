@@ -6,9 +6,9 @@
 #include "ynnpack/kernels/transpose/transpose.h"
 
 #include <algorithm>
+#include <array>
 #include <cassert>
 #include <cstddef>
-#include <cstdint>
 #include <cstring>
 #include <type_traits>
 
@@ -16,54 +16,33 @@
 #include "ynnpack/base/arithmetic.h"
 #include "ynnpack/base/base.h"
 #include "ynnpack/base/log.h"
-#include "ynnpack/base/type.h"
+#include "ynnpack/base/simd/byte_vec.h"
 #include "ynnpack/kernels/transpose/generic.h"
 
 namespace ynn {
 
-namespace {
+using simd::u8x4;
+using simd::u8x8;
 
 void transpose_x4(size_t m, size_t n, size_t n_bytes_a, size_t stride_a,
-                  const uint4x2* a, size_t stride_x, uint4x2* x) {
-  assert(m % 2 == 0);
-  assert(n % 2 == 0);
-  // Handle the in bounds columns first.
-  const size_t n_bytes = std::min(m / 2, n_bytes_a);
-  for (size_t j = 0; j < n / 2; ++j) {
-    for (size_t i = 0; i < n_bytes; ++i) {
-      const uint4x2 a0 = a[(2 * j + 0) * stride_a + i];
-      const uint4x2 a1 = a[(2 * j + 1) * stride_a + i];
-      x[(2 * i + 0) * stride_x + j] = uint4x2(a0.get(0), a1.get(0));
-      x[(2 * i + 1) * stride_x + j] = uint4x2(a0.get(1), a1.get(1));
-    }
-  }
-  // Handle any out of bounds columns of input (rows of output).
-  for (size_t i = n_bytes * 2; i < m; ++i) {
-    memset(&x[i * stride_x], 0, n / 2);
-  }
-}
-
-}  // namespace
-
-void transpose_x4(size_t m, size_t n, size_t n_bytes_a, size_t stride_a,
-                  const void* a, size_t stride_x, void* x) {
-  transpose_x4(m, n, n_bytes_a, stride_a, static_cast<const uint4x2*>(a),
-               stride_x, static_cast<uint4x2*>(x));
+                       const void* a, size_t stride_x, void* x) {
+  transpose<std::array<u8x4, 8>>(m, n, n_bytes_a, stride_a, a, stride_x, x,
+                                   std::integral_constant<size_t, 4>{});
 }
 void transpose_x8(size_t m, size_t n, size_t n_bytes_a, size_t stride_a,
-                  const void* a, size_t stride_x, void* x) {
-  transpose(m, n, n_bytes_a, stride_a, a, stride_x, x,
-            std::integral_constant<size_t, 1>{});
+                       const void* a, size_t stride_x, void* x) {
+  transpose<std::array<u8x4, 4>>(m, n, n_bytes_a, stride_a, a, stride_x, x,
+                                   std::integral_constant<size_t, 8>{});
 }
 void transpose_x16(size_t m, size_t n, size_t n_bytes_a, size_t stride_a,
-                   const void* a, size_t stride_x, void* x) {
-  transpose(m, n, n_bytes_a, stride_a, a, stride_x, x,
-            std::integral_constant<size_t, 2>{});
+                        const void* a, size_t stride_x, void* x) {
+  transpose<std::array<u8x4, 2>>(m, n, n_bytes_a, stride_a, a, stride_x, x,
+                                  std::integral_constant<size_t, 16>{});
 }
 void transpose_x32(size_t m, size_t n, size_t n_bytes_a, size_t stride_a,
-                   const void* a, size_t stride_x, void* x) {
-  transpose(m, n, n_bytes_a, stride_a, a, stride_x, x,
-            std::integral_constant<size_t, 4>{});
+                        const void* a, size_t stride_x, void* x) {
+  transpose<std::array<u8x8, 2>>(m, n, n_bytes_a, stride_a, a, stride_x, x,
+                                  std::integral_constant<size_t, 32>{});
 }
 void transpose_x64(size_t m, size_t n, size_t n_bytes_a, size_t stride_a,
                    const void* a, size_t stride_x, void* x) {

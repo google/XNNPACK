@@ -43,6 +43,7 @@ cc_library(
         # target. For example, f32x16 is provided by both avx512 as a single 512-bit vector, and
         # avx as two 256-bit vectors, and the `concat` operation of two f32x8 values is implemented
         # appropriately for that type.
+        "byte_vec.h",
         "arm_neon.h",
         "arm64_sve.h",
         "arm_neonfma.h",
