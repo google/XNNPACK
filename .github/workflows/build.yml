@@ -145,42 +145,6 @@ jobs:
           ccache -z
 
       - name: Configure and build
-        run: scripts/build-linux-riscv64.sh -DCMAKE_BUILD_TYPE=Release -DXNNPACK_ENABLE_RISCV_VECTOR=OFF
-
-      - name: Run tests
-        if: ${{ inputs.run-tests }}
-        run: ctest --output-on-failure --parallel $(nproc)
-        working-directory: build/linux/riscv64
-
-      - name: Print ccache stats
-        run: ccache -s
-
-  cmake-linux-riscv64-rvv:
-    runs-on: 'ubuntu-24.04-16core'
-    timeout-minutes: 60
-    container:
-      image: ghcr.io/google/xnnpack/riscv:latest
-    env:
-      CMAKE_C_COMPILER_LAUNCHER: ccache
-      CMAKE_CXX_COMPILER_LAUNCHER: ccache
-      CCACHE_DIR: /home/xnnpack/.ccache
-    steps:
-      - uses: actions/checkout@v6
-
-      - name: Mount ccache
-        uses: actions/cache@v5
-        with:
-          path: /home/xnnpack/.ccache
-          key: ccache-riscv64-rvv-${{ runner.os }}-${{ github.job }}-${{ github.run_id }}
-          restore-keys: |
-            ccache-riscv64-rvv-${{ runner.os }}-${{ github.job }}-
-
-      - name: Configure ccache limit
-        run: |
-          ccache -M 500M
-          ccache -z
-
-      - name: Configure and build
         run: |
           scripts/build-linux-riscv64.sh \
             -DCMAKE_BUILD_TYPE=Release \
