@@ -557,6 +557,7 @@ SET(SUBGRAPH_SRCS
   src/subgraph/max-pooling-2d.c
   src/subgraph/pack-lh.c
   src/subgraph/reshape-helpers.c
+  src/subgraph/rewrites/fp16_to_fp32.cc
   src/subgraph/rope.c
   src/subgraph/softmax.c
   src/subgraph/space-to-depth-2d.c
@@ -988,7 +989,7 @@ IF(XNNPACK_BUILD_LIBRARY)
   TARGET_LINK_LIBRARIES(xnnpack-operator-run PRIVATE xnnpack-base xnnpack-logging)
   TARGET_LINK_LIBRARIES(xnnpack-operator-utils PRIVATE xnnpack-base xnnpack-logging)
   TARGET_LINK_LIBRARIES(xnnpack-reference-ukernels PRIVATE xnnpack-base xnnpack-datatype)
-  TARGET_LINK_LIBRARIES(xnnpack-subgraph PRIVATE xnnpack-base xnnpack-allocator xnnpack-logging xnnpack-memory xnnpack-mutex xnnpack-operators xnnpack-operator-run xnnpack-datatype)
+  TARGET_LINK_LIBRARIES(xnnpack-subgraph PRIVATE xnnpack-base xnnpack-allocator xnnpack-cache xnnpack-logging xnnpack-memory xnnpack-mutex xnnpack-operators xnnpack-operator-run xnnpack-datatype)
   TARGET_LINK_LIBRARIES(XNNPACK PRIVATE xnnpack-base xnnpack-allocator xnnpack-cache
       xnnpack-hardware-config xnnpack-indirection xnnpack-memory xnnpack-microkernel-utils xnnpack-microparams-init
       xnnpack-mutex xnnpack-normalization xnnpack-operators xnnpack-operator-run

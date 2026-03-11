@@ -177,6 +177,16 @@ struct xnn_value {
     void* fp16_temp_data;
   } fp16_rewrite;
 
+  struct fp16_fp32_fallback {
+    // This marks nodes that have been forcefully rewritten from fp16 to fp32
+    // with inserting a convert.
+    bool was_overwritten;
+    // For static values, this points to the original static value's data. This
+    // allows the runtime inform the weight cache about the relationship between
+    // the original tensors and the converted tensors.
+    void* original_data;
+  } fp16_to_fp32_fallback;
+
   // Pointer to a `xnn_gemm_config` if this value is packed for a specific GEMM.
   const struct xnn_gemm_config* gemm_config;
   // Pointer to original fp32 data if this value was converted from fp32 to fp16
@@ -647,6 +657,8 @@ enum xnn_status xnn_subgraph_optimize(xnn_subgraph_t subgraph, uint32_t flags);
 void xnn_subgraph_rewrite_for_nchw(xnn_subgraph_t subgraph);
 // Rewrites subgraph for FP16, returns true if success, false if rewrite failed.
 bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph);
+
+void xnn_subgraph_clean_up(xnn_subgraph_t subgraph);
 
 void xnn_node_clear(struct xnn_node* node);
 void xnn_node_copy(struct xnn_node* dst_node, const struct xnn_node* src_node);
