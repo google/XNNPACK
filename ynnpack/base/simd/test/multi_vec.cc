@@ -42,6 +42,26 @@ TEST_ADD(multi_vec, s16, 4);
 TEST_ADD(multi_vec, f32, 2);
 TEST_ADD(multi_vec, s32, 2);
 
+TEST_AND(multi_vec, u8, 8);
+TEST_AND(multi_vec, s8, 8);
+TEST_AND(multi_vec, s16, 4);
+TEST_AND(multi_vec, s32, 2);
+
+TEST_OR(multi_vec, u8, 8);
+TEST_OR(multi_vec, s8, 8);
+TEST_OR(multi_vec, s16, 4);
+TEST_OR(multi_vec, s32, 2);
+
+TEST_XOR(multi_vec, u8, 8);
+TEST_XOR(multi_vec, s8, 8);
+TEST_XOR(multi_vec, s16, 4);
+TEST_XOR(multi_vec, s32, 2);
+
+TEST_NOT(multi_vec, u8, 8);
+TEST_NOT(multi_vec, s8, 8);
+TEST_NOT(multi_vec, s16, 4);
+TEST_NOT(multi_vec, s32, 2);
+
 TEST_MULTIPLY(multi_vec, f32, 2);
 
 using f32x4 = vec<f32, 4>;

@@ -279,6 +279,23 @@ YNN_ALWAYS_INLINE vec<To, 1> convert(vec<From, 1> from, To) {
 }
 
 template <typename T>
+YNN_ALWAYS_INLINE vec<T, 1> operator&(vec<T, 1> a, vec<T, 1> b) {
+  return vec<T, 1>{static_cast<T>(a.v & b.v)};
+}
+template <typename T>
+YNN_ALWAYS_INLINE vec<T, 1> operator|(vec<T, 1> a, vec<T, 1> b) {
+  return vec<T, 1>{static_cast<T>(a.v | b.v)};
+}
+template <typename T>
+YNN_ALWAYS_INLINE vec<T, 1> operator^(vec<T, 1> a, vec<T, 1> b) {
+  return vec<T, 1>{static_cast<T>(a.v ^ b.v)};
+}
+template <typename T>
+YNN_ALWAYS_INLINE vec<T, 1> operator~(vec<T, 1> a) {
+  return vec<T, 1>{static_cast<T>(~a.v)};
+}
+
+template <typename T>
 YNN_ALWAYS_INLINE T horizontal_sum(vec<T, 1> x) {
   return x.v;
 }

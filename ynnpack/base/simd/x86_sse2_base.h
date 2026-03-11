@@ -352,6 +352,51 @@ YNN_ALWAYS_INLINE s16x8 operator>>(s16x8 a, int b) {
 YNN_ALWAYS_INLINE s16x8 operator^(s16x8 a, s16x8 b) {
   return s16x8{_mm_xor_si128(a.v, b.v)};
 }
+YNN_ALWAYS_INLINE s16x8 operator|(s16x8 a, s16x8 b) {
+  return s16x8{_mm_or_si128(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE s16x8 operator~(s16x8 a) {
+  return s16x8{_mm_xor_si128(a.v, _mm_set1_epi32(-1))};
+}
+
+YNN_ALWAYS_INLINE s32x4 operator&(s32x4 a, s32x4 b) {
+  return s32x4{_mm_and_si128(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE s32x4 operator|(s32x4 a, s32x4 b) {
+  return s32x4{_mm_or_si128(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE s32x4 operator^(s32x4 a, s32x4 b) {
+  return s32x4{_mm_xor_si128(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE s32x4 operator~(s32x4 a) {
+  return s32x4{_mm_xor_si128(a.v, _mm_set1_epi32(-1))};
+}
+
+YNN_ALWAYS_INLINE u8x16 operator&(u8x16 a, u8x16 b) {
+  return u8x16{_mm_and_si128(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE u8x16 operator|(u8x16 a, u8x16 b) {
+  return u8x16{_mm_or_si128(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE u8x16 operator^(u8x16 a, u8x16 b) {
+  return u8x16{_mm_xor_si128(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE u8x16 operator~(u8x16 a) {
+  return u8x16{_mm_xor_si128(a.v, _mm_set1_epi32(-1))};
+}
+
+YNN_ALWAYS_INLINE s8x16 operator&(s8x16 a, s8x16 b) {
+  return s8x16{_mm_and_si128(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE s8x16 operator|(s8x16 a, s8x16 b) {
+  return s8x16{_mm_or_si128(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE s8x16 operator^(s8x16 a, s8x16 b) {
+  return s8x16{_mm_xor_si128(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE s8x16 operator~(s8x16 a) {
+  return s8x16{_mm_xor_si128(a.v, _mm_set1_epi32(-1))};
+}
 
 YNN_ALWAYS_INLINE f32x4 min(f32x4 a, f32x4 b) {
   return f32x4{_mm_min_ps(a.v, b.v)};

@@ -431,10 +431,88 @@ struct multiply_op {
   TEST_F(test_class, min_##type##x##N) { test_op<type, N, min_op>(); }
 #define TEST_MAX(test_class, type, N) \
   TEST_F(test_class, max_##type##x##N) { test_op<type, N, max_op>(); }
-#define TEST_AND(test_class, type, N) \
-  TEST_F(test_class, and_##type##x##N) { test_op<type, N, min_op>(); }
-#define TEST_OR(test_class, type, N) \
-  TEST_F(test_class, or_##type##x##N) { test_op<type, N, max_op>(); }
+
+struct bitwise_and_op {
+  template <typename T>
+  T operator()(T a, T b) {
+    return static_cast<T>(a & b);
+  }
+};
+
+struct bitwise_or_op {
+  template <typename T>
+  T operator()(T a, T b) {
+    return static_cast<T>(a | b);
+  }
+};
+
+struct bitwise_xor_op {
+  template <typename T>
+  T operator()(T a, T b) {
+    return static_cast<T>(a ^ b);
+  }
+};
+
+struct bitwise_not_op {
+  template <typename T>
+  T operator()(T a) {
+    return static_cast<T>(~a);
+  }
+};
+
+template <typename scalar, size_t N, typename Op>
+void test_bitwise_op() {
+  using vector = vec<scalar, N>;
+  ReplicableRandomDevice rng;
+  Op op;
+
+  for (auto _ : FuzzTest(std::chrono::milliseconds(100))) {
+    scalar a[vector::N];
+    scalar b[vector::N];
+    fill_random(a, vector::N, rng);
+    fill_random(b, vector::N, rng);
+    scalar result[vector::N];
+    store(result, op(load(a, vector::N), load(b, vector::N)));
+    for (size_t i = 0; i < vector::N; ++i) {
+      scalar expected = op(a[i], b[i]);
+      ASSERT_EQ(result[i], expected);
+    }
+  }
+}
+
+#define TEST_AND(test_class, type, N)           \
+  TEST_F(test_class, and_##type##x##N) {        \
+    test_bitwise_op<type, N, bitwise_and_op>(); \
+  }
+#define TEST_OR(test_class, type, N)           \
+  TEST_F(test_class, or_##type##x##N) {        \
+    test_bitwise_op<type, N, bitwise_or_op>(); \
+  }
+#define TEST_XOR(test_class, type, N)           \
+  TEST_F(test_class, xor_##type##x##N) {        \
+    test_bitwise_op<type, N, bitwise_xor_op>(); \
+  }
+
+template <typename scalar, size_t N>
+void test_not() {
+  using vector = vec<scalar, N>;
+  ReplicableRandomDevice rng;
+  bitwise_not_op op;
+
+  for (auto _ : FuzzTest(std::chrono::milliseconds(100))) {
+    scalar a[vector::N];
+    fill_random(a, vector::N, rng);
+    scalar result[vector::N];
+    store(result, ~load(a, vector::N));
+    for (size_t i = 0; i < vector::N; ++i) {
+      scalar expected = op(a[i]);
+      ASSERT_EQ(result[i], expected);
+    }
+  }
+}
+
+#define TEST_NOT(test_class, type, N) \
+  TEST_F(test_class, not_##type##x##N) { test_not<type, N>(); }
 
 template <size_t Lanes, typename From, size_t... Is>
 void test_extract_impl(std::index_sequence<Is...>, From from_v,

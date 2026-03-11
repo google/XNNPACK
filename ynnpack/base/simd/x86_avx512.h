@@ -606,14 +606,62 @@ YNN_ALWAYS_INLINE s32x16 operator*(s32x16 a, s32x16 b) {
   return s32x16{_mm512_mullo_epi32(a.v, b.v)};
 }
 
-YNN_ALWAYS_INLINE s16x32 operator&(s16x32 a, int b) {
-  return s16x32{_mm512_and_si512(a.v, _mm512_set1_epi16(b))};
+YNN_ALWAYS_INLINE s16x32 operator&(s16x32 a, s16x32 b) {
+  return s16x32{_mm512_and_si512(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE s16x32 operator|(s16x32 a, s16x32 b) {
+  return s16x32{_mm512_or_si512(a.v, b.v)};
 }
 YNN_ALWAYS_INLINE s16x32 operator^(s16x32 a, s16x32 b) {
   return s16x32{_mm512_xor_si512(a.v, b.v)};
 }
+YNN_ALWAYS_INLINE s16x32 operator~(s16x32 a) {
+  return s16x32{_mm512_xor_si512(a.v, _mm512_set1_epi32(-1))};
+}
+YNN_ALWAYS_INLINE s16x32 operator&(s16x32 a, int b) {
+  return s16x32{_mm512_and_si512(a.v, _mm512_set1_epi16(b))};
+}
 YNN_ALWAYS_INLINE s16x32 operator>>(s16x32 a, int b) {
   return s16x32{_mm512_srai_epi16(a.v, b)};
+}
+
+YNN_ALWAYS_INLINE s32x16 operator&(s32x16 a, s32x16 b) {
+  return s32x16{_mm512_and_si512(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE s32x16 operator|(s32x16 a, s32x16 b) {
+  return s32x16{_mm512_or_si512(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE s32x16 operator^(s32x16 a, s32x16 b) {
+  return s32x16{_mm512_xor_si512(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE s32x16 operator~(s32x16 a) {
+  return s32x16{_mm512_xor_si512(a.v, _mm512_set1_epi32(-1))};
+}
+
+YNN_ALWAYS_INLINE u8x64 operator&(u8x64 a, u8x64 b) {
+  return u8x64{_mm512_and_si512(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE u8x64 operator|(u8x64 a, u8x64 b) {
+  return u8x64{_mm512_or_si512(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE u8x64 operator^(u8x64 a, u8x64 b) {
+  return u8x64{_mm512_xor_si512(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE u8x64 operator~(u8x64 a) {
+  return u8x64{_mm512_xor_si512(a.v, _mm512_set1_epi32(-1))};
+}
+
+YNN_ALWAYS_INLINE s8x64 operator&(s8x64 a, s8x64 b) {
+  return s8x64{_mm512_and_si512(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE s8x64 operator|(s8x64 a, s8x64 b) {
+  return s8x64{_mm512_or_si512(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE s8x64 operator^(s8x64 a, s8x64 b) {
+  return s8x64{_mm512_xor_si512(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE s8x64 operator~(s8x64 a) {
+  return s8x64{_mm512_xor_si512(a.v, _mm512_set1_epi32(-1))};
 }
 
 YNN_ALWAYS_INLINE f32x16 fma(f32x16 a, f32x16 b, f32x16 acc) {

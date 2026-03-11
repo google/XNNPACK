@@ -372,15 +372,65 @@ YNN_ALWAYS_INLINE s8x16 operator*(s8x16 a, s8x16 b) {
   return s8x16{vmulq_s8(a.v, b.v)};
 }
 
-YNN_ALWAYS_INLINE s16x8 operator&(s16x8 a, int b) {
-  return s16x8{vandq_s16(a.v, vdupq_n_s16(b))};
-}
 YNN_ALWAYS_INLINE s16x8 operator>>(s16x8 a, int b) {
   return s16x8{vshlq_s16(a.v, vdupq_n_s16(-b))};
+}
+
+YNN_ALWAYS_INLINE s32x4 operator&(s32x4 a, s32x4 b) {
+  return s32x4{vandq_s32(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE s32x4 operator|(s32x4 a, s32x4 b) {
+  return s32x4{vorrq_s32(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE s32x4 operator^(s32x4 a, s32x4 b) {
+  return s32x4{veorq_s32(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE s32x4 operator~(s32x4 a) { return s32x4{vmvnq_s32(a.v)}; }
+
+YNN_ALWAYS_INLINE s16x8 operator&(s16x8 a, s16x8 b) {
+  return s16x8{vandq_s16(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE s16x8 operator|(s16x8 a, s16x8 b) {
+  return s16x8{vorrq_s16(a.v, b.v)};
 }
 YNN_ALWAYS_INLINE s16x8 operator^(s16x8 a, s16x8 b) {
   return s16x8{veorq_s16(a.v, b.v)};
 }
+YNN_ALWAYS_INLINE s16x8 operator~(s16x8 a) { return s16x8{vmvnq_s16(a.v)}; }
+
+YNN_ALWAYS_INLINE u8x16 operator&(u8x16 a, u8x16 b) {
+  return u8x16{vandq_u8(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE u8x16 operator|(u8x16 a, u8x16 b) {
+  return u8x16{vorrq_u8(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE u8x16 operator^(u8x16 a, u8x16 b) {
+  return u8x16{veorq_u8(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE u8x16 operator~(u8x16 a) { return u8x16{vmvnq_u8(a.v)}; }
+
+YNN_ALWAYS_INLINE s8x16 operator&(s8x16 a, s8x16 b) {
+  return s8x16{vandq_s8(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE s8x16 operator|(s8x16 a, s8x16 b) {
+  return s8x16{vorrq_s8(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE s8x16 operator^(s8x16 a, s8x16 b) {
+  return s8x16{veorq_s8(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE s8x16 operator~(s8x16 a) { return s8x16{vmvnq_s8(a.v)}; }
+
+YNN_ALWAYS_INLINE u8x8 operator&(u8x8 a, u8x8 b) {
+  return u8x8{vand_u8(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE u8x8 operator|(u8x8 a, u8x8 b) {
+  return u8x8{vorr_u8(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE u8x8 operator^(u8x8 a, u8x8 b) {
+  return u8x8{veor_u8(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE u8x8 operator~(u8x8 a) { return u8x8{vmvn_u8(a.v)}; }
+
 YNN_ALWAYS_INLINE f32x4 min(f32x4 a, f32x4 b) {
   return f32x4{vminq_f32(a.v, b.v)};
 }

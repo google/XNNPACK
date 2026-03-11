@@ -75,6 +75,26 @@ TEST_MAX(x86_sse2, u8, 16);
 TEST_MAX(x86_sse2, s16, 8);
 TEST_MAX(x86_sse2, f32, 4);
 
+TEST_AND(x86_sse2, u8, 16);
+TEST_AND(x86_sse2, s8, 16);
+TEST_AND(x86_sse2, s16, 8);
+TEST_AND(x86_sse2, s32, 4);
+
+TEST_OR(x86_sse2, u8, 16);
+TEST_OR(x86_sse2, s8, 16);
+TEST_OR(x86_sse2, s16, 8);
+TEST_OR(x86_sse2, s32, 4);
+
+TEST_XOR(x86_sse2, u8, 16);
+TEST_XOR(x86_sse2, s8, 16);
+TEST_XOR(x86_sse2, s16, 8);
+TEST_XOR(x86_sse2, s32, 4);
+
+TEST_NOT(x86_sse2, u8, 16);
+TEST_NOT(x86_sse2, s8, 16);
+TEST_NOT(x86_sse2, s16, 8);
+TEST_NOT(x86_sse2, s32, 4);
+
 TEST_SQRT(x86_sse2, f32, 4);
 
 TEST_HORIZONTAL_MIN(x86_sse2, u8, 16);
