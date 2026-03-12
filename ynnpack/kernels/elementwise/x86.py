@@ -106,38 +106,6 @@ def make_x86_bf16_patterns(vector_bits):
   return rules
 
 
-def make_x86_reinterpret_cast_patterns(vector_bits, prefix):
-  return [
-      i.vectorize(vector_bits)
-      for i in [
-          Rule(
-              Op(Float(32), "reinterpret_cast", [i32_a]),
-              Op(
-                  Float(32),
-                  prefix + "castsi" + str(vector_bits) + "_ps",
-                  [i32_a],
-              ),
-          ),
-          Rule(
-              Op(Int(32), "reinterpret_cast", [f32_a]),
-              Op(Int(32), prefix + "castps_si" + str(vector_bits), [f32_a]),
-          ),
-          Rule(
-              Op(Float(32), "reinterpret_cast", [u32_a]),
-              Op(
-                  Float(32),
-                  prefix + "castsi" + str(vector_bits) + "_ps",
-                  [u32_a],
-              ),
-          ),
-          Rule(
-              Op(UInt(32), "reinterpret_cast", [f32_a]),
-              Op(UInt(32), prefix + "castps_si" + str(vector_bits), [f32_a]),
-          ),
-      ]
-  ]
-
-
 def make_x86_integer_patterns(vector_bits, prefix):
   return [
       i.vectorize(vector_bits)
@@ -484,7 +452,6 @@ class X86(Target):
 
     self.patterns += make_x86_integer_patterns(128, "_mm_")
     self.patterns += make_x86_cast_patterns(128, "_mm_")
-    self.patterns += make_x86_reinterpret_cast_patterns(128, "_mm_")
     self.patterns += make_x86_float_comparison_patterns(128, "_mm_")
     self.patterns += make_x86_integer_comparison_patterns(128, "_mm_")
 
@@ -590,7 +557,6 @@ YNN_INTRINSIC __m128 wrapper_mm256_slice_extract_ps256_1(
         BFloat(16, 16): "simd::vec<bfloat16, 16>",
         BFloat(16, 8): "simd::vec<bfloat16, 8>",
     })
-    self.patterns += make_x86_reinterpret_cast_patterns(256, "_mm256_")
     self.patterns += make_x86_slice_patterns(256, "_mm256_")
 
   def update_for_avx2(self):
@@ -743,7 +709,6 @@ YNN_INTRINSIC __m256 wrapper_mm512_slice_extract_ps512_1(
         Float(16, 16): "simd::vec<half, 16>",
     })
     self.patterns += make_x86_fma_patterns(512, "_mm512_")
-    self.patterns += make_x86_reinterpret_cast_patterns(512, "_mm512_")
     self.patterns += make_x86_integer_patterns(512, "_mm512_")
     self.patterns += make_x86_cast_patterns(512, "_mm512_")
     self.patterns += make_x86_slice_patterns(512, "_mm512_")

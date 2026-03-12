@@ -970,6 +970,7 @@ class Target:
         "floor",
         "ceil",
         "sqrt",
+        "reinterpret_cast",
     }
     self.infix_ops = {
         "add": "+",
@@ -1023,10 +1024,16 @@ class Target:
     return self.types.get(ty, ty.to_c_decl(is_const))
 
   def legalize_op(self, op):
+    """Legalizes an operator."""
     if op.name == "broadcast":
       return (
           f"simd::broadcast<{op.ty.lanes},"
           f" {self.legalize_type(op.ty.scalar())}>"
+      )
+    if op.name == "reinterpret_cast":
+      return (
+          f"bit_cast<{self.legalize_type(op.ty)},"
+          f" {self.legalize_type(op.args[0].ty)}>"
       )
     elif op.name == "min" or op.name == "max":
       return f"simd::{op.name}"

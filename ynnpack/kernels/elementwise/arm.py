@@ -47,31 +47,6 @@ def make_neon_cast_patterns(vector_bits):
   )
 
 
-def make_neon_reinterpret_cast_patterns(vector_bits):
-  assert vector_bits == 128
-  return [
-      i.vectorize(vector_bits)
-      for i in [
-          Rule(
-              Op(Float(32), "reinterpret_cast", [i32_a]),
-              Op(Float(32), "vreinterpretq_f32_s32", [i32_a]),
-          ),
-          Rule(
-              Op(Int(32), "reinterpret_cast", [f32_a]),
-              Op(Int(32), "vreinterpretq_s32_f32", [f32_a]),
-          ),
-          Rule(
-              Op(Float(32), "reinterpret_cast", [u32_a]),
-              Op(Float(32), "vreinterpretq_f32_u32", [u32_a]),
-          ),
-          Rule(
-              Op(UInt(32), "reinterpret_cast", [f32_a]),
-              Op(UInt(32), "vreinterpretq_u32_f32", [f32_a]),
-          ),
-      ]
-  ]
-
-
 def make_neon_integer_patterns(vector_bits):
   assert vector_bits == 128
   return [
@@ -195,7 +170,6 @@ YNN_INTRINSIC uint8x16_t saturating_cast_int16_to_uint8(int16x8_t a, int16x8_t b
     self.patterns += make_neon_float32_patterns(128)
     self.patterns += make_neon_integer_patterns(128)
     self.patterns += make_neon_cast_patterns(128)
-    self.patterns += make_neon_reinterpret_cast_patterns(128)
 
   def update_for_fp16(self):
     self.header += """
