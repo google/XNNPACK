@@ -4,13 +4,9 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-$assert DATATYPE in ["QD8", "QC4"] or REQUANTIZATION in ["FP32"]
-$assert DATATYPE in ["QC8", "QD8", "QC4", "QU8", "QS8"]
+$assert DATATYPE in ["QC8", "QS8", "QU8", "QD8_F32", "QC4_F32", "QD8_F16", "QC4_F16", "QB4_F16"]
 $assert MR >= 1
-$assert NR in ["m2", "m4", "m8"]
-$OUT_LMUL = NR
-$IN_LMUL = {"m2": "mf2", "m4": "m1", "m8": "m2"}[OUT_LMUL]
-$INTER_LMUL = {"m2": "m1", "m4": "m2", "m8": "m4"}[OUT_LMUL]
+$assert LMUL in [1, 2, 4, 8]
 #include <assert.h>
 
 #include <riscv_vector.h>
@@ -18,8 +14,20 @@ $INTER_LMUL = {"m2": "m1", "m4": "m2", "m8": "m4"}[OUT_LMUL]
 #include "src/xnnpack/gemm.h"
 #include "src/xnnpack/math.h"
 
-$DATATYPE_SPEC = {"QC8": "qs8_qc8w", "QD8": "qd8_f32_qc8w", "QC4": "qd8_f32_qc4w", "QS8": "qs8", "QU8": "qu8"}[DATATYPE]
-$PARAMS_TYPE = {"QC8": "union xnn_qs8_qc8w_conv_minmax_params", "QD8": "struct xnn_f32_minmax_params", "QC4": "struct xnn_f32_qc4w_minmax_params", "QS8": "union xnn_qs8_conv_minmax_params", "QU8": "union xnn_qu8_conv_minmax_params"}[DATATYPE]
+$if DATATYPE in ["QC8", "QS8", "QU8"]:
+  $LMUL8 = {1: "m1", 2: "m2"}[LMUL]
+  $LMUL16 = {1: "m2", 2: "m4"}[LMUL]
+  $LMUL32 = {1: "m4", 2: "m8"}[LMUL]
+$elif DATATYPE in ["QD8_F16", "QC4_F16", "QB4_F16"]:
+  $LMUL8 = {1: "mf2", 2: "m1", 4: "m2"}[LMUL]
+  $LMUL16 = {1: "m1", 2: "m2", 4: "m4"}[LMUL]
+  $LMUL32 = {1: "m2", 2: "m4", 4: "m8"}[LMUL]
+$elif DATATYPE in ["QD8_F32", "QC4_F32"]:
+  $LMUL8 = {2: "mf2", 4: "m1", 8:"m2"}[LMUL]
+  $LMUL16 = {2: "m1", 4: "m2", 8:"m4"}[LMUL]
+  $LMUL32 = {2: "m2", 4: "m4", 8:"m8"}[LMUL]
+$DATATYPE_SPEC = {"QC8": "qs8_qc8w", "QS8": "qs8", "QU8": "qu8", "QD8_F32": "qd8_f32_qc8w", "QC4_F32": "qd8_f32_qc4w", "QD8_F16": "qd8_f16_qc8w", "QC4_F16": "qd8_f16_qc4w", "QB4_F16": "qd8_f16_qb4w"}[DATATYPE]
+$PARAMS_TYPE = {"QC8": "union xnn_qs8_qc8w_conv_minmax_params", "QS8": "union xnn_qs8_conv_minmax_params", "QU8": "union xnn_qu8_conv_minmax_params", "QD8_F32": "struct xnn_f32_minmax_params", "QC4_F32": "struct xnn_f32_qc4w_minmax_params", "QD8_F16": "struct xnn_f16_minmax_params", "QC4_F16": "struct xnn_f16_qc4w_minmax_params", "QB4_F16": "struct xnn_f16_qb4w_minmax_params"}[DATATYPE]
 $if DATATYPE in ["QC8", "QS8", "QU8"]:
   $REQUANTIZATION_SPEC = "_" + REQUANTIZATION.lower() if REQUANTIZATION else ""
   $PARAMS_STRUCT = REQUANTIZATION.lower() + "_scalar"
@@ -27,8 +35,9 @@ $else:
   $REQUANTIZATION_SPEC = ""
   $PARAMS_STRUCT = ""
 $XINT8_T = "uint8_t" if DATATYPE == "QU8" else "int8_t"
-$OUT_T = {"QC8": "int8_t", "QD8": "float", "QC4": "float", "QS8": "int8_t", "QU8": "uint8_t"}[DATATYPE]
-void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${OUT_LMUL[1]}v__rvv(
+$OUT_T = {"QC8": "int8_t", "QS8": "int8_t", "QU8": "uint8_t", "QD8_F32": "float", "QC4_F32": "float", "QD8_F16": "xnn_float16", "QC4_F16": "xnn_float16", "QB4_F16": "xnn_float16"}[DATATYPE]
+$ISA = "fp16arith" if DATATYPE in ["QD8_F16", "QC4_F16", "QB4_F16"] else ""
+void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${LMUL}v__rvv${ISA}(
     size_t mr,
     size_t nc,
     size_t kc,
@@ -38,7 +47,7 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${OUT_
     ${OUT_T}* restrict c,
     size_t cm_stride,
     size_t cn_stride,
-    $if DATATYPE in ["QD8", "QC4"]:
+    $if DATATYPE in ["QD8_F32", "QC4_F32", "QD8_F16", "QC4_F16", "QB4_F16"]:
       const ${PARAMS_TYPE}* restrict params,
       const struct xnn_qd8_quantization_params* restrict quantization_params)
     $else:
@@ -70,10 +79,10 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${OUT_
         c${M} = c${M-1};
       }
 
-  const size_t nr = __riscv_vsetvlmax_e32${OUT_LMUL}();
+  const size_t nr = __riscv_vsetvlmax_e32${LMUL32}();
   size_t vl = nr;
 
-  $if DATATYPE not in ["QD8", "QC4"]:
+  $if DATATYPE not in ["QD8_F32", "QC4_F32", "QD8_F16", "QC4_F16"]:
     $if REQUANTIZATION == "FP32":
       $if DATATYPE != "QC8":
         const float vscale = params->${PARAMS_STRUCT}.scale;
@@ -82,44 +91,44 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${OUT_
       const int32_t output_zero_point = params->${PARAMS_STRUCT}.output_zero_point;
   $if DATATYPE == "QU8":
     const int32_t vb_zero_point = params->${PARAMS_STRUCT}.kernel_zero_point;
-  $elif DATATYPE == "QC4":
+  $elif DATATYPE == "QC4_F32":
     kc = round_up_po2(kc, 2);
   do {
     if XNN_UNLIKELY(nc < nr) {
-      vl = __riscv_vsetvl_e32${OUT_LMUL}(nc);
+      vl = __riscv_vsetvl_e32${LMUL32}(nc);
     }
     nc = nc - vl;
 
-    $if DATATYPE in ["QD8", "QC4"]:
-      vint32${OUT_LMUL}_t vksum = __riscv_vle32_v_i32${OUT_LMUL}((const int32_t*)w, vl);
+    $if DATATYPE in ["QD8_F32", "QC4_F32", "QD8_F16", "QC4_F16"]:
+      vint32${LMUL32}_t vksum = __riscv_vle32_v_i32${LMUL32}((const int32_t*)w, vl);
       $for M in range(MR):
         const int32_t vinput_zero_point${M} = quantization_params[${M}].zero_point;
       $for M in range(MR):
-        vint32${OUT_LMUL}_t vacc${M} = __riscv_vmul_vx_i32${OUT_LMUL}(vksum, vinput_zero_point${M}, vl);
+        vint32${LMUL32}_t vacc${M} = __riscv_vmul(vksum, vinput_zero_point${M}, vl);
     $else:
-      vint32${OUT_LMUL}_t vacc0 = __riscv_vle32_v_i32${OUT_LMUL}((const int32_t*)w, vl);
+      vint32${LMUL32}_t vacc0 = __riscv_vle32_v_i32${LMUL32}((const int32_t*)w, vl);
       $for M in range(1, MR):
-        vint32${OUT_LMUL}_t vacc${M} = vacc0;
+        vint32${LMUL32}_t vacc${M} = vacc0;
 
     w = (const int32_t*) w + nr;
 
     size_t k = kc;
-    $if DATATYPE == "QC4":
+    $if DATATYPE in ["QC4_F32", "QC4_F16"]:
       for (; k >= 2 * sizeof(uint8_t); k -= 2 * sizeof(uint8_t)) {
         $for M in range(MR):
           const int8_t va${M}c0 = a${M}[0];
           const int8_t va${M}c1 = a${M}[1];
           a${M} += 2;
-        const vint8${IN_LMUL}_t vbi = __riscv_vle8_v_i8${IN_LMUL}((const int8_t*) w, vl);
+        const vint8${LMUL8}_t vbi = __riscv_vle8_v_i8${LMUL8}((const int8_t*) w, vl);
         w = (const uint8_t*) w + nr;
-        const vint8${IN_LMUL}_t vbc0 = __riscv_vsll_vx_i8${IN_LMUL}(vbi, 4, vl);
-        const vint8${IN_LMUL}_t vbc1 = __riscv_vand_vx_i8${IN_LMUL}(vbi, 0xF0, vl);
+        const vint8${LMUL8}_t vbc0 = __riscv_vsll(vbi, 4, vl);
+        const vint8${LMUL8}_t vbc1 = __riscv_vand(vbi, 0xF0, vl);
 
         $for M in range(MR):
-          vint16${INTER_LMUL}_t va${M}bc0 = __riscv_vwmul_vx_i16${INTER_LMUL}(vbc0, va${M}c0, vl);
-          vacc${M} = __riscv_vwadd_wv_i32${OUT_LMUL}(vacc${M}, va${M}bc0, vl);
-          vint16${INTER_LMUL}_t va${M}bc1 = __riscv_vwmul_vx_i16${INTER_LMUL}(vbc1, va${M}c1, vl);
-          vacc${M} = __riscv_vwadd_wv_i32${OUT_LMUL}(vacc${M}, va${M}bc1, vl);
+          vint16${LMUL16}_t va${M}bc0 = __riscv_vwmul(vbc0, va${M}c0, vl);
+          vacc${M} = __riscv_vwadd_wv(vacc${M}, va${M}bc0, vl);
+          vint16${LMUL16}_t va${M}bc1 = __riscv_vwmul(vbc1, va${M}c1, vl);
+          vacc${M} = __riscv_vwadd_wv(vacc${M}, va${M}bc1, vl);
       }
     $else:
       do {
@@ -130,103 +139,109 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${OUT_
             const int32_t va${M} = (int32_t) *a${M}++;
 
         $if DATATYPE == "QU8":
-          const vuint8${IN_LMUL}_t vb = __riscv_vle8_v_u8${IN_LMUL}((const uint8_t*) w, vl);
-          const vint16${INTER_LMUL}_t vb0 = __riscv_vsub_vx_i16${INTER_LMUL}(__riscv_vreinterpret_i16${INTER_LMUL}(__riscv_vzext_vf2(vb, vl)), vb_zero_point, vl);
+          const vuint8${LMUL8}_t vb = __riscv_vle8_v_u8${LMUL8}((const uint8_t*) w, vl);
+          const vint16${LMUL16}_t vb0 = __riscv_vsub(__riscv_vreinterpret_i16${LMUL16}(__riscv_vzext_vf2(vb, vl)), vb_zero_point, vl);
         $else:
-          const vint8${IN_LMUL}_t vb = __riscv_vle8_v_i8${IN_LMUL}((const int8_t*) w, vl);
-          const vint16${INTER_LMUL}_t vb0 = __riscv_vsext_vf2(vb, vl);
+          const vint8${LMUL8}_t vb = __riscv_vle8_v_i8${LMUL8}((const int8_t*) w, vl);
+          const vint16${LMUL16}_t vb0 = __riscv_vsext_vf2(vb, vl);
 
         w = (const ${XINT8_T}*) w + nr;
 
         $for M in range(MR):
-          vacc${M} = __riscv_vwmacc_vx_i32${OUT_LMUL}(vacc${M}, va${M}, vb0, vl);
+          vacc${M} = __riscv_vwmacc(vacc${M}, va${M}, vb0, vl);
 
         k -= sizeof(${XINT8_T});
       } while (k != 0);
 
-    $if DATATYPE in ["QD8", "QC4"]:
-      $if DATATYPE == "QC4":
+    $if DATATYPE in ["QD8_F32", "QC4_F32", "QD8_F16", "QC4_F16"]:
+      $if DATATYPE in ["QC4_F32", "QC4_F16"]:
         $for M in range(MR):
-          vacc${M} = __riscv_vsra_vx_i32${OUT_LMUL}(vacc${M}, 4, vl);
+          vacc${M} = __riscv_vsra(vacc${M}, 4, vl);
       // i32 -> f32
       $for M in range(MR):
-        vfloat32${OUT_LMUL}_t vout${M} = __riscv_vfcvt_f_x_v_f32${OUT_LMUL}(vacc${M}, vl);
+        vfloat32${LMUL32}_t vout${M} = __riscv_vfcvt_f(vacc${M}, vl);
 
       // vout * input_scale
       $for M in range(MR):
         const float vinput_scale${M} = quantization_params[${M}].inv_scale;
       $for M in range(MR):
-        vout${M} = __riscv_vfmul_vf_f32${OUT_LMUL}(vout${M}, vinput_scale${M}, vl);
+        vout${M} = __riscv_vfmul(vout${M}, vinput_scale${M}, vl);
 
-      const vfloat32${OUT_LMUL}_t vfilter_output_scale = __riscv_vle32_v_f32${OUT_LMUL}((const float*) w, vl);
+      const vfloat32${LMUL32}_t vfilter_output_scale = __riscv_vle32_v_f32${LMUL32}((const float*) w, vl);
       w = (const float*) w + nr;
       $for M in range(MR):
-        vout${M} = __riscv_vfmul_vv_f32${OUT_LMUL}(vout${M}, vfilter_output_scale, vl);
+        vout${M} = __riscv_vfmul(vout${M}, vfilter_output_scale, vl);
 
-      const vfloat32${OUT_LMUL}_t vbias =  __riscv_vle32_v_f32${OUT_LMUL}((const float*) w, vl);
+      const vfloat32${LMUL32}_t vbias = __riscv_vle32_v_f32${LMUL32}((const float*) w, vl);
       w = (const float*) w + nr;
       $for M in range(MR):
-        vout${M} = __riscv_vfadd_vv_f32${OUT_LMUL}(vout${M}, vbias, vl);
+        vout${M} = __riscv_vfadd(vout${M}, vbias, vl);
 
-      const float vmin = params->scalar.min;
-      $for M in range(MR):
-        vout${M} = __riscv_vfmax_vf_f32${OUT_LMUL}(vout${M}, vmin, vl);
-      const float vmax = params->scalar.max;
-      $for M in range(MR):
-        vout${M} = __riscv_vfmin_vf_f32${OUT_LMUL}(vout${M}, vmax, vl);
+      $if DATATYPE in ["QD8_F32", "QC4_F32"]:
+        const float vmin = params->scalar.min;
+        $for M in range(MR):
+          vout${M} = __riscv_vfmax(vout${M}, vmin, vl);
+        const float vmax = params->scalar.max;
+        $for M in range(MR):
+          vout${M} = __riscv_vfmin(vout${M}, vmax, vl);
 
-      // store ${MR} x vl results to c
-      $for M in range(MR):
-        __riscv_vse32_v_f32${OUT_LMUL}(c${M}, vout${M}, vl);
-        c${M} = (float*) ((uintptr_t) c${M} + cn_stride);
+        // store ${MR} x vl results to c
+        $for M in range(MR):
+          __riscv_vse32(c${M}, vout${M}, vl);
+          c${M} = (float*) ((uintptr_t) c${M} + cn_stride);
+      $else:
+        $for M in range(MR):
+          vfloat16${LMUL16}_t vfp16out${M} = __riscv_vfncvt_f(vout${M}, vl);
+
+        const xnn_float16 vmin = params->scalar.min;
+        $for M in range(MR):
+          vfp16out${M} = __riscv_vfmax(vfp16out${M}, vmin, vl);
+        const xnn_float16 vmax = params->scalar.max;
+        $for M in range(MR):
+          vfp16out${M} = __riscv_vfmin(vfp16out${M}, vmax, vl);
+
+        // store ${MR} x vl results to c
+        $for M in range(MR):
+          __riscv_vse16(c${M}, vfp16out${M}, vl);
+          c${M} = (xnn_float16*) ((uintptr_t) c${M} + cn_stride);
 
       $for M in range(MR):
         a${M} = (const ${XINT8_T}*) ((uintptr_t) a${M} - kc);
     $else:
       $if REQUANTIZATION == "FP32":
         $for M in range(MR):
-          vfloat32${OUT_LMUL}_t vfacc${M} = __riscv_vfcvt_f_x_v_f32${OUT_LMUL}(vacc${M}, vl);
+          vfloat32${LMUL32}_t vfacc${M} = __riscv_vfcvt_f(vacc${M}, vl);
 
         $if DATATYPE == "QC8":
-          const vfloat32${OUT_LMUL}_t vscale = __riscv_vle32_v_f32${OUT_LMUL}((const float*) w, vl);
+          const vfloat32${LMUL32}_t vscale = __riscv_vle32_v_f32${LMUL32}((const float*) w, vl);
           $for M in range(MR):
-            vfacc${M} = __riscv_vfmul_vv_f32${OUT_LMUL}(vfacc${M}, vscale, vl);
+            vfacc${M} = __riscv_vfmul(vfacc${M}, vscale, vl);
           w = (const float*) w + nr;
         $else:
           $for M in range(MR):
-            vfacc${M} = __riscv_vfmul_vf_f32${OUT_LMUL}(vfacc${M}, vscale, vl);
+            vfacc${M} = __riscv_vfmul(vfacc${M}, vscale, vl);
 
       $for M in range(MR):
-        vfacc${M} = __riscv_vfmax_vf_f32${OUT_LMUL}(vfacc${M}, output_min_less_zero_point, vl);
+        vfacc${M} = __riscv_vfmax(vfacc${M}, output_min_less_zero_point, vl);
       $for M in range(MR):
-        vfacc${M} = __riscv_vfmin_vf_f32${OUT_LMUL}(vfacc${M}, output_max_less_zero_point, vl);
+        vfacc${M} = __riscv_vfmin(vfacc${M}, output_max_less_zero_point, vl);
 
+      $for M in range(MR):
+        vint16${LMUL16}_t vout${M} = __riscv_vfncvt_x(vfacc${M}, vl);
+
+      $for M in range(MR):
+        vout${M} = __riscv_vadd(vout${M}, (int16_t) output_zero_point, vl);
+  
       $if DATATYPE == "QU8":
         $for M in range(MR):
-          vuint16${INTER_LMUL}_t vout${M} = __riscv_vfncvt_xu(vfacc${M}, vl);
-
-        $for M in range(MR):
-          vout${M} = __riscv_vadd_vx_u16${INTER_LMUL}(vout${M}, (uint16_t) output_zero_point, vl);
-
-        $for M in range(MR):
-          vuint8${IN_LMUL}_t vout8${M} = __riscv_vnclipu_wx_u8${IN_LMUL}(vout${M}, 0, vl);
-
-        $for M in range(MR):
-          __riscv_vse8_v_u8${IN_LMUL}(c${M}, vout8${M}, vl);
-          c${M} = (${XINT8_T}*) ((uintptr_t) c${M} + cn_stride);
+          vuint8${LMUL8}_t vout8${M} = __riscv_vncvt_x(__riscv_vreinterpret_u16${LMUL16}(vout${M}), vl);
       $else:
         $for M in range(MR):
-          vint16${INTER_LMUL}_t vout${M} = __riscv_vfncvt_x(vfacc${M}, vl);
+          vint8${LMUL8}_t vout8${M} = __riscv_vncvt_x(vout${M}, vl);
 
-        $for M in range(MR):
-          vout${M} = __riscv_vadd_vx_i16${INTER_LMUL}(vout${M}, (int16_t) output_zero_point, vl);
-
-        $for M in range(MR):
-          vint8${IN_LMUL}_t vout8${M} = __riscv_vncvt_x_x_w_i8${IN_LMUL}(vout${M}, vl);
-
-        $for M in range(MR):
-          __riscv_vse8_v_i8${IN_LMUL}(c${M}, vout8${M}, vl);
-          c${M} = (${XINT8_T}*) ((uintptr_t) c${M} + cn_stride);
+      $for M in range(MR):
+        __riscv_vse8(c${M}, vout8${M}, vl);
+        c${M} = (${XINT8_T}*) ((uintptr_t) c${M} + cn_stride);
 
       $for M in range(MR):
         a${M} = (const ${XINT8_T}*) ((uintptr_t) a${M} - kc);
