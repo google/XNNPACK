@@ -296,6 +296,141 @@ static void qd8_f16_qc2w_gemm_minmax_ukernel_4x4__scalar(benchmark::State& state
 
 BENCHMARK_GEMM(qd8_f16_qc2w_gemm_minmax_ukernel_4x4__scalar)
 
+#if XNN_ENABLE_ARM_DOTPROD && XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+  static void qd8_f16_qc2w_gemm_minmax_ukernel_1x8c4__neondotfp16arith(benchmark::State& state) {
+    GEMMBenchmark(state,
+      xnn_qd8_f16_qc2w_gemm_minmax_ukernel_1x8c4__neondotfp16arith,
+      xnn_init_f16_minmax_scalar_params,
+      xnn_pack_qd8_qc2w_gemm_goi_w,
+      /*mr=*/1, /*nr=*/8, /*kr=*/4, /*sr=*/1,
+      /*arch_flags=*/xnn_arch_arm_neon_dot | xnn_arch_arm_neon_fp16_arith);
+  }
+
+  BENCHMARK_GEMM(qd8_f16_qc2w_gemm_minmax_ukernel_1x8c4__neondotfp16arith)
+
+  static void qd8_f16_qc2w_gemm_minmax_ukernel_2x8c4__neondotfp16arith(benchmark::State& state) {
+    GEMMBenchmark(state,
+      xnn_qd8_f16_qc2w_gemm_minmax_ukernel_2x8c4__neondotfp16arith,
+      xnn_init_f16_minmax_scalar_params,
+      xnn_pack_qd8_qc2w_gemm_goi_w,
+      /*mr=*/2, /*nr=*/8, /*kr=*/4, /*sr=*/1,
+      /*arch_flags=*/xnn_arch_arm_neon_dot | xnn_arch_arm_neon_fp16_arith);
+  }
+
+  BENCHMARK_GEMM(qd8_f16_qc2w_gemm_minmax_ukernel_2x8c4__neondotfp16arith)
+
+  static void qd8_f16_qc2w_gemm_minmax_ukernel_3x8c4__neondotfp16arith(benchmark::State& state) {
+    GEMMBenchmark(state,
+      xnn_qd8_f16_qc2w_gemm_minmax_ukernel_3x8c4__neondotfp16arith,
+      xnn_init_f16_minmax_scalar_params,
+      xnn_pack_qd8_qc2w_gemm_goi_w,
+      /*mr=*/3, /*nr=*/8, /*kr=*/4, /*sr=*/1,
+      /*arch_flags=*/xnn_arch_arm_neon_dot | xnn_arch_arm_neon_fp16_arith);
+  }
+
+  BENCHMARK_GEMM(qd8_f16_qc2w_gemm_minmax_ukernel_3x8c4__neondotfp16arith)
+
+  static void qd8_f16_qc2w_gemm_minmax_ukernel_4x8c4__neondotfp16arith(benchmark::State& state) {
+    GEMMBenchmark(state,
+      xnn_qd8_f16_qc2w_gemm_minmax_ukernel_4x8c4__neondotfp16arith,
+      xnn_init_f16_minmax_scalar_params,
+      xnn_pack_qd8_qc2w_gemm_goi_w,
+      /*mr=*/4, /*nr=*/8, /*kr=*/4, /*sr=*/1,
+      /*arch_flags=*/xnn_arch_arm_neon_dot | xnn_arch_arm_neon_fp16_arith);
+  }
+
+  BENCHMARK_GEMM(qd8_f16_qc2w_gemm_minmax_ukernel_4x8c4__neondotfp16arith)
+
+  static void qd8_f16_qc2w_gemm_minmax_ukernel_5x8c4__neondotfp16arith(benchmark::State& state) {
+    GEMMBenchmark(state,
+      xnn_qd8_f16_qc2w_gemm_minmax_ukernel_5x8c4__neondotfp16arith,
+      xnn_init_f16_minmax_scalar_params,
+      xnn_pack_qd8_qc2w_gemm_goi_w,
+      /*mr=*/5, /*nr=*/8, /*kr=*/4, /*sr=*/1,
+      /*arch_flags=*/xnn_arch_arm_neon_dot | xnn_arch_arm_neon_fp16_arith);
+  }
+
+  BENCHMARK_GEMM(qd8_f16_qc2w_gemm_minmax_ukernel_5x8c4__neondotfp16arith)
+
+  static void qd8_f16_qc2w_gemm_minmax_ukernel_6x8c4__neondotfp16arith(benchmark::State& state) {
+    GEMMBenchmark(state,
+      xnn_qd8_f16_qc2w_gemm_minmax_ukernel_6x8c4__neondotfp16arith,
+      xnn_init_f16_minmax_scalar_params,
+      xnn_pack_qd8_qc2w_gemm_goi_w,
+      /*mr=*/6, /*nr=*/8, /*kr=*/4, /*sr=*/1,
+      /*arch_flags=*/xnn_arch_arm_neon_dot | xnn_arch_arm_neon_fp16_arith);
+  }
+
+  BENCHMARK_GEMM(qd8_f16_qc2w_gemm_minmax_ukernel_6x8c4__neondotfp16arith)
+
+  static void qd8_f16_qc2w_gemm_minmax_ukernel_1x16c4__neondotfp16arith(benchmark::State& state) {
+    GEMMBenchmark(state,
+      xnn_qd8_f16_qc2w_gemm_minmax_ukernel_1x16c4__neondotfp16arith,
+      xnn_init_f16_minmax_scalar_params,
+      xnn_pack_qd8_qc2w_gemm_goi_w,
+      /*mr=*/1, /*nr=*/16, /*kr=*/4, /*sr=*/1,
+      /*arch_flags=*/xnn_arch_arm_neon_dot | xnn_arch_arm_neon_fp16_arith);
+  }
+
+  BENCHMARK_GEMM(qd8_f16_qc2w_gemm_minmax_ukernel_1x16c4__neondotfp16arith)
+
+  static void qd8_f16_qc2w_gemm_minmax_ukernel_2x16c4__neondotfp16arith(benchmark::State& state) {
+    GEMMBenchmark(state,
+      xnn_qd8_f16_qc2w_gemm_minmax_ukernel_2x16c4__neondotfp16arith,
+      xnn_init_f16_minmax_scalar_params,
+      xnn_pack_qd8_qc2w_gemm_goi_w,
+      /*mr=*/2, /*nr=*/16, /*kr=*/4, /*sr=*/1,
+      /*arch_flags=*/xnn_arch_arm_neon_dot | xnn_arch_arm_neon_fp16_arith);
+  }
+
+  BENCHMARK_GEMM(qd8_f16_qc2w_gemm_minmax_ukernel_2x16c4__neondotfp16arith)
+
+  static void qd8_f16_qc2w_gemm_minmax_ukernel_3x16c4__neondotfp16arith(benchmark::State& state) {
+    GEMMBenchmark(state,
+      xnn_qd8_f16_qc2w_gemm_minmax_ukernel_3x16c4__neondotfp16arith,
+      xnn_init_f16_minmax_scalar_params,
+      xnn_pack_qd8_qc2w_gemm_goi_w,
+      /*mr=*/3, /*nr=*/16, /*kr=*/4, /*sr=*/1,
+      /*arch_flags=*/xnn_arch_arm_neon_dot | xnn_arch_arm_neon_fp16_arith);
+  }
+
+  BENCHMARK_GEMM(qd8_f16_qc2w_gemm_minmax_ukernel_3x16c4__neondotfp16arith)
+
+  static void qd8_f16_qc2w_gemm_minmax_ukernel_4x16c4__neondotfp16arith(benchmark::State& state) {
+    GEMMBenchmark(state,
+      xnn_qd8_f16_qc2w_gemm_minmax_ukernel_4x16c4__neondotfp16arith,
+      xnn_init_f16_minmax_scalar_params,
+      xnn_pack_qd8_qc2w_gemm_goi_w,
+      /*mr=*/4, /*nr=*/16, /*kr=*/4, /*sr=*/1,
+      /*arch_flags=*/xnn_arch_arm_neon_dot | xnn_arch_arm_neon_fp16_arith);
+  }
+
+  BENCHMARK_GEMM(qd8_f16_qc2w_gemm_minmax_ukernel_4x16c4__neondotfp16arith)
+
+  static void qd8_f16_qc2w_gemm_minmax_ukernel_5x16c4__neondotfp16arith(benchmark::State& state) {
+    GEMMBenchmark(state,
+      xnn_qd8_f16_qc2w_gemm_minmax_ukernel_5x16c4__neondotfp16arith,
+      xnn_init_f16_minmax_scalar_params,
+      xnn_pack_qd8_qc2w_gemm_goi_w,
+      /*mr=*/5, /*nr=*/16, /*kr=*/4, /*sr=*/1,
+      /*arch_flags=*/xnn_arch_arm_neon_dot | xnn_arch_arm_neon_fp16_arith);
+  }
+
+  BENCHMARK_GEMM(qd8_f16_qc2w_gemm_minmax_ukernel_5x16c4__neondotfp16arith)
+
+  static void qd8_f16_qc2w_gemm_minmax_ukernel_6x16c4__neondotfp16arith(benchmark::State& state) {
+    GEMMBenchmark(state,
+      xnn_qd8_f16_qc2w_gemm_minmax_ukernel_6x16c4__neondotfp16arith,
+      xnn_init_f16_minmax_scalar_params,
+      xnn_pack_qd8_qc2w_gemm_goi_w,
+      /*mr=*/6, /*nr=*/16, /*kr=*/4, /*sr=*/1,
+      /*arch_flags=*/xnn_arch_arm_neon_dot | xnn_arch_arm_neon_fp16_arith);
+  }
+
+  BENCHMARK_GEMM(qd8_f16_qc2w_gemm_minmax_ukernel_6x16c4__neondotfp16arith)
+#endif  // XNN_ENABLE_ARM_DOTPROD && XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+
+
 }  // namespace
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
