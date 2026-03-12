@@ -63,7 +63,7 @@ enum xnn_status xnn_delete_threadpool(xnn_threadpool_t threadpool);
 ///                    workspace is NULL, there will be no sharing: each runtime has its own workspace.
 /// @param threadpool - Threadpool object to to implement parallel operations.
 /// @param flags - binary features of the runtime. The only currently supported values are
-///                XNN_FLAG_HINT_SPARSE_INFERENCE, XNN_FLAG_HINT_FP16_INFERENCE, XNN_FLAG_FORCE_FP16_INFERENCE
+///                XNN_FLAG_HINT_SPARSE_INFERENCE
 /// @param runtime_out - pointer to the variable that will be initialized with a handle to the Runtime object upon
 ///                      successful return. Once constructed, the Runtime object is independent of the Subgraph object
 ///                      used to create it.
