@@ -12,6 +12,9 @@
 SET(PROD_NEONDOTFP16ARITH_MICROKERNEL_SRCS
   src/qd8-f16-qb4w-gemm/gen/qd8-f16-qb4w-gemm-1x16c4-minmax-neondotfp16arith.c
   src/qd8-f16-qb4w-gemm/gen/qd8-f16-qb4w-gemm-4x16c4-minmax-neondotfp16arith.c
+  src/qd8-f16-qc2w-gemm/gen/qd8-f16-qc2w-gemm-1x8c4-minmax-neondotfp16arith.c
+  src/qd8-f16-qc2w-gemm/gen/qd8-f16-qc2w-gemm-2x8c4-minmax-neondotfp16arith.c
+  src/qd8-f16-qc2w-gemm/gen/qd8-f16-qc2w-gemm-6x8c4-minmax-neondotfp16arith.c
   src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-1x16c4-minmax-neondotfp16arith.c
   src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-4x16c4-minmax-neondotfp16arith.c
   src/qd8-f16-qc8w-gemm/gen/qd8-f16-qc8w-gemm-1x8c4-minmax-neondotfp16arith.c
@@ -34,6 +37,15 @@ SET(NON_PROD_NEONDOTFP16ARITH_MICROKERNEL_SRCS
   src/qd8-f16-qb4w-gemm/gen/qd8-f16-qb4w-gemm-5x16c4-minmax-neondotfp16arith.c
   src/qd8-f16-qb4w-gemm/gen/qd8-f16-qb4w-gemm-6x8c4-minmax-neondotfp16arith.c
   src/qd8-f16-qb4w-gemm/gen/qd8-f16-qb4w-gemm-6x16c4-minmax-neondotfp16arith.c
+  src/qd8-f16-qc2w-gemm/gen/qd8-f16-qc2w-gemm-1x16c4-minmax-neondotfp16arith.c
+  src/qd8-f16-qc2w-gemm/gen/qd8-f16-qc2w-gemm-2x16c4-minmax-neondotfp16arith.c
+  src/qd8-f16-qc2w-gemm/gen/qd8-f16-qc2w-gemm-3x8c4-minmax-neondotfp16arith.c
+  src/qd8-f16-qc2w-gemm/gen/qd8-f16-qc2w-gemm-3x16c4-minmax-neondotfp16arith.c
+  src/qd8-f16-qc2w-gemm/gen/qd8-f16-qc2w-gemm-4x8c4-minmax-neondotfp16arith.c
+  src/qd8-f16-qc2w-gemm/gen/qd8-f16-qc2w-gemm-4x16c4-minmax-neondotfp16arith.c
+  src/qd8-f16-qc2w-gemm/gen/qd8-f16-qc2w-gemm-5x8c4-minmax-neondotfp16arith.c
+  src/qd8-f16-qc2w-gemm/gen/qd8-f16-qc2w-gemm-5x16c4-minmax-neondotfp16arith.c
+  src/qd8-f16-qc2w-gemm/gen/qd8-f16-qc2w-gemm-6x16c4-minmax-neondotfp16arith.c
   src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-1x8c4-minmax-neondotfp16arith.c
   src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-2x8c4-minmax-neondotfp16arith.c
   src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-2x16c4-minmax-neondotfp16arith.c
