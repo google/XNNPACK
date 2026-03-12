@@ -19,6 +19,7 @@
 #include "src/xnnpack/microparams.h"
 
 
+
 void xnn_qd8_f32_qc2w_gemm_minmax_ukernel_5x8c4__neondot(
     size_t mr,
     size_t nc,

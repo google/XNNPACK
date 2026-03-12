@@ -19,6 +19,7 @@
 #include "src/xnnpack/microparams.h"
 
 
+
 void xnn_qd8_f16_qc4w_gemm_minmax_ukernel_6x8c4__neondotfp16arith(
     size_t mr,
     size_t nc,
@@ -247,7 +248,6 @@ void xnn_qd8_f16_qc4w_gemm_minmax_ukernel_6x8c4__neondotfp16arith(
     float16x8_t vfp16out3x01234567 = vcombine_f16(vcvt_f16_f32(vout3x0123), vcvt_f16_f32(vout3x4567));
     float16x8_t vfp16out4x01234567 = vcombine_f16(vcvt_f16_f32(vout4x0123), vcvt_f16_f32(vout4x4567));
     float16x8_t vfp16out5x01234567 = vcombine_f16(vcvt_f16_f32(vout5x0123), vcvt_f16_f32(vout5x4567));
-
     const float16x8_t voutput_min = vreinterpretq_f16_u16(vld1q_dup_u16((const uint16_t*) &params->scalar.min));
     vfp16out0x01234567 = vmaxq_f16(vfp16out0x01234567, voutput_min);
     vfp16out1x01234567 = vmaxq_f16(vfp16out1x01234567, voutput_min);
