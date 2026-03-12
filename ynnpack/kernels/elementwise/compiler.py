@@ -949,7 +949,21 @@ class Target:
     self.tail_strategy = TailStrategy.SCALAR
     self.result = ""
     self.header = header
-    self.simd_ops = {"min", "max", "load", "store"}
+    self.simd_ops = {
+        "min",
+        "max",
+        "load",
+        "store",
+        "round",
+        "floor",
+        "ceil",
+        "sqrt",
+    }
+    self.infix_ops = {
+        "add": "+",
+        "sub": "-",
+        "mul": "*",
+    }
 
   def indent(self):
     return "  " * self.indent_level
@@ -981,12 +995,12 @@ class Target:
         )
 
   def needs_simd_wrapper(self, op):
-    if op.name in self.simd_ops:
+    if op.name in self.simd_ops or op.name in self.infix_ops:
       return False
     return True
 
   def simd_suffix(self, op):
-    if op.name in self.simd_ops:
+    if op.name in self.simd_ops or op.name in self.infix_ops:
       return ""
     return ".v"
 
@@ -1373,7 +1387,8 @@ class Target:
 
     is_load = isinstance(op, Load)
     is_store = isinstance(op, Op) and op.name == "store"
-    is_load_store = is_load or is_store
+
+    offset = op.offset_elements if is_load else 0
 
     str_args = []
 
@@ -1385,7 +1400,7 @@ class Target:
       # the existing broadcast value.
       b = self.as_buffer(op.index, buffers)
       if b is not None and b.broadcast_mode == BroadcastMode.ALWAYS:
-        self.result += f" = {result_type}({b.name}_broadcasted[{j}]);\n"
+        self.result += f" = {b.name}_broadcasted[{j}];\n"
         return
       # hack
       args = [op.index]
@@ -1413,7 +1428,6 @@ class Target:
             )
           else:
             row_offset = f" + stride_{arg.name}_m * min({j}, m - i - 1)"
-        offset = op.offset_elements if is_load else 0
         str_args.append(
             f"({t}*)offset_bytes({arg.name}, {stride_n} *"
             f" ({k * output_lanes}{row_offset} + {offset}))"
@@ -1426,48 +1440,37 @@ class Target:
         else:
           str_args.append(f"{arg}_{j}_{k}{self.simd_suffix(op)}")
 
-    offset = op.offset_elements if is_load else 0
     lanes = (
         f"min({op_natural_vector_size}, (size_t)std::max<int>(j -"
         f" {k * output_lanes} - {offset}, 0))"
     )
 
-    if (
-        is_load_store
-        and is_rem_width
-    ):
-      mask_op = ""
-      if is_load:
-        self.result += " = "
-        mask_op = "simd::load"
+    if not is_store:
+      self.result += " = "
+
+    mem_op = ""
+    if is_load:
+      mem_op = "simd::load"
+      if is_rem_width:
+        str_args.append(lanes)
+        str_args.append(f"simd::undef<{op.ty.lanes}>()")
       else:
-        mask_op = "simd::store"
-      self.result += f"{mask_op}({str_args[0]}"
-
-      if is_store:
-        self.result += f", {str_args[1]}"
-
-      self.result += f", {lanes}"
-
-      if is_load:
-        self.result += f", simd::undef<{op.ty.lanes}>()"
-      self.result += ");\n"
-    else:
-      if not is_store:
-        self.result += " = "
-      mem_op = ""
-
-      if is_load:
-        mem_op = "simd::load"
         str_args.append(f"{self.legalize_type(op.ty)}::N")
-      elif is_store:
-        mem_op = "simd::store"
-      else:
-        mem_op = self.legalize_op(op)
-      if self.needs_simd_wrapper(op):
-        self.result += f"{result_type}({mem_op}({', '.join(str_args)}));\n"
-      else:
-        self.result += f"{mem_op}({', '.join(str_args)});\n"
+    elif is_store:
+      mem_op = "simd::store"
+      if is_rem_width:
+        str_args.append(lanes)
+    elif op.name in self.infix_ops:
+      pass
+    else:
+      mem_op = self.legalize_op(op)
+
+    if op.name in self.infix_ops:
+      self.result += f"{str_args[0]} {self.infix_ops[op.name]} {str_args[1]};\n"
+    elif self.needs_simd_wrapper(op):
+      self.result += f"{result_type}({mem_op}({', '.join(str_args)}));\n"
+    else:
+      self.result += f"{mem_op}({', '.join(str_args)});\n"
 
   def emit_inner_loop_body(
       self,

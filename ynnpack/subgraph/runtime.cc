@@ -480,7 +480,7 @@ auto make_reshape_impl(ynn_runtime* runtime) {
         for (size_t d = 0; d < i.rank(); ++d) {
           if (i.extents[d].defined()) {
             i.data->dim(d).set_min_extent(
-                0, evaluate(slinky::max(0, i.extents[d]), ctx));
+                0, evaluate(i.extents[d], ctx));
           } else {
             i.data->dim(d).set_min_extent(0, 1);
           }
@@ -567,7 +567,7 @@ ynn_runtime::ynn_runtime(const ynn_subgraph& subgraph,
         if (!value.extents[d].defined()) {
           value.buffer->dim(d).bounds = slinky::point(0);
         } else if (const auto v = as_constant(value.extents[d])) {
-          value.buffer->dim(d).bounds = slinky::min_extent(0, *v);
+          value.buffer->dim(d).bounds = slinky::range(0, *v);
         }
       }
 

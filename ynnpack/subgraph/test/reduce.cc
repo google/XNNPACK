@@ -66,6 +66,7 @@ void TestReduce(A, C, ynn_reduce_operator op) {
   ReplicableRandomDevice rng;
   std::uniform_int_distribution<size_t> rank_dist(1, YNN_MAX_TENSOR_RANK);
   std::bernoulli_distribution random_bool(0.5);
+  std::bernoulli_distribution empty_shape_dist(0.01f);
 
   const float max_abs_value = 10.0f;
 
@@ -110,6 +111,9 @@ void TestReduce(A, C, ynn_reduce_operator op) {
       std::vector<size_t> c_shape = a_shape;
       size_t num_k_elements = 1;
       for (int32_t i : reduce_axes) {
+        if (empty_shape_dist(rng)) {
+          a_shape[i] = 0;
+        }
         num_k_elements *= a_shape[i];
         c_shape[i] = 1;
       }
@@ -205,6 +209,7 @@ void TestMinMax(T) {
   ReplicableRandomDevice rng;
   std::uniform_int_distribution<size_t> rank_dist(1, YNN_MAX_TENSOR_RANK - 1);
   std::bernoulli_distribution random_bool(0.5);
+  std::bernoulli_distribution empty_shape_dist(0.01f);
 
   const float max_abs_value = 10.0f;
 
@@ -248,6 +253,9 @@ void TestMinMax(T) {
       std::vector<size_t> a_shape = random_shape(rng, input_rank);
       std::vector<size_t> c_shape = a_shape;
       for (int32_t i : reduce_axes) {
+        if (empty_shape_dist(rng)) {
+          a_shape[i] = 0;
+        }
         c_shape[i] = 1;
       }
       c_shape.insert(c_shape.begin(), 2);

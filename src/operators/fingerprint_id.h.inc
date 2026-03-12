@@ -22,6 +22,8 @@
 // LINT.IfChange(fingerprint_id)
 XNN_FINGERPRINT_ID(fully_connected_nc, f16, f16, f16)
 XNN_FINGERPRINT_ID(fully_connected_nc, pf16, pf16, pf16)
+XNN_FINGERPRINT_ID(fully_connected_nc, qd8, f16, qc2w)
+XNN_FINGERPRINT_ID(fully_connected_nc, qdu8, f16, qc2w)
 XNN_FINGERPRINT_ID(fully_connected_nc, qd8, f16, qc4w)
 XNN_FINGERPRINT_ID(fully_connected_nc, qdu8, f16, qc4w)
 XNN_FINGERPRINT_ID(fully_connected_nc, qd8, f16, qb4w)

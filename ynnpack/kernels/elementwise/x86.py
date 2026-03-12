@@ -142,47 +142,6 @@ def make_x86_integer_patterns(vector_bits, prefix):
   return [
       i.vectorize(vector_bits)
       for i in [
-          Rule(u8_a + u8_b, Op(UInt(8), prefix + "add_epi8", [u8_a, u8_b])),
-          Rule(i8_a + i8_b, Op(Int(8), prefix + "add_epi8", [i8_a, i8_b])),
-          Rule(
-              u16_a + u16_b, Op(UInt(16), prefix + "add_epi16", [u16_a, u16_b])
-          ),
-          Rule(
-              i16_a + i16_b, Op(Int(16), prefix + "add_epi16", [i16_a, i16_b])
-          ),
-          Rule(
-              u32_a + u32_b, Op(UInt(32), prefix + "add_epi32", [u32_a, u32_b])
-          ),
-          Rule(
-              i32_a + i32_b, Op(Int(32), prefix + "add_epi32", [i32_a, i32_b])
-          ),
-          Rule(u8_a - u8_b, Op(UInt(8), prefix + "sub_epi8", [u8_a, u8_b])),
-          Rule(i8_a - i8_b, Op(Int(8), prefix + "sub_epi8", [i8_a, i8_b])),
-          Rule(
-              u16_a - u16_b, Op(UInt(16), prefix + "sub_epi16", [u16_a, u16_b])
-          ),
-          Rule(
-              i16_a - i16_b, Op(Int(16), prefix + "sub_epi16", [i16_a, i16_b])
-          ),
-          Rule(
-              u32_a - u32_b, Op(UInt(32), prefix + "sub_epi32", [u32_a, u32_b])
-          ),
-          Rule(
-              i32_a - i32_b, Op(Int(32), prefix + "sub_epi32", [i32_a, i32_b])
-          ),
-          Rule(
-              i32_a * i32_b, Op(Int(32), prefix + "mullo_epi32", [i32_a, i32_b])
-          ),
-          Rule(min(u8_a, u8_b), Op(UInt(8), prefix + "min_epu8", [u8_a, u8_b])),
-          Rule(max(u8_a, u8_b), Op(UInt(8), prefix + "max_epu8", [u8_a, u8_b])),
-          Rule(
-              min(i16_a, i16_b),
-              Op(Int(16), prefix + "min_epi16", [i16_a, i16_b]),
-          ),
-          Rule(
-              max(i16_a, i16_b),
-              Op(Int(16), prefix + "max_epi16", [i16_a, i16_b]),
-          ),
           Rule(
               u32_a & u32_b,
               Op(
@@ -497,24 +456,7 @@ def make_x86_float32_patterns(vector_bits, prefix):
   return [
       i.vectorize(vector_bits)
       for i in [
-          Rule(f32_a + f32_b, Op(Float(32), prefix + "add_ps", [f32_a, f32_b])),
-          Rule(f32_a - f32_b, Op(Float(32), prefix + "sub_ps", [f32_a, f32_b])),
-          Rule(f32_a * f32_b, Op(Float(32), prefix + "mul_ps", [f32_a, f32_b])),
           Rule(f32_a / f32_b, Op(Float(32), prefix + "div_ps", [f32_a, f32_b])),
-          Rule(
-              ceil(f32_a),
-              Op(Float(32), prefix + "ceil_ps", [f32_a]),
-              features=["SSE41"],
-          ),
-          Rule(
-              floor(f32_a),
-              Op(Float(32), prefix + "floor_ps", [f32_a]),
-              features=["SSE41"],
-          ),
-          Rule(
-              sqrt(f32_a),
-              Op(Float(32), prefix + "sqrt_ps", [f32_a]),
-          ),
           Rule(
               f32_a & f32_b,
               Op(Float(32), prefix + "and_ps", [f32_a, f32_b]),
@@ -660,26 +602,12 @@ YNN_INTRINSIC __m128 bitwise_not(__m128 val) {
 
   def update_for_sse41(self):
     """Updates the target for SSE41 support."""
-    self.header += """
-namespace {
-
-YNN_INTRINSIC __m128 round(__m128 x) {
-  return _mm_round_ps(x, _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC);
-}
-
-} // namespace
-
-"""
     self.patterns += make_x86_float32_patterns(128, "_mm_")
 
   def update_for_avx(self):
     """Updates the target for AVX support."""
     self.header += """
 namespace {
-
-YNN_INTRINSIC __m256 round(__m256 x) {
-  return _mm256_round_ps(x, _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC);
-}
 
 YNN_INTRINSIC __m256 bitwise_not(__m256 val) {
   __m256 all_ones = _mm256_castsi256_ps(_mm256_set1_epi32(-1));
@@ -838,10 +766,6 @@ YNN_INTRINSIC __m128i wrapper_mm256_cvtps_ph(__m256 x) {
     """Updates the target for AVX512F support."""
     self.header += """
 namespace {
-
-YNN_INTRINSIC __m512 round(__m512 x) {
-  return _mm512_roundscale_ps(x, _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC);
-}
 
 YNN_INTRINSIC __m512i bitwise_not(__m512i val) {
   __m512i all_ones = _mm512_set1_epi32(-1);
@@ -1015,10 +939,18 @@ YNN_INTRINSIC __m512i saturating_cast_int16_to_uint8(__m512i a, __m512i b) {
       simd_header = "x86_avx512.h"
       self.tail_strategy = TailStrategy.VECTOR
       self.vector_bits = 512
+    elif "AVX2" in all_features:
+      simd_header = "x86_avx2.h"
+      self.tail_strategy = TailStrategy.VECTOR
+      self.vector_bits = 256
     elif "AVX" in all_features:
       simd_header = "x86_avx.h"
       self.tail_strategy = TailStrategy.VECTOR
       self.vector_bits = 256
+    elif "SSE41" in all_features:
+      simd_header = "x86_sse41.h"
+      self.tail_strategy = TailStrategy.VECTOR
+      self.vector_bits = 128
     elif "SSE2" in all_features:
       simd_header = "x86_sse2.h"
       self.tail_strategy = TailStrategy.VECTOR

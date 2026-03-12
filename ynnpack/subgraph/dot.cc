@@ -644,9 +644,9 @@ std::tuple<slinky::expr, slinky::expr> choose_split_factors(
         }
       }
       // We want to make the tile bigger, figure out which dimension to grow.
-      if ((aspect_ratio * split_n < split_m || split_m >= m) && split_n < n) {
+      if ((aspect_ratio * split_n <= split_m || split_m >= m) && split_n < n) {
         split_n *= 2;
-      } else if ((split_m < aspect_ratio * split_n || split_n >= n) &&
+      } else if ((split_m <= aspect_ratio * split_n || split_n >= n) &&
                  split_m < m) {
         split_m *= 2;
       } else {
@@ -769,6 +769,20 @@ bool should_pack_b(const ynn_subgraph& subgraph, size_t num_k_dims,
   return true;
 }
 
+ynn_type deduce_output_type(ynn_type a_type, ynn_type b_type) {
+  // The rules here are:
+  // - If either input is float, the result should be float, otherwise integer.
+  // - The output should be max(max(a_bits, b_bits), 32) bits wide
+  if (a_type == ynn_type_fp64 || b_type == ynn_type_fp64) {
+    return ynn_type_fp64;
+  } else if (type_is_floating_point(a_type) || type_is_floating_point(b_type)) {
+    return ynn_type_fp32;
+  } else {
+    assert(type_is_integral(a_type) && type_is_integral(b_type));
+    return ynn_type_int32;
+  }
+}
+
 ynn_status define_dot(ynn_subgraph_t subgraph, size_t num_k_dims,
                       uint32_t input_a_id, uint32_t input_b_id,
                       uint32_t input_c_id, uint32_t* output_id,
@@ -778,10 +792,7 @@ ynn_status define_dot(ynn_subgraph_t subgraph, size_t num_k_dims,
 
   const ynn_value& a = subgraph->value(input_a_id);
   const ynn_value& b = subgraph->value(input_b_id);
-  // If any input is a float, the output should be a float.
-  const ynn_type c_type = !type_is_integral(a.type) || !type_is_integral(b.type)
-                              ? ynn_type_fp32
-                              : ynn_type_int32;
+  const ynn_type c_type = deduce_output_type(a.type, b.type);
   ynn_value& c = subgraph->get_output_value(output_id, c_type);
   if (input_c_id != YNN_INVALID_VALUE_ID) {
     const ynn_value& init_c = subgraph->value(input_c_id);

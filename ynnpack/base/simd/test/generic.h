@@ -46,6 +46,7 @@ using f16 = half;
 using bf16 = bfloat16;
 using f32 = float;
 using s32 = int32_t;
+using f64 = double;
 
 template <typename scalar, size_t N>
 void test_broadcast() {
@@ -95,9 +96,9 @@ void test_aligned_load_store() {
   EXPECT_THAT(dst, ElementsAreArray(src, N));
 }
 
-#define TEST_ALIGNED_LOAD_STORE(test_class, type, N)  \
+#define TEST_ALIGNED_LOAD_STORE(test_class, type, N)    \
   TEST_F(test_class, aligned_load_store_##type##x##N) { \
-    test_aligned_load_store<type, N>();               \
+    test_aligned_load_store<type, N>();                 \
   }
 
 template <typename scalar, size_t N>
@@ -236,6 +237,131 @@ void test_op() {
   }
 }
 
+template <typename scalar, size_t N>
+void test_floor() {
+  using vector = vec<scalar, N>;
+
+  ReplicableRandomDevice rng;
+  for (auto _ : FuzzTest(std::chrono::milliseconds(100))) {
+    scalar a[vector::N];
+    fill_random(a, vector::N, rng);
+
+    scalar result[vector::N];
+    store(result, floor(load(a, vector::N)));
+
+    for (size_t i = 0; i < vector::N; ++i) {
+      scalar expected = std::floor(a[i]);
+      ASSERT_EQ(result[i], expected);
+    }
+  }
+}
+
+#define TEST_FLOOR(test_class, type, N) \
+  TEST_F(test_class, floor_##type##x##N) { test_floor<type, N>(); }
+
+template <typename scalar, size_t N>
+void test_round() {
+  using vector = vec<scalar, N>;
+
+  ReplicableRandomDevice rng;
+  for (auto _ : FuzzTest(std::chrono::milliseconds(100))) {
+    scalar a[vector::N];
+    fill_random(a, vector::N, rng);
+
+    scalar result[vector::N];
+    store(result, round(load(a, vector::N)));
+
+    for (size_t i = 0; i < vector::N; ++i) {
+      scalar expected = std::nearbyint(a[i]);
+      ASSERT_EQ(result[i], expected);
+    }
+  }
+}
+
+#define TEST_ROUND(test_class, type, N) \
+  TEST_F(test_class, round_##type##x##N) { test_round<type, N>(); }
+
+template <typename scalar, size_t N>
+void test_ceil() {
+  using vector = vec<scalar, N>;
+
+  ReplicableRandomDevice rng;
+  for (auto _ : FuzzTest(std::chrono::milliseconds(100))) {
+    scalar a[vector::N];
+    fill_random(a, vector::N, rng);
+
+    scalar result[vector::N];
+    store(result, ceil(load(a, vector::N)));
+
+    for (size_t i = 0; i < vector::N; ++i) {
+      scalar expected = std::ceil(a[i]);
+      ASSERT_EQ(result[i], expected);
+    }
+  }
+}
+
+#define TEST_CEIL(test_class, type, N) \
+  TEST_F(test_class, ceil_##type##x##N) { test_ceil<type, N>(); }
+
+namespace internal {
+float tol_relative(float y_ref, float rel_tol) {
+  // Note that `y_ref * rel_tol`, i.e. the expected absolute difference,
+  // may round differently than `y_ref * (1 + rel_tol) - y_ref`, i.e. the
+  // effective absolute difference computed in `float`s. We therefore use
+  // the latter form since it is the true difference between two `float`s
+  // within the given relative tolerance.
+  if (!std::isfinite(y_ref)) {
+    // If the reference value is infinity, the computation below will produce
+    // NaN. We probably want to compute the tolerance as if the value is the
+    // largest value, not infinity.
+    y_ref = std::nexttoward(y_ref, 0.0f);
+  }
+  return std::abs(y_ref * (1.0f + rel_tol)) - std::abs(y_ref);
+}
+}  // namespace internal
+
+template <typename scalar, size_t N>
+void test_sqrt() {
+  using vector = vec<scalar, N>;
+
+  ReplicableRandomDevice rng;
+  for (auto _ : FuzzTest(std::chrono::milliseconds(100))) {
+    scalar a[vector::N];
+    if constexpr (std::is_same_v<scalar, float>) {
+      // The reciprocal square root estimate instructions (e.g. `vrsqrteq_f32`
+      // for Arm or `_m*_rsqrt_ps` for Intel) seem to fail for values larger
+      // than the inverse of the minimum normalized number when denormals are
+      // switched off, so limit the range to that of normally inversible
+      // numbers.
+      fill_random(a, vector::N, rng, type_info<float>::epsilon(),
+                  type_info<float>::max() / 4);
+    } else {
+      fill_random(a, vector::N, rng);
+    }
+    scalar result[vector::N];
+    store(result, sqrt(load(a, vector::N)));
+
+    for (size_t i = 0; i < vector::N; ++i) {
+      scalar expected = std::sqrt(a[i]);
+      if (std::isnan(expected)) {
+        ASSERT_TRUE(std::isnan(result[i]));
+      } else {
+        if constexpr (std::is_same_v<scalar, float>) {
+          ASSERT_NEAR(result[i], expected,
+                      internal::tol_relative(
+                          expected, 2.0f * type_info<float>::epsilon()))
+              << a[i] << " " << result[i];
+        } else {
+          ASSERT_EQ(result[i], expected);
+        }
+      }
+    }
+  }
+}
+
+#define TEST_SQRT(test_class, type, N) \
+  TEST_F(test_class, sqrt_##type##x##N) { test_sqrt<type, N>(); }
+
 struct min_op {
   template <typename T>
   T operator()(T a, T b) {
@@ -305,10 +431,88 @@ struct multiply_op {
   TEST_F(test_class, min_##type##x##N) { test_op<type, N, min_op>(); }
 #define TEST_MAX(test_class, type, N) \
   TEST_F(test_class, max_##type##x##N) { test_op<type, N, max_op>(); }
-#define TEST_AND(test_class, type, N) \
-  TEST_F(test_class, and_##type##x##N) { test_op<type, N, min_op>(); }
-#define TEST_OR(test_class, type, N) \
-  TEST_F(test_class, or_##type##x##N) { test_op<type, N, max_op>(); }
+
+struct bitwise_and_op {
+  template <typename T>
+  T operator()(T a, T b) {
+    return static_cast<T>(a & b);
+  }
+};
+
+struct bitwise_or_op {
+  template <typename T>
+  T operator()(T a, T b) {
+    return static_cast<T>(a | b);
+  }
+};
+
+struct bitwise_xor_op {
+  template <typename T>
+  T operator()(T a, T b) {
+    return static_cast<T>(a ^ b);
+  }
+};
+
+struct bitwise_not_op {
+  template <typename T>
+  T operator()(T a) {
+    return static_cast<T>(~a);
+  }
+};
+
+template <typename scalar, size_t N, typename Op>
+void test_bitwise_op() {
+  using vector = vec<scalar, N>;
+  ReplicableRandomDevice rng;
+  Op op;
+
+  for (auto _ : FuzzTest(std::chrono::milliseconds(100))) {
+    scalar a[vector::N];
+    scalar b[vector::N];
+    fill_random(a, vector::N, rng);
+    fill_random(b, vector::N, rng);
+    scalar result[vector::N];
+    store(result, op(load(a, vector::N), load(b, vector::N)));
+    for (size_t i = 0; i < vector::N; ++i) {
+      scalar expected = op(a[i], b[i]);
+      ASSERT_EQ(result[i], expected);
+    }
+  }
+}
+
+#define TEST_AND(test_class, type, N)           \
+  TEST_F(test_class, and_##type##x##N) {        \
+    test_bitwise_op<type, N, bitwise_and_op>(); \
+  }
+#define TEST_OR(test_class, type, N)           \
+  TEST_F(test_class, or_##type##x##N) {        \
+    test_bitwise_op<type, N, bitwise_or_op>(); \
+  }
+#define TEST_XOR(test_class, type, N)           \
+  TEST_F(test_class, xor_##type##x##N) {        \
+    test_bitwise_op<type, N, bitwise_xor_op>(); \
+  }
+
+template <typename scalar, size_t N>
+void test_not() {
+  using vector = vec<scalar, N>;
+  ReplicableRandomDevice rng;
+  bitwise_not_op op;
+
+  for (auto _ : FuzzTest(std::chrono::milliseconds(100))) {
+    scalar a[vector::N];
+    fill_random(a, vector::N, rng);
+    scalar result[vector::N];
+    store(result, ~load(a, vector::N));
+    for (size_t i = 0; i < vector::N; ++i) {
+      scalar expected = op(a[i]);
+      ASSERT_EQ(result[i], expected);
+    }
+  }
+}
+
+#define TEST_NOT(test_class, type, N) \
+  TEST_F(test_class, not_##type##x##N) { test_not<type, N>(); }
 
 template <size_t Lanes, typename From, size_t... Is>
 void test_extract_impl(std::index_sequence<Is...>, From from_v,
@@ -423,17 +627,17 @@ void test_horizontal_max() {
   }
 }
 
-#define TEST_HORIZONTAL_SUM(test_class, type, N)  \
+#define TEST_HORIZONTAL_SUM(test_class, type, N)    \
   TEST_F(test_class, horizontal_sum_##type##x##N) { \
-    test_horizontal_sum<type, N>();               \
+    test_horizontal_sum<type, N>();                 \
   }
-#define TEST_HORIZONTAL_MIN(test_class, type, N)  \
+#define TEST_HORIZONTAL_MIN(test_class, type, N)    \
   TEST_F(test_class, horizontal_min_##type##x##N) { \
-    test_horizontal_min<type, N>();               \
+    test_horizontal_min<type, N>();                 \
   }
-#define TEST_HORIZONTAL_MAX(test_class, type, N)  \
+#define TEST_HORIZONTAL_MAX(test_class, type, N)    \
   TEST_F(test_class, horizontal_max_##type##x##N) { \
-    test_horizontal_max<type, N>();               \
+    test_horizontal_max<type, N>();                 \
   }
 
 template <typename scalar, size_t N>

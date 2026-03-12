@@ -37,7 +37,7 @@ SET(PROD_NEONFP16ARITH_MICROKERNEL_SRCS
   src/f16-igemm/gen/f16-igemm-6x16-minmax-neonfp16arith-ld64.c
   src/f16-maxpool/gen/f16-maxpool-9p-minmax-neonfp16arith-u8.c
   src/f16-qs8-vcvt/gen/f16-qs8-vcvt-neonfp16arith-u32.c
-  src/f16-raddstoreexpminusmax/gen/f16-raddstoreexpminusmax-neonfp16arith-rr2-p2-u32-acc2.c
+  src/f16-raddstoreexpminusmax/gen/f16-raddstoreexpminusmax-neonfp16arith-rr2-p2-u32.c
   src/f16-rdminmax/gen/f16-rdmax-2p2x-neonfp16arith-u32.c
   src/f16-rdminmax/gen/f16-rdmin-2p2x-neonfp16arith-u32.c
   src/f16-rminmax/gen/f16-rmax-neonfp16arith-u32-acc4.c
@@ -173,8 +173,8 @@ SET(NON_PROD_NEONFP16ARITH_MICROKERNEL_SRCS
   src/f16-qs8-vcvt/gen/f16-qs8-vcvt-neonfp16arith-u64.c
   src/f16-raddstoreexpminusmax/gen/f16-raddstoreexpminusmax-neonfp16arith-rr2-p2-u16-acc2.c
   src/f16-raddstoreexpminusmax/gen/f16-raddstoreexpminusmax-neonfp16arith-rr2-p2-u16.c
+  src/f16-raddstoreexpminusmax/gen/f16-raddstoreexpminusmax-neonfp16arith-rr2-p2-u32-acc2.c
   src/f16-raddstoreexpminusmax/gen/f16-raddstoreexpminusmax-neonfp16arith-rr2-p2-u32-acc4.c
-  src/f16-raddstoreexpminusmax/gen/f16-raddstoreexpminusmax-neonfp16arith-rr2-p2-u32.c
   src/f16-rminmax/gen/f16-rmax-neonfp16arith-u8.c
   src/f16-rminmax/gen/f16-rmax-neonfp16arith-u16-acc2.c
   src/f16-rminmax/gen/f16-rmax-neonfp16arith-u24-acc3.c

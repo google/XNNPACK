@@ -82,8 +82,7 @@ ynn_status ynn_define_static_pad(ynn_subgraph_t subgraph, size_t num_axes,
     for (const ynn_node::static_pad::padding& p : op.paddings) {
       func_input.bounds[p.axis] -= p.pre_padding;
       if (input.extents[p.axis].defined()) {
-        func_input.input_crop[p.axis] =
-            slinky::min_extent(0, input.extents[p.axis]);
+        func_input.input_crop[p.axis] = all_bounds(input.extents[p.axis]);
       }
     }
 

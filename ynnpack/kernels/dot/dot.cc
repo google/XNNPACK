@@ -117,6 +117,20 @@ void dot_fp32_1x128x1_1x1x1(size_t m, size_t n, size_t k3, size_t k2, size_t k1,
                     static_cast<float*>(c_out));
 }
 
+void dot_fp64_1x128x1_1x1x1(size_t m, size_t n, size_t k3, size_t k2, size_t k1,
+                            size_t a_stride_m, size_t a_stride_k3,
+                            size_t a_stride_k2, const void* a,
+                            size_t b_stride_k3, size_t b_stride_k2,
+                            size_t b_stride_k1, const void* b,
+                            size_t c_in_stride_m, const void* c_in,
+                            size_t c_out_stride_m, void* c_out) {
+  dot_1x128x1_1x1x1(m, n, k3, k2, k1, a_stride_m, a_stride_k3, a_stride_k2,
+                    static_cast<const double*>(a), b_stride_k3, b_stride_k2,
+                    b_stride_k1, static_cast<const double*>(b), c_in_stride_m,
+                    static_cast<const double*>(c_in), c_out_stride_m,
+                    static_cast<double*>(c_out));
+}
+
 void dot_fp16_fp16_fp32_1x128x1_1x1x1(
     size_t m, size_t n, size_t k3, size_t k2, size_t k1, size_t a_stride_m,
     size_t a_stride_k3, size_t a_stride_k2, const void* a, size_t b_stride_k3,
@@ -342,8 +356,12 @@ dot_kernel get_dot_kernel(const dot_type& type, const dot_shape& shape,
                           bool consistent_arithmetic,
                           std::optional<bool> transpose_a,
                           uint64_t arch_flags) {
-  if (type.a == ynn_type_fp32 && type.b == ynn_type_fp32 &&
-      type.c == ynn_type_fp32) {
+  if (type.a == ynn_type_fp64 && type.b == ynn_type_fp64 &&
+      type.c == ynn_type_fp64) {
+    return get_dot_kernel<double, double, double>(
+        shape, packed_shape, consistent_arithmetic, transpose_a, arch_flags);
+  } else if (type.a == ynn_type_fp32 && type.b == ynn_type_fp32 &&
+             type.c == ynn_type_fp32) {
     return get_dot_kernel<float, float, float>(
         shape, packed_shape, consistent_arithmetic, transpose_a, arch_flags);
   } else if (type.a == ynn_type_fp16 && type.b == ynn_type_fp16 &&

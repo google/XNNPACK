@@ -117,7 +117,7 @@ void define_stencil_copy(ynn_subgraph& subgraph, ynn_node& node,
             compute_same_padding_min(*stencil, input.extents[d]);
         func_input.bounds[d] -= pre_padding;
         if (input.extents[d].defined()) {
-          func_input.input_crop[d] = slinky::min_extent(0, input.extents[d]);
+          func_input.input_crop[d] = all_bounds(input.extents[d]);
         }
         func_padding.bounds[d] -= pre_padding;
       }

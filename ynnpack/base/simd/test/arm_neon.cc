@@ -89,6 +89,35 @@ TEST_MAX(arm_neon, s16, 8);
 TEST_MAX(arm_neon, f32, 4);
 TEST_MAX(arm_neon, s32, 4);
 
+TEST_AND(arm_neon, u8, 16);
+TEST_AND(arm_neon, s8, 16);
+TEST_AND(arm_neon, s16, 8);
+TEST_AND(arm_neon, s32, 4);
+TEST_AND(arm_neon, u8, 8);
+
+TEST_OR(arm_neon, u8, 16);
+TEST_OR(arm_neon, s8, 16);
+TEST_OR(arm_neon, s16, 8);
+TEST_OR(arm_neon, s32, 4);
+TEST_OR(arm_neon, u8, 8);
+
+TEST_XOR(arm_neon, u8, 16);
+TEST_XOR(arm_neon, s8, 16);
+TEST_XOR(arm_neon, s16, 8);
+TEST_XOR(arm_neon, s32, 4);
+TEST_XOR(arm_neon, u8, 8);
+
+TEST_NOT(arm_neon, u8, 16);
+TEST_NOT(arm_neon, s8, 16);
+TEST_NOT(arm_neon, s16, 8);
+TEST_NOT(arm_neon, s32, 4);
+TEST_NOT(arm_neon, u8, 8);
+
+TEST_FLOOR(arm_neon, f32, 4);
+TEST_CEIL(arm_neon, f32, 4);
+TEST_ROUND(arm_neon, f32, 4);
+TEST_SQRT(arm_neon, f32, 4);
+
 TEST_HORIZONTAL_MIN(arm_neon, u8, 16);
 TEST_HORIZONTAL_MIN(arm_neon, s8, 16);
 TEST_HORIZONTAL_MIN(arm_neon, s16, 8);

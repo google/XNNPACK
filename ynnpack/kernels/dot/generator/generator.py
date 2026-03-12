@@ -11,6 +11,7 @@ import sys
 from ynnpack.kernels.dot.generator.arm_bf16_bf16_fp32 import arm64_neon_bf16_bf16_fp32
 from ynnpack.kernels.dot.generator.arm_bf16_bf16_fp32_k2 import arm_neonbf16_bf16_bf16_fp32_k2
 from ynnpack.kernels.dot.generator.arm_fp32 import arm64_neon_fp32
+from ynnpack.kernels.dot.generator.arm_fp64 import arm64_neon_fp64
 from ynnpack.kernels.dot.generator.arm_int8_int8_int32 import arm_neon_int8_int8_int32
 from ynnpack.kernels.dot.generator.arm_int8_int8_int32 import arm_neondot_int8_int8_int32
 from ynnpack.kernels.dot.generator.arm_int8_int8_int32 import arm_neoni8mm_int8_int8_int32
@@ -30,6 +31,9 @@ from ynnpack.kernels.dot.generator.x86_fp32_k2 import x86_avx2_fma3_fp32_k2
 from ynnpack.kernels.dot.generator.x86_fp32_k2 import x86_avx2_fp32_k2
 from ynnpack.kernels.dot.generator.x86_fp32_k2 import x86_avx512_fp32_k2
 from ynnpack.kernels.dot.generator.x86_fp32_k4 import x86_avx512_fp32_k4
+from ynnpack.kernels.dot.generator.x86_fp64 import x86_avx512_fp64
+from ynnpack.kernels.dot.generator.x86_fp64 import x86_avx_fp64
+from ynnpack.kernels.dot.generator.x86_fp64 import x86_fma3_fp64
 from ynnpack.kernels.dot.generator.x86_int8_int8_int32 import x86_avx2_int8_int8_int32
 from ynnpack.kernels.dot.generator.x86_int8_int8_int32 import x86_avx512_int8_int8_int32
 from ynnpack.kernels.dot.generator.x86_int8_int8_int32_k1 import x86_avx2_int8_int8_int32_k1
@@ -41,11 +45,14 @@ from ynnpack.kernels.dot.generator.x86_uint8_int8_int32_k16 import x86_avx512vnn
 arch_to_generator = {
     "x86_sse2_fp32": x86_sse2_fp32(),
     "x86_avx_fp32": x86_avx_fp32(),
+    "x86_avx_fp64": x86_avx_fp64(),
     "x86_avx2_fp32_k2": x86_avx2_fp32_k2(),
     "x86_fma3_fp32": x86_fma3_fp32(),
+    "x86_fma3_fp64": x86_fma3_fp64(),
     "x86_avx2_fma3_fp32_k2": x86_avx2_fma3_fp32_k2(),
     "x86_avx512_fp32_k2": x86_avx512_fp32_k2(),
     "x86_avx512_fp32": x86_avx512_fp32(),
+    "x86_avx512_fp64": x86_avx512_fp64(),
     "x86_avx512_fp32_k4": x86_avx512_fp32_k4(),
     "x86_f16c_fp16_fp16_fp32": x86_f16c_fp16_fp16_fp32(),
     "x86_f16c_fma3_fp16_fp16_fp32": x86_f16c_fma3_fp16_fp16_fp32(),
@@ -69,6 +76,7 @@ arch_to_generator = {
     "arm_neondot_int8_int8_int32": arm_neondot_int8_int8_int32(),
     "arm_neoni8mm_int8_int8_int32": arm_neoni8mm_int8_int8_int32(),
     "arm64_neon_fp32": arm64_neon_fp32(),
+    "arm64_neon_fp64": arm64_neon_fp64(),
     "arm64_neon_bf16_bf16_fp32": arm64_neon_bf16_bf16_fp32(),
 }
 

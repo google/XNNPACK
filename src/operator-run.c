@@ -1405,31 +1405,33 @@ void xnn_compute_contiguous_reduce(struct reduce_context* restrict context,
   }
 
   // Input dimension 1 is reduced.
-  for (size_t i = 0; i < input_shape1; ++i) {
-    const void* input = (const void*)((uintptr_t)context->input + input_offset);
-    // Input dimension 3 is reduced.
-    for (size_t j = 0; j < input_shape3; ++j) {
-      const void* input_row = input;
-      // output2_block_size output elements are written.
-      for (size_t k = 0; k < output2_block_size; ++k) {
-        // The microkernel reduces input dimension 5.
-        context->ukernel.contiguous_reduce(context->channels, input_row, output,
-                                           &context->params);
-        // input_stride[4] is the number of bytes of input which have been
-        // processed by the microkernel call.
-        input_row = (const void*)((uintptr_t)input_row + input_stride[4]);
-        // Increment output pointer by the number of output bytes which have
-        // been written.
-        output =
-            (void*)((uintptr_t)output + context->accumulation_element_size);
+  if (context->channels != 0) {
+    for (size_t i = 0; i < input_shape1; ++i) {
+      const void* input = (const void*)((uintptr_t)context->input + input_offset);
+      // Input dimension 3 is reduced.
+      for (size_t j = 0; j < input_shape3; ++j) {
+        const void* input_row = input;
+        // output2_block_size output elements are written.
+        for (size_t k = 0; k < output2_block_size; ++k) {
+          // The microkernel reduces input dimension 5.
+          context->ukernel.contiguous_reduce(context->channels, input_row, output,
+                                             &context->params);
+          // input_stride[4] is the number of bytes of input which have been
+          // processed by the microkernel call.
+          input_row = (const void*)((uintptr_t)input_row + input_stride[4]);
+          // Increment output pointer by the number of output bytes which have
+          // been written.
+          output =
+              (void*)((uintptr_t)output + context->accumulation_element_size);
+        }
+        // Reset the output pointer.
+        output = (void*)((uintptr_t)output_ptr + workspace_offset);
+        // Iterating over input_shape[3].
+        input = (const void*)((uintptr_t)input + input_stride[3]);
       }
-      // Reset the output pointer.
-      output = (void*)((uintptr_t)output_ptr + workspace_offset);
-      // Iterating over input_shape[3].
-      input = (const void*)((uintptr_t)input + input_stride[3]);
+      // Iterating over input_shape[1].
+      input_offset += input_stride[1];
     }
-    // Iterating over input_shape[1].
-    input_offset += input_stride[1];
   }
   // Convert to output datatype if accumulation type != output type.
   if (context->workspace) {
@@ -1482,30 +1484,32 @@ void xnn_compute_discontiguous_reduce(struct reduce_context* restrict context,
         context->accumulation_element_size, context->identity_value);
   }
 
-  if (context->is_old_reduce) {
-    // Input dimension 0 is reduced.
-    for (size_t i = 0; i < input_shape0; ++i) {
-      // Input dimension 2 is reduced.
-      for (size_t j = 0; j < input_shape2; ++j) {
-        // The microkernel reduces input dimension 4 and iterates over
-        // output_block_size elements of dimension 5.
-        context->ukernel.discontiguous_reduce(
-            context->channels, output2_block_size,
-            (const void*)((uintptr_t)context->input + input_offset +
-                          i * input_stride[0] + j * input_stride[2]),
-            input_stride[4], context->zero,
-            (void*)((uintptr_t)output_ptr + workspace_offset),
-            &context->params);
+  if (context->channels != 0) {
+    if (context->is_old_reduce) {
+      // Input dimension 0 is reduced.
+      for (size_t i = 0; i < input_shape0; ++i) {
+        // Input dimension 2 is reduced.
+        for (size_t j = 0; j < input_shape2; ++j) {
+          // The microkernel reduces input dimension 4 and iterates over
+          // output_block_size elements of dimension 5.
+          context->ukernel.discontiguous_reduce(
+              context->channels, output2_block_size,
+              (const void*)((uintptr_t)context->input + input_offset +
+                            i * input_stride[0] + j * input_stride[2]),
+              input_stride[4], context->zero,
+              (void*)((uintptr_t)output_ptr + workspace_offset),
+              &context->params);
+        }
       }
+    } else {
+      // The microkernel reduces input dimension 0, 2 & 4 and iterates over
+      // output_block_size elements of dimension 5.
+      context->ukernel.discontiguous_reduce2(
+          output2_block_size, context->channels, input_shape2, input_shape0,
+          (const void*)((uintptr_t)context->input + input_offset),
+          input_stride[4], input_stride[2], input_stride[0], context->zero,
+          output, &context->params);
     }
-  } else {
-    // The microkernel reduces input dimension 0, 2 & 4 and iterates over
-    // output_block_size elements of dimension 5.
-    context->ukernel.discontiguous_reduce2(
-        output2_block_size, context->channels, input_shape2, input_shape0,
-        (const void*)((uintptr_t)context->input + input_offset),
-        input_stride[4], input_stride[2], input_stride[0], context->zero,
-        output, &context->params);
   }
   // Convert to output datatype if accumulation type != output type.
   if (context->workspace) {
@@ -1562,6 +1566,15 @@ void xnn_compute_f16_qx8_convert(
   params.scalar.output_zero_point =
       context->quantization_params[batch_index].zero_point;
   context->convert_ukernel(n, input, output, (union xnn_unary_uparams*)&params);
+
+  if (context->rsum_ukernel) {
+    // Compute and store the row sum of the quantized output.
+    const size_t num_bytes = n / sizeof(xnn_float16) * sizeof(int8_t);
+    int32_t row_sum = 0;
+    struct xnn_qs8_rsum_params rsum_params = {0,};
+    context->rsum_ukernel(num_bytes, output, &row_sum, &rsum_params);
+    context->row_sum[batch_index] = (float)row_sum;
+  }
 }
 
 void xnn_compute_f16_qd8_convert(
@@ -1706,10 +1719,7 @@ void xnn_compute_floating_point_softmax(
   context->rmax_ukernel(n, x, &x_max, &context->rmax_params);
 
   // Second pass: reduce-add & store exp(x-x_max)
-  union {
-    float as_float;
-    xnn_float16 as_half;
-  } y_sum;
+  float y_sum;
   context->raddstoreexpminusmax_ukernel(n, x, &x_max, y, &y_sum,
                                         &context->expminus_params);
 

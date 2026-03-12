@@ -17,10 +17,12 @@ namespace ynn {
 
 struct dot_loop {
   // Which dimension this loop should iterate over.
-  enum { m = 0, n = 1, k = 2 } dim;
+  enum { m = 0, n = 1, k = 2 };
+
+  int dim = -1;
 
   // The step size of this loop, in blocks.
-  size_t blocks;
+  size_t blocks = 0;
 };
 
 // Generate a set of loops we should use when running a dot, attempting to

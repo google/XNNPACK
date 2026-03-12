@@ -3,8 +3,10 @@
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
 
+load("@rules_cc//cc:cc_binary.bzl", "cc_binary")
 load("@rules_cc//cc:cc_library.bzl", "cc_library")
 load("@rules_cc//cc:cc_test.bzl", "cc_test")
+load("@rules_shell//shell:sh_test.bzl", "sh_test")
 load("//ynnpack:build_defs.bzl", "ynn_binary_linkopts", "ynn_binary_malloc", "ynn_cc_library", "ynn_generate_src_hdr", "ynn_kernel_copts", "ynn_test_deps")
 
 _COMPATIBLE_WITH = []
@@ -49,6 +51,25 @@ ynn_generate_src_hdr(
 )
 
 ynn_generate_src_hdr(
+    name = "x86_avx_fp64",
+    compatible_with = _COMPATIBLE_WITH,
+    generator = "//ynnpack/kernels/dot/generator",
+    generator_args = [
+        "x86_avx_fp64",
+        "dot,1x16x1",
+        "dot,2x16x1",
+        "dot,2x8x1",
+        "dot,3x8x1",
+        "dot,4x8x1",
+        "dot,4x4x1",
+        "dot,6x4x1",
+        "dot,8x4x1",
+    ],
+    output_hdr = "x86_avx_fp64.inc",
+    output_src = "x86_avx_fp64.cc",
+)
+
+ynn_generate_src_hdr(
     name = "x86_fma3_fp32",
     compatible_with = _COMPATIBLE_WITH,
     generator = "//ynnpack/kernels/dot/generator",
@@ -70,6 +91,25 @@ ynn_generate_src_hdr(
     ],
     output_hdr = "x86_fma3_fp32.inc",
     output_src = "x86_fma3_fp32.cc",
+)
+
+ynn_generate_src_hdr(
+    name = "x86_fma3_fp64",
+    compatible_with = _COMPATIBLE_WITH,
+    generator = "//ynnpack/kernels/dot/generator",
+    generator_args = [
+        "x86_fma3_fp64",
+        "dot,1x16x1",
+        "dot,2x16x1",
+        "dot,2x8x1",
+        "dot,3x8x1",
+        "dot,4x8x1",
+        "dot,5x8x1",
+        "dot,6x8x1",
+        "dot,8x4x1",
+    ],
+    output_hdr = "x86_fma3_fp64.inc",
+    output_src = "x86_fma3_fp64.cc",
 )
 
 ynn_generate_src_hdr(
@@ -262,6 +302,27 @@ ynn_generate_src_hdr(
 )
 
 ynn_generate_src_hdr(
+    name = "x86_avx512_fp64",
+    compatible_with = _COMPATIBLE_WITH,
+    generator = "//ynnpack/kernels/dot/generator",
+    generator_args = [
+        "x86_avx512_fp64",
+        "dot,1x32x1",
+        "dot,2x32x1",
+        "dot,3x32x1",
+        "dot,4x32x1",
+        "dot,5x32x1",
+        "dot,2x16x1",
+        "dot,3x16x1",
+        "dot,4x16x1",
+        "dot,5x16x1",
+        "dot,5x8x1",
+    ],
+    output_hdr = "x86_avx512_fp64.inc",
+    output_src = "x86_avx512_fp64.cc",
+)
+
+ynn_generate_src_hdr(
     name = "x86_avx512_fp32_k4",
     compatible_with = _COMPATIBLE_WITH,
     generator = "//ynnpack/kernels/dot/generator",
@@ -394,6 +455,28 @@ ynn_generate_src_hdr(
     ],
     output_hdr = "arm64_neon_fp32.inc",
     output_src = "arm64_neon_fp32.cc",
+)
+
+ynn_generate_src_hdr(
+    name = "arm64_neon_fp64",
+    compatible_with = _COMPATIBLE_WITH,
+    generator = "//ynnpack/kernels/dot/generator",
+    generator_args = [
+        "arm64_neon_fp64",
+        "dot,1x16x2",
+        "dot,2x16x2",
+        "dot,3x16x2",
+        "dot,2x8x2",
+        "dot,3x8x2",
+        "dot,4x8x2",
+        "dot,5x8x2",
+        "dot,4x4x2",
+        "dot,6x4x2",
+        "dot,8x4x2",
+        "dot,8x2x2",
+    ],
+    output_hdr = "arm64_neon_fp64.inc",
+    output_src = "arm64_neon_fp64.cc",
 )
 
 ynn_generate_src_hdr(
@@ -668,6 +751,7 @@ ynn_cc_library(
     hdrs = [
         "arm64_neon_bf16_bf16_fp32.inc",
         "arm64_neon_fp32.inc",
+        "arm64_neon_fp64.inc",
         "arm64_neoni8mm_int8_int8_int32.inc",
         "arm64_sme.h",
         "arm_neon_int8_int8_int32.inc",
@@ -687,6 +771,7 @@ ynn_cc_library(
         "x86_avx512_fp32.inc",
         "x86_avx512_fp32_k2.inc",
         "x86_avx512_fp32_k4.inc",
+        "x86_avx512_fp64.inc",
         "x86_avx512_int8_int8_int32.inc",
         "x86_avx512_int8_int8_int32_k1.inc",
         "x86_avx512_int8_int8_int32_k16.inc",
@@ -694,9 +779,11 @@ ynn_cc_library(
         "x86_avx512vnni_uint8_int8_int32.inc",
         "x86_avx512vnni_uint8_int8_int32_k16.inc",
         "x86_avx_fp32.inc",
+        "x86_avx_fp64.inc",
         "x86_f16c_fma3_fp16_fp16_fp32.inc",
         "x86_f16c_fp16_fp16_fp32.inc",
         "x86_fma3_fp32.inc",
+        "x86_fma3_fp64.inc",
         "x86_sse2_fp32.inc",
     ],
     compatible_with = _COMPATIBLE_WITH,
@@ -704,6 +791,7 @@ ynn_cc_library(
     per_arch_srcs = {
         "arm64_neon": [
             "arm64_neon_fp32.cc",
+            "arm64_neon_fp64.cc",
             "arm64_neon_bf16_bf16_fp32.cc",
         ],
         "arm64_neoni8mm": ["arm64_neoni8mm_int8_int8_int32.cc"],
@@ -719,10 +807,16 @@ ynn_cc_library(
         "arm_neonbf16": ["arm_neonbf16_bf16_bf16_fp32_k2.cc"],
         "arm_neondot": ["arm_neondot_int8_int8_int32.cc"],
         "x86_sse2": ["x86_sse2_fp32.cc"],
-        "x86_avx": ["x86_avx_fp32.cc"],
+        "x86_avx": [
+            "x86_avx_fp32.cc",
+            "x86_avx_fp64.cc",
+        ],
         "x86_f16c": ["x86_f16c_fp16_fp16_fp32.cc"],
         "x86_f16c_fma3": ["x86_f16c_fma3_fp16_fp16_fp32.cc"],
-        "x86_fma3": ["x86_fma3_fp32.cc"],
+        "x86_fma3": [
+            "x86_fma3_fp32.cc",
+            "x86_fma3_fp64.cc",
+        ],
         "x86_avx2": [
             "x86_avx2_int8_int8_int32.cc",
             "x86_avx2_int8_int8_int32_k1.cc",
@@ -738,6 +832,7 @@ ynn_cc_library(
             "x86_avx512_bf16_bf16_fp32_k1.cc",
             "x86_avx512_fp16_fp16_fp32.cc",
             "x86_avx512_fp32.cc",
+            "x86_avx512_fp64.cc",
             "x86_avx512_fp32_k2.cc",
             "x86_avx512_fp32_k4.cc",
             "x86_avx512_int8_int8_int32.cc",
@@ -867,4 +962,30 @@ cc_test(
         "//ynnpack/base/test:tensor",
         "@com_google_benchmark//:benchmark",
     ],
+)
+
+cc_binary(
+    name = "schedule_bench",
+    testonly = True,
+    srcs = ["schedule_bench.cc"],
+    linkopts = ynn_binary_linkopts(),
+    malloc = ynn_binary_malloc(),
+    deps = [
+        ":dot",
+        ":schedule",
+        "//ynnpack/base",
+        "//ynnpack/base/test:buffer",
+        "//ynnpack/base/test:tensor",
+        "//ynnpack/base/test:util",
+        "@slinky//slinky/base",
+    ],
+)
+
+sh_test(
+    name = "schedule_bench_test",
+    srcs = ["schedule_bench_test.sh"],
+    args = ["$(rootpath :schedule_bench)"],
+    data = [":schedule_bench"],
+    # This doesn't work with emulators that use --run_under to execute the test.
+    tags = ["noemulator"],
 )

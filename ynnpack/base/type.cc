@@ -22,6 +22,7 @@ bool type_is_integral(ynn_type t) {
     case ynn_type_uint8:
     case ynn_type_int32:
       return true;
+    case ynn_type_fp64:
     case ynn_type_fp32:
     case ynn_type_fp16:
     case ynn_type_bf16:
@@ -35,6 +36,7 @@ bool type_is_integral(ynn_type t) {
 
 bool type_is_floating_point(ynn_type t) {
   switch (t) {
+    case ynn_type_fp64:
     case ynn_type_fp32:
     case ynn_type_fp16:
     case ynn_type_bf16:
@@ -69,6 +71,8 @@ size_t type_size_bits(ynn_type t) {
     case ynn_type_int32:
     case ynn_type_fp32:
       return 32;
+    case ynn_type_fp64:
+      return 64;
     case ynn_type_opaque:
       return 0;
     case ynn_type_invalid:
@@ -88,6 +92,8 @@ size_t type_mantissa_bits(ynn_type t) {
       return 8;
     case ynn_type_fp32:
       return 24;
+    case ynn_type_fp64:
+      return 53;
     default:
       // Treat all bits as mantissa for integers.
       return type_size_bits(t);
@@ -101,6 +107,8 @@ size_t type_exponent_bits(ynn_type t) {
     case ynn_type_bf16:
     case ynn_type_fp32:
       return 8;
+    case ynn_type_fp64:
+      return 11;
     default:
       // Integers don't have an exponent.
       return 0;
@@ -130,6 +138,8 @@ const char* to_string(ynn_type type) {
       return "uint8";
     case ynn_type_int32:
       return "int32";
+    case ynn_type_fp64:
+      return "fp64";
     case ynn_type_fp32:
       return "fp32";
     case ynn_type_fp16:
