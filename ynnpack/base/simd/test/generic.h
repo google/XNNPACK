@@ -303,6 +303,29 @@ void test_ceil() {
 #define TEST_CEIL(test_class, type, N) \
   TEST_F(test_class, ceil_##type##x##N) { test_ceil<type, N>(); }
 
+template <typename scalar, size_t N>
+void test_abs() {
+  using vector = vec<scalar, N>;
+  using result_vector = decltype(abs(std::declval<vector>()));
+  using result_scalar = typename result_vector::value_type;
+
+  ReplicableRandomDevice rng;
+  for (auto _ : FuzzTest(std::chrono::milliseconds(100))) {
+    scalar a[vector::N];
+    fill_random(a, vector::N, rng);
+
+    typename result_vector::value_type result[vector::N];
+    store(result, abs(load(a, vector::N)));
+
+    for (size_t i = 0; i < vector::N; ++i) {
+      ASSERT_EQ(result[i], static_cast<result_scalar>(std::abs(a[i])));
+    }
+  }
+}
+
+#define TEST_ABS(test_class, type, N) \
+  TEST_F(test_class, abs_##type##x##N) { test_abs<type, N>(); }
+
 namespace internal {
 float tol_relative(float y_ref, float rel_tol) {
   // Note that `y_ref * rel_tol`, i.e. the expected absolute difference,

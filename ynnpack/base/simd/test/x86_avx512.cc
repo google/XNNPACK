@@ -118,6 +118,11 @@ TEST_CEIL(x86_avx512, f32, 16);
 TEST_ROUND(x86_avx512, f32, 16);
 TEST_SQRT(x86_avx512, f32, 16);
 
+TEST_ABS(x86_avx512, s8, 64);
+TEST_ABS(x86_avx512, s16, 32);
+TEST_ABS(x86_avx512, s32, 16);
+TEST_ABS(x86_avx512, f32, 16);
+
 TEST_FMA(x86_avx512, f32, 16);
 
 TEST_EXTRACT(x86_avx512, s32x16, 4);

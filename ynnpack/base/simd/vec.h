@@ -132,6 +132,8 @@ template <typename T, size_t N>
 vec<T, N> round(vec<T, N> a);
 template <typename T, size_t N>
 vec<T, N> sqrt(vec<T, N> a);
+template <typename T, size_t N>
+vec<T, N> abs(vec<T, N> a);
 
 template <typename T>
 std::array<vec<T, 4>, 4> transpose(std::array<vec<T, 4>, 4> x);
@@ -271,6 +273,10 @@ YNN_ALWAYS_INLINE vec<T, 1> round(vec<T, 1> a) {
 template <typename T>
 YNN_ALWAYS_INLINE vec<T, 1> sqrt(vec<T, 1> a) {
   return vec<T, 1>{std::sqrt(a.v)};
+}
+template <typename T>
+YNN_ALWAYS_INLINE vec<T, 1> abs(vec<T, 1> a) {
+  return vec<T, 1>{std::abs(a.v)};
 }
 
 template <typename To, typename From>

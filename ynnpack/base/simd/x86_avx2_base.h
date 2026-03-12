@@ -115,6 +115,8 @@ YNN_ALWAYS_INLINE u8x32 max(u8x32 a, u8x32 b) {
 }
 
 YNN_ALWAYS_INLINE u8x32 abs(s8x32 a) { return u8x32{_mm256_abs_epi8(a.v)}; }
+YNN_ALWAYS_INLINE u16x16 abs(s16x16 a) { return u16x16{_mm256_abs_epi16(a.v)}; }
+YNN_ALWAYS_INLINE u32x8 abs(s32x8 a) { return u32x8{_mm256_abs_epi32(a.v)}; }
 
 YNN_ALWAYS_INLINE f32x8 convert(bf16x8 a, float) {
   return f32x8{_mm256_castsi256_ps(_mm256_slli_epi32(_mm256_cvtepu16_epi32(a.v),

@@ -28,6 +28,10 @@ TEST_MIN(x86_sse41, s32, 4);
 TEST_MAX(x86_sse41, s8, 16);
 TEST_MAX(x86_sse41, s32, 4);
 
+TEST_ABS(x86_sse41, s8, 16);
+TEST_ABS(x86_sse41, s16, 8);
+TEST_ABS(x86_sse41, s32, 4);
+
 TEST_HORIZONTAL_MIN(x86_sse41, s32, 4);
 
 TEST_HORIZONTAL_MAX(x86_sse41, s32, 4);

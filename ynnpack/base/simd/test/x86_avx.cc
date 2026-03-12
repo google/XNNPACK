@@ -82,6 +82,7 @@ TEST_FLOOR(x86_avx, f32, 8);
 TEST_CEIL(x86_avx, f32, 8);
 TEST_ROUND(x86_avx, f32, 8);
 TEST_SQRT(x86_avx, f32, 8);
+TEST_ABS(x86_avx, f32, 8);
 
 TEST_EXTRACT(x86_avx, s32x8, 4);
 TEST_EXTRACT(x86_avx, f32x8, 4);

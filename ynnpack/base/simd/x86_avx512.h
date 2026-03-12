@@ -67,6 +67,22 @@ struct vec<float, 16> {
 };
 
 template <>
+struct vec<uint32_t, 16> {
+  using value_type = uint32_t;
+  static constexpr std::integral_constant<size_t, 16> N = {};
+
+  vec() = default;
+  explicit vec(__m512i v) : v(v) {}
+  vec(u32x8 lo, u32x8 hi) : v(internal::concat(lo.v, hi.v)) {}
+  vec(uint32_t x) : v(_mm512_set1_epi32(x)) {}  // NOLINT
+
+  __m512i v;
+
+  YNN_ALWAYS_INLINE u32x8 lo() const { return u32x8{internal::lo(v)}; }
+  YNN_ALWAYS_INLINE u32x8 hi() const { return u32x8{internal::hi(v)}; }
+};
+
+template <>
 struct vec<int32_t, 16> {
   using value_type = int32_t;
   static constexpr std::integral_constant<size_t, 16> N = {};
@@ -112,6 +128,22 @@ struct vec<half, 32> {
 
   YNN_ALWAYS_INLINE f16x16 lo() const { return f16x16{internal::lo(v)}; }
   YNN_ALWAYS_INLINE f16x16 hi() const { return f16x16{internal::hi(v)}; }
+};
+
+template <>
+struct vec<uint16_t, 32> {
+  using value_type = uint16_t;
+  static constexpr std::integral_constant<size_t, 32> N = {};
+
+  vec() = default;
+  explicit vec(__m512i v) : v(v) {}
+  vec(u16x16 lo, u16x16 hi) : v(internal::concat(lo.v, hi.v)) {}
+  vec(uint16_t x) : v(_mm512_set1_epi16(x)) {}  // NOLINT
+
+  __m512i v;
+
+  YNN_ALWAYS_INLINE u16x16 lo() const { return u16x16{internal::lo(v)}; }
+  YNN_ALWAYS_INLINE u16x16 hi() const { return u16x16{internal::hi(v)}; }
 };
 
 template <>
@@ -163,9 +195,11 @@ struct vec<int8_t, 64> {
 };
 
 using f32x16 = vec<float, 16>;
+using u32x16 = vec<uint32_t, 16>;
 using s32x16 = vec<int32_t, 16>;
 using bf16x32 = vec<bfloat16, 32>;
 using f16x32 = vec<half, 32>;
+using u16x32 = vec<uint16_t, 32>;
 using s16x32 = vec<int16_t, 32>;
 using u8x64 = vec<uint8_t, 64>;
 using s8x64 = vec<int8_t, 64>;
@@ -203,6 +237,10 @@ YNN_ALWAYS_INLINE void store_aligned(float* ptr, f32x16 b,
                                      decltype(f32x16::N) = {}) {
   _mm512_store_ps(ptr, b.v);
 }
+YNN_ALWAYS_INLINE void store_aligned(uint32_t* ptr, u32x16 b,
+                                     decltype(u32x16::N) = {}) {
+  _mm512_store_si512(reinterpret_cast<__m512i*>(ptr), b.v);
+}
 YNN_ALWAYS_INLINE void store_aligned(int32_t* ptr, s32x16 b,
                                      decltype(s32x16::N) = {}) {
   _mm512_store_si512(reinterpret_cast<__m512i*>(ptr), b.v);
@@ -213,6 +251,10 @@ YNN_ALWAYS_INLINE void store_aligned(bfloat16* ptr, bf16x32 b,
 }
 YNN_ALWAYS_INLINE void store_aligned(half* ptr, f16x32 b,
                                      decltype(f16x32::N) = {}) {
+  _mm512_store_si512(reinterpret_cast<__m512i*>(ptr), b.v);
+}
+YNN_ALWAYS_INLINE void store_aligned(uint16_t* ptr, u16x32 b,
+                                     decltype(u16x32::N) = {}) {
   _mm512_store_si512(reinterpret_cast<__m512i*>(ptr), b.v);
 }
 YNN_ALWAYS_INLINE void store_aligned(int16_t* ptr, s16x32 b,
@@ -260,6 +302,10 @@ YNN_ALWAYS_INLINE s8x64 load(const int8_t* ptr, decltype(s8x64::N),
 YNN_ALWAYS_INLINE void store(float* ptr, f32x16 b, decltype(f32x16::N) = {}) {
   _mm512_storeu_ps(ptr, b.v);
 }
+YNN_ALWAYS_INLINE void store(uint32_t* ptr, u32x16 b,
+                             decltype(u32x16::N) = {}) {
+  _mm512_storeu_si512(reinterpret_cast<__m512i*>(ptr), b.v);
+}
 YNN_ALWAYS_INLINE void store(int32_t* ptr, s32x16 b, decltype(s32x16::N) = {}) {
   _mm512_storeu_si512(reinterpret_cast<__m512i*>(ptr), b.v);
 }
@@ -268,6 +314,10 @@ YNN_ALWAYS_INLINE void store(bfloat16* ptr, bf16x32 b,
   _mm512_storeu_si512(reinterpret_cast<__m512i*>(ptr), b.v);
 }
 YNN_ALWAYS_INLINE void store(half* ptr, f16x32 b, decltype(f16x32::N) = {}) {
+  _mm512_storeu_si512(reinterpret_cast<__m512i*>(ptr), b.v);
+}
+YNN_ALWAYS_INLINE void store(uint16_t* ptr, u16x32 b,
+                             decltype(u16x32::N) = {}) {
   _mm512_storeu_si512(reinterpret_cast<__m512i*>(ptr), b.v);
 }
 YNN_ALWAYS_INLINE void store(int16_t* ptr, s16x32 b, decltype(s16x32::N) = {}) {
@@ -712,6 +762,9 @@ YNN_ALWAYS_INLINE u8x64 max(u8x64 a, u8x64 b) {
 }
 
 YNN_ALWAYS_INLINE u8x64 abs(s8x64 a) { return u8x64{_mm512_abs_epi8(a.v)}; }
+YNN_ALWAYS_INLINE u16x32 abs(s16x32 a) { return u16x32{_mm512_abs_epi16(a.v)}; }
+YNN_ALWAYS_INLINE u32x16 abs(s32x16 a) { return u32x16{_mm512_abs_epi32(a.v)}; }
+YNN_ALWAYS_INLINE f32x16 abs(f32x16 a) { return f32x16{_mm512_abs_ps(a.v)}; }
 
 template <int Index>
 YNN_ALWAYS_INLINE s32x4 extract(s32x16 x, decltype(s32x4::N)) {

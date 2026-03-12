@@ -51,6 +51,18 @@ struct vec<float, 4> {
 };
 
 template <>
+struct vec<uint32_t, 4> {
+  using value_type = uint32_t;
+  static constexpr std::integral_constant<size_t, 4> N = {};
+
+  vec() = default;
+  explicit vec(uint32x4_t v) : v(v) {}
+  vec(uint32_t x) : v(vdupq_n_u32(x)) {}  // NOLINT
+
+  uint32x4_t v;
+};
+
+template <>
 struct vec<int32_t, 4> {
   using value_type = int32_t;
   static constexpr std::integral_constant<size_t, 4> N = {};
@@ -99,6 +111,18 @@ struct vec<half, 8> {
 };
 
 template <>
+struct vec<uint16_t, 8> {
+  using value_type = uint16_t;
+  static constexpr std::integral_constant<size_t, 8> N = {};
+
+  vec() = default;
+  explicit vec(uint16x8_t v) : v(v) {}
+  vec(uint16_t x) : v(vdupq_n_u16(x)) {}  // NOLINT
+
+  uint16x8_t v;
+};
+
+template <>
 struct vec<int16_t, 8> {
   using value_type = int16_t;
   static constexpr std::integral_constant<size_t, 8> N = {};
@@ -139,10 +163,12 @@ struct vec<int8_t, 16> {
 };
 
 using f32x4 = vec<float, 4>;
+using u32x4 = vec<uint32_t, 4>;
 using s32x4 = vec<int32_t, 4>;
 using bf16x8 = vec<bfloat16, 8>;
 using f16x4 = vec<half, 4>;
 using f16x8 = vec<half, 8>;
+using u16x8 = vec<uint16_t, 8>;
 using s16x8 = vec<int16_t, 8>;
 using u8x16 = vec<uint8_t, 16>;
 using s8x16 = vec<int8_t, 16>;
@@ -235,6 +261,10 @@ YNN_ALWAYS_INLINE void store_aligned(float* ptr, f32x4 b,
                                      decltype(f32x4::N) = {}) {
   vst1q_f32(ptr, b.v);
 }
+YNN_ALWAYS_INLINE void store_aligned(uint32_t* ptr, u32x4 b,
+                                     decltype(u32x4::N) = {}) {
+  vst1q_u32(ptr, b.v);
+}
 YNN_ALWAYS_INLINE void store_aligned(int32_t* ptr, s32x4 b,
                                      decltype(s32x4::N) = {}) {
   vst1q_s32(ptr, b.v);
@@ -246,6 +276,10 @@ YNN_ALWAYS_INLINE void store_aligned(bfloat16* ptr, bf16x8 b,
 YNN_ALWAYS_INLINE void store_aligned(half* ptr, f16x8 b,
                                      decltype(f16x8::N) = {}) {
   vst1q_u16(reinterpret_cast<uint16_t*>(ptr), b.v);
+}
+YNN_ALWAYS_INLINE void store_aligned(uint16_t* ptr, u16x8 b,
+                                     decltype(u16x8::N) = {}) {
+  vst1q_u16(ptr, b.v);
 }
 YNN_ALWAYS_INLINE void store_aligned(int16_t* ptr, s16x8 b,
                                      decltype(s16x8::N) = {}) {
@@ -306,6 +340,9 @@ YNN_ALWAYS_INLINE u8x8 load(const uint8_t* ptr, decltype(u8x8::N), u8x8 = {}) {
 YNN_ALWAYS_INLINE void store(float* ptr, f32x4 b, decltype(f32x4::N) = {}) {
   vst1q_f32(ptr, b.v);
 }
+YNN_ALWAYS_INLINE void store(uint32_t* ptr, u32x4 b, decltype(u32x4::N) = {}) {
+  vst1q_u32(ptr, b.v);
+}
 YNN_ALWAYS_INLINE void store(int32_t* ptr, s32x4 b, decltype(s32x4::N) = {}) {
   vst1q_s32(ptr, b.v);
 }
@@ -315,6 +352,9 @@ YNN_ALWAYS_INLINE void store(bfloat16* ptr, bf16x8 b,
 }
 YNN_ALWAYS_INLINE void store(half* ptr, f16x8 b, decltype(f16x8::N) = {}) {
   vst1q_u16(reinterpret_cast<uint16_t*>(ptr), b.v);
+}
+YNN_ALWAYS_INLINE void store(uint16_t* ptr, u16x8 b, decltype(u16x8::N) = {}) {
+  vst1q_u16(ptr, b.v);
 }
 YNN_ALWAYS_INLINE void store(int16_t* ptr, s16x8 b, decltype(s16x8::N) = {}) {
   vst1q_s16(ptr, b.v);
@@ -461,6 +501,17 @@ YNN_ALWAYS_INLINE u8x16 max(u8x16 a, u8x16 b) {
 }
 YNN_ALWAYS_INLINE s8x16 max(s8x16 a, s8x16 b) {
   return s8x16{vmaxq_s8(a.v, b.v)};
+}
+
+YNN_ALWAYS_INLINE f32x4 abs(f32x4 a) { return f32x4{vabsq_f32(a.v)}; }
+YNN_ALWAYS_INLINE u32x4 abs(s32x4 a) {
+  return u32x4{vreinterpretq_u32_s32(vabsq_s32(a.v))};
+}
+YNN_ALWAYS_INLINE u16x8 abs(s16x8 a) {
+  return u16x8{vreinterpretq_u16_s16(vabsq_s16(a.v))};
+}
+YNN_ALWAYS_INLINE u8x16 abs(s8x16 a) {
+  return u8x16{vreinterpretq_u8_s8(vabsq_s8(a.v))};
 }
 
 namespace internal {

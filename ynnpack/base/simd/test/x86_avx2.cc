@@ -40,6 +40,10 @@ TEST_MAX(x86_avx2, s8, 32);
 TEST_MAX(x86_avx2, s16, 16);
 TEST_MAX(x86_avx2, s32, 8);
 
+TEST_ABS(x86_avx2, s8, 32);
+TEST_ABS(x86_avx2, s16, 16);
+TEST_ABS(x86_avx2, s32, 8);
+
 TEST_HORIZONTAL_MIN(x86_avx2, u8, 32);
 TEST_HORIZONTAL_MIN(x86_avx2, s8, 32);
 TEST_HORIZONTAL_MIN(x86_avx2, s16, 16);
