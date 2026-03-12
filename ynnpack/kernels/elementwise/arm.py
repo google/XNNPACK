@@ -77,12 +77,6 @@ def make_neon_integer_patterns(vector_bits):
   return [
       i.vectorize(vector_bits)
       for i in [
-          Rule(u32_a & u32_b, Op(UInt(32), "vandq_u32", [u32_a, u32_b])),
-          Rule(i32_a & i32_b, Op(Int(32), "vandq_s32", [i32_a, i32_b])),
-          Rule(u32_a | u32_b, Op(UInt(32), "vorrq_u32", [u32_a, u32_b])),
-          Rule(i32_a | i32_b, Op(Int(32), "vorrq_s32", [i32_a, i32_b])),
-          Rule(u32_a ^ u32_b, Op(UInt(32), "veorq_u32", [u32_a, u32_b])),
-          Rule(i32_a ^ i32_b, Op(Int(32), "veorq_s32", [i32_a, i32_b])),
           Rule(
               saturating_add(u8_a, u8_b),
               Op(UInt(8), "vqaddq_u8", [u8_a, u8_b]),
@@ -130,15 +124,7 @@ def make_neon_integer_patterns(vector_bits):
 
 def make_neon_float32_patterns(vector_bits):
   assert vector_bits == 128
-  return [
-      i.vectorize(vector_bits)
-      for i in [
-          Rule(abs(f32_a), Op(Float(32), "vabsq_f32", [f32_a])),
-          Rule(f32_a & f32_b, Op(Float(32), "and_f32", [f32_a, f32_b])),
-          Rule(f32_a | f32_b, Op(Float(32), "or_f32", [f32_a, f32_b])),
-          Rule(f32_a ^ f32_b, Op(Float(32), "xor_f32", [f32_a, f32_b])),
-      ]
-  ]
+  return []
 
 
 class ARM(Target):
@@ -148,22 +134,6 @@ class ARM(Target):
     self.header += """
 
 namespace {
-
-YNN_INTRINSIC float32x4_t and_f32(float32x4_t a, float32x4_t b) {
-  return vreinterpretq_f32_u32(vandq_u32(vreinterpretq_u32_f32(a), vreinterpretq_u32_f32(b)));
-}
-
-YNN_INTRINSIC float32x4_t or_f32(float32x4_t a, float32x4_t b) {
-  return vreinterpretq_f32_u32(vorrq_u32(vreinterpretq_u32_f32(a), vreinterpretq_u32_f32(b)));
-}
-
-YNN_INTRINSIC float32x4_t xor_f32(float32x4_t a, float32x4_t b) {
-  return vreinterpretq_f32_u32(veorq_u32(vreinterpretq_u32_f32(a), vreinterpretq_u32_f32(b)));
-}
-
-YNN_INTRINSIC float32x4_t not_f32(float32x4_t a) {
-  return vreinterpretq_f32_u32(vmvnq_u32(vreinterpretq_u32_f32(a)));
-}
 
 YNN_INTRINSIC int32x4_t cast_f32_to_int32(float32x4_t f) {
 #if defined(__ARM_ARCH) && __ARM_ARCH < 8

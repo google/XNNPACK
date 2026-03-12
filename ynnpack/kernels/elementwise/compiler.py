@@ -253,7 +253,7 @@ class Value:
     return Op(self.ty, "bitwise_xor", promote_types(self, wrap(y)))
 
   def __invert__(self):
-    return Op(self.ty, "bitwise_not", [self])
+    return Op(self.ty, "~", [self])
 
   def __neg__(self):
     return Constant(self.ty, 0) - self
@@ -401,11 +401,6 @@ def not_equal(self, y):
 @intrinsic
 def abs(value):
   return Op(value.ty, "abs", [value])
-
-
-def lower_abs(x):
-  assert x.ty.is_float()
-  return x & reinterpret_cast(Float(32), i32(0x7FFFFFFF))
 
 
 @intrinsic
@@ -559,7 +554,15 @@ def select_bits(mask, x, y):
 
 
 def lower_select_bits(mask, x, y):
-  return y ^ ((x ^ y) & mask)
+  if x.ty.is_float():
+    ity = Int(x.ty.size, x.ty.lanes)
+    iy = reinterpret_cast(ity, y)
+    return reinterpret_cast(
+        x.ty,
+        iy ^ ((reinterpret_cast(ity, x) ^ iy) & reinterpret_cast(ity, mask)),
+    )
+  else:
+    return y ^ ((x ^ y) & mask)
 
 
 @intrinsic
@@ -570,7 +573,16 @@ def select(cond, x, y):
 
 # We assume that cond produces a mask.
 def lower_select(cond, x, y):
-  return (x & cond) | (y & ~cond)
+  if x.ty.is_float():
+    ity = Int(x.ty.size, x.ty.lanes)
+    icond = reinterpret_cast(ity, cond)
+    return reinterpret_cast(
+        x.ty,
+        (reinterpret_cast(ity, x) & icond)
+        | (reinterpret_cast(ity, y) & ~icond),
+    )
+  else:
+    return (x & cond) | (y & ~cond)
 
 
 def load(x, offset_index=0):
@@ -634,7 +646,6 @@ def slice_vector(arg, index, total):
 # Would it be bad if instead of using a map we looked up in a global namespace
 # if there is a function called "lower" + op.name?
 lowering_funcs = {
-    "abs": lower_abs,
     "widening_sub": lower_widening_sub,
     "widening_mul": lower_widening_mul,
     "saturating_add": lower_saturating_add,
@@ -950,6 +961,7 @@ class Target:
     self.result = ""
     self.header = header
     self.simd_ops = {
+        "abs",
         "min",
         "max",
         "load",
@@ -963,6 +975,9 @@ class Target:
         "add": "+",
         "sub": "-",
         "mul": "*",
+        "bitwise_and": "&",
+        "bitwise_or": "|",
+        "bitwise_xor": "^",
     }
 
   def indent(self):

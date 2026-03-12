@@ -143,36 +143,6 @@ def make_x86_integer_patterns(vector_bits, prefix):
       i.vectorize(vector_bits)
       for i in [
           Rule(
-              u32_a & u32_b,
-              Op(
-                  UInt(32),
-                  prefix + "and_si" + str(vector_bits),
-                  [u32_a, u32_b],
-              ),
-          ),
-          Rule(
-              i32_a & i32_b,
-              Op(Int(32), prefix + "and_si" + str(vector_bits), [i32_a, i32_b]),
-          ),
-          Rule(
-              u32_a | u32_b,
-              Op(UInt(32), prefix + "or_si" + str(vector_bits), [u32_a, u32_b]),
-          ),
-          Rule(
-              i32_a | i32_b,
-              Op(Int(32), prefix + "or_si" + str(vector_bits), [i32_a, i32_b]),
-          ),
-          Rule(
-              u32_a ^ u32_b,
-              Op(
-                  UInt(32), prefix + "xor_si" + str(vector_bits), [u32_a, u32_b]
-              ),
-          ),
-          Rule(
-              i32_a ^ i32_b,
-              Op(Int(32), prefix + "xor_si" + str(vector_bits), [i32_a, i32_b]),
-          ),
-          Rule(
               saturating_add(u8_a, u8_b),
               Op(UInt(8), prefix + "adds_epu8", [u8_a, u8_b]),
           ),
@@ -452,27 +422,6 @@ def make_x86_slice_patterns(vector_bits, prefix):
   return []
 
 
-def make_x86_float32_patterns(vector_bits, prefix):
-  return [
-      i.vectorize(vector_bits)
-      for i in [
-          Rule(f32_a / f32_b, Op(Float(32), prefix + "div_ps", [f32_a, f32_b])),
-          Rule(
-              f32_a & f32_b,
-              Op(Float(32), prefix + "and_ps", [f32_a, f32_b]),
-          ),
-          Rule(
-              f32_a | f32_b,
-              Op(Float(32), prefix + "or_ps", [f32_a, f32_b]),
-          ),
-          Rule(
-              f32_a ^ f32_b,
-              Op(Float(32), prefix + "xor_ps", [f32_a, f32_b]),
-          ),
-      ]
-  ]
-
-
 def make_x86_f16c_patterns(vector_bits, prefix):
   # TODO(vksnk): this is just a workaround, because the fp16 vector is shorter
   # than target bit width. This needs a clean-up.
@@ -533,7 +482,6 @@ class X86(Target):
         Float(32, 4): "simd::vec<float, 4>",
     })
 
-    self.patterns += make_x86_float32_patterns(128, "_mm_")
     self.patterns += make_x86_integer_patterns(128, "_mm_")
     self.patterns += make_x86_cast_patterns(128, "_mm_")
     self.patterns += make_x86_reinterpret_cast_patterns(128, "_mm_")
@@ -592,27 +540,16 @@ YNN_INTRINSIC __m128i saturating_cast_f32_to_uint8(__m128 f0, __m128 f1, __m128 
   return _mm_packus_epi16(i01_16, i23_16);
 }
 
-YNN_INTRINSIC __m128 bitwise_not(__m128 val) {
-  __m128 all_ones = _mm_castsi128_ps(_mm_set1_epi32(-1));
-  return _mm_xor_ps(val, all_ones);
-}
-
 } // namespace
 """
 
   def update_for_sse41(self):
     """Updates the target for SSE41 support."""
-    self.patterns += make_x86_float32_patterns(128, "_mm_")
 
   def update_for_avx(self):
     """Updates the target for AVX support."""
     self.header += """
 namespace {
-
-YNN_INTRINSIC __m256 bitwise_not(__m256 val) {
-  __m256 all_ones = _mm256_castsi256_ps(_mm256_set1_epi32(-1));
-  return _mm256_xor_ps(val, all_ones);
-}
 
 YNN_INTRINSIC __m256 greater_than(__m256 a, __m256 b) {
   return _mm256_cmp_ps(a, b, _CMP_GT_OS);
@@ -653,7 +590,6 @@ YNN_INTRINSIC __m128 wrapper_mm256_slice_extract_ps256_1(
         BFloat(16, 16): "simd::vec<bfloat16, 16>",
         BFloat(16, 8): "simd::vec<bfloat16, 8>",
     })
-    self.patterns += make_x86_float32_patterns(256, "_mm256_")
     self.patterns += make_x86_reinterpret_cast_patterns(256, "_mm256_")
     self.patterns += make_x86_slice_patterns(256, "_mm256_")
 
@@ -767,11 +703,6 @@ YNN_INTRINSIC __m128i wrapper_mm256_cvtps_ph(__m256 x) {
     self.header += """
 namespace {
 
-YNN_INTRINSIC __m512i bitwise_not(__m512i val) {
-  __m512i all_ones = _mm512_set1_epi32(-1);
-  return _mm512_xor_si512(val, all_ones);
-}
-
 YNN_INTRINSIC __m512 convert_bf16_to_fp32_avx512(__m256i a) {
   const __m512i fp32_integers = _mm512_cvtepu16_epi32(a);
   const __m512i shifted = _mm512_slli_epi32(fp32_integers, 16);
@@ -812,7 +743,6 @@ YNN_INTRINSIC __m256 wrapper_mm512_slice_extract_ps512_1(
         Float(16, 16): "simd::vec<half, 16>",
     })
     self.patterns += make_x86_fma_patterns(512, "_mm512_")
-    self.patterns += make_x86_float32_patterns(512, "_mm512_")
     self.patterns += make_x86_reinterpret_cast_patterns(512, "_mm512_")
     self.patterns += make_x86_integer_patterns(512, "_mm512_")
     self.patterns += make_x86_cast_patterns(512, "_mm512_")
