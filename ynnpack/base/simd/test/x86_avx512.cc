@@ -160,6 +160,8 @@ TEST_CONVERT(x86_avx512, s32, s8x16);
 TEST_CONVERT(x86_avx512, s32, u8x16);
 TEST_CONVERT(x86_avx512, s32, s8x32);
 TEST_CONVERT(x86_avx512, s32, u8x32);
+TEST_CONVERT(x86_avx512, f32, s32x16);
+TEST_CONVERT(x86_avx512, s32, f32x16);
 
 }  // namespace simd
 }  // namespace ynn

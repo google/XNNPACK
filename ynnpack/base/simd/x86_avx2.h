@@ -37,6 +37,14 @@ YNN_ALWAYS_INLINE s32x16 convert(u8x16 a, int32_t) {
   };
 }
 
+YNN_ALWAYS_INLINE f32x8 convert(s32x8 x, float) {
+  return f32x8{_mm256_cvtepi32_ps(x.v)};
+}
+
+YNN_ALWAYS_INLINE s32x8 convert(f32x8 x, int32_t) {
+  return s32x8{_mm256_cvttps_epi32(x.v)};
+}
+
 }  // namespace simd
 
 }  // namespace ynn

@@ -138,6 +138,8 @@ TEST_HORIZONTAL_MAX(arm_neon, s32, 4);
 TEST_CONVERT(arm_neon, s32, s8x16);
 TEST_CONVERT(arm_neon, s32, u8x16);
 TEST_CONVERT(arm_neon, s32, s16x8);
+TEST_CONVERT(arm_neon, f32, s32x4);
+TEST_CONVERT(arm_neon, s32, f32x4);
 TEST_CONVERT(arm_neon, f32, bf16x8);
 
 TEST_EXTRACT(arm_neon, u8x16, 8);

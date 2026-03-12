@@ -64,6 +64,14 @@ YNN_ALWAYS_INLINE s32x16 convert(u8x16 a, int32_t) {
   };
 }
 
+YNN_ALWAYS_INLINE f32x4 convert(s32x4 x, float) {
+  return f32x4{_mm_cvtepi32_ps(x.v)};
+}
+
+YNN_ALWAYS_INLINE s32x4 convert(f32x4 x, int32_t) {
+  return s32x4{_mm_cvttps_epi32(x.v)};
+}
+
 YNN_ALWAYS_INLINE f64x4 convert(f32x4 x, double) {
   return {f64x2{_mm_cvtps_pd(x.v)},
           f64x2{_mm_cvtps_pd(_mm_movehl_ps(x.v, x.v))}};

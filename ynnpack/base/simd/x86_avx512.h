@@ -862,6 +862,14 @@ YNN_ALWAYS_INLINE s16x32 convert(u8x32 a, int16_t) {
   return s16x32{_mm512_cvtepu8_epi16(a.v)};
 }
 
+YNN_ALWAYS_INLINE f32x16 convert(s32x16 x, float) {
+  return f32x16{_mm512_cvtepi32_ps(x.v)};
+}
+
+YNN_ALWAYS_INLINE s32x16 convert(f32x16 x, int32_t) {
+  return s32x16{_mm512_cvttps_epi32(x.v)};
+}
+
 }  // namespace simd
 
 }  // namespace ynn
