@@ -17,6 +17,10 @@ namespace simd {
 
 using f32x8 = vec<float, 8>;
 
+YNN_ALWAYS_INLINE f32x4 convert(f16x4 a, float) {
+  return f32x4{vcvt_f32_f16(vreinterpret_f16_u16(a.v))};
+}
+
 YNN_ALWAYS_INLINE f32x8 convert(f16x8 a, float) {
   return {
       f32x4{vcvt_f32_f16(vreinterpret_f16_u16(vget_low_u16(a.v)))},
