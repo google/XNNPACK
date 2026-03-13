@@ -160,6 +160,7 @@ enum xnn_status xnn_create_weights_cache_with_size(size_t size, xnn_weights_cach
   cache_provider->is_finalized = (bool (*)(void*))xnn_internal_weights_cache_is_finalized;
   cache_provider->offset_to_addr = (void*(*)(void*, size_t))xnn_internal_weights_cache_offset_to_addr;
   cache_provider->delete_cache = (enum xnn_status (*)(void*))xnn_internal_delete_weights_cache;
+  cache_provider->alias_data = NULL;
   *weights_cache_out = cache_provider;
   return xnn_status_success;
 

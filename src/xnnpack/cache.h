@@ -128,6 +128,9 @@ size_t xnn_weights_cache_look_up(
     xnn_weights_cache_t cache,
     const struct xnn_weights_cache_look_up_key* cache_key);
 
+enum xnn_status xnn_weights_cache_alias_data(xnn_weights_cache_t cache,
+                                             void* alias, void* original);
+
 #ifdef __cplusplus
 }  // extern "C"
 #endif

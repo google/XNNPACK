@@ -2363,6 +2363,14 @@ struct xnn_weights_cache_provider {
   /// Destroy a weights cache object, as well as memory used for the cache.
   /// @param context - The user-specified pointer from xnn_weights_cache_provider structure.
   enum xnn_status (*delete_cache)(void* context);
+
+  /// Marks `alias` as pointing to memory that is different but semantically
+  /// equivalent to the data pointed to by `original`.
+  ///
+  /// This is used by XNNPack when converting or copying constant data when
+  /// preprocessing the graph and allows the cache to map from new memory
+  /// addresses created by these transformations to the original data.
+  enum xnn_status (*alias_data)(void* context, void* alias, void* original);
 };
 
 /// Weights cache is a cache for packed weights. It can be reused between runtimes.
