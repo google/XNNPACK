@@ -10,41 +10,20 @@ def make_neon_cast_patterns(vector_bits):
   assert vector_bits == 128
   vf32_a = f32_a.with_lanes(vector_bits // 32)
   vf32_b = f32_b.with_lanes(vector_bits // 32)
-  vf16_a = f16_a.with_lanes(vector_bits // 32)
 
-  return (
-      [
-          i.vectorize(vector_bits)
-          for i in [
-              Rule(
-                  cast(Float(32), i32_a),
-                  Op(Float(32), "vcvtq_f32_s32", [i32_a]),
-              ),
-              Rule(
-                  cast(Int(32), round(f32_a)),
-                  Op(Int(32), "cast_f32_to_int32", [f32_a]),
-              ),
-          ]
-      ]
-      + [
-          Rule(
-              cast(Float(32, vector_bits // 32), vf16_a),
-              Op(Float(32, vector_bits // 32), "cast_f16_to_f32", [vf16_a]),
+  return [
+      Rule(
+          cast(
+              Float(16, vector_bits // 16),
+              combine_vectors([vf32_a, vf32_b]),
           ),
-          Rule(
-              cast(
-                  Float(16, vector_bits // 16),
-                  combine_vectors([vf32_a, vf32_b]),
-              ),
-              Op(
-                  Float(16, vector_bits // 16),
-                  "cast_f32_to_f16",
-                  [vf32_a, vf32_b],
-              ),
+          Op(
+              Float(16, vector_bits // 16),
+              "cast_f32_to_f16",
+              [vf32_a, vf32_b],
           ),
-      ]
-      + add_saturating_cast_rules(vector_bits)
-  )
+      ),
+  ] + add_saturating_cast_rules(vector_bits)
 
 
 def make_neon_integer_patterns(vector_bits):
@@ -175,10 +154,6 @@ YNN_INTRINSIC uint8x16_t saturating_cast_int16_to_uint8(int16x8_t a, int16x8_t b
     self.header += """
 namespace {
 
-YNN_INTRINSIC float32x4_t cast_f16_to_f32(uint16x4_t f0) {
-  return vcvt_f32_f16(vreinterpret_f16_u16(f0));
-}
-
 YNN_INTRINSIC uint16x8_t cast_f32_to_f16(float32x4_t f0, float32x4_t f1) {
   return vreinterpretq_u16_f16(vcombine_f16(vcvt_f16_f32(f0), vcvt_f16_f32(f1)));
 }
@@ -197,11 +172,6 @@ YNN_INTRINSIC uint16x8_t cast_f32_to_f16(float32x4_t f0, float32x4_t f1) {
     self.vector_bits = 128
     self.tail_strategy = TailStrategy.VECTOR
 
-    self.header += "#include <arm_neon.h>\n"
-    self.header += (
-        '#include "ynnpack/base/simd/arm_neon.h"\n'
-    )
-
     # These are transitive.
     implied_features = {
         "NEONFP16": ["NEON"],
@@ -215,9 +185,18 @@ YNN_INTRINSIC uint16x8_t cast_f32_to_f16(float32x4_t f0, float32x4_t f1) {
       if feature not in known_features:
         raise ValueError(f"Unknown feature: {feature}")
 
+    self.header += "#include <arm_neon.h>\n"
+    self.header += (
+        '#include "ynnpack/base/simd/arm_neon.h"\n'
+    )
+
     if "NEON" in all_features:
       self.update_for_neon()
     if "NEONFP16" in all_features:
+      self.header += (
+          '#include "ynnpack/base/simd/arm_neonfp16.h"\n'
+      )
+
       self.update_for_fp16()
 
   def arch_flags(self):

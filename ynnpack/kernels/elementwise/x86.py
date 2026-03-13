@@ -5,22 +5,10 @@ from ynnpack.kernels.elementwise.common_rules import add_saturating_cast_rules
 from ynnpack.kernels.elementwise.compiler import *  # pylint: disable=wildcard-import
 
 
-def make_x86_cast_patterns(vector_bits, prefix):
+def make_x86_cast_patterns(vector_bits):
   """Adds x86 cast patterns."""
 
-  return [
-      i.vectorize(vector_bits)
-      for i in [
-          Rule(
-              cast(Float(32), i32_a),
-              Op(Float(32), prefix + "cvtepi32_ps", [i32_a]),
-          ),
-          Rule(
-              cast(Int(32), round(f32_a)),
-              Op(Int(32), prefix + "cvtps_epi32", [f32_a]),
-          ),
-      ]
-  ] + add_saturating_cast_rules(vector_bits)
+  return add_saturating_cast_rules(vector_bits)
 
 
 def make_x86_bf16_patterns(vector_bits):
@@ -390,33 +378,6 @@ def make_x86_slice_patterns(vector_bits, prefix):
   return []
 
 
-def make_x86_f16c_patterns(vector_bits, prefix):
-  # TODO(vksnk): this is just a workaround, because the fp16 vector is shorter
-  # than target bit width. This needs a clean-up.
-  f32_to_f16_rule = Rule(
-      cast(Float(16), f32_a).with_lanes(vector_bits // 32),
-      Op(Float(16), "wrapper" + prefix + "cvtps_ph", [f32_a]).with_lanes(
-          vector_bits // 32
-      ),
-      ["F16C"],
-  )
-  return [
-      i.vectorize(vector_bits)
-      for i in [
-          Rule(
-              cast(Float(32), f16_a),
-              Op(Float(32), prefix + "cvtph_ps", [f16_a]),
-              ["F16C"],
-          ),
-          Rule(
-              cast(Float(16), f32_a),
-              Op(Float(16), prefix + "cvtps_ph", [f32_a]),
-              ["F16C"],
-          ),
-      ]
-  ] + [f32_to_f16_rule]
-
-
 def make_x86_fma_patterns(vector_bits, prefix):
   return [
       i.vectorize(vector_bits)
@@ -451,7 +412,7 @@ class X86(Target):
     })
 
     self.patterns += make_x86_integer_patterns(128, "_mm_")
-    self.patterns += make_x86_cast_patterns(128, "_mm_")
+    self.patterns += make_x86_cast_patterns(128)
     self.patterns += make_x86_float_comparison_patterns(128, "_mm_")
     self.patterns += make_x86_integer_comparison_patterns(128, "_mm_")
 
@@ -562,7 +523,7 @@ YNN_INTRINSIC __m128 wrapper_mm256_slice_extract_ps256_1(
   def update_for_avx2(self):
     """Updates the target for AVX2 support."""
     self.patterns += make_x86_integer_patterns(256, "_mm256_")
-    self.patterns += make_x86_cast_patterns(256, "_mm256_")
+    self.patterns += make_x86_cast_patterns(256)
     self.patterns += make_x86_bf16_patterns(256)
 
     self.header += """
@@ -652,17 +613,6 @@ YNN_INTRINSIC __m256i saturating_cast_f32_to_uint8(__m256 f0, __m256 f1, __m256 
 
   def update_for_f16c(self):
     """Updates the target for F16C support."""
-    self.header += """
-namespace {
-
-YNN_INTRINSIC __m128i wrapper_mm256_cvtps_ph(__m256 x) {
-  return _mm256_cvtps_ph(x, _MM_FROUND_TO_NEAREST_INT);
-}
-
-} // namespace
-
-"""
-    self.patterns += make_x86_f16c_patterns(256, "_mm256_")
 
   def update_for_avx512f(self):
     """Updates the target for AVX512F support."""
@@ -710,7 +660,7 @@ YNN_INTRINSIC __m256 wrapper_mm512_slice_extract_ps512_1(
     })
     self.patterns += make_x86_fma_patterns(512, "_mm512_")
     self.patterns += make_x86_integer_patterns(512, "_mm512_")
-    self.patterns += make_x86_cast_patterns(512, "_mm512_")
+    self.patterns += make_x86_cast_patterns(512)
     self.patterns += make_x86_slice_patterns(512, "_mm512_")
 
   def update_for_avx512bf16(self):
@@ -855,6 +805,10 @@ YNN_INTRINSIC __m512i saturating_cast_int16_to_uint8(__m512i a, __m512i b) {
         f'#include "ynnpack/base/simd/{simd_header}"\n'
     )
 
+    if "F16C" in all_features:
+      self.header += (
+          '#include "ynnpack/base/simd/x86_f16c.h"\n'
+      )
     if "AVX512BW" in all_features:
       self.update_for_avx512bw()
     if "AVX512BF16" in all_features:

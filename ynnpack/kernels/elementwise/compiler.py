@@ -971,6 +971,7 @@ class Target:
         "ceil",
         "sqrt",
         "reinterpret_cast",
+        "cast",
     }
     self.infix_ops = {
         "add": "+",
@@ -1030,11 +1031,13 @@ class Target:
           f"simd::broadcast<{op.ty.lanes},"
           f" {self.legalize_type(op.ty.scalar())}>"
       )
-    if op.name == "reinterpret_cast":
+    elif op.name == "reinterpret_cast":
       return (
           f"bit_cast<{self.legalize_type(op.ty)},"
           f" {self.legalize_type(op.args[0].ty)}>"
       )
+    elif op.name == "cast":
+      return "convert"
     elif op.name == "min" or op.name == "max":
       return f"simd::{op.name}"
     return op.name
@@ -1485,6 +1488,8 @@ class Target:
     elif op.name in self.infix_ops:
       pass
     else:
+      if op.name == "cast":
+        str_args.append(f"{self.legalize_type(op.ty.scalar())}{{}}")
       mem_op = self.legalize_op(op)
 
     if op.name in self.infix_ops:
