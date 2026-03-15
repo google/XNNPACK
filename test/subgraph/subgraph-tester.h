@@ -525,10 +525,6 @@ class SubgraphTester {
 
   SubgraphTester& RewriteForNchw();
 
-  SubgraphTester& RewriteForFp16();
-
-  SubgraphTester& RewriteForFp16WithFailure();
-
   xnn_status CreateRuntime(xnn_weights_cache_t weights_cache,
                            xnn_workspace_t workspace, pthreadpool_t threadpool,
                            uint32_t flags);

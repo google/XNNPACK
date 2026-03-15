@@ -9,6 +9,10 @@
 IF(XNNPACK_BUILD_LIBRARY)
   # ---[ Build end-to-end microbenchmarks
   ADD_LIBRARY(models STATIC
+    fp16-mobilenet-v1.cc
+    fp16-mobilenet-v2.cc
+    fp16-mobilenet-v3-large.cc
+    fp16-mobilenet-v3-small.cc
     fp32-mobilenet-v1.cc
     fp32-mobilenet-v2.cc
     fp32-mobilenet-v3-large.cc

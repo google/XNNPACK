@@ -212,20 +212,13 @@ void xnn_subgraph_log_impl(const char* filename, size_t line_number,
     if (value->first_consumer != XNN_INVALID_NODE_ID) {
       fprintf(out, ", first_consumer=%u", value->first_consumer);
     }
-    if (value->fp16_rewrite.fp16_compatible && value->fp16_rewrite.fp16_id != XNN_INVALID_VALUE_ID) {
-      fprintf(out, ", fp16_rewrite.fp16_id=%u", value->fp16_rewrite.fp16_id);
-    }
-    if (value->fp16_rewrite.fp16_compatible && value->fp16_rewrite.fp32_id != XNN_INVALID_VALUE_ID) {
-      fprintf(out, ", fp16_rewrite.fp32_id=%u", value->fp16_rewrite.fp32_id);
-    }
     if (value->flags &
         ~(XNN_VALUE_FLAG_EXTERNAL_INPUT | XNN_VALUE_FLAG_EXTERNAL_OUTPUT)) {
       fprintf(out, ", flags=");
       XNN_PRINT_FLAGS(
           value->flags, XNN_FLAG_SQUASH_GROUPS, XNN_VALUE_FLAG_ONE_CONSUMER,
-          XNN_VALUE_FLAG_FP16_COMPATIBLE, XNN_VALUE_FLAG_LAYOUT_NCHW,
-          XNN_VALUE_FLAG_SHAPE_IS_STATIC, XNN_VALUE_FLAG_IS_ZERO,
-          XNN_VALUE_FLAG_IS_ONE);
+          XNN_VALUE_FLAG_LAYOUT_NCHW, XNN_VALUE_FLAG_SHAPE_IS_STATIC,
+          XNN_VALUE_FLAG_IS_ZERO, XNN_VALUE_FLAG_IS_ONE);
     }
     fprintf(out, ".\n");
   }
