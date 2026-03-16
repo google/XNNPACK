@@ -2703,12 +2703,11 @@ static enum xnn_status optimize_common_subgraphs_merge_reshapes(
   // Check that we are the only consumer of the input node.
   const uint32_t input_id = node->inputs[0];
   struct xnn_value* input_value = &subgraph->values[input_id];
-  const uint32_t input_producer_id = input_value->producer;
-  if (input_producer_id == XNN_INVALID_NODE_ID ||
+  if (input_value->producer == XNN_INVALID_NODE_ID ||
       input_value->num_consumers != 1) {
     return xnn_status_success;
   }
-  struct xnn_node* input_producer = &subgraph->nodes[input_producer_id];
+  struct xnn_node* input_producer = &subgraph->nodes[input_value->producer];
 
   // Check all the interesting combinations.
 
@@ -2718,23 +2717,16 @@ static enum xnn_status optimize_common_subgraphs_merge_reshapes(
     XNN_RETURN_IF_ERROR(
         xnn_shape_fill_gaps(&input_producer->params.static_reshape.new_shape,
                             &node->params.static_reshape.new_shape));
-    XNN_RETURN_IF_ERROR(
-        xnn_define_static_reshape(
-            subgraph, node->params.static_reshape.new_shape.num_dims,
-            node->params.static_reshape.new_shape.dim,
-            input_producer->inputs[0], node->outputs[0],
-            node->flags | XNN_NODE_FLAG_DONT_ELIDE),
-        "Failed to create Binary Addition node.");
-    node = move_last_node_to(subgraph, node_id);
     node->inputs[0] = input_producer->inputs[0];
+    node->flags |= XNN_NODE_FLAG_DONT_ELIDE;
     input_value = &subgraph->values[node->inputs[0]];
-    if (input_value->first_consumer == input_producer_id) {
+    if (input_value->first_consumer == input_producer->id) {
       input_value->first_consumer = node->id;
     }
     xnn_log_info(
         "Replaced static_reshape[#%u](static_reshape[#%u](v%03u)) with "
         "static_reshape[#%u](v%03u).",
-        node_id, input_producer_id, node->inputs[0], node_id, node->inputs[0]);
+        node_id, input_producer->id, node->inputs[0], node_id, node->inputs[0]);
     xnn_node_clear(input_producer);
     (*changes)++;
   }
