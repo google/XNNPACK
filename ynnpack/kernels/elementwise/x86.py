@@ -365,16 +365,6 @@ class X86(Target):
 
   def update_for_sse2(self):
     """Updates the target for SSE2 support."""
-    self.types.update({
-        Int(8, 16): "simd::vec<int8_t, 16>",
-        Int(16, 8): "simd::vec<int16_t, 8>",
-        Int(32, 4): "simd::vec<int32_t, 4>",
-        UInt(8, 16): "simd::vec<uint8_t, 16>",
-        UInt(16, 8): "simd::vec<uint16_t, 8>",
-        UInt(32, 4): "simd::vec<uint32_t, 8>",
-        Float(32, 4): "simd::vec<float, 4>",
-    })
-
     self.patterns += make_x86_integer_patterns(128, "_mm_")
     self.patterns += make_x86_cast_patterns(128)
     self.patterns += make_x86_float_comparison_patterns(128, "_mm_")
@@ -470,18 +460,6 @@ YNN_INTRINSIC __m128 wrapper_mm256_slice_extract_ps256_1(
 } // namespace
 
 """
-    self.types.update({
-        Float(32, 8): "simd::vec<float, 8>",
-        Float(16, 8): "simd::vec<half, 8>",
-        Int(8, 32): "simd::vec<int8_t, 32>",
-        Int(16, 16): "simd::vec<int16_t, 16>",
-        Int(32, 8): "simd::vec<int32_t, 8>",
-        UInt(8, 32): "simd::vec<uint8_t, 32>",
-        UInt(16, 16): "simd::vec<uint16_t, 16>",
-        UInt(32, 8): "simd::vec<uint32_t, 8>",
-        BFloat(16, 16): "simd::vec<bfloat16, 16>",
-        BFloat(16, 8): "simd::vec<bfloat16, 8>",
-    })
     self.patterns += make_x86_slice_patterns(256, "_mm256_")
 
   def update_for_avx2(self):
@@ -612,16 +590,6 @@ YNN_INTRINSIC __m256 wrapper_mm512_slice_extract_ps512_1(
 } // namespace
 
 """
-    self.types.update({
-        Int(8, 64): "simd::vec<int8_t, 64>",
-        Int(16, 32): "simd::vec<int16_t, 32>",
-        Int(32, 16): "simd::vec<int32_t, 16>",
-        UInt(8, 64): "simd::vec<uint8_t, 64>",
-        UInt(16, 32): "simd::vec<uint16_t, 32>",
-        UInt(32, 16): "simd::vec<uint32_t, 16>",
-        Float(32, 16): "simd::vec<float, 16>",
-        Float(16, 16): "simd::vec<half, 16>",
-    })
     self.patterns += make_x86_fma_patterns(512, "_mm512_")
     self.patterns += make_x86_integer_patterns(512, "_mm512_")
     self.patterns += make_x86_cast_patterns(512)
@@ -639,9 +607,6 @@ YNN_INTRINSIC __m512i convert_fp32_to_bf16_avx512(__m512 a, __m512 b) {
 } // namespace
 
 """
-    self.types.update({
-        BFloat(16, 32): "simd::vec<bfloat16, 32>",
-    })
     self.patterns += make_x86_bf16_patterns(512)
 
   def update_for_avx512bw(self):
@@ -707,6 +672,13 @@ YNN_INTRINSIC __m512i saturating_cast_int16_to_uint8(__m512i a, __m512i b) {
 } // namespace
 
 """
+
+  def get_natural_lanes_num(self, ty):
+    """Returns a number of lanes in the native vector type."""
+    # TODO(vksnk): this a temporary workaround until we get rid of combine/split
+    if ty.type_class == "float" and ty.size == 16:
+      return (self.vector_bits // 2) // ty.size
+    return self.vector_bits // ty.size
 
   def __init__(self, features):
     Target.__init__(self)

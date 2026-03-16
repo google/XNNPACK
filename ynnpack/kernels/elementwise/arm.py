@@ -99,17 +99,6 @@ YNN_INTRINSIC uint8x16_t saturating_cast_int16_to_uint8(int16x8_t a, int16x8_t b
 
 } // namespace
 """
-
-    self.types.update({
-        Int(8, 16): "simd::vec<int8_t, 16>",
-        Int(16, 8): "simd::vec<int16_t, 8>",
-        Int(32, 4): "simd::vec<int32_t, 4>",
-        UInt(8, 16): "simd::vec<uint8_t, 16>",
-        UInt(16, 8): "simd::vec<uint16_t, 8>",
-        UInt(32, 4): "simd::vec<uint32_t, 4>",
-        Float(32, 4): "simd::vec<float, 4>",
-    })
-
     self.patterns += make_neon_float32_patterns(128)
     self.patterns += make_neon_integer_patterns(128)
     self.patterns += make_neon_cast_patterns(128)
@@ -124,11 +113,6 @@ YNN_INTRINSIC uint16x8_t cast_f32_to_f16(float32x4_t f0, float32x4_t f1) {
 
 } // namespace
 """
-
-    self.types.update({
-        Float(16, 4): "simd::vec<half, 4>",
-        Float(16, 8): "simd::vec<half, 8>",
-    })
 
   def __init__(self, features):
     Target.__init__(self)

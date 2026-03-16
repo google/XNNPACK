@@ -70,10 +70,18 @@ class Type:
     if self.size == 0:
       result += "ssize_t" if self.is_int() else "size_t"
     else:
-      result += self.type_class + str(self.size)
+      if self.type_class == "float" and self.size == 16:
+        result += "half"
+      elif self.type_class == "float" and self.size == 32:
+        result += "float"
+      elif self.type_class == "bfloat" and self.size == 16:
+        result += "bfloat16"
+      else:
+        result += self.type_class + str(self.size)
       if self.lanes > 1:
         result += "x" + str(self.lanes)
-      result += "_t"
+      if self.is_int() or self.is_uint() or self.lanes > 1:
+        result += "_t"
     while indirection > 0:
       result += "*"
       indirection -= 1
@@ -939,17 +947,6 @@ class Target:
   def __init__(self):
     self.indent_level = 0
     self.patterns = []
-    self.types = {
-        Int(8, 1): "int8_t",
-        Int(16, 1): "int16_t",
-        Int(32, 1): "int32_t",
-        UInt(8, 1): "uint8_t",
-        UInt(16, 1): "uint16_t",
-        UInt(32, 1): "uint32_t",
-        Float(16, 1): "half",
-        Float(32, 1): "float",
-        BFloat(16, 1): "bfloat16",
-    }
     self.features = []
     self.vector_bits = 0
     self.tail_strategy = TailStrategy.SCALAR
@@ -983,13 +980,8 @@ class Target:
     return "  " * self.indent_level
 
   def get_natural_lanes_num(self, ty):
-    """Returns a number of lanes of the widest type registered in target's types list which also matches class and size of the type."""
-    lanes = 1
-    for t in self.types:
-      if t.type_class == ty.type_class and t.size == ty.size:
-        lanes = builtins.max(lanes, t.lanes)
-
-    return lanes
+    """Returns a number of lanes in the native vector type."""
+    return self.vector_bits // ty.size
 
   def as_buffer(self, arg, buffers):
     b = None
@@ -1018,8 +1010,11 @@ class Target:
       return ""
     return ".v"
 
-  def legalize_type(self, ty, is_const=True):
-    return self.types.get(ty, ty.to_c_decl(is_const))
+  def legalize_type(self, ty, is_const=False):
+    if ty.lanes == 1:
+      return ty.to_c_decl(is_const)
+    else:
+      return f"simd::vec<{ty.scalar().to_c_decl(is_const)}, {ty.lanes}>"
 
   def legalize_op(self, op):
     """Legalizes an operator."""
@@ -1345,7 +1340,7 @@ class Target:
         for i in range(increment):
           self.result += (
               f"{self.indent()}{b.name}_broadcasted[{i}] ="
-              f" {self.legalize_op(broadcast_op)}(((const"
+              f" {self.legalize_op(broadcast_op)}((("
               f" {self.legalize_type(b.ty, True)}*)offset_bytes({prefix_after}{b.name},"
               f" min({i}, m - i - 1) * stride_{b.name}_m))[0]);\n"
           )
