@@ -55,8 +55,10 @@ void xnn_qd8_f16_qc2w_gemm_minmax_ukernel_1x8c8__avxvnni(
   const __m256 voutput_max = _mm256_cvtph_ps(_mm_set1_epi16(*(const uint16_t*) &params->scalar.max));
   // XNN_FORCE_REALIZATION(voutput_min);
   // XNN_FORCE_REALIZATION(voutput_max);
-  const __m256i vmask = _mm256_set1_epi8(0x03);
-  const __m256i vtwo = _mm256_set1_epi8(2);  // Subtract 2 (kernel zero point) from unsigned 2 bit to sign extend
+  const __m256i vshr0 = _mm256_set1_epi64x(0x0102020202020202);
+  const __m256i vshr2 = _mm256_set1_epi64x(0x0408080808080808);
+  const __m256i vshr4 = _mm256_set1_epi64x(0x1020202020202020);
+  const __m256i vshr6 = _mm256_set1_epi64x(0x4080808080808080);
   do {
     const __m256i vksum01234567 = _mm256_load_si256(w);
     __m256i vsum0x01234567 = _mm256_mullo_epi32(vksum01234567, vinput_zero_point0);
@@ -79,28 +81,14 @@ void xnn_qd8_f16_qc2w_gemm_minmax_ukernel_1x8c8__avxvnni(
 
       const __m256i vbb01234567x0123456789ABCDEF = _mm256_load_si256(w);
       const __m256i vbb89ABCDEFx0123456789ABCDEF = _mm256_load_si256((const __m256i*) ((const int8_t*) w + 32));
-      __m256i vb01234567x0123 = _mm256_and_si256(vbb01234567x0123456789ABCDEF, vmask);
-      __m256i vb89ABCDEFx0123 = _mm256_and_si256(vbb89ABCDEFx0123456789ABCDEF, vmask);
-      __m256i vbs01234567x4567 = _mm256_srli_epi32(vbb01234567x0123456789ABCDEF, 2);
-      __m256i vbs89ABCDEFx4567 = _mm256_srli_epi32(vbb89ABCDEFx0123456789ABCDEF, 2);
-      __m256i vb01234567x4567 = _mm256_and_si256(vbs01234567x4567, vmask);
-      __m256i vb89ABCDEFx4567 = _mm256_and_si256(vbs89ABCDEFx4567, vmask);
-      __m256i vbs01234567x89AB = _mm256_srli_epi32(vbb01234567x0123456789ABCDEF, 4);
-      __m256i vbs89ABCDEFx89AB = _mm256_srli_epi32(vbb89ABCDEFx0123456789ABCDEF, 4);
-      __m256i vb01234567x89AB = _mm256_and_si256(vbs01234567x89AB, vmask);
-      __m256i vb89ABCDEFx89AB = _mm256_and_si256(vbs89ABCDEFx89AB, vmask);
-      __m256i vbs01234567xCDEF = _mm256_srli_epi32(vbb01234567x0123456789ABCDEF, 6);
-      __m256i vbs89ABCDEFxCDEF = _mm256_srli_epi32(vbb89ABCDEFx0123456789ABCDEF, 6);
-      __m256i vb01234567xCDEF = _mm256_and_si256(vbs01234567xCDEF, vmask);
-      __m256i vb89ABCDEFxCDEF = _mm256_and_si256(vbs89ABCDEFxCDEF, vmask);
-      vb01234567x0123 = _mm256_sub_epi8(vb01234567x0123, vtwo);
-      vb89ABCDEFx0123 = _mm256_sub_epi8(vb89ABCDEFx0123, vtwo);
-      vb01234567x4567 = _mm256_sub_epi8(vb01234567x4567, vtwo);
-      vb89ABCDEFx4567 = _mm256_sub_epi8(vb89ABCDEFx4567, vtwo);
-      vb01234567x89AB = _mm256_sub_epi8(vb01234567x89AB, vtwo);
-      vb89ABCDEFx89AB = _mm256_sub_epi8(vb89ABCDEFx89AB, vtwo);
-      vb01234567xCDEF = _mm256_sub_epi8(vb01234567xCDEF, vtwo);
-      vb89ABCDEFxCDEF = _mm256_sub_epi8(vb89ABCDEFxCDEF, vtwo);
+      const __m256i vb01234567x0123 = _mm256_gf2p8affine_epi64_epi8(vbb01234567x0123456789ABCDEF, vshr0, 0xFE);
+      const __m256i vb89ABCDEFx0123 = _mm256_gf2p8affine_epi64_epi8(vbb89ABCDEFx0123456789ABCDEF, vshr0, 0xFE);
+      const __m256i vb01234567x4567 = _mm256_gf2p8affine_epi64_epi8(vbb01234567x0123456789ABCDEF, vshr2, 0xFE);
+      const __m256i vb89ABCDEFx4567 = _mm256_gf2p8affine_epi64_epi8(vbb89ABCDEFx0123456789ABCDEF, vshr2, 0xFE);
+      const __m256i vb01234567x89AB = _mm256_gf2p8affine_epi64_epi8(vbb01234567x0123456789ABCDEF, vshr4, 0xFE);
+      const __m256i vb89ABCDEFx89AB = _mm256_gf2p8affine_epi64_epi8(vbb89ABCDEFx0123456789ABCDEF, vshr4, 0xFE);
+      const __m256i vb01234567xCDEF = _mm256_gf2p8affine_epi64_epi8(vbb01234567x0123456789ABCDEF, vshr6, 0xFE);
+      const __m256i vb89ABCDEFxCDEF = _mm256_gf2p8affine_epi64_epi8(vbb89ABCDEFx0123456789ABCDEF, vshr6, 0xFE);
 
       vacc0x0123 = _mm256_dpbusd_avx_epi32(vacc0x0123, va0x0, vb01234567x0123);
       vacc0x4567 = _mm256_dpbusd_avx_epi32(vacc0x4567, va0x0, vb89ABCDEFx0123);
@@ -121,16 +109,10 @@ void xnn_qd8_f16_qc2w_gemm_minmax_ukernel_1x8c8__avxvnni(
       // 2 planes of 2 bit.  potentially 3rd plane handled later
       __m256i vbb01234567x01234567 = _mm256_load_si256(w);
       __m256i vbb89ABCDEFx01234567 = _mm256_load_si256((const __m256i*) ((const int8_t*) w + 32));
-      __m256i vbs01234567x4567 = _mm256_srli_epi32(vbb01234567x01234567, 2);
-      __m256i vbs89ABCDEFx4567 = _mm256_srli_epi32(vbb89ABCDEFx01234567, 2);
-      __m256i vb01234567x0123 = _mm256_and_si256(vbb01234567x01234567, vmask);
-      __m256i vb89ABCDEFx0123 = _mm256_and_si256(vbb89ABCDEFx01234567, vmask);
-      __m256i vb01234567x4567 = _mm256_and_si256(vbs01234567x4567, vmask);
-      __m256i vb89ABCDEFx4567 = _mm256_and_si256(vbs89ABCDEFx4567, vmask);
-      vb01234567x0123 = _mm256_sub_epi8(vb01234567x0123, vtwo);
-      vb89ABCDEFx0123 = _mm256_sub_epi8(vb89ABCDEFx0123, vtwo);
-      vb01234567x4567 = _mm256_sub_epi8(vb01234567x4567, vtwo);
-      vb89ABCDEFx4567 = _mm256_sub_epi8(vb89ABCDEFx4567, vtwo);
+      const __m256i vb01234567x0123 = _mm256_gf2p8affine_epi64_epi8(vbb01234567x01234567, vshr0, 0xFE);
+      const __m256i vb89ABCDEFx0123 = _mm256_gf2p8affine_epi64_epi8(vbb89ABCDEFx01234567, vshr0, 0xFE);
+      const __m256i vb01234567x4567 = _mm256_gf2p8affine_epi64_epi8(vbb01234567x01234567, vshr2, 0xFE);
+      const __m256i vb89ABCDEFx4567 = _mm256_gf2p8affine_epi64_epi8(vbb89ABCDEFx01234567, vshr2, 0xFE);
 
       vacc0x0123 = _mm256_dpbusd_avx_epi32(vacc0x0123, va0x01234567, vb01234567x0123);
       vacc0x4567 = _mm256_dpbusd_avx_epi32(vacc0x4567, va0x01234567, vb89ABCDEFx0123);
@@ -145,12 +127,8 @@ void xnn_qd8_f16_qc2w_gemm_minmax_ukernel_1x8c8__avxvnni(
         a0 += 8;
 
         // mask 3rd plane of 2 bit.
-        __m256i vbs01234567x89AB = _mm256_srli_epi32(vbb01234567x01234567, 4);
-        __m256i vbs89ABCDEFx89AB = _mm256_srli_epi32(vbb89ABCDEFx01234567, 4);
-        __m256i vb01234567x89AB = _mm256_and_si256(vbs01234567x89AB, vmask);
-        __m256i vb89ABCDEFx89AB = _mm256_and_si256(vbs89ABCDEFx89AB, vmask);
-        vb01234567x89AB = _mm256_sub_epi8(vb01234567x89AB, vtwo);
-        vb89ABCDEFx89AB = _mm256_sub_epi8(vb89ABCDEFx89AB, vtwo);
+        const __m256i vb01234567x89AB = _mm256_gf2p8affine_epi64_epi8(vbb01234567x01234567, vshr4, 0xFE);
+        const __m256i vb89ABCDEFx89AB = _mm256_gf2p8affine_epi64_epi8(vbb89ABCDEFx01234567, vshr4, 0xFE);
         vacc0x0123 = _mm256_dpbusd_avx_epi32(vacc0x0123, va0x3, vb01234567x89AB);
         vacc0x4567 = _mm256_dpbusd_avx_epi32(vacc0x4567, va0x3, vb89ABCDEFx89AB);
         k -= 8 * sizeof(int8_t);
@@ -164,10 +142,8 @@ void xnn_qd8_f16_qc2w_gemm_minmax_ukernel_1x8c8__avxvnni(
       // 1 plane of 2 bit.
       const __m256i vbb01234567x01234567 = _mm256_load_si256(w);
       const __m256i vbb89ABCDEFx01234567 = _mm256_load_si256((const __m256i*) ((const int8_t*) w + 32));
-      __m256i vb01234567x0123 = _mm256_and_si256(vbb01234567x01234567, vmask);
-      __m256i vb89ABCDEFx0123 = _mm256_and_si256(vbb89ABCDEFx01234567, vmask);
-      vb01234567x0123 = _mm256_sub_epi8(vb01234567x0123, vtwo);
-      vb89ABCDEFx0123 = _mm256_sub_epi8(vb89ABCDEFx0123, vtwo);
+      const __m256i vb01234567x0123 = _mm256_gf2p8affine_epi64_epi8(vbb01234567x01234567, vshr0, 0xFE);
+      const __m256i vb89ABCDEFx0123 = _mm256_gf2p8affine_epi64_epi8(vbb89ABCDEFx01234567, vshr0, 0xFE);
 
       vacc0x0123 = _mm256_dpbusd_avx_epi32(vacc0x0123, va0x01234567, vb01234567x0123);
       vacc0x4567 = _mm256_dpbusd_avx_epi32(vacc0x4567, va0x01234567, vb89ABCDEFx0123);
