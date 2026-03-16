@@ -2327,9 +2327,10 @@ static void init_qd8_f16_qc2w_gemm_config(void) {
       if (hardware_config->arch_flags & xnn_arch_arm_neon_dot) {
           qd8_f16_qc2w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_DQGEMM_UKERNEL(xnn_qd8_f16_qc2w_gemm_minmax_ukernel_1x8c4__neondotfp16arith);
           #if XNN_ARCH_ARM64
-            qd8_f16_qc2w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(6)] = XNN_INIT_HMP_DQGEMM_UKERNEL(xnn_qd8_f16_qc2w_gemm_minmax_ukernel_6x8c4__neondotfp16arith);
-            qd8_f16_qc2w_gemm_config.mr = 6;
+            qd8_f16_qc2w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(8)] = XNN_INIT_HMP_DQGEMM_UKERNEL(xnn_qd8_f16_qc2w_gemm_minmax_ukernel_8x8c4__neondotfp16arith);
+            qd8_f16_qc2w_gemm_config.mr = 8;
           #else
+            // TODO: fix sdot lane intrinsic bug that causes dup and register spill
             qd8_f16_qc2w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(2)] = XNN_INIT_HMP_DQGEMM_UKERNEL(xnn_qd8_f16_qc2w_gemm_minmax_ukernel_2x8c4__neondotfp16arith);
             qd8_f16_qc2w_gemm_config.mr = 2;
           #endif
