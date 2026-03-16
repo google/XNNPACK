@@ -168,18 +168,6 @@ static enum xnn_status reshape_reduce_nd(
     return xnn_status_invalid_parameter;
   }
 
-  if (num_reduction_axes == 0) {
-    xnn_log_error(
-        "failed to reshape %s operator with %zu reduction axes: the number of "
-        "reduction axes must be non-zero",
-        xnn_operator_type_to_string_v2(reduce_op), num_reduction_axes);
-    return xnn_status_invalid_parameter;
-  }
-
-  size_t normalized_input_shape[XNN_MAX_TENSOR_DIMS];
-  assert(num_input_dims <= XNN_MAX_TENSOR_DIMS);
-  memcpy(normalized_input_shape, input_shape, num_input_dims * sizeof(size_t));
-
   size_t normalized_reduction_axes[XNN_MAX_TENSOR_DIMS];
   assert(num_reduction_axes <= XNN_MAX_TENSOR_DIMS);
   for (int i = 0; i < num_reduction_axes; i++) {
@@ -190,9 +178,17 @@ static enum xnn_status reshape_reduce_nd(
   qsort(normalized_reduction_axes, num_reduction_axes, sizeof(size_t),
         cmp_value_size_t);
 
+  if (num_reduction_axes == 0 || normalized_reduction_axes[0] >= num_input_dims) {
+    xnn_log_error(
+        "failed to reshape %s operator with %zu reduction axes: the number of "
+        "valid reduction axes must be non-zero",
+        xnn_operator_type_to_string_v2(reduce_op), num_reduction_axes);
+    return xnn_status_invalid_parameter;
+  }
+
   // Remove duplicate reduction axes.
   int i = 0;
-  // The array is sorted, we're done if an axis is bigger than num_input_dims.
+  // The array is sorted, we're done when an axis is bigger than num_input_dims.
   for (int j = 1;
        j < num_reduction_axes && normalized_reduction_axes[j] < num_input_dims;
        ++j) {
@@ -204,6 +200,10 @@ static enum xnn_status reshape_reduce_nd(
   num_reduction_axes = i + 1;
 
   assert(num_reduction_axes <= num_input_dims);
+
+  size_t normalized_input_shape[XNN_MAX_TENSOR_DIMS];
+  assert(num_input_dims <= XNN_MAX_TENSOR_DIMS);
+  memcpy(normalized_input_shape, input_shape, num_input_dims * sizeof(size_t));
 
   xnn_normalize_reduction(
     &num_reduction_axes, normalized_reduction_axes,
