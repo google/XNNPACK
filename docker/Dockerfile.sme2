@@ -16,8 +16,8 @@ RUN apt-get update && apt-get install -y \
     bison
 
 WORKDIR /src
-RUN wget -nv https://download.qemu.org/qemu-9.2.2.tar.xz && tar xJf qemu-9.2.2.tar.xz
-WORKDIR /src/qemu-9.2.2
+RUN wget -nv https://download.qemu.org/qemu-10.2.1.tar.xz && tar xJf qemu-10.2.1.tar.xz
+WORKDIR /src/qemu-10.2.1
 RUN ./configure \
     --cc=clang \
     --cxx=clang++ \
@@ -59,7 +59,7 @@ RUN update-alternatives --install /usr/bin/clang clang /usr/bin/clang-20 100 && 
 RUN wget -nv https://github.com/bazelbuild/bazelisk/releases/download/v1.19.0/bazelisk-linux-arm64 -O /usr/local/bin/bazel && \
     chmod +x /usr/local/bin/bazel
 
-COPY --from=qemu-builder /src/qemu-9.2.2/build/qemu-aarch64 /usr/local/bin/qemu-aarch64
+COPY --from=qemu-builder /src/qemu-10.2.1/build/qemu-aarch64 /usr/local/bin/qemu-aarch64
 
 ARG USERNAME=xnnpack
 ARG USER_UID=1001
