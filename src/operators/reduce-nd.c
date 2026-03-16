@@ -159,12 +159,12 @@ static enum xnn_status reshape_reduce_nd(
     return xnn_status_unsupported_parameter;
   }
 
-  if (num_reduction_axes > num_input_dims) {
+  if (num_reduction_axes > XNN_MAX_TENSOR_DIMS) {
     xnn_log_error(
         "failed to reshape %s operator with %zu reduction axes: the number of "
-        "reduction axes must not exceed the number of input dimensions %zu",
+        "reduction axes must not exceed %d",
         xnn_operator_type_to_string_v2(reduce_op), num_reduction_axes,
-        num_input_dims);
+        XNN_MAX_TENSOR_DIMS);
     return xnn_status_invalid_parameter;
   }
 
@@ -180,19 +180,6 @@ static enum xnn_status reshape_reduce_nd(
   assert(num_input_dims <= XNN_MAX_TENSOR_DIMS);
   memcpy(normalized_input_shape, input_shape, num_input_dims * sizeof(size_t));
 
-  for (size_t i = 0; i < num_reduction_axes; i++) {
-    const int64_t signed_num_input_dims = (int64_t)num_input_dims;
-    if (signed_num_input_dims <= reduction_axes[i] ||
-        reduction_axes[i] < -signed_num_input_dims) {
-      xnn_log_error(
-          "failed to reshape %s operator with #%zu reduction axis of %" PRIi64
-          ": the index is out of bounds for a %zuD input shape",
-          xnn_operator_type_to_string_v2(reduce_op), i, reduction_axes[i],
-          num_input_dims);
-      return xnn_status_invalid_parameter;
-    }
-  }
-
   size_t normalized_reduction_axes[XNN_MAX_TENSOR_DIMS];
   assert(num_reduction_axes <= XNN_MAX_TENSOR_DIMS);
   for (int i = 0; i < num_reduction_axes; i++) {
@@ -203,15 +190,20 @@ static enum xnn_status reshape_reduce_nd(
   qsort(normalized_reduction_axes, num_reduction_axes, sizeof(size_t),
         cmp_value_size_t);
 
-  for (size_t i = 1; i < num_reduction_axes; i++) {
-    if (normalized_reduction_axes[i] <= normalized_reduction_axes[i - 1]) {
-      xnn_log_error(
-          "failed to reshape %s operator with #%zu reduction axis of %" PRIi64
-          ": the reduction axes must be unique",
-          xnn_operator_type_to_string_v2(reduce_op), i, reduction_axes[i]);
-      return xnn_status_invalid_parameter;
+  // Remove duplicate reduction axes.
+  int i = 0;
+  // The array is sorted, we're done if an axis is bigger than num_input_dims.
+  for (int j = 1;
+       j < num_reduction_axes && normalized_reduction_axes[j] < num_input_dims;
+       ++j) {
+    // Shift non-duplicate elements forward.
+    if (normalized_reduction_axes[i] != normalized_reduction_axes[j]) {
+      normalized_reduction_axes[++i] = normalized_reduction_axes[j];
     }
   }
+  num_reduction_axes = i + 1;
+
+  assert(num_reduction_axes <= num_input_dims);
 
   xnn_normalize_reduction(
     &num_reduction_axes, normalized_reduction_axes,

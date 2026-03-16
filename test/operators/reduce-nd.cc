@@ -55,14 +55,12 @@ class ReduceOperatorTester {
 
   ReduceOperatorTester& reduction_axes(
       std::initializer_list<int64_t> reduction_axes) {
-    assert(reduction_axes.size() <= XNN_MAX_TENSOR_DIMS);
     this->reduction_axes_ = std::vector<int64_t>(reduction_axes);
     return *this;
   }
 
   ReduceOperatorTester& reduction_axes(
       const std::vector<int64_t> reduction_axes) {
-    assert(reduction_axes.size() <= XNN_MAX_TENSOR_DIMS);
     this->reduction_axes_ = reduction_axes;
     return *this;
   }
@@ -520,11 +518,16 @@ class ReduceNDTest : public testing::TestWithParam<TestParam> {
     std::vector<int64_t> reduction_axes;
     for (int i = 0; i < param.dims; ++i) {
       if (reduce_dims[i]) {
-        if (param.use_neg_axes) {
-          reduction_axes.push_back(i - param.dims);
-        } else {
-          reduction_axes.push_back(i);
-        }
+        reduction_axes.push_back(i);
+      }
+    }
+
+    // We support negative axes, and we support redundant axes. We can test both
+    // at the same time by just specifying both expressions of the same axis.
+    for (int i = 0;
+         i < param.dims && reduction_axes.size() < XNN_MAX_TENSOR_DIMS; ++i) {
+      if (reduce_dims[i]) {
+        reduction_axes.push_back(i - param.dims);
       }
     }
     return reduction_axes;
@@ -605,11 +608,6 @@ std::vector<TestParam> GenerateTests() {
           params.push_back(
               TestParam{operation, datatype, dims, reduction_axes});
         }
-        // Test negative axes with all reduction axes only.
-        params.push_back(TestParam{operation, datatype, /*dims=*/dims,
-                                   /*reduction_axes=*/(1 << max_dims) - 1,
-                                   /*multithreaded=*/false,
-                                   /*use_neg_axes=*/true});
       }
       // Only do the multithreaded test when we have 6 dims and reduce over all
       // the axes.
