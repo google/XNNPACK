@@ -96,42 +96,6 @@ def make_x86_bf16_patterns(vector_bits):
 
 def make_x86_integer_patterns(vector_bits, prefix):
   return [
-      i.vectorize(vector_bits)
-      for i in [
-          Rule(
-              saturating_add(u8_a, u8_b),
-              Op(UInt(8), prefix + "adds_epu8", [u8_a, u8_b]),
-          ),
-          Rule(
-              saturating_add(i8_a, i8_b),
-              Op(Int(8), prefix + "adds_epi8", [i8_a, i8_b]),
-          ),
-          Rule(
-              saturating_add(u16_a, u16_b),
-              Op(UInt(16), prefix + "adds_epu16", [u16_a, u16_b]),
-          ),
-          Rule(
-              saturating_add(i16_a, i16_b),
-              Op(Int(16), prefix + "adds_epi16", [i16_a, i16_b]),
-          ),
-          Rule(
-              saturating_sub(u8_a, u8_b),
-              Op(UInt(8), prefix + "subs_epu8", [u8_a, u8_b]),
-          ),
-          Rule(
-              saturating_sub(i8_a, i8_b),
-              Op(Int(8), prefix + "subs_epi8", [i8_a, i8_b]),
-          ),
-          Rule(
-              saturating_sub(u16_a, u16_b),
-              Op(UInt(16), prefix + "subs_epu16", [u16_a, u16_b]),
-          ),
-          Rule(
-              saturating_sub(i16_a, i16_b),
-              Op(Int(16), prefix + "subs_epi16", [i16_a, i16_b]),
-          ),
-      ]
-  ] + [
       Rule(
           logical_shift_left(
               i16_a.with_lanes(vector_bits // 16),

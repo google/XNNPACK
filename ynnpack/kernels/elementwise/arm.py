@@ -29,42 +29,6 @@ def make_neon_cast_patterns(vector_bits):
 def make_neon_integer_patterns(vector_bits):
   assert vector_bits == 128
   return [
-      i.vectorize(vector_bits)
-      for i in [
-          Rule(
-              saturating_add(u8_a, u8_b),
-              Op(UInt(8), "vqaddq_u8", [u8_a, u8_b]),
-          ),
-          Rule(
-              saturating_add(i8_a, i8_b),
-              Op(Int(8), "vqaddq_s8", [i8_a, i8_b]),
-          ),
-          Rule(
-              saturating_add(u16_a, u16_b),
-              Op(UInt(16), "vqaddq_u16", [u16_a, u16_b]),
-          ),
-          Rule(
-              saturating_add(i16_a, i16_b),
-              Op(Int(16), "vqaddq_s16", [i16_a, i16_b]),
-          ),
-          Rule(
-              saturating_sub(u8_a, u8_b),
-              Op(UInt(8), "vqsubq_u8", [u8_a, u8_b]),
-          ),
-          Rule(
-              saturating_sub(i8_a, i8_b),
-              Op(Int(8), "vqsubq_s8", [i8_a, i8_b]),
-          ),
-          Rule(
-              saturating_sub(u16_a, u16_b),
-              Op(UInt(16), "vqsubq_u16", [u16_a, u16_b]),
-          ),
-          Rule(
-              saturating_sub(i16_a, i16_b),
-              Op(Int(16), "vqsubq_s16", [i16_a, i16_b]),
-          ),
-      ]
-  ] + [
       Rule(
           logical_shift_left(i16_a.with_lanes(8), broadcast(i16_b, 8)),
           Op(Int(16, 8), "vshlq_n_s16", [i16_a.with_lanes(8), i16_b]),

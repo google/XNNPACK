@@ -601,10 +601,6 @@ def lower_widening_mul(x, y):
   return widen(x) * widen(y)
 
 
-def lower_saturating_add(x, y):
-  return saturating_narrow(widen(x) + widen(y))
-
-
 def lower_multiply_add(x, y, z):
   return x * y + z
 
@@ -648,7 +644,6 @@ def slice_vector(arg, index, total):
 lowering_funcs = {
     "widening_sub": lower_widening_sub,
     "widening_mul": lower_widening_mul,
-    "saturating_add": lower_saturating_add,
     "select_bits": lower_select_bits,
     "select": lower_select,
     "multiply_add": lower_multiply_add,
@@ -972,6 +967,8 @@ class Target:
         "sqrt",
         "reinterpret_cast",
         "cast",
+        "saturating_add",
+        "saturating_sub",
     }
     self.infix_ops = {
         "add": "+",
