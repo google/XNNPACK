@@ -61,6 +61,16 @@ tools/xngen src/f16-rminmax/avx512skx.c.in -D BATCH_TILE=48 -D ACCUMULATORS=3 -D
 tools/xngen src/f16-rminmax/avx512skx.c.in -D BATCH_TILE=64 -D ACCUMULATORS=2 -D OP=MINMAX -o src/f16-rminmax/gen/f16-rminmax-avx512skx-u64-acc2.c &
 tools/xngen src/f16-rminmax/avx512skx.c.in -D BATCH_TILE=64 -D ACCUMULATORS=4 -D OP=MINMAX -o src/f16-rminmax/gen/f16-rminmax-avx512skx-u64-acc4.c &
 
+################################### RISCV FP16 Vector ############################
+tools/xngen src/f16-rminmax/rvv.c.in -D LMUL=4 -D OP=MAX -o src/f16-rminmax/gen/f16-rmax-rvvfp16arith-u4v.c &
+tools/xngen src/f16-rminmax/rvv.c.in -D LMUL=8 -D OP=MAX -o src/f16-rminmax/gen/f16-rmax-rvvfp16arith-u8v.c &
+
+tools/xngen src/f16-rminmax/rvv.c.in -D LMUL=4 -D OP=MIN -o src/f16-rminmax/gen/f16-rmin-rvvfp16arith-u4v.c &
+tools/xngen src/f16-rminmax/rvv.c.in -D LMUL=8 -D OP=MIN -o src/f16-rminmax/gen/f16-rmin-rvvfp16arith-u8v.c &
+
+tools/xngen src/f16-rminmax/rvv.c.in -D LMUL=4 -D OP=MINMAX -o src/f16-rminmax/gen/f16-rminmax-rvvfp16arith-u4v.c &
+tools/xngen src/f16-rminmax/rvv.c.in -D LMUL=8 -D OP=MINMAX -o src/f16-rminmax/gen/f16-rminmax-rvvfp16arith-u8v.c &
+
 #################################### Scalar ###################################
 ### Generic C micro-kernels
 tools/xngen src/f16-rminmax/scalar.c.in -D BATCH_TILE=1 -D DATATYPE=F16 -D ACCUMULATORS=1 -D OP=MINMAX -D WASM=0 -o src/f16-rminmax/gen/f16-rminmax-scalar-u1.c &

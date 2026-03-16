@@ -44,3 +44,7 @@ XNN_UKERNEL(xnn_arch_none, xnn_f32_rdsum2_ukernel_7p7x__wasmsimd_u32, 7, 32, fal
 XNN_UKERNEL(xnn_arch_none, xnn_f32_rdsum2_ukernel_7p7x__wasmsimd_u64, 7, 64, false, float, float, struct xnn_f32_scale_params, xnn_init_f32_scale_scalar_params)
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
+#if XNN_ENABLE_RISCV_VECTOR && (XNN_ARCH_RISCV)
+XNN_UKERNEL(xnn_arch_riscv_vector, xnn_f32_rdsum2_ukernel_7p7x__rvv_u4v, 7, 4, true, float, float, struct xnn_f32_scale_params, xnn_init_f32_scale_scalar_params)
+XNN_UKERNEL(xnn_arch_riscv_vector, xnn_f32_rdsum2_ukernel_7p7x__rvv_u8v, 7, 8, true, float, float, struct xnn_f32_scale_params, xnn_init_f32_scale_scalar_params)
+#endif  // XNN_ENABLE_RISCV_VECTOR && (XNN_ARCH_RISCV)
