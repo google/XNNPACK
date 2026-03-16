@@ -72,6 +72,20 @@ TEST_SUBTRACT(arm_neon, s8, 16);
 TEST_SUBTRACT(arm_neon, f32, 4);
 TEST_SUBTRACT(arm_neon, s32, 4);
 
+TEST_SATURATING_ADD(arm_neon, u8, 16);
+TEST_SATURATING_ADD(arm_neon, s8, 16);
+TEST_SATURATING_ADD(arm_neon, u16, 8);
+TEST_SATURATING_ADD(arm_neon, s16, 8);
+TEST_SATURATING_ADD(arm_neon, u32, 4);
+TEST_SATURATING_ADD(arm_neon, s32, 4);
+
+TEST_SATURATING_SUB(arm_neon, u8, 16);
+TEST_SATURATING_SUB(arm_neon, s8, 16);
+TEST_SATURATING_SUB(arm_neon, u16, 8);
+TEST_SATURATING_SUB(arm_neon, s16, 8);
+TEST_SATURATING_SUB(arm_neon, u32, 4);
+TEST_SATURATING_SUB(arm_neon, s32, 4);
+
 TEST_MULTIPLY(arm_neon, u8, 16);
 TEST_MULTIPLY(arm_neon, s8, 16);
 TEST_MULTIPLY(arm_neon, f32, 4);

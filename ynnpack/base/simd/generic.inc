@@ -182,6 +182,14 @@ YNN_ALWAYS_INLINE vec<T, N> abs(vec<T, N> a) {
   return {abs(a.lo()), abs(a.hi())};
 }
 template <typename T, size_t N>
+YNN_ALWAYS_INLINE vec<T, N> saturating_add(vec<T, N> a, vec<T, N> b) {
+  return {saturating_add(a.lo(), b.lo()), saturating_add(a.hi(), b.hi())};
+}
+template <typename T, size_t N>
+YNN_ALWAYS_INLINE vec<T, N> saturating_sub(vec<T, N> a, vec<T, N> b) {
+  return {saturating_sub(a.lo(), b.lo()), saturating_sub(a.hi(), b.hi())};
+}
+template <typename T, size_t N>
 YNN_ALWAYS_INLINE vec<T, N> floor(vec<T, N> a) {
   return {floor(a.lo()), floor(a.hi())};
 }

@@ -41,10 +41,12 @@ slinky::span<T> as_span(T* begin, T* end) {
 
 using u8 = uint8_t;
 using s8 = int8_t;
+using u16 = uint16_t;
 using s16 = int16_t;
 using f16 = half;
 using bf16 = bfloat16;
 using f32 = float;
+using u32 = uint32_t;
 using s32 = int32_t;
 using f64 = double;
 
@@ -696,6 +698,67 @@ void test_fma() {
 
 #define TEST_FMA(test_class, type, N) \
   TEST_F(test_class, fma_##type##x##N) { test_fma<type, N>(); }
+
+template <typename T>
+T saturating_add_reference(T a, T b) {
+  int64_t res = static_cast<int64_t>(a) + static_cast<int64_t>(b);
+  res = std::max(res, static_cast<int64_t>(std::numeric_limits<T>::min()));
+  res = std::min(res, static_cast<int64_t>(std::numeric_limits<T>::max()));
+  return static_cast<T>(res);
+}
+
+template <typename T>
+T saturating_sub_reference(T a, T b) {
+  int64_t res = static_cast<int64_t>(a) - static_cast<int64_t>(b);
+  res = std::max(res, static_cast<int64_t>(std::numeric_limits<T>::min()));
+  res = std::min(res, static_cast<int64_t>(std::numeric_limits<T>::max()));
+  return static_cast<T>(res);
+}
+
+template <typename scalar, size_t N>
+void test_saturating_add() {
+  using vector = vec<scalar, N>;
+  ReplicableRandomDevice rng;
+  for (auto _ : FuzzTest(std::chrono::milliseconds(100))) {
+    scalar a[N];
+    scalar b[N];
+    fill_random(a, N, rng);
+    fill_random(b, N, rng);
+
+    scalar result[N];
+    store(result, saturating_add(load(a, vector::N), load(b, vector::N)));
+    for (size_t i = 0; i < N; ++i) {
+      ASSERT_EQ(result[i], saturating_add_reference(a[i], b[i]));
+    }
+  }
+}
+
+template <typename scalar, size_t N>
+void test_saturating_sub() {
+  using vector = vec<scalar, N>;
+  ReplicableRandomDevice rng;
+  for (auto _ : FuzzTest(std::chrono::milliseconds(100))) {
+    scalar a[N];
+    scalar b[N];
+    fill_random(a, N, rng);
+    fill_random(b, N, rng);
+
+    scalar result[N];
+    store(result, saturating_sub(load(a, vector::N), load(b, vector::N)));
+    for (size_t i = 0; i < N; ++i) {
+      ASSERT_EQ(result[i], saturating_sub_reference(a[i], b[i]));
+    }
+  }
+}
+
+#define TEST_SATURATING_ADD(test_class, type, N)    \
+  TEST_F(test_class, saturating_add_##type##x##N) { \
+    test_saturating_add<type, N>();                 \
+  }
+#define TEST_SATURATING_SUB(test_class, type, N)    \
+  TEST_F(test_class, saturating_sub_##type##x##N) { \
+    test_saturating_sub<type, N>();                 \
+  }
 
 }  // namespace simd
 

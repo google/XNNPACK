@@ -13,6 +13,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
+#include <limits>
 #include <type_traits>
 
 #include "ynnpack/base/base.h"
@@ -134,6 +135,10 @@ template <typename T, size_t N>
 vec<T, N> sqrt(vec<T, N> a);
 template <typename T, size_t N>
 vec<T, N> abs(vec<T, N> a);
+template <typename T, size_t N>
+vec<T, N> saturating_add(vec<T, N> a, vec<T, N> b);
+template <typename T, size_t N>
+vec<T, N> saturating_sub(vec<T, N> a, vec<T, N> b);
 
 template <typename T>
 std::array<vec<T, 4>, 4> transpose(std::array<vec<T, 4>, 4> x);
@@ -277,6 +282,20 @@ YNN_ALWAYS_INLINE vec<T, 1> sqrt(vec<T, 1> a) {
 template <typename T>
 YNN_ALWAYS_INLINE vec<T, 1> abs(vec<T, 1> a) {
   return vec<T, 1>{std::abs(a.v)};
+}
+template <typename T>
+YNN_ALWAYS_INLINE vec<T, 1> saturating_add(vec<T, 1> a, vec<T, 1> b) {
+  const int64_t res = static_cast<int64_t>(a.v) + static_cast<int64_t>(b.v);
+  const int64_t min = std::numeric_limits<T>::min();
+  const int64_t max = std::numeric_limits<T>::max();
+  return vec<T, 1>{static_cast<T>(std::max(min, std::min(max, res)))};
+}
+template <typename T>
+YNN_ALWAYS_INLINE vec<T, 1> saturating_sub(vec<T, 1> a, vec<T, 1> b) {
+  const int64_t res = static_cast<int64_t>(a.v) - static_cast<int64_t>(b.v);
+  const int64_t min = std::numeric_limits<T>::min();
+  const int64_t max = std::numeric_limits<T>::max();
+  return vec<T, 1>{static_cast<T>(std::max(min, std::min(max, res)))};
 }
 
 template <typename To, typename From>

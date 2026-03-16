@@ -649,6 +649,32 @@ YNN_ALWAYS_INLINE u8x64 operator-(u8x64 a, u8x64 b) {
   return u8x64{_mm512_sub_epi8(a.v, b.v)};
 }
 
+YNN_ALWAYS_INLINE s16x32 saturating_add(s16x32 a, s16x32 b) {
+  return s16x32{_mm512_adds_epi16(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE u16x32 saturating_add(u16x32 a, u16x32 b) {
+  return u16x32{_mm512_adds_epu16(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE s8x64 saturating_add(s8x64 a, s8x64 b) {
+  return s8x64{_mm512_adds_epi8(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE u8x64 saturating_add(u8x64 a, u8x64 b) {
+  return u8x64{_mm512_adds_epu8(a.v, b.v)};
+}
+
+YNN_ALWAYS_INLINE s16x32 saturating_sub(s16x32 a, s16x32 b) {
+  return s16x32{_mm512_subs_epi16(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE u16x32 saturating_sub(u16x32 a, u16x32 b) {
+  return u16x32{_mm512_subs_epu16(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE s8x64 saturating_sub(s8x64 a, s8x64 b) {
+  return s8x64{_mm512_subs_epi8(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE u8x64 saturating_sub(u8x64 a, u8x64 b) {
+  return u8x64{_mm512_subs_epu8(a.v, b.v)};
+}
+
 YNN_ALWAYS_INLINE f32x16 operator*(f32x16 a, f32x16 b) {
   return f32x16{_mm512_mul_ps(a.v, b.v)};
 }

@@ -306,6 +306,10 @@ YNN_ALWAYS_INLINE void store_aligned(uint8_t* ptr, u8x8 b,
 YNN_ALWAYS_INLINE f32x4 load(const float* ptr, decltype(f32x4::N), f32x4 = {}) {
   return f32x4{vld1q_f32(ptr)};
 }
+YNN_ALWAYS_INLINE u32x4 load(const uint32_t* ptr, decltype(u32x4::N),
+                             u32x4 = {}) {
+  return u32x4{vld1q_u32(ptr)};
+}
 YNN_ALWAYS_INLINE s32x4 load(const int32_t* ptr, decltype(s32x4::N),
                              s32x4 = {}) {
   return s32x4{vld1q_s32(ptr)};
@@ -316,6 +320,10 @@ YNN_ALWAYS_INLINE bf16x8 load(const bfloat16* ptr, decltype(f16x8::N),
 }
 YNN_ALWAYS_INLINE f16x8 load(const half* ptr, decltype(f16x8::N), f16x8 = {}) {
   return f16x8{vld1q_u16(reinterpret_cast<const uint16_t*>(ptr))};
+}
+YNN_ALWAYS_INLINE u16x8 load(const uint16_t* ptr, decltype(u16x8::N),
+                             u16x8 = {}) {
+  return u16x8{vld1q_u16(ptr)};
 }
 YNN_ALWAYS_INLINE s16x8 load(const int16_t* ptr, decltype(s16x8::N),
                              s16x8 = {}) {
@@ -410,6 +418,50 @@ YNN_ALWAYS_INLINE u8x16 operator*(u8x16 a, u8x16 b) {
 }
 YNN_ALWAYS_INLINE s8x16 operator*(s8x16 a, s8x16 b) {
   return s8x16{vmulq_s8(a.v, b.v)};
+}
+
+YNN_ALWAYS_INLINE s32x4 saturating_add(s32x4 a, s32x4 b) {
+  return s32x4{vqaddq_s32(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE u32x4 saturating_add(u32x4 a, u32x4 b) {
+  return u32x4{vqaddq_u32(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE s16x8 saturating_add(s16x8 a, s16x8 b) {
+  return s16x8{vqaddq_s16(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE u16x8 saturating_add(u16x8 a, u16x8 b) {
+  return u16x8{vqaddq_u16(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE s8x16 saturating_add(s8x16 a, s8x16 b) {
+  return s8x16{vqaddq_s8(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE u8x16 saturating_add(u8x16 a, u8x16 b) {
+  return u8x16{vqaddq_u8(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE u8x8 saturating_add(u8x8 a, u8x8 b) {
+  return u8x8{vqadd_u8(a.v, b.v)};
+}
+
+YNN_ALWAYS_INLINE s32x4 saturating_sub(s32x4 a, s32x4 b) {
+  return s32x4{vqsubq_s32(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE u32x4 saturating_sub(u32x4 a, u32x4 b) {
+  return u32x4{vqsubq_u32(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE s16x8 saturating_sub(s16x8 a, s16x8 b) {
+  return s16x8{vqsubq_s16(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE u16x8 saturating_sub(u16x8 a, u16x8 b) {
+  return u16x8{vqsubq_u16(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE s8x16 saturating_sub(s8x16 a, s8x16 b) {
+  return s8x16{vqsubq_s8(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE u8x16 saturating_sub(u8x16 a, u8x16 b) {
+  return u8x16{vqsubq_u8(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE u8x8 saturating_sub(u8x8 a, u8x8 b) {
+  return u8x8{vqsub_u8(a.v, b.v)};
 }
 
 YNN_ALWAYS_INLINE s16x8 operator>>(s16x8 a, int b) {

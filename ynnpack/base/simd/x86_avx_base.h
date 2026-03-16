@@ -293,6 +293,10 @@ YNN_ALWAYS_INLINE f16x16 load(const half* ptr, decltype(f16x16::N),
                               f16x16 = {}) {
   return f16x16{_mm256_loadu_si256(reinterpret_cast<const __m256i*>(ptr))};
 }
+YNN_ALWAYS_INLINE u16x16 load(const uint16_t* ptr, decltype(u16x16::N),
+                              u16x16 = {}) {
+  return u16x16{_mm256_loadu_si256(reinterpret_cast<const __m256i*>(ptr))};
+}
 YNN_ALWAYS_INLINE s16x16 load(const int16_t* ptr, decltype(s16x16::N),
                               s16x16 = {}) {
   return s16x16{_mm256_loadu_si256(reinterpret_cast<const __m256i*>(ptr))};
