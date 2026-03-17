@@ -3,7 +3,7 @@
 //   Template: src/f16-vlrelu/rvv.c.in
 //   Generator: tools/xngen
 //
-// Copyright 2024 Imagination Technologies, Inc.
+// Copyright 2026 Imagination Technologies, Inc.
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
