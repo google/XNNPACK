@@ -971,6 +971,7 @@ class Target:
         "add": "+",
         "sub": "-",
         "mul": "*",
+        "truediv": "/",
         "bitwise_and": "&",
         "bitwise_or": "|",
         "bitwise_xor": "^",
