@@ -19,16 +19,11 @@ class arm_neonbf16_bf16_bf16_fp32_k4(arm_neon):
     self.flags += ["dot_flag::transpose_a"]
 
   def header(self):
-    return "#include <tuple>\n" + super().header() + """
+    return super().header() + """
 
 namespace {
 
 using bfloat16 = bfloat16_t;
-
-YNN_INTRINSIC std::tuple<float32x4_t, float32x4_t> transpose2x2_x64(float32x4_t x0, float32x4_t x1) {
-  return {vcombine_f32(vget_low_f32(x0), vget_low_f32(x1)),
-          vcombine_f32(vget_high_f32(x0), vget_high_f32(x1))};
-}
 
 }  // namespace
 """
