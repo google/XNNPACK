@@ -43,18 +43,13 @@ __arm_new("za") __arm_locally_streaming void sme2_dot(
 
   ptrdiff_t n = N;
   while (n >= svl * 4) {
-    // (All-true) masks for the column dimension, for both an input and an
-    // output.
-    svbool_t n_mask_ab = svptrue(TAB{});
-    svbool_t n_mask = svptrue(TC{});
-    svcount_t n_count_ab = svctrue(TAB{});
-
     if (C_in) {
       // Load the output to initialize the tile accumulator.
       // TODO: To improve numerical precision and better match the other
       // kernels, it would be best to initialize this to zero (`svzero_za()`)
       // the tile instead of loading the initial accumulator, and add this
       // later.
+      svbool_t n_mask = svptrue(TC{});
       for (size_t m = 0; m < M; ++m) {
         const void* C_in_m = offset_bytes(C_in, m * C_in_stride_m);
         svld1_hor_za32(/*tile=*/0, /*slice=*/m, n_mask,
@@ -69,6 +64,11 @@ __arm_new("za") __arm_locally_streaming void sme2_dot(
     } else {
       svzero_za();
     }
+
+    // (All-true) masks for the row and column dimension outputs.
+    svbool_t n_mask_ab = svptrue(TAB{});
+    svcount_t n_count_ab = svctrue(TAB{});
+
     const void* B_k3 = B;
     const void* A_k3 = A;
     size_t k3 = K3;
@@ -102,6 +102,7 @@ __arm_new("za") __arm_locally_streaming void sme2_dot(
     } while (k3 > 0);
 
     // Store the accumulated result back to the output.
+    svbool_t n_mask = svptrue(TC{});
     for (size_t m = 0; m < M; ++m) {
       void* C_out_m = offset_bytes(C_out, m * C_out_stride_m);
       svst1_hor_za32(/*tile=*/0, /*slice=*/m, n_mask,
@@ -119,26 +120,16 @@ __arm_new("za") __arm_locally_streaming void sme2_dot(
     n -= svl * 4;
   }
   if (n > 0) {
-    // Masks for the column dimension, for both an input and an output.
-    svbool_t n_mask_ab0 =
-        svwhilelt(0 * svl * dot_factor, n * dot_factor, TAB{});
-    svbool_t n_mask_ab1 =
-        svwhilelt(1 * svl * dot_factor, n * dot_factor, TAB{});
-    svbool_t n_mask_ab2 =
-        svwhilelt(2 * svl * dot_factor, n * dot_factor, TAB{});
-    svbool_t n_mask_ab3 =
-        svwhilelt(3 * svl * dot_factor, n * dot_factor, TAB{});
-    svbool_t n_mask0 = svwhilelt(0 * svl, n, TC{});
-    svbool_t n_mask1 = svwhilelt(1 * svl, n, TC{});
-    svbool_t n_mask2 = svwhilelt(2 * svl, n, TC{});
-    svbool_t n_mask3 = svwhilelt(3 * svl, n, TC{});
-
     if (C_in) {
       // Load the output to initialize the tile accumulator.
       // TODO: To improve numerical precision and better match the other
       // kernels, it would be best to initialize this to zero (`svzero_za()`)
       // the tile instead of loading the initial accumulator, and add this
       // later.
+      svbool_t n_mask0 = svwhilelt(0 * svl, n, TC{});
+      svbool_t n_mask1 = svwhilelt(1 * svl, n, TC{});
+      svbool_t n_mask2 = svwhilelt(2 * svl, n, TC{});
+      svbool_t n_mask3 = svwhilelt(3 * svl, n, TC{});
       for (size_t m = 0; m < M; ++m) {
         const void* C_in_m = offset_bytes(C_in, m * C_in_stride_m);
         svld1_hor_za32(/*tile=*/0, /*slice=*/m, n_mask0,
@@ -153,6 +144,17 @@ __arm_new("za") __arm_locally_streaming void sme2_dot(
     } else {
       svzero_za();
     }
+
+    // Masks for the column dimension output.
+    svbool_t n_mask_ab0 =
+        svwhilelt(0 * svl * dot_factor, n * dot_factor, TAB{});
+    svbool_t n_mask_ab1 =
+        svwhilelt(1 * svl * dot_factor, n * dot_factor, TAB{});
+    svbool_t n_mask_ab2 =
+        svwhilelt(2 * svl * dot_factor, n * dot_factor, TAB{});
+    svbool_t n_mask_ab3 =
+        svwhilelt(3 * svl * dot_factor, n * dot_factor, TAB{});
+
     const void* B_k3 = B;
     const void* A_k3 = A;
     size_t k3 = K3;
@@ -193,6 +195,10 @@ __arm_new("za") __arm_locally_streaming void sme2_dot(
     } while (k3 > 0);
 
     // Store the accumulated result back to the output.
+    svbool_t n_mask0 = svwhilelt(0 * svl, n, TC{});
+    svbool_t n_mask1 = svwhilelt(1 * svl, n, TC{});
+    svbool_t n_mask2 = svwhilelt(2 * svl, n, TC{});
+    svbool_t n_mask3 = svwhilelt(3 * svl, n, TC{});
     for (size_t m = 0; m < M; ++m) {
       void* C_out_m = offset_bytes(C_out, m * C_out_stride_m);
       svst1_hor_za32(/*tile=*/0, /*slice=*/m, n_mask0,
