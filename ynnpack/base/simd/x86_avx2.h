@@ -9,6 +9,7 @@
 #include <cstdint>
 
 #include "ynnpack/base/base.h"
+#include "ynnpack/base/bfloat16.h"
 #include "ynnpack/base/simd/vec.h"
 #include "ynnpack/base/simd/x86_avx2_base.h"  // IWYU pragma: export
 #include "ynnpack/base/simd/x86_avx_base.h"  // IWYU pragma: export
@@ -43,6 +44,18 @@ YNN_ALWAYS_INLINE f32x8 convert(s32x8 x, float) {
 
 YNN_ALWAYS_INLINE s32x8 convert(f32x8 x, int32_t) {
   return s32x8{_mm256_cvttps_epi32(x.v)};
+}
+
+YNN_ALWAYS_INLINE bf16x16 convert(f32x16 a, bfloat16) {
+  const __m256 rounding_multiplier = _mm256_set1_ps(1.0f + 0.5f / 128.0f);
+  __m256 a1 = _mm256_mul_ps(a.lo().v, rounding_multiplier);
+  __m256 a2 = _mm256_mul_ps(a.hi().v, rounding_multiplier);
+  const __m256i ai = _mm256_castps_si256(a1);
+  const __m256i bi = _mm256_castps_si256(a2);
+  const __m256i as = _mm256_srli_epi32(ai, 16);
+  const __m256i bs = _mm256_srli_epi32(bi, 16);
+  const __m256i r = _mm256_packus_epi32(as, bs);
+  return bf16x16{_mm256_permute4x64_epi64(r, _MM_SHUFFLE(3, 1, 2, 0))};
 }
 
 }  // namespace simd

@@ -874,6 +874,10 @@ YNN_ALWAYS_INLINE f32x16 convert(bf16x16 a, float) {
       _mm512_cvtepu16_epi32(a.v), 16))};
 }
 
+YNN_ALWAYS_INLINE bf16x32 convert(f32x32 a, bfloat16) {
+  return bf16x32{(__m512i)_mm512_cvtne2ps_pbh(a.hi().v, a.lo().v)};
+}
+
 YNN_ALWAYS_INLINE s32x16 convert(s8x16 a, int32_t) {
   return s32x16{_mm512_cvtepi8_epi32(a.v)};
 }
