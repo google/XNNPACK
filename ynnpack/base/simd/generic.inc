@@ -115,6 +115,10 @@ template <typename T, size_t N>
 YNN_ALWAYS_INLINE vec<T, N> operator*(vec<T, N> a, vec<T, N> b) {
   return {a.lo() * b.lo(), a.hi() * b.hi()};
 }
+template <typename T, size_t N>
+YNN_ALWAYS_INLINE vec<T, N> operator/(vec<T, N> a, vec<T, N> b) {
+  return {a.lo() / b.lo(), a.hi() / b.hi()};
+}
 
 template <typename T, size_t N>
 YNN_ALWAYS_INLINE vec<T, N>& operator+=(vec<T, N>& a, vec<T, N> b) {
@@ -129,6 +133,11 @@ YNN_ALWAYS_INLINE vec<T, N>& operator-=(vec<T, N>& a, vec<T, N> b) {
 template <typename T, size_t N>
 YNN_ALWAYS_INLINE vec<T, N>& operator*=(vec<T, N>& a, vec<T, N> b) {
   a = a * b;
+  return a;
+}
+template <typename T, size_t N>
+YNN_ALWAYS_INLINE vec<T, N>& operator/=(vec<T, N>& a, vec<T, N> b) {
+  a = a / b;
   return a;
 }
 

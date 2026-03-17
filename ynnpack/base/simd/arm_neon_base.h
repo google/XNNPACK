@@ -410,6 +410,9 @@ YNN_ALWAYS_INLINE s8x16 operator-(s8x16 a, s8x16 b) {
 YNN_ALWAYS_INLINE f32x4 operator*(f32x4 a, f32x4 b) {
   return f32x4{vmulq_f32(a.v, b.v)};
 }
+
+YNN_ALWAYS_INLINE f32x4 operator/(f32x4 a, f32x4 b) { return f32x4{a.v / b.v}; }
+
 YNN_ALWAYS_INLINE s32x4 operator*(s32x4 a, s32x4 b) {
   return s32x4{vmulq_s32(a.v, b.v)};
 }

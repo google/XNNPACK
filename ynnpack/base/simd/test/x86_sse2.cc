@@ -75,6 +75,8 @@ TEST_SATURATING_SUB(x86_sse2, s16, 8);
 TEST_MULTIPLY(x86_sse2, f32, 4);
 TEST_MULTIPLY(x86_sse2, f64, 2);
 
+TEST_DIVIDE(x86_sse2, f32, 4);
+
 TEST_COPYSIGN(x86_sse2, f64, 2);
 
 TEST_MIN(x86_sse2, u8, 16);

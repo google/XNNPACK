@@ -256,6 +256,10 @@ YNN_ALWAYS_INLINE vec<T, 1> operator*(vec<T, 1> a, vec<T, 1> b) {
   return vec<T, 1>{static_cast<T>(mul_no_overflow(a.v, b.v))};
 }
 template <typename T>
+YNN_ALWAYS_INLINE vec<T, 1> operator/(vec<T, 1> a, vec<T, 1> b) {
+  return vec<T, 1>{static_cast<T>(a.v / b.v)};
+}
+template <typename T>
 YNN_ALWAYS_INLINE vec<T, 1> min(vec<T, 1> a, vec<T, 1> b) {
   return vec<T, 1>{std::min(a.v, b.v)};
 }

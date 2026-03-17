@@ -234,7 +234,11 @@ void test_op() {
         continue;
       }
 #endif  // YNN_ARCH_ARM32
-      ASSERT_EQ(result[i], expected);
+      if (std::isnan(expected)) {
+        ASSERT_TRUE(std::isnan(result[i]));
+      } else {
+        ASSERT_EQ(result[i], expected);
+      }
     }
   }
 }
@@ -444,12 +448,21 @@ struct multiply_op {
   }
 };
 
+struct divide_op {
+  template <typename T>
+  T operator()(T a, T b) {
+    return a / b;
+  }
+};
+
 #define TEST_ADD(test_class, type, N) \
   TEST_F(test_class, add_##type##x##N) { test_op<type, N, add_op>(); }
 #define TEST_SUBTRACT(test_class, type, N) \
   TEST_F(test_class, subtract_##type##x##N) { test_op<type, N, sub_op>(); }
 #define TEST_MULTIPLY(test_class, type, N) \
   TEST_F(test_class, multiply_##type##x##N) { test_op<type, N, multiply_op>(); }
+#define TEST_DIVIDE(test_class, type, N) \
+  TEST_F(test_class, divide_##type##x##N) { test_op<type, N, divide_op>(); }
 #define TEST_COPYSIGN(test_class, type, N) \
   TEST_F(test_class, copysign_##type##x##N) { test_op<type, N, copysign_op>(); }
 #define TEST_MIN(test_class, type, N) \

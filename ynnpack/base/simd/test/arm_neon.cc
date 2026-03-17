@@ -91,6 +91,8 @@ TEST_MULTIPLY(arm_neon, s8, 16);
 TEST_MULTIPLY(arm_neon, f32, 4);
 TEST_MULTIPLY(arm_neon, s32, 4);
 
+TEST_DIVIDE(arm_neon, f32, 4);
+
 TEST_MIN(arm_neon, u8, 16);
 TEST_MIN(arm_neon, s8, 16);
 TEST_MIN(arm_neon, s16, 8);

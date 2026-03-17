@@ -678,6 +678,10 @@ YNN_ALWAYS_INLINE u8x64 saturating_sub(u8x64 a, u8x64 b) {
 YNN_ALWAYS_INLINE f32x16 operator*(f32x16 a, f32x16 b) {
   return f32x16{_mm512_mul_ps(a.v, b.v)};
 }
+YNN_ALWAYS_INLINE f32x16 operator/(f32x16 a, f32x16 b) {
+  return f32x16{_mm512_div_ps(a.v, b.v)};
+}
+
 YNN_ALWAYS_INLINE s32x16 operator*(s32x16 a, s32x16 b) {
   return s32x16{_mm512_mullo_epi32(a.v, b.v)};
 }

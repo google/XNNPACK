@@ -410,6 +410,9 @@ YNN_ALWAYS_INLINE f64x2 operator*(f64x2 a, f64x2 b) {
 YNN_ALWAYS_INLINE f32x4 operator*(f32x4 a, f32x4 b) {
   return f32x4{_mm_mul_ps(a.v, b.v)};
 }
+YNN_ALWAYS_INLINE f32x4 operator/(f32x4 a, f32x4 b) {
+  return f32x4{_mm_div_ps(a.v, b.v)};
+}
 
 YNN_ALWAYS_INLINE s16x8 operator&(s16x8 a, s16x8 b) {
   return s16x8{_mm_and_si128(a.v, b.v)};

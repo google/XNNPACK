@@ -55,6 +55,7 @@ TEST_PARTIAL_LOAD_STORE(x86_avx, s32, 8);
 TEST_ADD(x86_avx, f32, 8);
 TEST_SUBTRACT(x86_avx, f32, 8);
 TEST_MULTIPLY(x86_avx, f32, 8);
+TEST_DIVIDE(x86_avx, f32, 8);
 TEST_MIN(x86_avx, f32, 8);
 TEST_MAX(x86_avx, f32, 8);
 
