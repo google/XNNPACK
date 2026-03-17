@@ -632,7 +632,6 @@ jobs:
             --dynamic_mode=off \
             --features=fully_static_link \
             --disk_cache=/home/xnnpack/.cache/bazel/disk_cache \
-            --repository_cache=/home/xnnpack/.cache/bazel/repo_cache \
             //test:qs8_qc8w_igemm_minmax_fp32_test \
             //test:qp8_f32_qc4w_gemm_minmax_test \
             //test:pf32_gemm_minmax_test \
@@ -655,7 +654,6 @@ jobs:
             --dynamic_mode=off \
             --features=fully_static_link \
             --disk_cache=/home/xnnpack/.cache/bazel/disk_cache \
-            --repository_cache=/home/xnnpack/.cache/bazel/repo_cache \
             --test_tag_filters=-not_run:arm,-noemulator \
             //test:qs8_qc8w_igemm_minmax_fp32_test \
             //test:qp8_f32_qc4w_gemm_minmax_test \
@@ -681,7 +679,6 @@ jobs:
             --dynamic_mode=off \
             --features=fully_static_link \
             --disk_cache=/home/xnnpack/.cache/bazel/disk_cache \
-            --repository_cache=/home/xnnpack/.cache/bazel/repo_cache \
             --test_tag_filters=-not_run:arm,-noemulator \
             //test/subgraph/... \
             //ynnpack/... \
