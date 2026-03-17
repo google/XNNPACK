@@ -3,7 +3,7 @@
 //   Template: src/f16-rminmax/rvv.c.in
 //   Generator: tools/xngen
 //
-// Copyright 2023 SiFive, Inc.
+// Copyright 2026 SiFive, Inc.
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
@@ -37,7 +37,7 @@ void xnn_f16_rmax_ukernel__rvvfp16arith_u4v(
   for (avl = N - vl; avl; avl -= vl, input += vl) {
     vl = __riscv_vsetvl_e16m4(avl);
     vfloat16m4_t vec = __riscv_vle16_v_f16m4(input, vl);
-    t0 = __riscv_vfmax_vv_f16m4_tu(t0, t0, vec, vl);
+    t0 = __riscv_vfmax(t0, vec, vl);
   }
 
   vfloat16m1_t fmax = __riscv_vle16_v_f16m1(output + 0, 1);
