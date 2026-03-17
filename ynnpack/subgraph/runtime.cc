@@ -723,14 +723,18 @@ ynn_status ynn_runtime::invoke() {
 ynn_status ynn_set_external_value_shape(ynn_runtime_t runtime,
                                         uint32_t external_id, size_t rank,
                                         const size_t* dims) {
+  assert(external_id < runtime->values.size());
   ynn_runtime_value& value = runtime->value(external_id);
+  assert(value.is_external());
   return value.set_external_shape(rank, dims);
 }
 
 ynn_status ynn_get_external_value_shape(ynn_runtime_t runtime,
                                         uint32_t external_id, size_t* rank,
                                         size_t* dims) {
+  assert(external_id < runtime->values.size());
   const ynn_runtime_value& value = runtime->value(external_id);
+  assert(value.is_external());
   return value.get_external_shape(rank, dims);
 }
 
@@ -740,7 +744,10 @@ ynn_status ynn_reshape_runtime(ynn_runtime_t runtime) {
 
 ynn_status ynn_set_external_value_data(ynn_runtime_t runtime,
                                        uint32_t external_id, void* data) {
+  assert(external_id < runtime->values.size());
   ynn_value& value = runtime->values[external_id];
+  assert(value.is_external());
+  assert(value.data);
   value.data->base = data;
   return ynn_status_success;
 }
