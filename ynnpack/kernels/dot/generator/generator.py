@@ -92,17 +92,26 @@ def main(argv: Sequence[str]) -> None:
   src = gen.header()
   inc = ""
 
-  for i in argv[4:]:
-    args = i.split(",")
-    kind = args[0]
-    mr, nr, kr = args[1].split("x")
-    if kind == "dot":
-      src_i, inc_i = gen.generate_dot(int(mr), int(nr), int(kr))
-    else:
-      raise ValueError(f"Unknown kind: {kind}")
+  endifs = 0
 
-    src += src_i
-    inc += inc_i
+  for i in argv[4:]:
+    if i.startswith("--build_predicate="):
+      endifs += 1
+      src += "#if " + i.split("=")[1] + "\n"
+    else:
+      args = i.split(",")
+      kind = args[0]
+      mr, nr, kr = args[1].split("x")
+      if kind == "dot":
+        src_i, inc_i = gen.generate_dot(int(mr), int(nr), int(kr))
+      else:
+        raise ValueError(f"Unknown kind: {kind}")
+
+      src += src_i
+      inc += inc_i
+
+  for i in range(endifs):
+    src += "#endif\n"
 
   src += gen.footer()
 

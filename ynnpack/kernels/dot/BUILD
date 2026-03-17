@@ -528,6 +528,8 @@ ynn_generate_src_hdr(
     generator = "//ynnpack/kernels/dot/generator",
     generator_args = [
         "arm_neonbf16_bf16_bf16_fp32_k4",
+        # TODO(b/493642397): This kernel doesn't build with msan
+        "--build_predicate=\"!defined(MEMORY_SANIIZER)\"",
         # TODO: Unrolling these by 2x in k enables using ldp for the LHS, so far experiments do not
         # seem to show much benefit from this, but it seems like it should help.
         "dot,2x32x4",
