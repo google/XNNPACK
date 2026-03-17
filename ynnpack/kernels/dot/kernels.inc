@@ -121,6 +121,7 @@ YNN_DOT_KERNEL(arch_flag::sme, dot_int8_int8_int32_sme,
 #include "ynnpack/kernels/dot/arm64_neoni8mm_int8_int8_int32.inc"
 #endif  // YNN_ARCH_ARM64_NEONI8MM
 #ifdef YNN_ARCH_ARM_NEONBF16
+#include "ynnpack/kernels/dot/arm_neonbf16_bf16_bf16_fp32_k4.inc"
 #include "ynnpack/kernels/dot/arm_neonbf16_bf16_bf16_fp32_k2.inc"
 #endif  // YNN_ARCH_ARM_NEONBF16
 #ifdef YNN_ARCH_ARM64_NEON
