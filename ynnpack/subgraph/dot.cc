@@ -20,6 +20,7 @@
 
 #include "ynnpack/base/arithmetic.h"
 #include "ynnpack/base/base.h"
+#include "ynnpack/base/log.h"
 #include "ynnpack/base/type.h"
 #include "ynnpack/include/ynnpack.h"
 #include "ynnpack/kernels/dot/pack.h"
@@ -1128,34 +1129,31 @@ ynn_status define_bf16_dot_from_f32_inputs(
 
   uint32_t a_bf16 = YNN_INVALID_VALUE_ID;
   uint32_t a_residual = YNN_INVALID_VALUE_ID;
-  ynn_status status = define_split_f32_to_bf16(subgraph, input_a_id, &a_bf16,
-                                               &a_residual, flags);
-  if (status != ynn_status_success) return status;
+  YNN_RETURN_IF_ERROR(define_split_f32_to_bf16(subgraph, input_a_id, &a_bf16,
+                                               &a_residual, flags));
 
   uint32_t b_bf16 = YNN_INVALID_VALUE_ID;
   uint32_t b_residual = YNN_INVALID_VALUE_ID;
-  status = define_split_f32_to_bf16(subgraph, input_b_id, &b_bf16, &b_residual,
-                                    flags);
-  if (status != ynn_status_success) return status;
+  YNN_RETURN_IF_ERROR(define_split_f32_to_bf16(subgraph, input_b_id, &b_bf16,
+                                               &b_residual, flags));
 
   // For numerical accuracy, we sum the smallest results together first i.e.
   // we compute dot(a_residual, b_bf16) + dot(a_bf16, b_residual) before
   // adding it to dot(a_bf16, b_bf16) + c.
   uint32_t a_residual_b_bf16_dot = YNN_INVALID_VALUE_ID;
-  status = define_dot(subgraph, num_k_dims, a_residual, b_bf16,
-                      YNN_INVALID_VALUE_ID, &a_residual_b_bf16_dot, flags);
-  if (status != ynn_status_success) return status;
+  YNN_RETURN_IF_ERROR(define_dot(subgraph, num_k_dims, a_residual, b_bf16,
+                                 YNN_INVALID_VALUE_ID, &a_residual_b_bf16_dot,
+                                 flags));
 
   uint32_t a_bf16_b_residual_dot = YNN_INVALID_VALUE_ID;
-  status = define_dot(subgraph, num_k_dims, a_bf16, b_residual,
-                      a_residual_b_bf16_dot, &a_bf16_b_residual_dot, flags);
-  if (status != ynn_status_success) return status;
+  YNN_RETURN_IF_ERROR(define_dot(subgraph, num_k_dims, a_bf16, b_residual,
+                                 a_residual_b_bf16_dot, &a_bf16_b_residual_dot,
+                                 flags));
 
   if (input_c_id != YNN_INVALID_VALUE_ID) {
     uint32_t a_bf16_b_bf16_dot = YNN_INVALID_VALUE_ID;
-    status = define_dot(subgraph, num_k_dims, a_bf16, b_bf16, input_c_id,
-                        &a_bf16_b_bf16_dot, flags);
-    if (status != ynn_status_success) return status;
+    YNN_RETURN_IF_ERROR(define_dot(subgraph, num_k_dims, a_bf16, b_bf16,
+                                   input_c_id, &a_bf16_b_bf16_dot, flags));
 
     return ynn_define_binary(subgraph, ynn_binary_add, a_bf16_b_bf16_dot,
                              a_bf16_b_residual_dot, output_id, flags);
@@ -1174,12 +1172,21 @@ ynn_status ynn_define_dot(ynn_subgraph_t subgraph, size_t num_k_dims,
                           uint32_t input_c_id, uint32_t* output_id,
                           uint32_t flags) {
   // Validate arguments.
-  assert(subgraph);
-  assert(subgraph->is_valid_value(input_a_id));
-  assert(subgraph->is_valid_value(input_b_id));
-  // TODO: We can handle more than this, with loops outside of dot kernels.
-  assert(num_k_dims <= 3);
-  assert(num_k_dims > 0);
+  YNN_RETURN_IF_ERROR(validate_subgraph("dot", subgraph));
+  YNN_RETURN_IF_ERROR(
+      validate_input_tensor("dot", subgraph, "input_a_id", input_a_id));
+  YNN_RETURN_IF_ERROR(validate_input_tensor("dot", subgraph, "input_b_id",
+                                            input_b_id, /*optional=*/true));
+  YNN_RETURN_IF_ERROR(validate_input_tensor("dot", subgraph, "input_c_id",
+                                            input_c_id, /*optional=*/true));
+  YNN_RETURN_IF_ERROR(
+      validate_output_tensor("dot", subgraph, "output_id", output_id));
+
+  if (num_k_dims == 0 || num_k_dims > 3) {
+    YNN_LOG_ERROR() << "For node `dot`, `num_k_dims` must be in [1, 3], got "
+                    << num_k_dims;
+    return ynn_status_invalid_parameter;
+  }
 
   if (can_convert_f32_to_bf16(subgraph, input_a_id, input_b_id, flags)) {
     return define_bf16_dot_from_f32_inputs(subgraph, num_k_dims, input_a_id,

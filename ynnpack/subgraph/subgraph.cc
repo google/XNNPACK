@@ -41,6 +41,96 @@
 #include "slinky/runtime/expr.h"
 #include "slinky/runtime/print.h"
 
+namespace ynn {
+
+// Validation helpers for public APIs.
+ynn_status validate_subgraph(const char* node, ynn_subgraph_t subgraph) {
+  if (subgraph == nullptr) {
+    YNN_LOG_ERROR() << "For node `" << node << "`, subgraph must be non-null";
+    return ynn_status_invalid_parameter;
+  }
+  return ynn_status_success;
+}
+
+ynn_status validate_input_tensor(const char* node, ynn_subgraph_t subgraph,
+                                 const char* name, uint32_t id, bool optional) {
+  if (optional && id == YNN_INVALID_VALUE_ID) {
+    return ynn_status_success;
+  }
+  if (!subgraph->is_valid_value(id)) {
+    YNN_LOG_ERROR() << "For node `" << node << "`, tensor ID " << id
+                    << " is not valid for tensor `" << name << "`";
+    return ynn_status_invalid_parameter;
+  }
+  return ynn_status_success;
+}
+
+ynn_status validate_input_tensor_array(const char* node,
+                                       ynn_subgraph_t subgraph,
+                                       const char* name, size_t count,
+                                       const uint32_t* ids) {
+  if (count > 0 && ids == nullptr) {
+    YNN_LOG_ERROR() << "For node `" << node << "`, input array `" << name
+                    << "` must be non-null if count is " << count;
+    return ynn_status_invalid_parameter;
+  }
+  for (size_t i = 0; i < count; ++i) {
+    if (!subgraph->is_valid_value(ids[i])) {
+      YNN_LOG_ERROR() << "For node `" << node << "`, tensor ID " << ids[i]
+                      << " is not valid for tensor `" << name << "[" << i
+                      << "]`";
+      return ynn_status_invalid_parameter;
+    }
+  }
+  return ynn_status_success;
+}
+
+ynn_status validate_output_tensor(const char* node, ynn_subgraph_t subgraph,
+                                  const char* name, uint32_t* id_out) {
+  if (id_out == nullptr) {
+    YNN_LOG_ERROR() << "For node `" << node << "`, output `" << name
+                    << "` must be non-null";
+    return ynn_status_invalid_parameter;
+  }
+  if (*id_out != YNN_INVALID_VALUE_ID && !subgraph->is_valid_value(*id_out)) {
+    YNN_LOG_ERROR() << "For node `" << node << "`, tensor ID " << *id_out
+                    << " is not valid for tensor `" << name << "`";
+    return ynn_status_invalid_parameter;
+  }
+  return ynn_status_success;
+}
+
+ynn_status validate_output_tensor_array(const char* node,
+                                        ynn_subgraph_t subgraph,
+                                        const char* name, size_t count,
+                                        uint32_t* ids_out) {
+  if (count > 0 && ids_out == nullptr) {
+    YNN_LOG_ERROR() << "For node `" << node << "`, output array `" << name
+                    << "` must be non-null if count is " << count;
+    return ynn_status_invalid_parameter;
+  }
+  for (size_t i = 0; i < count; ++i) {
+    if (ids_out[i] != YNN_INVALID_VALUE_ID &&
+        !subgraph->is_valid_value(ids_out[i])) {
+      YNN_LOG_ERROR() << "For node `" << node << "`, tensor ID " << ids_out[i]
+                      << " is not valid for tensor `" << name << "[" << i
+                      << "]`";
+      return ynn_status_invalid_parameter;
+    }
+  }
+  return ynn_status_success;
+}
+
+ynn_status validate_runtime(ynn_runtime_t runtime) {
+  if (runtime == nullptr) {
+    YNN_LOG_ERROR() << "runtime must be non-null";
+    return ynn_status_invalid_parameter;
+  }
+  return ynn_status_success;
+}
+
+}  // namespace ynn
+
 std::string ynn_value::name() const {
   return name_prefix() + std::to_string(id);
 }
@@ -87,7 +177,14 @@ ynn_status ynn_value::set_external_shape(size_t rank, const size_t* dims) {
 }
 
 ynn_status ynn_value::get_external_shape(size_t* rank, size_t* dims) const {
-  assert(rank);
+  if (rank == nullptr) {
+    YNN_LOG_ERROR() << "rank pointer is null";
+    return ynn_status_invalid_parameter;
+  }
+  if (!data) {
+    YNN_LOG_ERROR() << "value " << id << " has no data buffer.";
+    return ynn_status_invalid_parameter;
+  }
   if (*rank < data->rank) {
     YNN_LOG_ERROR() << "ynn_get_external_value_shape called with rank ("
                     << *rank << ") < value " << id << " rank (" << data->rank
@@ -950,12 +1047,20 @@ extern "C" {
 
 ynn_status ynn_create_subgraph(uint32_t external_value_ids, uint32_t flags,
                                ynn_subgraph_t* subgraph) {
+  if (subgraph == nullptr) {
+    YNN_LOG_ERROR() << "output subgraph must be non-null";
+    return ynn_status_invalid_parameter;
+  }
   *subgraph = new ynn_subgraph(external_value_ids, flags);
   return ynn_status_success;
 }
 
 ynn_status ynn_optimize_subgraph(ynn_subgraph_t subgraph,
                                  ynn_threadpool_t threadpool, uint32_t flags) {
+  if (subgraph == nullptr) {
+    YNN_LOG_ERROR() << "subgraph must be non-null";
+    return ynn_status_invalid_parameter;
+  }
 #if YNN_LOG_LEVEL >= YNN_LOG_LEVEL_DEBUG
   YNN_LOG_DEBUG() << "subgraph before optimization:\n";
   subgraph->dump(std::cout);

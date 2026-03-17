@@ -27,8 +27,12 @@ ynn_status ynn_define_even_split(ynn_subgraph_t subgraph, int32_t axis,
                                  uint32_t input_id, size_t num_outputs,
                                  uint32_t* output_ids, uint32_t flags) {
   // Validate arguments.
-  assert(subgraph);
-  assert(subgraph->is_valid_value(input_id));
+  YNN_RETURN_IF_ERROR(validate_subgraph("even_split", subgraph));
+  YNN_RETURN_IF_ERROR(
+      validate_input_tensor("even_split", subgraph, "input_id", input_id));
+  YNN_RETURN_IF_ERROR(validate_output_tensor_array(
+      "even_split", subgraph, "output_ids", num_outputs, output_ids));
+
   const ynn_value& input = subgraph->value(input_id);
   for (size_t i = 0; i < num_outputs; ++i) {
     subgraph->get_output_value(&output_ids[i], input);
@@ -48,7 +52,7 @@ ynn_status ynn_define_even_split(ynn_subgraph_t subgraph, int32_t axis,
 
   node.checks.push_back({
       output_extents[axis] % split_factor == 0,
-      {"In node 'even_split', invalid split by ", split_factor,
+      {"For node 'even_split', invalid split by ", split_factor,
        " in dimension ", axis, " (", output_extents[axis], ") of ",
        ynn_node::input_idx{0}},
   });

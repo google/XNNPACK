@@ -285,8 +285,6 @@ void define_reduce(ynn_subgraph& subgraph, ynn_node& node,
                    ynn_reduce_operator op, const ynn::axes_set& k_dims,
                    uint32_t input_a_id, uint32_t input_b_id, uint32_t output_id,
                    bool keep_dims) {
-  assert(subgraph.is_valid_value(input_a_id));
-  assert(subgraph.is_valid_value(output_id));
   const ynn_value& a = subgraph.value(input_a_id);
   const ynn_value& output = subgraph.value(output_id);
 
@@ -377,8 +375,14 @@ ynn_status ynn_define_reduce(ynn_subgraph_t subgraph,
                              uint32_t input_b_id, uint32_t* output_id,
                              uint32_t flags) {
   // Validate arguments.
-  assert(subgraph);
-  assert(subgraph->is_valid_value(input_a_id));
+  YNN_RETURN_IF_ERROR(validate_subgraph("reduce", subgraph));
+  YNN_RETURN_IF_ERROR(
+      validate_input_tensor("reduce", subgraph, "input_a_id", input_a_id));
+  YNN_RETURN_IF_ERROR(validate_input_tensor("reduce", subgraph, "input_b_id",
+                                            input_b_id, /*optional=*/true));
+  YNN_RETURN_IF_ERROR(
+      validate_output_tensor("reduce", subgraph, "output_id", output_id));
+
   const ynn_value& a = subgraph->value(input_a_id);
 
   ynn::axes_set k_dims;
@@ -387,7 +391,6 @@ ynn_status ynn_define_reduce(ynn_subgraph_t subgraph,
   }
   bool keep_dims = flags & YNN_NODE_FLAG_KEEP_DIMS;
 
-  assert(output_id);
   if (*output_id == YNN_INVALID_VALUE_ID) {
     // Make the output for this reduction.
     ynn_type output_type = get_accumulator_type(op, a.type);

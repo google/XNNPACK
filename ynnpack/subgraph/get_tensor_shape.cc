@@ -13,6 +13,7 @@
 #include <vector>
 
 #include "ynnpack/base/base.h"
+#include "ynnpack/base/log.h"
 #include "ynnpack/include/ynnpack.h"
 #include "ynnpack/subgraph/runtime.h"
 #include "ynnpack/subgraph/slinky.h"
@@ -59,9 +60,16 @@ ynn_status ynn_define_get_tensor_shape(ynn_subgraph_t subgraph, size_t num_axes,
                                        size_t rank, uint32_t value_id,
                                        uint32_t* output_id, uint32_t flags) {
   // Validate arguments.
-  assert(subgraph);
-  assert(subgraph->is_valid_value(value_id));
-  assert(output_id);
+  YNN_RETURN_IF_ERROR(validate_subgraph("get_tensor_shape", subgraph));
+  YNN_RETURN_IF_ERROR(validate_input_tensor("get_tensor_shape", subgraph,
+                                            "value_id", value_id));
+  YNN_RETURN_IF_ERROR(validate_output_tensor("get_tensor_shape", subgraph,
+                                             "output_id", output_id));
+  if (num_axes > 0 && axes == nullptr) {
+    YNN_LOG_ERROR() << "For node `get_tensor_shape`, axes must be non-null "
+                       "when num_axes > 0";
+    return ynn_status_invalid_parameter;
+  }
   if (*output_id == YNN_INVALID_VALUE_ID) {
     *output_id = subgraph->new_internal_value(type).id;
   }

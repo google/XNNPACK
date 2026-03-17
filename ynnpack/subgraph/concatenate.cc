@@ -3,7 +3,6 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include <algorithm>
 #include <cassert>
 #include <cstddef>
 #include <cstdint>
@@ -11,6 +10,7 @@
 #include <utility>
 #include <vector>
 
+#include "ynnpack/base/log.h"
 #include "ynnpack/include/ynnpack.h"
 #include "ynnpack/subgraph/runtime.h"
 #include "ynnpack/subgraph/slinky.h"
@@ -26,10 +26,12 @@ ynn_status ynn_define_concatenate(ynn_subgraph_t subgraph, int32_t axis,
                                   size_t num_inputs, const uint32_t* input_ids,
                                   uint32_t* output_id, uint32_t flags) {
   // Validate arguments.
-  assert(subgraph);
-  assert(input_ids);
-  assert(output_id);
-  assert(subgraph->is_valid_value(input_ids[0]));
+  YNN_RETURN_IF_ERROR(validate_subgraph("concatenate", subgraph));
+  YNN_RETURN_IF_ERROR(validate_input_tensor_array(
+      "concatenate", subgraph, "input_ids", num_inputs, input_ids));
+  YNN_RETURN_IF_ERROR(
+      validate_output_tensor("concatenate", subgraph, "output_id", output_id));
+
   const ynn_value& input0 = subgraph->value(input_ids[0]);
   axis = axis_to_slinky_dim(input0.rank(), axis);
 
@@ -38,9 +40,12 @@ ynn_status ynn_define_concatenate(ynn_subgraph_t subgraph, int32_t axis,
 
   std::vector<slinky::expr> output_extents = input0.extents;
   for (int i = 1; i < num_inputs; ++i) {
-    assert(subgraph->is_valid_value(input_ids[i]));
     const ynn_value& input_i = subgraph->value(input_ids[i]);
-    assert(input0.rank() == input_i.rank());
+    if (input0.rank() != input_i.rank()) {
+      YNN_LOG_ERROR() << "For node `concatenate`, rank mismatch for input " << i
+                      << " of concatenate";
+      return ynn_status_invalid_parameter;
+    }
     output_extents[axis] += input_i.extents[axis];
     for (int d = 0; d < input0.rank(); ++d) {
       if (d == axis) continue;

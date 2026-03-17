@@ -30,9 +30,13 @@ ynn_status ynn_define_static_pad(ynn_subgraph_t subgraph, size_t num_axes,
                                  uint32_t input_id, uint32_t padding_id,
                                  uint32_t* output_id, uint32_t flags) {
   // Validate arguments.
-  assert(subgraph);
-  assert(subgraph->is_valid_value(input_id));
-  assert(output_id);
+  YNN_RETURN_IF_ERROR(validate_subgraph("static_pad", subgraph));
+  YNN_RETURN_IF_ERROR(
+      validate_input_tensor("static_pad", subgraph, "input_id", input_id));
+  YNN_RETURN_IF_ERROR(validate_input_tensor(
+      "static_pad", subgraph, "padding_id", padding_id, /*optional=*/true));
+  YNN_RETURN_IF_ERROR(
+      validate_output_tensor("static_pad", subgraph, "output_id", output_id));
   const ynn_value& input = subgraph->value(input_id);
 
   ynn_node::static_pad op;

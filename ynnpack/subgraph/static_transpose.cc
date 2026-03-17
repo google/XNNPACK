@@ -12,6 +12,7 @@
 #include <utility>
 #include <vector>
 
+#include "ynnpack/base/log.h"
 #include "ynnpack/base/type.h"
 #include "ynnpack/include/ynnpack.h"
 #include "ynnpack/kernels/transpose/transpose.h"
@@ -110,8 +111,11 @@ ynn_status define_static_transpose(ynn_subgraph_t subgraph,
                                    uint32_t input_id, uint32_t* output_id,
                                    bool alias) {
   // Validate arguments.
-  assert(subgraph);
-  assert(subgraph->is_valid_value(input_id));
+  YNN_RETURN_IF_ERROR(validate_subgraph("static_transpose", subgraph));
+  YNN_RETURN_IF_ERROR(validate_input_tensor("static_transpose", subgraph,
+                                            "input_id", input_id));
+  YNN_RETURN_IF_ERROR(validate_output_tensor("static_transpose", subgraph,
+                                             "output_id", output_id));
   const ynn_value& input = subgraph->value(input_id);
 
   ynn_value& output = subgraph->get_output_value(output_id, input);
@@ -138,7 +142,7 @@ ynn_status define_static_transpose(ynn_subgraph_t subgraph,
     // extent that is not aligned to `elem_count`.
     node.checks.push_back(ynn_node::check{
         output.extents[0] % elem_count == 0,
-        {"In node 'static_transpose', dimension 0 extent (", output.extents[0],
+        {"For node 'static_transpose', dimension 0 extent (", output.extents[0],
          ") of ", ynn_node::output_idx{0},
          " is not aligned to an instance of type ", to_string(output.type)},
     });
@@ -208,9 +212,18 @@ ynn_status ynn_define_static_transpose(ynn_subgraph_t subgraph, size_t rank,
                                        const int32_t* permutation,
                                        uint32_t input_id, uint32_t* output_id,
                                        uint32_t flags) {
+  // Validate arguments.
+  YNN_RETURN_IF_ERROR(validate_subgraph("static_transpose", subgraph));
+  YNN_RETURN_IF_ERROR(validate_input_tensor("static_transpose", subgraph,
+                                            "input_id", input_id));
+  YNN_RETURN_IF_ERROR(validate_output_tensor("static_transpose", subgraph,
+                                             "output_id", output_id));
+  if (permutation == nullptr && rank > 0) {
+    YNN_LOG_ERROR() << "permutation must be non-null for rank > 0";
+    return ynn_status_invalid_parameter;
+  }
+
   // Rewrite the permutation to be slinky dimensions.
-  assert(subgraph);
-  assert(subgraph->is_valid_value(input_id));
   const ynn_value& input = subgraph->value(input_id);
   std::vector<int32_t> op_permutation(rank);
   for (size_t i = 0; i < rank; ++i) {
