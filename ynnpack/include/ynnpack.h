@@ -63,6 +63,7 @@ enum ynn_type {
   ynn_type_invalid = -1,
 
   ynn_type_int2,
+  ynn_type_uint2,
   ynn_type_int4,
   ynn_type_uint4,
   ynn_type_int8,

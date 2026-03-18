@@ -155,6 +155,14 @@ YNN_ALWAYS_INLINE std::tuple<u8x4, u8x4> interleave(
   u8x4 t1{((x0.v & m1) >> 4) | (x1.v & m1)};
   return interleave(std::integral_constant<size_t, 8>{}, t0, t1);
 }
+YNN_ALWAYS_INLINE std::tuple<u8x4, u8x4> interleave(
+    std::integral_constant<size_t, 2>, u8x4 x0, u8x4 x1) {
+  constexpr uint32_t m0 = 0x33333333;
+  constexpr uint32_t m1 = 0xCCCCCCCC;
+  u8x4 t0{(x0.v & m0) | ((x1.v & m0) << 2)};
+  u8x4 t1{((x0.v & m1) >> 2) | (x1.v & m1)};
+  return interleave(std::integral_constant<size_t, 4>{}, t0, t1);
+}
 
 YNN_ALWAYS_INLINE std::tuple<u8x8, u8x8> interleave(
     std::integral_constant<size_t, 32>, u8x8 x0, u8x8 x1) {
