@@ -4,8 +4,8 @@
 // LICENSE file in the root directory of this source tree.
 //
 
-#ifndef __XNNPACK_SRC_XNNPACK_SIMD_S32_NEON_H_
-#define __XNNPACK_SRC_XNNPACK_SIMD_S32_NEON_H_
+#ifndef XNNPACK_SRC_XNNPACK_SIMD_S32_NEON_H_
+#define XNNPACK_SRC_XNNPACK_SIMD_S32_NEON_H_
 
 #include <arm_neon.h>
 #include <assert.h>
@@ -71,23 +71,27 @@ xnn_load_tail_s32(const int32_t* input, size_t num_elements) XNN_OOB_READS {
 }
 
 // TODO: Use direct load of 1,2 or 3 int32_t
-// Consider clearing pad values to 0
 static XNN_INLINE xnn_simd_s32_t xnn_load_tail_safe_s32(const int32_t* input,
                                                         size_t num_elements) {
   assert(num_elements <= xnn_simd_size_s32);
 
-  XNN_ALIGN(16) int32_t padded[4];
+  XNN_ALIGN(16) int32_t padded[4] = {0, 0, 0, 0};
   int32_t* dst = padded;
   switch (num_elements) {
     case 4:
       *dst++ = *input++;
+      XNN_FALLTHROUGH
     case 3:
       *dst++ = *input++;
+      XNN_FALLTHROUGH
     case 2:
       *dst++ = *input++;
+      XNN_FALLTHROUGH
     case 1:
       *dst++ = *input++;
-    default: ;
+      XNN_FALLTHROUGH
+    default:
+      break;
   }
   return vld1q_s32(padded);
 }
@@ -114,4 +118,4 @@ static XNN_INLINE float32x4_t xnn_cvt_f32_s32(xnn_simd_s32_t a) {
   return vcvtq_f32_s32(a);
 }
 
-#endif  // __XNNPACK_SRC_XNNPACK_SIMD_S32_NEON_H_
+#endif  // XNNPACK_SRC_XNNPACK_SIMD_S32_NEON_H_

@@ -3,8 +3,8 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#ifndef THIRD_PARTY_XNNPACK_TEST_SUBGRAPH_STENCIL_H_
-#define THIRD_PARTY_XNNPACK_TEST_SUBGRAPH_STENCIL_H_
+#ifndef XNNPACK_TEST_SUBGRAPH_STENCIL_H_
+#define XNNPACK_TEST_SUBGRAPH_STENCIL_H_
 
 #include <algorithm>
 #include <cassert>
@@ -48,12 +48,12 @@ struct StencilParams {
     }
   }
 
-  size_t input_extent(size_t output_extent, bool same_padding = false) const {
+  size_t input_extent(size_t output_extent, bool same_padding = false, size_t adjustment = 0) const {
     if (same_padding) {
       return output_extent * stride;
     } else {
       assert(output_extent > 0);
-      size_t unpadded = stride * (output_extent - 1) + dilated_kernel_extent();
+      size_t unpadded = stride * (output_extent - 1) + adjustment + dilated_kernel_extent();
       return std::max<size_t>(1, doz(unpadded, padding()));
     }
   }
@@ -133,4 +133,4 @@ Tensor<T> make_stencil_dim(Tensor<T> x, size_t dim,
 
 }  // namespace xnnpack
 
-#endif  // THIRD_PARTY_XNNPACK_TEST_SUBGRAPH_STENCIL_H_
+#endif  // XNNPACK_TEST_SUBGRAPH_STENCIL_H_

@@ -9,13 +9,16 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
 
 #include <immintrin.h>
 
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/intrinsics-polyfill.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/microparams.h"
 #include "src/xnnpack/reduce.h"
-#include "src/xnnpack/unaligned.h"
 
 
 void xnn_f16_f32acc_rsum_ukernel__avx512skx_u16(
@@ -42,7 +45,7 @@ void xnn_f16_f32acc_rsum_ukernel__avx512skx_u16(
     assert(batch <= 15 * sizeof(uint16_t));
 
     // Prepare mask for valid elements (depends on batch).
-    batch >>= XNN_LOG2_SIZEOF_HALF;
+    batch >>= XNN_LOG2_SIZEOF_FLOAT16;
     const __mmask16 vmask = _cvtu32_mask16((uint32_t) ((UINT32_C(1) << batch) - UINT32_C(1)));
 
     const __m512 vt = _mm512_cvtph_ps(_mm256_maskz_loadu_epi16(vmask, i));

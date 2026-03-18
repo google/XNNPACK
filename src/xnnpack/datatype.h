@@ -3,7 +3,8 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#pragma once
+#ifndef XNNPACK_SRC_XNNPACK_DATATYPE_H_
+#define XNNPACK_SRC_XNNPACK_DATATYPE_H_
 
 #include <assert.h>
 #include <stddef.h>
@@ -108,6 +109,9 @@ xnn_datatype xnn_datatype_of() {
     return xnn_datatype_qcint8;
   } else if (std::is_same<T, xnnpack::quantized<int32_t>>::value) {
     return xnn_datatype_qint32;
+  } else if (std::is_same<
+                 T, xnnpack::quantized<int32_t, xnnpack::channelwise>>::value) {
+    return xnn_datatype_qcint32;
   } else if (std::is_same<T, xnn_float16>::value) {
     return xnn_datatype_fp16;
   } else if (std::is_same<T, xnn_bfloat16>::value) {
@@ -121,3 +125,5 @@ xnn_datatype xnn_datatype_of() {
   }
 }
 #endif
+
+#endif  // XNNPACK_SRC_XNNPACK_DATATYPE_H_

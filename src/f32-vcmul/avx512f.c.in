@@ -8,6 +8,8 @@ $assert BATCH_TILE % SIMD_SIZE == 0
 $assert BATCH_TILE >= SIMD_SIZE
 $SIMD_TILE = BATCH_TILE // SIMD_SIZE
 #include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
 
 $if AVX >= 1:
   #include <immintrin.h>
@@ -15,6 +17,7 @@ $else:
   #include <xmmintrin.h>
 
 #include "src/xnnpack/common.h"
+#include "src/xnnpack/microparams.h"
 #include "src/xnnpack/vbinary.h"
 
 $ISA = {512: "avx512f", 1: "fma3", 0: "sse"}[AVX]

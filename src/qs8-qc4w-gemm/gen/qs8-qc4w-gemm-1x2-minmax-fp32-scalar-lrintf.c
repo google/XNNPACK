@@ -10,9 +10,14 @@
 
 #include <assert.h>
 #include <math.h>
+#include <stddef.h>
+#include <stdint.h>
 
+#include "src/xnnpack/common.h"
 #include "src/xnnpack/gemm.h"
 #include "src/xnnpack/math.h"
+#include "src/xnnpack/microparams.h"
+
 #include "src/xnnpack/unaligned.h"
 
 
@@ -26,7 +31,7 @@ void xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_1x2__scalar_lrintf(
     int8_t* restrict c,
     size_t cm_stride,
     size_t cn_stride,
-    const union xnn_qs8_qc8w_conv_minmax_params* restrict params)
+    const union xnn_qs8_qc8w_conv_minmax_params* restrict params) XNN_DISABLE_UBSAN
 {
   assert(mr != 0);
   assert(mr <= 1);
@@ -49,25 +54,24 @@ void xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_1x2__scalar_lrintf(
     w = (const int32_t*) w + 2;
 
     size_t k = kc;
-    do {
-      const int32_t va0 = (int32_t) *a0++;
-      const int32_t va1 = (int32_t) *a0++;
+    for (; k >= 2 * sizeof(uint8_t); k -= 2 * sizeof(uint8_t)) {
+      const int32_t va0c0 = (int32_t) a0[0];
+      const int32_t va0c1 = (int32_t) a0[1];
+      a0 += 2;
 
       const uint8_t vbi0 = ((const uint8_t*) w)[0];
-      w = (const uint8_t*) w + 1;
+      const uint8_t vbi1 = ((const uint8_t*) w)[1];
+      w = (const uint8_t*) w + 2;
       const int32_t vb0c0 = (int32_t) (int8_t) (vbi0 << 4);
-      const int32_t vb1c0 = (int32_t) (int8_t) (vbi0 & 0xF0);
-
-      const uint8_t vbi1 = ((const uint8_t*) w)[0];
-      w = (const uint8_t*) w + 1;
-      const int32_t vb0c1 = (int32_t) (int8_t) (vbi1 << 4);
+      const int32_t vb0c1 = (int32_t) (int8_t) (vbi0 & 0xF0);
+      const int32_t vb1c0 = (int32_t) (int8_t) (vbi1 << 4);
       const int32_t vb1c1 = (int32_t) (int8_t) (vbi1 & 0xF0);
 
-      vacc0x0 += va0 * vb0c0 + va1 * vb0c1;
-      vacc0x1 += va0 * vb1c0 + va1 * vb1c1;
-
-      k -= 2 * sizeof(int8_t);
-    } while (k != 0);
+      vacc0x0 += va0c0 * vb0c0;
+      vacc0x1 += va0c0 * vb1c0;
+      vacc0x0 += va0c1 * vb0c1;
+      vacc0x1 += va0c1 * vb1c1;
+    }
 
     float vfpacc0x0 = (float) math_asr_s32(vacc0x0, 4);
     float vfpacc0x1 = (float) math_asr_s32(vacc0x1, 4);
@@ -84,8 +88,8 @@ void xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_1x2__scalar_lrintf(
     vfpacc0x0 = math_min_f32(vfpacc0x0, voutput_max_less_zero_point);
     vfpacc0x1 = math_min_f32(vfpacc0x1, voutput_max_less_zero_point);
 
-    const int32_t vrndacc0x0 = (int32_t) lrintf(vfpacc0x0);
-    const int32_t vrndacc0x1 = (int32_t) lrintf(vfpacc0x1);
+    const int32_t vrndacc0x0 = math_round_f32_to_s32(vfpacc0x0);
+    const int32_t vrndacc0x1 = math_round_f32_to_s32(vfpacc0x1);
 
     int32_t vout0x0 = vrndacc0x0 + voutput_zero_point;
     int32_t vout0x1 = vrndacc0x1 + voutput_zero_point;
@@ -108,4 +112,3 @@ void xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_1x2__scalar_lrintf(
     }
   } while (nc != 0);
 }
-

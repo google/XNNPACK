@@ -1,8 +1,9 @@
 name: Build and update caches
 on:
   push:
-    branches:
-      - master
+    branches: [ master ]
+    paths-ignore:
+      - 'docker/**'
   workflow_dispatch:
 
 jobs:

@@ -1,7 +1,7 @@
 # Copyright (c) Facebook, Inc. and its affiliates.
 # All rights reserved.
 #
-# Copyright 2019 Google LLC
+# Copyright 2019-2025 Google LLC
 #
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
@@ -21,11 +21,12 @@ IF(XNNPACK_BUILD_LIBRARY)
       softmax
       unary)
   FOREACH(BENCH ${LIBRARY_OPERATOR_BENCHMARKS})
-    ADD_EXECUTABLE(${BENCH}-bench ${BENCH}.cc)
-    TARGET_LINK_LIBRARIES(${BENCH}-bench PRIVATE
-      bench-utils
+    ADD_EXECUTABLE(operator-${BENCH}-bench ${BENCH}.cc)
+    TARGET_LINK_LIBRARIES(operator-${BENCH}-bench PRIVATE
+      xnnpack-bench-utils
       benchmark::benchmark
-      datatype
+      xnnpack-datatype
+      xnnpack-test
       XNNPACK
     )
   ENDFOREACH()

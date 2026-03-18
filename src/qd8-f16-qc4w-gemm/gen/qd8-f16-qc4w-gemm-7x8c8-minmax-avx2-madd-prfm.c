@@ -9,14 +9,18 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
 
 #include <immintrin.h>
 
+#include "src/xnnpack/common.h"
 #include "src/xnnpack/gemm.h"
 #include "src/xnnpack/intrinsics-polyfill.h"
 #include "src/xnnpack/math.h"
-#include "src/xnnpack/unaligned.h"
+#include "src/xnnpack/microparams.h"
 #include "src/xnnpack/prefetch.h"
+#include "src/xnnpack/unaligned.h"
 
 
 void xnn_qd8_f16_qc4w_gemm_minmax_ukernel_7x8c8__avx2_madd_prfm(
@@ -145,12 +149,12 @@ void xnn_qd8_f16_qc4w_gemm_minmax_ukernel_7x8c8__avx2_madd_prfm(
 
       const __m256i vbb01234567x01234567 = _mm256_load_si256(w);
       const __m256i vbb89ABCDEFx01234567 = _mm256_load_si256((const __m256i*) ((const int8_t*) w + 32));
-      const __m256i vbs01234567x0123 = _mm256_srli_epi32(vbb01234567x01234567, 4);
-      const __m256i vbs89ABCDEFx0123 = _mm256_srli_epi32(vbb89ABCDEFx01234567, 4);
+      const __m256i vbs01234567x4567 = _mm256_srli_epi32(vbb01234567x01234567, 4);
+      const __m256i vbs89ABCDEFx4567 = _mm256_srli_epi32(vbb89ABCDEFx01234567, 4);
       const __m256i vb01234567x0123 = _mm256_and_si256(vbb01234567x01234567, vmask);
       const __m256i vb89ABCDEFx0123 = _mm256_and_si256(vbb89ABCDEFx01234567, vmask);
-      const __m256i vb01234567x4567 = _mm256_and_si256(vbs01234567x0123, vmask);
-      const __m256i vb89ABCDEFx4567 = _mm256_and_si256(vbs89ABCDEFx0123, vmask);
+      const __m256i vb01234567x4567 = _mm256_and_si256(vbs01234567x4567, vmask);
+      const __m256i vb89ABCDEFx4567 = _mm256_and_si256(vbs89ABCDEFx4567, vmask);
 
       vacc0x0123 = _mm256_dpbusd_epi32_madd(vacc0x0123, va0x01234567, vb01234567x0123);
       vacc0x4567 = _mm256_dpbusd_epi32_madd(vacc0x4567, va0x01234567, vb89ABCDEFx0123);

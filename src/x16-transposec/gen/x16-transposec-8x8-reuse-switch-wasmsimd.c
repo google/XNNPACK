@@ -3,7 +3,7 @@
 //   Template: src/x32-transposec/wasmsimd.c.in
 //   Generator: tools/xngen
 //
-// Copyright 2021 Google LLC
+// Copyright 2021-2025 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
@@ -282,23 +282,30 @@ void xnn_x16_transposec_ukernel__8x8_reuse_switch_wasmsimd(
           case 7:
             wasm_v128_store16_lane(oN, v0_7, 0);
             oN = (uint16_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 6:
             wasm_v128_store16_lane(oN, v0_6, 0);
             oN = (uint16_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 5:
             wasm_v128_store16_lane(oN, v0_5, 0);
             oN = (uint16_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 4:
             wasm_v128_store16_lane(oN, v0_4, 0);
             oN = (uint16_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 3:
             wasm_v128_store16_lane(oN, v0_3, 0);
             oN = (uint16_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 2:
             wasm_v128_store16_lane(oN, v0_2, 0);
             oN = (uint16_t*) ((uintptr_t) oN + minus_output_stride);
+            XNN_FALLTHROUGH
           case 1:
             wasm_v128_store16_lane(oN, v0_1, 0);
+            XNN_FALLTHROUGH
           case 0:
             wasm_v128_store16_lane(o, v0_0, 0);
             break;

@@ -1,9 +1,9 @@
-"""
-Microkernel filenames lists for avx512f.
-
-Auto-generated file. Do not edit!
-  Generator: tools/update-microkernels.py
-"""
+#
+# Microkernel filenames lists for avx512f.
+#
+# Auto-generated file. Do not edit!
+#   Generator: tools/update-microkernels.py
+#
 
 PROD_AVX512F_MICROKERNEL_SRCS = [
     "src/f32-avgpool/gen/f32-avgpool-9p-minmax-avx512f-u16.c",
@@ -20,13 +20,15 @@ PROD_AVX512F_MICROKERNEL_SRCS = [
     "src/f32-igemm/gen/f32-igemm-7x16-minmax-avx512f-broadcast.c",
     "src/f32-igemm/gen/f32-igemm-7x32-minmax-avx512f-broadcast.c",
     "src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-avx512f-rr2-p5-u64-acc2.c",
-    "src/f32-rdminmax/gen/f32-rdmax-2p2x-avx512f-c32.c",
-    "src/f32-rdminmax/gen/f32-rdmin-2p2x-avx512f-c32.c",
-    "src/f32-rdsum/gen/f32-rdsum-7p7x-minmax-avx512f-c64.c",
+    "src/f32-rdminmax/gen/f32-rdmax-2p2x-avx512f-u32.c",
+    "src/f32-rdminmax/gen/f32-rdmin-2p2x-avx512f-u32.c",
+    "src/f32-rdsum/gen/f32-rdsum-7p7x-minmax-avx512f-u64.c",
+    "src/f32-rdsum2/gen/f32-rdsum2-7p7x-minmax-avx512f.c",
     "src/f32-rminmax/gen/f32-rmax-avx512f-u64-acc4.c",
     "src/f32-rminmax/gen/f32-rmin-avx512f-u64-acc4.c",
     "src/f32-rminmax/gen/f32-rminmax-avx512f-u64-acc4.c",
     "src/f32-rsum/gen/f32-rsum-avx512f-u32-acc2.c",
+    "src/f32-rsum2/gen/f32-rsum2-avx512f-u16.c",
     "src/f32-vapproxgelu/gen/f32-vapproxgelu-avx512f-rational-12-10-div.c",
     "src/f32-vbinary/gen/f32-vadd-avx512f-u32.c",
     "src/f32-vbinary/gen/f32-vaddc-avx512f-u32.c",
@@ -59,7 +61,6 @@ PROD_AVX512F_MICROKERNEL_SRCS = [
     "src/f32-vhswish/gen/f32-vhswish-avx512f.c",
     "src/f32-vlog/gen/f32-vlog-avx512f-rational-3-3-div.c",
     "src/f32-vlrelu/gen/f32-vlrelu-avx512f-u16.c",
-    "src/f32-vrelu/gen/f32-vrelu-avx512f.c",
     "src/f32-vrnd/gen/f32-vrndd-avx512f-u16.c",
     "src/f32-vrnd/gen/f32-vrndne-avx512f-u16.c",
     "src/f32-vrnd/gen/f32-vrndu-avx512f-u16.c",
@@ -77,6 +78,7 @@ PROD_AVX512F_MICROKERNEL_SRCS = [
     "src/x32-packw/gen/x32-packw-x16-gemm-goi-avx512f-u4-prfm.c",
     "src/x32-packw/gen/x32-packw-x32-gemm-gio-avx512f-u8.c",
     "src/x32-packw/gen/x32-packw-x32-gemm-goi-avx512f-u4-prfm.c",
+    "src/x32-packw/gen/x32-packw-x32c2-gemm-goi-avx512f-u4-prfm.c",
 ]
 
 NON_PROD_AVX512F_MICROKERNEL_SRCS = [
@@ -130,12 +132,6 @@ NON_PROD_AVX512F_MICROKERNEL_SRCS = [
     "src/f32-gemm/gen/f32-gemm-16x16-minmax-avx512f-broadcast.c",
     "src/f32-gemm/gen/f32-gemm-16x32-minmax-avx512f-broadcast.c",
     "src/f32-gemm/gen/f32-gemm-16x64-minmax-avx512f-broadcast.c",
-    "src/f32-gemminc/gen/f32-gemminc-1x16-minmax-avx512f-broadcast.c",
-    "src/f32-gemminc/gen/f32-gemminc-4x16-minmax-avx512f-broadcast.c",
-    "src/f32-gemminc/gen/f32-gemminc-5x16-minmax-avx512f-broadcast.c",
-    "src/f32-gemminc/gen/f32-gemminc-6x16-minmax-avx512f-broadcast.c",
-    "src/f32-gemminc/gen/f32-gemminc-7x16-minmax-avx512f-broadcast.c",
-    "src/f32-gemminc/gen/f32-gemminc-8x16-minmax-avx512f-broadcast.c",
     "src/f32-igemm/gen/f32-igemm-4x16-minmax-avx512f-broadcast.c",
     "src/f32-igemm/gen/f32-igemm-4x32-minmax-avx512f-broadcast.c",
     "src/f32-igemm/gen/f32-igemm-5x16-minmax-avx512f-broadcast.c",
@@ -181,9 +177,9 @@ NON_PROD_AVX512F_MICROKERNEL_SRCS = [
     "src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-avx512f-rr2-p5-u16.c",
     "src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-avx512f-rr2-p5-u32-acc2.c",
     "src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-avx512f-rr2-p5-u64-acc4.c",
-    "src/f32-rdsum/gen/f32-rdsum-7p7x-minmax-avx512f-c16.c",
-    "src/f32-rdsum/gen/f32-rdsum-7p7x-minmax-avx512f-c32.c",
-    "src/f32-rdsum/gen/f32-rdsum-7p7x-minmax-avx512f-c128.c",
+    "src/f32-rdsum/gen/f32-rdsum-7p7x-minmax-avx512f-u16.c",
+    "src/f32-rdsum/gen/f32-rdsum-7p7x-minmax-avx512f-u32.c",
+    "src/f32-rdsum/gen/f32-rdsum-7p7x-minmax-avx512f-u128.c",
     "src/f32-rminmax/gen/f32-rmax-avx512f-u16.c",
     "src/f32-rminmax/gen/f32-rmax-avx512f-u32-acc2.c",
     "src/f32-rminmax/gen/f32-rmax-avx512f-u48-acc3.c",
@@ -280,6 +276,7 @@ NON_PROD_AVX512F_MICROKERNEL_SRCS = [
     "src/x32-packw/gen/x32-packw-x32-gemm-gio-avx512f-u1.c",
     "src/x32-packw/gen/x32-packw-x32-gemm-gio-avx512f-u8-prfm.c",
     "src/x32-packw/gen/x32-packw-x32-gemm-goi-avx512f-u4.c",
+    "src/x32-packw/gen/x32-packw-x32c2-gemm-goi-avx512f-u4.c",
 ]
 
 ALL_AVX512F_MICROKERNEL_SRCS = PROD_AVX512F_MICROKERNEL_SRCS + NON_PROD_AVX512F_MICROKERNEL_SRCS

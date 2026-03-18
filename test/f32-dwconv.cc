@@ -138,7 +138,6 @@ std::vector<DWConvTestParams> CreateTests(
   return tests;
 }
 
-}  // namespace
 
 #define XNN_UKERNEL(arch_flags, ukernel, c_block, is_pipelined, cr, kr, datatype, weights_type, params_type, init_params)\
 INSTANTIATE_TEST_SUITE_P(                                                                                                \
@@ -152,5 +151,7 @@ INSTANTIATE_TEST_SUITE_P(                                                       
     [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {                                                      \
       return info.param.test_name;                                                                                       \
     });
-#include "src/f32-dwconv/f32-dwconv.h"
+#include "src/f32-dwconv/f32-dwconv.inc"
 #undef XNN_UKERNEL
+
+}  // namespace

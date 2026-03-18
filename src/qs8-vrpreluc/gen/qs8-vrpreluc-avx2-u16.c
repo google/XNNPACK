@@ -34,10 +34,15 @@
 
 
 #include <assert.h>
-#include <immintrin.h>
+#include <stddef.h>
+#include <stdint.h>
+
 #include <emmintrin.h>
+
+#include "src/xnnpack/common.h"
 #include "src/xnnpack/intrinsics-polyfill.h"
 #include "src/xnnpack/math.h"
+#include "src/xnnpack/microparams.h"
 #include "src/xnnpack/vbinary.h"
 
 void xnn_qs8_vrpreluc_ukernel__avx2_u16(

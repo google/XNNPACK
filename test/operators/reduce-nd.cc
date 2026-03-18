@@ -55,14 +55,12 @@ class ReduceOperatorTester {
 
   ReduceOperatorTester& reduction_axes(
       std::initializer_list<int64_t> reduction_axes) {
-    assert(reduction_axes.size() <= XNN_MAX_TENSOR_DIMS);
     this->reduction_axes_ = std::vector<int64_t>(reduction_axes);
     return *this;
   }
 
   ReduceOperatorTester& reduction_axes(
       const std::vector<int64_t> reduction_axes) {
-    assert(reduction_axes.size() <= XNN_MAX_TENSOR_DIMS);
     this->reduction_axes_ = reduction_axes;
     return *this;
   }
@@ -73,17 +71,12 @@ class ReduceOperatorTester {
 
   size_t num_reduction_axes() const { return this->reduction_axes_.size(); }
 
-  ReduceOperatorTester& multithreaded(size_t multithreaded) {
-    this->multithreaded_ = multithreaded;
+  ReduceOperatorTester& threadpool(pthreadpool_t threadpool) {
+    this->threadpool_ = threadpool;
     return *this;
   }
 
-  size_t multithreaded() const { return this->multithreaded_; }
-
-  size_t num_threads() const {
-    // Do not spin up excessive number of threads for tests.
-    return multithreaded() ? 5 : 1;
-  }
+  pthreadpool_t threadpool() const { return this->threadpool_; }
 
   ReduceOperatorTester& iterations(size_t iterations) {
     this->iterations_ = iterations;
@@ -260,16 +253,7 @@ class ReduceOperatorTester {
         num_output_elements);
 
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      std::unique_ptr<pthreadpool, decltype(&pthreadpool_destroy)>
-          auto_threadpool{nullptr, pthreadpool_destroy};
-      if (multithreaded()) {
-        const pthreadpool_t threadpool = pthreadpool_create(num_threads());
-        if (pthreadpool_get_threads_count(threadpool) <= 1) {
-          GTEST_SKIP();
-        } else {
-          auto_threadpool.reset(threadpool);
-        }
-      }
+      pthreadpool_t threadpool = this->threadpool();
 
       std::generate_n(input.begin(), num_input_elements(),
                       [&]() { return dist(rng); });
@@ -290,44 +274,52 @@ class ReduceOperatorTester {
       const int32_t num_reduced_elements =
           num_input_elements() / num_output_elements;
       const float reduce_scale =
-          operation() == xnn_reduce_mean
+          (operation() == xnn_reduce_mean ||
+           operation() == xnn_reduce_mean_squared)
               ? static_cast<double>(1.0f) / num_reduced_elements
               : 1;
       const QuantizationConfig q = Config::GenerateQuantization(rng, dist);
 
       // Compute reference results.
+      assert(input_strides[5] == 1 || input_dims[5] == 1);
       for (size_t i = 0; i < input_dims[0]; i++) {
         for (size_t j = 0; j < input_dims[1]; j++) {
           for (size_t k = 0; k < input_dims[2]; k++) {
             for (size_t l = 0; l < input_dims[3]; l++) {
               for (size_t m = 0; m < input_dims[4]; m++) {
+                typename Config::AccumulatorType* acc_m =
+                    &accumulator[i * output_strides[0] + j * output_strides[1] +
+                                 k * output_strides[2] + l * output_strides[3] +
+                                 m * output_strides[4]];
+                const StorageType* input_m =
+                    &input[i * input_strides[0] + j * input_strides[1] +
+                           k * input_strides[2] + l * input_strides[3] +
+                           m * input_strides[4]];
                 for (size_t n = 0; n < input_dims[5]; n++) {
-                  size_t input_idx =
-                      i * input_strides[0] + j * input_strides[1] +
-                      k * input_strides[2] + l * input_strides[3] +
-                      m * input_strides[4] + n * input_strides[5];
-                  size_t output_idx =
-                      i * output_strides[0] + j * output_strides[1] +
-                      k * output_strides[2] + l * output_strides[3] +
-                      m * output_strides[4] + n * output_strides[5];
+                  size_t output_idx = n * output_strides[5];
                   switch (operation()) {
                     case xnn_reduce_mean:
                     case xnn_reduce_sum:
-                      accumulator[output_idx] +=
+                      acc_m[output_idx] +=
                           static_cast<typename Config::AccumulatorType>(
-                              input[input_idx]);
+                              input_m[n]);
                       break;
+                    case xnn_reduce_mean_squared:
+                    case xnn_reduce_sum_squared: {
+                      typename Config::AccumulatorType x = input_m[n];
+                      acc_m[output_idx] += x * x;
+                    } break;
                     case xnn_reduce_max:
-                      accumulator[output_idx] = std::max(
-                          accumulator[output_idx],
+                      acc_m[output_idx] = std::max(
+                          acc_m[output_idx],
                           static_cast<typename Config::AccumulatorType>(
-                              input[input_idx]));
+                              input_m[n]));
                       break;
                     case xnn_reduce_min:
-                      accumulator[output_idx] = std::min(
-                          accumulator[output_idx],
+                      acc_m[output_idx] = std::min(
+                          acc_m[output_idx],
                           static_cast<typename Config::AccumulatorType>(
-                              input[input_idx]));
+                              input_m[n]));
                       break;
                     default:
                       XNN_UNREACHABLE;
@@ -389,10 +381,10 @@ class ReduceOperatorTester {
       }
 
       ASSERT_EQ(xnn_status_success,
-                xnn_reshape_reduce_nd(
-                    reduce_op, num_reduction_axes(), reduction_axes().data(),
-                    num_input_dims(), input_shape().data(), workspace_size_ptr,
-                    auto_threadpool.get()));
+                xnn_reshape_reduce_nd(reduce_op, num_reduction_axes(),
+                                      reduction_axes().data(), num_input_dims(),
+                                      input_shape().data(), workspace_size_ptr,
+                                      threadpool));
 
       std::vector<char, AlignedAllocator<char, XNN_ALLOCATION_ALIGNMENT>>
           workspace;
@@ -407,30 +399,12 @@ class ReduceOperatorTester {
                 xnn_setup_reduce_nd(reduce_op, workspace_ptr, input.data(),
                                     output.data()));
 
-      ASSERT_EQ(xnn_status_success,
-                xnn_run_operator(reduce_op, auto_threadpool.get()));
+      ASSERT_EQ(xnn_status_success, xnn_run_operator(reduce_op, threadpool));
 
       // Verify results.
-      for (size_t i = 0; i < output_dims[0]; i++) {
-        for (size_t j = 0; j < output_dims[1]; j++) {
-          for (size_t k = 0; k < output_dims[2]; k++) {
-            for (size_t l = 0; l < output_dims[3]; l++) {
-              for (size_t m = 0; m < output_dims[4]; m++) {
-                for (size_t n = 0; n < output_dims[5]; n++) {
-                  const size_t index =
-                      i * output_strides[0] + j * output_strides[1] +
-                      k * output_strides[2] + l * output_strides[3] +
-                      m * output_strides[4] + n * output_strides[5];
-                  ASSERT_NEAR(
-                      output[index], output_ref[index],
-                      Config::GetTolerance() * std::abs(output_ref[index]))
-                      << "(i, j, k, l, m, n) = (" << i << ", " << j << ", " << k
-                      << ", " << l << ", " << m << ", " << n << ")";
-                }
-              }
-            }
-          }
-        }
+      for (size_t i = 0; i < num_output_elements; i++) {
+        ASSERT_NEAR(output[i], output_ref[i],
+                    Config::GetTolerance() * std::abs(output_ref[i]));
       }
     }
   }
@@ -438,7 +412,7 @@ class ReduceOperatorTester {
  private:
   std::vector<size_t> input_shape_;
   std::vector<int64_t> reduction_axes_;
-  bool multithreaded_{false};
+  pthreadpool_t threadpool_{nullptr};
   size_t iterations_{3};
   enum xnn_reduce_operator reduce_operator_;
 };
@@ -473,8 +447,8 @@ struct TestParam {
   enum xnn_datatype datatype;
   int dims;
   int reduction_axes;
-  bool multithreaded;
-  bool use_neg_axes;
+  bool multithreaded = false;
+  bool use_neg_axes = false;
 
   static std::string GetName(const testing::TestParamInfo<TestParam>& info) {
     std::stringstream sstr;
@@ -486,11 +460,17 @@ struct TestParam {
       case xnn_reduce_mean:
         sstr << "mean";
         break;
+      case xnn_reduce_mean_squared:
+        sstr << "mean_squared";
+        break;
       case xnn_reduce_min:
         sstr << "min";
         break;
       case xnn_reduce_sum:
         sstr << "sum";
+        break;
+      case xnn_reduce_sum_squared:
+        sstr << "sum_squared";
         break;
       case xnn_reduce_invalid:
         sstr << "invalid";
@@ -538,20 +518,41 @@ class ReduceNDTest : public testing::TestWithParam<TestParam> {
     std::vector<int64_t> reduction_axes;
     for (int i = 0; i < param.dims; ++i) {
       if (reduce_dims[i]) {
-        if (param.use_neg_axes) {
-          reduction_axes.push_back(i - param.dims);
-        } else {
-          reduction_axes.push_back(i);
-        }
+        reduction_axes.push_back(i);
+      }
+    }
+
+    // We support negative axes, and we support redundant axes. We can test both
+    // at the same time by just specifying both expressions of the same axis.
+    for (int i = 0;
+         i < param.dims && reduction_axes.size() < XNN_MAX_TENSOR_DIMS; ++i) {
+      if (reduce_dims[i]) {
+        reduction_axes.push_back(i - param.dims);
       }
     }
     return reduction_axes;
   }
 
+  static void SetUpTestSuite() {
+    ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+    threadpool_ = pthreadpool_create(5);
+  }
+
+  static void TearDownTestSuite() {
+    pthreadpool_destroy(threadpool_);
+    threadpool_ = nullptr;
+  }
+
+  static pthreadpool_t threadpool() { return threadpool_; }
+
  protected:
   static constexpr std::array<size_t, 6> reference_shape{kDim1, kDim2, kDim3,
                                                          kDim4, kDim5, kDim6};
+
+  static pthreadpool_t threadpool_;
 };
+
+pthreadpool_t ReduceNDTest::threadpool_ = nullptr;
 
 // If you are confused by this, read https://stackoverflow.com/a/28846608
 // TLDR: This is needed before C++17.
@@ -567,7 +568,8 @@ TEST_P(ReduceNDTest, reduce) {
   ReduceOperatorTester tester;
   tester.operation(param.operation)
       .input_shape(input_shape)
-      .reduction_axes(reduction_axes);
+      .reduction_axes(reduction_axes)
+      .threadpool(param.multithreaded ? ReduceNDTest::threadpool() : nullptr);
   switch (param.datatype) {
     case xnn_datatype_fp16:
       tester.Test<ReduceOperatorTester::F16Config>();
@@ -589,26 +591,29 @@ TEST_P(ReduceNDTest, reduce) {
 std::vector<TestParam> GenerateTests() {
   std::vector<TestParam> params;
   for (enum xnn_reduce_operator operation :
-       {xnn_reduce_sum, xnn_reduce_mean, xnn_reduce_max, xnn_reduce_min}) {
+       {xnn_reduce_sum, xnn_reduce_sum_squared, xnn_reduce_mean,
+        xnn_reduce_mean_squared, xnn_reduce_max, xnn_reduce_min}) {
     for (enum xnn_datatype datatype :
          {xnn_datatype_fp16, xnn_datatype_fp32, xnn_datatype_qint8,
           xnn_datatype_quint8}) {
-      for (int dims = 1; dims <= 6; ++dims) {
+      if ((datatype == xnn_datatype_qint8 || datatype == xnn_datatype_quint8) &&
+          (operation == xnn_reduce_sum_squared ||
+           operation == xnn_reduce_mean_squared)) {
+        continue;
+      }
+      constexpr int max_dims = 6;
+      for (int dims = 1; dims <= max_dims; ++dims) {
         for (int reduction_axes = 1; reduction_axes < (1 << dims);
              ++reduction_axes) {
-          for (bool use_neg_axes : {false, true}) {
-            for (bool multithreaded : {false, true}) {
-              params.push_back(TestParam{operation, datatype, dims,
-                                         reduction_axes, multithreaded,
-                                         use_neg_axes});
-              if (dims != 6 || reduction_axes != (1 << dims) - 1) {
-                break;  // Only do the multithreaded test when we have 6 dims
-                        // and reduce over all the axes.
-              }
-            }
-          }
+          params.push_back(
+              TestParam{operation, datatype, dims, reduction_axes});
         }
       }
+      // Only do the multithreaded test when we have 6 dims and reduce over all
+      // the axes.
+      params.push_back(TestParam{operation, datatype, /*dims=*/max_dims,
+                                 /*reduction_axes=*/(1 << max_dims) - 1,
+                                 /*multithreaded=*/true});
     }
   }
   return params;

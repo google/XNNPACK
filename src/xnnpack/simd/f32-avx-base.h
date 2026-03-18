@@ -17,8 +17,8 @@
 //   - xnn_sll_f32
 //   - xnn_srl_f32
 
-#ifndef __XNNPACK_SRC_XNNPACK_SIMD_F32_AVX_BASE_H_
-#define __XNNPACK_SRC_XNNPACK_SIMD_F32_AVX_BASE_H_
+#ifndef XNNPACK_SRC_XNNPACK_SIMD_F32_AVX_BASE_H_
+#define XNNPACK_SRC_XNNPACK_SIMD_F32_AVX_BASE_H_
 
 #include <assert.h>
 #include <immintrin.h>
@@ -125,6 +125,11 @@ static XNN_INLINE xnn_simd_f32_t xnn_xor_f32(xnn_simd_f32_t a,
   return _mm256_xor_ps(a, b);
 }
 
+static XNN_INLINE xnn_simd_f32_t xnn_andnot_f32(xnn_simd_f32_t a,
+                                                xnn_simd_f32_t b) {
+  return _mm256_andnot_ps(a, b);
+}
+
 // Special functions.
 #define XNN_SIMD_HAVE_RCP_F32 1
 #define XNN_SIMD_NUM_RCP_ITER_F32 1
@@ -200,4 +205,4 @@ static XNN_INLINE void xnn_store_tail_f32(float* output, xnn_simd_f32_t v,
   }
 }
 
-#endif  // __XNNPACK_SRC_XNNPACK_SIMD_F32_AVX_BASE_H_
+#endif  // XNNPACK_SRC_XNNPACK_SIMD_F32_AVX_BASE_H_

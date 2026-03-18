@@ -8,12 +8,15 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include <assert.h>
-
 #include <arm_neon.h>
+#include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
 
+#include "src/xnnpack/common.h"
 #include "src/xnnpack/gemm.h"
 #include "src/xnnpack/math.h"
+#include "src/xnnpack/microparams.h"
 
 
 void xnn_qd8_f16_qb4w_gemm_minmax_ukernel_1x16c4__neondotfp16arith(
@@ -102,7 +105,7 @@ void xnn_qd8_f16_qb4w_gemm_minmax_ukernel_1x16c4__neondotfp16arith(
       // Handle up to 4 final positions of `k`
       if XNN_UNLIKELY(k != 0) {
         // Load a 1x4 block of activations.
-        const int8x8_t va0x01234567 = vld1_s8(a0); a0 += 4;
+        const int8x8_t va0x0123 = vreinterpret_s8_s32(vld1_dup_s32((const int32_t*)a0)); a0 += 4;
 
         // Load a 4x16 block of weights.
         const int8x16_t vb0123x0123 = vld1q_s8(w); w = (const int8_t*) w + 16;
@@ -111,10 +114,10 @@ void xnn_qd8_f16_qb4w_gemm_minmax_ukernel_1x16c4__neondotfp16arith(
         const int8x16_t vb0123xCDEF = vld1q_s8(w); w = (const int8_t*) w + 16;
 
         // Multiply-accumulate: 1x4 * 4x16 --> 1x16.
-        vacc0x0123 = vdotq_lane_s32(vacc0x0123, vb0123x0123, va0x01234567, 0);
-        vacc0x4567 = vdotq_lane_s32(vacc0x4567, vb0123x4567, va0x01234567, 0);
-        vacc0x89AB = vdotq_lane_s32(vacc0x89AB, vb0123x89AB, va0x01234567, 0);
-        vacc0xCDEF = vdotq_lane_s32(vacc0xCDEF, vb0123xCDEF, va0x01234567, 0);
+        vacc0x0123 = vdotq_lane_s32(vacc0x0123, vb0123x0123, va0x0123, 0);
+        vacc0x4567 = vdotq_lane_s32(vacc0x4567, vb0123x4567, va0x0123, 0);
+        vacc0x89AB = vdotq_lane_s32(vacc0x89AB, vb0123x89AB, va0x0123, 0);
+        vacc0xCDEF = vdotq_lane_s32(vacc0xCDEF, vb0123xCDEF, va0x0123, 0);
       }
       const float32x4_t vfilter_output_scale0123 = vreinterpretq_f32_u32(vshll_n_u16(vld1_u16(w), 16)); w = (const uint16_t*) w + 4;
       const float32x4_t vfilter_output_scale4567 = vreinterpretq_f32_u32(vshll_n_u16(vld1_u16(w), 16)); w = (const uint16_t*) w + 4;

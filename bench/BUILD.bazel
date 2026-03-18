@@ -1,4 +1,4 @@
-# Copyright 2023 Google LLC
+# Copyright 2023-2025 Google LLC
 #
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
@@ -32,12 +32,14 @@ MICROKERNEL_BENCHMARK_DEPS = [
     "//:isa_checks",
     "//:math",
     "//:microfnptr_h",
+    "//:microkernel_defs",
     "//:microkernel_hdrs",
     "//:microparams_init",
     "//:packing",
     "//:params",
     "//:xnnpack_h",
     "//src/configs:hardware_config",
+    "//test:replicable_random_device",
 ]
 
 ############################### Helper libraries ###############################
@@ -74,6 +76,7 @@ xnnpack_cc_library(
     name = "conv",
     hdrs = ["conv.h"],
     deps = [
+        ":bench_utils",
         "@com_google_benchmark//:benchmark",
     ],
 )
@@ -96,6 +99,7 @@ xnnpack_cc_library(
 
 xnnpack_cxx_library(
     name = "gemm_benchmark",
+    testonly = True,
     srcs = [
         "gemm-benchmark.cc",
     ],
@@ -114,6 +118,7 @@ xnnpack_cxx_library(
 
 xnnpack_cxx_library(
     name = "packw_benchmark",
+    testonly = True,
     hdrs = [
         "packw-benchmark.h",
     ],
@@ -125,10 +130,24 @@ xnnpack_cxx_library(
 
 xnnpack_cxx_library(
     name = "bgemm",
+    testonly = True,
     hdrs = [
         "bgemm.h",
     ],
     deps = MICROKERNEL_BENCHMARK_DEPS + [
+        "@com_google_benchmark//:benchmark",
+    ],
+)
+
+xnnpack_cxx_library(
+    name = "packq_benchmark",
+    testonly = True,
+    srcs = [
+        "packq-benchmark.cc",
+    ],
+    hdrs = ["packq-benchmark.h"],
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        ":bgemm",
         "@com_google_benchmark//:benchmark",
     ],
 )
@@ -152,6 +171,10 @@ xnnpack_cxx_library(
     "qd8_f32_qc8w_gemm",
     "qd8_f16_qc4w_gemm",
     "qd8_f32_qc4w_gemm",
+    "qd8_f32_qc2w_gemm",
+    "qd8_f16_qc2w_gemm",
+    "qs8_qc2w_gemm_fp32",
+    "qs8_qc4w_gemm_fp32",
     "qs8_qc8w_gemm_fp32",
     "qu8_gemm_fp32",
     "qu8_gemm_rndnu",
@@ -173,7 +196,6 @@ xnnpack_cxx_library(
     ] + xnnpack_optional_ruy_deps() + xnnpack_optional_gemmlowp_deps(),
 ) for kernel in [
     "f16_gemm_minmax",
-    "f32_gemm_goi_minmax",
     "f32_gemm_minmax",
     "f32_gemm",
     "pqs8_qc8w_gemm_minmax",
@@ -274,8 +296,10 @@ xnnpack_benchmark(
     "f32_vcmul",
     "rdminmax",
     "rdsum",
+    "rdsum2",
     "rminmax",
     "rsum",
+    "rsum2",
     "x8_lut",
 ]]
 
@@ -435,25 +459,10 @@ xnnpack_benchmark(
 )
 
 xnnpack_benchmark(
-    name = "f32_spmm_bench",
-    srcs = [
-        "f32-spmm.cc",
-        "spmm-benchmark.h",
-    ],
+    name = "spmm_bench",
+    srcs = ["spmm.cc"],
     tags = xnnpack_slow_benchmark_tags(),
-    deps = MICROKERNEL_BENCHMARK_DEPS + [
-        ":spmm",
-    ],
-)
-
-xnnpack_benchmark(
-    name = "f16_spmm_bench",
-    srcs = [
-        "f16-spmm.cc",
-    ],
-    deps = MICROKERNEL_BENCHMARK_DEPS + [
-        ":spmm",
-    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS + [":spmm"],
 )
 
 xnnpack_benchmark(
@@ -464,18 +473,6 @@ xnnpack_benchmark(
     copts = xnnpack_optional_dnnl_copts(),
     deps = MICROKERNEL_BENCHMARK_DEPS + xnnpack_optional_dnnl_deps() + [
         "//:microparams_h",
-    ],
-)
-
-xnnpack_cxx_library(
-    name = "packq_benchmark",
-    srcs = [
-        "packq-benchmark.cc",
-    ],
-    hdrs = ["packq-benchmark.h"],
-    deps = MICROKERNEL_BENCHMARK_DEPS + [
-        ":bgemm",
-        "@com_google_benchmark//:benchmark",
     ],
 )
 
@@ -519,6 +516,18 @@ xnnpack_benchmark(
     name = "qs8_qc4w_packw_bench",
     srcs = [
         "qs8-qc4w-packw.cc",
+    ],
+    tags = xnnpack_slow_benchmark_tags(),
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        ":bgemm",
+        ":packw_benchmark",
+    ],
+)
+
+xnnpack_benchmark(
+    name = "qb4_packw_bench",
+    srcs = [
+        "qb4-packw.cc",
     ],
     tags = xnnpack_slow_benchmark_tags(),
     deps = MICROKERNEL_BENCHMARK_DEPS + [

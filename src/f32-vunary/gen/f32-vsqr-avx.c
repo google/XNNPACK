@@ -8,16 +8,13 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-
 #include <assert.h>
 #include <stddef.h>
 
-#include "src/xnnpack/simd/f32-avx.h"
-
 #include "src/xnnpack/common.h"
-#include "src/xnnpack/math.h"
-#include "src/xnnpack/vunary.h"
 #include "src/xnnpack/microparams.h"
+#include "src/xnnpack/simd/f32-avx.h"
+#include "src/xnnpack/vunary.h"
 
 
 void xnn_f32_vsqr_ukernel__avx_u8(

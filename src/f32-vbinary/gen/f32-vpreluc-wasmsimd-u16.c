@@ -32,7 +32,7 @@ void xnn_f32_vpreluc_ukernel__wasmsimd_u16(
   const v128_t vb = wasm_v128_load32_splat(input_b);
 
   for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
-    const v128_t va0 = wasm_v128_load(input_a);
+    const v128_t va0 = wasm_v128_load(input_a + 0);
     const v128_t va1 = wasm_v128_load(input_a + 4);
     const v128_t va2 = wasm_v128_load(input_a + 8);
     const v128_t va3 = wasm_v128_load(input_a + 12);
@@ -53,7 +53,7 @@ void xnn_f32_vpreluc_ukernel__wasmsimd_u16(
     vy2 = wasm_v128_bitselect(vy2, va2, vmask2);
     vy3 = wasm_v128_bitselect(vy3, va3, vmask3);
 
-    wasm_v128_store(output, vy0);
+    wasm_v128_store(output + 0, vy0);
     wasm_v128_store(output + 4, vy1);
     wasm_v128_store(output + 8, vy2);
     wasm_v128_store(output + 12, vy3);

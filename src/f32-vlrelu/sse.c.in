@@ -9,10 +9,13 @@ $assert SSE in [1, 2, 4]
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 $SSE_HEADER = {1: "xmmintrin.h", 2: "emmintrin.h", 4: "smmintrin.h"}[SSE]
 #include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
 
 #include <${SSE_HEADER}>
 
 #include "src/xnnpack/common.h"
+#include "src/xnnpack/microparams.h"
 #include "src/xnnpack/vunary.h"
 
 

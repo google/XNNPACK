@@ -5,6 +5,7 @@
 
 #include "src/xnnpack/assembly.h"
 
+      .p2align 6, 0x0
 .PERMUTATION:
       .long   0
       .long   2
@@ -37,10 +38,10 @@ BEGIN_FUNCTION xnn_qd8_f32_qc8w_gemm_minmax_ukernel_1x16c8__asm_amd64_avx512vnni
       push r13
       push r12
 
-      # load params to free up a GP registers
+      # load params to free up GP registers
       mov r13, [rsp + 96] # params
-      vbroadcastss zmm0, DWORD PTR [r13]
-      vbroadcastss zmm1, DWORD PTR [r13 + 4]
+      vbroadcastss zmm0, dword ptr [r13]
+      vbroadcastss zmm1, dword ptr [r13 + 4]
 
       # Load c pointer.
       mov r10, [rsp + 72]
@@ -75,7 +76,7 @@ BEGIN_FUNCTION xnn_qd8_f32_qc8w_gemm_minmax_ukernel_1x16c8__asm_amd64_avx512vnni
       mov r11, 0
       # Initialize accumulators with k_sum * input zero point.
       vmovaps  zmm6, [r9 + 0]
-      vpmulld zmm5, zmm6, ZMMWORD PTR [rsp + 64]
+      vpmulld zmm5, zmm6, zmmword ptr [rsp + 64]
       add r9, 64
       # Interleave with zeros.
       vextracti64x4 ymm12, zmm5, 1
@@ -86,7 +87,7 @@ BEGIN_FUNCTION xnn_qd8_f32_qc8w_gemm_minmax_ukernel_1x16c8__asm_amd64_avx512vnni
       vmovaps  zmm6, [r9 + 0]
       vmovaps  zmm7, [r9 + 64]
       add r9, 128
-      vbroadcasti32x2 zmm2, QWORD PTR [rcx + r11]
+      vbroadcasti32x2 zmm2, qword ptr [rcx + r11]
       vpdpbusd  zmm5, zmm2, zmm6
       vpdpbusd  zmm12, zmm2, zmm7
 
@@ -99,14 +100,14 @@ BEGIN_FUNCTION xnn_qd8_f32_qc8w_gemm_minmax_ukernel_1x16c8__asm_amd64_avx512vnni
       vpaddd zmm5, zmm5, zmm6
       vpsrlq zmm6, zmm12, 32
       vpaddd zmm12, zmm12, zmm6
-      vmovups zmm6, zmmword ptr [rip + .PERMUTATION]
+      vmovaps zmm6, zmmword ptr [rip + .PERMUTATION]
       vpermt2ps zmm5, zmm6, zmm12
 
       # Convert from int32 to float.
       vcvtdq2ps zmm5, zmm5
       # Load quantization_params pointer from stack
       mov r11, [rsp + 136]
-      vmulps zmm5, zmm5, DWORD PTR [r11 + 4]{1to16}
+      vmulps zmm5, zmm5, dword ptr [r11 + 4]{1to16}
       vmovaps zmm10, [r9 + 0]
       add r9, 64
       vmovaps zmm6, [r9 + 0]
@@ -132,7 +133,7 @@ BEGIN_FUNCTION xnn_qd8_f32_qc8w_gemm_minmax_ukernel_1x16c8__asm_amd64_avx512vnni
       shlx r11, r11, rsi
       not r11
       kmovw k1, r11d
-      vmovups  ZMMWORD PTR [r10]{k1}, zmm5
+      vmovups  zmmword ptr [r10]{k1}, zmm5
 
 .Lreturn:
       add rsp, 128

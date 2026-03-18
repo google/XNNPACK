@@ -8,15 +8,14 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-
 #include <assert.h>
 #include <stddef.h>
 #include <stdint.h>
 
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/packw.h"
 #include "src/xnnpack/simd/s32-hvx.h"
 
-#include "src/xnnpack/intrinsics-polyfill.h"
-#include "src/xnnpack/packw.h"
 
 
 // Pack pre-transposed weights (GIO) for use by f32-gemm

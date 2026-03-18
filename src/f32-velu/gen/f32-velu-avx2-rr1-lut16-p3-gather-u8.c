@@ -9,10 +9,13 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
 
 #include <immintrin.h>
 
 #include "src/xnnpack/common.h"
+#include "src/xnnpack/microparams.h"
 #include "src/xnnpack/vunary.h"
 
 
@@ -59,7 +62,7 @@ void xnn_f32_velu_ukernel__avx2_rr1_lut16_p3_gather_u8(
 
     __m256 vn = _mm256_fmadd_ps(vz, vlog2e, vmagic_bias);
     const __m256i vidx = _mm256_and_si256(_mm256_castps_si256(vn), vindex_mask);
-    const __m256i vl = _mm256_i32gather_epi32(xnn_table_exp2minus_k_over_16, vidx, sizeof(float));
+    const __m256i vl = _mm256_i32gather_epi32((const int*) xnn_table_exp2minus_k_over_16, vidx, sizeof(float));
 
     const __m256i ven = _mm256_slli_epi32(_mm256_castps_si256(vn), 19);
     vn = _mm256_sub_ps(vn, vmagic_bias);
@@ -92,7 +95,7 @@ void xnn_f32_velu_ukernel__avx2_rr1_lut16_p3_gather_u8(
 
     __m256 vn = _mm256_fmadd_ps(vz, vlog2e, vmagic_bias);
     const __m256i vidx = _mm256_and_si256(_mm256_castps_si256(vn), vindex_mask);
-    const __m256i vl = _mm256_i32gather_epi32(xnn_table_exp2minus_k_over_16, vidx, sizeof(float));
+    const __m256i vl = _mm256_i32gather_epi32((const int*) xnn_table_exp2minus_k_over_16, vidx, sizeof(float));
 
     const __m256i ven = _mm256_slli_epi32(_mm256_castps_si256(vn), 19);
     vn = _mm256_sub_ps(vn, vmagic_bias);

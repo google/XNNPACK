@@ -317,24 +317,6 @@ struct NegateOp {
 };
 
 template <typename T>
-struct ReLUOp {
-  explicit ReLUOp(const xnn_unary_uparams*) {}
-
-  int operator()(int x) const { return std::max(x, 0); }
-  float operator()(float x) const { return std::max(x, 0.0f); }
-  static const uint16_t sign_mask = 0x8000;
-  xnn_float16 operator()(xnn_float16 x) const {
-    return (xnn_float16_to_bits(x) & sign_mask) != 0 ? xnn_float16_from_bits(0)
-                                                     : x;
-  }
-  xnn_bfloat16 operator()(xnn_bfloat16 x) const {
-    return (xnn_bfloat16_to_bits(x) & sign_mask) != 0
-               ? xnn_bfloat16_from_bits(0)
-               : x;
-  }
-};
-
-template <typename T>
 struct RoundToNearestOp {
   explicit RoundToNearestOp(const xnn_unary_uparams*) {}
 

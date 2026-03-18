@@ -8,11 +8,13 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-
 #include <assert.h>
 #include <stddef.h>
 #include <stdint.h>
 
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/microparams.h"
 #include "src/xnnpack/packw.h"
 
 
@@ -56,7 +58,7 @@ void xnn_qs8_qc4w_packw_gemm_goi_ukernel_x8c8__scalar(
       size_t n = 0;
       if XNN_LIKELY(b != NULL) {
         while (n < nr_block_size) {
-          packed_b[n] = b[n + nr_block_start];
+          packed_b[n] = b[n + nr_block_start] * 16;
           ++n;
         }
       }

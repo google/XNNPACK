@@ -3,8 +3,8 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#ifndef __XNNPACK_TEST_PACKQ_MICROKERNEL_TESTER_H
-#define __XNNPACK_TEST_PACKQ_MICROKERNEL_TESTER_H
+#ifndef XNNPACK_TEST_PACKQ_MICROKERNEL_TESTER_H_
+#define XNNPACK_TEST_PACKQ_MICROKERNEL_TESTER_H_
 
 #include <cassert>
 #include <cstddef>
@@ -79,4 +79,4 @@ class PackQMicrokernelTester {
 
 };  // namespace xnnpack
 
-#endif  // __XNNPACK_TEST_PACKQ_MICROKERNEL_TESTER_H
+#endif  // XNNPACK_TEST_PACKQ_MICROKERNEL_TESTER_H_

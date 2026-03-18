@@ -1,16 +1,15 @@
-// Copyright 2023 Google LLC
+// Copyright 2023-2025 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
 #include <algorithm>
 #include <array>
-#include <cfloat>
-#include <cmath>
+#include <cstddef>
+#include <cstdint>
 #include <functional>
 #include <limits>
 #include <memory>
-#include <ostream>
 #include <random>
 #include <string>
 #include <utility>
@@ -19,7 +18,9 @@
 #include "bench/utils.h"
 #include "include/xnnpack.h"
 #include "src/xnnpack/buffer.h"
+#include "test/replicable_random_device.h"
 #include <benchmark/benchmark.h>
+#include <pthreadpool.h>
 
 #define XNN_INVALID_NODE_ID UINT32_MAX
 void xnnpack_fully_connected_qd8_f32_qc4w(benchmark::State& state,
@@ -30,8 +31,7 @@ void xnnpack_fully_connected_qd8_f32_qc4w(benchmark::State& state,
   const size_t num_threads = state.range(3);
 
   xnn_status status = xnn_initialize(nullptr /* allocator */);
-  std::random_device random_device;
-  auto rng = std::mt19937(random_device());
+  xnnpack::ReplicableRandomDevice rng;
   std::uniform_real_distribution<float> f32dist(-1.f, 1.f);
   std::uniform_real_distribution<float> f32idist(0.5f, 2.0f);
   std::uniform_int_distribution<int32_t> w8dist(
@@ -159,8 +159,8 @@ void xnnpack_fully_connected_qd8_f32_qc4w(benchmark::State& state,
   }
 
   state.counters["FLOPS"] =
-      benchmark::Counter(uint64_t(state.iterations()) * 2 * batch_size *
-                             input_channels * output_channels,
+      benchmark::Counter(static_cast<uint64_t>(state.iterations()) * 2 *
+                             batch_size * input_channels * output_channels,
                          benchmark::Counter::kIsRate);
 }
 
@@ -169,8 +169,7 @@ void xnnpack_fully_connected_f32(benchmark::State& state, const char* net) {
   const size_t input_channels = state.range(1);
   const size_t output_channels = state.range(2);
 
-  std::random_device random_device;
-  auto rng = std::mt19937(random_device());
+  xnnpack::ReplicableRandomDevice rng;
   auto f32rng = std::bind(std::uniform_real_distribution<float>(0.01f, 1.0f),
                           std::ref(rng));
 
@@ -254,8 +253,8 @@ void xnnpack_fully_connected_f32(benchmark::State& state, const char* net) {
   }
 
   state.counters["FLOPS"] =
-      benchmark::Counter(uint64_t(state.iterations()) * 2 * batch_size *
-                             input_channels * output_channels,
+      benchmark::Counter(static_cast<uint64_t>(state.iterations()) * 2 *
+                             batch_size * input_channels * output_channels,
                          benchmark::Counter::kIsRate);
 }
 
@@ -265,8 +264,7 @@ void xnnpack_dynamic_fully_connected_f32(benchmark::State& state,
   const size_t input_channels = state.range(1);
   const size_t output_channels = state.range(2);
 
-  std::random_device random_device;
-  auto rng = std::mt19937(random_device());
+  xnnpack::ReplicableRandomDevice rng;
   auto f32rng = std::bind(std::uniform_real_distribution<float>(0.01f, 1.0f),
                           std::ref(rng));
 
@@ -365,8 +363,8 @@ void xnnpack_dynamic_fully_connected_f32(benchmark::State& state,
   }
 
   state.counters["FLOPS"] =
-      benchmark::Counter(uint64_t(state.iterations()) * 2 * batch_size *
-                             input_channels * output_channels,
+      benchmark::Counter(static_cast<uint64_t>(state.iterations()) * 2 *
+                             batch_size * input_channels * output_channels,
                          benchmark::Counter::kIsRate);
 }
 

@@ -188,7 +188,7 @@ struct TestParams {
 #define XNN_PAD_UKERNEL(arch_flags, ukernel, tile_size) \
   {#ukernel, arch_flags, ukernel, tile_size},
 TestParams test_params[] = {
-#include "src/xx-pad/xx-pad.h"
+#include "src/xx-pad/xx-pad.inc"
 };
 #undef XNN_PAD_UKERNEL
 

@@ -8,15 +8,16 @@ $assert CHANNEL_TILE >= 4
 $assert PIXEL_TILE == 1
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 $VMULADDQ_F32 = "vfmaq_f32" if FMA else "vmlaq_f32"
-#include <assert.h>
-
 #include <arm_neon.h>
+#include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
 
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/ibilinear.h"
 
 
-void xnn_f32_ibilinear_ukernel__${"neonfma" if FMA else "neon"}_c${CHANNEL_TILE}${"" if PIXEL_TILE == 1 else "x%d" % PIXEL_TILE}(
+void xnn_f32_ibilinear_ukernel__${"neonfma" if FMA else "neon"}_u${CHANNEL_TILE}${"" if PIXEL_TILE == 1 else "x%d" % PIXEL_TILE}(
     size_t output_pixels,
     size_t channels,
     const float** restrict input,

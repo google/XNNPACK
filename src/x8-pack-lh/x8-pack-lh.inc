@@ -1,0 +1,16 @@
+// clang-format off
+// Copyright 2025 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+
+// Arguments are:
+// XNN_UKERNEL(arch, ukernel, size_fn, packed_offset_fn)
+
+#if XNN_ENABLE_KLEIDIAI
+XNN_UKERNEL(xnn_arch_arm_sme, xnn_x8_pack_lh_ukernel__neonsme,
+            xnn_x8_pack_lh_size__neonsme, xnn_x8_pack_lh_offset__neonsme)
+XNN_UKERNEL(xnn_arch_arm_sme2, xnn_x8_pack_lh_ukernel__neonsme2,
+            xnn_x8_pack_lh_size__neonsme2, xnn_x8_pack_lh_offset__neonsme2)            
+#endif  // XNN_ENABLE_KLEIDIAI

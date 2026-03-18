@@ -14,7 +14,7 @@ SET(PROD_FMA3_MICROKERNEL_SRCS
   src/f16-dwconv/gen/f16-dwconv-4p16c-minmax-fma3.c
   src/f16-dwconv/gen/f16-dwconv-9p16c-minmax-fma3.c
   src/f16-dwconv/gen/f16-dwconv-25p8c-minmax-fma3-acc2.c
-  src/f16-ibilinear/gen/f16-ibilinear-fma3-c8.c
+  src/f16-ibilinear/gen/f16-ibilinear-fma3-u8.c
   src/f16-vmulcaddc/gen/f16-vmulcaddc-c8-minmax-fma3-2x.c
   src/f16-vtanh/gen/f16-vtanh-fma3-polynomial-p19h9t2-u32.c
   src/f32-dwconv/gen/f32-dwconv-3p16c-minmax-fma3.c
@@ -24,6 +24,7 @@ SET(PROD_FMA3_MICROKERNEL_SRCS
   src/f32-gemm/gen/f32-gemm-1x8-minmax-fma3-broadcast.c
   src/f32-gemm/gen/f32-gemm-1x16-minmax-fma3-broadcast.c
   src/f32-gemm/gen/f32-gemm-1x16s4-minmax-fma3-broadcast.c
+  src/f32-gemm/gen/f32-gemm-2x16-minmax-fma3-broadcast.c
   src/f32-gemm/gen/f32-gemm-4x8-minmax-fma3-broadcast.c
   src/f32-gemm/gen/f32-gemm-4x16s4-minmax-fma3-broadcast.c
   src/f32-gemm/gen/f32-gemm-5x8-minmax-fma3-broadcast.c
@@ -72,7 +73,7 @@ SET(NON_PROD_FMA3_MICROKERNEL_SRCS
   src/f16-dwconv/gen/f16-dwconv-25p16c-minmax-fma3.c
   src/f16-dwconv/gen/f16-dwconv-25p32c-minmax-fma3-acc2.c
   src/f16-dwconv/gen/f16-dwconv-25p32c-minmax-fma3.c
-  src/f16-ibilinear/gen/f16-ibilinear-fma3-c16.c
+  src/f16-ibilinear/gen/f16-ibilinear-fma3-u16.c
   src/f16-vmulcaddc/gen/f16-vmulcaddc-c16-minmax-fma3-2x.c
   src/f16-vtanh/gen/f16-vtanh-fma3-expm1minus-rr1-p3h2ts-div-u8.c
   src/f16-vtanh/gen/f16-vtanh-fma3-expm1minus-rr1-p3h2ts-div-u16.c
@@ -106,22 +107,6 @@ SET(NON_PROD_FMA3_MICROKERNEL_SRCS
   src/f32-gemm/gen/f32-gemm-6x16s4-minmax-fma3-broadcast.c
   src/f32-gemm/gen/f32-gemm-7x8-minmax-fma3-broadcast.c
   src/f32-gemm/gen/f32-gemm-8x8-minmax-fma3-broadcast.c
-  src/f32-gemminc/gen/f32-gemminc-1x8-minmax-fma3-broadcast.c
-  src/f32-gemminc/gen/f32-gemminc-1x16-minmax-fma3-broadcast.c
-  src/f32-gemminc/gen/f32-gemminc-1x16s4-minmax-fma3-broadcast.c
-  src/f32-gemminc/gen/f32-gemminc-3x16-minmax-fma3-broadcast.c
-  src/f32-gemminc/gen/f32-gemminc-3x16s4-minmax-fma3-broadcast.c
-  src/f32-gemminc/gen/f32-gemminc-4x8-minmax-fma3-broadcast.c
-  src/f32-gemminc/gen/f32-gemminc-4x16-minmax-fma3-broadcast.c
-  src/f32-gemminc/gen/f32-gemminc-4x16s4-minmax-fma3-broadcast.c
-  src/f32-gemminc/gen/f32-gemminc-5x8-minmax-fma3-broadcast.c
-  src/f32-gemminc/gen/f32-gemminc-5x16-minmax-fma3-broadcast.c
-  src/f32-gemminc/gen/f32-gemminc-5x16s4-minmax-fma3-broadcast.c
-  src/f32-gemminc/gen/f32-gemminc-6x8-minmax-fma3-broadcast.c
-  src/f32-gemminc/gen/f32-gemminc-6x16-minmax-fma3-broadcast.c
-  src/f32-gemminc/gen/f32-gemminc-6x16s4-minmax-fma3-broadcast.c
-  src/f32-gemminc/gen/f32-gemminc-7x8-minmax-fma3-broadcast.c
-  src/f32-gemminc/gen/f32-gemminc-8x8-minmax-fma3-broadcast.c
   src/f32-igemm/gen/f32-igemm-3x16-minmax-fma3-broadcast.c
   src/f32-igemm/gen/f32-igemm-3x16s4-minmax-fma3-broadcast.c
   src/f32-igemm/gen/f32-igemm-4x16-minmax-fma3-broadcast.c
@@ -145,7 +130,6 @@ SET(NON_PROD_FMA3_MICROKERNEL_SRCS
   src/f32-qc8w-gemm/gen/f32-qc8w-gemm-6x16-minmax-fma3-broadcast.c
   src/f32-qc8w-gemm/gen/f32-qc8w-gemm-7x16-minmax-fma3-broadcast.c
   src/f32-qc8w-gemm/gen/f32-qc8w-gemm-8x16-minmax-fma3-broadcast.c
-  src/f32-vclamp/gen/f32-vclamp-fma3.c
   src/f32-vcmul/gen/f32-vcmul-fma3-u8.c
   src/f32-vcmul/gen/f32-vcmul-fma3-u32.c
   src/f32-vcmul/gen/f32-vcmul-fma3-u64.c

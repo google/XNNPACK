@@ -33,7 +33,7 @@ namespace xnnpack {
 class F32SimdAVX512FTest : public ::testing::Test {
  protected:
   void SetUp() override {
-    TEST_REQUIRES_X86_AVX512F;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_avx512f);
     inputs_.resize(3 * xnn_simd_size_f32);
     output_.resize(xnn_simd_size_f32);
     std::uniform_real_distribution<float> f32dist(-10.0f, 10.0f);
@@ -48,7 +48,9 @@ class F32SimdAVX512FTest : public ::testing::Test {
 
 TEST_F(F32SimdAVX512FTest, SetZero) {
   xnn_storeu_f32(output_.data(), xnn_zero_f32());
-  EXPECT_THAT(output_, testing::Each(testing::Eq(0.0f)));
+  for (size_t k = 0; k < xnn_simd_size_f32; k++) {
+    ASSERT_EQ(output_[k], 0.0f);
+  }
 }
 
 TEST_F(F32SimdAVX512FTest, Add) {
@@ -81,11 +83,8 @@ TEST_F(F32SimdAVX512FTest, Fmadd) {
   for (size_t k = 0; k < xnn_simd_size_f32; k++) {
 #if XNN_SIMD_HAS_NATIVE_FMA
     // If an arch claims to support FMA, it better also round things correctly.
-    ASSERT_EQ(output_[k],
-              static_cast<float>(
-                  static_cast<double>(inputs_[k]) *
-                      static_cast<double>(inputs_[k + xnn_simd_size_f32]) +
-                  static_cast<double>(inputs_[k + 2 * xnn_simd_size_f32])));
+    ASSERT_EQ(output_[k], std::fma(inputs_[k], inputs_[k + xnn_simd_size_f32],
+                                  inputs_[k + 2 * xnn_simd_size_f32]));
 #else
     ASSERT_EQ(output_[k],
               inputs_[k] * inputs_[k + xnn_simd_size_f32] +
@@ -104,11 +103,8 @@ TEST_F(F32SimdAVX512FTest, Fmsub) {
   for (size_t k = 0; k < xnn_simd_size_f32; k++) {
 #if XNN_SIMD_HAS_NATIVE_FMA
     // If an arch claims to support FMA, it better also round things correctly.
-    ASSERT_EQ(output_[k],
-              static_cast<float>(
-                  static_cast<double>(inputs_[k]) *
-                      static_cast<double>(inputs_[k + xnn_simd_size_f32]) -
-                  static_cast<double>(inputs_[k + 2 * xnn_simd_size_f32])));
+    ASSERT_EQ(output_[k], std::fma(inputs_[k], inputs_[k + xnn_simd_size_f32],
+                                   -inputs_[k + 2 * xnn_simd_size_f32]));
 #else
     ASSERT_EQ(output_[k],
               inputs_[k] * inputs_[k + xnn_simd_size_f32] -
@@ -127,11 +123,8 @@ TEST_F(F32SimdAVX512FTest, Fnmadd) {
   for (size_t k = 0; k < xnn_simd_size_f32; k++) {
 #if XNN_SIMD_HAS_NATIVE_FMA
     // If an arch claims to support FMA, it better also round things correctly.
-    ASSERT_EQ(output_[k],
-              static_cast<float>(
-                  static_cast<double>(-inputs_[k]) *
-                      static_cast<double>(inputs_[k + xnn_simd_size_f32]) +
-                  static_cast<double>(inputs_[k + 2 * xnn_simd_size_f32])));
+    ASSERT_EQ(output_[k], std::fma(-inputs_[k], inputs_[k + xnn_simd_size_f32],
+                                   inputs_[k + 2 * xnn_simd_size_f32]));
 #else
     ASSERT_EQ(output_[k],
               -inputs_[k] * inputs_[k + xnn_simd_size_f32] +
@@ -204,7 +197,7 @@ TEST_F(F32SimdAVX512FTest, Round) {
   const xnn_simd_f32_t res = xnn_round_f32(a);
   xnn_storeu_f32(output_.data(), res);
   for (size_t k = 0; k < xnn_simd_size_f32; k++) {
-    ASSERT_EQ(output_[k], std::round(inputs_[k]));
+    ASSERT_EQ(output_[k], std::rint(inputs_[k]));
   }
 
   // Check non-finite values.
@@ -213,7 +206,7 @@ TEST_F(F32SimdAVX512FTest, Round) {
     const xnn_simd_f32_t a = xnn_loadu_f32(inputs_.data());
     const xnn_simd_f32_t res = xnn_round_f32(a);
     xnn_storeu_f32(output_.data(), res);
-    ASSERT_THAT(output_[0], testing::NanSensitiveFloatEq(std::round(val)));
+    ASSERT_THAT(output_[0], testing::NanSensitiveFloatEq(std::rint(val)));
   }
 }
 
@@ -284,6 +277,18 @@ TEST_F(F32SimdAVX512FTest, Xor) {
   for (size_t k = 0; k < xnn_simd_size_f32; k++) {
     ASSERT_EQ(*(uint32_t *)&output_[k],
               *(uint32_t *)&inputs_[k] ^
+                  *(uint32_t *)&inputs_[k + xnn_simd_size_f32]);
+  }
+}
+
+TEST_F(F32SimdAVX512FTest, AndNot) {
+  const xnn_simd_f32_t a = xnn_loadu_f32(inputs_.data());
+  const xnn_simd_f32_t b = xnn_loadu_f32(inputs_.data() + xnn_simd_size_f32);
+  const xnn_simd_f32_t res = xnn_andnot_f32(a, b);
+  xnn_storeu_f32(output_.data(), res);
+  for (size_t k = 0; k < xnn_simd_size_f32; k++) {
+    ASSERT_EQ(*(uint32_t *)&output_[k],
+              ~(*(uint32_t *)&inputs_[k]) &
                   *(uint32_t *)&inputs_[k + xnn_simd_size_f32]);
   }
 }

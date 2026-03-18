@@ -140,6 +140,7 @@ static enum xnn_status create_fully_connected_operator(
         default:
           XNN_UNREACHABLE;
       }
+      break;
     default:
       XNN_UNREACHABLE;
   }
@@ -410,25 +411,32 @@ enum xnn_status xnn_define_fully_connected_sparse(
     if (!validate_datatypes_with_bias(
         input_value->datatype, kernel_value->datatype, bias_value->datatype, output_value->datatype)) {
       xnn_log_error(
-        "failed to define %s operator with input ID #%" PRIu32 ", filter ID #%" PRIu32 ", bias ID #%" PRIu32 ", and output ID #%" PRIu32
-        ": mismatching datatypes across input (%s), filter (%s), bias (%s), and output (%s)",
-        xnn_node_type_to_string(xnn_node_type_fully_connected_sparse), input_id, filter_id, bias_id, output_id,
-        xnn_datatype_to_string(input_value->datatype),
-        xnn_datatype_to_string(kernel_value->datatype),
-        xnn_datatype_to_string(bias_value->datatype),
-        xnn_datatype_to_string(output_value->datatype));
+          "failed to define %s operator with input ID #%" PRIu32
+          ", filter ID #%" PRIu32 ", bias ID #%" PRIu32
+          ", and output ID #%" PRIu32
+          ": mismatching datatypes across input (%s), filter (%s), bias (%s), "
+          "and output (%s)",
+          xnn_node_type_to_string(xnn_node_type_fully_connected_sparse),
+          input_id, filter_id, bias_id, output_id,
+          xnn_datatype_to_string(input_value->datatype),
+          xnn_datatype_to_string(kernel_value->datatype),
+          xnn_datatype_to_string(bias_value->datatype),
+          xnn_datatype_to_string(output_value->datatype));
       return xnn_status_invalid_parameter;
     }
   } else {
     if (!validate_datatypes_without_bias(
         input_value->datatype, kernel_value->datatype, output_value->datatype)) {
       xnn_log_error(
-        "failed to define %s operator with input ID #%" PRIu32 ", filter ID #%" PRIu32 ", and output ID #%" PRIu32
-        ": mismatching datatypes across input (%s), filter (%s), and output (%s)",
-        xnn_node_type_to_string(xnn_node_type_fully_connected_sparse), input_id, filter_id, output_id,
-        xnn_datatype_to_string(input_value->datatype),
-        xnn_datatype_to_string(kernel_value->datatype),
-        xnn_datatype_to_string(output_value->datatype));
+          "failed to define %s operator with input ID #%" PRIu32
+          ", filter ID #%" PRIu32 ", and output ID #%" PRIu32
+          ": mismatching datatypes across input (%s), filter (%s), and output "
+          "(%s)",
+          xnn_node_type_to_string(xnn_node_type_fully_connected_sparse),
+          input_id, filter_id, output_id,
+          xnn_datatype_to_string(input_value->datatype),
+          xnn_datatype_to_string(kernel_value->datatype),
+          xnn_datatype_to_string(output_value->datatype));
       return xnn_status_invalid_parameter;
     }
   }

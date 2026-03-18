@@ -19,7 +19,8 @@ size_t xnn_pqs8_qc8w_gemm_minmax_ukernel_32x32c4__neonsme2_get_mr() {
 #else
   assert(
       "Calling KleidiAI kai_get_mr wrapper, but XNNPACK was compiled without "
-      "`XNN_ENABLE_KLEIDIAI`." && 0);
+      "`XNN_ENABLE_KLEIDIAI`." &&
+      0);
   return 0;
 #endif  // XNN_ENABLE_KLEIDIAI
 }
@@ -30,7 +31,8 @@ size_t xnn_pqs8_qc8w_gemm_minmax_ukernel_32x32c4__neonsme2_get_nr() {
 #else
   assert(
       "Calling KleidiAI kai_get_nr wrapper, but XNNPACK was compiled without "
-      "`XNN_ENABLE_KLEIDIAI`." && 0);
+      "`XNN_ENABLE_KLEIDIAI`." &&
+      0);
   return 0;
 #endif  // XNN_ENABLE_KLEIDIAI
 }
@@ -54,6 +56,7 @@ void xnn_pqs8_qc8w_gemm_minmax_ukernel_32x32c4__neonsme2(
 #else
   assert(
       "Calling KleidiAI microkernel wrapper, but XNNPACK was compiled without "
-      "`XNN_ENABLE_KLEIDIAI`." && 0);
+      "`XNN_ENABLE_KLEIDIAI`." &&
+      0);
 #endif  // XNN_ENABLE_KLEIDIAI
 }

@@ -19,10 +19,10 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_9x8__asm_amd64_fma3_broadcast
       push r13
       push r12
 
-      # load params to free up a GP registers
+      # load params to free up GP registers
       mov r13, [rsp + 96] # params
-      vbroadcastss ymm0, DWORD PTR [r13]
-      vbroadcastss ymm1, DWORD PTR [r13 + 4]
+      vbroadcastss ymm0, dword ptr [r13]
+      vbroadcastss ymm1, dword ptr [r13 + 4]
 
       # Load c pointer.
       mov r10, [rsp + 72]
@@ -162,30 +162,30 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_9x8__asm_amd64_fma3_broadcast
       vmovaps ymm11, ymm6
       vmovaps ymm12, ymm6
       vmovaps ymm13, ymm6
-      vmovaps ymm15, ymm6
+      vmovaps ymm3, ymm6
       add r9, 32
 
 .Linner_loop:
       vmovaps  ymm14, [r9 + 0]
       add r9, 32
-      vbroadcastss ymm2, DWORD PTR [rcx + r11]
+      vbroadcastss ymm2, dword ptr [rcx + r11]
       vfmadd231ps  ymm6, ymm2, ymm14
-      vbroadcastss ymm2, DWORD PTR [rax + r11]
+      vbroadcastss ymm2, dword ptr [rax + r11]
       vfmadd231ps  ymm7, ymm2, ymm14
-      vbroadcastss ymm2, DWORD PTR [r15 + r11]
+      vbroadcastss ymm2, dword ptr [r15 + r11]
       vfmadd231ps  ymm8, ymm2, ymm14
-      vbroadcastss ymm2, DWORD PTR [r14 + r11]
+      vbroadcastss ymm2, dword ptr [r14 + r11]
       vfmadd231ps  ymm9, ymm2, ymm14
-      vbroadcastss ymm2, DWORD PTR [r10 + r11]
+      vbroadcastss ymm2, dword ptr [r10 + r11]
       vfmadd231ps  ymm10, ymm2, ymm14
-      vbroadcastss ymm2, DWORD PTR [r12 + r11]
+      vbroadcastss ymm2, dword ptr [r12 + r11]
       vfmadd231ps  ymm11, ymm2, ymm14
-      vbroadcastss ymm2, DWORD PTR [r13 + r11]
+      vbroadcastss ymm2, dword ptr [r13 + r11]
       vfmadd231ps  ymm12, ymm2, ymm14
-      vbroadcastss ymm2, DWORD PTR [rbx + r11]
+      vbroadcastss ymm2, dword ptr [rbx + r11]
       vfmadd231ps  ymm13, ymm2, ymm14
-      vbroadcastss ymm2, DWORD PTR [rbp + r11]
-      vfmadd231ps  ymm15, ymm2, ymm14
+      vbroadcastss ymm2, dword ptr [rbp + r11]
+      vfmadd231ps  ymm3, ymm2, ymm14
 
       add r11, 4
       cmp rdx, r11
@@ -201,7 +201,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_9x8__asm_amd64_fma3_broadcast
       vminps  ymm11, ymm1, ymm11
       vminps  ymm12, ymm1, ymm12
       vminps  ymm13, ymm1, ymm13
-      vminps  ymm15, ymm1, ymm15
+      vminps  ymm3, ymm1, ymm3
       vmaxps  ymm6, ymm0, ymm6
       vmaxps  ymm7, ymm0, ymm7
       vmaxps  ymm8, ymm0, ymm8
@@ -210,7 +210,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_9x8__asm_amd64_fma3_broadcast
       vmaxps  ymm11, ymm0, ymm11
       vmaxps  ymm12, ymm0, ymm12
       vmaxps  ymm13, ymm0, ymm13
-      vmaxps  ymm15, ymm0, ymm15
+      vmaxps  ymm3, ymm0, ymm3
 
       # Pop output pointers from the stack.
       mov rcx, [rsp + 24]
@@ -234,7 +234,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_9x8__asm_amd64_fma3_broadcast
       vmovups  [r12], ymm11
       vmovups  [r13], ymm12
       vmovups  [rbx], ymm13
-      vmovups  [rbp], ymm15
+      vmovups  [rbp], ymm3
       add rcx, 32
       add rax, 32
       add r15, 32
@@ -271,7 +271,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_9x8__asm_amd64_fma3_broadcast
       vmovups  [r12], xmm11
       vmovups  [r13], xmm12
       vmovups  [rbx], xmm13
-      vmovups  [rbp], xmm15
+      vmovups  [rbp], xmm3
       add  rcx, 16
       add  rax, 16
       add  r15, 16
@@ -289,21 +289,21 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_9x8__asm_amd64_fma3_broadcast
       vextractf128 xmm11, ymm11, 1
       vextractf128 xmm12, ymm12, 1
       vextractf128 xmm13, ymm13, 1
-      vextractf128 xmm15, ymm15, 1
+      vextractf128 xmm3, ymm3, 1
 
 
 .Ltail_2:
       test sil, 2
       jz .Ltail_1
-      vmovlps  QWORD PTR [rcx], xmm6
-      vmovlps  QWORD PTR [rax], xmm7
-      vmovlps  QWORD PTR [r15], xmm8
-      vmovlps  QWORD PTR [r14], xmm9
-      vmovlps  QWORD PTR [r10], xmm10
-      vmovlps  QWORD PTR [r12], xmm11
-      vmovlps  QWORD PTR [r13], xmm12
-      vmovlps  QWORD PTR [rbx], xmm13
-      vmovlps  QWORD PTR [rbp], xmm15
+      vmovlps  qword ptr [rcx], xmm6
+      vmovlps  qword ptr [rax], xmm7
+      vmovlps  qword ptr [r15], xmm8
+      vmovlps  qword ptr [r14], xmm9
+      vmovlps  qword ptr [r10], xmm10
+      vmovlps  qword ptr [r12], xmm11
+      vmovlps  qword ptr [r13], xmm12
+      vmovlps  qword ptr [rbx], xmm13
+      vmovlps  qword ptr [rbp], xmm3
       add rcx, 8
       add rax, 8
       add r15, 8
@@ -321,21 +321,21 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_9x8__asm_amd64_fma3_broadcast
       vmovhlps xmm11, xmm11, xmm11
       vmovhlps xmm12, xmm12, xmm12
       vmovhlps xmm13, xmm13, xmm13
-      vmovhlps xmm15, xmm15, xmm15
+      vmovhlps xmm3, xmm3, xmm3
 
 
 .Ltail_1:
       test sil, 1
       jz .Lreturn
-      vmovss  DWORD PTR [rcx], xmm6
-      vmovss  DWORD PTR [rax], xmm7
-      vmovss  DWORD PTR [r15], xmm8
-      vmovss  DWORD PTR [r14], xmm9
-      vmovss  DWORD PTR [r10], xmm10
-      vmovss  DWORD PTR [r12], xmm11
-      vmovss  DWORD PTR [r13], xmm12
-      vmovss  DWORD PTR [rbx], xmm13
-      vmovss  DWORD PTR [rbp], xmm15
+      vmovss  dword ptr [rcx], xmm6
+      vmovss  dword ptr [rax], xmm7
+      vmovss  dword ptr [r15], xmm8
+      vmovss  dword ptr [r14], xmm9
+      vmovss  dword ptr [r10], xmm10
+      vmovss  dword ptr [r12], xmm11
+      vmovss  dword ptr [r13], xmm12
+      vmovss  dword ptr [rbx], xmm13
+      vmovss  dword ptr [rbp], xmm3
 
 .Lreturn:
       add rsp, 256

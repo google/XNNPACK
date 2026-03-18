@@ -25,13 +25,15 @@ $VGET_LOW_X32 = "vget_low_u32" if DATATYPE == "QU8" else "vget_low_s32"
 $VGET_HIGH_X32 = "vget_high_u32" if DATATYPE == "QU8" else "vget_high_s32"
 $VPADD_X32 = "vpadd_u32" if DATATYPE == "QU8" else "vpadd_s32"
 $VGET_LANE_X32 = "vget_lane_u32" if DATATYPE == "QU8" else "vget_lane_s32"
-
-#include <assert.h>
-
 #include <arm_neon.h>
+#include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
 
 #include "src/xnnpack/common.h"
+#include "src/xnnpack/microparams.h"
 #include "src/xnnpack/reduce.h"
+
 
 $ACC_SUFFIX = "" if ACCUMULATORS == 1 else "_acc%d" % ACCUMULATORS
 void xnn_${DATATYPE_SPEC}_rsum_ukernel__neon_u${CHANNEL_TILE}${ACC_SUFFIX}(

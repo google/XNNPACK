@@ -3,7 +3,8 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#pragma once
+#ifndef XNNPACK_SRC_XNNPACK_INIT_ONCE_H_
+#define XNNPACK_SRC_XNNPACK_INIT_ONCE_H_
 
 #ifdef _WIN32
 #include <windows.h>
@@ -57,3 +58,5 @@
   } while (0) /* no semicolon */
 
 #endif
+
+#endif  // XNNPACK_SRC_XNNPACK_INIT_ONCE_H_

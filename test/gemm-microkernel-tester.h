@@ -6,7 +6,10 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#pragma once
+#ifndef XNNPACK_TEST_GEMM_MICROKERNEL_TESTER_H_
+#define XNNPACK_TEST_GEMM_MICROKERNEL_TESTER_H_
+
+#include <gtest/gtest.h>
 
 #include <algorithm>
 #include <cstddef>
@@ -18,7 +21,6 @@
 #include <ostream>
 #include <string>
 
-#include <gtest/gtest.h>
 #include "src/xnnpack/math.h"
 #include "src/xnnpack/microfnptr.h"
 #include "src/xnnpack/pack.h"
@@ -228,9 +230,13 @@ class GemmMicrokernelTester {
             xnn_init_qu8_conv_minmax_params_fn init_params,
             xnn_pack_qu8_igemm_fn pack, xnn_qu8_requantize_fn requantize);
 
+  void Test(xnn_qs8_qc2w_gemm_minmax_ukernel_fn gemm,
+          xnn_init_qs8_qc8w_conv_minmax_params_fn init_params,
+          xnn_pack_qs8_qc2w_gemm_fn pack, xnn_qs8_requantize_fn requantize);
+
   void Test(xnn_qs8_qc4w_gemm_minmax_ukernel_fn gemm,
             xnn_init_qs8_qc8w_conv_minmax_params_fn init_params,
-            xnn_pack_qs8_qc4w_gemm_fn pack, xnn_qs8_requantize_fn requantize) ;
+            xnn_pack_qs8_qc4w_gemm_fn pack, xnn_qs8_requantize_fn requantize);
 
   void Test(xnn_qs8_qc8w_gemm_minmax_ukernel_fn gemm,
             xnn_init_qs8_qc8w_conv_minmax_params_fn init_params,
@@ -259,6 +265,14 @@ class GemmMicrokernelTester {
   void Test(xnn_qd8_f16_qb4w_gemm_ukernel_fn gemm,
             xnn_init_f16_qb4w_minmax_params_fn init_params,
             xnn_pack_qs8_qb4w_gemm_fn pack) const;
+
+  void Test(xnn_qd8_f32_qc2w_gemm_ukernel_fn gemm,
+            xnn_init_f32_minmax_params_fn init_params,
+            xnn_pack_qd8_qc2w_gemm_fn pack) const;
+
+  void Test(xnn_qd8_f16_qc2w_gemm_ukernel_fn gemm,
+            xnn_init_f16_minmax_params_fn init_params,
+            xnn_pack_qd8_qc2w_gemm_fn pack) const;
 
   void Test(xnn_qd8_f32_qc4w_gemm_ukernel_fn gemm,
             xnn_init_f32_qc4w_minmax_params_fn init_params,
@@ -301,9 +315,6 @@ class GemmMicrokernelTester {
             xnn_init_f32_minmax_params_fn init_params,
             xnn_pack_f32_gemm_fn pack) const;
 
-  void Test(xnn_f32_gemm_goi_minmax_ukernel_fn gemm_minmax,
-            xnn_init_f32_minmax_params_fn init_params) const;
-
   void Test(xnn_f32_qc4w_gemm_minmax_ukernel_fn gemm_minmax,
             xnn_init_f32_qc4w_minmax_params_fn init_params,
             xnn_pack_f32_qc4w_gemm_fn pack) const;
@@ -317,10 +328,6 @@ class GemmMicrokernelTester {
   void Test(xnn_f32_qc8w_gemm_minmax_ukernel_fn gemm_minmax,
             xnn_init_f32_minmax_params_fn init_params,
             xnn_pack_f32_qs8w_gemm_fn pack) const;
-
-  void Test(xnn_f32_gemminc_minmax_ukernel_fn gemminc,
-            xnn_init_f32_minmax_params_fn init_params,
-            xnn_pack_f32_gemminc_fn pack) const;
 
   void Test(xnn_f32_igemm_ukernel_fn igemm, xnn_pack_f32_igemm_fn pack) const;
 
@@ -351,15 +358,38 @@ class GemmMicrokernelTester {
                  xnn_pack_weights_and_biases_fn pack,
                  xnn_packed_stride_weights_and_biases_fn packed_stride);
 
+  void Test_PF32(xnn_pf32_packed_lhs_igemm_ukernel_fn packed_igemm,
+                 xnn_init_f32_minmax_params_fn init_minmax_params,
+                 xnn_pack_lh_igemm_ukernel_fn pack_lh_for_igemm_fn,
+                 xnn_pack_lh_igemm_size_fn size_for_igemm_fn,
+                 xnn_pack_f32_igemm_fn pack_rhs) const;
+
   void Test_PF16(xnn_pf16_gemm_minmax_ukernel_fn gemm,
                  xnn_init_f16_minmax_params_fn init_minmax_params,
                  xnn_pack_weights_and_biases_fn pack,
                  xnn_packed_stride_weights_and_biases_fn packed_stride);
 
+#if XNN_ENABLE_ARM_SME2 || XNN_ENABLE_ARM_SME
+  // PF16 packed-LHS IGEMM (weights_and_biases API + packed_stride)
+  void Test_PF16(xnn_pf16_f16_packed_igemm_minmax_ukernel_fn packed_igemm,
+                 xnn_init_f16_minmax_params_fn init_minmax_params,
+                 xnn_pack_lh_igemm_ukernel_fn pack_lh_for_igemm_fn,
+                 xnn_pack_lh_igemm_size_fn size_for_igemm_fn,
+                 xnn_pack_weights_and_biases_fn pack_wb,
+                 xnn_packed_stride_weights_and_biases_fn packed_stride_wb);
+#endif
+
   void Test_PQS8(xnn_pqs8_qc8w_gemm_minmax_ukernel_fn gemm,
                  xnn_init_qs8_qc8w_conv_minmax_params_fn init_minmax_params,
                  xnn_pack_weights_and_biases_fn pack,
                  xnn_packed_stride_weights_and_biases_fn packed_stride) const;
+
+  void Test_PQS8(xnn_packed_lhs_igemm_ukernel_fn packed_igemm,
+                 xnn_init_qs8_qc8w_conv_minmax_params_fn init_minmax_params,
+                 xnn_pack_lh_igemm_ukernel_fn pack_lh_for_igemm_fn,
+                 xnn_pack_lh_igemm_size_fn size_for_igemm_fn,
+                 xnn_pack_qs8_igemm_fn pack_rhs,
+                 xnn_qs8_requantize_fn requantize) const;
 
  private:
   size_t mr_{1};
@@ -432,11 +462,11 @@ inline std::ostream& operator<<(std::ostream& outs,
 struct GemmTestParams {
   GemmTestParams(std::string test_name, GemmMicrokernelTester tester,
                  std::function<void(GemmMicrokernelTester& tester)> test_func,
-                 std::function<void(void)> isa_check = nullptr)
+                 uint64_t arch_flags = 0)
       : test_name(test_name),
         tester(tester),
         test_func(test_func),
-        isa_check(isa_check) {}
+        arch_flags(arch_flags) {}
 
   // Setters for the loops over `k`, `m`, and `n`.
   GemmTestParams& loop_k(size_t from, size_t to, size_t step = 1,
@@ -473,7 +503,7 @@ struct GemmTestParams {
   std::string test_name;
   GemmMicrokernelTester tester;
   std::function<void(GemmMicrokernelTester& tester)> test_func;
-  std::function<void(void)> isa_check;
+  uint64_t arch_flags;
   LoopParams loop_k_;
   LoopParams loop_m_;
   LoopParams loop_n_;
@@ -519,3 +549,5 @@ inline std::ostream& operator<<(std::ostream& outs,
 }
 
 using GemmTest = testing::TestWithParam<GemmTestParams>;
+
+#endif  // XNNPACK_TEST_GEMM_MICROKERNEL_TESTER_H_

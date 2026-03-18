@@ -3,7 +3,8 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#pragma once
+#ifndef XNNPACK_SRC_XNNPACK_REFERENCE_UTILS_H_
+#define XNNPACK_SRC_XNNPACK_REFERENCE_UTILS_H_
 
 #include <algorithm>
 #include <cmath>
@@ -23,7 +24,7 @@ template <typename Result>
 Result round_float_to_int(float x) {
   using Unwrapped = typename unwrap_quantized<Result>::type;
   x = std::isnan(x) ? 0.0f : x;
-  x = std::round(x);
+  x = std::nearbyint(x);
   // It's tricky to do this with std::max/std::min, because the min/max values
   // might not be exactly representable as floats, and so are ineffective to
   // avoid converting to an out of bounds integer. To avoid this problem, we've
@@ -93,3 +94,5 @@ T integer_pow(T a, T b) {
 }
 
 }  // namespace xnnpack
+
+#endif  // XNNPACK_SRC_XNNPACK_REFERENCE_UTILS_H_

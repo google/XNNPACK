@@ -9,9 +9,14 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
 
+#include "src/xnnpack/common.h"
 #include "src/xnnpack/gemm.h"
 #include "src/xnnpack/math.h"
+#include "src/xnnpack/microparams.h"
+
 #include "src/xnnpack/unaligned.h"
 
 
@@ -25,7 +30,7 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x2__scalar_imagic(
     int8_t* restrict c,
     size_t cm_stride,
     size_t cn_stride,
-    const union xnn_qs8_qc8w_conv_minmax_params* restrict params)
+    const union xnn_qs8_qc8w_conv_minmax_params* restrict params) XNN_DISABLE_UBSAN
 {
   assert(mr != 0);
   assert(mr <= 1);

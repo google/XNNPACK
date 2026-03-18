@@ -1,4 +1,4 @@
-// Copyright 2023 Google LLC
+// Copyright 2023-2025 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
@@ -18,20 +18,19 @@
 #include "src/xnnpack/microfnptr.h"
 #include "src/xnnpack/microparams-init.h"
 #include "src/xnnpack/vbinary.h"
+#include "test/replicable_random_device.h"
 #include <benchmark/benchmark.h>
 
 static void f32_vcmul(benchmark::State& state, uint64_t arch_flags,
                       xnn_f32_vbinary_ukernel_fn vcmul,
-                      xnn_init_f32_default_params_fn init_params = nullptr,
-                      benchmark::utils::IsaCheckFunction isa_check = nullptr) {
+                      xnn_init_f32_default_params_fn init_params = nullptr) {
   if (!benchmark::utils::CheckArchFlags(state, arch_flags)) {
     return;
   }
 
   const size_t num_elements = state.range(0);
 
-  std::random_device random_device;
-  auto rng = std::mt19937(random_device());
+  xnnpack::ReplicableRandomDevice rng;
   auto f32rng = std::bind(std::uniform_real_distribution<float>(-1.0f, 1.0f),
                           std::ref(rng));
 
@@ -76,7 +75,7 @@ static void f32_vcmul(benchmark::State& state, uint64_t arch_flags,
           benchmark::utils::BinaryElementwiseParameters<std::complex<float>,  \
                                                         std::complex<float>>) \
       ->UseRealTime();
-#include "src/f32-vbinary/f32-vcmul.h"
+#include "src/f32-vbinary/f32-vcmul.inc"
 #undef XNN_UKERNEL
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN

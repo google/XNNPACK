@@ -1,9 +1,10 @@
-// Copyright 2019 Google LLC
+// Copyright 2019-2025 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#pragma once
+#ifndef XNNPACK_BENCH_UTILS_H_
+#define XNNPACK_BENCH_UTILS_H_
 
 #include <algorithm>
 #include <cstddef>
@@ -11,16 +12,38 @@
 #include <functional>
 #include <string>
 
+#include "include/experimental.h"
 #include "src/xnnpack/common.h"
 #include <benchmark/benchmark.h>
 #include <pthreadpool.h>
 
-#ifdef BENCHMARK_ARGS_BOTTLENECK
+// Some of these gemm benchmarks attempt to generate 10s of thousands of
+// benchmarks. This causes a lot of problems for the compiler and linker if
+// these use lambdas or generate extra globals per benchmark. The most similar
+// macro in the benchmark framework to this is BENCHMARK_CAPTURE with no
+// extra arguments, but that creates a lambda. This is equivalent to that,
+// without the extra arguments (and lambda).
+#define BENCHMARK_NAMED(func, test_case_name)                          \
+  BENCHMARK_PRIVATE_DECLARE(_benchmark_) =                             \
+      (::benchmark::internal::RegisterBenchmarkInternal(               \
+          std::make_unique< ::benchmark::internal::FunctionBenchmark>( \
+              #func "/" #test_case_name, func)))
+
+#if defined(BENCHMARK_ARGS_BOTTLENECK)
 #define XNN_BENCHMARK_MAIN()                            \
   extern "C" {                                          \
   int BenchmarkArgBottleneck(int& argc, char**& argv) { \
     return benchmark::utils::ProcessArgs(argc, argv);   \
   }                                                     \
+  }
+#elif defined(__hexagon__)
+#define XNN_BENCHMARK_MAIN()                                            \
+  int __attribute__((weak)) main(int argc, char** argv) {               \
+    ::benchmark::Initialize(&argc, argv);                               \
+    int status = benchmark::utils::ProcessArgs(argc, argv);             \
+    if (status != 0) return status;                                     \
+    if (::benchmark::ReportUnrecognizedArguments(argc, argv)) return 1; \
+    ::benchmark::RunSpecifiedBenchmarks();                              \
   }
 #else
 #define XNN_BENCHMARK_MAIN()                                            \
@@ -30,8 +53,7 @@
     if (status != 0) return status;                                     \
     if (::benchmark::ReportUnrecognizedArguments(argc, argv)) return 1; \
     ::benchmark::RunSpecifiedBenchmarks();                              \
-  }                                                                     \
-  int main(int, char**)
+  }
 #endif  // BENCHMARK_ARGS_BOTTLENECK
 
 // Common flags for all benchmarks.
@@ -51,6 +73,8 @@ uint32_t PrefetchToL1(const void* ptr, size_t size);
 // Clear the L2 cache in each thread of the given `threadpool`, calls
 // `state.PauseTiming()` while doing so.
 void WipePthreadpoolL2Caches(benchmark::State& state, pthreadpool_t threadpool);
+void WipeSchedulerL2Caches(benchmark::State& state, xnn_scheduler_v2 scheduler,
+                           void* scheduler_context);
 
 // Disable support for denormalized numbers in floating-point units.
 void DisableDenormals();
@@ -63,7 +87,7 @@ uint64_t GetCurrentCpuFrequency();
 size_t GetMaxCacheSize();
 
 template <class InType>
-static void ReduceParameters(benchmark::internal::Benchmark* b) {
+static void ReduceParameters(benchmark::Benchmark* b) {
   b->ArgNames({"channels", "rows"});
   b->Args({1, 512});
   b->Args({1, 1024});
@@ -76,7 +100,7 @@ static void ReduceParameters(benchmark::internal::Benchmark* b) {
 }
 
 template <class InType>
-static void ReduceDiscontiguousParameters(benchmark::internal::Benchmark* b) {
+static void ReduceDiscontiguousParameters(benchmark::Benchmark* b) {
   b->ArgNames({"rows", "channels"});
   b->Args({8, 1024});
   b->Args({16, 1024});
@@ -90,7 +114,7 @@ static void ReduceDiscontiguousParameters(benchmark::internal::Benchmark* b) {
 // - Total memory footprint does not exceed the characteristic cache size for
 //   the architecture.
 template <class InType, class OutType>
-void UnaryElementwiseParameters(benchmark::internal::Benchmark* benchmark) {
+void UnaryElementwiseParameters(benchmark::Benchmark* benchmark) {
   benchmark->ArgName("N");
 
   size_t characteristic_l1 = 32 * 1024;
@@ -111,7 +135,7 @@ void UnaryElementwiseParameters(benchmark::internal::Benchmark* benchmark) {
 // - Total memory footprint does not exceed the characteristic cache size for
 //   the architecture.
 template <class InType, class OutType>
-void BinaryElementwiseParameters(benchmark::internal::Benchmark* benchmark) {
+void BinaryElementwiseParameters(benchmark::Benchmark* benchmark) {
   benchmark->ArgName("N");
 
   size_t characteristic_l1 = 32 * 1024;
@@ -128,187 +152,9 @@ void BinaryElementwiseParameters(benchmark::internal::Benchmark* benchmark) {
       std::max<size_t>(1, characteristic_l2 / elementwise_size / 960) * 960);
 }
 
-using IsaCheckFunction = std::function<bool(benchmark::State&)>;
-
 // Check if the architecture flags are supported.
 // If unsupported, report error in benchmark state, and return false.
 bool CheckArchFlags(benchmark::State& state, uint64_t arch_flags);
-
-// Check if either ARM VFPv2 or VFPv3 extension is supported.
-// If VFP is unsupported, report error in benchmark state, and return false.
-bool CheckVFP(benchmark::State& state);
-
-// Check if ARMv6 extensions are supported.
-// If ARMv6 extensions are unsupported, report error in benchmark state, and
-// return false.
-bool CheckARMV6(benchmark::State& state);
-
-// Check if ARM FP16-ARITH extension is supported.
-// If FP16-ARITH is unsupported, report error in benchmark state, and return
-// false.
-bool CheckFP16ARITH(benchmark::State& state);
-
-// Check if ARM NEON extension is supported.
-// If NEON is unsupported, report error in benchmark state, and return false.
-bool CheckNEON(benchmark::State& state);
-
-// Check if ARM NEON-FP16 extension is supported.
-// If NEON-FP16 is unsupported, report error in benchmark state, and return
-// false.
-bool CheckNEONFP16(benchmark::State& state);
-
-// Check if ARM NEON-FMA extension is supported.
-// If NEON-FMA is unsupported, report error in benchmark state, and return
-// false.
-bool CheckNEONFMA(benchmark::State& state);
-
-// Check if ARMv8 NEON instructions are supported.
-// If ARMv8 NEON is unsupported, report error in benchmark state, and return
-// false.
-bool CheckNEONV8(benchmark::State& state);
-
-// Check if ARM NEON-FP16-ARITH extension is supported.
-// If NEON-FP16-ARITH is unsupported, report error in benchmark state, and
-// return false.
-bool CheckNEONFP16ARITH(benchmark::State& state);
-
-// Check if ARM NEON-BF16 extension is supported.
-// If NEON-BF16 is unsupported, report error in benchmark state, and return
-// false.
-bool CheckNEONBF16(benchmark::State& state);
-
-// Check if ARM DOT extension is supported.
-// If DOT is unsupported, report error in benchmark state, and return false.
-bool CheckNEONDOT(benchmark::State& state);
-
-// Check if ARM I8MM extension is supported.
-// If I8MM is unsupported, report error in benchmark state, and return false.
-bool CheckNEONI8MM(benchmark::State& state);
-
-// Check if ARM SME extension is supported.
-// If SME is unsupported, report error in benchmark state, and return false.
-bool CheckNEONSME(benchmark::State& state);
-
-// Check if ARM SME2 extension is supported.
-// If SME2 is unsupported, report error in benchmark state, and return false.
-bool CheckNEONSME2(benchmark::State& state);
-
-// Check if RISC-V V (vector) extension is supported.
-// If V is unsupported, report error in benchmark state, and return false.
-bool CheckRVV(benchmark::State& state);
-
-// Check if RISC-V V (vector) FP16-ARITH extension is supported.
-// If RVV-FP16-ARITH is unsupported, report error in benchmark state, and return
-// false.
-bool CheckRVVFP16ARITH(benchmark::State& state);
-
-// Check if x86 SSSE3 extension is supported.
-// If SSSE3 is unsupported, report error in benchmark state, and return false.
-bool CheckSSSE3(benchmark::State& state);
-
-// Check if x86 SSE4.1 extension is supported.
-// If SSE4.1 is unsupported, report error in benchmark state, and return false.
-bool CheckSSE41(benchmark::State& state);
-
-// Check if x86 AVX extension is supported.
-// If AVX is unsupported, report error in benchmark state, and return false.
-bool CheckAVX(benchmark::State& state);
-
-// Check if x86 F16C extension is supported.
-// If F16C is unsupported, report error in benchmark state, and return false.
-bool CheckF16C(benchmark::State& state);
-
-// Check if x86 FMA3 extension is supported.
-// If FMA3 is unsupported, report error in benchmark state, and return false.
-bool CheckFMA3(benchmark::State& state);
-
-// Check if x86 AVX2 extension is supported.
-// If AVX2 is unsupported, report error in benchmark state, and return false.
-bool CheckAVX2(benchmark::State& state);
-
-// Check if x86 AVX512F extension is supported.
-// If AVX512F is unsupported, report error in benchmark state, and return false.
-bool CheckAVX512F(benchmark::State& state);
-
-// Check if x86 SKX-level AVX512 extensions (AVX512F, AVX512CD, AVX512BW,
-// AVX512DQ, and AVX512VL) are supported. If SKX-level AVX512 extensions are
-// unsupported, report error in benchmark state, and return false.
-bool CheckAVX512SKX(benchmark::State& state);
-
-// Check if x86 VBMI + SKX-level AVX512 extensions (AVX512F, AVX512CD, AVX512BW,
-// AVX512DQ, and AVX512VL) are supported. If VBMI or SKX-level AVX512 extensions
-// are unsupported, report error in benchmark state, and return false.
-bool CheckAVX512VBMI(benchmark::State& state);
-
-// Check if x86 VNNI + SKX-level AVX512 extensions (AVX512F, AVX512CD, AVX512BW,
-// AVX512DQ, and AVX512VL) are supported. If VNNI or SKX-level AVX512 extensions
-// are unsupported, report error in benchmark state, and return false.
-bool CheckAVX512VNNI(benchmark::State& state);
-
-// Check if x86 VNNI + GFNI + SKX-level AVX512 extensions (AVX512F, AVX512CD,
-// AVX512BW, AVX512DQ, AVX512VL, and GFNI) are supported. If VNNI or GFNI or
-// SKX-level AVX512 extensions are unsupported, report error in benchmark state,
-// and return false.
-bool CheckAVX512VNNIGFNI(benchmark::State& state);
-
-// Check if x86 VNNI + GFNI + SKX-level + AMX AVX512 extensions (AAVX512F,
-// AVX512CD, AVX512BW, AVX512DQ, AVX512VL, GFNI and AMX) are supported. If
-// AVX512 or AMX are unsupported, report error in benchmark state, and return
-// false.
-bool CheckAVX512AMX(benchmark::State& state);
-
-// Check if x86 VNNI + GFNI + SKX-level + FP16 AVX512 extensions (AAVX512F,
-// AVX512CD, AVX512BW, AVX512DQ, AVX512VL, GFNI and FP16) are supported. If
-// AVX512 or FP16 are unsupported, report error in benchmark state, and return
-// false.
-bool CheckAVX512FP16(benchmark::State& state);
-
-// Check if x86 AVX-VNNI extension is supported.
-// If AVX-VNNI extension is unsupported, report error in benchmark state, and
-// return false.
-bool CheckAVXVNNI(benchmark::State& state);
-
-// Check if x86 AVX-VNNI-INT8 extension is supported.
-// If AVX-VNNI-INT8 extension is unsupported, report error in benchmark state,
-// and return false.
-bool CheckAVXVNNIINT8(benchmark::State& state);
-
-// Check if x86 AVX256SKX extension is supported.
-// If AVX256SKX extension is unsupported, report error in benchmark state, and
-// return false.
-bool CheckAVX256SKX(benchmark::State& state);
-
-// Check if x86 AVXVNNI + AVX10 or AVX512 is supported
-// If VNNI or SKX-level AVX256 extensions are unsupported, report error in
-// benchmark state, and return false.
-bool CheckAVX256VNNI(benchmark::State& state);
-
-// Check if x86 VNNI + GFNI + AVX10 or AVX512 is supported
-bool CheckAVX256VNNIGFNI(benchmark::State& state);
-
-// Check if Hexagon HVX extension is supported.
-// If HVX is unsupported, report error in benchmark state, and return false.
-bool CheckHVX(benchmark::State& state);
-
-// Check if PSHUFB instruction is available in WAsm Relaxed SIMD as Relaxed
-// Swizzle. If WAsm PSHUFB is unsupported, report error in benchmark state, and
-// return false.
-bool CheckWAsmPSHUFB(benchmark::State& state);
-
-// Check if SDOT instruction is available in WAsm Relaxed SIMD as Relaxed
-// Integer Dot Product with Accumulation. If WAsm SDOT is unsupported, report
-// error in benchmark state, and return false.
-bool CheckWAsmSDOT(benchmark::State& state);
-
-// Check if USDOT instruction is available in WAsm Relaxed SIMD as Relaxed
-// Integer Dot Product with Accumulation. If WAsm USDOT is unsupported, report
-// error in benchmark state, and return false.
-bool CheckWAsmUSDOT(benchmark::State& state);
-
-// Check if BLENDVPS instruction is available in WAsm Relaxed SIMD as Relaxed
-// Lane Select. If WAsm BLENDVPS is unsupported, report error in benchmark
-// state, and return false.
-bool CheckWAsmBLENDVPS(benchmark::State& state);
 
 template <class T>
 inline T DivideRoundUp(T x, T q) {
@@ -327,3 +173,5 @@ inline T Doz(T a, T b) {
 
 }  // namespace utils
 }  // namespace benchmark
+
+#endif  // XNNPACK_BENCH_UTILS_H_

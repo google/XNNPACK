@@ -10,6 +10,8 @@ $assert REQUANTIZATION in ["FP16", "FP32", "RNDNU"] or not REQUANTIZATION
 $assert DATATYPE in ["QC8", "QS8", "QD8_F16", "QD8_F32", "QC4_F16", "QC4_F32", "QB4_F16", "QB4_F32"]
 $assert DATATYPE != "QC8" or REQUANTIZATION == "FP32"
 #include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
 
 $#
 $INDENT = 0
@@ -31,10 +33,12 @@ $def END():
 $#
 #include <arm_neon.h>
 
+#include "src/xnnpack/common.h"
 #include "src/xnnpack/gemm.h"
 $if REQUANTIZATION == "FP32":
   #include "src/xnnpack/intrinsics-polyfill.h"
 #include "src/xnnpack/math.h"
+#include "src/xnnpack/microparams.h"
 
 
 $DATATYPE_SPEC = {"QC8": "qs8_qc8w", "QS8": "qs8", "QD8_F16" : "qd8_f16_qc8w", "QD8_F32": "qd8_f32_qc8w", "QC4_F16": "qd8_f16_qc4w", "QC4_F32": "qd8_f32_qc4w", "QB4_F16": "qd8_f16_qb4w", "QB4_F32": "qd8_f32_qb4w"}[DATATYPE]

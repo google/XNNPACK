@@ -14,7 +14,7 @@ class NeonDot(neonfma_template.NeonFma):
     return 'neondot'
 
   def a_registers(self, idx):
-    registers = ['2', '3', '4', '5', '11']
+    registers = ['2', '3', '4', '5', '11', '26', '27']
     assert idx < len(registers)
     return registers[idx]
 
@@ -53,7 +53,7 @@ class NeonDot(neonfma_template.NeonFma):
     )
 
   def zp_scale(self, pos):
-    regs = ['30', '31']
+    regs = ['28', '29', '30', '31']
     return regs[pos]
 
   # kc = round_up_po2(kc, channels)
@@ -108,7 +108,7 @@ class NeonDot(neonfma_template.NeonFma):
       case _:
         raise NotImplementedError
 
-  def convert_to_output_type(self):
+  def convert_to_output(self):
     accumulators = self.acc_registers()
     self.comment('Convert from int32 to float.')
     for nr in range(0, self.n * self.m):
@@ -173,6 +173,9 @@ class NeonDot(neonfma_template.NeonFma):
             c=self.w_registers()[nr],
         )
 
+    self.comment('Min/max clamping.')
+    self.clamp()
+
   def init_accumulators(self):
     self.comment('Initialize accumulators with k_sum * input zero point.')
     accumulators = self.acc_registers()
@@ -187,6 +190,17 @@ class NeonDot(neonfma_template.NeonFma):
     else:
       self.load_simd_register(
           q=self.zp_scale(0), ptr=self.quantization_params_register(), offset=0
+      )
+    if self.m > 6:
+      self.load_simd_register_pair(
+          q0=self.zp_scale(2),
+          q1=self.zp_scale(3),
+          ptr=self.quantization_params_register(),
+          offset=32,
+      )
+    elif self.m > 4:
+      self.load_simd_register(
+          q=self.zp_scale(2), ptr=self.quantization_params_register(), offset=32
       )
     for nr in range(0, self.n - 1, 2):
       self.load_simd_register_pair(
@@ -282,7 +296,7 @@ class NeonDotQS8QC8W(NeonDot):
   def dup_s16(self, ptr, q):
     self.asm_string += f'ld1r {{v{q}.8h}}, [{ptr}]\n'
 
-  def convert_to_output_type(self):
+  def convert_to_output(self):
     accumulators = self.acc_registers()
     self.comment('Convert from int32 to float.')
     for nr in range(0, self.n * self.m):
@@ -349,6 +363,9 @@ class NeonDotQS8QC8W(NeonDot):
           b=accumulators[mr * self.n + 2],
           atype='sint16',
       )
+
+    self.comment('Min/max clamping.')
+    self.clamp()
 
   def clamp_min(self, reg, prefix):
     max_reg = self.max_register()

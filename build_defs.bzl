@@ -1,5 +1,8 @@
 """Build definitions and rules for XNNPACK."""
 
+load("@rules_cc//cc:cc_binary.bzl", "cc_binary")
+load("@rules_cc//cc:cc_library.bzl", "cc_library")
+load("@rules_cc//cc:cc_test.bzl", "cc_test")
 load("//:emscripten.bzl", "xnnpack_emscripten_benchmark_linkopts", "xnnpack_emscripten_deps", "xnnpack_emscripten_minimal_linkopts", "xnnpack_emscripten_test_linkopts")
 
 def xnnpack_select_if(cond = None, val_true = [], val_false = []):
@@ -16,10 +19,6 @@ def xnnpack_configurable_defines():
         "//:cpuinfo_enabled",
         ["XNN_ENABLE_CPUINFO=1"],
         ["XNN_ENABLE_CPUINFO=0"],
-    ) + xnnpack_select_if(
-        "//:memopt_enabled",
-        ["XNN_ENABLE_MEMOPT=1"],
-        ["XNN_ENABLE_MEMOPT=1"],
     ) + xnnpack_select_if(
         "//:sparse_enabled",
         ["XNN_ENABLE_SPARSE=1"],
@@ -53,17 +52,37 @@ def xnnpack_configurable_defines():
         ["XNN_ENABLE_RISCV_FP16_VECTOR=1"],
         ["XNN_ENABLE_RISCV_FP16_VECTOR=0"],
     ) + xnnpack_select_if(
-        "//:avx512amx_enabled",
-        ["XNN_ENABLE_AVX512AMX=1"],
-        ["XNN_ENABLE_AVX512AMX=0"],
+        "//:sse_enabled",
+        ["XNN_ENABLE_SSE=1"],
+        ["XNN_ENABLE_SSE=0"],
     ) + xnnpack_select_if(
-        "//:avx512fp16_enabled",
-        ["XNN_ENABLE_AVX512FP16=1"],
-        ["XNN_ENABLE_AVX512FP16=0"],
+        "//:sse2_enabled",
+        ["XNN_ENABLE_SSE2=1"],
+        ["XNN_ENABLE_SSE2=0"],
     ) + xnnpack_select_if(
-        "//:avx512bf16_enabled",
-        ["XNN_ENABLE_AVX512BF16=1"],
-        ["XNN_ENABLE_AVX512BF16=0"],
+        "//:ssse3_enabled",
+        ["XNN_ENABLE_SSSE3=1"],
+        ["XNN_ENABLE_SSSE3=0"],
+    ) + xnnpack_select_if(
+        "//:sse41_enabled",
+        ["XNN_ENABLE_SSE41=1"],
+        ["XNN_ENABLE_SSE41=0"],
+    ) + xnnpack_select_if(
+        "//:avx_enabled",
+        ["XNN_ENABLE_AVX=1"],
+        ["XNN_ENABLE_AVX=0"],
+    ) + xnnpack_select_if(
+        "//:f16c_enabled",
+        ["XNN_ENABLE_F16C=1"],
+        ["XNN_ENABLE_F16C=0"],
+    ) + xnnpack_select_if(
+        "//:fma3_enabled",
+        ["XNN_ENABLE_FMA3=1"],
+        ["XNN_ENABLE_FMA3=0"],
+    ) + xnnpack_select_if(
+        "//:avx2_enabled",
+        ["XNN_ENABLE_AVX2=1"],
+        ["XNN_ENABLE_AVX2=0"],
     ) + xnnpack_select_if(
         "//:avxvnni_enabled",
         ["XNN_ENABLE_AVXVNNI=1"],
@@ -105,6 +124,18 @@ def xnnpack_configurable_defines():
         ["XNN_ENABLE_AVX512VNNIGFNI=1"],
         ["XNN_ENABLE_AVX512VNNIGFNI=0"],
     ) + xnnpack_select_if(
+        "//:avx512amx_enabled",
+        ["XNN_ENABLE_AVX512AMX=1"],
+        ["XNN_ENABLE_AVX512AMX=0"],
+    ) + xnnpack_select_if(
+        "//:avx512fp16_enabled",
+        ["XNN_ENABLE_AVX512FP16=1"],
+        ["XNN_ENABLE_AVX512FP16=0"],
+    ) + xnnpack_select_if(
+        "//:avx512bf16_enabled",
+        ["XNN_ENABLE_AVX512BF16=1"],
+        ["XNN_ENABLE_AVX512BF16=0"],
+    ) + xnnpack_select_if(
         "//:hvx_enabled",
         ["XNN_ENABLE_HVX=1"],
         ["XNN_ENABLE_HVX=0"],
@@ -115,7 +146,7 @@ def xnnpack_configurable_defines():
     ) + xnnpack_select_if(
         "//:arm_sme_enabled",
         ["XNN_ENABLE_ARM_SME=1"],
-        ["XNN_ENABLE_SRM_SME=0"],
+        ["XNN_ENABLE_ARM_SME=0"],
     ) + xnnpack_select_if(
         "//:arm_sme2_enabled",
         ["XNN_ENABLE_ARM_SME2=1"],
@@ -124,7 +155,7 @@ def xnnpack_configurable_defines():
         "//:wasm_revectorize_enabled",
         ["XNN_ENABLE_WASM_REVECTORIZE=1"],
         ["XNN_ENABLE_WASM_REVECTORIZE=0"],
-    ) + xnnpack_slinky_defines()
+    )
 
 def xnnpack_visibility():
     """Visibility of :XNNPACK target.
@@ -140,7 +171,7 @@ def xnnpack_min_size_copts():
 
 def xnnpack_gcc_std_copts():
     """GCC-like compiler flags to specify language standard for C sources."""
-    return ["-std=c99"]
+    return ["-std=c99", "-Wimplicit-fallthrough"]
 
 def xnnpack_msvc_std_copts():
     """MSVC compiler flags to specify language standard for C sources."""
@@ -152,7 +183,15 @@ def xnnpack_std_copts():
 
 def xnnpack_std_cxxopts():
     """Compiler flags to specify language standard for C++ sources."""
-    return ["-std=gnu++14"]
+    return ["-std=c++17"]
+
+def xnnpack_std_c_defines():
+    """Default defines used throughout the C sources.
+
+    We need this for things like `struct timespec` that are not in c99, but
+    are part of POSIX 1003.1b-1993."""
+
+    return ["_DARWIN_C_SOURCE=1", "_POSIX_C_SOURCE=199309L"]
 
 def xnnpack_test_deps_for_library():
     """Depencies needed for a library to use gunit."""
@@ -188,12 +227,6 @@ def xnnpack_optional_tflite_deps():
 
 def xnnpack_optional_dnnl_deps():
     """Optional Intel DNNL dependencies."""
-    return []
-
-def xnnpack_slinky_deps():
-    return []
-
-def xnnpack_slinky_defines():
     return []
 
 def xnnpack_if_kleidiai_enabled(enabled = [], not_enabled = []):
@@ -295,10 +328,11 @@ def xnnpack_cc_library(
       testonly: If True only testonly targets (such as tests) can depend on this.
       **kwargs: Other arguments to pass to the cc_library rule.
     """
+
     # Set the default defines.
     defines = defines or xnnpack_configurable_defines()
 
-    native.cc_library(
+    cc_library(
         name = name,
         srcs = srcs + select({
             "//build_config:aarch32": aarch32_srcs,
@@ -320,7 +354,8 @@ def xnnpack_cc_library(
             "//build_config:macos_x86_64": gcc_x86_copts,
             "//build_config:macos_x86_64_legacy": gcc_x86_copts,
             "//build_config:macos_arm64": aarch64_copts,
-            "//build_config:windows_x86_64_clang": ["/clang:" + opt for opt in gcc_x86_copts],
+            "//build_config:windows_x86_64_clangcl": ["/clang:" + opt for opt in gcc_x86_copts],
+            "//build_config:windows_x86_64_clang": gcc_x86_copts,
             "//build_config:windows_x86_64_mingw": mingw_copts + gcc_x86_copts,
             "//build_config:windows_x86_64_msys": msys_copts + gcc_x86_copts,
             "//build_config:windows_x86_64": msvc_x86_64_copts,
@@ -341,7 +376,8 @@ def xnnpack_cc_library(
             "//build_config:emscripten_wasmrelaxedsimd": wasmrelaxedsimd_copts,
             "//conditions:default": [],
         }) + select({
-            "//build_config:windows_x86_64_clang": ["/clang:" + opt for opt in gcc_copts],
+            "//build_config:windows_x86_64_clangcl": ["/clang:" + opt for opt in gcc_copts],
+            "//build_config:windows_x86_64_clang": gcc_copts,
             "//build_config:windows_x86_64_mingw": gcc_copts,
             "//build_config:windows_x86_64_msys": gcc_copts,
             "//build_config:windows_x86_64": msvc_copts,
@@ -350,7 +386,7 @@ def xnnpack_cc_library(
             "//:optimized_build": optimized_copts,
             "//conditions:default": [],
         }),
-        defines = defines,
+        defines = xnnpack_std_c_defines() + defines,
         deps = deps,
         includes = ["include", "src"] + includes,
         linkstatic = True,
@@ -367,7 +403,7 @@ def xnnpack_cc_library(
         hdrs = hdrs,
         visibility = visibility,
         testonly = testonly,
-        **kwargs,
+        **kwargs
     )
 
 def xnnpack_cxx_library(name, copts = xnnpack_std_cxxopts(), gcc_copts = [], msvc_copts = [], **kwargs):
@@ -402,7 +438,7 @@ def xnnpack_unit_test(name, srcs, copts = [], mingw_copts = [], msys_copts = [],
     # Set the default defines.
     defines = defines or xnnpack_configurable_defines()
 
-    native.cc_test(
+    cc_test(
         name = name,
         srcs = srcs,
         copts = xnnpack_std_cxxopts() + select({
@@ -410,7 +446,8 @@ def xnnpack_unit_test(name, srcs, copts = [], mingw_copts = [], msys_copts = [],
             "//build_config:windows_x86_64_msys": msys_copts,
             "//conditions:default": [],
         }) + select({
-            "//build_config:windows_x86_64_clang": ["/clang:-Wno-unused-function"],
+            "//build_config:windows_x86_64_clangcl": ["/clang:-Wno-unused-function"],
+            "//build_config:windows_x86_64_clang": ["-Wno-unused-function"],
             "//build_config:windows_x86_64_mingw": ["-Wno-unused-function"],
             "//build_config:windows_x86_64_msys": ["-Wno-unused-function"],
             "//build_config:windows_x86_64": [],
@@ -431,7 +468,7 @@ def xnnpack_unit_test(name, srcs, copts = [], mingw_copts = [], msys_copts = [],
         tags = tags,
         timeout = timeout,
         shard_count = shard_count,
-        **kwargs,
+        **kwargs
     )
 
 def xnnpack_binary(name, srcs, copts = [], deps = [], linkopts = []):
@@ -444,7 +481,7 @@ def xnnpack_binary(name, srcs, copts = [], deps = [], linkopts = []):
       deps: The list of libraries to be linked.
       linkopts: The list of additional linker options
     """
-    native.cc_binary(
+    cc_binary(
         name = name,
         srcs = srcs,
         copts = copts,
@@ -469,14 +506,16 @@ def xnnpack_benchmark(name, srcs, copts = [], deps = [], tags = [], defines = []
       tags: The list of arbitrary text tags.
       defines: The list of arbitrary defines tags.
     """
+
     # Set the default defines.
     defines = defines or xnnpack_configurable_defines()
 
-    native.cc_test(
+    cc_test(
         name = name,
         srcs = srcs,
         copts = xnnpack_std_cxxopts() + select({
-            "//build_config:windows_x86_64_clang": ["/clang:-Wno-unused-function"],
+            "//build_config:windows_x86_64_clangcl": ["/clang:-Wno-unused-function"],
+            "//build_config:windows_x86_64_clang": ["-Wno-unused-function"],
             "//build_config:windows_x86_64_mingw": ["-Wno-unused-function"],
             "//build_config:windows_x86_64_msys": ["-Wno-unused-function"],
             "//build_config:windows_x86_64": [],

@@ -5,28 +5,32 @@
 
 // clang-format off
 
-#pragma once
+#ifndef XNNPACK_BENCH_BGEMM_H_
+#define XNNPACK_BENCH_BGEMM_H_
 
 #include <benchmark/benchmark.h>
+#include "bench/utils.h"
 
 #define BENCHMARK_BGEMM(bgemm_fn) \
-  BENCHMARK_CAPTURE(bgemm_fn, attention, "Attention")->Apply(QD8AttentionBgemmArguments)->UseRealTime(); \
-  BENCHMARK_CAPTURE(bgemm_fn, albert, "Albert")->Apply(AlbertBgemmArguments)->UseRealTime(); \
-  BENCHMARK_CAPTURE(bgemm_fn, mobilebert, "MobileBert")->Apply(MobilebertBgemmArguments)->UseRealTime(); \
-  BENCHMARK_CAPTURE(bgemm_fn, sd1x_diffusion, "SD1.X Diffusion")->Apply(SD1XDiffusionBgemmArguments)->UseRealTime(); \
-  BENCHMARK_CAPTURE(bgemm_fn, sd1x_encoder_decoder, "SD1.X Encoder-Decoder")->Apply(SD1XEncoderDecoderBgemmArguments)->UseRealTime(); \
-  BENCHMARK_CAPTURE(bgemm_fn, sd1x_text_encoder, "SD1.X Text Encoder")->Apply(SD1XTextEncoderBgemmArguments)->UseRealTime();
+  BENCHMARK_NAMED(bgemm_fn, attention)->Apply(QD8AttentionBgemmArguments)->UseRealTime(); \
+  BENCHMARK_NAMED(bgemm_fn, albert)->Apply(AlbertBgemmArguments)->UseRealTime(); \
+  BENCHMARK_NAMED(bgemm_fn, mobilebert)->Apply(MobilebertBgemmArguments)->UseRealTime(); \
+  BENCHMARK_NAMED(bgemm_fn, sd1x_diffusion)->Apply(SD1XDiffusionBgemmArguments)->UseRealTime(); \
+  BENCHMARK_NAMED(bgemm_fn, sd1x_encoder_decoder)->Apply(SD1XEncoderDecoderBgemmArguments)->UseRealTime(); \
+  BENCHMARK_NAMED(bgemm_fn, sd1x_text_encoder)->Apply(SD1XTextEncoderBgemmArguments)->UseRealTime(); \
+  BENCHMARK_NAMED(bgemm_fn, llm)->Apply(LLMGemmArguments)->UseRealTime();
 
 #define BENCHMARK_CAPTURE_BGEMM(bgemm_fn, name_prefix, ...) \
-  BENCHMARK_CAPTURE(bgemm_fn, name_prefix##attention, "Attention", __VA_ARGS__)->Apply(QD8AttentionBgemmArguments)->UseRealTime(); \
-  BENCHMARK_CAPTURE(bgemm_fn, name_prefix##albert, "Albert", __VA_ARGS__)->Apply(AlbertBgemmArguments)->UseRealTime(); \
-  BENCHMARK_CAPTURE(bgemm_fn, name_prefix##mobilebert, "MobileBert", __VA_ARGS__)->Apply(MobilebertBgemmArguments)->UseRealTime(); \
-  BENCHMARK_CAPTURE(bgemm_fn, name_prefix##sd1x_diffusion, "SD1.X Diffusion", __VA_ARGS__)->Apply(SD1XDiffusionBgemmArguments)->UseRealTime(); \
-  BENCHMARK_CAPTURE(bgemm_fn, name_prefix##sd1x_encoder_decoder, "SD1.X Encoder-Decoder", __VA_ARGS__)->Apply(SD1XEncoderDecoderBgemmArguments)->UseRealTime(); \
-  BENCHMARK_CAPTURE(bgemm_fn, name_prefix##sd1x_text_encoder, "SD1.X Text Encoder", __VA_ARGS__)->Apply(SD1XTextEncoderBgemmArguments)->UseRealTime();
+  BENCHMARK_CAPTURE(bgemm_fn, name_prefix##attention, __VA_ARGS__)->Apply(QD8AttentionBgemmArguments)->UseRealTime(); \
+  BENCHMARK_CAPTURE(bgemm_fn, name_prefix##albert, __VA_ARGS__)->Apply(AlbertBgemmArguments)->UseRealTime(); \
+  BENCHMARK_CAPTURE(bgemm_fn, name_prefix##mobilebert, __VA_ARGS__)->Apply(MobilebertBgemmArguments)->UseRealTime(); \
+  BENCHMARK_CAPTURE(bgemm_fn, name_prefix##sd1x_diffusion, __VA_ARGS__)->Apply(SD1XDiffusionBgemmArguments)->UseRealTime(); \
+  BENCHMARK_CAPTURE(bgemm_fn, name_prefix##sd1x_encoder_decoder, __VA_ARGS__)->Apply(SD1XEncoderDecoderBgemmArguments)->UseRealTime(); \
+  BENCHMARK_CAPTURE(bgemm_fn, name_prefix##sd1x_text_encoder, __VA_ARGS__)->Apply(SD1XTextEncoderBgemmArguments)->UseRealTime(); \
+  BENCHMARK_CAPTURE(bgemm_fn, name_prefix##llm, __VA_ARGS__)->Apply(LLMGemmArguments)->UseRealTime();
 
 
-inline void AlbertBgemmArguments(benchmark::internal::Benchmark* b) {
+inline void AlbertBgemmArguments(benchmark::Benchmark* b) {
   b->ArgNames({"B", "M", "N", "K"});
 
   /*        B   M    N    K  */
@@ -34,7 +38,7 @@ inline void AlbertBgemmArguments(benchmark::internal::Benchmark* b) {
   b->Args({12, 384, 384,  64});
 }
 
-inline void MobilebertBgemmArguments(benchmark::internal::Benchmark* b) {
+inline void MobilebertBgemmArguments(benchmark::Benchmark* b) {
   b->ArgNames({"B", "M", "N", "K"});
 
   /*       B   M    N    K  */
@@ -42,7 +46,7 @@ inline void MobilebertBgemmArguments(benchmark::internal::Benchmark* b) {
   b->Args({4, 384, 384,  32});
 }
 
-inline void SD1XDiffusionBgemmArguments(benchmark::internal::Benchmark* b) {
+inline void SD1XDiffusionBgemmArguments(benchmark::Benchmark* b) {
   b->ArgNames({"B", "M", "N", "K"});
 
   /*       B    M     N     K */
@@ -64,7 +68,7 @@ inline void SD1XDiffusionBgemmArguments(benchmark::internal::Benchmark* b) {
   b->Args({8,   64,  160,   77});
 }
 
-inline void SD1XEncoderDecoderBgemmArguments(benchmark::internal::Benchmark* b) {
+inline void SD1XEncoderDecoderBgemmArguments(benchmark::Benchmark* b) {
   b->ArgNames({"B", "M", "N", "K"});
 
   /*       B    M     N     K */
@@ -72,7 +76,7 @@ inline void SD1XEncoderDecoderBgemmArguments(benchmark::internal::Benchmark* b) 
   b->Args({1,  512, 4096, 4096});
 }
 
-inline void SD1XTextEncoderBgemmArguments(benchmark::internal::Benchmark* b) {
+inline void SD1XTextEncoderBgemmArguments(benchmark::Benchmark* b) {
   b->ArgNames({"B", "M", "N", "K"});
 
   /*       B   M    N   K */
@@ -80,7 +84,7 @@ inline void SD1XTextEncoderBgemmArguments(benchmark::internal::Benchmark* b) {
   b->Args({12, 77, 64, 77});
 }
 
-inline void QD8AttentionBgemmArguments(benchmark::internal::Benchmark* b) {
+inline void QD8AttentionBgemmArguments(benchmark::Benchmark* b) {
   b->ArgNames({"B", "M", "N", "K"});
 
   /*       B      M    N   K */
@@ -100,3 +104,14 @@ inline void QD8AttentionBgemmArguments(benchmark::internal::Benchmark* b) {
   b->Args({14,    1,  2, 1536});
   b->Args({10,    1,  2, 2048});
 }
+
+// Large Language Model (Generic)
+static void LLMGemmArguments(benchmark::Benchmark* b) {
+  b->ArgNames({"B", "M", "N", "K"});
+
+  b->Args({1, 128, 16, 1024});
+  b->Args({1, 128, 128, 1024});
+  b->Args({1, 128, 4096, 1024});
+}
+
+#endif  // XNNPACK_BENCH_BGEMM_H_

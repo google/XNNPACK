@@ -20,17 +20,18 @@
 #include "src/xnnpack/datatype.h"
 #include "src/xnnpack/math.h"
 #include "test/replicable_random_device.h"
+#include "test/subgraph/quantization-helpers.h"
 #include "test/subgraph/stencil.h"
 #include "test/subgraph/subgraph-tester.h"
 
 namespace xnnpack {
 
-template <typename Data, typename Filter, typename Bias>
+template <typename Data, typename Filter, typename Bias, typename Scale>
 Tensor<float> ReferenceImpl(Tensor<Data> input, Tensor<Filter> filter,
                             Tensor<Bias> bias,
                             const xnn_quantization_params& input_quantization,
                             int filter_zero_point, Tensor<float> filter_scale,
-                            const xnn_quantization_params& bias_quantization,
+                            int bias_zero_point, Tensor<Scale> bias_scale,
                             int depth_multiplier, const StencilParams& kh,
                             const StencilParams& kw) {
   Tensor<float> output({input.extent(0), kh.output_extent(input.extent(1)),
@@ -56,7 +57,9 @@ Tensor<float> ReferenceImpl(Tensor<Data> input, Tensor<Filter> filter,
                                                          filter_scale(c)};
           const size_t ic = c / depth_multiplier;
           double output_nyxc =
-              bias.empty() ? 0.0f : dequantize(bias(c), bias_quantization);
+              bias.empty()
+                  ? 0.0f
+                  : dequantize(bias(c), {bias_zero_point, bias_scale(c)});
           for (size_t dy = 0; dy < kh.size; ++dy) {
             for (size_t dx = 0; dx < kw.size; ++dx) {
               float padded_nyxc =
@@ -75,24 +78,6 @@ Tensor<float> ReferenceImpl(Tensor<Data> input, Tensor<Filter> filter,
   return output;
 }
 
-// For float types, generate data in [-1, 1]
-template <typename T>
-DatatypeGenerator<T> MakeDatatypeGenerator(T) {
-  return DatatypeGenerator<T>(-1.0f, 1.0f);
-}
-
-// For quantized types, generate the full range of the type.
-template <typename T>
-DatatypeGenerator<quantized<T>> MakeDatatypeGenerator(quantized<T>) {
-  return DatatypeGenerator<quantized<T>>();
-}
-
-template <>
-DatatypeGenerator<quantized<int32_t>> MakeDatatypeGenerator(
-    quantized<int32_t>) {
-  return DatatypeGenerator<quantized<int32_t>>(-10000, 10000, {0, 1.0f});
-}
-
 DepthwiseConvolutionParams StencilToDepthwiseConvolutionParams(
     const StencilParams& kh, const StencilParams& kw) {
   DepthwiseConvolutionParams params;
@@ -109,19 +94,11 @@ DepthwiseConvolutionParams StencilToDepthwiseConvolutionParams(
   return params;
 }
 
-template <typename T>
-xnn_quantization_params quantization_for_range(float min, float max) {
-  xnn_quantization_params result;
-  result.scale = (max - min) / (static_cast<float>(NumericLimits<T>::max()) -
-                                static_cast<float>(NumericLimits<T>::min()));
-  result.zero_point = NumericLimits<T>::min() - min / result.scale;
-  return result;
-}
-
-template <typename Input, typename Filter, typename Output>
+template <typename Input, typename Filter, typename Bias, typename Output>
 xnn_quantization_params CalculateConvolutionQuantizationParams(
     size_t reduction_size, xnn_quantization_params input_quantization,
-    xnn_quantization_params filter_quantization) {
+    xnn_quantization_params filter_quantization,
+    xnn_quantization_params bias_quantization) {
   if (!xnn_datatype_is_quantized(xnn_datatype_of<Output>())) {
     return {0, 1.0f};
   }
@@ -136,6 +113,9 @@ xnn_quantization_params CalculateConvolutionQuantizationParams(
   const float filter_max =
       dequantize(NumericLimits<Filter>::max(), filter_quantization);
 
+  const float bias_min = dequantize(-max_abs_bias<Bias>(), bias_quantization);
+  const float bias_max = dequantize(max_abs_bias<Bias>(), bias_quantization);
+
   // Find the range of the product of an input and a filter value.
   std::array<float, 4> corners = {
       input_min * filter_min,
@@ -146,14 +126,16 @@ xnn_quantization_params CalculateConvolutionQuantizationParams(
   auto input_filter_minmax =
       std::minmax_element(corners.begin(), corners.end());
 
-  const float output_min = *input_filter_minmax.first * reduction_size;
-  const float output_max = *input_filter_minmax.second * reduction_size;
+  const float output_min =
+      *input_filter_minmax.first * reduction_size + bias_min;
+  const float output_max =
+      *input_filter_minmax.second * reduction_size + bias_max;
 
   // Now we want the output quantization to hold the range of the output.
   return quantization_for_range<Output>(output_min, output_max);
 }
 
-template <typename Data, typename Filter, typename Bias>
+template <typename Data, typename Filter, typename Bias, typename Scale = float>
 void TestImpl(bool channelwise_quantization = false) {
   ReplicableRandomDevice rng;
 
@@ -189,7 +171,8 @@ void TestImpl(bool channelwise_quantization = false) {
         params.kernel.width,
         params.input_channels * params.depth_multiplier,
     };
-    DatatypeGenerator<Filter> filter_gen = MakeDatatypeGenerator(Filter());
+    DatatypeGenerator<Filter> filter_gen =
+        MakeDatatypeGenerator(Filter(), /*symmetric_range=*/true);
     Tensor<Filter> filter(filter_shape, XnnExtraBytes);
     filter.generate([&]() { return filter_gen(rng); });
 
@@ -198,8 +181,9 @@ void TestImpl(bool channelwise_quantization = false) {
     if (bool_dist(rng)) {
       std::vector<size_t> bias_shape = {params.input_channels *
                                         params.depth_multiplier};
-      DatatypeGenerator<Bias> bias_gen = MakeDatatypeGenerator(Bias());
-      Tensor<Bias> bias(bias_shape, XnnExtraBytes);
+      DatatypeGenerator<Bias> bias_gen = MakeDatatypeGenerator(
+          Bias(), -max_abs_bias<Bias>(), max_abs_bias<Bias>());
+      bias = Tensor<Bias>(bias_shape, XnnExtraBytes);
       bias.generate([&]() { return bias_gen(rng); });
     }
 
@@ -224,12 +208,15 @@ void TestImpl(bool channelwise_quantization = false) {
 
     // The output quantization is computed from the kernel size and input
     // quantization.
+    xnn_quantization_params bias_quantization =
+        xnn_datatype_is_quantized(datatype_of<Bias>())
+            ? xnn_quantization_params{0, input_quantization.scale *
+                                             filter_quantization.scale}
+            : xnn_quantization_params{0, 1.0f};
     xnn_quantization_params output_quantization =
-        CalculateConvolutionQuantizationParams<Data, Filter, Data>(
+        CalculateConvolutionQuantizationParams<Data, Filter, Bias, Data>(
             params.kernel.width * params.kernel.height, input_quantization,
-            filter_quantization);
-    xnn_quantization_params bias_quantization = {
-        0, input_quantization.scale * filter_quantization.scale};
+            filter_quantization, bias_quantization);
 
     params.output_min = dequantize(data_gen(rng), output_quantization);
     params.output_max = dequantize(data_gen(rng), output_quantization);
@@ -302,10 +289,22 @@ void TestImpl(bool channelwise_quantization = false) {
           .InvokeRuntime();
 
       // Verify results.
-      Tensor<float> expected =
-          ReferenceImpl(input, filter, bias, input_quantization,
-                        filter_quantization.zero_point, filter_scale,
-                        bias_quantization, params.depth_multiplier, kh, kw);
+      int32_t bias_zero_point;
+      Tensor<Scale> bias_scale({bias.size()});
+      if (xnn_datatype_is_channelwise_quantized(datatype_of<Bias>())) {
+        bias_zero_point = filter_quantization.zero_point;
+        for (size_t k = 0; k < bias_scale.extent(0); k++) {
+          bias_scale(k) = input_quantization.scale * filter_scale(k, 0);
+        }
+      } else {
+        bias_zero_point = bias_quantization.zero_point;
+        bias_scale.fill(bias_quantization.scale);
+      }
+
+      Tensor<float> expected = ReferenceImpl(
+          input, filter, bias, input_quantization,
+          filter_quantization.zero_point, filter_scale, bias_zero_point,
+          bias_scale, params.depth_multiplier, kh, kw);
 
       for (const auto& i : EnumerateIndices(output.extents())) {
         expected(i) = std::max(expected(i), params.output_min);
@@ -334,7 +333,7 @@ using qint8 = quantized<int8_t>;
 using qint32 = quantized<int32_t>;
 
 TEST(DepthwiseConvolution2DQC8, test) {
-  TestImpl<qint8, qint8, qint32>(/*channelwise_quantization=*/true);
+  TestImpl<qint8, qint8, qcint32>(/*channelwise_quantization=*/true);
 }
 TEST(DepthwiseConvolution2DQU8, test) { TestImpl<quint8, quint8, qint32>(); }
 TEST(DepthwiseConvolution2DQS8, test) { TestImpl<qint8, qint8, qint32>(); }

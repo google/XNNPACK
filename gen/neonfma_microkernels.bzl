@@ -1,9 +1,9 @@
-"""
-Microkernel filenames lists for neonfma.
-
-Auto-generated file. Do not edit!
-  Generator: tools/update-microkernels.py
-"""
+#
+# Microkernel filenames lists for neonfma.
+#
+# Auto-generated file. Do not edit!
+#   Generator: tools/update-microkernels.py
+#
 
 PROD_NEONFMA_MICROKERNEL_SRCS = [
     "src/f32-dwconv/gen/f32-dwconv-3p8c-minmax-neonfma.c",
@@ -14,7 +14,7 @@ PROD_NEONFMA_MICROKERNEL_SRCS = [
     "src/f32-gemm/gen/f32-gemm-4x8s4-minmax-neonfma.c",
     "src/f32-gemm/gen/f32-gemm-6x8s4-minmax-neonfma.c",
     "src/f32-ibilinear-chw/gen/f32-ibilinear-chw-neonfma-p8.c",
-    "src/f32-ibilinear/gen/f32-ibilinear-neonfma-c8.c",
+    "src/f32-ibilinear/gen/f32-ibilinear-neonfma-u8.c",
     "src/f32-igemm/gen/f32-igemm-1x8s4-minmax-neonfma.c",
     "src/f32-igemm/gen/f32-igemm-4x8s4-minmax-neonfma.c",
     "src/f32-igemm/gen/f32-igemm-6x8s4-minmax-neonfma.c",
@@ -63,18 +63,9 @@ NON_PROD_NEONFMA_MICROKERNEL_SRCS = [
     "src/f32-gemm/gen/f32-gemm-6x8-minmax-neonfma-dup-ld64.c",
     "src/f32-gemm/gen/f32-gemm-6x8-minmax-neonfma-dup-ld128.c",
     "src/f32-gemm/gen/f32-gemm-8x8s4-minmax-neonfma.c",
-    "src/f32-gemminc/gen/f32-gemminc-1x8-minmax-neonfma-dup-ld64.c",
-    "src/f32-gemminc/gen/f32-gemminc-1x8s4-minmax-neonfma.c",
-    "src/f32-gemminc/gen/f32-gemminc-4x8-minmax-neonfma-dup-ld64.c",
-    "src/f32-gemminc/gen/f32-gemminc-4x8-minmax-neonfma-dup-ld128.c",
-    "src/f32-gemminc/gen/f32-gemminc-4x8s4-minmax-neonfma.c",
-    "src/f32-gemminc/gen/f32-gemminc-6x8-minmax-neonfma-dup-ld64.c",
-    "src/f32-gemminc/gen/f32-gemminc-6x8-minmax-neonfma-dup-ld128.c",
-    "src/f32-gemminc/gen/f32-gemminc-6x8s4-minmax-neonfma.c",
-    "src/f32-gemminc/gen/f32-gemminc-8x8s4-minmax-neonfma.c",
     "src/f32-ibilinear-chw/gen/f32-ibilinear-chw-neonfma-p4.c",
     "src/f32-ibilinear-chw/gen/f32-ibilinear-chw-neonfma-p16.c",
-    "src/f32-ibilinear/gen/f32-ibilinear-neonfma-c4.c",
+    "src/f32-ibilinear/gen/f32-ibilinear-neonfma-u4.c",
     "src/f32-igemm/gen/f32-igemm-1x8-minmax-neonfma-dup-ld64.c",
     "src/f32-igemm/gen/f32-igemm-4x8-minmax-neonfma-dup-ld64.c",
     "src/f32-igemm/gen/f32-igemm-4x8-minmax-neonfma-dup-ld128.c",
@@ -98,16 +89,16 @@ NON_PROD_NEONFMA_MICROKERNEL_SRCS = [
     "src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-neonfma-rr1-p5-u16-acc2.c",
     "src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-neonfma-rr1-p5-u16-acc4.c",
     "src/f32-spmm/gen/f32-spmm-4x1-minmax-neonfma-pipelined.c",
-    "src/f32-spmm/gen/f32-spmm-4x1-minmax-neonfma-x2.c",
+    "src/f32-spmm/gen/f32-spmm-4x1-minmax-neonfma-u2.c",
     "src/f32-spmm/gen/f32-spmm-4x1-minmax-neonfma.c",
     "src/f32-spmm/gen/f32-spmm-8x1-minmax-neonfma-pipelined.c",
-    "src/f32-spmm/gen/f32-spmm-8x1-minmax-neonfma-x2.c",
+    "src/f32-spmm/gen/f32-spmm-8x1-minmax-neonfma-u2.c",
     "src/f32-spmm/gen/f32-spmm-8x1-minmax-neonfma.c",
     "src/f32-spmm/gen/f32-spmm-12x1-minmax-neonfma.c",
     "src/f32-spmm/gen/f32-spmm-16x1-minmax-neonfma-pipelined.c",
-    "src/f32-spmm/gen/f32-spmm-16x1-minmax-neonfma-x2.c",
+    "src/f32-spmm/gen/f32-spmm-16x1-minmax-neonfma-u2.c",
     "src/f32-spmm/gen/f32-spmm-16x1-minmax-neonfma.c",
-    "src/f32-spmm/gen/f32-spmm-32x1-minmax-neonfma-x2.c",
+    "src/f32-spmm/gen/f32-spmm-32x1-minmax-neonfma-u2.c",
     "src/f32-spmm/gen/f32-spmm-32x1-minmax-neonfma.c",
     "src/f32-velu/gen/f32-velu-neonfma-rr1-lut16-p3-u4.c",
     "src/f32-velu/gen/f32-velu-neonfma-rr1-lut16-p3-u8.c",

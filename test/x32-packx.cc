@@ -32,12 +32,10 @@ std::string GetTestName(
   {#ukernel, ukernel, arch_flags, k, mr},
 
 const XnnTestParam xnn_test_params[] = {
-#include "src/x32-packx/x32-packx.h"
+#include "src/x32-packx/x32-packx.inc"
 };
 
 #undef XNN_UKERNEL
-
-}  // namespace
 
 TEST_P(XnnTest, k_eq_kblock) {
   TEST_REQUIRES_ARCH_FLAGS(GetParam().arch_flags);
@@ -158,3 +156,5 @@ TEST_P(XnnTest, strided_x) {
 }
 INSTANTIATE_TEST_SUITE_P(x32_packx, XnnTest, testing::ValuesIn(xnn_test_params),
                          GetTestName);
+
+}  // namespace

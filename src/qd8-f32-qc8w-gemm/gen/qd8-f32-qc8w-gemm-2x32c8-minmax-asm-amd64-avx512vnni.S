@@ -5,6 +5,7 @@
 
 #include "src/xnnpack/assembly.h"
 
+      .p2align 6, 0x0
 .PERMUTATION:
       .long   0
       .long   2
@@ -37,10 +38,10 @@ BEGIN_FUNCTION xnn_qd8_f32_qc8w_gemm_minmax_ukernel_2x32c8__asm_amd64_avx512vnni
       push r13
       push r12
 
-      # load params to free up a GP registers
+      # load params to free up GP registers
       mov r13, [rsp + 96] # params
-      vbroadcastss zmm0, DWORD PTR [r13]
-      vbroadcastss zmm1, DWORD PTR [r13 + 4]
+      vbroadcastss zmm0, dword ptr [r13]
+      vbroadcastss zmm1, dword ptr [r13 + 4]
 
       # Load c pointer.
       mov r10, [rsp + 72]
@@ -88,10 +89,10 @@ BEGIN_FUNCTION xnn_qd8_f32_qc8w_gemm_minmax_ukernel_2x32c8__asm_amd64_avx512vnni
       # Initialize accumulators with k_sum * input zero point.
       vmovaps  zmm6, [r9 + 0]
       vmovaps  zmm7, [r9 + 64]
-      vpmulld zmm5, zmm6, ZMMWORD PTR [rsp + 64]
-      vpmulld zmm12, zmm6, ZMMWORD PTR [rsp + 128]
-      vpmulld zmm14, zmm7, ZMMWORD PTR [rsp + 64]
-      vpmulld zmm15, zmm7, ZMMWORD PTR [rsp + 128]
+      vpmulld zmm5, zmm6, zmmword ptr [rsp + 64]
+      vpmulld zmm12, zmm6, zmmword ptr [rsp + 128]
+      vpmulld zmm14, zmm7, zmmword ptr [rsp + 64]
+      vpmulld zmm15, zmm7, zmmword ptr [rsp + 128]
       add r9, 128
       # Interleave with zeros.
       vextracti64x4 ymm18, zmm14, 1
@@ -113,12 +114,12 @@ BEGIN_FUNCTION xnn_qd8_f32_qc8w_gemm_minmax_ukernel_2x32c8__asm_amd64_avx512vnni
       vmovaps  zmm8, [r9 + 128]
       vmovaps  zmm9, [r9 + 192]
       add r9, 256
-      vbroadcasti32x2 zmm2, QWORD PTR [rcx + r11]
+      vbroadcasti32x2 zmm2, qword ptr [rcx + r11]
       vpdpbusd  zmm5, zmm2, zmm6
       vpdpbusd  zmm14, zmm2, zmm7
       vpdpbusd  zmm16, zmm2, zmm8
       vpdpbusd  zmm18, zmm2, zmm9
-      vbroadcasti32x2 zmm2, QWORD PTR [rax + r11]
+      vbroadcasti32x2 zmm2, qword ptr [rax + r11]
       vpdpbusd  zmm12, zmm2, zmm6
       vpdpbusd  zmm15, zmm2, zmm7
       vpdpbusd  zmm17, zmm2, zmm8
@@ -145,7 +146,7 @@ BEGIN_FUNCTION xnn_qd8_f32_qc8w_gemm_minmax_ukernel_2x32c8__asm_amd64_avx512vnni
       vpaddd zmm18, zmm18, zmm6
       vpsrlq zmm6, zmm19, 32
       vpaddd zmm19, zmm19, zmm6
-      vmovups zmm6, zmmword ptr [rip + .PERMUTATION]
+      vmovaps zmm6, zmmword ptr [rip + .PERMUTATION]
       vpermt2ps zmm5, zmm6, zmm14
       vpermt2ps zmm12, zmm6, zmm15
       vpermt2ps zmm16, zmm6, zmm18
@@ -158,10 +159,10 @@ BEGIN_FUNCTION xnn_qd8_f32_qc8w_gemm_minmax_ukernel_2x32c8__asm_amd64_avx512vnni
       vcvtdq2ps zmm15, zmm17
       # Load quantization_params pointer from stack
       mov r11, [rsp + 200]
-      vmulps zmm5, zmm5, DWORD PTR [r11 + 4]{1to16}
-      vmulps zmm12, zmm12, DWORD PTR [r11 + 12]{1to16}
-      vmulps zmm14, zmm14, DWORD PTR [r11 + 4]{1to16}
-      vmulps zmm15, zmm15, DWORD PTR [r11 + 12]{1to16}
+      vmulps zmm5, zmm5, dword ptr [r11 + 4]{1to16}
+      vmulps zmm12, zmm12, dword ptr [r11 + 12]{1to16}
+      vmulps zmm14, zmm14, dword ptr [r11 + 4]{1to16}
+      vmulps zmm15, zmm15, dword ptr [r11 + 12]{1to16}
       vmovaps zmm10, [r9 + 0]
       vmovaps zmm11, [r9 + 64]
       add r9, 128
@@ -204,10 +205,10 @@ BEGIN_FUNCTION xnn_qd8_f32_qc8w_gemm_minmax_ukernel_2x32c8__asm_amd64_avx512vnni
       kmovw k1, r11d
       shr r11d, 16
       kmovw k2, r11d
-      vmovups  ZMMWORD PTR [r10]{k1}, zmm5
-      vmovups  ZMMWORD PTR [r10 + 64]{k2}, zmm14
-      vmovups  ZMMWORD PTR [r13]{k1}, zmm12
-      vmovups  ZMMWORD PTR [r13 + 64]{k2}, zmm15
+      vmovups  zmmword ptr [r10]{k1}, zmm5
+      vmovups  zmmword ptr [r10 + 64]{k2}, zmm14
+      vmovups  zmmword ptr [r13]{k1}, zmm12
+      vmovups  zmmword ptr [r13 + 64]{k2}, zmm15
 
 .Lreturn:
       add rsp, 192

@@ -11,8 +11,7 @@ load(
 )
 
 # buildifier: disable=out-of-order-load
-def register_extension_info(**kwargs):
-    pass
+load("//:register_extension_info.bzl", "register_extension_info")
 
 def xnnpack_src_to_target_name(src):
     src = src.split("/")[-1]
@@ -155,7 +154,7 @@ def xnnpack_simd_copts_for_arch(arch):
     return _XNNPACK_SIMD_ARCH_COPT_MAPPING.get(arch, [])
 
 def xnnpack_simd_f32_archs():
-    return ["avx", "avx2", "avx512f", "fma3", "hvx", "neon", "scalar", "sse2", "wasmsimd", "wasmrelaxedsimd"]
+    return ["avx", "avx2", "avx512f", "fma3", "hvx", "neon", "scalar", "sse2", "sse2fma", "wasmsimd", "wasmrelaxedsimd"]
 
 def xnnpack_simd_f16_archs():
     return ["scalar", "neonfp16arith", "avx512fp16"]
@@ -398,6 +397,9 @@ XNNPACK_PARAMS_FOR_ARCH = {
     "neonsme": _create_params(
         cond = "//:arm_sme_enabled",
         copts = ["-march=armv8.2-a+sve+sve2"],
+        extra_deps = xnnpack_if_kleidiai_enabled([
+            "@KleidiAI//kai/ukernels/matmul:matmul",
+        ]),
     ),
     "neonsme2": _create_params(
         cond = "//:arm_sme2_enabled",
@@ -431,6 +433,16 @@ XNNPACK_PARAMS_FOR_ARCH = {
         msvc_x86_64_copts = ["/arch:SSE"],
     ),
     "sse2": _create_params(
+        cond = "//build_config:x86",
+        copts = _x86_align_stack(16),
+        gcc_x86_copts = [
+            "-msse2",
+            "-mno-sse3",
+        ],
+        msvc_x86_32_copts = ["/arch:SSE2"],
+        msvc_x86_64_copts = ["/arch:SSE2"],
+    ),
+    "sse2fma": _create_params(
         cond = "//build_config:x86",
         copts = _x86_align_stack(16),
         gcc_x86_copts = [
@@ -482,6 +494,7 @@ XNNPACK_PARAMS_FOR_ARCH = {
             "-mavxvnni",
             "-mf16c",
             "-mfma",
+            "-mgfni",
         ],
         msvc_x86_32_copts = ["/arch:AVX"],
         msvc_x86_64_copts = ["/arch:AVX"],
@@ -494,6 +507,7 @@ XNNPACK_PARAMS_FOR_ARCH = {
             "-mavxvnniint8",
             "-mf16c",
             "-mfma",
+            "-mgfni",
         ],
         msvc_x86_32_copts = ["/arch:AVX"],
         msvc_x86_64_copts = ["/arch:AVX"],

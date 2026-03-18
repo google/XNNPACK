@@ -4,8 +4,8 @@
 // LICENSE file in the root directory of this source tree.
 //
 
-#ifndef __XNNPACK_SRC_XNNPACK_SIMD_F16_SCALAR_H_
-#define __XNNPACK_SRC_XNNPACK_SIMD_F16_SCALAR_H_
+#ifndef XNNPACK_SRC_XNNPACK_SIMD_F16_SCALAR_H_
+#define XNNPACK_SRC_XNNPACK_SIMD_F16_SCALAR_H_
 
 #include <math.h>
 #include <stddef.h>
@@ -158,9 +158,9 @@ static XNN_INLINE xnn_simd_f16_t xnn_neg_f16(xnn_simd_f16_t a) {
 
 static XNN_INLINE xnn_simd_f16_t xnn_round_f16(xnn_simd_f16_t a) {
 #if XNN_HAVE_FLOAT16
-  return roundf(a);
+  return rintf(a);
 #else
-  return xnn_float16_from_float(roundf(xnn_float16_to_float(a)));
+  return xnn_float16_from_float(rintf(xnn_float16_to_float(a)));
 #endif  // XNN_HAVE_FLOAT16
 }
 
@@ -190,7 +190,7 @@ static XNN_INLINE xnn_simd_f16_t xnn_srl_f16(xnn_simd_f16_t a, uint8_t bits) {
 
 static XNN_INLINE xnn_simd_f16_t xnn_cmpeq_f16(xnn_simd_f16_t a,
                                                xnn_simd_f16_t b) {
-  XNN_SIMD_CONST_U16(ones, 0xFFFF)
+  XNN_SIMD_CONST_U16(ones, UINT16_C(0xFFFF));
 #if XNN_HAVE_FLOAT16
   return a == b ? ones : xnn_zero_f16();
 #else
@@ -239,4 +239,4 @@ static XNN_INLINE void xnn_store_tail_f16(xnn_simd_f16_t *output,
   *output = v;
 }
 
-#endif  // __XNNPACK_SRC_XNNPACK_SIMD_F16_SCALAR_H_
+#endif  // XNNPACK_SRC_XNNPACK_SIMD_F16_SCALAR_H_

@@ -8,10 +8,11 @@ $assert BATCH_TILE >= 8
 $SIMD_TILE = BATCH_TILE // 8
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
 
 #include <immintrin.h>
 
-#include "src/xnnpack/common.h"
 #include "src/xnnpack/vscaleexpminusmax.h"
 
 

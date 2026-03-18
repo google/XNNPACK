@@ -9,14 +9,17 @@ $assert 8 <= NR <= 16
 $assert REQUANTIZATION in ["FP32", "RNDNU"]
 $assert DATATYPE in ["QC8", "QS8"]
 $assert DATATYPE != "QC8" or REQUANTIZATION == "FP32"
-#include <assert.h>
-
 #include <arm_neon.h>
+#include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
 
-#include "src/xnnpack/gemm.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/igemm.h"
 $if REQUANTIZATION == "FP32" and ARMV8:
   #include "src/xnnpack/intrinsics-polyfill.h"
 #include "src/xnnpack/math.h"
+#include "src/xnnpack/microparams.h"
 
 
 $DATATYPE_SPEC = {"QC8": "qs8_qc8w", "QS8": "qs8"}[DATATYPE]

@@ -3,7 +3,8 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#pragma once
+#ifndef XNNPACK_SRC_XNNPACK_CACHE_H_
+#define XNNPACK_SRC_XNNPACK_CACHE_H_
 
 #include <stddef.h>  // For size_t.
 #include <stdint.h>  // For uint32_t.
@@ -127,6 +128,11 @@ size_t xnn_weights_cache_look_up(
     xnn_weights_cache_t cache,
     const struct xnn_weights_cache_look_up_key* cache_key);
 
+enum xnn_status xnn_weights_cache_alias_data(xnn_weights_cache_t cache,
+                                             void* alias, void* original);
+
 #ifdef __cplusplus
 }  // extern "C"
 #endif
+
+#endif  // XNNPACK_SRC_XNNPACK_CACHE_H_

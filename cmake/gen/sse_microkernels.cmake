@@ -23,7 +23,7 @@ SET(PROD_SSE_MICROKERNEL_SRCS
   src/f32-gemm/gen/f32-gemm-4x2c4-minmax-sse.c
   src/f32-gemm/gen/f32-gemm-4x8-minmax-sse-load1.c
   src/f32-ibilinear-chw/gen/f32-ibilinear-chw-sse-p8.c
-  src/f32-ibilinear/gen/f32-ibilinear-sse-c8.c
+  src/f32-ibilinear/gen/f32-ibilinear-sse-u8.c
   src/f32-igemm/gen/f32-igemm-1x8-minmax-sse-load1.c
   src/f32-igemm/gen/f32-igemm-4x2c4-minmax-sse.c
   src/f32-igemm/gen/f32-igemm-4x8-minmax-sse-load1.c
@@ -117,23 +117,8 @@ SET(NON_PROD_SSE_MICROKERNEL_SRCS
   src/f32-gemm/gen/f32-gemm-6x8-minmax-sse-dup.c
   src/f32-gemm/gen/f32-gemm-6x8-minmax-sse-load1.c
   src/f32-gemm/gen/f32-gemm-6x8s4-minmax-sse.c
-  src/f32-gemminc/gen/f32-gemminc-1x8-minmax-sse-dup.c
-  src/f32-gemminc/gen/f32-gemminc-1x8-minmax-sse-load1.c
-  src/f32-gemminc/gen/f32-gemminc-1x8s4-minmax-sse.c
-  src/f32-gemminc/gen/f32-gemminc-3x8-minmax-sse-dup.c
-  src/f32-gemminc/gen/f32-gemminc-3x8-minmax-sse-load1.c
-  src/f32-gemminc/gen/f32-gemminc-3x8s4-minmax-sse.c
-  src/f32-gemminc/gen/f32-gemminc-4x8-minmax-sse-dup.c
-  src/f32-gemminc/gen/f32-gemminc-4x8-minmax-sse-load1.c
-  src/f32-gemminc/gen/f32-gemminc-4x8s4-minmax-sse.c
-  src/f32-gemminc/gen/f32-gemminc-5x8-minmax-sse-dup.c
-  src/f32-gemminc/gen/f32-gemminc-5x8-minmax-sse-load1.c
-  src/f32-gemminc/gen/f32-gemminc-5x8s4-minmax-sse.c
-  src/f32-gemminc/gen/f32-gemminc-6x8-minmax-sse-dup.c
-  src/f32-gemminc/gen/f32-gemminc-6x8-minmax-sse-load1.c
-  src/f32-gemminc/gen/f32-gemminc-6x8s4-minmax-sse.c
   src/f32-ibilinear-chw/gen/f32-ibilinear-chw-sse-p4.c
-  src/f32-ibilinear/gen/f32-ibilinear-sse-c4.c
+  src/f32-ibilinear/gen/f32-ibilinear-sse-u4.c
   src/f32-igemm/gen/f32-igemm-1x8-minmax-sse-dup.c
   src/f32-igemm/gen/f32-igemm-1x8s4-minmax-sse.c
   src/f32-igemm/gen/f32-igemm-3x8-minmax-sse-dup.c
@@ -161,11 +146,6 @@ SET(NON_PROD_SSE_MICROKERNEL_SRCS
   src/f32-rminmax/gen/f32-rminmax-sse-u8-acc2.c
   src/f32-rminmax/gen/f32-rminmax-sse-u12-acc3.c
   src/f32-rminmax/gen/f32-rminmax-sse-u16-acc2.c
-  src/f32-rsum/gen/f32-rsum-sse-u4.c
-  src/f32-rsum/gen/f32-rsum-sse-u8-acc2.c
-  src/f32-rsum/gen/f32-rsum-sse-u12-acc3.c
-  src/f32-rsum/gen/f32-rsum-sse-u16-acc2.c
-  src/f32-rsum/gen/f32-rsum-sse-u16-acc4.c
   src/f32-spmm/gen/f32-spmm-4x1-minmax-sse.c
   src/f32-spmm/gen/f32-spmm-8x1-minmax-sse.c
   src/f32-spmm/gen/f32-spmm-16x1-minmax-sse.c

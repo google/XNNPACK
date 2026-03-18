@@ -4,8 +4,8 @@
 // LICENSE file in the root directory of this source tree.
 //
 
-#ifndef __XNNPACK_SRC_XNNPACK_SIMD_S32_HVX_H_
-#define __XNNPACK_SRC_XNNPACK_SIMD_S32_HVX_H_
+#ifndef XNNPACK_SRC_XNNPACK_SIMD_S32_HVX_H_
+#define XNNPACK_SRC_XNNPACK_SIMD_S32_HVX_H_
 
 #include <assert.h>
 #include <hexagon_protos.h>
@@ -28,7 +28,7 @@ typedef HVX_Vector xnn_simd_s32_t;
 // Arithmetic operations.
 static XNN_INLINE xnn_simd_s32_t xnn_mul_s32(xnn_simd_s32_t a,
                                              xnn_simd_s32_t b) {
-  return Q6_V_lo_W(Q6_W_vmpyoacc_WVwVh(Q6_W_vmpye_VwVuh(a, b), a, b));
+  return Q6_Vw_vmpyieacc_VwVwVuh(Q6_Vw_vmpyieo_VhVh(a, b), a, b);
 }
 
 static XNN_INLINE xnn_simd_s32_t xnn_max_s32(xnn_simd_s32_t a,
@@ -92,4 +92,4 @@ static XNN_INLINE void xnn_store_tail_s32(int32_t* output, xnn_simd_s32_t v,
 }
 
 
-#endif  // __XNNPACK_SRC_XNNPACK_SIMD_S32_HVX_H_
+#endif  // XNNPACK_SRC_XNNPACK_SIMD_S32_HVX_H_

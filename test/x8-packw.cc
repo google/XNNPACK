@@ -34,13 +34,11 @@ std::string GetTestName(
 #define XNN_GIO_UKERNEL(arch_flags, ukernel, nr, kr, sr, kblock, nr_scale)
 
 const XnnTestParam xnn_test_params[] = {
-#include "src/x8-packw/x8-packw.h"
+#include "src/x8-packw/x8-packw.inc"
 };
 
 #undef XNN_UKERNEL
 #undef XNN_GIO_UKERNEL
-
-}  // namespace
 
 TEST_P(XnnTest, null_bias) {
   TEST_REQUIRES_ARCH_FLAGS(GetParam().arch_flags);
@@ -172,8 +170,6 @@ INSTANTIATE_TEST_SUITE_P(x8_packw, XnnTest, testing::ValuesIn(xnn_test_params),
 // Enable on all platforms when scalar available
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
 
-namespace {
-
 struct XnnTestGIOParam {
   const char* name;
   xnn_x8_packw_gemm_gio_ukernel_fn ukernel;
@@ -194,13 +190,11 @@ std::string GetTestGIOName(
 #define XNN_UKERNEL(arch_flags, ukernel, nr, kr, sr, kblock, nr_scale)
 
 const XnnTestGIOParam xnn_test_gio_params[] = {
-#include "src/x8-packw/x8-packw.h"
+#include "src/x8-packw/x8-packw.inc"
 };
 
 #undef XNN_UKERNEL
 #undef XNN_GIO_UKERNEL
-
-}  // namespace
 
 TEST_P(XnnTestGIO, null_bias) {
   TEST_REQUIRES_ARCH_FLAGS(GetParam().arch_flags);
@@ -331,3 +325,5 @@ INSTANTIATE_TEST_SUITE_P(x8_packw_gio, XnnTestGIO,
                          GetTestGIOName);
 
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+}  // namespace

@@ -1,4 +1,4 @@
-// Copyright 2019 Google LLC
+// Copyright 2019-2025 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
@@ -16,20 +16,22 @@
 #include "include/xnnpack.h"
 #include "src/xnnpack/buffer.h"
 #include "src/xnnpack/common.h"
+#include "src/xnnpack/hardware-config.h"
 #include "src/xnnpack/igemm.h"
 #include "src/xnnpack/indirection.h"
 #include "src/xnnpack/math.h"
 #include "src/xnnpack/microfnptr.h"
 #include "src/xnnpack/microparams-init.h"
 #include "src/xnnpack/pack.h"
+#include "test/replicable_random_device.h"
 #include <benchmark/benchmark.h>
 
 static void f16_igemm(benchmark::State& state,
                       xnn_f16_igemm_minmax_ukernel_fn igemm,
                       xnn_init_f16_minmax_params_fn init_params, uint32_t mr,
                       uint32_t nr, uint32_t kr, uint32_t sr,
-                      benchmark::utils::IsaCheckFunction isa_check = nullptr) {
-  if (isa_check != nullptr && !isa_check(state)) {
+                      uint64_t arch_flags = 0) {
+  if (!benchmark::utils::CheckArchFlags(state, arch_flags)) {
     return;
   }
 
@@ -45,8 +47,7 @@ static void f16_igemm(benchmark::State& state,
   const size_t group_input_channels = state.range(8);
   const size_t group_output_channels = state.range(9);
 
-  std::random_device random_device;
-  auto rng = std::mt19937(random_device());
+  xnnpack::ReplicableRandomDevice rng;
   auto f32rng =
       std::bind(std::uniform_real_distribution<float>(), std::ref(rng));
 
@@ -108,7 +109,7 @@ static void f16_igemm(benchmark::State& state,
       /*output_start=*/0,
       /*output_end=*/tiled_output_size,
       reinterpret_cast<const void**>(i.data()), a.data(), z.data(),
-      input_pixel_stride << XNN_LOG2_SIZEOF_HALF, input_height, input_width,
+      input_pixel_stride << XNN_LOG2_SIZEOF_FLOAT16, input_height, input_width,
       output_height, output_width, kernel_height, kernel_width, subsampling,
       subsampling, dilation, dilation, padding_top, padding_left);
   for (size_t n = 1; n < num_buffers; n++) {
@@ -161,71 +162,71 @@ static void f16_igemm(benchmark::State& state,
 
 #if XNN_ARCH_ARM64 && XNN_ENABLE_ASSEMBLY
 static void f16_igemm_6x16__asm_aarch64_neonfp16arith_cortex_a55(
-    benchmark::State& state, const char* net) {
+    benchmark::State& state) {
   f16_igemm(
       state,
       xnn_f16_igemm_minmax_ukernel_6x16__asm_aarch64_neonfp16arith_cortex_a55,
       xnn_init_f16_minmax_scalar_params,
       /*mr=*/6, /*nr=*/16, /*kr=*/1, /*sr=*/1,
-      benchmark::utils::CheckNEONFP16ARITH);
+      xnn_arch_arm_neon_fp16_arith);
 }
 static void f16_igemm_6x16__asm_aarch64_neonfp16arith_cortex_a55r0(
-    benchmark::State& state, const char* net) {
+    benchmark::State& state) {
   f16_igemm(
       state,
       xnn_f16_igemm_minmax_ukernel_6x16__asm_aarch64_neonfp16arith_cortex_a55r0,
       xnn_init_f16_minmax_scalar_params,
       /*mr=*/6, /*nr=*/16, /*kr=*/1, /*sr=*/1,
-      benchmark::utils::CheckNEONFP16ARITH);
+      xnn_arch_arm_neon_fp16_arith);
 }
 static void f16_igemm_6x16__asm_aarch64_neonfp16arith_cortex_a75(
-    benchmark::State& state, const char* net) {
+    benchmark::State& state) {
   f16_igemm(
       state,
       xnn_f16_igemm_minmax_ukernel_6x16__asm_aarch64_neonfp16arith_cortex_a75,
       xnn_init_f16_minmax_scalar_params,
       /*mr=*/6, /*nr=*/16, /*kr=*/1, /*sr=*/1,
-      benchmark::utils::CheckNEONFP16ARITH);
+      xnn_arch_arm_neon_fp16_arith);
 }
 static void f16_igemm_6x16__asm_aarch64_neonfp16arith_ld64(
-    benchmark::State& state, const char* net) {
+    benchmark::State& state) {
   f16_igemm(state,
             xnn_f16_igemm_minmax_ukernel_6x16__asm_aarch64_neonfp16arith_ld64,
             xnn_init_f16_minmax_scalar_params,
             /*mr=*/6, /*nr=*/16, /*kr=*/1, /*sr=*/1,
-            benchmark::utils::CheckNEONFP16ARITH);
+            xnn_arch_arm_neon_fp16_arith);
 }
 static void f16_igemm_4x16__asm_aarch64_neonfp16arith_ld32(
-    benchmark::State& state, const char* net) {
+    benchmark::State& state) {
   f16_igemm(state,
             xnn_f16_igemm_minmax_ukernel_4x16__asm_aarch64_neonfp16arith_ld32,
             xnn_init_f16_minmax_scalar_params,
             /*mr=*/4, /*nr=*/16, /*kr=*/1, /*sr=*/1,
-            benchmark::utils::CheckNEONFP16ARITH);
+            xnn_arch_arm_neon_fp16_arith);
 }
 static void f16_igemm_4x16__asm_aarch64_neonfp16arith_ld64(
-    benchmark::State& state, const char* net) {
+    benchmark::State& state) {
   f16_igemm(state,
             xnn_f16_igemm_minmax_ukernel_4x16__asm_aarch64_neonfp16arith_ld64,
             xnn_init_f16_minmax_scalar_params,
             /*mr=*/4, /*nr=*/16, /*kr=*/1, /*sr=*/1,
-            benchmark::utils::CheckNEONFP16ARITH);
+            xnn_arch_arm_neon_fp16_arith);
 }
 static void f16_igemm_1x16__asm_aarch64_neonfp16arith_ld32(
-    benchmark::State& state, const char* net) {
+    benchmark::State& state) {
   f16_igemm(state,
             xnn_f16_igemm_minmax_ukernel_1x16__asm_aarch64_neonfp16arith_ld32,
             xnn_init_f16_minmax_scalar_params,
             /*mr=*/1, /*nr=*/16, /*kr=*/1, /*sr=*/1,
-            benchmark::utils::CheckNEONFP16ARITH);
+            xnn_arch_arm_neon_fp16_arith);
 }
 static void f16_igemm_1x16__asm_aarch64_neonfp16arith_ld64(
-    benchmark::State& state, const char* net) {
+    benchmark::State& state) {
   f16_igemm(state,
             xnn_f16_igemm_minmax_ukernel_1x16__asm_aarch64_neonfp16arith_ld64,
             xnn_init_f16_minmax_scalar_params,
             /*mr=*/1, /*nr=*/16, /*kr=*/1, /*sr=*/1,
-            benchmark::utils::CheckNEONFP16ARITH);
+            xnn_arch_arm_neon_fp16_arith);
 }
 
 BENCHMARK_CONV(f16_igemm_6x16__asm_aarch64_neonfp16arith_cortex_a55)
@@ -239,61 +240,53 @@ BENCHMARK_CONV(f16_igemm_1x16__asm_aarch64_neonfp16arith_ld64)
 #endif  // XNN_ARCH_ARM64 && XNN_ENABLE_ASSEMBLY
 
 #if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
-static void f16_igemm_1x8__neonfp16arith_ld64(benchmark::State& state,
-                                              const char* net) {
+static void f16_igemm_1x8__neonfp16arith_ld64(benchmark::State& state) {
   f16_igemm(state, xnn_f16_igemm_minmax_ukernel_1x8__neonfp16arith_ld64,
             xnn_init_f16_minmax_scalar_params,
             /*mr=*/1, /*nr=*/8, /*kr=*/1, /*sr=*/1,
-            benchmark::utils::CheckNEONFP16ARITH);
+            xnn_arch_arm_neon_fp16_arith);
 }
-static void f16_igemm_4x8__neonfp16arith_ld64(benchmark::State& state,
-                                              const char* net) {
+static void f16_igemm_4x8__neonfp16arith_ld64(benchmark::State& state) {
   f16_igemm(state, xnn_f16_igemm_minmax_ukernel_4x8__neonfp16arith_ld64,
             xnn_init_f16_minmax_scalar_params,
             /*mr=*/4, /*nr=*/8, /*kr=*/1, /*sr=*/1,
-            benchmark::utils::CheckNEONFP16ARITH);
+            xnn_arch_arm_neon_fp16_arith);
 }
-static void f16_igemm_6x8__neonfp16arith_ld64(benchmark::State& state,
-                                              const char* net) {
+static void f16_igemm_6x8__neonfp16arith_ld64(benchmark::State& state) {
   f16_igemm(state, xnn_f16_igemm_minmax_ukernel_6x8__neonfp16arith_ld64,
             xnn_init_f16_minmax_scalar_params,
             /*mr=*/6, /*nr=*/8, /*kr=*/1, /*sr=*/1,
-            benchmark::utils::CheckNEONFP16ARITH);
+            xnn_arch_arm_neon_fp16_arith);
 }
-static void f16_igemm_8x8__neonfp16arith_ld64(benchmark::State& state,
-                                              const char* net) {
+static void f16_igemm_8x8__neonfp16arith_ld64(benchmark::State& state) {
   f16_igemm(state, xnn_f16_igemm_minmax_ukernel_8x8__neonfp16arith_ld64,
             xnn_init_f16_minmax_scalar_params,
             /*mr=*/8, /*nr=*/8, /*kr=*/1, /*sr=*/1,
-            benchmark::utils::CheckNEONFP16ARITH);
+            xnn_arch_arm_neon_fp16_arith);
 }
-static void f16_igemm_1x16__neonfp16arith_ld64(benchmark::State& state,
-                                               const char* net) {
+static void f16_igemm_1x16__neonfp16arith_ld64(benchmark::State& state) {
   f16_igemm(state, xnn_f16_igemm_minmax_ukernel_1x16__neonfp16arith_ld64,
             xnn_init_f16_minmax_scalar_params,
             /*mr=*/1, /*nr=*/16, /*kr=*/1, /*sr=*/1,
-            benchmark::utils::CheckNEONFP16ARITH);
+            xnn_arch_arm_neon_fp16_arith);
 }
-static void f16_igemm_4x16__neonfp16arith_ld64(benchmark::State& state,
-                                               const char* net) {
+static void f16_igemm_4x16__neonfp16arith_ld64(benchmark::State& state) {
   f16_igemm(state, xnn_f16_igemm_minmax_ukernel_4x16__neonfp16arith_ld64,
             xnn_init_f16_minmax_scalar_params,
             /*mr=*/4, /*nr=*/16, /*kr=*/1, /*sr=*/1,
-            benchmark::utils::CheckNEONFP16ARITH);
+            xnn_arch_arm_neon_fp16_arith);
 }
-static void f16_igemm_6x16__neonfp16arith_ld64(benchmark::State& state,
-                                               const char* net) {
+static void f16_igemm_6x16__neonfp16arith_ld64(benchmark::State& state) {
   f16_igemm(state, xnn_f16_igemm_minmax_ukernel_6x16__neonfp16arith_ld64,
             xnn_init_f16_minmax_scalar_params,
             /*mr=*/6, /*nr=*/16, /*kr=*/1, /*sr=*/1,
-            benchmark::utils::CheckNEONFP16ARITH);
+            xnn_arch_arm_neon_fp16_arith);
 }
-static void f16_igemm_8x16__neonfp16arith_ld64(benchmark::State& state,
-                                               const char* net) {
+static void f16_igemm_8x16__neonfp16arith_ld64(benchmark::State& state) {
   f16_igemm(state, xnn_f16_igemm_minmax_ukernel_8x16__neonfp16arith_ld64,
             xnn_init_f16_minmax_scalar_params,
             /*mr=*/8, /*nr=*/16, /*kr=*/1, /*sr=*/1,
-            benchmark::utils::CheckNEONFP16ARITH);
+            xnn_arch_arm_neon_fp16_arith);
 }
 
 BENCHMARK_CONV(f16_igemm_1x8__neonfp16arith_ld64)
@@ -307,68 +300,59 @@ BENCHMARK_CONV(f16_igemm_8x16__neonfp16arith_ld64)
 #endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-static void f16_igemm_1x8__avx2_broadcast(benchmark::State& state,
-                                          const char* net) {
+static void f16_igemm_1x8__avx2_broadcast(benchmark::State& state) {
   f16_igemm(state, xnn_f16_igemm_minmax_ukernel_1x8__avx2_broadcast,
             xnn_init_f16_minmax_scalar_params,
             /*mr=*/1, /*nr=*/8, /*kr=*/1, /*sr=*/1,
-            benchmark::utils::CheckAVX2);
+            xnn_arch_x86_avx2);
 }
-static void f16_igemm_4x8__avx2_broadcast(benchmark::State& state,
-                                          const char* net) {
+static void f16_igemm_4x8__avx2_broadcast(benchmark::State& state) {
   f16_igemm(state, xnn_f16_igemm_minmax_ukernel_4x8__avx2_broadcast,
             xnn_init_f16_minmax_scalar_params,
             /*mr=*/4, /*nr=*/8, /*kr=*/1, /*sr=*/1,
-            benchmark::utils::CheckAVX2);
+            xnn_arch_x86_avx2);
 }
-static void f16_igemm_5x8__avx2_broadcast(benchmark::State& state,
-                                          const char* net) {
+static void f16_igemm_5x8__avx2_broadcast(benchmark::State& state) {
   f16_igemm(state, xnn_f16_igemm_minmax_ukernel_5x8__avx2_broadcast,
             xnn_init_f16_minmax_scalar_params,
             /*mr=*/5, /*nr=*/8, /*kr=*/1, /*sr=*/1,
-            benchmark::utils::CheckAVX2);
+            xnn_arch_x86_avx2);
 }
-static void f16_igemm_6x8__avx2_broadcast(benchmark::State& state,
-                                          const char* net) {
+static void f16_igemm_6x8__avx2_broadcast(benchmark::State& state) {
   f16_igemm(state, xnn_f16_igemm_minmax_ukernel_6x8__avx2_broadcast,
             xnn_init_f16_minmax_scalar_params,
             /*mr=*/6, /*nr=*/8, /*kr=*/1, /*sr=*/1,
-            benchmark::utils::CheckAVX2);
+            xnn_arch_x86_avx2);
 }
-static void f16_igemm_7x8__avx2_broadcast(benchmark::State& state,
-                                          const char* net) {
+static void f16_igemm_7x8__avx2_broadcast(benchmark::State& state) {
   f16_igemm(state, xnn_f16_igemm_minmax_ukernel_7x8__avx2_broadcast,
             xnn_init_f16_minmax_scalar_params,
             /*mr=*/7, /*nr=*/8, /*kr=*/1, /*sr=*/1,
-            benchmark::utils::CheckAVX2);
+            xnn_arch_x86_avx2);
 }
-static void f16_igemm_1x16__avx2_broadcast(benchmark::State& state,
-                                           const char* net) {
+static void f16_igemm_1x16__avx2_broadcast(benchmark::State& state) {
   f16_igemm(state, xnn_f16_igemm_minmax_ukernel_1x16__avx2_broadcast,
             xnn_init_f16_minmax_scalar_params,
             /*mr=*/1, /*nr=*/16, /*kr=*/1, /*sr=*/1,
-            benchmark::utils::CheckAVX2);
+            xnn_arch_x86_avx2);
 }
-static void f16_igemm_3x16__avx2_broadcast(benchmark::State& state,
-                                           const char* net) {
+static void f16_igemm_3x16__avx2_broadcast(benchmark::State& state) {
   f16_igemm(state, xnn_f16_igemm_minmax_ukernel_3x16__avx2_broadcast,
             xnn_init_f16_minmax_scalar_params,
             /*mr=*/3, /*nr=*/16, /*kr=*/1, /*sr=*/1,
-            benchmark::utils::CheckAVX2);
+            xnn_arch_x86_avx2);
 }
-static void f16_igemm_4x16__avx2_broadcast(benchmark::State& state,
-                                           const char* net) {
+static void f16_igemm_4x16__avx2_broadcast(benchmark::State& state) {
   f16_igemm(state, xnn_f16_igemm_minmax_ukernel_4x16__avx2_broadcast,
             xnn_init_f16_minmax_scalar_params,
             /*mr=*/4, /*nr=*/16, /*kr=*/1, /*sr=*/1,
-            benchmark::utils::CheckAVX2);
+            xnn_arch_x86_avx2);
 }
-static void f16_igemm_5x16__avx2_broadcast(benchmark::State& state,
-                                           const char* net) {
+static void f16_igemm_5x16__avx2_broadcast(benchmark::State& state) {
   f16_igemm(state, xnn_f16_igemm_minmax_ukernel_5x16__avx2_broadcast,
             xnn_init_f16_minmax_scalar_params,
             /*mr=*/5, /*nr=*/16, /*kr=*/1, /*sr=*/1,
-            benchmark::utils::CheckAVX2);
+            xnn_arch_x86_avx2);
 }
 
 BENCHMARK_CONV(f16_igemm_1x8__avx2_broadcast)

@@ -9,6 +9,8 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
 
 #include <immintrin.h>
 
@@ -16,7 +18,7 @@
 #include "src/xnnpack/gemm.h"
 #include "src/xnnpack/intrinsics-polyfill.h"
 #include "src/xnnpack/math.h"
-#include "src/xnnpack/unaligned.h"
+#include "src/xnnpack/microparams.h"
 
 
 void xnn_qd8_f32_qb4w_gemm_minmax_ukernel_4x8c8__avx2(
@@ -347,8 +349,6 @@ void xnn_qd8_f32_qb4w_gemm_minmax_ukernel_4x8c8__avx2(
     vout1x01234567 = _mm256_fmadd_ps(vout1x01234567, vinput_scale1, vbias01234567);
     vout2x01234567 = _mm256_fmadd_ps(vout2x01234567, vinput_scale2, vbias01234567);
     vout3x01234567 = _mm256_fmadd_ps(vout3x01234567, vinput_scale3, vbias01234567);
-
-    
 
     vout0x01234567 = _mm256_max_ps(vout0x01234567, vmin);
     vout1x01234567 = _mm256_max_ps(vout1x01234567, vmin);

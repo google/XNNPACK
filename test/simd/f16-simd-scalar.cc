@@ -15,7 +15,6 @@
 #include <random>
 #include <vector>
 
-#include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include "src/xnnpack/math.h"
 #include "src/xnnpack/simd/f16-scalar.h"
@@ -61,7 +60,9 @@ TEST_F(F16SimdSCALARTest, ConstF16FromFloat) {
 
 TEST_F(F16SimdSCALARTest, SetZero) {
   xnn_storeu_f16(output_.data(), xnn_zero_f16());
-  EXPECT_THAT(ToFloat32(output_), testing::Each(testing::Eq(0.0f)));
+  for (size_t k = 0; k < xnn_simd_size_f16; k++) {
+    ASSERT_EQ(output_[k], xnn_float16_from_float(0.0f));
+  }
 }
 
 TEST_F(F16SimdSCALARTest, Add) {
@@ -244,7 +245,7 @@ TEST_F(F16SimdSCALARTest, Round) {
   std::vector<float> output_f32 = ToFloat32(output_);
   std::vector<float> inputs_f32 = ToFloat32(inputs_);
   for (size_t k = 0; k < xnn_simd_size_f16; k++) {
-    ASSERT_EQ(output_f32[k], std::round(inputs_f32[k]));
+    ASSERT_EQ(output_f32[k], std::rint(inputs_f32[k]));
   }
 }
 

@@ -15,6 +15,7 @@
 
 #include <immintrin.h>
 
+#include "src/xnnpack/common.h"
 #include "src/xnnpack/packw.h"
 #include "src/xnnpack/prefetch.h"
 

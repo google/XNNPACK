@@ -1,4 +1,4 @@
-// Copyright 2019 Google LLC
+// Copyright 2019-2025 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
@@ -17,16 +17,18 @@
 #include "src/xnnpack/buffer.h"
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/conv.h"
+#include "src/xnnpack/hardware-config.h"
 #include "src/xnnpack/microfnptr.h"
 #include "src/xnnpack/microparams-init.h"
 #include "src/xnnpack/pack.h"
+#include "test/replicable_random_device.h"
 #include <benchmark/benchmark.h>
 
 static void f32_conv_hwc(
     benchmark::State& state, xnn_f32_conv_hwc_ukernel_fn conv,
     xnn_init_f32_minmax_params_fn init_params, uint32_t output_channels_tile,
-    benchmark::utils::IsaCheckFunction isa_check = nullptr) {
-  if (isa_check && !isa_check(state)) {
+    uint64_t arch_flags = 0) {
+  if (!benchmark::utils::CheckArchFlags(state, arch_flags)) {
     return;
   }
 
@@ -34,8 +36,7 @@ static void f32_conv_hwc(
   const size_t input_width = state.range(1);
   const size_t output_channels = state.range(2);
 
-  std::random_device random_device;
-  auto rng = std::mt19937(random_device());
+  xnnpack::ReplicableRandomDevice rng;
   auto f32rng = std::bind(std::uniform_real_distribution<float>(0.0f, 1.0f),
                           std::ref(rng));
 
@@ -116,28 +117,28 @@ static void f32_conv_hwc(
 
 #if XNN_ARCH_ARM64
 static void f32_conv_hwc_3x3s2p1c3x8__aarch64_neonfma_2x1(
-    benchmark::State& state, const char* net) {
+    benchmark::State& state) {
   f32_conv_hwc(state, xnn_f32_conv_hwc_ukernel_3x3s2p1c3x8__aarch64_neonfma_2x1,
                xnn_init_f32_minmax_scalar_params, 8 /* output channel tile */,
-               benchmark::utils::CheckNEONFMA);
+               xnn_arch_arm_neon_fma);
 }
 static void f32_conv_hwc_3x3s2p1c3x4__aarch64_neonfma_2x1(
-    benchmark::State& state, const char* net) {
+    benchmark::State& state) {
   f32_conv_hwc(state, xnn_f32_conv_hwc_ukernel_3x3s2p1c3x4__aarch64_neonfma_2x1,
                xnn_init_f32_minmax_scalar_params, 4 /* output channel tile */,
-               benchmark::utils::CheckNEONFMA);
+               xnn_arch_arm_neon_fma);
 }
 static void f32_conv_hwc_3x3s2p1c3x8__aarch64_neonfma_2x2(
-    benchmark::State& state, const char* net) {
+    benchmark::State& state) {
   f32_conv_hwc(state, xnn_f32_conv_hwc_ukernel_3x3s2p1c3x8__aarch64_neonfma_2x2,
                xnn_init_f32_minmax_scalar_params, 8 /* output channel tile */,
-               benchmark::utils::CheckNEONFMA);
+               xnn_arch_arm_neon_fma);
 }
 static void f32_conv_hwc_3x3s2p1c3x4__aarch64_neonfma_2x2(
-    benchmark::State& state, const char* net) {
+    benchmark::State& state) {
   f32_conv_hwc(state, xnn_f32_conv_hwc_ukernel_3x3s2p1c3x4__aarch64_neonfma_2x2,
                xnn_init_f32_minmax_scalar_params, 4 /* output channel tile */,
-               benchmark::utils::CheckNEONFMA);
+               xnn_arch_arm_neon_fma);
 }
 
 BENCHMARK_DCONV(f32_conv_hwc_3x3s2p1c3x8__aarch64_neonfma_2x1);
@@ -147,29 +148,25 @@ BENCHMARK_DCONV(f32_conv_hwc_3x3s2p1c3x4__aarch64_neonfma_2x2);
 #endif  // XNN_ARCH_ARM64
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
-static void f32_conv_hwc_3x3s2p1c3x8__neon_2x1(benchmark::State& state,
-                                               const char* net) {
+static void f32_conv_hwc_3x3s2p1c3x8__neon_2x1(benchmark::State& state) {
   f32_conv_hwc(state, xnn_f32_conv_hwc_ukernel_3x3s2p1c3x8__neon_2x1,
                xnn_init_f32_minmax_scalar_params, 8 /* output channel tile */,
-               benchmark::utils::CheckNEON);
+               xnn_arch_arm_neon);
 }
-static void f32_conv_hwc_3x3s2p1c3x4__neon_2x1(benchmark::State& state,
-                                               const char* net) {
+static void f32_conv_hwc_3x3s2p1c3x4__neon_2x1(benchmark::State& state) {
   f32_conv_hwc(state, xnn_f32_conv_hwc_ukernel_3x3s2p1c3x4__neon_2x1,
                xnn_init_f32_minmax_scalar_params, 4 /* output channel tile */,
-               benchmark::utils::CheckNEON);
+               xnn_arch_arm_neon);
 }
-static void f32_conv_hwc_3x3s2p1c3x8__neon_2x2(benchmark::State& state,
-                                               const char* net) {
+static void f32_conv_hwc_3x3s2p1c3x8__neon_2x2(benchmark::State& state) {
   f32_conv_hwc(state, xnn_f32_conv_hwc_ukernel_3x3s2p1c3x8__neon_2x2,
                xnn_init_f32_minmax_scalar_params, 8 /* output channel tile */,
-               benchmark::utils::CheckNEON);
+               xnn_arch_arm_neon);
 }
-static void f32_conv_hwc_3x3s2p1c3x4__neon_2x2(benchmark::State& state,
-                                               const char* net) {
+static void f32_conv_hwc_3x3s2p1c3x4__neon_2x2(benchmark::State& state) {
   f32_conv_hwc(state, xnn_f32_conv_hwc_ukernel_3x3s2p1c3x4__neon_2x2,
                xnn_init_f32_minmax_scalar_params, 4 /* output channel tile */,
-               benchmark::utils::CheckNEON);
+               xnn_arch_arm_neon);
 }
 
 BENCHMARK_DCONV(f32_conv_hwc_3x3s2p1c3x8__neon_2x1);

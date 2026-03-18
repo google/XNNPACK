@@ -1,9 +1,9 @@
-"""
-Microkernel filenames lists for sse2.
-
-Auto-generated file. Do not edit!
-  Generator: tools/update-microkernels.py
-"""
+#
+# Microkernel filenames lists for sse2.
+#
+# Auto-generated file. Do not edit!
+#   Generator: tools/update-microkernels.py
+#
 
 PROD_SSE2_MICROKERNEL_SRCS = [
     "src/f16-f32-vcvt/gen/f16-f32-vcvt-sse2-int16-u32.c",
@@ -16,10 +16,12 @@ PROD_SSE2_MICROKERNEL_SRCS = [
     "src/f32-qs8-vcvt/gen/f32-qs8-vcvt-sse2-u32.c",
     "src/f32-qu8-vcvt/gen/f32-qu8-vcvt-sse2-u32.c",
     "src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-sse2-rr2-p5-u16-acc2.c",
-    "src/f32-rdminmax/gen/f32-rdmax-2p2x-sse2-c32.c",
-    "src/f32-rdminmax/gen/f32-rdmin-2p2x-sse2-c32.c",
-    "src/f32-rdsum/gen/f32-rdsum-7p7x-minmax-sse2-c16.c",
+    "src/f32-rdminmax/gen/f32-rdmax-2p2x-sse2-u32.c",
+    "src/f32-rdminmax/gen/f32-rdmin-2p2x-sse2-u32.c",
+    "src/f32-rdsum/gen/f32-rdsum-7p7x-minmax-sse2-u16.c",
+    "src/f32-rdsum2/gen/f32-rdsum2-7p7x-minmax-sse2.c",
     "src/f32-rsum/gen/f32-rsum-sse2-u16-acc4.c",
+    "src/f32-rsum2/gen/f32-rsum2-sse2-u4.c",
     "src/f32-vapproxgelu/gen/f32-vapproxgelu-sse2-rational-12-10-div.c",
     "src/f32-vbinary/gen/f32-vprelu-sse2-u8.c",
     "src/f32-vbinary/gen/f32-vpreluc-sse2-u8.c",
@@ -34,14 +36,15 @@ PROD_SSE2_MICROKERNEL_SRCS = [
     "src/f32-vgelu/gen/f32-vgelu-sse2-rational-12-10-div.c",
     "src/f32-vhswish/gen/f32-vhswish-sse2.c",
     "src/f32-vlog/gen/f32-vlog-sse2-rational-3-3-div.c",
-    "src/f32-vrelu/gen/f32-vrelu-sse2.c",
     "src/f32-vrnd/gen/f32-vrndd-sse2-u8.c",
     "src/f32-vrnd/gen/f32-vrndne-sse2-u8.c",
     "src/f32-vrnd/gen/f32-vrndu-sse2-u8.c",
     "src/f32-vrnd/gen/f32-vrndz-sse2-u8.c",
+    "src/f32-vrsqrt/gen/f32-vrsqrt-sse2-rsqrt.c",
     "src/f32-vrsqrt/gen/f32-vrsqrt-sse2-sqrt.c",
     "src/f32-vsigmoid/gen/f32-vsigmoid-sse2-rr2-lut64-p2-div-u8.c",
     "src/f32-vsin/gen/f32-vsin-sse2-rational-5-4-div.c",
+    "src/f32-vsqrt/gen/f32-vsqrt-sse2-rsqrt.c",
     "src/f32-vsqrt/gen/f32-vsqrt-sse2-sqrt.c",
     "src/f32-vtanh/gen/f32-vtanh-sse2-rational-9-8-div.c",
     "src/f32-vunary/gen/f32-vabs-sse2.c",
@@ -85,12 +88,12 @@ PROD_SSE2_MICROKERNEL_SRCS = [
     "src/qu8-vlrelu/gen/qu8-vlrelu-sse2-u32.c",
     "src/qu8-vmul/gen/qu8-vmul-minmax-fp32-sse2-mul16-ld64-u8.c",
     "src/qu8-vmulc/gen/qu8-vmulc-minmax-fp32-sse2-mul16-ld64-u8.c",
-    "src/s8-ibilinear/gen/s8-ibilinear-sse2-c8.c",
+    "src/s8-ibilinear/gen/s8-ibilinear-sse2-u8.c",
     "src/s8-vclamp/s8-vclamp-sse2-u64.c",
-    "src/u8-ibilinear/gen/u8-ibilinear-sse2-c8.c",
+    "src/u8-ibilinear/gen/u8-ibilinear-sse2-u8.c",
     "src/u8-maxpool/gen/u8-maxpool-9p-minmax-sse2-u16.c",
-    "src/u8-rdminmax/gen/u8-rdmax-2p2x-sse2-c32.c",
-    "src/u8-rdminmax/gen/u8-rdmin-2p2x-sse2-c32.c",
+    "src/u8-rdminmax/gen/u8-rdmax-2p2x-sse2-u32.c",
+    "src/u8-rdminmax/gen/u8-rdmin-2p2x-sse2-u32.c",
     "src/u8-rminmax/gen/u8-rmax-sse2-u32-acc2.c",
     "src/u8-rminmax/gen/u8-rmin-sse2-u32-acc2.c",
     "src/u8-rminmax/gen/u8-rminmax-sse2-u32-acc2.c",
@@ -127,8 +130,8 @@ NON_PROD_SSE2_MICROKERNEL_SRCS = [
     "src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-sse2-rr2-p5-u4.c",
     "src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-sse2-rr2-p5-u8-acc2.c",
     "src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-sse2-rr2-p5-u16-acc4.c",
-    "src/f32-rdsum/gen/f32-rdsum-7p7x-minmax-sse2-c32.c",
-    "src/f32-rdsum/gen/f32-rdsum-7p7x-minmax-sse2-c64.c",
+    "src/f32-rdsum/gen/f32-rdsum-7p7x-minmax-sse2-u32.c",
+    "src/f32-rdsum/gen/f32-rdsum-7p7x-minmax-sse2-u64.c",
     "src/f32-rsum/gen/f32-rsum-sse2-u4.c",
     "src/f32-rsum/gen/f32-rsum-sse2-u8-acc2.c",
     "src/f32-rsum/gen/f32-rsum-sse2-u12-acc3.c",
@@ -149,7 +152,6 @@ NON_PROD_SSE2_MICROKERNEL_SRCS = [
     "src/f32-vrnd/gen/f32-vrndne-sse2-u4.c",
     "src/f32-vrnd/gen/f32-vrndu-sse2-u4.c",
     "src/f32-vrnd/gen/f32-vrndz-sse2-u4.c",
-    "src/f32-vrsqrt/gen/f32-vrsqrt-sse2-rsqrt.c",
     "src/f32-vsigmoid/gen/f32-vsigmoid-sse2-rr2-lut64-p2-div-u4.c",
     "src/f32-vsigmoid/gen/f32-vsigmoid-sse2-rr2-lut64-p2-div-u12.c",
     "src/f32-vsigmoid/gen/f32-vsigmoid-sse2-rr2-lut64-p2-div-u16.c",
@@ -157,7 +159,6 @@ NON_PROD_SSE2_MICROKERNEL_SRCS = [
     "src/f32-vsigmoid/gen/f32-vsigmoid-sse2-rr2-p5-div-u8.c",
     "src/f32-vsigmoid/gen/f32-vsigmoid-sse2-rr2-p5-div-u12.c",
     "src/f32-vsigmoid/gen/f32-vsigmoid-sse2-rr2-p5-div-u16.c",
-    "src/f32-vsqrt/gen/f32-vsqrt-sse2-rsqrt.c",
     "src/f32-vtanh/gen/f32-vtanh-sse2-rational-9-8-nr.c",
     "src/qd8-f32-qb4w-gemm/gen/qd8-f32-qb4w-gemm-1x4c8-minmax-sse2-ld64.c",
     "src/qd8-f32-qb4w-gemm/gen/qd8-f32-qb4w-gemm-2x4c8-minmax-sse2-ld64.c",
@@ -302,8 +303,8 @@ NON_PROD_SSE2_MICROKERNEL_SRCS = [
     "src/qu8-vlrelu/gen/qu8-vlrelu-sse2-u16.c",
     "src/qu8-vmul/gen/qu8-vmul-minmax-fp32-sse2-mul16-ld64-u16.c",
     "src/qu8-vmulc/gen/qu8-vmulc-minmax-fp32-sse2-mul16-ld64-u16.c",
-    "src/s8-ibilinear/gen/s8-ibilinear-sse2-c16.c",
-    "src/u8-ibilinear/gen/u8-ibilinear-sse2-c16.c",
+    "src/s8-ibilinear/gen/s8-ibilinear-sse2-u16.c",
+    "src/u8-ibilinear/gen/u8-ibilinear-sse2-u16.c",
     "src/u8-rminmax/gen/u8-rmax-sse2-u16.c",
     "src/u8-rminmax/gen/u8-rmax-sse2-u48-acc3.c",
     "src/u8-rminmax/gen/u8-rmax-sse2-u64-acc2.c",

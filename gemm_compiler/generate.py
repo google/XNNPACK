@@ -40,11 +40,7 @@ def generate_gemm_microkernel(
   isa.inner_loop()
 
   isa.label('inner_loop_end')
-  isa.convert_to_output_type()
-
-  ## min/max clamping
-  isa.comment('Min/max clamping.')
-  isa.clamp()
+  isa.convert_to_output()
 
   ## store
   isa.store()

@@ -1,7 +1,7 @@
 // Copyright (c) Facebook, Inc. and its affiliates.
 // All rights reserved.
 //
-// Copyright 2019 Google LLC
+// Copyright 2019-2025 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
@@ -21,6 +21,7 @@
 #include "src/xnnpack/buffer.h"
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/math.h"
+#include "test/replicable_random_device.h"
 #include <benchmark/benchmark.h>
 #include <pthreadpool.h>
 
@@ -49,8 +50,7 @@ void xnnpack_convolution_qu8(benchmark::State& state, const char* net) {
   const size_t group_input_channels = state.range(10);
   const size_t group_output_channels = state.range(11);
 
-  std::random_device random_device;
-  auto rng = std::mt19937(random_device());
+  xnnpack::ReplicableRandomDevice rng;
   auto i32rng = std::bind(std::uniform_int_distribution<int32_t>(-10000, 10000),
                           std::ref(rng));
 
@@ -169,8 +169,7 @@ void xnnpack_convolution_qs8(benchmark::State& state, const char* net) {
   const size_t group_input_channels = state.range(10);
   const size_t group_output_channels = state.range(11);
 
-  std::random_device random_device;
-  auto rng = std::mt19937(random_device());
+  xnnpack::ReplicableRandomDevice rng;
   auto i32rng = std::bind(std::uniform_int_distribution<int32_t>(-10000, 10000),
                           std::ref(rng));
 
@@ -288,8 +287,7 @@ void xnnpack_convolution_f16(benchmark::State& state, const char* net) {
   const size_t group_input_channels = state.range(10);
   const size_t group_output_channels = state.range(11);
 
-  std::random_device random_device;
-  auto rng = std::mt19937(random_device());
+  xnnpack::ReplicableRandomDevice rng;
   auto f32rng = std::bind(std::uniform_real_distribution<float>(0.1f, 1.0f),
                           std::ref(rng));
 
@@ -410,8 +408,7 @@ void xnnpack_convolution_f32(benchmark::State& state, const char* net) {
   const size_t group_input_channels = state.range(10);
   const size_t group_output_channels = state.range(11);
 
-  std::random_device random_device;
-  auto rng = std::mt19937(random_device());
+  xnnpack::ReplicableRandomDevice rng;
   auto f32rng = std::bind(std::uniform_real_distribution<float>(0.0f, 1.0f),
                           std::ref(rng));
 
@@ -542,8 +539,7 @@ void tflite_convolution_f32(benchmark::State& state, const char* net) {
     }
   }
 
-  std::random_device random_device;
-  auto rng = std::mt19937(random_device());
+  xnnpack::ReplicableRandomDevice rng;
   auto f32rng = std::bind(std::uniform_real_distribution<float>(0.0f, 1.0f),
                           std::ref(rng));
 
@@ -716,9 +712,9 @@ void tflite_convolution_f32(benchmark::State& state, const char* net) {
   }
 
   state.counters["FLOPS"] = benchmark::Counter(
-      uint64_t(state.iterations()) * 2 * batch_size * output_height *
-          output_width * groups * group_input_channels * group_output_channels *
-          kernel_height * kernel_width,
+      static_cast<uint64_t>(state.iterations()) * 2 * batch_size *
+          output_height * output_width * groups * group_input_channels *
+          group_output_channels * kernel_height * kernel_width,
       benchmark::Counter::kIsRate);
 
   interpreter.reset();
@@ -726,7 +722,7 @@ void tflite_convolution_f32(benchmark::State& state, const char* net) {
 #endif  // BENCHMARK_TENSORFLOW_LITE
 
 // ShuffleNet v1 with 1 group.
-static void ShuffleNetV1G1(benchmark::internal::Benchmark* b) {
+static void ShuffleNetV1G1(benchmark::Benchmark* b) {
   b->ArgNames(
       {"N", "H", "W", "KH", "KW", "PH", "PW", "S", "D", "G", "GCin", "GCout"});
 
@@ -766,7 +762,7 @@ static void ShuffleNetV1G1(benchmark::internal::Benchmark* b) {
 }
 
 // ShuffleNet v1 with 2 groups.
-static void ShuffleNetV1G2(benchmark::internal::Benchmark* b) {
+static void ShuffleNetV1G2(benchmark::Benchmark* b) {
   b->ArgNames(
       {"N", "H", "W", "KH", "KW", "PH", "PW", "S", "D", "G", "GCin", "GCout"});
 
@@ -806,7 +802,7 @@ static void ShuffleNetV1G2(benchmark::internal::Benchmark* b) {
 }
 
 // ShuffleNet v1 with 3 groups.
-static void ShuffleNetV1G3(benchmark::internal::Benchmark* b) {
+static void ShuffleNetV1G3(benchmark::Benchmark* b) {
   b->ArgNames(
       {"N", "H", "W", "KH", "KW", "PH", "PW", "S", "D", "G", "GCin", "GCout"});
 
@@ -846,7 +842,7 @@ static void ShuffleNetV1G3(benchmark::internal::Benchmark* b) {
 }
 
 // ShuffleNet v1 with 4 groups.
-static void ShuffleNetV1G4(benchmark::internal::Benchmark* b) {
+static void ShuffleNetV1G4(benchmark::Benchmark* b) {
   b->ArgNames(
       {"N", "H", "W", "KH", "KW", "PH", "PW", "S", "D", "G", "GCin", "GCout"});
 
@@ -886,7 +882,7 @@ static void ShuffleNetV1G4(benchmark::internal::Benchmark* b) {
 }
 
 // ShuffleNet v1 with 8 groups.
-static void ShuffleNetV1G8(benchmark::internal::Benchmark* b) {
+static void ShuffleNetV1G8(benchmark::Benchmark* b) {
   b->ArgNames(
       {"N", "H", "W", "KH", "KW", "PH", "PW", "S", "D", "G", "GCin", "GCout"});
 
@@ -926,7 +922,7 @@ static void ShuffleNetV1G8(benchmark::internal::Benchmark* b) {
 }
 
 // ShuffleNet v2 (0.5X scale)
-static void ShuffleNetV2X05(benchmark::internal::Benchmark* b) {
+static void ShuffleNetV2X05(benchmark::Benchmark* b) {
   b->ArgNames(
       {"N", "H", "W", "KH", "KW", "PH", "PW", "S", "D", "G", "GCin", "GCout"});
 
@@ -957,7 +953,7 @@ static void ShuffleNetV2X05(benchmark::internal::Benchmark* b) {
 }
 
 // ShuffleNet v2 (1.0X scale)
-static void ShuffleNetV2X10(benchmark::internal::Benchmark* b) {
+static void ShuffleNetV2X10(benchmark::Benchmark* b) {
   b->ArgNames(
       {"N", "H", "W", "KH", "KW", "PH", "PW", "S", "D", "G", "GCin", "GCout"});
 
@@ -990,7 +986,7 @@ static void ShuffleNetV2X10(benchmark::internal::Benchmark* b) {
 }
 
 // ShuffleNet v2 (1.5X scale)
-static void ShuffleNetV2X15(benchmark::internal::Benchmark* b) {
+static void ShuffleNetV2X15(benchmark::Benchmark* b) {
   b->ArgNames(
       {"N", "H", "W", "KH", "KW", "PH", "PW", "S", "D", "G", "GCin", "GCout"});
 
@@ -1023,7 +1019,7 @@ static void ShuffleNetV2X15(benchmark::internal::Benchmark* b) {
 }
 
 // ShuffleNet v2 (2.0X scale)
-static void ShuffleNetV2X20(benchmark::internal::Benchmark* b) {
+static void ShuffleNetV2X20(benchmark::Benchmark* b) {
   b->ArgNames(
       {"N", "H", "W", "KH", "KW", "PH", "PW", "S", "D", "G", "GCin", "GCout"});
 
@@ -1055,7 +1051,7 @@ static void ShuffleNetV2X20(benchmark::internal::Benchmark* b) {
   b->Args({1, 7, 7, 1, 1, 0, 0, 1, 1, 1, 976, 2048});
 }
 
-static void MobileNetV1(benchmark::internal::Benchmark* b) {
+static void MobileNetV1(benchmark::Benchmark* b) {
   b->ArgNames(
       {"N", "H", "W", "KH", "KW", "PH", "PW", "S", "D", "G", "GCin", "GCout"});
 
@@ -1081,7 +1077,7 @@ static void MobileNetV1(benchmark::internal::Benchmark* b) {
   b->Args({1, 7, 7, 1, 1, 0, 0, 1, 1, 1, 1024, 1024});
 }
 
-static void MobileNetV2(benchmark::internal::Benchmark* b) {
+static void MobileNetV2(benchmark::Benchmark* b) {
   b->ArgNames(
       {"N", "H", "W", "KH", "KW", "PH", "PW", "S", "D", "G", "GCin", "GCout"});
 
@@ -1167,7 +1163,7 @@ static void MobileNetV2(benchmark::internal::Benchmark* b) {
   b->Args({1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1280, 1000});
 }
 
-static void MobileNetV3Small(benchmark::internal::Benchmark* b) {
+static void MobileNetV3Small(benchmark::Benchmark* b) {
   b->ArgNames(
       {"N", "H", "W", "KH", "KW", "PH", "PW", "S", "D", "G", "GCin", "GCout"});
 
@@ -1253,7 +1249,7 @@ static void MobileNetV3Small(benchmark::internal::Benchmark* b) {
   b->Args({1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1024, 1001});
 }
 
-static void MobileNetV3Large(benchmark::internal::Benchmark* b) {
+static void MobileNetV3Large(benchmark::Benchmark* b) {
   b->ArgNames(
       {"N", "H", "W", "KH", "KW", "PH", "PW", "S", "D", "G", "GCin", "GCout"});
 
@@ -1356,7 +1352,7 @@ static void MobileNetV3Large(benchmark::internal::Benchmark* b) {
 }
 
 // SqueezeNet 1.0
-static void SqueezeNetV10(benchmark::internal::Benchmark* b) {
+static void SqueezeNetV10(benchmark::Benchmark* b) {
   b->ArgNames(
       {"N", "H", "W", "KH", "KW", "PH", "PW", "S", "D", "G", "GCin", "GCout"});
 
@@ -1409,7 +1405,7 @@ static void SqueezeNetV10(benchmark::internal::Benchmark* b) {
 }
 
 // SqueezeNet 1.1
-static void SqueezeNetV11(benchmark::internal::Benchmark* b) {
+static void SqueezeNetV11(benchmark::Benchmark* b) {
   b->ArgNames(
       {"N", "H", "W", "KH", "KW", "PH", "PW", "S", "D", "G", "GCin", "GCout"});
 
@@ -1461,7 +1457,7 @@ static void SqueezeNetV11(benchmark::internal::Benchmark* b) {
   b->Args({1, 13, 13, 1, 1, 0, 0, 1, 1, 1, 512, 1000});
 }
 
-static void InceptionV3(benchmark::internal::Benchmark* b) {
+static void InceptionV3(benchmark::Benchmark* b) {
   b->ArgNames(
       {"N", "H", "W", "KH", "KW", "PH", "PW", "S", "D", "G", "GCin", "GCout"});
 
@@ -1512,7 +1508,7 @@ static void InceptionV3(benchmark::internal::Benchmark* b) {
   b->Args({1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 2048, 1001});
 }
 
-static void ResNet18(benchmark::internal::Benchmark* b) {
+static void ResNet18(benchmark::Benchmark* b) {
   b->ArgNames(
       {"N", "H", "W", "KH", "KW", "PH", "PW", "S", "D", "G", "GCin", "GCout"});
 
@@ -1539,7 +1535,7 @@ static void ResNet18(benchmark::internal::Benchmark* b) {
   b->Args({1, 14, 14, 1, 1, 0, 0, 2, 1, 1, 256, 512});
 }
 
-static void ResNet50(benchmark::internal::Benchmark* b) {
+static void ResNet50(benchmark::Benchmark* b) {
   b->ArgNames(
       {"N", "H", "W", "KH", "KW", "PH", "PW", "S", "D", "G", "GCin", "GCout"});
 
@@ -1592,7 +1588,7 @@ static void ResNet50(benchmark::internal::Benchmark* b) {
   // b->Args({1,   7,   7,  1,  1,  0,  0, 1, 1, 1,  512, 2048});
 }
 
-static void VGG(benchmark::internal::Benchmark* b) {
+static void VGG(benchmark::Benchmark* b) {
   b->ArgNames(
       {"N", "H", "W", "KH", "KW", "PH", "PW", "S", "D", "G", "GCin", "GCout"});
 
@@ -1639,7 +1635,7 @@ static void VGG(benchmark::internal::Benchmark* b) {
 }
 
 // SRCNN (9-1-5)
-static void SRCNN915(benchmark::internal::Benchmark* b) {
+static void SRCNN915(benchmark::Benchmark* b) {
   b->ArgNames(
       {"N", "H", "W", "KH", "KW", "PH", "PW", "S", "D", "G", "GCin", "GCout"});
 
@@ -1650,7 +1646,7 @@ static void SRCNN915(benchmark::internal::Benchmark* b) {
 }
 
 // SRCNN (9-3-5)
-static void SRCNN935(benchmark::internal::Benchmark* b) {
+static void SRCNN935(benchmark::Benchmark* b) {
   b->ArgNames(
       {"N", "H", "W", "KH", "KW", "PH", "PW", "S", "D", "G", "GCin", "GCout"});
 
@@ -1661,7 +1657,7 @@ static void SRCNN935(benchmark::internal::Benchmark* b) {
 }
 
 // SRCNN (9-5-5)
-static void SRCNN955(benchmark::internal::Benchmark* b) {
+static void SRCNN955(benchmark::Benchmark* b) {
   b->ArgNames(
       {"N", "H", "W", "KH", "KW", "PH", "PW", "S", "D", "G", "GCin", "GCout"});
 

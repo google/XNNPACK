@@ -6,7 +6,17 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#pragma once
+#ifndef XNNPACK_SRC_XNNPACK_COMMON_H_
+#define XNNPACK_SRC_XNNPACK_COMMON_H_
+
+#if defined(__GNUC__) && !defined(__clang__)
+// This warning has a ton of false positives and often requires adding
+// initialization with non-trivial cost to silence it. Furthermore, it is
+// impossible to disable in the build, because it only exists in new versions of
+// GCC, old/other compilers error if you try to disable it via the command line,
+// and we can't detect compiler versions in bazel.
+#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
+#endif
 
 #if defined(__APPLE__)
 #include <TargetConditionals.h>
@@ -104,13 +114,6 @@
 #define XNN_PLATFORM_MAC 1
 #else
 #define XNN_PLATFORM_MAC 0
-#endif
-
-// Mobile build x86 versions for debugging
-#if XNN_PLATFORM_ANDROID || XNN_PLATFORM_IOS
-#define XNN_PLATFORM_MOBILE 1
-#else
-#define XNN_PLATFORM_MOBILE 0
 #endif
 
 #if defined(__EMSCRIPTEN__) || defined(__wasm__)
@@ -247,16 +250,6 @@
 
 #define XNN_COUNT_OF(array) (sizeof(array) / sizeof(0 [array]))
 
-#if defined(__cplusplus) || XNN_COMPILER_MSVC || XNN_COMPILER_CLANG
-// static as array indices in function parameter declaration is a C99 feature,
-// not supported in C++. MSVC does not support this feature, even in C mode.
-// Clang generates suboptimal code, see
-// https://github.com/llvm/llvm-project/issues/59120
-#define XNN_MIN_ELEMENTS(count) count
-#else
-#define XNN_MIN_ELEMENTS(count) static count
-#endif
-
 #if defined(__cplusplus) || XNN_COMPILER_MSVC
 #define XNN_RESTRICT
 #else
@@ -280,35 +273,57 @@
 #define XNN_UNPREDICTABLE(condition) (!!(condition))
 #endif
 
+#if defined(__clang__)
+// Clang ignores sanitizer attributes on functions that get inlined. Also:
+// - GCC does not allow this attribute to be specified after a function
+// - It takes precedence over always_inline, so we can specify both.
+#define XNN_NO_INLINE_SANITIZER __attribute__((__noinline__))
+#else
+#define XNN_NO_INLINE_SANITIZER
+#endif
+
 #if XNN_COMPILER_HAS_FEATURE(thread_sanitizer)
-#define XNN_DISABLE_TSAN __attribute__((__no_sanitize__("thread")))
+#define XNN_DISABLE_TSAN \
+  __attribute__((__no_sanitize__("thread"))) XNN_NO_INLINE_SANITIZER
 #else
 #define XNN_DISABLE_TSAN
 #endif
 
 #if XNN_COMPILER_HAS_FEATURE(memory_sanitizer)
-#define XNN_DISABLE_MSAN __attribute__((__no_sanitize__("memory")))
+#define XNN_DISABLE_MSAN \
+  __attribute__((__no_sanitize__("memory"))) XNN_NO_INLINE_SANITIZER
 #else
 #define XNN_DISABLE_MSAN
 #endif
 
 #if XNN_COMPILER_HAS_FEATURE(hwaddress_sanitizer)
-#define XNN_DISABLE_HWASAN __attribute__((__no_sanitize__("hwaddress")))
+#define XNN_DISABLE_HWASAN \
+  __attribute__((__no_sanitize__("hwaddress"))) XNN_NO_INLINE_SANITIZER
 #else
 #define XNN_DISABLE_HWASAN
 #endif
 
 #if XNN_COMPILER_HAS_FEATURE(address_sanitizer)
-#define XNN_DISABLE_ASAN __attribute__((__no_sanitize__("address")))
+#define XNN_DISABLE_ASAN \
+  __attribute__((__no_sanitize__("address"))) XNN_NO_INLINE_SANITIZER
 #else
 #define XNN_DISABLE_ASAN
+#endif
+
+#if XNN_COMPILER_HAS_FEATURE(undefined_behavior_sanitizer)
+#define XNN_DISABLE_UBSAN \
+  __attribute__((__no_sanitize__("undefined"))) XNN_NO_INLINE_SANITIZER
+#else
+#define XNN_DISABLE_UBSAN
 #endif
 
 #define XNN_OOB_READS \
   XNN_DISABLE_TSAN XNN_DISABLE_MSAN XNN_DISABLE_HWASAN XNN_DISABLE_ASAN
 
-#if defined(__GNUC__)
+#if defined(__GNUC__) || XNN_COMPILER_HAS_ATTRIBUTE(fallthrough)
 #define XNN_FALLTHROUGH __attribute__((fallthrough));
+#elif defined(__cplusplus) && __cplusplus >= 201703L
+#define XNN_FALLTHROUGH [[fallthrough]];
 #else
 #define XNN_FALLTHROUGH /* fall through */
 #endif
@@ -368,11 +383,7 @@
 #if XNN_ARCH_WASM
 #define XNN_ALLOCATION_ALIGNMENT 4
 #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
-#if XNN_PLATFORM_MOBILE
-#define XNN_ALLOCATION_ALIGNMENT 32
-#else
 #define XNN_ALLOCATION_ALIGNMENT 64
-#endif
 #elif XNN_ARCH_HEXAGON
 #define XNN_ALLOCATION_ALIGNMENT 128
 #else
@@ -424,7 +435,16 @@
 #define XNN_LOG2_SIZEOF_UINT8_T 0   // log2(sizeof(uint8_t))
 #define XNN_LOG2_SIZEOF_INT16_T 1   // log2(sizeof(int16_t))
 #define XNN_LOG2_SIZEOF_UINT16_T 1  // log2(sizeof(uint16_t))
-#define XNN_LOG2_SIZEOF_HALF 1      // log2(sizeof(half))
+#define XNN_LOG2_SIZEOF_FLOAT16 1   // log2(sizeof(xnn_float16))
+#define XNN_LOG2_SIZEOF_BFLOAT16 1  // log2(sizeof(xnn_bfloat16))
 #define XNN_LOG2_SIZEOF_FLOAT 2     // log2(sizeof(float))
 #define XNN_LOG2_SIZEOF_INT32_T 2   // log2(sizeof(int32_t))
 #define XNN_LOG2_SIZEOF_UINT32_T 2  // log2(sizeof(uint32_t))
+
+#define XNN_LOG2_BIT_SIZEOF_INT4 2  // log2(4)
+#define XNN_LOG2_BIT_SIZEOF_UINT4 2  // log2(4)
+
+#define XNN_LOG2_BIT_SIZEOF_INT2 1  // log2(2)
+#define XNN_LOG2_BIT_SIZEOF_UINT2 1  // log2(2)
+
+#endif  // XNNPACK_SRC_XNNPACK_COMMON_H_

@@ -4,8 +4,8 @@
 // LICENSE file in the root directory of this source tree.
 //
 
-#ifndef __XNNPACK_SRC_XNNPACK_SIMD_S16_NEON_H_
-#define __XNNPACK_SRC_XNNPACK_SIMD_S16_NEON_H_
+#ifndef XNNPACK_SRC_XNNPACK_SIMD_S16_NEON_H_
+#define XNNPACK_SRC_XNNPACK_SIMD_S16_NEON_H_
 
 #include <arm_neon.h>
 #include <assert.h>
@@ -78,18 +78,27 @@ static XNN_INLINE xnn_simd_s16_t xnn_load_tail_safe_s16(const int16_t* input,
   switch (num_elements) {
     case 7:
       *d++ = *input++;
+      XNN_FALLTHROUGH
     case 6:
       *d++ = *input++;
+      XNN_FALLTHROUGH
     case 5:
       *d++ = *input++;
+      XNN_FALLTHROUGH
     case 4:
       *d++ = *input++;
+      XNN_FALLTHROUGH
     case 3:
       *d++ = *input++;
+      XNN_FALLTHROUGH
     case 2:
       *d++ = *input++;
+      XNN_FALLTHROUGH
     case 1:
       *d++ = *input++;
+      XNN_FALLTHROUGH
+    default:
+      break;
   }
   return vld1q_s16(&padded[0]);
 }
@@ -115,4 +124,4 @@ static XNN_INLINE void xnn_store_tail_s16(int16_t* output, xnn_simd_s16_t v,
   }
 }
 
-#endif  // __XNNPACK_SRC_XNNPACK_SIMD_S16_NEON_H_
+#endif  // XNNPACK_SRC_XNNPACK_SIMD_S16_NEON_H_

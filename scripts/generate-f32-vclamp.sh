@@ -11,7 +11,6 @@ tools/xngen src/f32-vclamp/simd.c.in -D ARCH=wasmrelaxedsimd -D BATCH_TILES=4,8,
 tools/xngen src/f32-vclamp/simd.c.in -D ARCH=neon            -D BATCH_TILES=4,8,16    -o src/f32-vclamp/gen/f32-vclamp-neon.c &
 tools/xngen src/f32-vclamp/simd.c.in -D ARCH=sse2            -D BATCH_TILES=4,8,16    -o src/f32-vclamp/gen/f32-vclamp-sse2.c &
 tools/xngen src/f32-vclamp/simd.c.in -D ARCH=avx             -D BATCH_TILES=8,16,32   -o src/f32-vclamp/gen/f32-vclamp-avx.c &
-tools/xngen src/f32-vclamp/simd.c.in -D ARCH=fma3            -D BATCH_TILES=8,16,32   -o src/f32-vclamp/gen/f32-vclamp-fma3.c &
 tools/xngen src/f32-vclamp/simd.c.in -D ARCH=avx512f         -D BATCH_TILES=16,32,64  -o src/f32-vclamp/gen/f32-vclamp-avx512f.c &
 tools/xngen src/f32-vclamp/simd.c.in -D ARCH=hvx             -D BATCH_TILES=32,64,128 -o src/f32-vclamp/gen/f32-vclamp-hvx.c &
 

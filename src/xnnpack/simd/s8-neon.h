@@ -4,8 +4,8 @@
 // LICENSE file in the root directory of this source tree.
 //
 
-#ifndef __XNNPACK_SRC_XNNPACK_SIMD_S8_NEON_H_
-#define __XNNPACK_SRC_XNNPACK_SIMD_S8_NEON_H_
+#ifndef XNNPACK_SRC_XNNPACK_SIMD_S8_NEON_H_
+#define XNNPACK_SRC_XNNPACK_SIMD_S8_NEON_H_
 
 #include <arm_neon.h>
 #include <assert.h>
@@ -98,34 +98,51 @@ static XNN_INLINE xnn_simd_s8_t xnn_load_tail_safe_s8(const int8_t* input,
   switch (num_elements) {
     case 15:
       *d++ = *input++;
+      XNN_FALLTHROUGH
     case 14:
       *d++ = *input++;
+      XNN_FALLTHROUGH
     case 13:
       *d++ = *input++;
+      XNN_FALLTHROUGH
     case 12:
       *d++ = *input++;
+      XNN_FALLTHROUGH
     case 11:
       *d++ = *input++;
+      XNN_FALLTHROUGH
     case 10:
       *d++ = *input++;
+      XNN_FALLTHROUGH
     case 9:
       *d++ = *input++;
+      XNN_FALLTHROUGH
     case 8:
       *d++ = *input++;
+      XNN_FALLTHROUGH
     case 7:
       *d++ = *input++;
+      XNN_FALLTHROUGH
     case 6:
       *d++ = *input++;
+      XNN_FALLTHROUGH
     case 5:
       *d++ = *input++;
+      XNN_FALLTHROUGH
     case 4:
       *d++ = *input++;
+      XNN_FALLTHROUGH
     case 3:
       *d++ = *input++;
+      XNN_FALLTHROUGH
     case 2:
       *d++ = *input++;
+      XNN_FALLTHROUGH
     case 1:
       *d++ = *input++;
+      XNN_FALLTHROUGH
+    default:
+      break;
   }
   return vld1q_s8(&padded[0]);
 }
@@ -156,4 +173,4 @@ static XNN_INLINE void xnn_store_tail_s8(int8_t* output, xnn_simd_s8_t v,
   }
 }
 
-#endif  // __XNNPACK_SRC_XNNPACK_SIMD_S8_NEON_H_
+#endif  // XNNPACK_SRC_XNNPACK_SIMD_S8_NEON_H_

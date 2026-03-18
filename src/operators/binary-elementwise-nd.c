@@ -173,22 +173,22 @@ static enum xnn_status init_binary_elementwise_nd(
           output_quantization ? output_quantization->scale : 1.0f;
       if (a_scale <= 0.0f || !isnormal(a_scale)) {
         xnn_log_error(
-            "failed to create %s operator with %.7g input 1 scale: scale must be "
-            "finite and positive",
+            "failed to create %s operator with %.7g input 1 scale: scale must "
+            "be finite and positive",
             xnn_binary_operator_to_string(type), a_scale);
         return xnn_status_invalid_parameter;
       }
       if (b_scale <= 0.0f || !isnormal(b_scale)) {
         xnn_log_error(
-            "failed to create %s operator with %.7g input 2 scale: scale must be "
-            "finite and positive",
+            "failed to create %s operator with %.7g input 2 scale: scale must "
+            "be finite and positive",
             xnn_binary_operator_to_string(type), b_scale);
         return xnn_status_invalid_parameter;
       }
       if (output_scale <= 0.0f || !isnormal(output_scale)) {
         xnn_log_error(
-            "failed to create %s operator with %.7g output scale: scale must be "
-            "finite and positive",
+            "failed to create %s operator with %.7g output scale: scale must "
+            "be finite and positive",
             xnn_binary_operator_to_string(type), output_scale);
         return xnn_status_invalid_parameter;
       }
@@ -207,7 +207,7 @@ static enum xnn_status init_binary_elementwise_nd(
   }
 
   memcpy(&op->params, &uparams, sizeof(uparams));
-  memcpy(op->params2, &uparams2, sizeof(uparams2));
+  memcpy(op->extra_params, &uparams2, sizeof(uparams2));
 
   op->binary_elementwise_config = config;
   op->binary_elementwise.log2_element_size =
@@ -250,20 +250,7 @@ enum xnn_status xnn_create_binary_elementwise_nd(
     return xnn_status_out_of_memory;
   }
   op->num_compute_invocations = 1;
-  op->params2 = xnn_allocate_zero_memory(sizeof(union xnn_params2));
-  if (op->params2 == NULL) {
-    xnn_log_error("failed to allocate %zu bytes for %s operator descriptor",
-                  sizeof(union xnn_params2),
-                  xnn_binary_operator_to_string(type));
-    return xnn_status_out_of_memory;
-  }
-  op->dynamic_context.elementwise_binary = xnn_allocate_zero_simd_memory(sizeof(struct elementwise_binary_context));
-  if (op->dynamic_context.elementwise_binary == NULL) {
-    xnn_log_error(
-      "failed to allocate %zu bytes for %s operator descriptor",
-      sizeof(struct elementwise_binary_context), xnn_binary_operator_to_string(type));
-    return xnn_status_out_of_memory;
-  }
+  xnn_allocate_extra_params(op, /*num_extra_params=*/1);
 
   enum xnn_status status =
       init_binary_elementwise_nd(op, type, datatype, a_quantization,
@@ -277,6 +264,15 @@ enum xnn_status xnn_create_binary_elementwise_nd(
   return xnn_status_success;
 }
 
+static size_t get_tile_size(xnn_operator_t op) {
+  // Assume a default width (unrolling factor) of 32.
+  const size_t element_tile = op->binary_elementwise_config->element_tile
+                                  ? op->binary_elementwise_config->element_tile
+                                  : 32;
+  return round_up(16 * 1024,
+                  element_tile << op->binary_elementwise.log2_element_size);
+}
+
 enum xnn_status xnn_reshape_binary_elementwise_nd(xnn_operator_t op,
                                                   size_t num_input1_dims,
                                                   const size_t* input1_shape,
@@ -288,8 +284,7 @@ enum xnn_status xnn_reshape_binary_elementwise_nd(xnn_operator_t op,
   if (max(num_input1_dims, num_input2_dims) > XNN_MAX_TENSOR_DIMS) {
     xnn_log_error(
         "failed to reshape %s operator with %zu and %zu dimensions in input "
-        "shapes: "
-        "the number of input dimensions must not exceed %d",
+        "shapes: the number of input dimensions must not exceed %d",
         xnn_operator_type_to_string_v2(op), num_input1_dims, num_input2_dims,
         XNN_MAX_TENSOR_DIMS);
     return xnn_status_unsupported_parameter;
@@ -346,9 +341,8 @@ enum xnn_status xnn_reshape_binary_elementwise_nd(xnn_operator_t op,
       compressed_output_shape[num_compressed_dims - 1] *= input1_dim;
     } else {
       xnn_log_error(
-          "failed to reshape %s operator: "
-          "shape dimension #%zu of input1 (%zu) does not match shape dimension "
-          "#%zu of input2 (%zu)",
+          "failed to reshape %s operator: shape dimension #%zu of input1 (%zu) "
+          "does not match shape dimension #%zu of input2 (%zu)",
           xnn_operator_type_to_string_v2(op), num_input1_dims - i, input1_dim,
           num_input2_dims - i, input2_dim);
       return xnn_status_invalid_parameter;
@@ -385,27 +379,27 @@ enum xnn_status xnn_reshape_binary_elementwise_nd(xnn_operator_t op,
   }
 
   const uint32_t log2_element_size = op->binary_elementwise.log2_element_size;
-  *op->dynamic_context.elementwise_binary = (struct elementwise_binary_context){
+  op->context.elementwise_binary = (struct elementwise_binary_context){
       .elements = compressed_output_shape[0] << log2_element_size,
   };
-  memcpy(&op->dynamic_context.elementwise_binary->params, &op->params.binary,
+  memcpy(&op->context.elementwise_binary.params, &op->params.binary,
          sizeof(op->params.binary));
 
   const size_t* compressed_a_shape = compressed_input1_shape;
   const size_t* compressed_b_shape = compressed_input2_shape;
   if (compressed_input1_shape[0] == 1) {
-    op->dynamic_context.elementwise_binary->flip_a_b = true;
-    op->dynamic_context.elementwise_binary->ukernel =
+    op->context.elementwise_binary.flip_a_b = true;
+    op->context.elementwise_binary.ukernel =
         op->binary_elementwise_config->ropc_ukernel;
     compressed_a_shape = compressed_input2_shape;
     compressed_b_shape = compressed_input1_shape;
-    memcpy(&op->dynamic_context.elementwise_binary->params, op->params2,
-           sizeof(op->params2->binary));
+    memcpy(&op->context.elementwise_binary.params, op->extra_params,
+           sizeof(op->extra_params->binary));
   } else if (compressed_input2_shape[0] == 1) {
-    op->dynamic_context.elementwise_binary->ukernel =
+    op->context.elementwise_binary.ukernel =
         op->binary_elementwise_config->opc_ukernel;
   } else if (compressed_input1_shape[0] == compressed_input2_shape[0]) {
-    op->dynamic_context.elementwise_binary->ukernel =
+    op->context.elementwise_binary.ukernel =
         op->binary_elementwise_config->op_ukernel;
   }
   size_t a_stride = compressed_a_shape[0];
@@ -413,47 +407,47 @@ enum xnn_status xnn_reshape_binary_elementwise_nd(xnn_operator_t op,
   size_t y_stride = compressed_output_shape[0];
   for (size_t i = 1; i < num_compressed_dims; i++) {
     if (compressed_a_shape[i] != 1) {
-      op->dynamic_context.elementwise_binary->a_stride[XNN_MAX_TENSOR_DIMS - 1 - i] =
+      op->context.elementwise_binary.a_stride[XNN_MAX_TENSOR_DIMS - 1 - i] =
           a_stride << log2_element_size;
     }
     if (compressed_b_shape[i] != 1) {
-      op->dynamic_context.elementwise_binary->b_stride[XNN_MAX_TENSOR_DIMS - 1 - i] =
+      op->context.elementwise_binary.b_stride[XNN_MAX_TENSOR_DIMS - 1 - i] =
           b_stride << log2_element_size;
     }
-    op->dynamic_context.elementwise_binary->y_stride[XNN_MAX_TENSOR_DIMS - 1 - i] =
+    op->context.elementwise_binary.y_stride[XNN_MAX_TENSOR_DIMS - 1 - i] =
         y_stride << log2_element_size;
     a_stride *= compressed_a_shape[i];
     b_stride *= compressed_b_shape[i];
     y_stride *= compressed_output_shape[i];
   }
 
-  const size_t element_tile = op->binary_elementwise_config->element_tile;
   if (compressed_output_shape[5] == 1) {
     if (compressed_output_shape[4] == 1) {
       if (compressed_output_shape[3] == 1) {
         if (compressed_output_shape[2] == 1) {
           if (compressed_output_shape[1] == 1) {
-            op->dynamic_context.elementwise_binary->a_stride[4] =
+            op->context.elementwise_binary.a_stride[4] =
                 compressed_a_shape[0] == 1 ? 0 : (1 << log2_element_size);
-            op->dynamic_context.elementwise_binary->b_stride[4] =
+            op->context.elementwise_binary.b_stride[4] =
                 compressed_b_shape[0] == 1 ? 0 : (1 << log2_element_size);
-            op->dynamic_context.elementwise_binary->y_stride[4] =
+            op->context.elementwise_binary.y_stride[4] =
                 (1 << log2_element_size);
-            op->dynamic_context.elementwise_binary->elements = (1 << log2_element_size);
+            op->context.elementwise_binary.elements = (1 << log2_element_size);
             op->compute[0].type = xnn_parallelization_type_1d_tile_1d_dynamic;
             op->compute[0].task_1d_tile_1d_dynamic =
                 (pthreadpool_task_1d_tile_1d_dynamic_t)
                     xnn_compute_elementwise_binary_1d_tile;
             op->compute[0].range[0] = compressed_output_shape[0]
                                       << log2_element_size;
-            op->compute[0].tile[0] = element_tile << log2_element_size;
+            op->compute[0].tile[0] = get_tile_size(op);
           } else {
             op->compute[0].type = xnn_parallelization_type_1d_tile_1d_dynamic;
             op->compute[0].task_1d_tile_1d_dynamic =
                 (pthreadpool_task_1d_tile_1d_dynamic_t)
                     xnn_compute_elementwise_binary_1d;
             op->compute[0].range[0] = compressed_output_shape[1];
-            op->compute[0].tile[0] = 1;
+            op->compute[0].tile[0] = divide_round_up(
+                get_tile_size(op), op->context.elementwise_binary.elements);
           }
         } else {
           op->compute[0].type = xnn_parallelization_type_2d_tile_1d_dynamic;
@@ -462,7 +456,8 @@ enum xnn_status xnn_reshape_binary_elementwise_nd(xnn_operator_t op,
                   xnn_compute_elementwise_binary_2d;
           op->compute[0].range[0] = compressed_output_shape[2];
           op->compute[0].range[1] = compressed_output_shape[1];
-          op->compute[0].tile[0] = 1;
+          op->compute[0].tile[0] = divide_round_up(
+              get_tile_size(op), op->context.elementwise_binary.elements);
         }
       } else {
         op->compute[0].type = xnn_parallelization_type_3d_tile_2d_dynamic;
@@ -521,13 +516,13 @@ enum xnn_status xnn_setup_binary_elementwise_nd(xnn_operator_t op,
       break;
   }
 
-  op->dynamic_context.elementwise_binary->a = input1;
-  op->dynamic_context.elementwise_binary->b = input2;
-  op->dynamic_context.elementwise_binary->y = output;
+  op->context.elementwise_binary.a = input1;
+  op->context.elementwise_binary.b = input2;
+  op->context.elementwise_binary.y = output;
 
-  if (op->dynamic_context.elementwise_binary->flip_a_b) {
-    op->dynamic_context.elementwise_binary->a = input2;
-    op->dynamic_context.elementwise_binary->b = input1;
+  if (op->context.elementwise_binary.flip_a_b) {
+    op->context.elementwise_binary.a = input2;
+    op->context.elementwise_binary.b = input1;
   }
 
   op->state = xnn_run_state_ready;
@@ -553,46 +548,32 @@ enum xnn_status xnn_run_binary_elementwise_nd(
     return xnn_status_out_of_memory;
   }
   op.num_compute_invocations = 1;
-  union xnn_params2 params2;
-  memset(&params2, 0, sizeof(params2));
-  op.params2 = &params2;
+  xnn_allocate_extra_params(&op, /*num_extra_params=*/1);
+  memset(op.extra_params, 0, sizeof(union xnn_params));
 
   enum xnn_status status = init_binary_elementwise_nd(
       &op, type, datatype, input1_quantization, input2_quantization,
       output_quantization, flags);
   if (status != xnn_status_success) {
-    op.params2 = NULL;
     xnn_destroy_operator(&op);
     return status;
-  }
-  op.dynamic_context.elementwise_binary = xnn_allocate_zero_simd_memory(sizeof(struct elementwise_binary_context));
-  if (op.dynamic_context.elementwise_binary == NULL) {
-    xnn_log_error(
-      "failed to allocate %zu bytes for %s operator descriptor",
-      sizeof(struct elementwise_binary_context), xnn_binary_operator_to_string(type));
-    op.params2 = NULL;
-    xnn_destroy_operator(&op);
-    return xnn_status_out_of_memory;
   }
 
   status = xnn_reshape_binary_elementwise_nd(&op, num_input1_dims, input1_shape,
                                              num_input2_dims, input2_shape,
                                              threadpool);
   if (status != xnn_status_success) {
-    op.params2 = NULL;
     xnn_destroy_operator(&op);
     return status;
   }
 
   status = xnn_setup_binary_elementwise_nd(&op, input1, input2, output);
   if (status != xnn_status_success) {
-    op.params2 = NULL;
     xnn_destroy_operator(&op);
     return status;
   }
 
   status = xnn_run_operator(&op, threadpool);
-  op.params2 = NULL;
   xnn_destroy_operator(&op);
   return status;
 }

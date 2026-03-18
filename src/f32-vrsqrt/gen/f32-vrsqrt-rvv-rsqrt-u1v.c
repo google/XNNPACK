@@ -9,6 +9,7 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <assert.h>
+#include <math.h>
 
 #include <riscv_vector.h>
 
@@ -50,6 +51,7 @@ void xnn_f32_vrsqrt_ukernel__rvv_rsqrt_u1v(
   batch >>= XNN_LOG2_SIZEOF_FLOAT;
 
   vfloat32m1_t onephalf_f32v = __riscv_vfmv_v_f_f32m1(1.5f, __riscv_vsetvl_e32m1(batch));
+  vfloat32m1_t zero_f32v = __riscv_vfmv_v_f_f32m1(0.0f, __riscv_vsetvl_e32m1(batch));
   for (; batch > 0; ) {
     int32_t n = __riscv_vsetvl_e32m1(batch); batch -= n;
     vfloat32m1_t in_f32v = __riscv_vle32_v_f32m1(input, n); input += n;
@@ -66,6 +68,10 @@ void xnn_f32_vrsqrt_ukernel__rvv_rsqrt_u1v(
     t1_f32v = __riscv_vfmul_vv_f32m1(t0_f32v, t0_f32v, n);
     t2_f32v = __riscv_vfnmsub_vv_f32m1(in_half_f32v, t1_f32v, onephalf_f32v, n);
     vfloat32m1_t y_f32v = __riscv_vfmul_vv_f32m1(t0_f32v, t2_f32v, n);
+
+    // Set output to 0 where the input is infinity (and not NaN)
+    vbool32_t inf_bv = __riscv_vmfeq_vf_f32m1_b32(in_f32v, INFINITY, n);
+    y_f32v = __riscv_vmerge_vvm_f32m1(y_f32v, zero_f32v, inf_bv, n);
 
     __riscv_vse32_v_f32m1(output, y_f32v, n); output += n;
   }

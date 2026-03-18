@@ -3,7 +3,8 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#pragma once
+#ifndef XNNPACK_SRC_XNNPACK_RADDSTOREEXPMINUSMAX_H_
+#define XNNPACK_SRC_XNNPACK_RADDSTOREEXPMINUSMAX_H_
 
 #include <stddef.h>
 #include <stdint.h>
@@ -18,7 +19,7 @@ extern "C" {
 #define DECLARE_F16_RADDSTOREEXPMINUSMAX_UKERNEL_FUNCTION(fn_name)       \
   XNN_INTERNAL void fn_name(size_t n, const xnn_float16* input,          \
                             const xnn_float16* max, xnn_float16* output, \
-                            xnn_float16* sum, const void* params);
+                            float* sum, const void* params);
 
 DECLARE_F16_RADDSTOREEXPMINUSMAX_UKERNEL_FUNCTION(
     xnn_f16_raddstoreexpminusmax_ukernel__avx2_rr1_p2_u16)
@@ -48,67 +49,17 @@ DECLARE_F16_RADDSTOREEXPMINUSMAX_UKERNEL_FUNCTION(
     xnn_f16_raddstoreexpminusmax_ukernel__avx2_rr1_p2_u64_acc2)
 DECLARE_F16_RADDSTOREEXPMINUSMAX_UKERNEL_FUNCTION(
     xnn_f16_raddstoreexpminusmax_ukernel__avx2_rr1_p2_u64_acc4)
-DECLARE_F16_RADDSTOREEXPMINUSMAX_UKERNEL_FUNCTION(
-    xnn_f16_raddstoreexpminusmax_ukernel__avx2_rr1_p2_u72)
-DECLARE_F16_RADDSTOREEXPMINUSMAX_UKERNEL_FUNCTION(
-    xnn_f16_raddstoreexpminusmax_ukernel__avx2_rr1_p2_u72_acc3)
-DECLARE_F16_RADDSTOREEXPMINUSMAX_UKERNEL_FUNCTION(
-    xnn_f16_raddstoreexpminusmax_ukernel__avx2_rr1_p2_u80)
-DECLARE_F16_RADDSTOREEXPMINUSMAX_UKERNEL_FUNCTION(
-    xnn_f16_raddstoreexpminusmax_ukernel__avx2_rr1_p2_u80_acc2)
-DECLARE_F16_RADDSTOREEXPMINUSMAX_UKERNEL_FUNCTION(
-    xnn_f16_raddstoreexpminusmax_ukernel__avx2_rr1_p2_u80_acc5)
-DECLARE_F16_RADDSTOREEXPMINUSMAX_UKERNEL_FUNCTION(
-    xnn_f16_raddstoreexpminusmax_ukernel__avx2_rr1_p2_u96)
-DECLARE_F16_RADDSTOREEXPMINUSMAX_UKERNEL_FUNCTION(
-    xnn_f16_raddstoreexpminusmax_ukernel__avx2_rr1_p2_u96_acc2)
-DECLARE_F16_RADDSTOREEXPMINUSMAX_UKERNEL_FUNCTION(
-    xnn_f16_raddstoreexpminusmax_ukernel__avx2_rr1_p2_u96_acc3)
-DECLARE_F16_RADDSTOREEXPMINUSMAX_UKERNEL_FUNCTION(
-    xnn_f16_raddstoreexpminusmax_ukernel__avx2_rr1_p2_u96_acc6)
 
+DECLARE_F16_RADDSTOREEXPMINUSMAX_UKERNEL_FUNCTION(
+    xnn_f16_raddstoreexpminusmax_ukernel__neonfp16arith_rr2_p2_u16)
+DECLARE_F16_RADDSTOREEXPMINUSMAX_UKERNEL_FUNCTION(
+    xnn_f16_raddstoreexpminusmax_ukernel__neonfp16arith_rr2_p2_u16_acc2)
 DECLARE_F16_RADDSTOREEXPMINUSMAX_UKERNEL_FUNCTION(
     xnn_f16_raddstoreexpminusmax_ukernel__neonfp16arith_rr2_p2_u32)
 DECLARE_F16_RADDSTOREEXPMINUSMAX_UKERNEL_FUNCTION(
     xnn_f16_raddstoreexpminusmax_ukernel__neonfp16arith_rr2_p2_u32_acc2)
 DECLARE_F16_RADDSTOREEXPMINUSMAX_UKERNEL_FUNCTION(
     xnn_f16_raddstoreexpminusmax_ukernel__neonfp16arith_rr2_p2_u32_acc4)
-DECLARE_F16_RADDSTOREEXPMINUSMAX_UKERNEL_FUNCTION(
-    xnn_f16_raddstoreexpminusmax_ukernel__neonfp16arith_rr2_p2_u40)
-DECLARE_F16_RADDSTOREEXPMINUSMAX_UKERNEL_FUNCTION(
-    xnn_f16_raddstoreexpminusmax_ukernel__neonfp16arith_rr2_p2_u40_acc2)
-DECLARE_F16_RADDSTOREEXPMINUSMAX_UKERNEL_FUNCTION(
-    xnn_f16_raddstoreexpminusmax_ukernel__neonfp16arith_rr2_p2_u40_acc5)
-DECLARE_F16_RADDSTOREEXPMINUSMAX_UKERNEL_FUNCTION(
-    xnn_f16_raddstoreexpminusmax_ukernel__neonfp16arith_rr2_p2_u48)
-DECLARE_F16_RADDSTOREEXPMINUSMAX_UKERNEL_FUNCTION(
-    xnn_f16_raddstoreexpminusmax_ukernel__neonfp16arith_rr2_p2_u48_acc2)
-DECLARE_F16_RADDSTOREEXPMINUSMAX_UKERNEL_FUNCTION(
-    xnn_f16_raddstoreexpminusmax_ukernel__neonfp16arith_rr2_p2_u48_acc3)
-DECLARE_F16_RADDSTOREEXPMINUSMAX_UKERNEL_FUNCTION(
-    xnn_f16_raddstoreexpminusmax_ukernel__neonfp16arith_rr2_p2_u64)
-DECLARE_F16_RADDSTOREEXPMINUSMAX_UKERNEL_FUNCTION(
-    xnn_f16_raddstoreexpminusmax_ukernel__neonfp16arith_rr2_p2_u64_acc2)
-DECLARE_F16_RADDSTOREEXPMINUSMAX_UKERNEL_FUNCTION(
-    xnn_f16_raddstoreexpminusmax_ukernel__neonfp16arith_rr2_p2_u64_acc4)
-DECLARE_F16_RADDSTOREEXPMINUSMAX_UKERNEL_FUNCTION(
-    xnn_f16_raddstoreexpminusmax_ukernel__neonfp16arith_rr2_p2_u72)
-DECLARE_F16_RADDSTOREEXPMINUSMAX_UKERNEL_FUNCTION(
-    xnn_f16_raddstoreexpminusmax_ukernel__neonfp16arith_rr2_p2_u72_acc3)
-DECLARE_F16_RADDSTOREEXPMINUSMAX_UKERNEL_FUNCTION(
-    xnn_f16_raddstoreexpminusmax_ukernel__neonfp16arith_rr2_p2_u80)
-DECLARE_F16_RADDSTOREEXPMINUSMAX_UKERNEL_FUNCTION(
-    xnn_f16_raddstoreexpminusmax_ukernel__neonfp16arith_rr2_p2_u80_acc2)
-DECLARE_F16_RADDSTOREEXPMINUSMAX_UKERNEL_FUNCTION(
-    xnn_f16_raddstoreexpminusmax_ukernel__neonfp16arith_rr2_p2_u80_acc5)
-DECLARE_F16_RADDSTOREEXPMINUSMAX_UKERNEL_FUNCTION(
-    xnn_f16_raddstoreexpminusmax_ukernel__neonfp16arith_rr2_p2_u96)
-DECLARE_F16_RADDSTOREEXPMINUSMAX_UKERNEL_FUNCTION(
-    xnn_f16_raddstoreexpminusmax_ukernel__neonfp16arith_rr2_p2_u96_acc2)
-DECLARE_F16_RADDSTOREEXPMINUSMAX_UKERNEL_FUNCTION(
-    xnn_f16_raddstoreexpminusmax_ukernel__neonfp16arith_rr2_p2_u96_acc3)
-DECLARE_F16_RADDSTOREEXPMINUSMAX_UKERNEL_FUNCTION(
-    xnn_f16_raddstoreexpminusmax_ukernel__neonfp16arith_rr2_p2_u96_acc6)
 
 #define DECLARE_F32_RADDSTOREEXPMINUSMAX_UKERNEL_FUNCTION(fn_name)          \
   XNN_INTERNAL void fn_name(size_t n, const float* input, const float* max, \
@@ -257,3 +208,5 @@ DECLARE_F32_RADDSTOREEXPMINUSMAX_UKERNEL_FUNCTION(
 #ifdef __cplusplus
 } /* extern "C" */
 #endif
+
+#endif  // XNNPACK_SRC_XNNPACK_RADDSTOREEXPMINUSMAX_H_

@@ -7,13 +7,15 @@ $assert CHANNEL_TILE >= 1
 $assert PIXEL_TILE == 1
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
 
 #include "src/xnnpack/ibilinear.h"
 #include "src/xnnpack/math.h"
 
 
 $XINT8_T = {"S8": "int8_t", "U8": "uint8_t"}[DATATYPE]
-void xnn_${DATATYPE.lower()}_ibilinear_ukernel__scalar_c${CHANNEL_TILE}${"" if PIXEL_TILE == 1 else "x%d" % PIXEL_TILE}(
+void xnn_${DATATYPE.lower()}_ibilinear_ukernel__scalar_u${CHANNEL_TILE}${"" if PIXEL_TILE == 1 else "x%d" % PIXEL_TILE}(
     size_t output_pixels,
     size_t channels,
     const ${XINT8_T}** restrict input,

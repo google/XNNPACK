@@ -1,4 +1,4 @@
-// Copyright 2019 Google LLC
+// Copyright 2019-2025 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
@@ -7,6 +7,7 @@
 
 #include <algorithm>
 #include <atomic>
+#include <condition_variable>  // NOLINT(build/c++11)
 #include <cstdint>
 #include <cstdio>
 #include <cstdlib>
@@ -14,8 +15,16 @@
 #include <iostream>
 #include <mutex>
 
+#include "include/experimental.h"
+
+#if defined(__APPLE__)
+#include <sys/types.h>
+#include <sys/sysctl.h>
+#endif
 #ifdef __linux__
 #include <sched.h>
+#else
+#include <thread>  // NOLINT(build/c++11)
 #endif
 #if defined(__ANDROID__) || defined(_WIN32) || defined(__CYGWIN__)
 #include <malloc.h>
@@ -33,6 +42,16 @@
 #include <benchmark/benchmark.h>
 #include <pthreadpool.h>
 
+#if XNN_PLATFORM_QURT
+#include <qurt.h>
+#include <HAP_power.h>
+#endif
+#if XNN_PLATFORM_WINDOWS
+#include <windows.h>
+#include <shlwapi.h>
+#endif
+
+
 // Common flags for all benchmarks.
 int FLAGS_num_threads = 1;
 int FLAGS_batch_size = 1;
@@ -46,7 +65,7 @@ namespace {
 static void* wipe_buffer = nullptr;
 static size_t wipe_buffer_size = 0;
 
-static std::once_flag wipe_buffer_guard;
+static std::once_flag wipe_buffer_guard;  // NOLINT(build/c++11)
 
 static void InitWipeBuffer() {
 #if XNN_ENABLE_CPUINFO
@@ -65,15 +84,28 @@ static void InitWipeBuffer() {
   // level 17.
   wipe_buffer = memalign(128, wipe_buffer_size);
 #else
-  (void)posix_memalign((void**)&wipe_buffer, 128, wipe_buffer_size);
+  // The posix_memalign function returns 0 on success, and an error number on
+  // failure. We should check the return value.
+  if (posix_memalign((void**)&wipe_buffer, 128, wipe_buffer_size) != 0) {
+    // Allocation failed, set wipe_buffer to nullptr to indicate failure
+    wipe_buffer = nullptr;
+  }
 #endif
   if (wipe_buffer != nullptr) {
     memset(wipe_buffer, 0xA5, wipe_buffer_size);
   }
 }
 
+struct ClearL2CacheContext {
+  std::atomic<int64_t> counter;
+  int64_t num_threads = 0;  // Set to zero if we don't need to wait for all
+                            // threads to finish.
+  std::mutex mutex;         // NOLINT(build/c++11)
+  std::condition_variable cond_var;
+};
+
 // Pthreadpool-compatible function to wipe the cache in each thread.
-void PthreadpoolClearL2Cache(std::atomic<size_t>* counter, size_t id) {
+void ClearL2CacheWorkerFun(ClearL2CacheContext* context, size_t id) {
 #if XNN_ENABLE_CPUINFO
   static const size_t wipe_buffer_size = []() {
     const auto* l2_cache = cpuinfo_get_l2_cache(0);
@@ -93,11 +125,30 @@ void PthreadpoolClearL2Cache(std::atomic<size_t>* counter, size_t id) {
 #else
   WipeCache();
 #endif  // XNN_ENABLE_CPUINFO
-  // Spin until all threads are done. This ensures that each thread calls this
+  // Wait until all threads are done. This ensures that each thread calls this
   // function exactly once.
-  counter->fetch_sub(1, std::memory_order_acquire);
-  while (counter->load(std::memory_order_acquire) > 0) {
-    std::atomic_thread_fence(std::memory_order_acquire);
+  std::unique_lock<std::mutex> lock(context->mutex);  // NOLINT(build/c++11)
+  if (context->counter.fetch_sub(1) == 1) {
+    context->cond_var.notify_all();
+  } else {
+    while (context->counter.load() > 0) {
+      context->cond_var.wait(lock);
+    }
+  }
+
+  // Last thread waits for all the others to finish.
+  if (context->num_threads) {
+    if (id == 0) {
+      if (context->counter.fetch_sub(1) - 1 != -context->num_threads) {
+        do {
+          context->cond_var.wait(lock);
+        } while (context->counter.load() != -context->num_threads);
+      }
+    } else {
+      if (context->counter.fetch_sub(1) - 1 == -context->num_threads) {
+        context->cond_var.notify_all();
+      }
+    }
   }
 }
 
@@ -106,7 +157,7 @@ void PthreadpoolClearL2Cache(std::atomic<size_t>* counter, size_t id) {
 int ProcessArgs(int& argc, char**& argv) {
   for (int i = 1; i < argc;) {
     if (strncmp(argv[i], "--num_threads=", 14) == 0) {
-      FLAGS_num_threads = atoi(argv[i] + 14);
+      FLAGS_num_threads = atoi(argv[i] + 14);  // NOLINT(runtime/deprecated_fn)
       if (FLAGS_num_threads <= 0) {
         std::cerr << "Invalid --num_threads: " << FLAGS_num_threads << "\n";
         return 1;
@@ -114,7 +165,7 @@ int ProcessArgs(int& argc, char**& argv) {
       std::copy(argv + i + 1, argv + argc, argv + i);
       argc -= 1;
     } else if (strncmp(argv[i], "--batch_size=", 13) == 0) {
-      FLAGS_batch_size = atoi(argv[i] + 13);
+      FLAGS_batch_size = atoi(argv[i] + 13);  // NOLINT(runtime/deprecated_fn)
       if (FLAGS_batch_size <= 0) {
         std::cerr << "Invalid --batch_size: " << FLAGS_batch_size << "\n";
         return 1;
@@ -124,14 +175,17 @@ int ProcessArgs(int& argc, char**& argv) {
     } else if (strncmp(argv[i], "--xnn_runtime_flags=", 20) == 0) {
       const char* v = argv[i] + 20;
       if (strlen(v) > 2 && strncmp(v, "0x", 2) == 0) {
-        FLAGS_xnn_runtime_flags = strtoul(v + 2, nullptr, 16);
+        FLAGS_xnn_runtime_flags =
+            strtoul(v + 2, nullptr, 16);  // NOLINT(runtime/deprecated_fn)
       } else {
-        FLAGS_xnn_runtime_flags = strtoul(v, nullptr, 10);
+        FLAGS_xnn_runtime_flags =
+            strtoul(v, nullptr, 10);  // NOLINT(runtime/deprecated_fn)
       }
       std::copy(argv + i + 1, argv + argc, argv + i);
       argc -= 1;
     } else if (strncmp(argv[i], "--benchmark_min_iters=", 22) == 0) {
-      FLAGS_benchmark_min_iters = atoi(argv[i] + 22);
+      FLAGS_benchmark_min_iters =
+          atoi(argv[i] + 22);  // NOLINT(runtime/deprecated_fn)
       if (FLAGS_benchmark_min_iters <= 0) {
         std::cerr << "Invalid --benchmark_min_iters: "
                   << FLAGS_benchmark_min_iters << "\n";
@@ -165,7 +219,7 @@ uint32_t PrefetchToL1(const void* ptr, size_t size) {
   // reads.
   uint32_t sum = 0;
   while (size >= step) {
-    sum += uint32_t(*u8_ptr);
+    sum += static_cast<uint32_t>(*u8_ptr);
     u8_ptr += step;
     size -= step;
   }
@@ -174,16 +228,34 @@ uint32_t PrefetchToL1(const void* ptr, size_t size) {
 
 void WipePthreadpoolL2Caches(benchmark::State& state,
                              pthreadpool_t threadpool) {
+  static struct ClearL2CacheContext context;
   state.PauseTiming();
-  std::atomic<size_t> counter(pthreadpool_get_threads_count(threadpool));
+  const int64_t num_threads = pthreadpool_get_threads_count(threadpool);
+  context.counter = num_threads;
   pthreadpool_parallelize_1d(
-      threadpool, (pthreadpool_task_1d_t)PthreadpoolClearL2Cache, &counter,
+      threadpool, (pthreadpool_task_1d_t)ClearL2CacheWorkerFun, &context,
       pthreadpool_get_threads_count(threadpool), 0);
   state.ResumeTiming();
 }
 
+void WipeSchedulerL2Caches(benchmark::State& state, xnn_scheduler_v2 scheduler,
+                           void* scheduler_context) {
+  static struct ClearL2CacheContext context;
+  state.PauseTiming();
+  const int64_t num_threads = scheduler.num_threads(scheduler_context) + 1;
+  context.num_threads = num_threads;
+  context.counter = num_threads;
+  for (int k = 1; k < num_threads; k++) {
+    scheduler.schedule(scheduler_context, &context, [](void* arg) -> void {
+      ClearL2CacheWorkerFun((struct ClearL2CacheContext*)arg, 1);
+    });
+  }
+  ClearL2CacheWorkerFun(&context, 0);
+  state.ResumeTiming();
+}
+
 uint32_t WipeCache() {
-  std::call_once(wipe_buffer_guard, InitWipeBuffer);
+  std::call_once(wipe_buffer_guard, InitWipeBuffer);  // NOLINT(build/c++11)
   if (!wipe_buffer) {
     return 0;
   }
@@ -223,7 +295,7 @@ void DisableDenormals() {
 
 // Return clock rate in Hz.
 uint64_t GetCurrentCpuFrequency() {
-#ifdef __linux__
+#if defined(__linux__)
   int freq = 0;
   char cpuinfo_name[512];
   int cpu = sched_getcpu();
@@ -238,7 +310,39 @@ uint64_t GetCurrentCpuFrequency() {
     }
     fclose(f);
   }
-#endif  // __linux__
+#elif XNN_PLATFORM_WINDOWS
+  // Read MHz from the registry
+  DWORD data, data_size = sizeof(data);
+  LSTATUS r = SHGetValueA(HKEY_LOCAL_MACHINE,
+                      "HARDWARE\\DESCRIPTION\\System\\CentralProcessor\\0",
+                      "~MHz", nullptr, &data, &data_size);
+  if (r == ERROR_SUCCESS) {
+    return static_cast<uint64_t>(data) * static_cast<uint64_t>(1000 * 1000);
+  }
+#elif XNN_PLATFORM_QURT
+  HAP_power_response_t response = {.type = HAP_power_get_clk_Freq};
+  if (HAP_power_get(NULL, &response) == AEE_SUCCESS) {
+    return static_cast<uint64_t>(response.clkFreqHz);
+  }
+#elif defined(__APPLE__)
+  uint64_t freq = 0;
+  size_t freq_len = sizeof(freq);
+
+  // On x86 return hw.cpufrequency
+  if (sysctlbyname("hw.cpufrequency", &freq, &freq_len, NULL, 0) >= 0) {
+    return freq;
+  }
+  // Retrieve the time base frequency (e.g., 24,000,000 Hz on M1/M2/M3/M4)
+  if (sysctlbyname("hw.tbfrequency", &freq, &freq_len, NULL, 0) >= 0) {
+    struct clockinfo clockrate;
+    size_t clock_len = sizeof(clockrate);
+    // Retrieve kernel clock information, including the 'hz' (system clock rate)
+    if (sysctlbyname("kern.clockrate", &clockrate, &clock_len, NULL, 0) >= 0) {
+      // Typical calculation used in some system monitoring tools
+      return freq * clockrate.hz;
+    }
+  }
+#endif
   return 0;
 }
 
@@ -270,438 +374,6 @@ bool CheckArchFlags(benchmark::State& state, uint64_t arch_flags) {
 
   return true;
 }
-
-#if XNN_ARCH_ARM
-bool CheckVFP(benchmark::State& state) {
-  const xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-  if (hardware_config == nullptr ||
-      !(hardware_config->use_arm_vfpv2 || hardware_config->use_arm_vfpv3)) {
-    state.SkipWithError("no VFP extension");
-    return false;
-  }
-  return true;
-}
-#endif  // XNN_ARCH_ARM
-
-#if XNN_ARCH_ARM
-bool CheckARMV6(benchmark::State& state) {
-  const xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-  if (hardware_config == nullptr || !hardware_config->use_arm_v6) {
-    state.SkipWithError("no ARMv6 extension");
-    return false;
-  }
-  return true;
-}
-#endif  // XNN_ARCH_ARM
-
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
-bool CheckFP16ARITH(benchmark::State& state) {
-  const xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-  if (hardware_config == nullptr || !hardware_config->use_arm_fp16_arith) {
-    state.SkipWithError("no FP16-ARITH extension");
-    return false;
-  }
-  return true;
-}
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
-
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
-bool CheckNEON(benchmark::State& state) {
-#if XNN_ARCH_ARM64
-  return true;
-#else
-  const xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-  if (hardware_config == nullptr || !hardware_config->use_arm_neon) {
-    state.SkipWithError("no NEON extension");
-    return false;
-  }
-  return true;
-#endif
-}
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
-
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
-bool CheckNEONFP16(benchmark::State& state) {
-#if XNN_ARCH_ARM64
-  return true;
-#else
-  const xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-  if (hardware_config == nullptr || !hardware_config->use_arm_neon_fp16) {
-    state.SkipWithError("no NEON-FP16 extension");
-    return false;
-  }
-  return true;
-#endif
-}
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
-
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
-bool CheckNEONFMA(benchmark::State& state) {
-#if XNN_ARCH_ARM64
-  return true;
-#else
-  const xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-  if (hardware_config == nullptr || !hardware_config->use_arm_neon_fma) {
-    state.SkipWithError("no NEON-FMA extension");
-    return false;
-  }
-  return true;
-#endif
-}
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
-
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
-bool CheckNEONV8(benchmark::State& state) {
-#if XNN_ARCH_ARM64
-  return true;
-#else
-  const xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-  if (hardware_config == nullptr || !hardware_config->use_arm_neon_v8) {
-    state.SkipWithError("no NEON-V8 extension");
-    return false;
-  }
-  return true;
-#endif
-}
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
-
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
-bool CheckNEONFP16ARITH(benchmark::State& state) {
-  const xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-  if (hardware_config == nullptr || !hardware_config->use_arm_neon_fp16_arith) {
-    state.SkipWithError("no NEON-FP16-ARITH extension");
-    return false;
-  }
-  return true;
-}
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
-
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
-bool CheckNEONBF16(benchmark::State& state) {
-  const xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-  if (hardware_config == nullptr || !hardware_config->use_arm_neon_bf16) {
-    state.SkipWithError("no NEON-BF16 extension");
-    return false;
-  }
-  return true;
-}
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
-
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
-bool CheckNEONDOT(benchmark::State& state) {
-  const xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-  if (hardware_config == nullptr || !hardware_config->use_arm_neon_dot) {
-    state.SkipWithError("no NEON-DOT extension");
-    return false;
-  }
-  return true;
-}
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
-
-#if XNN_ARCH_ARM64
-bool CheckNEONI8MM(benchmark::State& state) {
-  const xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-  if (hardware_config == nullptr || !hardware_config->use_arm_neon_i8mm) {
-    state.SkipWithError("no NEON-I8MM extension");
-    return false;
-  }
-  return true;
-}
-#endif  // XNN_ARCH_ARM64
-
-#if XNN_ARCH_ARM64
-bool CheckNEONSME(benchmark::State& state) {
-  const xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-  if (hardware_config == nullptr || !hardware_config->use_arm_sme) {
-    state.SkipWithError("no NEON-SME extension");
-    return false;
-  }
-  return true;
-}
-#endif  // XNN_ARCH_ARM64
-
-#if XNN_ARCH_ARM64
-bool CheckNEONSME2(benchmark::State& state) {
-  const xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-  if (hardware_config == nullptr || !hardware_config->use_arm_sme2) {
-    state.SkipWithError("no NEON-SME2 extension");
-    return false;
-  }
-  return true;
-}
-#endif  // XNN_ARCH_ARM64
-
-#if XNN_ARCH_RISCV
-bool CheckRVV(benchmark::State& state) {
-  const xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-  if (hardware_config == nullptr || !hardware_config->use_riscv_vector) {
-    state.SkipWithError("no RVV extension");
-    return false;
-  }
-  return true;
-}
-#endif  // XNN_ARCH_RISCV
-
-#if XNN_ARCH_RISCV
-bool CheckRVVFP16ARITH(benchmark::State& state) {
-  const xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-  if (hardware_config == nullptr ||
-      !hardware_config->use_riscv_vector_fp16_arith) {
-    state.SkipWithError("no RVV-FP16-ARITH extension");
-    return false;
-  }
-  return true;
-}
-#endif  // XNN_ARCH_RISCV
-
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-bool CheckSSSE3(benchmark::State& state) {
-  const xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-  if (hardware_config == nullptr || !hardware_config->use_x86_ssse3) {
-    state.SkipWithError("no SSSE3 extension");
-    return false;
-  }
-  return true;
-}
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-bool CheckSSE41(benchmark::State& state) {
-  const xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-  if (hardware_config == nullptr || !hardware_config->use_x86_sse4_1) {
-    state.SkipWithError("no SSE4.1 extension");
-    return false;
-  }
-  return true;
-}
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-bool CheckAVX(benchmark::State& state) {
-  const xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-  if (hardware_config == nullptr || !hardware_config->use_x86_avx) {
-    state.SkipWithError("no AVX extension");
-    return false;
-  }
-  return true;
-}
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-bool CheckF16C(benchmark::State& state) {
-  const xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-  if (hardware_config == nullptr || !hardware_config->use_x86_f16c) {
-    state.SkipWithError("no F16C extension");
-    return false;
-  }
-  return true;
-}
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-bool CheckFMA3(benchmark::State& state) {
-  const xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-  if (hardware_config == nullptr || !hardware_config->use_x86_fma3) {
-    state.SkipWithError("no FMA3 extension");
-    return false;
-  }
-  return true;
-}
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-bool CheckAVX2(benchmark::State& state) {
-  const xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-  if (hardware_config == nullptr || !hardware_config->use_x86_avx2) {
-    state.SkipWithError("no AVX2 extension");
-    return false;
-  }
-  return true;
-}
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-bool CheckAVX512F(benchmark::State& state) {
-  const xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-  if (hardware_config == nullptr || !hardware_config->use_x86_avx512f) {
-    state.SkipWithError("no AVX512F extension");
-    return false;
-  }
-  return true;
-}
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-bool CheckAVX512SKX(benchmark::State& state) {
-  const xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-  if (hardware_config == nullptr || !hardware_config->use_x86_avx512skx) {
-    state.SkipWithError("no AVX512 SKX extensions");
-    return false;
-  }
-  return true;
-}
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-bool CheckAVX512VBMI(benchmark::State& state) {
-  const xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-  if (hardware_config == nullptr || !hardware_config->use_x86_avx512vbmi) {
-    state.SkipWithError("no AVX512 VBMI extension");
-    return false;
-  }
-  return true;
-}
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-bool CheckAVX512VNNI(benchmark::State& state) {
-  const xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-  if (hardware_config == nullptr || !hardware_config->use_x86_avx512vnni) {
-    state.SkipWithError("no AVX512 VNNI extension");
-    return false;
-  }
-  return true;
-}
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-bool CheckAVX512AMX(benchmark::State& state) {
-  const xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-  if (hardware_config == nullptr || !hardware_config->use_x86_avx512amx) {
-    state.SkipWithError("no AVX512 AMX extension");
-    return false;
-  }
-  return true;
-}
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-bool CheckAVX512FP16(benchmark::State& state) {
-  const xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-  if (hardware_config == nullptr || !hardware_config->use_x86_avx512fp16) {
-    state.SkipWithError("no AVX512 FP16 extension");
-    return false;
-  }
-  return true;
-}
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-bool CheckAVX512VNNIGFNI(benchmark::State& state) {
-  const xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-  if (hardware_config == nullptr || !hardware_config->use_x86_avx512vnnigfni) {
-    state.SkipWithError("no GFNI extension");
-    return false;
-  }
-  return true;
-}
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-bool CheckAVXVNNI(benchmark::State& state) {
-  const xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-  if (hardware_config == nullptr || !hardware_config->use_x86_avxvnni) {
-    state.SkipWithError("no AVX VNNI extension");
-    return false;
-  }
-  return true;
-}
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-bool CheckAVXVNNIINT8(benchmark::State& state) {
-  const xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-  if (hardware_config == nullptr || !hardware_config->use_x86_avxvnniint8) {
-    state.SkipWithError("no AVX VNNI INT8 extension");
-    return false;
-  }
-  return true;
-}
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-bool CheckAVX256SKX(benchmark::State& state) {
-  const xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-  if (hardware_config == nullptr || !hardware_config->use_x86_avx256skx) {
-    state.SkipWithError("no AVX256SKX extension");
-    return false;
-  }
-  return true;
-}
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-bool CheckAVX256VNNI(benchmark::State& state) {
-  const xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-  if (hardware_config == nullptr || !hardware_config->use_x86_avx256vnni) {
-    state.SkipWithError("no AVX256VNNI extension");
-    return false;
-  }
-  return true;
-}
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-bool CheckAVX256VNNIGFNI(benchmark::State& state) {
-  const xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-  if (hardware_config == nullptr || !hardware_config->use_x86_avx256vnnigfni) {
-    state.SkipWithError("no AVX256VNNIGFNI extension");
-    return false;
-  }
-  return true;
-}
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-
-#if XNN_ARCH_HEXAGON
-bool CheckHVX(benchmark::State& state) {
-  const xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-  if (hardware_config == nullptr || !hardware_config->use_hvx) {
-    state.SkipWithError("no HVX extension");
-    return false;
-  }
-  return true;
-}
-#endif  // XNN_ARCH_HEXAGON
-
-#if XNN_ARCH_WASMRELAXEDSIMD
-bool CheckWAsmPSHUFB(benchmark::State& state) {
-  const xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-  if (hardware_config == nullptr || !hardware_config->use_wasm_pshufb) {
-    state.SkipWithError("no WAsm PSHUFB support");
-    return false;
-  }
-  return true;
-}
-#endif  // XNN_ARCH_WASMRELAXEDSIMD
-
-#if XNN_ARCH_WASMRELAXEDSIMD
-bool CheckWAsmSDOT(benchmark::State& state) {
-  const xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-  if (hardware_config == nullptr || !hardware_config->use_wasm_sdot) {
-    state.SkipWithError("no WAsm SDOT support");
-    return false;
-  }
-  return true;
-}
-
-bool CheckWAsmUSDOT(benchmark::State& state) {
-  const xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-  if (hardware_config == nullptr || !hardware_config->use_wasm_usdot) {
-    state.SkipWithError("no WAsm USDOT support");
-    return false;
-  }
-  return true;
-}
-
-bool CheckWAsmBLENDVPS(benchmark::State& state) {
-  const xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-  if (hardware_config == nullptr || !hardware_config->use_wasm_blendvps) {
-    state.SkipWithError("no WAsm BLEND support");
-    return false;
-  }
-  return true;
-}
-#endif  // XNN_ARCH_WASMRELAXEDSIMD
 
 }  // namespace utils
 }  // namespace benchmark

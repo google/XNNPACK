@@ -294,10 +294,10 @@ enum xnn_status xnn_define_max_pooling_2d(
 
   const uint32_t pooling_size = pooling_height * pooling_width;
   if (pooling_size == 0) {
-    xnn_log_error(
-      "failed to define %s operator with %" PRIu32 "x%" PRIu32 " pooling size: "
-      "pooling size dimensions must be non-zero",
-      xnn_node_type_to_string(xnn_node_type_max_pooling_2d), pooling_width, pooling_height);
+    xnn_log_error("failed to define %s operator with %" PRIu32 "x%" PRIu32
+                  " pooling size: pooling size dimensions must be non-zero",
+                  xnn_node_type_to_string(xnn_node_type_max_pooling_2d),
+                  pooling_width, pooling_height);
     return xnn_status_invalid_parameter;
   }
 
@@ -323,11 +323,13 @@ enum xnn_status xnn_define_max_pooling_2d(
   const bool any_padding = (input_padding_left | input_padding_top | input_padding_right | input_padding_bottom) != 0;
   if ((flags & XNN_FLAG_TENSORFLOW_SAME_PADDING) != 0) {
     if (any_padding) {
-      xnn_log_error(
-        "failed to define %s operator with %" PRIu32 "+%" PRIu32 "x%" PRIu32 "+%" PRIu32" padding: "
-        "TensorFlow SAME padding can't be combined with explicit padding specification",
-        xnn_node_type_to_string(xnn_node_type_max_pooling_2d),
-        input_padding_top, input_padding_left, input_padding_bottom, input_padding_right);
+      xnn_log_error("failed to define %s operator with %" PRIu32 "+%" PRIu32
+                    "x%" PRIu32 "+%" PRIu32
+                    " padding: TensorFlow SAME padding can't be combined with "
+                    "explicit padding specification",
+                    xnn_node_type_to_string(xnn_node_type_max_pooling_2d),
+                    input_padding_top, input_padding_left, input_padding_bottom,
+                    input_padding_right);
       return xnn_status_invalid_parameter;
     }
   }

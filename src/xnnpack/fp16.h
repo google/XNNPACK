@@ -1,5 +1,5 @@
-#ifndef THIRD_PARTY_XNNPACK_SRC_XNNPACK_FP16_H_
-#define THIRD_PARTY_XNNPACK_SRC_XNNPACK_FP16_H_
+#ifndef XNNPACK_SRC_XNNPACK_FP16_H_
+#define XNNPACK_SRC_XNNPACK_FP16_H_
 
 #include <stdint.h>
 
@@ -201,4 +201,4 @@ static inline uint16_t fp16_ieee_from_fp32_value(float f) {
          (shl1_w > UINT32_C(0xFF000000) ? UINT16_C(0x7E00) : nonsign);
 }
 
-#endif  // THIRD_PARTY_XNNPACK_SRC_XNNPACK_FP16_H_
+#endif  // XNNPACK_SRC_XNNPACK_FP16_H_

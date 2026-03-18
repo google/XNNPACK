@@ -4,19 +4,19 @@
 # LICENSE file in the root directory of this source tree.
 
 # Scalar
-- name: xnn_s8_ibilinear_ukernel__scalar_c1
-- name: xnn_s8_ibilinear_ukernel__scalar_c2
-- name: xnn_s8_ibilinear_ukernel__scalar_c4
+- name: xnn_s8_ibilinear_ukernel__scalar_u1
+- name: xnn_s8_ibilinear_ukernel__scalar_u2
+- name: xnn_s8_ibilinear_ukernel__scalar_u4
 # ARM NEON
-- name: xnn_s8_ibilinear_ukernel__neon_c8
-- name: xnn_s8_ibilinear_ukernel__neon_c16
+- name: xnn_s8_ibilinear_ukernel__neon_u8
+- name: xnn_s8_ibilinear_ukernel__neon_u16
 # x86 SSE
-- name: xnn_s8_ibilinear_ukernel__sse2_c8
-- name: xnn_s8_ibilinear_ukernel__sse2_c16
-- name: xnn_s8_ibilinear_ukernel__sse41_c8
-- name: xnn_s8_ibilinear_ukernel__sse41_c16
+- name: xnn_s8_ibilinear_ukernel__sse2_u8
+- name: xnn_s8_ibilinear_ukernel__sse2_u16
+- name: xnn_s8_ibilinear_ukernel__sse41_u8
+- name: xnn_s8_ibilinear_ukernel__sse41_u16
 # WAsm SIMD
-- name: xnn_s8_ibilinear_ukernel__wasmsimd_dot16x2_c8
-- name: xnn_s8_ibilinear_ukernel__wasmsimd_dot16x2_c16
-- name: xnn_s8_ibilinear_ukernel__wasmsimd_mul32_c8
-- name: xnn_s8_ibilinear_ukernel__wasmsimd_mul32_c16
+- name: xnn_s8_ibilinear_ukernel__wasmsimd_dot16x2_u8
+- name: xnn_s8_ibilinear_ukernel__wasmsimd_dot16x2_u16
+- name: xnn_s8_ibilinear_ukernel__wasmsimd_mul32_u8
+- name: xnn_s8_ibilinear_ukernel__wasmsimd_mul32_u16

@@ -4,8 +4,8 @@
 // LICENSE file in the root directory of this source tree.
 //
 
-#ifndef __XNNPACK_SRC_XNNPACK_SIMD_U8_HVX_H_
-#define __XNNPACK_SRC_XNNPACK_SIMD_U8_HVX_H_
+#ifndef XNNPACK_SRC_XNNPACK_SIMD_U8_HVX_H_
+#define XNNPACK_SRC_XNNPACK_SIMD_U8_HVX_H_
 
 #include <assert.h>
 #include <hexagon_protos.h>
@@ -107,4 +107,4 @@ static XNN_INLINE void xnn_store_tail_u8(uint8_t* output, xnn_simd_u8_t v,
   return Q6_V_vstu_variable(output, num_elements, v);
 }
 
-#endif  // __XNNPACK_SRC_XNNPACK_SIMD_U8_HVX_H_
+#endif  // XNNPACK_SRC_XNNPACK_SIMD_U8_HVX_H_

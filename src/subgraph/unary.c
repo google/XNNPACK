@@ -9,6 +9,7 @@
 #include <stdint.h>
 
 #include "include/xnnpack.h"
+#include "src/xnnpack/common.h"
 #include "src/xnnpack/internal.h"
 #include "src/xnnpack/log.h"
 #include "src/xnnpack/node-type.h"
@@ -206,41 +207,43 @@ static enum xnn_status setup_convert_operator(
     case xnn_operator_type_convert_nc_f16_qd8:
     {
       void* quantization_params = output_value->quantization.dynamic_params;
+      void* row_sum = output_value->quantization.row_sum;
       assert(quantization_params != NULL);
-      return xnn_setup_convert_nc_f16_qd8(
-        opdata->operator_objects[0],
-        input_data,
-        output_data,
-        quantization_params);
+      return xnn_setup_convert_nc_f16_qd8(opdata->operator_objects[0],
+                                          input_data, output_data, row_sum,
+                                          quantization_params);
     }
     case xnn_operator_type_convert_nc_f32_qd8:
     {
       void* quantization_params = output_value->quantization.dynamic_params;
+      void* row_sum = output_value->quantization.row_sum;
       assert(quantization_params != NULL);
       return xnn_setup_convert_nc_f32_qd8(
         opdata->operator_objects[0],
         input_data,
         output_data,
+        row_sum,
         quantization_params);
     }
     case xnn_operator_type_convert_nc_f16_qdu8:
     {
       void* quantization_params = output_value->quantization.dynamic_params;
+      void* row_sum = output_value->quantization.row_sum;
       assert(quantization_params != NULL);
-      return xnn_setup_convert_nc_f16_qdu8(
-        opdata->operator_objects[0],
-        input_data,
-        output_data,
-        quantization_params);
+      return xnn_setup_convert_nc_f16_qdu8(opdata->operator_objects[0],
+                                           input_data, output_data, row_sum,
+                                           quantization_params);
     }
     case xnn_operator_type_convert_nc_f32_qdu8:
     {
       void* quantization_params = output_value->quantization.dynamic_params;
+      void* row_sum = output_value->quantization.row_sum;
       assert(quantization_params != NULL);
       return xnn_setup_convert_nc_f32_qdu8(
         opdata->operator_objects[0],
         input_data,
         output_data,
+        row_sum,
         quantization_params);
     }
     case xnn_operator_type_convert_nc_f32_qp8:
@@ -392,12 +395,12 @@ enum xnn_status xnn_define_unary(
     case xnn_unary_leaky_relu:
     case xnn_unary_elu:
       if (!params) {
-        xnn_log_error(
-          "failed to define %s node with input ID #%" PRIu32 " and output ID #%" PRIu32
-          ": missing clamp params",
-          xnn_unary_operator_to_string(type), input_id, output_id);
+        xnn_log_error("failed to define %s node with input ID #%" PRIu32
+                      " and output ID #%" PRIu32 ": missing clamp params",
+                      xnn_unary_operator_to_string(type), input_id, output_id);
         return xnn_status_invalid_parameter;
       }
+      XNN_FALLTHROUGH
     default:
       break;
   }

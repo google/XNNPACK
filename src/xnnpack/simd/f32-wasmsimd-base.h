@@ -4,8 +4,8 @@
 // LICENSE file in the root directory of this source tree.
 //
 
-#ifndef __XNNPACK_SRC_XNNPACK_SIMD_F32_WASMSIMD_BASE_H_
-#define __XNNPACK_SRC_XNNPACK_SIMD_F32_WASMSIMD_BASE_H_
+#ifndef XNNPACK_SRC_XNNPACK_SIMD_F32_WASMSIMD_BASE_H_
+#define XNNPACK_SRC_XNNPACK_SIMD_F32_WASMSIMD_BASE_H_
 
 #include <assert.h>
 #include <stddef.h>
@@ -100,6 +100,11 @@ static XNN_INLINE xnn_simd_f32_t xnn_xor_f32(xnn_simd_f32_t a,
   return wasm_v128_xor(a, b);
 }
 
+static XNN_INLINE xnn_simd_f32_t xnn_andnot_f32(xnn_simd_f32_t a,
+                                                xnn_simd_f32_t b) {
+  return wasm_v128_andnot(b, a);
+}
+
 static XNN_INLINE xnn_simd_f32_t xnn_sll_f32(xnn_simd_f32_t a, uint8_t bits) {
   return wasm_i32x4_shl(a, bits);
 }
@@ -169,8 +174,10 @@ static XNN_INLINE xnn_simd_f32_t xnn_load_tail_safe_f32(const float* input,
   switch (num_elements) {
     case 3:
       *dst++ = *input++;
+      XNN_FALLTHROUGH
     case 2:
       *dst++ = *input++;
+      XNN_FALLTHROUGH
     default:
       *dst++ = *input++;
   }
@@ -192,4 +199,4 @@ static XNN_INLINE void xnn_store_tail_f32(float* output, xnn_simd_f32_t v,
   }
 }
 
-#endif  // __XNNPACK_SRC_XNNPACK_SIMD_F32_WASMSIMD_BASE_H_
+#endif  // XNNPACK_SRC_XNNPACK_SIMD_F32_WASMSIMD_BASE_H_

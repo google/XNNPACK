@@ -1,9 +1,9 @@
-"""
-Microkernel filenames lists for avx.
-
-Auto-generated file. Do not edit!
-  Generator: tools/update-microkernels.py
-"""
+#
+# Microkernel filenames lists for avx.
+#
+# Auto-generated file. Do not edit!
+#   Generator: tools/update-microkernels.py
+#
 
 PROD_AVX_MICROKERNEL_SRCS = [
     "src/f16-f32-vcvt/gen/f16-f32-vcvt-avx-int16-u16.c",
@@ -27,13 +27,15 @@ PROD_AVX_MICROKERNEL_SRCS = [
     "src/f32-qc8w-gemm/gen/f32-qc8w-gemm-5x16-minmax-avx-broadcast.c",
     "src/f32-qs8-vcvt/gen/f32-qs8-vcvt-avx-u32.c",
     "src/f32-qu8-vcvt/gen/f32-qu8-vcvt-avx-u32.c",
-    "src/f32-rdminmax/gen/f32-rdmax-2p2x-avx-c32.c",
-    "src/f32-rdminmax/gen/f32-rdmin-2p2x-avx-c32.c",
-    "src/f32-rdsum/gen/f32-rdsum-7p7x-minmax-avx-c32.c",
+    "src/f32-rdminmax/gen/f32-rdmax-2p2x-avx-u32.c",
+    "src/f32-rdminmax/gen/f32-rdmin-2p2x-avx-u32.c",
+    "src/f32-rdsum/gen/f32-rdsum-7p7x-minmax-avx-u32.c",
+    "src/f32-rdsum2/gen/f32-rdsum2-7p7x-minmax-avx.c",
     "src/f32-rminmax/gen/f32-rmax-avx-u32-acc4.c",
     "src/f32-rminmax/gen/f32-rmin-avx-u32-acc4.c",
     "src/f32-rminmax/gen/f32-rminmax-avx-u32-acc4.c",
     "src/f32-rsum/gen/f32-rsum-avx-u32-acc4.c",
+    "src/f32-rsum2/gen/f32-rsum2-avx-u8.c",
     "src/f32-vapproxgelu/gen/f32-vapproxgelu-avx-rational-12-10-div.c",
     "src/f32-vbinary/gen/f32-vadd-avx-u16.c",
     "src/f32-vbinary/gen/f32-vaddc-avx-u16.c",
@@ -64,7 +66,6 @@ PROD_AVX_MICROKERNEL_SRCS = [
     "src/f32-vgelu/gen/f32-vgelu-avx-rational-12-10-div.c",
     "src/f32-vhswish/gen/f32-vhswish-avx.c",
     "src/f32-vlrelu/gen/f32-vlrelu-avx-u16.c",
-    "src/f32-vrelu/gen/f32-vrelu-avx.c",
     "src/f32-vrnd/gen/f32-vrndd-avx-u16.c",
     "src/f32-vrnd/gen/f32-vrndne-avx-u16.c",
     "src/f32-vrnd/gen/f32-vrndu-avx-u16.c",
@@ -84,6 +85,8 @@ PROD_AVX_MICROKERNEL_SRCS = [
     "src/qs8-dwconv/gen/qs8-dwconv-9p16c-minmax-fp32-avx-mul16-add16.c",
     "src/qs8-dwconv/gen/qs8-dwconv-25p16c-minmax-fp32-avx-mul16-add16.c",
     "src/qs8-f32-vcvt/gen/qs8-f32-vcvt-avx-u32.c",
+    "src/qs8-qc4w-gemm/gen/qs8-qc4w-gemm-1x4c8-minmax-avx-madd-prfm.c",
+    "src/qs8-qc4w-gemm/gen/qs8-qc4w-gemm-5x4c8-minmax-avx-madd-prfm.c",
     "src/qs8-qc8w-dwconv/gen/qs8-qc8w-dwconv-3p16c-minmax-fp32-avx-mul16-add16.c",
     "src/qs8-qc8w-dwconv/gen/qs8-qc8w-dwconv-9p16c-minmax-fp32-avx-mul16-add16.c",
     "src/qs8-qc8w-dwconv/gen/qs8-qc8w-dwconv-25p16c-minmax-fp32-avx-mul16-add16.c",
@@ -149,16 +152,6 @@ NON_PROD_AVX_MICROKERNEL_SRCS = [
     "src/f32-gemm/gen/f32-gemm-6x8-minmax-avx-broadcast.c",
     "src/f32-gemm/gen/f32-gemm-6x16-minmax-avx-broadcast.c",
     "src/f32-gemm/gen/f32-gemm-7x8-minmax-avx-broadcast.c",
-    "src/f32-gemminc/gen/f32-gemminc-1x8-minmax-avx-broadcast.c",
-    "src/f32-gemminc/gen/f32-gemminc-1x16-minmax-avx-broadcast.c",
-    "src/f32-gemminc/gen/f32-gemminc-3x16-minmax-avx-broadcast.c",
-    "src/f32-gemminc/gen/f32-gemminc-4x8-minmax-avx-broadcast.c",
-    "src/f32-gemminc/gen/f32-gemminc-4x16-minmax-avx-broadcast.c",
-    "src/f32-gemminc/gen/f32-gemminc-5x8-minmax-avx-broadcast.c",
-    "src/f32-gemminc/gen/f32-gemminc-5x16-minmax-avx-broadcast.c",
-    "src/f32-gemminc/gen/f32-gemminc-6x8-minmax-avx-broadcast.c",
-    "src/f32-gemminc/gen/f32-gemminc-6x16-minmax-avx-broadcast.c",
-    "src/f32-gemminc/gen/f32-gemminc-7x8-minmax-avx-broadcast.c",
     "src/f32-igemm/gen/f32-igemm-3x16-minmax-avx-broadcast.c",
     "src/f32-igemm/gen/f32-igemm-4x8-minmax-avx-broadcast.c",
     "src/f32-igemm/gen/f32-igemm-4x16-minmax-avx-broadcast.c",
@@ -183,8 +176,8 @@ NON_PROD_AVX_MICROKERNEL_SRCS = [
     "src/f32-qu8-vcvt/gen/f32-qu8-vcvt-avx-u8.c",
     "src/f32-qu8-vcvt/gen/f32-qu8-vcvt-avx-u16.c",
     "src/f32-qu8-vcvt/gen/f32-qu8-vcvt-avx-u24.c",
-    "src/f32-rdsum/gen/f32-rdsum-7p7x-minmax-avx-c16.c",
-    "src/f32-rdsum/gen/f32-rdsum-7p7x-minmax-avx-c64.c",
+    "src/f32-rdsum/gen/f32-rdsum-7p7x-minmax-avx-u16.c",
+    "src/f32-rdsum/gen/f32-rdsum-7p7x-minmax-avx-u64.c",
     "src/f32-rminmax/gen/f32-rmax-avx-u8.c",
     "src/f32-rminmax/gen/f32-rmax-avx-u16-acc2.c",
     "src/f32-rminmax/gen/f32-rmax-avx-u24-acc3.c",
@@ -287,6 +280,16 @@ NON_PROD_AVX_MICROKERNEL_SRCS = [
     "src/qs8-f32-vcvt/gen/qs8-f32-vcvt-avx-u8.c",
     "src/qs8-f32-vcvt/gen/qs8-f32-vcvt-avx-u16.c",
     "src/qs8-f32-vcvt/gen/qs8-f32-vcvt-avx-u24.c",
+    "src/qs8-qc4w-gemm/gen/qs8-qc4w-gemm-1x4c8-minmax-avx-madd.c",
+    "src/qs8-qc4w-gemm/gen/qs8-qc4w-gemm-2x4c8-minmax-avx-madd-prfm.c",
+    "src/qs8-qc4w-gemm/gen/qs8-qc4w-gemm-2x4c8-minmax-avx-madd.c",
+    "src/qs8-qc4w-gemm/gen/qs8-qc4w-gemm-3x4c8-minmax-avx-madd-prfm.c",
+    "src/qs8-qc4w-gemm/gen/qs8-qc4w-gemm-3x4c8-minmax-avx-madd.c",
+    "src/qs8-qc4w-gemm/gen/qs8-qc4w-gemm-4x4c8-minmax-avx-madd-prfm.c",
+    "src/qs8-qc4w-gemm/gen/qs8-qc4w-gemm-4x4c8-minmax-avx-madd.c",
+    "src/qs8-qc4w-gemm/gen/qs8-qc4w-gemm-5x4c8-minmax-avx-madd.c",
+    "src/qs8-qc4w-gemm/gen/qs8-qc4w-gemm-6x4c8-minmax-avx-madd-prfm.c",
+    "src/qs8-qc4w-gemm/gen/qs8-qc4w-gemm-6x4c8-minmax-avx-madd.c",
     "src/qs8-qc8w-dwconv/gen/qs8-qc8w-dwconv-9p8c-minmax-fp32-avx-mul16-add16.c",
     "src/qs8-qc8w-dwconv/gen/qs8-qc8w-dwconv-9p8c-minmax-fp32-avx-mul16.c",
     "src/qs8-qc8w-dwconv/gen/qs8-qc8w-dwconv-9p8c-minmax-fp32-avx-mul32.c",

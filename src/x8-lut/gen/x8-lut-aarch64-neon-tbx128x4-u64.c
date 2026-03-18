@@ -8,13 +8,14 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include <assert.h>
-
 #include <arm_neon.h>
+#include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
 
+#include "src/xnnpack/common.h"
 #include "src/xnnpack/intrinsics-polyfill.h"
 #include "src/xnnpack/lut.h"
-#include "src/xnnpack/common.h"
 
 
 void xnn_x8_lut_ukernel__aarch64_neon_tbx128x4_u64(

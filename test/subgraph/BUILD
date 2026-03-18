@@ -12,19 +12,20 @@ load(
 )
 
 SUBGRAPH_TEST_DEPS = [
+    ":quantization_helpers",
     ":runtime_flags",
     ":subgraph_tester",
-    "//:XNNPACK",
     "//:buffer",
     "//:common",
     "//:datatype",
     "//:math",
     "//:node_type",
-    "//:operators",
     "//:operator_utils",
     "//:reference_ukernels",
     "//:requantization",
-    "//:subgraph",
+    "//:subgraph_h",
+    "//:XNNPACK",
+    "//src/configs:hardware_config",
     "//test:replicable_random_device",
 ]
 
@@ -44,6 +45,20 @@ xnnpack_cxx_library(
     deps = [
         "//:buffer",
         "//:math",
+    ],
+)
+
+xnnpack_cxx_library(
+    name = "quantization_helpers",
+    testonly = True,
+    hdrs = ["quantization-helpers.h"],
+    deps = xnnpack_test_deps_for_library() + [
+        "//:buffer",
+        "//:common",
+        "//:datatype",
+        "//:microparams_h",
+        "//:quantization",
+        "//:xnnpack_h",
     ],
 )
 
@@ -92,49 +107,65 @@ xnnpack_cxx_library(
 xnnpack_unit_test(
     name = "unary_test",
     srcs = ["unary.cc"],
+    defines = select({
+        "//ynnpack/xnnpack:use_ynnpack": ["XNNPACK_USE_YNNPACK"],
+        "//conditions:default": [],
+    }),
     deps = SUBGRAPH_TEST_DEPS + ["//test:unary_ops"],
 )
+
+NO_YNNPACK = [
+    "input_output",
+    "rewrites",
+    "static_resize_bilinear_2d",
+]
 
 [xnnpack_unit_test(
     name = "%s_test" % operator,
     srcs = [
         "%s.cc" % operator.replace("_", "-"),
     ],
-    deps = SUBGRAPH_TEST_DEPS,
+    defines = select({
+        "//ynnpack/xnnpack:use_ynnpack": ["XNNPACK_USE_YNNPACK"],
+        "//conditions:default": [],
+    }),
+    tags = ["no_ynnpack"] if operator in NO_YNNPACK else [],
+    deps = SUBGRAPH_TEST_DEPS + ["//:subgraph"],
 ) for operator in [
+    "binary",
+    "broadcast",
+    "concatenate",
     "copy",
+    "depth_to_space_2d",
+    "even_split",
+    "input_output",
+    "rewrites",
     "softmax",
     "space_to_depth_2d",
-    "depth_to_space_2d",
+    "split_fuse",
     "static_constant_pad",
     "static_expand_dims",
     "static_reshape",
+    "static_resize_bilinear_2d",
     "static_slice",
 ]]
 
 xnnpack_unit_test(
     name = "workspace_test",
     srcs = ["workspace.cc"],
-    deps = SUBGRAPH_TEST_DEPS + ["//:allocation_type"],
-)
-
-xnnpack_unit_test(
-    name = "persistent_test",
-    srcs = ["persistent.cc"],
-    deps = SUBGRAPH_TEST_DEPS + ["//:allocation_type"],
-)
-
-xnnpack_unit_test(
-    name = "binary_test",
-    timeout = "moderate",
-    srcs = ["binary.cc"],
-    deps = SUBGRAPH_TEST_DEPS,
+    tags = ["no_ynnpack"],
+    deps = SUBGRAPH_TEST_DEPS + [
+        "//:allocation_type",
+        "//:operators",
+        "//:subgraph",
+    ],
 )
 
 xnnpack_unit_test(
     name = "argmax_pooling_2d_test",
     timeout = "moderate",
     srcs = ["argmax-pooling-2d.cc"],
+    tags = ["no_ynnpack"],
     deps = SUBGRAPH_TEST_DEPS + [":stencil"],
 )
 
@@ -148,43 +179,42 @@ xnnpack_unit_test(
 xnnpack_unit_test(
     name = "batch_matrix_multiply_test",
     srcs = ["batch-matrix-multiply.cc"],
-    deps = SUBGRAPH_TEST_DEPS,
-)
-
-xnnpack_unit_test(
-    name = "concatenate_test",
-    srcs = ["concatenate.cc"],
+    shard_count = 5,
     deps = SUBGRAPH_TEST_DEPS,
 )
 
 xnnpack_unit_test(
     name = "convolution_2d_test",
     srcs = ["convolution-2d.cc"],
+    defines = select({
+        "//ynnpack/xnnpack:use_ynnpack": ["XNNPACK_USE_YNNPACK"],
+        "//conditions:default": [],
+    }),
     deps = SUBGRAPH_TEST_DEPS + [":stencil"],
 )
 
 xnnpack_unit_test(
     name = "deconvolution_2d_test",
     srcs = ["deconvolution-2d.cc"],
+    tags = ["no_ynnpack"],
     deps = SUBGRAPH_TEST_DEPS + [":stencil"],
 )
 
 xnnpack_unit_test(
     name = "depthwise_convolution_2d_test",
     srcs = ["depthwise-convolution-2d.cc"],
+    tags = ["no_ynnpack"],
     deps = SUBGRAPH_TEST_DEPS + [":stencil"],
-)
-
-xnnpack_unit_test(
-    name = "even_split_test",
-    srcs = ["even-split.cc"],
-    deps = SUBGRAPH_TEST_DEPS,
 )
 
 xnnpack_unit_test(
     name = "fully_connected_test",
     timeout = "moderate",
     srcs = ["fully-connected.cc"],
+    defines = select({
+        "//ynnpack/xnnpack:use_ynnpack": ["XNNPACK_USE_YNNPACK"],
+        "//conditions:default": [],
+    }),
     deps = SUBGRAPH_TEST_DEPS,
 )
 
@@ -199,12 +229,14 @@ xnnpack_unit_test(
     name = "rope_test",
     timeout = "moderate",
     srcs = ["rope.cc"],
+    tags = ["no_ynnpack"],
     deps = SUBGRAPH_TEST_DEPS,
 )
 
 xnnpack_unit_test(
     name = "static_reduce_test",
     srcs = ["static-reduce.cc"],
+    shard_count = 5,
     deps = SUBGRAPH_TEST_DEPS,
 )
 
@@ -217,20 +249,9 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
-    name = "split_fuse_test",
-    srcs = ["split-fuse.cc"],
-    deps = SUBGRAPH_TEST_DEPS,
-)
-
-xnnpack_unit_test(
-    name = "static_resize_bilinear_2d_test",
-    srcs = ["static-resize-bilinear-2d.cc"],
-    deps = SUBGRAPH_TEST_DEPS,
-)
-
-xnnpack_unit_test(
     name = "unpooling_2d_test",
     srcs = ["unpooling-2d.cc"],
+    tags = ["no_ynnpack"],
     deps = SUBGRAPH_TEST_DEPS + [":stencil"],
 )
 
@@ -239,12 +260,12 @@ xnnpack_unit_test(
     srcs = [
         "fusion.cc",
     ],
+    tags = ["no_ynnpack"],
     deps = [
         ":runtime_tester",
         ":subgraph_tester",
         "//:buffer",
         "//:node_type",
-        "//:subgraph",
         "//:subgraph_h",
         "//:xnnpack_h",
     ],
@@ -257,6 +278,7 @@ xnnpack_unit_test(
     srcs = [
         "runtime.cc",
     ],
+    tags = ["no_ynnpack"],
     deps = [
         ":runtime_tester",
     ],
@@ -267,6 +289,7 @@ xnnpack_unit_test(
     srcs = [
         "subgraph.cc",
     ],
+    tags = ["no_ynnpack"],
     deps = [
         ":runtime_tester",
         ":subgraph_tester",
@@ -279,6 +302,7 @@ xnnpack_unit_test(
     srcs = [
         "memory-planner.cc",
     ],
+    tags = ["no_ynnpack"],
     deps = [
         ":runtime_flags",
         ":runtime_tester",
@@ -293,6 +317,7 @@ xnnpack_unit_test(
 xnnpack_unit_test(
     name = "subgraph_nchw_test",
     srcs = ["subgraph-nchw.cc"],
+    tags = ["no_ynnpack"],
     deps = [
         ":subgraph_tester",
         "//:node_type",
@@ -306,6 +331,7 @@ xnnpack_unit_test(
         "mock-allocator.h",
         "subgraph-fp16.cc",
     ],
+    tags = ["no_ynnpack"],
     deps = [
         ":runtime_flags",
         ":runtime_tester",
@@ -315,7 +341,9 @@ xnnpack_unit_test(
         "//:buffer",
         "//:math",
         "//:node_type",
+        "//:operator_h",
         "//:params",
+        "//:subgraph",
         "//:subgraph_h",
         "//:xnnpack_h",
         "//test:replicable_random_device",

@@ -6,9 +6,8 @@
 
 #include <assert.h>
 
-#include "src/xnnpack/simd/f32-hvx.h"
-
 #include "src/xnnpack/math.h"
+#include "src/xnnpack/simd/f32-hvx.h"
 #include "src/xnnpack/vbinary.h"
 
 void xnn_f32_vsqrdiffc_ukernel__hvx_u32(
@@ -25,7 +24,6 @@ void xnn_f32_vsqrdiffc_ukernel__hvx_u32(
   assert(output != NULL);
 
   HVX_Vector vb = xnn_set1_f32(*input_b);
-
   for (; batch >= 32 * sizeof(float); batch -= 32 * sizeof(float)) {
     HVX_Vector va = xnn_loadu_f32(input_a);
     input_a += 32;

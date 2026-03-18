@@ -166,17 +166,19 @@ enum xnn_status xnn_reshape_resize_bilinear2d_nhwc(
 
   if (input_pixel_stride < channels) {
     xnn_log_error(
-      "failed to create %s operator with input pixel stride of %zu: "
-      "stride must be at least as large as the number of channels (%zu)",
-      xnn_operator_type_to_string(xnn_operator_type_resize_bilinear_nhwc), input_pixel_stride, channels);
+        "failed to create %s operator with input pixel stride of %zu: stride "
+        "must be at least as large as the number of channels (%zu)",
+        xnn_operator_type_to_string(xnn_operator_type_resize_bilinear_nhwc),
+        input_pixel_stride, channels);
     return xnn_status_invalid_parameter;
   }
 
   if (output_pixel_stride < channels) {
     xnn_log_error(
-      "failed to create %s operator with output pixel stride of %zu: "
-      "stride must be at least as large as the number of channels (%zu)",
-      xnn_operator_type_to_string(xnn_operator_type_resize_bilinear_nhwc), output_pixel_stride, channels);
+        "failed to create %s operator with output pixel stride of %zu: stride "
+        "must be at least as large as the number of channels (%zu)",
+        xnn_operator_type_to_string(xnn_operator_type_resize_bilinear_nhwc),
+        output_pixel_stride, channels);
     return xnn_status_invalid_parameter;
   }
 

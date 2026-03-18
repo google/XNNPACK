@@ -38,7 +38,7 @@ struct XnnTestParam;
 
 class Tester {
  public:
-  Tester(const XnnTestParam& param);
+  explicit Tester(const XnnTestParam& param);
 
   Tester& output_pixels(size_t output_pixels) {
     assert(output_pixels != 0);
@@ -441,14 +441,12 @@ const XnnTestParam xnn_test_params[] = {
        arch_flags,   channel_tile,                                             \
        primary_tile, false},
 
-#include "src/f16-avgpool/f16-avgpool-minmax.h"
-#include "src/f32-avgpool/f32-avgpool-minmax.h"
+#include "src/f16-avgpool/f16-avgpool-minmax.inc"
+#include "src/f32-avgpool/f32-avgpool-minmax.inc"
 
 #undef XNN_UKERNEL
 
 };
-
-}  // namespace
 
 TEST_P(XnnTest, channels_eq_channel_tile_unipass_fulltile) {
   TEST_REQUIRES_ARCH_FLAGS(GetParam().arch_flags);
@@ -829,3 +827,5 @@ TEST_P(XnnTest, few_output_pixels_with_step_0) {
 
 INSTANTIATE_TEST_SUITE_P(avgpool_minmax, XnnTest,
                          testing::ValuesIn(xnn_test_params), GetTestName);
+
+}  // namespace

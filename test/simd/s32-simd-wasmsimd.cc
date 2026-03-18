@@ -35,7 +35,7 @@ class S32SimdWASMSIMDTest : public ::testing::Test {
   void SetUp() override {
     inputs_.resize(3 * xnn_simd_size_s32);
     output_.resize(xnn_simd_size_s32);
-    std::uniform_int_distribution<int32_t> s32dist(-10000, 10000);
+    std::uniform_int_distribution<int> s32dist(-10000, 10000);
     std::generate(inputs_.begin(), inputs_.end(),
                   [&]() { return s32dist(rng_); });
   }

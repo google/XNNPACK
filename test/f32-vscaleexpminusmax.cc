@@ -159,5 +159,5 @@ class VScaleExpMinusMaxMicrokernelTester {
                                         init_params);                         \
   XNN_TEST_VSCALEEXPMINUSMAX_SCALE(ukernel, arch_flags, element_tile,         \
                                    init_params);
-#include "src/f32-vscaleexpminusmax/f32-vscaleexpminusmax.h"
+#include "src/f32-vscaleexpminusmax/f32-vscaleexpminusmax.inc"
 #undef XNN_UKERNEL

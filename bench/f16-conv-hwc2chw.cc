@@ -1,4 +1,4 @@
-// Copyright 2019 Google LLC
+// Copyright 2019-2025 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
@@ -16,25 +16,26 @@
 #include "src/xnnpack/buffer.h"
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/conv.h"
+#include "src/xnnpack/hardware-config.h"
 #include "src/xnnpack/math.h"
 #include "src/xnnpack/microfnptr.h"
 #include "src/xnnpack/microparams-init.h"
 #include "src/xnnpack/pack.h"
+#include "test/replicable_random_device.h"
 #include <benchmark/benchmark.h>
 
 static void f16_conv_hwc2chw(
     benchmark::State& state, xnn_f16_conv_hwc2chw_ukernel_fn conv,
     uint32_t output_channels_tile, xnn_init_f16_minmax_params_fn init_params,
-    benchmark::utils::IsaCheckFunction isa_check = nullptr) {
-  if ((isa_check != nullptr) && !isa_check(state)) {
+    uint64_t arch_flags = 0) {
+  if (!benchmark::utils::CheckArchFlags(state, arch_flags)) {
     return;
   }
   const size_t input_height = state.range(0);
   const size_t input_width = state.range(1);
   const size_t output_channels = state.range(2);
 
-  std::random_device random_device;
-  auto rng = std::mt19937(random_device());
+  xnnpack::ReplicableRandomDevice rng;
   auto f32rng = std::bind(std::uniform_real_distribution<float>(0.0f, 1.0f),
                           std::ref(rng));
 
@@ -117,10 +118,10 @@ static void f16_conv_hwc2chw(
 
 #if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 static void f16_conv_hwc2chw_3x3s2p1c3x4__neonfp16arith_2x2(
-    benchmark::State& state, const char* net) {
+    benchmark::State& state) {
   f16_conv_hwc2chw(
       state, xnn_f16_conv_hwc2chw_ukernel_3x3s2p1c3x4__neonfp16arith_2x2, 4,
-      xnn_init_f16_minmax_scalar_params, benchmark::utils::CheckNEONFP16ARITH);
+      xnn_init_f16_minmax_scalar_params, xnn_arch_arm_neon_fp16_arith);
 }
 
 BENCHMARK_DCONV(f16_conv_hwc2chw_3x3s2p1c3x4__neonfp16arith_2x2);

@@ -1,4 +1,4 @@
-// Copyright 2023 Google LLC
+// Copyright 2023-2025 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
@@ -19,20 +19,19 @@
 #include "src/xnnpack/microfnptr.h"
 #include "src/xnnpack/microparams-init.h"
 #include "src/xnnpack/vbinary.h"
+#include "test/replicable_random_device.h"
 #include <benchmark/benchmark.h>
 
 static void f16_vcmul(benchmark::State& state, uint64_t arch_flags,
                       xnn_f16_vbinary_ukernel_fn vcmul,
-                      xnn_init_f16_default_params_fn init_params = nullptr,
-                      benchmark::utils::IsaCheckFunction isa_check = nullptr) {
+                      xnn_init_f16_default_params_fn init_params = nullptr) {
   if (!benchmark::utils::CheckArchFlags(state, arch_flags)) {
     return;
   }
 
   const size_t num_elements = state.range(0);
 
-  std::random_device random_device;
-  auto rng = std::mt19937(random_device());
+  xnnpack::ReplicableRandomDevice rng;
   auto f32rng = std::bind(std::uniform_real_distribution<float>(-1.0f, 1.0f),
                           std::ref(rng));
   auto f16rng = std::bind(xnn_float16_from_float, f32rng);
@@ -78,7 +77,7 @@ static void f16_vcmul(benchmark::State& state, uint64_t arch_flags,
       ->Apply(benchmark::utils::BinaryElementwiseParameters<                \
               std::complex<xnn_float16>, std::complex<xnn_float16>>)        \
       ->UseRealTime();
-#include "src/f16-vbinary/f16-vcmul.h"
+#include "src/f16-vbinary/f16-vcmul.inc"
 #undef XNN_UKERNEL
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN

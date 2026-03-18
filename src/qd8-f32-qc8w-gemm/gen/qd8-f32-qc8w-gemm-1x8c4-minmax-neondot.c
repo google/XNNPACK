@@ -8,12 +8,15 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include <assert.h>
-
 #include <arm_neon.h>
+#include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
 
+#include "src/xnnpack/common.h"
 #include "src/xnnpack/gemm.h"
 #include "src/xnnpack/math.h"
+#include "src/xnnpack/microparams.h"
 
 
 void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_1x8c4__neondot(
@@ -76,15 +79,15 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_1x8c4__neondot(
     // Handle up to 4 final positions of `k`
     if XNN_UNLIKELY(k != 0) {
       // Load a 1x4 block of activations.
-      const int8x8_t va0x01234567 = vld1_s8(a0); a0 += 4;
+      const int8x8_t va0x0123 = vreinterpret_s8_s32(vld1_dup_s32((const int32_t*)a0)); a0 += 4;
 
       // Load a 4x8 block of weights.
       const int8x16_t vb0123x0123 = vld1q_s8(w); w = (const int8_t*) w + 16;
       const int8x16_t vb0123x4567 = vld1q_s8(w); w = (const int8_t*) w + 16;
 
       // Multiply-accumulate: 1x4 * 4x8 --> 1x8.
-      vacc0x0123 = vdotq_lane_s32(vacc0x0123, vb0123x0123, va0x01234567, 0);
-      vacc0x4567 = vdotq_lane_s32(vacc0x4567, vb0123x4567, va0x01234567, 0);
+      vacc0x0123 = vdotq_lane_s32(vacc0x0123, vb0123x0123, va0x0123, 0);
+      vacc0x4567 = vdotq_lane_s32(vacc0x4567, vb0123x4567, va0x0123, 0);
     }
 
     float32x4_t vout0x0123 = vcvtq_f32_s32(vacc0x0123);

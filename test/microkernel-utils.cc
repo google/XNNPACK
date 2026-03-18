@@ -34,7 +34,7 @@ TEST(GEMM_BEST_TILE_SIZE, min_tiles_per_thread) {
          {(size_t)1, num_threads, 5 * num_threads, 10 * num_threads}) {
       const size_t nc = xnn_gemm_best_tile_size(
           num_groups, m, n, /*m_stride=*/k * sizeof(float),
-          /*n_stride=*/k * sizeof(float), /*cm_stride=*/n * sizeof(float),
+          /*n_stride=*/k * sizeof(float),
           /*cn_stride=*/sizeof(float), mr, nr, num_threads);
 
       // Check that `nc` is an integer multiple of `nr` if it is less than `n`.

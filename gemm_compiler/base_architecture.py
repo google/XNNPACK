@@ -70,7 +70,7 @@ class BaseArchitecture:
     raise NotImplementedError
 
   @abc.abstractmethod
-  def convert_to_output_type(self) -> None:
+  def convert_to_output(self) -> None:
     """Returns an assembly string dequantizing the accumulators."""
     raise NotImplementedError
 

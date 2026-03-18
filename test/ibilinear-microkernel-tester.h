@@ -3,7 +3,8 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#pragma once
+#ifndef XNNPACK_TEST_IBILINEAR_MICROKERNEL_TESTER_H_
+#define XNNPACK_TEST_IBILINEAR_MICROKERNEL_TESTER_H_
 
 #include <algorithm>
 #include <cassert>
@@ -469,3 +470,5 @@ class IBilinearMicrokernelTester {
   uint32_t input_offset_{0};
   size_t iterations_{3};
 };
+
+#endif  // XNNPACK_TEST_IBILINEAR_MICROKERNEL_TESTER_H_

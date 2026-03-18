@@ -4,8 +4,8 @@
 // LICENSE file in the root directory of this source tree.
 //
 
-#ifndef __XNNPACK_SRC_XNNPACK_SIMD_F32_AVX512F_H_
-#define __XNNPACK_SRC_XNNPACK_SIMD_F32_AVX512F_H_
+#ifndef XNNPACK_SRC_XNNPACK_SIMD_F32_AVX512F_H_
+#define XNNPACK_SRC_XNNPACK_SIMD_F32_AVX512F_H_
 
 #include <assert.h>
 #include <immintrin.h>
@@ -133,6 +133,12 @@ static XNN_INLINE xnn_simd_f32_t xnn_xor_f32(xnn_simd_f32_t a,
       _mm512_xor_epi32(_mm512_castps_si512(a), _mm512_castps_si512(b)));
 }
 
+static XNN_INLINE xnn_simd_f32_t xnn_andnot_f32(xnn_simd_f32_t a,
+                                                xnn_simd_f32_t b) {
+  return _mm512_castsi512_ps(
+      _mm512_andnot_epi32(_mm512_castps_si512(a), _mm512_castps_si512(b)));
+}
+
 static XNN_INLINE xnn_simd_f32_t xnn_sll_f32(xnn_simd_f32_t a, uint8_t bits) {
   return _mm512_castsi512_ps(_mm512_slli_epi32(_mm512_castps_si512(a), bits));
 }
@@ -221,4 +227,4 @@ static XNN_INLINE void xnn_store_tail_f32(float* output, xnn_simd_f32_t v,
   _mm512_mask_storeu_ps(output, vmask, v);
 }
 
-#endif  // __XNNPACK_SRC_XNNPACK_SIMD_F32_AVX512F_H_
+#endif  // XNNPACK_SRC_XNNPACK_SIMD_F32_AVX512F_H_

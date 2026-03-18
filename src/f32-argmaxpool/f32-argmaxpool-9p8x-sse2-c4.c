@@ -44,7 +44,7 @@ void xnn_f32_argmaxpool_ukernel_9p8x__sse2_c4(
     const float** id = input;
 
     __m128i vidx0 = _mm_set1_epi32(0);
-    __m128i vidx8;
+    __m128i vidx8 = _mm_set1_epi32(0);
 
     assert(!ab);
     assert(!ib);

@@ -30,11 +30,11 @@ void xnn_f32_vsqrdiff_ukernel__wasmsimd_u8(
   assert(output != NULL);
 
   for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
-    const v128_t va0 = wasm_v128_load(input_a);
+    const v128_t va0 = wasm_v128_load(input_a + 0);
     const v128_t va1 = wasm_v128_load(input_a + 4);
     input_a += 8;
 
-    const v128_t vb0 = wasm_v128_load(input_b);
+    const v128_t vb0 = wasm_v128_load(input_b + 0);
     const v128_t vb1 = wasm_v128_load(input_b + 4);
     input_b += 8;
 
@@ -44,7 +44,7 @@ void xnn_f32_vsqrdiff_ukernel__wasmsimd_u8(
     vacc0 = wasm_f32x4_mul(vacc0, vacc0);
     vacc1 = wasm_f32x4_mul(vacc1, vacc1);
 
-    wasm_v128_store(output, vacc0);
+    wasm_v128_store(output + 0, vacc0);
     wasm_v128_store(output + 4, vacc1);
     output += 8;
   }

@@ -16,6 +16,9 @@ class Avx512F(fma3_template.Fma3):
   def register_bytes(self):
     return 64
 
+  def num_simd_registers(self):
+    return 32
+
   def prefix(self):
     return 'z'
 
@@ -155,24 +158,24 @@ class Avx512F(fma3_template.Fma3):
       )
       for mr in range(0, self.m):
         self.asm_string += (
-            'vmovups  ZMMWORD PTR [{c_reg}]{{k1}}, z{ACC}\n'.format(
+            'vmovups  zmmword ptr [{c_reg}]{{k1}}, z{ACC}\n'.format(
                 ACC=accumulators[mr], c_reg=cm_registers[mr + c_reg_offset]
             )
         )
         self.asm_string += (
-            'vmovups  ZMMWORD PTR [{c_reg} + 64]{{k2}}, z{ACC}\n'.format(
+            'vmovups  zmmword ptr [{c_reg} + 64]{{k2}}, z{ACC}\n'.format(
                 ACC=accumulators[mr + self.m],
                 c_reg=cm_registers[mr + c_reg_offset],
             )
         )
         self.asm_string += (
-            'vmovups  ZMMWORD PTR [{c_reg} + 128]{{k3}}, z{ACC}\n'.format(
+            'vmovups  zmmword ptr [{c_reg} + 128]{{k3}}, z{ACC}\n'.format(
                 ACC=accumulators[mr + 2 * self.m],
                 c_reg=cm_registers[mr + c_reg_offset],
             )
         )
         self.asm_string += (
-            'vmovups  ZMMWORD PTR [{c_reg} + 192]{{k4}}, z{ACC}\n'.format(
+            'vmovups  zmmword ptr [{c_reg} + 192]{{k4}}, z{ACC}\n'.format(
                 ACC=accumulators[mr + 3 * self.m],
                 c_reg=cm_registers[mr + c_reg_offset],
             )
@@ -191,12 +194,12 @@ class Avx512F(fma3_template.Fma3):
       )
       for mr in range(0, self.m):
         self.asm_string += (
-            'vmovups  ZMMWORD PTR [{c_reg}]{{k1}}, z{ACC}\n'.format(
+            'vmovups  zmmword ptr [{c_reg}]{{k1}}, z{ACC}\n'.format(
                 ACC=accumulators[mr], c_reg=cm_registers[mr + c_reg_offset]
             )
         )
         self.asm_string += (
-            'vmovups  ZMMWORD PTR [{c_reg} + 64]{{k2}}, z{ACC}\n'.format(
+            'vmovups  zmmword ptr [{c_reg} + 64]{{k2}}, z{ACC}\n'.format(
                 ACC=accumulators[mr + self.m],
                 c_reg=cm_registers[mr + c_reg_offset],
             )
@@ -213,7 +216,7 @@ class Avx512F(fma3_template.Fma3):
       )
       for mr in range(0, self.m):
         self.asm_string += (
-            'vmovups  ZMMWORD PTR [{c_reg}]{{k1}}, z{ACC}\n'.format(
+            'vmovups  zmmword ptr [{c_reg}]{{k1}}, z{ACC}\n'.format(
                 ACC=accumulators[mr], c_reg=cm_registers[mr + c_reg_offset]
             )
         )
@@ -224,7 +227,7 @@ class Avx512FC(Avx512F):
   def input_asm(self):
     in_asm = {
         'loop': [
-            'vbroadcastsd {AM}, QWORD PTR [{AM_ptr} + {a_offset}]\n',
+            'vbroadcastsd {AM}, qword ptr [{AM_ptr} + {a_offset}]\n',
         ]
     }
     return in_asm
@@ -255,7 +258,7 @@ class Avx512FC(Avx512F):
         + f'__asm_amd64_{self.isa()}_broadcast'
     )
 
-  def convert_to_output_type(self):
+  def convert_to_output(self):
     shift_add = """vpsrlq {tmp}, z{acc}, 32
       vaddps z{acc}, z{acc}, {tmp}\n"""
     accumulators = self.acc_registers()
@@ -274,6 +277,9 @@ class Avx512FC(Avx512F):
             acc0=accumulators[2 * self.m * nr + mr],
             acc1=accumulators[2 * self.m * nr + self.m + mr],
         )
+
+    self.comment('Min/max clamping.')
+    self.clamp()
 
   def k_mask(self):
     return '0xFFFFFFFFFFFFFFFB'

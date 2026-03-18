@@ -38,7 +38,7 @@ static void x8_packq(benchmark::State& state, const char* net,
   BENCHMARK_CAPTURE_BGEMM(x8_packq, ukernel##_mr4_kr4_, ukernel, arch_flags, \
                           /*mr=*/4, /*kr=*/4);
 
-#include "src/x8-packq/x8-packq.h"
+#include "src/x8-packq/x8-packq.inc"
 
 #undef XNN_UKERNEL
 

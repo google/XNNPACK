@@ -9,9 +9,14 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
 
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/igemm.h"
 #include "src/xnnpack/math.h"
-#include "src/xnnpack/gemm.h"
+#include "src/xnnpack/microparams.h"
+
 #include "src/xnnpack/unaligned.h"
 
 
@@ -29,7 +34,7 @@ void xnn_qd8_f32_qc8w_igemm_minmax_ukernel_1x2__scalar(
     const int8_t* zero,
     const int8_t* zero_data,
     const struct xnn_f32_minmax_params* restrict params,
-    const struct xnn_qd8_quantization_params* restrict quantization_params)
+    const struct xnn_qd8_quantization_params* restrict quantization_params) XNN_DISABLE_UBSAN
 {
   assert(mr != 0);
   assert(mr <= 1);

@@ -6,8 +6,8 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#ifndef THIRD_PARTY_XNNPACK_SRC_XNNPACK_LOG_H_
-#define THIRD_PARTY_XNNPACK_SRC_XNNPACK_LOG_H_
+#ifndef XNNPACK_SRC_XNNPACK_LOG_H_
+#define XNNPACK_SRC_XNNPACK_LOG_H_
 
 #include <stdarg.h>
 #include <stdlib.h>
@@ -154,4 +154,4 @@ XNN_LOG_ARGUMENTS_FORMAT inline static void xnn_log_fatal_(const char* format,
 #define XNN_LOG_UNREACHABLE(...) XNN_UNREACHABLE
 #endif
 
-#endif  // THIRD_PARTY_XNNPACK_SRC_XNNPACK_LOG_H_
+#endif  // XNNPACK_SRC_XNNPACK_LOG_H_

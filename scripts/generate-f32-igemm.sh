@@ -395,5 +395,7 @@ tools/xngen src/f32-igemm/hvx-broadcast.c.in -D MR=3  -D NR=128 -o src/f32-igemm
 tools/xngen src/f32-igemm/hvx-broadcast.c.in -D MR=4  -D NR=128 -o src/f32-igemm/gen/f32-igemm-4x128-minmax-hvx-broadcast.c &
 tools/xngen src/f32-igemm/hvx-broadcast.c.in -D MR=5  -D NR=128 -o src/f32-igemm/gen/f32-igemm-5x128-minmax-hvx-broadcast.c &
 tools/xngen src/f32-igemm/hvx-broadcast.c.in -D MR=6  -D NR=128 -o src/f32-igemm/gen/f32-igemm-6x128-minmax-hvx-broadcast.c &
+tools/xngen src/f32-igemm/hvx-broadcast.c.in -D MR=7  -D NR=128 -o src/f32-igemm/gen/f32-igemm-7x128-minmax-hvx-broadcast.c &
+tools/xngen src/f32-igemm/hvx-broadcast.c.in -D MR=8  -D NR=128 -o src/f32-igemm/gen/f32-igemm-8x128-minmax-hvx-broadcast.c &
 
 wait

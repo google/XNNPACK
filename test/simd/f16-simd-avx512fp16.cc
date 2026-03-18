@@ -19,7 +19,6 @@
 #include <random>
 #include <vector>
 
-#include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include "src/xnnpack/isa-checks.h"
 #include "src/xnnpack/math.h"
@@ -31,7 +30,7 @@ namespace xnnpack {
 class F16SimdAVX512FP16Test : public ::testing::Test {
  protected:
   void SetUp() override {
-    TEST_REQUIRES_X86_AVX512FP16;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_avx512fp16);
     inputs_.resize(3 * xnn_simd_size_f16);
     output_.resize(xnn_simd_size_f16);
     std::uniform_real_distribution<float> f32dist(-10.0f, 10.0f);
@@ -67,7 +66,9 @@ TEST_F(F16SimdAVX512FP16Test, ConstF16FromFloat) {
 
 TEST_F(F16SimdAVX512FP16Test, SetZero) {
   xnn_storeu_f16(output_.data(), xnn_zero_f16());
-  EXPECT_THAT(ToFloat32(output_), testing::Each(testing::Eq(0.0f)));
+  for (size_t k = 0; k < xnn_simd_size_f16; k++) {
+    ASSERT_EQ(output_[k], xnn_float16_from_float(0.0f));
+  }
 }
 
 TEST_F(F16SimdAVX512FP16Test, Add) {
@@ -250,7 +251,7 @@ TEST_F(F16SimdAVX512FP16Test, Round) {
   std::vector<float> output_f32 = ToFloat32(output_);
   std::vector<float> inputs_f32 = ToFloat32(inputs_);
   for (size_t k = 0; k < xnn_simd_size_f16; k++) {
-    ASSERT_EQ(output_f32[k], std::round(inputs_f32[k]));
+    ASSERT_EQ(output_f32[k], std::rint(inputs_f32[k]));
   }
 }
 

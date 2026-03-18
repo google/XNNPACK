@@ -3,7 +3,8 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#pragma once
+#ifndef XNNPACK_TEST_OPERATORS_SLICE_NORMALIZATION_TESTER_H_
+#define XNNPACK_TEST_OPERATORS_SLICE_NORMALIZATION_TESTER_H_
 
 #include <algorithm>
 #include <cassert>
@@ -105,3 +106,5 @@ class SliceNormalizationTester {
   std::vector<size_t> expected_output_shape_;
   size_t expected_num_normalized_dims_;
 };
+
+#endif  // XNNPACK_TEST_OPERATORS_SLICE_NORMALIZATION_TESTER_H_

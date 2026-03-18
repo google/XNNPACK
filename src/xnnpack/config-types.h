@@ -3,7 +3,8 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#pragma once
+#ifndef XNNPACK_SRC_XNNPACK_CONFIG_TYPES_H_
+#define XNNPACK_SRC_XNNPACK_CONFIG_TYPES_H_
 
 #include <stdbool.h>
 #include <stddef.h>
@@ -60,11 +61,15 @@ struct xnn_binary_elementwise_config {
 struct xnn_unary_elementwise_config {
   xnn_vunary_ukernel_fn ukernel;
   xnn_init_unary_uparams_fn init;
+  uint32_t element_tile;
 };
 
 struct xnn_reduce_config {
   xnn_reduce_ukernel_fn ukernel;
   xnn_reduce_discontiguous_ukernel_fn rd_ukernel;
+  // TODO(b/405244706): remove once all the datatypes and reductions are
+  // supported.
+  xnn_reduce_discontiguous_ukernel_fn2 rd_ukernel2;
   uint32_t identity_value;
   union {
     xnn_init_reduce_params_fn reduce;
@@ -72,6 +77,7 @@ struct xnn_reduce_config {
     xnn_init_f16_default_params_fn f16;
   } init;
   xnn_update_reduce_params_fn update;
+  uint32_t rd_width;
 };
 
 struct xnn_xx_fill_config {
@@ -98,9 +104,21 @@ struct xnn_avgpool_config {
 };
 
 struct xnn_pack_lh_config {
-  xnn_pack_lh_ukernel_fn ukernel;
-  xnn_pack_lh_size_fn size_fn;
-  xnn_pack_lh_offset_fn offset_fn;
+  union {
+    struct {
+      xnn_pack_lh_ukernel_fn pack_lh_fn;
+      xnn_pack_lh_size_fn size_fn;
+      xnn_pack_lh_offset_fn offset_fn;
+    };
+    struct {
+      xnn_pack_lh_igemm_ukernel_fn pack_lh_for_igemm_fn;
+      xnn_pack_lh_igemm_size_fn size_for_igemm_fn;
+      xnn_pack_lh_igemm_offset_fn offset_for_igemm_fn;
+    };
+  };
+  uint32_t log2_input_element_size;
+  uint32_t log2_packed_element_size;
+  bool gemv_noop;
 };
 
 struct xnn_dwconv_config {
@@ -179,6 +197,10 @@ struct xnn_gemm_config {
   uint8_t planes;     // number of 4 bit planes (1 for legacy, 2 for unzip)
   uint8_t mr_packed;  // `mr` value used for packed left-hand operands.
   enum xnn_arch_flags arch;
+  uint8_t log2_input_element_size;
+  uint8_t log2_filter_element_size;
+  uint8_t log2_filter_element_bit_size;
+  uint8_t bias_element_size;
 };
 
 struct xnn_maxpool_config {
@@ -295,3 +317,5 @@ struct xnn_unpool_config {
 #ifdef __cplusplus
 }  // extern "C"
 #endif
+
+#endif  // XNNPACK_SRC_XNNPACK_CONFIG_TYPES_H_

@@ -12,11 +12,10 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "src/xnnpack/simd/f16-neonfp16arith.h"
-
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/math.h"
 #include "src/xnnpack/microparams.h"
+#include "src/xnnpack/simd/f16-neonfp16arith.h"
 
 
 static XNN_INLINE xnn_simd_f16_t xnn_setexp_f16(xnn_simd_f16_t vx) {
@@ -88,7 +87,7 @@ void xnn_f16_vexp_ukernel__neonfp16arith_poly_3_u8(
     output += xnn_simd_size_f16;
   }
   if XNN_UNLIKELY(batch != 0) {
-    xnn_simd_f16_t vx = xnn_load_tail_f16(input, batch >> XNN_LOG2_SIZEOF_HALF);
+    xnn_simd_f16_t vx = xnn_load_tail_f16(input, batch >> XNN_LOG2_SIZEOF_FLOAT16);
 
     // Clamp `vz_prime = x * log2(e)` to the maximum exponents [-127, 128].
     xnn_simd_f16_t vz_prime = xnn_mul_f16(vx, vlog2e);
@@ -109,7 +108,7 @@ void xnn_f16_vexp_ukernel__neonfp16arith_poly_3_u8(
     // Compute 2^z * 2^r.
     const xnn_simd_f16_t vy = xnn_mul_f16(v2z, v2r);
 
-    xnn_store_tail_f16(output, vy, batch >> XNN_LOG2_SIZEOF_HALF);
+    xnn_store_tail_f16(output, vy, batch >> XNN_LOG2_SIZEOF_FLOAT16);
   }
 }
 
@@ -200,7 +199,7 @@ void xnn_f16_vexp_ukernel__neonfp16arith_poly_3_u16(
     output += xnn_simd_size_f16;
   }
   if XNN_UNLIKELY(batch != 0) {
-    xnn_simd_f16_t vx = xnn_load_tail_f16(input, batch >> XNN_LOG2_SIZEOF_HALF);
+    xnn_simd_f16_t vx = xnn_load_tail_f16(input, batch >> XNN_LOG2_SIZEOF_FLOAT16);
 
     // Clamp `vz_prime = x * log2(e)` to the maximum exponents [-127, 128].
     xnn_simd_f16_t vz_prime = xnn_mul_f16(vx, vlog2e);
@@ -221,7 +220,7 @@ void xnn_f16_vexp_ukernel__neonfp16arith_poly_3_u16(
     // Compute 2^z * 2^r.
     const xnn_simd_f16_t vy = xnn_mul_f16(v2z, v2r);
 
-    xnn_store_tail_f16(output, vy, batch >> XNN_LOG2_SIZEOF_HALF);
+    xnn_store_tail_f16(output, vy, batch >> XNN_LOG2_SIZEOF_FLOAT16);
   }
 }
 
@@ -334,7 +333,7 @@ void xnn_f16_vexp_ukernel__neonfp16arith_poly_3_u32(
     output += xnn_simd_size_f16;
   }
   if XNN_UNLIKELY(batch != 0) {
-    xnn_simd_f16_t vx = xnn_load_tail_f16(input, batch >> XNN_LOG2_SIZEOF_HALF);
+    xnn_simd_f16_t vx = xnn_load_tail_f16(input, batch >> XNN_LOG2_SIZEOF_FLOAT16);
 
     // Clamp `vz_prime = x * log2(e)` to the maximum exponents [-127, 128].
     xnn_simd_f16_t vz_prime = xnn_mul_f16(vx, vlog2e);
@@ -355,7 +354,7 @@ void xnn_f16_vexp_ukernel__neonfp16arith_poly_3_u32(
     // Compute 2^z * 2^r.
     const xnn_simd_f16_t vy = xnn_mul_f16(v2z, v2r);
 
-    xnn_store_tail_f16(output, vy, batch >> XNN_LOG2_SIZEOF_HALF);
+    xnn_store_tail_f16(output, vy, batch >> XNN_LOG2_SIZEOF_FLOAT16);
   }
 }
 

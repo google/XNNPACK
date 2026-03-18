@@ -33,10 +33,10 @@ namespace xnnpack {
 class S32SimdAVX2Test : public ::testing::Test {
  protected:
   void SetUp() override {
-    TEST_REQUIRES_X86_AVX2;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_avx2);
     inputs_.resize(3 * xnn_simd_size_s32);
     output_.resize(xnn_simd_size_s32);
-    std::uniform_int_distribution<int32_t> s32dist(-10000, 10000);
+    std::uniform_int_distribution<int> s32dist(-10000, 10000);
     std::generate(inputs_.begin(), inputs_.end(),
                   [&]() { return s32dist(rng_); });
   }

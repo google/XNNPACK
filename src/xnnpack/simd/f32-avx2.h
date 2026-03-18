@@ -4,8 +4,8 @@
 // LICENSE file in the root directory of this source tree.
 //
 
-#ifndef __XNNPACK_SRC_XNNPACK_SIMD_F32_AVX2_H_
-#define __XNNPACK_SRC_XNNPACK_SIMD_F32_AVX2_H_
+#ifndef XNNPACK_SRC_XNNPACK_SIMD_F32_AVX2_H_
+#define XNNPACK_SRC_XNNPACK_SIMD_F32_AVX2_H_
 
 #include <stdint.h>
 
@@ -69,9 +69,9 @@ static XNN_INLINE xnn_simd_f32_t xnn_cmpeq_f32(xnn_simd_f32_t a,
 
 static XNN_INLINE xnn_simd_f32_t xnn_cmpneq_f32(xnn_simd_f32_t a,
                                                 xnn_simd_f32_t b) {
-  return _mm256_castsi256_ps(_mm256_xor_epi32(
+  return _mm256_castsi256_ps(_mm256_xor_si256(
       _mm256_cmpeq_epi32(_mm256_castps_si256(a), _mm256_castps_si256(a)),
       _mm256_cmpeq_epi32(_mm256_castps_si256(a), _mm256_castps_si256(b))));
 }
 
-#endif  // __XNNPACK_SRC_XNNPACK_SIMD_F32_AVX2_H_
+#endif  // XNNPACK_SRC_XNNPACK_SIMD_F32_AVX2_H_

@@ -1,4 +1,4 @@
-// Copyright 2022 Google LLC
+// Copyright 2022-2025 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
@@ -9,7 +9,6 @@
 #include <functional>
 #include <limits>
 #include <random>
-#include <vector>
 
 #include "bench/gemm.h"
 #include "bench/utils.h"
@@ -17,18 +16,20 @@
 #include "src/xnnpack/buffer.h"
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/gemm.h"
+#include "src/xnnpack/hardware-config.h"
 #include "src/xnnpack/math.h"
 #include "src/xnnpack/microfnptr.h"
 #include "src/xnnpack/microparams-init.h"
 #include "src/xnnpack/pack.h"
+#include "test/replicable_random_device.h"
 #include <benchmark/benchmark.h>
 
 static void bf16_gemm(benchmark::State& state,
                       xnn_bf16_gemm_minmax_ukernel_fn gemm, size_t mr,
                       size_t nr, size_t kr, size_t sr,
                       xnn_init_bf16_minmax_params_fn init_params,
-                      benchmark::utils::IsaCheckFunction isa_check = nullptr) {
-  if (isa_check != nullptr && !isa_check(state)) {
+                      uint64_t arch_flags = 0) {
+  if (!benchmark::utils::CheckArchFlags(state, arch_flags)) {
     return;
   }
 
@@ -39,8 +40,7 @@ static void bf16_gemm(benchmark::State& state,
   const size_t nc_stride = benchmark::utils::RoundUp(nc, nr);
   const size_t kc_stride = benchmark::utils::RoundUp(kc, kr * sr);
 
-  std::random_device random_device;
-  auto rng = std::mt19937(random_device());
+  xnnpack::ReplicableRandomDevice rng;
   auto f32rng =
       std::bind(std::uniform_real_distribution<float>(), std::ref(rng));
 
@@ -112,95 +112,85 @@ static void bf16_gemm(benchmark::State& state,
 }
 
 #if XNN_ENABLE_ARM_BF16 && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
-static void bf16_gemm_1x8c2__neonbf16_bfdot_lane_ld128(benchmark::State& state,
-                                                       const char* net) {
+static void bf16_gemm_1x8c2__neonbf16_bfdot_lane_ld128(
+    benchmark::State& state) {
   bf16_gemm(state,
             xnn_bf16_gemm_minmax_ukernel_1x8c2__neonbf16_bfdot_lane_ld128, 1, 8,
             2, 1, xnn_init_bf16_minmax_scalar_params,
-            benchmark::utils::CheckNEONBF16);
+            xnn_arch_arm_neon_bf16);
 }
-static void bf16_gemm_4x8c2__neonbf16_bfdot_lane_ld128(benchmark::State& state,
-                                                       const char* net) {
+static void bf16_gemm_4x8c2__neonbf16_bfdot_lane_ld128(
+    benchmark::State& state) {
   bf16_gemm(state,
             xnn_bf16_gemm_minmax_ukernel_4x8c2__neonbf16_bfdot_lane_ld128, 4, 8,
             2, 1, xnn_init_bf16_minmax_scalar_params,
-            benchmark::utils::CheckNEONBF16);
+            xnn_arch_arm_neon_bf16);
 }
-static void bf16_gemm_5x8c2__neonbf16_bfdot_lane_ld128(benchmark::State& state,
-                                                       const char* net) {
+static void bf16_gemm_5x8c2__neonbf16_bfdot_lane_ld128(
+    benchmark::State& state) {
   bf16_gemm(state,
             xnn_bf16_gemm_minmax_ukernel_5x8c2__neonbf16_bfdot_lane_ld128, 5, 8,
             2, 1, xnn_init_bf16_minmax_scalar_params,
-            benchmark::utils::CheckNEONBF16);
+            xnn_arch_arm_neon_bf16);
 }
-static void bf16_gemm_6x8c2__neonbf16_bfdot_lane_ld128(benchmark::State& state,
-                                                       const char* net) {
+static void bf16_gemm_6x8c2__neonbf16_bfdot_lane_ld128(
+    benchmark::State& state) {
   bf16_gemm(state,
             xnn_bf16_gemm_minmax_ukernel_6x8c2__neonbf16_bfdot_lane_ld128, 6, 8,
             2, 1, xnn_init_bf16_minmax_scalar_params,
-            benchmark::utils::CheckNEONBF16);
+            xnn_arch_arm_neon_bf16);
 }
 
-static void bf16_gemm_1x4c8__neonbf16_bfdot(benchmark::State& state,
-                                            const char* net) {
+static void bf16_gemm_1x4c8__neonbf16_bfdot(benchmark::State& state) {
   bf16_gemm(state, xnn_bf16_gemm_minmax_ukernel_1x4c8__neonbf16_bfdot, 1, 4, 8,
             1, xnn_init_bf16_minmax_scalar_params,
-            benchmark::utils::CheckNEONBF16);
+            xnn_arch_arm_neon_bf16);
 }
-static void bf16_gemm_2x4c8__neonbf16_bfdot(benchmark::State& state,
-                                            const char* net) {
+static void bf16_gemm_2x4c8__neonbf16_bfdot(benchmark::State& state) {
   bf16_gemm(state, xnn_bf16_gemm_minmax_ukernel_2x4c8__neonbf16_bfdot, 2, 4, 8,
             1, xnn_init_bf16_minmax_scalar_params,
-            benchmark::utils::CheckNEONBF16);
+            xnn_arch_arm_neon_bf16);
 }
-static void bf16_gemm_3x4c8__neonbf16_bfdot(benchmark::State& state,
-                                            const char* net) {
+static void bf16_gemm_3x4c8__neonbf16_bfdot(benchmark::State& state) {
   bf16_gemm(state, xnn_bf16_gemm_minmax_ukernel_3x4c8__neonbf16_bfdot, 3, 4, 8,
             1, xnn_init_bf16_minmax_scalar_params,
-            benchmark::utils::CheckNEONBF16);
+            xnn_arch_arm_neon_bf16);
 }
-static void bf16_gemm_4x4c8__neonbf16_bfdot(benchmark::State& state,
-                                            const char* net) {
+static void bf16_gemm_4x4c8__neonbf16_bfdot(benchmark::State& state) {
   bf16_gemm(state, xnn_bf16_gemm_minmax_ukernel_4x4c8__neonbf16_bfdot, 4, 4, 8,
             1, xnn_init_bf16_minmax_scalar_params,
-            benchmark::utils::CheckNEONBF16);
+            xnn_arch_arm_neon_bf16);
 }
-static void bf16_gemm_5x4c8__neonbf16_bfdot(benchmark::State& state,
-                                            const char* net) {
+static void bf16_gemm_5x4c8__neonbf16_bfdot(benchmark::State& state) {
   bf16_gemm(state, xnn_bf16_gemm_minmax_ukernel_5x4c8__neonbf16_bfdot, 5, 4, 8,
             1, xnn_init_bf16_minmax_scalar_params,
-            benchmark::utils::CheckNEONBF16);
+            xnn_arch_arm_neon_bf16);
 }
 
-static void bf16_gemm_1x4c8__neonbf16_bfmlal(benchmark::State& state,
-                                             const char* net) {
+static void bf16_gemm_1x4c8__neonbf16_bfmlal(benchmark::State& state) {
   bf16_gemm(state, xnn_bf16_gemm_minmax_ukernel_1x4c8__neonbf16_bfmlal, 1, 4, 8,
             1, xnn_init_bf16_minmax_scalar_params,
-            benchmark::utils::CheckNEONBF16);
+            xnn_arch_arm_neon_bf16);
 }
-static void bf16_gemm_2x4c8__neonbf16_bfmlal(benchmark::State& state,
-                                             const char* net) {
+static void bf16_gemm_2x4c8__neonbf16_bfmlal(benchmark::State& state) {
   bf16_gemm(state, xnn_bf16_gemm_minmax_ukernel_2x4c8__neonbf16_bfmlal, 2, 4, 8,
             1, xnn_init_bf16_minmax_scalar_params,
-            benchmark::utils::CheckNEONBF16);
+            xnn_arch_arm_neon_bf16);
 }
-static void bf16_gemm_3x4c8__neonbf16_bfmlal(benchmark::State& state,
-                                             const char* net) {
+static void bf16_gemm_3x4c8__neonbf16_bfmlal(benchmark::State& state) {
   bf16_gemm(state, xnn_bf16_gemm_minmax_ukernel_3x4c8__neonbf16_bfmlal, 3, 4, 8,
             1, xnn_init_bf16_minmax_scalar_params,
-            benchmark::utils::CheckNEONBF16);
+            xnn_arch_arm_neon_bf16);
 }
-static void bf16_gemm_4x4c8__neonbf16_bfmlal(benchmark::State& state,
-                                             const char* net) {
+static void bf16_gemm_4x4c8__neonbf16_bfmlal(benchmark::State& state) {
   bf16_gemm(state, xnn_bf16_gemm_minmax_ukernel_4x4c8__neonbf16_bfmlal, 4, 4, 8,
             1, xnn_init_bf16_minmax_scalar_params,
-            benchmark::utils::CheckNEONBF16);
+            xnn_arch_arm_neon_bf16);
 }
-static void bf16_gemm_5x4c8__neonbf16_bfmlal(benchmark::State& state,
-                                             const char* net) {
+static void bf16_gemm_5x4c8__neonbf16_bfmlal(benchmark::State& state) {
   bf16_gemm(state, xnn_bf16_gemm_minmax_ukernel_5x4c8__neonbf16_bfmlal, 5, 4, 8,
             1, xnn_init_bf16_minmax_scalar_params,
-            benchmark::utils::CheckNEONBF16);
+            xnn_arch_arm_neon_bf16);
 }
 
 BENCHMARK_GEMM(bf16_gemm_1x8c2__neonbf16_bfdot_lane_ld128)
@@ -222,61 +212,51 @@ BENCHMARK_GEMM(bf16_gemm_5x4c8__neonbf16_bfmlal)
 #endif  // XNN_ENABLE_ARM_BF16 && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
-static void bf16_gemm_1x4c8__neonfma_zip(benchmark::State& state,
-                                         const char* net) {
+static void bf16_gemm_1x4c8__neonfma_zip(benchmark::State& state) {
   bf16_gemm(state, xnn_bf16_gemm_minmax_ukernel_1x4c8__neonfma_zip, 1, 4, 8, 1,
-            xnn_init_bf16_minmax_scalar_params, benchmark::utils::CheckNEONFMA);
+            xnn_init_bf16_minmax_scalar_params, xnn_arch_arm_neon_fma);
 }
-static void bf16_gemm_2x4c8__neonfma_zip(benchmark::State& state,
-                                         const char* net) {
+static void bf16_gemm_2x4c8__neonfma_zip(benchmark::State& state) {
   bf16_gemm(state, xnn_bf16_gemm_minmax_ukernel_2x4c8__neonfma_zip, 2, 4, 8, 1,
-            xnn_init_bf16_minmax_scalar_params, benchmark::utils::CheckNEONFMA);
+            xnn_init_bf16_minmax_scalar_params, xnn_arch_arm_neon_fma);
 }
-static void bf16_gemm_3x4c8__neonfma_zip(benchmark::State& state,
-                                         const char* net) {
+static void bf16_gemm_3x4c8__neonfma_zip(benchmark::State& state) {
   bf16_gemm(state, xnn_bf16_gemm_minmax_ukernel_3x4c8__neonfma_zip, 3, 4, 8, 1,
-            xnn_init_bf16_minmax_scalar_params, benchmark::utils::CheckNEONFMA);
+            xnn_init_bf16_minmax_scalar_params, xnn_arch_arm_neon_fma);
 }
-static void bf16_gemm_4x4c8__neonfma_zip(benchmark::State& state,
-                                         const char* net) {
+static void bf16_gemm_4x4c8__neonfma_zip(benchmark::State& state) {
   bf16_gemm(state, xnn_bf16_gemm_minmax_ukernel_4x4c8__neonfma_zip, 4, 4, 8, 1,
-            xnn_init_bf16_minmax_scalar_params, benchmark::utils::CheckNEONFMA);
+            xnn_init_bf16_minmax_scalar_params, xnn_arch_arm_neon_fma);
 }
-static void bf16_gemm_5x4c8__neonfma_zip(benchmark::State& state,
-                                         const char* net) {
+static void bf16_gemm_5x4c8__neonfma_zip(benchmark::State& state) {
   bf16_gemm(state, xnn_bf16_gemm_minmax_ukernel_5x4c8__neonfma_zip, 5, 4, 8, 1,
-            xnn_init_bf16_minmax_scalar_params, benchmark::utils::CheckNEONFMA);
+            xnn_init_bf16_minmax_scalar_params, xnn_arch_arm_neon_fma);
 }
 
-static void bf16_gemm_1x4c8__neonfma_shland(benchmark::State& state,
-                                            const char* net) {
+static void bf16_gemm_1x4c8__neonfma_shland(benchmark::State& state) {
   bf16_gemm(state, xnn_bf16_gemm_minmax_ukernel_1x4c8__neonfma_shland, 1, 4, 8,
             1, xnn_init_bf16_minmax_scalar_params,
-            benchmark::utils::CheckNEONFMA);
+            xnn_arch_arm_neon_fma);
 }
-static void bf16_gemm_2x4c8__neonfma_shland(benchmark::State& state,
-                                            const char* net) {
+static void bf16_gemm_2x4c8__neonfma_shland(benchmark::State& state) {
   bf16_gemm(state, xnn_bf16_gemm_minmax_ukernel_2x4c8__neonfma_shland, 2, 4, 8,
             1, xnn_init_bf16_minmax_scalar_params,
-            benchmark::utils::CheckNEONFMA);
+            xnn_arch_arm_neon_fma);
 }
-static void bf16_gemm_3x4c8__neonfma_shland(benchmark::State& state,
-                                            const char* net) {
+static void bf16_gemm_3x4c8__neonfma_shland(benchmark::State& state) {
   bf16_gemm(state, xnn_bf16_gemm_minmax_ukernel_3x4c8__neonfma_shland, 3, 4, 8,
             1, xnn_init_bf16_minmax_scalar_params,
-            benchmark::utils::CheckNEONFMA);
+            xnn_arch_arm_neon_fma);
 }
-static void bf16_gemm_4x4c8__neonfma_shland(benchmark::State& state,
-                                            const char* net) {
+static void bf16_gemm_4x4c8__neonfma_shland(benchmark::State& state) {
   bf16_gemm(state, xnn_bf16_gemm_minmax_ukernel_4x4c8__neonfma_shland, 4, 4, 8,
             1, xnn_init_bf16_minmax_scalar_params,
-            benchmark::utils::CheckNEONFMA);
+            xnn_arch_arm_neon_fma);
 }
-static void bf16_gemm_5x4c8__neonfma_shland(benchmark::State& state,
-                                            const char* net) {
+static void bf16_gemm_5x4c8__neonfma_shland(benchmark::State& state) {
   bf16_gemm(state, xnn_bf16_gemm_minmax_ukernel_5x4c8__neonfma_shland, 5, 4, 8,
             1, xnn_init_bf16_minmax_scalar_params,
-            benchmark::utils::CheckNEONFMA);
+            xnn_arch_arm_neon_fma);
 }
 
 BENCHMARK_GEMM(bf16_gemm_1x4c8__neonfma_zip)

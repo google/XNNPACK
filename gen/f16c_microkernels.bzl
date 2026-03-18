@@ -1,15 +1,17 @@
-"""
-Microkernel filenames lists for f16c.
-
-Auto-generated file. Do not edit!
-  Generator: tools/update-microkernels.py
-"""
+#
+# Microkernel filenames lists for f16c.
+#
+# Auto-generated file. Do not edit!
+#   Generator: tools/update-microkernels.py
+#
 
 PROD_F16C_MICROKERNEL_SRCS = [
     "src/f16-avgpool/gen/f16-avgpool-9p-minmax-f16c.c",
     "src/f16-f32-vcvt/gen/f16-f32-vcvt-f16c-u16.c",
-    "src/f16-f32acc-rdsum/gen/f16-f32acc-rdsum-7p7x-f16c-c32.c",
+    "src/f16-f32acc-rdsum/gen/f16-f32acc-rdsum-7p7x-minmax-f16c-u32.c",
+    "src/f16-f32acc-rdsum2/gen/f16-f32acc-rdsum2-7p7x-f16c.c",
     "src/f16-f32acc-rsum/gen/f16-f32acc-rsum-f16c-u32-acc4.c",
+    "src/f16-f32acc-rsum2/gen/f16-f32acc-rsum2-f16c.c",
     "src/f16-rminmax/f16-rmax-f16c-u32.c",
     "src/f16-vbinary/gen/f16-vadd-f16c-u16.c",
     "src/f16-vbinary/gen/f16-vaddc-f16c-u16.c",
@@ -46,9 +48,9 @@ PROD_F16C_MICROKERNEL_SRCS = [
 
 NON_PROD_F16C_MICROKERNEL_SRCS = [
     "src/f16-f32-vcvt/gen/f16-f32-vcvt-f16c-u8.c",
-    "src/f16-f32acc-rdsum/gen/f16-f32acc-rdsum-7p7x-f16c-c16.c",
-    "src/f16-f32acc-rdsum/gen/f16-f32acc-rdsum-7p7x-f16c-c64.c",
-    "src/f16-f32acc-rdsum/gen/f16-f32acc-rdsum-7p7x-f16c-c128.c",
+    "src/f16-f32acc-rdsum/gen/f16-f32acc-rdsum-7p7x-minmax-f16c-u16.c",
+    "src/f16-f32acc-rdsum/gen/f16-f32acc-rdsum-7p7x-minmax-f16c-u64.c",
+    "src/f16-f32acc-rdsum/gen/f16-f32acc-rdsum-7p7x-minmax-f16c-u128.c",
     "src/f16-f32acc-rsum/gen/f16-f32acc-rsum-f16c-u8.c",
     "src/f16-f32acc-rsum/gen/f16-f32acc-rsum-f16c-u16-acc2.c",
     "src/f16-f32acc-rsum/gen/f16-f32acc-rsum-f16c-u24-acc3.c",

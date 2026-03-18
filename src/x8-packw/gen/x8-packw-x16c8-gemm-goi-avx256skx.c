@@ -15,8 +15,10 @@
 
 #include <immintrin.h>
 
+#include "src/xnnpack/common.h"
 #include "src/xnnpack/packw.h"
 #include "src/xnnpack/unaligned.h"
+
 
 XNN_INLINE static uint64_t safe_load_u64(const void* address, size_t n) {
   uint64_t value = 0;

@@ -54,7 +54,7 @@ xnnpack_cxx_library(
     testonly = True,
     hdrs = ["operator-test-utils.h"],
     # TODO: This shouldn't be required outside of here.
-    visibility = ["//:__subpackages__"],
+    visibility = ["//visibility:private"],
     deps = ["//test:replicable_random_device"],
 )
 
@@ -117,7 +117,9 @@ xnnpack_unit_test(
         "batch-matrix-multiply-operator-tester.h",
     ],
     shard_count = 5,
-    deps = OPERATOR_TEST_DEPS,
+    deps = OPERATOR_TEST_DEPS + [
+        "//:requantization",
+    ],
 )
 
 xnnpack_unit_test(
@@ -145,7 +147,7 @@ xnnpack_unit_test(
     srcs = [
         "convert-nc.cc",
     ],
-    deps = OPERATOR_TEST_DEPS,
+    deps = OPERATOR_TEST_DEPS + ["//:subgraph_h"],
 )
 
 xnnpack_unit_test(
@@ -158,6 +160,7 @@ xnnpack_unit_test(
     shard_count = 10,
     deps = OPERATOR_TEST_DEPS + [
         ":convolution_test_helpers",
+        "//:operator_h",
     ],
 )
 
@@ -171,6 +174,7 @@ xnnpack_unit_test(
     shard_count = 10,
     deps = OPERATOR_TEST_DEPS + [
         ":convolution_test_helpers",
+        "//:operator_h",
     ],
 )
 
@@ -203,6 +207,7 @@ xnnpack_unit_test(
     shard_count = 10,
     deps = OPERATOR_TEST_DEPS + [
         ":convolution_test_helpers",
+        "//:operator_h",
     ],
 )
 
@@ -259,6 +264,7 @@ xnnpack_unit_test(
     srcs = [
         "reduce-nd.cc",
     ],
+    shard_count = 5,
     deps = OPERATOR_TEST_DEPS + [
         "//:requantization",
     ],

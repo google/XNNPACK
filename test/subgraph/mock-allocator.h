@@ -3,7 +3,8 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#pragma once
+#ifndef XNNPACK_TEST_SUBGRAPH_MOCK_ALLOCATOR_H_
+#define XNNPACK_TEST_SUBGRAPH_MOCK_ALLOCATOR_H_
 
 #include <cstddef>
 #include <cstring>
@@ -94,3 +95,5 @@ inline void RestoreDefaultAllocator(MockAllocator* mock_allocator) {
 }
 
 }  // namespace xnnpack
+
+#endif  // XNNPACK_TEST_SUBGRAPH_MOCK_ALLOCATOR_H_

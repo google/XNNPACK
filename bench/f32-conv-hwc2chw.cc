@@ -1,4 +1,4 @@
-// Copyright 2019 Google LLC
+// Copyright 2019-2025 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
@@ -21,13 +21,14 @@
 #include "src/xnnpack/microfnptr.h"
 #include "src/xnnpack/microparams-init.h"
 #include "src/xnnpack/pack.h"
+#include "test/replicable_random_device.h"
 #include <benchmark/benchmark.h>
 
 static void f32_conv_hwc2chw(
     benchmark::State& state, xnn_f32_conv_hwc2chw_ukernel_fn conv,
     xnn_init_f32_minmax_params_fn init_params, uint32_t output_channels_tile,
-    benchmark::utils::IsaCheckFunction isa_check = nullptr) {
-  if (isa_check && !isa_check(state)) {
+    uint64_t arch_flags = 0) {
+  if (!benchmark::utils::CheckArchFlags(state, arch_flags)) {
     return;
   }
 
@@ -35,8 +36,7 @@ static void f32_conv_hwc2chw(
   const size_t input_width = state.range(1);
   const size_t output_channels = state.range(2);
 
-  std::random_device random_device;
-  auto rng = std::mt19937(random_device());
+  xnnpack::ReplicableRandomDevice rng;
   auto f32rng = std::bind(std::uniform_real_distribution<float>(0.0f, 1.0f),
                           std::ref(rng));
 
@@ -117,25 +117,23 @@ static void f32_conv_hwc2chw(
 
 #if XNN_ARCH_ARM64
 static void f32_conv_hwc2chw_3x3s2p1c3x4__aarch64_neonfma_2x2(
-    benchmark::State& state, const char* net) {
+    benchmark::State& state) {
   f32_conv_hwc2chw(
       state, xnn_f32_conv_hwc2chw_ukernel_3x3s2p1c3x4__aarch64_neonfma_2x2,
       xnn_init_f32_minmax_scalar_params, 4 /* output channel tile */,
-      benchmark::utils::CheckNEONFMA);
+      xnn_arch_arm_neon_fma);
 }
 
 BENCHMARK_DCONV(f32_conv_hwc2chw_3x3s2p1c3x4__aarch64_neonfma_2x2);
 #endif
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-static void f32_conv_hwc2chw_3x3s2p1c3x4__sse_1x1(benchmark::State& state,
-                                                  const char* net) {
+static void f32_conv_hwc2chw_3x3s2p1c3x4__sse_1x1(benchmark::State& state) {
   f32_conv_hwc2chw(state, xnn_f32_conv_hwc2chw_ukernel_3x3s2p1c3x4__sse_1x1,
                    xnn_init_f32_minmax_scalar_params,
                    4 /* output channel tile */);
 }
-static void f32_conv_hwc2chw_3x3s2p1c3x4__sse_2x2(benchmark::State& state,
-                                                  const char* net) {
+static void f32_conv_hwc2chw_3x3s2p1c3x4__sse_2x2(benchmark::State& state) {
   f32_conv_hwc2chw(state, xnn_f32_conv_hwc2chw_ukernel_3x3s2p1c3x4__sse_2x2,
                    xnn_init_f32_minmax_scalar_params,
                    4 /* output channel tile */);
@@ -146,8 +144,8 @@ BENCHMARK_DCONV(f32_conv_hwc2chw_3x3s2p1c3x4__sse_2x2);
 #endif
 
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-static void f32_conv_hwc2chw_3x3s2p1c3x4__wasmsimd_2x2(benchmark::State& state,
-                                                       const char* net) {
+static void f32_conv_hwc2chw_3x3s2p1c3x4__wasmsimd_2x2(
+    benchmark::State& state) {
   f32_conv_hwc2chw(
       state, xnn_f32_conv_hwc2chw_ukernel_3x3s2p1c3x4__wasmsimd_2x2,
       xnn_init_f32_minmax_scalar_params, 4 /* output channel tile */);
@@ -157,25 +155,23 @@ BENCHMARK_DCONV(f32_conv_hwc2chw_3x3s2p1c3x4__wasmsimd_2x2);
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 #if XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
-static void f32_conv_hwc2chw_3x3s2p1c3x2v__rvv_1x1(benchmark::State& state,
-                                                   const char* net) {
+static void f32_conv_hwc2chw_3x3s2p1c3x2v__rvv_1x1(benchmark::State& state) {
   f32_conv_hwc2chw(state, xnn_f32_conv_hwc2chw_ukernel_3x3s2p1c3x2v__rvv_1x1,
                    xnn_init_f32_minmax_scalar_params,
                    2 * xnn_init_hardware_config()->vlenb / sizeof(float) /* output channel tile */);
 }
 
-static void f32_conv_hwc2chw_3x3s2p1c3x2v__rvv_2x1(benchmark::State& state,
-                                                   const char* net) {
+static void f32_conv_hwc2chw_3x3s2p1c3x2v__rvv_2x1(benchmark::State& state) {
   f32_conv_hwc2chw(state, xnn_f32_conv_hwc2chw_ukernel_3x3s2p1c3x2v__rvv_2x1,
                    xnn_init_f32_minmax_scalar_params,
                    2 * xnn_init_hardware_config()->vlenb / sizeof(float) /* output channel tile */);
 }
 
-static void f32_conv_hwc2chw_3x3s2p1c3x2v__rvv_2x2(benchmark::State& state,
-                                                   const char* net) {
-    f32_conv_hwc2chw(state, xnn_f32_conv_hwc2chw_ukernel_3x3s2p1c3x2v__rvv_2x2,
+static void f32_conv_hwc2chw_3x3s2p1c3x2v__rvv_2x2(benchmark::State& state) {
+  f32_conv_hwc2chw(state, xnn_f32_conv_hwc2chw_ukernel_3x3s2p1c3x2v__rvv_2x2,
                    xnn_init_f32_minmax_scalar_params,
-                   2 * xnn_init_hardware_config()->vlenb / sizeof(float) /* output channel tile */);
+                   2 * xnn_init_hardware_config()->vlenb /
+                       sizeof(float) /* output channel tile */);
 }
 
 BENCHMARK_DCONV(f32_conv_hwc2chw_3x3s2p1c3x2v__rvv_1x1);
@@ -183,8 +179,7 @@ BENCHMARK_DCONV(f32_conv_hwc2chw_3x3s2p1c3x2v__rvv_2x1);
 BENCHMARK_DCONV(f32_conv_hwc2chw_3x3s2p1c3x2v__rvv_2x2);
 #endif  // XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
 
-static void f32_conv_hwc2chw_3x3s2p1c3x4__scalar_1x1(benchmark::State& state,
-                                                     const char* net) {
+static void f32_conv_hwc2chw_3x3s2p1c3x4__scalar_1x1(benchmark::State& state) {
   f32_conv_hwc2chw(state, xnn_f32_conv_hwc2chw_ukernel_3x3s2p1c3x4__scalar_1x1,
                    xnn_init_f32_minmax_scalar_params,
                    4 /* output channel tile */);

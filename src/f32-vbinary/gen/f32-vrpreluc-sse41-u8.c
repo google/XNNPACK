@@ -9,11 +9,13 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
 
 #include <smmintrin.h>
 
 #include "src/xnnpack/common.h"
-#include "src/xnnpack/intrinsics-polyfill.h"
+#include "src/xnnpack/microparams.h"
 #include "src/xnnpack/vbinary.h"
 
 
@@ -33,7 +35,7 @@ void xnn_f32_vrpreluc_ukernel__sse41_u8(
   const __m128 vb = _mm_load1_ps(input_b);
 
   for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
-    const __m128 va0 = _mm_loadu_ps(input_a);
+    const __m128 va0 = _mm_loadu_ps(input_a + 0);
     const __m128 va1 = _mm_loadu_ps(input_a + 4);
     input_a += 8;
 
@@ -43,7 +45,7 @@ void xnn_f32_vrpreluc_ukernel__sse41_u8(
     vacc0 = _mm_blendv_ps(vb, vacc0, vb);
     vacc1 = _mm_blendv_ps(vb, vacc1, vb);
 
-    _mm_storeu_ps(output, vacc0);
+    _mm_storeu_ps(output + 0, vacc0);
     _mm_storeu_ps(output + 4, vacc1);
     output += 8;
   }

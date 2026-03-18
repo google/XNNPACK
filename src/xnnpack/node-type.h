@@ -3,7 +3,8 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#pragma once
+#ifndef XNNPACK_SRC_XNNPACK_NODE_TYPE_H_
+#define XNNPACK_SRC_XNNPACK_NODE_TYPE_H_
 
 #include "src/xnnpack/common.h"
 
@@ -14,7 +15,7 @@ extern "C" {
 enum xnn_node_type {
 #define XNN_ENUM_ITEM_0(enum_name, enum_string) enum_name = 0,
 #define XNN_ENUM_ITEM(enum_name, enum_string) enum_name,
-#include "src/xnnpack/node-type-defs.h"
+#include "src/xnnpack/node-type-defs.inc"
 #undef XNN_ENUM_ITEM_0
 #undef XNN_ENUM_ITEM
 };
@@ -30,3 +31,5 @@ XNN_INTERNAL const char* xnn_node_type_to_string(enum xnn_node_type type);
 #ifdef __cplusplus
 }  // extern "C"
 #endif
+
+#endif  // XNNPACK_SRC_XNNPACK_NODE_TYPE_H_

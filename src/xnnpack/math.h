@@ -6,7 +6,8 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#pragma once
+#ifndef XNNPACK_SRC_XNNPACK_MATH_H_
+#define XNNPACK_SRC_XNNPACK_MATH_H_
 
 #include <assert.h>
 #include <stdbool.h>
@@ -21,6 +22,11 @@
 
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/fp16.h"
+
+#if XNN_COMPILER_HAS_FEATURE(memory_sanitizer)
+  #include <sanitizer/msan_interface.h>
+  #include <math.h>
+#endif
 
 // stdlib.h from Windows 10 SDK defines min & max macros.
 // Undefine them before defining the corresponding functions.
@@ -467,16 +473,36 @@ XNN_INLINE static uint16_t math_cvt_bf16_fp32(float x) {
   return bits.as_uint32 >> 16;
 }
 
+#if XNN_COMPILER_HAS_FEATURE(memory_sanitizer)
+XNN_INLINE static int32_t math_round_f32_to_s32(float x) {
+  // msan flags lrintf(x) as use of uninitialized memory if x is uninitialized,
+  // but we want to use lrintf like we do SIMD instructions, which pass through
+  // uninitialized memory without error (but maintain the uninitialized-ness).
+  // This wrapper implements that behavior for lrintf.
+  int32_t shadow = __msan_test_shadow(&x, sizeof(x));
+  __msan_unpoison(&x, sizeof(x));
+  int32_t result = lrintf(x);
+  if (shadow != -1) {
+    __msan_poison(&result, sizeof(result));
+  }
+  return result;
+}
+#else
+// This is a workaround for the fact that we can't include math.h here.
+#define math_round_f32_to_s32(x) ((int32_t) lrintf(x))
+#endif
+
 #ifdef __cplusplus
 }  // extern "C"
 #endif
 
 // We want to use _Float16 if the compiler supports it fully, but it's
 // tricky to do this detection; there are compiler versions that define the
-// type in broken ways. We're only going to bother using it if the support is
+// type in broken ways. XNNPack only supports FP16 if the compiler and cpu are
 // known to be at least a robust f16<->f32 conversion, which generally means a
-// recent version of Clang or GCC, x86 or ARM or RISC-V architectures, and
-// (in some cases) the right architecture flags specified on the command line.
+// recent version of Clang or GCC or Visual C, x86 or ARM or RISC-V or
+// Web Assembly or Hexagon architectures, and the right architecture flags
+// specified on the command line.
 
 #ifndef XNN_HAVE_FLOAT16
 
@@ -500,7 +526,7 @@ XNN_INLINE static uint16_t math_cvt_bf16_fp32(float x) {
 #define XNN_HAVE_FLOAT16 1
 #endif
 
-#if defined(__riscv) && defined(__riscv_zvfh) && __clang__ >= 1600
+#if defined(__riscv) && defined(__riscv_zvfh)
 #define XNN_HAVE_FLOAT16 1
 #endif
 
@@ -611,15 +637,17 @@ XNN_INLINE static xnn_float16 xnn_float16_zero() {
 XNN_INLINE static bool xnn_float16_is_zero(xnn_float16 f) {
   // Check for +/- zero (0x0000/0x8000). uint16 overflow is well defined to wrap
   // around.
-  return xnn_float16_to_bits(f) * 2 == 0;
+  return (uint16_t) (xnn_float16_to_bits(f) * 2) == 0;
 }
 
 XNN_INLINE static bool xnn_bfloat16_is_zero(xnn_bfloat16 f) {
   // Check for +/- zero (0x0000/0x8000). uint16 overflow is well defined to wrap
   // around.
-  return xnn_bfloat16_to_bits(f) * 2 == 0;
+  return (uint16_t) (xnn_bfloat16_to_bits(f) * 2) == 0;
 }
 
 #ifdef __cplusplus
 }  // extern "C"
 #endif
+
+#endif  // XNNPACK_SRC_XNNPACK_MATH_H_

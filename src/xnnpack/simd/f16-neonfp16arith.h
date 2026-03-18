@@ -4,8 +4,8 @@
 // LICENSE file in the root directory of this source tree.
 //
 
-#ifndef THIRD_PARTY_XNNPACK_SRC_XNNPACK_SIMD_F16_NEONFP16ARITH_H_
-#define THIRD_PARTY_XNNPACK_SRC_XNNPACK_SIMD_F16_NEONFP16ARITH_H_
+#ifndef XNNPACK_SRC_XNNPACK_SIMD_F16_NEONFP16ARITH_H_
+#define XNNPACK_SRC_XNNPACK_SIMD_F16_NEONFP16ARITH_H_
 
 #include <arm_neon.h>
 #include <assert.h>
@@ -205,8 +205,8 @@ xnn_load_tail_f16(const xnn_float16 *input, size_t num_elements) XNN_OOB_READS {
   return vreinterpretq_f16_u16(vld1q_u16((const uint16_t *)input));
 }
 
-static xnn_simd_f16_t xnn_load_tail_safe_f16(const xnn_float16 *input,
-                                             size_t num_elements) {
+static XNN_INLINE xnn_simd_f16_t
+xnn_load_tail_safe_f16(const xnn_float16 *input, size_t num_elements) {
   assert(num_elements > 0);
   assert(num_elements < xnn_simd_size_f16);
 
@@ -215,18 +215,25 @@ static xnn_simd_f16_t xnn_load_tail_safe_f16(const xnn_float16 *input,
   switch (num_elements) {
     case 7:
       *dst++ = *input++;
+      XNN_FALLTHROUGH
     case 6:
       *dst++ = *input++;
+      XNN_FALLTHROUGH
     case 5:
       *dst++ = *input++;
+      XNN_FALLTHROUGH
     case 4:
       *dst++ = *input++;
+      XNN_FALLTHROUGH
     case 3:
       *dst++ = *input++;
+      XNN_FALLTHROUGH
     case 2:
       *dst++ = *input++;
+      XNN_FALLTHROUGH
     default:
       *dst++ = *input++;
+      break;
   }
   return vreinterpretq_f16_u16(vld1q_u16((const uint16_t *)&padded[0]));
 }
@@ -252,4 +259,4 @@ static XNN_INLINE void xnn_store_tail_f16(xnn_float16 *output, xnn_simd_f16_t v,
   }
 }
 
-#endif  // THIRD_PARTY_XNNPACK_SRC_XNNPACK_SIMD_F16_NEONFP16ARITH_H_
+#endif  // XNNPACK_SRC_XNNPACK_SIMD_F16_NEONFP16ARITH_H_

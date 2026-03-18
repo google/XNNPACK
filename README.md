@@ -12,6 +12,7 @@ XNNPACK is a highly optimized solution for neural network inference on ARM, x86,
 - WebAssembly SIMD
 - [WebAssembly Relaxed SIMD](https://github.com/WebAssembly/relaxed-simd) (experimental)
 - RISC-V (RV32GC and RV64GC)
+- Hexagon (with HVX)
 
 ## Operator Coverage
 
@@ -99,7 +100,7 @@ Benchmarked on Feb 8, 2022 with `end2end-bench --benchmark_min_time=5` on a Rasp
 ## Minimum build requirements
 
 - C11
-- C++14
+- C++17
 - Python 3
 
 ## Publications
@@ -127,4 +128,4 @@ Benchmarked on Feb 8, 2022 with `end2end-bench --benchmark_min_time=5` on a Rasp
 
 ## Acknowledgements
 
-XNNPACK is a based on [QNNPACK](https://github.com/pytorch/QNNPACK) library. Over time its codebase diverged a lot, and XNNPACK API is no longer compatible with QNNPACK.
+XNNPACK is based on [QNNPACK](https://github.com/pytorch/QNNPACK) library. Over time its codebase diverged a lot, and XNNPACK API is no longer compatible with QNNPACK.

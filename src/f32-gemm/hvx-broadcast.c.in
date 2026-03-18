@@ -5,9 +5,8 @@
 
 $assert NR % 32 == 0
 
-#include "src/xnnpack/simd/f32-hvx.h"
-
 #include "src/xnnpack/gemm.h"
+#include "src/xnnpack/simd/f32-hvx.h"
 
 $RANGE_MR = list(range(MR))
 void xnn_f32_gemm_minmax_ukernel_${MR}x${NR}__hvx_broadcast(

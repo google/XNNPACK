@@ -129,7 +129,7 @@ struct TestParams {
 
 #define XNN_FILL_UKERNEL(arch_flags, ukernel) {#ukernel, arch_flags, ukernel},
 TestParams test_params[] = {
-#include "src/xx-fill/xx-fill.h"
+#include "src/xx-fill/xx-fill.inc"
 };
 #undef XNN_FILL_UKERNEL
 

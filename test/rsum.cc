@@ -122,11 +122,11 @@ KernelInfo kernels[] = {
                     datatype_out, params_type, init_params)                    \
   {#ukernel,   arch_flags,  Kernel{ukernel, init_params},                      \
    batch_tile, vector_tile, sizeof(datatype_in)},
-#include "src/f16-f32acc-rsum/f16-f32acc-rsum.h"
-#include "src/f16-rsum/f16-rsum.h"
-#include "src/f32-rsum/f32-rsum.h"
-#include "src/qs8-rsum/qs8-rsum.h"
-#include "src/qu8-rsum/qu8-rsum.h"
+#include "src/f16-f32acc-rsum/f16-f32acc-rsum.inc"
+#include "src/f16-rsum/f16-rsum.inc"
+#include "src/f32-rsum/f32-rsum.inc"
+#include "src/qs8-rsum/qs8-rsum.inc"
+#include "src/qu8-rsum/qu8-rsum.inc"
 #undef XNN_UKERNEL
 };
 

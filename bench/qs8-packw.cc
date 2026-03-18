@@ -36,7 +36,7 @@ static void qs8_gio_packw(benchmark::State& state, const char* net,
   BENCHMARK_CAPTURE_BGEMM(qs8_gio_packw, ukernel##_, ukernel, arch_flags, nr,  \
                           kr, sr);
 
-#include "src/qs8-packw/qs8-packw.h"
+#include "src/qs8-packw/qs8-packw.inc"
 
 #undef XNN_QS8_UKERNEL
 

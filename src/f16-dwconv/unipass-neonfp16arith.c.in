@@ -7,11 +7,15 @@ $assert CHANNEL_TILE % 8 == 0
 $assert KERNEL_TILE >= 2
 $assert ACCUMULATORS >= 1
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-#include <assert.h>
-
 #include <arm_neon.h>
+#include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
 
+#include "src/xnnpack/common.h"
 #include "src/xnnpack/dwconv.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/microparams.h"
 
 
 void xnn_f16_dwconv_minmax_ukernel_${KERNEL_TILE}p${CHANNEL_TILE}c__neonfp16arith${"" if ACCUMULATORS == 1 else "_acc%d" % ACCUMULATORS}(

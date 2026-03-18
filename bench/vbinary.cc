@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2021-2025 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
@@ -21,7 +21,7 @@
 #include "src/xnnpack/math.h"
 #include "src/xnnpack/microfnptr.h"
 #include "src/xnnpack/microparams-init.h"
-#include "src/xnnpack/microparams.h"
+#include "test/replicable_random_device.h"
 #include <benchmark/benchmark.h>
 
 template <typename T>
@@ -123,8 +123,7 @@ static void vbinary(benchmark::State& state, uint64_t arch_flags,
 
   const size_t num_elements = state.range(0);
 
-  std::random_device random_device;
-  auto rng = std::mt19937(random_device());
+  xnnpack::ReplicableRandomDevice rng;
   UniformDistribution<T> dist;
 
   xnnpack::Buffer<T, XNN_ALLOCATION_ALIGNMENT> a(num_elements);
@@ -161,59 +160,59 @@ static void vbinary(benchmark::State& state, uint64_t arch_flags,
       ->Apply(                                                               \
           benchmark::utils::BinaryElementwiseParameters<datatype, datatype>) \
       ->UseRealTime();
-#include "src/f16-vbinary/f16-vadd.h"
-#include "src/f16-vbinary/f16-vaddc.h"
-#include "src/f16-vbinary/f16-vdiv.h"
-#include "src/f16-vbinary/f16-vdivc.h"
-#include "src/f16-vbinary/f16-vmax.h"
-#include "src/f16-vbinary/f16-vmaxc.h"
-#include "src/f16-vbinary/f16-vmin.h"
-#include "src/f16-vbinary/f16-vminc.h"
-#include "src/f16-vbinary/f16-vmul.h"
-#include "src/f16-vbinary/f16-vmulc.h"
-#include "src/f16-vbinary/f16-vprelu.h"
-#include "src/f16-vbinary/f16-vpreluc.h"
-#include "src/f16-vbinary/f16-vrdivc.h"
-#include "src/f16-vbinary/f16-vrpreluc.h"
-#include "src/f16-vbinary/f16-vrsubc.h"
-#include "src/f16-vbinary/f16-vsqrdiff.h"
-#include "src/f16-vbinary/f16-vsqrdiffc.h"
-#include "src/f16-vbinary/f16-vsub.h"
-#include "src/f16-vbinary/f16-vsubc.h"
-#include "src/f32-vbinary/f32-vadd.h"
-#include "src/f32-vbinary/f32-vaddc.h"
-#include "src/f32-vbinary/f32-vcopysign.h"
-#include "src/f32-vbinary/f32-vcopysignc.h"
-#include "src/f32-vbinary/f32-vdiv.h"
-#include "src/f32-vbinary/f32-vdivc.h"
-#include "src/f32-vbinary/f32-vmax.h"
-#include "src/f32-vbinary/f32-vmaxc.h"
-#include "src/f32-vbinary/f32-vmin.h"
-#include "src/f32-vbinary/f32-vminc.h"
-#include "src/f32-vbinary/f32-vmul.h"
-#include "src/f32-vbinary/f32-vmulc.h"
-#include "src/f32-vbinary/f32-vprelu.h"
-#include "src/f32-vbinary/f32-vpreluc.h"
-#include "src/f32-vbinary/f32-vrcopysignc.h"
-#include "src/f32-vbinary/f32-vrdivc.h"
-#include "src/f32-vbinary/f32-vrpreluc.h"
-#include "src/f32-vbinary/f32-vrsubc.h"
-#include "src/f32-vbinary/f32-vsqrdiff.h"
-#include "src/f32-vbinary/f32-vsqrdiffc.h"
-#include "src/f32-vbinary/f32-vsub.h"
-#include "src/f32-vbinary/f32-vsubc.h"
-#include "src/qs8-vadd/qs8-vadd-minmax.h"
-#include "src/qs8-vaddc/qs8-vaddc-minmax.h"
-#include "src/qs8-vmul/qs8-vmul-minmax-fp32.h"
-#include "src/qs8-vmul/qs8-vmul-minmax-rndnu.h"
-#include "src/qs8-vmulc/qs8-vmulc-minmax-fp32.h"
-#include "src/qs8-vmulc/qs8-vmulc-minmax-rndnu.h"
-#include "src/qu8-vadd/qu8-vadd-minmax.h"
-#include "src/qu8-vaddc/qu8-vaddc-minmax.h"
-#include "src/qu8-vmul/qu8-vmul-minmax-fp32.h"
-#include "src/qu8-vmul/qu8-vmul-minmax-rndnu.h"
-#include "src/qu8-vmulc/qu8-vmulc-minmax-fp32.h"
-#include "src/qu8-vmulc/qu8-vmulc-minmax-rndnu.h"
+#include "src/f16-vbinary/f16-vadd.inc"
+#include "src/f16-vbinary/f16-vaddc.inc"
+#include "src/f16-vbinary/f16-vdiv.inc"
+#include "src/f16-vbinary/f16-vdivc.inc"
+#include "src/f16-vbinary/f16-vmax.inc"
+#include "src/f16-vbinary/f16-vmaxc.inc"
+#include "src/f16-vbinary/f16-vmin.inc"
+#include "src/f16-vbinary/f16-vminc.inc"
+#include "src/f16-vbinary/f16-vmul.inc"
+#include "src/f16-vbinary/f16-vmulc.inc"
+#include "src/f16-vbinary/f16-vprelu.inc"
+#include "src/f16-vbinary/f16-vpreluc.inc"
+#include "src/f16-vbinary/f16-vrdivc.inc"
+#include "src/f16-vbinary/f16-vrpreluc.inc"
+#include "src/f16-vbinary/f16-vrsubc.inc"
+#include "src/f16-vbinary/f16-vsqrdiff.inc"
+#include "src/f16-vbinary/f16-vsqrdiffc.inc"
+#include "src/f16-vbinary/f16-vsub.inc"
+#include "src/f16-vbinary/f16-vsubc.inc"
+#include "src/f32-vbinary/f32-vadd.inc"
+#include "src/f32-vbinary/f32-vaddc.inc"
+#include "src/f32-vbinary/f32-vcopysign.inc"
+#include "src/f32-vbinary/f32-vcopysignc.inc"
+#include "src/f32-vbinary/f32-vdiv.inc"
+#include "src/f32-vbinary/f32-vdivc.inc"
+#include "src/f32-vbinary/f32-vmax.inc"
+#include "src/f32-vbinary/f32-vmaxc.inc"
+#include "src/f32-vbinary/f32-vmin.inc"
+#include "src/f32-vbinary/f32-vminc.inc"
+#include "src/f32-vbinary/f32-vmul.inc"
+#include "src/f32-vbinary/f32-vmulc.inc"
+#include "src/f32-vbinary/f32-vprelu.inc"
+#include "src/f32-vbinary/f32-vpreluc.inc"
+#include "src/f32-vbinary/f32-vrcopysignc.inc"
+#include "src/f32-vbinary/f32-vrdivc.inc"
+#include "src/f32-vbinary/f32-vrpreluc.inc"
+#include "src/f32-vbinary/f32-vrsubc.inc"
+#include "src/f32-vbinary/f32-vsqrdiff.inc"
+#include "src/f32-vbinary/f32-vsqrdiffc.inc"
+#include "src/f32-vbinary/f32-vsub.inc"
+#include "src/f32-vbinary/f32-vsubc.inc"
+#include "src/qs8-vadd/qs8-vadd-minmax.inc"
+#include "src/qs8-vaddc/qs8-vaddc-minmax.inc"
+#include "src/qs8-vmul/qs8-vmul-minmax-fp32.inc"
+#include "src/qs8-vmul/qs8-vmul-minmax-rndnu.inc"
+#include "src/qs8-vmulc/qs8-vmulc-minmax-fp32.inc"
+#include "src/qs8-vmulc/qs8-vmulc-minmax-rndnu.inc"
+#include "src/qu8-vadd/qu8-vadd-minmax.inc"
+#include "src/qu8-vaddc/qu8-vaddc-minmax.inc"
+#include "src/qu8-vmul/qu8-vmul-minmax-fp32.inc"
+#include "src/qu8-vmul/qu8-vmul-minmax-rndnu.inc"
+#include "src/qu8-vmulc/qu8-vmulc-minmax-fp32.inc"
+#include "src/qu8-vmulc/qu8-vmulc-minmax-rndnu.inc"
 #undef XNN_UKERNEL
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN

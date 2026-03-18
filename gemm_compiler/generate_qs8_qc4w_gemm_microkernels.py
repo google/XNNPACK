@@ -6,6 +6,7 @@
 
 import os
 
+from gemm_compiler import avx512vnni_template
 from gemm_compiler import neondot_template
 from gemm_compiler import generate
 
@@ -29,3 +30,13 @@ def generate_qs8_qc4w_gemm_microkernels():
               f'qs8-qc4w-gemm-{mr}x{nr}-minmax-fp32-asm-aarch64-neondot-ld{decrement}.S',
           ),
       )
+
+  nr = 16
+  for mr in range(1, 10):
+    generate.generate_gemm_microkernel(
+        isa=avx512vnni_template.Avx512VnniQS8QC4W(mr, nr, 8),
+        output_file=os.path.join(
+            output_base,
+            f'qs8-qc4w-gemm-{mr}x{nr}c8-minmax-fp32-asm-amd64-avx512vnni.S',
+        ),
+    )

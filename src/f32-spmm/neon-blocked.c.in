@@ -6,10 +6,13 @@
 $assert MR % 4 == 0
 $assert NR in [1, 2, 4]
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-#include <assert.h>
-
 #include <arm_neon.h>
+#include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
 
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/microparams.h"
 #include "src/xnnpack/prefetch.h"
 #include "src/xnnpack/spmm.h"
 

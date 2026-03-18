@@ -138,9 +138,9 @@ static enum xnn_status reshape_even_split_operator(
   // Check that the split dimension can be evenly split into outputs.
   if (axis >= input_value->shape.num_dims) {
     xnn_log_error(
-      "failed to reshape Even Split operator with the input ID #%" PRIu32
-      ": split dimension (%d) exceeds the number of dimensions (%zu)",
-      input_id, axis, input_value->shape.num_dims);
+        "failed to reshape Even Split operator with the input ID #%" PRIu32
+        ": split dimension (%d) exceeds the number of dimensions (%zu)",
+        input_id, axis, input_value->shape.num_dims);
     return xnn_status_invalid_parameter;
   }
   size_t batch_size = xnn_shape_multiply_leading_dims(&input_value->shape, axis);

@@ -32,7 +32,8 @@ void TestImpl(size_t rank) {
     std::vector<int64_t> begins(dims.size());
     std::vector<int64_t> ends(dims.size());
     for (size_t i = 0; i < dims.size(); i++) {
-      const int64_t range = dims[i];
+      // Test out of bounds slices too.
+      const int64_t range = dims[i] * 2;
       auto begin_dist =
           std::uniform_int_distribution<int64_t>(-range, range - 1);
       begins[i] = begin_dist(rng);

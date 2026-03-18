@@ -13,6 +13,16 @@ package(
     default_visibility = ["//:__subpackages__"],
 )
 
+################################### Platforms ##################################
+
+platform(
+    name = "aarch64_linux",
+    constraint_values = [
+        "@platforms//cpu:aarch64",
+        "@platforms//os:linux",
+    ],
+)
+
 ############################# Build configurations #############################
 
 config_setting(
@@ -100,9 +110,17 @@ config_setting(
 )
 
 config_setting(
-    name = "windows_x86_64_clang",
+    name = "windows_x86_64_clangcl",
     values = {
         "compiler": "clang-cl",
+        "cpu": "x64_windows",
+    },
+)
+
+config_setting(
+    name = "windows_x86_64_clang",
+    values = {
+        "compiler": "clang",
         "cpu": "x64_windows",
     },
 )
@@ -120,6 +138,13 @@ config_setting(
     values = {
         "compiler": "msys-gcc",
         "cpu": "x64_windows",
+    },
+)
+
+config_setting(
+    name = "windows_aarch64",
+    values = {
+         "cpu": "aarch64_windows",
     },
 )
 
@@ -212,9 +237,9 @@ config_setting(
 
 config_setting(
     name = "ios",
-    values = {
-        "apple_platform_type": "ios",
-    },
+    constraint_values = [
+        "@platforms//os:ios",
+    ],
 )
 
 config_setting(
@@ -284,6 +309,13 @@ config_setting(
     ],
 )
 
+config_setting(
+    name = "macos",
+    constraint_values = [
+        "@platforms//os:macos",
+    ],
+)
+
 ######################## Composite build configurations #######################
 
 selects.config_setting_group(
@@ -331,6 +363,7 @@ selects.config_setting_group(
         ":tvos_x86_64",
         ":watchos_x86_64",
         ":windows_x86_64",
+        ":windows_x86_64_clangcl",
         ":windows_x86_64_clang",
         ":windows_x86_64_mingw",
         ":windows_x86_64_msys",
@@ -347,6 +380,7 @@ selects.config_setting_group(
         ":macos_x86_64_legacy",
         ":tvos_x86_64",
         ":watchos_x86_64",
+        ":windows_x86_64_clangcl",
         ":windows_x86_64_clang",
         ":windows_x86_64_mingw",
     ],

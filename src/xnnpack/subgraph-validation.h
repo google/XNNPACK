@@ -3,7 +3,8 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#pragma once
+#ifndef XNNPACK_SRC_XNNPACK_SUBGRAPH_VALIDATION_H_
+#define XNNPACK_SRC_XNNPACK_SUBGRAPH_VALIDATION_H_
 
 #include "include/xnnpack.h"
 #include "src/xnnpack/subgraph.h"
@@ -59,3 +60,5 @@ enum xnn_status xnn_subgraph_check_batch_dims_match(
 #ifdef __cplusplus
 }  // extern "C"
 #endif
+
+#endif  // XNNPACK_SRC_XNNPACK_SUBGRAPH_VALIDATION_H_

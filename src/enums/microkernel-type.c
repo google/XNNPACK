@@ -11,7 +11,7 @@
 const char* xnn_microkernel_type_to_string(enum xnn_microkernel_type microkernel_type) {
   switch(microkernel_type) {
   #define XNN_ENUM_ITEM(enum_name, enum_string) case enum_name: return enum_string;
-  #include "src/xnnpack/microkernel-type-defs.h"
+  #include "src/xnnpack/microkernel-type-defs.inc"
   default:
     XNN_UNREACHABLE;
   #undef XNN_ENUM_ITEM

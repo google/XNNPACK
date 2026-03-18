@@ -3,7 +3,8 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#pragma once
+#ifndef XNNPACK_SRC_XNNPACK_PACKB_H_
+#define XNNPACK_SRC_XNNPACK_PACKB_H_
 
 #include <stddef.h>
 #include <stdint.h>
@@ -21,13 +22,14 @@ extern "C" {
                             const uint32_t* bias, uint32_t* packed_weights, \
                             size_t channel_tile_stride,                     \
                             size_t channel_subtile_stride,                  \
-                            const struct xnn_x32_packb_params               \
-                                params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+                            const struct xnn_x32_packb_params* params);
 
-#include "src/x32-packb/x32-packb.h"
+#include "src/x32-packb/x32-packb.inc"
 
 #undef XNN_UKERNEL
 
 #ifdef __cplusplus
 }  // extern "C"
 #endif
+
+#endif  // XNNPACK_SRC_XNNPACK_PACKB_H_

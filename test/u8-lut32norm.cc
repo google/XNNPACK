@@ -144,5 +144,5 @@ class LUTNormMicrokernelTester {
   XNN_TEST_LUTNORM_N_EQ_1_INPLACE(ukernel, arch_flags, init_params);         \
   XNN_TEST_LUTNORM_SMALL_N_INPLACE(ukernel, arch_flags, init_params);        \
   XNN_TEST_LUTNORM_LARGE_N_INPLACE(ukernel, arch_flags, init_params);
-#include "src/u8-lut32norm/u8-lut32norm.h"
+#include "src/u8-lut32norm/u8-lut32norm.inc"
 #undef XNN_UKERNEL

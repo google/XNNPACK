@@ -8,7 +8,7 @@ $assert NR % 8 == 0
 
 #include <wasm_simd128.h>
 
-#include "xnnpack/gemm.h"
+#include "src/xnnpack/gemm.h"
 
 void xnn_f16_gemm_minmax_ukernel_${MR}x${NR}__wasmrelaxedsimd_splat(
     size_t mr,

@@ -7,7 +7,9 @@
 #include <stddef.h>
 
 #include "src/xnnpack/common.h"
+#include "src/xnnpack/config-types.h"
 #include "src/xnnpack/config.h"
+#include "src/xnnpack/hardware-config.h"
 #include "src/xnnpack/init-once.h"
 #include "src/xnnpack/lut.h"
 
@@ -24,32 +26,44 @@ static void init_x8_lut_config(void) {
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
+    (void) hardware_config;  // May be unused.
 
     #if XNN_ENABLE_AVX256VBMI
-      if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512vbmi) {
+      if (hardware_config->arch_flags & xnn_arch_x86_avx512vbmi) {
         x8_lut_config.microkernel = xnn_x8_lut_ukernel__avx512vbmi_vpermx2b_u128;
       } else
     #endif
     #if XNN_ENABLE_AVX512SKX
-      if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512skx) {
+      if (hardware_config->arch_flags & xnn_arch_x86_avx512skx) {
         x8_lut_config.microkernel = xnn_x8_lut_ukernel__avx512skx_vpshufb_u64;
       } else
     #endif
-    if (hardware_config->use_x86_avx2) {
-      x8_lut_config.microkernel = xnn_x8_lut_ukernel__avx2_u128;
-    } else if (hardware_config->use_x86_avx) {
-      x8_lut_config.microkernel = xnn_x8_lut_ukernel__avx_u64;
-    } else {
-      // Note: SSSE3 version is usually slower than scalar
+    #if XNN_ENABLE_AVX2
+      if (hardware_config->arch_flags & xnn_arch_x86_avx2) {
+        x8_lut_config.microkernel = xnn_x8_lut_ukernel__avx2_u128;
+      } else
+    #endif
+    #if XNN_ENABLE_AVX
+      if (hardware_config->arch_flags & xnn_arch_x86_avx) {
+        x8_lut_config.microkernel = xnn_x8_lut_ukernel__avx_u64;
+      } else
+    #endif
+    #if XNN_ENABLE_SSSE3
+      if (hardware_config->arch_flags & xnn_arch_x86_ssse3) {
+        // Note: SSSE3 version is usually slower than scalar
+        x8_lut_config.microkernel = xnn_x8_lut_ukernel__scalar_u4;
+      } else
+    #endif
+    {
       x8_lut_config.microkernel = xnn_x8_lut_ukernel__scalar_u4;
     }
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
-
+    (void) hardware_config;  // May be unused.
     if (hardware_config->is_x86) {
       #if XNN_ARCH_WASMRELAXEDSIMD
-        if (hardware_config->use_wasm_pshufb) {
+        if (hardware_config->arch_flags & xnn_arch_wasm_pshufb) {
           x8_lut_config.microkernel = xnn_x8_lut_ukernel__wasmpshufb_u32;
         } else {
           x8_lut_config.microkernel = xnn_x8_lut_ukernel__scalar_u4;

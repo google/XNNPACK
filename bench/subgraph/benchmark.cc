@@ -1,10 +1,11 @@
-// Copyright 2019 Google LLC
+// Copyright 2019-2025 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include <benchmark/benchmark.h>
+#include "bench/subgraph/benchmark.h"
 
+#include <algorithm>
 #include <cassert>
 #include <cstddef>
 #include <cstdint>
@@ -14,82 +15,192 @@
 #include <memory>
 #include <vector>
 
-#include "bench/subgraph/models.h"
+#include "bench/subgraph/simple_scheduler.h"
 #include "bench/utils.h"
+#include "include/experimental.h"
 #include "include/xnnpack.h"
-#include "src/xnnpack/allocator.h"
+#include "src/xnnpack/datatype.h"
+#include "src/xnnpack/math.h"
 #include "src/xnnpack/subgraph.h"
+#include "test/replicable_random_device.h"
+#include <benchmark/benchmark.h>
 #include <pthreadpool.h>
 
-struct ModelRuntime {
-  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> model;
-  pthreadpool_t threadpool = nullptr;
-  xnn_runtime_t runtime = nullptr;
-  std::vector<xnn_external_value> external_values;
+namespace xnnpack {
 
-  explicit ModelRuntime(int num_threads) : model(nullptr, xnn_delete_subgraph) {
-    xnn_delete_runtime(runtime);
-    threadpool = pthreadpool_create(num_threads);
+unique_subgraph_ptr CreateUniqueSubgraph(uint32_t num_external_values,
+                                         uint32_t external_value_flags) {
+  xnn_subgraph_t subgraph = nullptr;
+  xnn_status status =
+      xnn_create_subgraph(num_external_values, external_value_flags, &subgraph);
+  if (status != xnn_status_success) {
+    std::cerr << "failed to create subgraph" << std::endl;
+    assert(!subgraph);
   }
+  return unique_subgraph_ptr(subgraph, xnn_delete_subgraph);
+}
 
-  ~ModelRuntime() {
-    if (runtime) {
-      xnn_delete_runtime(runtime);
+namespace {
+
+// Base class for loading and running models with XNNPACK.
+class ModelRuntimeBase {
+ public:
+  ModelRuntimeBase() : model_(nullptr, xnn_delete_subgraph) {};
+
+  virtual ~ModelRuntimeBase() {
+    if (runtime_) {
+      xnn_delete_runtime(runtime_);
     }
-    if (threadpool) {
-      pthreadpool_destroy(threadpool);
-    }
-    for (xnn_external_value& i : external_values) {
-      xnn_release_simd_memory(i.data);
+    for (xnn_external_value& i : external_values_) {
+      free(i.data);
     }
   }
 
   bool CreateModel(std::function<xnn_subgraph_t()> model_factory) {
-    model.reset(model_factory());
-    if (!model) {
-      return false;
-    }
-    for (uint32_t i = 0; i < model->num_values; ++i) {
-      if ((model->values[i].flags & (XNN_VALUE_FLAG_EXTERNAL_INPUT |
-                                     XNN_VALUE_FLAG_EXTERNAL_OUTPUT)) == 0) {
-        continue;
-      }
-      // Make a buffer for this external value.
-      size_t size = xnn_tensor_get_size(&model->values[i]) + XNN_EXTRA_BYTES;
-      external_values.push_back(
-          xnn_external_value{i, xnn_allocate_zero_simd_memory(size)});
-    }
-    return model != nullptr;
+    model_.reset(model_factory());
+    return model_ != nullptr;
   }
 
   bool CreateRuntime(uint32_t flags) {
-    assert(!runtime);
-    return xnn_status_success == xnn_create_runtime_v4(model.get(), nullptr,
-                                                       nullptr, threadpool,
-                                                       flags, &runtime);
+    assert(!runtime_);
+    return CreateRuntimeImpl(model_.get(), flags, &runtime_);
   }
+
   bool ReshapeRuntime() {
-    return xnn_status_success == xnn_reshape_runtime(runtime);
+    return xnn_status_success == xnn_reshape_runtime(runtime_);
   }
 
   bool SetupRuntime() {
-    return xnn_status_success == xnn_setup_runtime_v2(runtime,
-                                                      external_values.size(),
-                                                      external_values.data());
+    ReplicableRandomDevice rng;
+    for (uint32_t i = 0; i < xnn_subgraph_get_num_external_values(model_.get());
+         ++i) {
+      uint32_t flags = xnn_subgraph_get_value_flags(model_.get(), i);
+      if ((flags & (XNN_VALUE_FLAG_EXTERNAL_INPUT |
+                    XNN_VALUE_FLAG_EXTERNAL_OUTPUT)) == 0) {
+        continue;
+      }
+      // Make a buffer for this external value.
+      size_t num_dims = 0;
+      size_t dims[XNN_MAX_TENSOR_DIMS];
+      xnn_get_external_value_shape(runtime_, i, &num_dims, &dims[0]);
+      xnn_datatype type = xnn_subgraph_get_value_datatype(model_.get(), i);
+      size_t size = xnn_datatype_size_bytes(type);
+      for (size_t i = 0; i < num_dims; ++i) {
+        size *= dims[i];
+      }
+      void* data = malloc(size + XNN_EXTRA_BYTES);
+      switch (type) {
+        case xnn_datatype_fp32: {
+          std::generate((float*)data, (float*)((uintptr_t)data + size),
+                        [&] { return rng.NextFloat(); });
+        } break;
+        case xnn_datatype_fp16: {
+          std::generate((xnn_float16*)data,
+                        (xnn_float16*)((uintptr_t)data + size),
+                        [&] { return rng.NextFloat(); });
+        } break;
+        default: {
+          std::generate((uint8_t*)data, (uint8_t*)((uintptr_t)data + size),
+                        [&] { return rng.NextUInt32() & 0xFF; });
+        } break;
+      }
+      external_values_.push_back(xnn_external_value{i, data});
+    }
+    return xnn_status_success == xnn_setup_runtime_v2(runtime_,
+                                                      external_values_.size(),
+                                                      external_values_.data());
   }
 
-  bool Invoke() { return xnn_status_success == xnn_invoke_runtime(runtime); }
+  bool Invoke() { return xnn_status_success == xnn_invoke_runtime(runtime_); }
+
+  virtual void WipeL2Caches(benchmark::State& state) {
+    benchmark::utils::WipePthreadpoolL2Caches(state, /*threadpool=*/nullptr);
+  }
+
+ protected:
+  // This function needs to be overridden by subclasses.
+  virtual bool CreateRuntimeImpl(xnn_subgraph_t subgraph, uint32_t flags,
+                                 xnn_runtime_t* runtime) = 0;
+
+ private:
+  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> model_;
+  xnn_runtime_t runtime_ = nullptr;
+  std::vector<xnn_external_value> external_values_;
 };
 
-static void BenchmarkInvoke(benchmark::State& state,
-                            std::function<xnn_subgraph_t()> model_factory,
-                            uint32_t extra_flags = 0) {
+// Create and run a model in XNNPACK using a `pthreadpool` for parallelism.
+class ModelRuntimePthreadpool : public ModelRuntimeBase {
+ public:
+  explicit ModelRuntimePthreadpool(int num_threads)
+      : threadpool_(pthreadpool_create(num_threads), pthreadpool_destroy) {}
+
+  void WipeL2Caches(benchmark::State& state) override {
+    benchmark::utils::WipePthreadpoolL2Caches(state, threadpool_.get());
+  }
+
+ protected:
+  bool CreateRuntimeImpl(xnn_subgraph_t subgraph, uint32_t flags,
+                         xnn_runtime_t* runtime) override {
+    return (xnn_status_success ==
+            xnn_create_runtime_v4(subgraph, /*weights_cache=*/nullptr,
+                                  /*workspace=*/nullptr, threadpool_.get(),
+                                  flags, runtime));
+  }
+
+ private:
+  std::unique_ptr<struct pthreadpool, decltype(&pthreadpool_destroy)>
+      threadpool_;
+};
+
+// Create and run a model in XNNPACK using an `xnn_scheduler_v2` for
+// parallelism.
+class ModelRuntimeXnnThreadpool : public ModelRuntimeBase {
+ public:
+  explicit ModelRuntimeXnnThreadpool(int num_threads)
+      : scheduler_(
+            std::make_unique<xnnpack::SimpleScheduler>(num_threads - 1)) {
+    enum xnn_status status = xnn_create_threadpool_v2(
+        scheduler_->GetXnnSchedulerV2(), scheduler_->GetContext(), /*flags=*/0,
+        &threadpool_);
+    assert(status == xnn_status_success);
+    (void)status;
+  }
+  ~ModelRuntimeXnnThreadpool() override {
+    if (threadpool_) {
+      xnn_delete_threadpool(threadpool_);
+    }
+  }
+
+  void WipeL2Caches(benchmark::State& state) override {
+    benchmark::utils::WipeSchedulerL2Caches(
+        state, scheduler_->GetXnnSchedulerV2(), scheduler_->GetContext());
+  }
+
+ protected:
+  bool CreateRuntimeImpl(xnn_subgraph_t subgraph, uint32_t flags,
+                         xnn_runtime_t* runtime) override {
+    return (xnn_status_success == xnn_create_runtime_with_threadpool(
+                                      subgraph, /*weights_cache=*/nullptr,
+                                      threadpool_, flags, runtime));
+  }
+
+ private:
+  std::unique_ptr<xnnpack::SimpleScheduler> scheduler_;
+  xnn_threadpool_t threadpool_;
+};
+
+}  // namespace
+
+template <class M>
+void RunBenchmarkImpl(benchmark::State& state,
+                      std::function<xnn_subgraph_t()> model_factory,
+                      uint32_t extra_flags) {
   if (xnn_initialize(nullptr /* allocator */) != xnn_status_success) {
     state.SkipWithError("failed to initialize XNNPACK");
     return;
   }
 
-  ModelRuntime model_runtime(FLAGS_num_threads);
+  M model_runtime(FLAGS_num_threads);
   if (!model_runtime.CreateModel(model_factory)) {
     state.SkipWithError("failed to create model");
     return;
@@ -114,8 +225,7 @@ static void BenchmarkInvoke(benchmark::State& state,
   int num_iters = FLAGS_benchmark_min_iters;
   while (state.KeepRunningBatch(num_iters)) {
     for (int iter = 0; iter < num_iters; iter++) {
-      benchmark::utils::WipePthreadpoolL2Caches(state,
-                                                model_runtime.threadpool);
+      model_runtime.WipeL2Caches(state);
       if (!model_runtime.Invoke()) {
         state.SkipWithError("failed to invoke runtime");
         return;
@@ -130,228 +240,17 @@ static void BenchmarkInvoke(benchmark::State& state,
   }
 }
 
-static void FP32Attention(benchmark::State& state) {
-  BenchmarkInvoke(state, [&state]() {
-    return models::FP32Attention(FLAGS_batch_size, state.range(0),
-                                 state.range(1), state.range(2),
-                                 state.range(3));
-  });
+void RunBenchmark(benchmark::State& state,
+                  std::function<xnn_subgraph_t()> model_factory,
+                  uint32_t extra_flags) {
+#ifdef XNN_BENCHMARK_USE_THREADPOOL
+  RunBenchmarkImpl<ModelRuntimeXnnThreadpool>(state, model_factory,
+                                              extra_flags);
+#else
+  RunBenchmarkImpl<ModelRuntimePthreadpool>(state, model_factory, extra_flags);
+#endif
 }
 
-static void FP16Attention(benchmark::State& state) {
-  BenchmarkInvoke(
-      state,
-      [&state]() {
-        return models::FP32Attention(FLAGS_batch_size, state.range(0),
-                                     state.range(1), state.range(2),
-                                     state.range(3));
-      },
-      XNN_FLAG_FORCE_FP16_INFERENCE);
-}
-
-static void FP32MobileNetV1(benchmark::State& state) {
-  BenchmarkInvoke(state, models::FP32MobileNetV1);
-}
-
-static void FP32MobileNetV2(benchmark::State& state) {
-  BenchmarkInvoke(state, models::FP32MobileNetV2);
-}
-
-static void FP32MobileNetV3Large(benchmark::State& state) {
-  BenchmarkInvoke(state, models::FP32MobileNetV3Large);
-}
-
-static void FP32MobileNetV3Small(benchmark::State& state) {
-  BenchmarkInvoke(state, models::FP32MobileNetV3Small);
-}
-
-static void FP16MobileNetV1(benchmark::State& state) {
-  BenchmarkInvoke(state, models::FP32MobileNetV1,
-                  XNN_FLAG_FORCE_FP16_INFERENCE);
-}
-
-static void FP16MobileNetV2(benchmark::State& state) {
-  BenchmarkInvoke(state, models::FP32MobileNetV2,
-                  XNN_FLAG_FORCE_FP16_INFERENCE);
-}
-
-static void FP16MobileNetV3Large(benchmark::State& state) {
-  BenchmarkInvoke(state, models::FP32MobileNetV3Large,
-                  XNN_FLAG_FORCE_FP16_INFERENCE);
-}
-
-static void FP16MobileNetV3Small(benchmark::State& state) {
-  BenchmarkInvoke(state, models::FP32MobileNetV3Small,
-                  XNN_FLAG_FORCE_FP16_INFERENCE);
-}
-
-static void QD8Attention(benchmark::State& state) {
-  models::QD8AttentionWeights weights;
-  BenchmarkInvoke(state, [&state, &weights]() {
-    return models::QD8Attention(FLAGS_batch_size, state.range(0),
-                                state.range(1), state.range(2), state.range(3),
-                                weights);
-  });
-}
-
-static void QS8MobileNetV2(benchmark::State& state) {
-  BenchmarkInvoke(state, models::QS8MobileNetV2);
-}
-
-static void FP32Elementwise(benchmark::State& state) {
-  BenchmarkInvoke(state, [&state]() {
-    return models::FP32Elementwise(/*batch_size=*/state.range(0),
-                                   /*num_elements=*/state.range(1),
-                                   /*depth=*/state.range(2));
-  });
-}
-
-static void FP32LayerNorm(benchmark::State& state) {
-  BenchmarkInvoke(state, [&state]() {
-    return models::FP32LayerNorm(state.range(0), state.range(1), state.range(2),
-                                 state.range(3));
-  });
-}
-
-static void FP32L2Norm(benchmark::State& state) {
-  BenchmarkInvoke(state, [&state]() {
-    return models::FP32L2Norm(state.range(0), state.range(1), state.range(2),
-                                 state.range(3));
-  });
-}
-
-static void FP32SoftmaxDecomp(benchmark::State& state) {
-  BenchmarkInvoke(state, [&state]() {
-    return models::FP32Softmax(state.range(0), state.range(1), state.range(2),
-                               state.range(3), /*use_softmax=*/false);
-  });
-}
-
-static void FP32SoftmaxFused(benchmark::State& state) {
-  BenchmarkInvoke(state, [&state]() {
-    return models::FP32Softmax(state.range(0), state.range(1), state.range(2),
-                               state.range(3), /*use_softmax=*/true);
-  });
-}
-
-static void FP32DepthwiseSeparable(benchmark::State& state) {
-  models::FP32DepthwiseSeparableWeights weights;
-  BenchmarkInvoke(state, [&state, &weights]() {
-    return models::FP32DepthwiseSeparable(state.range(0), state.range(1),
-                                          state.range(2), state.range(3),
-                                          state.range(4), weights);
-  });
-}
-
-static void AttentionArguments(benchmark::internal::Benchmark* b) {
-  b->ArgNames({"T", "H", "N", "S"});
-  b->Args({16, 25, 24, 4});
-  b->Args({1536, 128, 12, 18});
-  b->Args({1024, 256, 4, 46});
-  b->Args({1792, 256, 8, 36});
-  b->Args({1536, 256, 6, 22});
-  b->Args({2048, 256, 8, 18});
-  b->Args({3072, 256, 16, 28});
-  b->Args({2304, 256, 8, 26});
-  b->Args({2048, 64, 32, 24});
-}
-
-static void LayerNormArguments(benchmark::internal::Benchmark* b) {
-  b->ArgNames({"M", "N", "K", "NormMask"});
-  for (int norm_mask = 1; norm_mask < 8; norm_mask++) {
-    b->Args({128, 256, 512, norm_mask});
-  }
-}
-
-static void L2NormArguments(benchmark::internal::Benchmark* b) {
-  b->ArgNames({"M", "N", "K", "NormMask"});
-  for (int norm_mask = 1; norm_mask < 8; norm_mask++) {
-    b->Args({128, 256, 512, norm_mask});
-  }
-}
-
-static void SoftmaxArguments(benchmark::internal::Benchmark* b) {
-  b->ArgNames({"M", "N", "K", "NormMask"});
-  for (int norm_mask = 1; norm_mask < 8; norm_mask++) {
-    b->Args({128, 256, 512, norm_mask});
-  }
-}
-
-static void DepthwiseSeparableArguments(benchmark::internal::Benchmark* b) {
-  b->ArgNames({"W", "H", "KW", "CI", "CO"});
-
-  // Mobilenet v2-ish
-  b->Args({112, 112, 3, 32, 16});
-  b->Args({56, 56, 3, 96, 24});
-  b->Args({28, 28, 3, 144, 32});
-  b->Args({14, 14, 3, 192, 64});
-  b->Args({14, 14, 3, 384, 96});
-  b->Args({14, 14, 3, 576, 160});
-  b->Args({7, 7, 3, 960, 320});
-
-  // Bigger
-  b->Args({512, 512, 3, 128, 128});
-}
-
-BENCHMARK(FP32Attention)
-    ->Unit(benchmark::kMicrosecond)
-    ->UseRealTime()
-    ->Apply(AttentionArguments);
-
-BENCHMARK(FP16Attention)
-    ->Unit(benchmark::kMicrosecond)
-    ->UseRealTime()
-    ->Apply(AttentionArguments);
-
-BENCHMARK(FP32MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime();
-BENCHMARK(FP32MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
-BENCHMARK(FP32MobileNetV3Large)->Unit(benchmark::kMicrosecond)->UseRealTime();
-BENCHMARK(FP32MobileNetV3Small)->Unit(benchmark::kMicrosecond)->UseRealTime();
-
-BENCHMARK(FP16MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime();
-BENCHMARK(FP16MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
-BENCHMARK(FP16MobileNetV3Large)->Unit(benchmark::kMicrosecond)->UseRealTime();
-BENCHMARK(FP16MobileNetV3Small)->Unit(benchmark::kMicrosecond)->UseRealTime();
-
-BENCHMARK(QD8Attention)
-    ->Unit(benchmark::kMicrosecond)
-    ->UseRealTime()
-    ->Apply(AttentionArguments);
-
-BENCHMARK(QS8MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
-
-BENCHMARK(FP32Elementwise)
-    ->Unit(benchmark::kMicrosecond)
-    ->UseRealTime()
-    ->ArgNames({"B", "N", "D"})
-    ->Args({1024, 1024, 6})
-    ->Args({1024, 1024, 10})
-    ->Args({1024, 1024, 18})
-    ->Args({1024, 1024, 34});
-
-BENCHMARK(FP32LayerNorm)
-    ->Unit(benchmark::kMicrosecond)
-    ->UseRealTime()
-    ->Apply(LayerNormArguments);
-
-BENCHMARK(FP32L2Norm)
-    ->Unit(benchmark::kMicrosecond)
-    ->UseRealTime()
-    ->Apply(L2NormArguments);
-
-BENCHMARK(FP32SoftmaxDecomp)
-    ->Unit(benchmark::kMicrosecond)
-    ->UseRealTime()
-    ->Apply(SoftmaxArguments);
-
-BENCHMARK(FP32SoftmaxFused)
-    ->Unit(benchmark::kMicrosecond)
-    ->UseRealTime()
-    ->Apply(SoftmaxArguments);
-
-BENCHMARK(FP32DepthwiseSeparable)
-    ->Unit(benchmark::kMicrosecond)
-    ->UseRealTime()
-    ->Apply(DepthwiseSeparableArguments);
+}  // namespace xnnpack
 
 XNN_BENCHMARK_MAIN();

@@ -32,12 +32,10 @@ std::string GetTestName(
   {#ukernel, ukernel, arch_flags, nr, kr, sr, kblock, nr_scale},
 
 const XnnTestParam xnn_test_qs8_qc4w_params[] = {
-#include "src/qs8-qc4w-packw/qs8-qc4w-packw.h"
+#include "src/qs8-qc4w-packw/qs8-qc4w-packw.inc"
 };
 
 #undef XNN_UKERNEL
-
-}  // namespace
 
 TEST_P(XnnTest, null_bias) {
   TEST_REQUIRES_ARCH_FLAGS(GetParam().arch_flags);
@@ -181,3 +179,5 @@ TEST_P(XnnTest, n_gt_nr) {
 INSTANTIATE_TEST_SUITE_P(qs8_qc4w_packw, XnnTest,
                          testing::ValuesIn(xnn_test_qs8_qc4w_params),
                          GetTestName);
+
+}  // namespace

@@ -22,7 +22,7 @@ def generate_f32_gemm_microkernels():
     os.chdir(os.environ['BUILD_WORKING_DIRECTORY'])
 
   nr = 8
-  for mr in range(1, 10):
+  for mr in range(1, 11):
     generate.generate_gemm_microkernel(
         isa=fma3_template.Fma3(mr, nr, c=1),
         output_file=os.path.join(
@@ -32,7 +32,7 @@ def generate_f32_gemm_microkernels():
     )
 
   nr = 16
-  for mr in range(1, 5):
+  for mr in range(1, 7):
     generate.generate_gemm_microkernel(
         isa=fma3_template.Fma3(mr, nr, c=1),
         output_file=os.path.join(

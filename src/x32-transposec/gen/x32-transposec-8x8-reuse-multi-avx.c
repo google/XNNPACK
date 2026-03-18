@@ -12,11 +12,12 @@
 #include <immintrin.h>
 
 #include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
 
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/math.h"
 #include "src/xnnpack/transpose.h"
-#include "src/xnnpack/unaligned.h"
 
 void xnn_x32_transposec_ukernel__8x8_reuse_multi_avx(
     const uint32_t* input,

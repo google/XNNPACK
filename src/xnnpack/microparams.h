@@ -3,7 +3,8 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#pragma once
+#ifndef XNNPACK_SRC_XNNPACK_MICROPARAMS_H_
+#define XNNPACK_SRC_XNNPACK_MICROPARAMS_H_
 
 #include <stddef.h>
 #include <stdint.h>
@@ -160,7 +161,8 @@ union xnn_qs8_vprelu_scalar_params {
   } scalar;
 };
 
-// Conv w. Min+Max: used by quantized GEMM/IGEMM/DWCONV microkernels with MINMAX activation.
+// Conv w. Min+Max: used by quantized GEMM/IGEMM/DWCONV microkernels with
+// MINMAX activation.
 struct xnn_qd8_quantization_params {
   int32_t zero_point;
   float inv_scale;
@@ -565,6 +567,17 @@ struct xnn_qs8_packw_params {
   int8_t input_zero_point;
 };
 
+struct xnn_qd8_qc2w_packing_params {
+  int8_t input_zero_point;
+  const float* kernel_zero_point;
+};
+
+struct xnn_qs8_qc2w_packing_params {
+  int8_t input_zero_point;
+  float kernel_zero_point;
+};
+
+
 struct xnn_qs8_qc4w_packing_params {
   int8_t input_zero_point;
   uint8_t kernel_zero_point;
@@ -621,3 +634,5 @@ struct subconvolution_params {
   // scaled_kernel_size := kernel_size * mr * sizeof(void*).
   size_t scaled_kernel_size;
 };
+
+#endif  // XNNPACK_SRC_XNNPACK_MICROPARAMS_H_

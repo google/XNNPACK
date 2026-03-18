@@ -36,13 +36,11 @@ std::string GetTestQS8Name(
                             izp)
 
 const XnnTestQS8Param xnn_test_qs8_params[] = {
-#include "src/qs8-packw/qs8-packw.h"
+#include "src/qs8-packw/qs8-packw.inc"
 };
 
 #undef XNN_QS8_UKERNEL
 #undef XNN_QS8_GIO_UKERNEL
-
-}  // namespace
 
 TEST_P(XnnTestQS8, null_bias) {
   TEST_REQUIRES_ARCH_FLAGS(GetParam().arch_flags);
@@ -223,7 +221,7 @@ std::string GetTestQS8GIOName(
 #define XNN_QS8_UKERNEL(arch_flags, ukernel, nr, kr, sr, kblock, nr_scale, izp)
 
 const XnnTestQS8GIOParam xnn_test_qs8_gio_params[] = {
-#include "src/qs8-packw/qs8-packw.h"
+#include "src/qs8-packw/qs8-packw.inc"
 };
 
 #undef XNN_QS8_UKERNEL
@@ -385,3 +383,6 @@ INSTANTIATE_TEST_SUITE_P(qs8_gio_packw, XnnTestQS8GIO,
                          GetTestQS8GIOName);
 
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+}  // namespace
+

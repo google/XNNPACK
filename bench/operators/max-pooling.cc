@@ -1,13 +1,12 @@
 // Copyright (c) Facebook, Inc. and its affiliates.
 // All rights reserved.
 //
-// Copyright 2019 Google LLC
+// Copyright 2019-2025 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
 #include <algorithm>
-#include <cmath>
 #include <cstddef>
 #include <cstdint>
 #include <functional>
@@ -18,6 +17,7 @@
 #include "bench/utils.h"
 #include "include/xnnpack.h"
 #include "src/xnnpack/buffer.h"
+#include "test/replicable_random_device.h"
 #include <benchmark/benchmark.h>
 
 void max_pooling_u8(benchmark::State& state, const char* net) {
@@ -29,8 +29,7 @@ void max_pooling_u8(benchmark::State& state, const char* net) {
   const size_t stride = state.range(5);
   const size_t channels = state.range(6);
 
-  std::random_device random_device;
-  auto rng = std::mt19937(random_device());
+  xnnpack::ReplicableRandomDevice rng;
 
   const size_t output_height =
       (2 * padding_size + input_height - pooling_size) / stride + 1;
@@ -98,7 +97,7 @@ void max_pooling_u8(benchmark::State& state, const char* net) {
   }
 
   state.counters["bytes"] = benchmark::Counter(
-      uint64_t(state.iterations()) * batch_size *
+      static_cast<uint64_t>(state.iterations()) * batch_size *
           (input_height * input_width + output_height * output_width) *
           channels * sizeof(uint8_t),
       benchmark::Counter::kIsRate);
@@ -113,8 +112,7 @@ void max_pooling_f32(benchmark::State& state, const char* net) {
   const size_t stride = state.range(5);
   const size_t channels = state.range(6);
 
-  std::random_device random_device;
-  auto rng = std::mt19937(random_device());
+  xnnpack::ReplicableRandomDevice rng;
   auto f32rng = std::bind(std::uniform_real_distribution<float>(0.0f, 1.0f),
                           std::ref(rng));
 
@@ -185,14 +183,14 @@ void max_pooling_f32(benchmark::State& state, const char* net) {
   }
 
   state.counters["bytes"] = benchmark::Counter(
-      uint64_t(state.iterations()) * batch_size *
+      static_cast<uint64_t>(state.iterations()) * batch_size *
           (input_height * input_width + output_height * output_width) *
           channels * sizeof(float),
       benchmark::Counter::kIsRate);
 }
 
 // ShuffleNet v1/v2.
-static void ShuffleNet(benchmark::internal::Benchmark* b) {
+static void ShuffleNet(benchmark::Benchmark* b) {
   b->ArgNames({"N", "H", "W", "K", "P", "S", "C"});
 
   /*       N   H   W    K  P  S   C */
@@ -200,7 +198,7 @@ static void ShuffleNet(benchmark::internal::Benchmark* b) {
 }
 
 // SqueezeNet 1.0
-static void SqueezeNetV10(benchmark::internal::Benchmark* b) {
+static void SqueezeNetV10(benchmark::Benchmark* b) {
   b->ArgNames({"N", "H", "W", "K", "P", "S", "C"});
 
   /*********** MaxPool 1 ************/
@@ -215,7 +213,7 @@ static void SqueezeNetV10(benchmark::internal::Benchmark* b) {
 }
 
 // SqueezeNet 1.1
-static void SqueezeNetV11(benchmark::internal::Benchmark* b) {
+static void SqueezeNetV11(benchmark::Benchmark* b) {
   b->ArgNames({"N", "H", "W", "K", "P", "S", "C"});
 
   /*********** MaxPool 1 ***********/
@@ -229,7 +227,7 @@ static void SqueezeNetV11(benchmark::internal::Benchmark* b) {
   b->Args({1, 13, 13, 3, 0, 2, 256});
 }
 
-static void VGG(benchmark::internal::Benchmark* b) {
+static void VGG(benchmark::Benchmark* b) {
   b->ArgNames({"N", "H", "W", "K", "P", "S", "C"});
 
   /*       N   H    W   K  P  S   C */

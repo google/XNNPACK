@@ -4,8 +4,8 @@
 // LICENSE file in the root directory of this source tree.
 //
 
-#ifndef __XNNPACK_SRC_XNNPACK_SIMD_U8_SSE2_H_
-#define __XNNPACK_SRC_XNNPACK_SIMD_U8_SSE2_H_
+#ifndef XNNPACK_SRC_XNNPACK_SIMD_U8_SSE2_H_
+#define XNNPACK_SRC_XNNPACK_SIMD_U8_SSE2_H_
 
 #include <assert.h>
 #include <emmintrin.h>
@@ -141,6 +141,9 @@ static XNN_INLINE xnn_simd_u8_t xnn_load_tail_safe_u8(const uint8_t* input,
       XNN_FALLTHROUGH
     case 1:
       *d++ = *input++;
+      XNN_FALLTHROUGH
+    default:
+      break;
   }
   return _mm_load_si128((const __m128i*)&padded[0]);
 }
@@ -170,4 +173,4 @@ static XNN_INLINE void xnn_store_tail_u8(uint8_t* output, xnn_simd_u8_t v,
   }
 }
 
-#endif  // __XNNPACK_SRC_XNNPACK_SIMD_U8_SSE2_H_
+#endif  // XNNPACK_SRC_XNNPACK_SIMD_U8_SSE2_H_

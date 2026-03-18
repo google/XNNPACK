@@ -166,9 +166,11 @@ def main(args):
   )
 
   folder = datatype + "-" + ("vbinary" if datatype.startswith("f") else op)
-  tests += f'#include "src/{folder}/{options.ukernel}.h"\n'
+  tests += (
+      f'#include "src/{folder}/{options.ukernel}.inc"\n'
+  )
   tests += "#undef XNN_UKERNEL\n"
-  tests = tests.replace("s32-vmulc/s32-vmulc.h", "s32-vmul/s32-vmulc.h")
+  tests = tests.replace("s32-vmulc/s32-vmulc.inc", "s32-vmul/s32-vmulc.inc")
 
   xnncommon.overwrite_if_changed(options.output, tests)
 

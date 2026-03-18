@@ -6,7 +6,6 @@
 $assert BATCH_TILE % 4 == 0
 $assert BATCH_TILE >= 4
 $SIMD_TILE = BATCH_TILE // 4
-$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 $assert OP in ["ADD", "DIV", "MAX", "MIN", "MUL", "SUB", "SQRDIFF", "PRELU"]
 #include <assert.h>
 
@@ -44,32 +43,29 @@ void xnn_f32_v${OP.lower()}_ukernel__wasm${RELAXED_SUFFIX}simd${ARCH_SUFFIX}_u${
 
   $if BATCH_TILE > 4:
     for (; batch >= ${BATCH_TILE} * sizeof(float); batch -= ${BATCH_TILE} * sizeof(float)) {
-      const v128_t va${ABC[0]} = wasm_v128_load(input_a);
-      $for N in range(1, SIMD_TILE):
-        const v128_t va${ABC[N]} = wasm_v128_load(input_a + ${N * 4});
+      $for N in range(SIMD_TILE):
+        const v128_t va${N} = wasm_v128_load(input_a + ${N * 4});
       input_a += ${BATCH_TILE};
 
-      const v128_t vb${ABC[0]} = wasm_v128_load(input_b);
-      $for N in range(1, SIMD_TILE):
-        const v128_t vb${ABC[N]} = wasm_v128_load(input_b + ${N * 4});
+      $for N in range(SIMD_TILE):
+        const v128_t vb${N} = wasm_v128_load(input_b + ${N * 4});
       input_b += ${BATCH_TILE};
 
       $for N in range(SIMD_TILE):
-        v128_t vacc${ABC[N]} = ${WASM_F32X4_OP}(va${ABC[N]}, vb${ABC[N]});
+        v128_t vacc${N} = ${WASM_F32X4_OP}(va${N}, vb${N});
 
       $if OP == "SQRDIFF":
         $for N in range(SIMD_TILE):
-          vacc${ABC[N]} = wasm_f32x4_mul(vacc${ABC[N]}, vacc${ABC[N]});
+          vacc${N} = wasm_f32x4_mul(vacc${N}, vacc${N});
       $elif OP == "PRELU":
         $for N in range(SIMD_TILE):
-          const v128_t vmask${ABC[N]} = wasm_i32x4_shr(va${ABC[N]}, 31);
+          const v128_t vmask${N} = wasm_i32x4_shr(va${N}, 31);
 
         $for N in range(SIMD_TILE):
-          vacc${ABC[N]} = ${WASM_V32X4_LANESELECT}(vacc${ABC[N]}, va${ABC[N]}, vmask${ABC[N]});
+          vacc${N} = ${WASM_V32X4_LANESELECT}(vacc${N}, va${N}, vmask${N});
 
-      wasm_v128_store(output, vacc${ABC[0]});
-      $for N in range(1, SIMD_TILE):
-        wasm_v128_store(output + ${N * 4}, vacc${ABC[N]});
+      $for N in range(SIMD_TILE):
+        wasm_v128_store(output + ${N * 4}, vacc${N});
       output += ${BATCH_TILE};
     }
   for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {

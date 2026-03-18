@@ -12,6 +12,7 @@ $assert KR == 4
 
 #include <emmintrin.h>
 
+#include "src/xnnpack/common.h"
 #include "src/xnnpack/packw.h"
 $if PREFETCH:
   #include "src/xnnpack/prefetch.h"

@@ -3,7 +3,8 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#pragma once
+#ifndef XNNPACK_TEST_OPERATORS_ROPE_OPERATOR_TESTER_H_
+#define XNNPACK_TEST_OPERATORS_ROPE_OPERATOR_TESTER_H_
 
 #include <algorithm>
 #include <cassert>
@@ -301,3 +302,5 @@ class RoPEOperatorTester {
   size_t batch_size_{1};
   size_t iterations_{3};
 };
+
+#endif  // XNNPACK_TEST_OPERATORS_ROPE_OPERATOR_TESTER_H_

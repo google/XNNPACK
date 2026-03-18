@@ -4,13 +4,13 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <cstddef>
-#include <random>
 
 #include "bench/utils.h"
 #include "src/xnnpack/buffer.h"
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/hardware-config.h"  // IWYU pragma: keep
 #include "src/xnnpack/reduce.h"  // IWYU pragma: keep
+#include "test/replicable_random_device.h"
 #include <benchmark/benchmark.h>
 
 // Microkernel function, templated on the `params` type.
@@ -27,8 +27,7 @@ static void reduce(benchmark::State& state, uint64_t arch_flags,
   const size_t channels = state.range(0);
   const size_t rows = state.range(1);
 
-  std::random_device random_device;
-  auto rng = std::mt19937(random_device());
+  xnnpack::ReplicableRandomDevice rng;
 
   xnnpack::Buffer<T, XNN_ALLOCATION_ALIGNMENT> input(channels * rows,
                                                      xnnpack::XnnExtraBytes);
@@ -48,14 +47,14 @@ static void reduce(benchmark::State& state, uint64_t arch_flags,
   }
 
   const size_t elements_per_iteration = rows * channels;
-  state.counters["elements"] =
-      benchmark::Counter(uint64_t(state.iterations()) * elements_per_iteration,
-                         benchmark::Counter::kIsRate);
+  state.counters["elements"] = benchmark::Counter(
+      static_cast<uint64_t>(state.iterations()) * elements_per_iteration,
+      benchmark::Counter::kIsRate);
 
   const size_t bytes_per_iteration = rows * channels * sizeof(T);
-  state.counters["bytes"] =
-      benchmark::Counter(uint64_t(state.iterations()) * bytes_per_iteration,
-                         benchmark::Counter::kIsRate);
+  state.counters["bytes"] = benchmark::Counter(
+      static_cast<uint64_t>(state.iterations()) * bytes_per_iteration,
+      benchmark::Counter::kIsRate);
 }
 
 #define XNN_UKERNEL(arch_flags, ukernel, batch_tile, vector_tile, datatype_in, \
@@ -63,18 +62,18 @@ static void reduce(benchmark::State& state, uint64_t arch_flags,
   BENCHMARK_CAPTURE(reduce, ukernel, arch_flags, ukernel)                      \
       ->Apply(benchmark::utils::ReduceParameters<datatype_in>)                 \
       ->UseRealTime();
-#include "src/f16-rminmax/f16-rmax.h"
-#include "src/f16-rminmax/f16-rmin.h"
-#include "src/f16-rminmax/f16-rminmax.h"
-#include "src/f32-rminmax/f32-rmax.h"
-#include "src/f32-rminmax/f32-rmin.h"
-#include "src/f32-rminmax/f32-rminmax.h"
-#include "src/s8-rminmax/s8-rmax.h"
-#include "src/s8-rminmax/s8-rmin.h"
-#include "src/s8-rminmax/s8-rminmax.h"
-#include "src/u8-rminmax/u8-rmax.h"
-#include "src/u8-rminmax/u8-rmin.h"
-#include "src/u8-rminmax/u8-rminmax.h"
+#include "src/f16-rminmax/f16-rmax.inc"
+#include "src/f16-rminmax/f16-rmin.inc"
+#include "src/f16-rminmax/f16-rminmax.inc"
+#include "src/f32-rminmax/f32-rmax.inc"
+#include "src/f32-rminmax/f32-rmin.inc"
+#include "src/f32-rminmax/f32-rminmax.inc"
+#include "src/s8-rminmax/s8-rmax.inc"
+#include "src/s8-rminmax/s8-rmin.inc"
+#include "src/s8-rminmax/s8-rminmax.inc"
+#include "src/u8-rminmax/u8-rmax.inc"
+#include "src/u8-rminmax/u8-rmin.inc"
+#include "src/u8-rminmax/u8-rminmax.inc"
 #undef XNN_UKERNEL
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN

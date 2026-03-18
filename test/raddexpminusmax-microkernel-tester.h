@@ -3,7 +3,8 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#pragma once
+#ifndef XNNPACK_TEST_RADDEXPMINUSMAX_MICROKERNEL_TESTER_H_
+#define XNNPACK_TEST_RADDEXPMINUSMAX_MICROKERNEL_TESTER_H_
 
 #include <algorithm>
 #include <cassert>
@@ -71,3 +72,5 @@ class RAddExpMinusMaxMicrokernelTester {
   size_t elements_{1};
   size_t iterations_{15};
 };
+
+#endif  // XNNPACK_TEST_RADDEXPMINUSMAX_MICROKERNEL_TESTER_H_

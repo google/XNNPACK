@@ -98,12 +98,12 @@ TestParams transpose_ukernels[] = {
                               block_width, block_height)                       \
   {#ukernel,     arch_flags,  make_ukernel_wrapper(ukernel),                   \
    element_size, block_width, block_height},
-#include "src/x16-transposec/x16-transposec.h"
-#include "src/x24-transposec/x24-transposec.h"
-#include "src/x32-transposec/x32-transposec.h"
-#include "src/x64-transposec/x64-transposec.h"
-#include "src/x8-transposec/x8-transposec.h"
-#include "src/xx-transposev/xx-transposev.h"
+#include "src/x16-transposec/x16-transposec.inc"
+#include "src/x24-transposec/x24-transposec.inc"
+#include "src/x32-transposec/x32-transposec.inc"
+#include "src/x64-transposec/x64-transposec.inc"
+#include "src/x8-transposec/x8-transposec.inc"
+#include "src/xx-transposev/xx-transposev.inc"
 };
 #undef XNN_TRANSPOSE_UKERNEL
 
@@ -113,7 +113,7 @@ TestParams transposev_ukernels[] = {
                               block_width, block_height)                       \
   {#ukernel,     arch_flags,  make_ukernel_wrapper(ukernel),                   \
    element_size, block_width, block_height},
-#include "src/xx-transposev/xx-transposev.h"
+#include "src/xx-transposev/xx-transposev.inc"
 };
 #undef XNN_TRANSPOSE_UKERNEL
 

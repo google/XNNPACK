@@ -6,7 +6,8 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#pragma once
+#ifndef XNNPACK_SRC_XNNPACK_INDIRECTION_H_
+#define XNNPACK_SRC_XNNPACK_INDIRECTION_H_
 
 #include <stddef.h>
 #include <stdint.h>
@@ -152,3 +153,5 @@ XNN_INTERNAL void xnn_indirection_init_pavgpool2d_f32(
 #ifdef __cplusplus
 }  // extern "C"
 #endif
+
+#endif  // XNNPACK_SRC_XNNPACK_INDIRECTION_H_

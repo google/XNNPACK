@@ -3,8 +3,8 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#ifndef __XNNPACK_TEST_BUFFER_H_
-#define __XNNPACK_TEST_BUFFER_H_
+#ifndef XNNPACK_TEST_BUFFER_H_
+#define XNNPACK_TEST_BUFFER_H_
 
 #include <algorithm>
 #include <array>
@@ -33,24 +33,6 @@
 #include "src/xnnpack/log.h"
 #include "src/xnnpack/math.h"
 #include "src/xnnpack/reference-utils.h"
-
-#if XNN_COMPILER_HAS_FEATURE(memory_sanitizer)
-#include <sanitizer/msan_interface.h>
-#define XNN_MSAN_POISON(x, size) __msan_poison(x, size)
-#define XNN_MSAN_UNPOISON(x, size) __msan_unpoison(x, size)
-#else
-#define XNN_MSAN_POISON(x, size)
-#define XNN_MSAN_UNPOISON(x, size)
-#endif
-
-#if XNN_COMPILER_HAS_FEATURE(address_sanitizer)
-#include <sanitizer/asan_interface.h>
-#define XNN_ASAN_POISON(x, size) __asan_poison_memory_region(x, size)
-#define XNN_ASAN_UNPOISON(x, size) __asan_unpoison_memory_region(x, size)
-#else
-#define XNN_ASAN_POISON(x, size)
-#define XNN_ASAN_UNPOISON(x, size)
-#endif
 
 namespace xnnpack {
 
@@ -128,7 +110,9 @@ template <typename T>
 T get_reduce_identity(xnn_reduce_operator op) {
   switch (op) {
     case xnn_reduce_sum:
+    case xnn_reduce_sum_squared:
     case xnn_reduce_mean:
+    case xnn_reduce_mean_squared:
       return 0;
     case xnn_reduce_max:
       return NumericLimits<T>::max_identity();
@@ -175,12 +159,9 @@ class Buffer {
                      std::max<size_t>(guard_bytes, extra_bytes.value)))),
         size_(size),
         name_(name) {
-    // Fill the region before the allocation with the guard bytes, and poison it
-    // for sanitizers.
+    // Fill the region before the allocation with the guard bytes.
     uint8_t* before = reinterpret_cast<uint8_t*>(data_);
     fill_guard_bytes(before);
-    XNN_MSAN_POISON(before, guard_bytes);
-    XNN_ASAN_POISON(before, guard_bytes);
 
     // The actual allocation is after the guard bytes.
     data_ =
@@ -189,12 +170,6 @@ class Buffer {
     // Fill the region after the allocation with the guard bytes.
     uint8_t* after = reinterpret_cast<uint8_t*>(data_ + size_);
     fill_guard_bytes(after);
-    // Here, we only want to poison the memory for sanitizers after the extra
-    // bytes. We want to allow reads past the end to not crash (in asan or
-    // otherwise), but we don't want that memory to be considered initialized by
-    // msan.
-    XNN_ASAN_POISON(after + extra_bytes.value, guard_bytes - extra_bytes.value);
-    XNN_MSAN_POISON(after, guard_bytes);
   }
   Buffer(size_t size, T value, PaddingBytes extra_bytes = {0},
          const char* name = nullptr)
@@ -212,11 +187,8 @@ class Buffer {
   }
   ~Buffer() {
     if (data_) {
-      // Check that the guard bytes after the buffer have not been modified. We
-      // need to unpoison the memory first so we can read it.
+      // Check that the guard bytes after the buffer have not been modified.
       const uint8_t* after = reinterpret_cast<uint8_t*>(data_ + size_);
-      XNN_ASAN_UNPOISON(after, guard_bytes);
-      XNN_MSAN_UNPOISON(after, guard_bytes);
       if (!check_guard_bytes(after)) {
         xnn_log_fatal(
             "Buffer%s%s%s: guard bytes after allocation were corrupted, "
@@ -228,8 +200,6 @@ class Buffer {
 
       // Check that the guard bytes before the buffer have not been modified.
       const uint8_t* before = reinterpret_cast<uint8_t*>(data_);
-      XNN_ASAN_UNPOISON(before, guard_bytes);
-      XNN_MSAN_UNPOISON(before, guard_bytes);
       if (!check_guard_bytes(before)) {
         xnn_log_fatal(
             "Buffer%s%s%s: guard bytes before allocation were corrupted, "
@@ -296,6 +266,7 @@ class Buffer {
 #endif
     }
 #endif
+    assert(reinterpret_cast<std::uintptr_t>(memory) % alignment == 0);
     return reinterpret_cast<T*>(memory);
   }
 
@@ -308,7 +279,15 @@ class Buffer {
   }
 
   // Some compilers can't handle static constexpr member variables.
+#if (XNN_COMPILER_HAS_FEATURE(address_sanitizer) || \
+    XNN_COMPILER_HAS_FEATURE(memory_sanitizer)) && !XNN_ARCH_ARM
+  // If we are using msan or asan, just rely on that to detect memory bugs,
+  // rather than our own hack. We don't do this on 32-bit ARM, because ASAN
+  // doesn't seem to actually detect out of bounds writes there.
+  enum { guard_bytes = 0 };
+#else
   enum { guard_bytes = std::max<size_t>(64, Alignment) };
+#endif
   // This value is chosen such that in the 16 bytes we have:
   // - float32 NaN (upper 32 bits)
   // - float16 NaN (lower 16 bits, the mantissa of the negative float32)
@@ -551,40 +530,33 @@ class Tensor {
 
   // This uses the same rules for indexing as numpy, i.e. negative numbers are
   // offset are added to the extents.
-  Tensor<T, Alignment> slice(const std::vector<int64_t>& begins,
-                             const std::vector<int64_t>& ends) const {
-    assert(rank() == begins.size());
-    assert(rank() == ends.size());
-
-    Tensor<T, Alignment> result(*this);
-    std::vector<size_t> offsets(rank());
-    std::vector<size_t> maxs(rank());
-    for (size_t i = 0; i < rank(); ++i) {
-      offsets[i] = begins[i] < 0 ? extents_[i] + begins[i] : begins[i];
-      result.extents_[i] = std::max<int64_t>(
-          0, (ends[i] <= 0 ? static_cast<int64_t>(extents_[i]) + ends[i]
-                           : ends[i]) -
-                 static_cast<int64_t>(offsets[i]));
-      maxs[i] = doz(result.extents_[i], 1);
-    }
-
-    result.begin_ = begin_ + flat_offset(offsets);
-    result.end_ = result.begin_ + result.flat_offset(maxs) + 1;
-
-    return result;
-  }
-
-  // This is similar to the above, but only slices one dimension.
   Tensor<T, Alignment> slice(size_t dim, int64_t begin, int64_t end) const {
     assert(dim < rank());
 
     begin = begin < 0 ? extents_[dim] + begin : begin;
     end = end <= 0 ? extents_[dim] + end : end;
 
+    begin = std::max<int64_t>(std::min<int64_t>(begin, extents_[dim]), 0);
+    end = std::max<int64_t>(std::min<int64_t>(end, extents_[dim]), begin);
+
     Tensor<T, Alignment> result(*this);
     result.extents_[dim] = end - begin;
     result.begin_ = begin_ + strides_[dim] * begin;
     result.end_ = begin_ + strides_[dim] * end;
+
+    return result;
+  }
+
+  // This is similar to above, but slices all dimensions.
+  Tensor<T, Alignment> slice(const std::vector<int64_t>& begins,
+                             const std::vector<int64_t>& ends) const {
+    assert(rank() == begins.size());
+    assert(rank() == ends.size());
+
+    Tensor<T, Alignment> result(*this);
+    for (size_t i = 0; i < rank(); ++i) {
+      result = result.slice(i, begins[i], ends[i]);
+    }
 
     return result;
   }
@@ -595,14 +567,11 @@ class Tensor {
 
   // Slice the leading dimensions at the indices of `at`.
   Tensor<T, Alignment> slice_leading(std::vector<size_t> at) const {
-    std::vector<int64_t> begins(rank());
-    std::vector<int64_t> ends(rank());
-    std::copy(at.begin(), at.end(), begins.begin());
-    std::copy(at.begin(), at.end(), ends.begin());
+    Tensor<T, Alignment> result(*this);
     for (size_t i = 0; i < at.size(); ++i) {
-      ends[i] += 1;
+      result = result.slice(i, at[i], at[i] + 1);
     }
-    return slice(begins, ends);
+    return result;
   }
 
   // Split a dimension dim into dimensions of extent `split_extents`. The first
@@ -935,6 +904,7 @@ xnn_quantization_params random_quantization(xnn_datatype datatype, Rng& rng,
     case xnn_datatype_qint8:
     case xnn_datatype_qcint8:
     case xnn_datatype_qcint4:
+    case xnn_datatype_qcint2:
       // signed integer quantization assumes zero point is 0.
       return {0, scale_dist(rng)};
     case xnn_datatype_quint8:
@@ -973,7 +943,7 @@ class DatatypeGenerator {
   bool reinterpret_ = false;
 
  public:
-  DatatypeGenerator(float min, float max, const xnn_quantization_params& = {}) {
+  DatatypeGenerator(double min, double max, const xnn_quantization_params& = {}) {
     if (min <= NumericLimits<T>::min() && max >= NumericLimits<T>::max()) {
       // The caller wants a full range of random value. Rather than generate
       // floats uniformly distributed across the range of floats, where a
@@ -984,8 +954,8 @@ class DatatypeGenerator {
       reinterpret_ = true;
     } else {
       reinterpret_ = false;
-      min = std::max<float>(min, NumericLimits<T>::min());
-      max = std::min<float>(max, NumericLimits<T>::max());
+      min = std::max<double>(min, NumericLimits<T>::min());
+      max = std::min<double>(max, NumericLimits<T>::max());
       dist_ = std::uniform_real_distribution<float>(min, max);
     }
   }
@@ -1041,7 +1011,7 @@ class DatatypeGenerator<quantized<T>> {
 
  public:
   DatatypeGenerator(float min, float max,
-                    const xnn_quantization_params& params) {
+                    const xnn_quantization_params params = {0, 1.0f}) {
     min = std::ceil(fake_quantize(min, params));
     max = std::floor(fake_quantize(max, params));
     dist_ = std::uniform_int_distribution<int>(round_float_to_int<T>(min),
@@ -1050,7 +1020,8 @@ class DatatypeGenerator<quantized<T>> {
   explicit DatatypeGenerator(const xnn_quantization_params& params)
       : DatatypeGenerator(-1.0f, 1.0f, params) {}
   DatatypeGenerator()
-      : dist_(std::numeric_limits<T>::min(), std::numeric_limits<T>::max()) {}
+      : DatatypeGenerator(std::numeric_limits<T>::min(),
+                          std::numeric_limits<T>::max()) {}
 
   template <typename Rng>
   T operator()(Rng& rng) {
@@ -1163,4 +1134,4 @@ inline std::string index_to_string(const std::vector<size_t>& v) {
 
 }  // namespace xnnpack
 
-#endif  // __XNNPACK_TEST_BUFFER_H_
+#endif  // XNNPACK_TEST_BUFFER_H_

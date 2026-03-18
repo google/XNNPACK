@@ -11,11 +11,10 @@
 #include <assert.h>
 #include <stddef.h>
 
-#include "src/xnnpack/simd/f16-neonfp16arith.h"
-
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/math.h"
 #include "src/xnnpack/microparams.h"
+#include "src/xnnpack/simd/f16-neonfp16arith.h"
 #include "src/xnnpack/vunary.h"
 
 
@@ -85,7 +84,7 @@ void xnn_f16_vapproxgelu_ukernel__neonfp16arith_rational_6_4_div_u8(
     output += xnn_simd_size_f16;
   }
   if XNN_UNLIKELY(batch != 0) {
-    xnn_simd_f16_t vx_orig = xnn_load_tail_f16(input, batch >> XNN_LOG2_SIZEOF_HALF);
+    xnn_simd_f16_t vx_orig = xnn_load_tail_f16(input, batch >> XNN_LOG2_SIZEOF_FLOAT16);
 
   // See above for comments.
   xnn_simd_f16_t vx = xnn_min_f16(vmax_abs_x, vx_orig);
@@ -100,7 +99,7 @@ void xnn_f16_vapproxgelu_ukernel__neonfp16arith_rational_6_4_div_u8(
   const xnn_simd_f16_t vy = xnn_mul_f16(xnn_mul_f16(vx_orig, vhalf),
                                         xnn_add_f16(verf, vone));
 
-    xnn_store_tail_f16(output, vy, batch >> XNN_LOG2_SIZEOF_HALF);
+    xnn_store_tail_f16(output, vy, batch >> XNN_LOG2_SIZEOF_FLOAT16);
   }
 }
 
@@ -214,7 +213,7 @@ void xnn_f16_vapproxgelu_ukernel__neonfp16arith_rational_6_4_div_u16(
     output += xnn_simd_size_f16;
   }
   if XNN_UNLIKELY(batch != 0) {
-    xnn_simd_f16_t vx_orig = xnn_load_tail_f16(input, batch >> XNN_LOG2_SIZEOF_HALF);
+    xnn_simd_f16_t vx_orig = xnn_load_tail_f16(input, batch >> XNN_LOG2_SIZEOF_FLOAT16);
 
   // See above for comments.
   xnn_simd_f16_t vx = xnn_min_f16(vmax_abs_x, vx_orig);
@@ -229,7 +228,7 @@ void xnn_f16_vapproxgelu_ukernel__neonfp16arith_rational_6_4_div_u16(
   const xnn_simd_f16_t vy = xnn_mul_f16(xnn_mul_f16(vx_orig, vhalf),
                                         xnn_add_f16(verf, vone));
 
-    xnn_store_tail_f16(output, vy, batch >> XNN_LOG2_SIZEOF_HALF);
+    xnn_store_tail_f16(output, vy, batch >> XNN_LOG2_SIZEOF_FLOAT16);
   }
 }
 
@@ -369,7 +368,7 @@ void xnn_f16_vapproxgelu_ukernel__neonfp16arith_rational_6_4_div_u32(
     output += xnn_simd_size_f16;
   }
   if XNN_UNLIKELY(batch != 0) {
-    xnn_simd_f16_t vx_orig = xnn_load_tail_f16(input, batch >> XNN_LOG2_SIZEOF_HALF);
+    xnn_simd_f16_t vx_orig = xnn_load_tail_f16(input, batch >> XNN_LOG2_SIZEOF_FLOAT16);
 
   // See above for comments.
   xnn_simd_f16_t vx = xnn_min_f16(vmax_abs_x, vx_orig);
@@ -384,6 +383,6 @@ void xnn_f16_vapproxgelu_ukernel__neonfp16arith_rational_6_4_div_u32(
   const xnn_simd_f16_t vy = xnn_mul_f16(xnn_mul_f16(vx_orig, vhalf),
                                         xnn_add_f16(verf, vone));
 
-    xnn_store_tail_f16(output, vy, batch >> XNN_LOG2_SIZEOF_HALF);
+    xnn_store_tail_f16(output, vy, batch >> XNN_LOG2_SIZEOF_FLOAT16);
   }
 }

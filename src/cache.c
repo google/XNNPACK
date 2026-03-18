@@ -1,4 +1,4 @@
-// Copyright 2022 Google LLC
+// Copyright 2022-2025 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
@@ -68,8 +68,10 @@ uint32_t murmur_hash3(const void* key, size_t len, uint32_t seed)
   switch (len & 3) {
     case 3:
       k1 ^= tail[2] << 16;
+      XNN_FALLTHROUGH
     case 2:
       k1 ^= tail[1] << 8;
+      XNN_FALLTHROUGH
     case 1:
       k1 ^= tail[0];
       k1 *= c1;
@@ -468,4 +470,12 @@ size_t xnn_weights_cache_look_up(
   xnn_weights_cache_t cache, const struct xnn_weights_cache_look_up_key* cache_key)
 {
   return cache->look_up(cache->context, cache_key);
+}
+
+enum xnn_status xnn_weights_cache_alias_data(xnn_weights_cache_t cache,
+                                             void* alias, void* original) {
+  if (cache->alias_data) {
+    return cache->alias_data(cache->context, alias, original);
+  }
+  return xnn_status_success;
 }

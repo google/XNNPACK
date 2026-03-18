@@ -20,6 +20,7 @@
 #include "src/xnnpack/buffer.h"
 #include "src/xnnpack/math.h"
 #include "src/xnnpack/node-type.h"
+#include "src/xnnpack/operator.h"
 #include "src/xnnpack/subgraph.h"
 #include "test/replicable_random_device.h"
 #include "test/subgraph/mock-allocator.h"
@@ -579,8 +580,8 @@ TEST(SUBGRAPH_FP16, fully_connected_qd8_f16_qc8w) {
   int8_t static_filter_data[6 + XNN_EXTRA_BYTES / sizeof(int8_t)] = {
       1, 2, 3, -3, -2, -1,
   };
-  float bias[2] = {1, 2};
-  float kernel_scale[2] = {0.5f, 1.5f};
+  float bias[2 + XNN_EXTRA_BYTES / sizeof(float)] = {1, 2};
+  float kernel_scale[2 + XNN_EXTRA_BYTES / sizeof(float)] = {0.5f, 1.5f};
   // external input[0]   bias [2]   static filter [1]
   //        |              /        /
   //  [convert f32->qd8]  /        /
@@ -645,7 +646,26 @@ TEST(SUBGRAPH_FP16, fully_connected_qd8_f16_qc8w) {
   xnnpack::Buffer<float> input(15, xnnpack::XnnExtraBytes);
   std::generate(input.begin(), input.end(), std::ref(f32rng));
   xnnpack::Buffer<float> reference_output(10), output(10);
-  ASSERT_EQ(tester.NumNodes(), 4);
+
+  switch (tester.NumNodes()) {
+    case 3:
+      // LHS packing was inlined.
+      ASSERT_EQ(tester.Node(0)->type, xnn_node_type_convert);
+      ASSERT_EQ(tester.Node(1)->type, xnn_node_type_fully_connected);
+      ASSERT_EQ(tester.Node(2)->type, xnn_node_type_convert);
+      ASSERT_TRUE(tester.Node(1)->flags & XNN_FLAG_INLINE_LHS_PACKING);
+      break;
+    case 4:
+      ASSERT_EQ(tester.Node(0)->type, xnn_node_type_convert);
+      ASSERT_EQ(tester.Node(1)->type, xnn_node_type_convert);
+      ASSERT_EQ(tester.Node(2)->type, xnn_node_type_fully_connected);
+      ASSERT_EQ(tester.Node(3)->type, xnn_node_type_convert);
+      break;
+    default:
+      GTEST_FAIL() << "Expected either 3 (inlined LHS packing) or 4 (no "
+                      "inlined LHS packing) nodes, but got "
+                   << tester.NumNodes() << ".";
+  }
 
   xnn_runtime_t fp16_runtime_ptr = nullptr;
   xnn_status status =
@@ -1203,5 +1223,186 @@ TEST(SUBGRAPH_FP16_BATCH_MATRIX_MULTIPLY, with_non_static_value) {
   const xnn_value* convert_out = tester.Value(3);
   ASSERT_EQ(convert_out->allocation_type, xnn_allocation_type_workspace);
 }
+
+TEST(SUBGRAPH_FP16_DUPLICATE_INPUTS, converted_only_once) {
+  SubgraphTester tester(2);
+
+  // external input[0]   input[0]
+  //               \     /
+  //                \   /
+  //                [add]
+  //                  |
+  //               external
+  //               output[1]
+  tester.AddInputTensorF32({1, 2, 2, 3}, 0)
+      .AddOutputTensorF32({1, 2, 2, 3}, 1)
+      .AddBinary(xnn_binary_add, nullptr, 0, 0, 1)
+      .Optimize()
+      .RewriteForFp16();
+
+  // After rewriting for FP16, the graph should look like this, with *
+  // indicating new operators and values created: The static tensor data has
+  // been converted into a new buffer.
+  //
+  // external input[0]
+  //        |
+  //    [convert]*
+  //        |
+  //     input[2]*.    input[2]*
+  //        \.            /
+  //         \           /
+  //             [add]
+  //               |
+  //           fp16 value[3]*
+  //               |
+  //           [convert]*
+  //               |
+  //             external
+  //             output[1]
+
+  // We should have 3 nodes, the original Add node, plus one convert node for
+  // each of the external input and output.
+  ASSERT_EQ(tester.NumNodes(), 3);
+  ASSERT_EQ(tester.Node(0)->type, xnn_node_type_convert);
+  ASSERT_EQ(tester.Node(1)->type, xnn_node_type_binary_elementwise);
+  ASSERT_EQ(tester.Node(2)->type, xnn_node_type_convert);
+
+  // Check that the inputs to the Add node are the same value.
+  ASSERT_EQ(tester.Node(1)->inputs[0], tester.Node(1)->inputs[1]);
+
+  // Check that the output of convert is allocated in workspace.
+  const xnn_value* convert_out = tester.Value(3);
+  ASSERT_EQ(convert_out->allocation_type, xnn_allocation_type_workspace);
+}
+
+#if XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI
+// This test targets the failure where pf16 packed-LHS iGEMM kernels were
+// accidentally invoked through the non-packed iGEMM call path. The packed-LHS
+// kernels have a different function signature, so the runtime ended up passing
+// mismatched arguments (e.g. params pointer where a stride was expected),
+// causing a crash. In this test we build a Conv2D that forces the pf16 iGEMM path with
+// inline LHS packing enabled
+TEST(SUBGRAPH_FP16_CONVOLUTION, inline_lhs_packing_pf16) {
+
+    const auto* hw = xnn_init_hardware_config();
+    if (!hw || (hw->arch_flags & xnn_arch_arm_sme2) == 0
+            || (hw->arch_flags & xnn_arch_arm_sme ) == 0) {
+      GTEST_SKIP() << "PF16/SME(2) path not available on this target";
+    }
+
+  // Construct an NHWC Conv that triggers iGEMM path
+  // Shapes: N=1, H=W=8 => output_size=64; Cin=32, Cout=64.
+  SubgraphTester tester(/*external_value_ids=*/ 4);
+  SubgraphTester reference_tester(/*external_value_ids=*/ 4);
+
+  const uint32_t input_id = 0;
+  const uint32_t filter_id = 1;
+  const uint32_t bias_id = 2;
+  const uint32_t output_id = 3;
+  const uint32_t runtime_flags = xnn_test_runtime_flags() & ~XNN_FLAG_NO_INLINED_LHS_PACKING;
+
+  // Build FP32 graph (then rewrite to FP16 in tester).
+  tester.AddInputTensorF32({1, 8, 8, 32}, input_id)
+        .AddStaticTensorF32({64, 3, 3, 32}, TensorType::kDense, filter_id)
+        .AddStaticTensorF32({64}, TensorType::kDense, bias_id)
+        .AddOutputTensorF32({1, 8, 8, 64}, output_id)
+        .AddConvolution2D(
+            ConvolutionParams{
+                Padding{1, 1, 1, 1},
+                Kernel{3, 3},
+                Subsampling{1, 1},
+                Dilation{1, 1},
+                /*groups=*/1,
+                /*group_input_channels=*/32,
+                /*group_output_channels=*/64,
+                /*output_min=*/-INFINITY,
+                /*output_max=*/INFINITY},
+                input_id, filter_id, bias_id, output_id, 0)
+        .RewriteForFp16()
+        .Optimize(runtime_flags);
+
+  // Reference FP32 graph for output comparison.
+  reference_tester
+      .AddInputTensorF32({1, 8, 8, 32}, input_id)
+      .AddStaticTensorF32({64, 3, 3, 32}, TensorType::kDense, filter_id)
+      .AddStaticTensorF32({64}, TensorType::kDense, bias_id)
+      .AddOutputTensorF32({1, 8, 8, 64}, output_id)
+      .AddConvolution2D(
+          ConvolutionParams{
+              Padding{1, 1, 1, 1},
+              Kernel{3, 3},
+              Subsampling{1, 1},
+              Dilation{1, 1},
+              /*groups=*/1,
+              /*group_input_channels=*/32,
+              /*group_output_channels=*/64,
+              /*output_min=*/-INFINITY,
+              /*output_max=*/INFINITY},
+          input_id, filter_id, bias_id, output_id, 0)
+      .Optimize(runtime_flags);
+
+  // Sanity-check whether inline LHS packing got requested
+  bool saw_inline = false;
+  for (uint32_t i = 0; i < tester.NumNodes(); i++) {
+    const xnn_node* n = tester.Node(i);
+    if (n->type == xnn_node_type_convolution_2d &&
+        (n->flags & XNN_FLAG_INLINE_LHS_PACKING)) {
+      saw_inline = true;
+      break;
+    }
+  }
+
+  EXPECT_TRUE(saw_inline)
+      << "Inlined LHS packing was not selected; "
+         "check PF16 config and runtime flags";
+
+  // Create runtimes.
+  xnn_runtime_t fp16_runtime_ptr = nullptr;
+
+  xnn_status status =
+      xnn_create_runtime_v2(tester.Subgraph(), /*threadpool=*/nullptr,
+                            runtime_flags, &fp16_runtime_ptr);
+  if (status == xnn_status_unsupported_hardware) {
+    // If SME(2)/PF16 isn’t available, skip.
+    GTEST_SKIP();
+  }
+  ASSERT_EQ(xnn_status_success, status);
+  std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_fp16_runtime(
+      fp16_runtime_ptr, xnn_delete_runtime);
+
+  xnn_runtime_t fp32_runtime_ptr = nullptr;
+  status = xnn_create_runtime_v2(reference_tester.Subgraph(), /*threadpool=*/nullptr,
+                                 runtime_flags, &fp32_runtime_ptr);
+  ASSERT_EQ(xnn_status_success, status);
+  std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_fp32_runtime(
+      fp32_runtime_ptr, xnn_delete_runtime);
+
+  // Random FP32 input. The FP16 subgraph will insert convert nodes for external I/O.
+  xnnpack::ReplicableRandomDevice rng;
+  auto f32rng = std::bind(std::uniform_real_distribution<float>(-1.f, 1.f), std::ref(rng));
+  xnnpack::Buffer<float> input(1 * 8 * 8 * 32, xnnpack::XnnExtraBytes);
+  std::generate(input.begin(), input.end(), std::ref(f32rng));
+
+  xnnpack::Buffer<float> out_fp16(1 * 8 * 8 * 64), out_fp32(1 * 8 * 8 * 64);
+
+  std::array<xnn_external_value, 2> ext_fp16 = {
+      xnn_external_value{input_id, input.data()},
+      xnn_external_value{output_id, out_fp16.data()}};
+  ASSERT_EQ(xnn_status_success, xnn_setup_runtime(fp16_runtime_ptr, 2, ext_fp16.data()));
+  ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(fp16_runtime_ptr));
+
+  std::array<xnn_external_value, 2> ext_fp32 = {
+      xnn_external_value{input_id, input.data()},
+      xnn_external_value{output_id, out_fp32.data()}};
+  ASSERT_EQ(xnn_status_success, xnn_setup_runtime(fp32_runtime_ptr, 2, ext_fp32.data()));
+  ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(fp32_runtime_ptr));
+
+  // Compare with a reasonable tolerance. This is primarily to ensure the path runs without crash.
+  for (size_t i = 0; i < out_fp16.size(); ++i) {
+    const float tol = std::max(std::abs(out_fp32[i]) * 5e-2f, 5e-2f);
+    ASSERT_NEAR(out_fp16[i], out_fp32[i], tol);
+  }
+}
+#endif
 
 }  // namespace xnnpack

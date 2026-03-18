@@ -1,0 +1,125 @@
+# Copyright 2026 Google LLC
+#
+# This source code is licensed under the BSD-style license found in the
+# LICENSE file in the root directory of this source tree.
+
+# This file contains various templates and helpers for XNNPACK's GN build.
+
+import("//build/config/gclient_args.gni")
+
+# Resolve to the parent GN path.
+xnnpack_path_prefix = get_path_info("../", "abspath")
+if (build_with_chromium) {
+  xnnpack_path_prefix = "//third_party/xnnpack/src"
+}
+
+xnnpack_add_configs = [
+  "//build/config/compiler:no_chromium_code",
+  xnnpack_path_prefix + ":xnnpack_public_config",
+  xnnpack_path_prefix + ":xnnpack_private_config",
+]
+xnnpack_remove_configs = [ "//build/config/compiler:chromium_code" ]
+
+template("xnnpack_source_set") {
+  target("source_set", target_name) {
+    forward_variables_from(invoker,
+                           "*",
+                           [
+                             "configs",
+                             "remove_configs",
+                           ])
+    configs -= xnnpack_remove_configs
+    configs += xnnpack_add_configs
+    if (defined(invoker.remove_configs)) {
+      configs -= invoker.remove_configs
+    }
+    if (defined(invoker.configs)) {
+      configs += invoker.configs
+    }
+  }
+}
+
+template("xnnpack_test") {
+  target("executable", "xnnpack_" + target_name + "_test") {
+    forward_variables_from(invoker,
+                           "*",
+                           [
+                             "configs",
+                             "remove_configs",
+                             "deps",
+                           ])
+    testonly = true
+    if (defined(invoker.cflags)) {
+      cflags = invoker.cflags
+    } else {
+      cflags = []
+    }
+    configs -= xnnpack_remove_configs
+    configs += xnnpack_add_configs
+    configs -= [ "//build/config/clang:find_bad_constructs" ]
+    if (defined(invoker.remove_configs)) {
+      configs -= invoker.remove_configs
+    }
+    deps = [
+      xnnpack_path_prefix + ":scalar_microkernels",
+      xnnpack_path_prefix + ":microkernel_headers",
+      xnnpack_path_prefix + ":test_support",
+      xnnpack_path_prefix + ":xnnpack",
+      "//third_party/googletest:gmock",
+      "//testing/gtest",
+      "//testing/gtest:gtest_main",
+    ]
+    if (defined(invoker.deps)) {
+      deps += invoker.deps
+    }
+    ldflags = []
+    if (is_android) {
+      ldflags += [ "-llog" ]
+    }
+  }
+}
+
+template("xnnpack_benchmark") {
+  target("executable", "xnnpack_" + target_name + "_bench") {
+    forward_variables_from(invoker,
+                           "*",
+                           [
+                             "configs",
+                             "remove_configs",
+                             "deps",
+                           ])
+    testonly = true
+    if (defined(invoker.cflags)) {
+      cflags = invoker.cflags
+    } else {
+      cflags = []
+    }
+    configs -= xnnpack_remove_configs
+    configs += xnnpack_add_configs
+    configs -= [ "//build/config/clang:find_bad_constructs" ]
+    if (defined(invoker.remove_configs)) {
+      configs -= invoker.remove_configs
+    }
+    if (defined(invoker.configs)) {
+      configs += invoker.configs
+    }
+    deps = [
+      xnnpack_path_prefix + ":scalar_microkernels",
+      xnnpack_path_prefix + ":microkernel_defs",
+      xnnpack_path_prefix + ":microkernel_headers",
+      xnnpack_path_prefix + ":test_support",
+      xnnpack_path_prefix + ":benchmark_test_support",
+      xnnpack_path_prefix + ":xnnpack",
+      "//third_party/google_benchmark:benchmark_main",
+      "//third_party/google_benchmark",
+      "//third_party/googletest:gtest",
+    ]
+    if (defined(invoker.deps)) {
+      deps += invoker.deps
+    }
+    ldflags = []
+    if (is_android) {
+      ldflags += [ "-llog" ]
+    }
+  }
+}

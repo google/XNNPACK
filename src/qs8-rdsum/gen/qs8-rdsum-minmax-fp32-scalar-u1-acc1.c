@@ -9,13 +9,15 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
 
 #include "src/xnnpack/common.h"
-#include "src/xnnpack/math.h"
+#include "src/xnnpack/microparams.h"
 #include "src/xnnpack/reduce.h"
 
 
-void xnn_qs8_rdsum_ukernel_7p7x__scalar_c4(
+void xnn_qs8_rdsum_ukernel_7p7x__scalar_u4(
     size_t rows,
     size_t channels,
     const int8_t* input,

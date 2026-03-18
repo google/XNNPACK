@@ -7,13 +7,17 @@ $assert DATATYPE in ["F32", "QC4", "QC8"]
 $assert NR % 16 == 0
 $assert 16 <= NR <= 64
 #include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
 
 #include <immintrin.h>
 $if DATATYPE in ["QC8", "QC4"]:
   #include <smmintrin.h>
 
+#include "src/xnnpack/common.h"
 #include "src/xnnpack/gemm.h"
 #include "src/xnnpack/intrinsics-polyfill.h"
+#include "src/xnnpack/microparams.h"
 
 
 $RANGE_MR = list(reversed(range(MR))) if INC else list(range(MR))
@@ -96,10 +100,12 @@ void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}
 
     size_t k = kc;
     do {
+      $for M in range(MR):
+        const __m512 va${M} = _mm512_set1_ps(*a${M});
+
       $if DATATYPE == "F32":
-        const __m512 vb0 = _mm512_load_ps(w);
-        $for N in range(16, NR, 16):
-          const __m512 vb${N//16} = _mm512_loadu_ps(w + ${N});
+        $for N in range(0, NR, 16):
+          const __m512 vb${N//16} = _mm512_load_ps(w + ${N});
         w += ${NR};
       $else:
         const __m512i vbi0 = _mm512_cvtepi8_epi32(_mm_loadu_si128((const __m128i*) w));
@@ -110,7 +116,6 @@ void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}
         w = (const int8_t*) w + ${NR};
 
       $for M in range(MR):
-        const __m512 va${M} = _mm512_set1_ps(*a${M});
         $for N in range(0, NR, 16):
           vacc${M}x${N//16} = _mm512_fmadd_ps(va${M}, vb${N//16}, vacc${M}x${N//16});
 
@@ -126,12 +131,14 @@ void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}
         $for M in range(MR):
           vacc${M}x${N//16} = _mm512_mul_ps(vacc${M}x${N//16}, vscale${N//16});
       w = (const float*) w + ${NR};
+
     const __m512 vmin = _mm512_set1_ps(params->scalar.min);
+    const __m512 vmax = _mm512_set1_ps(params->scalar.max);
+
     $for N in range(0, NR, 16):
       $for M in range(MR):
         vacc${M}x${N//16} = _mm512_max_ps(vmin, vacc${M}x${N//16});
 
-    const __m512 vmax = _mm512_set1_ps(params->scalar.max);
     $for N in range(0, NR, 16):
       $for M in range(MR):
         vacc${M}x${N//16} = _mm512_min_ps(vmax, vacc${M}x${N//16});

@@ -46,10 +46,10 @@ IF(XNNPACK_BUILD_LIBRARY)
     ADD_EXECUTABLE(${TEST}-test ${TEST}.cc)
     TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE
       convolution-test-helpers
-      hardware-config
-      logging
-      microkernels-all
-      microparams-init
+      xnnpack-hardware-config
+      xnnpack-logging
+      xnnpack-microkernels-all
+      xnnpack-microparams-init
       next-prime
       pthreadpool
       unary-ops
@@ -67,6 +67,7 @@ IF(XNNPACK_BUILD_LIBRARY)
   SHARD_TEST(deconvolution-nhwc-test 10)
   SHARD_TEST(fully-connected-nc-test 10)
   SHARD_TEST(max-pooling-nhwc-test 10)
+  SHARD_TEST(reduce-nd-test 5)
   SHARD_TEST(slice-nd-test 5)
   SHARD_TEST(transpose-nd-test 10)
   SHARD_TEST(transpose-nd-eager-test 5)
@@ -79,7 +80,7 @@ SET(NORMALIZATION_UNIT_TESTS
     transpose-normalization)
 FOREACH(TEST ${NORMALIZATION_UNIT_TESTS})
   ADD_EXECUTABLE(${TEST}-test ${TEST}.cc)
-  TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE xnnpack-test pthreadpool normalization)
+  TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE xnnpack-test pthreadpool xnnpack-normalization)
   ADD_TEST(NAME ${TEST}-test COMMAND ${TEST}-test)
 ENDFOREACH()
 

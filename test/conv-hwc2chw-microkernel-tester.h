@@ -3,7 +3,8 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#pragma once
+#ifndef XNNPACK_TEST_CONV_HWC2CHW_MICROKERNEL_TESTER_H_
+#define XNNPACK_TEST_CONV_HWC2CHW_MICROKERNEL_TESTER_H_
 
 #include <algorithm>
 #include <cassert>
@@ -565,3 +566,5 @@ class ConvHWC2CHWMicrokernelTester {
   uint8_t qmax_{255};
   size_t iterations_{1};
 };
+
+#endif  // XNNPACK_TEST_CONV_HWC2CHW_MICROKERNEL_TESTER_H_

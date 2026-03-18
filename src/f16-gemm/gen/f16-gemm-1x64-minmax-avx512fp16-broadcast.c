@@ -9,11 +9,15 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
 
 #include <immintrin.h>
 
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/microparams.h"
 #include "src/xnnpack/gemm.h"
-#include "src/xnnpack/intrinsics-polyfill.h"
 
 
 void xnn_f16_gemm_minmax_ukernel_1x64__avx512fp16_broadcast(
@@ -42,13 +46,13 @@ void xnn_f16_gemm_minmax_ukernel_1x64__avx512fp16_broadcast(
   uint16_t* c0 = (uint16_t*) c;
 
   do {
-    __m512h vacc0x0 = _mm512_load_ph(w);
+    __m512h vacc0x0 = _mm512_load_ph((const uint16_t*) w + 0);
     __m512h vacc0x1 = _mm512_load_ph((const uint16_t*) w + 32);
     w = (const xnn_float16*) w + 64;
 
     size_t k = kc;
     do {
-      const __m512h vb0 = _mm512_load_ph(w);
+      const __m512h vb0 = _mm512_load_ph((const uint16_t*) w + 0);
       const __m512h vb1 = _mm512_load_ph((const uint16_t*) w + 32);
       w = (const xnn_float16*) w + 64;
 
@@ -69,7 +73,7 @@ void xnn_f16_gemm_minmax_ukernel_1x64__avx512fp16_broadcast(
     vacc0x1 = _mm512_min_ph(vmax, vacc0x1);
 
     if XNN_LIKELY(nc >= 64) {
-      _mm512_storeu_ph(c0, vacc0x0);
+      _mm512_storeu_ph((uint16_t*) c0 + 0, vacc0x0);
       _mm512_storeu_ph((uint16_t*) c0 + 32, vacc0x1);
       a0 = (const uint16_t*) ((uintptr_t) a0 - kc);
       c0 = (uint16_t*) ((uintptr_t) c0 + cn_stride);

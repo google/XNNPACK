@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2021-2025 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
@@ -21,8 +21,8 @@
 #include "src/xnnpack/microfnptr.h"
 #include "src/xnnpack/microkernel-utils.h"
 #include "src/xnnpack/microparams-init.h"
-#include "src/xnnpack/microparams.h"
 #include "src/xnnpack/pack.h"
+#include "test/replicable_random_device.h"
 #include <benchmark/benchmark.h>
 
 static void bench_impl(uint64_t arch_flags, benchmark::State& state,
@@ -49,8 +49,7 @@ static void bench_impl(uint64_t arch_flags, benchmark::State& state,
     return;
   }
 
-  std::random_device random_device;
-  auto rng = std::mt19937(random_device());
+  xnnpack::ReplicableRandomDevice rng;
   auto i32rng = std::bind(std::uniform_int_distribution<int32_t>(-10000, 10000),
                           std::ref(rng));
   auto i8rng = std::bind(std::uniform_int_distribution<int32_t>(
@@ -174,13 +173,13 @@ static void bench_impl(uint64_t arch_flags, benchmark::State& state,
 
 #define XNN_UKERNEL(arch_flags, ukernel, c_block, is_pipelined, cr, kr, \
                     datatype, weights_type, params_type, init_params)   \
-  static void BM_##ukernel(benchmark::State& state, const char* net) {  \
+  static void BM_##ukernel(benchmark::State& state) {                   \
     bench_impl(arch_flags, state, ukernel, init_params, cr, kr);        \
   }                                                                     \
   BENCHMARK_DWCONV(BM_##ukernel);
 
-#include "src/qs8-dwconv/qs8-dwconv-minmax-fp32.h"
-#include "src/qs8-dwconv/qs8-dwconv-minmax-rndnu.h"
+#include "src/qs8-dwconv/qs8-dwconv-minmax-fp32.inc"
+#include "src/qs8-dwconv/qs8-dwconv-minmax-rndnu.inc"
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
 XNN_BENCHMARK_MAIN();

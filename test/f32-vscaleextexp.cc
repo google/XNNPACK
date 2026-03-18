@@ -131,5 +131,5 @@ class VScaleExtExpMicrokernelTester {
                                    init_params);                              \
   XNN_TEST_VSCALEEXTEXP_ELEMENT_GT(ukernel, arch_flags, element_tile,         \
                                    init_params);
-#include "src/f32-vscaleextexp/f32-vscaleextexp.h"
+#include "src/f32-vscaleextexp/f32-vscaleextexp.inc"
 #undef XNN_UKERNEL

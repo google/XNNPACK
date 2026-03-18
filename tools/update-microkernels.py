@@ -69,6 +69,7 @@ _ISA_LIST = frozenset({
     'scalar',
     'sse',
     'sse2',
+    'sse2fma',
     'sse41',
     'ssse3',
     'wasmblendvps',
@@ -197,19 +198,27 @@ def main(args):
         continue
       if name.endswith('.h'):
         continue
+      if name.endswith('.inc'):
+        continue
       basename, ext = os.path.splitext(name)
       if ext == '.sollya':
         continue
 
       subdir = os.path.relpath(root, root_dir)
       filepath = os.path.join(subdir, name)
+      if 'pipertmp' in filepath:
+        continue
+
+      # Skip files created by repository tools.
+      if (
+          name.startswith('._')
+          or filepath.endswith('.swp')
+          or filepath.endswith('.orig')
+      ):
+        continue
 
       # Build microkernel name -> microkernel filepath mapping
       with open(os.path.join(root_dir, filepath), 'r', encoding='utf-8') as f:
-        if filepath.endswith('.swp'):
-          continue
-        if filepath.endswith('.orig'):
-          continue
         content = f.read()
         microkernels = re.findall(_MICROKERNEL_NAME_REGEX, content)
         if not microkernels:
@@ -330,12 +339,12 @@ def main(args):
 
   with io.StringIO() as microkernels_bzl:
     microkernels_bzl.write('''\
-"""
-Microkernel filenames lists.
-
-Auto-generated file. Do not edit!
-  Generator: tools/update-microkernels.py
-"""
+#
+# Microkernel filenames lists.
+#
+# Auto-generated file. Do not edit!
+#   Generator: tools/update-microkernels.py
+#
 
 ''')
     prod_c_vars_per_arch = dict()
@@ -351,12 +360,12 @@ Auto-generated file. Do not edit!
       arch_microkernels_bzl_filename = key + '_microkernels.bzl'
       with io.StringIO() as arch_microkernels_bzl:
         arch_microkernels_bzl.write(f'''\
-"""
-Microkernel filenames lists for {key}.
-
-Auto-generated file. Do not edit!
-  Generator: tools/update-microkernels.py
-"""
+#
+# Microkernel filenames lists for {key}.
+#
+# Auto-generated file. Do not edit!
+#   Generator: tools/update-microkernels.py
+#
 ''')
         prod_c_vars = write_grouped_microkernels_bzl(
             arch_microkernels_bzl,

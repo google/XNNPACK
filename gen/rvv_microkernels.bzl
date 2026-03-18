@@ -1,9 +1,9 @@
-"""
-Microkernel filenames lists for rvv.
-
-Auto-generated file. Do not edit!
-  Generator: tools/update-microkernels.py
-"""
+#
+# Microkernel filenames lists for rvv.
+#
+# Auto-generated file. Do not edit!
+#   Generator: tools/update-microkernels.py
+#
 
 PROD_RVV_MICROKERNEL_SRCS = [
     "src/f32-argmaxpool/f32-argmaxpool-9p8x-rvv-u1v.c",
@@ -30,6 +30,7 @@ PROD_RVV_MICROKERNEL_SRCS = [
     "src/f32-rminmax/gen/f32-rmax-rvv-u8v.c",
     "src/f32-rminmax/gen/f32-rmin-rvv-u8v.c",
     "src/f32-rminmax/gen/f32-rminmax-rvv-u8v.c",
+    "src/f32-rsum/gen/f32-rsum-rvv-u4v.c",
     "src/f32-spmm/gen/f32-spmm-4vx4-minmax-rvv.c",
     "src/f32-spmm/gen/f32-spmm-8vx1-minmax-rvv.c",
     "src/f32-spmm/gen/f32-spmm-8vx2-minmax-rvv.c",
@@ -43,21 +44,28 @@ PROD_RVV_MICROKERNEL_SRCS = [
     "src/f32-vbinary/gen/f32-vminc-rvv-u8v.c",
     "src/f32-vbinary/gen/f32-vmul-rvv-u8v.c",
     "src/f32-vbinary/gen/f32-vmulc-rvv-u8v.c",
+    "src/f32-vbinary/gen/f32-vprelu-rvv-u8v.c",
+    "src/f32-vbinary/gen/f32-vpreluc-rvv-u8v.c",
     "src/f32-vbinary/gen/f32-vrdivc-rvv-u8v.c",
+    "src/f32-vbinary/gen/f32-vrpreluc-rvv-u8v.c",
     "src/f32-vbinary/gen/f32-vrsubc-rvv-u8v.c",
     "src/f32-vbinary/gen/f32-vsqrdiff-rvv-u8v.c",
     "src/f32-vbinary/gen/f32-vsqrdiffc-rvv-u8v.c",
     "src/f32-vbinary/gen/f32-vsub-rvv-u8v.c",
     "src/f32-vbinary/gen/f32-vsubc-rvv-u8v.c",
+    "src/f32-vclamp/gen/f32-vclamp-rvv-u8v.c",
     "src/f32-vcmul/gen/f32-vcmul-rvv-u2v.c",
     "src/f32-vhswish/gen/f32-vhswish-rvv-u4v.c",
     "src/f32-vlrelu/gen/f32-vlrelu-rvv-u4v.c",
-    "src/f32-vrelu/gen/f32-vrelu-rvv-u4v.c",
     "src/f32-vrnd/gen/f32-vrndd-rvv-u4v.c",
     "src/f32-vrnd/gen/f32-vrndne-rvv-u4v.c",
     "src/f32-vrnd/gen/f32-vrndu-rvv-u4v.c",
     "src/f32-vrnd/gen/f32-vrndz-rvv-u4v.c",
     "src/f32-vrsqrt/gen/f32-vrsqrt-rvv-rsqrt-u4v.c",
+    "src/f32-vsqrt/gen/f32-vsqrt-rvv-sqrt-u8v.c",
+    "src/f32-vunary/gen/f32-vabs-rvv-u8v.c",
+    "src/f32-vunary/gen/f32-vneg-rvv-u8v.c",
+    "src/f32-vunary/gen/f32-vsqr-rvv-u8v.c",
     "src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-1x4v-minmax-rvv.c",
     "src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-4x4v-minmax-rvv.c",
     "src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-1x4v-minmax-rvv.c",
@@ -146,7 +154,9 @@ NON_PROD_RVV_MICROKERNEL_SRCS = [
     "src/f32-rminmax/gen/f32-rminmax-rvv-u1v.c",
     "src/f32-rminmax/gen/f32-rminmax-rvv-u2v.c",
     "src/f32-rminmax/gen/f32-rminmax-rvv-u4v.c",
-    "src/f32-rsum/f32-rsum-rvv-u1v.c",
+    "src/f32-rsum/gen/f32-rsum-rvv-u1v.c",
+    "src/f32-rsum/gen/f32-rsum-rvv-u2v.c",
+    "src/f32-rsum/gen/f32-rsum-rvv-u8v.c",
     "src/f32-spmm/gen/f32-spmm-1vx1-minmax-rvv.c",
     "src/f32-spmm/gen/f32-spmm-1vx2-minmax-rvv.c",
     "src/f32-spmm/gen/f32-spmm-1vx4-minmax-rvv.c",
@@ -166,7 +176,10 @@ NON_PROD_RVV_MICROKERNEL_SRCS = [
     "src/f32-vbinary/gen/f32-vminc-rvv-u4v.c",
     "src/f32-vbinary/gen/f32-vmul-rvv-u4v.c",
     "src/f32-vbinary/gen/f32-vmulc-rvv-u4v.c",
+    "src/f32-vbinary/gen/f32-vprelu-rvv-u4v.c",
+    "src/f32-vbinary/gen/f32-vpreluc-rvv-u4v.c",
     "src/f32-vbinary/gen/f32-vrdivc-rvv-u4v.c",
+    "src/f32-vbinary/gen/f32-vrpreluc-rvv-u4v.c",
     "src/f32-vbinary/gen/f32-vrsubc-rvv-u4v.c",
     "src/f32-vbinary/gen/f32-vsqrdiff-rvv-u4v.c",
     "src/f32-vbinary/gen/f32-vsqrdiffc-rvv-u4v.c",
@@ -175,7 +188,6 @@ NON_PROD_RVV_MICROKERNEL_SRCS = [
     "src/f32-vclamp/gen/f32-vclamp-rvv-u1v.c",
     "src/f32-vclamp/gen/f32-vclamp-rvv-u2v.c",
     "src/f32-vclamp/gen/f32-vclamp-rvv-u4v.c",
-    "src/f32-vclamp/gen/f32-vclamp-rvv-u8v.c",
     "src/f32-vcmul/gen/f32-vcmul-rvv-u1v.c",
     "src/f32-vcmul/gen/f32-vcmul-rvv-u4v.c",
     "src/f32-vhswish/gen/f32-vhswish-rvv-u1v.c",
@@ -184,9 +196,6 @@ NON_PROD_RVV_MICROKERNEL_SRCS = [
     "src/f32-vlrelu/gen/f32-vlrelu-rvv-u1v.c",
     "src/f32-vlrelu/gen/f32-vlrelu-rvv-u2v.c",
     "src/f32-vlrelu/gen/f32-vlrelu-rvv-u8v.c",
-    "src/f32-vrelu/gen/f32-vrelu-rvv-u1v.c",
-    "src/f32-vrelu/gen/f32-vrelu-rvv-u2v.c",
-    "src/f32-vrelu/gen/f32-vrelu-rvv-u8v.c",
     "src/f32-vrnd/gen/f32-vrndd-rvv-u1v.c",
     "src/f32-vrnd/gen/f32-vrndd-rvv-u2v.c",
     "src/f32-vrnd/gen/f32-vrndd-rvv-u8v.c",
@@ -204,19 +213,15 @@ NON_PROD_RVV_MICROKERNEL_SRCS = [
     "src/f32-vsqrt/gen/f32-vsqrt-rvv-sqrt-u1v.c",
     "src/f32-vsqrt/gen/f32-vsqrt-rvv-sqrt-u2v.c",
     "src/f32-vsqrt/gen/f32-vsqrt-rvv-sqrt-u4v.c",
-    "src/f32-vsqrt/gen/f32-vsqrt-rvv-sqrt-u8v.c",
     "src/f32-vunary/gen/f32-vabs-rvv-u1v.c",
     "src/f32-vunary/gen/f32-vabs-rvv-u2v.c",
     "src/f32-vunary/gen/f32-vabs-rvv-u4v.c",
-    "src/f32-vunary/gen/f32-vabs-rvv-u8v.c",
     "src/f32-vunary/gen/f32-vneg-rvv-u1v.c",
     "src/f32-vunary/gen/f32-vneg-rvv-u2v.c",
     "src/f32-vunary/gen/f32-vneg-rvv-u4v.c",
-    "src/f32-vunary/gen/f32-vneg-rvv-u8v.c",
     "src/f32-vunary/gen/f32-vsqr-rvv-u1v.c",
     "src/f32-vunary/gen/f32-vsqr-rvv-u2v.c",
     "src/f32-vunary/gen/f32-vsqr-rvv-u4v.c",
-    "src/f32-vunary/gen/f32-vsqr-rvv-u8v.c",
     "src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-2x4v-minmax-rvv.c",
     "src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-3x4v-minmax-rvv.c",
     "src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-5x4v-minmax-rvv.c",

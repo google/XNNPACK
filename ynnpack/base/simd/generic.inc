@@ -1,0 +1,256 @@
+// Copyright 2025 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+#ifndef THIRD_PARTY_XNNPACK_YNNPACK_BASE_SIMD_GENERIC_INC_
+#define THIRD_PARTY_XNNPACK_YNNPACK_BASE_SIMD_GENERIC_INC_
+
+#include <cassert>
+#include <cstddef>
+#include <cstring>
+#include <type_traits>
+
+#include "ynnpack/base/base.h"
+#include "ynnpack/base/simd/vec.h"
+
+// This header provides generic implementations of vec<> operations that work by
+// splitting the vec into two smaller vectors and executing the operation on
+// those. It should be included after implementing specializations of vec<>.
+
+namespace ynn {
+
+namespace simd {
+
+template <typename T, size_t N>
+YNN_ALWAYS_INLINE vec<T, N> load(const T* ptr,
+                                 std::integral_constant<size_t, N> n,
+                                 vec<T, N>) {
+  std::integral_constant<size_t, N / 2> n2 = {};
+  return {load(ptr, n2), load(ptr + n2, n2)};
+}
+template <typename T, size_t N>
+YNN_ALWAYS_INLINE vec<T, N> load(const T* ptr,
+                                 std::integral_constant<size_t, N> n,
+                                 zeros<N>) {
+  return load(ptr, n, vec<T, N>{});
+}
+template <typename T, size_t N>
+YNN_ALWAYS_INLINE vec<T, N> load(const T* ptr,
+                                 std::integral_constant<size_t, N> n,
+                                 undef<N>) {
+  return load(ptr, n, vec<T, N>{});
+}
+template <typename T, size_t N>
+YNN_ALWAYS_INLINE vec<T, N> load_aligned(const T* ptr,
+                                         std::integral_constant<size_t, N> n,
+                                         vec<T, N>) {
+  std::integral_constant<size_t, N / 2> n2 = {};
+  return {load_aligned(ptr, n2), load_aligned(ptr + n2, n2)};
+}
+template <typename T, size_t N>
+YNN_ALWAYS_INLINE vec<T, N> load(const T* ptr, size_t n, vec<T, N> src) {
+  std::integral_constant<size_t, N / 2> n2 = {};
+  if (n < n2) {
+    return {load(ptr, n, src.lo()), src.hi()};
+  } else {
+    return {load(ptr, n2), load(ptr + n2, n - n2, src.hi())};
+  }
+}
+template <typename T, size_t N>
+YNN_ALWAYS_INLINE vec<T, N> load(const T* ptr, size_t n, zeros<N>) {
+  std::integral_constant<size_t, N / 2> n2 = {};
+  if (n < n2) {
+    return {load(ptr, n, zeros<N / 2>{}), vec<T, N / 2>{T{0}}};
+  } else {
+    return {load(ptr, n2), load(ptr + n2, n - n2, zeros<N / 2>{})};
+  }
+}
+template <typename T, size_t N>
+YNN_ALWAYS_INLINE vec<T, N> load(const T* ptr, size_t n, undef<N>) {
+  std::integral_constant<size_t, N / 2> n2 = {};
+  if (n < n2) {
+    return {load(ptr, n, undef<N / 2>{}), vec<T, N / 2>{}};
+  } else {
+    return {load(ptr, n2), load(ptr + n2, n - n2, undef<N / 2>{})};
+  }
+}
+
+// Store `N` elements of `T` to `ptr`.
+template <typename T, size_t N>
+YNN_ALWAYS_INLINE void store(T* ptr, vec<T, N> value,
+                             std::integral_constant<size_t, N> n) {
+  std::integral_constant<size_t, N / 2> n2 = {};
+  store(ptr, value.lo(), n2);
+  store(ptr + n2, value.hi(), n2);
+}
+template <typename T, size_t N>
+YNN_ALWAYS_INLINE void store_aligned(T* ptr, vec<T, N> value,
+                                     std::integral_constant<size_t, N> n) {
+  std::integral_constant<size_t, N / 2> n2 = {};
+  store_aligned(ptr, value.lo(), n2);
+  store_aligned(ptr + n2, value.hi(), n2);
+}
+template <typename T, size_t N>
+YNN_ALWAYS_INLINE void store(T* ptr, vec<T, N> value, size_t n) {
+  std::integral_constant<size_t, N / 2> n2 = {};
+  if (n < n2) {
+    store(ptr, value.lo(), n);
+  } else {
+    store(ptr, value.lo(), n2);
+    store(ptr + n2, value.hi(), n - n2);
+  }
+}
+
+// Arithmetic operators.
+template <typename T, size_t N>
+YNN_ALWAYS_INLINE vec<T, N> operator+(vec<T, N> a, vec<T, N> b) {
+  return {a.lo() + b.lo(), a.hi() + b.hi()};
+}
+template <typename T, size_t N>
+YNN_ALWAYS_INLINE vec<T, N> operator-(vec<T, N> a, vec<T, N> b) {
+  return {a.lo() - b.lo(), a.hi() - b.hi()};
+}
+template <typename T, size_t N>
+YNN_ALWAYS_INLINE vec<T, N> operator*(vec<T, N> a, vec<T, N> b) {
+  return {a.lo() * b.lo(), a.hi() * b.hi()};
+}
+
+template <typename T, size_t N>
+YNN_ALWAYS_INLINE vec<T, N>& operator+=(vec<T, N>& a, vec<T, N> b) {
+  a = a + b;
+  return a;
+}
+template <typename T, size_t N>
+YNN_ALWAYS_INLINE vec<T, N>& operator-=(vec<T, N>& a, vec<T, N> b) {
+  a = a - b;
+  return a;
+}
+template <typename T, size_t N>
+YNN_ALWAYS_INLINE vec<T, N>& operator*=(vec<T, N>& a, vec<T, N> b) {
+  a = a * b;
+  return a;
+}
+
+// Boolean operators.
+template <typename T, size_t N>
+YNN_ALWAYS_INLINE vec<T, N> operator&(vec<T, N> a, vec<T, N> b) {
+  return {a.lo() & b.lo(), a.hi() & b.hi()};
+}
+template <typename T, size_t N>
+YNN_ALWAYS_INLINE vec<T, N> operator|(vec<T, N> a, vec<T, N> b) {
+  return {a.lo() | b.lo(), a.hi() | b.hi()};
+}
+template <typename T, size_t N>
+YNN_ALWAYS_INLINE vec<T, N> operator^(vec<T, N> a, vec<T, N> b) {
+  return {a.lo() ^ b.lo(), a.hi() ^ b.hi()};
+}
+template <typename T, size_t N>
+YNN_ALWAYS_INLINE vec<T, N> operator~(vec<T, N> a) {
+  return {~a.lo(), ~a.hi()};
+}
+
+template <typename T, size_t N>
+YNN_ALWAYS_INLINE vec<T, N>& operator&=(vec<T, N>& a, vec<T, N> b) {
+  a = a & b;
+  return a;
+}
+template <typename T, size_t N>
+YNN_ALWAYS_INLINE vec<T, N>& operator|=(vec<T, N>& a, vec<T, N> b) {
+  a = a | b;
+  return a;
+}
+template <typename T, size_t N>
+YNN_ALWAYS_INLINE vec<T, N>& operator^=(vec<T, N>& a, vec<T, N> b) {
+  a = a ^ b;
+  return a;
+}
+template <typename T, size_t N>
+YNN_ALWAYS_INLINE vec<T, N> min(vec<T, N> a, vec<T, N> b) {
+  return {min(a.lo(), b.lo()), min(a.hi(), b.hi())};
+}
+template <typename T, size_t N>
+YNN_ALWAYS_INLINE vec<T, N> max(vec<T, N> a, vec<T, N> b) {
+  return {max(a.lo(), b.lo()), max(a.hi(), b.hi())};
+}
+template <typename T, size_t N>
+YNN_ALWAYS_INLINE vec<T, N> copysign(vec<T, N> mag, vec<T, N> sgn) {
+  return {copysign(mag.lo(), sgn.lo()), copysign(mag.hi(), sgn.hi())};
+};
+template <typename T, size_t N>
+YNN_ALWAYS_INLINE vec<T, N> abs(vec<T, N> a) {
+  return {abs(a.lo()), abs(a.hi())};
+}
+template <typename T, size_t N>
+YNN_ALWAYS_INLINE vec<T, N> floor(vec<T, N> a) {
+  return {floor(a.lo()), floor(a.hi())};
+}
+template <typename T, size_t N>
+YNN_ALWAYS_INLINE vec<T, N> ceil(vec<T, N> a) {
+  return {ceil(a.lo()), ceil(a.hi())};
+}
+template <typename T, size_t N>
+YNN_ALWAYS_INLINE vec<T, N> round(vec<T, N> a) {
+  return {round(a.lo()), round(a.hi())};
+}
+template <typename T, size_t N>
+YNN_ALWAYS_INLINE vec<T, N> sqrt(vec<T, N> a) {
+  return {sqrt(a.lo()), sqrt(a.hi())};
+}
+template <typename T, size_t N>
+YNN_ALWAYS_INLINE vec<T, N> fma(vec<T, N> a, vec<T, N> b, vec<T, N> acc) {
+  return {fma(a.lo(), b.lo(), acc.lo()), fma(a.hi(), b.hi(), acc.hi())};
+}
+
+template <int Index, typename T, size_t N>
+YNN_ALWAYS_INLINE vec<T, N> extract(vec<T, N> x,
+                                    std::integral_constant<size_t, N>) {
+  static_assert(Index == 0, "");
+  return x;
+}
+template <int Index, typename T, size_t N>
+YNN_ALWAYS_INLINE vec<T, N / 2> extract(vec<T, N> x,
+                                        std::integral_constant<size_t, N / 2>) {
+  static_assert(Index == 0 || Index == 1, "");
+  return Index == 0 ? x.lo() : x.hi();
+}
+template <int Index, typename T, size_t N>
+YNN_ALWAYS_INLINE vec<T, N / 4> extract(vec<T, N> x,
+                                        std::integral_constant<size_t, N / 4>) {
+  constexpr std::integral_constant<size_t, N / 2> n2 = {};
+  constexpr std::integral_constant<size_t, N / 4> n4 = {};
+  return extract<Index % 2>(extract<Index / 2>(x, n2), n4);
+}
+
+template <typename T, size_t N>
+YNN_ALWAYS_INLINE vec<T, N*2> concat(vec<T, N> a, vec<T, N> b) {
+  return {a, b};
+}
+
+template <typename T, size_t N>
+YNN_ALWAYS_INLINE vec<T, N> convert(vec<T, N> from, T) {
+  return from;
+}
+template <typename To, typename From, size_t N>
+YNN_ALWAYS_INLINE vec<To, N> convert(vec<From, N> from, To) {
+  return {convert(from.lo(), To()), convert(from.hi(), To())};
+}
+
+template <typename T, size_t N>
+YNN_ALWAYS_INLINE T horizontal_sum(vec<T, N> x) {
+  return horizontal_sum(x.lo() + x.hi());
+}
+template <typename T, size_t N>
+YNN_ALWAYS_INLINE T horizontal_min(vec<T, N> x) {
+  return horizontal_min(min(x.lo(), x.hi()));
+}
+template <typename T, size_t N>
+YNN_ALWAYS_INLINE T horizontal_max(vec<T, N> x) {
+  return horizontal_max(max(x.lo(), x.hi()));
+}
+
+}  // namespace simd
+
+}  // namespace ynn
+
+#endif  // THIRD_PARTY_XNNPACK_YNNPACK_BASE_SIMD_VEC_INC_

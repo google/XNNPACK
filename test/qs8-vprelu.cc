@@ -13,7 +13,7 @@
 #include "src/xnnpack/vbinary.h"
 #include "test/vbinary-microkernel-tester.h"
 
-#define XNN_UKERNEL(arch_flags, ukernel, batch_tile, vector_tile, datatype, params_type, init_params)                                \
+#define XNN_UKERNEL(arch_flags, ukernel, batch_tile, vector_tile, datatype, params_type, init_params)                                            \
 XNN_TEST_BINARY_BATCH_EQ(ukernel, arch_flags, batch_tile, false, datatype, ukernel, VBinaryMicrokernelTester::OpType::Prelu, init_params);       \
 XNN_TEST_BINARY_BATCH_DIV(ukernel, arch_flags, batch_tile, false, datatype, ukernel, VBinaryMicrokernelTester::OpType::Prelu, init_params);      \
 XNN_TEST_BINARY_BATCH_LT(ukernel, arch_flags, batch_tile, false, datatype, ukernel, VBinaryMicrokernelTester::OpType::Prelu, init_params);       \
@@ -29,5 +29,5 @@ XNN_TEST_BINARY_Y_ZERO_POINT(ukernel, arch_flags, batch_tile, false, datatype, u
 XNN_TEST_BINARY_A_SCALE(ukernel, arch_flags, batch_tile, false, datatype, ukernel, VBinaryMicrokernelTester::OpType::Prelu, init_params);        \
 XNN_TEST_BINARY_B_SCALE(ukernel, arch_flags, batch_tile, false, datatype, ukernel, VBinaryMicrokernelTester::OpType::Prelu, init_params);        \
 XNN_TEST_BINARY_Y_SCALE(ukernel, arch_flags, batch_tile, false, datatype, ukernel, VBinaryMicrokernelTester::OpType::Prelu, init_params);
-#include "src/qs8-vprelu/qs8-vprelu.h"
+#include "src/qs8-vprelu/qs8-vprelu.inc"
 #undef XNN_UKERNEL

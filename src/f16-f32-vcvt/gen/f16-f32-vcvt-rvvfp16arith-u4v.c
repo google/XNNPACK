@@ -26,7 +26,7 @@ void xnn_f16_f32_vcvt_ukernel__rvvfp16arith_u4v(
   assert(input != NULL);
   assert(output != NULL);
 
-  batch >>= XNN_LOG2_SIZEOF_HALF;
+  batch >>= XNN_LOG2_SIZEOF_FLOAT16;
 
   const _Float16* i = (const _Float16*) input;
   for (; batch > 0;) {

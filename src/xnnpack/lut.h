@@ -6,7 +6,8 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#pragma once
+#ifndef XNNPACK_SRC_XNNPACK_LUT_H_
+#define XNNPACK_SRC_XNNPACK_LUT_H_
 
 #include <stddef.h>
 #include <stdint.h>
@@ -69,10 +70,12 @@ DECLARE_X8_LUT_UKERNEL_FUNCTION(xnn_x8_lut_ukernel__wasmsimd_u64)
 #define XNN_UKERNEL(arch_flags, fn_name, datatype, params_type, init_params) \
   XNN_INTERNAL void fn_name(size_t n, const uint8_t* x, const uint32_t* t,   \
                             uint8_t* y);
-#include "src/u8-lut32norm/u8-lut32norm.h"
+#include "src/u8-lut32norm/u8-lut32norm.inc"
 #undef XNN_UKERNEL
 
 
 #ifdef __cplusplus
 }  // extern "C"
 #endif
+
+#endif  // XNNPACK_SRC_XNNPACK_LUT_H_

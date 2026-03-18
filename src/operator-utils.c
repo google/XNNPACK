@@ -150,6 +150,20 @@ uint32_t xnn_get_heuristic_mr_igemm(
   return best_mr;
 }
 
+enum xnn_status xnn_allocate_extra_params(
+    xnn_operator_t op, size_t num_extra_params) {
+  op->extra_params = xnn_allocate_zero_memory(
+      num_extra_params * sizeof(union xnn_params));
+  if (op->extra_params == NULL) {
+    xnn_log_error("failed to allocate %zu bytes for operator descriptor",
+                  num_extra_params * sizeof(union xnn_params));
+    return xnn_status_out_of_memory;
+  }
+  op->num_extra_params = num_extra_params;
+
+  return xnn_status_success;
+}
+
 enum xnn_status xnn_destroy_operator(xnn_operator_t op)
 {
   if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
@@ -181,7 +195,8 @@ enum xnn_status xnn_destroy_operator(xnn_operator_t op)
   xnn_release_simd_memory(op->ukernel.gemm_ukernels);
   xnn_release_simd_memory(op->dynamic_context.gemm);
   xnn_release_memory(op->compute);
-  xnn_release_memory(op->params2);
+  xnn_release_memory(op->extra_params);
+
   return xnn_status_success;
 }
 
@@ -248,6 +263,27 @@ const char* xnn_unary_operator_to_string(enum xnn_unary_operator op)
   return "unknown";
 }
 
+const char* xnn_reduce_operator_to_string(enum xnn_reduce_operator op) {
+  switch (op) {
+    case xnn_reduce_mean:
+      return "mean";
+    case xnn_reduce_mean_squared:
+      return "mean_squared";
+    case xnn_reduce_sum:
+      return "sum";
+    case xnn_reduce_sum_squared:
+      return "sum_squared";
+    case xnn_reduce_max:
+      return "max";
+    case xnn_reduce_min:
+      return "min";
+    case xnn_reduce_invalid:
+      return "invalid";
+  }
+  XNN_UNREACHABLE;
+  return "unknown";
+}
+
 const char* xnn_binary_operator_to_string(enum xnn_binary_operator op)
 {
   switch (op) {
@@ -299,8 +335,12 @@ enum xnn_operator_type xnn_reduce_operator_to_operator_type(enum xnn_reduce_oper
   switch (type) {
     case xnn_reduce_mean:
       return xnn_operator_type_mean_nd;
+    case xnn_reduce_mean_squared:
+      return xnn_operator_type_mean_squared_nd;
     case xnn_reduce_sum:
       return xnn_operator_type_sum_nd;
+    case xnn_reduce_sum_squared:
+      return xnn_operator_type_sum_squared_nd;
     case xnn_reduce_max:
       return xnn_operator_type_reduce_max_nd;
     case xnn_reduce_min:
@@ -353,6 +393,7 @@ const char* xnn_operator_type_to_string_v2(xnn_operator_t op) {
         case xnn_binary_invalid:
           return "Invalid Binary Op";
       }
+      break;
     case xnn_operator_type_unary_elementwise:
       switch (op->unary_elementwise.op_type) {
         case xnn_unary_abs:
@@ -410,6 +451,7 @@ const char* xnn_operator_type_to_string_v2(xnn_operator_t op) {
         case xnn_unary_invalid:
           return "Invalid Unary Op";
       }
+      break;
     case xnn_operator_type_copy_nc_x16:
     case xnn_operator_type_copy_nc_x32:
     case xnn_operator_type_copy_nc_x8:
@@ -426,6 +468,7 @@ const char* xnn_operator_type_to_string_v2(xnn_operator_t op) {
           return xnn_operator_type_to_string(op->type);
       }
     default:
-      return xnn_operator_type_to_string(op->type);
+      break;
   }
+  return xnn_operator_type_to_string(op->type);
 }

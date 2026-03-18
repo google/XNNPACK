@@ -22,7 +22,7 @@ static void x16_packw(benchmark::State& state, const char* net,
   BENCHMARK_CAPTURE_BGEMM(x16_packw, ukernel##_, ukernel, arch_flags, nr, kr, \
                           sr);
 
-#include "src/x16-packw/x16-packw.h"
+#include "src/x16-packw/x16-packw.inc"
 
 #undef XNN_UKERNEL
 

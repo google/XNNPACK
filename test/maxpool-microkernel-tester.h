@@ -6,7 +6,8 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#pragma once
+#ifndef XNNPACK_TEST_MAXPOOL_MICROKERNEL_TESTER_H_
+#define XNNPACK_TEST_MAXPOOL_MICROKERNEL_TESTER_H_
 
 #include <algorithm>
 #include <cassert>
@@ -545,3 +546,5 @@ class MaxPoolMicrokernelTester {
   int16_t qmax_{std::numeric_limits<int16_t>::max()};
   size_t iterations_{3};
 };
+
+#endif  // XNNPACK_TEST_MAXPOOL_MICROKERNEL_TESTER_H_

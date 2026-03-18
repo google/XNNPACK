@@ -11,10 +11,9 @@
 
 #include <assert.h>
 
-#include "src/xnnpack/simd/f32-hvx.h"
-
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/reduce.h"
+#include "src/xnnpack/simd/f32-hvx.h"
 
 
 void xnn_f32_rsum_ukernel__hvx_u128_acc2(

@@ -12,7 +12,7 @@ size:
 ```
 #define XNN_UKERNEL(arch_flags, fn_name, batch_tile, vector_tile, datatype) \
     printf("%s %d\n", #fn_name, batch_tile);
-#include "src/f32-vtanh/f32-vtanh.h"
+#include "src/f32-vtanh/f32-vtanh.inc"
 #undef XNN_UKERNEL
 ```
 

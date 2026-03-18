@@ -9,11 +9,14 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
 
 #include <immintrin.h>
 
 #include "src/xnnpack/common.h"
-#include "src/xnnpack/intrinsics-polyfill.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/microparams.h"
 #include "src/xnnpack/vbinary.h"
 
 
@@ -39,7 +42,7 @@ void xnn_f16_vsqrdiffc_ukernel__avx512fp16_u64(
 
 
   for (; batch >= 64 * sizeof(uint16_t); batch -= 64 * sizeof(uint16_t)) {
-    __m512h va0 = _mm512_loadu_ph(a);
+    __m512h va0 = _mm512_loadu_ph(a + 0);
     __m512h va1 = _mm512_loadu_ph(a + 32);
     a += 64;
 
@@ -49,7 +52,7 @@ void xnn_f16_vsqrdiffc_ukernel__avx512fp16_u64(
     vacc0 = _mm512_mul_ph(vacc0, vacc0);
     vacc1 = _mm512_mul_ph(vacc1, vacc1);
 
-    _mm512_storeu_ph(o, vacc0);
+    _mm512_storeu_ph(o + 0, vacc0);
     _mm512_storeu_ph(o + 32, vacc1);
     o += 64;
   }
@@ -67,7 +70,7 @@ void xnn_f16_vsqrdiffc_ukernel__avx512fp16_u64(
     assert(batch >= 1 * sizeof(uint16_t));
     assert(batch <= 31 * sizeof(uint16_t));
     // Prepare mask for valid 16-bit elements (depends on batch).
-    batch >>= XNN_LOG2_SIZEOF_HALF;
+    batch >>= XNN_LOG2_SIZEOF_FLOAT16;
     const __mmask32 vmask = _cvtu32_mask32((uint32_t) ((UINT32_C(1) << batch) - UINT32_C(1)));
 
     __m512h va = _mm512_castsi512_ph(_mm512_maskz_loadu_epi16(vmask, a));
