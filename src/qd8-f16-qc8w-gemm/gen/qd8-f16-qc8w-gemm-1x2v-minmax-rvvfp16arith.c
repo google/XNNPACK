@@ -93,6 +93,13 @@ void xnn_qd8_f16_qc8w_gemm_minmax_ukernel_1x2v__rvvfp16arith(
     c0 = (xnn_float16*) ((uintptr_t) c0 + cn_stride);
 
     a0 = (const int8_t*) ((uintptr_t) a0 - kc);
+  
+      vint8m1_t vout80 = __riscv_vncvt_x(vout0, vl);
+
+      __riscv_vse8(c0, vout80, vl);
+      c0 = (int8_t*) ((uintptr_t) c0 + cn_stride);
+
+      a0 = (const int8_t*) ((uintptr_t) a0 - kc);
 
   } while (nc != 0);
 }

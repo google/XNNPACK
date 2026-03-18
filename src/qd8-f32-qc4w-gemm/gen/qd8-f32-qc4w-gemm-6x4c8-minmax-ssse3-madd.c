@@ -87,7 +87,7 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_6x4c8__ssse3_madd(
   const __m128 voutput_min = _mm_set1_ps(params->scalar.min);
   const __m128 voutput_max = _mm_set1_ps(params->scalar.max);
   const __m128i vmask = _mm_set1_epi8(0x0F);
-  XNN_FORCE_REALIZATION(vmask);
+  // XNN_FORCE_REALIZATION(vmask);
   do {
     const __m128i vksum0123 = _mm_load_si128(w);
     const __m128i vksum13 = _mm_shuffle_epi32(vksum0123, 0xF5);

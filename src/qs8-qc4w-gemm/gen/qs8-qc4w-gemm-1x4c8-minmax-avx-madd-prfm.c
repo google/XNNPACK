@@ -49,12 +49,12 @@ void xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_1x4c8__avx_madd_prfm(
   int8_t* c0 = c;
 
   const __m128i vsign_mask = _mm_set1_epi8(0x80);
-  XNN_FORCE_REALIZATION(vsign_mask);
+  // XNN_FORCE_REALIZATION(vsign_mask);
   const __m128 voutput_max_less_zero_point = _mm_set1_ps((int32_t) params->fp32_scalar.output_max - (int32_t) params->fp32_scalar.output_zero_point);
   const __m128i voutput_zero_point = _mm_set1_epi32(params->fp32_scalar.output_zero_point);
   const __m128i voutput_min = _mm_set1_epi16(params->fp32_scalar.output_min);
   const __m128i vmask = _mm_set1_epi8(0x0F);
-  XNN_FORCE_REALIZATION(vmask);
+  // XNN_FORCE_REALIZATION(vmask);
   do {
     __m128i vacc0x01 = _mm_cvtepu32_epi64(_mm_loadu_si64(w));
     __m128i vacc0x23 = _mm_cvtepu32_epi64(_mm_loadu_si64(((const int32_t*) w + 2)));

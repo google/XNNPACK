@@ -78,7 +78,7 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x16c4__
 
   $if DATATYPE not in ["QD8", "QC4"]:
     const __m512i vsign_mask = _mm512_set1_epi8(0x80);
-    XNN_FORCE_REALIZATION(vsign_mask);
+    // XNN_FORCE_REALIZATION(vsign_mask);
   $if DATATYPE in ["QD8", "QC4"]:
     $for M in range(MR):
       const __m512i vinput_zero_point${M} = _mm512_set1_epi32((int) quantization_params[${M}].zero_point);
@@ -91,10 +91,10 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x16c4__
         const __m512i vmask = _mm512_set1_epi8(0x0F);
       $else:
         const __m512i vmask = _mm512_set1_epi8(0xF0);
-      XNN_FORCE_REALIZATION(vmask);
+      // XNN_FORCE_REALIZATION(vmask);
       $if GFNI:
         const __m512i vshl4 = _mm512_set1_epi64(0x01020408);
-        XNN_FORCE_REALIZATION(vshl4);
+        // XNN_FORCE_REALIZATION(vshl4);
   $else:
     $if DATATYPE != "QC8":
       const __m512 vscale = _mm512_set1_ps(params->${PARAMS_STRUCT}.scale);

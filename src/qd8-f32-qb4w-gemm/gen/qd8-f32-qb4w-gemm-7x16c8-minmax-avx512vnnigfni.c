@@ -101,9 +101,9 @@ void xnn_qd8_f32_qb4w_gemm_minmax_ukernel_7x16c8__avx512vnnigfni(
   // XNN_FORCE_REALIZATION(voutput_min);
   // XNN_FORCE_REALIZATION(voutput_max);
   const __m512i vmask = _mm512_set1_epi8(0xF0);
-  XNN_FORCE_REALIZATION(vmask);
+  // XNN_FORCE_REALIZATION(vmask);
   const __m512i vshl4 = _mm512_set1_epi64(0x01020408);
-  XNN_FORCE_REALIZATION(vshl4);
+  // XNN_FORCE_REALIZATION(vshl4);
   do {
     const __m512 vksum0123456789ABCDEF = _mm512_loadu_ps(w);
     __m512 vscaled0x0123456789ABCDEF = _mm512_mul_ps(vksum0123456789ABCDEF, vinput_zero_point0);
