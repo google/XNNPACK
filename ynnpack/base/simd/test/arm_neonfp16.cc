@@ -22,7 +22,10 @@ class arm_neonfp16 : public ::testing::Test {
   }
 };
 
+TEST_CONVERT(arm_neonfp16, f32, f16x4);
 TEST_CONVERT(arm_neonfp16, f32, f16x8);
+TEST_CONVERT(arm_neonfp16, f16, f32x4);
+TEST_CONVERT(arm_neonfp16, f16, f32x8);
 
 }  // namespace simd
 }  // namespace ynn

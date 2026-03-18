@@ -28,6 +28,15 @@ YNN_ALWAYS_INLINE f32x8 convert(f16x8 a, float) {
   };
 }
 
+YNN_ALWAYS_INLINE f16x4 convert(f32x4 a, half) {
+  return f16x4{vreinterpret_u16_f16(vcvt_f16_f32(a.v))};
+}
+
+YNN_ALWAYS_INLINE f16x8 convert(f32x8 a, half) {
+  return f16x8{vreinterpretq_u16_f16(
+      vcombine_f16(vcvt_f16_f32(a.lo().v), vcvt_f16_f32(a.hi().v)))};
+}
+
 }  // namespace simd
 
 }  // namespace ynn
