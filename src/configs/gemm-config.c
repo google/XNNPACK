@@ -3070,7 +3070,7 @@ static void init_qd8_f32_qb4w_gemm_config(void) {
         qd8_f32_qb4w_gemm_config.planes = 2;
     } else
     #endif
-    #if XNN_ENABLE_AVX2
+    #if XNN_ENABLE_AVX
       if (hardware_config->arch_flags & xnn_arch_x86_avx) {
         qd8_f32_qb4w_gemm_config.arch = xnn_arch_x86_avx;
         qd8_f32_qb4w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_DQGEMM_UKERNEL(xnn_qd8_f32_qb4w_gemm_minmax_ukernel_1x4c8__avx_ld128);
