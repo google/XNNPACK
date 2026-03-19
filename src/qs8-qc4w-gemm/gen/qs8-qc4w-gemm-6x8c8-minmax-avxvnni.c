@@ -85,10 +85,10 @@ void xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_6x8c8__avxvnni(
   // XNN_FORCE_REALIZATION(voutput_max_less_zero_point);
   // XNN_FORCE_REALIZATION(voutput_zero_point);
   // XNN_FORCE_REALIZATION(voutput_min);
-  const __m256i vmask = _mm256_set1_epi8(0xF0);
-  XNN_FORCE_REALIZATION(vmask);
+  const __m256i vmask = _mm256_gf2p8affine_epi64_epi8(_mm256_setzero_si256(), _mm256_setzero_si256(), 0xF0);
+  // XNN_FORCE_REALIZATION(vmask);
   const __m256i vshl4 = _mm256_set1_epi64x(0x01020408);
-  XNN_FORCE_REALIZATION(vshl4);
+  // XNN_FORCE_REALIZATION(vshl4);
   do {
     __m256i vacc0x0123 = _mm256_cvtepu32_epi64(_mm_load_si128((const __m128i*) w));
     __m256i vacc0x4567 = _mm256_cvtepu32_epi64(_mm_load_si128((const __m128i*) ((const int32_t*) w + 4)));
