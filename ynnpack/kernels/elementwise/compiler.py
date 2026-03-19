@@ -23,11 +23,10 @@ class Type:
     return hash((self.type_class, self.size, self.lanes))
 
   def __eq__(self, other):
-    return (self.type_class, self.size, self.lanes) == (
+    return (self.type_class, self.size) == (
         other.type_class,
         other.size,
-        other.lanes,
-    )
+    ) and ((self.lanes == other.lanes) or other.lanes == 0 or self.lanes == 0)
 
   def is_int(self):
     return self.type_class == "int"
@@ -910,7 +909,7 @@ def rewrite(pattern, replacement, expr):
   matches = []
   matched = match(pattern, expr, matches)
   if matched:
-    return Op(replacement.ty, replacement.name, matches)
+    return Op(expr.ty, replacement.name, matches)
   else:
     return None
 
@@ -955,6 +954,8 @@ class Target:
         "cast",
         "add_sat",
         "sub_sat",
+        "saturating_cast",
+        "saturating_rounding_cast",
     }
     self.infix_ops = {
         "add": "+",
@@ -1018,8 +1019,10 @@ class Target:
           f"bit_cast<{self.legalize_type(op.ty)},"
           f" {self.legalize_type(op.args[0].ty)}>"
       )
-    elif op.name == "cast":
-      return "cast"
+    elif op.name == "saturating_cast":
+      return "simd::saturate_cast"
+    elif op.name == "saturating_rounding_cast":
+      return "round_float_to_int"
     elif op.name == "min" or op.name == "max":
       return f"simd::{op.name}"
     return op.name
@@ -1048,100 +1051,6 @@ class Target:
 
     cache[expr] = v
     return v
-
-  def slice_wide_types(self, expr, cache):
-    """Recursively iterate over the expression and slice it into chunks matching the target platform vector size."""
-    if expr in cache:
-      return cache[expr]
-
-    if isinstance(expr, Var) or isinstance(expr, Constant):
-      v = expr
-    else:
-      natural_lanes = self.get_natural_lanes_num(expr.ty)
-      # If the number of lanes is less than what hardware vector has there is
-      # nothing to slice.
-      slices_num = builtins.max(expr.ty.lanes // natural_lanes, 1)
-
-      args = []
-      if not isinstance(expr, Load):
-        for arg in expr.args:
-          if isinstance(arg, Op) and arg.name == "broadcast":
-            args.append(arg)
-          else:
-            args.append(self.slice_wide_types(arg, cache))
-
-      if slices_num != 1:
-        op_slices = []
-        if isinstance(expr, Load):
-          for slice_index in range(slices_num):
-            op_slices.append(
-                Load(
-                    expr.ty.with_lanes(natural_lanes),
-                    expr.index,
-                    expr.offset_elements + natural_lanes * slice_index,
-                )
-            )
-        else:
-          for slice_index in range(slices_num):
-            op_slices.append(
-                Op(
-                    expr.ty.with_lanes(natural_lanes),
-                    expr.name,
-                    [
-                        slice_vector(arg, slice_index, slices_num)
-                        for arg in args
-                    ],
-                )
-            )
-
-        v = combine_vectors(op_slices)
-      else:
-        if isinstance(expr, Load):
-          v = expr
-        else:
-          v = Op(
-              expr.ty,
-              expr.name,
-              args,
-          )
-
-    cache[expr] = v
-    return v
-
-  def optimize_slices(self, expr, cache):
-    """Recursively iterate over the expression and optimize slices/combines."""
-    if expr in cache:
-      return cache[expr]
-
-    if isinstance(expr, Op):
-      args = [self.optimize_slices(arg, cache) for arg in expr.args]
-      if expr.name == "slice":
-        if isinstance(args[0], Op) and args[0].name == "combine":
-          comb = args[0]
-          slice_index = args[1].value
-          total_slices = args[2].value
-          if len(comb.args) == total_slices:
-            mutated = comb.args[slice_index]
-            cache[expr] = mutated
-            return mutated
-          elif len(comb.args) % total_slices == 0:
-            num = len(comb.args) // total_slices
-            mutated = combine_vectors(
-                comb.args[slice_index * num : (slice_index + 1) * num]
-            )
-            cache[expr] = mutated
-            return mutated
-
-        elif isinstance(args[0], Op) and args[0].name == "broadcast":
-          bc = args[0]
-          mutated = broadcast(bc.args[0], expr.ty.lanes)
-          cache[expr] = mutated
-          return mutated
-      mutated = Op(expr.ty, expr.name, args)
-      cache[expr] = mutated
-      return mutated
-    else:
-      return expr
 
   def pattern_match(self, expr, cache):
     """Recursively iterate over the expression and try to find patterns to replace."""
@@ -1262,6 +1171,7 @@ class Target:
       increment,
       emit_loop,
       buffers,
+      lanes,
       prefix_before,
       prefix_after,
   ):
@@ -1307,9 +1217,8 @@ class Target:
               f" stride_{b.name}_m;\n"
           )
 
-        broadcast_lanes = self.vector_bits // b.ty.size
         broadcast_op = self.pattern_match(
-            broadcast(Var(b.name, b.ty.with_lanes(1)), broadcast_lanes),
+            broadcast(Var(b.name, b.ty.with_lanes(1)), lanes),
             {},
         )
         self.result += (
@@ -1470,7 +1379,11 @@ class Target:
     elif op.name in self.infix_ops:
       pass
     else:
-      if op.name == "cast":
+      if (
+          op.name == "cast"
+          or op.name == "saturating_cast"
+          or op.name == "saturating_rounding_cast"
+      ):
         str_args.append(f"{self.legalize_type(op.ty.scalar())}{{}}")
       mem_op = self.legalize_op(op)
 
@@ -1536,6 +1449,7 @@ class Target:
           tile_height if not is_rem_height else 1,
           True,
           buffers,
+          natural_lanes,
           "base_",
           "",
       )
@@ -1555,6 +1469,7 @@ class Target:
             step,
             emit_loop,
             buffers,
+            natural_lanes,
             "",
             "",
         )
@@ -1663,8 +1578,6 @@ class Target:
 
     natural_lanes = self.get_natural_lanes_num(func.value.ty)
     ast = self.vectorize(ast, natural_lanes, {})
-    ast = self.slice_wide_types(ast, {})
-    ast = self.optimize_slices(ast, {})
     ast = self.pattern_match(ast, {})
 
     constants = {}
