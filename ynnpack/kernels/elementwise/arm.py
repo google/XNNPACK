@@ -8,22 +8,8 @@ from ynnpack.kernels.elementwise.compiler import *  # pylint: disable=wildcard-i
 def make_neon_cast_patterns(vector_bits):
   """Adds NEON cast patterns."""
   assert vector_bits == 128
-  vf32_a = f32_a.with_lanes(vector_bits // 32)
-  vf32_b = f32_b.with_lanes(vector_bits // 32)
 
-  return [
-      Rule(
-          cast(
-              Float(16, vector_bits // 16),
-              combine_vectors([vf32_a, vf32_b]),
-          ),
-          Op(
-              Float(16, vector_bits // 16),
-              "cast_f32_to_f16",
-              [vf32_a, vf32_b],
-          ),
-      ),
-  ] + add_saturating_cast_rules(vector_bits)
+  return add_saturating_cast_rules(vector_bits)
 
 
 def make_neon_integer_patterns(vector_bits):
@@ -49,70 +35,13 @@ class ARM(Target):
   """NEON target for elementwise kernels compiler."""
 
   def update_for_neon(self):
-    self.header += """
-
-namespace {
-
-YNN_INTRINSIC int32x4_t cast_f32_to_int32(float32x4_t f) {
-#if defined(__ARM_ARCH) && __ARM_ARCH < 8
-  return vcvtq_s32_f32(ynn::simd::round(ynn::simd::f32x4{f}).v);
-#else
-  return vcvtnq_s32_f32(f);
-#endif
-}
-
-YNN_INTRINSIC uint32x4_t cast_f32_to_uint32(float32x4_t f) {
-#if defined(__ARM_ARCH) && __ARM_ARCH < 8
-  return vcvtq_u32_f32(ynn::simd::round(ynn::simd::f32x4{f}).v);
-#else
-  return vcvtnq_u32_f32(f);
-#endif
-}
-
-YNN_INTRINSIC int16x8_t saturating_cast_f32_to_int16(float32x4_t f0, float32x4_t f1) {
-  return vcombine_s16(vqmovn_s32(cast_f32_to_int32(f0)), vqmovn_s32(cast_f32_to_int32(f1)));
-}
-
-YNN_INTRINSIC int8x16_t saturating_cast_f32_to_int8(float32x4_t f0, float32x4_t f1, float32x4_t f2, float32x4_t f3) {
-  const int16x8_t i01_16 = vcombine_s16(vqmovn_s32(cast_f32_to_int32(f0)), vqmovn_s32(cast_f32_to_int32(f1)));
-  const int16x8_t i23_16 = vcombine_s16(vqmovn_s32(cast_f32_to_int32(f2)), vqmovn_s32(cast_f32_to_int32(f3)));
-  return vcombine_s8(vqmovn_s16(i01_16), vqmovn_s16(i23_16));
-}
-
-YNN_INTRINSIC uint8x16_t saturating_cast_f32_to_uint8(float32x4_t f0, float32x4_t f1, float32x4_t f2, float32x4_t f3) {
-  const uint16x8_t i01_16 = vcombine_u16(vqmovn_u32(cast_f32_to_uint32(f0)), vqmovn_u32(cast_f32_to_uint32(f1)));
-  const uint16x8_t i23_16 = vcombine_u16(vqmovn_u32(cast_f32_to_uint32(f2)), vqmovn_u32(cast_f32_to_uint32(f3)));
-  return vcombine_u8(vqmovn_u16(i01_16), vqmovn_u16(i23_16));
-}
-
-YNN_INTRINSIC int16x8_t saturating_cast_int32_to_int16(int32x4_t a, int32x4_t b) {
-  return vcombine_s16(vqmovn_s32(a), vqmovn_s32(b));
-}
-
-YNN_INTRINSIC int8x16_t saturating_cast_int16_to_int8(int16x8_t a, int16x8_t b) {
-  return vcombine_s8(vqmovn_s16(a), vqmovn_s16(b));
-}
-
-YNN_INTRINSIC uint8x16_t saturating_cast_int16_to_uint8(int16x8_t a, int16x8_t b) {
-  return vcombine_u8(vqmovun_s16(a), vqmovun_s16(b));
-}
-
-} // namespace
-"""
+    """Updates the target for NEON support."""
     self.patterns += make_neon_float32_patterns(128)
     self.patterns += make_neon_integer_patterns(128)
     self.patterns += make_neon_cast_patterns(128)
 
   def update_for_fp16(self):
-    self.header += """
-namespace {
-
-YNN_INTRINSIC uint16x8_t cast_f32_to_f16(float32x4_t f0, float32x4_t f1) {
-  return vreinterpretq_u16_f16(vcombine_f16(vcvt_f16_f32(f0), vcvt_f16_f32(f1)));
-}
-
-} // namespace
-"""
+    """Updates the target for FP16 support."""
 
   def __init__(self, features):
     Target.__init__(self)

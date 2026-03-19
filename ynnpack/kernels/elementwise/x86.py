@@ -148,61 +148,6 @@ class X86(Target):
     self.patterns += make_x86_float_comparison_patterns(128, "_mm_")
     self.patterns += make_x86_integer_comparison_patterns(128, "_mm_")
 
-    self.header += """
-namespace {
-
-YNN_INTRINSIC __m128i saturating_cast_f32_to_int8(__m128 f0, __m128 f1, __m128 f2, __m128 f3) {
-  const __m128 max_int16 = _mm_set1_ps((1 << 15) - 1);
-  f0 = _mm_min_ps(f0, max_int16);
-  f1 = _mm_min_ps(f1, max_int16);
-  f2 = _mm_min_ps(f2, max_int16);
-  f3 = _mm_min_ps(f3, max_int16);
-  const __m128i i0 = _mm_cvtps_epi32(f0);
-  const __m128i i1 = _mm_cvtps_epi32(f1);
-  const __m128i i2 = _mm_cvtps_epi32(f2);
-  const __m128i i3 = _mm_cvtps_epi32(f3);
-  const __m128i i01_16 = _mm_packs_epi32(i0, i1);
-  const __m128i i23_16 = _mm_packs_epi32(i2, i3);
-  return _mm_packs_epi16(i01_16, i23_16);
-}
-
-YNN_INTRINSIC __m128i saturating_cast_f32_to_int16(__m128 f0, __m128 f1) {
-  const __m128 max_int16 = _mm_set1_ps((1 << 15) - 1);
-  f0 = _mm_min_ps(f0, max_int16);
-  f1 = _mm_min_ps(f1, max_int16);
-  const __m128i i0 = _mm_cvtps_epi32(f0);
-  const __m128i i1 = _mm_cvtps_epi32(f1);
-  return _mm_packs_epi32(i0, i1);
-}
-
-YNN_INTRINSIC __m128i saturating_cast_int32_to_int16(__m128i a, __m128i b) {
-  return _mm_packs_epi32(a, b);
-}
-
-YNN_INTRINSIC __m128i saturating_cast_int16_to_int8(__m128i a, __m128i b) {
-  return _mm_packs_epi16(a, b);
-}
-
-YNN_INTRINSIC __m128i saturating_cast_int16_to_uint8(__m128i a, __m128i b) {
-  return _mm_packus_epi16(a, b);
-}
-
-YNN_INTRINSIC __m128i saturating_cast_f32_to_uint8(__m128 f0, __m128 f1, __m128 f2, __m128 f3) {
-  const __m128 max_uint16 = _mm_set1_ps((1 << 16) - 1);
-  f0 = _mm_min_ps(f0, max_uint16);
-  f1 = _mm_min_ps(f1, max_uint16);
-  const __m128i i0 = _mm_cvtps_epi32(f0);
-  const __m128i i1 = _mm_cvtps_epi32(f1);
-  const __m128i i2 = _mm_cvtps_epi32(f2);
-  const __m128i i3 = _mm_cvtps_epi32(f3);
-  const __m128i i01_16 = _mm_packs_epi32(i0, i1);
-  const __m128i i23_16 = _mm_packs_epi32(i2, i3);
-  return _mm_packus_epi16(i01_16, i23_16);
-}
-
-} // namespace
-"""
-
   def update_for_sse41(self):
     """Updates the target for SSE41 support."""
 
@@ -224,69 +169,6 @@ YNN_INTRINSIC __m256 greater_than(__m256 a, __m256 b) {
     self.patterns += make_x86_integer_patterns(256, "_mm256_")
     self.patterns += make_x86_cast_patterns(256)
 
-    self.header += """
-namespace {
-
-YNN_INTRINSIC __m256i saturating_cast_f32_to_int8(__m256 f0, __m256 f1, __m256 f2, __m256 f3) {
-  const __m256 max_int16 = _mm256_set1_ps((1 << 15) - 1);
-  f0 = _mm256_min_ps(f0, max_int16);
-  f1 = _mm256_min_ps(f1, max_int16);
-  f2 = _mm256_min_ps(f2, max_int16);
-  f3 = _mm256_min_ps(f3, max_int16);
-  const __m256i i0 = _mm256_cvtps_epi32(f0);
-  const __m256i i1 = _mm256_cvtps_epi32(f1);
-  const __m256i i2 = _mm256_cvtps_epi32(f2);
-  const __m256i i3 = _mm256_cvtps_epi32(f3);
-  const __m256i i01_16 = _mm256_packs_epi32(i0, i1);
-  const __m256i i23_16 = _mm256_packs_epi32(i2, i3);
-  const __m256i r = _mm256_packs_epi16(i01_16, i23_16);
-  return _mm256_permutevar8x32_epi32(r, _mm256_setr_epi32(0, 4, 1, 5, 2, 6, 3, 7));
-}
-
-YNN_INTRINSIC __m256i saturating_cast_f32_to_int16(__m256 f0, __m256 f1) {
-  const __m256 max_int16 = _mm256_set1_ps((1 << 15) - 1);
-  f0 = _mm256_min_ps(f0, max_int16);
-  f1 = _mm256_min_ps(f1, max_int16);
-  const __m256i i0 = _mm256_cvtps_epi32(f0);
-  const __m256i i1 = _mm256_cvtps_epi32(f1);
-  const __m256i i01_16 = _mm256_packs_epi32(i0, i1);
-  return _mm256_permute4x64_epi64(i01_16, (0 << 0) + (2 << 2) + (1 << 4) + (3 << 6));
-}
-
-YNN_INTRINSIC __m256i saturating_cast_int32_to_int16(__m256i a, __m256i b) {
-  const __m256i r = _mm256_packs_epi32(a, b);
-  return _mm256_permute4x64_epi64(r, (0 << 0) + (2 << 2) + (1 << 4) + (3 << 6));
-}
-
-YNN_INTRINSIC __m256i saturating_cast_int16_to_int8(__m256i a, __m256i b) {
-  const __m256i r = _mm256_packs_epi16(a, b);
-  return _mm256_permute4x64_epi64(r, (0 << 0) + (2 << 2) + (1 << 4) + (3 << 6));
-}
-
-YNN_INTRINSIC __m256i saturating_cast_int16_to_uint8(__m256i a, __m256i b) {
-  const __m256i r = _mm256_packus_epi16(a, b);
-  return _mm256_permute4x64_epi64(r, (0 << 0) + (2 << 2) + (1 << 4) + (3 << 6));
-}
-
-YNN_INTRINSIC __m256i saturating_cast_f32_to_uint8(__m256 f0, __m256 f1, __m256 f2, __m256 f3) {
-  const __m256 max_uint16 = _mm256_set1_ps((1 << 16) - 1);
-  f0 = _mm256_min_ps(f0, max_uint16);
-  f1 = _mm256_min_ps(f1, max_uint16);
-  f2 = _mm256_min_ps(f2, max_uint16);
-  f3 = _mm256_min_ps(f3, max_uint16);
-  const __m256i i0 = _mm256_cvtps_epi32(f0);
-  const __m256i i1 = _mm256_cvtps_epi32(f1);
-  const __m256i i2 = _mm256_cvtps_epi32(f2);
-  const __m256i i3 = _mm256_cvtps_epi32(f3);
-  const __m256i i01_16 = _mm256_packs_epi32(i0, i1);
-  const __m256i i23_16 = _mm256_packs_epi32(i2, i3);
-  const __m256i r = _mm256_packus_epi16(i01_16, i23_16);
-  return _mm256_permutevar8x32_epi32(r, _mm256_setr_epi32(0, 4, 1, 5, 2, 6, 3, 7));
-}
-
-}  // namespace
-"""
-
   def update_for_fma3(self):
     """Updates the target for FMA3 support."""
     self.patterns += make_x86_fma_patterns(256, "_mm256_")
@@ -305,67 +187,6 @@ YNN_INTRINSIC __m256i saturating_cast_f32_to_uint8(__m256 f0, __m256 f1, __m256 
 
   def update_for_avx512bw(self):
     """Updates the target for AVX512BW support."""
-    self.header += """
-namespace {
-
-YNN_INTRINSIC __m512i saturating_cast_f32_to_int8(__m512 f0, __m512 f1, __m512 f2, __m512 f3) {
-  const __m512 max_int16 = _mm512_set1_ps((1 << 15) - 1);
-  f0 = _mm512_min_ps(f0, max_int16);
-  f1 = _mm512_min_ps(f1, max_int16);
-  f2 = _mm512_min_ps(f2, max_int16);
-  f3 = _mm512_min_ps(f3, max_int16);
-  const __m512i i0 = _mm512_cvtps_epi32(f0);
-  const __m512i i1 = _mm512_cvtps_epi32(f1);
-  const __m512i i2 = _mm512_cvtps_epi32(f2);
-  const __m512i i3 = _mm512_cvtps_epi32(f3);
-  const __m512i i01_16 = _mm512_packs_epi32(i0, i1);
-  const __m512i i23_16 = _mm512_packs_epi32(i2, i3);
-  const __m512i r = _mm512_packs_epi16(i01_16, i23_16);
-  return _mm512_permutexvar_epi32(_mm512_setr_epi32(0, 4, 8, 12, 1, 5, 9, 13, 2, 6, 10, 14, 3, 7, 11, 15), r);
-}
-
-YNN_INTRINSIC __m512i saturating_cast_f32_to_uint8(__m512 f0, __m512 f1, __m512 f2, __m512 f3) {
-  const __m512 max_uint16 = _mm512_set1_ps((1 << 16) - 1);
-  f0 = _mm512_min_ps(f0, max_uint16);
-  f1 = _mm512_min_ps(f1, max_uint16);
-  const __m512i i0 = _mm512_cvtps_epi32(f0);
-  const __m512i i1 = _mm512_cvtps_epi32(f1);
-  const __m512i i2 = _mm512_cvtps_epi32(f2);
-  const __m512i i3 = _mm512_cvtps_epi32(f3);
-  const __m512i i01_16 = _mm512_packus_epi32(i0, i1);
-  const __m512i i23_16 = _mm512_packus_epi32(i2, i3);
-  const __m512i r = _mm512_packus_epi16(i01_16, i23_16);
-  return _mm512_permutexvar_epi32(_mm512_setr_epi32(0, 4, 8, 12, 1, 5, 9, 13, 2, 6, 10, 14, 3, 7, 11, 15), r);
-}
-
-YNN_INTRINSIC __m512i saturating_cast_f32_to_int16(__m512 f0, __m512 f1) {
-  const __m512 max_int16 = _mm512_set1_ps((1 << 15) - 1);
-  f0 = _mm512_min_ps(f0, max_int16);
-  f1 = _mm512_min_ps(f1, max_int16);
-  const __m512i i0 = _mm512_cvtps_epi32(f0);
-  const __m512i i1 = _mm512_cvtps_epi32(f1);
-  const __m512i r = _mm512_packs_epi32(i0, i1);
-  return _mm512_permutexvar_epi64(_mm512_setr_epi64(0, 2, 4, 6, 1, 3, 5, 7), r);
-}
-
-YNN_INTRINSIC __m512i saturating_cast_int32_to_int16(__m512i a, __m512i b) {
-  const __m512i r = _mm512_packs_epi32(a, b);
-  return _mm512_permutexvar_epi64(_mm512_setr_epi64(0, 2, 4, 6, 1, 3, 5, 7), r);
-}
-
-YNN_INTRINSIC __m512i saturating_cast_int16_to_int8(__m512i a, __m512i b) {
-  const __m512i r = _mm512_packs_epi16(a, b);
-  return _mm512_permutexvar_epi64(_mm512_setr_epi64(0, 2, 4, 6, 1, 3, 5, 7), r);
-}
-
-YNN_INTRINSIC __m512i saturating_cast_int16_to_uint8(__m512i a, __m512i b) {
-  const __m512i r = _mm512_packus_epi16(a, b);
-  return _mm512_permutexvar_epi64(_mm512_setr_epi64(0, 2, 4, 6, 1, 3, 5, 7), r);
-}
-
-} // namespace
-
-"""
 
   def get_natural_lanes_num(self, ty):
     """Returns a number of lanes in the native vector type."""
