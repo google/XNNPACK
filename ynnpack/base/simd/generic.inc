@@ -253,6 +253,18 @@ YNN_ALWAYS_INLINE vec<To, N> convert(vec<From, N> from, To) {
   return {convert(from.lo(), To()), convert(from.hi(), To())};
 }
 
+template <typename To, typename From, size_t N>
+YNN_ALWAYS_INLINE vec<To, N> saturating_convert(vec<From, N> from, To) {
+  return {saturating_convert(from.lo(), To()),
+          saturating_convert(from.hi(), To())};
+}
+
+template <typename To, typename From, size_t N>
+YNN_ALWAYS_INLINE vec<To, N> saturating_rounding_convert(vec<From, N> from, To) {
+  return {saturating_rounding_convert(from.lo(), To()),
+          saturating_rounding_convert(from.hi(), To())};
+}
+
 template <typename T, size_t N>
 YNN_ALWAYS_INLINE T horizontal_sum(vec<T, N> x) {
   return horizontal_sum(x.lo() + x.hi());

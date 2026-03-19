@@ -764,17 +764,6 @@ header = """
 namespace ynn {
 namespace {
 
-template <typename T>
-YNN_INTRINSIC T* offset_bytes(T* ptr, std::ptrdiff_t offset) {
-  return reinterpret_cast<T*>(reinterpret_cast<uint8_t*>(ptr) + offset);
-}
-
-template <typename T>
-YNN_INTRINSIC const T* offset_bytes(const T* ptr, std::ptrdiff_t offset) {
-  return reinterpret_cast<const T*>(reinterpret_cast<const uint8_t*>(ptr) +
-                                    offset);
-}
-
 YNN_INTRINSIC std::size_t min(std::size_t a, std::size_t b) {
   return a < b ? a : b;
 }

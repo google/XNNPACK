@@ -16,6 +16,7 @@
 #include <limits>
 #include <type_traits>
 
+#include "ynnpack/base/arithmetic.h"
 #include "ynnpack/base/base.h"
 
 namespace ynn {
@@ -147,6 +148,12 @@ auto extract(vec<T, N>, SliceN);
 
 template <typename To, typename From, size_t N>
 vec<To, N> convert(vec<From, N> from, To);
+
+template <typename To, typename From, size_t N>
+vec<To, N> saturating_convert(vec<From, N> from, To);
+
+template <typename To, typename From, size_t N>
+vec<To, N> saturating_rounding_convert(vec<From, N> from, To);
 
 namespace internal {
 
@@ -305,6 +312,21 @@ YNN_ALWAYS_INLINE vec<T, 1> saturating_sub(vec<T, 1> a, vec<T, 1> b) {
 template <typename To, typename From>
 YNN_ALWAYS_INLINE vec<To, 1> convert(vec<From, 1> from, To) {
   return vec<To, 1>{static_cast<To>(from.v)};
+}
+
+template <typename To, typename From>
+YNN_ALWAYS_INLINE vec<To, 1> saturating_convert(vec<From, 1> from, To) {
+  return vec<To, 1>{saturate_cast<To>(from.v)};
+}
+
+template <typename To, typename From>
+YNN_ALWAYS_INLINE vec<To, 1> saturating_rounding_convert(vec<From, 1> from,
+                                                         To) {
+  if constexpr (std::is_same_v<From, float>) {
+    return vec<To, 1>{round_float_to_int<To>(from.v)};
+  } else {
+    return vec<To, 1>{saturate_cast<To>(from.v)};
+  }
 }
 
 template <typename T>

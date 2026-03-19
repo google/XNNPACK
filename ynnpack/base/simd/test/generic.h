@@ -16,6 +16,7 @@
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include "ynnpack/base/arithmetic.h"
 #include "ynnpack/base/bfloat16.h"
 #include "ynnpack/base/half.h"
 #include "ynnpack/base/simd/vec.h"
@@ -621,6 +622,70 @@ void test_convert() {
 
 #define TEST_CONVERT(test_class, to, from) \
   TEST_F(test_class, convert_##to##_##from) { test_convert<to, from>(); }
+
+template <typename To, typename From>
+To saturating_convert_reference(From from, bool round = false) {
+  if constexpr (std::is_floating_point_v<From> && std::is_integral_v<To>) {
+    if (round) {
+      return round_float_to_int<To>(from);
+    }
+  }
+  return ynn::saturate_cast<To>(from);
+}
+
+template <typename To, typename From>
+void test_saturating_convert() {
+  using FromScalar = typename From::value_type;
+  static constexpr size_t N = From::N;
+  using vector = vec<FromScalar, N>;
+
+  ReplicableRandomDevice rng;
+  for (auto _ : FuzzTest(std::chrono::milliseconds(100))) {
+    FromScalar src[N];
+    fill_random(src, N, rng);
+    From from_v = load(src, vector::N);
+    auto to_v = saturating_convert(from_v, To{});
+
+    To dst[N];
+    store(dst, to_v);
+    for (size_t i = 0; i < N; ++i) {
+      ASSERT_EQ(dst[i],
+                saturating_convert_reference<To>(src[i], /*round=*/false));
+    }
+  }
+}
+
+#define TEST_SATURATING_CONVERT(test_class, to, from)    \
+  TEST_F(test_class, saturating_convert_##to##_##from) { \
+    test_saturating_convert<to, from>();                 \
+  }
+
+template <typename To, typename From>
+void test_saturating_rounding_convert() {
+  using FromScalar = typename From::value_type;
+  static constexpr size_t N = From::N;
+  using vector = vec<FromScalar, N>;
+
+  ReplicableRandomDevice rng;
+  for (auto _ : FuzzTest(std::chrono::milliseconds(100))) {
+    FromScalar src[N];
+    fill_random(src, N, rng);
+    From from_v = load(src, vector::N);
+    auto to_v = saturating_rounding_convert(from_v, To{});
+
+    To dst[N];
+    store(dst, to_v);
+    for (size_t i = 0; i < N; ++i) {
+      ASSERT_EQ(dst[i],
+                saturating_convert_reference<To>(src[i], /*round=*/true));
+    }
+  }
+}
+
+#define TEST_SATURATING_ROUNDING_CONVERT(test_class, to, from)    \
+  TEST_F(test_class, saturating_rounding_convert_##to##_##from) { \
+    test_saturating_rounding_convert<to, from>();                 \
+  }
 
 template <typename scalar, size_t N>
 void test_horizontal_sum() {

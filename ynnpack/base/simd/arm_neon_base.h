@@ -823,10 +823,31 @@ YNN_ALWAYS_INLINE std::array<vec<T, 4>, 4> transpose(
   }};
 }
 
+namespace internal {
+
+YNN_ALWAYS_INLINE int32x4_t cast_f32_to_int32(float32x4_t f) {
+#if defined(__ARM_ARCH) && __ARM_ARCH < 8
+  return vcvtq_s32_f32(round(f32x4{f}).v);
+#else
+  return vcvtnq_s32_f32(f);
+#endif
+}
+
+YNN_ALWAYS_INLINE uint32x4_t cast_f32_to_uint32(float32x4_t f) {
+#if defined(__ARM_ARCH) && __ARM_ARCH < 8
+  return vcvtq_u32_f32(round(f32x4{f}).v);
+#else
+  return vcvtnq_u32_f32(f);
+#endif
+}
+
+}  // namespace internal
+
 using f32x8 = vec<float, 8>;
 using s32x8 = vec<int32_t, 8>;
 using s16x16 = vec<int16_t, 16>;
 using s32x16 = vec<int32_t, 16>;
+using f32x16 = vec<float, 16>;
 
 YNN_ALWAYS_INLINE f32x8 convert(bf16x8 a, float) {
   uint16x8x2_t a_u32 = vzipq_u16(vdupq_n_u16(0), a.v);
@@ -871,6 +892,43 @@ YNN_ALWAYS_INLINE f32x4 convert(s32x4 x, float) {
 
 YNN_ALWAYS_INLINE s32x4 convert(f32x4 x, int32_t) {
   return s32x4{vcvtq_s32_f32(x.v)};
+}
+
+YNN_ALWAYS_INLINE s16x8 saturating_convert(s32x8 a, int16_t) {
+  return s16x8{vcombine_s16(vqmovn_s32(a.lo().v), vqmovn_s32(a.hi().v))};
+}
+
+YNN_ALWAYS_INLINE s8x16 saturating_convert(s16x16 a, int8_t) {
+  return s8x16{vcombine_s8(vqmovn_s16(a.lo().v), vqmovn_s16(a.hi().v))};
+}
+
+YNN_ALWAYS_INLINE u8x16 saturating_convert(s16x16 a, uint8_t) {
+  return u8x16{vcombine_u8(vqmovun_s16(a.lo().v), vqmovun_s16(a.hi().v))};
+}
+
+YNN_ALWAYS_INLINE s16x8 saturating_rounding_convert(f32x8 f, int16_t) {
+  return s16x8{vcombine_s16(vqmovn_s32(internal::cast_f32_to_int32(f.lo().v)),
+                            vqmovn_s32(internal::cast_f32_to_int32(f.hi().v)))};
+}
+
+YNN_ALWAYS_INLINE s8x16 saturating_rounding_convert(f32x16 f, int8_t) {
+  const int16x8_t i01 =
+      vcombine_s16(vqmovn_s32(internal::cast_f32_to_int32(f.lo().lo().v)),
+                   vqmovn_s32(internal::cast_f32_to_int32(f.lo().hi().v)));
+  const int16x8_t i23 =
+      vcombine_s16(vqmovn_s32(internal::cast_f32_to_int32(f.hi().lo().v)),
+                   vqmovn_s32(internal::cast_f32_to_int32(f.hi().hi().v)));
+  return s8x16{vcombine_s8(vqmovn_s16(i01), vqmovn_s16(i23))};
+}
+
+YNN_ALWAYS_INLINE u8x16 saturating_rounding_convert(f32x16 f, uint8_t) {
+  const uint16x8_t i01 =
+      vcombine_u16(vqmovn_u32(internal::cast_f32_to_uint32(f.lo().lo().v)),
+                   vqmovn_u32(internal::cast_f32_to_uint32(f.lo().hi().v)));
+  const uint16x8_t i23 =
+      vcombine_u16(vqmovn_u32(internal::cast_f32_to_uint32(f.hi().lo().v)),
+                   vqmovn_u32(internal::cast_f32_to_uint32(f.hi().hi().v)));
+  return u8x16{vcombine_u8(vqmovn_u16(i01), vqmovn_u16(i23))};
 }
 
 }  // namespace simd
