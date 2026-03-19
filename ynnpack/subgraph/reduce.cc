@@ -28,7 +28,6 @@
 #include "slinky/builder/simplify.h"
 #include "slinky/runtime/buffer.h"
 #include "slinky/runtime/expr.h"
-#include "slinky/runtime/print.h"
 #include "slinky/runtime/stmt.h"
 
 namespace ynn {
@@ -387,7 +386,12 @@ ynn_status ynn_define_reduce(ynn_subgraph_t subgraph,
 
   ynn::axes_set k_dims;
   for (size_t i = 0; i < num_axes; ++i) {
-    k_dims[axis_to_slinky_dim(a.rank(), axes[i])] = true;
+    const int axis = axis_to_slinky_dim(a.rank(), axes[i]);
+    if (axis < a.rank()) {
+      k_dims[axis] = true;
+    } else {
+      // This is a reduction of an implicit broadcast, which is a no-op.
+    }
   }
   bool keep_dims = flags & YNN_NODE_FLAG_KEEP_DIMS;
 

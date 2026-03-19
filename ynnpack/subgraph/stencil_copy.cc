@@ -191,12 +191,18 @@ ynn_status ynn_define_stencil_copy(ynn_subgraph_t subgraph, size_t num_stencils,
       "stencil_copy", subgraph, "padding_id", padding_id, /*optional=*/true));
   YNN_RETURN_IF_ERROR(
       validate_output_tensor("stencil_copy", subgraph, "output_id", output_id));
+  const ynn_value& input = subgraph->value(input_id);
+  YNN_RETURN_IF_ERROR(
+      validate_rank("stencil_copy", "output", input.rank() + num_stencils));
 
   ynn_node node;
-  const ynn_value& input = subgraph->value(input_id);
   ynn_node::stencil_copy op_data;
   op_data.stencils.reserve(num_stencils);
   for (size_t i = 0; i < num_stencils; ++i) {
+    YNN_RETURN_IF_ERROR(
+        validate_axis("stencil_copy", "input", input.rank(), stencil_axes[i]));
+    YNN_RETURN_IF_ERROR(validate_axis(
+        "stencil_copy", "output", input.rank() + num_stencils, new_axes[i]));
     op_data.stencils.push_back({
         // Swap the axes to get the slinky dimensions.
         .axis = axis_to_slinky_dim(input.rank(), stencil_axes[i]),

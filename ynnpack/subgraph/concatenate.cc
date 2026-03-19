@@ -33,6 +33,8 @@ ynn_status ynn_define_concatenate(ynn_subgraph_t subgraph, int32_t axis,
       validate_output_tensor("concatenate", subgraph, "output_id", output_id));
 
   const ynn_value& input0 = subgraph->value(input_ids[0]);
+  YNN_RETURN_IF_ERROR(
+      validate_axis("concatenate", "input", input0.rank(), axis));
   axis = axis_to_slinky_dim(input0.rank(), axis);
 
   // Make the output and node.

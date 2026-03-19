@@ -118,15 +118,13 @@ ynn_status ynn_define_get_tensor_shape(ynn_subgraph_t subgraph, size_t num_axes,
     if (op.reshape_1d) {
       extents = {slinky::index_t(1)};
       for (int32_t i : op.axes) {
-        if (input.extents[i].defined()) {
-          extents[0] *= input.extents[i];
-        }
+        extents[0] *= input.extent(i);
       }
       extents[0] = slinky::simplify(extents[0]);
     } else {
       extents.reserve(op.axes.size());
       for (int32_t i : op.axes) {
-        extents.push_back(input.extents[i].defined() ? input.extents[i] : 1);
+        extents.push_back(input.extent(i));
       }
     }
 

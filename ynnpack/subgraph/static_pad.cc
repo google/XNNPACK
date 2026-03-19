@@ -3,11 +3,11 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include <algorithm>
 #include <cassert>
 #include <cstddef>
 #include <cstdint>
 #include <functional>
+#include <memory>
 #include <utility>
 #include <vector>
 
@@ -42,6 +42,8 @@ ynn_status ynn_define_static_pad(ynn_subgraph_t subgraph, size_t num_axes,
   ynn_node::static_pad op;
   op.paddings.reserve(num_axes);
   for (size_t i = 0; i < num_axes; ++i) {
+    YNN_RETURN_IF_ERROR(
+        validate_axis("static_pad", "input", input.rank(), axes[i]));
     if (pre_paddings[i] != 0 || post_paddings[i] != 0) {
       op.paddings.push_back({ynn::axis_to_slinky_dim(input.rank(), axes[i]),
                              pre_paddings[i], post_paddings[i]});

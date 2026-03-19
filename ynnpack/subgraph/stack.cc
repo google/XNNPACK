@@ -33,6 +33,9 @@ ynn_status ynn_define_stack(ynn_subgraph_t subgraph, int32_t axis,
       validate_output_tensor("stack", subgraph, "output_id", output_id));
 
   const ynn_value& input0 = subgraph->value(input_ids[0]);
+  YNN_RETURN_IF_ERROR(validate_rank("stack", "output", input0.rank() + 1));
+  YNN_RETURN_IF_ERROR(
+      validate_axis("stack", "output", input0.rank() + 1, axis));
   axis = axis_to_slinky_dim(input0.rank() + 1, axis);
 
   // Make the output and node.

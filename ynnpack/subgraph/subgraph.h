@@ -60,19 +60,24 @@ ynn_status define_static_transpose(ynn_subgraph_t subgraph,
 
 // Validation helpers for public APIs.
 ynn_status validate_subgraph(const char* node, ynn_subgraph_t subgraph);
+ynn_status validate_rank(const char* node, const char* rank_of, size_t rank);
+ynn_status validate_axis(const char* node, const char* axis_of, int rank,
+                         int32_t axis);
 ynn_status validate_input_tensor(const char* node, ynn_subgraph_t subgraph,
                                  const char* name, uint32_t id,
                                  bool optional = false);
 ynn_status validate_input_tensor_array(const char* node,
                                        ynn_subgraph_t subgraph,
                                        const char* name, size_t count,
-                                       const uint32_t* ids);
+                                       const uint32_t* ids,
+                                       bool allow_empty = false);
 ynn_status validate_output_tensor(const char* node, ynn_subgraph_t subgraph,
                                   const char* name, uint32_t* id_out);
 ynn_status validate_output_tensor_array(const char* node,
                                         ynn_subgraph_t subgraph,
                                         const char* name, size_t count,
-                                        uint32_t* id_outs);
+                                        uint32_t* id_outs,
+                                        bool allow_empty = false);
 ynn_status validate_runtime(ynn_runtime_t runtime);
 
 }  // namespace ynn

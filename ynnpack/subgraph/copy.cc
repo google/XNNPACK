@@ -176,6 +176,7 @@ slinky::func make_reshape(ynn_runtime& runtime,
 
 ynn_status validate_new_shape(const char* node, size_t rank,
                               const size_t* new_dims) {
+  YNN_RETURN_IF_ERROR(validate_rank(node, "new_dims", rank));
   if (new_dims == nullptr && rank > 0) {
     YNN_LOG_ERROR() << "For node `" << node
                     << "`, new_dims must be non-null for rank > 0";
@@ -346,19 +347,17 @@ ynn_status ynn_define_static_expand_dims(ynn_subgraph_t subgraph,
                                             "input_id", input_id));
   YNN_RETURN_IF_ERROR(validate_output_tensor("static_expand_dims", subgraph,
                                              "output_id", output_id));
-  if (new_axes == nullptr && num_new_axes > 0) {
-    YNN_LOG_ERROR() << "For node `static_expand_dims`, new_axes must be "
-                       "non-null for num_new_axes > 0";
-    return ynn_status_invalid_parameter;
-  }
 
   const ynn_value& input = subgraph->value(input_id);
 
   ynn_value& output = subgraph->get_output_value(output_id, input);
 
   const int new_rank = input.rank() + num_new_axes;
+  YNN_RETURN_IF_ERROR(validate_rank("static_expand_dims", "output", new_rank));
   ynn_node::static_expand_dims op;
   for (size_t i = 0; i < num_new_axes; ++i) {
+    YNN_RETURN_IF_ERROR(
+        validate_axis("static_expand_dims", "output", new_rank, new_axes[i]));
     op.new_axes[axis_to_slinky_dim(new_rank, new_axes[i])] = true;
   }
 
@@ -419,6 +418,10 @@ ynn_status ynn_define_fuse_dim(ynn_subgraph_t subgraph, int32_t axis,
     return ynn_status_invalid_parameter;
   }
   const ynn_value& input = subgraph->value(input_id);
+  YNN_RETURN_IF_ERROR(validate_axis("fuse_dim", "input", input.rank(), axis));
+  YNN_RETURN_IF_ERROR(
+      validate_axis("fuse_dim", "input", input.rank(), axis + axes_count - 1));
+
   ynn_node::fuse_dim op;
   // Since the first axis was specified with the dims in reverse order, we
   // actually want the last dim here.
@@ -483,6 +486,9 @@ ynn_status ynn_define_split_dim(ynn_subgraph_t subgraph, int32_t axis,
     return ynn_status_invalid_parameter;
   }
   const ynn_value& input = subgraph->value(input_id);
+  YNN_RETURN_IF_ERROR(
+      validate_rank("split_dim", "output", input.rank() + num_splits - 1));
+  YNN_RETURN_IF_ERROR(validate_axis("split_dim", "input", input.rank(), axis));
 
   ynn_value& output = subgraph->get_output_value(output_id, input);
 
@@ -546,6 +552,8 @@ ynn_status ynn_define_fuse_dims(ynn_subgraph_t subgraph, size_t num_axes,
 
   ynn_node::fuse_dims op;
   for (size_t i = 0; i < num_axes; ++i) {
+    YNN_RETURN_IF_ERROR(
+        validate_axis("fuse_dims", "input", input.rank(), axes[i]));
     // Since we are reversing the axes, the first dimension to fuse is actually
     // the next dimension.
     op.axes[axis_to_slinky_dim(input.rank(), axes[i] + 1)] = true;
@@ -596,6 +604,8 @@ ynn_status ynn_define_split_dims(ynn_subgraph_t subgraph, size_t num_axes,
   using split = ynn_node::split_dims::split;
   ynn_node::split_dims op;
   for (size_t i = 0; i < num_axes; ++i) {
+    YNN_RETURN_IF_ERROR(
+        validate_axis("split_dims", "input", input.rank(), axes[i]));
     op.splits.push_back({axis_to_slinky_dim(input.rank(), axes[i]), splits[i]});
   }
 

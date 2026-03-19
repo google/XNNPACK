@@ -16,7 +16,6 @@
 #include "ynnpack/subgraph/slinky.h"
 #include "ynnpack/subgraph/subgraph.h"
 #include "slinky/builder/pipeline.h"
-#include "slinky/runtime/buffer.h"
 #include "slinky/runtime/expr.h"
 
 namespace ynn {
@@ -34,6 +33,8 @@ ynn_status ynn_define_even_split(ynn_subgraph_t subgraph, int32_t axis,
       "even_split", subgraph, "output_ids", num_outputs, output_ids));
 
   const ynn_value& input = subgraph->value(input_id);
+  YNN_RETURN_IF_ERROR(validate_axis("even_split", "input", input.rank(), axis));
+
   for (size_t i = 0; i < num_outputs; ++i) {
     subgraph->get_output_value(&output_ids[i], input);
   }

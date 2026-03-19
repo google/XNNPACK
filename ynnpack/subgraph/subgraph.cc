@@ -52,6 +52,27 @@ ynn_status validate_subgraph(const char* node, ynn_subgraph_t subgraph) {
   return ynn_status_success;
 }
 
+ynn_status validate_rank(const char* node, const char* rank_of, size_t rank) {
+  if (rank > YNN_MAX_TENSOR_RANK) {
+    YNN_LOG_ERROR() << "For node `" << node << "`, rank " << rank
+                    << " of tensor `" << rank_of
+                    << "` exceeds YNN_MAX_TENSOR_RANK " << YNN_MAX_TENSOR_RANK;
+    return ynn_status_unsupported_parameter;
+  }
+  return ynn_status_success;
+}
+
+ynn_status validate_axis(const char* node, const char* axis_of, int rank,
+                         int32_t axis) {
+  if (axis < -rank || axis >= rank) {
+    YNN_LOG_ERROR() << "For node `" << node << "`, axis " << axis
+                    << " exceeds rank " << rank << " of tensor `" << axis_of
+                    << "`";
+    return ynn_status_invalid_parameter;
+  }
+  return ynn_status_success;
+}
+
 ynn_status validate_input_tensor(const char* node, ynn_subgraph_t subgraph,
                                  const char* name, uint32_t id, bool optional) {
   if (optional && id == YNN_INVALID_VALUE_ID) {
@@ -68,7 +89,12 @@ ynn_status validate_input_tensor(const char* node, ynn_subgraph_t subgraph,
 ynn_status validate_input_tensor_array(const char* node,
                                        ynn_subgraph_t subgraph,
                                        const char* name, size_t count,
-                                       const uint32_t* ids) {
+                                       const uint32_t* ids, bool allow_empty) {
+  if (!allow_empty && count == 0) {
+    YNN_LOG_ERROR() << "For node `" << node << "`, input array `" << name
+                    << "` must be non-empty";
+    return ynn_status_invalid_parameter;
+  }
   if (count > 0 && ids == nullptr) {
     YNN_LOG_ERROR() << "For node `" << node << "`, input array `" << name
                     << "` must be non-null if count is " << count;
@@ -103,7 +129,12 @@ ynn_status validate_output_tensor(const char* node, ynn_subgraph_t subgraph,
 ynn_status validate_output_tensor_array(const char* node,
                                         ynn_subgraph_t subgraph,
                                         const char* name, size_t count,
-                                        uint32_t* ids_out) {
+                                        uint32_t* ids_out, bool allow_empty) {
+  if (!allow_empty && count == 0) {
+    YNN_LOG_ERROR() << "For node `" << node << "`, output array `" << name
+                    << "` must be non-empty";
+    return ynn_status_invalid_parameter;
+  }
   if (count > 0 && ids_out == nullptr) {
     YNN_LOG_ERROR() << "For node `" << node << "`, output array `" << name
                     << "` must be non-null if count is " << count;

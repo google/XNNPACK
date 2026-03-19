@@ -128,7 +128,7 @@ ynn_status define_static_transpose(ynn_subgraph_t subgraph,
   const int elem_count = type_element_count(output.type);
   output.extents.resize(permutation.size());
   for (int d = 0; d < output.rank(); ++d) {
-    slinky::expr input_extent = input.extents[permutation[d]];
+    slinky::expr input_extent = input.extent(permutation[d]);
     if (permutation[d] == 0 && elem_count != 1) {
       // The extents are physical shapes, we need to convert to logical shapes
       // when we transpose the dimensions.
@@ -219,9 +219,11 @@ ynn_status ynn_define_static_transpose(ynn_subgraph_t subgraph, size_t rank,
   YNN_RETURN_IF_ERROR(validate_output_tensor("static_transpose", subgraph,
                                              "output_id", output_id));
   if (permutation == nullptr && rank > 0) {
-    YNN_LOG_ERROR() << "permutation must be non-null for rank > 0";
+    YNN_LOG_ERROR() << "For node `static_transpose`, permutation must be "
+                       "non-null for rank > 0";
     return ynn_status_invalid_parameter;
   }
+  YNN_RETURN_IF_ERROR(validate_rank("static_transpose", "output", rank));
 
   // Rewrite the permutation to be slinky dimensions.
   const ynn_value& input = subgraph->value(input_id);

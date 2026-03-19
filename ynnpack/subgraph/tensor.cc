@@ -75,6 +75,11 @@ ynn_status ynn_define_tensor_value(ynn_subgraph_t subgraph, enum ynn_type type,
                                    uint32_t scale_id, uint32_t flags,
                                    uint32_t* id_out) {
   YNN_RETURN_IF_ERROR(validate_subgraph("define_tensor", subgraph));
+  if (rank > YNN_MAX_TENSOR_RANK) {
+    YNN_LOG_ERROR() << "rank " << rank << " exceeds YNN_MAX_TENSOR_RANK "
+                    << YNN_MAX_TENSOR_RANK;
+    return ynn_status_unsupported_parameter;
+  }
   if (!id_out) {
     YNN_LOG_ERROR() << "id_out must be non-null";
     return ynn_status_invalid_parameter;
