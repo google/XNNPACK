@@ -31,6 +31,19 @@ def make_neon_float32_patterns(vector_bits):
   return []
 
 
+def make_neon_fma_patterns(vector_bits):
+  return [
+      i.vectorize(vector_bits)
+      for i in [
+          Rule(
+              multiply_add(f32_a, f32_b, f32_c),
+              Op(Float(32), "fma", [f32_a, f32_b, f32_c]),
+              ["FMA"],
+          ),
+      ]
+  ]
+
+
 class ARM(Target):
   """NEON target for elementwise kernels compiler."""
 
@@ -42,6 +55,9 @@ class ARM(Target):
 
   def update_for_fp16(self):
     """Updates the target for FP16 support."""
+
+  def update_for_fma(self):
+    self.patterns += make_neon_fma_patterns(128)
 
   def __init__(self, features):
     Target.__init__(self)
@@ -73,8 +89,12 @@ class ARM(Target):
       self.header += (
           '#include "ynnpack/base/simd/arm_neonfp16.h"\n'
       )
-
       self.update_for_fp16()
+    if "FMA" in all_features:
+      self.header += (
+          '#include "ynnpack/base/simd/arm_neonfma.h"\n'
+      )
+      self.update_for_fma()
 
   def arch_flags(self):
     return "|".join(["arch_flag::" + i.lower() for i in self.features])

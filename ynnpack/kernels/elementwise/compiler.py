@@ -956,6 +956,7 @@ class Target:
         "sub_sat",
         "saturating_cast",
         "saturating_rounding_cast",
+        "fma",
     }
     self.infix_ops = {
         "add": "+",

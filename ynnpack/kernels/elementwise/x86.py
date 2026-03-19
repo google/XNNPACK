@@ -120,18 +120,13 @@ def make_x86_integer_comparison_patterns(vector_bits, prefix):
   ]
 
 
-def make_x86_fma_patterns(vector_bits, prefix):
+def make_x86_fma_patterns(vector_bits):
   return [
       i.vectorize(vector_bits)
       for i in [
           Rule(
               multiply_add(f32_a, f32_b, f32_c),
-              Op(Float(32), prefix + "fmadd_ps", [f32_a, f32_b, f32_c]),
-              ["FMA3", "AVX512F"],
-          ),
-          Rule(
-              multiply_sub(f32_a, f32_b, f32_c),
-              Op(Float(32), prefix + "fmsub_ps", [f32_a, f32_b, f32_c]),
+              Op(Float(32), "fma", [f32_a, f32_b, f32_c]),
               ["FMA3", "AVX512F"],
           ),
       ]
@@ -171,14 +166,14 @@ YNN_INTRINSIC __m256 greater_than(__m256 a, __m256 b) {
 
   def update_for_fma3(self):
     """Updates the target for FMA3 support."""
-    self.patterns += make_x86_fma_patterns(256, "_mm256_")
+    self.patterns += make_x86_fma_patterns(256)
 
   def update_for_f16c(self):
     """Updates the target for F16C support."""
 
   def update_for_avx512f(self):
     """Updates the target for AVX512F support."""
-    self.patterns += make_x86_fma_patterns(512, "_mm512_")
+    self.patterns += make_x86_fma_patterns(512)
     self.patterns += make_x86_integer_patterns(512, "_mm512_")
     self.patterns += make_x86_cast_patterns(512)
 
@@ -267,6 +262,9 @@ YNN_INTRINSIC __m256 greater_than(__m256 a, __m256 b) {
     if "AVX512F" in all_features:
       self.update_for_avx512f()
     if "FMA3" in all_features:
+      self.header += (
+          '#include "ynnpack/base/simd/x86_fma3.h"\n'
+      )
       self.update_for_fma3()
     if "F16C" in all_features:
       self.update_for_f16c()
