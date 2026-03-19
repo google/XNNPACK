@@ -120,145 +120,6 @@ def make_x86_integer_comparison_patterns(vector_bits, prefix):
   ]
 
 
-def make_x86_slice_patterns(vector_bits, prefix):
-  """Adds x86 slice patterns.
-
-  Args:
-    vector_bits: The number of vector bits.
-    prefix: The prefix for the intrinsic names (e.g., "_mm256_").
-
-  Returns:
-    A list of rules for slice patterns.
-  """
-  if vector_bits == 256:
-    rules = []
-    for v in [i8_a, u8_a, i16_a, u16_a, i32_a, u32_a, bf16_a]:
-      lanes_256 = 256 // v.ty.size
-      lanes_128 = 128 // v.ty.size
-
-      val_256 = v.with_lanes(lanes_256)
-      val_128 = v.with_lanes(lanes_128)
-
-      rules.append(
-          Rule(
-              Op(
-                  val_128.ty,
-                  "slice",
-                  [val_256, WildConstant(0), WildConstant(2)],
-              ),
-              Op(
-                  val_128.ty, "wrapper" + prefix + "slice_cast_si256", [val_256]
-              ),
-          )
-      )
-      rules.append(
-          Rule(
-              Op(
-                  val_128.ty,
-                  "slice",
-                  [val_256, WildConstant(1), WildConstant(2)],
-              ),
-              Op(
-                  val_128.ty,
-                  "wrapper" + prefix + "slice_extract_si256_1",
-                  [val_256, i32(1)],
-              ),
-          )
-      )
-
-    lanes_256 = 256 // 32
-    lanes_128 = 128 // 32
-    val_256 = f32_a.with_lanes(lanes_256)
-    val_128 = f32_a.with_lanes(lanes_128)
-
-    rules.append(
-        Rule(
-            Op(
-                val_128.ty, "slice", [val_256, WildConstant(0), WildConstant(2)]
-            ),
-            Op(val_128.ty, "wrapper" + prefix + "slice_cast_ps256", [val_256]),
-        )
-    )
-    rules.append(
-        Rule(
-            Op(
-                val_128.ty, "slice", [val_256, WildConstant(1), WildConstant(2)]
-            ),
-            Op(
-                val_128.ty,
-                "wrapper" + prefix + "slice_extract_ps256_1",
-                [val_256, i32(1)],
-            ),
-        )
-    )
-    return rules
-
-  if vector_bits == 512:
-    rules = []
-    for v in [i8_a, u8_a, i16_a, u16_a, i32_a, u32_a, bf16_a]:
-      lanes_512 = 512 // v.ty.size
-      lanes_256 = 256 // v.ty.size
-
-      val_512 = v.with_lanes(lanes_512)
-      val_256 = v.with_lanes(lanes_256)
-
-      rules.append(
-          Rule(
-              Op(
-                  val_256.ty,
-                  "slice",
-                  [val_512, WildConstant(0), WildConstant(2)],
-              ),
-              Op(
-                  val_256.ty, "wrapper" + prefix + "slice_cast_si512", [val_512]
-              ),
-          )
-      )
-      rules.append(
-          Rule(
-              Op(
-                  val_256.ty,
-                  "slice",
-                  [val_512, WildConstant(1), WildConstant(2)],
-              ),
-              Op(
-                  val_256.ty,
-                  "wrapper" + prefix + "slice_extract_si512_1",
-                  [val_512, i32(1)],
-              ),
-          )
-      )
-
-    lanes_512 = 512 // 32
-    lanes_256 = 256 // 32
-    val_512 = f32_a.with_lanes(lanes_512)
-    val_256 = f32_a.with_lanes(lanes_256)
-
-    rules.append(
-        Rule(
-            Op(
-                val_256.ty, "slice", [val_512, WildConstant(0), WildConstant(2)]
-            ),
-            Op(val_256.ty, "wrapper" + prefix + "slice_cast_ps512", [val_512]),
-        )
-    )
-    rules.append(
-        Rule(
-            Op(
-                val_256.ty, "slice", [val_512, WildConstant(1), WildConstant(2)]
-            ),
-            Op(
-                val_256.ty,
-                "wrapper" + prefix + "slice_extract_ps512_1",
-                [val_512, i32(1)],
-            ),
-        )
-    )
-    return rules
-
-  return []
-
-
 def make_x86_fma_patterns(vector_bits, prefix):
   return [
       i.vectorize(vector_bits)
@@ -354,30 +215,9 @@ YNN_INTRINSIC __m256 greater_than(__m256 a, __m256 b) {
   return _mm256_cmp_ps(a, b, _CMP_GT_OS);
 }
 
-template <typename T>
-YNN_INTRINSIC __m128i wrapper_mm256_slice_cast_si256(T val, int idx, int total) {
-  return _mm256_castsi256_si128((__m256i)val);
-}
-
-YNN_INTRINSIC __m128 wrapper_mm256_slice_cast_ps256(__m256 val, int idx, int total) {
-  return _mm256_castps256_ps128(val);
-}
-
-template <typename T>
-YNN_INTRINSIC __m128i wrapper_mm256_slice_extract_si256_1(
-    T val, int idx, int total) {
-  return _mm256_extracti128_si256((__m256i)val, 1);
-}
-
-YNN_INTRINSIC __m128 wrapper_mm256_slice_extract_ps256_1(
-    __m256 val, int idx, int total) {
-  return _mm256_extractf128_ps(val, 1);
-}
-
 } // namespace
 
 """
-    self.patterns += make_x86_slice_patterns(256, "_mm256_")
 
   def update_for_avx2(self):
     """Updates the target for AVX2 support."""
@@ -456,36 +296,9 @@ YNN_INTRINSIC __m256i saturating_cast_f32_to_uint8(__m256 f0, __m256 f1, __m256 
 
   def update_for_avx512f(self):
     """Updates the target for AVX512F support."""
-    self.header += """
-namespace {
-
-template <typename T>
-YNN_INTRINSIC __m256i wrapper_mm512_slice_cast_si512(T val, int idx, int total) {
-  return _mm512_castsi512_si256((__m512i)val);
-}
-
-YNN_INTRINSIC __m256 wrapper_mm512_slice_cast_ps512(__m512 val, int idx, int total) {
-  return _mm512_castps512_ps256(val);
-}
-
-template <typename T>
-YNN_INTRINSIC __m256i wrapper_mm512_slice_extract_si512_1(
-    T val, int idx, int total) {
-  return _mm512_extracti64x4_epi64((__m512i)val, 1);
-}
-
-YNN_INTRINSIC __m256 wrapper_mm512_slice_extract_ps512_1(
-    __m512 val, int idx, int total) {
-  return _mm256_castsi256_ps(_mm512_extracti64x4_epi64(_mm512_castps_si512(val), 1));
-}
-
-} // namespace
-
-"""
     self.patterns += make_x86_fma_patterns(512, "_mm512_")
     self.patterns += make_x86_integer_patterns(512, "_mm512_")
     self.patterns += make_x86_cast_patterns(512)
-    self.patterns += make_x86_slice_patterns(512, "_mm512_")
 
   def update_for_avx512bf16(self):
     """Updates the target for AVX512BF16 support."""
