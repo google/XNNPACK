@@ -137,9 +137,9 @@ vec<T, N> sqrt(vec<T, N> a);
 template <typename T, size_t N>
 vec<T, N> abs(vec<T, N> a);
 template <typename T, size_t N>
-vec<T, N> saturating_add(vec<T, N> a, vec<T, N> b);
+vec<T, N> add_sat(vec<T, N> a, vec<T, N> b);
 template <typename T, size_t N>
-vec<T, N> saturating_sub(vec<T, N> a, vec<T, N> b);
+vec<T, N> sub_sat(vec<T, N> a, vec<T, N> b);
 
 template <typename T>
 std::array<vec<T, 4>, 4> transpose(std::array<vec<T, 4>, 4> x);
@@ -147,13 +147,13 @@ template <int Index, typename T, size_t N, typename SliceN>
 auto extract(vec<T, N>, SliceN);
 
 template <typename To, typename From, size_t N>
-vec<To, N> convert(vec<From, N> from, To);
+vec<To, N> cast(vec<From, N> from, To);
 
 template <typename To, typename From, size_t N>
-vec<To, N> saturating_convert(vec<From, N> from, To);
+vec<To, N> saturate_cast(vec<From, N> from, To);
 
 template <typename To, typename From, size_t N>
-vec<To, N> saturating_rounding_convert(vec<From, N> from, To);
+vec<To, N> round_float_to_int(vec<From, N> from, To);
 
 namespace internal {
 
@@ -295,38 +295,27 @@ YNN_ALWAYS_INLINE vec<T, 1> abs(vec<T, 1> a) {
   return vec<T, 1>{std::abs(a.v)};
 }
 template <typename T>
-YNN_ALWAYS_INLINE vec<T, 1> saturating_add(vec<T, 1> a, vec<T, 1> b) {
-  const int64_t res = static_cast<int64_t>(a.v) + static_cast<int64_t>(b.v);
-  const int64_t min = std::numeric_limits<T>::min();
-  const int64_t max = std::numeric_limits<T>::max();
-  return vec<T, 1>{static_cast<T>(std::max(min, std::min(max, res)))};
+YNN_ALWAYS_INLINE vec<T, 1> add_sat(vec<T, 1> a, vec<T, 1> b) {
+  return vec<T, 1>{add_sat(a.v, b.v)};
 }
 template <typename T>
-YNN_ALWAYS_INLINE vec<T, 1> saturating_sub(vec<T, 1> a, vec<T, 1> b) {
-  const int64_t res = static_cast<int64_t>(a.v) - static_cast<int64_t>(b.v);
-  const int64_t min = std::numeric_limits<T>::min();
-  const int64_t max = std::numeric_limits<T>::max();
-  return vec<T, 1>{static_cast<T>(std::max(min, std::min(max, res)))};
+YNN_ALWAYS_INLINE vec<T, 1> sub_sat(vec<T, 1> a, vec<T, 1> b) {
+  return vec<T, 1>{sub_sat(a.v, b.v)};
 }
 
 template <typename To, typename From>
-YNN_ALWAYS_INLINE vec<To, 1> convert(vec<From, 1> from, To) {
+YNN_ALWAYS_INLINE vec<To, 1> cast(vec<From, 1> from, To) {
   return vec<To, 1>{static_cast<To>(from.v)};
 }
 
 template <typename To, typename From>
-YNN_ALWAYS_INLINE vec<To, 1> saturating_convert(vec<From, 1> from, To) {
+YNN_ALWAYS_INLINE vec<To, 1> saturate_cast(vec<From, 1> from, To) {
   return vec<To, 1>{saturate_cast<To>(from.v)};
 }
 
 template <typename To, typename From>
-YNN_ALWAYS_INLINE vec<To, 1> saturating_rounding_convert(vec<From, 1> from,
-                                                         To) {
-  if constexpr (std::is_same_v<From, float>) {
-    return vec<To, 1>{round_float_to_int<To>(from.v)};
-  } else {
-    return vec<To, 1>{saturate_cast<To>(from.v)};
-  }
+YNN_ALWAYS_INLINE vec<To, 1> round_float_to_int(vec<From, 1> from, To) {
+  return vec<To, 1>{round_float_to_int<To>(from.v)};
 }
 
 template <typename T>

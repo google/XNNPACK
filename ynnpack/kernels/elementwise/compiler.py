@@ -496,15 +496,15 @@ def widening_mul(x, y):
 
 # Computes saturating_narrow(widen(x) + widen(y))
 @intrinsic
-def saturating_add(x, y):
+def add_sat(x, y):
   assert x.ty == y.ty
-  return Op(x.ty, "saturating_add", [x, y])
+  return Op(x.ty, "add_sat", [x, y])
 
 
 @intrinsic
-def saturating_sub(x, y):
+def sub_sat(x, y):
   assert x.ty == y.ty
-  return Op(x.ty, "saturating_sub", [x, y])
+  return Op(x.ty, "sub_sat", [x, y])
 
 
 # Computes x * y + z
@@ -953,8 +953,8 @@ class Target:
         "sqrt",
         "reinterpret_cast",
         "cast",
-        "saturating_add",
-        "saturating_sub",
+        "add_sat",
+        "sub_sat",
     }
     self.infix_ops = {
         "add": "+",
@@ -1019,7 +1019,7 @@ class Target:
           f" {self.legalize_type(op.args[0].ty)}>"
       )
     elif op.name == "cast":
-      return "convert"
+      return "cast"
     elif op.name == "min" or op.name == "max":
       return f"simd::{op.name}"
     return op.name

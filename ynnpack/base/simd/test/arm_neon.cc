@@ -72,19 +72,19 @@ TEST_SUBTRACT(arm_neon, s8, 16);
 TEST_SUBTRACT(arm_neon, f32, 4);
 TEST_SUBTRACT(arm_neon, s32, 4);
 
-TEST_SATURATING_ADD(arm_neon, u8, 16);
-TEST_SATURATING_ADD(arm_neon, s8, 16);
-TEST_SATURATING_ADD(arm_neon, u16, 8);
-TEST_SATURATING_ADD(arm_neon, s16, 8);
-TEST_SATURATING_ADD(arm_neon, u32, 4);
-TEST_SATURATING_ADD(arm_neon, s32, 4);
+TEST_ADD_SAT(arm_neon, u8, 16);
+TEST_ADD_SAT(arm_neon, s8, 16);
+TEST_ADD_SAT(arm_neon, u16, 8);
+TEST_ADD_SAT(arm_neon, s16, 8);
+TEST_ADD_SAT(arm_neon, u32, 4);
+TEST_ADD_SAT(arm_neon, s32, 4);
 
-TEST_SATURATING_SUB(arm_neon, u8, 16);
-TEST_SATURATING_SUB(arm_neon, s8, 16);
-TEST_SATURATING_SUB(arm_neon, u16, 8);
-TEST_SATURATING_SUB(arm_neon, s16, 8);
-TEST_SATURATING_SUB(arm_neon, u32, 4);
-TEST_SATURATING_SUB(arm_neon, s32, 4);
+TEST_SUB_SAT(arm_neon, u8, 16);
+TEST_SUB_SAT(arm_neon, s8, 16);
+TEST_SUB_SAT(arm_neon, u16, 8);
+TEST_SUB_SAT(arm_neon, s16, 8);
+TEST_SUB_SAT(arm_neon, u32, 4);
+TEST_SUB_SAT(arm_neon, s32, 4);
 
 TEST_MULTIPLY(arm_neon, u8, 16);
 TEST_MULTIPLY(arm_neon, s8, 16);
@@ -151,19 +151,19 @@ TEST_HORIZONTAL_MAX(arm_neon, s16, 8);
 TEST_HORIZONTAL_MAX(arm_neon, f32, 4);
 TEST_HORIZONTAL_MAX(arm_neon, s32, 4);
 
-TEST_CONVERT(arm_neon, s32, s8x16);
-TEST_CONVERT(arm_neon, s32, u8x16);
-TEST_CONVERT(arm_neon, s32, s16x8);
-TEST_CONVERT(arm_neon, f32, s32x4);
-TEST_CONVERT(arm_neon, s32, f32x4);
-TEST_CONVERT(arm_neon, f32, bf16x8);
+TEST_CAST(arm_neon, s32, s8x16);
+TEST_CAST(arm_neon, s32, u8x16);
+TEST_CAST(arm_neon, s32, s16x8);
+TEST_CAST(arm_neon, f32, s32x4);
+TEST_CAST(arm_neon, s32, f32x4);
+TEST_CAST(arm_neon, f32, bf16x8);
 
-TEST_SATURATING_CONVERT(arm_neon, s16, s32x8);
-TEST_SATURATING_CONVERT(arm_neon, u8, s16x16);
-TEST_SATURATING_CONVERT(arm_neon, s8, s16x16);
-TEST_SATURATING_ROUNDING_CONVERT(arm_neon, u8, f32x16);
-TEST_SATURATING_ROUNDING_CONVERT(arm_neon, s8, f32x16);
-TEST_SATURATING_ROUNDING_CONVERT(arm_neon, s16, f32x8);
+TEST_SATURATE_CAST(arm_neon, s16, s32x8);
+TEST_SATURATE_CAST(arm_neon, u8, s16x16);
+TEST_SATURATE_CAST(arm_neon, s8, s16x16);
+TEST_ROUND_FLOAT_TO_INT(arm_neon, u8, f32x16);
+TEST_ROUND_FLOAT_TO_INT(arm_neon, s8, f32x16);
+TEST_ROUND_FLOAT_TO_INT(arm_neon, s16, f32x8);
 
 TEST_EXTRACT(arm_neon, u8x16, 8);
 

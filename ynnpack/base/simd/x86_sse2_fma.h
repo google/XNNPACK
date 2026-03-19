@@ -70,7 +70,7 @@ inline f32x4 narrowing_add(f64x4 a, f64x4 b) {
   correction &= err != f64x4{-0.0};
   correction &= is_finite(c);
 
-  return convert(c + correction, float{});
+  return cast(c + correction, float{});
 }
 
 }  // namespace internal
@@ -78,8 +78,8 @@ inline f32x4 narrowing_add(f64x4 a, f64x4 b) {
 inline f32x4 fma(f32x4 a, f32x4 b, f32x4 acc) {
   // This product has no rounding error, because a double mantissa is more than
   // 2x bigger than a float mantissa.
-  f64x4 product = convert(a, double{}) * convert(b, double{});
-  return internal::narrowing_add(product, convert(acc, double{}));
+  f64x4 product = cast(a, double{}) * cast(b, double{});
+  return internal::narrowing_add(product, cast(acc, double{}));
 }
 
 }  // namespace simd

@@ -37,7 +37,7 @@ cc_library(
         "x86_sse41_base.h",
         "x86_avx_partial_load_store.h",
         "x86_sse2_partial_load_store.h",
-        "x86_sse2_saturating_convert.h",
+        "x86_sse2_saturate_cast.h",
         "generic.inc",
         # For the most part, only one of these headers should be included. Multiple of these headers
         # may define the same operation and type, using a different implementation, depending on the

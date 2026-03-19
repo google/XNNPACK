@@ -8,9 +8,12 @@
 
 #include <algorithm>
 #include <chrono>
+#include <cmath>
 #include <cstddef>
 #include <cstdint>
+#include <cstdlib>
 #include <cstring>
+#include <limits>
 #include <type_traits>
 #include <utility>
 
@@ -22,6 +25,7 @@
 #include "ynnpack/base/simd/vec.h"
 #include "ynnpack/base/test/fuzz_test.h"
 #include "ynnpack/base/test/random.h"
+#include "ynnpack/base/type.h"
 #include "slinky/base/span.h"
 
 namespace ynn {
@@ -602,7 +606,7 @@ void test_concat() {
   TEST_F(test_class, concat_##vector) { test_concat<vector>(); }
 
 template <typename To, typename From>
-void test_convert() {
+void test_cast() {
   using FromScalar = typename From::value_type;
   static constexpr size_t N = From::N;
 
@@ -611,7 +615,7 @@ void test_convert() {
     src[i] = static_cast<FromScalar>(i);
   }
   From from_v = load(src, From::N);
-  auto to_v = convert(from_v, To{});
+  auto to_v = cast(from_v, To{});
 
   To dst[N];
   store(dst, to_v);
@@ -620,21 +624,11 @@ void test_convert() {
   }
 }
 
-#define TEST_CONVERT(test_class, to, from) \
-  TEST_F(test_class, convert_##to##_##from) { test_convert<to, from>(); }
+#define TEST_CAST(test_class, to, from) \
+  TEST_F(test_class, cast_##to##_##from) { test_cast<to, from>(); }
 
 template <typename To, typename From>
-To saturating_convert_reference(From from, bool round = false) {
-  if constexpr (std::is_floating_point_v<From> && std::is_integral_v<To>) {
-    if (round) {
-      return round_float_to_int<To>(from);
-    }
-  }
-  return ynn::saturate_cast<To>(from);
-}
-
-template <typename To, typename From>
-void test_saturating_convert() {
+void test_saturate_cast() {
   using FromScalar = typename From::value_type;
   static constexpr size_t N = From::N;
   using vector = vec<FromScalar, N>;
@@ -644,24 +638,23 @@ void test_saturating_convert() {
     FromScalar src[N];
     fill_random(src, N, rng);
     From from_v = load(src, vector::N);
-    auto to_v = saturating_convert(from_v, To{});
+    auto to_v = saturate_cast(from_v, To{});
 
     To dst[N];
     store(dst, to_v);
     for (size_t i = 0; i < N; ++i) {
-      ASSERT_EQ(dst[i],
-                saturating_convert_reference<To>(src[i], /*round=*/false));
+      ASSERT_EQ(dst[i], ynn::saturate_cast<To>(src[i]));
     }
   }
 }
 
-#define TEST_SATURATING_CONVERT(test_class, to, from)    \
-  TEST_F(test_class, saturating_convert_##to##_##from) { \
-    test_saturating_convert<to, from>();                 \
+#define TEST_SATURATE_CAST(test_class, to, from)    \
+  TEST_F(test_class, saturate_cast_##to##_##from) { \
+    test_saturate_cast<to, from>();                 \
   }
 
 template <typename To, typename From>
-void test_saturating_rounding_convert() {
+void test_round_float_to_int() {
   using FromScalar = typename From::value_type;
   static constexpr size_t N = From::N;
   using vector = vec<FromScalar, N>;
@@ -671,20 +664,19 @@ void test_saturating_rounding_convert() {
     FromScalar src[N];
     fill_random(src, N, rng);
     From from_v = load(src, vector::N);
-    auto to_v = saturating_rounding_convert(from_v, To{});
+    auto to_v = round_float_to_int(from_v, To{});
 
     To dst[N];
     store(dst, to_v);
     for (size_t i = 0; i < N; ++i) {
-      ASSERT_EQ(dst[i],
-                saturating_convert_reference<To>(src[i], /*round=*/true));
+      ASSERT_EQ(dst[i], ynn::round_float_to_int<To>(src[i]));
     }
   }
 }
 
-#define TEST_SATURATING_ROUNDING_CONVERT(test_class, to, from)    \
-  TEST_F(test_class, saturating_rounding_convert_##to##_##from) { \
-    test_saturating_rounding_convert<to, from>();                 \
+#define TEST_ROUND_FLOAT_TO_INT(test_class, to, from)    \
+  TEST_F(test_class, round_float_to_int_##to##_##from) { \
+    test_round_float_to_int<to, from>();                 \
   }
 
 template <typename scalar, size_t N>
@@ -777,24 +769,8 @@ void test_fma() {
 #define TEST_FMA(test_class, type, N) \
   TEST_F(test_class, fma_##type##x##N) { test_fma<type, N>(); }
 
-template <typename T>
-T saturating_add_reference(T a, T b) {
-  int64_t res = static_cast<int64_t>(a) + static_cast<int64_t>(b);
-  res = std::max(res, static_cast<int64_t>(std::numeric_limits<T>::min()));
-  res = std::min(res, static_cast<int64_t>(std::numeric_limits<T>::max()));
-  return static_cast<T>(res);
-}
-
-template <typename T>
-T saturating_sub_reference(T a, T b) {
-  int64_t res = static_cast<int64_t>(a) - static_cast<int64_t>(b);
-  res = std::max(res, static_cast<int64_t>(std::numeric_limits<T>::min()));
-  res = std::min(res, static_cast<int64_t>(std::numeric_limits<T>::max()));
-  return static_cast<T>(res);
-}
-
 template <typename scalar, size_t N>
-void test_saturating_add() {
+void test_add_sat() {
   using vector = vec<scalar, N>;
   ReplicableRandomDevice rng;
   for (auto _ : FuzzTest(std::chrono::milliseconds(100))) {
@@ -804,15 +780,15 @@ void test_saturating_add() {
     fill_random(b, N, rng);
 
     scalar result[N];
-    store(result, saturating_add(load(a, vector::N), load(b, vector::N)));
+    store(result, add_sat(load(a, vector::N), load(b, vector::N)));
     for (size_t i = 0; i < N; ++i) {
-      ASSERT_EQ(result[i], saturating_add_reference(a[i], b[i]));
+      ASSERT_EQ(result[i], ynn::add_sat(a[i], b[i]));
     }
   }
 }
 
 template <typename scalar, size_t N>
-void test_saturating_sub() {
+void test_sub_sat() {
   using vector = vec<scalar, N>;
   ReplicableRandomDevice rng;
   for (auto _ : FuzzTest(std::chrono::milliseconds(100))) {
@@ -822,21 +798,17 @@ void test_saturating_sub() {
     fill_random(b, N, rng);
 
     scalar result[N];
-    store(result, saturating_sub(load(a, vector::N), load(b, vector::N)));
+    store(result, sub_sat(load(a, vector::N), load(b, vector::N)));
     for (size_t i = 0; i < N; ++i) {
-      ASSERT_EQ(result[i], saturating_sub_reference(a[i], b[i]));
+      ASSERT_EQ(result[i], ynn::sub_sat(a[i], b[i]));
     }
   }
 }
 
-#define TEST_SATURATING_ADD(test_class, type, N)    \
-  TEST_F(test_class, saturating_add_##type##x##N) { \
-    test_saturating_add<type, N>();                 \
-  }
-#define TEST_SATURATING_SUB(test_class, type, N)    \
-  TEST_F(test_class, saturating_sub_##type##x##N) { \
-    test_saturating_sub<type, N>();                 \
-  }
+#define TEST_ADD_SAT(test_class, type, N) \
+  TEST_F(test_class, add_sat_##type##x##N) { test_add_sat<type, N>(); }
+#define TEST_SUB_SAT(test_class, type, N) \
+  TEST_F(test_class, sub_sat_##type##x##N) { test_sub_sat<type, N>(); }
 
 }  // namespace simd
 

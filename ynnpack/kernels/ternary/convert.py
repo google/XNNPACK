@@ -9,7 +9,7 @@ def quantize(result_type, a, scale, zero_point, x):
   inv_scale = 1 / load(scale)
   zero_point = saturating_cast(Int(16), load(zero_point))
   vx = round(load(a) * inv_scale)
-  vx = saturating_add(saturating_cast(Int(16), vx), zero_point)
+  vx = add_sat(saturating_cast(Int(16), vx), zero_point)
   return store(saturating_cast(result_type, vx), x)
 
 

@@ -379,28 +379,28 @@ YNN_ALWAYS_INLINE u8x16 operator-(u8x16 a, u8x16 b) {
   return u8x16{_mm_sub_epi8(a.v, b.v)};
 }
 
-YNN_ALWAYS_INLINE s16x8 saturating_add(s16x8 a, s16x8 b) {
+YNN_ALWAYS_INLINE s16x8 add_sat(s16x8 a, s16x8 b) {
   return s16x8{_mm_adds_epi16(a.v, b.v)};
 }
-YNN_ALWAYS_INLINE u16x8 saturating_add(u16x8 a, u16x8 b) {
+YNN_ALWAYS_INLINE u16x8 add_sat(u16x8 a, u16x8 b) {
   return u16x8{_mm_adds_epu16(a.v, b.v)};
 }
-YNN_ALWAYS_INLINE s8x16 saturating_add(s8x16 a, s8x16 b) {
+YNN_ALWAYS_INLINE s8x16 add_sat(s8x16 a, s8x16 b) {
   return s8x16{_mm_adds_epi8(a.v, b.v)};
 }
-YNN_ALWAYS_INLINE u8x16 saturating_add(u8x16 a, u8x16 b) {
+YNN_ALWAYS_INLINE u8x16 add_sat(u8x16 a, u8x16 b) {
   return u8x16{_mm_adds_epu8(a.v, b.v)};
 }
-YNN_ALWAYS_INLINE s16x8 saturating_sub(s16x8 a, s16x8 b) {
+YNN_ALWAYS_INLINE s16x8 sub_sat(s16x8 a, s16x8 b) {
   return s16x8{_mm_subs_epi16(a.v, b.v)};
 }
-YNN_ALWAYS_INLINE u16x8 saturating_sub(u16x8 a, u16x8 b) {
+YNN_ALWAYS_INLINE u16x8 sub_sat(u16x8 a, u16x8 b) {
   return u16x8{_mm_subs_epu16(a.v, b.v)};
 }
-YNN_ALWAYS_INLINE s8x16 saturating_sub(s8x16 a, s8x16 b) {
+YNN_ALWAYS_INLINE s8x16 sub_sat(s8x16 a, s8x16 b) {
   return s8x16{_mm_subs_epi8(a.v, b.v)};
 }
-YNN_ALWAYS_INLINE u8x16 saturating_sub(u8x16 a, u8x16 b) {
+YNN_ALWAYS_INLINE u8x16 sub_sat(u8x16 a, u8x16 b) {
   return u8x16{_mm_subs_epu8(a.v, b.v)};
 }
 

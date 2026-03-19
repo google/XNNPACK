@@ -205,6 +205,16 @@ constexpr T saturate_cast(U x) noexcept {
   return static_cast<T>(x);
 }
 
+template <typename T>
+T add_sat(T a, T b) {
+  return saturate_cast<T>(static_cast<int64_t>(a) + static_cast<int64_t>(b));
+}
+
+template <typename T>
+T sub_sat(T a, T b) {
+  return saturate_cast<T>(static_cast<int64_t>(a) - static_cast<int64_t>(b));
+}
+
 }  // namespace ynn
 
 #endif  // XNNPACK_YNNPACK_BASE_ARITHMETIC_H_
