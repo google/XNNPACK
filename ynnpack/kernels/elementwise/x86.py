@@ -11,89 +11,6 @@ def make_x86_cast_patterns(vector_bits):
   return add_saturating_cast_rules(vector_bits)
 
 
-def make_x86_bf16_patterns(vector_bits):
-  """Adds x86 bfloat16 patterns.
-
-  Args:
-    vector_bits: The number of vector bits.
-
-  Returns:
-    A list of rules for bfloat16 patterns.
-  """
-  rules = []
-  if vector_bits == 256:
-    rules.append(
-        Rule(
-            cast(
-                BFloat(16, vector_bits // 16),
-                combine_vectors([
-                    f32_a.with_lanes(vector_bits // 32),
-                    f32_b.with_lanes(vector_bits // 32),
-                ]),
-            ),
-            Op(
-                BFloat(16, vector_bits // 16),
-                "convert_fp32_to_bf16_avx2",
-                [
-                    f32_a.with_lanes(vector_bits // 32),
-                    f32_b.with_lanes(vector_bits // 32),
-                ],
-            ),
-            features=["AVX2"],
-        )
-    )
-    rules.append(
-        Rule(
-            cast(
-                Float(32, vector_bits // 32),
-                bf16_a.with_lanes(vector_bits // 32),
-            ),
-            Op(
-                Float(32, vector_bits // 32),
-                "convert_bf16_to_fp32_avx2",
-                [bf16_a.with_lanes(vector_bits // 32)],
-            ),
-            features=["AVX2"],
-        )
-    )
-  if vector_bits == 512:
-    rules.append(
-        Rule(
-            cast(
-                BFloat(16, vector_bits // 16),
-                combine_vectors([
-                    f32_a.with_lanes(vector_bits // 32),
-                    f32_b.with_lanes(vector_bits // 32),
-                ]),
-            ),
-            Op(
-                BFloat(16, vector_bits // 16),
-                "convert_fp32_to_bf16_avx512",
-                [
-                    f32_a.with_lanes(vector_bits // 32),
-                    f32_b.with_lanes(vector_bits // 32),
-                ],
-            ),
-            features=["AVX512BF16"],
-        )
-    )
-    rules.append(
-        Rule(
-            cast(
-                Float(32, vector_bits // 32),
-                bf16_a.with_lanes(vector_bits // 32),
-            ),
-            Op(
-                Float(32, vector_bits // 32),
-                "convert_bf16_to_fp32_avx512",
-                [bf16_a.with_lanes(vector_bits // 32)],
-            ),
-            features=["AVX512F"],
-        )
-    )
-  return rules
-
-
 def make_x86_integer_patterns(vector_bits, prefix):
   return [
       Rule(
@@ -466,28 +383,9 @@ YNN_INTRINSIC __m128 wrapper_mm256_slice_extract_ps256_1(
     """Updates the target for AVX2 support."""
     self.patterns += make_x86_integer_patterns(256, "_mm256_")
     self.patterns += make_x86_cast_patterns(256)
-    self.patterns += make_x86_bf16_patterns(256)
 
     self.header += """
 namespace {
-
-YNN_INTRINSIC __m256i convert_fp32_to_bf16_avx2(__m256 a, __m256 b) {
-  const __m256 rounding_multiplier = _mm256_set1_ps(1.0f + 0.5f / 128.0f);
-  a = _mm256_mul_ps(a, rounding_multiplier);
-  b = _mm256_mul_ps(b, rounding_multiplier);
-  const __m256i ai = _mm256_castps_si256(a);
-  const __m256i bi = _mm256_castps_si256(b);
-  const __m256i as = _mm256_srli_epi32(ai, 16);
-  const __m256i bs = _mm256_srli_epi32(bi, 16);
-  const __m256i r = _mm256_packus_epi32(as, bs);
-  return _mm256_permute4x64_epi64(r, _MM_SHUFFLE(3, 1, 2, 0));
-}
-
-YNN_INTRINSIC __m256 convert_bf16_to_fp32_avx2(__m128i a) {
-  const __m256i fp32_integers = _mm256_cvtepu16_epi32(a);
-  const __m256i shifted = _mm256_slli_epi32(fp32_integers, 16);
-  return _mm256_castsi256_ps(shifted);
-}
 
 YNN_INTRINSIC __m256i saturating_cast_f32_to_int8(__m256 f0, __m256 f1, __m256 f2, __m256 f3) {
   const __m256 max_int16 = _mm256_set1_ps((1 << 15) - 1);
@@ -561,12 +459,6 @@ YNN_INTRINSIC __m256i saturating_cast_f32_to_uint8(__m256 f0, __m256 f1, __m256 
     self.header += """
 namespace {
 
-YNN_INTRINSIC __m512 convert_bf16_to_fp32_avx512(__m256i a) {
-  const __m512i fp32_integers = _mm512_cvtepu16_epi32(a);
-  const __m512i shifted = _mm512_slli_epi32(fp32_integers, 16);
-  return _mm512_castsi512_ps(shifted);
-}
-
 template <typename T>
 YNN_INTRINSIC __m256i wrapper_mm512_slice_cast_si512(T val, int idx, int total) {
   return _mm512_castsi512_si256((__m512i)val);
@@ -597,17 +489,6 @@ YNN_INTRINSIC __m256 wrapper_mm512_slice_extract_ps512_1(
 
   def update_for_avx512bf16(self):
     """Updates the target for AVX512BF16 support."""
-    self.header += """
-namespace {
-
-YNN_INTRINSIC __m512i convert_fp32_to_bf16_avx512(__m512 a, __m512 b) {
-  return (__m512i)_mm512_cvtne2ps_pbh(b, a);
-}
-
-} // namespace
-
-"""
-    self.patterns += make_x86_bf16_patterns(512)
 
   def update_for_avx512bw(self):
     """Updates the target for AVX512BW support."""
