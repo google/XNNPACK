@@ -18,6 +18,8 @@
 
 #include <gtest/gtest.h>
 #include "ynnpack/base/arch.h"  // IWYU pragma: keep
+#include "ynnpack/base/bfloat16.h"
+#include "ynnpack/base/half.h"
 #include "ynnpack/base/test/fuzz_test.h"
 #include "ynnpack/base/test/random.h"
 #include "ynnpack/base/test/tensor.h"
@@ -103,6 +105,37 @@ void Reference(Tensor<AT> a, Tensor<BT> b, Tensor<CT> c) {
       }
     }
   }
+}
+
+// If the output type is bf16 or fp16, we want to compute the result in fp32,
+// and convert to the output type after.
+template <typename AT, typename BT>
+void Reference(Tensor<AT> a, Tensor<BT> b, Tensor<bfloat16> c) {
+  Tensor<float> c_float(c.extents());
+  c_float.assign(c);
+  Reference(a, b, c_float);
+  c.assign(c_float);
+}
+
+template <typename AT, typename BT>
+void Reference(Tensor<AT> a, Tensor<BT> b, Tensor<half> c) {
+  Tensor<float> c_float(c.extents());
+  c_float.assign(c);
+  Reference(a, b, c_float);
+  c.assign(c_float);
+}
+
+float get_dot_tolerance(ynn_type type, size_t num_k_elements,
+                        float max_abs_value, uint32_t dot_flags) {
+  float eps;
+  if (type == ynn_type_fp32 && (dot_flags & YNN_NODE_FLAG_F32_DOT_TO_BF16_X3)) {
+    eps = epsilon(ynn_type_bf16) * epsilon(ynn_type_bf16) * 2.0f;
+  } else {
+    eps = epsilon(type);
+  }
+  // Account for the initial value too.
+  num_k_elements += 1;
+  return eps * num_k_elements * max_abs_value * max_abs_value * 2.0f;
 }
 
 // Remove the leading `at` dimensions of `tensor`
@@ -254,13 +287,8 @@ void TestStaticB(A, B, C) {
               << " a_shape=" << index_to_string(a_shape)
               << " b_shape=" << index_to_string(b_shape);
         } else {
-          float tolerance_epsilon = epsilon(type_of<C>());
-          if (dot_flags & YNN_NODE_FLAG_F32_DOT_TO_BF16_X3) {
-            tolerance_epsilon =
-                epsilon(ynn_type_bf16) * epsilon(ynn_type_bf16) * 2.0f;
-          }
-          const float tolerance = tolerance_epsilon * (num_k_elements + 1) *
-                                  max_abs_value * max_abs_value * 2.0f;
+          const float tolerance = get_dot_tolerance(
+              type_of<C>(), num_k_elements, max_abs_value, dot_flags);
           ASSERT_NEAR(c(i), expected(i), tolerance)
               << "i=" << index_to_string(i) << " num_k_dims=" << num_k_dims
               << " a_shape=" << index_to_string(a_shape)
@@ -467,13 +495,8 @@ void TestDynamicB(A, B, C) {
               << " shapes.a=" << index_to_string(shapes.a)
               << " shapes.b=" << index_to_string(shapes.b);
         } else {
-          float tolerance_epsilon = epsilon(type_of<C>());
-          if (dot_flags & YNN_NODE_FLAG_F32_DOT_TO_BF16_X3) {
-            tolerance_epsilon =
-                epsilon(ynn_type_bf16) * epsilon(ynn_type_bf16) * 2.0f;
-          }
-          const float tolerance = tolerance_epsilon * (num_k_elements + 1) *
-                                  max_abs_value * max_abs_value * 2.0f;
+          const float tolerance = get_dot_tolerance(
+              type_of<C>(), num_k_elements, max_abs_value, dot_flags);
           ASSERT_NEAR(c(i), expected(i), tolerance)
               << "i=" << index_to_string(i) << " num_k_dims=" << num_k_dims
               << " shapes.a=" << index_to_string(shapes.a)
@@ -632,13 +655,8 @@ void TestStaticShapeDynamicB(A, B, C) {
               << " shapes.a=" << index_to_string(shapes.a)
               << " shapes.b=" << index_to_string(shapes.b);
         } else {
-          float tolerance_epsilon = epsilon(type_of<C>());
-          if (dot_flags & YNN_NODE_FLAG_F32_DOT_TO_BF16_X3) {
-            tolerance_epsilon =
-                epsilon(ynn_type_bf16) * epsilon(ynn_type_bf16) * 2.0f;
-          }
-          const float tolerance = tolerance_epsilon * (num_k_elements + 1) *
-                                  max_abs_value * max_abs_value * 2.0f;
+          const float tolerance = get_dot_tolerance(
+              type_of<C>(), num_k_elements, max_abs_value, dot_flags);
           ASSERT_NEAR(c(i), expected(i), tolerance)
               << "i=" << index_to_string(i) << " num_k_dims=" << num_k_dims
               << " shapes.a=" << index_to_string(shapes.a)
@@ -669,15 +687,14 @@ TEST_P(Dot, StaticShapeDynamicB) {
   });
 }
 
-INSTANTIATE_TEST_SUITE_P(Test, Dot,
-                         testing::Values(multi_type::fp64, multi_type::fp32,
-                                         multi_type::fp16_fp16_fp32,
-                                         multi_type::bf16_bf16_fp32,
-                                         multi_type::int8_int8_int32,
-                                         multi_type::int8_int4_int32,
-                                         multi_type::uint8_int8_int32),
-                         [](const testing::TestParamInfo<multi_type>& info) {
-                           return to_string(info.param);
-                         });
+INSTANTIATE_TEST_SUITE_P(
+    Test, Dot,
+    testing::Values(multi_type::fp64, multi_type::fp32, multi_type::fp16,
+                    multi_type::bf16, multi_type::fp16_fp16_fp32,
+                    multi_type::bf16_bf16_fp32, multi_type::int8_int8_int32,
+                    multi_type::int8_int4_int32, multi_type::uint8_int8_int32),
+    [](const testing::TestParamInfo<multi_type>& info) {
+      return to_string(info.param);
+    });
 
 }  // namespace ynn

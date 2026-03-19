@@ -122,7 +122,7 @@ cc_test(
     srcs = ["dot.cc"],
     linkopts = ynn_binary_linkopts(),
     malloc = ynn_binary_malloc(),
-    shard_count = 18,
+    shard_count = 24,
     deps = TEST_DEPS,
 )
 

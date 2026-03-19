@@ -784,23 +784,25 @@ ynn_type deduce_output_type(ynn_type a_type, ynn_type b_type) {
   }
 }
 
-ynn_status define_dot(ynn_subgraph_t subgraph, size_t num_k_dims,
+ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
                       uint32_t input_a_id, uint32_t input_b_id,
                       uint32_t input_c_id, uint32_t* output_id,
                       uint32_t flags) {
+  assert(subgraph.is_valid_value(input_a_id));
+  assert(subgraph.is_valid_value(input_b_id));
+  assert(output_id);
   const bool b_transposed =
-      always_alias_transpose(*subgraph, input_b_id) == ynn_status_success;
+      always_alias_transpose(subgraph, input_b_id) == ynn_status_success;
 
-  const ynn_value& a = subgraph->value(input_a_id);
-  const ynn_value& b = subgraph->value(input_b_id);
+  const ynn_value& a = subgraph.value(input_a_id);
+  const ynn_value& b = subgraph.value(input_b_id);
   const ynn_type c_type = deduce_output_type(a.type, b.type);
-  ynn_value& c = subgraph->get_output_value(output_id, c_type);
+  ynn_value& c = subgraph.get_output_value(output_id, c_type);
   if (input_c_id != YNN_INVALID_VALUE_ID) {
-    const ynn_value& init_c = subgraph->value(input_c_id);
-    assert(init_c.type == c_type);
+    const ynn_value& init_c = subgraph.value(input_c_id);
+    assert(init_c.type == c.type);
     (void)init_c;
   }
-  assert(c.type == c_type);
 
   // Kernel selection is an interesting problem to solve. Here are the issues
   // affecting it:
@@ -830,7 +832,7 @@ ynn_status define_dot(ynn_subgraph_t subgraph, size_t num_k_dims,
   const dot_packed_shape* packed_shape = nullptr;
   const bool consistent_arithmetic =
       (!type_is_integral(a.type) || !type_is_integral(b.type)) &&
-      (subgraph->flags & YNN_FLAG_CONSISTENT_ARITHMETIC) != 0;
+      (subgraph.flags & YNN_FLAG_CONSISTENT_ARITHMETIC) != 0;
   dot_kernel kernel =
       get_dot_kernel(type, shape, packed_shape, consistent_arithmetic);
   dot_kernel unpacked_kernel;
@@ -852,19 +854,19 @@ ynn_status define_dot(ynn_subgraph_t subgraph, size_t num_k_dims,
 
   // Insert a packing node (if necessary).
   const bool pack_b =
-      should_pack_b(*subgraph, num_k_dims, a, b, kernel, unpacked_kernel);
+      should_pack_b(subgraph, num_k_dims, a, b, kernel, unpacked_kernel);
   uint32_t packed_b_id = YNN_INVALID_VALUE_ID;
   if (!pack_b) {
     // We don't want or need to pack B, but we still need to reshape it as if it
     // were packed.
     static constexpr int32_t tile_k_blocks_n[2] = {-1, -4};
     ynn_status status = ynn_define_static_expand_dims(
-        subgraph, 2, tile_k_blocks_n, input_b_id, &packed_b_id, /*flags=*/0);
+        &subgraph, 2, tile_k_blocks_n, input_b_id, &packed_b_id, /*flags=*/0);
     if (status != ynn_status_success) {
       return status;
     }
   } else {
-    packed_b_id = define_pack_b(subgraph, type, kernel, num_k_dims,
+    packed_b_id = define_pack_b(&subgraph, type, kernel, num_k_dims,
                                 consistent_arithmetic, input_b_id);
   }
 
@@ -895,20 +897,20 @@ ynn_status define_dot(ynn_subgraph_t subgraph, size_t num_k_dims,
   // batch dimensions.
 
   // inputs `b` and `c` have an elementwise dimension 0.
-  subgraph->infer_elementwise_shape(node, 1, 0, 0, 0,
-                                    type_element_count(b.type));
-  subgraph->infer_elementwise_shape(node, 2, 0, 0, 0);
+  subgraph.infer_elementwise_shape(node, 1, 0, 0, 0,
+                                   type_element_count(b.type));
+  subgraph.infer_elementwise_shape(node, 2, 0, 0, 0);
 
   if (c_rank >= 2) {
-    subgraph->infer_elementwise_shape(node, 0, 0, num_k_dims, 1);
-    subgraph->infer_elementwise_shape(node, 2, 0, 1, 1);
+    subgraph.infer_elementwise_shape(node, 0, 0, num_k_dims, 1);
+    subgraph.infer_elementwise_shape(node, 2, 0, 1, 1);
   }
 
   // The rest of the dimensions are elementwise.
   for (size_t d = 2; d < c_rank; ++d) {
-    subgraph->infer_elementwise_shape(node, 0, 0, d + num_k_dims - 1, d);
-    subgraph->infer_elementwise_shape(node, 1, 0, d + num_k_dims - 1, d);
-    subgraph->infer_elementwise_shape(node, 2, 0, d, d);
+    subgraph.infer_elementwise_shape(node, 0, 0, d + num_k_dims - 1, d);
+    subgraph.infer_elementwise_shape(node, 1, 0, d + num_k_dims - 1, d);
+    subgraph.infer_elementwise_shape(node, 2, 0, d, d);
   }
 
   // The k-dims must match.
@@ -931,7 +933,7 @@ ynn_status define_dot(ynn_subgraph_t subgraph, size_t num_k_dims,
   if (transpose_a) {
     // The kernel we want to use has a transposed a.
     node.inputs[0] =
-        define_transpose_a(*subgraph, kernel.tile_k, num_k_dims, input_a_id);
+        define_transpose_a(subgraph, kernel.tile_k, num_k_dims, input_a_id);
   }
 
   // If we're using an unpacked kernel, we'll be reading columns of B, make sure
@@ -1075,42 +1077,42 @@ ynn_status define_dot(ynn_subgraph_t subgraph, size_t num_k_dims,
     return ynn_status_success;
   };
 
-  subgraph->add_node(std::move(node));
+  subgraph.add_node(std::move(node));
   return ynn_status_success;
 }
 
-bool can_convert_f32_to_bf16(ynn_subgraph_t subgraph, uint32_t input_a_id,
+bool can_convert_f32_to_bf16(const ynn_subgraph& subgraph, uint32_t input_a_id,
                              uint32_t input_b_id, uint32_t flags) {
-  if (!is_constant(*subgraph, input_b_id)) {
+  if (!is_constant(subgraph, input_b_id)) {
     // TODO(b/475315838): Remove this workaround for a correctness bug when B is
     // not constant.
     return false;
   }
   return (flags & YNN_NODE_FLAG_F32_DOT_TO_BF16_X3) &&
-         subgraph->value(input_a_id).type == ynn_type_fp32 &&
-         subgraph->value(input_b_id).type == ynn_type_fp32;
+         subgraph.value(input_a_id).type == ynn_type_fp32 &&
+         subgraph.value(input_b_id).type == ynn_type_fp32;
 }
 
 // Splits an f32 value into 2 components:
 //     i) The bf16 conversion of the input value,
 //     ii) The residual, which is the difference between the input value and
 //         the bf16 conversion.
-ynn_status define_split_f32_to_bf16(ynn_subgraph_t subgraph, uint32_t input_id,
+ynn_status define_split_f32_to_bf16(ynn_subgraph& subgraph, uint32_t input_id,
                                     uint32_t* bf16_id,
                                     uint32_t* residual_bf16_id,
                                     uint32_t flags) {
-  assert(subgraph->value(input_id).type == ynn_type_fp32);
+  assert(subgraph.value(input_id).type == ynn_type_fp32);
 
-  ynn_status status = ynn_define_convert(subgraph, input_id, ynn_type_bf16,
+  ynn_status status = ynn_define_convert(&subgraph, input_id, ynn_type_bf16,
                                          YNN_INVALID_VALUE_ID,
                                          YNN_INVALID_VALUE_ID, bf16_id, flags);
   if (status != ynn_status_success) return status;
 
   // Explicitly define the residual as type bf16 otherwise type fp32 will be
   // implied.
-  ynn_value& residual_bf16 = subgraph->new_internal_value(ynn_type_bf16);
+  ynn_value& residual_bf16 = subgraph.new_internal_value(ynn_type_bf16);
   *residual_bf16_id = residual_bf16.id;
-  return ynn_define_binary(subgraph, ynn_binary_subtract, input_id, *bf16_id,
+  return ynn_define_binary(&subgraph, ynn_binary_subtract, input_id, *bf16_id,
                            residual_bf16_id, flags);
 }
 
@@ -1121,11 +1123,11 @@ ynn_status define_split_f32_to_bf16(ynn_subgraph_t subgraph, uint32_t input_id,
 // output ~= (a_bf16 + a_residual) * (b_bf16 + b_residual) + c
 // output ~= a_bf16 * b_bf16 + a_bf16 * b_residual + a_residual * b_bf16 + c
 ynn_status define_bf16_dot_from_f32_inputs(
-    ynn_subgraph_t subgraph, size_t num_k_dims, uint32_t input_a_id,
+    ynn_subgraph& subgraph, size_t num_k_dims, uint32_t input_a_id,
     uint32_t input_b_id, uint32_t input_c_id, uint32_t* output_id,
     uint32_t flags) {
-  assert(subgraph->value(input_a_id).type == ynn_type_fp32);
-  assert(subgraph->value(input_b_id).type == ynn_type_fp32);
+  assert(subgraph.value(input_a_id).type == ynn_type_fp32);
+  assert(subgraph.value(input_b_id).type == ynn_type_fp32);
 
   uint32_t a_bf16 = YNN_INVALID_VALUE_ID;
   uint32_t a_residual = YNN_INVALID_VALUE_ID;
@@ -1155,7 +1157,7 @@ ynn_status define_bf16_dot_from_f32_inputs(
     YNN_RETURN_IF_ERROR(define_dot(subgraph, num_k_dims, a_bf16, b_bf16,
                                    input_c_id, &a_bf16_b_bf16_dot, flags));
 
-    return ynn_define_binary(subgraph, ynn_binary_add, a_bf16_b_bf16_dot,
+    return ynn_define_binary(&subgraph, ynn_binary_add, a_bf16_b_bf16_dot,
                              a_bf16_b_residual_dot, output_id, flags);
   } else {
     return define_dot(subgraph, num_k_dims, a_bf16, b_bf16,
@@ -1188,14 +1190,53 @@ ynn_status ynn_define_dot(ynn_subgraph_t subgraph, size_t num_k_dims,
     return ynn_status_invalid_parameter;
   }
 
-  if (can_convert_f32_to_bf16(subgraph, input_a_id, input_b_id, flags)) {
-    return define_bf16_dot_from_f32_inputs(subgraph, num_k_dims, input_a_id,
-                                           input_b_id, input_c_id, output_id,
-                                           flags);
-  } else {
-    return define_dot(subgraph, num_k_dims, input_a_id, input_b_id, input_c_id,
-                      output_id, flags);
+  const ynn_value& a = subgraph->value(input_a_id);
+  const ynn_value& b = subgraph->value(input_b_id);
+  const ynn_type c_type = deduce_output_type(a.type, b.type);
+
+  if (input_c_id != YNN_INVALID_VALUE_ID) {
+    const ynn_value& input_c = subgraph->value(input_c_id);
+    if (input_c.type != c_type) {
+      uint32_t input_c_converted_id = YNN_INVALID_VALUE_ID;
+      YNN_RETURN_IF_ERROR(ynn_define_convert(
+          subgraph, input_c_id, c_type, YNN_INVALID_VALUE_ID,
+          YNN_INVALID_VALUE_ID, &input_c_converted_id, flags));
+      input_c_id = input_c_converted_id;
+    }
   }
+
+  uint32_t convert_to_id = YNN_INVALID_VALUE_ID;
+  if (*output_id != YNN_INVALID_VALUE_ID) {
+    const ynn_value& c = subgraph->value(*output_id);
+    if (c.type != c_type) {
+      // The type we want to compute is different from the output type. We're
+      // going to compute the result into an intermediate tensor, and insert
+      // a convert to the actual output_id after.
+      convert_to_id = *output_id;
+
+      // Just let define_dot make the output.
+      *output_id = YNN_INVALID_VALUE_ID;
+    }
+  }
+
+  if (can_convert_f32_to_bf16(*subgraph, input_a_id, input_b_id, flags)) {
+    YNN_RETURN_IF_ERROR(define_bf16_dot_from_f32_inputs(
+        *subgraph, num_k_dims, input_a_id, input_b_id, input_c_id, output_id,
+        flags));
+  } else {
+    YNN_RETURN_IF_ERROR(define_dot(*subgraph, num_k_dims, input_a_id,
+                                   input_b_id, input_c_id, output_id, flags));
+  }
+
+  if (convert_to_id != YNN_INVALID_VALUE_ID) {
+    // We decided above to compute the output into an intermediate tensor, and
+    // convert it to the output here.
+    YNN_RETURN_IF_ERROR(ynn_define_unary(subgraph, ynn_unary_convert,
+                                         *output_id, &convert_to_id, flags));
+    *output_id = convert_to_id;
+  }
+
+  return ynn_status_success;
 }
 
 }  // extern "C"
