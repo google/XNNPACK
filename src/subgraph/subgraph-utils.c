@@ -134,6 +134,7 @@ static void print_node_type(FILE* out, const xnn_subgraph_t subgraph,
 void xnn_subgraph_log_impl(const char* filename, size_t line_number,
                            xnn_subgraph_t subgraph, FILE* out) {
   xnn_mutex_lock(&mutex);
+  xnn_subgraph_analyze_consumers_and_producers(subgraph);
 
   // Header.
   fprintf(out, "%s:%zu: Subgraph %p with %u nodes and %u values:\n", filename,
@@ -235,6 +236,7 @@ void xnn_subgraph_log_impl(const char* filename, size_t line_number,
 
 void xnn_subgraph_log_dot_impl(xnn_subgraph_t subgraph, FILE* out) {
   xnn_mutex_lock(&mutex);
+  xnn_subgraph_analyze_consumers_and_producers(subgraph);
 
   // Header.
   fprintf(out,
