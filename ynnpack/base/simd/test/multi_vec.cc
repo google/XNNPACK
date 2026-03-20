@@ -36,6 +36,13 @@ TEST_PARTIAL_LOAD_STORE(multi_vec, bf16, 4);
 TEST_PARTIAL_LOAD_STORE(multi_vec, f32, 2);
 TEST_PARTIAL_LOAD_STORE(multi_vec, s32, 2);
 
+TEST_COMPARE_EQ(multi_vec, f32, 2);
+TEST_COMPARE_LT(multi_vec, f32, 2);
+TEST_COMPARE_GT(multi_vec, f32, 2);
+TEST_COMPARE_EQ(multi_vec, s32, 2);
+TEST_COMPARE_LT(multi_vec, s32, 2);
+TEST_COMPARE_GT(multi_vec, s32, 2);
+
 TEST_ADD(multi_vec, u8, 8);
 TEST_ADD(multi_vec, s8, 8);
 TEST_ADD(multi_vec, s16, 4);

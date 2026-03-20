@@ -199,6 +199,116 @@ using s16x16 = vec<int16_t, 16>;
 using u8x32 = vec<uint8_t, 32>;
 using s8x32 = vec<int8_t, 32>;
 
+using mf32x8 = mask<float, 8>;
+
+template <>
+struct mask<float, 8> {
+  static constexpr std::integral_constant<size_t, 8> N = {};
+  __m256 m;
+
+  mask() = default;
+  YNN_ALWAYS_INLINE explicit mask(__m256 m) : m(m) {}
+  YNN_ALWAYS_INLINE explicit mask(bool x)
+      : m(_mm256_castsi256_ps(_mm256_set1_epi32(x ? -1 : 0))) {}
+  YNN_ALWAYS_INLINE mask(mask<float, 4> m0, mask<float, 4> m1)
+      : m(internal::concat(m0.m, m1.m)) {}
+
+  YNN_ALWAYS_INLINE mask<float, 4> lo() const {
+    return mask<float, 4>{_mm256_castps256_ps128(m)};
+  }
+  YNN_ALWAYS_INLINE mask<float, 4> hi() const {
+    return mask<float, 4>{_mm256_extractf128_ps(m, 1)};
+  }
+};
+
+YNN_ALWAYS_INLINE mf32x8 operator==(f32x8 a, f32x8 b) {
+  return mf32x8{_mm256_cmp_ps(a.v, b.v, _CMP_EQ_OQ)};
+}
+YNN_ALWAYS_INLINE mf32x8 operator!=(f32x8 a, f32x8 b) {
+  return mf32x8{_mm256_cmp_ps(a.v, b.v, _CMP_NEQ_OQ)};
+}
+YNN_ALWAYS_INLINE mf32x8 operator<(f32x8 a, f32x8 b) {
+  return mf32x8{_mm256_cmp_ps(a.v, b.v, _CMP_LT_OQ)};
+}
+YNN_ALWAYS_INLINE mf32x8 operator<=(f32x8 a, f32x8 b) {
+  return mf32x8{_mm256_cmp_ps(a.v, b.v, _CMP_LE_OQ)};
+}
+YNN_ALWAYS_INLINE mf32x8 operator>(f32x8 a, f32x8 b) {
+  return mf32x8{_mm256_cmp_ps(a.v, b.v, _CMP_GT_OQ)};
+}
+YNN_ALWAYS_INLINE mf32x8 operator>=(f32x8 a, f32x8 b) {
+  return mf32x8{_mm256_cmp_ps(a.v, b.v, _CMP_GE_OQ)};
+}
+
+YNN_ALWAYS_INLINE mf32x8 operator&(mf32x8 a, mf32x8 b) {
+  return mf32x8{_mm256_and_ps(a.m, b.m)};
+}
+YNN_ALWAYS_INLINE mf32x8 operator|(mf32x8 a, mf32x8 b) {
+  return mf32x8{_mm256_or_ps(a.m, b.m)};
+}
+YNN_ALWAYS_INLINE mf32x8 operator^(mf32x8 a, mf32x8 b) {
+  return mf32x8{_mm256_xor_ps(a.m, b.m)};
+}
+YNN_ALWAYS_INLINE mf32x8 operator~(mf32x8 a) {
+  return mf32x8{_mm256_xor_ps(a.m, _mm256_castsi256_ps(_mm256_set1_epi32(-1)))};
+}
+
+YNN_ALWAYS_INLINE f32x8 select(mf32x8 m, f32x8 a, f32x8 b) {
+  return f32x8{_mm256_blendv_ps(b.v, a.v, m.m)};
+}
+
+using ms32x8 = mask<int32_t, 8>;
+
+template <>
+struct mask<int32_t, 8> {
+  static constexpr std::integral_constant<size_t, 8> N = {};
+  __m256i m;
+
+  mask() = default;
+  YNN_ALWAYS_INLINE explicit mask(__m256i m) : m(m) {}
+  YNN_ALWAYS_INLINE explicit mask(bool x) : m(_mm256_set1_epi32(x ? -1 : 0)) {}
+  YNN_ALWAYS_INLINE mask(mask<int32_t, 4> m0, mask<int32_t, 4> m1)
+      : m(internal::concat(m0.m, m1.m)) {}
+
+  YNN_ALWAYS_INLINE mask<int32_t, 4> lo() const {
+    return mask<int32_t, 4>{_mm256_castsi256_si128(m)};
+  }
+  YNN_ALWAYS_INLINE mask<int32_t, 4> hi() const {
+    return mask<int32_t, 4>{
+        _mm_castps_si128(_mm256_extractf128_ps(_mm256_castsi256_ps(m), 1))};
+  }
+};
+
+YNN_ALWAYS_INLINE ms32x8 operator&(ms32x8 a, ms32x8 b) {
+  return ms32x8{_mm256_castps_si256(
+      _mm256_and_ps(_mm256_castsi256_ps(a.m), _mm256_castsi256_ps(b.m)))};
+}
+YNN_ALWAYS_INLINE ms32x8 operator|(ms32x8 a, ms32x8 b) {
+  return ms32x8{_mm256_castps_si256(
+      _mm256_or_ps(_mm256_castsi256_ps(a.m), _mm256_castsi256_ps(b.m)))};
+}
+YNN_ALWAYS_INLINE ms32x8 operator^(ms32x8 a, ms32x8 b) {
+  return ms32x8{_mm256_castps_si256(
+      _mm256_xor_ps(_mm256_castsi256_ps(a.m), _mm256_castsi256_ps(b.m)))};
+}
+YNN_ALWAYS_INLINE ms32x8 operator~(ms32x8 a) {
+  return ms32x8{_mm256_castps_si256(_mm256_xor_ps(
+      _mm256_castsi256_ps(a.m), _mm256_castsi256_ps(_mm256_set1_epi32(-1))))};
+}
+
+YNN_ALWAYS_INLINE s32x8 select(ms32x8 m, s32x8 a, s32x8 b) {
+  return s32x8{_mm256_castps_si256(_mm256_blendv_ps(_mm256_castsi256_ps(b.v),
+                                                    _mm256_castsi256_ps(a.v),
+                                                    _mm256_castsi256_ps(m.m)))};
+}
+
+YNN_ALWAYS_INLINE ms32x8 cast(mf32x8 from, int32_t) {
+  return ms32x8{_mm256_castps_si256(from.m)};
+}
+YNN_ALWAYS_INLINE mf32x8 cast(ms32x8 from, float) {
+  return mf32x8{_mm256_castsi256_ps(from.m)};
+}
+
 namespace internal {
 
 // These overloads are x86-specific helpers for implementing templated

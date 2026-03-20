@@ -215,6 +215,93 @@ void test_partial_store() {
     test_partial_store<type, N>();                      \
   }
 
+struct cmp_eq_op {
+  template <typename T>
+  bool operator()(T a, T b) {
+    return a == b;
+  }
+  template <typename T, size_t N>
+  mask<T, N> operator()(vec<T, N> a, vec<T, N> b) {
+    return a == b;
+  }
+};
+
+struct cmp_lt_op {
+  template <typename T>
+  bool operator()(T a, T b) {
+    return a < b;
+  }
+  template <typename T, size_t N>
+  mask<T, N> operator()(vec<T, N> a, vec<T, N> b) {
+    return a < b;
+  }
+};
+
+struct cmp_gt_op {
+  template <typename T>
+  bool operator()(T a, T b) {
+    return a > b;
+  }
+  template <typename T, size_t N>
+  mask<T, N> operator()(vec<T, N> a, vec<T, N> b) {
+    return a > b;
+  }
+};
+
+template <typename scalar, size_t N, typename Op>
+void test_compare_select_op() {
+  using vector = vec<scalar, N>;
+  using mask_t = mask<scalar, N>;
+  Op op;
+
+  ReplicableRandomDevice rng;
+  for (auto _ : FuzzTest(std::chrono::milliseconds(100))) {
+    scalar a[N];
+    scalar b[N];
+    scalar c[N];
+    scalar d[N];
+    fill_random(a, N, rng);
+    fill_random(b, N, rng);
+    fill_random(c, N, rng);
+    fill_random(d, N, rng);
+
+    // Make some elements equal to test == and <= / >= properly
+    for (size_t i = 0; i < N; ++i) {
+      if (rng() % 3 == 0) a[i] = b[i];
+    }
+
+    mask_t m = op(load(a, vector::N), load(b, vector::N));
+    vector sel = select(m, load(c, vector::N), load(d, vector::N));
+
+    scalar res[N];
+    store(res, sel);
+
+    for (size_t i = 0; i < N; ++i) {
+      bool is_true = op(a[i], b[i]);
+      if constexpr (std::is_floating_point_v<scalar>) {
+        if (std::isnan(a[i]) || std::isnan(b[i])) continue;
+      }
+
+      ASSERT_EQ(res[i], is_true ? c[i] : d[i]);
+    }
+  }
+}
+
+#define TEST_COMPARE_EQ(test_class, type, N)      \
+  TEST_F(test_class, compare_eq_##type##x##N) {   \
+    test_compare_select_op<type, N, cmp_eq_op>(); \
+  }
+
+#define TEST_COMPARE_LT(test_class, type, N)      \
+  TEST_F(test_class, compare_lt_##type##x##N) {   \
+    test_compare_select_op<type, N, cmp_lt_op>(); \
+  }
+
+#define TEST_COMPARE_GT(test_class, type, N)      \
+  TEST_F(test_class, compare_gt_##type##x##N) {   \
+    test_compare_select_op<type, N, cmp_gt_op>(); \
+  }
+
 template <typename scalar, size_t N, typename Op>
 void test_op() {
   using vector = vec<scalar, N>;

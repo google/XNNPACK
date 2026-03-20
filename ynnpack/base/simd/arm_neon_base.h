@@ -173,6 +173,103 @@ using s16x8 = vec<int16_t, 8>;
 using u8x16 = vec<uint8_t, 16>;
 using s8x16 = vec<int8_t, 16>;
 
+using mf32x4 = mask<float, 4>;
+
+template <>
+struct mask<float, 4> {
+  static constexpr std::integral_constant<size_t, 4> N = {};
+  uint32x4_t m;
+
+  mask() = default;
+  YNN_ALWAYS_INLINE explicit mask(uint32x4_t m) : m(m) {}
+  YNN_ALWAYS_INLINE explicit mask(bool x)
+      : m(vdupq_n_u32(x ? 0xFFFFFFFF : 0)) {}
+};
+
+YNN_ALWAYS_INLINE mf32x4 operator==(f32x4 a, f32x4 b) {
+  return mf32x4{vceqq_f32(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE mf32x4 operator!=(f32x4 a, f32x4 b) {
+  return mf32x4{vmvnq_u32(vceqq_f32(a.v, b.v))};
+}
+YNN_ALWAYS_INLINE mf32x4 operator<(f32x4 a, f32x4 b) {
+  return mf32x4{vcltq_f32(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE mf32x4 operator<=(f32x4 a, f32x4 b) {
+  return mf32x4{vcleq_f32(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE mf32x4 operator>(f32x4 a, f32x4 b) {
+  return mf32x4{vcgtq_f32(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE mf32x4 operator>=(f32x4 a, f32x4 b) {
+  return mf32x4{vcgeq_f32(a.v, b.v)};
+}
+
+YNN_ALWAYS_INLINE mf32x4 operator&(mf32x4 a, mf32x4 b) {
+  return mf32x4{vandq_u32(a.m, b.m)};
+}
+YNN_ALWAYS_INLINE mf32x4 operator|(mf32x4 a, mf32x4 b) {
+  return mf32x4{vorrq_u32(a.m, b.m)};
+}
+YNN_ALWAYS_INLINE mf32x4 operator^(mf32x4 a, mf32x4 b) {
+  return mf32x4{veorq_u32(a.m, b.m)};
+}
+YNN_ALWAYS_INLINE mf32x4 operator~(mf32x4 a) { return mf32x4{vmvnq_u32(a.m)}; }
+
+YNN_ALWAYS_INLINE f32x4 select(mf32x4 m, f32x4 a, f32x4 b) {
+  return f32x4{vbslq_f32(m.m, a.v, b.v)};
+}
+
+using ms32x4 = mask<int32_t, 4>;
+
+template <>
+struct mask<int32_t, 4> {
+  static constexpr std::integral_constant<size_t, 4> N = {};
+  uint32x4_t m;
+
+  mask() = default;
+  YNN_ALWAYS_INLINE explicit mask(uint32x4_t m) : m(m) {}
+  YNN_ALWAYS_INLINE explicit mask(bool x)
+      : m(vdupq_n_u32(x ? 0xFFFFFFFF : 0)) {}
+};
+
+YNN_ALWAYS_INLINE ms32x4 operator==(s32x4 a, s32x4 b) {
+  return ms32x4{vceqq_s32(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE ms32x4 operator!=(s32x4 a, s32x4 b) {
+  return ms32x4{vmvnq_u32(vceqq_s32(a.v, b.v))};
+}
+YNN_ALWAYS_INLINE ms32x4 operator<(s32x4 a, s32x4 b) {
+  return ms32x4{vcltq_s32(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE ms32x4 operator<=(s32x4 a, s32x4 b) {
+  return ms32x4{vcleq_s32(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE ms32x4 operator>(s32x4 a, s32x4 b) {
+  return ms32x4{vcgtq_s32(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE ms32x4 operator>=(s32x4 a, s32x4 b) {
+  return ms32x4{vcgeq_s32(a.v, b.v)};
+}
+
+YNN_ALWAYS_INLINE ms32x4 operator&(ms32x4 a, ms32x4 b) {
+  return ms32x4{vandq_u32(a.m, b.m)};
+}
+YNN_ALWAYS_INLINE ms32x4 operator|(ms32x4 a, ms32x4 b) {
+  return ms32x4{vorrq_u32(a.m, b.m)};
+}
+YNN_ALWAYS_INLINE ms32x4 operator^(ms32x4 a, ms32x4 b) {
+  return ms32x4{veorq_u32(a.m, b.m)};
+}
+YNN_ALWAYS_INLINE ms32x4 operator~(ms32x4 a) { return ms32x4{vmvnq_u32(a.m)}; }
+
+YNN_ALWAYS_INLINE s32x4 select(ms32x4 m, s32x4 a, s32x4 b) {
+  return s32x4{vbslq_s32(m.m, a.v, b.v)};
+}
+
+YNN_ALWAYS_INLINE ms32x4 cast(mf32x4 from, int32_t) { return ms32x4{from.m}; }
+YNN_ALWAYS_INLINE mf32x4 cast(ms32x4 from, float) { return mf32x4{from.m}; }
+
 namespace internal {
 
 YNN_ALWAYS_INLINE int32x4x2_t vtrn(int32x4_t a, int32x4_t b) {

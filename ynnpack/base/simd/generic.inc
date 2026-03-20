@@ -202,6 +202,53 @@ template <typename T, size_t N>
 YNN_ALWAYS_INLINE vec<T, N> sub_sat(vec<T, N> a, vec<T, N> b) {
   return {sub_sat(a.lo(), b.lo()), sub_sat(a.hi(), b.hi())};
 }
+
+template <typename T, size_t N>
+YNN_ALWAYS_INLINE mask<T, N> operator==(vec<T, N> a, vec<T, N> b) {
+  return {a.lo() == b.lo(), a.hi() == b.hi()};
+}
+template <typename T, size_t N>
+YNN_ALWAYS_INLINE mask<T, N> operator!=(vec<T, N> a, vec<T, N> b) {
+  return {a.lo() != b.lo(), a.hi() != b.hi()};
+}
+template <typename T, size_t N>
+YNN_ALWAYS_INLINE mask<T, N> operator<(vec<T, N> a, vec<T, N> b) {
+  return {a.lo() < b.lo(), a.hi() < b.hi()};
+}
+template <typename T, size_t N>
+YNN_ALWAYS_INLINE mask<T, N> operator<=(vec<T, N> a, vec<T, N> b) {
+  return {a.lo() <= b.lo(), a.hi() <= b.hi()};
+}
+template <typename T, size_t N>
+YNN_ALWAYS_INLINE mask<T, N> operator>(vec<T, N> a, vec<T, N> b) {
+  return {a.lo() > b.lo(), a.hi() > b.hi()};
+}
+template <typename T, size_t N>
+YNN_ALWAYS_INLINE mask<T, N> operator>=(vec<T, N> a, vec<T, N> b) {
+  return {a.lo() >= b.lo(), a.hi() >= b.hi()};
+}
+
+template <typename T, size_t N>
+YNN_ALWAYS_INLINE mask<T, N> operator&(mask<T, N> a, mask<T, N> b) {
+  return {a.lo() & b.lo(), a.hi() & b.hi()};
+}
+template <typename T, size_t N>
+YNN_ALWAYS_INLINE mask<T, N> operator|(mask<T, N> a, mask<T, N> b) {
+  return {a.lo() | b.lo(), a.hi() | b.hi()};
+}
+template <typename T, size_t N>
+YNN_ALWAYS_INLINE mask<T, N> operator^(mask<T, N> a, mask<T, N> b) {
+  return {a.lo() ^ b.lo(), a.hi() ^ b.hi()};
+}
+template <typename T, size_t N>
+YNN_ALWAYS_INLINE mask<T, N> operator~(mask<T, N> a) {
+  return {~a.lo(), ~a.hi()};
+}
+
+template <typename T, size_t N>
+YNN_ALWAYS_INLINE vec<T, N> select(mask<T, N> m, vec<T, N> a, vec<T, N> b) {
+  return {select(m.lo(), a.lo(), b.lo()), select(m.hi(), a.hi(), b.hi())};
+}
 template <typename T, size_t N>
 YNN_ALWAYS_INLINE vec<T, N> floor(vec<T, N> a) {
   return {floor(a.lo()), floor(a.hi())};
