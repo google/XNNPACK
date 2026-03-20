@@ -503,6 +503,13 @@ struct bitwise_not_op {
   }
 };
 
+struct shift_left_op {
+  template <typename T>
+  T operator()(T a, int b) {
+    return a << b;
+  }
+};
+
 template <typename scalar, size_t N, typename Op>
 void test_bitwise_op() {
   using vector = vec<scalar, N>;
@@ -556,6 +563,31 @@ void test_not() {
 
 #define TEST_NOT(test_class, type, N) \
   TEST_F(test_class, not_##type##x##N) { test_not<type, N>(); }
+
+template <typename scalar, size_t N>
+void test_shift_left() {
+  using vector = vec<scalar, N>;
+
+  ReplicableRandomDevice rng;
+  shift_left_op op;
+
+  for (auto _ : FuzzTest(std::chrono::milliseconds(100))) {
+    scalar a[vector::N];
+    fill_random(a, vector::N, rng);
+    int shift = rng() % (sizeof(scalar) * 8 - 1);
+
+    scalar result[vector::N];
+
+    store(result, load(a, vector::N) << shift);
+    for (size_t i = 0; i < vector::N; ++i) {
+      scalar expected = op(a[i], shift);
+      ASSERT_EQ(result[i], expected);
+    }
+  }
+}
+
+#define TEST_SHIFT_LEFT(test_class, type, N) \
+  TEST_F(test_class, shift_left_##type##x##N) { test_shift_left<type, N>(); }
 
 template <size_t Lanes, typename From, size_t... Is>
 void test_extract_impl(std::index_sequence<Is...>, From from_v,

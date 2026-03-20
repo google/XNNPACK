@@ -420,6 +420,9 @@ YNN_ALWAYS_INLINE s16x8 operator&(s16x8 a, s16x8 b) {
 YNN_ALWAYS_INLINE s16x8 operator>>(s16x8 a, int b) {
   return s16x8{_mm_srai_epi16(a.v, b)};
 }
+YNN_ALWAYS_INLINE s16x8 operator<<(s16x8 a, int b) {
+  return s16x8{_mm_slli_epi16(a.v, b)};
+}
 YNN_ALWAYS_INLINE s16x8 operator^(s16x8 a, s16x8 b) {
   return s16x8{_mm_xor_si128(a.v, b.v)};
 }
@@ -442,7 +445,9 @@ YNN_ALWAYS_INLINE s32x4 operator^(s32x4 a, s32x4 b) {
 YNN_ALWAYS_INLINE s32x4 operator~(s32x4 a) {
   return s32x4{_mm_xor_si128(a.v, _mm_set1_epi32(-1))};
 }
-
+YNN_ALWAYS_INLINE s32x4 operator<<(s32x4 a, int b) {
+  return s32x4{_mm_slli_epi32(a.v, b)};
+}
 YNN_ALWAYS_INLINE u8x16 operator&(u8x16 a, u8x16 b) {
   return u8x16{_mm_and_si128(a.v, b.v)};
 }

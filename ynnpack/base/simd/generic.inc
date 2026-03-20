@@ -158,6 +158,10 @@ template <typename T, size_t N>
 YNN_ALWAYS_INLINE vec<T, N> operator~(vec<T, N> a) {
   return {~a.lo(), ~a.hi()};
 }
+template <typename T, size_t N>
+YNN_ALWAYS_INLINE vec<T, N> operator<<(vec<T, N> a, int b) {
+  return {a.lo() << b, a.hi() << b};
+}
 
 template <typename T, size_t N>
 YNN_ALWAYS_INLINE vec<T, N>& operator&=(vec<T, N>& a, vec<T, N> b) {

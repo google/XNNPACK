@@ -107,6 +107,9 @@ TEST_NOT(x86_sse2, s8, 16);
 TEST_NOT(x86_sse2, s16, 8);
 TEST_NOT(x86_sse2, s32, 4);
 
+TEST_SHIFT_LEFT(x86_sse2, s16, 8);
+TEST_SHIFT_LEFT(x86_sse2, s32, 4);
+
 TEST_SQRT(x86_sse2, f32, 4);
 
 TEST_ABS(x86_sse2, f32, 4);

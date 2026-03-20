@@ -140,6 +140,8 @@ template <typename T, size_t N>
 vec<T, N> add_sat(vec<T, N> a, vec<T, N> b);
 template <typename T, size_t N>
 vec<T, N> sub_sat(vec<T, N> a, vec<T, N> b);
+template <typename T, size_t N>
+vec<T, N> operator<<(vec<T, N> a, int b);
 
 template <typename T>
 std::array<vec<T, 4>, 4> transpose(std::array<vec<T, 4>, 4> x);
@@ -333,6 +335,10 @@ YNN_ALWAYS_INLINE vec<T, 1> operator^(vec<T, 1> a, vec<T, 1> b) {
 template <typename T>
 YNN_ALWAYS_INLINE vec<T, 1> operator~(vec<T, 1> a) {
   return vec<T, 1>{static_cast<T>(~a.v)};
+}
+template <typename T>
+YNN_ALWAYS_INLINE vec<T, 1> operator<<(vec<T, 1> a, int bits) {
+  return vec<T, 1>{static_cast<T>(a.v << bits)};
 }
 
 template <typename T>

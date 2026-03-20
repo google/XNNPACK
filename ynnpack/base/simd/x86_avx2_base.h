@@ -113,6 +113,12 @@ YNN_ALWAYS_INLINE s32x8 operator*(s32x8 a, s32x8 b) {
 YNN_ALWAYS_INLINE s16x16 operator>>(s16x16 a, int b) {
   return s16x16{_mm256_srai_epi16(a.v, b)};
 }
+YNN_ALWAYS_INLINE s16x16 operator<<(s16x16 a, int b) {
+  return s16x16{_mm256_slli_epi16(a.v, b)};
+}
+YNN_ALWAYS_INLINE s32x8 operator<<(s32x8 a, int b) {
+  return s32x8{_mm256_slli_epi32(a.v, b)};
+}
 
 YNN_ALWAYS_INLINE s32x8 min(s32x8 a, s32x8 b) {
   return s32x8{_mm256_min_epi32(a.v, b.v)};

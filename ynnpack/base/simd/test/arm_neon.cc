@@ -129,6 +129,10 @@ TEST_NOT(arm_neon, s16, 8);
 TEST_NOT(arm_neon, s32, 4);
 TEST_NOT(arm_neon, u8, 8);
 
+TEST_SHIFT_LEFT(arm_neon, s8, 16);
+TEST_SHIFT_LEFT(arm_neon, s16, 8);
+TEST_SHIFT_LEFT(arm_neon, s32, 4);
+
 TEST_FLOOR(arm_neon, f32, 4);
 TEST_CEIL(arm_neon, f32, 4);
 TEST_ROUND(arm_neon, f32, 4);
