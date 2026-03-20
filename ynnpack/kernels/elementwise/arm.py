@@ -16,12 +16,12 @@ def make_neon_integer_patterns(vector_bits):
   assert vector_bits == 128
   return [
       Rule(
-          logical_shift_left(i16_a.with_lanes(8), broadcast(i16_b, 8)),
-          Op(Int(16, 8), "vshlq_n_s16", [i16_a.with_lanes(8), i16_b]),
+          logical_shift_left(i16_a.with_lanes(0), broadcast(i16_b, 0)),
+          logical_shift_left(i16_a.with_lanes(0), i16_b),
       ),
       Rule(
-          logical_shift_left(i32_a.with_lanes(4), broadcast(i32_b, 4)),
-          Op(Int(32, 4), "vshlq_n_s32", [i32_a.with_lanes(4), i32_b]),
+          logical_shift_left(i32_a.with_lanes(0), broadcast(i32_b, 0)),
+          logical_shift_left(i32_a.with_lanes(0), i32_b),
       ),
   ]
 

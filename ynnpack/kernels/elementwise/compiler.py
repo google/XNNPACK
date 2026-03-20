@@ -966,6 +966,7 @@ class Target:
         "bitwise_and": "&",
         "bitwise_or": "|",
         "bitwise_xor": "^",
+        "logical_shift_left": "<<",
     }
 
   def indent(self):

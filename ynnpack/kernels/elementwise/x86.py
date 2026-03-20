@@ -11,34 +11,21 @@ def make_x86_cast_patterns(vector_bits):
   return add_saturating_cast_rules(vector_bits)
 
 
-def make_x86_integer_patterns(vector_bits, prefix):
+def make_x86_integer_patterns():
   return [
       Rule(
           logical_shift_left(
-              i16_a.with_lanes(vector_bits // 16),
-              broadcast(i16_b, vector_bits // 16),
+              i16_a.with_lanes(0),
+              broadcast(i16_b, 0),
           ),
-          Op(Int(16, vector_bits // 16), prefix + "slli_epi16", [i16_a, i16_b]),
+          logical_shift_left(i16_a.with_lanes(0), i16_b),
       ),
       Rule(
           logical_shift_left(
-              i32_a.with_lanes(vector_bits // 32),
-              broadcast(i32_b, vector_bits // 32),
+              i32_a.with_lanes(0),
+              broadcast(i32_b, 0),
           ),
-          Op(
-              Int(32, vector_bits // 32),
-              prefix + "slli_epi32",
-              [i32_a.with_lanes(vector_bits // 32), i32_b],
-          ),
-      ),
-      Rule(
-          u32_a.with_lanes(vector_bits // 32)
-          >> broadcast(u32_b, vector_bits // 32),
-          Op(
-              UInt(32, vector_bits // 32),
-              prefix + "srli_epi32",
-              [u32_a.with_lanes(vector_bits // 32), u32_b],
-          ),
+          logical_shift_left(i32_a.with_lanes(0), i32_b),
       ),
   ]
 
@@ -138,7 +125,7 @@ class X86(Target):
 
   def update_for_sse2(self):
     """Updates the target for SSE2 support."""
-    self.patterns += make_x86_integer_patterns(128, "_mm_")
+    self.patterns += make_x86_integer_patterns()
     self.patterns += make_x86_cast_patterns(128)
     self.patterns += make_x86_float_comparison_patterns(128, "_mm_")
     self.patterns += make_x86_integer_comparison_patterns(128, "_mm_")
@@ -161,7 +148,7 @@ YNN_INTRINSIC __m256 greater_than(__m256 a, __m256 b) {
 
   def update_for_avx2(self):
     """Updates the target for AVX2 support."""
-    self.patterns += make_x86_integer_patterns(256, "_mm256_")
+    self.patterns += make_x86_integer_patterns()
     self.patterns += make_x86_cast_patterns(256)
 
   def update_for_fma3(self):
@@ -174,7 +161,7 @@ YNN_INTRINSIC __m256 greater_than(__m256 a, __m256 b) {
   def update_for_avx512f(self):
     """Updates the target for AVX512F support."""
     self.patterns += make_x86_fma_patterns(512)
-    self.patterns += make_x86_integer_patterns(512, "_mm512_")
+    self.patterns += make_x86_integer_patterns()
     self.patterns += make_x86_cast_patterns(512)
 
   def update_for_avx512bf16(self):
