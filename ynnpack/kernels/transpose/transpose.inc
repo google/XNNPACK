@@ -30,13 +30,11 @@ YNN_TRANSPOSE_KERNEL(arch_flag::sse2, transpose_x1024_sse2, 1024)
 #endif  // YNN_ARCH_X86_SSE2
 
 #ifdef YNN_ARCH_ARM64_SVE
-#ifndef MEMORY_SANITIZER  // TODO(b/494230133)
 YNN_TRANSPOSE_KERNEL(arch_flag::sve, transpose_x4_sve, 4)
 YNN_TRANSPOSE_KERNEL(arch_flag::sve, transpose_x8_sve, 8)
 YNN_TRANSPOSE_KERNEL(arch_flag::sve, transpose_x16_sve, 16)
 YNN_TRANSPOSE_KERNEL(arch_flag::sve, transpose_x32_sve, 32)
 YNN_TRANSPOSE_KERNEL(arch_flag::sve, transpose_x64_sve, 64)
-#endif  // MEMORY_SANITIZER
 #endif  // YNN_ARCH_ARM64_SVE
 
 #ifdef YNN_ARCH_ARM_NEON

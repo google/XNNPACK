@@ -27,7 +27,6 @@ YNN_INTERLEAVE_KERNEL(arch_flag::sse2, interleave4_x32_sse2, 4, 32)
 #endif  // YNN_ARCH_X86_SSE2
 
 #ifdef YNN_ARCH_ARM64_SVE
-#ifndef MEMORY_SANITIZER  // TODO(b/494230133)
 YNN_INTERLEAVE_KERNEL(arch_flag::sve, interleave2_x4_sve, 2, 4)
 YNN_INTERLEAVE_KERNEL(arch_flag::sve, interleave2_x8_sve, 2, 8)
 YNN_INTERLEAVE_KERNEL(arch_flag::sve, interleave2_x16_sve, 2, 16)
@@ -35,7 +34,6 @@ YNN_INTERLEAVE_KERNEL(arch_flag::sve, interleave2_x32_sve, 2, 32)
 YNN_INTERLEAVE_KERNEL(arch_flag::sve, interleave4_x8_sve, 4, 8)
 YNN_INTERLEAVE_KERNEL(arch_flag::sve, interleave4_x16_sve, 4, 16)
 YNN_INTERLEAVE_KERNEL(arch_flag::sve, interleave4_x32_sve, 4, 32)
-#endif  // MEMORY_SANITIZER
 #endif  // YNN_ARCH_ARM64_SVE
 
 #ifdef YNN_ARCH_ARM_NEON
