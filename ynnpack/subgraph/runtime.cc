@@ -27,13 +27,13 @@
 #endif
 #include "ynnpack/base/base.h"
 #include "ynnpack/base/log.h"
+#include "ynnpack/base/span.h"
 #include "ynnpack/base/type.h"
 #include "ynnpack/include/ynnpack.h"
 #include "ynnpack/subgraph/slinky.h"
 #include "ynnpack/subgraph/subgraph.h"
 #include "ynnpack/subgraph/tensor.h"
 #include "slinky/base/arithmetic.h"
-#include "slinky/base/span.h"
 #include "slinky/base/thread_pool.h"
 #include "slinky/builder/node_mutator.h"
 #include "slinky/builder/pipeline.h"
@@ -67,7 +67,7 @@ void ynn_runtime_value::make_buffer(ynn_runtime& runtime) {
 
 std::unique_ptr<ynn::scheduling_info> ynn_runtime::make_schedule(
     const std::vector<slinky::var>& dims, const slinky::buffer_expr_ptr output,
-    uint32_t output_value, slinky::span<const slinky::expr> given_splits,
+    uint32_t output_value, ynn::span<const slinky::expr> given_splits,
     const slinky::expr& element_cost,
     const std::vector<slinky::index_t>& loop_order) {
   auto sched = std::make_unique<ynn::scheduling_info>();

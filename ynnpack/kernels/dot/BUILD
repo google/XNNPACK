@@ -744,10 +744,7 @@ cc_library(
     hdrs = ["schedule.h"],
     compatible_with = _COMPATIBLE_WITH,
     visibility = ["//ynnpack:__subpackages__"],
-    deps = [
-        "//ynnpack/base",
-        "@slinky//slinky/base",
-    ],
+    deps = ["//ynnpack/base"],
 )
 
 cc_library(
@@ -1005,7 +1002,6 @@ cc_binary(
         "//ynnpack/base/test:buffer",
         "//ynnpack/base/test:tensor",
         "//ynnpack/base/test:util",
-        "@slinky//slinky/base",
     ],
 )
 

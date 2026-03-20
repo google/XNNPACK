@@ -23,10 +23,10 @@
 #include "ynnpack/base/bfloat16.h"
 #include "ynnpack/base/half.h"
 #include "ynnpack/base/simd/vec.h"
+#include "ynnpack/base/span.h"
 #include "ynnpack/base/test/fuzz_test.h"
 #include "ynnpack/base/test/random.h"
 #include "ynnpack/base/type.h"
-#include "slinky/base/span.h"
 
 namespace ynn {
 
@@ -36,12 +36,12 @@ using testing::Each;
 using testing::ElementsAreArray;
 
 template <typename T>
-slinky::span<T> as_span(T* array, size_t size) {
-  return slinky::span<T>(array, array + size);
+span<T> as_span(T* array, size_t size) {
+  return span<T>(array, array + size);
 }
 template <typename T>
-slinky::span<T> as_span(T* begin, T* end) {
-  return slinky::span<T>(begin, end);
+span<T> as_span(T* begin, T* end) {
+  return span<T>(begin, end);
 }
 
 using u8 = uint8_t;

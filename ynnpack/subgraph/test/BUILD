@@ -39,9 +39,9 @@ cc_library(
     hdrs = ["matchers.h"],
     deps = [
         "//ynnpack:ynnpack_h",
+        "//ynnpack/base",
         "//ynnpack/subgraph",
         "@com_google_googletest//:gtest",
-        "@slinky//slinky/base",
     ],
 )
 

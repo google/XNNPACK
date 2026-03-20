@@ -18,9 +18,9 @@
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include "ynnpack/base/span.h"
 #include "ynnpack/include/ynnpack.h"
 #include "ynnpack/subgraph/subgraph.h"
-#include "slinky/base/span.h"
 
 // This causes gmock to print the subgraph instead of just a hex encoded dump of
 // the memory. It needs to be in the global namespace for argument dependent
@@ -285,7 +285,7 @@ inline const ynn_node& ProducerOf(uint32_t value_id,
 //   EXPECT_THAT(ValuesIn<float>(subgraph.value(x_id)),
 //               testing::ElementsAre(1.0f, 2.0f, 3.0f));
 template <typename T>
-slinky::span<const T> ValuesIn(const ynn_value& value) {
+span<const T> ValuesIn(const ynn_value& value) {
   if (!value.is_static()) {
     return {};
   }
@@ -293,7 +293,7 @@ slinky::span<const T> ValuesIn(const ynn_value& value) {
   if (count == 0) {
     return {};
   }
-  return slinky::span<const T>(static_cast<const T*>(value.data->base), count);
+  return span<const T>(static_cast<const T*>(value.data->base), count);
 }
 
 }  // namespace ynn
