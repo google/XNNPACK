@@ -44,3 +44,12 @@ def add_saturating_cast_rules(vector_bits):
           ),
       ),
   ]
+
+
+def add_select_rules():
+  """Adds generic select rewrite patterns."""
+  x = WildCard()
+  y = WildCard()
+  z = WildCard()
+  w = WildCard()
+  return [Rule(select(x > y, z, w), select_greater_than(x, y, z, w))]

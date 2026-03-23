@@ -1,7 +1,7 @@
 """X86 target for elementwise kernels compiler."""
 
 # pylint: disable=undefined-variable
-from ynnpack.kernels.elementwise.common_rules import add_saturating_cast_rules
+from ynnpack.kernels.elementwise.common_rules import *  # pylint: disable=wildcard-import
 from ynnpack.kernels.elementwise.compiler import *  # pylint: disable=wildcard-import
 
 
@@ -30,83 +30,6 @@ def make_x86_integer_patterns():
   ]
 
 
-# TODO(vksnk): These are only correct for SSE2
-def make_x86_float_comparison_patterns(vector_bits, prefix):
-  return [
-      i.vectorize(vector_bits)
-      for i in [
-          Rule(
-              equal(f32_a, f32_b),
-              Op(Float(32), prefix + "cmpeq_ps", [f32_a, f32_b]),
-          ),
-          Rule(
-              not_equal(f32_a, f32_b),
-              Op(Float(32), prefix + "cmpneq_ps", [f32_a, f32_b]),
-          ),
-          Rule(
-              f32_a > f32_b,
-              Op(Float(32), prefix + "cmpgt_ps", [f32_a, f32_b]),
-          ),
-          Rule(
-              f32_a < f32_b,
-              Op(Float(32), prefix + "cmplt_ps", [f32_a, f32_b]),
-          ),
-          Rule(
-              f32_a >= f32_b,
-              Op(Float(32), prefix + "cmpge_ps", [f32_a, f32_b]),
-          ),
-          Rule(
-              f32_a <= f32_b,
-              Op(Float(32), prefix + "cmple_ps", [f32_a, f32_b]),
-          ),
-      ]
-  ]
-
-
-# TODO(vksnk): These are only correct for SSE2
-def make_x86_integer_comparison_patterns(vector_bits, prefix):
-  return [
-      i.vectorize(vector_bits)
-      for i in [
-          Rule(
-              equal(i8_a, i8_b), Op(Int(8), prefix + "cmpeq_epi8", [i8_a, i8_b])
-          ),
-          Rule(
-              equal(i16_a, i16_b),
-              Op(Int(16), prefix + "cmpeq_epi16", [i16_a, i16_b]),
-          ),
-          Rule(
-              equal(i32_a, i32_b),
-              Op(Int(32), prefix + "cmpeq_epi32", [i32_a, i32_b]),
-          ),
-          Rule(
-              i8_a > i8_b,
-              Op(Int(8), prefix + "cmpgt_epi8", [i8_a, i8_b]),
-          ),
-          Rule(
-              i16_a > i16_b,
-              Op(Int(16), prefix + "cmpgt_epi16", [i16_a, i16_b]),
-          ),
-          Rule(
-              i32_a > i32_b,
-              Op(Int(32), prefix + "cmpgt_epi32", [i32_a, i32_b]),
-          ),
-          Rule(
-              i8_a < i8_b,
-              Op(Int(8), prefix + "cmpgt_epi8", [i8_b, i8_a]),
-          ),
-          Rule(
-              i16_a < i16_b,
-              Op(Int(16), prefix + "cmpgt_epi16", [i16_b, i16_a]),
-          ),
-          Rule(
-              i32_a < i32_b,
-              Op(Int(32), prefix + "cmpgt_epi32", [i32_b, i32_a]),
-          ),
-      ]
-  ]
-
-
 def make_x86_fma_patterns(vector_bits):
   return [
       i.vectorize(vector_bits)
@@ -127,8 +50,17 @@ class X86(Target):
     """Updates the target for SSE2 support."""
     self.patterns += make_x86_integer_patterns()
     self.patterns += make_x86_cast_patterns(128)
-    self.patterns += make_x86_float_comparison_patterns(128, "_mm_")
-    self.patterns += make_x86_integer_comparison_patterns(128, "_mm_")
+    self.header += """
+namespace ynn {
+namespace {
+template <>
+YNN_INTRINSIC ynn::simd::vec<float, 4> select_greater_than(ynn::simd::vec<float, 4> a, ynn::simd::vec<float, 4> b, ynn::simd::vec<float, 4> c, ynn::simd::vec<float, 4> d) {
+  __m128 mask = _mm_cmpgt_ps(a.v, b.v);
+  return ynn::simd::vec<float, 4>{_mm_or_ps(_mm_and_ps(mask, c.v), _mm_andnot_ps(mask, d.v))};
+}
+} // namespace
+} // namespace ynn
+"""
 
   def update_for_sse41(self):
     """Updates the target for SSE41 support."""
@@ -136,14 +68,15 @@ class X86(Target):
   def update_for_avx(self):
     """Updates the target for AVX support."""
     self.header += """
+namespace ynn {
 namespace {
-
-YNN_INTRINSIC __m256 greater_than(__m256 a, __m256 b) {
-  return _mm256_cmp_ps(a, b, _CMP_GT_OS);
+template <>
+YNN_INTRINSIC ynn::simd::vec<float, 8> select_greater_than(ynn::simd::vec<float, 8> a, ynn::simd::vec<float, 8> b, ynn::simd::vec<float, 8> c, ynn::simd::vec<float, 8> d) {
+  __m256 mask = _mm256_cmp_ps(a.v, b.v, _CMP_GT_OS);
+  return ynn::simd::vec<float, 8>{_mm256_blendv_ps(d.v, c.v, mask)};
 }
-
 } // namespace
-
+} // namespace ynn
 """
 
   def update_for_avx2(self):
@@ -163,6 +96,17 @@ YNN_INTRINSIC __m256 greater_than(__m256 a, __m256 b) {
     self.patterns += make_x86_fma_patterns(512)
     self.patterns += make_x86_integer_patterns()
     self.patterns += make_x86_cast_patterns(512)
+    self.header += """
+namespace ynn {
+namespace {
+template <>
+YNN_INTRINSIC ynn::simd::vec<float, 16> select_greater_than(ynn::simd::vec<float, 16> a, ynn::simd::vec<float, 16> b, ynn::simd::vec<float, 16> c, ynn::simd::vec<float, 16> d) {
+  __mmask16 mask = _mm512_cmp_ps_mask(a.v, b.v, _CMP_GT_OS);
+  return ynn::simd::vec<float, 16>{_mm512_mask_blend_ps(mask, d.v, c.v)};
+}
+} // namespace
+} // namespace ynn
+"""
 
   def update_for_avx512bf16(self):
     """Updates the target for AVX512BF16 support."""
@@ -179,6 +123,7 @@ YNN_INTRINSIC __m256 greater_than(__m256 a, __m256 b) {
 
   def __init__(self, features):
     Target.__init__(self)
+    self.patterns += add_select_rules()
     self.features = features
 
     # These are transitive.

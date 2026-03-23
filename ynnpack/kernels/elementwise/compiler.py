@@ -578,6 +578,13 @@ def select(cond, x, y):
   return Op(x.ty, "select", [cond, x, y])
 
 
+@intrinsic
+def select_greater_than(a, b, x, y):
+  assert x.ty == y.ty
+  a_pr, b_pr = promote_types(a, b)
+  return Op(x.ty, "select_greater_than", [a_pr, b_pr, x, y])
+
+
 # We assume that cond produces a mask.
 def lower_select(cond, x, y):
   if x.ty.is_float():
@@ -738,6 +745,8 @@ header = """
 #include <cstring>
 #include <cstdio>
 
+#include "ynnpack/base/simd/vec.h"
+
 #if !defined(__has_attribute)
 #define YNN_COMPILER_HAS_ATTRIBUTE(x) 0
 #else
@@ -795,6 +804,22 @@ YNN_INTRINSIC T mul(T a, T b) {
 template <typename T>
 YNN_INTRINSIC T truediv(T a, T b) {
     return a / b;
+}
+
+template <typename T>
+YNN_INTRINSIC T select_greater_than(T a, T b, T c, T d) {
+    return a > b ? c : d;
+}
+
+template <typename T>
+YNN_INTRINSIC simd::vec<T, 1> select_greater_than(simd::vec<T, 1> a, simd::vec<T, 1> b, simd::vec<T, 1> c, simd::vec<T, 1> d) {
+    return a.v > b.v ? c : d;
+}
+
+template <typename T, size_t N>
+YNN_INTRINSIC simd::vec<T, N> select_greater_than(simd::vec<T, N> a, simd::vec<T, N> b, simd::vec<T, N> c, simd::vec<T, N> d) {
+    return simd::vec<T, N>(select_greater_than(a.lo(), b.lo(), c.lo(), d.lo()),
+                           select_greater_than(a.hi(), b.hi(), c.hi(), d.hi()));
 }
 
 } // namespace
@@ -957,6 +982,7 @@ class Target:
         "saturating_cast",
         "saturating_rounding_cast",
         "fma",
+        "select_greater_than",
     }
     self.infix_ops = {
         "add": "+",

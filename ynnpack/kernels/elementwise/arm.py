@@ -1,7 +1,7 @@
 """ARM NEON target for elementwise kernels compiler."""
 
 # pylint: disable=undefined-variable
-from ynnpack.kernels.elementwise.common_rules import add_saturating_cast_rules
+from ynnpack.kernels.elementwise.common_rules import *  # pylint: disable=wildcard-import
 from ynnpack.kernels.elementwise.compiler import *  # pylint: disable=wildcard-import
 
 
@@ -52,6 +52,17 @@ class ARM(Target):
     self.patterns += make_neon_float32_patterns(128)
     self.patterns += make_neon_integer_patterns(128)
     self.patterns += make_neon_cast_patterns(128)
+    self.header += """
+namespace ynn {
+namespace {
+template <>
+YNN_INTRINSIC simd::vec<float, 4> select_greater_than(simd::vec<float, 4> a, simd::vec<float, 4> b, simd::vec<float, 4> c, simd::vec<float, 4> d) {
+  uint32x4_t mask = vcgtq_f32(a.v, b.v);
+  return simd::vec<float, 4>{vbslq_f32(mask, c.v, d.v)};
+}
+}
+} // namespace ynn
+"""
 
   def update_for_fp16(self):
     """Updates the target for FP16 support."""
@@ -61,6 +72,7 @@ class ARM(Target):
 
   def __init__(self, features):
     Target.__init__(self)
+    self.patterns += add_select_rules()
     self.features = features
     self.vector_bits = 128
     self.tail_strategy = TailStrategy.VECTOR
