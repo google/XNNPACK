@@ -2922,8 +2922,7 @@ static enum xnn_status optimize_common_subgraphs_min_max_to_clamp(
 static enum xnn_status optimize_common_subgraphs_merge_clamps(
     xnn_subgraph_t subgraph, uint32_t node_id, size_t* changes) {
   struct xnn_node* node = &subgraph->nodes[node_id];
-  if (node->type != xnn_node_type_unary_elementwise ||
-      node->unary_operator != xnn_unary_clamp) {
+  if (!is_clamp(node)) {
     return xnn_status_success;
   }
 
@@ -2944,22 +2943,25 @@ static enum xnn_status optimize_common_subgraphs_merge_clamps(
   // Note that the order of the min/max matches that of the `clamp` ops
   // themsevels and is required to ensure correctness when merging
   // non-overlapping clamps.
-  input_producer_node->activation.output_min =
-      math_min_f32(math_max_f32(input_producer_node->activation.output_min,
-                                node->params.unary.clamp.min),
-                   node->params.unary.clamp.max);
-  input_producer_node->activation.output_max =
-      math_min_f32(math_max_f32(input_producer_node->activation.output_max,
-                                node->params.unary.clamp.min),
-                   node->params.unary.clamp.max);
-  input_producer_node->params.unary.clamp.min =
-      math_min_f32(math_max_f32(input_producer_node->params.unary.clamp.min,
-                                node->params.unary.clamp.min),
-                   node->params.unary.clamp.max);
-  input_producer_node->params.unary.clamp.max =
-      math_min_f32(math_max_f32(input_producer_node->params.unary.clamp.max,
-                                node->params.unary.clamp.min),
-                   node->params.unary.clamp.max);
+  if (is_clamp(input_producer_node)) {
+    input_producer_node->params.unary.clamp.min =
+        math_min_f32(math_max_f32(input_producer_node->params.unary.clamp.min,
+                                  node->params.unary.clamp.min),
+                    node->params.unary.clamp.max);
+    input_producer_node->params.unary.clamp.max =
+        math_min_f32(math_max_f32(input_producer_node->params.unary.clamp.max,
+                                  node->params.unary.clamp.min),
+                    node->params.unary.clamp.max);
+  } else {
+    input_producer_node->activation.output_min =
+        math_min_f32(math_max_f32(input_producer_node->activation.output_min,
+                                  node->params.unary.clamp.min),
+                    node->params.unary.clamp.max);
+    input_producer_node->activation.output_max =
+        math_min_f32(math_max_f32(input_producer_node->activation.output_max,
+                                  node->params.unary.clamp.min),
+                    node->params.unary.clamp.max);
+  }
 
   // Elide the `clamp` node by just skipping it.
   input_producer_node->outputs[0] = node->outputs[0];
