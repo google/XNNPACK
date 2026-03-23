@@ -16,6 +16,7 @@
 #include "ynnpack/subgraph/slinky.h"
 #include "ynnpack/subgraph/subgraph.h"
 #include "slinky/builder/pipeline.h"
+#include "slinky/builder/simplify.h"
 #include "slinky/runtime/expr.h"
 
 namespace ynn {
@@ -58,7 +59,7 @@ ynn_status ynn_define_even_split(ynn_subgraph_t subgraph, int32_t axis,
        ynn_node::input_idx{0}},
   });
 
-  output_extents[axis] = output_extents[axis] / split_factor;
+  output_extents[axis] = simplify(output_extents[axis] / split_factor);
 
   for (size_t i = 0; i < num_outputs; ++i) {
     ynn_value& output = subgraph->value(output_ids[i]);

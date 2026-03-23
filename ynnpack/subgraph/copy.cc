@@ -68,7 +68,7 @@ void deduce_reshape_extent(ynn_node& node, int input_idx,
   }
 
   if (deduce_dim != -1) {
-    slinky::expr deduced_extent = num_elements / current_elements;
+    slinky::expr deduced_extent = simplify(num_elements / current_elements);
     if (is_pure(deduced_extent)) {
       output_extents[deduce_dim] = deduced_extent;
     } else {
