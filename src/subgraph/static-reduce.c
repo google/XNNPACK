@@ -254,6 +254,13 @@ enum xnn_status xnn_define_static_reduce(
   uint32_t output_id,
   uint32_t flags)
 {
+  if (num_reduction_axes > XNN_MAX_TENSOR_DIMS) {
+    xnn_log_error(
+        "failed to define reduce operator with %zu reduction axes: "
+        "the number of reduction axes must not exceed %zu",
+        num_reduction_axes, (size_t) XNN_MAX_TENSOR_DIMS);
+    return xnn_status_invalid_parameter;
+  }
   int64_t signed_reduction_axes[XNN_MAX_TENSOR_DIMS];
   for (int i = 0; i < num_reduction_axes; i++) {
     signed_reduction_axes[i] = reduction_axes[i];
@@ -329,6 +336,13 @@ enum xnn_status xnn_define_static_reduce_v2(
     xnn_log_error(
       "failed to define %s operator with %zu reduction axes: the number of reduction axes must be non-zero",
       xnn_node_type_to_string(node_type), num_reduction_axes);
+    return xnn_status_invalid_parameter;
+  }
+
+  if (num_reduction_axes > XNN_MAX_TENSOR_DIMS) {
+    xnn_log_error(
+      "failed to define %s operator with %zu reduction axes: the number of reduction axes must not exceed %zu",
+      xnn_node_type_to_string(node_type), num_reduction_axes, (size_t) XNN_MAX_TENSOR_DIMS);
     return xnn_status_invalid_parameter;
   }
 
