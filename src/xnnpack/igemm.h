@@ -1612,6 +1612,16 @@ DECLARE_QD8_F32_QC8W_IGEMM_MINMAX_UKERNEL_FUNCTION(
     xnn_qd8_f32_qc8w_igemm_minmax_ukernel_4x16c4__wasmusdot_u2)
 
 DECLARE_QD8_F32_QC8W_IGEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_qd8_f32_qc8w_igemm_minmax_ukernel_1x16c4__wasmsdot)
+DECLARE_QD8_F32_QC8W_IGEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_qd8_f32_qc8w_igemm_minmax_ukernel_4x16c4__wasmsdot)
+
+DECLARE_QD8_F32_QC8W_IGEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_qd8_f32_qc8w_igemm_minmax_ukernel_1x16c4__wasmsdot_u2)
+DECLARE_QD8_F32_QC8W_IGEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_qd8_f32_qc8w_igemm_minmax_ukernel_4x16c4__wasmsdot_u2)
+
+DECLARE_QD8_F32_QC8W_IGEMM_MINMAX_UKERNEL_FUNCTION(
     xnn_qd8_f32_qc8w_igemm_minmax_ukernel_1x4c2__wasmsimd_dot16x2_ld64)
 DECLARE_QD8_F32_QC8W_IGEMM_MINMAX_UKERNEL_FUNCTION(
     xnn_qd8_f32_qc8w_igemm_minmax_ukernel_1x4c2__wasmsimd_dot16x2_ld128)
