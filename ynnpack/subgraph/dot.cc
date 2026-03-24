@@ -1013,7 +1013,7 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
     attrs.name = node.to_string();
     // Allow the input_c and output to be computed in-place, which means we
     // don't need to initialize the accumulator.
-    if (allow_in_place(input_c.id, output.id, runtime.subgraph)) {
+    if (allow_in_place(input_c.id, output.id, *runtime.subgraph)) {
       attrs.allow_in_place = (1 << 2);
     }
     dot_type dot_type = {input_a.type, packed_b.type, output.type};

@@ -462,7 +462,7 @@ ynn_status ynn_subgraph::fold_constants(slinky::thread_pool* threadpool) {
 
   // Make a copy of this subgraph. We'll remove any non-constant nodes from
   // `constants`, and any constant nodes from `this`.
-  ynn_subgraph constants(*this);
+  slinky::ref_count<ynn_subgraph> constants = new ynn_subgraph(*this);
   for (uint32_t i = 0; i < nodes.size(); ++i) {
     ynn_node& node = nodes[i];
     if (std::all_of(node.inputs.begin(), node.inputs.end(),
@@ -482,9 +482,9 @@ ynn_status ynn_subgraph::fold_constants(slinky::thread_pool* threadpool) {
       // Remove the node (and its outputs) from the constant subgraph.
       for (uint32_t i : node.outputs) {
         if (i == YNN_INVALID_VALUE_ID) continue;
-        constants.values[i].invalidate();
+        constants->values[i].invalidate();
       }
-      constants.nodes[i].invalidate();
+      constants->nodes[i].invalidate();
     }
   }
 
@@ -511,14 +511,14 @@ ynn_status ynn_subgraph::fold_constants(slinky::thread_pool* threadpool) {
   // Mark these values as external outputs in `constants` so we can reshape and
   // learn the shape of the constants.
   for (uint32_t i : to_fold) {
-    constants.values[i].flags |= YNN_VALUE_FLAG_EXTERNAL_OUTPUT;
+    constants->values[i].flags |= YNN_VALUE_FLAG_EXTERNAL_OUTPUT;
   }
 
-  constants.invalidate_dead_values();
+  constants->invalidate_dead_values();
 
 #if YNN_LOG_LEVEL >= YNN_LOG_LEVEL_DEBUG
   YNN_LOG_DEBUG() << "constant subgraph:\n";
-  constants.dump(std::cout);
+  constants->dump(std::cout);
 #endif
 
   ynn_runtime runtime(constants, threadpool, 0);
@@ -1084,6 +1084,7 @@ ynn_status ynn_create_subgraph(uint32_t external_value_ids, uint32_t flags,
     return ynn_status_invalid_parameter;
   }
   *subgraph = new ynn_subgraph(external_value_ids, flags);
+  (*subgraph)->add_ref();
   return ynn_status_success;
 }
 
@@ -1113,6 +1114,8 @@ ynn_status ynn_optimize_subgraph(ynn_subgraph_t subgraph,
   return ynn_status_success;
 }
 
-void ynn_delete_subgraph(ynn_subgraph_t subgraph) { delete subgraph; }
+void ynn_delete_subgraph(ynn_subgraph_t subgraph) {
+  if (subgraph) subgraph->release();
+}
 
 }  // extern "C"

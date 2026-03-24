@@ -21,7 +21,7 @@
 #include <variant>
 #include <vector>
 
-#include "ynnpack/base/log.h"
+#include "ynnpack/base/ref_count.h"
 #include "ynnpack/base/type.h"
 #include "ynnpack/include/ynnpack.h"
 #include "ynnpack/kernels/ternary/ternary.h"
@@ -536,7 +536,7 @@ struct ynn_node {
   std::vector<check> checks;
 };
 
-struct ynn_subgraph {
+struct ynn_subgraph : public ynn::ref_counted<ynn_subgraph> {
   explicit ynn_subgraph(uint32_t external_value_ids, uint32_t flags);
 
   // Number of Value IDs reserved for communication with external graph
@@ -619,6 +619,8 @@ struct ynn_subgraph {
   ynn_status optimize(slinky::thread_pool* threadpool);
 
   void dump(std::ostream& os) const;
+
+  static void destroy(ynn_subgraph* subgraph) { delete subgraph; }
 };
 
 #endif  // XNNPACK_YNNPACK_SUBGRAPH_SUBGRAPH_H_

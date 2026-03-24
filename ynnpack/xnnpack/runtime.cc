@@ -12,11 +12,11 @@
 #include "include/experimental.h"
 #include "include/xnnpack.h"
 #include "ynnpack/base/log.h"
+#include "ynnpack/base/ref_count.h"
 #include "ynnpack/include/ynnpack.h"
 #include "ynnpack/xnnpack/utils.h"
 #include "ynnpack/xnnpack/xnnpack.h"
 #include <pthreadpool.h>
-#include "slinky/base/ref_count.h"
 #include "slinky/base/thread_pool.h"
 
 namespace {
@@ -57,7 +57,7 @@ xnn_status xnn_get_runtime_profiling_info(xnn_runtime_t runtime,
 // This wrapper only exists to run tasks under `run_with_xnn_fpu_state`,
 // otherwise we could just forward calls to the xnn_scheduler_v2 without adding
 // a new layer to the stack.
-struct xnn_threadpool : public slinky::ref_counted<xnn_threadpool> {
+struct xnn_threadpool : public ynn::ref_counted<xnn_threadpool> {
   ynn_threadpool_t ynn;
   ynn_scheduler scheduler;
   void* scheduler_context;
@@ -79,7 +79,7 @@ struct xnn_threadpool : public slinky::ref_counted<xnn_threadpool> {
   }
 
   struct wrapped_task {
-    slinky::ref_count<xnn_threadpool> pool;
+    ynn::ref_count<xnn_threadpool> pool;
     void* context;
     void (*task)(void*);
   };

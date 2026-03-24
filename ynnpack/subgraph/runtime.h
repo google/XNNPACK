@@ -12,11 +12,13 @@
 #include <utility>
 #include <vector>
 
+#include "ynnpack/base/ref_count.h"
 #include "ynnpack/base/span.h"
 #include "ynnpack/include/ynnpack.h"
 #include "ynnpack/subgraph/slinky.h"
 #include "ynnpack/subgraph/subgraph.h"
 #include "slinky/builder/pipeline.h"
+#include "slinky/runtime/buffer.h"
 #include "slinky/runtime/evaluate.h"
 #include "slinky/runtime/expr.h"
 #include "slinky/runtime/pipeline.h"
@@ -33,7 +35,7 @@ struct ynn_runtime_value : public ynn_value {
 };
 
 struct ynn_runtime {
-  const ynn_subgraph& subgraph;
+  ynn::ref_count<const ynn_subgraph> subgraph;
   std::vector<ynn_runtime_value> values;
   uint32_t flags;
 
@@ -76,8 +78,8 @@ struct ynn_runtime {
 
   void schedule();
 
-  ynn_runtime(const ynn_subgraph& subgraph, slinky::thread_pool* threadpool,
-              uint32_t flags);
+  ynn_runtime(ynn::ref_count<const ynn_subgraph> subgraph,
+              slinky::thread_pool* threadpool, uint32_t flags);
 
   ynn_status build();
   ynn_status reshape();

@@ -84,6 +84,7 @@ cc_library(
         "bit_cast.h",
         "fp16.h",
         "half.h",
+        "ref_count.h",
         "span.h",
         "to_string.h",
         "type.h",

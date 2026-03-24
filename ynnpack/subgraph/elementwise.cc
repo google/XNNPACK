@@ -191,7 +191,7 @@ ynn_status create_unary(const ynn_node& node, ynn_runtime& runtime,
 
   slinky::call_stmt::attributes attrs;
   attrs.name = to_string(std::get<ynn_node::unary_elementwise>(node.op).op);
-  attrs.allow_in_place = compute_allow_in_place(node, runtime.subgraph);
+  attrs.allow_in_place = compute_allow_in_place(node, *runtime.subgraph);
 
   slinky::func func = slinky::func::make(make_unary_elementwise_impl(kernel),
                                          {{a.buffer, std::move(bounds)}},
@@ -223,7 +223,7 @@ ynn_status create_lut(const ynn_node& node, ynn_runtime& runtime,
 
   slinky::call_stmt::attributes attrs;
   attrs.name = "lut";
-  attrs.allow_in_place = compute_allow_in_place(node, runtime.subgraph);
+  attrs.allow_in_place = compute_allow_in_place(node, *runtime.subgraph);
 
   auto func = slinky::func::make(
       make_lut_impl(kernel),
@@ -251,7 +251,7 @@ ynn_status create_binary(const ynn_node& node, ynn_runtime& runtime,
 
   slinky::call_stmt::attributes attrs;
   attrs.name = to_string(std::get<ynn_node::binary_elementwise>(node.op).op);
-  attrs.allow_in_place = compute_allow_in_place(node, runtime.subgraph);
+  attrs.allow_in_place = compute_allow_in_place(node, *runtime.subgraph);
 
   // Make the dims and bounds for this operation (does not depend on the
   // specific operation.)
@@ -287,7 +287,7 @@ ynn_status create_ternary(const ynn_node& node, ynn_runtime& runtime,
 
   slinky::call_stmt::attributes attrs;
   attrs.name = to_string(std::get<ynn_node::ternary_elementwise>(node.op).op);
-  attrs.allow_in_place = compute_allow_in_place(node, runtime.subgraph);
+  attrs.allow_in_place = compute_allow_in_place(node, *runtime.subgraph);
 
   // Make the dims and bounds for this operation (does not depend on the
   // specific operation.)

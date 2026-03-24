@@ -264,7 +264,7 @@ bool rewrite_subgraph_for_unary_lut(ynn_subgraph& subgraph,
   // Clone the candidate subgraph.
   uint32_t lut_input_id = YNN_INVALID_VALUE_ID;
   uint32_t lut_output_id = YNN_INVALID_VALUE_ID;
-  std::optional<ynn_subgraph> lut_subgraph = clone_subgraph_subset(
+  ynn::ref_count<ynn_subgraph> lut_subgraph = clone_subgraph_subset(
       subgraph, best_candidate.get_input_id(), best_candidate.get_output_id(),
       lut_input_id, lut_output_id);
   if (!lut_subgraph) {
@@ -287,7 +287,7 @@ bool rewrite_subgraph_for_unary_lut(ynn_subgraph& subgraph,
   const void* input_data = get_lut_input_data(input_value.type);
 
   // Run the cloned subgraph.
-  ynn_runtime runtime(*lut_subgraph, nullptr, 0);
+  ynn_runtime runtime(lut_subgraph, nullptr, 0);
   if (runtime.build() != ynn_status_success) {
     return false;
   }
