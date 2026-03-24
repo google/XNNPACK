@@ -30,19 +30,6 @@ def make_x86_integer_patterns():
   ]
 
 
-def make_x86_fma_patterns(vector_bits):
-  return [
-      i.vectorize(vector_bits)
-      for i in [
-          Rule(
-              multiply_add(f32_a, f32_b, f32_c),
-              Op(Float(32), "fma", [f32_a, f32_b, f32_c]),
-              ["FMA3", "AVX512F"],
-          ),
-      ]
-  ]
-
-
 class X86(Target):
   """X86 target for elementwise kernels compiler."""
 
@@ -86,14 +73,14 @@ YNN_INTRINSIC ynn::simd::vec<float, 8> select_greater_than(ynn::simd::vec<float,
 
   def update_for_fma3(self):
     """Updates the target for FMA3 support."""
-    self.patterns += make_x86_fma_patterns(256)
+    self.patterns += add_fma_rules()
 
   def update_for_f16c(self):
     """Updates the target for F16C support."""
 
   def update_for_avx512f(self):
     """Updates the target for AVX512F support."""
-    self.patterns += make_x86_fma_patterns(512)
+    self.patterns += add_fma_rules()
     self.patterns += make_x86_integer_patterns()
     self.patterns += make_x86_cast_patterns(512)
     self.header += """

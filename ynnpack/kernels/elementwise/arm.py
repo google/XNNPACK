@@ -31,19 +31,6 @@ def make_neon_float32_patterns(vector_bits):
   return []
 
 
-def make_neon_fma_patterns(vector_bits):
-  return [
-      i.vectorize(vector_bits)
-      for i in [
-          Rule(
-              multiply_add(f32_a, f32_b, f32_c),
-              Op(Float(32), "fma", [f32_a, f32_b, f32_c]),
-              ["FMA"],
-          ),
-      ]
-  ]
-
-
 class ARM(Target):
   """NEON target for elementwise kernels compiler."""
 
@@ -68,7 +55,7 @@ YNN_INTRINSIC simd::vec<float, 4> select_greater_than(simd::vec<float, 4> a, sim
     """Updates the target for FP16 support."""
 
   def update_for_fma(self):
-    self.patterns += make_neon_fma_patterns(128)
+    self.patterns += add_fma_rules()
 
   def __init__(self, features):
     Target.__init__(self)
