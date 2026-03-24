@@ -227,11 +227,11 @@ static XNN_INTRINSIC __m256i _mm256_dpbusd_epi32_madd(__m256i i32,
 }
 
 // AVXVNNI replacement that uses vpmaddubsw.
-// u4 is uint4 in lower 4 bits.
+// u2 is uint2 in lower 2 bits.
 static XNN_INTRINSIC __m256i _mm256_dpbusd_epi32_madd_kzp2(__m256i i32,
                                                       const __m256i u8,
-                                                      const __m256i u4) {
-  return _mm256_dpbusd_offset_epi32_madd(i32, u8, u4, 2);
+                                                      const __m256i u2) {
+  return _mm256_dpbusd_offset_epi32_madd(i32, u8, u2, 2);
 }
 
 #endif  // __AVX2__
