@@ -306,6 +306,10 @@ YNN_ALWAYS_INLINE void store_aligned(uint8_t* ptr, u8x8 b,
 YNN_ALWAYS_INLINE f32x4 load(const float* ptr, decltype(f32x4::N), f32x4 = {}) {
   return f32x4{vld1q_f32(ptr)};
 }
+YNN_ALWAYS_INLINE u32x4 load(const uint32_t* ptr, decltype(u32x4::N),
+                             u32x4 = {}) {
+  return u32x4{vld1q_u32(ptr)};
+}
 YNN_ALWAYS_INLINE s32x4 load(const int32_t* ptr, decltype(s32x4::N),
                              s32x4 = {}) {
   return s32x4{vld1q_s32(ptr)};
@@ -316,6 +320,10 @@ YNN_ALWAYS_INLINE bf16x8 load(const bfloat16* ptr, decltype(f16x8::N),
 }
 YNN_ALWAYS_INLINE f16x8 load(const half* ptr, decltype(f16x8::N), f16x8 = {}) {
   return f16x8{vld1q_u16(reinterpret_cast<const uint16_t*>(ptr))};
+}
+YNN_ALWAYS_INLINE u16x8 load(const uint16_t* ptr, decltype(u16x8::N),
+                             u16x8 = {}) {
+  return u16x8{vld1q_u16(ptr)};
 }
 YNN_ALWAYS_INLINE s16x8 load(const int16_t* ptr, decltype(s16x8::N),
                              s16x8 = {}) {
@@ -402,6 +410,9 @@ YNN_ALWAYS_INLINE s8x16 operator-(s8x16 a, s8x16 b) {
 YNN_ALWAYS_INLINE f32x4 operator*(f32x4 a, f32x4 b) {
   return f32x4{vmulq_f32(a.v, b.v)};
 }
+
+YNN_ALWAYS_INLINE f32x4 operator/(f32x4 a, f32x4 b) { return f32x4{a.v / b.v}; }
+
 YNN_ALWAYS_INLINE s32x4 operator*(s32x4 a, s32x4 b) {
   return s32x4{vmulq_s32(a.v, b.v)};
 }
@@ -412,8 +423,61 @@ YNN_ALWAYS_INLINE s8x16 operator*(s8x16 a, s8x16 b) {
   return s8x16{vmulq_s8(a.v, b.v)};
 }
 
+YNN_ALWAYS_INLINE s32x4 add_sat(s32x4 a, s32x4 b) {
+  return s32x4{vqaddq_s32(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE u32x4 add_sat(u32x4 a, u32x4 b) {
+  return u32x4{vqaddq_u32(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE s16x8 add_sat(s16x8 a, s16x8 b) {
+  return s16x8{vqaddq_s16(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE u16x8 add_sat(u16x8 a, u16x8 b) {
+  return u16x8{vqaddq_u16(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE s8x16 add_sat(s8x16 a, s8x16 b) {
+  return s8x16{vqaddq_s8(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE u8x16 add_sat(u8x16 a, u8x16 b) {
+  return u8x16{vqaddq_u8(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE u8x8 add_sat(u8x8 a, u8x8 b) {
+  return u8x8{vqadd_u8(a.v, b.v)};
+}
+
+YNN_ALWAYS_INLINE s32x4 sub_sat(s32x4 a, s32x4 b) {
+  return s32x4{vqsubq_s32(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE u32x4 sub_sat(u32x4 a, u32x4 b) {
+  return u32x4{vqsubq_u32(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE s16x8 sub_sat(s16x8 a, s16x8 b) {
+  return s16x8{vqsubq_s16(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE u16x8 sub_sat(u16x8 a, u16x8 b) {
+  return u16x8{vqsubq_u16(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE s8x16 sub_sat(s8x16 a, s8x16 b) {
+  return s8x16{vqsubq_s8(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE u8x16 sub_sat(u8x16 a, u8x16 b) {
+  return u8x16{vqsubq_u8(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE u8x8 sub_sat(u8x8 a, u8x8 b) {
+  return u8x8{vqsub_u8(a.v, b.v)};
+}
+
 YNN_ALWAYS_INLINE s16x8 operator>>(s16x8 a, int b) {
   return s16x8{vshlq_s16(a.v, vdupq_n_s16(-b))};
+}
+YNN_ALWAYS_INLINE s8x16 operator<<(s8x16 a, int b) {
+  return s8x16{vshlq_s8(a.v, vdupq_n_s8(b))};
+}
+YNN_ALWAYS_INLINE s16x8 operator<<(s16x8 a, int b) {
+  return s16x8{vshlq_s16(a.v, vdupq_n_s16(b))};
+}
+YNN_ALWAYS_INLINE s32x4 operator<<(s32x4 a, int b) {
+  return s32x4{vshlq_s32(a.v, vdupq_n_s32(b))};
 }
 
 YNN_ALWAYS_INLINE s32x4 operator&(s32x4 a, s32x4 b) {
@@ -768,12 +832,33 @@ YNN_ALWAYS_INLINE std::array<vec<T, 4>, 4> transpose(
   }};
 }
 
+namespace internal {
+
+YNN_ALWAYS_INLINE int32x4_t cast_f32_to_int32(float32x4_t f) {
+#if defined(__ARM_ARCH) && __ARM_ARCH < 8
+  return vcvtq_s32_f32(round(f32x4{f}).v);
+#else
+  return vcvtnq_s32_f32(f);
+#endif
+}
+
+YNN_ALWAYS_INLINE uint32x4_t cast_f32_to_uint32(float32x4_t f) {
+#if defined(__ARM_ARCH) && __ARM_ARCH < 8
+  return vcvtq_u32_f32(round(f32x4{f}).v);
+#else
+  return vcvtnq_u32_f32(f);
+#endif
+}
+
+}  // namespace internal
+
 using f32x8 = vec<float, 8>;
 using s32x8 = vec<int32_t, 8>;
 using s16x16 = vec<int16_t, 16>;
 using s32x16 = vec<int32_t, 16>;
+using f32x16 = vec<float, 16>;
 
-YNN_ALWAYS_INLINE f32x8 convert(bf16x8 a, float) {
+YNN_ALWAYS_INLINE f32x8 cast(bf16x8 a, float) {
   uint16x8x2_t a_u32 = vzipq_u16(vdupq_n_u16(0), a.v);
   return {
       f32x4{vreinterpretq_f32_u32(vreinterpretq_u32_u16(a_u32.val[0]))},
@@ -781,41 +866,78 @@ YNN_ALWAYS_INLINE f32x8 convert(bf16x8 a, float) {
   };
 }
 
-YNN_ALWAYS_INLINE s16x16 convert(s8x16 b, int16_t) {
+YNN_ALWAYS_INLINE s16x16 cast(s8x16 b, int16_t) {
   return {
       s16x8{vmovl_s8(vget_low_s8(b.v))},
       s16x8{vmovl_s8(vget_high_s8(b.v))},
   };
 }
 
-YNN_ALWAYS_INLINE s16x16 convert(u8x16 b, int16_t) {
+YNN_ALWAYS_INLINE s16x16 cast(u8x16 b, int16_t) {
   return {
       s16x8{vreinterpretq_s16_u16(vmovl_u8(vget_low_u8(b.v)))},
       s16x8{vreinterpretq_s16_u16(vmovl_u8(vget_high_u8(b.v)))},
   };
 }
 
-YNN_ALWAYS_INLINE s32x8 convert(s16x8 b, int32_t) {
+YNN_ALWAYS_INLINE s32x8 cast(s16x8 b, int32_t) {
   return {
       s32x4{vmovl_s16(vget_low_s16(b.v))},
       s32x4{vmovl_s16(vget_high_s16(b.v))},
   };
 }
 
-YNN_ALWAYS_INLINE s32x16 convert(s8x16 b, int32_t) {
-  return convert(convert(b, int16_t{}), int32_t{});
+YNN_ALWAYS_INLINE s32x16 cast(s8x16 b, int32_t) {
+  return cast(cast(b, int16_t{}), int32_t{});
 }
 
-YNN_ALWAYS_INLINE s32x16 convert(u8x16 b, int32_t) {
-  return convert(convert(b, int16_t{}), int32_t{});
+YNN_ALWAYS_INLINE s32x16 cast(u8x16 b, int32_t) {
+  return cast(cast(b, int16_t{}), int32_t{});
 }
 
-YNN_ALWAYS_INLINE f32x4 convert(s32x4 x, float) {
+YNN_ALWAYS_INLINE f32x4 cast(s32x4 x, float) {
   return f32x4{vcvtq_f32_s32(x.v)};
 }
 
-YNN_ALWAYS_INLINE s32x4 convert(f32x4 x, int32_t) {
+YNN_ALWAYS_INLINE s32x4 cast(f32x4 x, int32_t) {
   return s32x4{vcvtq_s32_f32(x.v)};
+}
+
+YNN_ALWAYS_INLINE s16x8 saturate_cast(s32x8 a, int16_t) {
+  return s16x8{vcombine_s16(vqmovn_s32(a.lo().v), vqmovn_s32(a.hi().v))};
+}
+
+YNN_ALWAYS_INLINE s8x16 saturate_cast(s16x16 a, int8_t) {
+  return s8x16{vcombine_s8(vqmovn_s16(a.lo().v), vqmovn_s16(a.hi().v))};
+}
+
+YNN_ALWAYS_INLINE u8x16 saturate_cast(s16x16 a, uint8_t) {
+  return u8x16{vcombine_u8(vqmovun_s16(a.lo().v), vqmovun_s16(a.hi().v))};
+}
+
+YNN_ALWAYS_INLINE s16x8 round_float_to_int(f32x8 f, int16_t) {
+  return s16x8{vcombine_s16(vqmovn_s32(internal::cast_f32_to_int32(f.lo().v)),
+                            vqmovn_s32(internal::cast_f32_to_int32(f.hi().v)))};
+}
+
+YNN_ALWAYS_INLINE s8x16 round_float_to_int(f32x16 f, int8_t) {
+  const int16x8_t i01 =
+      vcombine_s16(vqmovn_s32(internal::cast_f32_to_int32(f.lo().lo().v)),
+                   vqmovn_s32(internal::cast_f32_to_int32(f.lo().hi().v)));
+  const int16x8_t i23 =
+      vcombine_s16(vqmovn_s32(internal::cast_f32_to_int32(f.hi().lo().v)),
+                   vqmovn_s32(internal::cast_f32_to_int32(f.hi().hi().v)));
+  return s8x16{vcombine_s8(vqmovn_s16(i01), vqmovn_s16(i23))};
+}
+
+YNN_ALWAYS_INLINE u8x16 round_float_to_int(f32x16 f, uint8_t) {
+  const uint16x8_t i01 =
+      vcombine_u16(vqmovn_u32(internal::cast_f32_to_uint32(f.lo().lo().v)),
+                   vqmovn_u32(internal::cast_f32_to_uint32(f.lo().hi().v)));
+  const uint16x8_t i23 =
+      vcombine_u16(vqmovn_u32(internal::cast_f32_to_uint32(f.hi().lo().v)),
+                   vqmovn_u32(internal::cast_f32_to_uint32(f.hi().hi().v)));
+  return u8x16{vcombine_u8(vqmovn_u16(i01), vqmovn_u16(i23))};
 }
 
 }  // namespace simd

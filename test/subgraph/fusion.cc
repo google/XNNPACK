@@ -22,15 +22,15 @@ namespace xnnpack {
 
 TEST(AVERAGE_POOLING_2D_THEN_CLAMP, fusion) {
   RuntimeTester tester(3);
-  float output_min = -0.5f;
-  float output_max = 0.5f;
+  float output_min = 0.5f;
+  float output_max = 1.5f;
   uint32_t input_id = 0;
   uint32_t intermediate_id = 1;
   uint32_t output_id = 2;
-  tester.AddInputTensorF32({1, 10, 10, 3}, input_id)
+  tester.AddInputTensorF32({1, 8, 8, 3}, input_id)
       .AddDynamicTensorF32({1, 9, 9, 3}, intermediate_id)
       .AddOutputTensorF32({1, 9, 9, 3}, output_id)
-      .AddAveragePooling2D(0, 0, 0, 0, 2, 2, 1, 1, input_id, intermediate_id)
+      .AddAveragePooling2D(1, 1, 1, 1, 2, 2, 1, 1, input_id, intermediate_id)
       .AddClamp(output_min, output_max, intermediate_id, output_id);
 
   xnnpack::Buffer<float> unoptimized_output = tester.RunWithoutFusion<float>();
@@ -39,6 +39,10 @@ TEST(AVERAGE_POOLING_2D_THEN_CLAMP, fusion) {
   xnnpack::Buffer<float> optimized_output = tester.RunWithFusion<float>();
 
   ASSERT_EQ(tester.NumOperators(), 1);
+  ASSERT_EQ(tester.Node(0)->params.pooling_2d.padding_top, 1);
+  ASSERT_EQ(tester.Node(0)->params.pooling_2d.padding_right, 1);
+  ASSERT_EQ(tester.Node(0)->params.pooling_2d.padding_bottom, 1);
+  ASSERT_EQ(tester.Node(0)->params.pooling_2d.padding_left, 1);
   ASSERT_EQ(tester.Node(0)->activation.output_min, output_min);
   ASSERT_EQ(tester.Node(0)->activation.output_max, output_max);
   ASSERT_EQ(tester.Node(0)->outputs[0], output_id);

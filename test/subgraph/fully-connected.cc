@@ -468,7 +468,12 @@ void TestStaticB(xnn_datatype convert_to = xnn_datatype_invalid,
         }
       } else {
         const float max_a = MaxDatatype(Input());
-        const float max_b = MaxDatatype(Filter()) * filter_quantization.scale;
+        float max_b = MaxDatatype(Filter()) * filter_quantization.scale;
+        // For qd8_qc2w the range of channelwise ZP in this test is
+        // [-1.5, -0.5], which needs to be accounted for here.
+        if (is_qd8_qc2w) {
+          max_b += 1.5f * filter_quantization.scale;
+        }
         const float max_bias =
             bias.empty() ? 0.0f
                          : max_abs_bias<Bias>() * bias_quantization.scale;

@@ -24,6 +24,7 @@ SET(PROD_SSE41_MICROKERNEL_SRCS
   src/f32-vrnd/gen/f32-vrndu-sse41-u8.c
   src/f32-vrnd/gen/f32-vrndz-sse41-u8.c
   src/f32-vsigmoid/gen/f32-vsigmoid-sse41-rr2-lut64-p2-div-u8.c
+  src/f32-vsigmoid/gen/f32-vsigmoid-sse41-rr2-p5-div-u8.c
   src/qd8-f32-qb4w-gemm/gen/qd8-f32-qb4w-gemm-1x4c8-minmax-sse41-ld128.c
   src/qd8-f32-qb4w-gemm/gen/qd8-f32-qb4w-gemm-3x4c8-minmax-sse41-ld128.c
   src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-1x4c8-minmax-sse41-ld64.c
@@ -125,7 +126,6 @@ SET(NON_PROD_SSE41_MICROKERNEL_SRCS
   src/f32-vsigmoid/gen/f32-vsigmoid-sse41-rr2-lut64-p2-div-u12.c
   src/f32-vsigmoid/gen/f32-vsigmoid-sse41-rr2-lut64-p2-div-u16.c
   src/f32-vsigmoid/gen/f32-vsigmoid-sse41-rr2-p5-div-u4.c
-  src/f32-vsigmoid/gen/f32-vsigmoid-sse41-rr2-p5-div-u8.c
   src/f32-vsigmoid/gen/f32-vsigmoid-sse41-rr2-p5-div-u12.c
   src/f32-vsigmoid/gen/f32-vsigmoid-sse41-rr2-p5-div-u16.c
   src/qd8-f32-qb4w-gemm/gen/qd8-f32-qb4w-gemm-1x4c8-minmax-sse41-ld64.c

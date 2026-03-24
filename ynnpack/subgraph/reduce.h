@@ -15,8 +15,8 @@ namespace ynn {
 
 void define_reduce(ynn_subgraph& subgraph, ynn_node& node,
                    ynn_reduce_operator op, const ynn::axes_set& k_dims,
-                   uint32_t input_a_id, uint32_t input_b_id, uint32_t output_id,
-                   bool keep_dims);
+                   uint32_t input_a_id, uint32_t input_b_id,
+                   uint32_t* output_id, bool keep_dims);
 
 }  // namespace ynn
 

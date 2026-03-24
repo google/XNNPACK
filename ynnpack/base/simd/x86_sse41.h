@@ -12,6 +12,7 @@
 #include "ynnpack/base/simd/vec.h"
 #include "ynnpack/base/simd/x86_sse2_base.h"  // IWYU pragma: export
 #include "ynnpack/base/simd/x86_sse2_partial_load_store.h"  // IWYU pragma: export
+#include "ynnpack/base/simd/x86_sse2_saturate_cast.h"  // IWYU pragma: export
 #include "ynnpack/base/simd/x86_sse41_base.h"  // IWYU pragma: export
 
 namespace ynn {
@@ -20,7 +21,7 @@ namespace simd {
 
 using s32x16 = vec<int32_t, 16>;
 
-YNN_ALWAYS_INLINE s32x16 convert(s8x16 a, int32_t) {
+YNN_ALWAYS_INLINE s32x16 cast(s8x16 a, int32_t) {
   return {
       {s32x4{_mm_cvtepi8_epi32(a.v)},
        s32x4{_mm_cvtepi8_epi32(_mm_srli_si128(a.v, 4))}},
@@ -29,7 +30,7 @@ YNN_ALWAYS_INLINE s32x16 convert(s8x16 a, int32_t) {
   };
 }
 
-YNN_ALWAYS_INLINE s32x16 convert(u8x16 a, int32_t) {
+YNN_ALWAYS_INLINE s32x16 cast(u8x16 a, int32_t) {
   return {
       {s32x4{_mm_cvtepu8_epi32(a.v)},
        s32x4{_mm_cvtepu8_epi32(_mm_srli_si128(a.v, 4))}},

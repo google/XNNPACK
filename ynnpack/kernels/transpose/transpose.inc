@@ -59,6 +59,7 @@ YNN_TRANSPOSE_KERNEL(arch_flag::hvx, transpose_x256_hvx, 256)
 // YNN_TRANSPOSE_KERNEL(arch_flag::hvx, transpose_x1024_hvx, 1024)
 #endif  // YNN_ARCH_HEXAGON_HVX
 
+YNN_TRANSPOSE_KERNEL(arch_flag::none, transpose_x2, 2)
 YNN_TRANSPOSE_KERNEL(arch_flag::none, transpose_x4, 4)
 YNN_TRANSPOSE_KERNEL(arch_flag::none, transpose_x8, 8)
 YNN_TRANSPOSE_KERNEL(arch_flag::none, transpose_x16, 16)

@@ -3,7 +3,6 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include <algorithm>
 #include <cassert>
 #include <cstddef>
 #include <cstdint>
@@ -11,6 +10,7 @@
 #include <utility>
 #include <vector>
 
+#include "ynnpack/base/log.h"
 #include "ynnpack/include/ynnpack.h"
 #include "ynnpack/subgraph/runtime.h"
 #include "ynnpack/subgraph/slinky.h"
@@ -26,20 +26,28 @@ ynn_status ynn_define_stack(ynn_subgraph_t subgraph, int32_t axis,
                             size_t num_inputs, const uint32_t* input_ids,
                             uint32_t* output_id, uint32_t flags) {
   // Validate arguments.
-  assert(subgraph);
-  assert(input_ids);
-  assert(output_id);
-  assert(subgraph->is_valid_value(input_ids[0]));
+  YNN_RETURN_IF_ERROR(validate_subgraph("stack", subgraph));
+  YNN_RETURN_IF_ERROR(validate_input_tensor_array(
+      "stack", subgraph, "input_ids", num_inputs, input_ids));
+  YNN_RETURN_IF_ERROR(
+      validate_output_tensor("stack", subgraph, "output_id", output_id));
+
   const ynn_value& input0 = subgraph->value(input_ids[0]);
+  YNN_RETURN_IF_ERROR(validate_rank("stack", "output", input0.rank() + 1));
+  YNN_RETURN_IF_ERROR(
+      validate_axis("stack", "output", input0.rank() + 1, axis));
   axis = axis_to_slinky_dim(input0.rank() + 1, axis);
 
   // Make the output and node.
   ynn_node node;
 
   for (int i = 1; i < num_inputs; ++i) {
-    assert(subgraph->is_valid_value(input_ids[i]));
     const ynn_value& input_i = subgraph->value(input_ids[i]);
-    assert(input0.rank() == input_i.rank());
+    if (input0.rank() != input_i.rank()) {
+      YNN_LOG_ERROR() << "For node `stack`, rank mismatch for input " << i
+                      << " of stack";
+      return ynn_status_invalid_parameter;
+    }
     for (int d = 0; d < input0.rank(); ++d) {
       node.checks.push_back(
           {input_i.extents[d] == input0.extents[d],

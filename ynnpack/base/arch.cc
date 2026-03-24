@@ -8,6 +8,8 @@
 #include <cstddef>
 #include <cstdint>
 
+#include "ynnpack/base/base.h"
+
 #ifdef YNN_ENABLE_CPUINFO
 #include "ynnpack/base/log.h"
 #include <cpuinfo.h>
@@ -76,9 +78,12 @@ uint64_t get_supported_arch_flags() {
     if (cpuinfo_has_arm_neon_fp16_arith()) result |= arch_flag::neonfp16arith;
     if (cpuinfo_has_arm_neon_bf16()) result |= arch_flag::neonbf16;
     if (cpuinfo_has_arm_i8mm()) result |= arch_flag::neoni8mm;
+#if !YNN_COMPILER_HAS_FEATURE(memory_sanitizer)
+    // msan (understandably) does not support SVE/SME (b/494230133).
     if (cpuinfo_has_arm_sme()) result |= arch_flag::sme;
     if (cpuinfo_has_arm_sme2()) result |= arch_flag::sme2;
     if (cpuinfo_has_arm_sve()) result |= arch_flag::sve;
+#endif  //  YNN_COMPILER_HAS_FEATURE(memory_sanitizer)
 #endif  // YNN_ARCH_ARM
 #endif  // YNN_ENABLE_CPUINFO
 #ifdef YNN_ARCH_HEXAGON

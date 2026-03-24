@@ -84,6 +84,7 @@ cc_library(
         "bit_cast.h",
         "fp16.h",
         "half.h",
+        "span.h",
         "to_string.h",
         "type.h",
     ],
@@ -117,6 +118,7 @@ cc_library(
     deps = [
         ":log",
         "//ynnpack:ynnpack_h",
+        "@slinky//slinky/base",
     ] + select({
         "//ynnpack:ynn_enable_cpuinfo": ["@cpuinfo"],
         "//conditions:default": [],

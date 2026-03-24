@@ -23,11 +23,10 @@ class Type:
     return hash((self.type_class, self.size, self.lanes))
 
   def __eq__(self, other):
-    return (self.type_class, self.size, self.lanes) == (
+    return (self.type_class, self.size) == (
         other.type_class,
         other.size,
-        other.lanes,
-    )
+    ) and ((self.lanes == other.lanes) or other.lanes == 0 or self.lanes == 0)
 
   def is_int(self):
     return self.type_class == "int"
@@ -70,10 +69,18 @@ class Type:
     if self.size == 0:
       result += "ssize_t" if self.is_int() else "size_t"
     else:
-      result += self.type_class + str(self.size)
+      if self.type_class == "float" and self.size == 16:
+        result += "half"
+      elif self.type_class == "float" and self.size == 32:
+        result += "float"
+      elif self.type_class == "bfloat" and self.size == 16:
+        result += "bfloat16"
+      else:
+        result += self.type_class + str(self.size)
       if self.lanes > 1:
         result += "x" + str(self.lanes)
-      result += "_t"
+      if self.is_int() or self.is_uint() or self.lanes > 1:
+        result += "_t"
     while indirection > 0:
       result += "*"
       indirection -= 1
@@ -488,15 +495,15 @@ def widening_mul(x, y):
 
 # Computes saturating_narrow(widen(x) + widen(y))
 @intrinsic
-def saturating_add(x, y):
+def add_sat(x, y):
   assert x.ty == y.ty
-  return Op(x.ty, "saturating_add", [x, y])
+  return Op(x.ty, "add_sat", [x, y])
 
 
 @intrinsic
-def saturating_sub(x, y):
+def sub_sat(x, y):
   assert x.ty == y.ty
-  return Op(x.ty, "saturating_sub", [x, y])
+  return Op(x.ty, "sub_sat", [x, y])
 
 
 # Computes x * y + z
@@ -571,6 +578,13 @@ def select(cond, x, y):
   return Op(x.ty, "select", [cond, x, y])
 
 
+@intrinsic
+def select_greater_than(a, b, x, y):
+  assert x.ty == y.ty
+  a_pr, b_pr = promote_types(a, b)
+  return Op(x.ty, "select_greater_than", [a_pr, b_pr, x, y])
+
+
 # We assume that cond produces a mask.
 def lower_select(cond, x, y):
   if x.ty.is_float():
@@ -599,10 +613,6 @@ def lower_widening_sub(x, y):
 
 def lower_widening_mul(x, y):
   return widen(x) * widen(y)
-
-
-def lower_saturating_add(x, y):
-  return saturating_narrow(widen(x) + widen(y))
 
 
 def lower_multiply_add(x, y, z):
@@ -648,7 +658,6 @@ def slice_vector(arg, index, total):
 lowering_funcs = {
     "widening_sub": lower_widening_sub,
     "widening_mul": lower_widening_mul,
-    "saturating_add": lower_saturating_add,
     "select_bits": lower_select_bits,
     "select": lower_select,
     "multiply_add": lower_multiply_add,
@@ -736,6 +745,8 @@ header = """
 #include <cstring>
 #include <cstdio>
 
+#include "ynnpack/base/simd/vec.h"
+
 #if !defined(__has_attribute)
 #define YNN_COMPILER_HAS_ATTRIBUTE(x) 0
 #else
@@ -760,17 +771,6 @@ header = """
 
 namespace ynn {
 namespace {
-
-template <typename T>
-YNN_INTRINSIC T* offset_bytes(T* ptr, std::ptrdiff_t offset) {
-  return reinterpret_cast<T*>(reinterpret_cast<uint8_t*>(ptr) + offset);
-}
-
-template <typename T>
-YNN_INTRINSIC const T* offset_bytes(const T* ptr, std::ptrdiff_t offset) {
-  return reinterpret_cast<const T*>(reinterpret_cast<const uint8_t*>(ptr) +
-                                    offset);
-}
 
 YNN_INTRINSIC std::size_t min(std::size_t a, std::size_t b) {
   return a < b ? a : b;
@@ -804,6 +804,22 @@ YNN_INTRINSIC T mul(T a, T b) {
 template <typename T>
 YNN_INTRINSIC T truediv(T a, T b) {
     return a / b;
+}
+
+template <typename T>
+YNN_INTRINSIC T select_greater_than(T a, T b, T c, T d) {
+    return a > b ? c : d;
+}
+
+template <typename T>
+YNN_INTRINSIC simd::vec<T, 1> select_greater_than(simd::vec<T, 1> a, simd::vec<T, 1> b, simd::vec<T, 1> c, simd::vec<T, 1> d) {
+    return a.v > b.v ? c : d;
+}
+
+template <typename T, size_t N>
+YNN_INTRINSIC simd::vec<T, N> select_greater_than(simd::vec<T, N> a, simd::vec<T, N> b, simd::vec<T, N> c, simd::vec<T, N> d) {
+    return simd::vec<T, N>(select_greater_than(a.lo(), b.lo(), c.lo(), d.lo()),
+                           select_greater_than(a.hi(), b.hi(), c.hi(), d.hi()));
 }
 
 } // namespace
@@ -918,7 +934,7 @@ def rewrite(pattern, replacement, expr):
   matches = []
   matched = match(pattern, expr, matches)
   if matched:
-    return Op(replacement.ty, replacement.name, matches)
+    return Op(expr.ty, replacement.name, matches)
   else:
     return None
 
@@ -944,17 +960,6 @@ class Target:
   def __init__(self):
     self.indent_level = 0
     self.patterns = []
-    self.types = {
-        Int(8, 1): "int8_t",
-        Int(16, 1): "int16_t",
-        Int(32, 1): "int32_t",
-        UInt(8, 1): "uint8_t",
-        UInt(16, 1): "uint16_t",
-        UInt(32, 1): "uint32_t",
-        Float(16, 1): "half",
-        Float(32, 1): "float",
-        BFloat(16, 1): "bfloat16",
-    }
     self.features = []
     self.vector_bits = 0
     self.tail_strategy = TailStrategy.SCALAR
@@ -972,27 +977,30 @@ class Target:
         "sqrt",
         "reinterpret_cast",
         "cast",
+        "add_sat",
+        "sub_sat",
+        "saturating_cast",
+        "saturating_rounding_cast",
+        "fma",
+        "select_greater_than",
     }
     self.infix_ops = {
         "add": "+",
         "sub": "-",
         "mul": "*",
+        "truediv": "/",
         "bitwise_and": "&",
         "bitwise_or": "|",
         "bitwise_xor": "^",
+        "logical_shift_left": "<<",
     }
 
   def indent(self):
     return "  " * self.indent_level
 
   def get_natural_lanes_num(self, ty):
-    """Returns a number of lanes of the widest type registered in target's types list which also matches class and size of the type."""
-    lanes = 1
-    for t in self.types:
-      if t.type_class == ty.type_class and t.size == ty.size:
-        lanes = builtins.max(lanes, t.lanes)
-
-    return lanes
+    """Returns a number of lanes in the native vector type."""
+    return self.vector_bits // ty.size
 
   def as_buffer(self, arg, buffers):
     b = None
@@ -1021,8 +1029,11 @@ class Target:
       return ""
     return ".v"
 
-  def legalize_type(self, ty, is_const=True):
-    return self.types.get(ty, ty.to_c_decl(is_const))
+  def legalize_type(self, ty, is_const=False):
+    if ty.lanes == 1:
+      return ty.to_c_decl(is_const)
+    else:
+      return f"simd::vec<{ty.scalar().to_c_decl(is_const)}, {ty.lanes}>"
 
   def legalize_op(self, op):
     """Legalizes an operator."""
@@ -1036,8 +1047,10 @@ class Target:
           f"bit_cast<{self.legalize_type(op.ty)},"
           f" {self.legalize_type(op.args[0].ty)}>"
       )
-    elif op.name == "cast":
-      return "convert"
+    elif op.name == "saturating_cast":
+      return "simd::saturate_cast"
+    elif op.name == "saturating_rounding_cast":
+      return "round_float_to_int"
     elif op.name == "min" or op.name == "max":
       return f"simd::{op.name}"
     return op.name
@@ -1066,100 +1079,6 @@ class Target:
 
     cache[expr] = v
     return v
-
-  def slice_wide_types(self, expr, cache):
-    """Recursively iterate over the expression and slice it into chunks matching the target platform vector size."""
-    if expr in cache:
-      return cache[expr]
-
-    if isinstance(expr, Var) or isinstance(expr, Constant):
-      v = expr
-    else:
-      natural_lanes = self.get_natural_lanes_num(expr.ty)
-      # If the number of lanes is less than what hardware vector has there is
-      # nothing to slice.
-      slices_num = builtins.max(expr.ty.lanes // natural_lanes, 1)
-
-      args = []
-      if not isinstance(expr, Load):
-        for arg in expr.args:
-          if isinstance(arg, Op) and arg.name == "broadcast":
-            args.append(arg)
-          else:
-            args.append(self.slice_wide_types(arg, cache))
-
-      if slices_num != 1:
-        op_slices = []
-        if isinstance(expr, Load):
-          for slice_index in range(slices_num):
-            op_slices.append(
-                Load(
-                    expr.ty.with_lanes(natural_lanes),
-                    expr.index,
-                    expr.offset_elements + natural_lanes * slice_index,
-                )
-            )
-        else:
-          for slice_index in range(slices_num):
-            op_slices.append(
-                Op(
-                    expr.ty.with_lanes(natural_lanes),
-                    expr.name,
-                    [
-                        slice_vector(arg, slice_index, slices_num)
-                        for arg in args
-                    ],
-                )
-            )
-
-        v = combine_vectors(op_slices)
-      else:
-        if isinstance(expr, Load):
-          v = expr
-        else:
-          v = Op(
-              expr.ty,
-              expr.name,
-              args,
-          )
-
-    cache[expr] = v
-    return v
-
-  def optimize_slices(self, expr, cache):
-    """Recursively iterate over the expression and optimize slices/combines."""
-    if expr in cache:
-      return cache[expr]
-
-    if isinstance(expr, Op):
-      args = [self.optimize_slices(arg, cache) for arg in expr.args]
-      if expr.name == "slice":
-        if isinstance(args[0], Op) and args[0].name == "combine":
-          comb = args[0]
-          slice_index = args[1].value
-          total_slices = args[2].value
-          if len(comb.args) == total_slices:
-            mutated = comb.args[slice_index]
-            cache[expr] = mutated
-            return mutated
-          elif len(comb.args) % total_slices == 0:
-            num = len(comb.args) // total_slices
-            mutated = combine_vectors(
-                comb.args[slice_index * num : (slice_index + 1) * num]
-            )
-            cache[expr] = mutated
-            return mutated
-
-        elif isinstance(args[0], Op) and args[0].name == "broadcast":
-          bc = args[0]
-          mutated = broadcast(bc.args[0], expr.ty.lanes)
-          cache[expr] = mutated
-          return mutated
-      mutated = Op(expr.ty, expr.name, args)
-      cache[expr] = mutated
-      return mutated
-    else:
-      return expr
 
   def pattern_match(self, expr, cache):
     """Recursively iterate over the expression and try to find patterns to replace."""
@@ -1280,6 +1199,7 @@ class Target:
       increment,
       emit_loop,
       buffers,
+      lanes,
       prefix_before,
       prefix_after,
   ):
@@ -1325,9 +1245,8 @@ class Target:
               f" stride_{b.name}_m;\n"
           )
 
-        broadcast_lanes = self.vector_bits // b.ty.size
         broadcast_op = self.pattern_match(
-            broadcast(Var(b.name, b.ty.with_lanes(1)), broadcast_lanes),
+            broadcast(Var(b.name, b.ty.with_lanes(1)), lanes),
             {},
         )
         self.result += (
@@ -1348,7 +1267,7 @@ class Target:
         for i in range(increment):
           self.result += (
               f"{self.indent()}{b.name}_broadcasted[{i}] ="
-              f" {self.legalize_op(broadcast_op)}(((const"
+              f" {self.legalize_op(broadcast_op)}((("
               f" {self.legalize_type(b.ty, True)}*)offset_bytes({prefix_after}{b.name},"
               f" min({i}, m - i - 1) * stride_{b.name}_m))[0]);\n"
           )
@@ -1488,7 +1407,11 @@ class Target:
     elif op.name in self.infix_ops:
       pass
     else:
-      if op.name == "cast":
+      if (
+          op.name == "cast"
+          or op.name == "saturating_cast"
+          or op.name == "saturating_rounding_cast"
+      ):
         str_args.append(f"{self.legalize_type(op.ty.scalar())}{{}}")
       mem_op = self.legalize_op(op)
 
@@ -1554,6 +1477,7 @@ class Target:
           tile_height if not is_rem_height else 1,
           True,
           buffers,
+          natural_lanes,
           "base_",
           "",
       )
@@ -1573,6 +1497,7 @@ class Target:
             step,
             emit_loop,
             buffers,
+            natural_lanes,
             "",
             "",
         )
@@ -1681,8 +1606,6 @@ class Target:
 
     natural_lanes = self.get_natural_lanes_num(func.value.ty)
     ast = self.vectorize(ast, natural_lanes, {})
-    ast = self.slice_wide_types(ast, {})
-    ast = self.optimize_slices(ast, {})
     ast = self.pattern_match(ast, {})
 
     constants = {}

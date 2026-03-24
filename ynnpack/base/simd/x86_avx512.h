@@ -203,6 +203,7 @@ using u16x32 = vec<uint16_t, 32>;
 using s16x32 = vec<int16_t, 32>;
 using u8x64 = vec<uint8_t, 64>;
 using s8x64 = vec<int8_t, 64>;
+using f32x64 = vec<float, 64>;
 
 YNN_ALWAYS_INLINE f32x16 load_aligned(const float* ptr, decltype(f32x16::N),
                                       f32x16 = {}) {
@@ -649,9 +650,39 @@ YNN_ALWAYS_INLINE u8x64 operator-(u8x64 a, u8x64 b) {
   return u8x64{_mm512_sub_epi8(a.v, b.v)};
 }
 
+YNN_ALWAYS_INLINE s16x32 add_sat(s16x32 a, s16x32 b) {
+  return s16x32{_mm512_adds_epi16(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE u16x32 add_sat(u16x32 a, u16x32 b) {
+  return u16x32{_mm512_adds_epu16(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE s8x64 add_sat(s8x64 a, s8x64 b) {
+  return s8x64{_mm512_adds_epi8(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE u8x64 add_sat(u8x64 a, u8x64 b) {
+  return u8x64{_mm512_adds_epu8(a.v, b.v)};
+}
+
+YNN_ALWAYS_INLINE s16x32 sub_sat(s16x32 a, s16x32 b) {
+  return s16x32{_mm512_subs_epi16(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE u16x32 sub_sat(u16x32 a, u16x32 b) {
+  return u16x32{_mm512_subs_epu16(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE s8x64 sub_sat(s8x64 a, s8x64 b) {
+  return s8x64{_mm512_subs_epi8(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE u8x64 sub_sat(u8x64 a, u8x64 b) {
+  return u8x64{_mm512_subs_epu8(a.v, b.v)};
+}
+
 YNN_ALWAYS_INLINE f32x16 operator*(f32x16 a, f32x16 b) {
   return f32x16{_mm512_mul_ps(a.v, b.v)};
 }
+YNN_ALWAYS_INLINE f32x16 operator/(f32x16 a, f32x16 b) {
+  return f32x16{_mm512_div_ps(a.v, b.v)};
+}
+
 YNN_ALWAYS_INLINE s32x16 operator*(s32x16 a, s32x16 b) {
   return s32x16{_mm512_mullo_epi32(a.v, b.v)};
 }
@@ -674,7 +705,9 @@ YNN_ALWAYS_INLINE s16x32 operator&(s16x32 a, int b) {
 YNN_ALWAYS_INLINE s16x32 operator>>(s16x32 a, int b) {
   return s16x32{_mm512_srai_epi16(a.v, b)};
 }
-
+YNN_ALWAYS_INLINE s16x32 operator<<(s16x32 a, int b) {
+  return s16x32{_mm512_slli_epi16(a.v, b)};
+}
 YNN_ALWAYS_INLINE s32x16 operator&(s32x16 a, s32x16 b) {
   return s32x16{_mm512_and_si512(a.v, b.v)};
 }
@@ -686,6 +719,9 @@ YNN_ALWAYS_INLINE s32x16 operator^(s32x16 a, s32x16 b) {
 }
 YNN_ALWAYS_INLINE s32x16 operator~(s32x16 a) {
   return s32x16{_mm512_xor_si512(a.v, _mm512_set1_epi32(-1))};
+}
+YNN_ALWAYS_INLINE s32x16 operator<<(s32x16 a, int b) {
+  return s32x16{_mm512_slli_epi32(a.v, b)};
 }
 
 YNN_ALWAYS_INLINE u8x64 operator&(u8x64 a, u8x64 b) {
@@ -839,35 +875,100 @@ using s16x64 = vec<int16_t, 64>;
 using s32x32 = vec<int32_t, 32>;
 using s32x64 = vec<int32_t, 64>;
 
-YNN_ALWAYS_INLINE f32x16 convert(f16x16 x, float) {
+YNN_ALWAYS_INLINE f32x16 cast(f16x16 x, float) {
   return f32x16{_mm512_cvtph_ps(x.v)};
 }
 
-YNN_ALWAYS_INLINE f32x16 convert(bf16x16 a, float) {
+YNN_ALWAYS_INLINE f32x16 cast(bf16x16 a, float) {
   return f32x16{_mm512_castsi512_ps(_mm512_slli_epi32(
       _mm512_cvtepu16_epi32(a.v), 16))};
 }
 
-YNN_ALWAYS_INLINE s32x16 convert(s8x16 a, int32_t) {
+YNN_ALWAYS_INLINE bf16x32 cast(f32x32 a, bfloat16) {
+  return bf16x32{(__m512i)_mm512_cvtne2ps_pbh(a.hi().v, a.lo().v)};
+}
+
+YNN_ALWAYS_INLINE s32x16 cast(s8x16 a, int32_t) {
   return s32x16{_mm512_cvtepi8_epi32(a.v)};
 }
-YNN_ALWAYS_INLINE s32x16 convert(u8x16 a, int32_t) {
+YNN_ALWAYS_INLINE s32x16 cast(u8x16 a, int32_t) {
   return s32x16{_mm512_cvtepu8_epi32(a.v)};
 }
 
-YNN_ALWAYS_INLINE s16x32 convert(s8x32 a, int16_t) {
+YNN_ALWAYS_INLINE s16x32 cast(s8x32 a, int16_t) {
   return s16x32{_mm512_cvtepi8_epi16(a.v)};
 }
-YNN_ALWAYS_INLINE s16x32 convert(u8x32 a, int16_t) {
+YNN_ALWAYS_INLINE s16x32 cast(u8x32 a, int16_t) {
   return s16x32{_mm512_cvtepu8_epi16(a.v)};
 }
 
-YNN_ALWAYS_INLINE f32x16 convert(s32x16 x, float) {
+YNN_ALWAYS_INLINE f32x16 cast(s32x16 x, float) {
   return f32x16{_mm512_cvtepi32_ps(x.v)};
 }
 
-YNN_ALWAYS_INLINE s32x16 convert(f32x16 x, int32_t) {
+YNN_ALWAYS_INLINE s32x16 cast(f32x16 x, int32_t) {
   return s32x16{_mm512_cvttps_epi32(x.v)};
+}
+
+YNN_ALWAYS_INLINE s16x32 saturate_cast(s32x32 a, int16_t) {
+  const __m512i r = _mm512_packs_epi32(a.lo().v, a.hi().v);
+  return s16x32{
+      _mm512_permutexvar_epi64(_mm512_setr_epi64(0, 2, 4, 6, 1, 3, 5, 7), r)};
+}
+
+YNN_ALWAYS_INLINE s8x64 saturate_cast(s16x64 a, int8_t) {
+  const __m512i r = _mm512_packs_epi16(a.lo().v, a.hi().v);
+  return s8x64{
+      _mm512_permutexvar_epi64(_mm512_setr_epi64(0, 2, 4, 6, 1, 3, 5, 7), r)};
+}
+
+YNN_ALWAYS_INLINE u8x64 saturate_cast(s16x64 a, uint8_t) {
+  const __m512i r = _mm512_packus_epi16(a.lo().v, a.hi().v);
+  return u8x64{
+      _mm512_permutexvar_epi64(_mm512_setr_epi64(0, 2, 4, 6, 1, 3, 5, 7), r)};
+}
+
+YNN_ALWAYS_INLINE s16x32 round_float_to_int(f32x32 f, int16_t) {
+  const __m512 max_int16 = _mm512_set1_ps((1 << 15) - 1);
+  const __m512i i0 = _mm512_cvtps_epi32(_mm512_min_ps(f.lo().v, max_int16));
+  const __m512i i1 = _mm512_cvtps_epi32(_mm512_min_ps(f.hi().v, max_int16));
+  return saturate_cast(s32x32(s32x16(i0), s32x16(i1)), int16_t());
+}
+
+YNN_ALWAYS_INLINE u8x64 round_float_to_int(f32x64 f, uint8_t) {
+  const __m512 max_uint16 = _mm512_set1_ps((1 << 16) - 1);
+  const __m512i i0 =
+      _mm512_cvtps_epi32(_mm512_min_ps(f.lo().lo().v, max_uint16));
+  const __m512i i1 =
+      _mm512_cvtps_epi32(_mm512_min_ps(f.lo().hi().v, max_uint16));
+  const __m512i i2 =
+      _mm512_cvtps_epi32(_mm512_min_ps(f.hi().lo().v, max_uint16));
+  const __m512i i3 =
+      _mm512_cvtps_epi32(_mm512_min_ps(f.hi().hi().v, max_uint16));
+  const __m512i i01_16 = _mm512_packs_epi32(i0, i1);
+  const __m512i i23_16 = _mm512_packs_epi32(i2, i3);
+  const __m512i r = _mm512_packus_epi16(i01_16, i23_16);
+  const __m512i idx =
+      _mm512_setr_epi32(0, 4, 8, 12, 1, 5, 9, 13, 2, 6, 10, 14, 3, 7, 11, 15);
+  return u8x64{_mm512_permutexvar_epi32(idx, r)};
+}
+
+YNN_ALWAYS_INLINE s8x64 round_float_to_int(f32x64 f, int8_t) {
+  const __m512 max_int16 = _mm512_set1_ps((1 << 15) - 1);
+  const __m512i i0 =
+      _mm512_cvtps_epi32(_mm512_min_ps(f.lo().lo().v, max_int16));
+  const __m512i i1 =
+      _mm512_cvtps_epi32(_mm512_min_ps(f.lo().hi().v, max_int16));
+  const __m512i i2 =
+      _mm512_cvtps_epi32(_mm512_min_ps(f.hi().lo().v, max_int16));
+  const __m512i i3 =
+      _mm512_cvtps_epi32(_mm512_min_ps(f.hi().hi().v, max_int16));
+  const __m512i i01_16 = _mm512_packs_epi32(i0, i1);
+  const __m512i i23_16 = _mm512_packs_epi32(i2, i3);
+  const __m512i r = _mm512_packs_epi16(i01_16, i23_16);
+  const __m512i idx =
+      _mm512_setr_epi32(0, 4, 8, 12, 1, 5, 9, 13, 2, 6, 10, 14, 3, 7, 11, 15);
+  return s8x64{_mm512_permutexvar_epi32(idx, r)};
 }
 
 }  // namespace simd

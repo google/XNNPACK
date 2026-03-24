@@ -67,19 +67,13 @@ __m128i c_{i+3}_{j} = _mm512_extracti32x4_epi32(c16_{i}_{j}, 3);
 """
 
   def load_a_tile(self, i, k):
-    return (
-        f"__m512i a_{i}_{k} ="
-        f" _mm512_broadcast_i32x4(_mm_loadu_si128({self.a_ptr(i, k, '__m128i')}));\n"
-    )
+    a_x16 = f"_mm_loadu_si128({self.a_ptr(i, k, '__m128i')})"
+    return f"__m512i a_{i}_{k} = _mm512_broadcast_i32x4({a_x16});\n"
 
   def load_b_tile(self, k, j):
-    return (
-        f"__m512i b_{k}_{j} ="
-        f" _mm512_load_si512({self.b_ptr(k, j, '__m512i')});\n"
-    )
+    b_ptr = self.b_ptr(k, j, "__m512i")
+    return f"__m512i b_{k}_{j} = _mm512_load_si512({b_ptr});\n"
 
   def product(self, i, j, k):
-    return (
-        f"c16_{i}_{j} = _mm512_dpbusd_epi32(c16_{i}_{j}, a_{i}_{k},"
-        f" b_{k}_{j});\n"
-    )
+    c_ij = f"c16_{i}_{j}"
+    return f"{c_ij} = _mm512_dpbusd_epi32({c_ij}, a_{i}_{k}, b_{k}_{j});\n"

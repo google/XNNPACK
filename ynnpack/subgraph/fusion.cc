@@ -498,7 +498,7 @@ bool rewrite_reduce_sum_of_squared(ynn_subgraph& subgraph, ynn_node& node,
 
   YNN_LOG_DEBUG() << "Rewriting reduce_sum(x*x) to reduce_sum_squared(x)";
   ynn::define_reduce(subgraph, node, ynn_reduce_sum_squared, reduce_op->k_dims,
-                     node.inputs[0], node.inputs[1], node.outputs[0],
+                     node.inputs[0], node.inputs[1], &node.outputs[0],
                      reduce_op->keep_dims);
 
   return true;
@@ -542,7 +542,7 @@ bool rewrite_reduce_sum_convert(ynn_subgraph& subgraph, ynn_node& node,
 
   YNN_LOG_DEBUG() << "Rewriting reduce_sum(convert(x)) to reduce_sum(x)";
   ynn::define_reduce(subgraph, node, ynn_reduce_sum, reduce_op->k_dims, x.id,
-                     node.inputs[1], node.outputs[0], reduce_op->keep_dims);
+                     node.inputs[1], &node.outputs[0], reduce_op->keep_dims);
   return true;
 }
 
@@ -585,7 +585,7 @@ bool rewrite_reduce_sum_squared_convert(ynn_subgraph& subgraph, ynn_node& node,
   YNN_LOG_DEBUG() << "Rewriting reduce_sum_squared(convert(x)) to "
                      "reduce_sum_squared(x)";
   ynn::define_reduce(subgraph, node, ynn_reduce_sum_squared, reduce_op->k_dims,
-                     x.id, node.inputs[1], node.outputs[0],
+                     x.id, node.inputs[1], &node.outputs[0],
                      reduce_op->keep_dims);
   return true;
 }

@@ -163,7 +163,7 @@ xnn_init_f32_rndz_config();
 XNN_INTERNAL const struct xnn_unary_elementwise_config*
 xnn_init_f32_rsqrt_config(uint32_t flags);
 XNN_INTERNAL const struct xnn_unary_elementwise_config*
-xnn_init_f32_sigmoid_config();
+xnn_init_f32_sigmoid_config(uint32_t flags);
 XNN_INTERNAL const struct xnn_unary_elementwise_config*
 xnn_init_f32_sine_config(uint32_t flags);
 XNN_INTERNAL const struct xnn_unary_elementwise_config*

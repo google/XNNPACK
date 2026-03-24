@@ -329,7 +329,37 @@ jobs:
   gn-linux-x86_64:
     runs-on: 'ubuntu-24.04-8core'
     timeout-minutes: 15
+    env:
+      CCACHE_SLOPPINESS: time_macros,modules
+      CCACHE_DIR: /home/runner/.cache/ccache
+      CCACHE_DEPEND: 1
+      CCACHE_MAX_SIZE: 5G
+      CCACHE_COMPILERCHECK: content
     steps:
+      - name: Restore gclient cache
+        id: cache-gclient-restore
+        uses: actions/cache@v5
+        with:
+          # Cache the Git repos
+          path: /home/runner/.cache/gclient
+          key: experimental-v2-gclient-linux-${{ github.ref_name }}-${{ github.sha }}
+          restore-keys: |
+            experimental-v2-gclient-linux-${{ github.ref_name }}-
+            experimental-v2-gclient-linux-master-
+            experimental-v2-gclient-linux-
+      - name: Restore ccache
+        id: cache-ccache-restore
+        uses: actions/cache@v5
+        with:
+          path: |
+            /home/runner/.cache/ccache
+          key: experimental-v2-ccache-linux-${{ github.ref_name }}-${{ github.sha }}
+          restore-keys: |
+            experimental-v2-ccache-linux-${{ github.ref_name }}-
+            experimental-v2-ccache-linux-master-
+      - name: Install ccache
+        run: |
+          sudo apt-get install -y ccache
       - name: Install Depot Tools
         uses: newkdev/setup-depot-tools@v1.0.1
       - name: Write .gclient
@@ -345,21 +375,24 @@ jobs:
             "custom_vars": {},
             },
           ]
+          cache_dir = r"/home/runner/.cache/gclient"
           EOF
       - name: Sync to commit and run hooks
-        run: gclient sync -vv --revision $GITHUB_SHA
+        run: gclient sync --reset --force --upstream --revision $GITHUB_SHA
       - name: Check formatting
         run: |
           git cl format --presubmit --no-clang-format --no-python --diff
         working-directory: ${{ github.workspace }}/xnnpack
       - name: Generate build files
         run: |
-          gn gen --check --args="is_debug=false dcheck_always_on=true xnnpack_enable_avx512=false target_cpu=\"x64\" use_siso=true" out/x64.dchecks
+          gn gen --check --args="is_debug=false clang_use_chrome_plugins=false dcheck_always_on=true cc_wrapper=\"ccache\" symbol_level=0 xnnpack_enable_avx512=false target_cpu=\"x64\" use_siso=true" out/x64.dchecks
         working-directory: ${{ github.workspace }}/xnnpack
       - name: Build all targets (Release + debug checks)
         run: |
           autoninja -C out/x64.dchecks
         working-directory: ${{ github.workspace }}/xnnpack
+      - name: Print ccache stats
+        run: ccache -s
       - name: Run tests
         run: |
           python3 scripts/run-gn-tests.py out/x64.dchecks
@@ -619,76 +652,73 @@ jobs:
           key: bazel-clang20-opt-sme2-${{ runner.os }}-${{ github.job }}-${{ github.run_id }}
           restore-keys: bazel-clang20-opt-sme2-${{ runner.os }}-${{ github.job }}-
 
-      #- name: Build microkernel and subgraph tests
-      #  if: ${{ !inputs.run-tests }}
-      #  run: |
-      #    bazel build \
-      #      -c opt \
-      #      --copt=-g1 \
-      #      --copt=-DGOOGLE_COMMANDLINEFLAGS_FULL_API=1 \
-      #      --platforms=//build_config:aarch64_linux \
-      #      --run_under="qemu-aarch64 ${QEMU_ARGS} " \
-      #      --define xnn_enable_arm_sme2=true \
-      #      --dynamic_mode=off \
-      #      --features=fully_static_link \
-      #      --disk_cache=/home/xnnpack/.cache/bazel/disk_cache \
-      #      --repository_cache=/home/xnnpack/.cache/bazel/repo_cache \
-      #      //test:qs8_qc8w_igemm_minmax_fp32_test \
-      #      //test:qp8_f32_qc4w_gemm_minmax_test \
-      #      //test:pf32_gemm_minmax_test \
-      #      //test:pf16_gemm_minmax_test \
-      #      //test:pqs8_qc8w_gemm_minmax_test \
-      #      //test/subgraph/... \
-      #      //ynnpack/...
-      #  working-directory: ${{ github.workspace }}
+      - name: Build microkernel and subgraph tests
+        if: ${{ !inputs.run-tests }}
+        run: |
+          bazel build \
+            -c opt \
+            --copt=-g1 \
+            --copt=-DGOOGLE_COMMANDLINEFLAGS_FULL_API=1 \
+            --platforms=//build_config:aarch64_linux \
+            --run_under="qemu-aarch64 ${QEMU_ARGS} " \
+            --define xnn_enable_arm_sme2=true \
+            --dynamic_mode=off \
+            --features=fully_static_link \
+            --disk_cache=/home/xnnpack/.cache/bazel/disk_cache \
+            //test:qs8_qc8w_igemm_minmax_fp32_test \
+            //test:qp8_f32_qc4w_gemm_minmax_test \
+            //test:pf32_gemm_minmax_test \
+            //test:pf16_gemm_minmax_test \
+            //test:pqs8_qc8w_gemm_minmax_test \
+            //test/subgraph/... \
+            //ynnpack/...
+        working-directory: ${{ github.workspace }}
 
-      #- name: Build and run microkernel tests
-      #  if: ${{ inputs.run-tests }}
-      #  run: |
-      #    bazel test \
-      #      -c opt \
-      #      --copt=-g1 \
-      #      --copt=-DGOOGLE_COMMANDLINEFLAGS_FULL_API=1 \
-      #      --platforms=//build_config:aarch64_linux \
-      #      --run_under="qemu-aarch64 ${QEMU_ARGS} " \
-      #      --define xnn_enable_arm_sme2=true \
-      #      --dynamic_mode=off \
-      #      --features=fully_static_link \
-      #      --disk_cache=/home/xnnpack/.cache/bazel/disk_cache \
-      #      --repository_cache=/home/xnnpack/.cache/bazel/repo_cache \
-      #      --test_tag_filters=-not_run:arm \
-      #      //test:qs8_qc8w_igemm_minmax_fp32_test \
-      #      //test:qp8_f32_qc4w_gemm_minmax_test \
-      #      //test:pf32_gemm_minmax_test \
-      #      //test:pf16_gemm_minmax_test \
-      #      //test:pqs8_qc8w_gemm_minmax_test \
-      #      --cache_test_results=no \
-      #      --test_filter="*NEONSME2*" \
-      #      --test_output=errors \
-      #      --test_timeout=600 \
-      #      --local_test_jobs=$(nproc)
+      - name: Build and run microkernel tests
+        if: ${{ inputs.run-tests }}
+        run: |
+          bazel test \
+            -c opt \
+            --copt=-g1 \
+            --copt=-DGOOGLE_COMMANDLINEFLAGS_FULL_API=1 \
+            --platforms=//build_config:aarch64_linux \
+            --run_under="qemu-aarch64 ${QEMU_ARGS} " \
+            --define xnn_enable_arm_sme2=true \
+            --dynamic_mode=off \
+            --features=fully_static_link \
+            --disk_cache=/home/xnnpack/.cache/bazel/disk_cache \
+            --test_tag_filters=-not_run:arm,-noemulator \
+            //test:qs8_qc8w_igemm_minmax_fp32_test \
+            //test:qp8_f32_qc4w_gemm_minmax_test \
+            //test:pf32_gemm_minmax_test \
+            //test:pf16_gemm_minmax_test \
+            //test:pqs8_qc8w_gemm_minmax_test \
+            --cache_test_results=no \
+            --test_filter="*NEONSME2*" \
+            --test_output=errors \
+            --test_timeout=600 \
+            --local_test_jobs=$(nproc)
 
-      #- name: Build and run subgraph tests
-      #  if: ${{ inputs.run-tests }}
-      #  run: |
-      #    bazel test \
-      #      -c opt \
-      #      --copt=-g1 \
-      #      --copt=-DGOOGLE_COMMANDLINEFLAGS_FULL_API=1 \
-      #      --platforms=//build_config:aarch64_linux \
-      #      --run_under="qemu-aarch64 ${QEMU_ARGS} " \
-      #      --define xnn_enable_arm_sme2=true \
-      #      --dynamic_mode=off \
-      #      --features=fully_static_link \
-      #      --disk_cache=/home/xnnpack/.cache/bazel/disk_cache \
-      #      --repository_cache=/home/xnnpack/.cache/bazel/repo_cache \
-      #      --test_tag_filters=-not_run:arm \
-      #      //test/subgraph/... \
-      #      //ynnpack/... \
-      #      --cache_test_results=no \
-      #      --test_output=errors \
-      #      --test_timeout=600 \
-      #      --local_test_jobs=$(nproc)
+      - name: Build and run subgraph tests
+        if: ${{ inputs.run-tests }}
+        run: |
+          bazel test \
+            -c opt \
+            --copt=-g1 \
+            --copt=-DGOOGLE_COMMANDLINEFLAGS_FULL_API=1 \
+            --platforms=//build_config:aarch64_linux \
+            --run_under="qemu-aarch64 ${QEMU_ARGS} " \
+            --define xnn_enable_arm_sme2=true \
+            --dynamic_mode=off \
+            --features=fully_static_link \
+            --disk_cache=/home/xnnpack/.cache/bazel/disk_cache \
+            --test_tag_filters=-not_run:arm,-noemulator \
+            //test/subgraph/... \
+            //ynnpack/... \
+            --cache_test_results=no \
+            --test_output=errors \
+            --test_timeout=600 \
+            --local_test_jobs=$(nproc)
 
       - name: Compress disk cache
         if: ${{ inputs.update-caches }}
