@@ -4,7 +4,7 @@
 from ynnpack.kernels.elementwise.compiler import *  # pylint: disable=wildcard-import
 
 
-def add_saturating_cast_rules(vector_bits):
+def add_saturating_cast_rules():
   """Adds saturating cast patterns."""
 
   vf32_a = f32_a.with_lanes(0)
@@ -27,7 +27,7 @@ def add_saturating_cast_rules(vector_bits):
               round(vf32_a),
           ),
           Op(
-              UInt(8, vector_bits // 8),
+              UInt(8, 0),
               "saturating_rounding_cast",
               [vf32_a],
           ),

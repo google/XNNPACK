@@ -5,15 +5,12 @@ from ynnpack.kernels.elementwise.common_rules import *  # pylint: disable=wildca
 from ynnpack.kernels.elementwise.compiler import *  # pylint: disable=wildcard-import
 
 
-def make_neon_cast_patterns(vector_bits):
+def make_neon_cast_patterns():
   """Adds NEON cast patterns."""
-  assert vector_bits == 128
-
-  return add_saturating_cast_rules(vector_bits)
+  return add_saturating_cast_rules()
 
 
-def make_neon_integer_patterns(vector_bits):
-  assert vector_bits == 128
+def make_neon_integer_patterns():
   return [
       Rule(
           logical_shift_left(i16_a.with_lanes(0), broadcast(i16_b, 0)),
@@ -26,8 +23,7 @@ def make_neon_integer_patterns(vector_bits):
   ]
 
 
-def make_neon_float32_patterns(vector_bits):
-  assert vector_bits == 128
+def make_neon_float32_patterns():
   return []
 
 
@@ -36,9 +32,9 @@ class ARM(Target):
 
   def update_for_neon(self):
     """Updates the target for NEON support."""
-    self.patterns += make_neon_float32_patterns(128)
-    self.patterns += make_neon_integer_patterns(128)
-    self.patterns += make_neon_cast_patterns(128)
+    self.patterns += make_neon_float32_patterns()
+    self.patterns += make_neon_integer_patterns()
+    self.patterns += make_neon_cast_patterns()
     self.header += """
 namespace ynn {
 namespace {
