@@ -35,3 +35,6 @@ XNN_UKERNEL(xnn_arch_none, xnn_u8_rmin_ukernel__wasmsimd_u32_acc2, 32, false, ui
 XNN_UKERNEL(xnn_arch_hvx, xnn_u8_rmin_ukernel__hvx_u256_acc2, 256, false, uint8_t, uint8_t, void*, NULL)
 #endif  // XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
 
+#if XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
+XNN_UKERNEL(xnn_arch_riscv_vector, xnn_u8_rmin_ukernel__rvv_u8v, 8, true, uint8_t, uint8_t, void*, NULL)
+#endif  // XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR

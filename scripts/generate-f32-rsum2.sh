@@ -12,4 +12,8 @@ tools/xngen src/f32-rsum2/simd.c.in -D ARCH=avx512f -D BATCH_TILES=16,32,48,64 -
 tools/xngen src/f32-rsum2/simd.c.in -D ARCH=wasmsimd -D BATCH_TILES=4,8,12,16 -o src/f32-rsum2/gen/f32-rsum2-wasmsimd-u4.c &
 tools/xngen src/f32-rsum2/simd.c.in -D ARCH=scalar -D BATCH_TILES=1,2,3,4 -o src/f32-rsum2/gen/f32-rsum2-scalar-u1.c &
 
+################################## RISC-V Vector ##############################
+tools/xngen src/f32-rsum2/rvv.c.in -D LMUL=4 -o src/f32-rsum2/gen/f32-rsum2-rvv-u4v.c &
+tools/xngen src/f32-rsum2/rvv.c.in -D LMUL=8 -o src/f32-rsum2/gen/f32-rsum2-rvv-u8v.c &
+
 wait

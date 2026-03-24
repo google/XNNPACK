@@ -60,6 +60,11 @@ XNN_UKERNEL(xnn_arch_none, xnn_f32_rsum2_ukernel__wasmsimd_u16_acc2, 16, false, 
 XNN_UKERNEL(xnn_arch_none, xnn_f32_rsum2_ukernel__wasmsimd_u16_acc4, 16, false, float, float, struct xnn_f32_scale_params, xnn_init_f32_scale_scalar_params)
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
+#if XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
+XNN_UKERNEL(xnn_arch_riscv_vector, xnn_f32_rsum2_ukernel__rvv_u4v, 4, true, float, float, struct xnn_f32_scale_params, xnn_init_f32_scale_scalar_params)
+XNN_UKERNEL(xnn_arch_riscv_vector, xnn_f32_rsum2_ukernel__rvv_u8v, 8, true, float, float, struct xnn_f32_scale_params, xnn_init_f32_scale_scalar_params)
+#endif  // XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
+
 XNN_UKERNEL(xnn_arch_none, xnn_f32_rsum2_ukernel__scalar_u1, 1, false, float, float, struct xnn_f32_scale_params, xnn_init_f32_scale_scalar_params)
 XNN_UKERNEL(xnn_arch_none, xnn_f32_rsum2_ukernel__scalar_u2, 2, false, float, float, struct xnn_f32_scale_params, xnn_init_f32_scale_scalar_params)
 XNN_UKERNEL(xnn_arch_none, xnn_f32_rsum2_ukernel__scalar_u2_acc2, 2, false, float, float, struct xnn_f32_scale_params, xnn_init_f32_scale_scalar_params)

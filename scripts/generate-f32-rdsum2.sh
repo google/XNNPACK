@@ -13,4 +13,8 @@ tools/xngen src/f32-rdsum2/simd.c.in -D ARCH=avx512f -D SIMD_SIZE=16 -D CHANNELS
 tools/xngen src/f32-rdsum2/simd.c.in -D ARCH=hvx -D SIMD_SIZE=32 -D CHANNELS=32,64,128 -D ACCUMULATORS=7 -o src/f32-rdsum2/gen/f32-rdsum2-7p7x-minmax-hvx.c &
 tools/xngen src/f32-rdsum2/simd.c.in -D ARCH=wasmsimd -D SIMD_SIZE=4 -D CHANNELS=16,32,64 -D ACCUMULATORS=7 -o src/f32-rdsum2/gen/f32-rdsum2-7p7x-minmax-wasmsimd.c &
 
+################################ RISC-V Vector ################################
+tools/xngen src/f32-rdsum2/rvv.c.in -D ACCUMULATORS=7 LMUL=4 -o src/f32-rdsum2/gen/f32-rdsum2-7p7x-minmax-rvv-u4v.c &
+tools/xngen src/f32-rdsum2/rvv.c.in -D ACCUMULATORS=7 LMUL=8 -o src/f32-rdsum2/gen/f32-rdsum2-7p7x-minmax-rvv-u8v.c &
+
 wait

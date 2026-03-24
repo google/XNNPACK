@@ -1,0 +1,77 @@
+// Copyright 2026 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert LMUL >= 1
+$assert OP in ["MAX", "MIN", "MINMAX"]
+$assert DATATYPE in ["S8", "U8"]
+#include <assert.h>
+#include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
+
+#include <riscv_vector.h>
+
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/reduce.h"
+
+$if DATATYPE == "S8":
+  $VTYPE = "vint8"
+  $VLOAD = "__riscv_vle8_v_i8"
+  $VMIN = "__riscv_vmin"
+  $VMAX = "__riscv_vmax"
+  $VREDMIN = "__riscv_vredmin"
+  $VREDMAX = "__riscv_vredmax"
+  $VMV = "__riscv_vmv_x_s_i8m1_i8"
+$elif DATATYPE == "U8":
+  $VTYPE = "vuint8"
+  $VLOAD = "__riscv_vle8_v_u8"
+  $VMIN = "__riscv_vminu"
+  $VMAX = "__riscv_vmaxu"
+  $VREDMIN = "__riscv_vredminu"
+  $VREDMAX = "__riscv_vredmaxu"
+  $VMV = "__riscv_vmv_x_s_u8m1_u8"
+
+$EMIT_MIN = "MIN" in OP
+$EMIT_MAX = "MAX" in OP
+$MAX_POS = 1 if OP == "MINMAX" else 0
+$XINT8_T = {"S8": "int8_t", "U8": "uint8_t"}[DATATYPE]
+void xnn_${DATATYPE.lower()}_r${OP.lower()}_ukernel__rvv_u${LMUL}v(
+    size_t batch,
+    const ${XINT8_T}* input,
+    ${XINT8_T}* output,
+    const void* params)
+{
+  assert(batch != 0);
+  assert(batch % sizeof(${XINT8_T}) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
+
+  size_t vlmax = __riscv_vsetvl_e8m${LMUL}(batch); batch -= vlmax;
+  $if EMIT_MIN:
+    ${VTYPE}m${LMUL}_t vmin = ${VLOAD}m${LMUL}(input, vlmax); input += vlmax;
+  $if EMIT_MAX:
+    $if MAX_POS == 1:
+      ${VTYPE}m${LMUL}_t vmax = vmin;
+    $else:
+      ${VTYPE}m${LMUL}_t vmax = ${VLOAD}m${LMUL}(input, vlmax); input += vlmax;
+
+  while (batch > 0) {
+    size_t vl = __riscv_vsetvl_e8m${LMUL}(batch); batch -= vl;
+    ${VTYPE}m${LMUL}_t vinput = ${VLOAD}m${LMUL}(input, vl); input += vl;
+    $if EMIT_MIN:
+      vmin = ${VMIN}(vmin, vinput, vl);
+    $if EMIT_MAX:
+      vmax = ${VMAX}(vmax, vinput, vl);
+  }
+
+  $if EMIT_MIN:
+    ${VTYPE}m1_t min = ${VLOAD}m1(output, 1);
+  $if EMIT_MAX:
+    ${VTYPE}m1_t max = ${VLOAD}m1(output + ${MAX_POS}, 1);
+  $if EMIT_MIN:
+    output[0] = ${VMV}(${VREDMIN}(vmin, min, vlmax));
+  $if EMIT_MAX:
+    output[${MAX_POS}] = ${VMV}(${VREDMAX}(vmax, max, vlmax));
+}

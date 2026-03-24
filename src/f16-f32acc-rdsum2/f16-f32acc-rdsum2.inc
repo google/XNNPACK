@@ -25,3 +25,7 @@ XNN_UKERNEL(xnn_arch_x86_avx512skx, xnn_f16_f32acc_rdsum2_ukernel_7p7x__avx512sk
 XNN_UKERNEL(xnn_arch_x86_avx512skx, xnn_f16_f32acc_rdsum2_ukernel_7p7x__avx512skx_u128, 7, 128, false, xnn_float16, float, struct xnn_f16_f32acc_scale_params, xnn_init_f16_f32acc_scale_scalar_params)
 #endif  // XNN_ENABLE_AVX512SKX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
+#if XNN_ENABLE_RISCV_FP16_VECTOR && XNN_ARCH_RISCV
+XNN_UKERNEL(xnn_arch_riscv_vector_fp16_arith, xnn_f16_f32acc_rdsum2_ukernel_7p7x__rvvfp16arith_u2v, 7, 2, true, xnn_float16, float, struct xnn_f16_f32acc_scale_params, xnn_init_f16_f32acc_scale_scalar_params)
+XNN_UKERNEL(xnn_arch_riscv_vector_fp16_arith, xnn_f16_f32acc_rdsum2_ukernel_7p7x__rvvfp16arith_u4v, 7, 4, true, xnn_float16, float, struct xnn_f16_f32acc_scale_params, xnn_init_f16_f32acc_scale_scalar_params)
+#endif  // XNN_ENABLE_RISCV_FP16_VECTOR && XNN_ARCH_RISCV

@@ -26,4 +26,8 @@ tools/xngen src/f16-f32acc-rsum/avx512skx.c.in -D BATCH_TILE=64  -D ACCUMULATORS
 tools/xngen src/f16-f32acc-rsum/avx512skx.c.in -D BATCH_TILE=64  -D ACCUMULATORS=4 -o src/f16-f32acc-rsum/gen/f16-f32acc-rsum-avx512skx-u64-acc4.c &
 tools/xngen src/f16-f32acc-rsum/avx512skx.c.in -D BATCH_TILE=128 -D ACCUMULATORS=4 -o src/f16-f32acc-rsum/gen/f16-f32acc-rsum-avx512skx-u128-acc4.c &
 
+################################## RISC-V Vector ##############################
+tools/xngen src/f16-f32acc-rsum/rvv.c.in -D LMUL=2 -o src/f16-f32acc-rsum/gen/f16-f32acc-rsum-rvvfp16arith-u2v.c &
+tools/xngen src/f16-f32acc-rsum/rvv.c.in -D LMUL=4 -o src/f16-f32acc-rsum/gen/f16-f32acc-rsum-rvvfp16arith-u4v.c &
+
 wait
