@@ -96,4 +96,32 @@ INSTANTIATE_TEST_SUITE_P(ConstantPad, ConstantPadF16, rank_params);
 INSTANTIATE_TEST_SUITE_P(ConstantPad, ConstantPadBF16, rank_params);
 INSTANTIATE_TEST_SUITE_P(ConstantPad, ConstantPadF32, rank_params);
 
+TEST(ConstantPadF32, zero_dim_input_rejected) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
+
+  xnn_subgraph_t subgraph = nullptr;
+  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(2, 0, &subgraph));
+
+  uint32_t input_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_tensor_value(subgraph, xnn_datatype_fp32, 0, nullptr,
+                                   nullptr, XNN_INVALID_VALUE_ID, 0,
+                                   &input_id));
+
+  uint32_t output_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_tensor_value(subgraph, xnn_datatype_fp32, 0, nullptr,
+                                   nullptr, XNN_INVALID_VALUE_ID, 0,
+                                   &output_id));
+
+  size_t pre_paddings[] = {0, 0, 0, 1};
+  size_t post_paddings[] = {0, 0, 0, 1};
+  ASSERT_NE(xnn_status_success,
+            xnn_define_static_constant_pad(subgraph, pre_paddings,
+                                           post_paddings, 0.0f, input_id,
+                                           output_id, 0));
+
+  xnn_delete_subgraph(subgraph);
+}
+
 }  // namespace xnnpack

@@ -208,6 +208,13 @@ enum xnn_status xnn_define_static_constant_pad(
     return xnn_status_invalid_parameter;
   }
 
+  if (input_value->shape.num_dims == 0) {
+    xnn_log_error(
+      "failed to define %s operator with input ID #%" PRIu32 ": number of dimensions must be non-zero",
+      xnn_node_type_to_string(xnn_node_type_static_constant_pad), input_id);
+    return xnn_status_invalid_parameter;
+  }
+
   status = xnn_subgraph_check_output_node_id(xnn_node_type_static_constant_pad, output_id, subgraph->num_values);
   if (status != xnn_status_success) {
     return status;
