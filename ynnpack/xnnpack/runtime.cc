@@ -5,6 +5,7 @@
 
 #include "ynnpack/subgraph/runtime.h"
 
+#include <atomic>
 #include <cassert>
 #include <cstddef>
 #include <cstdint>
@@ -17,7 +18,9 @@
 #include "ynnpack/xnnpack/utils.h"
 #include "ynnpack/xnnpack/xnnpack.h"
 #include <pthreadpool.h>
+#include "slinky/base/function_ref.h"
 #include "slinky/base/thread_pool.h"
+#include "slinky/base/thread_pool_impl.h"
 
 namespace {
 
@@ -32,6 +35,37 @@ void run_with_xnn_fpu_state(Fn fn) {
   pthreadpool_parallelize_1d(
       nullptr, [fn = std::move(fn)](int) { fn(); }, 1,
       PTHREADPOOL_FLAG_DISABLE_DENORMALS);
+}
+
+// Call f with a slinky::thread_pool that uses threads from the pthreadpool.
+// This occupies the pthreadpool until this function returns.
+void pthreadpool_to_slinky_thread_pool(
+    pthreadpool_t threadpool,
+    slinky::function_ref<void(slinky::thread_pool&)> f) {
+  slinky::thread_pool_impl wrapper(/*num_threads=*/0);
+
+  bool done = false;
+  // We want to run f on only one worker thread.
+  std::atomic<bool> first_worker = true;
+  auto worker_impl = [&](size_t) {
+    bool is_first_worker = true;
+    if (first_worker.compare_exchange_strong(is_first_worker, false)) {
+      // This is the "main thread", run the function.
+      f(wrapper);
+
+      wrapper.atomic_call([&]() { done = true; });
+    } else if (!done) {
+      // This is a worker thread, join the thread pool.
+      wrapper.run_worker([&]() { return done; });
+    }
+  };
+
+  const size_t thread_count = pthreadpool_get_threads_count(threadpool);
+  // Exclude the main thread from the expected number of worker threads.
+  wrapper.expect_workers(thread_count - 1);
+  pthreadpool_parallelize_1d(
+      threadpool, worker_impl, thread_count,
+      PTHREADPOOL_FLAG_DISABLE_DENORMALS | PTHREADPOOL_FLAG_YIELD_WORKERS);
 }
 
 }  // namespace
@@ -124,17 +158,48 @@ static xnn_status create_runtime_impl(xnn_subgraph_t subgraph,
            "`ynn_create_subgraph` instead.";
   }
 
-  ynn_threadpool_t ynn_threadpool =
-      xnn_threadpool ? xnn_threadpool->ynn : nullptr;
+  ynn_runtime_t ynn_runtime = nullptr;
+  ynn_status status;
+  if (threadpool) {
+    assert(!xnn_threadpool);
+    pthreadpool_to_slinky_thread_pool(
+        threadpool, [&](slinky::thread_pool& thread_pool) {
+          ynn_threadpool_t ynn_threadpool =
+              reinterpret_cast<ynn_threadpool_t>(&thread_pool);
 
-  ynn_status status =
-      ynn_optimize_subgraph(subgraph->ynn, ynn_threadpool, ynn_flags);
+          status =
+              ynn_optimize_subgraph(subgraph->ynn, ynn_threadpool, ynn_flags);
+          if (status != ynn_status_success) return;
+
+          status = ynn_create_runtime(subgraph->ynn, ynn_threadpool, ynn_flags,
+                                      &ynn_runtime);
+
+          if (ynn_runtime) {
+            // This thread pool only exists for the lifetime of this lambda.
+            ynn_runtime->eval_config.thread_pool = nullptr;
+          }
+        });
+  } else {
+    ynn_threadpool_t ynn_threadpool =
+        xnn_threadpool ? xnn_threadpool->ynn : nullptr;
+
+    status = ynn_optimize_subgraph(subgraph->ynn, ynn_threadpool, ynn_flags);
+    if (status != ynn_status_success) {
+      return ynn::xnn_status_from_ynn(status);
+    }
+
+    status = ynn_create_runtime(subgraph->ynn, ynn_threadpool, ynn_flags,
+                                &ynn_runtime);
+  }
   if (status != ynn_status_success) {
     return ynn::xnn_status_from_ynn(status);
   }
 
-  return ynn::xnn_status_from_ynn(ynn_create_runtime(
-      subgraph->ynn, ynn_threadpool, ynn_flags, (ynn_runtime_t*)runtime_out));
+  assert(ynn_runtime);
+  *runtime_out = new xnn_runtime();
+  (*runtime_out)->ynn = ynn_runtime;
+  (*runtime_out)->pthreadpool = threadpool;
+  return xnn_status_success;
 }
 
 xnn_status xnn_create_runtime_with_threadpool(xnn_subgraph_t subgraph,
@@ -149,7 +214,7 @@ xnn_status xnn_create_runtime_with_threadpool(xnn_subgraph_t subgraph,
 
 xnn_status xnn_update_runtime_with_threadpool(xnn_runtime_t runtime,
                                               xnn_threadpool_t threadpool) {
-  ((ynn_runtime_t)runtime)->eval_config.thread_pool =
+  runtime->ynn->eval_config.thread_pool =
       reinterpret_cast<slinky::thread_pool*>(threadpool->ynn);
   return xnn_status_success;
 }
@@ -220,8 +285,8 @@ xnn_status xnn_create_runtime_v3(xnn_subgraph_t subgraph,
 xnn_status xnn_reshape_external_value(xnn_runtime_t runtime,
                                       uint32_t external_id, size_t num_dims,
                                       const size_t* dims) {
-  return ynn::xnn_status_from_ynn(ynn_set_external_value_shape(
-      (ynn_runtime_t)runtime, external_id, num_dims, dims));
+  return ynn::xnn_status_from_ynn(
+      ynn_set_external_value_shape(runtime->ynn, external_id, num_dims, dims));
 }
 
 xnn_status xnn_get_external_value_shape(xnn_runtime_t runtime,
@@ -231,12 +296,12 @@ xnn_status xnn_get_external_value_shape(xnn_runtime_t runtime,
   // much to `dims`, but XNNPACK just assumes it's big enough. To avoid hitting
   // the check in YNNPACK, implement XNNPACK's assumption.
   *num_dims = XNN_MAX_TENSOR_DIMS;
-  return ynn::xnn_status_from_ynn(ynn_get_external_value_shape(
-      (ynn_runtime_t)runtime, external_id, num_dims, dims));
+  return ynn::xnn_status_from_ynn(
+      ynn_get_external_value_shape(runtime->ynn, external_id, num_dims, dims));
 }
 
 xnn_status xnn_reshape_runtime(xnn_runtime_t runtime) {
-  return ynn::xnn_status_from_ynn(ynn_reshape_runtime((ynn_runtime_t)runtime));
+  return ynn::xnn_status_from_ynn(ynn_reshape_runtime(runtime->ynn));
 }
 
 static enum ynn_status set_external_values(
@@ -244,7 +309,7 @@ static enum ynn_status set_external_values(
     const xnn_external_value* external_values) {
   for (size_t i = 0; i < num_external_values; ++i) {
     enum ynn_status status = ynn_set_external_value_data(
-        (ynn_runtime_t)runtime, external_values[i].id, external_values[i].data);
+        runtime, external_values[i].id, external_values[i].data);
     if (status != ynn_status_success) {
       return status;
     }
@@ -254,32 +319,44 @@ static enum ynn_status set_external_values(
 
 xnn_status xnn_setup_runtime(xnn_runtime_t runtime, size_t num_external_values,
                              const xnn_external_value* external_values) {
-  enum ynn_status status = set_external_values(
-      (ynn_runtime_t)runtime, num_external_values, external_values);
+  enum ynn_status status =
+      set_external_values(runtime->ynn, num_external_values, external_values);
   if (status != ynn_status_success) {
     return ynn::xnn_status_from_ynn(status);
   }
-  return ynn::xnn_status_from_ynn(ynn_reshape_runtime((ynn_runtime_t)runtime));
+  return ynn::xnn_status_from_ynn(ynn_reshape_runtime(runtime->ynn));
 }
 
 xnn_status xnn_setup_runtime_v2(xnn_runtime_t runtime,
                                 size_t num_external_values,
                                 const xnn_external_value* external_values) {
-  return ynn::xnn_status_from_ynn(set_external_values(
-      (ynn_runtime_t)runtime, num_external_values, external_values));
+  return ynn::xnn_status_from_ynn(
+      set_external_values(runtime->ynn, num_external_values, external_values));
 }
 
 xnn_status xnn_invoke_runtime(xnn_runtime_t runtime) {
   xnn_status result;
-  run_with_xnn_fpu_state([&result, runtime]() {
-    result =
-        ynn::xnn_status_from_ynn(ynn_invoke_runtime((ynn_runtime_t)runtime));
-  });
+  if (runtime->pthreadpool) {
+    pthreadpool_to_slinky_thread_pool(
+        runtime->pthreadpool, [&](slinky::thread_pool& thread_pool) {
+          assert(!runtime->ynn->eval_config.thread_pool);
+          runtime->ynn->eval_config.thread_pool = &thread_pool;
+          result = ynn::xnn_status_from_ynn(ynn_invoke_runtime(runtime->ynn));
+          runtime->ynn->eval_config.thread_pool = nullptr;
+        });
+  } else {
+    run_with_xnn_fpu_state([&result, runtime]() {
+      result = ynn::xnn_status_from_ynn(ynn_invoke_runtime(runtime->ynn));
+    });
+  }
   return result;
 }
 
 xnn_status xnn_delete_runtime(xnn_runtime_t runtime) {
-  ynn_delete_runtime((ynn_runtime_t)runtime);
+  if (runtime) {
+    ynn_delete_runtime(runtime->ynn);
+    delete runtime;
+  }
   return xnn_status_success;
 }
 
