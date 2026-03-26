@@ -12,7 +12,7 @@
 namespace ynn {
 namespace simd {
 
-class wasm : public ::testing::Test {
+class wasm_simd128 : public ::testing::Test {
   void SetUp() override {
     if (!is_arch_supported(arch_flag::wasm_simd128)) {
       GTEST_SKIP() << "wasm simd128 not supported on this hardware";
@@ -20,7 +20,21 @@ class wasm : public ::testing::Test {
   }
 };
 
-TEST_BROADCAST(wasm, f32, 4);
+TEST_BROADCAST(wasm_simd128, u8, 16);
+TEST_BROADCAST(wasm_simd128, s8, 16);
+TEST_BROADCAST(wasm_simd128, u16, 8);
+TEST_BROADCAST(wasm_simd128, s16, 8);
+TEST_BROADCAST(wasm_simd128, f32, 4);
+TEST_BROADCAST(wasm_simd128, s32, 4);
+TEST_BROADCAST(wasm_simd128, f64, 2);
+
+TEST_LOAD_STORE(wasm_simd128, u8, 16);
+TEST_LOAD_STORE(wasm_simd128, s8, 16);
+TEST_LOAD_STORE(wasm_simd128, u16, 8);
+TEST_LOAD_STORE(wasm_simd128, s16, 8);
+TEST_LOAD_STORE(wasm_simd128, f32, 4);
+TEST_LOAD_STORE(wasm_simd128, s32, 4);
+TEST_LOAD_STORE(wasm_simd128, f64, 2);
 
 }  // namespace simd
 }  // namespace ynn
