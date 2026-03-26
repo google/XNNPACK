@@ -101,13 +101,6 @@ YNN_INTRINSIC ynn::simd::vec<float, 16> select_greater_than(ynn::simd::vec<float
   def update_for_avx512bw(self):
     """Updates the target for AVX512BW support."""
 
-  def get_natural_lanes_num(self, ty):
-    """Returns a number of lanes in the native vector type."""
-    # TODO(vksnk): this a temporary workaround until we get rid of combine/split
-    if ty.type_class == "float" and ty.size == 16:
-      return (self.vector_bits // 2) // ty.size
-    return self.vector_bits // ty.size
-
   def __init__(self, features):
     Target.__init__(self)
     self.patterns += add_select_rules()

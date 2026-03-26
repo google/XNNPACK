@@ -998,10 +998,6 @@ class Target:
   def indent(self):
     return "  " * self.indent_level
 
-  def get_natural_lanes_num(self, ty):
-    """Returns a number of lanes in the native vector type."""
-    return self.vector_bits // ty.size
-
   def as_buffer(self, arg, buffers):
     b = None
     if isinstance(arg, Var):
@@ -1269,8 +1265,12 @@ class Target:
               f"{self.indent()}{b.name}_broadcasted[{i}] ="
               f" {self.legalize_op(broadcast_op)}((("
               f" {self.legalize_type(b.ty, True)}*)offset_bytes({prefix_after}{b.name},"
-              f" min({i}, m - i - 1) * stride_{b.name}_m))[0]);\n"
           )
+          if i > 0:
+            self.result += f" min({i}, m - i - 1) * stride_{b.name}_m"
+          else:
+            self.result += " 0"
+          self.result += "))[0]);\n"
 
         if b.broadcast_mode == BroadcastMode.LOCAL_VAR:
           self.result += (
@@ -1322,6 +1322,7 @@ class Target:
       output_lanes,
   ):
     """Emits a single operation."""
+    assert output_lanes > 0
     op = i[1]
     self.result += self.indent()
     result_type = ""
@@ -1331,8 +1332,6 @@ class Target:
 
     is_load = isinstance(op, Load)
     is_store = isinstance(op, Op) and op.name == "store"
-
-    offset = op.offset_elements if is_load else 0
 
     str_args = []
 
@@ -1356,7 +1355,7 @@ class Target:
         t = self.legalize_type(b.ty, False)
         if is_load:
           t = "const " + t
-        row_offset = ""
+        row_offset = "0"
         stride_n = ""
         if b.broadcast_mode == BroadcastMode.NONE:
           # If there is no broadcasting for this b we can just use
@@ -1368,13 +1367,12 @@ class Target:
           # Only add stride if this is not the first row of the tile.
           if b.is_const and b.broadcast_mode == BroadcastMode.LOCAL_VAR:
             row_offset = (
-                f" + stride_{arg.name}_m_broadcasted * min({j}, m - i - 1)"
+                f"stride_{arg.name}_m_broadcasted * min({j}, m - i - 1)"
             )
           else:
-            row_offset = f" + stride_{arg.name}_m * min({j}, m - i - 1)"
+            row_offset = f"stride_{arg.name}_m * min({j}, m - i - 1)"
         str_args.append(
-            f"({t}*)offset_bytes({arg.name}, {stride_n} *"
-            f" ({k * output_lanes}{row_offset} + {offset}))"
+            f"({t}*)offset_bytes({arg.name}, {stride_n} * ({row_offset}))"
         )
       else:
         if isinstance(arg, Constant):
@@ -1384,11 +1382,6 @@ class Target:
         else:
           str_args.append(f"{arg}_{j}_{k}{self.simd_suffix(op)}")
 
-    lanes = (
-        f"min({op_natural_vector_size}, (size_t)std::max<int>(j -"
-        f" {k * output_lanes} - {offset}, 0))"
-    )
-
     if not is_store:
       self.result += " = "
 
@@ -1396,14 +1389,14 @@ class Target:
     if is_load:
       mem_op = "simd::load"
       if is_rem_width:
-        str_args.append(lanes)
+        str_args.append("j")
         str_args.append(f"simd::undef<{op.ty.lanes}>()")
       else:
         str_args.append(f"{self.legalize_type(op.ty)}::N")
     elif is_store:
       mem_op = "simd::store"
       if is_rem_width:
-        str_args.append(lanes)
+        str_args.append("j")
     elif op.name in self.infix_ops:
       pass
     else:
@@ -1604,29 +1597,29 @@ class Target:
 
     ast = copy.deepcopy(func.value)
 
-    natural_lanes = self.get_natural_lanes_num(func.value.ty)
-    ast = self.vectorize(ast, natural_lanes, {})
-    ast = self.pattern_match(ast, {})
-
-    constants = {}
-    ast = self.lift_constants(ast, constants)
-
-    values = {}
-    ops = []
-    self.linearize(ast, ops, values)
-
-    ops.append((
-        None,
-        Op(
-            func.value.ty.with_lanes(natural_lanes),
-            "store",
-            [func.to, values[ast]],
-        ),
-    ))
-
     for tile in tile_shapes:
       tile_width = tile[1]
       tile_height = tile[0]
+
+      natural_lanes = tile_width
+      ast = self.vectorize(ast, natural_lanes, {})
+      ast = self.pattern_match(ast, {})
+
+      constants = {}
+      ast = self.lift_constants(ast, constants)
+
+      values = {}
+      ops = []
+      self.linearize(ast, ops, values)
+
+      ops.append((
+          None,
+          Op(
+              func.value.ty.with_lanes(natural_lanes),
+              "store",
+              [func.to, values[ast]],
+          ),
+      ))
 
       self.begin_function(
           name,
