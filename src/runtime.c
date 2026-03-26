@@ -44,6 +44,13 @@ enum xnn_status xnn_reshape_external_value(
     uint32_t external_id,
     size_t num_dims,
     const size_t* dims) {
+  if (num_dims > XNN_MAX_TENSOR_DIMS) {
+    xnn_log_error(
+        "failed to reshape runtime: num of dimensions %zu exceeds XNNPACK "
+        "limit (%d)",
+        num_dims, XNN_MAX_TENSOR_DIMS);
+    return xnn_status_unsupported_parameter;
+  }
   if (external_id >= runtime->num_values) {
     xnn_log_error("failed to reshape runtime: out-of-bounds ID %" PRIu32 " in external value",
                   external_id);
