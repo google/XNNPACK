@@ -929,6 +929,14 @@ static enum xnn_status reshape_fully_connected_operator(
   assert(filter_id < num_values);
   struct xnn_runtime_value* filter_value = &values[filter_id];
 
+  if (filter_value->shape.num_dims < 2) {
+    xnn_log_error("failed to reshape %s operator with filter ID #%" PRIu32
+                  ": number of dimensions (%zu) must be at least 2",
+                  xnn_node_type_to_string(xnn_node_type_fully_connected),
+                  filter_id, filter_value->shape.num_dims);
+    return xnn_status_invalid_parameter;
+  }
+
   if (output_value->flags & XNN_VALUE_FLAG_LAYOUT_NCHW) {
     return reshape_convolution_operator(opdata, values, num_values, threadpool);
   }
@@ -945,8 +953,23 @@ static enum xnn_status reshape_fully_connected_operator(
     input_channels = filter_value->shape.dim[filter_value->shape.num_dims - 1];
   }
 
+  if (input_channels == 0) {
+    xnn_log_error("failed to reshape %s operator with input ID #%" PRIu32
+                  ": input channels must be non-zero",
+                  xnn_node_type_to_string(xnn_node_type_fully_connected),
+                  input_id);
+    return xnn_status_invalid_parameter;
+  }
+
+  if (num_input_elements % input_channels != 0) {
+    xnn_log_error("failed to reshape %s operator with input ID #%" PRIu32
+                  ": number of input elements %zu is not divisible by "
+                  "input channels %zu",
+                  xnn_node_type_to_string(xnn_node_type_fully_connected),
+                  input_id, num_input_elements, input_channels);
+    return xnn_status_invalid_parameter;
+  }
   const size_t batch_size = num_input_elements / input_channels;
-  assert(batch_size * input_channels == num_input_elements);
   const size_t old_workspace_size = opdata->workspace_size;
   enum xnn_status status = xnn_status_invalid_state;
 
@@ -1837,7 +1860,7 @@ enum xnn_status xnn_define_fully_connected(xnn_subgraph_t subgraph,
       xnn_log_error("failed to define %s operator with filter ID #%" PRIu32
                     ": invalid channel dimension %zu",
                     xnn_node_type_to_string(xnn_node_type_fully_connected),
-                    input_id, kernel_value->quantization.channel_dimension);
+                    filter_id, kernel_value->quantization.channel_dimension);
       return xnn_status_invalid_parameter;
     }
   }
@@ -1858,7 +1881,7 @@ enum xnn_status xnn_define_fully_connected(xnn_subgraph_t subgraph,
       xnn_log_error("failed to define %s operator with filter ID #%" PRIu32
                     ": invalid channel dimension %zu",
                     xnn_node_type_to_string(xnn_node_type_fully_connected),
-                    input_id,
+                    filter_id,
                     kernel_value->quantization.channel_dimension_blockwise);
       return xnn_status_invalid_parameter;
     }
@@ -1867,7 +1890,7 @@ enum xnn_status xnn_define_fully_connected(xnn_subgraph_t subgraph,
       xnn_log_error("failed to define %s operator with filter ID #%" PRIu32
                     ": invalid block size %zu, input_channels %zu",
                     xnn_node_type_to_string(xnn_node_type_fully_connected),
-                    input_id, kernel_value->quantization.block_size,
+                    filter_id, kernel_value->quantization.block_size,
                     input_channels);
       return xnn_status_invalid_parameter;
     }

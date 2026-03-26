@@ -34,7 +34,7 @@ enum xnn_status create_nchw_convolution(
   enum xnn_status status;
   const enum xnn_datatype filter_datatype = values[filter_id].datatype;
   const enum xnn_datatype bias_datatype = bias_id != XNN_INVALID_VALUE_ID
-                                              ? values[filter_id].datatype
+                                              ? values[bias_id].datatype
                                               : xnn_datatype_invalid;
   const enum xnn_datatype output_datatype = values[output_id].datatype;
   switch (filter_datatype) {
@@ -142,7 +142,7 @@ static enum xnn_status create_convolution_operator(
                                                   : values[input_id].datatype;
   const enum xnn_datatype filter_datatype = values[filter_id].datatype;
   const enum xnn_datatype bias_datatype = bias_id != XNN_INVALID_VALUE_ID
-                                              ? values[filter_id].datatype
+                                              ? values[bias_id].datatype
                                               : xnn_datatype_invalid;
   const enum xnn_datatype output_datatype = values[output_id].datatype;
   if (values[output_id].flags & XNN_VALUE_FLAG_LAYOUT_NCHW) {
@@ -257,7 +257,7 @@ static enum xnn_status create_convolution_operator(
                     node->activation.output_max, node->flags, weights_cache,
                     &opdata->operator_objects[0]);
                 break;
-              case xnn_datatype_pfp32: 
+              case xnn_datatype_pfp32:
                 status = xnn_create_convolution2d_nhwc_pf32(
                     node->params.convolution_2d.input_padding_top,
                     node->params.convolution_2d.input_padding_right,
@@ -668,9 +668,18 @@ enum xnn_status reshape_convolution_operator(struct xnn_operator_data* opdata,
   const uint32_t output_id = opdata->outputs[0];
   assert(output_id < num_values);
 
-  const size_t batch_size = values[input_id].shape.dim[0];
-  const size_t input_height = values[input_id].shape.dim[1];
-  const size_t input_width = values[input_id].shape.dim[2];
+  const struct xnn_runtime_value* input_value = values + input_id;
+  if (input_value->shape.num_dims < 3) {
+    xnn_log_error("failed to reshape %s operator with input ID #%" PRIu32
+                  ": number of dimensions (%zu) must be at least 3",
+                  xnn_node_type_to_string(xnn_node_type_convolution_2d),
+                  input_id, input_value->shape.num_dims);
+    return xnn_status_invalid_parameter;
+  }
+
+  const size_t batch_size = input_value->shape.dim[0];
+  const size_t input_height = input_value->shape.dim[1];
+  const size_t input_width = input_value->shape.dim[2];
 
   size_t output_height, output_width;
   enum xnn_status status = xnn_status_invalid_state;
@@ -695,7 +704,7 @@ enum xnn_status reshape_convolution_operator(struct xnn_operator_data* opdata,
       status = xnn_reshape_convolution2d_nhwc_pf32(
           opdata->operator_objects[0], batch_size, input_height, input_width,
           &opdata->workspace_size, &output_height, &output_width, threadpool);
-      break;      
+      break;
     case xnn_operator_type_convolution_nhwc_f16:
       status = xnn_reshape_convolution2d_nhwc_f16(
           opdata->operator_objects[0], batch_size, input_height, input_width,
@@ -816,7 +825,7 @@ enum xnn_status setup_convolution_operator(
       return xnn_setup_convolution2d_nhwc_pf32(opdata->operator_objects[0],
                                               opdata->workspace, input_data,
                                               output_data);
-      break;      
+      break;
     case xnn_operator_type_convolution_nhwc_f16:
       return xnn_setup_convolution2d_nhwc_f16(opdata->operator_objects[0],
                                               opdata->workspace, input_data,
@@ -1325,7 +1334,7 @@ enum xnn_status xnn_define_convolution_2d(
       xnn_log_error("failed to define %s operator with filter ID #%" PRIu32
                     ": invalid channel dimension %zu",
                     xnn_node_type_to_string(xnn_node_type_convolution_2d),
-                    input_id, filter_value->quantization.channel_dimension);
+                    filter_id, filter_value->quantization.channel_dimension);
       return xnn_status_invalid_parameter;
     }
 
