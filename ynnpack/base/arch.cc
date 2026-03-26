@@ -89,6 +89,9 @@ uint64_t get_supported_arch_flags() {
 #ifdef YNN_ARCH_HEXAGON
     result |= arch_flag::hvx;
 #endif  // YNN_ARCH_HEXAGON
+#ifdef YNN_ARCH_WASM
+    result |= arch_flag::wasm_simd128;
+#endif  // YNN_ARCH_WASM
     return result;
   }();
   return flags;

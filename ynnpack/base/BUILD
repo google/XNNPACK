@@ -110,6 +110,9 @@ cc_library(
         "//ynnpack:hexagon": [
             "YNN_ARCH_HEXAGON",
         ],
+        "//ynnpack:wasm": [
+            "YNN_ARCH_WASM",
+        ],
         "//conditions:default": [],
     }),
     local_defines = select({

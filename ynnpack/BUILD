@@ -107,6 +107,13 @@ selects.config_setting_group(
     ],
 )
 
+selects.config_setting_group(
+    name = "wasm",
+    match_any = [
+        "@platforms//os:emscripten",
+    ],
+)
+
 define_build_option(
     name = "ynn_enable_cpuinfo",
     default_any = [
@@ -284,4 +291,9 @@ define_build_option(
 define_build_option(
     name = "ynn_enable_hvx",
     default_all = [":hexagon"],
+)
+
+define_build_option(
+    name = "ynn_enable_wasm_simd128",
+    default_all = [":wasm"],
 )
