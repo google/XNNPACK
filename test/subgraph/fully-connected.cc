@@ -763,4 +763,52 @@ TEST(FullyConnectedF32, dynamic_b) {
   TestDynamicB<float, float, float, float>();
 }
 
+// Regression test: fully-connected with a zero-dimensional input must not
+// cause a heap-buffer-overflow via unsigned underflow on num_dims - 1.
+TEST(FullyConnectedF32, zero_dim_input_rejected) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
+
+  xnn_subgraph_t subgraph = nullptr;
+  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(3, 0, &subgraph));
+
+  uint32_t input_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_tensor_value(subgraph, xnn_datatype_fp32, 0, nullptr,
+                                   nullptr, 0, XNN_VALUE_FLAG_EXTERNAL_INPUT,
+                                   &input_id));
+
+  float filter = 1.0f;
+  size_t filter_dims[] = {1, 1};
+  uint32_t filter_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_tensor_value(subgraph, xnn_datatype_fp32, 2,
+                                   filter_dims, &filter, XNN_INVALID_VALUE_ID,
+                                   0, &filter_id));
+
+  uint32_t output_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_tensor_value(subgraph, xnn_datatype_fp32, 0, nullptr,
+                                   nullptr, 1, XNN_VALUE_FLAG_EXTERNAL_OUTPUT,
+                                   &output_id));
+
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_fully_connected(subgraph, -1e30f, 1e30f, input_id,
+                                       filter_id, XNN_INVALID_VALUE_ID,
+                                       output_id, 0));
+
+  xnn_runtime_t runtime = nullptr;
+  ASSERT_EQ(xnn_status_success, xnn_create_runtime(subgraph, &runtime));
+  ASSERT_NE(nullptr, runtime);
+
+  float in = 0.0f, out = 0.0f;
+  struct xnn_external_value ext[] = {{0, &in}, {1, &out}};
+  // xnn_setup_runtime (v1) calls xnn_reshape_runtime internally, which must
+  // reject num_dims=0 without OOB write.
+  xnn_status status = xnn_setup_runtime(runtime, 2, ext);
+  ASSERT_NE(xnn_status_success, status);
+
+  xnn_delete_runtime(runtime);
+  xnn_delete_subgraph(subgraph);
+}
+
 }  // namespace xnnpack
