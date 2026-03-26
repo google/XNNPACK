@@ -931,6 +931,9 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
 
   const bool transpose_a = kernel.flags & dot_flag::transpose_a;
   if (transpose_a) {
+    // We should not try to transpose A if it is rank 1.
+    assert(a.rank() >= 2);
+
     // The kernel we want to use has a transposed a.
     node.inputs[0] =
         define_transpose_a(subgraph, kernel.tile_k, num_k_dims, input_a_id);
@@ -966,8 +969,8 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
     slinky::var j = dims[0];
 
     // A: We need all of the k dims, i is elementwise.
-    slinky::box_expr a_bounds(num_k_dims);
-    for (size_t i = 0; i < num_k_dims; ++i) {
+    slinky::box_expr a_bounds(std::min<int>(input_a.rank(), num_k_dims));
+    for (size_t i = 0; i < a_bounds.size(); ++i) {
       a_bounds[i] = all_bounds(input_a.extent(i));
     }
 

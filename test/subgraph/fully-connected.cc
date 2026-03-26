@@ -805,7 +805,13 @@ TEST(FullyConnectedF32, zero_dim_input_rejected) {
   // xnn_setup_runtime (v1) calls xnn_reshape_runtime internally, which must
   // reject num_dims=0 without OOB write.
   xnn_status status = xnn_setup_runtime(runtime, 2, ext);
+#ifndef XNNPACK_USE_YNNPACK
   ASSERT_NE(xnn_status_success, status);
+#else
+  // This is basically just the dot with shapes {} * {1, 1}, which according to
+  // our broadcasting rules, should work, and it does in YNNPACK.
+  ASSERT_EQ(xnn_status_success, status);
+#endif  // XNNPACK_USE_YNNPACK
 
   xnn_delete_runtime(runtime);
   xnn_delete_subgraph(subgraph);
