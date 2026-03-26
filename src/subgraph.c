@@ -2754,6 +2754,9 @@ static enum xnn_status optimize_common_subgraphs_merge_reshapes(
         &input_producer->params.static_reshape.new_shape;
     const struct xnn_shape* expanded_dims =
         &node->params.static_reshape.new_shape;
+    if (reshape->num_dims + expanded_dims->num_dims > XNN_MAX_TENSOR_DIMS) {
+      return xnn_status_success;  // Skip optimization, let runtime validate.
+    }
     struct xnn_shape new_shape = {
         .num_dims = reshape->num_dims + expanded_dims->num_dims, .dim = {0}};
     for (uint32_t idx_expanded = 0, idx_reshape = 0, k = 0;
@@ -2817,6 +2820,9 @@ static enum xnn_status optimize_common_subgraphs_static_reshapes(
   } else if (node->type == xnn_node_type_static_expand_dims) {
     const struct xnn_shape* new_dims = &node->params.static_reshape.new_shape;
     new_shape.num_dims = input_value->shape.num_dims + new_dims->num_dims;
+    if (new_shape.num_dims > XNN_MAX_TENSOR_DIMS) {
+      return xnn_status_invalid_parameter;
+    }
     for (uint32_t idx_new = 0, idx_old = 0, k = 0; k < new_shape.num_dims;
          k++) {
       if (idx_new < new_dims->num_dims && new_dims->dim[idx_new] == k) {
