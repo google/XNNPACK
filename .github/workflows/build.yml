@@ -375,6 +375,7 @@ jobs:
             "custom_vars": {},
             },
           ]
+          target_os = ["android"]
           cache_dir = r"/home/runner/.cache/gclient"
           EOF
       - name: Sync to commit and run hooks
@@ -383,9 +384,17 @@ jobs:
         run: |
           git cl format --presubmit --no-clang-format --no-python --diff
         working-directory: ${{ github.workspace }}/xnnpack
+      - name: Generate build files (Android debug component build)
+        run: |
+          gn gen --check --args="target_os=\"android\" is_debug=true is_component_build=true clang_use_chrome_plugins=false cc_wrapper=\"ccache\" symbol_level=0 xnnpack_enable_avx512=false target_cpu=\"x64\" use_siso=true" out/x64.component
+        working-directory: ${{ github.workspace }}/xnnpack
       - name: Generate build files
         run: |
-          gn gen --check --args="is_debug=false clang_use_chrome_plugins=false dcheck_always_on=true cc_wrapper=\"ccache\" symbol_level=0 xnnpack_enable_avx512=false target_cpu=\"x64\" use_siso=true" out/x64.dchecks
+          gn gen --check --args="is_component_build=false is_debug=false clang_use_chrome_plugins=false cc_wrapper=\"ccache\" symbol_level=0 xnnpack_enable_avx512=false target_cpu=\"x64\" use_siso=true" out/x64.dchecks
+        working-directory: ${{ github.workspace }}/xnnpack
+      - name: Build all targets (Android debug component build)
+        run: |
+          autoninja -C out/x64.component
         working-directory: ${{ github.workspace }}/xnnpack
       - name: Build all targets (Release + debug checks)
         run: |
