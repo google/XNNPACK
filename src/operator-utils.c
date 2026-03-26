@@ -96,6 +96,9 @@ static bool mr_is_available_gemm(size_t mr, struct xnn_hmp_gemm_ukernel *gemm_ca
 uint32_t xnn_get_heuristic_mr_gemm(
   size_t batch_size, uint32_t max_mr, uint32_t nr, struct xnn_hmp_gemm_ukernel *gemm_cases)
 {
+  if (batch_size == 0) {
+    return max_mr;
+  }
   if (batch_size <= max_mr && mr_is_available_gemm(batch_size, gemm_cases)) {
     // We have a microkernel with MR that is the exact match with batch_size.
     return batch_size;
@@ -127,6 +130,9 @@ static bool mr_is_available_igemm(size_t mr, struct xnn_hmp_igemm_ukernel *igemm
 uint32_t xnn_get_heuristic_mr_igemm(
   size_t batch_size, uint32_t max_mr, uint32_t nr, struct xnn_hmp_igemm_ukernel *igemm_cases)
 {
+  if (batch_size == 0) {
+    return max_mr;
+  }
   if (batch_size <= max_mr && mr_is_available_igemm(batch_size, igemm_cases)) {
     // We have a microkernel with MR that is the exact match with batch_size.
     return batch_size;

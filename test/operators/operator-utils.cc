@@ -232,3 +232,20 @@ TEST(HEURISTIC_MR, max_mr_without_mr1_kernel) {
   ASSERT_EQ(4, xnn_get_heuristic_mr_gemm(3, params.mr, params.nr,
                                          params.minmax.gemm));
 }
+
+TEST(HEURISTIC_MR, batch_size_zero) {
+  xnn_gemm_config params = {};
+  params.minmax.gemm[0] = dummy_gemm_ukernel;
+  params.minmax.gemm[1] = dummy_gemm_ukernel;
+  params.minmax.igemm[0] = dummy_igemm_ukernel;
+  params.minmax.igemm[1] = dummy_igemm_ukernel;
+  params.mr = 2;
+  params.nr = 8;
+
+  // batch_size == 0 must not cause OOB read via mr_is_available_*(0, cases)
+  // which would access cases[-1].
+  ASSERT_EQ(params.mr, xnn_get_heuristic_mr_gemm(0, params.mr, params.nr,
+                                                  params.minmax.gemm));
+  ASSERT_EQ(params.mr, xnn_get_heuristic_mr_igemm(0, params.mr, params.nr,
+                                                   params.minmax.igemm));
+}
