@@ -2821,7 +2821,7 @@ static enum xnn_status optimize_common_subgraphs_static_reshapes(
     const struct xnn_shape* new_dims = &node->params.static_reshape.new_shape;
     new_shape.num_dims = input_value->shape.num_dims + new_dims->num_dims;
     if (new_shape.num_dims > XNN_MAX_TENSOR_DIMS) {
-      return xnn_status_invalid_parameter;
+      return xnn_status_success;  // Skip optimization, let runtime validate.
     }
     for (uint32_t idx_new = 0, idx_old = 0, k = 0; k < new_shape.num_dims;
          k++) {
