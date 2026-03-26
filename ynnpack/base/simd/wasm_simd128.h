@@ -188,6 +188,106 @@ YNN_ALWAYS_INLINE void store(double* ptr, f64x2 b, decltype(f64x2::N) = {}) {
   wasm_v128_store(ptr, b.v);
 }
 
+YNN_ALWAYS_INLINE f64x2 operator+(f64x2 a, f64x2 b) {
+  return f64x2{wasm_f64x2_add(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE f32x4 operator+(f32x4 a, f32x4 b) {
+  return f32x4{wasm_f32x4_add(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE i32x4 operator+(i32x4 a, i32x4 b) {
+  return i32x4{wasm_i32x4_add(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE u32x4 operator+(u32x4 a, u32x4 b) {
+  return u32x4{wasm_i32x4_add(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE i16x8 operator+(i16x8 a, i16x8 b) {
+  return i16x8{wasm_i16x8_add(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE u16x8 operator+(u16x8 a, u16x8 b) {
+  return u16x8{wasm_i16x8_add(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE i8x16 operator+(i8x16 a, i8x16 b) {
+  return i8x16{wasm_i8x16_add(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE u8x16 operator+(u8x16 a, u8x16 b) {
+  return u8x16{wasm_i8x16_add(a.v, b.v)};
+}
+
+YNN_ALWAYS_INLINE f64x2 operator-(f64x2 a, f64x2 b) {
+  return f64x2{wasm_f64x2_sub(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE f32x4 operator-(f32x4 a, f32x4 b) {
+  return f32x4{wasm_f32x4_sub(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE i32x4 operator-(i32x4 a, i32x4 b) {
+  return i32x4{wasm_i32x4_sub(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE u32x4 operator-(u32x4 a, u32x4 b) {
+  return u32x4{wasm_i32x4_sub(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE i16x8 operator-(i16x8 a, i16x8 b) {
+  return i16x8{wasm_i16x8_sub(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE u16x8 operator-(u16x8 a, u16x8 b) {
+  return u16x8{wasm_i16x8_sub(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE i8x16 operator-(i8x16 a, i8x16 b) {
+  return i8x16{wasm_i8x16_sub(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE u8x16 operator-(u8x16 a, u8x16 b) {
+  return u8x16{wasm_i8x16_sub(a.v, b.v)};
+}
+
+YNN_ALWAYS_INLINE i16x8 add_sat(i16x8 a, i16x8 b) {
+  return i16x8{wasm_i16x8_add_sat(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE u16x8 add_sat(u16x8 a, u16x8 b) {
+  return u16x8{wasm_u16x8_add_sat(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE i8x16 add_sat(i8x16 a, i8x16 b) {
+  return i8x16{wasm_i8x16_add_sat(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE u8x16 add_sat(u8x16 a, u8x16 b) {
+  return u8x16{wasm_u8x16_add_sat(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE i16x8 sub_sat(i16x8 a, i16x8 b) {
+  return i16x8{wasm_i16x8_sub_sat(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE u16x8 sub_sat(u16x8 a, u16x8 b) {
+  return u16x8{wasm_u16x8_sub_sat(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE i8x16 sub_sat(i8x16 a, i8x16 b) {
+  return i8x16{wasm_i8x16_sub_sat(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE u8x16 sub_sat(u8x16 a, u8x16 b) {
+  return u8x16{wasm_u8x16_sub_sat(a.v, b.v)};
+}
+
+YNN_ALWAYS_INLINE f64x2 operator*(f64x2 a, f64x2 b) {
+  return f64x2{wasm_f64x2_mul(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE f32x4 operator*(f32x4 a, f32x4 b) {
+  return f32x4{wasm_f32x4_mul(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE i32x4 operator*(i32x4 a, i32x4 b) {
+  return i32x4{wasm_i32x4_mul(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE u32x4 operator*(u32x4 a, u32x4 b) {
+  return u32x4{wasm_i32x4_mul(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE i16x8 operator*(i16x8 a, i16x8 b) {
+  return i16x8{wasm_i16x8_mul(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE u16x8 operator*(u16x8 a, u16x8 b) {
+  return u16x8{wasm_i16x8_mul(a.v, b.v)};
+}
+
+YNN_ALWAYS_INLINE f64x2 operator/(f64x2 a, f64x2 b) {
+  return f64x2{wasm_f64x2_div(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE f32x4 operator/(f32x4 a, f32x4 b) {
+  return f32x4{wasm_f32x4_div(a.v, b.v)};
+}
 }  // namespace simd
 
 }  // namespace ynn

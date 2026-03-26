@@ -36,5 +36,33 @@ TEST_LOAD_STORE(wasm_simd128, f32, 4);
 TEST_LOAD_STORE(wasm_simd128, s32, 4);
 TEST_LOAD_STORE(wasm_simd128, f64, 2);
 
+TEST_ADD(wasm_simd128, u8, 16);
+TEST_ADD(wasm_simd128, s8, 16);
+TEST_ADD(wasm_simd128, s16, 8);
+TEST_ADD(wasm_simd128, f32, 4);
+TEST_ADD(wasm_simd128, s32, 4);
+TEST_ADD(wasm_simd128, f64, 2);
+
+TEST_SUBTRACT(wasm_simd128, u8, 16);
+TEST_SUBTRACT(wasm_simd128, s8, 16);
+TEST_SUBTRACT(wasm_simd128, s16, 8);
+TEST_SUBTRACT(wasm_simd128, f32, 4);
+TEST_SUBTRACT(wasm_simd128, s32, 4);
+TEST_SUBTRACT(wasm_simd128, f64, 2);
+
+TEST_ADD_SAT(wasm_simd128, u8, 16);
+TEST_ADD_SAT(wasm_simd128, s8, 16);
+TEST_ADD_SAT(wasm_simd128, u16, 8);
+TEST_ADD_SAT(wasm_simd128, s16, 8);
+
+TEST_SUB_SAT(wasm_simd128, u8, 16);
+TEST_SUB_SAT(wasm_simd128, s8, 16);
+TEST_SUB_SAT(wasm_simd128, u16, 8);
+TEST_SUB_SAT(wasm_simd128, s16, 8);
+
+TEST_MULTIPLY(wasm_simd128, f32, 4);
+TEST_MULTIPLY(wasm_simd128, f64, 2);
+
+TEST_DIVIDE(wasm_simd128, f32, 4);
 }  // namespace simd
 }  // namespace ynn
