@@ -88,5 +88,13 @@ TEST_NOT(wasm_simd128, s32, 4);
 TEST_SHIFT_LEFT(wasm_simd128, s16, 8);
 TEST_SHIFT_LEFT(wasm_simd128, s32, 4);
 
+TEST_MIN(wasm_simd128, f32, 4);
+TEST_MIN(wasm_simd128, s16, 8);
+TEST_MIN(wasm_simd128, u8, 16);
+
+TEST_MAX(wasm_simd128, f32, 4);
+TEST_MAX(wasm_simd128, s16, 8);
+TEST_MAX(wasm_simd128, u8, 16);
+
 }  // namespace simd
 }  // namespace ynn

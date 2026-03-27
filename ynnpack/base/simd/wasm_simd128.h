@@ -340,6 +340,27 @@ YNN_ALWAYS_INLINE s8x16 operator^(s8x16 a, s8x16 b) {
   return s8x16{wasm_v128_xor(a.v, b.v)};
 }
 YNN_ALWAYS_INLINE s8x16 operator~(s8x16 a) { return s8x16{wasm_v128_not(a.v)}; }
+
+YNN_ALWAYS_INLINE f32x4 min(f32x4 a, f32x4 b) {
+  return f32x4{wasm_f32x4_min(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE s16x8 min(s16x8 a, s16x8 b) {
+  return s16x8{wasm_i16x8_min(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE u8x16 min(u8x16 a, u8x16 b) {
+  return u8x16{wasm_u8x16_min(a.v, b.v)};
+}
+
+YNN_ALWAYS_INLINE f32x4 max(f32x4 a, f32x4 b) {
+  return f32x4{wasm_f32x4_max(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE s16x8 max(s16x8 a, s16x8 b) {
+  return s16x8{wasm_i16x8_max(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE u8x16 max(u8x16 a, u8x16 b) {
+  return u8x16{wasm_u8x16_max(a.v, b.v)};
+}
+
 }  // namespace simd
 
 }  // namespace ynn
