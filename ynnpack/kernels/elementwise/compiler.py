@@ -1195,7 +1195,7 @@ class Target:
       increment,
       emit_loop,
       buffers,
-      lanes,
+      tile_width,
       prefix_before,
       prefix_after,
   ):
@@ -1242,7 +1242,7 @@ class Target:
           )
 
         broadcast_op = self.pattern_match(
-            broadcast(Var(b.name, b.ty.with_lanes(1)), lanes),
+            broadcast(Var(b.name, b.ty.with_lanes(1)), tile_width),
             {},
         )
         self.result += (
@@ -1310,25 +1310,14 @@ class Target:
           f" {self.legalize_op(v)}({v.args[0]});\n"
       )
 
-  def emit_op(
-      self,
-      i,
-      j,
-      k,
-      is_rem_width,
-      buffers,
-      constants,
-      op_natural_vector_size,
-      output_lanes,
-  ):
+  def emit_op(self, i, j, is_rem_width, buffers, constants, tile_width):
     """Emits a single operation."""
-    assert output_lanes > 0
     op = i[1]
     self.result += self.indent()
     result_type = ""
     if i[0] is not None:
-      result_type = self.legalize_type(op.ty.with_lanes(op_natural_vector_size))
-      self.result += f"{result_type} {i[0]}_{j}_{k}"
+      result_type = self.legalize_type(op.ty.with_lanes(tile_width))
+      self.result += f"{result_type} {i[0]}_{j}"
 
     is_load = isinstance(op, Load)
     is_store = isinstance(op, Op) and op.name == "store"
@@ -1380,7 +1369,7 @@ class Target:
         elif isinstance(arg, Var) and arg in constants:
           str_args.append(f"{arg}{self.simd_suffix(op)}")
         else:
-          str_args.append(f"{arg}_{j}_{k}{self.simd_suffix(op)}")
+          str_args.append(f"{arg}_{j}{self.simd_suffix(op)}")
 
     if not is_store:
       self.result += " = "
@@ -1420,8 +1409,7 @@ class Target:
       ops,
       rows_num,
       is_rem_width,
-      output_vector_num,
-      output_lanes,
+      tile_width,
       buffers,
       constants,
       step,
@@ -1429,22 +1417,7 @@ class Target:
     """Emits the body of the innermost loop."""
     for op in ops:
       for j in range(rows_num):
-        op_natural_vector_size = (
-            1
-            if is_rem_width and self.tail_strategy == TailStrategy.SCALAR
-            else op[1].ty.lanes
-        )
-        for k in range(output_vector_num):
-          self.emit_op(
-              op,
-              j,
-              k,
-              is_rem_width,
-              buffers,
-              constants,
-              op_natural_vector_size,
-              output_lanes,
-          )
+        self.emit_op(op, j, is_rem_width, buffers, constants, tile_width)
 
     if not is_rem_width:
       self.advance_pointers(buffers, "n", step)
@@ -1454,7 +1427,6 @@ class Target:
       ops,
       constants,
       buffers,
-      natural_lanes,
       tile_height,
       tile_width,
   ):
@@ -1470,7 +1442,7 @@ class Target:
           tile_height if not is_rem_height else 1,
           True,
           buffers,
-          natural_lanes,
+          tile_width,
           "base_",
           "",
       )
@@ -1490,22 +1462,16 @@ class Target:
             step,
             emit_loop,
             buffers,
-            natural_lanes,
+            tile_width,
             "",
             "",
-        )
-        output_vector_num = (
-            1
-            if is_rem_width and self.tail_strategy == TailStrategy.SCALAR
-            else tile_width // natural_lanes
         )
 
         self.emit_inner_loop_body(
             ops,
             rows_num,
             is_rem_width,
-            output_vector_num,
-            natural_lanes,
+            tile_width,
             buffers,
             constants,
             step,
@@ -1537,7 +1503,6 @@ class Target:
       ops,
       constants,
       buffers,
-      natural_lanes,
       tile_height,
       tile_width,
   ):
@@ -1555,7 +1520,6 @@ class Target:
             ops,
             constants,
             new_buffers,
-            natural_lanes,
             tile_height,
             tile_width,
         )
@@ -1569,7 +1533,6 @@ class Target:
             ops,
             constants,
             new_buffers,
-            natural_lanes,
             tile_height,
             tile_width,
         )
@@ -1584,7 +1547,6 @@ class Target:
         ops,
         constants,
         buffers,
-        natural_lanes,
         tile_height,
         tile_width,
     )
@@ -1601,8 +1563,7 @@ class Target:
       tile_width = tile[1]
       tile_height = tile[0]
 
-      natural_lanes = tile_width
-      ast = self.vectorize(ast, natural_lanes, {})
+      ast = self.vectorize(ast, tile_width, {})
       ast = self.pattern_match(ast, {})
 
       constants = {}
@@ -1615,7 +1576,7 @@ class Target:
       ops.append((
           None,
           Op(
-              func.value.ty.with_lanes(natural_lanes),
+              func.value.ty.with_lanes(tile_width),
               "store",
               [func.to, values[ast]],
           ),
@@ -1635,7 +1596,6 @@ class Target:
           ops,
           constants,
           buffer_args,
-          natural_lanes,
           tile_height,
           tile_width,
       )
