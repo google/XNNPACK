@@ -119,7 +119,7 @@ enum xnn_status xnn_define_global_average_pooling_1d(
 
   if (output_min != -INFINITY || output_max != INFINITY) {
     return xnn_insert_clamp_node(subgraph, output_min, output_max,
-                                 &subgraph->nodes[subgraph->num_nodes - 1]);
+                                 subgraph->num_nodes - 1);
   }
 
   return xnn_status_success;
@@ -150,7 +150,7 @@ enum xnn_status xnn_define_global_average_pooling_2d(
 
   if (output_min != -INFINITY || output_max != INFINITY) {
     return xnn_insert_clamp_node(subgraph, output_min, output_max,
-                                 &subgraph->nodes[subgraph->num_nodes - 1]);
+                                 subgraph->num_nodes - 1);
   }
 
   return xnn_status_success;
@@ -178,7 +178,7 @@ enum xnn_status xnn_define_global_sum_pooling_1d(
 
   if (output_min != -INFINITY || output_max != INFINITY) {
     return xnn_insert_clamp_node(subgraph, output_min, output_max,
-                                 &subgraph->nodes[subgraph->num_nodes - 1]);
+                                 subgraph->num_nodes - 1);
   }
 
   return xnn_status_success;
@@ -207,7 +207,7 @@ enum xnn_status xnn_define_global_sum_pooling_2d(
 
   if (output_min != -INFINITY || output_max != INFINITY) {
     return xnn_insert_clamp_node(subgraph, output_min, output_max,
-                                 &subgraph->nodes[subgraph->num_nodes - 1]);
+                                 subgraph->num_nodes - 1);
   }
 
   return xnn_status_success;
@@ -221,7 +221,7 @@ enum xnn_status xnn_define_convert(xnn_subgraph_t subgraph, uint32_t input_id,
 
 enum xnn_status xnn_define_abs(xnn_subgraph_t subgraph, uint32_t input_id,
                                uint32_t output_id, uint32_t flags) {
-  return xnn_define_unary(subgraph, xnn_unary_abs, NULL, input_id, output_id, 
+  return xnn_define_unary(subgraph, xnn_unary_abs, NULL, input_id, output_id,
                           flags);
 }
 
@@ -339,31 +339,31 @@ enum xnn_status xnn_define_tanh(xnn_subgraph_t subgraph, uint32_t input_id,
 enum xnn_status xnn_define_concatenate2(xnn_subgraph_t subgraph, int32_t axis, uint32_t input1_id,
                                   uint32_t input2_id, uint32_t output_id, uint32_t flags) {
   const uint32_t inputs_id[2] = {input1_id, input2_id};
-  return xnn_define_concatenate(subgraph, axis, /*num_inputs=*/2, 
+  return xnn_define_concatenate(subgraph, axis, /*num_inputs=*/2,
                                 inputs_id, output_id, flags);
 }
 
 enum xnn_status xnn_define_concatenate3(xnn_subgraph_t subgraph, int32_t axis, uint32_t input1_id,
-                                  uint32_t input2_id, uint32_t input3_id, uint32_t output_id, 
+                                  uint32_t input2_id, uint32_t input3_id, uint32_t output_id,
                                   uint32_t flags) {
   const uint32_t inputs_id[3] = {input1_id, input2_id, input3_id};
-  return xnn_define_concatenate(subgraph, axis, /*num_inputs=*/3, 
+  return xnn_define_concatenate(subgraph, axis, /*num_inputs=*/3,
                                 inputs_id, output_id, flags);
 }
 
 enum xnn_status xnn_define_concatenate4(xnn_subgraph_t subgraph, int32_t axis, uint32_t input1_id,
-                                  uint32_t input2_id, uint32_t input3_id, uint32_t input4_id, 
+                                  uint32_t input2_id, uint32_t input3_id, uint32_t input4_id,
                                   uint32_t output_id, uint32_t flags) {
   const uint32_t inputs_id[4] = {input1_id, input2_id, input3_id, input4_id};
-  return xnn_define_concatenate(subgraph, axis, /*num_inputs=*/4, 
+  return xnn_define_concatenate(subgraph, axis, /*num_inputs=*/4,
                                 inputs_id, output_id, flags);
 }
 
 enum xnn_status xnn_define_concatenate5(xnn_subgraph_t subgraph, int32_t axis, uint32_t input1_id,
-                                  uint32_t input2_id, uint32_t input3_id, uint32_t input4_id, 
+                                  uint32_t input2_id, uint32_t input3_id, uint32_t input4_id,
                                   uint32_t input5_id, uint32_t output_id, uint32_t flags) {
   const uint32_t inputs_id[5] = {input1_id, input2_id, input3_id, input4_id, input5_id};
-  return xnn_define_concatenate(subgraph, axis, /*num_inputs=*/5, 
+  return xnn_define_concatenate(subgraph, axis, /*num_inputs=*/5,
                                 inputs_id, output_id, flags);
 }
 
@@ -374,14 +374,14 @@ enum xnn_status xnn_define_even_split2(xnn_subgraph_t subgraph, int32_t split_di
 }
 
 enum xnn_status xnn_define_even_split3(xnn_subgraph_t subgraph, int32_t split_dim, uint32_t input_id,
-                                  uint32_t output1_id, uint32_t output2_id, 
+                                  uint32_t output1_id, uint32_t output2_id,
                                   uint32_t output3_id, uint32_t flags) {
   const uint32_t outputs_id[3] = {output1_id, output2_id, output3_id};
   return xnn_define_even_split(subgraph, split_dim, input_id, /*num_outputs=*/3, outputs_id, flags);
 }
 
 enum xnn_status xnn_define_even_split4(xnn_subgraph_t subgraph, int32_t split_dim, uint32_t input_id,
-                                  uint32_t output1_id, uint32_t output2_id, 
+                                  uint32_t output1_id, uint32_t output2_id,
                                   uint32_t output3_id, uint32_t output4_id, uint32_t flags) {
   const uint32_t outputs_id[4] = {output1_id, output2_id, output3_id, output4_id};
   return xnn_define_even_split(subgraph, split_dim, input_id, /*num_outputs=*/4, outputs_id, flags);

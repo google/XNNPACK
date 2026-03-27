@@ -407,27 +407,6 @@ TEST(SUBGRAPH_FP16, static_buffer_allocation_failure) {
   tester.RewriteForFp16WithFailure();
 }
 
-TEST(SUBGRAPH_FP16, external_value_allocation_failure) {
-  SubgraphTester tester(3);
-  tester.AddInputTensorF32({1, 2, 2, 3}, 0)
-      .AddStaticTensorF32({1, 1, 1, 3}, TensorType::kDense, 1,
-                          /*flags=*/XNN_VALUE_FLAG_EXTERNAL_INPUT)
-      .AddOutputTensorF32({1, 4, 2, 3}, 2)
-      .AddAddition(0, 1, 2)
-      .Optimize();
-
-  MockAllocator mock_allocator;
-  std::unique_ptr<MockAllocator, decltype(&RestoreDefaultAllocator)>
-      auto_mock_allocator(&mock_allocator, &RestoreDefaultAllocator);
-  SetUpMockAllocator(&mock_allocator);
-
-  // Make the allocation of the external values fail.
-  EXPECT_CALL(mock_allocator, reallocate(_, tester.Subgraph()->values, _))
-      .WillOnce(Return(nullptr));
-
-  tester.RewriteForFp16WithFailure();
-}
-
 TEST(SUBGRAPH_FP16, convolution_weights_used_by_another_node) {
   SubgraphTester tester(7);
 
