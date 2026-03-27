@@ -131,6 +131,72 @@ using u32x4 = vec<uint32_t, 4>;
 using f32x4 = vec<float, 4>;
 using f64x2 = vec<double, 2>;
 
+YNN_ALWAYS_INLINE f64x2 load_aligned(const double* ptr, decltype(f64x2::N),
+                                     f64x2 = {}) {
+  return f64x2{wasm_v128_load(ptr)};
+}
+YNN_ALWAYS_INLINE f32x4 load_aligned(const float* ptr, decltype(f32x4::N),
+                                     f32x4 = {}) {
+  return f32x4{wasm_v128_load(ptr)};
+}
+YNN_ALWAYS_INLINE u32x4 load_aligned(const uint32_t* ptr, decltype(u32x4::N),
+                                     u32x4 = {}) {
+  return u32x4{wasm_v128_load(ptr)};
+}
+YNN_ALWAYS_INLINE s32x4 load_aligned(const int32_t* ptr, decltype(s32x4::N),
+                                     s32x4 = {}) {
+  return s32x4{wasm_v128_load(ptr)};
+}
+YNN_ALWAYS_INLINE u16x8 load_aligned(const uint16_t* ptr, decltype(u16x8::N),
+                                     u16x8 = {}) {
+  return u16x8{wasm_v128_load(ptr)};
+}
+YNN_ALWAYS_INLINE s16x8 load_aligned(const int16_t* ptr, decltype(s16x8::N),
+                                     s16x8 = {}) {
+  return s16x8{wasm_v128_load(ptr)};
+}
+YNN_ALWAYS_INLINE u8x16 load_aligned(const uint8_t* ptr, decltype(u8x16::N),
+                                     u8x16 = {}) {
+  return u8x16{wasm_v128_load(ptr)};
+}
+YNN_ALWAYS_INLINE s8x16 load_aligned(const int8_t* ptr, decltype(s8x16::N),
+                                     s8x16 = {}) {
+  return s8x16{wasm_v128_load(ptr)};
+}
+
+YNN_ALWAYS_INLINE void store_aligned(double* ptr, f64x2 b,
+                                     decltype(f64x2::N) = {}) {
+  wasm_v128_store(ptr, b.v);
+}
+YNN_ALWAYS_INLINE void store_aligned(float* ptr, f32x4 b,
+                                     decltype(f32x4::N) = {}) {
+  wasm_v128_store(ptr, b.v);
+}
+YNN_ALWAYS_INLINE void store_aligned(uint32_t* ptr, u32x4 b,
+                                     decltype(u32x4::N) = {}) {
+  wasm_v128_store(ptr, b.v);
+}
+YNN_ALWAYS_INLINE void store_aligned(int32_t* ptr, s32x4 b,
+                                     decltype(s32x4::N) = {}) {
+  wasm_v128_store(ptr, b.v);
+}
+YNN_ALWAYS_INLINE void store_aligned(uint16_t* ptr, u16x8 b,
+                                     decltype(u16x8::N) = {}) {
+  wasm_v128_store(ptr, b.v);
+}
+YNN_ALWAYS_INLINE void store_aligned(int16_t* ptr, s16x8 b,
+                                     decltype(s16x8::N) = {}) {
+  wasm_v128_store(ptr, b.v);
+}
+YNN_ALWAYS_INLINE void store_aligned(uint8_t* ptr, u8x16 b,
+                                     decltype(u8x16::N) = {}) {
+  wasm_v128_store(ptr, b.v);
+}
+YNN_ALWAYS_INLINE void store_aligned(int8_t* ptr, s8x16 b,
+                                     decltype(s8x16::N) = {}) {
+  wasm_v128_store(ptr, b.v);
+}
+
 YNN_ALWAYS_INLINE u8x16 load(const uint8_t* ptr, decltype(u8x16::N),
                              u8x16 = {}) {
   return u8x16{wasm_v128_load(ptr)};
