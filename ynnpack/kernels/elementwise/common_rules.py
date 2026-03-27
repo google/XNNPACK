@@ -66,3 +66,23 @@ def add_select_rules():
   z = WildCard()
   w = WildCard()
   return [Rule(select(x > y, z, w), select_greater_than(x, y, z, w))]
+
+
+def add_shift_rules():
+  """Adds generic shift rewrite patterns."""
+  return [
+      Rule(
+          logical_shift_left(
+              i16_a.with_lanes(0),
+              broadcast(i16_b, 0),
+          ),
+          logical_shift_left(i16_a.with_lanes(0), i16_b),
+      ),
+      Rule(
+          logical_shift_left(
+              i32_a.with_lanes(0),
+              broadcast(i32_b, 0),
+          ),
+          logical_shift_left(i32_a.with_lanes(0), i32_b),
+      ),
+  ]
