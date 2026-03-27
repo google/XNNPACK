@@ -19,6 +19,7 @@ namespace ynn {
 
 #if defined(YNN_ARCH_X86_64) && defined(__linux__) && !defined(CHROMIUM)
 #include <sys/syscall.h>
+#include <sys/types.h>
 
 #define XFEATURE_XTILEDATA 18
 #define ARCH_REQ_XCOMP_PERM 0x1023
