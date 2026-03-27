@@ -342,21 +342,21 @@ jobs:
         with:
           # Cache the Git repos
           path: /home/runner/.cache/gclient
-          key: experimental-v2-gclient-linux-${{ github.ref_name }}-${{ github.sha }}
+          key: gclient-linux-${{ github.ref_name }}-${{ github.sha }}
           restore-keys: |
-            experimental-v2-gclient-linux-${{ github.ref_name }}-
-            experimental-v2-gclient-linux-master-
-            experimental-v2-gclient-linux-
+            gclient-linux-${{ github.ref_name }}-
+            gclient-linux-master-
+            gclient-linux-
       - name: Restore ccache
         id: cache-ccache-restore
         uses: actions/cache@v5
         with:
           path: |
             /home/runner/.cache/ccache
-          key: experimental-v2-ccache-linux-${{ github.ref_name }}-${{ github.sha }}
+          key: ccache-linux-${{ github.ref_name }}-${{ github.sha }}
           restore-keys: |
-            experimental-v2-ccache-linux-${{ github.ref_name }}-
-            experimental-v2-ccache-linux-master-
+            ccache-linux-${{ github.ref_name }}-
+            ccache-linux-master-
       - name: Install ccache
         run: |
           sudo apt-get install -y ccache
