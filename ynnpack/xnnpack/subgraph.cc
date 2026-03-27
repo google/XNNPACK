@@ -239,7 +239,7 @@ xnn_status xnn_define_convolution_2d(
       // close: first two dims are the same between filter and output, except
       // that output has extra dimension of extent 1).
       const size_t filter_scale_split[] = {groups, 1, group_output_channels};
-      status = ynn_define_split_dim(subgraph->ynn, 0, 3, filter_scale_split,
+      status = ynn_define_split_dim(subgraph->ynn, -1, 3, filter_scale_split,
                                     filter_scale_id, &split_id, /*flags=*/0);
       if (status != ynn_status_success) {
         return ynn::xnn_status_from_ynn(status);
@@ -390,25 +390,37 @@ xnn_status xnn_define_depthwise_convolution_2d(
 
   // We need to transpose and expand a filter buffer, so it matches format
   // expected by the grouped convolution.
-  // [kh, kw, ci * dm] -> [ci * dm, kh, kw]
-  int32_t swap_dims[3] = {2, 0, 1};
+  // [1, kh, kw, ci * dm] -> [ci * dm, kh, kw, 1]
+  int32_t swap_dims[4] = {3, 1, 2, 0};
 
-  status = ynn_define_static_transpose(subgraph->ynn, 3, swap_dims, filter_id,
+  status = ynn_define_static_transpose(subgraph->ynn, 4, swap_dims, filter_id,
                                        &transposed_filter_id, /*flags=*/0);
 
   if (status != ynn_status_success) {
     return ynn::xnn_status_from_ynn(status);
   }
 
-  uint32_t expanded_transposed_filter_id = YNN_INVALID_VALUE_ID;
-  // [kh, kw, ci * dm] -> [ci * dm, kh, kw, 1]
-  int32_t new_axes[] = {3};
-  status = ynn_define_static_expand_dims(subgraph->ynn, 1, new_axes,
-                                         transposed_filter_id,
-                                         &expanded_transposed_filter_id,
-                                         /*flags=*/0);
-  if (status != ynn_status_success) {
-    return ynn::xnn_status_from_ynn(status);
+  uint32_t old_scale_id = subgraph->ynn->value(transposed_filter_id).scale_id;
+
+  // Depthwise convolution has incompatible quantization dims to other ops, thus
+  // new scale is needed for channelwise quantized variants.
+  if (old_scale_id != YNN_INVALID_VALUE_ID &&
+      ynn::rank_of_value(subgraph->ynn, old_scale_id) >= 1) {
+    uint32_t new_scale_id = YNN_INVALID_VALUE_ID;
+
+    size_t quantization_dims[] = {1, 1, 1, depth_multiplier * input_channels};
+
+    // XNNPACK copies the scale data from the caller, do the same here.
+    const uint32_t scale_flags = YNN_VALUE_FLAG_COPY_DATA;
+    status = ynn_define_tensor(subgraph->ynn, ynn_type_fp32, 4,
+                               quantization_dims,
+                               subgraph->ynn->value(old_scale_id).data->base,
+                               scale_flags, &new_scale_id);
+    if (status != ynn_status_success) {
+      return ynn::xnn_status_from_ynn(status);
+    }
+
+    subgraph->ynn->value(transposed_filter_id).scale_id = new_scale_id;
   }
 
   return xnn_define_convolution_2d(
@@ -416,7 +428,7 @@ xnn_status xnn_define_depthwise_convolution_2d(
       input_padding_left, kernel_height, kernel_width, subsampling_height,
       subsampling_width, dilation_height, dilation_width, input_channels,
       /*group_input_channels=*/1, depth_multiplier, output_min, output_max,
-      input_id, expanded_transposed_filter_id, bias_id, output_id, flags);
+      input_id, transposed_filter_id, bias_id, output_id, flags);
 }
 
 xnn_status xnn_define_space_to_depth_2d(xnn_subgraph_t subgraph,
