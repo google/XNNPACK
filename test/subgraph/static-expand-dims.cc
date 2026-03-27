@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <cstddef>
 #include <cstdint>
+#include <memory>
 #include <numeric>
 #include <vector>
 
@@ -19,6 +20,36 @@
 #include "test/subgraph/subgraph-tester.h"
 
 namespace xnnpack {
+
+namespace {
+
+std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)>
+CreateSubgraphWithExternalInputAndOutput(uint32_t* input_id, uint32_t* output_id) {
+  xnn_subgraph_t subgraph = nullptr;
+  EXPECT_EQ(xnn_status_success,
+            xnn_create_subgraph(/*external_value_ids=*/2, /*flags=*/0,
+                                &subgraph));
+  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(
+      subgraph, xnn_delete_subgraph);
+  if (subgraph == nullptr) {
+    return auto_subgraph;
+  }
+
+  const size_t dims[1] = {1};
+  EXPECT_EQ(xnn_status_success,
+            xnn_define_tensor_value(subgraph, xnn_datatype_fp32,
+                                    /*num_dims=*/1, dims, /*data=*/nullptr,
+                                    /*external_id=*/0,
+                                    XNN_VALUE_FLAG_EXTERNAL_INPUT, input_id));
+  EXPECT_EQ(xnn_status_success,
+            xnn_define_tensor_value(subgraph, xnn_datatype_fp32,
+                                    /*num_dims=*/1, dims, /*data=*/nullptr,
+                                    /*external_id=*/1,
+                                    XNN_VALUE_FLAG_EXTERNAL_OUTPUT, output_id));
+  return auto_subgraph;
+}
+
+}  // namespace
 
 std::vector<size_t> mask_to_axes(uint32_t mask) {
   std::vector<size_t> axes;
@@ -102,5 +133,23 @@ INSTANTIATE_TEST_SUITE_P(ExpandDims, ExpandDimsQS8, rank_params);
 INSTANTIATE_TEST_SUITE_P(ExpandDims, ExpandDimsQU8, rank_params);
 INSTANTIATE_TEST_SUITE_P(ExpandDims, ExpandDimsF16, rank_params);
 INSTANTIATE_TEST_SUITE_P(ExpandDims, ExpandDimsF32, rank_params);
+
+TEST(ExpandDims, rejects_axis_count_above_max_tensor_dims) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+
+  uint32_t input_id = XNN_INVALID_VALUE_ID;
+  uint32_t output_id = XNN_INVALID_VALUE_ID;
+  auto subgraph =
+      CreateSubgraphWithExternalInputAndOutput(&input_id, &output_id);
+  ASSERT_NE(subgraph, nullptr);
+
+  std::vector<size_t> new_axes(XNN_MAX_TENSOR_DIMS + 1);
+  std::iota(new_axes.begin(), new_axes.end(), 0);
+
+  EXPECT_EQ(xnn_status_unsupported_parameter,
+            xnn_define_static_expand_dims(subgraph.get(), new_axes.size(),
+                                          new_axes.data(), input_id, output_id,
+                                          /*flags=*/0));
+}
 
 }  // namespace xnnpack
