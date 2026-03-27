@@ -341,8 +341,8 @@ TEST(CONSTANT_PAD_THEN_CONVOLUTION, fusion) {
   uint32_t filter_id = 2;
   uint32_t bias_id = 3;
   uint32_t output_id = 4;
-  size_t pre_paddings[4] = {0, 2, 4, 0};
-  size_t post_paddings[4] = {0, 6, 8, 0};
+  std::vector<size_t> pre_paddings = {0, 2, 4, 0};
+  std::vector<size_t> post_paddings = {0, 6, 8, 0};
   float padding_value = 0.0f;
 
   tester.AddInputTensorF32({1, 254, 254, 3}, input_id)
@@ -386,8 +386,8 @@ TEST(CONSTANT_PAD_THEN_CONVOLUTION, fusion_quantized_int8) {
   uint32_t filter_id = 2;
   uint32_t bias_id = 3;
   uint32_t output_id = 4;
-  size_t pre_paddings[4] = {0, 2, 4, 0};
-  size_t post_paddings[4] = {0, 6, 8, 0};
+  std::vector<size_t> pre_paddings = {0, 2, 4, 0};
+  std::vector<size_t> post_paddings = {0, 6, 8, 0};
   float padding_value = 0.0f;
   using qint8 = xnnpack::quantized<int8_t>;
   using qint32 = xnnpack::quantized<int32_t>;
@@ -446,8 +446,8 @@ TEST(CONSTANT_PAD_THEN_CONVOLUTION,
   uint32_t bias_id = 3;
   uint32_t output_id = 4;
   // Non-zero pre-padding in the N or C dimension.
-  size_t pre_paddings[4] = {1, 2, 4, 0};
-  size_t post_paddings[4] = {0, 6, 8, 0};
+  std::vector<size_t> pre_paddings = {1, 2, 4, 0};
+  std::vector<size_t> post_paddings = {0, 6, 8, 0};
   float padding_value = 0.0f;
 
   tester.AddInputTensorF32({1, 254, 254, 3}, input_id)
@@ -480,8 +480,8 @@ TEST(CONSTANT_PAD_THEN_CONVOLUTION, not_fused_due_to_padding_value_not_zero) {
   uint32_t filter_id = 2;
   uint32_t bias_id = 3;
   uint32_t output_id = 4;
-  size_t pre_paddings[4] = {1, 2, 4, 0};
-  size_t post_paddings[4] = {0, 6, 8, 0};
+  std::vector<size_t> pre_paddings = {1, 2, 4, 0};
+  std::vector<size_t> post_paddings = {0, 6, 8, 0};
   float padding_value = 1.0f;
 
   tester.AddInputTensorF32({1, 254, 254, 3}, input_id)
@@ -514,8 +514,8 @@ TEST(CONSTANT_PAD_THEN_DEPTHWISE_CONVOLUTION, fusion) {
   uint32_t filter_id = 2;
   uint32_t bias_id = 3;
   uint32_t output_id = 4;
-  size_t pre_paddings[4] = {0, 2, 4, 0};
-  size_t post_paddings[4] = {0, 6, 8, 0};
+  std::vector<size_t> pre_paddings = {0, 2, 4, 0};
+  std::vector<size_t> post_paddings = {0, 6, 8, 0};
   float padding_value = 0.0f;
   tester.AddInputTensorF32({1, 128, 128, 4}, input_id)
       .AddDynamicTensorF32({1, 136, 140, 4}, intermediate_id)
@@ -558,8 +558,8 @@ TEST(CONSTANT_PAD_THEN_DEPTHWISE_CONVOLUTION,
   uint32_t bias_id = 3;
   uint32_t output_id = 4;
   // Non-zero pre-padding in the N or C dimension.
-  size_t pre_paddings[4] = {1, 2, 4, 0};
-  size_t post_paddings[4] = {0, 6, 8, 0};
+  std::vector<size_t> pre_paddings = {1, 2, 4, 0};
+  std::vector<size_t> post_paddings = {0, 6, 8, 0};
   float padding_value = 0.0f;
   tester.AddInputTensorF32({1, 128, 128, 4}, input_id)
       .AddDynamicTensorF32({2, 136, 140, 4}, intermediate_id)
@@ -590,8 +590,8 @@ TEST(CONSTANT_PAD_THEN_DEPTHWISE_CONVOLUTION,
   uint32_t filter_id = 2;
   uint32_t bias_id = 3;
   uint32_t output_id = 4;
-  size_t pre_paddings[4] = {0, 2, 4, 0};
-  size_t post_paddings[4] = {0, 6, 8, 0};
+  std::vector<size_t> pre_paddings = {0, 2, 4, 0};
+  std::vector<size_t> post_paddings = {0, 6, 8, 0};
   float padding_value = 1.0f;
   tester.AddInputTensorF32({1, 128, 128, 4}, input_id)
       .AddDynamicTensorF32({1, 136, 140, 4}, intermediate_id)

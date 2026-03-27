@@ -744,12 +744,11 @@ xnn_status xnn_define_binary(xnn_subgraph_t subgraph, xnn_binary_operator type,
   }
 }
 
-xnn_status xnn_define_static_constant_pad(xnn_subgraph_t subgraph,
-                                          const size_t* pre_paddings,
-                                          const size_t* post_paddings,
-                                          float padding_value,
-                                          uint32_t input_id, uint32_t output_id,
-                                          uint32_t flags) {
+xnn_status xnn_define_static_constant_pad_v2(
+    xnn_subgraph_t subgraph, size_t num_padding_dims,
+    const size_t* pre_paddings, const size_t* post_paddings,
+    float padding_value, uint32_t input_id, uint32_t output_id,
+    uint32_t flags) {
   uint32_t padding_id = YNN_INVALID_VALUE_ID;
   ynn_status status = ynn::define_scalar_value_like(subgraph->ynn, input_id,
                                                     padding_value, &padding_id);
@@ -757,17 +756,16 @@ xnn_status xnn_define_static_constant_pad(xnn_subgraph_t subgraph,
     return ynn::xnn_status_from_ynn(status);
   }
 
-  size_t rank = ynn::rank_of_value(subgraph->ynn, input_id);
-
-  int64_t ynn_pre_paddings[YNN_MAX_TENSOR_RANK];
-  int64_t ynn_post_paddings[YNN_MAX_TENSOR_RANK];
-  std::copy_n(pre_paddings, rank, ynn_pre_paddings);
-  std::copy_n(post_paddings, rank, ynn_post_paddings);
-  int32_t axes[YNN_MAX_TENSOR_RANK];
-  std::iota(axes, axes + rank, 0);
+  std::vector<int64_t> ynn_pre_paddings(num_padding_dims);
+  std::vector<int64_t> ynn_post_paddings(num_padding_dims);
+  std::copy_n(pre_paddings, num_padding_dims, ynn_pre_paddings.data());
+  std::copy_n(post_paddings, num_padding_dims, ynn_post_paddings.data());
+  std::vector<int32_t> axes(num_padding_dims);
+  ;
+  std::iota(axes.begin(), axes.end(), 0);
   return ynn::xnn_status_from_ynn(ynn_define_static_pad(
-      subgraph->ynn, rank, axes, ynn_pre_paddings, ynn_post_paddings, input_id,
-      padding_id, &output_id, /*flags=*/0));
+      subgraph->ynn, num_padding_dims, axes.data(), ynn_pre_paddings.data(),
+      ynn_post_paddings.data(), input_id, padding_id, &output_id, /*flags=*/0));
 }
 
 xnn_status xnn_define_static_expand_dims(xnn_subgraph_t subgraph,
@@ -1123,6 +1121,8 @@ xnn_status xnn_define_batch_matrix_multiply(xnn_subgraph_t subgraph,
   if (flags & XNN_FLAG_TRANSPOSE_B) {
     uint32_t input2_id_transposed = YNN_INVALID_VALUE_ID;
     const size_t b_rank = ynn::rank_of_value(subgraph->ynn, input2_id);
+    assert(b_rank >= 2);
+    assert(b_rank <= YNN_MAX_TENSOR_RANK);
     std::array<int32_t, YNN_MAX_TENSOR_RANK> perm;
     std::iota(perm.begin(), perm.end(), 0);
     std::swap(perm[b_rank - 1], perm[b_rank - 2]);
@@ -1219,21 +1219,21 @@ xnn_status xnn_define_static_slice(xnn_subgraph_t subgraph, size_t num_dims,
                                    const size_t* offsets, const size_t* sizes,
                                    uint32_t input_id, uint32_t output_id,
                                    uint32_t flags) {
-  int64_t ynn_offsets[XNN_MAX_TENSOR_DIMS];
-  std::copy_n(offsets, num_dims, ynn_offsets);
-  return xnn_define_static_slice_v2(subgraph, num_dims, ynn_offsets, sizes,
-                                    input_id, output_id, flags);
+  std::vector<int64_t> ynn_offsets(num_dims);
+  std::copy_n(offsets, num_dims, ynn_offsets.data());
+  return xnn_define_static_slice_v2(subgraph, num_dims, ynn_offsets.data(),
+                                    sizes, input_id, output_id, flags);
 }
 
 xnn_status xnn_define_static_slice_v2(xnn_subgraph_t subgraph, size_t num_dims,
                                       const int64_t* offsets,
                                       const size_t* sizes, uint32_t input_id,
                                       uint32_t output_id, uint32_t flags) {
-  int64_t ends[XNN_MAX_TENSOR_DIMS];
+  std::vector<int64_t> ends(num_dims);
   for (int i = 0; i < num_dims; i++) {
     ends[i] = offsets[i] + (int64_t)sizes[i];
   }
-  return xnn_define_static_slice_v3(subgraph, num_dims, offsets, ends,
+  return xnn_define_static_slice_v3(subgraph, num_dims, offsets, ends.data(),
                                     /*strides=*/nullptr, input_id, output_id,
                                     flags);
 }
@@ -1243,20 +1243,21 @@ xnn_status xnn_define_static_slice_v3(xnn_subgraph_t subgraph, size_t num_dims,
                                       const int64_t* ends,
                                       const int64_t* strides, uint32_t input_id,
                                       uint32_t output_id, uint32_t flags) {
-  int32_t axes[YNN_MAX_TENSOR_RANK];
-  std::iota(axes, axes + YNN_MAX_TENSOR_RANK, 0);
-  return ynn::xnn_status_from_ynn(
-      ynn_define_static_slice(subgraph->ynn, num_dims, axes, begins, ends,
-                              strides, input_id, &output_id, /*flags=*/0));
+  std::vector<int32_t> axes(num_dims);
+  std::iota(axes.begin(), axes.end(), 0);
+  return ynn::xnn_status_from_ynn(ynn_define_static_slice(
+      subgraph->ynn, num_dims, axes.data(), begins, ends, strides, input_id,
+      &output_id, /*flags=*/0));
 }
 
 xnn_status xnn_define_static_transpose(xnn_subgraph_t subgraph, size_t num_dims,
                                        const size_t* perm, uint32_t input_id,
                                        uint32_t output_id, uint32_t flags) {
-  int32_t ynn_perm[XNN_MAX_TENSOR_DIMS];
-  std::copy_n(perm, num_dims, ynn_perm);
-  return ynn::xnn_status_from_ynn(ynn_define_static_transpose(
-      subgraph->ynn, num_dims, ynn_perm, input_id, &output_id, /*flags=*/0));
+  std::vector<int32_t> ynn_perm(num_dims);
+  std::copy_n(perm, num_dims, ynn_perm.data());
+  return ynn::xnn_status_from_ynn(
+      ynn_define_static_transpose(subgraph->ynn, num_dims, ynn_perm.data(),
+                                  input_id, &output_id, /*flags=*/0));
 }
 
 }  // extern "C"

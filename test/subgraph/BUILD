@@ -342,7 +342,6 @@ xnnpack_unit_test(
         "//:node_type",
         "//:operator_h",
         "//:params",
-        "//:subgraph",
         "//:subgraph_h",
         "//:xnnpack_h",
         "//test:replicable_random_device",

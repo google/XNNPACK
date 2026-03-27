@@ -364,6 +364,7 @@ struct xnn_node {
     struct {
       size_t pre_paddings[XNN_MAX_TENSOR_DIMS];
       size_t post_paddings[XNN_MAX_TENSOR_DIMS];
+      size_t num_padding_dims;
       uint32_t padding_value;
     } static_pad;
     struct {

@@ -222,8 +222,8 @@ TEST(SUBGRAPH_FP16, fully_connected_f16_weights_no_biases) {
 
 TEST(SUBGRAPH_FP16, value_both_external_output_and_input) {
   SubgraphTester tester(4);
-  std::array<size_t, 4> pre_paddings = {0, 1, 0, 0};
-  std::array<size_t, 4> post_paddings = {0, 1, 0, 0};
+  std::vector<size_t> pre_paddings = {0, 1, 0, 0};
+  std::vector<size_t> post_paddings = {0, 1, 0, 0};
   // external input[0]
   //      /
   // [constant pad]
@@ -239,7 +239,7 @@ TEST(SUBGRAPH_FP16, value_both_external_output_and_input) {
       .AddDynamicTensorF32({1, 1, 1, 3}, 1)
       .AddOutputTensorF32({1, 4, 2, 3}, 2)
       .AddOutputTensorF32({1, 4, 2, 3}, 3)
-      .AddConstantPad(pre_paddings.data(), post_paddings.data(), 0.0f, 0, 2)
+      .AddConstantPad(pre_paddings, post_paddings, 0.0f, 0, 2)
       .AddAddition(2, 1, 3)
       .Optimize()
       .RewriteForFp16();
@@ -940,14 +940,13 @@ TEST(SUBGRAPH_FP16_DYNAMIC_FULLY_CONNECTED,
   const uint32_t input2_id = 1;
   const uint32_t weights_id = 3;
   const uint32_t fully_connected_out_id = 2;
-  std::array<size_t, 4> pre_paddings = {1, 0, 0, 0};
-  std::array<size_t, 4> post_paddings = {0, 0, 0, 0};
+  std::vector<size_t> pre_paddings = {1, 0, 0, 0};
+  std::vector<size_t> post_paddings = {0, 0, 0, 0};
   tester.AddInputTensorF32({1, 5, 5, 3}, input_id)
       .AddInputTensorF32({1, 1, 1, 3}, input2_id)
       .AddOutputTensorF32({1, 5, 5, 2}, fully_connected_out_id)
       .AddDynamicTensorF32({2, 1, 1, 3}, weights_id)
-      .AddConstantPad(pre_paddings.data(), post_paddings.data(), 0.0f,
-                      input2_id, weights_id)
+      .AddConstantPad(pre_paddings, post_paddings, 0.0f, input2_id, weights_id)
       .AddFullyConnected(input_id, weights_id,
                          /*bias_id=*/XNN_INVALID_VALUE_ID,
                          fully_connected_out_id)
@@ -974,15 +973,14 @@ TEST(SUBGRAPH_FP16_DYNAMIC_FULLY_CONNECTED,
   const uint32_t weights_id = 3;
   const uint32_t bias_id = 4;
   const uint32_t fully_connected_out_id = 2;
-  std::array<size_t, 4> pre_paddings = {1, 0, 0, 0};
-  std::array<size_t, 4> post_paddings = {0, 0, 0, 0};
+  std::vector<size_t> pre_paddings = {1, 0, 0, 0};
+  std::vector<size_t> post_paddings = {0, 0, 0, 0};
   tester.AddInputTensorF32({1, 5, 5, 3}, input_id)
       .AddInputTensorF32({1, 1, 1, 3}, input2_id)
       .AddOutputTensorF32({1, 5, 5, 2}, fully_connected_out_id)
       .AddDynamicTensorF32({2, 1, 1, 3}, weights_id)
       .AddStaticTensorF32({2}, TensorType::kDense, bias_id)
-      .AddConstantPad(pre_paddings.data(), post_paddings.data(), 0.0f,
-                      input2_id, weights_id)
+      .AddConstantPad(pre_paddings, post_paddings, 0.0f, input2_id, weights_id)
       .AddFullyConnected(input_id, weights_id, bias_id, fully_connected_out_id)
       .Optimize()
       .RewriteForFp16();
@@ -1007,15 +1005,14 @@ TEST(SUBGRAPH_FP16_DYNAMIC_FULLY_CONNECTED,
   const uint32_t weights_id = 3;
   const uint32_t bias_id = 4;
   const uint32_t fully_connected_out_id = 2;
-  std::array<size_t, 4> pre_paddings = {1};
-  std::array<size_t, 4> post_paddings = {0};
+  std::vector<size_t> pre_paddings = {1};
+  std::vector<size_t> post_paddings = {0};
   tester.AddInputTensorF32({1, 5, 5, 3}, input_id)
       .AddInputTensorF32({1}, input2_id)
       .AddOutputTensorF32({1, 5, 5, 2}, fully_connected_out_id)
       .AddStaticTensorF32({2, 1, 1, 3}, TensorType::kDense, weights_id)
       .AddDynamicTensorF32({2}, bias_id)
-      .AddConstantPad(pre_paddings.data(), post_paddings.data(), 0.0f,
-                      input2_id, bias_id)
+      .AddConstantPad(pre_paddings, post_paddings, 0.0f, input2_id, bias_id)
       .AddFullyConnected(input_id, weights_id, bias_id, fully_connected_out_id)
       .Optimize()
       .RewriteForFp16();
@@ -1042,10 +1039,10 @@ TEST(SUBGRAPH_FP16_DYNAMIC_FULLY_CONNECTED,
   const uint32_t bias_id = 4;
   const uint32_t fully_connected_out_id = 5;
 
-  std::array<size_t, 4> weights_pre_paddings = {1, 0, 0, 0};
-  std::array<size_t, 4> weights_post_paddings = {0, 0, 0, 0};
-  std::array<size_t, 4> bias_pre_paddings = {1};
-  std::array<size_t, 4> bias_post_paddings = {0};
+  std::vector<size_t> weights_pre_paddings = {1, 0, 0, 0};
+  std::vector<size_t> weights_post_paddings = {0, 0, 0, 0};
+  std::vector<size_t> bias_pre_paddings = {1};
+  std::vector<size_t> bias_post_paddings = {0};
 
   tester.AddInputTensorF32({1, 5, 5, 3}, input_id)
       .AddInputTensorF32({1, 1, 1, 3}, input2_id)
@@ -1053,10 +1050,10 @@ TEST(SUBGRAPH_FP16_DYNAMIC_FULLY_CONNECTED,
       .AddOutputTensorF32({1, 5, 5, 2}, fully_connected_out_id)
       .AddDynamicTensorF32({2, 1, 1, 3}, weights_id)
       .AddDynamicTensorF32({2}, bias_id)
-      .AddConstantPad(weights_pre_paddings.data(), weights_post_paddings.data(),
-                      0.0f, input2_id, weights_id)
-      .AddConstantPad(bias_pre_paddings.data(), bias_post_paddings.data(), 0.0f,
-                      input3_id, bias_id)
+      .AddConstantPad(weights_pre_paddings, weights_post_paddings, 0.0f,
+                      input2_id, weights_id)
+      .AddConstantPad(bias_pre_paddings, bias_post_paddings, 0.0f, input3_id,
+                      bias_id)
       .AddFullyConnected(input_id, weights_id, bias_id, fully_connected_out_id)
       .Optimize()
       .RewriteForFp16();
