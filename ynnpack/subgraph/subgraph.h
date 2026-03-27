@@ -21,6 +21,7 @@
 #include <variant>
 #include <vector>
 
+#include "ynnpack/base/ref_count.h"
 #include "ynnpack/base/type.h"
 #include "ynnpack/include/ynnpack.h"
 #include "ynnpack/kernels/ternary/ternary.h"
@@ -30,6 +31,14 @@
 #include "slinky/runtime/expr.h"
 
 namespace ynn {
+
+#define YNN_RETURN_IF_ERROR(status)      \
+  do {                                   \
+    const ynn_status _status = (status); \
+    if (_status != ynn_status_success) { \
+      return _status;                    \
+    }                                    \
+  } while (0)
 
 // dot packing splits + transposes 2 dimensions.
 constexpr size_t ynn_internal_extra_dims = 2;
@@ -48,6 +57,28 @@ ynn_status define_static_transpose(ynn_subgraph_t subgraph,
                                    std::vector<int32_t> permutation,
                                    uint32_t input_id, uint32_t* output_id,
                                    bool alias = false);
+
+// Validation helpers for public APIs.
+ynn_status validate_subgraph(const char* node, ynn_subgraph_t subgraph);
+ynn_status validate_rank(const char* node, const char* rank_of, size_t rank);
+ynn_status validate_axis(const char* node, const char* axis_of, int rank,
+                         int32_t axis);
+ynn_status validate_input_tensor(const char* node, ynn_subgraph_t subgraph,
+                                 const char* name, uint32_t id,
+                                 bool optional = false);
+ynn_status validate_input_tensor_array(const char* node,
+                                       ynn_subgraph_t subgraph,
+                                       const char* name, size_t count,
+                                       const uint32_t* ids,
+                                       bool allow_empty = false);
+ynn_status validate_output_tensor(const char* node, ynn_subgraph_t subgraph,
+                                  const char* name, uint32_t* id_out);
+ynn_status validate_output_tensor_array(const char* node,
+                                        ynn_subgraph_t subgraph,
+                                        const char* name, size_t count,
+                                        uint32_t* id_outs,
+                                        bool allow_empty = false);
+ynn_status validate_runtime(ynn_runtime_t runtime);
 
 }  // namespace ynn
 
@@ -505,7 +536,7 @@ struct ynn_node {
   std::vector<check> checks;
 };
 
-struct ynn_subgraph {
+struct ynn_subgraph : public ynn::ref_counted<ynn_subgraph> {
   explicit ynn_subgraph(uint32_t external_value_ids, uint32_t flags);
 
   // Number of Value IDs reserved for communication with external graph
@@ -523,6 +554,10 @@ struct ynn_subgraph {
   ynn::slinky_globals globals;
 
   bool is_valid_value(uint32_t id) const { return id < values.size(); }
+  bool is_valid_external_value(uint32_t id) const {
+    assert(external_value_ids <= values.size());
+    return id < external_value_ids;
+  }
 
   const ynn_value& value(uint32_t id) const {
     assert(id < values.size());
@@ -584,6 +619,8 @@ struct ynn_subgraph {
   ynn_status optimize(slinky::thread_pool* threadpool);
 
   void dump(std::ostream& os) const;
+
+  static void destroy(ynn_subgraph* subgraph) { delete subgraph; }
 };
 
 #endif  // XNNPACK_YNNPACK_SUBGRAPH_SUBGRAPH_H_

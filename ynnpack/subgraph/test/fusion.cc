@@ -486,7 +486,7 @@ TEST(fusion, reduce_sum_squared_of_convert_int8_quantized) {
 
 namespace {
 
-void TestReduceSumOfSquared(ynn_type type) {
+void TestReduceSumOfSquared(ynn_type type, bool use_square) {
   const uint32_t x_id = 0;
   const uint32_t y_id = 1;
   SubgraphBuilder builder(2);
@@ -494,8 +494,12 @@ void TestReduceSumOfSquared(ynn_type type) {
   builder.AddInput(type, 2, x_id)
       .AddOutput(type, 1, y_id)
       .AddTensor(type, 2, sq_id);
-  builder.AddBinary(ynn_binary_multiply, x_id, x_id, sq_id)
-      .AddReduce(ynn_reduce_sum, {1}, sq_id, YNN_INVALID_VALUE_ID, y_id, 0);
+  if (use_square) {
+    builder.AddBinary(ynn_binary_multiply, x_id, x_id, sq_id);
+  } else {
+    builder.AddUnary(ynn_unary_square, x_id, sq_id);
+  }
+  builder.AddReduce(ynn_reduce_sum, {1}, sq_id, YNN_INVALID_VALUE_ID, y_id, 0);
 
   ynn_subgraph& subgraph = *builder.GetSubgraph();
 
@@ -515,18 +519,23 @@ void TestReduceSumOfSquared(ynn_type type) {
 
 TEST(fusion, reduce_sum_of_squared_f32) {
   // reduce_sum(x_f32 * x_f32) -> reduce_sum_squared(x_f32)
-  TestReduceSumOfSquared(ynn_type_fp32);
+  for (bool use_square : {false, true}) {
+    TestReduceSumOfSquared(ynn_type_fp32, use_square);
+  }
 }
 
 TEST(fusion, reduce_sum_of_squared_int32) {
   // reduce_sum(x_int32 * x_int32) -> reduce_sum_squared(x_int32)
-  TestReduceSumOfSquared(ynn_type_int32);
+  for (bool use_square : {false, true}) {
+    TestReduceSumOfSquared(ynn_type_int32, use_square);
+  }
 }
 
 namespace {
 
 void TestReduceSumOfSquaredWithConvert(ynn_type input_type,
-                                       ynn_type intermediate_type) {
+                                       ynn_type intermediate_type,
+                                       bool use_square) {
   const uint32_t x_id = 0;
   const uint32_t y_id = 1;
   uint32_t intermediate1_id = 2;
@@ -539,11 +548,15 @@ void TestReduceSumOfSquaredWithConvert(ynn_type input_type,
   // -> (reduce) -> y_id.
   builder.AddTensor(intermediate_type, 2, intermediate1_id)
       .AddTensor(intermediate_type, 2, intermediate2_id);
-  builder.AddUnary(ynn_unary_convert, x_id, intermediate1_id)
-      .AddBinary(ynn_binary_multiply, intermediate1_id, intermediate1_id,
-                 intermediate2_id)
-      .AddReduce(ynn_reduce_sum, {1}, intermediate2_id, YNN_INVALID_VALUE_ID,
-                 y_id, 0);
+  builder.AddUnary(ynn_unary_convert, x_id, intermediate1_id);
+  if (use_square) {
+    builder.AddBinary(ynn_binary_multiply, intermediate1_id, intermediate1_id,
+                      intermediate2_id);
+  } else {
+    builder.AddUnary(ynn_unary_square, intermediate1_id, intermediate2_id);
+  }
+  builder.AddReduce(ynn_reduce_sum, {1}, intermediate2_id, YNN_INVALID_VALUE_ID,
+                    y_id, 0);
 
   ynn_subgraph& subgraph = *builder.GetSubgraph();
 
@@ -563,17 +576,24 @@ void TestReduceSumOfSquaredWithConvert(ynn_type input_type,
 
 TEST(fusion, reduce_sum_of_squared_with_convert_fp16) {
   // reduce_sum(fp32(x_fp16) * fp32(x_fp16)) -> reduce_sum_squared(x_fp16).
-  TestReduceSumOfSquaredWithConvert(ynn_type_fp16, ynn_type_fp32);
+  for (bool use_square : {false, true}) {
+    TestReduceSumOfSquaredWithConvert(ynn_type_fp16, ynn_type_fp32, use_square);
+  }
 }
 
 TEST(fusion, reduce_sum_of_squared_with_convert_bf16) {
   // reduce_sum(fp32(x_bf16) * fp32(x_bf16)) -> reduce_sum_squared(x_bf16).
-  TestReduceSumOfSquaredWithConvert(ynn_type_bf16, ynn_type_fp32);
+  for (bool use_square : {false, true}) {
+    TestReduceSumOfSquaredWithConvert(ynn_type_bf16, ynn_type_fp32, use_square);
+  }
 }
 
 TEST(fusion, reduce_sum_of_squared_with_convert_int8) {
   // reduce_sum(int32(x_int8) * int32(x_int8)) -> reduce_sum_squared(x_int8).
-  TestReduceSumOfSquaredWithConvert(ynn_type_int8, ynn_type_int32);
+  for (bool use_square : {false, true}) {
+    TestReduceSumOfSquaredWithConvert(ynn_type_int8, ynn_type_int32,
+                                      use_square);
+  }
 }
 
 TEST(fusion, reduce_sum_of_squared_blocked_by_non_copy) {

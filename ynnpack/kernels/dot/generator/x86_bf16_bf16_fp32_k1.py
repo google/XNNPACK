@@ -20,21 +20,13 @@ class x86_bf16_bf16_fp32_k1(x86):
     self.b_type = "bfloat16"
 
   def header(self):
-    return super().header() + f"""
+    return super().header() + """
 
-namespace {{
+namespace {
 
-struct bfloat16 {{
-  std::uint16_t value;
-}};
+using bfloat16 = uint16_t;
 
-YNN_INTRINSIC __m{self.bits}i unaligned_load_broadcast_bf16(const bfloat16* ptr) {{
-    int16_t value;
-    memcpy(&value, ptr, sizeof(int16_t));
-    return {self._mm()}_set1_epi16(value);
-}}
-
-}}  // namespace
+}  // namespace
 """
 
   def load_a_tile(self, i, k):
@@ -44,19 +36,18 @@ YNN_INTRINSIC __m{self.bits}i unaligned_load_broadcast_bf16(const bfloat16* ptr)
     # We want to broadcast a single bf16 to a vector of f32. We implement this
     # with a 16-bit broadcast, and then masking off the low 16 bits of each
     # 32-bit value.
-    a_ik = f"unaligned_load_broadcast_bf16({self.a_ptr(i, k)})"
+    a = f"{self._mm()}_set1_epi16(*{self.a_ptr(i, k)})"
     mask = f"{self._mm()}_set1_epi32(0xffff0000)"
-    return f"__m{bits} a_{i}_{k} = {cast}({bitwise_and}({a_ik}, {mask}));\n"
+    return f"__m{bits} a_{i}_{k} = {cast}({bitwise_and}({a}, {mask}));\n"
 
   def load_b_tile(self, k, j):
     bits = self.bits
-    cast = f"{self._mm()}_castsi{bits}_ps"
-    ptr = self.b_ptr(k, j, f"__m{bits//2}i")
-    b_kj = f"{self._mm(bits//2)}_loadu_si{bits//2}({ptr})"
-    b_kj = f"{self._mm()}_cvtepi16_epi32({b_kj})"
-    return f"""
-__m{bits} b_{k}_{j} = {cast}({self._mm()}_slli_epi32({b_kj}, 16));
-"""
+    mm = self._mm()
+    cast = f"{mm}_castsi{bits}_ps"
+    b_ptr = self.b_ptr(k, j, f"__m{bits//2}i")
+    b = f"{self._mm(bits//2)}_loadu_si{bits//2}({b_ptr})"
+    b = f"{mm}_cvtepi16_epi32({b})"
+    return f"__m{bits} b_{k}_{j} = {cast}({mm}_slli_epi32({b}, 16));\n"
 
 
 class x86_avx2_bf16_bf16_fp32_k1(x86_bf16_bf16_fp32_k1, x86_avx):
@@ -64,11 +55,11 @@ class x86_avx2_bf16_bf16_fp32_k1(x86_bf16_bf16_fp32_k1, x86_avx):
     super().__init__(arch, bits, tile_shape)
 
   def product(self, i, j, k):
-    add = f"{self._mm()}_add_ps"
-    mul = f"{self._mm()}_mul_ps"
-    return f"""
-c_{i}_{j} = {add}(c_{i}_{j}, {mul}(a_{i}_{k}, b_{k}_{j}));
-"""
+    c_ij = f"c_{i}_{j}"
+    a_ik = f"a_{i}_{k}"
+    b_kj = f"b_{k}_{j}"
+    mm = self._mm()
+    return f"{c_ij} = {mm}_add_ps({c_ij}, {mm}_mul_ps({a_ik}, {b_kj}));\n"
 
 
 class x86_avx2_fma3_bf16_bf16_fp32_k1(x86_avx2_bf16_bf16_fp32_k1):
@@ -76,9 +67,9 @@ class x86_avx2_fma3_bf16_bf16_fp32_k1(x86_avx2_bf16_bf16_fp32_k1):
     super().__init__(arch, bits, tile_shape)
 
   def product(self, i, j, k):
-    return f"""
-c_{i}_{j} = {self._mm()}_fmadd_ps(a_{i}_{k}, b_{k}_{j}, c_{i}_{j});
-"""
+    c_ij = f"c_{i}_{j}"
+    mm = self._mm()
+    return f"{c_ij} = {mm}_fmadd_ps(a_{i}_{k}, b_{k}_{j}, {c_ij});\n"
 
 
 class x86_avx512_bf16_bf16_fp32_k1(x86_bf16_bf16_fp32_k1, x86_avx512):
@@ -87,6 +78,6 @@ class x86_avx512_bf16_bf16_fp32_k1(x86_bf16_bf16_fp32_k1, x86_avx512):
     super().__init__(arch, bits, tile_shape)
 
   def product(self, i, j, k):
-    return f"""
-c_{i}_{j} = {self._mm()}_fmadd_ps(a_{i}_{k}, b_{k}_{j}, c_{i}_{j});
-"""
+    c_ij = f"c_{i}_{j}"
+    mm = self._mm()
+    return f"{c_ij} = {mm}_fmadd_ps(a_{i}_{k}, b_{k}_{j}, {c_ij});\n"

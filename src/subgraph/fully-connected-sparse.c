@@ -58,7 +58,7 @@ static enum xnn_status create_fully_connected_operator(
   enum xnn_datatype input_datatype = values[input_id].datatype;
   const enum xnn_datatype filter_datatype = values[filter_id].datatype;
   const enum xnn_datatype bias_datatype = bias_id != XNN_INVALID_VALUE_ID
-                                              ? values[filter_id].datatype
+                                              ? values[bias_id].datatype
                                               : xnn_datatype_invalid;
   switch (input_datatype) {
     case xnn_datatype_fp16:
@@ -155,10 +155,26 @@ static enum xnn_status reshape_fully_connected_operator(
 {
   const uint32_t input_id = opdata->inputs[0];
   assert(input_id < num_values);
-  const uint32_t filter_id = opdata->inputs[0];
+  const uint32_t filter_id = opdata->inputs[1];
   assert(filter_id < num_values);
   const size_t input_channels = values[filter_id].shape.dim[1];
+  if (input_channels == 0) {
+    xnn_log_error("failed to reshape %s operator with input ID #%" PRIu32
+                  ": input channels must be non-zero",
+                  xnn_node_type_to_string(xnn_node_type_fully_connected_sparse),
+                  input_id);
+    return xnn_status_invalid_parameter;
+  }
+
   const size_t num_input_elements = xnn_shape_multiply_all_dims(&values[input_id].shape);
+  if (num_input_elements % input_channels != 0) {
+    xnn_log_error("failed to reshape %s operator with input ID #%" PRIu32
+                  ": number of input elements %zu is not divisible by "
+                  "input channels %zu",
+                  xnn_node_type_to_string(xnn_node_type_fully_connected_sparse),
+                  input_id, num_input_elements, input_channels);
+    return xnn_status_invalid_parameter;
+  }
   const size_t batch_size = num_input_elements / input_channels;
   const size_t old_workspace_size = opdata->workspace_size;
   enum xnn_status status = xnn_status_invalid_state;

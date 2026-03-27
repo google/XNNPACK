@@ -28,8 +28,8 @@
 #include "slinky/builder/simplify.h"
 #include "slinky/runtime/buffer.h"
 #include "slinky/runtime/expr.h"
-#include "slinky/runtime/print.h"
 #include "slinky/runtime/stmt.h"
+#include "slinky/runtime/print.h"
 
 namespace ynn {
 
@@ -147,33 +147,53 @@ auto make_unary_reduce_impl(ynn_reduce_operator op,
           // initializing the output.
           return 0;
         }
-        if (k2 == 1) {
+        slinky::index_t stride_i = a.dim(i).stride();
+        if (k1 * a.elem_size == stride_i) {
+          k1 *= extent_i;
+          slice(i);
+          continue;
+        } else if (a_stride_k2 * k2 == stride_i) {
+          k2 *= extent_i;
+          slice(i);
+          continue;
+        } else if (a_stride_k3 * k3 == stride_i) {
+          k3 *= extent_i;
+          slice(i);
+          continue;
+        } else if (k2 == 1) {
           k2 = extent_i;
-          a_stride_k2 = a.dim(i).stride();
+          a_stride_k2 = stride_i;
           slice(i);
           continue;
         } else if (k3 == 1) {
           k3 = extent_i;
-          a_stride_k3 = a.dim(i).stride();
+          a_stride_k3 = stride_i;
           slice(i);
           continue;
         }
       } else {
         // Not a reduction dimension. If we haven't already found a dimension
         // for the kernel, give it this one.
-        if (n == 1 && c.dim(i).stride() == c.elem_size) {
-          n = c.dim(i).extent();
-          if (n == 0) {
-            // The output is empty.
-            return 0;
+        if (c.dim(i).stride() == n * c.elem_size) {
+          if (a_stride_n * n == a.dim(i).stride()) {
+            n *= c.dim(i).extent();
+            slice(i);
+            continue;
+          } else if (n == 1) {
+            n = c.dim(i).extent();
+            a_stride_n = a.dim(i).stride();
+            slice(i);
+            continue;
           }
-          a_stride_n = a.dim(i).stride();
-          slice(i);
-          continue;
         }
       }
       // If we get here, we are keeping this dimension.
       ++i;
+    }
+
+    if (n == 0) {
+      // The output is empty.
+      return 0;
     }
 
     slinky::for_each_element(
@@ -201,7 +221,7 @@ ynn_type get_accumulator_type(ynn_reduce_operator op, ynn_type a_type) {
   }
 }
 
-uint32_t get_reduce_identity_value(ynn_subgraph_t subgraph,
+uint32_t get_reduce_identity_value(ynn_subgraph& subgraph,
                                    const ynn_value& output,
                                    ynn_reduce_operator op) {
   float value_f32[2];
@@ -255,27 +275,92 @@ uint32_t get_reduce_identity_value(ynn_subgraph_t subgraph,
   // the tensor, which expect the dimensions in descending stride order.
   std::reverse(dims, dims + rank);
 
-  return subgraph->get_static_value_id(output.type, rank, dims, zero_point_id,
-                                       scale_id, value_f32);
+  return subgraph.get_static_value_id(output.type, rank, dims, zero_point_id,
+                                      scale_id, value_f32);
 }
 
 }  // namespace
 
 void define_reduce(ynn_subgraph& subgraph, ynn_node& node,
                    ynn_reduce_operator op, const ynn::axes_set& k_dims,
-                   uint32_t input_a_id, uint32_t input_b_id, uint32_t output_id,
-                   bool keep_dims) {
-  assert(subgraph.is_valid_value(input_a_id));
-  assert(subgraph.is_valid_value(output_id));
+                   uint32_t input_a_id, uint32_t input_b_id,
+                   uint32_t* output_id, bool keep_dims) {
   const ynn_value& a = subgraph.value(input_a_id);
-  const ynn_value& output = subgraph.value(output_id);
+
+  if (*output_id == YNN_INVALID_VALUE_ID) {
+    // Make the output for this reduction.
+    ynn_type output_type = get_accumulator_type(op, a.type);
+    ynn_value& output = subgraph.new_internal_value(output_type);
+    uint32_t reduce_size_id = YNN_INVALID_VALUE_ID;
+    switch (op) {
+      case ynn_reduce_sum:
+      case ynn_reduce_sum_squared:
+        if (a.zero_point_id != YNN_INVALID_VALUE_ID) {
+          // When computing a sum, the zero point gets multiplied by the number
+          // of elements in the reduction.
+          int32_t axes[YNN_MAX_TENSOR_RANK];
+          int num_axes = 0;
+          for (int i = 0; i < a.rank(); ++i) {
+            if (k_dims[i]) axes[num_axes++] = a.rank() - 1 - i;
+          }
+          ynn_define_get_tensor_shape(&subgraph, num_axes, axes, ynn_type_int32,
+                                      /*rank=*/0, input_a_id, &reduce_size_id,
+                                      /*flags=*/YNN_NODE_FLAG_RESHAPE_1D);
+          ynn_define_binary(&subgraph, ynn_binary_multiply, a.zero_point_id,
+                            reduce_size_id, &output.zero_point_id,
+                            /*flags=*/0);
+        }
+        output.scale_id = a.scale_id;
+        break;
+      case ynn_reduce_max:
+      case ynn_reduce_min:
+      case ynn_reduce_min_max:
+        output.zero_point_id = a.zero_point_id;
+        output.scale_id = a.scale_id;
+        break;
+      default:
+        YNN_UNREACHABLE;
+    }
+
+    *output_id = output.id;
+  }
+
+  ynn_value& output = subgraph.value(*output_id);
 
   // Get the reduce kernel we are going to use.
   unary_reduce_kernel_fn kernel = get_reduce_kernel(op, a.type, output.type);
   assert(kernel);
 
+  // Propagate shape
+  output.extents = a.extents;
+  for (int i = static_cast<int>(output.extents.size()) - 1; i >= 0; --i) {
+    if (k_dims[i]) {
+      if (keep_dims) {
+        output.extents[i] = {};
+      } else {
+        output.extents.erase(output.extents.begin() + i);
+      }
+    }
+  }
+
+  if (op == ynn_reduce_min_max) {
+    // This reduction adds a dimension for the min/max index.
+    output.extents.push_back(2);
+  }
+
+  if (input_b_id == YNN_INVALID_VALUE_ID) {
+    input_b_id = get_reduce_identity_value(subgraph, output, op);
+  } else {
+    const ynn_value& b = subgraph.value(input_b_id);
+    if (b.type != output.type) {
+      input_b_id = YNN_INVALID_VALUE_ID;
+      ynn_define_convert(&subgraph, b.id, output.type, output.zero_point_id,
+                         output.scale_id, &input_b_id, /*flags=*/0);
+    }
+  }
+
   node.inputs = {input_a_id, input_b_id};
-  node.outputs = {output_id};
+  node.outputs = {*output_id};
   node.op = ynn_node::reduce{k_dims, op, keep_dims};
 
   node.create = [kernel](const ynn_node& node, ynn_runtime& runtime) {
@@ -288,23 +373,23 @@ void define_reduce(ynn_subgraph& subgraph, ynn_node& node,
 
     std::vector<slinky::var> dims = runtime.globals.make_dims(input_a.rank());
     slinky::box_expr a_bounds = make_elementwise_bounds(dims, input_a.extents);
-    slinky::box_expr c_bounds = make_elementwise_bounds(dims, input_c.extents);
 
     for (int i = static_cast<int>(input_a.rank()) - 1; i >= 0; --i) {
       if (op.k_dims[i]) {
         a_bounds[i] = all_bounds(input_a.extents[i]);
         if (!op.keep_dims) {
-          c_bounds.erase(c_bounds.begin() + i);
           dims.erase(dims.begin() + i);
         }
       }
     }
 
+    slinky::box_expr c_bounds = make_elementwise_bounds(dims, input_c.extents);
+
     slinky::call_stmt::attributes attrs;
     attrs.name = node.to_string();
     // Allow the input_c and output to be computed in-place, which means we
     // don't need to initialize the accumulator.
-    if (allow_in_place(input_c.id, output.id, runtime.subgraph)) {
+    if (allow_in_place(input_c.id, output.id, *runtime.subgraph)) {
       attrs.allow_in_place = (1 << 1);
     }
     auto sched = std::make_unique<scheduling_info>();
@@ -357,77 +442,50 @@ ynn_status ynn_define_reduce(ynn_subgraph_t subgraph,
                              uint32_t input_b_id, uint32_t* output_id,
                              uint32_t flags) {
   // Validate arguments.
-  assert(subgraph);
-  assert(subgraph->is_valid_value(input_a_id));
+  YNN_RETURN_IF_ERROR(validate_subgraph("reduce", subgraph));
+  YNN_RETURN_IF_ERROR(
+      validate_input_tensor("reduce", subgraph, "input_a_id", input_a_id));
+  YNN_RETURN_IF_ERROR(validate_input_tensor("reduce", subgraph, "input_b_id",
+                                            input_b_id, /*optional=*/true));
+  YNN_RETURN_IF_ERROR(
+      validate_output_tensor("reduce", subgraph, "output_id", output_id));
+
   const ynn_value& a = subgraph->value(input_a_id);
 
   ynn::axes_set k_dims;
   for (size_t i = 0; i < num_axes; ++i) {
-    k_dims[axis_to_slinky_dim(a.rank(), axes[i])] = true;
+    const int axis = axis_to_slinky_dim(a.rank(), axes[i]);
+    if (axis < a.rank()) {
+      k_dims[axis] = true;
+    } else {
+      // This is a reduction of an implicit broadcast, which is a no-op.
+    }
   }
   bool keep_dims = flags & YNN_NODE_FLAG_KEEP_DIMS;
 
-  assert(output_id);
-  if (*output_id == YNN_INVALID_VALUE_ID) {
-    // Make the output for this reduction.
+  uint32_t convert_to_id = YNN_INVALID_VALUE_ID;
+  if (*output_id != YNN_INVALID_VALUE_ID) {
     ynn_type output_type = get_accumulator_type(op, a.type);
-    ynn_value& output = subgraph->new_internal_value(output_type);
-    uint32_t reduce_size_id = YNN_INVALID_VALUE_ID;
-    switch (op) {
-      case ynn_reduce_sum:
-      case ynn_reduce_sum_squared:
-        if (a.zero_point_id != YNN_INVALID_VALUE_ID) {
-          // When computing a sum, the zero point gets multiplied by the number
-          // of elements in the reduction.
-          ynn_define_get_tensor_shape(subgraph, num_axes, axes, ynn_type_int32,
-                                      /*rank=*/0, input_a_id, &reduce_size_id,
-                                      /*flags=*/YNN_NODE_FLAG_RESHAPE_1D);
-          ynn_define_binary(subgraph, ynn_binary_multiply, a.zero_point_id,
-                            reduce_size_id, &output.zero_point_id,
-                            /*flags=*/0);
-        }
-        output.scale_id = a.scale_id;
-        break;
-      case ynn_reduce_max:
-      case ynn_reduce_min:
-      case ynn_reduce_min_max:
-        output.zero_point_id = a.zero_point_id;
-        output.scale_id = a.scale_id;
-        break;
-      default:
-        YNN_UNREACHABLE;
+    if (subgraph->value(*output_id).type != output_type) {
+      // We need to compute the reduction into an intermediate accumulator, and
+      // convert to the output after.
+      convert_to_id = *output_id;
+      *output_id = YNN_INVALID_VALUE_ID;
     }
-
-    *output_id = output.id;
-  }
-
-  // Propagate shape
-  ynn_value& output = subgraph->value(*output_id);
-  output.extents = a.extents;
-  for (int i = static_cast<int>(output.extents.size()) - 1; i >= 0; --i) {
-    if (k_dims[i]) {
-      if (keep_dims) {
-        output.extents[i] = {};
-      } else {
-        output.extents.erase(output.extents.begin() + i);
-      }
-    }
-  }
-
-  if (op == ynn_reduce_min_max) {
-    // This reduction adds a dimension for the min/max index.
-    output.extents.push_back(2);
-  }
-
-  if (input_b_id == YNN_INVALID_VALUE_ID) {
-    input_b_id = get_reduce_identity_value(subgraph, output, op);
   }
 
   // Make the node.
   ynn_node node;
-  define_reduce(*subgraph, node, op, k_dims, input_a_id, input_b_id, *output_id,
+  define_reduce(*subgraph, node, op, k_dims, input_a_id, input_b_id, output_id,
                 keep_dims);
   subgraph->add_node(std::move(node));
+
+  if (convert_to_id != YNN_INVALID_VALUE_ID) {
+    YNN_RETURN_IF_ERROR(ynn_define_unary(subgraph, ynn_unary_convert,
+                                         *output_id, &convert_to_id, flags));
+    *output_id = convert_to_id;
+  }
+
   return ynn_status_success;
 }
 

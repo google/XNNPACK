@@ -264,6 +264,11 @@ _YNN_PARAMS_FOR_ARCH = {
         "arch_copts": ["-mhvx"],
         "arch_flag": "hvx",
     },
+    "wasm_simd128": {
+        "cond": "//ynnpack:ynn_enable_wasm_simd128",
+        "arch_copts": ["-msimd128"],
+        "arch_flag": "wasm_simd128",
+    },
 }
 
 def ynn_if_arch(arch, if_true, if_false = []):

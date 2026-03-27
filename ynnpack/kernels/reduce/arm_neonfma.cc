@@ -21,7 +21,7 @@ namespace simd {
 static f32x8 reduce_add(
     f32x8 a, bf16x8 b, Square /*map_fn*/,
     std::integral_constant<size_t, 1> /*horizontal_factor*/) {
-  auto b_f32 = convert(b, float{});
+  auto b_f32 = cast(b, float{});
   a = fma(b_f32, b_f32, a);
   return a;
 }

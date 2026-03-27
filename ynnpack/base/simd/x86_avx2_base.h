@@ -80,12 +80,44 @@ YNN_ALWAYS_INLINE u8x32 operator-(u8x32 a, u8x32 b) {
   return u8x32{_mm256_sub_epi8(a.v, b.v)};
 }
 
+YNN_ALWAYS_INLINE s16x16 add_sat(s16x16 a, s16x16 b) {
+  return s16x16{_mm256_adds_epi16(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE u16x16 add_sat(u16x16 a, u16x16 b) {
+  return u16x16{_mm256_adds_epu16(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE s8x32 add_sat(s8x32 a, s8x32 b) {
+  return s8x32{_mm256_adds_epi8(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE u8x32 add_sat(u8x32 a, u8x32 b) {
+  return u8x32{_mm256_adds_epu8(a.v, b.v)};
+}
+
+YNN_ALWAYS_INLINE s16x16 sub_sat(s16x16 a, s16x16 b) {
+  return s16x16{_mm256_subs_epi16(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE u16x16 sub_sat(u16x16 a, u16x16 b) {
+  return u16x16{_mm256_subs_epu16(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE s8x32 sub_sat(s8x32 a, s8x32 b) {
+  return s8x32{_mm256_subs_epi8(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE u8x32 sub_sat(u8x32 a, u8x32 b) {
+  return u8x32{_mm256_subs_epu8(a.v, b.v)};
+}
+
 YNN_ALWAYS_INLINE s32x8 operator*(s32x8 a, s32x8 b) {
   return s32x8{_mm256_mullo_epi32(a.v, b.v)};
 }
 
 YNN_ALWAYS_INLINE s16x16 operator>>(s16x16 a, int b) {
   return s16x16{_mm256_srai_epi16(a.v, b)};
+}
+YNN_ALWAYS_INLINE s16x16 operator<<(s16x16 a, int b) {
+  return s16x16{_mm256_slli_epi16(a.v, b)};
+}
+YNN_ALWAYS_INLINE s32x8 operator<<(s32x8 a, int b) {
+  return s32x8{_mm256_slli_epi32(a.v, b)};
 }
 
 YNN_ALWAYS_INLINE s32x8 min(s32x8 a, s32x8 b) {
@@ -115,8 +147,10 @@ YNN_ALWAYS_INLINE u8x32 max(u8x32 a, u8x32 b) {
 }
 
 YNN_ALWAYS_INLINE u8x32 abs(s8x32 a) { return u8x32{_mm256_abs_epi8(a.v)}; }
+YNN_ALWAYS_INLINE u16x16 abs(s16x16 a) { return u16x16{_mm256_abs_epi16(a.v)}; }
+YNN_ALWAYS_INLINE u32x8 abs(s32x8 a) { return u32x8{_mm256_abs_epi32(a.v)}; }
 
-YNN_ALWAYS_INLINE f32x8 convert(bf16x8 a, float) {
+YNN_ALWAYS_INLINE f32x8 cast(bf16x8 a, float) {
   return f32x8{_mm256_castsi256_ps(_mm256_slli_epi32(_mm256_cvtepu16_epi32(a.v),
       16))};
 }

@@ -16,8 +16,12 @@ namespace ynn {
 
 namespace simd {
 
-YNN_ALWAYS_INLINE f32x8 convert(f16x8 a, float) {
+YNN_ALWAYS_INLINE f32x8 cast(f16x8 a, float) {
   return f32x8{_mm256_cvtph_ps(a.v)};
+}
+
+YNN_ALWAYS_INLINE f16x8 cast(f32x8 a, half) {
+  return f16x8{_mm256_cvtps_ph(a.v, _MM_FROUND_TO_NEAREST_INT)};
 }
 
 }  // namespace simd

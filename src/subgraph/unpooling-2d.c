@@ -51,6 +51,12 @@ static enum xnn_status reshape_unpooling_operator(
   const uint32_t output_id = opdata->outputs[0];
   assert(output_id < num_values);
 
+  if (values[input_id].shape.num_dims != 4) {
+    xnn_log_error(
+      "failed to define %s operator with input ID #%" PRIu32 ": number of dimensions (%zu) must be 4",
+      xnn_node_type_to_string(xnn_node_type_unpooling_2d), input_id, values[input_id].shape.num_dims);
+    return xnn_status_invalid_parameter;
+  }
   const size_t batch_size = values[input_id].shape.dim[0];
   const size_t input_height = values[input_id].shape.dim[1];
   const size_t input_width = values[input_id].shape.dim[2];

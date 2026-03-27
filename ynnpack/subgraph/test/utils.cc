@@ -62,7 +62,7 @@ TEST(CloneSubgraphSubset, SimpleChain) {
   std::cout << "Cloned subgraph: " << "\n";
   cloned_subgraph->dump(std::cout);
 
-  ASSERT_TRUE(cloned_subgraph.has_value());
+  ASSERT_NE(cloned_subgraph, nullptr);
   EXPECT_THAT(*cloned_subgraph,
               AllOf(HasValidValueCount(2), HasValidNodeCount(1),
                     HasValidValueIds(cloned_a_id, cloned_b_id)));
@@ -127,7 +127,7 @@ TEST(CloneSubgraphSubset, BranchingFails) {
   uint32_t cloned_c_id = YNN_INVALID_VALUE_ID;
   auto cloned_subgraph =
       clone_subgraph_subset(original, a_id, c_id, cloned_a_id, cloned_c_id);
-  EXPECT_FALSE(cloned_subgraph.has_value());
+  EXPECT_EQ(cloned_subgraph, nullptr);
 }
 
 TEST(CloneSubgraphSubset, MiddleCut) {
@@ -164,7 +164,7 @@ TEST(CloneSubgraphSubset, MiddleCut) {
   uint32_t cloned_c_id = YNN_INVALID_VALUE_ID;
   auto cloned_subgraph =
       clone_subgraph_subset(original, b_id, c_id, cloned_b_id, cloned_c_id);
-  ASSERT_TRUE(cloned_subgraph.has_value());
+  ASSERT_NE(cloned_subgraph, nullptr);
   EXPECT_THAT(*cloned_subgraph,
               AllOf(HasValidValueCount(2), HasValidNodeCount(1),
                     HasValidValueIds(cloned_b_id, cloned_c_id)));
@@ -229,7 +229,7 @@ TEST(CloneSubgraphSubset, DisconnectedInput) {
   uint32_t cloned_c_id = YNN_INVALID_VALUE_ID;
   auto cloned_subgraph =
       clone_subgraph_subset(original, c_id, b_id, cloned_c_id, cloned_b_id);
-  EXPECT_FALSE(cloned_subgraph.has_value());
+  EXPECT_EQ(cloned_subgraph, nullptr);
 }
 
 }  // namespace

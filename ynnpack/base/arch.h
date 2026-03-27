@@ -52,6 +52,9 @@ enum {
 #ifdef YNN_ARCH_HEXAGON
   hvx = 1 << 0,
 #endif  // YNN_ARCH_HEXAGON
+#ifdef YNN_ARCH_WASM
+  wasm_simd128 = 1 << 0,
+#endif  // YNN_ARCH_WASM
 };
 
 }  // namespace arch_flag

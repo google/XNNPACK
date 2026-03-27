@@ -62,6 +62,22 @@ struct vec<float, 8> {
 };
 
 template <>
+struct vec<uint32_t, 8> {
+  using value_type = uint32_t;
+  static constexpr std::integral_constant<size_t, 8> N = {};
+
+  vec() = default;
+  explicit vec(__m256i v) : v(v) {}
+  vec(u32x4 lo, u32x4 hi) : v(internal::concat(lo.v, hi.v)) {}
+  vec(uint32_t x) : v(_mm256_set1_epi32(x)) {}  // NOLINT
+
+  __m256i v;
+
+  YNN_ALWAYS_INLINE u32x4 lo() const { return u32x4{internal::lo(v)}; }
+  YNN_ALWAYS_INLINE u32x4 hi() const { return u32x4{internal::hi(v)}; }
+};
+
+template <>
 struct vec<int32_t, 8> {
   using value_type = int32_t;
   static constexpr std::integral_constant<size_t, 8> N = {};
@@ -107,6 +123,22 @@ struct vec<half, 16> {
 
   YNN_ALWAYS_INLINE f16x8 lo() const { return f16x8{internal::lo(v)}; }
   YNN_ALWAYS_INLINE f16x8 hi() const { return f16x8{internal::hi(v)}; }
+};
+
+template <>
+struct vec<uint16_t, 16> {
+  using value_type = uint16_t;
+  static constexpr std::integral_constant<size_t, 16> N = {};
+
+  vec() = default;
+  explicit vec(__m256i v) : v(v) {}
+  vec(u16x8 lo, u16x8 hi) : v(internal::concat(lo.v, hi.v)) {}
+  vec(uint16_t x) : v(_mm256_set1_epi16(x)) {}  // NOLINT
+
+  __m256i v;
+
+  YNN_ALWAYS_INLINE u16x8 lo() const { return u16x8{internal::lo(v)}; }
+  YNN_ALWAYS_INLINE u16x8 hi() const { return u16x8{internal::hi(v)}; }
 };
 
 template <>
@@ -158,9 +190,11 @@ struct vec<int8_t, 32> {
 };
 
 using f32x8 = vec<float, 8>;
+using u32x8 = vec<uint32_t, 8>;
 using s32x8 = vec<int32_t, 8>;
 using bf16x16 = vec<bfloat16, 16>;
 using f16x16 = vec<half, 16>;
+using u16x16 = vec<uint16_t, 16>;
 using s16x16 = vec<int16_t, 16>;
 using u8x32 = vec<uint8_t, 32>;
 using s8x32 = vec<int8_t, 32>;
@@ -211,6 +245,10 @@ YNN_ALWAYS_INLINE void store_aligned(float* ptr, f32x8 b,
                                      decltype(f32x8::N) = {}) {
   _mm256_store_ps(ptr, b.v);
 }
+YNN_ALWAYS_INLINE void store_aligned(uint32_t* ptr, u32x8 b,
+                                     decltype(u32x8::N) = {}) {
+  _mm256_store_si256(reinterpret_cast<__m256i*>(ptr), b.v);
+}
 YNN_ALWAYS_INLINE void store_aligned(int32_t* ptr, s32x8 b,
                                      decltype(s32x8::N) = {}) {
   _mm256_store_si256(reinterpret_cast<__m256i*>(ptr), b.v);
@@ -221,6 +259,10 @@ YNN_ALWAYS_INLINE void store_aligned(bfloat16* ptr, bf16x16 b,
 }
 YNN_ALWAYS_INLINE void store_aligned(half* ptr, f16x16 b,
                                      decltype(f16x16::N) = {}) {
+  _mm256_store_si256(reinterpret_cast<__m256i*>(ptr), b.v);
+}
+YNN_ALWAYS_INLINE void store_aligned(uint16_t* ptr, u16x16 b,
+                                     decltype(u16x16::N) = {}) {
   _mm256_store_si256(reinterpret_cast<__m256i*>(ptr), b.v);
 }
 YNN_ALWAYS_INLINE void store_aligned(int16_t* ptr, s16x16 b,
@@ -251,6 +293,10 @@ YNN_ALWAYS_INLINE f16x16 load(const half* ptr, decltype(f16x16::N),
                               f16x16 = {}) {
   return f16x16{_mm256_loadu_si256(reinterpret_cast<const __m256i*>(ptr))};
 }
+YNN_ALWAYS_INLINE u16x16 load(const uint16_t* ptr, decltype(u16x16::N),
+                              u16x16 = {}) {
+  return u16x16{_mm256_loadu_si256(reinterpret_cast<const __m256i*>(ptr))};
+}
 YNN_ALWAYS_INLINE s16x16 load(const int16_t* ptr, decltype(s16x16::N),
                               s16x16 = {}) {
   return s16x16{_mm256_loadu_si256(reinterpret_cast<const __m256i*>(ptr))};
@@ -267,6 +313,9 @@ YNN_ALWAYS_INLINE s8x32 load(const int8_t* ptr, decltype(s8x32::N),
 YNN_ALWAYS_INLINE void store(float* ptr, f32x8 b, decltype(f32x8::N) = {}) {
   _mm256_storeu_ps(ptr, b.v);
 }
+YNN_ALWAYS_INLINE void store(uint32_t* ptr, u32x8 b, decltype(u32x8::N) = {}) {
+  _mm256_storeu_si256(reinterpret_cast<__m256i*>(ptr), b.v);
+}
 YNN_ALWAYS_INLINE void store(int32_t* ptr, s32x8 b, decltype(s32x8::N) = {}) {
   _mm256_storeu_si256(reinterpret_cast<__m256i*>(ptr), b.v);
 }
@@ -275,6 +324,10 @@ YNN_ALWAYS_INLINE void store(bfloat16* ptr, bf16x16 b,
   _mm256_storeu_si256(reinterpret_cast<__m256i*>(ptr), b.v);
 }
 YNN_ALWAYS_INLINE void store(half* ptr, f16x16 b, decltype(f16x16::N) = {}) {
+  _mm256_storeu_si256(reinterpret_cast<__m256i*>(ptr), b.v);
+}
+YNN_ALWAYS_INLINE void store(uint16_t* ptr, u16x16 b,
+                             decltype(u16x16::N) = {}) {
   _mm256_storeu_si256(reinterpret_cast<__m256i*>(ptr), b.v);
 }
 YNN_ALWAYS_INLINE void store(int16_t* ptr, s16x16 b, decltype(s16x16::N) = {}) {
@@ -295,6 +348,9 @@ YNN_ALWAYS_INLINE f32x8 operator-(f32x8 a, f32x8 b) {
 }
 YNN_ALWAYS_INLINE f32x8 operator*(f32x8 a, f32x8 b) {
   return f32x8{_mm256_mul_ps(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE f32x8 operator/(f32x8 a, f32x8 b) {
+  return f32x8{_mm256_div_ps(a.v, b.v)};
 }
 
 YNN_ALWAYS_INLINE s16x16 operator&(s16x16 a, s16x16 b) {
@@ -378,6 +434,9 @@ YNN_ALWAYS_INLINE f32x8 round(f32x8 a) {
       _mm256_round_ps(a.v, _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC)};
 }
 YNN_ALWAYS_INLINE f32x8 sqrt(f32x8 a) { return f32x8{_mm256_sqrt_ps(a.v)}; }
+YNN_ALWAYS_INLINE f32x8 abs(f32x8 a) {
+  return f32x8{_mm256_and_ps(a.v, _mm256_set1_ps(bit_cast<float>(0x7FFFFFFF)))};
+}
 
 }  // namespace simd
 

@@ -1031,6 +1031,16 @@ xnnpack_unit_test(
     deps = MICROKERNEL_TEST_DEPS,
 )
 
+xnnpack_unit_test(
+    name = "polyfill_test",
+    srcs = ["polyfill.cc"],
+    deps = [
+        "//:common",
+        "//:intrinsics_polyfill",
+        "//:isa_checks",
+    ],
+)
+
 ############################### Misc unit tests ###############################
 
 xnnpack_unit_test(

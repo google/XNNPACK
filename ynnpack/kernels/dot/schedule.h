@@ -11,7 +11,7 @@
 #include <cstddef>
 
 #include "ynnpack/base/arithmetic.h"
-#include "slinky/base/span.h"
+#include "ynnpack/base/span.h"
 
 namespace ynn {
 
@@ -29,11 +29,10 @@ struct dot_loop {
 // optimize the order and size of loop steps such that memory locality is
 // maximized for each cache in `cache_sizes`. `storage` must have room for at
 // most 3 loops per cache size.
-slinky::span<dot_loop> schedule_dot(slinky::span<const size_t> cache_sizes,
-                                    size_t m, size_t n, size_t k1, size_t k2,
-                                    size_t k3, size_t block_m, size_t block_n,
-                                    size_t block_k, size_t a_elem_size,
-                                    size_t b_elem_size, dot_loop* storage);
+span<dot_loop> schedule_dot(span<const size_t> cache_sizes, size_t m, size_t n,
+                            size_t k1, size_t k2, size_t k3, size_t block_m,
+                            size_t block_n, size_t block_k, size_t a_elem_size,
+                            size_t b_elem_size, dot_loop* storage);
 
 // Block a dot's m dimension, calling f at each block.
 template <typename DotFn>
@@ -97,8 +96,8 @@ void block_dot_k(size_t m, size_t n, ptrdiff_t k, ptrdiff_t block_k,
 }
 
 template <typename DotFn>
-void run_dot(slinky::span<dot_loop> loops, size_t m, size_t n, size_t k,
-             size_t block_m, size_t block_n, size_t block_k, size_t a_stride_m,
+void run_dot(span<dot_loop> loops, size_t m, size_t n, size_t k, size_t block_m,
+             size_t block_n, size_t block_k, size_t a_stride_m,
              size_t a_stride_k, const void* a, size_t b_stride_k,
              size_t b_stride_n, const void* b, size_t init_c_stride_m,
              const void* init_c, size_t c_stride_m, size_t c_stride_n, void* c,

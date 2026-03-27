@@ -397,7 +397,8 @@ class FullyConnectedOperatorTester {
                 xnn_run_operator(fully_connected_op, /*threadpool=*/nullptr));
 
       // Verify results.
-      VerifyF16(output, output_ref, output_max, output_min);
+      VerifyF16(output, output_ref, output_max, output_min,
+                /*tolerance=*/1e-4f);
 
       if (use_weights_cache()) {
         // Create another operator with the same weights cache.
@@ -442,7 +443,8 @@ class FullyConnectedOperatorTester {
 
         VerifyWeightsCache(*internal_weights_cache, old_weights_cache_size);
 
-        VerifyF16(output2, output_ref, output_max, output_min);
+        VerifyF16(output2, output_ref, output_max, output_min,
+                  /*tolerance=*/1e-4f);
       }
     }
   }
@@ -635,7 +637,8 @@ class FullyConnectedOperatorTester {
                 xnn_run_operator(fully_connected_op, /*threadpool=*/nullptr));
 
       // Verify results.
-      VerifyF16(output, output_ref, output_max, output_min);
+      VerifyF16(output, output_ref, output_max, output_min,
+                /*tolerance=*/1e-4f);
 
       if (use_weights_cache()) {
         // Create another operator with the same weights cache.
@@ -679,7 +682,8 @@ class FullyConnectedOperatorTester {
 
         VerifyWeightsCache(*internal_weights_cache, old_weights_cache_size);
 
-        VerifyF16(output2, output_ref, output_max, output_min);
+        VerifyF16(output2, output_ref, output_max, output_min,
+                  /*tolerance=*/1e-4f);
       }
     }
   }
@@ -855,7 +859,8 @@ class FullyConnectedOperatorTester {
                 xnn_run_operator(fully_connected_op, /*threadpool=*/nullptr));
 
       // Verify results.
-      VerifyF16(output, output_ref, output_max, output_min);
+      VerifyF16(output, output_ref, output_max, output_min,
+                /*tolerance=*/1e-4f);
 
       if (use_weights_cache()) {
         // Create another operator with the same weights cache.
@@ -901,7 +906,8 @@ class FullyConnectedOperatorTester {
 
         VerifyWeightsCache(*internal_weights_cache, old_weights_cache_size);
 
-        VerifyF16(output2, output_ref, output_max, output_min);
+        VerifyF16(output2, output_ref, output_max, output_min,
+                  /*tolerance=*/1e-4f);
       }
     }
   }
@@ -1389,7 +1395,8 @@ class FullyConnectedOperatorTester {
                 xnn_run_operator(fully_connected_op, /*threadpool=*/nullptr));
 
       // Verify results.
-      VerifyF16(output, output_ref, output_max, output_min);
+      VerifyF16(output, output_ref, output_max, output_min,
+                /*tolerance=*/1e-3f);
 
       if (use_weights_cache()) {
         // Create another operator with the same weights cache.
@@ -1434,7 +1441,8 @@ class FullyConnectedOperatorTester {
 
         VerifyWeightsCache(*internal_weights_cache, old_weights_cache_size);
 
-        VerifyF16(output2, output_ref, output_max, output_min);
+        VerifyF16(output2, output_ref, output_max, output_min,
+                  /*tolerance=*/1e-4f);
       }
     }
   }
@@ -2995,7 +3003,7 @@ class FullyConnectedOperatorTester {
                 xnn_run_operator(fully_connected_op, /*threadpool=*/nullptr));
 
       // Verify results.
-      VerifyF16(output, output_ref, output_max, output_min);
+      VerifyF16(output, output_ref, output_max, output_min, /*tolerance=*/1e-4f);
 
       if (use_weights_cache()) {
         // Create another operator with the same weights cache.
@@ -3039,7 +3047,8 @@ class FullyConnectedOperatorTester {
 
         VerifyWeightsCache(*internal_weights_cache, old_weights_cache_size);
 
-        VerifyF16(output2, output_ref, output_max, output_min);
+        VerifyF16(output2, output_ref, output_max, output_min,
+                  /*tolerance=*/1e-4f);
       }
     }
   }
@@ -4580,8 +4589,9 @@ class FullyConnectedOperatorTester {
         ASSERT_NEAR(
             output_ref[i * output_channels() + c],
             output[i * output_stride() + c],
-            std::max(tolerance * std::abs(output_ref[i * output_channels() + c]),
-                     tolerance))
+            std::max(
+                tolerance * std::abs(output_ref[i * output_channels() + c]),
+                tolerance))
             << "batch index = " << i << ", channel = " << c;
       }
     }
@@ -5282,7 +5292,8 @@ class FullyConnectedOperatorTester {
                 xnn_run_operator(fully_connected_op, /*threadpool=*/nullptr));
 
       // Verify results.
-      VerifyF16(output, output_ref, output_max, output_min);
+      VerifyF16(output, output_ref, output_max, output_min,
+                /*tolerance=*/1e-4f);
 
       if (use_weights_cache()) {
         xnn_operator_t fully_connected_op2 = nullptr;
@@ -5317,7 +5328,8 @@ class FullyConnectedOperatorTester {
                                                        /*threadpool=*/nullptr));
 
         // Verify results.
-        VerifyF16(output2, output_ref, output_max, output_min);
+        VerifyF16(output2, output_ref, output_max, output_min,
+                  /*tolerance=*/1e-4f);
         VerifyWeightsCache(*internal_weights_cache, old_weights_cache_size);
       }
     }
@@ -5325,7 +5337,8 @@ class FullyConnectedOperatorTester {
 
   void VerifyF16(const xnnpack::Buffer<xnn_float16>& output,
                  const xnnpack::Buffer<float>& output_ref,
-                 const float output_max, const float output_min) const {
+                 const float output_max, const float output_min,
+                 const float tolerance) const {
     for (size_t i = 0; i < batch_size(); i++) {
       for (size_t c = 0; c < output_channels(); c++) {
         // FP16 overflows, it's the nature of the beast. If both reference and
@@ -5341,10 +5354,11 @@ class FullyConnectedOperatorTester {
             << "batch index = " << i << ", channel = " << c;
         ASSERT_GE(output[i * output_stride() + c], output_min)
             << "batch index = " << i << ", channel = " << c;
-        const float tolerance = std::max(
-            1e-4f, 1.0e-2f * std::abs(output_ref[i * output_channels() + c]));
+        const float epsilon = std::max(
+            tolerance,
+            1.0e-2f * std::abs(output_ref[i * output_channels() + c]));
         ASSERT_NEAR(output_ref[i * output_channels() + c],
-                    output[i * output_stride() + c], tolerance)
+                    output[i * output_stride() + c], epsilon)
             << "batch index = " << i << ", channel = " << c;
       }
     }

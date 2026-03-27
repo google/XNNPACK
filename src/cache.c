@@ -471,3 +471,11 @@ size_t xnn_weights_cache_look_up(
 {
   return cache->look_up(cache->context, cache_key);
 }
+
+enum xnn_status xnn_weights_cache_alias_data(xnn_weights_cache_t cache,
+                                             void* alias, void* original) {
+  if (cache->alias_data) {
+    return cache->alias_data(cache->context, alias, original);
+  }
+  return xnn_status_success;
+}

@@ -2445,11 +2445,24 @@ static enum xnn_status optimize_common_subgraphs_binary_to_const(
   return xnn_status_success;
 }
 
+static void convert_static_value_to_fp32(struct xnn_value* value) {
+  assert(xnn_value_is_static(value->allocation_type));
+  if (value->flags & XNN_VALUE_FLAG_NEEDS_CLEANUP) {
+    xnn_release_memory(value->data);
+  }
+  value->data = xnn_allocate_memory(sizeof(float));
+  float data = get_scalar_value_as_float(value);
+  memcpy(value->data, &data, sizeof(float));
+  value->flags |= XNN_VALUE_FLAG_NEEDS_CLEANUP;
+  value->datatype = xnn_datatype_fp32;
+}
+
 // Replace `mul(reduce_sum(x), 1/n)`, `div(reduce_sum(x), n)`  or
 // `mul(reduce_sum_squared(x), 1/n)`, `div(reduce_sum_squared(x), n)`
 // with `reduce_mean(x)` or `reduce_mean_squared(x)`, respectively.
-static enum xnn_status optimize_common_subgraphs_scaled_sum_to_mean(
-    xnn_subgraph_t subgraph, uint32_t node_id, size_t* changes) {
+static enum xnn_status widen_fp16_accumulators(xnn_subgraph_t subgraph,
+                                               uint32_t node_id,
+                                               size_t* changes) {
   struct xnn_node* node = &subgraph->nodes[node_id];
 
   if (node->type != xnn_node_type_binary_elementwise ||
@@ -2458,78 +2471,66 @@ static enum xnn_status optimize_common_subgraphs_scaled_sum_to_mean(
     return xnn_status_success;
   }
 
-  struct xnn_value* reduce_value = &subgraph->values[node->inputs[0]];
+  struct xnn_value* reduced_value = &subgraph->values[node->inputs[0]];
   struct xnn_value* arg_value = &subgraph->values[node->inputs[1]];
   if (xnn_shape_multiply_all_dims(&arg_value->shape) != 1 ||
       !xnn_value_is_static(arg_value->allocation_type)) {
-    if (xnn_shape_multiply_all_dims(&reduce_value->shape) == 1 &&
-        xnn_value_is_static(reduce_value->allocation_type)) {
-      swap_value_pointers(&reduce_value, &arg_value);
+    if (xnn_shape_multiply_all_dims(&reduced_value->shape) == 1 &&
+        xnn_value_is_static(reduced_value->allocation_type)) {
+      swap_value_pointers(&reduced_value, &arg_value);
     } else {
       return xnn_status_success;
     }
   }
 
   // Check that one of the args is a sum or sum2 reduction.
-  if (!(reduce_value->datatype == xnn_datatype_fp16 ||
-        reduce_value->datatype == xnn_datatype_fp32) ||
-      reduce_value->producer == XNN_INVALID_NODE_ID) {
+  if (reduced_value->datatype != xnn_datatype_fp16 ||
+      reduced_value->producer == XNN_INVALID_NODE_ID) {
     return xnn_status_success;
   }
-  struct xnn_node* reduce_node = &subgraph->nodes[reduce_value->producer];
+
+  if (reduced_value->num_consumers > 1 || arg_value->num_consumers > 1) {
+    // Don't rewrite if we might modify an unrelated consumer.
+    return xnn_status_success;
+  }
+
+  struct xnn_node* reduce_node = &subgraph->nodes[reduced_value->producer];
   const enum xnn_node_type reduce_node_type = reduce_node->type;
   if (!(reduce_node_type == xnn_node_type_static_sum ||
         reduce_node_type == xnn_node_type_static_sum_squared)) {
     return xnn_status_success;
   }
 
-  // Check that the other arg is the product of the dimensions of
-  // the reduction axes, or its inverse.
-  struct xnn_value* input_value = &subgraph->values[reduce_node->inputs[0]];
-  const float arg_as_float = get_scalar_value_as_float(arg_value);
-  size_t num_reduced_dims = 1;
-  for (size_t k = 0; k < reduce_node->params.reduce.num_reduction_axes; k++) {
-    num_reduced_dims *= xnn_shape_get_dim(
-        &input_value->shape, reduce_node->params.reduce.reduction_axes[k]);
-  }
-  if (!num_reduced_dims) {
-    return xnn_status_success;
-  }
-  const enum xnn_binary_operator binary_operator = node->binary_operator;
-  float expected_arg = (binary_operator == xnn_binary_multiply)
-                           ? 1.0f / num_reduced_dims
-                           : (float)num_reduced_dims;
-  if (arg_value->datatype == xnn_datatype_fp16) {
-    expected_arg = xnn_float16_to_float(xnn_float16_from_float(expected_arg));
-  }
-  if (arg_as_float != expected_arg) {
-    return xnn_status_success;
-  }
+  // Rewrite the internal values to this subgraph to be fp32.
+  reduced_value->datatype = xnn_datatype_fp32;
+  convert_static_value_to_fp32(arg_value);
 
-  const uint32_t output_id = node->outputs[0];
-  const size_t num_reduction_axes =
-      reduce_node->params.reduce.num_reduction_axes;
-  int64_t reduction_axes[XNN_MAX_TENSOR_DIMS];
-  memcpy(reduction_axes, reduce_node->params.reduce.reduction_axes,
-         num_reduction_axes * sizeof(int64_t));
-  XNN_RETURN_IF_ERROR(xnn_define_static_reduce_v2(
-                          subgraph,
-                          reduce_node_type == xnn_node_type_static_sum
-                              ? xnn_reduce_mean
-                              : xnn_reduce_mean_squared,
-                          num_reduction_axes, reduction_axes, input_value->id,
-                          output_id, reduce_node->flags),
-                      "Failed to create new `Mean` or `Mean Squared` node.");
-  node = move_last_node_to(subgraph, node_id);
+  uint32_t output_id = node->outputs[0];
+  struct xnn_value* output_value = &subgraph->values[output_id];
+  uint32_t output_fp32_id;
+  enum xnn_status status = xnn_define_tensor_value(
+      subgraph, xnn_datatype_fp32, output_value->shape.num_dims,
+      output_value->shape.dim,
+      /*data=*/NULL, XNN_INVALID_VALUE_ID,
+      /*flags=*/0, &output_fp32_id);
+  if (status != xnn_status_success) {
+    return status;
+  }
+  node->outputs[0] = output_fp32_id;
+
+  status = xnn_define_unary(subgraph, xnn_unary_convert, /*params=*/NULL,
+                            output_fp32_id, output_id, /*flags=*/0);
+  if (status != xnn_status_success) {
+    return status;
+  }
+  move_last_node_to(subgraph, node_id);
 
   xnn_log_info(
       "Converted %s[#%u](reduce_sum%s[#%u](v%03u), v%03u) to "
-      "reduce_mean%s[#%u](v%03u).",
-      (binary_operator == xnn_binary_multiply) ? "mul" : "div", node_id,
+      "fp32.",
+      (node->binary_operator == xnn_binary_multiply) ? "mul" : "div", node_id,
       reduce_node_type == xnn_node_type_static_sum_squared ? "_squared" : "",
-      reduce_value->producer, input_value->id, arg_value->id,
-      reduce_node_type == xnn_node_type_static_sum_squared ? "_squared" : "",
-      node_id, input_value->id);
+      reduced_value->producer, reduce_node->inputs[0], arg_value->id);
   (*changes)++;
 
   return xnn_status_success;
@@ -2702,12 +2703,11 @@ static enum xnn_status optimize_common_subgraphs_merge_reshapes(
   // Check that we are the only consumer of the input node.
   const uint32_t input_id = node->inputs[0];
   struct xnn_value* input_value = &subgraph->values[input_id];
-  const uint32_t input_producer_id = input_value->producer;
-  if (input_producer_id == XNN_INVALID_NODE_ID ||
+  if (input_value->producer == XNN_INVALID_NODE_ID ||
       input_value->num_consumers != 1) {
     return xnn_status_success;
   }
-  struct xnn_node* input_producer = &subgraph->nodes[input_producer_id];
+  struct xnn_node* input_producer = &subgraph->nodes[input_value->producer];
 
   // Check all the interesting combinations.
 
@@ -2717,23 +2717,16 @@ static enum xnn_status optimize_common_subgraphs_merge_reshapes(
     XNN_RETURN_IF_ERROR(
         xnn_shape_fill_gaps(&input_producer->params.static_reshape.new_shape,
                             &node->params.static_reshape.new_shape));
-    XNN_RETURN_IF_ERROR(
-        xnn_define_static_reshape(
-            subgraph, node->params.static_reshape.new_shape.num_dims,
-            node->params.static_reshape.new_shape.dim,
-            input_producer->inputs[0], node->outputs[0],
-            node->flags | XNN_NODE_FLAG_DONT_ELIDE),
-        "Failed to create Binary Addition node.");
-    node = move_last_node_to(subgraph, node_id);
     node->inputs[0] = input_producer->inputs[0];
+    node->flags |= XNN_NODE_FLAG_DONT_ELIDE;
     input_value = &subgraph->values[node->inputs[0]];
-    if (input_value->first_consumer == input_producer_id) {
+    if (input_value->first_consumer == input_producer->id) {
       input_value->first_consumer = node->id;
     }
     xnn_log_info(
         "Replaced static_reshape[#%u](static_reshape[#%u](v%03u)) with "
         "static_reshape[#%u](v%03u).",
-        node_id, input_producer_id, node->inputs[0], node_id, node->inputs[0]);
+        node_id, input_producer->id, node->inputs[0], node_id, node->inputs[0]);
     xnn_node_clear(input_producer);
     (*changes)++;
   }
@@ -2761,6 +2754,9 @@ static enum xnn_status optimize_common_subgraphs_merge_reshapes(
         &input_producer->params.static_reshape.new_shape;
     const struct xnn_shape* expanded_dims =
         &node->params.static_reshape.new_shape;
+    if (reshape->num_dims + expanded_dims->num_dims > XNN_MAX_TENSOR_DIMS) {
+      return xnn_status_success;  // Skip optimization, let runtime validate.
+    }
     struct xnn_shape new_shape = {
         .num_dims = reshape->num_dims + expanded_dims->num_dims, .dim = {0}};
     for (uint32_t idx_expanded = 0, idx_reshape = 0, k = 0;
@@ -2824,6 +2820,9 @@ static enum xnn_status optimize_common_subgraphs_static_reshapes(
   } else if (node->type == xnn_node_type_static_expand_dims) {
     const struct xnn_shape* new_dims = &node->params.static_reshape.new_shape;
     new_shape.num_dims = input_value->shape.num_dims + new_dims->num_dims;
+    if (new_shape.num_dims > XNN_MAX_TENSOR_DIMS) {
+      return xnn_status_success;  // Skip optimization, let runtime validate.
+    }
     for (uint32_t idx_new = 0, idx_old = 0, k = 0; k < new_shape.num_dims;
          k++) {
       if (idx_new < new_dims->num_dims && new_dims->dim[idx_new] == k) {
@@ -2929,8 +2928,7 @@ static enum xnn_status optimize_common_subgraphs_min_max_to_clamp(
 static enum xnn_status optimize_common_subgraphs_merge_clamps(
     xnn_subgraph_t subgraph, uint32_t node_id, size_t* changes) {
   struct xnn_node* node = &subgraph->nodes[node_id];
-  if (node->type != xnn_node_type_unary_elementwise ||
-      node->unary_operator != xnn_unary_clamp) {
+  if (!is_clamp(node)) {
     return xnn_status_success;
   }
 
@@ -2951,22 +2949,25 @@ static enum xnn_status optimize_common_subgraphs_merge_clamps(
   // Note that the order of the min/max matches that of the `clamp` ops
   // themsevels and is required to ensure correctness when merging
   // non-overlapping clamps.
-  input_producer_node->activation.output_min =
-      math_min_f32(math_max_f32(input_producer_node->activation.output_min,
-                                node->params.unary.clamp.min),
-                   node->params.unary.clamp.max);
-  input_producer_node->activation.output_max =
-      math_min_f32(math_max_f32(input_producer_node->activation.output_max,
-                                node->params.unary.clamp.min),
-                   node->params.unary.clamp.max);
-  input_producer_node->params.unary.clamp.min =
-      math_min_f32(math_max_f32(input_producer_node->params.unary.clamp.min,
-                                node->params.unary.clamp.min),
-                   node->params.unary.clamp.max);
-  input_producer_node->params.unary.clamp.max =
-      math_min_f32(math_max_f32(input_producer_node->params.unary.clamp.max,
-                                node->params.unary.clamp.min),
-                   node->params.unary.clamp.max);
+  if (is_clamp(input_producer_node)) {
+    input_producer_node->params.unary.clamp.min =
+        math_min_f32(math_max_f32(input_producer_node->params.unary.clamp.min,
+                                  node->params.unary.clamp.min),
+                    node->params.unary.clamp.max);
+    input_producer_node->params.unary.clamp.max =
+        math_min_f32(math_max_f32(input_producer_node->params.unary.clamp.max,
+                                  node->params.unary.clamp.min),
+                    node->params.unary.clamp.max);
+  } else {
+    input_producer_node->activation.output_min =
+        math_min_f32(math_max_f32(input_producer_node->activation.output_min,
+                                  node->params.unary.clamp.min),
+                    node->params.unary.clamp.max);
+    input_producer_node->activation.output_max =
+        math_min_f32(math_max_f32(input_producer_node->activation.output_max,
+                                  node->params.unary.clamp.min),
+                    node->params.unary.clamp.max);
+  }
 
   // Elide the `clamp` node by just skipping it.
   input_producer_node->outputs[0] = node->outputs[0];
@@ -3676,11 +3677,13 @@ static enum xnn_status optimize_common_subgraphs_iter(
         // XNN_RETURN_IF_ERROR(optimize_common_subgraphs_binary_to_const(
         //     subgraph, node_id, changes));
 
-        // Replace `mul(reduce_sum(x), 1/n)`, `div(reduce_sum(x), n)`  or
-        // `mul(reduce_sum_squared(x), 1/n)`, `div(reduce_sum_squared(x), n)`
-        // with `reduce_mean(x)` or `reduce_mean_squared(x)`, respectively.
-        XNN_RETURN_IF_ERROR(optimize_common_subgraphs_scaled_sum_to_mean(
-            subgraph, node_id, changes));
+        // Widen fp16 accumulators for `mul(reduce_sum(x), y)` or
+        // `div(reduce_sum(x), y)`. This is a bit of a hack to make subgraphs
+        // rewritten to be fp16 less likely to overflow. Especially if x is a
+        // squaring operation, and the data is fp16, it is very likely that the
+        // sum will overflow.
+        XNN_RETURN_IF_ERROR(
+            widen_fp16_accumulators(subgraph, node_id, changes));
 
         // Convert min/max operations with a single static value to a unary
         // `clamp` node.
@@ -4299,10 +4302,6 @@ enum xnn_status xnn_subgraph_optimize(xnn_subgraph_t subgraph,
     return xnn_status_unsupported_hardware;
   }
 
-  // Apply some common subgraph optimizations.
-  XNN_RETURN_IF_ERROR(
-      xnn_subgraph_optimize_common_subgraphs(subgraph, optimization_flags));
-
   if ((optimization_flags & XNN_FLAG_FORCE_FP16_INFERENCE) &&
       (!xnn_is_f16_compatible_config(hardware_config))) {
     xnn_log_error(
@@ -4328,6 +4327,10 @@ enum xnn_status xnn_subgraph_optimize(xnn_subgraph_t subgraph,
       xnn_subgraph_analyze_consumers_and_producers(subgraph);
     }
   }
+
+  // Apply some common subgraph optimizations.
+  XNN_RETURN_IF_ERROR(
+      xnn_subgraph_optimize_common_subgraphs(subgraph, optimization_flags));
 
 #if XNN_ENABLE_SPARSE
   if ((optimization_flags & XNN_FLAG_HINT_SPARSE_INFERENCE) &&

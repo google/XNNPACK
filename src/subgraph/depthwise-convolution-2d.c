@@ -59,7 +59,7 @@ static enum xnn_status create_depthwise_convolution_operator(
   const enum xnn_datatype filter_datatype = values[filter_id].datatype;
   const enum xnn_datatype output_datatype = values[output_id].datatype;
   const enum xnn_datatype bias_datatype = bias_id != XNN_INVALID_VALUE_ID
-                                              ? values[filter_id].datatype
+                                              ? values[bias_id].datatype
                                               : xnn_datatype_invalid;
   if (values[output_id].flags & XNN_VALUE_FLAG_LAYOUT_NCHW) {
     assert(values[input_id].flags & XNN_VALUE_FLAG_LAYOUT_NCHW);
@@ -395,9 +395,18 @@ static enum xnn_status reshape_depthwise_convolution_operator(
 {
   const uint32_t input_id = opdata->inputs[0];
   assert(input_id < num_values);
-  const size_t batch_size = values[input_id].shape.dim[0];
-  const size_t input_height = values[input_id].shape.dim[1];
-  const size_t input_width = values[input_id].shape.dim[2];
+  const struct xnn_runtime_value* input_value = values + input_id;
+  if (input_value->shape.num_dims != 3 && input_value->shape.num_dims != 4) {
+    xnn_log_error("failed to reshape %s operator with input ID #%" PRIu32
+                  ": number of dimensions (%zu) must be 3 or 4",
+                  xnn_node_type_to_string(xnn_node_type_depthwise_convolution_2d),
+                  input_id, input_value->shape.num_dims);
+    return xnn_status_invalid_parameter;
+  }
+
+  const size_t batch_size = input_value->shape.dim[0];
+  const size_t input_height = input_value->shape.dim[1];
+  const size_t input_width = input_value->shape.dim[2];
   enum xnn_status status = xnn_status_invalid_state;
   const size_t old_workspace_size = opdata->workspace_size;
   size_t output_height, output_width;
@@ -946,7 +955,7 @@ enum xnn_status xnn_define_depthwise_convolution_2d(
     if (filter_value->quantization.channel_dimension != filter_value->shape.num_dims - 1) {
       xnn_log_error(
         "failed to define %s operator with filter ID #%" PRIu32 ": invalid channel dimension %zu",
-        xnn_node_type_to_string(xnn_node_type_convolution_2d), input_id, filter_value->quantization.channel_dimension);
+        xnn_node_type_to_string(xnn_node_type_depthwise_convolution_2d), filter_id, filter_value->quantization.channel_dimension);
       return xnn_status_invalid_parameter;
     }
 
@@ -955,7 +964,7 @@ enum xnn_status xnn_define_depthwise_convolution_2d(
       if (bias_value->quantization.channel_dimension != 0) {
         xnn_log_error(
           "failed to define %s operator with bias ID #%" PRIu32 ": invalid channel dimension %zu",
-          xnn_node_type_to_string(xnn_node_type_convolution_2d), bias_id, bias_value->quantization.channel_dimension);
+          xnn_node_type_to_string(xnn_node_type_depthwise_convolution_2d), bias_id, bias_value->quantization.channel_dimension);
         return xnn_status_invalid_parameter;
       }
     }

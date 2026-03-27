@@ -11,6 +11,7 @@
 #include <cstdint>
 #include <memory>
 
+#include "ynnpack/base/log.h"
 #include "ynnpack/base/type.h"
 #include "ynnpack/include/ynnpack.h"
 #include "ynnpack/subgraph/subgraph.h"
@@ -73,10 +74,34 @@ ynn_status ynn_define_tensor_value(ynn_subgraph_t subgraph, enum ynn_type type,
                                    const void* data, uint32_t zero_point_id,
                                    uint32_t scale_id, uint32_t flags,
                                    uint32_t* id_out) {
+  YNN_RETURN_IF_ERROR(validate_subgraph("define_tensor", subgraph));
+  if (rank > YNN_MAX_TENSOR_RANK) {
+    YNN_LOG_ERROR() << "rank " << rank << " exceeds YNN_MAX_TENSOR_RANK "
+                    << YNN_MAX_TENSOR_RANK;
+    return ynn_status_unsupported_parameter;
+  }
+  if (!id_out) {
+    YNN_LOG_ERROR() << "id_out must be non-null";
+    return ynn_status_invalid_parameter;
+  }
+  if (scale_id != YNN_INVALID_VALUE_ID && !subgraph->is_valid_value(scale_id)) {
+    YNN_LOG_ERROR() << "scale_id must be a valid value ID";
+    return ynn_status_invalid_parameter;
+  }
+  if (zero_point_id != YNN_INVALID_VALUE_ID &&
+      !subgraph->is_valid_value(zero_point_id)) {
+    YNN_LOG_ERROR() << "zero_point_id must be a valid value ID";
+    return ynn_status_invalid_parameter;
+  }
+
   ynn_value* value;
   if (*id_out != YNN_INVALID_VALUE_ID) {
+    if (*id_out >= subgraph->external_value_ids) {
+      YNN_LOG_ERROR() << "tensor ID " << *id_out
+                      << " must be an external tensor ID";
+      return ynn_status_invalid_parameter;
+    }
     value = &subgraph->value(*id_out);
-    assert(value->id == *id_out);
   } else {
     value = &subgraph->new_internal_value();
   }

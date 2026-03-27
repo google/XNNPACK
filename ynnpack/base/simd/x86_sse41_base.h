@@ -45,6 +45,8 @@ YNN_ALWAYS_INLINE f32x4 round(f32x4 a) {
 }
 
 YNN_ALWAYS_INLINE u8x16 abs(s8x16 a) { return u8x16{_mm_abs_epi8(a.v)}; }
+YNN_ALWAYS_INLINE u16x8 abs(s16x8 a) { return u16x8{_mm_abs_epi16(a.v)}; }
+YNN_ALWAYS_INLINE u32x4 abs(s32x4 a) { return u32x4{_mm_abs_epi32(a.v)}; }
 
 YNN_ALWAYS_INLINE int8_t horizontal_max(s8x16 a) {
   const __m128i max8 = _mm_max_epi8(a.v, _mm_srli_si128(a.v, 8));

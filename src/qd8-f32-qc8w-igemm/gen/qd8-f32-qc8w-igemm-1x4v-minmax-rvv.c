@@ -55,7 +55,7 @@ void xnn_qd8_f32_qc8w_igemm_minmax_ukernel_1x4v__rvv(
 
     vint32m4_t vksum = __riscv_vle32_v_i32m4((const int32_t*)w, vl);
     const int32_t vinput_zero_point = quantization_params->zero_point;
-    vint32m4_t vacc0 = __riscv_vmul_vx_i32m4(vksum, vinput_zero_point, vl);
+    vint32m4_t vacc0 = __riscv_vmul(vksum, vinput_zero_point, vl);
     w = (const void*) ((const int32_t*) w + nr);
 
     size_t p = ks;
@@ -78,35 +78,35 @@ void xnn_qd8_f32_qc8w_igemm_minmax_ukernel_1x4v__rvv(
 
         w = (const void*) ((const int8_t*) w + nr);
 
-        vacc0 = __riscv_vwmacc_vx_i32m4(vacc0, va0, vb0, vl);
+        vacc0 = __riscv_vwmacc(vacc0, va0, vb0, vl);
 
         k -= sizeof(int8_t);
       } while (k != 0);
       p -= 1 * sizeof(void*);
     } while (p != 0);
 
-    vfloat32m4_t vfpacc0 = __riscv_vfcvt_f_x_v_f32m4(vacc0, vl);
+    vfloat32m4_t vfpacc0 = __riscv_vfcvt_f(vacc0, vl);
 
     const float vinput_scale = quantization_params->inv_scale;
-    vfpacc0 = __riscv_vfmul_vf_f32m4(vfpacc0, vinput_scale, vl);
+    vfpacc0 = __riscv_vfmul(vfpacc0, vinput_scale, vl);
 
     const vfloat32m4_t vscale = __riscv_vle32_v_f32m4((const float*) w, vl);
-    vfpacc0 = __riscv_vfmul_vv_f32m4(vfpacc0, vscale, vl);
+    vfpacc0 = __riscv_vfmul(vfpacc0, vscale, vl);
 
     w = (const void*) ((const float*) w + nr);
 
     const vfloat32m4_t vbias = __riscv_vle32_v_f32m4((const float*) w, vl);
-    vfpacc0 = __riscv_vfadd_vv_f32m4(vfpacc0, vbias, vl);
+    vfpacc0 = __riscv_vfadd(vfpacc0, vbias, vl);
 
     w = (const void*) ((const float*) w + nr);
 
     const float voutput_min = params->scalar.min;
-    vfpacc0 = __riscv_vfmax_vf_f32m4(vfpacc0, voutput_min, vl);
+    vfpacc0 = __riscv_vfmax(vfpacc0, voutput_min, vl);
 
     const float voutput_max = params->scalar.max;
-    vfpacc0 = __riscv_vfmin_vf_f32m4(vfpacc0, voutput_max, vl);
+    vfpacc0 = __riscv_vfmin(vfpacc0, voutput_max, vl);
 
-    __riscv_vse32_v_f32m4(c0, vfpacc0, vl);
+    __riscv_vse32(c0, vfpacc0, vl);
 
     c0 = (float*) ((uintptr_t) c0 + cn_stride);
 

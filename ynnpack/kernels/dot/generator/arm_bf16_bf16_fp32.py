@@ -23,44 +23,38 @@ class arm_neon_bf16_bf16_fp32(arm_neon):
 
 namespace {
 
-struct bfloat16 {
-  std::uint16_t value;
-};
+using bfloat16 = uint16_t;
 
-YNN_INTRINSIC float32x4_t unaligned_load_broadcast_bf16(const bfloat16* ptr) {
-    uint16_t value;
-    memcpy(&value, ptr, sizeof(uint16_t));
-    return vreinterpretq_f32_u32(vshll_n_u16(vdup_n_u16(value), 16));
-}
-
-YNN_INTRINSIC float32x4_t load_bf16x4(const bfloat16* ptr) {
-    return vreinterpretq_f32_u32(vshll_n_u16(vld1_u16(reinterpret_cast<const uint16_t*>(ptr)), 16));
+YNN_INTRINSIC float32x4_t bf16_to_f32(uint16x4_t x) {
+  return vreinterpretq_f32_u32(vshll_n_u16(x, 16));
 }
 
 }  // namespace
 """
 
   def load_a_tile_k_tail(self, i, k, nk):
-    if k % nk != 0:
+    a_ptr = self.a_ptr(i, k)
+    if nk == 1:
+      return f"float32x4_t a_{i}_{k} = bf16_to_f32(vdup_n_u16(*{a_ptr}));\n"
+    elif k % 4 == 0:
+      assert nk % 4 == 0
+      return f"float32x4_t a_{i}_{k} = bf16_to_f32(vld1_u16({a_ptr}));\n"
+    else:
       return ""
-    if nk == 4:
-      return f"float32x4_t a_{i}_{k} = load_bf16x4({self.a_ptr(i, k)});\n"
-    elif nk == 1:
-      return (
-          f"float32x4_t a_{i}_{k} ="
-          f" unaligned_load_broadcast_bf16({self.a_ptr(i, k)});\n"
-      )
 
   def load_b_tile(self, k, j):
-    return f"float32x4_t b_{k}_{j} = load_bf16x4({self.b_ptr(k, j)});\n"
+    b_ptr = self.b_ptr(k, j)
+    return f"float32x4_t b_{k}_{j} = bf16_to_f32(vld1_u16({b_ptr}));\n"
 
 
 class arm64_neon_bf16_bf16_fp32(arm_neon_bf16_bf16_fp32):
-  def __init__(self):
-    super().__init__()
-
   def product(self, i, j, k):
-    if self.block_shape[2] == 4:
-      return f"c_{i}_{j} = vfmaq_laneq_f32(c_{i}_{j}, b_{k}_{j}, a_{i}_{(k//4)*4}, {k%4});\n"
-    if self.block_shape[2] == 1:
-      return f"c_{i}_{j} = vfmaq_f32(c_{i}_{j}, b_{k}_{j}, a_{i}_{k});\n"
+    a_ik = f"a_{i}_{(k//4)*4}"
+    b_kj = f"b_{k}_{j}"
+    c_ij = f"c_{i}_{j}"
+    _, _, block_k = self.block_shape
+    if block_k == 1:
+      return f"{c_ij} = vfmaq_f32({c_ij}, {b_kj}, {a_ik});\n"
+    else:
+      assert block_k % 4 == 0
+      return f"{c_ij} = vfmaq_laneq_f32({c_ij}, {b_kj}, {a_ik}, {k%4});\n"

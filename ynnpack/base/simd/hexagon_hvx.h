@@ -604,29 +604,29 @@ using s32x64 = simd::vec<int32_t, 64>;
 using s32x128 = simd::vec<int32_t, 128>;
 using s16x128 = simd::vec<int16_t, 128>;
 
-YNN_ALWAYS_INLINE s16x128 convert(s8x128 x, int16_t) {
+YNN_ALWAYS_INLINE s16x128 cast(s8x128 x, int16_t) {
   HVX_VectorPair result = Q6_Wh_vunpack_Vb(x.v);
   return {s16x64{Q6_V_lo_W(result)}, s16x64{Q6_V_hi_W(result)}};
 }
-YNN_ALWAYS_INLINE s16x128 convert(u8x128 x, int16_t) {
+YNN_ALWAYS_INLINE s16x128 cast(u8x128 x, int16_t) {
   HVX_VectorPair result = Q6_Wuh_vunpack_Vub(x.v);
   return {s16x64{Q6_V_lo_W(result)}, s16x64{Q6_V_hi_W(result)}};
 }
 
-YNN_ALWAYS_INLINE s32x64 convert(s16x64 x, int32_t) {
+YNN_ALWAYS_INLINE s32x64 cast(s16x64 x, int32_t) {
   HVX_VectorPair result = Q6_Ww_vunpack_Vh(x.v);
   return {s32x32{Q6_V_lo_W(result)}, s32x32{Q6_V_hi_W(result)}};
 }
 
-YNN_ALWAYS_INLINE s32x128 convert(s8x128 x, int32_t) {
+YNN_ALWAYS_INLINE s32x128 cast(s8x128 x, int32_t) {
   HVX_VectorPair s16 = Q6_Wh_vunpack_Vb(x.v);
-  return {convert(s16x64{Q6_V_lo_W(s16)}, int32_t{}),
-          convert(s16x64{Q6_V_hi_W(s16)}, int32_t{})};
+  return {cast(s16x64{Q6_V_lo_W(s16)}, int32_t{}),
+          cast(s16x64{Q6_V_hi_W(s16)}, int32_t{})};
 }
-YNN_ALWAYS_INLINE s32x128 convert(u8x128 x, int32_t) {
+YNN_ALWAYS_INLINE s32x128 cast(u8x128 x, int32_t) {
   HVX_VectorPair s16 = Q6_Wuh_vunpack_Vub(x.v);
-  return {convert(s16x64{Q6_V_lo_W(s16)}, int32_t{}),
-          convert(s16x64{Q6_V_hi_W(s16)}, int32_t{})};
+  return {cast(s16x64{Q6_V_lo_W(s16)}, int32_t{}),
+          cast(s16x64{Q6_V_hi_W(s16)}, int32_t{})};
 }
 
 template <typename ElemSizeBits>

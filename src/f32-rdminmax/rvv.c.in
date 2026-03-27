@@ -1,0 +1,75 @@
+// Copyright 2026 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert LMUL >= 1
+$assert OP in ["MAX", "MIN"]
+#include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
+
+#include <riscv_vector.h>
+
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/reduce.h"
+
+$EMIT_MIN = "MIN" in OP
+$EMIT_MAX = "MAX" in OP
+
+void xnn_f32_rd${OP.lower()}_ukernel_${ACCUMULATORS}p${ACCUMULATORS}x__rvv_u${LMUL}v(
+    size_t rows,
+    size_t channels,
+    const float* input,
+    size_t input_stride,
+    const float* zero,
+    float* output,
+    const void* params)
+{
+  assert(rows != 0);
+  assert(channels != 0);
+  assert(input != NULL);
+  assert(output != NULL);
+
+  size_t input_increment = ${ACCUMULATORS} * input_stride;
+
+  do {
+    size_t vl = __riscv_vsetvl_e32m${LMUL}(channels);
+
+    const float* i0 = input;
+    $for ACC in range(1, ACCUMULATORS):
+      const float* i${ACC} = (const float*) ((uintptr_t) input + ${ACC} * input_stride);
+
+    $if EMIT_MIN:
+      vfloat32m${LMUL}_t vmin = __riscv_vle32_v_f32m${LMUL}(output, vl);
+    $if EMIT_MAX:
+      vfloat32m${LMUL}_t vmax = __riscv_vle32_v_f32m${LMUL}(output, vl);
+
+    for (int r = rows; r > 0; r -= ${ACCUMULATORS}) {
+      $for ACC in range(1, ACCUMULATORS):
+        if XNN_UNPREDICTABLE(r < ${ACC+1}) {
+          i${ACC} = i${ACC - 1};
+        }
+      $for ACC in range(ACCUMULATORS):
+        vfloat32m${LMUL}_t vin_${ACC} = __riscv_vle32_v_f32m${LMUL}(i${ACC}, vl);
+
+      $for ACC in range(ACCUMULATORS):
+        $if EMIT_MIN:
+          vmin = __riscv_vfmin(vmin, vin_${ACC}, vl);
+        $if EMIT_MAX:
+          vmax = __riscv_vfmax(vmax, vin_${ACC}, vl);
+
+      $for ACC in range(0, ACCUMULATORS):
+        i${ACC} = (float*) ((uintptr_t) i${ACC} + input_increment);
+    }
+
+    $if EMIT_MIN:
+      __riscv_vse32(output, vmin, vl);
+    $if EMIT_MAX:
+      __riscv_vse32(output, vmax, vl);
+
+    output = (float*) ((uintptr_t) output + vl * sizeof(float));
+    input = (float*) ((uintptr_t) input + vl * sizeof(float));
+    channels -= vl;
+  } while (channels > 0);
+}

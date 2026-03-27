@@ -37,7 +37,7 @@ template <typename AccT, typename AT, typename MapFn>
 YNN_ALWAYS_INLINE AccT
 reduce_add(AccT acc, AT a, MapFn map_fn,
            std::integral_constant<size_t, 1> /*horizontal_factor*/) {
-  return acc += map_fn(convert(a, typename AccT::value_type{}));
+  return acc += map_fn(cast(a, typename AccT::value_type{}));
 }
 
 template <typename AccT>

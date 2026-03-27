@@ -77,7 +77,7 @@ xnn_status xnn_define_quantized_tensor_value(
   const size_t* xnn_dims = data ? dims : nullptr;
   ynn_status status = ynn_define_tensor_value(
       subgraph->ynn, ynn::type_from_xnn(datatype), num_dims, xnn_dims, data,
-      zero_point_id, scale_id, flags, id_out);
+      zero_point_id, scale_id, ynn::value_flags_from_xnn(flags), id_out);
   if (status != ynn_status_success) {
     return ynn::xnn_status_from_ynn(status);
   }

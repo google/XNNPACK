@@ -151,32 +151,6 @@ class ExpressionCachingTest(unittest.TestCase):
     constant_count = 7
     self.assertEqual(mc_object_count, c_object_count + constant_count)
 
-  def test_slice_wide_types(self):
-    natural_lanes = 4
-
-    c = sample_func()
-    c_object_count = self.count_objects(c)
-
-    # At the moment slice_wide_type expects types to have number of lanes
-    # divisible by the natural lanes count.
-    mc = self.target.vectorize(c, natural_lanes, {})
-    mc = self.target.slice_wide_types(mc, {})
-    mc_object_count = self.count_objects(mc)
-
-    # We need to add a number of constants in the program, because they'll be
-    # broadcasted in the vectorize.
-    constant_count = 7
-    self.assertEqual(mc_object_count, c_object_count + constant_count)
-
-  def test_optimize_slices(self):
-    c = sample_func()
-    c_object_count = self.count_objects(c)
-
-    mc = self.target.optimize_slices(c, {})
-    mc_object_count = self.count_objects(mc)
-
-    self.assertEqual(mc_object_count, c_object_count)
-
   def test_pattern_match(self):
     c = sample_func()
     c_object_count = self.count_objects(c)

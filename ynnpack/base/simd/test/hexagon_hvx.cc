@@ -94,11 +94,11 @@ TEST_HORIZONTAL_MAX(hvx, s32, 32);
 TEST_HORIZONTAL_MAX(hvx, f16, 64);
 TEST_HORIZONTAL_MAX(hvx, f32, 32);
 
-TEST_CONVERT(hvx, s32, u8x128);
-TEST_CONVERT(hvx, s32, s8x128);
-TEST_CONVERT(hvx, s32, s16x64);
-TEST_CONVERT(hvx, s16, u8x128);
-TEST_CONVERT(hvx, s16, s8x128);
+TEST_CAST(hvx, s32, u8x128);
+TEST_CAST(hvx, s32, s8x128);
+TEST_CAST(hvx, s32, s16x64);
+TEST_CAST(hvx, s16, u8x128);
+TEST_CAST(hvx, s16, s8x128);
 
 }  // namespace simd
 }  // namespace ynn
