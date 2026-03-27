@@ -107,10 +107,6 @@ class Type:
       assert False
 
 
-def Index():
-  return Type("size_t", 0, 0)
-
-
 def Int(size=0, lanes=1):
   return Type("int", size, lanes)
 
@@ -312,7 +308,6 @@ class Op(Value):
     return self.name == other.name and self.ty == other.ty
 
   def with_lanes(self, lanes):
-    assert self.name != "combine" and self.name != "slice", self
     return Op(
         self.ty.with_lanes(lanes),
         self.name,
@@ -353,17 +348,16 @@ class Var(Value):
 class Load(Value):
   """A load node."""
 
-  def __init__(self, ty, index, offset_elements):
+  def __init__(self, ty, index):
     Value.__init__(self, ty)
     self.name = "load"
     self.index = index
-    self.offset_elements = offset_elements
 
   def __repr__(self):
-    return f"load<{self.ty}>({self.index}, {self.offset_elements})"
+    return f"load<{self.ty}>({self.index})"
 
   def with_lanes(self, lanes):
-    return Load(self.ty.with_lanes(lanes), self.index, self.offset_elements)
+    return Load(self.ty.with_lanes(lanes), self.index)
 
   def compare(self, other):
     if type(self) is not type(other):
@@ -371,7 +365,6 @@ class Load(Value):
 
     return (
         self.index == other.index
-        and self.offset_elements == other.offset_elements
         and self.ty == other.ty
     )
 
@@ -599,8 +592,8 @@ def lower_select(cond, x, y):
     return (x & cond) | (y & ~cond)
 
 
-def load(x, offset_index=0):
-  return Load(x.ty, x, offset_index)
+def load(x):
+  return Load(x.ty, x)
 
 
 def store(value, to):
@@ -637,20 +630,6 @@ def broadcast(x, lanes):
         [broadcast(arg, lanes) for arg in x.args],
     )
   return Op(x.ty.with_lanes(lanes), "broadcast", [x])
-
-
-def combine_vectors(args):
-  total_lanes = 0
-  for arg in args:
-    assert arg.ty == args[0].ty
-    total_lanes += arg.ty.lanes
-
-  return Op(args[0].ty.with_lanes(total_lanes), "combine", args)
-
-
-def slice_vector(arg, index, total):
-  sliced_ty = arg.ty.with_lanes(arg.ty.lanes // total)
-  return Op(sliced_ty, "slice", [arg, i32(index), i32(total)])
 
 
 # Would it be bad if instead of using a map we looked up in a global namespace
