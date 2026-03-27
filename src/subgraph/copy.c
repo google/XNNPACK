@@ -538,6 +538,12 @@ enum xnn_status xnn_define_static_expand_dims(
   uint32_t output_id,
   uint32_t flags)
 {
+  if (num_new_axes > XNN_MAX_TENSOR_DIMS) {
+    xnn_log_error(
+      "failed to define %s operator with %zu-dimensional output shape: at most %zu dimensions are supported",
+      xnn_node_type_to_string(xnn_node_type_static_expand_dims), num_new_axes, (size_t) XNN_MAX_TENSOR_DIMS);
+    return xnn_status_unsupported_parameter;
+  }
   return define_copy_node(subgraph, num_new_axes, new_axes, /*axis=*/0,
                           xnn_node_type_static_expand_dims, input_id, output_id,
                           flags);
@@ -593,4 +599,3 @@ enum xnn_status xnn_define_copy(
                           /*axis=*/0, xnn_node_type_copy, input_id, output_id,
                           flags);
 }
-
