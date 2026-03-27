@@ -60,3 +60,20 @@ TEST(RUNTIME, reshape_runtime) {
   }
   ASSERT_EQ(expected, output);
 }
+
+TEST(RUNTIME, reshape_external_value_rejects_rank_above_max_tensor_dims) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
+
+  xnnpack::RuntimeTester tester(2);
+  constexpr uint32_t input_id = 0;
+  constexpr uint32_t output_id = 1;
+  tester.AddInputTensorF32({1}, input_id)
+      .AddOutputTensorF32({1}, output_id)
+      .AddCopy(input_id, output_id);
+  tester.CreateRuntime(xnn_test_runtime_flags());
+
+  const size_t dims[XNN_MAX_TENSOR_DIMS + 1] = {1, 1, 1, 1, 1, 1, 1};
+  EXPECT_EQ(xnn_status_unsupported_parameter,
+            xnn_reshape_external_value(tester.Runtime(), input_id,
+                                       XNN_MAX_TENSOR_DIMS + 1, dims));
+}
