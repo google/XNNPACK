@@ -15,13 +15,13 @@
 
 #include "ynnpack/base/arch.h"
 #include "ynnpack/base/arithmetic.h"
+#include "ynnpack/base/span.h"
 #include "ynnpack/base/test/buffer.h"
 #include "ynnpack/base/test/tensor.h"
 #include "ynnpack/base/test/util.h"
 #include "ynnpack/base/type.h"
 #include "ynnpack/kernels/dot/dot.h"
 #include "ynnpack/kernels/dot/schedule.h"
-#include "slinky/base/span.h"
 
 namespace ynn {
 
@@ -118,7 +118,7 @@ void fill(T* data, size_t n, int value) {
 
 template <typename TA, typename TB, typename TC>
 double run_benchmark(TA, TB, TC, const kernel_info& kernel, size_t m, size_t n,
-                     size_t k, slinky::span<dot_loop> loops) {
+                     size_t k, span<dot_loop> loops) {
   const bool transpose_a = kernel.flags & dot_flag::transpose_a;
 
   const size_t tile_m = kernel.tile_m;

@@ -30,11 +30,15 @@ SET(PROD_RVV_MICROKERNEL_SRCS
   src/f32-qs8-vcvt/gen/f32-qs8-vcvt-rvv-u2v.c
   src/f32-qu8-vcvt/gen/f32-qu8-vcvt-rvv-u2v.c
   src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-rvv-rr2-p6-u4v.c
+  src/f32-rdminmax/gen/f32-rdmax-2p2x-rvv-u8v.c
+  src/f32-rdminmax/gen/f32-rdmin-2p2x-rvv-u8v.c
   src/f32-rdsum/gen/f32-rdsum-7p7x-minmax-rvv-u4v.c
+  src/f32-rdsum2/gen/f32-rdsum2-7p7x-minmax-rvv-u4v.c
   src/f32-rminmax/gen/f32-rmax-rvv-u8v.c
   src/f32-rminmax/gen/f32-rmin-rvv-u8v.c
   src/f32-rminmax/gen/f32-rminmax-rvv-u8v.c
   src/f32-rsum/gen/f32-rsum-rvv-u4v.c
+  src/f32-rsum2/gen/f32-rsum2-rvv-u4v.c
   src/f32-spmm/gen/f32-spmm-4vx4-minmax-rvv.c
   src/f32-spmm/gen/f32-spmm-8vx1-minmax-rvv.c
   src/f32-spmm/gen/f32-spmm-8vx2-minmax-rvv.c
@@ -90,6 +94,7 @@ SET(PROD_RVV_MICROKERNEL_SRCS
   src/qs8-rsum/gen/qs8-rsum-rvv-u2v.c
   src/qs8-vadd/gen/qs8-vadd-minmax-rvv-u2v.c
   src/qs8-vaddc/gen/qs8-vaddc-minmax-rvv-u2v.c
+  src/qs8-vcvt/gen/qs8-vcvt-rvv-u4v.c
   src/qs8-vlrelu/gen/qs8-vlrelu-rvv-u2v.c
   src/qs8-vmul/gen/qs8-vmul-minmax-f32-rvv-u2v.c
   src/qs8-vmulc/gen/qs8-vmulc-minmax-f32-rvv-u2v.c
@@ -104,10 +109,21 @@ SET(PROD_RVV_MICROKERNEL_SRCS
   src/qu8-rsum/gen/qu8-rsum-rvv-u2v.c
   src/qu8-vadd/gen/qu8-vadd-minmax-rvv-u2v.c
   src/qu8-vaddc/gen/qu8-vaddc-minmax-rvv-u2v.c
+  src/qu8-vcvt/gen/qu8-vcvt-rvv-u4v.c
   src/qu8-vlrelu/gen/qu8-vlrelu-rvv-u2v.c
   src/qu8-vmul/gen/qu8-vmul-minmax-f32-rvv-u2v.c
   src/qu8-vmulc/gen/qu8-vmulc-minmax-f32-rvv-u2v.c
+  src/s8-rdminmax/gen/s8-rdmax-2p2x-rvv-u8v.c
+  src/s8-rdminmax/gen/s8-rdmin-2p2x-rvv-u8v.c
+  src/s8-rminmax/gen/s8-rmax-rvv-u8v.c
+  src/s8-rminmax/gen/s8-rmin-rvv-u8v.c
+  src/s8-rminmax/gen/s8-rminmax-rvv-u8v.c
   src/s8-vclamp/gen/s8-vclamp-rvv-u4v.c
+  src/u8-rdminmax/gen/u8-rdmax-2p2x-rvv-u8v.c
+  src/u8-rdminmax/gen/u8-rdmin-2p2x-rvv-u8v.c
+  src/u8-rminmax/gen/u8-rmax-rvv-u8v.c
+  src/u8-rminmax/gen/u8-rmin-rvv-u8v.c
+  src/u8-rminmax/gen/u8-rminmax-rvv-u8v.c
   src/u8-vclamp/gen/u8-vclamp-rvv-u4v.c
   src/x32-packw/gen/x32-packw-x4v-gemm-goi-rvv-u8.c
   src/x32-transposec/gen/x32-transposec-4x4-rvv.c
@@ -150,6 +166,8 @@ SET(NON_PROD_RVV_MICROKERNEL_SRCS
   src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-rvv-rr2-p6-u2v.c
   src/f32-rdsum/gen/f32-rdsum-7p7x-minmax-rvv-u1v.c
   src/f32-rdsum/gen/f32-rdsum-7p7x-minmax-rvv-u2v.c
+  src/f32-rdsum/gen/f32-rdsum-7p7x-minmax-rvv-u8v.c
+  src/f32-rdsum2/gen/f32-rdsum2-7p7x-minmax-rvv-u8v.c
   src/f32-rminmax/gen/f32-rmax-rvv-u1v.c
   src/f32-rminmax/gen/f32-rmax-rvv-u2v.c
   src/f32-rminmax/gen/f32-rmax-rvv-u4v.c
@@ -162,6 +180,7 @@ SET(NON_PROD_RVV_MICROKERNEL_SRCS
   src/f32-rsum/gen/f32-rsum-rvv-u1v.c
   src/f32-rsum/gen/f32-rsum-rvv-u2v.c
   src/f32-rsum/gen/f32-rsum-rvv-u8v.c
+  src/f32-rsum2/gen/f32-rsum2-rvv-u8v.c
   src/f32-spmm/gen/f32-spmm-1vx1-minmax-rvv.c
   src/f32-spmm/gen/f32-spmm-1vx2-minmax-rvv.c
   src/f32-spmm/gen/f32-spmm-1vx4-minmax-rvv.c
@@ -251,6 +270,8 @@ SET(NON_PROD_RVV_MICROKERNEL_SRCS
   src/qs8-rsum/gen/qs8-rsum-rvv-u1v.c
   src/qs8-vadd/gen/qs8-vadd-minmax-rvv-u1v.c
   src/qs8-vaddc/gen/qs8-vaddc-minmax-rvv-u1v.c
+  src/qs8-vcvt/gen/qs8-vcvt-rvv-u1v.c
+  src/qs8-vcvt/gen/qs8-vcvt-rvv-u2v.c
   src/qs8-vlrelu/gen/qs8-vlrelu-rvv-u1v.c
   src/qs8-vmul/gen/qs8-vmul-minmax-f32-rvv-u1v.c
   src/qs8-vmulc/gen/qs8-vmulc-minmax-f32-rvv-u1v.c
@@ -261,6 +282,8 @@ SET(NON_PROD_RVV_MICROKERNEL_SRCS
   src/qu8-rsum/gen/qu8-rsum-rvv-u1v.c
   src/qu8-vadd/gen/qu8-vadd-minmax-rvv-u1v.c
   src/qu8-vaddc/gen/qu8-vaddc-minmax-rvv-u1v.c
+  src/qu8-vcvt/gen/qu8-vcvt-rvv-u1v.c
+  src/qu8-vcvt/gen/qu8-vcvt-rvv-u2v.c
   src/qu8-vlrelu/gen/qu8-vlrelu-rvv-u1v.c
   src/qu8-vmul/gen/qu8-vmul-minmax-f32-rvv-u1v.c
   src/qu8-vmulc/gen/qu8-vmulc-minmax-f32-rvv-u1v.c

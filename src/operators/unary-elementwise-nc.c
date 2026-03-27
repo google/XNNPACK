@@ -224,7 +224,7 @@ static const struct xnn_unary_elementwise_config* get_config(
       case xnn_unary_reciprocal_square_root:
         return xnn_init_f32_rsqrt_config(flags);
       case xnn_unary_sigmoid:
-        return xnn_init_f32_sigmoid_config();
+        return xnn_init_f32_sigmoid_config(flags);
       case xnn_unary_sine:
         return xnn_init_f32_sine_config(flags);
       case xnn_unary_square_root:

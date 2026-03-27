@@ -15,10 +15,10 @@ RUN apt-get update && apt-get install -y \
     bison
 
 WORKDIR /src
-RUN wget -nv https://download.qemu.org/qemu-9.2.2.tar.xz && \
-    tar xJf qemu-9.2.2.tar.xz
+RUN wget -nv https://download.qemu.org/qemu-10.2.1.tar.xz && \
+    tar xJf qemu-10.2.1.tar.xz
 
-WORKDIR /src/qemu-9.2.2
+WORKDIR /src/qemu-10.2.1
 RUN ./configure --target-list=riscv64-linux-user --static --disable-tools --disable-system --disable-docs
 RUN make -j$(nproc)
 
@@ -48,7 +48,7 @@ RUN wget -nv https://github.com/riscv-collab/riscv-gnu-toolchain/releases/downlo
     rm riscv64-glibc-ubuntu-24.04-llvm-nightly-2025.01.20-nightly.tar.xz
 
 WORKDIR /opt/qemu/bin
-COPY --from=qemu-builder /src/qemu-9.2.2/build/qemu-riscv64 .
+COPY --from=qemu-builder /src/qemu-10.2.1/build/qemu-riscv64 .
 ENV PATH="/opt/qemu/bin:${PATH}"
 
 ARG USERNAME=xnnpack

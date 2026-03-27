@@ -19,29 +19,30 @@ class x86_avx512vnni_uint8_int8_int32(x86_avx512):
     self.flags += ["dot_flag::consistent_arithmetic"]
 
   def header(self):
-    return super().header() + f"""
+    return super().header() + """
 
-namespace {{
+namespace {
 
-YNN_INTRINSIC __m{self.bits}i unaligned_load_broadcast_4xuint8(const uint8_t* ptr) {{
-    uint32_t value;
-    memcpy(&value, ptr, sizeof(uint32_t));
-    return _mm{self.bits}_set1_epi32(value);
-}}
+YNN_INTRINSIC int32_t unaligned_load_u8x4(const uint8_t* ptr) {
+    int32_t value;
+    memcpy(&value, ptr, sizeof(int32_t));
+    return value;
+}
 
-}}  // namespace
+}  // namespace
 """
 
   def load_a_tile(self, i, k):
-    return (
-        f"__m{self.bits}i a_{i}_{k} = unaligned_load_broadcast_4xuint8({self.a_ptr(i, k)});\n"
-    )
+    bits = self.bits
+    a = f"unaligned_load_u8x4({self.a_ptr(i, k)})"
+    return f"__m{bits}i a_{i}_{k} = _mm{self.bits}_set1_epi32({a});\n"
 
   def load_b_tile(self, k, j):
-    return (
-        f"__m{self.bits}i b_{k}_{j} ="
-        f" _mm{self.bits}_load_si{self.bits}({self.b_ptr(k, j, f'__m{self.bits}i')});\n"
-    )
+    bits = self.bits
+    b_ptr = self.b_ptr(k, j, f"__m{bits}i")
+    return f"__m{bits}i b_{k}_{j} = _mm{bits}_load_si{bits}({b_ptr});\n"
 
   def product(self, i, j, k):
-    return f"c_{i}_{j} = _mm{self.bits}_dpbusd_epi32(c_{i}_{j}, a_{i}_{k}, b_{k}_{j});\n"
+    mm = self._mm()
+    c_ij = f"c_{i}_{j}"
+    return f"{c_ij} = {mm}_dpbusd_epi32({c_ij}, a_{i}_{k}, b_{k}_{j});\n"

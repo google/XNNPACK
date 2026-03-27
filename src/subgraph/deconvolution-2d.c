@@ -63,7 +63,7 @@ static enum xnn_status create_deconvolution_operator(
                                                   : values[input_id].datatype;
   const enum xnn_datatype filter_datatype = values[filter_id].datatype;
   const enum xnn_datatype bias_datatype = bias_id != XNN_INVALID_VALUE_ID
-                                              ? values[filter_id].datatype
+                                              ? values[bias_id].datatype
                                               : xnn_datatype_invalid;
   const enum xnn_datatype output_datatype = values[output_id].datatype;
   switch (output_datatype) {
@@ -405,6 +405,12 @@ static enum xnn_status reshape_deconvolution_operator(
     size_t num_values, pthreadpool_t threadpool) {
   const uint32_t input_id = opdata->inputs[0];
   assert(input_id < num_values);
+  if (values[input_id].shape.num_dims != 3 && values[input_id].shape.num_dims != 4) {
+    xnn_log_error(
+      "failed to define %s operator with input ID #%" PRIu32 ": num_dims (%zu) must be 3 or 4",
+      xnn_node_type_to_string(xnn_node_type_deconvolution_2d), input_id, values[input_id].shape.num_dims);
+    return xnn_status_invalid_parameter;
+  }
   const size_t batch_size = values[input_id].shape.dim[0];
   const size_t input_height = values[input_id].shape.dim[1];
   const size_t input_width = values[input_id].shape.dim[2];
@@ -755,7 +761,7 @@ enum xnn_status xnn_define_deconvolution_2d(
           input_value->shape.num_dims) {
         xnn_log_error("failed to define %s operator with input ID #%" PRIu32
                       ": num_nonbatch_dims (%zu) must be < num_dims (%zu)",
-                      xnn_node_type_to_string(xnn_node_type_convolution_2d),
+                      xnn_node_type_to_string(xnn_node_type_deconvolution_2d),
                       input_id, input_value->quantization.num_nonbatch_dims,
                       input_value->shape.num_dims);
         return xnn_status_invalid_parameter;
@@ -931,8 +937,8 @@ enum xnn_status xnn_define_deconvolution_2d(
     if (filter_value->quantization.channel_dimension != 0) {
       xnn_log_error("failed to define %s operator with filter ID #%" PRIu32
                     ": invalid channel dimension %zu",
-                    xnn_node_type_to_string(xnn_node_type_convolution_2d),
-                    input_id, filter_value->quantization.channel_dimension);
+                    xnn_node_type_to_string(xnn_node_type_deconvolution_2d),
+                    filter_id, filter_value->quantization.channel_dimension);
       return xnn_status_invalid_parameter;
     }
 
@@ -943,7 +949,7 @@ enum xnn_status xnn_define_deconvolution_2d(
           bias_value->quantization.channel_dimension != 0) {
         xnn_log_error("failed to define %s operator with bias ID #%" PRIu32
                       ": invalid channel dimension %zu",
-                      xnn_node_type_to_string(xnn_node_type_convolution_2d),
+                      xnn_node_type_to_string(xnn_node_type_deconvolution_2d),
                       bias_id, bias_value->quantization.channel_dimension);
         return xnn_status_invalid_parameter;
       }

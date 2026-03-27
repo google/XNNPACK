@@ -83,7 +83,7 @@ static enum xnn_status reshape_binary_operator(
     }
     shape2.dim[0] = values[input2_id].shape.dim[0];
     shape2.dim[1] = values[input2_id].shape.dim[values[input2_id].shape.num_dims - 1];
-    if (values[input1_id].shape.num_dims > 2) {
+    if (values[input2_id].shape.num_dims > 2) {
       memcpy(&shape2.dim[2], &values[input2_id].shape.dim[1], (values[input2_id].shape.num_dims - 2) * sizeof(size_t));
     }
   } else {

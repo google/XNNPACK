@@ -1129,11 +1129,11 @@ void GEMMBenchmark(benchmark::State& state,
   for (auto _ : state) {
     // Use circular buffers (exceeding cache size) and prefetch to control cache
     // state:
-    // - A is always in L1 cache (if fits, otherwise L2, L3, etc)
+    // - A_packed is always in L1 cache (if fits, otherwise L2, L3, etc)
     // - W is not in cache (for any cache level)
     // - C is not in cache (for any cache level)
     state.PauseTiming();
-    benchmark::utils::PrefetchToL1(a.data(), a.size());
+    benchmark::utils::PrefetchToL1(input_qp8.data(), input_qp8.size());
     buffer_index = (buffer_index + 1) % num_buffers;
     state.ResumeTiming();
 
@@ -1474,11 +1474,11 @@ void GEMMBenchmark(benchmark::State& state,
   for (auto _ : state) {
     // Use circular buffers (exceeding cache size) and prefetch to control cache
     // state:
-    // - A is always in L1 cache (if fits, otherwise L2, L3, etc)
+    // - A_packed is always in L1 cache (if fits, otherwise L2, L3, etc)
     // - W is not in cache (for any cache level)
     // - C is not in cache (for any cache level)
     state.PauseTiming();
-    benchmark::utils::PrefetchToL1(a.data(), a.size());
+    benchmark::utils::PrefetchToL1(input_qp8.data(), input_qp8.size());
     buffer_index = (buffer_index + 1) % num_buffers;
     state.ResumeTiming();
 

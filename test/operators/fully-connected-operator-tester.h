@@ -4589,8 +4589,9 @@ class FullyConnectedOperatorTester {
         ASSERT_NEAR(
             output_ref[i * output_channels() + c],
             output[i * output_stride() + c],
-            std::max(tolerance * std::abs(output_ref[i * output_channels() + c]),
-                     tolerance))
+            std::max(
+                tolerance * std::abs(output_ref[i * output_channels() + c]),
+                tolerance))
             << "batch index = " << i << ", channel = " << c;
       }
     }

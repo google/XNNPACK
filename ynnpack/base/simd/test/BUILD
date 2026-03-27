@@ -48,6 +48,7 @@ package(default_visibility = ["//ynnpack:__subpackages__"])
     "x86_f16c",
     "x86_fma3",
     "hexagon_hvx",
+    "wasm_simd128",
 ]]
 
 cc_test(

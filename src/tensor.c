@@ -535,6 +535,7 @@ enum xnn_status xnn_define_blockwise_quantized_tensor_value_v2(
         "failed to create Blockwise Quantized Dense Tensor value: block size "
         "is invalid. Got %zu\n",
         block_size);
+    return xnn_status_invalid_parameter;
   }
 
   enum xnn_status status = check_zero_point(datatype, zero_point);

@@ -16,6 +16,7 @@ tools/xngen src/f32-rdsum/simd.c.in -D ARCH=neon -D SIMD_SIZE=4 -D CHANNELS=64 -
 tools/xngen src/f32-rdsum/rvv.c.in -D ACCUMULATORS=7 LMUL=1 -o src/f32-rdsum/gen/f32-rdsum-7p7x-minmax-rvv-u1v.c &
 tools/xngen src/f32-rdsum/rvv.c.in -D ACCUMULATORS=7 LMUL=2 -o src/f32-rdsum/gen/f32-rdsum-7p7x-minmax-rvv-u2v.c &
 tools/xngen src/f32-rdsum/rvv.c.in -D ACCUMULATORS=7 LMUL=4 -o src/f32-rdsum/gen/f32-rdsum-7p7x-minmax-rvv-u4v.c &
+tools/xngen src/f32-rdsum/rvv.c.in -D ACCUMULATORS=7 LMUL=8 -o src/f32-rdsum/gen/f32-rdsum-7p7x-minmax-rvv-u8v.c &
 
 #################################### SSE ######################################
 tools/xngen src/f32-rdsum/simd.c.in -D ARCH=sse2 -D SIMD_SIZE=4 -D CHANNELS=16 -D ACCUMULATORS=7 -o src/f32-rdsum/gen/f32-rdsum-7p7x-minmax-sse2-u16.c &

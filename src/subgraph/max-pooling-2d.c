@@ -137,12 +137,20 @@ static enum xnn_status reshape_max_pooling_operator(
   const uint32_t output_id = opdata->outputs[0];
   assert(output_id < num_values);
 
+  const struct xnn_runtime_value* input_value = values + input_id;
+  if (input_value->shape.num_dims < 4) {
+    xnn_log_error("failed to reshape %s operator with input ID #%" PRIu32
+                  ": number of dimensions (%zu) must be at least 4",
+                  xnn_node_type_to_string(xnn_node_type_max_pooling_2d),
+                  input_id, input_value->shape.num_dims);
+    return xnn_status_invalid_parameter;
+  }
   struct xnn_runtime_value* output_value = values + output_id;
 
-  const size_t batch_size = values[input_id].shape.dim[0];
-  const size_t input_height = values[input_id].shape.dim[1];
-  const size_t input_width = values[input_id].shape.dim[2];
-  const size_t channels = values[input_id].shape.dim[3];
+  const size_t batch_size = input_value->shape.dim[0];
+  const size_t input_height = input_value->shape.dim[1];
+  const size_t input_width = input_value->shape.dim[2];
+  const size_t channels = input_value->shape.dim[3];
 
   enum xnn_status status = xnn_status_invalid_state;
   size_t output_height, output_width;

@@ -468,7 +468,12 @@ void TestStaticB(xnn_datatype convert_to = xnn_datatype_invalid,
         }
       } else {
         const float max_a = MaxDatatype(Input());
-        const float max_b = MaxDatatype(Filter()) * filter_quantization.scale;
+        float max_b = MaxDatatype(Filter()) * filter_quantization.scale;
+        // For qd8_qc2w the range of channelwise ZP in this test is
+        // [-1.5, -0.5], which needs to be accounted for here.
+        if (is_qd8_qc2w) {
+          max_b += 1.5f * filter_quantization.scale;
+        }
         const float max_bias =
             bias.empty() ? 0.0f
                          : max_abs_bias<Bias>() * bias_quantization.scale;
@@ -756,6 +761,60 @@ TEST(FullyConnectedF16, dynamic_b) {
 }
 TEST(FullyConnectedF32, dynamic_b) {
   TestDynamicB<float, float, float, float>();
+}
+
+// Regression test: fully-connected with a zero-dimensional input must not
+// cause a heap-buffer-overflow via unsigned underflow on num_dims - 1.
+TEST(FullyConnectedF32, zero_dim_input_rejected) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
+
+  xnn_subgraph_t subgraph = nullptr;
+  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(3, 0, &subgraph));
+
+  uint32_t input_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_tensor_value(subgraph, xnn_datatype_fp32, 0, nullptr,
+                                   nullptr, 0, XNN_VALUE_FLAG_EXTERNAL_INPUT,
+                                   &input_id));
+
+  float filter = 1.0f;
+  size_t filter_dims[] = {1, 1};
+  uint32_t filter_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_tensor_value(subgraph, xnn_datatype_fp32, 2,
+                                   filter_dims, &filter, XNN_INVALID_VALUE_ID,
+                                   0, &filter_id));
+
+  uint32_t output_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_tensor_value(subgraph, xnn_datatype_fp32, 0, nullptr,
+                                   nullptr, 1, XNN_VALUE_FLAG_EXTERNAL_OUTPUT,
+                                   &output_id));
+
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_fully_connected(subgraph, -1e30f, 1e30f, input_id,
+                                       filter_id, XNN_INVALID_VALUE_ID,
+                                       output_id, 0));
+
+  xnn_runtime_t runtime = nullptr;
+  ASSERT_EQ(xnn_status_success, xnn_create_runtime(subgraph, &runtime));
+  ASSERT_NE(nullptr, runtime);
+
+  float in = 0.0f, out = 0.0f;
+  struct xnn_external_value ext[] = {{0, &in}, {1, &out}};
+  // xnn_setup_runtime (v1) calls xnn_reshape_runtime internally, which must
+  // reject num_dims=0 without OOB write.
+  xnn_status status = xnn_setup_runtime(runtime, 2, ext);
+#ifndef XNNPACK_USE_YNNPACK
+  ASSERT_NE(xnn_status_success, status);
+#else
+  // This is basically just the dot with shapes {} * {1, 1}, which according to
+  // our broadcasting rules, should work, and it does in YNNPACK.
+  ASSERT_EQ(xnn_status_success, status);
+#endif  // XNNPACK_USE_YNNPACK
+
+  xnn_delete_runtime(runtime);
+  xnn_delete_subgraph(subgraph);
 }
 
 }  // namespace xnnpack

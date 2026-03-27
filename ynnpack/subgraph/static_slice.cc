@@ -12,6 +12,7 @@
 #include <utility>
 #include <vector>
 
+#include "ynnpack/base/log.h"
 #include "ynnpack/include/ynnpack.h"
 #include "ynnpack/subgraph/runtime.h"
 #include "ynnpack/subgraph/slinky.h"
@@ -60,11 +61,17 @@ ynn_status ynn_define_static_slice(ynn_subgraph_t subgraph, size_t num_axes,
   const bool slice_dims = flags & YNN_NODE_FLAG_SLICE_DIMS;
 
   // Validate arguments.
-  assert(subgraph);
-  assert(subgraph->is_valid_value(input_id));
-  assert(slice_dims || ends);
-  assert(slice_dims || strides);
-  assert(output_id);
+  YNN_RETURN_IF_ERROR(validate_subgraph("static_slice", subgraph));
+  YNN_RETURN_IF_ERROR(
+      validate_input_tensor("static_slice", subgraph, "input_id", input_id));
+  if (!slice_dims && (ends == nullptr || strides == nullptr)) {
+    YNN_LOG_ERROR()
+        << "For node `static_slice`, ends and strides must be non-null when "
+           "YNN_NODE_FLAG_SLICE_DIMS is not set";
+    return ynn_status_invalid_parameter;
+  }
+  YNN_RETURN_IF_ERROR(
+      validate_output_tensor("static_slice", subgraph, "output_id", output_id));
   const ynn_value& input = subgraph->value(input_id);
 
   ynn_node::static_slice op;

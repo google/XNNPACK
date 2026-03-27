@@ -30,11 +30,9 @@ bool allow_in_place(uint32_t input_id, uint32_t output_id,
 // If there is no path from `input_id` to `output_id`, returns std::nullopt.
 //
 // Ids in the new subgraph will be different from the original subgraph.
-std::optional<ynn_subgraph> clone_subgraph_subset(const ynn_subgraph& subgraph,
-                                                  uint32_t input_id,
-                                                  uint32_t output_id,
-                                                  uint32_t& cloned_input_id,
-                                                  uint32_t& cloned_output_id);
+slinky::ref_count<ynn_subgraph> clone_subgraph_subset(
+    const ynn_subgraph& subgraph, uint32_t input_id, uint32_t output_id,
+    uint32_t& cloned_input_id, uint32_t& cloned_output_id);
 
 }  // namespace ynn
 

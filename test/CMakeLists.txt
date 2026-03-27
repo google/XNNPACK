@@ -461,6 +461,12 @@ TARGET_LINK_LIBRARIES(fingerprint-cache-test PRIVATE
 ADD_TEST(NAME fingerprint-cache-test COMMAND fingerprint-cache-test)
 SET_TARGET_PROPERTIES(fingerprint-cache-test PROPERTIES CXX_EXTENSIONS YES)
 
+ADD_EXECUTABLE(polyfill-test polyfill.cc)
+TARGET_LINK_LIBRARIES(polyfill-test PRIVATE
+  xnnpack-test)
+ADD_TEST(NAME polyfill-test COMMAND polyfill-test)
+SET_TARGET_PROPERTIES(polyfill-test PROPERTIES CXX_EXTENSIONS YES)
+
 IF(XNNPACK_BUILD_LIBRARY)
   ADD_EXECUTABLE(weights-cache-test weights-cache.cc)
   TARGET_LINK_LIBRARIES(weights-cache-test PRIVATE XNNPACK pthreadpool GTest::gtest GTest::gtest_main)

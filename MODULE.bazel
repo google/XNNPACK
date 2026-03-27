@@ -12,7 +12,7 @@ module(
 )
 
 # Bazel rule definitions
-bazel_dep(name = "rules_cc", version = "0.2.14")
+bazel_dep(name = "rules_cc", version = "0.2.17")
 bazel_dep(name = "rules_license", version = "1.0.0")
 bazel_dep(name = "rules_python", version = "1.7.0")
 bazel_dep(name = "rules_shell", version = "0.6.1")
@@ -115,9 +115,9 @@ http_archive(
 
 http_archive(
     name = "slinky",
-    sha256 = "659253670a5c7983bcebed6f2190b48024465a3beedcfcd7239acc0ae73778fb",
-    strip_prefix = "slinky-4a497c5bd9e52588a5579d4c7ab3a6983e5a8b1d",
+    sha256 = "71584e401c60a576cc934353d5d437b49b032dd315820fd810bb44629acff2bf",
+    strip_prefix = "slinky-b6b9cdfba51ad17959a8314f338e2931c55f74d6",
     urls = [
-        "https://github.com/dsharlet/slinky/archive/4a497c5bd9e52588a5579d4c7ab3a6983e5a8b1d.zip",
+        "https://github.com/dsharlet/slinky/archive/b6b9cdfba51ad17959a8314f338e2931c55f74d6.zip",
     ],
 )

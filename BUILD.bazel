@@ -691,7 +691,6 @@ xnnpack_cc_library(
         ":microparams_h",
         ":node_type",
         ":operator_type",
-        ":packing",
         ":xnnpack_h",
         "//src/configs:config_hdrs",
         "@pthreadpool",

@@ -20,6 +20,8 @@ using x2048_t = std::array<uint8_t, 256>;
 template <typename F>
 constexpr decltype(auto) switch_element_size(size_t element_size_bits, F&& f) {
   switch (element_size_bits) {
+    case 2:
+      return std::forward<F>(f)(uint2x4());
     case 4:
       return std::forward<F>(f)(uint4x2());
     case 8:

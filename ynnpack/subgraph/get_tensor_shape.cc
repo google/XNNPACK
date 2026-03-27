@@ -3,6 +3,7 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+#include <algorithm>
 #include <cassert>
 #include <cstddef>
 #include <cstdint>
@@ -12,6 +13,7 @@
 #include <vector>
 
 #include "ynnpack/base/base.h"
+#include "ynnpack/base/log.h"
 #include "ynnpack/include/ynnpack.h"
 #include "ynnpack/subgraph/runtime.h"
 #include "ynnpack/subgraph/slinky.h"
@@ -58,20 +60,34 @@ ynn_status ynn_define_get_tensor_shape(ynn_subgraph_t subgraph, size_t num_axes,
                                        size_t rank, uint32_t value_id,
                                        uint32_t* output_id, uint32_t flags) {
   // Validate arguments.
-  assert(subgraph);
-  assert(subgraph->is_valid_value(value_id));
-  assert(output_id);
+  YNN_RETURN_IF_ERROR(validate_subgraph("get_tensor_shape", subgraph));
+  YNN_RETURN_IF_ERROR(validate_input_tensor("get_tensor_shape", subgraph,
+                                            "value_id", value_id));
+  YNN_RETURN_IF_ERROR(validate_output_tensor("get_tensor_shape", subgraph,
+                                             "output_id", output_id));
+  if (num_axes > 0 && axes == nullptr) {
+    YNN_LOG_ERROR() << "For node `get_tensor_shape`, axes must be non-null "
+                       "when num_axes > 0";
+    return ynn_status_invalid_parameter;
+  }
   if (*output_id == YNN_INVALID_VALUE_ID) {
     *output_id = subgraph->new_internal_value(type).id;
   }
   const ynn_value& input = subgraph->value(value_id);
 
   ynn_node::get_tensor_shape op;
-  op.axes.resize(num_axes);
-  for (size_t i = 0; i < num_axes; ++i) {
-    op.axes[i] = axis_to_slinky_dim(input.rank(), axes[i]);
-  }
   op.reshape_1d = (flags & YNN_NODE_FLAG_RESHAPE_1D) != 0;
+  for (size_t i = 0; i < num_axes; ++i) {
+    int32_t axis = axis_to_slinky_dim(input.rank(), axes[i]);
+    // Most YNNPACK ops treat axes lists as a set, i.e. duplicate axes are
+    // treated as one. However, get_tensor_shape axes are used to produce a
+    // vector. We assume in the reshape_1d case that axes should be treated as a
+    // set, otherwise the operation could not be expressed as a reshape.
+    if (!op.reshape_1d ||
+        std::find(op.axes.begin(), op.axes.end(), axis) == op.axes.end()) {
+      op.axes.push_back(axis);
+    }
+  }
 
   // Propagate shape.
   ynn_value& output = subgraph->value(*output_id);
@@ -102,15 +118,13 @@ ynn_status ynn_define_get_tensor_shape(ynn_subgraph_t subgraph, size_t num_axes,
     if (op.reshape_1d) {
       extents = {slinky::index_t(1)};
       for (int32_t i : op.axes) {
-        if (input.extents[i].defined()) {
-          extents[0] *= input.extents[i];
-        }
+        extents[0] *= input.extent(i);
       }
       extents[0] = slinky::simplify(extents[0]);
     } else {
       extents.reserve(op.axes.size());
       for (int32_t i : op.axes) {
-        extents.push_back(input.extents[i].defined() ? input.extents[i] : 1);
+        extents.push_back(input.extent(i));
       }
     }
 

@@ -21,7 +21,6 @@
 #include "src/xnnpack/microparams.h"
 #include "src/xnnpack/node-type.h"
 #include "src/xnnpack/operator-type.h"
-#include "src/xnnpack/pack.h"
 #include <pthreadpool.h>
 
 #ifdef __cplusplus

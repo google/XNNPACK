@@ -1227,10 +1227,10 @@ xnn_datatype xnn_datatype_from_ynn(ynn_type type) {
     case ynn_type_int32:
       return xnn_datatype_qint32;
     case ynn_type_int4:
-      return xnn_datatype_qcint4;
     case ynn_type_uint4:
       return xnn_datatype_qcint4;
     case ynn_type_int2:
+    case ynn_type_uint2:
       return xnn_datatype_qcint2;
     case ynn_type_bf16:
       return xnn_datatype_bf16;

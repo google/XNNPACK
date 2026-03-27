@@ -155,6 +155,8 @@ constexpr decltype(auto) SwitchThreeTypes(multi_type type, F&& f) {
       return std::forward<F>(f)(float(), float(), float());
     case multi_type::bf16:
       return std::forward<F>(f)(bfloat16(), bfloat16(), bfloat16());
+    case multi_type::fp16:
+      return std::forward<F>(f)(half(), half(), half());
     case multi_type::int8:
       return std::forward<F>(f)(int8_t(), int8_t(), int8_t());
     case multi_type::uint8:

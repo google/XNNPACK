@@ -191,7 +191,7 @@ ynn_status create_unary(const ynn_node& node, ynn_runtime& runtime,
 
   slinky::call_stmt::attributes attrs;
   attrs.name = to_string(std::get<ynn_node::unary_elementwise>(node.op).op);
-  attrs.allow_in_place = compute_allow_in_place(node, runtime.subgraph);
+  attrs.allow_in_place = compute_allow_in_place(node, *runtime.subgraph);
 
   slinky::func func = slinky::func::make(make_unary_elementwise_impl(kernel),
                                          {{a.buffer, std::move(bounds)}},
@@ -223,7 +223,7 @@ ynn_status create_lut(const ynn_node& node, ynn_runtime& runtime,
 
   slinky::call_stmt::attributes attrs;
   attrs.name = "lut";
-  attrs.allow_in_place = compute_allow_in_place(node, runtime.subgraph);
+  attrs.allow_in_place = compute_allow_in_place(node, *runtime.subgraph);
 
   auto func = slinky::func::make(
       make_lut_impl(kernel),
@@ -251,7 +251,7 @@ ynn_status create_binary(const ynn_node& node, ynn_runtime& runtime,
 
   slinky::call_stmt::attributes attrs;
   attrs.name = to_string(std::get<ynn_node::binary_elementwise>(node.op).op);
-  attrs.allow_in_place = compute_allow_in_place(node, runtime.subgraph);
+  attrs.allow_in_place = compute_allow_in_place(node, *runtime.subgraph);
 
   // Make the dims and bounds for this operation (does not depend on the
   // specific operation.)
@@ -287,7 +287,7 @@ ynn_status create_ternary(const ynn_node& node, ynn_runtime& runtime,
 
   slinky::call_stmt::attributes attrs;
   attrs.name = to_string(std::get<ynn_node::ternary_elementwise>(node.op).op);
-  attrs.allow_in_place = compute_allow_in_place(node, runtime.subgraph);
+  attrs.allow_in_place = compute_allow_in_place(node, *runtime.subgraph);
 
   // Make the dims and bounds for this operation (does not depend on the
   // specific operation.)
@@ -398,17 +398,22 @@ extern "C" {
 ynn_status ynn_define_unary(ynn_subgraph_t subgraph, ynn_unary_operator op,
                             uint32_t input_a_id, uint32_t* output_id,
                             uint32_t flags) {
-  // Validate arguments.
-  assert(subgraph);
+  YNN_RETURN_IF_ERROR(validate_subgraph("unary", subgraph));
   if (op == ynn_unary_invalid) {
     YNN_LOG_ERROR() << "invalid unary operator of input " << input_a_id;
     return ynn_status_invalid_parameter;
   }
-  assert(subgraph->is_valid_value(input_a_id));
-  assert(output_id);
+  YNN_RETURN_IF_ERROR(
+      validate_input_tensor("unary", subgraph, "input_a_id", input_a_id));
+  YNN_RETURN_IF_ERROR(
+      validate_output_tensor("unary", subgraph, "output_id", output_id));
 
   if (op == ynn_unary_convert) {
-    assert(*output_id != YNN_INVALID_VALUE_ID);
+    if (*output_id == YNN_INVALID_VALUE_ID) {
+      YNN_LOG_ERROR() << "For node `unary` with operator `ynn_unary_convert`, "
+                         "output_id must be valid";
+      return ynn_status_invalid_parameter;
+    }
 
     const ynn_value& x = subgraph->value(*output_id);
     return ynn_define_convert(subgraph, input_a_id, x.type, x.zero_point_id,
@@ -463,10 +468,11 @@ ynn_status ynn_define_convert(ynn_subgraph_t subgraph, uint32_t input_id,
                               ynn_type output_type, uint32_t zero_point_id,
                               uint32_t scale_id, uint32_t* output_id,
                               uint32_t flags) {
-  // Validate arguments.
-  assert(subgraph);
-  assert(subgraph->is_valid_value(input_id));
-  assert(output_id);
+  YNN_RETURN_IF_ERROR(validate_subgraph("unary", subgraph));
+  YNN_RETURN_IF_ERROR(
+      validate_input_tensor("unary", subgraph, "input_id", input_id));
+  YNN_RETURN_IF_ERROR(
+      validate_output_tensor("unary", subgraph, "output_id", output_id));
 
   const ynn_value& a = subgraph->value(input_id);
 
@@ -654,15 +660,18 @@ ynn_status ynn_define_binary(ynn_subgraph_t subgraph, ynn_binary_operator op,
                              uint32_t input_a_id, uint32_t input_b_id,
                              uint32_t* output_id, uint32_t flags) {
   // Validate arguments.
-  assert(subgraph);
+  YNN_RETURN_IF_ERROR(validate_subgraph("binary", subgraph));
   if (op == ynn_binary_invalid) {
-    YNN_LOG_ERROR() << "invalid binary operator of inputs " << input_a_id
-                    << ", " << input_b_id;
+    YNN_LOG_ERROR() << "For node `binary`, invalid binary operator of inputs "
+                    << input_a_id << ", " << input_b_id;
     return ynn_status_invalid_parameter;
   }
-  assert(subgraph->is_valid_value(input_a_id));
-  assert(subgraph->is_valid_value(input_b_id));
-  assert(output_id);
+  YNN_RETURN_IF_ERROR(
+      validate_input_tensor("binary", subgraph, "input_a_id", input_a_id));
+  YNN_RETURN_IF_ERROR(
+      validate_input_tensor("binary", subgraph, "input_b_id", input_b_id));
+  YNN_RETURN_IF_ERROR(
+      validate_output_tensor("binary", subgraph, "output_id", output_id));
   const ynn_value& a = subgraph->value(input_a_id);
   const ynn_value& b = subgraph->value(input_b_id);
 
@@ -734,24 +743,26 @@ ynn_status ynn_define_binary(ynn_subgraph_t subgraph, ynn_binary_operator op,
 ynn_status ynn_define_lut(ynn_subgraph_t subgraph, uint32_t input_id,
                           uint32_t lut_id, uint32_t* output_id,
                           uint32_t flags) {
-  assert(subgraph);
-  assert(subgraph->is_valid_value(input_id));
-  assert(subgraph->is_valid_value(lut_id));
-  assert(output_id);
+  YNN_RETURN_IF_ERROR(validate_subgraph("lut", subgraph));
+  YNN_RETURN_IF_ERROR(
+      validate_input_tensor("lut", subgraph, "input_id", input_id));
+  YNN_RETURN_IF_ERROR(validate_input_tensor("lut", subgraph, "lut_id", lut_id));
+  YNN_RETURN_IF_ERROR(
+      validate_output_tensor("lut", subgraph, "output_id", output_id));
 
   const ynn_value& a = subgraph->value(input_id);
   const ynn_value& lut = subgraph->value(lut_id);
 
   if (!ynn::type_is_integral(a.type)) {
-    YNN_LOG_ERROR() << "Input must be integral, got " << a.type;
+    YNN_LOG_ERROR() << "For node `lut`, input must be integral, got " << a.type;
     return ynn_status_invalid_parameter;
   }
   if (!ynn::type_is_integral(lut.type)) {
-    YNN_LOG_ERROR() << "lut input must be uint8 or int8, got " << lut.type;
+    YNN_LOG_ERROR() << "For node `lut`, lut must be integral, got " << lut.type;
     return ynn_status_invalid_parameter;
   }
   if (lut.rank() != 1) {
-    YNN_LOG_ERROR() << "lut input must be 1D, got " << lut.rank();
+    YNN_LOG_ERROR() << "For node `lut`, lut must be 1D, got " << lut.rank();
     return ynn_status_invalid_parameter;
   }
 

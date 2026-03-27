@@ -12,6 +12,7 @@
 #include "src/xnnpack/allocation-type.h"
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/datatype.h"
+#include "src/xnnpack/internal.h"
 #include "src/xnnpack/log.h"
 #include "src/xnnpack/node-type.h"
 #include "src/xnnpack/operator-type.h"
@@ -146,6 +147,13 @@ static enum xnn_status reshape_even_split_operator(
   size_t batch_size = xnn_shape_multiply_leading_dims(&input_value->shape, axis);
 
   size_t num_splits = opdata->num_outputs;
+  if (input_value->shape.dim[axis] % num_splits != 0) {
+    xnn_log_error(
+        "failed to reshape %s operator with the input ID #%" PRIu32
+        ": split dimension (%zu) is not divisible by the number of splits (%zu)",
+        xnn_node_type_to_string(xnn_node_type_even_split), input_id, input_value->shape.dim[axis], num_splits);
+    return xnn_status_invalid_parameter;
+  }
   const size_t axis_elements = input_value->shape.dim[axis] / num_splits;
   const size_t old_workspace_size = opdata->workspace_size;
   bool reallocation_required = false;
@@ -328,22 +336,23 @@ enum xnn_status xnn_define_even_split(
     return status;
   }
 
-  for (int i = 0; i < num_outputs; ++i) {
-    status = check_output_value(subgraph, split_dim, input_id, output_ids[i], "Nth", node_type);
-    if (status != xnn_status_success) {
-      return status;
-    }
+  if (num_outputs == 0) {
+    xnn_log_error(
+      "failed to define %s operator with 0 outputs",
+      xnn_node_type_to_string(node_type));
+    return xnn_status_invalid_parameter;
   }
 
   if (num_outputs > XNN_MAX_OUTPUTS) {
     xnn_log_error(
-      "failed to define %s operator with %zu inputs: number of inputs (%zu) exceeds the supported maximum (%zu)",
-      xnn_node_type_to_string(node_type), num_outputs, num_outputs, (size_t) XNN_MAX_OUTPUTS);
+      "failed to define %s operator with %zu outputs: number of outputs exceeds the supported maximum (%zu)",
+      xnn_node_type_to_string(node_type), num_outputs, (size_t) XNN_MAX_OUTPUTS);
     return xnn_status_invalid_parameter;
   }
 
-  for (int i = 0; i < num_outputs; ++i) {
-    check_datatype_copyable(subgraph, input_id, output_ids[i], "Nth", node_type);
+  for (size_t i = 0; i < num_outputs; ++i) {
+    XNN_RETURN_IF_ERROR(check_output_value(subgraph, split_dim, input_id, output_ids[i], "Nth", node_type));
+    XNN_RETURN_IF_ERROR(check_datatype_copyable(subgraph, input_id, output_ids[i], "Nth", node_type));
   }
 
   struct xnn_node* node = xnn_subgraph_new_node(subgraph);
@@ -355,9 +364,9 @@ enum xnn_status xnn_define_even_split(
   node->type = node_type;
   node->num_inputs = 1;
   node->inputs[0] = input_id;
-  node->num_outputs = num_outputs;
-  for(int i=0;i<num_outputs;++i){
-    node->outputs[i]=output_ids[i];
+  node->num_outputs = (uint32_t) num_outputs;
+  for (size_t i = 0; i < num_outputs; ++i) {
+    node->outputs[i] = output_ids[i];
   }
   node->create = create_even_split_operator;
   node->reshape = reshape_even_split_operator;

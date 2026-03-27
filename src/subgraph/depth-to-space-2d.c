@@ -91,6 +91,13 @@ static enum xnn_status reshape_depth_to_space_operator(
   const uint32_t input_id = opdata->inputs[0];
   assert(input_id < num_values);
   const struct xnn_runtime_value* input_value = values + input_id;
+
+  if (input_value->shape.num_dims != 4) {
+    xnn_log_error(
+      "failed to reshape %s operator with input ID #%" PRIu32 ": number of dimensions (%zu) must be 4",
+      xnn_node_type_to_string(xnn_node_type_depth_to_space_2d), input_id, input_value->shape.num_dims);
+    return xnn_status_invalid_parameter;
+  }
   const size_t batch_size = input_value->shape.dim[0];
   const size_t input_height = input_value->shape.dim[1];
   const size_t input_width = input_value->shape.dim[2];

@@ -573,7 +573,7 @@ enum xnn_status xnn_define_batch_matrix_multiply(xnn_subgraph_t subgraph,
   const struct xnn_value* input2_value = &subgraph->values[input2_id];
 
   status = xnn_subgraph_check_input_type_dense(
-      xnn_node_type_batch_matrix_multiply, input2_id, input1_value);
+      xnn_node_type_batch_matrix_multiply, input2_id, input2_value);
   if (status != xnn_status_success) {
     return status;
   }

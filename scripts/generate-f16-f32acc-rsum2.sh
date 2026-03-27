@@ -13,4 +13,8 @@ tools/xngen src/f16-f32acc-rsum2/f16c.c.in -D BATCH_TILES=8,16,24,32 -o src/f16-
 ################################## x86 AVX512 #################################
 tools/xngen src/f16-f32acc-rsum2/avx512skx.c.in -D BATCH_TILES=16,32,48,64,128 -o src/f16-f32acc-rsum2/gen/f16-f32acc-rsum2-avx512skx.c &
 
+################################## RISC-V Vector ##############################
+tools/xngen src/f16-f32acc-rsum2/rvv.c.in -D LMUL=2 -o src/f16-f32acc-rsum2/gen/f16-f32acc-rsum2-rvvfp16arith-u2v.c &
+tools/xngen src/f16-f32acc-rsum2/rvv.c.in -D LMUL=4 -o src/f16-f32acc-rsum2/gen/f16-f32acc-rsum2-rvvfp16arith-u4v.c &
+
 wait

@@ -34,6 +34,11 @@ tools/xngen src/f32-rdminmax/simd.c.in -D CHANNELS=32 -D ACCUMULATORS=2 -D OP=MA
 
 tools/xngen src/f32-rdminmax/simd.c.in -D CHANNELS=32 -D ACCUMULATORS=2 -D OP=MIN -D ARCH=hvx -o src/f32-rdminmax/gen/f32-rdmin-2p2x-hvx-u32.c &
 
+################################## RISC-V Vector ##############################
+tools/xngen src/f32-rdminmax/rvv.c.in -D LMUL=8 -D ACCUMULATORS=2 -D OP=MAX -o src/f32-rdminmax/gen/f32-rdmax-2p2x-rvv-u8v.c &
+
+tools/xngen src/f32-rdminmax/rvv.c.in -D LMUL=8 -D ACCUMULATORS=2 -D OP=MIN -o src/f32-rdminmax/gen/f32-rdmin-2p2x-rvv-u8v.c &
+
 #################################### Scalar ###################################
 tools/xngen src/f32-rdminmax/simd.c.in -D CHANNELS=2 -D ACCUMULATORS=2 -D OP=MAX -D ARCH=scalar -o src/f32-rdminmax/gen/f32-rdmax-2p2x-scalar-u2.c &
 
