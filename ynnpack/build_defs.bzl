@@ -402,6 +402,25 @@ def ynn_generate_src_hdr(
         wrapped_target = name,
     )
 
+def ynn_generate_srcs(
+        name,
+        generator,
+        output_srcs,
+        **kwargs):
+    """Generates source files from a generator script."""
+    native.genrule(
+        name = name,
+        outs = output_srcs,
+        cmd = "$(location " + generator + ") " + " ".join(["$(location " + i + ")" for i in output_srcs]),
+        tools = [generator],
+        **kwargs
+    )
+
+    generated_file(
+        scopes = ["presubmit", "codesearch"],
+        wrapped_target = name,
+    )
+
 register_extension_info(
     extension = ynn_cc_library,
     label_regex_for_dep = "{extension_name}",

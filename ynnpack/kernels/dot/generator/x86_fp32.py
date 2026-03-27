@@ -8,6 +8,7 @@
 # pylint: disable=invalid-name
 # pylint: disable=missing-class-docstring
 
+from ynnpack.kernels.dot.generator.dot_base import generate_dot_kernels
 from ynnpack.kernels.dot.generator.x86 import x86
 from ynnpack.kernels.dot.generator.x86 import x86_avx
 from ynnpack.kernels.dot.generator.x86 import x86_avx512
@@ -90,3 +91,79 @@ class x86_avx512_fp32(x86_fp32, x86_avx512):
   def product(self, i, j, k):
     c_ij = f"c_{i}_{j}"
     return f"{c_ij} = {self._mm()}_fmadd_ps(a_{i}_{k}, b_{k}_{j}, {c_ij});\n"
+
+
+generate_dot_kernels(
+    x86_sse2_fp32(),
+    [
+        (1, 16, 1),
+        (2, 16, 1),
+        (3, 16, 1),
+        (2, 8, 1),
+        (3, 8, 1),
+        (4, 8, 1),
+        (4, 4, 1),
+        (6, 4, 1),
+        (8, 4, 1),
+    ],
+)
+
+generate_dot_kernels(
+    x86_avx_fp32(),
+    [
+        (1, 32, 1),
+        (2, 32, 1),
+        (2, 16, 1),
+        (3, 16, 1),
+        (4, 16, 1),
+        (4, 8, 1),
+        (6, 8, 1),
+        (8, 8, 1),
+    ],
+)
+
+generate_dot_kernels(
+    x86_fma3_fp32(),
+    [
+        (1, 32, 1),
+        (2, 32, 1),
+        # This is needed to avoid using sse2 for n <= 16, to avoid mul+add
+        # numerics.
+        (1, 16, 1),
+        (2, 16, 1),
+        (3, 16, 1),
+        (4, 16, 1),
+        (5, 16, 1),
+        (6, 16, 1),
+        (8, 8, 1),
+        # There doesn't seem to be anything wrong with this kernel, but for some
+        # shapes on AMD Rome, it is super slow, e.g. 128x8x16384 is >20x slower
+        # than 8x8. It also doesn't seem like it should be that much better than
+        # 8x8 when it is working well.
+        # (10, 8, 1),
+    ],
+)
+
+generate_dot_kernels(
+    x86_avx512_fp32(),
+    [
+        (1, 64, 1),
+        (2, 64, 1),
+        (3, 64, 1),
+        (4, 64, 1),
+        (5, 64, 1),
+        (2, 32, 1),
+        (3, 32, 1),
+        (4, 32, 1),
+        (5, 32, 1),
+        # The kernels which are commented out should be good, but for some
+        # reason they don't perform well. They don't seem to spill, so keeping
+        # them until we understand why are they slower.
+        # (6, 32, 1),
+        # (8, 32, 1),
+        # (10, 32, 1),
+        # (12, 32, 1),
+        (5, 16, 1),
+        # (16, 16, 1),
+    ],
+)

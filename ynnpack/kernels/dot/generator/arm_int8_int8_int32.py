@@ -9,6 +9,7 @@
 # pylint: disable=invalid-name
 
 from ynnpack.kernels.dot.generator.arm import arm_neon
+from ynnpack.kernels.dot.generator.dot_base import generate_dot_kernels
 
 
 class arm_int8_int8_int32(arm_neon):
@@ -93,7 +94,7 @@ YNN_INTRINSIC int32_t unaligned_load_int8x4(const int8_t* ptr) {
 """
 
 
-class arm_neoni8mm_int8_int8_int32(arm_int8_int8_int32):
+class arm64_neoni8mm_int8_int8_int32(arm_int8_int8_int32):
   def __init__(self):
     super().__init__("neoni8mm", (2, 4, 8))
     self.flags += ["dot_flag::transpose_a"]
@@ -142,3 +143,50 @@ vst1q_s32({self.c_out_ptr(i+0, j)}, c_{i+0}_{j});
 int32x4_t c_{i+1}_{j} = vcombine_s32(vget_high_s32({c0}), vget_high_s32({c2}));
 c_{i+0}_{j} = vcombine_s32(vget_low_s32({c0}), vget_low_s32({c2}));
 """
+
+
+generate_dot_kernels(
+    arm_neon_int8_int8_int32(),
+    [
+        (1, 16, 8),
+        (2, 16, 8),
+        (3, 16, 8),
+        (4, 16, 8),
+        (2, 8, 8),
+        (3, 8, 8),
+        (4, 8, 8),
+        (5, 8, 8),
+        (6, 8, 8),
+        (8, 8, 8),
+        (8, 4, 8),
+    ],
+)
+
+generate_dot_kernels(
+    arm_neondot_int8_int8_int32(),
+    [
+        (1, 32, 8),
+        (2, 32, 8),
+        (3, 32, 8),
+        (2, 16, 8),
+        (3, 16, 8),
+        (4, 16, 8),
+        (5, 16, 8),
+        (8, 8, 8),
+        (10, 8, 8),
+        (8, 4, 8),
+    ],
+)
+
+generate_dot_kernels(
+    arm64_neoni8mm_int8_int8_int32(),
+    [
+        (2, 32, 8),
+        (4, 16, 8),
+        (6, 16, 8),
+        (6, 8, 8),
+        (8, 8, 8),
+        (10, 8, 8),
+        (16, 4, 8),
+    ],
+)

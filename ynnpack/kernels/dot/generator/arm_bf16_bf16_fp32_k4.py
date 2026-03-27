@@ -9,6 +9,7 @@
 # pylint: disable=invalid-name
 
 from ynnpack.kernels.dot.generator.arm import arm_neon
+from ynnpack.kernels.dot.generator.dot_base import generate_dot_kernels
 
 
 class arm_neonbf16_bf16_bf16_fp32_k4(arm_neon):
@@ -74,3 +75,22 @@ vst1q_f32({self.c_out_ptr(i+0, j)}, c_{i+0}_{j});
 float32x4_t c_{i+1}_{j} = vcombine_f32(vget_high_f32({c0}), vget_high_f32({c1}));
 c_{i+0}_{j} = vcombine_f32(vget_low_f32({c0}), vget_low_f32({c1}));
 """
+
+
+generate_dot_kernels(
+    arm_neonbf16_bf16_bf16_fp32_k4(),
+    [
+        # Unrolling these by 2x in k enables using ldp for the LHS, so far
+        # experiments do not seem to show much benefit from this, but it seems
+        # like it should help.
+        (2, 32, 4),
+        (4, 16, 4),
+        (6, 16, 4),
+        (6, 8, 4),
+        (8, 8, 4),
+        (10, 8, 4),
+        (16, 4, 4),
+    ],
+    # TODO: b/493642397 - This kernel doesn't build with msan
+    build_predicate="!defined(MEMORY_SANITIZER)",
+)
