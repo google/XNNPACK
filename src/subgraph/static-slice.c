@@ -21,6 +21,17 @@
 #include "src/xnnpack/subgraph.h"
 #include <pthreadpool.h>
 
+static enum xnn_status check_num_dims(size_t num_dims) {
+  if (num_dims > XNN_MAX_TENSOR_DIMS) {
+    xnn_log_error(
+        "failed to define %s operator with %zu dimensions: at most %zu dimensions are supported",
+        xnn_node_type_to_string(xnn_node_type_static_slice), num_dims,
+        (size_t) XNN_MAX_TENSOR_DIMS);
+    return xnn_status_unsupported_parameter;
+  }
+  return xnn_status_success;
+}
+
 static enum xnn_status create_slice_operator(
     const struct xnn_node* node,
     const struct xnn_runtime_value* values,
@@ -180,6 +191,11 @@ enum xnn_status xnn_define_static_slice_v3(xnn_subgraph_t subgraph,
     return status;
   }
 
+  status = check_num_dims(num_dims);
+  if (status != xnn_status_success) {
+    return status;
+  }
+
   status = xnn_subgraph_check_input_node_id(xnn_node_type_static_slice, input_id, subgraph->num_values);
   if (status != xnn_status_success) {
     return status;
@@ -272,6 +288,10 @@ enum xnn_status xnn_define_static_slice(
     uint32_t input_id,
     uint32_t output_id,
     uint32_t flags) {
+  enum xnn_status status = check_num_dims(num_dims);
+  if (status != xnn_status_success) {
+    return status;
+  }
   int64_t signed_offsets[XNN_MAX_TENSOR_DIMS];
   for (int i = 0; i < num_dims; i++) {
     signed_offsets[i] = offsets[i];
@@ -286,6 +306,10 @@ enum xnn_status xnn_define_static_slice_v2(xnn_subgraph_t subgraph,
                                            const size_t* sizes,
                                            uint32_t input_id,
                                            uint32_t output_id, uint32_t flags) {
+  enum xnn_status status = check_num_dims(num_dims);
+  if (status != xnn_status_success) {
+    return status;
+  }
   int64_t ends[XNN_MAX_TENSOR_DIMS];
   for (int i = 0; i < num_dims; i++) {
     ends[i] = offsets[i] + (int64_t)sizes[i];

@@ -6,6 +6,7 @@
 #include <chrono>
 #include <cstddef>
 #include <cstdint>
+#include <memory>
 #include <random>
 #include <vector>
 
@@ -19,6 +20,36 @@
 #include "test/subgraph/subgraph-tester.h"
 
 namespace xnnpack {
+
+namespace {
+
+std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)>
+CreateSubgraphWithExternalInputAndOutput(uint32_t* input_id, uint32_t* output_id) {
+  xnn_subgraph_t subgraph = nullptr;
+  EXPECT_EQ(xnn_status_success,
+            xnn_create_subgraph(/*external_value_ids=*/2, /*flags=*/0,
+                                &subgraph));
+  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(
+      subgraph, xnn_delete_subgraph);
+  if (subgraph == nullptr) {
+    return auto_subgraph;
+  }
+
+  const size_t dims[1] = {1};
+  EXPECT_EQ(xnn_status_success,
+            xnn_define_tensor_value(subgraph, xnn_datatype_fp32,
+                                    /*num_dims=*/1, dims, /*data=*/nullptr,
+                                    /*external_id=*/0,
+                                    XNN_VALUE_FLAG_EXTERNAL_INPUT, input_id));
+  EXPECT_EQ(xnn_status_success,
+            xnn_define_tensor_value(subgraph, xnn_datatype_fp32,
+                                    /*num_dims=*/1, dims, /*data=*/nullptr,
+                                    /*external_id=*/1,
+                                    XNN_VALUE_FLAG_EXTERNAL_OUTPUT, output_id));
+  return auto_subgraph;
+}
+
+}  // namespace
 
 template <typename T>
 void TestImpl(size_t rank) {
@@ -110,5 +141,58 @@ INSTANTIATE_TEST_SUITE_P(Slice, SliceQS8, rank_params);
 INSTANTIATE_TEST_SUITE_P(Slice, SliceQU8, rank_params);
 INSTANTIATE_TEST_SUITE_P(Slice, SliceF16, rank_params);
 INSTANTIATE_TEST_SUITE_P(Slice, SliceF32, rank_params);
+
+TEST(Slice, rejects_rank_above_max_tensor_dims) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+
+  uint32_t input_id = XNN_INVALID_VALUE_ID;
+  uint32_t output_id = XNN_INVALID_VALUE_ID;
+  auto subgraph =
+      CreateSubgraphWithExternalInputAndOutput(&input_id, &output_id);
+  ASSERT_NE(subgraph, nullptr);
+
+  std::vector<size_t> offsets(XNN_MAX_TENSOR_DIMS + 1, 0);
+  std::vector<size_t> sizes(XNN_MAX_TENSOR_DIMS + 1, 1);
+  EXPECT_EQ(xnn_status_unsupported_parameter,
+            xnn_define_static_slice(subgraph.get(), offsets.size(),
+                                    offsets.data(), sizes.data(), input_id,
+                                    output_id, /*flags=*/0));
+}
+
+TEST(Slice, v2_rejects_rank_above_max_tensor_dims) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+
+  uint32_t input_id = XNN_INVALID_VALUE_ID;
+  uint32_t output_id = XNN_INVALID_VALUE_ID;
+  auto subgraph =
+      CreateSubgraphWithExternalInputAndOutput(&input_id, &output_id);
+  ASSERT_NE(subgraph, nullptr);
+
+  std::vector<int64_t> offsets(XNN_MAX_TENSOR_DIMS + 1, 0);
+  std::vector<size_t> sizes(XNN_MAX_TENSOR_DIMS + 1, 1);
+  EXPECT_EQ(xnn_status_unsupported_parameter,
+            xnn_define_static_slice_v2(subgraph.get(), offsets.size(),
+                                       offsets.data(), sizes.data(), input_id,
+                                       output_id, /*flags=*/0));
+}
+
+TEST(Slice, v3_rejects_rank_above_max_tensor_dims) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+
+  uint32_t input_id = XNN_INVALID_VALUE_ID;
+  uint32_t output_id = XNN_INVALID_VALUE_ID;
+  auto subgraph =
+      CreateSubgraphWithExternalInputAndOutput(&input_id, &output_id);
+  ASSERT_NE(subgraph, nullptr);
+
+  std::vector<int64_t> begins(XNN_MAX_TENSOR_DIMS + 1, 0);
+  std::vector<int64_t> ends(XNN_MAX_TENSOR_DIMS + 1, 1);
+  std::vector<int64_t> strides(XNN_MAX_TENSOR_DIMS + 1, 1);
+  EXPECT_EQ(xnn_status_unsupported_parameter,
+            xnn_define_static_slice_v3(subgraph.get(), begins.size(),
+                                       begins.data(), ends.data(),
+                                       strides.data(), input_id, output_id,
+                                       /*flags=*/0));
+}
 
 }  // namespace xnnpack
