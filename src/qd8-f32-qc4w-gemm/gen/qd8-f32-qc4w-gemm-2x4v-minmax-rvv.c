@@ -56,8 +56,8 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_2x4v__rvv(
     vint32m4_t vksum = __riscv_vle32_v_i32m4((const int32_t*)w, vl);
     const int32_t vinput_zero_point0 = quantization_params[0].zero_point;
     const int32_t vinput_zero_point1 = quantization_params[1].zero_point;
-    vint32m4_t vacc0 = __riscv_vmul_vx_i32m4(vksum, vinput_zero_point0, vl);
-    vint32m4_t vacc1 = __riscv_vmul_vx_i32m4(vksum, vinput_zero_point1, vl);
+    vint32m4_t vacc0 = __riscv_vmul(vksum, vinput_zero_point0, vl);
+    vint32m4_t vacc1 = __riscv_vmul(vksum, vinput_zero_point1, vl);
 
     w = (const int32_t*) w + nr;
 
@@ -71,52 +71,52 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_2x4v__rvv(
       a1 += 2;
       const vint8m1_t vbi = __riscv_vle8_v_i8m1((const int8_t*) w, vl);
       w = (const uint8_t*) w + nr;
-      const vint8m1_t vbc0 = __riscv_vsll_vx_i8m1(vbi, 4, vl);
-      const vint8m1_t vbc1 = __riscv_vand_vx_i8m1(vbi, 0xF0, vl);
+      const vint8m1_t vbc0 = __riscv_vsll(vbi, 4, vl);
+      const vint8m1_t vbc1 = __riscv_vand(vbi, 0xF0, vl);
 
-      vint16m2_t va0bc0 = __riscv_vwmul_vx_i16m2(vbc0, va0c0, vl);
-      vacc0 = __riscv_vwadd_wv_i32m4(vacc0, va0bc0, vl);
-      vint16m2_t va0bc1 = __riscv_vwmul_vx_i16m2(vbc1, va0c1, vl);
-      vacc0 = __riscv_vwadd_wv_i32m4(vacc0, va0bc1, vl);
-      vint16m2_t va1bc0 = __riscv_vwmul_vx_i16m2(vbc0, va1c0, vl);
-      vacc1 = __riscv_vwadd_wv_i32m4(vacc1, va1bc0, vl);
-      vint16m2_t va1bc1 = __riscv_vwmul_vx_i16m2(vbc1, va1c1, vl);
-      vacc1 = __riscv_vwadd_wv_i32m4(vacc1, va1bc1, vl);
+      vint16m2_t va0bc0 = __riscv_vwmul(vbc0, va0c0, vl);
+      vacc0 = __riscv_vwadd_wv(vacc0, va0bc0, vl);
+      vint16m2_t va0bc1 = __riscv_vwmul(vbc1, va0c1, vl);
+      vacc0 = __riscv_vwadd_wv(vacc0, va0bc1, vl);
+      vint16m2_t va1bc0 = __riscv_vwmul(vbc0, va1c0, vl);
+      vacc1 = __riscv_vwadd_wv(vacc1, va1bc0, vl);
+      vint16m2_t va1bc1 = __riscv_vwmul(vbc1, va1c1, vl);
+      vacc1 = __riscv_vwadd_wv(vacc1, va1bc1, vl);
     }
 
-    vacc0 = __riscv_vsra_vx_i32m4(vacc0, 4, vl);
-    vacc1 = __riscv_vsra_vx_i32m4(vacc1, 4, vl);
+    vacc0 = __riscv_vsra(vacc0, 4, vl);
+    vacc1 = __riscv_vsra(vacc1, 4, vl);
     // i32 -> f32
-    vfloat32m4_t vout0 = __riscv_vfcvt_f_x_v_f32m4(vacc0, vl);
-    vfloat32m4_t vout1 = __riscv_vfcvt_f_x_v_f32m4(vacc1, vl);
+    vfloat32m4_t vout0 = __riscv_vfcvt_f(vacc0, vl);
+    vfloat32m4_t vout1 = __riscv_vfcvt_f(vacc1, vl);
 
     // vout * input_scale
     const float vinput_scale0 = quantization_params[0].inv_scale;
     const float vinput_scale1 = quantization_params[1].inv_scale;
-    vout0 = __riscv_vfmul_vf_f32m4(vout0, vinput_scale0, vl);
-    vout1 = __riscv_vfmul_vf_f32m4(vout1, vinput_scale1, vl);
+    vout0 = __riscv_vfmul(vout0, vinput_scale0, vl);
+    vout1 = __riscv_vfmul(vout1, vinput_scale1, vl);
 
     const vfloat32m4_t vfilter_output_scale = __riscv_vle32_v_f32m4((const float*) w, vl);
     w = (const float*) w + nr;
-    vout0 = __riscv_vfmul_vv_f32m4(vout0, vfilter_output_scale, vl);
-    vout1 = __riscv_vfmul_vv_f32m4(vout1, vfilter_output_scale, vl);
+    vout0 = __riscv_vfmul(vout0, vfilter_output_scale, vl);
+    vout1 = __riscv_vfmul(vout1, vfilter_output_scale, vl);
 
-    const vfloat32m4_t vbias =  __riscv_vle32_v_f32m4((const float*) w, vl);
+    const vfloat32m4_t vbias = __riscv_vle32_v_f32m4((const float*) w, vl);
     w = (const float*) w + nr;
-    vout0 = __riscv_vfadd_vv_f32m4(vout0, vbias, vl);
-    vout1 = __riscv_vfadd_vv_f32m4(vout1, vbias, vl);
+    vout0 = __riscv_vfadd(vout0, vbias, vl);
+    vout1 = __riscv_vfadd(vout1, vbias, vl);
 
     const float vmin = params->scalar.min;
-    vout0 = __riscv_vfmax_vf_f32m4(vout0, vmin, vl);
-    vout1 = __riscv_vfmax_vf_f32m4(vout1, vmin, vl);
+    vout0 = __riscv_vfmax(vout0, vmin, vl);
+    vout1 = __riscv_vfmax(vout1, vmin, vl);
     const float vmax = params->scalar.max;
-    vout0 = __riscv_vfmin_vf_f32m4(vout0, vmax, vl);
-    vout1 = __riscv_vfmin_vf_f32m4(vout1, vmax, vl);
+    vout0 = __riscv_vfmin(vout0, vmax, vl);
+    vout1 = __riscv_vfmin(vout1, vmax, vl);
 
     // store 2 x vl results to c
-    __riscv_vse32_v_f32m4(c0, vout0, vl);
+    __riscv_vse32(c0, vout0, vl);
     c0 = (float*) ((uintptr_t) c0 + cn_stride);
-    __riscv_vse32_v_f32m4(c1, vout1, vl);
+    __riscv_vse32(c1, vout1, vl);
     c1 = (float*) ((uintptr_t) c1 + cn_stride);
 
     a0 = (const int8_t*) ((uintptr_t) a0 - kc);

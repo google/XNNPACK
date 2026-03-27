@@ -693,3 +693,18 @@
   init: xnn_init_f16_qc4w_minmax_scalar_params
   pack: xnn_pack_qs8_qc4w_gemm_goi_w
   k-block: 8
+
+# RISC-V Vector
+- name: xnn_qd8_f16_qc4w_gemm_minmax_ukernel_1x2v__rvvfp16arith
+  init: xnn_init_f16_qc4w_minmax_scalar_params
+  pack: xnn_pack_qs8_qc4w_gemm_goi_w
+  k-block: 1
+- name: xnn_qd8_f16_qc4w_gemm_minmax_ukernel_4x2v__rvvfp16arith
+  init: xnn_init_f16_qc4w_minmax_scalar_params
+  pack: xnn_pack_qs8_qc4w_gemm_goi_w
+  k-block: 1
+- name: xnn_qd8_f16_qc4w_gemm_minmax_ukernel_7x2v__rvvfp16arith
+  init: xnn_init_f16_qc4w_minmax_scalar_params
+  pack: xnn_pack_qs8_qc4w_gemm_goi_w
+  k-block: 1
+
