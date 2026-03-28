@@ -60,11 +60,11 @@ void xnn_f16_raddstoreexpminusmax_ukernel__rvvfp16arith_rr2_p2_u1v(
     vfloat16m1_t vn = __riscv_vfmv_v_f_f16m1(vmagic_bias, vl);
     vn = __riscv_vfmacc(vn, vlog2e, vx, vl);
 
-    const vfloat16m1_t vs = __riscv_vreinterpret_v_i16m1_f16m1(__riscv_vsll(__riscv_vreinterpret_v_f16m1_i16m1(vn), 10, vl));
+    const vfloat16m1_t vs = __riscv_vreinterpret_f16m1(__riscv_vsll(__riscv_vreinterpret_i16m1(vn), 10, vl));
 
     vn = __riscv_vfsub(vn, vmagic_bias, vl);
 
-    vfloat16m1_t vt = __riscv_vmv_v_v_f16m1(vx, vl);
+    vfloat16m1_t vt = __riscv_vmv_v(vx, vl);
     vt = __riscv_vfmacc(vt, vminus_ln2_hi, vn, vl);
     vt = __riscv_vfmacc(vt, vminus_ln2_lo, vn, vl);
 
@@ -73,7 +73,7 @@ void xnn_f16_raddstoreexpminusmax_ukernel__rvvfp16arith_rr2_p2_u1v(
 
     vt = __riscv_vfmul(vt, vs, vl);
 
-    vfloat16m1_t vf = __riscv_vmv_v_v_f16m1(vs, vl);
+    vfloat16m1_t vf = __riscv_vmv_v(vs, vl);
     vf = __riscv_vfmacc(vf, vp, vt, vl);
 
     const vbool16_t vmask = __riscv_vmflt(vx, vdenorm_cutoff, vl);
