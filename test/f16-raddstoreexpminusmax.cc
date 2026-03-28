@@ -718,3 +718,132 @@
     }
   }
 #endif  // XNN_ENABLE_AVX2 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+
+
+#if XNN_ENABLE_RISCV_FP16_VECTOR && XNN_ARCH_RISCV
+  TEST(F16_RADDSTOREEXPMINUSMAX__RVVFP16ARITH_RR2_P2_U1V, elements_eq_1v) {
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector_fp16_arith);
+    RAddStoreExpMinusMaxMicrokernelTester()
+      .elements(1 * xnn_init_hardware_config()->vlenb / sizeof(uint16_t))
+      .Test(xnn_f16_raddstoreexpminusmax_ukernel__rvvfp16arith_rr2_p2_u1v, nullptr);
+  }
+
+  TEST(F16_RADDSTOREEXPMINUSMAX__RVVFP16ARITH_RR2_P2_U1V, elements_div_1v) {
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector_fp16_arith);
+    for (size_t elements = 2 * xnn_init_hardware_config()->vlenb / sizeof(uint16_t);
+                elements < 10 * xnn_init_hardware_config()->vlenb / sizeof(uint16_t);
+                elements += 1 * xnn_init_hardware_config()->vlenb / sizeof(uint16_t)) {
+      RAddStoreExpMinusMaxMicrokernelTester()
+        .elements(elements)
+        .Test(xnn_f16_raddstoreexpminusmax_ukernel__rvvfp16arith_rr2_p2_u1v, nullptr);
+    }
+  }
+
+  TEST(F16_RADDSTOREEXPMINUSMAX__RVVFP16ARITH_RR2_P2_U1V, elements_lt_1v) {
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector_fp16_arith);
+    for (size_t elements = 1;
+                elements < 1 * xnn_init_hardware_config()->vlenb / sizeof(uint16_t);
+                elements++) {
+      RAddStoreExpMinusMaxMicrokernelTester()
+        .elements(elements)
+        .Test(xnn_f16_raddstoreexpminusmax_ukernel__rvvfp16arith_rr2_p2_u1v, nullptr);
+    }
+  }
+
+  TEST(F16_RADDSTOREEXPMINUSMAX__RVVFP16ARITH_RR2_P2_U1V, elements_gt_1v) {
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector_fp16_arith);
+    for (size_t elements = 1 * xnn_init_hardware_config()->vlenb / sizeof(uint16_t) + 1;
+                elements < 10 * xnn_init_hardware_config()->vlenb / sizeof(uint16_t);
+                elements += 2) {
+      RAddStoreExpMinusMaxMicrokernelTester()
+        .elements(elements)
+        .Test(xnn_f16_raddstoreexpminusmax_ukernel__rvvfp16arith_rr2_p2_u1v, nullptr);
+    }
+  }
+#endif  // XNN_ENABLE_RISCV_FP16_VECTOR && XNN_ARCH_RISCV
+
+
+#if XNN_ENABLE_RISCV_FP16_VECTOR && XNN_ARCH_RISCV
+  TEST(F16_RADDSTOREEXPMINUSMAX__RVVFP16ARITH_RR2_P2_U2V, elements_eq_2v) {
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector_fp16_arith);
+    RAddStoreExpMinusMaxMicrokernelTester()
+      .elements(2 * xnn_init_hardware_config()->vlenb / sizeof(uint16_t))
+      .Test(xnn_f16_raddstoreexpminusmax_ukernel__rvvfp16arith_rr2_p2_u2v, nullptr);
+  }
+
+  TEST(F16_RADDSTOREEXPMINUSMAX__RVVFP16ARITH_RR2_P2_U2V, elements_div_2v) {
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector_fp16_arith);
+    for (size_t elements = 4 * xnn_init_hardware_config()->vlenb / sizeof(uint16_t);
+                elements < 20 * xnn_init_hardware_config()->vlenb / sizeof(uint16_t);
+                elements += 2 * xnn_init_hardware_config()->vlenb / sizeof(uint16_t)) {
+      RAddStoreExpMinusMaxMicrokernelTester()
+        .elements(elements)
+        .Test(xnn_f16_raddstoreexpminusmax_ukernel__rvvfp16arith_rr2_p2_u2v, nullptr);
+    }
+  }
+
+  TEST(F16_RADDSTOREEXPMINUSMAX__RVVFP16ARITH_RR2_P2_U2V, elements_lt_2v) {
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector_fp16_arith);
+    for (size_t elements = 1;
+                elements < 2 * xnn_init_hardware_config()->vlenb / sizeof(uint16_t);
+                elements++) {
+      RAddStoreExpMinusMaxMicrokernelTester()
+        .elements(elements)
+        .Test(xnn_f16_raddstoreexpminusmax_ukernel__rvvfp16arith_rr2_p2_u2v, nullptr);
+    }
+  }
+
+  TEST(F16_RADDSTOREEXPMINUSMAX__RVVFP16ARITH_RR2_P2_U2V, elements_gt_2v) {
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector_fp16_arith);
+    for (size_t elements = 2 * xnn_init_hardware_config()->vlenb / sizeof(uint16_t) + 1;
+                elements < 4 * xnn_init_hardware_config()->vlenb / sizeof(uint16_t);
+                elements += 4) {
+      RAddStoreExpMinusMaxMicrokernelTester()
+        .elements(elements)
+        .Test(xnn_f16_raddstoreexpminusmax_ukernel__rvvfp16arith_rr2_p2_u2v, nullptr);
+    }
+  }
+#endif  // XNN_ENABLE_RISCV_FP16_VECTOR && XNN_ARCH_RISCV
+
+
+#if XNN_ENABLE_RISCV_FP16_VECTOR && XNN_ARCH_RISCV
+  TEST(F16_RADDSTOREEXPMINUSMAX__RVVFP16ARITH_RR2_P2_U4V, elements_eq_4v) {
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector_fp16_arith);
+    RAddStoreExpMinusMaxMicrokernelTester()
+      .elements(4 * xnn_init_hardware_config()->vlenb / sizeof(uint16_t))
+      .Test(xnn_f16_raddstoreexpminusmax_ukernel__rvvfp16arith_rr2_p2_u4v, nullptr);
+  }
+
+  TEST(F16_RADDSTOREEXPMINUSMAX__RVVFP16ARITH_RR2_P2_U4V, elements_div_4v) {
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector_fp16_arith);
+    for (size_t elements = 8 * xnn_init_hardware_config()->vlenb / sizeof(uint16_t);
+                elements < 40 * xnn_init_hardware_config()->vlenb / sizeof(uint16_t);
+                elements += 4 * xnn_init_hardware_config()->vlenb / sizeof(uint16_t)) {
+      RAddStoreExpMinusMaxMicrokernelTester()
+        .elements(elements)
+        .Test(xnn_f16_raddstoreexpminusmax_ukernel__rvvfp16arith_rr2_p2_u4v, nullptr);
+    }
+  }
+
+  TEST(F16_RADDSTOREEXPMINUSMAX__RVVFP16ARITH_RR2_P2_U4V, elements_lt_4v) {
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector_fp16_arith);
+    for (size_t elements = 1;
+                elements < 4 * xnn_init_hardware_config()->vlenb / sizeof(uint16_t);
+                elements++) {
+      RAddStoreExpMinusMaxMicrokernelTester()
+        .elements(elements)
+        .Test(xnn_f16_raddstoreexpminusmax_ukernel__rvvfp16arith_rr2_p2_u4v, nullptr);
+    }
+  }
+
+  TEST(F16_RADDSTOREEXPMINUSMAX__RVVFP16ARITH_RR2_P2_U4V, elements_gt_4v) {
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector_fp16_arith);
+    for (size_t elements = 4 * xnn_init_hardware_config()->vlenb / sizeof(uint16_t) + 1;
+                elements < 8 * xnn_init_hardware_config()->vlenb / sizeof(uint16_t);
+                elements += 8) {
+      RAddStoreExpMinusMaxMicrokernelTester()
+        .elements(elements)
+        .Test(xnn_f16_raddstoreexpminusmax_ukernel__rvvfp16arith_rr2_p2_u4v, nullptr);
+    }
+  }
+#endif  // XNN_ENABLE_RISCV_FP16_VECTOR && XNN_ARCH_RISCV
