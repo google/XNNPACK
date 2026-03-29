@@ -239,7 +239,7 @@ xnn_status xnn_define_convolution_2d(
       // close: first two dims are the same between filter and output, except
       // that output has extra dimension of extent 1).
       const size_t filter_scale_split[] = {groups, 1, group_output_channels};
-      status = ynn_define_split_dim(subgraph->ynn, 0, 3, filter_scale_split,
+      status = ynn_define_split_dim(subgraph->ynn, -1, 3, filter_scale_split,
                                     filter_scale_id, &split_id, /*flags=*/0);
       if (status != ynn_status_success) {
         return ynn::xnn_status_from_ynn(status);
@@ -390,25 +390,35 @@ xnn_status xnn_define_depthwise_convolution_2d(
 
   // We need to transpose and expand a filter buffer, so it matches format
   // expected by the grouped convolution.
-  // [kh, kw, ci * dm] -> [ci * dm, kh, kw]
-  int32_t swap_dims[3] = {2, 0, 1};
+  // [1, kh, kw, ci * dm] -> [ci * dm, kh, kw, 1]
+  int32_t swap_dims[4] = {3, 1, 2, 0};
 
-  status = ynn_define_static_transpose(subgraph->ynn, 3, swap_dims, filter_id,
+  status = ynn_define_static_transpose(subgraph->ynn, 4, swap_dims, filter_id,
                                        &transposed_filter_id, /*flags=*/0);
 
   if (status != ynn_status_success) {
     return ynn::xnn_status_from_ynn(status);
   }
 
-  uint32_t expanded_transposed_filter_id = YNN_INVALID_VALUE_ID;
-  // [kh, kw, ci * dm] -> [ci * dm, kh, kw, 1]
-  int32_t new_axes[] = {3};
-  status = ynn_define_static_expand_dims(subgraph->ynn, 1, new_axes,
-                                         transposed_filter_id,
-                                         &expanded_transposed_filter_id,
-                                         /*flags=*/0);
-  if (status != ynn_status_success) {
-    return ynn::xnn_status_from_ynn(status);
+  uint32_t old_scale_id = subgraph->ynn->value(transposed_filter_id).scale_id;
+
+  // Depthwise convolution has incompatible quantization dims to other ops, thus
+  // new scale is needed for channelwise quantized variants.
+  if (old_scale_id != YNN_INVALID_VALUE_ID &&
+      ynn::rank_of_value(subgraph->ynn, old_scale_id) >= 1) {
+    uint32_t new_scale_id = YNN_INVALID_VALUE_ID;
+
+    size_t quantization_dims[] = {1, 1, 1, depth_multiplier * input_channels};
+
+    status = ynn_define_tensor(subgraph->ynn, ynn_type_fp32, 4,
+                               quantization_dims,
+                               subgraph->ynn->value(old_scale_id).data->base,
+                               /*flags=*/0, &new_scale_id);
+    if (status != ynn_status_success) {
+      return ynn::xnn_status_from_ynn(status);
+    }
+
+    subgraph->ynn->value(transposed_filter_id).scale_id = new_scale_id;
   }
 
   return xnn_define_convolution_2d(
@@ -416,7 +426,7 @@ xnn_status xnn_define_depthwise_convolution_2d(
       input_padding_left, kernel_height, kernel_width, subsampling_height,
       subsampling_width, dilation_height, dilation_width, input_channels,
       /*group_input_channels=*/1, depth_multiplier, output_min, output_max,
-      input_id, expanded_transposed_filter_id, bias_id, output_id, flags);
+      input_id, transposed_filter_id, bias_id, output_id, flags);
 }
 
 xnn_status xnn_define_space_to_depth_2d(xnn_subgraph_t subgraph,
@@ -732,12 +742,11 @@ xnn_status xnn_define_binary(xnn_subgraph_t subgraph, xnn_binary_operator type,
   }
 }
 
-xnn_status xnn_define_static_constant_pad(xnn_subgraph_t subgraph,
-                                          const size_t* pre_paddings,
-                                          const size_t* post_paddings,
-                                          float padding_value,
-                                          uint32_t input_id, uint32_t output_id,
-                                          uint32_t flags) {
+xnn_status xnn_define_static_constant_pad_v2(
+    xnn_subgraph_t subgraph, size_t num_padding_dims,
+    const size_t* pre_paddings, const size_t* post_paddings,
+    float padding_value, uint32_t input_id, uint32_t output_id,
+    uint32_t flags) {
   uint32_t padding_id = YNN_INVALID_VALUE_ID;
   ynn_status status = ynn::define_scalar_value_like(subgraph->ynn, input_id,
                                                     padding_value, &padding_id);
@@ -745,17 +754,16 @@ xnn_status xnn_define_static_constant_pad(xnn_subgraph_t subgraph,
     return ynn::xnn_status_from_ynn(status);
   }
 
-  size_t rank = ynn::rank_of_value(subgraph->ynn, input_id);
-
-  int64_t ynn_pre_paddings[YNN_MAX_TENSOR_RANK];
-  int64_t ynn_post_paddings[YNN_MAX_TENSOR_RANK];
-  std::copy_n(pre_paddings, rank, ynn_pre_paddings);
-  std::copy_n(post_paddings, rank, ynn_post_paddings);
-  int32_t axes[YNN_MAX_TENSOR_RANK];
-  std::iota(axes, axes + rank, 0);
+  std::vector<int64_t> ynn_pre_paddings(num_padding_dims);
+  std::vector<int64_t> ynn_post_paddings(num_padding_dims);
+  std::copy_n(pre_paddings, num_padding_dims, ynn_pre_paddings.data());
+  std::copy_n(post_paddings, num_padding_dims, ynn_post_paddings.data());
+  std::vector<int32_t> axes(num_padding_dims);
+  ;
+  std::iota(axes.begin(), axes.end(), 0);
   return ynn::xnn_status_from_ynn(ynn_define_static_pad(
-      subgraph->ynn, rank, axes, ynn_pre_paddings, ynn_post_paddings, input_id,
-      padding_id, &output_id, /*flags=*/0));
+      subgraph->ynn, num_padding_dims, axes.data(), ynn_pre_paddings.data(),
+      ynn_post_paddings.data(), input_id, padding_id, &output_id, /*flags=*/0));
 }
 
 xnn_status xnn_define_static_expand_dims(xnn_subgraph_t subgraph,
@@ -1111,6 +1119,8 @@ xnn_status xnn_define_batch_matrix_multiply(xnn_subgraph_t subgraph,
   if (flags & XNN_FLAG_TRANSPOSE_B) {
     uint32_t input2_id_transposed = YNN_INVALID_VALUE_ID;
     const size_t b_rank = ynn::rank_of_value(subgraph->ynn, input2_id);
+    assert(b_rank >= 2);
+    assert(b_rank <= YNN_MAX_TENSOR_RANK);
     std::array<int32_t, YNN_MAX_TENSOR_RANK> perm;
     std::iota(perm.begin(), perm.end(), 0);
     std::swap(perm[b_rank - 1], perm[b_rank - 2]);
@@ -1207,21 +1217,21 @@ xnn_status xnn_define_static_slice(xnn_subgraph_t subgraph, size_t num_dims,
                                    const size_t* offsets, const size_t* sizes,
                                    uint32_t input_id, uint32_t output_id,
                                    uint32_t flags) {
-  int64_t ynn_offsets[XNN_MAX_TENSOR_DIMS];
-  std::copy_n(offsets, num_dims, ynn_offsets);
-  return xnn_define_static_slice_v2(subgraph, num_dims, ynn_offsets, sizes,
-                                    input_id, output_id, flags);
+  std::vector<int64_t> ynn_offsets(num_dims);
+  std::copy_n(offsets, num_dims, ynn_offsets.data());
+  return xnn_define_static_slice_v2(subgraph, num_dims, ynn_offsets.data(),
+                                    sizes, input_id, output_id, flags);
 }
 
 xnn_status xnn_define_static_slice_v2(xnn_subgraph_t subgraph, size_t num_dims,
                                       const int64_t* offsets,
                                       const size_t* sizes, uint32_t input_id,
                                       uint32_t output_id, uint32_t flags) {
-  int64_t ends[XNN_MAX_TENSOR_DIMS];
+  std::vector<int64_t> ends(num_dims);
   for (int i = 0; i < num_dims; i++) {
     ends[i] = offsets[i] + (int64_t)sizes[i];
   }
-  return xnn_define_static_slice_v3(subgraph, num_dims, offsets, ends,
+  return xnn_define_static_slice_v3(subgraph, num_dims, offsets, ends.data(),
                                     /*strides=*/nullptr, input_id, output_id,
                                     flags);
 }
@@ -1231,20 +1241,21 @@ xnn_status xnn_define_static_slice_v3(xnn_subgraph_t subgraph, size_t num_dims,
                                       const int64_t* ends,
                                       const int64_t* strides, uint32_t input_id,
                                       uint32_t output_id, uint32_t flags) {
-  int32_t axes[YNN_MAX_TENSOR_RANK];
-  std::iota(axes, axes + YNN_MAX_TENSOR_RANK, 0);
-  return ynn::xnn_status_from_ynn(
-      ynn_define_static_slice(subgraph->ynn, num_dims, axes, begins, ends,
-                              strides, input_id, &output_id, /*flags=*/0));
+  std::vector<int32_t> axes(num_dims);
+  std::iota(axes.begin(), axes.end(), 0);
+  return ynn::xnn_status_from_ynn(ynn_define_static_slice(
+      subgraph->ynn, num_dims, axes.data(), begins, ends, strides, input_id,
+      &output_id, /*flags=*/0));
 }
 
 xnn_status xnn_define_static_transpose(xnn_subgraph_t subgraph, size_t num_dims,
                                        const size_t* perm, uint32_t input_id,
                                        uint32_t output_id, uint32_t flags) {
-  int32_t ynn_perm[XNN_MAX_TENSOR_DIMS];
-  std::copy_n(perm, num_dims, ynn_perm);
-  return ynn::xnn_status_from_ynn(ynn_define_static_transpose(
-      subgraph->ynn, num_dims, ynn_perm, input_id, &output_id, /*flags=*/0));
+  std::vector<int32_t> ynn_perm(num_dims);
+  std::copy_n(perm, num_dims, ynn_perm.data());
+  return ynn::xnn_status_from_ynn(
+      ynn_define_static_transpose(subgraph->ynn, num_dims, ynn_perm.data(),
+                                  input_id, &output_id, /*flags=*/0));
 }
 
 }  // extern "C"

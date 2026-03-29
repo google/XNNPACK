@@ -21,138 +21,37 @@ py_binary(
     deps = ["//ynnpack/kernels/elementwise:generator"],
 )
 
-ynn_generate_src_hdr(
-    name = "x86_sse2",
-    compatible_with = _COMPATIBLE_WITH,
-    generator = ":generator",
-    generator_args = [
-        "x86_sse2",
-        "quantize_fp32_to_int8,16x1",
-        "multiply_fp32_fp32_fp32,8x1",
-        "multiply_int32_fp32_fp32,8x1",
-        "multiply_add_fp32_fp32_fp32,8x1",
-        "clamp_fp32_fp32_fp32,8x1",
-    ],
-    output_hdr = "x86_sse2.inc",
-    output_src = "x86_sse2.cc",
-)
+ARCHS = [
+    "x86_sse2",
+    "x86_sse41",
+    "x86_avx",
+    "x86_avx2",
+    "x86_avx512",
+    "arm_neon",
+]
 
-ynn_generate_src_hdr(
-    name = "x86_sse41",
-    compatible_with = _COMPATIBLE_WITH,
-    generator = ":generator",
-    generator_args = [
-        "x86_sse41",
-        "subtract_multiply_int32_int32_int32,8x1",
-        "quantize_fp32_to_uint8,16x1",
-    ],
-    output_hdr = "x86_sse41.inc",
-    output_src = "x86_sse41.cc",
-)
-
-ynn_generate_src_hdr(
-    name = "x86_avx",
-    compatible_with = _COMPATIBLE_WITH,
-    generator = ":generator",
-    generator_args = [
-        "x86_avx",
-        "multiply_fp32_fp32_fp32,16x1",
-        "multiply_add_fp32_fp32_fp32,16x1",
-        "clamp_fp32_fp32_fp32,16x1",
-    ],
-    output_hdr = "x86_avx.inc",
-    output_src = "x86_avx.cc",
-)
-
-ynn_generate_src_hdr(
-    name = "x86_avx2",
-    compatible_with = _COMPATIBLE_WITH,
-    generator = ":generator",
-    generator_args = [
-        "x86_avx2",
-        "quantize_fp32_to_int8,32x1",
-        "quantize_fp32_to_uint8,32x1",
-        "multiply_int32_fp32_fp32,16x1",
-        "subtract_multiply_int32_int32_int32,16x1",
-    ],
-    output_hdr = "x86_avx2.inc",
-    output_src = "x86_avx2.cc",
-)
-
-ynn_generate_src_hdr(
-    name = "x86_avx512f",
-    compatible_with = _COMPATIBLE_WITH,
-    generator = ":generator",
-    generator_args = [
-        "x86_avx512f",
-        "multiply_fp32_fp32_fp32,32x1",
-        "multiply_int32_fp32_fp32,32x1",
-        "subtract_multiply_int32_int32_int32,32x1",
-        "multiply_add_fp32_fp32_fp32,32x1",
-        "clamp_fp32_fp32_fp32,32x1",
-    ],
-    output_hdr = "x86_avx512f.inc",
-    output_src = "x86_avx512f.cc",
-)
-
-ynn_generate_src_hdr(
-    name = "x86_avx512bw",
-    compatible_with = _COMPATIBLE_WITH,
-    generator = ":generator",
-    generator_args = [
-        "x86_avx512bw",
-        "quantize_fp32_to_int8,64x1",
-        "quantize_fp32_to_uint8,64x1",
-    ],
-    output_hdr = "x86_avx512bw.inc",
-    output_src = "x86_avx512bw.cc",
-)
-
-ynn_generate_src_hdr(
-    name = "arm_neon",
-    compatible_with = _COMPATIBLE_WITH,
-    generator = ":generator",
-    generator_args = [
-        "arm_neon",
-        "quantize_fp32_to_int8,16x1",
-        "multiply_fp32_fp32_fp32,8x1",
-        "multiply_int32_fp32_fp32,8x1",
-        "subtract_multiply_int32_int32_int32,8x1",
-        # TODO(vksnk): add neon_fma library for this function.
-        "multiply_add_fp32_fp32_fp32,8x1",
-        "clamp_fp32_fp32_fp32,8x1",
-    ],
-    output_hdr = "arm_neon.inc",
-    output_src = "arm_neon.cc",
-)
+[
+    ynn_generate_src_hdr(
+        name = arch,
+        compatible_with = _COMPATIBLE_WITH,
+        generator = ":generator",
+        generator_args = [arch],
+        output_hdr = arch + ".inc",
+        output_src = arch + ".cc",
+    )
+    for arch in ARCHS
+]
 
 ynn_cc_library(
     name = "ternary",
     srcs = ["ternary.cc"],
     hdrs = [
-        "arm_neon.inc",
         "kernels.inc",
         "ternary.h",
-        "x86_avx.inc",
-        "x86_avx2.inc",
-        "x86_avx512bw.inc",
-        "x86_avx512f.inc",
-        "x86_sse2.inc",
-        "x86_sse41.inc",
-    ],
+    ] + [arch + ".inc" for arch in ARCHS],
     compatible_with = _COMPATIBLE_WITH,
     copts = ynn_kernel_copts(),
-    per_arch_srcs = {
-        "arm_neon": ["arm_neon.cc"],
-        "x86_avx": ["x86_avx.cc"],
-        "x86_avx512": [
-            "x86_avx512bw.cc",
-            "x86_avx512f.cc",
-        ],
-        "x86_avx2": ["x86_avx2.cc"],
-        "x86_sse2": ["x86_sse2.cc"],
-        "x86_sse41": ["x86_sse41.cc"],
-    },
+    per_arch_srcs = {arch: [arch + ".cc"] for arch in ARCHS},
     visibility = ["//ynnpack:__subpackages__"],
     deps = [
         "//ynnpack:ynnpack_h",

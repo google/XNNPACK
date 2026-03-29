@@ -4,7 +4,7 @@
 #include "ynnpack/kernels/unary/x86_avx512bf16.inc"
 #endif  // YNN_ARCH_X86_AVX512BF16
 #ifdef YNN_ARCH_X86_AVX512
-#include "ynnpack/kernels/unary/x86_avx512f.inc"
+#include "ynnpack/kernels/unary/x86_avx512.inc"
 #endif  // YNN_ARCH_X86_AVX512
 #ifdef YNN_ARCH_X86_FMA3
 #include "ynnpack/kernels/unary/x86_fma3.inc"

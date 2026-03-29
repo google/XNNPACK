@@ -9,6 +9,7 @@
 # pylint: disable=invalid-name
 
 from ynnpack.kernels.dot.generator.arm import arm_neon
+from ynnpack.kernels.dot.generator.dot_base import generate_dot_kernels
 
 
 class arm_neon_bf16_bf16_fp32(arm_neon):
@@ -63,3 +64,18 @@ YNN_INTRINSIC bfloat16x4_t unaligned_load_broadcast_bf16x2(const bfloat16* ptr) 
       return f"{c} = vbfdotq_lane_f32({c}, {b}, a_{i}_{0}, {k//2});\n"
     else:
       return f"{c} = vbfdotq_lane_f32({c}, {b}, a_{i}_{k}, 0);\n"
+
+
+generate_dot_kernels(
+    arm_neonbf16_bf16_bf16_fp32_k2(),
+    [
+        (1, 32, 4),
+        (2, 32, 4),
+        (2, 16, 4),
+        (3, 16, 4),
+        (4, 16, 4),
+        (4, 8, 4),
+        (6, 8, 4),
+        (8, 4, 4),
+    ],
+)

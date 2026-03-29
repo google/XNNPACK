@@ -133,14 +133,15 @@ xnn_status xnn_define_channelwise_quantized_tensor_value_v3(
     }
   }
 
-  // It seems that this API is used in XNNPACK in two different ways:
-  // - For batch matrix multiply filters, this is expected to be a broadcast
-  // only for the non-channel dimension of the "matrix" argument.
-  // - For convolution/depthwise filters, this is expected to be a broadcast in
-  // every dimension except the channel dimension.
-  // For convolutions/depthwise, the channel dimension is 0. So it seems like
-  // maybe a consistent rule here is that every dimension after the channel
-  // dimension is a broadcast, and every dimension before that is elementwise...
+  // The shape of XNNPACK scale data depends on which op is consuming it. We do
+  // our best to estimate the shape here, but this is only correct for some ops.
+  // Some specific examples are:
+  // - Batch matrix multiply: no broadcasts for any batch dimensions.
+  // - Convolution: broadcasts all dimensions except the output channels (0).
+  // - Depthwise convolution: broadcasts all dimensions except the output
+  // channels (3).
+  // This estimation is correct for batch matrix multiply and convolution, but
+  // not depthwise convolution.
   size_t quantization_dims[YNN_MAX_TENSOR_RANK];
   std::copy_n(dims, channel_dim + 1, quantization_dims);
   if (channel_dim > 0) {
@@ -150,12 +151,10 @@ xnn_status xnn_define_channelwise_quantized_tensor_value_v3(
     quantization_dims[channel_dim - 1] = 1;
   }
 
-  // XNNPACK copies the scale data from the caller, do the same here.
-  const uint32_t scale_flags = YNN_VALUE_FLAG_COPY_DATA;
   uint32_t scale_id = YNN_INVALID_VALUE_ID;
   ynn_status status =
       ynn_define_tensor(subgraph->ynn, ynn_type_fp32, channel_dim + 1,
-                        quantization_dims, scale, scale_flags, &scale_id);
+                        quantization_dims, scale, /*flags=*/0, &scale_id);
   if (status != ynn_status_success) {
     return ynn::xnn_status_from_ynn(status);
   }

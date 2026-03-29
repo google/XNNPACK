@@ -159,13 +159,12 @@ static enum xnn_status reshape_transpose_nd(
   size_t element_size)
 {
   transpose_op->state = xnn_run_state_invalid;
-  enum xnn_status status = xnn_status_invalid_parameter;
   if (num_dims == 0) {
     xnn_log_error(
         "failed to create %s operator with %zu num_dims: num_dims must be "
         "non-zero",
         xnn_operator_type_to_string_v2(transpose_op), num_dims);
-    goto error;
+    return xnn_status_invalid_parameter;
   }
 
   if (num_dims > XNN_MAX_TENSOR_DIMS) {
@@ -174,7 +173,7 @@ static enum xnn_status reshape_transpose_nd(
         "%d",
         xnn_operator_type_to_string_v2(transpose_op), num_dims,
         XNN_MAX_TENSOR_DIMS);
-    goto error;
+    return xnn_status_invalid_parameter;
   }
 
   for (size_t i = 0; i < num_dims; ++i) {
@@ -183,7 +182,7 @@ static enum xnn_status reshape_transpose_nd(
           "failed to create %s operator with %zu perm and %zu num_dims: 0 <= "
           "perm < num_dims",
           xnn_operator_type_to_string_v2(transpose_op), perm[i], num_dims);
-      goto error;
+      return xnn_status_invalid_parameter;
     }
   }
 
@@ -194,7 +193,7 @@ static enum xnn_status reshape_transpose_nd(
             "failed to create %s operator with duplicate entries in perm %zu "
             "%zu",
             xnn_operator_type_to_string_v2(transpose_op), perm[i], perm[j]);
-        goto error;
+        return xnn_status_invalid_parameter;
       }
     }
   }
@@ -206,7 +205,7 @@ static enum xnn_status reshape_transpose_nd(
           "input_stride[num_dims - 1] == 1",
           xnn_operator_type_to_string_v2(transpose_op),
           input_stride[num_dims - 1]);
-      goto error;
+      return xnn_status_invalid_parameter;
     }
     size_t current_stride = 1;
     for (size_t i = num_dims - 1; i > 0; --i) {
@@ -216,7 +215,7 @@ static enum xnn_status reshape_transpose_nd(
             "input_stride: input_stride >= input_shape",
             xnn_operator_type_to_string_v2(transpose_op), input_shape[i],
             input_stride[i]);
-        goto error;
+        return xnn_status_invalid_parameter;
       }
       current_stride *= input_shape[i];
     }
@@ -229,7 +228,7 @@ static enum xnn_status reshape_transpose_nd(
           "output_stride[num_dims - 1] == 1",
           xnn_operator_type_to_string_v2(transpose_op),
           output_stride[num_dims - 1]);
-      goto error;
+      return xnn_status_invalid_parameter;
     }
     size_t current_stride = 1;
     for (size_t i = num_dims - 1; i > 0; --i) {
@@ -239,7 +238,7 @@ static enum xnn_status reshape_transpose_nd(
             "output_stride: output_stride >= output_shape",
             xnn_operator_type_to_string_v2(transpose_op), input_shape[perm[i]],
             output_stride[i]);
-        goto error;
+        return xnn_status_invalid_parameter;
       }
       current_stride *= input_shape[perm[i]];
     }
@@ -409,10 +408,6 @@ static enum xnn_status reshape_transpose_nd(
   transpose_op->state = xnn_run_state_needs_setup;
 
   return xnn_status_success;
-
-error:
-  xnn_delete_operator(transpose_op);
-  return status;
 }
 
 enum xnn_status xnn_reshape_transpose_nd_x64(
@@ -613,7 +608,7 @@ enum xnn_status xnn_setup_transpose_nd_x8(
   return setup_transpose_nd(transpose_op, input, output);
 }
 
-enum xnn_status run_transpose_nd(
+static enum xnn_status run_transpose_nd(
     uint32_t flags,
     const void* input,
     void* output,

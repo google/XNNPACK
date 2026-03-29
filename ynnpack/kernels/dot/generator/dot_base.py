@@ -10,6 +10,8 @@ Provides the basic structure and shared logic for generating dot kernels."""
 # pylint: disable=missing-function-docstring
 
 from collections.abc import Sequence
+import sys
+from typing import Tuple
 
 
 def indent(text, prefix):
@@ -536,3 +538,53 @@ do {
     src += self.end_func()
 
     return src, inc
+
+
+def generate_dot_kernels_impl(
+    gen: dot_base,
+    output_src: str,
+    output_inc: str,
+    block_shapes: Sequence[Tuple[int, int, int]],
+    build_predicate: str | None = None,
+):
+  src = gen.header()
+  inc = ""
+
+  if build_predicate:
+    src += "#if " + build_predicate + "\n"
+
+  for m, n, k in block_shapes:
+    src_i, inc_i = gen.generate_dot(m, n, k)
+
+    src += src_i
+    inc += inc_i
+
+  if build_predicate:
+    src += "#endif\n"
+
+  src += gen.footer()
+
+  with open(output_src, "w") as f:
+    f.write(src)
+  with open(output_inc, "w") as f:
+    f.write(inc)
+
+
+def get_output_path(f: str) -> str:
+  """If sys.argv contains a list of output paths, find the one matching f."""
+  paths = [i for i in sys.argv[1:] if i.endswith(f)]
+  if len(paths) != 1:
+    raise ValueError(f"Expected one path for {f}, found {paths}")
+  return paths[0]
+
+
+def generate_dot_kernels(
+    gen: dot_base,
+    block_shapes: Sequence[Tuple[int, int, int]],
+    build_predicate: str | None = None,
+):
+  output_src = get_output_path(type(gen).__name__ + ".cc")
+  output_inc = get_output_path(type(gen).__name__ + ".inc")
+  generate_dot_kernels_impl(
+      gen, output_src, output_inc, block_shapes, build_predicate
+  )

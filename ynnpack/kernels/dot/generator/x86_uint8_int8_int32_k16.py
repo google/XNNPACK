@@ -8,6 +8,7 @@
 # pylint: disable=missing-class-docstring
 # pylint: disable=invalid-name
 
+from ynnpack.kernels.dot.generator.dot_base import generate_dot_kernels
 from ynnpack.kernels.dot.generator.x86 import x86_avx512
 
 
@@ -77,3 +78,14 @@ __m128i c_{i+3}_{j} = _mm512_extracti32x4_epi32(c16_{i}_{j}, 3);
   def product(self, i, j, k):
     c_ij = f"c16_{i}_{j}"
     return f"{c_ij} = _mm512_dpbusd_epi32({c_ij}, a_{i}_{k}, b_{k}_{j});\n"
+
+
+generate_dot_kernels(
+    x86_avx512vnni_uint8_int8_int32_k16(),
+    [
+        (4, 8, 16),
+        (8, 8, 16),
+        (4, 4, 16),
+        (8, 4, 16),
+    ],
+)

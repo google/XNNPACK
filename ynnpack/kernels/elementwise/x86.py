@@ -12,22 +12,7 @@ def make_x86_cast_patterns():
 
 
 def make_x86_integer_patterns():
-  return [
-      Rule(
-          logical_shift_left(
-              i16_a.with_lanes(0),
-              broadcast(i16_b, 0),
-          ),
-          logical_shift_left(i16_a.with_lanes(0), i16_b),
-      ),
-      Rule(
-          logical_shift_left(
-              i32_a.with_lanes(0),
-              broadcast(i32_b, 0),
-          ),
-          logical_shift_left(i32_a.with_lanes(0), i32_b),
-      ),
-  ]
+  return add_shift_rules()
 
 
 class X86(Target):

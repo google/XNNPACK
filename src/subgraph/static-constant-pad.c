@@ -173,8 +173,9 @@ static enum xnn_status setup_constant_pad_operator(
   }
 }
 
-enum xnn_status xnn_define_static_constant_pad(
+enum xnn_status xnn_define_static_constant_pad_v2(
   xnn_subgraph_t subgraph,
+  size_t num_padding_dims,
   const size_t* pre_paddings,
   const size_t* post_paddings,
   float padding_value,
@@ -185,6 +186,13 @@ enum xnn_status xnn_define_static_constant_pad(
   enum xnn_status status;
   if ((status = xnn_subgraph_check_xnnpack_initialized(xnn_node_type_static_constant_pad)) != xnn_status_success) {
     return status;
+  }
+
+  if (num_padding_dims > XNN_MAX_TENSOR_DIMS) {
+    xnn_log_error(
+      "failed to define %s operator with %zu dims: maximum number of dimensions is %d",
+      xnn_node_type_to_string(xnn_node_type_static_constant_pad), num_padding_dims, XNN_MAX_TENSOR_DIMS);
+    return xnn_status_invalid_parameter;
   }
 
   if (input_id >= subgraph->num_values) {
@@ -244,9 +252,11 @@ enum xnn_status xnn_define_static_constant_pad(
     return xnn_status_out_of_memory;
   }
 
-  const size_t num_dims = subgraph->values[input_id].shape.num_dims;
-  memcpy(&node->params.static_pad.pre_paddings, pre_paddings, num_dims * sizeof(size_t));
-  memcpy(&node->params.static_pad.post_paddings, post_paddings, num_dims * sizeof(size_t));
+  node->params.static_pad.num_padding_dims = num_padding_dims;
+  memset(&node->params.static_pad.pre_paddings, 0, XNN_MAX_TENSOR_DIMS * sizeof(size_t));
+  memset(&node->params.static_pad.post_paddings, 0, XNN_MAX_TENSOR_DIMS * sizeof(size_t));
+  memcpy(&node->params.static_pad.pre_paddings, pre_paddings, num_padding_dims * sizeof(size_t));
+  memcpy(&node->params.static_pad.post_paddings, post_paddings, num_padding_dims * sizeof(size_t));
   switch (output_value->datatype) {
     case xnn_datatype_fp32:
       node->params.static_pad.padding_value = float_as_uint32(padding_value);

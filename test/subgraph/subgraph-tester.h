@@ -361,11 +361,6 @@ class SubgraphTester {
   SubgraphTester& AddConcatenate(size_t axis, std::vector<uint32_t> input_ids,
                                  uint32_t output_id);
 
-  SubgraphTester& AddConstantPad(const size_t* pre_paddings,
-                                 const size_t* post_paddings,
-                                 float padding_value, uint32_t input_id,
-                                 uint32_t output_id);
-
   SubgraphTester& AddConstantPad(const std::vector<size_t>& pre_paddings,
                                  const std::vector<size_t>& post_paddings,
                                  float padding_value, uint32_t input_id,

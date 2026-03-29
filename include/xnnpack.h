@@ -1370,16 +1370,27 @@ XNN_DEPRECATED enum xnn_status xnn_define_squared_difference(
 /// Define a Constant Pad Node with static padding specification and add it to a Subgraph.
 ///
 /// @param subgraph - a Subgraph object that will own the created Node.
+/// @param num_padding_dims - number of dimensions to pad.
 /// @param pre_paddings - number of padding elements to insert before input elements for every dimension. This array
-///                       must have as many elements as the number of dimensions in the input tensor.
+///                       must have @num_padding_dims elements.
 /// @param post_paddings - number of padding elements to insert after input elements for every dimension. This array
-///                        must have as many elements as the number of dimensions in the input tensor.
+///                        must have @num_padding_dims elements.
 /// @param padding_value - constant value used to initialize padding elements.
 /// @param input_id - Value ID for the input tensor. The input tensor must be defined in the @a subgraph.
 /// @param output_id - Value ID for the output tensor. The output tensor must be defined in the @a subgraph, and its
 ///                    shape must match the shape of the input tensor with padding.
 /// @param flags - binary features of the Constant Pad Node. No supported flags are currently defined.
-enum xnn_status xnn_define_static_constant_pad(
+enum xnn_status xnn_define_static_constant_pad_v2(
+  xnn_subgraph_t subgraph,
+  size_t num_padding_dims,
+  const size_t* pre_paddings,
+  const size_t* post_paddings,
+  float padding_value,
+  uint32_t input_id,
+  uint32_t output_id,
+  uint32_t flags);
+
+XNN_DEPRECATED enum xnn_status xnn_define_static_constant_pad(
   xnn_subgraph_t subgraph,
   const size_t* pre_paddings,
   const size_t* post_paddings,
