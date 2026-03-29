@@ -410,12 +410,10 @@ xnn_status xnn_define_depthwise_convolution_2d(
 
     size_t quantization_dims[] = {1, 1, 1, depth_multiplier * input_channels};
 
-    // XNNPACK copies the scale data from the caller, do the same here.
-    const uint32_t scale_flags = YNN_VALUE_FLAG_COPY_DATA;
     status = ynn_define_tensor(subgraph->ynn, ynn_type_fp32, 4,
                                quantization_dims,
                                subgraph->ynn->value(old_scale_id).data->base,
-                               scale_flags, &new_scale_id);
+                               /*flags=*/0, &new_scale_id);
     if (status != ynn_status_success) {
       return ynn::xnn_status_from_ynn(status);
     }
