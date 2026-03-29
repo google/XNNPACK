@@ -4,10 +4,12 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <algorithm>
+#include <bitset>
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
 #include <functional>
+#include <random>
 #include <sstream>
 #include <string>
 #include <tuple>
@@ -29,12 +31,11 @@
 namespace xnnpack {
 
 struct Param {
-  using TupleT = std::tuple<xnn_reduce_operator, bool, bool, int>;
+  using TupleT = std::tuple<xnn_reduce_operator, bool, int>;
   explicit Param(TupleT p)
       : reduce_operator(std::get<0>(p)),
         keep_dims(std::get<1>(p)),
-        use_neg_axes(std::get<2>(p)),
-        rank(std::get<3>(p)) {}
+        rank(std::get<2>(p)) {}
 
   std::string Name() const {
     std::stringstream sstr;
@@ -64,33 +65,31 @@ struct Param {
     if (keep_dims) {
       sstr << "_keep_dims";
     }
-    if (use_neg_axes) {
-      sstr << "_use_neg_axes";
-    }
     sstr << "_" << rank;
     return sstr.str();
   }
 
   xnn_reduce_operator reduce_operator;
   bool keep_dims;
-  bool use_neg_axes;
   int rank;
 };
 
-std::vector<int64_t> mask_to_axes(uint32_t mask) {
+std::vector<int64_t> mask_to_axes(uint32_t mask, int32_t rank) {
   std::vector<int64_t> axes;
-  for (uint32_t i = 0; i < XNN_MAX_TENSOR_DIMS; ++i) {
+  for (int32_t i = 0; i < XNN_MAX_TENSOR_DIMS; ++i) {
     if (mask & (1 << i)) {
       axes.push_back(i);
     }
   }
-  return axes;
-}
-
-void negate_axes(int64_t rank, std::vector<int64_t>& axes) {
-  for (int64_t& axis : axes) {
-    axis = axis - rank;
+  // It is legal to specify an axis more than once. To test negative axes,
+  // we can just specify the same axis in both forms.
+  for (int32_t i = 0;
+       i < XNN_MAX_TENSOR_DIMS && axes.size() < XNN_MAX_TENSOR_DIMS; ++i) {
+    if (mask & (1 << i)) {
+      axes.push_back(i - rank);
+    }
   }
+  return axes;
 }
 
 template <typename T>
@@ -131,6 +130,7 @@ void TestImpl(const Param& p) {
   xnn_datatype datatype = xnn_datatype_of<T>();
 
   ReplicableRandomDevice rng;
+  std::bernoulli_distribution empty_shape_dist(0.01f);
 
   auto reference_op = get_reference_op(p.reduce_operator);
   const bool is_minmax = (p.reduce_operator == xnn_reduce_min ||
@@ -139,10 +139,9 @@ void TestImpl(const Param& p) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 
   for (uint32_t mask = 1; mask < (1 << p.rank); ++mask) {
-    std::vector<int64_t> reduction_axes = mask_to_axes(mask);
-    if (p.use_neg_axes) {
-      negate_axes(p.rank, reduction_axes);
-    }
+    const int num_reduction_axes =
+        std::bitset<XNN_MAX_TENSOR_DIMS>(mask).count();
+    std::vector<int64_t> reduction_axes = mask_to_axes(mask, p.rank);
 
     xnn_quantization_params input_quantization =
         random_quantization(datatype, rng);
@@ -157,7 +156,7 @@ void TestImpl(const Param& p) {
     // Create a runtime with the reduce op in it.
     SubgraphTester tester(2);
     tester.AddInputTensor(p.rank, datatype, input_quantization, 0)
-        .AddOutputTensor(p.keep_dims ? p.rank : p.rank - reduction_axes.size(),
+        .AddOutputTensor(p.keep_dims ? p.rank : p.rank - num_reduction_axes,
                          datatype, output_quantization, 1)
         .AddReduce(p.reduce_operator, reduction_axes, 0, 1,
                    p.keep_dims ? XNN_FLAG_KEEP_DIMS : 0);
@@ -175,6 +174,9 @@ void TestImpl(const Param& p) {
       size_t reduced_elements = 1;
       for (size_t i = 0; i < p.rank; ++i) {
         if (mask & (1 << i)) {
+          if (empty_shape_dist(rng)) {
+            input_shape[i] = 0;
+          }
           reduced_elements *= input_shape[i];
           output_shape[i] = 1;
         }
@@ -218,18 +220,26 @@ void TestImpl(const Param& p) {
       for (const auto& i : EnumerateIndices(input.extents())) {
         reference_op(expected(i), dequantize(input(i), input_quantization));
       }
-      const float scale = (p.reduce_operator == xnn_reduce_mean ||
-                           p.reduce_operator == xnn_reduce_mean_squared)
-                              ? 1.0f / reduced_elements
-                              : 1.0f;
+      const bool is_mean = p.reduce_operator == xnn_reduce_mean ||
+                           p.reduce_operator == xnn_reduce_mean_squared;
+      const float scale = is_mean ? 1.0f / reduced_elements : 1.0f;
 
       // Verify the output matches the reference.
       for (const auto& i : EnumerateIndices(output.extents())) {
         const float reference = expected(i) * scale;
         if (xnn_datatype_is_quantized(datatype)) {
-          ASSERT_NEAR(output(i), quantize<T>(reference, output_quantization), 1)
-              << "input_shape=" << to_string(input_shape)
-              << ", reduction_axes=" << to_string(reduction_axes);
+          if (!is_mean || reduced_elements > 0) {
+            ASSERT_NEAR(output(i), quantize<T>(reference, output_quantization),
+                        1)
+                << "input_shape=" << to_string(input_shape)
+                << ", reduction_axes=" << to_string(reduction_axes);
+          } else {
+            // An empty mean is not well defined (it is 0/0), let's not require
+            // a specific value.
+          }
+        } else if (std::isnan(static_cast<float>(output(i))) &&
+                   std::isnan(static_cast<float>(reference))) {
+          // Both are NaN, but the below ASSERT_NEAR would fail.
         } else {
           ASSERT_NEAR(output(i), reference, 1e-3f * std::abs(reference) + 1e-3f)
               << "input_shape=" << to_string(input_shape)
@@ -246,14 +256,12 @@ std::vector<size_t> normalize_shape(std::vector<size_t> shape) {
 
 template <typename T, typename Accum = T>
 void TestSubgraphRewrite(const Param& p) {
-  if (p.reduce_operator != xnn_reduce_sum_squared &&
-      p.reduce_operator != xnn_reduce_mean_squared) {
+  if (p.reduce_operator != xnn_reduce_sum_squared) {
     GTEST_SKIP();
     return;
   }
 
   const size_t rank = p.rank;
-  const bool use_neg_axes = p.use_neg_axes;
   const bool keep_dims = p.keep_dims;
   const xnn_reduce_operator reduce_operator = p.reduce_operator;
   auto reference_op = get_reference_op(reduce_operator);
@@ -265,10 +273,7 @@ void TestSubgraphRewrite(const Param& p) {
 
   for (uint32_t mask = 1; mask < (1 << rank); ++mask) {
     for (uint32_t iter = 0; iter < 10; iter++) {
-      std::vector<int64_t> reduction_axes = mask_to_axes(mask);
-      if (use_neg_axes) {
-        negate_axes(rank, reduction_axes);
-      }
+      std::vector<int64_t> reduction_axes = mask_to_axes(mask, rank);
 
       // Define subgraph
       enum external_value_ids : uint32_t {
@@ -290,7 +295,6 @@ void TestSubgraphRewrite(const Param& p) {
           output_shape.push_back(input_shape[i]);
         }
       }
-      const T inv_n = 1.0 / reduced_elements;
 
       // Generate the input.
       Tensor<T> input(input_shape, xnnpack::XnnExtraBytes);
@@ -315,39 +319,8 @@ void TestSubgraphRewrite(const Param& p) {
       }
 
       // c = reduce_sum(b).
-      switch (reduce_operator) {
-        case xnn_reduce_sum_squared:
-          subgraph.AddReduce(xnn_reduce_sum, reduction_axes, squared_id,
-                             output_id,
-                             /*flags=*/keep_dims ? XNN_FLAG_KEEP_DIMS : 0);
-          break;
-        case xnn_reduce_mean_squared:
-          if (rng() % 2) {
-            subgraph.AddReduce(xnn_reduce_mean, reduction_axes, squared_id,
-                               output_id,
-                               /*flags=*/keep_dims ? XNN_FLAG_KEEP_DIMS : 0);
-          } else {
-            uint32_t sum_squared_id = XNN_INVALID_VALUE_ID;
-            subgraph.AddInternalDynamicTensor(
-                output_shape, xnn_datatype_of<T>(), &sum_squared_id,
-                /*flags=*/0);
-            subgraph.AddReduce(xnn_reduce_sum, reduction_axes, squared_id,
-                               sum_squared_id,
-                               /*flags=*/keep_dims ? XNN_FLAG_KEEP_DIMS : 0);
-            // d = mul(c, inv_n).
-            uint32_t inv_n_id = XNN_INVALID_VALUE_ID;
-            subgraph.AddInternalStaticTensor(
-                /*shape=*/{1}, xnn_datatype_of<T>(), &inv_n_id, &inv_n);
-            if (rng() % 2) {
-              subgraph.AddMultiply(sum_squared_id, inv_n_id, output_id);
-            } else {
-              subgraph.AddMultiply(inv_n_id, sum_squared_id, output_id);
-            }
-          }
-          break;
-        default:
-          XNN_UNREACHABLE;
-      }
+      subgraph.AddReduce(xnn_reduce_sum, reduction_axes, squared_id, output_id,
+                         /*flags=*/keep_dims ? XNN_FLAG_KEEP_DIMS : 0);
 
       // Evaluate once with `XNN_FLAG_NO_OPERATOR_FUSION` enabled to
       // prevent the subgraph replacement.
@@ -450,7 +423,7 @@ using ::testing::Values;
 
 auto params = testing::ConvertGenerator<Param::TupleT>(Combine(
     Values(xnn_reduce_sum, xnn_reduce_mean, xnn_reduce_max, xnn_reduce_min),
-    Bool(), Bool(), Range(0, XNN_MAX_TENSOR_DIMS)));
+    Bool(), Range(0, XNN_MAX_TENSOR_DIMS)));
 INSTANTIATE_TEST_SUITE_P(Reduce, ReduceQS8, params,
                          [](auto p) { return p.param.Name(); });
 INSTANTIATE_TEST_SUITE_P(Reduce, ReduceQU8, params,
@@ -459,15 +432,14 @@ INSTANTIATE_TEST_SUITE_P(Reduce, ReduceQU8, params,
 auto params2 = testing::ConvertGenerator<Param::TupleT>(Combine(
     Values(xnn_reduce_sum, xnn_reduce_mean, xnn_reduce_max, xnn_reduce_min,
            xnn_reduce_mean_squared, xnn_reduce_sum_squared),
-    Bool(), Bool(), Range(0, XNN_MAX_TENSOR_DIMS)));
+    Bool(), Range(0, XNN_MAX_TENSOR_DIMS)));
 INSTANTIATE_TEST_SUITE_P(Reduce, ReduceF16, params2,
                          [](auto p) { return p.param.Name(); });
 INSTANTIATE_TEST_SUITE_P(Reduce, ReduceF32, params2,
                          [](auto p) { return p.param.Name(); });
 
-auto params3 = testing::ConvertGenerator<Param::TupleT>(
-    Combine(Values(xnn_reduce_mean_squared, xnn_reduce_sum_squared), Bool(),
-            Bool(), Range(0, XNN_MAX_TENSOR_DIMS)));
+auto params3 = testing::ConvertGenerator<Param::TupleT>(Combine(
+    Values(xnn_reduce_sum_squared), Bool(), Range(0, XNN_MAX_TENSOR_DIMS)));
 INSTANTIATE_TEST_SUITE_P(Reduce, ReduceF16Rewrite, params3,
                          [](auto p) { return p.param.Name(); });
 INSTANTIATE_TEST_SUITE_P(Reduce, ReduceF32Rewrite, params3,

@@ -22,10 +22,10 @@
 // by the runtime.
 #define XNN_VALUE_FLAG_NEEDS_CLEANUP 0x00000008
 
+#define XNN_VAR_ARG_HEAD(FIRST, ...) FIRST
 // Macro to check the `enum xnn_status` result of an expression and return it
 // if it is not `xnn_status_success`, followed by an optional string literal and
 // parameters for `xnn_log_error`.
-#define XNN_VAR_ARG_HEAD(FIRST, ...) FIRST
 #define XNN_RETURN_IF_ERROR(expr, ...)                             \
   do {                                                             \
     const enum xnn_status status_ = (expr);                        \
@@ -350,7 +350,7 @@ enum xnn_status xnn_create_convolution2d_nhwc_pf32(
 // XNN_EXTRA_QUANTIZATION_PARAMS entries.
 enum xnn_status xnn_setup_convert_nc_f16_qdu8(
     xnn_operator_t convert_op, const void* input, uint8_t* output,
-    struct xnn_quantization_params* quantization_params);
+    float* row_sum, struct xnn_quantization_params* quantization_params);
 
 enum xnn_status xnn_create_convert_nc_f16_qdu8(uint32_t flags,
                                                xnn_operator_t* convert_op_out);

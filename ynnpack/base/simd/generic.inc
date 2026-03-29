@@ -104,35 +104,79 @@ YNN_ALWAYS_INLINE void store(T* ptr, vec<T, N> value, size_t n) {
 
 // Arithmetic operators.
 template <typename T, size_t N>
+YNN_ALWAYS_INLINE vec<T, N> operator+(vec<T, N> a, vec<T, N> b) {
+  return {a.lo() + b.lo(), a.hi() + b.hi()};
+}
+template <typename T, size_t N>
+YNN_ALWAYS_INLINE vec<T, N> operator-(vec<T, N> a, vec<T, N> b) {
+  return {a.lo() - b.lo(), a.hi() - b.hi()};
+}
+template <typename T, size_t N>
+YNN_ALWAYS_INLINE vec<T, N> operator*(vec<T, N> a, vec<T, N> b) {
+  return {a.lo() * b.lo(), a.hi() * b.hi()};
+}
+template <typename T, size_t N>
+YNN_ALWAYS_INLINE vec<T, N> operator/(vec<T, N> a, vec<T, N> b) {
+  return {a.lo() / b.lo(), a.hi() / b.hi()};
+}
+
+template <typename T, size_t N>
 YNN_ALWAYS_INLINE vec<T, N>& operator+=(vec<T, N>& a, vec<T, N> b) {
-  a.lo() += b.lo();
-  a.hi() += b.hi();
+  a = a + b;
   return a;
 }
 template <typename T, size_t N>
 YNN_ALWAYS_INLINE vec<T, N>& operator-=(vec<T, N>& a, vec<T, N> b) {
-  a.lo() -= b.lo();
-  a.hi() -= b.hi();
+  a = a - b;
   return a;
 }
 template <typename T, size_t N>
 YNN_ALWAYS_INLINE vec<T, N>& operator*=(vec<T, N>& a, vec<T, N> b) {
-  a.lo() *= b.lo();
-  a.hi() *= b.hi();
+  a = a * b;
+  return a;
+}
+template <typename T, size_t N>
+YNN_ALWAYS_INLINE vec<T, N>& operator/=(vec<T, N>& a, vec<T, N> b) {
+  a = a / b;
   return a;
 }
 
+// Boolean operators.
 template <typename T, size_t N>
-YNN_ALWAYS_INLINE vec<T, N> operator+(vec<T, N> a, vec<T, N> b) {
-  return a += b;
+YNN_ALWAYS_INLINE vec<T, N> operator&(vec<T, N> a, vec<T, N> b) {
+  return {a.lo() & b.lo(), a.hi() & b.hi()};
 }
 template <typename T, size_t N>
-YNN_ALWAYS_INLINE vec<T, N> operator-(vec<T, N> a, vec<T, N> b) {
-  return a -= b;
+YNN_ALWAYS_INLINE vec<T, N> operator|(vec<T, N> a, vec<T, N> b) {
+  return {a.lo() | b.lo(), a.hi() | b.hi()};
 }
 template <typename T, size_t N>
-YNN_ALWAYS_INLINE vec<T, N> operator*(vec<T, N> a, vec<T, N> b) {
-  return a *= b;
+YNN_ALWAYS_INLINE vec<T, N> operator^(vec<T, N> a, vec<T, N> b) {
+  return {a.lo() ^ b.lo(), a.hi() ^ b.hi()};
+}
+template <typename T, size_t N>
+YNN_ALWAYS_INLINE vec<T, N> operator~(vec<T, N> a) {
+  return {~a.lo(), ~a.hi()};
+}
+template <typename T, size_t N>
+YNN_ALWAYS_INLINE vec<T, N> operator<<(vec<T, N> a, int b) {
+  return {a.lo() << b, a.hi() << b};
+}
+
+template <typename T, size_t N>
+YNN_ALWAYS_INLINE vec<T, N>& operator&=(vec<T, N>& a, vec<T, N> b) {
+  a = a & b;
+  return a;
+}
+template <typename T, size_t N>
+YNN_ALWAYS_INLINE vec<T, N>& operator|=(vec<T, N>& a, vec<T, N> b) {
+  a = a | b;
+  return a;
+}
+template <typename T, size_t N>
+YNN_ALWAYS_INLINE vec<T, N>& operator^=(vec<T, N>& a, vec<T, N> b) {
+  a = a ^ b;
+  return a;
 }
 template <typename T, size_t N>
 YNN_ALWAYS_INLINE vec<T, N> min(vec<T, N> a, vec<T, N> b) {
@@ -143,8 +187,36 @@ YNN_ALWAYS_INLINE vec<T, N> max(vec<T, N> a, vec<T, N> b) {
   return {max(a.lo(), b.lo()), max(a.hi(), b.hi())};
 }
 template <typename T, size_t N>
+YNN_ALWAYS_INLINE vec<T, N> copysign(vec<T, N> mag, vec<T, N> sgn) {
+  return {copysign(mag.lo(), sgn.lo()), copysign(mag.hi(), sgn.hi())};
+};
+template <typename T, size_t N>
 YNN_ALWAYS_INLINE vec<T, N> abs(vec<T, N> a) {
   return {abs(a.lo()), abs(a.hi())};
+}
+template <typename T, size_t N>
+YNN_ALWAYS_INLINE vec<T, N> add_sat(vec<T, N> a, vec<T, N> b) {
+  return {add_sat(a.lo(), b.lo()), add_sat(a.hi(), b.hi())};
+}
+template <typename T, size_t N>
+YNN_ALWAYS_INLINE vec<T, N> sub_sat(vec<T, N> a, vec<T, N> b) {
+  return {sub_sat(a.lo(), b.lo()), sub_sat(a.hi(), b.hi())};
+}
+template <typename T, size_t N>
+YNN_ALWAYS_INLINE vec<T, N> floor(vec<T, N> a) {
+  return {floor(a.lo()), floor(a.hi())};
+}
+template <typename T, size_t N>
+YNN_ALWAYS_INLINE vec<T, N> ceil(vec<T, N> a) {
+  return {ceil(a.lo()), ceil(a.hi())};
+}
+template <typename T, size_t N>
+YNN_ALWAYS_INLINE vec<T, N> round(vec<T, N> a) {
+  return {round(a.lo()), round(a.hi())};
+}
+template <typename T, size_t N>
+YNN_ALWAYS_INLINE vec<T, N> sqrt(vec<T, N> a) {
+  return {sqrt(a.lo()), sqrt(a.hi())};
 }
 template <typename T, size_t N>
 YNN_ALWAYS_INLINE vec<T, N> fma(vec<T, N> a, vec<T, N> b, vec<T, N> acc) {
@@ -177,12 +249,24 @@ YNN_ALWAYS_INLINE vec<T, N*2> concat(vec<T, N> a, vec<T, N> b) {
 }
 
 template <typename T, size_t N>
-YNN_ALWAYS_INLINE vec<T, N> convert(vec<T, N> from, T) {
+YNN_ALWAYS_INLINE vec<T, N> cast(vec<T, N> from, T) {
   return from;
 }
 template <typename To, typename From, size_t N>
-YNN_ALWAYS_INLINE vec<To, N> convert(vec<From, N> from, To) {
-  return {convert(from.lo(), To()), convert(from.hi(), To())};
+YNN_ALWAYS_INLINE vec<To, N> cast(vec<From, N> from, To) {
+  return {cast(from.lo(), To()), cast(from.hi(), To())};
+}
+
+template <typename To, typename From, size_t N>
+YNN_ALWAYS_INLINE vec<To, N> saturate_cast(vec<From, N> from, To) {
+  return {saturate_cast(from.lo(), To()),
+          saturate_cast(from.hi(), To())};
+}
+
+template <typename To, typename From, size_t N>
+YNN_ALWAYS_INLINE vec<To, N> round_float_to_int(vec<From, N> from, To) {
+  return {round_float_to_int(from.lo(), To()),
+          round_float_to_int(from.hi(), To())};
 }
 
 template <typename T, size_t N>

@@ -52,6 +52,7 @@ cc_library(
         "broadcast_like.cc",
         "concatenate.cc",
         "copy.cc",
+        "copy.h",
         "dot.cc",
         "dot.h",
         "elementwise.cc",

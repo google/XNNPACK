@@ -221,11 +221,18 @@ enum xnn_status xnn_subgraph_check_batch_dims_match(
   const struct xnn_value* tensor2_value,
   size_t num_batch_dims)
 {
+  if (num_batch_dims > XNN_MAX_TENSOR_DIMS) {
+    xnn_log_error("failed to define %s operator: number of batch dimensions (%zu) must be at most %d",
+                  xnn_node_type_to_string(node_type), num_batch_dims, XNN_MAX_TENSOR_DIMS);
+    return xnn_status_invalid_parameter;
+  }
+
   if (tensor1_value->shape.num_dims < num_batch_dims) {
     xnn_log_error("failed to define %s operator with value ID #%" PRIu32
                   ": number of dimensions of value (%zu) must be at least %zu",
                   xnn_node_type_to_string(node_type), tensor1_id,
                   tensor1_value->shape.num_dims, num_batch_dims);
+    return xnn_status_invalid_parameter;
   }
 
   if (tensor2_value->shape.num_dims < num_batch_dims) {
@@ -233,6 +240,7 @@ enum xnn_status xnn_subgraph_check_batch_dims_match(
                   ": number of dimensions of value (%zu) must be at least %zu",
                   xnn_node_type_to_string(node_type), tensor2_id,
                   tensor2_value->shape.num_dims, num_batch_dims);
+    return xnn_status_invalid_parameter;
   }
 
   for (size_t i = 0; i < num_batch_dims; i++) {

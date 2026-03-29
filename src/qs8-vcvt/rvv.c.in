@@ -1,0 +1,49 @@
+// Copyright 2026 Microchip
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert DATATYPE in ["QS8", "QU8"]
+$assert LMUL in [1, 2, 4]
+#include <assert.h>
+
+#include <riscv_vector.h>
+#include "src/xnnpack/vcvt.h"
+
+$XINT8_T = {"QS8": "int8_t", "QU8": "uint8_t"}[DATATYPE]
+void xnn_${DATATYPE.lower()}_vcvt_ukernel__rvv_u${LMUL}v(
+    size_t batch,
+    const ${XINT8_T}* input,
+    ${XINT8_T}* output,
+    const struct xnn_${DATATYPE.lower()}_cvt_params* restrict params)
+{
+  assert(batch != 0);
+  assert(batch % sizeof(${XINT8_T}) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
+
+  const ${XINT8_T} input_zero_point = params->scalar.input_zero_point;
+  const int16_t multiplier = params->scalar.multiplier;
+  const int16_t output_zero_point = params->scalar.output_zero_point;
+
+  do {
+    size_t vl = __riscv_vsetvl_e8m${LMUL}(batch); batch -= vl;
+    $if DATATYPE == "QS8":
+      vint8m${LMUL}_t in_i8v = __riscv_vle8_v_i8m${LMUL}(input, vl); input += vl;
+      vint16m${LMUL*2}_t acc_i16v = __riscv_vwsub_vx(in_i8v, input_zero_point, vl);
+      acc_i16v = __riscv_vsll(acc_i16v, 7, vl);
+      acc_i16v = __riscv_vsmul(acc_i16v, multiplier, __RISCV_VXRM_RNU, vl);
+      acc_i16v = __riscv_vsadd(acc_i16v, output_zero_point, vl);
+      vint8m${LMUL}_t out_i8v = __riscv_vnclip(acc_i16v, 0, __RISCV_VXRM_RNU, vl);
+      __riscv_vse8(output, out_i8v, vl); output += vl;
+    $else:
+      vuint8m${LMUL}_t in_u8v = __riscv_vle8_v_u8m${LMUL}(input, vl); input += vl;
+      vint16m${LMUL*2}_t acc_i16v = __riscv_vreinterpret_i16m${LMUL*2}(__riscv_vwsubu_vx(in_u8v, input_zero_point, vl));
+      acc_i16v = __riscv_vsll(acc_i16v, 7, vl);
+      acc_i16v = __riscv_vsmul(acc_i16v, multiplier, __RISCV_VXRM_RNU, vl);
+      acc_i16v = __riscv_vsadd(acc_i16v, output_zero_point, vl);
+      acc_i16v = __riscv_vmax(acc_i16v, 0, vl);
+      vuint8m${LMUL}_t out_u8v = __riscv_vnclipu(__riscv_vreinterpret_u16m${LMUL*2}(acc_i16v), 0, __RISCV_VXRM_RDN, vl);
+      __riscv_vse8(output, out_u8v, vl); output += vl;
+  } while (batch != 0);
+}

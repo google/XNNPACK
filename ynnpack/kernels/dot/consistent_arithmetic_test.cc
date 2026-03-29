@@ -82,11 +82,11 @@ void TestMatMul(AT, BT, CT, size_t k) {
   ReplicableRandomDevice rng;
   // We want a large range, but not so large that our outputs are likely to be
   // Inf/NaN.
-  const float max_abs_a_value = static_cast<float>(type_info<AT>::max());
-  const float max_abs_b_value = static_cast<float>(type_info<BT>::max());
-  const float max_abs_value =
-      std::min({0.95f * max_abs_a_value, 0.95f * max_abs_b_value,
-                static_cast<float>(std::sqrt(type_info<CT>::max()) / (k / 4))});
+  const double max_abs_a_value = type_info<AT>::max();
+  const double max_abs_b_value = type_info<BT>::max();
+  const double max_abs_value =
+      std::min<double>({0.95 * max_abs_a_value, 0.95 * max_abs_b_value,
+                        std::sqrt(type_info<CT>::max()) / (k / 4)});
   // The consistency of a kernel is mostly an issue for:
   // - The reduction order
   // - Whether fma is used or not
@@ -143,9 +143,8 @@ void TestMatMul(AT, BT, CT, size_t k) {
       int finite = 0;
       for (size_t i = 0; i < m; ++i) {
         for (size_t j = 0; j < n; ++j) {
-          bool c_finite = std::isfinite(static_cast<float>(c(i, j)));
-          bool kernel_c_finite =
-              std::isfinite(static_cast<float>(kernel_c(i, j)));
+          bool c_finite = std::isfinite(c(i, j));
+          bool kernel_c_finite = std::isfinite(kernel_c(i, j));
           if (c_finite && kernel_c_finite) {
             ASSERT_EQ(c(i, j), kernel_c(i, j));
             finite++;

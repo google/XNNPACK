@@ -150,6 +150,7 @@ class ConvertOperatorTester {
                     output_stride(), /*threadpool=*/nullptr));
       ASSERT_EQ(xnn_status_success, xnn_setup_convert_nc_f16_qd8(
                                         convert_op, input.data(), output.data(),
+                                        /*row_sum=*/nullptr,
                                         quantization_params.data()));
       ASSERT_EQ(xnn_status_success,
                 xnn_run_operator(convert_op, /*threadpool=*/nullptr));

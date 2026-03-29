@@ -62,7 +62,7 @@ TEST(CloneSubgraphSubset, SimpleChain) {
   std::cout << "Cloned subgraph: " << "\n";
   cloned_subgraph->dump(std::cout);
 
-  ASSERT_TRUE(cloned_subgraph.has_value());
+  ASSERT_NE(cloned_subgraph, nullptr);
   EXPECT_THAT(*cloned_subgraph,
               AllOf(HasValidValueCount(2), HasValidNodeCount(1),
                     HasValidValueIds(cloned_a_id, cloned_b_id)));
@@ -127,7 +127,7 @@ TEST(CloneSubgraphSubset, BranchingFails) {
   uint32_t cloned_c_id = YNN_INVALID_VALUE_ID;
   auto cloned_subgraph =
       clone_subgraph_subset(original, a_id, c_id, cloned_a_id, cloned_c_id);
-  EXPECT_FALSE(cloned_subgraph.has_value());
+  EXPECT_EQ(cloned_subgraph, nullptr);
 }
 
 TEST(CloneSubgraphSubset, MiddleCut) {
@@ -164,7 +164,7 @@ TEST(CloneSubgraphSubset, MiddleCut) {
   uint32_t cloned_c_id = YNN_INVALID_VALUE_ID;
   auto cloned_subgraph =
       clone_subgraph_subset(original, b_id, c_id, cloned_b_id, cloned_c_id);
-  ASSERT_TRUE(cloned_subgraph.has_value());
+  ASSERT_NE(cloned_subgraph, nullptr);
   EXPECT_THAT(*cloned_subgraph,
               AllOf(HasValidValueCount(2), HasValidNodeCount(1),
                     HasValidValueIds(cloned_b_id, cloned_c_id)));
@@ -195,97 +195,6 @@ TEST(CloneSubgraphSubset, MiddleCut) {
 
   for (size_t i = 0; i < c_data.size(); ++i) {
     EXPECT_FLOAT_EQ(cloned_c_data[i], c_data[i]);
-  }
-}
-
-TEST(CloneSubgraphSubset, QuantizationParams) {
-  // Original subgraph:
-  //   a -> (abs) -> b.
-  //
-  // Cloned subgraph (input a, output b):
-  //   a -> (abs) -> b.
-  const int kShapeSize = 10;
-  uint32_t a_id = 0;
-  uint32_t b_id = YNN_INVALID_VALUE_ID;
-
-  // Create original subgraph.
-  SubgraphBuilder builder(/*external_value_count=*/1);
-  uint32_t a_zero_point_id = builder.DefineScalar<int32_t>(-128);
-  uint32_t a_scale_id = builder.DefineScalar(0.5f);
-  uint32_t b_zero_point_id = builder.DefineScalar<int32_t>(128);
-  uint32_t b_scale_id = builder.DefineScalar(0.25f);
-  builder.AddInput(ynn_type_int8, {kShapeSize}, a_id, a_zero_point_id,
-                   a_scale_id);
-  builder.AddTensor(ynn_type_int8, {kShapeSize}, b_id, nullptr, b_zero_point_id,
-                    b_scale_id,
-                    /*flags=*/YNN_VALUE_FLAG_EXTERNAL_OUTPUT);
-  builder.AddUnary(ynn_unary_abs, a_id, b_id);
-  const ynn_subgraph& subgraph = *builder.GetSubgraph();
-
-  // Clone subgraph.
-  uint32_t cloned_a_id = YNN_INVALID_VALUE_ID;
-  uint32_t cloned_b_id = YNN_INVALID_VALUE_ID;
-  auto cloned_subgraph =
-      clone_subgraph_subset(subgraph, a_id, b_id, cloned_a_id, cloned_b_id);
-  ASSERT_TRUE(cloned_subgraph.has_value());
-  // Should have a, b and their quantization params.
-  EXPECT_THAT(*cloned_subgraph,
-              AllOf(HasValidValueCount(7), HasValidNodeCount(2),
-                    HasValidValueIds(cloned_a_id, cloned_b_id)));
-  EXPECT_THAT(cloned_subgraph->nodes[1], IsUnary(ynn_unary_abs));
-
-  // Make sure that quantization params are present in the cloned subgraph.
-  bool found_a_scale = false;
-  bool found_b_scale = false;
-  bool found_a_zero_point = false;
-  bool found_b_zero_point = false;
-  for (const auto& val : cloned_subgraph->values) {
-    if (val.is_static()) {
-      if (val.type == ynn_type_fp32) {
-        auto opt_val = val.as_scalar_float();
-        if (opt_val.has_value() && *opt_val == 0.5f) {
-          found_a_scale = true;
-        } else if (opt_val.has_value() && *opt_val == 0.25f) {
-          found_b_scale = true;
-        }
-      } else if (val.type == ynn_type_int32) {
-        auto val_int = val.static_scalar_value<int32_t>();
-        if (val_int == -128) {
-          found_a_zero_point = true;
-        } else if (val_int == 128) {
-          found_b_zero_point = true;
-        }
-      }
-    }
-  }
-  EXPECT_TRUE(found_a_scale);
-  EXPECT_TRUE(found_b_scale);
-  EXPECT_TRUE(found_a_zero_point);
-  EXPECT_TRUE(found_b_zero_point);
-
-  // Check numerical correctness of the cloned subgraph.
-  TestScheduler scheduler(/*thread_count=*/4);
-  Runtime orig_runtime(builder.GetSubgraph(), &scheduler);
-  ASSERT_EQ(orig_runtime.Status(), ynn_status_success);
-  Runtime subset_runtime(&*cloned_subgraph, &scheduler);
-  ASSERT_EQ(subset_runtime.Status(), ynn_status_success);
-
-  std::vector<int8_t> a_data(kShapeSize);
-  for (int i = 0; i < kShapeSize; ++i) a_data[i] = i - 5;
-  std::vector<int8_t> b_data(kShapeSize), cloned_b_data(kShapeSize);
-
-  orig_runtime.ReshapeExternalTensor({kShapeSize}, a_data.data(), a_id)
-      .ReshapeRuntime()
-      .SetupExternalTensor(b_data.data(), b_id)
-      .InvokeRuntime();
-
-  subset_runtime.ReshapeExternalTensor({kShapeSize}, a_data.data(), cloned_a_id)
-      .ReshapeRuntime()
-      .SetupExternalTensor(cloned_b_data.data(), cloned_b_id)
-      .InvokeRuntime();
-
-  for (size_t i = 0; i < b_data.size(); ++i) {
-    EXPECT_EQ(cloned_b_data[i], b_data[i]);
   }
 }
 
@@ -320,7 +229,7 @@ TEST(CloneSubgraphSubset, DisconnectedInput) {
   uint32_t cloned_c_id = YNN_INVALID_VALUE_ID;
   auto cloned_subgraph =
       clone_subgraph_subset(original, c_id, b_id, cloned_c_id, cloned_b_id);
-  EXPECT_FALSE(cloned_subgraph.has_value());
+  EXPECT_EQ(cloned_subgraph, nullptr);
 }
 
 }  // namespace

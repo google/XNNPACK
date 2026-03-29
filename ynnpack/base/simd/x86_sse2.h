@@ -14,6 +14,7 @@
 #include "ynnpack/base/simd/vec.h"
 #include "ynnpack/base/simd/x86_sse2_base.h"  // IWYU pragma: export
 #include "ynnpack/base/simd/x86_sse2_partial_load_store.h"  // IWYU pragma: export
+#include "ynnpack/base/simd/x86_sse2_saturate_cast.h"  // IWYU pragma: export
 
 namespace ynn {
 
@@ -26,10 +27,11 @@ using bf16x16 = vec<bfloat16, 16>;
 using f16x16 = vec<half, 16>;
 using s8x32 = vec<int8_t, 32>;
 using u8x32 = vec<uint8_t, 32>;
+using f64x4 = vec<double, 4>;
 
 using s32x16 = vec<int32_t, 16>;
 
-YNN_ALWAYS_INLINE f32x8 convert(bf16x8 b, float) {
+YNN_ALWAYS_INLINE f32x8 cast(bf16x8 b, float) {
   __m128i zero = _mm_setzero_si128();
 
   return {
@@ -38,7 +40,7 @@ YNN_ALWAYS_INLINE f32x8 convert(bf16x8 b, float) {
   };
 }
 
-YNN_ALWAYS_INLINE s32x16 convert(s8x16 a, int32_t) {
+YNN_ALWAYS_INLINE s32x16 cast(s8x16 a, int32_t) {
   __m128i i8_lo = _mm_unpacklo_epi8(a.v, a.v);
   __m128i i8_hi = _mm_unpackhi_epi8(a.v, a.v);
 
@@ -50,7 +52,7 @@ YNN_ALWAYS_INLINE s32x16 convert(s8x16 a, int32_t) {
   };
 }
 
-YNN_ALWAYS_INLINE s32x16 convert(u8x16 a, int32_t) {
+YNN_ALWAYS_INLINE s32x16 cast(u8x16 a, int32_t) {
   const __m128i zero = _mm_setzero_si128();
   __m128i i16_lo = _mm_unpacklo_epi8(a.v, zero);
   __m128i i16_hi = _mm_unpackhi_epi8(a.v, zero);
@@ -61,6 +63,22 @@ YNN_ALWAYS_INLINE s32x16 convert(u8x16 a, int32_t) {
       {s32x4{_mm_unpacklo_epi16(i16_hi, zero)},
        s32x4{_mm_unpackhi_epi16(i16_hi, zero)}},
   };
+}
+
+YNN_ALWAYS_INLINE f32x4 cast(s32x4 x, float) {
+  return f32x4{_mm_cvtepi32_ps(x.v)};
+}
+
+YNN_ALWAYS_INLINE s32x4 cast(f32x4 x, int32_t) {
+  return s32x4{_mm_cvttps_epi32(x.v)};
+}
+
+YNN_ALWAYS_INLINE f64x4 cast(f32x4 x, double) {
+  return {f64x2{_mm_cvtps_pd(x.v)},
+          f64x2{_mm_cvtps_pd(_mm_movehl_ps(x.v, x.v))}};
+}
+YNN_ALWAYS_INLINE f32x4 cast(f64x4 x, float) {
+  return f32x4{_mm_movelh_ps(_mm_cvtpd_ps(x[0].v), _mm_cvtpd_ps(x[1].v))};
 }
 
 }  // namespace simd

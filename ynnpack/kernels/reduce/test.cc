@@ -14,13 +14,13 @@
 #include <gtest/gtest.h>
 #include "ynnpack/base/arch.h"  // IWYU pragma: keep
 #include "ynnpack/base/base.h"
+#include "ynnpack/base/span.h"
 #include "ynnpack/base/test/fuzz_test.h"
 #include "ynnpack/base/test/random.h"
 #include "ynnpack/base/test/tensor.h"
 #include "ynnpack/base/test/util.h"
 #include "ynnpack/base/type.h"
 #include "ynnpack/kernels/reduce/reduce.h"
-#include "slinky/base/span.h"
 
 namespace ynn {
 
@@ -136,8 +136,8 @@ void Reference(Tensor<AT> a, Tensor<CT> c, ReduceOp op) {
 const float max_abs_value = 10.0f;
 
 template <typename T>
-slinky::span<T> row(Tensor<T> t, size_t i) {
-  return slinky::span<T>(&t(i, 0), t.extent(1));
+span<T> row(Tensor<T> t, size_t i) {
+  return span<T>(&t(i, 0), t.extent(1));
 }
 
 template <typename AT, typename CT>

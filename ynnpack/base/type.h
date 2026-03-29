@@ -42,6 +42,17 @@ size_t type_size_bytes(ynn_type t);
 // Returns the size of an element of the type in bits.
 size_t type_size_bits(ynn_type t);
 
+// Returns the number of bits in the mantissa of the type, including the implied
+// leading one for float types.
+size_t type_mantissa_bits(ynn_type t);
+
+// Returns the number of bits in the exponent of the type.
+size_t type_exponent_bits(ynn_type t);
+
+// Returns true if converting a value of `from` to `to` can be done without
+// losing information.
+bool is_convert_lossless(ynn_type from, ynn_type to);
+
 // Returns how many elements are contained in one instance of the type. We
 // assume that datatypes with a non-integer number of bytes per element can be
 // represented by a struct that contains multiple elements. `type_size_bytes`
@@ -49,6 +60,9 @@ size_t type_size_bits(ynn_type t);
 // returns the number of elements stored in that struct.
 inline size_t type_element_count(ynn_type t) {
   switch (t) {
+    case ynn_type_int2:
+    case ynn_type_uint2:
+      return 4;
     case ynn_type_int4:
     case ynn_type_uint4:
       return 2;
@@ -133,6 +147,52 @@ struct uint4x2 {
   bool operator!=(const uint4x2& other) const { return values != other.values; }
 };
 
+struct uint2x4 {
+  uint8_t values;
+
+  uint2x4() = default;
+  uint2x4(uint8_t values) : values(values) {}  // NOLINT
+  uint2x4(uint8_t x0, uint8_t x1, uint8_t x2, uint8_t x3)
+      : values((x3 << 6) | ((x2 & 0x3) << 4) | ((x1 & 0x3) << 2) | (x0 & 0x3)) {
+  }
+
+  YNN_ALWAYS_INLINE uint8_t get(size_t i) const {
+    switch (i) {
+      case 0:
+        return static_cast<uint8_t>(values & 0x03);
+      case 1:
+        return static_cast<uint8_t>(values & 0x0c) >> 2;
+      case 2:
+        return static_cast<uint8_t>(values & 0x30) >> 4;
+      case 3:
+        return static_cast<uint8_t>(values & 0xc0) >> 6;
+      default:
+        YNN_UNREACHABLE;
+    }
+  }
+  YNN_ALWAYS_INLINE void set(size_t i, uint8_t value) {
+    switch (i) {
+      case 0:
+        values = (values & 0xfc) | (value & 0x03);
+        return;
+      case 1:
+        values = (values & 0xf3) | ((value & 0x03) << 2);
+        return;
+      case 2:
+        values = (values & 0xcf) | ((value & 0x03) << 4);
+        return;
+      case 3:
+        values = (values & 0x3f) | ((value & 0x03) << 6);
+        return;
+      default:
+        YNN_UNREACHABLE;
+    }
+  }
+
+  bool operator==(const uint2x4& other) const { return values == other.values; }
+  bool operator!=(const uint2x4& other) const { return values != other.values; }
+};
+
 // We need a type that distinguishes an intX_t from a quantized intX_t. We can't
 // do arithmetic on these, because we don't know the quantization parameters.
 template <typename T>
@@ -186,6 +246,8 @@ ynn_type type_of() {
     return ynn_type_bf16;
   } else if (std::is_same<T, float>::value) {
     return ynn_type_fp32;
+  } else if (std::is_same<T, double>::value) {
+    return ynn_type_fp64;
   } else if (std::is_same<T, int8_t>::value ||
              std::is_same<T, quantized<int8_t>>::value) {
     return ynn_type_int8;
@@ -198,6 +260,9 @@ ynn_type type_of() {
   } else if (std::is_same<T, uint4x2>::value ||
              std::is_same<T, quantized<uint4x2>>::value) {
     return ynn_type_uint4;
+  } else if (std::is_same<T, uint2x4>::value ||
+             std::is_same<T, quantized<uint2x4>>::value) {
+    return ynn_type_uint2;
   } else if (std::is_same<T, int32_t>::value ||
              std::is_same<T, quantized<int32_t>>::value) {
     return ynn_type_int32;
@@ -389,6 +454,25 @@ class type_info<uint4x2> {
   }
   YNN_ALWAYS_INLINE static void set(uint4x2* x, size_t i, uint8_t value) {
     x[i >> 1].set(i & 1, value);
+  }
+};
+
+template <>
+class type_info<uint2x4> {
+ public:
+  static int32_t min() { return 0; }
+  static int32_t max() { return 3; }
+  static int32_t smallest_normal() { return 0; }
+  static int32_t min_identity() { return max(); }
+  static int32_t max_identity() { return min(); }
+
+  static constexpr size_t element_count() { return 4; }
+
+  YNN_ALWAYS_INLINE static int get(const uint2x4* x, size_t i) {
+    return x[i >> 2].get(i & 3);
+  }
+  YNN_ALWAYS_INLINE static void set(uint2x4* x, size_t i, uint8_t value) {
+    x[i >> 2].set(i & 3, value);
   }
 };
 

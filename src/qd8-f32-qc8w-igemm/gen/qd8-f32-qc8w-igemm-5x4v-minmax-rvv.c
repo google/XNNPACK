@@ -71,11 +71,11 @@ void xnn_qd8_f32_qc8w_igemm_minmax_ukernel_5x4v__rvv(
 
     vint32m4_t vksum = __riscv_vle32_v_i32m4((const int32_t*)w, vl);
     const int32_t vinput_zero_point = quantization_params->zero_point;
-    vint32m4_t vacc0 = __riscv_vmul_vx_i32m4(vksum, vinput_zero_point, vl);
-    vint32m4_t vacc1 = __riscv_vmul_vx_i32m4(vksum, vinput_zero_point, vl);
-    vint32m4_t vacc2 = __riscv_vmul_vx_i32m4(vksum, vinput_zero_point, vl);
-    vint32m4_t vacc3 = __riscv_vmul_vx_i32m4(vksum, vinput_zero_point, vl);
-    vint32m4_t vacc4 = __riscv_vmul_vx_i32m4(vksum, vinput_zero_point, vl);
+    vint32m4_t vacc0 = __riscv_vmul(vksum, vinput_zero_point, vl);
+    vint32m4_t vacc1 = __riscv_vmul(vksum, vinput_zero_point, vl);
+    vint32m4_t vacc2 = __riscv_vmul(vksum, vinput_zero_point, vl);
+    vint32m4_t vacc3 = __riscv_vmul(vksum, vinput_zero_point, vl);
+    vint32m4_t vacc4 = __riscv_vmul(vksum, vinput_zero_point, vl);
     w = (const void*) ((const int32_t*) w + nr);
 
     size_t p = ks;
@@ -130,67 +130,67 @@ void xnn_qd8_f32_qc8w_igemm_minmax_ukernel_5x4v__rvv(
 
         w = (const void*) ((const int8_t*) w + nr);
 
-        vacc0 = __riscv_vwmacc_vx_i32m4(vacc0, va0, vb0, vl);
-        vacc1 = __riscv_vwmacc_vx_i32m4(vacc1, va1, vb0, vl);
-        vacc2 = __riscv_vwmacc_vx_i32m4(vacc2, va2, vb0, vl);
-        vacc3 = __riscv_vwmacc_vx_i32m4(vacc3, va3, vb0, vl);
-        vacc4 = __riscv_vwmacc_vx_i32m4(vacc4, va4, vb0, vl);
+        vacc0 = __riscv_vwmacc(vacc0, va0, vb0, vl);
+        vacc1 = __riscv_vwmacc(vacc1, va1, vb0, vl);
+        vacc2 = __riscv_vwmacc(vacc2, va2, vb0, vl);
+        vacc3 = __riscv_vwmacc(vacc3, va3, vb0, vl);
+        vacc4 = __riscv_vwmacc(vacc4, va4, vb0, vl);
 
         k -= sizeof(int8_t);
       } while (k != 0);
       p -= 5 * sizeof(void*);
     } while (p != 0);
 
-    vfloat32m4_t vfpacc0 = __riscv_vfcvt_f_x_v_f32m4(vacc0, vl);
-    vfloat32m4_t vfpacc1 = __riscv_vfcvt_f_x_v_f32m4(vacc1, vl);
-    vfloat32m4_t vfpacc2 = __riscv_vfcvt_f_x_v_f32m4(vacc2, vl);
-    vfloat32m4_t vfpacc3 = __riscv_vfcvt_f_x_v_f32m4(vacc3, vl);
-    vfloat32m4_t vfpacc4 = __riscv_vfcvt_f_x_v_f32m4(vacc4, vl);
+    vfloat32m4_t vfpacc0 = __riscv_vfcvt_f(vacc0, vl);
+    vfloat32m4_t vfpacc1 = __riscv_vfcvt_f(vacc1, vl);
+    vfloat32m4_t vfpacc2 = __riscv_vfcvt_f(vacc2, vl);
+    vfloat32m4_t vfpacc3 = __riscv_vfcvt_f(vacc3, vl);
+    vfloat32m4_t vfpacc4 = __riscv_vfcvt_f(vacc4, vl);
 
     const float vinput_scale = quantization_params->inv_scale;
-    vfpacc0 = __riscv_vfmul_vf_f32m4(vfpacc0, vinput_scale, vl);
-    vfpacc1 = __riscv_vfmul_vf_f32m4(vfpacc1, vinput_scale, vl);
-    vfpacc2 = __riscv_vfmul_vf_f32m4(vfpacc2, vinput_scale, vl);
-    vfpacc3 = __riscv_vfmul_vf_f32m4(vfpacc3, vinput_scale, vl);
-    vfpacc4 = __riscv_vfmul_vf_f32m4(vfpacc4, vinput_scale, vl);
+    vfpacc0 = __riscv_vfmul(vfpacc0, vinput_scale, vl);
+    vfpacc1 = __riscv_vfmul(vfpacc1, vinput_scale, vl);
+    vfpacc2 = __riscv_vfmul(vfpacc2, vinput_scale, vl);
+    vfpacc3 = __riscv_vfmul(vfpacc3, vinput_scale, vl);
+    vfpacc4 = __riscv_vfmul(vfpacc4, vinput_scale, vl);
 
     const vfloat32m4_t vscale = __riscv_vle32_v_f32m4((const float*) w, vl);
-    vfpacc0 = __riscv_vfmul_vv_f32m4(vfpacc0, vscale, vl);
-    vfpacc1 = __riscv_vfmul_vv_f32m4(vfpacc1, vscale, vl);
-    vfpacc2 = __riscv_vfmul_vv_f32m4(vfpacc2, vscale, vl);
-    vfpacc3 = __riscv_vfmul_vv_f32m4(vfpacc3, vscale, vl);
-    vfpacc4 = __riscv_vfmul_vv_f32m4(vfpacc4, vscale, vl);
+    vfpacc0 = __riscv_vfmul(vfpacc0, vscale, vl);
+    vfpacc1 = __riscv_vfmul(vfpacc1, vscale, vl);
+    vfpacc2 = __riscv_vfmul(vfpacc2, vscale, vl);
+    vfpacc3 = __riscv_vfmul(vfpacc3, vscale, vl);
+    vfpacc4 = __riscv_vfmul(vfpacc4, vscale, vl);
 
     w = (const void*) ((const float*) w + nr);
 
     const vfloat32m4_t vbias = __riscv_vle32_v_f32m4((const float*) w, vl);
-    vfpacc0 = __riscv_vfadd_vv_f32m4(vfpacc0, vbias, vl);
-    vfpacc1 = __riscv_vfadd_vv_f32m4(vfpacc1, vbias, vl);
-    vfpacc2 = __riscv_vfadd_vv_f32m4(vfpacc2, vbias, vl);
-    vfpacc3 = __riscv_vfadd_vv_f32m4(vfpacc3, vbias, vl);
-    vfpacc4 = __riscv_vfadd_vv_f32m4(vfpacc4, vbias, vl);
+    vfpacc0 = __riscv_vfadd(vfpacc0, vbias, vl);
+    vfpacc1 = __riscv_vfadd(vfpacc1, vbias, vl);
+    vfpacc2 = __riscv_vfadd(vfpacc2, vbias, vl);
+    vfpacc3 = __riscv_vfadd(vfpacc3, vbias, vl);
+    vfpacc4 = __riscv_vfadd(vfpacc4, vbias, vl);
 
     w = (const void*) ((const float*) w + nr);
 
     const float voutput_min = params->scalar.min;
-    vfpacc0 = __riscv_vfmax_vf_f32m4(vfpacc0, voutput_min, vl);
-    vfpacc1 = __riscv_vfmax_vf_f32m4(vfpacc1, voutput_min, vl);
-    vfpacc2 = __riscv_vfmax_vf_f32m4(vfpacc2, voutput_min, vl);
-    vfpacc3 = __riscv_vfmax_vf_f32m4(vfpacc3, voutput_min, vl);
-    vfpacc4 = __riscv_vfmax_vf_f32m4(vfpacc4, voutput_min, vl);
+    vfpacc0 = __riscv_vfmax(vfpacc0, voutput_min, vl);
+    vfpacc1 = __riscv_vfmax(vfpacc1, voutput_min, vl);
+    vfpacc2 = __riscv_vfmax(vfpacc2, voutput_min, vl);
+    vfpacc3 = __riscv_vfmax(vfpacc3, voutput_min, vl);
+    vfpacc4 = __riscv_vfmax(vfpacc4, voutput_min, vl);
 
     const float voutput_max = params->scalar.max;
-    vfpacc0 = __riscv_vfmin_vf_f32m4(vfpacc0, voutput_max, vl);
-    vfpacc1 = __riscv_vfmin_vf_f32m4(vfpacc1, voutput_max, vl);
-    vfpacc2 = __riscv_vfmin_vf_f32m4(vfpacc2, voutput_max, vl);
-    vfpacc3 = __riscv_vfmin_vf_f32m4(vfpacc3, voutput_max, vl);
-    vfpacc4 = __riscv_vfmin_vf_f32m4(vfpacc4, voutput_max, vl);
+    vfpacc0 = __riscv_vfmin(vfpacc0, voutput_max, vl);
+    vfpacc1 = __riscv_vfmin(vfpacc1, voutput_max, vl);
+    vfpacc2 = __riscv_vfmin(vfpacc2, voutput_max, vl);
+    vfpacc3 = __riscv_vfmin(vfpacc3, voutput_max, vl);
+    vfpacc4 = __riscv_vfmin(vfpacc4, voutput_max, vl);
 
-    __riscv_vse32_v_f32m4(c4, vfpacc4, vl);
-    __riscv_vse32_v_f32m4(c3, vfpacc3, vl);
-    __riscv_vse32_v_f32m4(c2, vfpacc2, vl);
-    __riscv_vse32_v_f32m4(c1, vfpacc1, vl);
-    __riscv_vse32_v_f32m4(c0, vfpacc0, vl);
+    __riscv_vse32(c4, vfpacc4, vl);
+    __riscv_vse32(c3, vfpacc3, vl);
+    __riscv_vse32(c2, vfpacc2, vl);
+    __riscv_vse32(c1, vfpacc1, vl);
+    __riscv_vse32(c0, vfpacc0, vl);
 
     c4 = (float*) ((uintptr_t) c4 + cn_stride);
     c3 = (float*) ((uintptr_t) c3 + cn_stride);

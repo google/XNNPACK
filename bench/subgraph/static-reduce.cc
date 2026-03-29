@@ -102,11 +102,19 @@ static void ReduceArguments(benchmark::Benchmark* b) {
   b->ArgNames({"op", "K1", "K2", "K3", "NormMask"});
   for (auto op : reduce_ops) {
     for (int norm_mask = 1; norm_mask < 8; ++norm_mask) {
-      b->Args({op, 1, 1024, 64, norm_mask});
-      b->Args({op, 1, 4096, 64, norm_mask});
-      b->Args({op, 64, 1024, 1, norm_mask});
-      b->Args({op, 64, 1, 256, norm_mask});
-      b->Args({op, 1, 16384, 1, norm_mask});
+      if ((norm_mask & (1 << 0)) == 0) {
+        b->Args({op, 1, 1024, 64, norm_mask});
+        b->Args({op, 1, 4096, 64, norm_mask});
+        if ((norm_mask & (1 << 2)) == 0) {
+          b->Args({op, 1, 16384, 1, norm_mask});
+        }
+      }
+      if ((norm_mask & (1 << 1)) == 0) {
+        b->Args({op, 64, 1, 256, norm_mask});
+      }
+      if ((norm_mask & (1 << 2)) == 0) {
+        b->Args({op, 64, 1024, 1, norm_mask});
+      }
     }
   }
 }

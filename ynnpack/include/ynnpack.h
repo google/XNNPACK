@@ -63,6 +63,7 @@ enum ynn_type {
   ynn_type_invalid = -1,
 
   ynn_type_int2,
+  ynn_type_uint2,
   ynn_type_int4,
   ynn_type_uint4,
   ynn_type_int8,
@@ -71,6 +72,7 @@ enum ynn_type {
   ynn_type_fp16,
   ynn_type_bf16,
   ynn_type_fp32,
+  ynn_type_fp64,
 
   // For internal use only.
   ynn_type_opaque,
@@ -121,6 +123,10 @@ enum ynn_status ynn_define_tensor_value(ynn_subgraph_t subgraph,
                                         uint32_t zero_point_id,
                                         uint32_t scale_id, uint32_t flags,
                                         uint32_t* id_out);
+enum ynn_status ynn_define_tensor(ynn_subgraph_t subgraph, enum ynn_type type,
+                                  size_t rank, const size_t* dims,
+                                  const void* data, uint32_t flags,
+                                  uint32_t* id_out);
 
 #define YNN_NODE_FLAG_KEEP_DIMS (1 << 0)
 #define YNN_NODE_FLAG_SLICE_DIMS (1 << 0)

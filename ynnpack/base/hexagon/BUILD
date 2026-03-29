@@ -15,7 +15,6 @@ cc_library(
 
 cc_library(
     name = "benchmark_main",
-    testonly = True,
     srcs = [
         "benchmark_main.cc",
     ],

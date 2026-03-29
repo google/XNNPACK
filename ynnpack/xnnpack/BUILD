@@ -66,6 +66,7 @@ cc_library(
         "//ynnpack/subgraph",
         "@pthreadpool",
         "@slinky//slinky/base:thread_pool",
+        "@slinky//slinky/base:thread_pool_impl",
     ],
 )
 

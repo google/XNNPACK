@@ -27,13 +27,14 @@
 #endif
 #include "ynnpack/base/base.h"
 #include "ynnpack/base/log.h"
+#include "ynnpack/base/ref_count.h"
+#include "ynnpack/base/span.h"
 #include "ynnpack/base/type.h"
 #include "ynnpack/include/ynnpack.h"
 #include "ynnpack/subgraph/slinky.h"
 #include "ynnpack/subgraph/subgraph.h"
 #include "ynnpack/subgraph/tensor.h"
 #include "slinky/base/arithmetic.h"
-#include "slinky/base/span.h"
 #include "slinky/base/thread_pool.h"
 #include "slinky/builder/node_mutator.h"
 #include "slinky/builder/pipeline.h"
@@ -67,7 +68,7 @@ void ynn_runtime_value::make_buffer(ynn_runtime& runtime) {
 
 std::unique_ptr<ynn::scheduling_info> ynn_runtime::make_schedule(
     const std::vector<slinky::var>& dims, const slinky::buffer_expr_ptr output,
-    uint32_t output_value, slinky::span<const slinky::expr> given_splits,
+    uint32_t output_value, ynn::span<const slinky::expr> given_splits,
     const slinky::expr& element_cost,
     const std::vector<slinky::index_t>& loop_order) {
   auto sched = std::make_unique<ynn::scheduling_info>();
@@ -442,7 +443,7 @@ auto make_reshape_impl(ynn_runtime* runtime) {
   return [runtime](const slinky::call_stmt*,
                    slinky::eval_context& ctx) -> slinky::index_t {
     int errors = 0;
-    for (const ynn_node& node : runtime->subgraph.nodes) {
+    for (const ynn_node& node : runtime->subgraph->nodes) {
       if (!node.is_valid()) continue;
       for (const auto& check : node.checks) {
         if (!slinky::evaluate(check.condition, ctx)) {
@@ -480,7 +481,7 @@ auto make_reshape_impl(ynn_runtime* runtime) {
         for (size_t d = 0; d < i.rank(); ++d) {
           if (i.extents[d].defined()) {
             i.data->dim(d).set_min_extent(
-                0, evaluate(slinky::max(0, i.extents[d]), ctx));
+                0, evaluate(i.extents[d], ctx));
           } else {
             i.data->dim(d).set_min_extent(0, 1);
           }
@@ -506,11 +507,9 @@ const char* get_trace_filename() { return getenv("YNN_TRACE"); }
 
 extern "C" {
 
-ynn_runtime::ynn_runtime(const ynn_subgraph& subgraph,
+ynn_runtime::ynn_runtime(ynn::ref_count<const ynn_subgraph> subgraph,
                          slinky::thread_pool* threadpool, uint32_t flags)
-    : subgraph(subgraph),
-      flags(flags),
-      globals(subgraph.globals) {
+    : subgraph(subgraph), flags(flags), globals(subgraph->globals) {
   // Implement our required alignment for heap allocations.
   eval_config.allocate = [](slinky::var sym, slinky::raw_buffer* buffer) {
     return buffer->allocate(YNN_ALLOCATION_ALIGNMENT);
@@ -539,8 +538,8 @@ ynn_runtime::ynn_runtime(const ynn_subgraph& subgraph,
 #endif
   eval_context.config = &eval_config;
 
-  values.reserve(subgraph.values.size());
-  for (const ynn_value& i : subgraph.values) {
+  values.reserve(subgraph->values.size());
+  for (const ynn_value& i : subgraph->values) {
     values.push_back(ynn_runtime_value(i));
     ynn_runtime_value& value = values.back();
     if (!value.is_valid()) {
@@ -567,7 +566,7 @@ ynn_runtime::ynn_runtime(const ynn_subgraph& subgraph,
         if (!value.extents[d].defined()) {
           value.buffer->dim(d).bounds = slinky::point(0);
         } else if (const auto v = as_constant(value.extents[d])) {
-          value.buffer->dim(d).bounds = slinky::min_extent(0, *v);
+          value.buffer->dim(d).bounds = slinky::range(0, *v);
         }
       }
 
@@ -600,7 +599,7 @@ ynn_status ynn_runtime::build() {
     }
   }
 
-  for (const ynn_node& i : subgraph.nodes) {
+  for (const ynn_node& i : subgraph->nodes) {
     if (!i.is_valid()) continue;
     ynn_status status = i.create(i, *this);
     if (status != ynn_status_success) {
@@ -690,19 +689,18 @@ ynn_status ynn_runtime::setup() {
 ynn_status ynn_create_runtime(ynn_subgraph_t subgraph,
                               ynn_threadpool_t threadpool, uint32_t flags,
                               ynn_runtime_t* runtime_out) {
+  YNN_RETURN_IF_ERROR(ynn::validate_subgraph("create_runtime", subgraph));
+  if (runtime_out == nullptr) {
+    YNN_LOG_ERROR() << "runtime_out must be non-null";
+    return ynn_status_invalid_parameter;
+  }
+
   slinky::thread_pool* slinky_threadpool =
       reinterpret_cast<slinky::thread_pool*>(threadpool);
   auto runtime =
-      std::make_unique<ynn_runtime>(*subgraph, slinky_threadpool, flags);
-  ynn_status status = runtime->build();
-  if (status != ynn_status_success) {
-    return status;
-  }
-
-  status = runtime->setup();
-  if (status != ynn_status_success) {
-    return status;
-  }
+      std::make_unique<ynn_runtime>(subgraph, slinky_threadpool, flags);
+  YNN_RETURN_IF_ERROR(runtime->build());
+  YNN_RETURN_IF_ERROR(runtime->setup());
 
   *runtime_out = runtime.release();
   return ynn_status_success;
@@ -710,6 +708,7 @@ ynn_status ynn_create_runtime(ynn_subgraph_t subgraph,
 
 ynn_status ynn_update_runtime_with_threadpool(ynn_runtime_t runtime,
                                               ynn_threadpool_t threadpool) {
+  YNN_RETURN_IF_ERROR(ynn::validate_runtime(runtime));
   runtime->eval_config.thread_pool =
       reinterpret_cast<slinky::thread_pool*>(threadpool);
   return ynn_status_success;
@@ -723,6 +722,11 @@ ynn_status ynn_runtime::invoke() {
 ynn_status ynn_set_external_value_shape(ynn_runtime_t runtime,
                                         uint32_t external_id, size_t rank,
                                         const size_t* dims) {
+  YNN_RETURN_IF_ERROR(ynn::validate_runtime(runtime));
+  if (!runtime->subgraph->is_valid_value(external_id)) {
+    YNN_LOG_ERROR() << "invalid value ID: " << external_id;
+    return ynn_status_invalid_parameter;
+  }
   ynn_runtime_value& value = runtime->value(external_id);
   return value.set_external_shape(rank, dims);
 }
@@ -730,25 +734,37 @@ ynn_status ynn_set_external_value_shape(ynn_runtime_t runtime,
 ynn_status ynn_get_external_value_shape(ynn_runtime_t runtime,
                                         uint32_t external_id, size_t* rank,
                                         size_t* dims) {
+  YNN_RETURN_IF_ERROR(ynn::validate_runtime(runtime));
+  if (!runtime->subgraph->is_valid_value(external_id)) {
+    YNN_LOG_ERROR() << "invalid value ID: " << external_id;
+    return ynn_status_invalid_parameter;
+  }
   const ynn_runtime_value& value = runtime->value(external_id);
   return value.get_external_shape(rank, dims);
 }
 
 ynn_status ynn_reshape_runtime(ynn_runtime_t runtime) {
+  YNN_RETURN_IF_ERROR(ynn::validate_runtime(runtime));
   return runtime->reshape();
 }
 
 ynn_status ynn_set_external_value_data(ynn_runtime_t runtime,
                                        uint32_t external_id, void* data) {
+  YNN_RETURN_IF_ERROR(ynn::validate_runtime(runtime));
+  if (!runtime->subgraph->is_valid_value(external_id)) {
+    YNN_LOG_ERROR() << "invalid value ID: " << external_id;
+    return ynn_status_invalid_parameter;
+  }
   ynn_value& value = runtime->values[external_id];
+  assert(value.data);
   value.data->base = data;
   return ynn_status_success;
 }
 
 ynn_status ynn_invoke_runtime(ynn_runtime_t runtime) {
+  YNN_RETURN_IF_ERROR(ynn::validate_runtime(runtime));
   return runtime->invoke();
 }
-
 namespace {
 
 int32_t get_max_concurrency(const ynn_runtime& runtime) {
@@ -766,12 +782,14 @@ int32_t get_max_concurrency(const ynn_runtime& runtime) {
 }  // namespace
 
 ynn_status ynn_query_runtime(ynn_runtime_t runtime,
-                             ynn_runtime_property property, void* result,
+                             enum ynn_runtime_property property, void* result,
                              size_t* result_size) {
+  YNN_RETURN_IF_ERROR(ynn::validate_runtime(runtime));
   if (!result_size || !result) {
-    YNN_LOG_ERROR() << "Invalid result pointer";
-    return ynn_status_error;
+    YNN_LOG_ERROR() << "result and result_size must be non-null";
+    return ynn_status_invalid_parameter;
   }
+
   switch (property) {
     case ynn_runtime_property_concurrency: {
       memset(result, 0, *result_size);

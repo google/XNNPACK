@@ -15,52 +15,25 @@
 
 namespace ynn {
 
-// Elementwise ops are defined as x, y, ... = f(a, b, ...)
-struct unary_reference_params {
-  float a_scale;
-  int32_t a_zero_point;
-  float inv_x_scale;
-  int32_t x_zero_point;
-};
-
-union unary_params {
-  unary_reference_params reference;
-};
-
 typedef void (*unary_kernel_fn)(size_t width, size_t height, size_t stride_a,
-                                const void* a, size_t stride_x, void* x,
-                                const unary_params* params);
+                                const void* a, size_t stride_x, void* x);
 
-typedef void (*init_unary_params_fn)(float a_scale, int32_t a_zero_point,
-                                     float x_scale, int32_t x_zero_point,
-                                     unary_params& params);
-
-#define YNN_ELEMENTWISE_KERNEL(arch, name, op, init_params_fn, type_a, type_c) \
-  void name(size_t m, size_t n, size_t stride_a_m, const void* a,              \
-            size_t stride_x_m, void* x, const unary_params* params);
+#define YNN_ELEMENTWISE_KERNEL(arch, name, op, type_a, type_c)    \
+  void name(size_t m, size_t n, size_t stride_a_m, const void* a, \
+            size_t stride_x_m, void* x);
 #include "ynnpack/kernels/unary/kernels.inc"
 #undef YNN_ELEMENTWISE_KERNEL
 
-struct unary_kernel {
-  unary_kernel_fn op;
-  init_unary_params_fn init_params;
-};
-
-const unary_kernel* get_unary_reference_kernel(ynn_unary_operator op,
-                                               ynn_type a_type,
-                                               bool a_quantized,
-                                               ynn_type x_type,
-                                               bool x_quantized);
-
+unary_kernel_fn get_unary_reference_kernel(ynn_unary_operator op,
+                                           ynn_type type);
+unary_kernel_fn get_convert_reference_kernel(ynn_type a_type, ynn_type x_type);
 template <typename A, typename X>
-const unary_kernel* get_unary_reference_kernel(ynn_unary_operator op, A, X) {
-  return get_unary_reference_kernel(op, type_of<A>(), is_quantized<A>{},
-                                    type_of<X>(), is_quantized<X>{});
+unary_kernel_fn get_convert_reference_kernel() {
+  return get_convert_reference_kernel(type_of<A>(), type_of<X>());
 }
 
-const unary_kernel* get_unary_kernel(
-    ynn_unary_operator op, ynn_type a_type, bool a_quantized, ynn_type x_type,
-    bool x_quantized,
+unary_kernel_fn get_unary_kernel(
+    ynn_unary_operator op, ynn_type a_type, ynn_type x_type,
     uint64_t supported_arch_flags = get_supported_arch_flags());
 
 }  // namespace ynn

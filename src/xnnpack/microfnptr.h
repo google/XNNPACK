@@ -147,6 +147,12 @@ typedef void (*xnn_qd8_f32_qc2w_gemm_ukernel_fn)(
     const struct xnn_f32_minmax_params* params, const float* row_sum,
     const struct xnn_qd8_quantization_params* quantization_params);
 
+typedef void (*xnn_qd8_f16_qc2w_gemm_ukernel_fn)(
+    size_t mr, size_t nr, size_t k, const int8_t* a, size_t a_stride,
+    const void* w, xnn_float16* c, size_t cm_stride, size_t cn_stride,
+    const struct xnn_f16_minmax_params* params, const float* row_sum,
+    const struct xnn_qd8_quantization_params* quantization_params);
+
 typedef void (*xnn_qd8_f32_qc4w_gemm_ukernel_fn)(
     size_t mr, size_t nr, size_t k, const int8_t* a, size_t a_stride,
     const void* w, float* c, size_t cm_stride, size_t cn_stride,
@@ -922,12 +928,12 @@ typedef void (*xnn_u8_rmax_ukernel_fn)(size_t batch, const uint8_t* input,
 typedef void (*xnn_raddstoreexpminusmax_ukernel_fn)(size_t batch,
                                                     const void* input,
                                                     const void* max,
-                                                    void* output, void* sum,
+                                                    void* output, float* sum,
                                                     const void* params);
 
 typedef void (*xnn_f16_raddstoreexpminusmax_ukernel_fn)(
     size_t batch, const xnn_float16* input, const xnn_float16* max,
-    xnn_float16* output, xnn_float16* sum, const void* params);
+    xnn_float16* output, float* sum, const void* params);
 
 typedef void (*xnn_f32_raddstoreexpminusmax_ukernel_fn)(
     size_t batch, const float* input, const float* max, float* output,

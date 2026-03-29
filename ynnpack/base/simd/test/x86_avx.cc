@@ -55,8 +55,35 @@ TEST_PARTIAL_LOAD_STORE(x86_avx, s32, 8);
 TEST_ADD(x86_avx, f32, 8);
 TEST_SUBTRACT(x86_avx, f32, 8);
 TEST_MULTIPLY(x86_avx, f32, 8);
+TEST_DIVIDE(x86_avx, f32, 8);
 TEST_MIN(x86_avx, f32, 8);
 TEST_MAX(x86_avx, f32, 8);
+
+TEST_AND(x86_avx, u8, 32);
+TEST_AND(x86_avx, s8, 32);
+TEST_AND(x86_avx, s16, 16);
+TEST_AND(x86_avx, s32, 8);
+
+TEST_OR(x86_avx, u8, 32);
+TEST_OR(x86_avx, s8, 32);
+TEST_OR(x86_avx, s16, 16);
+TEST_OR(x86_avx, s32, 8);
+
+TEST_XOR(x86_avx, u8, 32);
+TEST_XOR(x86_avx, s8, 32);
+TEST_XOR(x86_avx, s16, 16);
+TEST_XOR(x86_avx, s32, 8);
+
+TEST_NOT(x86_avx, u8, 32);
+TEST_NOT(x86_avx, s8, 32);
+TEST_NOT(x86_avx, s16, 16);
+TEST_NOT(x86_avx, s32, 8);
+
+TEST_FLOOR(x86_avx, f32, 8);
+TEST_CEIL(x86_avx, f32, 8);
+TEST_ROUND(x86_avx, f32, 8);
+TEST_SQRT(x86_avx, f32, 8);
+TEST_ABS(x86_avx, f32, 8);
 
 TEST_EXTRACT(x86_avx, s32x8, 4);
 TEST_EXTRACT(x86_avx, f32x8, 4);

@@ -44,6 +44,13 @@ enum xnn_status xnn_reshape_external_value(
     uint32_t external_id,
     size_t num_dims,
     const size_t* dims) {
+  if (num_dims > XNN_MAX_TENSOR_DIMS) {
+    xnn_log_error(
+        "failed to reshape runtime: num of dimensions %zu exceeds XNNPACK "
+        "limit (%d)",
+        num_dims, XNN_MAX_TENSOR_DIMS);
+    return xnn_status_unsupported_parameter;
+  }
   if (external_id >= runtime->num_values) {
     xnn_log_error("failed to reshape runtime: out-of-bounds ID %" PRIu32 " in external value",
                   external_id);
@@ -160,6 +167,7 @@ enum xnn_status xnn_create_weights_cache_with_size(size_t size, xnn_weights_cach
   cache_provider->is_finalized = (bool (*)(void*))xnn_internal_weights_cache_is_finalized;
   cache_provider->offset_to_addr = (void*(*)(void*, size_t))xnn_internal_weights_cache_offset_to_addr;
   cache_provider->delete_cache = (enum xnn_status (*)(void*))xnn_internal_delete_weights_cache;
+  cache_provider->alias_data = NULL;
   *weights_cache_out = cache_provider;
   return xnn_status_success;
 
@@ -548,12 +556,11 @@ void propagate_rank(
   }
 }
 
-static enum xnn_status create_runtime_impl(
+enum xnn_status xnn_create_runtime_v4(
   xnn_subgraph_t subgraph,
   xnn_weights_cache_t weights_cache,
   xnn_workspace_t workspace,
   pthreadpool_t threadpool,
-  xnn_threadpool_t xnn_threadpool,
   uint32_t flags,
   xnn_runtime_t* runtime_out)
 {
@@ -740,18 +747,6 @@ error:
   return status;
 }
 
-enum xnn_status xnn_create_runtime_v4(
-  xnn_subgraph_t subgraph,
-  xnn_weights_cache_t weights_cache,
-  xnn_workspace_t workspace,
-  pthreadpool_t threadpool,
-  uint32_t flags,
-  xnn_runtime_t* runtime_out)
-{
-  return create_runtime_impl(subgraph, weights_cache, workspace, threadpool,
-                             /*xnn_threadpool=*/NULL, flags, runtime_out);
-}
-
 // The xnn_threadpool consists of an `xnn_scheduler_v2` and its context.
 struct xnn_threadpool {
   struct xnn_scheduler_v2 scheduler;
@@ -810,8 +805,8 @@ enum xnn_status xnn_create_runtime_with_threadpool(
     flags |= XNN_FLAG_RUNTIME_OWNS_THREADPOOL;
   }
 
-  return create_runtime_impl(subgraph, weights_cache, /*workspace=*/NULL,
-                             threadpool, xnn_threadpool, flags, runtime_out);
+  return xnn_create_runtime_v4(subgraph, weights_cache, /*workspace=*/NULL,
+                               threadpool, flags, runtime_out);
 }
 
 enum xnn_status xnn_plan_memory(

@@ -725,6 +725,16 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "qd8_f16_qc2w_gemm_minmax_test",
+    srcs = [
+        "qd8-f16-qc2w-gemm-minmax.cc",
+    ],
+    deps = MICROKERNEL_TEST_DEPS + [
+        ":gemm_microkernel_tester",
+    ],
+)
+
+xnnpack_unit_test(
     name = "qd8_f32_qc4w_gemm_minmax_test",
     timeout = "moderate",
     srcs = [
@@ -1021,6 +1031,16 @@ xnnpack_unit_test(
     deps = MICROKERNEL_TEST_DEPS,
 )
 
+xnnpack_unit_test(
+    name = "polyfill_test",
+    srcs = ["polyfill.cc"],
+    deps = [
+        "//:common",
+        "//:intrinsics_polyfill",
+        "//:isa_checks",
+    ],
+)
+
 ############################### Misc unit tests ###############################
 
 xnnpack_unit_test(
@@ -1031,6 +1051,7 @@ xnnpack_unit_test(
     deps = [
         ":replicable_random_device",
         "//:buffer",
+        "//:common",
     ],
 )
 

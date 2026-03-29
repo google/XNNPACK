@@ -116,8 +116,9 @@ const binary_op_info* get_binary_op_info(ynn_binary_operator op);
 // Check that `op(a, b)` == x, within tolerances described by `op`.
 template <typename A, typename B, typename X, typename OpInfo>
 void check_results(const OpInfo& op, const Tensor<A>& a, const Tensor<B>& b,
-                   const Tensor<X>& x, const quantization_params&,
-                   const quantization_params&, const quantization_params&) {
+                   const Tensor<X>& x, const quantization_params& = {},
+                   const quantization_params& = {},
+                   const quantization_params& = {}) {
   for (const auto& i : EnumerateIndices(x.extents())) {
     if (std::is_integral<X>::value) {
       const int32_t expected = op(a(i), b(i));

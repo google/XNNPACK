@@ -58,6 +58,7 @@ std::string test_param_to_string(const testing::TestParamInfo<T>& info) {
 // and then back to compile-time types, via. `SwitchTwoTypes` and
 // `SwitchThreeTypes`.
 enum class multi_type {
+  fp64,
   fp32,
   fp16,
   bf16,
@@ -96,6 +97,9 @@ inline multi_type multi_type_of(uint8_t, int32_t) {
 
 inline multi_type multi_type_of(float, float, float) {
   return multi_type::fp32;
+}
+inline multi_type multi_type_of(double, double, double) {
+  return multi_type::fp64;
 }
 
 inline multi_type multi_type_of(half, half, float) {
@@ -145,10 +149,14 @@ constexpr decltype(auto) SwitchTwoTypes(multi_type type, F&& f) {
 template <typename F>
 constexpr decltype(auto) SwitchThreeTypes(multi_type type, F&& f) {
   switch (type) {
+    case multi_type::fp64:
+      return std::forward<F>(f)(double(), double(), double());
     case multi_type::fp32:
       return std::forward<F>(f)(float(), float(), float());
     case multi_type::bf16:
       return std::forward<F>(f)(bfloat16(), bfloat16(), bfloat16());
+    case multi_type::fp16:
+      return std::forward<F>(f)(half(), half(), half());
     case multi_type::int8:
       return std::forward<F>(f)(int8_t(), int8_t(), int8_t());
     case multi_type::uint8:
@@ -170,6 +178,8 @@ constexpr decltype(auto) SwitchThreeTypes(multi_type type, F&& f) {
 
 inline const char* to_string(multi_type type) {
   switch (type) {
+    case multi_type::fp64:
+      return "fp64";
     case multi_type::fp32:
       return "fp32";
     case multi_type::fp16:

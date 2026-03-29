@@ -125,7 +125,7 @@ struct convert : public unary_op_info {
     if (type_is_integral(type)) {
       // The epsilon of a 23-bit integer.
       constexpr float epsilon_int23 = 1.0f / (1 << 23);
-      return tol_relative(y_ref, epsilon_int23);
+      return tol_mixed(y_ref, /*abs_tol=*/1, epsilon_int23);
     } else {
       return tol_mixed(y_ref, epsilon(type), epsilon(type));
     }
@@ -440,12 +440,13 @@ const unary_op_info* get_unary_op_info(ynn_unary_operator op);
 // Check that op(a) == x, within tolerances described by `op`.
 template <typename A, typename X>
 void check_results(const unary_op_info& op, Tensor<A> a, Tensor<X> x,
-                   const quantization_params& a_quantization,
-                   const quantization_params& x_quantization) {
+                   const quantization_params& a_quantization = {},
+                   const quantization_params& x_quantization = {}) {
   for (const auto& i : EnumerateIndices(x.extents())) {
     if (std::is_integral<X>::value) {
       if (std::is_integral<A>::value) {
-        const int32_t expected = op(static_cast<int32_t>(a(i)));
+        const int32_t expected =
+            saturate_cast<X>(op(static_cast<int32_t>(a(i))));
         ASSERT_EQ(expected, x(i)) << "i = " << index_to_string(i)
                                   << ", a(i) = " << static_cast<int32_t>(a(i));
       } else {

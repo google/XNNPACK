@@ -24,6 +24,11 @@ tools/xngen src/s8-rdminmax/simd.c.in -D CHANNELS=128 -D DATATYPE=S8 -D ACCUMULA
 
 tools/xngen src/s8-rdminmax/simd.c.in -D CHANNELS=128 -D DATATYPE=S8 -D ACCUMULATORS=2 -D OP=MIN -D ARCH=hvx -o src/s8-rdminmax/gen/s8-rdmin-2p2x-hvx-u128.c &
 
+################################## RISC-V Vector ##############################
+tools/xngen src/s8-rdminmax/rvv.c.in -D LMUL=8 -D DATATYPE=S8 -D ACCUMULATORS=2 -D OP=MAX -o src/s8-rdminmax/gen/s8-rdmax-2p2x-rvv-u8v.c &
+
+tools/xngen src/s8-rdminmax/rvv.c.in -D LMUL=8 -D DATATYPE=S8 -D ACCUMULATORS=2 -D OP=MIN -o src/s8-rdminmax/gen/s8-rdmin-2p2x-rvv-u8v.c &
+
 #################################### Scalar ###################################
 tools/xngen src/s8-rdminmax/simd.c.in -D CHANNELS=2 -D DATATYPE=S8 -D ACCUMULATORS=2 -D OP=MAX -D ARCH=scalar -o src/s8-rdminmax/gen/s8-rdmax-2p2x-scalar-u2.c &
 

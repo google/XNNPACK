@@ -9,11 +9,14 @@
 #include <algorithm>
 #include <array>
 #include <cassert>
+#include <cmath>
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
+#include <limits>
 #include <type_traits>
 
+#include "ynnpack/base/arithmetic.h"
 #include "ynnpack/base/base.h"
 
 namespace ynn {
@@ -123,6 +126,22 @@ template <typename T, size_t N>
 vec<T, N> min(vec<T, N> a, vec<T, N> b);
 template <typename T, size_t N>
 vec<T, N> max(vec<T, N> a, vec<T, N> b);
+template <typename T, size_t N>
+vec<T, N> floor(vec<T, N> a);
+template <typename T, size_t N>
+vec<T, N> ceil(vec<T, N> a);
+template <typename T, size_t N>
+vec<T, N> round(vec<T, N> a);
+template <typename T, size_t N>
+vec<T, N> sqrt(vec<T, N> a);
+template <typename T, size_t N>
+vec<T, N> abs(vec<T, N> a);
+template <typename T, size_t N>
+vec<T, N> add_sat(vec<T, N> a, vec<T, N> b);
+template <typename T, size_t N>
+vec<T, N> sub_sat(vec<T, N> a, vec<T, N> b);
+template <typename T, size_t N>
+vec<T, N> operator<<(vec<T, N> a, int b);
 
 template <typename T>
 std::array<vec<T, 4>, 4> transpose(std::array<vec<T, 4>, 4> x);
@@ -130,7 +149,13 @@ template <int Index, typename T, size_t N, typename SliceN>
 auto extract(vec<T, N>, SliceN);
 
 template <typename To, typename From, size_t N>
-vec<To, N> convert(vec<From, N> from, To);
+vec<To, N> cast(vec<From, N> from, To);
+
+template <typename To, typename From, size_t N>
+vec<To, N> saturate_cast(vec<From, N> from, To);
+
+template <typename To, typename From, size_t N>
+vec<To, N> round_float_to_int(vec<From, N> from, To);
 
 namespace internal {
 
@@ -228,19 +253,20 @@ inline float mul_no_overflow(float a, float b) {
 }
 
 template <typename T>
-YNN_ALWAYS_INLINE vec<T, 1>& operator+=(vec<T, 1>& a, vec<T, 1> b) {
-  a.v = add_no_overflow(a.v, b.v);
-  return a;
+YNN_ALWAYS_INLINE vec<T, 1> operator+(vec<T, 1> a, vec<T, 1> b) {
+  return vec<T, 1>{static_cast<T>(add_no_overflow(a.v, b.v))};
 }
 template <typename T>
-YNN_ALWAYS_INLINE vec<T, 1>& operator-=(vec<T, 1>& a, vec<T, 1> b) {
-  a.v = sub_no_overflow(a.v, b.v);
-  return a;
+YNN_ALWAYS_INLINE vec<T, 1> operator-(vec<T, 1> a, vec<T, 1> b) {
+  return vec<T, 1>{static_cast<T>(sub_no_overflow(a.v, b.v))};
 }
 template <typename T>
-YNN_ALWAYS_INLINE vec<T, 1>& operator*=(vec<T, 1>& a, vec<T, 1> b) {
-  a.v = mul_no_overflow(a.v, b.v);
-  return a;
+YNN_ALWAYS_INLINE vec<T, 1> operator*(vec<T, 1> a, vec<T, 1> b) {
+  return vec<T, 1>{static_cast<T>(mul_no_overflow(a.v, b.v))};
+}
+template <typename T>
+YNN_ALWAYS_INLINE vec<T, 1> operator/(vec<T, 1> a, vec<T, 1> b) {
+  return vec<T, 1>{static_cast<T>(a.v / b.v)};
 }
 template <typename T>
 YNN_ALWAYS_INLINE vec<T, 1> min(vec<T, 1> a, vec<T, 1> b) {
@@ -250,10 +276,69 @@ template <typename T>
 YNN_ALWAYS_INLINE vec<T, 1> max(vec<T, 1> a, vec<T, 1> b) {
   return vec<T, 1>{std::max(a.v, b.v)};
 }
+template <typename T>
+YNN_ALWAYS_INLINE vec<T, 1> floor(vec<T, 1> a) {
+  return vec<T, 1>{std::floor(a.v)};
+}
+template <typename T>
+YNN_ALWAYS_INLINE vec<T, 1> ceil(vec<T, 1> a) {
+  return vec<T, 1>{std::ceil(a.v)};
+}
+template <typename T>
+YNN_ALWAYS_INLINE vec<T, 1> round(vec<T, 1> a) {
+  return vec<T, 1>{std::round(a.v)};
+}
+template <typename T>
+YNN_ALWAYS_INLINE vec<T, 1> sqrt(vec<T, 1> a) {
+  return vec<T, 1>{std::sqrt(a.v)};
+}
+template <typename T>
+YNN_ALWAYS_INLINE vec<T, 1> abs(vec<T, 1> a) {
+  return vec<T, 1>{std::abs(a.v)};
+}
+template <typename T>
+YNN_ALWAYS_INLINE vec<T, 1> add_sat(vec<T, 1> a, vec<T, 1> b) {
+  return vec<T, 1>{add_sat(a.v, b.v)};
+}
+template <typename T>
+YNN_ALWAYS_INLINE vec<T, 1> sub_sat(vec<T, 1> a, vec<T, 1> b) {
+  return vec<T, 1>{sub_sat(a.v, b.v)};
+}
 
 template <typename To, typename From>
-YNN_ALWAYS_INLINE vec<To, 1> convert(vec<From, 1> from, To) {
+YNN_ALWAYS_INLINE vec<To, 1> cast(vec<From, 1> from, To) {
   return vec<To, 1>{static_cast<To>(from.v)};
+}
+
+template <typename To, typename From>
+YNN_ALWAYS_INLINE vec<To, 1> saturate_cast(vec<From, 1> from, To) {
+  return vec<To, 1>{saturate_cast<To>(from.v)};
+}
+
+template <typename To, typename From>
+YNN_ALWAYS_INLINE vec<To, 1> round_float_to_int(vec<From, 1> from, To) {
+  return vec<To, 1>{round_float_to_int<To>(from.v)};
+}
+
+template <typename T>
+YNN_ALWAYS_INLINE vec<T, 1> operator&(vec<T, 1> a, vec<T, 1> b) {
+  return vec<T, 1>{static_cast<T>(a.v & b.v)};
+}
+template <typename T>
+YNN_ALWAYS_INLINE vec<T, 1> operator|(vec<T, 1> a, vec<T, 1> b) {
+  return vec<T, 1>{static_cast<T>(a.v | b.v)};
+}
+template <typename T>
+YNN_ALWAYS_INLINE vec<T, 1> operator^(vec<T, 1> a, vec<T, 1> b) {
+  return vec<T, 1>{static_cast<T>(a.v ^ b.v)};
+}
+template <typename T>
+YNN_ALWAYS_INLINE vec<T, 1> operator~(vec<T, 1> a) {
+  return vec<T, 1>{static_cast<T>(~a.v)};
+}
+template <typename T>
+YNN_ALWAYS_INLINE vec<T, 1> operator<<(vec<T, 1> a, int bits) {
+  return vec<T, 1>{static_cast<T>(a.v << bits)};
 }
 
 template <typename T>

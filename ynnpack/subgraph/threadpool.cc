@@ -6,6 +6,7 @@
 #include <cassert>
 #include <cstdint>
 
+#include "ynnpack/base/log.h"
 #include "ynnpack/include/ynnpack.h"
 #include "ynnpack/subgraph/slinky_thread_pool.h"
 #include "slinky/base/thread_pool.h"
@@ -15,6 +16,14 @@ extern "C" {
 ynn_status ynn_create_threadpool(ynn_scheduler_t scheduler,
                                  void* scheduler_context, uint32_t flags,
                                  ynn_threadpool_t* threadpool_out) {
+  if (!scheduler) {
+    YNN_LOG_ERROR() << "scheduler must be non-null";
+    return ynn_status_invalid_parameter;
+  }
+  if (!threadpool_out) {
+    YNN_LOG_ERROR() << "threadpool_out must be non-null";
+    return ynn_status_invalid_parameter;
+  }
   *threadpool_out = reinterpret_cast<ynn_threadpool_t>(
       new ynn::slinky_thread_pool(scheduler, scheduler_context));
   return ynn_status_success;

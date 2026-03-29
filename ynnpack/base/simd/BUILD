@@ -37,12 +37,14 @@ cc_library(
         "x86_sse41_base.h",
         "x86_avx_partial_load_store.h",
         "x86_sse2_partial_load_store.h",
+        "x86_sse2_saturate_cast.h",
         "generic.inc",
         # For the most part, only one of these headers should be included. Multiple of these headers
         # may define the same operation and type, using a different implementation, depending on the
         # target. For example, f32x16 is provided by both avx512 as a single 512-bit vector, and
         # avx as two 256-bit vectors, and the `concat` operation of two f32x8 values is implemented
         # appropriately for that type.
+        "byte_vec.h",
         "arm_neon.h",
         "arm64_sve.h",
         "arm_neonfma.h",
@@ -55,7 +57,9 @@ cc_library(
         "x86_f16c.h",
         "x86_fma3.h",
         "x86_sse2.h",
+        "x86_sse2_fma.h",
         "x86_sse41.h",
+        "wasm_simd128.h",
     ],
     deps = ["//ynnpack/base"],
 )

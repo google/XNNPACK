@@ -6,6 +6,7 @@
 #include <assert.h>
 #include <inttypes.h>
 #include <limits.h>
+#include <math.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -111,6 +112,22 @@ static int cmp_value_size_t(const void* a_ptr, const void* b_ptr) {
   return (b < a) - (b > a);
 }
 
+static uint32_t get_identity_value(xnn_operator_t reduce_op, size_t num_reduction_elements) {
+  uint32_t identity_value = reduce_op->reduce.identity_value;
+  if (num_reduction_elements == 0) {
+    if (reduce_op->type == xnn_operator_type_mean_nd ||
+        reduce_op->type == xnn_operator_type_mean_squared_nd) {
+      // The identity value here really should be 0, and not need a special
+      // case. However, because we handle mean by scaling inside the kernel, and
+      // we don't call the kernel if the reduction is empty, we need to hack the
+      // identity value to produce the mean instead. Since the mean of an empty
+      // set would be 0/0 = NaN.
+      identity_value = float_as_uint32(NAN);
+    }
+  }
+  return identity_value;
+}
+
 static enum xnn_status reshape_reduce_nd(
     xnn_operator_t reduce_op, size_t num_reduction_axes,
     const int64_t* reduction_axes, size_t num_input_dims,
@@ -142,38 +159,13 @@ static enum xnn_status reshape_reduce_nd(
     return xnn_status_unsupported_parameter;
   }
 
-  if (num_reduction_axes > num_input_dims) {
+  if (num_reduction_axes > XNN_MAX_TENSOR_DIMS) {
     xnn_log_error(
         "failed to reshape %s operator with %zu reduction axes: the number of "
-        "reduction axes must not exceed the number of input dimensions %zu",
+        "reduction axes must not exceed %d",
         xnn_operator_type_to_string_v2(reduce_op), num_reduction_axes,
-        num_input_dims);
+        XNN_MAX_TENSOR_DIMS);
     return xnn_status_invalid_parameter;
-  }
-
-  if (num_reduction_axes == 0) {
-    xnn_log_error(
-        "failed to reshape %s operator with %zu reduction axes: the number of "
-        "reduction axes must be non-zero",
-        xnn_operator_type_to_string_v2(reduce_op), num_reduction_axes);
-    return xnn_status_invalid_parameter;
-  }
-
-  size_t normalized_input_shape[XNN_MAX_TENSOR_DIMS];
-  assert(num_input_dims <= XNN_MAX_TENSOR_DIMS);
-  memcpy(normalized_input_shape, input_shape, num_input_dims * sizeof(size_t));
-
-  for (size_t i = 0; i < num_reduction_axes; i++) {
-    const int64_t signed_num_input_dims = (int64_t)num_input_dims;
-    if (signed_num_input_dims <= reduction_axes[i] ||
-        reduction_axes[i] < -signed_num_input_dims) {
-      xnn_log_error(
-          "failed to reshape %s operator with #%zu reduction axis of %" PRIi64
-          ": the index is out of bounds for a %zuD input shape",
-          xnn_operator_type_to_string_v2(reduce_op), i, reduction_axes[i],
-          num_input_dims);
-      return xnn_status_invalid_parameter;
-    }
   }
 
   size_t normalized_reduction_axes[XNN_MAX_TENSOR_DIMS];
@@ -186,26 +178,48 @@ static enum xnn_status reshape_reduce_nd(
   qsort(normalized_reduction_axes, num_reduction_axes, sizeof(size_t),
         cmp_value_size_t);
 
-  for (size_t i = 1; i < num_reduction_axes; i++) {
-    if (normalized_reduction_axes[i] <= normalized_reduction_axes[i - 1]) {
-      xnn_log_error(
-          "failed to reshape %s operator with #%zu reduction axis of %" PRIi64
-          ": the reduction axes must be unique",
-          xnn_operator_type_to_string_v2(reduce_op), i, reduction_axes[i]);
-      return xnn_status_invalid_parameter;
+  if (num_reduction_axes == 0 || normalized_reduction_axes[0] >= num_input_dims) {
+    xnn_log_error(
+        "failed to reshape %s operator with %zu reduction axes: the number of "
+        "valid reduction axes must be non-zero",
+        xnn_operator_type_to_string_v2(reduce_op), num_reduction_axes);
+    return xnn_status_invalid_parameter;
+  }
+
+  // Remove duplicate reduction axes.
+  int i = 0;
+  // The array is sorted, we're done when an axis is bigger than num_input_dims.
+  for (int j = 1;
+       j < num_reduction_axes && normalized_reduction_axes[j] < num_input_dims;
+       ++j) {
+    // Shift non-duplicate elements forward.
+    if (normalized_reduction_axes[i] != normalized_reduction_axes[j]) {
+      normalized_reduction_axes[++i] = normalized_reduction_axes[j];
     }
   }
+  num_reduction_axes = i + 1;
+
+  assert(num_reduction_axes <= num_input_dims);
+
+  size_t normalized_input_shape[XNN_MAX_TENSOR_DIMS];
+  assert(num_input_dims <= XNN_MAX_TENSOR_DIMS);
+  memcpy(normalized_input_shape, input_shape, num_input_dims * sizeof(size_t));
 
   xnn_normalize_reduction(
     &num_reduction_axes, normalized_reduction_axes,
     &num_input_dims, normalized_input_shape);
 
-  size_t num_input_elements = 1;
+  size_t num_output_elements = 1;
+  size_t reduction_axis_index = 0;
   for (size_t i = 0; i < num_input_dims; i++) {
-    num_input_elements *= normalized_input_shape[i];
+    if (reduction_axis_index < num_reduction_axes && normalized_reduction_axes[reduction_axis_index] == i) {
+      reduction_axis_index++;
+    } else {
+      num_output_elements *= normalized_input_shape[i];
+    }
   }
 
-  if (num_input_elements == 0) {
+  if (num_output_elements == 0) {
     reduce_op->state = xnn_run_state_skip;
     return xnn_status_success;
   }
@@ -223,8 +237,6 @@ static enum xnn_status reshape_reduce_nd(
       ? xnn_microkernel_type_reduce
       : xnn_microkernel_type_reduce2;
   // Reduction along the innermost dimension.
-  const bool is_minmax = (reduce_op->type == xnn_operator_type_reduce_max_nd ||
-                          reduce_op->type == xnn_operator_type_reduce_min_nd);
 
   size_t num_reduction_elements;
   if (normalized_reduction_axes[num_reduction_axes - 1] == num_input_dims - 1) {
@@ -244,18 +256,17 @@ static enum xnn_status reshape_reduce_nd(
       reduce_op->reduce_config->update(&reduce_op->params.reduce, scale);
     }
 
+    uint32_t identity_value = get_identity_value(reduce_op, num_reduction_elements);
     *reduce_op->dynamic_context.reduce = (struct reduce_context) {
       .channels = axis_dim << log2_data_element_size,
       .accumulation_element_size = UINT32_C(1) << log2_accumulator_element_size,
       .output_element_size = UINT32_C(1) << log2_data_element_size,
-      .identity_value = reduce_op->reduce.identity_value,
+      .identity_value = identity_value,
       .ukernel.contiguous_reduce = reduce_op->reduce_config->ukernel,
       .is_old_reduce = is_old_reduce,
     };
 
-    if (is_minmax) {
-      reduce_op->dynamic_context.reduce->fill_ukernel = reduce_op->fill_config->ukernel;
-    }
+    reduce_op->dynamic_context.reduce->fill_ukernel = reduce_op->fill_config->ukernel;
 
     reduce_op->compute[0].type = xnn_parallelization_type_3d_tile_1d_dynamic;
     reduce_op->compute[0].task_3d_tile_1d_dynamic =
@@ -300,6 +311,7 @@ static enum xnn_status reshape_reduce_nd(
       reduce_op->channels = channel_like_dim;
     }
 
+    uint32_t identity_value = get_identity_value(reduce_op, num_reduction_elements);
     if (is_old_reduce) {
       *reduce_op->dynamic_context.reduce = (struct reduce_context) {
         .zero = reduce_op->zero_buffer,
@@ -307,7 +319,7 @@ static enum xnn_status reshape_reduce_nd(
         .ukernel.discontiguous_reduce = reduce_op->reduce_config->rd_ukernel,
         .accumulation_element_size = UINT32_C(1) << log2_accumulator_element_size,
         .output_element_size = UINT32_C(1) << log2_data_element_size,
-        .identity_value = reduce_op->reduce.identity_value,
+        .identity_value = identity_value,
         .is_old_reduce = true,
       };
     } else {
@@ -317,15 +329,13 @@ static enum xnn_status reshape_reduce_nd(
         .ukernel.discontiguous_reduce2 = reduce_op->reduce_config->rd_ukernel2,
         .accumulation_element_size = UINT32_C(1) << log2_accumulator_element_size,
         .output_element_size = UINT32_C(1) << log2_data_element_size,
-        .identity_value = reduce_op->reduce.identity_value,
+        .identity_value = identity_value,
         .is_old_reduce = false,
       };
     }
 
 
-    if (is_minmax) {
-      reduce_op->dynamic_context.reduce->fill_ukernel = reduce_op->fill_config->ukernel;
-    }
+    reduce_op->dynamic_context.reduce->fill_ukernel = reduce_op->fill_config->ukernel;
 
     reduce_op->compute[0].type = xnn_parallelization_type_3d_tile_1d_dynamic;
     reduce_op->compute[0].task_3d_tile_1d_dynamic =
@@ -432,7 +442,6 @@ enum xnn_status xnn_create_reduce_nd(
   // configuration. The unsued pointers must then be reset to NULL before
   // calling `create_reduce_nd`.
   const struct xnn_unary_elementwise_config* cvt_unused = (void*) -1;
-  const struct xnn_xx_fill_config* fill_unused = (void*) -1;
 
   const bool is_minmax = (operator_type == xnn_operator_type_reduce_max_nd ||
                           operator_type == xnn_operator_type_reduce_min_nd);
@@ -440,7 +449,8 @@ enum xnn_status xnn_create_reduce_nd(
   // Load configs.
   const struct xnn_reduce_config* reduce_config = NULL;
   const struct xnn_unary_elementwise_config* cvt_config = NULL;
-  const struct xnn_xx_fill_config* fill_config = NULL;
+  const struct xnn_xx_fill_config* fill_config = xnn_init_xx_fill_config();
+
   uint32_t log2_data_element_size = xnn_datatype_log2_size_bytes(datatype);
   uint32_t log2_accumulator_element_size;
   switch (datatype) {
@@ -465,11 +475,9 @@ enum xnn_status xnn_create_reduce_nd(
       }
       if (is_minmax) {
         log2_accumulator_element_size = 1;
-        fill_config = xnn_init_xx_fill_config();
         cvt_config = cvt_unused;
       } else {
         log2_accumulator_element_size = 2;
-        fill_config = fill_unused;
         cvt_config = xnn_init_f32_to_f16_cvt_config();
       }
       break;
@@ -492,11 +500,6 @@ enum xnn_status xnn_create_reduce_nd(
           break;
         default:
           break;
-      }
-      if (is_minmax) {
-        fill_config = xnn_init_xx_fill_config();
-      } else {
-        fill_config = fill_unused;
       }
 
       log2_accumulator_element_size = 2;
@@ -523,11 +526,9 @@ enum xnn_status xnn_create_reduce_nd(
         assert(
           input_quantization->zero_point == output_quantization->zero_point);
         log2_accumulator_element_size = 0;
-        fill_config = xnn_init_xx_fill_config();
         cvt_config = cvt_unused;
       } else {
         log2_accumulator_element_size = 2;
-        fill_config = fill_unused;
         cvt_config = xnn_init_unary_reference_config(
           xnn_unary_convert, xnn_datatype_int32, xnn_datatype_qint8);
       }
@@ -553,7 +554,6 @@ enum xnn_status xnn_create_reduce_nd(
         assert(
           input_quantization->zero_point == output_quantization->zero_point);
         log2_accumulator_element_size = 0;
-        fill_config = xnn_init_xx_fill_config();
         cvt_config = cvt_unused;
       } else {
         log2_accumulator_element_size = 2;
@@ -562,7 +562,6 @@ enum xnn_status xnn_create_reduce_nd(
         // insignificant.
         cvt_config = xnn_init_unary_reference_config(
           xnn_unary_convert, xnn_datatype_int32, xnn_datatype_quint8);
-        fill_config = fill_unused;
       }
       break;
     }
@@ -573,13 +572,12 @@ enum xnn_status xnn_create_reduce_nd(
   };
 
   // Check configs and restore unused pointers to NULL.
-  if (reduce_config == NULL || fill_config == NULL || cvt_config == NULL) {
+  if (reduce_config == NULL || cvt_config == NULL) {
     xnn_log_error(
         "failed to create %s (%s) operator: unsupported hardware configuration",
         xnn_operator_type_to_string(operator_type), xnn_datatype_to_string(datatype));
     return xnn_status_unsupported_hardware;
   } else {
-    fill_config = fill_config == fill_unused ? NULL : fill_config;
     cvt_config = cvt_config == cvt_unused ? NULL : cvt_config;
   }
 

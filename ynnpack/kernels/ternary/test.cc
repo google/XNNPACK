@@ -53,12 +53,10 @@ std::string to_string(const Shape& shape) {
 struct KernelInfo {
   uint64_t arch_flags = 0;
   ternary_kernel_fn kernel;
-  init_ternary_params_fn init_params;
 
   // Constructor for a kernel function.
-  KernelInfo(uint64_t arch_flags, ternary_kernel_fn kernel,
-             init_ternary_params_fn init_params)
-      : arch_flags(arch_flags), kernel(kernel), init_params(init_params) {}
+  KernelInfo(uint64_t arch_flags, ternary_kernel_fn kernel)
+      : arch_flags(arch_flags), kernel(kernel) {}
 };
 
 template <typename A, typename B, typename C, typename X, typename OpInfo>
@@ -71,7 +69,6 @@ void TestImpl(const KernelInfo& kernel_info, const OpInfo& op_info, size_t m,
   ReplicableRandomDevice rng;
 
   ternary_kernel_fn kernel = kernel_info.kernel;
-  init_ternary_params_fn init_params = kernel_info.init_params;
 
   size_t n = std::max(std::max(a_n, b_n), c_n);
 
@@ -99,18 +96,10 @@ void TestImpl(const KernelInfo& kernel_info, const OpInfo& op_info, size_t m,
   broadcast_extent_1(b);
   broadcast_extent_1(c);
 
-  ternary_params params;
-  if (init_params) {
-    init_params(a_quantization.scale, a_quantization.zero_point,
-                b_quantization.scale, b_quantization.zero_point,
-                c_quantization.scale, c_quantization.zero_point,
-                x_quantization.scale, x_quantization.zero_point, params);
-  }
-
   kernel(m, n, a.stride(0) * sizeof(A), a.stride(1) * sizeof(A), a.base(),
          b.stride(0) * sizeof(B), b.stride(1) * sizeof(B), b.base(),
          c.stride(0) * sizeof(C), c.stride(1) * sizeof(C), c.base(),
-         x.stride(0) * sizeof(X), x.base(), &params);
+         x.stride(0) * sizeof(X), x.base());
 
   check_results(op_info, a, b, c, x, a_quantization, b_quantization,
                 c_quantization, x_quantization);
@@ -164,29 +153,29 @@ const std::vector<Shape> all_shapes = []() {
   return shapes;
 }();
 
-#define YNN_ELEMENTWISE_KERNEL(arch_flags, kernel, op, init_params_fn, type_a, \
-                               type_b, type_c, type_x)                         \
+#define YNN_ELEMENTWISE_KERNEL(arch_flags, kernel, op, type_a, type_b, type_c, \
+                               type_x)                                         \
   class OpsTest_##kernel : public testing::TestWithParam<Shape> {};            \
                                                                                \
   TEST_P(OpsTest_##kernel, op) {                                               \
-    const KernelInfo kernel_info(arch_flags, kernel, init_params_fn);          \
+    const KernelInfo kernel_info(arch_flags, kernel);                          \
     const struct op op_info;                                                   \
     TestOp<type_a, type_b, type_c, type_x>(kernel_info, op_info, GetParam());  \
   }                                                                            \
   TEST_P(OpsTest_##kernel, op_broadcast_a) {                                   \
-    const KernelInfo kernel_info(arch_flags, kernel, init_params_fn);          \
+    const KernelInfo kernel_info(arch_flags, kernel);                          \
     const struct op op_info;                                                   \
     TestOpBroadcastA<type_a, type_b, type_c, type_x>(kernel_info, op_info,     \
                                                      GetParam());              \
   }                                                                            \
   TEST_P(OpsTest_##kernel, op_broadcast_b) {                                   \
-    const KernelInfo kernel_info(arch_flags, kernel, init_params_fn);          \
+    const KernelInfo kernel_info(arch_flags, kernel);                          \
     const struct op op_info;                                                   \
     TestOpBroadcastB<type_a, type_b, type_c, type_x>(kernel_info, op_info,     \
                                                      GetParam());              \
   }                                                                            \
   TEST_P(OpsTest_##kernel, op_broadcast_c) {                                   \
-    const KernelInfo kernel_info(arch_flags, kernel, init_params_fn);          \
+    const KernelInfo kernel_info(arch_flags, kernel);                          \
     const struct op op_info;                                                   \
     TestOpBroadcastC<type_a, type_b, type_c, type_x>(kernel_info, op_info,     \
                                                      GetParam());              \

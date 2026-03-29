@@ -19,7 +19,7 @@ namespace ynn {
 
 template <typename TA, typename TX>
 void bench(benchmark::State& state, uint64_t arch_flags, unary_kernel_fn kernel,
-           init_unary_params_fn init_params, TA, TX) {
+           TA, TX) {
   if (!is_arch_supported(arch_flags)) {
     state.SkipWithMessage("Unsupported hardware");
     return;
@@ -35,16 +35,9 @@ void bench(benchmark::State& state, uint64_t arch_flags, unary_kernel_fn kernel,
   broadcast_extent_1(a);
   broadcast_extent_1(x);
 
-  unary_params params;
-  if (init_params) {
-    // Use non-trivial quantization in case the kernel tries to optimize for
-    // that.
-    init_params(0.5f, 1, 2.0f, 3, params);
-  }
-
   for (auto _ : state) {
     kernel(m, n, a.stride(0) * sizeof(TA), a.base(), x.stride(0) * sizeof(TX),
-           x.base(), &params);
+           x.base());
   }
 
   const size_t ops = m * n;
@@ -56,14 +49,14 @@ void bench(benchmark::State& state, uint64_t arch_flags, unary_kernel_fn kernel,
                                                benchmark::Counter::kIsRate);
 }
 
+void bench_reference(benchmark::State& state, unary_kernel_fn kernel) {
+  return bench(state, arch_flag::none, kernel, float{}, float{});
+}
+
 template <typename TA, typename TX>
-void bench(benchmark::State& state, uint64_t arch_flags,
-           const unary_kernel* kernel, TA, TX) {
-  if (!kernel) {
-    state.SkipWithMessage("Unsupported hardware");
-    return;
-  }
-  bench(state, arch_flags, kernel->op, kernel->init_params, TA(), TX());
+void bench_reference_convert(benchmark::State& state, unary_kernel_fn kernel,
+                             TA, TX) {
+  return bench(state, arch_flag::none, kernel, TA{}, TX{});
 }
 
 template <typename A, typename X>
@@ -74,78 +67,63 @@ void Params(benchmark::Benchmark* b) {
   b->Args({16, 256});
 }
 
-#define BENCHMARK_REFERENCE(op, type)                                     \
-  BENCHMARK_CAPTURE(                                                      \
-      bench, reference_unary_##op##_##type, arch_flag::none,              \
-      get_unary_reference_kernel(ynn_unary_##op, type(), type()), type(), \
-      type())                                                             \
-      ->Apply(Params<type, type>)                                         \
+#define BENCHMARK_REFERENCE(op, type)                              \
+  BENCHMARK_CAPTURE(                                               \
+      bench_reference, op##_##type,                                \
+      get_unary_reference_kernel(ynn_unary_##op, type_of<type>())) \
+      ->Apply(Params<type, type>)                                  \
       ->UseRealTime();
 
-using qint8 = quantized<int8_t>;
-using quint8 = quantized<uint8_t>;
+BENCHMARK_REFERENCE(abs, float);
+BENCHMARK_REFERENCE(floor, float);
+BENCHMARK_REFERENCE(ceil, float);
+BENCHMARK_REFERENCE(round, float);
+BENCHMARK_REFERENCE(negate, float);
+BENCHMARK_REFERENCE(square, float);
+BENCHMARK_REFERENCE(square_root, float);
+BENCHMARK_REFERENCE(cube_root, float);
+BENCHMARK_REFERENCE(reciprocal_square_root, float);
+BENCHMARK_REFERENCE(log, float);
+BENCHMARK_REFERENCE(exp, float);
+BENCHMARK_REFERENCE(erf, float);
+BENCHMARK_REFERENCE(tanh, float);
+BENCHMARK_REFERENCE(sign, float);
+BENCHMARK_REFERENCE(sine, float);
+BENCHMARK_REFERENCE(cosine, float);
+BENCHMARK_REFERENCE(sigmoid, float);
+BENCHMARK_REFERENCE(hardswish, float);
 
-#define BENCHMARK_REFERENCE_REAL(op) \
-  BENCHMARK_REFERENCE(op, float);    \
-  BENCHMARK_REFERENCE(op, half);     \
-  BENCHMARK_REFERENCE(op, bfloat16); \
-  BENCHMARK_REFERENCE(op, qint8);    \
-  BENCHMARK_REFERENCE(op, quint8);
+BENCHMARK_REFERENCE(abs, int32_t);
+BENCHMARK_REFERENCE(negate, int32_t);
+BENCHMARK_REFERENCE(square, int32_t);
+BENCHMARK_REFERENCE(sign, int32_t);
 
-#define BENCHMARK_REFERENCE_INTEGER(op) BENCHMARK_REFERENCE(op, int32_t);
-
-BENCHMARK_REFERENCE_INTEGER(abs);
-BENCHMARK_REFERENCE_INTEGER(negate);
-BENCHMARK_REFERENCE_INTEGER(square);
-BENCHMARK_REFERENCE_INTEGER(sign);
-
-BENCHMARK_REFERENCE_REAL(abs);
-BENCHMARK_REFERENCE_REAL(floor);
-BENCHMARK_REFERENCE_REAL(ceil);
-BENCHMARK_REFERENCE_REAL(round);
-BENCHMARK_REFERENCE_REAL(negate);
-BENCHMARK_REFERENCE_REAL(square);
-BENCHMARK_REFERENCE_REAL(square_root);
-BENCHMARK_REFERENCE_REAL(cube_root);
-BENCHMARK_REFERENCE_REAL(reciprocal_square_root);
-BENCHMARK_REFERENCE_REAL(log);
-BENCHMARK_REFERENCE_REAL(exp);
-BENCHMARK_REFERENCE_REAL(erf);
-BENCHMARK_REFERENCE_REAL(tanh);
-BENCHMARK_REFERENCE_REAL(sign);
-BENCHMARK_REFERENCE_REAL(sine);
-BENCHMARK_REFERENCE_REAL(cosine);
-BENCHMARK_REFERENCE_REAL(sigmoid);
-BENCHMARK_REFERENCE_REAL(hardswish);
-
-#define BENCHMARK_REFERENCE_CONVERT(op, type_a, type_x)                   \
+#define BENCHMARK_REFERENCE_CONVERT(type_a, type_x)                       \
   BENCHMARK_CAPTURE(                                                      \
-      bench, reference_unary_##op##_##type_a##_##type_x, arch_flag::none, \
-      get_unary_reference_kernel(ynn_unary_##op, type_a(), type_x()),     \
+      bench_reference_convert, type_a##_##type_x,                         \
+      get_convert_reference_kernel(type_of<type_a>(), type_of<type_x>()), \
       type_a(), type_x())                                                 \
       ->Apply(Params<type_a, type_x>)                                     \
       ->UseRealTime();
 
-#define BENCHMARK_REFERENCE_CONVERT_FROM(type_a)          \
-  BENCHMARK_REFERENCE_CONVERT(convert, type_a, float);    \
-  BENCHMARK_REFERENCE_CONVERT(convert, type_a, half);     \
-  BENCHMARK_REFERENCE_CONVERT(convert, type_a, bfloat16); \
-  BENCHMARK_REFERENCE_CONVERT(convert, type_a, qint8);    \
-  BENCHMARK_REFERENCE_CONVERT(convert, type_a, quint8);   \
-  BENCHMARK_REFERENCE_CONVERT(convert, type_a, int32_t);
+#define BENCHMARK_REFERENCE_CONVERT_FROM(type_a) \
+  BENCHMARK_REFERENCE_CONVERT(type_a, float);    \
+  BENCHMARK_REFERENCE_CONVERT(type_a, half);     \
+  BENCHMARK_REFERENCE_CONVERT(type_a, bfloat16); \
+  BENCHMARK_REFERENCE_CONVERT(type_a, int8_t);   \
+  BENCHMARK_REFERENCE_CONVERT(type_a, uint8_t);  \
+  BENCHMARK_REFERENCE_CONVERT(type_a, int32_t);
 
 BENCHMARK_REFERENCE_CONVERT_FROM(float);
 BENCHMARK_REFERENCE_CONVERT_FROM(half);
 BENCHMARK_REFERENCE_CONVERT_FROM(bfloat16);
-BENCHMARK_REFERENCE_CONVERT_FROM(qint8);
-BENCHMARK_REFERENCE_CONVERT_FROM(quint8);
+BENCHMARK_REFERENCE_CONVERT_FROM(int8_t);
+BENCHMARK_REFERENCE_CONVERT_FROM(uint8_t);
 BENCHMARK_REFERENCE_CONVERT_FROM(int32_t);
 
-#define YNN_ELEMENTWISE_KERNEL(arch_flags, kernel, op, init_params_fn, type_a, \
-                               type_x)                                         \
-  BENCHMARK_CAPTURE(bench, kernel, arch_flags, kernel, init_params_fn,         \
-                    type_a(), type_x())                                        \
-      ->Apply(Params<type_a, type_x>)                                          \
+#define YNN_ELEMENTWISE_KERNEL(arch_flags, kernel, op, type_a, type_x)     \
+  BENCHMARK_CAPTURE(bench, kernel, arch_flags, kernel, type_a(), type_x()) \
+      ->Apply(Params<type_a, type_x>)                                      \
       ->UseRealTime();
 #include "ynnpack/kernels/unary/kernels.inc"
 #undef YNN_ELEMENTWISE_KERNEL

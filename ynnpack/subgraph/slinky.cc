@@ -99,7 +99,7 @@ slinky::interval_expr elementwise_bounds(slinky::var dim,
 }
 
 slinky::interval_expr all_bounds(const slinky::expr& extent) {
-  return extent.defined() ? slinky::min_extent(0, extent) : slinky::point(0);
+  return extent.defined() ? slinky::range(0, extent) : slinky::point(0);
 }
 
 // Make an array of bounds that is point(i) for i in dims in [begin, end).

@@ -38,11 +38,9 @@ bool has_multiple_inputs(const std::set<uint32_t>& relevant_values,
   return false;
 }
 
-std::optional<ynn_subgraph> clone_subgraph_subset(const ynn_subgraph& subgraph,
-                                                  uint32_t input_id,
-                                                  uint32_t output_id,
-                                                  uint32_t& cloned_input_id,
-                                                  uint32_t& cloned_output_id) {
+slinky::ref_count<ynn_subgraph> clone_subgraph_subset(
+    const ynn_subgraph& subgraph, uint32_t input_id, uint32_t output_id,
+    uint32_t& cloned_input_id, uint32_t& cloned_output_id) {
   assert(subgraph.is_valid_value(input_id));
   assert(subgraph.is_valid_value(output_id));
   assert(input_id != output_id);
@@ -89,17 +87,18 @@ std::optional<ynn_subgraph> clone_subgraph_subset(const ynn_subgraph& subgraph,
 
   if (relevant_values.find(input_id) == relevant_values.end()) {
     // The input is not connected to the output, so we can't clone it.
-    return std::nullopt;
+    return nullptr;
   }
 
   if (has_multiple_inputs(relevant_values, input_id, subgraph,
                           relevant_nodes)) {
     // Fail if there are multiple inputs connected to the output.
-    return std::nullopt;
+    return nullptr;
   }
 
   // Create new subgraph.
-  ynn_subgraph new_subgraph(/*external_value_ids=*/0, subgraph.flags);
+  slinky::ref_count<ynn_subgraph> new_subgraph =
+      new ynn_subgraph(/*external_value_ids=*/0, subgraph.flags);
   std::map<uint32_t, uint32_t> old_to_new_id;
 
   // Helper to clone values. Returns the ID of the new value.
@@ -108,7 +107,7 @@ std::optional<ynn_subgraph> clone_subgraph_subset(const ynn_subgraph& subgraph,
     if (old_to_new_id.count(old_id)) return old_to_new_id[old_id];
 
     // Create new value.
-    ynn_value& new_val = new_subgraph.new_internal_value();
+    ynn_value& new_val = new_subgraph->new_internal_value();
     const ynn_value& old_val = subgraph.value(old_id);
 
     // Copy all fields except quantization parameters. We'll handle those
@@ -154,7 +153,7 @@ std::optional<ynn_subgraph> clone_subgraph_subset(const ynn_subgraph& subgraph,
   for (uint32_t old_id : relevant_values) {
     uint32_t new_id = old_to_new_id[old_id];
     const ynn_value& old_val = subgraph.value(old_id);
-    ynn_value& new_val = new_subgraph.value(new_id);
+    ynn_value& new_val = new_subgraph->value(new_id);
     new_val.scale_id = clone_or_get_new_value(old_val.scale_id);
     new_val.zero_point_id = clone_or_get_new_value(old_val.zero_point_id);
   }
@@ -173,7 +172,7 @@ std::optional<ynn_subgraph> clone_subgraph_subset(const ynn_subgraph& subgraph,
         new_node.outputs.push_back(clone_or_get_new_value(old_out));
       }
 
-      new_subgraph.add_node(std::move(new_node));
+      new_subgraph->add_node(std::move(new_node));
     }
   }
 

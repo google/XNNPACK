@@ -29,10 +29,13 @@ ynn_status ynn_define_broadcast_like(ynn_subgraph_t subgraph, size_t num_axes,
                                      uint32_t template_id, uint32_t* output_id,
                                      uint32_t flags) {
   // Validate arguments.
-  assert(subgraph);
-  assert(subgraph->is_valid_value(input_id));
-  assert(subgraph->is_valid_value(template_id));
-  assert(output_id);
+  YNN_RETURN_IF_ERROR(validate_subgraph("broadcast_like", subgraph));
+  YNN_RETURN_IF_ERROR(
+      validate_input_tensor("broadcast_like", subgraph, "input_id", input_id));
+  YNN_RETURN_IF_ERROR(validate_input_tensor("broadcast_like", subgraph,
+                                            "template_id", template_id));
+  YNN_RETURN_IF_ERROR(validate_output_tensor("broadcast_like", subgraph,
+                                             "output_id", output_id));
   const ynn_value& input = subgraph->value(input_id);
   const ynn_value& template_value = subgraph->value(template_id);
   ynn::axes_set axes_set;

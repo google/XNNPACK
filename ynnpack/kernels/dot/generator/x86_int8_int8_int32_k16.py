@@ -70,19 +70,24 @@ __m128i c_{i+1}_{j} = _mm512_extracti32x4_epi32(c16_{i}_{j}, 1);
 """
 
   def load_a_tile(self, i, k):
+    a_x16 = f"_mm_loadu_si128({self.a_ptr(i, k, '__m128i')})"
     return (
         f"__m512i a_{i}_{k} ="
-        f" _mm512_cvtepi8_epi16(_mm256_broadcastsi128_si256(_mm_loadu_si128({self.a_ptr(i, k, '__m128i')})));\n"
+        f" _mm512_cvtepi8_epi16(_mm256_broadcastsi128_si256({a_x16}));\n"
     )
 
   def load_b_tile(self, k, j):
+    b0_ptr = self.b_ptr(k, j+0, "__m256i")
+    b2_ptr = self.b_ptr(k, j+2, "__m256i")
     return f"""
-__m512i b_{k}_{j+0} = _mm512_cvtepi8_epi16(_mm256_load_si256({self.b_ptr(k, j+0, '__m256i')}));
-__m512i b_{k}_{j+2} = _mm512_cvtepi8_epi16(_mm256_load_si256({self.b_ptr(k, j+2, '__m256i')}));
+__m512i b_{k}_{j+0} = _mm512_cvtepi8_epi16(_mm256_load_si256({b0_ptr}));
+__m512i b_{k}_{j+2} = _mm512_cvtepi8_epi16(_mm256_load_si256({b2_ptr}));
 """
 
   def product(self, i, j, k):
+    c_ij0 = f"c16_{i}_{j+0}"
+    c_ij2 = f"c16_{i}_{j+2}"
     return f"""
-c16_{i}_{j+0} = _mm512_add_epi32(c16_{i}_{j+0}, _mm512_madd_epi16(a_{i}_{k}, b_{k}_{j+0}));
-c16_{i}_{j+2} = _mm512_add_epi32(c16_{i}_{j+2}, _mm512_madd_epi16(a_{i}_{k}, b_{k}_{j+2}));
+{c_ij0} = _mm512_add_epi32({c_ij0}, _mm512_madd_epi16(a_{i}_{k}, b_{k}_{j+0}));
+{c_ij2} = _mm512_add_epi32({c_ij2}, _mm512_madd_epi16(a_{i}_{k}, b_{k}_{j+2}));
 """

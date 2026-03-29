@@ -214,6 +214,8 @@ SET(MICROKERNEL_GEMM_UNIT_TESTS
     qd8-f16-qc8w-gemm-minmax
     qd8-f32-qb4w-gemm-minmax
     qd8-f32-qc4w-gemm-minmax
+    qd8-f32-qc2w-gemm-minmax
+    qd8-f16-qc2w-gemm-minmax
     qd8-f32-qc8w-gemm-minmax
     qd8-f32-qc8w-igemm-minmax
     qp8-f32-qb4w-gemm-minmax
@@ -243,6 +245,7 @@ FOREACH(TEST ${MICROKERNEL_GEMM_UNIT_TESTS})
 ENDFOREACH()
 SHARD_TEST(qd8-f16-qc8w-gemm-minmax-test 10)
 SHARD_TEST(qd8-f32-qc4w-gemm-minmax-test 10)
+SHARD_TEST(qd8-f32-qc2w-gemm-minmax-test 10)
 SHARD_TEST(qd8-f32-qc8w-gemm-minmax-test 10)
 SHARD_TEST(qd8-f32-qc8w-igemm-minmax-test 10)
 SHARD_TEST(qs8-qc8w-gemm-minmax-fp32-test 10)
@@ -457,6 +460,12 @@ TARGET_LINK_LIBRARIES(fingerprint-cache-test PRIVATE
   xnnpack-fingerprint-id)
 ADD_TEST(NAME fingerprint-cache-test COMMAND fingerprint-cache-test)
 SET_TARGET_PROPERTIES(fingerprint-cache-test PROPERTIES CXX_EXTENSIONS YES)
+
+ADD_EXECUTABLE(polyfill-test polyfill.cc)
+TARGET_LINK_LIBRARIES(polyfill-test PRIVATE
+  xnnpack-test)
+ADD_TEST(NAME polyfill-test COMMAND polyfill-test)
+SET_TARGET_PROPERTIES(polyfill-test PROPERTIES CXX_EXTENSIONS YES)
 
 IF(XNNPACK_BUILD_LIBRARY)
   ADD_EXECUTABLE(weights-cache-test weights-cache.cc)

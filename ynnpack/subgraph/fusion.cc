@@ -17,6 +17,7 @@
 #include "ynnpack/include/ynnpack.h"
 #include "ynnpack/kernels/binary/binary.h"
 #include "ynnpack/kernels/ternary/ternary.h"
+#include "ynnpack/subgraph/copy.h"
 #include "ynnpack/subgraph/dot.h"
 #include "ynnpack/subgraph/elementwise.h"
 #include "ynnpack/subgraph/fusion_lut.h"
@@ -38,6 +39,55 @@ bool is_binary_node(const ynn_node& node, ynn_binary_operator op) {
   const ynn_node::binary_elementwise* binary =
       std::get_if<ynn_node::binary_elementwise>(&node.op);
   return binary && binary->op == op;
+}
+bool is_ternary_node(const ynn_node& node, ternary_op op) {
+  const ynn_node::ternary_elementwise* ternary =
+      std::get_if<ynn_node::ternary_elementwise>(&node.op);
+  return ternary && ternary->op == op;
+}
+
+bool is_square_node(const ynn_node& node) {
+  if (is_unary_node(node, ynn_unary_square)) {
+    return true;
+  } else if (is_binary_node(node, ynn_binary_multiply) &&
+             node.inputs[0] == node.inputs[1]) {
+    return true;
+  }
+  return false;
+}
+
+// Replace `from_id` with `to_id` in the subgraph, assuming `node` is the
+// producer of `from_id`. If `from_id` is an external output, replaces `node`
+// with a copy node from `to_id` to `from_id`, otherwise invalidates the node.
+// Returns true if `node` was made obsolete.
+bool replace_uses(subgraph_analysis& analysis, ynn_subgraph& subgraph,
+                  ynn_node& node, uint32_t from_id, uint32_t to_id) {
+  if (subgraph.value(from_id).is_external_output()) {
+    // The output is external. Can we rewrite the producer of the new value to
+    // produce this value instead?
+    if (!subgraph.value(to_id).is_external()) {
+      if (ynn_node* producer = analysis.producer_of(to_id)) {
+        // Redefine the producer of `to_id` to produce `from_id` instead.
+        for (uint32_t& o : producer->outputs) {
+          if (o == to_id) o = from_id;
+        }
+        // Update consumers of the producer.
+        replace_uses(analysis, subgraph, *producer, to_id, from_id);
+        return true;
+      }
+    }
+    YNN_LOG_DEBUG() << "Replacing node " << node.to_string() << " with copy";
+    ynn::define_copy(subgraph, node, to_id, from_id, /*flags=*/0);
+    return false;
+  } else {
+    YNN_LOG_DEBUG() << "Replacing uses of " << from_id << " with " << to_id;
+    for (ynn_node* consumer : analysis.consumers[from_id]) {
+      for (uint32_t& i : consumer->inputs) {
+        if (i == from_id) i = to_id;
+      }
+    }
+    return true;
+  }
 }
 
 // Rewrite add(multiply(a, b), c) to multiply_add(a, b, c)
@@ -140,6 +190,25 @@ bool rewrite_subtract_multiply(ynn_subgraph& subgraph, ynn_node& node,
   return false;
 }
 
+// Rewrite get_tensor_shape(unary(x)) to get_tensor_shape(x). This is useful
+// because unary(x) might otherwise be unused after another rewrite (e.g.
+// sum(square(x)) => sum_squared(x)).
+bool rewrite_get_tensor_shape_of_unary(ynn_subgraph& subgraph, ynn_node& node,
+                                       subgraph_analysis& analysis) {
+  if (!std::get_if<ynn_node::get_tensor_shape>(&node.op)) {
+    return false;
+  }
+  ynn_node* producer = analysis.producer_of(node.inputs[0]);
+  if (producer && std::get_if<ynn_node::unary_elementwise>(&producer->op)) {
+    // This is a get_tensor_shape of a unary elementwise op.
+    YNN_LOG_DEBUG() << "Rewriting get_tensor_shape(unary_elementwise(x)) to "
+                       "get_tensor_shape(x)";
+    node.inputs[0] = producer->inputs[0];
+    return true;
+  }
+  return false;
+}
+
 // Rewrite min(max(a, b), c) to clamp(a, b, c)
 bool rewrite_clamp(ynn_subgraph& subgraph, ynn_node& node,
                    subgraph_analysis& analysis) {
@@ -172,8 +241,11 @@ bool rewrite_clamp(ynn_subgraph& subgraph, ynn_node& node,
 }
 
 bool can_implicitly_broadcast(const ynn_node& node, uint32_t input_id) {
-  if (std::get_if<ynn_node::unary_elementwise>(&node.op) ||
-      std::get_if<ynn_node::binary_elementwise>(&node.op)) {
+  if (std::get_if<ynn_node::binary_elementwise>(&node.op)) {
+    return true;
+  } else if (std::get_if<ynn_node::ternary_elementwise>(&node.op)) {
+    // TODO: b/491453504 - Not all ternary ops can implicitly broadcast all
+    // operands.
     return true;
   }
   return false;
@@ -391,17 +463,7 @@ bool rewrite_reduce_sum_of_squared(ynn_subgraph& subgraph, ynn_node& node,
 
   ynn_node* mul_node =
       find_non_copy_producer(subgraph, analysis, node.inputs[0]);
-  if (mul_node == nullptr || !is_binary_node(*mul_node, ynn_binary_multiply)) {
-    return false;
-  }
-
-  if (mul_node->inputs[0] != mul_node->inputs[1]) {
-    return false;
-  }
-
-  uint32_t mul_output_id = mul_node->outputs[0];
-  if (analysis.consumers[mul_output_id].size() != 1 ||
-      subgraph.value(mul_output_id).is_external_output()) {
+  if (mul_node == nullptr || !is_square_node(*mul_node)) {
     return false;
   }
 
@@ -412,21 +474,31 @@ bool rewrite_reduce_sum_of_squared(ynn_subgraph& subgraph, ynn_node& node,
     return false;
   }
 
-  // Rewire multiply's consumers to use x directly. In the simple case
-  // (reduce directly consumes multiply) this updates node.inputs[0] to x_id.
-  // In the windowed case (copy ops in between) this splices out the
-  // multiply from the chain.
-  for (ynn_node* consumer : analysis.consumers[mul_output_id]) {
-    for (uint32_t& inp : consumer->inputs) {
-      if (inp == mul_output_id) {
-        inp = x_id;
-      }
+  uint32_t mul_output_id = mul_node->outputs[0];
+  if (mul_output_id != node.inputs[0]) {
+    // If there are intervening copy nodes, we need to rewrite the copy op to
+    // consume the multiply's input. We can only do this if the reduce is the
+    // only consumer of the copy, and the copy is the only consumer of the
+    // multiply. `find_non_copy_producer` checks that there are no other
+    // consumers of any output in this sequence of ops.
+    if (analysis.consumers[mul_output_id].size() != 1 ||
+        subgraph.value(mul_output_id).is_external_output()) {
+      return false;
     }
+
+    ynn_node* copy = analysis.consumers[mul_output_id].front();
+    assert(copy);
+    assert(analysis.consumers[copy->outputs[0]].size() == 1 &&
+        !subgraph.value(copy->outputs[0]).is_external_output());
+    copy->inputs[0] = mul_node->inputs[0];
+  } else {
+    // The reduce is consuming the multiply, just consume x instead.
+    node.inputs[0] = x_id;
   }
 
   YNN_LOG_DEBUG() << "Rewriting reduce_sum(x*x) to reduce_sum_squared(x)";
   ynn::define_reduce(subgraph, node, ynn_reduce_sum_squared, reduce_op->k_dims,
-                     node.inputs[0], node.inputs[1], node.outputs[0],
+                     node.inputs[0], node.inputs[1], &node.outputs[0],
                      reduce_op->keep_dims);
 
   return true;
@@ -470,7 +542,7 @@ bool rewrite_reduce_sum_convert(ynn_subgraph& subgraph, ynn_node& node,
 
   YNN_LOG_DEBUG() << "Rewriting reduce_sum(convert(x)) to reduce_sum(x)";
   ynn::define_reduce(subgraph, node, ynn_reduce_sum, reduce_op->k_dims, x.id,
-                     node.inputs[1], node.outputs[0], reduce_op->keep_dims);
+                     node.inputs[1], &node.outputs[0], reduce_op->keep_dims);
   return true;
 }
 
@@ -513,8 +585,96 @@ bool rewrite_reduce_sum_squared_convert(ynn_subgraph& subgraph, ynn_node& node,
   YNN_LOG_DEBUG() << "Rewriting reduce_sum_squared(convert(x)) to "
                      "reduce_sum_squared(x)";
   ynn::define_reduce(subgraph, node, ynn_reduce_sum_squared, reduce_op->k_dims,
-                     x.id, node.inputs[1], node.outputs[0],
+                     x.id, node.inputs[1], &node.outputs[0],
                      reduce_op->keep_dims);
+  return true;
+}
+
+bool fuse_converts(ynn_subgraph& subgraph, ynn_node& node,
+                   subgraph_analysis& analysis) {
+  const ynn_node::unary_elementwise* unary =
+      std::get_if<ynn_node::unary_elementwise>(&node.op);
+  if (unary == nullptr || unary->op != ynn_unary_convert) {
+    return false;
+  }
+
+  ynn_node* producer = analysis.producer_of(node.inputs[0]);
+  if (producer == nullptr || !is_unary_node(*producer, ynn_unary_convert)) {
+    return false;
+  }
+
+  const ynn_value& input = subgraph.value(producer->inputs[0]);
+  const ynn_value& output = subgraph.value(node.outputs[0]);
+  if (input.type != output.type) {
+    return false;
+  }
+
+  assert(producer->outputs[0] == node.inputs[0]);
+  const ynn_value& intermediate = subgraph.value(node.inputs[0]);
+  if (!is_convert_lossless(input.type, intermediate.type) &&
+      (subgraph.flags & YNN_FLAG_CONSISTENT_ARITHMETIC) != 0) {
+    // This conversion loses information, and the converts might have been
+    // inserted because we don't have a kernel for this type, which could vary
+    // depending on the machine we're running on.
+    // TODO(dsharlet): We could add a `round_to` operator for this case to fuse
+    // two operators into one.
+    YNN_LOG_DEBUG()
+        << "Not fusing converts because YNN_FLAG_CONSISTENT_ARITHMETIC is set.";
+    return false;
+  }
+
+  if (analysis.consumers[intermediate.id].size() != 1) {
+    // TODO: b/488394862 - We probably should rewrite even in this case, but it
+    // breaks dot bf16 rewrites until we can be explicit that we don't want this
+    // sequence of converts to be treated as a round_to_bf16 op.
+    return false;
+  }
+
+  if (replace_uses(analysis, subgraph, node, output.id, input.id)) {
+    node.invalidate();
+  }
+  return true;
+}
+
+bool fuse_quantize(ynn_subgraph& subgraph, ynn_node& node,
+                   subgraph_analysis& analysis) {
+  if (!is_ternary_node(node, ternary_op::dequantize)) {
+    return false;
+  }
+
+  ynn_node* producer = analysis.producer_of(node.inputs[0]);
+  if (producer == nullptr ||
+      (!is_ternary_node(*producer, ternary_op::quantize_int8) &&
+       !is_ternary_node(*producer, ternary_op::quantize_uint8))) {
+    return false;
+  }
+
+  if (node.inputs[1] != producer->inputs[2] ||
+      node.inputs[2] != producer->inputs[1]) {
+    return false;
+  }
+
+  const ynn_value& input = subgraph.value(producer->inputs[0]);
+  const ynn_value& output = subgraph.value(node.outputs[0]);
+  if (input.type != output.type) {
+    return false;
+  }
+
+  assert(producer->outputs[0] == node.inputs[0]);
+  if ((subgraph.flags & YNN_FLAG_CONSISTENT_ARITHMETIC) != 0) {
+    // This conversion loses information, and the converts might have been
+    // inserted because we don't have a kernel for this type, which could vary
+    // depending on the machine we're running on.
+    // TODO(dsharlet): We could add a `round_to` operator for this case to fuse
+    // two operators into one.
+    YNN_LOG_DEBUG() << "Not fusing quantization because "
+                       "YNN_FLAG_CONSISTENT_ARITHMETIC is set.";
+    return false;
+  }
+
+  if (replace_uses(analysis, subgraph, node, output.id, input.id)) {
+    node.invalidate();
+  }
   return true;
 }
 
@@ -531,22 +691,33 @@ ynn_status ynn_subgraph::fusion() {
     for (ynn_node& node : nodes) {
       if (!node.is_valid()) continue;
 
-      changed =
-          changed || ynn::rewrite_multiply_add(*this, node, analysis) ||
-          ynn::rewrite_multiply_multiply(*this, node, analysis) ||
-          ynn::rewrite_subtract_multiply(*this, node, analysis) ||
-          ynn::rewrite_clamp(*this, node, analysis) ||
-          ynn::remove_broadcast(*this, node, analysis) ||
-          ynn::rewrite_transpose_stencil_copy(*this, node, analysis) ||
-          ynn::rewrite_reduce_sum_of_squared(*this, node, analysis) ||
-          ynn::rewrite_reduce_sum_convert(*this, node, analysis) ||
-          ynn::rewrite_reduce_sum_squared_convert(*this, node, analysis);
+      changed = changed || ynn::rewrite_multiply_add(*this, node, analysis) ||
+                ynn::rewrite_multiply_multiply(*this, node, analysis) ||
+                ynn::rewrite_subtract_multiply(*this, node, analysis) ||
+                ynn::rewrite_get_tensor_shape_of_unary(*this, node, analysis) ||
+                ynn::rewrite_clamp(*this, node, analysis) ||
+                ynn::remove_broadcast(*this, node, analysis) ||
+                ynn::rewrite_transpose_stencil_copy(*this, node, analysis) ||
+                ynn::rewrite_reduce_sum_of_squared(*this, node, analysis) ||
+                ynn::rewrite_reduce_sum_convert(*this, node, analysis) ||
+                ynn::rewrite_reduce_sum_squared_convert(*this, node, analysis);
     }
   } while (changed);
 
   do {
     subgraph_analysis analysis(*this);
     changed = ynn::rewrite_subgraph_for_unary_lut(*this, analysis);
+  } while (changed);
+
+  do {
+    subgraph_analysis analysis(*this);
+    changed = false;
+    for (ynn_node& node : nodes) {
+      if (!node.is_valid()) continue;
+
+      changed = changed || ynn::fuse_converts(*this, node, analysis) ||
+                ynn::fuse_quantize(*this, node, analysis);
+    }
   } while (changed);
 
   return ynn_status_success;

@@ -60,7 +60,7 @@ static void f16_raddstoreexpminusmax(
     }
     state.ResumeTiming();
 
-    xnn_float16 y_sum;
+    float y_sum;
     raddstoreexpminusmax(elements * sizeof(xnn_float16), x.data(), &x_max,
                          y.data() + buffer_index * packed_elements, &y_sum,
                          nullptr);

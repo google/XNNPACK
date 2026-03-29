@@ -42,7 +42,7 @@ static s32x16 reduce_add(
 static s32x64 reduce_add(
     s32x64 a, u8x64 b, Square /*map_fn*/,
     std::integral_constant<size_t, 1> /*horizontal_factor*/) {
-  s32x64 b_s32 = convert(b, int32_t{});
+  s32x64 b_s32 = cast(b, int32_t{});
 
   // madd_epi16 works due to extra zeros from uint8 -> int32 conversion.
   a[0][0] += s32x16{_mm512_madd_epi16(b_s32[0][0].v, b_s32[0][0].v)};
@@ -97,7 +97,7 @@ static f32x16 reduce_add(
 static f32x32 reduce_add(
     f32x32 a, bf16x32 b, Square /*map_fn*/,
     std::integral_constant<size_t, 1> /*horizontal_factor*/) {
-  f32x32 b_f32 = convert(b, float{});
+  f32x32 b_f32 = cast(b, float{});
   return fma(b_f32, b_f32, a);
 }
 
@@ -116,14 +116,14 @@ static f32x16 reduce_add(
 static f32x32 reduce_add(
     f32x32 a, f16x32 b, Square /*map_fn*/,
     std::integral_constant<size_t, 1> /*horizontal_factor*/) {
-  f32x32 b_f32 = convert(b, float{});
+  f32x32 b_f32 = cast(b, float{});
   return fma(b_f32, b_f32, a);
 }
 
 static f32x16 reduce_add(
     f32x16 a, f16x16 b, Square /*map_fn*/,
     std::integral_constant<size_t, 1> /*horizontal_factor*/) {
-  f32x16 b_f32 = convert(b, float{});
+  f32x16 b_f32 = cast(b, float{});
   return fma(b_f32, b_f32, a);
 }
 

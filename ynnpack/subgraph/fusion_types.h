@@ -21,6 +21,10 @@ struct subgraph_analysis {
     auto i = producers.find(id);
     return i != producers.end() ? i->second : nullptr;
   }
+  const ynn_node* producer_of(uint32_t id) const {
+    auto i = producers.find(id);
+    return i != producers.end() ? i->second : nullptr;
+  }
 
   explicit subgraph_analysis(ynn_subgraph& subgraph);
 };

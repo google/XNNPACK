@@ -22,7 +22,7 @@ namespace simd {
 static s32x16 reduce_add(
     s32x16 a, u8x16 b, Square /*map_fn*/,
     std::integral_constant<size_t, 1> /*horizontal_factor*/) {
-  s32x16 b_s32 = convert(b, int32_t{});
+  s32x16 b_s32 = cast(b, int32_t{});
 
   // madd_epi16 works due to extra zeros from uint8 -> int32 conversion.
   a += s32x16{{s32x4{_mm_madd_epi16(b_s32[0][0].v, b_s32[0][0].v)},

@@ -1,0 +1,87 @@
+// Copyright 2026 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert LMUL >= 1
+$assert OP in ["MAX", "MIN"]
+$assert DATATYPE in ["S8", "U8"]
+#include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
+
+#include <riscv_vector.h>
+
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/reduce.h"
+
+$if DATATYPE == "S8":
+  $VTYPE = "vint8"
+  $VLOAD = "__riscv_vle8_v_i8"
+  $VMIN = "__riscv_vmin"
+  $VMAX = "__riscv_vmax"
+$elif DATATYPE == "U8":
+  $VTYPE = "vuint8"
+  $VLOAD = "__riscv_vle8_v_u8"
+  $VMIN = "__riscv_vminu"
+  $VMAX = "__riscv_vmaxu"
+
+$EMIT_MIN = "MIN" in OP
+$EMIT_MAX = "MAX" in OP
+$XINT8_T = {"S8": "int8_t", "U8": "uint8_t"}[DATATYPE]
+void xnn_${DATATYPE.lower()}_rd${OP.lower()}_ukernel_${ACCUMULATORS}p${ACCUMULATORS}x__rvv_u${LMUL}v(
+    size_t rows,
+    size_t channels,
+    const ${XINT8_T}* input,
+    size_t input_stride,
+    const ${XINT8_T}* zero,
+    ${XINT8_T}* output,
+    const void* params)
+{
+  assert(rows != 0);
+  assert(channels != 0);
+  assert(input != NULL);
+  assert(output != NULL);
+
+  size_t input_increment = ${ACCUMULATORS} * input_stride;
+
+  do {
+    size_t vl = __riscv_vsetvl_e8m${LMUL}(channels);
+
+    const ${XINT8_T}* i0 = input;
+    $for ACC in range(1, ACCUMULATORS):
+      const ${XINT8_T}* i${ACC} = (const ${XINT8_T}*) ((uintptr_t) input + ${ACC} * input_stride);
+
+    $if EMIT_MIN:
+      ${VTYPE}m${LMUL}_t vmin = ${VLOAD}m${LMUL}(output, vl);
+    $if EMIT_MAX:
+      ${VTYPE}m${LMUL}_t vmax = ${VLOAD}m${LMUL}(output, vl);
+
+    for (int r = rows; r > 0; r -= ${ACCUMULATORS}) {
+      $for ACC in range(1, ACCUMULATORS):
+        if XNN_UNPREDICTABLE(r < ${ACC+1}) {
+          i${ACC} = i${ACC - 1};
+        }
+      $for ACC in range(ACCUMULATORS):
+        ${VTYPE}m${LMUL}_t vin_${ACC} = ${VLOAD}m${LMUL}(i${ACC}, vl);
+
+      $for ACC in range(ACCUMULATORS):
+        $if EMIT_MIN:
+          vmin = ${VMIN}(vmin, vin_${ACC}, vl);
+        $if EMIT_MAX:
+          vmax = ${VMAX}(vmax, vin_${ACC}, vl);
+
+      $for ACC in range(0, ACCUMULATORS):
+        i${ACC} = (${XINT8_T}*) ((uintptr_t) i${ACC} + input_increment);
+    }
+
+    $if EMIT_MIN:
+      __riscv_vse8(output, vmin, vl);
+    $if EMIT_MAX:
+      __riscv_vse8(output, vmax, vl);
+
+    output = (${XINT8_T}*) ((uintptr_t) output + vl * sizeof(${XINT8_T}));
+    input = (${XINT8_T}*) ((uintptr_t) input + vl * sizeof(${XINT8_T}));
+    channels -= vl;
+  } while (channels > 0);
+}

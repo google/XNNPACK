@@ -30,6 +30,8 @@ SET(PROD_AVX2_MICROKERNEL_SRCS
   src/f32-vsigmoid/gen/f32-vsigmoid-avx2-rr1-p5-div-u16.c
   src/qd8-f16-qb4w-gemm/gen/qd8-f16-qb4w-gemm-1x8c8-minmax-avx2.c
   src/qd8-f16-qb4w-gemm/gen/qd8-f16-qb4w-gemm-3x8c8-minmax-avx2.c
+  src/qd8-f16-qc2w-gemm/gen/qd8-f16-qc2w-gemm-1x8c8-minmax-avx2-madd.c
+  src/qd8-f16-qc2w-gemm/gen/qd8-f16-qc2w-gemm-8x8c8-minmax-avx2-madd.c
   src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-1x8c8-minmax-avx2-madd-prfm.c
   src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-4x8c8-minmax-avx2-madd-prfm.c
   src/qd8-f16-qc8w-gemm/gen/qd8-f16-qc8w-gemm-1x8c8-minmax-avx2.c
@@ -258,6 +260,12 @@ SET(NON_PROD_AVX2_MICROKERNEL_SRCS
   src/f32-vsigmoid/gen/f32-vsigmoid-avx2-rr1-p5-nr2fma-u32.c
   src/qd8-f16-qb4w-gemm/gen/qd8-f16-qb4w-gemm-2x8c8-minmax-avx2.c
   src/qd8-f16-qb4w-gemm/gen/qd8-f16-qb4w-gemm-4x8c8-minmax-avx2.c
+  src/qd8-f16-qc2w-gemm/gen/qd8-f16-qc2w-gemm-2x8c8-minmax-avx2-madd.c
+  src/qd8-f16-qc2w-gemm/gen/qd8-f16-qc2w-gemm-3x8c8-minmax-avx2-madd.c
+  src/qd8-f16-qc2w-gemm/gen/qd8-f16-qc2w-gemm-4x8c8-minmax-avx2-madd.c
+  src/qd8-f16-qc2w-gemm/gen/qd8-f16-qc2w-gemm-5x8c8-minmax-avx2-madd.c
+  src/qd8-f16-qc2w-gemm/gen/qd8-f16-qc2w-gemm-6x8c8-minmax-avx2-madd.c
+  src/qd8-f16-qc2w-gemm/gen/qd8-f16-qc2w-gemm-7x8c8-minmax-avx2-madd.c
   src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-1x8c8-minmax-avx2-madd.c
   src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-1x8c8-minmax-avx2.c
   src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-2x8c8-minmax-avx2-madd-prfm.c

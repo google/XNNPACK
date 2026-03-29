@@ -3,11 +3,11 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include <algorithm>
 #include <cassert>
 #include <cstddef>
 #include <cstdint>
 #include <functional>
+#include <memory>
 #include <utility>
 #include <vector>
 
@@ -30,14 +30,20 @@ ynn_status ynn_define_static_pad(ynn_subgraph_t subgraph, size_t num_axes,
                                  uint32_t input_id, uint32_t padding_id,
                                  uint32_t* output_id, uint32_t flags) {
   // Validate arguments.
-  assert(subgraph);
-  assert(subgraph->is_valid_value(input_id));
-  assert(output_id);
+  YNN_RETURN_IF_ERROR(validate_subgraph("static_pad", subgraph));
+  YNN_RETURN_IF_ERROR(
+      validate_input_tensor("static_pad", subgraph, "input_id", input_id));
+  YNN_RETURN_IF_ERROR(validate_input_tensor(
+      "static_pad", subgraph, "padding_id", padding_id, /*optional=*/true));
+  YNN_RETURN_IF_ERROR(
+      validate_output_tensor("static_pad", subgraph, "output_id", output_id));
   const ynn_value& input = subgraph->value(input_id);
 
   ynn_node::static_pad op;
   op.paddings.reserve(num_axes);
   for (size_t i = 0; i < num_axes; ++i) {
+    YNN_RETURN_IF_ERROR(
+        validate_axis("static_pad", "input", input.rank(), axes[i]));
     if (pre_paddings[i] != 0 || post_paddings[i] != 0) {
       op.paddings.push_back({ynn::axis_to_slinky_dim(input.rank(), axes[i]),
                              pre_paddings[i], post_paddings[i]});
@@ -82,8 +88,7 @@ ynn_status ynn_define_static_pad(ynn_subgraph_t subgraph, size_t num_axes,
     for (const ynn_node::static_pad::padding& p : op.paddings) {
       func_input.bounds[p.axis] -= p.pre_padding;
       if (input.extents[p.axis].defined()) {
-        func_input.input_crop[p.axis] =
-            slinky::min_extent(0, input.extents[p.axis]);
+        func_input.input_crop[p.axis] = all_bounds(input.extents[p.axis]);
       }
     }
 

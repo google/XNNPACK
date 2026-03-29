@@ -418,13 +418,14 @@ class Tensor {
   }
 
   // Copy the contents from other to this. The extents must match.
-  void assign(const Tensor<T>& other) {
+  template <typename U>
+  void assign(const Tensor<U>& other) {
     assert(rank() == other.rank());
     for (size_t i = 0; i < rank(); ++i) {
       assert(other.stride(i) == 0 || other.extent(i) == extent(i));
     }
-    copy_impl(rank(), extents_.data(), other.strides_.data(), other.base(),
-              strides_.data(), base());
+    copy_impl(rank(), extents().data(), other.strides().data(), other.base(),
+              strides().data(), base());
   }
 
   // Make a copy of the buffer. The result will be contiguous, i.e. the strides
@@ -449,8 +450,9 @@ class Tensor {
   }
 
  private:
+  template <typename From>
   static void copy_impl(size_t rank, const size_t* extents,
-                        const size_t* src_strides, const T* src,
+                        const size_t* src_strides, const From* src,
                         const size_t* dst_strides, T* dst) {
     if (rank == 0) {
       *dst = *src;

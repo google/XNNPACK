@@ -52,14 +52,6 @@ static enum xnn_status check_zero_point(
   int32_t zero_point)
 {
   switch (datatype) {
-    case xnn_datatype_qcint2:
-      if (zero_point != 0) {
-        xnn_log_error(
-          "failed to create Quantized Dense Tensor value: invalid zero point %" PRId32" outside the [0, 0] range",
-          zero_point);
-        return xnn_status_invalid_parameter;
-      }
-      break;
     case xnn_datatype_qcint4:
     case xnn_datatype_qbint4:
       if (zero_point < 0 || zero_point > 15) {
@@ -69,7 +61,6 @@ static enum xnn_status check_zero_point(
         return xnn_status_invalid_parameter;
       }
       break;
-    case xnn_datatype_qcint8:
     case xnn_datatype_qint8:
       if ((int32_t) (int8_t) zero_point != zero_point) {
         xnn_log_error(
@@ -86,6 +77,8 @@ static enum xnn_status check_zero_point(
         return xnn_status_invalid_parameter;
       }
       break;
+    case xnn_datatype_qcint2:
+    case xnn_datatype_qcint8:
     case xnn_datatype_qcint32:
     case xnn_datatype_qint32:
       if (zero_point != 0) {
@@ -542,6 +535,7 @@ enum xnn_status xnn_define_blockwise_quantized_tensor_value_v2(
         "failed to create Blockwise Quantized Dense Tensor value: block size "
         "is invalid. Got %zu\n",
         block_size);
+    return xnn_status_invalid_parameter;
   }
 
   enum xnn_status status = check_zero_point(datatype, zero_point);

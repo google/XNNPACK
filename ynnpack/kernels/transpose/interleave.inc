@@ -55,6 +55,13 @@ YNN_INTERLEAVE_KERNEL(arch_flag::hvx, interleave4_x16_hvx, 4, 16)
 YNN_INTERLEAVE_KERNEL(arch_flag::hvx, interleave4_x32_hvx, 4, 32)
 #endif  // YNN_ARCH_HEXAGON_HVX
 
+YNN_INTERLEAVE_KERNEL(arch_flag::none, interleave2_x4, 2, 4)
+YNN_INTERLEAVE_KERNEL(arch_flag::none, interleave2_x8, 2, 8)
+YNN_INTERLEAVE_KERNEL(arch_flag::none, interleave2_x16, 2, 16)
+YNN_INTERLEAVE_KERNEL(arch_flag::none, interleave2_x32, 2, 32)
+YNN_INTERLEAVE_KERNEL(arch_flag::none, interleave4_x4, 4, 4)
+YNN_INTERLEAVE_KERNEL(arch_flag::none, interleave4_x8, 4, 8)
+
 YNN_INTERLEAVE_KERNEL(arch_flag::none, interleave_x4, 0, 4)
 YNN_INTERLEAVE_KERNEL(arch_flag::none, interleave_x8, 0, 8)
 YNN_INTERLEAVE_KERNEL(arch_flag::none, interleave_x16, 0, 16)

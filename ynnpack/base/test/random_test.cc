@@ -22,8 +22,8 @@ struct Stats {
   int inf_count = 0;
   int nan_count = 0;
   int subnormal_count = 0;
-  float min = std::numeric_limits<float>::infinity();
-  float max = -std::numeric_limits<float>::infinity();
+  double min = std::numeric_limits<double>::infinity();
+  double max = -std::numeric_limits<double>::infinity();
 };
 
 constexpr int kSamples = 1000000;
@@ -38,7 +38,7 @@ Stats RunFillRandom(Args... args) {
     T data[chunk_size];
     fill_random(data, chunk_size, rng, args...);
     for (int i = 0; i < std::min(chunk_size, n); ++i) {
-      float x = data[i];
+      double x = data[i];
       results.min = std::min(results.min, x);
       results.max = std::max(results.max, x);
 
@@ -62,7 +62,7 @@ Stats RunFillRandom(Args... args) {
 }
 
 template <typename T, typename... Args>
-void TestFillRandomFloats(float min, float max, Args... args) {
+void TestFillRandomFloats(double min, double max, Args... args) {
   Stats results = RunFillRandom<T>(args...);
 
   EXPECT_LE(results.min, min);
@@ -76,8 +76,8 @@ void TestFillRandomFloats(float min, float max, Args... args) {
 
 template <typename T>
 void TestFillRandomFloats() {
-  const float min = type_info<T>::min();
-  const float max = type_info<T>::max();
+  const double min = type_info<T>::min();
+  const double max = type_info<T>::max();
 
   // In these cases, we generate floats with a uniformly distributed exponent.
   TestFillRandomFloats<T>(min * 0.5f, max * 0.5f);
@@ -90,6 +90,7 @@ void TestFillRandomFloats() {
   TestFillRandomFloats<T>(-9.9f, 9.9f, -10.0f, 10.0f);
 }
 
+TEST(TypeGenerator, double) { TestFillRandomFloats<double>(); }
 TEST(TypeGenerator, float) { TestFillRandomFloats<float>(); }
 TEST(TypeGenerator, half) { TestFillRandomFloats<half>(); }
 TEST(TypeGenerator, bfloat16) { TestFillRandomFloats<bfloat16>(); }

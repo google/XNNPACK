@@ -24,5 +24,10 @@ class arm_neonfma : public ::testing::Test {
 
 TEST_FMA(arm_neonfma, f32, 4);
 
+TEST_FLOOR(arm_neonfma, f32, 4);
+TEST_CEIL(arm_neonfma, f32, 4);
+TEST_ROUND(arm_neonfma, f32, 4);
+TEST_SQRT(arm_neonfma, f32, 4);
+
 }  // namespace simd
 }  // namespace ynn

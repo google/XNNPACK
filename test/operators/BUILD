@@ -264,6 +264,7 @@ xnnpack_unit_test(
     srcs = [
         "reduce-nd.cc",
     ],
+    shard_count = 5,
     deps = OPERATOR_TEST_DEPS + [
         "//:requantization",
     ],

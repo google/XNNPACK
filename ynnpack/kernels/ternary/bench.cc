@@ -19,8 +19,7 @@ namespace ynn {
 
 template <typename A, typename B, typename C, typename X>
 void bench(benchmark::State& state, uint64_t arch_flags,
-           ternary_kernel_fn kernel, init_ternary_params_fn init_params, A, B,
-           C, X) {
+           ternary_kernel_fn kernel, A, B, C, X) {
   if (!is_arch_supported(arch_flags)) {
     state.SkipWithMessage("Unsupported hardware");
     return;
@@ -43,18 +42,11 @@ void bench(benchmark::State& state, uint64_t arch_flags,
   broadcast_extent_1(b);
   broadcast_extent_1(c);
 
-  ternary_params params;
-  if (init_params) {
-    // Use non-trivial quantization in case the kernel tries to optimize for
-    // that.
-    init_params(0.5f, 1, 0.25f, 2, 0.75f, 3, 2.0f, 3, params);
-  }
-
   for (auto _ : state) {
     kernel(m, n, a.stride(0) * sizeof(A), a.stride(1) * sizeof(A), a.base(),
            b.stride(0) * sizeof(B), b.stride(1) * sizeof(B), b.base(),
            c.stride(0) * sizeof(C), c.stride(1) * sizeof(C), c.base(),
-           x.stride(0) * sizeof(X), x.base(), &params);
+           x.stride(0) * sizeof(X), x.base());
   }
 
   const size_t ops = m * n;
@@ -66,16 +58,6 @@ void bench(benchmark::State& state, uint64_t arch_flags,
                         sizeof(B) * !broadcast_b + sizeof(C) * !broadcast_c);
   state.counters["Bytes"] = benchmark::Counter(state.iterations() * bytes,
                                                benchmark::Counter::kIsRate);
-}
-
-template <typename T>
-void bench(benchmark::State& state, uint64_t arch_flags,
-           const ternary_kernel* kernel, T) {
-  if (!kernel) {
-    state.SkipWithMessage("Unsupported hardware");
-    return;
-  }
-  bench(state, arch_flags, kernel->op, kernel->init_params, T(), T(), T(), T());
 }
 
 template <typename A, typename B, typename C, typename X>
@@ -92,10 +74,10 @@ void Params(benchmark::Benchmark* b) {
   b->Args({16, 256, 0, 0, 1});
 }
 
-#define YNN_ELEMENTWISE_KERNEL(arch_flags, kernel, op, init_params_fn, type_a, \
-                               type_b, type_c, type_x)                         \
-  BENCHMARK_CAPTURE(bench, kernel, arch_flags, kernel, init_params_fn,         \
-                    type_a(), type_b(), type_c(), type_x())                    \
+#define YNN_ELEMENTWISE_KERNEL(arch_flags, kernel, op, type_a, type_b, type_c, \
+                               type_x)                                         \
+  BENCHMARK_CAPTURE(bench, kernel, arch_flags, kernel, type_a(), type_b(),     \
+                    type_c(), type_x())                                        \
       ->Apply(Params<type_a, type_b, type_c, type_x>)                          \
       ->UseRealTime();
 #include "ynnpack/kernels/ternary/kernels.inc"

@@ -62,10 +62,30 @@ float Tolerance(ynn_reduce_operator op, size_t k, float max_abs_value) {
 }
 
 template <typename A, typename C>
+void ReferenceImpl(ynn_reduce_operator op, const Tensor<A>& a,
+                   Tensor<C>& c) {
+  if ((op == ynn_reduce_sum || op == ynn_reduce_sum_squared) &&
+       !std::is_same<C, float>::value && !std::is_same<C, int32_t>::value) {
+    // Compute sum and sum_squared with extra precision.
+    Tensor<float> c_float(c.extents());
+    c_float.assign(c);
+    ReferenceImpl(op, a, c_float);
+    c.assign(c_float);
+  } else {
+    auto op_impl = GetReferenceOp<C>(op);
+    broadcast_extent_1(c);
+    for (const auto& i : EnumerateIndices(a.shape())) {
+      c(i) = op_impl(c(i), a(i));
+    }
+  }
+}
+
+template <typename A, typename C>
 void TestReduce(A, C, ynn_reduce_operator op) {
   ReplicableRandomDevice rng;
   std::uniform_int_distribution<size_t> rank_dist(1, YNN_MAX_TENSOR_RANK);
   std::bernoulli_distribution random_bool(0.5);
+  std::bernoulli_distribution empty_shape_dist(0.01f);
 
   const float max_abs_value = 10.0f;
 
@@ -110,6 +130,9 @@ void TestReduce(A, C, ynn_reduce_operator op) {
       std::vector<size_t> c_shape = a_shape;
       size_t num_k_elements = 1;
       for (int32_t i : reduce_axes) {
+        if (empty_shape_dist(rng)) {
+          a_shape[i] = 0;
+        }
         num_k_elements *= a_shape[i];
         c_shape[i] = 1;
       }
@@ -119,11 +142,11 @@ void TestReduce(A, C, ynn_reduce_operator op) {
 
       runtime.ReshapeExternalTensor(a_shape, a.data(), a_id);
 
-      Tensor<C> expected(c_shape);
+      Tensor<C> c(c_shape);
       if (init_c) {
-        expected.fill(init_value);
+        c.fill(init_value);
       } else {
-        fill_random(expected.data(), expected.size(), rng, -max_abs_value,
+        fill_random(c.data(), c.size(), rng, -max_abs_value,
                     max_abs_value);
       }
 
@@ -136,7 +159,7 @@ void TestReduce(A, C, ynn_reduce_operator op) {
         }
       }
 
-      Tensor<C> c = expected.deep_copy();
+      Tensor<C> expected = c.deep_copy();
       if (!init_c) {
         std::vector<size_t> b_shape = c_shape;
         runtime.ReshapeExternalTensor(expected_shape, c.data(), c_id);
@@ -150,11 +173,7 @@ void TestReduce(A, C, ynn_reduce_operator op) {
       ASSERT_EQ(runtime.Status(), ynn_status_success);
 
       // Compute the reference result.
-      auto op_impl = GetReferenceOp<C>(op);
-      broadcast_extent_1(expected);
-      for (const auto& i : EnumerateIndices(a_shape)) {
-        expected(i) = op_impl(expected(i), a(i));
-      }
+      ReferenceImpl(op, a, expected);
 
       // Verify results.
       for (const auto& i : EnumerateIndices(c_shape)) {
@@ -182,7 +201,8 @@ TEST_P(Reduce, Test) {
 INSTANTIATE_TEST_SUITE_P(
     Sum, Reduce,
     testing::Combine(testing::Values(ynn_reduce_sum),
-                     testing::Values(multi_type::fp32, multi_type::fp16_fp32,
+                     testing::Values(multi_type::fp32, multi_type::fp16,
+                                     multi_type::bf16, multi_type::fp16_fp32,
                                      multi_type::bf16_fp32,
                                      multi_type::int8_int32,
                                      multi_type::uint8_int32)),
@@ -205,6 +225,7 @@ void TestMinMax(T) {
   ReplicableRandomDevice rng;
   std::uniform_int_distribution<size_t> rank_dist(1, YNN_MAX_TENSOR_RANK - 1);
   std::bernoulli_distribution random_bool(0.5);
+  std::bernoulli_distribution empty_shape_dist(0.01f);
 
   const float max_abs_value = 10.0f;
 
@@ -248,6 +269,9 @@ void TestMinMax(T) {
       std::vector<size_t> a_shape = random_shape(rng, input_rank);
       std::vector<size_t> c_shape = a_shape;
       for (int32_t i : reduce_axes) {
+        if (empty_shape_dist(rng)) {
+          a_shape[i] = 0;
+        }
         c_shape[i] = 1;
       }
       c_shape.insert(c_shape.begin(), 2);
