@@ -1,8 +1,8 @@
 """X86 target for elementwise kernels compiler."""
 
 # pylint: disable=undefined-variable
-from ynnpack.kernels.elementwise.common_rules import *  # pylint: disable=wildcard-import
 from ynnpack.kernels.elementwise.compiler import *  # pylint: disable=wildcard-import
+from ynnpack.kernels.elementwise.rules import *  # pylint: disable=wildcard-import
 
 
 def make_x86_cast_patterns():

@@ -10,9 +10,9 @@ py_library(
     name = "generator",
     srcs = [
         "arm.py",
-        "common_rules.py",
         "compiler.py",
         "generator.py",
+        "rules.py",
         "x86.py",
     ],
     tags = ["manual"],

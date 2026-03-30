@@ -1,8 +1,8 @@
 """ARM NEON target for elementwise kernels compiler."""
 
 # pylint: disable=undefined-variable
-from ynnpack.kernels.elementwise.common_rules import *  # pylint: disable=wildcard-import
 from ynnpack.kernels.elementwise.compiler import *  # pylint: disable=wildcard-import
+from ynnpack.kernels.elementwise.rules import *  # pylint: disable=wildcard-import
 
 
 def make_neon_cast_patterns():
