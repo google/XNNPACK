@@ -13,6 +13,7 @@ py_library(
         "compiler.py",
         "generator.py",
         "rules.py",
+        "wasm.py",
         "x86.py",
     ],
     tags = ["manual"],

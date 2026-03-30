@@ -65,6 +65,17 @@ def main(argv: Sequence[str]) -> None:
           (max_fp32, (8, 1)),
           (min_fp32, (8, 1)),
       ],
+      "wasm_simd128": [
+          (add_fp32, (8, 1)),
+          (subtract_fp32, (8, 1)),
+          (multiply_fp32, (8, 1)),
+          # (multiply_int32_fp32, (8, 1)),
+          (divide_fp32, (8, 1)),
+          (copysign_fp32, (8, 1)),
+          (max_fp32, (8, 1)),
+          (min_fp32, (8, 1)),
+      ],
+
   }[target]
 
   generate_elementwise_kernels(output_src, output_inc, target, kernels)
