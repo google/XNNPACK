@@ -5,23 +5,11 @@ from ynnpack.kernels.elementwise.compiler import *  # pylint: disable=wildcard-i
 from ynnpack.kernels.elementwise.rules import *  # pylint: disable=wildcard-import
 
 
-def make_x86_cast_patterns():
-  """Adds x86 cast patterns."""
-
-  return add_saturating_cast_rules()
-
-
-def make_x86_integer_patterns():
-  return add_shift_rules()
-
-
 class X86(Target):
   """X86 target for elementwise kernels compiler."""
 
   def update_for_sse2(self):
     """Updates the target for SSE2 support."""
-    self.patterns += make_x86_integer_patterns()
-    self.patterns += make_x86_cast_patterns()
     self.header += """
 namespace ynn {
 namespace {
@@ -53,8 +41,6 @@ YNN_INTRINSIC ynn::simd::vec<float, 8> select_greater_than(ynn::simd::vec<float,
 
   def update_for_avx2(self):
     """Updates the target for AVX2 support."""
-    self.patterns += make_x86_integer_patterns()
-    self.patterns += make_x86_cast_patterns()
 
   def update_for_fma3(self):
     """Updates the target for FMA3 support."""
@@ -66,8 +52,6 @@ YNN_INTRINSIC ynn::simd::vec<float, 8> select_greater_than(ynn::simd::vec<float,
   def update_for_avx512f(self):
     """Updates the target for AVX512F support."""
     self.patterns += add_fma_rules()
-    self.patterns += make_x86_integer_patterns()
-    self.patterns += make_x86_cast_patterns()
     self.header += """
 namespace ynn {
 namespace {
@@ -89,6 +73,9 @@ YNN_INTRINSIC ynn::simd::vec<float, 16> select_greater_than(ynn::simd::vec<float
   def __init__(self, features):
     Target.__init__(self)
     self.patterns += add_select_rules()
+    self.patterns += add_saturating_cast_rules()
+    self.patterns += add_shift_rules()
+
     self.features = features
 
     # These are transitive.
