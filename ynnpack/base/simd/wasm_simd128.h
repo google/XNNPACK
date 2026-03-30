@@ -491,6 +491,18 @@ YNN_ALWAYS_INLINE u8x16 max(u8x16 a, u8x16 b) {
   return u8x16{wasm_u8x16_max(a.v, b.v)};
 }
 
+YNN_ALWAYS_INLINE f32x4 abs(f32x4 a) { return f32x4{wasm_f32x4_abs(a.v)}; }
+YNN_ALWAYS_INLINE u32x4 abs(s32x4 a) { return u32x4{wasm_i32x4_abs(a.v)}; }
+YNN_ALWAYS_INLINE u16x8 abs(s16x8 a) { return u16x8{wasm_i16x8_abs(a.v)}; }
+YNN_ALWAYS_INLINE u8x16 abs(s8x16 a) { return u8x16{wasm_i8x16_abs(a.v)}; }
+
+YNN_ALWAYS_INLINE f32x4 floor(f32x4 a) { return f32x4{wasm_f32x4_floor(a.v)}; }
+YNN_ALWAYS_INLINE f32x4 ceil(f32x4 a) { return f32x4{wasm_f32x4_ceil(a.v)}; }
+YNN_ALWAYS_INLINE f32x4 round(f32x4 a) {
+  return f32x4{wasm_f32x4_nearest(a.v)};
+}
+YNN_ALWAYS_INLINE f32x4 sqrt(f32x4 a) { return f32x4{wasm_f32x4_sqrt(a.v)}; }
+
 }  // namespace simd
 
 }  // namespace ynn

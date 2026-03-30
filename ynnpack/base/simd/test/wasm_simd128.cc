@@ -112,5 +112,15 @@ TEST_MAX(wasm_simd128, f32, 4);
 TEST_MAX(wasm_simd128, s16, 8);
 TEST_MAX(wasm_simd128, u8, 16);
 
+TEST_FLOOR(wasm_simd128, f32, 4);
+TEST_CEIL(wasm_simd128, f32, 4);
+TEST_ROUND(wasm_simd128, f32, 4);
+TEST_SQRT(wasm_simd128, f32, 4);
+
+TEST_ABS(wasm_simd128, s8, 16);
+TEST_ABS(wasm_simd128, s16, 8);
+TEST_ABS(wasm_simd128, s32, 4);
+TEST_ABS(wasm_simd128, f32, 4);
+
 }  // namespace simd
 }  // namespace ynn
