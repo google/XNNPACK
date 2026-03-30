@@ -254,6 +254,70 @@ YNN_ALWAYS_INLINE void store(double* ptr, f64x2 b, decltype(f64x2::N) = {}) {
   wasm_v128_store(ptr, b.v);
 }
 
+YNN_ALWAYS_INLINE f32x4 load(const float* ptr, size_t n, f32x4 src) {
+  return internal::partial_load_memcpy(ptr, n, src);
+}
+YNN_ALWAYS_INLINE s32x4 load(const int32_t* ptr, size_t n, s32x4 src) {
+  return internal::partial_load_memcpy(ptr, n, src);
+}
+YNN_ALWAYS_INLINE s16x8 load(const int16_t* ptr, size_t n, s16x8 src) {
+  return internal::partial_load_memcpy(ptr, n, src);
+}
+YNN_ALWAYS_INLINE u8x16 load(const uint8_t* ptr, size_t n, u8x16 src) {
+  return internal::partial_load_memcpy(ptr, n, src);
+}
+YNN_ALWAYS_INLINE s8x16 load(const int8_t* ptr, size_t n, s8x16 src) {
+  return internal::partial_load_memcpy(ptr, n, src);
+}
+
+YNN_ALWAYS_INLINE f32x4 load(const float* ptr, size_t n, zeros<4> src) {
+  return internal::partial_load_memcpy(ptr, n, f32x4{0});
+}
+YNN_ALWAYS_INLINE s32x4 load(const int32_t* ptr, size_t n, zeros<4> src) {
+  return internal::partial_load_memcpy(ptr, n, s32x4{0});
+}
+YNN_ALWAYS_INLINE s16x8 load(const int16_t* ptr, size_t n, zeros<8> src) {
+  return internal::partial_load_memcpy(ptr, n, s16x8{0});
+}
+YNN_ALWAYS_INLINE u8x16 load(const uint8_t* ptr, size_t n, zeros<16> src) {
+  return internal::partial_load_memcpy(ptr, n, u8x16{0});
+}
+YNN_ALWAYS_INLINE s8x16 load(const int8_t* ptr, size_t n, zeros<16> src) {
+  return internal::partial_load_memcpy(ptr, n, s8x16{0});
+}
+
+YNN_ALWAYS_INLINE f32x4 load(const float* ptr, size_t n, undef<4> src) {
+  return internal::partial_load_memcpy(ptr, n, f32x4{});
+}
+YNN_ALWAYS_INLINE s32x4 load(const int32_t* ptr, size_t n, undef<4> src) {
+  return internal::partial_load_memcpy(ptr, n, s32x4{});
+}
+YNN_ALWAYS_INLINE s16x8 load(const int16_t* ptr, size_t n, undef<8> src) {
+  return internal::partial_load_memcpy(ptr, n, s16x8{});
+}
+YNN_ALWAYS_INLINE u8x16 load(const uint8_t* ptr, size_t n, undef<16> src) {
+  return internal::partial_load_memcpy(ptr, n, u8x16{});
+}
+YNN_ALWAYS_INLINE s8x16 load(const int8_t* ptr, size_t n, undef<16> src) {
+  return internal::partial_load_memcpy(ptr, n, s8x16{});
+}
+
+YNN_ALWAYS_INLINE void store(float* ptr, f32x4 b, size_t n) {
+  internal::partial_store_memcpy(ptr, b, n);
+}
+YNN_ALWAYS_INLINE void store(int32_t* ptr, s32x4 b, size_t n) {
+  internal::partial_store_memcpy(ptr, b, n);
+}
+YNN_ALWAYS_INLINE void store(int16_t* ptr, s16x8 value, size_t n) {
+  internal::partial_store_memcpy(ptr, value, n);
+}
+YNN_ALWAYS_INLINE void store(uint8_t* ptr, u8x16 value, size_t n) {
+  internal::partial_store_memcpy(ptr, value, n);
+}
+YNN_ALWAYS_INLINE void store(int8_t* ptr, s8x16 value, size_t n) {
+  internal::partial_store_memcpy(ptr, value, n);
+}
+
 YNN_ALWAYS_INLINE f64x2 operator+(f64x2 a, f64x2 b) {
   return f64x2{wasm_f64x2_add(a.v, b.v)};
 }
