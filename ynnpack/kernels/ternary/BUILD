@@ -17,7 +17,10 @@ py_binary(
         "generator.py",
         "kernels.py",
     ],
-    tags = ["manual"],
+    tags = [
+        "manual",
+        "python_tool",
+    ],
     deps = ["//ynnpack/kernels/elementwise:generator"],
 )
 

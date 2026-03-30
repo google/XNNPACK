@@ -16,7 +16,10 @@ py_library(
         "wasm.py",
         "x86.py",
     ],
-    tags = ["manual"],
+    tags = [
+        "manual",
+        "python_tool",
+    ],
     visibility = [
         "//ynnpack/kernels/binary:__pkg__",
         "//ynnpack/kernels/ternary:__pkg__",
