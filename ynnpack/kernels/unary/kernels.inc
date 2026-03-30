@@ -32,3 +32,7 @@
 #ifdef YNN_ARCH_ARM_NEONFP16
 #include "ynnpack/kernels/unary/arm_neonfp16.inc"
 #endif  // YNN_ARCH_ARM_NEONFP16
+
+#ifdef YNN_ARCH_WASM_SIMD128
+#include "ynnpack/kernels/unary/wasm_simd128.inc"
+#endif  // YNN_ARCH_WASM_SIMD128

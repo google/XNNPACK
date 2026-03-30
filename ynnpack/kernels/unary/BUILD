@@ -36,6 +36,7 @@ ARCHS = [
     "x86_avx512bf16",
     "arm_neon",
     "arm_neonfp16",
+    "wasm_simd128",
 ]
 
 [ynn_generate_src_hdr(

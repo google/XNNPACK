@@ -108,6 +108,21 @@ def main(argv: Sequence[str]) -> None:
           (convert_fp16_to_fp32, (8, 1)),
           (convert_fp32_to_fp16, (8, 1)),
       ],
+      "wasm_simd128": [
+          (abs_fp32, (8, 1)),
+          (ceil_fp32, (8, 1)),
+          (cosine_fp32, (8, 1)),
+          (erf_fp32, (8, 1)),
+          (exp_fp32, (8, 1)),
+          (floor_fp32, (8, 1)),
+          (negate_fp32, (8, 1)),
+          (reciprocal_square_root_fp32, (8, 1)),
+          (round_fp32, (8, 1)),
+          (sine_fp32, (8, 1)),
+          (square_root_fp32, (8, 1)),
+          (sigmoid_fp32, (8, 1)),
+          (tanh_fp32, (8, 1)),
+      ],
   }[target]
 
   generate_elementwise_kernels(output_src, output_inc, target, kernels)
