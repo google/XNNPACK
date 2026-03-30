@@ -200,7 +200,7 @@ ynn_status ynn_value::set_external_shape(size_t rank, const size_t* dims) {
 
   for (size_t d = 0; d < rank; ++d) {
     if (!extents[d].defined() || slinky::is_constant(extents[d], 1)) {
-      data->dim(d) = slinky::dim::broadcast();
+      data->mutable_dim(d) = slinky::dim::broadcast();
     }
   }
 

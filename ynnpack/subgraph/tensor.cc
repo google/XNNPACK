@@ -45,7 +45,7 @@ void init_buffer_strides(slinky::raw_buffer& buffer) {
   slinky::index_t stride = buffer.elem_size;
   for (size_t i = 0; i < buffer.rank; ++i) {
     if (buffer.dim(i) != slinky::dim::broadcast()) {
-      buffer.dim(i).set_stride(stride);
+      buffer.mutable_dim(i).set_stride(stride);
       stride *= buffer.dim(i).extent();
     }
   }
@@ -60,8 +60,8 @@ void init_buffer(slinky::raw_buffer& buffer, size_t elem_size, size_t num_dims,
   buffer.base = const_cast<void*>(data);
   if (dims) {
     for (size_t i = 0; i < num_dims; ++i) {
-      buffer.dim(i).set_min_extent(0, dims[num_dims - i - 1]);
-      buffer.dim(i).set_fold_factor(slinky::dim::unfolded);
+      buffer.mutable_dim(i).set_min_extent(0, dims[num_dims - i - 1]);
+      buffer.mutable_dim(i).set_fold_factor(slinky::dim::unfolded);
     }
     init_buffer_strides(buffer);
   }
@@ -162,7 +162,7 @@ ynn_status ynn_define_tensor_value(ynn_subgraph_t subgraph, enum ynn_type type,
   for (size_t d = 0; d < value->extents.size(); ++d) {
     if (!value->extents[d].defined() ||
         slinky::is_constant(value->extents[d], 1)) {
-      value->data->dim(d) = slinky::dim::broadcast();
+      value->data->mutable_dim(d) = slinky::dim::broadcast();
     }
   }
 

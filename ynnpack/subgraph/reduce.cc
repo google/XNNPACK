@@ -60,8 +60,8 @@ void prepare_reduction_output(slinky::buffer<void, YNN_MAX_TENSOR_RANK>& output,
   if (op.keep_dims) {
     for (int d = 0; d < input.rank; ++d) {
       if (op.k_dims[d]) {
-        output.dim(d) = input.dim(d);
-        output.dim(d).set_stride(0);
+        output.mutable_dim(d) = input.dim(d);
+        output.mutable_dim(d).set_stride(0);
       }
     }
   } else {

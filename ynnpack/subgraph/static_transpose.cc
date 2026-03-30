@@ -44,7 +44,7 @@ auto make_transpose_impl(int rank, size_t elem_count,
     int fuse_transpose[YNN_MAX_TENSOR_RANK];
     int fuse_batch[YNN_MAX_TENSOR_RANK];
     for (int d = 0; d < rank; ++d) {
-      sliced_input.dim(d) = input.dim(permutation[d]);
+      sliced_input.mutable_dim(d) = input.dim(permutation[d]);
       fuse_batch[d] = input_dim0 == -1 ? d : YNN_MAX_TENSOR_RANK;
       if (permutation[d] == 0) {
         input_dim0 = d;
