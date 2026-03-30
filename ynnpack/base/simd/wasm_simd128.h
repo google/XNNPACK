@@ -495,4 +495,6 @@ YNN_ALWAYS_INLINE u8x16 max(u8x16 a, u8x16 b) {
 
 }  // namespace ynn
 
+#include "ynnpack/base/simd/generic.inc"  // IWYU pragma: export
+
 #endif  // XNNPACK_YNNPACK_BASE_SIMD_WASM_SIMD128_H_
