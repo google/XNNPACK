@@ -1835,6 +1835,7 @@ enum xnn_status xnn_define_fully_connected(xnn_subgraph_t subgraph,
                       xnn_node_type_to_string(xnn_node_type_fully_connected),
                       filter_id, kernel_value->quantization.zero_point,
                       xnn_datatype_to_string(kernel_value->datatype));
+        return xnn_status_invalid_parameter;
       }
       break;
     case xnn_datatype_quint8:
