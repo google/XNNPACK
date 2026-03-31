@@ -131,6 +131,15 @@ using u32x4 = vec<uint32_t, 4>;
 using f32x4 = vec<float, 4>;
 using f64x2 = vec<double, 2>;
 
+using s32x16 = vec<int32_t, 16>;
+using u32x16 = vec<uint32_t, 16>;
+using f32x16 = vec<float, 16>;
+using s16x16 = vec<int16_t, 16>;
+using u16x16 = vec<uint16_t, 16>;
+using s32x8 = vec<int32_t, 8>;
+using u32x8 = vec<uint32_t, 8>;
+using f32x8 = vec<float, 8>;
+
 YNN_ALWAYS_INLINE f64x2 load_aligned(const double* ptr, decltype(f64x2::N),
                                      f64x2 = {}) {
   return f64x2{wasm_v128_load(ptr)};
@@ -502,6 +511,82 @@ YNN_ALWAYS_INLINE f32x4 round(f32x4 a) {
   return f32x4{wasm_f32x4_nearest(a.v)};
 }
 YNN_ALWAYS_INLINE f32x4 sqrt(f32x4 a) { return f32x4{wasm_f32x4_sqrt(a.v)}; }
+
+YNN_ALWAYS_INLINE s16x16 cast(s8x16 a, int16_t) {
+  return {s16x8{wasm_i16x8_extend_low_i8x16(a.v)},
+          s16x8{wasm_i16x8_extend_high_i8x16(a.v)}};
+}
+
+YNN_ALWAYS_INLINE u16x16 cast(u8x16 a, uint16_t) {
+  return {u16x8{wasm_u16x8_extend_low_u8x16(a.v)},
+          u16x8{wasm_u16x8_extend_high_u8x16(a.v)}};
+}
+
+YNN_ALWAYS_INLINE s32x8 cast(s16x8 a, int32_t) {
+  return {s32x4{wasm_i32x4_extend_low_i16x8(a.v)},
+          s32x4{wasm_i32x4_extend_high_i16x8(a.v)}};
+}
+
+YNN_ALWAYS_INLINE s32x8 cast(u16x8 a, int32_t) {
+  return {s32x4{wasm_u32x4_extend_low_u16x8(a.v)},
+          s32x4{wasm_u32x4_extend_high_u16x8(a.v)}};
+}
+
+YNN_ALWAYS_INLINE s32x16 cast(s8x16 a, int32_t) {
+  return cast(cast(a, int16_t()), int32_t());
+}
+
+YNN_ALWAYS_INLINE s32x16 cast(u8x16 a, int32_t) {
+  return cast(cast(a, uint16_t()), int32_t());
+}
+
+YNN_ALWAYS_INLINE f32x4 cast(s32x4 x, float) {
+  return f32x4{wasm_f32x4_convert_i32x4(x.v)};
+}
+
+YNN_ALWAYS_INLINE s32x4 cast(f32x4 x, int32_t) {
+  return s32x4{wasm_i32x4_trunc_sat_f32x4(x.v)};
+}
+
+YNN_ALWAYS_INLINE s16x8 saturate_cast(s32x8 a, int16_t) {
+  return s16x8{wasm_i16x8_narrow_i32x4(a.lo().v, a.hi().v)};
+}
+
+YNN_ALWAYS_INLINE s8x16 saturate_cast(s16x16 a, int8_t) {
+  return s8x16{wasm_i8x16_narrow_i16x8(a.lo().v, a.hi().v)};
+}
+
+YNN_ALWAYS_INLINE u8x16 saturate_cast(s16x16 a, uint8_t) {
+  return u8x16{wasm_u8x16_narrow_i16x8(a.lo().v, a.hi().v)};
+}
+
+YNN_ALWAYS_INLINE s16x8 round_float_to_int(f32x8 f, int16_t) {
+  const v128_t i0 = wasm_i32x4_trunc_sat_f32x4(wasm_f32x4_nearest(f.lo().v));
+  const v128_t i1 = wasm_i32x4_trunc_sat_f32x4(wasm_f32x4_nearest(f.hi().v));
+  return saturate_cast(s32x8(s32x4(i0), s32x4(i1)), int16_t());
+}
+
+YNN_ALWAYS_INLINE s8x16 round_float_to_int(f32x16 f, int8_t) {
+  const s16x8 i01 =
+      round_float_to_int(f32x8(f.lo().lo(), f.lo().hi()), int16_t());
+  const s16x8 i23 =
+      round_float_to_int(f32x8(f.hi().lo(), f.hi().hi()), int16_t());
+  return saturate_cast(s16x16(i01, i23), int8_t());
+}
+
+YNN_ALWAYS_INLINE u8x16 round_float_to_int(f32x16 f, uint8_t) {
+  const v128_t i0 =
+      wasm_i32x4_trunc_sat_f32x4(wasm_f32x4_nearest(f.lo().lo().v));
+  const v128_t i1 =
+      wasm_i32x4_trunc_sat_f32x4(wasm_f32x4_nearest(f.lo().hi().v));
+  const v128_t i2 =
+      wasm_i32x4_trunc_sat_f32x4(wasm_f32x4_nearest(f.hi().lo().v));
+  const v128_t i3 =
+      wasm_i32x4_trunc_sat_f32x4(wasm_f32x4_nearest(f.hi().hi().v));
+  const v128_t i01_16 = wasm_i16x8_narrow_i32x4(i0, i1);
+  const v128_t i23_16 = wasm_i16x8_narrow_i32x4(i2, i3);
+  return u8x16{wasm_u8x16_narrow_i16x8(i01_16, i23_16)};
+}
 
 }  // namespace simd
 
