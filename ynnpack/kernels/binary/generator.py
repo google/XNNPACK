@@ -69,7 +69,7 @@ def main(argv: Sequence[str]) -> None:
           (add_fp32, (8, 1)),
           (subtract_fp32, (8, 1)),
           (multiply_fp32, (8, 1)),
-          # (multiply_int32_fp32, (8, 1)),
+          (multiply_int32_fp32, (8, 1)),
           (divide_fp32, (8, 1)),
           (copysign_fp32, (8, 1)),
           (max_fp32, (8, 1)),
