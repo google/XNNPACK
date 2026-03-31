@@ -180,6 +180,15 @@ enum xnn_status xnn_define_static_slice_v3(xnn_subgraph_t subgraph,
     return status;
   }
 
+  if (num_dims > XNN_MAX_TENSOR_DIMS) {
+    xnn_log_error(
+      "failed to define %s operator with %zu dimensions: "
+      "the number of dimensions must not exceed %d",
+      xnn_node_type_to_string(xnn_node_type_static_slice),
+      num_dims, XNN_MAX_TENSOR_DIMS);
+    return xnn_status_unsupported_parameter;
+  }
+
   status = xnn_subgraph_check_input_node_id(xnn_node_type_static_slice, input_id, subgraph->num_values);
   if (status != xnn_status_success) {
     return status;
@@ -272,6 +281,14 @@ enum xnn_status xnn_define_static_slice(
     uint32_t input_id,
     uint32_t output_id,
     uint32_t flags) {
+  if (num_dims > XNN_MAX_TENSOR_DIMS) {
+    xnn_log_error(
+      "failed to define %s operator with %zu dimensions: "
+      "the number of dimensions must not exceed %d",
+      xnn_node_type_to_string(xnn_node_type_static_slice),
+      num_dims, XNN_MAX_TENSOR_DIMS);
+    return xnn_status_unsupported_parameter;
+  }
   int64_t signed_offsets[XNN_MAX_TENSOR_DIMS];
   for (int i = 0; i < num_dims; i++) {
     signed_offsets[i] = offsets[i];
@@ -286,6 +303,14 @@ enum xnn_status xnn_define_static_slice_v2(xnn_subgraph_t subgraph,
                                            const size_t* sizes,
                                            uint32_t input_id,
                                            uint32_t output_id, uint32_t flags) {
+  if (num_dims > XNN_MAX_TENSOR_DIMS) {
+    xnn_log_error(
+      "failed to define %s operator with %zu dimensions: "
+      "the number of dimensions must not exceed %d",
+      xnn_node_type_to_string(xnn_node_type_static_slice),
+      num_dims, XNN_MAX_TENSOR_DIMS);
+    return xnn_status_unsupported_parameter;
+  }
   int64_t ends[XNN_MAX_TENSOR_DIMS];
   for (int i = 0; i < num_dims; i++) {
     ends[i] = offsets[i] + (int64_t)sizes[i];
