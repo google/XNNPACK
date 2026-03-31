@@ -201,24 +201,6 @@ ynn_status compute_qd8_params(ynn_subgraph_t subgraph, size_t num_nonbatch_axes,
   (void)scale;
   (void)zero_point;
 
-  // We need the min and max of the input for each point in the scale/zero point
-  // values.
-  uint32_t min_identity_id = YNN_INVALID_VALUE_ID;
-  ynn_status status = define_scalar_value_like(
-      subgraph, input_id, std::numeric_limits<float>::infinity(),
-      &min_identity_id);
-  if (status != ynn_status_success) {
-    return status;
-  }
-
-  uint32_t max_identity_id = YNN_INVALID_VALUE_ID;
-  status = define_scalar_value_like(subgraph, input_id,
-                                    -std::numeric_limits<float>::infinity(),
-                                    &max_identity_id);
-  if (status != ynn_status_success) {
-    return status;
-  }
-
   // XNNPACK defines dynamic quantization as a number of "nonbatch_dims", which
   // is the rank of the quantization data, and is always the last dimensions.
   // We need to compute the reduction over these dimensions.
@@ -228,10 +210,10 @@ ynn_status compute_qd8_params(ynn_subgraph_t subgraph, size_t num_nonbatch_axes,
   }
 
   uint32_t min_max_id = YNN_INVALID_VALUE_ID;
-  status = ynn_define_reduce(subgraph, ynn_reduce_min_max, num_nonbatch_axes,
-                             nonbatch_axes, input_id, YNN_INVALID_VALUE_ID,
-                             &min_max_id,
-                             /*flags=*/YNN_NODE_FLAG_KEEP_DIMS);
+  ynn_status status = ynn_define_reduce(
+      subgraph, ynn_reduce_min_max, num_nonbatch_axes, nonbatch_axes, input_id,
+      YNN_INVALID_VALUE_ID, &min_max_id,
+      /*flags=*/YNN_NODE_FLAG_KEEP_DIMS);
   if (status != ynn_status_success) {
     return status;
   }
