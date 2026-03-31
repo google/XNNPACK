@@ -223,12 +223,8 @@ void fuse_and_slice_leading_dims(slinky::dim* x_dims, slinky::raw_buffer& x,
     internal::apply_to_pairs(
         [i, x_min_i = x_dims[i].min()](slinky::dim* in_dims,
                                        slinky::raw_buffer& in_buf) {
-          if (in_buf.rank > 0) {
-            in_dims[i] = in_buf.dim(0);
-            in_buf.slice(0, x_min_i);
-          } else {
-            in_dims[i] = slinky::dim::broadcast();
-          }
+          in_dims[i] = in_buf.dim(0);
+          in_buf.slice(0, x_min_i);
         },
         inputs...);
     if (x.rank > 0) x.slice(0);

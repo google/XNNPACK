@@ -61,18 +61,17 @@ auto make_dot_impl(dot_type type, bool consistent_arithmetic, bool transposed_a,
              slinky::raw_buffer init_c, slinky::raw_buffer c) -> index_t {
     // If the dot has fewer than 3 reduction dimensions, we use this dummy
     // dimension instead.
-    slinky::dim dummy_dim = slinky::dim(0, 0, 0, 0);
+    const slinky::dim& dummy_dim = slinky::dim::broadcast();
 
     // Learn what we need to know about m, n, k1, k2, k3 before slicing them.
-    const slinky::dim& init_c_m = init_c.rank > 1 ? init_c.dim(1) : dummy_dim;
-    const slinky::dim& init_c_n = init_c.rank > 0 ? init_c.dim(0) : dummy_dim;
-    const slinky::dim& c_m = c.rank > 1 ? c.dim(1) : dummy_dim;
+    const slinky::dim& init_c_m = init_c.dim(1);
+    const slinky::dim& init_c_n = init_c.dim(0);
+    const slinky::dim& c_m = c.dim(1);
     const slinky::dim& c_n = c.dim(0);
     const slinky::dim& a_k1 = a.dim(0);
     const slinky::dim& a_k2 = num_k_dims >= 2 ? a.dim(1) : dummy_dim;
     const slinky::dim& a_k3 = num_k_dims >= 3 ? a.dim(2) : dummy_dim;
-    const slinky::dim& a_m =
-        a.rank > num_k_dims ? a.dim(num_k_dims) : dummy_dim;
+    const slinky::dim& a_m = a.dim(num_k_dims);
     const slinky::dim& b_k1i = b.dim(0);
     const slinky::dim& b_ni = b.dim(1);
     const slinky::dim& b_k1o = b.dim(2);
@@ -178,9 +177,7 @@ auto make_dot_impl(dot_type type, bool consistent_arithmetic, bool transposed_a,
     for (size_t i = 0; i < num_k_dims; ++i) {
       a.slice(0);
     }
-    if (a.rank > 0) {
-      a.slice(0, c_m.min());
-    }
+    a.slice(0, c_m.min());
     if (pack_b) {
       // If b is packed, we must slice b at blocks of n.
       b.slice({0, 1, 2});
@@ -194,17 +191,9 @@ auto make_dot_impl(dot_type type, bool consistent_arithmetic, bool transposed_a,
     for (size_t i = 1; i < num_k_dims; ++i) {
       b.slice(0);
     }
-    if (init_c.rank >= 2) {
-      init_c.slice(0, c_n.min());
-      init_c.slice(0, c_m.min());
-    } else if (init_c.rank > 0) {
-      init_c.slice(0, c_n.min());
-    }
-    if (c.rank >= 2) {
-      c.slice({0, 1});
-    } else {
-      c.slice(0);
-    }
+    init_c.slice(0, c_n.min());
+    init_c.slice(0, c_m.min());
+    c.slice({0, 1});
     // TODO: At this point, we can probably fuse dimensions of c, a, b in the
     // hopes of making i bigger, which should improve performance in cases where
     // block_m does not divide c_m.extent()
