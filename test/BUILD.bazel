@@ -6,7 +6,6 @@
 load(
     "//:build_defs.bzl",
     "xnnpack_cxx_library",
-    "xnnpack_kleidiai_defines",
     "xnnpack_test_deps_for_library",
     "xnnpack_unit_test",
 )
@@ -359,7 +358,6 @@ xnnpack_unit_test(
     srcs = [
         "pf16-gemm-minmax.cc",
     ],
-    defines = xnnpack_kleidiai_defines(),
     deps = MICROKERNEL_TEST_DEPS + [
         ":gemm_microkernel_tester",
     ],
@@ -370,7 +368,6 @@ xnnpack_unit_test(
     srcs = [
         "pf16-f16-igemm-minmax.cc",
     ],
-    defines = xnnpack_kleidiai_defines(),
     deps = MICROKERNEL_TEST_DEPS + [
         ":gemm_microkernel_tester",
     ],
@@ -545,7 +542,6 @@ xnnpack_unit_test(
     srcs = [
         "pf32-gemm-minmax.cc",
     ],
-    defines = xnnpack_kleidiai_defines(),
     deps = MICROKERNEL_TEST_DEPS + [
         ":gemm_microkernel_tester",
     ],
@@ -777,7 +773,6 @@ xnnpack_unit_test(
     srcs = [
         "qp8-f32-qc4w-gemm-minmax.cc",
     ],
-    defines = xnnpack_kleidiai_defines(),
     deps = MICROKERNEL_TEST_DEPS + [
         ":gemm_microkernel_tester",
     ],
@@ -789,7 +784,6 @@ xnnpack_unit_test(
     srcs = [
         "qp8-f32-qb4w-gemm-minmax.cc",
     ],
-    defines = xnnpack_kleidiai_defines(),
     deps = MICROKERNEL_TEST_DEPS + [
         ":gemm_microkernel_tester",
     ],
@@ -801,7 +795,6 @@ xnnpack_unit_test(
     srcs = [
         "qp8-f32-qc8w-gemm-minmax.cc",
     ],
-    defines = xnnpack_kleidiai_defines(),
     deps = MICROKERNEL_TEST_DEPS + [
         ":gemm_microkernel_tester",
     ],
