@@ -11,7 +11,6 @@ package(default_visibility = ["//ynnpack/kernels/dot:__pkg__"])
 py_library(
     name = "dot_base",
     srcs = ["dot_base.py"],
-    tags = ["manual"],
 )
 
 py_library(
@@ -23,7 +22,10 @@ py_library(
 [py_binary(
     name = name,
     srcs = [name + ".py"],
-    tags = ["manual"],
+    tags = [
+        "manual",
+        "notap",
+    ],
     deps = [
         ":arm",
         ":dot_base",
@@ -46,7 +48,10 @@ py_library(
 [py_binary(
     name = name,
     srcs = [name + ".py"],
-    tags = ["manual"],
+    tags = [
+        "manual",
+        "notap",
+    ],
     deps = [
         ":dot_base",
         ":x86",
