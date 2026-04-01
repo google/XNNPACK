@@ -119,6 +119,7 @@ xnnpack_cxx_library(
         ":vunary_microkernel_tester",
     ],
 ) for kernel in [
+    "bf16_f32_vcvt",
     "f16_f32_vcvt",
     "f16_qs8_vcvt",
     "f16_qu8_vcvt",
@@ -142,6 +143,7 @@ xnnpack_cxx_library(
     "f16_vsqr",
     "f16_vsqrt",
     "f16_vtanh",
+    "f32_bf16_vcvt",
     "f32_f16_vcvt",
     "f32_qs8_vcvt",
     "f32_qu8_vcvt",
