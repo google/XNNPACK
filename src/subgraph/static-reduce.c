@@ -22,6 +22,11 @@ static const size_t INVERSE_NCHW_AXES_MAPPING[4] = {0, 3, 2, 1};
 
 static void rewrite_reduction_axes_for_nchw(size_t num_reduction_axes,
                                             int64_t* reduction_axes) {
+  // NCHW tensors are always 4-dimensional, so num_reduction_axes must not
+  // exceed 4. Guard against stack buffer overflow in original_reduction_axes.
+  if (num_reduction_axes > 4) {
+    num_reduction_axes = 4;
+  }
   bool mask[4] = {false};
   int64_t original_reduction_axes[4];
   memcpy(original_reduction_axes, reduction_axes,
