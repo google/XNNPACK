@@ -240,6 +240,9 @@ uint32_t get_reduce_identity_value(ynn_subgraph& subgraph,
       value_f32[0] = std::numeric_limits<float>::infinity();
       value_f32[1] = -std::numeric_limits<float>::infinity();
       rank = output.rank();
+      if (rank < 1 || rank > YNN_MAX_TENSOR_RANK) {
+        return YNN_INVALID_VALUE_ID;
+      }
       dims[rank - 1] = 2;
       break;
     default:
