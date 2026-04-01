@@ -16,6 +16,7 @@
 #include <vector>
 
 #include "ynnpack/base/base.h"
+#include "ynnpack/base/log.h"
 #include "ynnpack/base/type.h"
 #include "ynnpack/include/ynnpack.h"
 #include "ynnpack/subgraph/reduce.h"
@@ -240,9 +241,8 @@ uint32_t get_reduce_identity_value(ynn_subgraph& subgraph,
       value_f32[0] = std::numeric_limits<float>::infinity();
       value_f32[1] = -std::numeric_limits<float>::infinity();
       rank = output.rank();
-      if (rank < 1 || rank > YNN_MAX_TENSOR_RANK) {
-        return YNN_INVALID_VALUE_ID;
-      }
+      assert(rank >= 1);
+      assert(rank < YNN_MAX_TENSOR_RANK);
       dims[rank - 1] = 2;
       break;
     default:
@@ -281,10 +281,10 @@ uint32_t get_reduce_identity_value(ynn_subgraph& subgraph,
 
 }  // namespace
 
-void define_reduce(ynn_subgraph& subgraph, ynn_node& node,
-                   ynn_reduce_operator op, const ynn::axes_set& k_dims,
-                   uint32_t input_a_id, uint32_t input_b_id,
-                   uint32_t* output_id, bool keep_dims) {
+ynn_status define_reduce(ynn_subgraph& subgraph, ynn_node& node,
+                         ynn_reduce_operator op, const ynn::axes_set& k_dims,
+                         uint32_t input_a_id, uint32_t input_b_id,
+                         uint32_t* output_id, bool keep_dims) {
   const ynn_value& a = subgraph.value(input_a_id);
 
   if (*output_id == YNN_INVALID_VALUE_ID) {
@@ -346,6 +346,12 @@ void define_reduce(ynn_subgraph& subgraph, ynn_node& node,
   if (op == ynn_reduce_min_max) {
     // This reduction adds a dimension for the min/max index.
     output.extents.push_back(2);
+  }
+
+  if (output.rank() >= YNN_MAX_TENSOR_RANK) {
+    YNN_LOG_ERROR() << "output rank " << output.rank()
+                    << " exceeds YNN_MAX_TENSOR_RANK " << YNN_MAX_TENSOR_RANK;
+    return ynn_status_unsupported_parameter;
   }
 
   if (input_b_id == YNN_INVALID_VALUE_ID) {
@@ -432,6 +438,7 @@ void define_reduce(ynn_subgraph& subgraph, ynn_node& node,
     runtime.funcs.push_back(std::move(func));
     return ynn_status_success;
   };
+  return ynn_status_success;
 }
 
 extern "C" {
@@ -476,8 +483,8 @@ ynn_status ynn_define_reduce(ynn_subgraph_t subgraph,
 
   // Make the node.
   ynn_node node;
-  define_reduce(*subgraph, node, op, k_dims, input_a_id, input_b_id, output_id,
-                keep_dims);
+  YNN_RETURN_IF_ERROR(define_reduce(*subgraph, node, op, k_dims, input_a_id,
+                                    input_b_id, output_id, keep_dims));
   subgraph->add_node(std::move(node));
 
   if (convert_to_id != YNN_INVALID_VALUE_ID) {
