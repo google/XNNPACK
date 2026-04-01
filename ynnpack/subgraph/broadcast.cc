@@ -37,6 +37,8 @@ ynn_status ynn_define_broadcast(ynn_subgraph_t subgraph, size_t num_axes,
 
   ynn::axes_set axes_set;
   for (size_t i = 0; i < num_axes; ++i) {
+    YNN_RETURN_IF_ERROR(
+        validate_axis("broadcast", "input", input.rank(), axes[i]));
     axes_set[axis_to_slinky_dim(input.rank(), axes[i])] = true;
   }
 
