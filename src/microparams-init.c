@@ -1114,6 +1114,17 @@ size_t xnn_init_qs8_mul_minmax_rndnu_neon_params(
 }
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
+size_t xnn_init_bf16_qs8_cvt_scalar_params(
+  union xnn_unary_uparams* params,
+  const union xnn_unary_params* op_params,
+  const struct xnn_quantization_params* input_quantization,
+  const struct xnn_quantization_params* output_quantization)
+{
+  params->bf16_qs8_cvt.scalar.scale = xnn_bfloat16_from_float(1.0f / output_quantization->scale);
+  params->bf16_qs8_cvt.scalar.output_zero_point = output_quantization->zero_point;
+  return sizeof(params->bf16_qs8_cvt);
+}
+
 size_t xnn_init_f16_qs8_cvt_scalar_params(
   union xnn_unary_uparams* params,
   const union xnn_unary_params* op_params,

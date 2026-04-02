@@ -120,6 +120,7 @@ xnnpack_cxx_library(
     ],
 ) for kernel in [
     "bf16_f32_vcvt",
+    "bf16_qs8_vcvt",
     "f16_f32_vcvt",
     "f16_qs8_vcvt",
     "f16_qu8_vcvt",
