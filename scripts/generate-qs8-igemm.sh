@@ -152,7 +152,7 @@ tools/xngen src/qs8-igemm/MRx16c2s2-wasmsimd-dot16x2.c.in -D MR=1 -D NR=16 -D RE
 tools/xngen src/qs8-igemm/MRx16c2s2-wasmsimd-dot16x2.c.in -D MR=4 -D NR=16 -D REQUANTIZATION=FP32 -D DATATYPE=QC8 -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-4x16c2s2-minmax-fp32-wasmsimd-dot16x2.c &
 
 tools/xngen src/qs8-igemm/MRx16c2s2-wasmsimd-dot16x2.c.in -D MR=1 -D NR=16 -D REQUANTIZATION=     -D DATATYPE=QD8 -o src/qd8-f32-qc8w-igemm/gen/qd8-f32-qc8w-igemm-1x16c2s2-minmax-wasmsimd-dot16x2.c &
-tools/xngen src/qs8-igemm/MRx16c2s2-wasmsimd-dot16x2.c.in -D MR=4 -D NR=16 -D REQUANTIZATION=     -D DATATYPE=QD8 -o src/qd8-f32-qc8w-igemm/gen/qs8-f32-qc8w-igemm-4x16c2s2-minmax-wasmsimd-dot16x2.c &
+tools/xngen src/qs8-igemm/MRx16c2s2-wasmsimd-dot16x2.c.in -D MR=4 -D NR=16 -D REQUANTIZATION=     -D DATATYPE=QD8 -o src/qd8-f32-qc8w-igemm/gen/qd8-f32-qc8w-igemm-4x16c2s2-minmax-wasmsimd-dot16x2.c &
 
 ### C8 micro-kernels
 tools/xngen src/qs8-igemm/MRx4c8-wasmsimd-dot16x2.c.in -D MR=1 -D VARIANT=LD64  -D REQUANTIZATION=         -D DATATYPE=QD8 -o src/qd8-f32-qc8w-igemm/gen/qd8-f32-qc8w-igemm-1x4c8-minmax-wasmsimd-dot16x2-ld64.c &
