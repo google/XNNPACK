@@ -194,6 +194,7 @@ cc_test(
     "static_pad",
     "static_reshape",
     "static_slice",
+    "slice_like",
     "static_transpose",
     "stencil_copy",
 ]]

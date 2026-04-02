@@ -293,6 +293,13 @@ enum ynn_status ynn_define_static_slice(
     const int64_t* begins, const int64_t* ends, const int64_t* strides,
     uint32_t input_id, uint32_t* output_id, uint32_t flags);
 
+// Extracts the range of indices `[0, end)` in `axes` dimensions, where `end` is
+// the extent of the same axis in the template value.
+enum ynn_status ynn_define_slice_like(ynn_subgraph_t subgraph, size_t num_axes,
+                                      const int32_t* axes, uint32_t input_id,
+                                      uint32_t template_id, uint32_t* output_id,
+                                      uint32_t flags);
+
 // Copy the input to the output, using a permutation to select the dimensions of
 // the input.
 enum ynn_status ynn_define_static_transpose(

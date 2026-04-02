@@ -407,6 +407,15 @@ struct ynn_node {
              std::tie(b.slices, b.slice_dims);
     }
   };
+  struct slice_like {
+    ynn::axes_set axes;
+    friend bool operator==(const slice_like& a, const slice_like& b) {
+      return a.axes == b.axes;
+    }
+    friend bool operator<(const slice_like& a, const slice_like& b) {
+      return a.axes < b.axes;
+    }
+  };
   struct static_transpose {
     std::vector<int32_t> permutation;
     bool alias;
@@ -500,9 +509,10 @@ struct ynn_node {
   std::variant<invalid, opaque, broadcast, broadcast_like, concatenate,
                even_split, copy, split_dim, fuse_dim, fuse_dims, split_dims,
                stack, static_reshape, static_broadcast, static_expand_dims,
-               static_pad, static_slice, static_transpose, stencil_copy,
-               unary_elementwise, lut, binary_elementwise, ternary_elementwise,
-               dot, pack_b, transpose_a, get_tensor_shape, reduce>
+               static_pad, static_slice, slice_like, static_transpose,
+               stencil_copy, unary_elementwise, lut, binary_elementwise,
+               ternary_elementwise, dot, pack_b, transpose_a, get_tensor_shape,
+               reduce>
       op;
 
   const char* name() const;
