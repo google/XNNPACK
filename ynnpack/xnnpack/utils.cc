@@ -496,7 +496,12 @@ ynn_status define_xnn_dot_quantized(ynn_subgraph_t subgraph, size_t num_k_dims,
     status = convert_to(subgraph, &bias_id, ynn_type_fp32);
     if (status != ynn_status_success) return status;
 
-    uint32_t output_unconverted_id = YNN_INVALID_VALUE_ID;
+    // If the output is fp32, we can compute the add directly into the output.
+    // Otherwise, compute into an intermediate, and convert after.
+    uint32_t output_unconverted_id =
+        type_of_value(subgraph, output_id) == ynn_type_fp32
+            ? output_id
+            : YNN_INVALID_VALUE_ID;
     status = define_binary_with_broadcasting(
         subgraph, ynn_binary_add, dot_result_as_float_id, bias_id,
         &output_unconverted_id, /*flags=*/0);
