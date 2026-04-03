@@ -126,6 +126,18 @@ TEST_ABS(wasm_simd128, s16, 8);
 TEST_ABS(wasm_simd128, s32, 4);
 TEST_ABS(wasm_simd128, f32, 4);
 
+TEST_HORIZONTAL_MIN(wasm_simd128, u8, 16);
+TEST_HORIZONTAL_MIN(wasm_simd128, s8, 16);
+TEST_HORIZONTAL_MIN(wasm_simd128, s16, 8);
+TEST_HORIZONTAL_MIN(wasm_simd128, f32, 4);
+TEST_HORIZONTAL_MIN(wasm_simd128, s32, 4);
+
+TEST_HORIZONTAL_MAX(wasm_simd128, u8, 16);
+TEST_HORIZONTAL_MAX(wasm_simd128, s8, 16);
+TEST_HORIZONTAL_MAX(wasm_simd128, s16, 8);
+TEST_HORIZONTAL_MAX(wasm_simd128, f32, 4);
+TEST_HORIZONTAL_MAX(wasm_simd128, s32, 4);
+
 TEST_CAST(wasm_simd128, s32, f32x4);
 TEST_CAST(wasm_simd128, f32, s32x4);
 TEST_CAST(wasm_simd128, s32, s8x16);
