@@ -35,29 +35,29 @@ namespace ynn {
 namespace {
 
 // Call a unary kernel.
-auto make_unary_elementwise_impl(unary_kernel_fn kernel) {
-  return
-      [kernel](slinky::raw_buffer a, slinky::raw_buffer x) -> slinky::index_t {
-        slinky::dim a_dims[2], x_dims[2];
+auto make_unary_elementwise_impl(unary_kernel_fn kernel, unary_params params) {
+  return [kernel, params](slinky::raw_buffer a,
+                          slinky::raw_buffer x) -> slinky::index_t {
+    slinky::dim a_dims[2], x_dims[2];
 
-        fuse_and_slice_leading_dims<2>(&x_dims[0], x, &a_dims[0], a);
+    fuse_and_slice_leading_dims<2>(&x_dims[0], x, &a_dims[0], a);
 
-        // We don't support broadcasting of `a` here in the innermost
-        // dimension (and it would waste computation).
-        assert(is_continguous(a_dims[0], a.elem_size));
+    // We don't support broadcasting of `a` here in the innermost
+    // dimension (and it would waste computation).
+    assert(is_continguous(a_dims[0], a.elem_size));
 
-        const slinky::dim& x_n = x_dims[0];
-        const slinky::dim& a_m = a_dims[1];
-        const slinky::dim& x_m = x_dims[1];
+    const slinky::dim& x_n = x_dims[0];
+    const slinky::dim& a_m = a_dims[1];
+    const slinky::dim& x_m = x_dims[1];
 
-        slinky::for_each_element(
-            [&](void* x, const void* a) {
-              kernel(x_m.extent(), x_n.extent(), a_m.stride(), a, x_m.stride(),
-                     x);
-            },
-            x, a);
-        return 0;
-      };
+    slinky::for_each_element(
+        [&](void* x, const void* a) {
+          kernel(x_m.extent(), x_n.extent(), a_m.stride(), a, x_m.stride(), x,
+                 &params);
+        },
+        x, a);
+    return 0;
+  };
 }
 
 // Call a lut kernel.
@@ -100,7 +100,7 @@ auto make_binary_elementwise_impl(binary_kernel_fn kernel) {
     slinky::for_each_element(
         [&](void* x, const void* a, const void* b) {
           kernel(x_m.extent(), x_n.extent(), a_m.stride(), a_n.stride(), a,
-                 b_m.stride(), b_n.stride(), b, x_m.stride(), x);
+                 b_m.stride(), b_n.stride(), b, x_m.stride(), x, nullptr);
         },
         x, a, b);
     return 0;
@@ -140,7 +140,7 @@ auto make_ternary_elementwise_impl(ternary_kernel_fn kernel) {
             [&](void* x, const void* a, const void* b, const void* c) {
               kernel(x_m.extent(), x_n.extent(), a_m.stride(), a_n.stride(), a,
                      b_m.stride(), b_n.stride(), b, c_m.stride(), c_n.stride(),
-                     c, x_m.stride(), x);
+                     c, x_m.stride(), x, nullptr);
             },
             x, a, b, c);
         return 0;
@@ -162,7 +162,7 @@ std::pair<float, int32_t> GetScalarQuantization(
 }
 
 ynn_status create_unary(const ynn_node& node, ynn_runtime& runtime,
-                        unary_kernel_fn kernel) {
+                        unary_kernel_fn kernel, unary_params params) {
   assert(node.inputs.size() == 1);
   assert(node.outputs.size() == 1);
 
@@ -193,9 +193,9 @@ ynn_status create_unary(const ynn_node& node, ynn_runtime& runtime,
   attrs.name = to_string(std::get<ynn_node::unary_elementwise>(node.op).op);
   attrs.allow_in_place = compute_allow_in_place(node, *runtime.subgraph);
 
-  slinky::func func = slinky::func::make(make_unary_elementwise_impl(kernel),
-                                         {{a.buffer, std::move(bounds)}},
-                                         {{x.buffer, dims}}, std::move(attrs));
+  slinky::func func = slinky::func::make(
+      make_unary_elementwise_impl(kernel, params),
+      {{a.buffer, std::move(bounds)}}, {{x.buffer, dims}}, std::move(attrs));
 
   auto sched = runtime.make_schedule(dims, x.buffer, node.outputs[0]);
   func.user_data() = sched.get();
@@ -332,14 +332,14 @@ void infer_shape(ynn_node& node, ynn_subgraph& subgraph) {
 
 void define_unary(ynn_subgraph& subgraph, ynn_node& node, uint32_t input_a_id,
                   uint32_t output_id, ynn_unary_operator op,
-                  unary_kernel_fn kernel) {
+                  unary_kernel_fn kernel, unary_params params) {
   // Make the node.
   node.inputs = {input_a_id};
   node.outputs = {output_id};
   node.op = ynn_node::unary_elementwise{op};
   infer_shape(node, subgraph);
-  node.create = [kernel](const ynn_node& node, ynn_runtime& runtime) {
-    return create_unary(node, runtime, kernel);
+  node.create = [kernel, params](const ynn_node& node, ynn_runtime& runtime) {
+    return create_unary(node, runtime, kernel, params);
   };
 }
 
@@ -457,9 +457,12 @@ ynn_status ynn_define_unary(ynn_subgraph_t subgraph, ynn_unary_operator op,
     return ynn_status_unsupported_parameter;
   }
 
+  unary_params params = get_unary_params(op);
+
   // Make the node.
   ynn_node node;
-  ynn::define_unary(*subgraph, node, input_a_id, *output_id, op, kernel);
+  ynn::define_unary(*subgraph, node, input_a_id, *output_id, op, kernel,
+                    params);
   subgraph->add_node(std::move(node));
   return ynn_status_success;
 }
@@ -650,7 +653,7 @@ ynn_status ynn_define_convert(ynn_subgraph_t subgraph, uint32_t input_id,
   node.op = ynn_node::unary_elementwise{ynn_unary_convert};
   infer_shape(node, *subgraph);
   node.create = [kernel](const ynn_node& node, ynn_runtime& runtime) {
-    return create_unary(node, runtime, kernel);
+    return create_unary(node, runtime, kernel, unary_params{});
   };
   subgraph->add_node(std::move(node));
   return ynn_status_success;

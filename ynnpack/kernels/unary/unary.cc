@@ -29,11 +29,11 @@ namespace {
 // intend to give the compiler a reasonable chance at optimizing them.
 template <typename TIn, typename TOut, typename Operator>
 void unary_impl(size_t m, size_t n, size_t stride_x, const void* vx,
-                size_t stride_y, void* vy) {
+                size_t stride_y, void* vy, const unary_params* params) {
   auto x = reinterpret_cast<const TIn*>(vx);
   auto y = reinterpret_cast<TOut*>(vy);
 
-  Operator op;
+  Operator op(*params);
   for (size_t i = 0; i < m; ++i) {
     for (size_t j = 0; j < n; ++j) {
       y[j] = static_cast<TOut>(op(x[j]));
@@ -45,6 +45,7 @@ void unary_impl(size_t m, size_t n, size_t stride_x, const void* vx,
 
 template <typename TIn, typename TOut>
 struct convert_op {
+  explicit convert_op(const unary_params& = {}) {}
   TOut operator()(TIn x) const {
     if constexpr (std::is_integral<TOut>::value) {
       if constexpr (std::is_integral<TIn>::value) {
@@ -61,6 +62,7 @@ struct convert_op {
 #if XNN_HAVE_FLOAT16
 template <>
 struct convert_op<bfloat16, _Float16> {
+  explicit convert_op(const unary_params& = {}) {}
   _Float16 operator()(bfloat16 x) const {
     return static_cast<_Float16>(static_cast<float>(x));
   }
@@ -93,28 +95,34 @@ unary_kernel_fn get_convert_kernel(ynn_type output) {
 }
 
 struct abs_op {
+  explicit abs_op(const unary_params& = {}) {}
   float operator()(float x) const { return std::abs(x); }
   int32_t operator()(int32_t x) const { return std::abs(x); }
 };
 
 struct negate_op {
+  explicit negate_op(const unary_params& = {}) {}
   float operator()(float x) const { return -x; }
   int32_t operator()(int32_t x) const { return -x; }
 };
 
 struct round_op {
+  explicit round_op(const unary_params& = {}) {}
   float operator()(float x) const { return std::nearbyint(x); }
 };
 
 struct ceil_op {
+  explicit ceil_op(const unary_params& = {}) {}
   float operator()(float x) const { return std::ceil(x); }
 };
 
 struct floor_op {
+  explicit floor_op(const unary_params& = {}) {}
   float operator()(float x) const { return std::floor(x); }
 };
 
 struct square_op {
+  explicit square_op(const unary_params& = {}) {}
   float operator()(float x) const { return x * x; }
   int32_t operator()(int32_t x) const {
     return static_cast<int32_t>(static_cast<int64_t>(x) *
@@ -123,59 +131,76 @@ struct square_op {
 };
 
 struct square_root_op {
+  explicit square_root_op(const unary_params& = {}) {}
   float operator()(float x) const { return std::sqrt(x); }
 };
 
 struct cube_root_op {
+  explicit cube_root_op(const unary_params& = {}) {}
   float operator()(float x) const { return std::cbrt(x); }
 };
 
 struct tanh_op {
+  explicit tanh_op(const unary_params& = {}) {}
   float operator()(float x) const { return std::tanh(x); }
 };
 
 struct reciprocal_square_root_op {
+  explicit reciprocal_square_root_op(const unary_params& = {}) {}
   float operator()(float x) const { return 1 / std::sqrt(x); }
 };
 
 struct log_op {
+  explicit log_op(const unary_params& = {}) {}
   float operator()(float x) const { return std::log(x); }
 };
 
 struct log1p_op {
+  explicit log1p_op(const unary_params& = {}) {}
   float operator()(float x) const { return std::log1p(x); }
 };
 
 struct exp_op {
-  float operator()(float x) const { return std::exp(x); }
+  explicit exp_op(const unary_params& params) : params(params) {}
+  float operator()(float x) const {
+    return std::exp2(params.exp.input_multiplier * x);
+  }
+  unary_params params;
 };
 
 struct expm1_op {
+  explicit expm1_op(const unary_params& = {}) {}
   float operator()(float x) const { return std::expm1(x); }
 };
 
 struct erf_op {
+  explicit erf_op(const unary_params& = {}) {}
   float operator()(float x) const { return std::erf(x); }
 };
 
 struct sign_op {
+  explicit sign_op(const unary_params& = {}) {}
   float operator()(float x) const { return x < 0 ? -1 : x > 0 ? 1 : 0; }
   int32_t operator()(int32_t x) const { return x < 0 ? -1 : x > 0 ? 1 : 0; }
 };
 
 struct sine_op {
+  explicit sine_op(const unary_params& = {}) {}
   float operator()(float x) const { return std::sin(x); }
 };
 
 struct cosine_op {
+  explicit cosine_op(const unary_params& = {}) {}
   float operator()(float x) const { return std::cos(x); }
 };
 
 struct sigmoid_op {
+  explicit sigmoid_op(const unary_params& = {}) {}
   float operator()(float x) const { return 1.0f / (1.0f + std::exp(-x)); }
 };
 
 struct hardswish_op {
+  explicit hardswish_op(const unary_params& = {}) {}
   float operator()(float x) const {
     return (x * (1.0f / 6.0f)) * std::max(std::min(x + 3.0f, 6.0f), 0.0f);
   }
@@ -291,6 +316,18 @@ unary_kernel_fn get_unary_kernel(ynn_unary_operator op, ynn_type a_type,
   } else {
     return nullptr;
   }
+}
+
+unary_params get_unary_params(ynn_unary_operator op) {
+  switch (op) {
+    case ynn_unary_exp:
+      return unary_params{
+          .exp = exp_params{static_cast<float>(std::log2(std::exp(1.0)))}};
+    default:
+      return unary_params{};
+  }
+
+  return unary_params{};
 }
 
 }  // namespace ynn

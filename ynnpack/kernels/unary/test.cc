@@ -65,22 +65,25 @@ std::string to_string(const Shape& shape) {
 struct KernelInfo {
   uint64_t arch_flags = 0;
   unary_kernel_fn kernel;
+  unary_params params;
 
   // Constructor for a reference kernel.
-  KernelInfo(ynn_unary_operator op, ynn_type type) {
+  KernelInfo(ynn_unary_operator op, ynn_type type, unary_params p) {
     kernel = get_unary_reference_kernel(op, type);
+    params = p;
     assert(kernel);
   }
 
   // Constructor for a reference convert op.
-  KernelInfo(ynn_type a_type, ynn_type x_type) {
+  KernelInfo(ynn_type a_type, ynn_type x_type, unary_params p) {
     kernel = get_convert_reference_kernel(a_type, x_type);
+    params = p;
     assert(kernel);
   }
 
   // Constructor for a kernel function.
-  KernelInfo(uint64_t arch_flags, unary_kernel_fn kernel)
-      : arch_flags(arch_flags), kernel(kernel) {
+  KernelInfo(uint64_t arch_flags, unary_kernel_fn kernel, unary_params p)
+      : arch_flags(arch_flags), kernel(kernel), params(p) {
     assert(kernel);
   }
 };
@@ -105,7 +108,7 @@ void TestImpl(A, X, const KernelInfo& kernel_info, const OpInfo& op_info,
   x = x.crop_padding({0, 0}, {0, shape.padding_x});
 
   kernel(shape.m, shape.n, a.stride(0) * sizeof(A), a.base(),
-         x.stride(0) * sizeof(X), x.base());
+         x.stride(0) * sizeof(X), x.base(), &kernel_info.params);
 
   check_results(op_info, a, x);
 }
@@ -137,10 +140,10 @@ TEST_P(Reference, op) {
   ynn_type type = std::get<0>(GetParam());
   ynn_unary_operator op = std::get<1>(GetParam());
   const Shape& shape = std::get<2>(GetParam());
-  const unary_op_info& op_info = *get_unary_op_info(op);
-  KernelInfo kernel_info(op, type);
+  auto op_info = get_unary_op_info(op, get_unary_params(op));
+  KernelInfo kernel_info(op, type, get_unary_params(op));
   SwitchType(type, [&](auto type) {
-    TestImpl(type, type, kernel_info, op_info, shape);
+    TestImpl(type, type, kernel_info, *op_info, shape);
   });
 }
 
@@ -150,7 +153,7 @@ class ReferenceConvert
 TEST_P(ReferenceConvert, op) {
   ynn_type a = std::get<0>(GetParam());
   ynn_type x = std::get<1>(GetParam());
-  KernelInfo kernel_info(a, x);
+  KernelInfo kernel_info(a, x, get_unary_params(ynn_unary_convert));
   const Shape& shape = std::get<2>(GetParam());
   SwitchType(x, [&](auto x) {
     SwitchType(a,
@@ -209,6 +212,23 @@ const Shape reference_shapes[] = {
     {256, 4, 0, padding},
 };
 
+TEST(Exp, CustomParams) {
+  unary_params params;
+  params.exp.input_multiplier = 0.7f;
+  const Shape shape = {1, 32, 0, 0};
+  const ynn_type type = ynn_type_fp32;
+  const ynn_unary_operator op = ynn_unary_exp;
+  exp op_info(params);
+
+  unary_kernel_fn kernel = get_unary_kernel(op, type, type);
+  if (kernel == nullptr) {
+    GTEST_SKIP() << "No exp kernel found";
+  }
+
+  KernelInfo kernel_info(get_supported_arch_flags(), kernel, params);
+  TestImpl(float(), float(), kernel_info, op_info, shape);
+}
+
 INSTANTIATE_TEST_SUITE_P(RealOps, Reference,
                          Combine(Values(ynn_type_fp32), ValuesIn(all_real_ops),
                                  ValuesIn(reference_shapes)),
@@ -242,14 +262,17 @@ const std::vector<Shape> all_shapes = []() {
   return shapes;
 }();
 
-#define YNN_ELEMENTWISE_KERNEL(arch_flags, kernel, op, type_a, type_x) \
-  class kernel##_test : public testing::TestWithParam<Shape> {};       \
-  TEST_P(kernel##_test, no_broadcast) {                                \
-    KernelInfo kernel_info(arch_flags, kernel);                        \
-    TestImpl(type_a{}, type_x{}, kernel_info, op{}, GetParam());       \
-  }                                                                    \
-  INSTANTIATE_TEST_SUITE_P(test, kernel##_test, ValuesIn(all_shapes),  \
-                           [](const auto& i) { return to_string(i.param); });
+#define YNN_ELEMENTWISE_KERNEL(arch_flags, kernel, op, type_a, type_x)  \
+  class kernel##_test : public testing::TestWithParam<ynn::Shape> {};   \
+  TEST_P(kernel##_test, no_broadcast) {                                 \
+    ynn::KernelInfo kernel_info(arch_flags, kernel,                     \
+                                ynn::get_unary_params(ynn_unary_##op)); \
+    ynn::TestImpl(type_a{}, type_x{}, kernel_info,                      \
+                  ynn::op(kernel_info.params), GetParam());             \
+  }                                                                     \
+  INSTANTIATE_TEST_SUITE_P(                                             \
+      test, kernel##_test, ValuesIn(ynn::all_shapes),                   \
+      [](const auto& i) { return ynn::to_string(i.param); });
 #include "ynnpack/kernels/unary/kernels.inc"
 #undef YNN_ELEMENTWISE_KERNEL
 

@@ -77,6 +77,7 @@ cc_library(
     hdrs = ["reference.h"],
     visibility = ["//ynnpack:__subpackages__"],
     deps = [
+        ":unary",
         "//ynnpack:ynnpack_h",
         "//ynnpack/base",
         "//ynnpack/base/test:tensor",

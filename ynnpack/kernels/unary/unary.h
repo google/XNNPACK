@@ -15,12 +15,21 @@
 
 namespace ynn {
 
+struct exp_params {
+  float input_multiplier;
+};
+
+union unary_params {
+  exp_params exp;
+};
+
 typedef void (*unary_kernel_fn)(size_t width, size_t height, size_t stride_a,
-                                const void* a, size_t stride_x, void* x);
+                                const void* a, size_t stride_x, void* x,
+                                const unary_params* params);
 
 #define YNN_ELEMENTWISE_KERNEL(arch, name, op, type_a, type_c)    \
   void name(size_t m, size_t n, size_t stride_a_m, const void* a, \
-            size_t stride_x_m, void* x);
+            size_t stride_x_m, void* x, const unary_params* params);
 #include "ynnpack/kernels/unary/kernels.inc"
 #undef YNN_ELEMENTWISE_KERNEL
 
@@ -35,6 +44,8 @@ unary_kernel_fn get_convert_reference_kernel() {
 unary_kernel_fn get_unary_kernel(
     ynn_unary_operator op, ynn_type a_type, ynn_type x_type,
     uint64_t supported_arch_flags = get_supported_arch_flags());
+
+unary_params get_unary_params(ynn_unary_operator op);
 
 }  // namespace ynn
 

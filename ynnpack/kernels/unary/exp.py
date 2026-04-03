@@ -1,8 +1,7 @@
 """Definition of exp kernel."""
 
-import math
-
 # pylint: disable=undefined-variable
+# pylint: disable=missing-function-docstring
 from ynnpack.kernels.elementwise.compiler import *  # pylint: disable=wildcard-import
 
 
@@ -30,8 +29,11 @@ def qd_round_f32(a):
 
 @const_buffer("a", Float(32))
 @buffer("x", Float(32))
+@params(
+    Scalar("input_multiplier", Float(32)),
+)
 @operator_name("exp")
-def exp_fp32(a, x):
+def exp_fp32(a, x, input_multiplier):
   # The monomial coefficients of the numerator polynomial (`valpha_0` = 1.0).
   valpha_1 = 4.1594290733e-01
   valpha_2 = 7.2068706155e-02
@@ -41,9 +43,9 @@ def exp_fp32(a, x):
   vbeta_1 = -2.7720427513e-01
   vbeta_2 = 2.3986088112e-02
 
-  va = load(a)
+  va = load(a) * input_multiplier
   # Clamp `vz_prime = x * log2(e)` to the maximum exponents [-127, 128].
-  vz_prime = min(max(va * f32(math.log2(math.e)), -127.0), 128.0)
+  vz_prime = min(max(va, -127.0), 128.0)
 
   # Decompose x * log2e into `z` (integer part) and `r` (remainder).
   vz = qd_round_f32(vz_prime)
