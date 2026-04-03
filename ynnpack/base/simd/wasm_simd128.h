@@ -729,6 +729,36 @@ YNN_ALWAYS_INLINE v128_t movelh(v128_t a, v128_t b) {
 
 }  // namespace internal
 
+YNN_ALWAYS_INLINE std::tuple<u8x16, u8x16> interleave(
+    std::integral_constant<size_t, 64>, u8x16 x0, u8x16 x1) {
+  return {u8x16{internal::movelh(x0.v, x1.v)},
+          u8x16{internal::movehl(x1.v, x0.v)}};
+}
+YNN_ALWAYS_INLINE std::tuple<u8x16, u8x16> interleave(
+    std::integral_constant<size_t, 32>, u8x16 x0, u8x16 x1) {
+  return {u8x16{internal::unpacklo_x32x4(x0.v, x1.v)},
+          u8x16{internal::unpackhi_x32x4(x0.v, x1.v)}};
+}
+YNN_ALWAYS_INLINE std::tuple<u8x16, u8x16> interleave(
+    std::integral_constant<size_t, 16>, u8x16 x0, u8x16 x1) {
+  return {u8x16{wasm_v16x8_shuffle(x0.v, x1.v, 0, 8, 1, 9, 2, 10, 3, 11)},
+          u8x16{wasm_v16x8_shuffle(x0.v, x1.v, 4, 12, 5, 13, 6, 14, 7, 15)}};
+}
+YNN_ALWAYS_INLINE std::tuple<u8x16, u8x16> interleave(
+    std::integral_constant<size_t, 8>, u8x16 x0, u8x16 x1) {
+  return {u8x16{internal::unpacklo_x8x16(x0.v, x1.v)},
+          u8x16{internal::unpackhi_x8x16(x0.v, x1.v)}};
+}
+YNN_ALWAYS_INLINE std::tuple<u8x16, u8x16> interleave(
+    std::integral_constant<size_t, 4>, u8x16 x0, u8x16 x1) {
+  v128_t mask = wasm_i8x16_splat(0xf0);
+  v128_t x1_shl = wasm_i8x16_shl(x1.v, 4);
+  v128_t x0_shr = wasm_u8x16_shr(x0.v, 4);
+  u8x16 t0{wasm_v128_bitselect(x1_shl, x0.v, mask)};
+  u8x16 t1{wasm_v128_bitselect(x1.v, x0_shr, mask)};
+  return interleave(std::integral_constant<size_t, 8>{}, t0, t1);
+}
+
 template <typename T>
 YNN_ALWAYS_INLINE std::array<vec<T, 4>, 4> transpose(
     std::array<vec<T, 4>, 4> x) {
