@@ -652,6 +652,55 @@ XNN_INLINE static bool xnn_bfloat16_is_zero(xnn_bfloat16 f) {
   return (uint16_t) (xnn_bfloat16_to_bits(f) * 2) == 0;
 }
 
+// Overflow-safe arithmetic for allocation size calculations.
+// Returns false (and sets *result to 0) if the multiplication would overflow.
+XNN_INLINE static bool xnn_safe_mul(size_t a, size_t b, size_t* result) {
+#if defined(__GNUC__) || defined(__clang__)
+  return !__builtin_mul_overflow(a, b, result);
+#else
+  if (a != 0 && b > SIZE_MAX / a) {
+    *result = 0;
+    return false;
+  }
+  *result = a * b;
+  return true;
+#endif
+}
+
+// Overflow-safe addition. Returns false if the addition would overflow.
+XNN_INLINE static bool xnn_safe_add(size_t a, size_t b, size_t* result) {
+#if defined(__GNUC__) || defined(__clang__)
+  return !__builtin_add_overflow(a, b, result);
+#else
+  if (a > SIZE_MAX - b) {
+    *result = 0;
+    return false;
+  }
+  *result = a + b;
+  return true;
+#endif
+}
+
+// Overflow-safe multiplication of 3 values.
+XNN_INLINE static bool xnn_safe_mul3(size_t a, size_t b, size_t c, size_t* result) {
+  size_t ab;
+  if (!xnn_safe_mul(a, b, &ab)) {
+    *result = 0;
+    return false;
+  }
+  return xnn_safe_mul(ab, c, result);
+}
+
+// Overflow-safe multiplication of 4 values.
+XNN_INLINE static bool xnn_safe_mul4(size_t a, size_t b, size_t c, size_t d, size_t* result) {
+  size_t abc;
+  if (!xnn_safe_mul3(a, b, c, &abc)) {
+    *result = 0;
+    return false;
+  }
+  return xnn_safe_mul(abc, d, result);
+}
+
 #ifdef __cplusplus
 }  // extern "C"
 #endif

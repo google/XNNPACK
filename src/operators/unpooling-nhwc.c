@@ -217,7 +217,18 @@ enum xnn_status xnn_reshape_unpooling2d_nhwc_x32(
   const size_t pooling_width = unpooling_op->convolution_op->kernel_width;
   const size_t pooling_size = pooling_height * pooling_width;
 
-  const size_t indirection_buffer_size = sizeof(void*) * (batch_size * input_height * input_width * pooling_size);
+  size_t indirection_buffer_elements;
+  if (!xnn_safe_mul4(batch_size, input_height, input_width, pooling_size, &indirection_buffer_elements)) {
+    xnn_log_error("failed to calculate indirection buffer size for %s operator: overflow",
+      xnn_operator_type_to_string(xnn_operator_type_unpooling_nhwc_x32));
+    return xnn_status_out_of_memory;
+  }
+  size_t indirection_buffer_size;
+  if (!xnn_safe_mul(sizeof(void*), indirection_buffer_elements, &indirection_buffer_size)) {
+    xnn_log_error("failed to calculate indirection buffer size for %s operator: overflow",
+      xnn_operator_type_to_string(xnn_operator_type_unpooling_nhwc_x32));
+    return xnn_status_out_of_memory;
+  }
   const void** indirection_buffer = (const void**) xnn_reallocate_memory(unpooling_op->convolution_op->indirection_buffer, indirection_buffer_size);
   if (indirection_buffer == NULL) {
     xnn_log_error(
