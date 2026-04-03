@@ -824,6 +824,7 @@ def generate_test_cases(
         "xnn_%s_requantize_%s" % (requantization_datatype, requantization)
     )
 
+  output_datatype = output_datatype or input_datatype
   output_datatype = init_fn.split("_")[2] if init_fn else output_datatype
 
   nr_scale = ""
