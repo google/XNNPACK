@@ -4,6 +4,7 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <cassert>
+#include <cmath>
 #include <cstddef>
 #include <cstdint>
 #include <iostream>
@@ -44,6 +45,10 @@ std::string to_string(const std::pair<ynn_type, bool>& type) {
   return ss.str();
 }
 
+bool operator<(ynn_unary_operator lhs, ynn_unary_operator rhs) {
+  return static_cast<int>(lhs) < static_cast<int>(rhs);
+}
+
 namespace ynn {
 
 struct Shape {
@@ -65,32 +70,46 @@ std::string to_string(const Shape& shape) {
 struct KernelInfo {
   uint64_t arch_flags = 0;
   unary_kernel_fn kernel;
-  unary_params params;
 
   // Constructor for a reference kernel.
-  KernelInfo(ynn_unary_operator op, ynn_type type, unary_params p) {
+  KernelInfo(ynn_unary_operator op, ynn_type type) {
     kernel = get_unary_reference_kernel(op, type);
-    params = p;
     assert(kernel);
   }
 
   // Constructor for a reference convert op.
-  KernelInfo(ynn_type a_type, ynn_type x_type, unary_params p) {
+  KernelInfo(ynn_type a_type, ynn_type x_type) {
     kernel = get_convert_reference_kernel(a_type, x_type);
-    params = p;
     assert(kernel);
   }
 
   // Constructor for a kernel function.
-  KernelInfo(uint64_t arch_flags, unary_kernel_fn kernel, unary_params p)
-      : arch_flags(arch_flags), kernel(kernel), params(p) {
+  KernelInfo(uint64_t arch_flags, unary_kernel_fn kernel)
+      : arch_flags(arch_flags), kernel(kernel) {
     assert(kernel);
   }
 };
 
+std::vector<unary_params> get_params_for_op(ynn_unary_operator op) {
+  switch (op) {
+    case ynn_unary_exp:
+      return {
+          unary_params{.exp = exp_params{std::log2(std::exp(1.0f))}},
+          unary_params{.exp = exp_params{0.7f}},
+      };
+    case ynn_unary_erf:
+      return {
+          unary_params{.erf = erf_params{1.0f, 1.0f, 0.0f}},
+          unary_params{.erf = erf_params{0.7f, 0.6f, 0.5f}},
+      };
+    default:
+      return {get_unary_params(op)};
+  }
+}
+
 template <typename A, typename X, typename OpInfo>
 void TestImpl(A, X, const KernelInfo& kernel_info, const OpInfo& op_info,
-              const Shape& shape) {
+              const Shape& shape, const unary_params& params = {}) {
   if (!is_arch_supported(kernel_info.arch_flags)) {
     GTEST_SKIP() << "Unsupported hardware";
   }
@@ -108,7 +127,7 @@ void TestImpl(A, X, const KernelInfo& kernel_info, const OpInfo& op_info,
   x = x.crop_padding({0, 0}, {0, shape.padding_x});
 
   kernel(shape.m, shape.n, a.stride(0) * sizeof(A), a.base(),
-         x.stride(0) * sizeof(X), x.base(), &kernel_info.params);
+         x.stride(0) * sizeof(X), x.base(), &params);
 
   check_results(op_info, a, x);
 }
@@ -140,10 +159,12 @@ TEST_P(Reference, op) {
   ynn_type type = std::get<0>(GetParam());
   ynn_unary_operator op = std::get<1>(GetParam());
   const Shape& shape = std::get<2>(GetParam());
-  auto op_info = get_unary_op_info(op, get_unary_params(op));
-  KernelInfo kernel_info(op, type, get_unary_params(op));
+  KernelInfo kernel_info(op, type);
   SwitchType(type, [&](auto type) {
-    TestImpl(type, type, kernel_info, *op_info, shape);
+    for (const auto& params : get_params_for_op(op)) {
+      auto op_info = get_unary_op_info(op, params);
+      TestImpl(type, type, kernel_info, *op_info, shape, params);
+    }
   });
 }
 
@@ -153,7 +174,7 @@ class ReferenceConvert
 TEST_P(ReferenceConvert, op) {
   ynn_type a = std::get<0>(GetParam());
   ynn_type x = std::get<1>(GetParam());
-  KernelInfo kernel_info(a, x, get_unary_params(ynn_unary_convert));
+  KernelInfo kernel_info(a, x);
   const Shape& shape = std::get<2>(GetParam());
   SwitchType(x, [&](auto x) {
     SwitchType(a,
@@ -212,22 +233,6 @@ const Shape reference_shapes[] = {
     {256, 4, 0, padding},
 };
 
-TEST(Exp, CustomParams) {
-  unary_params params;
-  params.exp.input_multiplier = 0.7f;
-  const Shape shape = {1, 32, 0, 0};
-  const ynn_type type = ynn_type_fp32;
-  const ynn_unary_operator op = ynn_unary_exp;
-  exp op_info(params);
-
-  unary_kernel_fn kernel = get_unary_kernel(op, type, type);
-  if (kernel == nullptr) {
-    GTEST_SKIP() << "No exp kernel found";
-  }
-
-  KernelInfo kernel_info(get_supported_arch_flags(), kernel, params);
-  TestImpl(float(), float(), kernel_info, op_info, shape);
-}
 
 INSTANTIATE_TEST_SUITE_P(RealOps, Reference,
                          Combine(Values(ynn_type_fp32), ValuesIn(all_real_ops),
@@ -265,10 +270,11 @@ const std::vector<Shape> all_shapes = []() {
 #define YNN_ELEMENTWISE_KERNEL(arch_flags, kernel, op, type_a, type_x)  \
   class kernel##_test : public testing::TestWithParam<ynn::Shape> {};   \
   TEST_P(kernel##_test, no_broadcast) {                                 \
-    ynn::KernelInfo kernel_info(arch_flags, kernel,                     \
-                                ynn::get_unary_params(ynn_unary_##op)); \
-    ynn::TestImpl(type_a{}, type_x{}, kernel_info,                      \
-                  ynn::op(kernel_info.params), GetParam());             \
+    ynn::KernelInfo kernel_info(arch_flags, kernel);                    \
+    for (const auto& params : ynn::get_params_for_op(ynn_unary_##op)) { \
+      ynn::TestImpl(type_a{}, type_x{}, kernel_info, ynn::op(params),   \
+                    GetParam(), params);                                \
+    }                                                                   \
   }                                                                     \
   INSTANTIATE_TEST_SUITE_P(                                             \
       test, kernel##_test, ValuesIn(ynn::all_shapes),                   \

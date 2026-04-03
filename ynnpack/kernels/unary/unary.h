@@ -8,6 +8,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <tuple>
 
 #include "ynnpack/base/arch.h"
 #include "ynnpack/base/type.h"
@@ -17,10 +18,33 @@ namespace ynn {
 
 struct exp_params {
   float input_multiplier;
+
+  friend bool operator==(const exp_params& a, const exp_params& b) {
+    return a.input_multiplier == b.input_multiplier;
+  }
+  friend bool operator<(const exp_params& a, const exp_params& b) {
+    return a.input_multiplier < b.input_multiplier;
+  }
+};
+
+struct erf_params {
+  float input_multiplier;
+  float output_multiplier;
+  float output_offset;
+
+  friend bool operator==(const erf_params& a, const erf_params& b) {
+    return std::tie(a.input_multiplier, a.output_multiplier, a.output_offset) ==
+           std::tie(b.input_multiplier, b.output_multiplier, b.output_offset);
+  }
+  friend bool operator<(const erf_params& a, const erf_params& b) {
+    return std::tie(a.input_multiplier, a.output_multiplier, a.output_offset) <
+           std::tie(b.input_multiplier, b.output_multiplier, b.output_offset);
+  }
 };
 
 union unary_params {
   exp_params exp;
+  erf_params erf;
 };
 
 typedef void (*unary_kernel_fn)(size_t width, size_t height, size_t stride_a,

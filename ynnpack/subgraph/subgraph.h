@@ -25,6 +25,7 @@
 #include "ynnpack/base/type.h"
 #include "ynnpack/include/ynnpack.h"
 #include "ynnpack/kernels/ternary/ternary.h"
+#include "ynnpack/kernels/unary/unary.h"
 #include "ynnpack/subgraph/slinky.h"
 #include "slinky/runtime/buffer.h"
 #include "slinky/runtime/evaluate.h"
@@ -234,13 +235,28 @@ struct ynn_node {
   };
   struct unary_elementwise {
     ynn_unary_operator op;
+    ynn::unary_params params;
     friend bool operator==(const unary_elementwise& a,
                            const unary_elementwise& b) {
-      return a.op == b.op;
+      if (a.op != b.op) return false;
+      if (a.op == ynn_unary_exp) {
+        return a.params.exp == b.params.exp;
+      }
+      if (a.op == ynn_unary_erf) {
+        return a.params.erf == b.params.erf;
+      }
+      return true;
     }
     friend bool operator<(const unary_elementwise& a,
                           const unary_elementwise& b) {
-      return a.op < b.op;
+      if (a.op != b.op) return a.op < b.op;
+      if (a.op == ynn_unary_exp) {
+        return a.params.exp < b.params.exp;
+      }
+      if (a.op == ynn_unary_erf) {
+        return a.params.erf < b.params.erf;
+      }
+      return false;
     }
   };
   struct lut {

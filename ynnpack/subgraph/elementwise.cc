@@ -162,9 +162,12 @@ std::pair<float, int32_t> GetScalarQuantization(
 }
 
 ynn_status create_unary(const ynn_node& node, ynn_runtime& runtime,
-                        unary_kernel_fn kernel, unary_params params) {
+                        unary_kernel_fn kernel) {
   assert(node.inputs.size() == 1);
   assert(node.outputs.size() == 1);
+
+  const unary_params& params =
+      std::get<ynn_node::unary_elementwise>(node.op).params;
 
   ynn_runtime_value& a = runtime.value(node.inputs[0]);
   // Unary ops can't handle broadcasting. By constraining the stride of the
@@ -336,10 +339,10 @@ void define_unary(ynn_subgraph& subgraph, ynn_node& node, uint32_t input_a_id,
   // Make the node.
   node.inputs = {input_a_id};
   node.outputs = {output_id};
-  node.op = ynn_node::unary_elementwise{op};
+  node.op = ynn_node::unary_elementwise{op, params};
   infer_shape(node, subgraph);
-  node.create = [kernel, params](const ynn_node& node, ynn_runtime& runtime) {
-    return create_unary(node, runtime, kernel, params);
+  node.create = [kernel](const ynn_node& node, ynn_runtime& runtime) {
+    return create_unary(node, runtime, kernel);
   };
 }
 
@@ -650,10 +653,10 @@ ynn_status ynn_define_convert(ynn_subgraph_t subgraph, uint32_t input_id,
   ynn_node node;
   node.inputs = {input_id};
   node.outputs = {*output_id};
-  node.op = ynn_node::unary_elementwise{ynn_unary_convert};
+  node.op = ynn_node::unary_elementwise{ynn_unary_convert, unary_params{}};
   infer_shape(node, *subgraph);
   node.create = [kernel](const ynn_node& node, ynn_runtime& runtime) {
-    return create_unary(node, runtime, kernel, unary_params{});
+    return create_unary(node, runtime, kernel);
   };
   subgraph->add_node(std::move(node));
   return ynn_status_success;

@@ -143,6 +143,16 @@ cc_test(
 )
 
 cc_test(
+    name = "gelu",
+    srcs = ["gelu.cc"],
+    linkopts = ynn_binary_linkopts(),
+    malloc = ynn_binary_malloc(),
+    deps = TEST_DEPS + [
+        "//ynnpack/subgraph",
+    ],
+)
+
+cc_test(
     name = "fusion_lut",
     srcs = ["fusion_lut.cc"],
     linkopts = ynn_binary_linkopts(),

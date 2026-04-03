@@ -637,16 +637,10 @@ ynn_status implement_gelu(ynn_subgraph_t subgraph, uint32_t input_id,
     input_id = input_float_id;
   }
 
-  uint32_t x_over_2_id = YNN_INVALID_VALUE_ID;
-  ynn_status status = define_binary_scalar_b(subgraph, ynn_binary_multiply,
-                                             input_id, 0.5f, &x_over_2_id);
-  if (status != ynn_status_success) {
-    return status;
-  }
-
   uint32_t x_sqrt2_over_2_id = YNN_INVALID_VALUE_ID;
-  status = define_binary_scalar_b(subgraph, ynn_binary_multiply, input_id,
-                                  std::sqrt(2) / 2, &x_sqrt2_over_2_id);
+  ynn_status status = define_binary_scalar_b(subgraph, ynn_binary_multiply,
+                                             input_id, std::sqrt(2) / 2,
+                                             &x_sqrt2_over_2_id);
   if (status != ynn_status_success) {
     return status;
   }
@@ -659,10 +653,16 @@ ynn_status implement_gelu(ynn_subgraph_t subgraph, uint32_t input_id,
     return status;
   }
 
-  uint32_t erf_x_sqrt2_over_2_id_times_x_over_2_id = YNN_INVALID_VALUE_ID;
-  status = ynn_define_binary(
-      subgraph, ynn_binary_multiply, x_over_2_id, erf_x_sqrt2_over_2_id,
-      &erf_x_sqrt2_over_2_id_times_x_over_2_id, /*flags=*/0);
+  uint32_t half_erf_id = YNN_INVALID_VALUE_ID;
+  status = define_binary_scalar_b(subgraph, ynn_binary_multiply,
+                                  erf_x_sqrt2_over_2_id, 0.5f, &half_erf_id);
+  if (status != ynn_status_success) {
+    return status;
+  }
+
+  uint32_t half_erf_plus_half_id = YNN_INVALID_VALUE_ID;
+  status = define_binary_scalar_b(subgraph, ynn_binary_add, half_erf_id, 0.5f,
+                                  &half_erf_plus_half_id);
   if (status != ynn_status_success) {
     return status;
   }
@@ -672,9 +672,8 @@ ynn_status implement_gelu(ynn_subgraph_t subgraph, uint32_t input_id,
     output_float_id = YNN_INVALID_VALUE_ID;
   }
 
-  status = ynn_define_binary(subgraph, ynn_binary_add, x_over_2_id,
-                             erf_x_sqrt2_over_2_id_times_x_over_2_id,
-                             &output_float_id,
+  status = ynn_define_binary(subgraph, ynn_binary_multiply, input_id,
+                             half_erf_plus_half_id, &output_float_id,
                              /*flags=*/0);
   if (status != ynn_status_success) {
     return status;

@@ -174,8 +174,13 @@ struct expm1_op {
 };
 
 struct erf_op {
-  explicit erf_op(const unary_params& = {}) {}
-  float operator()(float x) const { return std::erf(x); }
+  explicit erf_op(const unary_params& params) : params(params) {}
+  float operator()(float x) const {
+    return std::erf(params.erf.input_multiplier * x) *
+               params.erf.output_multiplier +
+           params.erf.output_offset;
+  }
+  unary_params params;
 };
 
 struct sign_op {
@@ -322,7 +327,12 @@ unary_params get_unary_params(ynn_unary_operator op) {
   switch (op) {
     case ynn_unary_exp:
       return unary_params{
-          .exp = exp_params{static_cast<float>(std::log2(std::exp(1.0)))}};
+          .exp = exp_params{/*input_multiplier=*/static_cast<float>(
+              std::log2(std::exp(1.0)))}};
+    case ynn_unary_erf:
+      return unary_params{.erf = erf_params{/*input_multiplier=*/1.0f,
+                                            /*output_multiplier=*/1.0f,
+                                            /*output_offset=*/0.0f}};
     default:
       return unary_params{};
   }

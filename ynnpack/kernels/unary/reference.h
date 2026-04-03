@@ -12,6 +12,7 @@
 #include <cstdint>
 #include <cstdlib>
 #include <memory>
+#include <random>
 #include <type_traits>
 
 #include <gtest/gtest.h>
@@ -378,15 +379,16 @@ struct expm1 : public unary_op_info {
 };
 
 struct erf : public unary_op_info {
-  explicit erf(const unary_params& = {}) {}
-  float operator()(float x) const override { return std::erf(x); }
+  erf_params params;
+
+  explicit erf(const unary_params& params) : params(params.erf) {}
+  float operator()(float x) const override {
+    return std::erf(params.input_multiplier * x) * params.output_multiplier +
+           params.output_offset;
+  }
 
   float tolerance(float y_ref, ynn_type type) const override {
-    if (type == ynn_type_fp16) {
-      return tol_mixed(y_ref, 3 * epsilon(type), epsilon(type));
-    } else {
-      return tol_relative(y_ref, 3 * epsilon(type));
-    }
+    return tol_mixed(y_ref, 3 * epsilon(type), epsilon(type));
   }
 };
 
@@ -465,6 +467,19 @@ struct hardswish : public unary_op_info {
 
 std::unique_ptr<unary_op_info> get_unary_op_info(
     ynn_unary_operator op, const unary_params& params = {});
+
+template <typename Rng>
+unary_params get_random_unary_params(ynn_unary_operator op, Rng& rng) {
+  std::uniform_real_distribution<float> dist(-2.0f, 2.0f);
+  switch (op) {
+    case ynn_unary_exp:
+      return unary_params{.exp = exp_params{dist(rng)}};
+    case ynn_unary_erf:
+      return unary_params{.exp = exp_params{dist(rng), dist(rng), dist(rng)}};
+    default:
+      return unary_params{};
+  }
+}
 
 // Check that op(a) == x, within tolerances described by `op`.
 template <typename A, typename X>
