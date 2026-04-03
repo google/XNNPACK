@@ -700,6 +700,50 @@ YNN_ALWAYS_INLINE float horizontal_min(f32x4 a) {
                                                12, 13, 14, 15, 8, 9, 10, 11));
   return wasm_f32x4_extract_lane(min, 0);
 }
+
+namespace internal {
+
+// These are helpers for implementing interleave/transpose.
+YNN_ALWAYS_INLINE v128_t unpacklo_x32x4(v128_t a, v128_t b) {
+  return wasm_v32x4_shuffle(a, b, 0, 4, 1, 5);
+}
+YNN_ALWAYS_INLINE v128_t unpackhi_x32x4(v128_t a, v128_t b) {
+  return wasm_v32x4_shuffle(a, b, 2, 6, 3, 7);
+}
+
+YNN_ALWAYS_INLINE v128_t unpacklo_x8x16(v128_t a, v128_t b) {
+  return wasm_v8x16_shuffle(a, b, 0, 16, 1, 17, 2, 18, 3, 19, 4, 20, 5, 21, 6,
+                            22, 7, 23);
+}
+YNN_ALWAYS_INLINE v128_t unpackhi_x8x16(v128_t a, v128_t b) {
+  return wasm_v8x16_shuffle(a, b, 8, 24, 9, 25, 10, 26, 11, 27, 12, 28, 13, 29,
+                            14, 30, 15, 31);
+}
+
+YNN_ALWAYS_INLINE v128_t movehl(v128_t a, v128_t b) {
+  return wasm_v32x4_shuffle(a, b, 6, 7, 2, 3);
+}
+YNN_ALWAYS_INLINE v128_t movelh(v128_t a, v128_t b) {
+  return wasm_v32x4_shuffle(a, b, 0, 1, 4, 5);
+}
+
+}  // namespace internal
+
+template <typename T>
+YNN_ALWAYS_INLINE std::array<vec<T, 4>, 4> transpose(
+    std::array<vec<T, 4>, 4> x) {
+  vec<T, 4> t0{internal::unpacklo_x32x4(x[0].v, x[1].v)};
+  vec<T, 4> t1{internal::unpacklo_x32x4(x[2].v, x[3].v)};
+  vec<T, 4> t2{internal::unpackhi_x32x4(x[0].v, x[1].v)};
+  vec<T, 4> t3{internal::unpackhi_x32x4(x[2].v, x[3].v)};
+  return {{
+      vec<T, 4>{internal::movelh(t0.v, t1.v)},
+      vec<T, 4>{internal::movehl(t1.v, t0.v)},
+      vec<T, 4>{internal::movelh(t2.v, t3.v)},
+      vec<T, 4>{internal::movehl(t3.v, t2.v)},
+  }};
+}
+
 }  // namespace simd
 
 }  // namespace ynn
