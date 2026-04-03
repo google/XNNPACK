@@ -338,7 +338,7 @@ TEST(fusion, transpose_stencil_copy) {
 
   EXPECT_THAT(ProducerOf(z_id, subgraph),
               AllOf(IsStencilCopy(std::vector<ynn_node::stencil_copy::stencil>{
-                        {/*axis=*/1, /*new_axis=*/2, /*extent=*/3,
+                        {/*axis=*/2, /*new_axis=*/3, /*extent=*/3,
                          /*stride=*/1, /*dilation=*/1}}),
                     InputsAre(y_id, YNN_INVALID_VALUE_ID)));
 

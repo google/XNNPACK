@@ -64,14 +64,16 @@ auto make_dot_impl(dot_type type, bool consistent_arithmetic, bool transposed_a,
     const slinky::dim& dummy_dim = slinky::dim::broadcast();
 
     // Learn what we need to know about m, n, k1, k2, k3 before slicing them.
+    const int a_k1_dim = transposed_a ? 1 : 0;
     const slinky::dim& init_c_m = init_c.dim(1);
     const slinky::dim& init_c_n = init_c.dim(0);
     const slinky::dim& c_m = c.dim(1);
     const slinky::dim& c_n = c.dim(0);
-    const slinky::dim& a_k1 = a.dim(0);
-    const slinky::dim& a_k2 = num_k_dims >= 2 ? a.dim(1) : dummy_dim;
-    const slinky::dim& a_k3 = num_k_dims >= 3 ? a.dim(2) : dummy_dim;
-    const slinky::dim& a_m = a.dim(num_k_dims);
+    const slinky::dim& a_k1i = transposed_a ? a.dim(0) : dummy_dim;
+    const slinky::dim& a_k1o = a.dim(a_k1_dim);
+    const slinky::dim& a_k2 = num_k_dims >= 2 ? a.dim(a_k1_dim + 1) : dummy_dim;
+    const slinky::dim& a_k3 = num_k_dims >= 3 ? a.dim(a_k1_dim + 2) : dummy_dim;
+    const slinky::dim& a_m = a.dim(a_k1_dim + num_k_dims);
     const slinky::dim& b_k1i = b.dim(0);
     const slinky::dim& b_ni = b.dim(1);
     const slinky::dim& b_k1o = b.dim(2);
@@ -83,14 +85,13 @@ auto make_dot_impl(dot_type type, bool consistent_arithmetic, bool transposed_a,
     const index_t tile_k = b_k1i.extent() * b_type_element_count;
     // If a is transposed, then the k dimension has been reshaped to have tile_k
     // values in each element.
-    const index_t a_tile_k = transposed_a ? tile_k : 1;
+    const index_t a_tile_k = a_k1i.extent();
     const index_t a_stride_m = a_m.stride();
     const index_t a_stride_k3 = a_k3.stride();
     const index_t a_stride_k2 = a_k2.stride();
-    assert(a_k1.stride() % a_tile_k == 0);
-    const index_t a_stride_k1 = a_k1.stride() / a_tile_k;
-    const index_t k1 = (a_k1.extent() * a_tile_k) & ~(tile_k - 1);
-    const index_t k1_tail = (a_k1.extent() * a_tile_k) & (tile_k - 1);
+    const index_t a_stride_k1 = a_k1o.stride() / a_tile_k;
+    const index_t k1 = (a_k1o.extent() * a_tile_k) & ~(tile_k - 1);
+    const index_t k1_tail = (a_k1o.extent() * a_tile_k) & (tile_k - 1);
     const index_t k2 = a_k2.extent();
     const index_t k3 = a_k3.extent();
     const index_t block_n = pack_b ? b_ni.extent() : c_n.extent();
@@ -125,17 +126,22 @@ auto make_dot_impl(dot_type type, bool consistent_arithmetic, bool transposed_a,
     dot_packed_shape packed_shape;
     packed_shape.block_n = block_n;
     packed_shape.tile_k = tile_k;
-    dot_kernel kernel =
-        get_dot_kernel(type, shape, &packed_shape, consistent_arithmetic,
-                       a_stride_m == a_stride_k1 * a_tile_k
-                           ? std::nullopt
-                           : std::make_optional(transposed_a));
+    std::optional<bool> require_transpose_a = std::make_optional(transposed_a);
+    if (a_stride_m == a_stride_k1 * a_tile_k) {
+      // If the stride of m and k1 are the same (i.e. A is a vector of tile_k
+      // values), then we don't care if the kernel is transposed or not.
+      require_transpose_a = std::nullopt;
+    }
+    dot_kernel kernel = get_dot_kernel(
+        type, shape, &packed_shape, consistent_arithmetic, require_transpose_a);
     assert(kernel.kernel);
     assert(tile_k == kernel.tile_k);
     const index_t block_m = kernel.block_m;
     const index_t block_k = kernel.block_k;
 
-    assert(a_k1.min() == 0);
+    assert(a_k1i.min() == 0);
+    assert(a_k1o.min() == 0);
+    assert(a_tile_k == 1 || a_k1i.stride() == a.elem_size);
     assert(a_k2.min() == 0);
     assert(a_k3.min() == 0);
     assert(b_k1i.min() == 0);
@@ -152,7 +158,8 @@ auto make_dot_impl(dot_type type, bool consistent_arithmetic, bool transposed_a,
     assert(!c_m.is_folded());
     assert(!c_n.is_folded());
     assert(!a_m.is_folded(c_m.min(), c_m.max()));
-    assert(!a_k1.is_folded());
+    assert(!a_k1i.is_folded());
+    assert(!a_k1o.is_folded());
     assert(!a_k2.is_folded());
     assert(!a_k3.is_folded());
     assert(!b_k1o.is_folded());
@@ -176,7 +183,7 @@ auto make_dot_impl(dot_type type, bool consistent_arithmetic, bool transposed_a,
     // `for_each_element` below handles the batch dimensions, we handle the loop
     // over m, and the kernel handles the rest (n, k1, k2, k3). We need to slice
     // off these dimensions so we can handle them.
-    for (size_t i = 0; i < num_k_dims; ++i) {
+    for (size_t i = 0; i < a_k1_dim + num_k_dims; ++i) {
       a.slice(0);
     }
     a.slice(0, c_m.min());
@@ -202,8 +209,9 @@ auto make_dot_impl(dot_type type, bool consistent_arithmetic, bool transposed_a,
 
     const index_t a_stride = transposed_a ? a_stride_k1 : a_stride_m;
     // The kernels assume that the column dimension of a is stride 1 element.
-    assert(transposed_a ? (a_m.extent() == 1 || a_stride_m == a.elem_size)
-                        : (a_k1.extent() == 1 || a_stride_k1 == a.elem_size));
+    assert(transposed_a
+               ? (a_m.extent() == 1 || a_stride_m == a.elem_size * a_tile_k)
+               : (a_k1o.extent() == 1 || a_stride_k1 == a.elem_size));
 
     auto call_kernel = [=, kernel = kernel.kernel](
                            index_t m, index_t n, index_t k1, const void* a,
@@ -478,15 +486,17 @@ uint32_t define_pack_b(ynn_subgraph_t subgraph, const dot_type& type,
 // interleaving `tile_k` rows at a time.
 // TODO(b/454146513): We should try to combine both pack_b and transpose_a into
 // a `split_transpose` op that can handle padding, split, and transpose.
-auto make_transpose_a_impl(index_t tile_k, int m_dim) {
+auto make_transpose_a_impl(int m_dim) {
   constexpr size_t max_rank = YNN_MAX_TENSOR_RANK + ynn_internal_extra_dims;
-  return [tile_k, m_dim](slinky::buffer<const void, max_rank> input,
-                         slinky::buffer<void, max_rank> output) -> index_t {
+  return [m_dim](slinky::buffer<const void, max_rank> input,
+                 slinky::buffer<void, max_rank> output) -> index_t {
     const slinky::dim& input_k = input.dim(0);
     const slinky::dim& input_m = input.dim(m_dim);
-    const slinky::dim& output_ko = output.dim(0);
-    const slinky::dim& output_m = output.dim(m_dim);
+    const slinky::dim& output_ki = output.dim(0);
+    const slinky::dim& output_ko = output.dim(1);
+    const slinky::dim& output_m = output.dim(m_dim + 1);
 
+    const index_t tile_k = output_ki.extent();
     const index_t elem_size = input.elem_size;
     assert(output_m.extent() == 1 || output_m.stride() == elem_size * tile_k);
     (void)output_m;
@@ -508,7 +518,7 @@ auto make_transpose_a_impl(index_t tile_k, int m_dim) {
 
     input.slice(0);
     input.slice(m_dim - 1, output_m.min());
-    output.slice({0, static_cast<size_t>(m_dim)});
+    output.slice({0, 1, static_cast<size_t>(m_dim + 1)});
 
     slinky::for_each_element(
         [&](void* output, const void* input) {
@@ -534,6 +544,7 @@ void define_transpose_a(ynn_subgraph& subgraph, ynn_node& node, index_t tile_k,
   output.extents = a.extents;
   output.extents[0] =
       slinky::simplify(slinky::ceil_div<slinky::expr>(k, tile_k));
+  output.extents.insert(output.extents.begin(), tile_k);
 
   node.inputs = {input_a_id};
   node.outputs = {output.id};
@@ -545,26 +556,29 @@ void define_transpose_a(ynn_subgraph& subgraph, ynn_node& node, index_t tile_k,
     const ynn_runtime_value& input = runtime.value(node.inputs[0]);
     ynn_runtime_value& output = runtime.value(node.outputs[0]);
 
-    slinky::expr elem_size = input.buffer->elem_size() * tile_k;
+    slinky::expr elem_size = input.buffer->elem_size();
     output.make_buffer(runtime, elem_size);
-    output.buffer->dim(m_dim).stride = elem_size;
-    output.buffer->dim(0).stride =
-        elem_size * output.buffer->dim(m_dim).extent();
+    output.buffer->dim(0).stride = elem_size;
+    output.buffer->dim(m_dim + 1).stride = elem_size * tile_k;
+    output.buffer->dim(1).stride =
+        elem_size * tile_k * output.buffer->dim(m_dim + 1).extent();
+
     // Don't allow folding of dimensions we transpose.
-    output.buffer->dim(m_dim).fold_factor = slinky::dim::unfolded;
     output.buffer->dim(0).fold_factor = slinky::dim::unfolded;
+    output.buffer->dim(m_dim + 1).fold_factor = slinky::dim::unfolded;
+    output.buffer->dim(1).fold_factor = slinky::dim::unfolded;
 
     // Split + Transpose
     std::vector<slinky::var> dims =
         runtime.globals.make_dims(output.buffer->rank());
 
-    slinky::expr ko = dims[0];
+    slinky::expr ko = dims[1];
 
     slinky::func::input func_input = {input.buffer};
     func_input.bounds = {
         slinky::min_extent(ko * tile_k, tile_k),
     };
-    for (size_t i = 1; i < dims.size(); ++i) {
+    for (size_t i = 2; i < dims.size(); ++i) {
       func_input.bounds.push_back(slinky::point(dims[i]));
     }
     // This transpose handles padding the input up to tile_k.
@@ -574,7 +588,7 @@ void define_transpose_a(ynn_subgraph& subgraph, ynn_node& node, index_t tile_k,
 
     slinky::call_stmt::attributes attrs;
     attrs.name = "transpose_a";
-    auto func = slinky::func::make(make_transpose_a_impl(tile_k, m_dim),
+    auto func = slinky::func::make(make_transpose_a_impl(m_dim),
                                    {std::move(func_input)},
                                    {{output.buffer, dims}}, std::move(attrs));
 
@@ -962,22 +976,24 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
     slinky::var j = dims[0];
 
     // A: We need all of the k dims, i is elementwise.
-    slinky::box_expr a_bounds(std::min<int>(input_a.rank(), num_k_dims));
+    const int num_a_k_dims = num_k_dims + (transpose_a ? 1 : 0);
+    slinky::box_expr a_bounds(std::min<int>(input_a.rank(), num_a_k_dims));
     for (size_t i = 0; i < a_bounds.size(); ++i) {
       a_bounds[i] = all_bounds(input_a.extent(i));
     }
 
     // B: We need all of the k dims, j is elementwise. j has been split into
     // two dimensions.
-    slinky::box_expr b_bounds(num_k_dims + 3);
+    const int num_b_k_dims = num_k_dims + 2;
+    slinky::box_expr b_bounds(num_b_k_dims + 1);
     b_bounds[0] = all_bounds(packed_b.extent(0));  // ki
     b_bounds[1] = all_bounds(packed_b.extent(1));  // ni
     b_bounds[2] = all_bounds(packed_b.extent(2));  // ko
     // When we split a packed dimension, the inner part of the split remains
     // packed, but the outer part is not.
     b_bounds[3] = slinky::point(j) / packed_b.extent(1);
-    for (size_t i = 1; i < num_k_dims; ++i) {
-      b_bounds[i + 3] = all_bounds(packed_b.extent(i + 3));
+    for (size_t i = 4; i < num_b_k_dims + 1; ++i) {
+      b_bounds[i] = all_bounds(packed_b.extent(i));
     }
 
     // C: Elementwise
@@ -988,9 +1004,9 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
 
     // Batch dims are elementwise too.
     for (size_t i = 1; i < dims.size(); ++i) {
-      if (i + num_k_dims - 1 < input_a.rank()) {
+      if (i + num_a_k_dims - 1 < input_a.rank()) {
         a_bounds.push_back(
-            elementwise_bounds(dims[i], input_a.extent(i + num_k_dims - 1)));
+            elementwise_bounds(dims[i], input_a.extent(i + num_a_k_dims - 1)));
       }
       if (i >= 2 && i + 2 + num_k_dims - 1 < packed_b.rank()) {
         b_bounds.push_back(elementwise_bounds(

@@ -381,6 +381,13 @@ bool rewrite_transpose_stencil_copy(ynn_subgraph& subgraph, ynn_node& node,
   YNN_LOG_DEBUG() << "Rewriting transpose_a(stencil_copy(x)) to "
                      "stencil_copy(transpose_a(x))";
 
+  // transpose_a inserts a new dimension 0, update our stencil dimensions to
+  // account for this.
+  for (ynn_node::stencil_copy::stencil& stencil : stencil_copy.stencils) {
+    stencil.axis++;
+    stencil.new_axis++;
+  }
+
   uint32_t stencil_input_id = stencil_node->inputs[0];
   uint32_t stencil_padding_id = stencil_node->inputs.size() > 1
                                     ? stencil_node->inputs[1]
