@@ -308,6 +308,7 @@ const xnn_unary_operator all_real_ops[] = {
     xnn_unary_exp,
     xnn_unary_floor,
     xnn_unary_gelu,
+    xnn_unary_approxgelu,
     xnn_unary_hardswish,
     xnn_unary_leaky_relu,
     xnn_unary_log,

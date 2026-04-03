@@ -10,13 +10,18 @@
 """Definition of tanh kernels."""
 
 # pylint: disable=undefined-variable
+# pylint: disable=missing-function-docstring
 from ynnpack.kernels.elementwise.compiler import *  # pylint: disable=wildcard-import
 
 
 @const_buffer("a", Float(32))
 @buffer("x", Float(32))
+@params(
+    Scalar("output_multiplier", Float(32)),
+    Scalar("output_offset", Float(32)),
+)
 @operator_name("tanh")
-def tanh_fp32(a, x):
+def tanh_fp32(a, x, output_multiplier, output_offset):
   # Cap the inputs to this value as `tanh(x)` will always be `+/-1.0f` beyond
   # this point. This value is chosen as the first floating point number as of
   # which the interpolation returns 1.0f.
@@ -24,10 +29,13 @@ def tanh_fp32(a, x):
   vmin_x = -7.9807181358e00
 
   # The monomial coefficients of the numerator polynomial (odd).
-  valpha_3 = 1.3412411511e-01
-  valpha_5 = 3.5330520477e-03
-  valpha_7 = 2.1235626264e-05
-  valpha_9 = 1.4248920266e-08
+  # We distribute the output_multiplier into the coefficients, these multiplies
+  # are evaluated outside the loop over the output.
+  valpha_1 = output_multiplier
+  valpha_3 = 1.3412411511e-01 * output_multiplier
+  valpha_5 = 3.5330520477e-03 * output_multiplier
+  valpha_7 = 2.1235626264e-05 * output_multiplier
+  valpha_9 = 1.4248920266e-08 * output_multiplier
 
   # The monomial coefficients of the denominator polynomial (even).
   vbeta_2 = 4.6745735407e-01
@@ -49,7 +57,7 @@ def tanh_fp32(a, x):
   vp = multiply_add(vx2, valpha_9, valpha_7)
   vp = multiply_add(vx2, vp, valpha_5)
   vp = multiply_add(vx2, vp, valpha_3)
-  vp = multiply_add(vx2, vp, 1.0)
+  vp = multiply_add(vx2, vp, valpha_1)
   vp = vx * vp
 
   # Evaluate the denominator polynomial q.
@@ -59,7 +67,4 @@ def tanh_fp32(a, x):
   vq = multiply_add(vx2, vq, vbeta_2)
   vq = multiply_add(vx2, vq, 1.0)
 
-  # Divide the numerator by the denominator.
-  vy = vp / vq
-
-  return store(vy, x)
+  return store(vp / vq + output_offset, x)

@@ -141,8 +141,13 @@ struct cube_root_op {
 };
 
 struct tanh_op {
-  explicit tanh_op(const unary_params& = {}) {}
-  float operator()(float x) const { return std::tanh(x); }
+  unary_params params;
+
+  explicit tanh_op(const unary_params& params) : params(params) {}
+  float operator()(float x) const {
+    return std::tanh(x) * params.tanh.output_multiplier +
+           params.tanh.output_offset;
+  }
 };
 
 struct reciprocal_square_root_op {
@@ -211,6 +216,15 @@ struct hardswish_op {
   }
 };
 
+struct poly3_op {
+  poly3_params params;
+
+  explicit poly3_op(const unary_params& params) : params(params.poly3) {}
+  float operator()(float x) const {
+    return ((params.c3 * x + params.c2) * x + params.c1) * x + params.c0;
+  }
+};
+
 }  // namespace
 
 unary_kernel_fn get_unary_reference_kernel(ynn_unary_operator op,
@@ -257,6 +271,8 @@ unary_kernel_fn get_unary_reference_kernel(ynn_unary_operator op,
         return unary_impl<float, float, sigmoid_op>;
       case ynn_unary_hardswish:
         return unary_impl<float, float, hardswish_op>;
+      case ynn_unary_poly3:
+        return unary_impl<float, float, poly3_op>;
       case ynn_unary_convert:
       case ynn_unary_invalid:
         return nullptr;
@@ -330,9 +346,15 @@ unary_params get_unary_params(ynn_unary_operator op) {
           .exp = exp_params{/*input_multiplier=*/static_cast<float>(
               std::log2(std::exp(1.0)))}};
     case ynn_unary_erf:
-      return unary_params{.erf = erf_params{/*input_multiplier=*/1.0f,
+      return unary_params{.erf = erf_params{/*output_offset=*/0.0f,
                                             /*output_multiplier=*/1.0f,
-                                            /*output_offset=*/0.0f}};
+                                            /*input_multiplier=*/1.0f}};
+    case ynn_unary_tanh:
+      return unary_params{.tanh = tanh_params{/*output_offset=*/0.0f,
+                                              /*output_multiplier=*/1.0f}};
+    case ynn_unary_poly3:
+      return unary_params{.poly3 = poly3_params{/*c0=*/0.0f, /*c1=*/0.0f,
+                                                /*c2=*/0.0f, /*c3=*/0.0f}};
     default:
       return unary_params{};
   }

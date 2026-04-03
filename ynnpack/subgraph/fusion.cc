@@ -749,7 +749,15 @@ bool fold_unary_output(ynn_subgraph& subgraph, ynn_node& node,
 
     ynn_node::unary_elementwise* unary =
         std::get_if<ynn_node::unary_elementwise>(&producer->op);
-    if (unary == nullptr || unary->op != ynn_unary_erf) continue;
+    if (unary == nullptr) continue;
+    switch (unary->op) {
+      case ynn_unary_erf:
+      case ynn_unary_tanh:
+      case ynn_unary_poly3:
+        break;
+      default:
+        continue;
+    }
 
     // Check if the erf output is only used by this binary node.
     if (analysis.consumers[producer->outputs[0]].size() != 1) continue;
@@ -759,10 +767,18 @@ bool fold_unary_output(ynn_subgraph& subgraph, ynn_node& node,
 
     float c = *other.as_scalar_float();
     if (binary_op == ynn_binary_multiply) {
-      unary->params.erf.output_multiplier *= c;
-      unary->params.erf.output_offset *= c;
+      YNN_LOG_DEBUG() << "Folding multiply by " << c << " onto "
+                      << to_string(unary->op) << ".";
+      unary->params.poly3.c0 *= c;
+      unary->params.poly3.c1 *= c;
+      if (unary->op == ynn_unary_poly3) {
+        unary->params.poly3.c2 *= c;
+        unary->params.poly3.c3 *= c;
+      }
     } else {
-      unary->params.erf.output_offset += c;
+      YNN_LOG_DEBUG() << "Folding add of " << c << " onto "
+                      << to_string(unary->op) << ".";
+      unary->params.poly3.c0 += c;
     }
 
     producer->outputs[0] = node.outputs[0];

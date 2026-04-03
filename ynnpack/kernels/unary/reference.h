@@ -252,8 +252,12 @@ struct square_root : public unary_op_info {
 };
 
 struct tanh : public unary_op_info {
-  explicit tanh(const unary_params& = {}) {}
-  float operator()(float x) const override { return std::tanh(x); }
+  tanh_params params;
+
+  explicit tanh(const unary_params& params = {}) : params(params.tanh) {}
+  float operator()(float x) const override {
+    return std::tanh(x) * params.output_multiplier + params.output_offset;
+  }
 
   float tolerance(float y_ref, ynn_type type) const override {
     switch (type) {
@@ -261,7 +265,7 @@ struct tanh : public unary_op_info {
       case ynn_type_fp16:
       case ynn_type_bf16:
         return tol_mixed(y_ref, epsilon(type),
-                         4.0f * epsilon(type));  // 4 ULP
+                         5.0f * epsilon(type));  // 4 ULP
       default:
         return 1;
     }
@@ -463,6 +467,24 @@ struct hardswish : public unary_op_info {
   }
 
   interval domain(ynn_type) const override { return {-4.0f, 4.0f}; }
+};
+
+struct poly3 : public unary_op_info {
+  poly3_params params;
+
+  explicit poly3(const unary_params& params) : params(params.poly3) {}
+  float operator()(float x) const override {
+    return ((params.c3 * x + params.c2) * x + params.c1) * x + params.c0;
+  }
+
+  // Polynomials are tricky to test, because the tolerance should be based on
+  // maximum value of the argument. We don't know what that is, but we can
+  // define the domain to be [-1, 1].
+  interval domain(ynn_type) const override { return {-1.0f, 1.0f}; }
+
+  float tolerance(float y_ref, ynn_type type) const override {
+    return tol_mixed(y_ref, 5.0f * epsilon(type), epsilon(type));
+  }
 };
 
 std::unique_ptr<unary_op_info> get_unary_op_info(

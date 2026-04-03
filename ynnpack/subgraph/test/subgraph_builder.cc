@@ -61,6 +61,18 @@ SubgraphBuilder& SubgraphBuilder::AddUnary(ynn_unary_operator op,
   status_ = ynn_define_unary(subgraph_.get(), op, input_id, &output_id, flags);
   return *this;
 }
+
+SubgraphBuilder& SubgraphBuilder::AddPolynomial(
+    const std::vector<float>& coefficients, uint32_t input_id,
+    uint32_t output_id, uint32_t flags) {
+  assert(!coefficients.empty());
+  assert(status_ == ynn_status_success);
+  status_ = ynn_define_unary_polynomial(subgraph_.get(), input_id,
+                                        coefficients.size() - 1,
+                                        coefficients.data(), &output_id, flags);
+  return *this;
+}
+
 SubgraphBuilder& SubgraphBuilder::AddBinary(ynn_binary_operator op,
                                             uint32_t input_a_id,
                                             uint32_t input_b_id,

@@ -6,6 +6,7 @@
 #ifndef XNNPACK_YNNPACK_KERNELS_UNARY_H_
 #define XNNPACK_YNNPACK_KERNELS_UNARY_H_
 
+#include <algorithm>
 #include <cstddef>
 #include <cstdint>
 #include <tuple>
@@ -28,9 +29,9 @@ struct exp_params {
 };
 
 struct erf_params {
-  float input_multiplier;
-  float output_multiplier;
   float output_offset;
+  float output_multiplier;
+  float input_multiplier;
 
   friend bool operator==(const erf_params& a, const erf_params& b) {
     return std::tie(a.input_multiplier, a.output_multiplier, a.output_offset) ==
@@ -42,9 +43,40 @@ struct erf_params {
   }
 };
 
+struct tanh_params {
+  float output_offset;
+  float output_multiplier;
+
+  friend bool operator==(const tanh_params& a, const tanh_params& b) {
+    return std::tie(a.output_multiplier, a.output_offset) ==
+           std::tie(b.output_multiplier, b.output_offset);
+  }
+  friend bool operator<(const tanh_params& a, const tanh_params& b) {
+    return std::tie(a.output_multiplier, a.output_offset) <
+           std::tie(b.output_multiplier, b.output_offset);
+  }
+};
+
+struct poly3_params {
+  float c0, c1, c2, c3;
+
+  friend bool operator==(const poly3_params& x, const poly3_params& y) {
+    return std::tie(x.c0, x.c1, x.c2, x.c3) == std::tie(y.c0, y.c1, y.c2, y.c3);
+  }
+  friend bool operator<(const poly3_params& x, const poly3_params& y) {
+    return std::tie(x.c0, x.c1, x.c2, x.c3) < std::tie(y.c0, y.c1, y.c2, y.c3);
+  }
+};
+
 union unary_params {
   exp_params exp;
+
+  // All of these params have the first two params a, b, such that they form
+  // output offset and output scale parameters, respectively. We use this fact
+  // to support all of them via poly3's parameters.
   erf_params erf;
+  tanh_params tanh;
+  poly3_params poly3;
 };
 
 typedef void (*unary_kernel_fn)(size_t width, size_t height, size_t stride_a,

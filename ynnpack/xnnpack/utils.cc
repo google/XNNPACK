@@ -689,6 +689,79 @@ ynn_status implement_gelu(ynn_subgraph_t subgraph, uint32_t input_id,
   return ynn_status_success;
 }
 
+ynn_status implement_approxgelu(ynn_subgraph_t subgraph, uint32_t input_id,
+                                uint32_t output_id) {
+  ynn_type input_type = type_of_value(subgraph, input_id);
+
+  if (ynn::type_is_integral(input_type)) {
+    // Convert quantized inputs to float. We'll just convert this whole subgraph
+    // into a LUT anyways.
+    uint32_t input_float_id = YNN_INVALID_VALUE_ID;
+    ynn_status status = ynn_define_convert(
+        subgraph, input_id, ynn_type_fp32,
+        /*zero_point_id=*/YNN_INVALID_VALUE_ID,
+        /*scale_id=*/YNN_INVALID_VALUE_ID, &input_float_id, /*flags=*/0);
+    if (status != ynn_status_success) {
+      return status;
+    }
+    input_id = input_float_id;
+  }
+
+  // (x / 2) * (1 + tanh(sqrt(2 / pi) * (x + 0.044715 * x^3)))
+  const float sqrt_2_over_pi = 0.7978845608f;
+  const float coefficients[] = {0.0f, sqrt_2_over_pi, 0.0f,
+                                sqrt_2_over_pi * 0.044715f};
+
+  uint32_t tanh_arg_id = YNN_INVALID_VALUE_ID;
+  ynn_status status = ynn_define_unary_polynomial(
+      subgraph, input_id, 3, coefficients, &tanh_arg_id, /*flags=*/0);
+  if (status != ynn_status_success) {
+    return status;
+  }
+
+  uint32_t tanh_id = YNN_INVALID_VALUE_ID;
+  status = ynn_define_unary(subgraph, ynn_unary_tanh, tanh_arg_id, &tanh_id,
+                            /*flags=*/0);
+  if (status != ynn_status_success) {
+    return status;
+  }
+
+  uint32_t one_plus_tanh_id = YNN_INVALID_VALUE_ID;
+  status = define_binary_scalar_b(subgraph, ynn_binary_add, tanh_id, 1.0f,
+                                  &one_plus_tanh_id);
+  if (status != ynn_status_success) {
+    return status;
+  }
+
+  uint32_t x_times_half_id = YNN_INVALID_VALUE_ID;
+  status = define_binary_scalar_b(subgraph, ynn_binary_multiply, input_id, 0.5f,
+                                  &x_times_half_id);
+  if (status != ynn_status_success) {
+    return status;
+  }
+
+  uint32_t output_float_id = output_id;
+  if (ynn::type_is_integral(input_type)) {
+    output_float_id = YNN_INVALID_VALUE_ID;
+  }
+
+  status = ynn_define_binary(subgraph, ynn_binary_multiply, x_times_half_id,
+                             one_plus_tanh_id, &output_float_id,
+                             /*flags=*/0);
+  if (status != ynn_status_success) {
+    return status;
+  }
+
+  if (ynn::type_is_integral(input_type)) {
+    status = ynn_define_unary(subgraph, ynn_unary_convert, output_float_id,
+                              &output_id, /*flags=*/0);
+    if (status != ynn_status_success) {
+      return status;
+    }
+  }
+  return ynn_status_success;
+}
+
 // Implements elu(x) = select(x < 0, alpha * expm1(x), x)
 ynn_status implement_elu(ynn_subgraph_t subgraph, uint32_t input_id,
                          float alpha, uint32_t output_id) {

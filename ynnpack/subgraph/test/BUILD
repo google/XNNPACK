@@ -207,6 +207,7 @@ cc_test(
     "slice_like",
     "static_transpose",
     "stencil_copy",
+    "polynomial",
 ]]
 
 cc_test(

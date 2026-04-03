@@ -102,6 +102,19 @@ std::vector<unary_params> get_params_for_op(ynn_unary_operator op) {
           unary_params{.erf = erf_params{1.0f, 1.0f, 0.0f}},
           unary_params{.erf = erf_params{0.7f, 0.6f, 0.5f}},
       };
+    case ynn_unary_tanh:
+      return {
+          unary_params{.tanh = tanh_params{1.0f, 0.0f}},
+          unary_params{.tanh = tanh_params{0.5f, 0.2f}},
+      };
+    case ynn_unary_poly3:
+      return {
+          unary_params{.poly3 = poly3_params{1.0f, 0.0f, 0.0f, 0.0f}},
+          unary_params{.poly3 = poly3_params{1.0f, 1.0f, 0.0f, 0.0f}},
+          unary_params{.poly3 = poly3_params{1.0f, 1.0f, 1.0f, 0.0f}},
+          unary_params{.poly3 = poly3_params{1.0f, 1.0f, 1.0f, 1.0f}},
+          unary_params{.poly3 = poly3_params{0.5f, 0.2f, 0.1f, 0.1f}},
+      };
     default:
       return {get_unary_params(op)};
   }

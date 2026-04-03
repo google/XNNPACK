@@ -112,6 +112,9 @@ class SubgraphBuilder {
 
   SubgraphBuilder& AddUnary(ynn_unary_operator op, uint32_t input_id,
                             uint32_t output_id, uint32_t flags = 0);
+  SubgraphBuilder& AddPolynomial(const std::vector<float>& coefficients,
+                                 uint32_t input_id, uint32_t output_id,
+                                 uint32_t flags = 0);
   SubgraphBuilder& AddBinary(ynn_binary_operator op, uint32_t input_a_id,
                              uint32_t input_b_id, uint32_t output_id,
                              uint32_t flags = 0);

@@ -398,6 +398,55 @@ void define_lut(ynn_subgraph& subgraph, ynn_node& node, uint32_t input_id,
 
 extern "C" {
 
+ynn_status define_unary(ynn_subgraph_t subgraph, ynn_unary_operator op,
+                        uint32_t input_a_id, unary_params params,
+                        uint32_t* output_id, uint32_t flags) {
+  const ynn_value& a = subgraph->value(input_a_id);
+
+  // Propagate rank.
+  ynn_value& x = subgraph->get_output_value(output_id, a);
+  x.extents.clear();
+  x.extents.resize(x.rank());
+
+  // Find the kernel.
+  unary_kernel_fn kernel = get_unary_kernel(op, a.type, x.type);
+  if (!kernel) {
+    unary_kernel_fn float_kernel =
+        get_unary_kernel(op, ynn_type_fp32, ynn_type_fp32);
+    if (float_kernel) {
+      uint32_t a_float_id = YNN_INVALID_VALUE_ID;
+      ynn_status status =
+          ynn_define_convert(subgraph, input_a_id, ynn_type_fp32,
+                             a.zero_point_id, a.scale_id, &a_float_id,
+                             /*flags=*/0);
+      if (status != ynn_status_success) {
+        return status;
+      }
+
+      uint32_t x_float_id = YNN_INVALID_VALUE_ID;
+      status =
+          define_unary(subgraph, op, a_float_id, params, &x_float_id, flags);
+      if (status != ynn_status_success) {
+        return status;
+      }
+
+      return ynn_define_convert(subgraph, x_float_id, x.type, x.zero_point_id,
+                                x.scale_id, output_id, /*flags=*/0);
+    }
+
+    YNN_LOG_ERROR() << "Unsupported unary operator " << op << " for input type "
+                    << a.type << " and output type " << x.type;
+    return ynn_status_unsupported_parameter;
+  }
+
+  // Make the node.
+  ynn_node node;
+  ynn::define_unary(*subgraph, node, input_a_id, *output_id, op, kernel,
+                    params);
+  subgraph->add_node(std::move(node));
+  return ynn_status_success;
+}
+
 ynn_status ynn_define_unary(ynn_subgraph_t subgraph, ynn_unary_operator op,
                             uint32_t input_a_id, uint32_t* output_id,
                             uint32_t flags) {
@@ -423,51 +472,33 @@ ynn_status ynn_define_unary(ynn_subgraph_t subgraph, ynn_unary_operator op,
                               x.scale_id, output_id, flags);
   }
 
-  const ynn_value& a = subgraph->value(input_a_id);
+  return define_unary(subgraph, op, input_a_id, get_unary_params(op), output_id,
+                      flags);
+}
 
-  // Propagate rank.
-  ynn_value& x = subgraph->get_output_value(output_id, a);
-  x.extents.clear();
-  x.extents.resize(x.rank());
+ynn_status ynn_define_unary_polynomial(ynn_subgraph_t subgraph,
+                                       uint32_t input_id, size_t degree,
+                                       const float* coefficients,
+                                       uint32_t* output_id, uint32_t flags) {
+  YNN_RETURN_IF_ERROR(validate_subgraph("unary_polynomial", subgraph));
+  YNN_RETURN_IF_ERROR(validate_input_tensor("unary_polynomial", subgraph,
+                                            "input_id", input_id));
+  YNN_RETURN_IF_ERROR(validate_output_tensor("unary_polynomial", subgraph,
+                                             "output_id", output_id));
 
-  // Find the kernel.
-  unary_kernel_fn kernel = get_unary_kernel(op, a.type, x.type);
-  if (!kernel) {
-    unary_kernel_fn float_kernel =
-        get_unary_kernel(op, ynn_type_fp32, ynn_type_fp32);
-    if (float_kernel) {
-      uint32_t a_float_id = YNN_INVALID_VALUE_ID;
-      ynn_status status =
-          ynn_define_convert(subgraph, input_a_id, ynn_type_fp32,
-                             a.zero_point_id, a.scale_id, &a_float_id,
-                             /*flags=*/0);
-      if (status != ynn_status_success) {
-        return status;
-      }
-
-      uint32_t x_float_id = YNN_INVALID_VALUE_ID;
-      status = ynn_define_unary(subgraph, op, a_float_id, &x_float_id, flags);
-      if (status != ynn_status_success) {
-        return status;
-      }
-
-      return ynn_define_convert(subgraph, x_float_id, x.type, x.zero_point_id,
-                                x.scale_id, output_id, /*flags=*/0);
-    }
-
-    YNN_LOG_ERROR() << "Unsupported unary operator " << op << " for input type "
-                    << a.type << " and output type " << x.type;
+  if (degree > 3) {
+    YNN_LOG_ERROR() << "Only degree 3 polynomials are supported.";
     return ynn_status_unsupported_parameter;
   }
 
-  unary_params params = get_unary_params(op);
+  unary_params params;
+  params.poly3.c0 = coefficients[0];
+  params.poly3.c1 = 1 <= degree ? coefficients[1] : 0.0f;
+  params.poly3.c2 = 2 <= degree ? coefficients[2] : 0.0f;
+  params.poly3.c3 = 3 <= degree ? coefficients[3] : 0.0f;
 
-  // Make the node.
-  ynn_node node;
-  ynn::define_unary(*subgraph, node, input_a_id, *output_id, op, kernel,
-                    params);
-  subgraph->add_node(std::move(node));
-  return ynn_status_success;
+  return define_unary(subgraph, ynn_unary_poly3, input_id, params, output_id,
+                      flags);
 }
 
 ynn_status ynn_define_convert(ynn_subgraph_t subgraph, uint32_t input_id,
