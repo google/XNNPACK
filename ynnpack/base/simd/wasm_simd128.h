@@ -483,21 +483,33 @@ YNN_ALWAYS_INLINE s8x16 operator~(s8x16 a) { return s8x16{wasm_v128_not(a.v)}; }
 YNN_ALWAYS_INLINE f32x4 min(f32x4 a, f32x4 b) {
   return f32x4{wasm_f32x4_min(a.v, b.v)};
 }
+YNN_ALWAYS_INLINE u16x8 min(u16x8 a, u16x8 b) {
+  return u16x8{wasm_u16x8_min(a.v, b.v)};
+}
 YNN_ALWAYS_INLINE s16x8 min(s16x8 a, s16x8 b) {
   return s16x8{wasm_i16x8_min(a.v, b.v)};
 }
 YNN_ALWAYS_INLINE u8x16 min(u8x16 a, u8x16 b) {
   return u8x16{wasm_u8x16_min(a.v, b.v)};
 }
+YNN_ALWAYS_INLINE s8x16 min(s8x16 a, s8x16 b) {
+  return s8x16{wasm_i8x16_min(a.v, b.v)};
+}
 
 YNN_ALWAYS_INLINE f32x4 max(f32x4 a, f32x4 b) {
   return f32x4{wasm_f32x4_max(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE u16x8 max(u16x8 a, u16x8 b) {
+  return u16x8{wasm_u16x8_max(a.v, b.v)};
 }
 YNN_ALWAYS_INLINE s16x8 max(s16x8 a, s16x8 b) {
   return s16x8{wasm_i16x8_max(a.v, b.v)};
 }
 YNN_ALWAYS_INLINE u8x16 max(u8x16 a, u8x16 b) {
   return u8x16{wasm_u8x16_max(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE s8x16 max(s8x16 a, s8x16 b) {
+  return s8x16{wasm_i8x16_max(a.v, b.v)};
 }
 
 YNN_ALWAYS_INLINE f32x4 abs(f32x4 a) { return f32x4{wasm_f32x4_abs(a.v)}; }
