@@ -127,6 +127,31 @@ TEST(fusion, exp_multiplier) {
               1e-6f);
 }
 
+TEST(fusion, exp_negate) {
+  // exp(negate(a)) -> exp(a, multiplier = -log2(e))
+  const uint32_t a_id = 0;
+  const uint32_t x_id = 1;
+  SubgraphBuilder builder(2);
+  uint32_t a_negated_id = YNN_INVALID_VALUE_ID;
+  builder.AddInput(ynn_type_fp32, 2, a_id)
+      .AddOutput(ynn_type_fp32, 2, x_id)
+      .AddTensor(ynn_type_fp32, 2, a_negated_id);
+  builder.AddUnary(ynn_unary_negate, a_id, a_negated_id)
+      .AddUnary(ynn_unary_exp, a_negated_id, x_id);
+
+  ynn_subgraph& subgraph = *builder.GetSubgraph();
+
+  subgraph.fusion();
+  subgraph.invalidate_dead_values();
+
+  ASSERT_THAT(subgraph, AllOf(HasValidNodeCount(1), HasValidValueCount(2)));
+  const ynn_node& node = ProducerOf(x_id, subgraph);
+  EXPECT_THAT(node, IsUnary(ynn_unary_exp));
+  const auto& unary = std::get<ynn_node::unary_elementwise>(node.op);
+  EXPECT_NEAR(unary.params.exp.input_multiplier, -std::log2(std::exp(1.0f)),
+              1e-6f);
+}
+
 TEST(fusion, subtract_multiply) {
   // subtract(a, mul(b, c) -> subtract_multiply(a, b, c)
   const uint32_t a_id = 0;

@@ -58,6 +58,54 @@ bool is_square_node(const ynn_node& node) {
   return false;
 }
 
+struct scalar_arithmetic {
+  // This represents an operation a*x + b
+  uint32_t x_id = YNN_INVALID_VALUE_ID;
+  float a = 1.0f;
+  float b = 0.0f;
+};
+
+// If `node` is a linear expression of scalar constants, returns
+// `scalar_arithmetic` describing the operation.
+std::optional<scalar_arithmetic> is_scalar_arithmetic(
+    const ynn_subgraph& subgraph, const ynn_node& node) {
+  if (is_unary_node(node, ynn_unary_negate)) {
+    return scalar_arithmetic{node.inputs[0], -1.0f, 0.0f};
+  }
+  const ynn_node::binary_elementwise* binary =
+      std::get_if<ynn_node::binary_elementwise>(&node.op);
+  if (binary == nullptr) return std::nullopt;
+
+  if (const auto b = subgraph.value(node.inputs[1]).as_scalar_float()) {
+    switch (binary->op) {
+      case ynn_binary_add:
+        return scalar_arithmetic{node.inputs[0], 1.0f, *b};
+      case ynn_binary_subtract:
+        return scalar_arithmetic{node.inputs[0], 1.0f, -*b};
+      case ynn_binary_multiply:
+        return scalar_arithmetic{node.inputs[0], *b, 0.0f};
+      case ynn_binary_divide:
+        return scalar_arithmetic{node.inputs[0], 1.0f / *b, 0.0f};
+      default:
+        return std::nullopt;
+    }
+  }
+
+  if (const auto a = subgraph.value(node.inputs[0]).as_scalar_float()) {
+    switch (binary->op) {
+      case ynn_binary_add:
+        return scalar_arithmetic{node.inputs[1], 1.0f, *a};
+      case ynn_binary_subtract:
+        return scalar_arithmetic{node.inputs[1], -1.0f, *a};
+      case ynn_binary_multiply:
+        return scalar_arithmetic{node.inputs[1], *a, 0.0f};
+      default:
+        return std::nullopt;
+    }
+  }
+  return std::nullopt;
+}
+
 // Replace `from_id` with `to_id` in the subgraph, assuming `node` is the
 // producer of `from_id`. If `from_id` is an external output, replaces `node`
 // with a copy node from `to_id` to `from_id`, otherwise invalidates the node.
@@ -704,29 +752,23 @@ bool fold_unary_input(ynn_subgraph& subgraph, ynn_node& node,
   }
 
   ynn_node* producer = analysis.producer_of(node.inputs[0]);
-  if (producer && is_binary_node(*producer, ynn_binary_multiply)) {
-    const ynn_value& a = subgraph.value(producer->inputs[0]);
-    const ynn_value& b = subgraph.value(producer->inputs[1]);
-
-    std::optional<float> c;
-    uint32_t x_id = YNN_INVALID_VALUE_ID;
-    if (a.is_static_scalar()) {
-      c = a.as_scalar_float();
-      x_id = producer->inputs[1];
-    } else if (b.is_static_scalar()) {
-      c = b.as_scalar_float();
-      x_id = producer->inputs[0];
+  if (!producer) {
+    return false;
+  }
+  if (auto mul = is_scalar_arithmetic(subgraph, *producer)) {
+    if (mul->b != 0.0f) {
+      // We can't handle addition here.
+      return false;
     }
-
-    if (c) {
-      if (unary->op == ynn_unary_exp) {
-        unary->params.exp.input_multiplier *= *c;
-      } else {
-        unary->params.erf.input_multiplier *= *c;
-      }
-      node.inputs[0] = x_id;
-      return true;
+    YNN_LOG_DEBUG() << "Folding multiply by " << mul->a << " into "
+                    << to_string(unary->op) << ".";
+    if (unary->op == ynn_unary_exp) {
+      unary->params.exp.input_multiplier *= mul->a;
+    } else {
+      unary->params.erf.input_multiplier *= mul->a;
     }
+    node.inputs[0] = mul->x_id;
+    return true;
   }
   return false;
 }
@@ -734,58 +776,41 @@ bool fold_unary_input(ynn_subgraph& subgraph, ynn_node& node,
 // Rewrite f(x) * A + B to fold the arithmetic into the params
 bool fold_unary_output(ynn_subgraph& subgraph, ynn_node& node,
                         subgraph_analysis& analysis) {
-  ynn_binary_operator binary_op;
-  if (is_binary_node(node, ynn_binary_multiply)) {
-    binary_op = ynn_binary_multiply;
-  } else if (is_binary_node(node, ynn_binary_add)) {
-    binary_op = ynn_binary_add;
-  } else {
-    return false;
+  auto scalar_arithmetic = is_scalar_arithmetic(subgraph, node);
+  if (!scalar_arithmetic) return false;
+
+  ynn_node* producer = analysis.producer_of(scalar_arithmetic->x_id);
+  if (producer == nullptr) return false;
+
+  ynn_node::unary_elementwise* unary =
+      std::get_if<ynn_node::unary_elementwise>(&producer->op);
+  if (unary == nullptr) return false;
+
+  switch (unary->op) {
+    case ynn_unary_erf:
+    case ynn_unary_tanh:
+    case ynn_unary_poly3:
+      break;
+    default:
+      return false;
   }
 
-  for (int i : {0, 1}) {
-    ynn_node* producer = analysis.producer_of(node.inputs[i]);
-    if (producer == nullptr) continue;
+  // Check if the output is only used by this binary node.
+  if (analysis.consumers[producer->outputs[0]].size() != 1) return false;
 
-    ynn_node::unary_elementwise* unary =
-        std::get_if<ynn_node::unary_elementwise>(&producer->op);
-    if (unary == nullptr) continue;
-    switch (unary->op) {
-      case ynn_unary_erf:
-      case ynn_unary_tanh:
-      case ynn_unary_poly3:
-        break;
-      default:
-        continue;
-    }
+  YNN_LOG_DEBUG() << "Folding scalar arithmetic onto " << to_string(unary->op);
 
-    // Check if the erf output is only used by this binary node.
-    if (analysis.consumers[producer->outputs[0]].size() != 1) continue;
-
-    const ynn_value& other = subgraph.value(node.inputs[1 - i]);
-    if (!other.is_static_scalar()) continue;
-
-    float c = *other.as_scalar_float();
-    if (binary_op == ynn_binary_multiply) {
-      YNN_LOG_DEBUG() << "Folding multiply by " << c << " onto "
-                      << to_string(unary->op) << ".";
-      unary->params.poly3.c0 *= c;
-      unary->params.poly3.c1 *= c;
-      if (unary->op == ynn_unary_poly3) {
-        unary->params.poly3.c2 *= c;
-        unary->params.poly3.c3 *= c;
-      }
-    } else {
-      YNN_LOG_DEBUG() << "Folding add of " << c << " onto "
-                      << to_string(unary->op) << ".";
-      unary->params.poly3.c0 += c;
-    }
-
-    producer->outputs[0] = node.outputs[0];
-    node.invalidate();
-    return true;
+  unary->params.poly3.c0 *= scalar_arithmetic->a;
+  unary->params.poly3.c1 *= scalar_arithmetic->a;
+  if (unary->op == ynn_unary_poly3) {
+    unary->params.poly3.c2 *= scalar_arithmetic->a;
+    unary->params.poly3.c3 *= scalar_arithmetic->a;
   }
-  return false;
+  unary->params.poly3.c0 += scalar_arithmetic->b;
+
+  producer->outputs[0] = node.outputs[0];
+  node.invalidate();
+  return true;
 }
 
 }  // namespace
@@ -801,19 +826,18 @@ ynn_status ynn_subgraph::fusion() {
     for (ynn_node& node : nodes) {
       if (!node.is_valid()) continue;
 
-      changed =
-          changed || ynn::rewrite_multiply_add(*this, node, analysis) ||
-          ynn::rewrite_multiply_multiply(*this, node, analysis) ||
-          ynn::rewrite_subtract_multiply(*this, node, analysis) ||
-          ynn::rewrite_get_tensor_shape_of_unary(*this, node, analysis) ||
-          ynn::rewrite_clamp(*this, node, analysis) ||
-          ynn::remove_broadcast(*this, node, analysis) ||
-          ynn::rewrite_transpose_stencil_copy(*this, node, analysis) ||
-          ynn::rewrite_reduce_sum_of_squared(*this, node, analysis) ||
-          ynn::rewrite_reduce_sum_convert(*this, node, analysis) ||
-          ynn::rewrite_reduce_sum_squared_convert(*this, node, analysis) ||
-          ynn::fold_unary_input(*this, node, analysis) ||
-          ynn::fold_unary_output(*this, node, analysis);
+      changed = changed || ynn::fold_unary_input(*this, node, analysis) ||
+                ynn::fold_unary_output(*this, node, analysis) ||
+                ynn::rewrite_multiply_add(*this, node, analysis) ||
+                ynn::rewrite_multiply_multiply(*this, node, analysis) ||
+                ynn::rewrite_subtract_multiply(*this, node, analysis) ||
+                ynn::rewrite_get_tensor_shape_of_unary(*this, node, analysis) ||
+                ynn::rewrite_clamp(*this, node, analysis) ||
+                ynn::remove_broadcast(*this, node, analysis) ||
+                ynn::rewrite_transpose_stencil_copy(*this, node, analysis) ||
+                ynn::rewrite_reduce_sum_of_squared(*this, node, analysis) ||
+                ynn::rewrite_reduce_sum_convert(*this, node, analysis) ||
+                ynn::rewrite_reduce_sum_squared_convert(*this, node, analysis);
     }
   } while (changed);
 
