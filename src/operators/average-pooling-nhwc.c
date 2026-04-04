@@ -58,7 +58,7 @@ enum xnn_status create_average_pooling2d_nhwc(
     return xnn_status_uninitialized;
   }
 
-  const uint32_t pooling_size = pooling_height * pooling_width;
+  const uint64_t pooling_size = (uint64_t) pooling_height * pooling_width;
   if (pooling_size == 0) {
     xnn_log_error("failed to create %s operator with %" PRIu32 "x%" PRIu32
                   " pooling size: pooling size dimensions must be non-zero",
@@ -192,9 +192,9 @@ enum xnn_status xnn_create_average_pooling2d_nhwc_f16(
   }
   average_pooling_op->avgpool_config = avgpool_config;
 
-  const uint32_t pooling_size = pooling_height * pooling_width;
+  const uint64_t pooling_size = (uint64_t) pooling_height * pooling_width;
   avgpool_config->init.f16(&average_pooling_op->params.f16_scaleminmax,
-    xnn_float16_from_float(1.0f / (float) (int32_t) pooling_size), fp16_output_min, fp16_output_max);
+    xnn_float16_from_float(1.0f / (float) (int64_t) pooling_size), fp16_output_min, fp16_output_max);
   const bool tf_same_padding = (flags & XNN_FLAG_TENSORFLOW_SAME_PADDING) != 0;
   const bool any_padding = (input_padding_left | input_padding_top | input_padding_right | input_padding_bottom) != 0;
   if (any_padding || tf_same_padding) {
@@ -271,9 +271,9 @@ enum xnn_status xnn_create_average_pooling2d_nhwc_f32(
   }
   average_pooling_op->avgpool_config = avgpool_config;
 
-  const uint32_t pooling_size = pooling_height * pooling_width;
+  const uint64_t pooling_size = (uint64_t) pooling_height * pooling_width;
   avgpool_config->init.f32(&average_pooling_op->params.f32_scaleminmax,
-    1.0f / (float) (int32_t) pooling_size, output_min, output_max);
+    1.0f / (float) (int64_t) pooling_size, output_min, output_max);
   const bool tf_same_padding = (flags & XNN_FLAG_TENSORFLOW_SAME_PADDING) != 0;
   const bool any_padding = (input_padding_left | input_padding_top | input_padding_right | input_padding_bottom);
   if (any_padding || tf_same_padding) {
