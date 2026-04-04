@@ -37,7 +37,7 @@ static XNN_INLINE xnn_simd_f32_t xnn_fmsub_f32(xnn_simd_f32_t a,
 // intrinsic, consider using `avx2` instead.
 static XNN_INLINE xnn_simd_f32_t xnn_sll_f32(xnn_simd_f32_t a, uint8_t bits) {
 #ifdef __AVX2__
-  return _mm256_slli_epi32(a, bits);
+  return _mm256_castsi256_ps(_mm256_slli_epi32(_mm256_castps_si256(a), bits));
 #else
   __m128i a_lo = _mm256_castsi256_si128(_mm256_castps_si256(a));
   __m128i a_hi = _mm256_extractf128_si256(_mm256_castps_si256(a), 1);
@@ -52,7 +52,7 @@ static XNN_INLINE xnn_simd_f32_t xnn_sll_f32(xnn_simd_f32_t a, uint8_t bits) {
 // intrinsic, consider using `avx2` instead.
 static XNN_INLINE xnn_simd_f32_t xnn_srl_f32(xnn_simd_f32_t a, uint8_t bits) {
 #ifdef __AVX2__
-  return _mm256_srli_epi32(a, bits);
+  return _mm256_castsi256_ps(_mm256_srli_epi32(_mm256_castps_si256(a), bits));
 #else
   __m128i a_lo = _mm256_castsi256_si128(_mm256_castps_si256(a));
   __m128i a_hi = _mm256_extractf128_si256(_mm256_castps_si256(a), 1);
@@ -67,7 +67,7 @@ static XNN_INLINE xnn_simd_f32_t xnn_srl_f32(xnn_simd_f32_t a, uint8_t bits) {
 // intrinsic, consider using `avx2` instead.
 static XNN_INLINE xnn_simd_f32_t xnn_sra_f32(xnn_simd_f32_t a, uint8_t bits) {
 #ifdef __AVX2__
-  return _mm256_srai_epi32(a, bits);
+  return _mm256_castsi256_ps(_mm256_srai_epi32(_mm256_castps_si256(a), bits));
 #else
   __m128i a_lo = _mm256_castsi256_si128(_mm256_castps_si256(a));
   __m128i a_hi = _mm256_extractf128_si256(_mm256_castps_si256(a), 1);
