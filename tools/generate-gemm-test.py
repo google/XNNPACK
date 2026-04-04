@@ -791,7 +791,7 @@ def generate_test_cases(
       weights_datatype = token
     elif token in {"f32acc"}:
       accum_type = token
-    elif token in {"fp32", "fp32acc", "rndnu", "rndnu16", "ppmm"}:
+    elif token in {"fp32", "fp16", "fp32acc", "rndnu", "rndnu16", "ppmm"}:
       features = token
     elif token:
       print(f'Unknown token "{token}" in "{ukernel}".')
