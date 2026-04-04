@@ -433,6 +433,7 @@ cc_test(
     malloc = ynn_binary_malloc(),
     deps = [
         ":schedule",
+        "//ynnpack/base",
     ] + ynn_test_deps(),
 )
 

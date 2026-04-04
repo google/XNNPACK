@@ -12,6 +12,7 @@
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include "ynnpack/base/span.h"
 
 using testing::ElementsAre;
 
@@ -84,17 +85,22 @@ dot_call dot_call_at(size_t m, size_t n, size_t k, size_t i, size_t j,
 };
 
 auto make_record_calls(std::vector<dot_call>& calls) {
-  return [&](size_t m, size_t n, size_t k, const void* a, const void* b,
-             size_t init_c_stride_m, const void* init_c,
-             const void* c) { calls.push_back({m, n, k, a, b, init_c, c}); };
+  return [&](size_t m, size_t n, span<const size_t> k, const void* a,
+             size_t a_stride_m, span<const size_t> a_k_strides, const void* b,
+             span<const size_t> b_k_strides, size_t init_c_stride_m,
+             const void* init_c,
+             const void* c) { calls.push_back({m, n, k[0], a, b, init_c, c}); };
 }
 
 TEST(run_dot, loop_m) {
   const dot_loop loops[] = {{dot_loop::m, 1}};
+  const size_t ks[] = {k};
+  const size_t a_k_strides[] = {a_stride_k};
+  const size_t b_k_strides[] = {b_stride_k};
 
   std::vector<dot_call> calls;
-  run_dot(loops, m, n, k, block_m, block_n, block_k, a_stride_m, a_stride_k, a,
-          b_stride_k, b_stride_n, b, init_c_stride_m, init_c, c_stride_m,
+  run_dot(loops, m, n, ks, block_m, block_n, block_k, a_stride_m, a_k_strides,
+          a, b_k_strides, b_stride_n, b, init_c_stride_m, init_c, c_stride_m,
           c_stride_n, c, make_record_calls(calls));
   ASSERT_THAT(calls,
               ElementsAre(dot_call_at(block_m, n, k, 0 * block_m, 0, 0),
@@ -104,10 +110,13 @@ TEST(run_dot, loop_m) {
 
 TEST(run_dot, loop_n) {
   const dot_loop loops[] = {{dot_loop::n, 1}};
+  const size_t ks[] = {k};
+  const size_t a_k_strides[] = {a_stride_k};
+  const size_t b_k_strides[] = {b_stride_k};
 
   std::vector<dot_call> calls;
-  run_dot(loops, m, n, k, block_m, block_n, block_k, a_stride_m, a_stride_k, a,
-          b_stride_k, b_stride_n, b, init_c_stride_m, init_c, c_stride_m,
+  run_dot(loops, m, n, ks, block_m, block_n, block_k, a_stride_m, a_k_strides,
+          a, b_k_strides, b_stride_n, b, init_c_stride_m, init_c, c_stride_m,
           c_stride_n, c, make_record_calls(calls));
 
   ASSERT_THAT(calls,
@@ -120,24 +129,31 @@ TEST(run_dot, loop_n) {
 
 TEST(run_dot, loop_n_tail) {
   const dot_loop loops[] = {{dot_loop::n, 2}};
+  const size_t ks[] = {k};
+  const size_t a_k_strides[] = {a_stride_k};
+  const size_t b_k_strides[] = {b_stride_k};
 
   std::vector<dot_call> calls;
-  run_dot(loops, m, n, k, block_m, block_n, block_k, a_stride_m, a_stride_k, a,
-          b_stride_k, b_stride_n, b, init_c_stride_m, init_c, c_stride_m,
+  run_dot(loops, m, n, ks, block_m, block_n, block_k, a_stride_m, a_k_strides,
+          a, b_k_strides, b_stride_n, b, init_c_stride_m, init_c, c_stride_m,
           c_stride_n, c, make_record_calls(calls));
 
-  ASSERT_THAT(calls,
-              ElementsAre(dot_call_at(m, 2 * block_n, k, 0, 0 * block_n, 0),
-                          dot_call_at(m, 2 * block_n, k, 0, 2 * block_n, 0),
-                          dot_call_at(m, block_n, k, 0, 4 * block_n, 0)));
+  ASSERT_THAT(
+      calls,
+      ElementsAre(dot_call_at(m, 2 * block_n, k, 0, 0 * block_n, 0),
+                  dot_call_at(m, 2 * block_n, k, 0, 2 * block_n, 0),
+                  dot_call_at(m, n - 4 * block_n, k, 0, 4 * block_n, 0)));
 }
 
 TEST(run_dot, loop_k) {
   const dot_loop loops[] = {{dot_loop::k, 1}};
+  const size_t ks[] = {k};
+  const size_t a_k_strides[] = {a_stride_k};
+  const size_t b_k_strides[] = {b_stride_k};
 
   std::vector<dot_call> calls;
-  run_dot(loops, m, n, k, block_m, block_n, block_k, a_stride_m, a_stride_k, a,
-          b_stride_k, b_stride_n, b, init_c_stride_m, init_c, c_stride_m,
+  run_dot(loops, m, n, ks, block_m, block_n, block_k, a_stride_m, a_k_strides,
+          a, b_k_strides, b_stride_n, b, init_c_stride_m, init_c, c_stride_m,
           c_stride_n, c, make_record_calls(calls));
 
   ASSERT_THAT(calls,

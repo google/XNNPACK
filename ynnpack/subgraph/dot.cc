@@ -21,6 +21,7 @@
 #include "ynnpack/base/arithmetic.h"
 #include "ynnpack/base/base.h"
 #include "ynnpack/base/log.h"
+#include "ynnpack/base/span.h"
 #include "ynnpack/base/type.h"
 #include "ynnpack/include/ynnpack.h"
 #include "ynnpack/kernels/dot/pack.h"
@@ -207,22 +208,36 @@ auto make_dot_impl(dot_type type, bool consistent_arithmetic, bool transposed_a,
     // hopes of making i bigger, which should improve performance in cases where
     // block_m does not divide c_m.extent()
 
-    const index_t a_stride = transposed_a ? a_stride_k1 : a_stride_m;
     // The kernels assume that the column dimension of a is stride 1 element.
     assert(transposed_a
                ? (a_m.extent() == 1 || a_stride_m == a.elem_size * a_tile_k)
                : (a_k1o.extent() == 1 || a_stride_k1 == a.elem_size));
 
-    auto call_kernel = [=, kernel = kernel.kernel](
-                           index_t m, index_t n, index_t k1, const void* a,
-                           const void* b, index_t init_c_stride_m,
-                           const void* init_c, void* c) {
-      assert(n <= block_n);
-      assert(m <= block_m);
-      kernel(m, n, k3, k2, k1, a_stride, a_stride_k3, a_stride_k2, a,
-             b_stride_k3, b_stride_k2, b_stride_k1, b, init_c_stride_m, init_c,
-             c_stride_m, c);
+    std::array<size_t, 3> k = {static_cast<size_t>(k1), static_cast<size_t>(k2),
+                               static_cast<size_t>(k3)};
+    std::array<size_t, 3> a_k_strides = {
+        static_cast<size_t>(a_stride_k1),
+        static_cast<size_t>(a_stride_k2),
+        static_cast<size_t>(a_stride_k3),
     };
+    std::array<size_t, 3> b_k_strides = {
+        static_cast<size_t>(b_stride_k1),
+        static_cast<size_t>(b_stride_k2),
+        static_cast<size_t>(b_stride_k3),
+    };
+
+    auto call_kernel =
+        [transposed_a, c_stride_m, kernel = kernel.kernel](
+            index_t m, index_t n, span<const size_t> k, const void* a,
+            size_t a_stride_m, span<const size_t> a_k_strides, const void* b,
+            span<const size_t> b_k_strides, index_t init_c_stride_m,
+            const void* init_c, void* c) {
+          kernel(m, n, k[2], k[1], k[0],
+                 transposed_a ? a_k_strides[0] : a_stride_m,
+                 a_k_strides[2], a_k_strides[1], a, b_k_strides[2],
+                 b_k_strides[1], b_k_strides[0], b, init_c_stride_m, init_c,
+                 c_stride_m, c);
+        };
 
     const size_t cache_sizes[] = {cache_size_l2};
 
@@ -230,23 +245,26 @@ auto make_dot_impl(dot_type type, bool consistent_arithmetic, bool transposed_a,
     dot_loop loops_storage[std::size(cache_sizes) * 3];
 
     if (k1) {
-      auto loops = schedule_dot(cache_sizes, c_m.extent(), c_n.extent(), k1, k2,
-                                k3, block_m, block_n, block_k, a.elem_size,
+      auto loops = schedule_dot(cache_sizes, c_m.extent(), c_n.extent(), k,
+                                block_m, block_n, block_k, a.elem_size,
                                 b.elem_size, loops_storage);
 
       slinky::for_each_element(
           [&](void* c, const void* a, const void* b, const void* init_c) {
-            run_dot(loops, c_m.extent(), c_n.extent(), k1, block_m, block_n,
-                    block_k, a_stride_m, a_stride_k1, a, b_stride_k1,
+            run_dot(loops, c_m.extent(), c_n.extent(), k, block_m, block_n,
+                    block_k, a_stride_m, a_k_strides, a, b_k_strides,
                     b_stride_n, b, init_c_stride_m, init_c, c_stride_m,
                     c_stride_n, c, call_kernel);
           },
           c, a, b, init_c);
     }
     if (k1_tail) {
-      auto loops = schedule_dot(cache_sizes, c_m.extent(), c_n.extent(),
-                                k1_tail, k2, k3, block_m, block_n, block_k,
-                                a.elem_size, b.elem_size, loops_storage);
+      std::array<size_t, 3> k_tail = {static_cast<size_t>(k1_tail),
+                                      static_cast<size_t>(k2),
+                                      static_cast<size_t>(k3)};
+      auto loops = schedule_dot(cache_sizes, c_m.extent(), c_n.extent(), k_tail,
+                                block_m, block_n, block_k, a.elem_size,
+                                b.elem_size, loops_storage);
       // Dot kernels can't handle k1 not aligned to tile_k. We handle that here
       // by making a padded copy of the unaligned elements and calling the
       // kernel again.
@@ -260,32 +278,38 @@ auto make_dot_impl(dot_type type, bool consistent_arithmetic, bool transposed_a,
       const index_t a_padded_stride_m = a.elem_size * tile_k;
       void* a_padded = YNN_ALLOCA(uint8_t, block_m* a_padded_stride_m);
       memset(a_padded, 0, a_padded_stride_m * block_m);
-      auto call_kernel_tail = [&](index_t m, index_t n, index_t k1,
-                                  const void* a, const void* b,
-                                  index_t init_c_stride_m, const void* init_c,
-                                  void* c) {
-        assert(m <= block_m);
-        assert(n <= block_n);
-        assert(k1 < tile_k);
-        for (index_t K3 = 0; K3 < k3; ++K3) {
-          for (index_t K2 = 0; K2 < k2; ++K2) {
-            for (index_t i = 0; i < m; ++i) {
-              memcpy(offset_bytes(a_padded, i * a_padded_stride_m),
-                     offset_bytes(a, i * a_stride_m + K3 * a_stride_k3 +
-                                         K2 * a_stride_k2),
-                     k1 * a_elem_size);
+      const size_t a_k_strides_tail_v[] = {static_cast<size_t>(a_stride_k1),
+                                           static_cast<size_t>(a_stride_k2),
+                                           static_cast<size_t>(a_stride_k3)};
+      span<const size_t> a_k_strides_tail = a_k_strides_tail_v;
+      auto call_kernel_tail =
+          [&](index_t m, index_t n, span<const size_t> k, const void* a,
+              size_t a_stride_m, span<const size_t> a_k_strides, const void* b,
+              span<const size_t> b_k_strides, index_t init_c_stride_m,
+              const void* init_c, void* c) {
+            assert(m <= block_m);
+            assert(n <= block_n);
+            assert(k[0] < tile_k);
+            for (index_t K3 = 0; K3 < k3; ++K3) {
+              for (index_t K2 = 0; K2 < k2; ++K2) {
+                for (index_t i = 0; i < m; ++i) {
+                  memcpy(offset_bytes(a_padded, i * a_padded_stride_m),
+                         offset_bytes(a, i * a_stride_m + K3 * a_k_strides[2] +
+                                             K2 * a_k_strides[1]),
+                         k[0] * a_elem_size);
+                }
+                kernel.kernel(
+                    m, n, /*k3=*/1, /*k2=*/1, tile_k, a_padded_stride_m,
+                    /*a_stride_k3=*/0, /*a_stride_k2=*/0, a_padded,
+                    /*b_stride_k3=*/0,
+                    /*b_stride_k2=*/0, b_k_strides[0],
+                    offset_bytes(b, K3 * b_k_strides[2] + K2 * b_k_strides[1]),
+                    init_c_stride_m, init_c, c_stride_m, c);
+                init_c_stride_m = c_stride_m;
+                init_c = c;
+              }
             }
-            kernel.kernel(m, n, /*k3=*/1, /*k2=*/1, tile_k, a_padded_stride_m,
-                          /*a_stride_k3=*/0, /*a_stride_k2=*/0, a_padded,
-                          /*b_stride_k3=*/0,
-                          /*b_stride_k2=*/0, b_stride_k1,
-                          offset_bytes(b, K3 * b_stride_k3 + K2 * b_stride_k2),
-                          init_c_stride_m, init_c, c_stride_m, c);
-            init_c_stride_m = c_stride_m;
-            init_c = c;
-          }
-        }
-      };
+          };
       slinky::for_each_element(
           [&](void* c, const void* a, const void* b, const void* init_c) {
             index_t tail_init_c_stride_m = init_c_stride_m;
@@ -295,12 +319,10 @@ auto make_dot_impl(dot_type type, bool consistent_arithmetic, bool transposed_a,
             }
             a = offset_bytes(a, a_stride_k1 * k1);
             b = offset_bytes(b, b_stride_k1 * k1);
-            // We only expect to run one iteration of k here, so the k strides
-            // are irrelevant.
-            run_dot(loops, c_m.extent(), c_n.extent(), k1_tail, block_m,
-                    block_n, block_k, a_stride_m, /*a_stride_k1=*/0, a,
-                    /*b_stride_k1=*/0, b_stride_n, b, tail_init_c_stride_m,
-                    init_c, c_stride_m, c_stride_n, c, call_kernel_tail);
+            run_dot(loops, c_m.extent(), c_n.extent(), k_tail, block_m, block_n,
+                    block_k, a_stride_m, a_k_strides_tail, a, b_k_strides,
+                    b_stride_n, b, tail_init_c_stride_m, init_c, c_stride_m,
+                    c_stride_n, c, call_kernel_tail);
           },
           c, a, b, init_c);
     }
