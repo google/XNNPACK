@@ -2604,10 +2604,20 @@ static enum xnn_status reshape_igemm(
   const size_t groups = convolution_op->convolution_op->groups;
   const size_t kernel_height = convolution_op->convolution_op->kernel_height;
   const size_t kernel_width = convolution_op->convolution_op->kernel_width;
-  const size_t kernel_size = kernel_height * kernel_width;
+  size_t kernel_size;
+  if (!xnn_safe_mul(kernel_height, kernel_width, &kernel_size)) {
+    xnn_log_error("failed to reshape %s operator: kernel size overflow",
+      xnn_operator_type_to_string_v2(convolution_op));
+    return xnn_status_out_of_memory;
+  }
   const size_t output_height = convolution_op->convolution_op->output_height;
   const size_t output_width = convolution_op->convolution_op->output_width;
-  const size_t output_size = output_height * output_width;
+  size_t output_size;
+  if (!xnn_safe_mul(output_height, output_width, &output_size)) {
+    xnn_log_error("failed to reshape %s operator: output size overflow",
+      xnn_operator_type_to_string_v2(convolution_op));
+    return xnn_status_out_of_memory;
+  }
 
   const uint32_t nr = convolution_op->ukernel.igemm->nr;
   struct xnn_hmp_igemm_ukernel* igemm_cases =
@@ -2621,8 +2631,13 @@ static enum xnn_status reshape_igemm(
   struct xnn_hmp_igemm_ukernel igemm_ukernel = igemm_cases[mr - 1];
 
   const size_t tiled_output_size = round_up(output_size, mr);
-  const size_t indirection_buffer_size =
-      sizeof(void*) * kernel_size * tiled_output_size;
+  size_t indirection_buffer_size;
+  if (!xnn_safe_mul3(sizeof(void*), kernel_size, tiled_output_size,
+                     &indirection_buffer_size)) {
+    xnn_log_error("failed to reshape %s operator: indirection buffer size overflow",
+      xnn_operator_type_to_string_v2(convolution_op));
+    return xnn_status_out_of_memory;
+  }
   struct compute_parameters* igemm_compute = &convolution_op->compute[0];
 
   if (convolution_op->flags & XNN_FLAG_TRANSIENT_INDIRECTION_BUFFER) {
@@ -2894,15 +2909,31 @@ static enum xnn_status reshape_dwconv(
   const size_t input_width = convolution_op->convolution_op->input_width;
   const size_t kernel_height = convolution_op->convolution_op->kernel_height;
   const size_t kernel_width = convolution_op->convolution_op->kernel_width;
-  const size_t kernel_size = kernel_height * kernel_width;
+  size_t kernel_size;
+  if (!xnn_safe_mul(kernel_height, kernel_width, &kernel_size)) {
+    xnn_log_error("failed to reshape %s operator: kernel size overflow",
+      xnn_operator_type_to_string_v2(convolution_op));
+    return xnn_status_out_of_memory;
+  }
   const size_t output_height = convolution_op->convolution_op->output_height;
   const size_t output_width = convolution_op->convolution_op->output_width;
   const size_t step_width =
       convolution_op->convolution_op->dilation_width == 1
           ? min(convolution_op->convolution_op->stride_width, kernel_width)
           : kernel_width;
-  const size_t step_height =
-      kernel_size + (output_width - 1) * step_width * kernel_height;
+  size_t step_height_partial;
+  if (!xnn_safe_mul3(output_width > 0 ? output_width - 1 : 0, step_width,
+                     kernel_height, &step_height_partial)) {
+    xnn_log_error("failed to reshape %s operator: step height overflow",
+      xnn_operator_type_to_string_v2(convolution_op));
+    return xnn_status_out_of_memory;
+  }
+  size_t step_height;
+  if (!xnn_safe_add(kernel_size, step_height_partial, &step_height)) {
+    xnn_log_error("failed to reshape %s operator: step height overflow",
+      xnn_operator_type_to_string_v2(convolution_op));
+    return xnn_status_out_of_memory;
+  }
   const struct xnn_ukernel_dwconv dwconv_ukernel =
       convolution_op->ukernel.dwconv;
   const size_t primary_tile = dwconv_ukernel.primary_tile;
@@ -2910,10 +2941,23 @@ static enum xnn_status reshape_dwconv(
 
   // Micro-kernel will read (tile_size - kernel_size) elements after the end of
   // indirection buffer.
-  const size_t indirection_buffer_size =
-      round_up_po2(sizeof(void*) * (primary_tile - kernel_size +
-                                    output_height * step_height),
-                   XNN_ALLOCATION_ALIGNMENT);
+  size_t indirection_elements;
+  if (!xnn_safe_mul(output_height, step_height, &indirection_elements) ||
+      !xnn_safe_add(indirection_elements, primary_tile - kernel_size,
+                    &indirection_elements)) {
+    xnn_log_error("failed to reshape %s operator: indirection buffer overflow",
+      xnn_operator_type_to_string_v2(convolution_op));
+    return xnn_status_out_of_memory;
+  }
+  size_t indirection_buffer_size;
+  if (!xnn_safe_mul(sizeof(void*), indirection_elements,
+                    &indirection_buffer_size)) {
+    xnn_log_error("failed to reshape %s operator: indirection buffer size overflow",
+      xnn_operator_type_to_string_v2(convolution_op));
+    return xnn_status_out_of_memory;
+  }
+  indirection_buffer_size =
+      round_up_po2(indirection_buffer_size, XNN_ALLOCATION_ALIGNMENT);
 
   size_t dwconv_compute_index;
   const bool is_transient_indirection_buffer =
