@@ -23,7 +23,7 @@ arch_to_target = {
     "arm_neon": ARM(["NEON"]),
     "arm_neonfp16": ARM(["NEONFP16"]),
     "arm_neon_fma": ARM(["NEON", "FMA"]),
-    "wasm_simd128": WASM(["WASM_SIMD128"]),
+    "wasm_simd128": WASM(["SIMD128"]),
 }
 
 

@@ -17,9 +17,9 @@ YNN_UNARY_REDUCE_KERNEL(arch_flag::hvx, min_uint8_4x128_hvx, uint8_t, uint8_t)
 #endif  // YNN_ARCH_HEXAGON_HVX
 
 #ifdef YNN_ARCH_WASM_SIMD128
-YNN_UNARY_REDUCE_KERNEL(arch_flag::wasm_simd128, min_fp32_4x4_wasm_simd128, float, float)
-YNN_UNARY_REDUCE_KERNEL(arch_flag::wasm_simd128, min_int8_4x16_wasm_simd128, int8_t, int8_t)
-YNN_UNARY_REDUCE_KERNEL(arch_flag::wasm_simd128, min_uint8_4x16_wasm_simd128, uint8_t, uint8_t)
+YNN_UNARY_REDUCE_KERNEL(arch_flag::simd128, min_fp32_4x4_simd128, float, float)
+YNN_UNARY_REDUCE_KERNEL(arch_flag::simd128, min_int8_4x16_simd128, int8_t, int8_t)
+YNN_UNARY_REDUCE_KERNEL(arch_flag::simd128, min_uint8_4x16_simd128, uint8_t, uint8_t)
 #endif  // YNN_ARCH_WASM_SIMD128
 
 #ifdef YNN_ARCH_X86_AVX512

@@ -14,7 +14,7 @@ namespace simd {
 
 class wasm_simd128 : public ::testing::Test {
   void SetUp() override {
-    if (!is_arch_supported(arch_flag::wasm_simd128)) {
+    if (!is_arch_supported(arch_flag::simd128)) {
       GTEST_SKIP() << "wasm simd128 not supported on this hardware";
     }
   }

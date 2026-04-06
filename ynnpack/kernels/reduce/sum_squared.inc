@@ -25,7 +25,7 @@ YNN_UNARY_REDUCE_KERNEL(arch_flag::hvx, sum_squared_uint8_int32_hvx, uint8_t, in
 #endif  // YNN_ARCH_HEXAGON_HVX
 
 #ifdef YNN_ARCH_WASM_SIMD128
-YNN_UNARY_REDUCE_KERNEL(arch_flag::wasm_simd128, sum_squared_fp32_wasm_simd128, float, float)
+YNN_UNARY_REDUCE_KERNEL(arch_flag::simd128, sum_squared_fp32_simd128, float, float)
 #endif  // YNN_ARCH_WASM_SIMD128
 
 #ifdef YNN_ARCH_X86_AVX512BF16
