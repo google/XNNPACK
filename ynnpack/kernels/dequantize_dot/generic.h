@@ -60,52 +60,98 @@ static void dequantize_dot(size_t m, size_t n, size_t stride_dot_m,
         b_scale_m, stride_b_scale_n);
     broadcast_to_load<Vectorize * Unroll, int32_t> b_offset_broadcast(
         b_offset_m, stride_b_offset_n);
-    broadcast_to_load<Vectorize * Unroll, float> offset_broadcast(
-        offset_m, stride_offset_n);
 
-    size_t j = n;
+    if (stride_offset_n == 0) {
+      size_t j = n;
 
-    // Process n elements, with a constant upper bound of N.
-    auto body = [&](auto n, auto N) {
-      assert(n <= N);
-      auto dot_n = simd::load(dot_m, n, simd::undef<N>{});
-      const auto a_offset_n = simd::broadcast<N>(a_offset_m);
-      const auto a_scale_n = simd::broadcast<N>(a_scale_m);
-      const auto b_offset_n = simd::load(b_offset_m, n, simd::undef<N>{});
-      const auto b_scale_n = simd::load(b_scale_m, n, simd::undef<N>{});
-      const auto offset_n = simd::load(offset_m, n, simd::undef<N>{});
+      // Process n elements, with a constant upper bound of N.
+      auto body = [&](auto n, auto N) {
+        assert(n <= N);
+        auto dot_n = simd::load(dot_m, n, simd::undef<N>{});
+        const auto a_offset_n = simd::broadcast<N>(a_offset_m);
+        const auto a_scale_n = simd::broadcast<N>(a_scale_m);
+        const auto b_offset_n = simd::load(b_offset_m, n, simd::undef<N>{});
+        const auto b_scale_n = simd::load(b_scale_m, n, simd::undef<N>{});
+        const auto offset_n = simd::broadcast<N>(*offset_m);
 
-      dot_n -= a_offset_n * b_offset_n;
-      auto output_n = cast(dot_n, float{}) * (a_scale_n * b_scale_n) + offset_n;
+        dot_n -= a_offset_n * b_offset_n;
+        auto output_n =
+            cast(dot_n, float{}) * (a_scale_n * b_scale_n) + offset_n;
 
-      store(output_m, cast(output_n, Output{}), n);
-    };
+        store(output_m, cast(output_n, Output{}), n);
+      };
 
-    while (j >= Vectorize * Unroll) {
-      constexpr std::integral_constant<size_t, Vectorize * Unroll> N = {};
-      body(N, N);
+      while (j >= Vectorize * Unroll) {
+        constexpr std::integral_constant<size_t, Vectorize * Unroll> N = {};
+        body(N, N);
 
-      j -= N;
-      dot_m = offset_bytes(dot_m, N * sizeof(int32_t));
-      b_offset_m = offset_bytes(b_offset_m, N * stride_b_offset_n);
-      b_scale_m = offset_bytes(b_scale_m, N * stride_b_scale_n);
-      offset_m = offset_bytes(offset_m, N * stride_offset_n);
-      output_m = offset_bytes(output_m, N * sizeof(Output));
-    }
-    while (j >= Vectorize) {
-      constexpr std::integral_constant<size_t, Vectorize> N = {};
-      body(N, N);
+        j -= N;
+        dot_m = offset_bytes(dot_m, N * sizeof(int32_t));
+        b_offset_m = offset_bytes(b_offset_m, N * stride_b_offset_n);
+        b_scale_m = offset_bytes(b_scale_m, N * stride_b_scale_n);
+        output_m = offset_bytes(output_m, N * sizeof(Output));
+      }
+      while (j >= Vectorize) {
+        constexpr std::integral_constant<size_t, Vectorize> N = {};
+        body(N, N);
 
-      j -= N;
-      dot_m = offset_bytes(dot_m, N * sizeof(int32_t));
-      b_offset_m = offset_bytes(b_offset_m, N * stride_b_offset_n);
-      b_scale_m = offset_bytes(b_scale_m, N * stride_b_scale_n);
-      offset_m = offset_bytes(offset_m, N * stride_offset_n);
-      output_m = offset_bytes(output_m, N * sizeof(Output));
-    }
-    if (j > 0) {
-      constexpr std::integral_constant<size_t, Vectorize> N = {};
-      body(j, N);
+        j -= N;
+        dot_m = offset_bytes(dot_m, N * sizeof(int32_t));
+        b_offset_m = offset_bytes(b_offset_m, N * stride_b_offset_n);
+        b_scale_m = offset_bytes(b_scale_m, N * stride_b_scale_n);
+        output_m = offset_bytes(output_m, N * sizeof(Output));
+      }
+      if (j > 0) {
+        constexpr std::integral_constant<size_t, Vectorize> N = {};
+        body(j, N);
+      }
+    } else {
+      assert(stride_offset_n == sizeof(float));
+      size_t j = n;
+
+      // Process n elements, with a constant upper bound of N.
+      auto body = [&](auto n, auto N) {
+        assert(n <= N);
+        auto dot_n = simd::load(dot_m, n, simd::undef<N>{});
+        const auto a_offset_n = simd::broadcast<N>(a_offset_m);
+        const auto a_scale_n = simd::broadcast<N>(a_scale_m);
+        const auto b_offset_n = simd::load(b_offset_m, n, simd::undef<N>{});
+        const auto b_scale_n = simd::load(b_scale_m, n, simd::undef<N>{});
+        const auto offset_n = simd::load(offset_m, n, simd::undef<N>{});
+
+        dot_n -= a_offset_n * b_offset_n;
+        auto output_n =
+            cast(dot_n, float{}) * (a_scale_n * b_scale_n) + offset_n;
+
+        store(output_m, cast(output_n, Output{}), n);
+      };
+
+      while (j >= Vectorize * Unroll) {
+        constexpr std::integral_constant<size_t, Vectorize * Unroll> N = {};
+        body(N, N);
+
+        j -= N;
+        dot_m = offset_bytes(dot_m, N * sizeof(int32_t));
+        b_offset_m = offset_bytes(b_offset_m, N * stride_b_offset_n);
+        b_scale_m = offset_bytes(b_scale_m, N * stride_b_scale_n);
+        offset_m = offset_bytes(offset_m, N * stride_offset_n);
+        output_m = offset_bytes(output_m, N * sizeof(Output));
+      }
+      while (j >= Vectorize) {
+        constexpr std::integral_constant<size_t, Vectorize> N = {};
+        body(N, N);
+
+        j -= N;
+        dot_m = offset_bytes(dot_m, N * sizeof(int32_t));
+        b_offset_m = offset_bytes(b_offset_m, N * stride_b_offset_n);
+        b_scale_m = offset_bytes(b_scale_m, N * stride_b_scale_n);
+        offset_m = offset_bytes(offset_m, N * stride_offset_n);
+        output_m = offset_bytes(output_m, N * sizeof(Output));
+      }
+      if (j > 0) {
+        constexpr std::integral_constant<size_t, Vectorize> N = {};
+        body(j, N);
+      }
     }
 
     --m;
