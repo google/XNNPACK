@@ -44,3 +44,7 @@ XNN_UKERNEL(xnn_arch_x86_avx512skx, xnn_f16_vsqrt_ukernel__avx512skx_sqrt_u32, 3
 XNN_UKERNEL(xnn_arch_x86_avx512skx, xnn_f16_vsqrt_ukernel__avx512skx_sqrt_u64, 64, false, xnn_float16, struct xnn_f16_default_params, NULL)
 #endif  // XNN_ENABLE_AVX512SKX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
+#if XNN_ARCH_RISCV && XNN_ENABLE_RISCV_FP16_VECTOR
+XNN_UKERNEL(xnn_arch_riscv_vector_fp16_arith, xnn_f16_vsqrt_ukernel__rvvfp16arith_sqrt_u4v, 4, true, xnn_float16, struct xnn_f16_default_params, NULL)
+XNN_UKERNEL(xnn_arch_riscv_vector_fp16_arith, xnn_f16_vsqrt_ukernel__rvvfp16arith_sqrt_u8v, 8, true, xnn_float16, struct xnn_f16_default_params, NULL)
+#endif  // XNN_ARCH_RISCV && XNN_ENABLE_RISCV_FP16_VECTOR

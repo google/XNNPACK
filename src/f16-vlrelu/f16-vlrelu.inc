@@ -15,3 +15,7 @@ XNN_UKERNEL(xnn_arch_x86_f16c, xnn_f16_vlrelu_ukernel__f16c_u8, 8, false, xnn_fl
 XNN_UKERNEL(xnn_arch_x86_f16c, xnn_f16_vlrelu_ukernel__f16c_u16, 16, false, xnn_float16, struct xnn_f16_lrelu_params, xnn_init_f16_lrelu_scalar_params)
 #endif  // XNN_ENABLE_F16C && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
+#if XNN_ARCH_RISCV && XNN_ENABLE_RISCV_FP16_VECTOR
+XNN_UKERNEL(xnn_arch_riscv_vector_fp16_arith, xnn_f16_vlrelu_ukernel__rvvfp16arith_u4v, 4, true, xnn_float16, struct xnn_f16_lrelu_params, xnn_init_f16_lrelu_scalar_params)
+XNN_UKERNEL(xnn_arch_riscv_vector_fp16_arith, xnn_f16_vlrelu_ukernel__rvvfp16arith_u8v, 8, true, xnn_float16, struct xnn_f16_lrelu_params, xnn_init_f16_lrelu_scalar_params)
+#endif  //  XNN_ARCH_RISCV && XNN_ENABLE_RISCV_FP16_VECTOR

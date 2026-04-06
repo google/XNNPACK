@@ -632,6 +632,20 @@ static void init_f32_vcopysign_config(void) {
       f32_vcopysign_config.ropc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f32_vrcopysignc_ukernel__hvx_u128);
       f32_vcopysign_config.element_tile = 128;
     }
+  #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
+    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    assert(hardware_config != NULL);
+    if (hardware_config->arch_flags & xnn_arch_riscv_vector) {
+      f32_vcopysign_config.op_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f32_vcopysign_ukernel__rvv_u8v);
+      f32_vcopysign_config.opc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f32_vcopysignc_ukernel__rvv_u8v);
+      f32_vcopysign_config.ropc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f32_vrcopysignc_ukernel__rvv_u8v);
+      f32_vcopysign_config.element_tile = 8 * hardware_config->vlenb / sizeof(float);
+    } else {
+      f32_vcopysign_config.op_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f32_vcopysign_ukernel__scalar_u2);
+      f32_vcopysign_config.opc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f32_vcopysignc_ukernel__scalar_u2);
+      f32_vcopysign_config.ropc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f32_vrcopysignc_ukernel__scalar_u2);
+      f32_vcopysign_config.element_tile = 8;
+    }
   #else
     f32_vcopysign_config.op_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f32_vcopysign_ukernel__scalar_u2);
     f32_vcopysign_config.opc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f32_vcopysignc_ukernel__scalar_u2);
