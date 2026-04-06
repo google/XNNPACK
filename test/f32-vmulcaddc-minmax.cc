@@ -13,8 +13,12 @@
 #include "src/xnnpack/microparams-init.h"
 #include "src/xnnpack/vmulcaddc.h"
 #include "test/vmulcaddc-microkernel-tester.h"
-#define XNN_UKERNEL(arch_flags, ukernel, row_tile, channel_tile, datatype,     \
-                    params_type, init_params)                                  \
+#define XNN_VMULCADDC_SCALED_CHANNEL_TILE(channel_tile, vector_tile, datatype) \
+    (static_cast<int>((channel_tile) * ((vector_tile) ? get_batch_scale<datatype>() : 1)))
+
+#define XNN_EXPAND_VMULCADDC_TESTS(ukernel, arch_flags, row_tile,              \
+                                   channel_tile, datatype, params_type,        \
+                                   init_params)                                \
   XNN_TEST_VMULCADDC_ROW_DIV(ukernel, arch_flags, row_tile, channel_tile,      \
                              datatype, params_type, init_params);              \
   XNN_TEST_VMULCADDC_ROW_LT(ukernel, arch_flags, row_tile, channel_tile,       \
@@ -40,5 +44,11 @@
                           datatype, params_type, init_params);                 \
   XNN_TEST_VMULCADDC_QMIN(ukernel, arch_flags, row_tile, channel_tile,         \
                           datatype, params_type, init_params);
+
+#define XNN_UKERNEL(arch_flags, ukernel, row_tile, channel_tile, vector_tile,  \
+                    datatype, params_type, init_params)                        \
+  XNN_EXPAND_VMULCADDC_TESTS(ukernel, arch_flags, row_tile,                    \
+      XNN_VMULCADDC_SCALED_CHANNEL_TILE(channel_tile, vector_tile, datatype),  \
+      datatype, params_type, init_params)
 #include "src/f32-vmulcaddc/f32-vmulcaddc.inc"
 #undef XNN_UKERNEL

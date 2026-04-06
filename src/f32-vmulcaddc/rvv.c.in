@@ -1,8 +1,7 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
-$assert CHANNEL_TILE in [4, 8]
+$assert LMUL in [1, 2, 4, 8]
 $assert ROW_TILE >= 1
-$LMUL = CHANNEL_TILE // 4
 $BLEN = 32 // LMUL
 #include <assert.h>
 #include <stddef.h>
@@ -16,7 +15,7 @@ $BLEN = 32 // LMUL
 #include "src/xnnpack/vmulcaddc.h"
 
 
-void xnn_f32_vmulcaddc_minmax_ukernel_c${CHANNEL_TILE}__rvv_${ROW_TILE}x(
+void xnn_f32_vmulcaddc_minmax_ukernel_c${LMUL}v__rvv_${ROW_TILE}x(
     size_t rows,
     size_t channels,
     const float* restrict input,
@@ -57,13 +56,14 @@ void xnn_f32_vmulcaddc_minmax_ukernel_c${CHANNEL_TILE}__rvv_${ROW_TILE}x(
 
     const float* w = weights;
     size_t c = channels / sizeof(float);
+    const size_t vlmax = __riscv_vsetvlmax_e32m${LMUL}();
 
     while (c > 0) {
-      size_t vl = __riscv_vsetvl_e32m${LMUL}(c > ${CHANNEL_TILE} ? ${CHANNEL_TILE} : c);
+      size_t vl = __riscv_vsetvl_e32m${LMUL}(c);
 
       vfloat32m${LMUL}_t vscale = __riscv_vle32_v_f32m${LMUL}(w, vl);
-      vfloat32m${LMUL}_t vbias = __riscv_vle32_v_f32m${LMUL}(w + ${CHANNEL_TILE}, vl);
-      w += ${2 * CHANNEL_TILE};
+      vfloat32m${LMUL}_t vbias = __riscv_vle32_v_f32m${LMUL}(w + vlmax, vl);
+      w += 2 * vlmax;
 
       $for M in range(ROW_TILE):
         vfloat32m${LMUL}_t vacc${M} = __riscv_vle32_v_f32m${LMUL}(i${M}, vl); i${M} += vl;

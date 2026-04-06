@@ -17,7 +17,7 @@
 #include "src/xnnpack/vmulcaddc.h"
 
 
-void xnn_f32_vmulcaddc_minmax_ukernel_c8__rvv_2x(
+void xnn_f32_vmulcaddc_minmax_ukernel_c8v__rvv_2x(
     size_t rows,
     size_t channels,
     const float* restrict input,
@@ -50,34 +50,35 @@ void xnn_f32_vmulcaddc_minmax_ukernel_c8__rvv_2x(
 
     const float* w = weights;
     size_t c = channels / sizeof(float);
+    const size_t vlmax = __riscv_vsetvlmax_e32m8();
 
     while (c > 0) {
-      size_t vl = __riscv_vsetvl_e32m2(c > 8 ? 8 : c);
+      size_t vl = __riscv_vsetvl_e32m8(c);
 
-      vfloat32m2_t vscale = __riscv_vle32_v_f32m2(w, vl);
-      vfloat32m2_t vbias = __riscv_vle32_v_f32m2(w + 8, vl);
-      w += 16;
+      vfloat32m8_t vscale = __riscv_vle32_v_f32m8(w, vl);
+      vfloat32m8_t vbias = __riscv_vle32_v_f32m8(w + vlmax, vl);
+      w += 2 * vlmax;
 
-      vfloat32m2_t vacc0 = __riscv_vle32_v_f32m2(i0, vl); i0 += vl;
-      vfloat32m2_t vacc1 = __riscv_vle32_v_f32m2(i1, vl); i1 += vl;
+      vfloat32m8_t vacc0 = __riscv_vle32_v_f32m8(i0, vl); i0 += vl;
+      vfloat32m8_t vacc1 = __riscv_vle32_v_f32m8(i1, vl); i1 += vl;
 
-      vacc0 = __riscv_vfmadd_vv_f32m2(vacc0, vscale, vbias, vl);
-      vacc1 = __riscv_vfmadd_vv_f32m2(vacc1, vscale, vbias, vl);
+      vacc0 = __riscv_vfmadd_vv_f32m8(vacc0, vscale, vbias, vl);
+      vacc1 = __riscv_vfmadd_vv_f32m8(vacc1, vscale, vbias, vl);
 
-      vbool16_t nan0 = __riscv_vmfne_vv_f32m2_b16(vacc0, vacc0, vl);
-      vbool16_t nan1 = __riscv_vmfne_vv_f32m2_b16(vacc1, vacc1, vl);
+      vbool4_t nan0 = __riscv_vmfne_vv_f32m8_b4(vacc0, vacc0, vl);
+      vbool4_t nan1 = __riscv_vmfne_vv_f32m8_b4(vacc1, vacc1, vl);
 
-      vacc0 = __riscv_vfmax_vf_f32m2(vacc0, min_val, vl);
-      vacc1 = __riscv_vfmax_vf_f32m2(vacc1, min_val, vl);
+      vacc0 = __riscv_vfmax_vf_f32m8(vacc0, min_val, vl);
+      vacc1 = __riscv_vfmax_vf_f32m8(vacc1, min_val, vl);
 
-      vacc0 = __riscv_vfmin_vf_f32m2(vacc0, max_val, vl);
-      vacc1 = __riscv_vfmin_vf_f32m2(vacc1, max_val, vl);
+      vacc0 = __riscv_vfmin_vf_f32m8(vacc0, max_val, vl);
+      vacc1 = __riscv_vfmin_vf_f32m8(vacc1, max_val, vl);
 
-      vacc0 = __riscv_vfmerge_vfm_f32m2(vacc0, __builtin_nanf(""), nan0, vl);
-      vacc1 = __riscv_vfmerge_vfm_f32m2(vacc1, __builtin_nanf(""), nan1, vl);
+      vacc0 = __riscv_vfmerge_vfm_f32m8(vacc0, __builtin_nanf(""), nan0, vl);
+      vacc1 = __riscv_vfmerge_vfm_f32m8(vacc1, __builtin_nanf(""), nan1, vl);
 
-      __riscv_vse32_v_f32m2(o0, vacc0, vl); o0 += vl;
-      __riscv_vse32_v_f32m2(o1, vacc1, vl); o1 += vl;
+      __riscv_vse32_v_f32m8(o0, vacc0, vl); o0 += vl;
+      __riscv_vse32_v_f32m8(o1, vacc1, vl); o1 += vl;
 
       c -= vl;
     }
