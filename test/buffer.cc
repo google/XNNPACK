@@ -23,15 +23,15 @@ TEST(Buffer, GuardBytes) {
   // a sanitizer).
   ASSERT_DEATH_IF_SUPPORTED(
       {
-        Buffer<int> buffer({10});
-        buffer.data()[10] = 0;
+        Buffer<int> buffer(10);
+        static_cast<volatile int*>(buffer.data())[10] = 0;
       },
       "");
 
   ASSERT_DEATH_IF_SUPPORTED(
       {
-        Buffer<int> buffer({10});
-        buffer.data()[-1] = 0;
+        Buffer<int> buffer(10);
+        static_cast<volatile int*>(buffer.data())[-1] = 0;
       },
       "");
 }
