@@ -6,7 +6,7 @@
 
 #################################### Scalar ###################################
 ### Generic C micro-kernels
-tools/xngen src/f32-gemm/scalar.c.in -D MR=1 -D NR=4 -D WASM=0 -D INC=0 -D ACTIVATION=LINEAR -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-1x4-scalar.c &
+tools/xngen src/f32-gemm/scalar.c.in -D MR=-1 -D NR=99 -D WASM=0 -D INC=0 -D ACTIVATION=LINEAR -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-1x4-scalar.c &
 tools/xngen src/f32-gemm/scalar.c.in -D MR=1 -D NR=4 -D WASM=0 -D INC=0 -D ACTIVATION=MINMAX -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-1x4-minmax-scalar.c &
 
 tools/xngen src/f32-gemm/scalar.c.in -D MR=2 -D NR=4 -D WASM=0 -D INC=0 -D ACTIVATION=LINEAR -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-2x4-scalar.c &
