@@ -589,6 +589,14 @@ YNN_ALWAYS_INLINE std::array<vec<T, 4>, 4> transpose(
   }};
 }
 
+YNN_ALWAYS_INLINE f32x4 cast(s32x4 x, float) {
+  return f32x4{_mm_cvtepi32_ps(x.v)};
+}
+
+YNN_ALWAYS_INLINE s32x4 cast(f32x4 x, int32_t) {
+  return s32x4{_mm_cvttps_epi32(x.v)};
+}
+
 }  // namespace simd
 
 }  // namespace ynn

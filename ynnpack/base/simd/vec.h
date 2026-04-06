@@ -154,6 +154,11 @@ vec<To, N> cast(vec<From, N> from, To);
 template <typename To, typename From, size_t N>
 vec<To, N> saturate_cast(vec<From, N> from, To);
 
+template <typename T, size_t N>
+YNN_ALWAYS_INLINE vec<T, N> saturate_cast(vec<T, N> from, T) {
+  return from;
+}
+
 template <typename To, typename From, size_t N>
 vec<To, N> round_float_to_int(vec<From, N> from, To);
 

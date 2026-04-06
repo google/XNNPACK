@@ -24,6 +24,7 @@
 #include "ynnpack/base/ref_count.h"
 #include "ynnpack/base/type.h"
 #include "ynnpack/include/ynnpack.h"
+#include "ynnpack/kernels/dequantize_dot/dequantize_dot.h"
 #include "ynnpack/kernels/ternary/ternary.h"
 #include "ynnpack/kernels/unary/unary.h"
 #include "ynnpack/subgraph/slinky.h"
@@ -529,6 +530,15 @@ struct ynn_node {
              std::tie(b.op, b.keep_dims, b.k_dims);
     }
   };
+  struct dequantize_dot {
+    ynn::dequantize_dot_params params;
+    friend bool operator==(const dequantize_dot& a, const dequantize_dot& b) {
+      return a.params == b.params;
+    }
+    friend bool operator<(const dequantize_dot& a, const dequantize_dot& b) {
+      return a.params < b.params;
+    }
+  };
 
   // Value IDs for node inputs and outputs.
   // TODO: We need an absl::InlinedVector for things like this.
@@ -540,7 +550,7 @@ struct ynn_node {
                static_pad, static_slice, slice_like, static_transpose,
                stencil_copy, unary_elementwise, lut, binary_elementwise,
                ternary_elementwise, dot, pack_b, transpose_a, get_tensor_shape,
-               reduce>
+               reduce, dequantize_dot>
       op;
 
   const char* name() const;

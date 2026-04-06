@@ -15,6 +15,7 @@
 #include "ynnpack/base/type.h"
 #include "ynnpack/include/ynnpack.h"
 #include "ynnpack/kernels/binary/binary.h"
+#include "ynnpack/kernels/dequantize_dot/dequantize_dot.h"
 #include "ynnpack/kernels/lut/lut.h"
 #include "ynnpack/kernels/ternary/ternary.h"
 #include "ynnpack/kernels/unary/unary.h"
@@ -25,7 +26,6 @@
 #include "slinky/builder/pipeline.h"
 #include "slinky/runtime/buffer.h"
 #include "slinky/runtime/expr.h"
-#include "slinky/runtime/print.h"
 #include "slinky/runtime/stmt.h"
 
 using ynn::operator<<;  // NOLINT(misc-unused-using-decls)
@@ -145,6 +145,75 @@ auto make_ternary_elementwise_impl(ternary_kernel_fn kernel) {
             x, a, b, c);
         return 0;
       };
+}
+
+auto make_dequantize_dot_impl(dequantize_dot_kernel_fn kernel,
+                              dequantize_dot_params params) {
+  return [kernel, params](slinky::raw_buffer dot, slinky::raw_buffer a_offset,
+                          slinky::raw_buffer b_offset,
+                          slinky::raw_buffer a_scale,
+                          slinky::raw_buffer b_scale, slinky::raw_buffer offset,
+                          slinky::raw_buffer output) -> slinky::index_t {
+    const slinky::dim& n = output.dim(0);
+    assert(is_contiguous(n, output.elem_size));
+
+    assert(is_contiguous(dot.dim(0), dot.elem_size));
+    assert(is_broadcast(a_offset.dim(0)));
+    const slinky::dim& b_offset_n = b_offset.dim(0);
+    assert(is_broadcast(a_scale.dim(0)));
+    const slinky::dim& b_scale_n = b_scale.dim(0);
+    const slinky::dim& offset_n = offset.dim(0);
+
+    // Slice buffers to match n
+    dot.slice(0, n.min());
+    a_offset.slice(0, n.min());
+    b_offset.slice(0, n.min());
+    offset.slice(0, n.min());
+    a_scale.slice(0, n.min());
+    b_scale.slice(0, n.min());
+    output.slice(0);
+
+    // Get the m dimension. rank 1 buffers are common, so try to optimize
+    // for that case.
+    const slinky::dim& m = output.dim(0);
+    const slinky::dim& dot_m = dot.dim(0);
+    const slinky::dim& a_offset_m = a_offset.dim(0);
+    const slinky::dim& a_scale_m = a_scale.dim(0);
+
+    if (output.rank > 0) {
+      assert(is_broadcast(b_offset.dim(0)));
+      assert(is_broadcast(b_scale.dim(0)));
+      assert(is_broadcast(offset.dim(0)));
+
+      dot.slice(0, m.min());
+      a_offset.slice(0, m.min());
+      b_offset.slice(0, m.min());
+      offset.slice(0, m.min());
+      a_scale.slice(0, m.min());
+      b_scale.slice(0, m.min());
+      output.slice(0);
+    } else {
+      assert(is_broadcast(dot.dim(0)));
+      assert(is_broadcast(a_offset.dim(0)));
+      assert(is_broadcast(b_offset.dim(0)));
+      assert(is_broadcast(offset.dim(0)));
+      assert(is_broadcast(a_scale.dim(0)));
+      assert(is_broadcast(b_scale.dim(0)));
+    }
+
+    slinky::for_each_element(
+        [&](void* output, const void* dot, const void* a_offset,
+            const void* b_offset, const void* offset, const void* a_scale,
+            const void* b_scale) {
+          kernel(m.extent(), n.extent(), dot_m.stride(), dot,
+                 a_offset_m.stride(), a_offset, b_offset_n.stride(), b_offset,
+                 offset_n.stride(), offset, a_scale_m.stride(), a_scale,
+                 b_scale_n.stride(), b_scale, m.stride(), output, &params);
+        },
+        output, dot, a_offset, b_offset, offset, a_scale, b_scale);
+
+    return 0;
+  };
 }
 
 ynn_status create_unary(const ynn_node& node, ynn_runtime& runtime,
@@ -379,6 +448,66 @@ void define_lut(ynn_subgraph& subgraph, ynn_node& node, uint32_t input_id,
 
   node.create = [kernel](const ynn_node& node, ynn_runtime& runtime) {
     return create_lut(node, runtime, kernel);
+  };
+}
+
+void define_dequantize_dot(ynn_subgraph& subgraph, ynn_node& node,
+                           ynn_type output_type, uint32_t dot_id,
+                           uint32_t a_offset_id, uint32_t b_offset_id,
+                           uint32_t a_scale_id, uint32_t b_scale_id,
+                           uint32_t offset_id, uint32_t& output_id,
+                           const dequantize_dot_params& params) {
+  const ynn_value& dot = subgraph.value(dot_id);
+  ynn_value& output = subgraph.get_output_value(&output_id, output_type);
+
+  // Propagate shape from dot.
+  output.extents = dot.extents;
+
+  node.inputs = {dot_id,     a_offset_id, b_offset_id,
+                 a_scale_id, b_scale_id,  offset_id};
+  node.outputs = {output_id};
+  node.op = ynn_node::dequantize_dot{params};
+
+  dequantize_dot_kernel_fn kernel = get_dequantize_dot_kernel(output.type);
+
+  node.create = [kernel](const ynn_node& node, ynn_runtime& runtime) {
+    const ynn_node::dequantize_dot& op =
+        std::get<ynn_node::dequantize_dot>(node.op);
+    const ynn_runtime_value& dot = runtime.value(node.inputs[0]);
+    const ynn_runtime_value& a_offset = runtime.value(node.inputs[1]);
+    const ynn_runtime_value& b_offset = runtime.value(node.inputs[2]);
+    const ynn_runtime_value& a_scale = runtime.value(node.inputs[3]);
+    const ynn_runtime_value& b_scale = runtime.value(node.inputs[4]);
+    const ynn_runtime_value& offset = runtime.value(node.inputs[5]);
+    ynn_runtime_value& output = runtime.value(node.outputs[0]);
+
+    output.make_buffer(runtime);
+
+    std::vector<slinky::var> dims = runtime.globals.make_dims(output.rank());
+
+    slinky::box_expr bounds;
+    for (size_t i = 0; i < dims.size(); ++i) {
+      bounds.push_back(slinky::point(dims[i]));
+    }
+
+    slinky::call_stmt::attributes attrs;
+    attrs.name = "dequantize_dot";
+    attrs.allow_in_place = compute_allow_in_place(node, *runtime.subgraph);
+    auto func = slinky::func::make(make_dequantize_dot_impl(kernel, op.params),
+                                   {{dot.buffer, bounds},
+                                    {a_offset.buffer, bounds},
+                                    {b_offset.buffer, bounds},
+                                    {a_scale.buffer, bounds},
+                                    {b_scale.buffer, bounds},
+                                    {offset.buffer, bounds}},
+                                   {{output.buffer, dims}}, std::move(attrs));
+
+    auto sched = runtime.make_schedule(dims, output.buffer, node.outputs[0]);
+    func.user_data() = sched.get();
+    runtime.scheduling_info_storage.push_back(std::move(sched));
+
+    runtime.funcs.push_back(std::move(func));
+    return ynn_status_success;
   };
 }
 

@@ -18,6 +18,7 @@
 #include "ynnpack/base/type.h"
 #include "ynnpack/include/ynnpack.h"
 #include "ynnpack/kernels/binary/binary.h"
+#include "ynnpack/kernels/dequantize_dot/dequantize_dot.h"
 #include "ynnpack/kernels/ternary/ternary.h"
 #include "ynnpack/subgraph/copy.h"
 #include "ynnpack/subgraph/dot.h"
@@ -735,6 +736,107 @@ bool fuse_quantize(ynn_subgraph& subgraph, ynn_node& node,
   return true;
 }
 
+// Rewrite multiply(dot(..., subtract_multiply(0, a, b)), c, d) to
+// dequantize_dot(dot(..., YNN_INVALID_VALUE_ID), a, b, c, d, 0)
+bool rewrite_dequantize_dot(ynn_subgraph& subgraph, ynn_node& node,
+                            subgraph_analysis& analysis) {
+  if (!is_ternary_node(node, ternary_op::multiply)) {
+    return false;
+  }
+
+  ynn_node* dot_node = analysis.producer_of(node.inputs[0]);
+  if (!dot_node) return false;
+  const ynn_node::dot* dot_op = std::get_if<ynn_node::dot>(&dot_node->op);
+  if (!dot_op || dot_node->inputs.size() < 2) return false;
+
+  uint32_t input_c_id = dot_node->inputs[1];
+  ynn_node* input_c_producer = analysis.producer_of(input_c_id);
+  if (!input_c_producer ||
+      !is_ternary_node(*input_c_producer, ternary_op::subtract_multiply)) {
+    return false;
+  }
+
+  // Only do this rewrite if we won't break other consumers.
+  if (analysis.consumers[dot_node->outputs[0]].size() != 1 ||
+      subgraph.value(dot_node->outputs[0]).is_external_output()) {
+    return false;
+  }
+  if (analysis.consumers[input_c_id].size() != 1 ||
+      subgraph.value(input_c_id).is_external_output()) {
+    return false;
+  }
+
+  // Check if subtract_multiply(0, a, b)
+  const ynn_value& sm_a = subgraph.value(input_c_producer->inputs[0]);
+  if (!sm_a.is_static_scalar() || sm_a.as_scalar_float() != 0.0f) {
+    return false;
+  }
+
+  uint32_t a_offset_id = input_c_producer->inputs[1];
+  uint32_t b_offset_id = input_c_producer->inputs[2];
+  uint32_t a_scale_id = node.inputs[1];
+  uint32_t b_scale_id = node.inputs[2];
+
+  YNN_LOG_DEBUG() << "Rewriting multiply(dot(..., subtract_multiply(0, a, b)), "
+                     "c, d) to dequantize_dot";
+
+  const ynn_value& output = subgraph.value(node.outputs[0]);
+  uint32_t offset_id = subgraph.get_scalar_value_id(
+      output.type, YNN_INVALID_VALUE_ID, YNN_INVALID_VALUE_ID, 0.0f);
+
+  dot_node->inputs[1] = YNN_INVALID_VALUE_ID;
+  ynn::define_dequantize_dot(subgraph, node, output.type, dot_node->outputs[0],
+                             a_offset_id, b_offset_id, a_scale_id, b_scale_id,
+                             offset_id, node.outputs[0],
+                             dequantize_dot_params{});
+  return true;
+}
+
+// Rewrite add(dequantize_dot(..., 0), x) to dequantize_dot(..., x)
+bool rewrite_dequantize_dot_add(ynn_subgraph& subgraph, ynn_node& node,
+                                subgraph_analysis& analysis) {
+  if (!is_binary_node(node, ynn_binary_add)) {
+    return false;
+  }
+
+  for (int i : {0, 1}) {
+    uint32_t dequantize_dot_output_id = node.inputs[i];
+    ynn_node* dequantize_dot_node =
+        analysis.producer_of(dequantize_dot_output_id);
+    if (!dequantize_dot_node) continue;
+    const ynn_node::dequantize_dot* rescale_op =
+        std::get_if<ynn_node::dequantize_dot>(&dequantize_dot_node->op);
+    if (!rescale_op) continue;
+
+    if (analysis.consumers[dequantize_dot_output_id].size() != 1 ||
+        subgraph.value(dequantize_dot_output_id).is_external_output()) {
+      continue;
+    }
+
+    uint32_t offset_id = dequantize_dot_node->inputs[5];
+    const ynn_value& offset = subgraph.value(offset_id);
+    if (!offset.is_static_scalar() || offset.as_scalar_float() != 0.0f) {
+      continue;
+    }
+
+    uint32_t new_offset_id = node.inputs[1 - i];
+
+    YNN_LOG_DEBUG()
+        << "Rewriting add(dequantize_dot(..., 0), x) to dequantize_dot(..., x)";
+
+    const ynn_value& output = subgraph.value(node.outputs[0]);
+    ynn::define_dequantize_dot(
+        subgraph, node, output.type, dequantize_dot_node->inputs[0],
+        dequantize_dot_node->inputs[1], dequantize_dot_node->inputs[2],
+        dequantize_dot_node->inputs[3], dequantize_dot_node->inputs[4],
+        new_offset_id, node.outputs[0], rescale_op->params);
+
+    dequantize_dot_node->invalidate();
+    return true;
+  }
+  return false;
+}
+
 // Rewrite f(x * C) to fold the arithmetic into the params.
 bool fold_unary_input(ynn_subgraph& subgraph, ynn_node& node,
                               subgraph_analysis& analysis) {
@@ -839,6 +941,8 @@ ynn_status ynn_subgraph::fusion() {
                 ynn::rewrite_multiply_add(*this, node, analysis) ||
                 ynn::rewrite_multiply_multiply(*this, node, analysis) ||
                 ynn::rewrite_subtract_multiply(*this, node, analysis) ||
+                ynn::rewrite_dequantize_dot(*this, node, analysis) ||
+                ynn::rewrite_dequantize_dot_add(*this, node, analysis) ||
                 ynn::rewrite_get_tensor_shape_of_unary(*this, node, analysis) ||
                 ynn::rewrite_clamp(*this, node, analysis) ||
                 ynn::remove_broadcast(*this, node, analysis) ||

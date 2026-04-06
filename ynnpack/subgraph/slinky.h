@@ -188,6 +188,10 @@ YNN_ALWAYS_INLINE bool is_contiguous(const slinky::dim& dim,
   return dim.extent() == 1 || dim.stride() == element_size;
 }
 
+YNN_ALWAYS_INLINE bool is_broadcast(const slinky::dim& dim) {
+  return dim.extent() == 1 || dim.stride() == 0;
+}
+
 // Peels off the innermost `NumInnerDims` dimensions of `x` and `inputs`,
 // and where possible, fuses dimensions of buffers from the innermost to the
 // outermost.

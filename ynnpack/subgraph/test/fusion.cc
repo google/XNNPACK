@@ -12,6 +12,7 @@
 #include <gtest/gtest.h>
 #include "ynnpack/include/ynnpack.h"
 #include "ynnpack/kernels/ternary/ternary.h"
+#include "ynnpack/subgraph/elementwise.h"
 #include "ynnpack/subgraph/subgraph.h"
 #include "ynnpack/subgraph/test/matchers.h"
 #include "ynnpack/subgraph/test/subgraph_builder.h"
@@ -784,6 +785,100 @@ TEST(fusion, reduce_sum_of_squared_windowed) {
   EXPECT_THAT(ProducerOf(y_id, subgraph), IsReduce(ynn_reduce_sum_squared));
   // The pad should now take x_id as input (not sq_id).
   EXPECT_THAT(ProducerOf(padded_id, subgraph), InputsInclude(x_id));
+}
+
+TEST(fusion, dequantize_dot) {
+  // rewrite multiply(dot(A, B, subtract_multiply(0, a, b)), c, d) ->
+  // dequantize_dot(dot(A, B, YNN_INVALID_VALUE_ID), a, b, c, d, 0)
+  const uint32_t a_id = 0;
+  const uint32_t b_id = 1;
+  const uint32_t a_offset_id = 2;
+  const uint32_t b_offset_id = 3;
+  const uint32_t c_id = 4;
+  const uint32_t d_id = 5;
+  const uint32_t x_id = 6;
+  SubgraphBuilder builder(7);
+
+  uint32_t sm_id = YNN_INVALID_VALUE_ID;
+  uint32_t dot_output_id = YNN_INVALID_VALUE_ID;
+  uint32_t zero_id = builder.DefineScalar(0.0f);
+
+  builder.AddInput(ynn_type_fp32, 2, a_id)
+      .AddInput(ynn_type_fp32, 2, b_id)
+      .AddInput(ynn_type_fp32, 1, a_offset_id)
+      .AddInput(ynn_type_fp32, 1, b_offset_id)
+      .AddInput(ynn_type_fp32, 1, c_id)
+      .AddInput(ynn_type_fp32, 1, d_id)
+      .AddOutput(ynn_type_fp32, 2, x_id)
+      .AddTensor(ynn_type_fp32, 1, sm_id)
+      .AddTensor(ynn_type_fp32, 2, dot_output_id);
+
+  ynn_subgraph& subgraph = *builder.GetSubgraph();
+  ynn_node sm_node;
+  ynn::define_ternary(
+      subgraph, sm_node, zero_id, a_offset_id, b_offset_id, sm_id,
+      ternary_op::subtract_multiply,
+      get_ternary_kernel(ternary_op::subtract_multiply, ynn_type_fp32,
+                         ynn_type_fp32, ynn_type_fp32, ynn_type_fp32));
+  subgraph.add_node(std::move(sm_node));
+
+  builder.AddDot(1, a_id, b_id, sm_id, dot_output_id);
+
+  ynn_node mul_node;
+  ynn::define_ternary(
+      subgraph, mul_node, dot_output_id, c_id, d_id, x_id, ternary_op::multiply,
+      get_ternary_kernel(ternary_op::multiply, ynn_type_fp32, ynn_type_fp32,
+                         ynn_type_fp32, ynn_type_fp32));
+  subgraph.add_node(std::move(mul_node));
+
+  subgraph.fusion();
+  subgraph.invalidate_dead_values();
+
+  ASSERT_THAT(subgraph, AllOf(HasValidNodeCount(3), HasValidValueCount(10)));
+  EXPECT_THAT(ProducerOf(x_id, subgraph),
+              AllOf(IsRescaleDot(), HasInputCount(6)));
+}
+
+TEST(fusion, dequantize_dot_add) {
+  // rewrite add(dequantize_dot(..., 0), x) -> dequantize_dot(..., x)
+  const uint32_t dot_id = 0;
+  const uint32_t a_offset_id = 1;
+  const uint32_t b_offset_id = 2;
+  const uint32_t a_scale_id = 3;
+  const uint32_t b_scale_id = 4;
+  const uint32_t x_offset_id = 5;
+  const uint32_t out_id = 6;
+  SubgraphBuilder builder(7);
+
+  uint32_t dequantize_dot_out_id = YNN_INVALID_VALUE_ID;
+  uint32_t zero_id = builder.DefineScalar(0.0f);
+
+  builder.AddInput(ynn_type_fp32, 2, dot_id)
+      .AddInput(ynn_type_fp32, 1, a_offset_id)
+      .AddInput(ynn_type_fp32, 1, b_offset_id)
+      .AddInput(ynn_type_fp32, 1, a_scale_id)
+      .AddInput(ynn_type_fp32, 1, b_scale_id)
+      .AddInput(ynn_type_fp32, 1, x_offset_id)
+      .AddOutput(ynn_type_fp32, 2, out_id)
+      .AddTensor(ynn_type_fp32, 2, dequantize_dot_out_id);
+
+  ynn_subgraph& subgraph = *builder.GetSubgraph();
+  ynn_node rescale_node;
+  ynn::define_dequantize_dot(subgraph, rescale_node, ynn_type_fp32, dot_id,
+                             a_offset_id, b_offset_id, a_scale_id, b_scale_id,
+                             zero_id, dequantize_dot_out_id,
+                             ynn::dequantize_dot_params{});
+  subgraph.add_node(std::move(rescale_node));
+
+  builder.AddBinary(ynn_binary_add, dequantize_dot_out_id, x_offset_id, out_id);
+
+  subgraph.fusion();
+  subgraph.invalidate_dead_values();
+
+  ASSERT_THAT(subgraph, AllOf(HasValidNodeCount(1), HasValidValueCount(7)));
+  const ynn_node& final_node = ProducerOf(out_id, subgraph);
+  EXPECT_THAT(final_node, IsRescaleDot());
+  EXPECT_EQ(final_node.inputs[5], x_offset_id);
 }
 
 TEST(fusion, output_convert_convert) {
