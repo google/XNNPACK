@@ -183,8 +183,8 @@ YNN_ALWAYS_INLINE bool same_bounds(const slinky::dim& a, const slinky::dim& b,
 // A dimension is contiguous if it satisfies one of the following:
 //   1. Its extent is 1. In this case, we disregard stride.
 //   2. Its stride is equal to its element size.
-YNN_ALWAYS_INLINE bool is_continguous(const slinky::dim& dim,
-                                      const int element_size) {
+YNN_ALWAYS_INLINE bool is_contiguous(const slinky::dim& dim,
+                                     const int element_size) {
   return dim.extent() == 1 || dim.stride() == element_size;
 }
 
@@ -207,7 +207,7 @@ void fuse_and_slice_leading_dims(slinky::dim* x_dims, slinky::raw_buffer& x,
     // If the output innermost (n) dimension has extent 1, we need to make the n
     // dimension of all inputs a broadcast. This case is not expected to happen.
     // For now, we add an assert to catch this case if it does.
-    assert(i != 0 || is_continguous(x.dim(0), x.elem_size));
+    assert(i != 0 || is_contiguous(x.dim(0), x.elem_size));
 
     x_dims[i] = x.dim(0);
 

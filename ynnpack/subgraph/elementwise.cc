@@ -44,7 +44,7 @@ auto make_unary_elementwise_impl(unary_kernel_fn kernel, unary_params params) {
 
     // We don't support broadcasting of `a` here in the innermost
     // dimension (and it would waste computation).
-    assert(is_continguous(a_dims[0], a.elem_size));
+    assert(is_contiguous(a_dims[0], a.elem_size));
 
     const slinky::dim& x_n = x_dims[0];
     const slinky::dim& a_m = a_dims[1];
@@ -70,8 +70,8 @@ auto make_lut_impl(lut_kernel_fn kernel) {
 
     // We don't support broadcasting of `a` here in the innermost
     // dimension (and it would waste computation).
-    assert(is_continguous(a_dims[0], a.elem_size));
-    assert(is_continguous(x_dims[0], x.elem_size));
+    assert(is_contiguous(a_dims[0], a.elem_size));
+    assert(is_contiguous(x_dims[0], x.elem_size));
 
     const slinky::dim& x_n = x_dims[0];
 
@@ -145,20 +145,6 @@ auto make_ternary_elementwise_impl(ternary_kernel_fn kernel) {
             x, a, b, c);
         return 0;
       };
-}
-
-std::pair<float, int32_t> GetScalarQuantization(
-    const ynn_runtime& runtime, const ynn_runtime_value& value) {
-  std::pair<float, int32_t> result;
-  result.first =
-      value.scale_id != YNN_INVALID_VALUE_ID
-          ? runtime.value(value.scale_id).static_scalar_value<float>()
-          : 1.0f;
-  result.second =
-      value.zero_point_id != YNN_INVALID_VALUE_ID
-          ? runtime.value(value.zero_point_id).static_scalar_value<int32_t>()
-          : 0;
-  return result;
 }
 
 ynn_status create_unary(const ynn_node& node, ynn_runtime& runtime,
@@ -396,8 +382,6 @@ void define_lut(ynn_subgraph& subgraph, ynn_node& node, uint32_t input_id,
   };
 }
 
-extern "C" {
-
 ynn_status define_unary(ynn_subgraph_t subgraph, ynn_unary_operator op,
                         uint32_t input_a_id, unary_params params,
                         uint32_t* output_id, uint32_t flags) {
@@ -446,6 +430,8 @@ ynn_status define_unary(ynn_subgraph_t subgraph, ynn_unary_operator op,
   subgraph->add_node(std::move(node));
   return ynn_status_success;
 }
+
+extern "C" {
 
 ynn_status ynn_define_unary(ynn_subgraph_t subgraph, ynn_unary_operator op,
                             uint32_t input_a_id, uint32_t* output_id,
