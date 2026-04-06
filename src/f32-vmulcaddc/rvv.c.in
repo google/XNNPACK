@@ -1,0 +1,97 @@
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+$assert CHANNEL_TILE in [4, 8]
+$assert ROW_TILE >= 1
+$LMUL = CHANNEL_TILE // 4
+$BLEN = 32 // LMUL
+#include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
+
+#include <riscv_vector.h>
+
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/microparams.h"
+#include "src/xnnpack/vmulcaddc.h"
+
+
+void xnn_f32_vmulcaddc_minmax_ukernel_c${CHANNEL_TILE}__rvv_${ROW_TILE}x(
+    size_t rows,
+    size_t channels,
+    const float* restrict input,
+    size_t input_stride,
+    const float* restrict weights,
+    float* restrict output,
+    size_t output_stride,
+    const struct xnn_f32_minmax_params* restrict params)
+{
+  assert(rows != 0);
+  assert(channels != 0);
+  assert(channels % sizeof(float) == 0);
+
+  const float* i0 = input;
+  float* o0 = output;
+  $for M in range(1, ROW_TILE):
+    const float* i${M} = (const float*) ((uintptr_t) i${M-1} + input_stride);
+    float* o${M} = (float*) ((uintptr_t) o${M-1} + output_stride);
+
+  const size_t input_increment = input_stride * ${ROW_TILE} - channels;
+  const size_t output_increment = output_stride * ${ROW_TILE} - channels;
+
+  const float min_val = params->scalar.min;
+  const float max_val = params->scalar.max;
+
+  do {
+    $for M in range(1, ROW_TILE):
+      $if M % 2 == 0:
+        if XNN_UNPREDICTABLE(rows <= ${M}) {
+          i${M} = i${M-1};
+          o${M} = o${M-1};
+        }
+      $else:
+        if XNN_UNPREDICTABLE(rows < ${M+1}) {
+          i${M} = i${M-1};
+          o${M} = o${M-1};
+        }
+
+    const float* w = weights;
+    size_t c = channels / sizeof(float);
+
+    while (c > 0) {
+      size_t vl = __riscv_vsetvl_e32m${LMUL}(c > ${CHANNEL_TILE} ? ${CHANNEL_TILE} : c);
+
+      vfloat32m${LMUL}_t vscale = __riscv_vle32_v_f32m${LMUL}(w, vl);
+      vfloat32m${LMUL}_t vbias = __riscv_vle32_v_f32m${LMUL}(w + ${CHANNEL_TILE}, vl);
+      w += ${2 * CHANNEL_TILE};
+
+      $for M in range(ROW_TILE):
+        vfloat32m${LMUL}_t vacc${M} = __riscv_vle32_v_f32m${LMUL}(i${M}, vl); i${M} += vl;
+
+      $for M in range(ROW_TILE):
+        vacc${M} = __riscv_vfmadd_vv_f32m${LMUL}(vacc${M}, vscale, vbias, vl);
+
+      $for M in range(ROW_TILE):
+        vbool${BLEN}_t nan${M} = __riscv_vmfne_vv_f32m${LMUL}_b${BLEN}(vacc${M}, vacc${M}, vl);
+
+      $for M in range(ROW_TILE):
+        vacc${M} = __riscv_vfmax_vf_f32m${LMUL}(vacc${M}, min_val, vl);
+
+      $for M in range(ROW_TILE):
+        vacc${M} = __riscv_vfmin_vf_f32m${LMUL}(vacc${M}, max_val, vl);
+
+      $for M in range(ROW_TILE):
+        vacc${M} = __riscv_vfmerge_vfm_f32m${LMUL}(vacc${M}, __builtin_nanf(""), nan${M}, vl);
+
+      $for M in range(ROW_TILE):
+        __riscv_vse32_v_f32m${LMUL}(o${M}, vacc${M}, vl); o${M} += vl;
+
+      c -= vl;
+    }
+
+    $for M in range(ROW_TILE):
+      i${M} = (const float*) ((uintptr_t) i${M} + input_increment);
+      o${M} = (float*) ((uintptr_t) o${M} + output_increment);
+    rows = doz(rows, ${ROW_TILE});
+  } while (rows != 0);
+}
