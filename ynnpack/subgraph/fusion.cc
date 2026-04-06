@@ -787,8 +787,16 @@ bool fold_unary_output(ynn_subgraph& subgraph, ynn_node& node,
   if (unary == nullptr) return false;
 
   switch (unary->op) {
+    case ynn_unary_exp:
+      if (scalar_arithmetic->b != 0.0f) {
+        // exp does not support output offset
+        return false;
+      }
+      break;
     case ynn_unary_erf:
     case ynn_unary_tanh:
+    case ynn_unary_sine:
+    case ynn_unary_cosine:
     case ynn_unary_poly3:
       break;
     default:

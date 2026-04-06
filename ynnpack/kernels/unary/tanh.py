@@ -17,11 +17,11 @@ from ynnpack.kernels.elementwise.compiler import *  # pylint: disable=wildcard-i
 @const_buffer("a", Float(32))
 @buffer("x", Float(32))
 @params(
-    Scalar("output_multiplier", Float(32)),
     Scalar("output_offset", Float(32)),
+    Scalar("output_multiplier", Float(32)),
 )
 @operator_name("tanh")
-def tanh_fp32(a, x, output_multiplier, output_offset):
+def tanh_fp32(a, x, output_offset, output_multiplier):
   # Cap the inputs to this value as `tanh(x)` will always be `+/-1.0f` beyond
   # this point. This value is chosen as the first floating point number as of
   # which the interpolation returns 1.0f.
