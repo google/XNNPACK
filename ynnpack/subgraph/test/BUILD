@@ -239,3 +239,15 @@ cc_test(
         "@com_google_benchmark//:benchmark",
     ],
 )
+
+cc_test(
+    name = "slinky_bench",
+    srcs = ["slinky_bench.cc"],
+    linkopts = ynn_binary_linkopts(),
+    malloc = ynn_binary_malloc(),
+    deps = [
+        "//ynnpack/subgraph",
+        "@com_google_benchmark//:benchmark",
+        "@slinky//slinky/runtime",
+    ],
+)
