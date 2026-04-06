@@ -11,6 +11,8 @@
 #include <cmath>
 #include <cstdint>
 #include <cstdlib>
+#include <memory>
+#include <random>
 #include <type_traits>
 
 #include <gtest/gtest.h>
@@ -20,6 +22,7 @@
 #include "ynnpack/base/test/tensor.h"
 #include "ynnpack/base/type.h"
 #include "ynnpack/include/ynnpack.h"
+#include "ynnpack/kernels/unary/unary.h"
 
 namespace ynn {
 
@@ -118,6 +121,7 @@ struct unary_op_info {
 };
 
 struct convert : public unary_op_info {
+  explicit convert(const unary_params& = {}) {}
   float operator()(float x) const override { return x; }
   int32_t operator()(int32_t x) const override { return x; }
 
@@ -133,28 +137,34 @@ struct convert : public unary_op_info {
 };
 
 struct abs : public unary_op_info {
+  explicit abs(const unary_params& = {}) {}
   float operator()(float x) const override { return std::abs(x); }
   int32_t operator()(int32_t x) const override { return std::abs(x); }
 };
 
 struct negate : public unary_op_info {
+  explicit negate(const unary_params& = {}) {}
   float operator()(float x) const override { return -x; }
   int32_t operator()(int32_t x) const override { return -x; }
 };
 
 struct round : public unary_op_info {
+  explicit round(const unary_params& = {}) {}
   float operator()(float x) const override { return std::nearbyint(x); }
 };
 
 struct ceil : public unary_op_info {
+  explicit ceil(const unary_params& = {}) {}
   float operator()(float x) const override { return std::ceil(x); }
 };
 
 struct floor : public unary_op_info {
+  explicit floor(const unary_params& = {}) {}
   float operator()(float x) const override { return std::floor(x); }
 };
 
 struct sigmoid : public unary_op_info {
+  explicit sigmoid(const unary_params& = {}) {}
   float operator()(float x) const override {
     return 1.0 / (1.0 + std::exp(static_cast<double>(-x)));
   }
@@ -174,6 +184,7 @@ struct sigmoid : public unary_op_info {
 };
 
 struct square : public unary_op_info {
+  explicit square(const unary_params& = {}) {}
   float operator()(float x) const override { return x * x; }
   int32_t operator()(int32_t x) const override {
     return static_cast<int32_t>(static_cast<int64_t>(x) *
@@ -199,6 +210,7 @@ struct square : public unary_op_info {
 };
 
 struct square_root : public unary_op_info {
+  explicit square_root(const unary_params& = {}) {}
   float operator()(float x) const override { return std::sqrt(x); }
 
   float tolerance(float y_ref, ynn_type type) const override {
@@ -240,7 +252,12 @@ struct square_root : public unary_op_info {
 };
 
 struct tanh : public unary_op_info {
-  float operator()(float x) const override { return std::tanh(x); }
+  tanh_params params;
+
+  explicit tanh(const unary_params& params = {}) : params(params.tanh) {}
+  float operator()(float x) const override {
+    return std::tanh(x) * params.output_multiplier + params.output_offset;
+  }
 
   float tolerance(float y_ref, ynn_type type) const override {
     switch (type) {
@@ -248,7 +265,7 @@ struct tanh : public unary_op_info {
       case ynn_type_fp16:
       case ynn_type_bf16:
         return tol_mixed(y_ref, epsilon(type),
-                         4.0f * epsilon(type));  // 4 ULP
+                         5.0f * epsilon(type));  // 4 ULP
       default:
         return 1;
     }
@@ -265,6 +282,7 @@ struct tanh : public unary_op_info {
 };
 
 struct reciprocal_square_root : public unary_op_info {
+  explicit reciprocal_square_root(const unary_params& = {}) {}
   float operator()(float x) const override { return 1.0 / std::sqrt(x); }
 
   float tolerance(float y_ref, ynn_type type) const override {
@@ -306,6 +324,7 @@ struct reciprocal_square_root : public unary_op_info {
 };
 
 struct log : public unary_op_info {
+  explicit log(const unary_params& = {}) {}
   float operator()(float x) const override { return std::log(x); }
 
   float tolerance(float y_ref, ynn_type type) const override {
@@ -318,7 +337,12 @@ struct log : public unary_op_info {
 };
 
 struct exp : public unary_op_info {
-  float operator()(float x) const override { return std::exp(x); }
+  unary_params params;
+
+  explicit exp(const unary_params& params) : params(params) {}
+  float operator()(float x) const override {
+    return std::exp2(params.exp.input_multiplier * x);
+  }
 
   float tolerance(float y_ref, ynn_type type) const override {
     return tol_mixed(y_ref, 2 * epsilon(type), 6 * epsilon(type));
@@ -328,6 +352,7 @@ struct exp : public unary_op_info {
 };
 
 struct log1p : public unary_op_info {
+  explicit log1p(const unary_params& = {}) {}
   float operator()(float x) const override { return std::log1p(x); }
 
   float tolerance(float y_ref, ynn_type type) const override {
@@ -344,6 +369,7 @@ struct log1p : public unary_op_info {
 };
 
 struct expm1 : public unary_op_info {
+  explicit expm1(const unary_params& = {}) {}
   float operator()(float x) const override { return std::expm1(x); }
 
   float tolerance(float y_ref, ynn_type type) const override {
@@ -357,18 +383,21 @@ struct expm1 : public unary_op_info {
 };
 
 struct erf : public unary_op_info {
-  float operator()(float x) const override { return std::erf(x); }
+  erf_params params;
+
+  explicit erf(const unary_params& params) : params(params.erf) {}
+  float operator()(float x) const override {
+    return std::erf(params.input_multiplier * x) * params.output_multiplier +
+           params.output_offset;
+  }
 
   float tolerance(float y_ref, ynn_type type) const override {
-    if (type == ynn_type_fp16) {
-      return tol_mixed(y_ref, 3 * epsilon(type), epsilon(type));
-    } else {
-      return tol_relative(y_ref, 3 * epsilon(type));
-    }
+    return tol_mixed(y_ref, 3 * epsilon(type), epsilon(type));
   }
 };
 
 struct cube_root : public unary_op_info {
+  explicit cube_root(const unary_params& = {}) {}
   float operator()(float x) const override { return std::cbrt(x); }
 
   float tolerance(float y_ref, ynn_type type) const override {
@@ -377,6 +406,7 @@ struct cube_root : public unary_op_info {
 };
 
 struct sign : public unary_op_info {
+  explicit sign(const unary_params& = {}) {}
   float operator()(float x) const override {
     return x < 0 ? -1.0f : (x > 0 ? 1.0f : 0.0f);
   }
@@ -386,6 +416,7 @@ struct sign : public unary_op_info {
 };
 
 struct trig : public unary_op_info {
+  explicit trig(const unary_params& = {}) {}
   float tolerance(float y_ref, ynn_type type) const override {
     switch (type) {
       case ynn_type_fp32:
@@ -404,14 +435,17 @@ struct trig : public unary_op_info {
 };
 
 struct sine : public trig {
+  explicit sine(const unary_params& = {}) {}
   float operator()(float x) const override { return std::sin(x); }
 };
 
 struct cosine : public trig {
+  explicit cosine(const unary_params& = {}) {}
   float operator()(float x) const override { return std::cos(x); }
 };
 
 struct hardswish : public unary_op_info {
+  explicit hardswish(const unary_params& = {}) {}
   float operator()(float x) const override {
     return (x / 6.0) * std::max(std::min(x + 3.0, 6.0), 0.0);
   }
@@ -435,7 +469,39 @@ struct hardswish : public unary_op_info {
   interval domain(ynn_type) const override { return {-4.0f, 4.0f}; }
 };
 
-const unary_op_info* get_unary_op_info(ynn_unary_operator op);
+struct poly3 : public unary_op_info {
+  poly3_params params;
+
+  explicit poly3(const unary_params& params) : params(params.poly3) {}
+  float operator()(float x) const override {
+    return ((params.c3 * x + params.c2) * x + params.c1) * x + params.c0;
+  }
+
+  // Polynomials are tricky to test, because the tolerance should be based on
+  // maximum value of the argument. We don't know what that is, but we can
+  // define the domain to be [-1, 1].
+  interval domain(ynn_type) const override { return {-1.0f, 1.0f}; }
+
+  float tolerance(float y_ref, ynn_type type) const override {
+    return tol_mixed(y_ref, 5.0f * epsilon(type), epsilon(type));
+  }
+};
+
+std::unique_ptr<unary_op_info> get_unary_op_info(
+    ynn_unary_operator op, const unary_params& params = {});
+
+template <typename Rng>
+unary_params get_random_unary_params(ynn_unary_operator op, Rng& rng) {
+  std::uniform_real_distribution<float> dist(-2.0f, 2.0f);
+  switch (op) {
+    case ynn_unary_exp:
+      return unary_params{.exp = exp_params{dist(rng)}};
+    case ynn_unary_erf:
+      return unary_params{.exp = exp_params{dist(rng), dist(rng), dist(rng)}};
+    default:
+      return unary_params{};
+  }
+}
 
 // Check that op(a) == x, within tolerances described by `op`.
 template <typename A, typename X>

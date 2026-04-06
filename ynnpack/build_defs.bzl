@@ -364,7 +364,7 @@ def ynn_cc_library(
                 "-use_header_modules",
             ] + kwargs.get("features", []),
             # Don't build this target unless explicitly requested.
-            tags = ["manual"],
+            tags = ["manual", "notap"],
             **kwargs
         )
 

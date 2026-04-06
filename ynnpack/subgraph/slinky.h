@@ -167,11 +167,6 @@ YNN_ALWAYS_INLINE bool all_of_pairs(F&& f, A&& a, B&& b, Pairs&&... pairs) {
 
 }  // namespace internal
 
-YNN_ALWAYS_INLINE const slinky::dim& dim0_or_broadcast(
-    const slinky::raw_buffer& buf) {
-  return buf.rank > 0 ? buf.dim(0) : slinky::dim::broadcast();
-}
-
 YNN_ALWAYS_INLINE bool same_bounds(const slinky::dim& a, const slinky::dim& b) {
   // Return true if the dimensions have the same min and max or if they are
   // both broadcasts.
@@ -212,9 +207,9 @@ void fuse_and_slice_leading_dims(slinky::dim* x_dims, slinky::raw_buffer& x,
     // If the output innermost (n) dimension has extent 1, we need to make the n
     // dimension of all inputs a broadcast. This case is not expected to happen.
     // For now, we add an assert to catch this case if it does.
-    assert(i != 0 || is_continguous(dim0_or_broadcast(x), x.elem_size));
+    assert(i != 0 || is_continguous(x.dim(0), x.elem_size));
 
-    x_dims[i] = dim0_or_broadcast(x);
+    x_dims[i] = x.dim(0);
 
     // Initialize `in_dims[i]` for each input.
     // `x` is already a view to the correct tile in the larger output buffer.
@@ -223,25 +218,23 @@ void fuse_and_slice_leading_dims(slinky::dim* x_dims, slinky::raw_buffer& x,
     internal::apply_to_pairs(
         [i, x_min_i = x_dims[i].min()](slinky::dim* in_dims,
                                        slinky::raw_buffer& in_buf) {
-          if (in_buf.rank > 0) {
-            in_dims[i] = in_buf.dim(0);
-            in_buf.slice(0, x_min_i);
-          } else {
-            in_dims[i] = slinky::dim::broadcast();
-          }
+          in_dims[i] = in_buf.dim(0);
+          in_buf.slice(0, x_min_i);
         },
         inputs...);
     if (x.rank > 0) x.slice(0);
 
     while (x.rank > 0) {
       // First check whether fusing dimensions is possible.
+      const slinky::dim& x_dim_0 = x.dim(0);
       bool can_fuse_all =
-          slinky::can_fuse(x_dims[i], x.dim(0)) &&
+          slinky::can_fuse(x_dims[i], x_dim_0) &&
           internal::all_of_pairs(
-              [x_dims, i](const slinky::dim* in_dims,
-                          const slinky::raw_buffer& in_buf) {
+              [x_dims, i, &x_dim_0](const slinky::dim* in_dims,
+                                    const slinky::raw_buffer& in_buf) {
                 return same_bounds(x_dims[i], in_dims[i]) &&
-                       slinky::can_fuse(in_dims[i], dim0_or_broadcast(in_buf));
+                       same_bounds(x_dim_0, in_buf.dim(0)) &&
+                       slinky::can_fuse(in_dims[i], in_buf.dim(0));
               },
               inputs...);
       if (!can_fuse_all) {

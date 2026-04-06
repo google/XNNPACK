@@ -14,7 +14,10 @@ py_binary(
         "generator.py",
         "kernels.py",
     ],
-    tags = ["manual"],
+    tags = [
+        "manual",
+        "notap",
+    ],
     deps = ["//ynnpack/kernels/elementwise:generator"],
 )
 
@@ -27,6 +30,7 @@ ARCHS = [
     "x86_avx512",
     "x86_avx512bf16",
     "arm_neon",
+    "wasm_simd128",
 ]
 
 [ynn_generate_src_hdr(

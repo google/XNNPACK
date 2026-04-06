@@ -10,6 +10,7 @@
 
 
 SET(PROD_SCALAR_MICROKERNEL_SRCS
+  src/bf16-f32-vcvt/gen/bf16-f32-vcvt-scalar-u2.c
   src/f16-f32-vcvt/gen/f16-f32-vcvt-scalar-u4.c
   src/f16-qs8-vcvt/gen/f16-qs8-vcvt-scalar-imagic-u4.c
   src/f16-qu8-vcvt/gen/f16-qu8-vcvt-scalar-imagic-u4.c
@@ -25,6 +26,7 @@ SET(PROD_SCALAR_MICROKERNEL_SRCS
   src/f16-vsin/gen/f16-vsin-scalar-rational-3-2-div.c
   src/f32-argmaxpool/f32-argmaxpool-9p8x-scalar-c1.c
   src/f32-avgpool/gen/f32-avgpool-9p-minmax-scalar-u1.c
+  src/f32-bf16-vcvt/gen/f32-bf16-vcvt-scalar-u2.c
   src/f32-conv-hwc2chw/f32-conv-hwc2chw-3x3s2p1c3x4-scalar-1x1.c
   src/f32-dwconv/gen/f32-dwconv-3p1c-minmax-scalar-acc2.c
   src/f32-dwconv/gen/f32-dwconv-3p1c-scalar-acc2.c
@@ -248,6 +250,9 @@ SET(PROD_SCALAR_MICROKERNEL_SRCS
 
 SET(NON_PROD_SCALAR_MICROKERNEL_SRCS
   src/bf16-f32-gemm/bf16-f32-gemm-1x4c2-minmax-scalar.c
+  src/bf16-f32-vcvt/gen/bf16-f32-vcvt-scalar-u1.c
+  src/bf16-f32-vcvt/gen/bf16-f32-vcvt-scalar-u3.c
+  src/bf16-f32-vcvt/gen/bf16-f32-vcvt-scalar-u4.c
   src/f16-f32-vcvt/gen/f16-f32-vcvt-scalar-u1.c
   src/f16-f32-vcvt/gen/f16-f32-vcvt-scalar-u2.c
   src/f16-f32-vcvt/gen/f16-f32-vcvt-scalar-u3.c
@@ -273,6 +278,9 @@ SET(NON_PROD_SCALAR_MICROKERNEL_SRCS
   src/f16-rminmax/gen/f16-rminmax-scalar-u3-acc3.c
   src/f16-rminmax/gen/f16-rminmax-scalar-u4-acc2.c
   src/f16-rminmax/gen/f16-rminmax-scalar-u4-acc4.c
+  src/f32-bf16-vcvt/gen/f32-bf16-vcvt-scalar-u1.c
+  src/f32-bf16-vcvt/gen/f32-bf16-vcvt-scalar-u3.c
+  src/f32-bf16-vcvt/gen/f32-bf16-vcvt-scalar-u4.c
   src/f32-conv-hwc/f32-conv-hwc-3x3s2p0p1c3x4-scalar-1x1.c
   src/f32-conv-hwc/f32-conv-hwc-3x3s2p1c3x4-scalar-1x1.c
   src/f32-dwconv/gen/f32-dwconv-3p1c-minmax-scalar.c

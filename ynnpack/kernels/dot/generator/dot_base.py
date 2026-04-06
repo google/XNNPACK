@@ -155,7 +155,6 @@ void {func_name}(
     # When we clamp, we need to align down to the nearest tile.
     i = f"min({i}, (M - 1) & ~{self.tile_shape[0] - 1})" if i != 0 else i
     if "dot_flag::transpose_a" in self.flags:
-      k1 //= self.tile_shape[2]
       i = f"{i} * {self.tile_shape[2]}"
       i, k1 = k1, i
     offset = f"({i} * A_stride_m) + ({k1} * sizeof({self.a_type}))"
@@ -384,6 +383,12 @@ std::ptrdiff_t k1 = K1;
     block_body = self.generate_block(self.block_shape[2])
     tile_body = self.generate_block(self.tile_shape[2])
 
+    a_step = (
+        "A_stride_m"
+        if "dot_flag::transpose_a" in self.flags
+        else f"sizeof({self.a_type})"
+    )
+
     if block_body == tile_body:
       tile_body = None
 
@@ -397,11 +402,9 @@ std::ptrdiff_t k1 = K1;
           f"B_k1_{j} = offset_bytes(B_k1_{j}, {self.block_shape[2]} *"
           " B_stride_k1);\n"
       )
-    if "dot_flag::transpose_a" in self.flags:
-      a_step = f"{self.block_shape[2]//self.tile_shape[2]} * A_stride_m"
-    else:
-      a_step = f"{self.block_shape[2]} * sizeof({self.a_type})"
-    block_body += f"A_k1 = offset_bytes(A_k1, {a_step});\n"
+    block_body += (
+        f"A_k1 = offset_bytes(A_k1, {self.block_shape[2]} * {a_step});\n"
+    )
     result += indent(block_body, "  ") + "\n"
     if tile_body:
       result += "}\n"
@@ -421,8 +424,7 @@ std::ptrdiff_t k1 = K1;
               " B_stride_k1);\n"
           )
         tile_body += (
-            f"A_k1 = offset_bytes(A_k1, {self.tile_shape[2]} *"
-            f" sizeof({self.a_type}));\n"
+            f"A_k1 = offset_bytes(A_k1, {self.tile_shape[2]} * {a_step});\n"
         )
       result += indent(tile_body, "  ") + "\n"
       result += "}\n"

@@ -30,18 +30,21 @@ struct dot_loop {
 // maximized for each cache in `cache_sizes`. `storage` must have room for at
 // most 3 loops per cache size.
 span<dot_loop> schedule_dot(span<const size_t> cache_sizes, size_t m, size_t n,
-                            size_t k1, size_t k2, size_t k3, size_t block_m,
+                            span<const size_t> ks, size_t block_m,
                             size_t block_n, size_t block_k, size_t a_elem_size,
                             size_t b_elem_size, dot_loop* storage);
 
 // Block a dot's m dimension, calling f at each block.
 template <typename DotFn>
-void block_dot_m(ptrdiff_t m, size_t n, size_t k, ptrdiff_t block_m,
-                 size_t a_stride_m, const void* a, const void* b,
+void block_dot_m(ptrdiff_t m, size_t n, span<const size_t> ks,
+                 ptrdiff_t block_m, size_t a_stride_m,
+                 span<const size_t> a_k_strides, const void* a,
+                 span<const size_t> b_k_strides, const void* b,
                  size_t init_c_stride_m, const void* init_c, size_t c_stride_m,
                  size_t c_stride_n, void* c, DotFn f) {
   do {
-    f(std::min(m, block_m), n, k, a, b, init_c_stride_m, init_c, c);
+    f(std::min(m, block_m), n, ks, a, a_stride_m, a_k_strides, b, b_k_strides,
+      init_c_stride_m, init_c, c);
 
     m -= block_m;
     if (init_c) init_c = offset_bytes(init_c, init_c_stride_m * block_m);
@@ -52,12 +55,15 @@ void block_dot_m(ptrdiff_t m, size_t n, size_t k, ptrdiff_t block_m,
 
 // Block a dot's n dimension, calling f at each block.
 template <typename DotFn>
-void block_dot_n(size_t m, ptrdiff_t n, size_t k, ptrdiff_t block_n,
-                 const void* a, size_t b_stride_n, const void* b,
-                 size_t init_c_stride_m, const void* init_c, size_t c_stride_m,
-                 size_t c_stride_n, void* c, DotFn f) {
+void block_dot_n(size_t m, ptrdiff_t n, span<const size_t> ks,
+                 ptrdiff_t block_n, size_t a_stride_m,
+                 span<const size_t> a_k_strides, const void* a,
+                 size_t b_stride_n, span<const size_t> b_k_strides,
+                 const void* b, size_t init_c_stride_m, const void* init_c,
+                 size_t c_stride_m, size_t c_stride_n, void* c, DotFn f) {
   do {
-    f(m, std::min(n, block_n), k, a, b, init_c_stride_m, init_c, c);
+    f(m, std::min(n, block_n), ks, a, a_stride_m, a_k_strides, b, b_k_strides,
+      init_c_stride_m, init_c, c);
 
     n -= block_n;
     if (init_c) init_c = offset_bytes(init_c, c_stride_n * block_n);
@@ -68,12 +74,18 @@ void block_dot_n(size_t m, ptrdiff_t n, size_t k, ptrdiff_t block_n,
 
 // Block a dot's k dimension, calling f at each block.
 template <typename DotFn>
-void block_dot_k(size_t m, size_t n, ptrdiff_t k, ptrdiff_t block_k,
-                 size_t a_stride_k, const void* a, size_t b_stride_k,
-                 const void* b, size_t init_c_stride_m, const void* init_c,
-                 size_t c_stride_m, size_t c_stride_n, void* c, DotFn f) {
+void block_dot_k(size_t m, size_t n, span<const size_t> ks, ptrdiff_t block_k,
+                 size_t a_stride_m, span<const size_t> a_k_strides,
+                 const void* a, span<const size_t> b_k_strides, const void* b,
+                 size_t init_c_stride_m, const void* init_c, size_t c_stride_m,
+                 size_t c_stride_n, void* c, DotFn f) {
+  ptrdiff_t k = ks[0];
+  size_t k_block[3];
+  std::copy(ks.begin(), ks.end(), k_block);
   do {
-    f(m, n, std::min(k, block_k), a, b, init_c_stride_m, init_c, c);
+    k_block[0] = std::min(k, block_k);
+    f(m, n, {k_block, ks.size()}, a, a_stride_m, a_k_strides, b, b_k_strides,
+      init_c_stride_m, init_c, c);
 
     // Splitting k requires care for the initializer. The dot kernels read and
     // write from a separate buffer, so for each tile that we process in k, the
@@ -90,18 +102,18 @@ void block_dot_k(size_t m, size_t n, ptrdiff_t k, ptrdiff_t block_k,
     init_c_stride_m = c_stride_m;
 
     k -= block_k;
-    b = offset_bytes(b, b_stride_k * block_k);
-    a = offset_bytes(a, a_stride_k * block_k);
+    b = offset_bytes(b, b_k_strides[0] * block_k);
+    a = offset_bytes(a, a_k_strides[0] * block_k);
   } while (k > 0);
 }
 
 template <typename DotFn>
-void run_dot(span<dot_loop> loops, size_t m, size_t n, size_t k, size_t block_m,
-             size_t block_n, size_t block_k, size_t a_stride_m,
-             size_t a_stride_k, const void* a, size_t b_stride_k,
-             size_t b_stride_n, const void* b, size_t init_c_stride_m,
-             const void* init_c, size_t c_stride_m, size_t c_stride_n, void* c,
-             DotFn f) {
+void run_dot(span<dot_loop> loops, size_t m, size_t n, span<const size_t> ks,
+             size_t block_m, size_t block_n, size_t block_k, size_t a_stride_m,
+             span<const size_t> a_k_strides, const void* a,
+             span<const size_t> b_k_strides, size_t b_stride_n, const void* b,
+             size_t init_c_stride_m, const void* init_c, size_t c_stride_m,
+             size_t c_stride_n, void* c, DotFn f) {
   assert(!loops.empty());
   const dot_loop loop = loops.front();
   loops = loops.subspan(1);
@@ -110,40 +122,44 @@ void run_dot(span<dot_loop> loops, size_t m, size_t n, size_t k, size_t block_m,
     // There are no more loops after this one.
     switch (loop.dim) {
       case dot_loop::m:
-        return block_dot_m(m, n, k, block_m * loop.blocks, a_stride_m, a, b,
-                           init_c_stride_m, init_c, c_stride_m, c_stride_n, c,
-                           f);
+        return block_dot_m(m, n, ks, block_m * loop.blocks, a_stride_m,
+                           a_k_strides, a, b_k_strides, b, init_c_stride_m,
+                           init_c, c_stride_m, c_stride_n, c, f);
       case dot_loop::n:
-        return block_dot_n(m, n, k, block_n * loop.blocks, a, b_stride_n, b,
+        return block_dot_n(m, n, ks, block_n * loop.blocks, a_stride_m,
+                           a_k_strides, a, b_stride_n, b_k_strides, b,
                            init_c_stride_m, init_c, c_stride_m, c_stride_n, c,
                            f);
       case dot_loop::k:
-        return block_dot_k(m, n, k, block_k * loop.blocks, a_stride_k, a,
-                           b_stride_k, b, init_c_stride_m, init_c, c_stride_m,
-                           c_stride_n, c, f);
+        return block_dot_k(m, n, ks, block_k * loop.blocks, a_stride_m,
+                           a_k_strides, a, b_k_strides, b, init_c_stride_m,
+                           init_c, c_stride_m, c_stride_n, c, f);
     }
   } else {
     // Recursively call `run_dot` with the subsequent loops.
-    auto recursive_f = [=](size_t m, size_t n, size_t k, const void* a,
-                           const void* b, size_t init_c_stride_m,
-                           const void* init_c, void* c) {
-      run_dot(loops, m, n, k, block_m, block_n, block_k, a_stride_m, a_stride_k,
-              a, b_stride_k, b_stride_n, b, init_c_stride_m, init_c, c_stride_m,
-              c_stride_n, c, f);
-    };
+    auto recursive_f =
+        [=](size_t m, size_t n, span<const size_t> ks, const void* a,
+            size_t a_stride_m, span<const size_t> a_k_strides, const void* b,
+            span<const size_t> b_k_strides, size_t init_c_stride_m,
+            const void* init_c, void* c) {
+          run_dot(loops, m, n, ks, block_m, block_n, block_k, a_stride_m,
+                  a_k_strides, a, b_k_strides, b_stride_n, b, init_c_stride_m,
+                  init_c, c_stride_m, c_stride_n, c, f);
+        };
     switch (loop.dim) {
       case dot_loop::m:
-        return block_dot_m(m, n, k, block_m * loop.blocks, a_stride_m, a, b,
-                           init_c_stride_m, init_c, c_stride_m, c_stride_n, c,
-                           recursive_f);
+        return block_dot_m(m, n, ks, block_m * loop.blocks, a_stride_m,
+                           a_k_strides, a, b_k_strides, b, init_c_stride_m,
+                           init_c, c_stride_m, c_stride_n, c, recursive_f);
       case dot_loop::n:
-        return block_dot_n(m, n, k, block_n * loop.blocks, a, b_stride_n, b,
+        return block_dot_n(m, n, ks, block_n * loop.blocks, a_stride_m,
+                           a_k_strides, a, b_stride_n, b_k_strides, b,
                            init_c_stride_m, init_c, c_stride_m, c_stride_n, c,
                            recursive_f);
       case dot_loop::k:
-        return block_dot_k(m, n, k, block_k * loop.blocks, a_stride_k, a,
-                           b_stride_k, b, init_c_stride_m, init_c, c_stride_m,
-                           c_stride_n, c, recursive_f);
+        return block_dot_k(m, n, ks, block_k * loop.blocks, a_stride_m,
+                           a_k_strides, a, b_k_strides, b, init_c_stride_m,
+                           init_c, c_stride_m, c_stride_n, c, recursive_f);
     }
   }
 }

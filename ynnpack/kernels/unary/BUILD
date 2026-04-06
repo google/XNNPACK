@@ -21,7 +21,10 @@ py_binary(
         "sine_cosine.py",
         "tanh.py",
     ],
-    tags = ["manual"],
+    tags = [
+        "manual",
+        "notap",
+    ],
     deps = ["//ynnpack/kernels/elementwise:generator"],
 )
 
@@ -36,6 +39,7 @@ ARCHS = [
     "x86_avx512bf16",
     "arm_neon",
     "arm_neonfp16",
+    "wasm_simd128",
 ]
 
 [ynn_generate_src_hdr(
@@ -73,6 +77,7 @@ cc_library(
     hdrs = ["reference.h"],
     visibility = ["//ynnpack:__subpackages__"],
     deps = [
+        ":unary",
         "//ynnpack:ynnpack_h",
         "//ynnpack/base",
         "//ynnpack/base/test:tensor",

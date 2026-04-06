@@ -200,7 +200,7 @@ ynn_status ynn_value::set_external_shape(size_t rank, const size_t* dims) {
 
   for (size_t d = 0; d < rank; ++d) {
     if (!extents[d].defined() || slinky::is_constant(extents[d], 1)) {
-      data->dim(d) = slinky::dim::broadcast();
+      data->mutable_dim(d) = slinky::dim::broadcast();
     }
   }
 
@@ -775,6 +775,7 @@ const char* name_of(const ynn_node::static_expand_dims&) {
 }
 const char* name_of(const ynn_node::static_pad&) { return "static_pad"; }
 const char* name_of(const ynn_node::static_slice&) { return "static_slice"; }
+const char* name_of(const ynn_node::slice_like&) { return "slice_like"; }
 const char* name_of(const ynn_node::static_transpose&) {
   return "static_transpose";
 }
@@ -932,6 +933,10 @@ void print(std::ostream& os, const ynn_node::static_slice& op) {
     }
   }
   os << "}";
+}
+
+void print(std::ostream& os, const ynn_node::slice_like& op) {
+  os << "axes=" << op.axes;
 }
 
 void print(std::ostream& os, const ynn_node::static_transpose& op) {

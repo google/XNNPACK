@@ -78,13 +78,13 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x1v__rvv(
     vint16m2_t vout0 = __riscv_vfncvt_x(vfacc0, vl);
 
     vout0 = __riscv_vadd(vout0, (int16_t) output_zero_point, vl);
-  
-      vint8m1_t vout80 = __riscv_vncvt_x(vout0, vl);
 
-      __riscv_vse8(c0, vout80, vl);
-      c0 = (int8_t*) ((uintptr_t) c0 + cn_stride);
+    vint8m1_t vout80 = __riscv_vncvt_x(vout0, vl);
 
-      a0 = (const int8_t*) ((uintptr_t) a0 - kc);
+    __riscv_vse8(c0, vout80, vl);
+    c0 = (int8_t*) ((uintptr_t) c0 + cn_stride);
+
+    a0 = (const int8_t*) ((uintptr_t) a0 - kc);
 
   } while (nc != 0);
 }

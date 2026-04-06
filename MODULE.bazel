@@ -43,9 +43,9 @@ http_archive = use_repo_rule("@bazel_tools//tools/build_defs/repo:http.bzl", "ht
 # Google Test framework, used by most unit-tests.
 http_archive(
     name = "com_google_googletest",
-    sha256 = "47925a240670c819eda1df2590a40e58c68133aa88022df5a2b13c84251f62f5",
-    strip_prefix = "googletest-56efe3983185e3f37e43415d1afa97e3860f187f",
-    urls = ["https://github.com/google/googletest/archive/56efe3983185e3f37e43415d1afa97e3860f187f.zip"],
+    sha256 = "a4cb11930215b071168811982dfbebc82a2bb0f90db0e8713245931eb742ea46",
+    strip_prefix = "googletest-d72f9c8aea6817cdf1ca0ac10887f328de7f3da2",
+    urls = ["https://github.com/google/googletest/archive/d72f9c8aea6817cdf1ca0ac10887f328de7f3da2.zip"],
 )
 # LINT.ThenChange(cmake/DownloadGoogleTest.cmake)
 
@@ -73,9 +73,9 @@ http_archive(
 # pthreadpool library, used for parallelization
 http_archive(
     name = "pthreadpool",
-    sha256 = "f602ab141bdc5d5872a79d6551e9063b5bfa7ad6ad60cceaa641de5c45c86d70",
-    strip_prefix = "pthreadpool-0e6ca13779b57d397a5ba6bfdcaa8a275bc8ea2e",
-    urls = ["https://github.com/google/pthreadpool/archive/0e6ca13779b57d397a5ba6bfdcaa8a275bc8ea2e.zip"],
+    sha256 = "00a9a1c633f62290a22ea1db42c4401dffe9f05645fb66d6609ae46a05333a2a",
+    strip_prefix = "pthreadpool-9003ee6c137cea3b94161bd5c614fb43be523ee1",
+    urls = ["https://github.com/google/pthreadpool/archive/9003ee6c137cea3b94161bd5c614fb43be523ee1.zip"],
 )
 # LINT.ThenChange(cmake/DownloadPThreadPool.cmake)
 
@@ -83,10 +83,10 @@ http_archive(
 # cpuinfo library, used for detecting processor characteristics
 http_archive(
     name = "cpuinfo",
-    sha256 = "2d74c44c80d9419702ed83bb362ac764e71720093138ef06a34f73de829cce27",
-    strip_prefix = "cpuinfo-f9a03241f8c3d4ed0c9728f5d70bff873d43d4e0",
+    sha256 = "45807bf49ac57cabef37271053be3372415ca25d9648da366e7d41620a077c9c",
+    strip_prefix = "cpuinfo-7364b490b5f78d58efe23ea76e74210fd6c3c76f",
     urls = [
-        "https://github.com/pytorch/cpuinfo/archive/f9a03241f8c3d4ed0c9728f5d70bff873d43d4e0.zip",
+        "https://github.com/pytorch/cpuinfo/archive/7364b490b5f78d58efe23ea76e74210fd6c3c76f.zip",
     ],
 )
 # LINT.ThenChange(cmake/DownloadCpuinfo.cmake)
@@ -115,9 +115,9 @@ http_archive(
 
 http_archive(
     name = "slinky",
-    sha256 = "28d311d7aa3c7f432e3fc14a09f11bff363a1611896c198d1c4a41ed5aab0d48",
-    strip_prefix = "slinky-4de79eb693dfa2791fa469586c8052287cb3110d",
+    sha256 = "22e075dc4b40b53ab47f48c62a9c9c1d99a24fbb8f17c8ee39b14901a6e72169",
+    strip_prefix = "slinky-e36fd1197a2ae6a53fd41833731e25eb4ee1bb26",
     urls = [
-        "https://github.com/dsharlet/slinky/archive/4de79eb693dfa2791fa469586c8052287cb3110d.zip",
+        "https://github.com/dsharlet/slinky/archive/e36fd1197a2ae6a53fd41833731e25eb4ee1bb26.zip",
     ],
 )

@@ -20,6 +20,10 @@
 #include "ynnpack/kernels/ternary/arm_neon.inc"
 #endif  // YNN_ARCH_ARM_NEON
 
+#ifdef YNN_ARCH_WASM_SIMD128
+#include "ynnpack/kernels/ternary/wasm_simd128.inc"
+#endif  // YNN_ARCH_WASM_SIMD128
+
 YNN_ELEMENTWISE_KERNEL(arch_flag::none, quantize_fp32_to_int8, quantize_int8, float, float, int32_t, int8_t)
 YNN_ELEMENTWISE_KERNEL(arch_flag::none, quantize_fp32_to_uint8, quantize_uint8, float, float, int32_t, uint8_t)
 YNN_ELEMENTWISE_KERNEL(arch_flag::none, dequantize_int8_to_fp32, dequantize, int8_t, int32_t, float, float)

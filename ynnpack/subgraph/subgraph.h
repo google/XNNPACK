@@ -25,6 +25,7 @@
 #include "ynnpack/base/type.h"
 #include "ynnpack/include/ynnpack.h"
 #include "ynnpack/kernels/ternary/ternary.h"
+#include "ynnpack/kernels/unary/unary.h"
 #include "ynnpack/subgraph/slinky.h"
 #include "slinky/runtime/buffer.h"
 #include "slinky/runtime/evaluate.h"
@@ -234,13 +235,40 @@ struct ynn_node {
   };
   struct unary_elementwise {
     ynn_unary_operator op;
+    ynn::unary_params params;
     friend bool operator==(const unary_elementwise& a,
                            const unary_elementwise& b) {
-      return a.op == b.op;
+      if (a.op != b.op) return false;
+      switch (a.op) {
+        case ynn_unary_exp:
+          return a.params.exp == b.params.exp;
+        case ynn_unary_erf:
+          return a.params.erf == b.params.erf;
+        case ynn_unary_tanh:
+          return a.params.tanh == b.params.tanh;
+        case ynn_unary_poly3:
+          return a.params.poly3 == b.params.poly3;
+        default:
+          break;
+      }
+      return true;
     }
     friend bool operator<(const unary_elementwise& a,
                           const unary_elementwise& b) {
-      return a.op < b.op;
+      if (a.op != b.op) return a.op < b.op;
+      switch (a.op) {
+        case ynn_unary_exp:
+          return a.params.exp < b.params.exp;
+        case ynn_unary_erf:
+          return a.params.erf < b.params.erf;
+        case ynn_unary_tanh:
+          return a.params.tanh < b.params.tanh;
+        case ynn_unary_poly3:
+          return a.params.poly3 < b.params.poly3;
+        default:
+          break;
+      }
+      return false;
     }
   };
   struct lut {
@@ -407,6 +435,15 @@ struct ynn_node {
              std::tie(b.slices, b.slice_dims);
     }
   };
+  struct slice_like {
+    ynn::axes_set axes;
+    friend bool operator==(const slice_like& a, const slice_like& b) {
+      return a.axes == b.axes;
+    }
+    friend bool operator<(const slice_like& a, const slice_like& b) {
+      return a.axes < b.axes;
+    }
+  };
   struct static_transpose {
     std::vector<int32_t> permutation;
     bool alias;
@@ -500,9 +537,10 @@ struct ynn_node {
   std::variant<invalid, opaque, broadcast, broadcast_like, concatenate,
                even_split, copy, split_dim, fuse_dim, fuse_dims, split_dims,
                stack, static_reshape, static_broadcast, static_expand_dims,
-               static_pad, static_slice, static_transpose, stencil_copy,
-               unary_elementwise, lut, binary_elementwise, ternary_elementwise,
-               dot, pack_b, transpose_a, get_tensor_shape, reduce>
+               static_pad, static_slice, slice_like, static_transpose,
+               stencil_copy, unary_elementwise, lut, binary_elementwise,
+               ternary_elementwise, dot, pack_b, transpose_a, get_tensor_shape,
+               reduce>
       op;
 
   const char* name() const;

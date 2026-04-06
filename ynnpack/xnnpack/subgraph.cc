@@ -161,8 +161,8 @@ xnn_status xnn_define_unary(xnn_subgraph_t subgraph, xnn_unary_operator type,
     return ynn::xnn_status_from_ynn(
         ynn::implement_hardswish(subgraph->ynn, input_id, output_id));
   } else if (type == xnn_unary_approxgelu) {
-    // return (x / 2) * (1 + tanh(sqrt(2.0 / pi) * x * (1 + 0.044715 * x *
-    // x))));
+    return ynn::xnn_status_from_ynn(
+        ynn::implement_approxgelu(subgraph->ynn, input_id, output_id));
   } else {
     ynn_unary_operator ynn_type = ynn::unary_operator_from_xnn(type);
     if (ynn_type != ynn_unary_invalid) {
@@ -975,13 +975,22 @@ xnn_status xnn_define_rope(xnn_subgraph_t subgraph, size_t max_sequence_size,
   //   y(n, t, h, 1, c) =
   //       x(n, t, h, 0, c) * w(t, 1, c) + x(n, t, h, 1, c) * w(t, 0, c)
 
-  // [t, c] -> [0, t, 0, c]
+  // [t, c] -> [1, t, 1, c]
   const int32_t weights_broadcast_axes[] = {0, 2};
-  uint32_t weights_broadcasted_id = YNN_INVALID_VALUE_ID;
+  uint32_t weights_expanded_id = YNN_INVALID_VALUE_ID;
   ynn_status status =
       ynn_define_static_expand_dims(subgraph->ynn, 2, weights_broadcast_axes,
-                                    weights_id, &weights_broadcasted_id,
+                                    weights_id, &weights_expanded_id,
                                     /*flags=*/0);
+  if (status != ynn_status_success) {
+    return ynn::xnn_status_from_ynn(status);
+  }
+
+  // [1, t_max, 1, c] -> [1, t, 1, c]
+  const int32_t t_axis = 1;
+  uint32_t weights_broadcasted_id = YNN_INVALID_VALUE_ID;
+  status = ynn_define_slice_like(subgraph->ynn, 1, &t_axis, weights_expanded_id,
+                                 input_id, &weights_broadcasted_id, 0);
   if (status != ynn_status_success) {
     return ynn::xnn_status_from_ynn(status);
   }

@@ -426,6 +426,14 @@ enum xnn_status define_copy_node(xnn_subgraph_t subgraph, size_t num_dims,
     return status;
   }
 
+  if (num_dims > XNN_MAX_TENSOR_DIMS) {
+    xnn_log_error(
+      "failed to define %s operator with %zu dimensions: "
+      "the number of dimensions must not exceed %d",
+      xnn_node_type_to_string(node_type), num_dims, XNN_MAX_TENSOR_DIMS);
+    return xnn_status_unsupported_parameter;
+  }
+
   status = xnn_subgraph_check_input_node_id(node_type, input_id, subgraph->num_values);
   if (status != xnn_status_success) {
     return status;

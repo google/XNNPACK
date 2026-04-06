@@ -31,6 +31,7 @@ ynn_cc_library(
         "x86_avx2": ["x86_avx2.cc"],
         "x86_avx512": ["x86_avx512.cc"],
         "hexagon_hvx": ["hexagon_hvx.cc"],
+        "wasm_simd128": ["wasm_simd128.cc"],
     },
     visibility = ["//ynnpack:__subpackages__"],
     deps = [

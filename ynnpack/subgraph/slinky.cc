@@ -87,9 +87,13 @@ slinky::buffer_expr_ptr make_buffer_expr(slinky::var sym, int rank,
 void require_contiguous(slinky::buffer_expr& buf, size_t dims) {
   slinky::expr stride = buf.elem_size();
   for (size_t d = 0; d < std::min(dims, buf.rank()); ++d) {
-    buf.dim(d).stride = stride;
-    buf.dim(d).fold_factor = slinky::dim::unfolded;
-    stride *= buf.dim(d).extent();
+    if (prove_true(buf.dim(d).extent() == 1)) {
+      buf.dim(d) = slinky::dim::broadcast();
+    } else {
+      buf.dim(d).stride = stride;
+      buf.dim(d).fold_factor = slinky::dim::unfolded;
+      stride *= buf.dim(d).extent();
+    }
   }
 }
 

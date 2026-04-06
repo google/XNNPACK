@@ -60,6 +60,14 @@ static enum xnn_status reshape_rope_operator(
   const struct xnn_runtime_value* input_value = values + input_id;
 
   const size_t num_input_dims = input_value->shape.num_dims;
+  if (num_input_dims < 3) {
+    xnn_log_error(
+      "failed to reshape %s operator with input ID #%" PRIu32
+      ": number of dimensions (%zu) must be at least 3",
+      xnn_node_type_to_string(xnn_node_type_rope),
+      input_id, num_input_dims);
+    return xnn_status_invalid_parameter;
+  }
   const size_t batch_size = xnn_shape_multiply_batch_dims(&input_value->shape, 3);
   const size_t tokens = input_value->shape.dim[num_input_dims - 3];
   const size_t heads = input_value->shape.dim[num_input_dims - 2];

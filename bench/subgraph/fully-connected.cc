@@ -76,7 +76,8 @@ xnn_subgraph_t FullyConnected(size_t batch_size, size_t m, size_t k, size_t n,
     w1_data.resize(XNN_PAD_EXTRA_BYTES(k * n, Wunpacked));
     auto f32rng = std::bind(std::uniform_real_distribution<float>(-1.0f, +1.0f),
                             std::ref(rng));
-    std::generate(w1_data.begin(), w1_data.end(), std::ref(f32rng));
+    std::generate(w1_data.begin(), w1_data.end(),
+                  [&]() { return static_cast<Wunpacked>(f32rng()); });
     if (xnn_datatype_is_channelwise_quantized(datatype_w)) {
       static std::vector<float> w1_scale;
       w1_scale.resize(n);

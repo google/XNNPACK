@@ -480,10 +480,10 @@ auto make_reshape_impl(ynn_runtime* runtime) {
         assert(i.data->rank == i.rank());
         for (size_t d = 0; d < i.rank(); ++d) {
           if (i.extents[d].defined()) {
-            i.data->dim(d).set_min_extent(
+            i.data->mutable_dim(d).set_min_extent(
                 0, evaluate(i.extents[d], ctx));
           } else {
-            i.data->dim(d).set_min_extent(0, 1);
+            i.data->mutable_dim(d).set_min_extent(0, 1);
           }
         }
         ynn::init_buffer_strides(*i.data);
@@ -553,7 +553,7 @@ ynn_runtime::ynn_runtime(ynn::ref_count<const ynn_subgraph> subgraph,
       for (size_t d = 0; d < value.extents.size(); ++d) {
         if (!value.extents[d].defined() ||
             slinky::is_constant(value.extents[d], 1)) {
-          value.data->dim(d) = slinky::dim::broadcast();
+          value.data->mutable_dim(d) = slinky::dim::broadcast();
         }
       }
 
@@ -632,7 +632,7 @@ ynn_status ynn_runtime::build() {
       for (size_t d = 0; d < value.extents.size(); ++d) {
         if (!value.extents[d].defined() ||
             slinky::is_constant(value.extents[d], 1)) {
-          value.data->dim(d) = slinky::dim::broadcast();
+          value.data->mutable_dim(d) = slinky::dim::broadcast();
         }
       }
     }

@@ -55,6 +55,12 @@ static void init_f16_raddstoreexpminusmax_config(void) {
         f16_raddstoreexpminusmax_config.ukernel = XNN_INIT_RADDSTOREEXPMINUSMAX_UKERNEL(xnn_f16_raddstoreexpminusmax_ukernel__avx2_rr1_p2_u32);
       }
     #endif
+  #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_FP16_VECTOR
+    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    assert(hardware_config != NULL);
+    if (hardware_config->arch_flags & xnn_arch_riscv_vector_fp16_arith) {
+      f16_raddstoreexpminusmax_config.ukernel = XNN_INIT_RADDSTOREEXPMINUSMAX_UKERNEL(xnn_f16_raddstoreexpminusmax_ukernel__rvvfp16arith_rr2_p2_u4v);
+    }
   #endif
 }
 
@@ -127,6 +133,8 @@ static bool is_f16_compatible_config(const struct xnn_hardware_config* hardware_
     return (hardware_config->arch_flags & xnn_arch_arm_neon_fp16_arith);
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
     return (hardware_config->arch_flags & xnn_arch_x86_avx2);
+  #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_FP16_VECTOR
+    return (hardware_config->arch_flags & xnn_arch_riscv_vector_fp16_arith);
   #else
     return false;
   #endif

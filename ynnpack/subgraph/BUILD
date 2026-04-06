@@ -67,6 +67,7 @@ cc_library(
         "reduce.cc",
         "reduce.h",
         "runtime.cc",
+        "slice_like.cc",
         "slinky.cc",
         "stack.cc",
         "static_pad.cc",

@@ -3,6 +3,7 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+#include <cmath>
 #include <cstdint>
 #include <variant>
 #include <vector>
@@ -96,6 +97,59 @@ TEST(fusion, multiply_multiply) {
   EXPECT_THAT(ProducerOf(x_id, subgraph),
               AllOf(IsTernary(ternary_op::multiply),
                     InputsInclude(a_id, b_id, c_id)));
+}
+
+TEST(fusion, exp_multiplier) {
+  // exp(multiply(a, C)) -> exp(a, multiplier = log2(e) * C)
+  const uint32_t a_id = 0;
+  const uint32_t c_id = 1;
+  const uint32_t x_id = 2;
+  SubgraphBuilder builder(3);
+  uint32_t ac_id = YNN_INVALID_VALUE_ID;
+  float c = 0.5f;
+  builder.AddInput(ynn_type_fp32, 2, a_id)
+      .AddScalar(c, c_id)
+      .AddOutput(ynn_type_fp32, 2, x_id)
+      .AddTensor(ynn_type_fp32, 2, ac_id);
+  builder.AddBinary(ynn_binary_multiply, a_id, c_id, ac_id)
+      .AddUnary(ynn_unary_exp, ac_id, x_id);
+
+  ynn_subgraph& subgraph = *builder.GetSubgraph();
+
+  subgraph.fusion();
+  subgraph.invalidate_dead_values();
+
+  ASSERT_THAT(subgraph, AllOf(HasValidNodeCount(1), HasValidValueCount(2)));
+  const ynn_node& node = ProducerOf(x_id, subgraph);
+  EXPECT_THAT(node, IsUnary(ynn_unary_exp));
+  const auto& unary = std::get<ynn_node::unary_elementwise>(node.op);
+  EXPECT_NEAR(unary.params.exp.input_multiplier, std::log2(std::exp(1.0f)) * c,
+              1e-6f);
+}
+
+TEST(fusion, exp_negate) {
+  // exp(negate(a)) -> exp(a, multiplier = -log2(e))
+  const uint32_t a_id = 0;
+  const uint32_t x_id = 1;
+  SubgraphBuilder builder(2);
+  uint32_t a_negated_id = YNN_INVALID_VALUE_ID;
+  builder.AddInput(ynn_type_fp32, 2, a_id)
+      .AddOutput(ynn_type_fp32, 2, x_id)
+      .AddTensor(ynn_type_fp32, 2, a_negated_id);
+  builder.AddUnary(ynn_unary_negate, a_id, a_negated_id)
+      .AddUnary(ynn_unary_exp, a_negated_id, x_id);
+
+  ynn_subgraph& subgraph = *builder.GetSubgraph();
+
+  subgraph.fusion();
+  subgraph.invalidate_dead_values();
+
+  ASSERT_THAT(subgraph, AllOf(HasValidNodeCount(1), HasValidValueCount(2)));
+  const ynn_node& node = ProducerOf(x_id, subgraph);
+  EXPECT_THAT(node, IsUnary(ynn_unary_exp));
+  const auto& unary = std::get<ynn_node::unary_elementwise>(node.op);
+  EXPECT_NEAR(unary.params.exp.input_multiplier, -std::log2(std::exp(1.0f)),
+              1e-6f);
 }
 
 TEST(fusion, subtract_multiply) {
@@ -309,7 +363,7 @@ TEST(fusion, transpose_stencil_copy) {
 
   EXPECT_THAT(ProducerOf(z_id, subgraph),
               AllOf(IsStencilCopy(std::vector<ynn_node::stencil_copy::stencil>{
-                        {/*axis=*/1, /*new_axis=*/2, /*extent=*/3,
+                        {/*axis=*/2, /*new_axis=*/3, /*extent=*/3,
                          /*stride=*/1, /*dilation=*/1}}),
                     InputsAre(y_id, YNN_INVALID_VALUE_ID)));
 

@@ -793,6 +793,15 @@ static enum xnn_status reshape_batch_matrix_multiply_nc(
     return xnn_status_invalid_parameter;
   }
 
+  if (num_batch_dims > XNN_MAX_TENSOR_DIMS) {
+    xnn_log_error(
+        "failed to reshape %s operator with %zu batch dimensions: "
+        "the number of batch dimensions must not exceed %d",
+        xnn_operator_type_to_string_v2(batch_matrix_multiply_op),
+        num_batch_dims, XNN_MAX_TENSOR_DIMS);
+    return xnn_status_unsupported_parameter;
+  }
+
   // Compute the batch sizes of the A and B tensors.
   size_t batch_dims_c[XNN_MAX_TENSOR_DIMS];
   size_t batch_size_a = 1;

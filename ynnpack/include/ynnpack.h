@@ -156,6 +156,7 @@ enum ynn_unary_operator {
   ynn_unary_square,
   ynn_unary_square_root,
   ynn_unary_tanh,
+  ynn_unary_poly3,
 };
 
 // Defines a unary operation of a single input to a single output.
@@ -163,6 +164,14 @@ enum ynn_status ynn_define_unary(ynn_subgraph_t subgraph,
                                  enum ynn_unary_operator op,
                                  uint32_t input_a_id, uint32_t* output_id,
                                  uint32_t flags);
+
+// Defines a polynomial operation of a single input to a single
+// output: y = coefficients[degree]*x^degree + ... + coefficients[0]
+enum ynn_status ynn_define_unary_polynomial(ynn_subgraph_t subgraph,
+                                            uint32_t input_id, size_t degree,
+                                            const float* coefficients,
+                                            uint32_t* output_id,
+                                            uint32_t flags);
 
 // A helper for `ynn_define_unary` with `op` = `ynn_unary_convert`, which is
 // capable of defining the output value.
@@ -292,6 +301,13 @@ enum ynn_status ynn_define_static_slice(
     ynn_subgraph_t subgraph, size_t num_axes, const int32_t* axes,
     const int64_t* begins, const int64_t* ends, const int64_t* strides,
     uint32_t input_id, uint32_t* output_id, uint32_t flags);
+
+// Extracts the range of indices `[0, end)` in `axes` dimensions, where `end` is
+// the extent of the same axis in the template value.
+enum ynn_status ynn_define_slice_like(ynn_subgraph_t subgraph, size_t num_axes,
+                                      const int32_t* axes, uint32_t input_id,
+                                      uint32_t template_id, uint32_t* output_id,
+                                      uint32_t flags);
 
 // Copy the input to the output, using a permutation to select the dimensions of
 // the input.

@@ -228,7 +228,6 @@ xnnpack_unit_test(
     name = "rope_test",
     timeout = "moderate",
     srcs = ["rope.cc"],
-    tags = ["no_ynnpack"],
     deps = SUBGRAPH_TEST_DEPS,
 )
 

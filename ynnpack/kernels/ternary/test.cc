@@ -99,7 +99,7 @@ void TestImpl(const KernelInfo& kernel_info, const OpInfo& op_info, size_t m,
   kernel(m, n, a.stride(0) * sizeof(A), a.stride(1) * sizeof(A), a.base(),
          b.stride(0) * sizeof(B), b.stride(1) * sizeof(B), b.base(),
          c.stride(0) * sizeof(C), c.stride(1) * sizeof(C), c.base(),
-         x.stride(0) * sizeof(X), x.base());
+         x.stride(0) * sizeof(X), x.base(), nullptr);
 
   check_results(op_info, a, b, c, x, a_quantization, b_quantization,
                 c_quantization, x_quantization);

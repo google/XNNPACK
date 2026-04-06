@@ -20,3 +20,8 @@
 #include "ynnpack/kernels/binary/arm_neon.inc"
 #endif  // YNN_ARCH_ARM_NEON
 
+#ifdef YNN_ARCH_WASM_SIMD128
+#include "ynnpack/kernels/binary/wasm_simd128.inc"
+#endif  // YNN_ARCH_ARM_NEON
+
+

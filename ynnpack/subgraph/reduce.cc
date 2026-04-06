@@ -29,7 +29,6 @@
 #include "slinky/runtime/buffer.h"
 #include "slinky/runtime/expr.h"
 #include "slinky/runtime/stmt.h"
-#include "slinky/runtime/print.h"
 
 namespace ynn {
 
@@ -57,21 +56,20 @@ unary_reduce_kernel_fn get_reduce_kernel(ynn_reduce_operator op,
 // but with stride 0 for the reduction dimensions.
 void prepare_reduction_output(slinky::buffer<void, YNN_MAX_TENSOR_RANK>& output,
                               const slinky::raw_buffer& input,
-                              const ynn::axes_set& k_dims) {
-  if (output.rank != input.rank) {
+                              const ynn_node::reduce& op) {
+  if (op.keep_dims) {
     for (int d = 0; d < input.rank; ++d) {
-      if (k_dims[d]) {
+      if (op.k_dims[d]) {
+        output.mutable_dim(d) = input.dim(d);
+        output.mutable_dim(d).set_stride(0);
+      }
+    }
+  } else {
+    for (int d = 0; d < input.rank; ++d) {
+      if (op.k_dims[d]) {
         slinky::dim new_dim = input.dim(d);
         new_dim.set_stride(0);
         output.unslice(d, new_dim);
-      }
-    }
-    assert(output.rank == input.rank);
-  } else {
-    for (int d = 0; d < input.rank; ++d) {
-      if (k_dims[d]) {
-        output.dim(d) = input.dim(d);
-        output.dim(d).set_stride(0);
       }
     }
   }
@@ -79,10 +77,9 @@ void prepare_reduction_output(slinky::buffer<void, YNN_MAX_TENSOR_RANK>& output,
 
 // The wrapper for the kernel we use when we actually want to run a reduce
 // kernel on some buffers.
-auto make_unary_reduce_impl(ynn_reduce_operator op,
-                            unary_reduce_kernel_fn kernel,
-                            ynn::axes_set k_dims) {
-  return [op, kernel, k_dims](
+auto make_unary_reduce_impl(const ynn_node::reduce& op,
+                            unary_reduce_kernel_fn kernel) {
+  return [op, kernel](
              slinky::buffer<const void, YNN_MAX_TENSOR_RANK> a,
              slinky::buffer<const void, YNN_MAX_TENSOR_RANK> init_c,
              slinky::buffer<void, YNN_MAX_TENSOR_RANK> c) -> slinky::index_t {
@@ -97,14 +94,14 @@ auto make_unary_reduce_impl(ynn_reduce_operator op,
 
     // Slice off the "channel" dimension if any.
     slinky::index_t c_stride_m = 0;
-    if (op == ynn_reduce_min_max) {
+    if (op.op == ynn_reduce_min_max) {
       c_stride_m = c.dim(c.rank - 1).stride();
       c.rank -= 1;
     }
 
     // Make the output have the same rank as the iput, but with stride 0 dims
     // where we want to do a reduction.
-    prepare_reduction_output(c, a, k_dims);
+    prepare_reduction_output(c, a, op);
 
     // The next bit of logic selects which dimensions will be handled by the
     // kernel. We start out with the kernel's dimensions as no-ops (1). Any time
@@ -116,7 +113,7 @@ auto make_unary_reduce_impl(ynn_reduce_operator op,
     size_t k3 = 1;
     size_t a_stride_n = 0;
     assert(a.dim(0).stride() == a.elem_size || a.dim(0).extent() == 1);
-    if (k_dims[0]) {
+    if (op.k_dims[0]) {
       // The dense dimension is reduced.
       k1 = a.dim(0).extent();
     } else {
@@ -140,7 +137,7 @@ auto make_unary_reduce_impl(ynn_reduce_operator op,
     size_t a_stride_k3 = 0;
     size_t a_stride_k2 = 0;
     for (int i = 0; i < a.rank;) {
-      if (k_dims[i + sliced]) {
+      if (op.k_dims[i + sliced]) {
         slinky::index_t extent_i = a.dim(i).extent();
         if (extent_i == 0) {
           // The reduction is an empty reduction, so we are done after
@@ -422,7 +419,7 @@ void define_reduce(ynn_subgraph& subgraph, ynn_node& node,
                                     reduction_cost);
     }
     auto func = slinky::func::make(
-        make_unary_reduce_impl(op.op, kernel, op.k_dims),
+        make_unary_reduce_impl(op, kernel),
         {{input_a.buffer, std::move(a_bounds)},
          {input_c.buffer, std::move(c_bounds)}},
         {{output.buffer, std::move(dims)}}, std::move(attrs));

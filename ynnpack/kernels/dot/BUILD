@@ -433,6 +433,7 @@ cc_test(
     malloc = ynn_binary_malloc(),
     deps = [
         ":schedule",
+        "//ynnpack/base",
     ] + ynn_test_deps(),
 )
 
@@ -482,6 +483,7 @@ cc_binary(
     malloc = ynn_binary_malloc(),
     deps = [
         ":dot",
+        ":pack_test_tensor",
         ":schedule",
         "//ynnpack/base",
         "//ynnpack/base/test:buffer",

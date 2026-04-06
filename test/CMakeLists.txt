@@ -340,9 +340,11 @@ FOREACH(TEST ${MICROKERNEL_VBINARY_UNIT_TESTS})
 ENDFOREACH()
 
 SET(MICROKERNEL_VCVT_TESTS
+    bf16-f32-vcvt
     f16-f32-vcvt
     f16-qs8-vcvt
     f16-qu8-vcvt
+    f32-bf16-vcvt
     f32-f16-vcvt
     f32-qs8-vcvt
     f32-qu8-vcvt
