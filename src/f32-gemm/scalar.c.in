@@ -4,7 +4,7 @@
 // LICENSE file in the root directory of this source tree.
 
 $assert DATATYPE in ["F32", "QC4", "QC8"]
-$assert ACTIVATION in ["LINEAR", "RELU", "MINMAX"]
+$assert ACTIVATION in ["LINEAR", "MINMAX"]
 $assert ACTIVATION != "LINEAR" or not WASM
 $if DATATYPE == "QC4":
   $assert ACTIVATION == "MINMAX"
@@ -26,8 +26,8 @@ $DATATYPE_SPEC = {"F32": "f32", "QC8": "f32_qc8w", "QC4": "f32_qc4w"}[DATATYPE]
 $MIN_F32 = "__builtin_wasm_min_f32" if WASM else "math_min_f32"
 $MAX_F32 = "__builtin_wasm_max_f32" if WASM else "math_max_f32"
 $KERNEL = "gemminc" if INC else "gemm"
-$SUFFIX = {"LINEAR": "", "RELU": "_relu", "MINMAX": "_minmax"}[ACTIVATION]
-$PARAMS = {"LINEAR": "struct xnn_f32_default_params", "RELU": "struct xnn_f32_relu_params", "MINMAX": "struct xnn_f32_minmax_params"}[ACTIVATION]
+$SUFFIX = {"LINEAR": "", "MINMAX": "_minmax"}[ACTIVATION]
+$PARAMS = {"LINEAR": "struct xnn_f32_default_params", "MINMAX": "struct xnn_f32_minmax_params"}[ACTIVATION]
 void xnn_${DATATYPE_SPEC}_${KERNEL}${SUFFIX}_ukernel_${MR}x${NR}__${"wasm" if WASM else "scalar"}(
     size_t mr,
     size_t nc,
@@ -182,11 +182,6 @@ void xnn_${DATATYPE_SPEC}_${KERNEL}${SUFFIX}_ukernel_${MR}x${NR}__${"wasm" if WA
       $for M in range(MR):
         $for N in range(NR):
           vacc${M}${N} = ${MIN_F32}(vacc${M}${N}, vmax);
-    $elif ACTIVATION == "RELU":
-      $for M in range(MR):
-        $for N in range(NR):
-          vacc${M}${N} = ${MAX_F32}(vacc${M}${N}, 0.0f);
-
     if XNN_LIKELY(nc >= ${NR}) {
       $for M in RANGE_MR:
         $for N in range(NR):

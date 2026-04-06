@@ -3,7 +3,7 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-$assert ACTIVATION in ["LINEAR", "RELU", "MINMAX"]
+$assert ACTIVATION in ["LINEAR", "MINMAX"]
 $assert ACTIVATION != "LINEAR" or not WASM
 #include <assert.h>
 #include <stddef.h>
@@ -17,8 +17,8 @@ $assert ACTIVATION != "LINEAR" or not WASM
 
 $MIN_F32 = "__builtin_wasm_min_f32" if WASM else "math_min_f32"
 $MAX_F32 = "__builtin_wasm_max_f32" if WASM else "math_max_f32"
-$SUFFIX = {"LINEAR": "", "RELU": "_relu", "MINMAX": "_minmax"}[ACTIVATION]
-$PARAMS = {"LINEAR": "struct xnn_f32_default_params", "RELU": "struct xnn_f32_relu_params", "MINMAX": "struct xnn_f32_minmax_params"}[ACTIVATION]
+$SUFFIX = {"LINEAR": "", "MINMAX": "_minmax"}[ACTIVATION]
+$PARAMS = {"LINEAR": "struct xnn_f32_default_params", "MINMAX": "struct xnn_f32_minmax_params"}[ACTIVATION]
 void xnn_f32_igemm${SUFFIX}_ukernel_${MR}x${NR}__${"wasm" if WASM else "scalar"}(
     size_t mr,
     size_t nc,
@@ -108,11 +108,6 @@ void xnn_f32_igemm${SUFFIX}_ukernel_${MR}x${NR}__${"wasm" if WASM else "scalar"}
       $for M in range(MR):
         $for N in range(NR):
           vacc${M}${N} = ${MIN_F32}(vacc${M}${N}, vmax);
-    $elif ACTIVATION == "RELU":
-      $for M in range(MR):
-        $for N in range(NR):
-          vacc${M}${N} = ${MAX_F32}(vacc${M}${N}, 0.0f);
-
     if XNN_LIKELY(nc >= ${NR}) {
       $for M in reversed(range(MR)):
         $for N in range(NR):

@@ -7,7 +7,7 @@ $assert DATATYPE in ["F32", "QC8"]
 $assert NR % 4 == 0
 $if DATATYPE == "QC8":
   $assert NR % 8 == 0
-$assert ACTIVATION in ["LINEAR", "RELU", "MINMAX"]
+$assert ACTIVATION in ["LINEAR", "MINMAX"]
 $assert ACTIVATION != "MINMAX" or ARCH in ["ARM", "X86", "RELAXED"]
 $assert not FMA or ARCH == "RELAXED"
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
@@ -24,9 +24,9 @@ $if ACTIVATION == "MINMAX":
 $  WASM_F32X4_MIN={"ARM": "wasm_f32x4_min", "X86": "wasm_f32x4_pmin", "RELAXED": "wasm_f32x4_relaxed_min"}[ARCH]
 $  WASM_F32X4_MAX={"ARM": "wasm_f32x4_max", "X86": "wasm_f32x4_pmax", "RELAXED": "wasm_f32x4_relaxed_max"}[ARCH]
 $ACTIVATION_SUFFIX = {"LINEAR": ""}.get(ACTIVATION, "_" + ACTIVATION.lower())
-$ISA = "wasmsimd" if not FMA and (ACTIVATION in ["LINEAR", "RELU"] or ARCH != "RELAXED") else "wasmrelaxedsimd"
-$ARCH_SUFFIX = "" if not FMA and (ACTIVATION in ["LINEAR", "RELU"] or ARCH == "RELAXED") else "_" + ("fma" if FMA else ARCH.lower())
-$PARAMS = {"LINEAR": "struct xnn_f32_default_params", "RELU": "struct xnn_f32_relu_params", "MINMAX": "struct xnn_f32_minmax_params"}[ACTIVATION]
+$ISA = "wasmsimd" if not FMA and (ACTIVATION in ["LINEAR"] or ARCH != "RELAXED") else "wasmrelaxedsimd"
+$ARCH_SUFFIX = "" if not FMA and (ACTIVATION in ["LINEAR"] or ARCH == "RELAXED") else "_" + ("fma" if FMA else ARCH.lower())
+$PARAMS = {"LINEAR": "struct xnn_f32_default_params", "MINMAX": "struct xnn_f32_minmax_params"}[ACTIVATION]
 void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}${ACTIVATION_SUFFIX}_ukernel_${MR}x${NR}__${ISA}${ARCH_SUFFIX}_loadsplat(
     size_t mr,
     size_t nc,
@@ -145,12 +145,6 @@ void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}${ACTIVATION_SUFFIX}_ukerne
       $for N in range(0, NR, 4):
         $for M in range(MR):
           vacc${M}x${ABC[N:N+4]} = ${WASM_F32X4_MIN}(vmax, vacc${M}x${ABC[N:N+4]});
-    $elif ACTIVATION == "RELU":
-      const v128_t vzero = wasm_i32x4_const_splat(0);
-      $for N in range(0, NR, 4):
-        $for M in range(MR):
-          vacc${M}x${ABC[N:N+4]} = wasm_i32x4_max(vacc${M}x${ABC[N:N+4]}, vzero);
-
     if XNN_LIKELY(nc >= ${NR}) {
       $for M in RANGE_MR:
         wasm_v128_store(c${M}, vacc${M}x${ABC[0:4]});

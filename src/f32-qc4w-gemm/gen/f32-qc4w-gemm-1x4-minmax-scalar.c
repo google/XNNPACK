@@ -117,7 +117,6 @@ void xnn_f32_qc4w_gemm_minmax_ukernel_1x4__scalar(
     vacc01 = math_min_f32(vacc01, vmax);
     vacc02 = math_min_f32(vacc02, vmax);
     vacc03 = math_min_f32(vacc03, vmax);
-
     if XNN_LIKELY(nc >= 4) {
       c0[0] = vacc00;
       c0[1] = vacc01;

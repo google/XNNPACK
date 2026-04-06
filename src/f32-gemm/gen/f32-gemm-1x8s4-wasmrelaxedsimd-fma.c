@@ -122,7 +122,6 @@ void xnn_f32_gemm_ukernel_1x8s4__wasmrelaxedsimd_fma(
       w += 32;
     }
 
-
     if XNN_LIKELY(nc >= 8) {
       wasm_v128_store(c0, vacc0x0123);
       wasm_v128_store(c0 + 4, vacc0x4567);

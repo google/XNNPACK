@@ -3,7 +3,7 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-$assert ACTIVATION in ["LINEAR", "RELU", "MINMAX"]
+$assert ACTIVATION in ["LINEAR", "MINMAX"]
 $assert MR >= 1
 $assert NR in ["m1", "m2", "m4", "m8"]
 $LMUL = int(NR[1])
@@ -14,8 +14,8 @@ $LMUL = int(NR[1])
 #include "src/xnnpack/igemm.h"
 
 
-$SUFFIX = {"LINEAR": "", "RELU": "_relu", "MINMAX": "_minmax"}[ACTIVATION]
-$PARAMS = {"LINEAR": "struct xnn_f32_default_params", "RELU": "struct xnn_f32_relu_params", "MINMAX": "struct xnn_f32_minmax_params"}[ACTIVATION]
+$SUFFIX = {"LINEAR": "", "MINMAX": "_minmax"}[ACTIVATION]
+$PARAMS = {"LINEAR": "struct xnn_f32_default_params", "MINMAX": "struct xnn_f32_minmax_params"}[ACTIVATION]
 void xnn_f32_igemm${SUFFIX}_ukernel_${MR}x${LMUL}v__rvv(
     size_t mr,
     size_t nc,
@@ -45,8 +45,6 @@ void xnn_f32_igemm${SUFFIX}_ukernel_${MR}x${LMUL}v__rvv(
   $if ACTIVATION == "MINMAX":
     const float vmin = params->scalar.min;
     const float vmax = params->scalar.max;
-  $elif ACTIVATION == "RELU":
-    const float vmin = 0.0f;
   float* c0 = c;
   $for M in range(1, MR):
     float* c${M} = (float*) ((uintptr_t) c${M-1} + cm_stride);
@@ -105,10 +103,6 @@ void xnn_f32_igemm${SUFFIX}_ukernel_${MR}x${LMUL}v__rvv(
 
       $for M in range(MR):
         vacc${M} = __riscv_vfmin_vf_f32m${LMUL}(vacc${M}, vmax, vl);
-    $elif ACTIVATION == "RELU":
-      // apply ReLU to results
-      $for M in range(MR):
-        vacc${M} = __riscv_vfmax_vf_f32m${LMUL}(vacc${M}, vmin, vl);
     // store ${MR} x vl results to c
     $for M in reversed(range(MR)):
       __riscv_vse32_v_f32m${LMUL}(c${M}, vacc${M}, vl);

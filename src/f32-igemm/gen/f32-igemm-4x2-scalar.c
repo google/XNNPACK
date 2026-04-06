@@ -118,7 +118,6 @@ void xnn_f32_igemm_ukernel_4x2__scalar(
       p -= 4 * sizeof(void*);
     } while (p != 0);
 
-
     if XNN_LIKELY(nc >= 2) {
       c3[0] = vacc30;
       c3[1] = vacc31;

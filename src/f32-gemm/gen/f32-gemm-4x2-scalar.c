@@ -94,7 +94,6 @@ void xnn_f32_gemm_ukernel_4x2__scalar(
       k -= sizeof(float);
     } while (k != 0);
 
-
     if XNN_LIKELY(nc >= 2) {
       c0[0] = vacc00;
       c0[1] = vacc01;
