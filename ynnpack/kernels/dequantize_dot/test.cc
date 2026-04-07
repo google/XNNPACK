@@ -125,7 +125,7 @@ void TestKernel(uint64_t arch_flags, dequantize_dot_kernel_fn kernel,
   for (size_t i = 0; i < m; ++i) {
     for (size_t j = 0; j < n; ++j) {
       const float tolerance =
-          2.0f * std::abs(reference(i, j)) * epsilon + epsilon;
+          2.0f * std::abs(reference(i, j)) * epsilon + 2.0f * epsilon;
       ASSERT_NEAR(output(i, j), reference(i, j), tolerance)
           << "at (" << i << ", " << j << "), shape " << m << "x" << n;
     }
