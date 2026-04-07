@@ -121,10 +121,17 @@ static void init_f32_vmulcaddc_config(void) {
   #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
-    f32_vmulcaddc_config.ukernel = XNN_INIT_VMULCADDC_UKERNEL(xnn_f32_vmulcaddc_minmax_ukernel_c4v__rvv_2x);
-    f32_vmulcaddc_config.init.f32 = xnn_init_f32_minmax_scalar_params;
-    f32_vmulcaddc_config.channel_tile = 4 * hardware_config->vlenb / sizeof(float);
-    f32_vmulcaddc_config.row_tile = 2;
+    if (hardware_config->arch_flags & xnn_arch_riscv_vector) {
+      f32_vmulcaddc_config.ukernel = XNN_INIT_VMULCADDC_UKERNEL(xnn_f32_vmulcaddc_minmax_ukernel_c4v__rvv_2x);
+      f32_vmulcaddc_config.init.f32 = xnn_init_f32_minmax_scalar_params;
+      f32_vmulcaddc_config.channel_tile = 4 * hardware_config->vlenb / sizeof(float);
+      f32_vmulcaddc_config.row_tile = 2;
+    } else {
+      f32_vmulcaddc_config.ukernel = XNN_INIT_VMULCADDC_UKERNEL(xnn_f32_vmulcaddc_minmax_ukernel_c1__scalar_2x);
+      f32_vmulcaddc_config.init.f32 = xnn_init_f32_minmax_scalar_params;
+      f32_vmulcaddc_config.channel_tile = 1;
+      f32_vmulcaddc_config.row_tile = 2;
+    }
   #else
     f32_vmulcaddc_config.ukernel = XNN_INIT_VMULCADDC_UKERNEL(xnn_f32_vmulcaddc_minmax_ukernel_c1__scalar_2x);
     f32_vmulcaddc_config.init.f32 = xnn_init_f32_minmax_scalar_params;
