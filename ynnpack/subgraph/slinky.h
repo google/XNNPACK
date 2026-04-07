@@ -192,6 +192,47 @@ YNN_ALWAYS_INLINE bool is_broadcast(const slinky::dim& dim) {
   return dim.extent() == 1 || dim.stride() == 0;
 }
 
+namespace internal {
+
+// Try to fuse the next dimension of `x` and `inputs` into the `i`-th dimension
+// of `x_dims` and `in_dims`. Returns true if the fusion was successful.
+template <typename... DimBufferPairs>
+bool fuse_and_slice_leading_dim(int i, slinky::dim* x_dims,
+                                slinky::raw_buffer& x,
+                                DimBufferPairs&&... inputs) {
+  // First check whether fusing dimensions is possible.
+  const slinky::dim& x_dim_0 = x.dims[0];
+  bool can_fuse_all =
+      slinky::can_fuse(x_dims[i], x_dim_0) &&
+      all_of_pairs(
+          [x_dims, i, &x_dim_0](const slinky::dim* in_dims,
+                                const slinky::raw_buffer& in_buf) {
+            return same_bounds(x_dims[i], in_dims[i]) &&
+                   same_bounds(x_dim_0, in_buf.dim(0)) &&
+                   slinky::can_fuse(in_dims[i], in_buf.dim(0));
+          },
+          inputs...);
+  if (!can_fuse_all) {
+    return false;
+  }
+
+  // Fuse the dimensions and slice.
+  x_dims[i] = slinky::fuse(x_dims[i], x_dim_0);
+  apply_to_pairs(
+      [i, x_min_i = x_dim_0.min()](slinky::dim* in_dims,
+                                   slinky::raw_buffer& in_buf) {
+        if (in_buf.rank > 0) {
+          in_dims[i] = slinky::fuse(in_dims[i], in_buf.dim(0));
+          in_buf.slice(0, x_min_i);
+        }
+      },
+      inputs...);
+  x.slice(0);
+  return true;
+}
+
+}  // namespace internal
+
 // Peels off the innermost `NumInnerDims` dimensions of `x` and `inputs`,
 // and where possible, fuses dimensions of buffers from the innermost to the
 // outermost.
@@ -226,37 +267,16 @@ void fuse_and_slice_leading_dims(slinky::dim* x_dims, slinky::raw_buffer& x,
           in_buf.slice(0, x_min_i);
         },
         inputs...);
-    if (x.rank > 0) x.slice(0);
+    x.slice(0);
 
+    // Try to fuse more dimensions into this new dimension. This is separated
+    // into a helper function with the hope that maybe this outer function might
+    // inline, while this inner fusion helper may not, which might provide a
+    // nice "fast path" for 1D buffers.
     while (x.rank > 0) {
-      // First check whether fusing dimensions is possible.
-      const slinky::dim& x_dim_0 = x.dim(0);
-      bool can_fuse_all =
-          slinky::can_fuse(x_dims[i], x_dim_0) &&
-          internal::all_of_pairs(
-              [x_dims, i, &x_dim_0](const slinky::dim* in_dims,
-                                    const slinky::raw_buffer& in_buf) {
-                return same_bounds(x_dims[i], in_dims[i]) &&
-                       same_bounds(x_dim_0, in_buf.dim(0)) &&
-                       slinky::can_fuse(in_dims[i], in_buf.dim(0));
-              },
-              inputs...);
-      if (!can_fuse_all) {
+      if (!internal::fuse_and_slice_leading_dim(i, x_dims, x, inputs...)) {
         break;
       }
-
-      // Fuse the dimensions and slice.
-      x_dims[i] = slinky::fuse(x_dims[i], x.dim(0));
-      internal::apply_to_pairs(
-          [i, x_min_i = x.dim(0).min()](slinky::dim* in_dims,
-                                        slinky::raw_buffer& in_buf) {
-            if (in_buf.rank > 0) {
-              in_dims[i] = slinky::fuse(in_dims[i], in_buf.dim(0));
-              in_buf.slice(0, x_min_i);
-            }
-          },
-          inputs...);
-      x.slice(0);
     }
   }
 }
