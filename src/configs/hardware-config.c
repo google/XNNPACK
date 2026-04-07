@@ -157,7 +157,7 @@ extern long syscall(long number, ...);
 
 #ifndef RISCV_HWPROBE_EXT_ZVFH
     /* Bit 20 represents the Zvfh (Vector Float16) extension */
-    #define RISCV_HWPROBE_EXT_ZVFH (1ULL << 20)
+    #define RISCV_HWPROBE_EXT_ZVFH (1ULL << 30)
 #endif
 
 struct riscv_hwprobe {
