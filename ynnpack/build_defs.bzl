@@ -295,6 +295,10 @@ def ynn_binary_linkopts():
             "-shared",
             "-Wno-unused-command-line-argument",
         ],
+        "//ynnpack:wasm": [
+            "-s STACK_SIZE=1MB",
+            "-s DEFAULT_PTHREAD_STACK_SIZE=1MB",
+        ],
         "//conditions:default": [],
     })
 
