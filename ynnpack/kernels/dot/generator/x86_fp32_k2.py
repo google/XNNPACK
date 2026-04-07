@@ -154,6 +154,7 @@ generate_dot_kernels(
     [
         (1, 16, 2),
         (2, 16, 2),
+        (1, 8, 2),
         (3, 8, 2),
         (4, 8, 2),
         (5, 8, 2),
@@ -170,6 +171,7 @@ generate_dot_kernels(
     [
         (1, 16, 2),
         (2, 16, 2),
+        (1, 8, 2),
         (3, 8, 2),
         (4, 8, 2),
         (5, 8, 2),
@@ -193,6 +195,7 @@ generate_dot_kernels(
         # reason they don't perform well. They don't seem to spill, so keeping
         # them until we understand why are they slower.
         # (6, 32, 2),
+        (1, 16, 2),
         (4, 16, 2),
         # (5, 16, 2),
         # (6, 16, 2),
