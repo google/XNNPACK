@@ -298,6 +298,15 @@ def ynn_binary_linkopts():
         "//ynnpack:wasm": [
             "-s STACK_SIZE=1MB",
             "-s DEFAULT_PTHREAD_STACK_SIZE=1MB",
+            # This option allows to remain on the main thread and busy-wait (spin) to avoid the crash.
+            # This option works gracefully with or without --features=use_pthreads, though it may freeze the browser UI while busy-waiting.
+            # Another option would be to use https://emscripten.org/docs/tools_reference/settings_reference.html#proxy-to-pthread,
+            # but it requires --features=use_pthreads to be set.
+            "-s ALLOW_BLOCKING_ON_MAIN_THREAD=1",
+            # Pre-allocates Web Workers at module initialization so that synchronous
+            # calls to pthread_create don't crash or deadlock while waiting for
+            # asynchronous Web Worker instantiation.
+            "-s PTHREAD_POOL_SIZE=8",
         ],
         "//conditions:default": [],
     })
