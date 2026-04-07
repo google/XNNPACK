@@ -185,6 +185,9 @@ jobs:
         env:
           CFLAGS: "/UNDEBUG"
           CXXFLAGS: "/UNDEBUG"
+      - name: Print ccache stats
+        run: ccache -s
+        shell: bash
 
   cmake-windows-x64:
     runs-on: windows-2022-32core
@@ -214,6 +217,9 @@ jobs:
         if: ${{ inputs.run-tests }}
         run: ctest -C Release --output-on-failure --parallel $NUMBER_OF_PROCESSORS
         working-directory: ${{ github.workspace }}/build/windows/x64
+      - name: Print ccache stats
+        run: ccache -s
+        shell: bash
 
   cmake-windows-x86:
     runs-on: windows-2022-32core
@@ -243,6 +249,9 @@ jobs:
         if: ${{ inputs.run-tests }}
         run: ctest -C Release --output-on-failure --parallel $NUMBER_OF_PROCESSORS
         working-directory: ${{ github.workspace }}/build/windows/x86
+      - name: Print ccache stats
+        run: ccache -s
+        shell: bash
 
   cmake-macos-arm64:
     runs-on: macos-latest
@@ -725,4 +734,3 @@ jobs:
         run: |
           mkdir -p /home/xnnpack/.cache/bazel
           find "/home/xnnpack/.cache/bazel" -type f -atime +7 -delete
-
