@@ -142,6 +142,7 @@ YNN_DOT_KERNEL(arch_flag::sme, dot_int8_int8_int32_sme,
 
 #ifdef YNN_ARCH_WASM_SIMD128
 #include "ynnpack/kernels/dot/wasm_simd128_fp32.inc"
+#include "ynnpack/kernels/dot/wasm_simd128_fp64.inc"
 #endif  // YNN_ARCH_WASM_SIMD128
 
 #if defined(YNN_ARCH_X86) || defined(YNN_ARCH_ARM64)
