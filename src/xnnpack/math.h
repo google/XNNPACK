@@ -532,7 +532,8 @@ XNN_INLINE static int32_t math_round_f32_to_s32(float x) {
 #define XNN_HAVE_FLOAT16 1
 #endif
 
-#if defined(__riscv) && defined(__riscv_zvfh)
+// TODO: Switch to zfh and add flag to disable FP16 (non-vector)
+#if defined(__riscv) && defined(__riscv_zvfh) && XNN_ENABLE_RISCV_FP16_VECTOR
 #define XNN_HAVE_FLOAT16 1
 #endif
 
