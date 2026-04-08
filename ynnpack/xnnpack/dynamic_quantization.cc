@@ -111,15 +111,17 @@ auto make_compute_qd8_params_impl(int32_t output_zero_point) {
     const index_t n = scale_n[0].extent();
 
     slinky::for_each_element(
-        [&](float* scale, int32_t* zero_point, const T* min_max) {
+        [&](void* scale, void* zero_point, const void* min_max) {
           for (index_t i = 0; i < n; ++i) {
-            std::tie(scale[i], zero_point[i]) =
-                compute_qd8_params(min_max[i], min_max[i + index_stride]);
-            zero_point[i] += output_zero_point;
+            float& scale_i = reinterpret_cast<float*>(scale)[i];
+            int32_t& zero_point_i = reinterpret_cast<int32_t*>(zero_point)[i];
+            const T* min_max_i = reinterpret_cast<const T*>(min_max) + i;
+            std::tie(scale_i, zero_point_i) =
+                compute_qd8_params(min_max_i[0], min_max_i[index_stride]);
+            zero_point_i += output_zero_point;
           }
         },
-        scale.cast<float>(), zero_point.cast<int32_t>(),
-        min_max.cast<const T>());
+        scale, zero_point, min_max);
     return 0;
   };
 }
