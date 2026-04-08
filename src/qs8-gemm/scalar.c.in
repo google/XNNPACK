@@ -3,9 +3,9 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-$assert DATATYPE in ["QD8", "QC4", "QC2", "QC2_F16", "QB4_F16", "QB4_F32"] or REQUANTIZATION in ["FP32", "RNDNU"]
+$assert DATATYPE in ["QD8", "QC4", "QC2", "QC2_F16", "QB4_F16", "QB4_F32", "QB4_BF16"] or REQUANTIZATION in ["FP32", "RNDNU"]
 $assert REQUANTIZATION != "FP32" or VARIANT in ["FMAGIC", "IMAGIC", "LRINTF"]
-$assert DATATYPE in ["QC8", "QS8", "QU8", "QD8", "QC4", "QC2", "QC2_F16", "QB4_F16", "QB4_F32", "QS8_QC4", "QS8_QC2"]
+$assert DATATYPE in ["QC8", "QS8", "QU8", "QD8", "QC4", "QC2", "QC2_F16", "QB4_F16", "QB4_F32", "QB4_BF16", "QS8_QC4", "QS8_QC2"]
 #include <assert.h>
 $if VARIANT == "LRINTF":
   #include <math.h>
@@ -39,17 +39,17 @@ $def END():
   $return _ + '}'
 $#
 
-$DATATYPE_SPEC = {"QC8": "qs8_qc8w", "QS8_QC4": "qs8_qc4w", "QS8_QC2": "qs8_qc2w", "QS8": "qs8", "QU8": "qu8", "QD8": "qd8_f32_qc8w", "QC4": "qd8_f32_qc4w", "QC2": "qd8_f32_qc2w", "QC2_F16": "qd8_f16_qc2w", "QB4_F16": "qd8_f16_qb4w", "QB4_F32": "qd8_f32_qb4w"}[DATATYPE]
+$DATATYPE_SPEC = {"QC8": "qs8_qc8w", "QS8_QC4": "qs8_qc4w", "QS8_QC2": "qs8_qc2w", "QS8": "qs8", "QU8": "qu8", "QD8": "qd8_f32_qc8w", "QC4": "qd8_f32_qc4w", "QC2": "qd8_f32_qc2w", "QC2_F16": "qd8_f16_qc2w", "QB4_F16": "qd8_f16_qb4w", "QB4_F32": "qd8_f32_qb4w", "QB4_BF16": "qd8_bf16_qb4w"}[DATATYPE]
 $VARIANT_SPEC = "_" + VARIANT.lower() if VARIANT else ""
 $REQUANTIZATION_SPEC = "_" + REQUANTIZATION.lower() if REQUANTIZATION else ""
 $PARAMS_STRUCT = REQUANTIZATION.lower() + "_scalar"
-$PARAMS_TYPE = {"QC8": "union xnn_qs8_qc8w_conv_minmax_params", "QS8_QC4": "union xnn_qs8_qc8w_conv_minmax_params", "QS8_QC2": "union xnn_qs8_qc8w_conv_minmax_params", "QS8": "union xnn_qs8_conv_minmax_params", "QU8": "union xnn_qu8_conv_minmax_params", "QD8": "struct xnn_f32_minmax_params", "QC4": "struct xnn_f32_qc4w_minmax_params", "QC2": "struct xnn_f32_minmax_params",  "QC2_F16": "struct xnn_f16_minmax_params", "QB4_F16": "struct xnn_f16_qb4w_minmax_params", "QB4_F32": "struct xnn_f32_qb4w_minmax_params"}[DATATYPE]
-$SCALING_PARAMS = "xnn_qd8_quantization_params" if DATATYPE in ["QD8", "QC4", "QC2", "QC2_F16", "QB4_F16", "QB4_F32"] else ""
+$PARAMS_TYPE = {"QC8": "union xnn_qs8_qc8w_conv_minmax_params", "QS8_QC4": "union xnn_qs8_qc8w_conv_minmax_params", "QS8_QC2": "union xnn_qs8_qc8w_conv_minmax_params", "QS8": "union xnn_qs8_conv_minmax_params", "QU8": "union xnn_qu8_conv_minmax_params", "QD8": "struct xnn_f32_minmax_params", "QC4": "struct xnn_f32_qc4w_minmax_params", "QC2": "struct xnn_f32_minmax_params",  "QC2_F16": "struct xnn_f16_minmax_params", "QB4_F16": "struct xnn_f16_qb4w_minmax_params", "QB4_F32": "struct xnn_f32_qb4w_minmax_params", "QB4_BF16": "struct xnn_bf16_qb4w_minmax_params"}[DATATYPE]
+$SCALING_PARAMS = "xnn_qd8_quantization_params" if DATATYPE in ["QD8", "QC4", "QC2", "QC2_F16", "QB4_F16", "QB4_F32", "QB4_BF16"] else ""
 $XINT8_T = "uint8_t" if DATATYPE == "QU8" else "int8_t"
-$OUT_T = {"QC8": "int8_t", "QS8_QC4": "int8_t", "QS8_QC2": "int8_t", "QS8": "int8_t", "QU8": "uint8_t", "QB4_F16": "xnn_float16", "QD8": "float", "QC4": "float", "QC2": "float", "QC2_F16": "xnn_float16", "QB4_F32": "float"}[DATATYPE]
+$OUT_T = {"QC8": "int8_t", "QS8_QC4": "int8_t", "QS8_QC2": "int8_t", "QS8": "int8_t", "QU8": "uint8_t", "QB4_F16": "xnn_float16", "QD8": "float", "QC4": "float", "QC2": "float", "QC2_F16": "xnn_float16", "QB4_F32": "float", "QB4_BF16": "xnn_bfloat16"}[DATATYPE]
 $MIN_F32 = "__builtin_wasm_min_f32" if WASM else "math_min_f32"
 $MAX_F32 = "__builtin_wasm_max_f32" if WASM else "math_max_f32"
-$BLOCKWISE = True if DATATYPE in ["QB4_F16", "QB4_F32"] else False
+$BLOCKWISE = True if DATATYPE in ["QB4_F16", "QB4_F32", "QB4_BF16"] else False
 void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}__${"wasm" if WASM else "scalar"}${VARIANT_SPEC}(
     size_t mr,
     size_t nc,
@@ -60,7 +60,7 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}_
     ${OUT_T}* restrict c,
     size_t cm_stride,
     size_t cn_stride,
-    $if DATATYPE in ["QD8", "QC4", "QC2", "QC2_F16", "QB4_F16", "QB4_F32"]:
+    $if DATATYPE in ["QD8", "QC4", "QC2", "QC2_F16", "QB4_F16", "QB4_F32", "QB4_BF16"]:
       const ${PARAMS_TYPE}* restrict params,
       $if DATATYPE in ["QC2", "QC2_F16"]:
         const float* row_sum,
@@ -132,12 +132,12 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}_
 
   $if DATATYPE == "QU8":
     const int32_t vb_zero_point = params->${PARAMS_STRUCT}.kernel_zero_point;
-  $elif DATATYPE in ["QC4", "QB4_F16", "QB4_F32", "QS8_QC4"]:
+  $elif DATATYPE in ["QC4", "QB4_F16", "QB4_F32", "QB4_BF16", "QS8_QC4"]:
     kc = round_up_po2(kc, 2);
   $elif DATATYPE in ["QC2", "QC2_F16", "QS8_QC2"]:
     kc = round_up_po2(kc, 4);
   do {
-    $if DATATYPE in ["QD8", "QC4", "QC2", "QC2_F16", "QB4_F16", "QB4_F32"]:
+    $if DATATYPE in ["QD8", "QC4", "QC2", "QC2_F16", "QB4_F16", "QB4_F32", "QB4_BF16"]:
       $if NR % 4 != 0:
         $for N in range(NR):
           $if BLOCKWISE:
@@ -192,7 +192,7 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}_
       $SET_INDENT(1)
     $else:
       size_t k = kc;
-    $if DATATYPE in ["QC4", "QB4_F16", "QB4_F32", "QS8_QC4"]:
+    $if DATATYPE in ["QC4", "QB4_F16", "QB4_F32", "QB4_BF16", "QS8_QC4"]:
       ${_}for (; k >= 2 * sizeof(uint8_t); k -= 2 * sizeof(uint8_t)) {
         $for M in range(MR):
           ${_}const int32_t va${M}c0 = (int32_t) a${M}[0];
@@ -290,7 +290,7 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}_
         w = (const uint16_t*) w + ${NR};
       }
 
-    $if DATATYPE in ["QD8", "QC4", "QC2", "QC2_F16", "QB4_F16", "QB4_F32"]:
+    $if DATATYPE in ["QD8", "QC4", "QC2", "QC2_F16", "QB4_F16", "QB4_F32", "QB4_BF16"]:
       $for M in range(MR):
         $for N in range(NR):
           $if not BLOCKWISE:
@@ -360,6 +360,8 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}_
           $for N in range(NR):
             $if DATATYPE in ["QC2_F16", "QB4_F16"]:
               c${M}[${N}] = xnn_float16_from_float(vout${M}x${N});
+            $elif DATATYPE in ["QB4_BF16"]:
+              c${M}[${N}] = xnn_bfloat16_from_float(vout${M}x${N});
             $else:
               c${M}[${N}] = vout${M}x${N};
 
@@ -367,7 +369,7 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}_
           a${M} = (const ${XINT8_T}*) ((uintptr_t) a${M} - kc);
 
         $for M in range(MR):
-          $if DATATYPE in ["QC2_F16", "QB4_F16"]:
+          $if DATATYPE in ["QC2_F16", "QB4_F16", "QB4_BF16"]:
             c${M} = (${OUT_T}*) ((uintptr_t) c${M} + cn_stride);
           $else:
             c${M} = (float*) ((uintptr_t) c${M} + cn_stride);
@@ -380,6 +382,8 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}_
               $for N in range(1 << LOG2N):
                 $if DATATYPE in ["QC2_F16", "QB4_F16"]:
                   c${M}[${N}] = xnn_float16_from_float(vout${M}x${N});
+                $elif DATATYPE in ["QB4_BF16"]:
+                  c${M}[${N}] = xnn_bfloat16_from_float(vout${M}x${N});
                 $else:
                   c${M}[${N}] = vout${M}x${N};
               $if LOG2N != 0:
