@@ -784,12 +784,18 @@ bool rewrite_dequantize_dot(ynn_subgraph& subgraph, ynn_node& node,
   uint32_t offset_id = subgraph.get_scalar_value_id(
       output.type, YNN_INVALID_VALUE_ID, YNN_INVALID_VALUE_ID, 0.0f);
 
+  uint32_t input1_id = dot_node->inputs[1];
   dot_node->inputs[1] = YNN_INVALID_VALUE_ID;
-  ynn::define_dequantize_dot(subgraph, node, output.type, dot_node->outputs[0],
-                             a_offset_id, b_offset_id, a_scale_id, b_scale_id,
-                             offset_id, node.outputs[0],
-                             dequantize_dot_params{});
-  return true;
+  bool result = ynn::define_dequantize_dot(
+      subgraph, node, output.type, dot_node->outputs[0], a_offset_id,
+      b_offset_id, a_scale_id, b_scale_id, offset_id, node.outputs[0],
+      dequantize_dot_params{});
+  if (!result) {
+    // There is no kernel for dequantize_dot, so don't do rewrite and restore
+    // the old value.
+    dot_node->inputs[1] = input1_id;
+  }
+  return result;
 }
 
 // Rewrite add(dequantize_dot(..., 0), x) to dequantize_dot(..., x)
@@ -825,12 +831,15 @@ bool rewrite_dequantize_dot_add(ynn_subgraph& subgraph, ynn_node& node,
         << "Rewriting add(dequantize_dot(..., 0), x) to dequantize_dot(..., x)";
 
     const ynn_value& output = subgraph.value(node.outputs[0]);
-    ynn::define_dequantize_dot(
+    bool result = ynn::define_dequantize_dot(
         subgraph, node, output.type, dequantize_dot_node->inputs[0],
         dequantize_dot_node->inputs[1], dequantize_dot_node->inputs[2],
         dequantize_dot_node->inputs[3], dequantize_dot_node->inputs[4],
         new_offset_id, node.outputs[0], rescale_op->params);
 
+    if (!result) {
+      continue;
+    }
     dequantize_dot_node->invalidate();
     return true;
   }

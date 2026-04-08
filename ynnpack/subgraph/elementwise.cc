@@ -451,12 +451,17 @@ void define_lut(ynn_subgraph& subgraph, ynn_node& node, uint32_t input_id,
   };
 }
 
-void define_dequantize_dot(ynn_subgraph& subgraph, ynn_node& node,
+bool define_dequantize_dot(ynn_subgraph& subgraph, ynn_node& node,
                            ynn_type output_type, uint32_t dot_id,
                            uint32_t a_offset_id, uint32_t b_offset_id,
                            uint32_t a_scale_id, uint32_t b_scale_id,
                            uint32_t offset_id, uint32_t& output_id,
                            const dequantize_dot_params& params) {
+  dequantize_dot_kernel_fn kernel = get_dequantize_dot_kernel(output_type);
+  if (kernel == nullptr) {
+    return false;
+  }
+
   const ynn_value& dot = subgraph.value(dot_id);
   ynn_value& output = subgraph.get_output_value(&output_id, output_type);
 
@@ -467,8 +472,6 @@ void define_dequantize_dot(ynn_subgraph& subgraph, ynn_node& node,
                  a_scale_id, b_scale_id,  offset_id};
   node.outputs = {output_id};
   node.op = ynn_node::dequantize_dot{params};
-
-  dequantize_dot_kernel_fn kernel = get_dequantize_dot_kernel(output.type);
 
   node.create = [kernel](const ynn_node& node, ynn_runtime& runtime) {
     const ynn_node::dequantize_dot& op =
@@ -509,6 +512,7 @@ void define_dequantize_dot(ynn_subgraph& subgraph, ynn_node& node,
     runtime.funcs.push_back(std::move(func));
     return ynn_status_success;
   };
+  return true;
 }
 
 ynn_status define_unary(ynn_subgraph_t subgraph, ynn_unary_operator op,
