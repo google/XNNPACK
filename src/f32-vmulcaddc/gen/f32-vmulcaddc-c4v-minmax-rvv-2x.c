@@ -65,17 +65,11 @@ void xnn_f32_vmulcaddc_minmax_ukernel_c4v__rvv_2x(
       vacc0 = __riscv_vfmadd_vv_f32m4(vacc0, vscale, vbias, vl);
       vacc1 = __riscv_vfmadd_vv_f32m4(vacc1, vscale, vbias, vl);
 
-      vbool8_t nan0 = __riscv_vmfne_vv_f32m4_b8(vacc0, vacc0, vl);
-      vbool8_t nan1 = __riscv_vmfne_vv_f32m4_b8(vacc1, vacc1, vl);
-
       vacc0 = __riscv_vfmax_vf_f32m4(vacc0, min_val, vl);
       vacc1 = __riscv_vfmax_vf_f32m4(vacc1, min_val, vl);
 
       vacc0 = __riscv_vfmin_vf_f32m4(vacc0, max_val, vl);
       vacc1 = __riscv_vfmin_vf_f32m4(vacc1, max_val, vl);
-
-      vacc0 = __riscv_vfmerge_vfm_f32m4(vacc0, __builtin_nanf(""), nan0, vl);
-      vacc1 = __riscv_vfmerge_vfm_f32m4(vacc1, __builtin_nanf(""), nan1, vl);
 
       __riscv_vse32_v_f32m4(o0, vacc0, vl); o0 += vl;
       __riscv_vse32_v_f32m4(o1, vacc1, vl); o1 += vl;

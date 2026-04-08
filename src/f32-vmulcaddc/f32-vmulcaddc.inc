@@ -6,8 +6,8 @@
 
 
 #if XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
-XNN_UKERNEL(xnn_arch_none, xnn_f32_vmulcaddc_minmax_ukernel_c4v__rvv_2x, 2, 4, true, float, struct xnn_f32_minmax_params, xnn_init_f32_minmax_scalar_params)
-XNN_UKERNEL(xnn_arch_none, xnn_f32_vmulcaddc_minmax_ukernel_c8v__rvv_2x, 2, 8, true, float, struct xnn_f32_minmax_params, xnn_init_f32_minmax_scalar_params)
+XNN_UKERNEL(xnn_arch_riscv_vector, xnn_f32_vmulcaddc_minmax_ukernel_c4v__rvv_2x, 2, 4, true, float, struct xnn_f32_minmax_params, xnn_init_f32_minmax_scalar_params)
+XNN_UKERNEL(xnn_arch_riscv_vector, xnn_f32_vmulcaddc_minmax_ukernel_c8v__rvv_2x, 2, 8, true, float, struct xnn_f32_minmax_params, xnn_init_f32_minmax_scalar_params)
 #endif  // XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
