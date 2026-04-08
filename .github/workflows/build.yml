@@ -345,17 +345,6 @@ jobs:
       CCACHE_MAX_SIZE: 5G
       CCACHE_COMPILERCHECK: content
     steps:
-      - name: Restore gclient cache
-        id: cache-gclient-restore
-        uses: actions/cache@v5
-        with:
-          # Cache the Git repos
-          path: /home/runner/.cache/gclient
-          key: gclient-linux-${{ github.ref_name }}-${{ github.sha }}
-          restore-keys: |
-            gclient-linux-${{ github.ref_name }}-
-            gclient-linux-master-
-            gclient-linux-
       - name: Restore ccache
         id: cache-ccache-restore
         uses: actions/cache@v5
@@ -384,10 +373,9 @@ jobs:
             "custom_vars": {},
             },
           ]
-          cache_dir = r"/home/runner/.cache/gclient"
           EOF
       - name: Sync to commit and run hooks
-        run: gclient sync --reset --force --upstream --revision $GITHUB_SHA
+        run: gclient sync --reset --force --upstream --no-history --revision $GITHUB_SHA
       - name: Check formatting
         run: |
           git cl format --presubmit --no-clang-format --no-python --diff
