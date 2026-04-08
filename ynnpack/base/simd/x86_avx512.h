@@ -205,6 +205,133 @@ using u8x64 = vec<uint8_t, 64>;
 using s8x64 = vec<int8_t, 64>;
 using f32x64 = vec<float, 64>;
 
+using mf32x16 = mask<float, 16>;
+
+template <>
+struct mask<float, 16> {
+  static constexpr std::integral_constant<size_t, 16> N = {};
+  __mmask16 m;
+
+  mask() = default;
+  YNN_ALWAYS_INLINE explicit mask(__mmask16 m) : m(m) {}
+  YNN_ALWAYS_INLINE explicit mask(bool x) : m(x ? 0xFFFF : 0) {}
+  YNN_ALWAYS_INLINE mask(mask<float, 8> m0, mask<float, 8> m1)
+      : m(static_cast<__mmask16>(_mm256_movemask_ps(m0.m)) |
+          (static_cast<__mmask16>(_mm256_movemask_ps(m1.m)) << 8)) {}
+
+  YNN_ALWAYS_INLINE mask<float, 8> lo() const {
+    return mask<float, 8>{_mm256_castsi256_ps(
+        _mm256_maskz_set1_epi32(static_cast<__mmask8>(m), -1))};
+  }
+  YNN_ALWAYS_INLINE mask<float, 8> hi() const {
+    return mask<float, 8>{_mm256_castsi256_ps(
+        _mm256_maskz_set1_epi32(static_cast<__mmask8>(m >> 8), -1))};
+  }
+};
+
+YNN_ALWAYS_INLINE mf32x16 operator==(f32x16 a, f32x16 b) {
+  return mf32x16{_mm512_cmp_ps_mask(a.v, b.v, _CMP_EQ_OQ)};
+}
+YNN_ALWAYS_INLINE mf32x16 operator!=(f32x16 a, f32x16 b) {
+  return mf32x16{_mm512_cmp_ps_mask(a.v, b.v, _CMP_NEQ_OQ)};
+}
+YNN_ALWAYS_INLINE mf32x16 operator<(f32x16 a, f32x16 b) {
+  return mf32x16{_mm512_cmp_ps_mask(a.v, b.v, _CMP_LT_OQ)};
+}
+YNN_ALWAYS_INLINE mf32x16 operator<=(f32x16 a, f32x16 b) {
+  return mf32x16{_mm512_cmp_ps_mask(a.v, b.v, _CMP_LE_OQ)};
+}
+YNN_ALWAYS_INLINE mf32x16 operator>(f32x16 a, f32x16 b) {
+  return mf32x16{_mm512_cmp_ps_mask(a.v, b.v, _CMP_GT_OQ)};
+}
+YNN_ALWAYS_INLINE mf32x16 operator>=(f32x16 a, f32x16 b) {
+  return mf32x16{_mm512_cmp_ps_mask(a.v, b.v, _CMP_GE_OQ)};
+}
+
+YNN_ALWAYS_INLINE mf32x16 operator&(mf32x16 a, mf32x16 b) {
+  return mf32x16{static_cast<__mmask16>(a.m & b.m)};
+}
+YNN_ALWAYS_INLINE mf32x16 operator|(mf32x16 a, mf32x16 b) {
+  return mf32x16{static_cast<__mmask16>(a.m | b.m)};
+}
+YNN_ALWAYS_INLINE mf32x16 operator^(mf32x16 a, mf32x16 b) {
+  return mf32x16{static_cast<__mmask16>(a.m ^ b.m)};
+}
+YNN_ALWAYS_INLINE mf32x16 operator~(mf32x16 a) {
+  return mf32x16{static_cast<__mmask16>(~a.m)};
+}
+
+YNN_ALWAYS_INLINE f32x16 select(mf32x16 m, f32x16 a, f32x16 b) {
+  return f32x16{_mm512_mask_blend_ps(m.m, b.v, a.v)};
+}
+
+using ms32x16 = mask<int32_t, 16>;
+
+template <>
+struct mask<int32_t, 16> {
+  static constexpr std::integral_constant<size_t, 16> N = {};
+  __mmask16 m;
+
+  mask() = default;
+  YNN_ALWAYS_INLINE explicit mask(__mmask16 m) : m(m) {}
+  YNN_ALWAYS_INLINE explicit mask(bool x) : m(x ? 0xFFFF : 0) {}
+  YNN_ALWAYS_INLINE mask(mask<int32_t, 8> m0, mask<int32_t, 8> m1)
+      : m(static_cast<__mmask16>(
+              _mm256_movemask_ps(_mm256_castsi256_ps(m0.m))) |
+          (static_cast<__mmask16>(_mm256_movemask_ps(_mm256_castsi256_ps(m1.m)))
+           << 8)) {}
+
+  YNN_ALWAYS_INLINE mask<int32_t, 8> lo() const {
+    return mask<int32_t, 8>{
+        _mm256_maskz_set1_epi32(static_cast<__mmask8>(m), -1)};
+  }
+  YNN_ALWAYS_INLINE mask<int32_t, 8> hi() const {
+    return mask<int32_t, 8>{
+        _mm256_maskz_set1_epi32(static_cast<__mmask8>(m >> 8), -1)};
+  }
+};
+
+YNN_ALWAYS_INLINE ms32x16 operator==(s32x16 a, s32x16 b) {
+  return ms32x16{_mm512_cmp_epi32_mask(a.v, b.v, _MM_CMPINT_EQ)};
+}
+YNN_ALWAYS_INLINE ms32x16 operator!=(s32x16 a, s32x16 b) {
+  return ms32x16{_mm512_cmp_epi32_mask(a.v, b.v, _MM_CMPINT_NE)};
+}
+YNN_ALWAYS_INLINE ms32x16 operator<(s32x16 a, s32x16 b) {
+  return ms32x16{_mm512_cmp_epi32_mask(a.v, b.v, _MM_CMPINT_LT)};
+}
+YNN_ALWAYS_INLINE ms32x16 operator<=(s32x16 a, s32x16 b) {
+  return ms32x16{_mm512_cmp_epi32_mask(a.v, b.v, _MM_CMPINT_LE)};
+}
+YNN_ALWAYS_INLINE ms32x16 operator>(s32x16 a, s32x16 b) {
+  return ms32x16{_mm512_cmp_epi32_mask(a.v, b.v, _MM_CMPINT_NLE)};
+}
+YNN_ALWAYS_INLINE ms32x16 operator>=(s32x16 a, s32x16 b) {
+  return ms32x16{_mm512_cmp_epi32_mask(a.v, b.v, _MM_CMPINT_NLT)};
+}
+
+YNN_ALWAYS_INLINE ms32x16 operator&(ms32x16 a, ms32x16 b) {
+  return ms32x16{static_cast<__mmask16>(a.m & b.m)};
+}
+YNN_ALWAYS_INLINE ms32x16 operator|(ms32x16 a, ms32x16 b) {
+  return ms32x16{static_cast<__mmask16>(a.m | b.m)};
+}
+YNN_ALWAYS_INLINE ms32x16 operator^(ms32x16 a, ms32x16 b) {
+  return ms32x16{static_cast<__mmask16>(a.m ^ b.m)};
+}
+YNN_ALWAYS_INLINE ms32x16 operator~(ms32x16 a) {
+  return ms32x16{static_cast<__mmask16>(~a.m)};
+}
+
+YNN_ALWAYS_INLINE s32x16 select(ms32x16 m, s32x16 a, s32x16 b) {
+  return s32x16{_mm512_mask_blend_epi32(m.m, b.v, a.v)};
+}
+
+YNN_ALWAYS_INLINE ms32x16 cast(mf32x16 from, int32_t) {
+  return ms32x16{from.m};
+}
+YNN_ALWAYS_INLINE mf32x16 cast(ms32x16 from, float) { return mf32x16{from.m}; }
+
 YNN_ALWAYS_INLINE f32x16 load_aligned(const float* ptr, decltype(f32x16::N),
                                       f32x16 = {}) {
   return f32x16{_mm512_load_ps(ptr)};

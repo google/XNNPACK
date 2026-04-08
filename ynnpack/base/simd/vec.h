@@ -35,6 +35,37 @@ struct undef {
   static constexpr std::integral_constant<size_t, N_> N = {};
 };
 
+template <typename T, size_t N_>
+struct mask {
+  static constexpr std::integral_constant<size_t, N_> N = {};
+  using submask = mask<T, N_ / 2>;
+
+  submask m[2];
+
+  YNN_ALWAYS_INLINE submask& lo() { return m[0]; }
+  YNN_ALWAYS_INLINE const submask& lo() const { return m[0]; }
+  YNN_ALWAYS_INLINE submask& hi() { return m[1]; }
+  YNN_ALWAYS_INLINE const submask& hi() const { return m[1]; }
+
+  mask() = default;
+  YNN_ALWAYS_INLINE explicit mask(bool x) : m{submask{x}, submask{x}} {}
+  YNN_ALWAYS_INLINE mask(submask m0, submask m1) : m{m0, m1} {}
+
+  YNN_ALWAYS_INLINE submask& operator[](size_t i) { return m[i]; }
+  YNN_ALWAYS_INLINE const submask& operator[](size_t i) const { return m[i]; }
+};
+
+template <typename T>
+struct mask<T, 1> {
+  static constexpr std::integral_constant<size_t, 1> N = {};
+  using value_type = bool;
+
+  bool v;
+
+  mask() = default;
+  YNN_ALWAYS_INLINE explicit mask(bool x) : v(x) {}
+};
+
 // The idea here is to provide the minimal wrappers around various platform
 // specific intrinsics that allow overloading behavior based on type and vector
 // length. For example, suppose you want to implement the following generic
@@ -142,6 +173,31 @@ template <typename T, size_t N>
 vec<T, N> sub_sat(vec<T, N> a, vec<T, N> b);
 template <typename T, size_t N>
 vec<T, N> operator<<(vec<T, N> a, int b);
+
+template <typename T, size_t N>
+mask<T, N> operator==(vec<T, N> a, vec<T, N> b);
+template <typename T, size_t N>
+mask<T, N> operator!=(vec<T, N> a, vec<T, N> b);
+template <typename T, size_t N>
+mask<T, N> operator<(vec<T, N> a, vec<T, N> b);
+template <typename T, size_t N>
+mask<T, N> operator<=(vec<T, N> a, vec<T, N> b);
+template <typename T, size_t N>
+mask<T, N> operator>(vec<T, N> a, vec<T, N> b);
+template <typename T, size_t N>
+mask<T, N> operator>=(vec<T, N> a, vec<T, N> b);
+
+template <typename T, size_t N>
+mask<T, N> operator&(mask<T, N> a, mask<T, N> b);
+template <typename T, size_t N>
+mask<T, N> operator|(mask<T, N> a, mask<T, N> b);
+template <typename T, size_t N>
+mask<T, N> operator^(mask<T, N> a, mask<T, N> b);
+template <typename T, size_t N>
+mask<T, N> operator~(mask<T, N> a);
+
+template <typename T, size_t N>
+vec<T, N> select(mask<T, N> m, vec<T, N> a, vec<T, N> b);
 
 template <typename T>
 std::array<vec<T, 4>, 4> transpose(std::array<vec<T, 4>, 4> x);
@@ -308,6 +364,53 @@ YNN_ALWAYS_INLINE vec<T, 1> add_sat(vec<T, 1> a, vec<T, 1> b) {
 template <typename T>
 YNN_ALWAYS_INLINE vec<T, 1> sub_sat(vec<T, 1> a, vec<T, 1> b) {
   return vec<T, 1>{sub_sat(a.v, b.v)};
+}
+
+template <typename T>
+YNN_ALWAYS_INLINE mask<T, 1> operator==(vec<T, 1> a, vec<T, 1> b) {
+  return mask<T, 1>{a.v == b.v};
+}
+template <typename T>
+YNN_ALWAYS_INLINE mask<T, 1> operator!=(vec<T, 1> a, vec<T, 1> b) {
+  return mask<T, 1>{a.v != b.v};
+}
+template <typename T>
+YNN_ALWAYS_INLINE mask<T, 1> operator<(vec<T, 1> a, vec<T, 1> b) {
+  return mask<T, 1>{a.v < b.v};
+}
+template <typename T>
+YNN_ALWAYS_INLINE mask<T, 1> operator<=(vec<T, 1> a, vec<T, 1> b) {
+  return mask<T, 1>{a.v <= b.v};
+}
+template <typename T>
+YNN_ALWAYS_INLINE mask<T, 1> operator>(vec<T, 1> a, vec<T, 1> b) {
+  return mask<T, 1>{a.v > b.v};
+}
+template <typename T>
+YNN_ALWAYS_INLINE mask<T, 1> operator>=(vec<T, 1> a, vec<T, 1> b) {
+  return mask<T, 1>{a.v >= b.v};
+}
+
+template <typename T>
+YNN_ALWAYS_INLINE mask<T, 1> operator&(mask<T, 1> a, mask<T, 1> b) {
+  return mask<T, 1>{a.v && b.v};
+}
+template <typename T>
+YNN_ALWAYS_INLINE mask<T, 1> operator|(mask<T, 1> a, mask<T, 1> b) {
+  return mask<T, 1>{a.v || b.v};
+}
+template <typename T>
+YNN_ALWAYS_INLINE mask<T, 1> operator^(mask<T, 1> a, mask<T, 1> b) {
+  return mask<T, 1>{a.v != b.v};
+}
+template <typename T>
+YNN_ALWAYS_INLINE mask<T, 1> operator~(mask<T, 1> a) {
+  return mask<T, 1>{!a.v};
+}
+
+template <typename T>
+YNN_ALWAYS_INLINE vec<T, 1> select(mask<T, 1> m, vec<T, 1> a, vec<T, 1> b) {
+  return vec<T, 1>{m.v ? a.v : b.v};
 }
 
 template <typename To, typename From>
