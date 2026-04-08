@@ -174,6 +174,7 @@ struct xnn_gemm_config {
     xnn_init_f16_qb4w_minmax_params_fn f16_qb4w;
     xnn_init_f32_qc4w_minmax_params_fn f32_qc4w;
     xnn_init_f32_qb4w_minmax_params_fn f32_qb4w;
+    xnn_init_bf16_qb4w_minmax_params_fn bf16_qb4w;
     xnn_init_qs8_conv_minmax_params_fn qs8;
     xnn_init_qs8_qc8w_conv_minmax_params_fn qs8_qc8w;
     xnn_init_qu8_conv_minmax_params_fn qu8;
