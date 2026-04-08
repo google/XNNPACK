@@ -624,6 +624,20 @@ size_t xnn_init_f32_qb4w_minmax_scalar_params(
   return sizeof(params->scalar);
 }
 
+size_t xnn_init_bf16_qb4w_minmax_scalar_params(
+  struct xnn_bf16_qb4w_minmax_params* params,
+  float output_min,
+  float output_max,
+  uint8_t kernel_zero_point,
+  size_t blocksize)
+{
+  assert(kernel_zero_point <= 15);
+  params->scalar.min = output_min;
+  params->scalar.max = output_max;
+  params->scalar.blocksize = blocksize;
+  return sizeof(params->scalar);
+}
+
 size_t xnn_init_f16_elu_scalar_params(
   union xnn_unary_uparams* params,
   const union xnn_unary_params* op_params,
