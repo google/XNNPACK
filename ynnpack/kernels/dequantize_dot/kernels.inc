@@ -17,3 +17,7 @@ YNN_DEQUANTIZE_DOT_KERNEL(arch_flag::sse41, dequantize_dot_f32_1x16_sse41, float
 #ifdef YNN_ARCH_ARM_NEON
 YNN_DEQUANTIZE_DOT_KERNEL(arch_flag::neon, dequantize_dot_f32_1x16_neon, float)
 #endif  // YNN_ARCH_ARM_NEON
+
+#ifdef YNN_ARCH_WASM_SIMD128
+YNN_DEQUANTIZE_DOT_KERNEL(arch_flag::simd128, dequantize_dot_f32_1x16_simd128, float)
+#endif  // YNN_ARCH_WASM_SIMD128

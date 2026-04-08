@@ -22,6 +22,7 @@ ynn_cc_library(
     copts = ynn_kernel_copts(),
     per_arch_srcs = {
         "arm_neon": ["arm_neon.cc"],
+        "wasm_simd128": ["wasm_simd128.cc"],
         "x86_sse41": ["x86_sse41.cc"],
         "x86_avx": ["x86_avx.cc"],
         "x86_avx2": ["x86_avx2.cc"],
