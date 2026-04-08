@@ -49,6 +49,10 @@ cc_test(
     ],
     linkopts = ynn_binary_linkopts(),
     malloc = ynn_binary_malloc(),
+    shard_count = select({
+        "//ynnpack:hexagon": 10,
+        "//conditions:default": 1,
+    }),
     deps = [
         ":transpose",
         "//ynnpack/base",
