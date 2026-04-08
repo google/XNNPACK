@@ -186,10 +186,10 @@ SET(PROD_NEON_MICROKERNEL_SRCS
   src/xx-pad/xx-pad-p16-neon-u16.c)
 
 SET(NON_PROD_NEON_MICROKERNEL_SRCS
-  src/f16-f32-vcvt/gen/f16-f32-vcvt-neon-int16-u8.c
   src/bf16-f32-vcvt/gen/bf16-f32-vcvt-neon-u16.c
   src/bf16-f32-vcvt/gen/bf16-f32-vcvt-neon-u24.c
   src/bf16-f32-vcvt/gen/bf16-f32-vcvt-neon-u32.c
+  src/f16-f32-vcvt/gen/f16-f32-vcvt-neon-int16-u8.c
   src/f16-f32-vcvt/gen/f16-f32-vcvt-neon-int16-u24.c
   src/f16-f32-vcvt/gen/f16-f32-vcvt-neon-int16-u32.c
   src/f16-f32-vcvt/gen/f16-f32-vcvt-neon-int32-u8.c
