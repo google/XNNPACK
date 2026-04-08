@@ -52,29 +52,6 @@ unary_reduce_kernel_fn get_reduce_kernel(ynn_reduce_operator op,
   }
 }
 
-// A reduction output is a buffer that has the same dimensions as the input,
-// but with stride 0 for the reduction dimensions.
-void prepare_reduction_output(slinky::buffer<void, YNN_MAX_TENSOR_RANK>& output,
-                              const slinky::raw_buffer& input,
-                              const ynn_node::reduce& op) {
-  if (op.keep_dims) {
-    for (int d = 0; d < input.rank; ++d) {
-      if (op.k_dims[d]) {
-        output.mutable_dim(d) = input.dim(d);
-        output.mutable_dim(d).set_stride(0);
-      }
-    }
-  } else {
-    for (int d = 0; d < input.rank; ++d) {
-      if (op.k_dims[d]) {
-        slinky::dim new_dim = input.dim(d);
-        new_dim.set_stride(0);
-        output.unslice(d, new_dim);
-      }
-    }
-  }
-}
-
 // The wrapper for the kernel we use when we actually want to run a reduce
 // kernel on some buffers.
 auto make_unary_reduce_impl(const ynn_node::reduce& op,
@@ -99,98 +76,98 @@ auto make_unary_reduce_impl(const ynn_node::reduce& op,
       c.rank -= 1;
     }
 
-    // Make the output have the same rank as the iput, but with stride 0 dims
-    // where we want to do a reduction.
-    prepare_reduction_output(c, a, op);
-
-    // The next bit of logic selects which dimensions will be handled by the
-    // kernel. We start out with the kernel's dimensions as no-ops (1). Any time
-    // we want to send a dimension to the kernel, we just have to find one of
-    // these that has extent 1, and then it can be replaced.
+    // Conceptually, a reduction is c = f(c, a) for all indices of a. We need to
+    // do a few things to implement this:
+    // 1. We need broadcast dimensions in c corresponding to the reduction
+    // dimensions in a. If `keep_dims` is false, that means inserting new
+    // broadcast dimensions.
+    // 2. Remove the dimensions handled by the kernel.
+    // 3. We can optimize the loops over the buffers by fusing contiguous
+    // dimensions where possible.
     size_t n = 1;
     size_t k1 = 1;
     size_t k2 = 1;
     size_t k3 = 1;
     size_t a_stride_n = 0;
-    assert(a.dim(0).stride() == a.elem_size || a.dim(0).extent() == 1);
-    if (op.k_dims[0]) {
-      // The dense dimension is reduced.
-      k1 = a.dim(0).extent();
-    } else {
-      n = c.dim(0).extent();
-      a_stride_n = a.dim(0).stride();
-    }
-
-    // A helper to track slicing
-    int sliced = 0;
-    auto slice = [&](int d) {
-      assert(!a.dim(d).is_folded(c.dim(d)));
-      assert(!c.dim(d).is_folded());
-      a.slice(d, c.dim(d).min());
-      c.slice(d);
-      ++sliced;
-    };
-
-    // We took dimension 0 above.
-    slice(0);
 
     size_t a_stride_k3 = 0;
     size_t a_stride_k2 = 0;
+
+    int sliced = 0;
     for (int i = 0; i < a.rank;) {
-      if (op.k_dims[i + sliced]) {
-        slinky::index_t extent_i = a.dim(i).extent();
-        if (extent_i == 0) {
-          // The reduction is an empty reduction, so we are done after
-          // initializing the output.
-          return 0;
-        }
-        slinky::index_t stride_i = a.dim(i).stride();
-        if (k1 * a.elem_size == stride_i) {
+      const slinky::dim& a_dim_i = a.dim(i);
+      slinky::index_t extent_i = a_dim_i.extent();
+      if (extent_i == 0) {
+        // The reduction is an empty reduction, so we are done after
+        // initializing the output.
+        return 0;
+      } else if (op.k_dims[i + sliced]) {
+        assert(a_dim_i.min() == 0);
+        assert(!a_dim_i.is_folded());
+        if (extent_i == 1) {
+          // Slice extent 1 dimensions, they don't affect the result.
+        } else if (k1 * a.elem_size == a_dim_i.stride()) {
           k1 *= extent_i;
-          slice(i);
-          continue;
-        } else if (a_stride_k2 * k2 == stride_i) {
+        } else if (a_stride_k2 * k2 == a_dim_i.stride()) {
           k2 *= extent_i;
-          slice(i);
-          continue;
-        } else if (a_stride_k3 * k3 == stride_i) {
+        } else if (a_stride_k3 * k3 == a_dim_i.stride()) {
           k3 *= extent_i;
-          slice(i);
-          continue;
         } else if (k2 == 1) {
           k2 = extent_i;
-          a_stride_k2 = stride_i;
-          slice(i);
-          continue;
+          a_stride_k2 = a_dim_i.stride();
         } else if (k3 == 1) {
           k3 = extent_i;
-          a_stride_k3 = stride_i;
-          slice(i);
+          a_stride_k3 = a_dim_i.stride();
+        } else {
+          // This is a reduction dimension that is not handled by the kernel.
+          if (op.keep_dims) {
+            // Replace the existing dimension in c with a broadcast.
+            c.mutable_dim(i).set_bounds(a_dim_i.min(), a_dim_i.max());
+            c.mutable_dim(i).set_stride(0);
+          } else {
+            // Add a new dimension for the broadcast in c.
+            slinky::dim new_dim = a_dim_i;
+            new_dim.set_stride(0);
+            c.unslice(i, new_dim);
+          }
+          ++i;
           continue;
         }
+        // This is a reduction dimension that is handled by the kernel.
+        a.slice(i);
+        if (op.keep_dims) {
+          // If op.keep_dims is true, that means the buffer has these
+          // dimensions, but we don't want them there for dimensions we handle
+          // with the kernel.
+          c.slice(i);
+        }
+        ++sliced;
       } else {
+        const slinky::dim& c_dim_i = c.dim(i);
         // Not a reduction dimension. If we haven't already found a dimension
         // for the kernel, give it this one.
-        if (c.dim(i).stride() == n * c.elem_size) {
-          if (a_stride_n * n == a.dim(i).stride()) {
-            n *= c.dim(i).extent();
-            slice(i);
-            continue;
+        if (extent_i == 1) {
+          // Slice extent 1 dimensions, they don't affect the result.
+        } else if (c_dim_i.stride() == n * c.elem_size) {
+          if (a_stride_n * n == a_dim_i.stride()) {
+            n *= c_dim_i.extent();
           } else if (n == 1) {
-            n = c.dim(i).extent();
-            a_stride_n = a.dim(i).stride();
-            slice(i);
+            n = c_dim_i.extent();
+            a_stride_n = a_dim_i.stride();
+          } else {
+            ++i;
             continue;
           }
+        } else {
+          ++i;
+          continue;
         }
+        assert(!a_dim_i.is_folded(c_dim_i));
+        assert(!c_dim_i.is_folded());
+        a.slice(i, c_dim_i.min());
+        c.slice(i);
+        ++sliced;
       }
-      // If we get here, we are keeping this dimension.
-      ++i;
-    }
-
-    if (n == 0) {
-      // The output is empty.
-      return 0;
     }
 
     slinky::for_each_element(
