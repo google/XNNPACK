@@ -243,6 +243,16 @@ ynn_generate_srcs(
     ],
 )
 
+ynn_generate_srcs(
+    name = "wasm_int8_int8_int32",
+    compatible_with = _COMPATIBLE_WITH,
+    generator = "//ynnpack/kernels/dot/generator:wasm_int8_int8_int32",
+    output_srcs = [
+        "wasm_simd128_int8_int8_int32.cc",
+        "wasm_simd128_int8_int8_int32.inc",
+    ],
+)
+
 cc_library(
     name = "schedule",
     srcs = ["schedule.cc"],
@@ -288,6 +298,7 @@ ynn_cc_library(
         "kernels.inc",
         "wasm_simd128_fp32.inc",
         "wasm_simd128_fp64.inc",
+        "wasm_simd128_int8_int8_int32.inc",
         "x86_avx2_fma3_bf16_bf16_fp32.inc",
         "x86_avx2_fma3_bf16_bf16_fp32_k1.inc",
         "x86_avx2_fma3_fp32_k2.inc",
@@ -391,6 +402,7 @@ ynn_cc_library(
         "wasm_simd128": [
             "wasm_simd128_fp32.cc",
             "wasm_simd128_fp64.cc",
+            "wasm_simd128_int8_int8_int32.cc",
         ],
     },
     visibility = ["//ynnpack:__subpackages__"],

@@ -59,6 +59,7 @@ py_library(
 ) for name in [
     "wasm_fp32",
     "wasm_fp64",
+    "wasm_int8_int8_int32",
 ]]
 
 py_library(
