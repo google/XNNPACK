@@ -89,7 +89,11 @@ cc_test(
     srcs = ["test.cc"],
     linkopts = ynn_binary_linkopts(),
     malloc = ynn_binary_malloc(),
-    shard_count = 10,
+    shard_count = select({
+        "//ynnpack:hexagon": 20,
+        "//ynnpack:arm": 10,
+        "//conditions:default": 1,
+    }),
     deps = [
         ":reduce",
         "//ynnpack/base",
