@@ -6,6 +6,7 @@
 $assert NR % 4 == 0
 $assert ACTIVATION != "MINMAX" or ARCH in ["ARM", "X86", "RELAXED"]
 $assert not FMA or ARCH == "RELAXED"
+$UNROLL = locals().get("UNROLL", 1)
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <assert.h>
 
@@ -22,7 +23,7 @@ $ACTIVATION_SUFFIX = {"LINEAR": ""}.get(ACTIVATION, "_" + ACTIVATION.lower())
 $ISA = "wasmsimd" if not FMA and (ACTIVATION in ["LINEAR"] or ARCH != "RELAXED") else "wasmrelaxedsimd"
 $ARCH_SUFFIX = "" if not FMA and (ACTIVATION in ["LINEAR"] or ARCH == "RELAXED") else "_" + ("fma" if FMA else ARCH.lower())
 $PARAMS = {"LINEAR": "struct xnn_f32_default_params", "MINMAX": "struct xnn_f32_minmax_params"}[ACTIVATION]
-void xnn_f32_igemm${ACTIVATION_SUFFIX}_ukernel_${MR}x${NR}__${ISA}${ARCH_SUFFIX}_loadsplat(
+void xnn_f32_igemm${ACTIVATION_SUFFIX}_ukernel_${MR}x${NR}__${ISA}${ARCH_SUFFIX}_loadsplat${"_u" + str(UNROLL) if UNROLL > 1 else ""}(
     size_t mr,
     size_t nc,
     size_t kc,
@@ -89,24 +90,69 @@ void xnn_f32_igemm${ACTIVATION_SUFFIX}_ukernel_${MR}x${NR}__${ISA}${ARCH_SUFFIX}
       a += ${MR};
 
       size_t k = kc;
-      do {
-        const v128_t vb${ABC[0:4]} = wasm_v128_load(w);
-        $for N in range(4, NR, 4):
-          const v128_t vb${ABC[N:N+4]} = wasm_v128_load(w + ${N});
-        w += ${NR};
+      $if UNROLL > 1:
+        while (k >= ${UNROLL} * sizeof(float)) {
+          $for K in range(UNROLL):
+            $for N in range(0, NR, 4):
+              $if N == 0 and K == 0:
+                const v128_t vb${K}x${ABC[0:4]} = wasm_v128_load(w);
+              $else:
+                const v128_t vb${K}x${ABC[N:N+4]} = wasm_v128_load(w + ${N + NR * K});
+          w += ${UNROLL * NR};
 
-        $for M in range(MR):
-          const v128_t va${M} = wasm_v128_load32_splat(a${M});
-          a${M} += 1;
+          $for M in range(MR):
+            const v128_t va${M}x0 = wasm_v128_load32_splat(a${M});
+            $for K in range(1, UNROLL):
+              const v128_t va${M}x${K} = wasm_v128_load32_splat(a${M} + 1);
+            a${M} += ${UNROLL};
 
-        $for M in range(MR):
-          $for N in range(0, NR, 4):
-            $if FMA:
-              vacc${M}x${ABC[N:N+4]} = wasm_f32x4_relaxed_madd(va${M}, vb${ABC[N:N+4]}, vacc${M}x${ABC[N:N+4]});
-            $else:
-              vacc${M}x${ABC[N:N+4]} = wasm_f32x4_add(wasm_f32x4_mul(va${M}, vb${ABC[N:N+4]}), vacc${M}x${ABC[N:N+4]});
-        k -= sizeof(float);
-      } while (k != 0);
+          $for K in range(UNROLL):
+            $for M in range(MR):
+              $for N in range(0, NR, 4):
+                $if FMA:
+                  vacc${M}x${ABC[N:N+4]} = wasm_f32x4_relaxed_madd(va${M}x${K}, vb${K}x${ABC[N:N+4]}, vacc${M}x${ABC[N:N+4]});
+                $else:
+                  vacc${M}x${ABC[N:N+4]} = wasm_f32x4_add(wasm_f32x4_mul(va${M}x${K}, vb${K}x${ABC[N:N+4]}), vacc${M}x${ABC[N:N+4]});
+          k -= ${UNROLL} * sizeof(float);
+        }
+
+        while (k != 0) {
+          const v128_t vb${ABC[0:4]} = wasm_v128_load(w);
+          $for N in range(4, NR, 4):
+            const v128_t vb${ABC[N:N+4]} = wasm_v128_load(w + ${N});
+          w += ${NR};
+
+          $for M in range(MR):
+            const v128_t va${M} = wasm_v128_load32_splat(a${M});
+            a${M} += 1;
+
+          $for M in range(MR):
+            $for N in range(0, NR, 4):
+              $if FMA:
+                vacc${M}x${ABC[N:N+4]} = wasm_f32x4_relaxed_madd(va${M}, vb${ABC[N:N+4]}, vacc${M}x${ABC[N:N+4]});
+              $else:
+                vacc${M}x${ABC[N:N+4]} = wasm_f32x4_add(wasm_f32x4_mul(va${M}, vb${ABC[N:N+4]}), vacc${M}x${ABC[N:N+4]});
+          k -= sizeof(float);
+        }
+      $else:
+        do {
+          const v128_t vb${ABC[0:4]} = wasm_v128_load(w);
+          $for N in range(4, NR, 4):
+            const v128_t vb${ABC[N:N+4]} = wasm_v128_load(w + ${N});
+          w += ${NR};
+
+          $for M in range(MR):
+            const v128_t va${M} = wasm_v128_load32_splat(a${M});
+            a${M} += 1;
+
+          $for M in range(MR):
+            $for N in range(0, NR, 4):
+              $if FMA:
+                vacc${M}x${ABC[N:N+4]} = wasm_f32x4_relaxed_madd(va${M}, vb${ABC[N:N+4]}, vacc${M}x${ABC[N:N+4]});
+              $else:
+                vacc${M}x${ABC[N:N+4]} = wasm_f32x4_add(wasm_f32x4_mul(va${M}, vb${ABC[N:N+4]}), vacc${M}x${ABC[N:N+4]});
+          k -= sizeof(float);
+        } while (k != 0);
       p -= ${MR} * sizeof(void*);
     } while (p != 0);
 

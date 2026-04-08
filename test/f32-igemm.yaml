@@ -101,6 +101,36 @@
 - name: xnn_f32_igemm_ukernel_6x8s4__wasmrelaxedsimd_fma
   pack: xnn_pack_f32_conv_goki_w
   k-block: 4
+- name: xnn_f32_igemm_ukernel_1x16__wasmrelaxedsimd_fma_loadsplat
+  pack: xnn_pack_f32_conv_goki_w
+  k-block: 1
+- name: xnn_f32_igemm_ukernel_1x16__wasmrelaxedsimd_fma_loadsplat_u2
+  pack: xnn_pack_f32_conv_goki_w
+  k-block: 2
+- name: xnn_f32_igemm_ukernel_3x16__wasmrelaxedsimd_fma_loadsplat
+  pack: xnn_pack_f32_conv_goki_w
+  k-block: 1
+- name: xnn_f32_igemm_ukernel_3x16__wasmrelaxedsimd_fma_loadsplat_u2
+  pack: xnn_pack_f32_conv_goki_w
+  k-block: 2
+- name: xnn_f32_igemm_ukernel_4x16__wasmrelaxedsimd_fma_loadsplat
+  pack: xnn_pack_f32_conv_goki_w
+  k-block: 1
+- name: xnn_f32_igemm_ukernel_4x16__wasmrelaxedsimd_fma_loadsplat_u2
+  pack: xnn_pack_f32_conv_goki_w
+  k-block: 2
+- name: xnn_f32_igemm_ukernel_5x16__wasmrelaxedsimd_fma_loadsplat
+  pack: xnn_pack_f32_conv_goki_w
+  k-block: 1
+- name: xnn_f32_igemm_ukernel_5x16__wasmrelaxedsimd_fma_loadsplat_u2
+  pack: xnn_pack_f32_conv_goki_w
+  k-block: 2
+- name: xnn_f32_igemm_ukernel_6x16__wasmrelaxedsimd_fma_loadsplat
+  pack: xnn_pack_f32_conv_goki_w
+  k-block: 1
+- name: xnn_f32_igemm_ukernel_6x16__wasmrelaxedsimd_fma_loadsplat_u2
+  pack: xnn_pack_f32_conv_goki_w
+  k-block: 2
 # Scalar
 - name: xnn_f32_igemm_ukernel_1x4__scalar
   pack: xnn_pack_f32_conv_goki_w

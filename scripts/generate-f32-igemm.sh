@@ -43,6 +43,17 @@ tools/xngen src/f32-igemm/wasmsimd-loadsplat.c.in -D MR=4 -D NR=8 -D FMA=1 -D AC
 tools/xngen src/f32-igemm/wasmsimd-loadsplat.c.in -D MR=5 -D NR=8 -D FMA=1 -D ACTIVATION=MINMAX -D ARCH=RELAXED -o src/f32-igemm/gen/f32-igemm-5x8-minmax-wasmrelaxedsimd-fma-loadsplat.c &
 tools/xngen src/f32-igemm/wasmsimd-loadsplat.c.in -D MR=6 -D NR=8 -D FMA=1 -D ACTIVATION=MINMAX -D ARCH=RELAXED -o src/f32-igemm/gen/f32-igemm-6x8-minmax-wasmrelaxedsimd-fma-loadsplat.c &
 
+tools/xngen src/f32-igemm/wasmsimd-loadsplat.c.in -D MR=1 -D NR=16 -D FMA=1 -D ACTIVATION=MINMAX -D ARCH=RELAXED -o src/f32-igemm/gen/f32-igemm-1x16-minmax-wasmrelaxedsimd-fma-loadsplat.c &
+tools/xngen src/f32-igemm/wasmsimd-loadsplat.c.in -D MR=3 -D NR=16 -D FMA=1 -D ACTIVATION=MINMAX -D ARCH=RELAXED -o src/f32-igemm/gen/f32-igemm-3x16-minmax-wasmrelaxedsimd-fma-loadsplat.c &
+tools/xngen src/f32-igemm/wasmsimd-loadsplat.c.in -D MR=4 -D NR=16 -D FMA=1 -D ACTIVATION=MINMAX -D ARCH=RELAXED -o src/f32-igemm/gen/f32-igemm-4x16-minmax-wasmrelaxedsimd-fma-loadsplat.c &
+tools/xngen src/f32-igemm/wasmsimd-loadsplat.c.in -D MR=5 -D NR=16 -D FMA=1 -D ACTIVATION=MINMAX -D ARCH=RELAXED -o src/f32-igemm/gen/f32-igemm-5x16-minmax-wasmrelaxedsimd-fma-loadsplat.c &
+tools/xngen src/f32-igemm/wasmsimd-loadsplat.c.in -D MR=6 -D NR=16 -D FMA=1 -D ACTIVATION=MINMAX -D ARCH=RELAXED -o src/f32-igemm/gen/f32-igemm-6x16-minmax-wasmrelaxedsimd-fma-loadsplat.c &
+
+tools/xngen src/f32-igemm/wasmsimd-loadsplat.c.in -D MR=1 -D NR=16 -D FMA=1 -D ACTIVATION=MINMAX -D ARCH=RELAXED -D UNROLL=2 -o src/f32-igemm/gen/f32-igemm-1x16-minmax-wasmrelaxedsimd-fma-loadsplat-u2.c &
+tools/xngen src/f32-igemm/wasmsimd-loadsplat.c.in -D MR=3 -D NR=16 -D FMA=1 -D ACTIVATION=MINMAX -D ARCH=RELAXED -D UNROLL=2 -o src/f32-igemm/gen/f32-igemm-3x16-minmax-wasmrelaxedsimd-fma-loadsplat-u2.c &
+tools/xngen src/f32-igemm/wasmsimd-loadsplat.c.in -D MR=4 -D NR=16 -D FMA=1 -D ACTIVATION=MINMAX -D ARCH=RELAXED -D UNROLL=2 -o src/f32-igemm/gen/f32-igemm-4x16-minmax-wasmrelaxedsimd-fma-loadsplat-u2.c &
+tools/xngen src/f32-igemm/wasmsimd-loadsplat.c.in -D MR=5 -D NR=16 -D FMA=1 -D ACTIVATION=MINMAX -D ARCH=RELAXED -D UNROLL=2 -o src/f32-igemm/gen/f32-igemm-5x16-minmax-wasmrelaxedsimd-fma-loadsplat-u2.c &
+tools/xngen src/f32-igemm/wasmsimd-loadsplat.c.in -D MR=6 -D NR=16 -D FMA=1 -D ACTIVATION=MINMAX -D ARCH=RELAXED -D UNROLL=2 -o src/f32-igemm/gen/f32-igemm-6x16-minmax-wasmrelaxedsimd-fma-loadsplat-u2.c &
 
 
 tools/xngen src/f32-igemm/wasmsimd-loadsplat.c.in -D MR=1 -D NR=8 -D FMA=0 -D ACTIVATION=LINEAR                 -o src/f32-igemm/gen/f32-igemm-1x8-wasmsimd-loadsplat.c &
@@ -56,6 +67,18 @@ tools/xngen src/f32-igemm/wasmsimd-loadsplat.c.in -D MR=3 -D NR=8 -D FMA=1 -D AC
 tools/xngen src/f32-igemm/wasmsimd-loadsplat.c.in -D MR=4 -D NR=8 -D FMA=1 -D ACTIVATION=LINEAR -D ARCH=RELAXED -o src/f32-igemm/gen/f32-igemm-4x8-wasmrelaxedsimd-fma-loadsplat.c &
 tools/xngen src/f32-igemm/wasmsimd-loadsplat.c.in -D MR=5 -D NR=8 -D FMA=1 -D ACTIVATION=LINEAR -D ARCH=RELAXED -o src/f32-igemm/gen/f32-igemm-5x8-wasmrelaxedsimd-fma-loadsplat.c &
 tools/xngen src/f32-igemm/wasmsimd-loadsplat.c.in -D MR=6 -D NR=8 -D FMA=1 -D ACTIVATION=LINEAR -D ARCH=RELAXED -o src/f32-igemm/gen/f32-igemm-6x8-wasmrelaxedsimd-fma-loadsplat.c &
+
+tools/xngen src/f32-igemm/wasmsimd-loadsplat.c.in -D MR=1 -D NR=16 -D FMA=1 -D ACTIVATION=LINEAR -D ARCH=RELAXED -o src/f32-igemm/gen/f32-igemm-1x16-wasmrelaxedsimd-fma-loadsplat.c &
+tools/xngen src/f32-igemm/wasmsimd-loadsplat.c.in -D MR=3 -D NR=16 -D FMA=1 -D ACTIVATION=LINEAR -D ARCH=RELAXED -o src/f32-igemm/gen/f32-igemm-3x16-wasmrelaxedsimd-fma-loadsplat.c &
+tools/xngen src/f32-igemm/wasmsimd-loadsplat.c.in -D MR=4 -D NR=16 -D FMA=1 -D ACTIVATION=LINEAR -D ARCH=RELAXED -o src/f32-igemm/gen/f32-igemm-4x16-wasmrelaxedsimd-fma-loadsplat.c &
+tools/xngen src/f32-igemm/wasmsimd-loadsplat.c.in -D MR=5 -D NR=16 -D FMA=1 -D ACTIVATION=LINEAR -D ARCH=RELAXED -o src/f32-igemm/gen/f32-igemm-5x16-wasmrelaxedsimd-fma-loadsplat.c &
+tools/xngen src/f32-igemm/wasmsimd-loadsplat.c.in -D MR=6 -D NR=16 -D FMA=1 -D ACTIVATION=LINEAR -D ARCH=RELAXED -o src/f32-igemm/gen/f32-igemm-6x16-wasmrelaxedsimd-fma-loadsplat.c &
+
+tools/xngen src/f32-igemm/wasmsimd-loadsplat.c.in -D MR=1 -D NR=16 -D FMA=1 -D ACTIVATION=LINEAR -D ARCH=RELAXED -D UNROLL=2 -o src/f32-igemm/gen/f32-igemm-1x16-wasmrelaxedsimd-fma-loadsplat-u2.c &
+tools/xngen src/f32-igemm/wasmsimd-loadsplat.c.in -D MR=3 -D NR=16 -D FMA=1 -D ACTIVATION=LINEAR -D ARCH=RELAXED -D UNROLL=2 -o src/f32-igemm/gen/f32-igemm-3x16-wasmrelaxedsimd-fma-loadsplat-u2.c &
+tools/xngen src/f32-igemm/wasmsimd-loadsplat.c.in -D MR=4 -D NR=16 -D FMA=1 -D ACTIVATION=LINEAR -D ARCH=RELAXED -D UNROLL=2 -o src/f32-igemm/gen/f32-igemm-4x16-wasmrelaxedsimd-fma-loadsplat-u2.c &
+tools/xngen src/f32-igemm/wasmsimd-loadsplat.c.in -D MR=5 -D NR=16 -D FMA=1 -D ACTIVATION=LINEAR -D ARCH=RELAXED -D UNROLL=2 -o src/f32-igemm/gen/f32-igemm-5x16-wasmrelaxedsimd-fma-loadsplat-u2.c &
+tools/xngen src/f32-igemm/wasmsimd-loadsplat.c.in -D MR=6 -D NR=16 -D FMA=1 -D ACTIVATION=LINEAR -D ARCH=RELAXED -D UNROLL=2 -o src/f32-igemm/gen/f32-igemm-6x16-wasmrelaxedsimd-fma-loadsplat-u2.c &
 
 ### LOAD4+DUPLICATE micro-kernels
 tools/xngen src/f32-igemm/wasmsimd-splat.c.in -D MR=1 -D NR=8 -D FMA=0 -D ACTIVATION=MINMAX -D ARCH=ARM     -o src/f32-igemm/gen/f32-igemm-1x8-minmax-wasmsimd-arm-splat.c &
