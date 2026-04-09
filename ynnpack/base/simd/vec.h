@@ -319,9 +319,19 @@ YNN_ALWAYS_INLINE vec<To, 1> cast(vec<From, 1> from, To) {
   return vec<To, 1>{static_cast<To>(from.v)};
 }
 
+template <typename T>
+YNN_ALWAYS_INLINE vec<T, 1> cast(vec<T, 1> from, T) {
+  return from;
+}
+
 template <typename To, typename From>
 YNN_ALWAYS_INLINE vec<To, 1> saturate_cast(vec<From, 1> from, To) {
   return vec<To, 1>{saturate_cast<To>(from.v)};
+}
+
+template <typename T>
+YNN_ALWAYS_INLINE vec<T, 1> saturate_cast(vec<T, 1> from, T) {
+  return from;
 }
 
 template <typename To, typename From>
