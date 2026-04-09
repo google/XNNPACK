@@ -13,6 +13,9 @@ YNN_UNARY_REDUCE_KERNEL(arch_flag::neondot, sum_uint8_int32_neondot, uint8_t, in
 #ifdef YNN_ARCH_ARM_NEON
 YNN_UNARY_REDUCE_KERNEL(arch_flag::neon, sum_fp32_neon, float, float)
 YNN_UNARY_REDUCE_KERNEL(arch_flag::neon, sum_bf16_fp32_neon, bfloat16, float)
+#ifdef YNN_ARCH_ARM64
+YNN_UNARY_REDUCE_KERNEL(arch_flag::neon, sum_fp64_neon, double, double)
+#endif
 #endif  // YNN_ARCH_ARM_NEON
 
 #ifdef YNN_ARCH_HEXAGON_HVX
@@ -33,6 +36,7 @@ YNN_UNARY_REDUCE_KERNEL(arch_flag::avx512, sum_fp16_fp32_avx512, half, float)
 YNN_UNARY_REDUCE_KERNEL(arch_flag::avx512, sum_uint8_int32_avx512, uint8_t, int32_t)
 YNN_UNARY_REDUCE_KERNEL(arch_flag::avx512, sum_int8_int32_avx512, int8_t, int32_t)
 YNN_UNARY_REDUCE_KERNEL(arch_flag::avx512, sum_fp32_avx512, float, float)
+YNN_UNARY_REDUCE_KERNEL(arch_flag::avx512, sum_fp64_avx512, double, double)
 #endif  // YNN_ARCH_X86_AVX512
 #ifdef YNN_ARCH_X86_AVX2
 YNN_UNARY_REDUCE_KERNEL(arch_flag::avx2, sum_bf16_fp32_avx2, bfloat16, float)
@@ -40,7 +44,8 @@ YNN_UNARY_REDUCE_KERNEL(arch_flag::avx2, sum_uint8_int32_avx2, uint8_t, int32_t)
 YNN_UNARY_REDUCE_KERNEL(arch_flag::avx2, sum_int8_int32_avx2, int8_t, int32_t)
 #endif  // YNN_ARCH_X86_AVX2
 #ifdef YNN_ARCH_X86_AVX
-YNN_UNARY_REDUCE_KERNEL(arch_flag::avx2, sum_fp32_avx, float, float)
+YNN_UNARY_REDUCE_KERNEL(arch_flag::avx, sum_fp32_avx, float, float)
+YNN_UNARY_REDUCE_KERNEL(arch_flag::avx, sum_fp64_avx, double, double)
 #endif  // YNN_ARCH_X86_AVX
 #ifdef YNN_ARCH_X86_F16C
 YNN_UNARY_REDUCE_KERNEL(arch_flag::f16c, sum_fp16_fp32_f16c, half, float)
@@ -71,6 +76,7 @@ YNN_UNARY_REDUCE_KERNEL(arch_flag::ssse3, sum_int8_int32_ssse3, int8_t, int32_t)
 YNN_UNARY_REDUCE_KERNEL(arch_flag::none, sum_fp32, float, float)
 YNN_UNARY_REDUCE_KERNEL(arch_flag::none, sum_bf16_fp32, bfloat16, float)
 #endif  // !defined(YNN_ARCH_X86_SSE2)
+YNN_UNARY_REDUCE_KERNEL(arch_flag::none, sum_fp64, double, double)
 YNN_UNARY_REDUCE_KERNEL(arch_flag::none, sum_fp16_fp32, half, float)
 YNN_UNARY_REDUCE_KERNEL(arch_flag::none, sum_int8_int32, int8_t, int32_t)
 YNN_UNARY_REDUCE_KERNEL(arch_flag::none, sum_uint8_int32, uint8_t, int32_t)

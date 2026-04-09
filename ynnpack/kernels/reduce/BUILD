@@ -42,6 +42,7 @@ ynn_cc_library(
         "arm_neonfma": ["arm_neonfma.cc"],
         "arm_neondot": ["arm_neondot.cc"],
         "arm_neon": ["arm_neon.cc"],
+        "arm64_neon": ["arm64_neon.cc"],
         "hexagon_hvx": ["hexagon_hvx.cc"],
         "wasm_simd128": ["wasm_simd128.cc"],
         "x86_ssse3": ["x86_ssse3.cc"],

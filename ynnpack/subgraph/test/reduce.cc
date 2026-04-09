@@ -198,14 +198,29 @@ TEST_P(Reduce, Test) {
   });
 }
 
+multi_type sum_types[] = {
+#if defined(YNN_ARCH_X86) || defined(YNN_ARCH_ARM64)
+    // TODO(b/501068911): Replace this with YNN_ENABLE_FP64
+    multi_type::fp64,
+#endif
+    multi_type::fp32,        multi_type::fp16,      multi_type::bf16,
+    multi_type::fp16_fp32,   multi_type::bf16_fp32, multi_type::int8_int32,
+    multi_type::uint8_int32,
+};
+
+multi_type min_max_types[] = {
+#if defined(YNN_ARCH_X86) || defined(YNN_ARCH_ARM64)
+    // TODO(b/501068911): Replace this with YNN_ENABLE_FP64
+    multi_type::fp64,
+#endif
+    multi_type::fp32, multi_type::fp16,  multi_type::bf16,
+    multi_type::int8, multi_type::uint8,
+};
+
 INSTANTIATE_TEST_SUITE_P(
     Sum, Reduce,
     testing::Combine(testing::Values(ynn_reduce_sum),
-                     testing::Values(multi_type::fp32, multi_type::fp16,
-                                     multi_type::bf16, multi_type::fp16_fp32,
-                                     multi_type::bf16_fp32,
-                                     multi_type::int8_int32,
-                                     multi_type::uint8_int32)),
+                     testing::ValuesIn(sum_types)),
     [](const testing::TestParamInfo<Reduce::ParamType>& info) {
       return test_param_to_string(info);
     });
@@ -213,9 +228,7 @@ INSTANTIATE_TEST_SUITE_P(
 INSTANTIATE_TEST_SUITE_P(
     MinMax, Reduce,
     testing::Combine(testing::Values(ynn_reduce_min, ynn_reduce_max),
-                     testing::Values(multi_type::fp32, multi_type::fp16,
-                                     multi_type::bf16, multi_type::int8,
-                                     multi_type::uint8)),
+                     testing::ValuesIn(min_max_types)),
     [](const testing::TestParamInfo<Reduce::ParamType>& info) {
       return test_param_to_string(info);
     });
@@ -329,36 +342,14 @@ void TestMinMax(T) {
   }
 }
 
-template <typename F>
-constexpr decltype(auto) SwitchType(ynn_type type, F&& f) {
-  switch (type) {
-    case ynn_type_int8:
-      return std::forward<F>(f)(int8_t());
-    case ynn_type_uint8:
-      return std::forward<F>(f)(uint8_t());
-    case ynn_type_int32:
-      return std::forward<F>(f)(int32_t());
-    case ynn_type_fp16:
-      return std::forward<F>(f)(half());
-    case ynn_type_bf16:
-      return std::forward<F>(f)(bfloat16());
-    case ynn_type_fp32:
-      return std::forward<F>(f)(float());
-    default:
-      YNN_UNREACHABLE;
-  }
-}
-
-class MinMax : public testing::TestWithParam<ynn_type> {};
+class MinMax : public testing::TestWithParam<multi_type> {};
 
 TEST_P(MinMax, Test) {
-  SwitchType(GetParam(), [&](auto type) { TestMinMax(type); });
+  SwitchOneType(GetParam(), [&](auto type) { TestMinMax(type); });
 }
 
 INSTANTIATE_TEST_SUITE_P(
-    MinMax, MinMax,
-    testing::Values(ynn_type_fp32, ynn_type_fp16, ynn_type_bf16, ynn_type_int8,
-                    ynn_type_uint8),
+    MinMax, MinMax, testing::ValuesIn(min_max_types),
     [](const testing::TestParamInfo<MinMax::ParamType>& info) {
       return to_string(info.param);
     });

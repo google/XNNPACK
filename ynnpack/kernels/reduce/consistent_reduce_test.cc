@@ -70,8 +70,8 @@ void TestReduce(AT, CT, ynn_reduce_operator op, size_t n, size_t k3, size_t k2,
 
   // Choose the range of values in a and c such that infinite results should be
   // rare.
-  const float max_abs_value = type_info<CT>::max() / k;
-  const float max_abs_a_value =
+  const double max_abs_value = type_info<CT>::max() / k;
+  const double max_abs_a_value =
       op == ynn_reduce_sum_squared ? std::sqrt(max_abs_value) : max_abs_value;
   Tensor<AT> a({n, k3, k2, k1});
   Tensor<CT> init_c({n});
@@ -101,8 +101,8 @@ void TestReduce(AT, CT, ynn_reduce_operator op, size_t n, size_t k3, size_t k2,
     if (c.base()) {
       int finite = 0;
       for (size_t i = 0; i < n; ++i) {
-        bool c_finite = std::isfinite(static_cast<float>(c(i)));
-        bool kernel_c_finite = std::isfinite(static_cast<float>(kernel_c(i)));
+        bool c_finite = std::isfinite(c(i));
+        bool kernel_c_finite = std::isfinite(kernel_c(i));
         if (c_finite && kernel_c_finite) {
           ASSERT_EQ(c(i), kernel_c(i))
               << "Mismatch between " << reference_kernel_name << " and "

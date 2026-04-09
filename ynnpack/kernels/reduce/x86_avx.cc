@@ -17,10 +17,45 @@ namespace ynn {
 
 using simd::f32x16;
 using simd::f32x8;
+using simd::f64x4;
 
 MIN_MAX_KERNEL(min_max_fp32_4x8_avx, f32x8, f32x8, float, 8);
 MIN_MAX_KERNEL(min_fp32_4x8_avx, f32x8, dummy_t, float, 8);
 MIN_MAX_KERNEL(max_fp32_4x8_avx, dummy_t, f32x8, float, 8);
+
+MIN_MAX_KERNEL(min_max_fp64_4x4_avx, f64x4, f64x4, double, 4);
+MIN_MAX_KERNEL(min_fp64_4x4_avx, f64x4, dummy_t, double, 4);
+MIN_MAX_KERNEL(max_fp64_4x4_avx, dummy_t, f64x4, double, 4);
+
+void sum_fp64_avx(size_t n, size_t k3, size_t k2, size_t k1, size_t a_stride_n,
+                  size_t a_stride_k3, size_t a_stride_k2, const void* a, size_t,
+                  void* c) {
+  if (k1 == 1 && a_stride_n == sizeof(double)) {
+    stream_reduce<sum_accumulator_k1_1<f64x4>, double, double>(
+        n, k3, k2, a_stride_k3, a_stride_k2, reinterpret_cast<const double*>(a),
+        /*C_stride_m=*/0, reinterpret_cast<double*>(c));
+  } else {
+    tiled_reduce<sum_accumulator_fp64<>, double, double>(
+        n, k3, k2, k1, a_stride_n, a_stride_k3, a_stride_k2,
+        reinterpret_cast<const double*>(a),
+        /*C_stride_m=*/0, reinterpret_cast<double*>(c));
+  }
+}
+
+void sum_squared_fp64_avx(size_t n, size_t k3, size_t k2, size_t k1,
+                          size_t a_stride_n, size_t a_stride_k3,
+                          size_t a_stride_k2, const void* a, size_t, void* c) {
+  if (k1 == 1 && a_stride_n == sizeof(double)) {
+    stream_reduce<sum_accumulator_k1_1<f64x4, Square>, double, double>(
+        n, k3, k2, a_stride_k3, a_stride_k2, reinterpret_cast<const double*>(a),
+        /*C_stride_m=*/0, reinterpret_cast<double*>(c));
+  } else {
+    tiled_reduce<sum_accumulator_fp64<1, Square>, double, double>(
+        n, k3, k2, k1, a_stride_n, a_stride_k3, a_stride_k2,
+        reinterpret_cast<const double*>(a), /*C_stride_m=*/0,
+        reinterpret_cast<double*>(c));
+  }
+}
 
 void sum_fp32_avx(size_t n, size_t k3, size_t k2, size_t k1, size_t a_stride_n,
                   size_t a_stride_k3, size_t a_stride_k2, const void* a, size_t,
