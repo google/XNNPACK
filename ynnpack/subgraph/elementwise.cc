@@ -165,12 +165,12 @@ auto make_dequantize_dot_impl(dequantize_dot_kernel_fn kernel,
     const slinky::dim& offset_n = offset.dim(0);
 
     // Slice buffers to match n
-    dot.slice(0, n.min());
-    a_offset.slice(0, n.min());
-    b_offset.slice(0, n.min());
-    offset.slice(0, n.min());
-    a_scale.slice(0, n.min());
-    b_scale.slice(0, n.min());
+    dot.slice(0, slinky::in_bounds{n.min()});
+    a_offset.slice(0);
+    b_offset.slice(0, slinky::in_bounds{n.min()});
+    offset.slice(0, slinky::in_bounds{n.min()});
+    a_scale.slice(0);
+    b_scale.slice(0, slinky::in_bounds{n.min()});
     output.slice(0);
 
     // Get the m dimension. rank 1 buffers are common, so try to optimize
@@ -185,12 +185,12 @@ auto make_dequantize_dot_impl(dequantize_dot_kernel_fn kernel,
       assert(is_broadcast(b_scale.dim(0)));
       assert(is_broadcast(offset.dim(0)));
 
-      dot.slice(0, m.min());
-      a_offset.slice(0, m.min());
-      b_offset.slice(0, m.min());
-      offset.slice(0, m.min());
-      a_scale.slice(0, m.min());
-      b_scale.slice(0, m.min());
+      dot.slice(0, slinky::in_bounds{m.min()});
+      a_offset.slice(0, slinky::in_bounds{m.min()});
+      b_offset.slice(0);
+      offset.slice(0);
+      a_scale.slice(0, slinky::in_bounds{m.min()});
+      b_scale.slice(0);
       output.slice(0);
     } else {
       assert(is_broadcast(dot.dim(0)));

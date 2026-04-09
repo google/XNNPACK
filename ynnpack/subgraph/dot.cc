@@ -187,22 +187,22 @@ auto make_dot_impl(dot_type type, bool consistent_arithmetic, bool transposed_a,
     for (size_t i = 0; i < a_k1_dim + num_k_dims; ++i) {
       a.slice(0);
     }
-    a.slice(0, c_m.min());
+    a.slice(0, slinky::in_bounds{c_m.min()});
     if (pack_b) {
       // If b is packed, we must slice b at blocks of n.
       b.slice({0, 1, 2});
-      b.slice(0, c_n.min() / block_n);
+      b.slice(0, slinky::in_bounds{c_n.min() / block_n});
     } else {
       // If b is not packed, we need to just slice it at n.
       b.slice(0);
-      b.slice(0, c_n.min());
+      b.slice(0, slinky::in_bounds{c_n.min()});
       b.slice({0, 1});
     }
     for (size_t i = 1; i < num_k_dims; ++i) {
       b.slice(0);
     }
-    init_c.slice(0, c_n.min());
-    init_c.slice(0, c_m.min());
+    init_c.slice(0, slinky::in_bounds{c_n.min()});
+    init_c.slice(0, slinky::in_bounds{c_m.min()});
     c.slice({0, 1});
     // TODO: At this point, we can probably fuse dimensions of c, a, b in the
     // hopes of making i bigger, which should improve performance in cases where

@@ -223,7 +223,7 @@ bool fuse_and_slice_leading_dim(int i, slinky::dim* x_dims,
                                    slinky::raw_buffer& in_buf) {
         if (in_buf.rank > 0) {
           in_dims[i] = slinky::fuse(in_dims[i], in_buf.dim(0));
-          in_buf.slice(0, x_min_i);
+          in_buf.slice(0, slinky::in_bounds{x_min_i});
         }
       },
       inputs...);
@@ -245,6 +245,8 @@ bool fuse_and_slice_leading_dim(int i, slinky::dim* x_dims,
 // inputs after the peeling, and the buffers themselves e.g. { &a_dims[0], a,
 // &b_dims[0], b, ... }. The dimensions must be pointers to arrays of size
 // `NumInnerDims`.
+//
+// This function assumes that all of the input buffers are in bounds.
 template <int NumInnerDims, typename... DimBufferPairs>
 void fuse_and_slice_leading_dims(slinky::dim* x_dims, slinky::raw_buffer& x,
                                  DimBufferPairs&&... inputs) {
@@ -264,7 +266,7 @@ void fuse_and_slice_leading_dims(slinky::dim* x_dims, slinky::raw_buffer& x,
         [i, x_min_i = x_dims[i].min()](slinky::dim* in_dims,
                                        slinky::raw_buffer& in_buf) {
           in_dims[i] = in_buf.dim(0);
-          in_buf.slice(0, x_min_i);
+          in_buf.slice(0, slinky::in_bounds{x_min_i});
         },
         inputs...);
     x.slice(0);

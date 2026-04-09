@@ -164,7 +164,7 @@ auto make_unary_reduce_impl(const ynn_node::reduce& op,
         }
         assert(!a_dim_i.is_folded(c_dim_i));
         assert(!c_dim_i.is_folded());
-        a.slice(i, c_dim_i.min());
+        a.slice(i, slinky::in_bounds{c_dim_i.min()});
         c.slice(i);
         ++sliced;
       }
