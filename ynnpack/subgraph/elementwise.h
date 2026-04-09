@@ -19,7 +19,7 @@ namespace ynn {
 
 void define_unary(ynn_subgraph& subgraph, ynn_node& node, uint32_t input_a_id,
                   uint32_t output_id, ynn_unary_operator op,
-                  unary_kernel_fn kernel);
+                  unary_kernel_fn kernel, const unary_params& params = {});
 void define_binary(ynn_subgraph& subgraph, ynn_node& node, uint32_t input_a_id,
                    uint32_t input_b_id, uint32_t output_id,
                    ynn_binary_operator op, binary_kernel_fn kernel);

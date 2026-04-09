@@ -20,6 +20,7 @@
 #include "ynnpack/kernels/binary/binary.h"
 #include "ynnpack/kernels/dequantize_dot/dequantize_dot.h"
 #include "ynnpack/kernels/ternary/ternary.h"
+#include "ynnpack/kernels/unary/unary.h"
 #include "ynnpack/subgraph/copy.h"
 #include "ynnpack/subgraph/dot.h"
 #include "ynnpack/subgraph/elementwise.h"
@@ -139,6 +140,47 @@ bool replace_uses(subgraph_analysis& analysis, ynn_subgraph& subgraph,
     }
     return true;
   }
+}
+
+// Rewrite divide(x, sqrt(y)) to multiply(x, reciprocal_square_root(y))
+bool rewrite_divide_sqrt(ynn_subgraph& subgraph, ynn_node& node,
+                         subgraph_analysis& analysis) {
+  if (!is_binary_node(node, ynn_binary_divide)) {
+    return false;
+  }
+
+  ynn_node* producer = analysis.producer_of(node.inputs[1]);
+  if (!producer || !is_unary_node(*producer, ynn_unary_square_root)) {
+    // The denominator of the divide is not a square root.
+    return false;
+  }
+
+  if (analysis.consumers[producer->outputs[0]].size() != 1 ||
+      subgraph.value(producer->outputs[0]).is_external_output()) {
+    // The square root is used by something else.
+    return false;
+  }
+
+  // This is x/sqrt(y).
+  const ynn_value& x = subgraph.value(node.inputs[0]);
+  const ynn_value& sqrt_y = subgraph.value(producer->outputs[0]);
+  const ynn_value& y = subgraph.value(producer->inputs[0]);
+  const ynn_value& output = subgraph.value(node.outputs[0]);
+
+  const ynn::unary_kernel_fn rsqrt_kernel = ynn::get_unary_kernel(
+      ynn_unary_reciprocal_square_root, y.type, sqrt_y.type);
+  const ynn::binary_kernel_fn multiply_kernel = ynn::get_binary_kernel(
+      ynn_binary_multiply, x.type, sqrt_y.type, output.type);
+
+  if (rsqrt_kernel != nullptr && multiply_kernel != nullptr) {
+    YNN_LOG_DEBUG() << "Rewriting x/sqrt(y) to x*rsqrt(y)";
+    ynn::define_unary(subgraph, *producer, y.id, sqrt_y.id,
+                      ynn_unary_reciprocal_square_root, rsqrt_kernel);
+    ynn::define_binary(subgraph, node, x.id, sqrt_y.id, output.id,
+                        ynn_binary_multiply, multiply_kernel);
+    return true;
+  }
+  return false;
 }
 
 // Rewrite add(multiply(a, b), c) to multiply_add(a, b, c)
@@ -947,6 +989,7 @@ ynn_status ynn_subgraph::fusion() {
 
       changed = changed || ynn::fold_unary_input(*this, node, analysis) ||
                 ynn::fold_unary_output(*this, node, analysis) ||
+                ynn::rewrite_divide_sqrt(*this, node, analysis) ||
                 ynn::rewrite_multiply_add(*this, node, analysis) ||
                 ynn::rewrite_multiply_multiply(*this, node, analysis) ||
                 ynn::rewrite_subtract_multiply(*this, node, analysis) ||

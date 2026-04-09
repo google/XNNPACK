@@ -48,6 +48,34 @@ TEST(fusion, multiply_add) {
               AllOf(IsTernary(ternary_op::multiply_add), HasInputCount(3)));
 }
 
+TEST(fusion, divide_sqrt) {
+  // rewrite x/sqrt(y) -> x*rsqrt(y)
+  const uint32_t x_id = 0;
+  const uint32_t y_id = 1;
+  const uint32_t out_id = 2;
+  SubgraphBuilder builder(3);
+  uint32_t sqrt_y_id = YNN_INVALID_VALUE_ID;
+  builder.AddInput(ynn_type_fp32, 2, x_id)
+      .AddInput(ynn_type_fp32, 2, y_id)
+      .AddOutput(ynn_type_fp32, 2, out_id)
+      .AddTensor(ynn_type_fp32, 2, sqrt_y_id);
+  builder.AddUnary(ynn_unary_square_root, y_id, sqrt_y_id)
+      .AddBinary(ynn_binary_divide, x_id, sqrt_y_id, out_id);
+
+  ynn_subgraph& subgraph = *builder.GetSubgraph();
+
+  subgraph.fusion();
+  subgraph.invalidate_dead_values();
+
+  ASSERT_THAT(subgraph, AllOf(HasValidNodeCount(2), HasValidValueCount(4)));
+  EXPECT_THAT(
+      ProducerOf(out_id, subgraph),
+      AllOf(IsBinary(ynn_binary_multiply), InputsInclude(x_id, sqrt_y_id)));
+  EXPECT_THAT(
+      ProducerOf(sqrt_y_id, subgraph),
+      AllOf(IsUnary(ynn_unary_reciprocal_square_root), InputsAre(y_id)));
+}
+
 TEST(fusion, negate_multiply) {
   // negate(mul(a, b)) -> subtract_multiply(0, a, b)
   const uint32_t a_id = 0;

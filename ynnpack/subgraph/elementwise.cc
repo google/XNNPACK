@@ -390,7 +390,7 @@ void infer_shape(ynn_node& node, ynn_subgraph& subgraph) {
 
 void define_unary(ynn_subgraph& subgraph, ynn_node& node, uint32_t input_a_id,
                   uint32_t output_id, ynn_unary_operator op,
-                  unary_kernel_fn kernel, unary_params params) {
+                  unary_kernel_fn kernel, const unary_params& params) {
   // Make the node.
   node.inputs = {input_a_id};
   node.outputs = {output_id};
