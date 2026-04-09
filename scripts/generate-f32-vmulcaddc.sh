@@ -30,6 +30,10 @@ tools/xngen src/f32-vmulcaddc/neon.c.in -D CHANNEL_TILE=8 -D ROW_TILE=2 -D FMA=0
 tools/xngen src/f32-vmulcaddc/neon.c.in -D CHANNEL_TILE=4 -D ROW_TILE=2 -D FMA=1 -o src/f32-vmulcaddc/gen/f32-vmulcaddc-c4-minmax-neonfma-2x.c &
 tools/xngen src/f32-vmulcaddc/neon.c.in -D CHANNEL_TILE=8 -D ROW_TILE=2 -D FMA=1 -o src/f32-vmulcaddc/gen/f32-vmulcaddc-c8-minmax-neonfma-2x.c &
 
+################################## RISC-V RVV #################################
+tools/xngen src/f32-vmulcaddc/rvv.c.in -D LMUL=4 -D ROW_TILE=2 -o src/f32-vmulcaddc/gen/f32-vmulcaddc-c4v-minmax-rvv-2x.c &
+tools/xngen src/f32-vmulcaddc/rvv.c.in -D LMUL=8 -D ROW_TILE=2 -o src/f32-vmulcaddc/gen/f32-vmulcaddc-c8v-minmax-rvv-2x.c &
+
 ################################### x86 SSE ###################################
 tools/xngen src/f32-vmulcaddc/sse.c.in -D CHANNEL_TILE=4 -D ROW_TILE=2 -o src/f32-vmulcaddc/gen/f32-vmulcaddc-c4-minmax-sse-2x.c &
 tools/xngen src/f32-vmulcaddc/sse.c.in -D CHANNEL_TILE=8 -D ROW_TILE=2 -o src/f32-vmulcaddc/gen/f32-vmulcaddc-c8-minmax-sse-2x.c &
