@@ -199,6 +199,12 @@ tools/xngen src/f32-vsigmoid/wasmsimd-rr2-lut64-p2-div.c.in -D BATCH_TILE=8  -D 
 tools/xngen src/f32-vsigmoid/wasmsimd-rr2-lut64-p2-div.c.in -D BATCH_TILE=12 -D RELAXED=1 -D FMA=1 -o src/f32-vsigmoid/gen/f32-vsigmoid-wasmrelaxedsimd-fma-rr2-lut64-p2-div-u12.c &
 tools/xngen src/f32-vsigmoid/wasmsimd-rr2-lut64-p2-div.c.in -D BATCH_TILE=16 -D RELAXED=1 -D FMA=1 -o src/f32-vsigmoid/gen/f32-vsigmoid-wasmrelaxedsimd-fma-rr2-lut64-p2-div-u16.c &
 
+################################### RISC-V Vector #############################
+tools/xngen src/f32-vsigmoid/rvv-rr2-p5-div.c.in -D LMUL=1 -o src/f32-vsigmoid/gen/f32-vsigmoid-rvv-rr2-p5-div-u1v.c &
+tools/xngen src/f32-vsigmoid/rvv-rr2-p5-div.c.in -D LMUL=2 -o src/f32-vsigmoid/gen/f32-vsigmoid-rvv-rr2-p5-div-u2v.c &
+tools/xngen src/f32-vsigmoid/rvv-rr2-p5-div.c.in -D LMUL=4 -o src/f32-vsigmoid/gen/f32-vsigmoid-rvv-rr2-p5-div-u4v.c &
+tools/xngen src/f32-vsigmoid/rvv-rr2-p5-div.c.in -D LMUL=8 -o src/f32-vsigmoid/gen/f32-vsigmoid-rvv-rr2-p5-div-u8v.c &
+
 ################################### Scalar ####################################
 tools/xngen src/f32-vsigmoid/scalar-rr2-lut2048-p1-div.c.in -D BATCH_TILE=1 -o src/f32-vsigmoid/gen/f32-vsigmoid-scalar-rr2-lut2048-p1-div-u1.c &
 tools/xngen src/f32-vsigmoid/scalar-rr2-lut2048-p1-div.c.in -D BATCH_TILE=2 -o src/f32-vsigmoid/gen/f32-vsigmoid-scalar-rr2-lut2048-p1-div-u2.c &
