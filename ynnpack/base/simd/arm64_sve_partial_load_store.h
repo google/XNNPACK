@@ -30,6 +30,9 @@ namespace internal {
 svbool_t mask_x32(uint32_t n) {
   return svwhilelt_b32(static_cast<uint32_t>(0), n);
 }
+svbool_t mask_x64(uint32_t n) {
+  return svwhilelt_b64(static_cast<uint32_t>(0), n);
+}
 svbool_t mask_x16(uint32_t n) {
   return svwhilelt_b16(static_cast<uint32_t>(0), n);
 }
@@ -38,6 +41,7 @@ svbool_t mask_x8(uint32_t n) {
 }
 
 svfloat32_t to_sve(float32x4_t x) { return svset_neonq(svundef_f32(), x); }
+svfloat64_t to_sve(float64x2_t x) { return svset_neonq(svundef_f64(), x); }
 svint32_t to_sve(int32x4_t x) { return svset_neonq(svundef_s32(), x); }
 svuint16_t to_sve(uint16x8_t x) { return svset_neonq(svundef_u16(), x); }
 svint16_t to_sve(int16x8_t x) { return svset_neonq(svundef_s16(), x); }
@@ -55,6 +59,9 @@ svuint8_t to_sve(uint8x8_t x) {
 
 YNN_ALWAYS_INLINE f32x4 load(const float* ptr, size_t n, zeros<4> src) {
   return f32x4{svget_neonq(svld1(internal::mask_x32(n), ptr))};
+}
+YNN_ALWAYS_INLINE f64x2 load(const double* ptr, size_t n, zeros<2> src) {
+  return f64x2{svget_neonq(svld1(internal::mask_x64(n), ptr))};
 }
 YNN_ALWAYS_INLINE s32x4 load(const int32_t* ptr, size_t n, zeros<4> src) {
   return s32x4{svget_neonq(svld1(internal::mask_x32(n), ptr))};
@@ -88,6 +95,10 @@ YNN_ALWAYS_INLINE u8x8 load(const uint8_t* ptr, size_t n, zeros<8> src) {
 YNN_ALWAYS_INLINE f32x4 load(const float* ptr, size_t n, f32x4 src) {
   svbool_t m = internal::mask_x32(n);
   return f32x4{svget_neonq(svsel(m, svld1(m, ptr), internal::to_sve(src.v)))};
+}
+YNN_ALWAYS_INLINE f64x2 load(const double* ptr, size_t n, f64x2 src) {
+  svbool_t m = internal::mask_x64(n);
+  return f64x2{svget_neonq(svsel(m, svld1(m, ptr), internal::to_sve(src.v)))};
 }
 YNN_ALWAYS_INLINE s32x4 load(const int32_t* ptr, size_t n, s32x4 src) {
   svbool_t m = internal::mask_x32(n);
@@ -133,6 +144,9 @@ YNN_ALWAYS_INLINE u8x8 load(const uint8_t* ptr, size_t n, u8x8 src) {
 YNN_ALWAYS_INLINE f32x4 load(const float* ptr, size_t n, undef<4>) {
   return load(ptr, n, zeros<4>{});
 }
+YNN_ALWAYS_INLINE f64x2 load(const double* ptr, size_t n, undef<2>) {
+  return load(ptr, n, zeros<2>{});
+}
 YNN_ALWAYS_INLINE s32x4 load(const int32_t* ptr, size_t n, undef<4>) {
   return load(ptr, n, zeros<4>{});
 }
@@ -161,6 +175,9 @@ YNN_ALWAYS_INLINE u8x8 load(const uint8_t* ptr, size_t n, undef<8>) {
 
 YNN_ALWAYS_INLINE void store(float* ptr, f32x4 value, size_t n) {
   svst1(internal::mask_x32(n), ptr, internal::to_sve(value.v));
+}
+YNN_ALWAYS_INLINE void store(double* ptr, f64x2 value, size_t n) {
+  svst1(internal::mask_x64(n), ptr, internal::to_sve(value.v));
 }
 YNN_ALWAYS_INLINE void store(int32_t* ptr, s32x4 value, size_t n) {
   svst1(internal::mask_x32(n), ptr, internal::to_sve(value.v));

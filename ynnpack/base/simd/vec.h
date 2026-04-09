@@ -257,6 +257,10 @@ inline float mul_no_overflow(float a, float b) {
   return a * b;
 }
 
+inline double add_no_overflow(double a, double b) { return a + b; }
+inline double sub_no_overflow(double a, double b) { return a - b; }
+inline double mul_no_overflow(double a, double b) { return a * b; }
+
 template <typename T>
 YNN_ALWAYS_INLINE vec<T, 1> operator+(vec<T, 1> a, vec<T, 1> b) {
   return vec<T, 1>{static_cast<T>(add_no_overflow(a.v, b.v))};
