@@ -20,6 +20,9 @@ extern "C" {
                     datatype_out, params_type, init_params)                    \
   XNN_INTERNAL void ukernel(size_t batch, const datatype_in* input,            \
                             datatype_out* output, const params_type* params);
+#include "src/bf16-rminmax/bf16-rmax.inc"
+#include "src/bf16-rminmax/bf16-rmin.inc"
+#include "src/bf16-rminmax/bf16-rminmax.inc"
 #include "src/f16-f32acc-rsum/f16-f32acc-rsum.inc"
 #include "src/f16-f32acc-rsum2/f16-f32acc-rsum2.inc"
 #include "src/f16-rminmax/f16-rmax.inc"

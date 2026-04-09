@@ -770,6 +770,10 @@ typedef void (*xnn_pad_ukernel_fn)(size_t rows, size_t channels,
 typedef void (*xnn_reduce_ukernel_fn)(size_t batch, const void* input,
                                       void* output, const void* params);
 
+typedef void (*xnn_bf16_reduce_ukernel_fn)(
+    size_t batch, const xnn_bfloat16* input, xnn_bfloat16* output,
+    const struct xnn_bf16_default_params* params);
+
 typedef void (*xnn_f16_reduce_ukernel_fn)(
     size_t batch, const xnn_float16* input, xnn_float16* output,
     const struct xnn_f16_default_params* params);
