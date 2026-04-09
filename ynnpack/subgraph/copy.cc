@@ -288,32 +288,56 @@ ynn_status ynn_define_static_broadcast(ynn_subgraph_t subgraph, size_t rank,
                                              "output_id", output_id));
   YNN_RETURN_IF_ERROR(validate_new_shape("static_broadcast", rank, new_dims));
 
+  ynn_node node;
+
+  // Propagate shape.
   const ynn_value& input = subgraph->value(input_id);
   ynn_node::static_broadcast op;
   op.new_dims.assign(new_dims, new_dims + rank);
   std::reverse(op.new_dims.begin(), op.new_dims.end());
+  std::vector<slinky::expr> output_extents = input.extents;
+  bool noop = true;
+  for (size_t d = 0; d < std::min(output_extents.size(), op.new_dims.size());
+       ++d) {
+    if (slinky::prove_true(output_extents[d] ==
+                           static_cast<slinky::index_t>(op.new_dims[d]))) {
+      // This dimension is a no-op.
+      op.new_dims[d] = 0;
+      continue;
+    }
 
-  ynn_node node;
-
-  // Propagate shape.
-  ynn_value& output = subgraph->get_output_value(output_id, input);
-  const std::vector<slinky::expr>& input_extents = input.extents;
-  output.extents.clear();
-  output.extents.resize(op.new_dims.size());
-  for (size_t d = 0; d < output.rank(); ++d) {
-    if (d < input.rank() && op.new_dims[d] == 0) {
-      output.extents[d] = input_extents[d];
-    } else {
-      output.extents[d] = static_cast<slinky::index_t>(op.new_dims[d]);
-      if (d < input.rank() && input_extents[d].defined()) {
+    const slinky::index_t new_dim_d = op.new_dims[d];
+    if (new_dim_d != 0) {
+      noop = false;
+      output_extents[d] = new_dim_d;
+      if (d < input.rank() && input.extents[d].defined()) {
         node.checks.push_back({
-            input_extents[d] == 1 || input_extents[d] == op.new_dims[d],
+            input.extents[d] == 1 || input.extents[d] == new_dim_d,
             {"invalid broadcast in dimension ", d, " of ",
              ynn_node::input_idx{0}},
         });
       }
     }
   }
+  for (size_t d = output_extents.size(); d < op.new_dims.size(); ++d) {
+    // This is a new trailing dimension.
+    output_extents.push_back(op.new_dims[d]);
+    noop = false;
+  }
+
+  if (noop && *output_id == YNN_INVALID_VALUE_ID) {
+    // This node is a no-op, skip it.
+    *output_id = input_id;
+    return ynn_status_success;
+  }
+
+  // Remove no-op trailing broadcasts.
+  while (!op.new_dims.empty() && op.new_dims.back() == 0) {
+    op.new_dims.pop_back();
+  }
+
+  ynn_value& output = subgraph->get_output_value(output_id, input);
+  output.extents = std::move(output_extents);
 
   node.inputs = {input_id};
   node.outputs = {*output_id};
