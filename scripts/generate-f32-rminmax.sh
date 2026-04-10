@@ -133,6 +133,13 @@ tools/xngen src/f32-rminmax/wasmsimd.c.in -D BATCH_TILE=12 -D ACCUMULATORS=3 -D 
 tools/xngen src/f32-rminmax/wasmsimd.c.in -D BATCH_TILE=16 -D ACCUMULATORS=2 -D OP=MINMAX -D MINMAX=PMINMAX -o src/f32-rminmax/gen/f32-rminmax-wasmsimd-pminmax-u16-acc2.c &
 tools/xngen src/f32-rminmax/wasmsimd.c.in -D BATCH_TILE=16 -D ACCUMULATORS=4 -D OP=MINMAX -D MINMAX=PMINMAX -o src/f32-rminmax/gen/f32-rminmax-wasmsimd-pminmax-u16-acc4.c &
 
+tools/xngen src/f32-rminmax/wasmsimd.c.in -D BATCH_TILE=4  -D ACCUMULATORS=1 -D OP=MINMAX -D MINMAX=RELAXED_MINMAX -o src/f32-rminmax/gen/f32-rminmax-wasmrelaxedsimd-minmax-u4.c &
+tools/xngen src/f32-rminmax/wasmsimd.c.in -D BATCH_TILE=8  -D ACCUMULATORS=2 -D OP=MINMAX -D MINMAX=RELAXED_MINMAX -o src/f32-rminmax/gen/f32-rminmax-wasmrelaxedsimd-minmax-u8-acc2.c &
+tools/xngen src/f32-rminmax/wasmsimd.c.in -D BATCH_TILE=12 -D ACCUMULATORS=3 -D OP=MINMAX -D MINMAX=RELAXED_MINMAX -o src/f32-rminmax/gen/f32-rminmax-wasmrelaxedsimd-minmax-u12-acc3.c &
+tools/xngen src/f32-rminmax/wasmsimd.c.in -D BATCH_TILE=16 -D ACCUMULATORS=2 -D OP=MINMAX -D MINMAX=RELAXED_MINMAX -o src/f32-rminmax/gen/f32-rminmax-wasmrelaxedsimd-minmax-u16-acc2.c &
+tools/xngen src/f32-rminmax/wasmsimd.c.in -D BATCH_TILE=16 -D ACCUMULATORS=4 -D OP=MINMAX -D MINMAX=RELAXED_MINMAX -o src/f32-rminmax/gen/f32-rminmax-wasmrelaxedsimd-minmax-u16-acc4.c &
+tools/xngen src/f32-rminmax/wasmsimd.c.in -D BATCH_TILE=32 -D ACCUMULATORS=4 -D OP=MINMAX -D MINMAX=RELAXED_MINMAX -o src/f32-rminmax/gen/f32-rminmax-wasmrelaxedsimd-minmax-u32-acc4.c &
+
 #################################### Scalar ###################################
 ### Generic C micro-kernels
 tools/xngen src/f32-rminmax/simd.c.in -D ARCH=scalar -D BATCH_TILE=1 -D DATATYPE=F32 -D ACCUMULATORS=1 -D OP=MINMAX -D WASM=0 -o src/f32-rminmax/gen/f32-rminmax-scalar-u1.c &
