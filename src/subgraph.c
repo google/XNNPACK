@@ -1823,6 +1823,9 @@ static uint32_t copy_value_to_static_subgraph(xnn_subgraph_t src_subgraph,
     dst_value->id = dst_id;
     dst_value->producer = XNN_INVALID_NODE_ID;
     dst_value->first_consumer = XNN_INVALID_NODE_ID;
+    // Clear the cleanup flag to avoid double-free: the source subgraph retains
+    // ownership of the data pointer.
+    dst_value->flags &= ~XNN_VALUE_FLAG_NEEDS_CLEANUP;
   }
   return dst_id;
 }
@@ -1842,7 +1845,7 @@ static struct xnn_node* copy_node_to_static_subgraph(
         src_subgraph, value, value_map, dst_subgraph);
     dst_node->inputs[i] = dst_id;
   }
-  for (size_t i = 0; i < src_node->num_inputs; i++) {
+  for (size_t i = 0; i < src_node->num_outputs; i++) {
     const struct xnn_value* value = &src_subgraph->values[src_node->outputs[i]];
     const uint32_t dst_id = copy_value_to_static_subgraph(
         src_subgraph, value, value_map, dst_subgraph);
