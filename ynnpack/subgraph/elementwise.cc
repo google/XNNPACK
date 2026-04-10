@@ -154,52 +154,34 @@ auto make_dequantize_dot_impl(dequantize_dot_kernel_fn kernel,
                           slinky::raw_buffer a_scale,
                           slinky::raw_buffer b_scale, slinky::raw_buffer offset,
                           slinky::raw_buffer output) -> slinky::index_t {
-    const slinky::dim& n = output.dim(0);
-    assert(is_contiguous(n, output.elem_size));
+    using slinky::in_bounds;
 
+    const slinky::dim& n = slice_dim0(output);
+
+    assert(is_contiguous(n, output.elem_size));
     assert(is_contiguous(dot.dim(0), dot.elem_size));
     assert(is_broadcast(a_offset.dim(0)));
-    const slinky::dim& b_offset_n = b_offset.dim(0);
-    assert(is_broadcast(a_scale.dim(0)));
-    const slinky::dim& b_scale_n = b_scale.dim(0);
-    const slinky::dim& offset_n = offset.dim(0);
 
-    // Slice buffers to match n
-    dot.slice(0, slinky::in_bounds{n.min()});
+    dot.slice(0, in_bounds{n.min()});
     a_offset.slice(0);
-    b_offset.slice(0, slinky::in_bounds{n.min()});
-    offset.slice(0, slinky::in_bounds{n.min()});
+    assert(is_broadcast(a_scale.dim(0)));
     a_scale.slice(0);
-    b_scale.slice(0, slinky::in_bounds{n.min()});
-    output.slice(0);
+    const slinky::dim& b_offset_n = slice_dim0(b_offset, in_bounds{n.min()});
+    const slinky::dim& b_scale_n = slice_dim0(b_scale, in_bounds{n.min()});
+    const slinky::dim& offset_n = slice_dim0(offset, in_bounds{n.min()});
 
     // Get the m dimension. rank 1 buffers are common, so try to optimize
     // for that case.
-    const slinky::dim& m = output.dim(0);
-    const slinky::dim& dot_m = dot.dim(0);
-    const slinky::dim& a_offset_m = a_offset.dim(0);
-    const slinky::dim& a_scale_m = a_scale.dim(0);
-
-    if (output.rank > 0) {
-      assert(is_broadcast(b_offset.dim(0)));
-      assert(is_broadcast(b_scale.dim(0)));
-      assert(is_broadcast(offset.dim(0)));
-
-      dot.slice(0, slinky::in_bounds{m.min()});
-      a_offset.slice(0, slinky::in_bounds{m.min()});
-      b_offset.slice(0);
-      offset.slice(0);
-      a_scale.slice(0, slinky::in_bounds{m.min()});
-      b_scale.slice(0);
-      output.slice(0);
-    } else {
-      assert(is_broadcast(dot.dim(0)));
-      assert(is_broadcast(a_offset.dim(0)));
-      assert(is_broadcast(b_offset.dim(0)));
-      assert(is_broadcast(offset.dim(0)));
-      assert(is_broadcast(a_scale.dim(0)));
-      assert(is_broadcast(b_scale.dim(0)));
-    }
+    assert(is_broadcast(b_offset.dim(0)));
+    assert(is_broadcast(b_scale.dim(0)));
+    assert(is_broadcast(offset.dim(0)));
+    const slinky::dim& m = slice_dim0(output);
+    const slinky::dim& dot_m = slice_dim0(dot, in_bounds{m.min()});
+    const slinky::dim& a_offset_m = slice_dim0(a_offset, in_bounds{m.min()});
+    const slinky::dim& a_scale_m = slice_dim0(a_scale, in_bounds{m.min()});
+    b_offset.slice(0);
+    offset.slice(0);
+    b_scale.slice(0);
 
     slinky::for_each_element(
         [&](void* output, const void* dot, const void* a_offset,

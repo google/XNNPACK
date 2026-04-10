@@ -192,6 +192,21 @@ YNN_ALWAYS_INLINE bool is_broadcast(const slinky::dim& dim) {
   return dim.extent() == 1 || dim.stride() == 0;
 }
 
+// Remove dimension 0 from the buffer and return a reference to it. This
+// function is only possible because slicing dimension 0 will not modify the
+// dims array.
+YNN_ALWAYS_INLINE const slinky::dim& slice_dim0(slinky::raw_buffer& buffer) {
+  const slinky::dim& dim0 = buffer.dim(0);
+  buffer.slice(0);
+  return dim0;
+}
+YNN_ALWAYS_INLINE const slinky::dim& slice_dim0(slinky::raw_buffer& buffer,
+                                                slinky::in_bounds at) {
+  const slinky::dim& dim0 = buffer.dim(0);
+  buffer.slice(0, at);
+  return dim0;
+}
+
 namespace internal {
 
 // Try to fuse the next dimension of `x` and `inputs` into the `i`-th dimension
@@ -218,16 +233,18 @@ bool fuse_and_slice_leading_dim(int i, slinky::dim* x_dims,
 
   // Fuse the dimensions and slice.
   x_dims[i] = slinky::fuse(x_dims[i], x_dim_0);
+  --x.rank;
+  ++x.dims;
   apply_to_pairs(
       [i, x_min_i = x_dim_0.min()](slinky::dim* in_dims,
                                    slinky::raw_buffer& in_buf) {
         if (in_buf.rank > 0) {
-          in_dims[i] = slinky::fuse(in_dims[i], in_buf.dim(0));
-          in_buf.slice(0, slinky::in_bounds{x_min_i});
+          const slinky::dim& in_dim_0 =
+              slice_dim0(in_buf, slinky::in_bounds{x_min_i});
+          in_dims[i] = slinky::fuse(in_dims[i], in_dim_0);
         }
       },
       inputs...);
-  x.slice(0);
   return true;
 }
 
@@ -256,7 +273,7 @@ void fuse_and_slice_leading_dims(slinky::dim* x_dims, slinky::raw_buffer& x,
     // For now, we add an assert to catch this case if it does.
     assert(i != 0 || is_contiguous(x.dim(0), x.elem_size));
 
-    x_dims[i] = x.dim(0);
+    x_dims[i] = slice_dim0(x);
 
     // Initialize `in_dims[i]` for each input.
     // `x` is already a view to the correct tile in the larger output buffer.
@@ -265,11 +282,9 @@ void fuse_and_slice_leading_dims(slinky::dim* x_dims, slinky::raw_buffer& x,
     internal::apply_to_pairs(
         [i, x_min_i = x_dims[i].min()](slinky::dim* in_dims,
                                        slinky::raw_buffer& in_buf) {
-          in_dims[i] = in_buf.dim(0);
-          in_buf.slice(0, slinky::in_bounds{x_min_i});
+          in_dims[i] = slice_dim0(in_buf, slinky::in_bounds{x_min_i});
         },
         inputs...);
-    x.slice(0);
 
     // Try to fuse more dimensions into this new dimension. This is separated
     // into a helper function with the hope that maybe this outer function might
