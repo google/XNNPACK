@@ -52,6 +52,7 @@ static enum xnn_status check_zero_point(
   int32_t zero_point)
 {
   switch (datatype) {
+    case xnn_datatype_qint4:
     case xnn_datatype_qcint4:
     case xnn_datatype_qbint4:
       if (zero_point < 0 || zero_point > 15) {

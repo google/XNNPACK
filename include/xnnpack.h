@@ -309,6 +309,9 @@ enum xnn_datatype {
   /// Quantized 2-bit signed integer with shared per-channel quantization
   /// parameters, but packed into 8-bit integers.
   xnn_datatype_qcint2 = 18,
+  /// Quantized 4-bit signed integer with shared per-Value quantization
+  /// parameters.
+  xnn_datatype_qint4 = 19,
 };
 
 /// Define a tensor-type Value and add it to a Subgraph.
