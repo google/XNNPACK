@@ -3779,7 +3779,7 @@ static enum xnn_status optimize_common_subgraphs_iter(
         // is static.
         if (xnn_shape_multiply_all_dims(
                 &node->params.static_reshape.new_shape) != 0) {
-          xnn_log_info(
+          xnn_log_debug(
               "Marking output of static_reshape[#%u](v%03u) as static shaped.",
               node->id, node->inputs[0]);
           subgraph->values[node->outputs[0]].shape =
@@ -3848,7 +3848,7 @@ enum xnn_status xnn_subgraph_optimize_common_subgraphs(
       if (xnn_shape_multiply_all_dims(&value->shape) == 1) {
         // Get the value as a float.
         const float value_as_float = get_scalar_value_as_float(value);
-        xnn_log_info("v%03u is a constant: %e.", value->id, value_as_float);
+        xnn_log_debug("v%03u is a constant: %e.", value->id, value_as_float);
 
         // Mark the value accordingly.
         value->flags |= (value_as_float == 0.0f)   ? XNN_VALUE_FLAG_IS_ZERO
