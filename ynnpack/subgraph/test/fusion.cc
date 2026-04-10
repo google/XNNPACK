@@ -123,9 +123,9 @@ TEST(fusion, multiply_multiply) {
   subgraph.invalidate_dead_values();
 
   ASSERT_THAT(subgraph, AllOf(HasValidNodeCount(1), HasValidValueCount(4)));
-  EXPECT_THAT(ProducerOf(x_id, subgraph),
-              AllOf(IsTernary(ternary_op::multiply),
-                    InputsInclude(a_id, b_id, c_id)));
+  EXPECT_THAT(
+      ProducerOf(x_id, subgraph),
+      AllOf(IsTernary(ternary_op::multiply), InputsInclude(a_id, b_id, c_id)));
 }
 
 TEST(fusion, exp_multiplier) {
@@ -351,6 +351,47 @@ TEST(fusion, broadcast_of_static) {
   subgraph.invalidate_dead_values();
 
   ASSERT_THAT(subgraph, AllOf(HasValidNodeCount(1), HasValidValueCount(3)));
+}
+
+TEST(fusion, convert_broadcast_add) {
+  // rewrite add(convert(broadcast_like(x, y)), y) ->
+  // add(broadcast_like(convert(x), y), y)
+  const uint32_t x_id = 0;
+  const uint32_t y_id = 1;
+  const uint32_t out_id = 2;
+  SubgraphBuilder builder(3);
+  uint32_t broadcast_x_id = YNN_INVALID_VALUE_ID;
+  uint32_t converted_broadcast_x_id = YNN_INVALID_VALUE_ID;
+
+  builder.AddInput(ynn_type_fp16, {1, 10}, x_id)
+      .AddInput(ynn_type_fp32, {5, 10}, y_id)
+      .AddOutput(ynn_type_fp32, {5, 10}, out_id)
+      .AddTensor(ynn_type_fp16, {5, 10}, broadcast_x_id)
+      .AddTensor(ynn_type_fp32, {5, 10}, converted_broadcast_x_id);
+
+  builder.AddBroadcastLike({0}, x_id, y_id, broadcast_x_id)
+      .AddUnary(ynn_unary_convert, broadcast_x_id, converted_broadcast_x_id)
+      .AddBinary(ynn_binary_add, converted_broadcast_x_id, y_id, out_id);
+
+  ynn_subgraph& subgraph = *builder.GetSubgraph();
+
+  subgraph.fusion();
+  subgraph.invalidate_dead_values();
+
+  // The graph should now have:
+  // x_id -> convert -> converted_x_id
+  // converted_x_id -> add (with y_id) -> out_id
+  // (broadcast_like was moved past convert and then removed as it is
+  // redundant for add).
+
+  const ynn_node& add_node = ProducerOf(out_id, subgraph);
+  EXPECT_THAT(add_node, IsBinary(ynn_binary_add));
+  uint32_t convert_out_id =
+      add_node.inputs[0] == y_id ? add_node.inputs[1] : add_node.inputs[0];
+
+  const ynn_node& convert_node = ProducerOf(convert_out_id, subgraph);
+  EXPECT_THAT(convert_node, IsUnary(ynn_unary_convert));
+  EXPECT_EQ(convert_node.inputs[0], x_id);
 }
 
 TEST(fusion, transpose_stencil_copy) {

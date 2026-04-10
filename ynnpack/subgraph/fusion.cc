@@ -29,6 +29,7 @@
 #include "ynnpack/subgraph/reduce.h"
 #include "ynnpack/subgraph/stencil_copy.h"
 #include "ynnpack/subgraph/subgraph.h"
+#include "slinky/runtime/expr.h"
 
 namespace ynn {
 
@@ -177,7 +178,7 @@ bool rewrite_divide_sqrt(ynn_subgraph& subgraph, ynn_node& node,
     ynn::define_unary(subgraph, *producer, y.id, sqrt_y.id,
                       ynn_unary_reciprocal_square_root, rsqrt_kernel);
     ynn::define_binary(subgraph, node, x.id, sqrt_y.id, output.id,
-                        ynn_binary_multiply, multiply_kernel);
+                       ynn_binary_multiply, multiply_kernel);
     return true;
   }
   return false;
@@ -233,8 +234,8 @@ bool rewrite_multiply_multiply(ynn_subgraph& subgraph, ynn_node& node,
           ynn::ternary_op::multiply, a.type, b.type, c.type, x.type);
       if (kernel != nullptr) {
         // Yes we do. Rewrite this to a multiply-add.
-        YNN_LOG_DEBUG() <<
-            "Rewriting multiply and multiply to ternary multiply";
+        YNN_LOG_DEBUG()
+            << "Rewriting multiply and multiply to ternary multiply";
         ynn::define_ternary(subgraph, node, a.id, b.id, c.id, x.id,
                             ynn::ternary_op::multiply, kernel);
         return true;
@@ -342,6 +343,123 @@ bool can_implicitly_broadcast(const ynn_node& node, uint32_t input_id) {
     return true;
   }
   return false;
+}
+
+// Returns true if a broadcast of `input_id` in `axes` is a no-op for `node`.
+bool is_broadcast_noop(const ynn_subgraph& subgraph, const ynn_node& node,
+                       uint32_t input_id, axes_set axes) {
+  if (std::holds_alternative<ynn_node::unary_elementwise>(node.op) ||
+      std::holds_alternative<ynn_node::binary_elementwise>(node.op) ||
+      std::holds_alternative<ynn_node::ternary_elementwise>(node.op) ||
+      std::holds_alternative<ynn_node::dequantize_dot>(node.op)) {
+    // A broadcast is a no-op the other inputs in the broadcasted dimension are
+    // broadcasts.
+    for (size_t d = 0; d < axes.size(); ++d) {
+      if (!axes[d]) continue;
+      for (uint32_t i : node.inputs) {
+        if (i == input_id) continue;
+        const ynn_value& input = subgraph.value(i);
+        if (!slinky::is_one(input.extent(d))) {
+          return false;
+        }
+      }
+    }
+    return true;
+  } else if (std::holds_alternative<ynn_node::lut>(node.op) &&
+             input_id == node.inputs[0]) {
+    return true;
+  } else if (const auto* t =
+                 std::get_if<ynn_node::static_transpose>(&node.op)) {
+    assert(input_id == node.inputs[0]);
+    for (size_t i = 0; i < axes.size(); ++i) {
+      if (!axes[i]) continue;
+      if (i < t->permutation.size() && t->permutation[i] != i) {
+        // This transpose changes a dimension we broadcast, not a no-op.
+        // We could do better here, if we understood that we should change the
+        // dimensions that are broadcasted.
+        return false;
+      }
+    }
+    return true;
+  }
+  // We can handle more ops here, especially if we allow changing which
+  // dimensions are broadcasted.
+  return false;
+}
+
+// Get the axes that `node` broadcasts, if any.
+ynn::axes_set get_broadcast_axes(const ynn_node& node) {
+  if (const auto* broadcast =
+          std::get_if<ynn_node::static_broadcast>(&node.op)) {
+    ynn::axes_set axes;
+    assert(broadcast->new_dims.size() <= axes.size());
+    for (size_t i = 0; i < broadcast->new_dims.size(); ++i) {
+      if (broadcast->new_dims[i] != 0) {
+        axes[i] = true;
+      }
+    }
+    return axes;
+  } else if (const auto* broadcast_like =
+                 std::get_if<ynn_node::broadcast_like>(&node.op)) {
+    return broadcast_like->axes;
+  }
+  // We don't handle broadcast here because it doesn't actually broadcast the
+  // data, so it's harmless.
+  return ynn::axes_set{};
+}
+
+// Rewrite f(broadcast(x)) -> broadcast(f(x)) when possible.
+bool move_broadcast_to_output(ynn_subgraph& subgraph, ynn_node& broadcast,
+                              subgraph_analysis& analysis) {
+  const ynn::axes_set axes = get_broadcast_axes(broadcast);
+  if (!axes.any()) return false;
+
+  const ynn_value& input = subgraph.value(broadcast.inputs[0]);
+  uint32_t broadcast_id = broadcast.outputs[0];
+
+  ynn_node* consumer = analysis.single_consumer_of(broadcast_id);
+  if (!consumer) return false;
+
+  // Currently we don't handle any ops with more than one output.
+  if (consumer->outputs.size() != 1) return false;
+
+  if (!is_broadcast_noop(subgraph, *consumer, broadcast_id, axes)) {
+    // This consumer needs this broadcast.
+    return false;
+  }
+
+  uint32_t output_id = consumer->outputs[0];
+  if (output_id != YNN_INVALID_VALUE_ID &&
+      subgraph.value(output_id).is_external_output()) {
+    // This consumer produces an external output, we can't move the
+    // broadcast past it.
+    YNN_LOG_WARNING() << "Performance warning: node producing external output "
+                      << output_id << " consumes an unnecessary broadcast.";
+    return false;
+  }
+
+  // Currently we have consumer(broadcast(x)), we want broadcast(consumer(x)).
+  for (uint32_t& input_id : consumer->inputs) {
+    if (input_id == broadcast_id) {
+      // Consume the broadcast input instead.
+      input_id = broadcast.inputs[0];
+    }
+  }
+
+  ynn_value& broadcast_output = subgraph.value(broadcast.outputs[0]);
+  const ynn_value& consumer_output = subgraph.value(consumer->outputs[0]);
+  broadcast_output.type = consumer_output.type;
+  broadcast_output.zero_point_id = consumer_output.zero_point_id;
+  broadcast_output.scale_id = consumer_output.scale_id;
+  broadcast_output.extents = input.extents;
+
+  broadcast.inputs[0] = broadcast.outputs[0];
+  std::swap(consumer->outputs[0], broadcast.outputs[0]);
+
+  // Maintain topological order
+  std::swap(broadcast, *consumer);
+
+  return true;
 }
 
 template <typename BroadcastOp>
@@ -589,7 +707,7 @@ bool rewrite_reduce_sum_of_squared(ynn_subgraph& subgraph, ynn_node& node,
     ynn_node* copy = analysis.consumers[mul_output_id].front();
     assert(copy);
     assert(analysis.consumers[copy->outputs[0]].size() == 1 &&
-        !subgraph.value(copy->outputs[0]).is_external_output());
+           !subgraph.value(copy->outputs[0]).is_external_output());
     copy->inputs[0] = mul_node->inputs[0];
   } else {
     // The reduce is consuming the multiply, just consume x instead.
@@ -890,7 +1008,7 @@ bool rewrite_dequantize_dot_add(ynn_subgraph& subgraph, ynn_node& node,
 
 // Rewrite f(x * C) to fold the arithmetic into the params.
 bool fold_unary_input(ynn_subgraph& subgraph, ynn_node& node,
-                              subgraph_analysis& analysis) {
+                      subgraph_analysis& analysis) {
   ynn_node::unary_elementwise* unary =
       std::get_if<ynn_node::unary_elementwise>(&node.op);
   if (unary == nullptr) {
@@ -928,7 +1046,7 @@ bool fold_unary_input(ynn_subgraph& subgraph, ynn_node& node,
 
 // Rewrite f(x) * A + B to fold the arithmetic into the params
 bool fold_unary_output(ynn_subgraph& subgraph, ynn_node& node,
-                        subgraph_analysis& analysis) {
+                       subgraph_analysis& analysis) {
   auto scalar_arithmetic = is_scalar_arithmetic(subgraph, node);
   if (!scalar_arithmetic) return false;
 
@@ -997,6 +1115,7 @@ ynn_status ynn_subgraph::fusion() {
                 ynn::rewrite_dequantize_dot_add(*this, node, analysis) ||
                 ynn::rewrite_get_tensor_shape_of_unary(*this, node, analysis) ||
                 ynn::rewrite_clamp(*this, node, analysis) ||
+                ynn::move_broadcast_to_output(*this, node, analysis) ||
                 ynn::remove_broadcast(*this, node, analysis) ||
                 ynn::rewrite_transpose_stencil_copy(*this, node, analysis) ||
                 ynn::rewrite_reduce_sum_of_squared(*this, node, analysis) ||

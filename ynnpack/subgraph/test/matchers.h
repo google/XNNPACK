@@ -201,6 +201,14 @@ MATCHER(IsRescaleDot, "") {
 //   EXPECT_THAT(ProducerOf(y_id, subgraph), IsDot());
 MATCHER(IsDot, "") { return std::holds_alternative<ynn_node::dot>(arg.op); }
 
+// Checks that the given node is a broadcast_like.
+//
+// Example:
+//   EXPECT_THAT(ProducerOf(y_id, subgraph), IsBroadcastLike());
+MATCHER(IsBroadcastLike, "") {
+  return std::holds_alternative<ynn_node::broadcast_like>(arg.op);
+}
+
 // Checks that the given value ID is valid in the given subgraph.
 //
 // Example:
