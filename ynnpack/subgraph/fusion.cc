@@ -428,16 +428,6 @@ bool move_broadcast_to_output(ynn_subgraph& subgraph, ynn_node& broadcast,
     return false;
   }
 
-  uint32_t output_id = consumer->outputs[0];
-  if (output_id != YNN_INVALID_VALUE_ID &&
-      subgraph.value(output_id).is_external_output()) {
-    // This consumer produces an external output, we can't move the
-    // broadcast past it.
-    YNN_LOG_WARNING() << "Performance warning: node producing external output "
-                      << output_id << " consumes an unnecessary broadcast.";
-    return false;
-  }
-
   // Currently we have consumer(broadcast(x)), we want broadcast(consumer(x)).
   for (uint32_t& input_id : consumer->inputs) {
     if (input_id == broadcast_id) {

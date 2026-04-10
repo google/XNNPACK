@@ -172,6 +172,9 @@ class SubgraphBuilder {
   SubgraphBuilder& AddBroadcast(const std::vector<int32_t>& axes,
                                 uint32_t input_id, uint32_t output_id);
 
+  SubgraphBuilder& AddStaticBroadcast(const std::vector<size_t>& shape,
+                                      uint32_t input_id, uint32_t output_id);
+
   SubgraphBuilder& AddStencilCopy(const std::vector<int32_t>& stencil_axes,
                                   const std::vector<int32_t>& new_axes,
                                   const std::vector<size_t>& stencil_dims,

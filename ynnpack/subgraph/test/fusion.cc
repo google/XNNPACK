@@ -353,7 +353,30 @@ TEST(fusion, broadcast_of_static) {
   ASSERT_THAT(subgraph, AllOf(HasValidNodeCount(1), HasValidValueCount(3)));
 }
 
-TEST(fusion, convert_broadcast_add) {
+TEST(fusion, convert_broadcast_unary) {
+  // rewrite abs(static_broadcast(x)) -> static_broadcast(abs(x))
+  const uint32_t x_id = 0;
+  const uint32_t out_id = 1;
+  SubgraphBuilder builder(2);
+  uint32_t broadcast_x_id = YNN_INVALID_VALUE_ID;
+
+  builder.AddInput(ynn_type_fp32, 2, x_id)
+      .AddOutput(ynn_type_fp32, 2, out_id)
+      .AddTensor(ynn_type_fp32, 2, broadcast_x_id);
+
+  builder.AddStaticBroadcast({10, 0}, x_id, broadcast_x_id)
+      .AddUnary(ynn_unary_abs, broadcast_x_id, out_id);
+
+  ynn_subgraph& subgraph = *builder.GetSubgraph();
+
+  subgraph.fusion();
+  subgraph.invalidate_dead_values();
+
+  EXPECT_THAT(ProducerOf(out_id, subgraph),
+              AllOf(IsStaticBroadcast(), InputsAre(broadcast_x_id)));
+}
+
+TEST(fusion, convert_broadcast_binary) {
   // rewrite add(convert(broadcast_like(x, y)), y) ->
   // add(broadcast_like(convert(x), y), y)
   const uint32_t x_id = 0;

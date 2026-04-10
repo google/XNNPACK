@@ -208,6 +208,9 @@ MATCHER(IsDot, "") { return std::holds_alternative<ynn_node::dot>(arg.op); }
 MATCHER(IsBroadcastLike, "") {
   return std::holds_alternative<ynn_node::broadcast_like>(arg.op);
 }
+MATCHER(IsStaticBroadcast, "") {
+  return std::holds_alternative<ynn_node::static_broadcast>(arg.op);
+}
 
 // Checks that the given value ID is valid in the given subgraph.
 //
