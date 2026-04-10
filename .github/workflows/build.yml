@@ -375,7 +375,11 @@ jobs:
           ]
           EOF
       - name: Sync to commit and run hooks
-        run: gclient sync --reset --force --upstream --no-history --revision $GITHUB_SHA
+        run: gclient sync --reset --force --upstream --revision $GITHUB_SHA
+      - name: Check GN formatting
+        run: |
+          git cl format --presubmit --no-clang-format --no-python --diff
+        working-directory: ${{ github.workspace }}/xnnpack
       - name: Generate build files
         run: |
           gn gen --check --args="is_debug=false clang_use_chrome_plugins=false dcheck_always_on=true cc_wrapper=\"ccache\" symbol_level=0 xnnpack_enable_avx512=false target_cpu=\"x64\" use_siso=true" out/x64.dchecks
