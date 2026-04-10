@@ -2511,7 +2511,7 @@ void GemmMicrokernelTester::Test(xnn_qd8_f32_qb4w_gemm_ukernel_fn gemm,
 
 void GemmMicrokernelTester::Test(
     xnn_qp8_f32_qc4w_gemm_minmax_ukernel_fn gemm,
-    xnn_init_f32_minmax_params_fn init_minmax_params,
+    xnn_init_f32_qc4w_minmax_params_fn init_minmax_params,
     xnn_pack_weights_and_biases_fn pack,
     xnn_packed_stride_weights_and_biases_fn packed_stride) {
   ASSERT_LE(m(), mr());
@@ -2605,8 +2605,8 @@ void GemmMicrokernelTester::Test(
   }
 
   // Prepare parameters.
-  xnn_f32_minmax_params minmax_params;
-  init_minmax_params(&minmax_params, min(), max());
+  xnn_f32_qc4w_minmax_params minmax_params;
+  init_minmax_params(&minmax_params, min(), max(), 0);
 
   for (size_t m_index = 0; m_index < m(); m_index++) {
     for (size_t n_index = 0; n_index < n(); n_index++) {
