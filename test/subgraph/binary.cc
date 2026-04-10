@@ -373,7 +373,13 @@ const xnn_binary_operator all_real_ops[] = {
 };
 // clang-format on
 
+#ifndef XNNPACK_USE_YNNPACK
 auto all_ranks = testing::Range(0, XNN_MAX_TENSOR_DIMS);
+#else
+// TODO(b/501469601): Avoid excessive slow testing in YNNPACK. YNNPACK does not
+// have any special case code for rank >= 2 anyways.
+auto all_ranks = testing::Range(0, 3);
+#endif
 
 INSTANTIATE_TEST_SUITE_P(BinaryTest, IntegerOps,
                          testing::ConvertGenerator<Param::TupleT>(

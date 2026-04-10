@@ -132,6 +132,7 @@ NO_YNNPACK = [
     tags = ["no_ynnpack"] if operator in NO_YNNPACK else [],
     deps = SUBGRAPH_TEST_DEPS + ["//:subgraph"],
 ) for operator in [
+    "binary",
     "broadcast",
     "concatenate",
     "copy",
@@ -148,17 +149,6 @@ NO_YNNPACK = [
     "static_resize_bilinear_2d",
     "static_slice",
 ]]
-
-xnnpack_unit_test(
-    name = "binary_test",
-    timeout = "moderate",
-    srcs = ["binary.cc"],
-    defines = select({
-        "//ynnpack/xnnpack:use_ynnpack": ["XNNPACK_USE_YNNPACK"],
-        "//conditions:default": [],
-    }),
-    deps = SUBGRAPH_TEST_DEPS,
-)
 
 xnnpack_unit_test(
     name = "workspace_test",
