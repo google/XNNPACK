@@ -994,11 +994,35 @@ YNN_ALWAYS_INLINE f32x16 cast(bf16x16 a, float) {
       _mm512_cvtepu16_epi32(a.v), 16))};
 }
 
-#ifdef YNN_ARCH_X86_AVX512BF16
 YNN_ALWAYS_INLINE bf16x32 cast(f32x32 a, bfloat16) {
+#ifdef YNN_ARCH_X86_AVX512BF16
   return bf16x32{(__m512i)_mm512_cvtne2ps_pbh(a.hi().v, a.lo().v)};
-}
+#else
+  const __m512 rounding_multiplier =
+      _mm512_set1_ps(bfloat16::rounding_multiplier);
+  const __m512 b1 = _mm512_mul_ps(a.lo().v, rounding_multiplier);
+  const __m512 b2 = _mm512_mul_ps(a.hi().v, rounding_multiplier);
+  const __m512i c1 = _mm512_srli_epi32(_mm512_castps_si512(b1), 16);
+  const __m512i c2 = _mm512_srli_epi32(_mm512_castps_si512(b2), 16);
+  const __m512i d = _mm512_packus_epi32(c1, c2);
+  const __m512i permutation =
+      _mm512_set_epi32(15, 14, 11, 10, 7, 6, 3, 2, 13, 12, 9, 8, 5, 4, 1, 0);
+  return bf16x32{_mm512_permutevar_epi32(permutation, d)};
 #endif
+}
+YNN_ALWAYS_INLINE bf16x16 cast(f32x16 a, bfloat16) {
+#ifdef YNN_ARCH_X86_AVX512BF16
+  return bf16x16{
+      (__m256i)_mm256_cvtne2ps_pbh(internal::hi(a.v), internal::lo(a.v))};
+#else
+  const __m512 rounding_multiplier =
+      _mm512_set1_ps(bfloat16::rounding_multiplier);
+  const __m512 b = _mm512_mul_ps(a.v, rounding_multiplier);
+  const __m512i c = _mm512_srli_epi32(_mm512_castps_si512(b), 16);
+  const __m256i d = _mm256_packus_epi32(internal::lo(c), internal::hi(c));
+  return bf16x16{_mm256_permute4x64_epi64(d, _MM_SHUFFLE(3, 1, 2, 0))};
+#endif
+}
 
 YNN_ALWAYS_INLINE s32x16 cast(s8x16 a, int32_t) {
   return s32x16{_mm512_cvtepi8_epi32(a.v)};

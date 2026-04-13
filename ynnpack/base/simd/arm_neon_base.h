@@ -957,6 +957,21 @@ YNN_ALWAYS_INLINE f32x8 cast(bf16x8 a, float) {
   };
 }
 
+YNN_ALWAYS_INLINE bf16x8 cast(f32x8 a, bfloat16) {
+#ifdef YNN_ARCH_ARM_NEONBF16
+  return bf16x8{vreinterpretq_u16_bf16(
+      vcombine_bf16(vcvt_bf16_f32(a.lo().v), vcvt_bf16_f32(a.hi().v)))};
+#else
+  const float32x4_t rounding_multiplier =
+      vdupq_n_f32(bfloat16::rounding_multiplier);
+  float32x4_t b1 = vmulq_f32(a.lo().v, rounding_multiplier);
+  float32x4_t b2 = vmulq_f32(a.hi().v, rounding_multiplier);
+  uint16x4_t c1 = vshrn_n_u32(vreinterpretq_u32_f32(b1), 16);
+  uint16x4_t c2 = vshrn_n_u32(vreinterpretq_u32_f32(b2), 16);
+  return bf16x8{vcombine_u16(c1, c2)};
+#endif
+}
+
 YNN_ALWAYS_INLINE s16x16 cast(s8x16 b, int16_t) {
   return {
       s16x8{vmovl_s8(vget_low_s8(b.v))},

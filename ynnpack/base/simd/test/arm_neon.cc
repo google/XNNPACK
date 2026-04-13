@@ -161,6 +161,7 @@ TEST_CAST(arm_neon, s32, s16x8);
 TEST_CAST(arm_neon, f32, s32x4);
 TEST_CAST(arm_neon, s32, f32x4);
 TEST_CAST(arm_neon, f32, bf16x8);
+TEST_CAST(arm_neon, bf16, f32x8);
 
 TEST_SATURATE_CAST(arm_neon, s16, s32x8);
 TEST_SATURATE_CAST(arm_neon, u8, s16x16);
