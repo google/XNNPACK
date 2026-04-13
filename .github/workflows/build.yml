@@ -162,7 +162,7 @@ jobs:
         run: ccache -s
 
   cmake-windows-arm64:
-    runs-on: windows-2022-32core
+    runs-on: windows-2022-8core
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v6
@@ -190,7 +190,7 @@ jobs:
         shell: bash
 
   cmake-windows-x64:
-    runs-on: windows-2022-32core
+    runs-on: windows-2022-8core
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v6
@@ -222,7 +222,7 @@ jobs:
         shell: bash
 
   cmake-windows-x86:
-    runs-on: windows-2022-32core
+    runs-on: windows-2022-8core
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v6
