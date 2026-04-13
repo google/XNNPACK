@@ -1535,6 +1535,28 @@ BENCHMARK_BGEMM(f32_ppmm_4x2_twopass__scalar)
 BENCHMARK_BGEMM(f32_ppmm_4x4_twopass__scalar)
 BENCHMARK_BGEMM(f32_ppmm_3x3_twopass__scalar)
 
+#if XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+static void f32_ppmm_4x4v_unipass__rvv(benchmark::State& state) {
+  f32_ppmm1p(state, xnn_x32_packw_gemm_goi_ukernel_x4__scalar_float_u4,
+             xnn_x32_packx_ukernel_4x__scalar,
+             xnn_f32_ppmm_minmax_ukernel_4x4v__rvv,
+             xnn_init_f32_minmax_scalar_params,
+             /*mr=*/4, /*nr=*/4 * xnn_init_hardware_config()->vlenb / sizeof(float),
+             /*kr=*/1, /*sr=*/1);
+}
+static void f32_ppmm_4x4v_twopass__rvv(benchmark::State& state) {
+  f32_ppmm2p(state, xnn_x32_packw_gemm_goi_ukernel_x4__scalar_float_u4,
+             xnn_x32_packx_ukernel_4x__scalar,
+             xnn_f32_ppmm_minmax_ukernel_4x4v__rvv,
+             xnn_init_f32_minmax_scalar_params,
+             /*mr=*/4, /*nr=*/4 * xnn_init_hardware_config()->vlenb / sizeof(float),
+             /*kr=*/1, /*sr=*/1);
+}
+
+BENCHMARK_BGEMM(f32_ppmm_4x4v_unipass__rvv)
+BENCHMARK_BGEMM(f32_ppmm_4x4v_twopass__rvv)
+#endif  // XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+
 #ifdef BENCHMARK_RUY
 BENCHMARK_BGEMM(ruy_st)
 #endif  // BENCHMARK_RUY

@@ -1428,6 +1428,24 @@ BENCHMARK_GEMM(f32_qc8w_gemm_5x8s4__wasmsimd_x86)
 BENCHMARK_GEMM(f32_qc8w_gemm_6x8s4__wasmsimd_x86)
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
+#if XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+static void f32_qc8w_gemm_1x4v__rvv(benchmark::State& state) {
+  GEMMBenchmark(state, xnn_f32_qc8w_gemm_minmax_ukernel_1x4v__rvv,
+                xnn_init_f32_minmax_scalar_params,
+                /*mr=*/1, /*nr=*/4 * xnn_init_hardware_config()->vlenb / sizeof(float),
+                /*kr=*/1, /*sr=*/1, /*arch_flags=*/xnn_arch_riscv_vector);
+}
+static void f32_qc8w_gemm_4x4v__rvv(benchmark::State& state) {
+  GEMMBenchmark(state, xnn_f32_qc8w_gemm_minmax_ukernel_4x4v__rvv,
+                xnn_init_f32_minmax_scalar_params,
+                /*mr=*/4, /*nr=*/4 * xnn_init_hardware_config()->vlenb / sizeof(float),
+                /*kr=*/1, /*sr=*/1, /*arch_flags=*/xnn_arch_riscv_vector);
+}
+
+BENCHMARK_GEMM(f32_qc8w_gemm_1x4v__rvv)
+BENCHMARK_GEMM(f32_qc8w_gemm_4x4v__rvv)
+#endif  // XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+
 static void f32_qc8w_gemm_1x4__scalar(benchmark::State& state) {
   GEMMBenchmark(state, xnn_f32_qc8w_gemm_minmax_ukernel_1x4__scalar,
                 xnn_init_f32_minmax_scalar_params,
