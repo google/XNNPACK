@@ -77,12 +77,12 @@ static void FP32Reduce(benchmark::State& state) {
   const size_t d1 = state.range(2);
   const size_t d2 = state.range(3);
   const size_t norm_mask = state.range(4);
-  std::vector<size_t> dims = {d0, d1, d2};
+  std::vector<size_t> dims = {1000, d0, d1, d2};
   std::vector<size_t> axes;
   axes.reserve(dims.size());
   for (size_t i = 0; i < dims.size(); ++i) {
     if ((norm_mask & (1 << i)) != 0) {
-      axes.push_back(i);
+      axes.push_back(i + 1);
     }
   }
 
