@@ -46,14 +46,14 @@ auto make_unary_elementwise_impl(unary_kernel_fn kernel, unary_params params) {
     // dimension (and it would waste computation).
     assert(is_contiguous(a_dims[0], a.elem_size));
 
-    const slinky::dim& x_n = x_dims[0];
-    const slinky::dim& a_m = a_dims[1];
-    const slinky::dim& x_m = x_dims[1];
+    const slinky::index_t x_n_extent = x_dims[0].extent();
+    const slinky::index_t a_m_stride = a_dims[1].stride();
+    const slinky::index_t x_m_extent = x_dims[1].extent();
+    const slinky::index_t x_m_stride = x_dims[1].stride();
 
     slinky::for_each_element(
-        [&](void* x, const void* a) {
-          kernel(x_m.extent(), x_n.extent(), a_m.stride(), a, x_m.stride(), x,
-                 &params);
+        [=, &params](void* x, const void* a) {
+          kernel(x_m_extent, x_n_extent, a_m_stride, a, x_m_stride, x, &params);
         },
         x, a);
     return 0;
@@ -73,11 +73,11 @@ auto make_lut_impl(lut_kernel_fn kernel) {
     assert(is_contiguous(a_dims[0], a.elem_size));
     assert(is_contiguous(x_dims[0], x.elem_size));
 
-    const slinky::dim& x_n = x_dims[0];
+    const slinky::index_t x_n_extent = x_dims[0].extent();
 
     slinky::for_each_element(
-        [&](void* x, const void* a) { kernel(x_n.extent(), a, lut.base, x); },
-        x, a);
+        [=](void* x, const void* a) { kernel(x_n_extent, a, lut.base, x); }, x,
+        a);
     return 0;
   };
 }
@@ -90,17 +90,18 @@ auto make_binary_elementwise_impl(binary_kernel_fn kernel) {
 
     fuse_and_slice_leading_dims<2>(&x_dims[0], x, &a_dims[0], a, &b_dims[0], b);
 
-    const slinky::dim& a_n = a_dims[0];
-    const slinky::dim& b_n = b_dims[0];
-    const slinky::dim& x_n = x_dims[0];
-    const slinky::dim& a_m = a_dims[1];
-    const slinky::dim& b_m = b_dims[1];
-    const slinky::dim& x_m = x_dims[1];
+    const slinky::index_t x_m_extent = x_dims[1].extent();
+    const slinky::index_t x_n_extent = x_dims[0].extent();
+    const slinky::index_t a_m_stride = a_dims[1].stride();
+    const slinky::index_t a_n_stride = a_dims[0].stride();
+    const slinky::index_t b_m_stride = b_dims[1].stride();
+    const slinky::index_t b_n_stride = b_dims[0].stride();
+    const slinky::index_t x_m_stride = x_dims[1].stride();
 
     slinky::for_each_element(
-        [&](void* x, const void* a, const void* b) {
-          kernel(x_m.extent(), x_n.extent(), a_m.stride(), a_n.stride(), a,
-                 b_m.stride(), b_n.stride(), b, x_m.stride(), x, nullptr);
+        [=](void* x, const void* a, const void* b) {
+          kernel(x_m_extent, x_n_extent, a_m_stride, a_n_stride, a, b_m_stride,
+                 b_n_stride, b, x_m_stride, x, nullptr);
         },
         x, a, b);
     return 0;
@@ -127,20 +128,21 @@ auto make_ternary_elementwise_impl(ternary_kernel_fn kernel) {
         fuse_and_slice_leading_dims<2>(&x_dims[0], x, &a_dims[0], a, &b_dims[0],
                                        b, &c_dims[0], c);
 
-        const slinky::dim& a_n = a_dims[0];
-        const slinky::dim& b_n = b_dims[0];
-        const slinky::dim& c_n = c_dims[0];
-        const slinky::dim& x_n = x_dims[0];
-        const slinky::dim& a_m = a_dims[1];
-        const slinky::dim& b_m = b_dims[1];
-        const slinky::dim& c_m = c_dims[1];
-        const slinky::dim& x_m = x_dims[1];
+        const slinky::index_t x_m_extent = x_dims[1].extent();
+        const slinky::index_t x_n_extent = x_dims[0].extent();
+        const slinky::index_t a_m_stride = a_dims[1].stride();
+        const slinky::index_t a_n_stride = a_dims[0].stride();
+        const slinky::index_t b_m_stride = b_dims[1].stride();
+        const slinky::index_t b_n_stride = b_dims[0].stride();
+        const slinky::index_t c_m_stride = c_dims[1].stride();
+        const slinky::index_t c_n_stride = c_dims[0].stride();
+        const slinky::index_t x_m_stride = x_dims[1].stride();
 
         slinky::for_each_element(
-            [&](void* x, const void* a, const void* b, const void* c) {
-              kernel(x_m.extent(), x_n.extent(), a_m.stride(), a_n.stride(), a,
-                     b_m.stride(), b_n.stride(), b, c_m.stride(), c_n.stride(),
-                     c, x_m.stride(), x, nullptr);
+            [=](void* x, const void* a, const void* b, const void* c) {
+              kernel(x_m_extent, x_n_extent, a_m_stride, a_n_stride, a,
+                     b_m_stride, b_n_stride, b, c_m_stride, c_n_stride, c,
+                     x_m_stride, x, nullptr);
             },
             x, a, b, c);
         return 0;
@@ -154,21 +156,23 @@ auto make_dequantize_dot_impl(dequantize_dot_kernel_fn kernel,
                           slinky::raw_buffer a_scale,
                           slinky::raw_buffer b_scale, slinky::raw_buffer offset,
                           slinky::raw_buffer output) -> slinky::index_t {
-    using slinky::in_bounds;
+    using slinky::index_t;
 
     const slinky::dim& n = slice_dim0(output);
+    const slinky::in_bounds n_min{n.min()};
+    const index_t n_extent = n.extent();
 
     assert(is_contiguous(n, output.elem_size));
     assert(is_contiguous(dot.dim(0), dot.elem_size));
     assert(is_broadcast(a_offset.dim(0)));
 
-    dot.slice(0, in_bounds{n.min()});
+    dot.slice(0, n_min);
     a_offset.slice(0);
     assert(is_broadcast(a_scale.dim(0)));
     a_scale.slice(0);
-    const slinky::dim& b_offset_n = slice_dim0(b_offset, in_bounds{n.min()});
-    const slinky::dim& b_scale_n = slice_dim0(b_scale, in_bounds{n.min()});
-    const slinky::dim& offset_n = slice_dim0(offset, in_bounds{n.min()});
+    const index_t b_offset_n_stride = slice_dim0(b_offset, n_min).stride();
+    const index_t b_scale_n_stride = slice_dim0(b_scale, n_min).stride();
+    const index_t offset_n_stride = slice_dim0(offset, n_min).stride();
 
     // Get the m dimension. rank 1 buffers are common, so try to optimize
     // for that case.
@@ -176,21 +180,25 @@ auto make_dequantize_dot_impl(dequantize_dot_kernel_fn kernel,
     assert(is_broadcast(b_scale.dim(0)));
     assert(is_broadcast(offset.dim(0)));
     const slinky::dim& m = slice_dim0(output);
-    const slinky::dim& dot_m = slice_dim0(dot, in_bounds{m.min()});
-    const slinky::dim& a_offset_m = slice_dim0(a_offset, in_bounds{m.min()});
-    const slinky::dim& a_scale_m = slice_dim0(a_scale, in_bounds{m.min()});
+    const slinky::in_bounds m_min{m.min()};
+    const index_t m_extent = m.extent();
+    const index_t m_stride = m.stride();
+    const index_t dot_m_stride = slice_dim0(dot, m_min).stride();
+    const index_t a_offset_m_stride = slice_dim0(a_offset, m_min).stride();
+    const index_t a_scale_m_stride = slice_dim0(a_scale, m_min).stride();
     b_offset.slice(0);
     offset.slice(0);
     b_scale.slice(0);
 
+
     slinky::for_each_element(
-        [&](void* output, const void* dot, const void* a_offset,
-            const void* b_offset, const void* offset, const void* a_scale,
-            const void* b_scale) {
-          kernel(m.extent(), n.extent(), dot_m.stride(), dot,
-                 a_offset_m.stride(), a_offset, b_offset_n.stride(), b_offset,
-                 offset_n.stride(), offset, a_scale_m.stride(), a_scale,
-                 b_scale_n.stride(), b_scale, m.stride(), output, &params);
+        [=, &params](void* output, const void* dot, const void* a_offset,
+                     const void* b_offset, const void* offset,
+                     const void* a_scale, const void* b_scale) {
+          kernel(m_extent, n_extent, dot_m_stride, dot, a_offset_m_stride,
+                 a_offset, b_offset_n_stride, b_offset, offset_n_stride, offset,
+                 a_scale_m_stride, a_scale, b_scale_n_stride, b_scale, m_stride,
+                 output, &params);
         },
         output, dot, a_offset, b_offset, offset, a_scale, b_scale);
 
