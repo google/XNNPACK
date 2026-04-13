@@ -245,6 +245,133 @@ bool rewrite_multiply_multiply(ynn_subgraph& subgraph, ynn_node& node,
   return false;
 }
 
+// Rewrite binary(convert(x), y) to binary(x, y) if a kernel exists for the
+// input types.
+bool rewrite_binary_convert(ynn_subgraph& subgraph, ynn_node& node,
+                            subgraph_analysis& analysis) {
+  const ynn_node::binary_elementwise* binary =
+      std::get_if<ynn_node::binary_elementwise>(&node.op);
+  if (!binary) return false;
+
+  ynn_node* producers[2] = {analysis.producer_of(node.inputs[0]),
+                            analysis.producer_of(node.inputs[1])};
+  bool is_convert[2] = {
+      producers[0] && is_unary_node(*producers[0], ynn_unary_convert),
+      producers[1] && is_unary_node(*producers[1], ynn_unary_convert)};
+
+  if (!is_convert[0] && !is_convert[1]) {
+    return false;
+  }
+
+  const ynn_value& a =
+      subgraph.value(is_convert[0] ? producers[0]->inputs[0] : node.inputs[0]);
+  const ynn_value& b =
+      subgraph.value(is_convert[1] ? producers[1]->inputs[0] : node.inputs[1]);
+  const ynn_value& output = subgraph.value(node.outputs[0]);
+
+  // Check if either input is quantized.
+  if (a.scale_id != YNN_INVALID_VALUE_ID ||
+      a.zero_point_id != YNN_INVALID_VALUE_ID ||
+      b.scale_id != YNN_INVALID_VALUE_ID ||
+      b.zero_point_id != YNN_INVALID_VALUE_ID) {
+    return false;
+  }
+
+  // If it's a square, we must rewrite both or neither to keep it a square.
+  if (node.inputs[0] == node.inputs[1] && is_convert[0]) {
+    ynn::binary_kernel_fn kernel =
+        ynn::get_binary_kernel(binary->op, a.type, b.type, output.type);
+    if (kernel != nullptr) {
+      YNN_LOG_DEBUG() << "Rewriting " << to_string(binary->op)
+                      << "(convert(x), convert(x)) to " << to_string(binary->op)
+                      << "(x, x)";
+      ynn::define_binary(subgraph, node, a.id, b.id, output.id, binary->op,
+                         kernel);
+      return true;
+    }
+    return false;
+  }
+
+  // If both are converts, try rewriting both.
+  if (is_convert[0] && is_convert[1]) {
+    ynn::binary_kernel_fn kernel =
+        ynn::get_binary_kernel(binary->op, a.type, b.type, output.type);
+    if (kernel != nullptr) {
+      YNN_LOG_DEBUG() << "Rewriting " << to_string(binary->op)
+                      << "(convert(x), convert(y)) to " << to_string(binary->op)
+                      << "(x, y)";
+      ynn::define_binary(subgraph, node, a.id, b.id, output.id, binary->op,
+                         kernel);
+      return true;
+    }
+  }
+
+  // Try rewriting just one.
+  for (int i : {0, 1}) {
+    if (!is_convert[i]) continue;
+    ynn_type type_a = i == 0 ? a.type : subgraph.value(node.inputs[0]).type;
+    ynn_type type_b = i == 1 ? b.type : subgraph.value(node.inputs[1]).type;
+    ynn::binary_kernel_fn kernel =
+        ynn::get_binary_kernel(binary->op, type_a, type_b, output.type);
+    if (kernel != nullptr) {
+      YNN_LOG_DEBUG() << "Rewriting " << to_string(binary->op)
+                      << "(convert(x), y) to " << to_string(binary->op)
+                      << "(x, y)";
+      ynn::define_binary(subgraph, node, i == 0 ? a.id : node.inputs[0],
+                         i == 1 ? b.id : node.inputs[1], output.id, binary->op,
+                         kernel);
+      return true;
+    }
+  }
+
+  return false;
+}
+
+// Rewrite convert(elementwise(a, ...)) to elementwise(a, ...) if a kernel
+// exists for the output type.
+bool rewrite_convert_elementwise(ynn_subgraph& subgraph, ynn_node& node,
+                                 subgraph_analysis& analysis) {
+  if (!is_unary_node(node, ynn_unary_convert)) return false;
+
+  ynn_node* producer = analysis.producer_of(node.inputs[0]);
+  if (!producer) return false;
+  if (const auto* unary =
+          std::get_if<ynn_node::unary_elementwise>(&producer->op)) {
+    const ynn_value& a = subgraph.value(producer->inputs[0]);
+    const ynn_value& x = subgraph.value(node.outputs[0]);
+
+    if (unary->op == ynn_unary_convert) {
+      // We fuse two converts elsewhere.
+      return false;
+    }
+
+    ynn::unary_kernel_fn kernel =
+        ynn::get_unary_kernel(unary->op, a.type, x.type);
+    if (!kernel) return false;
+    YNN_LOG_DEBUG() << "Rewriting "
+                    << "convert(" << to_string(unary->op) << "(a)) to "
+                    << to_string(unary->op) << "(a)";
+    ynn::define_unary(subgraph, node, a.id, x.id, unary->op, kernel,
+                      unary->params);
+    return true;
+  } else if (const auto* binary =
+                 std::get_if<ynn_node::binary_elementwise>(&producer->op)) {
+    const ynn_value& a = subgraph.value(producer->inputs[0]);
+    const ynn_value& b = subgraph.value(producer->inputs[1]);
+    const ynn_value& x = subgraph.value(node.outputs[0]);
+
+    ynn::binary_kernel_fn kernel =
+        ynn::get_binary_kernel(binary->op, a.type, b.type, x.type);
+    if (!kernel) return false;
+    YNN_LOG_DEBUG() << "Rewriting "
+                    << "convert(" << to_string(binary->op) << "(a, b)) to "
+                    << to_string(binary->op) << "(a, b)";
+    ynn::define_binary(subgraph, node, a.id, b.id, x.id, binary->op, kernel);
+    return true;
+  }
+  return false;
+}
+
 // Rewrite subtract(a, multiply(b, c)) to subtract_multiply(a, b, c)
 bool rewrite_subtract_multiply(ynn_subgraph& subgraph, ynn_node& node,
                                subgraph_analysis& analysis) {
@@ -1100,6 +1227,8 @@ ynn_status ynn_subgraph::fusion() {
                 ynn::rewrite_divide_sqrt(*this, node, analysis) ||
                 ynn::rewrite_multiply_add(*this, node, analysis) ||
                 ynn::rewrite_multiply_multiply(*this, node, analysis) ||
+                ynn::rewrite_binary_convert(*this, node, analysis) ||
+                ynn::rewrite_convert_elementwise(*this, node, analysis) ||
                 ynn::rewrite_subtract_multiply(*this, node, analysis) ||
                 ynn::rewrite_dequantize_dot(*this, node, analysis) ||
                 ynn::rewrite_dequantize_dot_add(*this, node, analysis) ||

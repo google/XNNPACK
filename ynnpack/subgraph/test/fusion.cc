@@ -417,6 +417,30 @@ TEST(fusion, convert_broadcast_binary) {
   EXPECT_EQ(convert_node.inputs[0], x_id);
 }
 
+TEST(fusion, binary_convert) {
+  // x_bf16 * y_fp32 -> bf16 should be implemented with a single op.
+  const uint32_t x_id = 0;
+  const uint32_t y_id = 1;
+  const uint32_t out_id = 2;
+  SubgraphBuilder builder(3);
+
+  builder.AddInput(ynn_type_bf16, {10}, x_id)
+      .AddInput(ynn_type_fp32, {10}, y_id)
+      .AddOutput(ynn_type_bf16, {10}, out_id);
+
+  builder.AddBinary(ynn_binary_multiply, x_id, y_id, out_id);
+
+  ynn_subgraph& subgraph = *builder.GetSubgraph();
+
+  subgraph.fusion();
+  subgraph.invalidate_dead_values();
+
+  EXPECT_THAT(subgraph, HasValidNodeCount(1));
+  const ynn_node& node = ProducerOf(out_id, subgraph);
+  EXPECT_THAT(node,
+              AllOf(IsBinary(ynn_binary_multiply), InputsAre(x_id, y_id)));
+}
+
 TEST(fusion, transpose_stencil_copy) {
   // rewrite transpose_a(stencil_copy(x)) -> stencil_copy(transpose_a(x))
   const uint32_t x_id = 0;
@@ -1059,7 +1083,7 @@ TEST(fusion, bf16_elementwise) {
         .AddInput(ynn_type_bf16, 2, b_id)
         .AddOutput(ynn_type_bf16, 2, x_id)
         .AddTensor(ynn_type_bf16, 2, c_id);
-    builder.AddBinary(ynn_binary_multiply, a_id, b_id, c_id)
+    builder.AddBinary(ynn_binary_squared_difference, a_id, b_id, c_id)
         .AddBinary(ynn_binary_add, a_id, c_id, x_id);
 
     ynn_subgraph& subgraph = *builder.GetSubgraph();
