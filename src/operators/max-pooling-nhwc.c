@@ -66,7 +66,7 @@ static enum xnn_status create_max_pooling2d_nhwc(
 
   status = xnn_status_invalid_parameter;
 
-  const uint32_t pooling_size = pooling_height * pooling_width;
+  const uint64_t pooling_size = (uint64_t) pooling_height * pooling_width;
   if (pooling_size == 0) {
     xnn_log_error("failed to create %s operator with %" PRIu32 "x%" PRIu32
                   " pooling size: pooling size dimensions must be non-zero",
@@ -441,8 +441,8 @@ static enum xnn_status reshape_max_pooling2d_nhwc(
     max_pooling_op->convolution_op->output_width = compute_output_dimension_with_tf_same_padding(
         input_width, max_pooling_op->convolution_op->stride_width);
 
-    const uint32_t effective_kernel_height = (max_pooling_op->convolution_op->kernel_height - 1) * max_pooling_op->convolution_op->dilation_height + 1;
-    const uint32_t effective_kernel_width = (max_pooling_op->convolution_op->kernel_width - 1) * max_pooling_op->convolution_op->dilation_width + 1;
+    const size_t effective_kernel_height = (size_t)(max_pooling_op->convolution_op->kernel_height - 1) * max_pooling_op->convolution_op->dilation_height + 1;
+    const size_t effective_kernel_width = (size_t)(max_pooling_op->convolution_op->kernel_width - 1) * max_pooling_op->convolution_op->dilation_width + 1;
     const uint32_t total_padding_height =
       doz((max_pooling_op->convolution_op->output_height - 1) * max_pooling_op->convolution_op->stride_height + effective_kernel_height, input_height);
     const uint32_t total_padding_width =

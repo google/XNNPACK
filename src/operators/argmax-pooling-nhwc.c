@@ -63,7 +63,7 @@ enum xnn_status xnn_create_argmax_pooling2d_nhwc_f32(
 
   status = xnn_status_invalid_parameter;
 
-  const uint32_t pooling_size = pooling_height * pooling_width;
+  const uint64_t pooling_size = (uint64_t) pooling_height * pooling_width;
   if (pooling_size == 0) {
     xnn_log_error(
         "failed to create %s operator with %" PRIu32 "x%" PRIu32
