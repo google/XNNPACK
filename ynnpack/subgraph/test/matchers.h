@@ -22,13 +22,16 @@
 #include "ynnpack/include/ynnpack.h"
 #include "ynnpack/subgraph/subgraph.h"
 
-// This causes gmock to print the subgraph instead of just a hex encoded dump of
-// the memory. It needs to be in the global namespace for argument dependent
-// lookup to work.
+// This causes gmock to print the subgraph/node instead of just a hex encoded
+// dump of the memory. It needs to be in the global namespace for argument
+// dependent lookup to work.
 inline std::ostream& operator<<(std::ostream& os, const ynn_subgraph& g) {
   os << "subgraph:" << std::endl;
   g.dump(os);
   return os;
+}
+inline std::ostream& operator<<(std::ostream& os, const ynn_node& node) {
+  return os << node.to_string();
 }
 
 namespace ynn {
