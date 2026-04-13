@@ -119,7 +119,7 @@ struct scheduled_buffer {
   // location:
   // * if it's 0 then it will be stored at the same loop level it's computed at.
   // * if it's root it's an outermost location.
-  slinky::index_t store_at_min_depth = root;
+  slinky::index_t store_at_min_depth = 0;
 };
 
 struct scheduling_info {
