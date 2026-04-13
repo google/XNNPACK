@@ -26,7 +26,7 @@ package(default_visibility = ["//ynnpack:__subpackages__"])
     local_defines = ynn_if_arch(
         arch,
         ["YNN_ARCH=" + ynn_arch_flag(arch)],
-    ),
+    ) + ["YNN_ARCH_" + arch.upper()],
     malloc = ynn_binary_malloc(),
     deps = [
         "//ynnpack/base",  # buildcleaner:keep
@@ -39,6 +39,7 @@ package(default_visibility = ["//ynnpack:__subpackages__"])
     "arm_neon",
     "arm_neonfp16",
     "arm_neonfma",
+    "arm64_neon",
     "arm64_sve",
     "x86_sse2",
     "x86_sse41",

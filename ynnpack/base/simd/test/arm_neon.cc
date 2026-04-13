@@ -29,9 +29,6 @@ TEST_BROADCAST(arm_neon, f16, 8);
 TEST_BROADCAST(arm_neon, bf16, 8);
 TEST_BROADCAST(arm_neon, f32, 4);
 TEST_BROADCAST(arm_neon, s32, 4);
-#ifdef __aarch64__
-TEST_BROADCAST(arm_neon, f64, 2);
-#endif
 
 TEST_BROADCAST(arm_neon, u8, 8);
 
@@ -42,9 +39,6 @@ TEST_LOAD_STORE(arm_neon, f16, 8);
 TEST_LOAD_STORE(arm_neon, bf16, 8);
 TEST_LOAD_STORE(arm_neon, f32, 4);
 TEST_LOAD_STORE(arm_neon, s32, 4);
-#ifdef __aarch64__
-TEST_LOAD_STORE(arm_neon, f64, 2);
-#endif
 
 TEST_LOAD_STORE(arm_neon, u8, 8);
 
@@ -55,9 +49,6 @@ TEST_ALIGNED_LOAD_STORE(arm_neon, f16, 8);
 TEST_ALIGNED_LOAD_STORE(arm_neon, bf16, 8);
 TEST_ALIGNED_LOAD_STORE(arm_neon, f32, 4);
 TEST_ALIGNED_LOAD_STORE(arm_neon, s32, 4);
-#ifdef __aarch64__
-TEST_ALIGNED_LOAD_STORE(arm_neon, f64, 2);
-#endif
 
 TEST_ALIGNED_LOAD_STORE(arm_neon, u8, 8);
 
@@ -68,26 +59,17 @@ TEST_PARTIAL_LOAD_STORE(arm_neon, f16, 8);
 TEST_PARTIAL_LOAD_STORE(arm_neon, bf16, 8);
 TEST_PARTIAL_LOAD_STORE(arm_neon, f32, 4);
 TEST_PARTIAL_LOAD_STORE(arm_neon, s32, 4);
-#ifdef __aarch64__
-TEST_PARTIAL_LOAD_STORE(arm_neon, f64, 2);
-#endif
 
 TEST_PARTIAL_LOAD_STORE(arm_neon, u8, 8);
 
 TEST_ADD(arm_neon, u8, 16);
 TEST_ADD(arm_neon, s8, 16);
 TEST_ADD(arm_neon, f32, 4);
-#ifdef __aarch64__
-TEST_ADD(arm_neon, f64, 2);
-#endif
 TEST_ADD(arm_neon, s32, 4);
 
 TEST_SUBTRACT(arm_neon, u8, 16);
 TEST_SUBTRACT(arm_neon, s8, 16);
 TEST_SUBTRACT(arm_neon, f32, 4);
-#ifdef __aarch64__
-TEST_SUBTRACT(arm_neon, f64, 2);
-#endif
 TEST_SUBTRACT(arm_neon, s32, 4);
 
 TEST_ADD_SAT(arm_neon, u8, 16);
@@ -107,32 +89,20 @@ TEST_SUB_SAT(arm_neon, s32, 4);
 TEST_MULTIPLY(arm_neon, u8, 16);
 TEST_MULTIPLY(arm_neon, s8, 16);
 TEST_MULTIPLY(arm_neon, f32, 4);
-#ifdef __aarch64__
-TEST_MULTIPLY(arm_neon, f64, 2);
-#endif
 TEST_MULTIPLY(arm_neon, s32, 4);
 
 TEST_DIVIDE(arm_neon, f32, 4);
-#ifdef __aarch64__
-TEST_DIVIDE(arm_neon, f64, 2);
-#endif
 
 TEST_MIN(arm_neon, u8, 16);
 TEST_MIN(arm_neon, s8, 16);
 TEST_MIN(arm_neon, s16, 8);
 TEST_MIN(arm_neon, f32, 4);
-#ifdef __aarch64__
-TEST_MIN(arm_neon, f64, 2);
-#endif
 TEST_MIN(arm_neon, s32, 4);
 
 TEST_MAX(arm_neon, u8, 16);
 TEST_MAX(arm_neon, s8, 16);
 TEST_MAX(arm_neon, s16, 8);
 TEST_MAX(arm_neon, f32, 4);
-#ifdef __aarch64__
-TEST_MAX(arm_neon, f64, 2);
-#endif
 TEST_MAX(arm_neon, s32, 4);
 
 TEST_AND(arm_neon, u8, 16);
@@ -164,46 +134,25 @@ TEST_SHIFT_LEFT(arm_neon, s16, 8);
 TEST_SHIFT_LEFT(arm_neon, s32, 4);
 
 TEST_FLOOR(arm_neon, f32, 4);
-#ifdef __aarch64__
-TEST_FLOOR(arm_neon, f64, 2);
-#endif
 TEST_CEIL(arm_neon, f32, 4);
-#ifdef __aarch64__
-TEST_CEIL(arm_neon, f64, 2);
-#endif
 TEST_ROUND(arm_neon, f32, 4);
-#ifdef __aarch64__
-TEST_ROUND(arm_neon, f64, 2);
-#endif
 TEST_SQRT(arm_neon, f32, 4);
-#ifdef __aarch64__
-TEST_SQRT(arm_neon, f64, 2);
-#endif
 
 TEST_ABS(arm_neon, s8, 16);
 TEST_ABS(arm_neon, s16, 8);
 TEST_ABS(arm_neon, s32, 4);
 TEST_ABS(arm_neon, f32, 4);
-#ifdef __aarch64__
-TEST_ABS(arm_neon, f64, 2);
-#endif
 
 TEST_HORIZONTAL_MIN(arm_neon, u8, 16);
 TEST_HORIZONTAL_MIN(arm_neon, s8, 16);
 TEST_HORIZONTAL_MIN(arm_neon, s16, 8);
 TEST_HORIZONTAL_MIN(arm_neon, f32, 4);
-#ifdef __aarch64__
-TEST_HORIZONTAL_MIN(arm_neon, f64, 2);
-#endif
 TEST_HORIZONTAL_MIN(arm_neon, s32, 4);
 
 TEST_HORIZONTAL_MAX(arm_neon, u8, 16);
 TEST_HORIZONTAL_MAX(arm_neon, s8, 16);
 TEST_HORIZONTAL_MAX(arm_neon, s16, 8);
 TEST_HORIZONTAL_MAX(arm_neon, f32, 4);
-#ifdef __aarch64__
-TEST_HORIZONTAL_MAX(arm_neon, f64, 2);
-#endif
 TEST_HORIZONTAL_MAX(arm_neon, s32, 4);
 
 TEST_CAST(arm_neon, s32, s8x16);

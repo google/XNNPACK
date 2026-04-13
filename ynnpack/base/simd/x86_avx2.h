@@ -49,15 +49,14 @@ YNN_ALWAYS_INLINE s32x8 cast(f32x8 x, int32_t) {
 }
 
 YNN_ALWAYS_INLINE bf16x16 cast(f32x16 a, bfloat16) {
-  const __m256 rounding_multiplier = _mm256_set1_ps(1.0f + 0.5f / 128.0f);
-  __m256 a1 = _mm256_mul_ps(a.lo().v, rounding_multiplier);
-  __m256 a2 = _mm256_mul_ps(a.hi().v, rounding_multiplier);
-  const __m256i ai = _mm256_castps_si256(a1);
-  const __m256i bi = _mm256_castps_si256(a2);
-  const __m256i as = _mm256_srli_epi32(ai, 16);
-  const __m256i bs = _mm256_srli_epi32(bi, 16);
-  const __m256i r = _mm256_packus_epi32(as, bs);
-  return bf16x16{_mm256_permute4x64_epi64(r, _MM_SHUFFLE(3, 1, 2, 0))};
+  const __m256 rounding_multiplier =
+      _mm256_set1_ps(bfloat16::rounding_multiplier);
+  const __m256 b1 = _mm256_mul_ps(a.lo().v, rounding_multiplier);
+  const __m256 b2 = _mm256_mul_ps(a.hi().v, rounding_multiplier);
+  const __m256i c1 = _mm256_srli_epi32(_mm256_castps_si256(b1), 16);
+  const __m256i c2 = _mm256_srli_epi32(_mm256_castps_si256(b2), 16);
+  const __m256i d = _mm256_packus_epi32(c1, c2);
+  return bf16x16{_mm256_permute4x64_epi64(d, _MM_SHUFFLE(3, 1, 2, 0))};
 }
 
 YNN_ALWAYS_INLINE s16x16 saturate_cast(s32x16 a, int16_t) {
