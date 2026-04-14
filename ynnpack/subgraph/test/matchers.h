@@ -190,6 +190,27 @@ MATCHER(IsCopy, "") {
   return copy != nullptr;
 }
 
+// Checks that the given node is a quantize.
+//
+// Example:
+//   EXPECT_THAT(ProducerOf(y_id, subgraph), IsQuantize());
+MATCHER(IsQuantize, "") {
+  const ynn_node::ternary_elementwise* ternary =
+      std::get_if<ynn_node::ternary_elementwise>(&arg.op);
+  return ternary && (ternary->op == ternary_op::quantize_int8 ||
+                     ternary->op == ternary_op::quantize_uint8);
+}
+
+// Checks that the given node is a dequantize.
+//
+// Example:
+//   EXPECT_THAT(ProducerOf(y_id, subgraph), IsDequantize());
+MATCHER(IsDequantize, "") {
+  return std::get_if<ynn_node::ternary_elementwise>(&arg.op) &&
+         std::get<ynn_node::ternary_elementwise>(arg.op).op ==
+             ternary_op::dequantize;
+}
+
 // Checks that the given node is a dequantize_dot.
 //
 // Example:

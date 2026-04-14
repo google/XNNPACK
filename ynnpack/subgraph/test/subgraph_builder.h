@@ -112,6 +112,14 @@ class SubgraphBuilder {
 
   SubgraphBuilder& AddUnary(ynn_unary_operator op, uint32_t input_id,
                             uint32_t output_id, uint32_t flags = 0);
+  SubgraphBuilder& AddConvert(uint32_t input_id, ynn_type type,
+                              uint32_t output_id, uint32_t flags = 0);
+  SubgraphBuilder& AddQuantize(uint32_t input_id, ynn_type type,
+                               uint32_t zero_point_id, uint32_t scale_id,
+                               uint32_t output_id, uint32_t flags = 0);
+  SubgraphBuilder& AddDequantize(uint32_t input_id, uint32_t zero_point_id,
+                                 uint32_t scale_id, ynn_type type,
+                                 uint32_t output_id, uint32_t flags = 0);
   SubgraphBuilder& AddPolynomial(const std::vector<float>& coefficients,
                                  uint32_t input_id, uint32_t output_id,
                                  uint32_t flags = 0);

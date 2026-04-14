@@ -208,11 +208,12 @@ ynn_status define_qd8_params(ynn_subgraph_t subgraph, size_t num_nonbatch_axes,
 }  // namespace
 
 ynn_status compute_qd8_params(ynn_subgraph_t subgraph, size_t num_nonbatch_axes,
-                              uint32_t input_id, uint32_t output_id) {
+                              uint32_t input_id, uint32_t output_id,
+                              uint32_t scale_id, uint32_t zero_point_id) {
   ynn_value& output = subgraph->value(output_id);
 
-  const ynn_value& scale = subgraph->value(output.scale_id);
-  const ynn_value& zero_point = subgraph->value(output.zero_point_id);
+  const ynn_value& scale = subgraph->value(scale_id);
+  const ynn_value& zero_point = subgraph->value(zero_point_id);
   assert(scale.rank() == zero_point.rank());
   (void)scale;
   (void)zero_point;
@@ -246,9 +247,9 @@ ynn_status compute_qd8_params(ynn_subgraph_t subgraph, size_t num_nonbatch_axes,
     output_zero_point = 128;
   }
 
-  status = define_qd8_params(subgraph, num_nonbatch_axes, nonbatch_axes,
-                             output_zero_point, min_max_id, output.scale_id,
-                             output.zero_point_id);
+  status =
+      define_qd8_params(subgraph, num_nonbatch_axes, nonbatch_axes,
+                        output_zero_point, min_max_id, scale_id, zero_point_id);
   if (status != ynn_status_success) {
     return status;
   }

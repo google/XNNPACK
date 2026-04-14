@@ -16,7 +16,8 @@ namespace ynn {
 // Defines the subgraph to produce the scale and zero point tensors of the
 // output.
 ynn_status compute_qd8_params(ynn_subgraph_t subgraph, size_t num_nonbatch_axes,
-                              uint32_t input_id, uint32_t output_id);
+                              uint32_t input_id, uint32_t output_id,
+                              uint32_t scale_id, uint32_t zero_point_id);
 
 }  // namespace ynn
 

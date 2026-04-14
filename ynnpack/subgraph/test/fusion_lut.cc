@@ -1,3 +1,8 @@
+// Copyright 2026 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
 #include <cstddef>
 #include <cstdint>
 #include <functional>
@@ -195,10 +200,10 @@ TEST(fusion_lut, multiple_unary_chain) {
       .AddTensor(ynn_type_fp32, {256}, b_id)
       .AddTensor(ynn_type_fp32, {256}, c_id);
 
-  builder.AddUnary(ynn_unary_convert, x_id, a_id)
+  builder.AddConvert(x_id, ynn_type_fp32, a_id)
       .AddUnary(ynn_unary_square, a_id, b_id)
       .AddUnary(ynn_unary_exp, b_id, c_id)
-      .AddUnary(ynn_unary_convert, c_id, y_id);
+      .AddConvert(c_id, ynn_type_uint8, y_id);
 
   std::vector<uint8_t> input_data(256);
   std::iota(input_data.begin(), input_data.end(), -128);
@@ -265,12 +270,12 @@ TEST(fusion_lut, elu_chain) {
       .AddTensor(ynn_type_fp32, {}, alpha_const_id, d_val);
 
   // Build the chain
-  builder.AddUnary(ynn_unary_convert, x_id, a_id)
+  builder.AddConvert(x_id, ynn_type_fp32, a_id)
       .AddBinary(ynn_binary_min, a_id, zero_id, b_id)
       .AddUnary(ynn_unary_exp, b_id, c_id)
       .AddBinary(ynn_binary_multiply, c_id, alpha_const_id, e_id)
       .AddBinary(ynn_binary_max, a_id, e_id, f_id)
-      .AddUnary(ynn_unary_convert, f_id, y_id);
+      .AddConvert(f_id, ynn_type_uint8, y_id);
 
   std::vector<uint8_t> input_data(256);
   std::iota(input_data.begin(), input_data.end(), 0);
@@ -343,7 +348,7 @@ TEST(fusion_lut, input_type_unsupported) {
       .AddOutput(ynn_type_uint8, {256}, y_id);
 
   builder.AddUnary(ynn_unary_exp, x_id, a_id)
-      .AddUnary(ynn_unary_convert, a_id, y_id);
+      .AddConvert(a_id, ynn_type_uint8, y_id);
 
   FuseAndCheck(builder, [&](const ynn_subgraph& subgraph) {
     // We expect 2 nodes: `exp`, `convert`
@@ -377,9 +382,9 @@ TEST(fusion_lut, binary_scalar_constant) {
   static const float c_val[] = {1.0f};
   builder.AddTensor(ynn_type_fp32, {}, c_id, c_val);
 
-  builder.AddUnary(ynn_unary_convert, x_id, a_id)
+  builder.AddConvert(x_id, ynn_type_fp32, a_id)
       .AddBinary(ynn_binary_add, a_id, c_id, b_id)
-      .AddUnary(ynn_unary_convert, b_id, y_id);
+      .AddConvert(b_id, ynn_type_uint8, y_id);
 
   std::vector<uint8_t> input_data(256);
   std::iota(input_data.begin(), input_data.end(), 0);
@@ -417,9 +422,9 @@ TEST(fusion_lut, binary_nonscalar_constant_unsupported) {
   std::iota(c_val.begin(), c_val.end(), 0.0f);
   builder.AddTensor(ynn_type_fp32, {256}, c_id, c_val.data());
 
-  builder.AddUnary(ynn_unary_convert, x_id, a_id)
+  builder.AddConvert(x_id, ynn_type_fp32, a_id)
       .AddBinary(ynn_binary_add, a_id, c_id, b_id)
-      .AddUnary(ynn_unary_convert, b_id, y_id);
+      .AddConvert(b_id, ynn_type_uint8, y_id);
 
   std::vector<uint8_t> input_data(256);
   std::iota(input_data.begin(), input_data.end(), 0);

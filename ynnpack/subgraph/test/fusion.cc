@@ -5,6 +5,7 @@
 
 #include <cmath>
 #include <cstdint>
+#include <utility>
 #include <variant>
 #include <vector>
 
@@ -216,9 +217,9 @@ TEST(fusion, convert_int32_to_fp32_binary) {
   const uint32_t zero_point_id = YNN_INVALID_VALUE_ID;
   SubgraphBuilder builder(4);
   builder.AddInput(ynn_type_fp32, 2, scale_id)
-      .AddInput(ynn_type_int32, 2, a_id, zero_point_id, scale_id)
+      .AddInput(ynn_type_int32, 2, a_id)
       .AddOutput(ynn_type_fp32, 2, x_id);
-  builder.AddUnary(ynn_unary_convert, a_id, x_id);
+  builder.AddDequantize(a_id, zero_point_id, scale_id, ynn_type_fp32, x_id);
 
   ynn_subgraph& subgraph = *builder.GetSubgraph();
 
@@ -241,10 +242,10 @@ TEST(fusion, convert_int32_to_fp32_ternary) {
   builder.AddTensor(ynn_type_fp32, 2, scale_id);
   builder.AddInput(ynn_type_fp32, 2, scale1_id)
       .AddInput(ynn_type_fp32, 2, scale2_id)
-      .AddInput(ynn_type_int32, 2, a_id, zero_point_id, scale_id)
+      .AddInput(ynn_type_int32, 2, a_id)
       .AddOutput(ynn_type_fp32, 2, x_id);
   builder.AddBinary(ynn_binary_multiply, scale1_id, scale2_id, scale_id)
-      .AddUnary(ynn_unary_convert, a_id, x_id);
+      .AddDequantize(a_id, zero_point_id, scale_id, ynn_type_fp32, x_id);
 
   ynn_subgraph& subgraph = *builder.GetSubgraph();
 
@@ -267,8 +268,8 @@ TEST(fusion, convert_fp32_to_int8_ternary) {
   builder.AddInput(ynn_type_fp32, 2, scale_id)
       .AddInput(ynn_type_int32, 2, zero_point_id)
       .AddInput(ynn_type_fp32, 2, a_id)
-      .AddOutput(ynn_type_int8, 2, x_id, zero_point_id, scale_id);
-  builder.AddUnary(ynn_unary_convert, a_id, x_id);
+      .AddOutput(ynn_type_int8, 2, x_id);
+  builder.AddQuantize(a_id, ynn_type_int8, zero_point_id, scale_id, x_id);
 
   ynn_subgraph& subgraph = *builder.GetSubgraph();
 
@@ -291,8 +292,8 @@ TEST(fusion, convert_fp32_to_uint8_ternary) {
   builder.AddInput(ynn_type_fp32, 2, scale_id)
       .AddInput(ynn_type_int32, 2, zero_point_id)
       .AddInput(ynn_type_fp32, 2, a_id)
-      .AddOutput(ynn_type_uint8, 2, x_id, zero_point_id, scale_id);
-  builder.AddUnary(ynn_unary_convert, a_id, x_id);
+      .AddOutput(ynn_type_uint8, 2, x_id);
+  builder.AddQuantize(a_id, ynn_type_uint8, zero_point_id, scale_id, x_id);
 
   ynn_subgraph& subgraph = *builder.GetSubgraph();
 
@@ -584,12 +585,14 @@ void TestReduceSumOfConvertQuantized(ynn_reduce_operator reduce_op) {
   // Define scale and zero point.
   builder.AddInput(ynn_type_fp32, 0, scale_id)
       .AddInput(ynn_type_int32, 0, zero_point_id)
-      .AddInput(ynn_type_int8, 2, input_id, zero_point_id, scale_id)
+      .AddInput(ynn_type_int8, 2, input_id)
       .AddOutput(ynn_type_fp32, 1, output_id);
 
   uint32_t dequantized_x_id = YNN_INVALID_VALUE_ID;
   builder.AddTensor(ynn_type_fp32, 2, dequantized_x_id);
-  builder.AddUnary(ynn_unary_convert, input_id, dequantized_x_id)
+  builder
+      .AddDequantize(input_id, zero_point_id, scale_id, ynn_type_fp32,
+                     dequantized_x_id)
       .AddReduce(reduce_op, {1}, dequantized_x_id, YNN_INVALID_VALUE_ID,
                  output_id);
 
@@ -598,9 +601,10 @@ void TestReduceSumOfConvertQuantized(ynn_reduce_operator reduce_op) {
   subgraph.invalidate_dead_values();
 
   // Should NOT fuse.
-  // We expect the reduce node to still consume converted_x_id, not x_id.
+  // We expect the reduce node to still consume dequantized_x_id, not x_id.
   EXPECT_THAT(ProducerOf(output_id, subgraph), InputsInclude(dequantized_x_id));
-  EXPECT_THAT(ProducerOf(dequantized_x_id, subgraph), InputsInclude(input_id));
+  EXPECT_THAT(ProducerOf(dequantized_x_id, subgraph),
+              AllOf(IsDequantize(), InputsInclude(input_id)));
   EXPECT_THAT(subgraph,
               HasValidValueIds(input_id, output_id, dequantized_x_id));
 }
@@ -1055,10 +1059,9 @@ TEST(fusion, dequantize_quantize) {
   uint32_t scale_id = builder.DefineScalar(0.5f);
   builder.AddInput(ynn_type_fp32, 2, a_id)
       .AddOutput(ynn_type_fp32, 2, x_id)
-      .AddTensor(ynn_type_int8, 2, b_id, /*data=*/nullptr, zero_point_id,
-                 scale_id);
-  builder.AddUnary(ynn_unary_convert, a_id, b_id)
-      .AddUnary(ynn_unary_convert, b_id, x_id);
+      .AddTensor(ynn_type_int8, 2, b_id);
+  builder.AddQuantize(a_id, ynn_type_int8, zero_point_id, scale_id, b_id)
+      .AddDequantize(b_id, zero_point_id, scale_id, ynn_type_fp32, x_id);
 
   ynn_subgraph& subgraph = *builder.GetSubgraph();
 

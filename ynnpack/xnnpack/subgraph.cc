@@ -134,7 +134,7 @@ xnn_status xnn_define_unary(xnn_subgraph_t subgraph, xnn_unary_operator type,
       assert(subgraph->num_nonbatch_axes.count(output_id));
       ynn_status status = ynn::compute_qd8_params(
           subgraph->ynn, subgraph->num_nonbatch_axes[output_id], input_id,
-          output_id);
+          output_id, output.scale_id, output.zero_point_id);
       if (status != ynn_status_success) {
         return ynn::xnn_status_from_ynn(status);
       }

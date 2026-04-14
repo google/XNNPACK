@@ -175,10 +175,43 @@ enum ynn_status ynn_define_unary_polynomial(ynn_subgraph_t subgraph,
 
 // A helper for `ynn_define_unary` with `op` = `ynn_unary_convert`, which is
 // capable of defining the output value.
-enum ynn_status ynn_define_convert(ynn_subgraph_t subgraph, uint32_t input_a_id,
+enum ynn_status ynn_define_convert(ynn_subgraph_t subgraph, uint32_t input_id,
                                    enum ynn_type type, uint32_t zero_point_id,
                                    uint32_t scale_id, uint32_t* output_id,
                                    uint32_t flags);
+
+// A helper for `ynn_define_unary` with `op` = `ynn_unary_convert`, which is
+// capable of defining the output value.
+enum ynn_status ynn_define_convert_v2(ynn_subgraph_t subgraph,
+                                      uint32_t input_id, enum ynn_type type,
+                                      uint32_t* output_id, uint32_t flags);
+
+// Conceptually, a quantized tensor has the value `x*scale + zero_point`, where
+// `x` is the quantized tensor, `scale` is an fp32 tensor, and `zero_point` is
+// an int32 tensor. Like any other elementwise op, the `scale` and `zero_point`
+// tensors must have the same shape as `x`. These tensors are usually broadcasts
+// in at least some of the dimensions. Some common quantization schemes include:
+// - Per-tensor quantization: `zero_point_id` and `scale_id` both refer to
+//   broadcasted scalar values.
+// - Per-channel quantization: `zero_point_id` refers to a broadcasted scalar,
+//   `scale_id` refers to a tensor with a single non-broadcasted dimension.
+// - Blockwise quantization: `zero_point_id` refers to a broadcasted scalar,
+//   `scale_id` refers to a tensor that is broadcasted by a block size factor,
+//   and then reshaped.
+
+// Define a quantize operation. `output_id` will be a tensor of type `type`
+// quantized with `zero_point_id` and `scale_id`.
+enum ynn_status ynn_define_quantize(ynn_subgraph_t subgraph, uint32_t input_id,
+                                    enum ynn_type type, uint32_t zero_point_id,
+                                    uint32_t scale_id, uint32_t* output_id,
+                                    uint32_t flags);
+
+// Define a dequantize operation. `output_id` will be a tensor of type `type`
+// dequantized from `input_id` using `zero_point_id` and `scale_id`.
+enum ynn_status ynn_define_dequantize(ynn_subgraph_t subgraph,
+                                      uint32_t input_id, uint32_t zero_point_id,
+                                      uint32_t scale_id, enum ynn_type type,
+                                      uint32_t* output_id, uint32_t flags);
 
 enum ynn_binary_operator {
   ynn_binary_invalid = 0,

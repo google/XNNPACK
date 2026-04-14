@@ -62,6 +62,35 @@ SubgraphBuilder& SubgraphBuilder::AddUnary(ynn_unary_operator op,
   return *this;
 }
 
+SubgraphBuilder& SubgraphBuilder::AddConvert(uint32_t input_id, ynn_type type,
+                                             uint32_t output_id,
+                                             uint32_t flags) {
+  assert(status_ == ynn_status_success);
+  status_ =
+      ynn_define_convert_v2(subgraph_.get(), input_id, type, &output_id, flags);
+  return *this;
+}
+
+SubgraphBuilder& SubgraphBuilder::AddQuantize(uint32_t input_id, ynn_type type,
+                                              uint32_t zero_point_id,
+                                              uint32_t scale_id,
+                                              uint32_t output_id,
+                                              uint32_t flags) {
+  assert(status_ == ynn_status_success);
+  status_ = ynn_define_quantize(subgraph_.get(), input_id, type, zero_point_id,
+                                scale_id, &output_id, flags);
+  return *this;
+}
+
+SubgraphBuilder& SubgraphBuilder::AddDequantize(
+    uint32_t input_id, uint32_t zero_point_id, uint32_t scale_id, ynn_type type,
+    uint32_t output_id, uint32_t flags) {
+  assert(status_ == ynn_status_success);
+  status_ = ynn_define_dequantize(subgraph_.get(), input_id, zero_point_id,
+                                  scale_id, type, &output_id, flags);
+  return *this;
+}
+
 SubgraphBuilder& SubgraphBuilder::AddPolynomial(
     const std::vector<float>& coefficients, uint32_t input_id,
     uint32_t output_id, uint32_t flags) {
