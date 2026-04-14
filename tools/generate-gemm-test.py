@@ -764,7 +764,7 @@ def generate_test_cases(
   ukernel_type = "gemm"
   activation = "linear"
   for token in ukernel.split("ukernel", 1)[0].split("_")[1:]:
-    if token in {"minmax", "linear", "relu"}:
+    if token in {"minmax", "linear"}:
       activation = token
     elif token in {
         "f32",

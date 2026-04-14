@@ -1509,7 +1509,8 @@ static inline bool validate_datatypes_with_bias(
                  output_datatype == xnn_datatype_fp16) {
         return true;
       } else if (input_datatype == xnn_datatype_qint8 &&
-                 bias_datatype == xnn_datatype_qcint32 &&
+                 (bias_datatype == xnn_datatype_qcint32 ||
+                  bias_datatype == xnn_datatype_qint32) &&
                  output_datatype == xnn_datatype_qint8) {
         return true;
       }
@@ -1532,7 +1533,8 @@ static inline bool validate_datatypes_with_bias(
                  output_datatype == xnn_datatype_fp16) {
         return true;
       } else if (input_datatype == xnn_datatype_qint8 &&
-                 bias_datatype == xnn_datatype_qcint32 &&
+                 (bias_datatype == xnn_datatype_qcint32 ||
+                  bias_datatype == xnn_datatype_qint32) &&
                  output_datatype == xnn_datatype_qint8) {
         return true;
       }
@@ -1570,7 +1572,8 @@ static inline bool validate_datatypes_with_bias(
                  output_datatype == xnn_datatype_fp16) {
         return true;
       } else if (input_datatype == xnn_datatype_qint8 &&
-                 bias_datatype == xnn_datatype_qcint32 &&
+                 (bias_datatype == xnn_datatype_qcint32 ||
+                  bias_datatype == xnn_datatype_qint32) &&
                  output_datatype == xnn_datatype_qint8) {
         return true;
       }

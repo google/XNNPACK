@@ -98,14 +98,13 @@ int xnn_reduce_operator_to_node_type(int) {
   return 0;
 }
 
-xnn_status xnn_subgraph_optimize(xnn_subgraph_t subgraph) {
+xnn_status xnn_subgraph_optimize(xnn_subgraph_t subgraph, uint32_t flags) {
   YNN_LOG_ERROR() << "Test-only XNNPACK operation not supported";
   return xnn_status_deprecated;
 }
 
-xnn_status xnn_subgraph_rewrite_for_nchw(xnn_subgraph_t subgraph) {
+void xnn_subgraph_rewrite_for_nchw(xnn_subgraph_t subgraph) {
   YNN_LOG_ERROR() << "Test-only XNNPACK operation not supported";
-  return xnn_status_deprecated;
 }
 
 xnn_status xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph) {

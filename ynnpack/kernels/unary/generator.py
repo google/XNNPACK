@@ -77,6 +77,8 @@ def main(argv: Sequence[str]) -> None:
       ],
       "x86_avx512": [
           (ceil_fp32, (32, 1)),
+          (convert_bf16_to_fp32, (64, 1)),
+          (convert_fp32_to_bf16, (64, 1)),
           (cosine_fp32, (32, 1)),
           (erf_fp32, (32, 1)),
           (exp_fp32, (32, 1)),
@@ -91,12 +93,13 @@ def main(argv: Sequence[str]) -> None:
           (tanh_fp32, (32, 1)),
       ],
       "x86_avx512bf16": [
-          (convert_bf16_to_fp32, (32, 1)),
           (convert_fp32_to_bf16, (32, 1)),
       ],
       "arm_neon": [
           (abs_fp32, (8, 1)),
           (ceil_fp32, (8, 1)),
+          (convert_bf16_to_fp32, (16, 1)),
+          (convert_fp32_to_bf16, (16, 1)),
           (cosine_fp32, (8, 1)),
           (erf_fp32, (8, 1)),
           (exp_fp32, (8, 1)),
@@ -110,9 +113,12 @@ def main(argv: Sequence[str]) -> None:
           (sigmoid_fp32, (8, 1)),
           (tanh_fp32, (8, 1)),
       ],
+      "arm_neonbf16": [
+          (convert_fp32_to_bf16, (16, 1)),
+      ],
       "arm_neonfp16": [
-          (convert_fp16_to_fp32, (8, 1)),
-          (convert_fp32_to_fp16, (8, 1)),
+          (convert_fp16_to_fp32, (16, 1)),
+          (convert_fp32_to_fp16, (16, 1)),
       ],
       "wasm_simd128": [
           (abs_fp32, (8, 1)),

@@ -337,11 +337,11 @@ struct log : public unary_op_info {
 };
 
 struct exp : public unary_op_info {
-  unary_params params;
+  exp_params params;
 
-  explicit exp(const unary_params& params) : params(params) {}
+  explicit exp(const unary_params& params) : params(params.exp) {}
   float operator()(float x) const override {
-    return std::exp2(params.exp.input_multiplier * x);
+    return std::exp2(params.input_multiplier * x) * params.output_multiplier;
   }
 
   float tolerance(float y_ref, ynn_type type) const override {
@@ -435,13 +435,21 @@ struct trig : public unary_op_info {
 };
 
 struct sine : public trig {
-  explicit sine(const unary_params& = {}) {}
-  float operator()(float x) const override { return std::sin(x); }
+  sine_params params;
+
+  explicit sine(const unary_params& params = {}) : params(params.sine) {}
+  float operator()(float x) const override {
+    return std::sin(x) * params.output_multiplier + params.output_offset;
+  }
 };
 
 struct cosine : public trig {
-  explicit cosine(const unary_params& = {}) {}
-  float operator()(float x) const override { return std::cos(x); }
+  cosine_params params;
+
+  explicit cosine(const unary_params& params = {}) : params(params.cosine) {}
+  float operator()(float x) const override {
+    return std::cos(x) * params.output_multiplier + params.output_offset;
+  }
 };
 
 struct hardswish : public unary_op_info {
@@ -489,19 +497,6 @@ struct poly3 : public unary_op_info {
 
 std::unique_ptr<unary_op_info> get_unary_op_info(
     ynn_unary_operator op, const unary_params& params = {});
-
-template <typename Rng>
-unary_params get_random_unary_params(ynn_unary_operator op, Rng& rng) {
-  std::uniform_real_distribution<float> dist(-2.0f, 2.0f);
-  switch (op) {
-    case ynn_unary_exp:
-      return unary_params{.exp = exp_params{dist(rng)}};
-    case ynn_unary_erf:
-      return unary_params{.exp = exp_params{dist(rng), dist(rng), dist(rng)}};
-    default:
-      return unary_params{};
-  }
-}
 
 // Check that op(a) == x, within tolerances described by `op`.
 template <typename A, typename X>

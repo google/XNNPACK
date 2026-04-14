@@ -137,7 +137,6 @@ void xnn_f32_qc8w_gemm_ukernel_6x8__wasmrelaxedsimd_fma_loadsplat(
     vacc4x4567 = wasm_f32x4_mul(vacc4x4567, vscale4567);
     vacc5x4567 = wasm_f32x4_mul(vacc5x4567, vscale4567);
     w = (const float*) w + 8;
-
     if XNN_LIKELY(nc >= 8) {
       wasm_v128_store(c0, vacc0x0123);
       wasm_v128_store(c0 + 4, vacc0x4567);

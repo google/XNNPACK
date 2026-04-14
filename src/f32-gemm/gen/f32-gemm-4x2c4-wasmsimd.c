@@ -140,7 +140,6 @@ void xnn_f32_gemm_ukernel_4x2c4__wasmsimd(
       wasm_v32x4_shuffle(vacc2x01c2, vacc3x01c2, 0, 1, 4, 5),
       wasm_v32x4_shuffle(vacc2x01c2, vacc3x01c2, 2, 3, 6, 7));
 
-
     if XNN_LIKELY(nc >= 2) {
       wasm_v128_store64_lane(c0, vacc01x01, 0);
       c0 = (float*) ((uintptr_t) c0 + cn_stride);

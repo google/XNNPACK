@@ -30,14 +30,16 @@ def qd_round_f32(a):
 @const_buffer("a", Float(32))
 @buffer("x", Float(32))
 @params(
+    Scalar("output_multiplier", Float(32)),
     Scalar("input_multiplier", Float(32)),
 )
 @operator_name("exp")
-def exp_fp32(a, x, input_multiplier):
-  # The monomial coefficients of the numerator polynomial (`valpha_0` = 1.0).
-  valpha_1 = 4.1594290733e-01
-  valpha_2 = 7.2068706155e-02
-  valpha_3 = 5.5380910635e-03
+def exp_fp32(a, x, output_multiplier, input_multiplier):
+  # The monomial coefficients of the numerator polynomial.
+  valpha_0 = output_multiplier
+  valpha_1 = 4.1594290733e-01 * output_multiplier
+  valpha_2 = 7.2068706155e-02 * output_multiplier
+  valpha_3 = 5.5380910635e-03 * output_multiplier
 
   # The monomial coefficients of the denominator polynomial (`vbeta_0 = 1.0).
   vbeta_1 = -2.7720427513e-01
@@ -57,7 +59,7 @@ def exp_fp32(a, x, input_multiplier):
   # Evaluate the numerator polynomial p(f).
   vp = multiply_add(vr, valpha_3, valpha_2)
   vp = multiply_add(vr, vp, valpha_1)
-  vp = multiply_add(vr, vp, 1.0)
+  vp = multiply_add(vr, vp, valpha_0)
 
   # Evaluate the denominator polynomial q(r).
   vq = multiply_add(vr, vbeta_2, vbeta_1)
@@ -75,12 +77,12 @@ def exp_fp32(a, x, input_multiplier):
 @const_buffer("a", Float(32))
 @buffer("x", Float(32))
 @params(
-    Scalar("input_multiplier", Float(32)),
-    Scalar("output_multiplier", Float(32)),
     Scalar("output_offset", Float(32)),
+    Scalar("output_multiplier", Float(32)),
+    Scalar("input_multiplier", Float(32)),
 )
 @operator_name("erf")
-def erf_fp32(a, x, input_multiplier, output_multiplier, output_offset):
+def erf_fp32(a, x, output_offset, output_multiplier, input_multiplier):
   # Cap the inputs to this value as `erf(x)` will always be `+/-1.0f`
   # beyond this point. This value is chosen roughly as the first floating point
   # number as of which the interpolation returns +/-1.0f.

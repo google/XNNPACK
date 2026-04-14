@@ -1823,6 +1823,9 @@ static uint32_t copy_value_to_static_subgraph(xnn_subgraph_t src_subgraph,
     dst_value->id = dst_id;
     dst_value->producer = XNN_INVALID_NODE_ID;
     dst_value->first_consumer = XNN_INVALID_NODE_ID;
+    // Clear the cleanup flag to avoid double-free: the source subgraph retains
+    // ownership of the data pointer.
+    dst_value->flags &= ~XNN_VALUE_FLAG_NEEDS_CLEANUP;
   }
   return dst_id;
 }
@@ -1842,7 +1845,7 @@ static struct xnn_node* copy_node_to_static_subgraph(
         src_subgraph, value, value_map, dst_subgraph);
     dst_node->inputs[i] = dst_id;
   }
-  for (size_t i = 0; i < src_node->num_inputs; i++) {
+  for (size_t i = 0; i < src_node->num_outputs; i++) {
     const struct xnn_value* value = &src_subgraph->values[src_node->outputs[i]];
     const uint32_t dst_id = copy_value_to_static_subgraph(
         src_subgraph, value, value_map, dst_subgraph);
@@ -3779,7 +3782,7 @@ static enum xnn_status optimize_common_subgraphs_iter(
         // is static.
         if (xnn_shape_multiply_all_dims(
                 &node->params.static_reshape.new_shape) != 0) {
-          xnn_log_info(
+          xnn_log_debug(
               "Marking output of static_reshape[#%u](v%03u) as static shaped.",
               node->id, node->inputs[0]);
           subgraph->values[node->outputs[0]].shape =
@@ -3848,7 +3851,7 @@ enum xnn_status xnn_subgraph_optimize_common_subgraphs(
       if (xnn_shape_multiply_all_dims(&value->shape) == 1) {
         // Get the value as a float.
         const float value_as_float = get_scalar_value_as_float(value);
-        xnn_log_info("v%03u is a constant: %e.", value->id, value_as_float);
+        xnn_log_debug("v%03u is a constant: %e.", value->id, value_as_float);
 
         // Mark the value accordingly.
         value->flags |= (value_as_float == 0.0f)   ? XNN_VALUE_FLAG_IS_ZERO

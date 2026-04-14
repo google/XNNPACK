@@ -154,11 +154,6 @@ std::unique_ptr<ynn::scheduling_info> ynn_runtime::make_schedule(
 
   sched->base_buffer_id = output_value;
 
-  // Schedule the output buffer to be stored at the same level as it's
-  // computed at.
-  ynn::scheduled_buffer sched_output_buffer = {output, 0};
-  sched->scheduled_buffers.push_back(std::move(sched_output_buffer));
-
   return sched;
 }
 
@@ -380,7 +375,9 @@ void ynn_runtime::schedule() {
             global_loop_nest[loop_nest[compute_at - 1]].loop_id;
         f.compute_at(lid);
       }
-      if (sched) {
+      if (!sched || sched->scheduled_buffers.empty()) {
+        f.store_outputs_innermost();
+      } else {
         for (auto& b : sched->scheduled_buffers) {
           if (b.store_at_min_depth == 0) {
             b.buffer->store_at({&funcs[i], slinky::var()});

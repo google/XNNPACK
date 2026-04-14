@@ -90,22 +90,38 @@ std::pair<float, int32_t> compute_qd8_params(T min, T max) {
 // Call compute_qd8_params for each element.
 template <typename T>
 auto make_compute_qd8_params_impl(int32_t output_zero_point) {
-  return [=](const slinky::buffer<const T>& min_max,
-             const slinky::buffer<float>& scale,
-             const slinky::buffer<int32_t>& zero_point) -> index_t {
+  return [=](slinky::raw_buffer min_max, slinky::raw_buffer scale,
+             slinky::raw_buffer zero_point) -> index_t {
+    assert(min_max.rank > 0);
     const index_t index_stride_bytes =
         min_max.dim(min_max.rank - 1).stride();
     assert(index_stride_bytes % sizeof(T) == 0);
     const index_t index_stride = index_stride_bytes / sizeof(T);
-    slinky::for_each_contiguous_slice(scale,
-        [=](index_t n, float* scale, int32_t* zero_point, const T* min_max) {
+
+    slinky::dim scale_n[1];
+    slinky::dim zero_point_n[1];
+    slinky::dim min_max_n[1];
+
+    fuse_and_slice_leading_dims<1>(scale_n, scale, zero_point_n, zero_point,
+                                   min_max_n, min_max);
+
+    assert(is_contiguous(scale_n[0], scale.elem_size));
+    assert(is_contiguous(zero_point_n[0], zero_point.elem_size));
+    assert(is_contiguous(min_max_n[0], min_max.elem_size));
+    const index_t n = scale_n[0].extent();
+
+    slinky::for_each_element(
+        [&](void* scale, void* zero_point, const void* min_max) {
           for (index_t i = 0; i < n; ++i) {
-            std::tie(scale[i], zero_point[i]) =
-                compute_qd8_params(min_max[i], min_max[i + index_stride]);
-            zero_point[i] += output_zero_point;
+            float& scale_i = reinterpret_cast<float*>(scale)[i];
+            int32_t& zero_point_i = reinterpret_cast<int32_t*>(zero_point)[i];
+            const T* min_max_i = reinterpret_cast<const T*>(min_max) + i;
+            std::tie(scale_i, zero_point_i) =
+                compute_qd8_params(min_max_i[0], min_max_i[index_stride]);
+            zero_point_i += output_zero_point;
           }
         },
-        zero_point, min_max);
+        scale, zero_point, min_max);
     return 0;
   };
 }

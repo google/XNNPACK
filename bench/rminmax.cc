@@ -62,6 +62,9 @@ static void reduce(benchmark::State& state, uint64_t arch_flags,
   BENCHMARK_CAPTURE(reduce, ukernel, arch_flags, ukernel)                      \
       ->Apply(benchmark::utils::ReduceParameters<datatype_in>)                 \
       ->UseRealTime();
+#include "src/bf16-rminmax/bf16-rmax.inc"
+#include "src/bf16-rminmax/bf16-rmin.inc"
+#include "src/bf16-rminmax/bf16-rminmax.inc"
 #include "src/f16-rminmax/f16-rmax.inc"
 #include "src/f16-rminmax/f16-rmin.inc"
 #include "src/f16-rminmax/f16-rminmax.inc"

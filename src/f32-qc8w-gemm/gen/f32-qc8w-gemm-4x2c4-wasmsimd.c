@@ -150,7 +150,6 @@ void xnn_f32_qc8w_gemm_ukernel_4x2c4__wasmsimd(
     w = (const float*) w + 2;
     vacc01x01 = wasm_f32x4_mul(vacc01x01, vscalex01);
     vacc23x01 = wasm_f32x4_mul(vacc23x01, vscalex01);
-
     if XNN_LIKELY(nc >= 2) {
       wasm_v128_store64_lane(c0, vacc01x01, 0);
       c0 = (float*) ((uintptr_t) c0 + cn_stride);

@@ -95,6 +95,9 @@ LOGGING_SRCS = [
 
 MICROKERNEL_DEFS = [
     "src/bf16-f32-vcvt/bf16-f32-vcvt.inc",
+    "src/bf16-rminmax/bf16-rmax.inc",
+    "src/bf16-rminmax/bf16-rmin.inc",
+    "src/bf16-rminmax/bf16-rminmax.inc",
     "src/f16-avgpool/f16-avgpool-minmax.inc",
     "src/f16-dwconv/f16-dwconv-minmax.inc",
     "src/f16-f32-vcvt/f16-f32-vcvt.inc",

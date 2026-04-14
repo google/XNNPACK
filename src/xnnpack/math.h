@@ -474,6 +474,10 @@ XNN_INLINE static uint16_t math_cvt_bf16_fp32(float x) {
   // Apply rounding correction if not inf/nan.
   if ((bits.as_uint32 & F32_EXP_MASK) != F32_EXP_MASK) {
     bits.as_uint32 += 0x7FFFu + ((bits.as_uint32 >> 16) & 1u);
+  } else if (bits.as_uint32 & 0x007FFFFFu) {
+    // NaN with payload only in lower 16 bits would become inf after
+    // truncation. Set the quiet bit to ensure NaN is preserved.
+    bits.as_uint32 |= 0x00400000u;
   }
 
   return bits.as_uint32 >> 16;

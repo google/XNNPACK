@@ -53,7 +53,7 @@ enum {
   hvx = 1 << 0,
 #endif  // YNN_ARCH_HEXAGON
 #ifdef YNN_ARCH_WASM
-  wasm_simd128 = 1 << 0,
+  simd128 = 1 << 0,
 #endif  // YNN_ARCH_WASM
 };
 

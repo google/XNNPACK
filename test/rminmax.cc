@@ -93,6 +93,9 @@ struct Kernel {
   explicit Kernel(xnn_f32_reduce_ukernel_fn fn) {
     dispatch = [=](const Tester& tester) { tester.Test(fn); };
   }
+  explicit Kernel(xnn_bf16_reduce_ukernel_fn fn) {
+    dispatch = [=](const Tester& tester) { tester.Test(fn); };
+  }
   explicit Kernel(xnn_f16_reduce_ukernel_fn fn) {
     dispatch = [=](const Tester& tester) { tester.Test(fn); };
   }
@@ -122,6 +125,7 @@ KernelInfo kernels[] = {
                     datatype_out, params_type, init_params)                    \
   {#ukernel,   arch_flags,  Kernel{ukernel},    OpType::Max,                   \
    batch_tile, vector_tile, sizeof(datatype_in)},
+#include "src/bf16-rminmax/bf16-rmax.inc"
 #include "src/f16-rminmax/f16-rmax.inc"
 #include "src/f32-rminmax/f32-rmax.inc"
 #include "src/s8-rminmax/s8-rmax.inc"
@@ -132,6 +136,7 @@ KernelInfo kernels[] = {
                     datatype_out, params_type, init_params)                    \
   {#ukernel,   arch_flags,  Kernel{ukernel},    OpType::Min,                   \
    batch_tile, vector_tile, sizeof(datatype_in)},
+#include "src/bf16-rminmax/bf16-rmin.inc"
 #include "src/f16-rminmax/f16-rmin.inc"
 #include "src/f32-rminmax/f32-rmin.inc"
 #include "src/s8-rminmax/s8-rmin.inc"
@@ -142,6 +147,7 @@ KernelInfo kernels[] = {
                     datatype_out, params_type, init_params)                    \
   {#ukernel,   arch_flags,  Kernel{ukernel},    OpType::MinMax,                \
    batch_tile, vector_tile, sizeof(datatype_in)},
+#include "src/bf16-rminmax/bf16-rminmax.inc"
 #include "src/f16-rminmax/f16-rminmax.inc"
 #include "src/f32-rminmax/f32-rminmax.inc"
 #include "src/s8-rminmax/s8-rminmax.inc"

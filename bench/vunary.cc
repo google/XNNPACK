@@ -44,6 +44,16 @@ struct UniformDistribution<xnn_float16> {
 };
 
 template <>
+struct UniformDistribution<xnn_bfloat16> {
+  std::uniform_real_distribution<float> dist{-10.0f, 10.0f};
+
+  template <class Generator>
+  xnn_bfloat16 operator()(Generator& g) {
+    return xnn_bfloat16_from_float(dist(g));
+  }
+};
+
+template <>
 struct UniformDistribution<int8_t> {
   std::uniform_int_distribution<int32_t> dist{
       std::numeric_limits<int8_t>::lowest(),
@@ -287,6 +297,8 @@ void vlrelu(benchmark::State& state, uint64_t arch_flags,
       ->Apply(benchmark::utils::UnaryElementwiseParameters<datatype_in,     \
                                                            datatype_out>)   \
       ->UseRealTime();
+#include "src/bf16-f32-vcvt/bf16-f32-vcvt.inc"
+#include "src/f32-bf16-vcvt/f32-bf16-vcvt.inc"
 #include "src/f16-f32-vcvt/f16-f32-vcvt.inc"
 #include "src/f16-qs8-vcvt/f16-qs8-vcvt.inc"
 #include "src/f32-f16-vcvt/f32-f16-vcvt.inc"

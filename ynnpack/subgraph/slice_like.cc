@@ -76,11 +76,6 @@ ynn_status ynn_define_slice_like(ynn_subgraph_t subgraph, size_t num_axes,
       auto func = slinky::func::make_copy({input.buffer, std::move(bounds)},
                                           {output.buffer, dims});
 
-      auto sched = std::make_unique<scheduling_info>();
-      sched->scheduled_buffers.push_back({output.buffer, 0});
-      func.user_data() = sched.get();
-      runtime.scheduling_info_storage.push_back(std::move(sched));
-
       runtime.funcs.push_back(std::move(func));
     } else {
       // We don't actually need to do anything here, this op is only a

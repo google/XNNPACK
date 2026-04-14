@@ -27,6 +27,7 @@ TEST_BROADCAST(x86_avx, f16, 16);
 TEST_BROADCAST(x86_avx, bf16, 16);
 TEST_BROADCAST(x86_avx, f32, 8);
 TEST_BROADCAST(x86_avx, s32, 8);
+TEST_BROADCAST(x86_avx, f64, 4);
 
 TEST_LOAD_STORE(x86_avx, u8, 32);
 TEST_LOAD_STORE(x86_avx, s8, 32);
@@ -35,6 +36,7 @@ TEST_LOAD_STORE(x86_avx, f16, 16);
 TEST_LOAD_STORE(x86_avx, bf16, 16);
 TEST_LOAD_STORE(x86_avx, f32, 8);
 TEST_LOAD_STORE(x86_avx, s32, 8);
+TEST_LOAD_STORE(x86_avx, f64, 4);
 
 TEST_ALIGNED_LOAD_STORE(x86_avx, u8, 32);
 TEST_ALIGNED_LOAD_STORE(x86_avx, s8, 32);
@@ -43,6 +45,7 @@ TEST_ALIGNED_LOAD_STORE(x86_avx, f16, 16);
 TEST_ALIGNED_LOAD_STORE(x86_avx, bf16, 16);
 TEST_ALIGNED_LOAD_STORE(x86_avx, f32, 8);
 TEST_ALIGNED_LOAD_STORE(x86_avx, s32, 8);
+TEST_ALIGNED_LOAD_STORE(x86_avx, f64, 4);
 
 TEST_PARTIAL_LOAD_STORE(x86_avx, u8, 32);
 TEST_PARTIAL_LOAD_STORE(x86_avx, s8, 32);
@@ -51,13 +54,20 @@ TEST_PARTIAL_LOAD_STORE(x86_avx, f16, 16);
 TEST_PARTIAL_LOAD_STORE(x86_avx, bf16, 16);
 TEST_PARTIAL_LOAD_STORE(x86_avx, f32, 8);
 TEST_PARTIAL_LOAD_STORE(x86_avx, s32, 8);
+TEST_PARTIAL_LOAD_STORE(x86_avx, f64, 4);
 
 TEST_ADD(x86_avx, f32, 8);
+TEST_ADD(x86_avx, f64, 4);
 TEST_SUBTRACT(x86_avx, f32, 8);
+TEST_SUBTRACT(x86_avx, f64, 4);
 TEST_MULTIPLY(x86_avx, f32, 8);
+TEST_MULTIPLY(x86_avx, f64, 4);
 TEST_DIVIDE(x86_avx, f32, 8);
+TEST_DIVIDE(x86_avx, f64, 4);
 TEST_MIN(x86_avx, f32, 8);
+TEST_MIN(x86_avx, f64, 4);
 TEST_MAX(x86_avx, f32, 8);
+TEST_MAX(x86_avx, f64, 4);
 
 TEST_AND(x86_avx, u8, 32);
 TEST_AND(x86_avx, s8, 32);
@@ -80,10 +90,15 @@ TEST_NOT(x86_avx, s16, 16);
 TEST_NOT(x86_avx, s32, 8);
 
 TEST_FLOOR(x86_avx, f32, 8);
+TEST_FLOOR(x86_avx, f64, 4);
 TEST_CEIL(x86_avx, f32, 8);
+TEST_CEIL(x86_avx, f64, 4);
 TEST_ROUND(x86_avx, f32, 8);
+TEST_ROUND(x86_avx, f64, 4);
 TEST_SQRT(x86_avx, f32, 8);
+TEST_SQRT(x86_avx, f64, 4);
 TEST_ABS(x86_avx, f32, 8);
+TEST_ABS(x86_avx, f64, 4);
 
 TEST_EXTRACT(x86_avx, s32x8, 4);
 TEST_EXTRACT(x86_avx, f32x8, 4);
@@ -94,13 +109,16 @@ TEST_EXTRACT(x86_avx, u8x32, 16);
 
 TEST_CONCAT(x86_avx, s32x4);
 TEST_CONCAT(x86_avx, f32x4);
+TEST_CONCAT(x86_avx, f64x2);
 TEST_CONCAT(x86_avx, bf16x8);
 TEST_CONCAT(x86_avx, f16x8);
 TEST_CONCAT(x86_avx, s8x16);
 TEST_CONCAT(x86_avx, u8x16);
 
 TEST_HORIZONTAL_MIN(x86_avx, f32, 8);
+TEST_HORIZONTAL_MIN(x86_avx, f64, 4);
 TEST_HORIZONTAL_MAX(x86_avx, f32, 8);
+TEST_HORIZONTAL_MAX(x86_avx, f64, 4);
 
 }  // namespace simd
 }  // namespace ynn

@@ -140,6 +140,12 @@ YNN_DOT_KERNEL(arch_flag::sme, dot_int8_int8_int32_sme,
 #include "ynnpack/kernels/dot/arm_neon_int8_int8_int32.inc"
 #endif  // YNN_ARCH_ARM_NEON
 
+#ifdef YNN_ARCH_WASM_SIMD128
+#include "ynnpack/kernels/dot/wasm_simd128_fp32.inc"
+#include "ynnpack/kernels/dot/wasm_simd128_fp64.inc"
+#include "ynnpack/kernels/dot/wasm_simd128_int8_int8_int32.inc"
+#endif  // YNN_ARCH_WASM_SIMD128
+
 #if defined(YNN_ARCH_X86) || defined(YNN_ARCH_ARM64)
 // On x86 and on ARM64, we consider kernels that use FMA to be consistent (and
 // not ones that don't).

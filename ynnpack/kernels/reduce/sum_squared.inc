@@ -17,6 +17,9 @@ YNN_UNARY_REDUCE_KERNEL(arch_flag::neondot, sum_squared_uint8_int32_neondot, uin
 #ifdef YNN_ARCH_ARM_NEON
 YNN_UNARY_REDUCE_KERNEL(arch_flag::neon, sum_squared_fp32_neon, float, float)
 YNN_UNARY_REDUCE_KERNEL(arch_flag::neon, sum_squared_bf16_fp32_neon, bfloat16, float)
+#ifdef YNN_ARCH_ARM64
+YNN_UNARY_REDUCE_KERNEL(arch_flag::neon, sum_squared_fp64_neon, double, double)
+#endif
 #endif  // YNN_ARCH_ARM_NEON
 
 #ifdef YNN_ARCH_HEXAGON_HVX
@@ -25,7 +28,7 @@ YNN_UNARY_REDUCE_KERNEL(arch_flag::hvx, sum_squared_uint8_int32_hvx, uint8_t, in
 #endif  // YNN_ARCH_HEXAGON_HVX
 
 #ifdef YNN_ARCH_WASM_SIMD128
-YNN_UNARY_REDUCE_KERNEL(arch_flag::wasm_simd128, sum_squared_fp32_wasm_simd128, float, float)
+YNN_UNARY_REDUCE_KERNEL(arch_flag::simd128, sum_squared_fp32_simd128, float, float)
 #endif  // YNN_ARCH_WASM_SIMD128
 
 #ifdef YNN_ARCH_X86_AVX512BF16
@@ -37,6 +40,7 @@ YNN_UNARY_REDUCE_KERNEL(arch_flag::avx512, sum_squared_fp16_fp32_avx512, half, f
 YNN_UNARY_REDUCE_KERNEL(arch_flag::avx512, sum_squared_uint8_int32_avx512, uint8_t, int32_t)
 YNN_UNARY_REDUCE_KERNEL(arch_flag::avx512, sum_squared_int8_int32_avx512, int8_t, int32_t)
 YNN_UNARY_REDUCE_KERNEL(arch_flag::avx512, sum_squared_fp32_avx512, float, float)
+YNN_UNARY_REDUCE_KERNEL(arch_flag::avx512, sum_squared_fp64_avx512, double, double)
 #endif  // YNN_ARCH_X86_AVX512
 #ifdef YNN_ARCH_X86_AVX2_FMA3
 YNN_UNARY_REDUCE_KERNEL(arch_flag::avx2 | arch_flag::fma3, sum_squared_bf16_fp32_avx2_fma3, bfloat16, float)
@@ -47,7 +51,8 @@ YNN_UNARY_REDUCE_KERNEL(arch_flag::avx2, sum_squared_int8_int32_avx2, int8_t, in
 YNN_UNARY_REDUCE_KERNEL(arch_flag::avx2, sum_squared_uint8_int32_avx2, uint8_t, int32_t)
 #endif  // YNN_ARCH_X86_AVX2
 #ifdef YNN_ARCH_X86_AVX
-YNN_UNARY_REDUCE_KERNEL(arch_flag::avx2, sum_squared_fp32_avx, float, float)
+YNN_UNARY_REDUCE_KERNEL(arch_flag::avx, sum_squared_fp32_avx, float, float)
+YNN_UNARY_REDUCE_KERNEL(arch_flag::avx, sum_squared_fp64_avx, double, double)
 #endif  // YNN_ARCH_X86_AVX
 #ifdef YNN_ARCH_X86_F16C
 YNN_UNARY_REDUCE_KERNEL(arch_flag::f16c, sum_squared_fp16_fp32_f16c, half, float)
@@ -72,6 +77,7 @@ YNN_UNARY_REDUCE_KERNEL(arch_flag::sse2, sum_squared_bf16_fp32_sse2, bfloat16, f
 YNN_UNARY_REDUCE_KERNEL(arch_flag::none, sum_squared_fp32, float, float)
 YNN_UNARY_REDUCE_KERNEL(arch_flag::none, sum_squared_bf16_fp32, bfloat16, float)
 #endif  // !defined(YNN_ARCH_X86_SSE2)
+YNN_UNARY_REDUCE_KERNEL(arch_flag::none, sum_squared_fp64, double, double)
 YNN_UNARY_REDUCE_KERNEL(arch_flag::none, sum_squared_fp16_fp32, half, float)
 YNN_UNARY_REDUCE_KERNEL(arch_flag::none, sum_squared_int8_int32, int8_t, int32_t)
 YNN_UNARY_REDUCE_KERNEL(arch_flag::none, sum_squared_uint8_int32, uint8_t, int32_t)

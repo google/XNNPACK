@@ -22,13 +22,16 @@
 #include "ynnpack/include/ynnpack.h"
 #include "ynnpack/subgraph/subgraph.h"
 
-// This causes gmock to print the subgraph instead of just a hex encoded dump of
-// the memory. It needs to be in the global namespace for argument dependent
-// lookup to work.
+// This causes gmock to print the subgraph/node instead of just a hex encoded
+// dump of the memory. It needs to be in the global namespace for argument
+// dependent lookup to work.
 inline std::ostream& operator<<(std::ostream& os, const ynn_subgraph& g) {
   os << "subgraph:" << std::endl;
   g.dump(os);
   return os;
+}
+inline std::ostream& operator<<(std::ostream& os, const ynn_node& node) {
+  return os << node.to_string();
 }
 
 namespace ynn {
@@ -185,6 +188,31 @@ MATCHER_P(IsStencilCopy, stencils, "") {
 MATCHER(IsCopy, "") {
   const ynn_node::copy* copy = std::get_if<ynn_node::copy>(&arg.op);
   return copy != nullptr;
+}
+
+// Checks that the given node is a dequantize_dot.
+//
+// Example:
+//   EXPECT_THAT(ProducerOf(y_id, subgraph), IsRescaleDot());
+MATCHER(IsRescaleDot, "") {
+  return std::holds_alternative<ynn_node::dequantize_dot>(arg.op);
+}
+
+// Checks that the given node is a dot.
+//
+// Example:
+//   EXPECT_THAT(ProducerOf(y_id, subgraph), IsDot());
+MATCHER(IsDot, "") { return std::holds_alternative<ynn_node::dot>(arg.op); }
+
+// Checks that the given node is a broadcast_like.
+//
+// Example:
+//   EXPECT_THAT(ProducerOf(y_id, subgraph), IsBroadcastLike());
+MATCHER(IsBroadcastLike, "") {
+  return std::holds_alternative<ynn_node::broadcast_like>(arg.op);
+}
+MATCHER(IsStaticBroadcast, "") {
+  return std::holds_alternative<ynn_node::static_broadcast>(arg.op);
 }
 
 // Checks that the given value ID is valid in the given subgraph.

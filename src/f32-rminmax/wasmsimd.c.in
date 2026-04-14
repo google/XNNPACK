@@ -55,6 +55,7 @@ void xnn_f32_r${OP.lower()}_ukernel__wasmsimd${MINMAX_SUFFIX}_u${BATCH_TILE}${AC
       $for N in range(SIMD_TILE):
         $if EMIT_MIN:
           vmin${N % ACCUMULATORS} = ${WASM_F32X4_MIN}(vmin${N % ACCUMULATORS}, vt${N});
+      $for N in range(SIMD_TILE):
         $if EMIT_MAX:
           vmax${N % ACCUMULATORS} = ${WASM_F32X4_MAX}(vmax${N % ACCUMULATORS}, vt${N});
     }

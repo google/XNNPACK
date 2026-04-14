@@ -1,8 +1,8 @@
 name: Run Linux and Windows (x86, x64) Tests with Intel SDE Processors
 
 env:
-  SDE_WINDOWS_URL: https://downloadmirror.intel.com/913594/sde-external-10.7.0-2026-02-18-win.tar.xz
-  SDE_LINUX_URL: https://downloadmirror.intel.com/913594/sde-external-10.7.0-2026-02-18-lin.tar.xz
+  SDE_WINDOWS_URL: https://downloadmirror.intel.com/915934/sde-external-10.8.0-2026-03-15-win.tar.xz
+  SDE_LINUX_URL: https://downloadmirror.intel.com/915934/sde-external-10.8.0-2026-03-15-lin.tar.xz
 
 on:
   workflow_dispatch:

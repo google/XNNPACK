@@ -625,6 +625,8 @@ inline void SqueezeNetV11GemmArguments(benchmark::Benchmark* unwrapped_b) {
 
 inline void InceptionV3GemmArguments(benchmark::Benchmark* unwrapped_b) {
   BenchmarkWrapper b(unwrapped_b);
+  b.ArgNames({"M", "N", "K"});
+
   /*           M        N          K   */
   b.Args({150 * 150,   32,    3 * 3 * 3});
   b.Args({149 * 149,   32,   32 * 3 * 3});

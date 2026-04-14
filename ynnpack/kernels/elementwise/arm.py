@@ -25,6 +25,9 @@ YNN_INTRINSIC simd::vec<float, 4> select_greater_than(simd::vec<float, 4> a, sim
   def update_for_fp16(self):
     """Updates the target for FP16 support."""
 
+  def update_for_bf16(self):
+    """Updates the target for BF16 support."""
+
   def update_for_fma(self):
     self.patterns += add_fma_rules()
 
@@ -40,13 +43,14 @@ YNN_INTRINSIC simd::vec<float, 4> select_greater_than(simd::vec<float, 4> a, sim
 
     # These are transitive.
     implied_features = {
+        "NEONBF16": ["NEON"],
         "NEONFP16": ["NEON"],
         "FMA": ["NEON"],
     }
     all_features = []
     self.compute_all_features(features, implied_features, all_features)
 
-    known_features = ["NEON", "NEONFP16", "FMA"]
+    known_features = ["NEON", "NEONBF16", "NEONFP16", "FMA"]
     for feature in all_features:
       if feature not in known_features:
         raise ValueError(f"Unknown feature: {feature}")
@@ -63,6 +67,8 @@ YNN_INTRINSIC simd::vec<float, 4> select_greater_than(simd::vec<float, 4> a, sim
           '#include "ynnpack/base/simd/arm_neonfp16.h"\n'
       )
       self.update_for_fp16()
+    if "NEONBF16" in all_features:
+      self.update_for_bf16()
     if "FMA" in all_features:
       self.header += (
           '#include "ynnpack/base/simd/arm_neonfma.h"\n'

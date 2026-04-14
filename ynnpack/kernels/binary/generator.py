@@ -41,29 +41,51 @@ def main(argv: Sequence[str]) -> None:
       ],
       "x86_avx2": [
           (multiply_int32_fp32, (16, 1)),
-          (subtract_fp32_bf16, (16, 1)),
+          (subtract_fp32_bf16_bf16, (32, 1)),
+          (subtract_bf16_fp32, (32, 1)),
+          (divide_bf16_fp32, (32, 1)),
+          (multiply_bf16_fp32, (32, 1)),
+          (divide_bf16_fp32_bf16, (32, 1)),
+          (multiply_bf16_fp32_bf16, (32, 1)),
       ],
       "x86_avx512": [
           (add_fp32, (32, 1)),
           (subtract_fp32, (32, 1)),
+          (subtract_bf16_fp32, (64, 1)),
+          (subtract_fp32_bf16_bf16, (64, 1)),
           (multiply_fp32, (32, 1)),
           (multiply_int32_fp32, (32, 1)),
+          (multiply_bf16_fp32, (64, 1)),
+          (multiply_bf16_fp32_bf16, (64, 1)),
           (divide_fp32, (32, 1)),
+          (divide_bf16_fp32, (64, 1)),
+          (divide_bf16_fp32_bf16, (64, 1)),
           (max_fp32, (32, 1)),
           (min_fp32, (32, 1)),
       ],
       "x86_avx512bf16": [
-          (subtract_fp32_bf16, (32, 1)),
+          (subtract_fp32_bf16_bf16, (64, 1)),
+          (multiply_bf16_fp32_bf16, (64, 1)),
+          (divide_bf16_fp32_bf16, (64, 1)),
       ],
       "arm_neon": [
           (add_fp32, (8, 1)),
           (subtract_fp32, (8, 1)),
+          (subtract_bf16_fp32, (16, 1)),
           (multiply_fp32, (8, 1)),
           (multiply_int32_fp32, (8, 1)),
+          (multiply_bf16_fp32, (16, 1)),
+          (multiply_bf16_fp32_bf16, (16, 1)),
           (divide_fp32, (8, 1)),
+          (divide_bf16_fp32, (16, 1)),
+          (divide_bf16_fp32_bf16, (16, 1)),
           (copysign_fp32, (8, 1)),
           (max_fp32, (8, 1)),
           (min_fp32, (8, 1)),
+      ],
+      "arm_neonbf16": [
+          (multiply_bf16_fp32_bf16, (16, 1)),
+          (divide_bf16_fp32_bf16, (16, 1)),
       ],
       "wasm_simd128": [
           (add_fp32, (8, 1)),
@@ -75,7 +97,6 @@ def main(argv: Sequence[str]) -> None:
           (max_fp32, (8, 1)),
           (min_fp32, (8, 1)),
       ],
-
   }[target]
 
   generate_elementwise_kernels(output_src, output_inc, target, kernels)

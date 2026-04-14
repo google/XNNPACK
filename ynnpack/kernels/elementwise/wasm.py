@@ -34,12 +34,12 @@ YNN_INTRINSIC simd::vec<float, 4> select_greater_than(simd::vec<float, 4> a, sim
 
     # These are transitive.
     implied_features = {
-        "WASM_SIMD128": [],
+        "SIMD128": [],
     }
     all_features = []
     self.compute_all_features(features, implied_features, all_features)
 
-    known_features = ["WASM_SIMD128"]
+    known_features = ["SIMD128"]
     for feature in all_features:
       if feature not in known_features:
         raise ValueError(f"Unknown feature: {feature}")
@@ -48,7 +48,7 @@ YNN_INTRINSIC simd::vec<float, 4> select_greater_than(simd::vec<float, 4> a, sim
         '#include "ynnpack/base/simd/wasm_simd128.h"\n'
     )
 
-    if "WASM_SIMD128" in all_features:
+    if "SIMD128" in all_features:
       self.update_for_simd128()
 
   def arch_flags(self):

@@ -187,22 +187,22 @@ auto make_dot_impl(dot_type type, bool consistent_arithmetic, bool transposed_a,
     for (size_t i = 0; i < a_k1_dim + num_k_dims; ++i) {
       a.slice(0);
     }
-    a.slice(0, c_m.min());
+    a.slice(0, slinky::in_bounds{c_m.min()});
     if (pack_b) {
       // If b is packed, we must slice b at blocks of n.
       b.slice({0, 1, 2});
-      b.slice(0, c_n.min() / block_n);
+      b.slice(0, slinky::in_bounds{c_n.min() / block_n});
     } else {
       // If b is not packed, we need to just slice it at n.
       b.slice(0);
-      b.slice(0, c_n.min());
+      b.slice(0, slinky::in_bounds{c_n.min()});
       b.slice({0, 1});
     }
     for (size_t i = 1; i < num_k_dims; ++i) {
       b.slice(0);
     }
-    init_c.slice(0, c_n.min());
-    init_c.slice(0, c_m.min());
+    init_c.slice(0, slinky::in_bounds{c_n.min()});
+    init_c.slice(0, slinky::in_bounds{c_m.min()});
     c.slice({0, 1});
     // TODO: At this point, we can probably fuse dimensions of c, a, b in the
     // hopes of making i bigger, which should improve performance in cases where
@@ -250,7 +250,7 @@ auto make_dot_impl(dot_type type, bool consistent_arithmetic, bool transposed_a,
                                 b.elem_size, loops_storage);
 
       slinky::for_each_element(
-          [&](void* c, const void* a, const void* b, const void* init_c) {
+          [=](void* c, const void* a, const void* b, const void* init_c) {
             run_dot(loops, c_m.extent(), c_n.extent(), k, block_m, block_n,
                     block_k, a_stride_m, a_k_strides, a, b_k_strides,
                     b_stride_n, b, init_c_stride_m, init_c, c_stride_m,
@@ -311,7 +311,7 @@ auto make_dot_impl(dot_type type, bool consistent_arithmetic, bool transposed_a,
             }
           };
       slinky::for_each_element(
-          [&](void* c, const void* a, const void* b, const void* init_c) {
+          [=](void* c, const void* a, const void* b, const void* init_c) {
             index_t tail_init_c_stride_m = init_c_stride_m;
             if (k1 != 0) {
               init_c = c;
@@ -375,7 +375,7 @@ auto make_pack_impl(int elem_count) {
     packer p(transpose, elem_size * 8 / elem_count, tile_k, block_n);
 
     slinky::for_each_element(
-        [&](void* output, const void* input) {
+        [=, &p](void* output, const void* input) {
           p.pack(k, n, input_stride, input, output_ko.stride(),
                  output_no.stride(), output);
         },
@@ -543,7 +543,7 @@ auto make_transpose_a_impl(int m_dim) {
     output.slice({0, 1, static_cast<size_t>(m_dim + 1)});
 
     slinky::for_each_element(
-        [&](void* output, const void* input) {
+        [=, &p](void* output, const void* input) {
           p.pack(k, m, input_m_stride, input, output_ko_stride,
                  /*output_block_stride=*/0, output);
         },

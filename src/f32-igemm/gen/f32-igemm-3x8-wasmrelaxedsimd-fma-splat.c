@@ -169,7 +169,6 @@ void xnn_f32_igemm_ukernel_3x8__wasmrelaxedsimd_fma_splat(
       p -= 3 * sizeof(void*);
     } while (p != 0);
 
-
     if XNN_LIKELY(nc >= 8) {
       wasm_v128_store(c2, vacc2x0123);
       wasm_v128_store(c2 + 4, vacc2x4567);

@@ -40,6 +40,29 @@ py_library(
 ]]
 
 py_library(
+    name = "wasm",
+    srcs = ["wasm.py"],
+    deps = [":dot_base"],
+)
+
+[py_binary(
+    name = name,
+    srcs = [name + ".py"],
+    tags = [
+        "manual",
+        "notap",
+    ],
+    deps = [
+        ":dot_base",
+        ":wasm",
+    ],
+) for name in [
+    "wasm_fp32",
+    "wasm_fp64",
+    "wasm_int8_int8_int32",
+]]
+
+py_library(
     name = "x86",
     srcs = ["x86.py"],
     deps = [":dot_base"],

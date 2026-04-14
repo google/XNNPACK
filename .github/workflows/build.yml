@@ -162,7 +162,7 @@ jobs:
         run: ccache -s
 
   cmake-windows-arm64:
-    runs-on: windows-2022-32core
+    runs-on: windows-2022-8core
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v6
@@ -185,9 +185,12 @@ jobs:
         env:
           CFLAGS: "/UNDEBUG"
           CXXFLAGS: "/UNDEBUG"
+      - name: Print ccache stats
+        run: ccache -s
+        shell: bash
 
   cmake-windows-x64:
-    runs-on: windows-2022-32core
+    runs-on: windows-2022-8core
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v6
@@ -214,9 +217,12 @@ jobs:
         if: ${{ inputs.run-tests }}
         run: ctest -C Release --output-on-failure --parallel $NUMBER_OF_PROCESSORS
         working-directory: ${{ github.workspace }}/build/windows/x64
+      - name: Print ccache stats
+        run: ccache -s
+        shell: bash
 
   cmake-windows-x86:
-    runs-on: windows-2022-32core
+    runs-on: windows-2022-8core
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v6
@@ -243,6 +249,9 @@ jobs:
         if: ${{ inputs.run-tests }}
         run: ctest -C Release --output-on-failure --parallel $NUMBER_OF_PROCESSORS
         working-directory: ${{ github.workspace }}/build/windows/x86
+      - name: Print ccache stats
+        run: ccache -s
+        shell: bash
 
   cmake-macos-arm64:
     runs-on: macos-latest
@@ -336,17 +345,6 @@ jobs:
       CCACHE_MAX_SIZE: 5G
       CCACHE_COMPILERCHECK: content
     steps:
-      - name: Restore gclient cache
-        id: cache-gclient-restore
-        uses: actions/cache@v5
-        with:
-          # Cache the Git repos
-          path: /home/runner/.cache/gclient
-          key: gclient-linux-${{ github.ref_name }}-${{ github.sha }}
-          restore-keys: |
-            gclient-linux-${{ github.ref_name }}-
-            gclient-linux-master-
-            gclient-linux-
       - name: Restore ccache
         id: cache-ccache-restore
         uses: actions/cache@v5
@@ -375,11 +373,10 @@ jobs:
             "custom_vars": {},
             },
           ]
-          cache_dir = r"/home/runner/.cache/gclient"
           EOF
       - name: Sync to commit and run hooks
         run: gclient sync --reset --force --upstream --revision $GITHUB_SHA
-      - name: Check formatting
+      - name: Check GN formatting
         run: |
           git cl format --presubmit --no-clang-format --no-python --diff
         working-directory: ${{ github.workspace }}/xnnpack
@@ -725,4 +722,3 @@ jobs:
         run: |
           mkdir -p /home/xnnpack/.cache/bazel
           find "/home/xnnpack/.cache/bazel" -type f -atime +7 -delete
-

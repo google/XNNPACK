@@ -5,7 +5,23 @@
 
 namespace ynn {
 
+// Emscripten behavior:
+// - Without pthreads, we must not instantiate `std::thread` objects because the
+// target
+//   does not natively support threading, otherwise it aborts. Thus, thread pool
+//   size drops to 0.
+// - With pthreads, we limit the thread pool to 8 to avoid deadlocks: tests
+// invoke pthread_create
+//   synchronously, and we must match the pre-allocated PTHREAD_POOL_SIZE linked
+//   during build.
+#if defined(__EMSCRIPTEN__) && !defined(__EMSCRIPTEN_PTHREADS__)
+TestScheduler::TestScheduler(int) : impl_(0) {}
+#elif defined(__EMSCRIPTEN__) && defined(__EMSCRIPTEN_PTHREADS__)
+TestScheduler::TestScheduler(int thread_count)
+    : impl_(std::min(thread_count, 8)) {}
+#else
 TestScheduler::TestScheduler(int thread_count) : impl_(thread_count) {}
+#endif
 
 TestScheduler::~TestScheduler() { impl_.work_until_idle(); }
 

@@ -61,14 +61,18 @@ __m512i c16_{i+1}_{j+2} = _mm512_setzero_si512();
   def finalize_c_tile(self, i, j):
     if i % 2 != 0:
       return ""
-    return f"""
+    result = f"""
 c16_{i+0}_{j+0} = _mm512_hadd_epi32(c16_{i+0}_{j+0}, c16_{i+0}_{j+2});
 c16_{i+1}_{j+0} = _mm512_hadd_epi32(c16_{i+1}_{j+0}, c16_{i+1}_{j+2});
 c16_{i+0}_{j} = _mm512_hadd_epi32(c16_{i+0}_{j}, c16_{i+1}_{j});
 c16_{i}_{j} = _mm512_hadd_epi32(c16_{i}_{j}, c16_{i}_{j});
 __m128i c_{i+0}_{j} = _mm512_extracti32x4_epi32(c16_{i}_{j}, 0);
+"""
+    if i + 1 < self.block_shape[0]:
+      result += f"""
 __m128i c_{i+1}_{j} = _mm512_extracti32x4_epi32(c16_{i}_{j}, 1);
 """
+    return result
 
   def load_a_tile(self, i, k):
     a_x16 = f"_mm_loadu_si128({self.a_ptr(i, k, '__m128i')})"
@@ -97,7 +101,10 @@ __m512i b_{k}_{j+2} = _mm512_cvtepi8_epi16(_mm256_load_si256({b2_ptr}));
 generate_dot_kernels(
     x86_avx512_int8_int8_int32_k16(),
     [
+        (1, 32, 16),
+        (1, 16, 16),
         (2, 16, 16),
+        (1, 8, 16),
         (2, 8, 16),
         (4, 8, 16),
         (6, 8, 16),

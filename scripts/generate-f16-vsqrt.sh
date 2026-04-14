@@ -43,4 +43,8 @@ tools/xngen src/f16-vsqrt/avx512fp16-sqrt.c.in -D BATCH_TILE=32  -o src/f16-vsqr
 tools/xngen src/f16-vsqrt/avx512fp16-sqrt.c.in -D BATCH_TILE=64  -o src/f16-vsqrt/gen/f16-vsqrt-avx512fp16-sqrt-u64.c &
 tools/xngen src/f16-vsqrt/avx512fp16-sqrt.c.in -D BATCH_TILE=128 -o src/f16-vsqrt/gen/f16-vsqrt-avx512fp16-sqrt-u128.c &
 
+################################ RISC-V Vector ################################
+tools/xngen src/f16-vsqrt/rvv.c.in -D LMUL=4 -o src/f16-vsqrt/gen/f16-vsqrt-rvvfp16arith-sqrt-u4v.c &
+tools/xngen src/f16-vsqrt/rvv.c.in -D LMUL=8 -o src/f16-vsqrt/gen/f16-vsqrt-rvvfp16arith-sqrt-u8v.c &
+
 wait

@@ -161,27 +161,6 @@ namespace internal {
 
 // These overloads are x86-specific helpers for implementing templated
 // interleave/transpose helpers that are not x86-specific.
-YNN_ALWAYS_INLINE __m128 unpacklo_x32x4(__m128 a, __m128 b) {
-  return _mm_unpacklo_ps(a, b);
-}
-YNN_ALWAYS_INLINE __m128 unpackhi_x32x4(__m128 a, __m128 b) {
-  return _mm_unpackhi_ps(a, b);
-}
-
-YNN_ALWAYS_INLINE __m128i unpacklo_x32x4(__m128i a, __m128i b) {
-  return _mm_unpacklo_epi32(a, b);
-}
-YNN_ALWAYS_INLINE __m128i unpackhi_x32x4(__m128i a, __m128i b) {
-  return _mm_unpackhi_epi32(a, b);
-}
-
-YNN_ALWAYS_INLINE __m128i unpacklo_x8x16(__m128i a, __m128i b) {
-  return _mm_unpacklo_epi8(a, b);
-}
-YNN_ALWAYS_INLINE __m128i unpackhi_x8x16(__m128i a, __m128i b) {
-  return _mm_unpackhi_epi8(a, b);
-}
-
 YNN_ALWAYS_INLINE __m128 movehl(__m128 a, __m128 b) {
   return _mm_movehl_ps(a, b);
 }
@@ -413,6 +392,9 @@ YNN_ALWAYS_INLINE f32x4 operator*(f32x4 a, f32x4 b) {
 YNN_ALWAYS_INLINE f32x4 operator/(f32x4 a, f32x4 b) {
   return f32x4{_mm_div_ps(a.v, b.v)};
 }
+YNN_ALWAYS_INLINE f64x2 operator/(f64x2 a, f64x2 b) {
+  return f64x2{_mm_div_pd(a.v, b.v)};
+}
 
 YNN_ALWAYS_INLINE s16x8 operator&(s16x8 a, s16x8 b) {
   return s16x8{_mm_and_si128(a.v, b.v)};
@@ -477,6 +459,9 @@ YNN_ALWAYS_INLINE s8x16 operator~(s8x16 a) {
 YNN_ALWAYS_INLINE f32x4 min(f32x4 a, f32x4 b) {
   return f32x4{_mm_min_ps(a.v, b.v)};
 }
+YNN_ALWAYS_INLINE f64x2 min(f64x2 a, f64x2 b) {
+  return f64x2{_mm_min_pd(a.v, b.v)};
+}
 YNN_ALWAYS_INLINE s16x8 min(s16x8 a, s16x8 b) {
   return s16x8{_mm_min_epi16(a.v, b.v)};
 }
@@ -486,6 +471,9 @@ YNN_ALWAYS_INLINE u8x16 min(u8x16 a, u8x16 b) {
 
 YNN_ALWAYS_INLINE f32x4 max(f32x4 a, f32x4 b) {
   return f32x4{_mm_max_ps(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE f64x2 max(f64x2 a, f64x2 b) {
+  return f64x2{_mm_max_pd(a.v, b.v)};
 }
 YNN_ALWAYS_INLINE s16x8 max(s16x8 a, s16x8 b) {
   return s16x8{_mm_max_epi16(a.v, b.v)};
@@ -500,6 +488,21 @@ YNN_ALWAYS_INLINE f64x2 copysign(f64x2 mag, f64x2 sgn) {
       _mm_or_pd(_mm_and_pd(sign_mask, sgn.v), _mm_andnot_pd(sign_mask, mag.v))};
 }
 YNN_ALWAYS_INLINE f32x4 sqrt(f32x4 a) { return f32x4{_mm_sqrt_ps(a.v)}; }
+YNN_ALWAYS_INLINE f64x2 sqrt(f64x2 a) { return f64x2{_mm_sqrt_pd(a.v)}; }
+
+YNN_ALWAYS_INLINE f32x4 abs(f32x4 a) {
+  return f32x4{_mm_andnot_ps(_mm_set1_ps(-0.0), a.v)};
+}
+YNN_ALWAYS_INLINE f64x2 abs(f64x2 a) {
+  return f64x2{_mm_andnot_pd(_mm_set1_pd(-0.0), a.v)};
+}
+
+YNN_ALWAYS_INLINE double horizontal_max(f64x2 a) {
+  return _mm_cvtsd_f64(_mm_max_sd(a.v, _mm_shuffle_pd(a.v, a.v, 1)));
+}
+YNN_ALWAYS_INLINE double horizontal_min(f64x2 a) {
+  return _mm_cvtsd_f64(_mm_min_sd(a.v, _mm_shuffle_pd(a.v, a.v, 1)));
+}
 
 YNN_ALWAYS_INLINE float horizontal_max(f32x4 a) {
   const __m128 max_lanes = _mm_max_ps(a.v, _mm_movehl_ps(a.v, a.v));
@@ -510,9 +513,6 @@ YNN_ALWAYS_INLINE float horizontal_min(f32x4 a) {
   const __m128 min_lanes = _mm_min_ps(a.v, _mm_movehl_ps(a.v, a.v));
   return _mm_cvtss_f32(
       _mm_min_ss(min_lanes, _mm_shuffle_ps(min_lanes, min_lanes, 1)));
-}
-YNN_ALWAYS_INLINE f32x4 abs(f32x4 a) {
-  return f32x4{_mm_and_ps(a.v, _mm_castsi128_ps(_mm_set1_epi32(0x7FFFFFFF)))};
 }
 
 YNN_ALWAYS_INLINE int16_t horizontal_max(s16x8 a) {
@@ -574,19 +574,41 @@ YNN_ALWAYS_INLINE std::tuple<u8x16, u8x16> interleave(
                     u8x16{_mm_or_si128(odd1, _mm_srli_epi16(odd0, 4))});
 }
 
-template <typename T>
-YNN_ALWAYS_INLINE std::array<vec<T, 4>, 4> transpose(
-    std::array<vec<T, 4>, 4> x) {
-  vec<T, 4> t0{internal::unpacklo_x32x4(x[0].v, x[1].v)};
-  vec<T, 4> t1{internal::unpacklo_x32x4(x[2].v, x[3].v)};
-  vec<T, 4> t2{internal::unpackhi_x32x4(x[0].v, x[1].v)};
-  vec<T, 4> t3{internal::unpackhi_x32x4(x[2].v, x[3].v)};
+template <>
+YNN_ALWAYS_INLINE std::array<f32x4, 4> transpose<float>(
+    std::array<f32x4, 4> x) {
+  f32x4 t0{_mm_unpacklo_ps(x[0].v, x[1].v)};
+  f32x4 t1{_mm_unpacklo_ps(x[2].v, x[3].v)};
+  f32x4 t2{_mm_unpackhi_ps(x[0].v, x[1].v)};
+  f32x4 t3{_mm_unpackhi_ps(x[2].v, x[3].v)};
   return {{
-      vec<T, 4>{internal::movelh(t0.v, t1.v)},
-      vec<T, 4>{internal::movehl(t1.v, t0.v)},
-      vec<T, 4>{internal::movelh(t2.v, t3.v)},
-      vec<T, 4>{internal::movehl(t3.v, t2.v)},
+      f32x4{_mm_movelh_ps(t0.v, t1.v)},
+      f32x4{_mm_movehl_ps(t1.v, t0.v)},
+      f32x4{_mm_movelh_ps(t2.v, t3.v)},
+      f32x4{_mm_movehl_ps(t3.v, t2.v)},
   }};
+}
+template <>
+YNN_ALWAYS_INLINE std::array<s32x4, 4> transpose<int32_t>(
+    std::array<s32x4, 4> x) {
+  s32x4 t0{_mm_unpacklo_epi32(x[0].v, x[1].v)};
+  s32x4 t1{_mm_unpacklo_epi32(x[2].v, x[3].v)};
+  s32x4 t2{_mm_unpackhi_epi32(x[0].v, x[1].v)};
+  s32x4 t3{_mm_unpackhi_epi32(x[2].v, x[3].v)};
+  return {{
+      s32x4{internal::movelh(t0.v, t1.v)},
+      s32x4{internal::movehl(t1.v, t0.v)},
+      s32x4{internal::movelh(t2.v, t3.v)},
+      s32x4{internal::movehl(t3.v, t2.v)},
+  }};
+}
+
+YNN_ALWAYS_INLINE f32x4 cast(s32x4 x, float) {
+  return f32x4{_mm_cvtepi32_ps(x.v)};
+}
+
+YNN_ALWAYS_INLINE s32x4 cast(f32x4 x, int32_t) {
+  return s32x4{_mm_cvttps_epi32(x.v)};
 }
 
 }  // namespace simd

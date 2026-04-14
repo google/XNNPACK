@@ -78,6 +78,7 @@ enum class multi_type {
   uint8_int8_int32,
 };
 
+inline multi_type multi_type_of(double, double) { return multi_type::fp64; }
 inline multi_type multi_type_of(float, float) { return multi_type::fp32; }
 inline multi_type multi_type_of(bfloat16, bfloat16) { return multi_type::bf16; }
 inline multi_type multi_type_of(half, half) { return multi_type::fp16; }
@@ -119,8 +120,32 @@ inline multi_type multi_type_of(int8_t, int4x2, int32_t) {
 }
 
 template <typename F>
+constexpr decltype(auto) SwitchOneType(multi_type type, F&& f) {
+  switch (type) {
+    case multi_type::fp64:
+      return std::forward<F>(f)(double());
+    case multi_type::fp32:
+      return std::forward<F>(f)(float());
+    case multi_type::fp16:
+      return std::forward<F>(f)(half());
+    case multi_type::bf16:
+      return std::forward<F>(f)(bfloat16());
+    case multi_type::int8:
+      return std::forward<F>(f)(int8_t());
+    case multi_type::uint8:
+      return std::forward<F>(f)(uint8_t());
+    case multi_type::int32:
+      return std::forward<F>(f)(int32_t());
+    default:
+      YNN_UNREACHABLE;
+  }
+}
+
+template <typename F>
 constexpr decltype(auto) SwitchTwoTypes(multi_type type, F&& f) {
   switch (type) {
+    case multi_type::fp64:
+      return std::forward<F>(f)(double(), double());
     case multi_type::fp32:
       return std::forward<F>(f)(float(), float());
     case multi_type::fp16:

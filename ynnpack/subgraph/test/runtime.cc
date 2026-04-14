@@ -15,7 +15,10 @@
 using ynn::to_string;  // NOLINT(misc-unused-using-decls)
 
 namespace ynn {
-
+// By default WASM doesn't have any thread support.
+#if defined(__EMSCRIPTEN__) && !defined(__EMSCRIPTEN_PTHREADS__)
+TEST(runtime, dot_concurrency) {}
+#else
 TEST(runtime, dot_concurrency) {
   constexpr uint32_t a_id = 0;
   constexpr uint32_t b_id = 1;
@@ -61,5 +64,5 @@ TEST(runtime, dot_concurrency) {
   dynamic.AddDot(1, a_id, b_id, init_zero, c_id);
   ASSERT_GT(get_concurrency(dynamic), 1);
 }
-
+#endif
 }  // namespace ynn

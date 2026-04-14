@@ -20,11 +20,19 @@ def subtract_fp32(a, b, x):
   return store(load(a) - load(b), x)
 
 
+@const_buffer("a", BFloat(16))
+@const_buffer("b", Float(32))
+@buffer("x", Float(32))
+@operator_name("subtract")
+def subtract_bf16_fp32(a, b, x):
+  return store(cast(Float(32), load(a)) - load(b), x)
+
+
 @const_buffer("a", Float(32))
 @const_buffer("b", BFloat(16))
 @buffer("x", BFloat(16))
 @operator_name("subtract")
-def subtract_fp32_bf16(a, b, x):
+def subtract_fp32_bf16_bf16(a, b, x):
   return store(cast(BFloat(16), load(a) - cast(Float(32), load(b))), x)
 
 
@@ -44,12 +52,44 @@ def multiply_int32_fp32(a, b, x):
   return store(cast(Float(32), load(a)) * load(b), x)
 
 
+@const_buffer("a", BFloat(16))
+@const_buffer("b", Float(32))
+@buffer("x", Float(32))
+@operator_name("multiply")
+def multiply_bf16_fp32(a, b, x):
+  return store(cast(Float(32), load(a)) * load(b), x)
+
+
+@const_buffer("a", BFloat(16))
+@const_buffer("b", Float(32))
+@buffer("x", BFloat(16))
+@operator_name("multiply")
+def multiply_bf16_fp32_bf16(a, b, x):
+  return store(cast(BFloat(16), cast(Float(32), load(a)) * load(b)), x)
+
+
 @const_buffer("a", Float(32))
 @const_buffer("b", Float(32))
 @buffer("x", Float(32))
 @operator_name("divide")
 def divide_fp32(a, b, x):
   return store(load(a) / load(b), x)
+
+
+@const_buffer("a", BFloat(16))
+@const_buffer("b", Float(32))
+@buffer("x", Float(32))
+@operator_name("divide")
+def divide_bf16_fp32(a, b, x):
+  return store(cast(Float(32), load(a)) / load(b), x)
+
+
+@const_buffer("a", BFloat(16))
+@const_buffer("b", Float(32))
+@buffer("x", BFloat(16))
+@operator_name("divide")
+def divide_bf16_fp32_bf16(a, b, x):
+  return store(cast(BFloat(16), cast(Float(32), load(a)) / load(b)), x)
 
 
 @const_buffer("a", Float(32))

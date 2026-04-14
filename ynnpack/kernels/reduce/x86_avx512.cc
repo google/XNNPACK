@@ -133,6 +133,7 @@ using simd::bf16x32;
 using simd::f16x32;
 using simd::f32x16;
 using simd::f32x32;
+using simd::f64x8;
 using simd::s16x32;
 using simd::s32x16;
 using simd::s32x32;
@@ -166,6 +167,41 @@ MIN_MAX_KERNEL(max_bf16_4x32_avx512, dummy_t, bf16x32_rvar, bfloat16, 32);
 MIN_MAX_KERNEL(max_fp16_4x32_avx512, dummy_t, f16x32_rvar, half, 32);
 MIN_MAX_KERNEL(max_uint8_4x64_avx512, dummy_t, u8x64, uint8_t, 64);
 MIN_MAX_KERNEL(max_int8_4x64_avx512, dummy_t, s8x64, int8_t, 64);
+
+MIN_MAX_KERNEL(min_max_fp64_4x8_avx512, f64x8, f64x8, double, 8);
+MIN_MAX_KERNEL(min_fp64_4x8_avx512, f64x8, dummy_t, double, 8);
+MIN_MAX_KERNEL(max_fp64_4x8_avx512, dummy_t, f64x8, double, 8);
+
+void sum_fp64_avx512(size_t n, size_t k3, size_t k2, size_t k1,
+                     size_t a_stride_n, size_t a_stride_k3, size_t a_stride_k2,
+                     const void* a, size_t, void* c) {
+  if (k1 == 1 && a_stride_n == sizeof(double)) {
+    stream_reduce<sum_accumulator_k1_1<f64x8>, double, double>(
+        n, k3, k2, a_stride_k3, a_stride_k2, reinterpret_cast<const double*>(a),
+        /*C_stride_m=*/0, reinterpret_cast<double*>(c));
+  } else {
+    tiled_reduce<sum_accumulator_fp64<>, double, double>(
+        n, k3, k2, k1, a_stride_n, a_stride_k3, a_stride_k2,
+        reinterpret_cast<const double*>(a),
+        /*C_stride_m=*/0, reinterpret_cast<double*>(c));
+  }
+}
+
+void sum_squared_fp64_avx512(size_t n, size_t k3, size_t k2, size_t k1,
+                             size_t a_stride_n, size_t a_stride_k3,
+                             size_t a_stride_k2, const void* a, size_t,
+                             void* c) {
+  if (k1 == 1 && a_stride_n == sizeof(double)) {
+    stream_reduce<sum_accumulator_k1_1<f64x8, Square>, double, double>(
+        n, k3, k2, a_stride_k3, a_stride_k2, reinterpret_cast<const double*>(a),
+        /*C_stride_m=*/0, reinterpret_cast<double*>(c));
+  } else {
+    tiled_reduce<sum_accumulator_fp64<1, Square>, double, double>(
+        n, k3, k2, k1, a_stride_n, a_stride_k3, a_stride_k2,
+        reinterpret_cast<const double*>(a), /*C_stride_m=*/0,
+        reinterpret_cast<double*>(c));
+  }
+}
 
 void sum_fp32_avx512(size_t n, size_t k3, size_t k2, size_t k1,
                       size_t a_stride_n, size_t a_stride_k3,

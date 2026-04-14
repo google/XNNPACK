@@ -11,10 +11,6 @@ tools/xngen src/f32-igemm/scalar.c.in -D MR=2 -D NR=4 -D WASM=0 -D ACTIVATION=LI
 tools/xngen src/f32-igemm/scalar.c.in -D MR=4 -D NR=2 -D WASM=0 -D ACTIVATION=LINEAR -o src/f32-igemm/gen/f32-igemm-4x2-scalar.c &
 tools/xngen src/f32-igemm/scalar.c.in -D MR=4 -D NR=4 -D WASM=0 -D ACTIVATION=LINEAR -o src/f32-igemm/gen/f32-igemm-4x4-scalar.c &
 
-tools/xngen src/f32-igemm/scalar.c.in -D MR=1 -D NR=4 -D WASM=0 -D ACTIVATION=RELU   -o src/f32-igemm/gen/f32-igemm-1x4-relu-scalar.c &
-tools/xngen src/f32-igemm/scalar.c.in -D MR=2 -D NR=4 -D WASM=0 -D ACTIVATION=RELU   -o src/f32-igemm/gen/f32-igemm-2x4-relu-scalar.c &
-tools/xngen src/f32-igemm/scalar.c.in -D MR=4 -D NR=2 -D WASM=0 -D ACTIVATION=RELU   -o src/f32-igemm/gen/f32-igemm-4x2-relu-scalar.c &
-tools/xngen src/f32-igemm/scalar.c.in -D MR=4 -D NR=4 -D WASM=0 -D ACTIVATION=RELU   -o src/f32-igemm/gen/f32-igemm-4x4-relu-scalar.c &
 
 tools/xngen src/f32-igemm/scalar.c.in -D MR=1 -D NR=4 -D WASM=0 -D ACTIVATION=MINMAX -o src/f32-igemm/gen/f32-igemm-1x4-minmax-scalar.c &
 tools/xngen src/f32-igemm/scalar.c.in -D MR=2 -D NR=4 -D WASM=0 -D ACTIVATION=MINMAX -o src/f32-igemm/gen/f32-igemm-2x4-minmax-scalar.c &
@@ -47,17 +43,7 @@ tools/xngen src/f32-igemm/wasmsimd-loadsplat.c.in -D MR=4 -D NR=8 -D FMA=1 -D AC
 tools/xngen src/f32-igemm/wasmsimd-loadsplat.c.in -D MR=5 -D NR=8 -D FMA=1 -D ACTIVATION=MINMAX -D ARCH=RELAXED -o src/f32-igemm/gen/f32-igemm-5x8-minmax-wasmrelaxedsimd-fma-loadsplat.c &
 tools/xngen src/f32-igemm/wasmsimd-loadsplat.c.in -D MR=6 -D NR=8 -D FMA=1 -D ACTIVATION=MINMAX -D ARCH=RELAXED -o src/f32-igemm/gen/f32-igemm-6x8-minmax-wasmrelaxedsimd-fma-loadsplat.c &
 
-tools/xngen src/f32-igemm/wasmsimd-loadsplat.c.in -D MR=1 -D NR=8 -D FMA=0 -D ACTIVATION=RELU                   -o src/f32-igemm/gen/f32-igemm-1x8-relu-wasmsimd-loadsplat.c &
-tools/xngen src/f32-igemm/wasmsimd-loadsplat.c.in -D MR=3 -D NR=8 -D FMA=0 -D ACTIVATION=RELU                   -o src/f32-igemm/gen/f32-igemm-3x8-relu-wasmsimd-loadsplat.c &
-tools/xngen src/f32-igemm/wasmsimd-loadsplat.c.in -D MR=4 -D NR=8 -D FMA=0 -D ACTIVATION=RELU                   -o src/f32-igemm/gen/f32-igemm-4x8-relu-wasmsimd-loadsplat.c &
-tools/xngen src/f32-igemm/wasmsimd-loadsplat.c.in -D MR=5 -D NR=8 -D FMA=0 -D ACTIVATION=RELU                   -o src/f32-igemm/gen/f32-igemm-5x8-relu-wasmsimd-loadsplat.c &
-tools/xngen src/f32-igemm/wasmsimd-loadsplat.c.in -D MR=6 -D NR=8 -D FMA=0 -D ACTIVATION=RELU                   -o src/f32-igemm/gen/f32-igemm-6x8-relu-wasmsimd-loadsplat.c &
 
-tools/xngen src/f32-igemm/wasmsimd-loadsplat.c.in -D MR=1 -D NR=8 -D FMA=1 -D ACTIVATION=RELU   -D ARCH=RELAXED -o src/f32-igemm/gen/f32-igemm-1x8-relu-wasmrelaxedsimd-fma-loadsplat.c &
-tools/xngen src/f32-igemm/wasmsimd-loadsplat.c.in -D MR=3 -D NR=8 -D FMA=1 -D ACTIVATION=RELU   -D ARCH=RELAXED -o src/f32-igemm/gen/f32-igemm-3x8-relu-wasmrelaxedsimd-fma-loadsplat.c &
-tools/xngen src/f32-igemm/wasmsimd-loadsplat.c.in -D MR=4 -D NR=8 -D FMA=1 -D ACTIVATION=RELU   -D ARCH=RELAXED -o src/f32-igemm/gen/f32-igemm-4x8-relu-wasmrelaxedsimd-fma-loadsplat.c &
-tools/xngen src/f32-igemm/wasmsimd-loadsplat.c.in -D MR=5 -D NR=8 -D FMA=1 -D ACTIVATION=RELU   -D ARCH=RELAXED -o src/f32-igemm/gen/f32-igemm-5x8-relu-wasmrelaxedsimd-fma-loadsplat.c &
-tools/xngen src/f32-igemm/wasmsimd-loadsplat.c.in -D MR=6 -D NR=8 -D FMA=1 -D ACTIVATION=RELU   -D ARCH=RELAXED -o src/f32-igemm/gen/f32-igemm-6x8-relu-wasmrelaxedsimd-fma-loadsplat.c &
 
 tools/xngen src/f32-igemm/wasmsimd-loadsplat.c.in -D MR=1 -D NR=8 -D FMA=0 -D ACTIVATION=LINEAR                 -o src/f32-igemm/gen/f32-igemm-1x8-wasmsimd-loadsplat.c &
 tools/xngen src/f32-igemm/wasmsimd-loadsplat.c.in -D MR=3 -D NR=8 -D FMA=0 -D ACTIVATION=LINEAR                 -o src/f32-igemm/gen/f32-igemm-3x8-wasmsimd-loadsplat.c &
@@ -96,17 +82,7 @@ tools/xngen src/f32-igemm/wasmsimd-splat.c.in -D MR=4 -D NR=8 -D FMA=1 -D ACTIVA
 tools/xngen src/f32-igemm/wasmsimd-splat.c.in -D MR=5 -D NR=8 -D FMA=1 -D ACTIVATION=MINMAX -D ARCH=RELAXED -o src/f32-igemm/gen/f32-igemm-5x8-minmax-wasmrelaxedsimd-fma-splat.c &
 tools/xngen src/f32-igemm/wasmsimd-splat.c.in -D MR=6 -D NR=8 -D FMA=1 -D ACTIVATION=MINMAX -D ARCH=RELAXED -o src/f32-igemm/gen/f32-igemm-6x8-minmax-wasmrelaxedsimd-fma-splat.c &
 
-tools/xngen src/f32-igemm/wasmsimd-splat.c.in -D MR=1 -D NR=8 -D FMA=0 -D ACTIVATION=RELU                   -o src/f32-igemm/gen/f32-igemm-1x8-relu-wasmsimd-splat.c &
-tools/xngen src/f32-igemm/wasmsimd-splat.c.in -D MR=3 -D NR=8 -D FMA=0 -D ACTIVATION=RELU                   -o src/f32-igemm/gen/f32-igemm-3x8-relu-wasmsimd-splat.c &
-tools/xngen src/f32-igemm/wasmsimd-splat.c.in -D MR=4 -D NR=8 -D FMA=0 -D ACTIVATION=RELU                   -o src/f32-igemm/gen/f32-igemm-4x8-relu-wasmsimd-splat.c &
-tools/xngen src/f32-igemm/wasmsimd-splat.c.in -D MR=5 -D NR=8 -D FMA=0 -D ACTIVATION=RELU                   -o src/f32-igemm/gen/f32-igemm-5x8-relu-wasmsimd-splat.c &
-tools/xngen src/f32-igemm/wasmsimd-splat.c.in -D MR=6 -D NR=8 -D FMA=0 -D ACTIVATION=RELU                   -o src/f32-igemm/gen/f32-igemm-6x8-relu-wasmsimd-splat.c &
 
-tools/xngen src/f32-igemm/wasmsimd-splat.c.in -D MR=1 -D NR=8 -D FMA=1 -D ACTIVATION=RELU   -D ARCH=RELAXED -o src/f32-igemm/gen/f32-igemm-1x8-relu-wasmrelaxedsimd-fma-splat.c &
-tools/xngen src/f32-igemm/wasmsimd-splat.c.in -D MR=3 -D NR=8 -D FMA=1 -D ACTIVATION=RELU   -D ARCH=RELAXED -o src/f32-igemm/gen/f32-igemm-3x8-relu-wasmrelaxedsimd-fma-splat.c &
-tools/xngen src/f32-igemm/wasmsimd-splat.c.in -D MR=4 -D NR=8 -D FMA=1 -D ACTIVATION=RELU   -D ARCH=RELAXED -o src/f32-igemm/gen/f32-igemm-4x8-relu-wasmrelaxedsimd-fma-splat.c &
-tools/xngen src/f32-igemm/wasmsimd-splat.c.in -D MR=5 -D NR=8 -D FMA=1 -D ACTIVATION=RELU   -D ARCH=RELAXED -o src/f32-igemm/gen/f32-igemm-5x8-relu-wasmrelaxedsimd-fma-splat.c &
-tools/xngen src/f32-igemm/wasmsimd-splat.c.in -D MR=6 -D NR=8 -D FMA=1 -D ACTIVATION=RELU   -D ARCH=RELAXED -o src/f32-igemm/gen/f32-igemm-6x8-relu-wasmrelaxedsimd-fma-splat.c &
 
 tools/xngen src/f32-igemm/wasmsimd-splat.c.in -D MR=1 -D NR=8 -D FMA=0 -D ACTIVATION=LINEAR                 -o src/f32-igemm/gen/f32-igemm-1x8-wasmsimd-splat.c &
 tools/xngen src/f32-igemm/wasmsimd-splat.c.in -D MR=3 -D NR=8 -D FMA=0 -D ACTIVATION=LINEAR                 -o src/f32-igemm/gen/f32-igemm-3x8-wasmsimd-splat.c &
@@ -145,17 +121,7 @@ tools/xngen src/f32-igemm/wasmsimd-s4.c.in -D MR=4 -D NR=8 -D FMA=1 -D ACTIVATIO
 tools/xngen src/f32-igemm/wasmsimd-s4.c.in -D MR=5 -D NR=8 -D FMA=1 -D ACTIVATION=MINMAX -D ARCH=RELAXED -o src/f32-igemm/gen/f32-igemm-5x8s4-minmax-wasmrelaxedsimd-fma.c &
 tools/xngen src/f32-igemm/wasmsimd-s4.c.in -D MR=6 -D NR=8 -D FMA=1 -D ACTIVATION=MINMAX -D ARCH=RELAXED -o src/f32-igemm/gen/f32-igemm-6x8s4-minmax-wasmrelaxedsimd-fma.c &
 
-tools/xngen src/f32-igemm/wasmsimd-s4.c.in -D MR=1 -D NR=8 -D FMA=0 -D ACTIVATION=RELU                   -o src/f32-igemm/gen/f32-igemm-1x8s4-relu-wasmsimd.c &
-tools/xngen src/f32-igemm/wasmsimd-s4.c.in -D MR=3 -D NR=8 -D FMA=0 -D ACTIVATION=RELU                   -o src/f32-igemm/gen/f32-igemm-3x8s4-relu-wasmsimd.c &
-tools/xngen src/f32-igemm/wasmsimd-s4.c.in -D MR=4 -D NR=8 -D FMA=0 -D ACTIVATION=RELU                   -o src/f32-igemm/gen/f32-igemm-4x8s4-relu-wasmsimd.c &
-tools/xngen src/f32-igemm/wasmsimd-s4.c.in -D MR=5 -D NR=8 -D FMA=0 -D ACTIVATION=RELU                   -o src/f32-igemm/gen/f32-igemm-5x8s4-relu-wasmsimd.c &
-tools/xngen src/f32-igemm/wasmsimd-s4.c.in -D MR=6 -D NR=8 -D FMA=0 -D ACTIVATION=RELU                   -o src/f32-igemm/gen/f32-igemm-6x8s4-relu-wasmsimd.c &
 
-tools/xngen src/f32-igemm/wasmsimd-s4.c.in -D MR=1 -D NR=8 -D FMA=1 -D ACTIVATION=RELU   -D ARCH=RELAXED -o src/f32-igemm/gen/f32-igemm-1x8s4-relu-wasmrelaxedsimd-fma.c &
-tools/xngen src/f32-igemm/wasmsimd-s4.c.in -D MR=3 -D NR=8 -D FMA=1 -D ACTIVATION=RELU   -D ARCH=RELAXED -o src/f32-igemm/gen/f32-igemm-3x8s4-relu-wasmrelaxedsimd-fma.c &
-tools/xngen src/f32-igemm/wasmsimd-s4.c.in -D MR=4 -D NR=8 -D FMA=1 -D ACTIVATION=RELU   -D ARCH=RELAXED -o src/f32-igemm/gen/f32-igemm-4x8s4-relu-wasmrelaxedsimd-fma.c &
-tools/xngen src/f32-igemm/wasmsimd-s4.c.in -D MR=5 -D NR=8 -D FMA=1 -D ACTIVATION=RELU   -D ARCH=RELAXED -o src/f32-igemm/gen/f32-igemm-5x8s4-relu-wasmrelaxedsimd-fma.c &
-tools/xngen src/f32-igemm/wasmsimd-s4.c.in -D MR=6 -D NR=8 -D FMA=1 -D ACTIVATION=RELU   -D ARCH=RELAXED -o src/f32-igemm/gen/f32-igemm-6x8s4-relu-wasmrelaxedsimd-fma.c &
 
 tools/xngen src/f32-igemm/wasmsimd-s4.c.in -D MR=1 -D NR=8 -D FMA=0 -D ACTIVATION=LINEAR                 -o src/f32-igemm/gen/f32-igemm-1x8s4-wasmsimd.c &
 tools/xngen src/f32-igemm/wasmsimd-s4.c.in -D MR=3 -D NR=8 -D FMA=0 -D ACTIVATION=LINEAR                 -o src/f32-igemm/gen/f32-igemm-3x8s4-wasmsimd.c &
@@ -174,8 +140,6 @@ tools/xngen src/f32-igemm/MRx2c4-wasmsimd.c.in -D MR=4 -D NR=2 -D FMA=0 -D ACTIV
 tools/xngen src/f32-igemm/MRx2c4-wasmsimd.c.in -D MR=4 -D NR=2 -D FMA=0 -D ACTIVATION=MINMAX -D ARCH=X86     -o src/f32-igemm/gen/f32-igemm-4x2c4-minmax-wasmsimd-x86.c &
 tools/xngen src/f32-igemm/MRx2c4-wasmsimd.c.in -D MR=4 -D NR=2 -D FMA=0 -D ACTIVATION=MINMAX -D ARCH=RELAXED -o src/f32-igemm/gen/f32-igemm-4x2c4-minmax-wasmrelaxedsimd.c &
 tools/xngen src/f32-igemm/MRx2c4-wasmsimd.c.in -D MR=4 -D NR=2 -D FMA=1 -D ACTIVATION=MINMAX -D ARCH=RELAXED -o src/f32-igemm/gen/f32-igemm-4x2c4-minmax-wasmrelaxedsimd-fma.c &
-tools/xngen src/f32-igemm/MRx2c4-wasmsimd.c.in -D MR=4 -D NR=2 -D FMA=0 -D ACTIVATION=RELU                   -o src/f32-igemm/gen/f32-igemm-4x2c4-relu-wasmsimd.c &
-tools/xngen src/f32-igemm/MRx2c4-wasmsimd.c.in -D MR=4 -D NR=2 -D FMA=1 -D ACTIVATION=RELU   -D ARCH=RELAXED -o src/f32-igemm/gen/f32-igemm-4x2c4-relu-wasmrelaxedsimd-fma.c &
 tools/xngen src/f32-igemm/MRx2c4-wasmsimd.c.in -D MR=4 -D NR=2 -D FMA=0 -D ACTIVATION=LINEAR                 -o src/f32-igemm/gen/f32-igemm-4x2c4-wasmsimd.c &
 tools/xngen src/f32-igemm/MRx2c4-wasmsimd.c.in -D MR=4 -D NR=2 -D FMA=1 -D ACTIVATION=LINEAR -D ARCH=RELAXED -o src/f32-igemm/gen/f32-igemm-4x2c4-wasmrelaxedsimd-fma.c &
 
@@ -361,8 +325,6 @@ tools/xngen src/f32-igemm/avx512-broadcast.c.in -D MR=8 -D NR=32 -o src/f32-igem
 ################################ RISC-V Vector ################################
 tools/xngen src/f32-igemm/MRxNRv-rvv.c.in -D MR=1 -D NR=m4 -D ACTIVATION=LINEAR -o src/f32-igemm/gen/f32-igemm-1x4v-rvv.c &
 tools/xngen src/f32-igemm/MRxNRv-rvv.c.in -D MR=7 -D NR=m4 -D ACTIVATION=LINEAR -o src/f32-igemm/gen/f32-igemm-7x4v-rvv.c &
-tools/xngen src/f32-igemm/MRxNRv-rvv.c.in -D MR=1 -D NR=m4 -D ACTIVATION=RELU   -o src/f32-igemm/gen/f32-igemm-1x4v-relu-rvv.c &
-tools/xngen src/f32-igemm/MRxNRv-rvv.c.in -D MR=7 -D NR=m4 -D ACTIVATION=RELU   -o src/f32-igemm/gen/f32-igemm-7x4v-relu-rvv.c &
 tools/xngen src/f32-igemm/MRxNRv-rvv.c.in -D MR=1 -D NR=m4 -D ACTIVATION=MINMAX -o src/f32-igemm/gen/f32-igemm-1x4v-minmax-rvv.c &
 tools/xngen src/f32-igemm/MRxNRv-rvv.c.in -D MR=7 -D NR=m4 -D ACTIVATION=MINMAX -o src/f32-igemm/gen/f32-igemm-7x4v-minmax-rvv.c &
 

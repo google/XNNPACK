@@ -154,6 +154,11 @@ vec<To, N> cast(vec<From, N> from, To);
 template <typename To, typename From, size_t N>
 vec<To, N> saturate_cast(vec<From, N> from, To);
 
+template <typename T, size_t N>
+YNN_ALWAYS_INLINE vec<T, N> saturate_cast(vec<T, N> from, T) {
+  return from;
+}
+
 template <typename To, typename From, size_t N>
 vec<To, N> round_float_to_int(vec<From, N> from, To);
 
@@ -252,6 +257,10 @@ inline float mul_no_overflow(float a, float b) {
   return a * b;
 }
 
+inline double add_no_overflow(double a, double b) { return a + b; }
+inline double sub_no_overflow(double a, double b) { return a - b; }
+inline double mul_no_overflow(double a, double b) { return a * b; }
+
 template <typename T>
 YNN_ALWAYS_INLINE vec<T, 1> operator+(vec<T, 1> a, vec<T, 1> b) {
   return vec<T, 1>{static_cast<T>(add_no_overflow(a.v, b.v))};
@@ -310,9 +319,19 @@ YNN_ALWAYS_INLINE vec<To, 1> cast(vec<From, 1> from, To) {
   return vec<To, 1>{static_cast<To>(from.v)};
 }
 
+template <typename T>
+YNN_ALWAYS_INLINE vec<T, 1> cast(vec<T, 1> from, T) {
+  return from;
+}
+
 template <typename To, typename From>
 YNN_ALWAYS_INLINE vec<To, 1> saturate_cast(vec<From, 1> from, To) {
   return vec<To, 1>{saturate_cast<To>(from.v)};
+}
+
+template <typename T>
+YNN_ALWAYS_INLINE vec<T, 1> saturate_cast(vec<T, 1> from, T) {
+  return from;
 }
 
 template <typename To, typename From>

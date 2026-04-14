@@ -284,7 +284,7 @@ static enum xnn_status create_dwconv_path(
 
   if(convolution_op->packed_weights.offset == XNN_CACHE_NOT_FOUND) {
     const size_t packed_weights_size =
-        (context->groups * (context->kernel_height * context->kernel_width + 1 /* bias */)) << log2_filter_element_size;
+        ((size_t) context->groups * ((size_t) context->kernel_height * context->kernel_width + 1 /* bias */)) << log2_filter_element_size;
     const size_t aligned_total_weights_size = round_up_po2(packed_weights_size, XNN_ALLOCATION_ALIGNMENT);
     void* weights_ptr = xnn_get_pointer_to_write_weights(
         convolution_op, aligned_total_weights_size);
