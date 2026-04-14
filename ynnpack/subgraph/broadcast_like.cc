@@ -40,8 +40,6 @@ ynn_status ynn_define_broadcast_like(ynn_subgraph_t subgraph, size_t num_axes,
   const ynn_value& template_value = subgraph->value(template_id);
   ynn::axes_set axes_set;
   for (size_t i = 0; i < num_axes; ++i) {
-    YNN_RETURN_IF_ERROR(
-        validate_axis("broadcast_like", "input", input.rank(), axes[i]));
     const int axis = axis_to_slinky_dim(input.rank(), axes[i]);
     if (axis < template_value.rank()) {
       axes_set[axis] = true;

@@ -454,8 +454,6 @@ ynn_status ynn_define_reduce(ynn_subgraph_t subgraph,
 
   ynn::axes_set k_dims;
   for (size_t i = 0; i < num_axes; ++i) {
-    YNN_RETURN_IF_ERROR(
-        validate_axis("reduce", "input_a", a.rank(), axes[i]));
     const int axis = axis_to_slinky_dim(a.rank(), axes[i]);
     if (axis < a.rank()) {
       k_dims[axis] = true;

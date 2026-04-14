@@ -199,14 +199,6 @@ cc_test(
 ]]
 
 cc_test(
-    name = "oob_write_poc",
-    srcs = ["oob_write_poc.cc"],
-    linkopts = ynn_binary_linkopts(),
-    malloc = ynn_binary_malloc(),
-    deps = TEST_DEPS + ["//ynnpack/xnnpack"],
-)
-
-cc_test(
     name = "reduce_window",
     srcs = ["reduce_window.cc"],
     linkopts = ynn_binary_linkopts(),

@@ -774,6 +774,8 @@ xnn_status xnn_define_static_expand_dims(xnn_subgraph_t subgraph,
                                          uint32_t input_id, uint32_t output_id,
                                          uint32_t flags) {
   if (num_new_axes > XNN_MAX_TENSOR_DIMS) {
+    YNN_LOG_ERROR() << "num_new_axes " << num_new_axes
+                    << " exceeds XNN_MAX_TENSOR_DIMS " << XNN_MAX_TENSOR_DIMS;
     return xnn_status_invalid_parameter;
   }
   int32_t ynn_axes[XNN_MAX_TENSOR_DIMS];
@@ -808,6 +810,8 @@ xnn_status xnn_define_static_reduce(xnn_subgraph_t subgraph,
                                     uint32_t input_id, uint32_t output_id,
                                     uint32_t flags) {
   if (num_reduction_axes > XNN_MAX_TENSOR_DIMS) {
+    YNN_LOG_ERROR() << "num_reduction_axes " << num_reduction_axes
+                    << " exceeds XNN_MAX_TENSOR_DIMS " << XNN_MAX_TENSOR_DIMS;
     return xnn_status_invalid_parameter;
   }
   int64_t signed_reduction_axes[XNN_MAX_TENSOR_DIMS];
