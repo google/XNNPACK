@@ -57,11 +57,9 @@ void TestImpl(T) {
   std::bernoulli_distribution bool_dist(0.5);
 
   for (auto _ : FuzzTest(std::chrono::milliseconds(1000))) {
-    quantization_params quantization = random_quantization(type_of<T>(), rng);
-
     Tensor<T> output(random_shape(rng));
     Tensor<T> input(random_reshape(rng, output.size()));
-    fill_random(input.data(), input.size(), rng, quantization);
+    fill_random(input.data(), input.size(), rng);
 
     std::vector<size_t> dims = output.shape();
 
@@ -74,8 +72,8 @@ void TestImpl(T) {
 
     // Define subgraph
     SubgraphBuilder subgraph(2);
-    subgraph.AddInput(type_of<T>(), input.extents(), 0, quantization)
-        .AddOutput(type_of<T>(), output.extents(), 1, quantization)
+    subgraph.AddInput(type_of<T>(), input.extents(), 0)
+        .AddOutput(type_of<T>(), output.extents(), 1)
         .AddReshape(dims, 0, 1);
 
     Runtime runtime(subgraph.GetSubgraph());

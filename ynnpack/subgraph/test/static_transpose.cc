@@ -73,12 +73,10 @@ void TestImpl(T, size_t rank) {
   std::iota(perm.begin(), perm.end(), 0);
 
   do {
-    quantization_params quantization = random_quantization(type_of<T>(), rng);
-
     // Define subgraph
     SubgraphBuilder subgraph(2);
-    subgraph.AddInput(type_of<T>(), rank, 0, quantization)
-        .AddOutput(type_of<T>(), rank, 1, quantization)
+    subgraph.AddInput(type_of<T>(), rank, 0)
+        .AddOutput(type_of<T>(), rank, 1)
         .AddTranspose(perm, 0, 1);
 
     Runtime runtime(subgraph.GetSubgraph());

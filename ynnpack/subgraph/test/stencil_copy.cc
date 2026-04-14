@@ -88,8 +88,6 @@ void TestImpl(T, size_t rank) {
     for (size_t num_stencils = 1;
          num_stencils <= rank && num_stencils + rank <= YNN_MAX_TENSOR_RANK;
          ++num_stencils) {
-      quantization_params quantization = random_quantization(type_of<T>(), rng);
-
       std::vector<int32_t> stencil_axes(rank);
       std::iota(stencil_axes.begin(), stencil_axes.end(), 0);
       std::shuffle(stencil_axes.begin(), stencil_axes.end(), rng);
@@ -124,8 +122,8 @@ void TestImpl(T, size_t rank) {
       SubgraphBuilder subgraph(2);
       const uint32_t padding_id =
           bool_dist(rng) ? subgraph.DefineScalar<T>(0) : YNN_INVALID_VALUE_ID;
-      subgraph.AddInput(type_of<T>(), rank, 0, quantization)
-          .AddOutput(type_of<T>(), rank + num_stencils, 1, quantization)
+      subgraph.AddInput(type_of<T>(), rank, 0)
+          .AddOutput(type_of<T>(), rank + num_stencils, 1)
           .AddStencilCopy(stencil_axes, new_axes, stencil_dims, stencil_strides,
                           stencil_dilations, 0, padding_id, 1);
 
@@ -139,7 +137,7 @@ void TestImpl(T, size_t rank) {
         }
 
         Tensor<T> input(shape);
-        fill_random(input.data(), input.size(), rng, quantization);
+        fill_random(input.data(), input.size(), rng);
 
         Tensor<T> expected = input;
         if (padding_id != YNN_INVALID_VALUE_ID) {

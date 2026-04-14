@@ -34,8 +34,6 @@ void TestImpl(T, size_t rank) {
   for (size_t axis = 0; axis < rank; ++axis) {
     for (size_t axes_count = 1; rank + axes_count - 1 <= YNN_MAX_TENSOR_RANK;
          ++axes_count) {
-      quantization_params quantization = random_quantization(type_of<T>(), rng);
-
       std::vector<size_t> splits = random_shape(rng, axes_count);
       size_t deduced_split = dim_dist(rng);
       if (deduced_split < splits.size()) {
@@ -44,8 +42,8 @@ void TestImpl(T, size_t rank) {
 
       // Define subgraph
       SubgraphBuilder subgraph(2);
-      subgraph.AddInput(type_of<T>(), rank, 0, quantization)
-          .AddOutput(type_of<T>(), rank + axes_count - 1, 1, quantization)
+      subgraph.AddInput(type_of<T>(), rank, 0)
+          .AddOutput(type_of<T>(), rank + axes_count - 1, 1)
           .AddSplitDim(axis, splits, 0, 1);
 
       Runtime runtime(subgraph.GetSubgraph());
@@ -61,7 +59,7 @@ void TestImpl(T, size_t rank) {
                             static_cast<size_t>(1), std::multiplies<>());
 
         Tensor<T> input(input_shape);
-        fill_random(input.data(), input.size(), rng, quantization);
+        fill_random(input.data(), input.size(), rng);
 
         // Check reshaped shape is correct
         runtime.ReshapeExternalTensor(input_shape, input.base(), 0)
