@@ -53,60 +53,33 @@ class SubgraphBuilder {
   explicit SubgraphBuilder(size_t external_value_count, uint32_t flags = 0);
 
   SubgraphBuilder& AddTensor(ynn_type type, TensorShape shape, uint32_t& id,
-                             const void* data = nullptr,
-                             uint32_t zero_point_id = YNN_INVALID_VALUE_ID,
-                             uint32_t scale_id = YNN_INVALID_VALUE_ID,
-                             uint32_t flags = 0);
-  SubgraphBuilder& AddTensor(ynn_type type, TensorShape shape, uint32_t& id,
-                             const void* data,
-                             quantization_params scalar_quantization,
-                             uint32_t flags = 0);
+                             const void* data = nullptr, uint32_t flags = 0);
 
   SubgraphBuilder& AddInput(ynn_type type, TensorShape shape, uint32_t id,
-                            uint32_t zero_point_id = YNN_INVALID_VALUE_ID,
-                            uint32_t scale_id = YNN_INVALID_VALUE_ID,
                             uint32_t flags = 0) {
-    return AddTensor(type, shape, id, /*data=*/nullptr, zero_point_id, scale_id,
-                     flags | YNN_VALUE_FLAG_EXTERNAL_INPUT);
-  }
-  SubgraphBuilder& AddInput(ynn_type type, TensorShape shape, uint32_t id,
-                            quantization_params scalar_quantization,
-                            uint32_t flags = 0) {
-    return AddTensor(type, shape, id, /*data=*/nullptr, scalar_quantization,
+    return AddTensor(type, shape, id, /*data=*/nullptr,
                      flags | YNN_VALUE_FLAG_EXTERNAL_INPUT);
   }
   SubgraphBuilder& AddOutput(ynn_type type, TensorShape shape, uint32_t id,
-                             uint32_t zero_point_id = YNN_INVALID_VALUE_ID,
-                             uint32_t scale_id = YNN_INVALID_VALUE_ID,
                              uint32_t flags = 0) {
-    return AddTensor(type, shape, id, /*data=*/nullptr, zero_point_id, scale_id,
-                     flags | YNN_VALUE_FLAG_EXTERNAL_OUTPUT);
-  }
-  SubgraphBuilder& AddOutput(ynn_type type, TensorShape shape, uint32_t id,
-                             quantization_params scalar_quantization,
-                             uint32_t flags = 0) {
-    return AddTensor(type, shape, id, /*data=*/nullptr, scalar_quantization,
+    return AddTensor(type, shape, id, /*data=*/nullptr,
                      flags | YNN_VALUE_FLAG_EXTERNAL_OUTPUT);
   }
 
   template <typename T>
   SubgraphBuilder& AddTensor(const Tensor<T>& tensor, uint32_t id,
-                             quantization_params quantization = {},
                              uint32_t flags = 0) {
     std::vector<size_t> extents(tensor.extents());
     if (!extents.empty()) {
       // Convert physical shape of tensor to logical shape for YNNPACK API.
       extents.back() *= type_element_count(type_of<T>());
     }
-    return AddTensor(type_of<T>(), extents, id, tensor.data(), quantization,
-                     flags);
+    return AddTensor(type_of<T>(), extents, id, tensor.data(), flags);
   }
 
   template <typename T>
-  SubgraphBuilder& AddScalar(T value, uint32_t id,
-                             quantization_params quantization = {},
-                             uint32_t flags = 0) {
-    return AddTensor(type_of<T>(), {}, id, &value, quantization,
+  SubgraphBuilder& AddScalar(T value, uint32_t id, uint32_t flags = 0) {
+    return AddTensor(type_of<T>(), {}, id, &value,
                      flags | YNN_VALUE_FLAG_COPY_DATA);
   }
 
@@ -117,9 +90,16 @@ class SubgraphBuilder {
   SubgraphBuilder& AddQuantize(uint32_t input_id, ynn_type type,
                                uint32_t zero_point_id, uint32_t scale_id,
                                uint32_t output_id, uint32_t flags = 0);
+  SubgraphBuilder& AddQuantize(uint32_t input_id, ynn_type type,
+                               quantization_params quantization,
+                               uint32_t output_id, uint32_t flags = 0);
   SubgraphBuilder& AddDequantize(uint32_t input_id, uint32_t zero_point_id,
                                  uint32_t scale_id, ynn_type type,
                                  uint32_t output_id, uint32_t flags = 0);
+  SubgraphBuilder& AddDequantize(uint32_t input_id,
+                                 quantization_params quantization,
+                                 ynn_type type, uint32_t output_id,
+                                 uint32_t flags = 0);
   SubgraphBuilder& AddPolynomial(const std::vector<float>& coefficients,
                                  uint32_t input_id, uint32_t output_id,
                                  uint32_t flags = 0);
@@ -217,19 +197,6 @@ class SubgraphBuilder {
     status_ = ynn_define_tensor(subgraph_.get(), type_of<T>(), 0,
                                 /*dims=*/nullptr, &value,
                                 /*flags=*/YNN_VALUE_FLAG_COPY_DATA, &id);
-    return id;
-  }
-
-  // Define a quantized scalar with a dequantized value of `value`.
-  template <typename T>
-  uint32_t DefineScalar(float value, quantization_params quantization) {
-    uint32_t id = YNN_INVALID_VALUE_ID;
-    T quantized_value = quantize<T>(value, quantization);
-    status_ = ynn_define_tensor_value(subgraph_.get(), type_of<T>(), 0,
-                                      /*dims=*/nullptr, &quantized_value,
-                                      DefineScalar<T>(quantization.zero_point),
-                                      DefineScalar<T>(quantization.scale),
-                                      /*flags=*/YNN_VALUE_FLAG_COPY_DATA, &id);
     return id;
   }
 

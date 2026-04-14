@@ -7,6 +7,7 @@
 #include <chrono>
 #include <cmath>
 #include <cstddef>
+#include <cstdint>
 #include <random>
 #include <tuple>
 #include <vector>
@@ -64,16 +65,25 @@ void TestPolynomial(A, X) {
       c = coeff_dist(rng);
     }
 
+    uint32_t input_id = 0;
+    uint32_t output_id = 1;
+    uint32_t a_id = YNN_INVALID_VALUE_ID;
+    uint32_t x_id = YNN_INVALID_VALUE_ID;
     SubgraphBuilder subgraph(2);
-    subgraph.AddInput(type_of<A>(), rank, 0, a_quantization)
-        .AddOutput(type_of<X>(), rank, 1, output_quantization)
-        .AddPolynomial(coefficients, 0, 1);
+    subgraph.AddInput(type_of<A>(), rank, input_id)
+        .AddOutput(type_of<X>(), rank, output_id)
+        .AddTensor(ynn_type_fp32, rank, a_id)
+        .AddTensor(ynn_type_fp32, rank, x_id);
+
+    subgraph.AddDequantize(input_id, a_quantization, ynn_type_fp32, a_id)
+        .AddPolynomial(coefficients, a_id, x_id)
+        .AddQuantize(x_id, type_of<X>(), output_quantization, output_id);
 
     Runtime runtime(subgraph.GetSubgraph());
     ASSERT_EQ(runtime.Status(), ynn_status_success);
 
     for (int reshape = 0; reshape < 2; ++reshape) {
-      std::vector<size_t> shape = random_shape(rng, rank, 1, max_dim);
+      std::vector<size_t> shape = random_shape(rng, rank, output_id, max_dim);
 
       Tensor<A> a(shape);
       Tensor<X> output(shape);
@@ -81,11 +91,11 @@ void TestPolynomial(A, X) {
       fill_random(a.data(), a.size(), rng, -max_abs_value, max_abs_value,
                   a_quantization);
 
-      runtime.ReshapeExternalTensor(shape, a.data(), 0).ReshapeRuntime();
+      runtime.ReshapeExternalTensor(shape, a.data(), input_id).ReshapeRuntime();
 
-      ASSERT_EQ(runtime.GetExternalTensorShape(1), shape);
+      ASSERT_EQ(runtime.GetExternalTensorShape(output_id), shape);
 
-      runtime.SetupExternalTensor(output.data(), 1).InvokeRuntime();
+      runtime.SetupExternalTensor(output.data(), output_id).InvokeRuntime();
       for (const auto& i : EnumerateIndices(output.extents())) {
         float a_i = dequantize(a(i), a_quantization);
         float expected = EvalPolynomial(coefficients, a_i);

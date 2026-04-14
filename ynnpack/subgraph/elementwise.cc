@@ -718,11 +718,6 @@ ynn_status ynn_define_quantize(ynn_subgraph_t subgraph, uint32_t input_id,
       validate_output_tensor("quantize", subgraph, "output_id", output_id));
 
   const ynn_value& a = subgraph->value(input_id);
-  if (!type_is_floating_point(a.type)) {
-    YNN_LOG_ERROR() << "Input type of quantize must be floating point.";
-    return ynn_status_invalid_parameter;
-  }
-
   // Propagate rank.
   ynn_value& x = subgraph->get_output_value(output_id, output_type,
                                             zero_point_id, scale_id);
@@ -803,10 +798,6 @@ ynn_status ynn_define_dequantize(ynn_subgraph_t subgraph, uint32_t input_id,
 
   // Propagate rank.
   ynn_value& x = subgraph->get_output_value(output_id, output_type);
-  if (!type_is_floating_point(x.type)) {
-    YNN_LOG_ERROR() << "Output type of dequantize must be floating point.";
-    return ynn_status_invalid_parameter;
-  }
   x.extents.clear();
   x.extents.resize(x.rank());
 

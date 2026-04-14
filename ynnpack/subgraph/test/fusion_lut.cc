@@ -11,6 +11,7 @@
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include "ynnpack/base/type.h"
 #include "ynnpack/include/ynnpack.h"
 #include "ynnpack/kernels/ternary/ternary.h"
 #include "ynnpack/subgraph/subgraph.h"
@@ -81,43 +82,37 @@ void RunFuseCompare(
 
 TEST(fusion_lut, single_node_simple) {
   // y_int8 = sigmoid(x_int8).
-  uint32_t x_id = 0;
-  uint32_t y_id = 1;
-  uint32_t x_scale_id = 2;
-  uint32_t x_zero_point_id = 3;
-  uint32_t y_scale_id = 4;
-  uint32_t y_zero_point_id = 5;
-  static const float scale_val[] = {1.0f / 255.0f};
-  static const int32_t zero_point_val[] = {-128};
 
-  SubgraphBuilder builder(/*external_value_count=*/6);
+  const quantization_params quantization = {
+      .zero_point = -128,
+      .scale = 1.0f / 255.0f,
+  };
 
-  builder.AddTensor(ynn_type_fp32, {}, x_scale_id, scale_val)
-      .AddTensor(ynn_type_int32, {}, x_zero_point_id, zero_point_val)
-      .AddTensor(ynn_type_fp32, {}, y_scale_id, scale_val)
-      .AddTensor(ynn_type_int32, {}, y_zero_point_id, zero_point_val);
+  SubgraphBuilder builder(/*external_value_count=*/2);
+  uint32_t input_id = 0;
+  uint32_t output_id = 1;
+  uint32_t a_id = YNN_INVALID_VALUE_ID;
+  uint32_t x_id = YNN_INVALID_VALUE_ID;
+  builder.AddInput(ynn_type_int8, 1, input_id)
+      .AddOutput(ynn_type_int8, 1, output_id)
+      .AddTensor(ynn_type_fp32, 1, a_id)
+      .AddTensor(ynn_type_fp32, 1, x_id);
 
-  builder.AddInput(ynn_type_int8, 1, x_id, x_zero_point_id, x_scale_id)
-      .AddOutput(ynn_type_int8, 1, y_id, y_zero_point_id, y_scale_id);
-
-  builder.AddUnary(ynn_unary_sigmoid, x_id, y_id);
+  builder.AddDequantize(input_id, quantization, ynn_type_fp32, a_id)
+      .AddUnary(ynn_unary_sigmoid, a_id, x_id)
+      .AddQuantize(x_id, ynn_type_int8, quantization, output_id);
 
   std::vector<int8_t> input_data(256);
   std::iota(input_data.begin(), input_data.end(), -128);
 
   RunFuseCompare<int8_t, int8_t>(
-      builder, {x_id}, {input_data}, {TensorShape({input_data.size()})}, y_id,
-      256, [&](const ynn_subgraph& subgraph) {
-        ASSERT_THAT(subgraph,
-                    AllOf(HasValidNodeCount(1), HasValidValueIds(x_id, y_id)));
-        EXPECT_THAT(ProducerOf(y_id, subgraph),
-                    AllOf(IsLut(), InputsAre(x_id, IsValidValueIn(subgraph))));
-
-        // Check that the rewritten subgraph includes quantization parameters.
-        EXPECT_EQ(subgraph.value(x_id).scale_id, x_scale_id);
-        EXPECT_EQ(subgraph.value(x_id).zero_point_id, x_zero_point_id);
-        EXPECT_EQ(subgraph.value(y_id).scale_id, y_scale_id);
-        EXPECT_EQ(subgraph.value(y_id).zero_point_id, y_zero_point_id);
+      builder, {input_id}, {input_data}, {TensorShape({input_data.size()})},
+      output_id, 256, [&](const ynn_subgraph& subgraph) {
+        ASSERT_THAT(subgraph, AllOf(HasValidNodeCount(1),
+                                    HasValidValueIds(input_id, output_id)));
+        EXPECT_THAT(
+            ProducerOf(output_id, subgraph),
+            AllOf(IsLut(), InputsAre(input_id, IsValidValueIn(subgraph))));
       });
 }
 
@@ -128,33 +123,21 @@ TEST(fusion_lut, single_node) {
   // a * b -> x
   // x -> sigmoid -> y
   // y + c -> d
+
+  SubgraphBuilder builder(/*external_value_count=*/4);
   uint32_t a_id = 0;
   uint32_t b_id = 1;
   uint32_t c_id = 2;
-  uint32_t x_id = 3;
-  uint32_t y_id = 4;
-  uint32_t d_id = 5;
-  uint32_t scale_id = 6;
-  uint32_t zero_point_id = 7;
+  uint32_t d_id = 3;
+  uint32_t x_id = YNN_INVALID_VALUE_ID;
+  uint32_t y_id = YNN_INVALID_VALUE_ID;
 
-  static const float scale_val[] = {1.0f / 255.0f};
-  static const int32_t zero_point_val[] = {-128};
-
-  SubgraphBuilder builder(/*external_value_count=*/8);
-
-  builder.AddTensor(ynn_type_fp32, {}, scale_id, scale_val)
-      .AddTensor(ynn_type_int32, {}, zero_point_id, zero_point_val);
-
-  builder.AddInput(ynn_type_int8, {256}, a_id, zero_point_id, scale_id)
-      .AddInput(ynn_type_int8, {256}, b_id, zero_point_id, scale_id)
-      .AddInput(ynn_type_int8, {256}, c_id, zero_point_id, scale_id)
-      .AddOutput(ynn_type_int8, {256}, d_id, zero_point_id, scale_id);
-
-  builder
-      .AddTensor(ynn_type_int8, {256}, x_id, /*data=*/nullptr, zero_point_id,
-                 scale_id)
-      .AddTensor(ynn_type_int8, {256}, y_id, /*data=*/nullptr, zero_point_id,
-                 scale_id);
+  builder.AddInput(ynn_type_int8, {256}, a_id)
+      .AddInput(ynn_type_int8, {256}, b_id)
+      .AddInput(ynn_type_int8, {256}, c_id)
+      .AddOutput(ynn_type_int8, {256}, d_id)
+      .AddTensor(ynn_type_int8, {256}, x_id)
+      .AddTensor(ynn_type_int8, {256}, y_id);
 
   builder.AddBinary(ynn_binary_multiply, a_id, b_id, x_id)
       .AddUnary(ynn_unary_sigmoid, x_id, y_id)
@@ -174,12 +157,10 @@ TEST(fusion_lut, single_node) {
         // in this test.
         ASSERT_THAT(subgraph, AllOf(HasValidNodeCount(9),
                                     HasValidValueIds(a_id, b_id, c_id, d_id)));
-        EXPECT_THAT(ProducerOf(x_id, subgraph),
-                    IsTernary(ternary_op::quantize_int8));
+        EXPECT_THAT(ProducerOf(x_id, subgraph), IsUnary(ynn_unary_convert));
         EXPECT_THAT(ProducerOf(y_id, subgraph),
                     AllOf(IsLut(), InputsAre(x_id, IsValidValueIn(subgraph))));
-        EXPECT_THAT(ProducerOf(d_id, subgraph),
-                    IsTernary(ternary_op::quantize_int8));
+        EXPECT_THAT(ProducerOf(d_id, subgraph), IsUnary(ynn_unary_convert));
       });
 }
 
@@ -249,10 +230,8 @@ TEST(fusion_lut, elu_chain) {
   uint32_t c_id = 4;
   uint32_t e_id = 5;
   uint32_t f_id = 6;
-  uint32_t zero_id = 7;
-  uint32_t alpha_const_id = 8;
 
-  SubgraphBuilder builder(/*external_value_count=*/9);
+  SubgraphBuilder builder(/*external_value_count=*/7);
   builder.AddInput(ynn_type_uint8, 3, x_id)
       .AddOutput(ynn_type_uint8, 3, y_id)
       // Intermediate tensors (fp32)
@@ -262,12 +241,8 @@ TEST(fusion_lut, elu_chain) {
       .AddTensor(ynn_type_fp32, 3, e_id)
       .AddTensor(ynn_type_fp32, 3, f_id);
 
-  static const float zero_val[] = {0.0f};
-  static const float d_val[] = {
-      1.0f};  // Value doesn't matter for fusion structure
-
-  builder.AddTensor(ynn_type_fp32, {}, zero_id, zero_val)
-      .AddTensor(ynn_type_fp32, {}, alpha_const_id, d_val);
+  const uint32_t zero_id = builder.DefineScalar<float>(0.0f);
+  const uint32_t alpha_const_id = builder.DefineScalar<float>(1.0f);
 
   // Build the chain
   builder.AddConvert(x_id, ynn_type_fp32, a_id)
@@ -299,26 +274,17 @@ TEST(fusion_lut, branching_2_luts) {
   // x -> (lut_xy) -> y
   //     \
   //      -> (lut_xz) -> z
+
+  SubgraphBuilder builder(/*external_value_count=*/3);
   uint32_t x_id = 0;
-  uint32_t t_id = 1;
-  uint32_t y_id = 2;
-  uint32_t z_id = 3;
-  uint32_t scale_id = 4;
-  uint32_t zero_point_id = 5;
+  uint32_t y_id = 1;
+  uint32_t z_id = 2;
+  uint32_t t_id = YNN_INVALID_VALUE_ID;
 
-  static const float scale_val[] = {1.0f};
-  static const int32_t zero_point_val[] = {0};
-
-  SubgraphBuilder builder(/*external_value_count=*/6);
-
-  builder.AddTensor(ynn_type_fp32, {}, scale_id, scale_val)
-      .AddTensor(ynn_type_int32, {}, zero_point_id, zero_point_val);
-
-  builder.AddInput(ynn_type_int8, {256}, x_id, zero_point_id, scale_id)
-      .AddTensor(ynn_type_int8, {256}, t_id, /*data=*/nullptr, zero_point_id,
-                 scale_id)
-      .AddOutput(ynn_type_int8, {256}, y_id, zero_point_id, scale_id)
-      .AddOutput(ynn_type_int8, {256}, z_id, zero_point_id, scale_id);
+  builder.AddInput(ynn_type_int8, {256}, x_id)
+      .AddTensor(ynn_type_int8, {256}, t_id)
+      .AddOutput(ynn_type_int8, {256}, y_id)
+      .AddOutput(ynn_type_int8, {256}, z_id);
 
   builder.AddUnary(ynn_unary_abs, x_id, t_id)
       .AddUnary(ynn_unary_ceil, t_id, y_id)
@@ -369,9 +335,8 @@ TEST(fusion_lut, binary_scalar_constant) {
   uint32_t y_id = 1;
   uint32_t a_id = 2;
   uint32_t b_id = 3;
-  uint32_t c_id = 4;
 
-  SubgraphBuilder builder(/*external_value_count=*/5);
+  SubgraphBuilder builder(/*external_value_count=*/4);
 
   builder.AddInput(ynn_type_uint8, {256}, x_id)
       .AddOutput(ynn_type_uint8, {256}, y_id);
@@ -379,8 +344,7 @@ TEST(fusion_lut, binary_scalar_constant) {
   builder.AddTensor(ynn_type_fp32, {256}, a_id)
       .AddTensor(ynn_type_fp32, {256}, b_id);
 
-  static const float c_val[] = {1.0f};
-  builder.AddTensor(ynn_type_fp32, {}, c_id, c_val);
+  const uint32_t c_id = builder.DefineScalar<float>(1.0f);
 
   builder.AddConvert(x_id, ynn_type_fp32, a_id)
       .AddBinary(ynn_binary_add, a_id, c_id, b_id)
