@@ -1322,17 +1322,13 @@ void GEMMBenchmark(benchmark::State& state,
   // Pack the left-hand operand.
   const size_t input_packed_size =
       xnn_x32_pack_lh_size__neonsme(mc, kc, mr_packed, kr, sr);
-  xnnpack::Buffer<float, XNN_ALLOCATION_ALIGNMENT> input_packed(
-      input_packed_size / sizeof(float));
+  xnnpack::Buffer<uint8_t, XNN_ALLOCATION_ALIGNMENT> input_packed(
+      input_packed_size);
   xnn_x32_pack_lh_ukernel__neonsme(mc, kc, mr_packed, kr, sr,
                                     /*m_idx_start=*/0, a.data(),
                                     /*lhs_stride=*/kc * sizeof(float),
                                     input_packed.data());
 
-  // RHS packing
-  xnnpack::Buffer<float> kernel_scale(nc, 1.0f);
-  const xnn_qs8_qc4w_packing_params packing_params = {/*input_zero_point=*/1,
-                                                      /*kernel_zero_point=*/8};
   pack_weights(/*flags=*/0, &gemm_config, kc, nc,
                /*groups=*/1, /*unused_block_size=*/0, /*k_stride=*/kc,
                /*accumulator_init=*/nullptr,
@@ -1343,7 +1339,7 @@ void GEMMBenchmark(benchmark::State& state,
                /*init_extra_data1_fn=*/nullptr,
                /*extra_data1=*/nullptr,
                /*extra_data1_size=*/0,
-               /*packed_weights_ptr=*/w.data(), &packing_params);
+               /*packed_weights_ptr=*/w.data(), nullptr);
 
   xnnpack::Buffer<float> c(c_elements * num_buffers);
 
