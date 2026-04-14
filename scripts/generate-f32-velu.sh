@@ -149,4 +149,10 @@ tools/xngen src/f32-velu/avx512f-rr1-p6.c.in -D BATCH_TILE=32  -o src/f32-velu/g
 tools/xngen src/f32-velu/avx512f-rr1-p6.c.in -D BATCH_TILE=48  -o src/f32-velu/gen/f32-velu-avx512f-rr1-p6-u48.c &
 tools/xngen src/f32-velu/avx512f-rr1-p6.c.in -D BATCH_TILE=64  -o src/f32-velu/gen/f32-velu-avx512f-rr1-p6-u64.c &
 
+################################## RISC-V RVV #################################
+tools/xngen src/f32-velu/rvv-rr2-p6.c.in -D LMUL=1 -o src/f32-velu/gen/f32-velu-rvv-rr2-p6-u1v.c &
+tools/xngen src/f32-velu/rvv-rr2-p6.c.in -D LMUL=2 -o src/f32-velu/gen/f32-velu-rvv-rr2-p6-u2v.c &
+tools/xngen src/f32-velu/rvv-rr2-p6.c.in -D LMUL=4 -o src/f32-velu/gen/f32-velu-rvv-rr2-p6-u4v.c &
+tools/xngen src/f32-velu/rvv-rr2-p6.c.in -D LMUL=8 -o src/f32-velu/gen/f32-velu-rvv-rr2-p6-u8v.c &
+
 wait
