@@ -142,6 +142,7 @@ PROD_RVV_MICROKERNEL_SRCS = [
     "src/x32-transposec/gen/x32-transposec-8x8-rvv.c",
     "src/x32-transposec/gen/x32-transposec-16x8-rvv.c",
     "src/x32-transposec/gen/x32-transposec-32x8-rvv.c",
+    "src/f32-ppmm/gen/f32-ppmm-4x4v-minmax-rvv.c",
 ]
 
 NON_PROD_RVV_MICROKERNEL_SRCS = [
@@ -354,6 +355,14 @@ NON_PROD_RVV_MICROKERNEL_SRCS = [
     "src/x32-transposec/gen/x32-transposec-8xv1-rvv.c",
     "src/x32-transposec/gen/x32-transposec-8xv2-rvv.c",
     "src/x32-transposec/gen/x32-transposec-8xv4-rvv.c",
+    "src/f32-ppmm/gen/f32-ppmm-1x1v-minmax-rvv.c",
+    "src/f32-ppmm/gen/f32-ppmm-1x2v-minmax-rvv.c",
+    "src/f32-ppmm/gen/f32-ppmm-1x4v-minmax-rvv.c",
+    "src/f32-ppmm/gen/f32-ppmm-2x1v-minmax-rvv.c",
+    "src/f32-ppmm/gen/f32-ppmm-2x2v-minmax-rvv.c",
+    "src/f32-ppmm/gen/f32-ppmm-2x4v-minmax-rvv.c",
+    "src/f32-ppmm/gen/f32-ppmm-4x1v-minmax-rvv.c",
+    "src/f32-ppmm/gen/f32-ppmm-4x2v-minmax-rvv.c",
 ]
 
 ALL_RVV_MICROKERNEL_SRCS = PROD_RVV_MICROKERNEL_SRCS + NON_PROD_RVV_MICROKERNEL_SRCS
