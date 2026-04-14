@@ -13,7 +13,6 @@
 #include <cstdint>
 #include <cstdlib>
 #include <cstring>
-#include <limits>
 #include <type_traits>
 #include <utility>
 
@@ -651,9 +650,12 @@ void test_cast() {
 
   To dst[N];
   store(dst, to_v);
+
+  To ref[N];
   for (size_t i = 0; i < N; ++i) {
-    ASSERT_EQ(dst[i], static_cast<To>(src[i]));
+    ref[i] = static_cast<To>(src[i]);
   }
+  EXPECT_THAT(dst, ElementsAreArray(ref, N));
 }
 
 #define TEST_CAST(test_class, to, from) \

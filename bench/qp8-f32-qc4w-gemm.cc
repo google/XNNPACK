@@ -31,7 +31,7 @@ namespace {
   static void qp8_f32_qc4w_gemm_minmax_ukernel_4x4c16s2__neoni8mm(benchmark::State& state) {
     GEMMBenchmark(state,
       xnn_qp8_f32_qc4w_gemm_minmax_ukernel_4x4c16s2__neoni8mm,
-      xnn_init_f32_minmax_scalar_params,
+      xnn_init_f32_qc4w_minmax_scalar_params,
       xnn_pack_kai_qs4_weights_and_biases,
       xnn_packed_stride_kai_qs4_weights_and_biases,
       /*mr=*/4, /*nr=*/4, /*kr=*/16, /*sr=*/2,
@@ -44,7 +44,7 @@ namespace {
   static void qp8_f32_qc4w_gemm_minmax_ukernel_4x8c16s2__neoni8mm(benchmark::State& state) {
     GEMMBenchmark(state,
       xnn_qp8_f32_qc4w_gemm_minmax_ukernel_4x8c16s2__neoni8mm,
-      xnn_init_f32_minmax_scalar_params,
+      xnn_init_f32_qc4w_minmax_scalar_params,
       xnn_pack_kai_qs4_weights_and_biases,
       xnn_packed_stride_kai_qs4_weights_and_biases,
       /*mr=*/4, /*nr=*/8, /*kr=*/16, /*sr=*/2,
@@ -57,7 +57,7 @@ namespace {
   static void qp8_f32_qc4w_gemm_minmax_ukernel_8x4c16s2__neoni8mm_mstep2(benchmark::State& state) {
     GEMMBenchmark(state,
       xnn_qp8_f32_qc4w_gemm_minmax_ukernel_8x4c16s2__neoni8mm_mstep2,
-      xnn_init_f32_minmax_scalar_params,
+      xnn_init_f32_qc4w_minmax_scalar_params,
       xnn_pack_kai_qs4_weights_and_biases,
       xnn_packed_stride_kai_qs4_weights_and_biases,
       /*mr=*/8, /*nr=*/4, /*kr=*/16, /*sr=*/2,
@@ -70,7 +70,7 @@ namespace {
   static void qp8_f32_qc4w_gemm_minmax_ukernel_8x8c16s2__neoni8mm_mstep2(benchmark::State& state) {
     GEMMBenchmark(state,
       xnn_qp8_f32_qc4w_gemm_minmax_ukernel_8x8c16s2__neoni8mm_mstep2,
-      xnn_init_f32_minmax_scalar_params,
+      xnn_init_f32_qc4w_minmax_scalar_params,
       xnn_pack_kai_qs4_weights_and_biases,
       xnn_packed_stride_kai_qs4_weights_and_biases,
       /*mr=*/8, /*nr=*/8, /*kr=*/16, /*sr=*/2,
@@ -88,7 +88,7 @@ namespace {
   static void qp8_f32_qc4w_gemm_minmax_ukernel_1x4c16s2__aarch64_neondot(benchmark::State& state) {
     GEMMBenchmark(state,
       xnn_qp8_f32_qc4w_gemm_minmax_ukernel_1x4c16s2__aarch64_neondot,
-      xnn_init_f32_minmax_scalar_params,
+      xnn_init_f32_qc4w_minmax_scalar_params,
       xnn_pack_kai_qs4_weights_and_biases,
       xnn_packed_stride_kai_qs4_weights_and_biases,
       /*mr=*/1, /*nr=*/4, /*kr=*/16, /*sr=*/2,
@@ -101,7 +101,7 @@ namespace {
   static void qp8_f32_qc4w_gemm_minmax_ukernel_1x8c16s2__aarch64_neondot(benchmark::State& state) {
     GEMMBenchmark(state,
       xnn_qp8_f32_qc4w_gemm_minmax_ukernel_1x8c16s2__aarch64_neondot,
-      xnn_init_f32_minmax_scalar_params,
+      xnn_init_f32_qc4w_minmax_scalar_params,
       xnn_pack_kai_qs4_weights_and_biases,
       xnn_packed_stride_kai_qs4_weights_and_biases,
       /*mr=*/1, /*nr=*/8, /*kr=*/16, /*sr=*/2,
@@ -114,7 +114,7 @@ namespace {
   static void qp8_f32_qc4w_gemm_minmax_ukernel_1x4c8s2__aarch64_neondot(benchmark::State& state) {
     GEMMBenchmark(state,
       xnn_qp8_f32_qc4w_gemm_minmax_ukernel_1x4c8s2__aarch64_neondot,
-      xnn_init_f32_minmax_scalar_params,
+      xnn_init_f32_qc4w_minmax_scalar_params,
       xnn_pack_kai_qs4_weights_and_biases,
       xnn_packed_stride_kai_qs4_weights_and_biases,
       /*mr=*/1, /*nr=*/4, /*kr=*/8, /*sr=*/2,
@@ -127,7 +127,7 @@ namespace {
   static void qp8_f32_qc4w_gemm_minmax_ukernel_16x4c8s2__aarch64_neondot_mstep4(benchmark::State& state) {
     GEMMBenchmark(state,
       xnn_qp8_f32_qc4w_gemm_minmax_ukernel_16x4c8s2__aarch64_neondot_mstep4,
-      xnn_init_f32_minmax_scalar_params,
+      xnn_init_f32_qc4w_minmax_scalar_params,
       xnn_pack_kai_qs4_weights_and_biases,
       xnn_packed_stride_kai_qs4_weights_and_biases,
       /*mr=*/16, /*nr=*/4, /*kr=*/8, /*sr=*/2,
@@ -145,7 +145,7 @@ namespace {
   static void qp8_f32_qc4w_gemm_minmax_ukernel_1x64c4__neonsme2(benchmark::State& state) {
     GEMMBenchmark(state,
       xnn_qp8_f32_qc4w_gemm_minmax_ukernel_1x64c4__neonsme2,
-      xnn_init_f32_minmax_scalar_params,
+      xnn_init_f32_qc4w_minmax_scalar_params,
       xnn_pack_kai_qs4_weights_and_biases_sme,
       xnn_packed_stride_kai_qs4_weights_and_biases_sme,
       /*mr=*/[]() -> size_t {
@@ -185,7 +185,7 @@ namespace {
   static void qp8_f32_qc4w_gemm_minmax_ukernel_16x64c4__neonsme2(benchmark::State& state) {
     GEMMBenchmark(state,
       xnn_qp8_f32_qc4w_gemm_minmax_ukernel_16x64c4__neonsme2,
-      xnn_init_f32_minmax_scalar_params,
+      xnn_init_f32_qc4w_minmax_scalar_params,
       xnn_pack_kai_qs4_weights_and_biases_sme,
       xnn_packed_stride_kai_qs4_weights_and_biases_sme,
       /*mr=*/[]() -> size_t {

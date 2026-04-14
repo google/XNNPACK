@@ -112,6 +112,9 @@ class SubgraphBuilder {
 
   SubgraphBuilder& AddUnary(ynn_unary_operator op, uint32_t input_id,
                             uint32_t output_id, uint32_t flags = 0);
+  SubgraphBuilder& AddPolynomial(const std::vector<float>& coefficients,
+                                 uint32_t input_id, uint32_t output_id,
+                                 uint32_t flags = 0);
   SubgraphBuilder& AddBinary(ynn_binary_operator op, uint32_t input_a_id,
                              uint32_t input_b_id, uint32_t output_id,
                              uint32_t flags = 0);
@@ -158,12 +161,19 @@ class SubgraphBuilder {
                             uint32_t input_id, uint32_t output_id,
                             uint32_t flags = 0);
 
+  SubgraphBuilder& AddSliceLike(const std::vector<int32_t>& axes,
+                                uint32_t input_id, uint32_t template_id,
+                                uint32_t output_id);
+
   SubgraphBuilder& AddBroadcastLike(const std::vector<int32_t>& axes,
                                     uint32_t input_id, uint32_t template_id,
                                     uint32_t output_id);
 
   SubgraphBuilder& AddBroadcast(const std::vector<int32_t>& axes,
                                 uint32_t input_id, uint32_t output_id);
+
+  SubgraphBuilder& AddStaticBroadcast(const std::vector<size_t>& shape,
+                                      uint32_t input_id, uint32_t output_id);
 
   SubgraphBuilder& AddStencilCopy(const std::vector<int32_t>& stencil_axes,
                                   const std::vector<int32_t>& new_axes,

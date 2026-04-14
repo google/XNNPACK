@@ -19,24 +19,33 @@ RUN apt-get install -y \
     ccache \
     gcc-9 g++-9 \
     gcc-13 g++-13 \
-    crossbuild-essential-armhf \
-    && rm -rf /var/lib/apt/lists/*
+    clang-18 llvm-18 lld-18
 
-RUN ln -s /usr/arm-linux-gnueabihf/lib/ld-linux-armhf.so.3 /usr/lib/ld-linux-armhf.so.3
+# Declare TARGETARCH once; Buildx populates this automatically
+ARG TARGETARCH
+
+RUN if [ "$TARGETARCH" = "amd64" ] || [ "$TARGETARCH" = "arm64" ]; then \
+      apt-get update && \
+      apt-get install -y crossbuild-essential-armhf && \
+      ln -s /usr/arm-linux-gnueabihf/lib/ld-linux-armhf.so.3 /usr/lib/ld-linux-armhf.so.3; \
+    else \
+      echo "Skipping crossbuild-essential-armhf for architecture: $TARGETARCH"; \
+    fi
+
+RUN rm -rf /var/lib/apt/lists/*
+
+# ENV is not allowed to be conditional in Dockerfile.
 ENV LD_LIBRARY_PATH=/usr/arm-linux-gnueabihf/lib:${LD_LIBRARY_PATH}
 
-RUN wget https://apt.llvm.org/llvm.sh && \
-    chmod +x llvm.sh && \
-    ./llvm.sh 18 && \
-    rm llvm.sh
-
-ARG TARGETARCH
-RUN if [ "$TARGETARCH" = "arm64" ]; then \
-      wget -O /usr/local/bin/bazel https://github.com/bazelbuild/bazelisk/releases/download/v1.19.0/bazelisk-linux-arm64; \
+RUN if [ "$TARGETARCH" = "amd64" ]; then \
+      wget -O /usr/local/bin/bazel https://github.com/bazelbuild/bazelisk/releases/download/v1.19.0/bazelisk-linux-amd64 && \
+      chmod +x /usr/local/bin/bazel; \
+    elif [ "$TARGETARCH" = "arm64" ]; then \
+      wget -O /usr/local/bin/bazel https://github.com/bazelbuild/bazelisk/releases/download/v1.19.0/bazelisk-linux-arm64 && \
+      chmod +x /usr/local/bin/bazel; \
     else \
-      wget -O /usr/local/bin/bazel https://github.com/bazelbuild/bazelisk/releases/download/v1.19.0/bazelisk-linux-amd64; \
-    fi && \
-    chmod +x /usr/local/bin/bazel
+      echo "Skipping Bazel installation for unsupported architecture: $TARGETARCH"; \
+    fi
 
 RUN ln -sf /usr/bin/python3 /usr/bin/python
 

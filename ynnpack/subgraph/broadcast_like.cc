@@ -139,16 +139,6 @@ ynn_status ynn_define_broadcast_like(ynn_subgraph_t subgraph, size_t num_axes,
                                         {output.buffer, std::move(dims)});
     runtime.funcs.push_back(std::move(func));
 
-    auto sched = std::make_unique<scheduling_info>();
-
-    // Schedule the output buffer to be stored at the same level it's
-    // computed at.
-    scheduled_buffer sched_bc_buffer = {output.buffer, 0};
-    sched->scheduled_buffers.push_back(std::move(sched_bc_buffer));
-
-    runtime.funcs.back().user_data() = sched.get();
-    runtime.scheduling_info_storage.push_back(std::move(sched));
-
     return ynn_status_success;
   };
   subgraph->add_node(std::move(node));

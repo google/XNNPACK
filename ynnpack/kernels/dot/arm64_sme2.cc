@@ -90,7 +90,7 @@ __arm_new("za") __arm_locally_streaming void sme2_dot(
 
           k1 -= dot_factor;
           B_k1 = offset_bytes(B_k1, B_stride_k1 * dot_factor);
-          A_k1 = offset_bytes(A_k1, A_stride_m);
+          A_k1 = offset_bytes(A_k1, A_stride_m * dot_factor);
         }
         k2 -= 1;
         B_k2 = offset_bytes(B_k2, B_stride_k2);
@@ -183,7 +183,7 @@ __arm_new("za") __arm_locally_streaming void sme2_dot(
 
           k1 -= dot_factor;
           B_k1 = offset_bytes(B_k1, B_stride_k1 * dot_factor);
-          A_k1 = offset_bytes(A_k1, A_stride_m);
+          A_k1 = offset_bytes(A_k1, A_stride_m * dot_factor);
         }
         k2 -= 1;
         B_k2 = offset_bytes(B_k2, B_stride_k2);

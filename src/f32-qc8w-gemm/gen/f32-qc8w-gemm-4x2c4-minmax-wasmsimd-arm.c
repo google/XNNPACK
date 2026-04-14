@@ -159,7 +159,6 @@ void xnn_f32_qc8w_gemm_minmax_ukernel_4x2c4__wasmsimd_arm(
 
     vacc01x01 = wasm_f32x4_min(vmax, vacc01x01);
     vacc23x01 = wasm_f32x4_min(vmax, vacc23x01);
-
     if XNN_LIKELY(nc >= 2) {
       wasm_v128_store64_lane(c0, vacc01x01, 0);
       c0 = (float*) ((uintptr_t) c0 + cn_stride);

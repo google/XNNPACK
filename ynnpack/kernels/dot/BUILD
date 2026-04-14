@@ -7,735 +7,250 @@ load("@rules_cc//cc:cc_binary.bzl", "cc_binary")
 load("@rules_cc//cc:cc_library.bzl", "cc_library")
 load("@rules_cc//cc:cc_test.bzl", "cc_test")
 load("@rules_shell//shell:sh_test.bzl", "sh_test")
-load("//ynnpack:build_defs.bzl", "ynn_binary_linkopts", "ynn_binary_malloc", "ynn_cc_library", "ynn_generate_src_hdr", "ynn_kernel_copts", "ynn_test_deps")
+load("//ynnpack:build_defs.bzl", "ynn_binary_linkopts", "ynn_binary_malloc", "ynn_cc_library", "ynn_generate_srcs", "ynn_kernel_copts", "ynn_test_deps")
 
 _COMPATIBLE_WITH = []
 
-ynn_generate_src_hdr(
-    name = "x86_sse2_fp32",
+ynn_generate_srcs(
+    name = "arm_bf16_bf16_fp32",
     compatible_with = _COMPATIBLE_WITH,
-    generator = "//ynnpack/kernels/dot/generator",
-    generator_args = [
-        "x86_sse2_fp32",
-        "dot,1x16x1",
-        "dot,2x16x1",
-        "dot,3x16x1",
-        "dot,2x8x1",
-        "dot,3x8x1",
-        "dot,4x8x1",
-        "dot,4x4x1",
-        "dot,6x4x1",
-        "dot,8x4x1",
+    generator = "//ynnpack/kernels/dot/generator:arm_bf16_bf16_fp32",
+    output_srcs = [
+        "arm64_neon_bf16_bf16_fp32.cc",
+        "arm64_neon_bf16_bf16_fp32.inc",
     ],
-    output_hdr = "x86_sse2_fp32.inc",
-    output_src = "x86_sse2_fp32.cc",
 )
 
-ynn_generate_src_hdr(
-    name = "x86_avx_fp32",
+ynn_generate_srcs(
+    name = "arm_bf16_bf16_fp32_k2",
     compatible_with = _COMPATIBLE_WITH,
-    generator = "//ynnpack/kernels/dot/generator",
-    generator_args = [
-        "x86_avx_fp32",
-        "dot,1x32x1",
-        "dot,2x32x1",
-        "dot,2x16x1",
-        "dot,3x16x1",
-        "dot,4x16x1",
-        "dot,4x8x1",
-        "dot,6x8x1",
-        "dot,8x8x1",
+    generator = "//ynnpack/kernels/dot/generator:arm_bf16_bf16_fp32_k2",
+    output_srcs = [
+        "arm_neonbf16_bf16_bf16_fp32_k2.cc",
+        "arm_neonbf16_bf16_bf16_fp32_k2.inc",
     ],
-    output_hdr = "x86_avx_fp32.inc",
-    output_src = "x86_avx_fp32.cc",
 )
 
-ynn_generate_src_hdr(
-    name = "x86_avx_fp64",
+ynn_generate_srcs(
+    name = "arm_bf16_bf16_fp32_k4",
     compatible_with = _COMPATIBLE_WITH,
-    generator = "//ynnpack/kernels/dot/generator",
-    generator_args = [
-        "x86_avx_fp64",
-        "dot,1x16x1",
-        "dot,2x16x1",
-        "dot,2x8x1",
-        "dot,3x8x1",
-        "dot,4x8x1",
-        "dot,4x4x1",
-        "dot,6x4x1",
-        "dot,8x4x1",
+    generator = "//ynnpack/kernels/dot/generator:arm_bf16_bf16_fp32_k4",
+    output_srcs = [
+        "arm_neonbf16_bf16_bf16_fp32_k4.cc",
+        "arm_neonbf16_bf16_bf16_fp32_k4.inc",
     ],
-    output_hdr = "x86_avx_fp64.inc",
-    output_src = "x86_avx_fp64.cc",
 )
 
-ynn_generate_src_hdr(
-    name = "x86_fma3_fp32",
+ynn_generate_srcs(
+    name = "arm_fp32",
     compatible_with = _COMPATIBLE_WITH,
-    generator = "//ynnpack/kernels/dot/generator",
-    generator_args = [
-        "x86_fma3_fp32",
-        "dot,1x32x1",
-        "dot,2x32x1",
-        "dot,1x16x1",  # This is needed to avoid using sse2 for n <= 16, to avoid mul+add numerics.
-        "dot,2x16x1",
-        "dot,3x16x1",
-        "dot,4x16x1",
-        "dot,5x16x1",
-        "dot,6x16x1",
-        "dot,8x8x1",
-        # There doesn't seem to be anything wrong with this kernel, but for some shapes on AMD Rome,
-        # it is super slow, e.g. 128x8x16384 is >20x slower than 8x8. It also doesn't seem like it
-        # should be that much better than 8x8 when it is working well.
-        # "dot,10x8x1",
+    generator = "//ynnpack/kernels/dot/generator:arm_fp32",
+    output_srcs = [
+        "arm64_neon_fp32.cc",
+        "arm64_neon_fp32.inc",
     ],
-    output_hdr = "x86_fma3_fp32.inc",
-    output_src = "x86_fma3_fp32.cc",
 )
 
-ynn_generate_src_hdr(
-    name = "x86_fma3_fp64",
+ynn_generate_srcs(
+    name = "arm_fp64",
     compatible_with = _COMPATIBLE_WITH,
-    generator = "//ynnpack/kernels/dot/generator",
-    generator_args = [
-        "x86_fma3_fp64",
-        "dot,1x16x1",
-        "dot,2x16x1",
-        "dot,2x8x1",
-        "dot,3x8x1",
-        "dot,4x8x1",
-        "dot,5x8x1",
-        "dot,6x8x1",
-        "dot,8x4x1",
+    generator = "//ynnpack/kernels/dot/generator:arm_fp64",
+    output_srcs = [
+        "arm64_neon_fp64.cc",
+        "arm64_neon_fp64.inc",
     ],
-    output_hdr = "x86_fma3_fp64.inc",
-    output_src = "x86_fma3_fp64.cc",
 )
 
-ynn_generate_src_hdr(
-    name = "x86_avx2_fp32_k2",
+ynn_generate_srcs(
+    name = "arm_int8_int8_int32",
     compatible_with = _COMPATIBLE_WITH,
-    generator = "//ynnpack/kernels/dot/generator",
-    generator_args = [
-        "x86_avx2_fp32_k2",
-        "dot,1x16x2",
-        "dot,2x16x2",
-        "dot,3x8x2",
-        "dot,4x8x2",
-        "dot,5x8x2",
-        "dot,6x8x2",
-        "dot,4x4x2",
-        "dot,5x4x2",
-        "dot,6x4x2",
-        "dot,8x4x2",
+    generator = "//ynnpack/kernels/dot/generator:arm_int8_int8_int32",
+    output_srcs = [
+        "arm_neon_int8_int8_int32.cc",
+        "arm_neon_int8_int8_int32.inc",
+        "arm_neondot_int8_int8_int32.cc",
+        "arm_neondot_int8_int8_int32.inc",
+        "arm64_neoni8mm_int8_int8_int32.cc",
+        "arm64_neoni8mm_int8_int8_int32.inc",
     ],
-    output_hdr = "x86_avx2_fp32_k2.inc",
-    output_src = "x86_avx2_fp32_k2.cc",
 )
 
-ynn_generate_src_hdr(
-    name = "x86_avx2_fma3_fp32_k2",
+ynn_generate_srcs(
+    name = "x86_bf16_bf16_fp32",
     compatible_with = _COMPATIBLE_WITH,
-    generator = "//ynnpack/kernels/dot/generator",
-    generator_args = [
-        "x86_avx2_fma3_fp32_k2",
-        "dot,1x16x2",
-        "dot,2x16x2",
-        "dot,3x8x2",
-        "dot,4x8x2",
-        "dot,5x8x2",
-        "dot,6x8x2",
-        "dot,4x4x2",
-        "dot,5x4x2",
-        "dot,6x4x2",
-        "dot,8x4x2",
+    generator = "//ynnpack/kernels/dot/generator:x86_bf16_bf16_fp32",
+    output_srcs = [
+        "x86_avx2_fma3_bf16_bf16_fp32.cc",
+        "x86_avx2_fma3_bf16_bf16_fp32.inc",
+        "x86_avx512_bf16_bf16_fp32.cc",
+        "x86_avx512_bf16_bf16_fp32.inc",
+        "x86_avx512bf16_bf16_bf16_fp32.cc",
+        "x86_avx512bf16_bf16_bf16_fp32.inc",
     ],
-    output_hdr = "x86_avx2_fma3_fp32_k2.inc",
-    output_src = "x86_avx2_fma3_fp32_k2.cc",
 )
 
-ynn_generate_src_hdr(
-    name = "x86_avx512_fp32_k2",
+ynn_generate_srcs(
+    name = "x86_bf16_bf16_fp32_k1",
     compatible_with = _COMPATIBLE_WITH,
-    generator = "//ynnpack/kernels/dot/generator",
-    generator_args = [
-        "x86_avx512_fp32_k2",
-        "dot,1x32x2",
-        "dot,2x32x2",
-        "dot,3x32x2",
-        "dot,4x32x2",
-        "dot,5x32x2",
-        # The kernels which are commented out should be good, but for some
-        # reason they don't perform well. They don't seem to spill, so keeping them
-        # until we understand why are they slower.
-        # "dot,6x32x2",
-        "dot,4x16x2",
-        # "dot,5x16x2",
-        # "dot,6x16x2",
-        # "dot,8x16x2",
-        # "dot,10x16x2",
-        "dot,4x8x2",
-        "dot,8x8x2",
-        # "dot,12x8x2",
-        # "dot,16x8x2",
+    generator = "//ynnpack/kernels/dot/generator:x86_bf16_bf16_fp32_k1",
+    output_srcs = [
+        "x86_avx2_fma3_bf16_bf16_fp32_k1.cc",
+        "x86_avx2_fma3_bf16_bf16_fp32_k1.inc",
+        "x86_avx512_bf16_bf16_fp32_k1.cc",
+        "x86_avx512_bf16_bf16_fp32_k1.inc",
     ],
-    output_hdr = "x86_avx512_fp32_k2.inc",
-    output_src = "x86_avx512_fp32_k2.cc",
 )
 
-ynn_generate_src_hdr(
-    name = "x86_avx2_fma3_bf16_bf16_fp32",
+ynn_generate_srcs(
+    name = "x86_fp16_fp16_fp32",
     compatible_with = _COMPATIBLE_WITH,
-    generator = "//ynnpack/kernels/dot/generator",
-    generator_args = [
-        "x86_avx2_fma3_bf16_bf16_fp32",
-        "dot,1x32x2",
-        "dot,2x32x2",
-        "dot,2x16x2",
-        "dot,3x16x2",
-        "dot,4x16x2",
-        "dot,5x16x2",
-        "dot,8x8x2",
-        "dot,10x8x2",
-        "dot,12x8x2",
+    generator = "//ynnpack/kernels/dot/generator:x86_fp16_fp16_fp32",
+    output_srcs = [
+        "x86_f16c_fp16_fp16_fp32.cc",
+        "x86_f16c_fp16_fp16_fp32.inc",
+        "x86_f16c_fma3_fp16_fp16_fp32.cc",
+        "x86_f16c_fma3_fp16_fp16_fp32.inc",
+        "x86_avx512_fp16_fp16_fp32.cc",
+        "x86_avx512_fp16_fp16_fp32.inc",
     ],
-    output_hdr = "x86_avx2_fma3_bf16_bf16_fp32.inc",
-    output_src = "x86_avx2_fma3_bf16_bf16_fp32.cc",
 )
 
-ynn_generate_src_hdr(
-    name = "x86_avx2_fma3_bf16_bf16_fp32_k1",
+ynn_generate_srcs(
+    name = "x86_fp32",
     compatible_with = _COMPATIBLE_WITH,
-    generator = "//ynnpack/kernels/dot/generator",
-    generator_args = [
-        "x86_avx2_fma3_bf16_bf16_fp32_k1",
-        "dot,1x32x1",
-        "dot,2x32x1",
-        "dot,2x16x1",
-        "dot,3x16x1",
-        "dot,4x16x1",
-        "dot,5x16x1",
-        "dot,8x8x1",
-        "dot,10x8x1",
+    generator = "//ynnpack/kernels/dot/generator:x86_fp32",
+    output_srcs = [
+        "x86_sse2_fp32.cc",
+        "x86_sse2_fp32.inc",
+        "x86_avx_fp32.cc",
+        "x86_avx_fp32.inc",
+        "x86_fma3_fp32.cc",
+        "x86_fma3_fp32.inc",
+        "x86_avx512_fp32.cc",
+        "x86_avx512_fp32.inc",
     ],
-    output_hdr = "x86_avx2_fma3_bf16_bf16_fp32_k1.inc",
-    output_src = "x86_avx2_fma3_bf16_bf16_fp32_k1.cc",
 )
 
-ynn_generate_src_hdr(
-    name = "x86_avx512_bf16_bf16_fp32",
+ynn_generate_srcs(
+    name = "x86_fp32_k2",
     compatible_with = _COMPATIBLE_WITH,
-    generator = "//ynnpack/kernels/dot/generator",
-    generator_args = [
-        "x86_avx512_bf16_bf16_fp32",
-        "dot,1x64x2",
-        "dot,2x64x2",
-        "dot,3x64x2",
-        "dot,4x64x2",
-        "dot,5x64x2",
-        "dot,2x32x2",
-        "dot,3x32x2",
-        "dot,4x32x2",
-        "dot,5x32x2",
-        "dot,6x32x2",
-        "dot,8x32x2",
-        "dot,10x32x2",
-        "dot,12x32x2",
-        "dot,16x16x2",
+    generator = "//ynnpack/kernels/dot/generator:x86_fp32_k2",
+    output_srcs = [
+        "x86_avx2_fp32_k2.cc",
+        "x86_avx2_fp32_k2.inc",
+        "x86_avx2_fma3_fp32_k2.cc",
+        "x86_avx2_fma3_fp32_k2.inc",
+        "x86_avx512_fp32_k2.cc",
+        "x86_avx512_fp32_k2.inc",
     ],
-    output_hdr = "x86_avx512_bf16_bf16_fp32.inc",
-    output_src = "x86_avx512_bf16_bf16_fp32.cc",
 )
 
-ynn_generate_src_hdr(
-    name = "x86_avx512_bf16_bf16_fp32_k1",
+ynn_generate_srcs(
+    name = "x86_fp32_k4",
     compatible_with = _COMPATIBLE_WITH,
-    generator = "//ynnpack/kernels/dot/generator",
-    generator_args = [
-        "x86_avx512_bf16_bf16_fp32_k1",
-        "dot,1x64x1",
-        "dot,2x64x1",
-        "dot,3x64x1",
-        "dot,4x64x1",
-        "dot,5x64x1",
-        "dot,2x32x1",
-        "dot,3x32x1",
-        "dot,4x32x1",
-        "dot,5x32x1",
-        "dot,6x32x1",
-        "dot,8x32x1",
-        "dot,10x32x1",
-        "dot,12x32x1",
-        "dot,16x16x1",
+    generator = "//ynnpack/kernels/dot/generator:x86_fp32_k4",
+    output_srcs = [
+        "x86_avx512_fp32_k4.cc",
+        "x86_avx512_fp32_k4.inc",
     ],
-    output_hdr = "x86_avx512_bf16_bf16_fp32_k1.inc",
-    output_src = "x86_avx512_bf16_bf16_fp32_k1.cc",
 )
 
-ynn_generate_src_hdr(
-    name = "x86_avx512_fp32",
+ynn_generate_srcs(
+    name = "x86_fp64",
     compatible_with = _COMPATIBLE_WITH,
-    generator = "//ynnpack/kernels/dot/generator",
-    generator_args = [
-        "x86_avx512_fp32",
-        "dot,1x64x1",
-        "dot,2x64x1",
-        "dot,3x64x1",
-        "dot,4x64x1",
-        "dot,5x64x1",
-        "dot,2x32x1",
-        "dot,3x32x1",
-        "dot,4x32x1",
-        "dot,5x32x1",
-        # The kernels which are commented out should be good, but for some
-        # reason they don't perform well. They don't seem to spill, so keeping them
-        # until we understand why are they slower.
-        # "dot,6x32x1",
-        # "dot,8x32x1",
-        # "dot,10x32x1",
-        # "dot,12x32x1",
-        "dot,5x16x1",
-        # "dot,16x16x1",
+    generator = "//ynnpack/kernels/dot/generator:x86_fp64",
+    output_srcs = [
+        "x86_avx_fp64.cc",
+        "x86_avx_fp64.inc",
+        "x86_fma3_fp64.cc",
+        "x86_fma3_fp64.inc",
+        "x86_avx512_fp64.cc",
+        "x86_avx512_fp64.inc",
     ],
-    output_hdr = "x86_avx512_fp32.inc",
-    output_src = "x86_avx512_fp32.cc",
 )
 
-ynn_generate_src_hdr(
-    name = "x86_avx512_fp64",
+ynn_generate_srcs(
+    name = "x86_int8_int8_int32",
     compatible_with = _COMPATIBLE_WITH,
-    generator = "//ynnpack/kernels/dot/generator",
-    generator_args = [
-        "x86_avx512_fp64",
-        "dot,1x32x1",
-        "dot,2x32x1",
-        "dot,3x32x1",
-        "dot,4x32x1",
-        "dot,5x32x1",
-        "dot,2x16x1",
-        "dot,3x16x1",
-        "dot,4x16x1",
-        "dot,5x16x1",
-        "dot,5x8x1",
+    generator = "//ynnpack/kernels/dot/generator:x86_int8_int8_int32",
+    output_srcs = [
+        "x86_avx2_int8_int8_int32.cc",
+        "x86_avx2_int8_int8_int32.inc",
+        "x86_avx512_int8_int8_int32.cc",
+        "x86_avx512_int8_int8_int32.inc",
     ],
-    output_hdr = "x86_avx512_fp64.inc",
-    output_src = "x86_avx512_fp64.cc",
 )
 
-ynn_generate_src_hdr(
-    name = "x86_avx512_fp32_k4",
+ynn_generate_srcs(
+    name = "x86_int8_int8_int32_k1",
     compatible_with = _COMPATIBLE_WITH,
-    generator = "//ynnpack/kernels/dot/generator",
-    generator_args = [
-        "x86_avx512_fp32_k4",
-        "dot,1x32x4",
-        "dot,2x32x4",
-        "dot,3x16x4",
-        "dot,4x16x4",
-        "dot,5x16x4",
-        "dot,2x8x4",
-        "dot,4x8x4",
-        "dot,6x8x4",
-        "dot,4x4x4",
-        "dot,8x4x4",
+    generator = "//ynnpack/kernels/dot/generator:x86_int8_int8_int32_k1",
+    output_srcs = [
+        "x86_avx2_int8_int8_int32_k1.cc",
+        "x86_avx2_int8_int8_int32_k1.inc",
+        "x86_avx512_int8_int8_int32_k1.cc",
+        "x86_avx512_int8_int8_int32_k1.inc",
     ],
-    output_hdr = "x86_avx512_fp32_k4.inc",
-    output_src = "x86_avx512_fp32_k4.cc",
 )
 
-ynn_generate_src_hdr(
-    name = "x86_avx512bf16_bf16_bf16_fp32",
+ynn_generate_srcs(
+    name = "x86_int8_int8_int32_k16",
     compatible_with = _COMPATIBLE_WITH,
-    generator = "//ynnpack/kernels/dot/generator",
-    generator_args = [
-        "x86_avx512bf16_bf16_bf16_fp32",
-        "dot,1x64x2",
-        "dot,2x64x2",
-        "dot,3x64x2",
-        "dot,4x64x2",
-        "dot,5x64x2",
-        "dot,2x32x2",
-        "dot,3x32x2",
-        "dot,4x32x2",
-        "dot,5x32x2",
-        "dot,6x32x2",
-        "dot,8x32x2",
-        "dot,10x32x2",
-        "dot,12x32x2",
-        "dot,16x16x2",  # This kernel is required by the AMX to handle odd tails.
+    generator = "//ynnpack/kernels/dot/generator:x86_int8_int8_int32_k16",
+    output_srcs = [
+        "x86_avx512_int8_int8_int32_k16.cc",
+        "x86_avx512_int8_int8_int32_k16.inc",
     ],
-    output_hdr = "x86_avx512bf16_bf16_bf16_fp32.inc",
-    output_src = "x86_avx512bf16_bf16_bf16_fp32.cc",
 )
 
-ynn_generate_src_hdr(
-    name = "x86_f16c_fp16_fp16_fp32",
+ynn_generate_srcs(
+    name = "x86_uint8_int8_int32",
     compatible_with = _COMPATIBLE_WITH,
-    generator = "//ynnpack/kernels/dot/generator",
-    generator_args = [
-        "x86_f16c_fp16_fp16_fp32",
-        "dot,1x32x1",
-        "dot,2x32x1",
-        "dot,2x16x1",
-        "dot,3x16x1",
-        "dot,4x16x1",
-        "dot,4x8x1",
-        "dot,6x8x1",
-        "dot,8x8x1",
+    generator = "//ynnpack/kernels/dot/generator:x86_uint8_int8_int32",
+    output_srcs = [
+        "x86_avx512vnni_uint8_int8_int32.cc",
+        "x86_avx512vnni_uint8_int8_int32.inc",
     ],
-    output_hdr = "x86_f16c_fp16_fp16_fp32.inc",
-    output_src = "x86_f16c_fp16_fp16_fp32.cc",
 )
 
-ynn_generate_src_hdr(
-    name = "x86_f16c_fma3_fp16_fp16_fp32",
+ynn_generate_srcs(
+    name = "x86_uint8_int8_int32_k16",
     compatible_with = _COMPATIBLE_WITH,
-    generator = "//ynnpack/kernels/dot/generator",
-    generator_args = [
-        "x86_f16c_fma3_fp16_fp16_fp32",
-        "dot,1x32x1",
-        "dot,2x32x1",
-        "dot,1x16x1",
-        "dot,2x16x1",
-        "dot,4x16x1",
-        "dot,2x8x1",
-        "dot,4x8x1",
-        "dot,8x8x1",
+    generator = "//ynnpack/kernels/dot/generator:x86_uint8_int8_int32_k16",
+    output_srcs = [
+        "x86_avx512vnni_uint8_int8_int32_k16.cc",
+        "x86_avx512vnni_uint8_int8_int32_k16.inc",
     ],
-    output_hdr = "x86_f16c_fma3_fp16_fp16_fp32.inc",
-    output_src = "x86_f16c_fma3_fp16_fp16_fp32.cc",
 )
 
-ynn_generate_src_hdr(
-    name = "x86_avx512_fp16_fp16_fp32",
+ynn_generate_srcs(
+    name = "wasm_fp32",
     compatible_with = _COMPATIBLE_WITH,
-    generator = "//ynnpack/kernels/dot/generator",
-    generator_args = [
-        "x86_avx512_fp16_fp16_fp32",
-        "dot,1x64x1",
-        "dot,2x64x1",
-        "dot,3x64x1",
-        "dot,4x64x1",
-        "dot,5x64x1",
-        "dot,2x32x1",
-        "dot,3x32x1",
-        "dot,4x32x1",
-        "dot,5x32x1",
-        # The kernels which are commented out should be good, but for some
-        # reason they don't perform well. They don't seem to spill, so keeping them
-        # until we understand why are they slower.
-        # "dot,6x32x1",
-        # "dot,8x32x1",
-        # "dot,10x32x1",
-        # "dot,12x32x1",
-        "dot,5x16x1",
-        # "dot,16x16x1",
+    generator = "//ynnpack/kernels/dot/generator:wasm_fp32",
+    output_srcs = [
+        "wasm_simd128_fp32.cc",
+        "wasm_simd128_fp32.inc",
     ],
-    output_hdr = "x86_avx512_fp16_fp16_fp32.inc",
-    output_src = "x86_avx512_fp16_fp16_fp32.cc",
 )
 
-ynn_generate_src_hdr(
-    name = "arm64_neon_fp32",
+ynn_generate_srcs(
+    name = "wasm_fp64",
     compatible_with = _COMPATIBLE_WITH,
-    generator = "//ynnpack/kernels/dot/generator",
-    generator_args = [
-        "arm64_neon_fp32",
-        "dot,1x32x4",
-        "dot,2x32x4",
-        "dot,3x32x4",
-        "dot,2x16x4",
-        "dot,3x16x4",
-        "dot,4x16x4",
-        "dot,5x16x4",
-        "dot,4x8x4",
-        "dot,6x8x4",
-        "dot,8x8x4",
-        "dot,8x4x4",
+    generator = "//ynnpack/kernels/dot/generator:wasm_fp64",
+    output_srcs = [
+        "wasm_simd128_fp64.cc",
+        "wasm_simd128_fp64.inc",
     ],
-    output_hdr = "arm64_neon_fp32.inc",
-    output_src = "arm64_neon_fp32.cc",
 )
 
-ynn_generate_src_hdr(
-    name = "arm64_neon_fp64",
+ynn_generate_srcs(
+    name = "wasm_int8_int8_int32",
     compatible_with = _COMPATIBLE_WITH,
-    generator = "//ynnpack/kernels/dot/generator",
-    generator_args = [
-        "arm64_neon_fp64",
-        "dot,1x16x2",
-        "dot,2x16x2",
-        "dot,3x16x2",
-        "dot,2x8x2",
-        "dot,3x8x2",
-        "dot,4x8x2",
-        "dot,5x8x2",
-        "dot,4x4x2",
-        "dot,6x4x2",
-        "dot,8x4x2",
-        "dot,8x2x2",
+    generator = "//ynnpack/kernels/dot/generator:wasm_int8_int8_int32",
+    output_srcs = [
+        "wasm_simd128_int8_int8_int32.cc",
+        "wasm_simd128_int8_int8_int32.inc",
     ],
-    output_hdr = "arm64_neon_fp64.inc",
-    output_src = "arm64_neon_fp64.cc",
-)
-
-ynn_generate_src_hdr(
-    name = "arm64_neon_bf16_bf16_fp32",
-    compatible_with = _COMPATIBLE_WITH,
-    generator = "//ynnpack/kernels/dot/generator",
-    generator_args = [
-        "arm64_neon_bf16_bf16_fp32",
-        "dot,1x32x4",
-        "dot,2x32x4",
-        "dot,3x32x4",
-        "dot,2x16x4",
-        "dot,3x16x4",
-        "dot,4x16x4",
-        "dot,5x16x4",
-        "dot,4x8x4",
-        "dot,6x8x4",
-        "dot,8x8x4",
-        "dot,8x4x4",
-    ],
-    output_hdr = "arm64_neon_bf16_bf16_fp32.inc",
-    output_src = "arm64_neon_bf16_bf16_fp32.cc",
-)
-
-ynn_generate_src_hdr(
-    name = "arm_neonbf16_bf16_bf16_fp32_k2",
-    compatible_with = _COMPATIBLE_WITH,
-    generator = "//ynnpack/kernels/dot/generator",
-    generator_args = [
-        "arm_neonbf16_bf16_bf16_fp32_k2",
-        # TODO: https://github.com/llvm/llvm-project/issues/170883, the tile sizes could probably be
-        # improved after indexed bfdot bugs are fixed.
-        "dot,1x32x4",
-        "dot,2x32x4",
-        "dot,2x16x4",
-        "dot,3x16x4",
-        "dot,4x16x4",
-        "dot,4x8x4",
-        "dot,6x8x4",
-        "dot,8x4x4",
-    ],
-    output_hdr = "arm_neonbf16_bf16_bf16_fp32_k2.inc",
-    output_src = "arm_neonbf16_bf16_bf16_fp32_k2.cc",
-)
-
-ynn_generate_src_hdr(
-    name = "arm_neonbf16_bf16_bf16_fp32_k4",
-    compatible_with = _COMPATIBLE_WITH,
-    generator = "//ynnpack/kernels/dot/generator",
-    generator_args = [
-        "arm_neonbf16_bf16_bf16_fp32_k4",
-        # TODO(b/493642397): This kernel doesn't build with msan
-        "--build_predicate=\"!defined(MEMORY_SANITIZER)\"",
-        # TODO: Unrolling these by 2x in k enables using ldp for the LHS, so far experiments do not
-        # seem to show much benefit from this, but it seems like it should help.
-        "dot,2x32x4",
-        "dot,4x16x4",
-        "dot,6x16x4",
-        "dot,6x8x4",
-        "dot,8x8x4",
-        "dot,10x8x4",
-        "dot,16x4x4",
-    ],
-    output_hdr = "arm_neonbf16_bf16_bf16_fp32_k4.inc",
-    output_src = "arm_neonbf16_bf16_bf16_fp32_k4.cc",
-)
-
-ynn_generate_src_hdr(
-    name = "arm_neon_int8_int8_int32",
-    compatible_with = _COMPATIBLE_WITH,
-    generator = "//ynnpack/kernels/dot/generator",
-    generator_args = [
-        "arm_neon_int8_int8_int32",
-        "dot,1x16x8",
-        "dot,2x16x8",
-        "dot,3x16x8",
-        "dot,4x16x8",
-        "dot,2x8x8",
-        "dot,3x8x8",
-        "dot,4x8x8",
-        "dot,5x8x8",
-        "dot,6x8x8",
-        "dot,8x8x8",
-        "dot,8x4x8",
-    ],
-    output_hdr = "arm_neon_int8_int8_int32.inc",
-    output_src = "arm_neon_int8_int8_int32.cc",
-)
-
-# TODO: We can do an arm64-only version of this that unrolls k by 16.
-ynn_generate_src_hdr(
-    name = "arm_neondot_int8_int8_int32",
-    compatible_with = _COMPATIBLE_WITH,
-    generator = "//ynnpack/kernels/dot/generator",
-    generator_args = [
-        "arm_neondot_int8_int8_int32",
-        "dot,1x32x8",
-        "dot,2x32x8",
-        "dot,3x32x8",
-        "dot,2x16x8",
-        "dot,3x16x8",
-        "dot,4x16x8",
-        "dot,5x16x8",
-        "dot,8x8x8",
-        "dot,10x8x8",
-        "dot,8x4x8",
-    ],
-    output_hdr = "arm_neondot_int8_int8_int32.inc",
-    output_src = "arm_neondot_int8_int8_int32.cc",
-)
-
-ynn_generate_src_hdr(
-    name = "arm64_neoni8mm_int8_int8_int32",
-    compatible_with = _COMPATIBLE_WITH,
-    generator = "//ynnpack/kernels/dot/generator",
-    generator_args = [
-        "arm_neoni8mm_int8_int8_int32",
-        # TODO: Unrolling these by 2x in k enables using ldp for the LHS, so far experiments do not
-        # seem to show much benefit from this, but it seems like it should help.
-        "dot,2x32x8",
-        "dot,4x16x8",
-        "dot,6x16x8",
-        "dot,6x8x8",
-        "dot,8x8x8",
-        "dot,10x8x8",
-        "dot,16x4x8",
-    ],
-    output_hdr = "arm64_neoni8mm_int8_int8_int32.inc",
-    output_src = "arm64_neoni8mm_int8_int8_int32.cc",
-)
-
-ynn_generate_src_hdr(
-    name = "x86_avx2_int8_int8_int32",
-    compatible_with = _COMPATIBLE_WITH,
-    generator = "//ynnpack/kernels/dot/generator",
-    generator_args = [
-        "x86_avx2_int8_int8_int32",
-        "dot,1x32x4",
-        "dot,2x16x4",
-        "dot,3x8x4",
-        "dot,4x8x4",
-        "dot,6x8x4",
-    ],
-    output_hdr = "x86_avx2_int8_int8_int32.inc",
-    output_src = "x86_avx2_int8_int8_int32.cc",
-)
-
-ynn_generate_src_hdr(
-    name = "x86_avx2_int8_int8_int32_k1",
-    compatible_with = _COMPATIBLE_WITH,
-    generator = "//ynnpack/kernels/dot/generator",
-    generator_args = [
-        "x86_avx2_int8_int8_int32_k1",
-        "dot,1x32x1",
-        "dot,2x32x1",
-        "dot,3x16x1",
-        "dot,4x16x1",
-        "dot,5x16x1",
-        "dot,8x8x1",
-    ],
-    output_hdr = "x86_avx2_int8_int8_int32_k1.inc",
-    output_src = "x86_avx2_int8_int8_int32_k1.cc",
-)
-
-ynn_generate_src_hdr(
-    name = "x86_avx512_int8_int8_int32",
-    compatible_with = _COMPATIBLE_WITH,
-    generator = "//ynnpack/kernels/dot/generator",
-    generator_args = [
-        "x86_avx512_int8_int8_int32",
-        "dot,1x64x4",
-        "dot,2x64x4",
-        "dot,3x32x4",
-        "dot,4x32x4",
-        "dot,5x32x4",
-        "dot,6x32x4",
-        "dot,8x16x4",
-        "dot,12x16x4",
-    ],
-    output_hdr = "x86_avx512_int8_int8_int32.inc",
-    output_src = "x86_avx512_int8_int8_int32.cc",
-)
-
-ynn_generate_src_hdr(
-    name = "x86_avx512_int8_int8_int32_k1",
-    compatible_with = _COMPATIBLE_WITH,
-    generator = "//ynnpack/kernels/dot/generator",
-    generator_args = [
-        "x86_avx512_int8_int8_int32_k1",
-        "dot,1x64x1",
-        "dot,2x64x1",
-        "dot,3x64x1",
-        "dot,4x32x1",
-        "dot,5x32x1",
-        "dot,6x32x1",
-        "dot,8x32x1",
-        "dot,16x16x1",
-    ],
-    output_hdr = "x86_avx512_int8_int8_int32_k1.inc",
-    output_src = "x86_avx512_int8_int8_int32_k1.cc",
-)
-
-ynn_generate_src_hdr(
-    name = "x86_avx512_int8_int8_int32_k16",
-    compatible_with = _COMPATIBLE_WITH,
-    generator = "//ynnpack/kernels/dot/generator",
-    generator_args = [
-        "x86_avx512_int8_int8_int32_k16",
-        "dot,2x16x16",
-        "dot,2x8x16",
-        "dot,4x8x16",
-        "dot,6x8x16",
-        "dot,2x4x16",
-        "dot,4x4x16",
-        "dot,6x4x16",
-        "dot,8x4x16",
-    ],
-    output_hdr = "x86_avx512_int8_int8_int32_k16.inc",
-    output_src = "x86_avx512_int8_int8_int32_k16.cc",
-)
-
-ynn_generate_src_hdr(
-    name = "x86_avx512vnni_uint8_int8_int32",
-    compatible_with = _COMPATIBLE_WITH,
-    generator = "//ynnpack/kernels/dot/generator",
-    generator_args = [
-        "x86_avx512vnni_uint8_int8_int32",
-        "dot,1x64x4",
-        "dot,2x64x4",
-        "dot,3x64x4",
-        "dot,4x64x4",
-        "dot,5x64x4",
-        "dot,1x32x4",
-        "dot,2x32x4",
-        "dot,3x32x4",
-        "dot,4x32x4",
-        "dot,5x32x4",
-        "dot,6x32x4",
-        "dot,8x32x4",
-        "dot,10x32x4",
-        "dot,16x16x4",
-    ],
-    output_hdr = "x86_avx512vnni_uint8_int8_int32.inc",
-    output_src = "x86_avx512vnni_uint8_int8_int32.cc",
-)
-
-ynn_generate_src_hdr(
-    name = "x86_avx512vnni_uint8_int8_int32_k16",
-    compatible_with = _COMPATIBLE_WITH,
-    generator = "//ynnpack/kernels/dot/generator",
-    generator_args = [
-        "x86_avx512vnni_uint8_int8_int32_k16",
-        "dot,4x8x16",
-        "dot,8x8x16",
-        "dot,4x4x16",
-        "dot,8x4x16",
-    ],
-    output_hdr = "x86_avx512vnni_uint8_int8_int32_k16.inc",
-    output_src = "x86_avx512vnni_uint8_int8_int32_k16.cc",
 )
 
 cc_library(
@@ -781,6 +296,9 @@ ynn_cc_library(
         "arm_neondot_int8_int8_int32.inc",
         "dot.h",
         "kernels.inc",
+        "wasm_simd128_fp32.inc",
+        "wasm_simd128_fp64.inc",
+        "wasm_simd128_int8_int8_int32.inc",
         "x86_avx2_fma3_bf16_bf16_fp32.inc",
         "x86_avx2_fma3_bf16_bf16_fp32_k1.inc",
         "x86_avx2_fma3_fp32_k2.inc",
@@ -881,6 +399,11 @@ ynn_cc_library(
             "x86_amxint8.cc",
             "x86_amx.h",
         ],
+        "wasm_simd128": [
+            "wasm_simd128_fp32.cc",
+            "wasm_simd128_fp64.cc",
+            "wasm_simd128_int8_int8_int32.cc",
+        ],
     },
     visibility = ["//ynnpack:__subpackages__"],
     deps = [
@@ -948,6 +471,7 @@ cc_test(
     malloc = ynn_binary_malloc(),
     deps = [
         ":schedule",
+        "//ynnpack/base",
     ] + ynn_test_deps(),
 )
 
@@ -997,6 +521,7 @@ cc_binary(
     malloc = ynn_binary_malloc(),
     deps = [
         ":dot",
+        ":pack_test_tensor",
         ":schedule",
         "//ynnpack/base",
         "//ynnpack/base/test:buffer",

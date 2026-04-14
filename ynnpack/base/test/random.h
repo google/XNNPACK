@@ -91,12 +91,23 @@ quantization_params random_quantization(quantized<T>, Rng& rng,
 // Bitcast a random number generator to type T.
 template <typename T, typename Rng>
 T random_bits(Rng& rng) {
+  // Do this 32 bits at a time, because Rng::max() might not fully fill a 64-bit
+  // type.
   static_assert(Rng::min() == 0, "");
-  static_assert(Rng::max() >= (1ull << (sizeof(T) * 8)) - 1, "");
-  auto bits = rng();
+  static_assert(Rng::max() >= (1ull << 31) - 1, "");
   T result;
-  static_assert(sizeof(result) <= sizeof(bits), "");
-  memcpy(&result, &bits, sizeof(T));
+  size_t size_bytes = sizeof(T);
+  char* result_bytes = reinterpret_cast<char*>(&result);
+  while (size_bytes >= 4) {
+    auto bits = rng();
+    memcpy(result_bytes, &bits, 4);
+    size_bytes -= 4;
+    result_bytes += 4;
+  }
+  if (size_bytes > 0) {
+    auto bits = rng();
+    memcpy(result_bytes, &bits, size_bytes);
+  }
   return result;
 }
 

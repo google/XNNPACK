@@ -5,76 +5,60 @@
 
 #include "ynnpack/kernels/unary/reference.h"
 
+#include <memory>
+
 #include "ynnpack/include/ynnpack.h"
+#include "ynnpack/kernels/unary/unary.h"
 
 namespace ynn {
 
-const unary_op_info* get_unary_op_info(ynn_unary_operator op) {
-  static abs abs;
-  static convert convert;
-  static exp exp;
-  static expm1 expm1;
-  static erf erf;
-  static log log;
-  static log1p log1p;
-  static negate negate;
-  static reciprocal_square_root reciprocal_square_root;
-  static sigmoid sigmoid;
-  static square square;
-  static square_root square_root;
-  static tanh tanh;
-  static round round;
-  static ceil ceil;
-  static floor floor;
-  static cube_root cube_root;
-  static sign sign;
-  static sine sine;
-  static cosine cosine;
-  static hardswish hardswish;
-
+std::unique_ptr<unary_op_info> get_unary_op_info(ynn_unary_operator op,
+                                                 const unary_params& params) {
   switch (op) {
     case ynn_unary_abs:
-      return &abs;
+      return std::make_unique<abs>(params);
     case ynn_unary_round:
-      return &round;
+      return std::make_unique<round>(params);
     case ynn_unary_ceil:
-      return &ceil;
+      return std::make_unique<ceil>(params);
     case ynn_unary_convert:
-      return &convert;
+      return std::make_unique<convert>(params);
     case ynn_unary_exp:
-      return &exp;
+      return std::make_unique<exp>(params);
     case ynn_unary_expm1:
-      return &expm1;
+      return std::make_unique<expm1>(params);
     case ynn_unary_erf:
-      return &erf;
+      return std::make_unique<erf>(params);
     case ynn_unary_floor:
-      return &floor;
+      return std::make_unique<floor>(params);
     case ynn_unary_log:
-      return &log;
+      return std::make_unique<log>(params);
     case ynn_unary_log1p:
-      return &log1p;
+      return std::make_unique<log1p>(params);
     case ynn_unary_negate:
-      return &negate;
+      return std::make_unique<negate>(params);
     case ynn_unary_reciprocal_square_root:
-      return &reciprocal_square_root;
+      return std::make_unique<reciprocal_square_root>(params);
     case ynn_unary_square:
-      return &square;
+      return std::make_unique<square>(params);
     case ynn_unary_square_root:
-      return &square_root;
+      return std::make_unique<square_root>(params);
     case ynn_unary_tanh:
-      return &tanh;
+      return std::make_unique<tanh>(params);
     case ynn_unary_cube_root:
-      return &cube_root;
+      return std::make_unique<cube_root>(params);
     case ynn_unary_sign:
-      return &sign;
+      return std::make_unique<sign>(params);
     case ynn_unary_sine:
-      return &sine;
+      return std::make_unique<sine>(params);
     case ynn_unary_cosine:
-      return &cosine;
+      return std::make_unique<cosine>(params);
     case ynn_unary_sigmoid:
-      return &sigmoid;
+      return std::make_unique<sigmoid>(params);
     case ynn_unary_hardswish:
-      return &hardswish;
+      return std::make_unique<hardswish>(params);
+    case ynn_unary_poly3:
+      return std::make_unique<poly3>(params);
     case ynn_unary_invalid:
       return nullptr;
   }

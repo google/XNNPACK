@@ -122,11 +122,11 @@ void TestMatMul(AT, BT, CT, const DotShape& shape, const KernelInfo& kernel,
   Tensor<BT> packed_b = unpacked_b ? b : pack_b(b, tile_k, tile_n);
   Tensor<AT> packed_a = pack_a ? transpose_a(a, tile_m, tile_k) : a;
 
-  kernel.kernel(m, n, 1, 1, k, packed_a.stride(0) * sizeof(AT), 0, 0,
-                packed_a.base(), 0, 0, packed_b.stride(0) * sizeof(BT) / tile_k,
-                packed_b.base(), c.stride(0) * sizeof(CT),
-                init_zero ? nullptr : c.base(), c.stride(0) * sizeof(CT),
-                c.base());
+  kernel.kernel(
+      m, n, 1, 1, k, packed_a.stride(0) * sizeof(AT) / (pack_a ? tile_k : 1), 0,
+      0, packed_a.base(), 0, 0, packed_b.stride(0) * sizeof(BT) / tile_k,
+      packed_b.base(), c.stride(0) * sizeof(CT), init_zero ? nullptr : c.base(),
+      c.stride(0) * sizeof(CT), c.base());
 
   // Verify results.
   Reference(a, b, expected);
@@ -226,7 +226,8 @@ void TestConv2D(AT, BT, CT, const KernelInfo& kernel) {
                        {0, 0, 0, b.extent(3) - co / B_info::element_count()});
 
     kernel.kernel(
-        w, co, kh, kw, ci, packed_a.stride(0) * sizeof(AT),
+        w, co, kh, kw, ci,
+        packed_a.stride(0) * sizeof(AT) / (pack_a ? tile_k : 1),
         packed_a.stride(1) * sizeof(AT), packed_a.stride(2) * sizeof(AT),
         packed_a.base(), packed_b.stride(0) * sizeof(BT),
         packed_b.stride(1) * sizeof(BT),

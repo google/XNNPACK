@@ -226,7 +226,7 @@ enum xnn_status xnn_define_binary(
 
   if (params) {
     if (params->output_min != -INFINITY || params->output_max != INFINITY) {
-      xnn_insert_clamp_node(subgraph, params->output_min, params->output_max, node);
+      xnn_insert_clamp_node(subgraph, params->output_min, params->output_max, node->id);
     }
   }
 

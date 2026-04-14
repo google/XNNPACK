@@ -624,7 +624,7 @@ class PackWMicrokernelTester {
     std::iota(bias.begin(), bias.end(), UINT32_C(15));
     std::fill(packed_w.begin(), packed_w.end(), INT8_C(0));
     std::fill(packed_w_ref.begin(), packed_w_ref.end(), INT8_C(0));
-    std::iota(bf16_scales.begin(), bf16_scales.end(), 3.75);
+    std::iota(bf16_scales.begin(), bf16_scales.end(), 3.75f);
 
     const int32_t* bias_data = nullbias() ? nullptr : bias.data();
     const xnn_bfloat16* scale_data = bf16_scales.data();

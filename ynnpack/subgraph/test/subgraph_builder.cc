@@ -61,6 +61,18 @@ SubgraphBuilder& SubgraphBuilder::AddUnary(ynn_unary_operator op,
   status_ = ynn_define_unary(subgraph_.get(), op, input_id, &output_id, flags);
   return *this;
 }
+
+SubgraphBuilder& SubgraphBuilder::AddPolynomial(
+    const std::vector<float>& coefficients, uint32_t input_id,
+    uint32_t output_id, uint32_t flags) {
+  assert(!coefficients.empty());
+  assert(status_ == ynn_status_success);
+  status_ = ynn_define_unary_polynomial(subgraph_.get(), input_id,
+                                        coefficients.size() - 1,
+                                        coefficients.data(), &output_id, flags);
+  return *this;
+}
+
 SubgraphBuilder& SubgraphBuilder::AddBinary(ynn_binary_operator op,
                                             uint32_t input_a_id,
                                             uint32_t input_b_id,
@@ -79,6 +91,15 @@ SubgraphBuilder& SubgraphBuilder::AddBroadcast(const std::vector<size_t>& shape,
   assert(status_ == ynn_status_success);
   status_ = ynn_define_static_broadcast(
       subgraph_.get(), shape.size(), shape.data(), input_id, &output_id, flags);
+  return *this;
+}
+
+SubgraphBuilder& SubgraphBuilder::AddStaticBroadcast(
+    const std::vector<size_t>& shape, uint32_t input_id, uint32_t output_id) {
+  assert(status_ == ynn_status_success);
+  status_ = ynn_define_static_broadcast(
+      subgraph_.get(), shape.size(), shape.data(), input_id, &output_id,
+      /*flags=*/0);
   return *this;
 }
 
@@ -197,6 +218,17 @@ SubgraphBuilder& SubgraphBuilder::AddBroadcast(const std::vector<int32_t>& axes,
   assert(status_ == ynn_status_success);
   status_ = ynn_define_broadcast(subgraph_.get(), axes.size(), axes.data(),
                                  input_id, &output_id, /*flags=*/0);
+  return *this;
+}
+
+SubgraphBuilder& SubgraphBuilder::AddSliceLike(const std::vector<int32_t>& axes,
+                                              uint32_t input_id,
+                                              uint32_t template_id,
+                                              uint32_t output_id) {
+  assert(status_ == ynn_status_success);
+  status_ =
+      ynn_define_slice_like(subgraph_.get(), axes.size(), axes.data(), input_id,
+                            template_id, &output_id, /*flags=*/0);
   return *this;
 }
 

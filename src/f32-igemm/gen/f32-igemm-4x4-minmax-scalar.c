@@ -171,7 +171,6 @@ void xnn_f32_igemm_minmax_ukernel_4x4__scalar(
     vacc31 = math_min_f32(vacc31, vmax);
     vacc32 = math_min_f32(vacc32, vmax);
     vacc33 = math_min_f32(vacc33, vmax);
-
     if XNN_LIKELY(nc >= 4) {
       c3[0] = vacc30;
       c3[1] = vacc31;

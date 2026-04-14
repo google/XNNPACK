@@ -1,8 +1,7 @@
 // clang-format off
 
 #ifdef YNN_ARCH_X86_AVX512
-#include "ynnpack/kernels/ternary/x86_avx512bw.inc"
-#include "ynnpack/kernels/ternary/x86_avx512f.inc"
+#include "ynnpack/kernels/ternary/x86_avx512.inc"
 #endif  // YNN_ARCH_X86_AVX512
 #ifdef YNN_ARCH_X86_AVX2
 #include "ynnpack/kernels/ternary/x86_avx2.inc"
@@ -20,6 +19,10 @@
 #ifdef YNN_ARCH_ARM_NEON
 #include "ynnpack/kernels/ternary/arm_neon.inc"
 #endif  // YNN_ARCH_ARM_NEON
+
+#ifdef YNN_ARCH_WASM_SIMD128
+#include "ynnpack/kernels/ternary/wasm_simd128.inc"
+#endif  // YNN_ARCH_WASM_SIMD128
 
 YNN_ELEMENTWISE_KERNEL(arch_flag::none, quantize_fp32_to_int8, quantize_int8, float, float, int32_t, int8_t)
 YNN_ELEMENTWISE_KERNEL(arch_flag::none, quantize_fp32_to_uint8, quantize_uint8, float, float, int32_t, uint8_t)

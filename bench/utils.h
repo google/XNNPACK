@@ -17,17 +17,14 @@
 #include <benchmark/benchmark.h>
 #include <pthreadpool.h>
 
-// Some of these gemm benchmarks attempt to generate 10s of thousands of
-// benchmarks. This causes a lot of problems for the compiler and linker if
-// these use lambdas or generate extra globals per benchmark. The most similar
-// macro in the benchmark framework to this is BENCHMARK_CAPTURE with no
-// extra arguments, but that creates a lambda. This is equivalent to that,
-// without the extra arguments (and lambda).
+// This might be provided by google benchmark
+#ifndef BENCHMARK_NAMED
 #define BENCHMARK_NAMED(func, test_case_name)                          \
   BENCHMARK_PRIVATE_DECLARE(_benchmark_) =                             \
       (::benchmark::internal::RegisterBenchmarkInternal(               \
           std::make_unique< ::benchmark::internal::FunctionBenchmark>( \
               #func "/" #test_case_name, func)))
+#endif  // BENCHMARK_NAMED
 
 #if defined(BENCHMARK_ARGS_BOTTLENECK)
 #define XNN_BENCHMARK_MAIN()                            \

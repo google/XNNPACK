@@ -139,7 +139,6 @@ void xnn_f32_igemm_ukernel_1x8s4__wasmsimd(
       p -= 1 * sizeof(void*);
     } while (p != 0);
 
-
     if XNN_LIKELY(nc >= 8) {
       wasm_v128_store(c0, vacc0x0123);
       wasm_v128_store(c0 + 4, vacc0x4567);

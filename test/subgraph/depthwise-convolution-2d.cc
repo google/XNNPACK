@@ -65,7 +65,7 @@ Tensor<float> ReferenceImpl(Tensor<Data> input, Tensor<Filter> filter,
               float padded_nyxc =
                   dequantize(padded(n, y, dy, x, dx, ic), input_quantization);
               float filter_yxc =
-                  dequantize(filter(dy, dx, c), filter_quantization);
+                  dequantize(filter(0, dy, dx, c), filter_quantization);
               output_nyxc += padded_nyxc * filter_yxc;
             }
           }
@@ -167,6 +167,7 @@ void TestImpl(bool channelwise_quantization = false) {
 
     // Make a random filter.
     std::vector<size_t> filter_shape = {
+        1,
         params.kernel.height,
         params.kernel.width,
         params.input_channels * params.depth_multiplier,
@@ -195,7 +196,7 @@ void TestImpl(bool channelwise_quantization = false) {
     xnn_quantization_params filter_quantization =
         random_quantization(xnn_datatype_of<Filter>(), rng, 0.001f, 2.0f);
     Tensor<float> filter_scale(
-        {channelwise_quantization ? filter.extent(2) : 1});
+        {channelwise_quantization ? filter.extent(3) : 1});
     if (filter_scale.size() > 1) {
       // Generate random per-channel scales, in the range of the original scale.
       std::uniform_real_distribution<float> filter_scale_dist(
@@ -235,7 +236,7 @@ void TestImpl(bool channelwise_quantization = false) {
                             input_id);
     if (channelwise_quantization) {
       subgraph.AddStaticTensorQS8(
-          filter.extents(), /*channel_dim=*/2, TensorType::kDense,
+          filter.extents(), /*channel_dim=*/3, TensorType::kDense,
           filter_scale.data(), filter_id,
           /*flags=*/0, reinterpret_cast<int8_t*>(filter.base()));
     } else {

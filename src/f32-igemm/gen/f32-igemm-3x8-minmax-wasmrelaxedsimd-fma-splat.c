@@ -186,7 +186,6 @@ void xnn_f32_igemm_minmax_ukernel_3x8__wasmrelaxedsimd_fma_splat(
     vacc0x4567 = wasm_f32x4_relaxed_min(vmax, vacc0x4567);
     vacc1x4567 = wasm_f32x4_relaxed_min(vmax, vacc1x4567);
     vacc2x4567 = wasm_f32x4_relaxed_min(vmax, vacc2x4567);
-
     if XNN_LIKELY(nc >= 8) {
       wasm_v128_store(c2, vacc2x0123);
       wasm_v128_store(c2 + 4, vacc2x4567);

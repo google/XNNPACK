@@ -21,216 +21,47 @@ py_binary(
         "sine_cosine.py",
         "tanh.py",
     ],
-    tags = ["manual"],
+    tags = [
+        "manual",
+        "notap",
+    ],
     deps = ["//ynnpack/kernels/elementwise:generator"],
 )
 
-ynn_generate_src_hdr(
-    name = "x86_sse2",
-    compatible_with = _COMPATIBLE_WITH,
-    generator = ":generator",
-    generator_args = [
-        "x86_sse2",
-        "abs_fp32,8x1",
-        "erf_fp32,8x1",
-        "exp_fp32,8x1",
-        "negate_fp32,8x1",
-        "reciprocal_square_root_fp32,8x1",
-        "square_root_fp32,8x1",
-        "sigmoid_fp32,8x1",
-        "tanh_fp32,8x1",
-    ],
-    output_hdr = "x86_sse2.inc",
-    output_src = "x86_sse2.cc",
-)
+ARCHS = [
+    "x86_sse2",
+    "x86_sse41",
+    "x86_avx",
+    "x86_avx2",
+    "x86_fma3",
+    "x86_f16c",
+    "x86_avx512",
+    "x86_avx512bf16",
+    "arm_neon",
+    "arm_neonbf16",
+    "arm_neonfp16",
+    "wasm_simd128",
+]
 
-ynn_generate_src_hdr(
-    name = "x86_sse41",
+[ynn_generate_src_hdr(
+    name = arch,
     compatible_with = _COMPATIBLE_WITH,
     generator = ":generator",
-    generator_args = [
-        "x86_sse41",
-        "ceil_fp32,8x1",
-        "cosine_fp32,8x1",
-        "floor_fp32,8x1",
-        "round_fp32,8x1",
-        "sine_fp32,8x1",
-    ],
-    output_hdr = "x86_sse41.inc",
-    output_src = "x86_sse41.cc",
-)
-
-ynn_generate_src_hdr(
-    name = "x86_avx",
-    compatible_with = _COMPATIBLE_WITH,
-    generator = ":generator",
-    generator_args = [
-        "x86_avx",
-        "abs_fp32,16x1",
-        "ceil_fp32,16x1",
-        "cosine_fp32,16x1",
-        "erf_fp32,16x1",
-        "floor_fp32,16x1",
-        "negate_fp32,16x1",
-        "reciprocal_square_root_fp32,16x1",
-        "round_fp32,16x1",
-        "sine_fp32,16x1",
-        "square_root_fp32,16x1",
-        "tanh_fp32,16x1",
-    ],
-    output_hdr = "x86_avx.inc",
-    output_src = "x86_avx.cc",
-)
-
-ynn_generate_src_hdr(
-    name = "x86_avx2",
-    compatible_with = _COMPATIBLE_WITH,
-    generator = ":generator",
-    generator_args = [
-        "x86_avx2",
-        "convert_bf16_to_fp32,16x1",
-        "convert_fp32_to_bf16,16x1",
-        "exp_fp32,16x1",
-        "sigmoid_fp32,16x1",
-    ],
-    output_hdr = "x86_avx2.inc",
-    output_src = "x86_avx2.cc",
-)
-
-ynn_generate_src_hdr(
-    name = "x86_fma3",
-    compatible_with = _COMPATIBLE_WITH,
-    generator = ":generator",
-    generator_args = [
-        "x86_fma3",
-        "cosine_fp32,16x1",
-        "erf_fp32,16x1",
-        "reciprocal_square_root_fp32,16x1",
-        "sine_fp32,16x1",
-    ],
-    output_hdr = "x86_fma3.inc",
-    output_src = "x86_fma3.cc",
-)
-
-ynn_generate_src_hdr(
-    name = "x86_f16c",
-    compatible_with = _COMPATIBLE_WITH,
-    generator = ":generator",
-    generator_args = [
-        "x86_f16c",
-        "convert_fp16_to_fp32,16x1",
-        "convert_fp32_to_fp16,16x1",
-    ],
-    output_hdr = "x86_f16c.inc",
-    output_src = "x86_f16c.cc",
-)
-
-ynn_generate_src_hdr(
-    name = "x86_avx512f",
-    compatible_with = _COMPATIBLE_WITH,
-    generator = ":generator",
-    generator_args = [
-        "x86_avx512f",
-        # Requires avc512dq in the current implementation.
-        # "abs_fp32,32x1",
-        "ceil_fp32,32x1",
-        "cosine_fp32,32x1",
-        "erf_fp32,32x1",
-        "exp_fp32,32x1",
-        "floor_fp32,32x1",
-        "negate_fp32,32x1",
-        "reciprocal_square_root_fp32,32x1",
-        "round_fp32,32x1",
-        "sine_fp32,32x1",
-        "square_root_fp32,32x1",
-        "sigmoid_fp32,32x1",
-        "tanh_fp32,32x1",
-    ],
-    output_hdr = "x86_avx512f.inc",
-    output_src = "x86_avx512f.cc",
-)
-
-ynn_generate_src_hdr(
-    name = "x86_avx512bf16",
-    compatible_with = _COMPATIBLE_WITH,
-    generator = ":generator",
-    generator_args = [
-        "x86_avx512bf16",
-        "convert_bf16_to_fp32,32x1",
-        "convert_fp32_to_bf16,32x1",
-    ],
-    output_hdr = "x86_avx512bf16.inc",
-    output_src = "x86_avx512bf16.cc",
-)
-
-ynn_generate_src_hdr(
-    name = "arm_neon",
-    compatible_with = _COMPATIBLE_WITH,
-    generator = ":generator",
-    generator_args = [
-        "arm_neon",
-        "abs_fp32,8x1",
-        "ceil_fp32,8x1",
-        "cosine_fp32,8x1",
-        "erf_fp32,8x1",
-        "exp_fp32,8x1",
-        "floor_fp32,8x1",
-        "negate_fp32,8x1",
-        "reciprocal_square_root_fp32,8x1",
-        "round_fp32,8x1",
-        "sine_fp32,8x1",
-        "square_root_fp32,8x1",
-        "sigmoid_fp32,8x1",
-        "tanh_fp32,8x1",
-    ],
-    output_hdr = "arm_neon.inc",
-    output_src = "arm_neon.cc",
-)
-
-ynn_generate_src_hdr(
-    name = "arm_neonfp16",
-    compatible_with = _COMPATIBLE_WITH,
-    generator = ":generator",
-    generator_args = [
-        "arm_neonfp16",
-        "convert_fp16_to_fp32,8x1",
-        "convert_fp32_to_fp16,8x1",
-    ],
-    output_hdr = "arm_neonfp16.inc",
-    output_src = "arm_neonfp16.cc",
-)
+    generator_args = [arch],
+    output_hdr = arch + ".inc",
+    output_src = arch + ".cc",
+) for arch in ARCHS]
 
 ynn_cc_library(
     name = "unary",
     srcs = ["unary.cc"],
     hdrs = [
-        "arm_neon.inc",
-        "arm_neonfp16.inc",
         "kernels.inc",
         "unary.h",
-        "x86_avx.inc",
-        "x86_avx2.inc",
-        "x86_avx512bf16.inc",
-        "x86_avx512f.inc",
-        "x86_f16c.inc",
-        "x86_fma3.inc",
-        "x86_sse2.inc",
-        "x86_sse41.inc",
-    ],
+    ] + [arch + ".inc" for arch in ARCHS],
     compatible_with = _COMPATIBLE_WITH,
     copts = ynn_kernel_copts(),
-    per_arch_srcs = {
-        "arm_neon": ["arm_neon.cc"],
-        "arm_neonfp16": ["arm_neonfp16.cc"],
-        "x86_avx": ["x86_avx.cc"],
-        "x86_avx2": ["x86_avx2.cc"],
-        "x86_avx512bf16": ["x86_avx512bf16.cc"],
-        "x86_avx512": ["x86_avx512f.cc"],
-        "x86_f16c": ["x86_f16c.cc"],
-        "x86_fma3": ["x86_fma3.cc"],
-        "x86_sse2": ["x86_sse2.cc"],
-        "x86_sse41": ["x86_sse41.cc"],
-    },
+    per_arch_srcs = {arch: [arch + ".cc"] for arch in ARCHS},
     visibility = ["//ynnpack:__subpackages__"],
     deps = [
         "//ynnpack:ynnpack_h",
@@ -247,6 +78,7 @@ cc_library(
     hdrs = ["reference.h"],
     visibility = ["//ynnpack:__subpackages__"],
     deps = [
+        ":unary",
         "//ynnpack:ynnpack_h",
         "//ynnpack/base",
         "//ynnpack/base/test:tensor",

@@ -353,7 +353,6 @@ void xnn_f32_igemm_minmax_ukernel_6x8s4__wasmsimd_x86(
     vacc3x4567 = wasm_f32x4_pmin(vmax, vacc3x4567);
     vacc4x4567 = wasm_f32x4_pmin(vmax, vacc4x4567);
     vacc5x4567 = wasm_f32x4_pmin(vmax, vacc5x4567);
-
     if XNN_LIKELY(nc >= 8) {
       wasm_v128_store(c5, vacc5x0123);
       wasm_v128_store(c5 + 4, vacc5x4567);

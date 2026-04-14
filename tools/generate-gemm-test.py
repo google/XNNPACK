@@ -764,7 +764,7 @@ def generate_test_cases(
   ukernel_type = "gemm"
   activation = "linear"
   for token in ukernel.split("ukernel", 1)[0].split("_")[1:]:
-    if token in {"minmax", "linear", "relu"}:
+    if token in {"minmax", "linear"}:
       activation = token
     elif token in {
         "f32",
@@ -791,7 +791,7 @@ def generate_test_cases(
       weights_datatype = token
     elif token in {"f32acc"}:
       accum_type = token
-    elif token in {"fp32", "fp32acc", "rndnu", "rndnu16", "ppmm"}:
+    elif token in {"fp32", "fp16", "fp32acc", "rndnu", "rndnu16", "ppmm"}:
       features = token
     elif token:
       print(f'Unknown token "{token}" in "{ukernel}".')
@@ -824,6 +824,7 @@ def generate_test_cases(
         "xnn_%s_requantize_%s" % (requantization_datatype, requantization)
     )
 
+  output_datatype = output_datatype or input_datatype
   output_datatype = init_fn.split("_")[2] if init_fn else output_datatype
 
   nr_scale = ""

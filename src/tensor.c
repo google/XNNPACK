@@ -52,6 +52,7 @@ static enum xnn_status check_zero_point(
   int32_t zero_point)
 {
   switch (datatype) {
+    case xnn_datatype_qint4:
     case xnn_datatype_qcint4:
     case xnn_datatype_qbint4:
       if (zero_point < 0 || zero_point > 15) {
@@ -509,9 +510,11 @@ enum xnn_status xnn_define_blockwise_quantized_tensor_value_v2(
     return xnn_status_invalid_parameter;
   }
 
-  if (num_dims == 0) {
+  if (num_dims < 2) {
     xnn_log_error(
-      "failed to create Blockwise Quantized Dense Tensor value: no channel dimension exists");
+      "failed to create Blockwise Quantized Dense Tensor value: num of "
+      "dimensions %zu must be at least 2",
+      num_dims);
     return xnn_status_invalid_parameter;
   }
 

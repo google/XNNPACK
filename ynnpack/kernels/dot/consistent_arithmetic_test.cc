@@ -129,15 +129,14 @@ void TestMatMul(AT, BT, CT, size_t k) {
     // dot kernels require B's k and n dimensions to be aligned to tile_k,
     // tile_n. The kernel might also require b to be packed (tile_k > 1).
     Tensor<BT> packed_b = pack_b(b, tile_k, tile_n);
-    Tensor<AT> packed_a = (kernel.flags & dot_flag::transpose_a)
-                              ? transpose_a(a, tile_m, tile_k)
-                              : a;
+    const bool pack_a = kernel.flags & dot_flag::transpose_a;
+    Tensor<AT> packed_a = pack_a ? transpose_a(a, tile_m, tile_k) : a;
 
-    kernel.kernel(m, n, 1, 1, k, packed_a.stride(0) * sizeof(AT), 0, 0,
-                  packed_a.base(), 0, 0,
-                  packed_b.stride(0) * sizeof(BT) / tile_k, packed_b.base(),
-                  kernel_c.stride(0) * sizeof(CT), kernel_c.base(),
-                  kernel_c.stride(0) * sizeof(CT), kernel_c.base());
+    kernel.kernel(
+        m, n, 1, 1, k, packed_a.stride(0) * sizeof(AT) / (pack_a ? tile_k : 1),
+        0, 0, packed_a.base(), 0, 0, packed_b.stride(0) * sizeof(BT) / tile_k,
+        packed_b.base(), kernel_c.stride(0) * sizeof(CT), kernel_c.base(),
+        kernel_c.stride(0) * sizeof(CT), kernel_c.base());
 
     if (c.base()) {
       int finite = 0;

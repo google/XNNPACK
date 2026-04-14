@@ -200,7 +200,7 @@ ynn_status ynn_value::set_external_shape(size_t rank, const size_t* dims) {
 
   for (size_t d = 0; d < rank; ++d) {
     if (!extents[d].defined() || slinky::is_constant(extents[d], 1)) {
-      data->dim(d) = slinky::dim::broadcast();
+      data->mutable_dim(d) = slinky::dim::broadcast();
     }
   }
 
@@ -775,6 +775,7 @@ const char* name_of(const ynn_node::static_expand_dims&) {
 }
 const char* name_of(const ynn_node::static_pad&) { return "static_pad"; }
 const char* name_of(const ynn_node::static_slice&) { return "static_slice"; }
+const char* name_of(const ynn_node::slice_like&) { return "slice_like"; }
 const char* name_of(const ynn_node::static_transpose&) {
   return "static_transpose";
 }
@@ -782,6 +783,9 @@ const char* name_of(const ynn_node::stencil_copy&) { return "stencil_copy"; }
 const char* name_of(const ynn_node::dot&) { return "dot"; }
 const char* name_of(const ynn_node::pack_b&) { return "pack_b"; }
 const char* name_of(const ynn_node::transpose_a&) { return "transpose_a"; }
+const char* name_of(const ynn_node::dequantize_dot&) {
+  return "dequantize_dot";
+}
 const char* name_of(const ynn_node::get_tensor_shape&) {
   return "get_tensor_shape";
 }
@@ -934,6 +938,10 @@ void print(std::ostream& os, const ynn_node::static_slice& op) {
   os << "}";
 }
 
+void print(std::ostream& os, const ynn_node::slice_like& op) {
+  os << "axes=" << op.axes;
+}
+
 void print(std::ostream& os, const ynn_node::static_transpose& op) {
   os << "permutation=" << op.permutation;
   if (op.alias) {
@@ -953,6 +961,8 @@ void print(std::ostream& os, const ynn_node::pack_b& op) {}
 void print(std::ostream& os, const ynn_node::transpose_a& op) {
   os << "tile_k=" << op.tile_k << " m_dim=" << op.m_dim;
 }
+
+void print(std::ostream& os, const ynn_node::dequantize_dot& op) {}
 
 void print(std::ostream& os, const ynn_node::get_tensor_shape& op) {
   os << "axes=" << op.axes;
@@ -1055,7 +1065,7 @@ void ynn_subgraph::dump(std::ostream& os) const {
   }
 
   // Nodes header
-  const int inputs_width = (std::ceil(std::log10(values.size())) + 1) * 4 + 3;
+  const int inputs_width = (std::ceil(std::log10(values.size())) + 1) * 6 + 3;
   constexpr int outputs_width = 10;
   os << std::setw(inputs_width) << "node inputs" << " ";
   os << std::setw(outputs_width) << "outputs" << std::endl;

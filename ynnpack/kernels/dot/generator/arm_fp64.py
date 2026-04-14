@@ -9,6 +9,7 @@
 # pylint: disable=invalid-name
 
 from ynnpack.kernels.dot.generator.arm import arm_neon
+from ynnpack.kernels.dot.generator.dot_base import generate_dot_kernels
 
 
 class arm_neon_fp64(arm_neon):
@@ -43,3 +44,22 @@ class arm64_neon_fp64(arm_neon_fp64):
       assert block_k % 2 == 0
       return f"{c_ij} = vfmaq_laneq_f64({c_ij}, {b_kj}, {a_ik}, {k%2});\n"
 
+
+generate_dot_kernels(
+    arm64_neon_fp64(),
+    [
+        (1, 16, 2),
+        (2, 16, 2),
+        (3, 16, 2),
+        (1, 8, 2),
+        (2, 8, 2),
+        (3, 8, 2),
+        (4, 8, 2),
+        (5, 8, 2),
+        (1, 4, 2),
+        (4, 4, 2),
+        (6, 4, 2),
+        (8, 4, 2),
+        (8, 2, 2),
+    ],
+)

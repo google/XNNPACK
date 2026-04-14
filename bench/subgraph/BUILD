@@ -18,6 +18,7 @@ BENCHMARKS_SLOW_LARGE = {
     "elementwise": (False, False),
     "fully_connected": (True, True),
     "l2_norm": (False, False),
+    "rms_norm": (False, False),
     "layer_norm": (False, False),
     "mobilenet": (False, False),
     "softmax": (False, False),

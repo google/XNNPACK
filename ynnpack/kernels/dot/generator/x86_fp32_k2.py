@@ -8,6 +8,7 @@
 # pylint: disable=missing-class-docstring
 # pylint: disable=invalid-name
 
+from ynnpack.kernels.dot.generator.dot_base import generate_dot_kernels
 from ynnpack.kernels.dot.generator.x86 import x86_avx
 from ynnpack.kernels.dot.generator.x86 import x86_avx512
 
@@ -146,3 +147,63 @@ c_{i}_{j} = _mm512_permutexvar_ps({even}, c_{i}_{j});
 
   def product(self, i, j, k):
     return f"c_{i}_{j} = _mm512_fmadd_ps(a_{i}_{k}, b_{k}_{j}, c_{i}_{j});\n"
+
+
+generate_dot_kernels(
+    x86_avx2_fp32_k2(),
+    [
+        (1, 16, 2),
+        (2, 16, 2),
+        (1, 8, 2),
+        (3, 8, 2),
+        (4, 8, 2),
+        (5, 8, 2),
+        (6, 8, 2),
+        (4, 4, 2),
+        (5, 4, 2),
+        (6, 4, 2),
+        (8, 4, 2),
+    ],
+)
+
+generate_dot_kernels(
+    x86_avx2_fma3_fp32_k2(),
+    [
+        (1, 16, 2),
+        (2, 16, 2),
+        (1, 8, 2),
+        (3, 8, 2),
+        (4, 8, 2),
+        (5, 8, 2),
+        (6, 8, 2),
+        (4, 4, 2),
+        (5, 4, 2),
+        (6, 4, 2),
+        (8, 4, 2),
+    ],
+)
+
+generate_dot_kernels(
+    x86_avx512_fp32_k2(),
+    [
+        (1, 32, 2),
+        (2, 32, 2),
+        (3, 32, 2),
+        (4, 32, 2),
+        (5, 32, 2),
+        # The kernels which are commented out should be good, but for some
+        # reason they don't perform well. They don't seem to spill, so keeping
+        # them until we understand why are they slower.
+        # (6, 32, 2),
+        (1, 16, 2),
+        (4, 16, 2),
+        # (5, 16, 2),
+        # (6, 16, 2),
+        # (8, 16, 2),
+        # (10, 16, 2),
+        (4, 8, 2),
+        (8, 8, 2),
+        # (12, 8, 2),
+        # (16, 8, 2),
+    ],
+)

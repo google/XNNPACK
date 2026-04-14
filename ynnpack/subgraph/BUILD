@@ -56,7 +56,6 @@ cc_library(
         "dot.cc",
         "dot.h",
         "elementwise.cc",
-        "elementwise.h",
         "even_split.cc",
         "fusion.cc",
         "fusion_lut.cc",
@@ -67,6 +66,7 @@ cc_library(
         "reduce.cc",
         "reduce.h",
         "runtime.cc",
+        "slice_like.cc",
         "slinky.cc",
         "stack.cc",
         "static_pad.cc",
@@ -80,6 +80,7 @@ cc_library(
         "utils.cc",
     ],
     hdrs = [
+        "elementwise.h",  # Only public for tests...
         "runtime.h",
         "slinky.h",
         "subgraph.h",
@@ -94,6 +95,7 @@ cc_library(
         "//ynnpack/base",
         "//ynnpack/base:log",
         "//ynnpack/kernels/binary",
+        "//ynnpack/kernels/dequantize_dot",
         "//ynnpack/kernels/dot",
         "//ynnpack/kernels/dot:pack",
         "//ynnpack/kernels/dot:schedule",

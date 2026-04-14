@@ -281,9 +281,9 @@ static enum xnn_status create_deconvolution2d_nhwc(
   const uint32_t mr_packed =
       gemm_config->mr_packed ? gemm_config->mr_packed : mr;
 
-  const uint32_t n_stride = round_up(group_output_channels, nr);
-  const uint32_t k_stride = round_up_po2(group_input_channels, kr * sr);
-  const uint32_t kernel_size = kernel_height * kernel_width;
+  const size_t n_stride = round_up(group_output_channels, nr);
+  const size_t k_stride = round_up_po2(group_input_channels, kr * sr);
+  const size_t kernel_size = (size_t) kernel_height * kernel_width;
   enum xnn_microkernel_type ukernel_type = xnn_microkernel_type_igemm;
   size_t packed_group_weights_size =
       ((kernel_size * k_stride << log2_filter_element_size) +

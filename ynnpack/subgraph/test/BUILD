@@ -143,6 +143,16 @@ cc_test(
 )
 
 cc_test(
+    name = "gelu",
+    srcs = ["gelu.cc"],
+    linkopts = ynn_binary_linkopts(),
+    malloc = ynn_binary_malloc(),
+    deps = TEST_DEPS + [
+        "//ynnpack/subgraph",
+    ],
+)
+
+cc_test(
     name = "fusion_lut",
     srcs = ["fusion_lut.cc"],
     linkopts = ynn_binary_linkopts(),
@@ -194,8 +204,10 @@ cc_test(
     "static_pad",
     "static_reshape",
     "static_slice",
+    "slice_like",
     "static_transpose",
     "stencil_copy",
+    "polynomial",
 ]]
 
 cc_test(
@@ -225,5 +237,17 @@ cc_test(
         "//ynnpack",
         "//ynnpack/base",
         "@com_google_benchmark//:benchmark",
+    ],
+)
+
+cc_test(
+    name = "slinky_bench",
+    srcs = ["slinky_bench.cc"],
+    linkopts = ynn_binary_linkopts(),
+    malloc = ynn_binary_malloc(),
+    deps = [
+        "//ynnpack/subgraph",
+        "@com_google_benchmark//:benchmark",
+        "@slinky//slinky/runtime",
     ],
 )

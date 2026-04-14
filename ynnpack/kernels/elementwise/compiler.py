@@ -107,10 +107,6 @@ class Type:
       assert False
 
 
-def Index():
-  return Type("size_t", 0, 0)
-
-
 def Int(size=0, lanes=1):
   return Type("int", size, lanes)
 
@@ -312,7 +308,6 @@ class Op(Value):
     return self.name == other.name and self.ty == other.ty
 
   def with_lanes(self, lanes):
-    assert self.name != "combine" and self.name != "slice", self
     return Op(
         self.ty.with_lanes(lanes),
         self.name,
@@ -353,17 +348,16 @@ class Var(Value):
 class Load(Value):
   """A load node."""
 
-  def __init__(self, ty, index, offset_elements):
+  def __init__(self, ty, index):
     Value.__init__(self, ty)
     self.name = "load"
     self.index = index
-    self.offset_elements = offset_elements
 
   def __repr__(self):
-    return f"load<{self.ty}>({self.index}, {self.offset_elements})"
+    return f"load<{self.ty}>({self.index})"
 
   def with_lanes(self, lanes):
-    return Load(self.ty.with_lanes(lanes), self.index, self.offset_elements)
+    return Load(self.ty.with_lanes(lanes), self.index)
 
   def compare(self, other):
     if type(self) is not type(other):
@@ -371,7 +365,6 @@ class Load(Value):
 
     return (
         self.index == other.index
-        and self.offset_elements == other.offset_elements
         and self.ty == other.ty
     )
 
@@ -599,8 +592,8 @@ def lower_select(cond, x, y):
     return (x & cond) | (y & ~cond)
 
 
-def load(x, offset_index=0):
-  return Load(x.ty, x, offset_index)
+def load(x):
+  return Load(x.ty, x)
 
 
 def store(value, to):
@@ -637,20 +630,6 @@ def broadcast(x, lanes):
         [broadcast(arg, lanes) for arg in x.args],
     )
   return Op(x.ty.with_lanes(lanes), "broadcast", [x])
-
-
-def combine_vectors(args):
-  total_lanes = 0
-  for arg in args:
-    assert arg.ty == args[0].ty
-    total_lanes += arg.ty.lanes
-
-  return Op(args[0].ty.with_lanes(total_lanes), "combine", args)
-
-
-def slice_vector(arg, index, total):
-  sliced_ty = arg.ty.with_lanes(arg.ty.lanes // total)
-  return Op(sliced_ty, "slice", [arg, i32(index), i32(total)])
 
 
 # Would it be bad if instead of using a map we looked up in a global namespace
@@ -722,6 +701,13 @@ class BroadcastMode(enum.Enum):
   AUTO = 5
 
 
+class Scalar:
+
+  def __init__(self, name, ty):
+    self.name = name
+    self.ty = ty
+
+
 class Buffer:
 
   def __init__(
@@ -734,6 +720,8 @@ class Buffer:
 
 
 buffer_args = []
+scalar_args = []
+
 op_name = "unknown"
 code = ""
 
@@ -828,12 +816,16 @@ YNN_INTRINSIC simd::vec<T, N> select_greater_than(simd::vec<T, N> a, simd::vec<T
 """
 
 
-def scalar(name, ty):
+def params(*ps):
+  """Decorator to add scalar parameters to the function."""
   def actual_decorator(func):
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
+      assert len(ps) > 0
+      scalar_args.extend(ps)
       # fn_args.append((name, ty, 0))
-      args += (Var(name, ty),)
+      for p in ps:
+        args += (Var(p.name, p.ty),)
       return func(*args, **kwargs)
 
     return wrapper
@@ -1003,6 +995,12 @@ class Target:
     if isinstance(arg, Var):
       b = next((buf for buf in buffers if buf.name == arg.name), None)
     return b
+
+  def is_scalar_arg(self, arg):
+    s = None
+    if isinstance(arg, Var):
+      s = next((s for s in scalar_args if s.name == arg.name), None)
+    return s
 
   def compute_all_features(self, features, implied_features, all_features):
     for feature in features:
@@ -1179,6 +1177,8 @@ class Target:
         f" base_{args[-1].name}"
     )
 
+    arity = self.get_arity_string(args)
+    args_str.append(f"{self.indent()}const {arity}_params* params")
     self.result += ",\n".join(args_str)
     self.result += ") {\n"
 
@@ -1195,7 +1195,7 @@ class Target:
       increment,
       emit_loop,
       buffers,
-      lanes,
+      tile_width,
       prefix_before,
       prefix_after,
   ):
@@ -1242,7 +1242,7 @@ class Target:
           )
 
         broadcast_op = self.pattern_match(
-            broadcast(Var(b.name, b.ty.with_lanes(1)), lanes),
+            broadcast(Var(b.name, b.ty.with_lanes(1)), tile_width),
             {},
         )
         self.result += (
@@ -1310,25 +1310,28 @@ class Target:
           f" {self.legalize_op(v)}({v.args[0]});\n"
       )
 
-  def emit_op(
-      self,
-      i,
-      j,
-      k,
-      is_rem_width,
-      buffers,
-      constants,
-      op_natural_vector_size,
-      output_lanes,
-  ):
+  def emit_scalar_arguments(self, scalars, tile_width):
+    """Emits scalar arguments."""
+
+    if scalars:
+      self.result += f"{self.indent()}assert(params != nullptr);\n"
+
+    for s in scalars:
+      self.result += (
+          f"{self.indent()}const"
+          f" {self.legalize_type(s.ty.with_lanes(tile_width))} {s.name} ="
+          f" {self.legalize_op(broadcast(Constant(s.ty, 0), tile_width))}(reinterpret_cast<const"
+          f" {op_name}_params*>(params)->{s.name});\n"
+      )
+
+  def emit_op(self, i, j, is_rem_width, buffers, constants, tile_width):
     """Emits a single operation."""
-    assert output_lanes > 0
     op = i[1]
     self.result += self.indent()
     result_type = ""
     if i[0] is not None:
-      result_type = self.legalize_type(op.ty.with_lanes(op_natural_vector_size))
-      self.result += f"{result_type} {i[0]}_{j}_{k}"
+      result_type = self.legalize_type(op.ty.with_lanes(tile_width))
+      self.result += f"{result_type} {i[0]}_{j}"
 
     is_load = isinstance(op, Load)
     is_store = isinstance(op, Op) and op.name == "store"
@@ -1377,10 +1380,12 @@ class Target:
       else:
         if isinstance(arg, Constant):
           str_args.append(f"{arg}")
-        elif isinstance(arg, Var) and arg in constants:
+        elif isinstance(arg, Var) and (
+            arg in constants or (self.is_scalar_arg(arg) is not None)
+        ):
           str_args.append(f"{arg}{self.simd_suffix(op)}")
         else:
-          str_args.append(f"{arg}_{j}_{k}{self.simd_suffix(op)}")
+          str_args.append(f"{arg}_{j}{self.simd_suffix(op)}")
 
     if not is_store:
       self.result += " = "
@@ -1420,8 +1425,7 @@ class Target:
       ops,
       rows_num,
       is_rem_width,
-      output_vector_num,
-      output_lanes,
+      tile_width,
       buffers,
       constants,
       step,
@@ -1429,22 +1433,7 @@ class Target:
     """Emits the body of the innermost loop."""
     for op in ops:
       for j in range(rows_num):
-        op_natural_vector_size = (
-            1
-            if is_rem_width and self.tail_strategy == TailStrategy.SCALAR
-            else op[1].ty.lanes
-        )
-        for k in range(output_vector_num):
-          self.emit_op(
-              op,
-              j,
-              k,
-              is_rem_width,
-              buffers,
-              constants,
-              op_natural_vector_size,
-              output_lanes,
-          )
+        self.emit_op(op, j, is_rem_width, buffers, constants, tile_width)
 
     if not is_rem_width:
       self.advance_pointers(buffers, "n", step)
@@ -1454,7 +1443,6 @@ class Target:
       ops,
       constants,
       buffers,
-      natural_lanes,
       tile_height,
       tile_width,
   ):
@@ -1470,7 +1458,7 @@ class Target:
           tile_height if not is_rem_height else 1,
           True,
           buffers,
-          natural_lanes,
+          tile_width,
           "base_",
           "",
       )
@@ -1490,22 +1478,16 @@ class Target:
             step,
             emit_loop,
             buffers,
-            natural_lanes,
+            tile_width,
             "",
             "",
-        )
-        output_vector_num = (
-            1
-            if is_rem_width and self.tail_strategy == TailStrategy.SCALAR
-            else tile_width // natural_lanes
         )
 
         self.emit_inner_loop_body(
             ops,
             rows_num,
             is_rem_width,
-            output_vector_num,
-            natural_lanes,
+            tile_width,
             buffers,
             constants,
             step,
@@ -1537,7 +1519,6 @@ class Target:
       ops,
       constants,
       buffers,
-      natural_lanes,
       tile_height,
       tile_width,
   ):
@@ -1555,7 +1536,6 @@ class Target:
             ops,
             constants,
             new_buffers,
-            natural_lanes,
             tile_height,
             tile_width,
         )
@@ -1569,7 +1549,6 @@ class Target:
             ops,
             constants,
             new_buffers,
-            natural_lanes,
             tile_height,
             tile_width,
         )
@@ -1584,7 +1563,6 @@ class Target:
         ops,
         constants,
         buffers,
-        natural_lanes,
         tile_height,
         tile_width,
     )
@@ -1601,8 +1579,7 @@ class Target:
       tile_width = tile[1]
       tile_height = tile[0]
 
-      natural_lanes = tile_width
-      ast = self.vectorize(ast, natural_lanes, {})
+      ast = self.vectorize(ast, tile_width, {})
       ast = self.pattern_match(ast, {})
 
       constants = {}
@@ -1615,7 +1592,7 @@ class Target:
       ops.append((
           None,
           Op(
-              func.value.ty.with_lanes(natural_lanes),
+              func.value.ty.with_lanes(tile_width),
               "store",
               [func.to, values[ast]],
           ),
@@ -1630,12 +1607,12 @@ class Target:
         self.emit_asserts(buffers)
 
       self.emit_constants(constants)
+      self.emit_scalar_arguments(scalar_args, tile_width)
 
       self.handle_specialize(
           ops,
           constants,
           buffer_args,
-          natural_lanes,
           tile_height,
           tile_width,
       )
@@ -1651,9 +1628,20 @@ class Target:
   def arch_string(self):
     return "x86_" + "_".join([i.lower() for i in self.features])
 
+  def get_arity_string(self, buffers):
+    if len(buffers) == 4:
+      return "ternary"
+    elif len(buffers) == 3:
+      return "binary"
+    elif len(buffers) == 2:
+      return "unary"
+    else:
+      assert False, "Unsupported number of buffers."
+
   def compile_function(self, name, fn, tile_shapes):
     self.result = ""
     buffer_args.clear()
+    scalar_args.clear()
     global op_name
     op_name = "unknown"
     result = fn()
@@ -1674,12 +1662,8 @@ class Target:
     )
 
     src = '#include "ynnpack/kernels/'
-    if len(buffer_args) == 4:
-      src += "ternary/ternary.h"
-    elif len(buffer_args) == 3:
-      src += "binary/binary.h"
-    elif len(buffer_args) == 2:
-      src += "unary/unary.h"
+    arity = self.get_arity_string(buffer_args)
+    src += f"{arity}/{arity}.h"
     src += '"\n'
     src += "namespace ynn {\n"
     src += self.compile(func_name, buffer_args, result, tile_shapes)
@@ -1696,52 +1680,3 @@ class Target:
     )
 
     return src, inc
-
-
-# Placeholders used for pattern matching.
-i8_a = Var("a", Int(8))
-i8_b = Var("b", Int(8))
-u8_a = Var("a", UInt(8))
-u8_b = Var("b", UInt(8))
-i16_a = Var("a", Int(16))
-i16_b = Var("b", Int(16))
-u16_a = Var("a", UInt(16))
-u16_b = Var("b", UInt(16))
-i32_a = Var("a", Int(32))
-i32_b = Var("b", Int(32))
-u32_a = Var("a", UInt(32))
-u32_b = Var("b", UInt(32))
-f16_a = Var("a", Float(16))
-f16_b = Var("b", Float(16))
-f32_a = Var("a", Float(32))
-f32_b = Var("b", Float(32))
-f32_c = Var("c", Float(32))
-f32_d = Var("d", Float(32))
-bf16_a = Var("a", BFloat(16))
-bf16_b = Var("b", BFloat(16))
-
-
-class Rule:
-  # The first argument to the result should be split into the low and high parts.
-  split_operand_0_lo_hi = 1
-
-  def __init__(self, pattern, result, features=[], flags=0):
-    self.pattern = pattern
-    self.result = result
-    self.features = features
-    self.flags = flags
-
-  def __str__(self):
-    return f"{self.pattern} -> {self.result} ({', '.join(self.features)})"
-
-  def __repr__(self):
-    return str(self)
-
-  def vectorize(self, vector_bits):
-
-    return Rule(
-        self.pattern.with_lanes(vector_bits // (self.pattern.ty.size)),
-        self.result.with_lanes(vector_bits // (self.result.ty.size)),
-        self.features,
-        self.flags,
-    )

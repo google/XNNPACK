@@ -8,6 +8,7 @@
 
 #include <immintrin.h>
 
+#include <array>
 #include <cassert>
 #include <cstddef>
 #include <cstdint>
@@ -15,6 +16,7 @@
 
 #include "ynnpack/base/base.h"
 #include "ynnpack/base/bfloat16.h"
+#include "ynnpack/base/bit_cast.h"
 #include "ynnpack/base/half.h"
 #include "ynnpack/base/simd/vec.h"
 #include "ynnpack/base/simd/x86_sse41_base.h"  // IWYU pragma: export
@@ -38,12 +40,35 @@ YNN_ALWAYS_INLINE __m128i hi(__m256i x) {
 YNN_ALWAYS_INLINE __m256 concat(__m128 lo, __m128 hi) {
   return _mm256_insertf128_ps(_mm256_castps128_ps256(lo), hi, 1);
 }
+YNN_ALWAYS_INLINE __m256d concat(__m128d lo, __m128d hi) {
+  return _mm256_insertf128_pd(_mm256_castpd128_pd256(lo), hi, 1);
+}
 YNN_ALWAYS_INLINE __m256i concat(__m128i lo, __m128i hi) {
   return _mm256_castps_si256(
       concat(_mm_castsi128_ps(lo), _mm_castsi128_ps(hi)));
 }
 
 }  // namespace internal
+
+template <>
+struct vec<double, 4> {
+  using value_type = double;
+  static constexpr std::integral_constant<size_t, 4> N = {};
+
+  vec() = default;
+  explicit vec(__m256d v) : v(v) {}
+  vec(f64x2 lo, f64x2 hi) : v(internal::concat(lo.v, hi.v)) {}
+  vec(double x) : v(_mm256_set1_pd(x)) {}  // NOLINT
+
+  __m256d v;
+
+  YNN_ALWAYS_INLINE f64x2 lo() const {
+    return f64x2{_mm256_castpd256_pd128(v)};
+  }
+  YNN_ALWAYS_INLINE f64x2 hi() const {
+    return f64x2{_mm256_extractf128_pd(v, 1)};
+  }
+};
 
 template <>
 struct vec<float, 8> {
@@ -189,6 +214,7 @@ struct vec<int8_t, 32> {
   YNN_ALWAYS_INLINE s8x16 hi() const { return s8x16{internal::hi(v)}; }
 };
 
+using f64x4 = vec<double, 4>;
 using f32x8 = vec<float, 8>;
 using u32x8 = vec<uint32_t, 8>;
 using s32x8 = vec<int32_t, 8>;
@@ -212,6 +238,10 @@ YNN_ALWAYS_INLINE f32x8 unpackhi(f32x8 a, f32x8 b) {
 
 }  // namespace internal
 
+YNN_ALWAYS_INLINE f64x4 load_aligned(const double* ptr, decltype(f64x4::N),
+                                     f64x4 = {}) {
+  return f64x4{_mm256_load_pd(ptr)};
+}
 YNN_ALWAYS_INLINE f32x8 load_aligned(const float* ptr, decltype(f32x8::N),
                                      f32x8 = {}) {
   return f32x8{_mm256_load_ps(ptr)};
@@ -241,6 +271,10 @@ YNN_ALWAYS_INLINE s8x32 load_aligned(const int8_t* ptr, decltype(s8x32::N),
   return s8x32{_mm256_load_si256(reinterpret_cast<const __m256i*>(ptr))};
 }
 
+YNN_ALWAYS_INLINE void store_aligned(double* ptr, f64x4 b,
+                                     decltype(f64x4::N) = {}) {
+  _mm256_store_pd(ptr, b.v);
+}
 YNN_ALWAYS_INLINE void store_aligned(float* ptr, f32x8 b,
                                      decltype(f32x8::N) = {}) {
   _mm256_store_ps(ptr, b.v);
@@ -278,6 +312,10 @@ YNN_ALWAYS_INLINE void store_aligned(int8_t* ptr, s8x32 b,
   _mm256_store_si256(reinterpret_cast<__m256i*>(ptr), b.v);
 }
 
+YNN_ALWAYS_INLINE f64x4 load(const double* ptr, decltype(f64x4::N),
+                             f64x4 = {}) {
+  return f64x4{_mm256_loadu_pd(ptr)};
+}
 YNN_ALWAYS_INLINE f32x8 load(const float* ptr, decltype(f32x8::N), f32x8 = {}) {
   return f32x8{_mm256_loadu_ps(ptr)};
 }
@@ -310,6 +348,9 @@ YNN_ALWAYS_INLINE s8x32 load(const int8_t* ptr, decltype(s8x32::N),
   return s8x32{_mm256_loadu_si256(reinterpret_cast<const __m256i*>(ptr))};
 }
 
+YNN_ALWAYS_INLINE void store(double* ptr, f64x4 b, decltype(f64x4::N) = {}) {
+  _mm256_storeu_pd(ptr, b.v);
+}
 YNN_ALWAYS_INLINE void store(float* ptr, f32x8 b, decltype(f32x8::N) = {}) {
   _mm256_storeu_ps(ptr, b.v);
 }
@@ -340,14 +381,26 @@ YNN_ALWAYS_INLINE void store(int8_t* ptr, s8x32 b, decltype(s8x32::N) = {}) {
   _mm256_storeu_si256(reinterpret_cast<__m256i*>(ptr), b.v);
 }
 
+YNN_ALWAYS_INLINE f64x4 operator+(f64x4 a, f64x4 b) {
+  return f64x4{_mm256_add_pd(a.v, b.v)};
+}
 YNN_ALWAYS_INLINE f32x8 operator+(f32x8 a, f32x8 b) {
   return f32x8{_mm256_add_ps(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE f64x4 operator-(f64x4 a, f64x4 b) {
+  return f64x4{_mm256_sub_pd(a.v, b.v)};
 }
 YNN_ALWAYS_INLINE f32x8 operator-(f32x8 a, f32x8 b) {
   return f32x8{_mm256_sub_ps(a.v, b.v)};
 }
+YNN_ALWAYS_INLINE f64x4 operator*(f64x4 a, f64x4 b) {
+  return f64x4{_mm256_mul_pd(a.v, b.v)};
+}
 YNN_ALWAYS_INLINE f32x8 operator*(f32x8 a, f32x8 b) {
   return f32x8{_mm256_mul_ps(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE f64x4 operator/(f64x4 a, f64x4 b) {
+  return f64x4{_mm256_div_pd(a.v, b.v)};
 }
 YNN_ALWAYS_INLINE f32x8 operator/(f32x8 a, f32x8 b) {
   return f32x8{_mm256_div_ps(a.v, b.v)};
@@ -421,11 +474,28 @@ YNN_ALWAYS_INLINE s8x32 operator~(s8x32 a) {
       _mm256_castsi256_ps(a.v), _mm256_set1_ps(bit_cast<float>(-1))))};
 }
 
+YNN_ALWAYS_INLINE f64x4 min(f64x4 a, f64x4 b) {
+  return f64x4{_mm256_min_pd(a.v, b.v)};
+}
 YNN_ALWAYS_INLINE f32x8 min(f32x8 a, f32x8 b) {
   return f32x8{_mm256_min_ps(a.v, b.v)};
 }
+YNN_ALWAYS_INLINE f64x4 max(f64x4 a, f64x4 b) {
+  return f64x4{_mm256_max_pd(a.v, b.v)};
+}
 YNN_ALWAYS_INLINE f32x8 max(f32x8 a, f32x8 b) {
   return f32x8{_mm256_max_ps(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE f64x4 floor(f64x4 a) { return f64x4{_mm256_floor_pd(a.v)}; }
+YNN_ALWAYS_INLINE f64x4 ceil(f64x4 a) { return f64x4{_mm256_ceil_pd(a.v)}; }
+YNN_ALWAYS_INLINE f64x4 round(f64x4 a) {
+  return f64x4{
+      _mm256_round_pd(a.v, _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC)};
+}
+YNN_ALWAYS_INLINE f64x4 sqrt(f64x4 a) { return f64x4{_mm256_sqrt_pd(a.v)}; }
+YNN_ALWAYS_INLINE f64x4 abs(f64x4 a) {
+  return f64x4{_mm256_and_pd(
+      a.v, _mm256_castsi256_pd(_mm256_set1_epi64x(0x7FFFFFFFFFFFFFFF)))};
 }
 YNN_ALWAYS_INLINE f32x8 floor(f32x8 a) { return f32x8{_mm256_floor_ps(a.v)}; }
 YNN_ALWAYS_INLINE f32x8 ceil(f32x8 a) { return f32x8{_mm256_ceil_ps(a.v)}; }
@@ -436,6 +506,21 @@ YNN_ALWAYS_INLINE f32x8 round(f32x8 a) {
 YNN_ALWAYS_INLINE f32x8 sqrt(f32x8 a) { return f32x8{_mm256_sqrt_ps(a.v)}; }
 YNN_ALWAYS_INLINE f32x8 abs(f32x8 a) {
   return f32x8{_mm256_and_ps(a.v, _mm256_set1_ps(bit_cast<float>(0x7FFFFFFF)))};
+}
+
+template <>
+YNN_ALWAYS_INLINE std::array<f64x4, 4> transpose<double>(
+    std::array<f64x4, 4> x) {
+  __m256d t0 = _mm256_unpacklo_pd(x[0].v, x[1].v);
+  __m256d t1 = _mm256_unpackhi_pd(x[0].v, x[1].v);
+  __m256d t2 = _mm256_unpacklo_pd(x[2].v, x[3].v);
+  __m256d t3 = _mm256_unpackhi_pd(x[2].v, x[3].v);
+  return {{
+      f64x4{_mm256_permute2f128_pd(t0, t2, 0x20)},
+      f64x4{_mm256_permute2f128_pd(t1, t3, 0x20)},
+      f64x4{_mm256_permute2f128_pd(t0, t2, 0x31)},
+      f64x4{_mm256_permute2f128_pd(t1, t3, 0x31)},
+  }};
 }
 
 }  // namespace simd

@@ -169,7 +169,6 @@ void xnn_f32_igemm_minmax_ukernel_4x2c4__wasmrelaxedsimd(
 
     vacc01x01 = wasm_f32x4_relaxed_min(vmax, vacc01x01);
     vacc23x01 = wasm_f32x4_relaxed_min(vmax, vacc23x01);
-
     if XNN_LIKELY(nc >= 2) {
       wasm_v128_store64_lane(c3, vacc23x01, 1);
       c3 = (float*) ((uintptr_t) c3 + cn_stride);

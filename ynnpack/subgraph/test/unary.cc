@@ -73,7 +73,6 @@ void TestOp(A, X, const unary_op_info& op_info, ynn_unary_operator op) {
       ASSERT_EQ(runtime.GetExternalTensorShape(1), shape);
 
       runtime.SetupExternalTensor(output.data(), 1).InvokeRuntime();
-
       check_results(op_info, a, output, a_quantization, output_quantization);
     }
   }
@@ -88,8 +87,8 @@ class RealOps
 
 template <typename T>
 void TestOp(T type, ynn_unary_operator op) {
-  const unary_op_info& op_info = *get_unary_op_info(op);
-  TestOp(type, type, op_info, op);
+  auto op_info = get_unary_op_info(op, get_unary_params(op));
+  TestOp(type, type, *op_info, op);
 }
 
 TEST_P(IntegerOps, op) {

@@ -38,10 +38,16 @@ YNN_ALWAYS_INLINE s32x4 max(s32x4 a, s32x4 b) {
   return s32x4{_mm_max_epi32(a.v, b.v)};
 }
 YNN_ALWAYS_INLINE f32x4 floor(f32x4 a) { return f32x4{_mm_floor_ps(a.v)}; }
+YNN_ALWAYS_INLINE f64x2 floor(f64x2 a) { return f64x2{_mm_floor_pd(a.v)}; }
 YNN_ALWAYS_INLINE f32x4 ceil(f32x4 a) { return f32x4{_mm_ceil_ps(a.v)}; }
+YNN_ALWAYS_INLINE f64x2 ceil(f64x2 a) { return f64x2{_mm_ceil_pd(a.v)}; }
 YNN_ALWAYS_INLINE f32x4 round(f32x4 a) {
   return f32x4{
       _mm_round_ps(a.v, _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC)};
+}
+YNN_ALWAYS_INLINE f64x2 round(f64x2 a) {
+  return f64x2{
+      _mm_round_pd(a.v, _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC)};
 }
 
 YNN_ALWAYS_INLINE u8x16 abs(s8x16 a) { return u8x16{_mm_abs_epi8(a.v)}; }

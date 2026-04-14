@@ -150,13 +150,6 @@ ynn_status ynn_define_static_slice(ynn_subgraph_t subgraph, size_t num_axes,
     auto func =
         slinky::func::make_copy(std::move(func_input), {output.buffer, dims});
 
-    // TODO(dsharlet/vksnk): All copies probably need similar scheduling, we
-    // should have a unified way of doing this, or just make this the default.
-    auto sched = std::make_unique<scheduling_info>();
-    sched->scheduled_buffers.push_back({output.buffer, 0});
-    func.user_data() = sched.get();
-    runtime.scheduling_info_storage.push_back(std::move(sched));
-
     runtime.funcs.push_back(std::move(func));
     return ynn_status_success;
   };

@@ -15,6 +15,10 @@ namespace ynn {
 
 namespace simd {
 
+YNN_ALWAYS_INLINE f64x4 fma(f64x4 a, f64x4 b, f64x4 acc) {
+  return f64x4{_mm256_fmadd_pd(a.v, b.v, acc.v)};
+}
+
 YNN_ALWAYS_INLINE f32x8 fma(f32x8 a, f32x8 b, f32x8 acc) {
   return f32x8{_mm256_fmadd_ps(a.v, b.v, acc.v)};
 }

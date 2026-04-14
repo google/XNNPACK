@@ -21,6 +21,7 @@
 #include "ynnpack/base/test/util.h"
 #include "ynnpack/base/type.h"
 #include "ynnpack/kernels/dot/dot.h"
+#include "ynnpack/kernels/dot/pack_test_tensor.h"
 #include "ynnpack/kernels/dot/schedule.h"
 
 namespace ynn {
@@ -119,7 +120,7 @@ void fill(T* data, size_t n, int value) {
 template <typename TA, typename TB, typename TC>
 double run_benchmark(TA, TB, TC, const kernel_info& kernel, size_t m, size_t n,
                      size_t k, span<dot_loop> loops) {
-  const bool transpose_a = kernel.flags & dot_flag::transpose_a;
+  const bool pack_a = kernel.flags & dot_flag::transpose_a;
 
   const size_t tile_m = kernel.tile_m;
   const size_t tile_n = kernel.tile_n;
@@ -144,34 +145,37 @@ double run_benchmark(TA, TB, TC, const kernel_info& kernel, size_t m, size_t n,
   c.fill(0);
   b = b.crop_padding({0, 0}, {b.extent(0) - k, b.extent(1) - n});
 
-  if (transpose_a) {
-    // This mangles the data, but we don't care here.
-    a = a.reshape({k / tile_k, m * tile_k});
-  }
+  a = pack_a ? transpose_a(a, tile_m, tile_k) : a;
 
-  auto kernel_wrapper = [&](size_t m, size_t n, size_t k, const void* a_ptr,
-                            const void* b_ptr, size_t init_c_stride_m,
-                            const void* init_c, void* c_ptr) {
-    kernel.kernel(m, n, 1, 1, k, a.stride(0) * sizeof(TA), 0, 0, a_ptr, 0, 0,
-                  b.stride(0) * sizeof(TB), b_ptr, init_c_stride_m, init_c,
-                  c.stride(0) * sizeof(TC), c_ptr);
-  };
+  auto kernel_wrapper =
+      [&](size_t m, size_t n, span<const size_t> k, const void* a_ptr,
+          size_t a_stride_m, span<const size_t> a_k_strides, const void* b_ptr,
+          span<const size_t> b_k_strides, size_t init_c_stride_m,
+          const void* init_c, void* c_ptr) {
+        kernel.kernel(m, n, k[2], k[1], k[0], a_stride_m,
+                      a_k_strides[2], a_k_strides[1], a_ptr, b_k_strides[2],
+                      b_k_strides[1], b_k_strides[0], b_ptr, init_c_stride_m,
+                      init_c, c.stride(0) * sizeof(TC), c_ptr);
+      };
 
-  const size_t a_stride_m = transpose_a
-                                ? kernel.tile_k * sizeof(TA) / a_elem_count
-                                : a.stride(0) * sizeof(TA);
-  const size_t a_stride_k = transpose_a
-                                ? a.stride(0) * sizeof(TA) / kernel.tile_k
-                                : a.stride(1) * sizeof(TA) / a_elem_count;
+  const size_t a_stride_m = pack_a ? kernel.tile_k * sizeof(TA) / a_elem_count
+                                   : a.stride(0) * sizeof(TA);
+  const size_t a_stride_k = pack_a ? a.stride(0) * sizeof(TA) / kernel.tile_k
+                                   : a.stride(1) * sizeof(TA) / a_elem_count;
   const size_t b_stride_k = b.stride(0) * sizeof(TB);
   const size_t b_stride_n = b.stride(1) * sizeof(TB) / b_elem_count;
   const size_t c_stride_m = c.stride(0) * sizeof(TC);
   const size_t c_stride_n = c.stride(1) * sizeof(TC);
 
+  const size_t ks[] = {k, 1, 1};
+  const size_t a_k_strides[] = {a_stride_k, 0, 0};
+  const size_t b_k_strides[] = {b_stride_k, 0, 0};
+
   double t = benchmark([&]() {
-    run_dot(loops, m, n, k, kernel.block_m, kernel.block_n, kernel.block_k,
-            a_stride_m, a_stride_k, a.base(), b_stride_k, b_stride_n, b.base(),
-            0, nullptr, c_stride_m, c_stride_n, c.base(), kernel_wrapper);
+    run_dot(loops, m, n, ks, kernel.block_m, kernel.block_n, kernel.block_k,
+            a_stride_m, a_k_strides, a.base(), b_k_strides, b_stride_n,
+            b.base(), 0, nullptr, c_stride_m, c_stride_n, c.base(),
+            kernel_wrapper);
   });
   // Check that the kernel didn't compute the wrong thing. We assume the kernel
   // is correct, but we have some logic here that needs validation too. We

@@ -76,7 +76,6 @@ void xnn_f32_qc8w_gemm_ukernel_1x4__scalar(
     vacc01 *= vscale1;
     vacc02 *= vscale2;
     vacc03 *= vscale3;
-
     if XNN_LIKELY(nc >= 4) {
       c0[0] = vacc00;
       c0[1] = vacc01;

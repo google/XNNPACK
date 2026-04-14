@@ -285,25 +285,14 @@ SubgraphTester& SubgraphTester::AddConcatenate(size_t axis,
   return *this;
 }
 
-SubgraphTester& SubgraphTester::AddConstantPad(const size_t* pre_paddings,
-                                               const size_t* post_paddings,
-                                               float padding_value,
-                                               uint32_t input_id,
-                                               uint32_t output_id) {
-  const xnn_status status = xnn_define_static_constant_pad(
-      subgraph_.get(), pre_paddings, post_paddings, padding_value, input_id,
-      output_id, /*flags=*/0);
-  EXPECT_EQ(status, xnn_status_success);
-  return *this;
-}
-
 SubgraphTester& SubgraphTester::AddConstantPad(
     const std::vector<size_t>& pre_paddings,
     const std::vector<size_t>& post_paddings, float padding_value,
     uint32_t input_id, uint32_t output_id) {
-  const xnn_status status = xnn_define_static_constant_pad(
-      subgraph_.get(), pre_paddings.data(), post_paddings.data(), padding_value,
-      input_id, output_id, /*flags=*/0);
+  assert(pre_paddings.size() == post_paddings.size());
+  const xnn_status status = xnn_define_static_constant_pad_v2(
+      subgraph_.get(), pre_paddings.size(), pre_paddings.data(),
+      post_paddings.data(), padding_value, input_id, output_id, /*flags=*/0);
   EXPECT_EQ(status, xnn_status_success);
   return *this;
 }

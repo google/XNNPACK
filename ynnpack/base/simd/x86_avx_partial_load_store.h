@@ -24,6 +24,9 @@ namespace internal {
 alignas(64) static constexpr int32_t mask_table[16] = {
     -1, -1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0, 0};
 
+YNN_ALWAYS_INLINE f64x4 maskload(const double* ptr, __m256i mask) {
+  return f64x4{_mm256_maskload_pd(ptr, mask)};
+}
 YNN_ALWAYS_INLINE f32x8 maskload(const float* ptr, __m256i mask) {
   return f32x8{_mm256_maskload_ps(ptr, mask)};
 }
@@ -32,6 +35,10 @@ YNN_ALWAYS_INLINE s32x8 maskload(const int32_t* ptr, __m256i mask) {
       _mm256_maskload_ps(reinterpret_cast<const float*>(ptr), mask))};
 }
 
+YNN_ALWAYS_INLINE f64x4 maskload(const double* ptr, __m256d src, __m256i mask) {
+  return f64x4{_mm256_blendv_pd(src, _mm256_maskload_pd(ptr, mask),
+                                _mm256_castsi256_pd(mask))};
+}
 YNN_ALWAYS_INLINE f32x8 maskload(const float* ptr, __m256 src, __m256i mask) {
   return f32x8{_mm256_blendv_ps(src, _mm256_maskload_ps(ptr, mask),
                                 _mm256_castsi256_ps(mask))};
@@ -44,6 +51,9 @@ YNN_ALWAYS_INLINE s32x8 maskload(const int32_t* ptr, __m256i src,
       _mm256_castsi256_ps(mask)))};
 }
 
+YNN_ALWAYS_INLINE void maskstore(double* ptr, f64x4 val, __m256i mask) {
+  _mm256_maskstore_pd(ptr, mask, val.v);
+}
 YNN_ALWAYS_INLINE void maskstore(float* ptr, f32x8 val, __m256i mask) {
   _mm256_maskstore_ps(ptr, mask, val.v);
 }
@@ -53,6 +63,25 @@ YNN_ALWAYS_INLINE void maskstore(int32_t* ptr, s32x8 val, __m256i mask) {
 }
 
 // Partial load/store with a non-constant number of elements.
+template <typename T>
+YNN_ALWAYS_INLINE vec<T, 4> partial_load_mask_x64x4(const T* ptr, size_t n,
+                                                    vec<T, 4> src) {
+  assert(n <= 4);
+  auto mask = _mm256_loadu_si256(
+      reinterpret_cast<const __m256i*>(&mask_table[8 - n * 2]));
+  return vec<T, 4>{maskload(ptr, src.v, mask)};
+}
+
+// Partial load/store with a non-constant number of elements.
+template <typename T>
+YNN_ALWAYS_INLINE vec<T, 4> partial_load_mask_x64x4(const T* ptr, size_t n,
+                                                    zeros<4>) {
+  assert(n <= 4);
+  auto mask = _mm256_loadu_si256(
+      reinterpret_cast<const __m256i*>(&mask_table[8 - n * 2]));
+  return vec<T, 4>{maskload(ptr, mask)};
+}
+
 template <typename T>
 YNN_ALWAYS_INLINE vec<T, 8> partial_load_mask_x32x8(const T* ptr, size_t n,
                                                     vec<T, 8> src) {
@@ -73,6 +102,14 @@ YNN_ALWAYS_INLINE vec<T, 8> partial_load_mask_x32x8(const T* ptr, size_t n,
 }
 
 template <typename T>
+YNN_ALWAYS_INLINE void partial_store_x64x4(T* ptr, vec<T, 4> val, size_t n) {
+  assert(n <= 4);
+  auto mask = _mm256_loadu_si256(
+      reinterpret_cast<const __m256i*>(&mask_table[8 - n * 2]));
+  maskstore(ptr, val, mask);
+}
+
+template <typename T>
 YNN_ALWAYS_INLINE void partial_store_x32x8(T* ptr, vec<T, 8> val, size_t n) {
   assert(n <= 8);
   auto mask =
@@ -82,6 +119,9 @@ YNN_ALWAYS_INLINE void partial_store_x32x8(T* ptr, vec<T, 8> val, size_t n) {
 
 }  // namespace internal
 
+YNN_ALWAYS_INLINE f64x4 load(const double* ptr, size_t n, f64x4 src) {
+  return internal::partial_load_mask_x64x4(ptr, n, src);
+}
 YNN_ALWAYS_INLINE f32x8 load(const float* ptr, size_t n, f32x8 src) {
   return internal::partial_load_mask_x32x8(ptr, n, src);
 }
@@ -89,6 +129,9 @@ YNN_ALWAYS_INLINE s32x8 load(const int32_t* ptr, size_t n, s32x8 src) {
   return internal::partial_load_mask_x32x8(ptr, n, src);
 }
 
+YNN_ALWAYS_INLINE f64x4 load(const double* ptr, size_t n, zeros<4> src) {
+  return internal::partial_load_mask_x64x4(ptr, n, src);
+}
 YNN_ALWAYS_INLINE f32x8 load(const float* ptr, size_t n, zeros<8> src) {
   return internal::partial_load_mask_x32x8(ptr, n, src);
 }
@@ -96,6 +139,9 @@ YNN_ALWAYS_INLINE s32x8 load(const int32_t* ptr, size_t n, zeros<8> src) {
   return internal::partial_load_mask_x32x8(ptr, n, src);
 }
 
+YNN_ALWAYS_INLINE f64x4 load(const double* ptr, size_t n, undef<4> src) {
+  return internal::partial_load_mask_x64x4(ptr, n, zeros<4>{});
+}
 YNN_ALWAYS_INLINE f32x8 load(const float* ptr, size_t n, undef<8> src) {
   return internal::partial_load_mask_x32x8(ptr, n, zeros<8>{});
 }
@@ -103,6 +149,9 @@ YNN_ALWAYS_INLINE s32x8 load(const int32_t* ptr, size_t n, undef<8> src) {
   return internal::partial_load_mask_x32x8(ptr, n, zeros<8>{});
 }
 
+YNN_ALWAYS_INLINE void store(double* ptr, f64x4 val, size_t n) {
+  internal::partial_store_x64x4(ptr, val, n);
+}
 YNN_ALWAYS_INLINE void store(float* ptr, f32x8 val, size_t n) {
   internal::partial_store_x32x8(ptr, val, n);
 }

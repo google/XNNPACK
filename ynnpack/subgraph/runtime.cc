@@ -154,11 +154,6 @@ std::unique_ptr<ynn::scheduling_info> ynn_runtime::make_schedule(
 
   sched->base_buffer_id = output_value;
 
-  // Schedule the output buffer to be stored at the same level as it's
-  // computed at.
-  ynn::scheduled_buffer sched_output_buffer = {output, 0};
-  sched->scheduled_buffers.push_back(std::move(sched_output_buffer));
-
   return sched;
 }
 
@@ -380,7 +375,9 @@ void ynn_runtime::schedule() {
             global_loop_nest[loop_nest[compute_at - 1]].loop_id;
         f.compute_at(lid);
       }
-      if (sched) {
+      if (!sched || sched->scheduled_buffers.empty()) {
+        f.store_outputs_innermost();
+      } else {
         for (auto& b : sched->scheduled_buffers) {
           if (b.store_at_min_depth == 0) {
             b.buffer->store_at({&funcs[i], slinky::var()});
@@ -480,10 +477,10 @@ auto make_reshape_impl(ynn_runtime* runtime) {
         assert(i.data->rank == i.rank());
         for (size_t d = 0; d < i.rank(); ++d) {
           if (i.extents[d].defined()) {
-            i.data->dim(d).set_min_extent(
+            i.data->mutable_dim(d).set_min_extent(
                 0, evaluate(i.extents[d], ctx));
           } else {
-            i.data->dim(d).set_min_extent(0, 1);
+            i.data->mutable_dim(d).set_min_extent(0, 1);
           }
         }
         ynn::init_buffer_strides(*i.data);
@@ -553,7 +550,7 @@ ynn_runtime::ynn_runtime(ynn::ref_count<const ynn_subgraph> subgraph,
       for (size_t d = 0; d < value.extents.size(); ++d) {
         if (!value.extents[d].defined() ||
             slinky::is_constant(value.extents[d], 1)) {
-          value.data->dim(d) = slinky::dim::broadcast();
+          value.data->mutable_dim(d) = slinky::dim::broadcast();
         }
       }
 
@@ -632,7 +629,7 @@ ynn_status ynn_runtime::build() {
       for (size_t d = 0; d < value.extents.size(); ++d) {
         if (!value.extents[d].defined() ||
             slinky::is_constant(value.extents[d], 1)) {
-          value.data->dim(d) = slinky::dim::broadcast();
+          value.data->mutable_dim(d) = slinky::dim::broadcast();
         }
       }
     }

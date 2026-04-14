@@ -68,17 +68,7 @@ typedef void (*xnn_f32_qc8w_gemm_ukernel_fn)(
     const void* w, float* c, size_t cm_stride, size_t cn_stride,
     const struct xnn_f32_default_params* params);
 
-// GEMM: GEneral Matrix Multiplication with ReLU activation
 
-typedef void (*xnn_f32_gemm_relu_ukernel_fn)(
-    size_t mr, size_t nr, size_t k, const float* a, size_t a_stride,
-    const float* w, float* c, size_t cm_stride, size_t cn_stride,
-    const struct xnn_f32_relu_params* params);
-
-typedef void (*xnn_f32_qc8w_gemm_relu_ukernel_fn)(
-    size_t mr, size_t nr, size_t k, const float* a, size_t a_stride,
-    const void* w, float* c, size_t cm_stride, size_t cn_stride,
-    const struct xnn_f32_relu_params* params);
 
 // GEMM: GEneral Matrix Multiplication with Min+Max activation
 
@@ -190,7 +180,7 @@ typedef void (*xnn_qu8_gemm_minmax_ukernel_fn)(
 typedef void (*xnn_qp8_f32_qc4w_gemm_minmax_ukernel_fn)(
     size_t m, size_t n, size_t k, const void* lhs_packed,
     const void* rhs_packed, float* dst, size_t dst_stride_row,
-    size_t dst_stride_col, struct xnn_f32_minmax_params* minmax_params);
+    size_t dst_stride_col, struct xnn_f32_qc4w_minmax_params* minmax_params);
 
 typedef void (*xnn_qp8_f32_qc8w_gemm_minmax_ukernel_fn)(
     size_t m, size_t n, size_t k, const void* lhs_packed,
@@ -280,12 +270,7 @@ typedef void (*xnn_pf32_igemm_ukernel_fn)(
     float* c, size_t cm_stride, size_t cn_stride, size_t a_offset,
     const float* zero, const struct xnn_f32_default_params* params);
 
-// IGEMM: Indirect GEMM with ReLU activation
 
-typedef void (*xnn_f32_igemm_relu_ukernel_fn)(
-    size_t mr, size_t nr, size_t kc, size_t ks, const float** a, const float* w,
-    float* c, size_t cm_stride, size_t cn_stride, size_t a_offset,
-    const float* zero, const struct xnn_f32_relu_params* params);
 
 // IGEMM: Indirect GEMM with Min+Max activation
 
@@ -784,6 +769,10 @@ typedef void (*xnn_pad_ukernel_fn)(size_t rows, size_t channels,
 
 typedef void (*xnn_reduce_ukernel_fn)(size_t batch, const void* input,
                                       void* output, const void* params);
+
+typedef void (*xnn_bf16_reduce_ukernel_fn)(
+    size_t batch, const xnn_bfloat16* input, xnn_bfloat16* output,
+    const struct xnn_bf16_default_params* params);
 
 typedef void (*xnn_f16_reduce_ukernel_fn)(
     size_t batch, const xnn_float16* input, xnn_float16* output,

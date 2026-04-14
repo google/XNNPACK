@@ -1,8 +1,7 @@
 """Definition of exp kernel."""
 
-import math
-
 # pylint: disable=undefined-variable
+# pylint: disable=missing-function-docstring
 from ynnpack.kernels.elementwise.compiler import *  # pylint: disable=wildcard-import
 
 
@@ -30,20 +29,25 @@ def qd_round_f32(a):
 
 @const_buffer("a", Float(32))
 @buffer("x", Float(32))
+@params(
+    Scalar("output_multiplier", Float(32)),
+    Scalar("input_multiplier", Float(32)),
+)
 @operator_name("exp")
-def exp_fp32(a, x):
-  # The monomial coefficients of the numerator polynomial (`valpha_0` = 1.0).
-  valpha_1 = 4.1594290733e-01
-  valpha_2 = 7.2068706155e-02
-  valpha_3 = 5.5380910635e-03
+def exp_fp32(a, x, output_multiplier, input_multiplier):
+  # The monomial coefficients of the numerator polynomial.
+  valpha_0 = output_multiplier
+  valpha_1 = 4.1594290733e-01 * output_multiplier
+  valpha_2 = 7.2068706155e-02 * output_multiplier
+  valpha_3 = 5.5380910635e-03 * output_multiplier
 
   # The monomial coefficients of the denominator polynomial (`vbeta_0 = 1.0).
   vbeta_1 = -2.7720427513e-01
   vbeta_2 = 2.3986088112e-02
 
-  va = load(a)
+  va = load(a) * input_multiplier
   # Clamp `vz_prime = x * log2(e)` to the maximum exponents [-127, 128].
-  vz_prime = min(max(va * f32(math.log2(math.e)), -127.0), 128.0)
+  vz_prime = min(max(va, -127.0), 128.0)
 
   # Decompose x * log2e into `z` (integer part) and `r` (remainder).
   vz = qd_round_f32(vz_prime)
@@ -55,7 +59,7 @@ def exp_fp32(a, x):
   # Evaluate the numerator polynomial p(f).
   vp = multiply_add(vr, valpha_3, valpha_2)
   vp = multiply_add(vr, vp, valpha_1)
-  vp = multiply_add(vr, vp, 1.0)
+  vp = multiply_add(vr, vp, valpha_0)
 
   # Evaluate the denominator polynomial q(r).
   vq = multiply_add(vr, vbeta_2, vbeta_1)
@@ -72,20 +76,27 @@ def exp_fp32(a, x):
 
 @const_buffer("a", Float(32))
 @buffer("x", Float(32))
+@params(
+    Scalar("output_offset", Float(32)),
+    Scalar("output_multiplier", Float(32)),
+    Scalar("input_multiplier", Float(32)),
+)
 @operator_name("erf")
-def erf_fp32(a, x):
+def erf_fp32(a, x, output_offset, output_multiplier, input_multiplier):
   # Cap the inputs to this value as `erf(x)` will always be `+/-1.0f`
   # beyond this point. This value is chosen roughly as the first floating point
   # number as of which the interpolation returns +/-1.0f.
   vmax_abs_x = 3.8
 
   # The monomial coefficients of the numerator polynomial (`valpha_0` = 0.0).
-  valpha_1 = 1.1283791149e00
-  valpha_3 = 1.8942591284e-01
-  valpha_5 = 5.2645591597e-02
-  valpha_7 = 3.7304820991e-03
-  valpha_9 = 2.8532683811e-04
-  valpha_11 = 2.0742698573e-06
+  # We distribute the output_multiplier into the coefficients, these multiplies
+  # are evaluated outside the loop over the output.
+  valpha_1 = 1.1283791149e00 * output_multiplier
+  valpha_3 = 1.8942591284e-01 * output_multiplier
+  valpha_5 = 5.2645591597e-02 * output_multiplier
+  valpha_7 = 3.7304820991e-03 * output_multiplier
+  valpha_9 = 2.8532683811e-04 * output_multiplier
+  valpha_11 = 2.0742698573e-06 * output_multiplier
 
   # The monomial coefficients of the denominator polynomial (`vbeta_0 = 1.0).
   vbeta_2 = 5.0120705366e-01
@@ -95,7 +106,7 @@ def erf_fp32(a, x):
   vbeta_10 = 3.8364178182e-05
 
   # Clamp the inputs to the interpolation range.
-  vx = load(a)
+  vx = load(a) * input_multiplier
   vx = min(vmax_abs_x, vx)
   vx = max(-vmax_abs_x, vx)
 
@@ -118,4 +129,4 @@ def erf_fp32(a, x):
   vq = multiply_add(vx2, vq, 1.0)
 
   # Divide the numerator by the denominator.
-  return store(vp / vq, x)
+  return store((vp / vq) + output_offset, x)

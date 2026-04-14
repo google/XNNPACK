@@ -2511,7 +2511,7 @@ void GemmMicrokernelTester::Test(xnn_qd8_f32_qb4w_gemm_ukernel_fn gemm,
 
 void GemmMicrokernelTester::Test(
     xnn_qp8_f32_qc4w_gemm_minmax_ukernel_fn gemm,
-    xnn_init_f32_minmax_params_fn init_minmax_params,
+    xnn_init_f32_qc4w_minmax_params_fn init_minmax_params,
     xnn_pack_weights_and_biases_fn pack,
     xnn_packed_stride_weights_and_biases_fn packed_stride) {
   ASSERT_LE(m(), mr());
@@ -2605,8 +2605,8 @@ void GemmMicrokernelTester::Test(
   }
 
   // Prepare parameters.
-  xnn_f32_minmax_params minmax_params;
-  init_minmax_params(&minmax_params, min(), max());
+  xnn_f32_qc4w_minmax_params minmax_params;
+  init_minmax_params(&minmax_params, min(), max(), 0);
 
   for (size_t m_index = 0; m_index < m(); m_index++) {
     for (size_t n_index = 0; n_index < n(); n_index++) {
@@ -4409,67 +4409,7 @@ void GemmMicrokernelTester::Test(xnn_f32_gemm_ukernel_fn gemm,
   }
 }
 
-void GemmMicrokernelTester::Test(xnn_f32_gemm_relu_ukernel_fn gemm_relu,
-                                 xnn_pack_f32_gemm_fn pack) const {
-  ASSERT_LE(m(), mr());
-  ASSERT_GE(a_stride(), k());
-  ASSERT_GE(cm_stride(), n());
 
-  xnnpack::ReplicableRandomDevice rng;
-  std::uniform_real_distribution<float> f32dist;
-
-  xnnpack::Buffer<float> a((m() - 1) * a_stride() + k(),
-                           xnnpack::XnnExtraBytes);
-  xnnpack::Buffer<float> b(n() * k());
-  xnnpack::Buffer<float> bias(n());
-  xnnpack::Buffer<float, XNN_ALLOCATION_ALIGNMENT> packed_w(
-      packed_n() * packed_k() + packed_n());
-  xnnpack::Buffer<float> c((m() - 1) * cm_stride() + n());
-  xnnpack::Buffer<float> c_ref(m() * n());
-
-  std::generate(a.begin(), a.end(), [&]() { return f32dist(rng); });
-  std::generate(b.begin(), b.end(), [&]() { return f32dist(rng); });
-  std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
-  std::fill(c_ref.begin(), c_ref.end(), 0.0f);
-
-  pack(/*g=*/1, n(), k(), nr(), kr(), sr(), b.data(), bias.data(),
-       /*scale=*/nullptr, packed_w.data(), /*extra_bytes=*/0,
-       /*params=*/nullptr);
-
-  for (size_t m_index = 0; m_index < m(); m_index++) {
-    for (size_t n_index = 0; n_index < n(); n_index++) {
-      for (size_t k_index = 0; k_index < k(); k_index++) {
-        ASSERT_LE(n(), packed_n());
-        ASSERT_LT(m_index * n() + n_index, c_ref.size());
-        c_ref[m_index * n() + n_index] +=
-            a[m_index * a_stride() + k_index] * b[n_index * k() + k_index];
-      }
-      c_ref[m_index * n() + n_index] =
-          std::max(0.0f, c_ref[m_index * n() + n_index] + bias[n_index]);
-    }
-  }
-
-  gemm_relu(m(), n(), k() * sizeof(float), a.data(), a_stride() * sizeof(float),
-            packed_w.data(), c.data(), cm_stride() * sizeof(float),
-            nr() * sizeof(float), nullptr);
-
-  // Validate micro-kernel outputs.
-  for (size_t i = 0; i < m(); i++) {
-    for (size_t j = 0; j < n(); j++) {
-      ASSERT_GE(c[i * cm_stride() + j], 0.0f)
-          << "at " << i << ", " << j << ": reference = " << c_ref[i * n() + j]
-          << ", optimized = " << c[i * cm_stride() + j]
-          << ", Mr x Nr x Kr = " << mr() << " x " << nr() << " x " << kr()
-          << ", M x N x K = " << m() << " x " << n() << " x " << k();
-      ASSERT_NEAR(c[i * cm_stride() + j], c_ref[i * n() + j],
-                  std::max(1.0e-5f, std::abs(c_ref[i * n() + j]) * 1.0e-6f))
-          << "at " << i << ", " << j << ": reference = " << c_ref[i * n() + j]
-          << ", optimized = " << c[i * cm_stride() + j]
-          << ", Mr x Nr x Kr = " << mr() << " x " << nr() << " x " << kr()
-          << ", M x N x K = " << m() << " x " << n() << " x " << k();
-    }
-  }
-}
 
 void GemmMicrokernelTester::Test(xnn_f32_gemm_minmax_ukernel_fn gemm_minmax,
                                  xnn_init_f32_minmax_params_fn init_params,
@@ -4743,81 +4683,7 @@ void GemmMicrokernelTester::Test(xnn_f32_qc8w_gemm_ukernel_fn gemm,
   }
 }
 
-void GemmMicrokernelTester::Test(xnn_f32_qc8w_gemm_relu_ukernel_fn gemm_relu,
-                                 xnn_pack_f32_qs8w_gemm_fn pack) const {
-  ASSERT_LE(m(), mr());
-  ASSERT_GE(a_stride(), k());
-  ASSERT_GE(cm_stride(), n());
 
-  xnnpack::ReplicableRandomDevice rng;
-  std::uniform_real_distribution<float> f32dist;
-  std::uniform_int_distribution<int32_t> i8dist(
-      -1, std::numeric_limits<int8_t>::max());
-
-  xnnpack::Buffer<float> a((m() - 1) * a_stride() + k(),
-                           xnnpack::XnnExtraBytes);
-  xnnpack::Buffer<int8_t> b(n() * k());
-  xnnpack::Buffer<float> bias(n());
-  xnnpack::Buffer<float> scale(n());
-  xnnpack::Buffer<int8_t, XNN_ALLOCATION_ALIGNMENT> packed_w(
-      packed_n() * packed_k() + packed_n() * sizeof(float) * 2);
-  xnnpack::Buffer<float> c((m() - 1) * cm_stride() + n());
-  xnnpack::Buffer<float> c_ref(m() * n());
-
-  std::generate(a.begin(), a.end(), [&]() { return f32dist(rng); });
-  std::generate(b.begin(), b.end(), [&]() { return i8dist(rng); });
-  std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
-  std::generate(scale.begin(), scale.end(), [&]() { return f32dist(rng); });
-  std::fill(c_ref.begin(), c_ref.end(), 0.0f);
-  pack(/*g=*/1, n(), k(), nr(), kr(), sr(), b.data(), bias.data(),
-       /*scale=*/nullptr, packed_w.data(), nr() * sizeof(float),
-       /*params=*/nullptr);
-
-  // Fill in packed scale
-  xnn_init_qs8_qc8w_scale_fp32_params(
-      n(), nr(),
-      nr() * (ks() * packed_k() * sizeof(int8_t) +
-              (sizeof(float) + sizeof(float))),
-      scale.data(),
-      (void*)((uintptr_t)packed_w.data() +
-              nr() * (ks() * packed_k() * sizeof(int8_t) + sizeof(float))));
-
-  for (size_t m_index = 0; m_index < m(); m_index++) {
-    for (size_t n_index = 0; n_index < n(); n_index++) {
-      for (size_t k_index = 0; k_index < k(); k_index++) {
-        ASSERT_LE(n(), packed_n());
-        ASSERT_LT(m_index * n() + n_index, c_ref.size());
-        c_ref[m_index * n() + n_index] += a[m_index * a_stride() + k_index] *
-                                          (float)b[n_index * k() + k_index];
-      }
-      c_ref[m_index * n() + n_index] =
-          std::max(0.0f, c_ref[m_index * n() + n_index] + bias[n_index]);
-      c_ref[m_index * n() + n_index] *= scale[n_index];
-    }
-  }
-
-  gemm_relu(m(), n(),
-            k() * sizeof(float),  // Note KC measured in bytes of input
-            a.data(), a_stride() * sizeof(float), packed_w.data(), c.data(),
-            cm_stride() * sizeof(float), nr() * sizeof(float), nullptr);
-
-  // Validate micro-kernel outputs.
-  for (size_t i = 0; i < m(); i++) {
-    for (size_t j = 0; j < n(); j++) {
-      ASSERT_GE(c[i * cm_stride() + j], 0.0f)
-          << "at " << i << ", " << j << ": reference = " << c_ref[i * n() + j]
-          << ", optimized = " << c[i * cm_stride() + j]
-          << ", Mr x Nr x Kr = " << mr() << " x " << nr() << " x " << kr()
-          << ", M x N x K = " << m() << " x " << n() << " x " << k();
-      ASSERT_NEAR(c[i * cm_stride() + j], c_ref[i * n() + j],
-                  std::max(1.0e-5f, std::abs(c_ref[i * n() + j]) * 1.0e-6f))
-          << "at " << i << ", " << j << ": reference = " << c_ref[i * n() + j]
-          << ", optimized = " << c[i * cm_stride() + j]
-          << ", Mr x Nr x Kr = " << mr() << " x " << nr() << " x " << kr()
-          << ", M x N x K = " << m() << " x " << n() << " x " << k();
-    }
-  }
-}
 
 void GemmMicrokernelTester::Test(
     xnn_f32_qc8w_gemm_minmax_ukernel_fn gemm_minmax,
@@ -5007,100 +4873,7 @@ void GemmMicrokernelTester::Test(xnn_f32_igemm_ukernel_fn igemm,
   }
 }
 
-void GemmMicrokernelTester::Test(xnn_f32_igemm_relu_ukernel_fn igemm_relu,
-                                 xnn_pack_f32_igemm_fn pack) const {
-  ASSERT_LE(m(), mr());
 
-  xnnpack::ReplicableRandomDevice rng;
-  std::uniform_real_distribution<float> f32dist(-1.0f, 1.0f);
-
-  xnnpack::Buffer<float> a((mr() - 1) * a_stride() + k(),
-                           xnnpack::XnnExtraBytes);
-  xnnpack::Buffer<float> b(n() * ks() * k());
-  xnnpack::Buffer<float, XNN_ALLOCATION_ALIGNMENT> packed_w(
-      ks() * packed_k() * packed_n() + packed_n());
-  xnnpack::Buffer<float> bias(n());
-  xnnpack::Buffer<float> c((m() - 1) * cm_stride() + n());
-  xnnpack::Buffer<float> c_ref(m() * n());
-  xnnpack::Buffer<float> junk(k(), xnnpack::XnnExtraBytes);
-  xnnpack::Buffer<const float*> im2col(mr() * ks());
-
-  std::generate(a.begin(), a.end(), [&]() { return f32dist(rng); });
-  std::generate(b.begin(), b.end(), [&]() { return f32dist(rng); });
-  std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
-  std::fill(c_ref.begin(), c_ref.end(), 0.0f);
-
-  pack(/*g=*/1, n(), ks(), k(), nr(), kr(), sr(), b.data(), bias.data(),
-       /*scale=*/nullptr, packed_w.data(), /*extra_bytes=*/0,
-       /*params=*/nullptr);
-
-  for (size_t ks_index = 0; ks_index < ks(); ks_index++) {
-    for (size_t m_index = 0; m_index < mr(); m_index++) {
-      im2col[ks_index * mr() + m_index] =
-          a.data() + a_stride() * m_index - a_offset();
-    }
-  }
-  std::shuffle(im2col.begin(), im2col.end(), rng);
-  if (zero_index() != SIZE_MAX) {
-    for (size_t ks_index = 0; ks_index < ks(); ks_index++) {
-      im2col[ks_index * mr() + zero_index()] = a.data();
-    }
-  }
-  for (size_t ks_index = 0; ks_index < ks(); ks_index++) {
-    for (size_t m_index = m(); m_index < mr(); m_index++) {
-      im2col[ks_index * mr() + m_index] = junk.data();
-    }
-  }
-
-  std::fill(c_ref.begin(), c_ref.end(), 0.0f);
-  for (size_t m_index = 0; m_index < m(); m_index++) {
-    for (size_t n_index = 0; n_index < n(); n_index++) {
-      for (size_t ks_index = 0; ks_index < ks(); ks_index++) {
-        for (size_t k_index = 0; k_index < k(); k_index++) {
-          ASSERT_LT(ks_index * mr() + m_index, im2col.size());
-          ASSERT_LT(k_index, k());
-          ASSERT_LT(k_index, a_stride());
-          if (im2col[ks_index * mr() + m_index] == a.data()) {
-            c_ref[m_index * n() + n_index] +=
-                (im2col[ks_index * mr() + m_index][k_index]) *
-                (b[(n_index * ks() + ks_index) * k() + k_index]);
-          } else {
-            c_ref[m_index * n() + n_index] +=
-                (im2col[ks_index * mr() + m_index][k_index + a_offset()]) *
-                (b[(n_index * ks() + ks_index) * k() + k_index]);
-          }
-        }
-      }
-      c_ref[m_index * n() + n_index] =
-          std::max(0.0f, bias[n_index] + c_ref[m_index * n() + n_index]);
-    }
-  }
-
-  const float* zero_pointer = (zero_index() != SIZE_MAX) ? a.data() : nullptr;
-
-  igemm_relu(m(), n(), k() * sizeof(float), ks() * mr() * sizeof(void*),
-             im2col.data(), packed_w.data(), c.data(),
-             cm_stride() * sizeof(float), nr() * sizeof(float),
-             a_offset() * sizeof(float), zero_pointer, nullptr);
-
-  for (size_t i = 0; i < m(); i++) {
-    for (size_t j = 0; j < n(); j++) {
-      ASSERT_GE(c[i * cm_stride() + j], 0.0f)
-          << "at " << i << ", " << i << ": reference = " << c_ref[i * n() + j]
-          << ", optimized = " << c[i * cm_stride() + j]
-          << ", Mr x Nr x Kr = " << mr() << " x " << nr() << " x " << kr()
-          << ", M x N x KC x KS = " << m() << " x " << n() << " x " << k()
-          << " x " << ks();
-      ASSERT_NEAR(c[i * cm_stride() + j], c_ref[i * n() + j],
-                  std::max(1.0e-5f, std::abs(c_ref[i * n() + j]) * 1.0e-6f))
-          << "at " << i << ", " << i << ": reference = " << c_ref[i * n() + j]
-          << ", optimized = " << c[i * cm_stride() + j]
-          << ", Mr x Nr x Kr = " << mr() << " x " << nr() << " x " << kr()
-          << ", M x N x KC x KS = " << m() << " x " << n() << " x " << k()
-          << " x " << ks();
-    }
-  }
-}
 
 void GemmMicrokernelTester::Test(xnn_f32_igemm_minmax_ukernel_fn igemm_minmax,
                                  xnn_init_f32_minmax_params_fn init_params,

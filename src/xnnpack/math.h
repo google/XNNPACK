@@ -42,6 +42,8 @@
 #define M_PI 3.141592653589793238462643383280 /* pi */
 #endif
 
+#define F32_EXP_MASK 0x7F800000u
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -469,7 +471,11 @@ XNN_INLINE static uint16_t math_cvt_bf16_fp32(float x) {
   } bits;
   bits.as_float = x;
 
-  // TODO Handle fraction rounding
+  // Apply rounding correction if not inf/nan.
+  if ((bits.as_uint32 & F32_EXP_MASK) != F32_EXP_MASK) {
+    bits.as_uint32 += 0x7FFFu + ((bits.as_uint32 >> 16) & 1u);
+  }
+
   return bits.as_uint32 >> 16;
 }
 

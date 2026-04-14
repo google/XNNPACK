@@ -28,7 +28,7 @@ namespace ynn {
 
 namespace {
 
-auto make_transpose_impl(int rank, size_t elem_count,
+auto make_transpose_impl(int rank, int elem_count,
                          std::vector<int32_t> permutation) {
   return [rank, elem_count, permutation](
              const slinky::buffer<const void>& input,
@@ -44,7 +44,7 @@ auto make_transpose_impl(int rank, size_t elem_count,
     int fuse_transpose[YNN_MAX_TENSOR_RANK];
     int fuse_batch[YNN_MAX_TENSOR_RANK];
     for (int d = 0; d < rank; ++d) {
-      sliced_input.dim(d) = input.dim(permutation[d]);
+      sliced_input.mutable_dim(d) = input.dim(permutation[d]);
       fuse_batch[d] = input_dim0 == -1 ? d : YNN_MAX_TENSOR_RANK;
       if (permutation[d] == 0) {
         input_dim0 = d;
@@ -76,11 +76,9 @@ auto make_transpose_impl(int rank, size_t elem_count,
     const slinky::index_t m = sliced_output.dim(input_dim0).extent();
     const slinky::index_t n = sliced_output.dim(0).extent() * elem_count;
     const slinky::index_t n_bytes_a = m * output.elem_size;
-    assert(sliced_input.dim(input_dim0).extent() == 1 ||
-           sliced_input.dim(input_dim0).stride() == output.elem_size);
+    assert(is_contiguous(sliced_input.dim(input_dim0), output.elem_size));
     const slinky::index_t input_stride = sliced_input.dim(0).stride();
-    assert(sliced_output.dim(0).extent() == 1 ||
-           sliced_output.dim(0).stride() == output.elem_size);
+    assert(is_contiguous(sliced_output.dim(0), output.elem_size));
     const slinky::index_t output_stride =
         sliced_output.dim(input_dim0).stride();
 
@@ -89,9 +87,11 @@ auto make_transpose_impl(int rank, size_t elem_count,
     // correct pointers. `for_each_element` handles this for us for the
     // other dimensions. The order here is important because slicing dim0
     // would change the meaning of the input_dim0 index.
-    sliced_input.slice(input_dim0,
-                       sliced_output.dim(input_dim0).min() / elem_count);
-    sliced_input.slice(0, sliced_output.dim(0).min() * elem_count);
+    sliced_input.slice(
+        input_dim0,
+        slinky::in_bounds{sliced_output.dim(input_dim0).min() / elem_count});
+    sliced_input.slice(
+        0, slinky::in_bounds{sliced_output.dim(0).min() * elem_count});
     sliced_output.slice({0, static_cast<size_t>(input_dim0)});
 
     slinky::for_each_element(

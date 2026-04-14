@@ -35,7 +35,11 @@
 #endif
 
 enum xnn_status xnn_insert_clamp_node(xnn_subgraph_t subgraph, float output_min,
-                                      float output_max, struct xnn_node* node) {
+                                      float output_max, uint32_t node_id) {
+  XNN_RETURN_IF_ERROR(xnn_subgraph_reserve_nodes(subgraph, 1));
+  XNN_RETURN_IF_ERROR(xnn_subgraph_reserve_values(subgraph, 1));
+
+  struct xnn_node* node = &subgraph->nodes[node_id];
   uint32_t output_id = node->outputs[0];
   struct xnn_value* output_value = &subgraph->values[output_id];
   uint32_t new_id = XNN_INVALID_VALUE_ID;
@@ -79,6 +83,9 @@ enum xnn_status xnn_insert_clamp_node(xnn_subgraph_t subgraph, float output_min,
 
 enum xnn_status xnn_insert_pack_lh_node(xnn_subgraph_t subgraph,
                                         uint32_t input_id, uint32_t* new_id) {
+  XNN_RETURN_IF_ERROR(xnn_subgraph_reserve_nodes(subgraph, 1));
+  XNN_RETURN_IF_ERROR(xnn_subgraph_reserve_values(subgraph, 1));
+
   const struct xnn_value* input = &subgraph->values[input_id];
   enum xnn_status status = xnn_status_uninitialized;
   switch (input->datatype) {
@@ -151,15 +158,8 @@ error:
   return status;
 }
 
-struct xnn_value* xnn_subgraph_new_internal_value(xnn_subgraph_t subgraph) {
-  if (xnn_subgraph_add_internal_values(subgraph, 1) != xnn_status_success) {
-    return NULL;
-  }
-  return subgraph->values + subgraph->num_values - 1;
-}
-
-enum xnn_status xnn_subgraph_add_internal_values(xnn_subgraph_t subgraph,
-                                                 size_t num_values) {
+enum xnn_status xnn_subgraph_reserve_values(xnn_subgraph_t subgraph,
+                                            size_t num_values) {
   struct xnn_value* values = subgraph->values;
   const size_t size = subgraph->num_values;
   const size_t capacity = subgraph->num_reserved_values;
@@ -178,12 +178,26 @@ enum xnn_status xnn_subgraph_add_internal_values(xnn_subgraph_t subgraph,
     subgraph->num_reserved_values = new_capacity;
     subgraph->values = values;
   }
-  subgraph->num_values = size + num_values;
-  struct xnn_value* new_values = values + size;
+
+  return xnn_status_success;
+}
+
+struct xnn_value* xnn_subgraph_new_internal_value(xnn_subgraph_t subgraph) {
+  if (xnn_subgraph_add_internal_values(subgraph, 1) != xnn_status_success) {
+    return NULL;
+  }
+  return subgraph->values + subgraph->num_values - 1;
+}
+
+enum xnn_status xnn_subgraph_add_internal_values(xnn_subgraph_t subgraph,
+                                                 size_t num_values) {
+  XNN_RETURN_IF_ERROR(xnn_subgraph_reserve_values(subgraph, num_values));
+  struct xnn_value* new_values = subgraph->values + subgraph->num_values;
   for (size_t i = 0; i < num_values; i++) {
     xnn_value_clear(&new_values[i]);
-    new_values[i].id = size + i;
+    new_values[i].id = subgraph->num_values + i;
   }
+  subgraph->num_values += num_values;
 
   return xnn_status_success;
 }
@@ -248,8 +262,8 @@ struct xnn_node* xnn_subgraph_new_node(xnn_subgraph_t subgraph) {
   return subgraph->nodes + subgraph->num_nodes - 1;
 }
 
-enum xnn_status xnn_subgraph_add_nodes(xnn_subgraph_t subgraph,
-                                       size_t num_nodes) {
+enum xnn_status xnn_subgraph_reserve_nodes(xnn_subgraph_t subgraph,
+                                           size_t num_nodes) {
   struct xnn_node* nodes = subgraph->nodes;
   const size_t size = subgraph->num_nodes;
   const size_t capacity = subgraph->num_reserved_nodes;
@@ -269,12 +283,19 @@ enum xnn_status xnn_subgraph_add_nodes(xnn_subgraph_t subgraph,
     subgraph->num_reserved_nodes = new_capacity;
     subgraph->nodes = nodes;
   }
-  subgraph->num_nodes = size + num_nodes;
-  struct xnn_node* new_nodes = nodes + size;
+  return xnn_status_success;
+}
+
+enum xnn_status xnn_subgraph_add_nodes(xnn_subgraph_t subgraph,
+                                       size_t num_nodes) {
+  XNN_RETURN_IF_ERROR(xnn_subgraph_reserve_nodes(subgraph, num_nodes));
+
+  struct xnn_node* new_nodes = subgraph->nodes + subgraph->num_nodes;
   for (size_t i = 0; i < num_nodes; i++) {
     xnn_node_clear(&new_nodes[i]);
-    new_nodes[i].id = size + i;
+    new_nodes[i].id = subgraph->num_nodes + i;
   }
+  subgraph->num_nodes += num_nodes;
 
   return xnn_status_success;
 }
@@ -1802,6 +1823,9 @@ static uint32_t copy_value_to_static_subgraph(xnn_subgraph_t src_subgraph,
     dst_value->id = dst_id;
     dst_value->producer = XNN_INVALID_NODE_ID;
     dst_value->first_consumer = XNN_INVALID_NODE_ID;
+    // Clear the cleanup flag to avoid double-free: the source subgraph retains
+    // ownership of the data pointer.
+    dst_value->flags &= ~XNN_VALUE_FLAG_NEEDS_CLEANUP;
   }
   return dst_id;
 }
@@ -1821,7 +1845,7 @@ static struct xnn_node* copy_node_to_static_subgraph(
         src_subgraph, value, value_map, dst_subgraph);
     dst_node->inputs[i] = dst_id;
   }
-  for (size_t i = 0; i < src_node->num_inputs; i++) {
+  for (size_t i = 0; i < src_node->num_outputs; i++) {
     const struct xnn_value* value = &src_subgraph->values[src_node->outputs[i]];
     const uint32_t dst_id = copy_value_to_static_subgraph(
         src_subgraph, value, value_map, dst_subgraph);
@@ -1881,6 +1905,9 @@ static bool replace_node_with_lut(xnn_subgraph_t subgraph,
                                   struct xnn_node* node, uint32_t input_id,
                                   uint32_t unary_input_id,
                                   xnn_subgraph_t unary_subgraph) {
+  XNN_RETURN_IF_ERROR(xnn_subgraph_reserve_nodes(subgraph, 1));
+  XNN_RETURN_IF_ERROR(xnn_subgraph_reserve_values(subgraph, 1));
+
   const uint32_t unary_output_id =
       unary_subgraph->nodes[unary_subgraph->num_nodes - 1].outputs[0];
   assert(unary_input_id != XNN_INVALID_VALUE_ID);
@@ -2390,6 +2417,8 @@ static struct xnn_node* move_last_node_to(xnn_subgraph_t subgraph,
 // Replace `mul(x, x)` with `sqr(x)` for consistency.
 static enum xnn_status optimize_common_subgraphs_mul_to_sqr(
     xnn_subgraph_t subgraph, uint32_t node_id, size_t* changes) {
+  XNN_RETURN_IF_ERROR(xnn_subgraph_reserve_nodes(subgraph, 1));
+
   struct xnn_node* node = &subgraph->nodes[node_id];
 
   if (node->type != xnn_node_type_binary_elementwise ||
@@ -2463,6 +2492,9 @@ static void convert_static_value_to_fp32(struct xnn_value* value) {
 static enum xnn_status widen_fp16_accumulators(xnn_subgraph_t subgraph,
                                                uint32_t node_id,
                                                size_t* changes) {
+  XNN_RETURN_IF_ERROR(xnn_subgraph_reserve_nodes(subgraph, 1));
+  XNN_RETURN_IF_ERROR(xnn_subgraph_reserve_values(subgraph, 1));
+
   struct xnn_node* node = &subgraph->nodes[node_id];
 
   if (node->type != xnn_node_type_binary_elementwise ||
@@ -2540,6 +2572,8 @@ static enum xnn_status widen_fp16_accumulators(xnn_subgraph_t subgraph,
 // `reduce_sum_squared(a)` or `reduce_mean_squared(a)`, respectively.
 static enum xnn_status optimize_common_subgraphs_reduce_sum_to_square(
     xnn_subgraph_t subgraph, uint32_t node_id, size_t* changes) {
+  XNN_RETURN_IF_ERROR(xnn_subgraph_reserve_nodes(subgraph, 1));
+
   struct xnn_node* node = &subgraph->nodes[node_id];
   if (node->type != xnn_node_type_static_sum &&
       node->type != xnn_node_type_static_mean) {
@@ -2593,6 +2627,9 @@ static enum xnn_status optimize_common_subgraphs_reduce_sum_to_square(
 // batch_matrix_multiply nodes, so check if it can be elided.
 static enum xnn_status optimize_common_subgraphs_broadcast(
     xnn_subgraph_t subgraph, uint32_t node_id, size_t* changes) {
+  XNN_RETURN_IF_ERROR(xnn_subgraph_reserve_nodes(subgraph, 1));
+  XNN_RETURN_IF_ERROR(xnn_subgraph_reserve_values(subgraph, 1));
+
   struct xnn_node* node = &subgraph->nodes[node_id];
   if (node->type != xnn_node_type_static_broadcast) {
     return xnn_status_success;
@@ -2860,6 +2897,8 @@ static enum xnn_status optimize_common_subgraphs_static_reshapes(
 // node.
 static enum xnn_status optimize_common_subgraphs_min_max_to_clamp(
     xnn_subgraph_t subgraph, uint32_t node_id, size_t* changes) {
+  XNN_RETURN_IF_ERROR(xnn_subgraph_reserve_nodes(subgraph, 1));
+
   struct xnn_node* node = &subgraph->nodes[node_id];
   if (node->type != xnn_node_type_binary_elementwise ||
       (node->binary_operator != xnn_binary_maximum &&
@@ -2985,6 +3024,8 @@ static enum xnn_status optimize_common_subgraphs_merge_clamps(
 // Remove spurious unary clamp operations.
 static enum xnn_status optimize_common_subgraphs_spurious_clamps(
     xnn_subgraph_t subgraph, uint32_t node_id, size_t* changes) {
+  XNN_RETURN_IF_ERROR(xnn_subgraph_reserve_nodes(subgraph, 1));
+
   struct xnn_node* node = &subgraph->nodes[node_id];
   if (node->type != xnn_node_type_unary_elementwise ||
       node->unary_operator != xnn_unary_clamp) {
@@ -3312,6 +3353,8 @@ static void propagate_constants(xnn_subgraph_t subgraph, uint32_t node_id) {
 // `{mul,div}(neg(a), neg(b))` with `{mul,div}(a, b)`.
 static enum xnn_status optimize_common_subgraphs_simplify_binary_neg(
     xnn_subgraph_t subgraph, uint32_t node_id, size_t* changes) {
+  XNN_RETURN_IF_ERROR(xnn_subgraph_reserve_nodes(subgraph, 1));
+
   struct xnn_node* node = &subgraph->nodes[node_id];
   if (node->type != xnn_node_type_binary_elementwise ||
       node->flags & XNN_NODE_FLAG_DONT_ELIDE) {
@@ -3415,6 +3458,8 @@ static enum xnn_status optimize_common_subgraphs_simplify_binary_neg(
 // just `x`, where possible.
 static enum xnn_status optimize_common_subgraphs_binary_const_noop(
     xnn_subgraph_t subgraph, uint32_t node_id, size_t* changes) {
+  XNN_RETURN_IF_ERROR(xnn_subgraph_reserve_nodes(subgraph, 1));
+
   struct xnn_node* node = &subgraph->nodes[node_id];
   if (node->type != xnn_node_type_binary_elementwise ||
       (node->binary_operator != xnn_binary_multiply &&
@@ -3522,6 +3567,8 @@ static enum xnn_status optimize_common_subgraphs_binary_const_noop(
 // fully-connected op.
 static enum xnn_status optimize_common_subgraphs_gemm_rhs_transpose(
     xnn_subgraph_t subgraph, uint32_t node_id, size_t* changes) {
+  XNN_RETURN_IF_ERROR(xnn_subgraph_reserve_nodes(subgraph, 2));
+
   struct xnn_node* node = &subgraph->nodes[node_id];
   if (node->type != xnn_node_type_fully_connected &&
       node->type != xnn_node_type_batch_matrix_multiply) {
@@ -3735,7 +3782,7 @@ static enum xnn_status optimize_common_subgraphs_iter(
         // is static.
         if (xnn_shape_multiply_all_dims(
                 &node->params.static_reshape.new_shape) != 0) {
-          xnn_log_info(
+          xnn_log_debug(
               "Marking output of static_reshape[#%u](v%03u) as static shaped.",
               node->id, node->inputs[0]);
           subgraph->values[node->outputs[0]].shape =
@@ -3804,7 +3851,7 @@ enum xnn_status xnn_subgraph_optimize_common_subgraphs(
       if (xnn_shape_multiply_all_dims(&value->shape) == 1) {
         // Get the value as a float.
         const float value_as_float = get_scalar_value_as_float(value);
-        xnn_log_info("v%03u is a constant: %e.", value->id, value_as_float);
+        xnn_log_debug("v%03u is a constant: %e.", value->id, value_as_float);
 
         // Mark the value accordingly.
         value->flags |= (value_as_float == 0.0f)   ? XNN_VALUE_FLAG_IS_ZERO

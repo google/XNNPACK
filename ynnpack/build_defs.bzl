@@ -295,6 +295,19 @@ def ynn_binary_linkopts():
             "-shared",
             "-Wno-unused-command-line-argument",
         ],
+        "//ynnpack:wasm": [
+            "-s STACK_SIZE=1MB",
+            "-s DEFAULT_PTHREAD_STACK_SIZE=1MB",
+            # This option allows to remain on the main thread and busy-wait (spin) to avoid the crash.
+            # This option works gracefully with or without --features=use_pthreads, though it may freeze the browser UI while busy-waiting.
+            # Another option would be to use https://emscripten.org/docs/tools_reference/settings_reference.html#proxy-to-pthread,
+            # but it requires --features=use_pthreads to be set.
+            "-s ALLOW_BLOCKING_ON_MAIN_THREAD=1",
+            # Pre-allocates Web Workers at module initialization so that synchronous
+            # calls to pthread_create don't crash or deadlock while waiting for
+            # asynchronous Web Worker instantiation.
+            "-s PTHREAD_POOL_SIZE=8",
+        ],
         "//conditions:default": [],
     })
 
@@ -364,7 +377,7 @@ def ynn_cc_library(
                 "-use_header_modules",
             ] + kwargs.get("features", []),
             # Don't build this target unless explicitly requested.
-            tags = ["manual"],
+            tags = ["manual", "notap"],
             **kwargs
         )
 
@@ -393,6 +406,25 @@ def ynn_generate_src_hdr(
         name = name,
         outs = [output_src, output_hdr],
         cmd = "$(location " + generator + ") " + "$(location " + output_src + ") " + "$(location " + output_hdr + ") " + " ".join(generator_args),
+        tools = [generator],
+        **kwargs
+    )
+
+    generated_file(
+        scopes = ["presubmit", "codesearch"],
+        wrapped_target = name,
+    )
+
+def ynn_generate_srcs(
+        name,
+        generator,
+        output_srcs,
+        **kwargs):
+    """Generates source files from a generator script."""
+    native.genrule(
+        name = name,
+        outs = output_srcs,
+        cmd = "$(location " + generator + ") " + " ".join(["$(location " + i + ")" for i in output_srcs]),
         tools = [generator],
         **kwargs
     )

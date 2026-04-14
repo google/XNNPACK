@@ -231,7 +231,7 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${LMUL
 
       $for M in range(MR):
         vout${M} = __riscv_vadd(vout${M}, (int16_t) output_zero_point, vl);
-  
+
       $if DATATYPE == "QU8":
         $for M in range(MR):
           vuint8${LMUL8}_t vout8${M} = __riscv_vncvt_x(__riscv_vreinterpret_u16${LMUL16}(vout${M}), vl);

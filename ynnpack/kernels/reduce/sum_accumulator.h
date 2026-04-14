@@ -169,13 +169,20 @@ struct sum_accumulator_x32 {
 // We attempt to make all reductions numerically consistent across all x86
 // instruction sets (SSE, AVX, AVX512). We do this by always reassociating
 // reductions with the same tile size, and using multiple vectors when required.
-constexpr size_t consistent_tile_k = 16;
+constexpr size_t consistent_tile_k_fp32 = 16;
+constexpr size_t consistent_tile_k_fp64 = 8;
 
 template <size_t horizontal_factor = 1, typename MapFn = Identity,
           size_t N_ = 4>
 using sum_accumulator_fp32 =
-    sum_accumulator_x32<simd::vec<float, consistent_tile_k>,
-                        consistent_tile_k * horizontal_factor, MapFn, N_>;
+    sum_accumulator_x32<simd::vec<float, consistent_tile_k_fp32>,
+                        consistent_tile_k_fp32 * horizontal_factor, MapFn, N_>;
+
+template <size_t horizontal_factor = 1, typename MapFn = Identity,
+          size_t N_ = 4>
+using sum_accumulator_fp64 =
+    sum_accumulator_x32<simd::vec<double, consistent_tile_k_fp64>,
+                        consistent_tile_k_fp64 * horizontal_factor, MapFn, N_>;
 
 template <typename AccT, typename MapFn = Identity>
 struct sum_accumulator_k1_1 {

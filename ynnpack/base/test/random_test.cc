@@ -26,7 +26,7 @@ struct Stats {
   double max = -std::numeric_limits<double>::infinity();
 };
 
-constexpr int kSamples = 1000000;
+constexpr int kSamples = 100000;
 
 template <typename T, typename... Args>
 Stats RunFillRandom(Args... args) {

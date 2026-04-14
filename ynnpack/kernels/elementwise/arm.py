@@ -1,30 +1,8 @@
 """ARM NEON target for elementwise kernels compiler."""
 
 # pylint: disable=undefined-variable
-from ynnpack.kernels.elementwise.common_rules import *  # pylint: disable=wildcard-import
 from ynnpack.kernels.elementwise.compiler import *  # pylint: disable=wildcard-import
-
-
-def make_neon_cast_patterns():
-  """Adds NEON cast patterns."""
-  return add_saturating_cast_rules()
-
-
-def make_neon_integer_patterns():
-  return [
-      Rule(
-          logical_shift_left(i16_a.with_lanes(0), broadcast(i16_b, 0)),
-          logical_shift_left(i16_a.with_lanes(0), i16_b),
-      ),
-      Rule(
-          logical_shift_left(i32_a.with_lanes(0), broadcast(i32_b, 0)),
-          logical_shift_left(i32_a.with_lanes(0), i32_b),
-      ),
-  ]
-
-
-def make_neon_float32_patterns():
-  return []
+from ynnpack.kernels.elementwise.rules import *  # pylint: disable=wildcard-import
 
 
 class ARM(Target):
@@ -32,9 +10,6 @@ class ARM(Target):
 
   def update_for_neon(self):
     """Updates the target for NEON support."""
-    self.patterns += make_neon_float32_patterns()
-    self.patterns += make_neon_integer_patterns()
-    self.patterns += make_neon_cast_patterns()
     self.header += """
 namespace ynn {
 namespace {
@@ -50,25 +25,32 @@ YNN_INTRINSIC simd::vec<float, 4> select_greater_than(simd::vec<float, 4> a, sim
   def update_for_fp16(self):
     """Updates the target for FP16 support."""
 
+  def update_for_bf16(self):
+    """Updates the target for BF16 support."""
+
   def update_for_fma(self):
     self.patterns += add_fma_rules()
 
   def __init__(self, features):
     Target.__init__(self)
     self.patterns += add_select_rules()
+    self.patterns += add_saturating_cast_rules()
+    self.patterns += add_shift_rules()
+
     self.features = features
     self.vector_bits = 128
     self.tail_strategy = TailStrategy.VECTOR
 
     # These are transitive.
     implied_features = {
+        "NEONBF16": ["NEON"],
         "NEONFP16": ["NEON"],
         "FMA": ["NEON"],
     }
     all_features = []
     self.compute_all_features(features, implied_features, all_features)
 
-    known_features = ["NEON", "NEONFP16", "FMA"]
+    known_features = ["NEON", "NEONBF16", "NEONFP16", "FMA"]
     for feature in all_features:
       if feature not in known_features:
         raise ValueError(f"Unknown feature: {feature}")
@@ -85,6 +67,8 @@ YNN_INTRINSIC simd::vec<float, 4> select_greater_than(simd::vec<float, 4> a, sim
           '#include "ynnpack/base/simd/arm_neonfp16.h"\n'
       )
       self.update_for_fp16()
+    if "NEONBF16" in all_features:
+      self.update_for_bf16()
     if "FMA" in all_features:
       self.header += (
           '#include "ynnpack/base/simd/arm_neonfma.h"\n'

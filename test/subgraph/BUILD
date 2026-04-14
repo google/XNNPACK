@@ -203,7 +203,6 @@ xnnpack_unit_test(
 xnnpack_unit_test(
     name = "depthwise_convolution_2d_test",
     srcs = ["depthwise-convolution-2d.cc"],
-    tags = ["no_ynnpack"],
     deps = SUBGRAPH_TEST_DEPS + [":stencil"],
 )
 
@@ -229,7 +228,6 @@ xnnpack_unit_test(
     name = "rope_test",
     timeout = "moderate",
     srcs = ["rope.cc"],
-    tags = ["no_ynnpack"],
     deps = SUBGRAPH_TEST_DEPS,
 )
 
@@ -343,7 +341,6 @@ xnnpack_unit_test(
         "//:node_type",
         "//:operator_h",
         "//:params",
-        "//:subgraph",
         "//:subgraph_h",
         "//:xnnpack_h",
         "//test:replicable_random_device",

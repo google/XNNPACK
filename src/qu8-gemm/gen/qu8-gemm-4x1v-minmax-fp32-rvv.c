@@ -123,25 +123,25 @@ void xnn_qu8_gemm_minmax_fp32_ukernel_4x1v__rvv(
     vout1 = __riscv_vadd(vout1, (int16_t) output_zero_point, vl);
     vout2 = __riscv_vadd(vout2, (int16_t) output_zero_point, vl);
     vout3 = __riscv_vadd(vout3, (int16_t) output_zero_point, vl);
-  
-      vuint8m1_t vout80 = __riscv_vncvt_x(__riscv_vreinterpret_u16m2(vout0), vl);
-      vuint8m1_t vout81 = __riscv_vncvt_x(__riscv_vreinterpret_u16m2(vout1), vl);
-      vuint8m1_t vout82 = __riscv_vncvt_x(__riscv_vreinterpret_u16m2(vout2), vl);
-      vuint8m1_t vout83 = __riscv_vncvt_x(__riscv_vreinterpret_u16m2(vout3), vl);
 
-      __riscv_vse8(c0, vout80, vl);
-      c0 = (uint8_t*) ((uintptr_t) c0 + cn_stride);
-      __riscv_vse8(c1, vout81, vl);
-      c1 = (uint8_t*) ((uintptr_t) c1 + cn_stride);
-      __riscv_vse8(c2, vout82, vl);
-      c2 = (uint8_t*) ((uintptr_t) c2 + cn_stride);
-      __riscv_vse8(c3, vout83, vl);
-      c3 = (uint8_t*) ((uintptr_t) c3 + cn_stride);
+    vuint8m1_t vout80 = __riscv_vncvt_x(__riscv_vreinterpret_u16m2(vout0), vl);
+    vuint8m1_t vout81 = __riscv_vncvt_x(__riscv_vreinterpret_u16m2(vout1), vl);
+    vuint8m1_t vout82 = __riscv_vncvt_x(__riscv_vreinterpret_u16m2(vout2), vl);
+    vuint8m1_t vout83 = __riscv_vncvt_x(__riscv_vreinterpret_u16m2(vout3), vl);
 
-      a0 = (const uint8_t*) ((uintptr_t) a0 - kc);
-      a1 = (const uint8_t*) ((uintptr_t) a1 - kc);
-      a2 = (const uint8_t*) ((uintptr_t) a2 - kc);
-      a3 = (const uint8_t*) ((uintptr_t) a3 - kc);
+    __riscv_vse8(c0, vout80, vl);
+    c0 = (uint8_t*) ((uintptr_t) c0 + cn_stride);
+    __riscv_vse8(c1, vout81, vl);
+    c1 = (uint8_t*) ((uintptr_t) c1 + cn_stride);
+    __riscv_vse8(c2, vout82, vl);
+    c2 = (uint8_t*) ((uintptr_t) c2 + cn_stride);
+    __riscv_vse8(c3, vout83, vl);
+    c3 = (uint8_t*) ((uintptr_t) c3 + cn_stride);
+
+    a0 = (const uint8_t*) ((uintptr_t) a0 - kc);
+    a1 = (const uint8_t*) ((uintptr_t) a1 - kc);
+    a2 = (const uint8_t*) ((uintptr_t) a2 - kc);
+    a3 = (const uint8_t*) ((uintptr_t) a3 - kc);
 
   } while (nc != 0);
 }

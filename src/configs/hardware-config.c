@@ -139,6 +139,52 @@ static bool cpuinfo_uarch_to_dot(enum cpuinfo_uarch uarch) {
 }
 #endif  // XNN_ENABLE_CPUINFO && XNN_ARCH_ARM
 
+#if XNN_ARCH_RISCV
+
+#include <unistd.h>
+#include <sys/syscall.h>
+
+extern long syscall(long number, ...);
+
+/* Constants for kernels where headers might be missing */
+#ifndef __NR_riscv_hwprobe
+    #define __NR_riscv_hwprobe 258
+#endif
+
+#ifndef RISCV_HWPROBE_KEY_IMA_EXT_0
+    #define RISCV_HWPROBE_KEY_IMA_EXT_0 4
+#endif
+
+#ifndef RISCV_HWPROBE_EXT_ZVFH
+    /* Bit 30 represents the Zvfh (Vector Float16) extension */
+    #define RISCV_HWPROBE_EXT_ZVFH (1ULL << 30)
+#endif
+
+struct riscv_hwprobe {
+    long long key;
+    unsigned long long value;
+};
+
+/**
+ * Returns true if the hardware supports RISC-V Vector FP16 (Zvfh).
+ * Fails gracefully on kernels older than 6.4 (including older Android).
+ */
+static bool supports_rvv_fp16() {
+    struct riscv_hwprobe pair;
+    pair.key = RISCV_HWPROBE_KEY_IMA_EXT_0;
+    pair.value = 0;
+
+    /* Perform the syscall. If the kernel doesn't support it, it returns -1. */
+    if (syscall(__NR_riscv_hwprobe, &pair, 1, 0, NULL, 0) == 0) {
+        /* Check if the Zvfh bit is set in the returned value */
+        return (pair.value & RISCV_HWPROBE_EXT_ZVFH) != 0;
+    }
+
+    /* Fallback: System call not supported or failed */
+    return false;
+}
+#endif  // XNN_ARCH_RISCV
+
 static struct xnn_hardware_config hardware_config = {0};
 
 XNN_INIT_ONCE_GUARD(hardware);
@@ -287,16 +333,13 @@ static void init_hardware_config(void) {
 #endif  // XNN_ARCH_HEXAGON
 
   #if XNN_ARCH_RISCV
+    // TODO: Use cpuinfo when fp16 detect works
     const long hwcap = getauxval(AT_HWCAP);
     xnn_log_debug("getauxval(AT_HWCAP) = %08lX", hwcap);
     const bool use_riscv_vector = (hwcap & COMPAT_HWCAP_ISA_V) != 0;
     set_arch_flag(xnn_arch_riscv_vector, use_riscv_vector);
 
-    /* cpuinfo does not yet support risc-v isa extensions, so enable fp16 if compiled */
-    //set_arch_flag(xnn_arch_riscv_vector_fp16_arith, cpuinfo_has_riscv_zvfh());
-    #if XNN_ENABLE_RISCV_FP16_VECTOR
-    set_arch_flag(xnn_arch_riscv_vector_fp16_arith, use_riscv_vector);
-    #endif
+    set_arch_flag(xnn_arch_riscv_vector_fp16_arith, XNN_ENABLE_RISCV_FP16_VECTOR && supports_rvv_fp16());
 
     if (use_riscv_vector) {
       register uint32_t vlenb __asm__ ("t0");

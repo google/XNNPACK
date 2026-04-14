@@ -93,7 +93,9 @@ static const struct xnn_unary_elementwise_config* get_config(
     const struct xnn_quantization_params* output_quantization, uint32_t flags) {
   if (input_datatype != output_datatype) {
     if (op_type == xnn_unary_convert) {
-      if (input_datatype == xnn_datatype_fp32 && output_datatype == xnn_datatype_fp16) {
+      if (input_datatype == xnn_datatype_fp32 && output_datatype == xnn_datatype_bf16) {
+        return xnn_init_f32_to_bf16_cvt_config();
+      } else if (input_datatype == xnn_datatype_fp32 && output_datatype == xnn_datatype_fp16) {
         return xnn_init_f32_to_f16_cvt_config();
       } else if (input_datatype == xnn_datatype_fp32 && output_datatype == xnn_datatype_qint8) {
         return xnn_init_f32_to_qs8_cvt_config();
@@ -101,6 +103,8 @@ static const struct xnn_unary_elementwise_config* get_config(
         return xnn_init_f32_to_qu8_cvt_config();
       } else if (input_datatype == xnn_datatype_fp32 && output_datatype == xnn_datatype_qpint8) {
         return xnn_init_f32_to_qp8_cvt_config();
+      } else if (input_datatype == xnn_datatype_bf16 && output_datatype == xnn_datatype_fp32) {
+        return xnn_init_bf16_to_f32_cvt_config();
       } else if (input_datatype == xnn_datatype_fp16 && output_datatype == xnn_datatype_fp32) {
         return xnn_init_f16_to_f32_cvt_config();
       } else if (input_datatype == xnn_datatype_fp16 && output_datatype == xnn_datatype_qint8) {

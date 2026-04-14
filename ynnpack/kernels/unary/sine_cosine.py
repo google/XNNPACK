@@ -10,10 +10,11 @@
 """Definition of sine/cosine kernels."""
 
 # pylint: disable=undefined-variable
+# pylint: disable=missing-function-docstring
 from ynnpack.kernels.elementwise.compiler import *  # pylint: disable=wildcard-import
 
 
-def sine_cosine_impl(a, x, is_cosine):
+def sine_cosine_impl(a, x, is_cosine, output_offset, output_multiplier):
   # Some mathematical constants. We don't use pre-defined macros to ensure
   # that they are rounded exactly as we expect them to be.
   vpi = 3.1415927  # M_PI
@@ -26,9 +27,9 @@ def sine_cosine_impl(a, x, is_cosine):
   v2pi_lo = 1.9353072e-3  # 2.0 * M_PI (remaining bits)
 
   # The monomial coefficients of the numerator polynomial (odd,
-  # `valpha_1` = `vone`).
-  valpha_3 = -1.3314664364e-01
-  valpha_5 = 3.2340581529e-03
+  valpha_1 = output_multiplier
+  valpha_3 = -1.3314664364e-01 * output_multiplier
+  valpha_5 = 3.2340581529e-03 * output_multiplier
 
   # The monomial coefficients of the denominator polynomial (even,
   # `vbeta_0` = `vone`).
@@ -58,7 +59,7 @@ def sine_cosine_impl(a, x, is_cosine):
   # Evaluate the numerator polynomial p.
   # p = x * (1 + x^2 * (alpha_3 + x^2 * alpha_5))
   vp = multiply_add(vx2, valpha_5, valpha_3)
-  vp = multiply_add(vx2, vp, 1.0)
+  vp = multiply_add(vx2, vp, valpha_1)
   vp = vx * vp
 
   # Evaluate the denominator polynomial q.
@@ -69,18 +70,38 @@ def sine_cosine_impl(a, x, is_cosine):
   # Divide the numerator by the denominator.
   vy = vp / vq
 
-  return store(vy, x)
+  return store(vy + output_offset, x)
 
 
 @const_buffer("a", Float(32))
 @buffer("x", Float(32))
+@params(
+    Scalar("output_offset", Float(32)),
+    Scalar("output_multiplier", Float(32)),
+)
 @operator_name("sine")
-def sine_fp32(a, x):
-  return sine_cosine_impl(a, x, is_cosine=False)
+def sine_fp32(a, x, output_offset, output_multiplier):
+  return sine_cosine_impl(
+      a,
+      x,
+      is_cosine=False,
+      output_offset=output_offset,
+      output_multiplier=output_multiplier,
+  )
 
 
 @const_buffer("a", Float(32))
 @buffer("x", Float(32))
+@params(
+    Scalar("output_offset", Float(32)),
+    Scalar("output_multiplier", Float(32)),
+)
 @operator_name("cosine")
-def cosine_fp32(a, x):
-  return sine_cosine_impl(a, x, is_cosine=True)
+def cosine_fp32(a, x, output_offset, output_multiplier):
+  return sine_cosine_impl(
+      a,
+      x,
+      is_cosine=True,
+      output_offset=output_offset,
+      output_multiplier=output_multiplier,
+  )

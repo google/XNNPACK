@@ -3,6 +3,9 @@
 #ifdef YNN_ARCH_ARM_NEON
 YNN_UNARY_REDUCE_KERNEL(arch_flag::neon, max_fp32_4x4_neon, float, float)
 YNN_UNARY_REDUCE_KERNEL(arch_flag::neon, max_bf16_4x8_neon, bfloat16, bfloat16)
+#ifdef YNN_ARCH_ARM64
+YNN_UNARY_REDUCE_KERNEL(arch_flag::neon, max_fp64_4x2_neon, double, double)
+#endif
 YNN_UNARY_REDUCE_KERNEL(arch_flag::neon, max_fp16_4x8_neon, half, half)
 YNN_UNARY_REDUCE_KERNEL(arch_flag::neon, max_int8_4x16_neon, int8_t, int8_t)
 YNN_UNARY_REDUCE_KERNEL(arch_flag::neon, max_uint8_4x16_neon, uint8_t, uint8_t)
@@ -16,12 +19,19 @@ YNN_UNARY_REDUCE_KERNEL(arch_flag::hvx, max_int8_4x128_hvx, int8_t, int8_t)
 YNN_UNARY_REDUCE_KERNEL(arch_flag::hvx, max_uint8_4x128_hvx, uint8_t, uint8_t)
 #endif  // YNN_ARCH_HEXAGON_HVX
 
+#ifdef YNN_ARCH_WASM_SIMD128
+YNN_UNARY_REDUCE_KERNEL(arch_flag::simd128, max_fp32_4x4_simd128, float, float)
+YNN_UNARY_REDUCE_KERNEL(arch_flag::simd128, max_int8_4x16_simd128, int8_t, int8_t)
+YNN_UNARY_REDUCE_KERNEL(arch_flag::simd128, max_uint8_4x16_simd128, uint8_t, uint8_t)
+#endif  // YNN_ARCH_WASM_SIMD128
+
 #ifdef YNN_ARCH_X86_AVX512
 YNN_UNARY_REDUCE_KERNEL(arch_flag::avx512, max_bf16_4x32_avx512, bfloat16, bfloat16)
 YNN_UNARY_REDUCE_KERNEL(arch_flag::avx512, max_fp16_4x32_avx512, half, half)
 YNN_UNARY_REDUCE_KERNEL(arch_flag::avx512, max_int8_4x64_avx512, int8_t, int8_t)
 YNN_UNARY_REDUCE_KERNEL(arch_flag::avx512, max_uint8_4x64_avx512, uint8_t, uint8_t)
 YNN_UNARY_REDUCE_KERNEL(arch_flag::avx512, max_fp32_4x16_avx512, float, float)
+YNN_UNARY_REDUCE_KERNEL(arch_flag::avx512, max_fp64_4x8_avx512, double, double)
 #endif  // YNN_ARCH_X86_AVX512
 #ifdef YNN_ARCH_X86_AVX2
 YNN_UNARY_REDUCE_KERNEL(arch_flag::avx2, max_bf16_4x16_avx2, bfloat16, bfloat16)
@@ -30,7 +40,8 @@ YNN_UNARY_REDUCE_KERNEL(arch_flag::avx2, max_int8_4x32_avx2, int8_t, int8_t)
 YNN_UNARY_REDUCE_KERNEL(arch_flag::avx2, max_uint8_4x32_avx2, uint8_t, uint8_t)
 #endif  // YNN_ARCH_X86_AVX2
 #ifdef YNN_ARCH_X86_AVX
-YNN_UNARY_REDUCE_KERNEL(arch_flag::avx2, max_fp32_4x8_avx, float, float)
+YNN_UNARY_REDUCE_KERNEL(arch_flag::avx, max_fp32_4x8_avx, float, float)
+YNN_UNARY_REDUCE_KERNEL(arch_flag::avx, max_fp64_4x4_avx, double, double)
 #endif  // YNN_ARCH_X86_AVX
 #ifdef YNN_ARCH_X86_SSE41
 YNN_UNARY_REDUCE_KERNEL(arch_flag::sse41, max_int8_4x16_sse41, int8_t, int8_t)
@@ -43,6 +54,7 @@ YNN_UNARY_REDUCE_KERNEL(arch_flag::sse2, max_uint8_4x16_sse2, uint8_t, uint8_t)
 #endif  // YNN_ARCH_X86_SSE2
 
 YNN_UNARY_REDUCE_KERNEL(arch_flag::none, max_fp32, float, float)
+YNN_UNARY_REDUCE_KERNEL(arch_flag::none, max_fp64, double, double)
 YNN_UNARY_REDUCE_KERNEL(arch_flag::none, max_fp16, half, half)
 YNN_UNARY_REDUCE_KERNEL(arch_flag::none, max_bf16, bfloat16, bfloat16)
 YNN_UNARY_REDUCE_KERNEL(arch_flag::none, max_int8, int8_t, int8_t)

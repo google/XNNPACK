@@ -26,8 +26,9 @@ void TestImpl(size_t rank) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
 
   for (auto _ : FuzzTest(std::chrono::milliseconds(250))) {
-    std::vector<size_t> pre_padding = random_shape(rng, rank, 0, 3);
-    std::vector<size_t> post_padding = random_shape(rng, rank, 0, 3);
+    size_t padding_rank = std::uniform_int_distribution<size_t>(1, rank)(rng);
+    std::vector<size_t> pre_padding = random_shape(rng, padding_rank, 0, 3);
+    std::vector<size_t> post_padding = random_shape(rng, padding_rank, 0, 3);
     float pad_value = 1.0f;
 
     xnn_quantization_params quantization =
@@ -40,6 +41,10 @@ void TestImpl(size_t rank) {
         .AddConstantPad(pre_padding, post_padding, pad_value, 0, 1)
         .CreateRuntime();
 
+    // The test code needs the padding to be the same rank as the input/output.
+    pre_padding.resize(rank);
+    post_padding.resize(rank);
+
     for (int reshape = 0; reshape < 2; ++reshape) {
       std::vector<size_t> shape = random_shape(rng, rank);
 
@@ -48,7 +53,7 @@ void TestImpl(size_t rank) {
       input.generate([&]() { return generator(rng); });
 
       std::vector<size_t> output_shape(shape);
-      for (size_t i = 0; i < rank; ++i) {
+      for (size_t i = 0; i < padding_rank; ++i) {
         output_shape[i] += pre_padding[i] + post_padding[i];
       }
 

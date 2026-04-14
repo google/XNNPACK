@@ -26,6 +26,17 @@ struct subgraph_analysis {
     return i != producers.end() ? i->second : nullptr;
   }
 
+  ynn_node* single_consumer_of(uint32_t id) {
+    auto i = consumers.find(id);
+    return i != consumers.end() && i->second.size() == 1 ? i->second[0]
+                                     : nullptr;
+  }
+  const ynn_node* single_consumer_of(uint32_t id) const {
+    auto i = consumers.find(id);
+    return i != consumers.end() && i->second.size() == 1 ? i->second[0]
+                                     : nullptr;
+  }
+
   explicit subgraph_analysis(ynn_subgraph& subgraph);
 };
 

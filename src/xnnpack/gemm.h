@@ -284,11 +284,6 @@ DECLARE_F16_GEMM_MINMAX_UKERNEL_FUNCTION(
                             size_t cm_stride, size_t cn_stride,              \
                             const struct xnn_f32_default_params* params);
 
-#define DECLARE_F32_GEMM_RELU_UKERNEL_FUNCTION(fn_name)                      \
-  XNN_INTERNAL void fn_name(size_t mr, size_t nc, size_t kc, const float* a, \
-                            size_t a_stride, const float* w, float* c,       \
-                            size_t cm_stride, size_t cn_stride,              \
-                            const struct xnn_f32_relu_params* params);
 
 size_t xnn_pf16_gemm_minmax_ukernel_1x32c2__neonsme2_get_mr();
 size_t xnn_pf16_gemm_minmax_ukernel_1x32c2__neonsme2_get_nr();
@@ -1030,28 +1025,6 @@ DECLARE_F32_GEMM_UKERNEL_FUNCTION(
 DECLARE_F32_GEMM_UKERNEL_FUNCTION(
     xnn_f32_gemm_ukernel_6x8__wasmrelaxedsimd_fma_loadsplat)
 
-DECLARE_F32_GEMM_RELU_UKERNEL_FUNCTION(
-    xnn_f32_gemm_relu_ukernel_1x8__wasmsimd_loadsplat)
-DECLARE_F32_GEMM_RELU_UKERNEL_FUNCTION(
-    xnn_f32_gemm_relu_ukernel_3x8__wasmsimd_loadsplat)
-DECLARE_F32_GEMM_RELU_UKERNEL_FUNCTION(
-    xnn_f32_gemm_relu_ukernel_4x8__wasmsimd_loadsplat)
-DECLARE_F32_GEMM_RELU_UKERNEL_FUNCTION(
-    xnn_f32_gemm_relu_ukernel_5x8__wasmsimd_loadsplat)
-DECLARE_F32_GEMM_RELU_UKERNEL_FUNCTION(
-    xnn_f32_gemm_relu_ukernel_6x8__wasmsimd_loadsplat)
-
-DECLARE_F32_GEMM_RELU_UKERNEL_FUNCTION(
-    xnn_f32_gemm_relu_ukernel_1x8__wasmrelaxedsimd_fma_loadsplat)
-DECLARE_F32_GEMM_RELU_UKERNEL_FUNCTION(
-    xnn_f32_gemm_relu_ukernel_3x8__wasmrelaxedsimd_fma_loadsplat)
-DECLARE_F32_GEMM_RELU_UKERNEL_FUNCTION(
-    xnn_f32_gemm_relu_ukernel_4x8__wasmrelaxedsimd_fma_loadsplat)
-DECLARE_F32_GEMM_RELU_UKERNEL_FUNCTION(
-    xnn_f32_gemm_relu_ukernel_5x8__wasmrelaxedsimd_fma_loadsplat)
-DECLARE_F32_GEMM_RELU_UKERNEL_FUNCTION(
-    xnn_f32_gemm_relu_ukernel_6x8__wasmrelaxedsimd_fma_loadsplat)
-
 DECLARE_F32_GEMM_MINMAX_UKERNEL_FUNCTION(
     xnn_f32_gemm_minmax_ukernel_1x8__wasmsimd_arm_loadsplat)
 DECLARE_F32_GEMM_MINMAX_UKERNEL_FUNCTION(
@@ -1112,28 +1085,6 @@ DECLARE_F32_GEMM_UKERNEL_FUNCTION(
     xnn_f32_gemm_ukernel_5x8__wasmrelaxedsimd_fma_splat)
 DECLARE_F32_GEMM_UKERNEL_FUNCTION(
     xnn_f32_gemm_ukernel_6x8__wasmrelaxedsimd_fma_splat)
-
-DECLARE_F32_GEMM_RELU_UKERNEL_FUNCTION(
-    xnn_f32_gemm_relu_ukernel_1x8__wasmsimd_splat)
-DECLARE_F32_GEMM_RELU_UKERNEL_FUNCTION(
-    xnn_f32_gemm_relu_ukernel_3x8__wasmsimd_splat)
-DECLARE_F32_GEMM_RELU_UKERNEL_FUNCTION(
-    xnn_f32_gemm_relu_ukernel_4x8__wasmsimd_splat)
-DECLARE_F32_GEMM_RELU_UKERNEL_FUNCTION(
-    xnn_f32_gemm_relu_ukernel_5x8__wasmsimd_splat)
-DECLARE_F32_GEMM_RELU_UKERNEL_FUNCTION(
-    xnn_f32_gemm_relu_ukernel_6x8__wasmsimd_splat)
-
-DECLARE_F32_GEMM_RELU_UKERNEL_FUNCTION(
-    xnn_f32_gemm_relu_ukernel_1x8__wasmrelaxedsimd_fma_splat)
-DECLARE_F32_GEMM_RELU_UKERNEL_FUNCTION(
-    xnn_f32_gemm_relu_ukernel_3x8__wasmrelaxedsimd_fma_splat)
-DECLARE_F32_GEMM_RELU_UKERNEL_FUNCTION(
-    xnn_f32_gemm_relu_ukernel_4x8__wasmrelaxedsimd_fma_splat)
-DECLARE_F32_GEMM_RELU_UKERNEL_FUNCTION(
-    xnn_f32_gemm_relu_ukernel_5x8__wasmrelaxedsimd_fma_splat)
-DECLARE_F32_GEMM_RELU_UKERNEL_FUNCTION(
-    xnn_f32_gemm_relu_ukernel_6x8__wasmrelaxedsimd_fma_splat)
 
 DECLARE_F32_GEMM_MINMAX_UKERNEL_FUNCTION(
     xnn_f32_gemm_minmax_ukernel_1x8__wasmsimd_arm_splat)
@@ -1196,28 +1147,6 @@ DECLARE_F32_GEMM_UKERNEL_FUNCTION(
 DECLARE_F32_GEMM_UKERNEL_FUNCTION(
     xnn_f32_gemm_ukernel_6x8s4__wasmrelaxedsimd_fma)
 
-DECLARE_F32_GEMM_RELU_UKERNEL_FUNCTION(
-    xnn_f32_gemm_relu_ukernel_1x8s4__wasmsimd)
-DECLARE_F32_GEMM_RELU_UKERNEL_FUNCTION(
-    xnn_f32_gemm_relu_ukernel_3x8s4__wasmsimd)
-DECLARE_F32_GEMM_RELU_UKERNEL_FUNCTION(
-    xnn_f32_gemm_relu_ukernel_4x8s4__wasmsimd)
-DECLARE_F32_GEMM_RELU_UKERNEL_FUNCTION(
-    xnn_f32_gemm_relu_ukernel_5x8s4__wasmsimd)
-DECLARE_F32_GEMM_RELU_UKERNEL_FUNCTION(
-    xnn_f32_gemm_relu_ukernel_6x8s4__wasmsimd)
-
-DECLARE_F32_GEMM_RELU_UKERNEL_FUNCTION(
-    xnn_f32_gemm_relu_ukernel_1x8s4__wasmrelaxedsimd_fma)
-DECLARE_F32_GEMM_RELU_UKERNEL_FUNCTION(
-    xnn_f32_gemm_relu_ukernel_3x8s4__wasmrelaxedsimd_fma)
-DECLARE_F32_GEMM_RELU_UKERNEL_FUNCTION(
-    xnn_f32_gemm_relu_ukernel_4x8s4__wasmrelaxedsimd_fma)
-DECLARE_F32_GEMM_RELU_UKERNEL_FUNCTION(
-    xnn_f32_gemm_relu_ukernel_5x8s4__wasmrelaxedsimd_fma)
-DECLARE_F32_GEMM_RELU_UKERNEL_FUNCTION(
-    xnn_f32_gemm_relu_ukernel_6x8s4__wasmrelaxedsimd_fma)
-
 DECLARE_F32_GEMM_MINMAX_UKERNEL_FUNCTION(
     xnn_f32_gemm_minmax_ukernel_1x8s4__wasmsimd_arm)
 DECLARE_F32_GEMM_MINMAX_UKERNEL_FUNCTION(
@@ -1266,11 +1195,6 @@ DECLARE_F32_GEMM_UKERNEL_FUNCTION(
     xnn_f32_gemm_ukernel_4x2c4__wasmrelaxedsimd_fma)
 DECLARE_F32_GEMM_UKERNEL_FUNCTION(xnn_f32_gemm_ukernel_4x2c4__wasmsimd)
 
-DECLARE_F32_GEMM_RELU_UKERNEL_FUNCTION(
-    xnn_f32_gemm_relu_ukernel_4x2c4__wasmrelaxedsimd_fma)
-DECLARE_F32_GEMM_RELU_UKERNEL_FUNCTION(
-    xnn_f32_gemm_relu_ukernel_4x2c4__wasmsimd)
-
 DECLARE_F32_GEMM_MINMAX_UKERNEL_FUNCTION(
     xnn_f32_gemm_minmax_ukernel_4x2c4__wasmrelaxedsimd)
 DECLARE_F32_GEMM_MINMAX_UKERNEL_FUNCTION(
@@ -1285,11 +1209,6 @@ DECLARE_F32_GEMM_UKERNEL_FUNCTION(xnn_f32_gemm_ukernel_2x4__scalar)
 DECLARE_F32_GEMM_UKERNEL_FUNCTION(xnn_f32_gemm_ukernel_4x2__scalar)
 DECLARE_F32_GEMM_UKERNEL_FUNCTION(xnn_f32_gemm_ukernel_4x4__scalar)
 
-DECLARE_F32_GEMM_RELU_UKERNEL_FUNCTION(xnn_f32_gemm_relu_ukernel_1x4__scalar)
-DECLARE_F32_GEMM_RELU_UKERNEL_FUNCTION(xnn_f32_gemm_relu_ukernel_2x4__scalar)
-DECLARE_F32_GEMM_RELU_UKERNEL_FUNCTION(xnn_f32_gemm_relu_ukernel_4x2__scalar)
-DECLARE_F32_GEMM_RELU_UKERNEL_FUNCTION(xnn_f32_gemm_relu_ukernel_4x4__scalar)
-
 DECLARE_F32_GEMM_MINMAX_UKERNEL_FUNCTION(
     xnn_f32_gemm_minmax_ukernel_1x4__scalar)
 DECLARE_F32_GEMM_MINMAX_UKERNEL_FUNCTION(
@@ -1301,8 +1220,6 @@ DECLARE_F32_GEMM_MINMAX_UKERNEL_FUNCTION(
 
 DECLARE_F32_GEMM_MINMAX_UKERNEL_FUNCTION(xnn_f32_gemm_minmax_ukernel_1x4v__rvv)
 DECLARE_F32_GEMM_MINMAX_UKERNEL_FUNCTION(xnn_f32_gemm_minmax_ukernel_7x4v__rvv)
-DECLARE_F32_GEMM_RELU_UKERNEL_FUNCTION(xnn_f32_gemm_relu_ukernel_1x4v__rvv)
-DECLARE_F32_GEMM_RELU_UKERNEL_FUNCTION(xnn_f32_gemm_relu_ukernel_7x4v__rvv)
 DECLARE_F32_GEMM_UKERNEL_FUNCTION(xnn_f32_gemm_ukernel_1x4v__rvv)
 DECLARE_F32_GEMM_UKERNEL_FUNCTION(xnn_f32_gemm_ukernel_7x4v__rvv)
 
@@ -1674,11 +1591,6 @@ DECLARE_QD8_F16_QB4W_GEMM_MINMAX_UKERNEL_FUNCTION(
                             size_t cm_stride, size_t cn_stride,              \
                             const struct xnn_f32_default_params* params);
 
-#define DECLARE_F32_QC8W_GEMM_RELU_UKERNEL_FUNCTION(fn_name)                 \
-  XNN_INTERNAL void fn_name(size_t mr, size_t nc, size_t kc, const float* a, \
-                            size_t a_stride, const void* w, float* c,        \
-                            size_t cm_stride, size_t cn_stride,              \
-                            const struct xnn_f32_relu_params* params);
 
 #define DECLARE_F32_QC8W_GEMM_MINMAX_UKERNEL_FUNCTION(fn_name)               \
   XNN_INTERNAL void fn_name(size_t mr, size_t nc, size_t kc, const float* a, \
@@ -1959,28 +1871,6 @@ DECLARE_F32_QC8W_GEMM_UKERNEL_FUNCTION(
 DECLARE_F32_QC8W_GEMM_UKERNEL_FUNCTION(
     xnn_f32_qc8w_gemm_ukernel_6x8__wasmrelaxedsimd_fma_loadsplat)
 
-DECLARE_F32_QC8W_GEMM_RELU_UKERNEL_FUNCTION(
-    xnn_f32_qc8w_gemm_relu_ukernel_1x8__wasmsimd_loadsplat)
-DECLARE_F32_QC8W_GEMM_RELU_UKERNEL_FUNCTION(
-    xnn_f32_qc8w_gemm_relu_ukernel_3x8__wasmsimd_loadsplat)
-DECLARE_F32_QC8W_GEMM_RELU_UKERNEL_FUNCTION(
-    xnn_f32_qc8w_gemm_relu_ukernel_4x8__wasmsimd_loadsplat)
-DECLARE_F32_QC8W_GEMM_RELU_UKERNEL_FUNCTION(
-    xnn_f32_qc8w_gemm_relu_ukernel_5x8__wasmsimd_loadsplat)
-DECLARE_F32_QC8W_GEMM_RELU_UKERNEL_FUNCTION(
-    xnn_f32_qc8w_gemm_relu_ukernel_6x8__wasmsimd_loadsplat)
-
-DECLARE_F32_QC8W_GEMM_RELU_UKERNEL_FUNCTION(
-    xnn_f32_qc8w_gemm_relu_ukernel_1x8__wasmrelaxedsimd_fma_loadsplat)
-DECLARE_F32_QC8W_GEMM_RELU_UKERNEL_FUNCTION(
-    xnn_f32_qc8w_gemm_relu_ukernel_3x8__wasmrelaxedsimd_fma_loadsplat)
-DECLARE_F32_QC8W_GEMM_RELU_UKERNEL_FUNCTION(
-    xnn_f32_qc8w_gemm_relu_ukernel_4x8__wasmrelaxedsimd_fma_loadsplat)
-DECLARE_F32_QC8W_GEMM_RELU_UKERNEL_FUNCTION(
-    xnn_f32_qc8w_gemm_relu_ukernel_5x8__wasmrelaxedsimd_fma_loadsplat)
-DECLARE_F32_QC8W_GEMM_RELU_UKERNEL_FUNCTION(
-    xnn_f32_qc8w_gemm_relu_ukernel_6x8__wasmrelaxedsimd_fma_loadsplat)
-
 DECLARE_F32_QC8W_GEMM_MINMAX_UKERNEL_FUNCTION(
     xnn_f32_qc8w_gemm_minmax_ukernel_1x8__wasmsimd_arm_loadsplat)
 DECLARE_F32_QC8W_GEMM_MINMAX_UKERNEL_FUNCTION(
@@ -2046,28 +1936,6 @@ DECLARE_F32_QC8W_GEMM_UKERNEL_FUNCTION(
     xnn_f32_qc8w_gemm_ukernel_5x8__wasmrelaxedsimd_fma_splat)
 DECLARE_F32_QC8W_GEMM_UKERNEL_FUNCTION(
     xnn_f32_qc8w_gemm_ukernel_6x8__wasmrelaxedsimd_fma_splat)
-
-DECLARE_F32_QC8W_GEMM_RELU_UKERNEL_FUNCTION(
-    xnn_f32_qc8w_gemm_relu_ukernel_1x8__wasmsimd_splat)
-DECLARE_F32_QC8W_GEMM_RELU_UKERNEL_FUNCTION(
-    xnn_f32_qc8w_gemm_relu_ukernel_3x8__wasmsimd_splat)
-DECLARE_F32_QC8W_GEMM_RELU_UKERNEL_FUNCTION(
-    xnn_f32_qc8w_gemm_relu_ukernel_4x8__wasmsimd_splat)
-DECLARE_F32_QC8W_GEMM_RELU_UKERNEL_FUNCTION(
-    xnn_f32_qc8w_gemm_relu_ukernel_5x8__wasmsimd_splat)
-DECLARE_F32_QC8W_GEMM_RELU_UKERNEL_FUNCTION(
-    xnn_f32_qc8w_gemm_relu_ukernel_6x8__wasmsimd_splat)
-
-DECLARE_F32_QC8W_GEMM_RELU_UKERNEL_FUNCTION(
-    xnn_f32_qc8w_gemm_relu_ukernel_1x8__wasmrelaxedsimd_fma_splat)
-DECLARE_F32_QC8W_GEMM_RELU_UKERNEL_FUNCTION(
-    xnn_f32_qc8w_gemm_relu_ukernel_3x8__wasmrelaxedsimd_fma_splat)
-DECLARE_F32_QC8W_GEMM_RELU_UKERNEL_FUNCTION(
-    xnn_f32_qc8w_gemm_relu_ukernel_4x8__wasmrelaxedsimd_fma_splat)
-DECLARE_F32_QC8W_GEMM_RELU_UKERNEL_FUNCTION(
-    xnn_f32_qc8w_gemm_relu_ukernel_5x8__wasmrelaxedsimd_fma_splat)
-DECLARE_F32_QC8W_GEMM_RELU_UKERNEL_FUNCTION(
-    xnn_f32_qc8w_gemm_relu_ukernel_6x8__wasmrelaxedsimd_fma_splat)
 
 DECLARE_F32_QC8W_GEMM_MINMAX_UKERNEL_FUNCTION(
     xnn_f32_qc8w_gemm_minmax_ukernel_1x8__wasmsimd_arm_splat)
@@ -2135,28 +2003,6 @@ DECLARE_F32_QC8W_GEMM_UKERNEL_FUNCTION(
 DECLARE_F32_QC8W_GEMM_UKERNEL_FUNCTION(
     xnn_f32_qc8w_gemm_ukernel_6x8s4__wasmrelaxedsimd_fma)
 
-DECLARE_F32_QC8W_GEMM_RELU_UKERNEL_FUNCTION(
-    xnn_f32_qc8w_gemm_relu_ukernel_1x8s4__wasmsimd)
-DECLARE_F32_QC8W_GEMM_RELU_UKERNEL_FUNCTION(
-    xnn_f32_qc8w_gemm_relu_ukernel_3x8s4__wasmsimd)
-DECLARE_F32_QC8W_GEMM_RELU_UKERNEL_FUNCTION(
-    xnn_f32_qc8w_gemm_relu_ukernel_4x8s4__wasmsimd)
-DECLARE_F32_QC8W_GEMM_RELU_UKERNEL_FUNCTION(
-    xnn_f32_qc8w_gemm_relu_ukernel_5x8s4__wasmsimd)
-DECLARE_F32_QC8W_GEMM_RELU_UKERNEL_FUNCTION(
-    xnn_f32_qc8w_gemm_relu_ukernel_6x8s4__wasmsimd)
-
-DECLARE_F32_QC8W_GEMM_RELU_UKERNEL_FUNCTION(
-    xnn_f32_qc8w_gemm_relu_ukernel_1x8s4__wasmrelaxedsimd_fma)
-DECLARE_F32_QC8W_GEMM_RELU_UKERNEL_FUNCTION(
-    xnn_f32_qc8w_gemm_relu_ukernel_3x8s4__wasmrelaxedsimd_fma)
-DECLARE_F32_QC8W_GEMM_RELU_UKERNEL_FUNCTION(
-    xnn_f32_qc8w_gemm_relu_ukernel_4x8s4__wasmrelaxedsimd_fma)
-DECLARE_F32_QC8W_GEMM_RELU_UKERNEL_FUNCTION(
-    xnn_f32_qc8w_gemm_relu_ukernel_5x8s4__wasmrelaxedsimd_fma)
-DECLARE_F32_QC8W_GEMM_RELU_UKERNEL_FUNCTION(
-    xnn_f32_qc8w_gemm_relu_ukernel_6x8s4__wasmrelaxedsimd_fma)
-
 DECLARE_F32_QC8W_GEMM_MINMAX_UKERNEL_FUNCTION(
     xnn_f32_qc8w_gemm_minmax_ukernel_1x8s4__wasmsimd_arm)
 DECLARE_F32_QC8W_GEMM_MINMAX_UKERNEL_FUNCTION(
@@ -2206,11 +2052,6 @@ DECLARE_F32_QC8W_GEMM_UKERNEL_FUNCTION(
 DECLARE_F32_QC8W_GEMM_UKERNEL_FUNCTION(
     xnn_f32_qc8w_gemm_ukernel_4x2c4__wasmsimd)
 
-DECLARE_F32_QC8W_GEMM_RELU_UKERNEL_FUNCTION(
-    xnn_f32_qc8w_gemm_relu_ukernel_4x2c4__wasmrelaxedsimd_fma)
-DECLARE_F32_QC8W_GEMM_RELU_UKERNEL_FUNCTION(
-    xnn_f32_qc8w_gemm_relu_ukernel_4x2c4__wasmsimd)
-
 DECLARE_F32_QC8W_GEMM_MINMAX_UKERNEL_FUNCTION(
     xnn_f32_qc8w_gemm_minmax_ukernel_4x2c4__wasmrelaxedsimd)
 DECLARE_F32_QC8W_GEMM_MINMAX_UKERNEL_FUNCTION(
@@ -2224,15 +2065,6 @@ DECLARE_F32_QC8W_GEMM_UKERNEL_FUNCTION(xnn_f32_qc8w_gemm_ukernel_1x4__scalar)
 DECLARE_F32_QC8W_GEMM_UKERNEL_FUNCTION(xnn_f32_qc8w_gemm_ukernel_2x4__scalar)
 DECLARE_F32_QC8W_GEMM_UKERNEL_FUNCTION(xnn_f32_qc8w_gemm_ukernel_4x2__scalar)
 DECLARE_F32_QC8W_GEMM_UKERNEL_FUNCTION(xnn_f32_qc8w_gemm_ukernel_4x4__scalar)
-
-DECLARE_F32_QC8W_GEMM_RELU_UKERNEL_FUNCTION(
-    xnn_f32_qc8w_gemm_relu_ukernel_1x4__scalar)
-DECLARE_F32_QC8W_GEMM_RELU_UKERNEL_FUNCTION(
-    xnn_f32_qc8w_gemm_relu_ukernel_2x4__scalar)
-DECLARE_F32_QC8W_GEMM_RELU_UKERNEL_FUNCTION(
-    xnn_f32_qc8w_gemm_relu_ukernel_4x2__scalar)
-DECLARE_F32_QC8W_GEMM_RELU_UKERNEL_FUNCTION(
-    xnn_f32_qc8w_gemm_relu_ukernel_4x4__scalar)
 
 DECLARE_F32_QC8W_GEMM_MINMAX_UKERNEL_FUNCTION(
     xnn_f32_qc8w_gemm_minmax_ukernel_1x4__scalar)
@@ -4065,11 +3897,12 @@ size_t xnn_qp8_f32_qc4w_gemm_minmax_ukernel_1x64c4__neonsme2_get_nr();
 size_t xnn_qp8_f32_qc4w_gemm_minmax_ukernel_16x64c4__neonsme2_get_mr();
 size_t xnn_qp8_f32_qc4w_gemm_minmax_ukernel_16x64c4__neonsme2_get_nr();
 
-#define DECLARE_QP8_F32_QC4W_GEMM_MINMAX_UKERNEL_FUNCTION(fn_name) \
-  XNN_INTERNAL void fn_name(                                       \
-      size_t m, size_t n, size_t k, const void* lhs_packed,        \
-      const void* rhs_packed, float* dst, size_t dst_stride_row,   \
-      size_t dst_stride_col, struct xnn_f32_minmax_params* minmax_params);
+#define DECLARE_QP8_F32_QC4W_GEMM_MINMAX_UKERNEL_FUNCTION(fn_name)          \
+  XNN_INTERNAL void fn_name(size_t m, size_t n, size_t k,                   \
+                            const void* lhs_packed, const void* rhs_packed, \
+                            float* dst, size_t dst_stride_row,              \
+                            size_t dst_stride_col,                          \
+                            struct xnn_f32_qc4w_minmax_params* minmax_params);
 
 DECLARE_QP8_F32_QC4W_GEMM_MINMAX_UKERNEL_FUNCTION(
     xnn_qp8_f32_qc4w_gemm_minmax_ukernel_1x4c16s2__aarch64_neondot)
@@ -5075,6 +4908,8 @@ DECLARE_QD8_F32_QC8W_GEMM_MINMAX_UKERNEL_FUNCTION(
 DECLARE_QD8_F32_QC8W_GEMM_MINMAX_UKERNEL_FUNCTION(
     xnn_qd8_f32_qc8w_gemm_minmax_ukernel_1x4c8__wasmsimd_dot16x2_ld128)
 DECLARE_QD8_F32_QC8W_GEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_qd8_f32_qc8w_gemm_minmax_ukernel_1x16c2s2__wasmsimd_dot16x2)
+DECLARE_QD8_F32_QC8W_GEMM_MINMAX_UKERNEL_FUNCTION(
     xnn_qd8_f32_qc8w_gemm_minmax_ukernel_2x4c2__wasmsimd_dot16x2_ld64)
 DECLARE_QD8_F32_QC8W_GEMM_MINMAX_UKERNEL_FUNCTION(
     xnn_qd8_f32_qc8w_gemm_minmax_ukernel_2x4c2__wasmsimd_dot16x2_ld128)
@@ -5110,6 +4945,8 @@ DECLARE_QD8_F32_QC8W_GEMM_MINMAX_UKERNEL_FUNCTION(
     xnn_qd8_f32_qc8w_gemm_minmax_ukernel_4x4c8__wasmsimd_dot16x2_ld64)
 DECLARE_QD8_F32_QC8W_GEMM_MINMAX_UKERNEL_FUNCTION(
     xnn_qd8_f32_qc8w_gemm_minmax_ukernel_4x4c8__wasmsimd_dot16x2_ld128)
+DECLARE_QD8_F32_QC8W_GEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_qd8_f32_qc8w_gemm_minmax_ukernel_4x16c2s2__wasmsimd_dot16x2)
 
 DECLARE_QD8_F32_QC8W_GEMM_MINMAX_UKERNEL_FUNCTION(
     xnn_qd8_f32_qc8w_gemm_minmax_ukernel_1x4c16__wasmsdot)
@@ -5189,6 +5026,16 @@ DECLARE_QD8_F32_QC8W_GEMM_MINMAX_UKERNEL_FUNCTION(
     xnn_qd8_f32_qc8w_gemm_minmax_ukernel_1x16c4__wasmusdot_u2)
 DECLARE_QD8_F32_QC8W_GEMM_MINMAX_UKERNEL_FUNCTION(
     xnn_qd8_f32_qc8w_gemm_minmax_ukernel_4x16c4__wasmusdot_u2)
+
+DECLARE_QD8_F32_QC8W_GEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_qd8_f32_qc8w_gemm_minmax_ukernel_1x16c4__wasmsdot)
+DECLARE_QD8_F32_QC8W_GEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_qd8_f32_qc8w_gemm_minmax_ukernel_4x16c4__wasmsdot)
+
+DECLARE_QD8_F32_QC8W_GEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_qd8_f32_qc8w_gemm_minmax_ukernel_1x16c4__wasmsdot_u2)
+DECLARE_QD8_F32_QC8W_GEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_qd8_f32_qc8w_gemm_minmax_ukernel_4x16c4__wasmsdot_u2)
 
 DECLARE_QD8_F32_QC8W_GEMM_MINMAX_UKERNEL_FUNCTION(
     xnn_qd8_f32_qc8w_gemm_minmax_ukernel_1x2__scalar)

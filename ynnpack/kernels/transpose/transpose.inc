@@ -59,6 +59,18 @@ YNN_TRANSPOSE_KERNEL(arch_flag::hvx, transpose_x256_hvx, 256)
 // YNN_TRANSPOSE_KERNEL(arch_flag::hvx, transpose_x1024_hvx, 1024)
 #endif  // YNN_ARCH_HEXAGON_HVX
 
+#ifdef YNN_ARCH_WASM_SIMD128
+YNN_TRANSPOSE_KERNEL(arch_flag::simd128, transpose_x4_simd128, 4)
+YNN_TRANSPOSE_KERNEL(arch_flag::simd128, transpose_x8_simd128, 8)
+YNN_TRANSPOSE_KERNEL(arch_flag::simd128, transpose_x16_simd128, 16)
+YNN_TRANSPOSE_KERNEL(arch_flag::simd128, transpose_x32_simd128, 32)
+YNN_TRANSPOSE_KERNEL(arch_flag::simd128, transpose_x64_simd128, 64)
+YNN_TRANSPOSE_KERNEL(arch_flag::simd128, transpose_x128_simd128, 128)
+YNN_TRANSPOSE_KERNEL(arch_flag::simd128, transpose_x256_simd128, 256)
+YNN_TRANSPOSE_KERNEL(arch_flag::simd128, transpose_x512_simd128, 512)
+YNN_TRANSPOSE_KERNEL(arch_flag::simd128, transpose_x1024_simd128, 1024)
+#endif  // YNN_ARCH_WASM_SIMD128
+
 YNN_TRANSPOSE_KERNEL(arch_flag::none, transpose_x2, 2)
 YNN_TRANSPOSE_KERNEL(arch_flag::none, transpose_x4, 4)
 YNN_TRANSPOSE_KERNEL(arch_flag::none, transpose_x8, 8)

@@ -33,6 +33,9 @@ YNN_ALWAYS_INLINE __m256 hi(__m512 x) {
   return _mm256_castpd_ps(_mm512_extractf64x4_pd(_mm512_castps_pd(x), 1));
 }
 
+YNN_ALWAYS_INLINE __m256d lo(__m512d x) { return _mm512_castpd512_pd256(x); }
+YNN_ALWAYS_INLINE __m256d hi(__m512d x) { return _mm512_extractf64x4_pd(x, 1); }
+
 YNN_ALWAYS_INLINE __m256i lo(__m512i x) { return _mm512_castsi512_si256(x); }
 YNN_ALWAYS_INLINE __m256i hi(__m512i x) {
   return _mm512_extracti64x4_epi64(x, 1);
@@ -44,11 +47,31 @@ YNN_ALWAYS_INLINE __m512 concat(__m256 lo, __m256 hi) {
                          _mm256_castps_pd(hi), 1));
 }
 
+YNN_ALWAYS_INLINE __m512d concat(__m256d lo, __m256d hi) {
+  return _mm512_insertf64x4(_mm512_castpd256_pd512(lo), hi, 1);
+}
+
 YNN_ALWAYS_INLINE __m512i concat(__m256i lo, __m256i hi) {
   return _mm512_inserti64x4(_mm512_castsi256_si512(lo), hi, 1);
 }
 
 }  // namespace internal
+
+template <>
+struct vec<double, 8> {
+  using value_type = double;
+  static constexpr std::integral_constant<size_t, 8> N = {};
+
+  vec() = default;
+  explicit vec(__m512d v) : v(v) {}
+  vec(f64x4 lo, f64x4 hi) : v(internal::concat(lo.v, hi.v)) {}
+  vec(double x) : v(_mm512_set1_pd(x)) {}  // NOLINT
+
+  __m512d v;
+
+  YNN_ALWAYS_INLINE f64x4 lo() const { return f64x4{internal::lo(v)}; }
+  YNN_ALWAYS_INLINE f64x4 hi() const { return f64x4{internal::hi(v)}; }
+};
 
 template <>
 struct vec<float, 16> {
@@ -194,6 +217,7 @@ struct vec<int8_t, 64> {
   YNN_ALWAYS_INLINE s8x32 hi() const { return s8x32{internal::hi(v)}; }
 };
 
+using f64x8 = vec<double, 8>;
 using f32x16 = vec<float, 16>;
 using u32x16 = vec<uint32_t, 16>;
 using s32x16 = vec<int32_t, 16>;
@@ -205,6 +229,10 @@ using u8x64 = vec<uint8_t, 64>;
 using s8x64 = vec<int8_t, 64>;
 using f32x64 = vec<float, 64>;
 
+YNN_ALWAYS_INLINE f64x8 load_aligned(const double* ptr, decltype(f64x8::N),
+                                     f64x8 = {}) {
+  return f64x8{_mm512_load_pd(ptr)};
+}
 YNN_ALWAYS_INLINE f32x16 load_aligned(const float* ptr, decltype(f32x16::N),
                                       f32x16 = {}) {
   return f32x16{_mm512_load_ps(ptr)};
@@ -234,6 +262,10 @@ YNN_ALWAYS_INLINE s8x64 load_aligned(const int8_t* ptr, decltype(s8x64::N),
   return s8x64{_mm512_load_si512(reinterpret_cast<const __m512i*>(ptr))};
 }
 
+YNN_ALWAYS_INLINE void store_aligned(double* ptr, f64x8 b,
+                                     decltype(f64x8::N) = {}) {
+  _mm512_store_pd(ptr, b.v);
+}
 YNN_ALWAYS_INLINE void store_aligned(float* ptr, f32x16 b,
                                      decltype(f32x16::N) = {}) {
   _mm512_store_ps(ptr, b.v);
@@ -271,6 +303,10 @@ YNN_ALWAYS_INLINE void store_aligned(int8_t* ptr, s8x64 b,
   _mm512_store_si512(reinterpret_cast<__m512i*>(ptr), b.v);
 }
 
+YNN_ALWAYS_INLINE f64x8 load(const double* ptr, decltype(f64x8::N),
+                             f64x8 = {}) {
+  return f64x8{_mm512_loadu_pd(ptr)};
+}
 YNN_ALWAYS_INLINE f32x16 load(const float* ptr, decltype(f32x16::N),
                               f32x16 = {}) {
   return f32x16{_mm512_loadu_ps(ptr)};
@@ -300,6 +336,9 @@ YNN_ALWAYS_INLINE s8x64 load(const int8_t* ptr, decltype(s8x64::N),
   return s8x64{_mm512_loadu_si512(reinterpret_cast<const __m512i*>(ptr))};
 }
 
+YNN_ALWAYS_INLINE void store(double* ptr, f64x8 b, decltype(f64x8::N) = {}) {
+  _mm512_storeu_pd(ptr, b.v);
+}
 YNN_ALWAYS_INLINE void store(float* ptr, f32x16 b, decltype(f32x16::N) = {}) {
   _mm512_storeu_ps(ptr, b.v);
 }
@@ -333,6 +372,11 @@ YNN_ALWAYS_INLINE void store(int8_t* ptr, s8x64 b, decltype(s8x64::N) = {}) {
 
 namespace internal {
 
+YNN_ALWAYS_INLINE __mmask8 mask_x2(size_t n) {
+  assert(n <= 2);
+  return _cvtu32_mask8((uint32_t)((1 << n) - 1));
+}
+
 YNN_ALWAYS_INLINE __mmask8 mask_x4(size_t n) {
   assert(n <= 4);
   return _cvtu32_mask8((uint32_t)((1 << n) - 1));
@@ -360,6 +404,9 @@ YNN_ALWAYS_INLINE __mmask64 mask_x64(size_t n) {
 
 }  // namespace internal
 
+YNN_ALWAYS_INLINE f64x8 load(const double* ptr, size_t n, f64x8 src) {
+  return f64x8{_mm512_mask_loadu_pd(src.v, internal::mask_x8(n), ptr)};
+}
 YNN_ALWAYS_INLINE f32x16 load(const float* ptr, size_t n, f32x16 src) {
   return f32x16{_mm512_mask_loadu_ps(src.v, internal::mask_x16(n), ptr)};
 }
@@ -382,6 +429,9 @@ YNN_ALWAYS_INLINE s8x64 load(const int8_t* ptr, size_t n, s8x64 src) {
   return s8x64{_mm512_mask_loadu_epi8(src.v, internal::mask_x64(n), ptr)};
 }
 
+YNN_ALWAYS_INLINE f64x8 load(const double* ptr, size_t n, zeros<8>) {
+  return f64x8{_mm512_maskz_loadu_pd(internal::mask_x8(n), ptr)};
+}
 YNN_ALWAYS_INLINE f32x16 load(const float* ptr, size_t n, zeros<16>) {
   return f32x16{_mm512_maskz_loadu_ps(internal::mask_x16(n), ptr)};
 }
@@ -404,6 +454,9 @@ YNN_ALWAYS_INLINE s8x64 load(const int8_t* ptr, size_t n, zeros<64>) {
   return s8x64{_mm512_maskz_loadu_epi8(internal::mask_x64(n), ptr)};
 }
 
+YNN_ALWAYS_INLINE f64x8 load(const double* ptr, size_t n, undef<8>) {
+  return f64x8{_mm512_maskz_loadu_pd(internal::mask_x8(n), ptr)};
+}
 YNN_ALWAYS_INLINE f32x16 load(const float* ptr, size_t n, undef<16>) {
   return f32x16{_mm512_maskz_loadu_ps(internal::mask_x16(n), ptr)};
 }
@@ -426,6 +479,9 @@ YNN_ALWAYS_INLINE s8x64 load(const int8_t* ptr, size_t n, undef<64>) {
   return s8x64{_mm512_maskz_loadu_epi8(internal::mask_x64(n), ptr)};
 }
 
+YNN_ALWAYS_INLINE void store(double* ptr, f64x8 val, size_t n) {
+  _mm512_mask_storeu_pd(ptr, internal::mask_x8(n), val.v);
+}
 YNN_ALWAYS_INLINE void store(float* ptr, f32x16 val, size_t n) {
   _mm512_mask_storeu_ps(ptr, internal::mask_x16(n), val.v);
 }
@@ -448,6 +504,9 @@ YNN_ALWAYS_INLINE void store(int8_t* ptr, s8x64 val, size_t n) {
   _mm512_mask_storeu_epi8(ptr, internal::mask_x64(n), val.v);
 }
 
+YNN_ALWAYS_INLINE f64x4 load(const double* ptr, size_t n, f64x4 src) {
+  return f64x4{_mm256_mask_loadu_pd(src.v, internal::mask_x4(n), ptr)};
+}
 YNN_ALWAYS_INLINE f32x8 load(const float* ptr, size_t n, f32x8 src) {
   return f32x8{_mm256_mask_loadu_ps(src.v, internal::mask_x8(n), ptr)};
 }
@@ -470,6 +529,9 @@ YNN_ALWAYS_INLINE s8x32 load(const int8_t* ptr, size_t n, s8x32 src) {
   return s8x32{_mm256_mask_loadu_epi8(src.v, internal::mask_x32(n), ptr)};
 }
 
+YNN_ALWAYS_INLINE f64x4 load(const double* ptr, size_t n, zeros<4>) {
+  return f64x4{_mm256_maskz_loadu_pd(internal::mask_x4(n), ptr)};
+}
 YNN_ALWAYS_INLINE f32x8 load(const float* ptr, size_t n, zeros<8>) {
   return f32x8{_mm256_maskz_loadu_ps(internal::mask_x8(n), ptr)};
 }
@@ -492,6 +554,9 @@ YNN_ALWAYS_INLINE s8x32 load(const int8_t* ptr, size_t n, zeros<32>) {
   return s8x32{_mm256_maskz_loadu_epi8(internal::mask_x32(n), ptr)};
 }
 
+YNN_ALWAYS_INLINE f64x4 load(const double* ptr, size_t n, undef<4>) {
+  return f64x4{_mm256_maskz_loadu_pd(internal::mask_x4(n), ptr)};
+}
 YNN_ALWAYS_INLINE f32x8 load(const float* ptr, size_t n, undef<8>) {
   return f32x8{_mm256_maskz_loadu_ps(internal::mask_x8(n), ptr)};
 }
@@ -514,6 +579,9 @@ YNN_ALWAYS_INLINE s8x32 load(const int8_t* ptr, size_t n, undef<32>) {
   return s8x32{_mm256_maskz_loadu_epi8(internal::mask_x32(n), ptr)};
 }
 
+YNN_ALWAYS_INLINE void store(double* ptr, f64x4 val, size_t n) {
+  _mm256_mask_storeu_pd(ptr, internal::mask_x4(n), val.v);
+}
 YNN_ALWAYS_INLINE void store(float* ptr, f32x8 val, size_t n) {
   _mm256_mask_storeu_ps(ptr, internal::mask_x8(n), val.v);
 }
@@ -536,6 +604,9 @@ YNN_ALWAYS_INLINE void store(int8_t* ptr, s8x32 val, size_t n) {
   _mm256_mask_storeu_epi8(ptr, internal::mask_x32(n), val.v);
 }
 
+YNN_ALWAYS_INLINE f64x2 load(const double* ptr, size_t n, f64x2 src) {
+  return f64x2{_mm_mask_loadu_pd(src.v, internal::mask_x2(n), ptr)};
+}
 YNN_ALWAYS_INLINE f32x4 load(const float* ptr, size_t n, f32x4 src) {
   return f32x4{_mm_mask_loadu_ps(src.v, internal::mask_x4(n), ptr)};
 }
@@ -558,6 +629,9 @@ YNN_ALWAYS_INLINE s8x16 load(const int8_t* ptr, size_t n, s8x16 src) {
   return s8x16{_mm_mask_loadu_epi8(src.v, internal::mask_x16(n), ptr)};
 }
 
+YNN_ALWAYS_INLINE f64x2 load(const double* ptr, size_t n, zeros<2>) {
+  return f64x2{_mm_maskz_loadu_pd(internal::mask_x2(n), ptr)};
+}
 YNN_ALWAYS_INLINE f32x4 load(const float* ptr, size_t n, zeros<4>) {
   return f32x4{_mm_maskz_loadu_ps(internal::mask_x4(n), ptr)};
 }
@@ -580,6 +654,9 @@ YNN_ALWAYS_INLINE s8x16 load(const int8_t* ptr, size_t n, zeros<16>) {
   return s8x16{_mm_maskz_loadu_epi8(internal::mask_x16(n), ptr)};
 }
 
+YNN_ALWAYS_INLINE f64x2 load(const double* ptr, size_t n, undef<2>) {
+  return f64x2{_mm_maskz_loadu_pd(internal::mask_x2(n), ptr)};
+}
 YNN_ALWAYS_INLINE f32x4 load(const float* ptr, size_t n, undef<4>) {
   return f32x4{_mm_maskz_loadu_ps(internal::mask_x4(n), ptr)};
 }
@@ -602,6 +679,9 @@ YNN_ALWAYS_INLINE s8x16 load(const int8_t* ptr, size_t n, undef<16>) {
   return s8x16{_mm_maskz_loadu_epi8(internal::mask_x16(n), ptr)};
 }
 
+YNN_ALWAYS_INLINE void store(double* ptr, f64x2 val, size_t n) {
+  _mm_mask_storeu_pd(ptr, internal::mask_x2(n), val.v);
+}
 YNN_ALWAYS_INLINE void store(float* ptr, f32x4 val, size_t n) {
   _mm_mask_storeu_ps(ptr, internal::mask_x4(n), val.v);
 }
@@ -624,6 +704,9 @@ YNN_ALWAYS_INLINE void store(int8_t* ptr, s8x16 val, size_t n) {
   _mm_mask_storeu_epi8(ptr, internal::mask_x16(n), val.v);
 }
 
+YNN_ALWAYS_INLINE f64x8 operator+(f64x8 a, f64x8 b) {
+  return f64x8{_mm512_add_pd(a.v, b.v)};
+}
 YNN_ALWAYS_INLINE f32x16 operator+(f32x16 a, f32x16 b) {
   return f32x16{_mm512_add_ps(a.v, b.v)};
 }
@@ -637,6 +720,9 @@ YNN_ALWAYS_INLINE u8x64 operator+(u8x64 a, u8x64 b) {
   return u8x64{_mm512_add_epi8(a.v, b.v)};
 }
 
+YNN_ALWAYS_INLINE f64x8 operator-(f64x8 a, f64x8 b) {
+  return f64x8{_mm512_sub_pd(a.v, b.v)};
+}
 YNN_ALWAYS_INLINE f32x16 operator-(f32x16 a, f32x16 b) {
   return f32x16{_mm512_sub_ps(a.v, b.v)};
 }
@@ -676,8 +762,14 @@ YNN_ALWAYS_INLINE u8x64 sub_sat(u8x64 a, u8x64 b) {
   return u8x64{_mm512_subs_epu8(a.v, b.v)};
 }
 
+YNN_ALWAYS_INLINE f64x8 operator*(f64x8 a, f64x8 b) {
+  return f64x8{_mm512_mul_pd(a.v, b.v)};
+}
 YNN_ALWAYS_INLINE f32x16 operator*(f32x16 a, f32x16 b) {
   return f32x16{_mm512_mul_ps(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE f64x8 operator/(f64x8 a, f64x8 b) {
+  return f64x8{_mm512_div_pd(a.v, b.v)};
 }
 YNN_ALWAYS_INLINE f32x16 operator/(f32x16 a, f32x16 b) {
   return f32x16{_mm512_div_ps(a.v, b.v)};
@@ -750,10 +842,17 @@ YNN_ALWAYS_INLINE s8x64 operator~(s8x64 a) {
   return s8x64{_mm512_xor_si512(a.v, _mm512_set1_epi32(-1))};
 }
 
+YNN_ALWAYS_INLINE f64x8 fma(f64x8 a, f64x8 b, f64x8 acc) {
+  return f64x8{_mm512_fmadd_pd(a.v, b.v, acc.v)};
+}
+
 YNN_ALWAYS_INLINE f32x16 fma(f32x16 a, f32x16 b, f32x16 acc) {
   return f32x16{_mm512_fmadd_ps(a.v, b.v, acc.v)};
 }
 
+YNN_ALWAYS_INLINE f64x8 min(f64x8 a, f64x8 b) {
+  return f64x8{_mm512_min_pd(a.v, b.v)};
+}
 YNN_ALWAYS_INLINE f32x16 min(f32x16 a, f32x16 b) {
   return f32x16{_mm512_min_ps(a.v, b.v)};
 }
@@ -761,12 +860,22 @@ YNN_ALWAYS_INLINE s32x16 min(s32x16 a, s32x16 b) {
   return s32x16{_mm512_min_epi32(a.v, b.v)};
 }
 
+YNN_ALWAYS_INLINE f64x8 max(f64x8 a, f64x8 b) {
+  return f64x8{_mm512_max_pd(a.v, b.v)};
+}
 YNN_ALWAYS_INLINE f32x16 max(f32x16 a, f32x16 b) {
   return f32x16{_mm512_max_ps(a.v, b.v)};
 }
 YNN_ALWAYS_INLINE s32x16 max(s32x16 a, s32x16 b) {
   return s32x16{_mm512_max_epi32(a.v, b.v)};
 }
+YNN_ALWAYS_INLINE f64x8 floor(f64x8 a) { return f64x8{_mm512_floor_pd(a.v)}; }
+YNN_ALWAYS_INLINE f64x8 ceil(f64x8 a) { return f64x8{_mm512_ceil_pd(a.v)}; }
+YNN_ALWAYS_INLINE f64x8 round(f64x8 a) {
+  return f64x8{
+      _mm512_roundscale_pd(a.v, _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC)};
+}
+YNN_ALWAYS_INLINE f64x8 sqrt(f64x8 a) { return f64x8{_mm512_sqrt_pd(a.v)}; }
 YNN_ALWAYS_INLINE f32x16 floor(f32x16 a) {
   return f32x16{_mm512_floor_ps(a.v)};
 }
@@ -800,6 +909,7 @@ YNN_ALWAYS_INLINE u8x64 max(u8x64 a, u8x64 b) {
 YNN_ALWAYS_INLINE u8x64 abs(s8x64 a) { return u8x64{_mm512_abs_epi8(a.v)}; }
 YNN_ALWAYS_INLINE u16x32 abs(s16x32 a) { return u16x32{_mm512_abs_epi16(a.v)}; }
 YNN_ALWAYS_INLINE u32x16 abs(s32x16 a) { return u32x16{_mm512_abs_epi32(a.v)}; }
+YNN_ALWAYS_INLINE f64x8 abs(f64x8 a) { return f64x8{_mm512_abs_pd(a.v)}; }
 YNN_ALWAYS_INLINE f32x16 abs(f32x16 a) { return f32x16{_mm512_abs_ps(a.v)}; }
 
 template <int Index>
@@ -885,7 +995,33 @@ YNN_ALWAYS_INLINE f32x16 cast(bf16x16 a, float) {
 }
 
 YNN_ALWAYS_INLINE bf16x32 cast(f32x32 a, bfloat16) {
+#ifdef YNN_ARCH_X86_AVX512BF16
   return bf16x32{(__m512i)_mm512_cvtne2ps_pbh(a.hi().v, a.lo().v)};
+#else
+  const __m512 rounding_multiplier =
+      _mm512_set1_ps(bfloat16::rounding_multiplier);
+  const __m512 b1 = _mm512_mul_ps(a.lo().v, rounding_multiplier);
+  const __m512 b2 = _mm512_mul_ps(a.hi().v, rounding_multiplier);
+  const __m512i c1 = _mm512_srli_epi32(_mm512_castps_si512(b1), 16);
+  const __m512i c2 = _mm512_srli_epi32(_mm512_castps_si512(b2), 16);
+  const __m512i d = _mm512_packus_epi32(c1, c2);
+  const __m512i permutation =
+      _mm512_set_epi32(15, 14, 11, 10, 7, 6, 3, 2, 13, 12, 9, 8, 5, 4, 1, 0);
+  return bf16x32{_mm512_permutevar_epi32(permutation, d)};
+#endif
+}
+YNN_ALWAYS_INLINE bf16x16 cast(f32x16 a, bfloat16) {
+#ifdef YNN_ARCH_X86_AVX512BF16
+  return bf16x16{
+      (__m256i)_mm256_cvtne2ps_pbh(internal::hi(a.v), internal::lo(a.v))};
+#else
+  const __m512 rounding_multiplier =
+      _mm512_set1_ps(bfloat16::rounding_multiplier);
+  const __m512 b = _mm512_mul_ps(a.v, rounding_multiplier);
+  const __m512i c = _mm512_srli_epi32(_mm512_castps_si512(b), 16);
+  const __m256i d = _mm256_packus_epi32(internal::lo(c), internal::hi(c));
+  return bf16x16{_mm256_permute4x64_epi64(d, _MM_SHUFFLE(3, 1, 2, 0))};
+#endif
 }
 
 YNN_ALWAYS_INLINE s32x16 cast(s8x16 a, int32_t) {

@@ -10,6 +10,8 @@ Provides the basic structure and shared logic for generating dot kernels."""
 # pylint: disable=missing-function-docstring
 
 from collections.abc import Sequence
+import sys
+from typing import Tuple
 
 
 def indent(text, prefix):
@@ -153,7 +155,6 @@ void {func_name}(
     # When we clamp, we need to align down to the nearest tile.
     i = f"min({i}, (M - 1) & ~{self.tile_shape[0] - 1})" if i != 0 else i
     if "dot_flag::transpose_a" in self.flags:
-      k1 //= self.tile_shape[2]
       i = f"{i} * {self.tile_shape[2]}"
       i, k1 = k1, i
     offset = f"({i} * A_stride_m) + ({k1} * sizeof({self.a_type}))"
@@ -382,6 +383,12 @@ std::ptrdiff_t k1 = K1;
     block_body = self.generate_block(self.block_shape[2])
     tile_body = self.generate_block(self.tile_shape[2])
 
+    a_step = (
+        "A_stride_m"
+        if "dot_flag::transpose_a" in self.flags
+        else f"sizeof({self.a_type})"
+    )
+
     if block_body == tile_body:
       tile_body = None
 
@@ -395,11 +402,9 @@ std::ptrdiff_t k1 = K1;
           f"B_k1_{j} = offset_bytes(B_k1_{j}, {self.block_shape[2]} *"
           " B_stride_k1);\n"
       )
-    if "dot_flag::transpose_a" in self.flags:
-      a_step = f"{self.block_shape[2]//self.tile_shape[2]} * A_stride_m"
-    else:
-      a_step = f"{self.block_shape[2]} * sizeof({self.a_type})"
-    block_body += f"A_k1 = offset_bytes(A_k1, {a_step});\n"
+    block_body += (
+        f"A_k1 = offset_bytes(A_k1, {self.block_shape[2]} * {a_step});\n"
+    )
     result += indent(block_body, "  ") + "\n"
     if tile_body:
       result += "}\n"
@@ -419,8 +424,7 @@ std::ptrdiff_t k1 = K1;
               " B_stride_k1);\n"
           )
         tile_body += (
-            f"A_k1 = offset_bytes(A_k1, {self.tile_shape[2]} *"
-            f" sizeof({self.a_type}));\n"
+            f"A_k1 = offset_bytes(A_k1, {self.tile_shape[2]} * {a_step});\n"
         )
       result += indent(tile_body, "  ") + "\n"
       result += "}\n"
@@ -536,3 +540,53 @@ do {
     src += self.end_func()
 
     return src, inc
+
+
+def generate_dot_kernels_impl(
+    gen: dot_base,
+    output_src: str,
+    output_inc: str,
+    block_shapes: Sequence[Tuple[int, int, int]],
+    build_predicate: str | None = None,
+):
+  src = gen.header()
+  inc = ""
+
+  if build_predicate:
+    src += "#if " + build_predicate + "\n"
+
+  for m, n, k in block_shapes:
+    src_i, inc_i = gen.generate_dot(m, n, k)
+
+    src += src_i
+    inc += inc_i
+
+  if build_predicate:
+    src += "#endif\n"
+
+  src += gen.footer()
+
+  with open(output_src, "w") as f:
+    f.write(src)
+  with open(output_inc, "w") as f:
+    f.write(inc)
+
+
+def get_output_path(f: str) -> str:
+  """If sys.argv contains a list of output paths, find the one matching f."""
+  paths = [i for i in sys.argv[1:] if i.endswith(f)]
+  if len(paths) != 1:
+    raise ValueError(f"Expected one path for {f}, found {paths}")
+  return paths[0]
+
+
+def generate_dot_kernels(
+    gen: dot_base,
+    block_shapes: Sequence[Tuple[int, int, int]],
+    build_predicate: str | None = None,
+):
+  output_src = get_output_path(type(gen).__name__ + ".cc")
+  output_inc = get_output_path(type(gen).__name__ + ".inc")
+  generate_dot_kernels_impl(
+      gen, output_src, output_inc, block_shapes, build_predicate
+  )

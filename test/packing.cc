@@ -109,7 +109,7 @@ TEST(PACK_QD8_F32_QC2W_GEMM_GOI_W, kr_eq_4) {
   std::vector<int32_t> b(g * nc);
   std::iota(b.begin(), b.end(), 0);
   std::vector<float> kernel_zero_point(g * nc);
-  std::iota(kernel_zero_point.begin(), kernel_zero_point.end(), 16);
+  std::iota(kernel_zero_point.begin(), kernel_zero_point.end(), 16.0f);
   std::vector<uint8_t> k(g * nc * kc / 4);
   k[0] = 0x00;
   k[1] = 0x55;

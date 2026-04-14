@@ -7,19 +7,15 @@
 #################################### Scalar ###################################
 ### Generic C micro-kernels
 tools/xngen src/f32-gemm/scalar.c.in -D MR=1 -D NR=4 -D WASM=0 -D INC=0 -D ACTIVATION=LINEAR -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-1x4-scalar.c &
-tools/xngen src/f32-gemm/scalar.c.in -D MR=1 -D NR=4 -D WASM=0 -D INC=0 -D ACTIVATION=RELU   -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-1x4-relu-scalar.c &
 tools/xngen src/f32-gemm/scalar.c.in -D MR=1 -D NR=4 -D WASM=0 -D INC=0 -D ACTIVATION=MINMAX -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-1x4-minmax-scalar.c &
 
 tools/xngen src/f32-gemm/scalar.c.in -D MR=2 -D NR=4 -D WASM=0 -D INC=0 -D ACTIVATION=LINEAR -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-2x4-scalar.c &
-tools/xngen src/f32-gemm/scalar.c.in -D MR=2 -D NR=4 -D WASM=0 -D INC=0 -D ACTIVATION=RELU   -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-2x4-relu-scalar.c &
 tools/xngen src/f32-gemm/scalar.c.in -D MR=2 -D NR=4 -D WASM=0 -D INC=0 -D ACTIVATION=MINMAX -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-2x4-minmax-scalar.c &
 
 tools/xngen src/f32-gemm/scalar.c.in -D MR=4 -D NR=2 -D WASM=0 -D INC=0 -D ACTIVATION=LINEAR -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-4x2-scalar.c &
-tools/xngen src/f32-gemm/scalar.c.in -D MR=4 -D NR=2 -D WASM=0 -D INC=0 -D ACTIVATION=RELU   -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-4x2-relu-scalar.c &
 tools/xngen src/f32-gemm/scalar.c.in -D MR=4 -D NR=2 -D WASM=0 -D INC=0 -D ACTIVATION=MINMAX -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-4x2-minmax-scalar.c &
 
 tools/xngen src/f32-gemm/scalar.c.in -D MR=4 -D NR=4 -D WASM=0 -D INC=0 -D ACTIVATION=LINEAR -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-4x4-scalar.c &
-tools/xngen src/f32-gemm/scalar.c.in -D MR=4 -D NR=4 -D WASM=0 -D INC=0 -D ACTIVATION=RELU   -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-4x4-relu-scalar.c &
 tools/xngen src/f32-gemm/scalar.c.in -D MR=4 -D NR=4 -D WASM=0 -D INC=0 -D ACTIVATION=MINMAX -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-4x4-minmax-scalar.c &
 
 ############################### AArch64 assembly ##############################
@@ -196,17 +192,7 @@ tools/xngen src/f32-gemm/wasmsimd-loadsplat.c.in -D MR=5 -D NR=8 -D INC=0 -D FMA
 
 tools/xngen src/f32-gemm/wasmsimd-loadsplat.c.in -D MR=6 -D NR=8 -D INC=0 -D FMA=1 -D ACTIVATION=MINMAX -D ARCH=RELAXED -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-6x8-minmax-wasmrelaxedsimd-fma-loadsplat.c &
 
-tools/xngen src/f32-gemm/wasmsimd-loadsplat.c.in -D MR=1 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=RELU                 -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-1x8-relu-wasmsimd-loadsplat.c &
-tools/xngen src/f32-gemm/wasmsimd-loadsplat.c.in -D MR=3 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=RELU                 -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-3x8-relu-wasmsimd-loadsplat.c &
-tools/xngen src/f32-gemm/wasmsimd-loadsplat.c.in -D MR=4 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=RELU                 -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-4x8-relu-wasmsimd-loadsplat.c &
-tools/xngen src/f32-gemm/wasmsimd-loadsplat.c.in -D MR=5 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=RELU                 -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-5x8-relu-wasmsimd-loadsplat.c &
-tools/xngen src/f32-gemm/wasmsimd-loadsplat.c.in -D MR=6 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=RELU                 -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-6x8-relu-wasmsimd-loadsplat.c &
 
-tools/xngen src/f32-gemm/wasmsimd-loadsplat.c.in -D MR=1 -D NR=8 -D INC=0 -D FMA=1 -D ACTIVATION=RELU -D ARCH=RELAXED -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-1x8-relu-wasmrelaxedsimd-fma-loadsplat.c &
-tools/xngen src/f32-gemm/wasmsimd-loadsplat.c.in -D MR=3 -D NR=8 -D INC=0 -D FMA=1 -D ACTIVATION=RELU -D ARCH=RELAXED -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-3x8-relu-wasmrelaxedsimd-fma-loadsplat.c &
-tools/xngen src/f32-gemm/wasmsimd-loadsplat.c.in -D MR=4 -D NR=8 -D INC=0 -D FMA=1 -D ACTIVATION=RELU -D ARCH=RELAXED -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-4x8-relu-wasmrelaxedsimd-fma-loadsplat.c &
-tools/xngen src/f32-gemm/wasmsimd-loadsplat.c.in -D MR=5 -D NR=8 -D INC=0 -D FMA=1 -D ACTIVATION=RELU -D ARCH=RELAXED -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-5x8-relu-wasmrelaxedsimd-fma-loadsplat.c &
-tools/xngen src/f32-gemm/wasmsimd-loadsplat.c.in -D MR=6 -D NR=8 -D INC=0 -D FMA=1 -D ACTIVATION=RELU -D ARCH=RELAXED -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-6x8-relu-wasmrelaxedsimd-fma-loadsplat.c &
 
 tools/xngen src/f32-gemm/wasmsimd-loadsplat.c.in -D MR=1 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=LINEAR                 -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-1x8-wasmsimd-loadsplat.c &
 tools/xngen src/f32-gemm/wasmsimd-loadsplat.c.in -D MR=3 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=LINEAR                 -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-3x8-wasmsimd-loadsplat.c &
@@ -261,17 +247,7 @@ tools/xngen src/f32-gemm/wasmsimd-splat.c.in -D MR=5 -D NR=8 -D INC=0 -D FMA=1 -
 
 tools/xngen src/f32-gemm/wasmsimd-splat.c.in -D MR=6 -D NR=8 -D INC=0 -D FMA=1 -D ACTIVATION=MINMAX -D ARCH=RELAXED -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-6x8-minmax-wasmrelaxedsimd-fma-splat.c &
 
-tools/xngen src/f32-gemm/wasmsimd-splat.c.in -D MR=1 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=RELU                 -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-1x8-relu-wasmsimd-splat.c &
-tools/xngen src/f32-gemm/wasmsimd-splat.c.in -D MR=3 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=RELU                 -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-3x8-relu-wasmsimd-splat.c &
-tools/xngen src/f32-gemm/wasmsimd-splat.c.in -D MR=4 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=RELU                 -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-4x8-relu-wasmsimd-splat.c &
-tools/xngen src/f32-gemm/wasmsimd-splat.c.in -D MR=5 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=RELU                 -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-5x8-relu-wasmsimd-splat.c &
-tools/xngen src/f32-gemm/wasmsimd-splat.c.in -D MR=6 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=RELU                 -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-6x8-relu-wasmsimd-splat.c &
 
-tools/xngen src/f32-gemm/wasmsimd-splat.c.in -D MR=1 -D NR=8 -D INC=0 -D FMA=1 -D ACTIVATION=RELU -D ARCH=RELAXED -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-1x8-relu-wasmrelaxedsimd-fma-splat.c &
-tools/xngen src/f32-gemm/wasmsimd-splat.c.in -D MR=3 -D NR=8 -D INC=0 -D FMA=1 -D ACTIVATION=RELU -D ARCH=RELAXED -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-3x8-relu-wasmrelaxedsimd-fma-splat.c &
-tools/xngen src/f32-gemm/wasmsimd-splat.c.in -D MR=4 -D NR=8 -D INC=0 -D FMA=1 -D ACTIVATION=RELU -D ARCH=RELAXED -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-4x8-relu-wasmrelaxedsimd-fma-splat.c &
-tools/xngen src/f32-gemm/wasmsimd-splat.c.in -D MR=5 -D NR=8 -D INC=0 -D FMA=1 -D ACTIVATION=RELU -D ARCH=RELAXED -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-5x8-relu-wasmrelaxedsimd-fma-splat.c &
-tools/xngen src/f32-gemm/wasmsimd-splat.c.in -D MR=6 -D NR=8 -D INC=0 -D FMA=1 -D ACTIVATION=RELU -D ARCH=RELAXED -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-6x8-relu-wasmrelaxedsimd-fma-splat.c &
 
 tools/xngen src/f32-gemm/wasmsimd-splat.c.in -D MR=1 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=LINEAR                 -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-1x8-wasmsimd-splat.c &
 tools/xngen src/f32-gemm/wasmsimd-splat.c.in -D MR=3 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=LINEAR                 -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-3x8-wasmsimd-splat.c &
@@ -326,17 +302,7 @@ tools/xngen src/f32-gemm/wasmsimd-s4.c.in -D MR=5 -D NR=8 -D INC=0 -D FMA=1 -D A
 
 tools/xngen src/f32-gemm/wasmsimd-s4.c.in -D MR=6 -D NR=8 -D INC=0 -D FMA=1 -D ACTIVATION=MINMAX -D ARCH=RELAXED -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-6x8s4-minmax-wasmrelaxedsimd-fma.c &
 
-tools/xngen src/f32-gemm/wasmsimd-s4.c.in -D MR=1 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=RELU                 -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-1x8s4-relu-wasmsimd.c &
-tools/xngen src/f32-gemm/wasmsimd-s4.c.in -D MR=3 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=RELU                 -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-3x8s4-relu-wasmsimd.c &
-tools/xngen src/f32-gemm/wasmsimd-s4.c.in -D MR=4 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=RELU                 -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-4x8s4-relu-wasmsimd.c &
-tools/xngen src/f32-gemm/wasmsimd-s4.c.in -D MR=5 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=RELU                 -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-5x8s4-relu-wasmsimd.c &
-tools/xngen src/f32-gemm/wasmsimd-s4.c.in -D MR=6 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=RELU                 -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-6x8s4-relu-wasmsimd.c &
 
-tools/xngen src/f32-gemm/wasmsimd-s4.c.in -D MR=1 -D NR=8 -D INC=0 -D FMA=1 -D ACTIVATION=RELU -D ARCH=RELAXED -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-1x8s4-relu-wasmrelaxedsimd-fma.c &
-tools/xngen src/f32-gemm/wasmsimd-s4.c.in -D MR=3 -D NR=8 -D INC=0 -D FMA=1 -D ACTIVATION=RELU -D ARCH=RELAXED -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-3x8s4-relu-wasmrelaxedsimd-fma.c &
-tools/xngen src/f32-gemm/wasmsimd-s4.c.in -D MR=4 -D NR=8 -D INC=0 -D FMA=1 -D ACTIVATION=RELU -D ARCH=RELAXED -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-4x8s4-relu-wasmrelaxedsimd-fma.c &
-tools/xngen src/f32-gemm/wasmsimd-s4.c.in -D MR=5 -D NR=8 -D INC=0 -D FMA=1 -D ACTIVATION=RELU -D ARCH=RELAXED -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-5x8s4-relu-wasmrelaxedsimd-fma.c &
-tools/xngen src/f32-gemm/wasmsimd-s4.c.in -D MR=6 -D NR=8 -D INC=0 -D FMA=1 -D ACTIVATION=RELU -D ARCH=RELAXED -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-6x8s4-relu-wasmrelaxedsimd-fma.c &
 
 tools/xngen src/f32-gemm/wasmsimd-s4.c.in -D MR=1 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=LINEAR                 -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-1x8s4-wasmsimd.c &
 tools/xngen src/f32-gemm/wasmsimd-s4.c.in -D MR=3 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=LINEAR                 -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-3x8s4-wasmsimd.c &
@@ -355,8 +321,6 @@ tools/xngen src/f32-gemm/MRx2c4-wasmsimd.c.in -D MR=4 -D NR=2 -D FMA=0 -D ACTIVA
 tools/xngen src/f32-gemm/MRx2c4-wasmsimd.c.in -D MR=4 -D NR=2 -D FMA=0 -D ACTIVATION=MINMAX -D ARCH=X86     -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-4x2c4-minmax-wasmsimd-x86.c &
 tools/xngen src/f32-gemm/MRx2c4-wasmsimd.c.in -D MR=4 -D NR=2 -D FMA=0 -D ACTIVATION=MINMAX -D ARCH=RELAXED -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-4x2c4-minmax-wasmrelaxedsimd.c &
 tools/xngen src/f32-gemm/MRx2c4-wasmsimd.c.in -D MR=4 -D NR=2 -D FMA=1 -D ACTIVATION=MINMAX -D ARCH=RELAXED -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-4x2c4-minmax-wasmrelaxedsimd-fma.c &
-tools/xngen src/f32-gemm/MRx2c4-wasmsimd.c.in -D MR=4 -D NR=2 -D FMA=0 -D ACTIVATION=RELU                   -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-4x2c4-relu-wasmsimd.c &
-tools/xngen src/f32-gemm/MRx2c4-wasmsimd.c.in -D MR=4 -D NR=2 -D FMA=1 -D ACTIVATION=RELU   -D ARCH=RELAXED -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-4x2c4-relu-wasmrelaxedsimd-fma.c &
 tools/xngen src/f32-gemm/MRx2c4-wasmsimd.c.in -D MR=4 -D NR=2 -D FMA=0 -D ACTIVATION=LINEAR                 -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-4x2c4-wasmsimd.c &
 tools/xngen src/f32-gemm/MRx2c4-wasmsimd.c.in -D MR=4 -D NR=2 -D FMA=1 -D ACTIVATION=LINEAR -D ARCH=RELAXED -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-4x2c4-wasmrelaxedsimd-fma.c &
 
@@ -471,10 +435,8 @@ tools/xngen src/f32-gemm/avx512-broadcast.c.in -D MR=16 -D NR=64 -D INC=0 -D DAT
 
 ################################ RISC-V Vector ################################
 tools/xngen src/f32-gemm/MRxNRv-rvv.c.in -D MR=7 -D NR=m4 -D ACTIVATION=LINEAR -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-7x4v-rvv.c &
-tools/xngen src/f32-gemm/MRxNRv-rvv.c.in -D MR=7 -D NR=m4 -D ACTIVATION=RELU   -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-7x4v-relu-rvv.c &
 tools/xngen src/f32-gemm/MRxNRv-rvv.c.in -D MR=7 -D NR=m4 -D ACTIVATION=MINMAX -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-7x4v-minmax-rvv.c &
 tools/xngen src/f32-gemm/MRxNRv-rvv.c.in -D MR=1 -D NR=m4 -D ACTIVATION=LINEAR -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-1x4v-rvv.c &
-tools/xngen src/f32-gemm/MRxNRv-rvv.c.in -D MR=1 -D NR=m4 -D ACTIVATION=RELU   -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-1x4v-relu-rvv.c &
 tools/xngen src/f32-gemm/MRxNRv-rvv.c.in -D MR=1 -D NR=m4 -D ACTIVATION=MINMAX -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-1x4v-minmax-rvv.c &
 
 ################################### HEXAGON HVX ##################################
