@@ -15,14 +15,10 @@
 #include "src/xnnpack/microfnptr.h"
 #include "src/xnnpack/vbinary.h"
 
-#if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
-  static struct xnn_cmul_config f16_cmul_config = {0};
-#endif
+static struct xnn_cmul_config f16_cmul_config = {0};
 static struct xnn_cmul_config f32_cmul_config = {0};
 
-#if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
-  XNN_INIT_ONCE_GUARD(f16_cmul);
-#endif
+XNN_INIT_ONCE_GUARD(f16_cmul);
 XNN_INIT_ONCE_GUARD(f32_cmul);
 
 // Macros to log the microkernel names if and when they are registered.
@@ -30,11 +26,13 @@ XNN_INIT_ONCE_GUARD(f32_cmul);
   (xnn_vbinary_ukernel_fn) ukernel;    \
   xnn_log_info("Using cmul microkernel '%s'.", #ukernel);
 
-#if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
-  static void init_f16_cmul_config(void) {
-      f16_cmul_config.ukernel = XNN_INIT_CMUL_UKERNEL(xnn_f16_vcmul_ukernel__neonfp16arith_u16);
-  }
-#endif
+static void init_f16_cmul_config(void) {
+  #if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+    f16_cmul_config.ukernel = XNN_INIT_CMUL_UKERNEL(xnn_f16_vcmul_ukernel__neonfp16arith_u16);
+  #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_FP16_VECTOR
+    f16_cmul_config.ukernel = XNN_INIT_CMUL_UKERNEL(xnn_f16_vcmul_ukernel__rvvfp16arith_u2v);
+  #endif
+}
 
 static void init_f32_cmul_config(void) {
   #if XNN_ARCH_ARM
@@ -81,16 +79,12 @@ static void init_f32_cmul_config(void) {
 }
 
 const struct xnn_cmul_config* xnn_init_f16_cmul_config() {
-  #if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     if (hardware_config == NULL || !xnn_is_f16_compatible_config(hardware_config)) {
       return NULL;
     }
     XNN_INIT_ONCE(f16_cmul);
     return &f16_cmul_config;
-  #else
-    return NULL;
-  #endif
 }
 
 const struct xnn_cmul_config* xnn_init_f32_cmul_config() {
