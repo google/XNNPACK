@@ -5,19 +5,18 @@
 #include <cstddef>
 #include <cstdint>
 #include <memory>
-#include <optional>
 #include <set>
+#include <utility>
 #include <variant>
 #include <vector>
 
-#include "ynnpack/base/log.h"
 #include "ynnpack/base/type.h"
 #include "ynnpack/include/ynnpack.h"
 #include "ynnpack/subgraph/elementwise.h"
 #include "ynnpack/subgraph/fusion_types.h"
 #include "ynnpack/subgraph/runtime.h"
 #include "ynnpack/subgraph/subgraph.h"
-#include "ynnpack/subgraph/utils.h"
+#include "slinky/base/ref_count.h"
 #include "slinky/runtime/buffer.h"
 
 namespace ynn {
@@ -233,81 +232,123 @@ subgraph_candidate find_subgraph_for_unary_lut(
 
 bool rewrite_subgraph_for_unary_lut(ynn_subgraph& subgraph,
                                     subgraph_analysis& analysis) {
-  // Find the longest subgraph that can be optimized with a unary LUT.
-  // We iterate through the nodes in reverse order since
-  // `find_subgraph_for_unary_lut` traverses the nodes in reverse order.
-  subgraph_candidate best_candidate;
+  std::vector<subgraph_candidate> candidates;
+  std::set<const ynn_node*> used_nodes;
+
+  // Find all non-overlapping candidates.
+  // We iterate backwards to favor longer chains starting from outputs.
   for (auto it = subgraph.nodes.rbegin(); it != subgraph.nodes.rend(); ++it) {
     ynn_node& node = *it;
-    if (!node.is_valid()) continue;
+    if (!node.is_valid() || used_nodes.count(&node)) continue;
+
     subgraph_candidate candidate =
         find_subgraph_for_unary_lut(subgraph, node, analysis);
-    if (candidate.is_valid() && candidate.size() > best_candidate.size()) {
-      best_candidate = candidate;
+
+    if (candidate.is_valid()) {
+      // If candidate is a single node, check if it is worth replacing with a
+      // lut.
+      if (candidate.size() == 1 &&
+          !should_lut_single_node(**candidate.get_nodes().begin())) {
+        continue;
+      }
+
+      // Check if any node in the candidate is already used.
+      bool overlap = false;
+      for (const ynn_node* n : candidate.get_nodes()) {
+        if (used_nodes.count(n)) {
+          overlap = true;
+          break;
+        }
+      }
+      if (overlap) continue;
+
+      // Mark nodes as used and add candidate.
+      for (const ynn_node* n : candidate.get_nodes()) {
+        used_nodes.insert(n);
+      }
+      candidates.push_back(std::move(candidate));
     }
   }
 
-  if (!best_candidate.is_valid()) {
+  if (candidates.empty()) {
     return false;
   }
 
-  // If candidate is a single node, check if it is worth replacing with a lut.
-  if (best_candidate.size() == 1) {
-    const ynn_node& node = **best_candidate.get_nodes().begin();
-    if (!should_lut_single_node(node)) {
-      return false;
-    }
-  }
-
-  YNN_LOG_DEBUG() << "Found candidate of size " << best_candidate.size();
-
-  // Clone the candidate subgraph.
-  uint32_t lut_input_id = YNN_INVALID_VALUE_ID;
-  uint32_t lut_output_id = YNN_INVALID_VALUE_ID;
-  ynn::ref_count<ynn_subgraph> lut_subgraph = clone_subgraph_subset(
-      subgraph, best_candidate.get_input_id(), best_candidate.get_output_id(),
-      lut_input_id, lut_output_id);
-  if (!lut_subgraph) {
-    return false;
-  }
-
-  // Resize subgraph to be the same rank and size as the LUT table.
-  const size_t range = 256;
+  // Clone the subgraph. We'll remove any nodes that are not part of any
+  // candidate.
+  slinky::ref_count<ynn_subgraph> lut_subgraph = new ynn_subgraph(subgraph);
   for (ynn_value& value : lut_subgraph->values) {
-    if (value.is_valid() && !value.is_static()) {
-      value.extents = {static_cast<slinky::index_t>(range)};
-      value.data = nullptr;
+    value.flags &=
+        ~(YNN_VALUE_FLAG_EXTERNAL_INPUT | YNN_VALUE_FLAG_EXTERNAL_OUTPUT);
+  }
+  for (size_t i = 0; i < subgraph.nodes.size(); ++i) {
+    if (used_nodes.count(&subgraph.nodes[i])) {
+      lut_subgraph->nodes[i].checks.clear();
+    } else {
+      lut_subgraph->nodes[i].invalidate();
     }
   }
-  for (ynn_node& node : lut_subgraph->nodes) {
-    node.checks.clear();
+
+  // Set up inputs and outputs for the lut_subgraph.
+  const size_t range = 256;
+  struct lut_info {
+    uint32_t input_id;
+    uint32_t output_id;
+    ynn_type output_type;
+    std::vector<uint8_t> data;
+  };
+  std::vector<lut_info> lut_infos;
+
+  for (const auto& candidate : candidates) {
+    uint32_t in_id = candidate.get_input_id();
+    uint32_t out_id = candidate.get_output_id();
+
+    lut_subgraph->values[in_id].flags |= YNN_VALUE_FLAG_EXTERNAL_INPUT;
+    lut_subgraph->values[in_id].extents = {static_cast<slinky::index_t>(range)};
+    lut_subgraph->values[in_id].data = nullptr;
+
+    lut_subgraph->values[out_id].flags |= YNN_VALUE_FLAG_EXTERNAL_OUTPUT;
+    lut_subgraph->values[out_id].extents = {
+        static_cast<slinky::index_t>(range)};
+    lut_subgraph->values[out_id].data = nullptr;
+
+    // Intermediate values in the candidate chains also need to be resized.
+    for (uint32_t val_id : candidate.get_values()) {
+      if (val_id != in_id && val_id != out_id) {
+        lut_subgraph->values[val_id].extents = {
+            static_cast<slinky::index_t>(range)};
+        lut_subgraph->values[val_id].data = nullptr;
+      }
+    }
+
+    lut_infos.push_back({in_id, out_id, subgraph.values[out_id].type, {}});
   }
 
-  const ynn_value& input_value = lut_subgraph->value(lut_input_id);
-  const void* input_data = get_lut_input_data(input_value.type);
+  lut_subgraph->invalidate_dead_values();
 
-  // Run the cloned subgraph.
   ynn_runtime runtime(lut_subgraph, nullptr, 0);
   if (runtime.build() != ynn_status_success) {
     return false;
   }
 
-  size_t input_dims = range;
-  if (ynn_set_external_value_shape(&runtime, lut_input_id, 1, &input_dims) !=
-      ynn_status_success) {
-    return false;
-  }
-  if (ynn_set_external_value_data(&runtime, lut_input_id, (void*)input_data) !=
-      ynn_status_success) {
-    return false;
-  }
+  for (auto& info : lut_infos) {
+    const ynn_value& input_value = lut_subgraph->value(info.input_id);
+    const void* input_data = get_lut_input_data(input_value.type);
+    size_t input_dims = range;
+    if (ynn_set_external_value_shape(&runtime, info.input_id, 1, &input_dims) !=
+        ynn_status_success) {
+      return false;
+    }
+    if (ynn_set_external_value_data(&runtime, info.input_id,
+                                    (void*)input_data) != ynn_status_success) {
+      return false;
+    }
 
-  const ynn_value& output_value =
-      subgraph.value(best_candidate.get_output_id());
-  std::vector<uint8_t> output_data(range * type_size_bytes(output_value.type));
-  if (ynn_set_external_value_data(&runtime, lut_output_id,
-                                  output_data.data()) != ynn_status_success) {
-    return false;
+    info.data.resize(range * type_size_bytes(info.output_type));
+    if (ynn_set_external_value_data(&runtime, info.output_id,
+                                    info.data.data()) != ynn_status_success) {
+      return false;
+    }
   }
 
   if (runtime.reshape() != ynn_status_success ||
@@ -316,21 +357,24 @@ bool rewrite_subgraph_for_unary_lut(ynn_subgraph& subgraph,
     return false;
   }
 
-  // Create a new LUT table with the output values generated by the runtime.
-  uint32_t lut_id = YNN_INVALID_VALUE_ID;
-  size_t lut_dims[] = {range};
-  if (ynn_define_tensor_value(&subgraph, output_value.type, 1, lut_dims,
-                              output_data.data(), YNN_INVALID_VALUE_ID,
-                              YNN_INVALID_VALUE_ID, YNN_VALUE_FLAG_COPY_DATA,
-                              &lut_id) != ynn_status_success) {
-    return false;
+  // Create a new LUT table with the output values generated by the runtime and
+  // replace nodes in the original subgraph.
+  for (size_t i = 0; i < candidates.size(); ++i) {
+    auto& info = lut_infos[i];
+
+    uint32_t lut_id = YNN_INVALID_VALUE_ID;
+    size_t lut_dims[] = {range};
+    if (ynn_define_tensor_value(&subgraph, info.output_type, 1, lut_dims,
+                                info.data.data(), YNN_INVALID_VALUE_ID,
+                                YNN_INVALID_VALUE_ID, YNN_VALUE_FLAG_COPY_DATA,
+                                &lut_id) != ynn_status_success) {
+      return false;
+    }
+
+    ynn_node* output_node = analysis.producer_of(info.output_id);
+    define_lut(subgraph, *output_node, info.input_id, lut_id, info.output_id);
   }
 
-  // Replace and invalidate all nodes in `candidate` with the new LUT node.
-  ynn_node* output_node = analysis.producers[best_candidate.get_output_id()];
-
-  define_lut(subgraph, *output_node, best_candidate.get_input_id(), lut_id,
-             best_candidate.output_id());
   return true;
 }
 
