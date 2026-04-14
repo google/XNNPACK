@@ -44,14 +44,28 @@ namespace ynn {
 
 namespace {
 
-// TODO(dsharlet): This should probably be a parameter we learn based on cpuinfo
-// or other source of CPU metadata. This was determined experimentally.
-constexpr index_t cache_size_l2 = 128 * 1024;
+// Set default cache sizes to be conservative.
+constexpr index_t default_cache_size_l1 = 16 * 1024;
+constexpr index_t default_cache_size_l2 = 128 * 1024;
+constexpr index_t default_cache_size_l3 = 4096 * 1024;
+constexpr index_t default_num_shared_l3_cores = 4;
 
 // When we want arithmetic to be consistent, we need to make all tiling
 // decisions independently of any hardware dependent parameters (cache sizes,
 // kernel tile sizes, etc.).
 constexpr index_t consistent_block_n = 64;
+
+const cpu_info& get_cpu_info() {
+  static const cpu_info info = []() {
+    cpu_info info;
+    info.cache_sizes[0] = default_cache_size_l1;
+    info.cache_sizes[1] = default_cache_size_l2;
+    info.cache_sizes[2] = default_cache_size_l3;
+    info.num_shared_l3_cores = default_num_shared_l3_cores;
+    return info;
+  }();
+  return info;
+}
 
 // The wrapper for the kernel we use when we actually want to run a dot kernel
 // on some buffers.
@@ -239,15 +253,14 @@ auto make_dot_impl(dot_type type, bool consistent_arithmetic, bool transposed_a,
                  c_stride_m, c);
         };
 
-    const size_t cache_sizes[] = {cache_size_l2};
-
+    const cpu_info& cpu_info = get_cpu_info();
     // We need up to 3 loops per cache level.
-    dot_loop loops_storage[std::size(cache_sizes) * 3];
+    dot_loop loops_storage[cpu_info::kNumCacheLevels * 3];
 
     if (k1) {
-      auto loops = schedule_dot(cache_sizes, c_m.extent(), c_n.extent(), k,
+      auto loops = schedule_dot(cpu_info, c_m.extent(), c_n.extent(), k,
                                 block_m, block_n, block_k, a.elem_size,
-                                b.elem_size, loops_storage);
+                                b.elem_size, c.elem_size, loops_storage);
 
       slinky::for_each_element(
           [=](void* c, const void* a, const void* b, const void* init_c) {
@@ -262,9 +275,9 @@ auto make_dot_impl(dot_type type, bool consistent_arithmetic, bool transposed_a,
       std::array<size_t, 3> k_tail = {static_cast<size_t>(k1_tail),
                                       static_cast<size_t>(k2),
                                       static_cast<size_t>(k3)};
-      auto loops = schedule_dot(cache_sizes, c_m.extent(), c_n.extent(), k_tail,
+      auto loops = schedule_dot(cpu_info, c_m.extent(), c_n.extent(), k_tail,
                                 block_m, block_n, block_k, a.elem_size,
-                                b.elem_size, loops_storage);
+                                b.elem_size, c.elem_size, loops_storage);
       // Dot kernels can't handle k1 not aligned to tile_k. We handle that here
       // by making a padded copy of the unaligned elements and calling the
       // kernel again.
@@ -405,7 +418,7 @@ uint32_t define_pack_b(ynn_subgraph_t subgraph, const dot_type& type,
   slinky::expr k3 = num_k_dims >= 3 ? b.extent(3) : 1;
 
   const index_t elem_size_bits = type_size_bytes(b.type) * 8 / element_count;
-  const index_t cache_elements = cache_size_l2 * 8 / elem_size_bits;
+  const index_t cache_elements = default_cache_size_l2 * 8 / elem_size_bits;
 
   // When choosing block_n, we have the following concerns:
   // - We want to make the block bigger than the kernel's `block_n`
@@ -630,58 +643,100 @@ uint32_t define_transpose_a(ynn_subgraph& subgraph, index_t tile_k,
   return output.id;
 }
 
+// Dynamically determines the optimal 2D tiling (m_split, n_split) for a given
+// dot workload to maximize thread saturation and minimize thread starvation.
+//
+// The logic relies on several geometric scaling phases:
+// 1. Fast Path: Extremely small workloads bypass the thread pool entirely,
+//    running in a single thread to eliminate OS scheduling overhead.
+// 2. Symmetric Scaling: For workloads with a moderate aspect ratio (m/n), we
+//    prioritize growing the larger dimension, doubling tile sizes until we
+//    reach a target footprint or cost ceiling.
+// 3. Asymmetric Compute Density Boost: For highly asymmetric shapes
+//    (aspect_ratio != 4), the target footprint and cost ceiling are doubled.
+//    This saturates large thread pools by coalescing sliver tasks into fewer,
+//    denser blocks, resolving thread starvation on many-core processors.
 std::tuple<slinky::expr, slinky::expr> choose_split_factors(
     ynn_runtime& runtime, slinky::expr m, slinky::expr n, slinky::expr k,
-    slinky::expr block_n) {
+    slinky::expr block_n, ynn_type input_a_type, ynn_type input_b_type,
+    ynn_type output_c_type) {
   // We can only return a scalar from a slinky expression, so we pack the two
   // splits into one integer.
-  auto impl = [](const slinky::call* op, slinky::eval_context& ctx) {
+
+  index_t elem_a = type_size_bytes(input_a_type);
+  index_t elem_b = type_size_bytes(input_b_type);
+  index_t elem_c = type_size_bytes(output_c_type);
+  auto impl = [elem_a, elem_b, elem_c](const slinky::call* op,
+                                       slinky::eval_context& ctx) {
     index_t m = evaluate(op->args[0], ctx);
     index_t n = evaluate(op->args[1], ctx);
     index_t k = evaluate(op->args[2], ctx);
-    index_t block_n = evaluate(op->args[3], ctx);
 
-    // If k gets big, we're going to tile k anyways. It could be faster to
-    // parallelize more finely, but it will waste CPU cycles due to more memory
-    // traffic out of the cache.
-    k = std::min<index_t>(k, 1024);
+    index_t split_m = m;
+    index_t split_n = n;
 
-    // Considerations for task size:
-    // - We want tasks to be square-ish, to maximize the number of times we can
-    // use data we load from either side.
-    // - Tasks shouldn't be too small, to avoid parallelism overhead.
-    // - Tasks shouldn't be too large, so we get enough parallelism.
-    const index_t min_area =
-        std::min<index_t>(m, 64) * std::min<index_t>(n, 64);
-    const index_t max_area = 256 * 256;
-    // The maximum cost of a tile, according to the cost function (m + n) * k.
-    const index_t max_cost = 1024 * 64;
+    index_t footprint_bytes = m * k * elem_a + k * n * elem_b + m * n * elem_c;
+    if (footprint_bytes <= get_cpu_info().cache_sizes[1] / 4) {
+      // Extremely small workloads bypass the thread pool entirely.
+    } else {
+      // Cap K to 1024. If K is excessively large, it will be tiled anyway in
+      // `schedule_dot`. Capping it here ensures we don't overestimate the cost
+      // of a chunk.
+      k = std::min<index_t>(k, 1024);
 
-    // A parameter indicating the target split_m/split_n ratio.
-    // TODO(b/438841352): Figure out why we want tall skinny tiles, at least on
-    // AMD Rome.
-    const index_t aspect_ratio = 4;
+      // Considerations for task size:
+      // - Footprint: Enforces a spatial limit. We target a specific footprint
+      //   to maximize data reuse and saturate CPU caches.
+      // - Cost: The total number of input elements read from matrices A and B.
+      //   Enforces a temporal limit, ensuring a single thread doesn't process
+      //   too much data and cause thread starvation.
+      const index_t min_footprint = 256 * 1024;
+      index_t max_footprint = 512 * 1024;
+      index_t target_cost = elem_a * 16 * 1024;
 
-    index_t split_n = std::min<index_t>(n, block_n);
-    index_t split_m = std::min<index_t>(m, 16);
-    while (true) {
-      if (split_n * split_m >= min_area) {
-        // We've reached the minimum tile size, should we stop?
-        if ((split_m + split_n) * k >= max_cost ||
-            split_m * split_n >= max_area) {
-          // We've reached the maximum task size, we should stop.
+      // Default aspect ratio for symmetric matrices.
+      index_t aspect_ratio = 4;
+      // For M-heavy or N-heavy shapes, we adjust the aspect_ratio to prioritize
+      // growing the larger dimension. We also boost `max_footprint` and
+      // `target_cost` to coalesce tiny slivers into fewer, larger blocks.
+      if (m >= 4 * n) {
+        aspect_ratio = 16;  // Prioritize growing m
+        max_footprint *= 2;
+        target_cost *= 2;
+      } else if (n >= 4 * m) {
+        aspect_ratio = 1;  // Prioritize growing n
+        max_footprint *= 2;
+        target_cost *= 2;
+      }
+
+      const index_t block_n = evaluate(op->args[3], ctx);
+      split_n = std::min<index_t>(split_n, block_n);
+      split_m = std::min<index_t>(split_m, 16);
+      index_t footprint = split_m * k * elem_a + k * split_n * elem_b +
+                          split_m * split_n * elem_c;
+      while (true) {
+        index_t cost = (split_m + split_n) * k;
+
+        if (footprint >= min_footprint) {
+          if (cost >= target_cost || footprint >= max_footprint) {
+            break;
+          }
+        }
+        // We want to make the tile bigger, figure out which dimension to grow.
+        if ((aspect_ratio * split_n <= split_m || split_m >= m) &&
+            split_n < n) {
+          footprint += k * split_n * elem_b + split_m * split_n * elem_c;
+          split_n *= 2;
+        } else if ((split_m <= aspect_ratio * split_n || split_n >= n) &&
+                   split_m < m) {
+          footprint += split_m * k * elem_a + split_m * split_n * elem_c;
+          split_m *= 2;
+        } else {
           break;
         }
       }
-      // We want to make the tile bigger, figure out which dimension to grow.
-      if ((aspect_ratio * split_n <= split_m || split_m >= m) && split_n < n) {
-        split_n *= 2;
-      } else if ((split_m <= aspect_ratio * split_n || split_n >= n) &&
-                 split_m < m) {
-        split_m *= 2;
-      } else {
-        break;
-      }
+      split_m = std::min<index_t>(split_m, m);
+      split_n = std::min<index_t>(split_n, n);
     }
 
     assert(split_n < 65536);
@@ -1070,8 +1125,8 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
     }
 
     slinky::expr split_n, split_m;
-    std::tie(split_n, split_m) =
-        choose_split_factors(runtime, m, n, k, block_n);
+    std::tie(split_n, split_m) = choose_split_factors(
+        runtime, m, n, k, block_n, input_a.type, packed_b.type, output.type);
 
     if (slinky::prove_true(n <= block_n)) {
       // We know n is smaller than the side of the area we want to compute,
