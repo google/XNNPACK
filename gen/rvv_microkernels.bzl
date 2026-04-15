@@ -24,6 +24,7 @@ PROD_RVV_MICROKERNEL_SRCS = [
     "src/f32-igemm/gen/f32-igemm-1x4v-minmax-rvv.c",
     "src/f32-igemm/gen/f32-igemm-7x4v-minmax-rvv.c",
     "src/f32-maxpool/gen/f32-maxpool-9p-minmax-rvv-u2v.c",
+    "src/f32-ppmm/gen/f32-ppmm-4x4v-minmax-rvv.c",
     "src/f32-qs8-vcvt/gen/f32-qs8-vcvt-rvv-u2v.c",
     "src/f32-qu8-vcvt/gen/f32-qu8-vcvt-rvv-u2v.c",
     "src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-rvv-rr2-p6-u4v.c",
@@ -142,7 +143,6 @@ PROD_RVV_MICROKERNEL_SRCS = [
     "src/x32-transposec/gen/x32-transposec-8x8-rvv.c",
     "src/x32-transposec/gen/x32-transposec-16x8-rvv.c",
     "src/x32-transposec/gen/x32-transposec-32x8-rvv.c",
-    "src/f32-ppmm/gen/f32-ppmm-4x4v-minmax-rvv.c",
 ]
 
 NON_PROD_RVV_MICROKERNEL_SRCS = [
@@ -166,6 +166,14 @@ NON_PROD_RVV_MICROKERNEL_SRCS = [
     "src/f32-gemm/gen/f32-gemm-7x4v-rvv.c",
     "src/f32-igemm/gen/f32-igemm-1x4v-rvv.c",
     "src/f32-igemm/gen/f32-igemm-7x4v-rvv.c",
+    "src/f32-ppmm/gen/f32-ppmm-1x1v-minmax-rvv.c",
+    "src/f32-ppmm/gen/f32-ppmm-1x2v-minmax-rvv.c",
+    "src/f32-ppmm/gen/f32-ppmm-1x4v-minmax-rvv.c",
+    "src/f32-ppmm/gen/f32-ppmm-2x1v-minmax-rvv.c",
+    "src/f32-ppmm/gen/f32-ppmm-2x2v-minmax-rvv.c",
+    "src/f32-ppmm/gen/f32-ppmm-2x4v-minmax-rvv.c",
+    "src/f32-ppmm/gen/f32-ppmm-4x1v-minmax-rvv.c",
+    "src/f32-ppmm/gen/f32-ppmm-4x2v-minmax-rvv.c",
     "src/f32-qs8-vcvt/gen/f32-qs8-vcvt-rvv-u1v.c",
     "src/f32-qs8-vcvt/gen/f32-qs8-vcvt-rvv-u4v.c",
     "src/f32-qs8-vcvt/gen/f32-qs8-vcvt-rvv-u8v.c",
