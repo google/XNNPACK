@@ -43,6 +43,7 @@ SET(PROD_RVV_MICROKERNEL_SRCS
   src/f32-spmm/gen/f32-spmm-4vx4-minmax-rvv.c
   src/f32-spmm/gen/f32-spmm-8vx1-minmax-rvv.c
   src/f32-spmm/gen/f32-spmm-8vx2-minmax-rvv.c
+  src/f32-vapproxgelu/gen/f32-vapproxgelu-rvv-rational-12-10-div-u4v.c
   src/f32-vbinary/gen/f32-vadd-rvv-u8v.c
   src/f32-vbinary/gen/f32-vaddc-rvv-u8v.c
   src/f32-vbinary/gen/f32-vdiv-rvv-u8v.c
@@ -69,6 +70,8 @@ SET(PROD_RVV_MICROKERNEL_SRCS
   src/f32-vcopysign/gen/f32-vrcopysignc-rvv-u8v.c
   src/f32-vcos/gen/f32-vcos-rvv-rational-5-4-div-u8v.c
   src/f32-vexp/gen/f32-vexp-rvv-rational-3-2-div-u8v.c
+  src/f32-velu/gen/f32-velu-rvv-rr2-p6-u4v.c
+  src/f32-vgelu/gen/f32-vgelu-rvv-rational-12-10-div-u4v.c
   src/f32-vhswish/gen/f32-vhswish-rvv-u4v.c
   src/f32-vlog/gen/f32-vlog-rvv-rational-3-3-div-u8v.c
   src/f32-vlrelu/gen/f32-vlrelu-rvv-u4v.c
@@ -143,9 +146,6 @@ SET(PROD_RVV_MICROKERNEL_SRCS
   src/x32-transposec/gen/x32-transposec-8x8-rvv.c
   src/x32-transposec/gen/x32-transposec-16x8-rvv.c
   src/x32-transposec/gen/x32-transposec-32x8-rvv.c
-  src/f32-vapproxgelu/gen/f32-vapproxgelu-rvv-rational-12-10-div-u4v.c
-  src/f32-velu/gen/f32-velu-rvv-rr2-p6-u4v.c
-  src/f32-vgelu/gen/f32-vgelu-rvv-rational-12-10-div-u4v.c)
 
 SET(NON_PROD_RVV_MICROKERNEL_SRCS
   src/f32-conv-hwc2chw/f32-conv-hwc2chw-3x3s2p1c3x2v-rvv-1x1.c
@@ -201,6 +201,13 @@ SET(NON_PROD_RVV_MICROKERNEL_SRCS
   src/f32-spmm/gen/f32-spmm-4vx1-minmax-rvv.c
   src/f32-spmm/gen/f32-spmm-4vx2-minmax-rvv.c
   src/f32-spmm/gen/f32-spmm-8vx4-minmax-rvv.c
+  src/f32-vapproxgelu/gen/f32-vapproxgelu-rvv-rational-12-10-div-u1v.c
+  src/f32-vapproxgelu/gen/f32-vapproxgelu-rvv-rational-12-10-div-u2v.c
+  src/f32-vapproxgelu/gen/f32-vapproxgelu-rvv-rational-12-10-div-u8v.c
+  src/f32-vapproxgelu/gen/f32-vapproxgelu-rvv-rational-12-10-nr-u1v.c
+  src/f32-vapproxgelu/gen/f32-vapproxgelu-rvv-rational-12-10-nr-u2v.c
+  src/f32-vapproxgelu/gen/f32-vapproxgelu-rvv-rational-12-10-nr-u4v.c
+  src/f32-vapproxgelu/gen/f32-vapproxgelu-rvv-rational-12-10-nr-u8v.c
   src/f32-vbinary/gen/f32-vadd-rvv-u4v.c
   src/f32-vbinary/gen/f32-vaddc-rvv-u4v.c
   src/f32-vbinary/gen/f32-vdiv-rvv-u4v.c
@@ -234,6 +241,16 @@ SET(NON_PROD_RVV_MICROKERNEL_SRCS
   src/f32-vexp/gen/f32-vexp-rvv-rational-3-2-div-u1v.c
   src/f32-vexp/gen/f32-vexp-rvv-rational-3-2-div-u2v.c
   src/f32-vexp/gen/f32-vexp-rvv-rational-3-2-div-u4v.c
+  src/f32-velu/gen/f32-velu-rvv-rr2-p6-u1v.c
+  src/f32-velu/gen/f32-velu-rvv-rr2-p6-u2v.c
+  src/f32-velu/gen/f32-velu-rvv-rr2-p6-u8v.c
+  src/f32-vgelu/gen/f32-vgelu-rvv-rational-12-10-div-u1v.c
+  src/f32-vgelu/gen/f32-vgelu-rvv-rational-12-10-div-u2v.c
+  src/f32-vgelu/gen/f32-vgelu-rvv-rational-12-10-div-u8v.c
+  src/f32-vgelu/gen/f32-vgelu-rvv-rational-12-10-nr-u1v.c
+  src/f32-vgelu/gen/f32-vgelu-rvv-rational-12-10-nr-u2v.c
+  src/f32-vgelu/gen/f32-vgelu-rvv-rational-12-10-nr-u4v.c
+  src/f32-vgelu/gen/f32-vgelu-rvv-rational-12-10-nr-u8v.c
   src/f32-vhswish/gen/f32-vhswish-rvv-u1v.c
   src/f32-vhswish/gen/f32-vhswish-rvv-u2v.c
   src/f32-vhswish/gen/f32-vhswish-rvv-u8v.c
@@ -337,22 +354,5 @@ SET(NON_PROD_RVV_MICROKERNEL_SRCS
   src/x32-packw/gen/x32-packw-x8v-gemm-goi-rvv-u2.c
   src/x32-packw/gen/x32-packw-x8v-gemm-goi-rvv-u4.c
   src/x32-packw/gen/x32-packw-x8v-gemm-goi-rvv-u8.c
-  src/f32-vapproxgelu/gen/f32-vapproxgelu-rvv-rational-12-10-div-u1v.c
-  src/f32-vapproxgelu/gen/f32-vapproxgelu-rvv-rational-12-10-div-u2v.c
-  src/f32-vapproxgelu/gen/f32-vapproxgelu-rvv-rational-12-10-div-u8v.c
-  src/f32-vapproxgelu/gen/f32-vapproxgelu-rvv-rational-12-10-nr-u1v.c
-  src/f32-vapproxgelu/gen/f32-vapproxgelu-rvv-rational-12-10-nr-u2v.c
-  src/f32-vapproxgelu/gen/f32-vapproxgelu-rvv-rational-12-10-nr-u4v.c
-  src/f32-vapproxgelu/gen/f32-vapproxgelu-rvv-rational-12-10-nr-u8v.c
-  src/f32-velu/gen/f32-velu-rvv-rr2-p6-u1v.c
-  src/f32-velu/gen/f32-velu-rvv-rr2-p6-u2v.c
-  src/f32-velu/gen/f32-velu-rvv-rr2-p6-u8v.c
-  src/f32-vgelu/gen/f32-vgelu-rvv-rational-12-10-div-u1v.c
-  src/f32-vgelu/gen/f32-vgelu-rvv-rational-12-10-div-u2v.c
-  src/f32-vgelu/gen/f32-vgelu-rvv-rational-12-10-div-u8v.c
-  src/f32-vgelu/gen/f32-vgelu-rvv-rational-12-10-nr-u1v.c
-  src/f32-vgelu/gen/f32-vgelu-rvv-rational-12-10-nr-u2v.c
-  src/f32-vgelu/gen/f32-vgelu-rvv-rational-12-10-nr-u4v.c
-  src/f32-vgelu/gen/f32-vgelu-rvv-rational-12-10-nr-u8v.c)
 
 SET(ALL_RVV_MICROKERNEL_SRCS ${PROD_RVV_MICROKERNEL_SRCS} + ${NON_PROD_RVV_MICROKERNEL_SRCS})
