@@ -684,8 +684,8 @@ std::tuple<slinky::expr, slinky::expr> choose_split_factors(
       }
     }
 
-    assert(split_n < 65536);
-    assert(split_m < 32768);
+    split_m = std::min<index_t>(split_m, 32768);
+    split_n = std::min<index_t>(split_n, 65536);
     return split_m * 65536 + split_n;
   };
   slinky::expr splits = slinky::call::make(impl, {m, n, k, block_n});
