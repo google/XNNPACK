@@ -660,10 +660,9 @@ ynn_status ynn_define_convert(ynn_subgraph_t subgraph, uint32_t input_id,
     // don't have a kernel for this conversion. Handle it by converting to an
     // intermediate float.
     uint32_t intermediate_id = YNN_INVALID_VALUE_ID;
-    ynn_status status = ynn_define_tensor_value(
-        subgraph, ynn_type_fp32, /*rank=*/0, /*dims=*/nullptr,
-        /*data=*/nullptr, /*zero_point_id=*/YNN_INVALID_VALUE_ID,
-        /*scale_id=*/YNN_INVALID_VALUE_ID, /*flags=*/0, &intermediate_id);
+    ynn_status status =
+        ynn_define_tensor(subgraph, ynn_type_fp32, /*rank=*/0, /*dims=*/nullptr,
+                          /*data=*/nullptr, /*flags=*/0, &intermediate_id);
     if (status != ynn_status_success) {
       return status;
     }
@@ -831,10 +830,9 @@ ynn_status ynn_define_dequantize(ynn_subgraph_t subgraph, uint32_t input_id,
                                ynn_type_fp32);
     if (kernel) {
       uint32_t output_float_id = YNN_INVALID_VALUE_ID;
-      ynn_status status = ynn_define_tensor_value(
+      ynn_status status = ynn_define_tensor(
           subgraph, ynn_type_fp32, /*rank=*/0, /*dims=*/nullptr,
-          /*data=*/nullptr, /*zero_point_id=*/YNN_INVALID_VALUE_ID,
-          /*scale_id=*/YNN_INVALID_VALUE_ID, /*flags=*/0, &output_float_id);
+          /*data=*/nullptr, /*flags=*/0, &output_float_id);
       if (status != ynn_status_success) {
         return status;
       }
@@ -871,10 +869,9 @@ ynn_status ynn_define_dequantize(ynn_subgraph_t subgraph, uint32_t input_id,
     assert(kernel);
 
     uint32_t output_float_id = YNN_INVALID_VALUE_ID;
-    ynn_status status = ynn_define_tensor_value(
-        subgraph, ynn_type_fp32, /*rank=*/0, /*dims=*/nullptr,
-        /*data=*/nullptr, /*zero_point_id=*/YNN_INVALID_VALUE_ID,
-        /*scale_id=*/YNN_INVALID_VALUE_ID, /*flags=*/0, &output_float_id);
+    ynn_status status =
+        ynn_define_tensor(subgraph, ynn_type_fp32, /*rank=*/0, /*dims=*/nullptr,
+                          /*data=*/nullptr, /*flags=*/0, &output_float_id);
     if (status != ynn_status_success) {
       return status;
     }

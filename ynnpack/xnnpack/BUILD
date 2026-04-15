@@ -10,25 +10,11 @@ load("//ynnpack:build_defs.bzl", "ynn_binary_linkopts", "ynn_binary_malloc", "yn
 _COMPATIBLE_WITH = []
 
 cc_library(
-    name = "utils",
-    srcs = ["utils.cc"],
-    hdrs = ["utils.h"],
-    compatible_with = _COMPATIBLE_WITH,
-    deps = [
-        "//:xnnpack_h",
-        "//ynnpack",
-        "//ynnpack/base",
-        "//ynnpack/subgraph",
-    ],
-)
-
-cc_library(
     name = "dynamic_quantization",
     srcs = ["dynamic_quantization.cc"],
     hdrs = ["dynamic_quantization.h"],
     compatible_with = _COMPATIBLE_WITH,
     deps = [
-        ":utils",
         "//ynnpack",
         "//ynnpack/base",
         "//ynnpack/base:log",
@@ -49,6 +35,8 @@ cc_library(
         "runtime.cc",
         "subgraph.cc",
         "tensor.cc",
+        "utils.cc",
+        "utils.h",
         "weights_cache.cc",
         "workspace.cc",
         "xnnpack.h",
@@ -58,7 +46,6 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         ":dynamic_quantization",
-        ":utils",
         "//:xnnpack_h",
         "//ynnpack",
         "//ynnpack/base",

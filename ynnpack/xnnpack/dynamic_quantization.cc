@@ -3,9 +3,10 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+#include "ynnpack/xnnpack/dynamic_quantization.h"
+
 #include <algorithm>
 #include <cassert>
-#include <cmath>
 #include <cstddef>
 #include <cstdint>
 #include <limits>
@@ -21,7 +22,6 @@
 #include "ynnpack/subgraph/runtime.h"
 #include "ynnpack/subgraph/slinky.h"
 #include "ynnpack/subgraph/subgraph.h"
-#include "ynnpack/xnnpack/utils.h"
 #include "slinky/builder/pipeline.h"
 #include "slinky/runtime/buffer.h"
 #include "slinky/runtime/expr.h"
