@@ -1118,4 +1118,114 @@ TEST(fusion, bf16_elementwise) {
   }
 }
 
+TEST(fusion, remove_static_broadcast_from_elementwise_binary) {
+  const uint32_t x_id = 0;
+  const uint32_t y_id = 1;
+  const uint32_t out_id = 2;
+  SubgraphBuilder builder(3);
+  uint32_t broadcast_x_id = YNN_INVALID_VALUE_ID;
+
+  builder.AddInput(ynn_type_fp32, {1, 10}, x_id)
+      .AddInput(ynn_type_fp32, {5, 10}, y_id)
+      .AddOutput(ynn_type_fp32, {5, 10}, out_id)
+      .AddTensor(ynn_type_fp32, {5, 10}, broadcast_x_id);
+
+  builder.AddStaticBroadcast({5, 0}, x_id, broadcast_x_id)
+      .AddBinary(ynn_binary_add, broadcast_x_id, y_id, out_id);
+
+  ynn_subgraph& subgraph = *builder.GetSubgraph();
+
+  subgraph.fusion();
+  subgraph.invalidate_dead_values();
+
+  // The static_broadcast should be removed because it is implied by the other
+  // operand.
+  EXPECT_THAT(ProducerOf(out_id, subgraph),
+              AllOf(IsBinary(ynn_binary_add), InputsInclude(x_id, y_id)));
+}
+
+TEST(fusion, keep_static_broadcast_from_dynamic_shape_elementwise_binary) {
+  const uint32_t x_id = 0;
+  const uint32_t y_id = 1;
+  const uint32_t out_id = 2;
+  SubgraphBuilder builder(3);
+  uint32_t broadcast_x_id = YNN_INVALID_VALUE_ID;
+
+  builder.AddInput(ynn_type_fp32, 2, x_id)
+      .AddInput(ynn_type_fp32, 2, y_id)
+      .AddOutput(ynn_type_fp32, 2, out_id)
+      .AddTensor(ynn_type_fp32, 2, broadcast_x_id);
+
+  builder.AddStaticBroadcast({5, 0}, x_id, broadcast_x_id)
+      .AddBinary(ynn_binary_add, broadcast_x_id, y_id, out_id);
+
+  ynn_subgraph& subgraph = *builder.GetSubgraph();
+
+  subgraph.fusion();
+  subgraph.invalidate_dead_values();
+
+  // The static_broadcast should not be removed because we don't know if it is
+  // needed or not.
+  EXPECT_THAT(
+      ProducerOf(out_id, subgraph),
+      AllOf(IsBinary(ynn_binary_add), InputsInclude(broadcast_x_id, y_id)));
+}
+
+TEST(fusion, keep_static_broadcast_from_elementwise_binary) {
+  const uint32_t x_id = 0;
+  const uint32_t y_id = 1;
+  const uint32_t out_id = 2;
+  SubgraphBuilder builder(3);
+  uint32_t broadcast_x_id = YNN_INVALID_VALUE_ID;
+
+  builder.AddInput(ynn_type_fp32, {1, 10}, x_id)
+      .AddInput(ynn_type_fp32, {1, 10}, y_id)
+      .AddOutput(ynn_type_fp32, {5, 10}, out_id)
+      .AddTensor(ynn_type_fp32, {5, 10}, broadcast_x_id);
+
+  builder.AddStaticBroadcast({5, 0}, x_id, broadcast_x_id)
+      .AddBinary(ynn_binary_add, broadcast_x_id, y_id, out_id);
+
+  ynn_subgraph& subgraph = *builder.GetSubgraph();
+
+  subgraph.fusion();
+  subgraph.invalidate_dead_values();
+
+  // The static_broadcast should be moved to the output instead of removed.
+  EXPECT_THAT(ProducerOf(out_id, subgraph), IsStaticBroadcast());
+  uint32_t add_out_id = ProducerOf(out_id, subgraph).inputs[0];
+  EXPECT_THAT(ProducerOf(add_out_id, subgraph),
+              AllOf(IsBinary(ynn_binary_add), InputsInclude(x_id, y_id)));
+}
+
+TEST(fusion, keep_static_broadcast_multiple_consumers) {
+  const uint32_t x_id = 0;
+  const uint32_t y_id = 1;
+  const uint32_t out_id = 2;
+  const uint32_t out2_id = 3;
+  SubgraphBuilder builder(4);
+  uint32_t broadcast_x_id = YNN_INVALID_VALUE_ID;
+
+  builder.AddInput(ynn_type_fp32, {1, 10}, x_id)
+      .AddInput(ynn_type_fp32, {1, 10}, y_id)
+      .AddOutput(ynn_type_fp32, {5, 10}, out_id)
+      .AddOutput(ynn_type_fp32, {5, 10}, out2_id)
+      .AddTensor(ynn_type_fp32, {5, 10}, broadcast_x_id);
+
+  builder.AddStaticBroadcast({5, 0}, x_id, broadcast_x_id)
+      .AddBinary(ynn_binary_add, broadcast_x_id, y_id, out_id)
+      .AddUnary(ynn_unary_abs, broadcast_x_id, out2_id);
+
+  ynn_subgraph& subgraph = *builder.GetSubgraph();
+
+  subgraph.fusion();
+  subgraph.invalidate_dead_values();
+
+  // We can't rewrite this because the broadcast has two consumers. We could
+  // improve the rewrite to handle this case.
+  EXPECT_THAT(
+      ProducerOf(out_id, subgraph),
+      AllOf(IsBinary(ynn_binary_add), InputsInclude(broadcast_x_id, y_id)));
+}
+
 }  // namespace ynn

@@ -29,6 +29,7 @@
 #include "ynnpack/subgraph/reduce.h"
 #include "ynnpack/subgraph/stencil_copy.h"
 #include "ynnpack/subgraph/subgraph.h"
+#include "slinky/builder/simplify.h"
 #include "slinky/runtime/expr.h"
 
 namespace ynn {
@@ -643,6 +644,53 @@ bool remove_broadcast(ynn_subgraph& subgraph, ynn_node& node,
          remove_broadcast<ynn_node::broadcast_like>(subgraph, node, analysis);
 }
 
+// If the producer of an elementwise op is a static_broadcast, and the dimension
+// being broadcast is known to be a broadcast, we don't need the broadcast.
+bool remove_static_broadcast_from_elementwise(ynn_subgraph& subgraph,
+                                              ynn_node& node,
+                                              subgraph_analysis& analysis) {
+  if (!std::holds_alternative<ynn_node::binary_elementwise>(node.op) &&
+      !std::holds_alternative<ynn_node::ternary_elementwise>(node.op)) {
+    // This is not an op that we can assume implicitly broadcasts statically
+    // extent 1 dimensions.
+    return false;
+  }
+
+  bool change = false;
+
+  for (uint32_t& input_id : node.inputs) {
+    ynn_node* producer = analysis.producer_of(input_id);
+    if (!producer) continue;
+
+    ynn_node::static_broadcast* broadcast =
+        std::get_if<ynn_node::static_broadcast>(&producer->op);
+    if (broadcast == nullptr) continue;
+
+    for (size_t d = 0; d < broadcast->new_dims.size(); ++d) {
+      if (!broadcast->new_dims[d]) continue;
+
+      if (std::any_of(node.inputs.begin(), node.inputs.end(), [&](uint32_t id) {
+            if (id == input_id) return false;
+
+            slinky::expr extent_d = subgraph.value(id).extent(d);
+            return slinky::prove_true(extent_d == broadcast->new_dims[d]);
+          })) {
+        // This dimension of the broadcast is not needed because it is implied
+        // by another operand of the elementwise op.
+      } else {
+        // This broadcast is needed
+        return false;
+      }
+    }
+
+    YNN_LOG_DEBUG() << "Removing static_broadcast from elementwise input.";
+    input_id = producer->inputs[0];
+    change = true;
+  }
+
+  return change;
+}
+
 // Rewrite transpose_a(stencil_copy(x)) to stencil_copy(transpose_a(x)).
 bool rewrite_transpose_stencil_copy(ynn_subgraph& subgraph, ynn_node& node,
                                     subgraph_analysis& analysis) {
@@ -1236,6 +1284,8 @@ ynn_status ynn_subgraph::fusion() {
                 ynn::rewrite_clamp(*this, node, analysis) ||
                 ynn::move_broadcast_to_output(*this, node, analysis) ||
                 ynn::remove_broadcast(*this, node, analysis) ||
+                ynn::remove_static_broadcast_from_elementwise(*this, node,
+                                                              analysis) ||
                 ynn::rewrite_transpose_stencil_copy(*this, node, analysis) ||
                 ynn::rewrite_reduce_sum_of_squared(*this, node, analysis) ||
                 ynn::rewrite_reduce_sum_convert(*this, node, analysis) ||

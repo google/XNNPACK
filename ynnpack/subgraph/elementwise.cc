@@ -214,24 +214,7 @@ ynn_status create_unary(const ynn_node& node, ynn_runtime& runtime,
   const unary_params& params =
       std::get<ynn_node::unary_elementwise>(node.op).params;
 
-  ynn_runtime_value& a = runtime.value(node.inputs[0]);
-  // Unary ops can't handle broadcasting. By constraining the stride of the
-  // first dimension to be 1, we force slinky to actually realize the broadcast
-  // into memory.
-  // TODO: b/488387849 - Elsewhere, we should avoid this from happening by
-  // rewriting unary(broadcast(x)) -> broadcast(unary(x)).
-  if (a.rank() > 0 && !is_one(a.extent(0))) {
-    const int elem_size = type_size_bytes(a.type);
-    slinky::expr& stride = a.buffer->dim(0).stride;
-    // Make sure that the stride is not already constrained to something else.
-    // We should never constrain the stride of dimension 0 to anything other
-    // than 0 (broadcast) or 1 element.
-    assert(
-        is_variable(stride, a.buffer->sym(), slinky::buffer_field::stride, 0) ||
-        is_constant(stride, elem_size));
-    stride = elem_size;
-  }
-
+  const ynn_runtime_value& a = runtime.value(node.inputs[0]);
   ynn_runtime_value& x = runtime.value(node.outputs[0]);
   x.make_buffer(runtime);
   std::vector<slinky::var> dims = runtime.globals.make_dims(x.rank());
