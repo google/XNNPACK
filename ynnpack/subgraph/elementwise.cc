@@ -509,11 +509,7 @@ ynn_status define_unary(ynn_subgraph_t subgraph, ynn_unary_operator op,
                         uint32_t input_a_id, unary_params params,
                         uint32_t* output_id, uint32_t flags) {
   const ynn_value& a = subgraph->value(input_a_id);
-
-  // Propagate rank.
   ynn_value& x = subgraph->get_output_value(output_id, a);
-  x.extents.clear();
-  x.extents.resize(x.rank());
 
   // Find the kernel.
   unary_kernel_fn kernel = get_unary_kernel(op, a.type, x.type);
@@ -621,12 +617,8 @@ ynn_status ynn_define_convert(ynn_subgraph_t subgraph, uint32_t input_id,
       validate_output_tensor("unary", subgraph, "output_id", output_id));
 
   const ynn_value& a = subgraph->value(input_id);
-
-  // Propagate rank.
   ynn_value& x = subgraph->get_output_value(output_id, output_type,
                                             zero_point_id, scale_id);
-  x.extents.clear();
-  x.extents.resize(x.rank());
 
   const uint32_t x_scale_id =
       scale_id != YNN_INVALID_VALUE_ID ? scale_id : x.scale_id;
@@ -717,12 +709,8 @@ ynn_status ynn_define_quantize(ynn_subgraph_t subgraph, uint32_t input_id,
       validate_output_tensor("quantize", subgraph, "output_id", output_id));
 
   const ynn_value& a = subgraph->value(input_id);
-  // Propagate rank.
   ynn_value& x = subgraph->get_output_value(output_id, output_type,
                                             zero_point_id, scale_id);
-
-  x.extents.clear();
-  x.extents.resize(x.rank());
 
   uint32_t x_scale_id =
       scale_id != YNN_INVALID_VALUE_ID ? scale_id : x.scale_id;
@@ -794,11 +782,7 @@ ynn_status ynn_define_dequantize(ynn_subgraph_t subgraph, uint32_t input_id,
       validate_output_tensor("dequantize", subgraph, "output_id", output_id));
 
   const ynn_value& a = subgraph->value(input_id);
-
-  // Propagate rank.
   ynn_value& x = subgraph->get_output_value(output_id, output_type);
-  x.extents.clear();
-  x.extents.resize(x.rank());
 
   uint32_t a_scale_id =
       scale_id != YNN_INVALID_VALUE_ID ? scale_id : a.scale_id;
@@ -909,8 +893,6 @@ ynn_status ynn_define_binary(ynn_subgraph_t subgraph, ynn_binary_operator op,
       validate_output_tensor("binary", subgraph, "output_id", output_id));
   const ynn_value& a = subgraph->value(input_a_id);
   const ynn_value& b = subgraph->value(input_b_id);
-
-  // Propagate rank.
   ynn_value& x = subgraph->get_output_value(output_id, a);
 
   // Find the kernel.
