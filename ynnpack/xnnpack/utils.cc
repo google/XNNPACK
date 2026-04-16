@@ -580,22 +580,7 @@ ynn_status define_binary_with_broadcasting(
 }
 
 ynn_status implement_gelu(xnn_subgraph_t subgraph, uint32_t input_id,
-                          uint32_t output_id) {
-  ynn_type input_type = type_of_value(subgraph, input_id);
-
-  if (ynn::type_is_integral(input_type)) {
-    // Convert quantized inputs to float. We'll just convert this whole subgraph
-    // into a LUT anyways.
-    uint32_t input_float_id = YNN_INVALID_VALUE_ID;
-    ynn_status status = ynn_define_dequantize(
-        subgraph->ynn, input_id, YNN_INVALID_VALUE_ID, YNN_INVALID_VALUE_ID,
-        ynn_type_fp32, &input_float_id, /*flags=*/0);
-    if (status != ynn_status_success) {
-      return status;
-    }
-    input_id = input_float_id;
-  }
-
+                          uint32_t* output_id) {
   uint32_t x_sqrt2_over_2_id = YNN_INVALID_VALUE_ID;
   ynn_status status = define_binary_scalar_b(subgraph, ynn_binary_multiply,
                                              input_id, std::sqrt(2) / 2,
@@ -626,48 +611,13 @@ ynn_status implement_gelu(xnn_subgraph_t subgraph, uint32_t input_id,
     return status;
   }
 
-  uint32_t output_float_id = output_id;
-  if (ynn::type_is_integral(input_type)) {
-    output_float_id = YNN_INVALID_VALUE_ID;
-  }
-
-  status = ynn_define_binary(subgraph->ynn, ynn_binary_multiply, input_id,
-                             half_erf_plus_half_id, &output_float_id,
-                             /*flags=*/0);
-  if (status != ynn_status_success) {
-    return status;
-  }
-
-  if (ynn::type_is_integral(input_type)) {
-    const ynn_value& output = subgraph->ynn->value(output_id);
-    status = ynn_define_quantize(subgraph->ynn, output_float_id, output.type,
-                                 get_zero_point_id(subgraph, output_id),
-                                 get_scale_id(subgraph, output_id), &output_id,
-                                 /*flags=*/0);
-    if (status != ynn_status_success) {
-      return status;
-    }
-  }
-  return ynn_status_success;
+  return ynn_define_binary(subgraph->ynn, ynn_binary_multiply, input_id,
+                           half_erf_plus_half_id, output_id,
+                           /*flags=*/0);
 }
 
 ynn_status implement_approxgelu(xnn_subgraph_t subgraph, uint32_t input_id,
-                                uint32_t output_id) {
-  ynn_type input_type = type_of_value(subgraph, input_id);
-
-  if (ynn::type_is_integral(input_type)) {
-    // Convert quantized inputs to float. We'll just convert this whole subgraph
-    // into a LUT anyways.
-    uint32_t input_float_id = YNN_INVALID_VALUE_ID;
-    ynn_status status = ynn_define_dequantize(
-        subgraph->ynn, input_id, YNN_INVALID_VALUE_ID, YNN_INVALID_VALUE_ID,
-        ynn_type_fp32, &input_float_id, /*flags=*/0);
-    if (status != ynn_status_success) {
-      return status;
-    }
-    input_id = input_float_id;
-  }
-
+                                uint32_t* output_id) {
   // (x / 2) * (1 + tanh(sqrt(2 / pi) * (x + 0.044715 * x^3)))
   const float sqrt_2_over_pi = 0.7978845608f;
   const float coefficients[] = {0.0f, sqrt_2_over_pi, 0.0f,
@@ -702,57 +652,14 @@ ynn_status implement_approxgelu(xnn_subgraph_t subgraph, uint32_t input_id,
     return status;
   }
 
-  uint32_t output_float_id = output_id;
-  if (ynn::type_is_integral(input_type)) {
-    output_float_id = YNN_INVALID_VALUE_ID;
-  }
-
-  status =
-      ynn_define_binary(subgraph->ynn, ynn_binary_multiply, x_times_half_id,
-                        one_plus_tanh_id, &output_float_id,
-                        /*flags=*/0);
-  if (status != ynn_status_success) {
-    return status;
-  }
-
-  if (ynn::type_is_integral(input_type)) {
-    const ynn_value& output = subgraph->ynn->value(output_id);
-    status = ynn_define_quantize(subgraph->ynn, output_float_id, output.type,
-                                 get_zero_point_id(subgraph, output_id),
-                                 get_scale_id(subgraph, output_id), &output_id,
-                                 /*flags=*/0);
-    if (status != ynn_status_success) {
-      return status;
-    }
-  }
-  return ynn_status_success;
+  return ynn_define_binary(subgraph->ynn, ynn_binary_multiply, x_times_half_id,
+                           one_plus_tanh_id, output_id,
+                           /*flags=*/0);
 }
 
 // Implements elu(x) = select(x < 0, alpha * expm1(x), x)
 ynn_status implement_elu(xnn_subgraph_t subgraph, uint32_t input_id,
-                         float alpha, uint32_t output_id) {
-  ynn_type input_type = type_of_value(subgraph, input_id);
-
-  if (ynn::type_is_integral(input_type)) {
-    // Convert quantized inputs to float. We'll just convert this whole subgraph
-    // into a LUT anyways.
-    uint32_t input_float_id = YNN_INVALID_VALUE_ID;
-    ynn_status status = ynn_define_tensor_value(
-        subgraph->ynn, ynn_type_fp32, rank_of_value(subgraph, input_id),
-        /*dims=*/nullptr, /*data=*/nullptr,
-        /*zero_point_id=*/YNN_INVALID_VALUE_ID,
-        /*scale_id=*/YNN_INVALID_VALUE_ID, /*flags=*/0, &input_float_id);
-    if (status != ynn_status_success) {
-      return status;
-    }
-    status = ynn_define_unary(subgraph->ynn, ynn_unary_convert, input_id,
-                              &input_float_id, /*flags=*/0);
-    if (status != ynn_status_success) {
-      return status;
-    }
-    input_id = input_float_id;
-  }
-
+                         float alpha, uint32_t* output_id) {
   // We implement this using min/max instead:
   //
   // elu(x) = max(alpha*expm1(min(x, 0)), x)
@@ -782,48 +689,13 @@ ynn_status implement_elu(xnn_subgraph_t subgraph, uint32_t input_id,
     return status;
   }
 
-  uint32_t output_float_id = output_id;
-  if (ynn::type_is_integral(input_type)) {
-    output_float_id = YNN_INVALID_VALUE_ID;
-  }
-
-  status = ynn_define_binary(subgraph->ynn, ynn_binary_max,
-                             alpha_times_expm1_x_id, input_id, &output_float_id,
-                             /*flags=*/0);
-  if (status != ynn_status_success) {
-    return status;
-  }
-
-  if (ynn::type_is_integral(input_type)) {
-    const ynn_value& output = subgraph->ynn->value(output_id);
-    status = ynn_define_quantize(subgraph->ynn, output_float_id, output.type,
-                                 get_zero_point_id(subgraph, output_id),
-                                 get_scale_id(subgraph, output_id), &output_id,
-                                 /*flags=*/0);
-    if (status != ynn_status_success) {
-      return status;
-    }
-  }
-  return ynn_status_success;
+  return ynn_define_binary(subgraph->ynn, ynn_binary_max,
+                           alpha_times_expm1_x_id, input_id, output_id,
+                           /*flags=*/0);
 }
 
 ynn_status implement_hardswish(xnn_subgraph_t subgraph, uint32_t input_id,
-                               uint32_t output_id) {
-  ynn_type input_type = type_of_value(subgraph, input_id);
-
-  if (ynn::type_is_integral(input_type)) {
-    // Convert quantized inputs to float. We'll just convert this whole subgraph
-    // into a LUT anyways.
-    uint32_t input_float_id = YNN_INVALID_VALUE_ID;
-    ynn_status status = ynn_define_dequantize(
-        subgraph->ynn, input_id, YNN_INVALID_VALUE_ID, YNN_INVALID_VALUE_ID,
-        ynn_type_fp32, &input_float_id, /*flags=*/0);
-    if (status != ynn_status_success) {
-      return status;
-    }
-    input_id = input_float_id;
-  }
-
+                               uint32_t* output_id) {
   uint32_t x_div_6_id = YNN_INVALID_VALUE_ID;
   ynn_status status = define_binary_scalar_b(
       subgraph, ynn_binary_multiply, input_id, 1.0f / 6.0f, &x_div_6_id);
@@ -852,60 +724,15 @@ ynn_status implement_hardswish(xnn_subgraph_t subgraph, uint32_t input_id,
     return status;
   }
 
-  uint32_t output_float_id = output_id;
-  if (ynn::type_is_integral(input_type)) {
-    output_float_id = YNN_INVALID_VALUE_ID;
-  }
-
-  status = ynn_define_binary(subgraph->ynn, ynn_binary_multiply, input_id,
-                             relu6_id, &output_float_id,
-                             /*flags=*/0);
-  if (status != ynn_status_success) {
-    return status;
-  }
-
-  if (ynn::type_is_integral(input_type)) {
-    const ynn_value& output = subgraph->ynn->value(output_id);
-    status = ynn_define_quantize(subgraph->ynn, output_float_id, output.type,
-                                 get_zero_point_id(subgraph, output_id),
-                                 get_scale_id(subgraph, output_id), &output_id,
-                                 /*flags=*/0);
-    if (status != ynn_status_success) {
-      return status;
-    }
-  }
-  return ynn_status_success;
+  return ynn_define_binary(subgraph->ynn, ynn_binary_multiply, input_id,
+                           relu6_id, output_id,
+                           /*flags=*/0);
 }
 
 ynn_status implement_leaky_relu(xnn_subgraph_t subgraph, uint32_t input_id,
-                                uint32_t output_id, float alpha) {
-  if (ynn::type_is_integral(ynn::type_of_value(subgraph, output_id))) {
-    uint32_t input_dequantized_id = YNN_INVALID_VALUE_ID;
-    ynn_status status = ynn_define_dequantize(
-        subgraph->ynn, input_id, YNN_INVALID_VALUE_ID, YNN_INVALID_VALUE_ID,
-        ynn_type_fp32, &input_dequantized_id,
-        /*flags=*/0);
-    if (status != ynn_status_success) {
-      return status;
-    }
-
-    uint32_t output_dequantized_id = YNN_INVALID_VALUE_ID;
-    status = define_binary_scalar_b(subgraph, ynn_binary_leaky_relu,
-                                    input_dequantized_id, alpha,
-                                    &output_dequantized_id);
-    if (status != ynn_status_success) {
-      return status;
-    }
-
-    const ynn_value& output = subgraph->ynn->value(output_id);
-    return ynn_define_quantize(
-        subgraph->ynn, output_dequantized_id, output.type,
-        get_zero_point_id(subgraph, output_id),
-        get_scale_id(subgraph, output_id), &output_id, /*flags=*/0);
-  } else {
-    return define_binary_scalar_b(subgraph, ynn_binary_leaky_relu, input_id,
-                                  alpha, &output_id);
-  }
+                                uint32_t* output_id, float alpha) {
+  return define_binary_scalar_b(subgraph, ynn_binary_leaky_relu, input_id,
+                                alpha, output_id);
 }
 
 ynn_status define_clamp(xnn_subgraph_t subgraph, float min, float max,
@@ -1089,6 +916,11 @@ ynn_type type_of_value(xnn_subgraph_t subgraph, uint32_t id) {
 
 size_t rank_of_value(xnn_subgraph_t subgraph, uint32_t id) {
   return subgraph->ynn->value(id).rank();
+}
+
+bool is_value_quantized(xnn_subgraph_t subgraph, uint32_t id) {
+  const ynn_value& value = subgraph->ynn->value(id);
+  return value.type == ynn_type_int8 || value.type == ynn_type_uint8;
 }
 
 uint32_t get_zero_point_id(xnn_subgraph_t subgraph, uint32_t id) {

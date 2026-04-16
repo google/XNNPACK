@@ -116,18 +116,33 @@ xnn_status xnn_define_unary(xnn_subgraph_t subgraph, xnn_unary_operator type,
                             const union xnn_unary_params* params,
                             uint32_t input_id, uint32_t output_id,
                             uint32_t flags) {
+  if (ynn::is_value_quantized(subgraph, input_id)) {
+    // Convert quantized inputs to float. We'll just convert this whole subgraph
+    // into a LUT anyways.
+    uint32_t input_float_id = YNN_INVALID_VALUE_ID;
+    ynn_status status = ynn_define_dequantize(
+        subgraph->ynn, input_id, ynn::get_zero_point_id(subgraph, input_id),
+        ynn::get_scale_id(subgraph, input_id), ynn_type_fp32, &input_float_id,
+        /*flags=*/0);
+    if (status != ynn_status_success) {
+      return ynn::xnn_status_from_ynn(status);
+    }
+    input_id = input_float_id;
+  }
+
+  uint32_t output_scale_id = ynn::get_scale_id(subgraph, output_id);
+  uint32_t output_zero_point_id = ynn::get_zero_point_id(subgraph, output_id);
   if (type == xnn_unary_convert) {
     // This might be a dynamic quantization conversion.
-    uint32_t scale_id = ynn::get_scale_id(subgraph, output_id);
-    const ynn_value* scale = scale_id != YNN_INVALID_VALUE_ID
-                                 ? &subgraph->ynn->value(scale_id)
-                                 : nullptr;
-    uint32_t zero_point_id = ynn::get_zero_point_id(subgraph, output_id);
-    const ynn_value* zero_point = zero_point_id != YNN_INVALID_VALUE_ID
-                                      ? &subgraph->ynn->value(zero_point_id)
-                                      : nullptr;
-    if (scale && zero_point && !scale->is_static() &&
-        !zero_point->is_static()) {
+    const ynn_value* output_scale = output_scale_id != YNN_INVALID_VALUE_ID
+                                        ? &subgraph->ynn->value(output_scale_id)
+                                        : nullptr;
+    const ynn_value* output_zero_point =
+        output_zero_point_id != YNN_INVALID_VALUE_ID
+            ? &subgraph->ynn->value(output_zero_point_id)
+            : nullptr;
+    if (output_scale && output_zero_point && !output_scale->is_static() &&
+        !output_zero_point->is_static()) {
       // This is a qd8 dynamic quantization. We need to compute the quantization
       // params.
       assert(ynn::type_of_value(subgraph, output_id) == ynn_type_uint8 ||
@@ -135,7 +150,7 @@ xnn_status xnn_define_unary(xnn_subgraph_t subgraph, xnn_unary_operator type,
       assert(subgraph->num_nonbatch_axes.count(output_id));
       ynn_status status = ynn::compute_qd8_params(
           subgraph->ynn, subgraph->num_nonbatch_axes[output_id], input_id,
-          output_id, scale_id, zero_point_id);
+          output_id, output_scale_id, output_zero_point_id);
       if (status != ynn_status_success) {
         return ynn::xnn_status_from_ynn(status);
       }
@@ -143,35 +158,61 @@ xnn_status xnn_define_unary(xnn_subgraph_t subgraph, xnn_unary_operator type,
       // Now that we've computed the params,
       // We still need the convert node below.
     }
+
+    return ynn::xnn_status_from_ynn(ynn_define_quantize(
+        subgraph->ynn, input_id, ynn::type_of_value(subgraph, output_id),
+        output_zero_point_id, output_scale_id, &output_id,
+        /*flags=*/0));
   }
+
+  uint32_t output_float_id = output_id;
+  if (ynn::is_value_quantized(subgraph, output_id)) {
+    output_float_id = YNN_INVALID_VALUE_ID;
+  }
+
+  ynn_status status;
   if (type == xnn_unary_leaky_relu) {
-    return ynn::xnn_status_from_ynn(ynn::implement_leaky_relu(
-        subgraph, input_id, output_id, params->leaky_relu.negative_slope));
+    status = ynn::implement_leaky_relu(subgraph, input_id, &output_float_id,
+                                       params->leaky_relu.negative_slope);
   } else if (type == xnn_unary_clamp) {
-    return ynn::xnn_status_from_ynn(ynn::define_clamp(
-        subgraph, params->clamp.min, params->clamp.max, input_id, &output_id));
+    status = ynn::define_clamp(subgraph, params->clamp.min, params->clamp.max,
+                               input_id, &output_float_id);
   } else if (type == xnn_unary_elu) {
-    return ynn::xnn_status_from_ynn(
-        ynn::implement_elu(subgraph, input_id, params->elu.alpha, output_id));
+    status = ynn::implement_elu(subgraph, input_id, params->elu.alpha,
+                                &output_float_id);
   } else if (type == xnn_unary_gelu) {
-    return ynn::xnn_status_from_ynn(
-        ynn::implement_gelu(subgraph, input_id, output_id));
+    status = ynn::implement_gelu(subgraph, input_id, &output_float_id);
   } else if (type == xnn_unary_hardswish) {
-    return ynn::xnn_status_from_ynn(
-        ynn::implement_hardswish(subgraph, input_id, output_id));
+    status = ynn::implement_hardswish(subgraph, input_id, &output_float_id);
   } else if (type == xnn_unary_approxgelu) {
-    return ynn::xnn_status_from_ynn(
-        ynn::implement_approxgelu(subgraph, input_id, output_id));
+    status = ynn::implement_approxgelu(subgraph, input_id, &output_float_id);
   } else {
     ynn_unary_operator ynn_type = ynn::unary_operator_from_xnn(type);
     if (ynn_type != ynn_unary_invalid) {
       // This is a simple op without any relevant params.
-      return ynn::xnn_status_from_ynn(ynn_define_unary(
-          subgraph->ynn, ynn_type, input_id, &output_id, /*flags=*/0));
+      status =
+          ynn_define_unary(subgraph->ynn, ynn_type, input_id, &output_float_id,
+                           /*flags=*/0);
+    } else {
+      YNN_LOG_ERROR() << "Unsupported unary operator " << type;
+      return xnn_status_unsupported_parameter;
     }
   }
-  YNN_LOG_ERROR() << "Unsupported unary operator " << type;
-  return xnn_status_deprecated;
+  if (status != ynn_status_success) {
+    return ynn::xnn_status_from_ynn(status);
+  }
+
+  if (output_id != output_float_id) {
+    status = ynn_define_quantize(
+        subgraph->ynn, output_float_id, ynn::type_of_value(subgraph, output_id),
+        output_zero_point_id, output_scale_id, &output_id,
+        /*flags=*/0);
+    if (status != ynn_status_success) {
+      return ynn::xnn_status_from_ynn(status);
+    }
+  }
+
+  return xnn_status_success;
 }
 
 xnn_status xnn_define_convolution_2d(
