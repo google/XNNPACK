@@ -554,11 +554,11 @@ size_t xnn_tensor_get_size(const struct xnn_value* value);
 size_t xnn_runtime_tensor_get_size(const struct xnn_runtime_value* value);
 
 XNN_INLINE static size_t xnn_get_rounded_size(size_t size) {
-  // We round it to XNN_EXTRA_BYTES to ensure that we can read more than the
-  // actual size of the tensor, and round it to allocation alignment to ensure
-  // that all tensors and operator workspaces are aligned correctly.
-  return round_up_po2(round_up_po2(size, XNN_EXTRA_BYTES),
-                      XNN_ALLOCATION_ALIGNMENT);
+  // Add XNN_EXTRA_BYTES of padding after the data so that XNNPACK kernels can
+  // over-read by up to XNN_EXTRA_BYTES without triggering memory-safety faults
+  // (e.g. MTE on ARM64). Merely rounding up to a multiple of XNN_EXTRA_BYTES
+  // provides no padding for sizes that are already aligned.
+  return round_up_po2(size + XNN_EXTRA_BYTES, XNN_ALLOCATION_ALIGNMENT);
 }
 
 // Returns the size of tensor rounded to appropriate extra bytes and allocation
