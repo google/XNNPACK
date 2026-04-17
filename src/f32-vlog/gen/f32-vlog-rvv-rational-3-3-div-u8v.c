@@ -16,14 +16,12 @@
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/microparams.h"
 #include "src/xnnpack/vunary.h"
-#include "src/xnnpack/simd/f32-scalar.h"
+#include "src/xnnpack/simd/f32-scalar.h" // xnn_f32_i32_t
 
 // Define some mathematical constants in case they are not provided by `math.h`.
 #ifndef M_LN2
 #define M_LN2 0.69314718055994531
 #endif  // M_LN2
-
-
 
 // Extracts the exponent of the input `a` as a `float` value.
 static XNN_INLINE vfloat32m8_t xnn_signed_getexp_f32(vfloat32m8_t a, size_t vl) {
@@ -53,12 +51,8 @@ static XNN_INLINE vfloat32m8_t xnn_signed_getexp_f32(vfloat32m8_t a, size_t vl) 
   // zero (e.g. the input was `0.0f` or denormal).
 
   // Some useful constants.
-  //const float sign_mask = -0.0f;
-  //const int32_t sign_mask = 0x80000000;
   const xnn_f32_i32_t sign_mask = {.f = -0.0f};
   const int32_t sign_and_exp_mask = 0xff800000;
-  //const float bias_256 = 256.0f;
-  //const int32_t bias_256 = 0x43800000;
   const xnn_f32_i32_t bias_256 = {.f = 256.0f};
   const float bias_383 = 383.0f;
 
@@ -91,8 +85,7 @@ void xnn_f32_vlog_ukernel__rvv_rational_3_3_div_u8v(
   batch >>= XNN_LOG2_SIZEOF_FLOAT;
 
   // Some useful constants.
-  const float vone = 1.0f;
-  const int32_t vone_x = 0x3F800000;
+  const xnn_f32_i32_t vone = {.f = 1.0f};
   const float vln2 = M_LN2;
   const int32_t vmantissa_bits_mask = 0x007FFFFFUL;
 
@@ -125,12 +118,12 @@ void xnn_f32_vlog_ukernel__rvv_rational_3_3_div_u8v(
     const vfloat32m8_t vexp = xnn_signed_getexp_f32(vx, vl);
 
     // Normalize `x` to an exponent of zero.
-    vx = __riscv_vreinterpret_f32m8(__riscv_vor(__riscv_vand(__riscv_vreinterpret_i32m8(vx), vmantissa_bits_mask, vl), vone_x, vl));
+    vx = __riscv_vreinterpret_f32m8(__riscv_vor(__riscv_vand(__riscv_vreinterpret_i32m8(vx), vmantissa_bits_mask, vl), vone.s, vl));
 
     // Scale `x` back with `1/sqrt(2)` to move its range from `[1.0, 2.0)` to
     // `[sqrt(1/2), sqrt(2))`, and further subtract `1.0` so that it is around
     // zero, i.e. `[sqrt(1/2) - 1, sqrt(2) - 1)`, or `[−0.29289, 0.4142136)`.
-    vx = __riscv_vfsub(__riscv_vfmul(vx, vsqrt1_2, vl), vone, vl);
+    vx = __riscv_vfsub(__riscv_vfmul(vx, vsqrt1_2, vl), vone.f, vl);
 
     // In the following, we use a 3/2-degree rational polynomial to
     // approximate the (shifted) `log(x + 1)` on the (shifted) interval
@@ -138,14 +131,14 @@ void xnn_f32_vlog_ukernel__rvv_rational_3_3_div_u8v(
     // `f(0) = 0`.
 
     // Evaluate the numerator polynomial p.
-    vfloat32m8_t vp = __riscv_vfadd(__riscv_vfmul(vx, valpha_3, vl), vone, vl);
-    vp = __riscv_vfadd(__riscv_vfmul(vx, vp, vl), vone, vl);
+    vfloat32m8_t vp = __riscv_vfadd(__riscv_vfmul(vx, valpha_3, vl), vone.f, vl);
+    vp = __riscv_vfadd(__riscv_vfmul(vx, vp, vl), vone.f, vl);
     vp = __riscv_vfmul(vx, vp, vl);
 
     // Evaluate the denominator polynomial q.
     vfloat32m8_t vq = __riscv_vfadd(__riscv_vfmul(vx, vbeta_3, vl), vbeta_2, vl);
     vq = __riscv_vfadd(__riscv_vfmul(vx, vq, vl), vbeta_1, vl);
-    vq = __riscv_vfadd(__riscv_vfmul(vx, vq, vl), vone, vl);
+    vq = __riscv_vfadd(__riscv_vfmul(vx, vq, vl), vone.f, vl);
 
     // Divide the numerator by the denominator.
     vfloat32m8_t vy = __riscv_vfdiv(vp, vq, vl);
