@@ -46,7 +46,7 @@ void xnn_x32_transposec_ukernel__8xv2_rvv(
       uint32_t* o_ptr = o_col + bw * output_stride_u32;
 
       // Issue loads with the first half of each tuple's stores interleaved to
-      // cover segmented-load latency (mirrors the hand-written m2 kernel).
+      // cover segmented-load latency.
       vuint32m2x4_t tuple0 = __riscv_vlsseg4e32_v_u32m2x4(i_ptr + 0, input_stride, vl);
       __riscv_vse32_v_u32m2(o_ptr + 0 * output_stride_u32, __riscv_vget_v_u32m2x4_u32m2(tuple0, 0), vl);
       __riscv_vse32_v_u32m2(o_ptr + 1 * output_stride_u32, __riscv_vget_v_u32m2x4_u32m2(tuple0, 1), vl);

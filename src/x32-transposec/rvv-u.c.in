@@ -46,7 +46,7 @@ void xnn_x32_transposec_ukernel__${TILE_WIDTH}xv${LMUL}_rvv(
       uint32_t* o_ptr = o_col + bw * output_stride_u32;
 
       // Issue loads with the first half of each tuple's stores interleaved to
-      // cover segmented-load latency (mirrors the hand-written m2 kernel).
+      // cover segmented-load latency.
       $for L in range(N_LOADS):
         vuint32m${LMUL}x${SEG_PER_LOAD}_t tuple${L} = __riscv_vlsseg${SEG_PER_LOAD}e32_v_u32m${LMUL}x${SEG_PER_LOAD}(i_ptr + ${L * SEG_PER_LOAD}, input_stride, vl);
         $if L + 1 < N_LOADS:
