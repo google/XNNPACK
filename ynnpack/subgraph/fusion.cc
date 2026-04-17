@@ -829,6 +829,87 @@ ynn_node* find_non_copy_producer(const ynn_subgraph& subgraph,
   return nullptr;
 }
 
+// Rewrite reduce(reduce(x, k_dims1), k_dims2) to reduce(x, k_dims1 | k_dims2)
+bool rewrite_reduce_reduce(ynn_subgraph& subgraph, ynn_node& node,
+                           subgraph_analysis& analysis) {
+  ynn_node::reduce* reduce2 = std::get_if<ynn_node::reduce>(&node.op);
+  if (!reduce2) return false;
+
+  ynn_node* producer = analysis.producer_of(node.inputs[0]);
+  if (!producer) return false;
+
+  ynn_node::reduce* reduce1 = std::get_if<ynn_node::reduce>(&producer->op);
+  if (!reduce1) return false;
+
+  // Conditions:
+  // 1. Same reduction operator, OR (reduce1=sum_squared, reduce2=sum)
+  ynn_reduce_operator combined_op = ynn_reduce_invalid;
+  if (reduce2->op == ynn_reduce_sum_squared) {
+    // These can't be combined because the squaring happens after the reduction
+    // in this case.
+    return false;
+  } else if (reduce1->op == ynn_reduce_sum_squared &&
+             reduce2->op == ynn_reduce_sum) {
+    combined_op = ynn_reduce_sum_squared;
+  } else if (reduce1->op == reduce2->op) {
+    combined_op = reduce1->op;
+  } else {
+    return false;
+  }
+
+  if (combined_op == ynn_reduce_min_max) return false;
+
+  // 2. Initial value of reduce2 is identity.
+  uint32_t init2_id = node.inputs[1];
+  if (init2_id != YNN_INVALID_VALUE_ID) {
+    std::optional<float> val = subgraph.value(init2_id).as_scalar_float();
+    if (!val) return false;
+    // get_reduce_identity may return NaN if the identity value is unknown.
+    if (!(*val == ynn::get_reduce_identity(reduce2->op))) return false;
+  }
+
+  // 3. Keep dims must match to be able to fuse into a single node.
+  if (reduce1->keep_dims != reduce2->keep_dims) return false;
+
+  // 4. reduce1 output used only by reduce2.
+  if (analysis.consumers[producer->outputs[0]].size() != 1 ||
+      subgraph.value(producer->outputs[0]).is_external_output()) {
+    return false;
+  }
+
+  ynn::axes_set combined_k_dims = reduce1->k_dims;
+  if (reduce1->keep_dims) {
+    combined_k_dims |= reduce2->k_dims;
+  } else {
+    // Map reduce2's axes back to the input of reduce1.
+    size_t reduced = 0;
+    for (size_t i = 0; i < reduce1->k_dims.size(); ++i) {
+      if (reduce1->k_dims[i]) {
+        reduced++;
+      } else {
+        if (i - reduced < reduce2->k_dims.size() &&
+            reduce2->k_dims[i - reduced]) {
+          combined_k_dims[i] = true;
+        }
+      }
+    }
+    assert(combined_k_dims.count() ==
+           reduce1->k_dims.count() + reduce2->k_dims.count());
+  }
+
+  YNN_LOG_DEBUG() << "Fusing " << to_string(reduce2->op) << "("
+                  << to_string(reduce1->op) << "(x))) to "
+                  << to_string(combined_op) << "(x)";
+
+  node.inputs[0] = producer->inputs[0];
+  node.inputs[1] = producer->inputs[1];
+  reduce2->op = combined_op;
+  reduce2->k_dims = combined_k_dims;
+
+  producer->invalidate();
+  return true;
+}
+
 // Rewrites ynn_reduce_sum(x*x) to ynn_reduce_sum_squared(x).
 // Also handles the windowed case where copy shape ops (stencil_copy,
 // static_pad) appear between the multiply and the reduce:
@@ -1270,26 +1351,28 @@ ynn_status ynn_subgraph::fusion() {
     for (ynn_node& node : nodes) {
       if (!node.is_valid()) continue;
 
-      changed = changed || ynn::fold_unary_input(*this, node, analysis) ||
-                ynn::fold_unary_output(*this, node, analysis) ||
-                ynn::rewrite_divide_sqrt(*this, node, analysis) ||
-                ynn::rewrite_multiply_add(*this, node, analysis) ||
-                ynn::rewrite_multiply_multiply(*this, node, analysis) ||
-                ynn::rewrite_binary_convert(*this, node, analysis) ||
-                ynn::rewrite_convert_elementwise(*this, node, analysis) ||
-                ynn::rewrite_subtract_multiply(*this, node, analysis) ||
-                ynn::rewrite_dequantize_dot(*this, node, analysis) ||
-                ynn::rewrite_dequantize_dot_add(*this, node, analysis) ||
-                ynn::rewrite_get_tensor_shape_of_unary(*this, node, analysis) ||
-                ynn::rewrite_clamp(*this, node, analysis) ||
-                ynn::move_broadcast_to_output(*this, node, analysis) ||
-                ynn::remove_broadcast(*this, node, analysis) ||
-                ynn::remove_static_broadcast_from_elementwise(*this, node,
-                                                              analysis) ||
-                ynn::rewrite_transpose_stencil_copy(*this, node, analysis) ||
-                ynn::rewrite_reduce_sum_of_squared(*this, node, analysis) ||
-                ynn::rewrite_reduce_sum_convert(*this, node, analysis) ||
-                ynn::rewrite_reduce_sum_squared_convert(*this, node, analysis);
+      changed =
+          changed || ynn::fold_unary_input(*this, node, analysis) ||
+          ynn::fold_unary_output(*this, node, analysis) ||
+          ynn::rewrite_divide_sqrt(*this, node, analysis) ||
+          ynn::rewrite_multiply_add(*this, node, analysis) ||
+          ynn::rewrite_multiply_multiply(*this, node, analysis) ||
+          ynn::rewrite_binary_convert(*this, node, analysis) ||
+          ynn::rewrite_convert_elementwise(*this, node, analysis) ||
+          ynn::rewrite_subtract_multiply(*this, node, analysis) ||
+          ynn::rewrite_dequantize_dot(*this, node, analysis) ||
+          ynn::rewrite_dequantize_dot_add(*this, node, analysis) ||
+          ynn::rewrite_get_tensor_shape_of_unary(*this, node, analysis) ||
+          ynn::rewrite_clamp(*this, node, analysis) ||
+          ynn::move_broadcast_to_output(*this, node, analysis) ||
+          ynn::remove_broadcast(*this, node, analysis) ||
+          ynn::remove_static_broadcast_from_elementwise(*this, node,
+                                                        analysis) ||
+          ynn::rewrite_transpose_stencil_copy(*this, node, analysis) ||
+          ynn::rewrite_reduce_sum_of_squared(*this, node, analysis) ||
+          ynn::rewrite_reduce_sum_convert(*this, node, analysis) ||
+          ynn::rewrite_reduce_sum_squared_convert(*this, node, analysis) ||
+          ynn::rewrite_reduce_reduce(*this, node, analysis);
     }
   } while (changed);
 
