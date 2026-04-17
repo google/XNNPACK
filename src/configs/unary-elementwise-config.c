@@ -866,8 +866,7 @@ static void init_f16_to_f32_cvt_config(void) {
     if (hardware_config->arch_flags & xnn_arch_riscv_vector_fp16_arith) {
       f16_to_f32_cvt_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f16_f32_vcvt_ukernel__rvvfp16arith_u4v);
       f16_to_f32_cvt_config.element_tile = 4 * hardware_config->vlenb / sizeof(xnn_float16);
-    } else
-    {
+    } else {
       f16_to_f32_cvt_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f16_f32_vcvt_ukernel__scalar_u4);
       f16_to_f32_cvt_config.element_tile = 4;
     }
@@ -1182,6 +1181,16 @@ static void init_f32_cosine_config_impl(struct xnn_unary_elementwise_config* con
     if (hardware_config->arch_flags & xnn_arch_hvx) {
       config->ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f32_vcos_ukernel__hvx_rational_5_4_div_u128);
       config->element_tile = 128;
+    }
+  #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
+    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    assert(hardware_config != NULL);
+    if (hardware_config->arch_flags & xnn_arch_riscv_vector) {
+      config->ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f32_vcos_ukernel__rvv_rational_5_4_div_u8v);
+      config->element_tile = 8 * hardware_config->vlenb / sizeof(float);
+    } else {
+      config->ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f32_vcos_ukernel__scalar_rational_5_4_div_u1);
+      config->element_tile = 1;
     }
   #else
     config->ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f32_vcos_ukernel__scalar_rational_5_4_div_u1);
@@ -1499,6 +1508,16 @@ static void init_f32_exp_config_impl(struct xnn_unary_elementwise_config* config
       config->ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f32_vexp_ukernel__hvx_rational_3_2_div_u128);
       config->element_tile = 128;
     }
+  #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
+    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    assert(hardware_config != NULL);
+    if (hardware_config->arch_flags & xnn_arch_riscv_vector) {
+      config->ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f32_vexp_ukernel__rvv_rational_3_2_div_u8v);
+      config->element_tile = 8 * hardware_config->vlenb / sizeof(float);
+    } else {
+      config->ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f32_vexp_ukernel__scalar_rational_3_2_div_u4);
+      config->element_tile = 4;
+    }
   #else
     config->ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f32_vexp_ukernel__scalar_rational_3_2_div_u4);
     config->element_tile = 4;
@@ -1569,6 +1588,16 @@ static void init_f32_log_config_impl(struct xnn_unary_elementwise_config* config
     if (hardware_config->arch_flags & xnn_arch_hvx) {
       config->ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f32_vlog_ukernel__hvx_rational_3_3_div_u128);
       config->element_tile = 128;
+    }
+  #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
+    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    assert(hardware_config != NULL);
+    if (hardware_config->arch_flags & xnn_arch_riscv_vector) {
+      config->ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f32_vlog_ukernel__rvv_rational_3_3_div_u8v);
+      config->element_tile = 8 * hardware_config->vlenb / sizeof(float);
+    } else {
+      config->ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f32_vlog_ukernel__scalar_rational_3_3_div_u1);
+      config->element_tile = 1;
     }
   #else
     config->ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f32_vlog_ukernel__scalar_rational_3_3_div_u1);
@@ -2095,6 +2124,16 @@ static void init_f32_sigmoid_config_impl(struct xnn_unary_elementwise_config* co
   #elif XNN_ARCH_WASMSIMD
     config->ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f32_vsigmoid_ukernel__wasmsimd_rr2_p5_div_u16);
     config->element_tile = 16;
+  #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
+    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    assert(hardware_config != NULL);
+    if (hardware_config->arch_flags & xnn_arch_riscv_vector) {
+      config->ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f32_vsigmoid_ukernel__rvv_rr2_p5_div_u8v);
+      config->element_tile = 8 * hardware_config->vlenb / sizeof(float);
+    } else {
+      config->ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f32_vsigmoid_ukernel__scalar_rr2_lut64_p2_div_u2);
+      config->element_tile = 2;
+    }
   #else
     config->ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f32_vsigmoid_ukernel__scalar_rr2_lut64_p2_div_u2);
     config->element_tile = 2;
@@ -2376,6 +2415,16 @@ static void init_f32_sine_config_impl(struct xnn_unary_elementwise_config* confi
       config->ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f32_vsin_ukernel__hvx_rational_5_4_div_u128);
       config->element_tile = 128;
     }
+  #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
+    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    assert(hardware_config != NULL);
+    if (hardware_config->arch_flags & xnn_arch_riscv_vector) {
+      config->ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f32_vsin_ukernel__rvv_rational_5_4_div_u8v);
+      config->element_tile = 8 * hardware_config->vlenb / sizeof(float);
+    } else {
+      config->ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f32_vsin_ukernel__scalar_rational_5_4_div_u1);
+      config->element_tile = 1;
+    }
   #else
     config->ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f32_vsin_ukernel__scalar_rational_5_4_div_u1);
     config->element_tile = 1;
@@ -2454,6 +2503,16 @@ static void init_f32_tanh_config_impl(struct xnn_unary_elementwise_config* confi
     if (hardware_config->arch_flags & xnn_arch_hvx) {
       config->ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f32_vtanh_ukernel__hvx_rational_9_8_div_u128);
       config->element_tile = 128;
+    }
+  #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
+    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    assert(hardware_config != NULL);
+    if (hardware_config->arch_flags & xnn_arch_riscv_vector) {
+      config->ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f32_vtanh_ukernel__rvv_rational_9_8_div_u8v);
+      config->element_tile = 8 * hardware_config->vlenb / sizeof(float);
+    } else {
+      config->ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f32_vtanh_ukernel__scalar_rational_9_8_div_u1);
+      config->element_tile = 1;
     }
   #else
     config->ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f32_vtanh_ukernel__scalar_rational_9_8_div_u1);

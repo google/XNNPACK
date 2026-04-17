@@ -21,4 +21,10 @@ tools/xngen src/f32-vlog/rational-3-3.c.in -D ARCH=hvx      -D BATCH_TILES=32,64
 tools/xngen src/f32-vlog/rational-3-3.c.in -D ARCH=fma3     -D BATCH_TILES=8,16,24,32   -D DIV=NR  -o src/f32-vlog/gen/f32-vlog-fma3-rational-3-3-nr.c &
 tools/xngen src/f32-vlog/rational-3-3.c.in -D ARCH=avx512f  -D BATCH_TILES=16,32,48,64  -D DIV=NR  -o src/f32-vlog/gen/f32-vlog-avx512f-rational-3-3-nr.c &
 
+################################### RISC-V Vector #############################
+tools/xngen src/f32-vlog/rvv-rational-3-3.c.in -D LMUL=1 -o src/f32-vlog/gen/f32-vlog-rvv-rational-3-3-div-u1v.c &
+tools/xngen src/f32-vlog/rvv-rational-3-3.c.in -D LMUL=2 -o src/f32-vlog/gen/f32-vlog-rvv-rational-3-3-div-u2v.c &
+tools/xngen src/f32-vlog/rvv-rational-3-3.c.in -D LMUL=4 -o src/f32-vlog/gen/f32-vlog-rvv-rational-3-3-div-u4v.c &
+tools/xngen src/f32-vlog/rvv-rational-3-3.c.in -D LMUL=8 -o src/f32-vlog/gen/f32-vlog-rvv-rational-3-3-div-u8v.c &
+
 wait
