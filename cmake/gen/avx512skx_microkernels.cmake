@@ -10,6 +10,7 @@
 
 
 SET(PROD_AVX512SKX_MICROKERNEL_SRCS
+  src/bf16-f32-vcvt/gen/bf16-f32-vcvt-avx512skx-u16.c
   src/f16-f32-vcvt/gen/f16-f32-vcvt-avx512skx-u16.c
   src/f16-f32acc-rdsum/gen/f16-f32acc-rdsum-7p7x-minmax-avx512skx-u64.c
   src/f16-f32acc-rdsum2/gen/f16-f32acc-rdsum2-7p7x-avx512skx.c
@@ -18,6 +19,7 @@ SET(PROD_AVX512SKX_MICROKERNEL_SRCS
   src/f16-rminmax/gen/f16-rmax-avx512skx-u64-acc4.c
   src/f16-rminmax/gen/f16-rmin-avx512skx-u64-acc4.c
   src/f16-rminmax/gen/f16-rminmax-avx512skx-u64-acc4.c
+  src/f32-bf16-vcvt/gen/f32-bf16-vcvt-avx512skx-u16.c
   src/f32-f16-vcvt/gen/f32-f16-vcvt-avx512skx-u16.c
   src/f32-qc8w-gemm/gen/f32-qc4w-gemm-1x32-minmax-avx512skx-broadcast.c
   src/f32-qc8w-gemm/gen/f32-qc4w-gemm-7x32-minmax-avx512skx-broadcast.c
@@ -61,6 +63,7 @@ SET(PROD_AVX512SKX_MICROKERNEL_SRCS
   src/x8-lut/gen/x8-lut-avx512skx-vpshufb-u64.c)
 
 SET(NON_PROD_AVX512SKX_MICROKERNEL_SRCS
+  src/bf16-f32-vcvt/gen/bf16-f32-vcvt-avx512skx-u32.c
   src/f16-f32-vcvt/gen/f16-f32-vcvt-avx512skx-u32.c
   src/f16-f32acc-rdsum/gen/f16-f32acc-rdsum-7p7x-minmax-avx512skx-u16.c
   src/f16-f32acc-rdsum/gen/f16-f32acc-rdsum-7p7x-minmax-avx512skx-u32.c
@@ -85,6 +88,7 @@ SET(NON_PROD_AVX512SKX_MICROKERNEL_SRCS
   src/f16-vsqrt/gen/f16-vsqrt-avx512skx-sqrt-u16.c
   src/f16-vsqrt/gen/f16-vsqrt-avx512skx-sqrt-u32.c
   src/f16-vsqrt/gen/f16-vsqrt-avx512skx-sqrt-u64.c
+  src/f32-bf16-vcvt/gen/f32-bf16-vcvt-avx512skx-u32.c
   src/f32-f16-vcvt/gen/f32-f16-vcvt-avx512skx-u32.c
   src/f32-qc8w-gemm/gen/f32-qc4w-gemm-2x32-minmax-avx512skx-broadcast.c
   src/f32-qc8w-gemm/gen/f32-qc4w-gemm-3x32-minmax-avx512skx-broadcast.c
