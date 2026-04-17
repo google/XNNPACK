@@ -120,9 +120,20 @@ xnn_status xnn_define_channelwise_quantized_tensor_value_v3(
     const float* scale, size_t num_dims, size_t channel_dim, const size_t* dims,
     const void* data, uint32_t external_id, uint32_t flags, uint32_t* id_out,
     const float* channelwise_zero_point) {
-  // Channelwise zero points are not supported yet.
-  assert(channelwise_zero_point == nullptr);
-  assert(data);
+  if (channelwise_zero_point) {
+    YNN_LOG_ERROR() << "channelwise zero points are not supported";
+    return xnn_status_unsupported_parameter;
+  }
+  if (num_dims > YNN_MAX_TENSOR_RANK) {
+    YNN_LOG_ERROR() << "num_dims " << num_dims << " exceeds YNN_MAX_TENSOR_RANK "
+                    << YNN_MAX_TENSOR_RANK;
+    return xnn_status_unsupported_parameter;
+  }
+  if (channel_dim >= num_dims) {
+    YNN_LOG_ERROR() << "channel_dim " << channel_dim << " must be in [0, "
+                    << num_dims << ")";
+    return xnn_status_invalid_parameter;
+  }
   uint32_t zero_point_id = YNN_INVALID_VALUE_ID;
   if (zero_point != 0) {
     ynn_status status = ynn_define_tensor(
