@@ -22,6 +22,7 @@ extern "C" {
   XNN_INTERNAL void ukernel(size_t n, const type_in* input, type_out* output, \
                             const params_type* params);
 #include "src/bf16-f32-vcvt/bf16-f32-vcvt.inc"
+#include "src/bf16-qs8-vcvt/bf16-qs8-vcvt.inc"
 #include "src/f16-f32-vcvt/f16-f32-vcvt.inc"
 #include "src/f16-qs8-vcvt/f16-qs8-vcvt.inc"
 #include "src/f16-qu8-vcvt/f16-qu8-vcvt.inc"

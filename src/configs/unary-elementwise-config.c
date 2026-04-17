@@ -24,6 +24,7 @@ static const int default_config = 0;
 static const int consistent_config = 1;
 
 static struct xnn_unary_elementwise_config bf16_to_f32_cvt_config = {0};
+static struct xnn_unary_elementwise_config bf16_to_qs8_cvt_config = {0};
 static struct xnn_unary_elementwise_config f16_abs_config = {0};
 static struct xnn_unary_elementwise_config f16_approxgelu_config = {0};
 static struct xnn_unary_elementwise_config f16_clamp_config = {0};
@@ -86,6 +87,7 @@ static struct xnn_unary_elementwise_config xx_copy_config = {0};
 
 
 XNN_INIT_ONCE_GUARD(bf16_to_f32_cvt);
+XNN_INIT_ONCE_GUARD(bf16_to_qs8_cvt);
 XNN_INIT_ONCE_GUARD(f16_abs);
 XNN_INIT_ONCE_GUARD(f16_approxgelu);
 XNN_INIT_ONCE_GUARD(f16_clamp);
@@ -793,6 +795,12 @@ static void init_f16_tanh_config(void) {
     #endif
     ;
   #endif
+}
+
+static void init_bf16_to_qs8_cvt_config(void) {
+  bf16_to_qs8_cvt_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_bf16_qs8_vcvt_ukernel__scalar_imagic_u4);
+  bf16_to_qs8_cvt_config.element_tile = 4;
+  bf16_to_qs8_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_bf16_qs8_cvt_scalar_params;
 }
 
 static void init_f16_to_f32_cvt_config(void) {
@@ -3724,6 +3732,15 @@ const struct xnn_unary_elementwise_config* xnn_init_f16_tanh_config() {
   }
   XNN_INIT_ONCE(f16_tanh);
   return &f16_tanh_config;
+}
+
+const struct xnn_unary_elementwise_config* xnn_init_bf16_to_qs8_cvt_config() {
+  const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+  if (hardware_config == NULL) {
+    return NULL;
+  }
+  XNN_INIT_ONCE(bf16_to_qs8_cvt);
+  return &bf16_to_qs8_cvt_config;
 }
 
 const struct xnn_unary_elementwise_config* xnn_init_f16_to_f32_cvt_config() {
