@@ -1,0 +1,127 @@
+// Copyright 2026 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert LMUL in [1, 2, 4, 8]
+$assert(DATATYPE in ["f32", "f16"])
+#include <assert.h>
+#include "src/xnnpack/maxpool.h"
+#include <riscv_vector.h>
+
+$CTYPE = {"f32": "float", "f16": "xnn_float16"}[DATATYPE]
+$VTYPE = {"f32": "vfloat32", "f16": "vfloat16"}[DATATYPE]
+$VLOAD = {"f32": "__riscv_vle32_v_f32", "f16": "__riscv_vle16_v_f16"}[DATATYPE]
+$VSTORE = {"f32": "__riscv_vse32_v_f32", "f16": "__riscv_vse16_v_f16"}[DATATYPE]
+$VSETVL = {"f32": "__riscv_vsetvl_e32", "f16": "__riscv_vsetvl_e16"}[DATATYPE]
+$ISA = "fp16arith" if DATATYPE == "f16" else ""
+
+void xnn_${DATATYPE}_avgpool_minmax_ukernel_9p__rvv${ISA}_u${LMUL}v(
+    size_t output_pixels,
+    size_t kernel_elements,
+    size_t channels,
+    const ${CTYPE}** input,
+    size_t input_offset,
+    size_t input_pixel_stride,
+    const ${CTYPE}* zero,
+    const ${CTYPE}* multiplier,
+    ${CTYPE}* output,
+    size_t input_increment,
+    size_t output_increment,
+    const struct xnn_${DATATYPE}_scaleminmax_params* restrict params)
+{
+  assert(output_pixels != 0);
+  assert(kernel_elements != 0);
+  assert(channels != 0);
+
+  const ${CTYPE} min = params->scalar.min;
+  const ${CTYPE} max = params->scalar.max;
+  ${CTYPE} scale = params->scalar.scale;
+
+  do {
+    // Start with the previous output as the zero buffer.
+    const ${CTYPE}* prev_output = zero;
+
+    const ${CTYPE}** i = input;
+
+    // Passes 0 - n-1: load the output, add 9 inputs.
+    size_t k = kernel_elements;
+    for (; k > 9; k -= 9) {
+      $for K in range(9):
+        const ${CTYPE}* i${K} = *i++;
+        assert(i${K} != NULL);
+        if XNN_UNPREDICTABLE(i${K} != zero) {
+          i${K} = (const ${CTYPE}*) ((uintptr_t) i${K} + input_offset);
+        }
+
+      ${CTYPE}* o = output;
+      size_t c = channels;
+      do {
+        size_t vl = ${VSETVL}m${LMUL}(c);
+        $for K in range(9):
+          ${VTYPE}m${LMUL}_t vi${K} = ${VLOAD}m${LMUL}(i${K}, vl); i${K} += vl;
+        ${VTYPE}m${LMUL}_t vprev = ${VLOAD}m${LMUL}(prev_output, vl); prev_output += vl;
+
+        ${VTYPE}m${LMUL}_t vsum01 = __riscv_vfadd(vi0, vi1, vl);
+        ${VTYPE}m${LMUL}_t vsum23 = __riscv_vfadd(vi2, vi3, vl);
+        ${VTYPE}m${LMUL}_t vsum45 = __riscv_vfadd(vi4, vi5, vl);
+        ${VTYPE}m${LMUL}_t vsum67 = __riscv_vfadd(vi6, vi7, vl);
+        ${VTYPE}m${LMUL}_t vsum018 = __riscv_vfadd(vsum01, vi8, vl);
+
+        ${VTYPE}m${LMUL}_t vsum2345 = __riscv_vfadd(vsum23, vsum45, vl);
+        ${VTYPE}m${LMUL}_t vsum01678 = __riscv_vfadd(vsum67, vsum018, vl);
+        ${VTYPE}m${LMUL}_t vsum012345678 = __riscv_vfadd(vsum2345, vsum01678, vl);
+        ${VTYPE}m${LMUL}_t vacc = __riscv_vfadd(vprev, vsum012345678, vl);
+        ${VSTORE}m${LMUL}(o, vacc, vl); o += vl;
+
+        c -= vl;
+      } while (c != 0);
+
+      // Subsequent passes read from the previous output.
+      prev_output = output;
+    }
+
+    // Final pass: load the output, add remaining kernel elements, apply scaling/min/max
+    $for K in range(9):
+      const ${CTYPE}* i${K} = ${K} < k ? *i++ : zero;
+      assert(i${K} != NULL);
+      if XNN_UNPREDICTABLE(i${K} != zero) {
+        i${K} = (const ${CTYPE}*) ((uintptr_t) i${K} + input_offset);
+      }
+
+    if (multiplier != NULL) {
+      scale = *multiplier++;
+    }
+    ${CTYPE}* o = output;
+    size_t c = channels;
+    do {
+      size_t vl = ${VSETVL}m${LMUL}(c);
+      $for K in range(9):
+        ${VTYPE}m${LMUL}_t vi${K} = ${VLOAD}m${LMUL}(i${K}, vl); i${K} += vl;
+      ${VTYPE}m${LMUL}_t vprev = ${VLOAD}m${LMUL}(prev_output, vl); prev_output += vl;
+
+      ${VTYPE}m${LMUL}_t vsum01 = __riscv_vfadd(vi0, vi1, vl);
+      ${VTYPE}m${LMUL}_t vsum23 = __riscv_vfadd(vi2, vi3, vl);
+      ${VTYPE}m${LMUL}_t vsum45 = __riscv_vfadd(vi4, vi5, vl);
+      ${VTYPE}m${LMUL}_t vsum67 = __riscv_vfadd(vi6, vi7, vl);
+      ${VTYPE}m${LMUL}_t vsum018 = __riscv_vfadd(vsum01, vi8, vl);
+
+      ${VTYPE}m${LMUL}_t vsum2345 = __riscv_vfadd(vsum23, vsum45, vl);
+      ${VTYPE}m${LMUL}_t vsum01678 = __riscv_vfadd(vsum67, vsum018, vl);
+      ${VTYPE}m${LMUL}_t vsum012345678 = __riscv_vfadd(vsum2345, vsum01678, vl);
+      ${VTYPE}m${LMUL}_t vacc = __riscv_vfadd(vprev, vsum012345678, vl);
+
+      vacc = __riscv_vfmul(vacc, scale, vl);
+      vacc = __riscv_vfmax(vacc, min, vl);
+      vacc = __riscv_vfmin(vacc, max, vl);
+
+      ${VSTORE}m${LMUL}(o, vacc, vl); o += vl;
+
+      c -= vl;
+    } while (c != 0);
+
+    input = (const ${CTYPE}**) ((uintptr_t) input + input_increment);
+    input_offset += input_pixel_stride;
+    output = (${CTYPE}*) ((uintptr_t) output + output_increment);
+  } while (--output_pixels != 0);
+}
