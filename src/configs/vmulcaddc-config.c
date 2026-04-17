@@ -48,6 +48,13 @@ static void init_f16_vmulcaddc_config(void) {
       f16_vmulcaddc_config.channel_tile = 8;
       f16_vmulcaddc_config.row_tile = 2;
     }
+  #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_FP16_VECTOR
+    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    assert(hardware_config != NULL);
+    f16_vmulcaddc_config.ukernel = XNN_INIT_VMULCADDC_UKERNEL(xnn_f16_vmulcaddc_minmax_ukernel_c4v__rvvfp16arith_2x);
+    f16_vmulcaddc_config.init.f16 = xnn_init_f16_minmax_scalar_params;
+    f16_vmulcaddc_config.channel_tile = 4 * hardware_config->vlenb / sizeof(xnn_float16);
+    f16_vmulcaddc_config.row_tile = 2;
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
