@@ -7,7 +7,6 @@
 #define XNNPACK_YNNPACK_KERNELS_DOT_SCHEDULE_H_
 
 #include <algorithm>
-#include <array>
 #include <cassert>
 #include <cstddef>
 
@@ -26,24 +25,14 @@ struct dot_loop {
   size_t blocks = 0;
 };
 
-struct cpu_info {
-  constexpr static size_t kNumCacheLevels = 3;
-  // The size of each cache level in bytes. cache_sizes[0] is L1, cache_sizes[1]
-  // is L2, cache_sizes[2] is L3.
-  size_t cache_sizes[kNumCacheLevels] = {0, 0, 0};
-  // The number of cores that share the L3 cache.
-  size_t num_shared_l3_cores = 0;
-};
-
 // Generate a set of loops we should use when running a dot, attempting to
 // optimize the order and size of loop steps such that memory locality is
-// maximized for each cache in `cpu_info.cache_sizes`. `storage` must have room
-// for at most 3 loops per cache size.
-span<dot_loop> schedule_dot(const cpu_info& cpu_info, size_t m, size_t n,
+// maximized for each cache in `cache_sizes`. `storage` must have room for at
+// most 3 loops per cache size.
+span<dot_loop> schedule_dot(span<const size_t> cache_sizes, size_t m, size_t n,
                             span<const size_t> ks, size_t block_m,
                             size_t block_n, size_t block_k, size_t a_elem_size,
-                            size_t b_elem_size, size_t c_elem_size,
-                            dot_loop* storage);
+                            size_t b_elem_size, dot_loop* storage);
 
 // Block a dot's m dimension, calling f at each block.
 template <typename DotFn>
