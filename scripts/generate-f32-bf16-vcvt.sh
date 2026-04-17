@@ -8,6 +8,10 @@
 tools/xngen src/f32-bf16-vcvt/avx512skx.c.in -D BATCH_TILE=16 -o src/f32-bf16-vcvt/gen/f32-bf16-vcvt-avx512skx-u16.c &
 tools/xngen src/f32-bf16-vcvt/avx512skx.c.in -D BATCH_TILE=32 -o src/f32-bf16-vcvt/gen/f32-bf16-vcvt-avx512skx-u32.c &
 
+################################# AVX512 BF16 #################################
+tools/xngen src/f32-bf16-vcvt/avx512bf16.c.in -D BATCH_TILE=16 -o src/f32-bf16-vcvt/gen/f32-bf16-vcvt-avx512bf16-u16.c &
+tools/xngen src/f32-bf16-vcvt/avx512bf16.c.in -D BATCH_TILE=32 -o src/f32-bf16-vcvt/gen/f32-bf16-vcvt-avx512bf16-u32.c &
+
 ################################### ARM NEON ##################################
 tools/xngen src/f32-bf16-vcvt/neon.c.in -D BATCH_TILE=8  -o src/f32-bf16-vcvt/gen/f32-bf16-vcvt-neon-u8.c &
 tools/xngen src/f32-bf16-vcvt/neon.c.in -D BATCH_TILE=16 -o src/f32-bf16-vcvt/gen/f32-bf16-vcvt-neon-u16.c &

@@ -2597,6 +2597,12 @@ static void init_f32_to_bf16_cvt_config(void) {
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     (void) hardware_config;  // May be unused.
+    #if XNN_ENABLE_AVX512BF16
+      if (hardware_config->arch_flags & xnn_arch_x86_avx512bf16) {
+        f32_to_bf16_cvt_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f32_bf16_vcvt_ukernel__avx512bf16_u16);
+        f32_to_bf16_cvt_config.element_tile = 16;
+      } else
+    #endif
     #if XNN_ENABLE_AVX512SKX
       if (hardware_config->arch_flags & xnn_arch_x86_avx512skx) {
         f32_to_bf16_cvt_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f32_bf16_vcvt_ukernel__avx512skx_u16);
