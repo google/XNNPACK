@@ -18,6 +18,7 @@
 #include <variant>
 #include <vector>
 
+#include "ynnpack/base/arch.h"
 #include "ynnpack/base/arithmetic.h"
 #include "ynnpack/base/base.h"
 #include "ynnpack/base/log.h"
@@ -44,9 +45,14 @@ namespace ynn {
 
 namespace {
 
-// TODO(dsharlet): This should probably be a parameter we learn based on cpuinfo
-// or other source of CPU metadata. This was determined experimentally.
-constexpr index_t cache_size_l2 = 128 * 1024;
+// Effective L2 cache budget for kc-blocking in schedule_dot. Sized so that a
+// (kc × N) stripe of B fits in this many bytes — see the formula in
+// kernels/dot/schedule.cc.  When cpuinfo is available this comes from the
+// running CPU's reported L2 (per-thread share, with a 2x factor for gradual
+// spill into outer caches); otherwise a conservative 1 MiB is used.
+inline index_t cache_size_l2() {
+  return static_cast<index_t>(get_l2_cache_size());
+}
 
 // When we want arithmetic to be consistent, we need to make all tiling
 // decisions independently of any hardware dependent parameters (cache sizes,
@@ -239,7 +245,7 @@ auto make_dot_impl(dot_type type, bool consistent_arithmetic, bool transposed_a,
                  c_stride_m, c);
         };
 
-    const size_t cache_sizes[] = {cache_size_l2};
+    const size_t cache_sizes[] = {static_cast<size_t>(cache_size_l2())};
 
     // We need up to 3 loops per cache level.
     dot_loop loops_storage[std::size(cache_sizes) * 3];
@@ -405,7 +411,7 @@ uint32_t define_pack_b(ynn_subgraph_t subgraph, const dot_type& type,
   slinky::expr k3 = num_k_dims >= 3 ? b.extent(3) : 1;
 
   const index_t elem_size_bits = type_size_bytes(b.type) * 8 / element_count;
-  const index_t cache_elements = cache_size_l2 * 8 / elem_size_bits;
+  const index_t cache_elements = cache_size_l2() * 8 / elem_size_bits;
 
   // When choosing block_n, we have the following concerns:
   // - We want to make the block bigger than the kernel's `block_n`
