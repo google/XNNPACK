@@ -71,6 +71,7 @@ cc_library(
         "stack.cc",
         "static_pad.cc",
         "static_slice.cc",
+        "static_slice.h",
         "static_transpose.cc",
         "stencil_copy.cc",
         "stencil_copy.h",

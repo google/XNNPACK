@@ -320,4 +320,38 @@ TEST(fusion, keep_static_broadcast_multiple_consumers) {
       AllOf(IsBinary(ynn_binary_add), InputsInclude(broadcast_x_id, y_id)));
 }
 
+TEST(fusion, reshape_to_expand_dims) {
+  const uint32_t x_id = 0;
+  const uint32_t out_id = 1;
+  SubgraphBuilder builder(2);
+
+  builder.AddInput(ynn_type_fp32, {10, 20}, x_id)
+      .AddOutput(ynn_type_fp32, {1, 10, 1, 20, 1}, out_id);
+
+  builder.AddReshape({1, 10, 1, 20, 1}, x_id, out_id);
+
+  ynn_subgraph& subgraph = *builder.GetSubgraph();
+  subgraph.fusion();
+
+  EXPECT_THAT(ProducerOf(out_id, subgraph), IsStaticExpandDims());
+}
+
+TEST(fusion, reshape_to_slice) {
+  const uint32_t x_id = 0;
+  const uint32_t out_id = 1;
+  SubgraphBuilder builder(2);
+
+  builder.AddInput(ynn_type_fp32, {1, 10, 1, 20, 1}, x_id)
+      .AddOutput(ynn_type_fp32, {10, 20}, out_id);
+
+  builder.AddReshape({10, 20}, x_id, out_id);
+
+  ynn_subgraph& subgraph = *builder.GetSubgraph();
+  subgraph.fusion();
+
+  EXPECT_THAT(ProducerOf(out_id, subgraph), IsStaticSlice());
+  EXPECT_TRUE(std::get<ynn_node::static_slice>(ProducerOf(out_id, subgraph).op)
+                  .slice_dims);
+}
+
 }  // namespace ynn

@@ -235,6 +235,15 @@ MATCHER(IsBroadcastLike, "") {
 MATCHER(IsStaticBroadcast, "") {
   return std::holds_alternative<ynn_node::static_broadcast>(arg.op);
 }
+MATCHER(IsStaticReshape, "") {
+  return std::holds_alternative<ynn_node::static_reshape>(arg.op);
+}
+MATCHER(IsStaticExpandDims, "") {
+  return std::holds_alternative<ynn_node::static_expand_dims>(arg.op);
+}
+MATCHER(IsStaticSlice, "") {
+  return std::holds_alternative<ynn_node::static_slice>(arg.op);
+}
 
 // Checks that the given value ID is valid in the given subgraph.
 //

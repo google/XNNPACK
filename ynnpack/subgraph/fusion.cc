@@ -27,6 +27,7 @@
 #include "ynnpack/subgraph/fusion_lut.h"
 #include "ynnpack/subgraph/fusion_types.h"
 #include "ynnpack/subgraph/reduce.h"
+#include "ynnpack/subgraph/static_slice.h"
 #include "ynnpack/subgraph/stencil_copy.h"
 #include "ynnpack/subgraph/subgraph.h"
 #include "slinky/builder/simplify.h"
@@ -1338,6 +1339,65 @@ bool fold_unary_output(ynn_subgraph& subgraph, ynn_node& node,
   return true;
 }
 
+// Rewrite reshape to expand_dims or slice if possible.
+bool rewrite_reshape(ynn_subgraph& subgraph, ynn_node& node,
+                     subgraph_analysis& analysis) {
+  const ynn_node::static_reshape* reshape =
+      std::get_if<ynn_node::static_reshape>(&node.op);
+  if (!reshape) return false;
+
+  const ynn_value& input = subgraph.value(node.inputs[0]);
+  const ynn_value& output = subgraph.value(node.outputs[0]);
+
+  bool is_expand_dims = output.rank() >= input.rank();
+  bool is_slice = output.rank() <= input.rank();
+  ynn::axes_set new_axes;
+  std::vector<ynn_node::static_slice::slice> slices;
+
+  size_t i = 0;
+  size_t o = 0;
+  while (o < output.rank() && i < input.rank()) {
+    if (slinky::prove_true(output.extent(o) == input.extent(i))) {
+      ++i;
+      ++o;
+    } else if (slinky::prove_true(output.extent(o) == 1)) {
+      new_axes[o] = true;
+      is_slice = false;
+      ++o;
+    } else if (slinky::prove_true(input.extent(i) == 1)) {
+      slices.push_back({static_cast<int32_t>(i), 0, 0, 0});
+      is_expand_dims = false;
+      ++i;
+    } else {
+      return false;
+    }
+  }
+  for (; i < input.rank(); ++i) {
+    if (!slinky::prove_true(input.extent(i) == 1)) return false;
+    slices.push_back({static_cast<int32_t>(i), 0, 0, 0});
+    is_expand_dims = false;
+  }
+  for (; o < output.rank(); ++o) {
+    if (!slinky::prove_true(output.extent(o) == 1)) return false;
+    new_axes[o] = true;
+    is_slice = false;
+  }
+
+  if (is_expand_dims) {
+    YNN_LOG_DEBUG() << "Rewriting reshape to static_expand_dims";
+    ynn::define_static_expand_dims(subgraph, node, input.id, output.id,
+                                   new_axes);
+    return true;
+  } else if (is_slice) {
+    YNN_LOG_DEBUG() << "Rewriting reshape to static_slice";
+    ynn::define_static_slice(subgraph, node, input.id, output.id,
+                             std::move(slices), /*slice_dims=*/true);
+    return true;
+  }
+
+  return false;
+}
+
 }  // namespace
 
 }  // namespace ynn
@@ -1354,6 +1414,7 @@ ynn_status ynn_subgraph::fusion() {
       changed =
           changed || ynn::fold_unary_input(*this, node, analysis) ||
           ynn::fold_unary_output(*this, node, analysis) ||
+          ynn::rewrite_reshape(*this, node, analysis) ||
           ynn::rewrite_divide_sqrt(*this, node, analysis) ||
           ynn::rewrite_multiply_add(*this, node, analysis) ||
           ynn::rewrite_multiply_multiply(*this, node, analysis) ||

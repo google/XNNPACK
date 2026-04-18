@@ -8,7 +8,6 @@
 #include <cstddef>
 #include <cstdint>
 #include <functional>
-#include <memory>
 #include <utility>
 #include <vector>
 
@@ -51,54 +50,20 @@ std::pair<slinky::expr, slinky::expr> calc_begin_end(const slice_info& slice,
 
 }  // namespace
 
-extern "C" {
+void define_static_slice(ynn_subgraph& subgraph, ynn_node& node,
+                         uint32_t input_id, uint32_t output_id,
+                         std::vector<ynn_node::static_slice::slice> slices,
+                         bool slice_dims) {
+  const ynn_value& input = subgraph.value(input_id);
+  ynn_value& output = subgraph.value(output_id);
 
-ynn_status ynn_define_static_slice(ynn_subgraph_t subgraph, size_t num_axes,
-                                   const int32_t* axes, const int64_t* begins,
-                                   const int64_t* ends, const int64_t* strides,
-                                   uint32_t input_id, uint32_t* output_id,
-                                   uint32_t flags) {
-  const bool slice_dims = flags & YNN_NODE_FLAG_SLICE_DIMS;
-
-  // Validate arguments.
-  YNN_RETURN_IF_ERROR(validate_subgraph("static_slice", subgraph));
-  YNN_RETURN_IF_ERROR(
-      validate_input_tensor("static_slice", subgraph, "input_id", input_id));
-  if (!slice_dims && (ends == nullptr || strides == nullptr)) {
-    YNN_LOG_ERROR()
-        << "For node `static_slice`, ends and strides must be non-null when "
-           "YNN_NODE_FLAG_SLICE_DIMS is not set";
-    return ynn_status_invalid_parameter;
-  }
-  YNN_RETURN_IF_ERROR(
-      validate_output_tensor("static_slice", subgraph, "output_id", output_id));
-  const ynn_value& input = subgraph->value(input_id);
+  std::reverse(slices.begin(), slices.end());
 
   ynn_node::static_slice op;
-  op.slice_dims = (flags & YNN_NODE_FLAG_SLICE_DIMS) != 0;
-  op.slices.reserve(num_axes);
-  for (int d = 0; d < num_axes; ++d) {
-    const int32_t dim = axis_to_slinky_dim(input.rank(), axes[d]);
-    if (dim >= 0 && dim < input.rank()) {
-      op.slices.push_back({
-          dim,
-          begins[d],
-          slice_dims ? 0 : ends[d],
-          slice_dims ? 0 : strides[d],
-      });
-    } else {
-      // The implicit dimensions are broadcasts, slicing them is a no-op.
-      // TODO(dsharlet): I'm not sure if we want this feature or not. It is very
-      // slinky-like to allow this, but not very XNNPACK-like.
-    }
-  }
+  op.slice_dims = slice_dims;
+  op.slices = std::move(slices);
 
-  std::sort(
-      op.slices.begin(), op.slices.end(),
-      [](const slice_info& a, const slice_info& b) { return b.axis < a.axis; });
-
-  // Propagate rank.
-  ynn_value& output = subgraph->get_output_value(output_id, input);
+  // Propagate shape.
   output.extents = input.extents;
   for (const slice_info& slice : op.slices) {
     if (op.slice_dims) {
@@ -115,10 +80,8 @@ ynn_status ynn_define_static_slice(ynn_subgraph_t subgraph, size_t num_axes,
     }
   }
 
-  // Make the node.
-  ynn_node node;
   node.inputs = {input_id};
-  node.outputs = {*output_id};
+  node.outputs = {output_id};
   node.op = std::move(op);
   node.create = [](const ynn_node& node, ynn_runtime& runtime) {
     const ynn_node::static_slice& op =
@@ -153,7 +116,58 @@ ynn_status ynn_define_static_slice(ynn_subgraph_t subgraph, size_t num_axes,
     runtime.funcs.push_back(std::move(func));
     return ynn_status_success;
   };
+}
 
+extern "C" {
+
+ynn_status ynn_define_static_slice(ynn_subgraph_t subgraph, size_t num_axes,
+                                   const int32_t* axes, const int64_t* begins,
+                                   const int64_t* ends, const int64_t* strides,
+                                   uint32_t input_id, uint32_t* output_id,
+                                   uint32_t flags) {
+  const bool slice_dims = flags & YNN_NODE_FLAG_SLICE_DIMS;
+
+  // Validate arguments.
+  YNN_RETURN_IF_ERROR(validate_subgraph("static_slice", subgraph));
+  YNN_RETURN_IF_ERROR(
+      validate_input_tensor("static_slice", subgraph, "input_id", input_id));
+  if (!slice_dims && (ends == nullptr || strides == nullptr)) {
+    YNN_LOG_ERROR()
+        << "For node `static_slice`, ends and strides must be non-null when "
+           "YNN_NODE_FLAG_SLICE_DIMS is not set";
+    return ynn_status_invalid_parameter;
+  }
+  YNN_RETURN_IF_ERROR(
+      validate_output_tensor("static_slice", subgraph, "output_id", output_id));
+  const ynn_value& input = subgraph->value(input_id);
+
+  std::vector<slice_info> slices;
+  slices.reserve(num_axes);
+  for (int d = 0; d < num_axes; ++d) {
+    const int32_t dim = axis_to_slinky_dim(input.rank(), axes[d]);
+    if (dim >= 0 && dim < input.rank()) {
+      slices.push_back({
+          dim,
+          begins[d],
+          slice_dims ? 0 : ends[d],
+          slice_dims ? 0 : strides[d],
+      });
+    } else {
+      // The implicit dimensions are broadcasts, slicing them is a no-op.
+      // TODO(dsharlet): I'm not sure if we want this feature or not. It is very
+      // slinky-like to allow this, but not very XNNPACK-like.
+    }
+  }
+
+  std::sort(
+      slices.begin(), slices.end(),
+      [](const slice_info& a, const slice_info& b) { return a.axis < b.axis; });
+
+  // Propagate rank.
+  ynn_value& output = subgraph->get_output_value(output_id, input);
+  ynn_node node;
+  define_static_slice(*subgraph, node, input_id, output.id, std::move(slices),
+                      slice_dims);
   subgraph->add_node(std::move(node));
   return ynn_status_success;
 }
