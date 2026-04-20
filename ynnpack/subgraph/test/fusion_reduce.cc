@@ -503,4 +503,245 @@ TEST(fusion, reduce_sum_of_squared_windowed) {
   EXPECT_THAT(ProducerOf(padded_id, subgraph), InputsInclude(x_id));
 }
 
+TEST(fusion, reduce_expand_dims) {
+  const uint32_t a_id = 0;
+  const uint32_t x_id = 1;
+  SubgraphBuilder builder(2);
+  uint32_t v1_id = YNN_INVALID_VALUE_ID;
+  builder.AddInput(ynn_type_fp32, 4, a_id)
+      .AddOutput(ynn_type_fp32, 4, x_id)
+      .AddTensor(ynn_type_fp32, 2, v1_id);
+
+  // reduce axes {1, 2}, keep_dims=false
+  // output rank is 2.
+  // expand axes {1, 2}.
+  // output rank is 4.
+  builder
+      .AddReduce(ynn_reduce_sum, {1, 2}, a_id, YNN_INVALID_VALUE_ID, v1_id, 0)
+      .AddExpandDims({1, 2}, v1_id, x_id);
+
+  ynn_subgraph& subgraph = *builder.GetSubgraph();
+  subgraph.fusion();
+  subgraph.invalidate_dead_values();
+
+  ASSERT_THAT(subgraph, AllOf(HasValidNodeCount(1), HasValidValueCount(3)));
+  const ynn_node& node = ProducerOf(x_id, subgraph);
+  EXPECT_THAT(node, AllOf(IsReduce(ynn_reduce_sum), InputsInclude(a_id)));
+  const auto& reduce = std::get<ynn_node::reduce>(node.op);
+  EXPECT_EQ(reduce.k_dims, 0b0110);
+  EXPECT_TRUE(reduce.keep_dims);
+}
+
+TEST(fusion, reduce_sum_add) {
+  const uint32_t a_id = 0;
+  const uint32_t b_id = 1;
+  const uint32_t x_id = 2;
+  SubgraphBuilder builder(3);
+  uint32_t v1_id = YNN_INVALID_VALUE_ID;
+  builder.AddInput(ynn_type_fp32, 2, a_id)
+      .AddInput(ynn_type_fp32, 1, b_id)
+      .AddOutput(ynn_type_fp32, 1, x_id)
+      .AddTensor(ynn_type_fp32, 1, v1_id);
+
+  // v1 = sum(a, identity=0)
+  // x = add(v1, b)
+  // Should fuse to x = sum(a, b)
+  builder.AddReduce(ynn_reduce_sum, {1}, a_id, YNN_INVALID_VALUE_ID, v1_id, 0)
+      .AddBinary(ynn_binary_add, v1_id, b_id, x_id);
+
+  ynn_subgraph& subgraph = *builder.GetSubgraph();
+  subgraph.fusion();
+  subgraph.invalidate_dead_values();
+
+  ASSERT_THAT(subgraph, AllOf(HasValidNodeCount(1), HasValidValueCount(3)));
+  const ynn_node& node = ProducerOf(x_id, subgraph);
+  EXPECT_THAT(node, AllOf(IsReduce(ynn_reduce_sum), InputsAre(a_id, b_id)));
+}
+
+TEST(fusion, reduce_sum_squared_add) {
+  const uint32_t a_id = 0;
+  const uint32_t b_id = 1;
+  const uint32_t x_id = 2;
+  SubgraphBuilder builder(3);
+  uint32_t v1_id = YNN_INVALID_VALUE_ID;
+  builder.AddInput(ynn_type_fp32, 2, a_id)
+      .AddInput(ynn_type_fp32, 1, b_id)
+      .AddOutput(ynn_type_fp32, 1, x_id)
+      .AddTensor(ynn_type_fp32, 1, v1_id);
+
+  // v1 = sum_squared(a, identity=0)
+  // x = add(v1, b)
+  // Should fuse to x = sum_squared(a, b)
+  builder
+      .AddReduce(ynn_reduce_sum_squared, {1}, a_id, YNN_INVALID_VALUE_ID, v1_id,
+                 0)
+      .AddBinary(ynn_binary_add, v1_id, b_id, x_id);
+
+  ynn_subgraph& subgraph = *builder.GetSubgraph();
+  subgraph.fusion();
+  subgraph.invalidate_dead_values();
+
+  ASSERT_THAT(subgraph, AllOf(HasValidNodeCount(1), HasValidValueCount(3)));
+  const ynn_node& node = ProducerOf(x_id, subgraph);
+  EXPECT_THAT(node,
+              AllOf(IsReduce(ynn_reduce_sum_squared), InputsAre(a_id, b_id)));
+}
+
+TEST(fusion, reduce_min_min) {
+  const uint32_t a_id = 0;
+  const uint32_t b_id = 1;
+  const uint32_t x_id = 2;
+  SubgraphBuilder builder(3);
+  uint32_t v1_id = YNN_INVALID_VALUE_ID;
+  builder.AddInput(ynn_type_fp32, 2, a_id)
+      .AddInput(ynn_type_fp32, 1, b_id)
+      .AddOutput(ynn_type_fp32, 1, x_id)
+      .AddTensor(ynn_type_fp32, 1, v1_id);
+
+  // v1 = min_reduce(a, identity=inf)
+  // x = min(v1, b)
+  // Should fuse to x = min_reduce(a, b)
+  builder.AddReduce(ynn_reduce_min, {1}, a_id, YNN_INVALID_VALUE_ID, v1_id, 0)
+      .AddBinary(ynn_binary_min, v1_id, b_id, x_id);
+
+  ynn_subgraph& subgraph = *builder.GetSubgraph();
+  subgraph.fusion();
+  subgraph.invalidate_dead_values();
+
+  ASSERT_THAT(subgraph, AllOf(HasValidNodeCount(1), HasValidValueCount(3)));
+  const ynn_node& node = ProducerOf(x_id, subgraph);
+  EXPECT_THAT(node, AllOf(IsReduce(ynn_reduce_min), InputsAre(a_id, b_id)));
+}
+
+TEST(fusion, reduce_max_max) {
+  const uint32_t a_id = 0;
+  const uint32_t b_id = 1;
+  const uint32_t x_id = 2;
+  SubgraphBuilder builder(3);
+  uint32_t v1_id = YNN_INVALID_VALUE_ID;
+  builder.AddInput(ynn_type_fp32, 2, a_id)
+      .AddInput(ynn_type_fp32, 1, b_id)
+      .AddOutput(ynn_type_fp32, 1, x_id)
+      .AddTensor(ynn_type_fp32, 1, v1_id);
+
+  // v1 = max_reduce(a, identity=-inf)
+  // x = max(v1, b)
+  // Should fuse to x = max_reduce(a, b)
+  builder.AddReduce(ynn_reduce_max, {1}, a_id, YNN_INVALID_VALUE_ID, v1_id, 0)
+      .AddBinary(ynn_binary_max, v1_id, b_id, x_id);
+
+  ynn_subgraph& subgraph = *builder.GetSubgraph();
+  subgraph.fusion();
+  subgraph.invalidate_dead_values();
+
+  ASSERT_THAT(subgraph, AllOf(HasValidNodeCount(1), HasValidValueCount(3)));
+  const ynn_node& node = ProducerOf(x_id, subgraph);
+  EXPECT_THAT(node, AllOf(IsReduce(ynn_reduce_max), InputsAre(a_id, b_id)));
+}
+
+TEST(fusion, reduce_sum_add_commutative) {
+  const uint32_t a_id = 0;
+  const uint32_t b_id = 1;
+  const uint32_t x_id = 2;
+  SubgraphBuilder builder(3);
+  uint32_t v1_id = YNN_INVALID_VALUE_ID;
+  builder.AddInput(ynn_type_fp32, 2, a_id)
+      .AddInput(ynn_type_fp32, 1, b_id)
+      .AddOutput(ynn_type_fp32, 1, x_id)
+      .AddTensor(ynn_type_fp32, 1, v1_id);
+
+  // v1 = sum(a, identity=0)
+  // x = add(b, v1)
+  // Should fuse to x = sum(a, b)
+  builder.AddReduce(ynn_reduce_sum, {1}, a_id, YNN_INVALID_VALUE_ID, v1_id, 0)
+      .AddBinary(ynn_binary_add, b_id, v1_id, x_id);
+
+  ynn_subgraph& subgraph = *builder.GetSubgraph();
+  subgraph.fusion();
+  subgraph.invalidate_dead_values();
+
+  ASSERT_THAT(subgraph, AllOf(HasValidNodeCount(1), HasValidValueCount(3)));
+  const ynn_node& node = ProducerOf(x_id, subgraph);
+  EXPECT_THAT(node, AllOf(IsReduce(ynn_reduce_sum), InputsAre(a_id, b_id)));
+}
+
+TEST(fusion, reduce_sum_add_non_identity) {
+  const uint32_t a_id = 0;
+  const uint32_t b_id = 1;
+  const uint32_t x_id = 2;
+  SubgraphBuilder builder(3);
+  uint32_t v1_id = YNN_INVALID_VALUE_ID;
+  uint32_t init_id = builder.DefineScalar(1.0f);
+  builder.AddInput(ynn_type_fp32, 2, a_id)
+      .AddInput(ynn_type_fp32, 1, b_id)
+      .AddOutput(ynn_type_fp32, 1, x_id)
+      .AddTensor(ynn_type_fp32, 1, v1_id);
+
+  // v1 = sum(a, identity=1.0)
+  // x = add(v1, b)
+  // Should NOT fuse
+  builder.AddReduce(ynn_reduce_sum, {1}, a_id, init_id, v1_id, 0)
+      .AddBinary(ynn_binary_add, v1_id, b_id, x_id);
+
+  ynn_subgraph& subgraph = *builder.GetSubgraph();
+  subgraph.fusion();
+  subgraph.invalidate_dead_values();
+
+  EXPECT_THAT(subgraph, HasValidNodeCount(2));
+}
+
+TEST(fusion, reduce_sum_multiply) {
+  const uint32_t a_id = 0;
+  const uint32_t b_id = 1;
+  const uint32_t x_id = 2;
+  SubgraphBuilder builder(3);
+  uint32_t v1_id = YNN_INVALID_VALUE_ID;
+  builder.AddInput(ynn_type_fp32, 2, a_id)
+      .AddInput(ynn_type_fp32, 1, b_id)
+      .AddOutput(ynn_type_fp32, 1, x_id)
+      .AddTensor(ynn_type_fp32, 1, v1_id);
+
+  // v1 = sum(a, identity=0)
+  // x = multiply(v1, b)
+  // Should NOT fuse
+  builder.AddReduce(ynn_reduce_sum, {1}, a_id, YNN_INVALID_VALUE_ID, v1_id, 0)
+      .AddBinary(ynn_binary_multiply, v1_id, b_id, x_id);
+
+  ynn_subgraph& subgraph = *builder.GetSubgraph();
+  subgraph.fusion();
+  subgraph.invalidate_dead_values();
+
+  EXPECT_THAT(subgraph, HasValidNodeCount(2));
+}
+
+TEST(fusion, reduce_sum_add_of_reduce) {
+  const uint32_t a_id = 0;
+  const uint32_t b_id = 1;
+  const uint32_t x_id = 2;
+  SubgraphBuilder builder(3);
+  uint32_t reduce_id = YNN_INVALID_VALUE_ID;
+  uint32_t abs_reduce_id = YNN_INVALID_VALUE_ID;
+  builder.AddInput(ynn_type_fp32, 2, a_id)
+      .AddInput(ynn_type_fp32, 1, b_id)
+      .AddOutput(ynn_type_fp32, 1, x_id)
+      .AddTensor(ynn_type_fp32, 1, reduce_id)
+      .AddTensor(ynn_type_fp32, 1, abs_reduce_id);
+
+  // reduce = sum(a, identity=0)
+  // x = add(reduce, abs(reduce))
+  // We can't rewrite this to sum(a, abs(reduce)) because it would create a
+  // cycle in the graph.
+  // This rewrite shouldn't happen because the reduce op has more than one user.
+  builder
+      .AddReduce(ynn_reduce_sum, {1}, a_id, YNN_INVALID_VALUE_ID, reduce_id, 0)
+      .AddUnary(ynn_unary_abs, reduce_id, abs_reduce_id)
+      .AddBinary(ynn_binary_add, abs_reduce_id, b_id, x_id);
+
+  ynn_subgraph& subgraph = *builder.GetSubgraph();
+  subgraph.fusion();
+  subgraph.invalidate_dead_values();
+
+  EXPECT_THAT(subgraph, HasValidNodeCount(3));
+}
+
 }  // namespace ynn

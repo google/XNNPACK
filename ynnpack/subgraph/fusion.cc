@@ -885,6 +885,38 @@ bool rewrite_reduce_reduce(ynn_subgraph& subgraph, ynn_node& node,
   return true;
 }
 
+// Rewrite static_expand_dims(reduce(x)) to reduce(x, keep_dims=true)
+bool rewrite_expand_dims_reduce(ynn_subgraph& subgraph, ynn_node& node,
+                                subgraph_analysis& analysis) {
+  ynn_node::static_expand_dims* expand =
+      std::get_if<ynn_node::static_expand_dims>(&node.op);
+  if (!expand) return false;
+
+  ynn_node* producer = analysis.producer_of(node.inputs[0]);
+  if (!producer) return false;
+
+  ynn_node::reduce* reduce = std::get_if<ynn_node::reduce>(&producer->op);
+  if (!reduce || reduce->keep_dims) return false;
+
+  if (expand->new_axes != reduce->k_dims) return false;
+
+  // Check that the intermediate output has exactly one consumer
+  // and is not an external output.
+  uint32_t intermediate_id = producer->outputs[0];
+  if (analysis.consumers[intermediate_id].size() != 1 ||
+      subgraph.value(intermediate_id).is_external_output()) {
+    return false;
+  }
+
+  YNN_LOG_DEBUG() << "Fusing static_expand_dims and " << to_string(reduce->op)
+                  << " to " << to_string(reduce->op) << "(keep_dims=true)";
+
+  std::get<ynn_node::reduce>(producer->op).keep_dims = true;
+  producer->outputs[0] = node.outputs[0];
+  node.invalidate();
+  return true;
+}
+
 // Rewrites ynn_reduce_sum(x*x) to ynn_reduce_sum_squared(x).
 // Also handles the windowed case where copy shape ops (stencil_copy,
 // static_pad) appear between the multiply and the reduce:
@@ -1374,6 +1406,61 @@ bool rewrite_reshape(ynn_subgraph& subgraph, ynn_node& node,
   return false;
 }
 
+// Rewrite op(reduce_op(x, identity), y) to reduce_op(x, y)
+bool rewrite_reduce_binary_identity(ynn_subgraph& subgraph, ynn_node& node,
+                                    subgraph_analysis& analysis) {
+  const ynn_node::binary_elementwise* binary =
+      std::get_if<ynn_node::binary_elementwise>(&node.op);
+  if (!binary) return false;
+
+  for (int i : {0, 1}) {
+    ynn_node* producer = analysis.producer_of(node.inputs[i]);
+    if (!producer) continue;
+    const ynn_node::reduce* reduce =
+        std::get_if<ynn_node::reduce>(&producer->op);
+    if (!reduce) continue;
+
+    // Check if the reduction operator is compatible with the binary operator.
+    if (binary->op == ynn_binary_add &&
+        (reduce->op == ynn_reduce_sum ||
+         reduce->op == ynn_reduce_sum_squared)) {
+    } else if (binary->op == ynn_binary_min && reduce->op == ynn_reduce_min) {
+    } else if (binary->op == ynn_binary_max && reduce->op == ynn_reduce_max) {
+    } else {
+      continue;
+    }
+
+    // Check if the reduction's initial value is the identity of the binary op.
+    // The binary op's identity is the same as the reduction's identity.
+    const ynn_value& initial_value = subgraph.value(producer->inputs[1]);
+    if (initial_value.as_scalar_float() != get_reduce_identity(reduce->op)) {
+      continue;
+    }
+
+    // Check if the reduction result is only used by this binary op.
+    if (analysis.consumers[producer->outputs[0]].size() != 1 ||
+        subgraph.value(producer->outputs[0]).is_external_output()) {
+      continue;
+    }
+
+    // Rewrite: binary_op(reduce_op(x, identity), y) -> reduce_op(x, y)
+    YNN_LOG_DEBUG() << "Rewriting " << to_string(binary->op) << "("
+                    << to_string(reduce->op) << "(x, identity), y) to "
+                    << to_string(reduce->op) << "(x, y)";
+
+    uint32_t x_id = producer->inputs[0];
+    uint32_t y_id = node.inputs[1 - i];
+    uint32_t output_id = node.outputs[0];
+    assert(subgraph.value(y_id).type == initial_value.type);
+
+    ynn::define_reduce(subgraph, node, reduce->op, reduce->k_dims, x_id, y_id,
+                       &output_id, reduce->keep_dims);
+    producer->invalidate();
+    return true;
+  }
+  return false;
+}
+
 }  // namespace
 
 }  // namespace ynn
@@ -1390,6 +1477,8 @@ ynn_status ynn_subgraph::fusion() {
       changed =
           changed || ynn::fold_unary_input(*this, node, analysis) ||
           ynn::fold_unary_output(*this, node, analysis) ||
+          ynn::rewrite_reduce_binary_identity(*this, node, analysis) ||
+          ynn::rewrite_expand_dims_reduce(*this, node, analysis) ||
           ynn::rewrite_reshape(*this, node, analysis) ||
           ynn::rewrite_divide_sqrt(*this, node, analysis) ||
           ynn::rewrite_ternary(*this, node, analysis) ||
