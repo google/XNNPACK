@@ -215,6 +215,17 @@ T sub_sat(T a, T b) {
   return saturate_cast<T>(static_cast<int64_t>(a) - static_cast<int64_t>(b));
 }
 
+template <typename T>
+T floor_log2(T a) {
+  if (a == 0.0) return -std::numeric_limits<T>::infinity();
+  // This is true if a is NaN.
+  if (!(a >= 0.0)) return std::numeric_limits<T>::quiet_NaN();
+  int exp;
+  T significand = std::frexp(a, &exp);
+  if (std::isinf(significand)) return significand;
+  return static_cast<T>(exp - 1);
+}
+
 }  // namespace ynn
 
 #endif  // XNNPACK_YNNPACK_BASE_ARITHMETIC_H_

@@ -7,7 +7,9 @@
 #define XNNPACK_YNNPACK_BASE_SIMD_X86_SSE2_H_
 
 #include <cstdint>
+#include <limits>
 
+#include "ynnpack/base/arithmetic.h"
 #include "ynnpack/base/base.h"
 #include "ynnpack/base/bfloat16.h"
 #include "ynnpack/base/half.h"
@@ -71,6 +73,31 @@ YNN_ALWAYS_INLINE f64x4 cast(f32x4 x, double) {
 }
 YNN_ALWAYS_INLINE f32x4 cast(f64x4 x, float) {
   return f32x4{_mm_movelh_ps(_mm_cvtpd_ps(x[0].v), _mm_cvtpd_ps(x[1].v))};
+}
+
+YNN_ALWAYS_INLINE f32x4 floor_log2(f32x4 a) {
+  __m128 sign_mask = _mm_set1_ps(-0.0f);
+  __m128 is_zero = _mm_cmpeq_ps(a.v, _mm_setzero_ps());
+  a.v = _mm_or_ps(_mm_and_ps(is_zero, sign_mask), a.v);
+
+  __m128i sign_and_exp_mask = _mm_set1_epi32(0xFF800000);
+  __m128i exp = _mm_and_si128(_mm_castps_si128(a.v), sign_and_exp_mask);
+
+  __m128 infinity = _mm_set1_ps(std::numeric_limits<float>::infinity());
+  __m128 is_inf = _mm_cmpeq_ps(a.v, infinity);
+
+  exp = _mm_srai_epi32(exp, 8);
+
+  __m128 bias_256 = _mm_set1_ps(256.0f);
+  __m128 bias_383 = _mm_set1_ps(383.0f);
+  __m128 res = _mm_sub_ps(_mm_or_ps(bias_256, _mm_castsi128_ps(exp)), bias_383);
+  return f32x4{
+      _mm_or_ps(_mm_andnot_ps(is_inf, res), _mm_and_ps(is_inf, infinity))};
+}
+YNN_ALWAYS_INLINE f64x2 floor_log2(f64x2 a) {
+  double a0 = _mm_cvtsd_f64(a.v);
+  double a1 = _mm_cvtsd_f64(_mm_shuffle_pd(a.v, a.v, _MM_SHUFFLE2(1, 1)));
+  return f64x2(_mm_set_pd(ynn::floor_log2(a1), ynn::floor_log2(a0)));
 }
 
 }  // namespace simd

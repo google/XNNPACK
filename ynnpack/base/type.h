@@ -310,6 +310,7 @@ class type_info {
  public:
   static constexpr T epsilon() { return std::numeric_limits<T>::epsilon(); }
   static constexpr T infinity() { return std::numeric_limits<T>::infinity(); }
+  static constexpr T nan() { return std::numeric_limits<T>::quiet_NaN(); }
   static constexpr T min() { return std::numeric_limits<T>::lowest(); }
   static constexpr T max() { return std::numeric_limits<T>::max(); }
   static constexpr T smallest_normal() { return std::numeric_limits<T>::min(); }

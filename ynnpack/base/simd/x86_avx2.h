@@ -7,7 +7,9 @@
 #define XNNPACK_YNNPACK_BASE_SIMD_X86_AVX2_H_
 
 #include <cstdint>
+#include <limits>
 
+#include "ynnpack/base/arithmetic.h"
 #include "ynnpack/base/base.h"
 #include "ynnpack/base/bfloat16.h"
 #include "ynnpack/base/simd/vec.h"
@@ -104,6 +106,31 @@ YNN_ALWAYS_INLINE u8x32 round_float_to_int(f32x32 f, uint8_t) {
   const __m256i r = _mm256_packus_epi16(i01_16, i23_16);
   return u8x32{_mm256_permutevar8x32_epi32(
       r, _mm256_setr_epi32(0, 4, 1, 5, 2, 6, 3, 7))};
+}
+
+YNN_ALWAYS_INLINE f32x8 floor_log2(f32x8 a) {
+  __m256 sign_mask = _mm256_set1_ps(-0.0f);
+  __m256 is_zero = _mm256_cmp_ps(a.v, _mm256_setzero_ps(), _CMP_EQ_OQ);
+  a.v = _mm256_or_ps(_mm256_and_ps(is_zero, sign_mask), a.v);
+
+  __m256i sign_and_exp_mask = _mm256_set1_epi32(0xFF800000);
+  __m256i exp = _mm256_and_si256(_mm256_castps_si256(a.v), sign_and_exp_mask);
+
+  __m256 infinity = _mm256_set1_ps(std::numeric_limits<float>::infinity());
+  __m256 is_inf = _mm256_cmp_ps(a.v, infinity, _CMP_EQ_OQ);
+
+  exp = _mm256_srai_epi32(exp, 8);
+
+  __m256 bias_256 = _mm256_set1_ps(256.0f);
+  __m256 bias_383 = _mm256_set1_ps(383.0f);
+  __m256 res =
+      _mm256_sub_ps(_mm256_or_ps(bias_256, _mm256_castsi256_ps(exp)), bias_383);
+  return f32x8{_mm256_blendv_ps(res, infinity, is_inf)};
+}
+YNN_ALWAYS_INLINE f64x2 floor_log2(f64x2 a) {
+  double a0 = _mm_cvtsd_f64(a.v);
+  double a1 = _mm_cvtsd_f64(_mm_shuffle_pd(a.v, a.v, _MM_SHUFFLE2(1, 1)));
+  return f64x2(_mm_set_pd(ynn::floor_log2(a1), ynn::floor_log2(a0)));
 }
 
 }  // namespace simd

@@ -28,6 +28,7 @@ using f16 = half;
 using bf16 = bfloat16;
 using f32 = float;
 using s32 = int32_t;
+using f64 = double;
 
 template <typename T, typename Init>
 YNN_NO_INLINE static auto load_no_inline(const T* src, size_t n, Init init) {
@@ -132,6 +133,24 @@ static void BM_fma(benchmark::State& state) {
     BM_fma<type, N>(state);                                    \
   }                                                            \
   BENCHMARK(BM_fma_##type##x##N##_##arch);
+
+template <typename scalar, size_t N, typename Fn>
+static void BM_unary(benchmark::State& state, Fn fn) {
+  using vector = vec<scalar, N>;
+
+  vector a{1};
+
+  benchmark::DoNotOptimize(a);
+  for (auto _ : state) {
+    benchmark::DoNotOptimize(fn(a));
+  }
+}
+
+#define BENCH_UNARY(arch, op, type, N)                                      \
+  void BM_##op##_##type##x##N##_##arch(benchmark::State& state) {           \
+    BM_unary<type, N>(state, [](vec<type, N> a) { return floor_log2(a); }); \
+  }                                                                         \
+  BENCHMARK(BM_##op##_##type##x##N##_##arch);
 
 }  // namespace simd
 
