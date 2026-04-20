@@ -149,6 +149,8 @@ ternary_kernel_fn get_ternary_kernel(ternary_op op, ynn_type type_a,
 
 const char* to_string(ternary_op op) {
   switch (op) {
+    case ternary_op::invalid:
+      return "invalid";
     case ternary_op::multiply:
       return "multiply";
     case ternary_op::multiply_add:
