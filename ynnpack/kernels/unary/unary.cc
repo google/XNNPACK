@@ -155,8 +155,13 @@ struct reciprocal_square_root_op {
 };
 
 struct log_op {
-  explicit log_op(const unary_params& = {}) {}
-  float operator()(float x) const { return std::log(x); }
+  log_params params;
+
+  explicit log_op(const unary_params& params) : params(params.log) {}
+  float operator()(float x) const {
+    return std::log2(x * params.input_multiplier / std::sqrt(2.0f)) *
+           params.output_multiplier;
+  }
 };
 
 struct log1p_op {
@@ -355,6 +360,13 @@ unary_params get_unary_params(ynn_unary_operator op) {
               ._ = 0.0f,
               .output_multiplier = 1.0f,
               .input_multiplier = static_cast<float>(std::log2(std::exp(1.0))),
+          }};
+    case ynn_unary_log:
+      return unary_params{
+          .log = log_params{
+              ._ = 0.0f,
+              .output_multiplier = static_cast<float>(std::log(2.0)),
+              .input_multiplier = 1.4142134190e+00f,  // sqrt(2)
           }};
     case ynn_unary_erf:
       return unary_params{.erf = erf_params{.output_offset = 0.0f,

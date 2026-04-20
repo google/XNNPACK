@@ -424,6 +424,11 @@ def floor(value):
 
 
 @intrinsic
+def floor_log2(value):
+  return Op(value.ty, "floor_log2", [value])
+
+
+@intrinsic
 def sqrt(value):
   return Op(value.ty, "sqrt", [value])
 
@@ -965,6 +970,7 @@ class Target:
         "store",
         "round",
         "floor",
+        "floor_log2",
         "ceil",
         "sqrt",
         "reinterpret_cast",

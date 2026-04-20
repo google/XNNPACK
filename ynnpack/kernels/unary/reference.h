@@ -324,8 +324,13 @@ struct reciprocal_square_root : public unary_op_info {
 };
 
 struct log : public unary_op_info {
-  explicit log(const unary_params& = {}) {}
-  float operator()(float x) const override { return std::log(x); }
+  log_params params;
+
+  explicit log(const unary_params& params) : params(params.log) {}
+  float operator()(float x) const override {
+    return std::log2(x * params.input_multiplier / std::sqrt(2.0f)) *
+           params.output_multiplier;
+  }
 
   float tolerance(float y_ref, ynn_type type) const override {
     return tol_mixed(y_ref, 2 * epsilon(type), 6 * epsilon(type));
