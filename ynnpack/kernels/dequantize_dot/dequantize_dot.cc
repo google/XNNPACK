@@ -8,6 +8,7 @@
 #include <cstdint>
 
 #include "ynnpack/base/arch.h"
+#include "ynnpack/base/log.h"
 #include "ynnpack/base/type.h"
 #include "ynnpack/include/ynnpack.h"
 
@@ -17,6 +18,7 @@ dequantize_dot_kernel_fn get_dequantize_dot_kernel(ynn_type type,
                                                    uint64_t arch_flags) {
 #define YNN_DEQUANTIZE_DOT_KERNEL(arch, name, output_type)                     \
   if (type == type_of<output_type>() && is_arch_supported(arch, arch_flags)) { \
+    YNN_LOG_DEBUG() << "Using dequantize dot kernel " << #name;                \
     return name;                                                               \
   }
 #include "ynnpack/kernels/dequantize_dot/kernels.inc"

@@ -196,7 +196,7 @@ binary_kernel_fn get_binary_kernel(ynn_binary_operator op, ynn_type type_a,
       op == ynn_binary_##op_type) {                          \
     if (type_of<A>() == type_a && type_of<B>() == type_b &&  \
         type_of<X>() == type_x) {                            \
-      YNN_LOG_INFO() << "Using binary kernel " << #name;     \
+      YNN_LOG_DEBUG() << "Using binary kernel " << #name;    \
       return name;                                           \
     }                                                        \
   }

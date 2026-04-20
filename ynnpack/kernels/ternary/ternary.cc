@@ -13,6 +13,7 @@
 #include "ynnpack/base/arithmetic.h"
 #include "ynnpack/base/base.h"
 #include "ynnpack/base/half.h"
+#include "ynnpack/base/log.h"
 #include "ynnpack/base/type.h"  // IWYU pragma: keep
 #include "ynnpack/include/ynnpack.h"
 
@@ -139,6 +140,7 @@ ternary_kernel_fn get_ternary_kernel(ternary_op op, ynn_type type_a,
   if (ternary_op::kernel_op == op && is_arch_supported(arch)) {   \
     if (type_of<A>() == type_a && type_of<B>() == type_b &&       \
         type_of<C>() == type_c && type_of<X>() == type_x) {       \
+      YNN_LOG_DEBUG() << "Using ternary kernel " << #name;        \
       return name;                                                \
     }                                                             \
   }

@@ -334,7 +334,7 @@ unary_kernel_fn get_unary_kernel(ynn_unary_operator op, ynn_type a_type,
   if (a_type == type_of<type_a>() && x_type == type_of<type_x>() && \
       op == ynn_unary_##op_type &&                                  \
       is_arch_supported(arch, supported_arch_flags)) {              \
-    YNN_LOG_INFO() << "Using unary kernel " << #name;               \
+    YNN_LOG_DEBUG() << "Using unary kernel " << #name;              \
     return &name;                                                   \
   }
 

@@ -35,6 +35,7 @@
 #include "ynnpack/include/ynnpack.h"
 #include "ynnpack/subgraph/runtime.h"
 #include "ynnpack/subgraph/tensor.h"
+#include "slinky/base/ref_count.h"
 #include "slinky/base/thread_pool.h"
 #include "slinky/runtime/buffer.h"
 #include "slinky/runtime/evaluate.h"
@@ -1116,8 +1117,8 @@ ynn_status ynn_optimize_subgraph(ynn_subgraph_t subgraph,
     return status;
   }
 
-#if YNN_LOG_LEVEL >= YNN_LOG_LEVEL_DEBUG
-  YNN_LOG_DEBUG() << "subgraph after optimization:\n";
+#if YNN_LOG_LEVEL >= YNN_LOG_LEVEL_INFO
+  YNN_LOG_INFO() << "subgraph after optimization:\n";
   subgraph->dump(std::cout);
 #endif
 
