@@ -82,7 +82,7 @@ void xnn_f16_gemm_minmax_ukernel_1x8__wasmrelaxedsimd_splat(
       if (nc & 2) {
         wasm_v128_store32_lane(c0, vh0x0, 0);
 
-        wasm_i32x4_shuffle(vh0x0, vh0x0, 1, 2, 3, 1);
+        vh0x0 = wasm_i32x4_shuffle(vh0x0, vh0x0, 1, 2, 3, 1);
 
         c0 += 2;
       }

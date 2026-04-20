@@ -291,14 +291,14 @@ void xnn_f16_gemm_minmax_ukernel_8x16__wasmrelaxedsimd_splat(
         wasm_v128_store32_lane(c6, vh6x0, 0);
         wasm_v128_store32_lane(c7, vh7x0, 0);
 
-        wasm_i32x4_shuffle(vh0x0, vh0x0, 1, 2, 3, 1);
-        wasm_i32x4_shuffle(vh1x0, vh1x0, 1, 2, 3, 1);
-        wasm_i32x4_shuffle(vh2x0, vh2x0, 1, 2, 3, 1);
-        wasm_i32x4_shuffle(vh3x0, vh3x0, 1, 2, 3, 1);
-        wasm_i32x4_shuffle(vh4x0, vh4x0, 1, 2, 3, 1);
-        wasm_i32x4_shuffle(vh5x0, vh5x0, 1, 2, 3, 1);
-        wasm_i32x4_shuffle(vh6x0, vh6x0, 1, 2, 3, 1);
-        wasm_i32x4_shuffle(vh7x0, vh7x0, 1, 2, 3, 1);
+        vh0x0 = wasm_i32x4_shuffle(vh0x0, vh0x0, 1, 2, 3, 1);
+        vh1x0 = wasm_i32x4_shuffle(vh1x0, vh1x0, 1, 2, 3, 1);
+        vh2x0 = wasm_i32x4_shuffle(vh2x0, vh2x0, 1, 2, 3, 1);
+        vh3x0 = wasm_i32x4_shuffle(vh3x0, vh3x0, 1, 2, 3, 1);
+        vh4x0 = wasm_i32x4_shuffle(vh4x0, vh4x0, 1, 2, 3, 1);
+        vh5x0 = wasm_i32x4_shuffle(vh5x0, vh5x0, 1, 2, 3, 1);
+        vh6x0 = wasm_i32x4_shuffle(vh6x0, vh6x0, 1, 2, 3, 1);
+        vh7x0 = wasm_i32x4_shuffle(vh7x0, vh7x0, 1, 2, 3, 1);
 
         c0 += 2;
         c1 += 2;
