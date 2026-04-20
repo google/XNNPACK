@@ -142,7 +142,10 @@ SET(PROD_RVV_MICROKERNEL_SRCS
   src/x32-transposec/gen/x32-transposec-4x4-rvv.c
   src/x32-transposec/gen/x32-transposec-8x8-rvv.c
   src/x32-transposec/gen/x32-transposec-16x8-rvv.c
-  src/x32-transposec/gen/x32-transposec-32x8-rvv.c)
+  src/x32-transposec/gen/x32-transposec-32x8-rvv.c
+  src/x32-transposec/gen/x32-transposec-8xv1-rvv.c
+  src/x32-transposec/gen/x32-transposec-8xv2-rvv.c
+  src/x32-transposec/gen/x32-transposec-8xv4-rvv.c)
 
 SET(NON_PROD_RVV_MICROKERNEL_SRCS
   src/f32-conv-hwc2chw/f32-conv-hwc2chw-3x3s2p1c3x2v-rvv-1x1.c
