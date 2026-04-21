@@ -39,10 +39,10 @@ def main(argv: Sequence[str]) -> None:
       ],
       "x86_sse41": [
           (ceil_fp32, (8, 1)),
-          (cosine_fp32, (8, 1)),
+          (cosine_fp32, (32, 1)),
           (floor_fp32, (8, 1)),
           (round_fp32, (8, 1)),
-          (sine_fp32, (8, 1)),
+          (sine_fp32, (32, 1)),
       ],
       "x86_avx": [
           (abs_fp32, (16, 1)),
