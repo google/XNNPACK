@@ -132,6 +132,14 @@ struct xnn_f32_qb4w_minmax_params {
   } scalar;
 };
 
+struct xnn_bf16_qb4w_minmax_params {
+  struct {
+    float min;
+    float max;
+    size_t blocksize;
+  } scalar;
+};
+
 struct xnn_s8_minmax_params {
   struct {
     int32_t min;
