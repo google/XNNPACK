@@ -90,6 +90,4 @@ generate_dot_kernels(
         (10, 8, 8),
         (16, 4, 8),
     ],
-    # TODO: b/493642397 - This kernel doesn't build with msan
-    build_predicate="!defined(MEMORY_SANITIZER)",
 )
