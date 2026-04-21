@@ -711,6 +711,24 @@ DECLARE_F16_IGEMM_MINMAX_UKERNEL_FUNCTION(
 DECLARE_F16_IGEMM_MINMAX_UKERNEL_FUNCTION(
     xnn_f16_igemm_minmax_ukernel_7x4v__rvvfp16arith)
 
+DECLARE_F16_IGEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_f16_igemm_minmax_ukernel_1x8__wasmrelaxedsimd_splat)
+DECLARE_F16_IGEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_f16_igemm_minmax_ukernel_4x8__wasmrelaxedsimd_splat)
+DECLARE_F16_IGEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_f16_igemm_minmax_ukernel_6x8__wasmrelaxedsimd_splat)
+DECLARE_F16_IGEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_f16_igemm_minmax_ukernel_8x8__wasmrelaxedsimd_splat)
+
+DECLARE_F16_IGEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_f16_igemm_minmax_ukernel_1x16__wasmrelaxedsimd_splat)
+DECLARE_F16_IGEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_f16_igemm_minmax_ukernel_4x16__wasmrelaxedsimd_splat)
+DECLARE_F16_IGEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_f16_igemm_minmax_ukernel_6x16__wasmrelaxedsimd_splat)
+DECLARE_F16_IGEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_f16_igemm_minmax_ukernel_8x16__wasmrelaxedsimd_splat)
+
 #define DECLARE_QU8_IGEMM_MINMAX_UKERNEL_FUNCTION(fn_name)                \
   XNN_INTERNAL void fn_name(size_t mr, size_t nc, size_t kc, size_t ks,   \
                             const uint8_t** a, const void* w, uint8_t* c, \
