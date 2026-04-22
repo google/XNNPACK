@@ -90,10 +90,10 @@ http_archive(
 # cpuinfo library, used for detecting processor characteristics
 http_archive(
     name = "cpuinfo",
-    sha256 = "995316f224247d1611ab1b624a66bc5cbd5b5d2e5ce991ed68d983aac950ad8b",
-    strip_prefix = "cpuinfo-bc3c01e230c6974283e4b89421cfb0e232435589",
+    sha256 = "5d7f00693e97bd7525753de94be63f99b0490ae6855df168f5a6b2cfc452e49e",
+    strip_prefix = "cpuinfo-3c8b1533ac03dd6531ab6e7b9245d488f13a82a5",
     urls = [
-        "https://github.com/pytorch/cpuinfo/archive/bc3c01e230c6974283e4b89421cfb0e232435589.zip",
+        "https://github.com/pytorch/cpuinfo/archive/3c8b1533ac03dd6531ab6e7b9245d488f13a82a5.zip",
     ],
 )
 # LINT.ThenChange(cmake/DownloadCpuinfo.cmake)
