@@ -61,8 +61,8 @@ def main(argv: Sequence[str]) -> None:
       "x86_avx2": [
           (convert_bf16_to_fp32, (16, 1)),
           (convert_fp32_to_bf16, (16, 1)),
-          (exp_fp32, (16, 1)),
-          (log_fp32, (8, 1)),
+          (exp_fp32, (32, 1)),
+          (log_fp32, (32, 1)),
           (poly3_fp32, (16, 1)),
           (sigmoid_fp32, (16, 1)),
       ],
