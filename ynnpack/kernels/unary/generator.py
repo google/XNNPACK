@@ -74,7 +74,7 @@ def main(argv: Sequence[str]) -> None:
           (sine_fp32, (16, 1)),
       ],
       "x86_avx2_fma3": [
-          (log_fp32, (8, 1)),
+          (log_fp32, (32, 1)),
       ],
       "x86_f16c": [
           (convert_fp16_to_fp32, (16, 1)),
