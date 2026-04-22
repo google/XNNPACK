@@ -512,10 +512,6 @@ TEST(fusion, reduce_expand_dims) {
       .AddOutput(ynn_type_fp32, 4, x_id)
       .AddTensor(ynn_type_fp32, 2, v1_id);
 
-  // reduce axes {1, 2}, keep_dims=false
-  // output rank is 2.
-  // expand axes {1, 2}.
-  // output rank is 4.
   builder
       .AddReduce(ynn_reduce_sum, {1, 2}, a_id, YNN_INVALID_VALUE_ID, v1_id, 0)
       .AddExpandDims({1, 2}, v1_id, x_id);
@@ -527,6 +523,35 @@ TEST(fusion, reduce_expand_dims) {
   ASSERT_THAT(subgraph, AllOf(HasValidNodeCount(1), HasValidValueCount(3)));
   const ynn_node& node = ProducerOf(x_id, subgraph);
   EXPECT_THAT(node, AllOf(IsReduce(ynn_reduce_sum), InputsInclude(a_id)));
+  const auto& reduce = std::get<ynn_node::reduce>(node.op);
+  EXPECT_EQ(reduce.k_dims, 0b0110);
+  EXPECT_TRUE(reduce.keep_dims);
+}
+
+TEST(fusion, reduce_expand_dims_initializer) {
+  const uint32_t a_id = 0;
+  const uint32_t b_id = 1;
+  const uint32_t x_id = 2;
+  SubgraphBuilder builder(3);
+  uint32_t v1_id = YNN_INVALID_VALUE_ID;
+  builder.AddInput(ynn_type_fp32, 4, a_id)
+      .AddInput(ynn_type_fp32, 2, b_id)
+      .AddOutput(ynn_type_fp32, 4, x_id)
+      .AddTensor(ynn_type_fp32, 2, v1_id);
+
+  builder.AddReduce(ynn_reduce_sum, {1, 2}, a_id, b_id, v1_id, 0)
+      .AddExpandDims({1, 2}, v1_id, x_id);
+
+  ynn_subgraph& subgraph = *builder.GetSubgraph();
+  subgraph.fusion();
+  subgraph.invalidate_dead_values();
+
+  ASSERT_THAT(subgraph, AllOf(HasValidNodeCount(2), HasValidValueCount(4)));
+  const ynn_node& node = ProducerOf(x_id, subgraph);
+  EXPECT_THAT(node,
+              AllOf(IsReduce(ynn_reduce_sum), InputsInclude(a_id, v1_id)));
+  EXPECT_THAT(ProducerOf(v1_id, subgraph),
+              AllOf(IsExpandDims(), InputsAre(b_id)));
   const auto& reduce = std::get<ynn_node::reduce>(node.op);
   EXPECT_EQ(reduce.k_dims, 0b0110);
   EXPECT_TRUE(reduce.keep_dims);

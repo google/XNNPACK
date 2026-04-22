@@ -185,6 +185,12 @@ MATCHER_P(IsStencilCopy, stencils, "") {
   return true;
 }
 
+MATCHER(IsExpandDims, "") {
+  const ynn_node::static_expand_dims* expand_dims =
+      std::get_if<ynn_node::static_expand_dims>(&arg.op);
+  return expand_dims != nullptr;
+}
+
 MATCHER(IsCopy, "") {
   const ynn_node::copy* copy = std::get_if<ynn_node::copy>(&arg.op);
   return copy != nullptr;

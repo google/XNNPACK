@@ -444,6 +444,8 @@ bool can_implicitly_broadcast(const ynn_node& node, uint32_t input_id) {
     // TODO: b/491453504 - Not all ternary ops can implicitly broadcast all
     // operands.
     return true;
+  } else if (std::get_if<ynn_node::static_broadcast>(&node.op)) {
+    return true;
   }
   return false;
 }
@@ -613,9 +615,60 @@ bool remove_broadcast(ynn_subgraph& subgraph, ynn_node& node,
   return simplified;
 }
 
+bool is_expand_dims_noop(const ynn_value& input,
+                         const ynn::axes_set& new_axes) {
+  size_t output_rank = input.rank() + new_axes.count();
+  for (int d = static_cast<int>(new_axes.size()) - 1; d >= 0; --d) {
+    if (!new_axes[d]) continue;
+    if (d + 1 > output_rank) {
+    } else if (d + 1 == output_rank) {
+      --output_rank;
+    } else {
+      return false;
+    }
+  }
+  return true;
+}
+
+bool remove_broadcast_expand_dims(ynn_subgraph& subgraph, ynn_node& node,
+                                  subgraph_analysis& analysis) {
+  auto* expand_dims = std::get_if<ynn_node::static_expand_dims>(&node.op);
+  if (!expand_dims) return false;
+
+  const ynn_value& input = subgraph.value(node.inputs[0]);
+  ynn_value& output = subgraph.value(node.outputs[0]);
+  if (output.is_external_output()) return false;
+
+  if (!is_expand_dims_noop(input, expand_dims->new_axes)) return false;
+
+  std::vector<ynn_node*>& consumers = analysis.consumers[node.outputs[0]];
+  if (!std::all_of(consumers.begin(), consumers.end(), [&](const ynn_node* i) {
+        return can_implicitly_broadcast(*i, output.id);
+      })) {
+    // One of the consumers can't handle implicit broadcasts.
+    return false;
+  }
+
+  // This broadcast is a no-op, replace consumers with our input, and remove
+  // the op.
+  YNN_LOG_DEBUG() << "Removing expand_dims";
+  for (ynn_node* i : consumers) {
+    for (uint32_t& id : i->inputs) {
+      if (id == node.outputs[0]) {
+        id = node.inputs[0];
+      }
+    }
+  }
+  node.invalidate();
+  return true;
+}
+
 bool remove_broadcast(ynn_subgraph& subgraph, ynn_node& node,
                       subgraph_analysis& analysis) {
-  return remove_broadcast<ynn_node::broadcast>(subgraph, node, analysis) ||
+  // expand_dims is often used to broadcast trailing dimensions and not needed
+  // in this case.
+  return remove_broadcast_expand_dims(subgraph, node, analysis) ||
+         remove_broadcast<ynn_node::broadcast>(subgraph, node, analysis) ||
          remove_broadcast<ynn_node::broadcast_like>(subgraph, node, analysis);
 }
 
@@ -913,6 +966,19 @@ bool rewrite_expand_dims_reduce(ynn_subgraph& subgraph, ynn_node& node,
 
   std::get<ynn_node::reduce>(producer->op).keep_dims = true;
   producer->outputs[0] = node.outputs[0];
+  if (producer->inputs[1] != YNN_INVALID_VALUE_ID) {
+    const ynn_value& init = subgraph.value(producer->inputs[1]);
+    if (!is_expand_dims_noop(init, expand->new_axes)) {
+      // We need to move the expand_dims to the initializer input.
+      uint32_t expanded_id = node.inputs[0];
+      ynn::define_static_expand_dims(subgraph, node, producer->inputs[1],
+                                     expanded_id, expand->new_axes);
+      producer->inputs[1] = expanded_id;
+      // Swap the nodes to maintain topological order.
+      std::swap(node, *producer);
+      return true;
+    }
+  }
   node.invalidate();
   return true;
 }
