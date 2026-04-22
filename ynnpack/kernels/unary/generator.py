@@ -27,15 +27,15 @@ def main(argv: Sequence[str]) -> None:
   kernels = {
       "x86_sse2": [
           (abs_fp32, (8, 1)),
-          (erf_fp32, (8, 1)),
-          (exp_fp32, (8, 1)),
-          (log_fp32, (4, 1)),
+          (erf_fp32, (16, 1)),
+          (exp_fp32, (16, 1)),
+          (log_fp32, (8, 1)),
           (negate_fp32, (8, 1)),
-          (poly3_fp32, (8, 1)),
+          (poly3_fp32, (16, 1)),
           (reciprocal_square_root_fp32, (8, 1)),
           (square_root_fp32, (8, 1)),
-          (sigmoid_fp32, (8, 1)),
-          (tanh_fp32, (8, 1)),
+          (sigmoid_fp32, (32, 1)),
+          (tanh_fp32, (16, 1)),
       ],
       "x86_sse41": [
           (ceil_fp32, (8, 1)),
