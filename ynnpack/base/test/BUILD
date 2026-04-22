@@ -42,7 +42,7 @@ cc_library(
     hdrs = ["util.h"],
     deps = [
         "//ynnpack/base",
-        "@com_google_googletest//:gtest",
+        "@com_google_googletest//:gtest",  # no g3
     ],
 )
 
@@ -52,7 +52,7 @@ cc_library(
     hdrs = ["fuzz_test.h"],
     deps = [
         "//ynnpack/base",
-        "@com_google_googletest//:gtest",
+        "@com_google_googletest//:gtest",  # no g3
     ],
 )
 

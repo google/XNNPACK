@@ -9,7 +9,7 @@ cc_library(
         "test_main.cc",
     ],
     visibility = ["//:__subpackages__"],
-    deps = ["@com_google_googletest//:gtest"],
+    deps = ["@com_google_googletest//:gtest"],  # no g3
     alwayslink = True,
 )
 

@@ -41,7 +41,7 @@ cc_library(
         "//ynnpack:ynnpack_h",
         "//ynnpack/base",
         "//ynnpack/subgraph",
-        "@com_google_googletest//:gtest",
+        "@com_google_googletest//:gtest",  # no g3
     ],
 )
 

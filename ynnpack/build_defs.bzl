@@ -320,7 +320,7 @@ def ynn_binary_malloc():
 def ynn_test_deps():
     return select({
         "//ynnpack:hexagon": [
-            "@com_google_googletest//:gtest",
+            "@com_google_googletest//:gtest",  # no g3
             "//ynnpack/base/hexagon:test_main",
         ],
         "//conditions:default": ["@com_google_googletest//:gtest_main"],
