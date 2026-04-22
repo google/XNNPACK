@@ -27,8 +27,8 @@ cc_library(
     ],
     # copybara:uncomment includes = ["utils"],
     deps = [
-        "//litert/tensor:buffer",
-        "//litert/tensor:datatypes",
+        ":buffer",
+        ":datatypes",
         "//litert/tensor/internal:graph",
         "//litert/tensor/utils:source_location",
         "@abseil-cpp//absl/log:absl_check",
@@ -95,9 +95,9 @@ cc_library(
     hdrs = ["arithmetic.h"],
     deps = [
         ":arithmetic_graph",
+        ":buffer",
+        ":datatypes",
         ":tensor",
-        "//litert/tensor:buffer",
-        "//litert/tensor:datatypes",
         "//litert/tensor/internal:arithmetic_helpers",
         "//litert/tensor/internal:graph",
         "//litert/tensor/utils:macros",
