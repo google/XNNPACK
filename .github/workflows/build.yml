@@ -283,7 +283,7 @@ jobs:
           cmake \
             --build \
             build/macos/arm64 \
-            -j$((2*$(sysctl -n hw.ncpu)))
+            -j$(sysctl -n hw.ncpu)
         working-directory: ${{ github.workspace }}
 
   cmake-android:
