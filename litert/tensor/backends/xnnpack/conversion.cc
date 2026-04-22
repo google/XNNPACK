@@ -267,7 +267,7 @@ absl::Status XnnpackBuildContext::Init() {
 
 absl::StatusOr<std::unique_ptr<XnnpackGraph>> XnnpackBuildContext::Finalize() {
   for (const graph::Tensor& tensor : outputs_) {
-    LRT_TENSOR_ASSIGN_OR_RETURN(auto _, DefineValue(tensor));
+    LRT_TENSOR_RETURN_IF_ERROR(DefineValue(tensor));
   }
 
   auto* subgraph = subgraph_;
