@@ -44,7 +44,7 @@ def main(argv: Sequence[str]) -> None:
           (subtract_fp32_bf16_bf16, (32, 1)),
           (subtract_bf16_fp32, (32, 1)),
           (divide_bf16_fp32, (32, 1)),
-          (multiply_bf16_fp32, (32, 1)),
+          (multiply_bf16_fp32, (64, 1)),
           (divide_bf16_fp32_bf16, (32, 1)),
           (multiply_bf16_fp32_bf16, (32, 1)),
       ],
