@@ -1538,10 +1538,56 @@ void xnn_compute_pad_qd8_params(
   }
 }
 
+typedef struct xnn_qd8_quantization_params(bf16_quantization_params_fn)(
+    xnn_bfloat16 min, xnn_bfloat16 max, xnn_bfloat16* bf16_scale);
 typedef struct xnn_qd8_quantization_params(f16_quantization_params_fn)(
     xnn_float16 min, xnn_float16 max, xnn_float16* f32_scale);
 typedef struct xnn_qd8_quantization_params(f32_quantization_params_fn)(
     float min, float max, float* f32_scale);
+
+void xnn_compute_bf16_qx8_convert(
+    struct bf16_qd8_convert_context* restrict context,
+    bf16_quantization_params_fn quantization_params_function,
+    size_t batch_index) {
+  const size_t x_stride = context->x_stride;
+  const size_t y_stride = context->y_stride;
+  const size_t n = context->n;
+  const void* input =
+      (const void*)((uintptr_t)context->x + x_stride * batch_index);
+  void* output = (void*)((uintptr_t)context->y + y_stride * batch_index);
+
+  xnn_bfloat16 minmax[2] = {xnn_bfloat16_from_bits(UINT16_C(0x7F80)),
+                             xnn_bfloat16_from_bits(UINT16_C(0xFF80))};
+  context->rminmax_ukernel(n, input, minmax, &context->params);
+  xnn_bfloat16 bf16_scale;
+  context->quantization_params[batch_index] =
+      quantization_params_function(minmax[0], minmax[1], &bf16_scale);
+
+  struct xnn_bf16_qs8_cvt_params params;
+  params.scalar.scale = bf16_scale;
+  params.scalar.output_zero_point =
+      context->quantization_params[batch_index].zero_point;
+  context->convert_ukernel(n, input, output, (union xnn_unary_uparams*)&params);
+
+  if (context->rsum_ukernel) {
+    // Compute and store the row sum of the quantized output.
+    const size_t num_bytes = n / sizeof(xnn_bfloat16) * sizeof(int8_t);
+    int32_t row_sum = 0;
+    struct xnn_qs8_rsum_params rsum_params = {0,};
+    context->rsum_ukernel(num_bytes, output, &row_sum, &rsum_params);
+    context->row_sum[batch_index] = (float)row_sum;
+  }
+}
+
+void xnn_compute_bf16_qd8_convert(
+    struct bf16_qd8_convert_context* restrict context, size_t batch_offset,
+    size_t batch_range) {
+  for (size_t batch_index = batch_offset;
+       batch_index < batch_offset + batch_range; batch_index++) {
+    xnn_compute_bf16_qx8_convert(
+        context, xnn_bf16_qd8_asymmetric_quantization_params, batch_index);
+  }
+}
 
 void xnn_compute_f16_qx8_convert(
     struct f16_qd8_convert_context* restrict context,

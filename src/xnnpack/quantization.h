@@ -90,4 +90,15 @@ xnn_f16_qd8_asymmetric_quantization_params(xnn_float16 min, xnn_float16 max,
   return params;
 }
 
+static inline struct xnn_qd8_quantization_params
+xnn_bf16_qd8_asymmetric_quantization_params(xnn_bfloat16 min, xnn_bfloat16 max,
+                                            xnn_bfloat16* bf16_scale) {
+  struct xnn_qd8_quantization_params params =
+      xnn_qd8_asymmetric_quantization_params(xnn_bfloat16_to_float(min),
+                                             xnn_bfloat16_to_float(max));
+  *bf16_scale = xnn_bfloat16_from_float(params.inv_scale);
+  params.inv_scale = 1.f / params.inv_scale;
+  return params;
+}
+
 #endif  // XNNPACK_SRC_XNNPACK_QUANTIZATION_H_
