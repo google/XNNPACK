@@ -107,22 +107,6 @@ enum ynn_type {
 // exists, unless the `YNN_VALUE_FLAG_COPY_DATA` flag is used, indicating that
 // this function will make a copy of the data, releasing the caller of the
 // obligation to maintain it.
-//
-// Quantization parameters are specified via other tensor IDs. Conceptually,
-// these tensors must have the same shape as this tensor. Some common examples
-// include:
-// - Per-tensor quantization: `zero_point_id` and `scale_id` both refer to
-//   broadcasted scalar values.
-// - Per-channel quantization: `zero_point_id` refers to a broadcasted scalar,
-//   `scale_id` refers to a tensor with a single non-broadcasted dimension.
-// - Blockwise quantization: `zero_point_id` refers to a broadcasted scalar,
-//   `scale_id` refers to a tensor that is broadcasted and reshaped.
-enum ynn_status ynn_define_tensor_value(ynn_subgraph_t subgraph,
-                                        enum ynn_type type, size_t rank,
-                                        const size_t* dims, const void* data,
-                                        uint32_t zero_point_id,
-                                        uint32_t scale_id, uint32_t flags,
-                                        uint32_t* id_out);
 enum ynn_status ynn_define_tensor(ynn_subgraph_t subgraph, enum ynn_type type,
                                   size_t rank, const size_t* dims,
                                   const void* data, uint32_t flags,

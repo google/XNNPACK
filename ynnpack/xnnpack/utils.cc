@@ -24,11 +24,17 @@ ynn_status define_tensor_value_like(xnn_subgraph_t subgraph, uint32_t type_id,
                                     size_t rank, uint32_t* id_out) {
   const ynn_value& type_value = subgraph->ynn->value(type_id);
   assert(*id_out == YNN_INVALID_VALUE_ID);
-  return ynn_define_tensor_value(subgraph->ynn, type_value.type, rank,
-                                 /*dims=*/nullptr, /*data=*/nullptr,
-                                 get_zero_point_id(subgraph, type_id),
-                                 get_scale_id(subgraph, type_id),
-                                 /*flags=*/0, id_out);
+  ynn_status status = ynn_define_tensor(subgraph->ynn, type_value.type, rank,
+                                        /*dims=*/nullptr, /*data=*/nullptr,
+                                        /*flags=*/0, id_out);
+  if (status != ynn_status_success) {
+    return status;
+  }
+
+  ynn_value& value = subgraph->ynn->value(*id_out);
+  value.zero_point_id = get_zero_point_id(subgraph, type_id);
+  value.scale_id = get_scale_id(subgraph, type_id);
+  return ynn_status_success;
 }
 
 ynn_status define_tensor_value_like(xnn_subgraph_t subgraph, uint32_t id,
@@ -90,11 +96,10 @@ ynn_status subtract_a_times_sum_b(xnn_subgraph_t subgraph, size_t num_k_dims,
   }
 
   uint32_t sum_sliced_id = YNN_INVALID_VALUE_ID;
-  status = ynn_define_tensor_value(
+  status = ynn_define_tensor(
       subgraph->ynn, accumulator_for_type(ynn::type_of_value(subgraph, b_id)),
       ynn::rank_of_value(subgraph, b_id) - num_k_dims, /*dims=*/nullptr,
       /*data=*/nullptr,
-      /*zero_point_id=*/YNN_INVALID_VALUE_ID, /*scale_id=*/YNN_INVALID_VALUE_ID,
       /*flags=*/0, &sum_sliced_id);
   if (status != ynn_status_success) {
     return status;
@@ -290,14 +295,13 @@ ynn_status define_xnn_accumulator_for_quantized_dot(
   } else {
     *output_id = YNN_INVALID_VALUE_ID;
     ynn_status status =
-        ynn_define_tensor_value(subgraph->ynn, accumulator_type, /*rank=*/0,
-                                /*dims=*/nullptr, /*data=*/nullptr,
-                                /*zero_point_id=*/YNN_INVALID_VALUE_ID,
-                                /*scale_id=*/scale_id,
-                                /*flags=*/0, output_id);
+        ynn_define_tensor(subgraph->ynn, accumulator_type, /*rank=*/0,
+                          /*dims=*/nullptr, /*data=*/nullptr,
+                          /*flags=*/0, output_id);
     if (status != ynn_status_success) {
       return status;
     }
+    subgraph->ynn->value(*output_id).scale_id = scale_id;
   }
 
   return ynn_status_success;

@@ -353,9 +353,13 @@ uint32_t ynn_subgraph::get_static_value_id(ynn_type type, size_t rank,
       uint32_t zero_id =
           get_static_value_id(type, rank, dims, YNN_INVALID_VALUE_ID,
                               YNN_INVALID_VALUE_ID, value_f32);
-      ynn_define_tensor_value(this, type, /*num_dims=*/0, /*dims=*/nullptr,
-                              /*data=*/nullptr, zero_point_id, scale_id,
-                              /*flags=*/0, &id);
+      ynn_define_tensor(this, type, /*num_dims=*/0, /*dims=*/nullptr,
+                        /*data=*/nullptr, /*flags=*/0, &id);
+
+      ynn_value& value = this->value(id);
+      value.zero_point_id = zero_point_id;
+      value.scale_id = scale_id;
+
       ynn_define_unary(this, ynn_unary_convert, zero_id, &id,
                        /*flags=*/0);
       return id;
@@ -372,28 +376,28 @@ uint32_t ynn_subgraph::get_static_value_id(ynn_type type, size_t rank,
     zero_point = value(zero_point_id).static_scalar_value<int32_t>();
   }
 
-  std::vector<char> value(size * ynn::type_size_bytes(type));
+  std::vector<char> data(size * ynn::type_size_bytes(type));
   switch (type) {
     case ynn_type_fp32:
-      std::copy_n(value_f32, size, reinterpret_cast<float*>(value.data()));
+      std::copy_n(value_f32, size, reinterpret_cast<float*>(data.data()));
       break;
     case ynn_type_fp16:
-      std::copy_n(value_f32, size, reinterpret_cast<ynn::half*>(value.data()));
+      std::copy_n(value_f32, size, reinterpret_cast<ynn::half*>(data.data()));
       break;
     case ynn_type_bf16:
       std::copy_n(value_f32, size,
-                  reinterpret_cast<ynn::bfloat16*>(value.data()));
+                  reinterpret_cast<ynn::bfloat16*>(data.data()));
       break;
     case ynn_type_int32:
-      ynn::quantize(value_f32, reinterpret_cast<int32_t*>(value.data()), size,
+      ynn::quantize(value_f32, reinterpret_cast<int32_t*>(data.data()), size,
                     1.0f / scale, zero_point);
       break;
     case ynn_type_int8:
-      ynn::quantize(value_f32, reinterpret_cast<int8_t*>(value.data()), size,
+      ynn::quantize(value_f32, reinterpret_cast<int8_t*>(data.data()), size,
                     1.0f / scale, zero_point);
       break;
     case ynn_type_uint8:
-      ynn::quantize(value_f32, reinterpret_cast<uint8_t*>(value.data()), size,
+      ynn::quantize(value_f32, reinterpret_cast<uint8_t*>(data.data()), size,
                     1.0f / scale, zero_point);
       break;
     default:
@@ -401,8 +405,11 @@ uint32_t ynn_subgraph::get_static_value_id(ynn_type type, size_t rank,
   }
 
   uint32_t id = YNN_INVALID_VALUE_ID;
-  ynn_define_tensor_value(this, type, rank, dims, value.data(), zero_point_id,
-                          scale_id, YNN_VALUE_FLAG_COPY_DATA, &id);
+  ynn_define_tensor(this, type, rank, dims, data.data(),
+                    YNN_VALUE_FLAG_COPY_DATA, &id);
+  ynn_value& value = this->value(id);
+  value.zero_point_id = zero_point_id;
+  value.scale_id = scale_id;
   return id;
 }
 
