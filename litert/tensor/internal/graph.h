@@ -143,7 +143,9 @@ struct Tensor {
   //
   // Warning: This checks whether two Tensor objects point to the same
   // underlying data, not that the tensor properties are equal.
-  bool operator==(const Tensor& b) const = default;
+  bool operator==(const Tensor& b) const {
+    return group == b.group && index == b.index;
+  }
 
   template <class H>
   friend H AbslHashValue(H h, const Tensor& t) {

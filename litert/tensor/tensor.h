@@ -130,8 +130,9 @@ class TensorHandle {
   //
   // Warning: This checks whether two Tensor handles point to the same
   // underlying data, not that the tensor properties are equal.
-  friend bool operator==(const TensorHandle& a,
-                         const TensorHandle& b) = default;
+  friend bool operator==(const TensorHandle& a, const TensorHandle& b) {
+    return a.impl_ == b.impl_;
+  }
 
  private:
   graph::Tensor impl_;
