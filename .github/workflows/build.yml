@@ -440,7 +440,8 @@ jobs:
               -- \
               //test/... \
               //bench/... \
-              //ynnpack/...
+              //ynnpack/... \
+              //litert/...
 
       - name: Compress disk cache
         if: ${{ inputs.update-caches }}
@@ -508,6 +509,7 @@ jobs:
               //test/... \
               //bench/... \
               //ynnpack/... \
+              //litert/... \
               -//ynnpack/kernels/dot:get_dot_kernel_test
 
       - name: Compress disk cache
@@ -562,7 +564,8 @@ jobs:
               -- \
               //test/... \
               //bench/... \
-              //ynnpack/...
+              //ynnpack/... \
+              //litert/...
 
       - name: Compress disk cache
         if: ${{ inputs.update-caches }}
@@ -606,7 +609,8 @@ jobs:
               -- \
               //test/... \
               //bench/... \
-              //ynnpack/...
+              //ynnpack/... \
+              //litert/...
 
       - name: Build and run tests
         if: ${{ inputs.run-tests }}
@@ -622,7 +626,8 @@ jobs:
               -- \
               //test/... \
               //bench/... \
-              //ynnpack/...
+              //ynnpack/... \
+              //litert/...
 
       - name: Compress disk cache
         if: ${{ inputs.update-caches }}
