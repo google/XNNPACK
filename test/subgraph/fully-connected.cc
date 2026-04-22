@@ -763,6 +763,7 @@ TEST(FullyConnectedF32, dynamic_b) {
   TestDynamicB<float, float, float, float>();
 }
 
+#ifndef XNNPACK_USE_YNNPACK
 TEST(FullyConnectedQS8, filter_zero_point_must_be_zero) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
 
@@ -803,6 +804,7 @@ TEST(FullyConnectedQS8, filter_zero_point_must_be_zero) {
 
   xnn_delete_subgraph(subgraph);
 }
+#endif  // XNNPACK_USE_YNNPACK
 
 // Regression test: fully-connected with a zero-dimensional input must not
 // cause a heap-buffer-overflow via unsigned underflow on num_dims - 1.
