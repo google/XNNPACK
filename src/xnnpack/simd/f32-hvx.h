@@ -131,32 +131,15 @@ static XNN_INLINE xnn_simd_f32_t xnn_neg_f32(xnn_simd_f32_t a) {
 }
 
 // todo: v81 use rnd
-#if __HVX_ARCH__ >= 73
-static XNN_INLINE xnn_simd_f32_t xnn_round_f32(xnn_simd_f32_t a) {
-  const HVX_Vector vabs_a = Q6_V_vand_VV(a, Q6_V_vsplat_R(0x7FFFFFFF));
-  const HVX_Vector vhalf = Q6_V_vsplat_R(float_as_uint32(0.5f));
-  const HVX_Vector vroundup =
-      Q6_Vsf_equals_Vqf32(Q6_Vqf32_vadd_VsfVsf(vabs_a, vhalf));
-
-  const HVX_Vector vsign_a = Q6_V_vand_VV(a, Q6_V_vsplat_R(0x80000000));
-  const HVX_Vector vresult = Q6_V_vor_VV(vroundup, vsign_a);
-
-  const HVX_Vector vmax_non_int_val =
-      Q6_V_vsplat_R(float_as_uint32(8388607.0f));  // 2^23-1
-  const HVX_VectorPred vfilter = Q6_Q_vcmp_gt_VsfVsf(vabs_a, vmax_non_int_val);
-  return Q6_V_vmux_QVV(vfilter, a, vresult);
-}
-#else
 static XNN_INLINE xnn_simd_f32_t xnn_round_f32(xnn_simd_f32_t a) {
   XNN_ALIGN(128) float input[xnn_simd_size_f32];
   XNN_ALIGN(128) float output[xnn_simd_size_f32];
   *((HVX_Vector*)input) = a;
   for (size_t k = 0; k < xnn_simd_size_f32; ++k) {
-    output[k] = roundf(input[k]);
+    output[k] = rintf(input[k]);
   }
   return *((HVX_Vector*)output);
 }
-#endif  // __HVX_ARCH__ >= 73
 
 #if __HVX_ARCH__ >= 73
 static XNN_INLINE xnn_simd_f32_t xnn_trunc_f32(xnn_simd_f32_t a) {

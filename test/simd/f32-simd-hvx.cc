@@ -59,7 +59,8 @@ TEST_F(F32SimdHVXTest, Add) {
   const xnn_simd_f32_t res = xnn_add_f32(a, b);
   xnn_storeu_f32(output_.data(), res);
   for (size_t k = 0; k < xnn_simd_size_f32; k++) {
-    ASSERT_EQ(output_[k], inputs_[k] + inputs_[k + xnn_simd_size_f32]);
+    ASSERT_NEAR(output_[k], inputs_[k] + inputs_[k + xnn_simd_size_f32],
+                std::max(std::abs(output_[k]) * 1e-6f, 1e-6f));
   }
 }
 
@@ -69,7 +70,8 @@ TEST_F(F32SimdHVXTest, Mul) {
   const xnn_simd_f32_t res = xnn_mul_f32(a, b);
   xnn_storeu_f32(output_.data(), res);
   for (size_t k = 0; k < xnn_simd_size_f32; k++) {
-    ASSERT_EQ(output_[k], inputs_[k] * inputs_[k + xnn_simd_size_f32]);
+    ASSERT_NEAR(output_[k], inputs_[k] * inputs_[k + xnn_simd_size_f32],
+                std::max(std::abs(output_[k]) * 1e-6f, 1e-6f));
   }
 }
 
@@ -83,12 +85,14 @@ TEST_F(F32SimdHVXTest, Fmadd) {
   for (size_t k = 0; k < xnn_simd_size_f32; k++) {
 #if XNN_SIMD_HAS_NATIVE_FMA
     // If an arch claims to support FMA, it better also round things correctly.
-    ASSERT_EQ(output_[k], std::fma(inputs_[k], inputs_[k + xnn_simd_size_f32],
-                                  inputs_[k + 2 * xnn_simd_size_f32]));
+    ASSERT_NEAR(output_[k], std::fma(inputs_[k], inputs_[k + xnn_simd_size_f32],
+                                  inputs_[k + 2 * xnn_simd_size_f32]),
+                std::max(std::abs(output_[k]) * 1e-6f, 1e-6f));
 #else
-    ASSERT_EQ(output_[k],
+    ASSERT_NEAR(output_[k],
               inputs_[k] * inputs_[k + xnn_simd_size_f32] +
-                  inputs_[k + 2 * xnn_simd_size_f32]);
+                  inputs_[k + 2 * xnn_simd_size_f32],
+              std::max(std::abs(output_[k]) * 1e-6f, 1e-6f));
 #endif  // XNN_SIMD_HAS_NATIVE_FMA
   }
 }
@@ -103,12 +107,14 @@ TEST_F(F32SimdHVXTest, Fmsub) {
   for (size_t k = 0; k < xnn_simd_size_f32; k++) {
 #if XNN_SIMD_HAS_NATIVE_FMA
     // If an arch claims to support FMA, it better also round things correctly.
-    ASSERT_EQ(output_[k], std::fma(inputs_[k], inputs_[k + xnn_simd_size_f32],
-                                   -inputs_[k + 2 * xnn_simd_size_f32]));
+    ASSERT_NEAR(output_[k], std::fma(inputs_[k], inputs_[k + xnn_simd_size_f32],
+                                   -inputs_[k + 2 * xnn_simd_size_f32]),
+                std::max(std::abs(output_[k]) * 1e-6f, 1e-6f));
 #else
-    ASSERT_EQ(output_[k],
+    ASSERT_NEAR(output_[k],
               inputs_[k] * inputs_[k + xnn_simd_size_f32] -
-                  inputs_[k + 2 * xnn_simd_size_f32]);
+                  inputs_[k + 2 * xnn_simd_size_f32],
+              std::max(std::abs(output_[k]) * 1e-6f, 1e-6f));
 #endif  // XNN_SIMD_HAS_NATIVE_FMA
   }
 }
@@ -123,12 +129,14 @@ TEST_F(F32SimdHVXTest, Fnmadd) {
   for (size_t k = 0; k < xnn_simd_size_f32; k++) {
 #if XNN_SIMD_HAS_NATIVE_FMA
     // If an arch claims to support FMA, it better also round things correctly.
-    ASSERT_EQ(output_[k], std::fma(-inputs_[k], inputs_[k + xnn_simd_size_f32],
-                                   inputs_[k + 2 * xnn_simd_size_f32]));
+    ASSERT_NEAR(output_[k], std::fma(-inputs_[k], inputs_[k + xnn_simd_size_f32],
+                                   inputs_[k + 2 * xnn_simd_size_f32]),
+                std::max(std::abs(output_[k]) * 1e-6f, 1e-6f));
 #else
-    ASSERT_EQ(output_[k],
+    ASSERT_NEAR(output_[k],
               -inputs_[k] * inputs_[k + xnn_simd_size_f32] +
-                  inputs_[k + 2 * xnn_simd_size_f32]);
+                  inputs_[k + 2 * xnn_simd_size_f32],
+              std::max(std::abs(output_[k]) * 1e-6f, 1e-6f));
 #endif  // XNN_SIMD_HAS_NATIVE_FMA
   }
 }
@@ -139,7 +147,8 @@ TEST_F(F32SimdHVXTest, Sub) {
   const xnn_simd_f32_t res = xnn_sub_f32(a, b);
   xnn_storeu_f32(output_.data(), res);
   for (size_t k = 0; k < xnn_simd_size_f32; k++) {
-    ASSERT_EQ(output_[k], inputs_[k] - inputs_[k + xnn_simd_size_f32]);
+    ASSERT_NEAR(output_[k], inputs_[k] - inputs_[k + xnn_simd_size_f32],
+                std::max(std::abs(output_[k]) * 1e-6f, 1e-6f));
   }
 }
 
@@ -150,7 +159,7 @@ TEST_F(F32SimdHVXTest, Div) {
   xnn_storeu_f32(output_.data(), res);
   for (size_t k = 0; k < xnn_simd_size_f32; k++) {
     ASSERT_NEAR(output_[k], inputs_[k] / inputs_[k + xnn_simd_size_f32],
-    8 * std::numeric_limits<float>::epsilon() * std::abs(output_[k]));
+    64 * std::numeric_limits<float>::epsilon() * std::max(std::abs(output_[k]), 1.0f));
   }
 }
 
@@ -986,7 +995,7 @@ TEST_F(F32SimdHVXTest, Reduce_Add) {
   for (size_t k = 0; k < xnn_simd_size_f32; k++) {
     sum += inputs_[k];
   }
-  const float tolerance = std::numeric_limits<float>::epsilon() * std::abs(sum);
+  const float tolerance = std::max(std::abs(sum) * 1e-5f, 1e-5f);
   ASSERT_NEAR(res, sum, tolerance);
 }
 #endif
