@@ -62,7 +62,7 @@ TensorHandle& TensorHandle::Set(TensorInit init, source_location loc) & {
   graph::TensorInformation& info = *GetInfo(impl_);
   info.name = std::move(init.name);
   info.type = init.type;
-  info.shape = std::move(init.shape);
+  info.shape = std::move(init.shape)
   std::visit(
       [&info](auto&& arg) {
         using T = std::decay_t<decltype(arg)>;
