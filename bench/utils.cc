@@ -57,6 +57,7 @@ int FLAGS_num_threads = 1;
 int FLAGS_batch_size = 1;
 uint32_t FLAGS_xnn_runtime_flags = 0;
 uint32_t FLAGS_benchmark_min_iters = 1;
+bool FLAGS_wipe_caches = false;
 
 namespace benchmark {
 namespace utils {
@@ -191,6 +192,10 @@ int ProcessArgs(int& argc, char**& argv) {
                   << FLAGS_benchmark_min_iters << "\n";
         return 1;
       }
+      std::copy(argv + i + 1, argv + argc, argv + i);
+      argc -= 1;
+    } else if (strncmp(argv[i], "--wipe_caches", 13) == 0) {
+      FLAGS_wipe_caches = true;
       std::copy(argv + i + 1, argv + argc, argv + i);
       argc -= 1;
     } else {
