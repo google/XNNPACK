@@ -133,6 +133,54 @@ void dequantize_int32_to_fp32(size_t m, size_t n, size_t stride_a_m,
              stride_x_m, reinterpret_cast<float*>(x), params);
 }
 
+void dequantize_int4_to_fp32(size_t m, size_t n, size_t stride_a_m,
+                             size_t stride_a_n, const void* va,
+                             size_t stride_b_m, size_t stride_b_n,
+                             const void* vb, size_t stride_c_m,
+                             size_t stride_c_n, const void* vc,
+                             size_t stride_x_m, void* vx,
+                             const ternary_params* params) {
+  auto x = reinterpret_cast<float*>(vx);
+
+  for (size_t i = 0; i < m; ++i) {
+    auto a_row = reinterpret_cast<const uint8_t*>(va) + i * stride_a_m;
+    auto b = reinterpret_cast<const uint8_t*>(vb) + i * stride_b_m;
+    auto c = reinterpret_cast<const uint8_t*>(vc) + i * stride_c_m;
+    for (size_t j = 0; j < n; ++j) {
+      int8_t sign_extended = int4x2(*(a_row + (j / 2) * stride_a_n)).get(j % 2);
+      int32_t zp = *reinterpret_cast<const int32_t*>(b + j * stride_b_n);
+      float scale = *reinterpret_cast<const float*>(c + j * stride_c_n);
+      x[j] =
+          (static_cast<float>(sign_extended) - static_cast<float>(zp)) * scale;
+    }
+    x = offset_bytes(x, stride_x_m);
+  }
+}
+
+void dequantize_int2_to_fp32(size_t m, size_t n, size_t stride_a_m,
+                             size_t stride_a_n, const void* va,
+                             size_t stride_b_m, size_t stride_b_n,
+                             const void* vb, size_t stride_c_m,
+                             size_t stride_c_n, const void* vc,
+                             size_t stride_x_m, void* vx,
+                             const ternary_params* params) {
+  auto x = reinterpret_cast<float*>(vx);
+
+  for (size_t i = 0; i < m; ++i) {
+    auto a_row = reinterpret_cast<const uint8_t*>(va) + i * stride_a_m;
+    auto b = reinterpret_cast<const uint8_t*>(vb) + i * stride_b_m;
+    auto c = reinterpret_cast<const uint8_t*>(vc) + i * stride_c_m;
+    for (size_t j = 0; j < n; ++j) {
+      int8_t sign_extended = int2x4(*(a_row + (j / 4) * stride_a_n)).get(j % 4);
+      int32_t zp = *reinterpret_cast<const int32_t*>(b + j * stride_b_n);
+      float scale = *reinterpret_cast<const float*>(c + j * stride_c_n);
+      x[j] =
+          (static_cast<float>(sign_extended) - static_cast<float>(zp)) * scale;
+    }
+    x = offset_bytes(x, stride_x_m);
+  }
+}
+
 ternary_kernel_fn get_ternary_kernel(ternary_op op, ynn_type type_a,
                                      ynn_type type_b, ynn_type type_c,
                                      ynn_type type_x) {

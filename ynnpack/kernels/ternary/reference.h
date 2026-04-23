@@ -98,6 +98,19 @@ struct dequantize {
   }
 };
 
+template <typename T>
+decltype(auto) get_element(const Tensor<T>& t, const std::vector<size_t>& i) {
+  if constexpr (type_info<T>::element_count() == 1) {
+    return t(i);
+  } else {
+    std::vector<size_t> physical_i = i;
+    size_t logical_innermost = i.back();
+    physical_i.back() = logical_innermost / type_info<T>::element_count();
+    return type_info<T>::get(&t(physical_i),
+                             logical_innermost % type_info<T>::element_count());
+  }
+}
+
 // Check that `op(a, b, c)` == x, within tolerances described by `op`.
 template <typename A, typename B, typename C, typename X, typename OpInfo>
 void check_results(const OpInfo& op, const Tensor<A>& a, const Tensor<B>& b,
@@ -105,15 +118,18 @@ void check_results(const OpInfo& op, const Tensor<A>& a, const Tensor<B>& b,
                    const quantization_params&, const quantization_params&,
                    const quantization_params&, const quantization_params&) {
   for (const auto& i : EnumerateIndices(x.extents())) {
+    auto a_i = get_element(a, i);
+    auto b_i = get_element(b, i);
+    auto c_i = get_element(c, i);
     if (std::is_integral<X>::value) {
-      const int32_t expected = op(a(i), b(i), c(i));
+      const int32_t expected = op(a_i, b_i, c_i);
       const int32_t tolerance =
-          std::nearbyint(op.tolerance(a(i), b(i), c(i), type_of<X>()));
+          std::nearbyint(op.tolerance(a_i, b_i, c_i, type_of<X>()));
       ASSERT_NEAR(expected, x(i), tolerance)
-          << "i = " << index_to_string(i) << ", a(i) = " << a(i)
-          << ", b(i) = " << b(i) << ", c(i) = " << c(i);
+          << "i = " << index_to_string(i) << ", a(i) = " << a_i
+          << ", b(i) = " << b_i << ", c(i) = " << c_i;
     } else {
-      float expected = op(a(i), b(i), c(i));
+      float expected = op(a_i, b_i, c_i);
       if (expected < type_info<X>::min()) {
         expected = -type_info<float>::infinity();
       }
@@ -124,10 +140,10 @@ void check_results(const OpInfo& op, const Tensor<A>& a, const Tensor<B>& b,
         // Checking the x is NaN could make sense, but it fails in
         // a variety of cases.
       } else {
-        const float tolerance = op.tolerance(a(i), b(i), c(i), type_of<X>());
+        const float tolerance = op.tolerance(a_i, b_i, c_i, type_of<X>());
         ASSERT_NEAR(expected, x(i), tolerance)
-            << "i = " << index_to_string(i) << ", a(i) = " << a(i)
-            << ", b(i) = " << b(i) << ", c(i) = " << c(i);
+            << "i = " << index_to_string(i) << ", a(i) = " << a_i
+            << ", b(i) = " << b_i << ", c(i) = " << c_i;
       }
     }
   }

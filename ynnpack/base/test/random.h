@@ -150,6 +150,7 @@ inline void replace_denormals_and_nans(double* data, size_t size) {
 }
 
 inline void replace_denormals_and_nans(int4x2*, size_t) {}
+inline void replace_denormals_and_nans(int2x4*, size_t) {}
 
 // Fill `[data, data + size)` with uniform random bits, excluding denormals and
 // NaNs for floating point types.
@@ -199,12 +200,32 @@ void fill_random(int4x2* data, size_t size, Rng& rng, double min, double max,
   if (min <= type_info<int4x2>::min() && max >= type_info<int4x2>::max()) {
     fill_random(data, size, rng);
   } else {
-    std::uniform_int_distribution<int> dist(
-        std::max<int>(round_float_to_int<int>(min), type_info<int4x2>::min()),
-        std::min<int>(round_float_to_int<int>(max), type_info<int4x2>::max()));
+    std::uniform_int_distribution<int8_t> dist(
+        std::max<int>(round_float_to_int<int>(static_cast<float>(min)),
+                      type_info<int4x2>::min()),
+        std::min<int>(round_float_to_int<int>(static_cast<float>(max)),
+                      type_info<int4x2>::max()));
     for (size_t i = 0; i < size; ++i) {
-      data[i] = int4x2{static_cast<int8_t>(dist(rng)),
-                       static_cast<int8_t>(dist(rng))};
+      data[i] = int4x2{dist(rng), dist(rng)};
+    }
+  }
+}
+
+// A specialization of the above for int2x4, which needs to set four values at
+// once.
+template <typename Rng>
+void fill_random(int2x4* data, size_t size, Rng& rng, double min, double max,
+                 const quantization_params& = {}) {
+  if (min <= type_info<int2x4>::min() && max >= type_info<int2x4>::max()) {
+    fill_random(data, size, rng);
+  } else {
+    std::uniform_int_distribution<int8_t> dist(
+        std::max<int>(round_float_to_int<int>(static_cast<float>(min)),
+                      type_info<int2x4>::min()),
+        std::min<int>(round_float_to_int<int>(static_cast<float>(max)),
+                      type_info<int2x4>::max()));
+    for (size_t i = 0; i < size; ++i) {
+      data[i] = int2x4{dist(rng), dist(rng), dist(rng), dist(rng)};
     }
   }
 }

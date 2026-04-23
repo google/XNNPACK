@@ -113,6 +113,53 @@ struct int4x2 {
   bool operator!=(const int4x2& other) const { return values != other.values; }
 };
 
+// Four int2 values stored in an int8.
+struct int2x4 {
+  uint8_t values;
+
+  int2x4() = default;
+  int2x4(uint8_t values) : values(values) {}  // NOLINT
+  int2x4(int8_t x0, int8_t x1, int8_t x2, int8_t x3)
+      : values(((x3 & 0x3) << 6) | ((x2 & 0x3) << 4) | ((x1 & 0x3) << 2) |
+               (x0 & 0x3)) {}
+
+  YNN_ALWAYS_INLINE int8_t get(size_t i) const {
+    switch (i) {
+      case 0:
+        return static_cast<int8_t>(values << 6) >> 6;
+      case 1:
+        return static_cast<int8_t>((values << 4) & 0xc0) >> 6;
+      case 2:
+        return static_cast<int8_t>((values << 2) & 0xc0) >> 6;
+      case 3:
+        return static_cast<int8_t>(values & 0xc0) >> 6;
+      default:
+        YNN_UNREACHABLE;
+    }
+  }
+  YNN_ALWAYS_INLINE void set(size_t i, int8_t value) {
+    switch (i) {
+      case 0:
+        values = (values & 0xfc) | (value & 0x03);
+        return;
+      case 1:
+        values = (values & 0xf3) | ((value & 0x03) << 2);
+        return;
+      case 2:
+        values = (values & 0xcf) | ((value & 0x03) << 4);
+        return;
+      case 3:
+        values = (values & 0x3f) | ((value & 0x03) << 6);
+        return;
+      default:
+        YNN_UNREACHABLE;
+    }
+  }
+
+  bool operator==(const int2x4& other) const { return values == other.values; }
+  bool operator!=(const int2x4& other) const { return values != other.values; }
+};
+
 struct uint4x2 {
   uint8_t values;
 
@@ -260,6 +307,9 @@ ynn_type type_of() {
   } else if (std::is_same<T, uint4x2>::value ||
              std::is_same<T, quantized<uint4x2>>::value) {
     return ynn_type_uint4;
+  } else if (std::is_same<T, int2x4>::value ||
+             std::is_same<T, quantized<int2x4>>::value) {
+    return ynn_type_int2;
   } else if (std::is_same<T, uint2x4>::value ||
              std::is_same<T, quantized<uint2x4>>::value) {
     return ynn_type_uint2;
@@ -436,6 +486,25 @@ class type_info<int4x2> {
   }
   YNN_ALWAYS_INLINE static void set(int4x2* x, size_t i, int8_t value) {
     x[i >> 1].set(i & 1, value);
+  }
+};
+
+template <>
+class type_info<int2x4> {
+ public:
+  static int32_t min() { return -2; }
+  static int32_t max() { return 1; }
+  static int32_t smallest_normal() { return 0; }
+  static int32_t min_identity() { return max(); }
+  static int32_t max_identity() { return min(); }
+
+  static constexpr size_t element_count() { return 4; }
+
+  YNN_ALWAYS_INLINE static int get(const int2x4* x, size_t i) {
+    return x[i >> 2].get(i & 3);
+  }
+  YNN_ALWAYS_INLINE static void set(int2x4* x, size_t i, int8_t value) {
+    x[i >> 2].set(i & 3, value);
   }
 };
 

@@ -14,6 +14,7 @@
 
 #include <gtest/gtest.h>
 #include "ynnpack/base/arch.h"
+#include "ynnpack/base/arithmetic.h"
 #include "ynnpack/base/test/fuzz_test.h"
 #include "ynnpack/base/test/random.h"
 #include "ynnpack/base/test/tensor.h"
@@ -72,10 +73,14 @@ void TestImpl(const KernelInfo& kernel_info, const OpInfo& op_info, size_t m,
 
   size_t n = std::max(std::max(a_n, b_n), c_n);
 
-  Tensor<A> a({m, a_n + shape.padding_a});
-  Tensor<B> b({m, b_n + shape.padding_b});
-  Tensor<C> c({m, c_n + shape.padding_c});
-  Tensor<X> x({m, n + shape.padding_x});
+  Tensor<A> a(
+      {m, ceil_div(a_n, type_info<A>::element_count()) + shape.padding_a});
+  Tensor<B> b(
+      {m, ceil_div(b_n, type_info<B>::element_count()) + shape.padding_b});
+  Tensor<C> c(
+      {m, ceil_div(c_n, type_info<C>::element_count()) + shape.padding_c});
+  Tensor<X> x(
+      {m, ceil_div(n, type_info<X>::element_count()) + shape.padding_x});
 
   quantization_params a_quantization = random_quantization(A(), rng);
   quantization_params b_quantization = random_quantization(B(), rng);
