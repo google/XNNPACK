@@ -1090,8 +1090,9 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
     }
 
     slinky::expr splits[] = {split_n, split_m};
-    auto sched = runtime.make_schedule(dims, output.buffer, node.outputs[0],
-                                       splits, 1, loop_order);
+    auto sched =
+        runtime.make_schedule(dims, output.extents, output.buffer->elem_size(),
+                              splits, loop_order);
 
     // We want to use exactly these loop splits for two innermost dot loops.
     for (size_t i = 0; i < std::min<std::size_t>(2, sched->loop_splits.size());

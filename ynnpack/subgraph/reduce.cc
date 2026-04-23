@@ -398,8 +398,8 @@ void define_reduce(ynn_subgraph& subgraph, ynn_node& node,
       }
       reduction_cost =
           slinky::ceil_div(reduction_cost, slinky::expr(cost_scaling_factor));
-      sched = runtime.make_schedule(dims, output.buffer, node.outputs[0], {},
-                                    reduction_cost);
+      reduction_cost *= output.buffer->elem_size();
+      sched = runtime.make_schedule(dims, output.extents, reduction_cost);
     }
     auto func = slinky::func::make(
         make_unary_reduce_impl(op, kernel),

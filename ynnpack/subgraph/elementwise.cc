@@ -228,7 +228,8 @@ ynn_status create_unary(const ynn_node& node, ynn_runtime& runtime,
       make_unary_elementwise_impl(kernel, params),
       {{a.buffer, std::move(bounds)}}, {{x.buffer, dims}}, std::move(attrs));
 
-  auto sched = runtime.make_schedule(dims, x.buffer, node.outputs[0]);
+  auto sched =
+      runtime.make_schedule(dims, x.extents, x.buffer->elem_size());
   func.user_data() = sched.get();
   runtime.scheduling_info_storage.push_back(std::move(sched));
 
@@ -261,7 +262,8 @@ ynn_status create_lut(const ynn_node& node, ynn_runtime& runtime,
       {{a.buffer, std::move(bounds)}, {lut.buffer, std::move(lut_bounds)}},
       {{x.buffer, dims}}, std::move(attrs));
 
-  auto sched = runtime.make_schedule(dims, x.buffer, node.outputs[0]);
+  auto sched =
+      runtime.make_schedule(dims, x.extents, x.buffer->elem_size());
   func.user_data() = sched.get();
   runtime.scheduling_info_storage.push_back(std::move(sched));
   runtime.funcs.push_back(std::move(func));
@@ -296,7 +298,8 @@ ynn_status create_binary(const ynn_node& node, ynn_runtime& runtime,
       {{a.buffer, std::move(a_bounds)}, {b.buffer, std::move(b_bounds)}},
       {{x.buffer, dims}}, std::move(attrs));
 
-  auto sched = runtime.make_schedule(dims, x.buffer, node.outputs[0]);
+  auto sched =
+      runtime.make_schedule(dims, x.extents, x.buffer->elem_size());
   func.user_data() = sched.get();
   runtime.scheduling_info_storage.push_back(std::move(sched));
   runtime.funcs.push_back(std::move(func));
@@ -335,7 +338,8 @@ ynn_status create_ternary(const ynn_node& node, ynn_runtime& runtime,
                                   {c.buffer, std::move(c_bounds)}},
                                  {{x.buffer, dims}}, attrs);
 
-  auto sched = runtime.make_schedule(dims, x.buffer, node.outputs[0]);
+  auto sched =
+      runtime.make_schedule(dims, x.extents, x.buffer->elem_size());
   func.user_data() = sched.get();
   runtime.scheduling_info_storage.push_back(std::move(sched));
   runtime.funcs.push_back(std::move(func));
@@ -478,7 +482,8 @@ bool define_dequantize_dot(ynn_subgraph& subgraph, ynn_node& node,
                                     {offset.buffer, bounds}},
                                    {{output.buffer, dims}}, std::move(attrs));
 
-    auto sched = runtime.make_schedule(dims, output.buffer, node.outputs[0]);
+    auto sched =
+        runtime.make_schedule(dims, output.extents, output.buffer->elem_size());
     func.user_data() = sched.get();
     runtime.scheduling_info_storage.push_back(std::move(sched));
 
