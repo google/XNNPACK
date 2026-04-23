@@ -139,9 +139,6 @@ PROD_RVV_MICROKERNEL_SRCS = [
     "src/x32-transposec/gen/x32-transposec-8x8-rvv.c",
     "src/x32-transposec/gen/x32-transposec-16x8-rvv.c",
     "src/x32-transposec/gen/x32-transposec-32x8-rvv.c",
-    "src/x32-transposec/gen/x32-transposec-8xv1-rvv.c",
-    "src/x32-transposec/gen/x32-transposec-8xv2-rvv.c",
-    "src/x32-transposec/gen/x32-transposec-8xv4-rvv.c",
 ]
 
 NON_PROD_RVV_MICROKERNEL_SRCS = [
@@ -334,6 +331,9 @@ NON_PROD_RVV_MICROKERNEL_SRCS = [
     "src/x32-packw/gen/x32-packw-x8v-gemm-goi-rvv-u2.c",
     "src/x32-packw/gen/x32-packw-x8v-gemm-goi-rvv-u4.c",
     "src/x32-packw/gen/x32-packw-x8v-gemm-goi-rvv-u8.c",
+    "src/x32-transposec/gen/x32-transposec-8xv1-rvv.c",
+    "src/x32-transposec/gen/x32-transposec-8xv2-rvv.c",
+    "src/x32-transposec/gen/x32-transposec-8xv4-rvv.c",
 ]
 
 ALL_RVV_MICROKERNEL_SRCS = PROD_RVV_MICROKERNEL_SRCS + NON_PROD_RVV_MICROKERNEL_SRCS
