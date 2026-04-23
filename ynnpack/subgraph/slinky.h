@@ -13,7 +13,6 @@
 
 #include <cassert>
 #include <cstddef>
-#include <cstdint>
 #include <limits>
 #include <string>
 #include <utility>
@@ -260,7 +259,7 @@ bool fuse_and_slice_leading_dim(int i, slinky::dim* x_dims,
 //
 // This function assumes that all of the input buffers are in bounds.
 template <int NumInnerDims, typename... DimBufferPairs>
-void fuse_and_slice_leading_dims(slinky::dim* x_dims, slinky::raw_buffer& x,
+bool fuse_and_slice_leading_dims(slinky::dim* x_dims, slinky::raw_buffer& x,
                                  DimBufferPairs&&... inputs) {
   for (int i = 0; i < NumInnerDims; ++i) {
     // If the output innermost (n) dimension has extent 1, we need to make the n
@@ -269,6 +268,9 @@ void fuse_and_slice_leading_dims(slinky::dim* x_dims, slinky::raw_buffer& x,
     assert(i != 0 || is_contiguous(x.dim(0), x.elem_size));
 
     x_dims[i] = slice_dim0(x);
+    if (x_dims[i].empty()) {
+      return false;
+    }
 
     // Initialize `in_dims[i]` for each input.
     // `x` is already a view to the correct tile in the larger output buffer.
@@ -291,6 +293,8 @@ void fuse_and_slice_leading_dims(slinky::dim* x_dims, slinky::raw_buffer& x,
       }
     }
   }
+
+  return true;
 }
 
 }  // namespace ynn

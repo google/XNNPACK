@@ -40,7 +40,9 @@ auto make_unary_elementwise_impl(unary_kernel_fn kernel, unary_params params) {
                           slinky::raw_buffer x) -> slinky::index_t {
     slinky::dim a_dims[2], x_dims[2];
 
-    fuse_and_slice_leading_dims<2>(&x_dims[0], x, &a_dims[0], a);
+    if (!fuse_and_slice_leading_dims<2>(&x_dims[0], x, &a_dims[0], a)) {
+      return 0;
+    }
 
     // We don't support broadcasting of `a` here in the innermost
     // dimension (and it would waste computation).
@@ -66,7 +68,9 @@ auto make_lut_impl(lut_kernel_fn kernel) {
                   slinky::raw_buffer x) -> slinky::index_t {
     slinky::dim a_dims[1], x_dims[1];
 
-    fuse_and_slice_leading_dims<1>(&x_dims[0], x, &a_dims[0], a);
+    if (!fuse_and_slice_leading_dims<1>(&x_dims[0], x, &a_dims[0], a)) {
+      return 0;
+    }
 
     // We don't support broadcasting of `a` here in the innermost
     // dimension (and it would waste computation).
@@ -88,7 +92,10 @@ auto make_binary_elementwise_impl(binary_kernel_fn kernel) {
                   slinky::raw_buffer x) -> slinky::index_t {
     slinky::dim a_dims[2], b_dims[2], x_dims[2];
 
-    fuse_and_slice_leading_dims<2>(&x_dims[0], x, &a_dims[0], a, &b_dims[0], b);
+    if (!fuse_and_slice_leading_dims<2>(&x_dims[0], x, &a_dims[0], a,
+                                        &b_dims[0], b)) {
+      return 0;
+    }
 
     const slinky::index_t x_m_extent = x_dims[1].extent();
     const slinky::index_t x_n_extent = x_dims[0].extent();
@@ -125,8 +132,10 @@ auto make_ternary_elementwise_impl(ternary_kernel_fn kernel) {
                slinky::raw_buffer x) -> slinky::index_t {
         slinky::dim a_dims[2], b_dims[2], c_dims[2], x_dims[2];
 
-        fuse_and_slice_leading_dims<2>(&x_dims[0], x, &a_dims[0], a, &b_dims[0],
-                                       b, &c_dims[0], c);
+        if (!fuse_and_slice_leading_dims<2>(&x_dims[0], x, &a_dims[0], a,
+                                            &b_dims[0], b, &c_dims[0], c)) {
+          return 0;
+        }
 
         const slinky::index_t x_m_extent = x_dims[1].extent();
         const slinky::index_t x_n_extent = x_dims[0].extent();
@@ -190,6 +199,9 @@ auto make_dequantize_dot_impl(dequantize_dot_kernel_fn kernel,
     offset.slice(0);
     b_scale.slice(0);
 
+    if (n_extent <= 0 || m_extent <= 0) {
+      return 0;
+    }
 
     slinky::for_each_element(
         [=, &params](void* output, const void* dot, const void* a_offset,
