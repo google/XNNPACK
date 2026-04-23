@@ -102,7 +102,7 @@ class ErrorStatusBuilder {
       : error_(AsError(std::forward<T>(error))), loc_(loc) {}
 
   // NOLINTBEGIN(*-explicit-constructor): This class transparently converts to
-  // `LiteRtStatus`.
+  // `absl::Status`.
   operator absl::Status() const noexcept {
     return absl::Status(error_.code(), LogMessage());
   }
@@ -110,6 +110,11 @@ class ErrorStatusBuilder {
   template <class T>
   operator absl::StatusOr<T>() const noexcept {
     return operator absl::Status();
+  }
+
+  template <class T, class A = decltype(T(absl::OkStatus()))>
+  operator T() const noexcept {
+    return T(static_cast<absl::Status>(*this));
   }
   // NOLINTEND(*-explicit-constructor)
 
@@ -143,6 +148,11 @@ class ErrorStatusBuilder {
   template <class T>
   static T& ForwardWrappedValue(absl::StatusOr<T&>& e) {
     return e.value();
+  }
+
+  template <class T>
+  static T&& ForwardWrappedValue(T&& value) {
+    return ErrorConversion<std::decay_t<T>>::Forward(std::forward<T>(value));
   }
 
  private:
