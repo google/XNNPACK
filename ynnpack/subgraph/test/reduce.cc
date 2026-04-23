@@ -161,7 +161,6 @@ void TestReduce(A, C, ynn_reduce_operator op) {
 
       Tensor<C> expected = c.deep_copy();
       if (!init_c) {
-        std::vector<size_t> b_shape = c_shape;
         runtime.ReshapeExternalTensor(expected_shape, c.data(), c_id);
       }
       runtime.ReshapeRuntime();
