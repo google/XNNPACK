@@ -114,12 +114,8 @@ template <class InType, class OutType>
 void UnaryElementwiseParameters(benchmark::Benchmark* benchmark) {
   benchmark->ArgName("N");
 
-  size_t characteristic_l1 = 32 * 1024;
-  size_t characteristic_l2 = 256 * 1024;
-#if XNN_ARCH_ARM
-  characteristic_l1 = 16 * 1024;
-  characteristic_l2 = 128 * 1024;
-#endif  // XNN_ARCH_ARM
+  const size_t characteristic_l1 = 32 * 1024;
+  const size_t characteristic_l2 = 256 * 1024;
 
   const size_t elementwise_size = sizeof(InType) + sizeof(OutType);
   benchmark->Arg(characteristic_l1 / elementwise_size / 960 * 960);
@@ -135,12 +131,8 @@ template <class InType, class OutType>
 void BinaryElementwiseParameters(benchmark::Benchmark* benchmark) {
   benchmark->ArgName("N");
 
-  size_t characteristic_l1 = 32 * 1024;
-  size_t characteristic_l2 = 256 * 1024;
-#if XNN_ARCH_ARM
-  characteristic_l1 = 16 * 1024;
-  characteristic_l2 = 128 * 1024;
-#endif  // XNN_ARCH_ARM
+  const size_t characteristic_l1 = 32 * 1024;
+  const size_t characteristic_l2 = 256 * 1024;
 
   const size_t elementwise_size = 2 * sizeof(InType) + sizeof(OutType);
   benchmark->Arg(
