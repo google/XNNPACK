@@ -29,6 +29,7 @@ def main(argv: Sequence[str]) -> None:
           (copysign_fp32, (8, 1)),
           (max_fp32, (8, 1)),
           (min_fp32, (8, 1)),
+          (squared_difference_fp32, (8, 1)),
       ],
       "x86_avx": [
           (add_fp32, (16, 1)),
@@ -38,6 +39,7 @@ def main(argv: Sequence[str]) -> None:
           (copysign_fp32, (16, 1)),
           (max_fp32, (16, 1)),
           (min_fp32, (16, 1)),
+          (squared_difference_fp32, (16, 1)),
       ],
       "x86_avx2": [
           (multiply_int32_fp32, (16, 1)),
@@ -62,6 +64,7 @@ def main(argv: Sequence[str]) -> None:
           (divide_bf16_fp32_bf16, (64, 1)),
           (max_fp32, (32, 1)),
           (min_fp32, (32, 1)),
+          (squared_difference_fp32, (32, 1)),
       ],
       "x86_avx512bf16": [
           (subtract_fp32_bf16_bf16, (64, 1)),
@@ -82,6 +85,7 @@ def main(argv: Sequence[str]) -> None:
           (copysign_fp32, (8, 1)),
           (max_fp32, (8, 1)),
           (min_fp32, (8, 1)),
+          (squared_difference_fp32, (8, 1)),
       ],
       "arm_neonbf16": [
           (multiply_bf16_fp32_bf16, (16, 1)),
@@ -96,6 +100,7 @@ def main(argv: Sequence[str]) -> None:
           (copysign_fp32, (8, 1)),
           (max_fp32, (8, 1)),
           (min_fp32, (8, 1)),
+          (squared_difference_fp32, (8, 1)),
       ],
   }[target]
 
