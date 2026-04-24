@@ -48,7 +48,7 @@ void xnn_qs8_qc2w_gemm_minmax_fp32_ukernel_1x8c8__avx2_madd(
   int8_t* c0 = c;
 
   const __m256i vsign_mask = _mm256_set1_epi8(0x80);
-  XNN_FORCE_REALIZATION(vsign_mask);
+  // XNN_FORCE_REALIZATION(vsign_mask);
   const __m256 voutput_max_less_zero_point = _mm256_set1_ps((int32_t) params->fp32_scalar.output_max - (int32_t) params->fp32_scalar.output_zero_point);
   const __m256i voutput_zero_point = _mm256_set1_epi32(params->fp32_scalar.output_zero_point);
   const __m128i voutput_min = _mm_set1_epi8(params->fp32_scalar.output_min);

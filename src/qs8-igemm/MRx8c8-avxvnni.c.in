@@ -97,14 +97,14 @@ void xnn_${DATATYPE_SPEC}_igemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x8c8__
     // XNN_FORCE_REALIZATION(voutput_max);
     $if DATATYPE in ["QC4_F16", "QC4_F32"]:
       const __m256i vmask = _mm256_set1_epi8(0xF0);
-      XNN_FORCE_REALIZATION(vmask);
+      // XNN_FORCE_REALIZATION(vmask);
       $if GFNI:
         const __m256i vshl4 = _mm256_set1_epi64(0x01020408);
-        XNN_FORCE_REALIZATION(vshl4);
+        // XNN_FORCE_REALIZATION(vshl4);
   $else:
     $if VARIANT != "AVXVNNIINT8":
       const __m256i vsign_mask = _mm256_set1_epi8(0x80);
-      XNN_FORCE_REALIZATION(vsign_mask);
+      // XNN_FORCE_REALIZATION(vsign_mask);
     $if DATATYPE != "QC8":
       const __m256 vscale = _mm256_load_ps(params->${PARAMS_STRUCT}.scale);
       // XNN_FORCE_REALIZATION(vscale);
