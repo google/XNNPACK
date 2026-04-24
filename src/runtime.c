@@ -627,6 +627,18 @@ enum xnn_status xnn_create_runtime_v4(
     }
   }
 
+  if (flags & XNN_FLAG_FORCE_FP16_INFERENCE) {
+    xnn_log_warning(
+        "XNN_FLAG_FORCE_FP16_INFERENCE is deprecated and will be removed soon: "
+        "convert your tensors to FP16 instead.");
+  }
+
+  if (flags & XNN_FLAG_HINT_FP16_INFERENCE) {
+    xnn_log_warning(
+        "XNN_FLAG_HINT_FP16_INFERENCE is deprecated and will be removed soon: "
+        "convert your tensors to FP16 instead.");
+  }
+
   if (flags & XNN_FLAG_SLOW_CONSISTENT_ARITHMETIC) {
     xnn_log_warning(
         "XNN_FLAG_SLOW_CONSISTENT_ARITHMETIC is enabled: performance will be "

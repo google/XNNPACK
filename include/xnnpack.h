@@ -45,12 +45,14 @@ extern "C" {
 /// Allow IEEE FP16 inference in a Runtime.
 ///
 /// Note: this flag hints XNNPACK to consider IEEE FP16 inference, but does not guarantee it.
+/// Deprecated, convert the subgraph to FP16 instead.
 #define XNN_FLAG_HINT_FP16_INFERENCE 0x00000002
 
 /// Force IEEE FP16 inference in a Runtime, and fail if FP16 inference is not possible.
 ///
 /// Note: this flag guarantees that XNNPACK will use IEEE FP16 inference, or fail to create the Runtime object.
 /// Warning: on x86 systems FP16 computations will be emulated at a substantial performance cost.
+/// Deprecated, convert the subgraph to FP16 instead.
 #define XNN_FLAG_FORCE_FP16_INFERENCE 0x00000004
 
 /// Enable timing of each operator's runtime.
