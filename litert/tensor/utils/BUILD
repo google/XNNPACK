@@ -6,6 +6,7 @@ package(default_visibility = ["//visibility:public"])
 cc_library(
     name = "macros",
     hdrs = ["macros.h"],
+    # copybara:uncomment includes = ["../utils"],
     deps = [
         ":source_location",
         "@abseil-cpp//absl/log:absl_log",
