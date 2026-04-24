@@ -11,7 +11,7 @@
 #include <hexagon_protos.h>
 #include <hexagon_types.h>
 #include <hvx_hexagon_protos.h>
-#include <math.h>  // for roundf
+#include <math.h>  // for rintf
 #include <stddef.h>
 #include <string.h>  // for memcpy
 
@@ -130,7 +130,7 @@ static XNN_INLINE xnn_simd_f32_t xnn_neg_f32(xnn_simd_f32_t a) {
   return Q6_V_vxor_VV(a, Q6_V_vsplat_R(0x80000000));
 }
 
-// todo: v81 use rnd
+// todo: v81 use Q6_Vsf_vrnd_Vsf
 static XNN_INLINE xnn_simd_f32_t xnn_round_f32(xnn_simd_f32_t a) {
   XNN_ALIGN(128) float input[xnn_simd_size_f32];
   XNN_ALIGN(128) float output[xnn_simd_size_f32];

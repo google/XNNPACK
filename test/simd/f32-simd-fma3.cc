@@ -200,13 +200,30 @@ TEST_F(F32SimdFMA3Test, Round) {
     ASSERT_EQ(output_[k], std::rint(inputs_[k]));
   }
 
-  // Check non-finite values.
-  for (const float val : {INFINITY, -INFINITY, NAN}) {
-    inputs_[0] = val;
+  // Check special and interesting values.
+  const float special_values[] = {
+      // Tie-breakers
+      0.5f, -0.5f, 1.5f, -1.5f, 2.5f, -2.5f,
+      // Values > 2^23 and equivalent negatives
+      8388608.0f, -8388608.0f, 8388609.0f, -8388609.0f, 1e10f, -1e10f,
+      // Large values that can still represent non-integer values
+      2097152.5f, -2097152.5f, 4194304.5f, -4194304.5f,
+      // Non-finite values
+      INFINITY, -INFINITY, NAN,
+      // Denormals and zero
+      std::numeric_limits<float>::denorm_min(),
+      -std::numeric_limits<float>::denorm_min(),
+      0.0f, -0.0f
+  };
+
+  for (const float val : special_values) {
+    std::fill(inputs_.begin(), inputs_.end(), val);
     const xnn_simd_f32_t a = xnn_loadu_f32(inputs_.data());
     const xnn_simd_f32_t res = xnn_round_f32(a);
     xnn_storeu_f32(output_.data(), res);
-    ASSERT_THAT(output_[0], testing::NanSensitiveFloatEq(std::rint(val)));
+    for (size_t k = 0; k < xnn_simd_size_f32; k++) {
+      ASSERT_THAT(output_[k], testing::NanSensitiveFloatEq(std::rint(val)));
+    }
   }
 }
 
