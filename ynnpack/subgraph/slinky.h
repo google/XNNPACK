@@ -212,6 +212,7 @@ bool fuse_and_slice_leading_dim(int i, slinky::dim* x_dims,
   // First check whether fusing dimensions is possible.
   const slinky::dim& x_dim_0 = x.dims[0];
   bool can_fuse_all =
+      !x_dim_0.empty() &&
       slinky::can_fuse(x_dims[i], x_dim_0) &&
       all_of_pairs(
           [x_dims, i, &x_dim_0](const slinky::dim* in_dims,

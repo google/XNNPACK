@@ -356,7 +356,7 @@ void define_reduce(ynn_subgraph& subgraph, ynn_node& node,
 
     for (int i = static_cast<int>(input_a.rank()) - 1; i >= 0; --i) {
       if (op.k_dims[i]) {
-        a_bounds[i] = all_bounds(input_a.extents[i]);
+        a_bounds[i] = all_bounds(input_a.extent(i));
         if (!op.keep_dims) {
           dims.erase(dims.begin() + i);
         }
