@@ -29,6 +29,7 @@ limitations under the License.
 #include "litert/tensor/buffer.h"
 #include "litert/tensor/datatypes.h"
 #include "litert/tensor/internal/graph.h"
+#include "litert/tensor/utils/macros.h"
 #include "litert/tensor/utils/source_location.h"
 
 namespace litert::tensor {
@@ -53,6 +54,10 @@ class TensorHandle {
   explicit TensorHandle(TensorInit init,
                         source_location loc = source_location::current());
   explicit TensorHandle(graph::Tensor impl);
+
+  TensorHandle(absl::Status status,
+               source_location loc = source_location::current())
+      : TensorHandle(graph::ErrorTensor(std::move(status), loc)) {}
 
   // Creates an invalid tensor handle.
   //
@@ -144,6 +149,8 @@ class Tensor : public TensorHandle, public Mixins... {
   // NOLINTNEXTLINE(*-explicit-constructor)
   Tensor(const TensorHandle& t) : TensorHandle(t) {}
 
+  Tensor(const Tensor& t) = default;
+
   explicit Tensor(source_location loc = source_location::current())
       : TensorHandle(loc) {};
   explicit Tensor(const TensorInit& t,
@@ -168,6 +175,23 @@ inline TensorHandle Create(const char* name, Type type, Shape shape,
                        .shape = std::move(shape),
                        .buffer = std::forward<Buffer>(buffer)});
 }
+
+template <>
+struct ErrorStatusBuilder::ErrorConversion<TensorHandle> {
+  static bool IsError(const TensorHandle& value) {
+    return !value.GetStatus().ok();
+  };
+  static absl::Status AsError(const TensorHandle& value) {
+    return value.GetStatus();
+  }
+  static TensorHandle& Forward(TensorHandle& value) { return value; }
+};
+
+template <class... Mixins>
+struct ErrorStatusBuilder::ErrorConversion<Tensor<Mixins...>>
+    : ErrorStatusBuilder::ErrorConversion<TensorHandle> {
+  static Tensor<Mixins...>& Forward(Tensor<Mixins...>& value) { return value; }
+};
 
 }  // namespace litert::tensor
 

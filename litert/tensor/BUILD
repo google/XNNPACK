@@ -30,6 +30,7 @@ cc_library(
         ":buffer",
         ":datatypes",
         "//litert/tensor/internal:graph",
+        "//litert/tensor/utils:macros",
         "//litert/tensor/utils:source_location",
         "@abseil-cpp//absl/log:absl_check",
         "@abseil-cpp//absl/log:absl_log",
