@@ -15,6 +15,7 @@ import dataclasses
 import datetime
 import glob
 import os
+import platform
 import sys
 
 # Add tests that require sharding here.
@@ -134,7 +135,10 @@ async def main() -> None:
   semaphore = asyncio.Semaphore(concurrency)
 
   # Pick up the executables - must be named in this way to work
+  # If we're on Windows, the executable will have a .exe extension.
   test_suites = list(sorted(glob.glob(args.out_dir + '/xnnpack_*_test')))
+  if platform.system() == "Windows":
+    test_suites = list(sorted(glob.glob(args.out_dir + '/xnnpack_*_test.exe')))
 
   print(f'Discovered {len(test_suites)} test suites...')
   # Create the list of tests to run, sharding the long ones.
