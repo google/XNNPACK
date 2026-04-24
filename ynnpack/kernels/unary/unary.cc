@@ -33,19 +33,30 @@ void unary_impl(size_t m, size_t n, size_t stride_x, const void* vx,
   auto x = reinterpret_cast<const TIn*>(vx);
   auto y = reinterpret_cast<TOut*>(vy);
 
+  constexpr size_t unroll = std::max(type_info<TIn>::element_count(),
+                                     type_info<TOut>::element_count());
+
+  assert(n % unroll == 0);
+
   Operator op(*params);
   for (size_t i = 0; i < m; ++i) {
-    for (size_t j = 0; j < n; ++j) {
-      y[j] = static_cast<TOut>(op(x[j]));
+    for (size_t j = 0; j < n; j += unroll) {
+      YNN_UNROLL
+      for (size_t ji = 0; ji < unroll; ++ji) {
+        auto y_j = static_cast<TOut>(op(type_info<TIn>::get(x, j + ji)));
+        type_info<TOut>::set(y, j + ji, y_j);
+      }
     }
     x = offset_bytes(x, stride_x);
     y = offset_bytes(y, stride_y);
   }
 }
 
-template <typename TIn, typename TOut>
+template <typename TOut>
 struct convert_op {
   explicit convert_op(const unary_params& = {}) {}
+
+  template <typename TIn>
   TOut operator()(TIn x) const {
     if constexpr (std::is_integral<TOut>::value) {
       if constexpr (std::is_integral<TIn>::value) {
@@ -57,21 +68,16 @@ struct convert_op {
       return static_cast<TOut>(x);
     }
   }
-};
 
-#if XNN_HAVE_FLOAT16
-template <>
-struct convert_op<bfloat16, _Float16> {
-  explicit convert_op(const unary_params& = {}) {}
-  _Float16 operator()(bfloat16 x) const {
-    return static_cast<_Float16>(static_cast<float>(x));
+  // We need to give the compiler a little help for bf16 -> fp16
+  TOut operator()(bfloat16 x) const {
+    return operator()(static_cast<float>(x));
   }
 };
-#endif
 
 template <typename TIn, typename TOut>
 unary_kernel_fn get_convert_kernel(TIn, TOut) {
-  return unary_impl<TIn, TOut, convert_op<TIn, TOut>>;
+  return unary_impl<TIn, TOut, convert_op<TOut>>;
 }
 
 template <typename TIn>
@@ -321,6 +327,10 @@ unary_kernel_fn get_convert_reference_kernel(ynn_type a_type, ynn_type x_type) {
       return get_convert_kernel<uint8_t>(x_type);
     case ynn_type_int32:
       return get_convert_kernel<int32_t>(x_type);
+    case ynn_type_int4:
+      return get_convert_kernel<int4x2>(x_type);
+    case ynn_type_int2:
+      return get_convert_kernel<int2x4>(x_type);
     default:
       return nullptr;
   }
