@@ -226,6 +226,13 @@ struct packw_gemm_goi_context {
   xnn_init_scale_params_fn init_scale_b;
   const void* scale_b;
   size_t scale_b_size;
+
+  // Stride, in bytes, between each batch of `scale_b` (0 for a broadcast scale
+  // shared across batches).
+  size_t gc_scale_stride;
+  // Stride, in bytes, between each output channel of `scale_b` (0 for a
+  // broadcast scale shared across channels).
+  size_t n_scale_stride;
 };
 
 XNN_PRIVATE void xnn_compute_packw_gemm_goi(
@@ -284,6 +291,13 @@ struct packw_gemm_gio_context {
   xnn_init_scale_params_fn init_scale_b;
   const void* scale_b;
   size_t scale_b_size;
+
+  // Stride, in bytes, between each batch of `scale_b` (0 for a broadcast scale
+  // shared across batches).
+  size_t gc_scale_stride;
+  // Stride, in bytes, between each output channel of `scale_b` (0 for a
+  // broadcast scale shared across channels).
+  size_t n_scale_stride;
 };
 
 XNN_PRIVATE void xnn_compute_packw_gemm_gio(

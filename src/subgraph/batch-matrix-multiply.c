@@ -156,10 +156,16 @@ static enum xnn_status create_batch_matrix_multiply_operator(
     case xnn_datatype_qdint8: {
       switch (input_b_datatype) {
         case xnn_datatype_qcint8:
-          status = xnn_create_batch_matrix_multiply_nc_qd8_f32_qc8w(
-              batch_size_b, k, n, input_b->data,
-              input_b->quantization.channelwise_scale, node->flags,
-              &opdata->operator_objects[0]);
+          if (xnn_value_is_static(input_b->allocation_type)) {
+            status =
+                xnn_create_batch_matrix_multiply_nc_qd8_f32_qc8w_const_weights(
+                  batch_size_b, k, n, input_b->data,
+                  input_b->quantization.channelwise_scale, node->flags,
+                  &opdata->operator_objects[0]);
+          } else {
+            status = xnn_create_batch_matrix_multiply_nc_qd8_f32_qc8w(
+                node->flags, &opdata->operator_objects[0]);
+          }
           break;
         default:
           XNN_UNREACHABLE;
@@ -355,9 +361,17 @@ static enum xnn_status reshape_batch_matrix_multiply_operator(
           padded_dims_b, m, k, n, &opdata->workspace_size, threadpool);
       break;
     case xnn_operator_type_batch_matrix_multiply_nc_qd8_f32_qc8w:
-      status = xnn_reshape_batch_matrix_multiply_nc_qd8_f32_qc8w(
-          opdata->operator_objects[0], num_batch_dims, padded_dims_a,
-          padded_dims_b, m, k, n, &opdata->workspace_size, threadpool);
+      if (xnn_value_is_static(input_b->allocation_type)) {
+        status =
+            xnn_reshape_batch_matrix_multiply_nc_qd8_f32_qc8w_const_weights(
+                opdata->operator_objects[0], num_batch_dims, padded_dims_a,
+                padded_dims_b, m, k, n, &opdata->workspace_size, threadpool);
+      } else {
+        status = xnn_reshape_batch_matrix_multiply_nc_qd8_f32_qc8w(
+            opdata->operator_objects[0], num_batch_dims, padded_dims_a,
+            padded_dims_b, m, k, n, input_b->quantization.channelwise_scale,
+            &opdata->workspace_size, threadpool);
+      }
       break;
     case xnn_operator_type_batch_matrix_multiply_nc_qp8_f32_qc8w:
       status = xnn_reshape_batch_matrix_multiply_nc_qp8_f32_qc8w(

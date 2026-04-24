@@ -238,13 +238,20 @@ void xnn_compute_batched_packw_gemm_gio(
                                  n_block_start * context->w_stride +
                                  batch_index * context->gc_stride);
 
+  const void* scale_b = context->scale_b;
+  if (scale_b != NULL) {
+    scale_b = (const void*)((uintptr_t)context->scale_b +
+                                     n_block_start * context->gc_scale_stride +
+                                     batch_index * context->n_scale_stride);
+  }
+
   if (context->pack_weights_and_biases) {
     context->pack_weights_and_biases(
         /*flags=*/XNN_FLAG_TRANSPOSE_WEIGHTS, context->gemm_config, context->kc,
         n_block_size, /*groups=*/1, /*block_size=*/0,
         /*k_stride=*/context->k_stride_elements, /*accumulator_init=*/bias,
         kernel, /*init_extra_data0_fn=*/context->init_scale_b,
-        /*extra_data0=*/context->scale_b,
+        /*extra_data0=*/scale_b,
         /*extra_data0_element_size=*/context->scale_b_size,
         /*init_extra_data1_fn=*/NULL, /*extra_data1=*/NULL,
         /*extra_data1_element_size=*/0, packed_weights,
@@ -256,14 +263,14 @@ void xnn_compute_batched_packw_gemm_gio(
         packed_weights, /*extra_bytes=*/context->nr * context->scale_b_size,
         /*params=*/context->params);
 
-    if (context->scale_b != NULL) {
+    if (scale_b != NULL) {
       assert(context->init_scale_b != NULL);
       void* weights =
           (void*)((uintptr_t)packed_weights + context->nr * (
               context->w_stride - context->scale_b_size));
       context->init_scale_b(n_block_size, context->nr,
                             context->nr * context->w_stride,
-                            context->scale_b, weights);
+                            scale_b, weights);
     }
   }
 }
@@ -290,13 +297,19 @@ void xnn_compute_batched_packw_gemm_goi(
                                  context->w_stride * n_block_start +
                                  batch_index * context->gc_stride);
 
+  const void* scale_b = context->scale_b;
+  if (scale_b != NULL) {
+    scale_b = (const void*)((uintptr_t)context->scale_b +
+                                     n_block_start * context->gc_scale_stride +
+                                     batch_index * context->n_scale_stride);
+  }
   if (context->pack_weights_and_biases) {
     context->pack_weights_and_biases(
         /*flags=*/0, context->gemm_config, context->kc, n_block_size,
         /*groups=*/1, /*block_size=*/0, /*k_stride=*/context->kc,
         /*accumulator_init=*/bias, kernel,
         /*init_extra_data0_fn=*/context->init_scale_b,
-        /*extra_data0=*/context->scale_b,
+        /*extra_data0=*/scale_b,
         /*extra_data0_element_size=*/context->scale_b_size,
         /*init_extra_data1_fn=*/NULL, /*extra_data1=*/NULL,
         /*extra_data1_element_size=*/0, packed_weights,
@@ -308,14 +321,13 @@ void xnn_compute_batched_packw_gemm_goi(
         /*extra_bytes=*/context->nr * context->scale_b_size,
         /*params=*/context->params);
 
-    if (context->scale_b != NULL) {
+    if (scale_b != NULL) {
       assert(context->init_scale_b != NULL);
       void* weights =
           (void*)((uintptr_t)packed_weights + context->nr *
                   (context->w_stride - context->scale_b_size));
       context->init_scale_b(n_block_size, context->nr,
-                            context->nr * context->w_stride, context->scale_b,
-                            weights);
+                            context->nr * context->w_stride, scale_b, weights);
     }
   }
 }
