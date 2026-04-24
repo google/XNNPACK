@@ -16,20 +16,19 @@ limitations under the License.
 #ifndef LITERT_TENSOR_INTERNAL_ARITHMETIC_HELPERS_H_
 #define LITERT_TENSOR_INTERNAL_ARITHMETIC_HELPERS_H_
 
-#include <array>
 #include <memory>
 #include <type_traits>
 #include <utility>
 #include <vector>
 
 #include "absl/status/status.h"
-#include "absl/status/statusor.h"
 #include "absl/types/span.h"
 #include "litert/tensor/datatypes.h"
 #include "litert/tensor/internal/graph.h"
 #include "litert/tensor/internal/shape.h"
 #include "litert/tensor/internal/utils.h"
 #include "litert/tensor/tensor.h"
+#include "litert/tensor/utils/macros.h"
 #include "litert/tensor/utils/source_location.h"
 
 namespace litert::tensor {
@@ -86,46 +85,37 @@ TensorHandle AddOutput(std::shared_ptr<Op>& operation, source_location op_loc) {
   return TensorHandle(graph::GetTensor(group->tensor_infos.size() - 1, group));
 }
 
+template <class... Tensors>
+absl::Status CheckTensors(Tensors... tensors) {
+  absl::Status status = absl::OkStatus();
+  (status.Update(tensors.GetStatus()), ...);
+  return status;
+}
+
 template <class Op, class... Tensors>
 TensorHandle ElementwiseOp(source_location loc, TensorHandle a,
                            Tensors&... tensors) {
+  LRT_TENSOR_RETURN_IF_ERROR(CheckTensors(a, tensors...));
   auto operation = std::make_shared<Op>();
   AddInputs(operation, a, tensors...);
   TensorHandle output = AddOutput(operation, loc);
-  const graph::TensorInformation& a_info = *GetInfo(a.GetRaw());
-  graph::TensorInformation& o_info = *GetInfo(output.GetRaw());
+  LRT_TENSOR_ASSIGN_OR_RETURN(const graph::TensorInformation& a_info,
+                              GetInfo(a.GetRaw()));
+  LRT_TENSOR_ASSIGN_OR_RETURN(graph::TensorInformation & o_info,
+                              GetInfo(output.GetRaw()));
+  LRT_TENSOR_ASSIGN_OR_RETURN(
+      o_info.shape, BroadcastShapes({a_info.shape, tensors.GetShape()...}));
+  o_info.type = IsComparisonOp(*operation) ? Type::kBOOL : a_info.type;
 
-  const std::array<const TensorHandle*, sizeof...(tensors)> tensor_ptrs{
-      &tensors...};
-
-  std::vector<std::vector<int>> shapes;
-  shapes.push_back(a_info.shape);
-
-  for (const TensorHandle* tensor : tensor_ptrs) {
-    shapes.push_back(GetInfo(tensor->GetRaw())->shape);
-  }
-
-  absl::StatusOr<std::vector<int>> broadcasted_shape = BroadcastShapes(shapes);
-  if (!broadcasted_shape.ok()) {
-    return TensorHandle(graph::ErrorTensor(broadcasted_shape.status()));
-  }
-  o_info.shape = *broadcasted_shape;
-  if (IsComparisonOp(*operation)) {
-    o_info.type = Type::kBOOL;
-  } else {
-    o_info.type = a_info.type;
-  }
-
-  const bool all_types_match =
-      std::all_of(tensor_ptrs.begin(), tensor_ptrs.end(),
-                  [a_type = a.GetType()](const TensorHandle* tensor) {
-                    return tensor->GetType() == a_type;
-                  });
-  if (!all_types_match) {
-    return TensorHandle(graph::ErrorTensor(absl::InvalidArgumentError(
-        absl::StrCat("All tensors in an elementwise operation "
-                     "must have the same type. op: ",
-                     operation->GetName()))));
+  const bool all_same_types = ((a.GetType() == tensors.GetType()) && ...);
+  if (!all_same_types) {
+    return TensorHandle(
+        absl::InvalidArgumentError(absl::StrCat(
+            loc.file_name(), ":", loc.line(), operation->GetName(),
+            ": all tensors in an elementwise operation must have the "
+            "same type. Got (",
+            absl::StrJoin({a.GetType(), tensors.GetType()...}, ", "), ")")),
+        loc);
   }
 
   graph::OpDebugger::DebugOp(*operation);
