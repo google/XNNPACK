@@ -131,9 +131,9 @@ ynn_status ynn_define_static_slice(ynn_subgraph_t subgraph, size_t num_axes,
   YNN_RETURN_IF_ERROR(validate_subgraph("static_slice", subgraph));
   YNN_RETURN_IF_ERROR(
       validate_input_tensor("static_slice", subgraph, "input_id", input_id));
-  if (!slice_dims && (ends == nullptr || strides == nullptr)) {
+  if (!slice_dims && ends == nullptr) {
     YNN_LOG_ERROR()
-        << "For node `static_slice`, ends and strides must be non-null when "
+        << "For node `static_slice`, ends must be non-null when "
            "YNN_NODE_FLAG_SLICE_DIMS is not set";
     return ynn_status_invalid_parameter;
   }
@@ -150,7 +150,7 @@ ynn_status ynn_define_static_slice(ynn_subgraph_t subgraph, size_t num_axes,
           dim,
           begins[d],
           slice_dims ? 0 : ends[d],
-          slice_dims ? 0 : strides[d],
+          slice_dims ? 0 : (strides ? strides[d] : 1),
       });
     } else {
       // The implicit dimensions are broadcasts, slicing them is a no-op.
