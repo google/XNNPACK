@@ -136,6 +136,21 @@ TEST(LiteRtAssignOrReturnTest, VariableAssignmentWorks) {
   EXPECT_EQ(canary_value, 1);
 }
 
+TEST(LiteRtAssignOrReturnTest, StatusOrHoldingReferenceWorks) {
+  int origin_value = 1;
+  int canary_value = 0;
+  auto ChangeCanaryValue = [&canary_value, &origin_value]() -> absl::Status {
+    LRT_TENSOR_ASSIGN_OR_RETURN(int& assigned_value,
+                                absl::StatusOr<int&>(origin_value));
+    canary_value = assigned_value;
+    assigned_value = 2;
+    return absl::OkStatus();
+  };
+  EXPECT_EQ(ChangeCanaryValue(), absl::OkStatus());
+  EXPECT_EQ(canary_value, 1);
+  EXPECT_EQ(origin_value, 2);
+}
+
 TEST(LiteRtAssignOrReturnTest, MoveOnlyVariableAssignmentWorks) {
   struct MoveOnly {
     explicit MoveOnly(int val) : val(val) {};
