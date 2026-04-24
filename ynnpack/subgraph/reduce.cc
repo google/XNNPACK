@@ -74,26 +74,14 @@ auto make_unary_reduce_impl(const ynn_node::reduce& op,
   return [op, kernel](
              slinky::buffer<const void, YNN_MAX_TENSOR_RANK> a,
              slinky::buffer<const void, YNN_MAX_TENSOR_RANK> init_c,
-             slinky::buffer<void, YNN_MAX_TENSOR_RANK> c,
-             const slinky::raw_buffer& reduction_bounds) -> slinky::index_t {
-    // Determine if this is the first tile in the reduction.
-    bool init_output = true;
-    for (int i = 0; i < reduction_bounds.rank; ++i) {
-      if (reduction_bounds.dim(i).min() != 0) {
-        init_output = false;
-        break;
-      }
-    }
-    if (init_output) {
-      // If this is the first tile, we need to initialize the output.
-      if (init_c.base() == c.base()) {
-        // The input and accumulator were aliased to the same buffer, we don't
-        // need to copy it.
-        // TODO: Do we need to slice init_c first? Or maybe just fall through to
-        // slinky::copy and make it optimize this case?
-      } else {
-        slinky::copy(init_c, c);
-      }
+             slinky::buffer<void, YNN_MAX_TENSOR_RANK> c) -> slinky::index_t {
+    if (init_c.base() == c.base()) {
+      // The input and accumulator were aliased to the same buffer, we don't
+      // need to copy it.
+      // TODO: Do we need to slice init_c first? Or maybe just fall through to
+      // slinky::copy and make it optimize this case?
+    } else {
+      slinky::copy(init_c, c);
     }
 
     // Slice off the "channel" dimension if any.
@@ -121,49 +109,47 @@ auto make_unary_reduce_impl(const ynn_node::reduce& op,
     size_t a_stride_k2 = 0;
 
     int sliced = 0;
-    int reduction_idx = 0;
     for (int i = 0; i < a.rank;) {
       const slinky::dim& a_dim_i = a.dim(i);
-      if (a_dim_i.empty()) {
+      slinky::index_t extent_i = a_dim_i.extent();
+      if (extent_i == 0) {
         // The reduction is an empty reduction, so we are done after
         // initializing the output.
         return 0;
       } else if (op.k_dims[i + sliced]) {
-        const slinky::dim& r_dim_i = reduction_bounds.dim(reduction_idx);
-        assert(r_dim_i.stride() == 0);
-
-        assert(a_dim_i.contains(r_dim_i));
-        const slinky::index_t r_extent_i = r_dim_i.extent();
-        assert(!a_dim_i.is_folded(r_dim_i.min(), r_dim_i.max()));
-        if (r_extent_i == 1) {
+        assert(a_dim_i.min() == 0);
+        assert(!a_dim_i.is_folded());
+        if (extent_i == 1) {
           // Slice extent 1 dimensions, they don't affect the result.
         } else if (k1 * a.elem_size == a_dim_i.stride()) {
-          k1 *= r_extent_i;
+          k1 *= extent_i;
         } else if (a_stride_k2 * k2 == a_dim_i.stride()) {
-          k2 *= r_extent_i;
+          k2 *= extent_i;
         } else if (a_stride_k3 * k3 == a_dim_i.stride()) {
-          k3 *= r_extent_i;
+          k3 *= extent_i;
         } else if (k2 == 1) {
-          k2 = r_extent_i;
+          k2 = extent_i;
           a_stride_k2 = a_dim_i.stride();
         } else if (k3 == 1) {
-          k3 = r_extent_i;
+          k3 = extent_i;
           a_stride_k3 = a_dim_i.stride();
         } else {
           // This is a reduction dimension that is not handled by the kernel.
           if (op.keep_dims) {
             // Replace the existing dimension in c with a broadcast.
-            c.mutable_dim(i) = r_dim_i;
+            c.mutable_dim(i).set_bounds(a_dim_i.min(), a_dim_i.max());
+            c.mutable_dim(i).set_stride(0);
           } else {
             // Add a new dimension for the broadcast in c.
-            c.unslice(i, r_dim_i);
+            slinky::dim new_dim = a_dim_i;
+            new_dim.set_stride(0);
+            c.unslice(i, new_dim);
           }
           ++i;
-          ++reduction_idx;
           continue;
         }
         // This is a reduction dimension that is handled by the kernel.
-        a.slice(i, slinky::in_bounds{r_dim_i.min()});
+        a.slice(i);
         if (op.keep_dims) {
           // If op.keep_dims is true, that means the buffer has these
           // dimensions, but we don't want them there for dimensions we handle
@@ -171,13 +157,11 @@ auto make_unary_reduce_impl(const ynn_node::reduce& op,
           c.slice(i);
         }
         ++sliced;
-        ++reduction_idx;
       } else {
         const slinky::dim& c_dim_i = c.dim(i);
-        const slinky::index_t c_extent_i = c_dim_i.extent();
         // Not a reduction dimension. If we haven't already found a dimension
         // for the kernel, give it this one.
-        if (c_extent_i == 1) {
+        if (extent_i == 1) {
           // Slice extent 1 dimensions, they don't affect the result.
         } else if (c_dim_i.stride() == n * c.elem_size) {
           if (a_stride_n * n == a_dim_i.stride()) {
@@ -367,56 +351,19 @@ void define_reduce(ynn_subgraph& subgraph, ynn_node& node,
 
     output.make_buffer(runtime);
 
-    // We want to be able to schedule producers for the reduction inside the
-    // reduction loops. To be able to do this, we need the loops to be in the
-    // slinky pipeline. To implement this, we make a dummy buffer that contains
-    // the reduction dimensions as its dimensions, but with an element size and
-    // stride of 0 (so it will not actually occupy any memory).
-    // Both the output and this reduction buffer are outputs to the pipeline
-    // stage, so slinky generates loops for both sets of dimensions. We can then
-    // schedule these loops like any other dimensions.
-    slinky::buffer_expr_ptr reduction_buffer = slinky::buffer_expr::make(
-        runtime.globals.symbols, "reduction", op.k_dims.count(), 0);
+    std::vector<slinky::var> dims = runtime.globals.make_dims(input_a.rank());
+    slinky::box_expr a_bounds = make_elementwise_bounds(dims, input_a.extents);
 
-    std::vector<slinky::var> output_dims;
-    std::vector<slinky::var> reduction_dims;
-    std::vector<slinky::var> all_dims;
-    std::vector<slinky::expr> all_extents;
-    slinky::box_expr a_bounds;
-    slinky::box_expr a_crop;
-    int reduction_dim = 0;
-    for (int i = 0; i < input_a.rank(); ++i) {
-      slinky::var dim_i = runtime.globals.make_dim(i);
-      const slinky::expr& a_extent_i = input_a.extent(i);
-      all_extents.push_back(a_extent_i);
+    for (int i = static_cast<int>(input_a.rank()) - 1; i >= 0; --i) {
       if (op.k_dims[i]) {
-        slinky::var reduction_dim_i =
-            runtime.globals.make_dim(reduction_dim, "k");
-        all_dims.push_back(reduction_dim_i);
-        reduction_dims.push_back(reduction_dim_i);
-
-        a_bounds.push_back(slinky::point(reduction_dim_i));
-        a_crop.push_back(slinky::min_extent(0, a_extent_i));
-        if (op.keep_dims) {
-          output_dims.push_back(dim_i);
+        a_bounds[i] = all_bounds(input_a.extent(i));
+        if (!op.keep_dims) {
+          dims.erase(dims.begin() + i);
         }
-
-        // Set up the reduction buffer.
-        reduction_buffer->dim(reduction_dim).bounds =
-            slinky::min_extent(0, max(a_extent_i, 1));
-        reduction_buffer->dim(reduction_dim).stride = 0;
-
-        ++reduction_dim;
-      } else {
-        all_dims.push_back(dim_i);
-        output_dims.push_back(dim_i);
-        a_bounds.push_back(elementwise_bounds(dim_i, a_extent_i));
-        a_crop.push_back({});
       }
     }
 
-    slinky::box_expr c_bounds =
-        make_elementwise_bounds(output_dims, input_c.extents);
+    slinky::box_expr c_bounds = make_elementwise_bounds(dims, input_c.extents);
 
     slinky::call_stmt::attributes attrs;
     attrs.name = node.to_string();
@@ -425,17 +372,40 @@ void define_reduce(ynn_subgraph& subgraph, ynn_node& node,
     if (allow_in_place(input_c.id, output.id, *runtime.subgraph)) {
       attrs.allow_in_place = (1 << 1);
     }
-
-    auto sched = runtime.make_schedule(all_dims, all_extents,
-                                       input_a.buffer->elem_size());
-
+    auto sched = std::make_unique<scheduling_info>();
+    slinky::expr output_count = 1;
+    for (const slinky::expr& e : output.extents) {
+      if (e.defined()) {
+        output_count *= e;
+      }
+    }
+    if (dims.empty() || slinky::prove_true(output_count == 1)) {
+      // This is a total reduction, so can't have any loops and we don't want
+      // to schedule it inside of any other loops.
+      sched->force_root = true;
+    } else {
+      // The elementwise schedule is based on the output shape.
+      // The cost of computation of a single output element is modeled
+      // as the product of the reduction dimensions multiplied by the element
+      // size and divided by some tuning coefficient. This naturally leads to
+      // smaller tiles for large reductions and bigger tiles for small ones.
+      static constexpr int cost_scaling_factor = 512;  // 256;
+      slinky::expr reduction_cost = input_a.buffer->elem_size();
+      for (int d = 0; d < input_a.rank(); ++d) {
+        if (op.k_dims[d] && input_a.extents[d].defined()) {
+          reduction_cost *= input_a.extents[d];
+        }
+      }
+      reduction_cost =
+          slinky::ceil_div(reduction_cost, slinky::expr(cost_scaling_factor));
+      reduction_cost *= output.buffer->elem_size();
+      sched = runtime.make_schedule(dims, output.extents, reduction_cost);
+    }
     auto func = slinky::func::make(
         make_unary_reduce_impl(op, kernel),
-        {{input_a.buffer, std::move(a_bounds), std::move(a_crop)},
+        {{input_a.buffer, std::move(a_bounds)},
          {input_c.buffer, std::move(c_bounds)}},
-        {{output.buffer, std::move(output_dims)},
-         {reduction_buffer, std::move(reduction_dims)}},
-        std::move(attrs));
+        {{output.buffer, std::move(dims)}}, std::move(attrs));
 
     func.user_data() = sched.get();
     runtime.scheduling_info_storage.push_back(std::move(sched));

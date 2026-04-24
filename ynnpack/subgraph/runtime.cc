@@ -67,10 +67,10 @@ void ynn_runtime_value::make_buffer(ynn_runtime& runtime) {
 }
 
 std::unique_ptr<ynn::scheduling_info> ynn_runtime::make_schedule(
-    ynn::span<const slinky::var> dims, ynn::span<const slinky::expr> extents,
+    const std::vector<slinky::var>& dims, ynn::span<const slinky::expr> extents,
     const slinky::expr& element_cost,
     ynn::span<const slinky::expr> given_splits,
-    ynn::span<const int> loop_order) {
+    const std::vector<slinky::index_t>& loop_order) {
   auto sched = std::make_unique<ynn::scheduling_info>();
 
   int max_threads = threadpool() ? threadpool()->thread_count() : 1;
@@ -124,7 +124,7 @@ std::unique_ptr<ynn::scheduling_info> ynn_runtime::make_schedule(
 
   for (int index_d = rank - 1; index_d >= 0; --index_d) {
     int d = get_loop_dim(index_d);
-    if (max_threads == 1 || globals.is_reduction_dim(dims[d])) {
+    if (max_threads == 1) {
       workers[d] = slinky::loop::serial;
     } else if (extents[d].defined() && splits[d].defined()) {
       slinky::expr w =
@@ -288,11 +288,6 @@ void ynn_runtime::schedule() {
         // step are not equal and both are required.
         if (split.step_is_required && global_loop.step_is_required &&
             !prove_true(split.step == global_loop.step)) {
-          break;
-        }
-        if (globals.is_reduction_dim(split.var)) {
-          // We don't want to fuse a reduction dimension because it is likely
-          // being broadcasted here.
           break;
         }
         if (prove_true(split.extent == global_loop.extent)) {
