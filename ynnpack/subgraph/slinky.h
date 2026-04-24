@@ -28,15 +28,24 @@
 
 namespace ynn {
 
+static constexpr char reduction_dim_prefix = 'k';
+
 class slinky_globals {
  public:
   // Make a global variable for the given expression. Deduplicates identical
   // expressions to the same variable.
   slinky::expr get(slinky::expr value, const char* prefix);
 
+  // Make a single dimension with index `d`.
+  slinky::var make_dim(int d, const char* prefix = "d");
+  slinky::var make_reduction_dim(int d);
+
+  bool is_reduction_dim(slinky::var dim);
+
   // Make an array of dimensions that is begin, 1, ... end - 1.
-  std::vector<slinky::var> make_dims(int begin, int end);
-  std::vector<slinky::var> make_dims(int rank);
+  std::vector<slinky::var> make_dims(int begin, int end,
+                                     const char* prefix = "d");
+  std::vector<slinky::var> make_dims(int rank, const char* prefix = "d");
 
   slinky::buffer_expr_ptr make_buffer_expr(const std::string& name, int rank,
                                            slinky::expr elem_size);
