@@ -286,6 +286,32 @@ class OwningCpuBuffer : public MutableBuffer {
   static absl::StatusOr<std::shared_ptr<OwningCpuBuffer>> Own(
       std::shared_ptr<std::byte> data, size_t bytes);
 
+#define LITERT_TENSOR_BUFFER_OP_AS_CASE(OP, TYPE, ...) \
+  case Type::k##TYPE:                                  \
+    return OP<Type::k##TYPE>(__VA_ARGS__)
+
+#define LITERT_TENSOR_BUFFER_OP_AS_SWITCH(OP, ...)          \
+  switch (type) {                                           \
+    LITERT_TENSOR_BUFFER_OP_AS_CASE(OP, BOOL, __VA_ARGS__); \
+    LITERT_TENSOR_BUFFER_OP_AS_CASE(OP, I2, __VA_ARGS__);   \
+    LITERT_TENSOR_BUFFER_OP_AS_CASE(OP, I4, __VA_ARGS__);   \
+    LITERT_TENSOR_BUFFER_OP_AS_CASE(OP, I8, __VA_ARGS__);   \
+    LITERT_TENSOR_BUFFER_OP_AS_CASE(OP, I16, __VA_ARGS__);  \
+    LITERT_TENSOR_BUFFER_OP_AS_CASE(OP, I32, __VA_ARGS__);  \
+    LITERT_TENSOR_BUFFER_OP_AS_CASE(OP, I64, __VA_ARGS__);  \
+    LITERT_TENSOR_BUFFER_OP_AS_CASE(OP, U4, __VA_ARGS__);   \
+    LITERT_TENSOR_BUFFER_OP_AS_CASE(OP, U8, __VA_ARGS__);   \
+    LITERT_TENSOR_BUFFER_OP_AS_CASE(OP, U16, __VA_ARGS__);  \
+    LITERT_TENSOR_BUFFER_OP_AS_CASE(OP, U32, __VA_ARGS__);  \
+    LITERT_TENSOR_BUFFER_OP_AS_CASE(OP, U64, __VA_ARGS__);  \
+    LITERT_TENSOR_BUFFER_OP_AS_CASE(OP, FP16, __VA_ARGS__); \
+    LITERT_TENSOR_BUFFER_OP_AS_CASE(OP, FP32, __VA_ARGS__); \
+    LITERT_TENSOR_BUFFER_OP_AS_CASE(OP, FP64, __VA_ARGS__); \
+    LITERT_TENSOR_BUFFER_OP_AS_CASE(OP, BF16, __VA_ARGS__); \
+    case Type::kUnknown:                                    \
+      return nullptr;                                       \
+  }
+
   // Allocates a buffer that can hold `count` elements.
   template <Type type>
   static std::shared_ptr<OwningCpuBuffer> Allocate(size_t count) {
@@ -299,6 +325,15 @@ class OwningCpuBuffer : public MutableBuffer {
   static std::shared_ptr<OwningCpuBuffer> Allocate(std::vector<int32_t> shape) {
     return Allocate<type>(
         std::accumulate(shape.begin(), shape.end(), 1, std::multiplies<>()));
+  }
+
+  static std::shared_ptr<OwningCpuBuffer> AllocateAs(Type type, size_t count) {
+    LITERT_TENSOR_BUFFER_OP_AS_SWITCH(Allocate, count);
+  }
+
+  static std::shared_ptr<OwningCpuBuffer> AllocateAs(
+      Type type, std::vector<int32_t> shape) {
+    LITERT_TENSOR_BUFFER_OP_AS_SWITCH(Allocate, std::move(shape));
   }
 
   // Builds an `OwningCpuBuffer` and copy the given data to it.
@@ -327,6 +362,21 @@ class OwningCpuBuffer : public MutableBuffer {
     return OwningCpuBuffer::Copy<type>(seq);
   }
 
+  // Builds an `OwningCpuBuffer` by copying the elements in the given sequence
+  // with run time type dispatching.
+  template <class Sequence>
+  static std::shared_ptr<OwningCpuBuffer> CopyAs(Type type, Sequence&& seq) {
+    LITERT_TENSOR_BUFFER_OP_AS_SWITCH(Copy, std::forward<Sequence>(seq));
+  }
+
+  // Builds an `OwningCpuBuffer` by copying the elements of the given
+  // initializer list with run time dispatching.
+  template <class T>
+  static std::shared_ptr<OwningCpuBuffer> CopyAs(
+      Type type, std::initializer_list<T>&& seq) {
+    LITERT_TENSOR_BUFFER_OP_AS_SWITCH(Copy, std::move(seq));
+  }
+
   // Builds an `OwningCpuBuffer` by applying the given `transform` to elements
   // of a sequence.
   template <Type type, class Sequence, class F>
@@ -340,6 +390,15 @@ class OwningCpuBuffer : public MutableBuffer {
     std::transform(begin(seq), end(seq), copied_data->Span<NativeType>().data(),
                    std::forward<F>(transform));
     return copied_data;
+  }
+
+  // Builds an `OwningCpuBuffer` by applying the given `transform` to elements
+  // of a sequence with run time type dispatching.
+  template <class Sequence, class F>
+  static std::shared_ptr<OwningCpuBuffer> TransformAs(Type type, Sequence&& seq,
+                                                      F&& transform) {
+    LITERT_TENSOR_BUFFER_OP_AS_SWITCH(Transform, std::forward<Sequence>(seq),
+                                      std::forward<F>(transform));
   }
 
   // Allocates an array with an alignment of `kBufferAlignment`.
