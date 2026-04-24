@@ -11,16 +11,9 @@
 #include "src/xnnpack/packw.h"
 #include <benchmark/benchmark.h>
 
-static void x16_packw(benchmark::State& state, const char* net,
-                      xnn_x16_packw_gemm_goi_ukernel_fn ukernel,
-                      uint64_t arch_flags, size_t nr, size_t kr, size_t sr) {
-  benchmark::utils::CheckArchFlags(state, arch_flags);
-  x16_packw(state, ukernel, nr, kr, sr);
-}
-
 #define XNN_UKERNEL(arch_flags, ukernel, nr, kr, sr, kblock, nr_scale)        \
-  BENCHMARK_CAPTURE_BGEMM(x16_packw, ukernel##_, ukernel, arch_flags, nr, kr, \
-                          sr);
+  BENCHMARK_CAPTURE_BGEMM(x16_packw, ukernel##_, ukernel, nr, kr, sr,         \
+                          arch_flags);
 
 #include "src/x16-packw/x16-packw.inc"
 
