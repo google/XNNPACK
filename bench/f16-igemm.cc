@@ -356,17 +356,6 @@ namespace {
 
 
 #if XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM64 && XNN_ENABLE_ASSEMBLY
-  static void f16_igemm_minmax_ukernel_1x16__asm_aarch64_neonfp16arith_ld32(benchmark::State& state) {
-    IGEMMBenchmark(state,
-      xnn_f16_igemm_minmax_ukernel_1x16__asm_aarch64_neonfp16arith_ld32,
-      xnn_init_f16_minmax_scalar_params,
-      xnn_pack_f16_conv_goki_w,
-      /*mr=*/1, /*nr=*/16, /*kr=*/1, /*sr=*/1,
-      /*arch_flags=*/xnn_arch_arm_neon_fp16_arith);
-  }
-
-  BENCHMARK_CONV(f16_igemm_minmax_ukernel_1x16__asm_aarch64_neonfp16arith_ld32)
-
   static void f16_igemm_minmax_ukernel_1x16__asm_aarch64_neonfp16arith_ld64(benchmark::State& state) {
     IGEMMBenchmark(state,
       xnn_f16_igemm_minmax_ukernel_1x16__asm_aarch64_neonfp16arith_ld64,
@@ -377,17 +366,6 @@ namespace {
   }
 
   BENCHMARK_CONV(f16_igemm_minmax_ukernel_1x16__asm_aarch64_neonfp16arith_ld64)
-
-  static void f16_igemm_minmax_ukernel_4x16__asm_aarch64_neonfp16arith_ld32(benchmark::State& state) {
-    IGEMMBenchmark(state,
-      xnn_f16_igemm_minmax_ukernel_4x16__asm_aarch64_neonfp16arith_ld32,
-      xnn_init_f16_minmax_scalar_params,
-      xnn_pack_f16_conv_goki_w,
-      /*mr=*/4, /*nr=*/16, /*kr=*/1, /*sr=*/1,
-      /*arch_flags=*/xnn_arch_arm_neon_fp16_arith);
-  }
-
-  BENCHMARK_CONV(f16_igemm_minmax_ukernel_4x16__asm_aarch64_neonfp16arith_ld32)
 
   static void f16_igemm_minmax_ukernel_4x16__asm_aarch64_neonfp16arith_ld64(benchmark::State& state) {
     IGEMMBenchmark(state,
@@ -432,17 +410,6 @@ namespace {
   }
 
   BENCHMARK_CONV(f16_igemm_minmax_ukernel_6x16__asm_aarch64_neonfp16arith_cortex_a75)
-
-  static void f16_igemm_minmax_ukernel_6x16__asm_aarch64_neonfp16arith_ld32(benchmark::State& state) {
-    IGEMMBenchmark(state,
-      xnn_f16_igemm_minmax_ukernel_6x16__asm_aarch64_neonfp16arith_ld32,
-      xnn_init_f16_minmax_scalar_params,
-      xnn_pack_f16_conv_goki_w,
-      /*mr=*/6, /*nr=*/16, /*kr=*/1, /*sr=*/1,
-      /*arch_flags=*/xnn_arch_arm_neon_fp16_arith);
-  }
-
-  BENCHMARK_CONV(f16_igemm_minmax_ukernel_6x16__asm_aarch64_neonfp16arith_ld32)
 
   static void f16_igemm_minmax_ukernel_6x16__asm_aarch64_neonfp16arith_ld64(benchmark::State& state) {
     IGEMMBenchmark(state,
