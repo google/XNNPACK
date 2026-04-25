@@ -492,6 +492,15 @@ struct ynn_node {
       return a.num_k_dims < b.num_k_dims;
     }
   };
+  struct iota {
+    ynn_type type;
+    friend bool operator==(const iota& a, const iota& b) {
+      return a.type == b.type;
+    }
+    friend bool operator<(const iota& a, const iota& b) {
+      return a.type < b.type;
+    }
+  };
   struct pack_b {
     friend bool operator==(const pack_b&, const pack_b&) { return true; }
     friend bool operator<(const pack_b&, const pack_b&) { return false; }
@@ -549,8 +558,8 @@ struct ynn_node {
                stack, static_reshape, static_broadcast, static_expand_dims,
                static_pad, static_slice, slice_like, static_transpose,
                stencil_copy, unary_elementwise, lut, binary_elementwise,
-               ternary_elementwise, dot, pack_b, transpose_a, get_tensor_shape,
-               reduce, dequantize_dot>
+               ternary_elementwise, dot, iota, pack_b, transpose_a,
+               get_tensor_shape, reduce, dequantize_dot>
       op;
 
   const char* name() const;

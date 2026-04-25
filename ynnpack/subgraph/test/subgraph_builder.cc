@@ -122,6 +122,16 @@ SubgraphBuilder& SubgraphBuilder::AddBinary(ynn_binary_operator op,
   return *this;
 }
 
+SubgraphBuilder& SubgraphBuilder::AddIota(ynn_type type,
+                                          const std::vector<size_t>& shape,
+                                          uint32_t begin_id, uint32_t stride_id,
+                                          uint32_t output_id, uint32_t flags) {
+  assert(status_ == ynn_status_success);
+  status_ = ynn_define_iota(subgraph_.get(), type, shape.size(), shape.data(),
+                            begin_id, stride_id, &output_id, flags);
+  return *this;
+}
+
 SubgraphBuilder& SubgraphBuilder::AddBroadcast(const std::vector<size_t>& shape,
                                                uint32_t input_id,
                                                uint32_t output_id,

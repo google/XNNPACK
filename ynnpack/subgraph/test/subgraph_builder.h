@@ -107,6 +107,10 @@ class SubgraphBuilder {
                              uint32_t input_b_id, uint32_t output_id,
                              uint32_t flags = 0);
 
+  SubgraphBuilder& AddIota(ynn_type type, const std::vector<size_t>& shape,
+                           uint32_t begin_id, uint32_t stride_id,
+                           uint32_t output_id, uint32_t flags = 0);
+
   SubgraphBuilder& AddBroadcast(const std::vector<size_t>& shape,
                                 uint32_t input_id, uint32_t output_id,
                                 uint32_t flags = 0);

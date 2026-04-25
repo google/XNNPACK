@@ -112,6 +112,25 @@ enum ynn_status ynn_define_tensor(ynn_subgraph_t subgraph, enum ynn_type type,
                                   const void* data, uint32_t flags,
                                   uint32_t* id_out);
 
+// Defines a tensor with values that are a linear combination of its indices and
+// the given `stride_id` tensor:
+//   output[i_0, ..., i_{rank-1}] = begin + sum_{d=0}^{rank-1} (i_d *
+//   stride[d])
+//
+// `begin_id` may be YNN_INVALID_VALUE_ID, indicating the sequence should start
+// at 0.
+//
+// `stride_id` is a 1D tensor with extent `rank`, where element i indicates the
+// step between output elements in dimension i.
+//
+// The ID of the new tensor will be stored in `output_id`. If `*output_id` is
+// not `YNN_INVALID_VALUE_ID`, it must be a valid ID of a tensor previously
+// defined by `ynn_define_tensor`.
+enum ynn_status ynn_define_iota(ynn_subgraph_t subgraph, enum ynn_type type,
+                                size_t rank, const size_t* dims,
+                                uint32_t begin_id, uint32_t stride_id,
+                                uint32_t* output_id, uint32_t flags);
+
 #define YNN_NODE_FLAG_KEEP_DIMS (1 << 0)
 #define YNN_NODE_FLAG_SLICE_DIMS (1 << 0)
 #define YNN_NODE_FLAG_RESHAPE_1D (1 << 0)

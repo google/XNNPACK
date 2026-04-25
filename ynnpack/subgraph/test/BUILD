@@ -5,7 +5,7 @@
 
 load("@rules_cc//cc:cc_library.bzl", "cc_library")
 load("@rules_cc//cc:cc_test.bzl", "cc_test")
-load("//ynnpack:build_defs.bzl", "ynn_binary_linkopts", "ynn_binary_malloc", "ynn_test_deps")
+load("//ynnpack:build_defs.bzl", "ynn_benchmark_deps", "ynn_binary_linkopts", "ynn_binary_malloc", "ynn_test_deps")
 
 cc_library(
     name = "scheduler",
@@ -187,6 +187,7 @@ cc_test(
     "fuse_dim",
     "fuse_dims",
     "get_tensor_shape",
+    "iota",
     "lut",
     "reduce",
     "runtime",
@@ -243,4 +244,17 @@ cc_test(
         "@com_google_benchmark//:benchmark",
         "@slinky//slinky/runtime",
     ],
+)
+
+cc_test(
+    name = "pi_bench",
+    srcs = ["pi_bench.cc"],
+    linkopts = ynn_binary_linkopts(),
+    malloc = ynn_binary_malloc(),
+    deps = [
+        ":scheduler",
+        "//ynnpack",
+        "//ynnpack/base",
+        "//ynnpack/subgraph",
+    ] + ynn_benchmark_deps(),
 )
