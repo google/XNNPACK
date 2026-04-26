@@ -157,6 +157,17 @@ struct ynn_value {
     return i < extents.size() && extents[i].defined() ? extents[i] : 1;
   }
 
+  slinky::expr logical_extent(size_t i) const {
+    slinky::expr e = extent(i);
+    if (i == 0) {
+      const int element_count = ynn::type_element_count(type);
+      if (element_count != 1) {
+        e *= element_count;
+      }
+    }
+    return e;
+  }
+
   // Asserting that the value is reshapable to a static scalar value of type T,
   // returns that value.
   template <typename T>
@@ -657,9 +668,7 @@ struct ynn_subgraph : public ynn::ref_counted<ynn_subgraph> {
   }
 
   void infer_elementwise_shape(ynn_node& node, int input_idx, int output_idx,
-                               int input_dim, int output_dim,
-                               int input_type_element_count = 1,
-                               int output_type_element_count = 1);
+                               int input_dim, int output_dim);
 
   // Find parts of the graph that can be executed independently of any inputs.
   ynn_status fold_constants(slinky::thread_pool* threadpool);

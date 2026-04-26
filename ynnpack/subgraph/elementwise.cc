@@ -642,9 +642,10 @@ ynn_status ynn_define_convert(ynn_subgraph_t subgraph, uint32_t input_id,
                                  a.scale_id, output_type, output_id, flags);
   }
 
-  // We can only look for a kernel if we don't have any quantization to handle.
+  // We can use a convert kernel if quantization parameters match, or if there
+  // are no quantization parameters.
   unary_kernel_fn kernel =
-      !a_is_quantized && !x_is_quantized
+      (a.scale_id == x_scale_id && a.zero_point_id == x_zero_point_id)
           ? get_unary_kernel(ynn_unary_convert, a.type, x.type)
           : nullptr;
   if (!kernel) {

@@ -926,8 +926,7 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
   // batch dimensions.
 
   // inputs `b` and `c` have an elementwise dimension 0.
-  subgraph.infer_elementwise_shape(node, 1, 0, 0, 0,
-                                   type_element_count(b.type));
+  subgraph.infer_elementwise_shape(node, 1, 0, 0, 0);
   subgraph.infer_elementwise_shape(node, 2, 0, 0, 0);
 
   if (c_rank >= 2) {
@@ -944,8 +943,8 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
 
   // The k-dims must match.
   for (int d = 0; d < num_k_dims; ++d) {
-    slinky::expr a_k_dim = a.extent(d);
-    slinky::expr b_k_dim = b.extent(d + 1);
+    slinky::expr a_k_dim = a.logical_extent(d);
+    slinky::expr b_k_dim = b.logical_extent(d + 1);
     node.checks.push_back(
         {a_k_dim == b_k_dim,
          {"reduction dimension ", d, " (", a_k_dim, ") of ",

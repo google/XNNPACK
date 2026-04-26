@@ -668,6 +668,22 @@ xnn_status xnn_define_fully_connected(xnn_subgraph_t subgraph, float output_min,
                                       float output_max, uint32_t input_id,
                                       uint32_t filter_id, uint32_t bias_id,
                                       uint32_t output_id, uint32_t flags) {
+  if (ynn::type_of_value(subgraph, filter_id) == ynn_type_int4 ||
+      ynn::type_of_value(subgraph, filter_id) == ynn_type_int2) {
+    assert(!(flags & XNN_FLAG_TRANSPOSE_WEIGHTS));
+    uint32_t unpacked_id = YNN_INVALID_VALUE_ID;
+    ynn_status status =
+        ynn_define_convert(subgraph->ynn, filter_id, ynn_type_int8,
+                           ynn::get_zero_point_id(subgraph, filter_id),
+                           ynn::get_scale_id(subgraph, filter_id), &unpacked_id,
+                           /*flags=*/0);
+    if (status != ynn_status_success) {
+      return ynn::xnn_status_from_ynn(status);
+    }
+
+    filter_id = unpacked_id;
+  }
+
   if (!(flags & XNN_FLAG_TRANSPOSE_WEIGHTS)) {
     uint32_t filter_id_transposed = YNN_INVALID_VALUE_ID;
     assert(ynn::rank_of_value(subgraph, filter_id) == 2);
