@@ -6,6 +6,7 @@
 #ifndef XNNPACK_YNNPACK_BASE_TYPE_H_
 #define XNNPACK_YNNPACK_BASE_TYPE_H_
 
+#include <algorithm>
 #include <cassert>
 #include <cstddef>
 #include <cstdint>
@@ -358,6 +359,8 @@ constexpr decltype(auto) SwitchIntegerType(ynn_type type, F&& f) {
 template <typename T>
 class type_info {
  public:
+  using element_type = T;
+
   static constexpr T epsilon() { return std::numeric_limits<T>::epsilon(); }
   static constexpr T infinity() { return std::numeric_limits<T>::infinity(); }
   static constexpr T nan() { return std::numeric_limits<T>::quiet_NaN(); }
@@ -376,11 +379,14 @@ class type_info {
   // Get the `i`th element from an array `x` of instances of type `T`.
   YNN_ALWAYS_INLINE static T get(const T* x, size_t i) { return x[i]; }
   YNN_ALWAYS_INLINE static void set(T* x, size_t i, T value) { x[i] = value; }
+  YNN_ALWAYS_INLINE static T& ref(T* x, size_t i) { return x[i]; }
 };
 
 template <>
 class type_info<half> {
  public:
+  using element_type = half;
+
   static constexpr half epsilon() { return half::epsilon(); }
   static constexpr half infinity() { return half::infinity(); }
   static constexpr half min() { return half::min(); }
@@ -396,11 +402,14 @@ class type_info<half> {
   YNN_ALWAYS_INLINE static void set(half* x, size_t i, half value) {
     x[i] = value;
   }
+  YNN_ALWAYS_INLINE static half& ref(half* x, size_t i) { return x[i]; }
 };
 
 template <>
 class type_info<bfloat16> {
  public:
+  using element_type = bfloat16;
+
   static constexpr bfloat16 epsilon() {
     return bfloat16::from_bits(0x3c00);  // 2^-7 = 0.0078125
   }
@@ -426,11 +435,14 @@ class type_info<bfloat16> {
   YNN_ALWAYS_INLINE static void set(bfloat16* x, size_t i, bfloat16 value) {
     x[i] = value;
   }
+  YNN_ALWAYS_INLINE static bfloat16& ref(bfloat16* x, size_t i) { return x[i]; }
 };
 
 template <>
 class type_info<int8_t> {
  public:
+  using element_type = int8_t;
+
   static constexpr int8_t epsilon() { return 1; }
   static constexpr int8_t min() { return -128; }
   static constexpr int8_t max() { return 127; }
@@ -447,11 +459,14 @@ class type_info<int8_t> {
   YNN_ALWAYS_INLINE static void set(int8_t* x, size_t i, int8_t value) {
     x[i] = value;
   }
+  YNN_ALWAYS_INLINE static int8_t& ref(int8_t* x, size_t i) { return x[i]; }
 };
 
 template <>
 class type_info<uint8_t> {
  public:
+  using element_type = uint8_t;
+
   static constexpr uint8_t epsilon() { return 1; }
   static constexpr uint8_t min() { return 0; }
   static constexpr uint8_t max() { return 255; }
@@ -468,11 +483,44 @@ class type_info<uint8_t> {
   YNN_ALWAYS_INLINE static void set(uint8_t* x, size_t i, uint8_t value) {
     x[i] = value;
   }
+  YNN_ALWAYS_INLINE static uint8_t& ref(uint8_t* x, size_t i) { return x[i]; }
+};
+
+// This wrapper allows forming a "reference" to a sub-byte datatype.
+template <typename T>
+class element_ref {
+ public:
+  YNN_ALWAYS_INLINE element_ref(T* values, size_t offset)
+      : values_(values), offset_(offset) {}
+
+  YNN_ALWAYS_INLINE operator int() const {  // NOLINT
+    return type_info<T>::get(values_, offset_);
+  }
+  YNN_ALWAYS_INLINE element_ref& operator=(const element_ref& other) {
+    type_info<T>::set(values_, offset_, other);
+    return *this;
+  }
+  template <typename U>
+  YNN_ALWAYS_INLINE element_ref& operator=(U value) {
+    type_info<T>::set(values_, offset_, value);
+    return *this;
+  }
+
+  T* address_of() {
+    assert(offset_ % type_info<T>::element_count() == 0);
+    return values_ + offset_ / type_info<T>::element_count();
+  }
+
+ private:
+  T* values_;
+  size_t offset_;
 };
 
 template <>
 class type_info<int4x2> {
  public:
+  using element_type = int8_t;
+
   static int32_t min() { return -8; }
   static int32_t max() { return 7; }
   static int32_t smallest_normal() { return 0; }
@@ -487,11 +535,16 @@ class type_info<int4x2> {
   YNN_ALWAYS_INLINE static void set(int4x2* x, size_t i, int8_t value) {
     x[i >> 1].set(i & 1, value);
   }
+  YNN_ALWAYS_INLINE static element_ref<int4x2> ref(int4x2* x, size_t i) {
+    return element_ref<int4x2>(x, i);
+  }
 };
 
 template <>
 class type_info<int2x4> {
  public:
+  using element_type = int8_t;
+
   static int32_t min() { return -2; }
   static int32_t max() { return 1; }
   static int32_t smallest_normal() { return 0; }
@@ -506,11 +559,16 @@ class type_info<int2x4> {
   YNN_ALWAYS_INLINE static void set(int2x4* x, size_t i, int8_t value) {
     x[i >> 2].set(i & 3, value);
   }
+  YNN_ALWAYS_INLINE static element_ref<int2x4> ref(int2x4* x, size_t i) {
+    return element_ref<int2x4>(x, i);
+  }
 };
 
 template <>
 class type_info<uint4x2> {
  public:
+  using element_type = uint8_t;
+
   static int32_t min() { return 0; }
   static int32_t max() { return 15; }
   static int32_t smallest_normal() { return 0; }
@@ -525,11 +583,16 @@ class type_info<uint4x2> {
   YNN_ALWAYS_INLINE static void set(uint4x2* x, size_t i, uint8_t value) {
     x[i >> 1].set(i & 1, value);
   }
+  YNN_ALWAYS_INLINE static element_ref<uint4x2> ref(uint4x2* x, size_t i) {
+    return element_ref<uint4x2>(x, i);
+  }
 };
 
 template <>
 class type_info<uint2x4> {
  public:
+  using element_type = uint8_t;
+
   static int32_t min() { return 0; }
   static int32_t max() { return 3; }
   static int32_t smallest_normal() { return 0; }
@@ -544,11 +607,16 @@ class type_info<uint2x4> {
   YNN_ALWAYS_INLINE static void set(uint2x4* x, size_t i, uint8_t value) {
     x[i >> 2].set(i & 3, value);
   }
+  YNN_ALWAYS_INLINE static element_ref<uint2x4> ref(uint2x4* x, size_t i) {
+    return element_ref<uint2x4>(x, i);
+  }
 };
 
 template <typename T>
 class type_info<quantized<T>> {
  public:
+  using element_type = quantized<typename type_info<T>::element_type>;
+
   static quantized<T> min() { return {type_info<T>::min()}; }
   static quantized<T> max() { return {type_info<T>::max()}; }
   static quantized<T> smallest_normal() { return {0}; }
@@ -559,14 +627,27 @@ class type_info<quantized<T>> {
     return type_info<T>::element_count();
   }
 
-  YNN_ALWAYS_INLINE static quantized<T> get(const quantized<T>* x, size_t i) {
-    return x[i];
+  YNN_ALWAYS_INLINE static element_type get(const quantized<T>* x, size_t i) {
+    return {type_info<T>::get(reinterpret_cast<const T*>(x), i)};
   }
   YNN_ALWAYS_INLINE static void set(quantized<T>* x, size_t i,
-                                    quantized<T> value) {
-    x[i] = value;
+                                    element_type value) {
+    type_info<T>::set(reinterpret_cast<T*>(x), i, value.value);
+  }
+  YNN_ALWAYS_INLINE static auto ref(quantized<T>* x, size_t i) {
+    return type_info<T>::ref(reinterpret_cast<T*>(x), i);
   }
 };
+
+template <typename T>
+T* address_of(T& value) {
+  return &value;
+}
+
+template <typename T>
+T* address_of(element_ref<T> value) {
+  return value.address_of();
+}
 
 // Extend std::is_integral for our sub-byte types.
 template <typename T>
@@ -613,6 +694,52 @@ struct quantization_params {
   int32_t zero_point = 0;
   float scale = 1.0f;
 };
+
+// Implement std::copy_n, std::generate_n with support for sub-byte types.
+template <typename Dst, typename F>
+void generate_n(Dst* dst, size_t offset, size_t n, F&& f) {
+  using DstInfo = type_info<Dst>;
+  if (DstInfo::element_count() == 1) {
+    std::generate_n(dst + offset, n, std::forward<F>(f));
+  } else {
+    // We could relax these requirements if needed...
+    assert(offset % DstInfo::element_count() == 0);
+    assert(n % DstInfo::element_count() == 0);
+    dst += offset / DstInfo::element_count();
+    n /= DstInfo::element_count();
+    for (size_t i = 0; i < n; ++i) {
+      for (size_t j = 0; j < DstInfo::element_count(); ++j) {
+        type_info<Dst>::set(dst, j, f());
+      }
+      ++dst;
+    }
+  }
+}
+
+template <typename Src, typename Dst>
+void copy_n(Src* src, size_t src_offset, size_t n, Dst* dst,
+            size_t dst_offset) {
+  using SrcInfo = type_info<std::remove_cv_t<Src>>;
+  using DstInfo = type_info<std::remove_cv_t<Dst>>;
+  if (SrcInfo::element_count() == 1 && DstInfo::element_count() == 1) {
+    std::copy_n(src + src_offset, n, dst + dst_offset);
+  } else {
+    // We could relax these requirements if needed...
+    assert(src_offset % SrcInfo::element_count() == 0);
+    assert(dst_offset % DstInfo::element_count() == 0);
+    assert(n % DstInfo::element_count() == 0);
+    src += src_offset / SrcInfo::element_count();
+    dst += dst_offset / DstInfo::element_count();
+    n /= DstInfo::element_count();
+    for (size_t i = 0; i < n; ++i) {
+      for (size_t j = 0; j < DstInfo::element_count(); ++j) {
+        DstInfo::set(dst, j,
+                     SrcInfo::get(src, i * DstInfo::element_count() + j));
+      }
+      ++dst;
+    }
+  }
+}
 
 }  // namespace ynn
 

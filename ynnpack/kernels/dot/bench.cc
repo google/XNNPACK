@@ -59,9 +59,6 @@ void dot(benchmark::State& state, uint64_t arch_flags, dot_kernel_fn kernel,
     return;
   }
 
-  const size_t a_elem_count = type_element_count(type_of<TA>());
-  const size_t b_elem_count = type_element_count(type_of<TB>());
-
   const size_t m = shape.m;
   const size_t n = shape.n;
   // If k gets aligned up, that means this kernel would have needed to pad the
@@ -73,8 +70,8 @@ void dot(benchmark::State& state, uint64_t arch_flags, dot_kernel_fn kernel,
 
   const bool transpose_a = flags & dot_flag::transpose_a;
 
-  Tensor<TA> a({align_up(m, tile_m), k / a_elem_count});
-  Tensor<TB> b({k, align_up(n, tile_n) / b_elem_count},
+  Tensor<TA> a({align_up(m, tile_m), k});
+  Tensor<TB> b({k, align_up(n, tile_n * tile_k)},
                Alignment{.bytes = tile_n * tile_k * sizeof(TB)});
   Tensor<TC> c({m, n});
   a.fill(1);
@@ -92,7 +89,7 @@ void dot(benchmark::State& state, uint64_t arch_flags, dot_kernel_fn kernel,
       size_t m_i = std::min(block_m, m - i);
       const void* a_i = transpose_a ? &a(0, i * tile_k) : &a(i, 0);
       kernel(m_i, n, 1, 1, k, a.stride_bytes(0) / (transpose_a ? tile_k : 1), 0,
-             0, a_i, 0, 0, b.stride_bytes(0), b.base(),
+             0, a_i, 0, 0, b.stride_bytes(0) / tile_k, b.base(),
              /*init_c_stride_m=*/0, nullptr, c.stride_bytes(0), &c(i, 0));
     }
   }

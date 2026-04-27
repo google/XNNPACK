@@ -29,7 +29,7 @@ namespace ynn {
 template <typename T, typename Rng>
 void fill_uniform_random_bits(T* data, size_t size, Rng& rng) {
   using RngT = decltype(rng());
-  size_t size_bytes = size * sizeof(T);
+  size_t size_bytes = ceil_div(size, type_info<T>::element_count()) * sizeof(T);
   // Fill with as many RngT as we can.
   while (size_bytes >= sizeof(RngT)) {
     RngT bits = rng();
@@ -131,7 +131,7 @@ void replace_denormals_and_nans(T* data, size_t size) {
     // There are no denormals for this type.
     return;
   }
-  for (size_t i = 0; i < size * type_info<T>::element_count(); ++i) {
+  for (size_t i = 0; i < size; ++i) {
     float data_i = static_cast<float>(type_info<T>::get(data, i));
     if (std::abs(data_i) >= type_info<T>::smallest_normal()) {
       // This is a normal float, or infinity.
@@ -178,7 +178,7 @@ void fill_random(T* data, size_t size, Rng& rng, double min, double max,
                         type_info<T>::min()),
           std::min<int>(round_float_to_int<int>(static_cast<float>(max)),
                         type_info<T>::max()));
-      for (size_t i = 0; i < size * type_info<T>::element_count(); ++i) {
+      for (size_t i = 0; i < size; ++i) {
         type_info<T>::set(data, i, dist(rng));
       }
     } else {
@@ -223,9 +223,10 @@ void fill_random(quantized<int32_t>* data, size_t size, Rng& rng,
 
 // Return a single random value of type T.
 template <typename T, typename Rng, typename... Args>
-T random_value(Rng& rng, Args&&... args) {
+T random_value(Rng& rng, Args... args) {
   T result;
-  fill_random(&result, 1, rng, std::forward<Args>(args)...);
+  fill_random(&result, type_info<T>::element_count(), rng,
+              std::forward<Args>(args)...);
   return result;
 }
 

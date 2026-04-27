@@ -10,10 +10,7 @@
 #include <cassert>
 #include <cstddef>
 #include <cstdint>
-#include <cstdlib>
-#include <cstring>
 #include <functional>
-#include <iostream>
 #include <memory>
 #include <numeric>
 #include <sstream>
@@ -24,16 +21,17 @@
 #include "ynnpack/base/arithmetic.h"
 #include "ynnpack/base/base.h"
 #include "ynnpack/base/test/buffer.h"
+#include "ynnpack/base/test/random.h"
 #include "ynnpack/base/type.h"
 
 namespace ynn {
 
 // This stores a multi-dimensional array in a Buffer<T> object
 // (above). The sizes of dimensions are `extent`s, the distance between elements
-// in a dimension in memory are `stride`s. The address of an element x is
-// base() + sum(x[i]*stride(i) for i in rank)
-// This buffer holds an std::shared_ptr to the underlying Buffer<T>
-// objects, i.e. copies are shallow.
+// in a dimension in memory are `stride`s. The "flat index" `i` =
+// `sum(x[d]*stride(d) for d in rank)` for a multi-dimensional index `x`. This
+// buffer holds an std::shared_ptr to the underlying Buffer<T> objects, i.e.
+// copies are shallow.
 template <typename T>
 class Tensor {
  public:
@@ -56,8 +54,8 @@ class Tensor {
       stride *= extents_[i - 1];
     }
     data_ = std::make_shared<Buffer<T>>(stride, alignment);
-    begin_ = data_->begin();
-    end_ = data_->end();
+    begin_ = 0;
+    end_ = stride;
   }
   Tensor& operator=(const Tensor& other) = default;
   Tensor& operator=(Tensor&& other) = default;
@@ -88,7 +86,18 @@ class Tensor {
   const index_type& strides() const { return strides_; }
   size_t extent(size_t dim) const { return extents_[dim]; }
   size_t stride(size_t dim) const { return strides_[dim]; }
-  size_t stride_bytes(size_t dim) const { return stride(dim) * sizeof(T); }
+  size_t stride_bytes(size_t dim) const {
+    size_t result = strides_[dim] * sizeof(T);
+    if (result == 1) {
+      // The stride 1 dimension is a special case. Kernels might accept a stride
+      // for this dimension, but the only valid values are 0 or the size of the
+      // type. If the type is a sub-byte type, we need to just return 1.
+      return 1;
+    } else {
+      assert(result % type_info<T>::element_count() == 0);
+      return result / type_info<T>::element_count();
+    }
+  }
 
   // This is a dangerous function, use carefully.
   void set_shape(index_type extents, index_type strides) {
@@ -100,51 +109,85 @@ class Tensor {
   YNN_ALWAYS_INLINE bool empty() const { return begin_ >= end_; }
 
   // Returns a pointer to the element {0,...}
-  YNN_ALWAYS_INLINE T* base() { return begin_; }
-  YNN_ALWAYS_INLINE const T* base() const { return begin_; }
+  T* base() {
+    if (!data_) return nullptr;
+    return at_flat_index(begin_);
+  }
+  const T* base() const {
+    if (!data_) return nullptr;
+    return at_flat_index(begin_);
+  }
 
   // Form a reference to an element at a particular index.
-  T& operator()(const index_type& indices) {
-    return *(begin_ + flat_offset(indices));
+  decltype(auto) operator()(const index_type& indices) {
+    assert(data_);
+    return type_info<T>::ref(data_->data(), begin_ + flat_offset(indices));
   }
-  const T& operator()(const index_type& indices) const {
-    return *(begin_ + flat_offset(indices));
+  auto operator()(const index_type& indices) const {
+    assert(data_);
+    return type_info<T>::get(data_->data(), begin_ + flat_offset(indices));
   }
 
   template <typename... Args>
-  T& operator()(Args... args) {
+  decltype(auto) operator()(Args... args) {
+    assert(data_);
     assert(sizeof...(args) >= rank());
-    return *(begin_ + flat_offset_variadic(sizeof...(args) - rank(), args...));
+    return type_info<T>::ref(
+        data_->data(),
+        begin_ + flat_offset_variadic(sizeof...(args) - rank(), args...));
   }
   template <typename... Args>
-  const T& operator()(Args... args) const {
+  auto operator()(Args... args) const {
+    assert(data_);
     assert(sizeof...(args) >= rank());
-    return *(begin_ + flat_offset_variadic(sizeof...(args) - rank(), args...));
+    return type_info<T>::get(
+        data_->data(),
+        begin_ + flat_offset_variadic(sizeof...(args) - rank(), args...));
   }
 
   // The following functions produce iterators or accessors to the "flat" array
   // in memory, and can only be used if `is_contiguous()` is true.
   T* data() {
+    if (!data_) return nullptr;
     assert(is_contiguous());
-    return begin_;
+    return at_flat_index(begin_);
   }
   const T* data() const {
+    if (!data_) return nullptr;
     assert(is_contiguous());
-    return begin_;
+    return at_flat_index(begin_);
   }
   size_t size() const {
     assert(is_contiguous());
     return end_ - begin_;
   }
-  size_t size_bytes() const { return size() * sizeof(T); }
+  size_t size_bytes() const {
+    return ceil_div(size(), type_info<T>::element_count()) * sizeof(T);
+  }
   T* begin() { return data(); }
-  T* end() { return end_; }
-  const T* begin() const { return data(); }
-  const T* end() const { return end_; }
+  T* end() {
+    if (!data_) return nullptr;
+    assert(is_contiguous());
+    return at_flat_index(end_);
+  }
+  const T* begin() const { return cbegin(); }
+  const T* end() const { return cend(); }
   const T* cbegin() const { return data(); }
-  const T* cend() const { return end_; }
-  T& operator[](size_t index) { return data()[index]; }
-  const T& operator[](size_t index) const { return data()[index]; }
+  const T* cend() const {
+    if (!data_) return nullptr;
+    assert(is_contiguous());
+    return at_flat_index(end_);
+  }
+  decltype(auto) operator[](size_t index) {
+    assert(data_);
+    assert(is_contiguous());
+    return type_info<T>::ref(data_->data(), begin_ + index);
+  }
+  auto operator[](size_t index) const {
+    assert(data_);
+    assert(is_contiguous());
+    return type_info<T>::get(data_->data(), begin_ + index);
+  }
 
   // The following manipulators only affect the strides or extents of the
   // Tensor, they do not affect the memory addressed by the Tensor. To realize
@@ -427,7 +470,7 @@ class Tensor {
       assert(other.stride(i) == 0 || other.extent(i) == extent(i));
     }
     copy_impl(rank(), extents().data(), other.strides().data(), other.base(),
-              strides().data(), base());
+              0, strides().data(), data_->data(), begin_);
   }
 
   // Make a copy of the buffer. The result will be contiguous, i.e. the strides
@@ -442,12 +485,14 @@ class Tensor {
   // std::generate).
   template <typename G>
   void generate(const G& g) {
-    generate_impl(rank(), extents_.data(), strides_.data(), base(), g);
+    generate_impl(rank(), extents_.data(), strides_.data(), data_->data(),
+                  begin_, g);
   }
 
   // Fill each element of this tensor with the given value (compare to
   // std::fill).
-  void fill(T value) {
+  template <typename U>
+  void fill(U value) {
     generate([=]() { return value; });
   }
 
@@ -455,45 +500,49 @@ class Tensor {
   template <typename From>
   static void copy_impl(size_t rank, const size_t* extents,
                         const size_t* src_strides, const From* src,
-                        const size_t* dst_strides, T* dst) {
+                        size_t src_offset, const size_t* dst_strides, T* dst,
+                        size_t dst_offset) {
     if (rank == 0) {
-      *dst = *src;
-      return;
+      copy_n(src, src_offset, 1, dst, dst_offset);
     } else {
       --rank;
       size_t extent = *extents++;
       size_t src_stride = *src_strides++;
       size_t dst_stride = *dst_strides++;
       if (rank == 0 && src_stride == 1 && dst_stride == 1) {
-        std::copy_n(src, extent, dst);
+        copy_n(src, src_offset, extent, dst, dst_offset);
       } else if (rank == 0 && src_stride == 0 && dst_stride == 1) {
-        std::fill_n(dst, extent, *src);
+        assert(dst_offset % type_info<T>::element_count() == 0);
+        assert(extent % type_info<T>::element_count() == 0);
+        dst += dst_offset / type_info<T>::element_count();
+        extent /= type_info<T>::element_count();
+        std::fill_n(dst, extent, type_info<From>::get(src, src_offset));
       } else {
         for (size_t i = 0; i < extent; ++i) {
-          copy_impl(rank, extents, src_strides, src, dst_strides, dst);
-          src += src_stride;
-          dst += dst_stride;
+          copy_impl(rank, extents, src_strides, src, src_offset, dst_strides,
+                    dst, dst_offset);
+          src_offset += src_stride;
+          dst_offset += dst_stride;
         }
       }
     }
   }
 
   template <typename G>
-  static void generate_impl(size_t rank, const size_t* extents,
-                            const size_t* strides, T* dst, const G& g) {
+  void generate_impl(size_t rank, const size_t* extents, const size_t* strides,
+                     T* dst, size_t offset, const G& g) {
     if (rank == 0) {
-      *dst = g();
-      return;
+      generate_n(dst, offset, 1, g);
     } else {
       --rank;
       size_t extent = *extents++;
       size_t stride = *strides++;
       if (rank == 0 && stride == 1) {
-        std::generate_n(dst, extent, g);
+        generate_n(dst, offset, extent, g);
       } else {
         for (size_t i = 0; i < extent; ++i) {
-          generate_impl(rank, extents, strides, dst, g);
-          dst += stride;
+          generate_impl(rank, extents, strides, dst, offset, g);
+          offset += stride;
         }
       }
     }
@@ -558,11 +607,22 @@ class Tensor {
     return *strides * idx0 + flat_offset_no_broadcast(strides + 1, idxs...);
   }
 
+  T* at_flat_index(size_t index) {
+    assert(data_ != nullptr);
+    assert(index % type_info<T>::element_count() == 0);
+    return data_->data() + (index / type_info<T>::element_count());
+  }
+  const T* at_flat_index(size_t index) const {
+    assert(data_ != nullptr);
+    assert(index % type_info<T>::element_count() == 0);
+    return data_->data() + (index / type_info<T>::element_count());
+  }
+
   index_type extents_;
   index_type strides_;
   std::shared_ptr<Buffer<T>> data_;
-  T* begin_ = nullptr;
-  T* end_ = nullptr;
+  size_t begin_ = 0;
+  size_t end_ = 0;
 };
 
 template <typename T>

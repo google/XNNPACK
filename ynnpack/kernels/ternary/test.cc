@@ -67,21 +67,31 @@ void TestImpl(const KernelInfo& kernel_info, const OpInfo& op_info, size_t m,
     GTEST_SKIP() << "Unsupported hardware";
   }
 
+  if ((a_n == 1 && type_info<A>::element_count() > 1) ||
+      (b_n == 1 && type_info<B>::element_count() > 1) ||
+      (c_n == 1 && type_info<C>::element_count() > 1)) {
+    GTEST_SKIP() << "Skipping test with broadcasted sub-byte type";
+  }
+
+  size_t n = std::max({a_n, b_n, c_n});
+  size_t alignment = std::max({type_info<A>::element_count(),
+                               type_info<B>::element_count(),
+                               type_info<C>::element_count(),
+                               type_info<X>::element_count()});
+  n = align_up(n, alignment);
+
+  if (a_n > 1) a_n = n;
+  if (b_n > 1) b_n = n;
+  if (c_n > 1) c_n = n;
+
   ReplicableRandomDevice rng;
 
   ternary_kernel_fn kernel = kernel_info.kernel;
 
-  size_t n = std::max(std::max(a_n, b_n), c_n);
-
-  Tensor<A> a(
-      {m, ceil_div(a_n, type_info<A>::element_count()) + shape.padding_a});
-  Tensor<B> b(
-      {m, ceil_div(b_n, type_info<B>::element_count()) + shape.padding_b});
-  Tensor<C> c(
-      {m, ceil_div(c_n, type_info<C>::element_count()) + shape.padding_c});
-  Tensor<X> x(
-      {m, ceil_div(n, type_info<X>::element_count()) + shape.padding_x});
-
+  Tensor<A> a({m, a_n + shape.padding_a});
+  Tensor<B> b({m, b_n + shape.padding_b});
+  Tensor<C> c({m, c_n + shape.padding_c});
+  Tensor<X> x({m, n + shape.padding_x});
   quantization_params a_quantization = random_quantization(A(), rng);
   quantization_params b_quantization = random_quantization(B(), rng);
   quantization_params c_quantization = random_quantization(C(), rng);

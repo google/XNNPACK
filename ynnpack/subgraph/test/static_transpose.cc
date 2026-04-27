@@ -103,11 +103,11 @@ void TestImpl(T, size_t rank) {
           std::accumulate(input_shape.begin(), input_shape.end(),
                           static_cast<size_t>(1), std::multiplies<size_t>());
 
-      Buffer<T> input(flat_size / elem_count);
+      Buffer<T> input(flat_size);
       std::vector<size_t> input_strides = compute_strides(input_shape);
       for (const auto& i : EnumerateIndices(input_shape)) {
         size_t flat_index = dot(i, input_strides);
-        T_info::set(input.data(), flat_index, dot(i, basis));
+        input[flat_index] = dot(i, basis);
       }
 
       // Check reshaped shape is correct
@@ -117,7 +117,7 @@ void TestImpl(T, size_t rank) {
       ASSERT_EQ(runtime.GetExternalTensorShape(1), output_shape);
 
       // Run subgraph
-      Buffer<T> output(flat_size / elem_count);
+      Buffer<T> output(flat_size);
       runtime.SetupExternalTensor(output.data(), 1).InvokeRuntime();
 
       // Verify results.
@@ -128,8 +128,7 @@ void TestImpl(T, size_t rank) {
         T expected;
         T_info::set(&expected, 0, dot(i, basis));
         size_t flat_index = dot(permute(perm, i), output_strides);
-        ASSERT_EQ(T_info::get(&expected, 0),
-                  T_info::get(output.data(), flat_index));
+        ASSERT_EQ(output[flat_index], T_info::get(&expected, 0));
       }
     }
   } while (std::next_permutation(perm.begin(), perm.end()));

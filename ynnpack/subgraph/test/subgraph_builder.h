@@ -69,12 +69,7 @@ class SubgraphBuilder {
   template <typename T>
   SubgraphBuilder& AddTensor(const Tensor<T>& tensor, uint32_t id,
                              uint32_t flags = 0) {
-    std::vector<size_t> extents(tensor.extents());
-    if (!extents.empty()) {
-      // Convert physical shape of tensor to logical shape for YNNPACK API.
-      extents.back() *= type_element_count(type_of<T>());
-    }
-    return AddTensor(type_of<T>(), extents, id, tensor.data(), flags);
+    return AddTensor(type_of<T>(), tensor.extents(), id, tensor.data(), flags);
   }
 
   template <typename T>

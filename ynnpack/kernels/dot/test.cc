@@ -52,7 +52,7 @@ void Reference(Tensor<AT> a, Tensor<BT> b, Tensor<CT> c) {
   const size_t K2 = a.extent(2);
   const size_t K1 = a.extent(3);
   ASSERT_EQ(c.extent(0), a.extent(0));
-  ASSERT_EQ(c.extent(1), b.extent(3) * B_info::element_count());
+  ASSERT_EQ(c.extent(1), b.extent(3));
   ASSERT_EQ(K3, b.extent(0));
   ASSERT_EQ(K2, b.extent(1));
   ASSERT_EQ(K1, b.extent(2));
@@ -62,7 +62,7 @@ void Reference(Tensor<AT> a, Tensor<BT> b, Tensor<CT> c) {
       for (size_t k2 = 0; k2 < K2; ++k2) {
         for (size_t k1 = 0; k1 < K1; ++k1) {
           const CT a_ik = static_cast<CT>(a(i, k3, k2, k1));
-          const BT* b_k1 = &b(k3, k2, k1, 0);
+          const BT* b_k1 = address_of(b(k3, k2, k1, 0));
           for (size_t j = 0; j < c.extent(1); ++j) {
             c_i[j] = c_i[j] + a_ik * static_cast<CT>(B_info::get(b_k1, j));
           }
@@ -86,8 +86,6 @@ struct KernelInfo {
 template <typename AT, typename BT, typename CT>
 void TestMatMul(AT, BT, CT, const DotShape& shape, const KernelInfo& kernel,
                 bool init_zero = false) {
-  using B_info = type_info<BT>;
-
   ReplicableRandomDevice rng;
 
   const size_t tile_m = kernel.tile_m;
@@ -102,7 +100,7 @@ void TestMatMul(AT, BT, CT, const DotShape& shape, const KernelInfo& kernel,
   const float max_abs_value = 10.0f;
 
   Tensor<AT> a({m, k});
-  Tensor<BT> b({k, n / B_info::element_count()},
+  Tensor<BT> b({k, n},
                Alignment{.bytes = (unpacked_b ? 1 : tile_n) * sizeof(BT)});
   Tensor<CT> c({m, n});
   Tensor<CT> expected;
@@ -185,8 +183,7 @@ void TestConv2D(AT, BT, CT, const KernelInfo& kernel) {
     Tensor<AT> a({kh, w + kw - 1, ci});
     // dot kernels assume that the rows of b are aligned to a multiple of
     // block_n.
-    Tensor<BT> b({kh, kw, ci, co / B_info::element_count()},
-                 Alignment{.bytes = tile_n * sizeof(BT)});
+    Tensor<BT> b({kh, kw, ci, co}, Alignment{.bytes = tile_n * sizeof(BT)});
     Tensor<CT> c({w, co});
 
     fill_random(a.data(), a.size(), rng, -max_abs_value, max_abs_value);
@@ -220,9 +217,6 @@ void TestConv2D(AT, BT, CT, const KernelInfo& kernel) {
     // dot kernels require B's k and n dimensions to be aligned to tile_k,
     // tile_n. The kernel might also require b to be packed (tile_k > 1).
     Tensor<BT> packed_b = pack_b(b, tile_k, tile_n);
-
-    b = b.crop_padding({0, 0, 0, 0},
-                       {0, 0, 0, b.extent(3) - co / B_info::element_count()});
 
     kernel.kernel(
         w, co, kh, kw, ci, packed_a.stride_bytes(0) / (pack_a ? tile_k : 1),

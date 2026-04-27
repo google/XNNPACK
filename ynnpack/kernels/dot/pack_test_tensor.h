@@ -31,7 +31,7 @@ Tensor<T> pack_b(Tensor<T> b, size_t tile_k, size_t tile_n) {
 
   // Get n, k dimensions from b, and remove them from the extents.
   std::vector<size_t> extents = b.extents();
-  size_t n = extents.back() * elem_count;
+  size_t n = extents.back();
   extents.pop_back();
   size_t k = extents.back();
   extents.pop_back();
@@ -44,7 +44,7 @@ Tensor<T> pack_b(Tensor<T> b, size_t tile_k, size_t tile_n) {
   // blocks_n is always 1 (and thus `block_n = n`) in these tests.
   extents.push_back(ceil_div(k, tile_k));
   extents.push_back(align_up(n, tile_n));
-  extents.push_back(tile_k / elem_count);
+  extents.push_back(tile_k);
 
   // Make the result.
   Tensor<T> result(extents, Alignment({.bytes = tile_k * tile_n * sizeof(T)}));
@@ -66,7 +66,7 @@ Tensor<T> transpose_a(Tensor<T> a, size_t tile_m, size_t tile_k) {
 
   // Get n, k dimensions from a, and remove them from the extents.
   std::vector<size_t> extents = a.extents();
-  size_t k = extents.back() * elem_count;
+  size_t k = extents.back();
   extents.pop_back();
   size_t m = extents.back();
   extents.pop_back();

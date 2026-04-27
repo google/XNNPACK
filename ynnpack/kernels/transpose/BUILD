@@ -56,6 +56,7 @@ cc_test(
     deps = [
         ":transpose",
         "//ynnpack/base",
+        "//ynnpack/base/test:buffer",
         "//ynnpack/base/test:tensor",
         "//ynnpack/base/test:util",
     ] + ynn_test_deps(),
@@ -73,6 +74,7 @@ cc_test(
     deps = [
         ":transpose",
         "//ynnpack/base",
+        "//ynnpack/base/test:buffer",
         "//ynnpack/base/test:tensor",
     ] + ynn_benchmark_deps(),
 )

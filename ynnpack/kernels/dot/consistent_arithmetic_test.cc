@@ -77,8 +77,6 @@ size_t get_max_alignment() {
 
 template <typename AT, typename BT, typename CT>
 void TestMatMul(AT, BT, CT, size_t k) {
-  using B_info = type_info<BT>;
-
   ReplicableRandomDevice rng;
   // We want a large range, but not so large that our outputs are likely to be
   // Inf/NaN.
@@ -95,8 +93,7 @@ void TestMatMul(AT, BT, CT, size_t k) {
   const size_t n = 4096;
 
   Tensor<AT> a({m, k});
-  Tensor<BT> b({k, n / B_info::element_count()},
-               Alignment({.bytes = get_max_alignment()}));
+  Tensor<BT> b({k, n}, Alignment{.bytes = get_max_alignment()});
   Tensor<CT> init_c({m, n});
   fill_random(a.data(), a.size(), rng, -max_abs_value, max_abs_value);
   fill_random(b.data(), b.size(), rng, -max_abs_value, max_abs_value);

@@ -10,6 +10,7 @@
 
 #include "ynnpack/base/arch.h"  // IWYU pragma: keep
 #include "ynnpack/base/arithmetic.h"
+#include "ynnpack/base/test/buffer.h"
 #include "ynnpack/base/test/tensor.h"
 #include "ynnpack/base/type.h"
 #include "ynnpack/kernels/transpose/interleave.h"
@@ -30,8 +31,8 @@ void bench_impl(benchmark::State& state, uint64_t arch_flags,
   const size_t m = state.range(0);
   const size_t n = state.range(1);
 
-  Tensor<T> a({n, m / element_count});
-  Tensor<T> x({m, n / element_count});
+  Tensor<T> a({n, m});
+  Tensor<T> x({m, n});
   memset(a.data(), 0, a.size_bytes());
 
   const size_t a_stride = a.stride_bytes(0);
@@ -58,19 +59,18 @@ void bench_impl(benchmark::State& state, uint64_t arch_flags,
     return;
   }
 
-  constexpr size_t element_count = type_info<T>::element_count();
   const size_t factor = state.range(0);
   const size_t m = state.range(1);
   const size_t n = state.range(2);
 
-  Tensor<T> a({m, n / element_count});
-  Tensor<T> x({factor * n / element_count});
+  Tensor<T> a({m, n});
+  Buffer<T> x(factor * n);
   memset(a.data(), 0, a.size_bytes());
 
   const size_t a_stride = a.stride_bytes(0);
 
   while (state.KeepRunningBatch(m * n)) {
-    kernel(factor, m, n, a_stride, a.base(), x.base());
+    kernel(factor, m, n, a_stride, a.base(), x.data());
   }
 }
 

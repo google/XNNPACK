@@ -98,21 +98,6 @@ struct dequantize {
   }
 };
 
-template <typename T>
-decltype(auto) get_element(const Tensor<T>& t, const std::vector<size_t>& i) {
-  if constexpr (type_info<T>::element_count() == 1) {
-    return t(i);
-  } else {
-    std::vector<size_t> physical_i = i;
-    size_t logical_innermost = i.back();
-    if (t.extent(t.rank() - 1) == 1) {
-      logical_innermost = 0;
-    }
-    physical_i.back() = logical_innermost / type_info<T>::element_count();
-    return type_info<T>::get(&t(physical_i),
-                             logical_innermost % type_info<T>::element_count());
-  }
-}
 
 // Check that `op(a, b, c)` == x, within tolerances described by `op`.
 template <typename A, typename B, typename C, typename X, typename OpInfo>
@@ -121,9 +106,9 @@ void check_results(const OpInfo& op, const Tensor<A>& a, const Tensor<B>& b,
                    const quantization_params&, const quantization_params&,
                    const quantization_params&, const quantization_params&) {
   for (const auto& i : EnumerateIndices(x.extents())) {
-    auto a_i = get_element(a, i);
-    auto b_i = get_element(b, i);
-    auto c_i = get_element(c, i);
+    auto a_i = a(i);
+    auto b_i = b(i);
+    auto c_i = c(i);
     if (is_integral<X>::value) {
       const int32_t expected = op(a_i, b_i, c_i);
       const int32_t tolerance =
