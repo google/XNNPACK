@@ -5,7 +5,6 @@
 
 #include "ynnpack/base/simd/x86_sse41.h"
 
-#include <cstddef>
 #include <cstdint>
 
 #include "ynnpack/kernels/iota/generic.h"
@@ -13,6 +12,6 @@
 
 namespace ynn {
 
-YNN_DEFINE_IOTA_KERNEL(arch_flag::sse41, ynn_iota_int32_sse41, int32_t);
+YNN_DEFINE_IOTA_KERNEL(arch_flag::sse41, iota_int32_sse41, int32_t);
 
 }  // namespace ynn

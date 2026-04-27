@@ -7,10 +7,11 @@
 
 #include <cstddef>
 #include <cstdint>
-#include <type_traits>
 
 #include "ynnpack/base/arch.h"
 #include "ynnpack/base/log.h"
+#include "ynnpack/base/type.h"
+#include "ynnpack/include/ynnpack.h"
 #include "ynnpack/kernels/iota/generic.h"
 
 namespace ynn {
@@ -46,15 +47,13 @@ void iota_impl(size_t n, T begin, T stride, T* output) {
 
 }  // namespace
 
-void ynn_iota_int32(size_t n, const void* begin, const void* stride,
-                    void* output) {
+void iota_int32(size_t n, const void* begin, const void* stride, void* output) {
   iota_impl<int32_t>(n, *static_cast<const int32_t*>(begin),
                      *static_cast<const int32_t*>(stride),
                      static_cast<int32_t*>(output));
 }
 
-void ynn_iota_fp32(size_t n, const void* begin, const void* stride,
-                      void* output) {
+void iota_fp32(size_t n, const void* begin, const void* stride, void* output) {
   iota_impl<float>(n, *static_cast<const float*>(begin),
                    *static_cast<const float*>(stride),
                    static_cast<float*>(output));

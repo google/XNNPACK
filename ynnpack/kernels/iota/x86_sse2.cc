@@ -10,6 +10,6 @@
 
 namespace ynn {
 
-YNN_DEFINE_IOTA_KERNEL(arch_flag::sse2, ynn_iota_fp32_sse2, float);
+YNN_DEFINE_IOTA_KERNEL(arch_flag::sse2, iota_fp32_sse2, float);
 
 }  // namespace ynn

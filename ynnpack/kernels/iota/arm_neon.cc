@@ -13,9 +13,7 @@
 
 namespace ynn {
 
-using f32xN = simd::vec<float, consistent_tile_n>;
-
-YNN_DEFINE_IOTA_KERNEL(arch_flag::neon, ynn_iota_fp32_neon, float);
-YNN_DEFINE_IOTA_KERNEL(arch_flag::neon, ynn_iota_int32_neon, int32_t);
+YNN_DEFINE_IOTA_KERNEL(arch_flag::neon, iota_fp32_neon, float);
+YNN_DEFINE_IOTA_KERNEL(arch_flag::neon, iota_int32_neon, int32_t);
 
 }  // namespace ynn
