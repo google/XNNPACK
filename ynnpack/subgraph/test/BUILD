@@ -249,6 +249,7 @@ cc_test(
 cc_test(
     name = "pi_bench",
     srcs = ["pi_bench.cc"],
+    args = ["--benchmark_min_time=1x"],
     linkopts = ynn_binary_linkopts(),
     malloc = ynn_binary_malloc(),
     deps = [

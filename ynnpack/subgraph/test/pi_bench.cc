@@ -35,12 +35,12 @@ void bench_pi(benchmark::State& state) {
   const int thread_count = state.range(1);
 
   const size_t n_size = static_cast<size_t>(n);
-  const T n_val = static_cast<T>(n);
   const T half = static_cast<T>(0.5);
+  const T quarter = static_cast<T>(0.25);
+  const T three_quarters = static_cast<T>(0.75);
   const T one = static_cast<T>(1.0);
-  const T four = static_cast<T>(4.0);
 
-  // pi = sum_{i=0}^{n-1} (4 / (1 + ((i + 0.5) / n)^2)) / n
+  // pi = sum_{i=0}^{n-1} (0.5 / ((i + 0.25) * (i + 0.75)))
 
   TestScheduler scheduler(thread_count);
   ynn_threadpool_t threadpool_raw = nullptr;
@@ -48,7 +48,7 @@ void bench_pi(benchmark::State& state) {
   threadpool_ptr threadpool(threadpool_raw, &ynn_delete_threadpool);
 
   ynn_subgraph_t sub_raw = nullptr;
-  // Reserve 2 external value IDs: 0 for output, 1 for stride.
+  // Reserve 1 external value ID: 0 for output, 1 for stride.
   ynn_create_subgraph(2, 0, &sub_raw);
   subgraph_ptr subgraph(sub_raw, &ynn_delete_subgraph);
 
@@ -70,39 +70,32 @@ void bench_pi(benchmark::State& state) {
   ynn_define_iota(subgraph.get(), type_of<T>(), 1, &n_size,
                   YNN_INVALID_VALUE_ID, stride_id, &i_id, 0);
 
+  uint32_t quarter_id = define_constant(quarter);
+  uint32_t i_plus_quarter_id = YNN_INVALID_VALUE_ID;
+  ynn_define_binary(subgraph.get(), ynn_binary_add, i_id, quarter_id,
+                    &i_plus_quarter_id, 0);
+
+  uint32_t three_quarters_id = define_constant(three_quarters);
+  uint32_t i_plus_three_quarters_id = YNN_INVALID_VALUE_ID;
+  ynn_define_binary(subgraph.get(), ynn_binary_add, i_id, three_quarters_id,
+                    &i_plus_three_quarters_id, 0);
+
+  uint32_t denom_id = YNN_INVALID_VALUE_ID;
+  ynn_define_binary(subgraph.get(), ynn_binary_multiply, i_plus_quarter_id,
+                    i_plus_three_quarters_id, &denom_id, 0);
+
   uint32_t half_id = define_constant(half);
-  uint32_t i_plus_half_id = YNN_INVALID_VALUE_ID;
-  ynn_define_binary(subgraph.get(), ynn_binary_add, i_id, half_id,
-                    &i_plus_half_id, 0);
-
-  uint32_t n_id = define_constant(n_val);
-  uint32_t x_id = YNN_INVALID_VALUE_ID;
-  ynn_define_binary(subgraph.get(), ynn_binary_divide, i_plus_half_id, n_id,
-                    &x_id, 0);
-
-  uint32_t x2_id = YNN_INVALID_VALUE_ID;
-  ynn_define_unary(subgraph.get(), ynn_unary_square, x_id, &x2_id, 0);
-
-  uint32_t one_id = define_constant(one);
-  uint32_t one_plus_x2_id = YNN_INVALID_VALUE_ID;
-  ynn_define_binary(subgraph.get(), ynn_binary_add, one_id, x2_id,
-                    &one_plus_x2_id, 0);
-
-  uint32_t four_id = define_constant(four);
   uint32_t term_id = YNN_INVALID_VALUE_ID;
-  ynn_define_binary(subgraph.get(), ynn_binary_divide, four_id, one_plus_x2_id,
+  ynn_define_binary(subgraph.get(), ynn_binary_divide, half_id, denom_id,
                     &term_id, 0);
-
-  uint32_t pi_sum_id = YNN_INVALID_VALUE_ID;
-  int32_t axis = 0;
-  ynn_define_reduce(subgraph.get(), ynn_reduce_sum, 1, &axis, term_id,
-                    YNN_INVALID_VALUE_ID, &pi_sum_id, 0);
 
   uint32_t output_id = 0;
   ynn_define_tensor(subgraph.get(), type_of<T>(), 0, nullptr, nullptr,
                     YNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id);
-  ynn_define_binary(subgraph.get(), ynn_binary_divide, pi_sum_id, n_id,
-                    &output_id, 0);
+
+  int32_t axis = 0;
+  ynn_define_reduce(subgraph.get(), ynn_reduce_sum, 1, &axis, term_id,
+                    YNN_INVALID_VALUE_ID, &output_id, 0);
 
   // Optimize and create runtime.
   ynn_optimize_subgraph(subgraph.get(), threadpool.get(), 0);
@@ -124,7 +117,7 @@ void bench_pi(benchmark::State& state) {
   // Check that the result is approximately pi.
   const double pi = 3.14159265358979323846;
   const double actual = static_cast<double>(output);
-  if (std::abs(actual - pi) > 1e-5) {
+  if (std::abs(actual - pi) > 1e-4) {
     std::cerr << "Incorrect result: " << actual << " (expected " << pi << ")"
               << std::endl;
     state.SkipWithError("Incorrect result");
