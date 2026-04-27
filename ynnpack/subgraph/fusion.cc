@@ -1049,7 +1049,10 @@ bool rewrite_reduce_sum_of_squared(ynn_subgraph& subgraph, ynn_node& node,
 bool rewrite_reduce_sum_convert(ynn_subgraph& subgraph, ynn_node& node,
                                 subgraph_analysis& analysis) {
   const ynn_node::reduce* reduce_op = std::get_if<ynn_node::reduce>(&node.op);
-  if (reduce_op == nullptr || reduce_op->op != ynn_reduce_sum) {
+  if (!reduce_op) return false;
+
+  if (reduce_op->op != ynn_reduce_sum &&
+      reduce_op->op != ynn_reduce_sum_squared) {
     return false;
   }
 
@@ -1077,53 +1080,11 @@ bool rewrite_reduce_sum_convert(ynn_subgraph& subgraph, ynn_node& node,
     return false;
   }
 
-  YNN_LOG_DEBUG() << "Rewriting reduce_sum(convert(x)) to reduce_sum(x)";
-  ynn::define_reduce(subgraph, node, ynn_reduce_sum, reduce_op->k_dims, x.id,
+  YNN_LOG_DEBUG() << "Rewriting reduce(" << to_string(reduce_op->op)
+                  << ", convert(x)) to reduce(" << to_string(reduce_op->op)
+                  << ", x)";
+  ynn::define_reduce(subgraph, node, reduce_op->op, reduce_op->k_dims, x.id,
                      node.inputs[1], &node.outputs[0], reduce_op->keep_dims);
-  return true;
-}
-
-// Rewrites ynn_reduce_sum_squared of convert to ynn_reduce_sum_squared of
-// convert's input. Specifically:
-//   ynn_reduce_sum_squared(f32(x_fp16)) -> ynn_reduce_sum_squared(x_fp16)
-//   ynn_reduce_sum_squared(f32(x_bf16)) -> ynn_reduce_sum_squared(x_bf16)
-//   ynn_reduce_sum_squared(int32(x_int8)) -> ynn_reduce_sum_squared(x_int8)
-bool rewrite_reduce_sum_squared_convert(ynn_subgraph& subgraph, ynn_node& node,
-                                        subgraph_analysis& analysis) {
-  const ynn_node::reduce* reduce_op = std::get_if<ynn_node::reduce>(&node.op);
-  if (reduce_op == nullptr || reduce_op->op != ynn_reduce_sum_squared) {
-    return false;
-  }
-
-  ynn_node* convert = analysis.producer_of(node.inputs[0]);
-  if (!convert || !is_unary_node(*convert, ynn_unary_convert)) {
-    return false;
-  }
-
-  const ynn_value& x = subgraph.value(convert->inputs[0]);
-  const ynn_value& converted_x = subgraph.value(convert->outputs[0]);
-
-  if (converted_x.type == ynn_type_fp32) {
-    if (!ynn::type_is_floating_point(x.type)) {
-      return false;
-    }
-  } else if (converted_x.type == ynn_type_int32) {
-    if (!ynn::type_is_integral(x.type)) {
-      return false;
-    }
-    if (x.scale_id != YNN_INVALID_VALUE_ID ||
-        x.zero_point_id != YNN_INVALID_VALUE_ID) {
-      return false;
-    }
-  } else {
-    return false;
-  }
-
-  YNN_LOG_DEBUG() << "Rewriting reduce_sum_squared(convert(x)) to "
-                     "reduce_sum_squared(x)";
-  ynn::define_reduce(subgraph, node, ynn_reduce_sum_squared, reduce_op->k_dims,
-                     x.id, node.inputs[1], &node.outputs[0],
-                     reduce_op->keep_dims);
   return true;
 }
 
@@ -1413,6 +1374,24 @@ bool fold_unary_output(ynn_subgraph& subgraph, ynn_node& node,
   return true;
 }
 
+bool rewrite_binary(ynn_subgraph& subgraph, ynn_node& node,
+                    subgraph_analysis& analysis) {
+  if (is_binary_node(node, ynn_binary_multiply) &&
+      node.inputs[0] == node.inputs[1]) {
+    const ynn_value& input = subgraph.value(node.inputs[0]);
+    const ynn_value& output = subgraph.value(node.outputs[0]);
+    unary_kernel_fn kernel =
+        get_unary_kernel(ynn_unary_square, input.type, output.type);
+    if (!kernel) return false;
+
+    YNN_LOG_DEBUG() << "Rewriting multiply(x, x) to square(x)";
+    define_unary(subgraph, node, node.inputs[0], node.outputs[0],
+                 ynn_unary_square, kernel);
+    return true;
+  }
+  return false;
+}
+
 // Rewrite reshape to expand_dims or slice if possible.
 bool rewrite_reshape(ynn_subgraph& subgraph, ynn_node& node,
                      subgraph_analysis& analysis) {
@@ -1540,29 +1519,28 @@ ynn_status ynn_subgraph::fusion() {
     for (ynn_node& node : nodes) {
       if (!node.is_valid()) continue;
 
-      changed =
-          changed || ynn::fold_unary_input(*this, node, analysis) ||
-          ynn::fold_unary_output(*this, node, analysis) ||
-          ynn::rewrite_reduce_binary_identity(*this, node, analysis) ||
-          ynn::rewrite_expand_dims_reduce(*this, node, analysis) ||
-          ynn::rewrite_reshape(*this, node, analysis) ||
-          ynn::rewrite_divide_sqrt(*this, node, analysis) ||
-          ynn::rewrite_ternary(*this, node, analysis) ||
-          ynn::rewrite_binary_convert(*this, node, analysis) ||
-          ynn::rewrite_convert_elementwise(*this, node, analysis) ||
-          ynn::rewrite_negate_multiply(*this, node, analysis) ||
-          ynn::rewrite_dequantize_dot(*this, node, analysis) ||
-          ynn::rewrite_dequantize_dot_add(*this, node, analysis) ||
-          ynn::rewrite_get_tensor_shape_of_unary(*this, node, analysis) ||
-          ynn::move_broadcast_to_output(*this, node, analysis) ||
-          ynn::remove_broadcast(*this, node, analysis) ||
-          ynn::remove_static_broadcast_from_elementwise(*this, node,
-                                                        analysis) ||
-          ynn::rewrite_transpose_stencil_copy(*this, node, analysis) ||
-          ynn::rewrite_reduce_sum_of_squared(*this, node, analysis) ||
-          ynn::rewrite_reduce_sum_convert(*this, node, analysis) ||
-          ynn::rewrite_reduce_sum_squared_convert(*this, node, analysis) ||
-          ynn::rewrite_reduce_reduce(*this, node, analysis);
+      changed = changed || ynn::fold_unary_input(*this, node, analysis) ||
+                ynn::fold_unary_output(*this, node, analysis) ||
+                ynn::rewrite_binary(*this, node, analysis) ||
+                ynn::rewrite_reduce_binary_identity(*this, node, analysis) ||
+                ynn::rewrite_expand_dims_reduce(*this, node, analysis) ||
+                ynn::rewrite_reshape(*this, node, analysis) ||
+                ynn::rewrite_divide_sqrt(*this, node, analysis) ||
+                ynn::rewrite_ternary(*this, node, analysis) ||
+                ynn::rewrite_binary_convert(*this, node, analysis) ||
+                ynn::rewrite_convert_elementwise(*this, node, analysis) ||
+                ynn::rewrite_negate_multiply(*this, node, analysis) ||
+                ynn::rewrite_dequantize_dot(*this, node, analysis) ||
+                ynn::rewrite_dequantize_dot_add(*this, node, analysis) ||
+                ynn::rewrite_get_tensor_shape_of_unary(*this, node, analysis) ||
+                ynn::move_broadcast_to_output(*this, node, analysis) ||
+                ynn::remove_broadcast(*this, node, analysis) ||
+                ynn::remove_static_broadcast_from_elementwise(*this, node,
+                                                              analysis) ||
+                ynn::rewrite_transpose_stencil_copy(*this, node, analysis) ||
+                ynn::rewrite_reduce_sum_of_squared(*this, node, analysis) ||
+                ynn::rewrite_reduce_sum_convert(*this, node, analysis) ||
+                ynn::rewrite_reduce_reduce(*this, node, analysis);
     }
   } while (changed);
 
