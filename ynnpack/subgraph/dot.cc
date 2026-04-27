@@ -57,7 +57,15 @@ constexpr index_t consistent_block_n = 64;
 // on some buffers.
 auto make_dot_impl(dot_type type, bool consistent_arithmetic, bool transposed_a,
                    bool pack_b, size_t num_k_dims) {
-  return [type, consistent_arithmetic, transposed_a, pack_b, num_k_dims](
+  uint32_t kernel_flags = 0;
+  if (consistent_arithmetic) {
+    kernel_flags |= dot_flag::consistent_arithmetic;
+  }
+  if (!pack_b) {
+    kernel_flags |= dot_flag::unaligned_b;
+  }
+
+  return [type, kernel_flags, transposed_a, pack_b, num_k_dims](
              slinky::raw_buffer a, slinky::raw_buffer b,
              slinky::raw_buffer init_c, slinky::raw_buffer c) -> index_t {
     // If the dot has fewer than 3 reduction dimensions, we use this dummy
@@ -133,8 +141,8 @@ auto make_dot_impl(dot_type type, bool consistent_arithmetic, bool transposed_a,
       // values), then we don't care if the kernel is transposed or not.
       require_transpose_a = std::nullopt;
     }
-    dot_kernel kernel = get_dot_kernel(
-        type, shape, &packed_shape, consistent_arithmetic, require_transpose_a);
+    dot_kernel kernel = get_dot_kernel(type, shape, &packed_shape, kernel_flags,
+                                       require_transpose_a);
     assert(kernel.kernel);
     assert(tile_k == kernel.tile_k);
     const index_t block_m = kernel.block_m;
@@ -862,8 +870,9 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
   const bool consistent_arithmetic =
       (!type_is_integral(a.type) || !type_is_integral(b.type)) &&
       (subgraph.flags & YNN_FLAG_CONSISTENT_ARITHMETIC) != 0;
-  dot_kernel kernel =
-      get_dot_kernel(type, shape, packed_shape, consistent_arithmetic);
+  uint32_t kernel_flags =
+      consistent_arithmetic ? dot_flag::consistent_arithmetic : 0;
+  dot_kernel kernel = get_dot_kernel(type, shape, packed_shape, kernel_flags);
   dot_kernel unpacked_kernel;
   if (b_transposed) {
     // If b is transposed, we might as well use the packing to do it.
@@ -876,8 +885,8 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
   } else {
     unpacked_kernel = kernel;
     if (kernel.tile_k != 1) {
-      unpacked_kernel =
-          get_dot_kernel(type, shape, &no_tile_k, consistent_arithmetic);
+      unpacked_kernel = get_dot_kernel(type, shape, &no_tile_k,
+                                       kernel_flags | dot_flag::unaligned_b);
     }
   }
 
