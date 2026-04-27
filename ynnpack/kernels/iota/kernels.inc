@@ -8,10 +8,8 @@ YNN_IOTA_KERNEL(arch_flag::avx512, iota_fp32_avx512, float)
 YNN_IOTA_KERNEL(arch_flag::avx512, iota_int32_avx512, int32_t)
 #endif
 #ifdef YNN_ARCH_X86_AVX2
+YNN_IOTA_KERNEL(arch_flag::avx2, iota_fp32_avx2, float)
 YNN_IOTA_KERNEL(arch_flag::avx2, iota_int32_avx2, int32_t)
-#endif
-#ifdef YNN_ARCH_X86_AVX
-YNN_IOTA_KERNEL(arch_flag::avx, iota_fp32_avx, float)
 #endif
 #ifdef YNN_ARCH_X86_SSE41
 YNN_IOTA_KERNEL(arch_flag::sse41, iota_int32_sse41, int32_t)

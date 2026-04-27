@@ -5,6 +5,8 @@
 
 #include "ynnpack/kernels/iota/iota.h"
 
+#include <algorithm>
+#include <cassert>
 #include <cstddef>
 #include <cstdint>
 
@@ -12,48 +14,38 @@
 #include "ynnpack/base/log.h"
 #include "ynnpack/base/type.h"
 #include "ynnpack/include/ynnpack.h"
-#include "ynnpack/kernels/iota/generic.h"
 
 namespace ynn {
 
 namespace {
 
 template <typename T>
-void iota_impl(size_t n, T begin, T stride, T* output) {
-  if (begin == 0 && stride == 0) {
-    memset(output, 0, n * sizeof(T));
-  } else if (stride == 0) {
-    std::fill_n(output, n, begin);
+void iota_impl(size_t n, T offset, T stride, T* output) {
+  if (stride == 0) {
+    if (offset == 0) {
+      memset(output, 0, n * sizeof(T));
+    } else {
+      std::fill_n(output, n, offset);
+    }
   } else {
-    // Factor the loop into tiles of `consistent_tile_n`, to be consistent with
-    // other floating point implementations of this kernel.
-    T tile[consistent_tile_n];
-    for (size_t i = 0; i < consistent_tile_n; ++i) {
-      tile[i] = begin + stride * i;
-    }
-    while (n >= consistent_tile_n) {
-      memcpy(output, tile, consistent_tile_n * sizeof(T));
-      for (size_t i = 0; i < consistent_tile_n; ++i) {
-        tile[i] += stride * consistent_tile_n;
-      }
-      output += consistent_tile_n;
-      n -= consistent_tile_n;
-    }
-    for (size_t i = 0; i < n; ++i) {
-      output[i] = tile[i];
+    assert(static_cast<size_t>(static_cast<int>(n)) == n);
+    for (int i = 0; i < static_cast<int>(n); ++i) {
+      output[i] = i * stride + offset;
     }
   }
 }
 
 }  // namespace
 
-void iota_int32(size_t n, const void* begin, const void* stride, void* output) {
+void iota_int32(size_t n, const void* begin, const void* stride,
+                    void* output) {
   iota_impl<int32_t>(n, *static_cast<const int32_t*>(begin),
                      *static_cast<const int32_t*>(stride),
                      static_cast<int32_t*>(output));
 }
 
-void iota_fp32(size_t n, const void* begin, const void* stride, void* output) {
+void iota_fp32(size_t n, const void* begin, const void* stride,
+                      void* output) {
   iota_impl<float>(n, *static_cast<const float*>(begin),
                    *static_cast<const float*>(stride),
                    static_cast<float*>(output));

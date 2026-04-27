@@ -13,7 +13,7 @@
 
 namespace ynn {
 
-YNN_DEFINE_IOTA_KERNEL(arch_flag::neon, iota_fp32_neon, float);
-YNN_DEFINE_IOTA_KERNEL(arch_flag::neon, iota_int32_neon, int32_t);
+YNN_DEFINE_IOTA_KERNEL(arch_flag::neon, iota_fp32_neon, float, 16);
+YNN_DEFINE_IOTA_KERNEL(arch_flag::neon, iota_int32_neon, int32_t, 16);
 
 }  // namespace ynn

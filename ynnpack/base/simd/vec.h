@@ -151,18 +151,18 @@ template <int Index, typename T, size_t N, typename SliceN>
 auto extract(vec<T, N>, SliceN);
 
 template <typename To, typename From, size_t N>
-vec<To, N> cast(vec<From, N> from, To);
+vec<To, N> cast(vec<From, N> from, To = {});
 
 template <typename To, typename From, size_t N>
-vec<To, N> saturate_cast(vec<From, N> from, To);
+vec<To, N> saturate_cast(vec<From, N> from, To = {});
 
 template <typename T, size_t N>
-YNN_ALWAYS_INLINE vec<T, N> saturate_cast(vec<T, N> from, T) {
+YNN_ALWAYS_INLINE vec<T, N> saturate_cast(vec<T, N> from, T = {}) {
   return from;
 }
 
 template <typename To, typename From, size_t N>
-vec<To, N> round_float_to_int(vec<From, N> from, To);
+vec<To, N> round_float_to_int(vec<From, N> from, To = {});
 
 namespace internal {
 
