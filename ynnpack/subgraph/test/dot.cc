@@ -281,7 +281,7 @@ void TestStaticB(A, B, C) {
         num_k_elements *= b_shape[i];
       }
       for (const auto& i : EnumerateIndices(c_shape)) {
-        if (std::is_integral<C>::value) {
+        if (is_integral<C>::value) {
           ASSERT_EQ(c(i), expected(i))
               << "i=" << index_to_string(i) << " num_k_dims=" << num_k_dims
               << " a_shape=" << index_to_string(a_shape)
@@ -489,7 +489,7 @@ void TestDynamicB(A, B, C) {
         num_k_elements *= shapes.dot_dims[i + 1];
       }
       for (const auto& i : EnumerateIndices(shapes.c)) {
-        if (std::is_integral<C>::value) {
+        if (is_integral<C>::value) {
           ASSERT_EQ(c(i), expected(i))
               << "i=" << index_to_string(i) << " num_k_dims=" << num_k_dims
               << " shapes.a=" << index_to_string(shapes.a)
@@ -649,7 +649,7 @@ void TestStaticShapeDynamicB(A, B, C) {
         num_k_elements *= shapes.dot_dims[i + 1];
       }
       for (const auto& i : EnumerateIndices(shapes.c)) {
-        if (std::is_integral<C>::value) {
+        if (is_integral<C>::value) {
           ASSERT_EQ(c(i), expected(i))
               << "i=" << index_to_string(i) << " num_k_dims=" << num_k_dims
               << " shapes.a=" << index_to_string(shapes.a)

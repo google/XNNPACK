@@ -262,7 +262,7 @@ struct sum_op {
   T operator()(T a, T b) { return a + b; }
 
   static constexpr auto identity = type_info<T>::sum_identity();
-  static constexpr bool is_associative = std::is_integral<T>::value;
+  static constexpr bool is_associative = is_integral<T>::value;
 };
 
 template <typename T, typename A>

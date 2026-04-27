@@ -77,8 +77,8 @@ void dot(benchmark::State& state, uint64_t arch_flags, dot_kernel_fn kernel,
   Tensor<TB> b({k, align_up(n, tile_n) / b_elem_count},
                Alignment{.bytes = tile_n * tile_k * sizeof(TB)});
   Tensor<TC> c({m, n});
-  fill(a.data(), a.size() * a_elem_count, 1);
-  fill(b.data(), b.size() * b_elem_count, 1);
+  a.fill(1);
+  b.fill(1);
   c.fill(0);
   b = b.crop_padding({0, 0}, {b.extent(0) - k, b.extent(1) - n});
 

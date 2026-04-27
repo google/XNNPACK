@@ -32,7 +32,7 @@ void bench_impl(benchmark::State& state, uint64_t arch_flags,
 
   Tensor<T> a({n, m / element_count});
   Tensor<T> x({m, n / element_count});
-  memset(a.data(), 0, a.size() * sizeof(T));
+  memset(a.data(), 0, a.size_bytes());
 
   const size_t a_stride = a.stride_bytes(0);
   const size_t n_bytes_a = m * sizeof(T) / element_count;

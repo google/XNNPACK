@@ -124,7 +124,7 @@ void check_results(const OpInfo& op, const Tensor<A>& a, const Tensor<B>& b,
     auto a_i = get_element(a, i);
     auto b_i = get_element(b, i);
     auto c_i = get_element(c, i);
-    if (std::is_integral<X>::value) {
+    if (is_integral<X>::value) {
       const int32_t expected = op(a_i, b_i, c_i);
       const int32_t tolerance =
           std::nearbyint(op.tolerance(a_i, b_i, c_i, type_of<X>()));

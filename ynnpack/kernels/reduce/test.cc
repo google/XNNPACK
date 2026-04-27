@@ -163,7 +163,7 @@ void TestUnaryReduce(Tensor<AT> a, Tensor<CT> c,
   Reference(a, expected, op);
   ASSERT_EQ(c.rank(), 2);
   for (size_t i = 0; i < c.extent(0); ++i) {
-    if (std::is_integral<CT>::value) {
+    if (is_integral<CT>::value) {
       EXPECT_THAT(row(c, i), ElementsAreArray(row(expected, i)))
           << "shape=" << n << "x" << k3 << "x" << k2 << "x" << k1
           << " row=" << i;

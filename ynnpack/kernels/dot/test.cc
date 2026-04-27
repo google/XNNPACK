@@ -130,7 +130,7 @@ void TestMatMul(AT, BT, CT, const DotShape& shape, const KernelInfo& kernel,
   // Verify results.
   Reference(a, b, expected);
   for (const auto& i : EnumerateIndices({m, n})) {
-    if (std::is_integral<CT>::value) {
+    if (is_integral<CT>::value) {
       ASSERT_EQ(c(i), expected(i)) << shape;
     } else {
       const float tolerance = epsilon(type_of<CT>()) * (k + 1) * max_abs_value *
@@ -236,7 +236,7 @@ void TestConv2D(AT, BT, CT, const KernelInfo& kernel) {
     // a dimensions are now {n, kh, kw, ci}
     Reference(a, b, expected);
     for (const auto& i : EnumerateIndices({w, co})) {
-      if (std::is_integral<CT>::value) {
+      if (is_integral<CT>::value) {
         ASSERT_EQ(c(i), expected(i));
       } else {
         const float tolerance = epsilon(type_of<CT>()) * (ci * kh * kw + 1) *

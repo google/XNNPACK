@@ -61,8 +61,8 @@ struct convert_op {
 
   template <typename TIn>
   TOut operator()(TIn x) const {
-    if constexpr (std::is_integral<TOut>::value) {
-      if constexpr (std::is_integral<TIn>::value) {
+    if constexpr (is_integral<TOut>::value) {
+      if constexpr (is_integral<TIn>::value) {
         return saturate_cast<TOut>(x);
       } else {
         return round_float_to_int<TOut>(x);
