@@ -69,10 +69,10 @@ struct ynn_runtime {
   }
 
   std::unique_ptr<ynn::scheduling_info> make_schedule(
-      ynn::span<const slinky::var> dims, ynn::span<const slinky::expr> extents,
-      const slinky::expr& element_cost,
+      const std::vector<slinky::var>& dims,
+      ynn::span<const slinky::expr> extents, const slinky::expr& element_cost,
       ynn::span<const slinky::expr> given_splits = {},
-      ynn::span<const int> loop_order = {});
+      const std::vector<slinky::index_t>& loop_order = {});
 
   slinky::buffer_expr_ptr null_buffer();
 
