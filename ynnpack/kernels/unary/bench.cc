@@ -36,8 +36,8 @@ void bench(benchmark::State& state, uint64_t arch_flags, unary_kernel_fn kernel,
   broadcast_extent_1(x);
 
   for (auto _ : state) {
-    kernel(m, n, a.stride(0) * sizeof(TA), a.base(), x.stride(0) * sizeof(TX),
-           x.base(), &params);
+    kernel(m, n, a.stride_bytes(0), a.base(), x.stride_bytes(0), x.base(),
+           &params);
   }
 
   const size_t ops = m * n;
@@ -122,6 +122,9 @@ BENCHMARK_REFERENCE_CONVERT_FROM(bfloat16);
 BENCHMARK_REFERENCE_CONVERT_FROM(int8_t);
 BENCHMARK_REFERENCE_CONVERT_FROM(uint8_t);
 BENCHMARK_REFERENCE_CONVERT_FROM(int32_t);
+
+BENCHMARK_REFERENCE_CONVERT(int4x2, int8_t);
+BENCHMARK_REFERENCE_CONVERT(int2x4, int8_t);
 
 #define YNN_ELEMENTWISE_KERNEL(arch_flags, kernel, op, type_a, type_x)    \
   BENCHMARK_CAPTURE(bench, kernel, arch_flags, kernel,                    \
