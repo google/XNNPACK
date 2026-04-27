@@ -593,6 +593,9 @@ ynn_status ynn_define_fuse_dims(ynn_subgraph_t subgraph, size_t num_axes,
   for (size_t i = 0; i < num_axes; ++i) {
     YNN_RETURN_IF_ERROR(
         validate_axis("fuse_dims", "input", input.rank(), axes[i]));
+    // Fusing requires a next dimension, so axes[i]+1 must also be valid.
+    YNN_RETURN_IF_ERROR(
+        validate_axis("fuse_dims", "input", input.rank(), axes[i] + 1));
     // Since we are reversing the axes, the first dimension to fuse is actually
     // the next dimension.
     op.axes[axis_to_slinky_dim(input.rank(), axes[i] + 1)] = true;
