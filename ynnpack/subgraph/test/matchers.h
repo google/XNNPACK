@@ -231,6 +231,12 @@ MATCHER(IsRescaleDot, "") {
 //   EXPECT_THAT(ProducerOf(y_id, subgraph), IsDot());
 MATCHER(IsDot, "") { return std::holds_alternative<ynn_node::dot>(arg.op); }
 
+// Checks that the given node is an iota.
+//
+// Example:
+//   EXPECT_THAT(ProducerOf(y_id, subgraph), IsIota());
+MATCHER(IsIota, "") { return std::holds_alternative<ynn_node::iota>(arg.op); }
+
 // Checks that the given node is a broadcast_like.
 //
 // Example:

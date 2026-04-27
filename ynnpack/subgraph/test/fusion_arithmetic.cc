@@ -565,4 +565,86 @@ TEST(fusion, bf16_elementwise) {
   }
 }
 
+TEST(fusion, iota_multiply_add) {
+  // rewrite add(multiply(iota, A), B) -> iota(folded)
+  const uint32_t begin_id = 0;
+  const uint32_t stride_id = 1;
+  const uint32_t out_id = 2;
+  SubgraphBuilder builder(3);
+
+  uint32_t iota_out_id = YNN_INVALID_VALUE_ID;
+  uint32_t mul_out_id = YNN_INVALID_VALUE_ID;
+
+  float A = 2.0f;
+  float B = 3.0f;
+  uint32_t A_id = builder.DefineScalar(A);
+  uint32_t B_id = builder.DefineScalar(B);
+
+  builder.AddInput(ynn_type_fp32, 1, begin_id)
+      .AddInput(ynn_type_fp32, 1, stride_id)
+      .AddOutput(ynn_type_fp32, 1, out_id)
+      .AddTensor(ynn_type_fp32, 1, iota_out_id)
+      .AddTensor(ynn_type_fp32, 1, mul_out_id);
+
+  builder.AddIota(ynn_type_fp32, {10}, begin_id, stride_id, iota_out_id)
+      .AddBinary(ynn_binary_multiply, iota_out_id, A_id, mul_out_id)
+      .AddBinary(ynn_binary_add, mul_out_id, B_id, out_id);
+
+  ynn_subgraph& subgraph = *builder.GetSubgraph();
+
+  subgraph.fusion();
+  subgraph.invalidate_dead_values();
+
+  ASSERT_THAT(subgraph, HasValidNodeCount(1));
+  const ynn_node& final_node = ProducerOf(out_id, subgraph);
+  EXPECT_THAT(final_node, IsIota());
+
+  const ynn_node::iota* iota_op = std::get_if<ynn_node::iota>(&final_node.op);
+  ASSERT_NE(iota_op, nullptr);
+  EXPECT_EQ(iota_op->params.scale, A);
+  EXPECT_EQ(iota_op->params.offset, B);
+}
+
+TEST(fusion, iota_multi_consumer) {
+  // iota -> v1
+  // v1 -> other_consumer (v1 is an output)
+  // v1 -> multiply(A) -> v2
+
+  const uint32_t begin_id = 0;
+  const uint32_t stride_id = 1;
+  const uint32_t v1_id = 2;
+  const uint32_t v2_id = 3;
+  SubgraphBuilder builder(4);
+
+  float A = 2.0f;
+  uint32_t A_id = builder.DefineScalar(A);
+
+  builder.AddInput(ynn_type_fp32, 1, begin_id)
+      .AddInput(ynn_type_fp32, 1, stride_id)
+      .AddOutput(ynn_type_fp32, 1, v1_id)
+      .AddOutput(ynn_type_fp32, 1, v2_id);
+
+  builder.AddIota(ynn_type_fp32, {10}, begin_id, stride_id, v1_id)
+      .AddBinary(ynn_binary_multiply, v1_id, A_id, v2_id);
+
+  ynn_subgraph& subgraph = *builder.GetSubgraph();
+
+  subgraph.fusion();
+  subgraph.invalidate_dead_values();
+
+  ASSERT_THAT(subgraph, HasValidNodeCount(2));
+
+  const ynn_node& node1 = ProducerOf(v1_id, subgraph);
+  EXPECT_THAT(node1, IsIota());
+  const ynn_node::iota* iota1 = std::get_if<ynn_node::iota>(&node1.op);
+  EXPECT_EQ(iota1->params.scale, 1.0f);
+  EXPECT_EQ(iota1->params.offset, 0.0f);
+
+  const ynn_node& node2 = ProducerOf(v2_id, subgraph);
+  EXPECT_THAT(node2, IsIota());
+  const ynn_node::iota* iota2 = std::get_if<ynn_node::iota>(&node2.op);
+  EXPECT_EQ(iota2->params.scale, A);
+  EXPECT_EQ(iota2->params.offset, 0.0f);
+}
+
 }  // namespace ynn

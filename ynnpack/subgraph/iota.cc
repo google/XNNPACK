@@ -16,6 +16,7 @@
 #include "ynnpack/base/base.h"
 #include "ynnpack/base/log.h"
 #include "ynnpack/include/ynnpack.h"
+#include "ynnpack/subgraph/iota.h"
 #include "ynnpack/subgraph/runtime.h"
 #include "ynnpack/subgraph/slinky.h"
 #include "ynnpack/subgraph/subgraph.h"
@@ -56,10 +57,16 @@ void iota_impl(iota_kernel_fn kernel, T begin, const T* stride,
 }
 
 template <typename T>
-auto make_iota_impl(iota_kernel_fn kernel) {
+auto make_iota_impl(iota_kernel_fn kernel, const iota_params& params) {
   return
       [=](slinky::buffer<const T, 0> begin, slinky::buffer<const T, 1> stride,
           slinky::buffer<T, YNN_MAX_TENSOR_RANK> output) -> slinky::index_t {
+        // Copy the params to the type of the iota.
+        T scale = params.scale;
+        T offset = params.offset;
+        assert(scale == params.scale);
+        assert(offset == params.offset);
+
         assert(is_contiguous(stride.dim(0), sizeof(T)));
         assert(!stride.dim(0).is_folded());
         assert(output.rank <= YNN_MAX_TENSOR_RANK);
@@ -68,9 +75,10 @@ auto make_iota_impl(iota_kernel_fn kernel) {
         // ubsan complaints when output.rank = 0.
         T stride_broadcast[YNN_MAX_TENSOR_RANK] = {0, };
         for (int i = 0; i < output.rank; ++i) {
-          stride_broadcast[i] = stride(i);
+          stride_broadcast[i] = stride(i) * scale;
         }
-        iota_impl(kernel, begin(), stride_broadcast, output);
+        iota_impl<T>(kernel, begin() * scale + offset,
+                     stride_broadcast, output);
         return 0;
       };
 }
@@ -79,8 +87,8 @@ auto make_iota_impl(iota_kernel_fn kernel) {
 
 extern "C" {
 
-ynn_status ynn_define_iota(ynn_subgraph_t subgraph, enum ynn_type type,
-                           size_t rank, const size_t* dims, uint32_t begin_id,
+ynn_status ynn_define_iota(ynn_subgraph_t subgraph, ynn_type type, size_t rank,
+                           const size_t* dims, uint32_t begin_id,
                            uint32_t stride_id, uint32_t* output_id,
                            uint32_t flags) {
   // Validate arguments.
@@ -124,7 +132,7 @@ ynn_status ynn_define_iota(ynn_subgraph_t subgraph, enum ynn_type type,
   ynn_node node;
   node.inputs = {begin_id, stride_id};
   node.outputs = {*output_id};
-  node.op = ynn_node::iota{type};
+  node.op = ynn_node::iota{};
   node.create = [](const ynn_node& node, ynn_runtime& runtime) {
     const ynn_node::iota& op = std::get<ynn_node::iota>(node.op);
     const ynn_runtime_value& begin = runtime.value(node.inputs[0]);
@@ -133,9 +141,9 @@ ynn_status ynn_define_iota(ynn_subgraph_t subgraph, enum ynn_type type,
 
     output.make_buffer(runtime);
 
-    iota_kernel_fn kernel = get_iota_kernel(op.type);
+    iota_kernel_fn kernel = get_iota_kernel(output.type);
     if (!kernel) {
-      YNN_LOG_ERROR() << "Unsupported type for iota: " << op.type;
+      YNN_LOG_ERROR() << "Unsupported type for iota: " << output.type;
       return ynn_status_unsupported_parameter;
     }
 
@@ -148,14 +156,14 @@ ynn_status ynn_define_iota(ynn_subgraph_t subgraph, enum ynn_type type,
     auto sched =
         runtime.make_schedule(dims, output.extents, output.buffer->elem_size());
 
-    if (op.type == ynn_type_int32) {
+    if (output.type == ynn_type_int32) {
       runtime.funcs.push_back(slinky::func::make(
-          make_iota_impl<int32_t>(kernel),
+          make_iota_impl<int32_t>(kernel, op.params),
           {{begin.buffer, {}}, {stride.buffer, std::move(stride_bounds)}},
           {{output.buffer, std::move(dims)}}, std::move(attrs)));
-    } else if (op.type == ynn_type_fp32) {
+    } else if (output.type == ynn_type_fp32) {
       runtime.funcs.push_back(slinky::func::make(
-          make_iota_impl<float>(kernel),
+          make_iota_impl<float>(kernel, op.params),
           {{begin.buffer, {}}, {stride.buffer, std::move(stride_bounds)}},
           {{output.buffer, std::move(dims)}}, std::move(attrs)));
     } else {

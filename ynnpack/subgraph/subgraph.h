@@ -27,6 +27,7 @@
 #include "ynnpack/kernels/dequantize_dot/dequantize_dot.h"
 #include "ynnpack/kernels/ternary/ternary.h"
 #include "ynnpack/kernels/unary/unary.h"
+#include "ynnpack/subgraph/iota.h"
 #include "ynnpack/subgraph/slinky.h"
 #include "slinky/runtime/buffer.h"
 #include "slinky/runtime/evaluate.h"
@@ -504,12 +505,12 @@ struct ynn_node {
     }
   };
   struct iota {
-    ynn_type type;
+    ynn::iota_params params;
     friend bool operator==(const iota& a, const iota& b) {
-      return a.type == b.type;
+      return a.params == b.params;
     }
     friend bool operator<(const iota& a, const iota& b) {
-      return a.type < b.type;
+      return a.params < b.params;
     }
   };
   struct pack_b {

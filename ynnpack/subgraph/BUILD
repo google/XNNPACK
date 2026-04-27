@@ -64,6 +64,7 @@ cc_library(
         "fusion_types.h",
         "get_tensor_shape.cc",
         "iota.cc",
+        "iota.h",
         "reduce.cc",
         "reduce.h",
         "runtime.cc",

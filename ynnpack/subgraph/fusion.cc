@@ -1374,6 +1374,41 @@ bool fold_unary_output(ynn_subgraph& subgraph, ynn_node& node,
   return true;
 }
 
+// Rewrite iota(x) * A + B to fold the arithmetic into the params
+bool fold_iota_output(ynn_subgraph& subgraph, ynn_node& node,
+                      subgraph_analysis& analysis) {
+  // iota supports dynamic begin/stride values too, so we could also fold non-
+  // constant arithmetic into it, but it's messier to do that...
+  auto scalar_arithmetic = is_scalar_arithmetic(subgraph, node);
+  if (!scalar_arithmetic) return false;
+
+  ynn_node* producer = analysis.producer_of(scalar_arithmetic->x_id);
+  if (!producer || !std::holds_alternative<ynn_node::iota>(producer->op)) {
+    return false;
+  }
+
+  YNN_LOG_DEBUG() << "Folding iota into scalar arithmetic";
+
+  uint32_t output_id = node.outputs[0];
+  const ynn_value& output = subgraph.value(output_id);
+  if (ynn::type_is_integral(output.type)) {
+    if (scalar_arithmetic->a != static_cast<int>(scalar_arithmetic->a) ||
+        scalar_arithmetic->b != static_cast<int>(scalar_arithmetic->b)) {
+      // We can't fuse arithmetic we can't exactly represent the scalars as
+      // integers.
+      return false;
+    }
+  }
+
+  node = *producer;
+  node.outputs[0] = output_id;
+  ynn_node::iota& node_iota = std::get<ynn_node::iota>(node.op);
+  node_iota.params.scale *= scalar_arithmetic->a;
+  node_iota.params.offset *= scalar_arithmetic->a;
+  node_iota.params.offset += scalar_arithmetic->b;
+  return true;
+}
+
 bool rewrite_binary(ynn_subgraph& subgraph, ynn_node& node,
                     subgraph_analysis& analysis) {
   if (is_binary_node(node, ynn_binary_multiply) &&
@@ -1521,6 +1556,7 @@ ynn_status ynn_subgraph::fusion() {
 
       changed = changed || ynn::fold_unary_input(*this, node, analysis) ||
                 ynn::fold_unary_output(*this, node, analysis) ||
+                ynn::fold_iota_output(*this, node, analysis) ||
                 ynn::rewrite_binary(*this, node, analysis) ||
                 ynn::rewrite_reduce_binary_identity(*this, node, analysis) ||
                 ynn::rewrite_expand_dims_reduce(*this, node, analysis) ||
