@@ -7,7 +7,6 @@
 #define XNNPACK_YNNPACK_BASE_TEST_TENSOR_H_
 
 #include <algorithm>
-#include <array>
 #include <cassert>
 #include <cstddef>
 #include <cstdint>
@@ -25,6 +24,7 @@
 #include "ynnpack/base/arithmetic.h"
 #include "ynnpack/base/base.h"
 #include "ynnpack/base/test/buffer.h"
+#include "ynnpack/base/type.h"
 
 namespace ynn {
 
@@ -88,6 +88,7 @@ class Tensor {
   const index_type& strides() const { return strides_; }
   size_t extent(size_t dim) const { return extents_[dim]; }
   size_t stride(size_t dim) const { return strides_[dim]; }
+  size_t stride_bytes(size_t dim) const { return stride(dim) * sizeof(T); }
 
   // This is a dangerous function, use carefully.
   void set_shape(index_type extents, index_type strides) {
@@ -135,6 +136,7 @@ class Tensor {
     assert(is_contiguous());
     return end_ - begin_;
   }
+  size_t size_bytes() const { return size() * sizeof(T); }
   T* begin() { return data(); }
   T* end() { return end_; }
   const T* begin() const { return data(); }

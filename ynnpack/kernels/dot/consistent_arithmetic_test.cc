@@ -132,11 +132,11 @@ void TestMatMul(AT, BT, CT, size_t k) {
     const bool pack_a = kernel.flags & dot_flag::transpose_a;
     Tensor<AT> packed_a = pack_a ? transpose_a(a, tile_m, tile_k) : a;
 
-    kernel.kernel(
-        m, n, 1, 1, k, packed_a.stride(0) * sizeof(AT) / (pack_a ? tile_k : 1),
-        0, 0, packed_a.base(), 0, 0, packed_b.stride(0) * sizeof(BT) / tile_k,
-        packed_b.base(), kernel_c.stride(0) * sizeof(CT), kernel_c.base(),
-        kernel_c.stride(0) * sizeof(CT), kernel_c.base());
+    kernel.kernel(m, n, 1, 1, k,
+                  packed_a.stride_bytes(0) / (pack_a ? tile_k : 1), 0, 0,
+                  packed_a.base(), 0, 0, packed_b.stride_bytes(0) / tile_k,
+                  packed_b.base(), kernel_c.stride_bytes(0), kernel_c.base(),
+                  kernel_c.stride_bytes(0), kernel_c.base());
 
     if (c.base()) {
       int finite = 0;

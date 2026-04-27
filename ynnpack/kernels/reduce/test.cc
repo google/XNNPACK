@@ -156,9 +156,8 @@ void TestUnaryReduce(Tensor<AT> a, Tensor<CT> c,
   // place.
   Tensor<CT> expected = c.deep_copy();
 
-  kernel(n, k3, k2, k1, a.stride(0) * sizeof(AT),
-          a.stride(1) * sizeof(AT), a.stride(2) * sizeof(AT), a.base(),
-          c.stride(0) * sizeof(CT), c.base());
+  kernel(n, k3, k2, k1, a.stride_bytes(0), a.stride_bytes(1), a.stride_bytes(2),
+         a.base(), c.stride_bytes(0), c.base());
 
   // Verify results.
   Reference(a, expected, op);

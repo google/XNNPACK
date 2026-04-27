@@ -66,9 +66,8 @@ void TestTranspose(T, transpose_fn kernel, std::vector<size_t> ms,
       for (size_t n_input : {m, m - 1, m / 2}) {
         if (n_input % element_count != 0) continue;
 
-        kernel(m, n, n_input * sizeof(T) / element_count,
-               input.stride(0) * sizeof(T), input.base(),
-               output.stride(0) * sizeof(T), output.base());
+        kernel(m, n, n_input * sizeof(T) / element_count, input.stride_bytes(0),
+               input.base(), output.stride_bytes(0), output.base());
 
         // Verify results.
         for (size_t i = 0; i < m; ++i) {
@@ -96,8 +95,7 @@ void TestInterleave(T type, size_t factor, interleave_kernel_fn kernel) {
   }
   for (size_t m = 1; m <= factor; ++m) {
     for (size_t n : simd_sizes_up_to(max_n, element_count)) {
-      kernel(factor, m, n, input.stride(0) * sizeof(T), input.base(),
-             output.base());
+      kernel(factor, m, n, input.stride_bytes(0), input.base(), output.base());
 
       for (size_t j = 0; j < n; ++j) {
         for (size_t i = 0; i < factor; ++i) {

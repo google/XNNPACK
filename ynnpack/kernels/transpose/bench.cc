@@ -34,9 +34,9 @@ void bench_impl(benchmark::State& state, uint64_t arch_flags,
   Tensor<T> x({m, n / element_count});
   memset(a.data(), 0, a.size() * sizeof(T));
 
-  const size_t a_stride = a.stride(0) * sizeof(T);
+  const size_t a_stride = a.stride_bytes(0);
   const size_t n_bytes_a = m * sizeof(T) / element_count;
-  const size_t x_stride = x.stride(0) * sizeof(T);
+  const size_t x_stride = x.stride_bytes(0);
 
   for (auto _ : state) {
     kernel(m, n, n_bytes_a, a_stride, a.base(), x_stride, x.base());
@@ -65,9 +65,9 @@ void bench_impl(benchmark::State& state, uint64_t arch_flags,
 
   Tensor<T> a({m, n / element_count});
   Tensor<T> x({factor * n / element_count});
-  memset(a.data(), 0, a.size() * sizeof(T));
+  memset(a.data(), 0, a.size_bytes());
 
-  const size_t a_stride = a.stride(0);
+  const size_t a_stride = a.stride_bytes(0);
 
   while (state.KeepRunningBatch(m * n)) {
     kernel(factor, m, n, a_stride, a.base(), x.base());
