@@ -1087,7 +1087,7 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
       split_n = {};
     }
 
-    std::vector<slinky::index_t> loop_order;
+    std::vector<int> loop_order;
     if (output.rank() >= 2) {
       loop_order = {0, 1};
       if (pack_b && !packed_b.is_static()) {

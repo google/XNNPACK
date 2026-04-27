@@ -45,16 +45,32 @@ slinky::buffer_expr_ptr slinky_globals::make_buffer_expr(
   return ynn::make_buffer_expr(symbols.insert_unique(name), rank, elem_size);
 }
 
-// Make an array of dimensions that is begin, 1, ... end - 1.
-std::vector<slinky::var> slinky_globals::make_dims(int begin, int end) {
+slinky::var slinky_globals::make_dim(int d, const char* prefix) {
+  return symbols.insert(prefix + std::to_string(d));
+}
+
+slinky::var slinky_globals::make_reduction_dim(int d) {
+  return symbols.insert(std::string(1, reduction_dim_prefix) +
+                        std::to_string(d));
+}
+
+bool slinky_globals::is_reduction_dim(slinky::var dim) {
+  std::string name = symbols.name(dim);
+  return !name.empty() && name[0] == reduction_dim_prefix;
+}
+
+std::vector<slinky::var> slinky_globals::make_dims(int begin, int end,
+                                                   const char* prefix) {
   std::vector<slinky::var> result(end - begin);
   for (int i = 0; i < result.size(); ++i) {
-    result[i] = symbols.insert("d" + std::to_string(begin + i));
+    result[i] = symbols.insert(prefix + std::to_string(begin + i));
   }
   return result;
 }
-std::vector<slinky::var> slinky_globals::make_dims(int rank) {
-  return make_dims(0, rank);
+
+std::vector<slinky::var> slinky_globals::make_dims(int rank,
+                                                   const char* prefix) {
+  return make_dims(0, rank, prefix);
 }
 
 slinky::buffer_expr_ptr make_buffer_expr(slinky::var sym, int rank,
