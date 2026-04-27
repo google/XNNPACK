@@ -167,37 +167,42 @@ auto make_dequantize_dot_impl(dequantize_dot_kernel_fn kernel,
                           slinky::raw_buffer output) -> slinky::index_t {
     using slinky::index_t;
 
-    const slinky::dim& n = slice_dim0(output);
-    const slinky::in_bounds n_min{n.min()};
-    const index_t n_extent = n.extent();
+    index_t n_extent = 1;
+    // These are intentionally left uninitialized, if the extent is 1 they
+    // should be unused.
+    index_t b_offset_n_stride, b_scale_n_stride, offset_n_stride;
+    if (is_contiguous(dot.dim(0), dot.elem_size) &&
+        is_broadcast(a_offset.dim(0)) && is_broadcast(a_scale.dim(0))) {
+      const slinky::dim& n = slice_dim0(output);
+      assert(is_contiguous(n, output.elem_size));
+      const slinky::in_bounds n_min{n.min()};
+      n_extent = n.extent();
 
-    assert(is_contiguous(n, output.elem_size));
-    assert(is_contiguous(dot.dim(0), dot.elem_size));
-    assert(is_broadcast(a_offset.dim(0)));
+      dot.slice(0, n_min);
+      a_offset.slice(0);
+      a_scale.slice(0);
+      b_offset_n_stride = slice_dim0(b_offset, n_min).stride();
+      b_scale_n_stride = slice_dim0(b_scale, n_min).stride();
+      offset_n_stride = slice_dim0(offset, n_min).stride();
+    }
 
-    dot.slice(0, n_min);
-    a_offset.slice(0);
-    assert(is_broadcast(a_scale.dim(0)));
-    a_scale.slice(0);
-    const index_t b_offset_n_stride = slice_dim0(b_offset, n_min).stride();
-    const index_t b_scale_n_stride = slice_dim0(b_scale, n_min).stride();
-    const index_t offset_n_stride = slice_dim0(offset, n_min).stride();
-
-    // Get the m dimension. rank 1 buffers are common, so try to optimize
-    // for that case.
-    assert(is_broadcast(b_offset.dim(0)));
-    assert(is_broadcast(b_scale.dim(0)));
-    assert(is_broadcast(offset.dim(0)));
-    const slinky::dim& m = slice_dim0(output);
-    const slinky::in_bounds m_min{m.min()};
-    const index_t m_extent = m.extent();
-    const index_t m_stride = m.stride();
-    const index_t dot_m_stride = slice_dim0(dot, m_min).stride();
-    const index_t a_offset_m_stride = slice_dim0(a_offset, m_min).stride();
-    const index_t a_scale_m_stride = slice_dim0(a_scale, m_min).stride();
-    b_offset.slice(0);
-    offset.slice(0);
-    b_scale.slice(0);
+    index_t m_extent = 1;
+    // These are intentionally left uninitialized, if the extent is 1 they
+    // should be unused.
+    index_t m_stride, dot_m_stride, a_offset_m_stride, a_scale_m_stride;
+    if (is_broadcast(b_offset.dim(0)) && is_broadcast(b_scale.dim(0)) &&
+        is_broadcast(offset.dim(0))) {
+      const slinky::dim& m = slice_dim0(output);
+      const slinky::in_bounds m_min{m.min()};
+      m_extent = m.extent();
+      m_stride = m.stride();
+      dot_m_stride = slice_dim0(dot, m_min).stride();
+      a_offset_m_stride = slice_dim0(a_offset, m_min).stride();
+      a_scale_m_stride = slice_dim0(a_scale, m_min).stride();
+      b_offset.slice(0);
+      b_scale.slice(0);
+      offset.slice(0);
+    }
 
     if (n_extent <= 0 || m_extent <= 0) {
       return 0;
