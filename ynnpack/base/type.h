@@ -82,7 +82,7 @@ struct int4x2 {
   uint8_t values;
 
   int4x2() = default;
-  int4x2(uint8_t values) : values(values) {}  // NOLINT
+  int4x2(int8_t x) : int4x2(x, x) {}  // NOLINT
   int4x2(int8_t x0, int8_t x1) : values((x1 << 4) | (x0 & 0x0f)) {}
 
   YNN_ALWAYS_INLINE int8_t get(size_t i) const {
@@ -118,7 +118,7 @@ struct int2x4 {
   uint8_t values;
 
   int2x4() = default;
-  int2x4(uint8_t values) : values(values) {}  // NOLINT
+  int2x4(int8_t x) : int2x4(x, x, x, x) {}  // NOLINT
   int2x4(int8_t x0, int8_t x1, int8_t x2, int8_t x3)
       : values(((x3 & 0x3) << 6) | ((x2 & 0x3) << 4) | ((x1 & 0x3) << 2) |
                (x0 & 0x3)) {}
@@ -164,7 +164,7 @@ struct uint4x2 {
   uint8_t values;
 
   uint4x2() = default;
-  uint4x2(uint8_t values) : values(values) {}  // NOLINT
+  uint4x2(uint8_t x) : uint4x2(x, x) {}  // NOLINT
   uint4x2(uint8_t x0, uint8_t x1) : values((x1 << 4) | (x0 & 0x0f)) {}
 
   YNN_ALWAYS_INLINE uint8_t get(size_t i) const {
@@ -198,7 +198,7 @@ struct uint2x4 {
   uint8_t values;
 
   uint2x4() = default;
-  uint2x4(uint8_t values) : values(values) {}  // NOLINT
+  uint2x4(uint8_t x) : uint2x4(x, x, x, x) {}  // NOLINT
   uint2x4(uint8_t x0, uint8_t x1, uint8_t x2, uint8_t x3)
       : values((x3 << 6) | ((x2 & 0x3) << 4) | ((x1 & 0x3) << 2) | (x0 & 0x3)) {
   }
@@ -568,8 +568,36 @@ class type_info<quantized<T>> {
   }
 };
 
+// Extend std::is_integral for our sub-byte types.
+template <typename T>
+struct is_integral {
+  static constexpr bool value = std::is_integral<T>::value;
+};
+
+template <>
+struct is_integral<int4x2> {
+  static constexpr bool value = true;
+};
+
+template <>
+struct is_integral<uint4x2> {
+  static constexpr bool value = true;
+};
+
+template <>
+struct is_integral<int2x4> {
+  static constexpr bool value = true;
+};
+
+template <>
+struct is_integral<uint2x4> {
+  static constexpr bool value = true;
+};
+
 inline float epsilon(ynn_type type) {
   switch (type) {
+    case ynn_type_fp64:
+      return type_info<double>::epsilon();
     case ynn_type_fp32:
       return type_info<float>::epsilon();
     case ynn_type_fp16:

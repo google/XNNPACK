@@ -65,7 +65,8 @@ template <typename A, typename C>
 void ReferenceImpl(ynn_reduce_operator op, const Tensor<A>& a,
                    Tensor<C>& c) {
   if ((op == ynn_reduce_sum || op == ynn_reduce_sum_squared) &&
-       !std::is_same<C, float>::value && !std::is_same<C, int32_t>::value) {
+      !std::is_same<C, float>::value && !std::is_same<C, double>::value &&
+      !std::is_same<C, int32_t>::value) {
     // Compute sum and sum_squared with extra precision.
     Tensor<float> c_float(c.extents());
     c_float.assign(c);
@@ -176,7 +177,7 @@ void TestReduce(A, C, ynn_reduce_operator op) {
 
       // Verify results.
       for (const auto& i : EnumerateIndices(c_shape)) {
-        if (std::is_integral<C>::value) {
+        if (is_integral<C>::value) {
           ASSERT_EQ(c(i), expected(i));
         } else {
           const float tolerance =

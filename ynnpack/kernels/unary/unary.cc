@@ -14,10 +14,13 @@
 #include <cstring>
 #include <type_traits>
 
+#include "ynnpack/base/arch.h"
 #include "ynnpack/base/arithmetic.h"
+#include "ynnpack/base/base.h"
 #include "ynnpack/base/bfloat16.h"
 #include "ynnpack/base/half.h"
 #include "ynnpack/base/log.h"
+#include "ynnpack/base/type.h"
 #include "ynnpack/include/ynnpack.h"
 
 namespace ynn {

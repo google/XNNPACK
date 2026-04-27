@@ -105,6 +105,9 @@ decltype(auto) get_element(const Tensor<T>& t, const std::vector<size_t>& i) {
   } else {
     std::vector<size_t> physical_i = i;
     size_t logical_innermost = i.back();
+    if (t.extent(t.rank() - 1) == 1) {
+      logical_innermost = 0;
+    }
     physical_i.back() = logical_innermost / type_info<T>::element_count();
     return type_info<T>::get(&t(physical_i),
                              logical_innermost % type_info<T>::element_count());

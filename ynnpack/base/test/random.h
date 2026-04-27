@@ -38,8 +38,10 @@ void fill_uniform_random_bits(T* data, size_t size, Rng& rng) {
     size_bytes -= sizeof(RngT);
   }
   // Fill the remaining bytes.
-  RngT bits = rng();
-  memcpy(data, &bits, size_bytes);
+  if (size_bytes > 0) {
+    RngT bits = rng();
+    memcpy(data, &bits, size_bytes);
+  }
 }
 
 // Generate a random shape of the given rank, where each dim is in [min_dim,
@@ -129,12 +131,12 @@ void replace_denormals_and_nans(T* data, size_t size) {
     // There are no denormals for this type.
     return;
   }
-  for (size_t i = 0; i < size; ++i) {
-    if (std::abs(static_cast<float>(data[i])) >=
-        type_info<T>::smallest_normal()) {
+  for (size_t i = 0; i < size * type_info<T>::element_count(); ++i) {
+    float data_i = static_cast<float>(type_info<T>::get(data, i));
+    if (std::abs(data_i) >= type_info<T>::smallest_normal()) {
       // This is a normal float, or infinity.
     } else {
-      data[i] = static_cast<T>(0);
+      type_info<T>::set(data, i, static_cast<T>(0));
     }
   }
 }
@@ -170,14 +172,14 @@ void fill_random(T* data, size_t size, Rng& rng, double min, double max,
     // [min, max] exceeds the range of T, just fill it with random bits.
     fill_random(data, size, rng);
   } else {
-    if constexpr (std::is_integral_v<T>) {
+    if constexpr (is_integral<T>::value || is_quantized<T>::value) {
       std::uniform_int_distribution<int> dist(
           std::max<int>(round_float_to_int<int>(static_cast<float>(min)),
                         type_info<T>::min()),
           std::min<int>(round_float_to_int<int>(static_cast<float>(max)),
                         type_info<T>::max()));
-      for (size_t i = 0; i < size; ++i) {
-        data[i] = static_cast<T>(dist(rng));
+      for (size_t i = 0; i < size * type_info<T>::element_count(); ++i) {
+        type_info<T>::set(data, i, dist(rng));
       }
     } else {
       // Floating point types
@@ -186,46 +188,8 @@ void fill_random(T* data, size_t size, Rng& rng, double min, double max,
       std::uniform_real_distribution<DistT> dist(static_cast<DistT>(min),
                                                  static_cast<DistT>(max));
       for (size_t i = 0; i < size; ++i) {
-        data[i] = static_cast<T>(dist(rng));
+        type_info<T>::set(data, i, dist(rng));
       }
-    }
-  }
-}
-
-// A specialization of the above for int4x2, which needs to set two values at
-// once.
-template <typename Rng>
-void fill_random(int4x2* data, size_t size, Rng& rng, double min, double max,
-                 const quantization_params& = {}) {
-  if (min <= type_info<int4x2>::min() && max >= type_info<int4x2>::max()) {
-    fill_random(data, size, rng);
-  } else {
-    std::uniform_int_distribution<int8_t> dist(
-        std::max<int>(round_float_to_int<int>(static_cast<float>(min)),
-                      type_info<int4x2>::min()),
-        std::min<int>(round_float_to_int<int>(static_cast<float>(max)),
-                      type_info<int4x2>::max()));
-    for (size_t i = 0; i < size; ++i) {
-      data[i] = int4x2{dist(rng), dist(rng)};
-    }
-  }
-}
-
-// A specialization of the above for int2x4, which needs to set four values at
-// once.
-template <typename Rng>
-void fill_random(int2x4* data, size_t size, Rng& rng, double min, double max,
-                 const quantization_params& = {}) {
-  if (min <= type_info<int2x4>::min() && max >= type_info<int2x4>::max()) {
-    fill_random(data, size, rng);
-  } else {
-    std::uniform_int_distribution<int8_t> dist(
-        std::max<int>(round_float_to_int<int>(static_cast<float>(min)),
-                      type_info<int2x4>::min()),
-        std::min<int>(round_float_to_int<int>(static_cast<float>(max)),
-                      type_info<int2x4>::max()));
-    for (size_t i = 0; i < size; ++i) {
-      data[i] = int2x4{dist(rng), dist(rng), dist(rng), dist(rng)};
     }
   }
 }

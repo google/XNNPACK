@@ -27,8 +27,8 @@ float clamp_float_to_int(float x) {
   // determined a constant that when added to the min/max float values, results
   // in the upper bound of the integer range.
   constexpr int half_mantissa = sizeof(Unwrapped) * 8 > 23 ? 127 : 0;
-  x = std::max<float>(x, std::numeric_limits<Unwrapped>::min());
-  x = std::min<float>(x, std::numeric_limits<Unwrapped>::max() - half_mantissa);
+  x = std::max<float>(x, type_info<Unwrapped>::min());
+  x = std::min<float>(x, type_info<Unwrapped>::max() - half_mantissa);
   return x;
 }
 
@@ -36,13 +36,12 @@ float clamp_float_to_int(float x) {
 // - Rounds to nearest integer
 // - Replaces NaN with 0
 // - Saturates to the bounds of the result type
-template <typename Result>
-Result round_float_to_int(float x) {
-  using Unwrapped = typename unwrap_quantized<Result>::type;
+template <typename Int>
+int round_float_to_int(float x) {
   x = std::isnan(x) ? 0.0f : x;
   x = std::nearbyint(x);
-  x = clamp_float_to_int<Result>(x);
-  return static_cast<Unwrapped>(x);
+  x = clamp_float_to_int<Int>(x);
+  return static_cast<int>(x);
 }
 
 template <typename T>
@@ -196,12 +195,8 @@ constexpr T saturate_cast(U x) noexcept {
   // use, which is tricky. Writing it this way is basically using comparisons of
   // `constexpr` values, hopefully the compiler can choose a reasonable type for
   // the comparison.
-  if (x > std::numeric_limits<T>::max()) {
-    return std::numeric_limits<T>::max();
-  }
-  if (x < std::numeric_limits<T>::lowest()) {
-    return std::numeric_limits<T>::lowest();
-  }
+  if (x > type_info<T>::max()) return type_info<T>::max();
+  if (x < type_info<T>::min()) return type_info<T>::min();
   return static_cast<T>(x);
 }
 
