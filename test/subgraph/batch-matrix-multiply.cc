@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <cassert>
 #include <chrono>
+#include <cmath>
 #include <cstddef>
 #include <cstdint>
 #include <cstdlib>
@@ -20,6 +21,9 @@
 #include "src/xnnpack/buffer.h"
 #include "src/xnnpack/datatype.h"
 #include "src/xnnpack/math.h"
+#include "src/xnnpack/microparams.h"
+#include "src/xnnpack/reference-utils.h"
+#include "src/xnnpack/quantization.h"
 #include "src/xnnpack/subgraph.h"
 #include "test/replicable_random_device.h"
 #include "test/subgraph/quantization-helpers.h"
@@ -27,6 +31,8 @@
 #include "test/subgraph/subgraph-tester.h"
 
 namespace xnnpack {
+
+using qcint8 = quantized<int8_t, channelwise>;
 
 // Make input matrices of the given ranks, with random broadcasting, such that
 // the result of batch matrix multiply of the two operands is `output_shape`.
@@ -58,17 +64,20 @@ std::pair<std::vector<size_t>, std::vector<size_t>> random_broadcasted_inputs(
 // tensor.
 template <typename T>
 Tensor<T> slice_batches(Tensor<T> tensor, std::vector<size_t> at) {
-  std::reverse(at.begin(), at.end());
-  while (at.size() + 2 > tensor.rank()) {
-    at.pop_back();
+  const size_t num_batch_dims = tensor.rank() >= 2 ? tensor.rank() - 2 : 0;
+  if (at.size() > num_batch_dims) {
+    at.erase(at.begin(), at.begin() + (at.size() - num_batch_dims));
   }
-  std::reverse(at.begin(), at.end());
-  tensor = tensor.slice_leading(at);
-  std::vector<size_t> shape = tensor.shape();
-  std::vector<size_t> strides = tensor.strides();
-  shape.erase(shape.begin(), shape.begin() + at.size());
-  strides.erase(strides.begin(), strides.begin() + at.size());
-  tensor.set_shape(shape, strides);
+
+  for (size_t idx : at) {
+    const size_t i = tensor.extent(0) == 1 ? 0 : idx;
+    tensor = tensor.slice(0, i, i + 1);
+    std::vector<size_t> shape = tensor.shape();
+    std::vector<size_t> strides = tensor.strides();
+    shape.erase(shape.begin());
+    strides.erase(strides.begin());
+    tensor.set_shape(shape, strides);
+  }
   return tensor;
 }
 
@@ -94,6 +103,47 @@ void ReferenceImpl(Tensor<InputA> input_a, Tensor<InputB> input_b,
         output_ij += a * b;
       }
       output(i, j) = output_ij;
+    }
+  }
+}
+
+template <>
+void ReferenceImpl<float, qcint8>(Tensor<float> input_a, Tensor<qcint8> input_b,
+                   const xnn_quantization_params& input_a_quantization,
+                   int32_t input_b_zero_point, Tensor<float> input_b_scale,
+                   Tensor<float> output) {
+  assert(input_a.rank() == 2);
+  assert(input_b.rank() == 2);
+  assert(output.rank() == 2);
+  assert(input_a.extent(0) == output.extent(0));
+  assert(input_b.extent(1) == output.extent(1));
+  assert(input_a.extent(1) == input_b.extent(0));
+
+  for (size_t i = 0; i < output.extent(0); ++i) {
+    float rmin = INFINITY;
+    float rmax = -INFINITY;
+    for (size_t k = 0; k < input_a.extent(1); ++k) {
+      rmin = std::min(rmin, input_a(i, k));
+      rmax = std::max(rmax, input_a(i, k));
+    }
+    float scale_row;
+    struct xnn_qd8_quantization_params qp =
+        xnn_f32_qd8_asymmetric_quantization_params(rmin, rmax, &scale_row);
+
+    for (size_t j = 0; j < output.extent(1); ++j) {
+      int32_t sum = 0;
+      for (size_t k = 0; k < input_a.extent(1); ++k) {
+        int32_t q_a = lrintf(input_a(i, k) * scale_row) + qp.zero_point;
+        q_a = std::min(std::max(q_a, -128), 127);
+
+        float b_float = dequantize(
+            input_b(k, j), input_b_scale(k, j), input_b_zero_point);
+        int32_t q_b = lrintf(b_float / input_b_scale(k, j));
+
+        sum += (q_a - qp.zero_point) * q_b;
+      }
+      output(i, j) =
+          static_cast<float>(sum) * qp.inv_scale * input_b_scale(0, j);
     }
   }
 }
@@ -141,13 +191,13 @@ Tensor<float> ReferenceImpl(Tensor<InputA> input_a, Tensor<InputB> input_b,
   return output;
 }
 
-template <typename Input, typename Output = Input>
-void TestDynamicB(uint64_t runtime_flags = xnn_test_runtime_flags()) {
+template <typename InputA, typename InputB = InputA, typename Output = InputA>
+void TestDynamicB(xnn_datatype convert_to = xnn_datatype_invalid,
+                  uint64_t runtime_flags = xnn_test_runtime_flags()) {
   ReplicableRandomDevice rng;
   std::bernoulli_distribution flag_dist(0.5);
   std::bernoulli_distribution k_big_dist(0.33);
   std::uniform_int_distribution<> rank_dist{2, XNN_MAX_TENSOR_DIMS - 1};
-  const bool is_qs8_qs8 = xnn_datatype_is_quantized(xnn_datatype_of<Input>());
 
   // To get good coverage without excessive cost, pick one of the M, N, K
   // dimensions to make very large.
@@ -162,22 +212,23 @@ void TestDynamicB(uint64_t runtime_flags = xnn_test_runtime_flags()) {
   xnn_quantization_params input_a_quantization = {0, 1.0f};
   xnn_quantization_params input_b_quantization = {0, 1.0f};
   xnn_quantization_params output_quantization = {0, 1.0f};
+
+  const bool is_qs8_qs8 =
+      std::is_same<InputA, InputB>::value &&
+      std::is_same<InputA, xnnpack::quantized<int8_t>>::value;
+
   if (is_qs8_qs8) {
     input_a_quantization =
-        random_quantization(xnn_datatype_of<Input>(), rng, 0.001f, 2.0f);
+        random_quantization(xnn_datatype_of<InputA>(), rng, 0.001f, 2.0f);
     input_b_quantization =
-        random_quantization(xnn_datatype_of<Input>(), rng, 0.001f, 2.0f);
+        random_quantization(xnn_datatype_of<InputB>(), rng, 0.001f, 2.0f);
     // The output quantization is computed from the kernel size and input
     // quantization.
     output_quantization =
-        CalculateGEMMQuantizationParams<Input, Input, Output>(
+        CalculateGEMMQuantizationParams<InputA, InputB, Output>(
             k, input_a_quantization, input_b_quantization,
             /*bias_quantization=*/{0, 1.0f});
   }
-
-  Tensor<float> b_scales({1, 1});
-  b_scales.fill(input_b_quantization.scale);
-  broadcast_extent_1(b_scales);
 
   for (auto _ : FuzzTest(std::chrono::milliseconds(1000))) {
     size_t input_a_rank = rank_dist(rng);
@@ -185,7 +236,8 @@ void TestDynamicB(uint64_t runtime_flags = xnn_test_runtime_flags()) {
     size_t output_rank = std::max(input_a_rank, input_b_rank);
 
     uint32_t flags = 0;
-    if (flag_dist(rng)) {
+    if (flag_dist(rng) &&
+        !xnn_datatype_is_channelwise_quantized(xnn_datatype_of<InputB>())) {
       flags |= XNN_FLAG_TRANSPOSE_B;
     }
     if (flag_dist(rng)) {
@@ -196,14 +248,67 @@ void TestDynamicB(uint64_t runtime_flags = xnn_test_runtime_flags()) {
     const uint32_t input_a_id = 0;
     const uint32_t input_b_id = 1;
     const uint32_t output_id = 2;
+    uint32_t bmm_input_a_id = input_a_id;
 
-    subgraph.AddInputTensor(input_a_rank, xnn_datatype_of<Input>(),
-                            input_a_quantization, input_a_id)
-            .AddInputTensor(input_b_rank, xnn_datatype_of<Input>(),
-                            input_b_quantization, input_b_id)
-            .AddOutputTensor(output_rank, xnn_datatype_of<Output>(),
+    subgraph.AddInputTensor(input_a_rank, xnn_datatype_of<InputA>(),
+                            input_a_quantization, input_a_id);
+
+    if (convert_to != xnn_datatype_invalid) {
+      subgraph.AddInternalDynamicallyQuantizedTensor(
+          input_a_rank, convert_to, /*num_nonbatch_dims=*/1, &bmm_input_a_id);
+      subgraph.AddConvert(input_a_id, bmm_input_a_id);
+    }
+
+    Tensor<float> b_scales;
+    Tensor<InputB> input_b;
+    std::vector<size_t> channelwise_b_shape;
+    bool is_channelwise_n_big = false;
+    if (xnn_datatype_is_channelwise_quantized(xnn_datatype_of<InputB>())) {
+      channelwise_b_shape = random_shape(rng, input_b_rank, 1, 4);
+      channelwise_b_shape[input_b_rank - 2] = k;
+      is_channelwise_n_big = !is_k_big && (rng() % 2 == 1);
+      channelwise_b_shape[input_b_rank - 1] =
+          is_channelwise_n_big ? big_dim_dist(rng) : dim_dist(rng);  // n
+
+      // Add enough broadcast dimensions to b.
+      for (size_t i = 0; i + 2 < output_rank; ++i) {
+        if (i >= input_b_rank) {
+          channelwise_b_shape.insert(channelwise_b_shape.begin(), 1);
+          input_b_rank++;
+        }
+      }
+
+      input_b = Tensor<InputB>({channelwise_b_shape});
+      auto input_b_gen =
+          MakeDatatypeGenerator(InputB(), /*symmetric_range=*/true);
+      input_b.generate([&]() { return input_b_gen(rng); });
+
+      std::vector<size_t> scales_shape = input_b.shape();
+      scales_shape[input_b.rank() - 2] = 1;
+      std::uniform_real_distribution<float> b_scale_dist(
+          0.001f, input_b_quantization.scale);
+      b_scales = Tensor<float>({scales_shape});
+      b_scales.generate([&]() { return b_scale_dist(rng); });
+    } else {
+      b_scales = Tensor<float>({1, 1});
+      b_scales.fill(input_b_quantization.scale);
+    }
+    broadcast_extent_1(b_scales);
+
+    if (xnn_datatype_is_channelwise_quantized(xnn_datatype_of<InputB>())) {
+      subgraph.AddDynamicChannelwiseQuantizedTensor(
+          input_b.shape(), input_b.shape().size() - 1,
+          xnn_datatype_of<InputB>(), b_scales.data(), input_b_id,
+          /*data=*/nullptr);
+    } else {
+      subgraph.AddInputTensor(input_b_rank, xnn_datatype_of<InputB>(),
+                              input_b_quantization, input_b_id);
+    }
+
+    subgraph.AddOutputTensor(output_rank, xnn_datatype_of<Output>(),
                              output_quantization, output_id)
-            .AddBatchMatrixMultiply(input_a_id, input_b_id, output_id, flags);
+            .AddBatchMatrixMultiply(bmm_input_a_id, input_b_id, output_id,
+                                    flags);
 
     xnn_status status = subgraph.CreateRuntime();
     if (status == xnn_status_unsupported_hardware) {
@@ -217,29 +322,50 @@ void TestDynamicB(uint64_t runtime_flags = xnn_test_runtime_flags()) {
       std::vector<size_t> a_shape, b_shape;
       std::tie(a_shape, b_shape) = random_broadcasted_inputs(
           rng, output_shape, input_a_rank, input_b_rank);
-      size_t mn[] = {dim_dist(rng), dim_dist(rng)};
-      if (!is_k_big) {
-        mn[rng() % 2] = big_dim_dist(rng);
-      }
-      const size_t m = mn[0];
-      const size_t n = mn[1];
 
-      a_shape[input_a_rank - 2] = m;
+      if (xnn_datatype_is_channelwise_quantized(xnn_datatype_of<InputB>())) {
+        b_shape = channelwise_b_shape;
+        a_shape = random_shape(rng, input_a_rank, 1, 4);
+        if (!is_channelwise_n_big) {
+          a_shape[input_a_rank - 2] = big_dim_dist(rng);
+        }
+
+        // Copy the batch dimensions from right to left.
+        const size_t num_batch_dims =
+            std::min(a_shape.size(), b_shape.size()) - 2;
+        std::copy_n(b_shape.rbegin() + 2, num_batch_dims, a_shape.rbegin() + 2);
+      } else {
+        size_t mn[] = {dim_dist(rng), dim_dist(rng)};
+        if (!is_k_big) {
+          mn[rng() % 2] = big_dim_dist(rng);
+        }
+
+        a_shape[input_a_rank - 2] = mn[0];
+        b_shape[input_b_rank - 2] = k;
+        b_shape[input_b_rank - 1] = mn[1];
+
+        if (flags & XNN_FLAG_TRANSPOSE_B) {
+          std::swap(b_shape[input_b_rank - 1], b_shape[input_b_rank - 2]);
+        }
+
+        input_b = Tensor<InputB>({b_shape});
+        auto input_b_gen =
+            MakeDatatypeGenerator(InputB(), /*symmetric_range=*/true);
+        input_b.generate([&]() { return input_b_gen(rng); });
+      }
+
       a_shape[input_a_rank - 1] = k;
-      b_shape[input_b_rank - 2] = k;
-      b_shape[input_b_rank - 1] = n;
-
-      if (flags & XNN_FLAG_TRANSPOSE_B) {
-        std::swap(b_shape[input_b_rank - 1], b_shape[input_b_rank - 2]);
-      }
-
-      Tensor<Input> input_a(a_shape, XnnExtraBytes);
-      Tensor<Input> input_b(b_shape, XnnExtraBytes);
-      auto input_a_gen = MakeDatatypeGenerator(Input());
-      auto input_b_gen =
-          MakeDatatypeGenerator(Input(), /*symmetric_range=*/true);
+      Tensor<InputA> input_a(a_shape, XnnExtraBytes);
+      auto input_a_gen = MakeDatatypeGenerator(InputA());
       input_a.generate([&]() { return input_a_gen(rng); });
-      input_b.generate([&]() { return input_b_gen(rng); });
+
+      if (convert_to != xnn_datatype_invalid) {
+        std::vector<size_t> input_batches = input_a.shape();
+        input_batches.pop_back();
+        for (const auto& i : EnumerateIndices(input_batches)) {
+          FakeDynamicQuantize(input_a.slice_leading(i), convert_to);
+        }
+      }
       broadcast_extent_1(input_a);
       broadcast_extent_1(input_b);
 
@@ -274,9 +400,10 @@ void TestDynamicB(uint64_t runtime_flags = xnn_test_runtime_flags()) {
               << ", output_shape=" << index_to_string(expected.shape());
         }
       } else {
-        // In this case, both inputs should be in the range [-1, 1].
-        const float tolerance =
-            xnnpack::epsilon(xnn_datatype_of<Output>()) * k * 2.0f;
+        const float max_a = MaxDatatype(InputA());
+        const float max_b = MaxDatatype(InputB()) * input_b_quantization.scale;
+        const float tolerance = xnnpack::epsilon(xnn_datatype_of<Output>()) *
+                                k * max_a * max_b * 3.0f;
 
         for (const auto& i : EnumerateIndices(output.shape())) {
           ASSERT_NEAR(
@@ -291,28 +418,40 @@ void TestDynamicB(uint64_t runtime_flags = xnn_test_runtime_flags()) {
   }
 }
 
-TEST(BatchMatrixMultiplyF16, dynamic_b) {
-  TestDynamicB<xnn_float16, xnn_float16>();
-}
-TEST(BatchMatrixMultiplyF32, dynamic_b) { TestDynamicB<float, float>(); }
+TEST(BatchMatrixMultiplyF16, dynamic_b) { TestDynamicB<xnn_float16>(); }
+TEST(BatchMatrixMultiplyF32, dynamic_b) { TestDynamicB<float>(); }
 TEST(BatchMatrixMultiplyBF16F32, dynamic_b) {
-  TestDynamicB<xnn_bfloat16, float>();
+  TestDynamicB<xnn_bfloat16, xnn_bfloat16, float>();
 }
 TEST(BatchMatrixMultiplyQS8, dynamic_b) {
-  TestDynamicB<xnnpack::quantized<int8_t>, xnnpack::quantized<int8_t>>();
+  TestDynamicB<xnnpack::quantized<int8_t>>();
+}
+
+TEST(BatchMatrixMultiplyQD8F32, dynamic_b) {
+  TestDynamicB<float, qcint8>(/*convert_to=*/xnn_datatype_qdint8);
+}
+
+TEST(BatchMatrixMultiplyQD8F32, dont_inline_lhs_dynamic_b) {
+  TestDynamicB<float, qcint8>(/*convert_to=*/xnn_datatype_qdint8,
+                              /*runtime_flags=*/xnn_test_runtime_flags() |
+                                XNN_FLAG_NO_INLINED_LHS_PACKING);
 }
 
 TEST(BatchMatrixMultiplyF16, dont_inline_lhs_dynamic_b) {
-  TestDynamicB<xnn_float16, xnn_float16>(
+  TestDynamicB<xnn_float16>(
+      /*convert_to=*/xnn_datatype_invalid,
       /*runtime_flags=*/xnn_test_runtime_flags() |
       XNN_FLAG_NO_INLINED_LHS_PACKING);
 }
 TEST(BatchMatrixMultiplyF32, dont_inline_lhs_dynamic_b) {
-  TestDynamicB<float, float>(/*runtime_flags=*/xnn_test_runtime_flags() |
+  TestDynamicB<float>(
+      /*convert_to=*/xnn_datatype_invalid,
+      /*runtime_flags=*/xnn_test_runtime_flags() |
                              XNN_FLAG_NO_INLINED_LHS_PACKING);
 }
 TEST(BatchMatrixMultiplyBF16F32, dont_inline_lhs_dynamic_b) {
-  TestDynamicB<xnn_bfloat16, float>(
+  TestDynamicB<xnn_bfloat16, xnn_bfloat16, float>(
+      /*convert_to=*/xnn_datatype_invalid,
       /*runtime_flags=*/xnn_test_runtime_flags() |
       XNN_FLAG_NO_INLINED_LHS_PACKING);
 }
@@ -520,8 +659,6 @@ TEST(BatchMatrixMultiplyBF16F32, dont_inline_lhs_static_b) {
           XNN_FLAG_NO_INLINED_LHS_PACKING);
 }
 
-using qcint8 = quantized<int8_t, channelwise>;
-
 TEST(BatchMatrixMultiplyQD8F32, static_b) {
   TestStaticB<float, qcint8>(/*convert_to=*/xnn_datatype_qdint8);
 }
@@ -529,7 +666,7 @@ TEST(BatchMatrixMultiplyQD8F32, static_b) {
 TEST(BatchMatrixMultiplyQD8F32, dont_inline_lhs_static_b) {
   TestStaticB<float, qcint8>(/*convert_to=*/xnn_datatype_qdint8,
                              /*runtime_flags=*/xnn_test_runtime_flags() |
-                                 XNN_FLAG_NO_INLINED_LHS_PACKING);
+                                XNN_FLAG_NO_INLINED_LHS_PACKING);
 }
 
 }  // namespace xnnpack

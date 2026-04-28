@@ -951,87 +951,109 @@ class BatchMatMulOperatorTester {
     xnnpack::Buffer<float> output(batch_size_output * m() * n());
     xnnpack::Buffer<float> output_ref(batch_size_output * m() * n());
 
-    for (size_t iteration = 0; iteration < kIterations; iteration++) {
-      std::generate(input_a.begin(), input_a.end(),
-                    [&]() { return f32dist(rng); });
-      std::generate(input_b.begin(), input_b.end(),
-                    [&]() { return f32dist(rng); });
+    for (bool const_weights : {true, false}) {
+      for (size_t iteration = 0; iteration < kIterations; iteration++) {
+        std::generate(input_a.begin(), input_a.end(),
+                      [&]() { return f32dist(rng); });
+        std::generate(input_b.begin(), input_b.end(),
+                      [&]() { return f32dist(rng); });
 
-      ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+        ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
 
-      // Create the dynamically quantized input data.
-      xnnpack::Buffer<int8_t> input_a_qp8(
-          batch_size_a *
-              xnn_x8_packq_f32qp8_gemm_packed_size(gemm_config, m(), k()),
-          xnnpack::XnnExtraBytes);
-      xnn_operator_t convert_op = nullptr;
-      xnn_status status = xnn_create_convert_nc_f32_qp8(
-          /*flags=*/0, gemm_config, &convert_op);
-      std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)>
-          auto_convert_op(convert_op, xnn_delete_operator);
-      if (status == xnn_status_unsupported_hardware) {
-        GTEST_SKIP();
+        // Create the dynamically quantized input data.
+        xnnpack::Buffer<int8_t> input_a_qp8(
+            batch_size_a *
+                xnn_x8_packq_f32qp8_gemm_packed_size(gemm_config, m(), k()),
+            xnnpack::XnnExtraBytes);
+        xnn_operator_t convert_op = nullptr;
+        xnn_status status = xnn_create_convert_nc_f32_qp8(
+            /*flags=*/0, gemm_config, &convert_op);
+        std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)>
+            auto_convert_op(convert_op, xnn_delete_operator);
+        if (status == xnn_status_unsupported_hardware) {
+          GTEST_SKIP();
+        }
+        ASSERT_EQ(xnn_status_success, status);
+        ASSERT_NE(nullptr, convert_op);
+        ASSERT_EQ(xnn_status_success,
+                  xnn_reshape_convert_nc_f32_qp8(convert_op, batch_size_a, m(),
+                                                 k(), k(),
+                                                 /*threadpool=*/nullptr));
+        ASSERT_EQ(xnn_status_success,
+                  xnn_setup_convert_nc_f32_qp8(convert_op, input_a.data(),
+                                               input_a_qp8.data()));
+        ASSERT_EQ(xnn_status_success,
+                  xnn_run_operator(convert_op, /*threadpool=*/nullptr));
+
+        // Compute the channelwise quantized input_b.
+        xnnpack::Buffer<int8_t> input_b_qc8(batch_size_b * k() * n(),
+                                            xnnpack::XnnExtraBytes);
+        xnnpack::Buffer<float> channelwise_scale_b(batch_size_b * n(),
+                                                   xnnpack::XnnExtraBytes);
+        ComputeQC8W(input_b, batch_size_b, input_b_qc8, channelwise_scale_b);
+
+        // Compute reference results.
+        ComputeReference(batch_dims_output, input_a.data(), input_b.data(),
+                         output_ref.data(), ComputeRef<float>);
+
+        // Create, setup, run, and destroy Batch Matrix Multiply operator.
+        xnn_operator_t batch_matrix_multiply_op = nullptr;
+
+        if (const_weights) {
+          status =
+              xnn_create_batch_matrix_multiply_nc_qp8_f32_qc8w_const_weights(
+                  batch_size_b, k(), n(), input_b_qc8.data(),
+                  channelwise_scale_b.data(), flags(),
+                  &batch_matrix_multiply_op);
+        } else {
+          status = xnn_create_batch_matrix_multiply_nc_qp8_f32_qc8w(
+              flags(), &batch_matrix_multiply_op);
+        }
+
+        if (status == xnn_status_unsupported_hardware) {
+          GTEST_SKIP();
+        }
+        ASSERT_EQ(xnn_status_success, status);
+        ASSERT_NE(nullptr, batch_matrix_multiply_op);
+
+        // Smart pointer to automatically delete batch_matrix_multiply_op.
+        std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)>
+            auto_batch_matrix_multiply_op(batch_matrix_multiply_op,
+                                          xnn_delete_operator);
+
+        size_t workspace_size = 0;
+        if (const_weights) {
+          ASSERT_EQ(
+              expected_status_reshape(),
+              xnn_reshape_batch_matrix_multiply_nc_qp8_f32_qc8w_const_weights(
+                  batch_matrix_multiply_op, num_batch_dims,
+                  batch_dims_a().data(), batch_dims_b().data(), m(), k(), n(),
+                  &workspace_size, /*threadpool=*/nullptr));
+        } else {
+          ASSERT_EQ(expected_status_reshape(),
+                    xnn_reshape_batch_matrix_multiply_nc_qp8_f32_qc8w(
+                        batch_matrix_multiply_op, num_batch_dims,
+                        batch_dims_a().data(), batch_dims_b().data(), m(), k(),
+                        n(), channelwise_scale_b.data(), &workspace_size,
+                        /*threadpool=*/nullptr));
+        }
+        if (expected_status_reshape() != xnn_status_success) {
+          return;
+        }
+        xnnpack::Buffer<uint8_t, XNN_ALLOCATION_ALIGNMENT> workspace(
+            workspace_size);
+        std::fill(workspace.begin(), workspace.end(), 0);
+
+        ASSERT_EQ(xnn_status_success,
+                  xnn_setup_batch_matrix_multiply_nc_qp8_f32_qc8w(
+                      batch_matrix_multiply_op, workspace.data(),
+                      input_a_qp8.data(), input_b_qc8.data(), output.data()));
+
+        ASSERT_EQ(xnn_status_success, xnn_run_operator(batch_matrix_multiply_op,
+                                                       /*threadpool=*/nullptr));
+
+        VerifyQD8F32QC8W(output, output_ref);
       }
-      ASSERT_EQ(xnn_status_success, status);
-      ASSERT_NE(nullptr, convert_op);
-      ASSERT_EQ(xnn_status_success, xnn_reshape_convert_nc_f32_qp8(
-                                        convert_op, batch_size_a, m(), k(), k(),
-                                        /*threadpool=*/nullptr));
-      ASSERT_EQ(xnn_status_success,
-                xnn_setup_convert_nc_f32_qp8(convert_op, input_a.data(),
-                                             input_a_qp8.data()));
-      ASSERT_EQ(xnn_status_success,
-                xnn_run_operator(convert_op, /*threadpool=*/nullptr));
-
-      // Compute the channelwise quantized input_b.
-      xnnpack::Buffer<int8_t> input_b_qc8(batch_size_b * k() * n(),
-                                          xnnpack::XnnExtraBytes);
-      xnnpack::Buffer<float> channelwise_scale_b(batch_size_b * n(),
-                                                 xnnpack::XnnExtraBytes);
-      ComputeQC8W(input_b, batch_size_b, input_b_qc8, channelwise_scale_b);
-
-      // Compute reference results.
-      ComputeReference(batch_dims_output, input_a.data(), input_b.data(),
-                       output_ref.data(), ComputeRef<float>);
-
-      // Create, setup, run, and destroy Batch Matrix Multiply operator.
-      xnn_operator_t batch_matrix_multiply_op = nullptr;
-
-      status = xnn_create_batch_matrix_multiply_nc_qp8_f32_qc8w(
-          batch_size_b, k(), n(), input_b_qc8.data(),
-          channelwise_scale_b.data(), flags(), &batch_matrix_multiply_op);
-      if (status == xnn_status_unsupported_hardware) {
-        GTEST_SKIP();
-      }
-      ASSERT_EQ(xnn_status_success, status);
-      ASSERT_NE(nullptr, batch_matrix_multiply_op);
-
-      // Smart pointer to automatically delete batch_matrix_multiply_op.
-      std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)>
-          auto_batch_matrix_multiply_op(batch_matrix_multiply_op,
-                                        xnn_delete_operator);
-
-      size_t workspace_size = 0;
-      ASSERT_EQ(expected_status_reshape(),
-                xnn_reshape_batch_matrix_multiply_nc_qp8_f32_qc8w(
-                    batch_matrix_multiply_op, num_batch_dims,
-                    batch_dims_a().data(), batch_dims_b().data(), m(), k(), n(),
-                    &workspace_size, /*threadpool=*/nullptr));
-      if (expected_status_reshape() != xnn_status_success) {
-        return;
-      }
-      xnnpack::Buffer<uint8_t, XNN_ALLOCATION_ALIGNMENT> workspace(
-          workspace_size);
-
-      ASSERT_EQ(xnn_status_success,
-                xnn_setup_batch_matrix_multiply_nc_qp8_f32_qc8w(
-                    batch_matrix_multiply_op, workspace.data(),
-                    input_a_qp8.data(), /*input_b=*/nullptr, output.data()));
-
-      ASSERT_EQ(xnn_status_success, xnn_run_operator(batch_matrix_multiply_op,
-                                                     /*threadpool=*/nullptr));
-
-      VerifyQD8F32QC8W(output, output_ref);
     }
   }
 

@@ -180,7 +180,10 @@ xnnpack_unit_test(
     name = "batch_matrix_multiply_test",
     srcs = ["batch-matrix-multiply.cc"],
     shard_count = 5,
-    deps = SUBGRAPH_TEST_DEPS,
+    deps = SUBGRAPH_TEST_DEPS + [
+        "//:microparams_h",
+        "//:quantization",
+    ],
 )
 
 xnnpack_unit_test(
