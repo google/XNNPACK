@@ -553,21 +553,6 @@ uint32_t xnn_subgraph_get_num_values(xnn_subgraph_t subgraph);
 size_t xnn_tensor_get_size(const struct xnn_value* value);
 size_t xnn_runtime_tensor_get_size(const struct xnn_runtime_value* value);
 
-XNN_INLINE static size_t xnn_get_rounded_size(size_t size) {
-  // We round it to XNN_EXTRA_BYTES to ensure that we can read more than the
-  // actual size of the tensor, and round it to allocation alignment to ensure
-  // that all tensors and operator workspaces are aligned correctly.
-  return round_up_po2(round_up_po2(size, XNN_EXTRA_BYTES),
-                      XNN_ALLOCATION_ALIGNMENT);
-}
-
-// Returns the size of tensor rounded to appropriate extra bytes and allocation
-// alignment.
-XNN_INLINE static size_t xnn_tensor_get_rounded_size(
-    const struct xnn_runtime_value* value) {
-  return xnn_get_rounded_size(value->size);
-}
-
 // Product of all shape dimensions
 size_t xnn_shape_multiply_all_dims(const struct xnn_shape* shape);
 
@@ -613,28 +598,6 @@ size_t xnn_tensor_get_dynamic_quant_param_size(enum xnn_datatype datatype,
 size_t xnn_tensor_get_row_sum_size(enum xnn_datatype datatype,
                                    const struct xnn_shape* shape,
                                    size_t num_nonbatch_dims);
-
-XNN_INLINE static size_t xnn_tensor_get_rounded_dynamic_quant_param_size(
-    const struct xnn_runtime_value* value) {
-  assert(value->datatype == xnn_datatype_qdint8 ||
-         value->datatype == xnn_datatype_qduint8);
-
-  // We may read out of bounds for qparams.
-  return xnn_get_rounded_size(
-      value->quantization.dynamic_params_size + XNN_EXTRA_QUANTIZATION_PARAMS *
-          sizeof(struct xnn_quantization_params));
-}
-
-XNN_INLINE static size_t xnn_tensor_get_rounded_row_sum_size(
-    const struct xnn_runtime_value* value) {
-  assert(value->datatype == xnn_datatype_qdint8 ||
-         value->datatype == xnn_datatype_qduint8);
-
-  // We may read out of bounds for qparams.
-  return xnn_get_rounded_size(
-      value->quantization.row_sum_size + XNN_EXTRA_QUANTIZATION_PARAMS *
-          sizeof(float));
-}
 
 // Rewrites the subgraph such that values have exactly one producer.
 void xnn_subgraph_rewrite_ssa(xnn_subgraph_t subgraph);
