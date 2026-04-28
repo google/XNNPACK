@@ -259,8 +259,15 @@ enum xnn_status xnn_define_dynamically_quantized_tensor_value(
 
   switch (datatype) {
     case xnn_datatype_qdint8:
-    case xnn_datatype_qpint8:
       break;
+    case xnn_datatype_qpint8:
+      // qpint8 reaches get_tensor_size() at tensor.c:770, which dereferences
+      // value->gemm_config (left NULL by this define path). Reject until the
+      // gemm-config wiring is added.
+      xnn_log_error("failed to create Dynamically Quantized Dense Tensor value: "
+        "datatype %s (%d) is not supported on this code path",
+        xnn_datatype_to_string(datatype), datatype);
+      return xnn_status_unsupported_parameter;
     default:
       xnn_log_error("failed to create Dynamically Quantized Dense Tensor value: unsupported datatype %s (%d)",
         xnn_datatype_to_string(datatype), datatype);
