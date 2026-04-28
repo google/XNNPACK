@@ -1,5 +1,6 @@
 // clang-format off
 
+#if !YNN_COMPILER_HAS_FEATURE(memory_sanitizer)
 #ifdef YNN_ARCH_X86_AMXBF16
 YNN_DOT_KERNEL(arch_flag::amxbf16, dot_bf16_bf16_fp32_16x64x32_16x16x2_amxbf16,
                16, 64, 32, 1, 16, 2,
@@ -27,6 +28,7 @@ YNN_DOT_KERNEL(arch_flag::amxint8, dot_uint8_int8_int32_32x32x64_16x16x4_amxint8
                32, 32, 64, 16, 16, 4,
                dot_flag::consistent_arithmetic, uint8_t, int8_t, int32_t)
 #endif  // YNN_ARCH_X86_AMXINT8
+#endif  // YNN_COMPILER_HAS_FEATURE(memory_sanitizer)
 
 #ifdef YNN_ARCH_X86_AVX512VNNI
 #include "ynnpack/kernels/dot/x86_avx512vnni_uint8_int8_int32.inc"

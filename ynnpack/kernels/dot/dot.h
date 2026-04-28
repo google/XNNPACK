@@ -12,6 +12,7 @@
 #include <optional>
 
 #include "ynnpack/base/arch.h"  // IWYU pragma: keep
+#include "ynnpack/base/base.h"  // IWYU pragma: keep
 #include "ynnpack/include/ynnpack.h"
 #include "ynnpack/kernels/dot/arm64_sme.h"  // IWYU pragma: keep
 
