@@ -181,5 +181,25 @@ TEST(OwningCpuBuffer, CopyFromInitializerList) {
               ElementsAreArray(reference_data));
 }
 
+TEST(OwningCpuBuffer, CopyToBF16) {
+  std::initializer_list<int> reference_data{1, 2, 3, 4, 5};
+
+  std::shared_ptr<OwningCpuBuffer> buffer =
+      OwningCpuBuffer::Copy<Type::kBF16>(reference_data);
+  ASSERT_THAT(buffer, NotNull());
+  ASSERT_THAT(buffer->LockMutable().As<bf16_t>(),
+              ElementsAreArray(reference_data));
+}
+
+TEST(OwningCpuBuffer, CopyFromBF16) {
+  std::initializer_list<bf16_t> reference_data{1, 2, 3, 4, 5};
+
+  std::shared_ptr<OwningCpuBuffer> buffer =
+      OwningCpuBuffer::Copy<Type::kI32>(reference_data);
+  ASSERT_THAT(buffer, NotNull());
+  ASSERT_THAT(buffer->LockMutable().As<int>(),
+              ElementsAreArray(reference_data));
+}
+
 }  // namespace
 }  // namespace litert::tensor

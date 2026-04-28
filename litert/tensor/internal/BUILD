@@ -203,3 +203,8 @@ cc_test(
         "@com_google_googletest//:gtest_main",  # gunit
     ],
 )
+
+cc_library(
+    name = "fp16",
+    hdrs = ["fp16.h"],
+)

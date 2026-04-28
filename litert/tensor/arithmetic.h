@@ -1469,6 +1469,9 @@ Tensor<Mixins...> Gelu(Tensor<Mixins...> input, bool approximate = false,
 template <class... Mixins>
 Tensor<Mixins...> Cast(Tensor<Mixins...> input, Type to,
                        source_location loc = source_location::current()) {
+  if (input.GetType() == to) {
+    return input;
+  }
   auto op = std::make_shared<graph::CastOperation<Mixins...>>();
   op->to = to;
   AddInputs(op, input);
