@@ -20,7 +20,7 @@ namespace ynn {
 //
 // for all i, j, k3, k2, k1
 //
-// For most reductions, l will be 0, and B is ignored.
+// For most reductions, i will be 0, and B is ignored.
 typedef void (*unary_reduce_kernel_fn)(size_t n, size_t k3, size_t k2,
                                        size_t k1, size_t a_stride_n,
                                        size_t a_stride_k3, size_t a_stride_k2,
