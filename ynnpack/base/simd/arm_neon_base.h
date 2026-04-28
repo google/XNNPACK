@@ -932,6 +932,13 @@ YNN_ALWAYS_INLINE std::tuple<u8x16, u8x16> interleave(
       u8x16{vbslq_u8(vdupq_n_u8(0xf0), vshlq_n_u8(x1.v, 4), x0.v)},
       u8x16{vbslq_u8(vdupq_n_u8(0xf0), x1.v, vshrq_n_u8(x0.v, 4))});
 }
+YNN_ALWAYS_INLINE std::tuple<u8x16, u8x16> interleave(
+    std::integral_constant<size_t, 2>, u8x16 x0, u8x16 x1) {
+  return interleave(
+      std::integral_constant<size_t, 4>{},
+      u8x16{vbslq_u8(vdupq_n_u8(0xcc), vshlq_n_u8(x1.v, 2), x0.v)},
+      u8x16{vbslq_u8(vdupq_n_u8(0xcc), x1.v, vshrq_n_u8(x0.v, 2))});
+}
 
 YNN_ALWAYS_INLINE std::tuple<u8x8, u8x8> interleave(
     std::integral_constant<size_t, 32>, u8x8 x0, u8x8 x1) {
@@ -957,6 +964,12 @@ YNN_ALWAYS_INLINE std::tuple<u8x8, u8x8> interleave(
   return interleave(std::integral_constant<size_t, 8>{},
                     u8x8{vbsl_u8(vdup_n_u8(0xf0), vshl_n_u8(x1.v, 4), x0.v)},
                     u8x8{vbsl_u8(vdup_n_u8(0xf0), x1.v, vshr_n_u8(x0.v, 4))});
+}
+YNN_ALWAYS_INLINE std::tuple<u8x8, u8x8> interleave(
+    std::integral_constant<size_t, 2>, u8x8 x0, u8x8 x1) {
+  return interleave(std::integral_constant<size_t, 4>{},
+                    u8x8{vbsl_u8(vdup_n_u8(0xcc), vshl_n_u8(x1.v, 2), x0.v)},
+                    u8x8{vbsl_u8(vdup_n_u8(0xcc), x1.v, vshr_n_u8(x0.v, 2))});
 }
 
 template <typename T>

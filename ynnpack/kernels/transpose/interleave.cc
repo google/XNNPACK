@@ -56,10 +56,41 @@ void interleave_impl(size_t factor, size_t m, size_t n, size_t stride_a,
     const int i0 = 2 * i + 0;
     const int i1 = 2 * i + 1;
     for (size_t j = 0; j < n / 2; ++j) {
-      const uint4x2 a0 = i0 < m ? a[i0 * stride_a + j] : uint4x2(0, 0);
-      const uint4x2 a1 = i1 < m ? a[i1 * stride_a + j] : uint4x2(0, 0);
+      const uint4x2 a0 = i0 < m ? a[i0 * stride_a + j] : uint4x2(0);
+      const uint4x2 a1 = i1 < m ? a[i1 * stride_a + j] : uint4x2(0);
       x[(2 * j + 0) * x_stride_n + i] = uint4x2(a0.get(0), a1.get(0));
       x[(2 * j + 1) * x_stride_n + i] = uint4x2(a0.get(1), a1.get(1));
+    }
+  }
+}
+
+void interleave_impl(size_t factor, size_t m, size_t n, size_t stride_a,
+                     const uint2x4* a, uint2x4* x) {
+  assert(m <= factor);
+  if (factor == 1) {
+    memcpy(x, a, n / 4);
+    return;
+  }
+  assert(n % 4 == 0);
+  const size_t x_stride_n = factor / 4;
+  for (size_t i = 0; i < factor / 4; ++i) {
+    const int i0 = 4 * i + 0;
+    const int i1 = 4 * i + 1;
+    const int i2 = 4 * i + 2;
+    const int i3 = 4 * i + 3;
+    for (size_t j = 0; j < n / 4; ++j) {
+      const uint2x4 a0 = i0 < m ? a[i0 * stride_a + j] : uint2x4(0);
+      const uint2x4 a1 = i1 < m ? a[i1 * stride_a + j] : uint2x4(0);
+      const uint2x4 a2 = i2 < m ? a[i2 * stride_a + j] : uint2x4(0);
+      const uint2x4 a3 = i3 < m ? a[i3 * stride_a + j] : uint2x4(0);
+      x[(4 * j + 0) * x_stride_n + i] =
+          uint2x4(a0.get(0), a1.get(0), a2.get(0), a3.get(0));
+      x[(4 * j + 1) * x_stride_n + i] =
+          uint2x4(a0.get(1), a1.get(1), a2.get(1), a3.get(1));
+      x[(4 * j + 2) * x_stride_n + i] =
+          uint2x4(a0.get(2), a1.get(2), a2.get(2), a3.get(2));
+      x[(4 * j + 3) * x_stride_n + i] =
+          uint2x4(a0.get(3), a1.get(3), a2.get(3), a3.get(3));
     }
   }
 }
@@ -110,6 +141,11 @@ void interleave4_x8(size_t factor, size_t m, size_t n, size_t stride_a,
                                    std::integral_constant<size_t, 8>{});
 }
 
+void interleave_x2(size_t factor, size_t m, size_t n, size_t stride_a,
+                   const void* a, void* x) {
+  interleave_impl(factor, m, n, stride_a, static_cast<const uint2x4*>(a),
+                  static_cast<uint2x4*>(x));
+}
 void interleave_x4(size_t factor, size_t m, size_t n, size_t stride_a,
                    const void* a, void* x) {
   interleave_impl(factor, m, n, stride_a, static_cast<const uint4x2*>(a),

@@ -1023,6 +1023,16 @@ YNN_ALWAYS_INLINE std::tuple<u8x64, u8x64> interleave(
                     u8x64{_mm512_or_si512(_mm512_slli_epi16(even1, 4), even0)},
                     u8x64{_mm512_or_si512(odd1, _mm512_srli_epi16(odd0, 4))});
 }
+YNN_ALWAYS_INLINE std::tuple<u8x64, u8x64> interleave(
+    std::integral_constant<size_t, 2>, u8x64 x0, u8x64 x1) {
+  __m512i even0 = _mm512_and_si512(x0.v, _mm512_set1_epi8(0x33));
+  __m512i even1 = _mm512_and_si512(x1.v, _mm512_set1_epi8(0x33));
+  __m512i odd0 = _mm512_and_si512(x0.v, _mm512_set1_epi8(0xcc));
+  __m512i odd1 = _mm512_and_si512(x1.v, _mm512_set1_epi8(0xcc));
+  return interleave(std::integral_constant<size_t, 4>{},
+                    u8x64{_mm512_or_si512(_mm512_slli_epi16(even1, 2), even0)},
+                    u8x64{_mm512_or_si512(odd1, _mm512_srli_epi16(odd0, 2))});
+}
 
 using f32x32 = vec<float, 32>;
 using s16x64 = vec<int16_t, 64>;

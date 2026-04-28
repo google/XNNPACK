@@ -50,6 +50,13 @@ void transpose_x64_avx2(size_t m, size_t n, size_t n_bytes_a, size_t stride_a,
 
 // The 128-bit avx2 kernel is faster than SSE2, *if* the transpose is not tiled.
 
+void interleave2_x2_avx2(size_t factor, size_t m, size_t n, size_t stride_a,
+                         const void* a, void* x) {
+  assert(factor == 2);
+  interleave<std::array<u8x32, 2>>(m, n, stride_a, a, x,
+                                   std::integral_constant<size_t, 2>{});
+}
+
 void interleave2_x4_avx2(size_t factor, size_t m, size_t n, size_t stride_a,
                          const void* a, void* x) {
   assert(factor == 2);
@@ -76,6 +83,20 @@ void interleave2_x32_avx2(size_t factor, size_t m, size_t n, size_t stride_a,
   assert(factor == 2);
   interleave<std::array<u8x32, 2>>(m, n, stride_a, a, x,
                                    std::integral_constant<size_t, 32>{});
+}
+
+void interleave4_x2_avx2(size_t factor, size_t m, size_t n, size_t stride_a,
+                         const void* a, void* x) {
+  assert(factor == 4);
+  interleave<std::array<u8x32, 4>>(m, n, stride_a, a, x,
+                                   std::integral_constant<size_t, 2>{});
+}
+
+void interleave4_x4_avx2(size_t factor, size_t m, size_t n, size_t stride_a,
+                         const void* a, void* x) {
+  assert(factor == 4);
+  interleave<std::array<u8x32, 4>>(m, n, stride_a, a, x,
+                                   std::integral_constant<size_t, 4>{});
 }
 
 void interleave4_x8_avx2(size_t factor, size_t m, size_t n, size_t stride_a,
