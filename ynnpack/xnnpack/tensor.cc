@@ -124,7 +124,6 @@ xnn_status xnn_define_channelwise_quantized_tensor_value_v3(
     const float* channelwise_zero_point) {
   // Channelwise zero points are not supported yet.
   assert(channelwise_zero_point == nullptr);
-  assert(data);
   uint32_t zero_point_id = YNN_INVALID_VALUE_ID;
   if (zero_point != 0) {
     ynn_status status = ynn_define_tensor(
