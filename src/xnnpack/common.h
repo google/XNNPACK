@@ -140,10 +140,12 @@
 #define XNN_PLATFORM_QURT 0
 #endif
 
+#ifndef XNN_HAS_MMAP
 #if XNN_PLATFORM_WINDOWS
 #define XNN_HAS_MMAP 0
 #else
 #define XNN_HAS_MMAP 1
+#endif
 #endif
 
 #if XNN_PLATFORM_WINDOWS
