@@ -36,6 +36,7 @@ _ISA_LIST = frozenset({
     'armsimd32',
     'avx',
     'avx2',
+    'avx512bf16',
     'avx512f',
     'avx512skx',
     'avx512vbmi',
