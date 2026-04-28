@@ -230,6 +230,43 @@ enum xnn_status xnn_create_runtime_v3(
   return status;
 }
 
+static size_t xnn_get_rounded_size(size_t size) {
+  // We round it to XNN_EXTRA_BYTES to ensure that we can read more than the
+  // actual size of the tensor, and round it to allocation alignment to ensure
+  // that all tensors and operator workspaces are aligned correctly.
+  return round_up_po2(round_up_po2(size, XNN_EXTRA_BYTES),
+                      XNN_ALLOCATION_ALIGNMENT);
+}
+
+// Returns the size of tensor rounded to appropriate extra bytes and allocation
+// alignment.
+static size_t xnn_tensor_get_rounded_size(
+    const struct xnn_runtime_value* value) {
+  return xnn_get_rounded_size(value->size);
+}
+
+static size_t xnn_tensor_get_rounded_dynamic_quant_param_size(
+    const struct xnn_runtime_value* value) {
+  assert(value->datatype == xnn_datatype_qdint8 ||
+         value->datatype == xnn_datatype_qduint8);
+
+  // We may read out of bounds for qparams.
+  return xnn_get_rounded_size(
+      value->quantization.dynamic_params_size + XNN_EXTRA_QUANTIZATION_PARAMS *
+          sizeof(struct xnn_quantization_params));
+}
+
+static size_t xnn_tensor_get_rounded_row_sum_size(
+    const struct xnn_runtime_value* value) {
+  assert(value->datatype == xnn_datatype_qdint8 ||
+         value->datatype == xnn_datatype_qduint8);
+
+  // We may read out of bounds for qparams.
+  return xnn_get_rounded_size(
+      value->quantization.row_sum_size + XNN_EXTRA_QUANTIZATION_PARAMS *
+          sizeof(float));
+}
+
 static enum xnn_status initialize_workspace_values(
     xnn_runtime_t runtime,
     struct xnn_value_allocation_tracker* mem_alloc_tracker)
