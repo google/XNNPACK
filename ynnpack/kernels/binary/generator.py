@@ -88,7 +88,7 @@ def main(argv: Sequence[str]) -> None:
           (squared_difference_fp32, (32, 1)),
       ],
       "arm_neonbf16": [
-          (multiply_bf16_fp32_bf16, (16, 1)),
+          (multiply_bf16_fp32_bf16, (64, 1)),
           (divide_bf16_fp32_bf16, (16, 1)),
       ],
       "wasm_simd128": [

@@ -124,7 +124,7 @@ def main(argv: Sequence[str]) -> None:
           (tanh_fp32, (16, 1)),
       ],
       "arm_neonbf16": [
-          (convert_fp32_to_bf16, (16, 1)),
+          (convert_fp32_to_bf16, (64, 1)),
       ],
       "arm_neonfp16": [
           (convert_fp16_to_fp32, (16, 1)),
