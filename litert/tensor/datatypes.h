@@ -52,10 +52,11 @@ namespace internal {
 //
 // - T: the native type used to store data.
 // - Bits: a power of 2, for data that is smaller than 1 byte.
-template <class T, size_t Bits = 8 * sizeof(T)>
-struct NativeStorageImpl {
+template <Type t, class T, size_t Bits = 8 * sizeof(T)>
+struct StorageImpl {
   static_assert((Bits & (Bits - 1)) == 0, "Bits must be a power of 2.");
   using type = T;
+  static constexpr Type value = t;
   static constexpr size_t BufferSize(size_t count) {
     return (Bits * count + 7) / 8;
   }
@@ -159,54 +160,118 @@ static_assert(alignof(fp16_t) == alignof(int16_t));
 
 template <>
 struct NativeStorage<Type::kI2>
-    : internal::NativeStorageImpl<int8_t, /*Bits=*/2> {};
+    : internal::StorageImpl<Type::kI2, int2_t, /*Bits=*/2> {};
 
 template <>
 struct NativeStorage<Type::kI4>
-    : internal::NativeStorageImpl<int8_t, /*Bits=*/4> {};
+    : internal::StorageImpl<Type::kI4, int4_t, /*Bits=*/4> {};
 
 template <>
-struct NativeStorage<Type::kI8> : internal::NativeStorageImpl<int8_t> {};
+struct NativeStorage<Type::kI8> : internal::StorageImpl<Type::kI8, int8_t> {};
 
 template <>
-struct NativeStorage<Type::kI16> : internal::NativeStorageImpl<int16_t> {};
+struct NativeStorage<Type::kI16> : internal::StorageImpl<Type::kI16, int16_t> {
+};
 
 template <>
-struct NativeStorage<Type::kI32> : internal::NativeStorageImpl<int32_t> {};
+struct NativeStorage<Type::kI32> : internal::StorageImpl<Type::kI32, int32_t> {
+};
 
 template <>
-struct NativeStorage<Type::kI64> : internal::NativeStorageImpl<int64_t> {};
+struct NativeStorage<Type::kI64> : internal::StorageImpl<Type::kI64, int64_t> {
+};
 
 template <>
 struct NativeStorage<Type::kU4>
-    : internal::NativeStorageImpl<uint8_t, /*Bits=*/4> {};
+    : internal::StorageImpl<Type::kU4, uint4_t, /*Bits=*/4> {};
 
 template <>
-struct NativeStorage<Type::kU8> : internal::NativeStorageImpl<uint8_t> {};
+struct NativeStorage<Type::kU8> : internal::StorageImpl<Type::kU8, uint8_t> {};
 
 template <>
-struct NativeStorage<Type::kU16> : internal::NativeStorageImpl<uint16_t> {};
+struct NativeStorage<Type::kU16> : internal::StorageImpl<Type::kU16, uint16_t> {
+};
 
 template <>
-struct NativeStorage<Type::kU32> : internal::NativeStorageImpl<uint32_t> {};
+struct NativeStorage<Type::kU32> : internal::StorageImpl<Type::kU32, uint32_t> {
+};
 
 template <>
-struct NativeStorage<Type::kU64> : internal::NativeStorageImpl<uint64_t> {};
+struct NativeStorage<Type::kU64> : internal::StorageImpl<Type::kU64, uint64_t> {
+};
 
 template <>
-struct NativeStorage<Type::kBF16> : internal::NativeStorageImpl<uint16_t> {};
+struct NativeStorage<Type::kBF16> : internal::StorageImpl<Type::kBF16, bf16_t> {
+};
 
 template <>
-struct NativeStorage<Type::kFP16> : internal::NativeStorageImpl<uint16_t> {};
+struct NativeStorage<Type::kFP16> : internal::StorageImpl<Type::kFP16, fp16_t> {
+};
 
 template <>
-struct NativeStorage<Type::kFP32> : internal::NativeStorageImpl<float> {};
+struct NativeStorage<Type::kFP32> : internal::StorageImpl<Type::kFP32, float> {
+};
 
 template <>
-struct NativeStorage<Type::kFP64> : internal::NativeStorageImpl<double> {};
+struct NativeStorage<Type::kFP64> : internal::StorageImpl<Type::kFP64, double> {
+};
 
 template <>
-struct NativeStorage<Type::kBOOL> : internal::NativeStorageImpl<bool> {};
+struct NativeStorage<Type::kBOOL> : internal::StorageImpl<Type::kBOOL, bool> {};
+
+template <class T>
+struct ApiType;
+
+template <>
+struct ApiType<int2_t> : internal::StorageImpl<Type::kI2, int2_t, /*Bits=*/2> {
+};
+
+template <>
+struct ApiType<int4_t> : internal::StorageImpl<Type::kI4, int4_t, /*Bits=*/4> {
+};
+
+template <>
+struct ApiType<int8_t> : internal::StorageImpl<Type::kI8, int8_t> {};
+
+template <>
+struct ApiType<int16_t> : internal::StorageImpl<Type::kI16, int16_t> {};
+
+template <>
+struct ApiType<int32_t> : internal::StorageImpl<Type::kI32, int32_t> {};
+
+template <>
+struct ApiType<int64_t> : internal::StorageImpl<Type::kI64, int64_t> {};
+
+template <>
+struct ApiType<uint4_t>
+    : internal::StorageImpl<Type::kU4, uint4_t, /*Bits=*/4> {};
+
+template <>
+struct ApiType<uint8_t> : internal::StorageImpl<Type::kU8, uint8_t> {};
+
+template <>
+struct ApiType<uint16_t> : internal::StorageImpl<Type::kU16, uint16_t> {};
+
+template <>
+struct ApiType<uint32_t> : internal::StorageImpl<Type::kU32, uint32_t> {};
+
+template <>
+struct ApiType<uint64_t> : internal::StorageImpl<Type::kU64, uint64_t> {};
+
+template <>
+struct ApiType<bf16_t> : internal::StorageImpl<Type::kBF16, bf16_t> {};
+
+template <>
+struct ApiType<fp16_t> : internal::StorageImpl<Type::kFP16, fp16_t> {};
+
+template <>
+struct ApiType<float> : internal::StorageImpl<Type::kFP32, float> {};
+
+template <>
+struct ApiType<double> : internal::StorageImpl<Type::kFP64, double> {};
+
+template <>
+struct ApiType<bool> : internal::StorageImpl<Type::kBOOL, bool> {};
 
 inline const char* ToString(Type t) {
 #define LITERT_TENSOR_TYPE_TO_STRING_CASE(name) \
