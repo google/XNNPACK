@@ -637,12 +637,20 @@ enum xnn_status xnn_define_blockwise_quantized_tensor_value(
                                                         block_size, dims, data, external_id, flags, xnn_datatype_bf16, id_out);
 }
 
+static inline size_t checked_mul(size_t a, size_t b) {
+  size_t result;
+  if (__builtin_mul_overflow(a, b, &result)) {
+    return SIZE_MAX;
+  }
+  return result;
+}
+
 size_t xnn_shape_multiply_all_dims(
   const struct xnn_shape* shape)
 {
   size_t batch_size = 1;
   for (size_t i = 0; i < shape->num_dims; i++) {
-    batch_size *= shape->dim[i];
+    batch_size = checked_mul(batch_size, shape->dim[i]);
   }
   return batch_size;
 }
@@ -653,7 +661,7 @@ size_t xnn_shape_multiply_batch_dims(
 {
   size_t batch_size = 1;
   for (size_t i = 0; i + num_nonbatch_dims < shape->num_dims; i++) {
-    batch_size *= shape->dim[i];
+    batch_size = checked_mul(batch_size, shape->dim[i]);
   }
   return batch_size;
 }
@@ -663,7 +671,7 @@ size_t xnn_shape_multiply_non_channel_dims(
 {
   size_t batch_size = 1;
   for (size_t i = 0; i + 1 < shape->num_dims; i++) {
-    batch_size *= shape->dim[i];
+    batch_size = checked_mul(batch_size, shape->dim[i]);
   }
   return batch_size;
 }
@@ -674,7 +682,7 @@ size_t xnn_shape_multiply_leading_dims(
 {
   size_t batch_size = 1;
   for (size_t i = 0; i < num_leading_dims; i++) {
-    batch_size *= shape->dim[i];
+    batch_size = checked_mul(batch_size, shape->dim[i]);
   }
   return batch_size;
 }
@@ -685,7 +693,7 @@ size_t xnn_shape_multiply_trailing_dims(
 {
   size_t product = 1;
   for (size_t i = start_dim; i < shape->num_dims; i++) {
-    product *= shape->dim[i];
+    product = checked_mul(product, shape->dim[i]);
   }
   return product;
 }
