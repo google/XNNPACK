@@ -816,10 +816,14 @@ size_t get_tensor_size(const struct xnn_gemm_config* gemm_config, enum xnn_value
   // Returns SIZE_MAX on overflow so the caller can detect and reject the tensor
   // before the wrapped value is treated as an allocation size.
   const size_t num_elements = xnn_shape_multiply_all_dims(shape);
+  if (num_elements == SIZE_MAX) {
+    return SIZE_MAX;
+  }
   size_t size_bits;
-  if (num_elements == SIZE_MAX ||
-      !xnn_safe_mul(num_elements, xnn_datatype_size_bits(datatype), &size_bits) ||
-      !xnn_safe_add(size_bits, 7, &size_bits)) {
+  if (!xnn_safe_mul(num_elements, xnn_datatype_size_bits(datatype), &size_bits)) {
+    return SIZE_MAX;
+  }
+  if (!xnn_safe_add(size_bits, 7, &size_bits)) {
     return SIZE_MAX;
   }
   // TODO: We should not be using this helper for non-byte-addressable types,
