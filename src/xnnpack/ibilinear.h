@@ -57,6 +57,10 @@ DECLARE_F32_IBILINEAR_UKERNEL_FUNCTION(
 DECLARE_F32_IBILINEAR_UKERNEL_FUNCTION(
     xnn_f32_ibilinear_ukernel__wasmrelaxedsimd_u8)
 
+DECLARE_F32_IBILINEAR_UKERNEL_FUNCTION(xnn_f32_ibilinear_ukernel__rvv_u1v)
+DECLARE_F32_IBILINEAR_UKERNEL_FUNCTION(xnn_f32_ibilinear_ukernel__rvv_u2v)
+DECLARE_F32_IBILINEAR_UKERNEL_FUNCTION(xnn_f32_ibilinear_ukernel__rvv_u4v)
+
 #define DECLARE_S8_IBILINEAR_UKERNEL_FUNCTION(fn_name)                 \
   XNN_INTERNAL void fn_name(size_t output_pixels, size_t channels,     \
                             const int8_t** input, size_t input_offset, \
