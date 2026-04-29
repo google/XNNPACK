@@ -42,12 +42,13 @@ void TestImpl(T, size_t rank) {
     const uint32_t zero_point_id = 3;
     SubgraphBuilder subgraph(4);
     subgraph.AddInput(type_of<T>(), rank, input_id)
-        .AddOutput(type_of<int8_t>(), rank, output_id, zero_point_id, scale_id)
+        .AddOutput(type_of<int8_t>(), rank, output_id)
         .AddOutput(type_of<float>(), rank, scale_id)
         .AddOutput(type_of<int32_t>(), rank, zero_point_id);
     ynn::compute_qd8_params(subgraph.GetSubgraph(), num_nonbatch_axes, input_id,
-                            output_id);
-    subgraph.AddUnary(ynn_unary_convert, input_id, output_id);
+                            output_id, scale_id, zero_point_id);
+    subgraph.AddQuantize(input_id, type_of<int8_t>(), zero_point_id, scale_id,
+                         output_id);
 
     Runtime runtime(subgraph.GetSubgraph());
     ASSERT_EQ(runtime.Status(), ynn_status_success);

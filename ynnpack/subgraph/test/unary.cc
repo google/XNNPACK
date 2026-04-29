@@ -50,10 +50,25 @@ void TestOp(A, X, const unary_op_info& op_info, ynn_unary_operator op) {
     quantization_params a_quantization = random_quantization(A(), rng);
     quantization_params output_quantization = random_quantization(X(), rng);
 
+    uint32_t input_id = 0;
+    uint32_t output_id = 1;
     SubgraphBuilder subgraph(2);
-    subgraph.AddInput(type_of<A>(), rank, 0, a_quantization)
-        .AddOutput(type_of<X>(), rank, 1, output_quantization)
-        .AddUnary(op, 0, 1);
+    if (is_quantized<A>() || is_quantized<X>()) {
+      uint32_t a_id = YNN_INVALID_VALUE_ID;
+      uint32_t x_id = YNN_INVALID_VALUE_ID;
+      subgraph.AddInput(type_of<A>(), rank, input_id)
+          .AddOutput(type_of<X>(), rank, output_id)
+          .AddTensor(ynn_type_fp32, rank, a_id)
+          .AddTensor(ynn_type_fp32, rank, x_id);
+
+      subgraph.AddDequantize(input_id, a_quantization, ynn_type_fp32, a_id)
+          .AddUnary(op, a_id, x_id)
+          .AddQuantize(x_id, type_of<X>(), output_quantization, output_id);
+    } else {
+      subgraph.AddInput(type_of<A>(), rank, input_id)
+          .AddOutput(type_of<X>(), rank, output_id)
+          .AddUnary(op, input_id, output_id);
+    }
 
     Runtime runtime(subgraph.GetSubgraph());
     ASSERT_EQ(runtime.Status(), ynn_status_success);
@@ -68,11 +83,11 @@ void TestOp(A, X, const unary_op_info& op_info, ynn_unary_operator op) {
       fill_random(a.data(), a.size(), rng, domain.min, domain.max,
                   a_quantization);
 
-      runtime.ReshapeExternalTensor(shape, a.data(), 0).ReshapeRuntime();
+      runtime.ReshapeExternalTensor(shape, a.data(), input_id).ReshapeRuntime();
 
-      ASSERT_EQ(runtime.GetExternalTensorShape(1), shape);
+      ASSERT_EQ(runtime.GetExternalTensorShape(output_id), shape);
 
-      runtime.SetupExternalTensor(output.data(), 1).InvokeRuntime();
+      runtime.SetupExternalTensor(output.data(), output_id).InvokeRuntime();
       check_results(op_info, a, output, a_quantization, output_quantization);
     }
   }

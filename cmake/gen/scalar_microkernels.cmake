@@ -11,6 +11,7 @@
 
 SET(PROD_SCALAR_MICROKERNEL_SRCS
   src/bf16-f32-vcvt/gen/bf16-f32-vcvt-scalar-u2.c
+  src/bf16-qs8-vcvt/gen/bf16-qs8-vcvt-scalar-imagic-u4.c
   src/bf16-rminmax/gen/bf16-rmax-scalar-u2-acc2.c
   src/bf16-rminmax/gen/bf16-rmin-scalar-u2-acc2.c
   src/bf16-rminmax/gen/bf16-rminmax-scalar-u2-acc2.c
@@ -252,6 +253,9 @@ SET(NON_PROD_SCALAR_MICROKERNEL_SRCS
   src/bf16-f32-vcvt/gen/bf16-f32-vcvt-scalar-u1.c
   src/bf16-f32-vcvt/gen/bf16-f32-vcvt-scalar-u3.c
   src/bf16-f32-vcvt/gen/bf16-f32-vcvt-scalar-u4.c
+  src/bf16-qs8-vcvt/gen/bf16-qs8-vcvt-scalar-imagic-u1.c
+  src/bf16-qs8-vcvt/gen/bf16-qs8-vcvt-scalar-imagic-u2.c
+  src/bf16-qs8-vcvt/gen/bf16-qs8-vcvt-scalar-imagic-u3.c
   src/bf16-rminmax/gen/bf16-rmax-scalar-u1.c
   src/bf16-rminmax/gen/bf16-rmax-scalar-u3-acc3.c
   src/bf16-rminmax/gen/bf16-rmax-scalar-u4-acc2.c
@@ -914,4 +918,4 @@ SET(NON_PROD_SCALAR_MICROKERNEL_SRCS
   src/x64-transposec/gen/x64-transposec-4x1-scalar-int.c
   src/x64-transposec/gen/x64-transposec-4x2-scalar-float.c)
 
-SET(ALL_SCALAR_MICROKERNEL_SRCS ${PROD_SCALAR_MICROKERNEL_SRCS} + ${NON_PROD_SCALAR_MICROKERNEL_SRCS})
+SET(ALL_SCALAR_MICROKERNEL_SRCS ${PROD_SCALAR_MICROKERNEL_SRCS} ${NON_PROD_SCALAR_MICROKERNEL_SRCS})

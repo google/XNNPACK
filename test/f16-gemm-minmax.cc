@@ -22,7 +22,6 @@
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/gemm.h"
 #include "src/xnnpack/hardware-config.h"
-#include "src/xnnpack/igemm.h"
 #include "src/xnnpack/microparams-init.h"
 #include "src/xnnpack/pack-lh.h"
 #include "src/xnnpack/pack.h"
@@ -624,25 +623,6 @@ std::vector<GemmTestParams> CreateTests1(
       });
 
   INSTANTIATE_TEST_SUITE_P(
-      F16_GEMM_MINMAX_1X16__ASM_AARCH64_NEONFP16ARITH_LD32, GemmTest,
-      testing::ValuesIn(CreateTests1(
-          /*k_block=*/2,
-          /*adj_k_block=*/2,
-          /*mr=*/1, /*nr=*/16, /*kr=*/1, /*sr=*/1,
-          /*is_igemm=*/false,
-          /*unsigned_inputs=*/false,
-          /*planes=*/1,
-          [](GemmMicrokernelTester& tester) {
-            tester.Test(xnn_f16_gemm_minmax_ukernel_1x16__asm_aarch64_neonfp16arith_ld32,
-                        xnn_init_f16_minmax_scalar_params,
-                        xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_u8);
-          },
-          xnn_arch_arm_neon_fp16_arith)),
-      [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
-        return info.param.test_name;
-      });
-
-  INSTANTIATE_TEST_SUITE_P(
       F16_GEMM_MINMAX_1X16__ASM_AARCH64_NEONFP16ARITH_LD64, GemmTest,
       testing::ValuesIn(CreateTests1(
           /*k_block=*/4,
@@ -653,25 +633,6 @@ std::vector<GemmTestParams> CreateTests1(
           /*planes=*/1,
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_f16_gemm_minmax_ukernel_1x16__asm_aarch64_neonfp16arith_ld64,
-                        xnn_init_f16_minmax_scalar_params,
-                        xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_u8);
-          },
-          xnn_arch_arm_neon_fp16_arith)),
-      [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
-        return info.param.test_name;
-      });
-
-  INSTANTIATE_TEST_SUITE_P(
-      F16_GEMM_MINMAX_4X16__ASM_AARCH64_NEONFP16ARITH_LD32, GemmTest,
-      testing::ValuesIn(CreateTests1(
-          /*k_block=*/2,
-          /*adj_k_block=*/2,
-          /*mr=*/4, /*nr=*/16, /*kr=*/1, /*sr=*/1,
-          /*is_igemm=*/false,
-          /*unsigned_inputs=*/false,
-          /*planes=*/1,
-          [](GemmMicrokernelTester& tester) {
-            tester.Test(xnn_f16_gemm_minmax_ukernel_4x16__asm_aarch64_neonfp16arith_ld32,
                         xnn_init_f16_minmax_scalar_params,
                         xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_u8);
           },
@@ -748,25 +709,6 @@ std::vector<GemmTestParams> CreateTests1(
           /*planes=*/1,
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_f16_gemm_minmax_ukernel_6x16__asm_aarch64_neonfp16arith_cortex_a75,
-                        xnn_init_f16_minmax_scalar_params,
-                        xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_u8);
-          },
-          xnn_arch_arm_neon_fp16_arith)),
-      [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
-        return info.param.test_name;
-      });
-
-  INSTANTIATE_TEST_SUITE_P(
-      F16_GEMM_MINMAX_6X16__ASM_AARCH64_NEONFP16ARITH_LD32, GemmTest,
-      testing::ValuesIn(CreateTests1(
-          /*k_block=*/2,
-          /*adj_k_block=*/2,
-          /*mr=*/6, /*nr=*/16, /*kr=*/1, /*sr=*/1,
-          /*is_igemm=*/false,
-          /*unsigned_inputs=*/false,
-          /*planes=*/1,
-          [](GemmMicrokernelTester& tester) {
-            tester.Test(xnn_f16_gemm_minmax_ukernel_6x16__asm_aarch64_neonfp16arith_ld32,
                         xnn_init_f16_minmax_scalar_params,
                         xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_u8);
           },

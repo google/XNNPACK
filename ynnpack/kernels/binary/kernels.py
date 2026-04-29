@@ -111,6 +111,15 @@ def min_fp32(a, b, x):
 @const_buffer("a", Float(32))
 @const_buffer("b", Float(32))
 @buffer("x", Float(32))
+@operator_name("squared_difference")
+def squared_difference_fp32(a, b, x):
+  diff = load(a) - load(b)
+  return store(diff * diff, x)
+
+
+@const_buffer("a", Float(32))
+@const_buffer("b", Float(32))
+@buffer("x", Float(32))
 @operator_name("copysign")
 def copysign_fp32(a, b, x):
   va = load(a)

@@ -250,6 +250,10 @@ class SubgraphTester {
       const float* scale, uint32_t external_id, uint32_t flags = 0,
       void* data = nullptr);
 
+  SubgraphTester& AddDynamicChannelwiseQuantizedTensor(
+      const TensorShape& shape, size_t channel_dim, xnn_datatype datatype,
+      const float* scale, uint32_t external_id, void* data = nullptr);
+
   SubgraphTester& AddStaticTensorQS8(const TensorShape& shape,
                                      size_t channel_dim, TensorType tensor_type,
                                      const float* scale, uint32_t external_id,

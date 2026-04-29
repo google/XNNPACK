@@ -43,7 +43,7 @@ XNN_UKERNEL(xnn_arch_x86_avx512f, xnn_f32_rminmax_ukernel__avx512f_u64_acc2, 64,
 XNN_UKERNEL(xnn_arch_x86_avx512f, xnn_f32_rminmax_ukernel__avx512f_u64_acc4, 64, false, float, float, struct xnn_f32_default_params, ((struct xnn_init_f32_default_params_fn) NULL))
 #endif  // XNN_ENABLE_AVX512F && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
-#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+#if XNN_ARCH_WASMSIMD
 XNN_UKERNEL(xnn_arch_none, xnn_f32_rminmax_ukernel__wasmsimd_minmax_u4, 4, false, float, float, struct xnn_f32_default_params, ((struct xnn_init_f32_default_params_fn) NULL))
 XNN_UKERNEL(xnn_arch_none, xnn_f32_rminmax_ukernel__wasmsimd_minmax_u8_acc2, 8, false, float, float, struct xnn_f32_default_params, ((struct xnn_init_f32_default_params_fn) NULL))
 XNN_UKERNEL(xnn_arch_none, xnn_f32_rminmax_ukernel__wasmsimd_minmax_u12_acc3, 12, false, float, float, struct xnn_f32_default_params, ((struct xnn_init_f32_default_params_fn) NULL))
@@ -54,7 +54,16 @@ XNN_UKERNEL(xnn_arch_none, xnn_f32_rminmax_ukernel__wasmsimd_pminmax_u8_acc2, 8,
 XNN_UKERNEL(xnn_arch_none, xnn_f32_rminmax_ukernel__wasmsimd_pminmax_u12_acc3, 12, false, float, float, struct xnn_f32_default_params, ((struct xnn_init_f32_default_params_fn) NULL))
 XNN_UKERNEL(xnn_arch_none, xnn_f32_rminmax_ukernel__wasmsimd_pminmax_u16_acc2, 16, false, float, float, struct xnn_f32_default_params, ((struct xnn_init_f32_default_params_fn) NULL))
 XNN_UKERNEL(xnn_arch_none, xnn_f32_rminmax_ukernel__wasmsimd_pminmax_u16_acc4, 16, false, float, float, struct xnn_f32_default_params, ((struct xnn_init_f32_default_params_fn) NULL))
-#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+#endif  // XNN_ARCH_WASMSIMD
+
+#if XNN_ARCH_WASMRELAXEDSIMD
+XNN_UKERNEL(xnn_arch_none, xnn_f32_rminmax_ukernel__wasmrelaxedsimd_minmax_u4, 4, false, float, float, struct xnn_f32_default_params, ((struct xnn_init_f32_default_params_fn) NULL))
+XNN_UKERNEL(xnn_arch_none, xnn_f32_rminmax_ukernel__wasmrelaxedsimd_minmax_u8_acc2, 8, false, float, float, struct xnn_f32_default_params, ((struct xnn_init_f32_default_params_fn) NULL))
+XNN_UKERNEL(xnn_arch_none, xnn_f32_rminmax_ukernel__wasmrelaxedsimd_minmax_u12_acc3, 12, false, float, float, struct xnn_f32_default_params, ((struct xnn_init_f32_default_params_fn) NULL))
+XNN_UKERNEL(xnn_arch_none, xnn_f32_rminmax_ukernel__wasmrelaxedsimd_minmax_u16_acc2, 16, false, float, float, struct xnn_f32_default_params, ((struct xnn_init_f32_default_params_fn) NULL))
+XNN_UKERNEL(xnn_arch_none, xnn_f32_rminmax_ukernel__wasmrelaxedsimd_minmax_u16_acc4, 16, false, float, float, struct xnn_f32_default_params, ((struct xnn_init_f32_default_params_fn) NULL))
+XNN_UKERNEL(xnn_arch_none, xnn_f32_rminmax_ukernel__wasmrelaxedsimd_minmax_u32_acc4, 16, false, float, float, struct xnn_f32_default_params, ((struct xnn_init_f32_default_params_fn) NULL))
+#endif  // XNN_ARCH_WASMRELAXEDSIMD
 
 #if XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
 XNN_UKERNEL(xnn_arch_riscv_vector, xnn_f32_rminmax_ukernel__rvv_u1v, 1, true, float, float, struct xnn_f32_default_params, ((struct xnn_init_f32_default_params_fn) NULL))

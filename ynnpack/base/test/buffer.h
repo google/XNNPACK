@@ -15,6 +15,9 @@
 #include <type_traits>
 #include <utility>
 
+#include "ynnpack/base/arithmetic.h"
+#include "ynnpack/base/type.h"
+
 namespace ynn {
 
 struct Alignment {
@@ -39,8 +42,9 @@ class Buffer {
 
   Buffer() : data_(nullptr), size_(0) {}
   explicit Buffer(size_t size, Alignment alignment = {})
-      : data_(
-            reinterpret_cast<T*>(allocate(size * sizeof(T), alignment.bytes))),
+      : data_(reinterpret_cast<T*>(
+            allocate(ceil_div(size, type_info<T>::element_count()) * sizeof(T),
+                     alignment.bytes))),
         size_(size) {}
   Buffer(size_t size, T value, Alignment alignment = {})
       : Buffer(size, alignment) {
@@ -70,13 +74,21 @@ class Buffer {
   T* data() { return data_; }
   const T* data() const { return data_; }
   T* begin() { return data_; }
-  T* end() { return data_ + size_; }
+  T* end() { return data_ + ceil_div(size_, type_info<T>::element_count()); }
   const T* begin() const { return data_; }
-  const T* end() const { return data_ + size_; }
+  const T* end() const {
+    return data_ + ceil_div(size_, type_info<T>::element_count());
+  }
   const T* cbegin() const { return data_; }
-  const T* cend() const { return data_ + size_; }
-  T& operator[](size_t index) { return data_[index]; }
-  const T& operator[](size_t index) const { return data_[index]; }
+  const T* cend() const {
+    return data_ + ceil_div(size_, type_info<T>::element_count());
+  }
+  decltype(auto) operator[](size_t index) {
+    return type_info<T>::ref(data_, index);
+  }
+  auto operator[](size_t index) const {
+    return type_info<T>::get(data_, index);
+  }
 
   bool operator==(const Buffer& other) const {
     return size_ == other.size_ && std::equal(begin(), end(), other.begin());

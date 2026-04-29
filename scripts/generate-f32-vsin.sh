@@ -18,4 +18,10 @@ tools/xngen src/f32-vsin/rational-5-4.c.in -D FUN=SIN -D ARCH=hvx      -D BATCH_
 tools/xngen src/f32-vsin/rational-5-4.c.in -D FUN=SIN -D ARCH=neon     -D BATCH_TILES=4,8,12,16    -D DIV=NR   -o src/f32-vsin/gen/f32-vsin-neon-rational-5-4-nr.c &
 tools/xngen src/f32-vsin/rational-5-4.c.in -D FUN=SIN -D ARCH=avx512f  -D BATCH_TILES=16,32,48,64  -D DIV=NR   -o src/f32-vsin/gen/f32-vsin-avx512f-rational-5-4-nr.c &
 
+################################### RISC-V Vector #############################
+tools/xngen src/f32-vsin/rvv-rational-5-4.c.in -D FUN=SIN -D LMUL=1 -o src/f32-vsin/gen/f32-vsin-rvv-rational-5-4-div-u1v.c &
+tools/xngen src/f32-vsin/rvv-rational-5-4.c.in -D FUN=SIN -D LMUL=2 -o src/f32-vsin/gen/f32-vsin-rvv-rational-5-4-div-u2v.c &
+tools/xngen src/f32-vsin/rvv-rational-5-4.c.in -D FUN=SIN -D LMUL=4 -o src/f32-vsin/gen/f32-vsin-rvv-rational-5-4-div-u4v.c &
+tools/xngen src/f32-vsin/rvv-rational-5-4.c.in -D FUN=SIN -D LMUL=8 -o src/f32-vsin/gen/f32-vsin-rvv-rational-5-4-div-u8v.c &
+
 wait

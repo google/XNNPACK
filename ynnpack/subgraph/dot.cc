@@ -57,7 +57,15 @@ constexpr index_t consistent_block_n = 64;
 // on some buffers.
 auto make_dot_impl(dot_type type, bool consistent_arithmetic, bool transposed_a,
                    bool pack_b, size_t num_k_dims) {
-  return [type, consistent_arithmetic, transposed_a, pack_b, num_k_dims](
+  uint32_t kernel_flags = 0;
+  if (consistent_arithmetic) {
+    kernel_flags |= dot_flag::consistent_arithmetic;
+  }
+  if (!pack_b) {
+    kernel_flags |= dot_flag::unaligned_b;
+  }
+
+  return [type, kernel_flags, transposed_a, pack_b, num_k_dims](
              slinky::raw_buffer a, slinky::raw_buffer b,
              slinky::raw_buffer init_c, slinky::raw_buffer c) -> index_t {
     // If the dot has fewer than 3 reduction dimensions, we use this dummy
@@ -133,8 +141,8 @@ auto make_dot_impl(dot_type type, bool consistent_arithmetic, bool transposed_a,
       // values), then we don't care if the kernel is transposed or not.
       require_transpose_a = std::nullopt;
     }
-    dot_kernel kernel = get_dot_kernel(
-        type, shape, &packed_shape, consistent_arithmetic, require_transpose_a);
+    dot_kernel kernel = get_dot_kernel(type, shape, &packed_shape, kernel_flags,
+                                       require_transpose_a);
     assert(kernel.kernel);
     assert(tile_k == kernel.tile_k);
     const index_t block_m = kernel.block_m;
@@ -684,8 +692,8 @@ std::tuple<slinky::expr, slinky::expr> choose_split_factors(
       }
     }
 
-    assert(split_n < 65536);
-    assert(split_m < 32768);
+    split_m = std::min<index_t>(split_m, 32768);
+    split_n = std::min<index_t>(split_n, 65536);
     return split_m * 65536 + split_n;
   };
   slinky::expr splits = slinky::call::make(impl, {m, n, k, block_n});
@@ -862,8 +870,9 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
   const bool consistent_arithmetic =
       (!type_is_integral(a.type) || !type_is_integral(b.type)) &&
       (subgraph.flags & YNN_FLAG_CONSISTENT_ARITHMETIC) != 0;
-  dot_kernel kernel =
-      get_dot_kernel(type, shape, packed_shape, consistent_arithmetic);
+  uint32_t kernel_flags =
+      consistent_arithmetic ? dot_flag::consistent_arithmetic : 0;
+  dot_kernel kernel = get_dot_kernel(type, shape, packed_shape, kernel_flags);
   dot_kernel unpacked_kernel;
   if (b_transposed) {
     // If b is transposed, we might as well use the packing to do it.
@@ -876,8 +885,8 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
   } else {
     unpacked_kernel = kernel;
     if (kernel.tile_k != 1) {
-      unpacked_kernel =
-          get_dot_kernel(type, shape, &no_tile_k, consistent_arithmetic);
+      unpacked_kernel = get_dot_kernel(type, shape, &no_tile_k,
+                                       kernel_flags | dot_flag::unaligned_b);
     }
   }
 
@@ -926,8 +935,7 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
   // batch dimensions.
 
   // inputs `b` and `c` have an elementwise dimension 0.
-  subgraph.infer_elementwise_shape(node, 1, 0, 0, 0,
-                                   type_element_count(b.type));
+  subgraph.infer_elementwise_shape(node, 1, 0, 0, 0);
   subgraph.infer_elementwise_shape(node, 2, 0, 0, 0);
 
   if (c_rank >= 2) {
@@ -944,8 +952,8 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
 
   // The k-dims must match.
   for (int d = 0; d < num_k_dims; ++d) {
-    slinky::expr a_k_dim = a.extent(d);
-    slinky::expr b_k_dim = b.extent(d + 1);
+    slinky::expr a_k_dim = a.logical_extent(d);
+    slinky::expr b_k_dim = b.logical_extent(d + 1);
     node.checks.push_back(
         {a_k_dim == b_k_dim,
          {"reduction dimension ", d, " (", a_k_dim, ") of ",
@@ -1090,8 +1098,9 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
     }
 
     slinky::expr splits[] = {split_n, split_m};
-    auto sched = runtime.make_schedule(dims, output.buffer, node.outputs[0],
-                                       splits, 1, loop_order);
+    auto sched =
+        runtime.make_schedule(dims, output.extents, output.buffer->elem_size(),
+                              splits, loop_order);
 
     // We want to use exactly these loop splits for two innermost dot loops.
     for (size_t i = 0; i < std::min<std::size_t>(2, sched->loop_splits.size());

@@ -5,6 +5,11 @@
 // LICENSE file in the root directory of this source tree.
 
 
+#if XNN_ARCH_RISCV && XNN_ENABLE_RISCV_FP16_VECTOR
+XNN_UKERNEL(xnn_arch_riscv_vector_fp16_arith, xnn_f16_vmulcaddc_minmax_ukernel_c4v__rvvfp16arith_2x, 2, 4, true, xnn_float16, struct xnn_f16_minmax_params, xnn_init_f16_minmax_scalar_params)
+XNN_UKERNEL(xnn_arch_riscv_vector_fp16_arith, xnn_f16_vmulcaddc_minmax_ukernel_c8v__rvvfp16arith_2x, 2, 8, true, xnn_float16, struct xnn_f16_minmax_params, xnn_init_f16_minmax_scalar_params)
+#endif  // XNN_ARCH_RISCV && XNN_ENABLE_RISCV_FP16_VECTOR
+
 #if XNN_ENABLE_FMA3 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 XNN_UKERNEL(xnn_arch_x86_fma3, xnn_f16_vmulcaddc_minmax_ukernel_c8__fma3_2x, 2, 8, false, xnn_float16, struct xnn_f16_minmax_params, xnn_init_f16_minmax_scalar_params)
 XNN_UKERNEL(xnn_arch_x86_fma3, xnn_f16_vmulcaddc_minmax_ukernel_c16__fma3_2x, 2, 16, false, xnn_float16, struct xnn_f16_minmax_params, xnn_init_f16_minmax_scalar_params)

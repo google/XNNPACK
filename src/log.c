@@ -45,7 +45,7 @@
 
 #define XNN_LOG_STDERR STD_ERROR_HANDLE
 #define XNN_LOG_STDOUT STD_OUTPUT_HANDLE
-#elif defined(__hexagon__)
+#elif defined(__hexagon__) || defined(__ZEPHYR__)
 #define XNN_LOG_NEWLINE_LENGTH 1
 
 #define XNN_LOG_STDERR 0
@@ -113,6 +113,10 @@ static void xnn_vlog(int output_handle, const char* prefix,
       GetStdHandle((DWORD)output_handle), out_buffer,
       (prefix_length + format_length + XNN_LOG_NEWLINE_LENGTH) * sizeof(char),
       &bytes_written, NULL);
+#elif defined(__ZEPHYR__)
+  out_buffer[prefix_length + format_length] = '\n';
+  out_buffer[prefix_length + format_length + 1] = '\0';
+  printf("%s", out_buffer);
 #else
   out_buffer[prefix_length + format_length] = '\n';
 

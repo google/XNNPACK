@@ -341,6 +341,7 @@ ENDFOREACH()
 
 SET(MICROKERNEL_VCVT_TESTS
     bf16-f32-vcvt
+    bf16-qs8-vcvt
     f16-f32-vcvt
     f16-qs8-vcvt
     f16-qu8-vcvt

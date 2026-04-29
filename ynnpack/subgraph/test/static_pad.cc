@@ -87,15 +87,13 @@ void TestImpl(T, size_t rank) {
       }
     }
 
-    float pad_value = 1.0f;
-
-    quantization_params quantization = random_quantization(type_of<T>(), rng);
+    T pad_value = 7;
 
     // Define subgraph
     SubgraphBuilder subgraph(2);
-    uint32_t padding_id = subgraph.DefineScalar<T>(pad_value, quantization);
-    subgraph.AddInput(type_of<T>(), rank, 0, quantization)
-        .AddOutput(type_of<T>(), rank, 1, quantization)
+    uint32_t padding_id = subgraph.DefineScalar<T>(pad_value);
+    subgraph.AddInput(type_of<T>(), rank, 0)
+        .AddOutput(type_of<T>(), rank, 1)
         .AddPad(axes, gather(axes, pre_padding), gather(axes, post_padding), 0,
                 padding_id, 1);
 
@@ -106,7 +104,7 @@ void TestImpl(T, size_t rank) {
       std::vector<size_t> shape = random_shape(rng, rank);
 
       Tensor<T> input(shape);
-      fill_random(input.data(), input.size(), rng, quantization);
+      fill_random(input.data(), input.size(), rng);
 
       std::vector<size_t> output_shape(shape);
       for (size_t i = 0; i < rank; ++i) {
@@ -125,7 +123,7 @@ void TestImpl(T, size_t rank) {
       // Make the expected output: fill a buffer with padding, and then copy
       // the unpadded area from the input with the negative padding cropped off.
       Tensor<T> expected(output_shape);
-      expected.fill(quantize<T>(pad_value, quantization));
+      expected.fill(pad_value);
       expected.crop_padding(max0(pre_padding), max0(post_padding))
           .assign(input.crop_padding(max0(negate(pre_padding)),
                                      max0(negate(post_padding))));

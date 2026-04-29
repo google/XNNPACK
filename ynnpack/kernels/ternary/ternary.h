@@ -36,6 +36,7 @@ typedef void (*ternary_kernel_fn)(size_t m, size_t n, size_t stride_a_m,
 #undef YNN_ELEMENTWISE_KERNEL
 
 enum class ternary_op {
+  invalid,
   multiply,           // a*b*c
   multiply_add,       // a*b + c
   subtract_multiply,  // a - b*c

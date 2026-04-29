@@ -61,16 +61,14 @@ void TestImpl(T, size_t rank) {
   for (size_t input_rank = 0; input_rank <= rank; input_rank++) {
     for (std::pair<size_t, size_t> input_ranks :
          {std::make_pair(input_rank, rank), std::make_pair(rank, input_rank)}) {
-      quantization_params quantization = random_quantization(type_of<T>(), rng);
-
       std::vector<int32_t> axes(input_ranks.first);
       std::iota(axes.begin(), axes.end(), 0);
 
       // Define subgraph
       SubgraphBuilder subgraph(3);
-      subgraph.AddInput(type_of<T>(), input_ranks.first, 0, quantization)
+      subgraph.AddInput(type_of<T>(), input_ranks.first, 0)
           .AddInput(type_of<half>(), input_ranks.second, 1)
-          .AddOutput(type_of<T>(), rank, 2, quantization)
+          .AddOutput(type_of<T>(), rank, 2)
           .AddBroadcastLike(axes, 0, 1, 2);
 
       Runtime runtime(subgraph.GetSubgraph());
@@ -83,7 +81,7 @@ void TestImpl(T, size_t rank) {
             rng, output_shape, input_ranks.first, input_ranks.second);
 
         Tensor<T> input(input_shape);
-        fill_random(input.data(), input.size(), rng, quantization);
+        fill_random(input.data(), input.size(), rng);
 
         // Check reshaped shape is correct
         runtime.ReshapeExternalTensor(input_shape, input.base(), 0)

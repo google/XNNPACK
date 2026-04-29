@@ -16,6 +16,7 @@
 #include "ynnpack/subgraph/slinky.h"
 #include "ynnpack/subgraph/subgraph.h"
 #include "slinky/builder/pipeline.h"
+#include "slinky/builder/simplify.h"
 #include "slinky/runtime/expr.h"
 
 namespace ynn {
@@ -41,6 +42,8 @@ ynn_status ynn_define_concatenate(ynn_subgraph_t subgraph, int32_t axis,
   ynn_node node;
 
   std::vector<slinky::expr> output_extents = input0.extents;
+  slinky::expr& extent_axis = output_extents[axis];
+  if (!extent_axis.defined()) extent_axis = 1;
   for (int i = 1; i < num_inputs; ++i) {
     const ynn_value& input_i = subgraph->value(input_ids[i]);
     if (input0.rank() != input_i.rank()) {
@@ -48,16 +51,17 @@ ynn_status ynn_define_concatenate(ynn_subgraph_t subgraph, int32_t axis,
                       << " of concatenate";
       return ynn_status_invalid_parameter;
     }
-    output_extents[axis] += input_i.extents[axis];
+    extent_axis += input_i.extent(axis);
     for (int d = 0; d < input0.rank(); ++d) {
       if (d == axis) continue;
       node.checks.push_back(
-          {input_i.extents[d] == input0.extents[d],
+          {input_i.extent(d) == input0.extent(d),
            {"mismatch in non-concatenated dimension ", d, " of ",
-            ynn_node::input_idx{0}, " (", input0.extents[d], ") and ",
-            ynn_node::input_idx{i}, " (", input_i.extents[d], ")"}});
+            ynn_node::input_idx{0}, " (", input0.extent(d), ") and ",
+            ynn_node::input_idx{i}, " (", input_i.extent(d), ")"}});
     }
   }
+  extent_axis = slinky::simplify(extent_axis);
 
   ynn_value& output_value = subgraph->get_output_value(output_id, input0);
   output_value.extents = std::move(output_extents);
@@ -81,7 +85,7 @@ ynn_status ynn_define_concatenate(ynn_subgraph_t subgraph, int32_t axis,
     for (uint32_t i : node.inputs) {
       const ynn_runtime_value& input_value = runtime.value(i);
       inputs.push_back(input_value.buffer);
-      bounds.push_back(bounds.back() + input_value.extents[axis]);
+      bounds.push_back(bounds.back() + input_value.extent(axis));
     }
     auto func =
         slinky::func::make_concat(inputs, {output.buffer, dims}, axis, bounds);

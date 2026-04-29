@@ -7,6 +7,7 @@
 
 #include <algorithm>
 #include <cassert>
+#include <cmath>
 #include <cstddef>
 #include <cstdint>
 #include <functional>
@@ -31,6 +32,20 @@
 #include "slinky/runtime/stmt.h"
 
 namespace ynn {
+
+float get_reduce_identity(ynn_reduce_operator op) {
+  switch (op) {
+    case ynn_reduce_sum:
+    case ynn_reduce_sum_squared:
+      return 0.0f;
+    case ynn_reduce_max:
+      return -std::numeric_limits<float>::infinity();
+    case ynn_reduce_min:
+      return std::numeric_limits<float>::infinity();
+    default:
+      return std::nan("");
+  }
+}
 
 namespace {
 
@@ -205,25 +220,13 @@ uint32_t get_reduce_identity_value(ynn_subgraph& subgraph,
   int rank = 0;
   size_t dims[YNN_MAX_TENSOR_RANK];
   std::fill_n(dims, YNN_MAX_TENSOR_RANK, 1);
-  switch (op) {
-    case ynn_reduce_sum:
-    case ynn_reduce_sum_squared:
-      value_f32[0] = 0.0f;
-      break;
-    case ynn_reduce_max:
-      value_f32[0] = -std::numeric_limits<float>::infinity();
-      break;
-    case ynn_reduce_min:
-      value_f32[0] = std::numeric_limits<float>::infinity();
-      break;
-    case ynn_reduce_min_max:
-      value_f32[0] = std::numeric_limits<float>::infinity();
-      value_f32[1] = -std::numeric_limits<float>::infinity();
-      rank = output.rank();
-      dims[rank - 1] = 2;
-      break;
-    default:
-      return YNN_INVALID_VALUE_ID;
+  if (op == ynn_reduce_min_max) {
+    value_f32[0] = get_reduce_identity(ynn_reduce_min);
+    value_f32[1] = get_reduce_identity(ynn_reduce_max);
+    rank = output.rank();
+    dims[rank - 1] = 2;
+  } else {
+    value_f32[0] = get_reduce_identity(op);
   }
 
   uint32_t zero_point_id;
@@ -353,7 +356,7 @@ void define_reduce(ynn_subgraph& subgraph, ynn_node& node,
 
     for (int i = static_cast<int>(input_a.rank()) - 1; i >= 0; --i) {
       if (op.k_dims[i]) {
-        a_bounds[i] = all_bounds(input_a.extents[i]);
+        a_bounds[i] = all_bounds(input_a.extent(i));
         if (!op.keep_dims) {
           dims.erase(dims.begin() + i);
         }
@@ -395,8 +398,8 @@ void define_reduce(ynn_subgraph& subgraph, ynn_node& node,
       }
       reduction_cost =
           slinky::ceil_div(reduction_cost, slinky::expr(cost_scaling_factor));
-      sched = runtime.make_schedule(dims, output.buffer, node.outputs[0], {},
-                                    reduction_cost);
+      reduction_cost *= output.buffer->elem_size();
+      sched = runtime.make_schedule(dims, output.extents, reduction_cost);
     }
     auto func = slinky::func::make(
         make_unary_reduce_impl(op, kernel),

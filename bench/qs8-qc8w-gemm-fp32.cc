@@ -889,61 +889,6 @@ namespace {
 
 
 #if XNN_ENABLE_ARM_DOTPROD && XNN_ARCH_ARM64 && XNN_ENABLE_ASSEMBLY
-  static void qs8_qc8w_gemm_minmax_fp32_ukernel_1x16c4__asm_aarch64_neondot_ld32_2(benchmark::State& state) {
-    GEMMBenchmark(state,
-      xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x16c4__asm_aarch64_neondot_ld32_2,
-      xnn_init_qs8_qc8w_conv_minmax_fp32_neonv8_params,
-      xnn_pack_qs8_gemm_goi_w,
-      /*mr=*/1, /*nr=*/16, /*kr=*/4, /*sr=*/1,
-      /*arch_flags=*/xnn_arch_arm_neon_dot);
-  }
-
-  BENCHMARK_GEMM(qs8_qc8w_gemm_minmax_fp32_ukernel_1x16c4__asm_aarch64_neondot_ld32_2)
-
-  static void qs8_qc8w_gemm_minmax_fp32_ukernel_2x16c4__asm_aarch64_neondot_ld32_2(benchmark::State& state) {
-    GEMMBenchmark(state,
-      xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_2x16c4__asm_aarch64_neondot_ld32_2,
-      xnn_init_qs8_qc8w_conv_minmax_fp32_neonv8_params,
-      xnn_pack_qs8_gemm_goi_w,
-      /*mr=*/2, /*nr=*/16, /*kr=*/4, /*sr=*/1,
-      /*arch_flags=*/xnn_arch_arm_neon_dot);
-  }
-
-  BENCHMARK_GEMM(qs8_qc8w_gemm_minmax_fp32_ukernel_2x16c4__asm_aarch64_neondot_ld32_2)
-
-  static void qs8_qc8w_gemm_minmax_fp32_ukernel_3x16c4__asm_aarch64_neondot_ld32_2(benchmark::State& state) {
-    GEMMBenchmark(state,
-      xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_3x16c4__asm_aarch64_neondot_ld32_2,
-      xnn_init_qs8_qc8w_conv_minmax_fp32_neonv8_params,
-      xnn_pack_qs8_gemm_goi_w,
-      /*mr=*/3, /*nr=*/16, /*kr=*/4, /*sr=*/1,
-      /*arch_flags=*/xnn_arch_arm_neon_dot);
-  }
-
-  BENCHMARK_GEMM(qs8_qc8w_gemm_minmax_fp32_ukernel_3x16c4__asm_aarch64_neondot_ld32_2)
-
-  static void qs8_qc8w_gemm_minmax_fp32_ukernel_4x16c4__asm_aarch64_neondot_ld32_2(benchmark::State& state) {
-    GEMMBenchmark(state,
-      xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_4x16c4__asm_aarch64_neondot_ld32_2,
-      xnn_init_qs8_qc8w_conv_minmax_fp32_neonv8_params,
-      xnn_pack_qs8_gemm_goi_w,
-      /*mr=*/4, /*nr=*/16, /*kr=*/4, /*sr=*/1,
-      /*arch_flags=*/xnn_arch_arm_neon_dot);
-  }
-
-  BENCHMARK_GEMM(qs8_qc8w_gemm_minmax_fp32_ukernel_4x16c4__asm_aarch64_neondot_ld32_2)
-
-  static void qs8_qc8w_gemm_minmax_fp32_ukernel_5x16c4__asm_aarch64_neondot_ld32_2(benchmark::State& state) {
-    GEMMBenchmark(state,
-      xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_5x16c4__asm_aarch64_neondot_ld32_2,
-      xnn_init_qs8_qc8w_conv_minmax_fp32_neonv8_params,
-      xnn_pack_qs8_gemm_goi_w,
-      /*mr=*/5, /*nr=*/16, /*kr=*/4, /*sr=*/1,
-      /*arch_flags=*/xnn_arch_arm_neon_dot);
-  }
-
-  BENCHMARK_GEMM(qs8_qc8w_gemm_minmax_fp32_ukernel_5x16c4__asm_aarch64_neondot_ld32_2)
-
   static void qs8_qc8w_gemm_minmax_fp32_ukernel_1x16c4__asm_aarch64_neondot_ld64_2(benchmark::State& state) {
     GEMMBenchmark(state,
       xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x16c4__asm_aarch64_neondot_ld64_2,
@@ -1054,17 +999,6 @@ namespace {
 
   BENCHMARK_GEMM(qs8_qc8w_gemm_minmax_fp32_ukernel_5x16c4__asm_aarch64_neondot_ld128_2)
 
-  static void qs8_qc8w_gemm_minmax_fp32_ukernel_1x16c4__asm_aarch64_neondot_ld32(benchmark::State& state) {
-    GEMMBenchmark(state,
-      xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x16c4__asm_aarch64_neondot_ld32,
-      xnn_init_qs8_qc8w_conv_minmax_fp32_neonv8_params,
-      xnn_pack_qs8_gemm_goi_w,
-      /*mr=*/1, /*nr=*/16, /*kr=*/4, /*sr=*/1,
-      /*arch_flags=*/xnn_arch_arm_neon_dot);
-  }
-
-  BENCHMARK_GEMM(qs8_qc8w_gemm_minmax_fp32_ukernel_1x16c4__asm_aarch64_neondot_ld32)
-
   static void qs8_qc8w_gemm_minmax_fp32_ukernel_1x16c4__asm_aarch64_neondot_ld64(benchmark::State& state) {
     GEMMBenchmark(state,
       xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x16c4__asm_aarch64_neondot_ld64,
@@ -1086,17 +1020,6 @@ namespace {
   }
 
   BENCHMARK_GEMM(qs8_qc8w_gemm_minmax_fp32_ukernel_4x16c4__asm_aarch64_neondot_cortex_a55)
-
-  static void qs8_qc8w_gemm_minmax_fp32_ukernel_4x16c4__asm_aarch64_neondot_ld32(benchmark::State& state) {
-    GEMMBenchmark(state,
-      xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_4x16c4__asm_aarch64_neondot_ld32,
-      xnn_init_qs8_qc8w_conv_minmax_fp32_neonv8_params,
-      xnn_pack_qs8_gemm_goi_w,
-      /*mr=*/4, /*nr=*/16, /*kr=*/4, /*sr=*/1,
-      /*arch_flags=*/xnn_arch_arm_neon_dot);
-  }
-
-  BENCHMARK_GEMM(qs8_qc8w_gemm_minmax_fp32_ukernel_4x16c4__asm_aarch64_neondot_ld32)
 
   static void qs8_qc8w_gemm_minmax_fp32_ukernel_4x16c4__asm_aarch64_neondot_ld64(benchmark::State& state) {
     GEMMBenchmark(state,

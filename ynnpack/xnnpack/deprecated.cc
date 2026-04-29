@@ -106,11 +106,9 @@ xnn_status xnn_define_static_mean(xnn_subgraph_t subgraph,
 xnn_status xnn_define_global_average_pooling_1d(
     xnn_subgraph_t subgraph, float output_min, float output_max,
     uint32_t input_id, uint32_t output_id, uint32_t flags) {
-  ynn_subgraph_t ynn_subgraph = subgraph->ynn;
-
   size_t reduction_axes[XNN_MAX_TENSOR_DIMS];
 
-  reduction_axes[0] = ynn::rank_of_value(ynn_subgraph, input_id) - 2;
+  reduction_axes[0] = ynn::rank_of_value(subgraph, input_id) - 2;
 
   xnn_status status =
       (xnn_define_static_reduce(subgraph, xnn_reduce_mean, 1, reduction_axes,
@@ -122,7 +120,7 @@ xnn_status xnn_define_global_average_pooling_1d(
 
   if (output_min != -INFINITY || output_max != INFINITY) {
     return ynn::xnn_status_from_ynn(
-        ynn::implement_clamp(ynn_subgraph, output_min, output_max, output_id));
+        ynn::implement_clamp(subgraph, output_min, output_max, output_id));
   }
 
   return xnn_status_success;
@@ -131,12 +129,10 @@ xnn_status xnn_define_global_average_pooling_1d(
 xnn_status xnn_define_global_average_pooling_2d(
     xnn_subgraph_t subgraph, float output_min, float output_max,
     uint32_t input_id, uint32_t output_id, uint32_t flags) {
-  ynn_subgraph_t ynn_subgraph = subgraph->ynn;
-
   size_t reduction_axes[XNN_MAX_TENSOR_DIMS];
 
-  reduction_axes[0] = ynn::rank_of_value(ynn_subgraph, input_id) - 3;
-  reduction_axes[1] = ynn::rank_of_value(ynn_subgraph, input_id) - 2;
+  reduction_axes[0] = ynn::rank_of_value(subgraph, input_id) - 3;
+  reduction_axes[1] = ynn::rank_of_value(subgraph, input_id) - 2;
 
   xnn_status status = xnn_define_static_reduce(
       subgraph, xnn_reduce_mean, 2, reduction_axes, input_id, output_id, flags);
@@ -147,7 +143,7 @@ xnn_status xnn_define_global_average_pooling_2d(
 
   if (output_min != -INFINITY || output_max != INFINITY) {
     return ynn::xnn_status_from_ynn(
-        ynn::implement_clamp(ynn_subgraph, output_min, output_max, output_id));
+        ynn::implement_clamp(subgraph, output_min, output_max, output_id));
   }
 
   return xnn_status_success;
@@ -158,10 +154,8 @@ xnn_status xnn_define_global_sum_pooling_1d(xnn_subgraph_t subgraph,
                                             uint32_t input_id,
                                             uint32_t output_id,
                                             uint32_t flags) {
-  ynn_subgraph_t ynn_subgraph = subgraph->ynn;
-
   size_t reduction_axes[XNN_MAX_TENSOR_DIMS];
-  reduction_axes[0] = ynn::rank_of_value(ynn_subgraph, input_id) - 2;
+  reduction_axes[0] = ynn::rank_of_value(subgraph, input_id) - 2;
 
   xnn_status status = xnn_define_static_reduce(
       subgraph, xnn_reduce_sum, 1, reduction_axes, input_id, output_id, flags);
@@ -172,7 +166,7 @@ xnn_status xnn_define_global_sum_pooling_1d(xnn_subgraph_t subgraph,
 
   if (output_min != -INFINITY || output_max != INFINITY) {
     return ynn::xnn_status_from_ynn(
-        ynn::implement_clamp(ynn_subgraph, output_min, output_max, output_id));
+        ynn::implement_clamp(subgraph, output_min, output_max, output_id));
   }
 
   return xnn_status_success;
@@ -183,11 +177,9 @@ xnn_status xnn_define_global_sum_pooling_2d(xnn_subgraph_t subgraph,
                                             uint32_t input_id,
                                             uint32_t output_id,
                                             uint32_t flags) {
-  ynn_subgraph_t ynn_subgraph = subgraph->ynn;
-
   size_t reduction_axes[XNN_MAX_TENSOR_DIMS];
-  reduction_axes[0] = ynn::rank_of_value(ynn_subgraph, input_id) - 3;
-  reduction_axes[1] = ynn::rank_of_value(ynn_subgraph, input_id) - 2;
+  reduction_axes[0] = ynn::rank_of_value(subgraph, input_id) - 3;
+  reduction_axes[1] = ynn::rank_of_value(subgraph, input_id) - 2;
 
   xnn_status status = xnn_define_static_reduce(
       subgraph, xnn_reduce_sum, 2, reduction_axes, input_id, output_id, flags);
@@ -198,7 +190,7 @@ xnn_status xnn_define_global_sum_pooling_2d(xnn_subgraph_t subgraph,
 
   if (output_min != -INFINITY || output_max != INFINITY) {
     return ynn::xnn_status_from_ynn(
-        ynn::implement_clamp(ynn_subgraph, output_min, output_max, output_id));
+        ynn::implement_clamp(subgraph, output_min, output_max, output_id));
   }
 
   return xnn_status_success;

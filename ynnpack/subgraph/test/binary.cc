@@ -7,6 +7,7 @@
 #include <chrono>
 #include <cmath>
 #include <cstddef>
+#include <cstdint>
 #include <random>
 #include <tuple>
 #include <vector>
@@ -78,11 +79,30 @@ void TestOp(T, const binary_op_info& op_info, ynn_binary_operator op) {
     quantization_params b_quantization = random_quantization(T(), rng);
     quantization_params x_quantization = random_quantization(T(), rng);
 
+    uint32_t input_a_id = 0;
+    uint32_t input_b_id = 1;
+    uint32_t output_id = 2;
     SubgraphBuilder subgraph(3);
-    subgraph.AddInput(type_of<T>(), reversed(a_shape), 0, a_quantization)
-        .AddInput(type_of<T>(), reversed(b_shape), 1, b_quantization)
-        .AddOutput(type_of<T>(), rank, 2, x_quantization)
-        .AddBinary(op, 0, 1, 2);
+    if (is_quantized<T>()) {
+      uint32_t a_id = YNN_INVALID_VALUE_ID;
+      uint32_t b_id = YNN_INVALID_VALUE_ID;
+      uint32_t x_id = YNN_INVALID_VALUE_ID;
+      subgraph.AddInput(type_of<T>(), reversed(a_shape), input_a_id)
+          .AddInput(type_of<T>(), reversed(b_shape), input_b_id)
+          .AddOutput(type_of<T>(), rank, output_id)
+          .AddTensor(ynn_type_fp32, rank, a_id)
+          .AddTensor(ynn_type_fp32, rank, b_id)
+          .AddTensor(ynn_type_fp32, rank, x_id);
+      subgraph.AddDequantize(input_a_id, a_quantization, ynn_type_fp32, a_id)
+          .AddDequantize(input_b_id, b_quantization, ynn_type_fp32, b_id)
+          .AddBinary(op, a_id, b_id, x_id)
+          .AddQuantize(x_id, type_of<T>(), x_quantization, output_id);
+    } else {
+      subgraph.AddInput(type_of<T>(), reversed(a_shape), input_a_id)
+          .AddInput(type_of<T>(), reversed(b_shape), input_b_id)
+          .AddOutput(type_of<T>(), rank, output_id)
+          .AddBinary(op, input_a_id, input_b_id, output_id);
+    }
 
     Runtime runtime(subgraph.GetSubgraph());
     ASSERT_EQ(runtime.Status(), ynn_status_success);
@@ -109,13 +129,13 @@ void TestOp(T, const binary_op_info& op_info, ynn_binary_operator op) {
       fill_random(a.data(), a.size(), rng, a_quantization);
       fill_random(b.data(), b.size(), rng, b_quantization);
 
-      runtime.ReshapeExternalTensor(a.extents(), a.data(), 0)
-          .ReshapeExternalTensor(b.extents(), b.data(), 1)
+      runtime.ReshapeExternalTensor(a.extents(), a.data(), input_a_id)
+          .ReshapeExternalTensor(b.extents(), b.data(), input_b_id)
           .ReshapeRuntime();
 
-      ASSERT_EQ(runtime.GetExternalTensorShape(2), x.extents());
+      ASSERT_EQ(runtime.GetExternalTensorShape(output_id), x.extents());
 
-      runtime.SetupExternalTensor(x.data(), 2).InvokeRuntime();
+      runtime.SetupExternalTensor(x.data(), output_id).InvokeRuntime();
 
       broadcast_extent_1(a);
       broadcast_extent_1(b);

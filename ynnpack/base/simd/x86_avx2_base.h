@@ -59,6 +59,16 @@ YNN_ALWAYS_INLINE std::tuple<u8x32, u8x32> interleave(
                     u8x32{_mm256_or_si256(_mm256_slli_epi16(even1, 4), even0)},
                     u8x32{_mm256_or_si256(odd1, _mm256_srli_epi16(odd0, 4))});
 }
+YNN_ALWAYS_INLINE std::tuple<u8x32, u8x32> interleave(
+    std::integral_constant<size_t, 2>, u8x32 x0, u8x32 x1) {
+  __m256i even0 = _mm256_and_si256(x0.v, _mm256_set1_epi8(0x33));
+  __m256i even1 = _mm256_and_si256(x1.v, _mm256_set1_epi8(0x33));
+  __m256i odd0 = _mm256_and_si256(x0.v, _mm256_set1_epi8(0xcc));
+  __m256i odd1 = _mm256_and_si256(x1.v, _mm256_set1_epi8(0xcc));
+  return interleave(std::integral_constant<size_t, 4>{},
+                    u8x32{_mm256_or_si256(_mm256_slli_epi16(even1, 2), even0)},
+                    u8x32{_mm256_or_si256(odd1, _mm256_srli_epi16(odd0, 2))});
+}
 
 YNN_ALWAYS_INLINE s32x8 operator+(s32x8 a, s32x8 b) {
   return s32x8{_mm256_add_epi32(a.v, b.v)};

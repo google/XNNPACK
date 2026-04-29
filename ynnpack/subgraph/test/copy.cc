@@ -28,12 +28,10 @@ void TestImpl(T, size_t rank) {
   ReplicableRandomDevice rng;
 
   for (auto _ : FuzzTest(std::chrono::milliseconds(250))) {
-    quantization_params quantization = random_quantization(type_of<T>(), rng);
-
     // Define subgraph
     SubgraphBuilder subgraph(2);
-    subgraph.AddInput(type_of<T>(), rank, 0, quantization)
-        .AddOutput(type_of<T>(), rank, 1, quantization)
+    subgraph.AddInput(type_of<T>(), rank, 0)
+        .AddOutput(type_of<T>(), rank, 1)
         .AddCopy(0, 1);
 
     Runtime runtime(subgraph.GetSubgraph());
@@ -43,7 +41,7 @@ void TestImpl(T, size_t rank) {
       std::vector<size_t> shape = random_shape(rng, rank);
 
       Tensor<T> input(shape);
-      fill_random(input.data(), input.size(), rng, quantization);
+      fill_random(input.data(), input.size(), rng);
 
       // Check reshaped shape is correct
       runtime.ReshapeExternalTensor(shape, input.base(), 0).ReshapeRuntime();

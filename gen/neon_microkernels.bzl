@@ -6,9 +6,14 @@
 #
 
 PROD_NEON_MICROKERNEL_SRCS = [
+    "src/bf16-f32-vcvt/gen/bf16-f32-vcvt-neon-u8.c",
+    "src/bf16-rminmax/gen/bf16-rmax-neon-u32-acc4.c",
+    "src/bf16-rminmax/gen/bf16-rmin-neon-u32-acc4.c",
+    "src/bf16-rminmax/gen/bf16-rminmax-neon-u32-acc4.c",
     "src/f16-f32-vcvt/gen/f16-f32-vcvt-neon-int16-u16.c",
     "src/f32-argmaxpool/f32-argmaxpool-9p8x-neon-c4.c",
     "src/f32-avgpool/gen/f32-avgpool-9p-minmax-neon-u4.c",
+    "src/f32-bf16-vcvt/gen/f32-bf16-vcvt-neon-u8.c",
     "src/f32-conv-hwc2chw/f32-conv-hwc2chw-3x3s2p1c3x4-neon-2x2.c",
     "src/f32-dwconv/gen/f32-dwconv-3p8c-minmax-neon.c",
     "src/f32-dwconv/gen/f32-dwconv-4p8c-minmax-neon.c",
@@ -181,6 +186,21 @@ PROD_NEON_MICROKERNEL_SRCS = [
 ]
 
 NON_PROD_NEON_MICROKERNEL_SRCS = [
+    "src/bf16-f32-vcvt/gen/bf16-f32-vcvt-neon-u16.c",
+    "src/bf16-f32-vcvt/gen/bf16-f32-vcvt-neon-u24.c",
+    "src/bf16-f32-vcvt/gen/bf16-f32-vcvt-neon-u32.c",
+    "src/bf16-rminmax/gen/bf16-rmax-neon-u8.c",
+    "src/bf16-rminmax/gen/bf16-rmax-neon-u16-acc2.c",
+    "src/bf16-rminmax/gen/bf16-rmax-neon-u24-acc3.c",
+    "src/bf16-rminmax/gen/bf16-rmax-neon-u32-acc2.c",
+    "src/bf16-rminmax/gen/bf16-rmin-neon-u8.c",
+    "src/bf16-rminmax/gen/bf16-rmin-neon-u16-acc2.c",
+    "src/bf16-rminmax/gen/bf16-rmin-neon-u24-acc3.c",
+    "src/bf16-rminmax/gen/bf16-rmin-neon-u32-acc2.c",
+    "src/bf16-rminmax/gen/bf16-rminmax-neon-u8.c",
+    "src/bf16-rminmax/gen/bf16-rminmax-neon-u16-acc2.c",
+    "src/bf16-rminmax/gen/bf16-rminmax-neon-u24-acc3.c",
+    "src/bf16-rminmax/gen/bf16-rminmax-neon-u32-acc2.c",
     "src/f16-f32-vcvt/gen/f16-f32-vcvt-neon-int16-u8.c",
     "src/f16-f32-vcvt/gen/f16-f32-vcvt-neon-int16-u24.c",
     "src/f16-f32-vcvt/gen/f16-f32-vcvt-neon-int16-u32.c",
@@ -188,6 +208,9 @@ NON_PROD_NEON_MICROKERNEL_SRCS = [
     "src/f16-f32-vcvt/gen/f16-f32-vcvt-neon-int32-u16.c",
     "src/f16-f32-vcvt/gen/f16-f32-vcvt-neon-int32-u24.c",
     "src/f16-f32-vcvt/gen/f16-f32-vcvt-neon-int32-u32.c",
+    "src/f32-bf16-vcvt/gen/f32-bf16-vcvt-neon-u16.c",
+    "src/f32-bf16-vcvt/gen/f32-bf16-vcvt-neon-u24.c",
+    "src/f32-bf16-vcvt/gen/f32-bf16-vcvt-neon-u32.c",
     "src/f32-conv-hwc/gen/f32-conv-hwc-3x3s2p0p1c3x4-neon-2x1.c",
     "src/f32-conv-hwc/gen/f32-conv-hwc-3x3s2p0p1c3x4-neon-2x2.c",
     "src/f32-conv-hwc/gen/f32-conv-hwc-3x3s2p0p1c3x8-neon-2x1.c",

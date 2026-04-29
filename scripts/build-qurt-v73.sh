@@ -34,4 +34,4 @@ CMAKE_ARGS+=($@)
 cd build/qurt/${HEXAGON_ARCH} && cmake ../../.. \
     "${CMAKE_ARGS[@]}"
 
-cmake --build . -- "-j$((2*$(nproc)))"
+cmake --build . -- "-j$(nproc)"

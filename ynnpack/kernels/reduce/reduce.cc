@@ -262,7 +262,7 @@ struct sum_op {
   T operator()(T a, T b) { return a + b; }
 
   static constexpr auto identity = type_info<T>::sum_identity();
-  static constexpr bool is_associative = std::is_integral<T>::value;
+  static constexpr bool is_associative = is_integral<T>::value;
 };
 
 template <typename T, typename A>
@@ -579,6 +579,7 @@ unary_reduce_kernel_fn get_sum_kernel(ynn_type a_type, ynn_type c_type,
 #define YNN_UNARY_REDUCE_KERNEL(arch, name, A, C)           \
   if (is_arch_supported(arch)) {                            \
     if (type_of<A>() == a_type && type_of<C>() == c_type) { \
+      YNN_LOG_DEBUG() << "Using reduce kernel " << #name;   \
       return name;                                          \
     }                                                       \
   }
@@ -594,6 +595,7 @@ unary_reduce_kernel_fn get_sum_squared_kernel(ynn_type a_type, ynn_type c_type,
 #define YNN_UNARY_REDUCE_KERNEL(arch, name, A, C)           \
   if (is_arch_supported(arch)) {                            \
     if (type_of<A>() == a_type && type_of<C>() == c_type) { \
+      YNN_LOG_DEBUG() << "Using reduce kernel " << #name;   \
       return name;                                          \
     }                                                       \
   }
@@ -605,11 +607,12 @@ unary_reduce_kernel_fn get_sum_squared_kernel(ynn_type a_type, ynn_type c_type,
 
 unary_reduce_kernel_fn get_min_kernel(ynn_type type, size_t n, size_t k3,
                                       size_t k2, size_t k1) {
-#define YNN_UNARY_REDUCE_KERNEL(arch, name, A, C)       \
-  if (is_arch_supported(arch)) {                        \
-    if (type_of<A>() == type && type_of<C>() == type) { \
-      return name;                                      \
-    }                                                   \
+#define YNN_UNARY_REDUCE_KERNEL(arch, name, A, C)         \
+  if (is_arch_supported(arch)) {                          \
+    if (type_of<A>() == type && type_of<C>() == type) {   \
+      YNN_LOG_DEBUG() << "Using reduce kernel " << #name; \
+      return name;                                        \
+    }                                                     \
   }
 #include "ynnpack/kernels/reduce/min.inc"
 #undef YNN_UNARY_REDUCE_KERNEL
@@ -619,11 +622,12 @@ unary_reduce_kernel_fn get_min_kernel(ynn_type type, size_t n, size_t k3,
 
 unary_reduce_kernel_fn get_max_kernel(ynn_type type, size_t n, size_t k3,
                                       size_t k2, size_t k1) {
-#define YNN_UNARY_REDUCE_KERNEL(arch, name, A, C)       \
-  if (is_arch_supported(arch)) {                        \
-    if (type_of<A>() == type && type_of<C>() == type) { \
-      return name;                                      \
-    }                                                   \
+#define YNN_UNARY_REDUCE_KERNEL(arch, name, A, C)         \
+  if (is_arch_supported(arch)) {                          \
+    if (type_of<A>() == type && type_of<C>() == type) {   \
+      YNN_LOG_DEBUG() << "Using reduce kernel " << #name; \
+      return name;                                        \
+    }                                                     \
   }
 #include "ynnpack/kernels/reduce/max.inc"
 #undef YNN_UNARY_REDUCE_KERNEL
@@ -633,11 +637,12 @@ unary_reduce_kernel_fn get_max_kernel(ynn_type type, size_t n, size_t k3,
 
 unary_reduce_kernel_fn get_min_max_kernel(ynn_type type, size_t n, size_t k3,
                                           size_t k2, size_t k1) {
-#define YNN_UNARY_REDUCE_KERNEL(arch, name, A, C)       \
-  if (is_arch_supported(arch)) {                        \
-    if (type_of<A>() == type && type_of<C>() == type) { \
-      return name;                                      \
-    }                                                   \
+#define YNN_UNARY_REDUCE_KERNEL(arch, name, A, C)         \
+  if (is_arch_supported(arch)) {                          \
+    if (type_of<A>() == type && type_of<C>() == type) {   \
+      YNN_LOG_DEBUG() << "Using reduce kernel " << #name; \
+      return name;                                        \
+    }                                                     \
   }
 #include "ynnpack/kernels/reduce/min_max.inc"
 #undef YNN_UNARY_REDUCE_KERNEL

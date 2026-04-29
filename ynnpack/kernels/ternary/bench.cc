@@ -43,19 +43,17 @@ void bench(benchmark::State& state, uint64_t arch_flags,
   broadcast_extent_1(c);
 
   for (auto _ : state) {
-    kernel(m, n, a.stride(0) * sizeof(A), a.stride(1) * sizeof(A), a.base(),
-           b.stride(0) * sizeof(B), b.stride(1) * sizeof(B), b.base(),
-           c.stride(0) * sizeof(C), c.stride(1) * sizeof(C), c.base(),
-           x.stride(0) * sizeof(X), x.base(), nullptr);
+    kernel(m, n, a.stride_bytes(0), a.stride_bytes(1), a.base(),
+           b.stride_bytes(0), b.stride_bytes(1), b.base(), c.stride_bytes(0),
+           c.stride_bytes(1), c.base(), x.stride_bytes(0), x.base(), nullptr);
   }
 
   const size_t ops = m * n;
   state.counters["Op"] =
       benchmark::Counter(state.iterations() * ops, benchmark::Counter::kIsRate);
 
-  const size_t bytes = m * n *
-                       (sizeof(X) + sizeof(A) * !broadcast_a +
-                        sizeof(B) * !broadcast_b + sizeof(C) * !broadcast_c);
+  const size_t bytes = a.size_bytes() + b.size_bytes() + c.size_bytes() +
+                       x.size_bytes();
   state.counters["Bytes"] = benchmark::Counter(state.iterations() * bytes,
                                                benchmark::Counter::kIsRate);
 }

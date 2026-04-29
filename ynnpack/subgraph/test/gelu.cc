@@ -26,7 +26,7 @@ float gelu(float x) {
 float approxgelu(float x) {
   const float c1 = static_cast<float>(std::sqrt(2.0f / M_PI));
   const float c3 = 0.044715f;
-  return x * 0.5f * (1.0f + std::tanh(x * (c1 + c3 * x * x)));
+  return x * 0.5f * (1.0f + std::tanh(c1 * x * (1.0f + c3 * x * x)));
 }
 
 TEST(subgraph, gelu) {
@@ -109,7 +109,7 @@ TEST(subgraph, approxgelu) {
   // (x / 2) * (1 + tanh(sqrt(2 / pi) * (x + 0.044715 * x^3)))
   const float c1 = static_cast<float>(std::sqrt(2.0f / M_PI));
   const float c3 = 0.044715f;
-  builder.AddPolynomial({0.0f, c1, 0.0f, c3}, x_id, x_poly_id)
+  builder.AddPolynomial({0.0f, c1, 0.0f, c1 * c3}, x_id, x_poly_id)
       .AddUnary(ynn_unary_tanh, x_poly_id, tanh_id)
       .AddBinary(ynn_binary_multiply, tanh_id, half_id, half_tanh_id)
       .AddBinary(ynn_binary_add, half_tanh_id, half_id, half_tanh_plus_half_id)

@@ -238,16 +238,41 @@ void xnn_compute_batched_packw_gemm_gio(
                                  n_block_start * context->w_stride +
                                  batch_index * context->gc_stride);
 
+  const void* scale_b = context->scale_b;
+  if (scale_b != NULL) {
+    scale_b = (const void*)((uintptr_t)context->scale_b +
+                                     n_block_start * context->gc_scale_stride +
+                                     batch_index * context->n_scale_stride);
+  }
+
   if (context->pack_weights_and_biases) {
+    // Mirror the layout used by `create_batch_matrix_multiply_nc_const_weights`:
+    // pass `scale_b` as `extra_data1` (the per-channel scale slot, written
+    // first) and reserve the remaining trailing bytes as `extra_data0` (the
+    // float-bias placeholder). Some packing helpers — notably the KleidiAI
+    // wrapper — read `extra_data0` as the bias and `extra_data1` as the scale,
+    // so getting these in the right slots is required for correctness.
+    //
+    // Zero the per-tile region first so the bias-placeholder slot is
+    // well-defined when no explicit bias is provided (the const-weights path
+    // memsets the whole packed buffer up front; the dynamic path uses the
+    // user's workspace, which is not pre-cleared).
+    const size_t scale_size = (scale_b != NULL) ? sizeof(float) : 0;
+    const size_t bias_pad_size =
+        context->scale_b_size > scale_size
+            ? context->scale_b_size - scale_size
+            : 0;
+    memset(packed_weights, 0, context->nr * context->w_stride);
+
     context->pack_weights_and_biases(
         /*flags=*/XNN_FLAG_TRANSPOSE_WEIGHTS, context->gemm_config, context->kc,
         n_block_size, /*groups=*/1, /*block_size=*/0,
         /*k_stride=*/context->k_stride_elements, /*accumulator_init=*/bias,
-        kernel, /*init_extra_data0_fn=*/context->init_scale_b,
-        /*extra_data0=*/context->scale_b,
-        /*extra_data0_element_size=*/context->scale_b_size,
-        /*init_extra_data1_fn=*/NULL, /*extra_data1=*/NULL,
-        /*extra_data1_element_size=*/0, packed_weights,
+        kernel, /*init_extra_data0_fn=*/NULL, /*extra_data0=*/NULL,
+        /*extra_data0_element_size=*/bias_pad_size,
+        /*init_extra_data1_fn=*/context->init_scale_b,
+        /*extra_data1=*/scale_b,
+        /*extra_data1_element_size=*/scale_size, packed_weights,
         /*params=*/context->params);
   } else {
     context->packw_gemm_gio(
@@ -256,14 +281,14 @@ void xnn_compute_batched_packw_gemm_gio(
         packed_weights, /*extra_bytes=*/context->nr * context->scale_b_size,
         /*params=*/context->params);
 
-    if (context->scale_b != NULL) {
+    if (scale_b != NULL) {
       assert(context->init_scale_b != NULL);
       void* weights =
           (void*)((uintptr_t)packed_weights + context->nr * (
               context->w_stride - context->scale_b_size));
       context->init_scale_b(n_block_size, context->nr,
                             context->nr * context->w_stride,
-                            context->scale_b, weights);
+                            scale_b, weights);
     }
   }
 }
@@ -290,16 +315,30 @@ void xnn_compute_batched_packw_gemm_goi(
                                  context->w_stride * n_block_start +
                                  batch_index * context->gc_stride);
 
+  const void* scale_b = context->scale_b;
+  if (scale_b != NULL) {
+    scale_b = (const void*)((uintptr_t)context->scale_b +
+                                     n_block_start * context->gc_scale_stride +
+                                     batch_index * context->n_scale_stride);
+  }
   if (context->pack_weights_and_biases) {
+    // See the matching comment in `xnn_compute_batched_packw_gemm_gio`.
+    const size_t scale_size = (scale_b != NULL) ? sizeof(float) : 0;
+    const size_t bias_pad_size =
+        context->scale_b_size > scale_size
+            ? context->scale_b_size - scale_size
+            : 0;
+    memset(packed_weights, 0, context->nr * context->w_stride);
+
     context->pack_weights_and_biases(
         /*flags=*/0, context->gemm_config, context->kc, n_block_size,
         /*groups=*/1, /*block_size=*/0, /*k_stride=*/context->kc,
         /*accumulator_init=*/bias, kernel,
-        /*init_extra_data0_fn=*/context->init_scale_b,
-        /*extra_data0=*/context->scale_b,
-        /*extra_data0_element_size=*/context->scale_b_size,
-        /*init_extra_data1_fn=*/NULL, /*extra_data1=*/NULL,
-        /*extra_data1_element_size=*/0, packed_weights,
+        /*init_extra_data0_fn=*/NULL, /*extra_data0=*/NULL,
+        /*extra_data0_element_size=*/bias_pad_size,
+        /*init_extra_data1_fn=*/context->init_scale_b,
+        /*extra_data1=*/scale_b,
+        /*extra_data1_element_size=*/scale_size, packed_weights,
         /*params=*/context->params);
   } else {
     context->packw_gemm_goi(
@@ -308,14 +347,13 @@ void xnn_compute_batched_packw_gemm_goi(
         /*extra_bytes=*/context->nr * context->scale_b_size,
         /*params=*/context->params);
 
-    if (context->scale_b != NULL) {
+    if (scale_b != NULL) {
       assert(context->init_scale_b != NULL);
       void* weights =
           (void*)((uintptr_t)packed_weights + context->nr *
                   (context->w_stride - context->scale_b_size));
       context->init_scale_b(n_block_size, context->nr,
-                            context->nr * context->w_stride, context->scale_b,
-                            weights);
+                            context->nr * context->w_stride, scale_b, weights);
     }
   }
 }

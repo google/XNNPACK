@@ -144,7 +144,7 @@ void xnn_f16_gemm_minmax_ukernel_${MR}x${NR}__wasmrelaxedsimd_splat(
                 wasm_v128_store32_lane(c${M}, vh${M}x0, 0);
 
               $for M in range(MR):
-                wasm_i32x4_shuffle(vh${M}x0, vh${M}x0, 1, 2, 3, 1);
+                vh${M}x0 = wasm_i32x4_shuffle(vh${M}x0, vh${M}x0, 1, 2, 3, 1);
 
               $for M in range(MR):
                 c${M} += 2;

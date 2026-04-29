@@ -187,6 +187,7 @@ generate_dot_kernels(
         (2, 32, 8),
         (4, 16, 8),
         (6, 16, 8),
+        # The bfmmla kernels benefit from unrolling these by 2x, but not these?!
         (6, 8, 8),
         (8, 8, 8),
         (10, 8, 8),

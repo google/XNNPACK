@@ -30,6 +30,14 @@ def floor_fp32(a, x):
 
 @const_buffer("a", Float(32))
 @buffer("x", Float(32))
+@operator_name("square")
+def square_fp32(a, x):
+  vx = load(a)
+  return store(vx * vx, x)
+
+
+@const_buffer("a", Float(32))
+@buffer("x", Float(32))
 @operator_name("square_root")
 def square_root_fp32(a, x):
   return store(sqrt(load(a)), x)

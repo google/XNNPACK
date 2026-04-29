@@ -48,13 +48,11 @@ void TestImpl(T, size_t rank, size_t num_outputs) {
   std::iota(output_ids.begin(), output_ids.end(), 1);
 
   for (size_t axis = 0; axis < rank; ++axis) {
-    quantization_params quantization = random_quantization(type_of<T>(), rng);
-
     // Define subgraph
     SubgraphBuilder subgraph(num_outputs + 1);
-    subgraph.AddInput(type_of<T>(), rank, 0, quantization);
+    subgraph.AddInput(type_of<T>(), rank, 0);
     for (size_t i = 0; i < num_outputs; ++i) {
-      subgraph.AddOutput(type_of<T>(), rank, i + 1, quantization);
+      subgraph.AddOutput(type_of<T>(), rank, i + 1);
     }
     subgraph.AddEvenSplit(axis, 0, output_ids);
 
@@ -67,7 +65,7 @@ void TestImpl(T, size_t rank, size_t num_outputs) {
       input_shape[axis] *= num_outputs;
 
       Tensor<T> input(input_shape);
-      fill_random(input.data(), input.size(), rng, quantization);
+      fill_random(input.data(), input.size(), rng);
 
       // Check reshaped shape is correct
       runtime.ReshapeExternalTensor(input_shape, input.base(), 0)

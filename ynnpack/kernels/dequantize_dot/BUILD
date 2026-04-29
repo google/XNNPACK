@@ -32,6 +32,7 @@ ynn_cc_library(
     deps = [
         "//ynnpack:ynnpack_h",
         "//ynnpack/base",
+        "//ynnpack/base:log",
         "//ynnpack/base/simd",  # buildcleaner: keep
     ],
 )

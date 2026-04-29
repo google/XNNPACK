@@ -107,26 +107,29 @@ enum ynn_type {
 // exists, unless the `YNN_VALUE_FLAG_COPY_DATA` flag is used, indicating that
 // this function will make a copy of the data, releasing the caller of the
 // obligation to maintain it.
-//
-// Quantization parameters are specified via other tensor IDs. Conceptually,
-// these tensors must have the same shape as this tensor. Some common examples
-// include:
-// - Per-tensor quantization: `zero_point_id` and `scale_id` both refer to
-//   broadcasted scalar values.
-// - Per-channel quantization: `zero_point_id` refers to a broadcasted scalar,
-//   `scale_id` refers to a tensor with a single non-broadcasted dimension.
-// - Blockwise quantization: `zero_point_id` refers to a broadcasted scalar,
-//   `scale_id` refers to a tensor that is broadcasted and reshaped.
-enum ynn_status ynn_define_tensor_value(ynn_subgraph_t subgraph,
-                                        enum ynn_type type, size_t rank,
-                                        const size_t* dims, const void* data,
-                                        uint32_t zero_point_id,
-                                        uint32_t scale_id, uint32_t flags,
-                                        uint32_t* id_out);
 enum ynn_status ynn_define_tensor(ynn_subgraph_t subgraph, enum ynn_type type,
                                   size_t rank, const size_t* dims,
                                   const void* data, uint32_t flags,
                                   uint32_t* id_out);
+
+// Defines a tensor with values that are a linear combination of its indices and
+// the given `stride_id` tensor:
+//   output[i_0, ..., i_{rank-1}] = begin + sum_{d=0}^{rank-1} (i_d *
+//   stride[d])
+//
+// `begin_id` may be YNN_INVALID_VALUE_ID, indicating the sequence should start
+// at 0.
+//
+// `stride_id` is a 1D tensor with extent `rank`, where element i indicates the
+// step between output elements in dimension i.
+//
+// The ID of the new tensor will be stored in `output_id`. If `*output_id` is
+// not `YNN_INVALID_VALUE_ID`, it must be a valid ID of a tensor previously
+// defined by `ynn_define_tensor`.
+enum ynn_status ynn_define_iota(ynn_subgraph_t subgraph, enum ynn_type type,
+                                size_t rank, const size_t* dims,
+                                uint32_t begin_id, uint32_t stride_id,
+                                uint32_t* output_id, uint32_t flags);
 
 #define YNN_NODE_FLAG_KEEP_DIMS (1 << 0)
 #define YNN_NODE_FLAG_SLICE_DIMS (1 << 0)
@@ -175,10 +178,43 @@ enum ynn_status ynn_define_unary_polynomial(ynn_subgraph_t subgraph,
 
 // A helper for `ynn_define_unary` with `op` = `ynn_unary_convert`, which is
 // capable of defining the output value.
-enum ynn_status ynn_define_convert(ynn_subgraph_t subgraph, uint32_t input_a_id,
+enum ynn_status ynn_define_convert(ynn_subgraph_t subgraph, uint32_t input_id,
                                    enum ynn_type type, uint32_t zero_point_id,
                                    uint32_t scale_id, uint32_t* output_id,
                                    uint32_t flags);
+
+// A helper for `ynn_define_unary` with `op` = `ynn_unary_convert`, which is
+// capable of defining the output value.
+enum ynn_status ynn_define_convert_v2(ynn_subgraph_t subgraph,
+                                      uint32_t input_id, enum ynn_type type,
+                                      uint32_t* output_id, uint32_t flags);
+
+// Conceptually, a quantized tensor has the value `x*scale + zero_point`, where
+// `x` is the quantized tensor, `scale` is an fp32 tensor, and `zero_point` is
+// an int32 tensor. Like any other elementwise op, the `scale` and `zero_point`
+// tensors must have the same shape as `x`. These tensors are usually broadcasts
+// in at least some of the dimensions. Some common quantization schemes include:
+// - Per-tensor quantization: `zero_point_id` and `scale_id` both refer to
+//   broadcasted scalar values.
+// - Per-channel quantization: `zero_point_id` refers to a broadcasted scalar,
+//   `scale_id` refers to a tensor with a single non-broadcasted dimension.
+// - Blockwise quantization: `zero_point_id` refers to a broadcasted scalar,
+//   `scale_id` refers to a tensor that is broadcasted by a block size factor,
+//   and then reshaped.
+
+// Define a quantize operation. `output_id` will be a tensor of type `type`
+// quantized with `zero_point_id` and `scale_id`.
+enum ynn_status ynn_define_quantize(ynn_subgraph_t subgraph, uint32_t input_id,
+                                    enum ynn_type type, uint32_t zero_point_id,
+                                    uint32_t scale_id, uint32_t* output_id,
+                                    uint32_t flags);
+
+// Define a dequantize operation. `output_id` will be a tensor of type `type`
+// dequantized from `input_id` using `zero_point_id` and `scale_id`.
+enum ynn_status ynn_define_dequantize(ynn_subgraph_t subgraph,
+                                      uint32_t input_id, uint32_t zero_point_id,
+                                      uint32_t scale_id, enum ynn_type type,
+                                      uint32_t* output_id, uint32_t flags);
 
 enum ynn_binary_operator {
   ynn_binary_invalid = 0,

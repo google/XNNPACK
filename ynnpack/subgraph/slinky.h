@@ -13,7 +13,6 @@
 
 #include <cassert>
 #include <cstddef>
-#include <cstdint>
 #include <limits>
 #include <string>
 #include <utility>
@@ -98,8 +97,7 @@ struct scheduling_split {
   slinky::var var;
   slinky::expr step;
   slinky::expr workers = slinky::loop::parallel;
-  // The axis of the extent which was used to compute this split.
-  slinky::index_t axis;
+  slinky::expr extent;
   // If this is true the corresponding loop is required to have this specific
   // step, i.e. it can not get scheduled in the loop of the other function
   // unless the step matches or the other loop doesn't have required step yet.
@@ -130,10 +128,6 @@ struct scheduling_info {
   // A set of loop splits for a given function.
   std::vector<scheduling_split> loop_splits;
   std::vector<scheduled_buffer> scheduled_buffers;
-
-  // This is an ID of the buffer whose extents were used to compute this
-  // scheduling info.
-  uint32_t base_buffer_id = 0;
 
   bool force_root = false;
 };
@@ -218,6 +212,7 @@ bool fuse_and_slice_leading_dim(int i, slinky::dim* x_dims,
   // First check whether fusing dimensions is possible.
   const slinky::dim& x_dim_0 = x.dims[0];
   bool can_fuse_all =
+      !x_dim_0.empty() &&
       slinky::can_fuse(x_dims[i], x_dim_0) &&
       all_of_pairs(
           [x_dims, i, &x_dim_0](const slinky::dim* in_dims,
@@ -265,7 +260,7 @@ bool fuse_and_slice_leading_dim(int i, slinky::dim* x_dims,
 //
 // This function assumes that all of the input buffers are in bounds.
 template <int NumInnerDims, typename... DimBufferPairs>
-void fuse_and_slice_leading_dims(slinky::dim* x_dims, slinky::raw_buffer& x,
+bool fuse_and_slice_leading_dims(slinky::dim* x_dims, slinky::raw_buffer& x,
                                  DimBufferPairs&&... inputs) {
   for (int i = 0; i < NumInnerDims; ++i) {
     // If the output innermost (n) dimension has extent 1, we need to make the n
@@ -274,6 +269,9 @@ void fuse_and_slice_leading_dims(slinky::dim* x_dims, slinky::raw_buffer& x,
     assert(i != 0 || is_contiguous(x.dim(0), x.elem_size));
 
     x_dims[i] = slice_dim0(x);
+    if (x_dims[i].empty()) {
+      return false;
+    }
 
     // Initialize `in_dims[i]` for each input.
     // `x` is already a view to the correct tile in the larger output buffer.
@@ -296,6 +294,8 @@ void fuse_and_slice_leading_dims(slinky::dim* x_dims, slinky::raw_buffer& x,
       }
     }
   }
+
+  return true;
 }
 
 }  // namespace ynn

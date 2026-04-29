@@ -395,6 +395,52 @@ void test_sqrt() {
 #define TEST_SQRT(test_class, type, N) \
   TEST_F(test_class, sqrt_##type##x##N) { test_sqrt<type, N>(); }
 
+template <typename scalar, size_t N>
+void test_floor_log2() {
+  using vector = vec<scalar, N>;
+
+  std::pair<scalar, scalar> special_values[] = {
+      {static_cast<scalar>(0.0), -type_info<scalar>::infinity()},
+      {static_cast<scalar>(-0.0), -type_info<scalar>::infinity()},
+      {type_info<scalar>::infinity(), type_info<scalar>::infinity()},
+      {static_cast<scalar>(-1.0), type_info<scalar>::nan()},
+      {-type_info<scalar>::infinity(), type_info<scalar>::nan()},
+      {-type_info<scalar>::max(), type_info<scalar>::nan()},
+  };
+
+  for (const auto& [input, expected] : special_values) {
+    scalar a[vector::N];
+    std::fill_n(a, vector::N, input);
+
+    scalar result[vector::N];
+    store(result, floor_log2(load(a, vector::N)));
+    if (std::isnan(expected)) {
+      ASSERT_TRUE(std::isnan(result[0])) << input;
+    } else {
+      ASSERT_EQ(result[0], expected) << input;
+    }
+  }
+
+  ReplicableRandomDevice rng;
+  for (auto _ : FuzzTest(std::chrono::milliseconds(100))) {
+    scalar a[vector::N];
+    fill_random(a, vector::N, rng, 0.0, 1000.0);
+
+    scalar result[vector::N];
+    store(result, floor_log2(load(a, vector::N)));
+
+    for (size_t i = 0; i < vector::N; ++i) {
+      int exp;
+      std::frexp(static_cast<double>(a[i]), &exp);
+      scalar expected = static_cast<scalar>(exp - 1);
+      ASSERT_EQ(result[i], expected);
+    }
+  }
+}
+
+#define TEST_FLOOR_LOG2(test_class, type, N) \
+  TEST_F(test_class, floor_log2_##type##x##N) { test_floor_log2<type, N>(); }
+
 struct min_op {
   template <typename T>
   T operator()(T a, T b) {

@@ -150,8 +150,8 @@ void TestImpl(A, X, const KernelInfo& kernel_info, const OpInfo& op_info,
   a = a.crop_padding({0, 0}, {0, shape.padding_a});
   x = x.crop_padding({0, 0}, {0, shape.padding_x});
 
-  kernel(shape.m, shape.n, a.stride(0) * sizeof(A), a.base(),
-         x.stride(0) * sizeof(X), x.base(), &params);
+  kernel(shape.m, shape.n, a.stride_bytes(0), a.base(), x.stride_bytes(0),
+         x.base(), &params);
 
   check_results(op_info, a, x);
 }
@@ -171,6 +171,10 @@ constexpr decltype(auto) SwitchType(ynn_type type, F&& f) {
       return std::forward<F>(f)(bfloat16());
     case ynn_type_fp32:
       return std::forward<F>(f)(float());
+    case ynn_type_int4:
+      return std::forward<F>(f)(int4x2());
+    case ynn_type_int2:
+      return std::forward<F>(f)(int2x4());
     default:
       YNN_UNREACHABLE;
   }
@@ -207,7 +211,18 @@ TEST_P(ReferenceConvert, op) {
 }
 
 // clang-format off
-ynn_type all_convert_types[] = {
+ynn_type all_convert_input_types[] = {
+    ynn_type_int2,
+    ynn_type_int4,
+    ynn_type_int8,
+    ynn_type_uint8,
+    ynn_type_int32,
+    ynn_type_fp16,
+    ynn_type_bf16,
+    ynn_type_fp32,
+};
+
+ynn_type all_convert_output_types[] = {
     ynn_type_int8,
     ynn_type_uint8,
     ynn_type_int32,
@@ -269,8 +284,8 @@ INSTANTIATE_TEST_SUITE_P(IntegerOps, Reference,
                          test_param_to_string<Reference::ParamType>);
 
 INSTANTIATE_TEST_SUITE_P(Convert, ReferenceConvert,
-                         Combine(ValuesIn(all_convert_types),
-                                 ValuesIn(all_convert_types),
+                         Combine(ValuesIn(all_convert_input_types),
+                                 ValuesIn(all_convert_output_types),
                                  ValuesIn(reference_shapes)),
                          test_param_to_string<ReferenceConvert::ParamType>);
 

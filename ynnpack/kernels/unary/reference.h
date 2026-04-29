@@ -324,8 +324,13 @@ struct reciprocal_square_root : public unary_op_info {
 };
 
 struct log : public unary_op_info {
-  explicit log(const unary_params& = {}) {}
-  float operator()(float x) const override { return std::log(x); }
+  log_params params;
+
+  explicit log(const unary_params& params) : params(params.log) {}
+  float operator()(float x) const override {
+    return std::log2(x * params.input_multiplier / std::sqrt(2.0f)) *
+           params.output_multiplier;
+  }
 
   float tolerance(float y_ref, ynn_type type) const override {
     return tol_mixed(y_ref, 2 * epsilon(type), 6 * epsilon(type));
@@ -504,10 +509,11 @@ void check_results(const unary_op_info& op, Tensor<A> a, Tensor<X> x,
                    const quantization_params& a_quantization = {},
                    const quantization_params& x_quantization = {}) {
   for (const auto& i : EnumerateIndices(x.extents())) {
-    if (std::is_integral<X>::value) {
-      if (std::is_integral<A>::value) {
-        const int32_t expected =
-            saturate_cast<X>(op(static_cast<int32_t>(a(i))));
+    if constexpr (is_integral<X>::value) {
+      if constexpr (is_integral<A>::value) {
+        int32_t expected = op(static_cast<int32_t>(a(i)));
+        if (expected > type_info<X>::max()) expected = type_info<X>::max();
+        if (expected < type_info<X>::min()) expected = type_info<X>::min();
         ASSERT_EQ(expected, x(i)) << "i = " << index_to_string(i)
                                   << ", a(i) = " << static_cast<int32_t>(a(i));
       } else {
@@ -519,7 +525,7 @@ void check_results(const unary_op_info& op, Tensor<A> a, Tensor<X> x,
             << "i = " << index_to_string(i) << ", a(i) = " << input_i << " ("
             << static_cast<float>(a(i)) << ")";
       }
-    } else if (is_quantized<X>()) {
+    } else if constexpr (is_quantized<X>()) {
       const float input_i = dequantize(a(i), a_quantization);
       float expected = op(input_i);
       expected = fake_quantize(expected, x_quantization);

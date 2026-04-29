@@ -292,6 +292,12 @@ xnn_status xnn_setup_batch_matrix_multiply_nc_qs8(
 }
 
 xnn_status xnn_create_batch_matrix_multiply_nc_qd8_f32_qc8w(
+    uint32_t flags, xnn_operator_t* batch_matrix_multiply_op) {
+  YNN_LOG_FATAL() << "operator API is not supported";
+  return xnn_status_deprecated;
+}
+
+xnn_status xnn_create_batch_matrix_multiply_nc_qd8_f32_qc8w_const_weights(
     size_t batch_size_b, size_t k, size_t n, const int8_t* data_b,
     const float* scale_b, uint32_t flags,
     xnn_operator_t* batch_matrix_multiply_op) {
@@ -300,6 +306,15 @@ xnn_status xnn_create_batch_matrix_multiply_nc_qd8_f32_qc8w(
 }
 
 xnn_status xnn_reshape_batch_matrix_multiply_nc_qd8_f32_qc8w(
+    xnn_operator_t batch_matrix_multiply_op, size_t num_batch_dims,
+    const size_t* batch_dims_a, const size_t* batch_dims_b, size_t m, size_t k,
+    size_t n, const float* scale_b, size_t* workspace_size,
+    pthreadpool_t threadpool) {
+  YNN_LOG_FATAL() << "operator API is not supported";
+  return xnn_status_deprecated;
+}
+
+xnn_status xnn_reshape_batch_matrix_multiply_nc_qd8_f32_qc8w_const_weights(
     xnn_operator_t batch_matrix_multiply_op, size_t num_batch_dims,
     const size_t* batch_dims_a, const size_t* batch_dims_b, size_t m, size_t k,
     size_t n, size_t* workspace_size, pthreadpool_t threadpool) {

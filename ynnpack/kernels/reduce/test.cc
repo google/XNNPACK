@@ -156,15 +156,14 @@ void TestUnaryReduce(Tensor<AT> a, Tensor<CT> c,
   // place.
   Tensor<CT> expected = c.deep_copy();
 
-  kernel(n, k3, k2, k1, a.stride(0) * sizeof(AT),
-          a.stride(1) * sizeof(AT), a.stride(2) * sizeof(AT), a.base(),
-          c.stride(0) * sizeof(CT), c.base());
+  kernel(n, k3, k2, k1, a.stride_bytes(0), a.stride_bytes(1), a.stride_bytes(2),
+         a.base(), c.stride_bytes(0), c.base());
 
   // Verify results.
   Reference(a, expected, op);
   ASSERT_EQ(c.rank(), 2);
   for (size_t i = 0; i < c.extent(0); ++i) {
-    if (std::is_integral<CT>::value) {
+    if (is_integral<CT>::value) {
       EXPECT_THAT(row(c, i), ElementsAreArray(row(expected, i)))
           << "shape=" << n << "x" << k3 << "x" << k2 << "x" << k1
           << " row=" << i;

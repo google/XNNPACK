@@ -58,6 +58,7 @@ extern int FLAGS_num_threads;
 extern int FLAGS_batch_size;
 extern uint32_t FLAGS_xnn_runtime_flags;
 extern uint32_t FLAGS_benchmark_min_iters;
+extern bool FLAGS_wipe_caches;
 
 namespace benchmark {
 namespace utils {

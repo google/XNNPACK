@@ -399,10 +399,10 @@ inline void MobileNetV3SmallGemmArguments(benchmark::Benchmark* unwrapped_b) {
   b.Args({ 14 *  14,   40,  240 * 1 * 1});
   /************* Bottleneck 6 ************/
   /*           M        N          K     */
-//b.Args({ 14 *  14,  240,   40 * 1 * 1});
-//b.Args({  1 *   1,   64,  240 * 1 * 1});
-//b.Args({  1 *   1,  240,   64 * 1 * 1});
-//b.Args({ 14 *  14,   40,  240 * 1 * 1});
+//b.Args({ 14 *  14,  240,   40 * 1 * 1}); // Skipped due to repeated shape
+//b.Args({  1 *   1,   64,  240 * 1 * 1}); // Skipped due to repeated shape
+//b.Args({  1 *   1,  240,   64 * 1 * 1}); // Skipped due to repeated shape
+//b.Args({ 14 *  14,   40,  240 * 1 * 1}); // Skipped due to repeated shape
   /************* Bottleneck 7 ************/
   /*           M        N          K     */
   b.Args({ 14 *  14,  120,   40 * 1 * 1});
@@ -429,13 +429,13 @@ inline void MobileNetV3SmallGemmArguments(benchmark::Benchmark* unwrapped_b) {
   b.Args({  7 *   7,   96,  576 * 1 * 1});
   /************ Bottleneck 11 ************/
   /*           M        N          K     */
-//b.Args({  7 *   7,  576,   96 * 1 * 1});
-//b.Args({  1 *   1,  144,  576 * 1 * 1});
-//b.Args({  1 *   1,  576,  144 * 1 * 1});
-//b.Args({  7 *   7,   96,  576 * 1 * 1});
+//b.Args({  7 *   7,  576,   96 * 1 * 1}); // Skipped due to repeated shape
+//b.Args({  1 *   1,  144,  576 * 1 * 1}); // Skipped due to repeated shape
+//b.Args({  1 *   1,  576,  144 * 1 * 1}); // Skipped due to repeated shape
+//b.Args({  7 *   7,   96,  576 * 1 * 1}); // Skipped due to repeated shape
   /************* Last Stage  *************/
   /*           M        N          K     */
-//b.Args({  7 *   7,  576,   96 * 1 * 1});
+//b.Args({  7 *   7,  576,   96 * 1 * 1}); // Skipped due to repeated shape
   b.Args({  1 *   1, 1024,  576 * 1 * 1});
   b.Args({  1 *   1, 1001, 1024 * 1 * 1});
 }
@@ -460,7 +460,7 @@ inline void MobileNetV3LargeGemmArguments(benchmark::Benchmark* unwrapped_b) {
   b.Args({ 56 *  56,   24,   72 * 1 * 1});
   /************* Bottleneck 4 ************/
   /*           M        N          K     */
-//b.Args({ 56 *  56,   72,   24 * 1 * 1});
+//b.Args({ 56 *  56,   72,   24 * 1 * 1}); // Skipped due to repeated shape
   b.Args({  1 *   1,   24,   72 * 1 * 1});
   b.Args({  1 *   1,   72,   24 * 1 * 1});
   b.Args({ 28 *  28,   40,   72 * 1 * 1});
@@ -472,10 +472,10 @@ inline void MobileNetV3LargeGemmArguments(benchmark::Benchmark* unwrapped_b) {
   b.Args({ 28 *  28,   40,  120 * 1 * 1});
   /************* Bottleneck 6 ************/
   /*           M        N          K     */
-//b.Args({ 28 *  28,  120,   40 * 1 * 1});
-//b.Args({  1 *   1,   32,  120 * 1 * 1});
-//b.Args({  1 *   1,  120,   32 * 1 * 1});
-//b.Args({ 28 *  28,   40,  120 * 1 * 1});
+//b.Args({ 28 *  28,  120,   40 * 1 * 1}); // Skipped due to repeated shape
+//b.Args({  1 *   1,   32,  120 * 1 * 1}); // Skipped due to repeated shape
+//b.Args({  1 *   1,  120,   32 * 1 * 1}); // Skipped due to repeated shape
+//b.Args({ 28 *  28,   40,  120 * 1 * 1}); // Skipped due to repeated shape
   /************* Bottleneck 7 ************/
   /*           M        N          K     */
   b.Args({ 28 *  28,  240,   40 * 1 * 1});
@@ -490,8 +490,8 @@ inline void MobileNetV3LargeGemmArguments(benchmark::Benchmark* unwrapped_b) {
   b.Args({ 14 *  14,   80,  184 * 1 * 1});
   /************ Bottleneck 10 ************/
   /*           M        N          K     */
-  b.Args({ 14 *  14,  184,   80 * 1 * 1});
-  b.Args({ 14 *  14,   80,  184 * 1 * 1});
+//b.Args({ 14 *  14,  184,   80 * 1 * 1}); // Skipped due to repeated shape
+//b.Args({ 14 *  14,   80,  184 * 1 * 1}); // Skipped due to repeated shape
   /************ Bottleneck 11 ************/
   /*           M        N          K     */
   b.Args({ 14 *  14,  480,   80 * 1 * 1});
@@ -506,9 +506,9 @@ inline void MobileNetV3LargeGemmArguments(benchmark::Benchmark* unwrapped_b) {
   b.Args({ 14 *  14,  112,  672 * 1 * 1});
   /************ Bottleneck 13 ************/
   /*           M        N          K     */
-//b.Args({ 14 *  14,  672,  112 * 1 * 1});
-//b.Args({  1 *   1,  168,  672 * 1 * 1});
-//b.Args({  1 *   1,  672,  168 * 1 * 1});
+//b.Args({ 14 *  14,  672,  112 * 1 * 1}); // Skipped due to repeated shape
+//b.Args({  1 *   1,  168,  672 * 1 * 1}); // Skipped due to repeated shape
+//b.Args({  1 *   1,  672,  168 * 1 * 1}); // Skipped due to repeated shape
   b.Args({  7 *   7,  160,  672 * 1 * 1});
   /************ Bottleneck 14 ************/
   /*           M        N          K     */
@@ -518,13 +518,13 @@ inline void MobileNetV3LargeGemmArguments(benchmark::Benchmark* unwrapped_b) {
   b.Args({  7 *   7,  160,  960 * 1 * 1});
   /************ Bottleneck 15 ************/
   /*           M        N          K     */
-//b.Args({  7 *   7,  960,  160 * 1 * 1});
-//b.Args({  1 *   1,  240,  960 * 1 * 1});
-//b.Args({  1 *   1,  960,  240 * 1 * 1});
-//b.Args({  7 *   7,  160,  960 * 1 * 1});
+//b.Args({  7 *   7,  960,  160 * 1 * 1}); // Skipped due to repeated shape
+//b.Args({  1 *   1,  240,  960 * 1 * 1}); // Skipped due to repeated shape
+//b.Args({  1 *   1,  960,  240 * 1 * 1}); // Skipped due to repeated shape
+//b.Args({  7 *   7,  160,  960 * 1 * 1}); // Skipped due to repeated shape
   /************* Last Stage  *************/
   /*           M        N          K     */
-//b.Args({  7 *   7,  960,  160 * 1 * 1});
+//b.Args({  7 *   7,  960,  160 * 1 * 1}); // Skipped due to repeated shape
   b.Args({  1 *   1, 1280,  960 * 1 * 1});
   b.Args({  1 *   1, 1001, 1280 * 1 * 1});
 }
@@ -625,6 +625,8 @@ inline void SqueezeNetV11GemmArguments(benchmark::Benchmark* unwrapped_b) {
 
 inline void InceptionV3GemmArguments(benchmark::Benchmark* unwrapped_b) {
   BenchmarkWrapper b(unwrapped_b);
+  b.ArgNames({"M", "N", "K"});
+
   /*           M        N          K   */
   b.Args({150 * 150,   32,    3 * 3 * 3});
   b.Args({149 * 149,   32,   32 * 3 * 3});
@@ -647,15 +649,15 @@ inline void InceptionV3GemmArguments(benchmark::Benchmark* unwrapped_b) {
   b.Args({ 19 *  19,  128,  768 * 1 * 1});
   b.Args({ 19 *  19,  128,  128 * 1 * 7});
   b.Args({ 19 *  19,  192,  128 * 7 * 1});
-  b.Args({ 19 *  19,  128,  128 * 7 * 1});
-  b.Args({ 19 *  19,  192,  128 * 1 * 7});
+//b.Args({ 19 *  19,  128,  128 * 7 * 1}); // Skipped due to repeated shape
+//b.Args({ 19 *  19,  192,  128 * 1 * 7}); // Skipped due to repeated shape
   b.Args({ 19 *  19,  160,  768 * 1 * 1});
   b.Args({ 19 *  19,  160,  160 * 1 * 7});
   b.Args({ 19 *  19,  192,  160 * 7 * 1});
-  b.Args({ 19 *  19,  160,  160 * 7 * 1});
+//b.Args({ 19 *  19,  160,  160 * 7 * 1}); // Skipped due to repeated shape
   b.Args({ 19 *  19,  192,  160 * 1 * 7});
   b.Args({ 19 *  19,  192,  192 * 1 * 7});
-  b.Args({ 19 *  19,  192,  192 * 7 * 1});
+//b.Args({ 19 *  19,  192,  192 * 7 * 1}); // Skipped due to repeated shape
   b.Args({  9 *   9,  320,  192 * 3 * 3});
   b.Args({  9 *   9,  192,  192 * 3 * 3});
   b.Args({ 10 *  10,  320, 1280 * 1 * 1});

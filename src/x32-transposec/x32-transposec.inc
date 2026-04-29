@@ -57,6 +57,9 @@ XNN_TRANSPOSE_UKERNEL(xnn_arch_riscv_vector, xnn_x32_transposec_ukernel__4x4_rvv
 XNN_TRANSPOSE_UKERNEL(xnn_arch_riscv_vector, xnn_x32_transposec_ukernel__8x8_rvv, 32, uint32_t, 8, 8)
 XNN_TRANSPOSE_UKERNEL(xnn_arch_riscv_vector, xnn_x32_transposec_ukernel__16x8_rvv, 32, uint32_t, 16, 8)
 XNN_TRANSPOSE_UKERNEL(xnn_arch_riscv_vector, xnn_x32_transposec_ukernel__32x8_rvv, 32, uint32_t, 32, 8)
+XNN_TRANSPOSE_UKERNEL(xnn_arch_riscv_vector, xnn_x32_transposec_ukernel__8xv1_rvv, 32, uint32_t, 4, 8)
+XNN_TRANSPOSE_UKERNEL(xnn_arch_riscv_vector, xnn_x32_transposec_ukernel__8xv2_rvv, 32, uint32_t, 8, 8)
+XNN_TRANSPOSE_UKERNEL(xnn_arch_riscv_vector, xnn_x32_transposec_ukernel__8xv4_rvv, 32, uint32_t, 16, 8)
 #endif  // XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64

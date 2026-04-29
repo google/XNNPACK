@@ -94,9 +94,9 @@ void TestImpl(const KernelInfo& kernel_info, const OpInfo& op_info, size_t m,
   broadcast_extent_1(a);
   broadcast_extent_1(b);
 
-  kernel(m, n, a.stride(0) * sizeof(A), a.stride(1) * sizeof(A), a.base(),
-         b.stride(0) * sizeof(B), b.stride(1) * sizeof(B), b.base(),
-         x.stride(0) * sizeof(X), x.base(), nullptr);
+  kernel(m, n, a.stride_bytes(0), a.stride_bytes(1), a.base(),
+         b.stride_bytes(0), b.stride_bytes(1), b.base(), x.stride_bytes(0),
+         x.base(), nullptr);
 
   check_results(op_info, a, b, x);
 }

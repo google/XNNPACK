@@ -57,13 +57,11 @@ void TestKeepDims(T, size_t rank) {
       ends[i] = end_dist(rng);
     }
 
-    quantization_params quantization = random_quantization(type_of<T>(), rng);
-
     std::vector<int64_t> strides(dims.size(), 1);
     // Define subgraph
     SubgraphBuilder subgraph(2);
-    subgraph.AddInput(type_of<T>(), rank, 0, quantization)
-        .AddOutput(type_of<T>(), rank, 1, quantization)
+    subgraph.AddInput(type_of<T>(), rank, 0)
+        .AddOutput(type_of<T>(), rank, 1)
         .AddSlice(axes, begins, ends, strides, 0, 1);
 
     Runtime runtime(subgraph.GetSubgraph());
@@ -76,7 +74,7 @@ void TestKeepDims(T, size_t rank) {
       }
 
       Tensor<T> input(shape);
-      fill_random(input.data(), input.size(), rng, quantization);
+      fill_random(input.data(), input.size(), rng);
 
       // Make a deep copy so the expected result is contiguous.
       Tensor<T> expected = input.slice(begins, ends).deep_copy();
@@ -123,12 +121,10 @@ void TestSliceDims(T, size_t rank) {
         at[i] = begin_dist(rng);
       }
 
-      quantization_params quantization = random_quantization(type_of<T>(), rng);
-
       // Define subgraph
       SubgraphBuilder subgraph(2);
-      subgraph.AddInput(type_of<T>(), rank, 0, quantization)
-          .AddOutput(type_of<T>(), rank - axes.size(), 1, quantization)
+      subgraph.AddInput(type_of<T>(), rank, 0)
+          .AddOutput(type_of<T>(), rank - axes.size(), 1)
           .AddSlice(axes, at, {}, {}, 0, 1, YNN_NODE_FLAG_SLICE_DIMS);
 
       Runtime runtime(subgraph.GetSubgraph());
@@ -141,7 +137,7 @@ void TestSliceDims(T, size_t rank) {
         }
 
         Tensor<T> input(shape);
-        fill_random(input.data(), input.size(), rng, quantization);
+        fill_random(input.data(), input.size(), rng);
 
         // Make a deep copy so the expected result is contiguous.
         Tensor<T> expected = input;

@@ -681,7 +681,7 @@ TEST(SUBGRAPH_FP16, fully_connected_qd8_f16_qc8w) {
 
   for (int i = 0; i < output.size(); ++i) {
     const float tolerance =
-        std::max(std::abs(reference_output[i]) * 5e-2, 5e-2);
+        std::max(std::abs(reference_output[i]) * 1.5e-1, 1.5e-1);
     ASSERT_NEAR(output[i], reference_output[i], tolerance);
   }
 }

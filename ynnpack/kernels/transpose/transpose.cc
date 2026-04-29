@@ -64,6 +64,7 @@ transpose_kernel_fn get_transpose_kernel(size_t element_size_bits) {
 #define YNN_TRANSPOSE_KERNEL(arch_flags, name, kernel_element_size_bits) \
   if (kernel_element_size_bits == element_size_bits) {                   \
     if (is_arch_supported(arch_flags)) {                                 \
+      YNN_LOG_DEBUG() << "Using transpose kernel " << #name;             \
       return name;                                                       \
     }                                                                    \
   }

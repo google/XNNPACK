@@ -27,6 +27,7 @@
 #include "ynnpack/kernels/dequantize_dot/dequantize_dot.h"
 #include "ynnpack/kernels/ternary/ternary.h"
 #include "ynnpack/kernels/unary/unary.h"
+#include "ynnpack/subgraph/iota.h"
 #include "ynnpack/subgraph/slinky.h"
 #include "slinky/runtime/buffer.h"
 #include "slinky/runtime/evaluate.h"
@@ -155,6 +156,17 @@ struct ynn_value {
   // Get the extent of a dimension, or 1 if it is implicitly broadcasted.
   slinky::expr extent(size_t i) const {
     return i < extents.size() && extents[i].defined() ? extents[i] : 1;
+  }
+
+  slinky::expr logical_extent(size_t i) const {
+    slinky::expr e = extent(i);
+    if (i == 0) {
+      const int element_count = ynn::type_element_count(type);
+      if (element_count != 1) {
+        e *= element_count;
+      }
+    }
+    return e;
   }
 
   // Asserting that the value is reshapable to a static scalar value of type T,
@@ -492,6 +504,15 @@ struct ynn_node {
       return a.num_k_dims < b.num_k_dims;
     }
   };
+  struct iota {
+    ynn::iota_params params;
+    friend bool operator==(const iota& a, const iota& b) {
+      return a.params == b.params;
+    }
+    friend bool operator<(const iota& a, const iota& b) {
+      return a.params < b.params;
+    }
+  };
   struct pack_b {
     friend bool operator==(const pack_b&, const pack_b&) { return true; }
     friend bool operator<(const pack_b&, const pack_b&) { return false; }
@@ -549,8 +570,8 @@ struct ynn_node {
                stack, static_reshape, static_broadcast, static_expand_dims,
                static_pad, static_slice, slice_like, static_transpose,
                stencil_copy, unary_elementwise, lut, binary_elementwise,
-               ternary_elementwise, dot, pack_b, transpose_a, get_tensor_shape,
-               reduce, dequantize_dot>
+               ternary_elementwise, dot, iota, pack_b, transpose_a,
+               get_tensor_shape, reduce, dequantize_dot>
       op;
 
   const char* name() const;
@@ -648,9 +669,7 @@ struct ynn_subgraph : public ynn::ref_counted<ynn_subgraph> {
   }
 
   void infer_elementwise_shape(ynn_node& node, int input_idx, int output_idx,
-                               int input_dim, int output_dim,
-                               int input_type_element_count = 1,
-                               int output_type_element_count = 1);
+                               int input_dim, int output_dim);
 
   // Find parts of the graph that can be executed independently of any inputs.
   ynn_status fold_constants(slinky::thread_pool* threadpool);

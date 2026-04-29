@@ -24,6 +24,8 @@ struct xnn_subgraph {
   std::map<uint32_t, size_t> num_nonbatch_axes;
 };
 
+typedef struct xnn_subgraph* xnn_subgraph_t;
+
 // We could just cast `xnn_runtime_t` to `ynn_runtime_t`, but this approach is
 // both type safe and gives us a place to put a pthreadpool, which we can't
 // easily adapt to a `ynn_threadpool_t`.

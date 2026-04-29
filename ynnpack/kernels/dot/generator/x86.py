@@ -273,20 +273,17 @@ class x86_avx512(x86):
       if self.c_type == "float":
         add_c_tiles += (
             f"c_{i}_0 = {self._mm()}_add_ps(c_{i}_0,"
-            f" {self._mm()}_mask_loadu_ps(c_{i}_0, mask,"
-            f" {self.c_in_ptr(i, 0)}));\n"
+            f" {self._mm()}_maskz_loadu_ps(mask, {self.c_in_ptr(i, 0)}));\n"
         )
       elif self.c_type == "double":
         add_c_tiles += (
             f"c_{i}_0 = {self._mm()}_add_pd(c_{i}_0,"
-            f" {self._mm()}_mask_loadu_pd(c_{i}_0, mask,"
-            f" {self.c_in_ptr(i, 0)}));\n"
+            f" {self._mm()}_maskz_loadu_pd(mask, {self.c_in_ptr(i, 0)}));\n"
         )
       elif self.c_type == "int32_t":
         add_c_tiles += (
             f"c_{i}_0 = {self._mm()}_add_epi32(c_{i}_0,"
-            f" {self._mm()}_mask_loadu_epi32(c_{i}_0, mask,"
-            f" {self.c_in_ptr(i, 0)}));\n"
+            f" {self._mm()}_maskz_loadu_epi32(mask, {self.c_in_ptr(i, 0)}));\n"
         )
       else:
         raise ValueError(f"Unsupported c_type: {self.c_type}")

@@ -11,6 +11,7 @@
 #include <cassert>
 #include <cstddef>
 #include <cstdint>
+#include <limits>
 #include <tuple>
 #include <type_traits>
 
@@ -912,6 +913,49 @@ YNN_ALWAYS_INLINE u32x16 abs(s32x16 a) { return u32x16{_mm512_abs_epi32(a.v)}; }
 YNN_ALWAYS_INLINE f64x8 abs(f64x8 a) { return f64x8{_mm512_abs_pd(a.v)}; }
 YNN_ALWAYS_INLINE f32x16 abs(f32x16 a) { return f32x16{_mm512_abs_ps(a.v)}; }
 
+YNN_ALWAYS_INLINE f32x4 floor_log2(f32x4 a) {
+  // getexp handles 0 correctly, but not negative numbers.
+  __m128 res = _mm_getexp_ps(a.v);
+  __mmask8 negative = _mm_cmp_ps_mask(a.v, _mm_setzero_ps(), _CMP_LT_OQ);
+  return f32x4{_mm_mask_blend_ps(
+      negative, res, _mm_set1_ps(std::numeric_limits<float>::quiet_NaN()))};
+}
+YNN_ALWAYS_INLINE f32x8 floor_log2(f32x8 a) {
+  // getexp handles 0 correctly, but not negative numbers.
+  __m256 res = _mm256_getexp_ps(a.v);
+  __mmask8 negative = _mm256_cmp_ps_mask(a.v, _mm256_setzero_ps(), _CMP_LT_OQ);
+  return f32x8{_mm256_mask_blend_ps(
+      negative, res, _mm256_set1_ps(std::numeric_limits<float>::quiet_NaN()))};
+}
+YNN_ALWAYS_INLINE f32x16 floor_log2(f32x16 a) {
+  // getexp handles 0 correctly, but not negative numbers.
+  __m512 res = _mm512_getexp_ps(a.v);
+  __mmask16 negative = _mm512_cmp_ps_mask(a.v, _mm512_setzero_ps(), _CMP_LT_OQ);
+  return f32x16{_mm512_mask_blend_ps(
+      negative, res, _mm512_set1_ps(std::numeric_limits<float>::quiet_NaN()))};
+}
+YNN_ALWAYS_INLINE f64x2 floor_log2(f64x2 a) {
+  // getexp handles 0 correctly, but not negative numbers.
+  __m128d res = _mm_getexp_pd(a.v);
+  __mmask8 negative = _mm_cmp_pd_mask(a.v, _mm_setzero_pd(), _CMP_LT_OQ);
+  return f64x2{_mm_mask_blend_pd(
+      negative, res, _mm_set1_pd(std::numeric_limits<double>::quiet_NaN()))};
+}
+YNN_ALWAYS_INLINE f64x4 floor_log2(f64x4 a) {
+  // getexp handles 0 correctly, but not negative numbers.
+  __m256d res = _mm256_getexp_pd(a.v);
+  __mmask8 negative = _mm256_cmp_pd_mask(a.v, _mm256_setzero_pd(), _CMP_LT_OQ);
+  return f64x4{_mm256_mask_blend_pd(
+      negative, res, _mm256_set1_pd(std::numeric_limits<double>::quiet_NaN()))};
+}
+YNN_ALWAYS_INLINE f64x8 floor_log2(f64x8 a) {
+  // getexp handles 0 correctly, but not negative numbers.
+  __m512d res = _mm512_getexp_pd(a.v);
+  __mmask8 negative = _mm512_cmp_pd_mask(a.v, _mm512_setzero_pd(), _CMP_LT_OQ);
+  return f64x8{_mm512_mask_blend_pd(
+      negative, res, _mm512_set1_pd(std::numeric_limits<double>::quiet_NaN()))};
+}
+
 template <int Index>
 YNN_ALWAYS_INLINE s32x4 extract(s32x16 x, decltype(s32x4::N)) {
   return s32x4{_mm512_extracti32x4_epi32(x.v, Index)};
@@ -978,6 +1022,16 @@ YNN_ALWAYS_INLINE std::tuple<u8x64, u8x64> interleave(
   return interleave(std::integral_constant<size_t, 8>{},
                     u8x64{_mm512_or_si512(_mm512_slli_epi16(even1, 4), even0)},
                     u8x64{_mm512_or_si512(odd1, _mm512_srli_epi16(odd0, 4))});
+}
+YNN_ALWAYS_INLINE std::tuple<u8x64, u8x64> interleave(
+    std::integral_constant<size_t, 2>, u8x64 x0, u8x64 x1) {
+  __m512i even0 = _mm512_and_si512(x0.v, _mm512_set1_epi8(0x33));
+  __m512i even1 = _mm512_and_si512(x1.v, _mm512_set1_epi8(0x33));
+  __m512i odd0 = _mm512_and_si512(x0.v, _mm512_set1_epi8(0xcc));
+  __m512i odd1 = _mm512_and_si512(x1.v, _mm512_set1_epi8(0xcc));
+  return interleave(std::integral_constant<size_t, 4>{},
+                    u8x64{_mm512_or_si512(_mm512_slli_epi16(even1, 2), even0)},
+                    u8x64{_mm512_or_si512(odd1, _mm512_srli_epi16(odd0, 2))});
 }
 
 using f32x32 = vec<float, 32>;

@@ -17,22 +17,23 @@
 
 namespace ynn {
 
-struct exp_params {
+struct log_exp_params {
   float _;  // output_offset not supported by exp
   float output_multiplier;
   float input_multiplier;
 
-  friend bool operator==(const exp_params& a,
-                         const exp_params& b) {
+  friend bool operator==(const log_exp_params& a, const log_exp_params& b) {
     return std::tie(a.input_multiplier, a.output_multiplier) ==
            std::tie(b.input_multiplier, b.output_multiplier);
   }
-  friend bool operator<(const exp_params& a,
-                        const exp_params& b) {
+  friend bool operator<(const log_exp_params& a, const log_exp_params& b) {
     return std::tie(a.input_multiplier, a.output_multiplier) <
            std::tie(b.input_multiplier, b.output_multiplier);
   }
 };
+
+using exp_params = log_exp_params;
+using log_params = log_exp_params;
 
 struct erf_params {
   float output_offset;
@@ -82,6 +83,7 @@ struct poly3_params {
 
 union unary_params {
   exp_params exp;
+  log_params log;
 
   // All of these params have the first two params a, b, such that they form
   // output offset and output scale parameters, respectively. We use this fact

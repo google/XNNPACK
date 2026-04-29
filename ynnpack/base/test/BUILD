@@ -13,6 +13,7 @@ cc_library(
     name = "buffer",
     testonly = True,
     hdrs = ["buffer.h"],
+    deps = ["//ynnpack/base"],
 )
 
 cc_library(
@@ -21,6 +22,7 @@ cc_library(
     hdrs = ["tensor.h"],
     deps = [
         ":buffer",
+        ":random",
         "//ynnpack/base",
     ],
 )
@@ -42,7 +44,7 @@ cc_library(
     hdrs = ["util.h"],
     deps = [
         "//ynnpack/base",
-        "@com_google_googletest//:gtest",
+        "@com_google_googletest//:gtest",  # no g3
     ],
 )
 
@@ -52,7 +54,7 @@ cc_library(
     hdrs = ["fuzz_test.h"],
     deps = [
         "//ynnpack/base",
-        "@com_google_googletest//:gtest",
+        "@com_google_googletest//:gtest",  # no g3
     ],
 )
 
@@ -88,6 +90,14 @@ cc_test(
         ":fuzz_test",
         ":random",
         "//ynnpack:ynnpack_h",
+        "//ynnpack/base",
+    ] + ynn_test_deps(),
+)
+
+cc_test(
+    name = "type_test",
+    srcs = ["type_test.cc"],
+    deps = [
         "//ynnpack/base",
     ] + ynn_test_deps(),
 )

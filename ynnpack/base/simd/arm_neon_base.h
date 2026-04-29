@@ -663,6 +663,39 @@ YNN_ALWAYS_INLINE u8x16 abs(s8x16 a) {
   return u8x16{vreinterpretq_u8_s8(vabsq_s8(a.v))};
 }
 
+YNN_ALWAYS_INLINE f32x4 floor_log2(f32x4 a) {
+  uint32x4_t is_zero = vceqq_f32(a.v, vdupq_n_f32(0.0f));
+  a.v = vreinterpretq_f32_u32(
+      vorrq_u32(vandq_u32(is_zero, vreinterpretq_u32_f32(vdupq_n_f32(-0.0f))),
+                vreinterpretq_u32_f32(a.v)));
+
+  uint32x4_t sign_and_exp_mask = vdupq_n_u32(0xFF800000);
+  int32x4_t exp = vreinterpretq_s32_u32(
+      vandq_u32(vreinterpretq_u32_f32(a.v), sign_and_exp_mask));
+
+  float32x4_t infinity = vdupq_n_f32(std::numeric_limits<float>::infinity());
+  uint32x4_t is_inf = vceqq_f32(a.v, infinity);
+
+  exp = vshrq_n_s32(exp, 8);
+
+  float32x4_t bias_256 = vdupq_n_f32(256.0f);
+  float32x4_t bias_383 = vdupq_n_f32(383.0f);
+  float32x4_t res =
+      vsubq_f32(vreinterpretq_f32_u32(vorrq_u32(vreinterpretq_u32_f32(bias_256),
+                                                vreinterpretq_u32_s32(exp))),
+                bias_383);
+  return f32x4{vbslq_f32(is_inf, infinity, res)};
+}
+#ifdef YNN_ARCH_ARM64
+YNN_ALWAYS_INLINE f64x2 floor_log2(f64x2 a) {
+  const double result[] = {
+      ynn::floor_log2(vgetq_lane_f64(a.v, 0)),
+      ynn::floor_log2(vgetq_lane_f64(a.v, 1)),
+  };
+  return f64x2{vld1q_f64(result)};
+}
+#endif
+
 namespace internal {
 YNN_ALWAYS_INLINE float32x4_t and_f32(float32x4_t a, float32x4_t b) {
   return vreinterpretq_f32_u32(
@@ -899,6 +932,13 @@ YNN_ALWAYS_INLINE std::tuple<u8x16, u8x16> interleave(
       u8x16{vbslq_u8(vdupq_n_u8(0xf0), vshlq_n_u8(x1.v, 4), x0.v)},
       u8x16{vbslq_u8(vdupq_n_u8(0xf0), x1.v, vshrq_n_u8(x0.v, 4))});
 }
+YNN_ALWAYS_INLINE std::tuple<u8x16, u8x16> interleave(
+    std::integral_constant<size_t, 2>, u8x16 x0, u8x16 x1) {
+  return interleave(
+      std::integral_constant<size_t, 4>{},
+      u8x16{vbslq_u8(vdupq_n_u8(0xcc), vshlq_n_u8(x1.v, 2), x0.v)},
+      u8x16{vbslq_u8(vdupq_n_u8(0xcc), x1.v, vshrq_n_u8(x0.v, 2))});
+}
 
 YNN_ALWAYS_INLINE std::tuple<u8x8, u8x8> interleave(
     std::integral_constant<size_t, 32>, u8x8 x0, u8x8 x1) {
@@ -924,6 +964,12 @@ YNN_ALWAYS_INLINE std::tuple<u8x8, u8x8> interleave(
   return interleave(std::integral_constant<size_t, 8>{},
                     u8x8{vbsl_u8(vdup_n_u8(0xf0), vshl_n_u8(x1.v, 4), x0.v)},
                     u8x8{vbsl_u8(vdup_n_u8(0xf0), x1.v, vshr_n_u8(x0.v, 4))});
+}
+YNN_ALWAYS_INLINE std::tuple<u8x8, u8x8> interleave(
+    std::integral_constant<size_t, 2>, u8x8 x0, u8x8 x1) {
+  return interleave(std::integral_constant<size_t, 4>{},
+                    u8x8{vbsl_u8(vdup_n_u8(0xcc), vshl_n_u8(x1.v, 2), x0.v)},
+                    u8x8{vbsl_u8(vdup_n_u8(0xcc), x1.v, vshr_n_u8(x0.v, 2))});
 }
 
 template <typename T>

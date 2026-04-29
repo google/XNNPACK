@@ -36,6 +36,7 @@ _ISA_LIST = frozenset({
     'armsimd32',
     'avx',
     'avx2',
+    'avx512bf16',
     'avx512f',
     'avx512skx',
     'avx512vbmi',
@@ -543,12 +544,12 @@ def all_srcs_for_arch(arch):
         if c_vars:
           c_vars = [f'${{{v}}}' for v in c_vars]
           arch_microkernels_cmake.write(
-              f'\nSET({make_variable_name("ALL", key, "MICROKERNEL_SRCS")} {" + ".join(c_vars)})\n'
+              f'\nSET({make_variable_name("ALL", key, "MICROKERNEL_SRCS")} {" ".join(c_vars)})\n'
           )
         if asm_vars:
           asm_vars = [f'${{{v}}}' for v in asm_vars]
           arch_microkernels_cmake.write(
-              f'\nSET({make_variable_name("ALL", key, "ASM_MICROKERNEL_SRCS")} {" + ".join(asm_vars)})\n'
+              f'\nSET({make_variable_name("ALL", key, "ASM_MICROKERNEL_SRCS")} {" ".join(asm_vars)})\n'
           )
         microkernels_cmake.write(
             f'INCLUDE(cmake/gen/{arch_microkernels_cmake_filename})\n'
