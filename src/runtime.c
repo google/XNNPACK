@@ -76,6 +76,12 @@ enum xnn_status xnn_reshape_external_value(
     value->shape = new_shape;
   }
   value->size = xnn_runtime_tensor_get_size(value);
+  if (value->size == SIZE_MAX) {
+    xnn_log_error(
+      "failed to reshape runtime: size overflow for Value %" PRIu32 " with the given shape",
+      external_id);
+    return xnn_status_unsupported_parameter;
+  }
   return xnn_status_success;
 }
 

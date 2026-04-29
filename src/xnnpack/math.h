@@ -656,6 +656,35 @@ XNN_INLINE static bool xnn_bfloat16_is_zero(xnn_bfloat16 f) {
   return (uint16_t) (xnn_bfloat16_to_bits(f) * 2) == 0;
 }
 
+// Overflow-safe arithmetic for allocation size calculations.
+// Returns false (and leaves *result unspecified) if the operation would
+// overflow size_t.
+XNN_INLINE static bool xnn_safe_mul(size_t a, size_t b, size_t* result) {
+#if defined(__GNUC__) || defined(__clang__)
+  return !__builtin_mul_overflow(a, b, result);
+#else
+  if (a != 0 && b > SIZE_MAX / a) {
+    *result = 0;
+    return false;
+  }
+  *result = a * b;
+  return true;
+#endif
+}
+
+XNN_INLINE static bool xnn_safe_add(size_t a, size_t b, size_t* result) {
+#if defined(__GNUC__) || defined(__clang__)
+  return !__builtin_add_overflow(a, b, result);
+#else
+  if (b > SIZE_MAX - a) {
+    *result = 0;
+    return false;
+  }
+  *result = a + b;
+  return true;
+#endif
+}
+
 #ifdef __cplusplus
 }  // extern "C"
 #endif
