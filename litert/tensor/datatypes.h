@@ -19,6 +19,8 @@ limitations under the License.
 #include <cstdint>
 #include <ostream>
 
+#include "litert/tensor/internal/fp16.h"
+
 namespace litert::tensor {
 
 enum class Type {
@@ -68,6 +70,92 @@ struct NativeStorage<Type::kUnknown> {
   using type = void;
   static constexpr size_t BufferSize(size_t count) { return 0; }
 };
+
+struct int2_t {
+  int8_t a : 2;
+  int8_t b : 2;
+  int8_t c : 2;
+  int8_t d : 2;
+};
+
+static_assert(sizeof(int2_t) == sizeof(int8_t));
+static_assert(alignof(int2_t) == alignof(int8_t));
+
+struct int4_t {
+  int8_t a : 4;
+  int8_t b : 4;
+};
+
+static_assert(sizeof(int4_t) == sizeof(int8_t));
+static_assert(alignof(int4_t) == alignof(int8_t));
+
+struct uint4_t {
+  uint8_t a : 4;
+  uint8_t b : 4;
+};
+
+static_assert(sizeof(uint4_t) == sizeof(uint8_t));
+static_assert(alignof(uint4_t) == alignof(uint8_t));
+
+struct bf16_t {
+  constexpr bf16_t() = default;
+  constexpr bf16_t(const bf16_t&) = default;
+  constexpr bf16_t& operator=(const bf16_t&) = default;
+
+  // NOLINTNEXTLINE(*-explicit-constructor): bf16_t can be built from a float.
+  bf16_t(float v) : val(fp32_to_bf16(v)) {}
+  // NOLINTNEXTLINE(*-explicit-constructor): bf16_t can be converted to a float.
+  operator float() const {
+    return bit_cast<float>(static_cast<uint32_t>(val) << 16);
+  }
+
+  friend bool operator==(bf16_t a, bf16_t b) { return a.val == b.val; }
+  friend bool operator==(bf16_t a, float b) {
+    return static_cast<float>(a) == b;
+  }
+  friend bool operator==(float a, bf16_t b) {
+    return a == static_cast<float>(b);
+  }
+
+  uint16_t val = 0;
+
+  // Converts an fp32 value to bf16 and rounds to nearest even.
+  static uint16_t fp32_to_bf16(float value) {
+    const uint32_t float_bits = bit_cast<uint32_t>(value);
+    if ((float_bits & 0x7f800000) == 0x7f800000 && (float_bits & 0x007fffff)) {
+      return 0x7fc0;
+    }
+    const uint32_t rounding_bias = 0x7fff + ((float_bits >> 16) & 1);
+    return static_cast<uint16_t>((float_bits + rounding_bias) >> 16);
+  }
+};
+
+static_assert(sizeof(bf16_t) == sizeof(int16_t));
+static_assert(alignof(bf16_t) == alignof(int16_t));
+
+struct fp16_t {
+  constexpr fp16_t() = default;
+  constexpr fp16_t(const fp16_t&) = default;
+  constexpr fp16_t& operator=(const fp16_t&) = default;
+
+  // NOLINTNEXTLINE(*-explicit-constructor): fp16_t can be built from a float.
+  fp16_t(float f) : val(fp16_ieee_from_fp32_value(f)) {}
+  // NOLINTNEXTLINE(*-explicit-constructor): fp16_t can be converted to a float.
+  operator float() const { return fp16_ieee_to_fp32_value(val); }
+
+  friend bool operator==(fp16_t a, fp16_t b) { return a.val == b.val; }
+  friend bool operator==(fp16_t a, float b) {
+    return static_cast<float>(a) == b;
+  }
+  friend bool operator==(float a, fp16_t b) {
+    return a == static_cast<float>(b);
+  }
+
+  uint16_t val = 0;
+};
+
+static_assert(sizeof(fp16_t) == sizeof(int16_t));
+static_assert(alignof(fp16_t) == alignof(int16_t));
 
 template <>
 struct NativeStorage<Type::kI2>

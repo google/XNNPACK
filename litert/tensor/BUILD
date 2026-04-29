@@ -69,6 +69,9 @@ cc_test(
 cc_library(
     name = "datatypes",
     hdrs = ["datatypes.h"],
+    deps = [
+        "//litert/tensor/internal:fp16",
+    ],
 )
 
 cc_test(
