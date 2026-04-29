@@ -44,35 +44,6 @@ enum class Type {
   kBF16,
 };
 
-template <Type>
-struct NativeStorage;
-
-namespace internal {
-
-// Implements the NativeStorage interface.
-//
-// - T: the native type used to store data.
-// - Bits: a power of 2, for data that is smaller than 1 byte.
-template <Type t, class T, size_t Bits = 8 * sizeof(T)>
-struct StorageImpl {
-  static_assert((Bits & (Bits - 1)) == 0, "Bits must be a power of 2.");
-  using type = T;
-  static constexpr Type value = t;
-  static constexpr size_t BufferSize(size_t count) {
-    return (Bits * count + 7) / 8;
-  }
-};
-
-}  // namespace internal
-
-// We're defining this for consistency. Actually using for anything else is an
-// error.
-template <>
-struct NativeStorage<Type::kUnknown> {
-  using type = void;
-  static constexpr size_t BufferSize(size_t count) { return 0; }
-};
-
 struct int2_t {
   int8_t a : 2;
   int8_t b : 2;
@@ -158,6 +129,36 @@ struct fp16_t {
 
 static_assert(sizeof(fp16_t) == sizeof(int16_t));
 static_assert(alignof(fp16_t) == alignof(int16_t));
+
+template <Type>
+struct NativeStorage;
+
+namespace internal {
+
+// Implements the NativeStorage interface.
+//
+// The NativeStorage specializations inherit from this template to avoid code
+// duplication.
+//
+// - T: the native type used to store data.
+// - Bits: a power of 2, for data that is smaller than 1 byte.
+template <Type t, class T, uint64_t Bits = 8 * sizeof(T)>
+struct StorageImpl {
+  static_assert((Bits & (Bits - 1)) == 0, "Bits must be a power of 2.");
+  using type = T;
+  static constexpr Type value = t;
+  static constexpr uint64_t BufferSize(size_t count) {
+    return (Bits * count + 7) / 8;
+  }
+};
+
+}  // namespace internal
+
+// We're defining this for consistency. Actually using it for anything else is
+// an error.
+template <>
+struct NativeStorage<Type::kUnknown>
+    : internal::StorageImpl<Type::kUnknown, void, /*Bits=*/0> {};
 
 template <>
 struct NativeStorage<Type::kI2>
