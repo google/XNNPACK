@@ -53,6 +53,7 @@ SET(PROD_RVVFP16ARITH_MICROKERNEL_SRCS
   src/f16-vbinary/gen/f16-vsub-rvvfp16arith-u8v.c
   src/f16-vbinary/gen/f16-vsubc-rvvfp16arith-u8v.c
   src/f16-vclamp/gen/f16-vclamp-rvvfp16arith-u8v.c
+  src/f16-vcmul/gen/f16-vcmul-rvvfp16arith-u2v.c
   src/f16-velu/gen/f16-velu-rvvfp16arith-rr1-p3-u2v.c
   src/f16-vgelu/gen/f16-vgelu-rvvfp16arith-rational-6-4-div-u2v.c
   src/f16-vhswish/gen/f16-vhswish-rvvfp16arith-u8v.c
@@ -160,6 +161,8 @@ SET(NON_PROD_RVVFP16ARITH_MICROKERNEL_SRCS
   src/f16-vclamp/gen/f16-vclamp-rvvfp16arith-u1v.c
   src/f16-vclamp/gen/f16-vclamp-rvvfp16arith-u2v.c
   src/f16-vclamp/gen/f16-vclamp-rvvfp16arith-u4v.c
+  src/f16-vcmul/gen/f16-vcmul-rvvfp16arith-u1v.c
+  src/f16-vcmul/gen/f16-vcmul-rvvfp16arith-u4v.c
   src/f16-velu/gen/f16-velu-rvvfp16arith-rr1-p3-u1v.c
   src/f16-velu/gen/f16-velu-rvvfp16arith-rr1-p3-u4v.c
   src/f16-vgelu/gen/f16-vgelu-rvvfp16arith-rational-6-4-div-u1v.c
