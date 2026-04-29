@@ -69,8 +69,8 @@ SET(PROD_RVV_MICROKERNEL_SRCS
   src/f32-vcopysign/gen/f32-vcopysignc-rvv-u8v.c
   src/f32-vcopysign/gen/f32-vrcopysignc-rvv-u8v.c
   src/f32-vcos/gen/f32-vcos-rvv-rational-5-4-div-u8v.c
-  src/f32-vexp/gen/f32-vexp-rvv-rational-3-2-div-u8v.c
   src/f32-velu/gen/f32-velu-rvv-rr2-p6-u4v.c
+  src/f32-vexp/gen/f32-vexp-rvv-rational-3-2-div-u8v.c
   src/f32-vgelu/gen/f32-vgelu-rvv-rational-12-10-div-u4v.c
   src/f32-vhswish/gen/f32-vhswish-rvv-u4v.c
   src/f32-vlog/gen/f32-vlog-rvv-rational-3-3-div-u8v.c
@@ -238,12 +238,12 @@ SET(NON_PROD_RVV_MICROKERNEL_SRCS
   src/f32-vcos/gen/f32-vcos-rvv-rational-5-4-div-u1v.c
   src/f32-vcos/gen/f32-vcos-rvv-rational-5-4-div-u2v.c
   src/f32-vcos/gen/f32-vcos-rvv-rational-5-4-div-u4v.c
-  src/f32-vexp/gen/f32-vexp-rvv-rational-3-2-div-u1v.c
-  src/f32-vexp/gen/f32-vexp-rvv-rational-3-2-div-u2v.c
-  src/f32-vexp/gen/f32-vexp-rvv-rational-3-2-div-u4v.c
   src/f32-velu/gen/f32-velu-rvv-rr2-p6-u1v.c
   src/f32-velu/gen/f32-velu-rvv-rr2-p6-u2v.c
   src/f32-velu/gen/f32-velu-rvv-rr2-p6-u8v.c
+  src/f32-vexp/gen/f32-vexp-rvv-rational-3-2-div-u1v.c
+  src/f32-vexp/gen/f32-vexp-rvv-rational-3-2-div-u2v.c
+  src/f32-vexp/gen/f32-vexp-rvv-rational-3-2-div-u4v.c
   src/f32-vgelu/gen/f32-vgelu-rvv-rational-12-10-div-u1v.c
   src/f32-vgelu/gen/f32-vgelu-rvv-rational-12-10-div-u2v.c
   src/f32-vgelu/gen/f32-vgelu-rvv-rational-12-10-div-u8v.c
