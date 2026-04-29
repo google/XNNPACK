@@ -79,7 +79,7 @@ std::vector<GemmTestParams> CreateTests1(
       tester.clone()
           .k(k_block)
       , test_func, arch_flags)
-      .loop_n(1, nr)
+      .loop_n(1, nr, xnnpack::NextPrime(nr >> 1))
       .loop_m(1, mr));
   gemm_tests.push_back(GemmTestParams(
       "k_eq_" + kbs + "_subtile_m",
@@ -92,7 +92,7 @@ std::vector<GemmTestParams> CreateTests1(
       tester.clone()
           .m(mr).k(k_block)
       , test_func, arch_flags)
-      .loop_n(1, nr));
+      .loop_n(1, nr, xnnpack::NextPrime(nr >> 1)));
   if (k_block > 1) {
     gemm_tests.push_back(GemmTestParams(
         "k_lt_" + akbs,
@@ -105,7 +105,7 @@ std::vector<GemmTestParams> CreateTests1(
         tester.clone()
         , test_func, arch_flags)
         .loop_k(1, adj_k_block - 1)
-        .loop_n(1, nr)
+        .loop_n(1, nr, xnnpack::NextPrime(nr >> 1))
         .loop_m(1, mr));
   }
   gemm_tests.push_back(GemmTestParams(
@@ -119,7 +119,7 @@ std::vector<GemmTestParams> CreateTests1(
       tester.clone()
       , test_func, arch_flags)
       .loop_k(adj_k_block + 1, adj_k_block * 2 - 1, k_block)
-      .loop_n(1, nr)
+      .loop_n(1, nr, xnnpack::NextPrime(nr >> 1))
       .loop_m(1, mr));
   if (k_block > 1) {
     gemm_tests.push_back(GemmTestParams(
@@ -133,7 +133,7 @@ std::vector<GemmTestParams> CreateTests1(
         tester.clone()
         , test_func, arch_flags)
         .loop_k(adj_k_block + k_block, k_block * 5, k_block)
-        .loop_n(1, nr)
+        .loop_n(1, nr, xnnpack::NextPrime(nr >> 1))
         .loop_m(1, mr));
   }
   gemm_tests.push_back(GemmTestParams(
@@ -141,13 +141,13 @@ std::vector<GemmTestParams> CreateTests1(
       tester.clone()
           .m(mr)
       , test_func, arch_flags)
-      .loop_n(nr + 1, nr * 2 - 1)
+      .loop_n(nr + 1, nr * 2 - 1, xnnpack::NextPrime(nr >> 1))
       .loop_k(1, k_block * 3, k_block + 1));
   gemm_tests.push_back(GemmTestParams(
       "n_gt_" + nrs + "_subtile",
       tester.clone()
       , test_func, arch_flags)
-      .loop_n(nr + 1, nr * 2 - 1)
+      .loop_n(nr + 1, nr * 2 - 1, xnnpack::NextPrime(nr >> 1))
       .loop_k(1, k_block * 3, k_block + 1)
       .loop_m(1, mr));
   gemm_tests.push_back(GemmTestParams(
@@ -177,14 +177,14 @@ std::vector<GemmTestParams> CreateTests1(
             .ks(3)
         , test_func, arch_flags)
         .loop_k(1, k_block * 3, k_block + 1)
-        .loop_n(1, nr)
+        .loop_n(1, nr, xnnpack::NextPrime(nr >> 1))
         .loop_m(1, mr));
     gemm_tests.push_back(GemmTestParams(
         "n_gt_" + nrs + "_small_kernel",
         tester.clone()
             .m(mr).ks(3)
         , test_func, arch_flags)
-        .loop_n(nr + 1, nr * 2 - 1)
+        .loop_n(nr + 1, nr * 2 - 1, xnnpack::NextPrime(nr >> 1))
         .loop_k(1, k_block * 3, k_block + 1));
     gemm_tests.push_back(GemmTestParams(
         "n_div_" + nrs + "_small_kernel",
@@ -201,7 +201,7 @@ std::vector<GemmTestParams> CreateTests1(
           .cm_stride(xnnpack::NextPrime(nr + 1))
       , test_func, arch_flags)
       .loop_k(1, k_block * 3, k_block + 1)
-      .loop_n(1, nr)
+      .loop_n(1, nr, xnnpack::NextPrime(nr >> 1))
       .loop_m(1, mr));
   if (is_igemm) {
     gemm_tests.push_back(GemmTestParams(

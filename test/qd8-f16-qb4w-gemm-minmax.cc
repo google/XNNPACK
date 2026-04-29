@@ -91,7 +91,7 @@ std::vector<GemmTestParams> CreateTests1(
           .b_zero_point(8)
           .bl(32)
       , test_func, arch_flags)
-      .loop_n(1, nr)
+      .loop_n(1, nr, xnnpack::NextPrime(nr >> 1))
       .loop_m(1, mr));
   gemm_tests.push_back(GemmTestParams(
       "k_eq_" + kbs + "_subtile_m",
@@ -108,7 +108,7 @@ std::vector<GemmTestParams> CreateTests1(
           .b_zero_point(8)
           .bl(32)
       , test_func, arch_flags)
-      .loop_n(1, nr));
+      .loop_n(1, nr, xnnpack::NextPrime(nr >> 1)));
   gemm_tests.push_back(GemmTestParams(
       "bl",
       tester.clone()
