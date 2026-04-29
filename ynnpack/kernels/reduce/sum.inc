@@ -12,6 +12,7 @@ YNN_UNARY_REDUCE_KERNEL(arch_flag::neondot, sum_uint8_int32_neondot, uint8_t, in
 #endif  // YNN_ARCH_ARM_NEONDOT
 #ifdef YNN_ARCH_ARM_NEON
 YNN_UNARY_REDUCE_KERNEL(arch_flag::neon, sum_fp32_neon, float, float)
+YNN_UNARY_REDUCE_KERNEL(arch_flag::neon, sum_int32_neon, int32_t, int32_t)
 YNN_UNARY_REDUCE_KERNEL(arch_flag::neon, sum_bf16_fp32_neon, bfloat16, float)
 #ifdef YNN_ARCH_ARM64
 YNN_UNARY_REDUCE_KERNEL(arch_flag::neon, sum_fp64_neon, double, double)
@@ -35,6 +36,7 @@ YNN_UNARY_REDUCE_KERNEL(arch_flag::avx512, sum_bf16_fp32_avx512, bfloat16, float
 YNN_UNARY_REDUCE_KERNEL(arch_flag::avx512, sum_fp16_fp32_avx512, half, float)
 YNN_UNARY_REDUCE_KERNEL(arch_flag::avx512, sum_uint8_int32_avx512, uint8_t, int32_t)
 YNN_UNARY_REDUCE_KERNEL(arch_flag::avx512, sum_int8_int32_avx512, int8_t, int32_t)
+YNN_UNARY_REDUCE_KERNEL(arch_flag::avx512, sum_int32_avx512, int32_t, int32_t)
 YNN_UNARY_REDUCE_KERNEL(arch_flag::avx512, sum_fp32_avx512, float, float)
 YNN_UNARY_REDUCE_KERNEL(arch_flag::avx512, sum_fp64_avx512, double, double)
 #endif  // YNN_ARCH_X86_AVX512
@@ -42,6 +44,7 @@ YNN_UNARY_REDUCE_KERNEL(arch_flag::avx512, sum_fp64_avx512, double, double)
 YNN_UNARY_REDUCE_KERNEL(arch_flag::avx2, sum_bf16_fp32_avx2, bfloat16, float)
 YNN_UNARY_REDUCE_KERNEL(arch_flag::avx2, sum_uint8_int32_avx2, uint8_t, int32_t)
 YNN_UNARY_REDUCE_KERNEL(arch_flag::avx2, sum_int8_int32_avx2, int8_t, int32_t)
+YNN_UNARY_REDUCE_KERNEL(arch_flag::avx2, sum_int32_avx2, int32_t, int32_t)
 #endif  // YNN_ARCH_X86_AVX2
 #ifdef YNN_ARCH_X86_AVX
 YNN_UNARY_REDUCE_KERNEL(arch_flag::avx, sum_fp32_avx, float, float)
@@ -59,6 +62,7 @@ YNN_UNARY_REDUCE_KERNEL(arch_flag::sse2, sum_fp32_sse2, float, float)
 YNN_UNARY_REDUCE_KERNEL(arch_flag::sse2, sum_bf16_fp32_sse2, bfloat16, float)
 YNN_UNARY_REDUCE_KERNEL(arch_flag::sse2, sum_uint8_int32_sse2, uint8_t, int32_t)
 YNN_UNARY_REDUCE_KERNEL(arch_flag::sse2, sum_int8_int32_sse2, int8_t, int32_t)
+YNN_UNARY_REDUCE_KERNEL(arch_flag::sse2, sum_int32_sse2, int32_t, int32_t)
 #endif  // YNN_ARCH_X86_SSE2
 #ifdef YNN_ARCH_X86_SSSE3
 YNN_UNARY_REDUCE_KERNEL(arch_flag::ssse3, sum_uint8_int32_ssse3, uint8_t, int32_t)
