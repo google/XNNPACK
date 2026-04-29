@@ -97,4 +97,67 @@ uint64_t get_supported_arch_flags() {
   return flags;
 }
 
+size_t get_l2_cache_size() {
+  static const size_t size = []() -> size_t {
+    // Conservative default when cpuinfo isn't available: 1 MiB. This is
+    // within a small factor of what typical Cortex-A7xx / Neoverse cores
+    // have per core, and large enough that kc stays usefully big for
+    // typical GEMM shapes (for N <= 4096, f32, it keeps kc >= 64).
+    constexpr size_t kFallback = 1 * 1024 * 1024;
+#ifdef YNN_ENABLE_CPUINFO
+    if (!cpuinfo_initialize()) {
+      return kFallback;
+    }
+    const uint32_t count = cpuinfo_get_l2_caches_count();
+    if (count == 0) {
+      return kFallback;
+    }
+    // Pick the L2 with the largest per-thread share. On asymmetric systems
+    // (Apple M-series P+E, Arm big.LITTLE) this deterministically selects
+    // the performance cluster, which is where latency-critical GEMM work
+    // lands. On homogeneous systems every L2 yields the same answer. Also
+    // track the total size of the selected L2 for the second branch below.
+    size_t best_per_thread = 0;
+    size_t best_total = 0;
+    for (uint32_t i = 0; i < count; ++i) {
+      const struct cpuinfo_cache* l2 = cpuinfo_get_l2_cache(i);
+      if (l2 == nullptr || l2->size == 0) continue;
+      const uint32_t sharers =
+          l2->processor_count > 0 ? l2->processor_count : 1;
+      const size_t per_thread = static_cast<size_t>(l2->size) / sharers;
+      if (per_thread > best_per_thread) {
+        best_per_thread = per_thread;
+        best_total = static_cast<size_t>(l2->size);
+      }
+    }
+    if (best_per_thread == 0) return kFallback;
+    // Two bounds, take the larger:
+    //
+    //   per_thread * 2: assumes all sharers run GEMM concurrently; the 2x
+    //     absorbs graceful spillover into outer SLC/L3 on Apple M-series
+    //     and Neoverse cores.
+    //
+    //   total * 3/4: on a physically-shared L2 cluster (M-series P-cluster,
+    //     big.LITTLE P-cluster) a single-threaded GEMM gets near-full L2 —
+    //     the per-thread model under-counts. The 1/4 headroom covers A/C
+    //     tiles, TLB, and prefetch interference near capacity.
+    //
+    // On per-core L2 systems (sharers=1) the first always dominates, so
+    // behavior there is unchanged. The second fires only on shared clusters,
+    // which is exactly the topology the per-thread model under-counts.
+    //
+    // Both are tuned for single-threaded latency. Under MT on clustered L2,
+    // threads each using 3/4 of total oversubscribe the cache — the
+    // long-term fix is plumbing active-thread count from pthreadpool.
+    const size_t per_thread_budget = best_per_thread * 2;
+    const size_t shared_cluster_budget = best_total - best_total / 4;
+    return per_thread_budget > shared_cluster_budget ? per_thread_budget
+                                                     : shared_cluster_budget;
+#else
+    return kFallback;
+#endif
+  }();
+  return size;
+}
+
 }  // namespace ynn

@@ -6,6 +6,7 @@
 #ifndef XNNPACK_YNNPACK_BASE_ARCH_H_
 #define XNNPACK_YNNPACK_BASE_ARCH_H_
 
+#include <cstddef>
 #include <cstdint>
 
 namespace ynn {
@@ -66,6 +67,20 @@ inline bool is_arch_supported(
     uint64_t supported_arch_flags = get_supported_arch_flags()) {
   return (arch_flags & supported_arch_flags) == arch_flags;
 }
+
+// Returns the L2-class cache budget (in bytes) to use for GEMM kc-blocking
+// heuristics — see schedule_dot in kernels/dot/schedule.cc for the formula.
+//
+// When cpuinfo is available, picks the L2 with the largest per-thread share
+// (size / processor_count) across all reported L2 caches — on asymmetric
+// systems (Apple M-series P+E, Arm big.LITTLE) this selects the performance
+// cluster; on homogeneous systems every L2 yields the same answer. The
+// selected share is doubled to account for the stripe gracefully spilling
+// into the outer SLC/L3 present on Apple M-series and Neoverse cores. This
+// heuristic is tuned for single-threaded latency — see the implementation
+// for the multi-thread caveat. Falls back to a conservative 1 MiB when
+// cpuinfo is not available.
+size_t get_l2_cache_size();
 
 }  // namespace ynn
 
