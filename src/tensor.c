@@ -816,24 +816,15 @@ size_t get_tensor_size(const struct xnn_gemm_config* gemm_config, enum xnn_value
   // Returns SIZE_MAX on overflow so the caller can detect and reject the tensor
   // before the wrapped value is treated as an allocation size.
   const size_t num_elements = xnn_shape_multiply_all_dims(shape);
-  if (num_elements == SIZE_MAX) {
-    return SIZE_MAX;
-  }
-  uint64_t size_bits = xnn_datatype_size_bits(datatype);
-  if (size_bits != 0 && num_elements > UINT64_MAX / size_bits) {
-    return SIZE_MAX;
-  }
-  size_bits *= (uint64_t) num_elements;
-
-  // Round size up to the nearest byte. (size_bits + 7) cannot wrap because we
-  // already bounded size_bits via the check above.
-  const uint64_t size_bytes = (size_bits + 7) >> 3;
-  if (size_bytes > (uint64_t) SIZE_MAX) {
+  size_t size_bits;
+  if (num_elements == SIZE_MAX ||
+      !xnn_safe_mul(num_elements, xnn_datatype_size_bits(datatype), &size_bits) ||
+      !xnn_safe_add(size_bits, 7, &size_bits)) {
     return SIZE_MAX;
   }
   // TODO: We should not be using this helper for non-byte-addressable types,
   // perhaps we should just assert here.
-  return (size_t) size_bytes;
+  return size_bits >> 3;
 }
 
 size_t xnn_runtime_tensor_get_size(const struct xnn_runtime_value* value)
