@@ -18,6 +18,7 @@ limitations under the License.
 #include <cstddef>
 #include <cstdint>
 #include <ostream>
+#include <type_traits>
 
 #include "litert/tensor/internal/fp16.h"
 
@@ -272,6 +273,68 @@ struct ApiType<double> : internal::StorageImpl<Type::kFP64, double> {};
 
 template <>
 struct ApiType<bool> : internal::StorageImpl<Type::kBOOL, bool> {};
+
+template <Type out, Type in, class = void>
+struct Conversion {
+  static constexpr typename NativeStorage<out>::type Call(
+      typename NativeStorage<in>::type val) {
+    return static_cast<typename NativeStorage<out>::type>(val);
+  }
+};
+
+template <Type inout>
+struct Conversion<inout, inout, void> {
+  static constexpr typename NativeStorage<inout>::type Call(
+      typename NativeStorage<inout>::type val) {
+    return val;
+  }
+};
+
+template <Type type>
+struct Conversion<
+    Type::kBF16, type,
+    std::enable_if_t<type != Type::kFP32 && type != Type::kBF16>> {
+  static constexpr typename NativeStorage<Type::kBF16>::type Call(
+      typename NativeStorage<type>::type val) {
+    return Conversion<Type::kBF16, Type::kFP32>::Call(static_cast<float>(val));
+  }
+};
+
+template <Type type>
+struct Conversion<
+    type, Type::kBF16,
+    std::enable_if_t<type != Type::kFP32 && type != Type::kBF16>> {
+  static constexpr typename NativeStorage<type>::type Call(
+      typename NativeStorage<Type::kBF16>::type val) {
+    return Conversion<type, Type::kFP32>::Call(static_cast<float>(val));
+  }
+};
+
+template <Type type>
+struct Conversion<Type::kFP16, type,
+                  std::enable_if_t<type != Type::kFP32 && type != Type::kFP16 &&
+                                   type != Type::kBF16>> {
+  static constexpr typename NativeStorage<Type::kFP16>::type Call(
+      typename NativeStorage<type>::type val) {
+    return Conversion<Type::kFP16, Type::kFP32>::Call(static_cast<float>(val));
+  }
+};
+
+template <Type type>
+struct Conversion<type, Type::kFP16,
+                  std::enable_if_t<type != Type::kFP32 && type != Type::kFP16 &&
+                                   type != Type::kBF16>> {
+  static constexpr typename NativeStorage<type>::type Call(
+      typename NativeStorage<Type::kFP16>::type val) {
+    return Conversion<type, Type::kFP32>::Call(static_cast<float>(val));
+  }
+};
+
+template <Type to, class T>
+auto ConvertTo(T value) {
+  constexpr Type from = ApiType<T>::value;
+  return Conversion<to, from>::Call(value);
+}
 
 inline const char* ToString(Type t) {
 #define LITERT_TENSOR_TYPE_TO_STRING_CASE(name) \

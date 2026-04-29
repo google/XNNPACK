@@ -346,12 +346,20 @@ class OwningCpuBuffer : public MutableBuffer {
   // - `type`: The underlying storage type.
   template <Type type, class Sequence>
   static std::shared_ptr<OwningCpuBuffer> Copy(Sequence&& seq) {
-    using NativeType = typename NativeStorage<type>::type;
     using std::begin;
     using std::end;
     using std::size;
+    using NativeType = typename NativeStorage<type>::type;
+    constexpr Type seq_type =
+        ApiType<std::decay_t<decltype(*std::begin(seq))>>::value;
     std::shared_ptr<OwningCpuBuffer> copied_data = Allocate<type>(size(seq));
-    std::copy(begin(seq), end(seq), copied_data->Span<NativeType>().data());
+    if constexpr (type == seq_type) {
+      std::copy(begin(seq), end(seq), copied_data->Span<NativeType>().data());
+    } else {
+      std::transform(begin(seq), end(seq),
+                     copied_data->Span<NativeType>().data(),
+                     Conversion<type, seq_type>::Call);
+    }
     return copied_data;
   }
 

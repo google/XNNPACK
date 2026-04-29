@@ -63,5 +63,29 @@ TEST(DatatypesTest, BufferSize) {
   EXPECT_THAT(BufferSize(Type::kBF16, 15), Eq(15 * 2));
 }
 
+TEST(ConvertTest, FP16ToBF16) {
+  const bf16_t bf16_val = 23.;
+  const fp16_t fp16_val = 23.;
+  EXPECT_THAT(ConvertTo<Type::kFP16>(bf16_val).val, Eq(fp16_val.val));
+  EXPECT_THAT(ConvertTo<Type::kBF16>(fp16_val).val, Eq(bf16_val.val));
+}
+
+TEST(ConvertTest, FP16ToFP32) {
+  const fp16_t fp16_val = 23.;
+  const float fp32_val = 23.;
+  EXPECT_THAT(ConvertTo<Type::kFP16>(fp32_val).val, Eq(fp16_val.val));
+  EXPECT_THAT(ConvertTo<Type::kFP32>(fp16_val), Eq(fp32_val));
+}
+
+TEST(ConvertTest, FP16ToFP16Compiles) {
+  const fp16_t fp16_val = 23.;
+  EXPECT_THAT(ConvertTo<Type::kFP16>(fp16_val).val, Eq(fp16_val.val));
+}
+
+TEST(ConvertTest, BF16ToBF16Compiles) {
+  const bf16_t bf16_val = 23.;
+  EXPECT_THAT(ConvertTo<Type::kBF16>(bf16_val).val, Eq(bf16_val.val));
+}
+
 }  // namespace
 }  // namespace litert::tensor
