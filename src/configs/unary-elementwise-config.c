@@ -233,6 +233,16 @@ static void init_f16_approxgelu_config(void) {
     f16_approxgelu_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f16_vapproxgelu_ukernel__neonfp16arith_rational_6_4_div_u16);
     f16_approxgelu_config.element_tile = 16;
   }
+#elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR && XNN_ENABLE_RISCV_FP16_VECTOR
+  const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+  assert(hardware_config != NULL);
+  if (hardware_config->arch_flags & xnn_arch_riscv_vector_fp16_arith) {
+    f16_approxgelu_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f16_vapproxgelu_ukernel__rvvfp16arith_rational_6_4_div_u2v);
+    f16_approxgelu_config.element_tile = 2 * hardware_config->vlenb / sizeof(xnn_float16);
+  } else {
+    f16_approxgelu_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f16_vapproxgelu_ukernel__scalar_rational_6_4_div_u4);
+    f16_approxgelu_config.element_tile = 4;
+  }
 #else
   f16_approxgelu_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f16_vapproxgelu_ukernel__scalar_rational_6_4_div_u4);
   f16_approxgelu_config.element_tile = 4;
@@ -324,6 +334,14 @@ static void init_f16_elu_config(void) {
         f16_elu_config.init = (xnn_init_unary_uparams_fn) xnn_init_f16_elu_scalar_params;
       }
     #endif
+  #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR && XNN_ENABLE_RISCV_FP16_VECTOR
+    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    assert(hardware_config != NULL);
+    if (hardware_config->arch_flags & xnn_arch_riscv_vector_fp16_arith) {
+      f16_elu_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f16_velu_ukernel__rvvfp16arith_rr1_p3_u2v);
+      f16_elu_config.element_tile = 2 * hardware_config->vlenb / sizeof(xnn_float16);
+      f16_elu_config.init = (xnn_init_unary_uparams_fn) xnn_init_f16_elu_scalar_params;
+    }
   #endif
 }
 
@@ -350,6 +368,16 @@ static void init_f16_gelu_config(void) {
   if (hardware_config->arch_flags & xnn_arch_arm_neon_fp16_arith) {
     f16_gelu_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f16_vgelu_ukernel__neonfp16arith_rational_6_4_div_u16);
     f16_gelu_config.element_tile = 16;
+  }
+#elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR && XNN_ENABLE_RISCV_FP16_VECTOR
+  const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+  assert(hardware_config != NULL);
+  if (hardware_config->arch_flags & xnn_arch_riscv_vector_fp16_arith) {
+    f16_gelu_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f16_vgelu_ukernel__rvvfp16arith_rational_6_4_div_u2v);
+    f16_gelu_config.element_tile = 2 * hardware_config->vlenb / sizeof(xnn_float16);
+  } else {
+    f16_gelu_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f16_vgelu_ukernel__scalar_rational_6_4_div_u4);
+    f16_gelu_config.element_tile = 4;
   }
 #else
   f16_gelu_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f16_vgelu_ukernel__scalar_rational_6_4_div_u4);
@@ -683,6 +711,13 @@ static void init_f16_sigmoid_config(void) {
         f16_sigmoid_config.element_tile = 32;
       }
     #endif
+  #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR && XNN_ENABLE_RISCV_FP16_VECTOR
+    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    assert(hardware_config != NULL);
+    if (hardware_config->arch_flags & xnn_arch_riscv_vector_fp16_arith) {
+      f16_sigmoid_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f16_vsigmoid_ukernel__rvvfp16arith_rr2_p2_u2v);
+      f16_sigmoid_config.element_tile = 2 * hardware_config->vlenb / sizeof(xnn_float16);
+    }
   #endif
 }
 
@@ -808,6 +843,13 @@ static void init_f16_tanh_config(void) {
       }
     #endif
     ;
+  #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR && XNN_ENABLE_RISCV_FP16_VECTOR
+    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    assert(hardware_config != NULL);
+    if (hardware_config->arch_flags & xnn_arch_riscv_vector_fp16_arith) {
+      f16_tanh_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f16_vtanh_ukernel__rvvfp16arith_expm1minus_rr1_p3h2ts_div_u2v);
+      f16_tanh_config.element_tile = 2 * hardware_config->vlenb / sizeof(xnn_float16);
+    }
   #endif
 }
 

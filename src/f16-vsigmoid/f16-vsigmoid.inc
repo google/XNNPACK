@@ -33,3 +33,9 @@ XNN_UKERNEL(xnn_arch_x86_avx2, xnn_f16_vsigmoid_ukernel__avx2_rr1_p2_rcp_u16, 16
 XNN_UKERNEL(xnn_arch_x86_avx2, xnn_f16_vsigmoid_ukernel__avx2_rr1_p2_rcp_u24, 24, false, xnn_float16, struct xnn_f16_default_params, NULL)
 XNN_UKERNEL(xnn_arch_x86_avx2, xnn_f16_vsigmoid_ukernel__avx2_rr1_p2_rcp_u32, 32, false, xnn_float16, struct xnn_f16_default_params, NULL)
 #endif  // XNN_ENABLE_AVX2 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+
+#if XNN_ARCH_RISCV && XNN_ENABLE_RISCV_FP16_VECTOR
+XNN_UKERNEL(xnn_arch_riscv_vector_fp16_arith, xnn_f16_vsigmoid_ukernel__rvvfp16arith_rr2_p2_u1v, 1, true, xnn_float16, struct xnn_f16_default_params, NULL)
+XNN_UKERNEL(xnn_arch_riscv_vector_fp16_arith, xnn_f16_vsigmoid_ukernel__rvvfp16arith_rr2_p2_u2v, 2, true, xnn_float16, struct xnn_f16_default_params, NULL)
+XNN_UKERNEL(xnn_arch_riscv_vector_fp16_arith, xnn_f16_vsigmoid_ukernel__rvvfp16arith_rr2_p2_u4v, 4, true, xnn_float16, struct xnn_f16_default_params, NULL)
+#endif  // XNN_ARCH_RISCV && XNN_ENABLE_RISCV_FP16_VECTOR

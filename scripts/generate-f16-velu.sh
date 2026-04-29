@@ -13,3 +13,8 @@ tools/xngen src/f16-velu/avx2-rr1-p3.c.in -D BATCH_TILE=8  -o src/f16-velu/gen/f
 tools/xngen src/f16-velu/avx2-rr1-p3.c.in -D BATCH_TILE=16 -o src/f16-velu/gen/f16-velu-avx2-rr1-p3-u16.c &
 
 wait
+
+################################## RISC-V RVV #################################
+tools/xngen src/f16-velu/rvvfp16arith-rr1-p3.c.in -D LMUL=1 -o src/f16-velu/gen/f16-velu-rvvfp16arith-rr1-p3-u1v.c &
+tools/xngen src/f16-velu/rvvfp16arith-rr1-p3.c.in -D LMUL=2 -o src/f16-velu/gen/f16-velu-rvvfp16arith-rr1-p3-u2v.c &
+tools/xngen src/f16-velu/rvvfp16arith-rr1-p3.c.in -D LMUL=4 -o src/f16-velu/gen/f16-velu-rvvfp16arith-rr1-p3-u4v.c &

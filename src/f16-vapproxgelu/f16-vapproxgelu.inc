@@ -8,6 +8,12 @@
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/math.h"
 
+#if XNN_ARCH_RISCV && XNN_ENABLE_RISCV_FP16_VECTOR
+XNN_UKERNEL(xnn_arch_riscv_vector_fp16_arith, xnn_f16_vapproxgelu_ukernel__rvvfp16arith_rational_6_4_div_u1v, 1, true, xnn_float16, struct xnn_f16_default_params, NULL)
+XNN_UKERNEL(xnn_arch_riscv_vector_fp16_arith, xnn_f16_vapproxgelu_ukernel__rvvfp16arith_rational_6_4_div_u2v, 2, true, xnn_float16, struct xnn_f16_default_params, NULL)
+XNN_UKERNEL(xnn_arch_riscv_vector_fp16_arith, xnn_f16_vapproxgelu_ukernel__rvvfp16arith_rational_6_4_div_u4v, 4, true, xnn_float16, struct xnn_f16_default_params, NULL)
+#endif  // XNN_ARCH_RISCV && XNN_ENABLE_RISCV_FP16_VECTOR
+
 XNN_UKERNEL(xnn_arch_none, xnn_f16_vapproxgelu_ukernel__scalar_rational_6_4_div_u1, 1, false, xnn_float16, struct xnn_f16_default_params, NULL)
 XNN_UKERNEL(xnn_arch_none, xnn_f16_vapproxgelu_ukernel__scalar_rational_6_4_div_u2, 2, false, xnn_float16, struct xnn_f16_default_params, NULL)
 XNN_UKERNEL(xnn_arch_none, xnn_f16_vapproxgelu_ukernel__scalar_rational_6_4_div_u4, 4, false, xnn_float16, struct xnn_f16_default_params, NULL)
