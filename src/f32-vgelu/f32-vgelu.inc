@@ -68,3 +68,10 @@ XNN_UKERNEL(xnn_arch_hvx, xnn_f32_vgelu_ukernel__hvx_rational_12_10_nr_u32, 32, 
 XNN_UKERNEL(xnn_arch_hvx, xnn_f32_vgelu_ukernel__hvx_rational_12_10_nr_u64, 64, false, float, struct xnn_f32_default_params, NULL)
 XNN_UKERNEL(xnn_arch_hvx, xnn_f32_vgelu_ukernel__hvx_rational_12_10_nr_u128, 128, false, float, struct xnn_f32_default_params, NULL)
 #endif  // XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
+
+#if XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
+XNN_UKERNEL(xnn_arch_riscv_vector, xnn_f32_vgelu_ukernel__rvv_rational_12_10_div_u1v, 1, true, float, struct xnn_f32_default_params, NULL)
+XNN_UKERNEL(xnn_arch_riscv_vector, xnn_f32_vgelu_ukernel__rvv_rational_12_10_div_u2v, 2, true, float, struct xnn_f32_default_params, NULL)
+XNN_UKERNEL(xnn_arch_riscv_vector, xnn_f32_vgelu_ukernel__rvv_rational_12_10_div_u4v, 4, true, float, struct xnn_f32_default_params, NULL)
+XNN_UKERNEL(xnn_arch_riscv_vector, xnn_f32_vgelu_ukernel__rvv_rational_12_10_div_u8v, 8, true, float, struct xnn_f32_default_params, NULL)
+#endif  // XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
