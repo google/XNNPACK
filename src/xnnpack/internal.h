@@ -8,7 +8,6 @@
 #ifndef XNNPACK_SRC_XNNPACK_INTERNAL_H_
 #define XNNPACK_SRC_XNNPACK_INTERNAL_H_
 
-#include <pthreadpool.h>
 #include <stddef.h>
 #include <stdint.h>
 
@@ -17,12 +16,14 @@
 #include "src/xnnpack/log.h"
 #include "src/xnnpack/math.h"
 #include "src/xnnpack/subgraph.h"
+#include <pthreadpool.h>
 
 // Runtime values marked with this flag should be cleaned up (i.e. deallocated)
 // by the runtime.
 #define XNN_VALUE_FLAG_NEEDS_CLEANUP 0x00000008
 
 #define XNN_VAR_ARG_HEAD(FIRST, ...) FIRST
+
 // Macro to check the `enum xnn_status` result of an expression and return it
 // if it is not `xnn_status_success`, followed by an optional string literal and
 // parameters for `xnn_log_error`.
@@ -36,6 +37,25 @@
       return status_;                                              \
     }                                                              \
   } while (false)
+
+// Checks the `status` member of the return value of `expr`. If it's
+// `xnn_status_success`, then assigns `lhs` to the `value` member of the return
+// value of `expr`.
+#define XNN_ASSIGN_OR_RETURN_C(ret, lhs, expr, ...) \
+  _XNN_ASSIGN_OR_RETURN_IMPL(__LINE__, ret, lhs, (expr), __VA_ARGS__)
+
+#define XNN_ASSIGN_OR_RETURN_CXX(lhs, expr, ...) \
+  _XNN_ASSIGN_OR_RETURN_IMPL(__LINE__, auto, lhs, (expr), __VA_ARGS__)
+
+#define _XNN_ASSIGN_OR_RETURN_IMPL(line, ret, lhs, expr, ...) \
+  const ret maybe_value##line = (expr);                               \
+  if (maybe_value##line.status != xnn_status_success) {                     \
+    if (sizeof(XNN_VAR_ARG_HEAD("" __VA_ARGS__)) > sizeof("")) {      \
+      xnn_log_error("" __VA_ARGS__);                                  \
+    }                                                                 \
+    return maybe_value##line.status;                                 \
+  }                                                                   \
+  lhs = maybe_value##line.value
 
 #define XNN_IF_ERROR_GOTO(label, expr, ...)                        \
   do {                                                             \
