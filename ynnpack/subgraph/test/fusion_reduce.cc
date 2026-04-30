@@ -38,7 +38,7 @@ TEST(fusion, reduce_reduce_keep_dims) {
   subgraph.fusion();
   subgraph.invalidate_dead_values();
 
-  ASSERT_THAT(subgraph, AllOf(HasValidNodeCount(1), HasValidValueCount(3)));
+  ASSERT_THAT(subgraph, AllOf(HasValidNodeCount(1), HasValidValueCount(2)));
   const ynn_node& node = ProducerOf(x_id, subgraph);
   EXPECT_THAT(node, AllOf(IsReduce(ynn_reduce_sum), InputsInclude(a_id)));
   const auto& reduce = std::get<ynn_node::reduce>(node.op);
@@ -64,7 +64,7 @@ TEST(fusion, reduce_reduce_no_keep_dims) {
   subgraph.fusion();
   subgraph.invalidate_dead_values();
 
-  ASSERT_THAT(subgraph, AllOf(HasValidNodeCount(1), HasValidValueCount(3)));
+  ASSERT_THAT(subgraph, AllOf(HasValidNodeCount(1), HasValidValueCount(2)));
   const ynn_node& node = ProducerOf(x_id, subgraph);
   EXPECT_THAT(node, AllOf(IsReduce(ynn_reduce_sum), InputsInclude(a_id)));
   const auto& reduce = std::get<ynn_node::reduce>(node.op);
@@ -91,7 +91,7 @@ TEST(fusion, reduce_sum_squared_sum) {
   subgraph.fusion();
   subgraph.invalidate_dead_values();
 
-  ASSERT_THAT(subgraph, AllOf(HasValidNodeCount(1), HasValidValueCount(3)));
+  ASSERT_THAT(subgraph, AllOf(HasValidNodeCount(1), HasValidValueCount(2)));
   const ynn_node& node = ProducerOf(x_id, subgraph);
   EXPECT_THAT(node,
               AllOf(IsReduce(ynn_reduce_sum_squared), InputsInclude(a_id)));
@@ -168,7 +168,7 @@ void TestReduceSumOfConvert(ynn_type input_type, ynn_type intermediate_type,
                     Not(HasValidValueId(converted_x_id))));
   EXPECT_THAT(ProducerOf(y_id, subgraph),
               AllOf(IsReduce(op), HasInputCount(2),
-                    InputsAre(x_id, IsValidValueIn(subgraph))));
+                    InputsAre(x_id, YNN_INVALID_VALUE_ID)));
 }
 
 void TestReduceSumOfConvertQuantized(ynn_reduce_operator reduce_op) {
@@ -283,7 +283,7 @@ void TestReduceSumOfSquared(ynn_type type, bool use_square) {
                     Not(HasValidValueIds(sq_id))));
   EXPECT_THAT(ProducerOf(y_id, subgraph),
               AllOf(IsReduce(ynn_reduce_sum_squared), HasInputCount(2),
-                    InputsAre(x_id, IsValidValueIn(subgraph))));
+                    InputsAre(x_id, YNN_INVALID_VALUE_ID)));
 }
 
 }  // namespace
@@ -340,7 +340,7 @@ void TestReduceSumOfSquaredWithConvert(ynn_type input_type,
                     Not(HasValidValueIds(intermediate1_id, intermediate2_id))));
   EXPECT_THAT(ProducerOf(y_id, subgraph),
               AllOf(IsReduce(ynn_reduce_sum_squared), HasInputCount(2),
-                    InputsAre(x_id, IsValidValueIn(subgraph))));
+                    InputsAre(x_id, YNN_INVALID_VALUE_ID)));
 }
 
 }  // namespace
@@ -520,7 +520,7 @@ TEST(fusion, reduce_expand_dims) {
   subgraph.fusion();
   subgraph.invalidate_dead_values();
 
-  ASSERT_THAT(subgraph, AllOf(HasValidNodeCount(1), HasValidValueCount(3)));
+  ASSERT_THAT(subgraph, AllOf(HasValidNodeCount(1), HasValidValueCount(2)));
   const ynn_node& node = ProducerOf(x_id, subgraph);
   EXPECT_THAT(node, AllOf(IsReduce(ynn_reduce_sum), InputsInclude(a_id)));
   const auto& reduce = std::get<ynn_node::reduce>(node.op);

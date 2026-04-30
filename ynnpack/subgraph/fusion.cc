@@ -889,12 +889,7 @@ bool rewrite_reduce_reduce(ynn_subgraph& subgraph, ynn_node& node,
 
   // 2. Initial value of reduce2 is identity.
   uint32_t init2_id = node.inputs[1];
-  if (init2_id != YNN_INVALID_VALUE_ID) {
-    std::optional<float> val = subgraph.value(init2_id).as_scalar_float();
-    if (!val) return false;
-    // get_reduce_identity may return NaN if the identity value is unknown.
-    if (!(*val == ynn::get_reduce_identity(reduce2->op))) return false;
-  }
+  if (init2_id != YNN_INVALID_VALUE_ID) return false;
 
   // 3. Keep dims must match to be able to fuse into a single node.
   if (reduce1->keep_dims != reduce2->keep_dims) return false;
@@ -1510,16 +1505,14 @@ bool rewrite_reduce_binary_identity(ynn_subgraph& subgraph, ynn_node& node,
       continue;
     }
 
-    // Check if the reduction's initial value is the identity of the binary op.
-    // The binary op's identity is the same as the reduction's identity.
-    const ynn_value& initial_value = subgraph.value(producer->inputs[1]);
-    if (initial_value.as_scalar_float() != get_reduce_identity(reduce->op)) {
+    if (producer->inputs[1] != YNN_INVALID_VALUE_ID) {
+      // The first reduce op has a non-identity initial value.
       continue;
     }
 
-    // Check if the reduction result is only used by this binary op.
     if (analysis.consumers[producer->outputs[0]].size() != 1 ||
         subgraph.value(producer->outputs[0]).is_external_output()) {
+      // The first reduce op is used by some other op.
       continue;
     }
 
@@ -1531,7 +1524,6 @@ bool rewrite_reduce_binary_identity(ynn_subgraph& subgraph, ynn_node& node,
     uint32_t x_id = producer->inputs[0];
     uint32_t y_id = node.inputs[1 - i];
     uint32_t output_id = node.outputs[0];
-    assert(subgraph.value(y_id).type == initial_value.type);
 
     ynn::define_reduce(subgraph, node, reduce->op, reduce->k_dims, x_id, y_id,
                        &output_id, reduce->keep_dims);

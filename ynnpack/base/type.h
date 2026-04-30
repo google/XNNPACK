@@ -741,6 +741,9 @@ void copy_n(Src* src, size_t src_offset, size_t n, Dst* dst,
   }
 }
 
+// Convert `n` floats from `src` to `type` stored in `dst`.
+void convert_n(const float* src, size_t n, ynn_type type, void* dst);
+
 }  // namespace ynn
 
 #endif  // XNNPACK_YNNPACK_BASE_TYPE_H_

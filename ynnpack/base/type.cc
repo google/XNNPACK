@@ -5,10 +5,15 @@
 
 #include "ynnpack/base/type.h"
 
+#include <algorithm>
 #include <cassert>
 #include <cstddef>
+#include <cstdint>
 
+#include "ynnpack/base/arithmetic.h"
 #include "ynnpack/base/base.h"
+#include "ynnpack/base/bfloat16.h"
+#include "ynnpack/base/half.h"
 #include "ynnpack/include/ynnpack.h"
 
 namespace ynn {
@@ -154,6 +159,59 @@ const char* to_string(ynn_type type) {
   }
   YNN_UNREACHABLE;
   return "unknown";
+}
+
+namespace {
+
+template <typename T>
+void convert_to_int(const float* src, size_t n, T* dst) {
+  for (size_t i = 0; i < n; ++i) {
+    type_info<T>::set(dst, i, round_float_to_int<T>(src[i]));
+  }
+}
+
+}  // namespace
+
+void convert_n(const float* src, size_t n, ynn_type type, void* dst) {
+  switch (type) {
+    case ynn_type_fp64:
+      std::copy_n(src, n, (double*)dst);
+      return;
+    case ynn_type_fp32:
+      std::copy_n(src, n, (float*)dst);
+      return;
+    case ynn_type_fp16:
+      std::copy_n(src, n, (half*)dst);
+      return;
+    case ynn_type_bf16:
+      std::copy_n(src, n, (bfloat16*)dst);
+      return;
+    case ynn_type_int2:
+      convert_to_int<int2x4>(src, n, (int2x4*)dst);
+      return;
+    case ynn_type_uint2:
+      convert_to_int<uint2x4>(src, n, (uint2x4*)dst);
+      return;
+    case ynn_type_int4:
+      convert_to_int<int4x2>(src, n, (int4x2*)dst);
+      return;
+    case ynn_type_uint4:
+      convert_to_int<uint4x2>(src, n, (uint4x2*)dst);
+      return;
+    case ynn_type_int8:
+      convert_to_int<int8_t>(src, n, (int8_t*)dst);
+      return;
+    case ynn_type_uint8:
+      convert_to_int<uint8_t>(src, n, (uint8_t*)dst);
+      return;
+    case ynn_type_int32:
+      convert_to_int<int32_t>(src, n, (int32_t*)dst);
+      return;
+    case ynn_type_opaque:
+    case ynn_type_invalid:
+      break;
+  }
+  YNN_UNREACHABLE;
 }
 
 }  // namespace ynn

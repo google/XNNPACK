@@ -19,6 +19,7 @@
 #include "ynnpack/base/base.h"
 #include "ynnpack/base/type.h"
 #include "ynnpack/include/ynnpack.h"
+#include "ynnpack/subgraph/copy.h"
 #include "ynnpack/subgraph/reduce.h"
 #include "ynnpack/subgraph/runtime.h"
 #include "ynnpack/subgraph/slinky.h"
@@ -229,50 +230,34 @@ ynn_type get_accumulator_type(ynn_reduce_operator op, ynn_type a_type) {
   }
 }
 
-uint32_t get_reduce_identity_value(ynn_subgraph& subgraph,
-                                   const ynn_value& output,
-                                   ynn_reduce_operator op) {
+slinky::raw_buffer_ptr make_reduce_identity(ynn_type type, int rank,
+                                            ynn_reduce_operator op) {
+  slinky::dim dims[YNN_MAX_TENSOR_RANK];
+  slinky::raw_buffer value;
+  value.rank = 0;
+  value.elem_size = ynn::type_size_bytes(type);
+  value.dims = dims;
+
   float value_f32[2];
-  int rank = 0;
-  size_t dims[YNN_MAX_TENSOR_RANK];
-  std::fill_n(dims, YNN_MAX_TENSOR_RANK, 1);
+  size_t n = 1;
   if (op == ynn_reduce_min_max) {
+    value.rank = rank;
+    for (int i = 0; i < rank - 1; ++i) {
+      value.mutable_dim(i) = slinky::dim::broadcast();
+    }
+    value.mutable_dim(rank - 1) = slinky::dim(0, 1, value.elem_size);
     value_f32[0] = get_reduce_identity(ynn_reduce_min);
     value_f32[1] = get_reduce_identity(ynn_reduce_max);
-    rank = output.rank();
-    dims[rank - 1] = 2;
+    n = 2;
   } else {
     value_f32[0] = get_reduce_identity(op);
   }
 
-  uint32_t zero_point_id;
-  uint32_t scale_id;
-  switch (op) {
-    case ynn_reduce_sum:
-    case ynn_reduce_sum_squared:
-      // Here, we want the unquantized identity value.
-      // TODO(dsharlet): Why? I think it's because we are ignoring these
-      // quantization parameters when implementing the sum reduction. This is a
-      // bit of a wart in the design here.
-      zero_point_id = YNN_INVALID_VALUE_ID;
-      scale_id = YNN_INVALID_VALUE_ID;
-      break;
-    case ynn_reduce_max:
-    case ynn_reduce_min:
-    case ynn_reduce_min_max:
-      zero_point_id = output.zero_point_id;
-      scale_id = output.scale_id;
-      break;
-    default:
-      return YNN_INVALID_VALUE_ID;
-  }
-
-  // TODO(dsharlet): `get_static_value_id` uses public API functions to create
-  // the tensor, which expect the dimensions in descending stride order.
-  std::reverse(dims, dims + rank);
-
-  return subgraph.get_static_value_id(output.type, rank, dims, zero_point_id,
-                                      scale_id, value_f32);
+  assert(type_size_bytes(type) <= sizeof(double));
+  alignas(double) char storage[2 * sizeof(double)] = {0, };
+  value.base = storage;
+  convert_n(value_f32, n, type, value.base);
+  return slinky::raw_buffer::make_copy(value);
 }
 
 }  // namespace
@@ -344,11 +329,13 @@ void define_reduce(ynn_subgraph& subgraph, ynn_node& node,
     output.extents.push_back(2);
   }
 
-  if (input_b_id == YNN_INVALID_VALUE_ID) {
-    input_b_id = get_reduce_identity_value(subgraph, output, op);
-  } else {
+  if (input_b_id != YNN_INVALID_VALUE_ID) {
     const ynn_value& b = subgraph.value(input_b_id);
-    if (b.type != output.type) {
+    if (b.as_scalar_float() == get_reduce_identity(op)) {
+      // This is the default value, using the default enables some fusions to
+      // happen.
+      input_b_id = YNN_INVALID_VALUE_ID;
+    } else if (b.type != output.type) {
       input_b_id = YNN_INVALID_VALUE_ID;
       ynn_define_convert(&subgraph, b.id, output.type, output.zero_point_id,
                          output.scale_id, &input_b_id, /*flags=*/0);
@@ -362,8 +349,18 @@ void define_reduce(ynn_subgraph& subgraph, ynn_node& node,
   node.create = [kernel](const ynn_node& node, ynn_runtime& runtime) {
     const ynn_node::reduce& op = std::get<ynn_node::reduce>(node.op);
     const ynn_runtime_value& input_a = runtime.value(node.inputs[0]);
-    const ynn_runtime_value& input_c = runtime.value(node.inputs[1]);
     ynn_runtime_value& output = runtime.value(node.outputs[0]);
+
+    auto identity_buffer = slinky::buffer_expr::make_constant(
+        runtime.globals.symbols, "identity",
+        make_reduce_identity(output.type, output.rank(), op.op));
+
+    ynn_runtime_value input_c;
+    if (node.inputs[1] != YNN_INVALID_VALUE_ID) {
+      input_c = runtime.value(node.inputs[1]);
+    } else {
+      input_c.buffer = identity_buffer;
+    }
 
     output.make_buffer(runtime);
 

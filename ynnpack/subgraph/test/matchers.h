@@ -266,7 +266,7 @@ MATCHER_P(HasValidValueId, value_id, "") {
   if (subgraph == nullptr) {
     return false;
   }
-  if (!subgraph->value(value_id).is_valid()) {
+  if (!subgraph->is_valid_value(value_id)) {
     *result_listener << "value " << value_id << " is invalid";
     return false;
   }
@@ -282,7 +282,7 @@ MATCHER_P(IsValidValueIn, subgraph, "") {
   if (s == nullptr) {
     return false;
   }
-  if (!s->value(arg).is_valid()) {
+  if (!s->is_valid_value(arg)) {
     *result_listener << "value " << arg << " is invalid";
     return false;
   }

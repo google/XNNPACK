@@ -622,10 +622,12 @@ struct ynn_subgraph : public ynn::ref_counted<ynn_subgraph> {
 
   ynn::slinky_globals globals;
 
-  bool is_valid_value(uint32_t id) const { return id < values.size(); }
+  bool is_valid_value(uint32_t id) const {
+    return id < values.size() && values[id].is_valid();
+  }
   bool is_valid_external_value(uint32_t id) const {
     assert(external_value_ids <= values.size());
-    return id < external_value_ids;
+    return id < external_value_ids && values[id].is_valid();
   }
 
   const ynn_value& value(uint32_t id) const {
