@@ -20,8 +20,15 @@
 static const size_t NCHW_AXES_MAPPING[4] = {0, 2, 3, 1};
 static const size_t INVERSE_NCHW_AXES_MAPPING[4] = {0, 3, 2, 1};
 
-static void rewrite_reduction_axes_for_nchw(size_t num_reduction_axes,
-                                            int64_t* reduction_axes) {
+static enum xnn_status rewrite_reduction_axes_for_nchw(
+    size_t num_reduction_axes, int64_t* reduction_axes) {
+  if (num_reduction_axes > 4) {
+    xnn_log_error(
+        "failed to rewrite reduction axes for NCHW: num_reduction_axes %zu "
+        "exceeds 4",
+        num_reduction_axes);
+    return xnn_status_invalid_parameter;
+  }
   bool mask[4] = {false};
   int64_t original_reduction_axes[4];
   memcpy(original_reduction_axes, reduction_axes,
@@ -39,6 +46,7 @@ static void rewrite_reduction_axes_for_nchw(size_t num_reduction_axes,
       mask[idx] = false;
     }
   }
+  return xnn_status_success;
 }
 
 static enum xnn_status create_reduce_operator(
@@ -130,7 +138,10 @@ static enum xnn_status reshape_reduce_operator(
   size_t input_dims[XNN_MAX_TENSOR_DIMS];
   memcpy(input_dims, input_value->shape.dim, input_num_dims * sizeof(size_t));
   if (input_value->shape.num_dims == 4 && input_value->flags & XNN_VALUE_FLAG_LAYOUT_NCHW) {
-    rewrite_reduction_axes_for_nchw(num_reduction_axes, reduction_axes);
+    status = rewrite_reduction_axes_for_nchw(num_reduction_axes, reduction_axes);
+    if (status != xnn_status_success) {
+      return status;
+    }
 
     for (size_t idx = 0; idx < input_num_dims; ++idx) {
       input_dims[idx] = input_value->shape.dim[INVERSE_NCHW_AXES_MAPPING[idx]];
