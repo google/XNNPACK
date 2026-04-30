@@ -11,3 +11,8 @@ XNN_UKERNEL(xnn_arch_arm_neon_fp16_arith, xnn_f16_vcmul_ukernel__neonfp16arith_u
 XNN_UKERNEL(xnn_arch_arm_neon_fp16_arith, xnn_f16_vcmul_ukernel__neonfp16arith_u32, 32, false, xnn_float16, struct xnn_f16_default_params, ((xnn_init_f16_default_params_fn) NULL))
 #endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 
+#if XNN_ARCH_RISCV && XNN_ENABLE_RISCV_FP16_VECTOR
+XNN_UKERNEL(xnn_arch_riscv_vector_fp16_arith, xnn_f16_vcmul_ukernel__rvvfp16arith_u1v, 1, true, float, struct xnn_f16_default_params, ((xnn_init_f16_default_params_fn) NULL))
+XNN_UKERNEL(xnn_arch_riscv_vector_fp16_arith, xnn_f16_vcmul_ukernel__rvvfp16arith_u2v, 2, true, float, struct xnn_f16_default_params, ((xnn_init_f16_default_params_fn) NULL))
+XNN_UKERNEL(xnn_arch_riscv_vector_fp16_arith, xnn_f16_vcmul_ukernel__rvvfp16arith_u4v, 4, true, float, struct xnn_f16_default_params, ((xnn_init_f16_default_params_fn) NULL))
+#endif  // XNN_ARCH_RISCV && XNN_ENABLE_RISCV_FP16_VECTOR
