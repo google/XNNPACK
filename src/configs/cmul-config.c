@@ -79,12 +79,12 @@ static void init_f32_cmul_config(void) {
 }
 
 const struct xnn_cmul_config* xnn_init_f16_cmul_config() {
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-    if (hardware_config == NULL || !xnn_is_f16_compatible_config(hardware_config)) {
-      return NULL;
-    }
-    XNN_INIT_ONCE(f16_cmul);
-    return &f16_cmul_config;
+  const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+  if (hardware_config == NULL || !xnn_is_f16_compatible_config(hardware_config)) {
+    return NULL;
+  }
+  XNN_INIT_ONCE(f16_cmul);
+  return f16_cmul_config.ukernel ? &f16_cmul_config : NULL;
 }
 
 const struct xnn_cmul_config* xnn_init_f32_cmul_config() {
