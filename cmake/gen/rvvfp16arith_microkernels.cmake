@@ -53,8 +53,8 @@ SET(PROD_RVVFP16ARITH_MICROKERNEL_SRCS
   src/f16-vbinary/gen/f16-vsub-rvvfp16arith-u8v.c
   src/f16-vbinary/gen/f16-vsubc-rvvfp16arith-u8v.c
   src/f16-vclamp/gen/f16-vclamp-rvvfp16arith-u8v.c
-  src/f16-vgelu/gen/f16-vgelu-rvvfp16arith-rational-6-4-div-u2v.c
   src/f16-velu/gen/f16-velu-rvvfp16arith-rr1-p3-u2v.c
+  src/f16-vgelu/gen/f16-vgelu-rvvfp16arith-rational-6-4-div-u2v.c
   src/f16-vhswish/gen/f16-vhswish-rvvfp16arith-u8v.c
   src/f16-vlrelu/gen/f16-vlrelu-rvvfp16arith-u8v.c
   src/f16-vmulcaddc/gen/f16-vmulcaddc-c4v-minmax-rvvfp16arith-2x.c
@@ -63,9 +63,9 @@ SET(PROD_RVVFP16ARITH_MICROKERNEL_SRCS
   src/f16-vrnd/gen/f16-vrndu-rvvfp16arith-u8v.c
   src/f16-vrnd/gen/f16-vrndz-rvvfp16arith-u8v.c
   src/f16-vrsqrt/gen/f16-vrsqrt-rvvfp16arith-rsqrt-u4v.c
+  src/f16-vsigmoid/gen/f16-vsigmoid-rvvfp16arith-rr2-p2-u2v.c
   src/f16-vsqrt/gen/f16-vsqrt-rvvfp16arith-sqrt-u8v.c
   src/f16-vtanh/gen/f16-vtanh-rvvfp16arith-expm1minus-rr1-p3h2ts-div-u2v.c
-  src/f16-vsigmoid/gen/f16-vsigmoid-rvvfp16arith-rr2-p2-u2v.c
   src/f16-vunary/gen/f16-vabs-rvvfp16arith-u8v.c
   src/f16-vunary/gen/f16-vneg-rvvfp16arith-u8v.c
   src/f16-vunary/gen/f16-vsqr-rvvfp16arith-u8v.c
@@ -160,10 +160,10 @@ SET(NON_PROD_RVVFP16ARITH_MICROKERNEL_SRCS
   src/f16-vclamp/gen/f16-vclamp-rvvfp16arith-u1v.c
   src/f16-vclamp/gen/f16-vclamp-rvvfp16arith-u2v.c
   src/f16-vclamp/gen/f16-vclamp-rvvfp16arith-u4v.c
-  src/f16-vgelu/gen/f16-vgelu-rvvfp16arith-rational-6-4-div-u1v.c
-  src/f16-vgelu/gen/f16-vgelu-rvvfp16arith-rational-6-4-div-u4v.c
   src/f16-velu/gen/f16-velu-rvvfp16arith-rr1-p3-u1v.c
   src/f16-velu/gen/f16-velu-rvvfp16arith-rr1-p3-u4v.c
+  src/f16-vgelu/gen/f16-vgelu-rvvfp16arith-rational-6-4-div-u1v.c
+  src/f16-vgelu/gen/f16-vgelu-rvvfp16arith-rational-6-4-div-u4v.c
   src/f16-vhswish/gen/f16-vhswish-rvvfp16arith-u4v.c
   src/f16-vlrelu/gen/f16-vlrelu-rvvfp16arith-u4v.c
   src/f16-vmulcaddc/gen/f16-vmulcaddc-c8v-minmax-rvvfp16arith-2x.c
@@ -172,11 +172,11 @@ SET(NON_PROD_RVVFP16ARITH_MICROKERNEL_SRCS
   src/f16-vrnd/gen/f16-vrndu-rvvfp16arith-u4v.c
   src/f16-vrnd/gen/f16-vrndz-rvvfp16arith-u4v.c
   src/f16-vrsqrt/gen/f16-vrsqrt-rvvfp16arith-rsqrt-u2v.c
+  src/f16-vsigmoid/gen/f16-vsigmoid-rvvfp16arith-rr2-p2-u1v.c
+  src/f16-vsigmoid/gen/f16-vsigmoid-rvvfp16arith-rr2-p2-u4v.c
   src/f16-vsqrt/gen/f16-vsqrt-rvvfp16arith-sqrt-u4v.c
   src/f16-vtanh/gen/f16-vtanh-rvvfp16arith-expm1minus-rr1-p3h2ts-div-u1v.c
   src/f16-vtanh/gen/f16-vtanh-rvvfp16arith-expm1minus-rr1-p3h2ts-div-u4v.c
-  src/f16-vsigmoid/gen/f16-vsigmoid-rvvfp16arith-rr2-p2-u1v.c
-  src/f16-vsigmoid/gen/f16-vsigmoid-rvvfp16arith-rr2-p2-u4v.c
   src/f16-vunary/gen/f16-vabs-rvvfp16arith-u1v.c
   src/f16-vunary/gen/f16-vabs-rvvfp16arith-u2v.c
   src/f16-vunary/gen/f16-vabs-rvvfp16arith-u4v.c
