@@ -249,6 +249,7 @@ tools/xngen test/simd/f32-simd.cc.in -D ARCH=hvx -D ARCH_MACRO=XNN_ARCH_HEXAGON 
 tools/xngen test/simd/f16-simd.cc.in -D ARCH=scalar -D ARCH_MACRO="" -D TEST_REQUIRES="" -o test/simd/f16-simd-scalar.cc &
 tools/xngen test/simd/f16-simd.cc.in -D ARCH=neonfp16arith -D ARCH_MACRO=XNN_ARCH_ARM64 -D TEST_REQUIRES="TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_fp16_arith)" -o test/simd/f16-simd-neonfp16arith.cc &
 tools/xngen test/simd/f16-simd.cc.in -D ARCH=avx512fp16 -D ARCH_MACRO="(XNN_ARCH_X86 || XNN_ARCH_X86_64) && XNNPACK_ENABLE_AVX512FP16" -D TEST_REQUIRES="TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_avx512fp16)" -o test/simd/f16-simd-avx512fp16.cc &
+tools/xngen test/simd/f16-simd.cc.in -D ARCH=wasmrelaxedsimd -D ARCH_MACRO="XNN_ARCH_WASMRELAXEDSIMD" -D TEST_REQUIRES="" -o test/simd/f16-simd-wasmrelaxedsimd.cc &
 
 tools/xngen test/simd/s16-simd.cc.in -D ARCH=scalar -D ARCH_MACRO="" -D TEST_REQUIRES="" -o test/simd/s16-simd-scalar.cc &
 tools/xngen test/simd/s16-simd.cc.in -D ARCH=neon -D ARCH_MACRO="XNN_ARCH_ARM || XNN_ARCH_ARM64" -D TEST_REQUIRES="TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_neon)" -o test/simd/s16-simd-neon.cc &
