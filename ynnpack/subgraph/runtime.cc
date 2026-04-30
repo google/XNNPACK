@@ -66,13 +66,11 @@ void ynn_runtime_value::make_buffer(ynn_runtime& runtime) {
   make_buffer(runtime, ynn::type_size_bytes(type));
 }
 
-std::unique_ptr<ynn::scheduling_info> ynn_runtime::make_schedule(
+std::vector<ynn::scheduling_split> ynn_runtime::make_loops(
     ynn::span<const slinky::var> dims, ynn::span<const slinky::expr> extents,
     const slinky::expr& element_cost,
     ynn::span<const slinky::expr> given_splits,
     ynn::span<const int> loop_order) {
-  auto sched = std::make_unique<ynn::scheduling_info>();
-
   int max_threads = threadpool() ? threadpool()->thread_count() : 1;
   // Enough tasks to have good load balancing.
   slinky::index_t target_task_count = max_threads > 1 ? max_threads * 2 : 1;
@@ -80,7 +78,7 @@ std::unique_ptr<ynn::scheduling_info> ynn_runtime::make_schedule(
   const int rank = dims.size();
   if (rank <= 0) {
     // Nothing to schedule here.
-    return sched;
+    return {};
   }
 
   // Area is selected such that tiles fit better into cache, this is a
@@ -139,15 +137,28 @@ std::unique_ptr<ynn::scheduling_info> ynn_runtime::make_schedule(
     }
   }
 
+  std::vector<ynn::scheduling_split> loop_splits;
   for (int index_d = 0; index_d < rank; ++index_d) {
     int d = get_loop_dim(index_d);
     if (extents[d].defined() && splits[d].defined()) {
-      sched->loop_splits.push_back(
+      loop_splits.push_back(
           {dims[d], splits[d], workers[d], extents[d]});
     }
   }
 
-  return sched;
+  return loop_splits;
+}
+
+std::unique_ptr<ynn::scheduling_info> ynn_runtime::make_schedule(
+    ynn::span<const slinky::var> dims, ynn::span<const slinky::expr> extents,
+    const slinky::expr& element_cost,
+    ynn::span<const slinky::expr> given_splits,
+    ynn::span<const int> loop_order) {
+  std::vector<ynn::scheduling_split> loop_splits =
+      make_loops(dims, extents, element_cost, given_splits, loop_order);
+  auto scheduling_info = std::make_unique<ynn::scheduling_info>();
+  scheduling_info->loop_splits = std::move(loop_splits);
+  return scheduling_info;
 }
 
 namespace {
