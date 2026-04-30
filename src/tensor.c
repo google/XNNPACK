@@ -267,8 +267,14 @@ enum xnn_status xnn_define_dynamically_quantized_tensor_value(
 
   switch (datatype) {
     case xnn_datatype_qdint8:
-    case xnn_datatype_qpint8:
       break;
+    case xnn_datatype_qpint8:
+      // qpint8 is an internal datatype produced downstream of public types
+      // like qdint8; it is not valid as an input to the public define API.
+      xnn_log_error("failed to create Dynamically Quantized Dense Tensor value: "
+        "datatype %s (%d) is an internal type and cannot be used through the public API",
+        xnn_datatype_to_string(datatype), datatype);
+      return xnn_status_unsupported_parameter;
     default:
       xnn_log_error("failed to create Dynamically Quantized Dense Tensor value: unsupported datatype %s (%d)",
         xnn_datatype_to_string(datatype), datatype);
