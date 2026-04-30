@@ -47,4 +47,7 @@ tools/xngen src/f16-vsqrt/avx512fp16-sqrt.c.in -D BATCH_TILE=128 -o src/f16-vsqr
 tools/xngen src/f16-vsqrt/rvv.c.in -D LMUL=4 -o src/f16-vsqrt/gen/f16-vsqrt-rvvfp16arith-sqrt-u4v.c &
 tools/xngen src/f16-vsqrt/rvv.c.in -D LMUL=8 -o src/f16-vsqrt/gen/f16-vsqrt-rvvfp16arith-sqrt-u8v.c &
 
+################################ WAsmRelaxedSIMD ##############################
+tools/xngen src/f16-vsqrt/simd-sqrt.c.in -D ARCH=wasmrelaxedsimd -D BATCH_TILES=8,16,32 -o src/f16-vsqrt/gen/f16-vsqrt-wasmrelaxedsimd-sqrt.c &
+
 wait

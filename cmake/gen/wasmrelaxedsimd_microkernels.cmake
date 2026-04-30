@@ -135,6 +135,7 @@ SET(NON_PROD_WASMRELAXEDSIMD_MICROKERNEL_SRCS
   src/f16-igemm/gen/f16-igemm-8x16-minmax-wasmrelaxedsimd-splat.c
   src/f16-vcos/gen/f16-vcos-wasmrelaxedsimd-rational-3-2-div.c
   src/f16-vsin/gen/f16-vsin-wasmrelaxedsimd-rational-3-2-div.c
+  src/f16-vsqrt/gen/f16-vsqrt-wasmrelaxedsimd-sqrt.c
   src/f32-dwconv/gen/f32-dwconv-3p4c-minmax-wasmrelaxedsimd-acc2.c
   src/f32-dwconv/gen/f32-dwconv-3p4c-minmax-wasmrelaxedsimd-fma-acc2.c
   src/f32-dwconv/gen/f32-dwconv-3p4c-minmax-wasmrelaxedsimd-fma.c
