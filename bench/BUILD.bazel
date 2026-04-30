@@ -107,6 +107,8 @@ xnnpack_cxx_library(
         "gemm-benchmark.h",
     ],
     deps = MICROKERNEL_BENCHMARK_DEPS + [
+        ":conv",
+        "//:indirection",
         "//:microparams_h",
         "//src/configs:config_hdrs",
         "@com_google_benchmark//:benchmark",
@@ -343,6 +345,7 @@ xnnpack_benchmark(
     tags = xnnpack_slow_benchmark_tags(),
     deps = MICROKERNEL_BENCHMARK_DEPS + [
         ":conv",
+        ":gemm_benchmark",
         "//:indirection",
     ],
 )

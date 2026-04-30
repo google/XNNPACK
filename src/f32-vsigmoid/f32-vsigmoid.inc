@@ -184,6 +184,13 @@ XNN_UKERNEL(xnn_arch_none, xnn_f32_vsigmoid_ukernel__wasmrelaxedsimd_rr2_p5_div_
 XNN_UKERNEL(xnn_arch_none, xnn_f32_vsigmoid_ukernel__wasmrelaxedsimd_rr2_p5_div_u16, 16, false, float, struct xnn_f32_default_params, NULL)
 #endif  // XNN_ARCH_WASMRELAXEDSIMD
 
+#if XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
+XNN_UKERNEL(xnn_arch_riscv_vector, xnn_f32_vsigmoid_ukernel__rvv_rr2_p5_div_u1v, 1, true, float, struct xnn_f32_default_params, NULL)
+XNN_UKERNEL(xnn_arch_riscv_vector, xnn_f32_vsigmoid_ukernel__rvv_rr2_p5_div_u2v, 2, true, float, struct xnn_f32_default_params, NULL)
+XNN_UKERNEL(xnn_arch_riscv_vector, xnn_f32_vsigmoid_ukernel__rvv_rr2_p5_div_u4v, 4, true, float, struct xnn_f32_default_params, NULL)
+XNN_UKERNEL(xnn_arch_riscv_vector, xnn_f32_vsigmoid_ukernel__rvv_rr2_p5_div_u8v, 8, true, float, struct xnn_f32_default_params, NULL)
+#endif  // XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
+
 XNN_UKERNEL(xnn_arch_none, xnn_f32_vsigmoid_ukernel__scalar_rr2_lut64_p2_div_u1, 1, false, float, struct xnn_f32_default_params, NULL)
 XNN_UKERNEL(xnn_arch_none, xnn_f32_vsigmoid_ukernel__scalar_rr2_lut64_p2_div_u2, 2, false, float, struct xnn_f32_default_params, NULL)
 XNN_UKERNEL(xnn_arch_none, xnn_f32_vsigmoid_ukernel__scalar_rr2_lut64_p2_div_u4, 4, false, float, struct xnn_f32_default_params, NULL)

@@ -21,18 +21,10 @@
   pack: xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_u8
   k-block: 4
 
-- name: xnn_f16_gemm_minmax_ukernel_1x16__asm_aarch64_neonfp16arith_ld32
-  init: xnn_init_f16_minmax_scalar_params
-  pack: xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_u8
-  k-block: 2
 - name: xnn_f16_gemm_minmax_ukernel_1x16__asm_aarch64_neonfp16arith_ld64
   init: xnn_init_f16_minmax_scalar_params
   pack: xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_u8
   k-block: 4
-- name: xnn_f16_gemm_minmax_ukernel_4x16__asm_aarch64_neonfp16arith_ld32
-  init: xnn_init_f16_minmax_scalar_params
-  pack: xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_u8
-  k-block: 2
 - name: xnn_f16_gemm_minmax_ukernel_4x16__asm_aarch64_neonfp16arith_ld64
   init: xnn_init_f16_minmax_scalar_params
   pack: xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_u8
@@ -49,10 +41,6 @@
   init: xnn_init_f16_minmax_scalar_params
   pack: xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_u8
   k-block: 4
-- name: xnn_f16_gemm_minmax_ukernel_6x16__asm_aarch64_neonfp16arith_ld32
-  init: xnn_init_f16_minmax_scalar_params
-  pack: xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_u8
-  k-block: 2
 - name: xnn_f16_gemm_minmax_ukernel_6x16__asm_aarch64_neonfp16arith_ld64
   init: xnn_init_f16_minmax_scalar_params
   pack: xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_u8

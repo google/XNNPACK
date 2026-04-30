@@ -33,8 +33,6 @@ void TestImpl(T, size_t rank) {
   std::uniform_int_distribution<size_t> dim_dist(1, 9);
 
   for (auto _ : FuzzTest(std::chrono::milliseconds(250))) {
-    quantization_params quantization = random_quantization(type_of<T>(), rng);
-
     // The broadcast shape is a random shape, with 0s randomly added which pass
     // through the input shape.
     std::vector<size_t> broadcast_shape = random_shape(rng, rank);
@@ -55,8 +53,8 @@ void TestImpl(T, size_t rank) {
 
     // Define subgraph
     SubgraphBuilder subgraph(2);
-    subgraph.AddInput(type_of<T>(), input_rank, 0, quantization)
-        .AddOutput(type_of<T>(), rank, 1, quantization)
+    subgraph.AddInput(type_of<T>(), input_rank, 0)
+        .AddOutput(type_of<T>(), rank, 1)
         .AddBroadcast(broadcast_shape, 0, 1);
 
     Runtime runtime(subgraph.GetSubgraph());
@@ -77,7 +75,7 @@ void TestImpl(T, size_t rank) {
                         input_shape.begin() + rank - input_rank);
 
       Tensor<T> input(input_shape);
-      fill_random(input.data(), input.size(), rng, quantization);
+      fill_random(input.data(), input.size(), rng);
 
       // Check reshaped shape is correct
       runtime.ReshapeExternalTensor(input_shape, input.base(), 0)

@@ -114,7 +114,9 @@ class ModelRuntimeBase {
   bool Invoke() { return xnn_status_success == xnn_invoke_runtime(runtime_); }
 
   virtual void WipeL2Caches(benchmark::State& state) {
-    benchmark::utils::WipePthreadpoolL2Caches(state, /*threadpool=*/nullptr);
+    if (FLAGS_wipe_caches) {
+      benchmark::utils::WipePthreadpoolL2Caches(state, /*threadpool=*/nullptr);
+    }
   }
 
  protected:
@@ -135,7 +137,9 @@ class ModelRuntimePthreadpool : public ModelRuntimeBase {
       : threadpool_(pthreadpool_create(num_threads), pthreadpool_destroy) {}
 
   void WipeL2Caches(benchmark::State& state) override {
-    benchmark::utils::WipePthreadpoolL2Caches(state, threadpool_.get());
+    if (FLAGS_wipe_caches) {
+      benchmark::utils::WipePthreadpoolL2Caches(state, threadpool_.get());
+    }
   }
 
  protected:
@@ -172,8 +176,10 @@ class ModelRuntimeXnnThreadpool : public ModelRuntimeBase {
   }
 
   void WipeL2Caches(benchmark::State& state) override {
-    benchmark::utils::WipeSchedulerL2Caches(
-        state, scheduler_->GetXnnSchedulerV2(), scheduler_->GetContext());
+    if (FLAGS_wipe_caches) {
+      benchmark::utils::WipeSchedulerL2Caches(
+          state, scheduler_->GetXnnSchedulerV2(), scheduler_->GetContext());
+    }
   }
 
  protected:

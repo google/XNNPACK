@@ -36,7 +36,7 @@ cd build/local && cmake ../.. \
 # Cross-platform parallel build
 if [ "$(uname)" == "Darwin" ]
 then
-  cmake --build . -- "-j$((2*$(sysctl -n hw.ncpu)))"
+  cmake --build . -- "-j$(sysctl -n hw.ncpu)"
 else
-  cmake --build . -- "-j$((2*$(nproc)))"
+  cmake --build . -- "-j$(nproc)"
 fi

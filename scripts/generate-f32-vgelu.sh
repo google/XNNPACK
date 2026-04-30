@@ -21,4 +21,14 @@ tools/xngen src/f32-vgelu/rational-12-10.c.in -D ARCH=hvx      -D BATCH_TILES=32
 tools/xngen src/f32-vgelu/rational-12-10.c.in -D ARCH=avx512f  -D BATCH_TILES=16,32,48,64 -D DIV=NR  -o src/f32-vgelu/gen/f32-vgelu-avx512f-rational-12-10-nr.c &
 tools/xngen src/f32-vgelu/rational-12-10.c.in -D ARCH=hvx      -D BATCH_TILES=32,64,128   -D DIV=NR  -o src/f32-vgelu/gen/f32-vgelu-hvx-rational-12-10-nr.c &
 
+################################## RISC-V RVV #################################
+tools/xngen src/f32-vgelu/rvv-rational-12-10.c.in -D LMUL=1 -D DIV=DIV -o src/f32-vgelu/gen/f32-vgelu-rvv-rational-12-10-div-u1v.c &
+tools/xngen src/f32-vgelu/rvv-rational-12-10.c.in -D LMUL=2 -D DIV=DIV -o src/f32-vgelu/gen/f32-vgelu-rvv-rational-12-10-div-u2v.c &
+tools/xngen src/f32-vgelu/rvv-rational-12-10.c.in -D LMUL=4 -D DIV=DIV -o src/f32-vgelu/gen/f32-vgelu-rvv-rational-12-10-div-u4v.c &
+tools/xngen src/f32-vgelu/rvv-rational-12-10.c.in -D LMUL=8 -D DIV=DIV -o src/f32-vgelu/gen/f32-vgelu-rvv-rational-12-10-div-u8v.c &
+tools/xngen src/f32-vgelu/rvv-rational-12-10.c.in -D LMUL=1 -D DIV=NR  -o src/f32-vgelu/gen/f32-vgelu-rvv-rational-12-10-nr-u1v.c &
+tools/xngen src/f32-vgelu/rvv-rational-12-10.c.in -D LMUL=2 -D DIV=NR  -o src/f32-vgelu/gen/f32-vgelu-rvv-rational-12-10-nr-u2v.c &
+tools/xngen src/f32-vgelu/rvv-rational-12-10.c.in -D LMUL=4 -D DIV=NR  -o src/f32-vgelu/gen/f32-vgelu-rvv-rational-12-10-nr-u4v.c &
+tools/xngen src/f32-vgelu/rvv-rational-12-10.c.in -D LMUL=8 -D DIV=NR  -o src/f32-vgelu/gen/f32-vgelu-rvv-rational-12-10-nr-u8v.c &
+
 wait

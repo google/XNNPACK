@@ -65,3 +65,10 @@ XNN_UKERNEL(xnn_arch_none, xnn_f32_vapproxgelu_ukernel__wasmsimd_rational_12_10_
 XNN_UKERNEL(xnn_arch_none, xnn_f32_vapproxgelu_ukernel__wasmsimd_rational_12_10_div_u12, 12, false, float, struct xnn_f32_default_params, NULL)
 XNN_UKERNEL(xnn_arch_none, xnn_f32_vapproxgelu_ukernel__wasmsimd_rational_12_10_div_u16, 16, false, float, struct xnn_f32_default_params, NULL)
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+
+#if XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
+XNN_UKERNEL(xnn_arch_riscv_vector, xnn_f32_vapproxgelu_ukernel__rvv_rational_12_10_div_u1v, 1, true, float, struct xnn_f32_default_params, NULL)
+XNN_UKERNEL(xnn_arch_riscv_vector, xnn_f32_vapproxgelu_ukernel__rvv_rational_12_10_div_u2v, 2, true, float, struct xnn_f32_default_params, NULL)
+XNN_UKERNEL(xnn_arch_riscv_vector, xnn_f32_vapproxgelu_ukernel__rvv_rational_12_10_div_u4v, 4, true, float, struct xnn_f32_default_params, NULL)
+XNN_UKERNEL(xnn_arch_riscv_vector, xnn_f32_vapproxgelu_ukernel__rvv_rational_12_10_div_u8v, 8, true, float, struct xnn_f32_default_params, NULL)
+#endif  // XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR

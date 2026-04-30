@@ -207,6 +207,10 @@ YNN_ALWAYS_INLINE vec<T, N> floor(vec<T, N> a) {
   return {floor(a.lo()), floor(a.hi())};
 }
 template <typename T, size_t N>
+YNN_ALWAYS_INLINE vec<T, N> floor_log2(vec<T, N> a) {
+  return {floor_log2(a.lo()), floor_log2(a.hi())};
+}
+template <typename T, size_t N>
 YNN_ALWAYS_INLINE vec<T, N> ceil(vec<T, N> a) {
   return {ceil(a.lo()), ceil(a.hi())};
 }
@@ -259,14 +263,14 @@ YNN_ALWAYS_INLINE vec<To, N> cast(vec<From, N> from, To) {
 
 template <typename To, typename From, size_t N>
 YNN_ALWAYS_INLINE vec<To, N> saturate_cast(vec<From, N> from, To) {
-  return {saturate_cast(from.lo(), To()),
-          saturate_cast(from.hi(), To())};
+  return {saturate_cast(from.lo(), To{}),
+          saturate_cast(from.hi(), To{})};
 }
 
 template <typename To, typename From, size_t N>
 YNN_ALWAYS_INLINE vec<To, N> round_float_to_int(vec<From, N> from, To) {
-  return {round_float_to_int(from.lo(), To()),
-          round_float_to_int(from.hi(), To())};
+  return {round_float_to_int(from.lo(), To{}),
+          round_float_to_int(from.hi(), To{})};
 }
 
 template <typename T, size_t N>

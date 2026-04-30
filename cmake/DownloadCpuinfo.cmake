@@ -18,8 +18,8 @@ ENDIF()
 # LINT.IfChange
 INCLUDE(ExternalProject)
 ExternalProject_Add(cpuinfo
-  URL https://github.com/pytorch/cpuinfo/archive/7364b490b5f78d58efe23ea76e74210fd6c3c76f.zip
-  URL_HASH SHA256=45807bf49ac57cabef37271053be3372415ca25d9648da366e7d41620a077c9c
+  URL https://github.com/pytorch/cpuinfo/archive/bc3c01e230c6974283e4b89421cfb0e232435589.zip
+  URL_HASH SHA256=995316f224247d1611ab1b624a66bc5cbd5b5d2e5ce991ed68d983aac950ad8b
   SOURCE_DIR "${CMAKE_BINARY_DIR}/cpuinfo-source"
   BINARY_DIR "${CMAKE_BINARY_DIR}/cpuinfo"
   CONFIGURE_COMMAND ""

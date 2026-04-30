@@ -54,11 +54,11 @@ def main(argv: Sequence[str]) -> None:
       ],
       "arm_neon": [
           (quantize_fp32_to_int8, (16, 1)),
-          (multiply_fp32_fp32_fp32, (8, 1)),
-          (multiply_int32_fp32_fp32, (8, 1)),
+          (multiply_fp32_fp32_fp32, (32, 1)),
+          (multiply_int32_fp32_fp32, (64, 1)),
           (subtract_multiply_int32_int32_int32, (8, 1)),
-          (multiply_add_fp32_fp32_fp32, (8, 1)),
-          (clamp_fp32_fp32_fp32, (8, 1)),
+          (multiply_add_fp32_fp32_fp32, (32, 1)),
+          (clamp_fp32_fp32_fp32, (32, 1)),
       ],
       "wasm_simd128": [
           (quantize_fp32_to_int8, (16, 1)),

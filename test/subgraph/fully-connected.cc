@@ -500,10 +500,8 @@ TEST(FullyConnectedQU8, static_b) { TestStaticB<quint8, quint8, qint32>(); }
 #endif  // XNNPACK_USE_YNNPACK
 
 TEST(FullyConnectedQS8QC8W, static_b) { TestStaticB<qint8, qcint8, qcint32>(); }
-#ifndef XNNPACK_USE_YNNPACK
 TEST(FullyConnectedQS8QC4W, static_b) { TestStaticB<qint8, qcint4, qcint32>(); }
 TEST(FullyConnectedQS8QC2W, static_b) { TestStaticB<qint8, qcint2, qcint32>(); }
-#endif  // XNNPACK_USE_YNNPACK
 
 TEST(FullyConnectedF16F32F16, static_b) {
   TestStaticB<xnn_float16, float, float>();
@@ -762,6 +760,49 @@ TEST(FullyConnectedF16, dynamic_b) {
 TEST(FullyConnectedF32, dynamic_b) {
   TestDynamicB<float, float, float, float>();
 }
+
+#ifndef XNNPACK_USE_YNNPACK
+TEST(FullyConnectedQS8, filter_zero_point_must_be_zero) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
+
+  xnn_subgraph_t subgraph = nullptr;
+  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(3, 0, &subgraph));
+
+  const size_t input_dims[] = {1, 4};
+  uint32_t input_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_quantized_tensor_value(
+                subgraph, xnn_datatype_qint8, /*zero_point=*/0,
+                /*scale=*/0.75f, /*num_dims=*/2, input_dims,
+                /*data=*/nullptr, /*external_id=*/0,
+                XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id));
+
+  const size_t filter_dims[] = {3, 4};
+  int8_t filter_data[12] = {};
+  uint32_t filter_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_quantized_tensor_value(
+                subgraph, xnn_datatype_qint8, /*zero_point=*/1,
+                /*scale=*/0.5f, /*num_dims=*/2, filter_dims, filter_data,
+                XNN_INVALID_VALUE_ID, /*flags=*/0, &filter_id));
+
+  const size_t output_dims[] = {1, 3};
+  uint32_t output_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_quantized_tensor_value(
+                subgraph, xnn_datatype_qint8, /*zero_point=*/0,
+                /*scale=*/0.25f, /*num_dims=*/2, output_dims,
+                /*data=*/nullptr, /*external_id=*/1,
+                XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
+
+  ASSERT_EQ(xnn_status_invalid_parameter,
+            xnn_define_fully_connected(
+                subgraph, -128.0f, 127.0f, input_id, filter_id,
+                XNN_INVALID_VALUE_ID, output_id, /*flags=*/0));
+
+  xnn_delete_subgraph(subgraph);
+}
+#endif  // XNNPACK_USE_YNNPACK
 
 // Regression test: fully-connected with a zero-dimensional input must not
 // cause a heap-buffer-overflow via unsigned underflow on num_dims - 1.

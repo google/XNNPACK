@@ -203,20 +203,19 @@ static XNN_INLINE xnn_simd_f32_t xnn_round_f32(xnn_simd_f32_t a) {
   const xnn_simd_f32_t vfilter =
       vreinterpretq_f32_u32(vcaltq_f32(a, vmax_non_int_val));
 
-  // Create a vector of `0.5f` with the same sign as the entries of `a`.
-  XNN_SIMD_CONST_F32(vhalf, 0.5f);
+  // Round to nearest even using the magic number trick.
+  XNN_SIMD_CONST_F32(vmagic, 12582912.0f);  // 1.5 * 2^23
   XNN_SIMD_CONST_F32(vsign_mask, -0.0f);
-  const xnn_simd_f32_t vsigned_half =
-      xnn_or_f32(xnn_and_f32(a, vsign_mask), vhalf);
-  const xnn_simd_f32_t vresult =
-      vcvtq_f32_s32(vcvtq_s32_f32(xnn_add_f32(a, vsigned_half)));
+  const xnn_simd_f32_t vabs_a = xnn_abs_f32(a);
+  const xnn_simd_f32_t vround = xnn_sub_f32(xnn_add_f32(vabs_a, vmagic), vmagic);
+  const xnn_simd_f32_t vresult = xnn_or_f32(vround, xnn_and_f32(a, vsign_mask));
 
   // Apply the non-finite value filter to replace any non-finite input with `a`.
   return xnn_or_f32(xnn_and_f32(vfilter, vresult),
                     xnn_and_f32(xnn_not_f32(vfilter), a));
 #else
   return vrndnq_f32(a);
-#endif  // defined(__ARM_ARCH) && __ARM_ARCH == 7
+#endif  // defined(__ARM_ARCH) && __ARM_ARCH < 8
 }
 
 // Special functions.

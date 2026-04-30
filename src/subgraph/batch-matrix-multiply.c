@@ -10,7 +10,6 @@
 #include <string.h>
 
 #include "include/xnnpack.h"
-#include "src/xnnpack/allocation-type.h"
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/internal.h"
 #include "src/xnnpack/log.h"
@@ -156,10 +155,16 @@ static enum xnn_status create_batch_matrix_multiply_operator(
     case xnn_datatype_qdint8: {
       switch (input_b_datatype) {
         case xnn_datatype_qcint8:
-          status = xnn_create_batch_matrix_multiply_nc_qd8_f32_qc8w(
-              batch_size_b, k, n, input_b->data,
-              input_b->quantization.channelwise_scale, node->flags,
-              &opdata->operator_objects[0]);
+          if (xnn_value_is_static(input_b->allocation_type)) {
+            status =
+                xnn_create_batch_matrix_multiply_nc_qd8_f32_qc8w_const_weights(
+                  batch_size_b, k, n, input_b->data,
+                  input_b->quantization.channelwise_scale, node->flags,
+                  &opdata->operator_objects[0]);
+          } else {
+            status = xnn_create_batch_matrix_multiply_nc_qd8_f32_qc8w(
+                node->flags, &opdata->operator_objects[0]);
+          }
           break;
         default:
           XNN_UNREACHABLE;
@@ -169,10 +174,16 @@ static enum xnn_status create_batch_matrix_multiply_operator(
     case xnn_datatype_qpint8: {
       switch (input_b_datatype) {
         case xnn_datatype_qcint8:
-          status = xnn_create_batch_matrix_multiply_nc_qp8_f32_qc8w(
-              batch_size_b, k, n, input_b->data,
-              input_b->quantization.channelwise_scale, node->flags,
-              &opdata->operator_objects[0]);
+          if (xnn_value_is_static(input_b->allocation_type)) {
+            status =
+                xnn_create_batch_matrix_multiply_nc_qp8_f32_qc8w_const_weights(
+                  batch_size_b, k, n, input_b->data,
+                  input_b->quantization.channelwise_scale, node->flags,
+                  &opdata->operator_objects[0]);
+          } else {
+            status = xnn_create_batch_matrix_multiply_nc_qp8_f32_qc8w(
+                node->flags, &opdata->operator_objects[0]);
+          }
           break;
         default:
           XNN_UNREACHABLE;
@@ -182,10 +193,16 @@ static enum xnn_status create_batch_matrix_multiply_operator(
     case xnn_datatype_qduint8: {
       switch (input_b_datatype) {
         case xnn_datatype_qcint8:
-          status = xnn_create_batch_matrix_multiply_nc_qdu8_f32_qc8w(
-              batch_size_b, k, n, input_b->data,
-              input_b->quantization.channelwise_scale, node->flags,
-              &opdata->operator_objects[0]);
+          if (xnn_value_is_static(input_b->allocation_type)) {
+            status =
+                xnn_create_batch_matrix_multiply_nc_qdu8_f32_qc8w_const_weights(
+                  batch_size_b, k, n, input_b->data,
+                  input_b->quantization.channelwise_scale, node->flags,
+                  &opdata->operator_objects[0]);
+          } else {
+            status = xnn_create_batch_matrix_multiply_nc_qdu8_f32_qc8w(
+                node->flags, &opdata->operator_objects[0]);
+          }
           break;
         default:
           XNN_UNREACHABLE;
@@ -355,19 +372,43 @@ static enum xnn_status reshape_batch_matrix_multiply_operator(
           padded_dims_b, m, k, n, &opdata->workspace_size, threadpool);
       break;
     case xnn_operator_type_batch_matrix_multiply_nc_qd8_f32_qc8w:
-      status = xnn_reshape_batch_matrix_multiply_nc_qd8_f32_qc8w(
-          opdata->operator_objects[0], num_batch_dims, padded_dims_a,
-          padded_dims_b, m, k, n, &opdata->workspace_size, threadpool);
+      if (xnn_value_is_static(input_b->allocation_type)) {
+        status =
+            xnn_reshape_batch_matrix_multiply_nc_qd8_f32_qc8w_const_weights(
+                opdata->operator_objects[0], num_batch_dims, padded_dims_a,
+                padded_dims_b, m, k, n, &opdata->workspace_size, threadpool);
+      } else {
+        status = xnn_reshape_batch_matrix_multiply_nc_qd8_f32_qc8w(
+            opdata->operator_objects[0], num_batch_dims, padded_dims_a,
+            padded_dims_b, m, k, n, input_b->quantization.channelwise_scale,
+            &opdata->workspace_size, threadpool);
+      }
       break;
     case xnn_operator_type_batch_matrix_multiply_nc_qp8_f32_qc8w:
-      status = xnn_reshape_batch_matrix_multiply_nc_qp8_f32_qc8w(
-          opdata->operator_objects[0], num_batch_dims, padded_dims_a,
-          padded_dims_b, m, k, n, &opdata->workspace_size, threadpool);
+      if (xnn_value_is_static(input_b->allocation_type)) {
+        status =
+            xnn_reshape_batch_matrix_multiply_nc_qp8_f32_qc8w_const_weights(
+                opdata->operator_objects[0], num_batch_dims, padded_dims_a,
+                padded_dims_b, m, k, n, &opdata->workspace_size, threadpool);
+      } else {
+        status = xnn_reshape_batch_matrix_multiply_nc_qp8_f32_qc8w(
+            opdata->operator_objects[0], num_batch_dims, padded_dims_a,
+            padded_dims_b, m, k, n, input_b->quantization.channelwise_scale,
+            &opdata->workspace_size, threadpool);
+      }
       break;
     case xnn_operator_type_batch_matrix_multiply_nc_qdu8_f32_qc8w:
-      status = xnn_reshape_batch_matrix_multiply_nc_qdu8_f32_qc8w(
-          opdata->operator_objects[0], num_batch_dims, padded_dims_a,
-          padded_dims_b, m, k, n, &opdata->workspace_size, threadpool);
+      if (xnn_value_is_static(input_b->allocation_type)) {
+        status =
+            xnn_reshape_batch_matrix_multiply_nc_qdu8_f32_qc8w_const_weights(
+                opdata->operator_objects[0], num_batch_dims, padded_dims_a,
+                padded_dims_b, m, k, n, &opdata->workspace_size, threadpool);
+      } else {
+        status = xnn_reshape_batch_matrix_multiply_nc_qdu8_f32_qc8w(
+            opdata->operator_objects[0], num_batch_dims, padded_dims_a,
+            padded_dims_b, m, k, n, input_b->quantization.channelwise_scale,
+            &opdata->workspace_size, threadpool);
+      }
       break;
     case xnn_operator_type_batch_matrix_multiply_nc_qs8:
       if (xnn_value_is_static(input_b->allocation_type)) {
@@ -587,13 +628,9 @@ enum xnn_status xnn_define_batch_matrix_multiply(xnn_subgraph_t subgraph,
     case xnn_datatype_qcint8:
       // Check that `input2` is static, which is required for this variant.
       if (!xnn_value_is_static(input2_value->allocation_type)) {
-        xnn_log_error(
-            "failed to define %s operator with input ID #%" PRIu32
-            ": %s input must be static (got %s)",
-            xnn_node_type_to_string(xnn_node_type_batch_matrix_multiply),
-            input2_id, xnn_datatype_to_string(input2_value->datatype),
-            xnn_allocation_type_to_string(input2_value->allocation_type));
-        return xnn_status_invalid_parameter;
+        xnn_log_warning(
+            "Non static %s input might lead to suboptimal performance",
+            xnn_node_type_to_string(xnn_node_type_batch_matrix_multiply));
       }
       break;
     default:

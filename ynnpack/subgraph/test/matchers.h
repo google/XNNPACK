@@ -185,9 +185,36 @@ MATCHER_P(IsStencilCopy, stencils, "") {
   return true;
 }
 
+MATCHER(IsExpandDims, "") {
+  const ynn_node::static_expand_dims* expand_dims =
+      std::get_if<ynn_node::static_expand_dims>(&arg.op);
+  return expand_dims != nullptr;
+}
+
 MATCHER(IsCopy, "") {
   const ynn_node::copy* copy = std::get_if<ynn_node::copy>(&arg.op);
   return copy != nullptr;
+}
+
+// Checks that the given node is a quantize.
+//
+// Example:
+//   EXPECT_THAT(ProducerOf(y_id, subgraph), IsQuantize());
+MATCHER(IsQuantize, "") {
+  const ynn_node::ternary_elementwise* ternary =
+      std::get_if<ynn_node::ternary_elementwise>(&arg.op);
+  return ternary && (ternary->op == ternary_op::quantize_int8 ||
+                     ternary->op == ternary_op::quantize_uint8);
+}
+
+// Checks that the given node is a dequantize.
+//
+// Example:
+//   EXPECT_THAT(ProducerOf(y_id, subgraph), IsDequantize());
+MATCHER(IsDequantize, "") {
+  return std::get_if<ynn_node::ternary_elementwise>(&arg.op) &&
+         std::get<ynn_node::ternary_elementwise>(arg.op).op ==
+             ternary_op::dequantize;
 }
 
 // Checks that the given node is a dequantize_dot.
@@ -204,6 +231,12 @@ MATCHER(IsRescaleDot, "") {
 //   EXPECT_THAT(ProducerOf(y_id, subgraph), IsDot());
 MATCHER(IsDot, "") { return std::holds_alternative<ynn_node::dot>(arg.op); }
 
+// Checks that the given node is an iota.
+//
+// Example:
+//   EXPECT_THAT(ProducerOf(y_id, subgraph), IsIota());
+MATCHER(IsIota, "") { return std::holds_alternative<ynn_node::iota>(arg.op); }
+
 // Checks that the given node is a broadcast_like.
 //
 // Example:
@@ -213,6 +246,15 @@ MATCHER(IsBroadcastLike, "") {
 }
 MATCHER(IsStaticBroadcast, "") {
   return std::holds_alternative<ynn_node::static_broadcast>(arg.op);
+}
+MATCHER(IsStaticReshape, "") {
+  return std::holds_alternative<ynn_node::static_reshape>(arg.op);
+}
+MATCHER(IsStaticExpandDims, "") {
+  return std::holds_alternative<ynn_node::static_expand_dims>(arg.op);
+}
+MATCHER(IsStaticSlice, "") {
+  return std::holds_alternative<ynn_node::static_slice>(arg.op);
 }
 
 // Checks that the given value ID is valid in the given subgraph.
@@ -224,7 +266,7 @@ MATCHER_P(HasValidValueId, value_id, "") {
   if (subgraph == nullptr) {
     return false;
   }
-  if (!subgraph->value(value_id).is_valid()) {
+  if (!subgraph->is_valid_value(value_id)) {
     *result_listener << "value " << value_id << " is invalid";
     return false;
   }
@@ -240,7 +282,7 @@ MATCHER_P(IsValidValueIn, subgraph, "") {
   if (s == nullptr) {
     return false;
   }
-  if (!s->value(arg).is_valid()) {
+  if (!s->is_valid_value(arg)) {
     *result_listener << "value " << arg << " is invalid";
     return false;
   }

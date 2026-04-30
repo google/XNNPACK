@@ -129,6 +129,8 @@ vec<T, N> max(vec<T, N> a, vec<T, N> b);
 template <typename T, size_t N>
 vec<T, N> floor(vec<T, N> a);
 template <typename T, size_t N>
+vec<T, N> floor_log2(vec<T, N> a);
+template <typename T, size_t N>
 vec<T, N> ceil(vec<T, N> a);
 template <typename T, size_t N>
 vec<T, N> round(vec<T, N> a);
@@ -149,18 +151,18 @@ template <int Index, typename T, size_t N, typename SliceN>
 auto extract(vec<T, N>, SliceN);
 
 template <typename To, typename From, size_t N>
-vec<To, N> cast(vec<From, N> from, To);
+vec<To, N> cast(vec<From, N> from, To = {});
 
 template <typename To, typename From, size_t N>
-vec<To, N> saturate_cast(vec<From, N> from, To);
+vec<To, N> saturate_cast(vec<From, N> from, To = {});
 
 template <typename T, size_t N>
-YNN_ALWAYS_INLINE vec<T, N> saturate_cast(vec<T, N> from, T) {
+YNN_ALWAYS_INLINE vec<T, N> saturate_cast(vec<T, N> from, T = {}) {
   return from;
 }
 
 template <typename To, typename From, size_t N>
-vec<To, N> round_float_to_int(vec<From, N> from, To);
+vec<To, N> round_float_to_int(vec<From, N> from, To = {});
 
 namespace internal {
 
@@ -312,6 +314,10 @@ YNN_ALWAYS_INLINE vec<T, 1> add_sat(vec<T, 1> a, vec<T, 1> b) {
 template <typename T>
 YNN_ALWAYS_INLINE vec<T, 1> sub_sat(vec<T, 1> a, vec<T, 1> b) {
   return vec<T, 1>{sub_sat(a.v, b.v)};
+}
+template <typename T>
+YNN_ALWAYS_INLINE vec<T, 1> floor_log2(vec<T, 1> a) {
+  return vec<T, 1>{floor_log2(a.v)};
 }
 
 template <typename To, typename From>

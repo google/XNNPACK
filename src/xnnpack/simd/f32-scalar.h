@@ -89,7 +89,7 @@ static XNN_INLINE xnn_simd_f32_t xnn_abs_f32(xnn_simd_f32_t a) {
 static XNN_INLINE xnn_simd_f32_t xnn_neg_f32(xnn_simd_f32_t a) { return -a; }
 
 static XNN_INLINE xnn_simd_f32_t xnn_round_f32(xnn_simd_f32_t a) {
-  return roundf(a);
+  return rintf(a);
 }
 
 // Logical operations.

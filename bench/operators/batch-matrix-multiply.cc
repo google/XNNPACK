@@ -169,7 +169,7 @@ void xnnpack_batch_matrix_multiply_qd8_f32_qc8w(benchmark::State& state,
   xnn_operator_t op;
 
   uint32_t flags = transpose_b ? XNN_FLAG_TRANSPOSE_B : 0;
-  status = xnn_create_batch_matrix_multiply_nc_qd8_f32_qc8w(
+  status = xnn_create_batch_matrix_multiply_nc_qd8_f32_qc8w_const_weights(
       batch_size, k, n, input2.data(), channelwise_scales.data(), flags, &op);
   if (status != xnn_status_success) {
     state.SkipWithError(
@@ -180,7 +180,7 @@ void xnnpack_batch_matrix_multiply_qd8_f32_qc8w(benchmark::State& state,
   pthreadpool_t threadpool = pthreadpool_create(num_threads);
 
   size_t workspace_size = 0;
-  status = xnn_reshape_batch_matrix_multiply_nc_qd8_f32_qc8w(
+  status = xnn_reshape_batch_matrix_multiply_nc_qd8_f32_qc8w_const_weights(
       op, /*num_batch_dims=*/1, /*batch_dims_a=*/&batch_size,
       /*batch_dims_b=*/&batch_size, m, k, n, &workspace_size, threadpool);
 

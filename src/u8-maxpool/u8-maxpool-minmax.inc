@@ -17,6 +17,8 @@ XNN_UKERNEL(xnn_arch_x86_sse2, xnn_u8_maxpool_minmax_ukernel_9p__sse2_u16, 16, 9
 XNN_UKERNEL(xnn_arch_none, xnn_u8_maxpool_minmax_ukernel_9p__wasmsimd_u16, 16, 9, uint8_t, struct xnn_u8_minmax_params, xnn_init_u8_minmax_scalar_params)
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
+#if XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
+XNN_UKERNEL(xnn_arch_riscv_vector, xnn_u8_maxpool_minmax_ukernel_9p__rvv_u2v, (2*xnn_init_hardware_config()->vlenb/sizeof(uint8_t)), 9, uint8_t, struct xnn_u8_minmax_params, xnn_init_u8_minmax_scalar_params)
+#endif  // XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
+
 XNN_UKERNEL(xnn_arch_none, xnn_u8_maxpool_minmax_ukernel_9p__scalar_u1, 1, 9, uint8_t, struct xnn_u8_minmax_params, xnn_init_u8_minmax_scalar_params)
-
-

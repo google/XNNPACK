@@ -68,3 +68,9 @@ XNN_UKERNEL(xnn_arch_arm_neon, xnn_f32_vcos_ukernel__neon_rational_5_4_nr_u12, 1
 XNN_UKERNEL(xnn_arch_arm_neon, xnn_f32_vcos_ukernel__neon_rational_5_4_nr_u16, 16, false, float, struct xnn_f32_default_params, NULL)
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
+#if XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
+XNN_UKERNEL(xnn_arch_riscv_vector, xnn_f32_vcos_ukernel__rvv_rational_5_4_div_u1v, 1, true, float, struct xnn_f32_default_params, NULL)
+XNN_UKERNEL(xnn_arch_riscv_vector, xnn_f32_vcos_ukernel__rvv_rational_5_4_div_u2v, 2, true, float, struct xnn_f32_default_params, NULL)
+XNN_UKERNEL(xnn_arch_riscv_vector, xnn_f32_vcos_ukernel__rvv_rational_5_4_div_u4v, 4, true, float, struct xnn_f32_default_params, NULL)
+XNN_UKERNEL(xnn_arch_riscv_vector, xnn_f32_vcos_ukernel__rvv_rational_5_4_div_u8v, 8, true, float, struct xnn_f32_default_params, NULL)
+#endif  // XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR

@@ -36,9 +36,6 @@ void TestLut() {
     const size_t max_dim = static_cast<size_t>(std::ceil(
         std::pow(static_cast<double>(max_size),
                  1.0 / static_cast<double>(std::max<size_t>(1, rank)))));
-    quantization_params a_quantization = random_quantization(A(), rng);
-    quantization_params output_quantization = random_quantization(X(), rng);
-
     std::vector<X> lut_data(256);
     std::uniform_int_distribution<int> lut_dist(std::numeric_limits<X>::min(),
                                                 std::numeric_limits<X>::max());
@@ -50,8 +47,8 @@ void TestLut() {
     uint32_t output_id = 1;
     uint32_t lut_id = YNN_INVALID_VALUE_ID;
 
-    subgraph.AddInput(type_of<A>(), rank, input_id, a_quantization)
-        .AddOutput(type_of<X>(), rank, output_id, output_quantization)
+    subgraph.AddInput(type_of<A>(), rank, input_id)
+        .AddOutput(type_of<X>(), rank, output_id)
         .AddTensor(type_of<X>(), {256}, lut_id, lut_data.data());
 
     ASSERT_EQ(

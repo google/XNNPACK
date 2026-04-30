@@ -94,9 +94,8 @@ void TestReduce(AT, CT, ynn_reduce_operator op, size_t n, size_t k3, size_t k2,
 
     Tensor<CT> kernel_c = init_c.deep_copy();
 
-    kernel.kernel(n, k3, k2, k1, a.stride(0) * sizeof(AT),
-                  a.stride(1) * sizeof(AT), a.stride(2) * sizeof(AT), a.base(),
-                  0, kernel_c.base());
+    kernel.kernel(n, k3, k2, k1, a.stride_bytes(0), a.stride_bytes(1),
+                  a.stride_bytes(2), a.base(), 0, kernel_c.base());
 
     if (c.base()) {
       int finite = 0;

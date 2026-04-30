@@ -14,10 +14,13 @@
 #include <cstring>
 #include <type_traits>
 
+#include "ynnpack/base/arch.h"
 #include "ynnpack/base/arithmetic.h"
+#include "ynnpack/base/base.h"
 #include "ynnpack/base/bfloat16.h"
 #include "ynnpack/base/half.h"
 #include "ynnpack/base/log.h"
+#include "ynnpack/base/type.h"
 #include "ynnpack/include/ynnpack.h"
 
 namespace ynn {
@@ -33,22 +36,33 @@ void unary_impl(size_t m, size_t n, size_t stride_x, const void* vx,
   auto x = reinterpret_cast<const TIn*>(vx);
   auto y = reinterpret_cast<TOut*>(vy);
 
+  constexpr size_t unroll = std::max(type_info<TIn>::element_count(),
+                                     type_info<TOut>::element_count());
+
+  assert(n % unroll == 0);
+
   Operator op(*params);
   for (size_t i = 0; i < m; ++i) {
-    for (size_t j = 0; j < n; ++j) {
-      y[j] = static_cast<TOut>(op(x[j]));
+    for (size_t j = 0; j < n; j += unroll) {
+      YNN_UNROLL
+      for (size_t ji = 0; ji < unroll; ++ji) {
+        auto y_j = static_cast<TOut>(op(type_info<TIn>::get(x, j + ji)));
+        type_info<TOut>::set(y, j + ji, y_j);
+      }
     }
     x = offset_bytes(x, stride_x);
     y = offset_bytes(y, stride_y);
   }
 }
 
-template <typename TIn, typename TOut>
+template <typename TOut>
 struct convert_op {
   explicit convert_op(const unary_params& = {}) {}
+
+  template <typename TIn>
   TOut operator()(TIn x) const {
-    if constexpr (std::is_integral<TOut>::value) {
-      if constexpr (std::is_integral<TIn>::value) {
+    if constexpr (is_integral<TOut>::value) {
+      if constexpr (is_integral<TIn>::value) {
         return saturate_cast<TOut>(x);
       } else {
         return round_float_to_int<TOut>(x);
@@ -57,21 +71,16 @@ struct convert_op {
       return static_cast<TOut>(x);
     }
   }
-};
 
-#if XNN_HAVE_FLOAT16
-template <>
-struct convert_op<bfloat16, _Float16> {
-  explicit convert_op(const unary_params& = {}) {}
-  _Float16 operator()(bfloat16 x) const {
-    return static_cast<_Float16>(static_cast<float>(x));
+  // We need to give the compiler a little help for bf16 -> fp16
+  TOut operator()(bfloat16 x) const {
+    return operator()(static_cast<float>(x));
   }
 };
-#endif
 
 template <typename TIn, typename TOut>
 unary_kernel_fn get_convert_kernel(TIn, TOut) {
-  return unary_impl<TIn, TOut, convert_op<TIn, TOut>>;
+  return unary_impl<TIn, TOut, convert_op<TOut>>;
 }
 
 template <typename TIn>
@@ -155,8 +164,13 @@ struct reciprocal_square_root_op {
 };
 
 struct log_op {
-  explicit log_op(const unary_params& = {}) {}
-  float operator()(float x) const { return std::log(x); }
+  log_params params;
+
+  explicit log_op(const unary_params& params) : params(params.log) {}
+  float operator()(float x) const {
+    return std::log2(x * params.input_multiplier / std::sqrt(2.0f)) *
+           params.output_multiplier;
+  }
 };
 
 struct log1p_op {
@@ -316,6 +330,10 @@ unary_kernel_fn get_convert_reference_kernel(ynn_type a_type, ynn_type x_type) {
       return get_convert_kernel<uint8_t>(x_type);
     case ynn_type_int32:
       return get_convert_kernel<int32_t>(x_type);
+    case ynn_type_int4:
+      return get_convert_kernel<int4x2>(x_type);
+    case ynn_type_int2:
+      return get_convert_kernel<int2x4>(x_type);
     default:
       return nullptr;
   }
@@ -329,7 +347,7 @@ unary_kernel_fn get_unary_kernel(ynn_unary_operator op, ynn_type a_type,
   if (a_type == type_of<type_a>() && x_type == type_of<type_x>() && \
       op == ynn_unary_##op_type &&                                  \
       is_arch_supported(arch, supported_arch_flags)) {              \
-    YNN_LOG_INFO() << "Using unary kernel " << #name;               \
+    YNN_LOG_DEBUG() << "Using unary kernel " << #name;              \
     return &name;                                                   \
   }
 
@@ -355,6 +373,13 @@ unary_params get_unary_params(ynn_unary_operator op) {
               ._ = 0.0f,
               .output_multiplier = 1.0f,
               .input_multiplier = static_cast<float>(std::log2(std::exp(1.0))),
+          }};
+    case ynn_unary_log:
+      return unary_params{
+          .log = log_params{
+              ._ = 0.0f,
+              .output_multiplier = static_cast<float>(std::log(2.0)),
+              .input_multiplier = 1.4142134190e+00f,  // sqrt(2)
           }};
     case ynn_unary_erf:
       return unary_params{.erf = erf_params{.output_offset = 0.0f,

@@ -80,17 +80,14 @@ c_{i+0}_{j} = vcombine_f32(vget_low_f32({c0}), vget_low_f32({c1}));
 generate_dot_kernels(
     arm_neonbf16_bf16_bf16_fp32_k4(),
     [
-        # Unrolling these by 2x in k enables using ldp for the LHS, so far
-        # experiments do not seem to show much benefit from this, but it seems
-        # like it should help.
         (2, 32, 4),
         (4, 16, 4),
         (6, 16, 4),
-        (6, 8, 4),
-        (8, 8, 4),
-        (10, 8, 4),
-        (16, 4, 4),
+        # These are faster if we unroll k by 2x so we can use ldp when loading
+        # from A, but not the kernels above...
+        (6, 8, 8),
+        (8, 8, 8),
+        (10, 8, 8),
+        (16, 4, 8),
     ],
-    # TODO: b/493642397 - This kernel doesn't build with msan
-    build_predicate="!defined(MEMORY_SANITIZER)",
 )

@@ -128,6 +128,13 @@ XNN_UKERNEL(xnn_arch_none, xnn_f32_velu_ukernel__wasmrelaxedsimd_rr2_p6_u12, 12,
 XNN_UKERNEL(xnn_arch_none, xnn_f32_velu_ukernel__wasmrelaxedsimd_rr2_p6_u16, 16, false, float, struct xnn_f32_elu_params, xnn_init_f32_elu_scalar_params)
 #endif  // XNN_ARCH_WASMRELAXEDSIMD
 
+#if XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
+XNN_UKERNEL(xnn_arch_riscv_vector, xnn_f32_velu_ukernel__rvv_rr2_p6_u1v, 1, true, float, struct xnn_f32_elu_params, xnn_init_f32_elu_scalar_params)
+XNN_UKERNEL(xnn_arch_riscv_vector, xnn_f32_velu_ukernel__rvv_rr2_p6_u2v, 2, true, float, struct xnn_f32_elu_params, xnn_init_f32_elu_scalar_params)
+XNN_UKERNEL(xnn_arch_riscv_vector, xnn_f32_velu_ukernel__rvv_rr2_p6_u4v, 4, true, float, struct xnn_f32_elu_params, xnn_init_f32_elu_scalar_params)
+XNN_UKERNEL(xnn_arch_riscv_vector, xnn_f32_velu_ukernel__rvv_rr2_p6_u8v, 8, true, float, struct xnn_f32_elu_params, xnn_init_f32_elu_scalar_params)
+#endif  // XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
+
 XNN_UKERNEL(xnn_arch_none, xnn_f32_velu_ukernel__scalar_rr2_lut16_p3_u1, 1, false, float, struct xnn_f32_elu_params, xnn_init_f32_elu_scalar_params)
 XNN_UKERNEL(xnn_arch_none, xnn_f32_velu_ukernel__scalar_rr2_lut16_p3_u2, 2, false, float, struct xnn_f32_elu_params, xnn_init_f32_elu_scalar_params)
 XNN_UKERNEL(xnn_arch_none, xnn_f32_velu_ukernel__scalar_rr2_lut16_p3_u3, 3, false, float, struct xnn_f32_elu_params, xnn_init_f32_elu_scalar_params)

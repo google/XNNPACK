@@ -9,7 +9,8 @@
 #   Generator: tools/update-microkernels.py
 
 
-SET(PROD_NEONBF16_MICROKERNEL_SRCS)
+SET(PROD_NEONBF16_MICROKERNEL_SRCS
+  src/f32-bf16-vcvt/gen/f32-bf16-vcvt-neonbf16-u16.c)
 
 SET(NON_PROD_NEONBF16_MICROKERNEL_SRCS
   src/bf16-gemm/gen/bf16-gemm-1x4c8-minmax-neonbf16-bfdot.c
@@ -25,6 +26,7 @@ SET(NON_PROD_NEONBF16_MICROKERNEL_SRCS
   src/bf16-gemm/gen/bf16-gemm-5x4c8-minmax-neonbf16-bfdot.c
   src/bf16-gemm/gen/bf16-gemm-5x4c8-minmax-neonbf16-bfmlal.c
   src/bf16-gemm/gen/bf16-gemm-5x8c2-minmax-neonbf16-bfdot-lane-ld128.c
-  src/bf16-gemm/gen/bf16-gemm-6x8c2-minmax-neonbf16-bfdot-lane-ld128.c)
+  src/bf16-gemm/gen/bf16-gemm-6x8c2-minmax-neonbf16-bfdot-lane-ld128.c
+  src/f32-bf16-vcvt/gen/f32-bf16-vcvt-neonbf16-u8.c)
 
-SET(ALL_NEONBF16_MICROKERNEL_SRCS ${PROD_NEONBF16_MICROKERNEL_SRCS} + ${NON_PROD_NEONBF16_MICROKERNEL_SRCS})
+SET(ALL_NEONBF16_MICROKERNEL_SRCS ${PROD_NEONBF16_MICROKERNEL_SRCS} ${NON_PROD_NEONBF16_MICROKERNEL_SRCS})

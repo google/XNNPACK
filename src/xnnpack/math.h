@@ -474,6 +474,10 @@ XNN_INLINE static uint16_t math_cvt_bf16_fp32(float x) {
   // Apply rounding correction if not inf/nan.
   if ((bits.as_uint32 & F32_EXP_MASK) != F32_EXP_MASK) {
     bits.as_uint32 += 0x7FFFu + ((bits.as_uint32 >> 16) & 1u);
+  } else if (bits.as_uint32 & 0x007FFFFFu) {
+    // NaN with payload only in lower 16 bits would become inf after
+    // truncation. Set the quiet bit to ensure NaN is preserved.
+    bits.as_uint32 |= 0x00400000u;
   }
 
   return bits.as_uint32 >> 16;
@@ -650,6 +654,35 @@ XNN_INLINE static bool xnn_bfloat16_is_zero(xnn_bfloat16 f) {
   // Check for +/- zero (0x0000/0x8000). uint16 overflow is well defined to wrap
   // around.
   return (uint16_t) (xnn_bfloat16_to_bits(f) * 2) == 0;
+}
+
+// Overflow-safe arithmetic for allocation size calculations.
+// Returns false (and leaves *result unspecified) if the operation would
+// overflow size_t.
+XNN_INLINE static bool xnn_safe_mul(size_t a, size_t b, size_t* result) {
+#if defined(__GNUC__) || defined(__clang__)
+  return !__builtin_mul_overflow(a, b, result);
+#else
+  if (a != 0 && b > SIZE_MAX / a) {
+    *result = 0;
+    return false;
+  }
+  *result = a * b;
+  return true;
+#endif
+}
+
+XNN_INLINE static bool xnn_safe_add(size_t a, size_t b, size_t* result) {
+#if defined(__GNUC__) || defined(__clang__)
+  return !__builtin_add_overflow(a, b, result);
+#else
+  if (b > SIZE_MAX - a) {
+    *result = 0;
+    return false;
+  }
+  *result = a + b;
+  return true;
+#endif
 }
 
 #ifdef __cplusplus

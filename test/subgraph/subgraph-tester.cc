@@ -127,6 +127,21 @@ SubgraphTester& SubgraphTester::AddStaticChannelwiseQuantizedTensor(
   return *this;
 }
 
+SubgraphTester& SubgraphTester::AddDynamicChannelwiseQuantizedTensor(
+    const TensorShape& shape, size_t channel_dim, xnn_datatype datatype,
+    const float* scale, uint32_t external_id, void* data) {
+  assert(external_id < xnn_subgraph_get_num_external_values(subgraph_.get()));
+  uint32_t id_out;
+  const xnn_status status = xnn_define_channelwise_quantized_tensor_value(
+      subgraph_.get(), datatype, scale, shape.Rank(), channel_dim, shape.Dims(),
+      data, external_id, XNN_VALUE_FLAG_EXTERNAL_INPUT, &id_out);
+  EXPECT_EQ(status, xnn_status_success);
+  EXPECT_EQ(id_out, external_id);
+  auto it = external_tensors_.insert({external_id, data});
+  EXPECT_TRUE(it.second);
+  return *this;
+}
+
 SubgraphTester& SubgraphTester::AddStaticTensorQS8(
     const TensorShape& shape, size_t channel_dim, TensorType tensor_type,
     const float* scale, uint32_t external_id, uint32_t flags, int8_t* data) {

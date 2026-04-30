@@ -399,17 +399,6 @@ namespace {
 
   BENCHMARK_GEMM(f16_gemm_minmax_ukernel_8x8__asm_aarch64_neonfp16arith_ld64)
 
-  static void f16_gemm_minmax_ukernel_1x16__asm_aarch64_neonfp16arith_ld32(benchmark::State& state) {
-    GEMMBenchmark(state,
-      xnn_f16_gemm_minmax_ukernel_1x16__asm_aarch64_neonfp16arith_ld32,
-      xnn_init_f16_minmax_scalar_params,
-      xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_u8,
-      /*mr=*/1, /*nr=*/16, /*kr=*/1, /*sr=*/1,
-      /*arch_flags=*/xnn_arch_arm_neon_fp16_arith);
-  }
-
-  BENCHMARK_GEMM(f16_gemm_minmax_ukernel_1x16__asm_aarch64_neonfp16arith_ld32)
-
   static void f16_gemm_minmax_ukernel_1x16__asm_aarch64_neonfp16arith_ld64(benchmark::State& state) {
     GEMMBenchmark(state,
       xnn_f16_gemm_minmax_ukernel_1x16__asm_aarch64_neonfp16arith_ld64,
@@ -420,17 +409,6 @@ namespace {
   }
 
   BENCHMARK_GEMM(f16_gemm_minmax_ukernel_1x16__asm_aarch64_neonfp16arith_ld64)
-
-  static void f16_gemm_minmax_ukernel_4x16__asm_aarch64_neonfp16arith_ld32(benchmark::State& state) {
-    GEMMBenchmark(state,
-      xnn_f16_gemm_minmax_ukernel_4x16__asm_aarch64_neonfp16arith_ld32,
-      xnn_init_f16_minmax_scalar_params,
-      xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_u8,
-      /*mr=*/4, /*nr=*/16, /*kr=*/1, /*sr=*/1,
-      /*arch_flags=*/xnn_arch_arm_neon_fp16_arith);
-  }
-
-  BENCHMARK_GEMM(f16_gemm_minmax_ukernel_4x16__asm_aarch64_neonfp16arith_ld32)
 
   static void f16_gemm_minmax_ukernel_4x16__asm_aarch64_neonfp16arith_ld64(benchmark::State& state) {
     GEMMBenchmark(state,
@@ -475,17 +453,6 @@ namespace {
   }
 
   BENCHMARK_GEMM(f16_gemm_minmax_ukernel_6x16__asm_aarch64_neonfp16arith_cortex_a75)
-
-  static void f16_gemm_minmax_ukernel_6x16__asm_aarch64_neonfp16arith_ld32(benchmark::State& state) {
-    GEMMBenchmark(state,
-      xnn_f16_gemm_minmax_ukernel_6x16__asm_aarch64_neonfp16arith_ld32,
-      xnn_init_f16_minmax_scalar_params,
-      xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_u8,
-      /*mr=*/6, /*nr=*/16, /*kr=*/1, /*sr=*/1,
-      /*arch_flags=*/xnn_arch_arm_neon_fp16_arith);
-  }
-
-  BENCHMARK_GEMM(f16_gemm_minmax_ukernel_6x16__asm_aarch64_neonfp16arith_ld32)
 
   static void f16_gemm_minmax_ukernel_6x16__asm_aarch64_neonfp16arith_ld64(benchmark::State& state) {
     GEMMBenchmark(state,

@@ -38,6 +38,7 @@ TEST_CEIL(arm_neon, f64, 2);
 TEST_ROUND(arm_neon, f64, 2);
 TEST_SQRT(arm_neon, f64, 2);
 TEST_ABS(arm_neon, f64, 2);
+TEST_FLOOR_LOG2(arm_neon, f64, 2);
 
 TEST_HORIZONTAL_MIN(arm_neon, f64, 2);
 TEST_HORIZONTAL_MAX(arm_neon, f64, 2);

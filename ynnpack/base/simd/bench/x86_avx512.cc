@@ -25,5 +25,12 @@ BENCH_PARTIAL_LOAD_STORE(avx512, s32, 16);
 
 BENCH_FMA(avx512, f32, 16);
 
+BENCH_UNARY(avx512, floor_log2, f32, 16);
+BENCH_UNARY(avx512, floor_log2, f32, 8);
+BENCH_UNARY(avx512, floor_log2, f32, 4);
+BENCH_UNARY(avx512, floor_log2, f64, 8);
+BENCH_UNARY(avx512, floor_log2, f64, 4);
+BENCH_UNARY(avx512, floor_log2, f64, 2);
+
 }  // namespace simd
 }  // namespace ynn

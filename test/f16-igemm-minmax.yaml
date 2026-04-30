@@ -4,18 +4,10 @@
 # LICENSE file in the root directory of this source tree.
 
 # AArch64 assembly
-- name: xnn_f16_igemm_minmax_ukernel_1x16__asm_aarch64_neonfp16arith_ld32
-  init: xnn_init_f16_minmax_scalar_params
-  pack: xnn_pack_f16_conv_goki_w
-  k-block: 2
 - name: xnn_f16_igemm_minmax_ukernel_1x16__asm_aarch64_neonfp16arith_ld64
   init: xnn_init_f16_minmax_scalar_params
   pack: xnn_pack_f16_conv_goki_w
   k-block: 4
-- name: xnn_f16_igemm_minmax_ukernel_4x16__asm_aarch64_neonfp16arith_ld32
-  init: xnn_init_f16_minmax_scalar_params
-  pack: xnn_pack_f16_conv_goki_w
-  k-block: 2
 - name: xnn_f16_igemm_minmax_ukernel_4x16__asm_aarch64_neonfp16arith_ld64
   init: xnn_init_f16_minmax_scalar_params
   pack: xnn_pack_f16_conv_goki_w
@@ -32,10 +24,6 @@
   init: xnn_init_f16_minmax_scalar_params
   pack: xnn_pack_f16_conv_goki_w
   k-block: 4
-- name: xnn_f16_igemm_minmax_ukernel_6x16__asm_aarch64_neonfp16arith_ld32
-  init: xnn_init_f16_minmax_scalar_params
-  pack: xnn_pack_f16_conv_goki_w
-  k-block: 2
 - name: xnn_f16_igemm_minmax_ukernel_6x16__asm_aarch64_neonfp16arith_ld64
   init: xnn_init_f16_minmax_scalar_params
   pack: xnn_pack_f16_conv_goki_w
@@ -174,6 +162,41 @@
   pack: xnn_pack_f16_conv_goki_w
   k-block: 1
 - name: xnn_f16_igemm_minmax_ukernel_7x4v__rvvfp16arith
+  init: xnn_init_f16_minmax_scalar_params
+  pack: xnn_pack_f16_conv_goki_w
+  k-block: 1
+
+# WASM FP16
+- name: xnn_f16_igemm_minmax_ukernel_1x8__wasmrelaxedsimd_splat
+  init: xnn_init_f16_minmax_scalar_params
+  pack: xnn_pack_f16_conv_goki_w
+  k-block: 1
+- name: xnn_f16_igemm_minmax_ukernel_4x8__wasmrelaxedsimd_splat
+  init: xnn_init_f16_minmax_scalar_params
+  pack: xnn_pack_f16_conv_goki_w
+  k-block: 1
+- name: xnn_f16_igemm_minmax_ukernel_6x8__wasmrelaxedsimd_splat
+  init: xnn_init_f16_minmax_scalar_params
+  pack: xnn_pack_f16_conv_goki_w
+  k-block: 1
+- name: xnn_f16_igemm_minmax_ukernel_8x8__wasmrelaxedsimd_splat
+  init: xnn_init_f16_minmax_scalar_params
+  pack: xnn_pack_f16_conv_goki_w
+  k-block: 1
+
+- name: xnn_f16_igemm_minmax_ukernel_1x16__wasmrelaxedsimd_splat
+  init: xnn_init_f16_minmax_scalar_params
+  pack: xnn_pack_f16_conv_goki_w
+  k-block: 1
+- name: xnn_f16_igemm_minmax_ukernel_4x16__wasmrelaxedsimd_splat
+  init: xnn_init_f16_minmax_scalar_params
+  pack: xnn_pack_f16_conv_goki_w
+  k-block: 1
+- name: xnn_f16_igemm_minmax_ukernel_6x16__wasmrelaxedsimd_splat
+  init: xnn_init_f16_minmax_scalar_params
+  pack: xnn_pack_f16_conv_goki_w
+  k-block: 1
+- name: xnn_f16_igemm_minmax_ukernel_8x16__wasmrelaxedsimd_splat
   init: xnn_init_f16_minmax_scalar_params
   pack: xnn_pack_f16_conv_goki_w
   k-block: 1

@@ -213,6 +213,57 @@ void define_copy(ynn_subgraph& subgraph, ynn_node& node, uint32_t input_id,
   };
 }
 
+void define_static_expand_dims(ynn_subgraph& subgraph, ynn_node& node,
+                               uint32_t input_id, uint32_t output_id,
+                               const axes_set& new_axes) {
+  const ynn_value& input = subgraph.value(input_id);
+  ynn_value& output = subgraph.value(output_id);
+
+  ynn_node::static_expand_dims op;
+  op.new_axes = new_axes;
+
+  const int new_rank = input.rank() + new_axes.count();
+  node.inputs = {input_id};
+  node.outputs = {output_id};
+  node.op = std::move(op);
+
+  // Propagate shape.
+  output.extents.resize(new_rank);
+  auto input_d = input.extents.begin();
+  for (size_t d = 0; d < output.rank() && input_d != input.extents.end(); ++d) {
+    if (new_axes[d]) {
+      output.extents[d] = {};
+    } else {
+      output.extents[d] = *input_d++;
+    }
+  }
+
+  node.create = [](const ynn_node& node, ynn_runtime& runtime) {
+    const ynn::axes_set& new_axes =
+        std::get<ynn_node::static_expand_dims>(node.op).new_axes;
+    const ynn_runtime_value& input = runtime.value(node.inputs[0]);
+    ynn_runtime_value& output = runtime.value(node.outputs[0]);
+    assert(input.rank() == input.extents.size());
+    assert(output.rank() == input.rank() + new_axes.count());
+
+    std::vector<slinky::var> dims = runtime.globals.make_dims(output.rank());
+    slinky::box_expr bounds(input.rank());
+
+    auto bounds_d = bounds.begin();
+    for (size_t d = 0; d < output.rank() && bounds_d != bounds.end(); ++d) {
+      if (!new_axes[d]) {
+        *bounds_d++ = slinky::point(dims[d]);
+      }
+    }
+
+    output.make_buffer(runtime, input.buffer->elem_size());
+    auto func = slinky::func::make_copy({input.buffer, std::move(bounds)},
+                                        {output.buffer, std::move(dims)});
+    runtime.funcs.push_back(std::move(func));
+    return ynn_status_success;
+  };
+}
+
 extern "C" {
 
 ynn_status ynn_define_copy(ynn_subgraph_t subgraph, uint32_t input_id,
@@ -379,52 +430,15 @@ ynn_status ynn_define_static_expand_dims(ynn_subgraph_t subgraph,
 
   const int new_rank = input.rank() + num_new_axes;
   YNN_RETURN_IF_ERROR(validate_rank("static_expand_dims", "output", new_rank));
-  ynn_node::static_expand_dims op;
+  ynn::axes_set axes;
   for (size_t i = 0; i < num_new_axes; ++i) {
     YNN_RETURN_IF_ERROR(
         validate_axis("static_expand_dims", "output", new_rank, new_axes[i]));
-    op.new_axes[axis_to_slinky_dim(new_rank, new_axes[i])] = true;
-  }
-
-  // Propagate shape.
-  output.extents.resize(new_rank);
-  auto input_d = input.extents.begin();
-  for (size_t d = 0; d < output.rank() && input_d != input.extents.end(); ++d) {
-    if (op.new_axes[d]) {
-      output.extents[d] = {};
-    } else {
-      output.extents[d] = *input_d++;
-    }
+    axes[axis_to_slinky_dim(new_rank, new_axes[i])] = true;
   }
 
   ynn_node node;
-  node.inputs = {input_id};
-  node.outputs = {*output_id};
-  node.op = std::move(op);
-  node.create = [](const ynn_node& node, ynn_runtime& runtime) {
-    const ynn::axes_set& new_axes =
-        std::get<ynn_node::static_expand_dims>(node.op).new_axes;
-    const ynn_runtime_value& input = runtime.value(node.inputs[0]);
-    ynn_runtime_value& output = runtime.value(node.outputs[0]);
-    assert(input.rank() == input.extents.size());
-    assert(output.rank() == input.rank() + new_axes.count());
-
-    std::vector<slinky::var> dims = runtime.globals.make_dims(output.rank());
-    slinky::box_expr bounds(input.rank());
-
-    auto bounds_d = bounds.begin();
-    for (size_t d = 0; d < output.rank() && bounds_d != bounds.end(); ++d) {
-      if (!new_axes[d]) {
-        *bounds_d++ = slinky::point(dims[d]);
-      }
-    }
-
-    output.make_buffer(runtime, input.buffer->elem_size());
-    auto func = slinky::func::make_copy({input.buffer, std::move(bounds)},
-                                        {output.buffer, std::move(dims)});
-    runtime.funcs.push_back(std::move(func));
-    return ynn_status_success;
-  };
+  define_static_expand_dims(*subgraph, node, input_id, output.id, axes);
   subgraph->add_node(std::move(node));
   return ynn_status_success;
 }

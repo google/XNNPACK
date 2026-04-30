@@ -12,6 +12,7 @@
 #include <optional>
 
 #include "ynnpack/base/arch.h"  // IWYU pragma: keep
+#include "ynnpack/base/base.h"  // IWYU pragma: keep
 #include "ynnpack/include/ynnpack.h"
 #include "ynnpack/kernels/dot/arm64_sme.h"  // IWYU pragma: keep
 
@@ -127,7 +128,7 @@ struct dot_packed_shape {
 // if *transpose_a is true.
 dot_kernel get_dot_kernel(const dot_type& type, const dot_shape& shape = {},
                           const dot_packed_shape* dot_packed_shape = nullptr,
-                          bool consistent_arithmetic = false,
+                          uint32_t required_flags = 0,
                           std::optional<bool> transpose_a = std::nullopt,
                           uint64_t arch_flags = get_supported_arch_flags());
 

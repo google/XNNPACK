@@ -573,6 +573,16 @@ YNN_ALWAYS_INLINE std::tuple<u8x16, u8x16> interleave(
                     u8x16{_mm_or_si128(_mm_slli_epi16(even1, 4), even0)},
                     u8x16{_mm_or_si128(odd1, _mm_srli_epi16(odd0, 4))});
 }
+YNN_ALWAYS_INLINE std::tuple<u8x16, u8x16> interleave(
+    std::integral_constant<size_t, 2>, u8x16 x0, u8x16 x1) {
+  __m128i even0 = _mm_and_si128(x0.v, _mm_set1_epi8(0x33));
+  __m128i even1 = _mm_and_si128(x1.v, _mm_set1_epi8(0x33));
+  __m128i odd0 = _mm_and_si128(x0.v, _mm_set1_epi8(0xcc));
+  __m128i odd1 = _mm_and_si128(x1.v, _mm_set1_epi8(0xcc));
+  return interleave(std::integral_constant<size_t, 4>{},
+                    u8x16{_mm_or_si128(_mm_slli_epi16(even1, 2), even0)},
+                    u8x16{_mm_or_si128(odd1, _mm_srli_epi16(odd0, 2))});
+}
 
 template <>
 YNN_ALWAYS_INLINE std::array<f32x4, 4> transpose<float>(

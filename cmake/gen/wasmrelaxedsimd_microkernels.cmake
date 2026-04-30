@@ -50,6 +50,7 @@ SET(PROD_WASMRELAXEDSIMD_MICROKERNEL_SRCS
   src/f32-qc8w-gemm/gen/f32-qc8w-gemm-6x8-minmax-wasmrelaxedsimd-fma-splat.c
   src/f32-qc8w-gemm/gen/f32-qc8w-gemm-6x8-wasmrelaxedsimd-fma-splat.c
   src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-wasmrelaxedsimd-rr2-p5-u16-acc2.c
+  src/f32-rminmax/gen/f32-rminmax-wasmrelaxedsimd-minmax-u16-acc4.c
   src/f32-spmm/gen/f32-spmm-32x1-minmax-wasmrelaxedsimd-arm.c
   src/f32-spmm/gen/f32-spmm-32x1-minmax-wasmrelaxedsimd-x86.c
   src/f32-vclamp/gen/f32-vclamp-wasmrelaxedsimd.c
@@ -124,6 +125,14 @@ SET(NON_PROD_WASMRELAXEDSIMD_MICROKERNEL_SRCS
   src/f16-gemm/gen/f16-gemm-6x16-minmax-wasmrelaxedsimd-splat.c
   src/f16-gemm/gen/f16-gemm-8x8-minmax-wasmrelaxedsimd-splat.c
   src/f16-gemm/gen/f16-gemm-8x16-minmax-wasmrelaxedsimd-splat.c
+  src/f16-igemm/gen/f16-igemm-1x8-minmax-wasmrelaxedsimd-splat.c
+  src/f16-igemm/gen/f16-igemm-1x16-minmax-wasmrelaxedsimd-splat.c
+  src/f16-igemm/gen/f16-igemm-4x8-minmax-wasmrelaxedsimd-splat.c
+  src/f16-igemm/gen/f16-igemm-4x16-minmax-wasmrelaxedsimd-splat.c
+  src/f16-igemm/gen/f16-igemm-6x8-minmax-wasmrelaxedsimd-splat.c
+  src/f16-igemm/gen/f16-igemm-6x16-minmax-wasmrelaxedsimd-splat.c
+  src/f16-igemm/gen/f16-igemm-8x8-minmax-wasmrelaxedsimd-splat.c
+  src/f16-igemm/gen/f16-igemm-8x16-minmax-wasmrelaxedsimd-splat.c
   src/f32-dwconv/gen/f32-dwconv-3p4c-minmax-wasmrelaxedsimd-acc2.c
   src/f32-dwconv/gen/f32-dwconv-3p4c-minmax-wasmrelaxedsimd-fma-acc2.c
   src/f32-dwconv/gen/f32-dwconv-3p4c-minmax-wasmrelaxedsimd-fma.c
@@ -279,6 +288,11 @@ SET(NON_PROD_WASMRELAXEDSIMD_MICROKERNEL_SRCS
   src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-wasmrelaxedsimd-rr2-p5-u4.c
   src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-wasmrelaxedsimd-rr2-p5-u8-acc2.c
   src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-wasmrelaxedsimd-rr2-p5-u16-acc4.c
+  src/f32-rminmax/gen/f32-rminmax-wasmrelaxedsimd-minmax-u4.c
+  src/f32-rminmax/gen/f32-rminmax-wasmrelaxedsimd-minmax-u8-acc2.c
+  src/f32-rminmax/gen/f32-rminmax-wasmrelaxedsimd-minmax-u12-acc3.c
+  src/f32-rminmax/gen/f32-rminmax-wasmrelaxedsimd-minmax-u16-acc2.c
+  src/f32-rminmax/gen/f32-rminmax-wasmrelaxedsimd-minmax-u32-acc4.c
   src/f32-spmm/gen/f32-spmm-4x1-minmax-wasmrelaxedsimd-arm-pipelined-u2.c
   src/f32-spmm/gen/f32-spmm-4x1-minmax-wasmrelaxedsimd-arm-pipelined.c
   src/f32-spmm/gen/f32-spmm-4x1-minmax-wasmrelaxedsimd-arm-u2.c
@@ -509,4 +523,4 @@ SET(NON_PROD_WASMRELAXEDSIMD_MICROKERNEL_SRCS
   src/x8-lut/gen/x8-lut-wasmpshufb-u48.c
   src/x8-lut/gen/x8-lut-wasmpshufb-u64.c)
 
-SET(ALL_WASMRELAXEDSIMD_MICROKERNEL_SRCS ${PROD_WASMRELAXEDSIMD_MICROKERNEL_SRCS} + ${NON_PROD_WASMRELAXEDSIMD_MICROKERNEL_SRCS})
+SET(ALL_WASMRELAXEDSIMD_MICROKERNEL_SRCS ${PROD_WASMRELAXEDSIMD_MICROKERNEL_SRCS} ${NON_PROD_WASMRELAXEDSIMD_MICROKERNEL_SRCS})

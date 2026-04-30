@@ -33,8 +33,6 @@ void TestSliceLike(T, size_t rank) {
 
   for (size_t input_rank = rank; input_rank <= rank; input_rank++) {
     for (size_t template_rank = rank; template_rank <= rank; template_rank++) {
-      quantization_params quantization = random_quantization(type_of<T>(), rng);
-
       std::vector<int32_t> axes;
       for (int i = 0; i < rank; ++i) {
         if (slice_dist(rng)) {
@@ -44,9 +42,9 @@ void TestSliceLike(T, size_t rank) {
 
       // Define subgraph
       SubgraphBuilder subgraph(3);
-      subgraph.AddInput(type_of<T>(), input_rank, 0, quantization)
+      subgraph.AddInput(type_of<T>(), input_rank, 0)
           .AddInput(type_of<half>(), template_rank, 1)
-          .AddOutput(type_of<T>(), rank, 2, quantization)
+          .AddOutput(type_of<T>(), rank, 2)
           .AddSliceLike(axes, 0, 1, 2);
 
       Runtime runtime(subgraph.GetSubgraph());
@@ -68,7 +66,7 @@ void TestSliceLike(T, size_t rank) {
         }
 
         Tensor<T> input(input_shape);
-        fill_random(input.data(), input.size(), rng, quantization);
+        fill_random(input.data(), input.size(), rng);
 
         // Check reshaped shape is correct
         runtime.ReshapeExternalTensor(input_shape, input.base(), 0)

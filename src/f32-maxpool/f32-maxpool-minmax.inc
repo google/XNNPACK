@@ -18,7 +18,6 @@ XNN_UKERNEL(xnn_arch_none, xnn_f32_maxpool_minmax_ukernel_9p__wasmsimd_u4, 4, 9,
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 #if XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
-XNN_UKERNEL(xnn_arch_riscv_vector, xnn_f32_maxpool_minmax_ukernel_9p__rvv_u1v, (1*xnn_init_hardware_config()->vlenb/sizeof(float)), 9, float, struct xnn_f32_minmax_params, xnn_init_f32_minmax_scalar_params)
 XNN_UKERNEL(xnn_arch_riscv_vector, xnn_f32_maxpool_minmax_ukernel_9p__rvv_u2v, (2*xnn_init_hardware_config()->vlenb/sizeof(float)), 9, float, struct xnn_f32_minmax_params, xnn_init_f32_minmax_scalar_params)
 #endif  // XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
 

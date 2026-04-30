@@ -65,7 +65,8 @@ template <typename A, typename C>
 void ReferenceImpl(ynn_reduce_operator op, const Tensor<A>& a,
                    Tensor<C>& c) {
   if ((op == ynn_reduce_sum || op == ynn_reduce_sum_squared) &&
-       !std::is_same<C, float>::value && !std::is_same<C, int32_t>::value) {
+      !std::is_same<C, float>::value && !std::is_same<C, double>::value &&
+      !std::is_same<C, int32_t>::value) {
     // Compute sum and sum_squared with extra precision.
     Tensor<float> c_float(c.extents());
     c_float.assign(c);
@@ -161,7 +162,6 @@ void TestReduce(A, C, ynn_reduce_operator op) {
 
       Tensor<C> expected = c.deep_copy();
       if (!init_c) {
-        std::vector<size_t> b_shape = c_shape;
         runtime.ReshapeExternalTensor(expected_shape, c.data(), c_id);
       }
       runtime.ReshapeRuntime();
@@ -177,7 +177,7 @@ void TestReduce(A, C, ynn_reduce_operator op) {
 
       // Verify results.
       for (const auto& i : EnumerateIndices(c_shape)) {
-        if (std::is_integral<C>::value) {
+        if (is_integral<C>::value) {
           ASSERT_EQ(c(i), expected(i));
         } else {
           const float tolerance =
@@ -353,5 +353,124 @@ INSTANTIATE_TEST_SUITE_P(
     [](const testing::TestParamInfo<MinMax::ParamType>& info) {
       return to_string(info.param);
     });
+
+template <typename T>
+void MaxAbsDiff(const Tensor<T>& a, const Tensor<T>& b, Tensor<T>& c) {
+  broadcast_extent_1(c);
+  for (const auto& i : EnumerateIndices(a.shape())) {
+    c(i) = std::max(c(i), std::abs(a(i) - b(i)));
+  }
+}
+
+TEST(MaxAbsDiff, Test) {
+  ReplicableRandomDevice rng;
+  std::uniform_int_distribution<size_t> rank_dist(1, YNN_MAX_TENSOR_RANK - 1);
+  std::bernoulli_distribution random_bool(0.5);
+  std::bernoulli_distribution empty_shape_dist(0.01f);
+
+  const float max_abs_value = 1.0f;
+
+  for (auto _ : FuzzTest(std::chrono::milliseconds(500))) {
+    const bool keep_dims = random_bool(rng);
+
+    const size_t input_rank = rank_dist(rng);
+    const size_t num_k_dims =
+        std::uniform_int_distribution<size_t>(1, input_rank)(rng);
+    const size_t output_rank = input_rank - (keep_dims ? 0 : num_k_dims);
+
+    // Select random axes to reduce.
+    std::vector<int32_t> reduce_axes(input_rank);
+    std::iota(reduce_axes.begin(), reduce_axes.end(), 0);
+    std::shuffle(reduce_axes.begin(), reduce_axes.end(), rng);
+    reduce_axes.resize(num_k_dims);
+
+    // Build the subgraph.
+    SubgraphBuilder subgraph(4);
+    const uint32_t a_id = 0;
+    const uint32_t b_id = 1;
+    uint32_t c_id = 2;
+    const uint32_t output_id = 3;
+    uint32_t diff_id = YNN_INVALID_VALUE_ID;
+    uint32_t abs_diff_id = YNN_INVALID_VALUE_ID;
+    subgraph.AddInput(type_of<float>(), input_rank, a_id)
+        .AddInput(type_of<float>(), input_rank, b_id)
+        .AddTensor(type_of<float>(), input_rank, diff_id)
+        .AddTensor(type_of<float>(), input_rank, abs_diff_id)
+        .AddOutput(type_of<float>(), output_rank, output_id);
+
+    const bool init_c = random_bool(rng);
+    const float init_value =
+        random_value<float>(rng, -max_abs_value, max_abs_value);
+    if (init_c) {
+      subgraph.AddScalar<float>(init_value, c_id);
+    } else {
+      subgraph.AddInput(type_of<float>(), output_rank, c_id);
+    }
+
+    subgraph.AddBinary(ynn_binary_subtract, a_id, b_id, diff_id)
+        .AddUnary(ynn_unary_abs, diff_id, abs_diff_id)
+        .AddReduce(ynn_reduce_max, reduce_axes, abs_diff_id, c_id, output_id,
+                   keep_dims ? YNN_NODE_FLAG_KEEP_DIMS : 0);
+
+    Runtime runtime(subgraph.GetSubgraph());
+    ASSERT_EQ(runtime.Status(), ynn_status_success);
+
+    for (int reshape = 0; reshape < 2; ++reshape) {
+      std::vector<size_t> ab_shape = random_shape(rng, input_rank);
+      std::vector<size_t> c_shape = ab_shape;
+      for (int32_t i : reduce_axes) {
+        if (empty_shape_dist(rng)) {
+          ab_shape[i] = 0;
+        }
+        c_shape[i] = 1;
+      }
+
+      Tensor<float> a(ab_shape);
+      Tensor<float> b(ab_shape);
+      fill_random(a.data(), a.size(), rng, -max_abs_value, max_abs_value);
+      fill_random(b.data(), b.size(), rng, -max_abs_value, max_abs_value);
+
+      runtime.ReshapeExternalTensor(ab_shape, a.data(), a_id);
+      runtime.ReshapeExternalTensor(ab_shape, b.data(), b_id);
+
+      Tensor<float> c(c_shape);
+      if (init_c) {
+        c.fill(init_value);
+      } else {
+        fill_random(c.data(), c.size(), rng, -max_abs_value,
+                    max_abs_value);
+      }
+
+      std::vector<size_t> expected_shape = c_shape;
+      if (!keep_dims) {
+        std::sort(reduce_axes.begin(), reduce_axes.end(),
+                  std::greater<int32_t>());
+        for (int32_t i : reduce_axes) {
+          expected_shape.erase(expected_shape.begin() + i);
+        }
+      }
+
+      Tensor<float> expected = c.deep_copy();
+      if (!init_c) {
+        runtime.ReshapeExternalTensor(expected_shape, c.data(), c_id);
+      }
+      runtime.ReshapeRuntime();
+      ASSERT_EQ(runtime.Status(), ynn_status_success);
+
+      ASSERT_EQ(runtime.GetExternalTensorShape(output_id), expected_shape);
+
+      runtime.SetupExternalTensor(c.data(), output_id).InvokeRuntime();
+      ASSERT_EQ(runtime.Status(), ynn_status_success);
+
+      // Compute the reference result.
+      MaxAbsDiff(a, b, expected);
+
+      // Verify results.
+      for (const auto& i : EnumerateIndices(c_shape)) {
+        ASSERT_EQ(c(i), expected(i));
+      }
+    }
+  }
+}
 
 }  // namespace ynn

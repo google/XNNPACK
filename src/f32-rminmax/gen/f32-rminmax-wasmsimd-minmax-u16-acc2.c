@@ -39,12 +39,12 @@ void xnn_f32_rminmax_ukernel__wasmsimd_minmax_u16_acc2(
     input += 16;
 
     vmin0 = wasm_f32x4_min(vmin0, vt0);
-    vmax0 = wasm_f32x4_max(vmax0, vt0);
     vmin1 = wasm_f32x4_min(vmin1, vt1);
-    vmax1 = wasm_f32x4_max(vmax1, vt1);
     vmin0 = wasm_f32x4_min(vmin0, vt2);
-    vmax0 = wasm_f32x4_max(vmax0, vt2);
     vmin1 = wasm_f32x4_min(vmin1, vt3);
+    vmax0 = wasm_f32x4_max(vmax0, vt0);
+    vmax1 = wasm_f32x4_max(vmax1, vt1);
+    vmax0 = wasm_f32x4_max(vmax0, vt2);
     vmax1 = wasm_f32x4_max(vmax1, vt3);
   }
   vmin0 = wasm_f32x4_min(vmin0, vmin1);
