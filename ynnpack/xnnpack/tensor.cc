@@ -122,18 +122,6 @@ xnn_status xnn_define_channelwise_quantized_tensor_value_v3(
     const float* scale, size_t num_dims, size_t channel_dim, const size_t* dims,
     const void* data, uint32_t external_id, uint32_t flags, uint32_t* id_out,
     const float* channelwise_zero_point) {
-  // Channelwise zero points are not supported yet.
-  assert(channelwise_zero_point == nullptr);
-  uint32_t zero_point_id = YNN_INVALID_VALUE_ID;
-  if (zero_point != 0) {
-    ynn_status status = ynn_define_tensor(
-        subgraph->ynn, ynn_type_int32, 0, nullptr, &zero_point,
-        YNN_VALUE_FLAG_COPY_DATA, &zero_point_id);
-    if (status != ynn_status_success) {
-      return ynn::xnn_status_from_ynn(status);
-    }
-  }
-
   // The shape of XNNPACK scale data depends on which op is consuming it. We do
   // our best to estimate the shape here, but this is only correct for some ops.
   // Some specific examples are:
@@ -150,6 +138,24 @@ xnn_status xnn_define_channelwise_quantized_tensor_value_v3(
     // a broadcast?!?! This might only be true for XNN_FLAG_TRANSPOSE_B (or not)
     // which would be a headache to support here.
     quantization_dims[channel_dim - 1] = 1;
+  }
+
+  uint32_t zero_point_id = YNN_INVALID_VALUE_ID;
+  if (channelwise_zero_point != nullptr) {
+    ynn_status status =
+        ynn_define_tensor(subgraph->ynn, ynn_type_fp32, channel_dim + 1,
+                          quantization_dims, channelwise_zero_point,
+                          /*flags=*/0, &zero_point_id);
+    if (status != ynn_status_success) {
+      return ynn::xnn_status_from_ynn(status);
+    }
+  } else if (zero_point != 0) {
+    ynn_status status = ynn_define_tensor(
+        subgraph->ynn, ynn_type_int32, 0, nullptr, &zero_point,
+        YNN_VALUE_FLAG_COPY_DATA, &zero_point_id);
+    if (status != ynn_status_success) {
+      return ynn::xnn_status_from_ynn(status);
+    }
   }
 
   uint32_t scale_id = YNN_INVALID_VALUE_ID;
@@ -169,6 +175,7 @@ xnn_status xnn_define_channelwise_quantized_tensor_value_v3(
     return ynn::xnn_status_from_ynn(status);
   }
   subgraph->ynn->value(*id_out).scale_id = scale_id;
+  subgraph->ynn->value(*id_out).zero_point_id = zero_point_id;
   return xnn_status_success;
 }
 

@@ -148,6 +148,14 @@ static XNN_INLINE xnn_simd_f16_t xnn_abs_f16(xnn_simd_f16_t a) {
 #endif  // XNN_HAVE_FLOAT16
 }
 
+static XNN_INLINE xnn_simd_f16_t xnn_sqrt_f16(xnn_simd_f16_t a) {
+#if XNN_HAVE_FLOAT16
+  return sqrtf(a);
+#else
+  return xnn_float16_from_float(sqrtf(xnn_float16_to_float(a)));
+#endif  // XNN_HAVE_FLOAT16
+}
+
 static XNN_INLINE xnn_simd_f16_t xnn_neg_f16(xnn_simd_f16_t a) {
 #if XNN_HAVE_FLOAT16
   return -a;

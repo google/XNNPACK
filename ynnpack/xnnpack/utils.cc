@@ -227,11 +227,21 @@ ynn_status define_xnn_accumulator_for_quantized_dot(
     // initialization. Even if a_zero_point and b_zero_point are scalars
     // this is conceptually a dot-product of broadcasted vectors, so we
     // need to additionally multiply by k.
+    ynn_type zp_product_type =
+        product_type(type_of_value(subgraph, a_zero_point_id),
+                     type_of_value(subgraph, b_zero_point_id));
     uint32_t a_times_b_zero_point_no_k_id = YNN_INVALID_VALUE_ID;
-    status =
-        ynn_define_binary(subgraph->ynn, ynn_binary_multiply, a_zero_point_id,
-                          b_zero_point_id, &a_times_b_zero_point_no_k_id,
-                          /*flags=*/0);
+    status = ynn_define_tensor(subgraph->ynn, zp_product_type, /*rank=*/0,
+                               /*dims=*/nullptr, /*data=*/nullptr, /*flags=*/0,
+                               &a_times_b_zero_point_no_k_id);
+    if (status != ynn_status_success) {
+      return status;
+    }
+
+    status = define_binary_with_broadcasting(subgraph, ynn_binary_multiply,
+                                             a_zero_point_id, b_zero_point_id,
+                                             &a_times_b_zero_point_no_k_id,
+                                             /*flags=*/0);
     if (status != ynn_status_success) {
       return status;
     }
@@ -246,10 +256,10 @@ ynn_status define_xnn_accumulator_for_quantized_dot(
     }
 
     uint32_t a_times_b_zero_point_id = YNN_INVALID_VALUE_ID;
-    status = ynn_define_binary(subgraph->ynn, ynn_binary_multiply,
-                               a_times_b_zero_point_no_k_id, k_id,
-                               &a_times_b_zero_point_id,
-                               /*flags=*/0);
+    status = define_binary_with_broadcasting(subgraph, ynn_binary_multiply,
+                                             a_times_b_zero_point_no_k_id, k_id,
+                                             &a_times_b_zero_point_id,
+                                             /*flags=*/0);
     if (status != ynn_status_success) {
       return status;
     }
@@ -414,10 +424,23 @@ ynn_status define_xnn_dot_quantized(xnn_subgraph_t subgraph, size_t num_k_dims,
 
   // 2. Define the dot product.
 
+  uint32_t a_zp_id = get_zero_point_id(subgraph, a_id);
+  uint32_t b_zp_id = get_zero_point_id(subgraph, b_id);
+  // If either zero point is floating-point (e.g., channelwise zero points), we
+  // cannot initialize the integer dot-product accumulator with it without
+  // losing precision. Instead, we defer adding the initialization terms until
+  // after the raw integer dot product is completed and converted back to
+  // floating-point.
+  bool defer_init =
+      (a_zp_id != YNN_INVALID_VALUE_ID &&
+       type_promotes_to_float(type_of_value(subgraph, a_zp_id))) ||
+      (b_zp_id != YNN_INVALID_VALUE_ID &&
+       type_promotes_to_float(type_of_value(subgraph, b_zp_id)));
+
   // We can reuse the `output_id` as the accumulator to the dot if there is no
   // bias and the output type matches the accumulator type. Otherwise, let
   // `define_xnn_accumulator_for_quantized_dot` define the accumulator.
-  bool allow_reuse = bias_id == YNN_INVALID_VALUE_ID &&
+  bool allow_reuse = bias_id == YNN_INVALID_VALUE_ID && !defer_init &&
                      type_of_value(subgraph, output_id) ==
                          accumulator_for_type(type_of_value(subgraph, a_id));
   uint32_t accumulator_id = allow_reuse ? output_id : YNN_INVALID_VALUE_ID;
@@ -428,12 +451,14 @@ ynn_status define_xnn_dot_quantized(xnn_subgraph_t subgraph, size_t num_k_dims,
       allow_reuse);
   if (status != ynn_status_success) return status;
 
-  status = ynn_define_dot(subgraph->ynn, num_k_dims, a_id, b_id,
-                          init_accumulator_id, &accumulator_id, /*flags=*/0);
+  uint32_t dot_init_id =
+      defer_init ? YNN_INVALID_VALUE_ID : init_accumulator_id;
+  status = ynn_define_dot(subgraph->ynn, num_k_dims, a_id, b_id, dot_init_id,
+                          &accumulator_id, /*flags=*/0);
   if (status != ynn_status_success) return status;
 
   // 3. Handle the bias, if present.
-  if (bias_id != YNN_INVALID_VALUE_ID) {
+  if (bias_id != YNN_INVALID_VALUE_ID || defer_init) {
     // XNNPACK semantics: output = scale * (dot_result) + bias.
     // We perform this in fp32 to support arbitrary bias scales and fusing.
 
@@ -452,24 +477,55 @@ ynn_status define_xnn_dot_quantized(xnn_subgraph_t subgraph, size_t num_k_dims,
       dot_result_as_float_id = float_val_id;
     }
 
-    // Ensure bias is also fp32 for the addition.
-    status = convert_to(subgraph, &bias_id, ynn_type_fp32);
-    if (status != ynn_status_success) return status;
+    if (defer_init && init_accumulator_id != YNN_INVALID_VALUE_ID) {
+      uint32_t scale_id = get_scale_id(subgraph, accumulator_id);
+      if (scale_id != YNN_INVALID_VALUE_ID) {
+        uint32_t scaled_init_id = YNN_INVALID_VALUE_ID;
+        status = define_binary_with_broadcasting(subgraph, ynn_binary_multiply,
+                                                 init_accumulator_id, scale_id,
+                                                 &scaled_init_id, /*flags=*/0);
+        if (status != ynn_status_success) return status;
+        init_accumulator_id = scaled_init_id;
+      }
 
-    // If the output is fp32, we can compute the add directly into the output.
-    // Otherwise, compute into an intermediate, and convert after.
-    uint32_t output_unconverted_id =
-        type_of_value(subgraph, output_id) == ynn_type_fp32
-            ? output_id
-            : YNN_INVALID_VALUE_ID;
-    status = define_binary_with_broadcasting(
-        subgraph, ynn_binary_add, dot_result_as_float_id, bias_id,
-        &output_unconverted_id, /*flags=*/0);
-    if (status != ynn_status_success) return status;
+      uint32_t added_dot_id =
+          (bias_id == YNN_INVALID_VALUE_ID &&
+           type_of_value(subgraph, output_id) == ynn_type_fp32)
+              ? output_id
+              : YNN_INVALID_VALUE_ID;
+      status = define_binary_with_broadcasting(
+          subgraph, ynn_binary_add, dot_result_as_float_id, init_accumulator_id,
+          &added_dot_id, /*flags=*/0);
+      if (status != ynn_status_success) return status;
+      dot_result_as_float_id = added_dot_id;
+    }
 
-    if (output_unconverted_id != output_id) {
-      status = ynn_define_unary(subgraph->ynn, ynn_unary_convert,
-                                output_unconverted_id, &output_id, /*flags=*/0);
+    if (bias_id != YNN_INVALID_VALUE_ID) {
+      // Ensure bias is also fp32 for the addition.
+      status = convert_to(subgraph, &bias_id, ynn_type_fp32);
+      if (status != ynn_status_success) return status;
+
+      // If the output is fp32, we can compute the add directly into the output.
+      // Otherwise, compute into an intermediate, and convert after.
+      uint32_t output_unconverted_id =
+          type_of_value(subgraph, output_id) == ynn_type_fp32
+              ? output_id
+              : YNN_INVALID_VALUE_ID;
+      status = define_binary_with_broadcasting(
+          subgraph, ynn_binary_add, dot_result_as_float_id, bias_id,
+          &output_unconverted_id, /*flags=*/0);
+      if (status != ynn_status_success) return status;
+
+      if (output_unconverted_id != output_id) {
+        status =
+            ynn_define_unary(subgraph->ynn, ynn_unary_convert,
+                             output_unconverted_id, &output_id, /*flags=*/0);
+        if (status != ynn_status_success) return status;
+      }
+    } else if (dot_result_as_float_id != output_id) {
+      status =
+          ynn_define_unary(subgraph->ynn, ynn_unary_convert,
+                           dot_result_as_float_id, &output_id, /*flags=*/0);
       if (status != ynn_status_success) return status;
     }
   } else if (accumulator_id != output_id) {

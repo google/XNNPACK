@@ -28,21 +28,12 @@ namespace ynn {
 
 template <typename Rng>
 ynn_type random_type(Rng& rng) {
-  std::uniform_int_distribution<> type_dist(0, 4);
-  switch (type_dist(rng)) {
-    case 0:
-      return ynn_type_int8;
-    case 1:
-      return ynn_type_uint8;
-    case 2:
-      return ynn_type_bf16;
-    case 3:
-      return ynn_type_fp32;
-    case 4:
-      return ynn_type_int32;
-    default:
-      YNN_UNREACHABLE;
-  }
+  ynn_type types[] = {
+      ynn_type_int2, ynn_type_int4, ynn_type_int8,
+      ynn_type_bf16, ynn_type_fp32,  ynn_type_int32,
+  };
+  std::uniform_int_distribution<> type_dist(0, std::size(types) - 1);
+  return types[type_dist(rng)];
 }
 
 template <typename T>
@@ -61,9 +52,11 @@ void TestImpl(T, size_t rank, bool output_rank, bool reshape_1d) {
     do {
       std::vector<int32_t> axes(all_axes.begin(), all_axes.begin() + num_axes);
 
+      ynn_type in_type = random_type(rng);
+
       // Define subgraph
       SubgraphBuilder subgraph(2);
-      subgraph.AddInput(random_type(rng), rank, 0)
+      subgraph.AddInput(in_type, rank, 0)
           .AddOutput(type_of<T>(), output_rank, 1)
           .AddGetTensorShape(axes, type_of<T>(), output_rank, 0, 1,
                              reshape_1d ? YNN_NODE_FLAG_RESHAPE_1D : 0);
@@ -73,6 +66,13 @@ void TestImpl(T, size_t rank, bool output_rank, bool reshape_1d) {
 
       for (int reshape = 0; reshape < 2; ++reshape) {
         std::vector<size_t> shape = random_shape(rng, rank);
+        // Ensure the innermost dimension is aligned to the element count for
+        // sub-byte packed types like int4 and int2.
+        int elem_count = type_element_count(in_type);
+        if (elem_count > 1 && !shape.empty()) {
+          shape.back() =
+              std::max<size_t>(1, shape.back() / elem_count) * elem_count;
+        }
 
         std::vector<size_t> expected_shape;
         if (output_rank != 0) {

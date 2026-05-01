@@ -39,6 +39,20 @@ cc_library(
     ],
 )
 
+# This should mirror the :matchers target and is provided for compatibility
+# with internal targets that are built exclusively for OSS.
+cc_library(
+    name = "matchers_no_g3",
+    testonly = True,
+    hdrs = ["matchers.h"],
+    deps = [
+        ":macros",
+        "@abseil-cpp//absl/status",
+        "@abseil-cpp//absl/status:statusor",
+        "@com_google_googletest//:gtest",  # no g3
+    ],
+)
+
 cc_library(
     name = "source_location",
     hdrs = ["source_location.h"],

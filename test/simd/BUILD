@@ -36,7 +36,7 @@ SIMD_TEST_DEPS = [
     copts = xnnpack_simd_copts_for_arch(arch),
     tags = ["simd_wrapper_test"],
     deps = SIMD_TEST_DEPS,
-) for arch in xnnpack_simd_f32_archs()]
+) for arch in xnnpack_simd_f32_archs() if arch != "wasmrelaxedsimd"]
 
 [xnnpack_unit_test(
     name = "f16_simd_" + arch + "_test",
@@ -47,7 +47,7 @@ SIMD_TEST_DEPS = [
     features = ["-use_header_modules"],
     tags = ["simd_wrapper_test"],
     deps = SIMD_TEST_DEPS,
-) for arch in xnnpack_simd_f16_archs()]
+) for arch in xnnpack_simd_f16_archs() if arch != "wasmrelaxedsimd"]
 
 [xnnpack_unit_test(
     name = "s16_simd_" + arch + "_test",

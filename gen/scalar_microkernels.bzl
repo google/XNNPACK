@@ -290,6 +290,7 @@ NON_PROD_SCALAR_MICROKERNEL_SRCS = [
     "src/f16-rminmax/gen/f16-rminmax-scalar-u3-acc3.c",
     "src/f16-rminmax/gen/f16-rminmax-scalar-u4-acc2.c",
     "src/f16-rminmax/gen/f16-rminmax-scalar-u4-acc4.c",
+    "src/f16-vsqrt/gen/f16-vsqrt-scalar-sqrt.c",
     "src/f32-bf16-vcvt/gen/f32-bf16-vcvt-scalar-u1.c",
     "src/f32-bf16-vcvt/gen/f32-bf16-vcvt-scalar-u3.c",
     "src/f32-bf16-vcvt/gen/f32-bf16-vcvt-scalar-u4.c",
