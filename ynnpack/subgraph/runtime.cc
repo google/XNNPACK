@@ -377,11 +377,11 @@ void ynn_runtime::schedule() {
       const int splits_match = sched_data.splits_match;
       std::vector<slinky::func::loop_info> loops;
       loops.reserve(loop_splits.size() - splits_match);
-      for (int j = 0; j < loop_splits.size() - splits_match; ++j) {
+      for (int j = 0; j < (int)loop_splits.size() - splits_match; ++j) {
         const ynn::scheduling_split& dim = loop_splits[j];
         loops.push_back(
             {dim.var,
-             global_loop_nest[loop_nest[loop_nest.size() - j - 1]].step,
+             global_loop_nest[loop_nest[loop_nest.size() - 1 - j]].step,
              dim.workers});
       }
 
