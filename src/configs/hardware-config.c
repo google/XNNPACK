@@ -95,6 +95,7 @@ static enum xnn_uarch cpuinfo_to_xnn_uarch(enum cpuinfo_uarch uarch) {
     case cpuinfo_uarch_cortex_a76: return xnn_uarch_cortex_a76;
     case cpuinfo_uarch_cortex_a77: return xnn_uarch_cortex_a77;
     case cpuinfo_uarch_cortex_a78: return xnn_uarch_cortex_a78;
+    case cpuinfo_uarch_cortex_a320: return xnn_uarch_cortex_a510;
     case cpuinfo_uarch_cortex_a510: return xnn_uarch_cortex_a510;
     case cpuinfo_uarch_cortex_a710: return xnn_uarch_cortex_a710;
     case cpuinfo_uarch_cortex_a715: return xnn_uarch_cortex_a715;
