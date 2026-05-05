@@ -642,6 +642,11 @@ void xnn_subgraph_rewrite_ssa(xnn_subgraph_t subgraph);
 // corresponding flag XNN_NODE_FLAG_REQUIRES_ROW_SUM.
 enum xnn_status xnn_subgraph_rewrite_for_row_sum(xnn_subgraph_t subgraph);
 
+// Rewrites the pattern `bmm(a:f32, dequant(b:qint8):f32) -> f32` into
+// `bmm(convert(a:f32 -> qdint8), convert(b:qint8 -> qcint8)) -> f32`. The
+// per-tensor scale of `b` is broadcast to a per-channel scale array.
+enum xnn_status xnn_subgraph_rewrite_dequant_bmm(xnn_subgraph_t subgraph);
+
 enum xnn_status xnn_subgraph_optimize(xnn_subgraph_t subgraph, uint32_t flags);
 
 void xnn_subgraph_rewrite_for_nchw(xnn_subgraph_t subgraph);
