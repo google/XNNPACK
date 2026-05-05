@@ -25,6 +25,45 @@
 #define XNN_PAD_EXTRA_BYTES(s, t) \
   (((s) + XNN_EXTRA_BYTES / sizeof(t) - 1) & ~(XNN_EXTRA_BYTES / sizeof(t) - 1))
 
+// Minimal int4/int2 packing structs and type unwrapping for benchmarks.
+struct int4x2 {
+  uint8_t value;
+  int4x2() = default;
+  int4x2(uint8_t value) : value(value) {}
+};
+
+struct int2x4 {
+  uint8_t value;
+  int2x4() = default;
+  int2x4(uint8_t value) : value(value) {}
+};
+
+using qcint8 = xnnpack::quantized<int8_t, xnnpack::channelwise>;
+using qcint4 = xnnpack::quantized<int4x2, xnnpack::channelwise>;
+using qcint2 = xnnpack::quantized<int2x4, xnnpack::channelwise>;
+
+namespace xnnpack {
+template <>
+struct unwrap_quantized<qcint4> {
+  using type = uint8_t;
+};
+
+template <>
+struct unwrap_quantized<qcint2> {
+  using type = uint8_t;
+};
+}  // namespace xnnpack
+
+template <>
+inline xnn_datatype xnn_datatype_of<qcint4>() {
+  return xnn_datatype_qcint4;
+}
+
+template <>
+inline xnn_datatype xnn_datatype_of<qcint2>() {
+  return xnn_datatype_qcint2;
+}
+
 namespace models {
 
 template <typename T, typename W = T, typename O = T>
@@ -50,20 +89,34 @@ xnn_subgraph_t FullyConnected(size_t batch_size, size_t m, size_t k, size_t n,
   std::array<size_t, 3> dims_out = {{batch_size, m, n}};
 
   uint32_t input_id = XNN_INVALID_VALUE_ID;
-  status = xnn_define_tensor_value(subgraph.get(), datatype_in, dims_in.size(),
-                                   dims_in.data(),
-                                   /*data=*/nullptr, /*external_id=*/0,
-                                   XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id);
+  if (xnn_datatype_is_quantized(datatype_in)) {
+    status = xnn_define_quantized_tensor_value(
+        subgraph.get(), datatype_in, /*zero_point=*/0, /*scale=*/1.0f,
+        dims_in.size(), dims_in.data(), /*data=*/nullptr,
+        /*external_id=*/0, XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id);
+  } else {
+    status = xnn_define_tensor_value(subgraph.get(), datatype_in,
+                                     dims_in.size(), dims_in.data(),
+                                     /*data=*/nullptr, /*external_id=*/0,
+                                     XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id);
+  }
   if (status != xnn_status_success) {
     std::cerr << "failed to create input tensor" << std::endl;
     return nullptr;
   }
 
   uint32_t output_id = XNN_INVALID_VALUE_ID;
-  status = xnn_define_tensor_value(
-      subgraph.get(), datatype_out, dims_out.size(), dims_out.data(),
-      /*data=*/nullptr, /*external_id=*/1,
-      /*flags=*/XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id);
+  if (xnn_datatype_is_quantized(datatype_out)) {
+    status = xnn_define_quantized_tensor_value(
+        subgraph.get(), datatype_out, /*zero_point=*/0, /*scale=*/1.0f,
+        dims_out.size(), dims_out.data(), /*data=*/nullptr,
+        /*external_id=*/1, XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id);
+  } else {
+    status = xnn_define_tensor_value(
+        subgraph.get(), datatype_out, dims_out.size(), dims_out.data(),
+        /*data=*/nullptr, /*external_id=*/1,
+        /*flags=*/XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id);
+  }
   if (status != xnn_status_success) {
     std::cerr << "failed to create output tensor" << std::endl;
     return nullptr;
@@ -74,11 +127,36 @@ xnn_subgraph_t FullyConnected(size_t batch_size, size_t m, size_t k, size_t n,
     using Wunpacked = typename xnnpack::unwrap_quantized<W>::type;
     static std::vector<Wunpacked> w1_data;
     w1_data.resize(XNN_PAD_EXTRA_BYTES(k * n, Wunpacked));
-    auto f32rng = std::bind(std::uniform_real_distribution<float>(-1.0f, +1.0f),
-                            std::ref(rng));
-    std::generate(w1_data.begin(), w1_data.end(),
-                  [&]() { return static_cast<Wunpacked>(f32rng()); });
-    if (xnn_datatype_is_channelwise_quantized(datatype_w)) {
+
+    if (datatype_w == xnn_datatype_qcint4 ||
+        datatype_w == xnn_datatype_qcint2) {
+      auto u8rng =
+          std::bind(std::uniform_int_distribution<int>(0, 255), std::ref(rng));
+      std::generate(reinterpret_cast<uint8_t*>(w1_data.data()),
+                    reinterpret_cast<uint8_t*>(w1_data.data() + w1_data.size()),
+                    [&]() { return static_cast<uint8_t>(u8rng()); });
+    } else {
+      auto f32rng = std::bind(
+          std::uniform_real_distribution<float>(-1.0f, +1.0f), std::ref(rng));
+      std::generate(w1_data.begin(), w1_data.end(),
+                    [&]() { return static_cast<Wunpacked>(f32rng()); });
+    }
+
+    if (datatype_w == xnn_datatype_qcint2 && dynamically_quantize_lhs) {
+      static std::vector<float> w1_scale;
+      w1_scale.resize(n);
+      std::fill(w1_scale.begin(), w1_scale.end(), 1.0f);
+      static std::vector<float> channelwise_zero_point;
+      channelwise_zero_point.resize(n);
+      std::fill(channelwise_zero_point.begin(), channelwise_zero_point.end(),
+                -1.0f);
+      status = xnn_define_channelwise_quantized_tensor_value_v3(
+          subgraph.get(), datatype_w, /*zero_point=*/0,
+          /*scale=*/w1_scale.data(), dims_w.size(), /*channel_dim=*/0,
+          dims_w.data(),
+          /*data=*/w1_data.data(), /*external_id=*/XNN_INVALID_VALUE_ID,
+          /*flags=*/0, &weights_id, channelwise_zero_point.data());
+    } else if (xnn_datatype_is_channelwise_quantized(datatype_w)) {
       static std::vector<float> w1_scale;
       w1_scale.resize(n);
       std::fill(w1_scale.begin(), w1_scale.end(), 1.0f);
@@ -169,14 +247,45 @@ static void FP16FullyConnected(benchmark::State& state) {
   });
 }
 
-static void QD8FullyConnected(benchmark::State& state) {
+static void QD8F32QC8W(benchmark::State& state) {
   xnnpack::RunBenchmark(state, [&state]() {
-    return models::FullyConnected<
-        float, xnnpack::quantized<int8_t, xnnpack::channelwise>>(
+    return models::FullyConnected<float, qcint8>(
         FLAGS_batch_size,
         /*m=*/state.range(0), /*k=*/state.range(1),
         /*n=*/state.range(2),
         /*dynamically_quantize_lhs=*/true);
+  });
+}
+
+static void QD8F32QC4WFullyConnected(benchmark::State& state) {
+  xnnpack::RunBenchmark(state, [&state]() {
+    return models::FullyConnected<float, qcint4>(
+        FLAGS_batch_size, state.range(0), state.range(1), state.range(2),
+        /*dynamically_quantize_lhs=*/true);
+  });
+}
+
+static void QD8F32QC2WFullyConnected(benchmark::State& state) {
+  xnnpack::RunBenchmark(state, [&state]() {
+    return models::FullyConnected<float, qcint2>(
+        FLAGS_batch_size, state.range(0), state.range(1), state.range(2),
+        /*dynamically_quantize_lhs=*/true);
+  });
+}
+
+static void QS8QC4WFullyConnected(benchmark::State& state) {
+  xnnpack::RunBenchmark(state, [&state]() {
+    return models::FullyConnected<xnnpack::quantized<int8_t>, qcint4>(
+        FLAGS_batch_size, state.range(0), state.range(1), state.range(2),
+        /*dynamically_quantize_lhs=*/false);
+  });
+}
+
+static void QS8QC2WFullyConnected(benchmark::State& state) {
+  xnnpack::RunBenchmark(state, [&state]() {
+    return models::FullyConnected<xnnpack::quantized<int8_t>, qcint2>(
+        FLAGS_batch_size, state.range(0), state.range(1), state.range(2),
+        /*dynamically_quantize_lhs=*/false);
   });
 }
 
@@ -194,7 +303,31 @@ BENCHMARK(FP16FullyConnected)
     ->UseRealTime()
     ->Apply(FullyConnectedArgs);
 
-BENCHMARK(QD8FullyConnected)
+BENCHMARK(QD8F32QC8W)
+    ->Unit(benchmark::kMicrosecond)
+    ->MeasureProcessCPUTime()
+    ->UseRealTime()
+    ->Apply(FullyConnectedArgs);
+
+BENCHMARK(QD8F32QC4WFullyConnected)
+    ->Unit(benchmark::kMicrosecond)
+    ->MeasureProcessCPUTime()
+    ->UseRealTime()
+    ->Apply(FullyConnectedArgs);
+
+BENCHMARK(QD8F32QC2WFullyConnected)
+    ->Unit(benchmark::kMicrosecond)
+    ->MeasureProcessCPUTime()
+    ->UseRealTime()
+    ->Apply(FullyConnectedArgs);
+
+BENCHMARK(QS8QC4WFullyConnected)
+    ->Unit(benchmark::kMicrosecond)
+    ->MeasureProcessCPUTime()
+    ->UseRealTime()
+    ->Apply(FullyConnectedArgs);
+
+BENCHMARK(QS8QC2WFullyConnected)
     ->Unit(benchmark::kMicrosecond)
     ->MeasureProcessCPUTime()
     ->UseRealTime()
