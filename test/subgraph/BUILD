@@ -179,6 +179,10 @@ xnnpack_unit_test(
 xnnpack_unit_test(
     name = "batch_matrix_multiply_test",
     srcs = ["batch-matrix-multiply.cc"],
+    defines = select({
+        "//ynnpack/xnnpack:use_ynnpack": ["XNNPACK_USE_YNNPACK"],
+        "//conditions:default": [],
+    }),
     shard_count = 5,
     deps = SUBGRAPH_TEST_DEPS + [
         "//:microparams_h",

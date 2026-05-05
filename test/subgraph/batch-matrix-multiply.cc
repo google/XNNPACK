@@ -675,6 +675,7 @@ TEST(BatchMatrixMultiplyQD8F32, dont_inline_lhs_static_b) {
                                 XNN_FLAG_NO_INLINED_LHS_PACKING);
 }
 
+#ifndef XNNPACK_USE_YNNPACK
 // Verifies the `bmm(a:f32, dequant(b:qint8):f32)` -> `bmm(qdint8, qcint8)`
 // rewrite at the subgraph level. With `XNN_FLAG_NO_INLINED_LHS_PACKING` we
 // keep the inserted `convert(f32 -> qdint8)` as a standalone node so the
@@ -731,5 +732,6 @@ TEST(BatchMatrixMultiplyDequantBmmRewrite, dynamic_b) {
     }
   }
 }
+#endif  // XNNPACK_USE_YNNPACK
 
 }  // namespace xnnpack
