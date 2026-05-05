@@ -849,6 +849,57 @@ ynn_status ynn_subgraph::eliminate_common_subgraphs() {
   return ynn_status_success;
 }
 
+void ynn_subgraph::topological_sort() {
+  std::vector<bool> value_ready(values.size(), false);
+  for (uint32_t i = 0; i < values.size(); ++i) {
+    if (values[i].is_external_input() || values[i].is_static()) {
+      value_ready[i] = true;
+    }
+  }
+
+  // This topological sort implementation would be inefficient if the nodes were
+  // not already mostly sorted.
+  size_t begin = 0;
+  size_t invalid_count = 0;
+  bool changed;
+  do {
+    changed = false;
+    for (size_t i = begin; i < nodes.size(); ++i) {
+      if (!nodes[i].is_valid()) {
+        ++invalid_count;
+        continue;
+      }
+
+      const bool node_is_ready = std::all_of(
+          nodes[i].inputs.begin(), nodes[i].inputs.end(), [&](uint32_t id) {
+            return id == YNN_INVALID_VALUE_ID || value_ready[id];
+          });
+
+      if (!node_is_ready) continue;
+
+      if (i > begin) {
+        std::rotate(nodes.begin() + begin, nodes.begin() + i,
+                    nodes.begin() + i + 1);
+      }
+      for (uint32_t output_id : nodes[begin].outputs) {
+        if (output_id != YNN_INVALID_VALUE_ID) {
+          value_ready[output_id] = true;
+        }
+      }
+      begin++;
+      changed = true;
+    }
+  } while (changed && begin < nodes.size());
+
+  if (begin + invalid_count < nodes.size()) {
+    YNN_LOG_WARNING()
+        << "Failed to topologically sort subgraph; graph may have "
+           "cycles.";
+  }
+
+  nodes.resize(begin);
+}
+
 ynn_status ynn_subgraph::optimize(slinky::thread_pool* threadpool) {
   ynn_status status;
 

@@ -689,6 +689,9 @@ struct ynn_subgraph : public ynn::ref_counted<ynn_subgraph> {
   // Invalidate unused values.
   void invalidate_dead_values();
 
+  // Topologically sort the nodes in the subgraph.
+  void topological_sort();
+
   ynn_status optimize(slinky::thread_pool* threadpool);
 
   void dump(std::ostream& os) const;

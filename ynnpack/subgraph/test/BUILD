@@ -190,6 +190,7 @@ cc_test(
     "iota",
     "lut",
     "reduce",
+    "reduce_dot",
     "runtime",
     "split_dim",
     "stack",

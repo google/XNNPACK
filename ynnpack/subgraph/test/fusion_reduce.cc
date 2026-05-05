@@ -16,6 +16,7 @@
 namespace ynn {
 
 using ::testing::AllOf;
+using ::testing::ElementsAre;
 using ::testing::Not;
 
 namespace {
@@ -717,6 +718,34 @@ TEST(fusion, reduce_static_transpose_identity) {
   // Transpose permutation is {0, 2, 1}, which translates to slinky permutation
   // {1, 0, 2}. Mapped axis = perm[0] = 1.
   EXPECT_EQ(reduce_op.k_dims, 0b010);
+}
+
+TEST(fusion, reduce_sum_to_dot_f32) {
+  const uint32_t a_id = 0;
+  const uint32_t b_id = 1;
+  const uint32_t y_id = 2;
+  SubgraphBuilder builder(3);
+  uint32_t mul_id = YNN_INVALID_VALUE_ID;
+  builder.AddInput(ynn_type_fp32, {4, 8, 1}, a_id)
+      .AddInput(ynn_type_fp32, {1, 8, 3}, b_id)
+      .AddOutput(ynn_type_fp32, {4, 3}, y_id)
+      .AddTensor(ynn_type_fp32, {4, 8, 3}, mul_id);
+
+  // y = sum(a * b, axis=1)
+  // This should rewrite to a dot.
+  builder.AddBinary(ynn_binary_multiply, a_id, b_id, mul_id)
+      .AddReduce(ynn_reduce_sum, {1}, mul_id, YNN_INVALID_VALUE_ID, y_id, 0);
+
+  ynn_subgraph& subgraph = *builder.GetSubgraph();
+  subgraph.fusion();
+  subgraph.invalidate_dead_values();
+
+  EXPECT_THAT(subgraph, Not(HasValidValueId(mul_id)));
+  const ynn_node& dot_node = ProducerOf(y_id, subgraph);
+  ASSERT_THAT(dot_node, IsDot());
+  EXPECT_THAT(
+      ProducerOf(dot_node.inputs[0], subgraph),
+      AllOf(IsStaticTransposeWithPerm(ElementsAre(1, 2)), InputsAre(a_id)));
 }
 
 }  // namespace ynn

@@ -115,35 +115,42 @@ void define_static_transpose(ynn_subgraph& subgraph, ynn_node& node,
                              uint32_t input_id, uint32_t& output_id,
                              bool alias) {
   const ynn_value& input = subgraph.value(input_id);
-  ynn_value& output = subgraph.get_output_value(&output_id, input);
-
-  node.inputs = {input_id};
-  node.outputs = {output.id};
 
   // Propagate shape.
-  const int elem_count = type_element_count(output.type);
-  output.extents.resize(permutation.size());
-  int first_non_trivial_dim = permutation.size();
-  for (int d = 0; d < output.rank(); ++d) {
-    // Here we want to preserve undefined (broadcast) dimensions.
+  const int elem_count = type_element_count(input.type);
+  std::vector<slinky::expr> output_extents(permutation.size());
+  size_t first_non_trivial_dim = permutation.size();
+  bool identity = permutation.size() == input.rank();
+  for (size_t d = 0; d < output_extents.size(); ++d) {
+    identity = identity && (permutation[d] == static_cast<int32_t>(d));
     slinky::expr input_extent = permutation[d] < input.rank()
                                     ? input.extents[permutation[d]]
                                     : slinky::expr{};
     if (input_extent.defined()) {
       first_non_trivial_dim = std::min(first_non_trivial_dim, d);
     }
-    output.extents[d] = input_extent;
+    output_extents[d] = input_extent;
   }
-  if (elem_count != 1 && output.rank() > 0 && output.extent(0).defined()) {
-    // This could fail if the user transposes a dimension with an
+  if (elem_count != 1 && !output_extents.empty() &&
+      output_extents[0].defined()) {
+    // And convert back to a physical shape after converting to a logical
+    // shape above. This could fail if the user transposes a dimension with an
     // extent that is not aligned to `elem_count`.
     node.checks.push_back(ynn_node::check{
-        output.extents[0] % elem_count == 0,
-        {"For node 'static_transpose', dimension 0 extent (", output.extents[0],
+        output_extents[0] % elem_count == 0,
+        {"For node 'static_transpose', dimension 0 extent (", output_extents[0],
          ") of ", ynn_node::output_idx{0},
-         " is not aligned to an instance of type ", to_string(output.type)},
+         " is not aligned to an instance of type ", to_string(input.type)},
     });
   }
+
+  if (identity && output_id == YNN_INVALID_VALUE_ID) {
+    output_id = input_id;
+    return;
+  }
+
+  ynn_value& output = subgraph.get_output_value(&output_id, input);
+  output.extents = std::move(output_extents);
 
   // We can alias if we aren't rearranging the stride 1 dimension from the
   // input.
@@ -151,6 +158,8 @@ void define_static_transpose(ynn_subgraph& subgraph, ynn_node& node,
           first_non_trivial_dim >= permutation.size() ||
           permutation[first_non_trivial_dim] == 0;
 
+  node.inputs = {input_id};
+  node.outputs = {output_id};
   node.op = ynn_node::static_transpose{std::move(permutation), alias};
 
   node.create = [](const ynn_node& node, ynn_runtime& runtime) {

@@ -8,12 +8,14 @@
 #include <cstddef>
 #include <cstdint>
 #include <initializer_list>
+#include <numeric>
 #include <optional>
 #include <utility>
 #include <variant>
 #include <vector>
 
 #include "ynnpack/base/log.h"
+#include "ynnpack/base/span.h"
 #include "ynnpack/base/to_string.h"
 #include "ynnpack/base/type.h"
 #include "ynnpack/include/ynnpack.h"
@@ -1557,6 +1559,203 @@ bool rewrite_reduce_static_transpose(ynn_subgraph& subgraph, ynn_node& node,
   return true;
 }
 
+// Rewrites sum(a * b) to dot(a, b).
+// dot(a, b) is sum(a(., k1, k2, k3, i, ...) * b(j, k1, k2, k3, ., ...)) where .
+// indicates a new dimension. This rewrite looks for sums that can be transposed
+// and have the new dimensions inserted to match the dot layout (and the result
+// then transposed back to the sum's output layout).
+bool rewrite_sum_to_dot(ynn_subgraph& subgraph, ynn_node& node,
+                        subgraph_analysis& analysis) {
+  const ynn_node::reduce* reduce_op = std::get_if<ynn_node::reduce>(&node.op);
+  if (!reduce_op || reduce_op->op != ynn_reduce_sum) {
+    return false;
+  }
+
+  if (node.inputs[1] != YNN_INVALID_VALUE_ID) {
+    YNN_LOG_DEBUG()
+        << "not rewriting sum(a*b) to dot(a, b) because the sum has "
+           "a non-identity initial value.";
+    return false;
+  }
+
+  if (reduce_op->k_dims.count() > 1) {
+    YNN_LOG_DEBUG()
+        << "not rewriting sum(a*b) to dot(a, b) because the sum has "
+           "more than 1 reduction dimension.";
+    return false;
+  }
+
+  ynn_node* mul_node = analysis.producer_of(node.inputs[0]);
+  if (!mul_node || !is_binary_node(*mul_node, ynn_binary_multiply)) {
+    return false;
+  }
+
+  if (analysis.consumers[mul_node->outputs[0]].size() != 1 ||
+      subgraph.value(mul_node->outputs[0]).is_external_output()) {
+    return false;
+  }
+
+  uint32_t a_id = mul_node->inputs[0];
+  uint32_t b_id = mul_node->inputs[1];
+
+  if (slinky::prove_true(subgraph.value(b_id).extent(0) == 1)) {
+    // B already has a broadcast where we want it in A, swap them to make
+    // the transposes less likely to be needed.
+    // TODO: dsharlet - We could probably be smarter about this optimization.
+    std::swap(a_id, b_id);
+  }
+
+  const ynn_value& a = subgraph.value(a_id);
+  const ynn_value& b = subgraph.value(b_id);
+
+  if (a.type != ynn_type_fp32 || b.type != ynn_type_fp32) {
+    // TODO: dsharlet - Support more types.
+    YNN_LOG_DEBUG() << "not rewriting sum(a*b) to dot(a, b) because the inputs "
+                       "are not fp32.";
+    return false;
+  }
+
+  const int max_rank = std::max(a.rank(), b.rank());
+  std::vector<int32_t> perm_a(max_rank);
+  std::iota(perm_a.begin(), perm_a.end(), 0);
+
+  // 1. permute the operation such that the reduction dimensions are in the
+  // first num_k_dims dimensions:
+  // sum(a(k1, k2, ..., d1, d2, ...) * b(k1, k2, ..., d1, d2, ...))
+  int num_k_dims = 0;
+  for (size_t i = 0; i < max_rank; ++i) {
+    if (reduce_op->k_dims[i]) {
+      if (!slinky::prove_true(a.extent(i) == b.extent(i))) {
+        // Don't handle broadcasted reduction dimensions.
+        return false;
+      }
+      std::swap(perm_a[num_k_dims++], perm_a[i]);
+    }
+  }
+
+  // Helper to find a broadcast dimension.
+  // TODO: dsharlet - This should find the broadcast with the biggest extent in
+  // the other buffer to maximize the value of the dot.
+  auto find_broadcast = [&](const ynn_value& v, ynn::span<const int32_t> perm,
+                            int exclude = -1) -> int {
+    for (size_t i = num_k_dims; i < perm.size(); ++i) {
+      if (static_cast<int>(i) != exclude &&
+          slinky::prove_true(v.extent(perm[i]) == 1)) {
+        return i;
+      }
+    }
+    return -1;
+  };
+  std::vector<int32_t> perm_b = perm_a;
+
+  // 2. Find broadcasts from b to move into the i dimension for a, and from a to
+  // move into the j dimension for b.
+  // sum(a(., k1, k2, i, ..., d1, d2, ...) * b(j, k1, k2, ., ..., d1, d2, ...))
+  int i_dim = find_broadcast(b, perm_b);
+  int j_dim = find_broadcast(a, perm_a, i_dim);
+
+  // TODO: dsharlet - Maybe if there is no broadcast on either side, it is not
+  // faster to use dot.
+  if (i_dim != -1) {
+    std::rotate(perm_a.begin() + num_k_dims, perm_a.begin() + i_dim,
+                perm_a.begin() + i_dim + 1);
+  } else {
+    perm_a.insert(perm_a.begin() + num_k_dims, YNN_MAX_TENSOR_RANK);
+  }
+  if (j_dim != -1) {
+    perm_a.erase(perm_a.begin() +
+                 (j_dim < i_dim || i_dim == -1 ? j_dim + 1 : j_dim));
+  }
+
+  if (j_dim != -1) {
+    std::rotate(perm_b.begin(), perm_b.begin() + j_dim,
+                perm_b.begin() + j_dim + 1);
+  } else {
+    perm_b.insert(perm_b.begin(), YNN_MAX_TENSOR_RANK);
+  }
+  if (i_dim != -1) {
+    perm_b.erase(perm_b.begin() +
+                 (i_dim < j_dim || j_dim == -1 ? i_dim + 1 : i_dim));
+  }
+
+  YNN_LOG_DEBUG() << "Rewriting sum(a * b) to dot(a, b)";
+
+  // Do the transposes of the inputs.
+  uint32_t a_t_id = YNN_INVALID_VALUE_ID;
+  uint32_t b_t_id = YNN_INVALID_VALUE_ID;
+  ynn_node transpose_a, transpose_b;
+  define_static_transpose(subgraph, transpose_a, perm_a, a_id, a_t_id);
+  define_static_transpose(subgraph, transpose_b, perm_b, b_id, b_t_id);
+  if (a_t_id != a_id) subgraph.add_node(std::move(transpose_a));
+  if (b_t_id != b_id) subgraph.add_node(std::move(transpose_b));
+
+  // 3. Construct the output permutation.
+  uint32_t output_id = node.outputs[0];
+  std::vector<int32_t> perm_output;
+  const int dot_output_rank =
+      (perm_a.size() == static_cast<size_t>(num_k_dims))
+          ? static_cast<int>(perm_b.size()) - num_k_dims
+          : static_cast<int>(std::max(perm_a.size(), perm_b.size())) + 1 -
+                num_k_dims;
+  bool is_perm_output_identity =
+      subgraph.value(output_id).rank() == dot_output_rank;
+
+  auto add_to_perm_output = [&](int32_t dim) {
+    is_perm_output_identity =
+        is_perm_output_identity && (dim == perm_output.size());
+    perm_output.push_back(dim);
+  };
+  for (int d = 0; d < max_rank; ++d) {
+    if (reduce_op->k_dims[d]) {
+      if (reduce_op->keep_dims) {
+        add_to_perm_output(YNN_MAX_TENSOR_RANK);
+      }
+    } else {
+      // Find where original dimension is in the dot output.
+      if (perm_b[0] == static_cast<int32_t>(d)) {
+        add_to_perm_output(0);
+      } else if (perm_a[num_k_dims] == static_cast<int32_t>(d)) {
+        add_to_perm_output(1);
+      } else {
+        int dot_idx = -1;
+        for (int k = num_k_dims + 1; k < perm_a.size(); ++k) {
+          if (perm_a[k] == static_cast<int32_t>(d)) {
+            dot_idx = k - num_k_dims + 1;
+            break;
+          }
+        }
+        if (dot_idx != -1) {
+          add_to_perm_output(dot_idx);
+        } else {
+          // This must be a dimension that was 1 in both inputs, and was not
+          // selected as i or j, and thus is not in the dot output at all.
+          add_to_perm_output(YNN_MAX_TENSOR_RANK);
+        }
+      }
+    }
+  }
+
+  // Do the dot.
+  uint32_t dot_id = is_perm_output_identity ? output_id : YNN_INVALID_VALUE_ID;
+  ynn_define_dot(&subgraph, num_k_dims, a_t_id, b_t_id, YNN_INVALID_VALUE_ID,
+                 &dot_id,
+                 /*flags=*/0);
+
+  node.invalidate();
+  if (!is_perm_output_identity) {
+    // Transpose the output back to the original layout.
+    ynn_node transpose;
+    define_static_transpose(subgraph, transpose, perm_output, dot_id,
+                            output_id);
+    subgraph.add_node(std::move(transpose));
+  }
+
+  subgraph.topological_sort();
+  analysis.invalidate();
+
+  return true;
+}
+
 }  // namespace
 
 }  // namespace ynn
@@ -1578,6 +1777,7 @@ ynn_status ynn_subgraph::fusion() {
                 ynn::rewrite_expand_dims_reduce(*this, node, analysis) ||
                 ynn::rewrite_reshape(*this, node, analysis) ||
                 ynn::rewrite_divide_sqrt(*this, node, analysis) ||
+                ynn::rewrite_sum_to_dot(*this, node, analysis) ||
                 ynn::rewrite_ternary(*this, node, analysis) ||
                 ynn::rewrite_binary_convert(*this, node, analysis) ||
                 ynn::rewrite_convert_elementwise(*this, node, analysis) ||
@@ -1593,6 +1793,10 @@ ynn_status ynn_subgraph::fusion() {
                 ynn::rewrite_reduce_sum_of_squared(*this, node, analysis) ||
                 ynn::rewrite_reduce_sum_convert(*this, node, analysis) ||
                 ynn::rewrite_reduce_static_transpose(*this, node, analysis);
+
+      if (!analysis.is_valid) {
+        break;
+      }
     }
     if (changed) invalidate_dead_values();
   } while (changed);
@@ -1611,6 +1815,10 @@ ynn_status ynn_subgraph::fusion() {
 
       changed = changed || ynn::fuse_converts(*this, node, analysis) ||
                 ynn::fuse_quantize(*this, node, analysis);
+
+      if (!analysis.is_valid) {
+        break;
+      }
     }
     if (changed) invalidate_dead_values();
   } while (changed);

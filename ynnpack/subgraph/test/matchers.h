@@ -256,6 +256,16 @@ MATCHER(IsStaticExpandDims, "") {
 MATCHER(IsStaticSlice, "") {
   return std::holds_alternative<ynn_node::static_slice>(arg.op);
 }
+MATCHER(IsStaticTranspose, "") {
+  return std::holds_alternative<ynn_node::static_transpose>(arg.op);
+}
+MATCHER_P(IsStaticTransposeWithPerm, perm_matcher, "") {
+  const ynn_node::static_transpose* transpose =
+      std::get_if<ynn_node::static_transpose>(&arg.op);
+  return transpose &&
+         testing::ExplainMatchResult(perm_matcher, transpose->permutation,
+                                     result_listener);
+}
 
 // Checks that the given value ID is valid in the given subgraph.
 //
