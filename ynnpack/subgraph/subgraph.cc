@@ -487,7 +487,6 @@ bool should_constant_fold(const ynn_subgraph& subgraph, const ynn_node& node) {
       std::holds_alternative<ynn_node::split_dim>(node.op) ||
       std::holds_alternative<ynn_node::split_dims>(node.op) ||
       std::holds_alternative<ynn_node::static_broadcast>(node.op) ||
-      std::holds_alternative<ynn_node::static_expand_dims>(node.op) ||
       std::holds_alternative<ynn_node::static_reshape>(node.op) ||
       std::holds_alternative<ynn_node::static_transpose>(node.op)) {
     // Don't constant fold these "free" ops. If we allowed them to constant
@@ -956,9 +955,6 @@ const char* name_of(const ynn_node::static_reshape&) {
 const char* name_of(const ynn_node::static_broadcast&) {
   return "static_broadcast";
 }
-const char* name_of(const ynn_node::static_expand_dims&) {
-  return "static_expand_dims";
-}
 const char* name_of(const ynn_node::static_pad&) { return "static_pad"; }
 const char* name_of(const ynn_node::static_slice&) { return "static_slice"; }
 const char* name_of(const ynn_node::slice_like&) { return "slice_like"; }
@@ -1098,10 +1094,6 @@ void print(std::ostream& os, const ynn_node::static_reshape& op) {
 
 void print(std::ostream& os, const ynn_node::static_broadcast& op) {
   os << "new_dims=" << op.new_dims;
-}
-
-void print(std::ostream& os, const ynn_node::static_expand_dims& op) {
-  os << "new_axes=" << op.new_axes;
 }
 
 void print(std::ostream& os, const ynn_node::static_pad& op) {

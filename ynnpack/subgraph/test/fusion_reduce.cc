@@ -426,7 +426,7 @@ TEST(fusion, reduce_expand_dims_initializer) {
   EXPECT_THAT(node,
               AllOf(IsReduce(ynn_reduce_sum), InputsInclude(a_id, v1_id)));
   EXPECT_THAT(ProducerOf(v1_id, subgraph),
-              AllOf(IsExpandDims(), InputsAre(b_id)));
+              AllOf(IsExpandDims(subgraph), InputsAre(b_id)));
   const auto& reduce = std::get<ynn_node::reduce>(node.op);
   EXPECT_EQ(reduce.k_dims, 0b0110);
   EXPECT_TRUE(reduce.keep_dims);

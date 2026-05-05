@@ -394,17 +394,6 @@ struct ynn_node {
       return a.new_dims < b.new_dims;
     }
   };
-  struct static_expand_dims {
-    ynn::axes_set new_axes;
-    friend bool operator==(const static_expand_dims& a,
-                           const static_expand_dims& b) {
-      return a.new_axes == b.new_axes;
-    }
-    friend bool operator<(const static_expand_dims& a,
-                          const static_expand_dims& b) {
-      return a.new_axes < b.new_axes;
-    }
-  };
   struct static_pad {
     struct padding {
       int32_t axis;
@@ -571,11 +560,11 @@ struct ynn_node {
   std::vector<uint32_t> outputs;
   std::variant<invalid, opaque, broadcast, broadcast_like, concatenate,
                even_split, copy, split_dim, fuse_dim, fuse_dims, split_dims,
-               stack, static_reshape, static_broadcast, static_expand_dims,
-               static_pad, static_slice, slice_like, static_transpose,
-               stencil_copy, unary_elementwise, lut, binary_elementwise,
-               ternary_elementwise, dot, iota, pack_b, transpose_a,
-               get_tensor_shape, reduce, dequantize_dot>
+               stack, static_reshape, static_broadcast, static_pad,
+               static_slice, slice_like, static_transpose, stencil_copy,
+               unary_elementwise, lut, binary_elementwise, ternary_elementwise,
+               dot, iota, pack_b, transpose_a, get_tensor_shape, reduce,
+               dequantize_dot>
       op;
 
   const char* name() const;
