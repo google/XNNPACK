@@ -210,6 +210,11 @@ template <typename T, size_t N>
 YNN_ALWAYS_INLINE vec<T, N> floor_log2(vec<T, N> a) {
   return {floor_log2(a.lo()), floor_log2(a.hi())};
 }
+
+template <typename T, size_t N>
+YNN_ALWAYS_INLINE vec<T, N> exp2_round(vec<T, N> a) {
+  return {exp2_round(a.lo()), exp2_round(a.hi())};
+}
 template <typename T, size_t N>
 YNN_ALWAYS_INLINE vec<T, N> ceil(vec<T, N> a) {
   return {ceil(a.lo()), ceil(a.hi())};

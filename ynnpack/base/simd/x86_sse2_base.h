@@ -505,6 +505,19 @@ YNN_ALWAYS_INLINE f64x2 abs(f64x2 a) {
   return f64x2{_mm_andnot_pd(_mm_set1_pd(-0.0), a.v)};
 }
 
+YNN_ALWAYS_INLINE f32x4 exp2_round(f32x4 a) {
+  const __m128 magic = _mm_set1_ps(127.0 + static_cast<float>(1 << 23));
+  const __m128 res_bits = _mm_add_ps(a.v, magic);
+  return f32x4{
+      _mm_castsi128_ps(_mm_slli_epi32(_mm_castps_si128(res_bits), 23))};
+}
+YNN_ALWAYS_INLINE f64x2 exp2_round(f64x2 a) {
+  const __m128d magic = _mm_set1_pd(1023.0 + static_cast<double>(1ll << 52));
+  const __m128d res_bits = _mm_add_pd(a.v, magic);
+  return f64x2{
+      _mm_castsi128_pd(_mm_slli_epi64(_mm_castpd_si128(res_bits), 52))};
+}
+
 YNN_ALWAYS_INLINE double horizontal_max(f64x2 a) {
   return _mm_cvtsd_f64(_mm_max_sd(a.v, _mm_shuffle_pd(a.v, a.v, 1)));
 }

@@ -233,6 +233,11 @@ T floor_log2(T a) {
   return static_cast<T>(exp - 1);
 }
 
+template <typename T>
+T exp2_round(T a) {
+  return std::ldexp(static_cast<T>(1.0), static_cast<int>(std::nearbyint(a)));
+}
+
 }  // namespace ynn
 
 #endif  // XNNPACK_YNNPACK_BASE_ARITHMETIC_H_

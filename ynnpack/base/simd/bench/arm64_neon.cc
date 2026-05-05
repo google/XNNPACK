@@ -13,6 +13,7 @@ namespace ynn {
 namespace simd {
 
 BENCH_UNARY(neon, floor_log2, f64, 2);
+BENCH_UNARY(neon, exp2_round, f64, 2);
 
 }  // namespace simd
 }  // namespace ynn

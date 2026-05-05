@@ -12,6 +12,8 @@ namespace simd {
 
 BENCH_UNARY(avx2, floor_log2, f32, 8);
 BENCH_UNARY(avx2, floor_log2, f64, 4);
+BENCH_UNARY(avx2, exp2_round, f32, 8);
+BENCH_UNARY(avx2, exp2_round, f64, 4);
 
 }  // namespace simd
 }  // namespace ynn

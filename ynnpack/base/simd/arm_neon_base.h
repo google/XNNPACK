@@ -717,6 +717,21 @@ YNN_ALWAYS_INLINE f32x4 floor_log2(f32x4 a) {
                 bias_383);
   return f32x4{vbslq_f32(is_inf, infinity, res)};
 }
+YNN_ALWAYS_INLINE f32x4 exp2_round(f32x4 a) {
+#if defined(__ARM_ARCH) && __ARM_ARCH < 8
+  const float result[] = {
+      ynn::exp2_round(vgetq_lane_f32(a.v, 0)),
+      ynn::exp2_round(vgetq_lane_f32(a.v, 1)),
+      ynn::exp2_round(vgetq_lane_f32(a.v, 2)),
+      ynn::exp2_round(vgetq_lane_f32(a.v, 3)),
+  };
+  return f32x4{vld1q_f32(result)};
+#else
+  float32x4_t magic = vdupq_n_f32(127.0f + static_cast<float>(1 << 23));
+  int32x4_t res_bits = vreinterpretq_s32_f32(vaddq_f32(a.v, magic));
+  return f32x4{vreinterpretq_f32_s32(vshlq_n_s32(res_bits, 23))};
+#endif
+}
 #ifdef YNN_ARCH_ARM64
 YNN_ALWAYS_INLINE f64x2 floor_log2(f64x2 a) {
   const double result[] = {
@@ -724,6 +739,11 @@ YNN_ALWAYS_INLINE f64x2 floor_log2(f64x2 a) {
       ynn::floor_log2(vgetq_lane_f64(a.v, 1)),
   };
   return f64x2{vld1q_f64(result)};
+}
+YNN_ALWAYS_INLINE f64x2 exp2_round(f64x2 a) {
+  float64x2_t magic = vdupq_n_f64(1023.0 + static_cast<double>(1ll << 52));
+  int64x2_t res_bits = vreinterpretq_s64_f64(vaddq_f64(a.v, magic));
+  return f64x2{vreinterpretq_f64_s64(vshlq_n_s64(res_bits, 52))};
 }
 #endif
 
@@ -750,7 +770,7 @@ YNN_ALWAYS_INLINE float32x4_t not_f32(float32x4_t a) {
 
 YNN_ALWAYS_INLINE f32x4 floor(f32x4 a) {
 #if defined(__ARM_ARCH) && __ARM_ARCH < 8
-  float32x4_t max_non_int_val = vdupq_n_f32(8388608.0f);
+  float32x4_t max_non_int_val = vdupq_n_f32(static_cast<float>(1 << 23));
   uint32x4_t use_rounding = vcaltq_f32(a.v, max_non_int_val);
   float32x4_t trunc = vcvtq_f32_s32(vcvtq_s32_f32(a.v));
   uint32x4_t floor_mask = vcgtq_f32(trunc, a.v);
@@ -768,7 +788,7 @@ YNN_ALWAYS_INLINE f64x2 floor(f64x2 a) { return f64x2{vrndmq_f64(a.v)}; }
 
 YNN_ALWAYS_INLINE f32x4 ceil(f32x4 a) {
 #if defined(__ARM_ARCH) && __ARM_ARCH < 8
-  float32x4_t max_non_int_val = vdupq_n_f32(8388608.0f);
+  float32x4_t max_non_int_val = vdupq_n_f32(static_cast<float>(1 << 23));
   uint32x4_t use_rounding = vcaltq_f32(a.v, max_non_int_val);
   float32x4_t trunc = vcvtq_f32_s32(vcvtq_s32_f32(a.v));
   uint32x4_t ceil_mask = vcltq_f32(trunc, a.v);
@@ -786,7 +806,7 @@ YNN_ALWAYS_INLINE f64x2 ceil(f64x2 a) { return f64x2{vrndpq_f64(a.v)}; }
 
 YNN_ALWAYS_INLINE f32x4 round(f32x4 a) {
 #if defined(__ARM_ARCH) && __ARM_ARCH < 8
-  float32x4_t max_non_int_val = vdupq_n_f32(8388608.0f);
+  float32x4_t max_non_int_val = vdupq_n_f32(static_cast<float>(1 << 23));
   float32x4_t filter = vreinterpretq_f32_u32(vcaltq_f32(a.v, max_non_int_val));
   float32x4_t half = vdupq_n_f32(0.5f);
   float32x4_t sign_mask = vdupq_n_f32(-0.0f);

@@ -130,6 +130,9 @@ template <typename T, size_t N>
 vec<T, N> floor(vec<T, N> a);
 template <typename T, size_t N>
 vec<T, N> floor_log2(vec<T, N> a);
+// This function is permitted to use any rounding mode.
+template <typename T, size_t N>
+vec<T, N> exp2_round(vec<T, N> a);
 template <typename T, size_t N>
 vec<T, N> ceil(vec<T, N> a);
 template <typename T, size_t N>
@@ -317,7 +320,11 @@ YNN_ALWAYS_INLINE vec<T, 1> sub_sat(vec<T, 1> a, vec<T, 1> b) {
 }
 template <typename T>
 YNN_ALWAYS_INLINE vec<T, 1> floor_log2(vec<T, 1> a) {
-  return vec<T, 1>{floor_log2(a.v)};
+  return vec<T, 1>{ynn::floor_log2(a.v)};
+}
+template <typename T>
+YNN_ALWAYS_INLINE vec<T, 1> exp2_round(vec<T, 1> a) {
+  return vec<T, 1>{ynn::exp2_round(a.v)};
 }
 
 template <typename To, typename From>

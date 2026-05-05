@@ -5,25 +5,11 @@
 from ynnpack.kernels.elementwise.compiler import *  # pylint: disable=wildcard-import
 
 
-def setexp_f32(x):
-  # If `x` is an floating point value in the range [-127, 128], then
-  # `(x + magic) << 23` will generate the floating point value corresponding
-  # to `2^round(x)` (2^-127 and 2^128 will flush to zero and infinity,
-  # respectively).
-  vmagic = 8388735.0
-  return reinterpret_cast(
-      Float(32),
-      logical_shift_left(reinterpret_cast(Int(32), x + vmagic), i32(23)),
-  )
-
-
-# Quick-and-dirty round to nearest, only works for floats in the range
-# `[2^-22, 2^22)`.
 def qd_round_f32(a):
   # If `x` is an floating point value in the range `[2^-22, 2^22)`, then
   # `(x + magic) - magic`` will generate the floating point value corresponding
   # to `round(x)`.
-  vmagic = 12582912.0
+  vmagic = 1.5*(2**23)
   return (vmagic + a) - vmagic
 
 
@@ -54,7 +40,7 @@ def exp_fp32(a, x, output_multiplier, input_multiplier):
   vr = vz_prime - vz
 
   # Compute 2^z.
-  v2z = setexp_f32(vz)
+  v2z = exp2_round(vz)
 
   # Evaluate the numerator polynomial p(f).
   vp = multiply_add(vr, valpha_3, valpha_2)

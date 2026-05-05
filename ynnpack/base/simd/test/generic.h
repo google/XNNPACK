@@ -441,6 +441,32 @@ void test_floor_log2() {
 #define TEST_FLOOR_LOG2(test_class, type, N) \
   TEST_F(test_class, floor_log2_##type##x##N) { test_floor_log2<type, N>(); }
 
+template <typename scalar, size_t N>
+void test_exp2_round() {
+  using vector = vec<scalar, N>;
+
+  ReplicableRandomDevice rng;
+  for (auto _ : FuzzTest(std::chrono::milliseconds(100))) {
+    scalar a[vector::N];
+    auto abs_max = std::log2(type_info<scalar>::max()) - 2;
+    fill_random(a, vector::N, rng, -abs_max, abs_max);
+
+    scalar result[vector::N];
+    store(result, exp2_round(load(a, vector::N)));
+
+    for (size_t i = 0; i < vector::N; ++i) {
+      // Allow any integer k such that |k - a| <= 0.5.
+      // This accommodates different tie-breaking behaviors.
+      auto k = std::log2(result[i]);
+      ASSERT_NEAR(k, a[i], 0.5001) << a[i];
+      ASSERT_EQ(k, std::nearbyint(k)) << a[i];
+    }
+  }
+}
+
+#define TEST_EXP2_ROUND(test_class, type, N) \
+  TEST_F(test_class, exp2_round_##type##x##N) { test_exp2_round<type, N>(); }
+
 struct min_op {
   template <typename T>
   T operator()(T a, T b) {

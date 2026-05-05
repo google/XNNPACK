@@ -146,10 +146,10 @@ static void BM_unary(benchmark::State& state, Fn fn) {
   }
 }
 
-#define BENCH_UNARY(arch, op, type, N)                                      \
-  void BM_##op##_##type##x##N##_##arch(benchmark::State& state) {           \
-    BM_unary<type, N>(state, [](vec<type, N> a) { return floor_log2(a); }); \
-  }                                                                         \
+#define BENCH_UNARY(arch, op, type, N)                              \
+  void BM_##op##_##type##x##N##_##arch(benchmark::State& state) {   \
+    BM_unary<type, N>(state, [](vec<type, N> a) { return op(a); }); \
+  }                                                                 \
   BENCHMARK(BM_##op##_##type##x##N##_##arch);
 
 }  // namespace simd
