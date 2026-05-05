@@ -3668,8 +3668,8 @@ void xnn_pack_f32_conv_kgo_w(size_t g, size_t nc, size_t ks, size_t nr,
           std::fill_n(packed_weights, nr * kr, 0.0f);
           for (size_t nr_block_offset = (-sr_block_offset) & (sr - 1);
                nr_block_offset < nr_block_size; nr_block_offset += sr) {
-            packed_weights[nr_block_offset * kr] =
-                k[ki * g * nc + (nr_block_start + nr_block_offset)];
+            unaligned_indexed_store_f32(packed_weights, nr_block_offset * kr,
+                                        unaligned_indexed_load_f32(k, ki * g * nc + (nr_block_start + nr_block_offset)));
           }
           packed_weights += nr * kr;
         }
@@ -3706,8 +3706,8 @@ void xnn_pack_f16_conv_kgo_w(size_t g, size_t nc, size_t ks, size_t nr,
           std::fill_n(packed_weights, nr * kr, UINT16_C(0));
           for (size_t nr_block_offset = (-sr_block_offset) & (sr - 1);
                nr_block_offset < nr_block_size; nr_block_offset += sr) {
-            packed_weights[nr_block_offset * kr] =
-                k[ki * g * nc + (nr_block_start + nr_block_offset)];
+            unaligned_indexed_store_u16(packed_weights, nr_block_offset * kr,
+                                        unaligned_indexed_load_u16(k, ki * g * nc + (nr_block_start + nr_block_offset)));
           }
           packed_weights += nr * kr;
         }
