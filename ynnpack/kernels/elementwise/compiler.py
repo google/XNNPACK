@@ -553,13 +553,13 @@ def saturating_narrow(x):
 
 @intrinsic
 def min(x, y):
-  assert x.ty == y.ty
+  (x, y) = promote_types(x, y)
   return Op(wrap(x).ty, "min", [x, y])
 
 
 @intrinsic
 def max(x, y):
-  assert x.ty == y.ty
+  (x, y) = promote_types(x, y)
   return Op(x.ty, "max", [x, y])
 
 
@@ -694,8 +694,16 @@ def i32(value):
   return Constant(Int(32), value)
 
 
+def i64(value):
+  return Constant(Int(64), value)
+
+
 def f32(value):
   return Constant(Float(32), value)
+
+
+def f64(value):
+  return Constant(Float(64), value)
 
 
 class BroadcastMode(enum.Enum):
@@ -1623,8 +1631,8 @@ class Target:
       if len(buffers) > 2:
         self.emit_asserts(buffers)
 
-      self.emit_constants(constants)
       self.emit_scalar_arguments(scalar_args, tile_width)
+      self.emit_constants(constants)
 
       self.handle_specialize(
           ops,
