@@ -247,7 +247,7 @@ static void FP16FullyConnected(benchmark::State& state) {
   });
 }
 
-static void QD8F32QC8W(benchmark::State& state) {
+static void QD8F32QC8WFullyConnected(benchmark::State& state) {
   xnnpack::RunBenchmark(state, [&state]() {
     return models::FullyConnected<float, qcint8>(
         FLAGS_batch_size,
@@ -303,7 +303,7 @@ BENCHMARK(FP16FullyConnected)
     ->UseRealTime()
     ->Apply(FullyConnectedArgs);
 
-BENCHMARK(QD8F32QC8W)
+BENCHMARK(QD8F32QC8WFullyConnected)
     ->Unit(benchmark::kMicrosecond)
     ->MeasureProcessCPUTime()
     ->UseRealTime()
