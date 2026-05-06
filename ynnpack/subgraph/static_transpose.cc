@@ -9,7 +9,6 @@
 #include <cstdint>
 #include <functional>
 #include <memory>
-#include <optional>
 #include <utility>
 #include <vector>
 
@@ -213,42 +212,6 @@ void define_static_transpose(ynn_subgraph& subgraph, ynn_node& node,
   };
 }
 
-void define_static_expand_dims(ynn_subgraph& subgraph, ynn_node& node,
-                               uint32_t input_id, uint32_t output_id,
-                               const axes_set& new_axes) {
-  const ynn_value& input = subgraph.value(input_id);
-
-  // This is implemented by a transpose that is an identity permutation, except
-  // with the new dimensions inserted.
-  std::vector<int32_t> permutation(input.rank() + new_axes.count());
-  int dim = 0;
-  for (int i = 0; i < permutation.size(); ++i) {
-    permutation[i] = new_axes[i] ? input.rank() : dim++;
-  }
-
-  define_static_transpose(subgraph, node, std::move(permutation), input_id,
-                          output_id, /*alias=*/true);
-}
-
-std::optional<axes_set> get_static_expand_dims_axes(
-    const ynn_node::static_transpose& op, int input_rank) {
-  axes_set axes;
-  int next_input_dim = 0;
-  for (size_t i = 0; i < op.permutation.size(); ++i) {
-    if (op.permutation[i] < 0 || op.permutation[i] >= input_rank) {
-      axes[i] = true;
-    } else if (op.permutation[i] == next_input_dim) {
-      next_input_dim++;
-    } else {
-      return std::nullopt;
-    }
-  }
-  if (next_input_dim != input_rank) {
-    return std::nullopt;
-  }
-  return axes;
-}
-
 extern "C" {
 
 ynn_status ynn_define_static_transpose(ynn_subgraph_t subgraph, size_t rank,
@@ -283,37 +246,6 @@ ynn_status ynn_define_static_transpose(ynn_subgraph_t subgraph, size_t rank,
   ynn_node node;
   define_static_transpose(*subgraph, node, std::move(op_permutation), input_id,
                           *output_id, flags);
-  subgraph->add_node(std::move(node));
-  return ynn_status_success;
-}
-
-ynn_status ynn_define_static_expand_dims(ynn_subgraph_t subgraph,
-                                         size_t num_new_axes,
-                                         const int32_t* new_axes,
-                                         uint32_t input_id, uint32_t* output_id,
-                                         uint32_t flags) {
-  // Validate arguments.
-  YNN_RETURN_IF_ERROR(validate_subgraph("static_expand_dims", subgraph));
-  YNN_RETURN_IF_ERROR(validate_input_tensor("static_expand_dims", subgraph,
-                                            "input_id", input_id));
-  YNN_RETURN_IF_ERROR(validate_output_tensor("static_expand_dims", subgraph,
-                                             "output_id", output_id));
-
-  const ynn_value& input = subgraph->value(input_id);
-
-  ynn_value& output = subgraph->get_output_value(output_id, input);
-
-  const int new_rank = input.rank() + num_new_axes;
-  YNN_RETURN_IF_ERROR(validate_rank("static_expand_dims", "output", new_rank));
-  ynn::axes_set axes;
-  for (size_t i = 0; i < num_new_axes; ++i) {
-    YNN_RETURN_IF_ERROR(
-        validate_axis("static_expand_dims", "output", new_rank, new_axes[i]));
-    axes[axis_to_slinky_dim(new_rank, new_axes[i])] = true;
-  }
-
-  ynn_node node;
-  define_static_expand_dims(*subgraph, node, input_id, output.id, axes);
   subgraph->add_node(std::move(node));
   return ynn_status_success;
 }
