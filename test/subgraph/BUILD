@@ -364,3 +364,18 @@ xnnpack_unit_test(
         "//test:replicable_random_device",
     ],
 )
+
+xnnpack_unit_test(
+    name = "planning_test",
+    srcs = ["planning.cc"],
+    tags = ["no_ynnpack"],
+    deps = [
+        "//:xnnpack_h",
+        "//litert/tensor",
+        "//litert/tensor:arithmetic",
+        "//litert/tensor:datatypes",
+        "//litert/tensor/backends/xnnpack:arithmetic",
+        "//litert/tensor/backends/xnnpack:conversion",
+        "//litert/tensor/utils:matchers_no_g3",
+    ],
+)
