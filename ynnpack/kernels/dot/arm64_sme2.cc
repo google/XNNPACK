@@ -31,7 +31,7 @@ __arm_new("za") __arm_locally_streaming void sme2_dot(
   assert(K3 > 0);
   assert(K2 > 0);
   assert(K1 > 0);
-  const size_t svl = svcnt(TC{});
+  const size_t svl = svcnts(TC{});
   assert(M <= svl);
 
   // This is how many elements of the k dimension are multiplied and accumulated
