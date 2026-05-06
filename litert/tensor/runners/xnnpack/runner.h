@@ -28,7 +28,6 @@ limitations under the License.
 #include "absl/types/span.h"
 #include "litert/tensor/backends/xnnpack/conversion.h"
 #include "litert/tensor/buffer.h"
-#include "litert/tensor/internal/graph.h"
 #include "litert/tensor/tensor.h"
 #include <pthreadpool.h>
 
@@ -52,25 +51,17 @@ class XnnpackRunner {
   void SetNumThreads(size_t num_threads) { num_threads_ = num_threads; }
 
   // Sets the input data for a given tensor.
-  absl::Status SetInput(const graph::Tensor& tensor,
-                        absl::Span<const std::byte> data);
   absl::Status SetInput(const TensorHandle& tensor,
                         absl::Span<const std::byte> data);
   // Updates the shape for an external input tensor.
-  absl::Status ReshapeInput(const graph::Tensor& tensor,
-                            absl::Span<const int32_t> shape);
   absl::Status ReshapeInput(const TensorHandle& tensor,
                             absl::Span<const int32_t> shape);
   // Writes a slice of bytes into an external input tensor's host buffer.
-  absl::Status WriteInput(const graph::Tensor& tensor, size_t offset_bytes,
-                          absl::Span<const std::byte> data);
   absl::Status WriteInput(const TensorHandle& tensor, size_t offset_bytes,
                           absl::Span<const std::byte> data);
   // Runs the XNNPACK graph.
   absl::Status Run();
   // Reads the output data for a given tensor.
-  absl::StatusOr<LockedBufferSpan<const std::byte>> ReadOutput(
-      const graph::Tensor& tensor) const;
   absl::StatusOr<LockedBufferSpan<const std::byte>> ReadOutput(
       const TensorHandle& tensor) const;
 

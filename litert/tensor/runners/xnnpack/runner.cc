@@ -73,9 +73,8 @@ XnnpackRunner::XnnpackRunner(std::unique_ptr<XnnpackGraph> graph)
     : graph_(std::move(graph)) {}
 
 // Sets the input data for a given tensor.
-absl::Status XnnpackRunner::SetInput(const graph::Tensor& tensor,
+absl::Status XnnpackRunner::SetInput(const TensorHandle& tensor,
                                      absl::Span<const std::byte> data) {
-  // Find the index of the tensor in the graph.
   LRT_TENSOR_ASSIGN_OR_RETURN(size_t index, graph_->Lookup(tensor));
   XnnpackValue& value = graph_->mutable_values()[index];
   // Check if the tensor is marked as an external input.
@@ -89,12 +88,7 @@ absl::Status XnnpackRunner::SetInput(const graph::Tensor& tensor,
   return absl::OkStatus();
 }
 
-absl::Status XnnpackRunner::SetInput(const TensorHandle& tensor,
-                                     absl::Span<const std::byte> data) {
-  return SetInput(tensor.GetRaw(), data);
-}
-
-absl::Status XnnpackRunner::ReshapeInput(const graph::Tensor& tensor,
+absl::Status XnnpackRunner::ReshapeInput(const TensorHandle& tensor,
                                          absl::Span<const int32_t> shape) {
   LRT_TENSOR_ASSIGN_OR_RETURN(size_t index, graph_->Lookup(tensor));
   XnnpackValue& value = graph_->mutable_values()[index];
@@ -106,12 +100,7 @@ absl::Status XnnpackRunner::ReshapeInput(const graph::Tensor& tensor,
   return absl::OkStatus();
 }
 
-absl::Status XnnpackRunner::ReshapeInput(const TensorHandle& tensor,
-                                         absl::Span<const int32_t> shape) {
-  return ReshapeInput(tensor.GetRaw(), shape);
-}
-
-absl::Status XnnpackRunner::WriteInput(const graph::Tensor& tensor,
+absl::Status XnnpackRunner::WriteInput(const TensorHandle& tensor,
                                        size_t offset_bytes,
                                        absl::Span<const std::byte> data) {
   LRT_TENSOR_ASSIGN_OR_RETURN(size_t index, graph_->Lookup(tensor));
@@ -126,12 +115,6 @@ absl::Status XnnpackRunner::WriteInput(const graph::Tensor& tensor,
   }
   absl::c_copy(data, buffer.begin() + offset_bytes);
   return absl::OkStatus();
-}
-
-absl::Status XnnpackRunner::WriteInput(const TensorHandle& tensor,
-                                       size_t offset_bytes,
-                                       absl::Span<const std::byte> data) {
-  return WriteInput(tensor.GetRaw(), offset_bytes, data);
 }
 
 // Runs the XNNPACK graph.
@@ -212,9 +195,8 @@ absl::Status XnnpackRunner::Run() {
                          "xnn_invoke_runtime");
 }
 
-// Reads the output data for a given tensor.
 absl::StatusOr<LockedBufferSpan<const std::byte>> XnnpackRunner::ReadOutput(
-    const graph::Tensor& tensor) const {
+    const TensorHandle& tensor) const {
   // Find the index of the tensor in the graph.
   LRT_TENSOR_ASSIGN_OR_RETURN(size_t index, graph_->Lookup(tensor));
   const XnnpackValue& value = graph_->values()[index];
@@ -232,11 +214,6 @@ absl::StatusOr<LockedBufferSpan<const std::byte>> XnnpackRunner::ReadOutput(
   return LockedBufferSpan<const std::byte>(
       buffer_it->second.data(), [](const std::byte*) {},
       buffer_it->second.size());
-}
-
-absl::StatusOr<LockedBufferSpan<const std::byte>> XnnpackRunner::ReadOutput(
-    const TensorHandle& tensor) const {
-  return ReadOutput(tensor.GetRaw());
 }
 
 }  // namespace litert::tensor

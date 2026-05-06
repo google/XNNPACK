@@ -51,19 +51,16 @@ TEST(ArithmeticXnnpackTest, AddBuildsExternalFlags) {
   LRT_TENSOR_ASSERT_OK_AND_ASSIGN(auto graph, BuildXnnpackGraph({output}));
   EXPECT_EQ(graph->values().size(), 3);
 
-  LRT_TENSOR_ASSERT_OK_AND_ASSIGN(size_t input_index,
-                                  graph->Lookup(input.GetRaw()));
+  LRT_TENSOR_ASSERT_OK_AND_ASSIGN(size_t input_index, graph->Lookup(input));
   const XnnpackValue& input_value = graph->values()[input_index];
   EXPECT_NE(input_value.flags & XNN_VALUE_FLAG_EXTERNAL_INPUT, 0);
   EXPECT_EQ(input_value.flags & XNN_VALUE_FLAG_EXTERNAL_OUTPUT, 0);
 
-  LRT_TENSOR_ASSERT_OK_AND_ASSIGN(size_t bias_index,
-                                  graph->Lookup(bias.GetRaw()));
+  LRT_TENSOR_ASSERT_OK_AND_ASSIGN(size_t bias_index, graph->Lookup(bias));
   const XnnpackValue& bias_value = graph->values()[bias_index];
   EXPECT_EQ(bias_value.flags, 0);
 
-  LRT_TENSOR_ASSERT_OK_AND_ASSIGN(size_t output_index,
-                                  graph->Lookup(output.GetRaw()));
+  LRT_TENSOR_ASSERT_OK_AND_ASSIGN(size_t output_index, graph->Lookup(output));
   const XnnpackValue& output_value = graph->values()[output_index];
   EXPECT_NE(output_value.flags & XNN_VALUE_FLAG_EXTERNAL_OUTPUT, 0);
 }
