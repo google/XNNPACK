@@ -4557,8 +4557,6 @@ enum xnn_status xnn_subgraph_optimize(xnn_subgraph_t subgraph,
   }
 #endif
 
-  XNN_RETURN_IF_ERROR(xnn_subgraph_rewrite_dequant_bmm(subgraph));
-
   XNN_RETURN_IF_ERROR(
       xnn_subgraph_optimize_packed_lhs(subgraph, optimization_flags));
 
