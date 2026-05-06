@@ -22,6 +22,8 @@
 
 #include "include/experimental.h"
 #include "include/xnnpack.h"
+#include "src/subgraph/rewrites/fp16_to_fp32.h"
+#include "src/subgraph/rewrites/static_convert.h"
 #include "src/xnnpack/allocation-type.h"
 #include "src/xnnpack/allocator.h"
 #include "src/xnnpack/cache.h"
@@ -597,6 +599,12 @@ enum xnn_status xnn_create_runtime_v4(
     xnn_log_error("failed to optimize subgraph");
     goto error;
   }
+
+  XNN_IF_ERROR_GOTO(error, xnn_subgraph_alias_fp16_fp32_fallback_data(
+                               subgraph, weights_cache));
+
+  XNN_IF_ERROR_GOTO(error, xnn_subgraph_alias_constant_folded_data(
+                               subgraph, weights_cache));
 
   status = xnn_status_out_of_memory;
 
@@ -1194,7 +1202,7 @@ enum xnn_status xnn_delete_runtime(
       xnn_release_memory(runtime->opdata);
 
       if (runtime->values != NULL) {
-        // Release the buffers created during FP16 rewrite.
+        // Release buffers created during rewrites.
         for (size_t i = 0; i < runtime->num_values; i++) {
           struct xnn_runtime_value* value = &runtime->values[i];
           if (value->allocation_type == xnn_allocation_type_dynamic ||
