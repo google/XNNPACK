@@ -849,11 +849,12 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
   assert(subgraph.is_valid_value(input_a_id));
   assert(subgraph.is_valid_value(input_b_id));
   assert(output_id);
-  const bool b_transposed =
-      always_alias_transpose(subgraph, input_b_id) == ynn_status_success;
-
   const ynn_value& a = subgraph.value(input_a_id);
   const ynn_value& b = subgraph.value(input_b_id);
+  const bool is_sub_byte = type_size_bits(b.type) < 8;
+  const bool b_transposed =
+      !is_sub_byte &&
+      always_alias_transpose(subgraph, input_b_id) == ynn_status_success;
   const ynn_type c_type = deduce_output_type(a.type, b.type);
   ynn_value& c = subgraph.get_output_value(output_id, c_type);
   if (input_c_id != YNN_INVALID_VALUE_ID) {
@@ -884,6 +885,9 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
   //    compatible with the packed B layout and the transposed-ness of A.
 
   dot_type type = {a.type, b.type, c.type};
+  if (is_sub_byte) {
+    type.b = ynn_type_int8;
+  }
   dot_shape shape;
   learn_shape_from_b(shape, num_k_dims, b);
   static constexpr dot_packed_shape no_tile_k = {0, 1};
@@ -893,7 +897,8 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
       (subgraph.flags & YNN_FLAG_CONSISTENT_ARITHMETIC) != 0;
   uint32_t kernel_flags =
       consistent_arithmetic ? dot_flag::consistent_arithmetic : 0;
-  dot_kernel kernel = get_dot_kernel(type, shape, packed_shape, kernel_flags);
+  dot_kernel kernel = get_dot_kernel(type, shape, packed_shape, kernel_flags,
+                                     std::nullopt, get_supported_arch_flags());
   dot_kernel unpacked_kernel;
   if (b_transposed) {
     // If b is transposed, we might as well use the packing to do it.
@@ -906,29 +911,77 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
   } else {
     unpacked_kernel = kernel;
     if (kernel.tile_k != 1) {
-      unpacked_kernel = get_dot_kernel(type, shape, &no_tile_k,
-                                       kernel_flags | dot_flag::unaligned_b);
+      unpacked_kernel = get_dot_kernel(
+          type, shape, &no_tile_k, kernel_flags | dot_flag::unaligned_b,
+          std::nullopt, get_supported_arch_flags());
     }
   }
 
   // Insert a packing node (if necessary).
   const bool pack_b =
       should_pack_b(subgraph, num_k_dims, a, b, kernel, unpacked_kernel);
+
+  const int original_element_count = type_element_count(b.type);
+  const size_t dot_tile_k = pack_b ? kernel.tile_k : unpacked_kernel.tile_k;
+  const bool do_post_convert =
+      is_sub_byte && (dot_tile_k % original_element_count == 0);
+
   uint32_t packed_b_id = YNN_INVALID_VALUE_ID;
-  if (!pack_b) {
-    // We don't want or need to pack B, but we still need to reshape it as if it
-    // were packed.
-    ynn_node node;
-    define_static_expand_dims(subgraph, node, input_b_id, &packed_b_id, 0b1001);
-    subgraph.add_node(std::move(node));
+  uint32_t dot_input_b_id = YNN_INVALID_VALUE_ID;
+
+  if (is_sub_byte && !do_post_convert) {
+    // Pathway A: Pre-packing Convert
+    uint32_t converted_b_id = YNN_INVALID_VALUE_ID;
+    ynn_status status =
+        ynn_define_convert(&subgraph, input_b_id, ynn_type_int8,
+                           b.zero_point_id, b.scale_id, &converted_b_id, flags);
+    if (status != ynn_status_success) {
+      return status;
+    }
+
+    // We update type.b to reflect that we are now packing an int8 tensor.
+    type.b = ynn_type_int8;
+
+    if (!pack_b) {
+      ynn_node node;
+      define_static_expand_dims(subgraph, node, converted_b_id, &packed_b_id,
+                                0b1001);
+      subgraph.add_node(std::move(node));
+    } else {
+      packed_b_id = define_pack_b(&subgraph, type, kernel, num_k_dims,
+                                  consistent_arithmetic, converted_b_id);
+    }
+    dot_input_b_id = packed_b_id;
   } else {
-    packed_b_id = define_pack_b(&subgraph, type, kernel, num_k_dims,
-                                consistent_arithmetic, input_b_id);
+    // Pathway B: Post-packing Convert (or normal non-sub-byte path)
+    if (!pack_b) {
+      ynn_node node;
+      define_static_expand_dims(subgraph, node, input_b_id, &packed_b_id,
+                                0b1001);
+      subgraph.add_node(std::move(node));
+    } else {
+      packed_b_id = define_pack_b(&subgraph, type, kernel, num_k_dims,
+                                  consistent_arithmetic, input_b_id);
+    }
+
+    dot_input_b_id = packed_b_id;
+    if (is_sub_byte) {
+      uint32_t converted_b_id = YNN_INVALID_VALUE_ID;
+      ynn_status status = ynn_define_convert(
+          &subgraph, packed_b_id, ynn_type_int8, YNN_INVALID_VALUE_ID,
+          YNN_INVALID_VALUE_ID, &converted_b_id, flags);
+      if (status != ynn_status_success) {
+        return status;
+      }
+      subgraph.value(converted_b_id).scale_id = b.scale_id;
+      subgraph.value(converted_b_id).zero_point_id = b.zero_point_id;
+      dot_input_b_id = converted_b_id;
+    }
   }
 
   ynn_node node;
   // We need both the original input b (for shape inference only) and packed b.
-  node.inputs = {input_a_id, input_b_id, input_c_id, packed_b_id};
+  node.inputs = {input_a_id, input_b_id, input_c_id, dot_input_b_id};
   node.outputs = {*output_id};
   node.op = ynn_node::dot{num_k_dims};
 
