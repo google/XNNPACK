@@ -29,7 +29,7 @@ namespace ynn {
 
 template <typename AB, typename C>
 void ReferenceImpl(const std::vector<int32_t>& reduce_axes, const Tensor<AB>& a,
-                   const Tensor<AB>& b, Tensor<C>& c) {
+                   const Tensor<AB>& b, const Tensor<C>& init, Tensor<C>& c) {
   if (a.empty() || b.empty()) {
     return;
   }
@@ -37,7 +37,13 @@ void ReferenceImpl(const std::vector<int32_t>& reduce_axes, const Tensor<AB>& a,
       !std::is_same<C, int32_t>::value) {
     Tensor<float> c_float(c.extents());
     c_float.assign(c);
-    ReferenceImpl(reduce_axes, a, b, c_float);
+    if (init.empty()) {
+      ReferenceImpl(reduce_axes, a, b, Tensor<float>(), c_float);
+    } else {
+      Tensor<float> init_float(init.extents());
+      init_float.assign(init);
+      ReferenceImpl(reduce_axes, a, b, init_float, c_float);
+    }
     c.assign(c_float);
   } else {
     std::vector<size_t> common_shape = a.shape();
@@ -50,7 +56,14 @@ void ReferenceImpl(const std::vector<int32_t>& reduce_axes, const Tensor<AB>& a,
     for (const auto& i : EnumerateIndices(common_shape)) {
       mul(i) = static_cast<C>(a_bc(i)) * static_cast<C>(b_bc(i));
     }
-    c.assign(mul.reduce(reduce_axes, std::plus<C>()));
+    Tensor<C> reduced = mul.reduce(reduce_axes, std::plus<C>());
+    if (init.empty()) {
+      c.assign(reduced);
+    } else {
+      for (const auto& i : EnumerateIndices(c.extents())) {
+        c(i) = init(i) + reduced(i);
+      }
+    }
   }
 }
 
@@ -113,16 +126,23 @@ void TestReduceDot(AB, C) {
       }
     }
 
-    SubgraphBuilder subgraph(4);
+    const bool use_init = random_bool(rng);
+
+    SubgraphBuilder subgraph(5);
     uint32_t a_id = 0;
     uint32_t b_id = 1;
-    uint32_t mul_id = 2;
-    uint32_t output_id = 3;
+    uint32_t init_id = 2;
+    uint32_t mul_id = 3;
+    uint32_t output_id = 4;
 
     subgraph.AddInput(type_of<AB>(), a_shape, a_id)
         .AddInput(type_of<AB>(), b_shape, b_id)
         .AddTensor(type_of<C>(), common_shape, mul_id)
         .AddOutput(type_of<C>(), output_shape, output_id);
+
+    if (use_init) {
+      subgraph.AddInput(type_of<C>(), output_shape, init_id);
+    }
 
     if (!std::is_same<AB, C>::value) {
       uint32_t a_converted_id = YNN_INVALID_VALUE_ID;
@@ -138,7 +158,7 @@ void TestReduceDot(AB, C) {
       subgraph.AddBinary(ynn_binary_multiply, a_id, b_id, mul_id);
     }
     subgraph.AddReduce(ynn_reduce_sum, reduce_axes, mul_id,
-                       YNN_INVALID_VALUE_ID, output_id,
+                       use_init ? init_id : YNN_INVALID_VALUE_ID, output_id,
                        keep_dims ? YNN_NODE_FLAG_KEEP_DIMS : 0);
 
     Runtime runtime(subgraph.GetSubgraph());
@@ -151,6 +171,12 @@ void TestReduceDot(AB, C) {
 
     runtime.ReshapeExternalTensor(a_shape, a.data(), a_id);
     runtime.ReshapeExternalTensor(b_shape, b.data(), b_id);
+
+    Tensor<C> init(output_shape);
+    if (use_init) {
+      fill_random(init.data(), init.size(), rng, -max_abs_value, max_abs_value);
+      runtime.ReshapeExternalTensor(output_shape, init.data(), init_id);
+    }
 
     Tensor<C> c(output_shape);
     runtime.SetupExternalTensor(c.data(), output_id);
@@ -172,7 +198,9 @@ void TestReduceDot(AB, C) {
 
     Tensor<C> expected(reduced_shape);
     expected.fill(0);
-    ReferenceImpl(reduce_axes, a, b, expected);
+    ReferenceImpl(reduce_axes, a, b,
+                  use_init ? init.reshape(reduced_shape) : Tensor<C>(),
+                  expected);
 
     Tensor<C> c_squeezed = c.reshape(reduced_shape);
     for (const auto& i : EnumerateIndices(reduced_shape)) {

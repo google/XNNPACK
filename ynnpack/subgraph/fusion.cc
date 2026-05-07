@@ -1581,13 +1581,6 @@ bool rewrite_sum_to_dot(ynn_subgraph& subgraph, ynn_node& node,
     return false;
   }
 
-  if (node.inputs[1] != YNN_INVALID_VALUE_ID) {
-    YNN_LOG_DEBUG()
-        << "not rewriting sum(a*b) to dot(a, b) because the sum has "
-           "a non-identity initial value.";
-    return false;
-  }
-
   if (reduce_op->k_dims.count() > 1) {
     YNN_LOG_DEBUG()
         << "not rewriting sum(a*b) to dot(a, b) because the sum has "
@@ -1735,10 +1728,27 @@ bool rewrite_sum_to_dot(ynn_subgraph& subgraph, ynn_node& node,
     }
   }
 
+  // Prepare the initializer
+  uint32_t init_id = node.inputs[1];
+  uint32_t init_t_id = YNN_INVALID_VALUE_ID;
+  if (init_id != YNN_INVALID_VALUE_ID) {
+    std::vector<int32_t> perm_init(dot_output_rank, YNN_MAX_TENSOR_RANK);
+    for (int d = 0; d < static_cast<int>(perm_output.size()); ++d) {
+      if (perm_output[d] != YNN_MAX_TENSOR_RANK) {
+        perm_init[perm_output[d]] = d;
+      }
+    }
+    ynn_node transpose_init;
+    define_static_transpose(subgraph, transpose_init, perm_init, init_id,
+                            init_t_id);
+    if (init_t_id != init_id) {
+      subgraph.add_node(std::move(transpose_init));
+    }
+  }
+
   // Do the dot.
   uint32_t dot_id = is_perm_output_identity ? output_id : YNN_INVALID_VALUE_ID;
-  ynn_define_dot(&subgraph, num_k_dims, a_t_id, b_t_id, YNN_INVALID_VALUE_ID,
-                 &dot_id,
+  ynn_define_dot(&subgraph, num_k_dims, a_t_id, b_t_id, init_t_id, &dot_id,
                  /*flags=*/0);
 
   node.invalidate();
