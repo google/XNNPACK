@@ -343,17 +343,18 @@ void define_reduce(ynn_subgraph& subgraph, ynn_node& node,
 
   ynn_value& output = subgraph.value(*output_id);
 
-  assert(split_factors.size() <= a.extents.size());
-  split_factors.resize(a.extents.size());
+  auto split_factor = [&](size_t i) {
+    return i < split_factors.size() ? split_factors[i] : slinky::expr{};
+  };
 
   // Propagate shape
   output.extents = a.extents;
   for (int i = static_cast<int>(output.extents.size()) - 1; i >= 0; --i) {
     if (k_dims[i]) {
       if (keep_dims) {
-        if (split_factors[i].defined()) {
+        if (split_factor(i).defined()) {
           output.extents[i] = slinky::simplify(
-              slinky::ceil_div(max(1, output.extents[i]), split_factors[i]));
+              slinky::ceil_div(max(1, output.extents[i]), split_factor(i)));
         } else {
           output.extents[i] = {};
         }
@@ -419,6 +420,10 @@ void define_reduce(ynn_subgraph& subgraph, ynn_node& node,
     slinky::buffer_expr_ptr reduction_buffer = slinky::buffer_expr::make(
         runtime.globals.symbols, "reduction", op.k_dims.count(), 0);
 
+    auto split_factor = [&](size_t i) {
+      return i < split_factors.size() ? split_factors[i] : slinky::expr{};
+    };
+
     std::vector<slinky::var> output_dims;
     std::vector<slinky::var> reduction_dims;
     std::vector<slinky::var> all_dims;
@@ -432,7 +437,7 @@ void define_reduce(ynn_subgraph& subgraph, ynn_node& node,
         // While this is a reduction dimension, we don't want the scheduling
         // mechanism to treat it like one. We can parallelize it.
         slinky::var reduction_dim_i =
-            split_factors[i].defined()
+            split_factor(i).defined()
                 ? runtime.globals.make_dim(reduction_dim, "r")
                 : runtime.globals.make_reduction_dim(reduction_dim);
         all_dims.push_back(reduction_dim_i);
@@ -449,7 +454,7 @@ void define_reduce(ynn_subgraph& subgraph, ynn_node& node,
         reduction_buffer->dim(reduction_dim).bounds =
             slinky::min_extent(0, max(a_extent_i, 1));
         reduction_buffer->dim(reduction_dim).stride = 0;
-        reduction_buffer->dim(reduction_dim).fold_factor = split_factors[i];
+        reduction_buffer->dim(reduction_dim).fold_factor = split_factor(i);
 
         ++reduction_dim;
       } else {
@@ -471,8 +476,9 @@ void define_reduce(ynn_subgraph& subgraph, ynn_node& node,
       attrs.allow_in_place = (1 << 1);
     }
 
-    auto sched = runtime.make_schedule(all_dims, input_a.physical_extents(),
-                                       input_a.buffer->elem_size());
+    auto sched =
+        runtime.make_schedule(all_dims, input_a.physical_extents(),
+                              input_a.buffer->elem_size(), split_factors);
 
     auto func = slinky::func::make(
         make_unary_reduce_impl(op, kernel),

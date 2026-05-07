@@ -7,6 +7,7 @@
 #define XNNPACK_YNNPACK_BASE_TEST_TENSOR_H_
 
 #include <algorithm>
+#include <bitset>
 #include <cassert>
 #include <cstddef>
 #include <cstdint>
@@ -21,10 +22,112 @@
 #include "ynnpack/base/arithmetic.h"
 #include "ynnpack/base/base.h"
 #include "ynnpack/base/test/buffer.h"
-#include "ynnpack/base/test/random.h"
 #include "ynnpack/base/type.h"
 
 namespace ynn {
+
+namespace internal {
+
+class IndexIterator {
+  std::vector<size_t> extents_;
+  std::vector<size_t> i_;
+
+ public:
+  static IndexIterator make_end(std::vector<size_t> extents) {
+    IndexIterator result;
+    result.extents_ = std::move(extents);
+    if (result.extents_.empty()) {
+      // This is a bit of a hack. For rank 0 shapes, we need a way of separating
+      // "begin" from "end". We call "begin" {}, which is the rank 0 index.
+      // "end" is {1}.
+      result.i_ = {1};
+    } else {
+      // The "end" iterator is when we reach one past the end of the first
+      // dimension, and the rest of the dimensions are 0.
+      result.i_ = std::vector<size_t>(result.extents_.size(), 0);
+      result.i_.front() = result.extents_.front();
+    }
+    return result;
+  }
+  static IndexIterator make_begin(std::vector<size_t> extents) {
+    size_t size =
+        std::accumulate(extents.begin(), extents.end(), static_cast<size_t>(1),
+                        std::multiplies<size_t>());
+    if (size == 0) {
+      return make_end(extents);
+    }
+    IndexIterator result;
+    result.extents_ = std::move(extents);
+    result.i_ = std::vector<size_t>(result.extents_.size(), 0);
+    return result;
+  }
+
+  IndexIterator& operator++() {
+    if (i_.empty()) {
+      i_.push_back(1);
+    } else {
+      i_.back() += 1;
+      for (size_t d = i_.size() - 1; d > 0; --d) {
+        if (i_[d] >= extents_[d]) {
+          ++i_[d - 1];
+          i_[d] = 0;
+        } else {
+          break;
+        }
+      }
+    }
+    return *this;
+  }
+
+  IndexIterator operator++(int) {
+    IndexIterator result = *this;
+    ++(*this);
+    return result;
+  }
+
+  const std::vector<size_t>& operator*() const { return i_; }
+  const std::vector<size_t>* operator->() const { return &i_; }
+
+  bool operator!=(const IndexIterator& other) const { return i_ != other.i_; }
+};
+
+class IndexRange {
+  IndexIterator begin_;
+  IndexIterator end_;
+
+ public:
+  using value_type = std::vector<size_t>;
+
+  IndexRange(IndexIterator begin, IndexIterator end)
+      : begin_(std::move(begin)), end_(std::move(end)) {}
+
+  const IndexIterator& begin() const { return begin_; }
+  const IndexIterator& end() const { return end_; }
+};
+
+}  // namespace internal
+
+// Enumerate the indices in a multidimensional range [0, extents)
+// This is very inefficient, it is intended for use in tests, where a more
+// efficient approach would result in calling ASSERT_* in another function.
+inline internal::IndexRange EnumerateIndices(
+    const std::vector<size_t>& extents) {
+  return internal::IndexRange(internal::IndexIterator::make_begin(extents),
+                              internal::IndexIterator::make_end(extents));
+}
+
+inline std::string index_to_string(const std::vector<size_t>& v) {
+  std::stringstream ss;
+  ss << "{";
+  for (size_t i = 0; i < v.size(); i++) {
+    ss << v[i];
+    if (i + 1 < v.size()) {
+      ss << ", ";
+    }
+  }
+  ss << "}";
+  return ss.str();
+}
 
 // This stores a multi-dimensional array in a Buffer<T> object
 // (above). The sizes of dimensions are `extent`s, the distance between elements
@@ -299,7 +402,7 @@ class Tensor {
     return result;
   }
 
-  Tensor<T> broadcast_like(const std::vector<size_t>& extents) {
+  Tensor<T> broadcast_like(const std::vector<size_t>& extents) const {
     Tensor<T> result(*this);
     while (result.rank() < extents.size()) {
       result = result.expand_dims({0});
@@ -387,6 +490,55 @@ class Tensor {
     }
     result.end_ = result.begin_ + result.flat_offset(max) + 1;
     return result;
+  }
+
+  // Compute the reduction of `axes` dimensions using the binary operator `op`.
+  template <typename Op>
+  Tensor<T> reduce(std::vector<int32_t> axes, Op op) const {
+    std::bitset<32> axes_set = {};
+    for (int32_t axis : axes) {
+      axes_set[axis >= 0 ? axis : rank() + axis] = true;
+    }
+
+    // Normalize negative axes and compute the total number of reduced elements.
+    size_t num_reduced_elements = 1;
+    for (size_t i = 0; i < rank(); ++i) {
+      if (axes_set[i]) {
+        num_reduced_elements *= extent(i);
+      }
+    }
+
+    // Make a transpose that puts all the reduction dimensions at the end.
+    std::vector<int32_t> perm(rank());
+    std::iota(perm.begin(), perm.end(), 0);
+    // Stable sort so we don't transpose unnecessarily.
+    std::stable_sort(perm.begin(), perm.end(), [&](int32_t i, int32_t j) {
+      return !axes_set[i] && axes_set[j];
+    });
+
+    Tensor<T> buffer = transpose(perm).deep_copy();
+
+    // Remove reduced dimensions from the buffer.
+    std::vector<size_t> extents = buffer.extents();
+    std::vector<size_t> strides = buffer.strides();
+    extents.resize(extents.size() - axes_set.count());
+    strides.resize(strides.size() - axes_set.count());
+    buffer.set_shape(extents, strides);
+
+    // Now we can do a 1D tree reduction in-place on buffer.
+    for (auto i : EnumerateIndices(buffer.shape())) {
+      T* begin = &buffer(i);
+      size_t size = num_reduced_elements;
+      while (size > 1) {
+        size_t next_size = (size + 1) / 2;
+        for (size_t j = 0; j < size / 2; ++j) {
+          begin[j] = op(begin[j], begin[j + next_size]);
+        }
+        size = next_size;
+      }
+    }
+
+    return buffer.deep_copy();
   }
 
   // Remove `pre` elements from the beginning of each dimension, and `post`
@@ -509,14 +661,23 @@ class Tensor {
       size_t extent = *extents++;
       size_t src_stride = *src_strides++;
       size_t dst_stride = *dst_strides++;
-      if (rank == 0 && src_stride == 1 && dst_stride == 1) {
-        copy_n(src, src_offset, extent, dst, dst_offset);
-      } else if (rank == 0 && src_stride == 0 && dst_stride == 1) {
-        assert(dst_offset % type_info<T>::element_count() == 0);
-        assert(extent % type_info<T>::element_count() == 0);
-        dst += dst_offset / type_info<T>::element_count();
-        extent /= type_info<T>::element_count();
-        std::fill_n(dst, extent, type_info<From>::get(src, src_offset));
+      if (rank == 0) {
+        if (src_stride == 1 && dst_stride == 1) {
+          copy_n(src, src_offset, extent, dst, dst_offset);
+        } else if (src_stride == 0 && dst_stride == 1) {
+          assert(dst_offset % type_info<T>::element_count() == 0);
+          assert(extent % type_info<T>::element_count() == 0);
+          dst += dst_offset / type_info<T>::element_count();
+          extent /= type_info<T>::element_count();
+          std::fill_n(dst, extent, type_info<From>::get(src, src_offset));
+        } else {
+          for (size_t i = 0; i < extent; ++i) {
+            type_info<T>::set(dst, dst_offset,
+                              type_info<From>::get(src, src_offset));
+            src_offset += src_stride;
+            dst_offset += dst_stride;
+          }
+        }
       } else {
         for (size_t i = 0; i < extent; ++i) {
           copy_impl(rank, extents, src_strides, src, src_offset, dst_strides,
@@ -665,109 +826,6 @@ inline Tensor<T> make_stencil_dim(Tensor<T> x, int dim, int size,
   std::swap(extents[dim], extents[dim + 1]);
   x.set_shape(std::move(extents), std::move(strides));
   return x;
-}
-
-namespace internal {
-
-class IndexIterator {
-  std::vector<size_t> extents_;
-  std::vector<size_t> i_;
-
- public:
-  static IndexIterator make_end(std::vector<size_t> extents) {
-    IndexIterator result;
-    result.extents_ = std::move(extents);
-    if (result.extents_.empty()) {
-      // This is a bit of a hack. For rank 0 shapes, we need a way of separating
-      // "begin" from "end". We call "begin" {}, which is the rank 0 index.
-      // "end" is {1}.
-      result.i_ = {1};
-    } else {
-      // The "end" iterator is when we reach one past the end of the first
-      // dimension, and the rest of the dimensions are 0.
-      result.i_ = std::vector<size_t>(result.extents_.size(), 0);
-      result.i_.front() = result.extents_.front();
-    }
-    return result;
-  }
-  static IndexIterator make_begin(std::vector<size_t> extents) {
-    size_t size =
-        std::accumulate(extents.begin(), extents.end(), static_cast<size_t>(1),
-                        std::multiplies<size_t>());
-    if (size == 0) {
-      return make_end(extents);
-    }
-    IndexIterator result;
-    result.extents_ = std::move(extents);
-    result.i_ = std::vector<size_t>(result.extents_.size(), 0);
-    return result;
-  }
-
-  IndexIterator& operator++() {
-    if (i_.empty()) {
-      i_.push_back(1);
-    } else {
-      i_.back() += 1;
-      for (size_t d = i_.size() - 1; d > 0; --d) {
-        if (i_[d] >= extents_[d]) {
-          ++i_[d - 1];
-          i_[d] = 0;
-        } else {
-          break;
-        }
-      }
-    }
-    return *this;
-  }
-
-  IndexIterator operator++(int) {
-    IndexIterator result = *this;
-    ++(*this);
-    return result;
-  }
-
-  const std::vector<size_t>& operator*() const { return i_; }
-  const std::vector<size_t>* operator->() const { return &i_; }
-
-  bool operator!=(const IndexIterator& other) const { return i_ != other.i_; }
-};
-
-class IndexRange {
-  IndexIterator begin_;
-  IndexIterator end_;
-
- public:
-  using value_type = std::vector<size_t>;
-
-  IndexRange(IndexIterator begin, IndexIterator end)
-      : begin_(std::move(begin)), end_(std::move(end)) {}
-
-  const IndexIterator& begin() const { return begin_; }
-  const IndexIterator& end() const { return end_; }
-};
-
-}  // namespace internal
-
-// Enumerate the indices in a multidimensional range [0, extents)
-// This is very inefficient, it is intended for use in tests, where a more
-// efficient approach would result in calling ASSERT_* in another function.
-inline internal::IndexRange EnumerateIndices(
-    const std::vector<size_t>& extents) {
-  return internal::IndexRange(internal::IndexIterator::make_begin(extents),
-                              internal::IndexIterator::make_end(extents));
-}
-
-inline std::string index_to_string(const std::vector<size_t>& v) {
-  std::stringstream ss;
-  ss << "{";
-  for (size_t i = 0; i < v.size(); i++) {
-    ss << v[i];
-    if (i + 1 < v.size()) {
-      ss << ", ";
-    }
-  }
-  ss << "}";
-  return ss.str();
 }
 
 template <typename T, typename Scale, typename ZeroPoint>

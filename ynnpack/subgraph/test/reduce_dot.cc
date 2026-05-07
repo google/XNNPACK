@@ -28,22 +28,29 @@ namespace ynn {
 // of a and b. This is essentially a fuzz tester for rewriting sum(a*b) to dot.
 
 template <typename AB, typename C>
-void ReferenceImpl(const std::vector<size_t>& shape, Tensor<AB> a, Tensor<AB> b,
-                   Tensor<C>& c) {
+void ReferenceImpl(const std::vector<int32_t>& reduce_axes, const Tensor<AB>& a,
+                   const Tensor<AB>& b, Tensor<C>& c) {
+  if (a.empty() || b.empty()) {
+    return;
+  }
   if (!std::is_same<C, float>::value && !std::is_same<C, double>::value &&
       !std::is_same<C, int32_t>::value) {
     Tensor<float> c_float(c.extents());
     c_float.assign(c);
-    ReferenceImpl(shape, a, b, c_float);
+    ReferenceImpl(reduce_axes, a, b, c_float);
     c.assign(c_float);
   } else {
-    broadcast_extent_1(a);
-    broadcast_extent_1(b);
-    broadcast_extent_1(c);
-
-    for (const auto& i : EnumerateIndices(shape)) {
-      c(i) = c(i) + static_cast<C>(a(i)) * static_cast<C>(b(i));
+    std::vector<size_t> common_shape = a.shape();
+    for (size_t i = 0; i < common_shape.size(); ++i) {
+      common_shape[i] = std::max(a.extent(i), b.extent(i));
     }
+    Tensor<AB> a_bc = a.broadcast_like(common_shape);
+    Tensor<AB> b_bc = b.broadcast_like(common_shape);
+    Tensor<C> mul(common_shape);
+    for (const auto& i : EnumerateIndices(common_shape)) {
+      mul(i) = static_cast<C>(a_bc(i)) * static_cast<C>(b_bc(i));
+    }
+    c.assign(mul.reduce(reduce_axes, std::plus<C>()));
   }
 }
 
@@ -155,33 +162,27 @@ void TestReduceDot(AB, C) {
     runtime.InvokeRuntime();
     ASSERT_EQ(runtime.Status(), ynn_status_success);
 
-    Tensor<C> expected(c_shape);
-    expected.fill(0);
-    ReferenceImpl(common_shape, a, b, expected);
+    std::vector<size_t> reduced_shape = c_shape;
+    std::vector<int32_t> sorted_reduce_axes = reduce_axes;
+    std::sort(sorted_reduce_axes.begin(), sorted_reduce_axes.end(),
+              std::greater<int32_t>());
+    for (int32_t axis : sorted_reduce_axes) {
+      reduced_shape.erase(reduced_shape.begin() + axis);
+    }
 
-    for (const auto& i : EnumerateIndices(output_shape)) {
-      std::vector<size_t> expected_i = i;
-      if (!keep_dims) {
-        expected_i = std::vector<size_t>(rank, 0);
-        std::vector<int32_t> sorted_axes = reduce_axes;
-        std::sort(sorted_axes.begin(), sorted_axes.end());
-        size_t dst_axis = 0;
-        for (size_t r = 0; r < rank; ++r) {
-          if (std::find(sorted_axes.begin(), sorted_axes.end(), r) !=
-              sorted_axes.end()) {
-            expected_i[r] = 0;
-          } else {
-            expected_i[r] = i[dst_axis++];
-          }
-        }
-      }
+    Tensor<C> expected(reduced_shape);
+    expected.fill(0);
+    ReferenceImpl(reduce_axes, a, b, expected);
+
+    Tensor<C> c_squeezed = c.reshape(reduced_shape);
+    for (const auto& i : EnumerateIndices(reduced_shape)) {
       if (is_integral<C>::value) {
-        ASSERT_EQ(c(i), expected(expected_i));
+        ASSERT_EQ(c_squeezed(i), expected(i));
       } else {
         const float tolerance =
             Tolerance<C>(num_reduce_elements, max_abs_value);
-        ASSERT_NEAR(static_cast<float>(c(i)),
-                    static_cast<float>(expected(expected_i)), tolerance);
+        ASSERT_NEAR(static_cast<float>(c_squeezed(i)),
+                    static_cast<float>(expected(i)), tolerance);
       }
     }
   }

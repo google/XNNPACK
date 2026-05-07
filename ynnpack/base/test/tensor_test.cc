@@ -6,7 +6,12 @@
 #include "ynnpack/base/test/tensor.h"
 
 #include <algorithm>
-#include <cmath>
+#include <cstddef>
+#include <cstdint>
+#include <functional>
+#include <initializer_list>
+#include <numeric>
+#include <vector>
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
@@ -179,6 +184,36 @@ TEST(Pad, Constant2D) {
   ASSERT_THAT(padded.extents(), testing::ElementsAre(3, 5));
   ASSERT_THAT(padded, testing::ElementsAre(-1, -1, -1, -1, -1, -1, -1, 3, 5, -1,
                                            -1, -1, 7, 9, -1));
+}
+
+TEST(Tensor, Reduce1D) {
+  Tensor<int> x({5});
+  std::iota(x.begin(), x.end(), 1);  // 1, 2, 3, 4, 5
+  Tensor<int> reduced = x.reduce({0}, std::plus<int>());
+  ASSERT_THAT(reduced.extents(), testing::ElementsAre());
+  ASSERT_EQ(reduced(), 15);
+}
+
+TEST(Tensor, Reduce2D) {
+  Tensor<int> x({2, 3});
+  // 1, 2, 3
+  // 4, 5, 6
+  std::iota(x.begin(), x.end(), 1);
+
+  // Reduce dim 0: [1+4, 2+5, 3+6] = [5, 7, 9]
+  Tensor<int> reduced0 = x.reduce({0}, std::plus<int>());
+  ASSERT_THAT(reduced0.extents(), testing::ElementsAre(3));
+  ASSERT_THAT(reduced0, testing::ElementsAre(5, 7, 9));
+
+  // Reduce dim 1: [1+2+3, 4+5+6] = [6, 15]
+  Tensor<int> reduced1 = x.reduce({1}, std::plus<int>());
+  ASSERT_THAT(reduced1.extents(), testing::ElementsAre(2));
+  ASSERT_THAT(reduced1, testing::ElementsAre(6, 15));
+
+  // Reduce both: 1+2+3+4+5+6 = 21
+  Tensor<int> reduced_both = x.reduce({0, 1}, std::plus<int>());
+  ASSERT_THAT(reduced_both.extents(), testing::ElementsAre());
+  ASSERT_EQ(reduced_both(), 21);
 }
 
 }  // namespace ynn

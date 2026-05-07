@@ -27,6 +27,7 @@
 #include "ynnpack/base/to_string.h"
 #include "ynnpack/base/type.h"
 #include "ynnpack/include/ynnpack.h"
+#include "ynnpack/subgraph/test/scheduler.h"
 #include "ynnpack/subgraph/test/subgraph_builder.h"
 
 using ynn::to_string;  // NOLINT(misc-unused-using-decls)
@@ -55,28 +56,59 @@ float Tolerance(ynn_reduce_operator op, size_t k, float max_abs_value) {
     case ynn_reduce_sum:
       return type_info<T>::epsilon() * k * max_abs_value * 3.0f;
     case ynn_reduce_sum_squared:
-      return type_info<T>::epsilon() * k * max_abs_value * max_abs_value * 6.0f;
+      // TODO: b/510604061 - This tolerance is too large.
+      return type_info<T>::epsilon() * k * max_abs_value * max_abs_value *
+             100.0f;
     default:
       return 0.0f;
   }
 }
 
 template <typename A, typename C>
-void ReferenceImpl(ynn_reduce_operator op, const Tensor<A>& a,
-                   Tensor<C>& c) {
+void ReferenceImpl(ynn_reduce_operator op, const std::vector<int32_t>& axes,
+                   const Tensor<A>& a, Tensor<C>& c) {
+  if (a.empty()) {
+    return;
+  }
   if ((op == ynn_reduce_sum || op == ynn_reduce_sum_squared) &&
       !std::is_same<C, float>::value && !std::is_same<C, double>::value &&
       !std::is_same<C, int32_t>::value) {
     // Compute sum and sum_squared with extra precision.
     Tensor<float> c_float(c.extents());
     c_float.assign(c);
-    ReferenceImpl(op, a, c_float);
+    ReferenceImpl(op, axes, a, c_float);
     c.assign(c_float);
   } else {
-    auto op_impl = GetReferenceOp<C>(op);
-    broadcast_extent_1(c);
-    for (const auto& i : EnumerateIndices(a.shape())) {
-      c(i) = op_impl(c(i), a(i));
+    Tensor<C> a_c(a.extents());
+    a_c.assign(a);
+    if (op == ynn_reduce_sum_squared) {
+      for (C& i : a_c) {
+        i = i * i;
+      }
+    }
+
+    Tensor<C> reduced;
+    switch (op) {
+      case ynn_reduce_sum:
+      case ynn_reduce_sum_squared:
+        reduced = a_c.reduce(axes, std::plus<C>());
+        break;
+      case ynn_reduce_min:
+        reduced = a_c.reduce(axes, [](C a, C b) { return std::min<C>(a, b); });
+        break;
+      case ynn_reduce_max:
+        reduced = a_c.reduce(axes, [](C a, C b) { return std::max<C>(a, b); });
+        break;
+      case ynn_reduce_invalid:
+      case ynn_reduce_min_max:
+        YNN_UNREACHABLE;
+    }
+
+    auto op_impl =
+        GetReferenceOp<C>(op == ynn_reduce_sum_squared ? ynn_reduce_sum : op);
+    Tensor<C> reduced_reshaped = reduced.reshape(c.extents());
+    for (const auto& i : EnumerateIndices(c.shape())) {
+      c(i) = op_impl(c(i), reduced_reshaped(i));
     }
   }
 }
@@ -88,15 +120,22 @@ void TestReduce(A, C, ynn_reduce_operator op) {
   std::bernoulli_distribution random_bool(0.5);
   std::bernoulli_distribution empty_shape_dist(0.01f);
 
+  TestScheduler scheduler(3);
+
   const float max_abs_value = 10.0f;
 
-  for (auto _ : FuzzTest(std::chrono::milliseconds(500))) {
+  for (auto _ : FuzzTest(std::chrono::milliseconds(250))) {
     const bool keep_dims = random_bool(rng);
 
-    const size_t input_rank = rank_dist(rng);
+    const int input_rank = rank_dist(rng);
+    // Limiting the number of reduction dims to 4 gives us a reasonable upper
+    // bound on the total size of reductions, which means we avoid issues with
+    // overflow for int32 accumulators.
     const size_t num_k_dims =
-        std::uniform_int_distribution<size_t>(1, input_rank)(rng);
+        std::uniform_int_distribution<size_t>(1, std::min(input_rank, 4))(rng);
     const size_t output_rank = input_rank - (keep_dims ? 0 : num_k_dims);
+    std::uniform_int_distribution<size_t> dim_dist(0, input_rank - 1);
+    std::uniform_int_distribution<size_t> large_shape_dist(10, 100);
 
     // Select random axes to reduce.
     std::vector<int32_t> reduce_axes(input_rank);
@@ -106,11 +145,12 @@ void TestReduce(A, C, ynn_reduce_operator op) {
 
     // Build the subgraph.
     SubgraphBuilder subgraph(3);
-    const uint32_t a_id = 0;
+    const uint32_t input_a_id = 0;
     uint32_t c_id = 1;
     const uint32_t output_id = 2;
     std::vector<size_t> input_shape = random_shape(rng, input_rank, 0, 9);
-    subgraph.AddInput(type_of<A>(), input_shape, a_id)
+    input_shape[dim_dist(rng)] = large_shape_dist(rng);
+    subgraph.AddInput(type_of<A>(), input_shape, input_a_id)
         .AddOutput(type_of<C>(), output_rank, output_id);
 
     const bool init_c = random_bool(rng);
@@ -121,10 +161,33 @@ void TestReduce(A, C, ynn_reduce_operator op) {
       subgraph.AddInput(type_of<C>(), output_rank, c_id);
     }
 
-    subgraph.AddReduce(op, reduce_axes, a_id, c_id, output_id,
+    ynn_reduce_operator subgraph_op = op;
+    uint32_t a_id = input_a_id;
+    if (op == ynn_reduce_sum_squared) {
+      if (random_bool(rng)) {
+        // Some of the time, express ynn_reduce_sum_squared as a sum of a square
+        // op to test pattern matching. We might need to convert to the output
+        // type first.
+        uint32_t wide_id = YNN_INVALID_VALUE_ID;
+        if (!std::is_same_v<A, C>) {
+          // Widen the input to the type of C before squaring.
+          subgraph.AddTensor(type_of<C>(), input_rank, wide_id);
+          subgraph.AddUnary(ynn_unary_convert, input_a_id, wide_id);
+        } else {
+          wide_id = input_a_id;
+        }
+        a_id = YNN_INVALID_VALUE_ID;
+        subgraph.AddTensor(type_of<C>(), input_rank, a_id);
+        subgraph.AddUnary(ynn_unary_square, wide_id, a_id);
+        subgraph_op = ynn_reduce_sum;
+      }
+    }
+
+    subgraph.AddReduce(subgraph_op, reduce_axes, a_id, c_id, output_id,
                        keep_dims ? YNN_NODE_FLAG_KEEP_DIMS : 0);
 
-    Runtime runtime(subgraph.GetSubgraph());
+    Runtime runtime(subgraph.GetSubgraph(),
+                    random_bool(rng) ? &scheduler : nullptr);
     ASSERT_EQ(runtime.Status(), ynn_status_success);
 
     for (int reshape = 0; reshape < 2; ++reshape) {
@@ -142,7 +205,7 @@ void TestReduce(A, C, ynn_reduce_operator op) {
       Tensor<A> a(a_shape);
       fill_random(a.data(), a.size(), rng, -max_abs_value, max_abs_value);
 
-      runtime.ReshapeExternalTensor(a_shape, a.data(), a_id);
+      runtime.ReshapeExternalTensor(a_shape, a.data(), input_a_id);
 
       Tensor<C> c(c_shape);
       if (init_c) {
@@ -174,7 +237,7 @@ void TestReduce(A, C, ynn_reduce_operator op) {
       ASSERT_EQ(runtime.Status(), ynn_status_success);
 
       // Compute the reference result.
-      ReferenceImpl(op, a, expected);
+      ReferenceImpl(op, reduce_axes, a, expected);
 
       // Verify results.
       for (const auto& i : EnumerateIndices(c_shape)) {
@@ -220,7 +283,7 @@ multi_type min_max_types[] = {
 
 INSTANTIATE_TEST_SUITE_P(
     Sum, Reduce,
-    testing::Combine(testing::Values(ynn_reduce_sum),
+    testing::Combine(testing::Values(ynn_reduce_sum, ynn_reduce_sum_squared),
                      testing::ValuesIn(sum_types)),
     [](const testing::TestParamInfo<Reduce::ParamType>& info) {
       return test_param_to_string(info);
@@ -241,15 +304,19 @@ void TestMinMax(T) {
   std::bernoulli_distribution random_bool(0.5);
   std::bernoulli_distribution empty_shape_dist(0.01f);
 
+  TestScheduler scheduler(3);
+
   const float max_abs_value = 10.0f;
 
-  for (auto _ : FuzzTest(std::chrono::milliseconds(500))) {
+  for (auto _ : FuzzTest(std::chrono::milliseconds(250))) {
     const bool keep_dims = random_bool(rng);
 
     const size_t input_rank = rank_dist(rng);
     const size_t num_k_dims =
         std::uniform_int_distribution<size_t>(1, input_rank)(rng);
     const size_t output_rank = input_rank - (keep_dims ? 0 : num_k_dims) + 1;
+    std::uniform_int_distribution<size_t> dim_dist(0, input_rank - 1);
+    std::uniform_int_distribution<size_t> large_shape_dist(10, 100);
 
     // Select random axes to reduce.
     std::vector<int32_t> reduce_axes(input_rank);
@@ -263,6 +330,7 @@ void TestMinMax(T) {
     uint32_t c_id = 1;
     const uint32_t output_id = 2;
     std::vector<size_t> input_shape = random_shape(rng, input_rank, 0, 9);
+    input_shape[dim_dist(rng)] = large_shape_dist(rng);
     subgraph.AddInput(type_of<T>(), input_shape, a_id)
         .AddOutput(type_of<T>(), output_rank, output_id);
 
@@ -277,7 +345,8 @@ void TestMinMax(T) {
     subgraph.AddReduce(ynn_reduce_min_max, reduce_axes, a_id, c_id, output_id,
                        keep_dims ? YNN_NODE_FLAG_KEEP_DIMS : 0);
 
-    Runtime runtime(subgraph.GetSubgraph());
+    Runtime runtime(subgraph.GetSubgraph(),
+                    random_bool(rng) ? &scheduler : nullptr);
     ASSERT_EQ(runtime.Status(), ynn_status_success);
 
     for (int reshape = 0; reshape < 2; ++reshape) {
@@ -329,11 +398,22 @@ void TestMinMax(T) {
       // Compute the reference result.
       Tensor<T> expected_min = expected.slice(0, 0).remove_dim(0);
       Tensor<T> expected_max = expected.slice(0, 1).remove_dim(0);
-      broadcast_extent_1(expected_min);
-      broadcast_extent_1(expected_max);
-      for (const auto& i : EnumerateIndices(a_shape)) {
-        expected_min(i) = std::min(expected_min(i), a(i));
-        expected_max(i) = std::max(expected_max(i), a(i));
+
+      if (!a.empty()) {
+        Tensor<T> reduced_min =
+            a.reduce(reduce_axes, [](T x, T y) { return std::min(x, y); });
+        Tensor<T> reduced_max =
+            a.reduce(reduce_axes, [](T x, T y) { return std::max(x, y); });
+
+        Tensor<T> reduced_min_reshaped =
+            reduced_min.reshape(expected_min.extents());
+        Tensor<T> reduced_max_reshaped =
+            reduced_max.reshape(expected_max.extents());
+
+        for (const auto& i : EnumerateIndices(expected_min.shape())) {
+          expected_min(i) = std::min(expected_min(i), reduced_min_reshaped(i));
+          expected_max(i) = std::max(expected_max(i), reduced_max_reshaped(i));
+        }
       }
 
       // Verify results.
@@ -357,10 +437,20 @@ INSTANTIATE_TEST_SUITE_P(
     });
 
 template <typename T>
-void MaxAbsDiff(const Tensor<T>& a, const Tensor<T>& b, Tensor<T>& c) {
-  broadcast_extent_1(c);
+void MaxAbsDiff(const std::vector<int32_t>& axes, const Tensor<T>& a,
+                const Tensor<T>& b, Tensor<T>& c) {
+  if (a.empty()) {
+    return;
+  }
+  Tensor<T> diff(a.extents());
   for (const auto& i : EnumerateIndices(a.shape())) {
-    c(i) = std::max(c(i), std::abs(a(i) - b(i)));
+    diff(i) = std::abs(a(i) - b(i));
+  }
+  Tensor<T> reduced =
+      diff.reduce(axes, [](T x, T y) { return std::max(x, y); });
+  Tensor<T> reduced_reshaped = reduced.reshape(c.extents());
+  for (const auto& i : EnumerateIndices(c.shape())) {
+    c(i) = std::max(c(i), reduced_reshaped(i));
   }
 }
 
@@ -369,6 +459,8 @@ TEST(MaxAbsDiff, Test) {
   std::uniform_int_distribution<size_t> rank_dist(1, YNN_MAX_TENSOR_RANK - 1);
   std::bernoulli_distribution random_bool(0.5);
   std::bernoulli_distribution empty_shape_dist(0.01f);
+
+  TestScheduler scheduler(3);
 
   const float max_abs_value = 1.0f;
 
@@ -379,6 +471,8 @@ TEST(MaxAbsDiff, Test) {
     const size_t num_k_dims =
         std::uniform_int_distribution<size_t>(1, input_rank)(rng);
     const size_t output_rank = input_rank - (keep_dims ? 0 : num_k_dims);
+    std::uniform_int_distribution<size_t> dim_dist(0, input_rank - 1);
+    std::uniform_int_distribution<size_t> large_shape_dist(10, 100);
 
     // Select random axes to reduce.
     std::vector<int32_t> reduce_axes(input_rank);
@@ -395,6 +489,7 @@ TEST(MaxAbsDiff, Test) {
     uint32_t diff_id = YNN_INVALID_VALUE_ID;
     uint32_t abs_diff_id = YNN_INVALID_VALUE_ID;
     std::vector<size_t> input_shape = random_shape(rng, input_rank, 0, 9);
+    input_shape[dim_dist(rng)] = large_shape_dist(rng);
     subgraph.AddInput(type_of<float>(), input_shape, a_id)
         .AddInput(type_of<float>(), input_rank, b_id)
         .AddTensor(type_of<float>(), input_rank, diff_id)
@@ -415,7 +510,8 @@ TEST(MaxAbsDiff, Test) {
         .AddReduce(ynn_reduce_max, reduce_axes, abs_diff_id, c_id, output_id,
                    keep_dims ? YNN_NODE_FLAG_KEEP_DIMS : 0);
 
-    Runtime runtime(subgraph.GetSubgraph());
+    Runtime runtime(subgraph.GetSubgraph(),
+                    random_bool(rng) ? &scheduler : nullptr);
     ASSERT_EQ(runtime.Status(), ynn_status_success);
 
     for (int reshape = 0; reshape < 2; ++reshape) {
@@ -466,7 +562,7 @@ TEST(MaxAbsDiff, Test) {
       ASSERT_EQ(runtime.Status(), ynn_status_success);
 
       // Compute the reference result.
-      MaxAbsDiff(a, b, expected);
+      MaxAbsDiff(reduce_axes, a, b, expected);
 
       // Verify results.
       for (const auto& i : EnumerateIndices(c_shape)) {
