@@ -31,8 +31,9 @@ void TestImpl(T, size_t rank) {
   for (size_t axis = 0; axis < rank; ++axis) {
     for (size_t axes_count = 1; axis + axes_count <= rank; ++axes_count) {
       // Define subgraph
+      std::vector<size_t> template_shape = random_shape(rng, rank, 0, 9);
       SubgraphBuilder subgraph(2);
-      subgraph.AddInput(type_of<T>(), rank, 0)
+      subgraph.AddInput(type_of<T>(), template_shape, 0)
           .AddOutput(type_of<T>(), rank + 1 - axes_count, 1)
           .AddFuseDim(axis, axes_count, 0, 1);
 
@@ -40,7 +41,7 @@ void TestImpl(T, size_t rank) {
       ASSERT_EQ(runtime.Status(), ynn_status_success);
 
       for (int reshape = 0; reshape < 2; ++reshape) {
-        std::vector<size_t> input_shape = random_shape(rng, rank);
+        std::vector<size_t> input_shape = random_shape(rng, template_shape);
 
         Tensor<T> input(input_shape);
         fill_random(input.data(), input.size(), rng);

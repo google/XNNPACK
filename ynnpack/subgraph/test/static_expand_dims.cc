@@ -53,7 +53,8 @@ void TestImpl(T, size_t rank) {
 
     // Define subgraph
     SubgraphBuilder subgraph(2);
-    subgraph.AddInput(type_of<T>(), rank, 0)
+    std::vector<size_t> static_input_shape = random_shape(rng, rank, 0, 10);
+    subgraph.AddInput(type_of<T>(), static_input_shape, 0)
         .AddOutput(type_of<T>(), rank + new_axes.size(), 1)
         .AddExpandDims(new_axes, 0, 1);
 
@@ -61,7 +62,7 @@ void TestImpl(T, size_t rank) {
     ASSERT_EQ(runtime.Status(), ynn_status_success);
 
     for (int reshape = 0; reshape < 2; ++reshape) {
-      std::vector<size_t> shape = random_shape(rng, rank);
+      std::vector<size_t> shape = random_shape(rng, static_input_shape);
 
       Tensor<T> input(shape);
       fill_random(input.data(), input.size(), rng);

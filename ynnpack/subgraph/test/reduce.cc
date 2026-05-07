@@ -109,7 +109,8 @@ void TestReduce(A, C, ynn_reduce_operator op) {
     const uint32_t a_id = 0;
     uint32_t c_id = 1;
     const uint32_t output_id = 2;
-    subgraph.AddInput(type_of<A>(), input_rank, a_id)
+    std::vector<size_t> input_shape = random_shape(rng, input_rank, 0, 9);
+    subgraph.AddInput(type_of<A>(), input_shape, a_id)
         .AddOutput(type_of<C>(), output_rank, output_id);
 
     const bool init_c = random_bool(rng);
@@ -127,11 +128,11 @@ void TestReduce(A, C, ynn_reduce_operator op) {
     ASSERT_EQ(runtime.Status(), ynn_status_success);
 
     for (int reshape = 0; reshape < 2; ++reshape) {
-      std::vector<size_t> a_shape = random_shape(rng, input_rank);
+      std::vector<size_t> a_shape = random_shape(rng, input_shape);
       std::vector<size_t> c_shape = a_shape;
       size_t num_k_elements = 1;
       for (int32_t i : reduce_axes) {
-        if (empty_shape_dist(rng)) {
+        if (input_shape[i] == 0 && empty_shape_dist(rng)) {
           a_shape[i] = 0;
         }
         num_k_elements *= a_shape[i];
@@ -261,7 +262,8 @@ void TestMinMax(T) {
     const uint32_t a_id = 0;
     uint32_t c_id = 1;
     const uint32_t output_id = 2;
-    subgraph.AddInput(type_of<T>(), input_rank, a_id)
+    std::vector<size_t> input_shape = random_shape(rng, input_rank, 0, 9);
+    subgraph.AddInput(type_of<T>(), input_shape, a_id)
         .AddOutput(type_of<T>(), output_rank, output_id);
 
     const bool init_c = random_bool(rng);
@@ -279,10 +281,10 @@ void TestMinMax(T) {
     ASSERT_EQ(runtime.Status(), ynn_status_success);
 
     for (int reshape = 0; reshape < 2; ++reshape) {
-      std::vector<size_t> a_shape = random_shape(rng, input_rank);
+      std::vector<size_t> a_shape = random_shape(rng, input_shape);
       std::vector<size_t> c_shape = a_shape;
       for (int32_t i : reduce_axes) {
-        if (empty_shape_dist(rng)) {
+        if (input_shape[i] == 0 && empty_shape_dist(rng)) {
           a_shape[i] = 0;
         }
         c_shape[i] = 1;
@@ -392,7 +394,8 @@ TEST(MaxAbsDiff, Test) {
     const uint32_t output_id = 3;
     uint32_t diff_id = YNN_INVALID_VALUE_ID;
     uint32_t abs_diff_id = YNN_INVALID_VALUE_ID;
-    subgraph.AddInput(type_of<float>(), input_rank, a_id)
+    std::vector<size_t> input_shape = random_shape(rng, input_rank, 0, 9);
+    subgraph.AddInput(type_of<float>(), input_shape, a_id)
         .AddInput(type_of<float>(), input_rank, b_id)
         .AddTensor(type_of<float>(), input_rank, diff_id)
         .AddTensor(type_of<float>(), input_rank, abs_diff_id)
@@ -416,10 +419,10 @@ TEST(MaxAbsDiff, Test) {
     ASSERT_EQ(runtime.Status(), ynn_status_success);
 
     for (int reshape = 0; reshape < 2; ++reshape) {
-      std::vector<size_t> ab_shape = random_shape(rng, input_rank);
+      std::vector<size_t> ab_shape = random_shape(rng, input_shape);
       std::vector<size_t> c_shape = ab_shape;
       for (int32_t i : reduce_axes) {
-        if (empty_shape_dist(rng)) {
+        if (input_shape[i] == 0 && empty_shape_dist(rng)) {
           ab_shape[i] = 0;
         }
         c_shape[i] = 1;

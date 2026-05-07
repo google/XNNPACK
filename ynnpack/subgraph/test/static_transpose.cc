@@ -144,6 +144,18 @@ std::vector<size_t> compute_strides(const std::vector<size_t>& shape) {
   return strides;
 }
 
+// Align both the input and output trailing dimensions of a transpose to be a
+// multiple of `align`.
+void align_shape(std::vector<size_t>& shape, const std::vector<int32_t>& perm,
+                 size_t align) {
+  if (!shape.empty()) {
+    shape.back() = align_up(shape.back(), align);
+  }
+  if (!perm.empty() && static_cast<size_t>(perm.back()) < shape.size()) {
+    shape[perm.back()] = align_up(shape[perm.back()], align);
+  }
+};
+
 template <typename T>
 void test_random(T, bool with_copy) {
   using T_info = type_info<T>;
@@ -170,8 +182,11 @@ void test_random(T, bool with_copy) {
     }
 
     // Define subgraph
+    std::vector<size_t> input_template_shape =
+        random_shape(rng, input_rank, 0, 9);
+    align_shape(input_template_shape, perm, elem_count);
     SubgraphBuilder subgraph(2);
-    subgraph.AddInput(type_of<T>(), input_rank, 0)
+    subgraph.AddInput(type_of<T>(), input_template_shape, 0)
         .AddOutput(type_of<T>(), perm.size(), 1);
 
     if (with_copy) {
@@ -200,17 +215,8 @@ void test_random(T, bool with_copy) {
     }
 
     for (int reshape = 0; reshape < 2; ++reshape) {
-      std::vector<size_t> input_shape = random_shape(rng, input_rank);
-      // We need both the input and output dense dimension to be aligned to the
-      // number of elements in an instance of T.
-      if (!input_shape.empty()) {
-        input_shape.back() = align_up(input_shape.back(), elem_count);
-      }
-      if (!perm.empty() &&
-          static_cast<size_t>(perm.back()) < input_shape.size()) {
-        input_shape[perm.back()] =
-            align_up(input_shape[perm.back()], elem_count);
-      }
+      std::vector<size_t> input_shape = random_shape(rng, input_template_shape);
+      align_shape(input_shape, perm, elem_count);
 
       size_t flat_size_in =
           std::accumulate(input_shape.begin(), input_shape.end(),

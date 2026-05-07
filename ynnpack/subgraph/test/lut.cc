@@ -47,7 +47,8 @@ void TestLut() {
     uint32_t output_id = 1;
     uint32_t lut_id = YNN_INVALID_VALUE_ID;
 
-    subgraph.AddInput(type_of<A>(), rank, input_id)
+    std::vector<size_t> input_shape = random_shape(rng, rank, 0, max_dim);
+    subgraph.AddInput(type_of<A>(), input_shape, input_id)
         .AddOutput(type_of<X>(), rank, output_id)
         .AddTensor(type_of<X>(), {256}, lut_id, lut_data.data());
 
@@ -59,7 +60,7 @@ void TestLut() {
     ASSERT_EQ(runtime.Status(), ynn_status_success);
 
     for (int reshape = 0; reshape < 2; ++reshape) {
-      std::vector<size_t> shape = random_shape(rng, rank, 1, max_dim);
+      std::vector<size_t> shape = random_shape(rng, input_shape, 1, max_dim);
 
       Tensor<A> a(shape);
       Tensor<X> output(shape);

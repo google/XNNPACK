@@ -603,7 +603,8 @@ ynn_status ynn_define_fuse_dims(ynn_subgraph_t subgraph, size_t num_axes,
   output.extents = input.extents;
   for (int i = op.axes.size() - 1; i >= 0; --i) {
     if (!op.axes[i]) continue;
-    output.extents[i] *= output.extents[i + 1];
+    output.extents[i] =
+        slinky::simplify(output.extent(i) * output.extent(i + 1));
     output.extents.erase(output.extents.begin() + i + 1);
   }
 
@@ -658,13 +659,14 @@ ynn_status ynn_define_split_dims(ynn_subgraph_t subgraph, size_t num_axes,
   ynn_value& output = subgraph->get_output_value(output_id, input);
   output.extents = input.extents;
   for (const ynn_node::split_dims::split& split : op.splits) {
+    slinky::expr extent = output.extent(split.axis);
     output.extents.insert(output.extents.begin() + split.axis, split.factor);
     node.checks.push_back({
-        output.extents[split.axis] % split.factor == 0,
+        extent % split.factor == 0,
         {"invalid split by ", split.factor, " in dimension ", split.axis, " (",
-         output.extents[split.axis], ") of ", ynn_node::input_idx{0}},
+         extent, ") of ", ynn_node::input_idx{0}},
     });
-    output.extents[split.axis + 1] /= split.factor;
+    output.extents[split.axis + 1] = extent / split.factor;
   }
 
   node.inputs = {input_id};

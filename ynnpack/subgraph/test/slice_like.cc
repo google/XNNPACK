@@ -42,7 +42,9 @@ void TestSliceLike(T, size_t rank) {
 
       // Define subgraph
       SubgraphBuilder subgraph(3);
-      subgraph.AddInput(type_of<T>(), input_rank, 0)
+      std::vector<size_t> static_input_shape =
+          random_shape(rng, input_rank, 0, 10);
+      subgraph.AddInput(type_of<T>(), static_input_shape, 0)
           .AddInput(type_of<half>(), template_rank, 1)
           .AddOutput(type_of<T>(), rank, 2)
           .AddSliceLike(axes, 0, 1, 2);
@@ -51,7 +53,7 @@ void TestSliceLike(T, size_t rank) {
       ASSERT_EQ(runtime.Status(), ynn_status_success);
 
       for (int reshape = 0; reshape < 2; ++reshape) {
-        std::vector<size_t> input_shape = random_shape(rng, input_rank, 1, 10);
+        std::vector<size_t> input_shape = random_shape(rng, static_input_shape);
         std::vector<size_t> template_shape =
             random_shape(rng, template_rank, 1, 10);
 

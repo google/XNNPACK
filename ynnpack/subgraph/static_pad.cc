@@ -7,7 +7,6 @@
 #include <cstddef>
 #include <cstdint>
 #include <functional>
-#include <memory>
 #include <utility>
 #include <vector>
 
@@ -63,10 +62,10 @@ ynn_status ynn_define_static_pad(ynn_subgraph_t subgraph, size_t num_axes,
 
   for (const ynn_node::static_pad::padding& p : op.paddings) {
     if ((p.pre_padding + p.post_padding) != 0) {
-      output.extents[p.axis] =
-          slinky::simplify(output.extent(p.axis) +
-                           (static_cast<slinky::index_t>(p.pre_padding) +
-                            static_cast<slinky::index_t>(p.post_padding)));
+      output.extents[p.axis] = slinky::simplify(
+          slinky::max(0, output.extent(p.axis) +
+                             (static_cast<slinky::index_t>(p.pre_padding) +
+                              static_cast<slinky::index_t>(p.post_padding))));
     }
   }
 
@@ -88,10 +87,10 @@ ynn_status ynn_define_static_pad(ynn_subgraph_t subgraph, size_t num_axes,
         input.buffer, make_elementwise_bounds(dims, input.physical_extents())};
     func_input.input_crop.resize(rank);
     for (const ynn_node::static_pad::padding& p : op.paddings) {
-      func_input.bounds[p.axis] -= p.pre_padding;
-      if (input.extents[p.axis].defined()) {
-        func_input.input_crop[p.axis] = all_bounds(input.extents[p.axis]);
-      }
+      // In this case, we don't allow broadcasting of extent 1 dimensions, so we
+      // ignore the bounds that make_elementwise_bounds produced for us here.
+      func_input.bounds[p.axis] = slinky::point(dims[p.axis]) - p.pre_padding;
+      func_input.input_crop[p.axis] = all_bounds(input.extent(p.axis));
     }
 
     slinky::func f;
@@ -101,7 +100,7 @@ ynn_status ynn_define_static_pad(ynn_subgraph_t subgraph, size_t num_axes,
           padding_value.buffer,
           make_elementwise_bounds(dims, padding_value.physical_extents())};
       for (const ynn_node::static_pad::padding& p : op.paddings) {
-        padding.bounds[p.axis] -= p.pre_padding;
+        padding.bounds[p.axis] = slinky::point(dims[p.axis]) - p.pre_padding;
       }
 
       f = slinky::func::make_copy(std::move(func_input),

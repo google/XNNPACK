@@ -49,8 +49,13 @@ void TestImpl(T, size_t rank, size_t num_outputs) {
 
   for (size_t axis = 0; axis < rank; ++axis) {
     // Define subgraph
+    std::vector<size_t> expected_template_shape = random_shape(rng, rank, 0, 9);
+    std::vector<size_t> input_template_shape = expected_template_shape;
+    if (input_template_shape[axis] != 0) {
+      input_template_shape[axis] *= num_outputs;
+    }
     SubgraphBuilder subgraph(num_outputs + 1);
-    subgraph.AddInput(type_of<T>(), rank, 0);
+    subgraph.AddInput(type_of<T>(), input_template_shape, 0);
     for (size_t i = 0; i < num_outputs; ++i) {
       subgraph.AddOutput(type_of<T>(), rank, i + 1);
     }
@@ -60,7 +65,8 @@ void TestImpl(T, size_t rank, size_t num_outputs) {
     ASSERT_EQ(runtime.Status(), ynn_status_success);
 
     for (int reshape = 0; reshape < 2; ++reshape) {
-      std::vector<size_t> expected_shape = random_shape(rng, rank);
+      std::vector<size_t> expected_shape =
+          random_shape(rng, expected_template_shape);
       std::vector<size_t> input_shape = expected_shape;
       input_shape[axis] *= num_outputs;
 

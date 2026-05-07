@@ -191,11 +191,17 @@ void TestStaticB(A, B, C) {
     if (random_bool(rng)) {
       dot_flags |= YNN_NODE_FLAG_F32_DOT_TO_BF16_X3;
     }
+    std::vector<size_t> batch_template_shape =
+        random_shape(rng, output_rank - 1, 0, 9);
+    std::vector<size_t> a_template_shape = batch_template_shape;
+    for (size_t i = 0; i < num_k_dims; ++i) {
+      a_template_shape.push_back(b_shape[i]);
+    }
     SubgraphBuilder subgraph(4, subgraph_flags);
     const uint32_t a_id = 0;
     const uint32_t b_id = 1;
     const uint32_t output_id = 3;
-    subgraph.AddInput(type_of<A>(), input_rank, a_id)
+    subgraph.AddInput(type_of<A>(), a_template_shape, a_id)
         .AddTensor(b, b_id)
         .AddOutput(type_of<C>(), output_rank, output_id);
 
@@ -222,7 +228,7 @@ void TestStaticB(A, B, C) {
 
     for (int reshape = 0; reshape < 2; ++reshape) {
       std::vector<size_t> batch_dims =
-          random_shape(rng, output_rank - 1, 1, max_output_dim);
+          random_shape(rng, batch_template_shape, 1, max_output_dim);
 
       // Start with the batch dimensions.
       std::vector<size_t> c_shape = batch_dims;

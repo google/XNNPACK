@@ -134,8 +134,12 @@ slinky::box_expr make_elementwise_bounds(
     const std::vector<slinky::expr>& extents, size_t begin, size_t end) {
   assert(end <= dims.size());
   slinky::box_expr bounds(end - begin);
-  for (size_t i = 0; i < bounds.size() && begin + i < extents.size(); ++i) {
-    bounds[i] = elementwise_bounds(dims[begin + i], extents[begin + i]);
+  for (size_t i = 0; i < bounds.size(); ++i) {
+    if (begin + i < extents.size()) {
+      bounds[i] = elementwise_bounds(dims[begin + i], extents[begin + i]);
+    } else {
+      bounds[i] = slinky::point(0);
+    }
   }
   return bounds;
 }

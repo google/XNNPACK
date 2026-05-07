@@ -33,10 +33,11 @@ void TestImpl(T, size_t rank, size_t num_inputs) {
 
   for (size_t axis = 0; axis < rank; ++axis) {
     // Define subgraph
+    std::vector<size_t> template_shape = random_shape(rng, rank, 0, 9);
     SubgraphBuilder subgraph(num_inputs + 1);
     subgraph.AddOutput(type_of<T>(), rank, 0);
     for (size_t i = 0; i < num_inputs; ++i) {
-      subgraph.AddInput(type_of<T>(), rank, i + 1);
+      subgraph.AddInput(type_of<T>(), template_shape, i + 1);
     }
     subgraph.AddConcatenate(axis, input_ids, 0);
 
@@ -44,12 +45,14 @@ void TestImpl(T, size_t rank, size_t num_inputs) {
     ASSERT_EQ(runtime.Status(), ynn_status_success);
 
     for (int reshape = 0; reshape < 2; ++reshape) {
-      std::vector<size_t> shape = random_shape(rng, rank);
+      std::vector<size_t> shape = random_shape(rng, template_shape);
       std::vector<size_t> expected_shape = shape;
       expected_shape[axis] = 0;
       std::vector<Tensor<T>> inputs;
       for (size_t i = 0; i < num_inputs; ++i) {
-        shape[axis] = random_shape(rng, 1)[0];
+        if (template_shape[axis] == 0) {
+          shape[axis] = random_shape(rng, 1)[0];
+        }
         expected_shape[axis] += shape[axis];
 
         Tensor<T> input_i(shape);

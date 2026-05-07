@@ -52,11 +52,12 @@ void TestOp(A, X, const unary_op_info& op_info, ynn_unary_operator op) {
 
     uint32_t input_id = 0;
     uint32_t output_id = 1;
+    std::vector<size_t> input_shape = random_shape(rng, rank, 0, max_dim);
     SubgraphBuilder subgraph(2);
     if (is_quantized<A>() || is_quantized<X>()) {
       uint32_t a_id = YNN_INVALID_VALUE_ID;
       uint32_t x_id = YNN_INVALID_VALUE_ID;
-      subgraph.AddInput(type_of<A>(), rank, input_id)
+      subgraph.AddInput(type_of<A>(), input_shape, input_id)
           .AddOutput(type_of<X>(), rank, output_id)
           .AddTensor(ynn_type_fp32, rank, a_id)
           .AddTensor(ynn_type_fp32, rank, x_id);
@@ -65,7 +66,7 @@ void TestOp(A, X, const unary_op_info& op_info, ynn_unary_operator op) {
           .AddUnary(op, a_id, x_id)
           .AddQuantize(x_id, type_of<X>(), output_quantization, output_id);
     } else {
-      subgraph.AddInput(type_of<A>(), rank, input_id)
+      subgraph.AddInput(type_of<A>(), input_shape, input_id)
           .AddOutput(type_of<X>(), rank, output_id)
           .AddUnary(op, input_id, output_id);
     }
@@ -74,7 +75,7 @@ void TestOp(A, X, const unary_op_info& op_info, ynn_unary_operator op) {
     ASSERT_EQ(runtime.Status(), ynn_status_success);
 
     for (int reshape = 0; reshape < 2; ++reshape) {
-      std::vector<size_t> shape = random_shape(rng, rank, 1, max_dim);
+      std::vector<size_t> shape = random_shape(rng, input_shape, 1, max_dim);
 
       Tensor<A> a(shape);
       Tensor<X> output(shape);
