@@ -376,7 +376,7 @@ dot_kernel get_dot_kernel(const dot_type& type, const dot_shape& shape,
         shape, packed_shape, required_flags, transpose_a, arch_flags);
   } else if (type.a == ynn_type_int8 && type.b == ynn_type_int4 &&
              type.c == ynn_type_int32) {
-    return get_dot_kernel<uint8_t, int4x2, int32_t>(
+    return get_dot_kernel<int8_t, int4x2, int32_t>(
         shape, packed_shape, required_flags, transpose_a, arch_flags);
   } else if (type.a == ynn_type_uint8 && type.b == ynn_type_int8 &&
              type.c == ynn_type_int32) {
