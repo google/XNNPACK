@@ -48,6 +48,7 @@
     ::benchmark::Initialize(&argc, argv);                               \
     int status = benchmark::utils::ProcessArgs(argc, argv);             \
     if (status != 0) return status;                                     \
+    benchmark::utils::ApplyDeferredArgs();                              \
     if (::benchmark::ReportUnrecognizedArguments(argc, argv)) return 1; \
     ::benchmark::RunSpecifiedBenchmarks();                              \
   }
@@ -63,7 +64,14 @@ extern bool FLAGS_wipe_caches;
 namespace benchmark {
 namespace utils {
 
+extern std::vector<int64_t> FLAGS_shapes;
+extern int64_t FLAGS_gemm_block_size;
+
 int ProcessArgs(int& argc, char**& argv);
+
+typedef void (*ArgsFn)(benchmark::Benchmark*);
+void DeferArgs(benchmark::Benchmark* b, ArgsFn fn);
+void ApplyDeferredArgs();
 
 uint32_t WipeCache();
 uint32_t PrefetchToL1(const void* ptr, size_t size);

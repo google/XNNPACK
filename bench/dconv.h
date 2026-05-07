@@ -11,50 +11,24 @@
 #ifndef XNNPACK_BENCH_DCONV_H_
 #define XNNPACK_BENCH_DCONV_H_
 
+#include <cstddef>
+
 #include "bench/utils.h"
 #include <benchmark/benchmark.h>
 
+inline void CmdlineDConvArguments(benchmark::Benchmark* b) {
+  b->ArgNames({"H", "W", "Cout"});
+
+  for (size_t i = 0; i + 2 < benchmark::utils::FLAGS_shapes.size(); i += 3) {
+    b->Args({benchmark::utils::FLAGS_shapes[i],
+             benchmark::utils::FLAGS_shapes[i + 1],
+             benchmark::utils::FLAGS_shapes[i + 2]});
+  }
+}
 
 #define BENCHMARK_DCONV(conv_fn) \
-  BENCHMARK_NAMED(conv_fn, mobilenet_v1)->Apply(MobileNetConvArguments)->UseRealTime(); \
-  BENCHMARK_NAMED(conv_fn, mobilenet_v3)->Apply(MobileNetV3ConvArguments)->UseRealTime(); \
-  BENCHMARK_NAMED(conv_fn, shufflenet)->Apply(ShuffleNetConvArguments)->UseRealTime(); \
-  BENCHMARK_NAMED(conv_fn, squeezenet_v11)->Apply(SqueezeNetV11ConvArguments)->UseRealTime();
-
-
-// ShuffleNet v1/v2.
-inline void ShuffleNetConvArguments(benchmark::Benchmark* b) {
-  b->ArgNames({"H", "W", "Cout"});
-
-  /********* Conv 1 ********/
-  /*        H    W   GCout */
-  b->Args({224, 224,   24});
-}
-
-// MobileNet v1/v2.
-inline void MobileNetConvArguments(benchmark::Benchmark* b) {
-  b->ArgNames({"H", "W", "Cout"});
-
-  /*        H    W   GCout */
-  b->Args({224, 224,   32});
-}
-
-// MobileNet v3 Small/Large.
-inline void MobileNetV3ConvArguments(benchmark::Benchmark* b) {
-  b->ArgNames({"H", "W", "Cout"});
-
-  /******************* Initial Stage *******************/
-  /*        H    W   GCout */
-  b->Args({224, 224,   16});
-}
-
-// SqueezeNet 1.1
-inline void SqueezeNetV11ConvArguments(benchmark::Benchmark* b) {
-  b->ArgNames({"H", "W", "GCout"});
-
-  /*********************** Conv 1 **********************/
-  /*        H    W   GCout */
-  b->Args({224, 224,   64});
-}
+  BENCHMARK(conv_fn)->Apply([](benchmark::Benchmark* b) { \
+    benchmark::utils::DeferArgs(b, CmdlineDConvArguments); \
+  })->UseRealTime();
 
 #endif  // XNNPACK_BENCH_DCONV_H_

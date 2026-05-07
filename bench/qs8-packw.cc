@@ -11,30 +11,15 @@
 #include "src/xnnpack/packw.h"
 #include <benchmark/benchmark.h>
 
-static void qs8_packw(benchmark::State& state, const char* net,
-                      xnn_qs8_packw_gemm_goi_ukernel_fn ukernel,
-                      uint64_t arch_flags, size_t nr, size_t kr, size_t sr) {
-  benchmark::utils::CheckArchFlags(state, arch_flags);
-  qs8_packw(state, ukernel, nr, kr, sr);
-}
-
-static void qs8_gio_packw(benchmark::State& state, const char* net,
-                          xnn_qs8_packw_gemm_gio_ukernel_fn ukernel,
-                          uint64_t arch_flags, size_t nr, size_t kr,
-                          size_t sr) {
-  benchmark::utils::CheckArchFlags(state, arch_flags);
-  qs8_gio_packw(state, ukernel, nr, kr, sr);
-}
-
-#define XNN_QS8_UKERNEL(arch_flags, ukernel, nr, kr, sr, kblock, nr_scale,    \
-                        izp)                                                  \
-  BENCHMARK_CAPTURE_BGEMM(qs8_packw, ukernel##_, ukernel, arch_flags, nr, kr, \
-                          sr);
+#define XNN_QS8_UKERNEL(arch_flags, ukernel, nr, kr, sr, kblock, nr_scale, \
+                        izp)                                               \
+  BENCHMARK_CAPTURE_BGEMM(qs8_packw, ukernel##_, ukernel, nr, kr, sr,      \
+                          arch_flags);
 
 #define XNN_QS8_GIO_UKERNEL(arch_flags, ukernel, nr, kr, sr, kblock, nr_scale, \
                             izp)                                               \
-  BENCHMARK_CAPTURE_BGEMM(qs8_gio_packw, ukernel##_, ukernel, arch_flags, nr,  \
-                          kr, sr);
+  BENCHMARK_CAPTURE_BGEMM(qs8_gio_packw, ukernel##_, ukernel, nr, kr, sr,      \
+                          arch_flags);
 
 #include "src/qs8-packw/qs8-packw.inc"
 
