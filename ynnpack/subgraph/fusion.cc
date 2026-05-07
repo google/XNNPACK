@@ -1571,6 +1571,16 @@ bool rewrite_sum_to_dot(ynn_subgraph& subgraph, ynn_node& node,
     return false;
   }
 
+  ynn_node* mul_node = analysis.producer_of(node.inputs[0]);
+  if (!mul_node || !is_binary_node(*mul_node, ynn_binary_multiply)) {
+    return false;
+  }
+
+  if (analysis.consumers[mul_node->outputs[0]].size() != 1 ||
+      subgraph.value(mul_node->outputs[0]).is_external_output()) {
+    return false;
+  }
+
   if (node.inputs[1] != YNN_INVALID_VALUE_ID) {
     YNN_LOG_DEBUG()
         << "not rewriting sum(a*b) to dot(a, b) because the sum has "
@@ -1582,16 +1592,6 @@ bool rewrite_sum_to_dot(ynn_subgraph& subgraph, ynn_node& node,
     YNN_LOG_DEBUG()
         << "not rewriting sum(a*b) to dot(a, b) because the sum has "
            "more than 1 reduction dimension.";
-    return false;
-  }
-
-  ynn_node* mul_node = analysis.producer_of(node.inputs[0]);
-  if (!mul_node || !is_binary_node(*mul_node, ynn_binary_multiply)) {
-    return false;
-  }
-
-  if (analysis.consumers[mul_node->outputs[0]].size() != 1 ||
-      subgraph.value(mul_node->outputs[0]).is_external_output()) {
     return false;
   }
 
