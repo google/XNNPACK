@@ -15,17 +15,14 @@ $DATATYPE_IMPL = {"f32": "f32", "f16": "f16" if ARCH == "neonfp16arith" else "s1
 // xoring with the sign bit mask.
 $if ARCH == "sse2" and DATATYPE == "s8":
   #define xnn_load_impl(x) xnn_xor_u8(xnn_loadu_u8(x), vsign_bit_mask)
-  #define xnn_load_tail_impl(x, c) xnn_xor_u8(xnn_load_tail_u8(x, c), vsign_bit_mask)
   #define xnn_load_tail_safe_impl(x, c) xnn_xor_u8(xnn_load_tail_safe_u8(x, c), vsign_bit_mask)
   #define xnn_pre_store_impl(x) xnn_xor_u8(x, vsign_bit_mask)
 $elif DATATYPE == "f16" and ARCH != "neonfp16arith":
   #define xnn_load_impl(x) xnn_signcomplement_s16(xnn_loadu_s16(x))
-  #define xnn_load_tail_impl(x, c) xnn_signcomplement_s16(xnn_load_tail_s16(x, c))
   #define xnn_load_tail_safe_impl(x, c) xnn_signcomplement_s16(xnn_load_tail_safe_s16(x, c))
   #define xnn_pre_store_impl(x) xnn_signcomplement_s16(x)
 $else:
   #define xnn_load_impl(x) xnn_loadu_${DATATYPE}(x)
-  #define xnn_load_tail_impl(x, c) xnn_load_tail_${DATATYPE}(x, c)
   #define xnn_load_tail_safe_impl(x, c) xnn_load_tail_safe_${DATATYPE}(x, c)
   #define xnn_pre_store_impl(x) x
 
@@ -104,7 +101,7 @@ $elif DATATYPE == "f16" and ARCH != "neonfp16arith":
     $if SIMD_SIZE > 1:
       if (c > 0) {
         $for K in range(9):
-          const xnn_simd_${DATATYPE_IMPL}_t vi${K} = xnn_load_tail_impl(i${K}, c);
+          const xnn_simd_${DATATYPE_IMPL}_t vi${K} = xnn_load_tail_safe_impl(i${K}, c);
 
         const xnn_simd_${DATATYPE_IMPL}_t vmax018 = xnn_max_${DATATYPE_IMPL}(xnn_max_${DATATYPE_IMPL}(vi0, vi1), vi8);
         const xnn_simd_${DATATYPE_IMPL}_t vmax23 = xnn_max_${DATATYPE_IMPL}(vi2, vi3);
@@ -159,7 +156,7 @@ $elif DATATYPE == "f16" and ARCH != "neonfp16arith":
       $if SIMD_SIZE > 1:
         if (c > 0) {
           $for K in range(9):
-            const xnn_simd_${DATATYPE_IMPL}_t vi${K} = xnn_load_tail_impl(i${K}, c);
+            const xnn_simd_${DATATYPE_IMPL}_t vi${K} = xnn_load_tail_safe_impl(i${K}, c);
           const xnn_simd_${DATATYPE_IMPL}_t vprev = xnn_load_tail_safe_impl(o, c);
 
           const xnn_simd_${DATATYPE_IMPL}_t vmax018 = xnn_max_${DATATYPE_IMPL}(xnn_max_${DATATYPE_IMPL}(vi0, vi1), vi8);

@@ -16,7 +16,6 @@
 // On some architectures, we have max(u8, u8) but not max(s8, s8). We can emulate max(s8, s8) on these architectures by
 // xoring with the sign bit mask.
 #define xnn_load_impl(x) xnn_loadu_s8(x)
-#define xnn_load_tail_impl(x, c) xnn_load_tail_s8(x, c)
 #define xnn_load_tail_safe_impl(x, c) xnn_load_tail_safe_s8(x, c)
 #define xnn_pre_store_impl(x) x
 
