@@ -73,7 +73,7 @@ void define_static_slice(ynn_subgraph& subgraph, ynn_node& node,
       auto begin_end = calc_begin_end(slice, output.extents[slice.axis]);
       const slinky::expr& begin = begin_end.first;
       const slinky::expr& end = begin_end.second;
-      output.extents[slice.axis] = end - begin;
+      output.extents[slice.axis] = slinky::simplify(end - begin);
       if (slinky::prove_true(output.extents[slice.axis] == 1)) {
         output.extents[slice.axis] = {};
       }
