@@ -11,7 +11,7 @@
 // This header needs to go first for the arch test macros.
 #include "src/xnnpack/common.h"
 
-#if (XNN_ARCH_X86 || XNN_ARCH_X86_64) && XNNPACK_ENABLE_AVX512FP16
+#if (XNN_ARCH_X86 || XNN_ARCH_X86_64) && XNN_ENABLE_AVX512FP16
 
 #include <algorithm>
 #include <cmath>
@@ -584,4 +584,4 @@ TEST_F(F16SimdAVX512FP16Test, StoreTail) {
 
 }  // namespace xnnpack
 
-#endif  // (XNN_ARCH_X86 || XNN_ARCH_X86_64) && XNNPACK_ENABLE_AVX512FP16
+#endif  // (XNN_ARCH_X86 || XNN_ARCH_X86_64) && XNN_ENABLE_AVX512FP16

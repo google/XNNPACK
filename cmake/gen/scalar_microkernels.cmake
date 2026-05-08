@@ -29,6 +29,7 @@ SET(PROD_SCALAR_MICROKERNEL_SRCS
   src/f16-vgelu/gen/f16-vgelu-scalar-rational-6-4-div.c
   src/f16-vsin/gen/f16-vsin-scalar-rational-3-2-div.c
   src/f16-vsqrt/gen/f16-vsqrt-scalar-sqrt.c
+  src/f16-vtanh/gen/f16-vtanh-scalar-expm1minus-rr1-p3h2ts-div.c
   src/f32-argmaxpool/f32-argmaxpool-9p8x-scalar-c1.c
   src/f32-avgpool/gen/f32-avgpool-9p-minmax-scalar-u1.c
   src/f32-bf16-vcvt/gen/f32-bf16-vcvt-scalar-u2.c

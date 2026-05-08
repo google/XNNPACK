@@ -74,3 +74,19 @@ XNN_UKERNEL(xnn_arch_riscv_vector_fp16_arith, xnn_f16_vtanh_ukernel__rvvfp16arit
 XNN_UKERNEL(xnn_arch_riscv_vector_fp16_arith, xnn_f16_vtanh_ukernel__rvvfp16arith_expm1minus_rr1_p3h2ts_div_u2v, 2, true, xnn_float16, struct xnn_f16_default_params, NULL)
 XNN_UKERNEL(xnn_arch_riscv_vector_fp16_arith, xnn_f16_vtanh_ukernel__rvvfp16arith_expm1minus_rr1_p3h2ts_div_u4v, 4, true, xnn_float16, struct xnn_f16_default_params, NULL)
 #endif  // XNN_ARCH_RISCV && XNN_ENABLE_RISCV_FP16_VECTOR
+
+XNN_UKERNEL(xnn_arch_none, xnn_f16_vtanh_ukernel__scalar_expm1minus_rr1_p3h2ts_div_u1, 1, false, xnn_float16, struct xnn_f16_default_params, NULL)
+XNN_UKERNEL(xnn_arch_none, xnn_f16_vtanh_ukernel__scalar_expm1minus_rr1_p3h2ts_div_u2, 2, false, xnn_float16, struct xnn_f16_default_params, NULL)
+XNN_UKERNEL(xnn_arch_none, xnn_f16_vtanh_ukernel__scalar_expm1minus_rr1_p3h2ts_div_u4, 4, false, xnn_float16, struct xnn_f16_default_params, NULL)
+
+#if (XNN_ARCH_X86 || XNN_ARCH_X86_64) && XNN_ENABLE_AVX512FP16
+XNN_UKERNEL(xnn_arch_x86_avx512fp16, xnn_f16_vtanh_ukernel__avx512fp16_expm1minus_rr1_p3h2ts_div_u32, 32, false, xnn_float16, struct xnn_f16_default_params, NULL)
+XNN_UKERNEL(xnn_arch_x86_avx512fp16, xnn_f16_vtanh_ukernel__avx512fp16_expm1minus_rr1_p3h2ts_div_u64, 64, false, xnn_float16, struct xnn_f16_default_params, NULL)
+#endif  // (XNN_ARCH_X86 || XNN_ARCH_X86_64) && XNN_ENABLE_AVX512FP16
+
+#if XNN_ARCH_WASMRELAXEDSIMDFP16
+XNN_UKERNEL(xnn_arch_none, xnn_f16_vtanh_ukernel__wasmrelaxedsimd_expm1minus_rr1_p3h2ts_div_u8, 8, false, xnn_float16, struct xnn_f16_default_params, NULL)
+XNN_UKERNEL(xnn_arch_none, xnn_f16_vtanh_ukernel__wasmrelaxedsimd_expm1minus_rr1_p3h2ts_div_u16, 16, false, xnn_float16, struct xnn_f16_default_params, NULL)
+XNN_UKERNEL(xnn_arch_none, xnn_f16_vtanh_ukernel__wasmrelaxedsimd_expm1minus_rr1_p3h2ts_div_u24, 24, false, xnn_float16, struct xnn_f16_default_params, NULL)
+XNN_UKERNEL(xnn_arch_none, xnn_f16_vtanh_ukernel__wasmrelaxedsimd_expm1minus_rr1_p3h2ts_div_u32, 32, false, xnn_float16, struct xnn_f16_default_params, NULL)
+#endif  // XNN_ARCH_WASMRELAXEDSIMDFP16
