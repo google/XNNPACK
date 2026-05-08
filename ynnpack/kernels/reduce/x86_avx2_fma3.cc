@@ -13,14 +13,14 @@
 #include "ynnpack/base/simd/x86_avx2.h"
 #include "ynnpack/base/simd/x86_fma3.h"
 #include "ynnpack/kernels/reduce/generic.h"
-#include "ynnpack/kernels/reduce/sum_accumulator.h"
+#include "ynnpack/kernels/reduce/sum.h"
 
 namespace ynn {
 
 namespace simd {
 
 static f32x8 reduce_add(
-    f32x8 a, bf16x16 b, Square /*map_fn*/,
+    f32x8 a, bf16x16 b, square /*map_fn*/,
     std::integral_constant<size_t, 2> /*horizontal_factor*/ = {}) {
   __m256 mask = _mm256_castsi256_ps(_mm256_set1_epi32(0xFFFF0000));
   f32x8 evens{_mm256_castsi256_ps(_mm256_slli_epi32(b.v, 16))};
@@ -49,21 +49,8 @@ static f32x16 reduce_add(
 using simd::bf16x8;
 using simd::f32x8;
 
-void sum_squared_bf16_fp32_avx2_fma3(size_t n, size_t k3, size_t k2, size_t k1,
-                                     size_t a_stride_n, size_t a_stride_k3,
-                                     size_t a_stride_k2, const void* a, size_t,
-                                     void* c) {
-  if (k1 == 1 && a_stride_n == sizeof(bfloat16)) {
-    stream_reduce<sum_accumulator_k1_1<f32x8, Square>, bfloat16, float>(
-        n, k3, k2, a_stride_k3, a_stride_k2,
-        reinterpret_cast<const bfloat16*>(a), /*C_stride_m=*/0,
-        reinterpret_cast<float*>(c));
-  } else {
-    tiled_reduce<sum_accumulator_fp32<2, Square>, bfloat16, float>(
-        n, k3, k2, k1, a_stride_n, a_stride_k3, a_stride_k2,
-        reinterpret_cast<const bfloat16*>(a), /*C_stride_m=*/0,
-        reinterpret_cast<float*>(c));
-  }
-}
+SUM_K1_KERNEL(sum_bf16_fp32_k1_avx2_fma3, bfloat16, float,
+              consistent_tile_k_fp32, 2, square);
+SUM_KN_KERNEL(sum_bf16_fp32_kn_avx2_fma3, bfloat16, float, 16, square);
 
 }  // namespace ynn

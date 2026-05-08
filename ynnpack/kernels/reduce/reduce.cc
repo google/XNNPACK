@@ -15,10 +15,11 @@
 #include "ynnpack/base/bfloat16.h"
 #include "ynnpack/base/half.h"
 #include "ynnpack/base/log.h"
+#include "ynnpack/base/simd/scalar.h"
 #include "ynnpack/base/type.h"
 #include "ynnpack/include/ynnpack.h"
 #include "ynnpack/kernels/reduce/generic.h"
-#include "ynnpack/kernels/reduce/sum_accumulator.h"
+#include "ynnpack/kernels/reduce/sum.h"
 
 namespace ynn {
 
@@ -283,7 +284,7 @@ void reduce(size_t N, size_t K3, size_t K2, size_t K1, size_t A_stride_n,
             ReduceOp = ReduceOp{}, F = F{}) {
   if (K1 == 1 && A_stride_n == sizeof(AT)) {
     stream_reduce<accumulator_k1_1<AccT, CT, 128 / sizeof(AccT), ReduceOp, F>,
-                  AT, CT>(N, K3, K2, A_stride_k3, A_stride_k2, A,
+                  AT, CT>(N, K3, K2, A_stride_n, A_stride_k3, A_stride_k2, A,
                           /*C_stride_m=*/0, C);
   } else {
     constexpr size_t K =
@@ -303,7 +304,7 @@ void min_max(size_t N, size_t K3, size_t K2, size_t K1, size_t A_stride_n,
   if (K1 == 1 && A_stride_n == sizeof(T)) {
     stream_reduce<
         min_max_accumulator_k1_1<AccT, T, 64 / sizeof(AccT), Min, Max>, T, T>(
-        N, K3, K2, A_stride_k3, A_stride_k2, A, C_stride_m, C);
+        N, K3, K2, A_stride_n, A_stride_k3, A_stride_k2, A, C_stride_m, C);
   } else {
     tiled_reduce<min_max_accumulator<AccT, T, 1, 64 / sizeof(AccT), Min, Max>,
                  T, T>(N, K3, K2, K1, A_stride_n, A_stride_k3, A_stride_k2, A,
@@ -313,341 +314,261 @@ void min_max(size_t N, size_t K3, size_t K2, size_t K1, size_t A_stride_n,
 
 }  // namespace
 
-void sum_fp32(size_t n, size_t k3, size_t k2, size_t k1, size_t a_stride_n,
-              size_t a_stride_k3, size_t a_stride_k2, const void* a, size_t,
-              void* c) {
-  reduce<float>(n, k3, k2, k1, a_stride_n, a_stride_k3, a_stride_k2,
-                static_cast<const float*>(a), static_cast<float*>(c),
-                sum_op<float>());
-}
+SUM_K1_KERNEL(sum_fp32_k1, float, float, consistent_tile_k_fp32, 1, identity);
+SUM_KN_KERNEL(sum_fp32_kn, float, float, 1, identity);
 
-void sum_fp64(size_t n, size_t k3, size_t k2, size_t k1, size_t a_stride_n,
-              size_t a_stride_k3, size_t a_stride_k2, const void* a, size_t,
-              void* c) {
-  reduce<double>(n, k3, k2, k1, a_stride_n, a_stride_k3, a_stride_k2,
-                 static_cast<const double*>(a), static_cast<double*>(c),
-                 sum_op<double>());
-}
+SUM_K1_KERNEL(sum_fp64_k1, double, double, consistent_tile_k_fp64, 1, identity);
+SUM_KN_KERNEL(sum_fp64_kn, double, double, 1, identity);
 
-void sum_bf16_fp32(size_t n, size_t k3, size_t k2, size_t k1, size_t a_stride_n,
-                   size_t a_stride_k3, size_t a_stride_k2, const void* a,
-                   size_t, void* c) {
-  reduce<float>(n, k3, k2, k1, a_stride_n, a_stride_k3, a_stride_k2,
-                static_cast<const bfloat16*>(a), static_cast<float*>(c),
-                sum_op<float>());
-}
+SUM_K1_KERNEL(sum_bf16_fp32_k1, bfloat16, float, consistent_tile_k_fp32, 1,
+              identity);
+SUM_KN_KERNEL(sum_bf16_fp32_kn, bfloat16, float, 1, identity);
 
-void sum_fp16_fp32(size_t n, size_t k3, size_t k2, size_t k1, size_t a_stride_n,
-                   size_t a_stride_k3, size_t a_stride_k2, const void* a,
-                   size_t, void* c) {
-  reduce<float>(n, k3, k2, k1, a_stride_n, a_stride_k3, a_stride_k2,
-                static_cast<const half*>(a), static_cast<float*>(c),
-                sum_op<float>());
-}
+SUM_K1_KERNEL(sum_fp16_fp32_k1, half, float, consistent_tile_k_fp32, 1,
+              identity);
+SUM_KN_KERNEL(sum_fp16_fp32_kn, half, float, 1, identity);
 
-void sum_int32(size_t n, size_t k3, size_t k2, size_t k1, size_t a_stride_n,
-               size_t a_stride_k3, size_t a_stride_k2, const void* a, size_t,
-               void* c) {
-  reduce<int32_t>(n, k3, k2, k1, a_stride_n, a_stride_k3, a_stride_k2,
-                  static_cast<const int32_t*>(a), static_cast<int32_t*>(c),
-                  sum_op<int32_t>());
-}
+SUM_K1_KERNEL(sum_int32_k1, int32_t, int32_t, 1, 1, identity);
+SUM_KN_KERNEL(sum_int32_kn, int32_t, int32_t, 1, identity);
 
-void sum_int8_int32(size_t n, size_t k3, size_t k2, size_t k1,
-                    size_t a_stride_n, size_t a_stride_k3, size_t a_stride_k2,
-                    const void* a, size_t, void* c) {
-  reduce<int32_t>(n, k3, k2, k1, a_stride_n, a_stride_k3, a_stride_k2,
-                  static_cast<const int8_t*>(a), static_cast<int32_t*>(c),
-                  sum_op<int32_t>());
-}
+SUM_K1_KERNEL(sum_int8_int32_k1, int8_t, int32_t, 1, 1, identity);
+SUM_KN_KERNEL(sum_int8_int32_kn, int8_t, int32_t, 1, identity);
 
-void sum_uint8_int32(size_t n, size_t k3, size_t k2, size_t k1,
-                     size_t a_stride_n, size_t a_stride_k3, size_t a_stride_k2,
-                     const void* a, size_t, void* c) {
-  reduce<int32_t>(n, k3, k2, k1, a_stride_n, a_stride_k3, a_stride_k2,
-                  static_cast<const uint8_t*>(a), static_cast<int32_t*>(c),
-                  sum_op<int32_t>());
-}
+SUM_K1_KERNEL(sum_uint8_int32_k1, uint8_t, int32_t, 1, 1, identity);
+SUM_KN_KERNEL(sum_uint8_int32_kn, uint8_t, int32_t, 1, identity);
 
-void sum_squared_fp32(size_t n, size_t k3, size_t k2, size_t k1,
-                      size_t a_stride_n, size_t a_stride_k3, size_t a_stride_k2,
-                      const void* a, size_t, void* c) {
-  reduce<float>(n, k3, k2, k1, a_stride_n, a_stride_k3, a_stride_k2,
-                static_cast<const float*>(a), static_cast<float*>(c),
-                sum_op<float>(), square_op<float, float>());
-}
+SUM_K1_KERNEL(sum_squared_fp32_k1, float, float, consistent_tile_k_fp32, 1,
+              square);
+SUM_KN_KERNEL(sum_squared_fp32_kn, float, float, 1, square);
 
-void sum_squared_fp64(size_t n, size_t k3, size_t k2, size_t k1,
-                      size_t a_stride_n, size_t a_stride_k3, size_t a_stride_k2,
-                      const void* a, size_t, void* c) {
-  reduce<double>(n, k3, k2, k1, a_stride_n, a_stride_k3, a_stride_k2,
-                 static_cast<const double*>(a), static_cast<double*>(c),
-                 sum_op<double>(), square_op<double, double>());
-}
+SUM_K1_KERNEL(sum_squared_fp64_k1, double, double, consistent_tile_k_fp64, 1,
+              square);
+SUM_KN_KERNEL(sum_squared_fp64_kn, double, double, 1, square);
 
-void sum_squared_bf16_fp32(size_t n, size_t k3, size_t k2, size_t k1,
-                           size_t a_stride_n, size_t a_stride_k3,
-                           size_t a_stride_k2, const void* a, size_t, void* c) {
-  reduce<float>(n, k3, k2, k1, a_stride_n, a_stride_k3, a_stride_k2,
-                static_cast<const bfloat16*>(a), static_cast<float*>(c),
-                sum_op<float>(), square_op<float, bfloat16>());
-}
+SUM_K1_KERNEL(sum_squared_bf16_fp32_k1, bfloat16, float, consistent_tile_k_fp32,
+              1, square);
+SUM_KN_KERNEL(sum_squared_bf16_fp32_kn, bfloat16, float, 1, square);
 
-void sum_squared_fp16_fp32(size_t n, size_t k3, size_t k2, size_t k1,
-                           size_t a_stride_n, size_t a_stride_k3,
-                           size_t a_stride_k2, const void* a, size_t, void* c) {
-  reduce<float>(n, k3, k2, k1, a_stride_n, a_stride_k3, a_stride_k2,
-                static_cast<const half*>(a), static_cast<float*>(c),
-                sum_op<float>(), square_op<float, half>());
-}
+SUM_K1_KERNEL(sum_squared_fp16_fp32_k1, half, float, consistent_tile_k_fp32, 1,
+              square);
+SUM_KN_KERNEL(sum_squared_fp16_fp32_kn, half, float, 1, square);
 
-void sum_squared_int32(size_t n, size_t k3, size_t k2, size_t k1,
-                       size_t a_stride_n, size_t a_stride_k3,
-                       size_t a_stride_k2, const void* a, size_t, void* c) {
-  reduce<int32_t>(n, k3, k2, k1, a_stride_n, a_stride_k3, a_stride_k2,
-                  static_cast<const int32_t*>(a), static_cast<int32_t*>(c),
-                  sum_op<int32_t>(), square_op<int32_t, int32_t>());
-}
+SUM_K1_KERNEL(sum_squared_int32_k1, int32_t, int32_t, 1, 1, square);
+SUM_KN_KERNEL(sum_squared_int32_kn, int32_t, int32_t, 1, square);
 
-void sum_squared_int8_int32(size_t n, size_t k3, size_t k2, size_t k1,
-                            size_t a_stride_n, size_t a_stride_k3,
-                            size_t a_stride_k2, const void* a, size_t,
-                            void* c) {
-  reduce<int32_t>(n, k3, k2, k1, a_stride_n, a_stride_k3, a_stride_k2,
-                  static_cast<const int8_t*>(a), static_cast<int32_t*>(c),
-                  sum_op<int32_t>(), square_op<int32_t, int8_t>());
-}
+SUM_K1_KERNEL(sum_squared_int8_int32_k1, int8_t, int32_t, 1, 1, square);
+SUM_KN_KERNEL(sum_squared_int8_int32_kn, int8_t, int32_t, 1, square);
 
-void sum_squared_uint8_int32(size_t n, size_t k3, size_t k2, size_t k1,
-                             size_t a_stride_n, size_t a_stride_k3,
-                             size_t a_stride_k2, const void* a, size_t,
-                             void* c) {
-  reduce<int32_t>(n, k3, k2, k1, a_stride_n, a_stride_k3, a_stride_k2,
-                  static_cast<const uint8_t*>(a), static_cast<int32_t*>(c),
-                  sum_op<int32_t>(), square_op<int32_t, uint8_t>());
-}
+SUM_K1_KERNEL(sum_squared_uint8_int32_k1, uint8_t, int32_t, 1, 1, square);
+SUM_KN_KERNEL(sum_squared_uint8_int32_kn, uint8_t, int32_t, 1, square);
 
-void min_fp32(size_t n, size_t k3, size_t k2, size_t k1, size_t a_stride_n,
-              size_t a_stride_k3, size_t a_stride_k2, const void* a, size_t,
-              void* c) {
-  reduce<float>(n, k3, k2, k1, a_stride_n, a_stride_k3, a_stride_k2,
-                static_cast<const float*>(a), static_cast<float*>(c),
-                min_op<float>());
-}
+// min/max kernels
+#define MIN_K1_KERNEL(name, T)                                    \
+  void name(size_t n, size_t k, size_t a_stride_n, const void* a, \
+            size_t c_stride_m, void* c) {                         \
+    reduce<T, T, T, min_op<T>>(n, 1, 1, k, a_stride_n, 0, 0,      \
+                               reinterpret_cast<const T*>(a),     \
+                               reinterpret_cast<T*>(c));          \
+  }
+#define MIN_KN_KERNEL(name, T)                                       \
+  void name(size_t n, size_t k, size_t a_stride_k, const void* a,    \
+            size_t c_stride_m, void* c) {                            \
+    reduce<T, T, T, min_op<T>>(n, 1, k, 1, sizeof(T), 0, a_stride_k, \
+                               reinterpret_cast<const T*>(a),        \
+                               reinterpret_cast<T*>(c));             \
+  }
+#define MAX_K1_KERNEL(name, T)                                    \
+  void name(size_t n, size_t k, size_t a_stride_n, const void* a, \
+            size_t c_stride_m, void* c) {                         \
+    reduce<T, T, T, max_op<T>>(n, 1, 1, k, a_stride_n, 0, 0,      \
+                               reinterpret_cast<const T*>(a),     \
+                               reinterpret_cast<T*>(c));          \
+  }
+#define MAX_KN_KERNEL(name, T)                                       \
+  void name(size_t n, size_t k, size_t a_stride_k, const void* a,    \
+            size_t c_stride_m, void* c) {                            \
+    reduce<T, T, T, max_op<T>>(n, 1, k, 1, sizeof(T), 0, a_stride_k, \
+                               reinterpret_cast<const T*>(a),        \
+                               reinterpret_cast<T*>(c));             \
+  }
+#define MIN_MAX_K1_KERNEL(name, T)                                      \
+  void name(size_t n, size_t k, size_t a_stride_n, const void* a,       \
+            size_t c_stride_m, void* c) {                               \
+    min_max<T, T, min_op<T>, max_op<T>>(                                \
+        n, 1, 1, k, a_stride_n, 0, 0, reinterpret_cast<const T*>(a),    \
+        c_stride_m, reinterpret_cast<T*>(c), min_op<T>{}, max_op<T>{}); \
+  }
+#define MIN_MAX_KN_KERNEL(name, T)                                           \
+  void name(size_t n, size_t k, size_t a_stride_k, const void* a,            \
+            size_t c_stride_m, void* c) {                                    \
+    min_max<T, T, min_op<T>, max_op<T>>(                                     \
+        n, 1, k, 1, sizeof(T), 0, a_stride_k, reinterpret_cast<const T*>(a), \
+        c_stride_m, reinterpret_cast<T*>(c), min_op<T>{}, max_op<T>{});      \
+  }
 
-void min_fp64(size_t n, size_t k3, size_t k2, size_t k1, size_t a_stride_n,
-              size_t a_stride_k3, size_t a_stride_k2, const void* a, size_t,
-              void* c) {
-  reduce<double>(n, k3, k2, k1, a_stride_n, a_stride_k3, a_stride_k2,
-                 static_cast<const double*>(a), static_cast<double*>(c),
-                 min_op<double>());
-}
+MIN_K1_KERNEL(min_fp32_k1, float);
+MIN_KN_KERNEL(min_fp32_kn, float);
+MIN_K1_KERNEL(min_fp64_k1, double);
+MIN_KN_KERNEL(min_fp64_kn, double);
+MIN_K1_KERNEL(min_fp16_k1, half);
+MIN_KN_KERNEL(min_fp16_kn, half);
+MIN_K1_KERNEL(min_bf16_k1, bfloat16);
+MIN_KN_KERNEL(min_bf16_kn, bfloat16);
+MIN_K1_KERNEL(min_int8_k1, int8_t);
+MIN_KN_KERNEL(min_int8_kn, int8_t);
+MIN_K1_KERNEL(min_uint8_k1, uint8_t);
+MIN_KN_KERNEL(min_uint8_kn, uint8_t);
 
-void min_fp16(size_t n, size_t k3, size_t k2, size_t k1, size_t a_stride_n,
-              size_t a_stride_k3, size_t a_stride_k2, const void* a, size_t,
-              void* c) {
-  reduce<half_rvar>(n, k3, k2, k1, a_stride_n, a_stride_k3, a_stride_k2,
-                    static_cast<const half*>(a), static_cast<half*>(c),
-                    min_op<half_rvar>());
-}
+MAX_K1_KERNEL(max_fp32_k1, float);
+MAX_KN_KERNEL(max_fp32_kn, float);
+MAX_K1_KERNEL(max_fp64_k1, double);
+MAX_KN_KERNEL(max_fp64_kn, double);
+MAX_K1_KERNEL(max_fp16_k1, half);
+MAX_KN_KERNEL(max_fp16_kn, half);
+MAX_K1_KERNEL(max_bf16_k1, bfloat16);
+MAX_KN_KERNEL(max_bf16_kn, bfloat16);
+MAX_K1_KERNEL(max_int8_k1, int8_t);
+MAX_KN_KERNEL(max_int8_kn, int8_t);
+MAX_K1_KERNEL(max_uint8_k1, uint8_t);
+MAX_KN_KERNEL(max_uint8_kn, uint8_t);
 
-void min_bf16(size_t n, size_t k3, size_t k2, size_t k1, size_t a_stride_n,
-              size_t a_stride_k3, size_t a_stride_k2, const void* a, size_t,
-              void* c) {
-  reduce<bfloat16_rvar>(n, k3, k2, k1, a_stride_n, a_stride_k3, a_stride_k2,
-                        static_cast<const bfloat16*>(a),
-                        static_cast<bfloat16*>(c), min_op<bfloat16_rvar>());
-}
+MIN_MAX_K1_KERNEL(min_max_fp32_k1, float);
+MIN_MAX_KN_KERNEL(min_max_fp32_kn, float);
+MIN_MAX_K1_KERNEL(min_max_fp64_k1, double);
+MIN_MAX_KN_KERNEL(min_max_fp64_kn, double);
+MIN_MAX_K1_KERNEL(min_max_fp16_k1, half);
+MIN_MAX_KN_KERNEL(min_max_fp16_kn, half);
+MIN_MAX_K1_KERNEL(min_max_bf16_k1, bfloat16);
+MIN_MAX_KN_KERNEL(min_max_bf16_kn, bfloat16);
+MIN_MAX_K1_KERNEL(min_max_int8_k1, int8_t);
+MIN_MAX_KN_KERNEL(min_max_int8_kn, int8_t);
+MIN_MAX_K1_KERNEL(min_max_uint8_k1, uint8_t);
+MIN_MAX_KN_KERNEL(min_max_uint8_kn, uint8_t);
 
-void min_int8(size_t n, size_t k3, size_t k2, size_t k1, size_t a_stride_n,
-              size_t a_stride_k3, size_t a_stride_k2, const void* a, size_t,
-              void* c) {
-  reduce<int8_t>(n, k3, k2, k1, a_stride_n, a_stride_k3, a_stride_k2,
-                 static_cast<const int8_t*>(a), static_cast<int8_t*>(c),
-                 min_op<int8_t>());
-}
-
-void min_uint8(size_t n, size_t k3, size_t k2, size_t k1, size_t a_stride_n,
-               size_t a_stride_k3, size_t a_stride_k2, const void* a, size_t,
-               void* c) {
-  reduce<uint8_t>(n, k3, k2, k1, a_stride_n, a_stride_k3, a_stride_k2,
-                  static_cast<const uint8_t*>(a), static_cast<uint8_t*>(c),
-                  min_op<uint8_t>());
-}
-
-void max_fp32(size_t n, size_t k3, size_t k2, size_t k1, size_t a_stride_n,
-              size_t a_stride_k3, size_t a_stride_k2, const void* a, size_t,
-              void* c) {
-  reduce<float>(n, k3, k2, k1, a_stride_n, a_stride_k3, a_stride_k2,
-                static_cast<const float*>(a), static_cast<float*>(c),
-                max_op<float>());
-}
-
-void max_fp64(size_t n, size_t k3, size_t k2, size_t k1, size_t a_stride_n,
-              size_t a_stride_k3, size_t a_stride_k2, const void* a, size_t,
-              void* c) {
-  reduce<double>(n, k3, k2, k1, a_stride_n, a_stride_k3, a_stride_k2,
-                 static_cast<const double*>(a), static_cast<double*>(c),
-                 max_op<double>());
-}
-
-void max_fp16(size_t n, size_t k3, size_t k2, size_t k1, size_t a_stride_n,
-              size_t a_stride_k3, size_t a_stride_k2, const void* a, size_t,
-              void* c) {
-  reduce<half_rvar>(n, k3, k2, k1, a_stride_n, a_stride_k3, a_stride_k2,
-                    static_cast<const half*>(a), static_cast<half*>(c),
-                    max_op<half_rvar>());
-}
-
-void max_bf16(size_t n, size_t k3, size_t k2, size_t k1, size_t a_stride_n,
-              size_t a_stride_k3, size_t a_stride_k2, const void* a, size_t,
-              void* c) {
-  reduce<bfloat16_rvar>(n, k3, k2, k1, a_stride_n, a_stride_k3, a_stride_k2,
-                        static_cast<const bfloat16*>(a),
-                        static_cast<bfloat16*>(c), max_op<bfloat16_rvar>());
-}
-
-void max_int8(size_t n, size_t k3, size_t k2, size_t k1, size_t a_stride_n,
-              size_t a_stride_k3, size_t a_stride_k2, const void* a, size_t,
-              void* c) {
-  reduce<int8_t>(n, k3, k2, k1, a_stride_n, a_stride_k3, a_stride_k2,
-                 static_cast<const int8_t*>(a), static_cast<int8_t*>(c),
-                 max_op<int8_t>());
-}
-
-void max_uint8(size_t n, size_t k3, size_t k2, size_t k1, size_t a_stride_n,
-               size_t a_stride_k3, size_t a_stride_k2, const void* a, size_t,
-               void* c) {
-  reduce<uint8_t>(n, k3, k2, k1, a_stride_n, a_stride_k3, a_stride_k2,
-                  static_cast<const uint8_t*>(a), static_cast<uint8_t*>(c),
-                  max_op<uint8_t>());
-}
-
-void min_max_fp32(size_t n, size_t k3, size_t k2, size_t k1, size_t a_stride_n,
-                  size_t a_stride_k3, size_t a_stride_k2, const void* a,
-                  size_t c_stride_m, void* c) {
-  min_max<float>(n, k3, k2, k1, a_stride_n, a_stride_k3, a_stride_k2,
-                 static_cast<const float*>(a), c_stride_m,
-                 static_cast<float*>(c), min_op<float>(), max_op<float>());
-}
-
-void min_max_fp64(size_t n, size_t k3, size_t k2, size_t k1, size_t a_stride_n,
-                  size_t a_stride_k3, size_t a_stride_k2, const void* a,
-                  size_t c_stride_m, void* c) {
-  min_max<double>(n, k3, k2, k1, a_stride_n, a_stride_k3, a_stride_k2,
-                  static_cast<const double*>(a), c_stride_m,
-                  static_cast<double*>(c), min_op<double>(), max_op<double>());
-}
-void min_max_fp16(size_t n, size_t k3, size_t k2, size_t k1, size_t a_stride_n,
-                  size_t a_stride_k3, size_t a_stride_k2, const void* a,
-                  size_t c_stride_m, void* c) {
-  min_max<half_rvar>(n, k3, k2, k1, a_stride_n, a_stride_k3, a_stride_k2,
-                     static_cast<const half*>(a), c_stride_m,
-                     static_cast<half*>(c), min_op<half_rvar>(),
-                     max_op<half_rvar>());
-}
-
-void min_max_bf16(size_t n, size_t k3, size_t k2, size_t k1, size_t a_stride_n,
-                  size_t a_stride_k3, size_t a_stride_k2, const void* a,
-                  size_t c_stride_m, void* c) {
-  min_max<bfloat16_rvar>(n, k3, k2, k1, a_stride_n, a_stride_k3, a_stride_k2,
-                         static_cast<const bfloat16*>(a), c_stride_m,
-                         static_cast<bfloat16*>(c), min_op<bfloat16_rvar>(),
-                         max_op<bfloat16_rvar>());
-}
-
-void min_max_int8(size_t n, size_t k3, size_t k2, size_t k1, size_t a_stride_n,
-                  size_t a_stride_k3, size_t a_stride_k2, const void* a,
-                  size_t c_stride_m, void* c) {
-  min_max<int8_t>(n, k3, k2, k1, a_stride_n, a_stride_k3, a_stride_k2,
-                  static_cast<const int8_t*>(a), c_stride_m,
-                  static_cast<int8_t*>(c), min_op<int8_t>(), max_op<int8_t>());
-}
-
-void min_max_uint8(size_t n, size_t k3, size_t k2, size_t k1, size_t a_stride_n,
-                   size_t a_stride_k3, size_t a_stride_k2, const void* a,
-                   size_t c_stride_m, void* c) {
-  min_max<uint8_t>(n, k3, k2, k1, a_stride_n, a_stride_k3, a_stride_k2,
-                   static_cast<const uint8_t*>(a), c_stride_m,
-                   static_cast<uint8_t*>(c), min_op<uint8_t>(),
-                   max_op<uint8_t>());
-}
-
-unary_reduce_kernel_fn get_sum_kernel(ynn_type a_type, ynn_type c_type,
-                                      size_t n, size_t k3, size_t k2,
-                                      size_t k1) {
-#define YNN_UNARY_REDUCE_KERNEL(arch, name, A, C)           \
-  if (is_arch_supported(arch)) {                            \
-    if (type_of<A>() == a_type && type_of<C>() == c_type) { \
-      YNN_LOG_DEBUG() << "Using reduce kernel " << #name;   \
-      return name;                                          \
-    }                                                       \
+reduce_kernel get_sum_kernel(ynn_type a_type, ynn_type c_type) {
+  reduce_kernel res = {nullptr, nullptr};
+#define YNN_REDUCE_K1_KERNEL(arch, name, A, C)               \
+  if (is_arch_supported(arch)) {                             \
+    if (type_of<A>() == a_type && type_of<C>() == c_type) {  \
+      YNN_LOG_DEBUG() << "Using reduce k1 kernel " << #name; \
+      res.k1 = name;                                         \
+    }                                                        \
+  }
+#define YNN_REDUCE_KN_KERNEL(arch, name, A, C)               \
+  if (is_arch_supported(arch)) {                             \
+    if (type_of<A>() == a_type && type_of<C>() == c_type) {  \
+      YNN_LOG_DEBUG() << "Using reduce kn kernel " << #name; \
+      res.kn = name;                                         \
+    }                                                        \
   }
 #include "ynnpack/kernels/reduce/sum.inc"
-#undef YNN_UNARY_REDUCE_KERNEL
-  YNN_LOG_ERROR() << "Unsupported sum type " << a_type << "_" << c_type;
-  return nullptr;
+#undef YNN_REDUCE_K1_KERNEL
+#undef YNN_REDUCE_KN_KERNEL
+  if (!res.k1 || !res.kn) {
+    YNN_LOG_ERROR() << "Unsupported sum type " << a_type << "_" << c_type;
+  }
+  return res;
 }
 
-unary_reduce_kernel_fn get_sum_squared_kernel(ynn_type a_type, ynn_type c_type,
-                                              size_t n, size_t k3, size_t k2,
-                                              size_t k1) {
-#define YNN_UNARY_REDUCE_KERNEL(arch, name, A, C)           \
-  if (is_arch_supported(arch)) {                            \
-    if (type_of<A>() == a_type && type_of<C>() == c_type) { \
-      YNN_LOG_DEBUG() << "Using reduce kernel " << #name;   \
-      return name;                                          \
-    }                                                       \
+reduce_kernel get_sum_squared_kernel(ynn_type a_type, ynn_type c_type) {
+  reduce_kernel res = {nullptr, nullptr};
+#define YNN_REDUCE_K1_KERNEL(arch, name, A, C)               \
+  if (is_arch_supported(arch)) {                             \
+    if (type_of<A>() == a_type && type_of<C>() == c_type) {  \
+      YNN_LOG_DEBUG() << "Using reduce k1 kernel " << #name; \
+      res.k1 = name;                                         \
+    }                                                        \
+  }
+#define YNN_REDUCE_KN_KERNEL(arch, name, A, C)               \
+  if (is_arch_supported(arch)) {                             \
+    if (type_of<A>() == a_type && type_of<C>() == c_type) {  \
+      YNN_LOG_DEBUG() << "Using reduce kn kernel " << #name; \
+      res.kn = name;                                         \
+    }                                                        \
   }
 #include "ynnpack/kernels/reduce/sum_squared.inc"
-#undef YNN_UNARY_REDUCE_KERNEL
-  YNN_LOG_ERROR() << "Unsupported sum_squared type " << a_type << "_" << c_type;
-  return nullptr;
+#undef YNN_REDUCE_K1_KERNEL
+#undef YNN_REDUCE_KN_KERNEL
+  if (!res.k1 || !res.kn) {
+    YNN_LOG_ERROR() << "Unsupported sum_squared type " << a_type << "_"
+                    << c_type;
+  }
+  return res;
 }
 
-unary_reduce_kernel_fn get_min_kernel(ynn_type type, size_t n, size_t k3,
-                                      size_t k2, size_t k1) {
-#define YNN_UNARY_REDUCE_KERNEL(arch, name, A, C)         \
-  if (is_arch_supported(arch)) {                          \
-    if (type_of<A>() == type && type_of<C>() == type) {   \
-      YNN_LOG_DEBUG() << "Using reduce kernel " << #name; \
-      return name;                                        \
-    }                                                     \
+reduce_kernel get_min_kernel(ynn_type type) {
+  reduce_kernel res = {nullptr, nullptr};
+#define YNN_REDUCE_K1_KERNEL(arch, name, A, C)               \
+  if (is_arch_supported(arch)) {                             \
+    if (type_of<A>() == type && type_of<C>() == type) {      \
+      YNN_LOG_DEBUG() << "Using reduce k1 kernel " << #name; \
+      res.k1 = name;                                         \
+    }                                                        \
+  }
+#define YNN_REDUCE_KN_KERNEL(arch, name, A, C)               \
+  if (is_arch_supported(arch)) {                             \
+    if (type_of<A>() == type && type_of<C>() == type) {      \
+      YNN_LOG_DEBUG() << "Using reduce kn kernel " << #name; \
+      res.kn = name;                                         \
+    }                                                        \
   }
 #include "ynnpack/kernels/reduce/min.inc"
-#undef YNN_UNARY_REDUCE_KERNEL
-  YNN_LOG_ERROR() << "Unsupported min type " << type;
-  return nullptr;
+#undef YNN_REDUCE_K1_KERNEL
+#undef YNN_REDUCE_KN_KERNEL
+  if (!res.k1 || !res.kn) {
+    YNN_LOG_ERROR() << "Unsupported min type " << type;
+  }
+  return res;
 }
 
-unary_reduce_kernel_fn get_max_kernel(ynn_type type, size_t n, size_t k3,
-                                      size_t k2, size_t k1) {
-#define YNN_UNARY_REDUCE_KERNEL(arch, name, A, C)         \
-  if (is_arch_supported(arch)) {                          \
-    if (type_of<A>() == type && type_of<C>() == type) {   \
-      YNN_LOG_DEBUG() << "Using reduce kernel " << #name; \
-      return name;                                        \
-    }                                                     \
+reduce_kernel get_max_kernel(ynn_type type) {
+  reduce_kernel res = {nullptr, nullptr};
+#define YNN_REDUCE_K1_KERNEL(arch, name, A, C)               \
+  if (is_arch_supported(arch)) {                             \
+    if (type_of<A>() == type && type_of<C>() == type) {      \
+      YNN_LOG_DEBUG() << "Using reduce k1 kernel " << #name; \
+      res.k1 = name;                                         \
+    }                                                        \
+  }
+#define YNN_REDUCE_KN_KERNEL(arch, name, A, C)               \
+  if (is_arch_supported(arch)) {                             \
+    if (type_of<A>() == type && type_of<C>() == type) {      \
+      YNN_LOG_DEBUG() << "Using reduce kn kernel " << #name; \
+      res.kn = name;                                         \
+    }                                                        \
   }
 #include "ynnpack/kernels/reduce/max.inc"
-#undef YNN_UNARY_REDUCE_KERNEL
-  YNN_LOG_ERROR() << "Unsupported max type " << type;
-  return nullptr;
+#undef YNN_REDUCE_K1_KERNEL
+#undef YNN_REDUCE_KN_KERNEL
+  if (!res.k1 || !res.kn) {
+    YNN_LOG_ERROR() << "Unsupported max type " << type;
+  }
+  return res;
 }
 
-unary_reduce_kernel_fn get_min_max_kernel(ynn_type type, size_t n, size_t k3,
-                                          size_t k2, size_t k1) {
-#define YNN_UNARY_REDUCE_KERNEL(arch, name, A, C)         \
-  if (is_arch_supported(arch)) {                          \
-    if (type_of<A>() == type && type_of<C>() == type) {   \
-      YNN_LOG_DEBUG() << "Using reduce kernel " << #name; \
-      return name;                                        \
-    }                                                     \
+reduce_kernel get_min_max_kernel(ynn_type type) {
+  reduce_kernel res = {nullptr, nullptr};
+#define YNN_REDUCE_K1_KERNEL(arch, name, A, C)               \
+  if (is_arch_supported(arch)) {                             \
+    if (type_of<A>() == type && type_of<C>() == type) {      \
+      YNN_LOG_DEBUG() << "Using reduce k1 kernel " << #name; \
+      res.k1 = name;                                         \
+    }                                                        \
+  }
+#define YNN_REDUCE_KN_KERNEL(arch, name, A, C)               \
+  if (is_arch_supported(arch)) {                             \
+    if (type_of<A>() == type && type_of<C>() == type) {      \
+      YNN_LOG_DEBUG() << "Using reduce kn kernel " << #name; \
+      res.kn = name;                                         \
+    }                                                        \
   }
 #include "ynnpack/kernels/reduce/min_max.inc"
-#undef YNN_UNARY_REDUCE_KERNEL
-  YNN_LOG_ERROR() << "Unsupported min_max type " << type;
-  return nullptr;
+#undef YNN_REDUCE_K1_KERNEL
+#undef YNN_REDUCE_KN_KERNEL
+  if (!res.k1 || !res.kn) {
+    YNN_LOG_ERROR() << "Unsupported min_max type " << type;
+  }
+  return res;
 }
 
 }  // namespace ynn

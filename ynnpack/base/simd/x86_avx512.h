@@ -400,7 +400,7 @@ YNN_ALWAYS_INLINE __mmask32 mask_x32(size_t n) {
 
 YNN_ALWAYS_INLINE __mmask64 mask_x64(size_t n) {
   assert(n <= 64);
-  return _cvtu64_mask64(((1ull << n) - 1));
+  return n == 64 ? (__mmask64)-1ull : (__mmask64)((1ull << n) - 1);
 }
 
 }  // namespace internal

@@ -5,7 +5,7 @@
 
 load("@rules_cc//cc:cc_library.bzl", "cc_library")
 load("@rules_cc//cc:cc_test.bzl", "cc_test")
-load("//ynnpack:build_defs.bzl", "ynn_binary_linkopts", "ynn_binary_malloc", "ynn_cc_library", "ynn_kernel_copts", "ynn_test_deps")
+load("//ynnpack:build_defs.bzl", "ynn_benchmark_deps", "ynn_binary_linkopts", "ynn_binary_malloc", "ynn_cc_library", "ynn_kernel_copts", "ynn_test_deps")
 
 _COMPATIBLE_WITH = []
 
@@ -13,8 +13,8 @@ cc_library(
     name = "generic",
     hdrs = [
         "generic.h",
-        "min_max_accumulator.h",
-        "sum_accumulator.h",
+        "min_max.h",
+        "sum.h",
     ],
     compatible_with = _COMPATIBLE_WITH,
     deps = [
@@ -108,6 +108,17 @@ cc_test(
 )
 
 cc_test(
+    name = "pi_test",
+    srcs = ["pi_test.cc"],
+    linkopts = ynn_binary_linkopts(),
+    malloc = ynn_binary_malloc(),
+    deps = [
+        ":reduce",
+        "//ynnpack/base",
+    ] + ynn_test_deps(),
+)
+
+cc_test(
     name = "bench",
     srcs = ["bench.cc"],
     args = ["--benchmark_min_time=1x"],
@@ -117,6 +128,5 @@ cc_test(
         ":reduce",
         "//ynnpack/base",
         "//ynnpack/base/test:tensor",
-        "@com_google_benchmark//:benchmark",
-    ],
+    ] + ynn_benchmark_deps(),
 )

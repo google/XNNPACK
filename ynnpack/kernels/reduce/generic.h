@@ -97,9 +97,9 @@ static void tiled_reduce(size_t N, size_t K3, size_t K2, size_t K1,
 // where it maintains the reduction result in C itself instead of a local
 // accumulator.
 template <typename Accumulator, typename AT, typename CT>
-static void stream_reduce(size_t N, size_t K3, size_t K2, size_t A_stride_k3,
-                          size_t A_stride_k2, const AT* A, size_t C_stride_m,
-                          CT* C) {
+static void stream_reduce(size_t N, size_t K3, size_t K2, size_t A_stride_n,
+                          size_t A_stride_k3, size_t A_stride_k2, const AT* A,
+                          size_t C_stride_m, CT* C) {
   Accumulator acc;
   for (size_t k3 = 0; k3 < K3; ++k3) {
     const AT* a_k3 = offset_bytes(A, k3 * A_stride_k3);
@@ -111,7 +111,7 @@ static void stream_reduce(size_t N, size_t K3, size_t K2, size_t A_stride_k3,
       while (n >= Accumulator::N) {
         acc.reduce_accumulate(a, Accumulator::N, A_stride_k2, Accumulator::K2,
                               C_stride_m, c);
-        a = offset_bytes(a, Accumulator::N * sizeof(AT));
+        a = offset_bytes(a, Accumulator::N * A_stride_n);
         c = offset_bytes(c, Accumulator::N * sizeof(CT));
         n -= Accumulator::N;
       }
@@ -129,7 +129,7 @@ static void stream_reduce(size_t N, size_t K3, size_t K2, size_t A_stride_k3,
       while (n >= Accumulator::N) {
         acc.reduce_accumulate(a, Accumulator::N, A_stride_k2, k2, C_stride_m,
                               c);
-        a = offset_bytes(a, Accumulator::N * sizeof(AT));
+        a = offset_bytes(a, Accumulator::N * A_stride_n);
         c = offset_bytes(c, Accumulator::N * sizeof(CT));
         n -= Accumulator::N;
       }

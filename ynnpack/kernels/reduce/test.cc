@@ -65,73 +65,6 @@ float Tolerance(ReduceOp op, size_t k, float max_abs_value) {
   return 0.0f;
 }
 
-template <typename AT, typename CT>
-YNN_ALWAYS_INLINE void ReduceRow(ReduceOp op, CT* c_0, CT* c_1, const AT* a,
-                                 size_t N, size_t K1, size_t a_stride_n) {
-  for (size_t j = 0; j < N; ++j) {
-    for (size_t k1 = 0; k1 < K1; ++k1) {
-      CT a_j = static_cast<CT>(a[k1]);
-
-      switch (op) {
-        case ReduceOp::kSum:
-          c_0[j] = c_0[j] + a_j;
-          break;
-        case ReduceOp::kSumSquared:
-          c_0[j] = c_0[j] + a_j * a_j;
-          break;
-        case ReduceOp::kMin:
-          c_0[j] = std::min(c_0[j], a_j);
-          break;
-        case ReduceOp::kMax:
-          c_0[j] = std::max(c_0[j], a_j);
-          break;
-        case ReduceOp::kMinMax:
-          c_0[j] = std::min(c_0[j], a_j);
-          c_1[j] = std::max(c_1[j], a_j);
-          break;
-        default:
-          YNN_UNREACHABLE;
-      }
-    }
-    a += a_stride_n;
-  }
-}
-
-template <typename AT, typename CT>
-void Reference(Tensor<AT> a, Tensor<CT> c, ReduceOp op) {
-  // This helper allows omitting 2 of the 3 k dimensions. Canonicalize to 3 k
-  // dimensions here.
-  while (a.rank() < 4) {
-    a = a.expand_dims({1});
-  }
-
-  ASSERT_EQ(a.extent(0), c.extent(1));
-  const size_t a_stride_n = a.stride(0);
-  const size_t a_stride_k1 = a.stride(3);
-  const size_t K3 = a.extent(1);
-  const size_t K2 = a.extent(2);
-  const size_t K1 = a.extent(3);
-  const size_t N = c.extent(1);
-  CT* c_0 = &c(0, 0);
-  CT* c_1 = &c(1, 0);
-  for (size_t k3 = 0; k3 < K3; ++k3) {
-    for (size_t k2 = 0; k2 < K2; ++k2) {
-      if (a_stride_n == 1) {
-        // Move the loop over k1 outside the loop over n (and call the "kernel"
-        // with K1=1).
-        const AT* a_k1 = &a(0, k3, k2, 0);
-        for (size_t k1 = 0; k1 < K1; ++k1) {
-          ReduceRow(op, c_0, c_1, a_k1, N, /*K1=*/1,
-                    /*a_stride_n=*/1);
-          a_k1 += a_stride_k1;
-        }
-      } else {
-        ReduceRow(op, c_0, c_1, &a(0, k3, k2, 0), N, K1, a_stride_n);
-      }
-    }
-  }
-}
-
 const float max_abs_value = 10.0f;
 
 template <typename T>
@@ -140,12 +73,51 @@ span<T> row(Tensor<T> t, size_t i) {
 }
 
 template <typename AT, typename CT>
-void TestUnaryReduce(Tensor<AT> a, Tensor<CT> c,
-                     ReduceOp op, unary_reduce_kernel_fn kernel) {
+YNN_ALWAYS_INLINE void ReduceRow(ReduceOp op, CT* c_0, CT* c_1, const AT* a,
+                                 size_t k, size_t a_stride_k) {
+  for (size_t j = 0; j < k; ++j) {
+    CT a_j = static_cast<CT>(*offset_bytes(a, j * a_stride_k));
+
+    switch (op) {
+      case ReduceOp::kSum:
+        c_0[0] = c_0[0] + a_j;
+        break;
+      case ReduceOp::kSumSquared:
+        c_0[0] = c_0[0] + a_j * a_j;
+        break;
+      case ReduceOp::kMin:
+        c_0[0] = std::min(c_0[0], a_j);
+        break;
+      case ReduceOp::kMax:
+        c_0[0] = std::max(c_0[0], a_j);
+        break;
+      case ReduceOp::kMinMax:
+        c_0[0] = std::min(c_0[0], a_j);
+        c_1[0] = std::max(c_1[0], a_j);
+        break;
+      default:
+        YNN_UNREACHABLE;
+    }
+  }
+}
+
+template <typename AT, typename CT>
+void Reference(ReduceOp op, size_t n, size_t k, size_t a_stride_n,
+               size_t a_stride_k, const AT* a, size_t c_stride_m, CT* c,
+               bool is_k1) {
+  for (size_t i = 0; i < n; ++i) {
+    CT* c_0 = offset_bytes(c, i * sizeof(CT));
+    CT* c_1 = offset_bytes(c, i * sizeof(CT) + c_stride_m);
+    ReduceRow(op, c_0, c_1, offset_bytes(a, i * a_stride_n), k,
+              is_k1 ? sizeof(AT) : a_stride_k);
+  }
+}
+
+template <typename AT, typename CT>
+void TestUnaryReduce(Tensor<AT> a, Tensor<CT> c, ReduceOp op,
+                     reduce_kernel_fn kernel, bool is_k1) {
   const size_t n = a.extent(0);
-  const size_t k3 = a.extent(1);
-  const size_t k2 = a.extent(2);
-  const size_t k1 = a.extent(3);
+  const size_t k = a.extent(1);
 
   // We will modify c
   c = c.deep_copy();
@@ -155,151 +127,123 @@ void TestUnaryReduce(Tensor<AT> a, Tensor<CT> c,
   // place.
   Tensor<CT> expected = c.deep_copy();
 
-  kernel(n, k3, k2, k1, a.stride_bytes(0), a.stride_bytes(1), a.stride_bytes(2),
-         a.base(), c.stride_bytes(0), c.base());
+  if (is_k1) {
+    kernel(n, k, a.stride_bytes(0), a.base(), c.stride_bytes(0), c.base());
 
-  // Verify results.
-  Reference(a, expected, op);
+    // Verify results.
+    Reference(op, n, k, a.stride_bytes(0), a.stride_bytes(1), a.base(),
+              expected.stride_bytes(0), expected.base(), is_k1);
+  } else {
+    kernel(k, n, a.stride_bytes(0), a.base(), c.stride_bytes(0), c.base());
+
+    // Verify results.
+    Reference(op, k, n, a.stride_bytes(1), a.stride_bytes(0), a.base(),
+              expected.stride_bytes(0), expected.base(), is_k1);
+  }
+
   ASSERT_EQ(c.rank(), 2);
   for (size_t i = 0; i < c.extent(0); ++i) {
     if (is_integral<CT>::value) {
       EXPECT_THAT(row(c, i), ElementsAreArray(row(expected, i)))
-          << "shape=" << n << "x" << k3 << "x" << k2 << "x" << k1
-          << " row=" << i;
+          << "shape=" << n << "x" << k << " row=" << i;
     } else {
       const float tolerance =
-          Tolerance<CT>(op, k3 * k2 * k1 + 1, max_abs_value);
+          Tolerance<CT>(op, (is_k1 ? k : n) + 1, max_abs_value);
       EXPECT_THAT(row(c, i), Pointwise(FloatNear(tolerance), row(expected, i)))
-          << "shape=" << n << "x" << k3 << "x" << k2 << "x" << k1
-          << " row=" << i;
+          << "shape=" << n << "x" << k << " row=" << i;
     }
   }
 }
 
 template <typename AT, typename CT>
-void TestUnaryReduce(AT, CT, std::vector<size_t> ns, std::vector<size_t> k3s,
-                     std::vector<size_t> k2s, std::vector<size_t> k1s,
-                     ReduceOp op, unary_reduce_kernel_fn kernel) {
+void TestUnaryReduce(AT, CT, std::vector<size_t> ns, std::vector<size_t> ks,
+                     ReduceOp op, reduce_kernel_fn kernel, bool is_k1) {
   ReplicableRandomDevice rng;
 
   // Get the max size of the buffer we want to test.
   const size_t max_n = *std::max_element(ns.begin(), ns.end());
-  const size_t max_k1 = *std::max_element(k1s.begin(), k1s.end());
-  const size_t max_k2 = *std::max_element(k2s.begin(), k2s.end());
-  const size_t max_k3 = *std::max_element(k3s.begin(), k3s.end());
+  const size_t max_k = *std::max_element(ks.begin(), ks.end());
 
-  // We want n to be contiguous if k1 is 1, so allocate it in that order, and
-  // transpose it after.
-  Tensor<AT> a_max({max_k3, max_k2, max_n, max_k1});
-  Tensor<CT> c_max({OutputRows(op), max_n});
+  Tensor<AT> a_max({max_n, max_k});
+  Tensor<CT> c_max({OutputRows(op), is_k1 ? max_n : max_k});
   fill_random(a_max.data(), a_max.size(), rng, -max_abs_value, max_abs_value);
   fill_random(c_max.data(), c_max.size(), rng, -max_abs_value, max_abs_value);
 
-  a_max = a_max.transpose({2, 0, 1, 3});
-
   for (size_t n : ns) {
-    for (size_t k3 : k3s) {
-      for (size_t k2 : k2s) {
-        for (size_t k1 : k1s) {
-          Tensor<AT> a = a_max.crop({0, 0, 0, 0}, {n, k3, k2, k1});
-          Tensor<CT> c = c_max.crop({0, 0}, {OutputRows(op), n});
-          TestUnaryReduce(a, c, op, kernel);
-        }
-      }
+    for (size_t k : ks) {
+      Tensor<AT> a = a_max.crop({0, 0}, {n, k});
+      Tensor<CT> c = c_max.crop({0, 0}, {OutputRows(op), is_k1 ? n : k});
+      TestUnaryReduce(a, c, op, kernel, is_k1);
     }
   }
 }
 
 struct KernelParam {
   uint64_t arch_flags;
-  unary_reduce_kernel_fn kernel;
+  reduce_kernel_fn kernel;
   ReduceOp op;
   multi_type type;
+  bool is_k1;
 };
 
 const char* to_string(const KernelParam& param) { return ""; }
 
 class UnaryReduce : public ::testing::TestWithParam<KernelParam> {};
 
-constexpr size_t max_n_dim_bytes = 256;
-constexpr size_t max_k_dim = 64;
-const auto k_values = simd_sizes_up_to(max_k_dim);
+constexpr size_t max_k_dim_bytes = 256;
+constexpr size_t max_n_dim = 64;
 
-TEST_P(UnaryReduce, k1) {
+TEST_P(UnaryReduce, k) {
   KernelParam kernel = GetParam();
   if (!is_arch_supported(kernel.arch_flags)) GTEST_SKIP();
   SwitchTwoTypes(kernel.type, [&](auto a_type, auto c_type) {
-    constexpr size_t max_n_dim = max_n_dim_bytes / sizeof(a_type);
-    TestUnaryReduce(a_type, c_type, {max_n_dim}, {1}, {1}, k_values, kernel.op,
-                    kernel.kernel);
-  });
-}
-
-TEST_P(UnaryReduce, k2) {
-  KernelParam kernel = GetParam();
-  if (!is_arch_supported(kernel.arch_flags)) GTEST_SKIP();
-  SwitchTwoTypes(kernel.type, [&](auto a_type, auto c_type) {
-    constexpr size_t max_n_dim = max_n_dim_bytes / sizeof(a_type);
-    TestUnaryReduce(a_type, c_type, {max_n_dim}, {1}, k_values, {1}, kernel.op,
-                    kernel.kernel);
-  });
-}
-
-TEST_P(UnaryReduce, k3) {
-  KernelParam kernel = GetParam();
-  if (!is_arch_supported(kernel.arch_flags)) GTEST_SKIP();
-  SwitchTwoTypes(kernel.type, [&](auto a_type, auto c_type) {
-    constexpr size_t max_n_dim = max_n_dim_bytes / sizeof(a_type);
-    TestUnaryReduce(a_type, c_type, {max_n_dim}, k_values, {1}, {1}, kernel.op,
-                    kernel.kernel);
+    const size_t max_k_dim = max_k_dim_bytes / sizeof(a_type);
+    const auto k_values = simd_sizes_up_to(max_k_dim);
+    TestUnaryReduce(a_type, c_type, {max_n_dim}, k_values, kernel.op,
+                    kernel.kernel, kernel.is_k1);
   });
 }
 
 TEST_P(UnaryReduce, n) {
   KernelParam kernel = GetParam();
+  std::vector<size_t> ns = simd_sizes_up_to(max_n_dim);
   if (!is_arch_supported(kernel.arch_flags)) GTEST_SKIP();
   SwitchTwoTypes(kernel.type, [&](auto a_type, auto c_type) {
-    constexpr size_t max_n_dim = max_n_dim_bytes / sizeof(a_type);
-    const auto n_values = simd_sizes_up_to(max_n_dim);
-    constexpr size_t k_dim = 4;
-    TestUnaryReduce(a_type, c_type, n_values, {1}, {1}, {k_dim}, kernel.op,
-                    kernel.kernel);
-    TestUnaryReduce(a_type, c_type, n_values, {1}, {k_dim}, {1}, kernel.op,
-                    kernel.kernel);
-    TestUnaryReduce(a_type, c_type, n_values, {k_dim}, {1}, {1}, kernel.op,
-                    kernel.kernel);
+    constexpr size_t max_k_dim = max_k_dim_bytes / sizeof(a_type);
+    TestUnaryReduce(a_type, c_type, ns, {max_k_dim}, kernel.op, kernel.kernel,
+                    kernel.is_k1);
   });
 }
 
-#define TEST_REDUCE_KERNEL(op, arch_flags, name, a_type, c_type) \
-  INSTANTIATE_TEST_SUITE_P(                                      \
-      name, UnaryReduce,                                         \
-      testing::Values(KernelParam{arch_flags, name, op,          \
-                                  multi_type_of(a_type(), c_type())}));
+#define TEST_REDUCE_KERNEL(op, arch_flags, name, a_type, c_type, is_k1) \
+  INSTANTIATE_TEST_SUITE_P(                                             \
+      name, UnaryReduce,                                                \
+      testing::Values(KernelParam{arch_flags, name, op,                 \
+                                  multi_type_of(a_type(), c_type()), is_k1}));
 
-#define YNN_UNARY_REDUCE_KERNEL(arch_flags, name, a_type, c_type) \
-  TEST_REDUCE_KERNEL(ReduceOp::kSum, arch_flags, name, a_type, c_type);
+#define YNN_REDUCE_K1_KERNEL(arch_flags, name, a_type, c_type) \
+  TEST_REDUCE_KERNEL(current_op, arch_flags, name, a_type, c_type, true);
+#define YNN_REDUCE_KN_KERNEL(arch_flags, name, a_type, c_type) \
+  TEST_REDUCE_KERNEL(current_op, arch_flags, name, a_type, c_type, false);
+
+#define current_op ReduceOp::kSum
 #include "ynnpack/kernels/reduce/sum.inc"
-#undef YNN_UNARY_REDUCE_KERNEL
+#undef current_op
 
-#define YNN_UNARY_REDUCE_KERNEL(arch_flags, name, a_type, c_type) \
-  TEST_REDUCE_KERNEL(ReduceOp::kSumSquared, arch_flags, name, a_type, c_type);
+#define current_op ReduceOp::kSumSquared
 #include "ynnpack/kernels/reduce/sum_squared.inc"
-#undef YNN_UNARY_REDUCE_KERNEL
+#undef current_op
 
-#define YNN_UNARY_REDUCE_KERNEL(arch_flags, name, a_type, c_type) \
-  TEST_REDUCE_KERNEL(ReduceOp::kMin, arch_flags, name, a_type, c_type);
+#define current_op ReduceOp::kMin
 #include "ynnpack/kernels/reduce/min.inc"
-#undef YNN_UNARY_REDUCE_KERNEL
+#undef current_op
 
-#define YNN_UNARY_REDUCE_KERNEL(arch_flags, name, a_type, c_type) \
-  TEST_REDUCE_KERNEL(ReduceOp::kMax, arch_flags, name, a_type, c_type);
+#define current_op ReduceOp::kMax
 #include "ynnpack/kernels/reduce/max.inc"
-#undef YNN_UNARY_REDUCE_KERNEL
+#undef current_op
 
-#define YNN_UNARY_REDUCE_KERNEL(arch_flags, name, a_type, c_type) \
-  TEST_REDUCE_KERNEL(ReduceOp::kMinMax, arch_flags, name, a_type, c_type);
+#define current_op ReduceOp::kMinMax
 #include "ynnpack/kernels/reduce/min_max.inc"
-#undef YNN_UNARY_REDUCE_KERNEL
+#undef current_op
 
 }  // namespace ynn

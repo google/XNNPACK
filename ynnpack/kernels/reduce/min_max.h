@@ -3,8 +3,8 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#ifndef XNNPACK_YNNPACK_KERNELS_REDUCE_MIN_MAX_ACCUMULATOR_H_
-#define XNNPACK_YNNPACK_KERNELS_REDUCE_MIN_MAX_ACCUMULATOR_H_
+#ifndef XNNPACK_YNNPACK_KERNELS_REDUCE_MIN_MAX_H_
+#define XNNPACK_YNNPACK_KERNELS_REDUCE_MIN_MAX_H_
 
 #include <cassert>
 #include <cstddef>
@@ -243,23 +243,24 @@ struct min_max_accumulator_k1_1 {
   }
 };
 
-#define MIN_MAX_KERNEL(name, acc_min, acc_max, scalar, N)                      \
-  void name(size_t n, size_t k3, size_t k2, size_t k1, size_t a_stride_n,      \
-            size_t a_stride_k3, size_t a_stride_k2, const void* a,             \
-            size_t c_stride_m, void* c) {                                      \
-    if (k1 == 1 && (a_stride_n == sizeof(scalar))) {                           \
-      stream_reduce<min_max_accumulator_k1_1<acc_min, acc_max, scalar, N>,     \
-                    scalar, scalar>(n, k3, k2, a_stride_k3, a_stride_k2,       \
-                                    reinterpret_cast<const scalar*>(a),        \
-                                    c_stride_m, reinterpret_cast<scalar*>(c)); \
-    } else {                                                                   \
-      tiled_reduce<min_max_accumulator<acc_min, acc_max, scalar, N>, scalar,   \
-                   scalar>(n, k3, k2, k1, a_stride_n, a_stride_k3,             \
-                           a_stride_k2, reinterpret_cast<const scalar*>(a),    \
-                           c_stride_m, reinterpret_cast<scalar*>(c));          \
-    }                                                                          \
+#define MIN_MAX_K1_KERNEL(name, acc_min, acc_max, scalar, N)               \
+  void name(size_t n, size_t k, size_t a_stride_n, const void* a,          \
+            size_t c_stride_m, void* c) {                                  \
+    tiled_reduce<min_max_accumulator<acc_min, acc_max, scalar, N>, scalar, \
+                 scalar>(n, 1, 1, k, a_stride_n, 0, 0,                     \
+                         reinterpret_cast<const scalar*>(a), c_stride_m,   \
+                         reinterpret_cast<scalar*>(c));                    \
+  }
+
+#define MIN_MAX_KN_KERNEL(name, acc_min, acc_max, scalar, N)                 \
+  void name(size_t n, size_t k, size_t a_stride_k, const void* a,            \
+            size_t c_stride_m, void* c) {                                    \
+    stream_reduce<min_max_accumulator_k1_1<acc_min, acc_max, scalar, N>,     \
+                  scalar, scalar>(n, 1, k, sizeof(scalar), 0, a_stride_k,    \
+                                  reinterpret_cast<const scalar*>(a),        \
+                                  c_stride_m, reinterpret_cast<scalar*>(c)); \
   }
 
 }  // namespace ynn
 
-#endif  // XNNPACK_YNNPACK_KERNELS_REDUCE_MIN_MAX_ACCUMULATOR_H_
+#endif  // XNNPACK_YNNPACK_KERNELS_REDUCE_MIN_MAX_H_

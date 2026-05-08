@@ -3,15 +3,15 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+#include "ynnpack/base/simd/x86_avx.h"
+
 #include <immintrin.h>
 
 #include <cstddef>
 
-#include "ynnpack/base/simd/x86_avx.h"
-#include "ynnpack/kernels/reduce/generic.h"
-#include "ynnpack/kernels/reduce/min_max_accumulator.h"
+#include "ynnpack/kernels/reduce/min_max.h"
 #include "ynnpack/kernels/reduce/reduce.h"
-#include "ynnpack/kernels/reduce/sum_accumulator.h"
+#include "ynnpack/kernels/reduce/sum.h"
 
 namespace ynn {
 
@@ -19,72 +19,32 @@ using simd::f32x16;
 using simd::f32x8;
 using simd::f64x4;
 
-MIN_MAX_KERNEL(min_max_fp32_4x8_avx, f32x8, f32x8, float, 8);
-MIN_MAX_KERNEL(min_fp32_4x8_avx, f32x8, dummy_t, float, 8);
-MIN_MAX_KERNEL(max_fp32_4x8_avx, dummy_t, f32x8, float, 8);
+MIN_MAX_K1_KERNEL(min_max_fp32_k1_avx, f32x8, f32x8, float, 8);
+MIN_MAX_KN_KERNEL(min_max_fp32_kn_avx, f32x8, f32x8, float, 8);
+MIN_MAX_K1_KERNEL(min_fp32_k1_avx, f32x8, dummy_t, float, 8);
+MIN_MAX_KN_KERNEL(min_fp32_kn_avx, f32x8, dummy_t, float, 8);
+MIN_MAX_K1_KERNEL(max_fp32_k1_avx, dummy_t, f32x8, float, 8);
+MIN_MAX_KN_KERNEL(max_fp32_kn_avx, dummy_t, f32x8, float, 8);
 
-MIN_MAX_KERNEL(min_max_fp64_4x4_avx, f64x4, f64x4, double, 4);
-MIN_MAX_KERNEL(min_fp64_4x4_avx, f64x4, dummy_t, double, 4);
-MIN_MAX_KERNEL(max_fp64_4x4_avx, dummy_t, f64x4, double, 4);
+MIN_MAX_K1_KERNEL(min_max_fp64_k1_avx, f64x4, f64x4, double, 4);
+MIN_MAX_KN_KERNEL(min_max_fp64_kn_avx, f64x4, f64x4, double, 4);
+MIN_MAX_K1_KERNEL(min_fp64_k1_avx, f64x4, dummy_t, double, 4);
+MIN_MAX_KN_KERNEL(min_fp64_kn_avx, f64x4, dummy_t, double, 4);
+MIN_MAX_K1_KERNEL(max_fp64_k1_avx, dummy_t, f64x4, double, 4);
+MIN_MAX_KN_KERNEL(max_fp64_kn_avx, dummy_t, f64x4, double, 4);
 
-void sum_fp64_avx(size_t n, size_t k3, size_t k2, size_t k1, size_t a_stride_n,
-                  size_t a_stride_k3, size_t a_stride_k2, const void* a, size_t,
-                  void* c) {
-  if (k1 == 1 && a_stride_n == sizeof(double)) {
-    stream_reduce<sum_accumulator_k1_1<f64x4>, double, double>(
-        n, k3, k2, a_stride_k3, a_stride_k2, reinterpret_cast<const double*>(a),
-        /*C_stride_m=*/0, reinterpret_cast<double*>(c));
-  } else {
-    tiled_reduce<sum_accumulator_fp64<>, double, double>(
-        n, k3, k2, k1, a_stride_n, a_stride_k3, a_stride_k2,
-        reinterpret_cast<const double*>(a),
-        /*C_stride_m=*/0, reinterpret_cast<double*>(c));
-  }
-}
+SUM_K1_KERNEL(sum_fp64_k1_avx, double, double, consistent_tile_k_fp64, 1,
+              identity);
+SUM_KN_KERNEL(sum_fp64_kn_avx, double, double, 4, identity);
+SUM_K1_KERNEL(sum_fp32_k1_avx, float, float, consistent_tile_k_fp32, 1,
+              identity);
+SUM_KN_KERNEL(sum_fp32_kn_avx, float, float, 8, identity);
 
-void sum_squared_fp64_avx(size_t n, size_t k3, size_t k2, size_t k1,
-                          size_t a_stride_n, size_t a_stride_k3,
-                          size_t a_stride_k2, const void* a, size_t, void* c) {
-  if (k1 == 1 && a_stride_n == sizeof(double)) {
-    stream_reduce<sum_accumulator_k1_1<f64x4, Square>, double, double>(
-        n, k3, k2, a_stride_k3, a_stride_k2, reinterpret_cast<const double*>(a),
-        /*C_stride_m=*/0, reinterpret_cast<double*>(c));
-  } else {
-    tiled_reduce<sum_accumulator_fp64<1, Square>, double, double>(
-        n, k3, k2, k1, a_stride_n, a_stride_k3, a_stride_k2,
-        reinterpret_cast<const double*>(a), /*C_stride_m=*/0,
-        reinterpret_cast<double*>(c));
-  }
-}
-
-void sum_fp32_avx(size_t n, size_t k3, size_t k2, size_t k1, size_t a_stride_n,
-                  size_t a_stride_k3, size_t a_stride_k2, const void* a, size_t,
-                  void* c) {
-  if (k1 == 1 && a_stride_n == sizeof(float)) {
-    stream_reduce<sum_accumulator_k1_1<f32x8>, float, float>(
-        n, k3, k2, a_stride_k3, a_stride_k2, reinterpret_cast<const float*>(a),
-        /*C_stride_m=*/0, reinterpret_cast<float*>(c));
-  } else {
-    tiled_reduce<sum_accumulator_fp32<>, float, float>(
-        n, k3, k2, k1, a_stride_n, a_stride_k3, a_stride_k2,
-        reinterpret_cast<const float*>(a),
-        /*C_stride_m=*/0, reinterpret_cast<float*>(c));
-  }
-}
-
-void sum_squared_fp32_avx(size_t n, size_t k3, size_t k2, size_t k1,
-                          size_t a_stride_n, size_t a_stride_k3,
-                          size_t a_stride_k2, const void* a, size_t, void* c) {
-  if (k1 == 1 && a_stride_n == sizeof(float)) {
-    stream_reduce<sum_accumulator_k1_1<f32x8, Square>, float, float>(
-        n, k3, k2, a_stride_k3, a_stride_k2, reinterpret_cast<const float*>(a),
-        /*C_stride_m=*/0, reinterpret_cast<float*>(c));
-  } else {
-    tiled_reduce<sum_accumulator_fp32<1, Square>, float, float>(
-        n, k3, k2, k1, a_stride_n, a_stride_k3, a_stride_k2,
-        reinterpret_cast<const float*>(a), /*C_stride_m=*/0,
-        reinterpret_cast<float*>(c));
-  }
-}
+SUM_K1_KERNEL(sum_squared_fp64_k1_avx, double, double, consistent_tile_k_fp64,
+              1, square);
+SUM_KN_KERNEL(sum_squared_fp64_kn_avx, double, double, 4, square);
+SUM_K1_KERNEL(sum_squared_fp32_k1_avx, float, float, consistent_tile_k_fp32, 1,
+              square);
+SUM_KN_KERNEL(sum_squared_fp32_kn_avx, float, float, 8, square);
 
 }  // namespace ynn
