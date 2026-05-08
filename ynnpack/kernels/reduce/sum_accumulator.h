@@ -217,6 +217,41 @@ struct sum_accumulator_k1_1 {
   }
 };
 
+#define SUM_KERNEL(name, acc_t, scalar_a, scalar_c, K)                      \
+  void name(size_t n, size_t k3, size_t k2, size_t k1, size_t a_stride_n,   \
+            size_t a_stride_k3, size_t a_stride_k2, const void* a,          \
+            size_t c_stride_m, void* c) {                                   \
+    if (k1 == 1 && (a_stride_n == sizeof(scalar_a))) {                      \
+      stream_reduce<sum_accumulator_k1_1<simd::vec<scalar_c, K>>, scalar_a, \
+                    scalar_c>(n, k3, k2, a_stride_k3, a_stride_k2,          \
+                              reinterpret_cast<const scalar_a*>(a),         \
+                              c_stride_m, reinterpret_cast<scalar_c*>(c));  \
+    } else {                                                                \
+      tiled_reduce<sum_accumulator_x32<acc_t, K>, scalar_a, scalar_c>(      \
+          n, k3, k2, k1, a_stride_n, a_stride_k3, a_stride_k2,              \
+          reinterpret_cast<const scalar_a*>(a), c_stride_m,                 \
+          reinterpret_cast<scalar_c*>(c));                                  \
+    }                                                                       \
+  }
+
+#define SUM_SQUARED_KERNEL(name, acc_t, scalar_a, scalar_c, K)                 \
+  void name(size_t n, size_t k3, size_t k2, size_t k1, size_t a_stride_n,      \
+            size_t a_stride_k3, size_t a_stride_k2, const void* a,             \
+            size_t c_stride_m, void* c) {                                      \
+    if (k1 == 1 && (a_stride_n == sizeof(scalar_a))) {                         \
+      stream_reduce<sum_accumulator_k1_1<simd::vec<scalar_c, K>, Square>,      \
+                    scalar_a, scalar_c>(n, k3, k2, a_stride_k3, a_stride_k2,   \
+                                        reinterpret_cast<const scalar_a*>(a),  \
+                                        c_stride_m,                            \
+                                        reinterpret_cast<scalar_c*>(c));       \
+    } else {                                                                   \
+      tiled_reduce<sum_accumulator_x32<acc_t, K, Square>, scalar_a, scalar_c>( \
+          n, k3, k2, k1, a_stride_n, a_stride_k3, a_stride_k2,                 \
+          reinterpret_cast<const scalar_a*>(a), c_stride_m,                    \
+          reinterpret_cast<scalar_c*>(c));                                     \
+    }                                                                          \
+  }
+
 }  // namespace ynn
 
 #endif  // XNNPACK_YNNPACK_KERNELS_REDUCE_SUM_ACCUMULATOR_H_

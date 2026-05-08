@@ -83,6 +83,7 @@ namespace {
 
 using simd::bf16x8;
 using simd::f16x8;
+using simd::f32x16;
 using simd::f32x4;
 using simd::f32x8;
 using simd::s16x8;
@@ -173,99 +174,12 @@ void sum_int8_int32_sse2(size_t n, size_t k3, size_t k2, size_t k1,
   }
 }
 
-void sum_uint8_int32_sse2(size_t n, size_t k3, size_t k2, size_t k1,
-                          size_t a_stride_n, size_t a_stride_k3,
-                          size_t a_stride_k2, const void* a, size_t, void* c) {
-  if (k1 == 1 && a_stride_n == sizeof(uint8_t)) {
-    stream_reduce<sum_accumulator_k1_1<s32x16>, uint8_t, int32_t>(
-        n, k3, k2, a_stride_k3, a_stride_k2,
-        reinterpret_cast<const uint8_t*>(a),
-        /*C_stride_m=*/0, reinterpret_cast<int32_t*>(c));
-  } else {
-    tiled_reduce<sum_accumulator_x32<s32x4, 16>, uint8_t, int32_t>(
-        n, k3, k2, k1, a_stride_n, a_stride_k3, a_stride_k2,
-        reinterpret_cast<const uint8_t*>(a), /*C_stride_m=*/0,
-        reinterpret_cast<int32_t*>(c));
-  }
-}
+SUM_KERNEL(sum_fp32_sse2, f32x16, float, float, 16);
+SUM_KERNEL(sum_bf16_fp32_sse2, f32x16, bfloat16, float, 32);
+SUM_KERNEL(sum_uint8_int32_sse2, s32x4, uint8_t, int32_t, 16);
+SUM_KERNEL(sum_int32_sse2, s32x4, int32_t, int32_t, 4);
 
-void sum_bf16_fp32_sse2(size_t n, size_t k3, size_t k2, size_t k1,
-                        size_t a_stride_n, size_t a_stride_k3,
-                        size_t a_stride_k2, const void* a, size_t, void* c) {
-  if (k1 == 1 && a_stride_n == sizeof(bfloat16)) {
-    stream_reduce<sum_accumulator_k1_1<f32x8>, bfloat16, float>(
-        n, k3, k2, a_stride_k3, a_stride_k2,
-        reinterpret_cast<const bfloat16*>(a), /*C_stride_m=*/0,
-        reinterpret_cast<float*>(c));
-  } else {
-    tiled_reduce<sum_accumulator_fp32<2, Identity, 2>, bfloat16, float>(
-        n, k3, k2, k1, a_stride_n, a_stride_k3, a_stride_k2,
-        reinterpret_cast<const bfloat16*>(a), /*C_stride_m=*/0,
-        reinterpret_cast<float*>(c));
-  }
-}
-
-void sum_squared_bf16_fp32_sse2(size_t n, size_t k3, size_t k2, size_t k1,
-                                size_t a_stride_n, size_t a_stride_k3,
-                                size_t a_stride_k2, const void* a, size_t,
-                                void* c) {
-  if (k1 == 1 && a_stride_n == sizeof(bfloat16)) {
-    stream_reduce<sum_accumulator_k1_1<f32x8, Square>, bfloat16, float>(
-        n, k3, k2, a_stride_k3, a_stride_k2,
-        reinterpret_cast<const bfloat16*>(a), /*C_stride_m=*/0,
-        reinterpret_cast<float*>(c));
-  } else {
-    tiled_reduce<sum_accumulator_fp32<2, Square, 2>, bfloat16, float>(
-        n, k3, k2, k1, a_stride_n, a_stride_k3, a_stride_k2,
-        reinterpret_cast<const bfloat16*>(a), /*C_stride_m=*/0,
-        reinterpret_cast<float*>(c));
-  }
-}
-
-void sum_fp32_sse2(size_t n, size_t k3, size_t k2, size_t k1,
-                   size_t a_stride_n, size_t a_stride_k3, size_t a_stride_k2,
-                   const void* a, size_t, void* c) {
-  if (k1 == 1 && a_stride_n == sizeof(float)) {
-    stream_reduce<sum_accumulator_k1_1<f32x4>, float, float>(
-        n, k3, k2, a_stride_k3, a_stride_k2, reinterpret_cast<const float*>(a),
-        /*C_stride_m=*/0, reinterpret_cast<float*>(c));
-  } else {
-    tiled_reduce<sum_accumulator_fp32<1, Identity, 2>, float, float>(
-        n, k3, k2, k1, a_stride_n, a_stride_k3, a_stride_k2,
-        reinterpret_cast<const float*>(a),
-        /*C_stride_m=*/0, reinterpret_cast<float*>(c));
-  }
-}
-
-void sum_int32_sse2(size_t n, size_t k3, size_t k2, size_t k1,
-                    size_t a_stride_n, size_t a_stride_k3, size_t a_stride_k2,
-                    const void* a, size_t, void* c) {
-  if (k1 == 1 && a_stride_n == sizeof(int32_t)) {
-    stream_reduce<sum_accumulator_k1_1<s32x4>, int32_t, int32_t>(
-        n, k3, k2, a_stride_k3, a_stride_k2,
-        reinterpret_cast<const int32_t*>(a),
-        /*C_stride_m=*/0, reinterpret_cast<int32_t*>(c));
-  } else {
-    tiled_reduce<sum_accumulator_x32<s32x4, 4>, int32_t, int32_t>(
-        n, k3, k2, k1, a_stride_n, a_stride_k3, a_stride_k2,
-        reinterpret_cast<const int32_t*>(a), /*C_stride_m=*/0,
-        reinterpret_cast<int32_t*>(c));
-  }
-}
-
-void sum_squared_fp32_sse2(size_t n, size_t k3, size_t k2, size_t k1,
-                           size_t a_stride_n, size_t a_stride_k3,
-                           size_t a_stride_k2, const void* a, size_t, void* c) {
-  if (k1 == 1 && a_stride_n == sizeof(float)) {
-    stream_reduce<sum_accumulator_k1_1<f32x4, Square>, float, float>(
-        n, k3, k2, a_stride_k3, a_stride_k2, reinterpret_cast<const float*>(a),
-        /*C_stride_m=*/0, reinterpret_cast<float*>(c));
-  } else {
-    tiled_reduce<sum_accumulator_fp32<1, Square, 2>, float, float>(
-        n, k3, k2, k1, a_stride_n, a_stride_k3, a_stride_k2,
-        reinterpret_cast<const float*>(a), /*C_stride_m=*/0,
-        reinterpret_cast<float*>(c));
-  }
-}
+SUM_SQUARED_KERNEL(sum_squared_fp32_sse2, f32x16, float, float, 16);
+SUM_SQUARED_KERNEL(sum_squared_bf16_fp32_sse2, f32x16, bfloat16, float, 32);
 
 }  // namespace ynn
