@@ -1188,6 +1188,10 @@ XNN_PRIVATE void xnn_compute_bf16_qd8_convert(
     struct bf16_qd8_convert_context* context, size_t batch_offset,
     size_t batch_range);
 
+XNN_PRIVATE void xnn_compute_bf16_qdu8_convert(
+    struct bf16_qd8_convert_context* context, size_t batch_offset,
+    size_t batch_range);
+
 XNN_PRIVATE void xnn_compute_f16_qd8_convert(
     struct f16_qd8_convert_context* context, size_t batch_offset,
     size_t batch_range);
