@@ -850,6 +850,15 @@ enum xnn_status xnn_create_convert_nc_bf16_qd8(
       convert_op_out);
 }
 
+enum xnn_status xnn_create_convert_nc_bf16_qdu8(
+  uint32_t flags,
+  xnn_operator_t* convert_op_out) {
+  return create_convert_nc_qx8(
+      flags, xnn_init_bf16_to_qu8_cvt_config(), xnn_init_bf16_rminmax_config(),
+      xnn_init_qu8_rsum_config(), xnn_operator_type_convert_nc_bf16_qdu8,
+      convert_op_out);
+}
+
 enum xnn_status xnn_create_convert_nc_f16_qd8(
   uint32_t flags,
   xnn_operator_t* convert_op_out) {
@@ -995,6 +1004,10 @@ enum xnn_status reshape_convert_nc_bf16_qx8(
     case xnn_operator_type_convert_nc_bf16_qd8:
       convert_op->compute[0].task_1d_tile_1d_dynamic =
           (pthreadpool_task_1d_tile_1d_dynamic_t)xnn_compute_bf16_qd8_convert;
+      break;
+    case xnn_operator_type_convert_nc_bf16_qdu8:
+      convert_op->compute[0].task_1d_tile_1d_dynamic =
+          (pthreadpool_task_1d_tile_1d_dynamic_t)xnn_compute_bf16_qdu8_convert;
       break;
     default:
       XNN_UNREACHABLE;
@@ -1151,6 +1164,12 @@ enum xnn_status xnn_reshape_convert_nc_bf16_qd8(
     xnn_operator_t convert_op, size_t batch_size, size_t channels,
     size_t input_stride, size_t output_stride, pthreadpool_t threadpool) {
   return reshape_convert_nc_bf16_qx8(convert_op, batch_size, channels, input_stride, output_stride, xnn_operator_type_convert_nc_bf16_qd8, threadpool);
+}
+
+enum xnn_status xnn_reshape_convert_nc_bf16_qdu8(
+    xnn_operator_t convert_op, size_t batch_size, size_t channels,
+    size_t input_stride, size_t output_stride, pthreadpool_t threadpool) {
+  return reshape_convert_nc_bf16_qx8(convert_op, batch_size, channels, input_stride, output_stride, xnn_operator_type_convert_nc_bf16_qdu8, threadpool);
 }
 
 enum xnn_status xnn_reshape_convert_nc_f16_qd8(
@@ -1482,6 +1501,16 @@ enum xnn_status xnn_setup_convert_nc_bf16_qd8(
   struct xnn_quantization_params* quantization_params)
 {
   return setup_convert_nc_bf16_qx8(convert_op, input, output, xnn_operator_type_convert_nc_bf16_qd8, row_sum, quantization_params);
+}
+
+enum xnn_status xnn_setup_convert_nc_bf16_qdu8(
+  xnn_operator_t convert_op,
+  const void* input,
+  uint8_t* output,
+  float* row_sum,
+  struct xnn_quantization_params* quantization_params)
+{
+  return setup_convert_nc_bf16_qx8(convert_op, input, output, xnn_operator_type_convert_nc_bf16_qdu8, row_sum, quantization_params);
 }
 
 enum xnn_status xnn_setup_convert_nc_f32_qd8(

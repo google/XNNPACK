@@ -1587,7 +1587,7 @@ typedef struct xnn_qd8_quantization_params(f16_quantization_params_fn)(
 typedef struct xnn_qd8_quantization_params(f32_quantization_params_fn)(
     float min, float max, float* f32_scale);
 
-void xnn_compute_bf16_qx8_convert(
+XNN_NO_SANITIZE_FUNCTION void xnn_compute_bf16_qx8_convert(
     struct bf16_qd8_convert_context* restrict context,
     bf16_quantization_params_fn quantization_params_function,
     size_t batch_index) {
@@ -1628,6 +1628,16 @@ void xnn_compute_bf16_qd8_convert(
        batch_index < batch_offset + batch_range; batch_index++) {
     xnn_compute_bf16_qx8_convert(
         context, xnn_bf16_qd8_asymmetric_quantization_params, batch_index);
+  }
+}
+
+void xnn_compute_bf16_qdu8_convert(
+    struct bf16_qd8_convert_context* restrict context, size_t batch_offset,
+    size_t batch_range) {
+  for (size_t batch_index = batch_offset;
+       batch_index < batch_offset + batch_range; batch_index++) {
+    xnn_compute_bf16_qx8_convert(
+        context, xnn_bf16_qdu8_asymmetric_quantization_params, batch_index);
   }
 }
 

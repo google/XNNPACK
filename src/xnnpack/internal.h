@@ -396,6 +396,19 @@ enum xnn_status xnn_reshape_convert_nc_bf16_qd8(
 
 // quantization_params must be padded with at least
 // XNN_EXTRA_QUANTIZATION_PARAMS entries.
+enum xnn_status xnn_setup_convert_nc_bf16_qdu8(
+    xnn_operator_t convert_op, const void* input, uint8_t* output,
+    float* row_sum, struct xnn_quantization_params* quantization_params);
+
+enum xnn_status xnn_create_convert_nc_bf16_qdu8(uint32_t flags,
+                                                xnn_operator_t* convert_op_out);
+
+enum xnn_status xnn_reshape_convert_nc_bf16_qdu8(
+    xnn_operator_t convert_op, size_t batch_size, size_t channels,
+    size_t input_stride, size_t output_stride, pthreadpool_t threadpool);
+
+// quantization_params must be padded with at least
+// XNN_EXTRA_QUANTIZATION_PARAMS entries.
 enum xnn_status xnn_setup_convert_nc_f16_qdu8(
     xnn_operator_t convert_op, const void* input, uint8_t* output,
     float* row_sum, struct xnn_quantization_params* quantization_params);
