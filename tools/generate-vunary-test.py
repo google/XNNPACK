@@ -117,6 +117,15 @@ SPECIAL_VALUES_F32 = {
     ),
 }
 
+SPECIAL_VALUES_F16 = {
+    "Log": (
+        4,  # Number of elements.
+        "{1.0f, -1.0f, 0.0f, -0.0f}",  # Inputs.
+        "{0.0f, NAN, -INFINITY, -INFINITY}",  # Expected outputs.
+        1,  # Error margin in ULP.
+    ),
+}
+
 TEST_TEMPLATE = """\
 #define XNN_UKERNEL(arch_flags, ukernel, batch_tile, vector_tile, datatype, params_type, init_params)
   TEST(ukernel, batch_eq) { TestBatchEq<TestInfo, datatype, datatype>(arch_flags, batch_tile, ukernel, init_params); }
@@ -191,6 +200,14 @@ $if DATATYPE == "f32" and OP_TYPE in SPECIAL_VALUES_F32:
       /*outputs=*/${SPECIAL_VALUES_F32[OP_TYPE][2]},
       /*tolerance_ulp=*/${SPECIAL_VALUES_F32[OP_TYPE][3]});
   }
+$if DATATYPE == "f16" and OP_TYPE in SPECIAL_VALUES_F16:
+  TEST(ukernel, special_values) {
+    TEST_REQUIRES_ARCH_FLAGS(arch_flags);
+    VUnaryMicrokernelTester().Test<TestInfo, datatype, datatype>(ukernel, init_params,
+      /*inputs=*/${SPECIAL_VALUES_F16[OP_TYPE][1]},
+      /*outputs=*/${SPECIAL_VALUES_F16[OP_TYPE][2]},
+      /*tolerance_ulp=*/${SPECIAL_VALUES_F16[OP_TYPE][3]});
+  }
 """
 
 
@@ -259,6 +276,7 @@ using TestInfo = {op_type};
               "OP_TYPE": op_type,
               "OP_NAME": op,
               "SPECIAL_VALUES_F32": SPECIAL_VALUES_F32,
+              "SPECIAL_VALUES_F16": SPECIAL_VALUES_F16,
           },
       )
   )

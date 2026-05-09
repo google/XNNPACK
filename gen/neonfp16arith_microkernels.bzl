@@ -64,6 +64,7 @@ PROD_NEONFP16ARITH_MICROKERNEL_SRCS = [
     "src/f16-vexp/gen/f16-vexp-neonfp16arith-poly-3.c",
     "src/f16-vgelu/gen/f16-vgelu-neonfp16arith-rational-6-4-div.c",
     "src/f16-vhswish/gen/f16-vhswish-neonfp16arith-u16.c",
+    "src/f16-vlog/gen/f16-vlog-neonfp16arith-rational-3-3-div.c",
     "src/f16-vlrelu/gen/f16-vlrelu-neonfp16arith-u16.c",
     "src/f16-vmulcaddc/gen/f16-vmulcaddc-c8-minmax-neonfp16arith-2x.c",
     "src/f16-vrnd/gen/f16-vrndd-neonfp16arith-u16.c",
