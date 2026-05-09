@@ -297,13 +297,7 @@ static void init_f16_cosine_config(void) {
   if (hardware_config->arch_flags & xnn_arch_arm_neon_fp16_arith) {
     f16_cosine_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f16_vcos_ukernel__neonfp16arith_rational_3_2_div_u16);
     f16_cosine_config.element_tile = 16;
-  } else {
-    f16_cosine_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f16_vcos_ukernel__scalar_rational_3_2_div_u4);
-    f16_cosine_config.element_tile = 4;
   }
-#elif XNN_ARCH_WASMRELAXEDSIMDFP16
-  f16_cosine_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f16_vcos_ukernel__wasmrelaxedsimd_rational_3_2_div_u32);
-  f16_cosine_config.element_tile = 32;
 #elif (XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR && XNN_ENABLE_RISCV_FP16_VECTOR)
   const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
   assert(hardware_config != NULL);
@@ -755,13 +749,7 @@ static void init_f16_sine_config(void) {
   if (hardware_config->arch_flags & xnn_arch_arm_neon_fp16_arith) {
     f16_sine_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f16_vsin_ukernel__neonfp16arith_rational_3_2_div_u16);
     f16_sine_config.element_tile = 16;
-  } else {
-    f16_sine_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f16_vsin_ukernel__scalar_rational_3_2_div_u4);
-    f16_sine_config.element_tile = 4;
   }
-#elif XNN_ARCH_WASMRELAXEDSIMDFP16
-  f16_sine_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f16_vsin_ukernel__wasmrelaxedsimd_rational_3_2_div_u32);
-  f16_sine_config.element_tile = 32;
 #elif (XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR && XNN_ENABLE_RISCV_FP16_VECTOR)
   const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
   assert(hardware_config != NULL);
