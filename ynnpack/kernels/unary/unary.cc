@@ -424,33 +424,33 @@ unary_params get_unary_params(ynn_unary_operator op) {
     case ynn_unary_exp:
       return unary_params{
           .exp = exp_params{
-              ._ = 0.0f,
-              .output_multiplier = 1.0f,
-              .input_multiplier = static_cast<float>(std::log2(std::exp(1.0))),
+              ._ = 0.0,
+              .output_multiplier = 1.0,
+              .input_multiplier = static_cast<real>(std::log2(std::exp(1.0))),
           }};
     case ynn_unary_log:
       return unary_params{
           .log = log_params{
-              ._ = 0.0f,
-              .output_multiplier = static_cast<float>(std::log(2.0)),
-              .input_multiplier = 1.4142134190e+00f,  // sqrt(2)
+              ._ = 0.0,
+              .output_multiplier = static_cast<real>(std::log(2.0)),
+              .input_multiplier = static_cast<real>(std::sqrt(2.0)),
           }};
     case ynn_unary_erf:
-      return unary_params{.erf = erf_params{.output_offset = 0.0f,
-                                            .output_multiplier = 1.0f,
-                                            .input_multiplier = 1.0f}};
+      return unary_params{.erf = erf_params{.output_offset = 0.0,
+                                            .output_multiplier = 1.0,
+                                            .input_multiplier = 1.0}};
     case ynn_unary_tanh:
-      return unary_params{.tanh = tanh_params{.output_offset = 0.0f,
-                                              .output_multiplier = 1.0f}};
+      return unary_params{
+          .tanh = tanh_params{.output_offset = 0.0, .output_multiplier = 1.0}};
     case ynn_unary_sine:
-      return unary_params{.sine = sine_params{.output_offset = 0.0f,
-                                              .output_multiplier = 1.0f}};
+      return unary_params{
+          .sine = sine_params{.output_offset = 0.0, .output_multiplier = 1.0}};
     case ynn_unary_cosine:
-      return unary_params{.cosine = cosine_params{.output_offset = 0.0f,
-                                                  .output_multiplier = 1.0f}};
+      return unary_params{.cosine = cosine_params{.output_offset = 0.0,
+                                                  .output_multiplier = 1.0}};
     case ynn_unary_poly3:
-      return unary_params{.poly3 = poly3_params{/*c0=*/0.0f, /*c1=*/0.0f,
-                                                /*c2=*/0.0f, /*c3=*/0.0f}};
+      return unary_params{.poly3 = poly3_params{/*c0=*/0.0, /*c1=*/0.0,
+                                                /*c2=*/0.0, /*c3=*/0.0}};
     default:
       return unary_params{};
   }

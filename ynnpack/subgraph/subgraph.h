@@ -186,7 +186,7 @@ struct ynn_value {
 
   // If the value is reshape-able to a scalar, returns the value converted to
   // a float, otherwise returns nullopt.
-  std::optional<float> as_scalar_float() const;
+  std::optional<ynn::real> as_scalar() const;
 };
 
 struct ynn_node {

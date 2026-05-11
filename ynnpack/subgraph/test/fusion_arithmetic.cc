@@ -153,53 +153,6 @@ TEST(fusion, exp_negate) {
               1e-6f);
 }
 
-TEST(fusion, fold_exact_fp64) {
-  SubgraphBuilder builder(2);
-  uint32_t in_id = 0;
-  builder.AddInput(ynn_type_fp64, {10}, in_id);
-  uint32_t out_id = 1;
-  builder.AddOutput(ynn_type_fp64, {10}, out_id);
-
-  uint32_t tanh_id = YNN_INVALID_VALUE_ID;
-  builder.AddTensor(ynn_type_fp64, {10}, tanh_id);
-  builder.AddUnary(ynn_unary_tanh, in_id, tanh_id);
-
-  // 1.25 is exactly representable as fp32.
-  uint32_t c_id = builder.DefineScalar(1.25);
-  builder.AddBinary(ynn_binary_add, tanh_id, c_id, out_id);
-
-  Runtime runtime(builder.GetSubgraph());
-  ASSERT_EQ(runtime.Status(), ynn_status_success);
-  const ynn_subgraph& subgraph = *builder.GetSubgraph();
-
-  EXPECT_THAT(subgraph, HasValidNodeCount(1));
-  EXPECT_THAT(ProducerOf(out_id, subgraph), IsUnary(ynn_unary_tanh));
-}
-
-TEST(fusion, no_fold_inexact_fp32) {
-  SubgraphBuilder builder(2);
-  uint32_t in_id = 0;
-  builder.AddInput(ynn_type_fp64, {10}, in_id);
-  uint32_t out_id = 1;
-  builder.AddOutput(ynn_type_fp64, {10}, out_id);
-
-  uint32_t tanh_id = YNN_INVALID_VALUE_ID;
-  builder.AddTensor(ynn_type_fp64, {10}, tanh_id);
-  builder.AddUnary(ynn_unary_tanh, in_id, tanh_id);
-
-  // 1.0 + 2^-40 is not exactly representable as fp32.
-  double inexact_val = 1.0 + std::pow(2.0, -40.0);
-  uint32_t c_id = builder.DefineScalar(inexact_val);
-  builder.AddBinary(ynn_binary_add, tanh_id, c_id, out_id);
-
-  Runtime runtime(builder.GetSubgraph());
-  ASSERT_EQ(runtime.Status(), ynn_status_success);
-  const ynn_subgraph& subgraph = *builder.GetSubgraph();
-
-  EXPECT_THAT(subgraph, HasValidNodeCount(2));
-  EXPECT_THAT(ProducerOf(out_id, subgraph), IsBinary(ynn_binary_add));
-}
-
 TEST(fusion, subtract_multiply) {
   // subtract(a, mul(b, c) -> subtract_multiply(a, b, c)
   const uint32_t a_id = 0;

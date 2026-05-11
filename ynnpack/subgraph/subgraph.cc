@@ -233,11 +233,11 @@ ynn_status ynn_value::get_external_shape(size_t* rank, size_t* dims) const {
   return ynn_status_success;
 }
 
-std::optional<float> ynn_value::as_scalar_float() const {
+std::optional<ynn::real> ynn_value::as_scalar() const {
   if (!is_static_scalar()) return std::nullopt;
   switch (type) {
     case ynn_type_fp64:
-      return static_cast<float>(static_scalar_value<double>());
+      return static_cast<ynn::real>(static_scalar_value<double>());
     case ynn_type_fp32:
       return static_scalar_value<float>();
     case ynn_type_fp16:
@@ -245,11 +245,11 @@ std::optional<float> ynn_value::as_scalar_float() const {
     case ynn_type_bf16:
       return static_scalar_value<ynn::bfloat16>();
     case ynn_type_int32:
-      return static_cast<float>(static_scalar_value<int32_t>());
+      return static_cast<ynn::real>(static_scalar_value<int32_t>());
     case ynn_type_int8:
-      return static_cast<float>(static_scalar_value<int8_t>());
+      return static_cast<ynn::real>(static_scalar_value<int8_t>());
     case ynn_type_uint8:
-      return static_cast<float>(static_scalar_value<uint8_t>());
+      return static_cast<ynn::real>(static_scalar_value<uint8_t>());
     case ynn_type_int4:
     case ynn_type_uint4:
     case ynn_type_int2:
@@ -378,6 +378,9 @@ uint32_t ynn_subgraph::get_static_value_id(ynn_type type, size_t rank,
 
   std::vector<char> data(size * ynn::type_size_bytes(type));
   switch (type) {
+    case ynn_type_fp64:
+      std::copy_n(value_f32, size, reinterpret_cast<double*>(data.data()));
+      break;
     case ynn_type_fp32:
       std::copy_n(value_f32, size, reinterpret_cast<float*>(data.data()));
       break;
@@ -1232,7 +1235,7 @@ void ynn_subgraph::dump(std::ostream& os) const {
     }
     if (value.is_static()) {
       os << "static ";
-      if (std::optional<float> v = value.as_scalar_float()) {
+      if (auto v = value.as_scalar()) {
         os << "value=" << *v << " ";
       }
     }

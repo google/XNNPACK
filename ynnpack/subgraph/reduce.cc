@@ -371,7 +371,7 @@ void define_reduce(ynn_subgraph& subgraph, ynn_node& node,
 
   if (input_b_id != YNN_INVALID_VALUE_ID) {
     const ynn_value& b = subgraph.value(input_b_id);
-    if (b.as_scalar_float() == get_reduce_identity(op)) {
+    if (b.as_scalar() == get_reduce_identity(op)) {
       // This is the default value, using the default enables some fusions to
       // happen.
       input_b_id = YNN_INVALID_VALUE_ID;

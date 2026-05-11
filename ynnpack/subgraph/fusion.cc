@@ -69,56 +69,44 @@ bool is_square_node(const ynn_node& node) {
 struct scalar_arithmetic {
   // This represents an operation a*x + b
   uint32_t x_id = YNN_INVALID_VALUE_ID;
-  float a = 1.0f;
-  float b = 0.0f;
+  real a = 1.0;
+  real b = 0.0;
 };
 
 // If `node` is a linear expression of scalar constants, returns
 // `scalar_arithmetic` describing the operation.
-std::optional<float> as_exact_scalar_float(const ynn_value& value) {
-  std::optional<float> f = value.as_scalar_float();
-  if (!f) return std::nullopt;
-  if (value.type == ynn_type_fp64) {
-    double d = value.static_scalar_value<double>();
-    if (static_cast<double>(*f) != d) {
-      return std::nullopt;
-    }
-  }
-  return f;
-}
-
 std::optional<scalar_arithmetic> is_scalar_arithmetic(
     const ynn_subgraph& subgraph, const ynn_node& node) {
   if (is_unary_node(node, ynn_unary_negate)) {
-    return scalar_arithmetic{node.inputs[0], -1.0f, 0.0f};
+    return scalar_arithmetic{node.inputs[0], -1.0, 0.0};
   }
   const ynn_node::binary_elementwise* binary =
       std::get_if<ynn_node::binary_elementwise>(&node.op);
   if (binary == nullptr) return std::nullopt;
 
-  if (const auto b = as_exact_scalar_float(subgraph.value(node.inputs[1]))) {
+  if (const auto b = subgraph.value(node.inputs[1]).as_scalar()) {
     switch (binary->op) {
       case ynn_binary_add:
-        return scalar_arithmetic{node.inputs[0], 1.0f, *b};
+        return scalar_arithmetic{node.inputs[0], 1.0, *b};
       case ynn_binary_subtract:
-        return scalar_arithmetic{node.inputs[0], 1.0f, -*b};
+        return scalar_arithmetic{node.inputs[0], 1.0, -*b};
       case ynn_binary_multiply:
-        return scalar_arithmetic{node.inputs[0], *b, 0.0f};
+        return scalar_arithmetic{node.inputs[0], *b, 0.0};
       case ynn_binary_divide:
-        return scalar_arithmetic{node.inputs[0], 1.0f / *b, 0.0f};
+        return scalar_arithmetic{node.inputs[0], 1.0 / *b, 0.0};
       default:
         return std::nullopt;
     }
   }
 
-  if (const auto a = as_exact_scalar_float(subgraph.value(node.inputs[0]))) {
+  if (const auto a = subgraph.value(node.inputs[0]).as_scalar()) {
     switch (binary->op) {
       case ynn_binary_add:
-        return scalar_arithmetic{node.inputs[1], 1.0f, *a};
+        return scalar_arithmetic{node.inputs[1], 1.0, *a};
       case ynn_binary_subtract:
-        return scalar_arithmetic{node.inputs[1], -1.0f, *a};
+        return scalar_arithmetic{node.inputs[1], -1.0, *a};
       case ynn_binary_multiply:
-        return scalar_arithmetic{node.inputs[1], *a, 0.0f};
+        return scalar_arithmetic{node.inputs[1], *a, 0.0};
       default:
         return std::nullopt;
     }
@@ -1144,7 +1132,7 @@ bool rewrite_dequantize_dot(ynn_subgraph& subgraph, ynn_node& node,
 
   // Check if subtract_multiply(0, a, b)
   const ynn_value& sm_a = subgraph.value(input_c_producer->inputs[0]);
-  if (!sm_a.is_static_scalar() || sm_a.as_scalar_float() != 0.0f) {
+  if (!sm_a.is_static_scalar() || sm_a.as_scalar() != 0.0f) {
     return false;
   }
 
@@ -1197,7 +1185,7 @@ bool rewrite_dequantize_dot_add(ynn_subgraph& subgraph, ynn_node& node,
 
     uint32_t offset_id = dequantize_dot_node->inputs[5];
     const ynn_value& offset = subgraph.value(offset_id);
-    if (!offset.is_static_scalar() || offset.as_scalar_float() != 0.0f) {
+    if (!offset.is_static_scalar() || offset.as_scalar() != 0.0f) {
       continue;
     }
 

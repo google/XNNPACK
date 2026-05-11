@@ -32,6 +32,10 @@ using bfloat16x1_t = bfloat16;
 using float32x1_t = float;
 using float64x1_t = double;
 
+// TODO: b/501068911 - When we have an option to disable fp64 support, we should
+// make this float when fp64 is disabled.
+using real = double;
+
 // Returns true if the type is an integer type.
 bool type_is_integral(ynn_type t);
 
