@@ -1636,8 +1636,13 @@ bool rewrite_sum_to_dot(ynn_subgraph& subgraph, ynn_node& node,
   int i_dim = find_broadcast(b, perm_b);
   int j_dim = find_broadcast(a, perm_a, i_dim);
 
-  // TODO: dsharlet - Maybe if there is no broadcast on either side, it is not
-  // faster to use dot.
+  if (i_dim == -1 && j_dim == -1) {
+    YNN_LOG_DEBUG()
+        << "Not rewriting sum(a*b) to dot(a, b) because there are no "
+           "broadcast dimensions.";
+    return false;
+  }
+
   if (i_dim != -1) {
     std::rotate(perm_a.begin() + num_k_dims, perm_a.begin() + i_dim,
                 perm_a.begin() + i_dim + 1);
