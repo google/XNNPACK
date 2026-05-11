@@ -267,11 +267,9 @@ const ynn_unary_operator all_integer_ops[] = {
 const size_t padding = 16;
 
 const Shape reference_shapes[] = {
-    {256, 4, 0, 0},
-    {256, 4, padding, 0},
-    {256, 4, 0, padding},
+    {256, 4, 0, 0}, {256, 4, padding, 0}, {256, 4, 0, padding},
+    {256, 3, 1, 0}, {256, 5, 3, 0},
 };
-
 
 INSTANTIATE_TEST_SUITE_P(RealOps, Reference,
                          Combine(Values(ynn_type_fp32), ValuesIn(all_real_ops),

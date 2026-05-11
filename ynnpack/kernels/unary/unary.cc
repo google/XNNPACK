@@ -38,16 +38,19 @@ void unary_impl(size_t m, size_t n, size_t stride_x, const void* vx,
   constexpr size_t unroll = std::max(type_info<TIn>::element_count(),
                                      type_info<TOut>::element_count());
 
-  assert(n % unroll == 0);
-
   Operator op(*params);
   for (size_t i = 0; i < m; ++i) {
-    for (size_t j = 0; j < n; j += unroll) {
+    size_t j = 0;
+    for (; j + unroll <= n; j += unroll) {
       YNN_UNROLL
       for (size_t ji = 0; ji < unroll; ++ji) {
         auto y_j = static_cast<TOut>(op(type_info<TIn>::get(x, j + ji)));
         type_info<TOut>::set(y, j + ji, y_j);
       }
+    }
+    for (; j < n; ++j) {
+      auto y_j = static_cast<TOut>(op(type_info<TIn>::get(x, j)));
+      type_info<TOut>::set(y, j, y_j);
     }
     x = offset_bytes(x, stride_x);
     y = offset_bytes(y, stride_y);
