@@ -16,6 +16,7 @@
 
 #include "ynnpack/base/log.h"
 #include "ynnpack/include/ynnpack.h"
+#include "ynnpack/subgraph/copy.h"
 #include "ynnpack/subgraph/runtime.h"
 #include "ynnpack/subgraph/slinky.h"
 #include "ynnpack/subgraph/subgraph.h"
@@ -223,17 +224,17 @@ void define_copy(ynn_subgraph& subgraph, ynn_node& node, uint32_t input_id,
 }
 
 void define_static_expand_dims(ynn_subgraph& subgraph, ynn_node& node,
-                               uint32_t input_id, uint32_t output_id,
+                               uint32_t input_id, uint32_t* output_id,
                                const axes_set& new_axes) {
   const ynn_value& input = subgraph.value(input_id);
-  ynn_value& output = subgraph.value(output_id);
+  ynn_value& output = subgraph.get_output_value(output_id, input);
 
   ynn_node::static_expand_dims op;
   op.new_axes = new_axes;
 
   const int new_rank = input.rank() + new_axes.count();
   node.inputs = {input_id};
-  node.outputs = {output_id};
+  node.outputs = {output.id};
   node.op = std::move(op);
 
   // Propagate shape.
@@ -435,8 +436,6 @@ ynn_status ynn_define_static_expand_dims(ynn_subgraph_t subgraph,
 
   const ynn_value& input = subgraph->value(input_id);
 
-  ynn_value& output = subgraph->get_output_value(output_id, input);
-
   const int new_rank = input.rank() + num_new_axes;
   YNN_RETURN_IF_ERROR(validate_rank("static_expand_dims", "output", new_rank));
   ynn::axes_set axes;
@@ -447,7 +446,7 @@ ynn_status ynn_define_static_expand_dims(ynn_subgraph_t subgraph,
   }
 
   ynn_node node;
-  define_static_expand_dims(*subgraph, node, input_id, output.id, axes);
+  define_static_expand_dims(*subgraph, node, input_id, output_id, axes);
   subgraph->add_node(std::move(node));
   return ynn_status_success;
 }

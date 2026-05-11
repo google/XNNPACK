@@ -894,7 +894,7 @@ bool rewrite_expand_dims_reduce(ynn_subgraph& subgraph, ynn_node& node,
       // We need to move the expand_dims to the initializer input.
       uint32_t expanded_id = node.inputs[0];
       ynn::define_static_expand_dims(subgraph, node, producer->inputs[1],
-                                     expanded_id, expand->new_axes);
+                                     &expanded_id, expand->new_axes);
       producer->inputs[1] = expanded_id;
       // Swap the nodes to maintain topological order.
       std::swap(node, *producer);
@@ -1395,14 +1395,15 @@ bool rewrite_reshape(ynn_subgraph& subgraph, ynn_node& node,
     is_slice = false;
   }
 
+  uint32_t output_id = output.id;
   if (is_expand_dims) {
     YNN_LOG_DEBUG() << "Rewriting reshape to static_expand_dims";
-    ynn::define_static_expand_dims(subgraph, node, input.id, output.id,
+    ynn::define_static_expand_dims(subgraph, node, input.id, &output_id,
                                    new_axes);
     return true;
   } else if (is_slice) {
     YNN_LOG_DEBUG() << "Rewriting reshape to static_slice";
-    ynn::define_static_slice(subgraph, node, input.id, output.id,
+    ynn::define_static_slice(subgraph, node, input.id, &output_id,
                              std::move(slices), /*slice_dims=*/true);
     return true;
   }

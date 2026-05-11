@@ -26,6 +26,7 @@
 #include "ynnpack/include/ynnpack.h"
 #include "ynnpack/kernels/dot/pack.h"
 #include "ynnpack/kernels/dot/schedule.h"
+#include "ynnpack/subgraph/copy.h"
 #include "ynnpack/subgraph/runtime.h"
 #include "ynnpack/subgraph/slinky.h"
 #include "ynnpack/subgraph/static_transpose.h"
@@ -899,12 +900,9 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
   if (!pack_b) {
     // We don't want or need to pack B, but we still need to reshape it as if it
     // were packed.
-    static constexpr int32_t tile_k_blocks_n[2] = {-1, -4};
-    ynn_status status = ynn_define_static_expand_dims(
-        &subgraph, 2, tile_k_blocks_n, input_b_id, &packed_b_id, /*flags=*/0);
-    if (status != ynn_status_success) {
-      return status;
-    }
+    ynn_node node;
+    define_static_expand_dims(subgraph, node, input_b_id, &packed_b_id, 0b1001);
+    subgraph.add_node(std::move(node));
   } else {
     packed_b_id = define_pack_b(&subgraph, type, kernel, num_k_dims,
                                 consistent_arithmetic, input_b_id);

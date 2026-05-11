@@ -51,11 +51,11 @@ std::pair<slinky::expr, slinky::expr> calc_begin_end(const slice_info& slice,
 }  // namespace
 
 void define_static_slice(ynn_subgraph& subgraph, ynn_node& node,
-                         uint32_t input_id, uint32_t output_id,
+                         uint32_t input_id, uint32_t* output_id,
                          std::vector<ynn_node::static_slice::slice> slices,
                          bool slice_dims) {
   const ynn_value& input = subgraph.value(input_id);
-  ynn_value& output = subgraph.value(output_id);
+  ynn_value& output = subgraph.get_output_value(output_id, input);
 
   std::reverse(slices.begin(), slices.end());
 
@@ -81,7 +81,7 @@ void define_static_slice(ynn_subgraph& subgraph, ynn_node& node,
   }
 
   node.inputs = {input_id};
-  node.outputs = {output_id};
+  node.outputs = {output.id};
   node.op = std::move(op);
   node.create = [](const ynn_node& node, ynn_runtime& runtime) {
     const ynn_node::static_slice& op =
@@ -163,10 +163,8 @@ ynn_status ynn_define_static_slice(ynn_subgraph_t subgraph, size_t num_axes,
       slices.begin(), slices.end(),
       [](const slice_info& a, const slice_info& b) { return a.axis < b.axis; });
 
-  // Propagate rank.
-  ynn_value& output = subgraph->get_output_value(output_id, input);
   ynn_node node;
-  define_static_slice(*subgraph, node, input_id, output.id, std::move(slices),
+  define_static_slice(*subgraph, node, input_id, output_id, std::move(slices),
                       slice_dims);
   subgraph->add_node(std::move(node));
   return ynn_status_success;
