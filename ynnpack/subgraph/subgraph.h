@@ -179,8 +179,10 @@ struct ynn_value {
   T static_scalar_value() const {
     assert(is_static_scalar());
     assert(sizeof(T) == data->elem_size);
-    T result;
-    memcpy(&result, data->base, sizeof(T));
+    T result = T{};
+    if (data->elem_size >= sizeof(T)) {
+      memcpy(&result, data->base, sizeof(T));
+    }
     return result;
   }
 
