@@ -355,6 +355,8 @@ xnnpack_source_set("operators") {
   ]
   if (!build_with_chromium) {
     deps += [ "//third_party/pthreadpool:pthreadpool_standalone" ]
+  } else {
+    deps += [ "//third_party/pthreadpool" ]
   }
 }
 
