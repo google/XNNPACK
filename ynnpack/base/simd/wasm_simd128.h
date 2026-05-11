@@ -638,6 +638,23 @@ YNN_ALWAYS_INLINE u8x16 round_float_to_int(f32x16 f, uint8_t) {
   return u8x16{wasm_u8x16_narrow_i16x8(i01_16, i23_16)};
 }
 
+YNN_ALWAYS_INLINE float horizontal_sum(f32x4 a) {
+  v128_t sum =
+      wasm_f32x4_add(a.v, wasm_v8x16_shuffle(a.v, a.v, 8, 9, 10, 11, 12, 13, 14,
+                                             15, 0, 1, 2, 3, 4, 5, 6, 7));
+  sum = wasm_f32x4_add(sum, wasm_v8x16_shuffle(sum, sum, 4, 5, 6, 7, 0, 1, 2, 3,
+                                               12, 13, 14, 15, 8, 9, 10, 11));
+  return wasm_f32x4_extract_lane(sum, 0);
+}
+YNN_ALWAYS_INLINE int32_t horizontal_sum(s32x4 a) {
+  v128_t sum =
+      wasm_i32x4_add(a.v, wasm_v8x16_shuffle(a.v, a.v, 8, 9, 10, 11, 12, 13, 14,
+                                             15, 0, 1, 2, 3, 4, 5, 6, 7));
+  sum = wasm_i32x4_add(sum, wasm_v8x16_shuffle(sum, sum, 4, 5, 6, 7, 0, 1, 2, 3,
+                                               12, 13, 14, 15, 8, 9, 10, 11));
+  return wasm_i32x4_extract_lane(sum, 0);
+}
+
 YNN_ALWAYS_INLINE int8_t horizontal_max(s8x16 a) {
   v128_t max =
       wasm_i8x16_max(a.v, wasm_v8x16_shuffle(a.v, a.v, 8, 9, 10, 11, 12, 13, 14,

@@ -926,6 +926,7 @@ YNN_ALWAYS_INLINE int32_t horizontal_max(s32x4 a) {
 #endif
 }
 YNN_ALWAYS_INLINE float horizontal_max(f32x4 a) { return vmaxvq_f32(a.v); }
+
 YNN_ALWAYS_INLINE int8_t horizontal_min(s8x16 a) { return vminvq_s8(a.v); }
 YNN_ALWAYS_INLINE uint8_t horizontal_min(u8x16 a) { return vminvq_u8(a.v); }
 YNN_ALWAYS_INLINE int16_t horizontal_min(s16x8 a) { return vminvq_s16(a.v); }
@@ -938,6 +939,16 @@ YNN_ALWAYS_INLINE int32_t horizontal_min(s32x4 a) {
 #endif
 }
 YNN_ALWAYS_INLINE float horizontal_min(f32x4 a) { return vminvq_f32(a.v); }
+
+YNN_ALWAYS_INLINE float horizontal_sum(f32x4 a) {
+  float32x2_t lohi = vadd_f32(vget_low_f32(a.v), vget_high_f32(a.v));
+  return vget_lane_f32(lohi, 0) + vget_lane_f32(lohi, 1);
+}
+YNN_ALWAYS_INLINE int32_t horizontal_sum(s32x4 a) {
+  int32x2_t lohi = vadd_s32(vget_low_s32(a.v), vget_high_s32(a.v));
+  return vget_lane_s32(lohi, 0) + vget_lane_s32(lohi, 1);
+}
+
 #ifdef YNN_ARCH_ARM64
 YNN_ALWAYS_INLINE double horizontal_min(f64x2 a) {
   return std::min(vgetq_lane_f64(a.v, 0), vgetq_lane_f64(a.v, 1));

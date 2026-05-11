@@ -518,6 +518,9 @@ YNN_ALWAYS_INLINE f64x2 exp2_round(f64x2 a) {
       _mm_castsi128_pd(_mm_slli_epi64(_mm_castpd_si128(res_bits), 52))};
 }
 
+YNN_ALWAYS_INLINE double horizontal_sum(f64x2 a) {
+  return _mm_cvtsd_f64(_mm_add_sd(a.v, _mm_shuffle_pd(a.v, a.v, 1)));
+}
 YNN_ALWAYS_INLINE double horizontal_max(f64x2 a) {
   return _mm_cvtsd_f64(_mm_max_sd(a.v, _mm_shuffle_pd(a.v, a.v, 1)));
 }
@@ -525,6 +528,11 @@ YNN_ALWAYS_INLINE double horizontal_min(f64x2 a) {
   return _mm_cvtsd_f64(_mm_min_sd(a.v, _mm_shuffle_pd(a.v, a.v, 1)));
 }
 
+YNN_ALWAYS_INLINE float horizontal_sum(f32x4 a) {
+  const __m128 sum_lanes = _mm_add_ps(a.v, _mm_movehl_ps(a.v, a.v));
+  return _mm_cvtss_f32(
+      _mm_add_ss(sum_lanes, _mm_shuffle_ps(sum_lanes, sum_lanes, 1)));
+}
 YNN_ALWAYS_INLINE float horizontal_max(f32x4 a) {
   const __m128 max_lanes = _mm_max_ps(a.v, _mm_movehl_ps(a.v, a.v));
   return _mm_cvtss_f32(
@@ -534,6 +542,12 @@ YNN_ALWAYS_INLINE float horizontal_min(f32x4 a) {
   const __m128 min_lanes = _mm_min_ps(a.v, _mm_movehl_ps(a.v, a.v));
   return _mm_cvtss_f32(
       _mm_min_ss(min_lanes, _mm_shuffle_ps(min_lanes, min_lanes, 1)));
+}
+
+YNN_ALWAYS_INLINE int32_t horizontal_sum(s32x4 a) {
+  const __m128i sum_lanes = _mm_add_epi32(a.v, _mm_unpackhi_epi64(a.v, a.v));
+  return _mm_cvtsi128_si32(_mm_add_epi32(
+      sum_lanes, _mm_shuffle_epi32(sum_lanes, _MM_SHUFFLE(0, 0, 0, 1))));
 }
 
 YNN_ALWAYS_INLINE int16_t horizontal_max(s16x8 a) {

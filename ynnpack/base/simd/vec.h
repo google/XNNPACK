@@ -167,6 +167,15 @@ YNN_ALWAYS_INLINE vec<T, N> saturate_cast(vec<T, N> from, T = {}) {
 template <typename To, typename From, size_t N>
 vec<To, N> round_float_to_int(vec<From, N> from, To = {});
 
+// horizontal_sum must be numerically equivalent to slicing the vector in half,
+// adding the halves, and repeating until the result is a scalar.
+template <typename T, size_t N>
+T horizontal_sum(vec<T, N> x);
+template <typename T, size_t N>
+T horizontal_min(vec<T, N> x);
+template <typename T, size_t N>
+T horizontal_max(vec<T, N> x);
+
 namespace internal {
 
 template <typename T, size_t N>
