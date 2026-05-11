@@ -151,6 +151,26 @@ NO_YNNPACK = [
 ]]
 
 xnnpack_unit_test(
+    name = "fp16_to_fp32_fallback_test",
+    srcs = ["fp16-to-fp32-fallback.cc"],
+    deps = [
+        "//:XNNPACK",
+        "//:node_type",
+        "//:operator_utils",
+        "//:subgraph",
+        "//litert/tensor",
+        "//litert/tensor:arithmetic",
+        "//litert/tensor:buffer",
+        "//litert/tensor:datatypes",
+        "//litert/tensor/backends/xnnpack:arithmetic",
+        "//litert/tensor/backends/xnnpack:conversion",
+        "//litert/tensor/utils:matchers_no_g3",
+        "//src/subgraph/rewrites:fp16_to_fp32",
+        "//test/subgraph/rewrites:subgraph_matcher",
+    ],
+)
+
+xnnpack_unit_test(
     name = "workspace_test",
     srcs = ["workspace.cc"],
     tags = ["no_ynnpack"],

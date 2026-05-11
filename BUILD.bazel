@@ -904,6 +904,8 @@ xnnpack_cc_library(
         ":xnnpack_h",
         "//src/configs:config_hdrs",
         "//src/configs:hardware_config",
+        "//src/subgraph/rewrites:fp16_to_fp32",
+        "//src/subgraph/rewrites:static_convert",
         "@pthreadpool",
     ],
 )
