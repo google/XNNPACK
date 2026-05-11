@@ -128,13 +128,21 @@ slinky::func make_reshape(ynn_runtime& runtime,
   require_contiguous(*output_buf);
 
   // We also need to assume that we compute at least the min = 0... element of
-  // the input.
+  // the input and output.
   for (size_t d = 0; d < in_rank; ++d) {
     if (input_extents[d].defined()) {
       input_buf->dim(d).bounds.min = 0;
       input_buf->dim(d).bounds.max = input_extents[d] - 1;
     } else {
       input_buf->dim(d).bounds = slinky::point(0);
+    }
+  }
+  for (size_t d = 0; d < out_rank; ++d) {
+    if (output_extents[d].defined()) {
+      output_buf->dim(d).bounds.min = 0;
+      output_buf->dim(d).bounds.max = output_extents[d] - 1;
+    } else {
+      output_buf->dim(d).bounds = slinky::point(0);
     }
   }
 
