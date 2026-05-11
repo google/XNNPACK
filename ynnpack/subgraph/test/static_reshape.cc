@@ -157,4 +157,53 @@ TEST(Reshape, ReshapeSliceRegression) {
   }
 }
 
+TEST(Reshape, DotBitcastSliceReduceRegression) {
+  std::vector<size_t> p1_shape = {400, 64};
+  std::vector<size_t> p2_shape = {64, 2};
+  std::vector<size_t> dot_shape = {400, 2};
+  std::vector<size_t> bitcast_shape = {100, 4, 2};
+  std::vector<size_t> slice_shape = {100, 3, 2};
+
+  Tensor<float> p1(p1_shape);
+  Tensor<float> p2(p2_shape);
+  Tensor<float> output(slice_shape);
+
+  ReplicableRandomDevice rng;
+  fill_random(p1.data(), p1.size(), rng);
+  fill_random(p2.data(), p2.size(), rng);
+
+  uint32_t p1_id = 0;
+  uint32_t p2_id = 1;
+  uint32_t output_id = 2;
+
+  uint32_t dot_id = YNN_INVALID_VALUE_ID;
+  uint32_t bitcast_id = YNN_INVALID_VALUE_ID;
+  uint32_t slice_id = YNN_INVALID_VALUE_ID;
+  uint32_t reduce_id = YNN_INVALID_VALUE_ID;
+
+  SubgraphBuilder subgraph(3);
+  subgraph.AddInput(ynn_type_fp32, p1_shape, p1_id)
+      .AddInput(ynn_type_fp32, p2_shape, p2_id)
+      .AddOutput(ynn_type_fp32, slice_shape, output_id)
+      .AddTensor(ynn_type_fp32, dot_shape, dot_id)
+      .AddTensor(ynn_type_fp32, bitcast_shape, bitcast_id)
+      .AddTensor(ynn_type_fp32, slice_shape, slice_id)
+      .AddTensor(ynn_type_fp32, {100, 3, 1}, reduce_id)
+      .AddDot(1, p1_id, p2_id, YNN_INVALID_VALUE_ID, dot_id)
+      .AddReshape(bitcast_shape, dot_id, bitcast_id)
+      .AddSlice({1}, {0}, {3}, {1}, bitcast_id, slice_id)
+      .AddReduce(ynn_reduce_max, {2}, slice_id, YNN_INVALID_VALUE_ID, reduce_id,
+                 YNN_NODE_FLAG_KEEP_DIMS)
+      .AddBinary(ynn_binary_subtract, slice_id, reduce_id, output_id);
+
+  Runtime runtime(subgraph.GetSubgraph());
+  ASSERT_EQ(runtime.Status(), ynn_status_success);
+
+  runtime.ReshapeExternalTensor(p1_shape, p1.base(), p1_id)
+      .ReshapeExternalTensor(p2_shape, p2.base(), p2_id)
+      .ReshapeRuntime();
+
+  runtime.SetupExternalTensor(output.base(), output_id).InvokeRuntime();
+}
+
 }  // namespace ynn

@@ -124,10 +124,6 @@ slinky::func make_reshape(ynn_runtime& runtime,
     }
   }
 
-  // Reshape's definition assumes that there is no padding between dimensions.
-  require_contiguous(*input_buf);
-  require_contiguous(*output_buf);
-
   // We also need to assume that we compute at least the min = 0... element of
   // the input and output.
   for (size_t d = 0; d < in_rank; ++d) {
@@ -146,6 +142,10 @@ slinky::func make_reshape(ynn_runtime& runtime,
       output_buf->dim(d).bounds = slinky::point(0);
     }
   }
+
+  // Reshape's definition assumes that there is no padding between dimensions.
+  require_contiguous(*input_buf);
+  require_contiguous(*output_buf);
 
   slinky::func::input input{input_buf, bounds};
   slinky::func::output output{output_buf, dims};
