@@ -9,6 +9,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <functional>
+#include <numeric>
 #include <random>
 #include <sstream>
 #include <string>
@@ -27,6 +28,9 @@
 #include "test/replicable_random_device.h"
 #include "test/subgraph/runtime-flags.h"
 #include "test/subgraph/subgraph-tester.h"
+
+using ::testing::Contains;
+using ::testing::ResultOf;
 
 namespace xnnpack {
 
@@ -358,9 +362,17 @@ void TestSubgraphRewrite(const Param& p) {
       // Re-create the runtime and evaluate again and check that the subgraph
       // was replaced.
       ASSERT_EQ(subgraph.CreateRuntime(), xnn_status_success);
-      ASSERT_EQ(subgraph.NumNodes(), 1);
-      ASSERT_EQ(subgraph.Node(0)->type,
-                xnn_reduce_operator_to_node_type(reduce_operator));
+
+      // Some rewrites may introduce other nodes. We check that the fused reduce
+      // operator has been added.
+      std::vector<int> indices(subgraph.NumNodes());
+      std::iota(indices.begin(), indices.end(), 0);
+      ASSERT_THAT(
+          indices,
+          Contains(
+              ResultOf([&](int index) { return subgraph.Node(index)->type; },
+                       xnn_reduce_operator_to_node_type(reduce_operator)))
+              .Times(1));
 
       // Reshape the subgraph.
       Tensor<T> output_rewritten(output_shape, xnnpack::XnnExtraBytes);
