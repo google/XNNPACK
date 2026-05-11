@@ -281,7 +281,7 @@ static void transpose(size_t m, size_t n, size_t n_bytes_a, size_t stride_a,
       // Handle a full set of M rows x partial set of j columns.
       Tile t = load(Tile{}, a_j, stride_a, j, N_bytes);
       interleave_in_place(elem_size_bits, t);
-      store(t, x_j, stride_x, M, j * elem_size_bits / 8);
+      store(t, x_j, stride_x, M, ceil_div<size_t>(j * elem_size_bits, 8));
     }
     m -= M;
     n_bytes_a -= M_bytes;
@@ -308,7 +308,8 @@ static void transpose(size_t m, size_t n, size_t n_bytes_a, size_t stride_a,
       // Handle a partial set of m rows x j columns.
       Tile t = load(Tile{}, a_j, stride_a, j, n_bytes);
       interleave_in_place(elem_size_bits, t);
-      store(t, x_j, stride_x, std::min(m, M), j * elem_size_bits / 8);
+      store(t, x_j, stride_x, std::min(m, M),
+            ceil_div<size_t>(j * elem_size_bits, 8));
     }
     m = sub_sat(m, M);
     n_bytes_a = sub_sat(n_bytes_a, M_bytes);
