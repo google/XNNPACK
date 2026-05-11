@@ -158,6 +158,8 @@ TEST_HORIZONTAL_MAX(arm_neon, s16, 8);
 TEST_HORIZONTAL_MAX(arm_neon, f32, 4);
 TEST_HORIZONTAL_MAX(arm_neon, s32, 4);
 
+TEST_KAHAN_SUM(arm_neon, f32, 4);
+
 TEST_HORIZONTAL_SUM(arm_neon, f32, 4);
 TEST_HORIZONTAL_SUM(arm_neon, s32, 4);
 

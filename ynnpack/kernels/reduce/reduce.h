@@ -8,74 +8,49 @@
 
 #include <cstddef>
 #include <cstdint>  // IWYU pragma: keep
+#include <type_traits>
 
 #include "ynnpack/base/arch.h"  // IWYU pragma: keep
 #include "ynnpack/include/ynnpack.h"
 
 namespace ynn {
 
-// Reduce kernels compute the following:
-//
-//    C(i, j) = f(A(j, k3, k2, k1), B(k3, k2, k1), i)
-//
-// for all i, j, k3, k2, k1
-//
-// For most reductions, i will be 0, and B is ignored.
-typedef void (*unary_reduce_kernel_fn)(size_t n, size_t k3, size_t k2,
-                                       size_t k1, size_t a_stride_n,
-                                       size_t a_stride_k3, size_t a_stride_k2,
-                                       const void* a, size_t c_stride_m,
-                                       void* c);
+// Reduction kernels process rank-2 buffers and produce rank-1 buffers.
+// The k dimension is reduced, the n dimension is a "batch" dimension, which is
+// also the dimension of the rank-1 result.
+typedef void (*reduce_kernel_fn)(size_t n, size_t k, size_t a_stride_n,
+                                 const void* a, void* x0, void* x1);
 
-typedef void (*binary_reduce_kernel_fn)(size_t n, size_t k3, size_t k2,
-                                        size_t k1, size_t a_stride_n,
-                                        size_t a_stride_k3, size_t a_stride_k2,
-                                        const void* a, size_t b_stride_n,
-                                        size_t b_stride_k3, size_t b_stride_k2,
-                                        size_t b_stride_k1, const void* b,
-                                        size_t c_stride_m, void* c);
+// These constants are basically an enum, but use std::integral_constant to
+// allow dispatching to overloaded functions if necessary.
+namespace reduce_dim {
 
-#define YNN_UNARY_REDUCE_KERNEL(arch, name, type_a, type_c)               \
-  void name(size_t n, size_t k3, size_t k2, size_t k1, size_t a_stride_n, \
-            size_t a_stride_k3, size_t a_stride_k2, const void* a,        \
-            size_t c_stride_m, void* c);
+inline constexpr std::integral_constant<size_t, 0> k1 = {};
+inline constexpr std::integral_constant<size_t, 1> kn = {};
+
+}  // namespace reduce_dim
+
+struct reduce_kernel {
+  reduce_kernel_fn k1 = nullptr;
+  reduce_kernel_fn kn = nullptr;
+};
+
+#define YNN_REDUCE_KERNEL(arch, name, k_dim, type_a, type_c)                \
+  void name(size_t n, size_t k, size_t a_stride_n, const void* a, void* x0, \
+            void* x1);
 #include "ynnpack/kernels/reduce/max.inc"
 #include "ynnpack/kernels/reduce/min.inc"
 #include "ynnpack/kernels/reduce/min_max.inc"
 #include "ynnpack/kernels/reduce/sum.inc"
 #include "ynnpack/kernels/reduce/sum_squared.inc"
-#undef YNN_UNARY_REDUCE_KERNEL
+#undef YNN_REDUCE_KERNEL
 
-constexpr size_t unknown_reduce_extent = static_cast<size_t>(-1);
+reduce_kernel get_sum_kernel(ynn_type a_type, ynn_type c_type);
+reduce_kernel get_sum_squared_kernel(ynn_type a_type, ynn_type c_type);
 
-unary_reduce_kernel_fn get_sum_kernel(ynn_type a_type, ynn_type c_type,
-                                      size_t n = unknown_reduce_extent,
-                                      size_t k3 = unknown_reduce_extent,
-                                      size_t k2 = unknown_reduce_extent,
-                                      size_t k1 = unknown_reduce_extent);
-
-unary_reduce_kernel_fn get_sum_squared_kernel(
-    ynn_type a_type, ynn_type c_type, size_t n = unknown_reduce_extent,
-    size_t k3 = unknown_reduce_extent, size_t k2 = unknown_reduce_extent,
-    size_t k1 = unknown_reduce_extent);
-
-unary_reduce_kernel_fn get_min_kernel(ynn_type type,
-                                      size_t n = unknown_reduce_extent,
-                                      size_t k3 = unknown_reduce_extent,
-                                      size_t k2 = unknown_reduce_extent,
-                                      size_t k1 = unknown_reduce_extent);
-
-unary_reduce_kernel_fn get_max_kernel(ynn_type type,
-                                      size_t n = unknown_reduce_extent,
-                                      size_t k3 = unknown_reduce_extent,
-                                      size_t k2 = unknown_reduce_extent,
-                                      size_t k1 = unknown_reduce_extent);
-
-unary_reduce_kernel_fn get_min_max_kernel(ynn_type type,
-                                          size_t n = unknown_reduce_extent,
-                                          size_t k3 = unknown_reduce_extent,
-                                          size_t k2 = unknown_reduce_extent,
-                                          size_t k1 = unknown_reduce_extent);
+reduce_kernel get_min_kernel(ynn_type type);
+reduce_kernel get_max_kernel(ynn_type type);
+reduce_kernel get_min_max_kernel(ynn_type type);
 
 }  // namespace ynn
 

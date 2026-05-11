@@ -56,9 +56,8 @@ float Tolerance(ynn_reduce_operator op, size_t k, float max_abs_value) {
     case ynn_reduce_sum:
       return type_info<T>::epsilon() * k * max_abs_value * 3.0f;
     case ynn_reduce_sum_squared:
-      // TODO: b/510604061 - This tolerance is too large.
       return type_info<T>::epsilon() * k * max_abs_value * max_abs_value *
-             100.0f;
+             20.0f;
     default:
       return 0.0f;
   }
@@ -246,7 +245,14 @@ void TestReduce(A, C, ynn_reduce_operator op) {
         } else {
           const float tolerance =
               Tolerance<C>(op, num_k_elements + 1, max_abs_value);
-          ASSERT_NEAR(c(i), expected(i), tolerance);
+          if (std::isfinite(c(i)) || !std::isfinite(expected(i))) {
+            ASSERT_NEAR(c(i), expected(i), tolerance);
+          } else {
+            // When the output type is fp16, the kernel might produce infinity
+            // while we produce the max value. Handle this case by comparing
+            // with the max of the type instead.
+            ASSERT_NEAR(type_info<C>::max(), expected(i), tolerance);
+          }
         }
       }
     }

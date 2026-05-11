@@ -368,7 +368,9 @@ class type_info {
  public:
   using element_type = T;
 
-  static constexpr T epsilon() { return std::numeric_limits<T>::epsilon(); }
+  static constexpr T epsilon() {
+    return std::is_integral_v<T> ? 1 : std::numeric_limits<T>::epsilon();
+  }
   static constexpr T infinity() { return std::numeric_limits<T>::infinity(); }
   static constexpr T nan() { return std::numeric_limits<T>::quiet_NaN(); }
   static constexpr T min() { return std::numeric_limits<T>::lowest(); }

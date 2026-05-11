@@ -16,6 +16,7 @@
 #include <vector>
 
 #include "ynnpack/base/algorithm.h"
+#include "ynnpack/base/arithmetic.h"
 #include "ynnpack/base/base.h"
 #include "ynnpack/base/span.h"
 #include "ynnpack/base/type.h"
@@ -30,7 +31,6 @@
 #include "slinky/builder/simplify.h"
 #include "slinky/runtime/buffer.h"
 #include "slinky/runtime/expr.h"
-#include "slinky/runtime/print.h"
 #include "slinky/runtime/stmt.h"
 
 namespace ynn {
@@ -51,28 +51,27 @@ float get_reduce_identity(ynn_reduce_operator op) {
 
 namespace {
 
-unary_reduce_kernel_fn get_reduce_kernel(ynn_reduce_operator op,
-                                         ynn_type a_type, ynn_type c_type) {
+reduce_kernel get_reduce_kernel(ynn_reduce_operator op, ynn_type a_type,
+                                ynn_type c_type) {
   switch (op) {
     case ynn_reduce_sum:
       return get_sum_kernel(a_type, c_type);
     case ynn_reduce_sum_squared:
       return get_sum_squared_kernel(a_type, c_type);
     case ynn_reduce_max:
-      return get_max_kernel(a_type, c_type);
+      return get_max_kernel(c_type);
     case ynn_reduce_min:
-      return get_min_kernel(a_type, c_type);
+      return get_min_kernel(c_type);
     case ynn_reduce_min_max:
-      return get_min_max_kernel(a_type, c_type);
+      return get_min_max_kernel(c_type);
     default:
-      return nullptr;
+      return {};
   }
 }
 
 // The wrapper for the kernel we use when we actually want to run a reduce
 // kernel on some buffers.
-auto make_unary_reduce_impl(const ynn_node::reduce& op,
-                            unary_reduce_kernel_fn kernel) {
+auto make_unary_reduce_impl(const ynn_node::reduce& op, reduce_kernel kernel) {
   return [op, kernel](
              slinky::buffer<const void, YNN_MAX_TENSOR_RANK> a,
              slinky::buffer<const void, YNN_MAX_TENSOR_RANK> init_c,
@@ -149,10 +148,7 @@ auto make_unary_reduce_impl(const ynn_node::reduce& op,
     size_t n = 1;
     size_t k1 = 1;
     size_t k2 = 1;
-    size_t k3 = 1;
     size_t a_stride_n = 0;
-
-    size_t a_stride_k3 = 0;
     size_t a_stride_k2 = 0;
 
     int sliced = 0;
@@ -176,14 +172,9 @@ auto make_unary_reduce_impl(const ynn_node::reduce& op,
           k1 *= r_extent_i;
         } else if (a_stride_k2 * k2 == a_dim_i.stride()) {
           k2 *= r_extent_i;
-        } else if (a_stride_k3 * k3 == a_dim_i.stride()) {
-          k3 *= r_extent_i;
         } else if (k2 == 1) {
           k2 = r_extent_i;
           a_stride_k2 = a_dim_i.stride();
-        } else if (k3 == 1) {
-          k3 = r_extent_i;
-          a_stride_k3 = a_dim_i.stride();
         } else {
           // This is a reduction dimension that is not handled by the kernel.
           if (op.keep_dims) {
@@ -236,10 +227,24 @@ auto make_unary_reduce_impl(const ynn_node::reduce& op,
       }
     }
 
+    // The k1 kernel always works.
+    reduce_kernel_fn kernel_fn = kernel.k1;
+    if (k1 == 1 && k2 != 1 && (n == 1 || a_stride_n == a.elem_size)) {
+      // There is no reduction in the k1 dimension, and the n dimension is
+      // contiguous in a, the kn kernel will be much faster.
+      kernel_fn = kernel.kn;
+      k1 = k2;
+      a_stride_n = a_stride_k2;
+      k2 = 1;
+    }
+
     slinky::for_each_element(
-        [&](void* c, const void* a) {
-          kernel(n, k3, k2, k1, a_stride_n, a_stride_k3, a_stride_k2, a,
-                 c_stride_m, c);
+        [&](void* c0, const void* a) {
+          void* c1 = offset_bytes(c0, c_stride_m);
+          for (size_t i = 0; i < k2; ++i) {
+            kernel_fn(n, k1, a_stride_n, a, c0, c1);
+            a = offset_bytes(a, a_stride_k2);
+          }
         },
         c, a);
 
@@ -392,9 +397,9 @@ void define_reduce(ynn_subgraph& subgraph, ynn_node& node,
     ynn_runtime_value& output = runtime.value(node.outputs[0]);
 
     // Get the reduce kernel we are going to use.
-    unary_reduce_kernel_fn kernel =
-        get_reduce_kernel(op.op, input_a.type, output.type);
-    assert(kernel);
+    reduce_kernel kernel = get_reduce_kernel(op.op, input_a.type, output.type);
+    assert(kernel.k1);
+    assert(kernel.kn);
 
     auto identity_buffer = slinky::buffer_expr::make_constant(
         runtime.globals.symbols, "identity",

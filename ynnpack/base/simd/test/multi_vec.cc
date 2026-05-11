@@ -64,6 +64,9 @@ TEST_NOT(multi_vec, s32, 2);
 
 TEST_MULTIPLY(multi_vec, f32, 2);
 
+TEST_KAHAN_SUM(multi_vec, f32, 2);
+TEST_KAHAN_SUM(multi_vec, f32, 4);
+
 using f32x4 = vec<f32, 4>;
 using s32x4 = vec<s32, 4>;
 using s16x8 = vec<s16, 8>;

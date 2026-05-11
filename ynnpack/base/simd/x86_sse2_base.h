@@ -12,6 +12,7 @@
 #include <cassert>
 #include <cstddef>
 #include <cstdint>
+#include <limits>
 #include <tuple>
 #include <type_traits>
 
@@ -516,6 +517,26 @@ YNN_ALWAYS_INLINE f64x2 exp2_round(f64x2 a) {
   const __m128d res_bits = _mm_add_pd(a.v, magic);
   return f64x2{
       _mm_castsi128_pd(_mm_slli_epi64(_mm_castpd_si128(res_bits), 52))};
+}
+
+YNN_ALWAYS_INLINE void kahan_sum(f32x4 a, f32x4& acc, f32x4& error) {
+  f32x4 y = a - error;
+  f32x4 t = acc + y;
+  error = (t - acc) - y;
+  __m128 mask = _mm_set1_ps(std::numeric_limits<float>::infinity());
+  error = f32x4{
+      _mm_and_ps(error.v, _mm_cmpneq_ps(_mm_and_ps(error.v, mask), mask))};
+  acc = t;
+}
+
+YNN_ALWAYS_INLINE void kahan_sum(f64x2 a, f64x2& acc, f64x2& error) {
+  f64x2 y = a - error;
+  f64x2 t = acc + y;
+  error = (t - acc) - y;
+  __m128d mask = _mm_set1_pd(std::numeric_limits<double>::infinity());
+  error = f64x2{
+      _mm_and_pd(error.v, _mm_cmpneq_pd(_mm_and_pd(error.v, mask), mask))};
+  acc = t;
 }
 
 YNN_ALWAYS_INLINE double horizontal_sum(f64x2 a) {

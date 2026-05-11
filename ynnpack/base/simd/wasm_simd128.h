@@ -638,6 +638,16 @@ YNN_ALWAYS_INLINE u8x16 round_float_to_int(f32x16 f, uint8_t) {
   return u8x16{wasm_u8x16_narrow_i16x8(i01_16, i23_16)};
 }
 
+YNN_ALWAYS_INLINE void kahan_sum(f32x4 a, f32x4& acc, f32x4& error) {
+  f32x4 y = a - error;
+  f32x4 t = acc + y;
+  error = (t - acc) - y;
+  v128_t mask = wasm_i32x4_splat(0x7F800000);
+  v128_t is_inf = wasm_i32x4_eq(wasm_v128_and(error.v, mask), mask);
+  error = f32x4{wasm_v128_andnot(error.v, is_inf)};
+  acc = t;
+}
+
 YNN_ALWAYS_INLINE float horizontal_sum(f32x4 a) {
   v128_t sum =
       wasm_f32x4_add(a.v, wasm_v8x16_shuffle(a.v, a.v, 8, 9, 10, 11, 12, 13, 14,

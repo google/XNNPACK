@@ -866,6 +866,30 @@ YNN_ALWAYS_INLINE f32x4 sqrt(f32x4 a) {
 YNN_ALWAYS_INLINE f64x2 sqrt(f64x2 a) { return f64x2{vsqrtq_f64(a.v)}; }
 #endif
 
+YNN_ALWAYS_INLINE void kahan_sum(f32x4 a, f32x4& acc, f32x4& error) {
+  f32x4 y = a - error;
+  f32x4 t = acc + y;
+  error = (t - acc) - y;
+  uint32x4_t mask = vdupq_n_u32(0x7F800000);
+  uint32x4_t error_u = vreinterpretq_u32_f32(error.v);
+  uint32x4_t is_inf = vceqq_u32(vandq_u32(error_u, mask), mask);
+  error = f32x4{vreinterpretq_f32_u32(vbicq_u32(error_u, is_inf))};
+  acc = t;
+}
+
+#ifdef YNN_ARCH_ARM64
+YNN_ALWAYS_INLINE void kahan_sum(f64x2 a, f64x2& acc, f64x2& error) {
+  f64x2 y = a - error;
+  f64x2 t = acc + y;
+  error = (t - acc) - y;
+  uint64x2_t mask = vdupq_n_u64(0x7FF0000000000000ULL);
+  uint64x2_t error_u = vreinterpretq_u64_f64(error.v);
+  uint64x2_t is_inf = vceqq_u64(vandq_u64(error_u, mask), mask);
+  error = f64x2{vreinterpretq_f64_u64(vbicq_u64(error_u, is_inf))};
+  acc = t;
+}
+#endif
+
 #ifdef YNN_ARCH_ARM32
 YNN_ALWAYS_INLINE float vmaxvq_f32(float32x4_t a) {
   float32x2_t max_halves = vmax_f32(vget_low_f32(a), vget_high_f32(a));

@@ -291,6 +291,19 @@ YNN_ALWAYS_INLINE T horizontal_max(vec<T, N> x) {
   return horizontal_max(max(x.lo(), x.hi()));
 }
 
+template <typename T, size_t N>
+YNN_ALWAYS_INLINE void kahan_sum(vec<T, N> a, vec<T, N>& acc,
+                                 vec<T, N>& error) {
+  vec<T, N / 2> acc_lo = acc.lo();
+  vec<T, N / 2> acc_hi = acc.hi();
+  vec<T, N / 2> error_lo = error.lo();
+  vec<T, N / 2> error_hi = error.hi();
+  kahan_sum(a.lo(), acc_lo, error_lo);
+  kahan_sum(a.hi(), acc_hi, error_hi);
+  acc = concat(acc_lo, acc_hi);
+  error = concat(error_lo, error_hi);
+}
+
 }  // namespace simd
 
 }  // namespace ynn

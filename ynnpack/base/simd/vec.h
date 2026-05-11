@@ -176,6 +176,9 @@ T horizontal_min(vec<T, N> x);
 template <typename T, size_t N>
 T horizontal_max(vec<T, N> x);
 
+template <typename T, size_t N>
+void kahan_sum(vec<T, N> a, vec<T, N>& acc, vec<T, N>& error);
+
 namespace internal {
 
 template <typename T, size_t N>
@@ -393,6 +396,12 @@ YNN_ALWAYS_INLINE T horizontal_min(vec<T, 1> x) {
 template <typename T>
 YNN_ALWAYS_INLINE T horizontal_max(vec<T, 1> x) {
   return x.v;
+}
+
+template <typename T>
+YNN_ALWAYS_INLINE void kahan_sum(vec<T, 1> a, vec<T, 1>& acc,
+                                 vec<T, 1>& error) {
+  ynn::kahan_sum(a.v, acc.v, error.v);
 }
 
 }  // namespace simd

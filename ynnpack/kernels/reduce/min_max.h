@@ -3,8 +3,8 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#ifndef XNNPACK_YNNPACK_KERNELS_REDUCE_MIN_MAX_ACCUMULATOR_H_
-#define XNNPACK_YNNPACK_KERNELS_REDUCE_MIN_MAX_ACCUMULATOR_H_
+#ifndef XNNPACK_YNNPACK_KERNELS_REDUCE_MIN_MAX_H_
+#define XNNPACK_YNNPACK_KERNELS_REDUCE_MIN_MAX_H_
 
 #include <cassert>
 #include <cstddef>
@@ -16,6 +16,81 @@
 #include "ynnpack/kernels/reduce/generic.h"
 
 namespace ynn {
+
+using std::max;
+using std::min;
+
+// This class allows min/max reductions of sign-magnitude floating point types
+// to be computed efficiently using integer arithmetic. It is implicitly
+// convertible to-from Float, and supports computing min/max.
+//
+// The intended usage is:
+//
+//   float16_wrapper<Float, Int, Float::value_type> r(init_value);
+//   for (int i = 0; i < n; ++i) {
+//     r = min(r, floats[i]);
+//   }
+//   Float result = static_cast<Float>(r);
+template <typename Float, typename Int>
+class float16_wrapper {
+ public:
+  float16_wrapper() = default;
+  float16_wrapper(Float value)  // NOLINT
+      : value_(sign_complement(bit_cast<Int>(value))) {}
+  constexpr float16_wrapper(Int value)  // NOLINT
+      : value_(value) {}
+
+  operator Float() const {  // NOLINT
+    return bit_cast<Float>(sign_complement(value_));
+  }
+
+  operator Int() const {  // NOLINT
+    return value_;
+  }
+
+  friend float16_wrapper min(float16_wrapper a, float16_wrapper b) {
+    a.value_ = min(a.value_, b.value_);
+    return a;
+  }
+  friend float16_wrapper max(float16_wrapper a, float16_wrapper b) {
+    a.value_ = max(a.value_, b.value_);
+    return a;
+  }
+
+ private:
+  Int value_;
+
+  static constexpr Int sign_complement(Int a) {
+    return (a & 0x7FFF) ^ (a >> 15);
+  }
+};
+
+using half_rvar = float16_wrapper<half, int16_t>;
+using bfloat16_rvar = float16_wrapper<bfloat16, int16_t>;
+
+// Forward type_info for simd::vec.
+template <typename T, size_t N>
+class type_info<simd::vec<T, N>> {
+ public:
+  static constexpr simd::vec<T, N> min_identity() {
+    return simd::vec<T, N>(type_info<T>::min_identity());
+  }
+  static constexpr simd::vec<T, N> max_identity() {
+    return simd::vec<T, N>(type_info<T>::max_identity());
+  }
+};
+
+// Forward type_info for float16_wrapper.
+template <typename Float, typename Int>
+class type_info<float16_wrapper<Float, Int>> {
+ public:
+  static constexpr auto min_identity() {
+    return type_info<Float>::min_identity();
+  }
+  static constexpr auto max_identity() {
+    return type_info<Float>::max_identity();
+  }
+};
 
 template <typename Float, typename Int, size_t N>
 float16_wrapper<Float, Int> horizontal_min(
@@ -172,14 +247,19 @@ struct min_max_accumulator {
   void accumulate_min(T* __restrict C, size_t n, const dummy_t* acc) {}
   void accumulate_max(T* __restrict C, size_t n, const dummy_t* acc) {}
 
-  YNN_ALWAYS_INLINE void accumulate(size_t C_stride_m, T* __restrict C,
+  YNN_ALWAYS_INLINE void accumulate(T* __restrict x0, T* __restrict x1,
                                     size_t n) {
     if (!std::is_same<AccMinT, dummy_t>::value) {
-      accumulate_min(C, n, acc_min);
-      C = offset_bytes(C, C_stride_m);
-    }
-    if (!std::is_same<AccMaxT, dummy_t>::value) {
-      accumulate_max(C, n, acc_max);
+      if (!std::is_same<AccMaxT, dummy_t>::value) {
+        accumulate_min(x0, n, acc_min);
+        accumulate_max(x1, n, acc_max);
+      } else {
+        accumulate_min(x0, n, acc_min);
+      }
+    } else {
+      if (!std::is_same<AccMaxT, dummy_t>::value) {
+        accumulate_max(x0, n, acc_max);
+      }
     }
   }
 };
@@ -202,7 +282,7 @@ struct min_max_accumulator_k1_1 {
   template <typename AT, typename NT, typename K2T>
   YNN_ALWAYS_INLINE void reduce_accumulate(const AT* __restrict A, NT n,
                                            size_t A_stride_k2, K2T k2,
-                                           size_t C_stride_m, T* __restrict C) {
+                                           T* __restrict x0, T* __restrict x1) {
     assert(k2 <= K2);
     assert(n <= N);
     auto id_max = type_info<AccMaxT>::max_identity();
@@ -234,32 +314,38 @@ struct min_max_accumulator_k1_1 {
     acc_max = max(acc_max, a_3_max);
 
     if (!std::is_same<AccMinT, dummy_t>::value) {
-      accumulate_min(C, acc_min, n);
-      C = offset_bytes(C, C_stride_m);
-    }
-    if (!std::is_same<AccMaxT, dummy_t>::value) {
-      accumulate_max(C, acc_max, n);
+      if (!std::is_same<AccMaxT, dummy_t>::value) {
+        accumulate_min(x0, acc_min, n);
+        accumulate_max(x1, acc_max, n);
+      } else {
+        accumulate_min(x0, acc_min, n);
+      }
+    } else {
+      if (!std::is_same<AccMaxT, dummy_t>::value) {
+        accumulate_max(x0, acc_max, n);
+      }
     }
   }
 };
 
-#define MIN_MAX_KERNEL(name, acc_min, acc_max, scalar, N)                      \
-  void name(size_t n, size_t k3, size_t k2, size_t k1, size_t a_stride_n,      \
-            size_t a_stride_k3, size_t a_stride_k2, const void* a,             \
-            size_t c_stride_m, void* c) {                                      \
-    if (k1 == 1 && (a_stride_n == sizeof(scalar))) {                           \
-      stream_reduce<min_max_accumulator_k1_1<acc_min, acc_max, scalar, N>,     \
-                    scalar, scalar>(n, k3, k2, a_stride_k3, a_stride_k2,       \
-                                    reinterpret_cast<const scalar*>(a),        \
-                                    c_stride_m, reinterpret_cast<scalar*>(c)); \
-    } else {                                                                   \
-      tiled_reduce<min_max_accumulator<acc_min, acc_max, scalar, N>, scalar,   \
-                   scalar>(n, k3, k2, k1, a_stride_n, a_stride_k3,             \
-                           a_stride_k2, reinterpret_cast<const scalar*>(a),    \
-                           c_stride_m, reinterpret_cast<scalar*>(c));          \
-    }                                                                          \
+#define MIN_MAX_K1_KERNEL(name, acc_min, acc_max, scalar, N)                \
+  void name(size_t n, size_t k, size_t a_stride_n, const void* a, void* x0, \
+            void* x1) {                                                     \
+    tiled_reduce<min_max_accumulator<acc_min, acc_max, scalar, N>, scalar,  \
+                 scalar>(                                                   \
+        n, 1, k, a_stride_n, 0, reinterpret_cast<const scalar*>(a),         \
+        reinterpret_cast<scalar*>(x0), reinterpret_cast<scalar*>(x1));      \
+  }
+
+#define MIN_MAX_KN_KERNEL(name, acc_min, acc_max, scalar, N)                  \
+  void name(size_t n, size_t k, size_t a_stride_k, const void* a, void* x0,   \
+            void* x1) {                                                       \
+    stream_reduce<min_max_accumulator_k1_1<acc_min, acc_max, scalar, N>,      \
+                  scalar, scalar>(                                            \
+        n, k, sizeof(scalar), a_stride_k, reinterpret_cast<const scalar*>(a), \
+        reinterpret_cast<scalar*>(x0), reinterpret_cast<scalar*>(x1));        \
   }
 
 }  // namespace ynn
 
-#endif  // XNNPACK_YNNPACK_KERNELS_REDUCE_MIN_MAX_ACCUMULATOR_H_
+#endif  // XNNPACK_YNNPACK_KERNELS_REDUCE_MIN_MAX_H_

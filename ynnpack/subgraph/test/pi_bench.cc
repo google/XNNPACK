@@ -110,9 +110,8 @@ void bench_pi(benchmark::State& state) {
 
   // Check that the result is approximately pi.
   const double pi = 3.14159265358979323846;
-  const double actual = static_cast<double>(output);
-  if (std::abs(actual - pi) > 1e-4) {
-    std::cerr << "Incorrect result: " << actual << " (expected " << pi << ")"
+  if (std::abs(output - pi) > 1e-6) {
+    std::cerr << "Incorrect result: " << output << " (expected " << pi << ")"
               << std::endl;
     state.SkipWithError("Incorrect result");
   }
@@ -124,7 +123,7 @@ static void config(benchmark::Benchmark* b) {
   b->ArgNames({"n", "thread_count"});
   b->UseRealTime();
   b->MeasureProcessCPUTime();
-  for (int n : {10000, 100000, 1000000}) {
+  for (int n : {1000000}) {
     for (int thread_count : {1, 2, 4, 8, 16}) {
       b->Args({n, thread_count});
     }

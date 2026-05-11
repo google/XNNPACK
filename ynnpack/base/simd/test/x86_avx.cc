@@ -120,6 +120,9 @@ TEST_HORIZONTAL_MIN(x86_avx, f64, 4);
 TEST_HORIZONTAL_MAX(x86_avx, f32, 8);
 TEST_HORIZONTAL_MAX(x86_avx, f64, 4);
 
+TEST_KAHAN_SUM(x86_avx, f32, 8);
+TEST_KAHAN_SUM(x86_avx, f64, 4);
+
 TEST_CAST(x86_avx, f64, f32x4);
 TEST_CAST(x86_avx, f64, f32x8);
 TEST_CAST(x86_avx, f32, f64x4);

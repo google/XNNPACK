@@ -14,14 +14,14 @@
 #include "ynnpack/base/simd/vec.h"
 #include "ynnpack/kernels/reduce/generic.h"
 #include "ynnpack/kernels/reduce/reduce.h"
-#include "ynnpack/kernels/reduce/sum_accumulator.h"
+#include "ynnpack/kernels/reduce/sum.h"
 
 namespace ynn {
 
 namespace simd {
 
 static s32x4 reduce_add(
-    s32x4 a, s8x16 b, Identity /*map_fn*/,
+    s32x4 a, s8x16 b, identity /*map_fn*/,
     std::integral_constant<size_t, 4> /*horizontal_factor*/) {
   a.v = vdotq_s32(a.v, b.v, vdupq_n_s8(1));
   return a;
@@ -29,7 +29,7 @@ static s32x4 reduce_add(
 
 // We want to accumulate uint8 dot products in int32 accumulators.
 static s32x4 reduce_add(
-    s32x4 a, u8x16 b, Identity /*map_fn*/,
+    s32x4 a, u8x16 b, identity /*map_fn*/,
     std::integral_constant<size_t, 4> /*horizontal_factor*/) {
   a.v = vreinterpretq_s32_u32(vdotq_u32(vreinterpretq_u32_s32(a.v), b.v,
                               vdupq_n_u8(1)));
@@ -37,7 +37,7 @@ static s32x4 reduce_add(
 }
 
 static s32x16 reduce_add(
-    s32x16 a, s8x16 b, Square /*map_fn*/,
+    s32x16 a, s8x16 b, square /*map_fn*/,
     std::integral_constant<size_t, 1> /*horizontal_factor*/) {
   int8x8_t b_lo_s8 = vget_low_s8(b.v);
   int8x8_t b_hi_s8 = vget_high_s8(b.v);
@@ -53,7 +53,7 @@ static s32x16 reduce_add(
 }
 
 static s32x16 reduce_add(
-    s32x16 a, u8x16 b, Square /*map_fn*/,
+    s32x16 a, u8x16 b, square /*map_fn*/,
     std::integral_constant<size_t, 1> /*horizontal_factor*/) {
   uint8x8_t b_lo_s8 = vget_low_u8(b.v);
   uint8x8_t b_hi_s8 = vget_high_u8(b.v);
@@ -73,7 +73,7 @@ static s32x16 reduce_add(
 }
 
 static s32x4 reduce_add(
-    s32x4 a, s8x16 b, Square /*map_fn*/,
+    s32x4 a, s8x16 b, square /*map_fn*/,
     std::integral_constant<size_t, 4> /*horizontal_factor*/) {
   a.v = vdotq_s32(a.v, b.v, b.v);
   return a;
@@ -81,7 +81,7 @@ static s32x4 reduce_add(
 
 // We want to accumulate uint8 dot products in int32 accumulators.
 static s32x4 reduce_add(
-    s32x4 a, u8x16 b, Square /*map_fn*/,
+    s32x4 a, u8x16 b, square /*map_fn*/,
     std::integral_constant<size_t, 4> /*horizontal_factor*/) {
   a.v = vreinterpretq_s32_u32(vdotq_u32(vreinterpretq_u32_s32(a.v), b.v, b.v));
   return a;
@@ -94,70 +94,15 @@ using simd::s32x16;
 using simd::s8x16;
 using simd::u8x16;
 
-void sum_int8_int32_neondot(size_t n, size_t k3, size_t k2, size_t k1,
-                            size_t a_stride_n, size_t a_stride_k3,
-                            size_t a_stride_k2, const void* a, size_t,
-                            void* c) {
-  if (k1 == 1 && a_stride_n == sizeof(int8_t)) {
-    stream_reduce<sum_accumulator_k1_1<s32x16>, int8_t, int32_t>(
-        n, k3, k2, a_stride_k3, a_stride_k2, reinterpret_cast<const int8_t*>(a),
-        /*C_stride_m=*/0, reinterpret_cast<int32_t*>(c));
-  } else {
-    tiled_reduce<sum_accumulator_x32<s32x4, 16>, int8_t, int32_t>(
-        n, k3, k2, k1, a_stride_n, a_stride_k3, a_stride_k2,
-        reinterpret_cast<const int8_t*>(a), /*C_stride_m=*/0,
-        reinterpret_cast<int32_t*>(c));
-  }
-}
+SUM_K1_KERNEL(sum_k1_uint8_int32_neondot, uint8_t, int32_t, 4, 4, identity);
+SUM_KN_KERNEL(sum_kn_uint8_int32_neondot, uint8_t, int32_t, 16, identity);
+SUM_K1_KERNEL(sum_k1_int8_int32_neondot, int8_t, int32_t, 4, 4, identity);
+SUM_KN_KERNEL(sum_kn_int8_int32_neondot, int8_t, int32_t, 16, identity);
 
-void sum_uint8_int32_neondot(size_t n, size_t k3, size_t k2, size_t k1,
-                             size_t a_stride_n, size_t a_stride_k3,
-                             size_t a_stride_k2, const void* a, size_t,
-                             void* c) {
-  if (k1 == 1 && a_stride_n == sizeof(uint8_t)) {
-    stream_reduce<sum_accumulator_k1_1<s32x16>, uint8_t, int32_t>(
-        n, k3, k2, a_stride_k3, a_stride_k2,
-        reinterpret_cast<const uint8_t*>(a),
-        /*C_stride_m=*/0, reinterpret_cast<int32_t*>(c));
-  } else {
-    tiled_reduce<sum_accumulator_x32<s32x4, 16>, uint8_t, int32_t>(
-        n, k3, k2, k1, a_stride_n, a_stride_k3, a_stride_k2,
-        reinterpret_cast<const uint8_t*>(a), /*C_stride_m=*/0,
-        reinterpret_cast<int32_t*>(c));
-  }
-}
-
-void sum_squared_int8_int32_neondot(size_t n, size_t k3, size_t k2, size_t k1,
-                                    size_t a_stride_n, size_t a_stride_k3,
-                                    size_t a_stride_k2, const void* a, size_t,
-                                    void* c) {
-  if (k1 == 1 && a_stride_n == sizeof(int8_t)) {
-    stream_reduce<sum_accumulator_k1_1<s32x16, Square>, int8_t, int32_t>(
-        n, k3, k2, a_stride_k3, a_stride_k2, reinterpret_cast<const int8_t*>(a),
-        /*C_stride_m=*/0, reinterpret_cast<int32_t*>(c));
-  } else {
-    tiled_reduce<sum_accumulator_x32<s32x4, 16, Square>, int8_t, int32_t>(
-        n, k3, k2, k1, a_stride_n, a_stride_k3, a_stride_k2,
-        reinterpret_cast<const int8_t*>(a), /*C_stride_m=*/0,
-        reinterpret_cast<int32_t*>(c));
-  }
-}
-
-void sum_squared_uint8_int32_neondot(size_t n, size_t k3, size_t k2, size_t k1,
-                                     size_t a_stride_n, size_t a_stride_k3,
-                                     size_t a_stride_k2, const void* a, size_t,
-                                     void* c) {
-  if (k1 == 1 && a_stride_n == sizeof(uint8_t)) {
-    stream_reduce<sum_accumulator_k1_1<s32x16, Square>, uint8_t, int32_t>(
-        n, k3, k2, a_stride_k3, a_stride_k2,
-        reinterpret_cast<const uint8_t*>(a),
-        /*C_stride_m=*/0, reinterpret_cast<int32_t*>(c));
-  } else {
-    tiled_reduce<sum_accumulator_x32<s32x4, 16, Square>, uint8_t, int32_t>(
-        n, k3, k2, k1, a_stride_n, a_stride_k3, a_stride_k2,
-        reinterpret_cast<const uint8_t*>(a), /*C_stride_m=*/0,
-        reinterpret_cast<int32_t*>(c));
-  }
-}
+SUM_K1_KERNEL(sum_squared_k1_uint8_int32_neondot, uint8_t, int32_t, 4, 4,
+              square);
+SUM_KN_KERNEL(sum_squared_kn_uint8_int32_neondot, uint8_t, int32_t, 16, square);
+SUM_K1_KERNEL(sum_squared_k1_int8_int32_neondot, int8_t, int32_t, 4, 4, square);
+SUM_KN_KERNEL(sum_squared_kn_int8_int32_neondot, int8_t, int32_t, 16, square);
 
 }  // namespace ynn

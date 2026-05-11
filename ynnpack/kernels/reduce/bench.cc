@@ -19,60 +19,59 @@
 namespace ynn {
 
 struct Shape {
-  int n, k3, k2, k1;
+  int n, k;
 
   static Shape parse(std::string str) {
     std::replace(str.begin(), str.end(), 'x', ' ');
     std::stringstream ss(str);
     Shape result;
-    ss >> result.n >> result.k3 >> result.k2 >> result.k1;
+    ss >> result.n >> result.k;
     return result;
   }
 };
 
-Shape shape = {256, 1, 1, 256};
+Shape shape = {256, 256};
 
 template <typename TA, typename TC>
 void bench(benchmark::State& state, uint64_t arch_flags,
-           unary_reduce_kernel_fn kernel, TA, TC) {
+           reduce_kernel_fn kernel, int k_dim, TA, TC) {
   if (!is_arch_supported(arch_flags)) {
     state.SkipWithMessage("Unsupported hardware");
     return;
   }
 
   const size_t n = shape.n;
-  const size_t k3 = shape.k3;
-  const size_t k2 = shape.k2;
-  const size_t k1 = shape.k1;
-  state.SetLabel(std::to_string(n) + "x" + std::to_string(k3) + "x" +
-                 std::to_string(k2) + "x" + std::to_string(k1));
+  const size_t k = shape.k;
+  state.SetLabel(std::to_string(n) + "x" + std::to_string(k));
 
-  Tensor<TA> a({k3, k2, n, k1});
+  Tensor<TA> a({n, k});
   Tensor<TC> c({2, n});
   a.fill(1);
   c.fill(0);
 
-  for (auto _ : state) {
-    kernel(n, k3, k2, k1, a.stride(2) * sizeof(TA), a.stride(0) * sizeof(TA),
-           a.stride(1) * sizeof(TA), a.base(), c.stride(0) * sizeof(TC),
-           c.base());
+  if (k_dim != reduce_dim::k1) {
+    a = a.reshape({k, n});
   }
 
-  const size_t ops = n * k3 * k2 * k1;
-  ;
+  for (auto _ : state) {
+    kernel(n, k, a.stride_bytes(0), a.base(), &c(0, 0), &c(1, 0));
+  }
+
+  const size_t ops = n * k;
   state.counters["OP"] =
       benchmark::Counter(state.iterations() * ops, benchmark::Counter::kIsRate);
 }
 
-#define YNN_UNARY_REDUCE_KERNEL(arch_flags, kernel, a_type, c_type)        \
-  BENCHMARK_CAPTURE(bench, kernel, arch_flags, kernel, a_type(), c_type()) \
+#define YNN_REDUCE_KERNEL(arch_flags, kernel, k_dim, a_type, c_type)    \
+  BENCHMARK_CAPTURE(bench, kernel, arch_flags, kernel, k_dim, a_type{}, \
+                    c_type{})                                           \
       ->UseRealTime();
 #include "ynnpack/kernels/reduce/max.inc"
 #include "ynnpack/kernels/reduce/min.inc"
 #include "ynnpack/kernels/reduce/min_max.inc"
 #include "ynnpack/kernels/reduce/sum.inc"
 #include "ynnpack/kernels/reduce/sum_squared.inc"
-#undef YNN_UNARY_REDUCE_KERNEL
+#undef YNN_REDUCE_KERNEL
 
 }  // namespace ynn
 

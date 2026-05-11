@@ -969,6 +969,28 @@ YNN_ALWAYS_INLINE f64x8 exp2_round(f64x8 a) {
       _mm512_slli_epi64(_mm512_castpd_si512(res_bits), 52))};
 }
 
+YNN_ALWAYS_INLINE void kahan_sum(f32x16 a, f32x16& acc, f32x16& error) {
+  f32x16 y = a - error;
+  f32x16 t = acc + y;
+  error = (t - acc) - y;
+  __m512 mask = _mm512_set1_ps(std::numeric_limits<float>::infinity());
+  __mmask16 m =
+      _mm512_cmp_ps_mask(_mm512_and_ps(error.v, mask), mask, _CMP_NEQ_OQ);
+  error = f32x16{_mm512_maskz_mov_ps(m, error.v)};
+  acc = t;
+}
+
+YNN_ALWAYS_INLINE void kahan_sum(f64x8 a, f64x8& acc, f64x8& error) {
+  f64x8 y = a - error;
+  f64x8 t = acc + y;
+  error = (t - acc) - y;
+  __m512d mask = _mm512_set1_pd(std::numeric_limits<double>::infinity());
+  __mmask8 m =
+      _mm512_cmp_pd_mask(_mm512_and_pd(error.v, mask), mask, _CMP_NEQ_OQ);
+  error = f64x8{_mm512_maskz_mov_pd(m, error.v)};
+  acc = t;
+}
+
 template <int Index>
 YNN_ALWAYS_INLINE s32x4 extract(s32x16 x, decltype(s32x4::N)) {
   return s32x4{_mm512_extracti32x4_epi32(x.v, Index)};

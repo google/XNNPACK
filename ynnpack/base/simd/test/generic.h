@@ -876,6 +876,51 @@ void test_fma() {
   TEST_F(test_class, fma_##type##x##N) { test_fma<type, N>(); }
 
 template <typename scalar, size_t N>
+void test_kahan_sum() {
+  using vector = vec<scalar, N>;
+
+  ReplicableRandomDevice rng;
+  for (auto _ : FuzzTest(std::chrono::milliseconds(100))) {
+    scalar a[vector::N];
+    scalar b[vector::N];
+    fill_random(a, vector::N, rng);
+    fill_random(b, vector::N, rng);
+
+    vector acc = broadcast<N>(static_cast<scalar>(0));
+    vector error = broadcast<N>(static_cast<scalar>(0));
+    kahan_sum(load(a, vector::N), acc, error);
+    kahan_sum(load(b, vector::N), acc, error);
+
+    scalar sum[vector::N];
+    store(sum, acc);
+
+    for (size_t i = 0; i < vector::N; ++i) {
+      scalar a_i = a[i];
+      scalar b_i = b[i];
+      scalar expected = a_i + b_i;
+
+#ifdef YNN_ARCH_ARM32
+      if (std::abs(expected) < type_info<scalar>::smallest_normal()) {
+        // ARM32 flushes denormals to 0(?).
+        continue;
+      }
+#endif  // YNN_ARCH_ARM32
+
+      if (std::isnan(expected)) {
+        ASSERT_TRUE(std::isnan(sum[i]));
+      } else {
+        scalar tolerance = type_info<scalar>::epsilon() *
+                           std::max(std::abs(a_i), std::abs(b_i));
+        ASSERT_NEAR(sum[i], expected, tolerance);
+      }
+    }
+  }
+}
+
+#define TEST_KAHAN_SUM(test_class, type, N) \
+  TEST_F(test_class, kahan_sum_##type##x##N) { test_kahan_sum<type, N>(); }
+
+template <typename scalar, size_t N>
 void test_add_sat() {
   using vector = vec<scalar, N>;
   ReplicableRandomDevice rng;

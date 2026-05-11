@@ -145,6 +145,8 @@ TEST_HORIZONTAL_MAX(wasm_simd128, s16, 8);
 TEST_HORIZONTAL_MAX(wasm_simd128, f32, 4);
 TEST_HORIZONTAL_MAX(wasm_simd128, s32, 4);
 
+TEST_KAHAN_SUM(wasm_simd128, f32, 4);
+
 TEST_CAST(wasm_simd128, s32, f32x4);
 TEST_CAST(wasm_simd128, f32, s32x4);
 TEST_CAST(wasm_simd128, s32, s8x16);
