@@ -1771,8 +1771,7 @@ alias(
     name = "wasmrelaxedsimdfp16_enabled",
     actual = select({
         ":xnn_enable_wasmrelaxedsimdfp16_explicit_true": ":xnn_enable_wasmrelaxedsimdfp16_explicit_true",
-        ":xnn_enable_wasmrelaxedsimdfp16_explicit_false": ":xnn_enable_wasmrelaxedsimdfp16_explicit_true",
-        "//conditions:default": ":wasmrelaxedsimdfp16_enabled_by_default",
+        "//conditions:default": ":xnn_enable_wasmrelaxedsimdfp16_explicit_false",
     }),
 )
 
