@@ -55,7 +55,6 @@ void define_static_slice(ynn_subgraph& subgraph, ynn_node& node,
                          std::vector<ynn_node::static_slice::slice> slices,
                          bool slice_dims) {
   const ynn_value& input = subgraph.value(input_id);
-  ynn_value& output = subgraph.get_output_value(output_id, input);
 
   std::reverse(slices.begin(), slices.end());
 
@@ -64,21 +63,40 @@ void define_static_slice(ynn_subgraph& subgraph, ynn_node& node,
   op.slices = std::move(slices);
 
   // Propagate shape.
-  output.extents = input.extents;
-  for (const slice_info& slice : op.slices) {
-    if (op.slice_dims) {
-      assert(slice.axis < output.extents.size());
-      output.extents.erase(output.extents.begin() + slice.axis);
-    } else {
-      auto begin_end = calc_begin_end(slice, output.extents[slice.axis]);
+  std::vector<slinky::expr> output_extents = input.extents;
+  if (op.slice_dims) {
+    for (const slice_info& slice : op.slices) {
+      assert(slice.axis < output_extents.size());
+      output_extents.erase(output_extents.begin() + slice.axis);
+    }
+  } else {
+    for (auto i = op.slices.begin(); i != op.slices.end();) {
+      const slice_info& slice = *i;
+      assert(slice.axis < output_extents.size());
+      auto begin_end = calc_begin_end(slice, output_extents[slice.axis]);
       const slinky::expr& begin = begin_end.first;
       const slinky::expr& end = begin_end.second;
-      output.extents[slice.axis] = slinky::simplify(end - begin);
-      if (slinky::prove_true(output.extents[slice.axis] == 1)) {
-        output.extents[slice.axis] = {};
+      if (slinky::prove_true(begin == 0 && end == output_extents[slice.axis]) &&
+          slice.stride == 1) {
+        i = op.slices.erase(i);
+      } else {
+        output_extents[slice.axis] = slinky::simplify(end - begin);
+        if (slinky::prove_true(output_extents[slice.axis] == 1)) {
+          output_extents[slice.axis] = {};
+        }
+        ++i;
       }
     }
   }
+
+  if (op.slices.empty() && *output_id == YNN_INVALID_VALUE_ID) {
+    // Slice is a no-op.
+    *output_id = input_id;
+    return;
+  }
+
+  ynn_value& output = subgraph.get_output_value(output_id, input);
+  output.extents = std::move(output_extents);
 
   node.inputs = {input_id};
   node.outputs = {output.id};
@@ -90,6 +108,11 @@ void define_static_slice(ynn_subgraph& subgraph, ynn_node& node,
     ynn_runtime_value& output = runtime.value(node.outputs[0]);
 
     output.make_buffer(runtime, input.buffer->elem_size());
+
+    if (!slinky::prove_true(output.extent(0) == 1)) {
+      // Don't create output buffers where dimension 0 is not dense.
+      output.buffer->dim(0).stride = output.buffer->elem_size();
+    }
 
     const int rank = input.rank();
     std::vector<slinky::var> dims = runtime.globals.make_dims(rank);

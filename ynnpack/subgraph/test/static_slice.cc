@@ -176,6 +176,38 @@ TEST_P(Slice, slice_dims) {
   SwitchRealType(type, [&](auto type) { TestSliceDims(type, rank); });
 }
 
+TEST(Slice, slice_and_subtract) {
+  Tensor<float> input({2, 3});
+  std::iota(input.data(), input.data() + input.size(), 1.0f);
+
+  Tensor<float> output({2});
+
+  SubgraphBuilder subgraph(2);
+  subgraph.AddInput(ynn_type_fp32, input.shape(), 0)
+      .AddOutput(ynn_type_fp32, output.shape(), 1);
+
+  uint32_t const_three_id = subgraph.DefineScalar(3.0f);
+
+  uint32_t slice_output_id = YNN_INVALID_VALUE_ID;
+  subgraph.AddTensor(ynn_type_fp32, 1, slice_output_id);
+
+  // The slice op must not leave a buffer with a stride other than 1 in the
+  // trailing dimension, this test verifies it does not do that.
+  subgraph
+      .AddSlice({1}, {1}, {}, {}, 0, slice_output_id, YNN_NODE_FLAG_SLICE_DIMS)
+      .AddBinary(ynn_binary_subtract, const_three_id, slice_output_id, 1);
+
+  Runtime runtime(subgraph.GetSubgraph());
+  ASSERT_EQ(runtime.Status(), ynn_status_success);
+
+  runtime.ReshapeExternalTensor(input.shape(), input.base(), 0)
+      .ReshapeRuntime();
+
+  runtime.SetupExternalTensor(output.base(), 1).InvokeRuntime();
+
+  ASSERT_THAT(output, testing::ElementsAre(1.0f, -2.0f));
+}
+
 // This operation should work for arbitrary rank and this upper bound should
 // cover all code paths.
 constexpr int max_rank_for_testing = 4;
