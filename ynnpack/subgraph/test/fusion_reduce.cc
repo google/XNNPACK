@@ -458,6 +458,29 @@ TEST(fusion, reduce_sum_add) {
   EXPECT_THAT(node, AllOf(IsReduce(ynn_reduce_sum), InputsAre(a_id, b_id)));
 }
 
+TEST(fusion, reduce_sum_broadcast_add) {
+  const uint32_t a_id = 0;
+  const uint32_t b_id = 1;
+  const uint32_t x_id = 2;
+  SubgraphBuilder builder(3);
+  uint32_t v1_id = YNN_INVALID_VALUE_ID;
+  builder.AddInput(ynn_type_fp32, 2, a_id)
+      .AddInput(ynn_type_fp32, 3, b_id)
+      .AddOutput(ynn_type_fp32, 3, x_id)
+      .AddTensor(ynn_type_fp32, 1, v1_id);
+
+  // Similar to the case above, but the add is broadcasting, which reduce cannot
+  // implement.
+  builder.AddReduce(ynn_reduce_sum, {1}, a_id, YNN_INVALID_VALUE_ID, v1_id, 0)
+      .AddBinary(ynn_binary_add, v1_id, b_id, x_id);
+
+  ynn_subgraph& subgraph = *builder.GetSubgraph();
+  subgraph.fusion();
+  subgraph.invalidate_dead_values();
+
+  ASSERT_THAT(subgraph, AllOf(HasValidNodeCount(2), HasValidValueCount(4)));
+}
+
 TEST(fusion, reduce_sum_squared_add) {
   const uint32_t a_id = 0;
   const uint32_t b_id = 1;
@@ -718,6 +741,33 @@ TEST(fusion, reduce_static_transpose_identity) {
   // Transpose permutation is {0, 2, 1}, which translates to slinky permutation
   // {1, 0, 2}. Mapped axis = perm[0] = 1.
   EXPECT_EQ(reduce_op.k_dims, 0b010);
+}
+
+TEST(fusion, reduce_new_dimension_static_transpose) {
+  const uint32_t x_id = 0;
+  uint32_t transposed_id = 1;
+  const uint32_t y_id = 2;
+  SubgraphBuilder builder(3);
+
+  builder.AddInput(ynn_type_fp32, 2, x_id)
+      .AddOutput(ynn_type_fp32, 2, y_id)
+      .AddTensor(ynn_type_fp32, 3, transposed_id);
+
+  // Transpose (2, 0, 1). So dimension 0 -> 2, 1 -> 0, 2 -> 1.
+  std::vector<int32_t> perm = {2, YNN_MAX_TENSOR_RANK, 1};
+  builder.AddTranspose(perm, x_id, transposed_id)
+      .AddReduce(ynn_reduce_sum, {1}, transposed_id, YNN_INVALID_VALUE_ID, y_id,
+                 /*flags=*/0);
+
+  ynn_subgraph& subgraph = *builder.GetSubgraph();
+  subgraph.fusion();
+  subgraph.invalidate_dead_values();
+
+  ASSERT_THAT(subgraph, HasValidNodeCount(2));
+
+  // This should not be rewritten because the reduction is of a new dimension
+  // inserted by the transpose.
+  EXPECT_THAT(ProducerOf(y_id, subgraph), IsReduce(ynn_reduce_sum));
 }
 
 TEST(fusion, reduce_sum_to_dot_f32) {

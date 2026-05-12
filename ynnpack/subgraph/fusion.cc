@@ -1446,13 +1446,26 @@ bool rewrite_reduce_binary_identity(ynn_subgraph& subgraph, ynn_node& node,
       continue;
     }
 
+    uint32_t y_id = node.inputs[1 - i];
+    uint32_t reduce_output_id = producer->outputs[0];
+
+    const ynn_value& reduce_output = subgraph.value(reduce_output_id);
+    const ynn_value& y = subgraph.value(y_id);
+
+    for (size_t d = 0; d < y.rank(); ++d) {
+      if (slinky::is_constant(reduce_output.extent(d), 1) &&
+          !slinky::is_constant(y.extent(d), 1)) {
+        // y causes x to be broadcasted, which the reduce op does not do.
+        return false;
+      }
+    }
+
     // Rewrite: binary_op(reduce_op(x, identity), y) -> reduce_op(x, y)
     YNN_LOG_DEBUG() << "Rewriting " << to_string(binary->op) << "("
                     << to_string(reduce->op) << "(x, identity), y) to "
                     << to_string(reduce->op) << "(x, y)";
 
     uint32_t x_id = producer->inputs[0];
-    uint32_t y_id = node.inputs[1 - i];
     uint32_t output_id = node.outputs[0];
 
     node = std::move(*producer);
@@ -1488,10 +1501,20 @@ bool rewrite_reduce_static_transpose(ynn_subgraph& subgraph, ynn_node& node,
   uint32_t init_id = node.inputs[1];
   uint32_t y_id = node.outputs[0];
 
+  const ynn_value& x = subgraph.value(x_id);
+
   ynn::axes_set new_axes;
   for (size_t d = 0; d < transpose_op->permutation.size(); ++d) {
     if (reduce_op->k_dims[d]) {
-      new_axes.set(transpose_op->permutation[d]);
+      if (transpose_op->permutation[d] >= x.rank()) {
+        // This seems like it should work, but probably is of marginal value to
+        // implement.
+        YNN_LOG_DEBUG()
+            << "Not rewriting reduce(static_transpose(x)) because the "
+               "reduced dimension is a new dimension.";
+        return false;
+      }
+      new_axes[transpose_op->permutation[d]] = true;
     }
   }
 
