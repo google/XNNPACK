@@ -743,15 +743,22 @@ ynn_status ynn_invoke_runtime(ynn_runtime_t runtime) {
 namespace {
 
 int32_t get_max_concurrency(const ynn_runtime& runtime) {
-  int32_t result = 1;
-  slinky::recursive_mutate<slinky::loop>(
-      runtime.pipeline.body, [&](const slinky::loop* op) -> slinky::stmt {
-        if (!slinky::prove_true(op->max_workers == 1)) {
-          result = std::numeric_limits<int32_t>::max();
-        }
-        return slinky::stmt{op};
-      });
-  return result;
+  // Traverse the pipeline body for any loops. If we find a parallel loop, we
+  // return `max_int32`. Otherwise, we return 1.
+  class visitor : public slinky::recursive_node_visitor {
+   public:
+    int32_t result = 1;
+    void visit(const slinky::loop* op) override {
+      if (!slinky::prove_true(op->max_workers == 1)) {
+        result = std::numeric_limits<int32_t>::max();
+      }
+      slinky::recursive_node_visitor::visit(op);
+    }
+  } v;
+  if (runtime.pipeline.body.defined()) {
+    runtime.pipeline.body.accept(&v);
+  }
+  return v.result;
 }
 
 }  // namespace
