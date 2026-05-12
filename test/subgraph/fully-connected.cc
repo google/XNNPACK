@@ -18,7 +18,6 @@
 #include <gtest/gtest.h>
 #include "include/xnnpack.h"
 #include "src/xnnpack/buffer.h"
-#include "src/xnnpack/common.h"
 #include "src/xnnpack/datatype.h"
 #include "src/xnnpack/math.h"
 #include "src/xnnpack/subgraph.h"
@@ -223,13 +222,9 @@ void TestStaticB(xnn_datatype convert_to = xnn_datatype_invalid,
   auto output_gen = MakeDatatypeGenerator(Output());
   std::uniform_int_distribution<> channels_dist{1, 100};
   std::uniform_real_distribution<float> zero_point_dist{-1.5f, -0.5f};
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
   // TODO(b/408280445): The rank should go down to 1, but hits a bug in QP8
   // code paths that assume the LHS has rank >= 2.
   std::uniform_int_distribution<> rank_dist{2, XNN_MAX_TENSOR_DIMS - 1};
-#else
-  std::uniform_int_distribution<> rank_dist{1, XNN_MAX_TENSOR_DIMS - 1};
-#endif
 
   for (auto _ : FuzzTest(std::chrono::milliseconds(500))) {
     size_t rank = rank_dist(rng);
@@ -623,13 +618,7 @@ void TestDynamicB(xnn_datatype convert_to = xnn_datatype_invalid,
   auto input_gen = MakeDatatypeGenerator(Input());
   auto output_gen = MakeDatatypeGenerator(Output());
   std::uniform_int_distribution<> channels_dist{1, 100};
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  // TODO(b/408280445): The rank should go down to 1, but hits a bug in QP8
-  // code paths that assume the LHS has rank >= 2.
-  std::uniform_int_distribution<> rank_dist{2, XNN_MAX_TENSOR_DIMS - 1};
-#else
   std::uniform_int_distribution<> rank_dist{1, XNN_MAX_TENSOR_DIMS - 1};
-#endif
 
   for (auto _ : FuzzTest(std::chrono::milliseconds(500))) {
     const size_t rank = rank_dist(rng);
