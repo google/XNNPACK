@@ -40,6 +40,7 @@ void TestKeepDims(T, size_t rank) {
     std::iota(axes.begin(), axes.end(), 0);
     std::vector<int64_t> begins(dims.size());
     std::vector<int64_t> ends(dims.size());
+    std::vector<int64_t> strides(dims.size());
     for (size_t i = 0; i < dims.size(); i++) {
       // Test out of bounds slices too.
       const int64_t range = dims[i] == 0 ? max_dim * 2 : dims[i];
@@ -58,9 +59,9 @@ void TestKeepDims(T, size_t rank) {
         end_dist = std::uniform_int_distribution<int64_t>(begins[i], range);
       }
       ends[i] = end_dist(rng);
+      strides[i] = stride_dist(rng);
     }
 
-    std::vector<int64_t> strides(dims.size(), 1);
     // Define subgraph
     SubgraphBuilder subgraph(2);
     subgraph.AddInput(type_of<T>(), dims, 0)
@@ -77,7 +78,7 @@ void TestKeepDims(T, size_t rank) {
       fill_random(input.data(), input.size(), rng);
 
       // Make a deep copy so the expected result is contiguous.
-      Tensor<T> expected = input.slice(begins, ends).deep_copy();
+      Tensor<T> expected = input.slice(begins, ends, strides).deep_copy();
 
       // Check reshape is correct
       runtime.ReshapeExternalTensor(shape, input.base(), 0).ReshapeRuntime();

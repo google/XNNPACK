@@ -22,7 +22,6 @@ cc_library(
     hdrs = ["tensor.h"],
     deps = [
         ":buffer",
-        ":random",
         "//ynnpack/base",
     ],
 )
