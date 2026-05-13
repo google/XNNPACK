@@ -28,6 +28,9 @@ using slice_info = ynn_node::static_slice::slice;
 
 std::pair<slinky::expr, slinky::expr> calc_begin_end(const slice_info& slice,
                                                      slinky::expr extent) {
+  if (!extent.defined()) {
+    extent = 1;
+  }
   slinky::expr begin_expr, end_expr;
 
   if (slice.begin < 0) {
