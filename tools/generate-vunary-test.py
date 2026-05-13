@@ -8,8 +8,12 @@ import argparse
 import math
 import os
 import sys
-import types
 from typing import NamedTuple
+
+try:
+  from immutabledict import immutabledict
+except ImportError:
+  immutabledict = dict
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import xngen
@@ -41,7 +45,7 @@ class SpecialValues(NamedTuple):
     expected_outputs: str
     tolerance_ulp: int
 
-OP_TYPES = {
+OP_TYPES = immutabledict({
     "vabs": "Abs",
     "vapproxgelu": "ApproxGELU",
     "vclamp": "Clamp",
@@ -63,11 +67,11 @@ OP_TYPES = {
     "vsqr": "Square",
     "vsqrt": "SquareRoot",
     "vtanh": "TanH",
-}
+})
 
 PARAMS_TYPES = ["Clamp", "ELU", "LeakyReLU"]
 
-SPECIAL_VALUES_BY_OP_TYPE_F32 = types.MappingProxyType({
+SPECIAL_VALUES_BY_OP_TYPE_F32 = immutabledict({
     "SquareRoot": SpecialValues(
         num_elements=4,
         inputs="{0.0f, -0.0f, 1.0f, -1.0f}",
@@ -127,7 +131,7 @@ SPECIAL_VALUES_BY_OP_TYPE_F32 = types.MappingProxyType({
 })
 
 
-SPECIAL_VALUES_BY_OP_TYPE_F16 = types.MappingProxyType({
+SPECIAL_VALUES_BY_OP_TYPE_F16 = immutabledict({
     "Log": SpecialValues(
         num_elements=4,
         inputs="{1.0f, -1.0f, 0.0f, -0.0f}",

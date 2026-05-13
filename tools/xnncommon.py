@@ -6,6 +6,11 @@
 
 import codecs
 import os
+try:
+  from immutabledict import immutabledict
+except ImportError:
+  immutabledict = dict
+
 
 
 def _indent(text):
@@ -23,7 +28,7 @@ def _remove_duplicate_newlines(text):
   return "\n".join(filtered_lines)
 
 
-_ARCH_TO_MACRO_MAP = {
+_ARCH_TO_MACRO_MAP = immutabledict({
     "aarch32": "XNN_ARCH_ARM",
     "aarch64": "XNN_ARCH_ARM64",
     "x86-32": "XNN_ARCH_X86",
@@ -38,11 +43,11 @@ _ARCH_TO_MACRO_MAP = {
     "wasmsimd32": "XNN_ARCH_WASMSIMD",
     "wasmrelaxedsimd32": "XNN_ARCH_WASMRELAXEDSIMD",
     "wasmrelaxedsimdfp16": "XNN_ARCH_WASMRELAXEDSIMDFP16",
-}
+})
 
 # Mapping from ISA extension to macro guarding build-time enabled/disabled
 # status for the ISA. Only ISAs that can be enabled/disabled have an entry.
-_ISA_TO_MACRO_MAP = {
+_ISA_TO_MACRO_MAP = immutabledict({
     "fp16arith": "XNN_ENABLE_ARM_FP16_SCALAR",
     "neonfp16arith": "XNN_ENABLE_ARM_FP16_VECTOR",
     "neonbf16": "XNN_ENABLE_ARM_BF16",
@@ -75,9 +80,9 @@ _ISA_TO_MACRO_MAP = {
     "avx512fp16": "XNN_ENABLE_AVX512FP16",
     "avx512bf16": "XNN_ENABLE_AVX512BF16",
     "hvx": "XNN_ENABLE_HVX",
-}
+})
 
-_ISA_TO_ARCH_MAP = {
+_ISA_TO_ARCH_MAP = immutabledict({
     "armsimd32": ["aarch32"],
     "fp16arith": ["aarch32", "aarch64"],
     "neon": ["aarch32", "aarch64"],
@@ -124,9 +129,9 @@ _ISA_TO_ARCH_MAP = {
     "wasmsdot": ["wasmrelaxedsimd"],
     "wasmusdot": ["wasmrelaxedsimd"],
     "wasmblendvps": ["wasmrelaxedsimd"],
-}
+})
 
-_ISA_TO_ARCH_FLAGS_MAP = {
+_ISA_TO_ARCH_FLAGS_MAP = immutabledict({
     "armsimd32": "xnn_arch_arm_v6",
     "fp16arith": "xnn_arch_arm_fp16_arith",
     "neon": "xnn_arch_arm_neon",
@@ -168,7 +173,7 @@ _ISA_TO_ARCH_FLAGS_MAP = {
     "wasmsdot": "xnn_arch_wasm_sdot",
     "wasmusdot": "xnn_arch_wasm_usdot",
     "wasmblendvps": "xnn_arch_wasm_blendvps",
-}
+})
 
 
 def isa_hierarchy_map():
@@ -268,7 +273,7 @@ _ISA_HIERARCHY = [
     "hvx",
 ]
 
-_ISA_HIERARCHY_MAP = {isa: v for v, isa in enumerate(_ISA_HIERARCHY)}
+_ISA_HIERARCHY_MAP = immutabledict({isa: v for v, isa in enumerate(_ISA_HIERARCHY)})
 
 
 def overwrite_if_changed(filepath, content):
