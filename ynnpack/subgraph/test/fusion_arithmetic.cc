@@ -445,51 +445,65 @@ TEST(fusion, output_convert_convert) {
 }
 
 TEST(fusion, convert_convert) {
-  // rewrite convert<fp32>(convert<bf16>(-a_fp32)) to just -a_fp32.
   const uint32_t a_id = 0;
   const uint32_t x_id = 1;
-  SubgraphBuilder builder(2);
-  uint32_t b_id = YNN_INVALID_VALUE_ID;
-  uint32_t bf16_id = YNN_INVALID_VALUE_ID;
-  builder.AddInput(ynn_type_fp32, 2, a_id)
-      .AddOutput(ynn_type_fp32, 2, x_id)
-      .AddTensor(ynn_type_fp32, 2, b_id)
-      .AddTensor(ynn_type_bf16, 2, bf16_id);
-  builder.AddUnary(ynn_unary_negate, a_id, b_id)
-      .AddUnary(ynn_unary_convert, b_id, bf16_id)
-      .AddUnary(ynn_unary_convert, bf16_id, x_id);
+  for (uint32_t flags : {0, YNN_FLAG_NO_EXCESS_PRECISION}) {
+    // rewrite convert<fp32>(convert<bf16>(-a_fp32)) to just -a_fp32.
+    SubgraphBuilder builder(2, flags);
+    uint32_t b_id = YNN_INVALID_VALUE_ID;
+    uint32_t bf16_id = YNN_INVALID_VALUE_ID;
+    builder.AddInput(ynn_type_fp32, 2, a_id)
+        .AddOutput(ynn_type_fp32, 2, x_id)
+        .AddTensor(ynn_type_fp32, 2, b_id)
+        .AddTensor(ynn_type_bf16, 2, bf16_id);
+    builder.AddUnary(ynn_unary_negate, a_id, b_id)
+        .AddUnary(ynn_unary_convert, b_id, bf16_id)
+        .AddUnary(ynn_unary_convert, bf16_id, x_id);
 
-  ynn_subgraph& subgraph = *builder.GetSubgraph();
+    ynn_subgraph& subgraph = *builder.GetSubgraph();
 
-  subgraph.fusion();
-  subgraph.invalidate_dead_values();
+    subgraph.fusion();
+    subgraph.invalidate_dead_values();
 
-  ASSERT_THAT(subgraph, AllOf(HasValidNodeCount(1), HasValidValueCount(2)));
-  EXPECT_THAT(ProducerOf(x_id, subgraph),
-              AllOf(IsUnary(ynn_unary_negate), InputsAre(a_id)));
+    if ((flags & YNN_FLAG_NO_EXCESS_PRECISION) != 0) {
+      ASSERT_THAT(subgraph, AllOf(HasValidNodeCount(3), HasValidValueCount(4)));
+      EXPECT_THAT(ProducerOf(x_id, subgraph),
+                  AllOf(IsUnary(ynn_unary_convert)));
+    } else {
+      ASSERT_THAT(subgraph, AllOf(HasValidNodeCount(1), HasValidValueCount(2)));
+      EXPECT_THAT(ProducerOf(x_id, subgraph),
+                  AllOf(IsUnary(ynn_unary_negate), InputsAre(a_id)));
+    }
+  }
 }
 
 TEST(fusion, dequantize_quantize) {
   // rewrite dequantize(quantize(a_fp32)) -> a_fp32.
   const uint32_t a_id = 0;
   const uint32_t x_id = 1;
-  SubgraphBuilder builder(2);
-  uint32_t b_id = YNN_INVALID_VALUE_ID;
-  uint32_t zero_point_id = builder.DefineScalar(5);
-  uint32_t scale_id = builder.DefineScalar(0.5f);
-  builder.AddInput(ynn_type_fp32, 2, a_id)
-      .AddOutput(ynn_type_fp32, 2, x_id)
-      .AddTensor(ynn_type_int8, 2, b_id);
-  builder.AddQuantize(a_id, ynn_type_int8, zero_point_id, scale_id, b_id)
-      .AddDequantize(b_id, zero_point_id, scale_id, ynn_type_fp32, x_id);
+  for (uint32_t flags : {0, YNN_FLAG_NO_EXCESS_PRECISION}) {
+    SubgraphBuilder builder(2, flags);
+    uint32_t b_id = YNN_INVALID_VALUE_ID;
+    uint32_t zero_point_id = builder.DefineScalar(5);
+    uint32_t scale_id = builder.DefineScalar(0.5f);
+    builder.AddInput(ynn_type_fp32, 2, a_id)
+        .AddOutput(ynn_type_fp32, 2, x_id)
+        .AddTensor(ynn_type_int8, 2, b_id);
+    builder.AddQuantize(a_id, ynn_type_int8, zero_point_id, scale_id, b_id)
+        .AddDequantize(b_id, zero_point_id, scale_id, ynn_type_fp32, x_id);
 
-  ynn_subgraph& subgraph = *builder.GetSubgraph();
+    ynn_subgraph& subgraph = *builder.GetSubgraph();
 
-  subgraph.fusion();
-  subgraph.invalidate_dead_values();
+    subgraph.fusion();
+    subgraph.invalidate_dead_values();
 
-  ASSERT_THAT(subgraph, AllOf(HasValidNodeCount(1), HasValidValueCount(2)));
-  EXPECT_THAT(ProducerOf(x_id, subgraph), AllOf(IsCopy(), InputsAre(a_id)));
+    if ((flags & YNN_FLAG_NO_EXCESS_PRECISION) != 0) {
+      ASSERT_THAT(subgraph, AllOf(HasValidNodeCount(2), HasValidValueCount(5)));
+    } else {
+      ASSERT_THAT(subgraph, AllOf(HasValidNodeCount(1), HasValidValueCount(2)));
+      EXPECT_THAT(ProducerOf(x_id, subgraph), AllOf(IsCopy(), InputsAre(a_id)));
+    }
+  }
 }
 
 TEST(fusion, bf16_elementwise) {

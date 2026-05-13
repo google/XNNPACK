@@ -1047,14 +1047,16 @@ bool fuse_converts(ynn_subgraph& subgraph, ynn_node& node,
   assert(producer->outputs[0] == node.inputs[0]);
   const ynn_value& intermediate = subgraph.value(node.inputs[0]);
   if (!is_convert_lossless(input.type, intermediate.type) &&
-      (subgraph.flags & YNN_FLAG_CONSISTENT_ARITHMETIC) != 0) {
+      ((subgraph.flags & YNN_FLAG_CONSISTENT_ARITHMETIC) != 0 ||
+       (subgraph.flags & YNN_FLAG_NO_EXCESS_PRECISION) != 0)) {
     // This conversion loses information, and the converts might have been
     // inserted because we don't have a kernel for this type, which could vary
     // depending on the machine we're running on.
     // TODO(dsharlet): We could add a `round_to` operator for this case to fuse
     // two operators into one.
-    YNN_LOG_DEBUG()
-        << "Not fusing converts because YNN_FLAG_CONSISTENT_ARITHMETIC is set.";
+    YNN_LOG_DEBUG() << "Not fusing converts because "
+                       "YNN_FLAG_CONSISTENT_ARITHMETIC or "
+                       "YNN_FLAG_NO_EXCESS_PRECISION is set.";
     return false;
   }
 
@@ -1064,6 +1066,10 @@ bool fuse_converts(ynn_subgraph& subgraph, ynn_node& node,
     // sequence of converts to be treated as a round_to_bf16 op.
     return false;
   }
+
+  YNN_LOG_DEBUG() << "Rewriting convert(" << to_string(input.type)
+                  << ", convert(" << to_string(intermediate.type)
+                  << ", x)) to x";
 
   if (replace_uses(analysis, subgraph, node, output.id, input.id)) {
     node.invalidate();
@@ -1096,16 +1102,20 @@ bool fuse_quantize(ynn_subgraph& subgraph, ynn_node& node,
   }
 
   assert(producer->outputs[0] == node.inputs[0]);
-  if ((subgraph.flags & YNN_FLAG_CONSISTENT_ARITHMETIC) != 0) {
+  if ((subgraph.flags & YNN_FLAG_CONSISTENT_ARITHMETIC) != 0 ||
+      (subgraph.flags & YNN_FLAG_NO_EXCESS_PRECISION) != 0) {
     // This conversion loses information, and the converts might have been
     // inserted because we don't have a kernel for this type, which could vary
     // depending on the machine we're running on.
     // TODO(dsharlet): We could add a `round_to` operator for this case to fuse
     // two operators into one.
     YNN_LOG_DEBUG() << "Not fusing quantization because "
-                       "YNN_FLAG_CONSISTENT_ARITHMETIC is set.";
+                       "YNN_FLAG_CONSISTENT_ARITHMETIC or "
+                       "YNN_FLAG_NO_EXCESS_PRECISION is set.";
     return false;
   }
+
+  YNN_LOG_DEBUG() << "Rewriting dequantize(quantize(x)) to x";
 
   if (replace_uses(analysis, subgraph, node, output.id, input.id)) {
     node.invalidate();

@@ -25,6 +25,10 @@ extern "C" {
 // other codepath that could be used in the same compiled YNNPACK library.
 #define YNN_FLAG_CONSISTENT_ARITHMETIC (1 << 1)
 
+// Disallows optimizations that result in more precision than the graph
+// specified.
+#define YNN_FLAG_NO_EXCESS_PRECISION (1 << 2)
+
 #ifdef __GNUC__
 #define YNN_DEPRECATED __attribute__((deprecated))
 #else
