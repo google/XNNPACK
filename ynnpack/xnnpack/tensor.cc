@@ -131,19 +131,28 @@ xnn_status xnn_define_channelwise_quantized_tensor_value_v3(
   // channels (3).
   // This estimation is correct for batch matrix multiply and convolution, but
   // not depthwise convolution.
-  size_t quantization_dims[YNN_MAX_TENSOR_RANK];
-  std::copy_n(dims, channel_dim + 1, quantization_dims);
+  size_t quantization_buffer[YNN_MAX_TENSOR_RANK];
+  std::copy_n(dims, channel_dim + 1, quantization_buffer);
   if (channel_dim > 0) {
     // ... *except* for the one dimension before the channel dimension, which is
     // a broadcast?!?! This might only be true for XNN_FLAG_TRANSPOSE_B (or not)
     // which would be a headache to support here.
-    quantization_dims[channel_dim - 1] = 1;
+    quantization_buffer[channel_dim - 1] = 1;
   }
+
+  // Remove leading dimensions of size 1, if any.
+  size_t first_dim = 0;
+  while (first_dim < channel_dim + 1 && quantization_buffer[first_dim] == 1) {
+    ++first_dim;
+  }
+  size_t num_quantization_dims = channel_dim + 1 - first_dim;
+  const size_t* quantization_dims =
+      num_quantization_dims == 0 ? nullptr : quantization_buffer + first_dim;
 
   uint32_t zero_point_id = YNN_INVALID_VALUE_ID;
   if (channelwise_zero_point != nullptr) {
     ynn_status status =
-        ynn_define_tensor(subgraph->ynn, ynn_type_fp32, channel_dim + 1,
+        ynn_define_tensor(subgraph->ynn, ynn_type_fp32, num_quantization_dims,
                           quantization_dims, channelwise_zero_point,
                           /*flags=*/0, &zero_point_id);
     if (status != ynn_status_success) {
@@ -160,7 +169,7 @@ xnn_status xnn_define_channelwise_quantized_tensor_value_v3(
 
   uint32_t scale_id = YNN_INVALID_VALUE_ID;
   ynn_status status =
-      ynn_define_tensor(subgraph->ynn, ynn_type_fp32, channel_dim + 1,
+      ynn_define_tensor(subgraph->ynn, ynn_type_fp32, num_quantization_dims,
                         quantization_dims, scale, /*flags=*/0, &scale_id);
   if (status != ynn_status_success) {
     return ynn::xnn_status_from_ynn(status);

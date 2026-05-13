@@ -222,9 +222,7 @@ void TestStaticB(xnn_datatype convert_to = xnn_datatype_invalid,
   auto output_gen = MakeDatatypeGenerator(Output());
   std::uniform_int_distribution<> channels_dist{1, 100};
   std::uniform_real_distribution<float> zero_point_dist{-1.5f, -0.5f};
-  // TODO(b/408280445): The rank should go down to 1, but hits a bug in QP8
-  // code paths that assume the LHS has rank >= 2.
-  std::uniform_int_distribution<> rank_dist{2, XNN_MAX_TENSOR_DIMS - 1};
+  std::uniform_int_distribution<> rank_dist{1, XNN_MAX_TENSOR_DIMS - 1};
 
   for (auto _ : FuzzTest(std::chrono::milliseconds(500))) {
     size_t rank = rank_dist(rng);
