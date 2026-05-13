@@ -19,6 +19,7 @@
 #include <vector>
 
 #include "ynnpack/base/base.h"
+#include "ynnpack/base/span.h"
 #include "slinky/builder/pipeline.h"
 #include "slinky/runtime/buffer.h"
 #include "slinky/runtime/expr.h"
@@ -28,7 +29,8 @@
 
 namespace ynn {
 
-static constexpr char reduction_dim_prefix = 'k';
+static constexpr char reduction_dim_prefix[] = "k";
+static constexpr char pure_dim_prefix[] = "d";
 
 class slinky_globals {
  public:
@@ -37,15 +39,17 @@ class slinky_globals {
   slinky::expr get(slinky::expr value, const char* prefix);
 
   // Make a single dimension with index `d`.
-  slinky::var make_dim(int d, const char* prefix = "d");
+  slinky::var make_dim(int d, const char* prefix = pure_dim_prefix);
   slinky::var make_reduction_dim(int d);
 
   bool is_reduction_dim(slinky::var dim);
+  bool is_pure_dim(slinky::var dim);
 
   // Make an array of dimensions that is begin, 1, ... end - 1.
   std::vector<slinky::var> make_dims(int begin, int end,
-                                     const char* prefix = "d");
-  std::vector<slinky::var> make_dims(int rank, const char* prefix = "d");
+                                     const char* prefix = pure_dim_prefix);
+  std::vector<slinky::var> make_dims(int rank,
+                                     const char* prefix = pure_dim_prefix);
 
   slinky::buffer_expr_ptr make_buffer_expr(const std::string& name, int rank,
                                            slinky::expr elem_size);
@@ -100,6 +104,12 @@ slinky::interval_expr make_broadcast_bounds(const slinky::var& dim,
 slinky::box_expr make_broadcast_bounds(
     std::vector<slinky::var> dims, const std::vector<slinky::expr>& src_extents,
     const std::vector<slinky::expr>& dst_extents, bool no_broadcast = false);
+
+std::vector<slinky::expr> make_split_factors(
+    ynn::slinky_globals& globals, ynn::span<const slinky::expr> extents,
+    const slinky::expr& element_cost,
+    ynn::span<const slinky::expr> given_splits = {},
+    ynn::span<const int> loop_order = {});
 
 // A loop split for a given function.
 struct scheduling_split {

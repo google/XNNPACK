@@ -292,7 +292,7 @@ error:
   return status;
 }
 
-static enum xnn_status reshape_average_pooling2d(
+static XNN_NO_SANITIZE_FUNCTION enum xnn_status reshape_average_pooling2d(
   xnn_operator_t average_pooling_op,
   size_t batch_size,
   size_t input_height,

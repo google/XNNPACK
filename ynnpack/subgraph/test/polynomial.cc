@@ -69,8 +69,9 @@ void TestPolynomial(A, X) {
     uint32_t output_id = 1;
     uint32_t a_id = YNN_INVALID_VALUE_ID;
     uint32_t x_id = YNN_INVALID_VALUE_ID;
+    std::vector<size_t> input_shape = random_shape(rng, rank, 0, max_dim);
     SubgraphBuilder subgraph(2);
-    subgraph.AddInput(type_of<A>(), rank, input_id)
+    subgraph.AddInput(type_of<A>(), input_shape, input_id)
         .AddOutput(type_of<X>(), rank, output_id)
         .AddTensor(ynn_type_fp32, rank, a_id)
         .AddTensor(ynn_type_fp32, rank, x_id);
@@ -83,7 +84,7 @@ void TestPolynomial(A, X) {
     ASSERT_EQ(runtime.Status(), ynn_status_success);
 
     for (int reshape = 0; reshape < 2; ++reshape) {
-      std::vector<size_t> shape = random_shape(rng, rank, output_id, max_dim);
+      std::vector<size_t> shape = random_shape(rng, input_shape, 1, max_dim);
 
       Tensor<A> a(shape);
       Tensor<X> output(shape);
@@ -103,7 +104,7 @@ void TestPolynomial(A, X) {
           expected = quantize<X>(expected, output_quantization);
           ASSERT_NEAR(expected, output(i), 1);
         } else {
-          const float tolerance = epsilon(type_of<X>()) * max_abs_value *
+          const float tolerance = type_info<X>::epsilon() * max_abs_value *
                                   std::pow(max_abs_value, degree);
           ASSERT_NEAR(expected, output(i), tolerance);
         }

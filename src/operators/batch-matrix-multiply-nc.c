@@ -377,7 +377,7 @@ static struct bmm_variant qs8_variant = {
     .cleanup = cleanup_qs8,
 };
 
-enum xnn_status create_batch_matrix_multiply_nc_const_weights(
+XNN_NO_SANITIZE_FUNCTION enum xnn_status create_batch_matrix_multiply_nc_const_weights(
     size_t batch_size_b, size_t k, size_t n, const void* data_b,
     size_t log2_kernel_element_size, size_t bias_element_size,
     const void* packing_params, xnn_init_scale_params_fn init_scale_b,

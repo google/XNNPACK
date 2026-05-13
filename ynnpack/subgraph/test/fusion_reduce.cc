@@ -16,133 +16,8 @@
 namespace ynn {
 
 using ::testing::AllOf;
+using ::testing::ElementsAre;
 using ::testing::Not;
-
-TEST(fusion, reduce_reduce_keep_dims) {
-  const uint32_t a_id = 0;
-  const uint32_t x_id = 1;
-  SubgraphBuilder builder(2);
-  uint32_t v1_id = YNN_INVALID_VALUE_ID;
-  builder.AddInput(ynn_type_fp32, 6, a_id)
-      .AddOutput(ynn_type_fp32, 6, x_id)
-      .AddTensor(ynn_type_fp32, 6, v1_id);
-
-  // reduce axes {1} then {2}, both keep_dims=true
-  builder
-      .AddReduce(ynn_reduce_sum, {1, 3}, a_id, YNN_INVALID_VALUE_ID, v1_id,
-                 YNN_NODE_FLAG_KEEP_DIMS)
-      .AddReduce(ynn_reduce_sum, {2, 4}, v1_id, YNN_INVALID_VALUE_ID, x_id,
-                 YNN_NODE_FLAG_KEEP_DIMS);
-
-  ynn_subgraph& subgraph = *builder.GetSubgraph();
-  subgraph.fusion();
-  subgraph.invalidate_dead_values();
-
-  ASSERT_THAT(subgraph, AllOf(HasValidNodeCount(1), HasValidValueCount(2)));
-  const ynn_node& node = ProducerOf(x_id, subgraph);
-  EXPECT_THAT(node, AllOf(IsReduce(ynn_reduce_sum), InputsInclude(a_id)));
-  const auto& reduce = std::get<ynn_node::reduce>(node.op);
-  EXPECT_EQ(reduce.k_dims, 0b011110);
-  EXPECT_TRUE(reduce.keep_dims);
-}
-
-TEST(fusion, reduce_reduce_no_keep_dims) {
-  const uint32_t a_id = 0;
-  const uint32_t x_id = 1;
-  SubgraphBuilder builder(2);
-  uint32_t v1_id = YNN_INVALID_VALUE_ID;
-  builder.AddInput(ynn_type_fp32, 6, a_id)
-      .AddOutput(ynn_type_fp32, 2, x_id)
-      .AddTensor(ynn_type_fp32, 4, v1_id);
-
-  // reduce axis {1} then {1} (which was axis 2), both keep_dims=false
-  builder
-      .AddReduce(ynn_reduce_sum, {1, 2}, a_id, YNN_INVALID_VALUE_ID, v1_id, 0)
-      .AddReduce(ynn_reduce_sum, {1, 2}, v1_id, YNN_INVALID_VALUE_ID, x_id, 0);
-
-  ynn_subgraph& subgraph = *builder.GetSubgraph();
-  subgraph.fusion();
-  subgraph.invalidate_dead_values();
-
-  ASSERT_THAT(subgraph, AllOf(HasValidNodeCount(1), HasValidValueCount(2)));
-  const ynn_node& node = ProducerOf(x_id, subgraph);
-  EXPECT_THAT(node, AllOf(IsReduce(ynn_reduce_sum), InputsInclude(a_id)));
-  const auto& reduce = std::get<ynn_node::reduce>(node.op);
-  EXPECT_EQ(reduce.k_dims, 0b011110);
-  EXPECT_FALSE(reduce.keep_dims);
-}
-
-TEST(fusion, reduce_sum_squared_sum) {
-  const uint32_t a_id = 0;
-  const uint32_t x_id = 1;
-  SubgraphBuilder builder(2);
-  uint32_t v1_id = YNN_INVALID_VALUE_ID;
-  builder.AddInput(ynn_type_fp32, 4, a_id)
-      .AddOutput(ynn_type_fp32, 4, x_id)
-      .AddTensor(ynn_type_fp32, 4, v1_id);
-
-  builder
-      .AddReduce(ynn_reduce_sum_squared, {1}, a_id, YNN_INVALID_VALUE_ID, v1_id,
-                 YNN_NODE_FLAG_KEEP_DIMS)
-      .AddReduce(ynn_reduce_sum, {2}, v1_id, YNN_INVALID_VALUE_ID, x_id,
-                 YNN_NODE_FLAG_KEEP_DIMS);
-
-  ynn_subgraph& subgraph = *builder.GetSubgraph();
-  subgraph.fusion();
-  subgraph.invalidate_dead_values();
-
-  ASSERT_THAT(subgraph, AllOf(HasValidNodeCount(1), HasValidValueCount(2)));
-  const ynn_node& node = ProducerOf(x_id, subgraph);
-  EXPECT_THAT(node,
-              AllOf(IsReduce(ynn_reduce_sum_squared), InputsInclude(a_id)));
-}
-
-TEST(fusion, reduce_reduce_keep_dims_mismatch) {
-  const uint32_t a_id = 0;
-  const uint32_t x_id = 1;
-  SubgraphBuilder builder(2);
-  uint32_t v1_id = YNN_INVALID_VALUE_ID;
-  builder.AddInput(ynn_type_fp32, 4, a_id)
-      .AddOutput(ynn_type_fp32, 3, x_id)
-      .AddTensor(ynn_type_fp32, 4, v1_id);
-
-  // reduce axis {1} keep_dims=true, then {2} keep_dims=false
-  builder
-      .AddReduce(ynn_reduce_sum, {1}, a_id, YNN_INVALID_VALUE_ID, v1_id,
-                 YNN_NODE_FLAG_KEEP_DIMS)
-      .AddReduce(ynn_reduce_sum, {2}, v1_id, YNN_INVALID_VALUE_ID, x_id, 0);
-
-  ynn_subgraph& subgraph = *builder.GetSubgraph();
-  subgraph.fusion();
-  subgraph.invalidate_dead_values();
-
-  // Should NOT fuse.
-  EXPECT_THAT(subgraph, HasValidNodeCount(2));
-}
-
-TEST(fusion, reduce_reduce_non_identity_init) {
-  const uint32_t a_id = 0;
-  const uint32_t x_id = 1;
-  SubgraphBuilder builder(2);
-  uint32_t v1_id = YNN_INVALID_VALUE_ID;
-  uint32_t init2_id = builder.DefineScalar(1.0f);
-  builder.AddInput(ynn_type_fp32, 4, a_id)
-      .AddOutput(ynn_type_fp32, 4, x_id)
-      .AddTensor(ynn_type_fp32, 4, v1_id);
-
-  builder
-      .AddReduce(ynn_reduce_sum, {1}, a_id, YNN_INVALID_VALUE_ID, v1_id,
-                 YNN_NODE_FLAG_KEEP_DIMS)
-      .AddReduce(ynn_reduce_sum, {2}, v1_id, init2_id, x_id,
-                 YNN_NODE_FLAG_KEEP_DIMS);
-
-  ynn_subgraph& subgraph = *builder.GetSubgraph();
-  subgraph.fusion();
-  subgraph.invalidate_dead_values();
-
-  // Should NOT fuse because init2 is 1.0f, not identity 0.0f.
-  EXPECT_THAT(subgraph, HasValidNodeCount(2));
-}
 
 namespace {
 
@@ -583,6 +458,29 @@ TEST(fusion, reduce_sum_add) {
   EXPECT_THAT(node, AllOf(IsReduce(ynn_reduce_sum), InputsAre(a_id, b_id)));
 }
 
+TEST(fusion, reduce_sum_broadcast_add) {
+  const uint32_t a_id = 0;
+  const uint32_t b_id = 1;
+  const uint32_t x_id = 2;
+  SubgraphBuilder builder(3);
+  uint32_t v1_id = YNN_INVALID_VALUE_ID;
+  builder.AddInput(ynn_type_fp32, 2, a_id)
+      .AddInput(ynn_type_fp32, 3, b_id)
+      .AddOutput(ynn_type_fp32, 3, x_id)
+      .AddTensor(ynn_type_fp32, 1, v1_id);
+
+  // Similar to the case above, but the add is broadcasting, which reduce cannot
+  // implement.
+  builder.AddReduce(ynn_reduce_sum, {1}, a_id, YNN_INVALID_VALUE_ID, v1_id, 0)
+      .AddBinary(ynn_binary_add, v1_id, b_id, x_id);
+
+  ynn_subgraph& subgraph = *builder.GetSubgraph();
+  subgraph.fusion();
+  subgraph.invalidate_dead_values();
+
+  ASSERT_THAT(subgraph, AllOf(HasValidNodeCount(2), HasValidValueCount(4)));
+}
+
 TEST(fusion, reduce_sum_squared_add) {
   const uint32_t a_id = 0;
   const uint32_t b_id = 1;
@@ -767,6 +665,137 @@ TEST(fusion, reduce_sum_add_of_reduce) {
   subgraph.invalidate_dead_values();
 
   EXPECT_THAT(subgraph, HasValidNodeCount(3));
+}
+
+TEST(fusion, reduce_static_transpose) {
+  // reduce(static_transpose(x)) -> static_transpose(reduce(x))
+  const uint32_t x_id = 0;
+  uint32_t transposed_id = 1;
+  const uint32_t y_id = 2;
+  SubgraphBuilder builder(3);
+
+  builder.AddInput(ynn_type_fp32, 3, x_id)
+      .AddOutput(ynn_type_fp32, 2, y_id)
+      .AddTensor(ynn_type_fp32, 3, transposed_id);
+
+  // Transpose (2, 0, 1). So dimension 0 -> 2, 1 -> 0, 2 -> 1.
+  std::vector<int32_t> perm = {2, 0, 1};
+  builder.AddTranspose(perm, x_id, transposed_id)
+      .AddReduce(ynn_reduce_sum, {1}, transposed_id, YNN_INVALID_VALUE_ID, y_id,
+                 /*flags=*/0);
+
+  ynn_subgraph& subgraph = *builder.GetSubgraph();
+  subgraph.fusion();
+  subgraph.invalidate_dead_values();
+
+  ASSERT_THAT(subgraph, HasValidNodeCount(2));
+
+  const ynn_node& trans_node = ProducerOf(y_id, subgraph);
+  EXPECT_TRUE(
+      std::holds_alternative<ynn_node::static_transpose>(trans_node.op));
+  const uint32_t r_id = trans_node.inputs[0];
+
+  const ynn_node& reduce_node = ProducerOf(r_id, subgraph);
+  EXPECT_THAT(reduce_node, AllOf(IsReduce(ynn_reduce_sum),
+                                 InputsAre(x_id, YNN_INVALID_VALUE_ID)));
+
+  const auto& reduce_op = std::get<ynn_node::reduce>(reduce_node.op);
+  // Original user reduce axis is 1 -> Slinky axis 1. (k_dims[1] = true).
+  // Transpose permutation is {2, 0, 1}, which translates to slinky permutation
+  // {1, 2, 0}. Mapped axis = perm[1] = 2.
+  EXPECT_EQ(reduce_op.k_dims, 0b100);
+}
+
+TEST(fusion, reduce_static_transpose_identity) {
+  // reduce(static_transpose(x)) -> reduce(x) where the resulting transpose is
+  // an identity.
+  const uint32_t x_id = 0;
+  uint32_t transposed_id = 1;
+  const uint32_t y_id = 2;
+  SubgraphBuilder builder(3);
+
+  builder.AddInput(ynn_type_fp32, 3, x_id)
+      .AddOutput(ynn_type_fp32, 2, y_id)
+      .AddTensor(ynn_type_fp32, 3, transposed_id);
+
+  // Transpose (0, 2, 1). So dimension 0 -> 0, 1 -> 2, 2 -> 1.
+  std::vector<int32_t> perm = {0, 2, 1};
+  builder.AddTranspose(perm, x_id, transposed_id)
+      .AddReduce(ynn_reduce_sum, {2}, transposed_id, YNN_INVALID_VALUE_ID, y_id,
+                 /*flags=*/0);
+
+  ynn_subgraph& subgraph = *builder.GetSubgraph();
+  subgraph.fusion();
+  subgraph.invalidate_dead_values();
+
+  ASSERT_THAT(subgraph,
+              AllOf(HasValidNodeCount(1), HasValidValueIds(x_id, y_id),
+                    Not(HasValidValueId(transposed_id))));
+
+  const ynn_node& reduce_node = ProducerOf(y_id, subgraph);
+  EXPECT_THAT(reduce_node, AllOf(IsReduce(ynn_reduce_sum),
+                                 InputsAre(x_id, YNN_INVALID_VALUE_ID)));
+
+  const auto& reduce_op = std::get<ynn_node::reduce>(reduce_node.op);
+  // Original user reduce axis is 2 -> Slinky axis 0. (k_dims[0] = true).
+  // Transpose permutation is {0, 2, 1}, which translates to slinky permutation
+  // {1, 0, 2}. Mapped axis = perm[0] = 1.
+  EXPECT_EQ(reduce_op.k_dims, 0b010);
+}
+
+TEST(fusion, reduce_new_dimension_static_transpose) {
+  const uint32_t x_id = 0;
+  uint32_t transposed_id = 1;
+  const uint32_t y_id = 2;
+  SubgraphBuilder builder(3);
+
+  builder.AddInput(ynn_type_fp32, 2, x_id)
+      .AddOutput(ynn_type_fp32, 2, y_id)
+      .AddTensor(ynn_type_fp32, 3, transposed_id);
+
+  // Transpose (2, 0, 1). So dimension 0 -> 2, 1 -> 0, 2 -> 1.
+  std::vector<int32_t> perm = {2, YNN_MAX_TENSOR_RANK, 1};
+  builder.AddTranspose(perm, x_id, transposed_id)
+      .AddReduce(ynn_reduce_sum, {1}, transposed_id, YNN_INVALID_VALUE_ID, y_id,
+                 /*flags=*/0);
+
+  ynn_subgraph& subgraph = *builder.GetSubgraph();
+  subgraph.fusion();
+  subgraph.invalidate_dead_values();
+
+  ASSERT_THAT(subgraph, HasValidNodeCount(2));
+
+  // This should not be rewritten because the reduction is of a new dimension
+  // inserted by the transpose.
+  EXPECT_THAT(ProducerOf(y_id, subgraph), IsReduce(ynn_reduce_sum));
+}
+
+TEST(fusion, reduce_sum_to_dot_f32) {
+  const uint32_t a_id = 0;
+  const uint32_t b_id = 1;
+  const uint32_t y_id = 2;
+  SubgraphBuilder builder(3);
+  uint32_t mul_id = YNN_INVALID_VALUE_ID;
+  builder.AddInput(ynn_type_fp32, {4, 8, 1}, a_id)
+      .AddInput(ynn_type_fp32, {1, 8, 3}, b_id)
+      .AddOutput(ynn_type_fp32, {4, 3}, y_id)
+      .AddTensor(ynn_type_fp32, {4, 8, 3}, mul_id);
+
+  // y = sum(a * b, axis=1)
+  // This should rewrite to a dot.
+  builder.AddBinary(ynn_binary_multiply, a_id, b_id, mul_id)
+      .AddReduce(ynn_reduce_sum, {1}, mul_id, YNN_INVALID_VALUE_ID, y_id, 0);
+
+  ynn_subgraph& subgraph = *builder.GetSubgraph();
+  subgraph.fusion();
+  subgraph.invalidate_dead_values();
+
+  EXPECT_THAT(subgraph, Not(HasValidValueId(mul_id)));
+  const ynn_node& dot_node = ProducerOf(y_id, subgraph);
+  ASSERT_THAT(dot_node, IsDot());
+  EXPECT_THAT(
+      ProducerOf(dot_node.inputs[0], subgraph),
+      AllOf(IsStaticTransposeWithPerm(ElementsAre(1, 2)), InputsAre(a_id)));
 }
 
 }  // namespace ynn

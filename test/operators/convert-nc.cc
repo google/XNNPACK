@@ -529,6 +529,55 @@ class ConvertOperatorTester {
     }
   }
 
+  void TestQS8toQC8() const {
+    xnnpack::ReplicableRandomDevice rng;
+
+    xnnpack::Buffer<int8_t> input(
+        (batch_size() - 1) * input_stride() + channels(),
+        xnnpack::XnnExtraBytes);
+    xnnpack::Buffer<int8_t> output((batch_size() - 1) * output_stride() +
+                                   channels());
+    std::uniform_int_distribution<int32_t> i8dist(
+        std::numeric_limits<int8_t>::min(),
+        std::numeric_limits<int8_t>::max());
+    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+      std::generate(input.begin(), input.end(),
+                    [&]() { return static_cast<int8_t>(i8dist(rng)); });
+
+      std::fill(output.begin(), output.end(), static_cast<int8_t>(0x7E));
+
+      ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+      xnn_operator_t convert_op = nullptr;
+
+      ASSERT_EQ(xnn_status_success, xnn_create_convert_nc_qs8_qc8(
+                                        /*flags=*/0, &convert_op));
+      ASSERT_NE(nullptr, convert_op);
+
+      std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)>
+          auto_convert_op(convert_op, xnn_delete_operator);
+
+      ASSERT_EQ(xnn_status_success,
+                xnn_reshape_convert_nc_qs8_qc8(
+                    convert_op, batch_size(), channels(), input_stride(),
+                    output_stride(), /*threadpool=*/nullptr));
+      ASSERT_EQ(xnn_status_success,
+                xnn_setup_convert_nc_qs8_qc8(convert_op, input.data(),
+                                             output.data()));
+      ASSERT_EQ(xnn_status_success,
+                xnn_run_operator(convert_op, /*threadpool=*/nullptr));
+
+      for (size_t i = 0; i < batch_size(); i++) {
+        for (size_t c = 0; c < channels(); c++) {
+          const int8_t expected = input[i * input_stride() + c];
+          const int8_t actual = output[i * output_stride() + c];
+          ASSERT_EQ(expected, actual)
+              << "at batch " << i << " / " << batch_size() << ", channel " << c
+              << " / " << channels();
+        }
+      }
+    }
+  }
+
  private:
   size_t batch_size_{1};
   size_t channels_{1};
@@ -784,5 +833,59 @@ TEST(CONVERT_NC_F32_QDU8, small_batch_with_input_and_output_stride) {
         .output_stride(117)
         .iterations(3)
         .TestF32toQDU8();
+  }
+}
+
+TEST(CONVERT_NC_QS8_QC8, unit_batch) {
+  for (size_t channels = 1; channels < 100; channels++) {
+    ConvertOperatorTester()
+        .batch_size(1)
+        .channels(channels)
+        .iterations(3)
+        .TestQS8toQC8();
+  }
+}
+
+TEST(CONVERT_NC_QS8_QC8, small_batch) {
+  for (size_t channels = 1; channels < 100; channels++) {
+    ConvertOperatorTester()
+        .batch_size(3)
+        .channels(channels)
+        .iterations(3)
+        .TestQS8toQC8();
+  }
+}
+
+TEST(CONVERT_NC_QS8_QC8, small_batch_with_input_stride) {
+  for (size_t channels = 1; channels < 100; channels += 15) {
+    ConvertOperatorTester()
+        .batch_size(3)
+        .channels(channels)
+        .input_stride(129)
+        .iterations(3)
+        .TestQS8toQC8();
+  }
+}
+
+TEST(CONVERT_NC_QS8_QC8, small_batch_with_output_stride) {
+  for (size_t channels = 1; channels < 100; channels += 15) {
+    ConvertOperatorTester()
+        .batch_size(3)
+        .channels(channels)
+        .output_stride(117)
+        .iterations(3)
+        .TestQS8toQC8();
+  }
+}
+
+TEST(CONVERT_NC_QS8_QC8, small_batch_with_input_and_output_stride) {
+  for (size_t channels = 1; channels < 100; channels += 15) {
+    ConvertOperatorTester()
+        .batch_size(3)
+        .channels(channels)
+        .input_stride(129)
+        .output_stride(117)
+        .iterations(3)
+        .TestQS8toQC8();
   }
 }

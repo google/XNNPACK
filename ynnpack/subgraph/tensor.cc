@@ -119,8 +119,7 @@ ynn_status ynn_define_tensor(ynn_subgraph_t subgraph, enum ynn_type type,
         // Any (logical) extent 1 dimensions of static values may be implicitly
         // broadcasted.
         const slinky::index_t logical = dims[rank - 1 - d];
-        const slinky::index_t physical = physical_dims[rank - 1 - d];
-        value->extents.push_back(logical == 1 ? slinky::expr{} : physical);
+        value->extents.push_back(logical == 1 ? slinky::expr{} : logical);
       }
     }
   }
@@ -143,7 +142,14 @@ ynn_status ynn_define_tensor(ynn_subgraph_t subgraph, enum ynn_type type,
     // Replace any constant 0 dimensions with dynamic extents.
     for (size_t d = 0; d < rank; ++d) {
       if (!dims || physical_dims[rank - 1 - d] == 0) {
-        value->extents[d] = buffer_max(value->symbol, d) + 1;
+        slinky::expr extent_d = buffer_max(value->symbol, d) + 1;
+        if (d == 0) {
+          int elem_count = ynn::type_element_count(type);
+          if (elem_count != 1) {
+            extent_d *= elem_count;
+          }
+        }
+        value->extents[d] = extent_d;
       }
     }
   }

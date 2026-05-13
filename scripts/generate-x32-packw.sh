@@ -155,7 +155,7 @@ tools/xngen src/x32-packw/gio-simd.c.in -D BATCH_TILES=4,8,12,16    -D PREFETCH=
 ################################# x86 SSE41 #################################
 tools/xngen src/x32-packw/gio-simd.c.in -D BATCH_TILES=4,8,12,16    -D PREFETCH=0 -D KBLOCK=2 -D ARCH=sse41    -o src/x32-packw/gen/x32-packw-gio-sse41-u2.c
 
-################################## WAsm SIMD ##################################
+################################## Wasm SIMD ##################################
 tools/xngen src/x32-packw/gio-simd.c.in -D BATCH_TILES=4,8,12,16    -D PREFETCH=0 -D KBLOCK=2 -D ARCH=wasmsimd -o src/x32-packw/gen/x32-packw-gio-wasmsimd-u2.c
 
 ################################## Hexagon HVX #################################

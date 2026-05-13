@@ -160,7 +160,7 @@ tools/xngen src/x32-transposec/neon-zip.c.in -D SIZE=64 VECTOR_SIZE=128 IN_PTRS=
 tools/xngen src/x32-transposec/neon-zip.c.in -D SIZE=64 VECTOR_SIZE=128 IN_PTRS=MULTI OUT_PTRS=DEC    -o src/x64-transposec/gen/x64-transposec-2x2-multi-dec-zip-neon.c &
 tools/xngen src/x32-transposec/neon-zip.c.in -D SIZE=64 VECTOR_SIZE=128 IN_PTRS=MULTI OUT_PTRS=MOV    -o src/x64-transposec/gen/x64-transposec-2x2-multi-mov-zip-neon.c &
 
-#################################### WAsm SIMD ###############################
+#################################### Wasm SIMD ###############################
 tools/xngen src/x32-transposec/wasmsimd.c.in -D SIZE=8  IN_PTRS=REUSE OUT_PTRS=MOV    -o src/x8-transposec/gen/x8-transposec-16x16-reuse-mov-wasmsimd.c &
 tools/xngen src/x32-transposec/wasmsimd.c.in -D SIZE=8  IN_PTRS=REUSE OUT_PTRS=SWITCH -o src/x8-transposec/gen/x8-transposec-16x16-reuse-switch-wasmsimd.c &
 tools/xngen src/x32-transposec/wasmsimd.c.in -D SIZE=16 IN_PTRS=REUSE OUT_PTRS=MOV    -o src/x16-transposec/gen/x16-transposec-8x8-reuse-mov-wasmsimd.c &

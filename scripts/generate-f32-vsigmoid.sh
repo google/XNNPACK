@@ -158,7 +158,7 @@ tools/xngen src/f32-vsigmoid/avx512f-rr2-lut32-p2-perm2-scalef.c.in -D BATCH_TIL
 tools/xngen src/f32-vsigmoid/avx512f-rr2-lut32-p2-perm2-scalef.c.in -D BATCH_TILE=48  -D RR_STEPS=2 -D DIV_ALGO=nr1fma -o src/f32-vsigmoid/gen/f32-vsigmoid-avx512f-rr2-lut32-p2-perm2-scalef-nr1fma-u48.c &
 tools/xngen src/f32-vsigmoid/avx512f-rr2-lut32-p2-perm2-scalef.c.in -D BATCH_TILE=64  -D RR_STEPS=2 -D DIV_ALGO=nr1fma -o src/f32-vsigmoid/gen/f32-vsigmoid-avx512f-rr2-lut32-p2-perm2-scalef-nr1fma-u64.c &
 
-################################## WAsm SIMD ##################################
+################################## Wasm SIMD ##################################
 tools/xngen src/f32-vsigmoid/wasmsimd-rr2-p5-div.c.in -D BATCH_TILE=4  -D RELAXED=0 -D FMA=0 -D BLENDVPS=0 -o src/f32-vsigmoid/gen/f32-vsigmoid-wasmsimd-rr2-p5-div-u4.c &
 tools/xngen src/f32-vsigmoid/wasmsimd-rr2-p5-div.c.in -D BATCH_TILE=8  -D RELAXED=0 -D FMA=0 -D BLENDVPS=0 -o src/f32-vsigmoid/gen/f32-vsigmoid-wasmsimd-rr2-p5-div-u8.c &
 tools/xngen src/f32-vsigmoid/wasmsimd-rr2-p5-div.c.in -D BATCH_TILE=12 -D RELAXED=0 -D FMA=0 -D BLENDVPS=0 -o src/f32-vsigmoid/gen/f32-vsigmoid-wasmsimd-rr2-p5-div-u12.c &

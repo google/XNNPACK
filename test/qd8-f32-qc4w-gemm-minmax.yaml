@@ -2132,7 +2132,7 @@
   k-block: 2
   planes: 2
 
-# WAsmSIMD
+# WasmSIMD
 - name: xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x4c8__wasmsimd_dot16x2_ld64
   init: xnn_init_f32_qc4w_minmax_scalar_params
   pack: xnn_pack_qs8_qc4w_gemm_goi_w

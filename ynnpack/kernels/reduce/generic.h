@@ -7,14 +7,8 @@
 #define XNNPACK_YNNPACK_KERNELS_REDUCE_GENERIC_H_
 
 #include <cstddef>
-#include <cstdint>
 
 #include "ynnpack/base/arithmetic.h"
-#include "ynnpack/base/bfloat16.h"
-#include "ynnpack/base/bit_cast.h"
-#include "ynnpack/base/half.h"
-#include "ynnpack/base/simd/vec.h"
-#include "ynnpack/base/type.h"
 
 namespace ynn {
 
@@ -44,51 +38,44 @@ namespace ynn {
 // statically dispatched at compile time to handle the whole-tile vs. "tail"
 // cases.
 template <typename Accumulator, typename AT, typename CT>
-static void tiled_reduce(size_t N, size_t K3, size_t K2, size_t K1,
-                         size_t A_stride_n, size_t A_stride_k3,
-                         size_t A_stride_k2, const AT* A, size_t C_stride_m,
-                         CT* C) {
+static void tiled_reduce(size_t N, size_t K2, size_t K1, size_t A_stride_n,
+                         size_t A_stride_k2, const AT* A, CT* x0, CT* x1) {
   Accumulator acc;
   while (N >= Accumulator::N) {
-    acc = Accumulator(K3 * K2 * K1);
-    for (size_t k3 = 0; k3 < K3; ++k3) {
-      const AT* A_k3 = offset_bytes(A, k3 * A_stride_k3);
-      for (size_t k2 = 0; k2 < K2; ++k2) {
-        const AT* A_k1 = offset_bytes(A_k3, k2 * A_stride_k2);
-        size_t k1 = K1;
-        while (k1 >= Accumulator::K) {
-          acc.reduce(A_k1, A_stride_n, Accumulator::N, Accumulator::K);
-          A_k1 = offset_bytes(A_k1, Accumulator::K * sizeof(AT));
-          k1 -= Accumulator::K;
-        }
-        if (k1 > 0) {
-          acc.reduce(A_k1, A_stride_n, Accumulator::N, k1);
-        }
+    acc = Accumulator(K2 * K1);
+    for (size_t k2 = 0; k2 < K2; ++k2) {
+      const AT* A_k1 = offset_bytes(A, k2 * A_stride_k2);
+      size_t k1 = K1;
+      while (k1 >= Accumulator::K) {
+        acc.reduce(A_k1, A_stride_n, Accumulator::N, Accumulator::K);
+        A_k1 = offset_bytes(A_k1, Accumulator::K * sizeof(AT));
+        k1 -= Accumulator::K;
+      }
+      if (k1 > 0) {
+        acc.reduce(A_k1, A_stride_n, Accumulator::N, k1);
       }
     }
-    acc.accumulate(C_stride_m, C, Accumulator::N);
-    C = offset_bytes(C, Accumulator::N * sizeof(CT));
+    acc.accumulate(x0, x1, Accumulator::N);
+    x0 = offset_bytes(x0, Accumulator::N * sizeof(CT));
+    if (x1) x1 = offset_bytes(x1, Accumulator::N * sizeof(CT));
     A = offset_bytes(A, Accumulator::N * A_stride_n);
     N -= Accumulator::N;
   }
   if (N > 0) {
-    acc = Accumulator(K3 * K2 * K1);
-    for (size_t k3 = 0; k3 < K3; ++k3) {
-      const AT* A_k3 = offset_bytes(A, k3 * A_stride_k3);
-      for (size_t k2 = 0; k2 < K2; ++k2) {
-        const AT* A_k1 = offset_bytes(A_k3, k2 * A_stride_k2);
-        size_t k1 = K1;
-        while (k1 >= Accumulator::K) {
-          acc.reduce(A_k1, A_stride_n, N, Accumulator::K);
-          A_k1 = offset_bytes(A_k1, Accumulator::K * sizeof(AT));
-          k1 -= Accumulator::K;
-        }
-        if (k1 > 0) {
-          acc.reduce(A_k1, A_stride_n, N, k1);
-        }
+    acc = Accumulator(K2 * K1);
+    for (size_t k2 = 0; k2 < K2; ++k2) {
+      const AT* A_k1 = offset_bytes(A, k2 * A_stride_k2);
+      size_t k1 = K1;
+      while (k1 >= Accumulator::K) {
+        acc.reduce(A_k1, A_stride_n, N, Accumulator::K);
+        A_k1 = offset_bytes(A_k1, Accumulator::K * sizeof(AT));
+        k1 -= Accumulator::K;
+      }
+      if (k1 > 0) {
+        acc.reduce(A_k1, A_stride_n, N, k1);
       }
     }
-    acc.accumulate(C_stride_m, C, N);
+    acc.accumulate(x0, x1, N);
   }
 }
 
@@ -97,123 +84,46 @@ static void tiled_reduce(size_t N, size_t K3, size_t K2, size_t K1,
 // where it maintains the reduction result in C itself instead of a local
 // accumulator.
 template <typename Accumulator, typename AT, typename CT>
-static void stream_reduce(size_t N, size_t K3, size_t K2, size_t A_stride_k3,
-                          size_t A_stride_k2, const AT* A, size_t C_stride_m,
-                          CT* C) {
+static void stream_reduce(size_t N, size_t K2, size_t A_stride_n,
+                          size_t A_stride_k2, const AT* A, CT* x0, CT* x1) {
   Accumulator acc;
-  for (size_t k3 = 0; k3 < K3; ++k3) {
-    const AT* a_k3 = offset_bytes(A, k3 * A_stride_k3);
-    size_t k2 = K2;
-    while (k2 >= Accumulator::K2) {
-      const AT* a = a_k3;
-      CT* c = C;
-      size_t n = N;
-      while (n >= Accumulator::N) {
-        acc.reduce_accumulate(a, Accumulator::N, A_stride_k2, Accumulator::K2,
-                              C_stride_m, c);
-        a = offset_bytes(a, Accumulator::N * sizeof(AT));
-        c = offset_bytes(c, Accumulator::N * sizeof(CT));
-        n -= Accumulator::N;
-      }
-      if (n > 0) {
-        acc.reduce_accumulate(a, n, A_stride_k2, Accumulator::K2, C_stride_m,
-                              c);
-      }
-      a_k3 = offset_bytes(a_k3, Accumulator::K2 * A_stride_k2);
-      k2 -= Accumulator::K2;
+  size_t k2 = K2;
+  while (k2 >= Accumulator::K2) {
+    const AT* a = A;
+    CT* c0 = x0;
+    CT* c1 = x1;
+    size_t n = N;
+    while (n >= Accumulator::N) {
+      acc.reduce_accumulate(a, Accumulator::N, A_stride_k2, Accumulator::K2, c0,
+                            c1);
+      a = offset_bytes(a, Accumulator::N * A_stride_n);
+      c0 = offset_bytes(c0, Accumulator::N * sizeof(CT));
+      if (c1) c1 = offset_bytes(c1, Accumulator::N * sizeof(CT));
+      n -= Accumulator::N;
     }
-    if (k2 > 0) {
-      const AT* a = a_k3;
-      CT* c = C;
-      size_t n = N;
-      while (n >= Accumulator::N) {
-        acc.reduce_accumulate(a, Accumulator::N, A_stride_k2, k2, C_stride_m,
-                              c);
-        a = offset_bytes(a, Accumulator::N * sizeof(AT));
-        c = offset_bytes(c, Accumulator::N * sizeof(CT));
-        n -= Accumulator::N;
-      }
-      if (n > 0) {
-        acc.reduce_accumulate(a, n, A_stride_k2, k2, C_stride_m, c);
-      }
+    if (n > 0) {
+      acc.reduce_accumulate(a, n, A_stride_k2, Accumulator::K2, c0, c1);
+    }
+    A = offset_bytes(A, Accumulator::K2 * A_stride_k2);
+    k2 -= Accumulator::K2;
+  }
+  if (k2 > 0) {
+    const AT* a = A;
+    CT* c0 = x0;
+    CT* c1 = x1;
+    size_t n = N;
+    while (n >= Accumulator::N) {
+      acc.reduce_accumulate(a, Accumulator::N, A_stride_k2, k2, c0, c1);
+      a = offset_bytes(a, Accumulator::N * A_stride_n);
+      c0 = offset_bytes(c0, Accumulator::N * sizeof(CT));
+      if (c1) c1 = offset_bytes(c1, Accumulator::N * sizeof(CT));
+      n -= Accumulator::N;
+    }
+    if (n > 0) {
+      acc.reduce_accumulate(a, n, A_stride_k2, k2, c0, c1);
     }
   }
 }
-
-using std::max;
-using std::min;
-
-// This class allows min/max reductions of sign-magnitude floating point types
-// to be computed efficiently using integer arithmetic. It is implicitly
-// convertible to-from Float, and supports computing min/max.
-//
-// The intended usage is:
-//
-//   float16_wrapper<Float, Int, Float::value_type> r(init_value);
-//   for (int i = 0; i < n; ++i) {
-//     r = min(r, floats[i]);
-//   }
-//   Float result = static_cast<Float>(r);
-template <typename Float, typename Int>
-class float16_wrapper {
- public:
-  float16_wrapper() = default;
-  float16_wrapper(Float value)  // NOLINT
-      : value_(sign_complement(bit_cast<Int>(value))) {}
-  constexpr float16_wrapper(Int value)  // NOLINT
-      : value_(value) {}
-
-  operator Float() const {  // NOLINT
-    return bit_cast<Float>(sign_complement(value_));
-  }
-
-  operator Int() const {  // NOLINT
-    return value_;
-  }
-
-  friend float16_wrapper min(float16_wrapper a, float16_wrapper b) {
-    a.value_ = min(a.value_, b.value_);
-    return a;
-  }
-  friend float16_wrapper max(float16_wrapper a, float16_wrapper b) {
-    a.value_ = max(a.value_, b.value_);
-    return a;
-  }
-
- private:
-  Int value_;
-
-  static constexpr Int sign_complement(Int a) {
-    return (a & 0x7FFF) ^ (a >> 15);
-  }
-};
-
-using half_rvar = float16_wrapper<half, int16_t>;
-using bfloat16_rvar = float16_wrapper<bfloat16, int16_t>;
-
-// Forward type_info for simd::vec.
-template <typename T, size_t N>
-class type_info<simd::vec<T, N>> {
- public:
-  static constexpr simd::vec<T, N> min_identity() {
-    return type_info<T>::min_identity();
-  }
-  static constexpr simd::vec<T, N> max_identity() {
-    return type_info<T>::max_identity();
-  }
-};
-
-// Forward type_info for float16_wrapper.
-template <typename Float, typename Int>
-class type_info<float16_wrapper<Float, Int>> {
- public:
-  static constexpr auto min_identity() {
-    return type_info<Float>::min_identity();
-  }
-  static constexpr auto max_identity() {
-    return type_info<Float>::max_identity();
-  }
-};
 
 }  // namespace ynn
 

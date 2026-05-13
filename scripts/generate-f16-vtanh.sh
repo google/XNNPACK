@@ -62,4 +62,10 @@ tools/xngen src/f16-vtanh/neonfp16arith-expm1minus.c.in -D P=3 -D H=2 -D PS=0 -D
 tools/xngen src/f16-vtanh/neonfp16arith-expm1minus.c.in -D P=3 -D H=2 -D PS=0 -D BATCH_TILE=24 -D SAT=MINMAX -D DIV=RECPEADJ -o src/f16-vtanh/gen/f16-vtanh-neonfp16arith-expm1minus-rr1-p3h2ts-recpeadj-u24.c &
 tools/xngen src/f16-vtanh/neonfp16arith-expm1minus.c.in -D P=3 -D H=2 -D PS=0 -D BATCH_TILE=32 -D SAT=MINMAX -D DIV=RECPEADJ -o src/f16-vtanh/gen/f16-vtanh-neonfp16arith-expm1minus-rr1-p3h2ts-recpeadj-u32.c &
 
+################################ Portable SIMD ################################
+tools/xngen src/f16-vtanh/simd-expm1minus.c.in -D ARCH=scalar -D P=3 -D H=2 -D PS=0 -D BATCH_TILES=1,2,4 -D DIV=DIV -o src/f16-vtanh/gen/f16-vtanh-scalar-expm1minus-rr1-p3h2ts-div.c &
+tools/xngen src/f16-vtanh/simd-expm1minus.c.in -D ARCH=avx512fp16 -D P=3 -D H=2 -D PS=0 -D BATCH_TILES=32,64 -D DIV=DIV -o src/f16-vtanh/gen/f16-vtanh-avx512fp16-expm1minus-rr1-p3h2ts-div.c &
+tools/xngen src/f16-vtanh/simd-expm1minus.c.in -D ARCH=wasmrelaxedsimd -D P=3 -D H=2 -D PS=0 -D BATCH_TILES=8,16,24,32 -D DIV=DIV -o src/f16-vtanh/gen/f16-vtanh-wasmrelaxedsimd-expm1minus-rr1-p3h2ts-div.c &
+# TODO: add hvx generator
+
 wait

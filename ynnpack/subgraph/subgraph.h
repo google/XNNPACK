@@ -54,13 +54,6 @@ inline bool operator<(const axes_set& a, const axes_set& b) {
   return a.to_ulong() < b.to_ulong();
 }
 
-// Define a transpose node, optionally using a slinky copy that may alias even
-// if dimension 0 is not stride 1 in the result.
-ynn_status define_static_transpose(ynn_subgraph_t subgraph,
-                                   std::vector<int32_t> permutation,
-                                   uint32_t input_id, uint32_t* output_id,
-                                   bool alias = false);
-
 // Validation helpers for public APIs.
 ynn_status validate_subgraph(const char* node, ynn_subgraph_t subgraph);
 ynn_status validate_rank(const char* node, const char* rank_of, size_t rank);
@@ -153,20 +146,31 @@ struct ynn_value {
 
   std::string name() const;
 
-  // Get the extent of a dimension, or 1 if it is implicitly broadcasted.
+  // Get the logical extent of a dimension, or 1 if it is implicitly
+  // broadcasted.
   slinky::expr extent(size_t i) const {
     return i < extents.size() && extents[i].defined() ? extents[i] : 1;
   }
 
-  slinky::expr logical_extent(size_t i) const {
-    slinky::expr e = extent(i);
-    if (i == 0) {
-      const int element_count = ynn::type_element_count(type);
-      if (element_count != 1) {
-        e *= element_count;
+  slinky::expr physical_extent(size_t i) const {
+    if (i == 0 && i < extents.size()) {
+      int elem_count = ynn::type_element_count(type);
+      if (elem_count != 1) {
+        return slinky::ceil_div<slinky::expr>(extent(0), elem_count);
       }
     }
-    return e;
+
+    return extent(i);
+  }
+
+  std::vector<slinky::expr> physical_extents() const {
+    std::vector<slinky::expr> phys = extents;
+    if (!phys.empty()) {
+      if (phys[0].defined() || ynn::type_element_count(type) != 1) {
+        phys[0] = physical_extent(0);
+      }
+    }
+    return phys;
   }
 
   // Asserting that the value is reshapable to a static scalar value of type T,
@@ -182,7 +186,7 @@ struct ynn_value {
 
   // If the value is reshape-able to a scalar, returns the value converted to
   // a float, otherwise returns nullopt.
-  std::optional<float> as_scalar_float() const;
+  std::optional<ynn::real> as_scalar() const;
 };
 
 struct ynn_node {
@@ -684,6 +688,9 @@ struct ynn_subgraph : public ynn::ref_counted<ynn_subgraph> {
 
   // Invalidate unused values.
   void invalidate_dead_values();
+
+  // Topologically sort the nodes in the subgraph.
+  void topological_sort();
 
   ynn_status optimize(slinky::thread_pool* threadpool);
 

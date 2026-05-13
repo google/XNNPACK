@@ -13,7 +13,7 @@ tools/xngen src/s8-ibilinear/scalar.c.in -D CHANNEL_TILE=1 -D PIXEL_TILE=1 -D DA
 tools/xngen src/s8-ibilinear/scalar.c.in -D CHANNEL_TILE=2 -D PIXEL_TILE=1 -D DATATYPE=U8 -o src/u8-ibilinear/gen/u8-ibilinear-scalar-u2.c &
 tools/xngen src/s8-ibilinear/scalar.c.in -D CHANNEL_TILE=4 -D PIXEL_TILE=1 -D DATATYPE=U8 -o src/u8-ibilinear/gen/u8-ibilinear-scalar-u4.c &
 
-################################## WAsm SIMD ##################################
+################################## Wasm SIMD ##################################
 tools/xngen src/s8-ibilinear/wasmsimd-dot16x2.c.in -D CHANNEL_TILE=8  -D PIXEL_TILE=1 -D DATATYPE=S8 -o src/s8-ibilinear/gen/s8-ibilinear-wasmsimd-dot16x2-u8.c &
 tools/xngen src/s8-ibilinear/wasmsimd-dot16x2.c.in -D CHANNEL_TILE=16 -D PIXEL_TILE=1 -D DATATYPE=S8 -o src/s8-ibilinear/gen/s8-ibilinear-wasmsimd-dot16x2-u16.c &
 

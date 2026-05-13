@@ -9,6 +9,7 @@
 #include <stdint.h>
 
 #include "include/xnnpack.h"
+#include "src/xnnpack/allocator.h"
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/internal.h"
 #include "src/xnnpack/log.h"
@@ -74,6 +75,17 @@ static enum xnn_status create_convert_operator(
           break;
         case xnn_datatype_qduint8:
           status = xnn_create_convert_nc_f16_qdu8(
+              node->flags,
+              &opdata->operator_objects[0]);
+          break;
+        default:
+          break;
+      }
+      break;
+    case xnn_datatype_qint8:
+      switch (output_datatype) {
+        case xnn_datatype_qcint8:
+          status = xnn_create_convert_nc_qs8_qc8(
               node->flags,
               &opdata->operator_objects[0]);
           break;
@@ -167,6 +179,41 @@ static enum xnn_status reshape_convert_operator(
           /*input_stride=*/channels, threadpool);
       break;
     }
+    case xnn_operator_type_convert_nc_qs8_qc8: {
+      struct xnn_runtime_value* output = values + output_id;
+      const size_t channel_dimension =
+          output->quantization.channel_dimension;
+      const size_t num_channels =
+          output->shape.num_dims > channel_dimension
+              ? output->shape.dim[channel_dimension] : 0;
+      if (num_channels > 0 && dq_batch_size > 0) {
+        xnn_operator_t op = opdata->operator_objects[0];
+        const size_t bytes_needed =
+            num_channels * dq_batch_size * sizeof(float);
+        if (op->channelwise_quantization_buffer_capacity < bytes_needed) {
+          xnn_release_memory(op->channelwise_quantization_buffer);
+          op->channelwise_quantization_buffer = xnn_allocate_memory(bytes_needed);
+          if (op->channelwise_quantization_buffer == NULL) {
+            op->channelwise_quantization_buffer_capacity = 0;
+            return xnn_status_out_of_memory;
+          }
+          op->channelwise_quantization_buffer_capacity = bytes_needed;
+        }
+        float* channelwise_scale = (float*)op->channelwise_quantization_buffer;
+        for (size_t c = 0; c < num_channels; c++) {
+          channelwise_scale[c] = input_value->quantization.scale;
+        }
+        output->quantization.channelwise_scale = channelwise_scale;
+        output->quantization.channelwise_zero_point = NULL;
+      }
+      status = xnn_reshape_convert_nc_qs8_qc8(
+          opdata->operator_objects[0],
+          batch_size,
+          /*channels=*/channel_dim, /*input_stride=*/channel_dim,
+          /*output_stride=*/channel_dim,
+          threadpool);
+      break;
+    }
     default:
       status = xnn_reshape_unary_elementwise_nc(
         opdata->operator_objects[0],
@@ -248,6 +295,9 @@ static enum xnn_status setup_convert_operator(
     }
     case xnn_operator_type_convert_nc_f32_qp8:
       return xnn_setup_convert_nc_f32_qp8(opdata->operator_objects[0],
+                                          input_data, output_data);
+    case xnn_operator_type_convert_nc_qs8_qc8:
+      return xnn_setup_convert_nc_qs8_qc8(opdata->operator_objects[0],
                                           input_data, output_data);
     default:
       return xnn_setup_unary_elementwise_nc(opdata->operator_objects[0], input_data, output_data);
@@ -420,7 +470,9 @@ enum xnn_status xnn_define_unary(
   if (type == xnn_unary_convert) {
     // Some convert types are not elementwise ops, handle them now.
     if (output_value->datatype == xnn_datatype_qdint8 ||
-        output_value->datatype == xnn_datatype_qduint8) {
+        output_value->datatype == xnn_datatype_qduint8 ||
+        (input_value->datatype == xnn_datatype_qint8 &&
+         output_value->datatype == xnn_datatype_qcint8)) {
       struct xnn_node* node = xnn_subgraph_new_node(subgraph);
       if (node == NULL) {
         return xnn_status_out_of_memory;

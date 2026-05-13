@@ -182,6 +182,7 @@ const ynn_type all_real_types[] = {
     ynn_type_fp16,
     ynn_type_bf16,
     ynn_type_fp32,
+    ynn_type_fp64,
 };
 
 const ynn_binary_operator all_integer_ops[] = {

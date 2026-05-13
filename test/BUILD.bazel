@@ -132,6 +132,7 @@ xnnpack_cxx_library(
     "f16_vexp",
     "f16_vgelu",
     "f16_vhswish",
+    "f16_vlog",
     "f16_vlrelu",
     "f16_vneg",
     "f16_vrndd",

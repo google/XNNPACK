@@ -12,46 +12,25 @@
 #include "ynnpack/base/arithmetic.h"
 #include "ynnpack/base/simd/arm_neon.h"
 #include "ynnpack/kernels/reduce/generic.h"
-#include "ynnpack/kernels/reduce/min_max_accumulator.h"
+#include "ynnpack/kernels/reduce/min_max.h"
 #include "ynnpack/kernels/reduce/reduce.h"
-#include "ynnpack/kernels/reduce/sum_accumulator.h"
+#include "ynnpack/kernels/reduce/sum.h"
 
 namespace ynn {
 
 using simd::f64x2;
 
-MIN_MAX_KERNEL(min_max_fp64_4x2_neon, f64x2, f64x2, double, 2);
-MIN_MAX_KERNEL(min_fp64_4x2_neon, f64x2, dummy_t, double, 2);
-MIN_MAX_KERNEL(max_fp64_4x2_neon, dummy_t, f64x2, double, 2);
+MIN_MAX_K1_KERNEL(min_max_k1_fp64_neon, f64x2, f64x2, double, 2);
+MIN_MAX_KN_KERNEL(min_max_kn_fp64_neon, f64x2, f64x2, double, 2);
+MIN_MAX_K1_KERNEL(min_k1_fp64_neon, f64x2, dummy_t, double, 2);
+MIN_MAX_KN_KERNEL(min_kn_fp64_neon, f64x2, dummy_t, double, 2);
+MIN_MAX_K1_KERNEL(max_k1_fp64_neon, dummy_t, f64x2, double, 2);
+MIN_MAX_KN_KERNEL(max_kn_fp64_neon, dummy_t, f64x2, double, 2);
 
-void sum_fp64_neon(size_t n, size_t k3, size_t k2, size_t k1, size_t a_stride_n,
-                   size_t a_stride_k3, size_t a_stride_k2, const void* a,
-                   size_t, void* c) {
-  if (k1 == 1 && a_stride_n == sizeof(double)) {
-    stream_reduce<sum_accumulator_k1_1<f64x2>, double, double>(
-        n, k3, k2, a_stride_k3, a_stride_k2, reinterpret_cast<const double*>(a),
-        /*C_stride_m=*/0, reinterpret_cast<double*>(c));
-  } else {
-    tiled_reduce<sum_accumulator_x32<f64x2, 2>, double, double>(
-        n, k3, k2, k1, a_stride_n, a_stride_k3, a_stride_k2,
-        reinterpret_cast<const double*>(a), /*C_stride_m=*/0,
-        reinterpret_cast<double*>(c));
-  }
-}
+SUM_FLOAT_K1_KERNEL(sum_k1_fp64_neon, double, double, 2, 1, identity);
+SUM_FLOAT_KN_KERNEL(sum_kn_fp64_neon, double, double, 4, identity);
 
-void sum_squared_fp64_neon(size_t n, size_t k3, size_t k2, size_t k1,
-                           size_t a_stride_n, size_t a_stride_k3,
-                           size_t a_stride_k2, const void* a, size_t, void* c) {
-  if (k1 == 1 && a_stride_n == sizeof(double)) {
-    stream_reduce<sum_accumulator_k1_1<f64x2, Square>, double, double>(
-        n, k3, k2, a_stride_k3, a_stride_k2, reinterpret_cast<const double*>(a),
-        /*C_stride_m=*/0, reinterpret_cast<double*>(c));
-  } else {
-    tiled_reduce<sum_accumulator_x32<f64x2, 2, Square>, double, double>(
-        n, k3, k2, k1, a_stride_n, a_stride_k3, a_stride_k2,
-        reinterpret_cast<const double*>(a), /*C_stride_m=*/0,
-        reinterpret_cast<double*>(c));
-  }
-}
+SUM_FLOAT_K1_KERNEL(sum_squared_k1_fp64_neon, double, double, 2, 1, square);
+SUM_FLOAT_KN_KERNEL(sum_squared_kn_fp64_neon, double, double, 4, square);
 
 }  // namespace ynn

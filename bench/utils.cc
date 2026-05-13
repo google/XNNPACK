@@ -61,6 +61,29 @@ bool FLAGS_wipe_caches = false;
 
 namespace benchmark {
 namespace utils {
+
+std::vector<int64_t> FLAGS_shapes;
+int64_t FLAGS_gemm_block_size = 32;
+
+struct DeferredArgs {
+  benchmark::Benchmark* b;
+  ArgsFn fn;
+};
+static std::vector<DeferredArgs>& GetDeferredArgs() {
+  static std::vector<DeferredArgs> deferred_args;
+  return deferred_args;
+}
+
+void DeferArgs(benchmark::Benchmark* b, ArgsFn fn) {
+  GetDeferredArgs().push_back({b, fn});
+}
+
+void ApplyDeferredArgs() {
+  for (auto& deferred : GetDeferredArgs()) {
+    deferred.fn(deferred.b);
+  }
+}
+
 namespace {
 
 static void* wipe_buffer = nullptr;
@@ -198,8 +221,25 @@ int ProcessArgs(int& argc, char**& argv) {
       FLAGS_wipe_caches = true;
       std::copy(argv + i + 1, argv + argc, argv + i);
       argc -= 1;
+    } else if (strncmp(argv[i], "--block_size=", 13) == 0) {
+      FLAGS_gemm_block_size =
+          atoll(argv[i] + 13);  // NOLINT(runtime/deprecated_fn)
+      if (FLAGS_gemm_block_size <= 0) {
+        std::cerr << "Invalid --block_size: " << FLAGS_gemm_block_size << "\n";
+        return 1;
+      }
+      std::copy(argv + i + 1, argv + argc, argv + i);
+      argc -= 1;
     } else {
-      ++i;
+      char* endptr;
+      int64_t val = strtoll(argv[i], &endptr, 10);
+      if (endptr != argv[i] && *endptr == '\0') {
+        FLAGS_shapes.push_back(val);
+        std::copy(argv + i + 1, argv + argc, argv + i);
+        argc -= 1;
+      } else {
+        ++i;
+      }
     }
   }
 #if !XNN_PLATFORM_QURT

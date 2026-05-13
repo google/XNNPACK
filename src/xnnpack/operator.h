@@ -287,6 +287,14 @@ struct xnn_operator {
   // commutative ops with per-operand params.
   union xnn_params* extra_params;
   uint32_t num_extra_params;
+
+  // Operator-owned scratch space sized to the per-channel count, used by
+  // metadata-producing converts (e.g. `qint8 -> qcint8`) to materialize a
+  // broadcast scale array on the output value. Allocated lazily during
+  // reshape; freed in `xnn_destroy_operator`.
+  void* channelwise_quantization_buffer;
+  size_t channelwise_quantization_buffer_capacity;
+
   enum xnn_operator_type type;
   struct xnn_ukernel ukernel;
 

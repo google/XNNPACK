@@ -4,9 +4,12 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <algorithm>
+#include <array>
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
+#include <limits>
+#include <memory>
 #include <random>
 #include <sstream>
 #include <string>
@@ -22,7 +25,9 @@
 #include "src/xnnpack/math.h"
 #include "src/xnnpack/operator-utils.h"
 #include "src/xnnpack/reference-utils.h"
+#include "src/xnnpack/subgraph.h"
 #include "test/replicable_random_device.h"
+#include "test/subgraph/runtime-flags.h"
 #include "test/subgraph/subgraph-tester.h"
 #include "test/unary-ops.h"
 
@@ -173,6 +178,102 @@ void TestImpl(size_t rank, xnn_unary_operator op) {
   }
 }
 
+using qcint8 = quantized<int8_t, channelwise>;
+
+template <>
+void TestImpl<quantized<int8_t>, qcint8>(size_t rank, xnn_unary_operator op) {
+  if (op != xnn_unary_convert) {
+    GTEST_SKIP() << "TestImpl<qint8, qcint8> is only supported for convert";
+  }
+  if (rank == 0) {
+    GTEST_SKIP() << " QCINT8 requires a channel dimension";
+  }
+  ASSERT_EQ(xnn_initialize(/*allocator=*/nullptr), xnn_status_success);
+
+  ReplicableRandomDevice rng;
+
+  constexpr size_t max_size = 1024;
+  const size_t max_dim = static_cast<size_t>(std::ceil(
+      std::pow(static_cast<double>(max_size),
+               1.0 / static_cast<double>(std::max<size_t>(1, rank)))));
+  const std::vector<size_t> shape = random_shape(rng, rank, 1, max_dim);
+  size_t num_elements = 1;
+  for (size_t d : shape) {
+    num_elements *= d;
+  }
+  const size_t num_channels = shape.back();
+  const float scale = 0.125f;
+
+  std::uniform_int_distribution<int32_t> i8dist(
+      std::numeric_limits<int8_t>::min(),
+      std::numeric_limits<int8_t>::max());
+  Buffer<int8_t> input(num_elements, XnnExtraBytes);
+  std::generate(input.begin(), input.end(),
+                [&]() { return static_cast<int8_t>(i8dist(rng)); });
+  Buffer<int8_t> output(num_elements);
+  std::fill(output.begin(), output.end(), static_cast<int8_t>(0x7E));
+
+  std::vector<float> channelwise_scale(num_channels, 1.0f);
+
+  xnn_subgraph_t subgraph = nullptr;
+  ASSERT_EQ(xnn_create_subgraph(/*external_value_ids=*/2, /*flags=*/0,
+                                &subgraph),
+            xnn_status_success);
+
+  uint32_t input_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(xnn_define_quantized_tensor_value(
+                subgraph, xnn_datatype_qint8, /*zero_point=*/0, scale,
+                shape.size(), shape.data(), /*data=*/nullptr,
+                /*external_id=*/0, XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id),
+            xnn_status_success);
+
+  uint32_t output_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(xnn_define_channelwise_quantized_tensor_value(
+                subgraph, xnn_datatype_qcint8, channelwise_scale.data(),
+                shape.size(),
+                /*channel_dim=*/shape.size() - 1, shape.data(),
+                /*data=*/nullptr, /*external_id=*/1,
+                XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id),
+            xnn_status_success);
+
+  ASSERT_EQ(xnn_define_unary(subgraph, xnn_unary_convert,
+                             /*params=*/nullptr, input_id, output_id,
+                             /*flags=*/0),
+            xnn_status_success);
+
+  xnn_runtime_t runtime_raw = nullptr;
+  ASSERT_EQ(xnn_create_runtime_v2(subgraph, /*threadpool=*/nullptr,
+                                  xnn_test_runtime_flags(), &runtime_raw),
+            xnn_status_success);
+  std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> runtime(
+      runtime_raw, xnn_delete_runtime);
+  ASSERT_EQ(xnn_reshape_runtime(runtime.get()), xnn_status_success);
+
+  std::array<xnn_external_value, 2> external = {{
+      {input_id, input.data()},
+      {output_id, output.data()},
+  }};
+  ASSERT_EQ(
+      xnn_setup_runtime_v2(runtime.get(), external.size(), external.data()),
+      xnn_status_success);
+  ASSERT_EQ(xnn_invoke_runtime(runtime.get()), xnn_status_success);
+
+  for (size_t i = 0; i < num_elements; ++i) {
+    ASSERT_EQ(input[i], output[i])
+        << "data mismatch at element " << i;
+  }
+
+  ASSERT_LT(output_id, runtime->num_values);
+  const xnn_runtime_value& output_value = runtime->values[output_id];
+  ASSERT_NE(output_value.quantization.channelwise_scale, nullptr)
+      << "channelwise_scale was not populated";
+  for (size_t c = 0; c < num_channels; ++c) {
+    ASSERT_FLOAT_EQ(output_value.quantization.channelwise_scale[c], scale)
+        << "channelwise_scale[" << c << "] did not match the broadcast input "
+        << "scale (" << scale << ")";
+  }
+}
+
 class IntegerOps : public testing::TestWithParam<Param> {};
 class RealOps : public testing::TestWithParam<Param> {};
 class Convert : public testing::TestWithParam<ConvertParam> {};
@@ -221,6 +322,9 @@ void ConvertImpl(size_t rank, xnn_datatype in) {
     case xnn_datatype_quint8:
       TestImpl<quantized<uint8_t>, Out>(rank, xnn_unary_convert);
       break;
+    case xnn_datatype_qcint8:
+      TestImpl<qcint8, Out>(rank, xnn_unary_convert);
+      break;
     case xnn_datatype_fp16:
       TestImpl<xnn_float16, Out>(rank, xnn_unary_convert);
       break;
@@ -245,6 +349,9 @@ TEST_P(Convert, test) {
       break;
     case xnn_datatype_quint8:
       ConvertImpl<quantized<uint8_t>>(GetParam().rank, GetParam().in);
+      break;
+    case xnn_datatype_qcint8:
+      ConvertImpl<qcint8>(GetParam().rank, GetParam().in);
       break;
     case xnn_datatype_fp16:
       ConvertImpl<xnn_float16>(GetParam().rank, GetParam().in);
@@ -344,5 +451,14 @@ INSTANTIATE_TEST_SUITE_P(UnaryTest, Convert,
                              Combine(ValuesIn(all_datatypes),
                                      ValuesIn(all_datatypes), all_ranks)),
                          [](const auto& info) { return info.param.Name(); });
+
+#ifndef XNNPACK_USE_YNNPACK
+INSTANTIATE_TEST_SUITE_P(UnaryTestQint8ToQcint8, Convert,
+                         testing::ConvertGenerator<ConvertParam::TupleT>(
+                             Combine(ValuesIn({xnn_datatype_qint8}),
+                                     ValuesIn({xnn_datatype_qcint8}),
+                                     testing::Range(1, XNN_MAX_TENSOR_DIMS))),
+                         [](const auto& info) { return info.param.Name(); });
+#endif
 
 }  // namespace xnnpack

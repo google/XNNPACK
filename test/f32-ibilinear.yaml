@@ -15,9 +15,9 @@
 # x86 SSE
 - name: xnn_f32_ibilinear_ukernel__sse_u4
 - name: xnn_f32_ibilinear_ukernel__sse_u8
-# WAsm SIMD
+# Wasm SIMD
 - name: xnn_f32_ibilinear_ukernel__wasmsimd_u4
 - name: xnn_f32_ibilinear_ukernel__wasmsimd_u8
-# WAsm Relaxed SIMD
+# Wasm Relaxed SIMD
 - name: xnn_f32_ibilinear_ukernel__wasmrelaxedsimd_u4
 - name: xnn_f32_ibilinear_ukernel__wasmrelaxedsimd_u8

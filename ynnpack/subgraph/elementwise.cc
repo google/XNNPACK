@@ -235,7 +235,7 @@ ynn_status create_unary(const ynn_node& node, ynn_runtime& runtime,
   ynn_runtime_value& x = runtime.value(node.outputs[0]);
   x.make_buffer(runtime);
   std::vector<slinky::var> dims = runtime.globals.make_dims(x.rank());
-  slinky::box_expr bounds = make_elementwise_bounds(dims, a.extents);
+  slinky::box_expr bounds = make_elementwise_bounds(dims, a.physical_extents());
 
   slinky::call_stmt::attributes attrs;
   attrs.name = to_string(std::get<ynn_node::unary_elementwise>(node.op).op);
@@ -246,7 +246,7 @@ ynn_status create_unary(const ynn_node& node, ynn_runtime& runtime,
       {{a.buffer, std::move(bounds)}}, {{x.buffer, dims}}, std::move(attrs));
 
   auto sched =
-      runtime.make_schedule(dims, x.extents, x.buffer->elem_size());
+      runtime.make_schedule(dims, x.physical_extents(), x.buffer->elem_size());
   func.user_data() = sched.get();
   runtime.scheduling_info_storage.push_back(std::move(sched));
 
@@ -265,7 +265,7 @@ ynn_status create_lut(const ynn_node& node, ynn_runtime& runtime,
 
   x.make_buffer(runtime);
   std::vector<slinky::var> dims = runtime.globals.make_dims(x.rank());
-  slinky::box_expr bounds = make_elementwise_bounds(dims, a.extents);
+  slinky::box_expr bounds = make_elementwise_bounds(dims, a.physical_extents());
 
   slinky::box_expr lut_bounds = {
       slinky::interval_expr(0, 1 << type_size_bytes(a.type))};
@@ -280,7 +280,7 @@ ynn_status create_lut(const ynn_node& node, ynn_runtime& runtime,
       {{x.buffer, dims}}, std::move(attrs));
 
   auto sched =
-      runtime.make_schedule(dims, x.extents, x.buffer->elem_size());
+      runtime.make_schedule(dims, x.physical_extents(), x.buffer->elem_size());
   func.user_data() = sched.get();
   runtime.scheduling_info_storage.push_back(std::move(sched));
   runtime.funcs.push_back(std::move(func));
@@ -306,8 +306,10 @@ ynn_status create_binary(const ynn_node& node, ynn_runtime& runtime,
   // Make the dims and bounds for this operation (does not depend on the
   // specific operation.)
   std::vector<slinky::var> dims = runtime.globals.make_dims(x.rank());
-  slinky::box_expr a_bounds = make_elementwise_bounds(dims, a.extents);
-  slinky::box_expr b_bounds = make_elementwise_bounds(dims, b.extents);
+  slinky::box_expr a_bounds =
+      make_elementwise_bounds(dims, a.physical_extents());
+  slinky::box_expr b_bounds =
+      make_elementwise_bounds(dims, b.physical_extents());
   a_bounds.resize(a.rank());
   b_bounds.resize(b.rank());
   auto func = slinky::func::make(
@@ -316,7 +318,7 @@ ynn_status create_binary(const ynn_node& node, ynn_runtime& runtime,
       {{x.buffer, dims}}, std::move(attrs));
 
   auto sched =
-      runtime.make_schedule(dims, x.extents, x.buffer->elem_size());
+      runtime.make_schedule(dims, x.physical_extents(), x.buffer->elem_size());
   func.user_data() = sched.get();
   runtime.scheduling_info_storage.push_back(std::move(sched));
   runtime.funcs.push_back(std::move(func));
@@ -343,9 +345,12 @@ ynn_status create_ternary(const ynn_node& node, ynn_runtime& runtime,
   // Make the dims and bounds for this operation (does not depend on the
   // specific operation.)
   std::vector<slinky::var> dims = runtime.globals.make_dims(x.rank());
-  slinky::box_expr a_bounds = make_elementwise_bounds(dims, a.extents);
-  slinky::box_expr b_bounds = make_elementwise_bounds(dims, b.extents);
-  slinky::box_expr c_bounds = make_elementwise_bounds(dims, c.extents);
+  slinky::box_expr a_bounds =
+      make_elementwise_bounds(dims, a.physical_extents());
+  slinky::box_expr b_bounds =
+      make_elementwise_bounds(dims, b.physical_extents());
+  slinky::box_expr c_bounds =
+      make_elementwise_bounds(dims, c.physical_extents());
   a_bounds.resize(a.rank());
   b_bounds.resize(b.rank());
   c_bounds.resize(c.rank());
@@ -356,7 +361,7 @@ ynn_status create_ternary(const ynn_node& node, ynn_runtime& runtime,
                                  {{x.buffer, dims}}, attrs);
 
   auto sched =
-      runtime.make_schedule(dims, x.extents, x.buffer->elem_size());
+      runtime.make_schedule(dims, x.physical_extents(), x.buffer->elem_size());
   func.user_data() = sched.get();
   runtime.scheduling_info_storage.push_back(std::move(sched));
   runtime.funcs.push_back(std::move(func));
@@ -499,8 +504,8 @@ bool define_dequantize_dot(ynn_subgraph& subgraph, ynn_node& node,
                                     {offset.buffer, bounds}},
                                    {{output.buffer, dims}}, std::move(attrs));
 
-    auto sched =
-        runtime.make_schedule(dims, output.extents, output.buffer->elem_size());
+    auto sched = runtime.make_schedule(dims, output.physical_extents(),
+                                       output.buffer->elem_size());
     func.user_data() = sched.get();
     runtime.scheduling_info_storage.push_back(std::move(sched));
 

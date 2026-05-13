@@ -131,8 +131,8 @@ void TestMatMul(AT, BT, CT, const DotShape& shape, const KernelInfo& kernel,
     if (is_integral<CT>::value) {
       ASSERT_EQ(c(i), expected(i)) << shape;
     } else {
-      const float tolerance = epsilon(type_of<CT>()) * (k + 1) * max_abs_value *
-                              max_abs_value * 2.0f;
+      const float tolerance = type_info<CT>::epsilon() * (k + 1) *
+                              max_abs_value * max_abs_value * 2.0f;
       ASSERT_NEAR(c(i), expected(i), tolerance) << shape;
     }
   }
@@ -233,7 +233,7 @@ void TestConv2D(AT, BT, CT, const KernelInfo& kernel) {
       if (is_integral<CT>::value) {
         ASSERT_EQ(c(i), expected(i));
       } else {
-        const float tolerance = epsilon(type_of<CT>()) * (ci * kh * kw + 1) *
+        const float tolerance = type_info<CT>::epsilon() * (ci * kh * kw + 1) *
                                 max_abs_value * max_abs_value * 2.0f;
         ASSERT_NEAR(c(i), expected(i), tolerance);
       }

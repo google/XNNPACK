@@ -17,7 +17,7 @@ tools/xngen src/f32-igemm/scalar.c.in -D MR=2 -D NR=4 -D WASM=0 -D ACTIVATION=MI
 tools/xngen src/f32-igemm/scalar.c.in -D MR=4 -D NR=2 -D WASM=0 -D ACTIVATION=MINMAX -o src/f32-igemm/gen/f32-igemm-4x2-minmax-scalar.c &
 tools/xngen src/f32-igemm/scalar.c.in -D MR=4 -D NR=4 -D WASM=0 -D ACTIVATION=MINMAX -o src/f32-igemm/gen/f32-igemm-4x4-minmax-scalar.c &
 
-################################## WAsm SIMD ##################################
+################################## Wasm SIMD ##################################
 ### LOAD1+BROADCAST micro-kernels
 tools/xngen src/f32-igemm/wasmsimd-loadsplat.c.in -D MR=1 -D NR=8 -D FMA=0 -D ACTIVATION=MINMAX -D ARCH=ARM     -o src/f32-igemm/gen/f32-igemm-1x8-minmax-wasmsimd-arm-loadsplat.c &
 tools/xngen src/f32-igemm/wasmsimd-loadsplat.c.in -D MR=3 -D NR=8 -D FMA=0 -D ACTIVATION=MINMAX -D ARCH=ARM     -o src/f32-igemm/gen/f32-igemm-3x8-minmax-wasmsimd-arm-loadsplat.c &

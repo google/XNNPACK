@@ -11,13 +11,13 @@ tools/xngen src/x8-lut/scalar.c.in -D BATCH_TILE=4  -o src/x8-lut/gen/x8-lut-sca
 tools/xngen src/x8-lut/scalar.c.in -D BATCH_TILE=8  -o src/x8-lut/gen/x8-lut-scalar-u8.c &
 tools/xngen src/x8-lut/scalar.c.in -D BATCH_TILE=16 -o src/x8-lut/gen/x8-lut-scalar-u16.c &
 
-################################## WAsm SIMD ##################################
+################################## Wasm SIMD ##################################
 tools/xngen src/x8-lut/wasmsimd.c.in -D BATCH_TILE=16 -o src/x8-lut/gen/x8-lut-wasmsimd-u16.c &
 tools/xngen src/x8-lut/wasmsimd.c.in -D BATCH_TILE=32 -o src/x8-lut/gen/x8-lut-wasmsimd-u32.c &
 tools/xngen src/x8-lut/wasmsimd.c.in -D BATCH_TILE=48 -o src/x8-lut/gen/x8-lut-wasmsimd-u48.c &
 tools/xngen src/x8-lut/wasmsimd.c.in -D BATCH_TILE=64 -o src/x8-lut/gen/x8-lut-wasmsimd-u64.c &
 
-############################## WAsm Relaxed SIMD ##############################
+############################## Wasm Relaxed SIMD ##############################
 tools/xngen src/x8-lut/wasmpshufb.c.in -D BATCH_TILE=16 -o src/x8-lut/gen/x8-lut-wasmpshufb-u16.c &
 tools/xngen src/x8-lut/wasmpshufb.c.in -D BATCH_TILE=32 -o src/x8-lut/gen/x8-lut-wasmpshufb-u32.c &
 tools/xngen src/x8-lut/wasmpshufb.c.in -D BATCH_TILE=48 -o src/x8-lut/gen/x8-lut-wasmpshufb-u48.c &

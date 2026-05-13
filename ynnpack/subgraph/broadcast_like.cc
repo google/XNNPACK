@@ -123,12 +123,13 @@ ynn_status ynn_define_broadcast_like(ynn_subgraph_t subgraph, size_t num_axes,
     output.make_buffer(runtime, input.buffer->elem_size());
 
     std::vector<slinky::var> dims = runtime.globals.make_dims(output.rank());
-    slinky::box_expr bounds = make_elementwise_bounds(dims, input.extents);
+    slinky::box_expr bounds =
+        make_elementwise_bounds(dims, input.physical_extents());
 
     for (size_t i = 0; i < axes.size(); ++i) {
       if (!axes[i]) continue;
-      bounds[i] =
-          make_broadcast_bounds(dims[i], input.extents[i], output.extents[i]);
+      bounds[i] = make_broadcast_bounds(dims[i], input.physical_extent(i),
+                                        output.physical_extent(i));
     }
 
     if (bounds.size() > input.rank()) {

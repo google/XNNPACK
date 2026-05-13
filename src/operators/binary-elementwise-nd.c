@@ -131,7 +131,7 @@ static const struct xnn_binary_elementwise_config* init_config(
   }
 }
 
-static enum xnn_status init_binary_elementwise_nd(
+static XNN_NO_SANITIZE_FUNCTION enum xnn_status init_binary_elementwise_nd(
     xnn_operator_t op, enum xnn_binary_operator type,
     enum xnn_datatype datatype,
     const struct xnn_quantization_params* a_quantization,

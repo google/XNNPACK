@@ -7,7 +7,7 @@
 - name: xnn_f32_gemm_ukernel_4x4__asm_aarch32_vfp_ld64
   pack: xnn_pack_f32_gemm_goi_w
   k-block: 2
-# WAsm SIMD
+# Wasm SIMD
 - name: xnn_f32_gemm_ukernel_1x8__wasmsimd_loadsplat
   pack: xnn_pack_f32_gemm_goi_w
   k-block: 1
@@ -56,7 +56,7 @@
 - name: xnn_f32_gemm_ukernel_6x8s4__wasmsimd
   pack: xnn_pack_f32_gemm_goi_w
   k-block: 4
-# WAsm Relaxed SIMD
+# Wasm Relaxed SIMD
 - name: xnn_f32_gemm_ukernel_1x8__wasmrelaxedsimd_fma_loadsplat
   pack: xnn_pack_f32_gemm_goi_w
   k-block: 1

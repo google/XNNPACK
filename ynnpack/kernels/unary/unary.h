@@ -18,9 +18,9 @@
 namespace ynn {
 
 struct log_exp_params {
-  float _;  // output_offset not supported by exp
-  float output_multiplier;
-  float input_multiplier;
+  real _;  // output_offset not supported by exp
+  real output_multiplier;
+  real input_multiplier;
 
   friend bool operator==(const log_exp_params& a, const log_exp_params& b) {
     return std::tie(a.input_multiplier, a.output_multiplier) ==
@@ -36,9 +36,9 @@ using exp_params = log_exp_params;
 using log_params = log_exp_params;
 
 struct erf_params {
-  float output_offset;
-  float output_multiplier;
-  float input_multiplier;
+  real output_offset;
+  real output_multiplier;
+  real input_multiplier;
 
   friend bool operator==(const erf_params& a, const erf_params& b) {
     return std::tie(a.input_multiplier, a.output_multiplier, a.output_offset) ==
@@ -51,8 +51,8 @@ struct erf_params {
 };
 
 struct affine_output_params {
-  float output_offset;
-  float output_multiplier;
+  real output_offset;
+  real output_multiplier;
 
   friend bool operator==(const affine_output_params& a,
                          const affine_output_params& b) {
@@ -71,7 +71,7 @@ using sine_params = affine_output_params;
 using cosine_params = affine_output_params;
 
 struct poly3_params {
-  float c0, c1, c2, c3;
+  real c0, c1, c2, c3;
 
   friend bool operator==(const poly3_params& x, const poly3_params& y) {
     return std::tie(x.c0, x.c1, x.c2, x.c3) == std::tie(y.c0, y.c1, y.c2, y.c3);

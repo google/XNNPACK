@@ -65,6 +65,7 @@ void binary_impl(size_t m, size_t n, size_t stride_a_m, size_t stride_a_n,
 // they overflow.
 struct AddOp {
   float operator()(float a, float b) const { return a + b; }
+  double operator()(double a, double b) const { return a + b; }
   int32_t operator()(int32_t a, int32_t b) const {
     return static_cast<int32_t>(static_cast<int64_t>(a) +
                                 static_cast<int64_t>(b));
@@ -74,6 +75,7 @@ struct AddOp {
 
 struct SubtractOp {
   float operator()(float a, float b) const { return a - b; }
+  double operator()(double a, double b) const { return a - b; }
   int32_t operator()(int32_t a, int32_t b) const {
     return static_cast<int64_t>(a) - static_cast<int64_t>(b);
   }
@@ -82,6 +84,7 @@ struct SubtractOp {
 
 struct MultiplyOp {
   float operator()(float a, float b) const { return a * b; }
+  double operator()(double a, double b) const { return a * b; }
   int32_t operator()(int32_t a, int32_t b) const {
     return static_cast<int64_t>(a) * static_cast<int64_t>(b);
   }
@@ -90,6 +93,7 @@ struct MultiplyOp {
 
 struct DivideOp {
   float operator()(float a, float b) const { return a / b; }
+  double operator()(double a, double b) const { return a / b; }
   int32_t operator()(int32_t a, int32_t b) const { return euclidean_div(a, b); }
   using commutative = std::false_type;
 };
@@ -112,17 +116,20 @@ struct MinOp {
 
 struct SquaredDifferenceOp {
   float operator()(float a, float b) const { return (a - b) * (a - b); }
+  double operator()(double a, double b) const { return (a - b) * (a - b); }
   using commutative = std::true_type;
 };
 
 struct PowOp {
   float operator()(float a, float b) const { return std::pow(a, b); }
+  double operator()(double a, double b) const { return std::pow(a, b); }
   int32_t operator()(int32_t a, int32_t b) const { return integer_pow(a, b); }
   using commutative = std::false_type;
 };
 
 struct LeakyReluOp {
   float operator()(float a, float b) const { return (a < 0) ? a * b : a; }
+  double operator()(double a, double b) const { return (a < 0) ? a * b : a; }
   using commutative = std::false_type;
 };
 
@@ -134,35 +141,43 @@ struct CopysignOp {
   using commutative = std::false_type;
 };
 
+template <typename T>
+binary_kernel_fn get_float_binary_reference_kernel(ynn_binary_operator op) {
+  switch (op) {
+    case ynn_binary_add:
+      return binary_impl<T, AddOp>;
+    case ynn_binary_subtract:
+      return binary_impl<T, SubtractOp>;
+    case ynn_binary_multiply:
+      return binary_impl<T, MultiplyOp>;
+    case ynn_binary_divide:
+      return binary_impl<T, DivideOp>;
+    case ynn_binary_max:
+      return binary_impl<T, MaxOp>;
+    case ynn_binary_min:
+      return binary_impl<T, MinOp>;
+    case ynn_binary_copysign:
+      return binary_impl<T, CopysignOp>;
+    case ynn_binary_squared_difference:
+      return binary_impl<T, SquaredDifferenceOp>;
+    case ynn_binary_pow:
+      return binary_impl<T, PowOp>;
+    case ynn_binary_leaky_relu:
+      return binary_impl<T, LeakyReluOp>;
+    default:
+      break;
+  }
+  return nullptr;
+}
+
 }  // namespace
 
 binary_kernel_fn get_binary_reference_kernel(ynn_binary_operator op,
                                              ynn_type type) {
   if (type == ynn_type_fp32) {
-    switch (op) {
-      case ynn_binary_add:
-        return binary_impl<float, AddOp>;
-      case ynn_binary_subtract:
-        return binary_impl<float, SubtractOp>;
-      case ynn_binary_multiply:
-        return binary_impl<float, MultiplyOp>;
-      case ynn_binary_divide:
-        return binary_impl<float, DivideOp>;
-      case ynn_binary_max:
-        return binary_impl<float, MaxOp>;
-      case ynn_binary_min:
-        return binary_impl<float, MinOp>;
-      case ynn_binary_copysign:
-        return binary_impl<float, CopysignOp>;
-      case ynn_binary_squared_difference:
-        return binary_impl<float, SquaredDifferenceOp>;
-      case ynn_binary_pow:
-        return binary_impl<float, PowOp>;
-      case ynn_binary_leaky_relu:
-        return binary_impl<float, LeakyReluOp>;
-      case ynn_binary_invalid:
-        return nullptr;
-    }
+    return get_float_binary_reference_kernel<float>(op);
+  } else if (type == ynn_type_fp64) {
+    return get_float_binary_reference_kernel<double>(op);
   } else if (type == ynn_type_int32) {
     switch (op) {
       case ynn_binary_add:
@@ -202,8 +217,11 @@ binary_kernel_fn get_binary_kernel(ynn_binary_operator op, ynn_type type_a,
   }
 #include "ynnpack/kernels/binary/kernels.inc"
 #undef YNN_ELEMENTWISE_KERNEL
-  if (type_a == ynn_type_fp32 && type_b == ynn_type_fp32 &&
-      type_x == ynn_type_fp32) {
+  if (type_a == ynn_type_fp64 && type_b == ynn_type_fp64 &&
+      type_x == ynn_type_fp64) {
+    return get_binary_reference_kernel(op, type_x);
+  } else if (type_a == ynn_type_fp32 && type_b == ynn_type_fp32 &&
+             type_x == ynn_type_fp32) {
     return get_binary_reference_kernel(op, type_x);
   } else if (type_a == ynn_type_int32 && type_b == ynn_type_int32 &&
              type_x == ynn_type_int32) {

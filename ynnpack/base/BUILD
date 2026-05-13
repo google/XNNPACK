@@ -77,6 +77,7 @@ cc_library(
         "type.cc",
     ],
     hdrs = [
+        "algorithm.h",
         "arch.h",
         "arithmetic.h",
         "base.h",

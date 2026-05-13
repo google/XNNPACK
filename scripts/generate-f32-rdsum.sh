@@ -39,7 +39,7 @@ tools/xngen src/f32-rdsum/simd.c.in -D ARCH=hvx -D SIMD_SIZE=32 -D CHANNELS=32  
 tools/xngen src/f32-rdsum/simd.c.in -D ARCH=hvx -D SIMD_SIZE=32 -D CHANNELS=64  -D ACCUMULATORS=7 -o src/f32-rdsum/gen/f32-rdsum-7p7x-minmax-hvx-u64.c &
 tools/xngen src/f32-rdsum/simd.c.in -D ARCH=hvx -D SIMD_SIZE=32 -D CHANNELS=128 -D ACCUMULATORS=7 -o src/f32-rdsum/gen/f32-rdsum-7p7x-minmax-hvx-u128.c &
 
-#################################### WAsm SIMD ################################
+#################################### Wasm SIMD ################################
 tools/xngen src/f32-rdsum/simd.c.in -D ARCH=wasmsimd -D SIMD_SIZE=4 -D CHANNELS=16 -D ACCUMULATORS=7 -o src/f32-rdsum/gen/f32-rdsum-7p7x-minmax-wasmsimd-u16.c &
 tools/xngen src/f32-rdsum/simd.c.in -D ARCH=wasmsimd -D SIMD_SIZE=4 -D CHANNELS=32 -D ACCUMULATORS=7 -o src/f32-rdsum/gen/f32-rdsum-7p7x-minmax-wasmsimd-u32.c &
 tools/xngen src/f32-rdsum/simd.c.in -D ARCH=wasmsimd -D SIMD_SIZE=4 -D CHANNELS=64 -D ACCUMULATORS=7 -o src/f32-rdsum/gen/f32-rdsum-7p7x-minmax-wasmsimd-u64.c &

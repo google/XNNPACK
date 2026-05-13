@@ -346,7 +346,9 @@ enum ynn_status ynn_define_slice_like(ynn_subgraph_t subgraph, size_t num_axes,
                                       uint32_t flags);
 
 // Copy the input to the output, using a permutation to select the dimensions of
-// the input.
+// the input. Dimensions can be removed (by not including the dimension in the
+// permutation) or added (by using a dimension that is larger than the rank of
+// the input).
 enum ynn_status ynn_define_static_transpose(
     ynn_subgraph_t subgraph, size_t rank, const int32_t* permutation,
     uint32_t input_id, uint32_t* output_id, uint32_t flags);
@@ -439,7 +441,7 @@ enum ynn_reduce_operator {
 //   output(...) = b(...)
 //   output(...) = op(output(...), a(...))
 //
-// `XNN_NODE_FLAG_KEEP_DIMS` indicates that a reduction should keep the reduced
+// `YNN_NODE_FLAG_KEEP_DIMS` indicates that a reduction should keep the reduced
 // dimensions in the result (with extent 1).
 //
 // If `output_id` is `YNN_INVALID_VALUE_ID` and `op` is `ynn_reduce_sum` or the

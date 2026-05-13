@@ -29,6 +29,13 @@ using f16x32 = vec<half, 32>;
 using s8x64 = vec<int8_t, 64>;
 using u8x64 = vec<uint8_t, 64>;
 
+YNN_ALWAYS_INLINE f64x4 cast(f32x4 a, double) {
+  return f64x4{_mm256_cvtps_pd(a.v)};
+}
+YNN_ALWAYS_INLINE f32x4 cast(f64x4 a, float) {
+  return f32x4{_mm256_cvtpd_ps(a.v)};
+}
+
 }  // namespace simd
 
 }  // namespace ynn

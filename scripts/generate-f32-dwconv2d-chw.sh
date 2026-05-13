@@ -212,7 +212,7 @@ tools/xngen src/f32-dwconv2d-chw/5x5s2p2-scalar.c.in -D ROW_TILE=2 -D ACCUMULATO
 tools/xngen src/f32-dwconv2d-chw/5x5s2p2-scalar.c.in -D ROW_TILE=2 -D ACCUMULATORS=3 -o src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-5x5s2p2-minmax-scalar-2x1-acc3.c &
 tools/xngen src/f32-dwconv2d-chw/5x5s2p2-scalar.c.in -D ROW_TILE=3 -D ACCUMULATORS=2 -o src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-5x5s2p2-minmax-scalar-3x1-acc2.c &
 
-################################## WAsm SIMD ##################################
+################################## Wasm SIMD ##################################
 tools/xngen src/f32-dwconv2d-chw/3x3p1-wasmsimd-loadsplat.c.in -D ROW_TILE=1 -D ACCUMULATORS=1 -D X86=0 -o src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-3x3p1-minmax-wasmsimd-arm-loadsplat-1x4.c &
 tools/xngen src/f32-dwconv2d-chw/3x3p1-wasmsimd-loadsplat.c.in -D ROW_TILE=2 -D ACCUMULATORS=1 -D X86=0 -o src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-3x3p1-minmax-wasmsimd-arm-loadsplat-2x4.c &
 tools/xngen src/f32-dwconv2d-chw/3x3p1-wasmsimd-loadsplat.c.in -D ROW_TILE=3 -D ACCUMULATORS=1 -D X86=0 -o src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-3x3p1-minmax-wasmsimd-arm-loadsplat-3x4.c &

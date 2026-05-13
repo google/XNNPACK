@@ -16,6 +16,7 @@
 
 #include "ynnpack/base/log.h"
 #include "ynnpack/include/ynnpack.h"
+#include "ynnpack/subgraph/copy.h"
 #include "ynnpack/subgraph/runtime.h"
 #include "ynnpack/subgraph/slinky.h"
 #include "ynnpack/subgraph/subgraph.h"
@@ -123,12 +124,8 @@ slinky::func make_reshape(ynn_runtime& runtime,
     }
   }
 
-  // Reshape's definition assumes that there is no padding between dimensions.
-  require_contiguous(*input_buf);
-  require_contiguous(*output_buf);
-
   // We also need to assume that we compute at least the min = 0... element of
-  // the input.
+  // the input and output.
   for (size_t d = 0; d < in_rank; ++d) {
     if (input_extents[d].defined()) {
       input_buf->dim(d).bounds.min = 0;
@@ -137,6 +134,18 @@ slinky::func make_reshape(ynn_runtime& runtime,
       input_buf->dim(d).bounds = slinky::point(0);
     }
   }
+  for (size_t d = 0; d < out_rank; ++d) {
+    if (output_extents[d].defined()) {
+      output_buf->dim(d).bounds.min = 0;
+      output_buf->dim(d).bounds.max = output_extents[d] - 1;
+    } else {
+      output_buf->dim(d).bounds = slinky::point(0);
+    }
+  }
+
+  // Reshape's definition assumes that there is no padding between dimensions.
+  require_contiguous(*input_buf);
+  require_contiguous(*output_buf);
 
   slinky::func::input input{input_buf, bounds};
   slinky::func::output output{output_buf, dims};
@@ -205,7 +214,8 @@ void define_copy(ynn_subgraph& subgraph, ynn_node& node, uint32_t input_id,
 
     output.make_buffer(runtime, input.buffer->elem_size());
     std::vector<slinky::var> dims = runtime.globals.make_dims(output.rank());
-    slinky::box_expr bounds = make_elementwise_bounds(dims, input.extents);
+    slinky::box_expr bounds =
+        make_elementwise_bounds(dims, input.physical_extents());
     auto func = slinky::func::make_copy({input.buffer, std::move(bounds)},
                                         {output.buffer, std::move(dims)});
     runtime.funcs.push_back(std::move(func));
@@ -214,17 +224,17 @@ void define_copy(ynn_subgraph& subgraph, ynn_node& node, uint32_t input_id,
 }
 
 void define_static_expand_dims(ynn_subgraph& subgraph, ynn_node& node,
-                               uint32_t input_id, uint32_t output_id,
+                               uint32_t input_id, uint32_t* output_id,
                                const axes_set& new_axes) {
   const ynn_value& input = subgraph.value(input_id);
-  ynn_value& output = subgraph.value(output_id);
+  ynn_value& output = subgraph.get_output_value(output_id, input);
 
   ynn_node::static_expand_dims op;
   op.new_axes = new_axes;
 
   const int new_rank = input.rank() + new_axes.count();
   node.inputs = {input_id};
-  node.outputs = {output_id};
+  node.outputs = {output.id};
   node.op = std::move(op);
 
   // Propagate shape.
@@ -318,8 +328,8 @@ ynn_status ynn_define_static_reshape(ynn_subgraph_t subgraph, size_t rank,
     ynn_runtime_value& output = runtime.value(node.outputs[0]);
 
     output.make_buffer(runtime, input.buffer->elem_size());
-    auto func = make_reshape(runtime, input.buffer, input.extents,
-                             output.buffer, output.extents);
+    auto func = make_reshape(runtime, input.buffer, input.physical_extents(),
+                             output.buffer, output.physical_extents());
     runtime.funcs.push_back(std::move(func));
     return ynn_status_success;
   };
@@ -399,8 +409,8 @@ ynn_status ynn_define_static_broadcast(ynn_subgraph_t subgraph, size_t rank,
     ynn_runtime_value& output = runtime.value(node.outputs[0]);
 
     std::vector<slinky::var> dims = runtime.globals.make_dims(output.rank());
-    slinky::box_expr bounds =
-        make_broadcast_bounds(dims, input.extents, output.extents);
+    slinky::box_expr bounds = make_broadcast_bounds(
+        dims, input.physical_extents(), output.physical_extents());
 
     output.make_buffer(runtime, input.buffer->elem_size());
     auto func = slinky::func::make_copy({input.buffer, std::move(bounds)},
@@ -426,8 +436,6 @@ ynn_status ynn_define_static_expand_dims(ynn_subgraph_t subgraph,
 
   const ynn_value& input = subgraph->value(input_id);
 
-  ynn_value& output = subgraph->get_output_value(output_id, input);
-
   const int new_rank = input.rank() + num_new_axes;
   YNN_RETURN_IF_ERROR(validate_rank("static_expand_dims", "output", new_rank));
   ynn::axes_set axes;
@@ -438,7 +446,7 @@ ynn_status ynn_define_static_expand_dims(ynn_subgraph_t subgraph,
   }
 
   ynn_node node;
-  define_static_expand_dims(*subgraph, node, input_id, output.id, axes);
+  define_static_expand_dims(*subgraph, node, input_id, output_id, axes);
   subgraph->add_node(std::move(node));
   return ynn_status_success;
 }
@@ -500,8 +508,8 @@ ynn_status ynn_define_fuse_dim(ynn_subgraph_t subgraph, int32_t axis,
     ynn_runtime_value& output = runtime.value(node.outputs[0]);
 
     output.make_buffer(runtime, input.buffer->elem_size());
-    auto func = make_reshape(runtime, input.buffer, input.extents,
-                             output.buffer, output.extents);
+    auto func = make_reshape(runtime, input.buffer, input.physical_extents(),
+                             output.buffer, output.physical_extents());
     runtime.funcs.push_back(std::move(func));
     return ynn_status_success;
   };
@@ -563,8 +571,8 @@ ynn_status ynn_define_split_dim(ynn_subgraph_t subgraph, int32_t axis,
 
     output.make_buffer(runtime, input.buffer->elem_size());
 
-    auto func = make_reshape(runtime, input.buffer, input.extents,
-                             output.buffer, output.extents);
+    auto func = make_reshape(runtime, input.buffer, input.physical_extents(),
+                             output.buffer, output.physical_extents());
     runtime.funcs.push_back(std::move(func));
     return ynn_status_success;
   };
@@ -602,7 +610,8 @@ ynn_status ynn_define_fuse_dims(ynn_subgraph_t subgraph, size_t num_axes,
   output.extents = input.extents;
   for (int i = op.axes.size() - 1; i >= 0; --i) {
     if (!op.axes[i]) continue;
-    output.extents[i] *= output.extents[i + 1];
+    output.extents[i] =
+        slinky::simplify(output.extent(i) * output.extent(i + 1));
     output.extents.erase(output.extents.begin() + i + 1);
   }
 
@@ -615,8 +624,8 @@ ynn_status ynn_define_fuse_dims(ynn_subgraph_t subgraph, size_t num_axes,
     ynn_runtime_value& output = runtime.value(node.outputs[0]);
 
     output.make_buffer(runtime, input.buffer->elem_size());
-    auto func = make_reshape(runtime, input.buffer, input.extents,
-                             output.buffer, output.extents);
+    auto func = make_reshape(runtime, input.buffer, input.physical_extents(),
+                             output.buffer, output.physical_extents());
     runtime.funcs.push_back(std::move(func));
     return ynn_status_success;
   };
@@ -657,13 +666,14 @@ ynn_status ynn_define_split_dims(ynn_subgraph_t subgraph, size_t num_axes,
   ynn_value& output = subgraph->get_output_value(output_id, input);
   output.extents = input.extents;
   for (const ynn_node::split_dims::split& split : op.splits) {
+    slinky::expr extent = output.extent(split.axis);
     output.extents.insert(output.extents.begin() + split.axis, split.factor);
     node.checks.push_back({
-        output.extents[split.axis] % split.factor == 0,
+        extent % split.factor == 0,
         {"invalid split by ", split.factor, " in dimension ", split.axis, " (",
-         output.extents[split.axis], ") of ", ynn_node::input_idx{0}},
+         extent, ") of ", ynn_node::input_idx{0}},
     });
-    output.extents[split.axis + 1] /= split.factor;
+    output.extents[split.axis + 1] = extent / split.factor;
   }
 
   node.inputs = {input_id};
@@ -675,8 +685,8 @@ ynn_status ynn_define_split_dims(ynn_subgraph_t subgraph, size_t num_axes,
     ynn_runtime_value& output = runtime.value(node.outputs[0]);
 
     output.make_buffer(runtime, input.buffer->elem_size());
-    auto func = make_reshape(runtime, input.buffer, input.extents,
-                             output.buffer, output.extents);
+    auto func = make_reshape(runtime, input.buffer, input.physical_extents(),
+                             output.buffer, output.physical_extents());
     runtime.funcs.push_back(std::move(func));
     return ynn_status_success;
   };

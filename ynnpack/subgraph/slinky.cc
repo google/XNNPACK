@@ -13,6 +13,8 @@
 #include <utility>
 #include <vector>
 
+#include "ynnpack/base/span.h"
+#include "slinky/base/arithmetic.h"
 #include "slinky/builder/pipeline.h"
 #include "slinky/builder/simplify.h"
 #include "slinky/builder/substitute.h"
@@ -50,13 +52,17 @@ slinky::var slinky_globals::make_dim(int d, const char* prefix) {
 }
 
 slinky::var slinky_globals::make_reduction_dim(int d) {
-  return symbols.insert(std::string(1, reduction_dim_prefix) +
-                        std::to_string(d));
+  return make_dim(d, reduction_dim_prefix);
 }
 
 bool slinky_globals::is_reduction_dim(slinky::var dim) {
   std::string name = symbols.name(dim);
-  return !name.empty() && name[0] == reduction_dim_prefix;
+  return !name.empty() && name[0] == reduction_dim_prefix[0];
+}
+
+bool slinky_globals::is_pure_dim(slinky::var dim) {
+  std::string name = symbols.name(dim);
+  return !name.empty() && name[0] == pure_dim_prefix[0];
 }
 
 std::vector<slinky::var> slinky_globals::make_dims(int begin, int end,
@@ -128,8 +134,12 @@ slinky::box_expr make_elementwise_bounds(
     const std::vector<slinky::expr>& extents, size_t begin, size_t end) {
   assert(end <= dims.size());
   slinky::box_expr bounds(end - begin);
-  for (size_t i = 0; i < bounds.size() && begin + i < extents.size(); ++i) {
-    bounds[i] = elementwise_bounds(dims[begin + i], extents[begin + i]);
+  for (size_t i = 0; i < bounds.size(); ++i) {
+    if (begin + i < extents.size()) {
+      bounds[i] = elementwise_bounds(dims[begin + i], extents[begin + i]);
+    } else {
+      bounds[i] = slinky::point(0);
+    }
   }
   return bounds;
 }
@@ -176,6 +186,51 @@ slinky::box_expr make_broadcast_bounds(
                                       no_broadcast);
   }
   return bounds;
+}
+
+std::vector<slinky::expr> make_split_factors(
+    ynn::slinky_globals& globals, ynn::span<const slinky::expr> extents,
+    const slinky::expr& element_cost,
+    ynn::span<const slinky::expr> given_splits,
+    ynn::span<const int> loop_order) {
+  const int rank = extents.size();
+
+  // Area is selected such that tiles fit better into cache, this is a
+  // constant for now, but we could add a more advanced logic based on
+  // hardware info.
+  slinky::expr tile_area =
+      slinky::ceil_div(slinky::expr(32768 * 4), element_cost);
+  std::vector<slinky::expr> splits(rank);
+  slinky::expr tile_area_so_far = 1;
+
+  auto get_loop_dim = [&](int index_d) {
+    return index_d < loop_order.size() ? loop_order[index_d] : index_d;
+  };
+
+  for (int index_d = 0; index_d < rank; ++index_d) {
+    int d = get_loop_dim(index_d);
+    assert(d < extents.size());
+    if (!extents[d].defined()) continue;
+    if (d < given_splits.size()) {
+      splits[d] = given_splits[d];
+    } else {
+      slinky::expr s = slinky::simplify(slinky::max(
+          1, slinky::min(tile_area / tile_area_so_far, extents[d])));
+      s = globals.get(s, "s");
+      splits[d] = s;
+    }
+    if (splits[d].defined() && slinky::prove_true(splits[d] >= extents[d])) {
+      // TODO(b/458542243): We should not need to do this optimization
+      // ourselves.
+      splits[d] = {};
+    }
+    if (splits[d].defined()) {
+      tile_area_so_far = slinky::simplify(tile_area_so_far * splits[d]);
+    } else {
+      tile_area_so_far = slinky::simplify(tile_area_so_far * extents[d]);
+    }
+  }
+  return splits;
 }
 
 }  // namespace ynn

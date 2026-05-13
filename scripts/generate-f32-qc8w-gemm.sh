@@ -48,7 +48,7 @@ tools/xngen src/f32-gemm/4x1-aarch64-neonfma-ld128.S.in     -D INC=0            
 tools/xngen src/f32-gemm/4x2-aarch64-neonfma-ld64.S.in      -D INC=0                -D DATATYPE=QC8 -o src/f32-qc8w-gemm/gen/f32-qc8w-gemm-4x2-minmax-asm-aarch64-neonfma-ld64.S &
 tools/xngen src/f32-gemm/4x2-aarch64-neonfma-ld128.S.in     -D INC=0                -D DATATYPE=QC8 -o src/f32-qc8w-gemm/gen/f32-qc8w-gemm-4x2-minmax-asm-aarch64-neonfma-ld128.S &
 
-################################## WAsm SIMD ##################################
+################################## Wasm SIMD ##################################
 ### LOAD1+BROADCAST micro-kernels
 tools/xngen src/f32-gemm/wasmsimd-loadsplat.c.in -D MR=1 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=MINMAX -D ARCH=ARM     -D DATATYPE=QC8 -o src/f32-qc8w-gemm/gen/f32-qc8w-gemm-1x8-minmax-wasmsimd-arm-loadsplat.c &
 tools/xngen src/f32-gemm/wasmsimd-loadsplat.c.in -D MR=3 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=MINMAX -D ARCH=ARM     -D DATATYPE=QC8 -o src/f32-qc8w-gemm/gen/f32-qc8w-gemm-3x8-minmax-wasmsimd-arm-loadsplat.c &

@@ -153,8 +153,8 @@ ynn_status ynn_define_iota(ynn_subgraph_t subgraph, ynn_type type, size_t rank,
     attrs.name = "iota";
     slinky::box_expr stride_bounds = {all_bounds(output.rank())};
 
-    auto sched =
-        runtime.make_schedule(dims, output.extents, output.buffer->elem_size());
+    auto sched = runtime.make_schedule(dims, output.physical_extents(),
+                                       output.buffer->elem_size());
 
     if (output.type == ynn_type_int32) {
       runtime.funcs.push_back(slinky::func::make(

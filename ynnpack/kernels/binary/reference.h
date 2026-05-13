@@ -10,7 +10,6 @@
 #include <cassert>
 #include <cmath>
 #include <cstdint>
-#include <cstdlib>
 #include <type_traits>
 
 #include <gtest/gtest.h>
@@ -18,6 +17,7 @@
 #include "ynnpack/base/base.h"
 #include "ynnpack/base/bfloat16.h"
 #include "ynnpack/base/test/tensor.h"
+#include "ynnpack/base/test/tolerance.h"
 #include "ynnpack/base/type.h"
 #include "ynnpack/include/ynnpack.h"
 
@@ -29,16 +29,18 @@ struct binary_op_info {
   virtual ~binary_op_info() = default;
 
   virtual float operator()(float a, float b) const { YNN_UNREACHABLE; }
+  virtual double operator()(double a, double b) const { YNN_UNREACHABLE; }
   virtual int32_t operator()(int32_t a, int32_t b) const { YNN_UNREACHABLE; }
 
   // Compute the tolerance for error given the reference result and the type.
-  virtual float Tolerance(float x_ref, ynn_type type) const {
-    return (std::abs(x_ref) + 1.0f) * 3.0f * epsilon(type);
+  virtual tolerance_spec tolerance() const {
+    return tolerance_spec{/*relative=*/3.0f, /*absolute=*/1.0f};
   }
 };
 
 struct add : public binary_op_info {
   float operator()(float a, float b) const override { return a + b; }
+  double operator()(double a, double b) const override { return a + b; }
   int32_t operator()(int32_t a, int32_t b) const override {
     return static_cast<int32_t>(widen(a) + widen(b));
   }
@@ -46,6 +48,7 @@ struct add : public binary_op_info {
 
 struct subtract : public binary_op_info {
   float operator()(float a, float b) const override { return a - b; }
+  double operator()(double a, double b) const override { return a - b; }
   int32_t operator()(int32_t a, int32_t b) const override {
     return static_cast<int32_t>(widen(a) - widen(b));
   }
@@ -54,6 +57,7 @@ struct subtract : public binary_op_info {
 
 struct multiply : public binary_op_info {
   float operator()(float a, float b) const override { return a * b; }
+  double operator()(double a, double b) const override { return a * b; }
   float operator()(int32_t a, float b) const {
     return static_cast<float>(a) * b;
   }
@@ -64,6 +68,7 @@ struct multiply : public binary_op_info {
 
 struct divide : public binary_op_info {
   float operator()(float a, float b) const override { return a / b; }
+  double operator()(double a, double b) const override { return a / b; }
   int32_t operator()(int32_t a, int32_t b) const override {
     return euclidean_div(a, b);
   }
@@ -71,6 +76,9 @@ struct divide : public binary_op_info {
 
 struct min : public binary_op_info {
   float operator()(float a, float b) const override { return std::min(a, b); }
+  double operator()(double a, double b) const override {
+    return std::min(a, b);
+  }
   int32_t operator()(int32_t a, int32_t b) const override {
     return std::min(a, b);
   }
@@ -78,6 +86,9 @@ struct min : public binary_op_info {
 
 struct max : public binary_op_info {
   float operator()(float a, float b) const override { return std::max(a, b); }
+  double operator()(double a, double b) const override {
+    return std::max(a, b);
+  }
   int32_t operator()(int32_t a, int32_t b) const override {
     return std::max(a, b);
   }
@@ -87,6 +98,9 @@ struct copysign : public binary_op_info {
   float operator()(float a, float b) const override {
     return std::copysign(a, b);
   }
+  double operator()(double a, double b) const override {
+    return std::copysign(a, b);
+  }
   int32_t operator()(int32_t a, int32_t b) const override {
     return std::copysign(a, b);
   }
@@ -94,6 +108,9 @@ struct copysign : public binary_op_info {
 
 struct pow : public binary_op_info {
   float operator()(float a, float b) const override { return std::pow(a, b); }
+  double operator()(double a, double b) const override {
+    return std::pow(a, b);
+  }
   int32_t operator()(int32_t a, int32_t b) const override {
     return integer_pow(a, b);
   }
@@ -103,10 +120,16 @@ struct squared_difference : public binary_op_info {
   float operator()(float a, float b) const override {
     return (a - b) * (a - b);
   }
+  double operator()(double a, double b) const override {
+    return (a - b) * (a - b);
+  }
 };
 
 struct leaky_relu : public binary_op_info {
   float operator()(float a, float b) const override {
+    return a < 0 ? a * b : a;
+  }
+  double operator()(double a, double b) const override {
     return a < 0 ? a * b : a;
   }
 };
@@ -119,24 +142,28 @@ void check_results(const OpInfo& op, const Tensor<A>& a, const Tensor<B>& b,
                    const Tensor<X>& x, const quantization_params& = {},
                    const quantization_params& = {},
                    const quantization_params& = {}) {
+  using Float =
+      std::conditional_t<std::is_same<X, double>::value, double, float>;
+  tolerance_spec tol = op.tolerance();
+  (void)tol;
   for (const auto& i : EnumerateIndices(x.extents())) {
-    if (is_integral<X>::value) {
+    if constexpr (is_integral<X>::value) {
       const int32_t expected = op(a(i), b(i));
       ASSERT_EQ(expected, x(i)) << "i = " << index_to_string(i)
                                 << ", a(i) = " << a(i) << ", b(i) = " << b(i);
     } else {
-      float expected = op(a(i), b(i));
+      auto expected = op(a(i), b(i));
       if (expected < type_info<X>::min()) {
-        expected = -type_info<float>::infinity();
+        expected = -type_info<Float>::infinity();
       }
       if (expected > type_info<X>::max()) {
-        expected = type_info<float>::infinity();
+        expected = type_info<Float>::infinity();
       }
       if (std::isnan(expected)) {
         // Checking the x is NaN could make sense, but it fails in
         // a variety of cases.
       } else {
-        ASSERT_NEAR(expected, x(i), op.Tolerance(expected, type_of<X>()))
+        ASSERT_NEAR(expected, x(i), tol.absolute_error<X>(expected))
             << "i = " << index_to_string(i) << ", a(i) = " << a(i)
             << ", b(i) = " << b(i);
       }

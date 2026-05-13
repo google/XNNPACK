@@ -11,6 +11,11 @@
 
 SET(PROD_WASMRELAXEDSIMD_MICROKERNEL_SRCS
   src/f16-f32-vcvt/gen/f16-f32-vcvt-wasmrelaxedsimd-int16-u16.c
+  src/f16-vcos/gen/f16-vcos-wasmrelaxedsimd-rational-3-2-div.c
+  src/f16-vlog/gen/f16-vlog-wasmrelaxedsimd-rational-3-3-div.c
+  src/f16-vsin/gen/f16-vsin-wasmrelaxedsimd-rational-3-2-div.c
+  src/f16-vsqrt/gen/f16-vsqrt-wasmrelaxedsimd-sqrt.c
+  src/f16-vtanh/gen/f16-vtanh-wasmrelaxedsimd-expm1minus-rr1-p3h2ts-div.c
   src/f32-dwconv/gen/f32-dwconv-3p8c-minmax-wasmrelaxedsimd-fma.c
   src/f32-dwconv/gen/f32-dwconv-3p8c-wasmrelaxedsimd-fma.c
   src/f32-dwconv/gen/f32-dwconv-4p8c-minmax-wasmrelaxedsimd-fma.c
@@ -133,9 +138,6 @@ SET(NON_PROD_WASMRELAXEDSIMD_MICROKERNEL_SRCS
   src/f16-igemm/gen/f16-igemm-6x16-minmax-wasmrelaxedsimd-splat.c
   src/f16-igemm/gen/f16-igemm-8x8-minmax-wasmrelaxedsimd-splat.c
   src/f16-igemm/gen/f16-igemm-8x16-minmax-wasmrelaxedsimd-splat.c
-  src/f16-vcos/gen/f16-vcos-wasmrelaxedsimd-rational-3-2-div.c
-  src/f16-vsin/gen/f16-vsin-wasmrelaxedsimd-rational-3-2-div.c
-  src/f16-vsqrt/gen/f16-vsqrt-wasmrelaxedsimd-sqrt.c
   src/f32-dwconv/gen/f32-dwconv-3p4c-minmax-wasmrelaxedsimd-acc2.c
   src/f32-dwconv/gen/f32-dwconv-3p4c-minmax-wasmrelaxedsimd-fma-acc2.c
   src/f32-dwconv/gen/f32-dwconv-3p4c-minmax-wasmrelaxedsimd-fma.c

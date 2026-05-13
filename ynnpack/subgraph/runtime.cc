@@ -66,59 +66,42 @@ void ynn_runtime_value::make_buffer(ynn_runtime& runtime) {
   make_buffer(runtime, ynn::type_size_bytes(type));
 }
 
-std::vector<ynn::scheduling_split> ynn_runtime::make_loops(
+std::unique_ptr<ynn::scheduling_info> ynn_runtime::make_schedule(
     ynn::span<const slinky::var> dims, ynn::span<const slinky::expr> extents,
     const slinky::expr& element_cost,
     ynn::span<const slinky::expr> given_splits,
     ynn::span<const int> loop_order) {
-  int max_threads = threadpool() ? threadpool()->thread_count() : 1;
-  // Enough tasks to have good load balancing.
-  slinky::index_t target_task_count = max_threads > 1 ? max_threads * 2 : 1;
-
   const int rank = dims.size();
   if (rank <= 0) {
     // Nothing to schedule here.
     return {};
   }
 
-  // Area is selected such that tiles fit better into cache, this is a
-  // constant for now, but we could add a more advanced logic based on
-  // hardware info.
-  slinky::expr tile_area =
-      slinky::ceil_div(slinky::expr(32768 * 4), element_cost);
-  std::vector<slinky::expr> splits(rank);
-  slinky::expr tile_area_so_far = 1;
+  std::vector<slinky::expr> splits = make_split_factors(
+      globals, extents, element_cost, given_splits, loop_order);
+
+  return make_schedule(dims, extents, splits, loop_order);
+}
+
+std::unique_ptr<ynn::scheduling_info> ynn_runtime::make_schedule(
+    ynn::span<const slinky::var> dims, ynn::span<const slinky::expr> extents,
+    ynn::span<const slinky::expr> splits, ynn::span<const int> loop_order) {
+  const int rank = dims.size();
+  if (rank <= 0) {
+    // Nothing to schedule here.
+    return {};
+  }
+
+  int max_threads = threadpool() ? threadpool()->thread_count() : 1;
+  // Enough tasks to have good load balancing.
+  slinky::index_t target_task_count = max_threads > 1 ? max_threads * 2 : 1;
+
+  std::vector<slinky::expr> workers(rank);
+  slinky::expr threads_so_far = 1;
 
   auto get_loop_dim = [&](int index_d) {
     return index_d < loop_order.size() ? loop_order[index_d] : index_d;
   };
-
-  for (int index_d = 0; index_d < rank; ++index_d) {
-    int d = get_loop_dim(index_d);
-    assert(d < extents.size());
-    if (!extents[d].defined()) continue;
-    if (d < given_splits.size()) {
-      splits[d] = given_splits[d];
-    } else {
-      slinky::expr s = slinky::simplify(slinky::max(
-          1, slinky::min(tile_area / tile_area_so_far, extents[d])));
-      s = globals.get(s, "s");
-      splits[d] = s;
-    }
-    if (splits[d].defined() && slinky::prove_true(splits[d] >= extents[d])) {
-      // TODO(b/458542243): We should not need to do this optimization
-      // ourselves.
-      splits[d] = {};
-    }
-    if (splits[d].defined()) {
-      tile_area_so_far = slinky::simplify(tile_area_so_far * splits[d]);
-    } else {
-      tile_area_so_far = slinky::simplify(tile_area_so_far * extents[d]);
-    }
-  }
-
-  std::vector<slinky::expr> workers(rank);
-  slinky::expr threads_so_far = 1;
 
   for (int index_d = rank - 1; index_d >= 0; --index_d) {
     int d = get_loop_dim(index_d);
@@ -146,16 +129,6 @@ std::vector<ynn::scheduling_split> ynn_runtime::make_loops(
     }
   }
 
-  return loop_splits;
-}
-
-std::unique_ptr<ynn::scheduling_info> ynn_runtime::make_schedule(
-    ynn::span<const slinky::var> dims, ynn::span<const slinky::expr> extents,
-    const slinky::expr& element_cost,
-    ynn::span<const slinky::expr> given_splits,
-    ynn::span<const int> loop_order) {
-  std::vector<ynn::scheduling_split> loop_splits =
-      make_loops(dims, extents, element_cost, given_splits, loop_order);
   auto scheduling_info = std::make_unique<ynn::scheduling_info>();
   scheduling_info->loop_splits = std::move(loop_splits);
   return scheduling_info;
@@ -301,7 +274,7 @@ void ynn_runtime::schedule() {
             !prove_true(split.step == global_loop.step)) {
           break;
         }
-        if (globals.is_reduction_dim(split.var)) {
+        if (!globals.is_pure_dim(split.var)) {
           // We don't want to fuse a reduction dimension because it is likely
           // being broadcasted here.
           break;
@@ -478,10 +451,11 @@ auto make_reshape_impl(ynn_runtime* runtime) {
       if (i.is_external_output()) {
         assert(i.data);
         assert(i.data->rank == i.rank());
+        std::vector<slinky::expr> phys_extents = i.physical_extents();
         for (size_t d = 0; d < i.rank(); ++d) {
-          if (i.extents[d].defined()) {
-            i.data->mutable_dim(d).set_min_extent(
-                0, evaluate(i.extents[d], ctx));
+          slinky::expr extent_d = i.physical_extent(d);
+          if (extent_d.defined()) {
+            i.data->mutable_dim(d).set_min_extent(0, evaluate(extent_d, ctx));
           } else {
             i.data->mutable_dim(d).set_min_extent(0, 1);
           }
@@ -563,9 +537,10 @@ ynn_runtime::ynn_runtime(ynn::ref_count<const ynn_subgraph> subgraph,
       value.make_buffer(*this);
 
       for (size_t d = 0; d < value.extents.size(); ++d) {
-        if (!value.extents[d].defined()) {
+        slinky::expr extent_d = i.physical_extent(d);
+        if (!extent_d.defined()) {
           value.buffer->dim(d).bounds = slinky::point(0);
-        } else if (const auto v = as_constant(value.extents[d])) {
+        } else if (const auto v = as_constant(extent_d)) {
           value.buffer->dim(d).bounds = slinky::range(0, *v);
         }
       }
@@ -768,15 +743,22 @@ ynn_status ynn_invoke_runtime(ynn_runtime_t runtime) {
 namespace {
 
 int32_t get_max_concurrency(const ynn_runtime& runtime) {
-  int32_t result = 1;
-  slinky::recursive_mutate<slinky::loop>(
-      runtime.pipeline.body, [&](const slinky::loop* op) -> slinky::stmt {
-        if (!slinky::prove_true(op->max_workers == 1)) {
-          result = std::numeric_limits<int32_t>::max();
-        }
-        return slinky::stmt{op};
-      });
-  return result;
+  // Traverse the pipeline body for any loops. If we find a parallel loop, we
+  // return `max_int32`. Otherwise, we return 1.
+  class visitor : public slinky::recursive_node_visitor {
+   public:
+    int32_t result = 1;
+    void visit(const slinky::loop* op) override {
+      if (!slinky::prove_true(op->max_workers == 1)) {
+        result = std::numeric_limits<int32_t>::max();
+      }
+      slinky::recursive_node_visitor::visit(op);
+    }
+  } v;
+  if (runtime.pipeline.body.defined()) {
+    runtime.pipeline.body.accept(&v);
+  }
+  return v.result;
 }
 
 }  // namespace

@@ -71,7 +71,8 @@ ynn_status ynn_define_slice_like(ynn_subgraph_t subgraph, size_t num_axes,
 
       const int rank = input.rank();
       std::vector<slinky::var> dims = runtime.globals.make_dims(rank);
-      slinky::box_expr bounds = make_elementwise_bounds(dims, output.extents);
+      slinky::box_expr bounds =
+          make_elementwise_bounds(dims, output.physical_extents());
 
       auto func = slinky::func::make_copy({input.buffer, std::move(bounds)},
                                           {output.buffer, dims});

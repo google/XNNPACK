@@ -16,6 +16,7 @@ xnnpack_cxx_library(
     testonly = True,
     srcs = ["subgraph_matcher.cc"],
     hdrs = ["subgraph_matcher.h"],
+    tags = ["no_ynnpack"],
     deps = [
         "//:cache",
         "//:logging",
@@ -30,6 +31,7 @@ xnnpack_cxx_library(
 xnnpack_unit_test(
     name = "subgraph_matcher_test",
     srcs = ["subgraph_matcher_test.cc"],
+    tags = ["no_ynnpack"],
     deps = [
         ":subgraph_matcher",
         "//litert/tensor",

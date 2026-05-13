@@ -524,6 +524,44 @@ YNN_ALWAYS_INLINE f32x4 round(f32x4 a) {
 }
 YNN_ALWAYS_INLINE f32x4 sqrt(f32x4 a) { return f32x4{wasm_f32x4_sqrt(a.v)}; }
 
+YNN_ALWAYS_INLINE f32x4 floor_log2(f32x4 a) {
+  const v128_t sign_mask = wasm_f32x4_splat(-0.0f);
+  const v128_t is_zero = wasm_f32x4_eq(a.v, wasm_f32x4_splat(0.0f));
+  a.v = wasm_v128_or(wasm_v128_and(is_zero, sign_mask), a.v);
+
+  const v128_t sign_and_exp_mask = wasm_i32x4_splat(0xFF800000);
+  v128_t exp = wasm_v128_and(a.v, sign_and_exp_mask);
+
+  const v128_t infinity =
+      wasm_f32x4_splat(std::numeric_limits<float>::infinity());
+  const v128_t is_inf = wasm_f32x4_eq(a.v, infinity);
+
+  exp = wasm_i32x4_shr(exp, 8);
+
+  const v128_t bias_256 = wasm_f32x4_splat(256.0f);
+  const v128_t bias_383 = wasm_f32x4_splat(383.0f);
+  const v128_t res = wasm_f32x4_sub(wasm_v128_or(bias_256, exp), bias_383);
+  return f32x4{wasm_v128_bitselect(infinity, res, is_inf)};
+}
+
+YNN_ALWAYS_INLINE f64x2 floor_log2(f64x2 a) {
+  return f64x2{wasm_f64x2_make(
+      ynn::floor_log2(wasm_f64x2_extract_lane(a.v, 0)),
+      ynn::floor_log2(wasm_f64x2_extract_lane(a.v, 1)))};
+}
+
+YNN_ALWAYS_INLINE f32x4 exp2_round(f32x4 a) {
+  const v128_t magic = wasm_f32x4_splat(127.0f + static_cast<float>(1 << 23));
+  const v128_t res_bits = wasm_f32x4_add(a.v, magic);
+  return f32x4{wasm_i32x4_shl(res_bits, 23)};
+}
+
+YNN_ALWAYS_INLINE f64x2 exp2_round(f64x2 a) {
+  return f64x2{wasm_f64x2_make(
+      ynn::exp2_round(wasm_f64x2_extract_lane(a.v, 0)),
+      ynn::exp2_round(wasm_f64x2_extract_lane(a.v, 1)))};
+}
+
 YNN_ALWAYS_INLINE s16x16 cast(s8x16 a, int16_t) {
   return {s16x8{wasm_i16x8_extend_low_i8x16(a.v)},
           s16x8{wasm_i16x8_extend_high_i8x16(a.v)}};
@@ -598,6 +636,33 @@ YNN_ALWAYS_INLINE u8x16 round_float_to_int(f32x16 f, uint8_t) {
   const v128_t i01_16 = wasm_i16x8_narrow_i32x4(i0, i1);
   const v128_t i23_16 = wasm_i16x8_narrow_i32x4(i2, i3);
   return u8x16{wasm_u8x16_narrow_i16x8(i01_16, i23_16)};
+}
+
+YNN_ALWAYS_INLINE void kahan_sum(f32x4 a, f32x4& acc, f32x4& error) {
+  f32x4 y = a - error;
+  f32x4 t = acc + y;
+  error = (t - acc) - y;
+  v128_t mask = wasm_i32x4_splat(0x7F800000);
+  v128_t is_inf = wasm_i32x4_eq(wasm_v128_and(error.v, mask), mask);
+  error = f32x4{wasm_v128_andnot(error.v, is_inf)};
+  acc = t;
+}
+
+YNN_ALWAYS_INLINE float horizontal_sum(f32x4 a) {
+  v128_t sum =
+      wasm_f32x4_add(a.v, wasm_v8x16_shuffle(a.v, a.v, 8, 9, 10, 11, 12, 13, 14,
+                                             15, 0, 1, 2, 3, 4, 5, 6, 7));
+  sum = wasm_f32x4_add(sum, wasm_v8x16_shuffle(sum, sum, 4, 5, 6, 7, 0, 1, 2, 3,
+                                               12, 13, 14, 15, 8, 9, 10, 11));
+  return wasm_f32x4_extract_lane(sum, 0);
+}
+YNN_ALWAYS_INLINE int32_t horizontal_sum(s32x4 a) {
+  v128_t sum =
+      wasm_i32x4_add(a.v, wasm_v8x16_shuffle(a.v, a.v, 8, 9, 10, 11, 12, 13, 14,
+                                             15, 0, 1, 2, 3, 4, 5, 6, 7));
+  sum = wasm_i32x4_add(sum, wasm_v8x16_shuffle(sum, sum, 4, 5, 6, 7, 0, 1, 2, 3,
+                                               12, 13, 14, 15, 8, 9, 10, 11));
+  return wasm_i32x4_extract_lane(sum, 0);
 }
 
 YNN_ALWAYS_INLINE int8_t horizontal_max(s8x16 a) {

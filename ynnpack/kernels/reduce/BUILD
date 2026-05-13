@@ -13,8 +13,8 @@ cc_library(
     name = "generic",
     hdrs = [
         "generic.h",
-        "min_max_accumulator.h",
-        "sum_accumulator.h",
+        "min_max.h",
+        "sum.h",
     ],
     compatible_with = _COMPATIBLE_WITH,
     deps = [
@@ -104,6 +104,17 @@ cc_test(
         "//ynnpack/base/test:tensor",
         "//ynnpack/base/test:util",
         "@slinky//slinky/base",
+    ] + ynn_test_deps(),
+)
+
+cc_test(
+    name = "pi_test",
+    srcs = ["pi_test.cc"],
+    linkopts = ynn_binary_linkopts(),
+    malloc = ynn_binary_malloc(),
+    deps = [
+        ":reduce",
+        "//ynnpack/base",
     ] + ynn_test_deps(),
 )
 

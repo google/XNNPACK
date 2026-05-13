@@ -63,7 +63,7 @@ tools/xngen src/f32-raddstoreexpminusmax/avx512f-rr2-p5.c.in -D BATCH_TILE=32 -D
 tools/xngen src/f32-raddstoreexpminusmax/avx512f-rr2-p5.c.in -D BATCH_TILE=64 -D ACCUMULATORS=2 -o src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-avx512f-rr2-p5-u64-acc2.c &
 tools/xngen src/f32-raddstoreexpminusmax/avx512f-rr2-p5.c.in -D BATCH_TILE=64 -D ACCUMULATORS=4 -o src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-avx512f-rr2-p5-u64-acc4.c &
 
-################################## WAsm SIMD ##################################
+################################## Wasm SIMD ##################################
 tools/xngen src/f32-raddstoreexpminusmax/wasmsimd-rr2-p5.c.in -D BATCH_TILE=4  -D ACCUMULATORS=1 -D FMA=0 -o src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-wasmsimd-rr2-p5-u4.c &
 tools/xngen src/f32-raddstoreexpminusmax/wasmsimd-rr2-p5.c.in -D BATCH_TILE=8  -D ACCUMULATORS=2 -D FMA=0 -o src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-wasmsimd-rr2-p5-u8-acc2.c &
 tools/xngen src/f32-raddstoreexpminusmax/wasmsimd-rr2-p5.c.in -D BATCH_TILE=16 -D ACCUMULATORS=2 -D FMA=0 -o src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-wasmsimd-rr2-p5-u16-acc2.c &

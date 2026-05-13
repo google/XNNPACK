@@ -73,6 +73,25 @@ std::vector<size_t> random_shape(Rng& rng) {
   return random_shape(rng, 1, 9);
 }
 
+// Generate a random shape using the input `shape` as a template: non-zero
+// values are preserved, zero values are given a random non-zero value.
+template <typename Rng>
+std::vector<size_t> random_shape(Rng& rng, std::vector<size_t> shape,
+                                 size_t min_dim, size_t max_dim) {
+  std::uniform_int_distribution<size_t> dim_dist(min_dim, max_dim);
+  for (size_t& i : shape) {
+    if (i == 0) {
+      i = dim_dist(rng);
+    }
+  }
+  return shape;
+}
+
+template <typename Rng>
+std::vector<size_t> random_shape(Rng& rng, std::vector<size_t> shape) {
+  return random_shape(rng, shape, 1, 9);
+}
+
 // Generate random quantization parameters for a given type.
 template <typename T, typename Rng>
 quantization_params random_quantization(T, Rng& rng, float min_scale = 0.25f,

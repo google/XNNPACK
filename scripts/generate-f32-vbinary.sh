@@ -84,7 +84,7 @@ tools/xngen src/f32-vbinary/vopc-scalar.c.in -D OP=SUB         -D BATCH_TILE=2 -
 tools/xngen src/f32-vbinary/vopc-scalar.c.in -D OP=SUB         -D BATCH_TILE=4 -D WASM=0 -D -o src/f32-vbinary/gen/f32-vsubc-scalar-u4.c &
 tools/xngen src/f32-vbinary/vopc-scalar.c.in -D OP=SUB         -D BATCH_TILE=8 -D WASM=0 -D -o src/f32-vbinary/gen/f32-vsubc-scalar-u8.c &
 
-################################## WAsm SIMD ##################################
+################################## Wasm SIMD ##################################
 tools/xngen src/f32-vbinary/vop-wasmsimd.c.in -D OP=ADD        -D BATCH_TILE=16 -D RELAXED=0 -D X86=0 -o src/f32-vbinary/gen/f32-vadd-wasmsimd-u16.c &
 tools/xngen src/f32-vbinary/vop-wasmsimd.c.in -D OP=ADD        -D BATCH_TILE=4  -D RELAXED=0 -D X86=0 -o src/f32-vbinary/gen/f32-vadd-wasmsimd-u4.c &
 tools/xngen src/f32-vbinary/vop-wasmsimd.c.in -D OP=ADD        -D BATCH_TILE=8  -D RELAXED=0 -D X86=0 -o src/f32-vbinary/gen/f32-vadd-wasmsimd-u8.c &

@@ -1495,6 +1495,106 @@ void GEMMBenchmark(benchmark::State& state,
       static_cast<uint64_t>(state.iterations()) * 2 * mc * nc * kc,
       benchmark::Counter::kIsRate);
 }
+
+void GEMMBenchmark(benchmark::State& state,
+                   xnn_pqs8_qc8w_gemm_minmax_ukernel_fn gemm,
+                   xnn_init_qs8_qc8w_conv_minmax_params_fn init_minmax_params,
+                   xnn_pack_weights_and_biases_fn pack_weights,
+                   xnn_packed_stride_weights_and_biases_fn packed_stride,
+                   ConstantOrFunction mr, ConstantOrFunction nr, size_t kr,
+                   size_t sr, ConstantOrFunction mr_packed,
+                   uint64_t arch_flags) {
+  if (!benchmark::utils::CheckArchFlags(state, arch_flags)) {
+    return;
+  }
+
+  const size_t mc = state.range(0);
+  const size_t nc = state.range(1);
+  const size_t kc = state.range(2);
+
+  xnnpack::ReplicableRandomDevice rng;
+  auto i32rng = std::bind(std::uniform_int_distribution<int32_t>(-10000, 10000),
+                          std::ref(rng));
+
+  xnnpack::Buffer<int8_t> a(mc * kc, xnnpack::XnnExtraBytes);
+  xnnpack::fill_uniform_random_bits(a.data(), a.size(), rng);
+  xnnpack::Buffer<int8_t> k(nc * kc);
+  xnnpack::fill_uniform_random_bits(k.data(), k.size(), rng);
+  xnnpack::Buffer<int32_t> b(nc);
+  std::generate(b.begin(), b.end(), std::ref(i32rng));
+
+  // Create a fake `gemm_config` for the packing functions.
+  struct xnn_gemm_config gemm_config;
+  gemm_config.mr = static_cast<uint8_t>(mr);
+  gemm_config.mr_packed = static_cast<uint8_t>(mr_packed);
+  gemm_config.nr = static_cast<uint8_t>(nr);
+  gemm_config.log2_kr = static_cast<uint8_t>(31 - math_clz_nonzero_u32(kr));
+  gemm_config.log2_sr = static_cast<uint8_t>(31 - math_clz_nonzero_u32(sr));
+
+  const size_t packed_w_stride =
+      packed_stride(&gemm_config, kc, /*unused_block_size=*/0, /*k_stride=*/kc,
+                    /*extra_bytes=*/0);
+  const size_t packed_w_size = packed_w_stride * round_up(nc, nr);
+
+  const size_t c_elements = mc * nc;
+  const size_t num_buffers =
+      1 + benchmark::utils::DivideRoundUp<size_t>(
+              benchmark::utils::GetMaxCacheSize(),
+              packed_w_size + c_elements * sizeof(int8_t));
+
+  xnnpack::Buffer<char, XNN_ALLOCATION_ALIGNMENT> w(packed_w_size *
+                                                    num_buffers);
+
+  // RHS packing
+  xnnpack::Buffer<float> kernel_scale(nc, 1.0f);
+  const xnn_qs8_packing_params packing_params = {127};
+  pack_weights(/*flags=*/0, &gemm_config, kc, nc,
+               /*groups=*/1, /*unused_block_size=*/0, /*k_stride=*/kc,
+               /*accumulator_init=*/nullptr,
+               /*weights=*/k.data(),
+               /*int_extra_data0_fn=*/nullptr,
+               /*extra_data0=*/b.data(),
+               /*extra_data0_size=*/sizeof(int32_t),
+               /*init_extra_data1_fn=*/nullptr,
+               /*extra_data1=*/kernel_scale.data(),
+               /*extra_data1_size=*/sizeof(float),
+               /*packed_weights_ptr=*/w.data(), &packing_params);
+
+  xnnpack::Buffer<int8_t> c(c_elements * num_buffers);
+
+  // Prepare parameters.
+  union xnn_qs8_qc8w_conv_minmax_params quantization_params;
+  init_minmax_params(&quantization_params,
+              /*output_zero_point=*/127,
+              /*output_min=*/-127,
+              /*output_max=*/126);
+
+  size_t buffer_index = 0;
+  for (auto _ : state) {
+    state.PauseTiming();
+    benchmark::utils::PrefetchToL1(a.data(), a.size() * sizeof(int8_t));
+    buffer_index = (buffer_index + 1) % num_buffers;
+    state.ResumeTiming();
+
+    for (uint32_t m = 0; m < mc; m += mr) {
+      const uint32_t mb = min(mc - m, mr);
+      gemm(mb, nc, kc * sizeof(int8_t),
+            a.data() + m * kc,
+            w.data() + packed_w_size * buffer_index,
+            c.data() + (buffer_index * mc + m) * nc, nc * sizeof(int8_t),
+            sizeof(int8_t), &quantization_params);
+    }
+  }
+
+  const uint64_t cpu_frequency = benchmark::utils::GetCurrentCpuFrequency();
+  if (cpu_frequency != 0) {
+    state.counters["cpufreq"] = cpu_frequency;
+  }
+
+  state.counters["OPS"] = benchmark::Counter(
+      static_cast<uint64_t>(state.iterations()) * 2 * mc * nc * kc,
+      benchmark::Counter::kIsRate);
+}
 #endif  // XNN_ENABLE_KLEIDIAI && (XNN_ENABLE_ARM_SME2 || XNN_ENABLE_ARM_SME)
 
 void GEMMBenchmark(benchmark::State& state,

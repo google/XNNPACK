@@ -601,7 +601,7 @@
   init: xnn_init_f32_minmax_scalar_params
   pack: xnn_pack_f32_conv_goki_w
   k-block: 1
-# WAsm SIMD
+# Wasm SIMD
 - name: xnn_f32_igemm_minmax_ukernel_1x8__wasmsimd_arm_loadsplat
   init: xnn_init_f32_minmax_scalar_params
   pack: xnn_pack_f32_conv_goki_w
@@ -730,7 +730,7 @@
   init: xnn_init_f32_minmax_scalar_params
   pack: xnn_pack_f32_conv_goki_w
   k-block: 4
-# WAsm Relaxed SIMD
+# Wasm Relaxed SIMD
 - name: xnn_f32_igemm_minmax_ukernel_1x8__wasmrelaxedsimd_fma_loadsplat
   init: xnn_init_f32_minmax_scalar_params
   pack: xnn_pack_f32_conv_goki_w

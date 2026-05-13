@@ -52,6 +52,9 @@ typedef float16x8_t xnn_simd_f16_t;
 #define xnn_srl_f16(a, bits) \
   vreinterpretq_f16_u16(vshrq_n_u16(vreinterpretq_u16_f16(a), bits))
 
+#define xnn_sra_f16(a, bits) \
+  vreinterpretq_f16_s16(vshrq_n_s16(vreinterpretq_s16_f16(a), bits))
+
 // Arithmetic operations.
 static XNN_INLINE xnn_simd_f16_t xnn_zero_f16() {
   return vreinterpretq_f16_u16(vdupq_n_u16(0));

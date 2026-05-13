@@ -75,6 +75,7 @@ cc_library(
         "static_slice.cc",
         "static_slice.h",
         "static_transpose.cc",
+        "static_transpose.h",
         "stencil_copy.cc",
         "stencil_copy.h",
         "subgraph.cc",

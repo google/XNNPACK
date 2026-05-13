@@ -16,6 +16,9 @@
 #include "ynnpack/kernels/ternary/x86_sse2.inc"
 #endif  // YNN_ARCH_X86
 
+#ifdef YNN_ARCH_ARM64_NEON
+#include "ynnpack/kernels/ternary/arm64_neon.inc"
+#endif  // YNN_ARCH_ARM64_NEON
 #ifdef YNN_ARCH_ARM_NEON
 #include "ynnpack/kernels/ternary/arm_neon.inc"
 #endif  // YNN_ARCH_ARM_NEON

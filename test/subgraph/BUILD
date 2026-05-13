@@ -179,6 +179,10 @@ xnnpack_unit_test(
 xnnpack_unit_test(
     name = "batch_matrix_multiply_test",
     srcs = ["batch-matrix-multiply.cc"],
+    defines = select({
+        "//ynnpack/xnnpack:use_ynnpack": ["XNNPACK_USE_YNNPACK"],
+        "//conditions:default": [],
+    }),
     shard_count = 5,
     deps = SUBGRAPH_TEST_DEPS + [
         "//:microparams_h",
@@ -358,5 +362,20 @@ xnnpack_unit_test(
         "//:buffer",
         "//:operator_utils",
         "//test:replicable_random_device",
+    ],
+)
+
+xnnpack_unit_test(
+    name = "planning_test",
+    srcs = ["planning.cc"],
+    tags = ["no_ynnpack"],
+    deps = [
+        "//:xnnpack_h",
+        "//litert/tensor",
+        "//litert/tensor:arithmetic",
+        "//litert/tensor:datatypes",
+        "//litert/tensor/backends/xnnpack:arithmetic",
+        "//litert/tensor/backends/xnnpack:conversion",
+        "//litert/tensor/utils:matchers_no_g3",
     ],
 )

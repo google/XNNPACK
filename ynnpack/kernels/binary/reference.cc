@@ -16,7 +16,7 @@ const binary_op_info* get_binary_op_info(ynn_binary_operator op) {
   static max max;
   static min min;
   static multiply mul;
-  static pow pow;
+  static struct pow pow;
   static squared_difference squared_difference;
   static subtract sub;
   static leaky_relu leaky_relu;

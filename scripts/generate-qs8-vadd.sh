@@ -21,7 +21,7 @@ tools/xngen src/qs8-vaddc/scalar.c.in -D BATCH_TILE=1 -D DATATYPE=QU8 -o src/qu8
 tools/xngen src/qs8-vaddc/scalar.c.in -D BATCH_TILE=2 -D DATATYPE=QU8 -o src/qu8-vaddc/gen/qu8-vaddc-minmax-scalar-u2.c &
 tools/xngen src/qs8-vaddc/scalar.c.in -D BATCH_TILE=4 -D DATATYPE=QU8 -o src/qu8-vaddc/gen/qu8-vaddc-minmax-scalar-u4.c &
 
-################################## WAsm SIMD ##################################
+################################## Wasm SIMD ##################################
 tools/xngen src/qs8-vadd/wasmsimd.c.in -D BATCH_TILE=8  -D DATATYPE=QS8 -o src/qs8-vadd/gen/qs8-vadd-minmax-wasmsimd-u8.c &
 tools/xngen src/qs8-vadd/wasmsimd.c.in -D BATCH_TILE=16 -D DATATYPE=QS8 -o src/qs8-vadd/gen/qs8-vadd-minmax-wasmsimd-u16.c &
 tools/xngen src/qs8-vadd/wasmsimd.c.in -D BATCH_TILE=24 -D DATATYPE=QS8 -o src/qs8-vadd/gen/qs8-vadd-minmax-wasmsimd-u24.c &

@@ -210,6 +210,11 @@ template <typename T, size_t N>
 YNN_ALWAYS_INLINE vec<T, N> floor_log2(vec<T, N> a) {
   return {floor_log2(a.lo()), floor_log2(a.hi())};
 }
+
+template <typename T, size_t N>
+YNN_ALWAYS_INLINE vec<T, N> exp2_round(vec<T, N> a) {
+  return {exp2_round(a.lo()), exp2_round(a.hi())};
+}
 template <typename T, size_t N>
 YNN_ALWAYS_INLINE vec<T, N> ceil(vec<T, N> a) {
   return {ceil(a.lo()), ceil(a.hi())};
@@ -284,6 +289,19 @@ YNN_ALWAYS_INLINE T horizontal_min(vec<T, N> x) {
 template <typename T, size_t N>
 YNN_ALWAYS_INLINE T horizontal_max(vec<T, N> x) {
   return horizontal_max(max(x.lo(), x.hi()));
+}
+
+template <typename T, size_t N>
+YNN_ALWAYS_INLINE void kahan_sum(vec<T, N> a, vec<T, N>& acc,
+                                 vec<T, N>& error) {
+  vec<T, N / 2> acc_lo = acc.lo();
+  vec<T, N / 2> acc_hi = acc.hi();
+  vec<T, N / 2> error_lo = error.lo();
+  vec<T, N / 2> error_hi = error.hi();
+  kahan_sum(a.lo(), acc_lo, error_lo);
+  kahan_sum(a.hi(), acc_hi, error_hi);
+  acc = concat(acc_lo, acc_hi);
+  error = concat(error_lo, error_hi);
 }
 
 }  // namespace simd

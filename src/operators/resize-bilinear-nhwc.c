@@ -114,7 +114,7 @@ enum xnn_status xnn_create_resize_bilinear2d_nhwc(
   return xnn_status_success;
 }
 
-enum xnn_status xnn_reshape_resize_bilinear2d_nhwc(
+XNN_NO_SANITIZE_FUNCTION enum xnn_status xnn_reshape_resize_bilinear2d_nhwc(
     xnn_operator_t resize_op,
     size_t batch_size,
     size_t input_height,

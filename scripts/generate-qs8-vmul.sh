@@ -21,7 +21,7 @@ tools/xngen src/qs8-vmulc/scalar.c.in -D BATCH_TILE=1 -D REQUANTIZATION=FP32 -D 
 tools/xngen src/qs8-vmulc/scalar.c.in -D BATCH_TILE=2 -D REQUANTIZATION=FP32 -D DATATYPE=QU8 -o src/qu8-vmulc/gen/qu8-vmulc-minmax-fp32-scalar-u2.c &
 tools/xngen src/qs8-vmulc/scalar.c.in -D BATCH_TILE=4 -D REQUANTIZATION=FP32 -D DATATYPE=QU8 -o src/qu8-vmulc/gen/qu8-vmulc-minmax-fp32-scalar-u4.c &
 
-################################## WAsm SIMD ##################################
+################################## Wasm SIMD ##################################
 tools/xngen src/qs8-vmul/wasmsimd-mul32-ld64.c.in -D BATCH_TILE=8  -D REQUANTIZATION=FP32 -D DATATYPE=QS8 -o src/qs8-vmul/gen/qs8-vmul-minmax-fp32-wasmsimd-mul32-ld64-u8.c &
 tools/xngen src/qs8-vmul/wasmsimd-mul32-ld64.c.in -D BATCH_TILE=16 -D REQUANTIZATION=FP32 -D DATATYPE=QS8 -o src/qs8-vmul/gen/qs8-vmul-minmax-fp32-wasmsimd-mul32-ld64-u16.c &
 

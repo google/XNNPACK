@@ -9,7 +9,7 @@
 - name: xnn_f32_argmaxpool_ukernel_9p8x__rvv_u1v
 # x86 SSE
 - name: xnn_f32_argmaxpool_ukernel_9p8x__sse2_c4
-# WAsm SIMD
+# Wasm SIMD
 - name: xnn_f32_argmaxpool_ukernel_9p8x__wasmsimd_c4
 # Scalar
 - name: xnn_f32_argmaxpool_ukernel_9p8x__scalar_c1

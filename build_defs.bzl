@@ -132,6 +132,10 @@ def xnnpack_configurable_defines():
         ["XNN_ENABLE_AVX512FP16=1"],
         ["XNN_ENABLE_AVX512FP16=0"],
     ) + xnnpack_select_if(
+        "//:wasmrelaxedsimdfp16_enabled",
+        ["XNN_ENABLE_WASMRELAXEDSIMDFP16=1"],
+        ["XNN_ENABLE_WASMRELAXEDSIMDFP16=0"],
+    ) + xnnpack_select_if(
         "//:avx512bf16_enabled",
         ["XNN_ENABLE_AVX512BF16=1"],
         ["XNN_ENABLE_AVX512BF16=0"],

@@ -147,6 +147,7 @@ tools/generate-vunary-test.py --ukernel f16-vcos --output test/f16-vcos.cc &
 tools/generate-vunary-test.py --ukernel f16-velu --output test/f16-velu.cc &
 tools/generate-vunary-test.py --ukernel f16-vexp --output test/f16-vexp.cc &
 tools/generate-vunary-test.py --ukernel f16-vgelu --output test/f16-vgelu.cc &
+tools/generate-vunary-test.py --ukernel f16-vlog --output test/f16-vlog.cc &
 tools/generate-vunary-test.py --ukernel f16-vneg --output test/f16-vneg.cc &
 tools/generate-vunary-test.py --ukernel f16-vrndd  --output test/f16-vrndd.cc &
 tools/generate-vunary-test.py --ukernel f16-vrndne --output test/f16-vrndne.cc &
@@ -248,7 +249,7 @@ tools/xngen test/simd/f32-simd.cc.in -D ARCH=hvx -D ARCH_MACRO=XNN_ARCH_HEXAGON 
 
 tools/xngen test/simd/f16-simd.cc.in -D ARCH=scalar -D ARCH_MACRO="" -D TEST_REQUIRES="" -o test/simd/f16-simd-scalar.cc &
 tools/xngen test/simd/f16-simd.cc.in -D ARCH=neonfp16arith -D ARCH_MACRO=XNN_ARCH_ARM64 -D TEST_REQUIRES="TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_fp16_arith)" -o test/simd/f16-simd-neonfp16arith.cc &
-tools/xngen test/simd/f16-simd.cc.in -D ARCH=avx512fp16 -D ARCH_MACRO="(XNN_ARCH_X86 || XNN_ARCH_X86_64) && XNNPACK_ENABLE_AVX512FP16" -D TEST_REQUIRES="TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_avx512fp16)" -o test/simd/f16-simd-avx512fp16.cc &
+tools/xngen test/simd/f16-simd.cc.in -D ARCH=avx512fp16 -D ARCH_MACRO="(XNN_ARCH_X86 || XNN_ARCH_X86_64) && XNN_ENABLE_AVX512FP16" -D TEST_REQUIRES="TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_avx512fp16)" -o test/simd/f16-simd-avx512fp16.cc &
 tools/xngen test/simd/f16-simd.cc.in -D ARCH=wasmrelaxedsimd -D ARCH_MACRO="XNN_ARCH_WASMRELAXEDSIMD" -D TEST_REQUIRES="" -o test/simd/f16-simd-wasmrelaxedsimd.cc &
 
 tools/xngen test/simd/s16-simd.cc.in -D ARCH=scalar -D ARCH_MACRO="" -D TEST_REQUIRES="" -o test/simd/s16-simd-scalar.cc &

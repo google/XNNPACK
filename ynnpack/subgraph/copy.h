@@ -12,7 +12,7 @@ void define_copy(ynn_subgraph& subgraph, ynn_node& node, uint32_t input_id,
                  uint32_t output_id, uint32_t flags);
 
 void define_static_expand_dims(ynn_subgraph& subgraph, ynn_node& node,
-                               uint32_t input_id, uint32_t output_id,
+                               uint32_t input_id, uint32_t* output_id,
                                const axes_set& new_axes);
 
 }  // namespace ynn

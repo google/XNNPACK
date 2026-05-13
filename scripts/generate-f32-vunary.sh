@@ -45,7 +45,7 @@ tools/xngen src/f32-vunary/simd.c.in -D OP=ABS -D ARCH=neon -D BATCH_TILES="4,8,
 tools/xngen src/f32-vunary/simd.c.in -D OP=NEG -D ARCH=neon -D BATCH_TILES="4,8,12" -o src/f32-vunary/gen/f32-vneg-neon.c
 tools/xngen src/f32-vunary/simd.c.in -D OP=SQR -D ARCH=neon -D BATCH_TILES="4,8,12" -o src/f32-vunary/gen/f32-vsqr-neon.c
 
-################################## WAsm SIMD ##################################
+################################## Wasm SIMD ##################################
 tools/xngen src/f32-vunary/simd.c.in -D OP=ABS -D ARCH=wasmsimd -D BATCH_TILES="4,8,12" -o src/f32-vunary/gen/f32-vabs-wasmsimd.c
 tools/xngen src/f32-vunary/simd.c.in -D OP=NEG -D ARCH=wasmsimd -D BATCH_TILES="4,8,12" -o src/f32-vunary/gen/f32-vneg-wasmsimd.c
 tools/xngen src/f32-vunary/simd.c.in -D OP=SQR -D ARCH=wasmsimd -D BATCH_TILES="4,8,12" -o src/f32-vunary/gen/f32-vsqr-wasmsimd.c

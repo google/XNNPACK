@@ -93,7 +93,7 @@
   pack: xnn_pack_f32_gemm_goi_w
   k-block: 1
 
-# WAsm SIMD
+# Wasm SIMD
 - name: xnn_f32_ppmm_minmax_ukernel_4x8__wasmsimd_arm_splat
   init: xnn_init_f32_minmax_scalar_params
   pack: xnn_pack_f32_gemm_goi_w

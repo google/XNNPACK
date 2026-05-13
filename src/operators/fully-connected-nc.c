@@ -93,7 +93,7 @@ static enum xnn_operator_type get_operator_type(
 
 #undef XNNPACK_OP_TYPE_TO_FINGERPRINT
 
-static enum xnn_status create_fully_connected_nc(
+static XNN_NO_SANITIZE_FUNCTION enum xnn_status create_fully_connected_nc(
     size_t input_channels, size_t output_channels, size_t input_stride,
     size_t output_stride, const void* kernel, const void* bias, uint32_t flags,
     size_t block_size, const uint16_t* blockwise_kernel_scale_params,

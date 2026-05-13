@@ -7,12 +7,25 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include "ynnpack/base/arithmetic.h"
+#include "ynnpack/base/type.h"
 
 using ::testing::_;
 using ::testing::ElementsAreArray;
 using ::testing::Matcher;
 
 namespace ynn {
+
+MATCHER_P4(Int2x4Match, e0, e1, e2, e3, "") {
+  return ExplainMatchResult(e0, arg.get(0), result_listener) &&
+         ExplainMatchResult(e1, arg.get(1), result_listener) &&
+         ExplainMatchResult(e2, arg.get(2), result_listener) &&
+         ExplainMatchResult(e3, arg.get(3), result_listener);
+}
+
+MATCHER_P2(Int4x2Match, e0, e1, "") {
+  return ExplainMatchResult(e0, arg.get(0), result_listener) &&
+         ExplainMatchResult(e1, arg.get(1), result_listener);
+}
 
 // Generate an (optionally transposed) matrix using an `iota` function down
 // the columns:
@@ -29,13 +42,17 @@ namespace ynn {
 //
 template <typename T>
 std::vector<T> iota_columns(bool transposed, size_t m, size_t n) {
-  std::vector<T> result(m * n);
+  const size_t elem_count = type_info<T>::element_count();
+  std::vector<T> result(ceil_div(m * n, elem_count));
   if (transposed) {
-    std::iota(result.begin(), result.end(), 0);
+    for (size_t i = 0; i < m * n; ++i) {
+      type_info<T>::set(result.data(), i, i);
+    }
   } else {
     for (size_t i = 0; i < m; ++i) {
       for (size_t j = 0; j < n; ++j) {
-        result[i * n + j] = j * m + i;
+        type_info<T>::set(result.data(), i * n + j,
+                          static_cast<int>(j * m + i));
       }
     }
   }
@@ -301,6 +318,98 @@ TEST_P(pack, tile_4x2) {
       14, 0, 0, 0, _, _, _, _,
       // clang-format on
   };
+  EXPECT_THAT(output, ElementsAreArray(expected));
+}
+
+TEST(pack_subbyte, int2_transpose_false) {
+  const bool transpose = false;
+  const int element_size_bits = 2;
+  const int tile_m = 4;
+  const int tile_n = 4;
+
+  packer p(transpose, element_size_bits, tile_m, tile_n);
+
+  const int m = 8;
+  const int n = 4;
+
+  std::vector<int2x4> input = iota_columns<int2x4>(transpose, m, n);
+  std::vector<int2x4> output(8);
+
+  p.pack(m, n, /*input_stride=*/1,
+         /*input=*/input.data(),
+         /*output_stride=*/4,
+         /*output_block_stride=*/8,
+         /*output=*/output.data());
+
+  std::vector<Matcher<int2x4>> expected = {
+      Int2x4Match(0, 1, -2, -1), Int2x4Match(0, 1, -2, -1),
+      Int2x4Match(0, 1, -2, -1), Int2x4Match(0, 1, -2, -1),
+      Int2x4Match(0, 1, -2, -1), Int2x4Match(0, 1, -2, -1),
+      Int2x4Match(0, 1, -2, -1), Int2x4Match(0, 1, -2, -1),
+  };
+
+  EXPECT_THAT(output, ElementsAreArray(expected));
+}
+
+TEST(pack_subbyte, int4_transpose_false) {
+  const bool transpose = false;
+  const int element_size_bits = 4;
+  const int tile_m = 4;
+  const int tile_n = 4;
+
+  packer p(transpose, element_size_bits, tile_m, tile_n);
+
+  const int m = 8;
+  const int n = 4;
+
+  std::vector<int4x2> input = iota_columns<int4x2>(transpose, m, n);
+  std::vector<int4x2> output(16);
+
+  p.pack(m, n, /*input_stride=*/2,
+         /*input=*/input.data(),
+         /*output_stride=*/8,
+         /*output_block_stride=*/16,
+         /*output=*/output.data());
+
+  std::vector<Matcher<int4x2>> expected = {
+      Int4x2Match(0, 1),   Int4x2Match(2, 3),   Int4x2Match(-8, -7),
+      Int4x2Match(-6, -5), Int4x2Match(0, 1),   Int4x2Match(2, 3),
+      Int4x2Match(-8, -7), Int4x2Match(-6, -5), Int4x2Match(4, 5),
+      Int4x2Match(6, 7),   Int4x2Match(-4, -3), Int4x2Match(-2, -1),
+      Int4x2Match(4, 5),   Int4x2Match(6, 7),   Int4x2Match(-4, -3),
+      Int4x2Match(-2, -1),
+  };
+
+  EXPECT_THAT(output, ElementsAreArray(expected));
+}
+
+TEST(pack_subbyte, int2_non_aligned) {
+  const bool transpose = false;
+  const int element_size_bits = 2;
+  const int tile_m = 4;
+  const int tile_n = 4;
+
+  packer p(transpose, element_size_bits, tile_m, tile_n);
+
+  const int m = 5;
+  const int n = 4;
+
+  std::vector<int2x4> input = iota_columns<int2x4>(transpose, m, n);
+  std::vector<int2x4> output(8);
+
+  p.pack(m, n, /*input_stride=*/1,
+         /*input=*/input.data(),
+         /*output_stride=*/4,
+         /*output_block_stride=*/8,
+         /*output=*/output.data());
+
+  std::vector<Matcher<int2x4>> expected = {
+      Int2x4Match(0, 1, -2, -1), Int2x4Match(1, -2, -1, 0),
+      Int2x4Match(-2, -1, 0, 1), Int2x4Match(-1, 0, 1, -2),
+      Int2x4Match(0, _, _, _),   Int2x4Match(1, _, _, _),
+      Int2x4Match(-2, _, _, _),  Int2x4Match(-1, _, _, _),
+  };
+
   EXPECT_THAT(output, ElementsAreArray(expected));
 }
 

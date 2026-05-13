@@ -73,6 +73,8 @@ class Type:
         result += "half"
       elif self.type_class == "float" and self.size == 32:
         result += "float"
+      elif self.type_class == "float" and self.size == 64:
+        result += "double"
       elif self.type_class == "bfloat" and self.size == 16:
         result += "bfloat16"
       else:
@@ -129,7 +131,10 @@ fn_ops = []
 def wrap(y):
   result = y
   if isinstance(y, int):
-    result = Constant(Int(32), y)
+    if builtins.abs(y) > 2**31 - 1:
+      result = Constant(Int(64), y)
+    else:
+      result = Constant(Int(32), y)
   elif isinstance(y, float):
     result = Constant(Float(32), y)
   return result
@@ -429,6 +434,11 @@ def floor_log2(value):
 
 
 @intrinsic
+def exp2_round(value):
+  return Op(value.ty, "exp2_round", [value])
+
+
+@intrinsic
 def sqrt(value):
   return Op(value.ty, "sqrt", [value])
 
@@ -543,13 +553,13 @@ def saturating_narrow(x):
 
 @intrinsic
 def min(x, y):
-  assert x.ty == y.ty
+  (x, y) = promote_types(x, y)
   return Op(wrap(x).ty, "min", [x, y])
 
 
 @intrinsic
 def max(x, y):
-  assert x.ty == y.ty
+  (x, y) = promote_types(x, y)
   return Op(x.ty, "max", [x, y])
 
 
@@ -684,8 +694,16 @@ def i32(value):
   return Constant(Int(32), value)
 
 
+def i64(value):
+  return Constant(Int(64), value)
+
+
 def f32(value):
   return Constant(Float(32), value)
+
+
+def f64(value):
+  return Constant(Float(64), value)
 
 
 class BroadcastMode(enum.Enum):
@@ -971,6 +989,7 @@ class Target:
         "round",
         "floor",
         "floor_log2",
+        "exp2_round",
         "ceil",
         "sqrt",
         "reinterpret_cast",
@@ -1612,8 +1631,8 @@ class Target:
       if len(buffers) > 2:
         self.emit_asserts(buffers)
 
-      self.emit_constants(constants)
       self.emit_scalar_arguments(scalar_args, tile_width)
+      self.emit_constants(constants)
 
       self.handle_specialize(
           ops,

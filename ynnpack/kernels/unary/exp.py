@@ -5,25 +5,16 @@
 from ynnpack.kernels.elementwise.compiler import *  # pylint: disable=wildcard-import
 
 
-def setexp_f32(x):
-  # If `x` is an floating point value in the range [-127, 128], then
-  # `(x + magic) << 23` will generate the floating point value corresponding
-  # to `2^round(x)` (2^-127 and 2^128 will flush to zero and infinity,
-  # respectively).
-  vmagic = 8388735.0
-  return reinterpret_cast(
-      Float(32),
-      logical_shift_left(reinterpret_cast(Int(32), x + vmagic), i32(23)),
-  )
-
-
-# Quick-and-dirty round to nearest, only works for floats in the range
-# `[2^-22, 2^22)`.
 def qd_round_f32(a):
   # If `x` is an floating point value in the range `[2^-22, 2^22)`, then
   # `(x + magic) - magic`` will generate the floating point value corresponding
   # to `round(x)`.
-  vmagic = 12582912.0
+  vmagic = 1.5*(2**23)
+  return (vmagic + a) - vmagic
+
+
+def qd_round_f64(a):
+  vmagic = 1.5*(2**52)
   return (vmagic + a) - vmagic
 
 
@@ -54,7 +45,7 @@ def exp_fp32(a, x, output_multiplier, input_multiplier):
   vr = vz_prime - vz
 
   # Compute 2^z.
-  v2z = setexp_f32(vz)
+  v2z = exp2_round(vz)
 
   # Evaluate the numerator polynomial p(f).
   vp = multiply_add(vr, valpha_3, valpha_2)
@@ -64,6 +55,68 @@ def exp_fp32(a, x, output_multiplier, input_multiplier):
   # Evaluate the denominator polynomial q(r).
   vq = multiply_add(vr, vbeta_2, vbeta_1)
   vq = multiply_add(vr, vq, 1.0)
+
+  # Divide the numerator by the denominator, obtaining 2^r.
+  v2r = vp / vq
+
+  # Compute 2^z * 2^r.
+  vx = v2z * v2r
+
+  return store(vx, x)
+
+
+@const_buffer("a", Float(64))
+@buffer("x", Float(64))
+@params(
+    # These are actually fp32, but we convert them to fp64 when loading them.
+    Scalar("output_multiplier", Float(64)),
+    Scalar("input_multiplier", Float(64)),
+)
+@operator_name("exp")
+def exp_fp64(a, x, output_multiplier, input_multiplier):
+  # The monomial coefficients of the numerator polynomial.
+  valpha_0 = output_multiplier
+  valpha_1 = f64(3.4676676602009343e-01) * output_multiplier
+  valpha_2 = f64(4.8547260476602683e-03) * output_multiplier
+  valpha_3 = f64(-1.6449512448332461e-02) * output_multiplier
+  valpha_4 = f64(-3.9542371727433537e-03) * output_multiplier
+  valpha_5 = f64(-4.7934022810405645e-04) * output_multiplier
+  valpha_6 = f64(-3.3721468729512247e-05) * output_multiplier
+  valpha_7 = f64(-1.1751189228021222e-06) * output_multiplier
+
+  # The monomial coefficients of the denominator polynomial (`vbeta_0 = 1.0).
+  vbeta_1 = f64(-3.4638041453985308e-01)
+  vbeta_2 = f64(4.7208268280255761e-03)
+  vbeta_3 = f64(7.9839081451320987e-03)
+  vbeta_4 = f64(-1.0149212714116937e-03)
+  vbeta_5 = f64(4.2353669794714666e-05)
+
+  va = load(a) * input_multiplier
+  # Clamp `vz_prime = x * log2(e)` to the maximum exponents [-1023, 1024].
+  vz_prime = min(max(va, -1023.0), 1024.0)
+
+  # Decompose x * log2e into `z` (integer part) and `r` (remainder).
+  vz = qd_round_f64(vz_prime)
+  vr = vz_prime - vz
+
+  # Compute 2^z.
+  v2z = exp2_round(vz)
+
+  # Evaluate the numerator polynomial p(f).
+  vp = multiply_add(vr, valpha_7, valpha_6)
+  vp = multiply_add(vr, vp, valpha_5)
+  vp = multiply_add(vr, vp, valpha_4)
+  vp = multiply_add(vr, vp, valpha_3)
+  vp = multiply_add(vr, vp, valpha_2)
+  vp = multiply_add(vr, vp, valpha_1)
+  vp = multiply_add(vr, vp, valpha_0)
+
+  # Evaluate the denominator polynomial q(r).
+  vq = multiply_add(vr, vbeta_5, vbeta_4)
+  vq = multiply_add(vr, vq, vbeta_3)
+  vq = multiply_add(vr, vq, vbeta_2)
+  vq = multiply_add(vr, vq, vbeta_1)
+  vq = multiply_add(vr, vq, f64(1.0))
 
   # Divide the numerator by the denominator, obtaining 2^r.
   v2r = vp / vq

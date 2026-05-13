@@ -62,7 +62,7 @@ tools/xngen src/f16-f32-vcvt/f16c.c.in -D BATCH_TILE=16 -o src/f16-f32-vcvt/gen/
 tools/xngen src/f16-f32-vcvt/avx512skx.c.in -D BATCH_TILE=16 -o src/f16-f32-vcvt/gen/f16-f32-vcvt-avx512skx-u16.c &
 tools/xngen src/f16-f32-vcvt/avx512skx.c.in -D BATCH_TILE=32 -o src/f16-f32-vcvt/gen/f16-f32-vcvt-avx512skx-u32.c &
 
-################################## WAsm SIMD ##################################
+################################## Wasm SIMD ##################################
 tools/xngen src/f16-f32-vcvt/wasmsimd-int16.c.in -D BATCH_TILE=8  -D RELAXED=0 -o src/f16-f32-vcvt/gen/f16-f32-vcvt-wasmsimd-int16-u8.c &
 tools/xngen src/f16-f32-vcvt/wasmsimd-int16.c.in -D BATCH_TILE=16 -D RELAXED=0 -o src/f16-f32-vcvt/gen/f16-f32-vcvt-wasmsimd-int16-u16.c &
 tools/xngen src/f16-f32-vcvt/wasmsimd-int16.c.in -D BATCH_TILE=24 -D RELAXED=0 -o src/f16-f32-vcvt/gen/f16-f32-vcvt-wasmsimd-int16-u24.c &

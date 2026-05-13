@@ -1404,7 +1404,7 @@
   pack: xnn_pack_qs8_gemm_goi_w
   k-block: 16
 
-# WAsm SIMD
+# Wasm SIMD
 - name: xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x4c2__wasmsimd_dot16x2_ld64
   init: xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params
   pack: xnn_pack_qs8_gemm_goi_w
@@ -1518,7 +1518,7 @@
   pack: xnn_pack_qs8_gemm_goi_w
   k-block: 8
 
-# WAsm Relaxed SIMD
+# Wasm Relaxed SIMD
 - name: xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x4c16__wasmsdot
   init: xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params
   pack: xnn_pack_qs8_gemm_goi_w

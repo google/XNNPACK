@@ -230,8 +230,8 @@ XnnpackGraph::~XnnpackGraph() {
   }
 }
 
-absl::StatusOr<size_t> XnnpackGraph::Lookup(const graph::Tensor& tensor) const {
-  auto it = tensor_index_.find(tensor);
+absl::StatusOr<size_t> XnnpackGraph::Lookup(const TensorHandle& tensor) const {
+  auto it = tensor_index_.find(tensor.GetRaw());
   if (it == tensor_index_.end()) {
     return absl::NotFoundError("Tensor not part of XNNPACK graph");
   }

@@ -49,9 +49,10 @@ void bench(benchmark::State& state, uint64_t arch_flags, unary_kernel_fn kernel,
                                                benchmark::Counter::kIsRate);
 }
 
+template <typename T>
 void bench_reference(benchmark::State& state, unary_kernel_fn kernel,
-                     const unary_params& params) {
-  return bench(state, arch_flag::none, kernel, params, float{}, float{});
+                     const unary_params& params, T) {
+  return bench(state, arch_flag::none, kernel, params, T{}, T{});
 }
 
 template <typename TA, typename TX>
@@ -72,28 +73,32 @@ void Params(benchmark::Benchmark* b) {
   BENCHMARK_CAPTURE(                                               \
       bench_reference, op##_##type,                                \
       get_unary_reference_kernel(ynn_unary_##op, type_of<type>()), \
-      get_unary_params(ynn_unary_##op))                            \
+      get_unary_params(ynn_unary_##op), type())                    \
       ->Apply(Params<type, type>)                                  \
       ->UseRealTime();
 
-BENCHMARK_REFERENCE(abs, float);
-BENCHMARK_REFERENCE(floor, float);
-BENCHMARK_REFERENCE(ceil, float);
-BENCHMARK_REFERENCE(round, float);
-BENCHMARK_REFERENCE(negate, float);
-BENCHMARK_REFERENCE(square, float);
-BENCHMARK_REFERENCE(square_root, float);
-BENCHMARK_REFERENCE(cube_root, float);
-BENCHMARK_REFERENCE(reciprocal_square_root, float);
-BENCHMARK_REFERENCE(log, float);
-BENCHMARK_REFERENCE(exp, float);
-BENCHMARK_REFERENCE(erf, float);
-BENCHMARK_REFERENCE(tanh, float);
-BENCHMARK_REFERENCE(sign, float);
-BENCHMARK_REFERENCE(sine, float);
-BENCHMARK_REFERENCE(cosine, float);
-BENCHMARK_REFERENCE(sigmoid, float);
-BENCHMARK_REFERENCE(hardswish, float);
+#define BENCHMARK_FLOAT_REFERENCE(op) \
+  BENCHMARK_REFERENCE(op, float);     \
+  BENCHMARK_REFERENCE(op, double);
+
+BENCHMARK_FLOAT_REFERENCE(abs);
+BENCHMARK_FLOAT_REFERENCE(floor);
+BENCHMARK_FLOAT_REFERENCE(ceil);
+BENCHMARK_FLOAT_REFERENCE(round);
+BENCHMARK_FLOAT_REFERENCE(negate);
+BENCHMARK_FLOAT_REFERENCE(square);
+BENCHMARK_FLOAT_REFERENCE(square_root);
+BENCHMARK_FLOAT_REFERENCE(cube_root);
+BENCHMARK_FLOAT_REFERENCE(reciprocal_square_root);
+BENCHMARK_FLOAT_REFERENCE(log);
+BENCHMARK_FLOAT_REFERENCE(exp);
+BENCHMARK_FLOAT_REFERENCE(erf);
+BENCHMARK_FLOAT_REFERENCE(tanh);
+BENCHMARK_FLOAT_REFERENCE(sign);
+BENCHMARK_FLOAT_REFERENCE(sine);
+BENCHMARK_FLOAT_REFERENCE(cosine);
+BENCHMARK_FLOAT_REFERENCE(sigmoid);
+BENCHMARK_FLOAT_REFERENCE(hardswish);
 
 BENCHMARK_REFERENCE(abs, int32_t);
 BENCHMARK_REFERENCE(negate, int32_t);

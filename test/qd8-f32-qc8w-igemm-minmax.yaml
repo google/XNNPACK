@@ -687,7 +687,7 @@
   k-block: 16
   unsigned-inputs: True
 
-# WAsm Relaxed SIMD
+# Wasm Relaxed SIMD
 - name: xnn_qd8_f32_qc8w_igemm_minmax_ukernel_1x16c4__wasmusdot
   init: xnn_init_f32_minmax_scalar_params
   pack: xnn_pack_qs8_conv_goki_w
@@ -805,7 +805,7 @@
   pack: xnn_pack_qs8_conv_goki_w
   k-block: 16
 
-# WAsm SIMD
+# Wasm SIMD
 - name: xnn_qd8_f32_qc8w_igemm_minmax_ukernel_1x4c2__wasmsimd_dot16x2_ld64
   init: xnn_init_f32_minmax_scalar_params
   pack: xnn_pack_qs8_conv_goki_w

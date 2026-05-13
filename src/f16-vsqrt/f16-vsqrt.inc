@@ -49,11 +49,11 @@ XNN_UKERNEL(xnn_arch_riscv_vector_fp16_arith, xnn_f16_vsqrt_ukernel__rvvfp16arit
 XNN_UKERNEL(xnn_arch_riscv_vector_fp16_arith, xnn_f16_vsqrt_ukernel__rvvfp16arith_sqrt_u8v, 8, true, xnn_float16, struct xnn_f16_default_params, NULL)
 #endif  // XNN_ARCH_RISCV && XNN_ENABLE_RISCV_FP16_VECTOR
 
-#if XNN_ARCH_WASMRELAXEDSIMD
+#if XNN_ARCH_WASMRELAXEDSIMDFP16
 XNN_UKERNEL(xnn_arch_none, xnn_f16_vsqrt_ukernel__wasmrelaxedsimd_sqrt_u8, 8, false, xnn_float16, struct xnn_f16_default_params, NULL)
 XNN_UKERNEL(xnn_arch_none, xnn_f16_vsqrt_ukernel__wasmrelaxedsimd_sqrt_u16, 16, false, xnn_float16, struct xnn_f16_default_params, NULL)
 XNN_UKERNEL(xnn_arch_none, xnn_f16_vsqrt_ukernel__wasmrelaxedsimd_sqrt_u32, 32, false, xnn_float16, struct xnn_f16_default_params, NULL)
-#endif  // XNN_ARCH_WASMRELAXEDSIMD
+#endif  // XNN_ARCH_WASMRELAXEDSIMDFP16
 
 XNN_UKERNEL(xnn_arch_none, xnn_f16_vsqrt_ukernel__scalar_sqrt_u1, 1, false, xnn_float16, struct xnn_f16_default_params, NULL)
 XNN_UKERNEL(xnn_arch_none, xnn_f16_vsqrt_ukernel__scalar_sqrt_u2, 2, false, xnn_float16, struct xnn_f16_default_params, NULL)

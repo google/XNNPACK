@@ -188,7 +188,7 @@ tools/xngen src/qs8-gemm/rvv.c.in -D MR=1 -D LMUL=1 -D DATATYPE=QU8 -D REQUANTIZ
 tools/xngen src/qs8-gemm/rvv.c.in -D MR=4 -D LMUL=1 -D DATATYPE=QU8 -D REQUANTIZATION=FP32 -o src/qu8-gemm/gen/qu8-gemm-4x1v-minmax-fp32-rvv.c &
 tools/xngen src/qs8-gemm/rvv.c.in -D MR=7 -D LMUL=1 -D DATATYPE=QU8 -D REQUANTIZATION=FP32 -o src/qu8-gemm/gen/qu8-gemm-7x1v-minmax-fp32-rvv.c &
 
-################################## WAsm SIMD ##################################
+################################## Wasm SIMD ##################################
 ### C2 micro-kernels
 tools/xngen src/qs8-gemm/MRx4c2-wasmsimd-dot16x2.c.in -D MR=1 -D VARIANT=LD64     -D REQUANTIZATION=         -D DATATYPE=QD8 -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-1x4c2-minmax-wasmsimd-dot16x2-ld64.c &
 tools/xngen src/qs8-gemm/MRx4c2-wasmsimd-dot16x2.c.in -D MR=2 -D VARIANT=LD64     -D REQUANTIZATION=         -D DATATYPE=QD8 -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-2x4c2-minmax-wasmsimd-dot16x2-ld64.c &
@@ -295,7 +295,7 @@ tools/xngen src/qs8-gemm/MRx4c8-wasmsimd-dot16x2.c.in -D MR=2 -D VARIANT=LD128  
 tools/xngen src/qs8-gemm/MRx4c8-wasmsimd-dot16x2.c.in -D MR=3 -D VARIANT=LD128    -D REQUANTIZATION=FP32     -D DATATYPE=QU8 -o src/qu8-gemm/gen/qu8-gemm-3x4c8-minmax-fp32-wasmsimd-dot16x2-ld128.c &
 tools/xngen src/qs8-gemm/MRx4c8-wasmsimd-dot16x2.c.in -D MR=4 -D VARIANT=LD128    -D REQUANTIZATION=FP32     -D DATATYPE=QU8 -o src/qu8-gemm/gen/qu8-gemm-4x4c8-minmax-fp32-wasmsimd-dot16x2-ld128.c &
 
-############################## WAsm Relaxed SIMD ##############################
+############################## Wasm Relaxed SIMD ##############################
 ### C16 micro-kernels
 tools/xngen src/qs8-gemm/MRx4c16-wasmdot.c.in -D MR=1 NR=4 -D REQUANTIZATION=FP32 -D DATATYPE=QC8 -D SDOT=1 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-1x4c16-minmax-fp32-wasmsdot.c &
 tools/xngen src/qs8-gemm/MRx4c16-wasmdot.c.in -D MR=2 NR=4 -D REQUANTIZATION=FP32 -D DATATYPE=QC8 -D SDOT=1 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-2x4c16-minmax-fp32-wasmsdot.c &

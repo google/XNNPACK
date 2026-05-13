@@ -169,7 +169,7 @@ static inline const struct xnn_dwconv_config* find_dwconv_ukernel(
   return best_ukernel;
 }
 
-static enum xnn_status create_vmulcaddc_path(
+static XNN_NO_SANITIZE_FUNCTION enum xnn_status create_vmulcaddc_path(
     uint32_t groups, const void* kernel, const void* bias,
     uint32_t log2_filter_element_size, uint32_t bias_element_size,
     xnn_pack_vmulcaddc_w_fn pack_vmulcaddc_w, const void* packing_params,
@@ -237,7 +237,7 @@ error:
   return status;
 }
 
-static enum xnn_status create_dwconv_path(
+static XNN_NO_SANITIZE_FUNCTION enum xnn_status create_dwconv_path(
     uint32_t kernel_height, uint32_t kernel_width, uint32_t groups,
     const void* kernel, const void* bias, uint32_t flags,
     uint32_t log2_input_element_size, uint32_t log2_filter_element_size,
@@ -358,7 +358,7 @@ error:
   return status;
 }
 
-static enum xnn_status create_igemm(
+static XNN_NO_SANITIZE_FUNCTION enum xnn_status create_igemm(
     enum xnn_microkernel_type ukernel_type, uint32_t kernel_size,
     uint32_t groups, size_t group_input_channels, size_t group_output_channels,
     const void* kernel, const void* bias, uint32_t flags,

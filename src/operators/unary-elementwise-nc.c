@@ -66,7 +66,7 @@ static enum xnn_status init_lut_op(
   return xnn_status_success;
 }
 
-static enum xnn_status init_lut_op_with_config(
+static XNN_NO_SANITIZE_FUNCTION enum xnn_status init_lut_op_with_config(
     xnn_operator_t op,
     const struct xnn_unary_elementwise_config* reference_config,
     const union xnn_unary_params* params,
@@ -908,6 +908,16 @@ enum xnn_status xnn_create_copy_nc_x8(
     xnn_operator_type_copy_nc_x8, copy_op_out);
 }
 
+enum xnn_status xnn_create_convert_nc_qs8_qc8(
+    uint32_t flags,
+    xnn_operator_t* convert_op_out)
+{
+  return create_unary_elementwise_nc(
+    flags, xnn_init_xx_copy_config(),
+    /*params=*/NULL, /*params_size=*/0,
+    xnn_operator_type_convert_nc_qs8_qc8, convert_op_out);
+}
+
 enum xnn_status xnn_create_copy_nc_x16(
     uint32_t flags,
     xnn_operator_t* copy_op_out)
@@ -1185,6 +1195,24 @@ enum xnn_status xnn_reshape_copy_nc_x8(
     threadpool);
 }
 
+enum xnn_status xnn_reshape_convert_nc_qs8_qc8(
+    xnn_operator_t convert_op,
+    size_t batch_size,
+    size_t channels,
+    size_t input_stride,
+    size_t output_stride,
+    pthreadpool_t threadpool)
+{
+  return reshape_unary_elementwise_nc(
+    convert_op, xnn_operator_type_convert_nc_qs8_qc8,
+    batch_size,
+    channels, input_stride, output_stride,
+    /*log2_input_size=*/XNN_LOG2_SIZEOF_UINT8_T,
+    /*log2_output_size=*/XNN_LOG2_SIZEOF_UINT8_T,
+    /*params=*/NULL, /*params_size=*/0,
+    threadpool);
+}
+
 enum xnn_status xnn_reshape_copy_nc_x16(
     xnn_operator_t copy_op,
     size_t batch_size,
@@ -1384,6 +1412,16 @@ enum xnn_status xnn_setup_copy_nc_x8(
 {
   return setup_unary_elementwise_nc(
     copy_op, xnn_operator_type_copy_nc_x8,
+    input, output);
+}
+
+enum xnn_status xnn_setup_convert_nc_qs8_qc8(
+    xnn_operator_t convert_op,
+    const int8_t* input,
+    int8_t* output)
+{
+  return setup_unary_elementwise_nc(
+    convert_op, xnn_operator_type_convert_nc_qs8_qc8,
     input, output);
 }
 

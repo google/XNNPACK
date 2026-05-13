@@ -30,6 +30,7 @@ ARCHS = [
     "x86_avx",
     "x86_avx2",
     "x86_avx512",
+    "arm64_neon",
     "arm_neon",
     "wasm_simd128",
 ]

@@ -67,10 +67,17 @@ def add_fma_rules():
   vf32_a = Var("a", Float(32, 0))
   vf32_b = Var("b", Float(32, 0))
   vf32_c = Var("c", Float(32, 0))
+  vf64_a = Var("a", Float(64, 0))
+  vf64_b = Var("b", Float(64, 0))
+  vf64_c = Var("c", Float(64, 0))
   return [
       Rule(
           multiply_add(vf32_a, vf32_b, vf32_c),
           Op(Float(32), "fma", [vf32_a, vf32_b, vf32_c]),
+      ),
+      Rule(
+          multiply_add(vf64_a, vf64_b, vf64_c),
+          Op(Float(64), "fma", [vf64_a, vf64_b, vf64_c]),
       )
   ]
 

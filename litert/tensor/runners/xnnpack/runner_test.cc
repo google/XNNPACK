@@ -51,7 +51,7 @@ TEST(XnnpackRunnerTest, SetInputRejectsNonExternalTensors) {
   const std::array<float, 2> data = {0.f, 0.f};
   absl::Span<const std::byte> bytes(
       reinterpret_cast<const std::byte*>(data.data()), sizeof(data));
-  absl::Status status = runner.SetInput(lhs.GetRaw(), bytes);
+  absl::Status status = runner.SetInput(lhs, bytes);
   EXPECT_EQ(status.code(), absl::StatusCode::kInvalidArgument);
 }
 
@@ -89,7 +89,7 @@ TEST(XnnpackRunnerTest, ComputesRuntimeInputAdd) {
   const std::array<float, 2> host = {10.f, 20.f};
   ASSERT_THAT(
       runner.SetInput(
-          runtime_input.GetRaw(),
+          runtime_input,
           absl::Span<const std::byte>(
               reinterpret_cast<const std::byte*>(host.data()), sizeof(host))),
       IsOk());

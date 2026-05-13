@@ -8,6 +8,8 @@ import argparse
 import math
 import os
 import sys
+import types
+from typing import NamedTuple
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import xngen
@@ -31,6 +33,13 @@ parser.add_argument(
     help="Output (C++ source) file",
 )
 parser.set_defaults(defines=list())
+
+
+class SpecialValues(NamedTuple):
+    num_elements: int
+    inputs: str
+    expected_outputs: str
+    tolerance_ulp: int
 
 OP_TYPES = {
     "vabs": "Abs",
@@ -58,64 +67,74 @@ OP_TYPES = {
 
 PARAMS_TYPES = ["Clamp", "ELU", "LeakyReLU"]
 
-SPECIAL_VALUES_F32 = {
-    "SquareRoot": (
-        4,  # Number of elements.
-        "{0.0f, -0.0f, 1.0f, -1.0f}",  # Inputs.
-        "{0.0f, -0.0f, 1.0f, NAN}",  # Expected outputs.
-        1,  # Error margin in ULP.
+SPECIAL_VALUES_BY_OP_TYPE_F32 = types.MappingProxyType({
+    "SquareRoot": SpecialValues(
+        num_elements=4,
+        inputs="{0.0f, -0.0f, 1.0f, -1.0f}",
+        expected_outputs="{0.0f, -0.0f, 1.0f, NAN}",
+        tolerance_ulp=1,
     ),
-    "ReciprocalSquareRoot": (
-        3,  # Number of elements.
-        "{INFINITY, -INFINITY, NAN}",  # Inputs.
-        "{0, NAN, NAN}",  # Expected outputs.
-        1,  # Error margin in ULP.
+    "ReciprocalSquareRoot": SpecialValues(
+        num_elements=3,
+        inputs="{INFINITY, -INFINITY, NAN}",
+        expected_outputs="{0, NAN, NAN}",
+        tolerance_ulp=1,
     ),
-    "TanH": (
-        7,  # Number of elements.
-        "{0.0f, -0.0f, 10.0f, -10.0f, INFINITY, -INFINITY, NAN}",
-        "{0.0f, -0.0f, 1.0f, -1.0f, 1.0f, -1.0f, NAN}",
+    "TanH": SpecialValues(
+        num_elements=7,
+        inputs="{0.0f, -0.0f, 10.0f, -10.0f, INFINITY, -INFINITY, NAN}",
+        expected_outputs="{0.0f, -0.0f, 1.0f, -1.0f, 1.0f, -1.0f, NAN}",
         # TODO: b/338934971 - This should be `1` ulp, but this fails on
         # `cmake-linux-riscv64-rvv` (but not on `cmake-linux-riscv64`).
-        3,
+        tolerance_ulp=3,
     ),
-    "Log": (
-        4,  # Number of elements.
-        "{1.0f, -1.0f, 0.0f, -0.0f}",  # Inputs.
-        "{0.0f, NAN, -INFINITY, -INFINITY}",  # Expected outputs.
-        1,  # Error margin in ULP.
+    "Log": SpecialValues(
+        num_elements=4,
+        inputs="{1.0f, -1.0f, 0.0f, -0.0f}",
+        expected_outputs="{0.0f, NAN, -INFINITY, -INFINITY}",
+        tolerance_ulp=1,
     ),
-    "GELU": (
-        3,  # Number of elements.
-        "{-6.0f, 6.0f, 0.0f}",  # Inputs.
-        "{0.0f, 6.0f, 0.0f}",  # Expected outputs.
-        1,  # Error margin in ULP.
+    "GELU": SpecialValues(
+        num_elements=3,
+        inputs="{-6.0f, 6.0f, 0.0f}",
+        expected_outputs="{0.0f, 6.0f, 0.0f}",
+        tolerance_ulp=1,
     ),
-    "ApproxGELU": (
-        3,  # Number of elements.
-        "{-6.0f, 6.0f, 0.0f}",  # Inputs.
-        "{0.0f, 6.0f, 0.0f}",  # Expected outputs.
-        1,  # Error margin in ULP.
+    "ApproxGELU": SpecialValues(
+        num_elements=3,
+        inputs="{-6.0f, 6.0f, 0.0f}",
+        expected_outputs="{0.0f, 6.0f, 0.0f}",
+        tolerance_ulp=1,
     ),
-    "Exp": (
-        3,  # Number of elements.
-        "{0.0f, -1e3f, 1e3f}",  # Inputs.
-        "{1.0f, 0.0f, INFINITY}",  # Expected outputs.
-        1,  # Error margin in ULP.
+    "Exp": SpecialValues(
+        num_elements=3,
+        inputs="{0.0f, -1e3f, 1e3f}",
+        expected_outputs="{1.0f, 0.0f, INFINITY}",
+        tolerance_ulp=1,
     ),
-    "Sine": (
-        3,  # Number of elements
-        f"{{0.0f, {-math.pi/2:.8e},  {math.pi/2:.8e}}}",  # Inputs.
-        "{0.0f, -1.0f, 1.0f}",  # Expected outputs.
-        1,  # Error margin in ULP.
+    "Sine": SpecialValues(
+        num_elements=3,
+        inputs=f"{{0.0f, {-math.pi/2:.8e},  {math.pi/2:.8e}}}",
+        expected_outputs="{0.0f, -1.0f, 1.0f}",
+        tolerance_ulp=1,
     ),
-    "Cosine": (
-        3,  # Number of elements
-        f"{{0.0f, {math.pi/2:.8e},  {-math.pi/2:.8e}}}",  # Inputs.
-        "{1.0f, 0.0f, 0.0f}",  # Expected outputs.
-        1,  # Error margin in ULP.
+    "Cosine": SpecialValues(
+        num_elements=3,
+        inputs=f"{{0.0f, {math.pi/2:.8e},  {-math.pi/2:.8e}}}",
+        expected_outputs="{1.0f, 0.0f, 0.0f}",
+        tolerance_ulp=1,
     ),
-}
+})
+
+
+SPECIAL_VALUES_BY_OP_TYPE_F16 = types.MappingProxyType({
+    "Log": SpecialValues(
+        num_elements=4,
+        inputs="{1.0f, -1.0f, 0.0f, -0.0f}",
+        expected_outputs="{0.0f, NAN, -INFINITY, -INFINITY}",
+        tolerance_ulp=1,
+    ),
+})
 
 TEST_TEMPLATE = """\
 #define XNN_UKERNEL(arch_flags, ukernel, batch_tile, vector_tile, datatype, params_type, init_params)
@@ -183,13 +202,21 @@ $if "q" in DATATYPE:
   TEST(ukernel, output_scale) { TestOutputScale<TestInfo, datatype, datatype>(arch_flags, batch_tile, ukernel, init_params); }
   TEST(ukernel, input_zero_point) { TestInputZeroPoint<TestInfo, datatype, datatype>(arch_flags, batch_tile, ukernel, init_params); }
   TEST(ukernel, output_zero_point) { TestOutputZeroPoint<TestInfo, datatype, datatype>(arch_flags, batch_tile, ukernel, init_params); }
-$if DATATYPE == "f32" and OP_TYPE in SPECIAL_VALUES_F32:
+$if DATATYPE == "f32" and OP_TYPE in SPECIAL_VALUES_BY_OP_TYPE_F32:
   TEST(ukernel, special_values) {
     TEST_REQUIRES_ARCH_FLAGS(arch_flags);
     VUnaryMicrokernelTester().Test<TestInfo, datatype, datatype>(ukernel, init_params,
-      /*inputs=*/${SPECIAL_VALUES_F32[OP_TYPE][1]},
-      /*outputs=*/${SPECIAL_VALUES_F32[OP_TYPE][2]},
-      /*tolerance_ulp=*/${SPECIAL_VALUES_F32[OP_TYPE][3]});
+      /*inputs=*/${SPECIAL_VALUES_BY_OP_TYPE_F32[OP_TYPE].inputs},
+      /*outputs=*/${SPECIAL_VALUES_BY_OP_TYPE_F32[OP_TYPE].expected_outputs},
+      /*tolerance_ulp=*/${SPECIAL_VALUES_BY_OP_TYPE_F32[OP_TYPE].tolerance_ulp});
+  }
+$if DATATYPE == "f16" and OP_TYPE in SPECIAL_VALUES_BY_OP_TYPE_F16:
+  TEST(ukernel, special_values) {
+    TEST_REQUIRES_ARCH_FLAGS(arch_flags);
+    VUnaryMicrokernelTester().Test<TestInfo, datatype, datatype>(ukernel, init_params,
+      /*inputs=*/${SPECIAL_VALUES_BY_OP_TYPE_F16[OP_TYPE].inputs},
+      /*outputs=*/${SPECIAL_VALUES_BY_OP_TYPE_F16[OP_TYPE].expected_outputs},
+      /*tolerance_ulp=*/${SPECIAL_VALUES_BY_OP_TYPE_F16[OP_TYPE].tolerance_ulp});
   }
 """
 
@@ -258,7 +285,8 @@ using TestInfo = {op_type};
               "DATATYPE": datatype,
               "OP_TYPE": op_type,
               "OP_NAME": op,
-              "SPECIAL_VALUES_F32": SPECIAL_VALUES_F32,
+              "SPECIAL_VALUES_BY_OP_TYPE_F32": SPECIAL_VALUES_BY_OP_TYPE_F32,
+              "SPECIAL_VALUES_BY_OP_TYPE_F16": SPECIAL_VALUES_BY_OP_TYPE_F16,
           },
       )
   )

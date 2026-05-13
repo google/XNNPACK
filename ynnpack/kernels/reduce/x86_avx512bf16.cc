@@ -12,14 +12,14 @@
 #include "ynnpack/base/simd/vec.h"
 #include "ynnpack/base/simd/x86_avx512.h"
 #include "ynnpack/kernels/reduce/generic.h"
-#include "ynnpack/kernels/reduce/sum_accumulator.h"
+#include "ynnpack/kernels/reduce/sum.h"
 
 namespace ynn {
 
 namespace simd {
 
 static f32x32 reduce_add(
-    f32x32 a, bf16x32 b, Identity /*map_fn*/,
+    f32x32 a, bf16x32 b, identity /*map_fn*/,
     std::integral_constant<size_t, 1> /*horizontal_factor*/) {
   __m512bh ones = reinterpret_cast<__m512bh>(_mm512_set1_epi32(0x00003F80));
   __m512i b_bits = reinterpret_cast<__m512i>(b.v);
@@ -33,7 +33,7 @@ static f32x32 reduce_add(
 }
 
 static f32x32 reduce_add(
-    f32x32 a, bf16x32 b, Square /*map_fn*/,
+    f32x32 a, bf16x32 b, square /*map_fn*/,
     std::integral_constant<size_t, 1> /*horizontal_factor*/) {
   __m512i b_bits = reinterpret_cast<__m512i>(b.v);
   __m512bh lo = reinterpret_cast<__m512bh>(
@@ -46,7 +46,7 @@ static f32x32 reduce_add(
 }
 
 static f32x16 reduce_add(
-    f32x16 a, bf16x32 b, Identity /*map_fn*/,
+    f32x16 a, bf16x32 b, identity /*map_fn*/,
     std::integral_constant<size_t, 2> /*horizontal_factor*/) {
   return f32x16{_mm512_dpbf16_ps(
       a.v, reinterpret_cast<__m512bh>(b.v),
@@ -54,7 +54,7 @@ static f32x16 reduce_add(
 }
 
 static f32x16 reduce_add(
-    f32x16 a, bf16x32 b, Square /*map_fn*/,
+    f32x16 a, bf16x32 b, square /*map_fn*/,
     std::integral_constant<size_t, 2> /*horizontal_factor*/) {
   return f32x16{_mm512_dpbf16_ps(
       a.v, reinterpret_cast<__m512bh>(b.v), reinterpret_cast<__m512bh>(b.v))};
@@ -66,38 +66,13 @@ using simd::bf16x32;
 using simd::f32x16;
 using simd::f32x32;
 
-void sum_bf16_fp32_avx512bf16(size_t n, size_t k3, size_t k2, size_t k1,
-                              size_t a_stride_n, size_t a_stride_k3,
-                              size_t a_stride_k2, const void* a, size_t,
-                              void* c) {
-  if (k1 == 1 && a_stride_n == sizeof(bfloat16)) {
-    stream_reduce<sum_accumulator_k1_1<f32x32>, bfloat16, float>(
-        n, k3, k2, a_stride_k3, a_stride_k2,
-        reinterpret_cast<const bfloat16*>(a), /*C_stride_m=*/0,
-        reinterpret_cast<float*>(c));
-  } else {
-    tiled_reduce<sum_accumulator_fp32<2>, bfloat16, float>(
-        n, k3, k2, k1, a_stride_n, a_stride_k3, a_stride_k2,
-        reinterpret_cast<const bfloat16*>(a), /*C_stride_m=*/0,
-        reinterpret_cast<float*>(c));
-  }
-}
+SUM_FLOAT_K1_KERNEL(sum_k1_bf16_fp32_avx512bf16, bfloat16, float, 0, 2,
+                    identity);
+SUM_FLOAT_KN_KERNEL(sum_kn_bf16_fp32_avx512bf16, bfloat16, float, 32, identity);
 
-void sum_squared_bf16_fp32_avx512bf16(size_t n, size_t k3, size_t k2, size_t k1,
-                                      size_t a_stride_n, size_t a_stride_k3,
-                                      size_t a_stride_k2, const void* a, size_t,
-                                      void* c) {
-  if (k1 == 1 && a_stride_n == sizeof(bfloat16)) {
-    stream_reduce<sum_accumulator_k1_1<f32x32, Square>, bfloat16, float>(
-        n, k3, k2, a_stride_k3, a_stride_k2,
-        reinterpret_cast<const bfloat16*>(a), /*C_stride_m=*/0,
-        reinterpret_cast<float*>(c));
-  } else {
-    tiled_reduce<sum_accumulator_fp32<2, Square>, bfloat16, float>(
-        n, k3, k2, k1, a_stride_n, a_stride_k3, a_stride_k2,
-        reinterpret_cast<const bfloat16*>(a), /*C_stride_m=*/0,
-        reinterpret_cast<float*>(c));
-  }
-}
+SUM_FLOAT_K1_KERNEL(sum_squared_k1_bf16_fp32_avx512bf16, bfloat16, float, 0, 2,
+                    square);
+SUM_FLOAT_KN_KERNEL(sum_squared_kn_bf16_fp32_avx512bf16, bfloat16, float, 32,
+                    square);
 
 }  // namespace ynn

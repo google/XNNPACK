@@ -115,7 +115,7 @@ static bool is_subconv2d(struct deconv2d_context* context) {
          !(context->flags & XNN_FLAG_INLINE_LHS_PACKING);
 }
 
-static enum xnn_status create_deconvolution2d_nhwc(
+static XNN_NO_SANITIZE_FUNCTION enum xnn_status create_deconvolution2d_nhwc(
     struct deconv2d_context* context) {
   const uint32_t output_padding_top = context->output_padding_top;
   const uint32_t output_padding_right = context->output_padding_right;

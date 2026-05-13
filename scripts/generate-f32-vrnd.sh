@@ -19,7 +19,7 @@ tools/xngen src/f32-vrnd/scalar-libm.c.in -D OP=RNDD  -D BATCH_TILE=1 -o src/f32
 tools/xngen src/f32-vrnd/scalar-libm.c.in -D OP=RNDD  -D BATCH_TILE=2 -o src/f32-vrnd/gen/f32-vrndd-scalar-libm-u2.c &
 tools/xngen src/f32-vrnd/scalar-libm.c.in -D OP=RNDD  -D BATCH_TILE=4 -o src/f32-vrnd/gen/f32-vrndd-scalar-libm-u4.c &
 
-################################## WAsm SIMD ##################################
+################################## Wasm SIMD ##################################
 tools/xngen src/f32-vrnd/wasmsimd.c.in -D BATCH_TILE=4 -D OP=RNDNE -o src/f32-vrnd/gen/f32-vrndne-wasmsimd-u4.c &
 tools/xngen src/f32-vrnd/wasmsimd.c.in -D BATCH_TILE=8 -D OP=RNDNE -o src/f32-vrnd/gen/f32-vrndne-wasmsimd-u8.c &
 tools/xngen src/f32-vrnd/wasmsimd.c.in -D BATCH_TILE=4 -D OP=RNDZ  -o src/f32-vrnd/gen/f32-vrndz-wasmsimd-u4.c &

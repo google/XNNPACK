@@ -74,19 +74,30 @@
 #define XNN_ARCH_WASM 0
 #define XNN_ARCH_WASMSIMD 0
 #define XNN_ARCH_WASMRELAXEDSIMD 1
+#ifndef XNN_ENABLE_WASMRELAXEDSIMDFP16
+#define XNN_ENABLE_WASMRELAXEDSIMDFP16 0
+#endif
+#if XNN_ENABLE_WASMRELAXEDSIMDFP16
+#define XNN_ARCH_WASMRELAXEDSIMDFP16 1
+#else
+#define XNN_ARCH_WASMRELAXEDSIMDFP16 0
+#endif
 #elif defined(__wasm_simd128__)
 #define XNN_ARCH_WASM 0
 #define XNN_ARCH_WASMSIMD 1
 #define XNN_ARCH_WASMRELAXEDSIMD 0
+#define XNN_ARCH_WASMRELAXEDSIMDFP16 0
 #else
 #define XNN_ARCH_WASM 1
 #define XNN_ARCH_WASMSIMD 0
 #define XNN_ARCH_WASMRELAXEDSIMD 0
+#define XNN_ARCH_WASMRELAXEDSIMDFP16 0
 #endif
 #else
 #define XNN_ARCH_WASM 0
 #define XNN_ARCH_WASMSIMD 0
 #define XNN_ARCH_WASMRELAXEDSIMD 0
+#define XNN_ARCH_WASMRELAXEDSIMDFP16 0
 #endif
 
 // Define platform identification macros
@@ -317,6 +328,15 @@
   __attribute__((__no_sanitize__("undefined"))) XNN_NO_INLINE_SANITIZER
 #else
 #define XNN_DISABLE_UBSAN
+#endif
+
+// Disable function sanitization here. XNNPACK calls these functions
+// via function pointers with void* contexts, which triggers false positives in
+// the function sanitizer when casting and calling the actual context type.
+#if defined(__clang__) && XNN_COMPILER_HAS_ATTRIBUTE(no_sanitize)
+#define XNN_NO_SANITIZE_FUNCTION __attribute__((no_sanitize("function")))
+#else
+#define XNN_NO_SANITIZE_FUNCTION
 #endif
 
 #define XNN_OOB_READS \

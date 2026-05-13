@@ -74,7 +74,7 @@ ynn_status ynn_define_even_split(ynn_subgraph_t subgraph, int32_t axis,
     std::vector<slinky::var> dims =
         runtime.globals.make_dims(input.buffer->rank());
 
-    slinky::expr delta = input.extents[axis] / split_factor;
+    slinky::expr delta = input.physical_extent(axis) / split_factor;
     slinky::expr offset = 0;
 
     // We implement splits by making a func for each output.
@@ -84,7 +84,8 @@ ynn_status ynn_define_even_split(ynn_subgraph_t subgraph, int32_t axis,
         output.make_buffer(runtime, input.buffer->elem_size());
 
         slinky::func::input func_input{
-            input.buffer, ynn::make_elementwise_bounds(dims, input.extents)};
+            input.buffer,
+            ynn::make_elementwise_bounds(dims, input.physical_extents())};
         func_input.bounds[axis] += offset;
         auto func = slinky::func::make_copy(std::move(func_input),
                                             {output.buffer, dims});

@@ -54,7 +54,7 @@ tools/xngen src/qs8-vlrelu/avx2.c.in -D BATCH_TILE=16 -D DATATYPE=QU8 -o src/qu8
 tools/xngen src/qs8-vlrelu/avx2.c.in -D BATCH_TILE=32 -D DATATYPE=QU8 -o src/qu8-vlrelu/gen/qu8-vlrelu-avx2-u32.c &
 tools/xngen src/qs8-vlrelu/avx2.c.in -D BATCH_TILE=64 -D DATATYPE=QU8 -o src/qu8-vlrelu/gen/qu8-vlrelu-avx2-u64.c &
 
-################################## WAsm SIMD ##################################
+################################## Wasm SIMD ##################################
 tools/xngen src/qs8-vlrelu/wasmsimd-arm.c.in -D BATCH_TILE=16 -D RELAXED=0 -D DATATYPE=QS8 -o src/qs8-vlrelu/gen/qs8-vlrelu-wasmsimd-arm-u16.c &
 tools/xngen src/qs8-vlrelu/wasmsimd-arm.c.in -D BATCH_TILE=32 -D RELAXED=0 -D DATATYPE=QS8 -o src/qs8-vlrelu/gen/qs8-vlrelu-wasmsimd-arm-u32.c &
 

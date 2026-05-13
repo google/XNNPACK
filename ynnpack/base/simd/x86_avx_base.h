@@ -12,6 +12,7 @@
 #include <cassert>
 #include <cstddef>
 #include <cstdint>
+#include <limits>
 #include <type_traits>
 
 #include "ynnpack/base/base.h"
@@ -506,6 +507,26 @@ YNN_ALWAYS_INLINE f32x8 round(f32x8 a) {
 YNN_ALWAYS_INLINE f32x8 sqrt(f32x8 a) { return f32x8{_mm256_sqrt_ps(a.v)}; }
 YNN_ALWAYS_INLINE f32x8 abs(f32x8 a) {
   return f32x8{_mm256_and_ps(a.v, _mm256_set1_ps(bit_cast<float>(0x7FFFFFFF)))};
+}
+
+YNN_ALWAYS_INLINE void kahan_sum(f32x8 a, f32x8& acc, f32x8& error) {
+  f32x8 y = a - error;
+  f32x8 t = acc + y;
+  error = (t - acc) - y;
+  __m256 mask = _mm256_set1_ps(std::numeric_limits<float>::infinity());
+  error = f32x8{_mm256_and_ps(
+      error.v, _mm256_cmp_ps(_mm256_and_ps(error.v, mask), mask, _CMP_NEQ_OQ))};
+  acc = t;
+}
+
+YNN_ALWAYS_INLINE void kahan_sum(f64x4 a, f64x4& acc, f64x4& error) {
+  f64x4 y = a - error;
+  f64x4 t = acc + y;
+  error = (t - acc) - y;
+  __m256d mask = _mm256_set1_pd(std::numeric_limits<double>::infinity());
+  error = f64x4{_mm256_and_pd(
+      error.v, _mm256_cmp_pd(_mm256_and_pd(error.v, mask), mask, _CMP_NEQ_OQ))};
+  acc = t;
 }
 
 template <>

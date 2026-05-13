@@ -118,17 +118,20 @@ void Reference(Tensor<AT> a, Tensor<BT> b, Tensor<half> c) {
   c.assign(c_float);
 }
 
-float get_dot_tolerance(ynn_type type, size_t num_k_elements,
-                        float max_abs_value, uint32_t dot_flags) {
-  float eps;
-  if (type == ynn_type_fp32 && (dot_flags & YNN_NODE_FLAG_F32_DOT_TO_BF16_X3)) {
-    eps = epsilon(ynn_type_bf16) * epsilon(ynn_type_bf16) * 2.0f;
+template <typename T>
+T get_dot_tolerance(size_t num_k_elements, float max_abs_value,
+                    uint32_t dot_flags) {
+  double eps;
+  if (std::is_same_v<T, float> &&
+      (dot_flags & YNN_NODE_FLAG_F32_DOT_TO_BF16_X3)) {
+    const double eps_bf16 = type_info<bfloat16>::epsilon();
+    eps = eps_bf16 * eps_bf16 * 2.0f;
   } else {
-    eps = epsilon(type);
+    eps = type_info<T>::epsilon();
   }
   // Account for the initial value too.
   num_k_elements += 1;
-  return eps * num_k_elements * max_abs_value * max_abs_value * 2.0f;
+  return eps * num_k_elements * max_abs_value * max_abs_value * 2.0;
 }
 
 // Remove the leading `at` dimensions of `tensor`
@@ -188,11 +191,17 @@ void TestStaticB(A, B, C) {
     if (random_bool(rng)) {
       dot_flags |= YNN_NODE_FLAG_F32_DOT_TO_BF16_X3;
     }
+    std::vector<size_t> batch_template_shape =
+        random_shape(rng, output_rank - 1, 0, 9);
+    std::vector<size_t> a_template_shape = batch_template_shape;
+    for (size_t i = 0; i < num_k_dims; ++i) {
+      a_template_shape.push_back(b_shape[i]);
+    }
     SubgraphBuilder subgraph(4, subgraph_flags);
     const uint32_t a_id = 0;
     const uint32_t b_id = 1;
     const uint32_t output_id = 3;
-    subgraph.AddInput(type_of<A>(), input_rank, a_id)
+    subgraph.AddInput(type_of<A>(), a_template_shape, a_id)
         .AddTensor(b, b_id)
         .AddOutput(type_of<C>(), output_rank, output_id);
 
@@ -219,7 +228,7 @@ void TestStaticB(A, B, C) {
 
     for (int reshape = 0; reshape < 2; ++reshape) {
       std::vector<size_t> batch_dims =
-          random_shape(rng, output_rank - 1, 1, max_output_dim);
+          random_shape(rng, batch_template_shape, 1, max_output_dim);
 
       // Start with the batch dimensions.
       std::vector<size_t> c_shape = batch_dims;
@@ -280,8 +289,8 @@ void TestStaticB(A, B, C) {
               << " a_shape=" << index_to_string(a_shape)
               << " b_shape=" << index_to_string(b_shape);
         } else {
-          const float tolerance = get_dot_tolerance(
-              type_of<C>(), num_k_elements, max_abs_value, dot_flags);
+          const auto tolerance =
+              get_dot_tolerance<C>(num_k_elements, max_abs_value, dot_flags);
           ASSERT_NEAR(c(i), expected(i), tolerance)
               << "i=" << index_to_string(i) << " num_k_dims=" << num_k_dims
               << " a_shape=" << index_to_string(a_shape)
@@ -488,8 +497,8 @@ void TestDynamicB(A, B, C) {
               << " shapes.a=" << index_to_string(shapes.a)
               << " shapes.b=" << index_to_string(shapes.b);
         } else {
-          const float tolerance = get_dot_tolerance(
-              type_of<C>(), num_k_elements, max_abs_value, dot_flags);
+          const auto tolerance =
+              get_dot_tolerance<C>(num_k_elements, max_abs_value, dot_flags);
           ASSERT_NEAR(c(i), expected(i), tolerance)
               << "i=" << index_to_string(i) << " num_k_dims=" << num_k_dims
               << " shapes.a=" << index_to_string(shapes.a)
@@ -648,8 +657,8 @@ void TestStaticShapeDynamicB(A, B, C) {
               << " shapes.a=" << index_to_string(shapes.a)
               << " shapes.b=" << index_to_string(shapes.b);
         } else {
-          const float tolerance = get_dot_tolerance(
-              type_of<C>(), num_k_elements, max_abs_value, dot_flags);
+          const auto tolerance =
+              get_dot_tolerance<C>(num_k_elements, max_abs_value, dot_flags);
           ASSERT_NEAR(c(i), expected(i), tolerance)
               << "i=" << index_to_string(i) << " num_k_dims=" << num_k_dims
               << " shapes.a=" << index_to_string(shapes.a)

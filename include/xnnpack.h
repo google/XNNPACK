@@ -2996,6 +2996,23 @@ enum xnn_status xnn_setup_convert_nc_f32_qd8(
   float* row_sum,
   struct xnn_quantization_params* quantization_params);
 
+enum xnn_status xnn_create_convert_nc_qs8_qc8(
+  uint32_t flags,
+  xnn_operator_t* convert_op_out);
+
+enum xnn_status xnn_reshape_convert_nc_qs8_qc8(
+  xnn_operator_t convert_op,
+  size_t batch_size,
+  size_t channels,
+  size_t input_stride,
+  size_t output_stride,
+  pthreadpool_t threadpool);
+
+enum xnn_status xnn_setup_convert_nc_qs8_qc8(
+  xnn_operator_t convert_op,
+  const int8_t* input,
+  int8_t* output);
+
 XNN_DEPRECATED enum xnn_status xnn_run_convert_nc_f32_f16(
   size_t channels,
   size_t input_stride,

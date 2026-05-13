@@ -6,6 +6,7 @@
 #ifndef XNNPACK_YNNPACK_SUBGRAPH_FUSION_TYPES_H_
 #define XNNPACK_YNNPACK_SUBGRAPH_FUSION_TYPES_H_
 
+#include <cassert>
 #include <cstdint>
 #include <map>
 #include <vector>
@@ -14,27 +15,36 @@
 #include "ynnpack/subgraph/subgraph.h"
 
 struct subgraph_analysis {
+  bool is_valid;
   std::map<uint32_t, ynn_node*> producers;
   std::map<uint32_t, std::vector<ynn_node*>> consumers;
 
   ynn_node* producer_of(uint32_t id) {
+    assert(is_valid);
     auto i = producers.find(id);
     return i != producers.end() ? i->second : nullptr;
   }
   const ynn_node* producer_of(uint32_t id) const {
+    assert(is_valid);
     auto i = producers.find(id);
     return i != producers.end() ? i->second : nullptr;
   }
 
   ynn_node* single_consumer_of(uint32_t id) {
+    assert(is_valid);
     auto i = consumers.find(id);
     return i != consumers.end() && i->second.size() == 1 ? i->second[0]
                                      : nullptr;
   }
   const ynn_node* single_consumer_of(uint32_t id) const {
+    assert(is_valid);
     auto i = consumers.find(id);
     return i != consumers.end() && i->second.size() == 1 ? i->second[0]
                                      : nullptr;
+  }
+
+  void invalidate() {
+    is_valid = false;
   }
 
   explicit subgraph_analysis(ynn_subgraph& subgraph);

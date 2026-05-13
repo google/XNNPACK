@@ -3,10 +3,12 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+#include <algorithm>
 #include <cassert>
 #include <chrono>
 #include <cmath>
 #include <cstddef>
+#include <cstdint>
 #include <random>
 #include <vector>
 
@@ -104,5 +106,104 @@ INSTANTIATE_TEST_SUITE_P(Reshape, Reshape,
                                          ynn_type_fp16, ynn_type_bf16,
                                          ynn_type_fp32),
                          [](auto p) { return to_string(p.param); });
+
+// A reshape followed by a slice could cause the internal allocation to be too
+// small, because the reshape was writing its full output into an allocation
+// sized only for the sliced output.
+TEST(Reshape, ReshapeSliceRegression) {
+  std::vector<size_t> input_shape = {112};
+  std::vector<size_t> reshape_shape = {7, 16};
+  std::vector<size_t> output_shape = {100};
+
+  Tensor<float> input(input_shape);
+  Tensor<float> other(reshape_shape);
+  Tensor<float> output(output_shape);
+
+  std::fill(input.data(), input.data() + input.size(), 1.0f);
+  std::fill(other.data(), other.data() + other.size(), 2.0f);
+
+  uint32_t input_id = 0;
+  uint32_t other_id = 1;
+  uint32_t output_id = 2;
+
+  // Intermediate values.
+  uint32_t reshape1_id = YNN_INVALID_VALUE_ID;
+  uint32_t add_id = YNN_INVALID_VALUE_ID;
+  uint32_t reshape2_id = YNN_INVALID_VALUE_ID;
+
+  SubgraphBuilder subgraph(3);
+  subgraph.AddInput(ynn_type_fp32, input_shape, input_id)
+      .AddInput(ynn_type_fp32, reshape_shape, other_id)
+      .AddOutput(ynn_type_fp32, output_shape, output_id)
+      .AddTensor(ynn_type_fp32, 2, reshape1_id)
+      .AddTensor(ynn_type_fp32, 2, add_id)
+      .AddTensor(ynn_type_fp32, 1, reshape2_id)
+      .AddReshape(reshape_shape, input_id, reshape1_id)
+      .AddBinary(ynn_binary_add, reshape1_id, other_id, add_id)
+      .AddReshape(input_shape, add_id, reshape2_id)
+      .AddSlice({0}, {0}, {100}, {1}, reshape2_id, output_id);
+
+  Runtime runtime(subgraph.GetSubgraph());
+  ASSERT_EQ(runtime.Status(), ynn_status_success);
+
+  runtime.ReshapeExternalTensor(input_shape, input.base(), input_id)
+      .ReshapeExternalTensor(reshape_shape, other.base(), other_id)
+      .ReshapeRuntime();
+
+  runtime.SetupExternalTensor(output.base(), output_id).InvokeRuntime();
+
+  for (size_t i = 0; i < output.size(); ++i) {
+    ASSERT_EQ(output.data()[i], 3.0f);
+  }
+}
+
+TEST(Reshape, DotBitcastSliceReduceRegression) {
+  std::vector<size_t> p1_shape = {400, 64};
+  std::vector<size_t> p2_shape = {64, 2};
+  std::vector<size_t> dot_shape = {400, 2};
+  std::vector<size_t> bitcast_shape = {100, 4, 2};
+  std::vector<size_t> slice_shape = {100, 3, 2};
+
+  Tensor<float> p1(p1_shape);
+  Tensor<float> p2(p2_shape);
+  Tensor<float> output(slice_shape);
+
+  ReplicableRandomDevice rng;
+  fill_random(p1.data(), p1.size(), rng);
+  fill_random(p2.data(), p2.size(), rng);
+
+  uint32_t p1_id = 0;
+  uint32_t p2_id = 1;
+  uint32_t output_id = 2;
+
+  uint32_t dot_id = YNN_INVALID_VALUE_ID;
+  uint32_t bitcast_id = YNN_INVALID_VALUE_ID;
+  uint32_t slice_id = YNN_INVALID_VALUE_ID;
+  uint32_t reduce_id = YNN_INVALID_VALUE_ID;
+
+  SubgraphBuilder subgraph(3);
+  subgraph.AddInput(ynn_type_fp32, p1_shape, p1_id)
+      .AddInput(ynn_type_fp32, p2_shape, p2_id)
+      .AddOutput(ynn_type_fp32, slice_shape, output_id)
+      .AddTensor(ynn_type_fp32, dot_shape, dot_id)
+      .AddTensor(ynn_type_fp32, bitcast_shape, bitcast_id)
+      .AddTensor(ynn_type_fp32, slice_shape, slice_id)
+      .AddTensor(ynn_type_fp32, {100, 3, 1}, reduce_id)
+      .AddDot(1, p1_id, p2_id, YNN_INVALID_VALUE_ID, dot_id)
+      .AddReshape(bitcast_shape, dot_id, bitcast_id)
+      .AddSlice({1}, {0}, {3}, {1}, bitcast_id, slice_id)
+      .AddReduce(ynn_reduce_max, {2}, slice_id, YNN_INVALID_VALUE_ID, reduce_id,
+                 YNN_NODE_FLAG_KEEP_DIMS)
+      .AddBinary(ynn_binary_subtract, slice_id, reduce_id, output_id);
+
+  Runtime runtime(subgraph.GetSubgraph());
+  ASSERT_EQ(runtime.Status(), ynn_status_success);
+
+  runtime.ReshapeExternalTensor(p1_shape, p1.base(), p1_id)
+      .ReshapeExternalTensor(p2_shape, p2.base(), p2_id)
+      .ReshapeRuntime();
+
+  runtime.SetupExternalTensor(output.base(), output_id).InvokeRuntime();
+}
 
 }  // namespace ynn

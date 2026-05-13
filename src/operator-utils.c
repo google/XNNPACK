@@ -202,6 +202,7 @@ enum xnn_status xnn_destroy_operator(xnn_operator_t op)
   xnn_release_simd_memory(op->dynamic_context.gemm);
   xnn_release_memory(op->compute);
   xnn_release_memory(op->extra_params);
+  xnn_release_memory(op->channelwise_quantization_buffer);
 
   return xnn_status_success;
 }

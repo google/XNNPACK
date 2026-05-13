@@ -9,7 +9,7 @@ tools/xngen src/f32-ibilinear/scalar.c.in -D CHANNEL_TILE=1 -D PIXEL_TILE=1 -o s
 tools/xngen src/f32-ibilinear/scalar.c.in -D CHANNEL_TILE=2 -D PIXEL_TILE=1 -o src/f32-ibilinear/gen/f32-ibilinear-scalar-u2.c &
 tools/xngen src/f32-ibilinear/scalar.c.in -D CHANNEL_TILE=4 -D PIXEL_TILE=1 -o src/f32-ibilinear/gen/f32-ibilinear-scalar-u4.c &
 
-################################## WAsm SIMD ##################################
+################################## Wasm SIMD ##################################
 tools/xngen src/f32-ibilinear/wasmsimd.c.in -D CHANNEL_TILE=4 -D PIXEL_TILE=1 -D FMA=0 -o src/f32-ibilinear/gen/f32-ibilinear-wasmsimd-u4.c &
 tools/xngen src/f32-ibilinear/wasmsimd.c.in -D CHANNEL_TILE=8 -D PIXEL_TILE=1 -D FMA=0 -o src/f32-ibilinear/gen/f32-ibilinear-wasmsimd-u8.c &
 

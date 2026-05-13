@@ -7,7 +7,7 @@
 - name: xnn_f32_ibilinear_chw_ukernel__scalar_p1
 - name: xnn_f32_ibilinear_chw_ukernel__scalar_p2
 - name: xnn_f32_ibilinear_chw_ukernel__scalar_p4
-# WAsm SIMD
+# Wasm SIMD
 - name: xnn_f32_ibilinear_chw_ukernel__wasmsimd_p4
 - name: xnn_f32_ibilinear_chw_ukernel__wasmsimd_p8
 # ARM NEON

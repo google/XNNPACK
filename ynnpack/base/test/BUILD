@@ -41,7 +41,10 @@ cc_library(
     name = "util",
     testonly = True,
     srcs = ["util.cc"],
-    hdrs = ["util.h"],
+    hdrs = [
+        "tolerance.h",
+        "util.h",
+    ],
     deps = [
         "//ynnpack/base",
         "@com_google_googletest//:gtest",  # no g3
@@ -97,6 +100,8 @@ cc_test(
 cc_test(
     name = "type_test",
     srcs = ["type_test.cc"],
+    linkopts = ynn_binary_linkopts(),
+    malloc = ynn_binary_malloc(),
     deps = [
         "//ynnpack/base",
     ] + ynn_test_deps(),

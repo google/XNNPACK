@@ -165,6 +165,19 @@ YNN_ALWAYS_INLINE f32x8 cast(bf16x8 a, float) {
       16))};
 }
 
+YNN_ALWAYS_INLINE f32x8 exp2_round(f32x8 a) {
+  const __m256 magic = _mm256_set1_ps(127.0f + static_cast<float>(1 << 23));
+  const __m256 res_bits = _mm256_add_ps(a.v, magic);
+  return f32x8{_mm256_castsi256_ps(
+      _mm256_slli_epi32(_mm256_castps_si256(res_bits), 23))};
+}
+YNN_ALWAYS_INLINE f64x4 exp2_round(f64x4 a) {
+  const __m256d magic = _mm256_set1_pd(1023.0 + static_cast<double>(1ll << 52));
+  const __m256d res_bits = _mm256_add_pd(a.v, magic);
+  return f64x4{_mm256_castsi256_pd(
+      _mm256_slli_epi64(_mm256_castpd_si256(res_bits), 52))};
+}
+
 }  // namespace simd
 
 }  // namespace ynn

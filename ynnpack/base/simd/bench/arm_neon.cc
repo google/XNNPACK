@@ -18,6 +18,7 @@ BENCH_PARTIAL_LOAD_STORE(neon, s16, 8);
 BENCH_PARTIAL_LOAD_STORE(neon, s32, 4);
 
 BENCH_UNARY(neon, floor_log2, f32, 4);
+BENCH_UNARY(neon, exp2_round, f32, 4);
 
 }  // namespace simd
 }  // namespace ynn

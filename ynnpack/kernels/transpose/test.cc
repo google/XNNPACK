@@ -14,6 +14,7 @@
 
 #include <gtest/gtest.h>
 #include "ynnpack/base/arch.h"  // IWYU pragma: keep
+#include "ynnpack/base/arithmetic.h"
 #include "ynnpack/base/test/buffer.h"
 #include "ynnpack/base/test/tensor.h"
 #include "ynnpack/base/test/util.h"
@@ -53,8 +54,10 @@ template <typename T>
 void TestTranspose(T, transpose_fn kernel, std::vector<size_t> ms,
                    std::vector<size_t> ns) {
   constexpr size_t element_count = type_info<T>::element_count();
-  const size_t max_m = *std::max_element(ms.begin(), ms.end());
-  const size_t max_n = *std::max_element(ns.begin(), ns.end());
+  const size_t max_m =
+      align_up(*std::max_element(ms.begin(), ms.end()), element_count);
+  const size_t max_n =
+      align_up(*std::max_element(ns.begin(), ns.end()), element_count);
   Tensor<T> input({max_n, max_m});
   Tensor<T> output({max_m, max_n});
   for (size_t m : ms) {
@@ -63,18 +66,18 @@ void TestTranspose(T, transpose_fn kernel, std::vector<size_t> ms,
     }
 
     for (size_t n : ns) {
-      if (m % element_count != 0 || n % element_count != 0) continue;
+      if (m % element_count != 0) continue;
 
       // TODO(dsharlet): Find a better way to test the padding capability.
       for (size_t n_input : {m, m - 1, m / 2}) {
-        if (n_input % element_count != 0) continue;
-
-        kernel(m, n, n_input * sizeof(T) / element_count, input.stride_bytes(0),
-               input.base(), output.stride_bytes(0), output.base());
+        size_t n_bytes = ceil_div(n_input * sizeof(T), element_count);
+        kernel(m, n, n_bytes, input.stride_bytes(0), input.base(),
+               output.stride_bytes(0), output.base());
 
         // Verify results.
         for (size_t i = 0; i < m; ++i) {
           const T* output_i = address_of(output(i, 0));
+          if (element_count > 1 && i >= n_input) continue;
           for (size_t j = 0; j < n; ++j) {
             T expected;
             type_info<T>::set(&expected, 0, i < n_input ? i * m + j : 0);
@@ -148,10 +151,9 @@ TEST_P(Transpose, mx1) {
   TransposeParam kernel = GetParam();
   if (!is_arch_supported(kernel.arch_flags)) GTEST_SKIP();
   const size_t element_size_bits = kernel.element_size_bits;
-  const size_t element_count = std::max<size_t>(1, 8 / element_size_bits);
   switch_element_size(element_size_bits, [&](auto type) {
     auto sizes = unaligned_sizes(element_size_bits);
-    TestTranspose(type, kernel.kernel, sizes, {element_count});
+    TestTranspose(type, kernel.kernel, sizes, {1});
   });
 }
 

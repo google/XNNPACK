@@ -53,7 +53,7 @@ tools/xngen src/qs8-vcvt/avx2.c.in -D BATCH_TILE=16 -D DATATYPE=QU8 -o src/qu8-v
 tools/xngen src/qs8-vcvt/avx2.c.in -D BATCH_TILE=32 -D DATATYPE=QU8 -o src/qu8-vcvt/gen/qu8-vcvt-avx2-u32.c &
 tools/xngen src/qs8-vcvt/avx2.c.in -D BATCH_TILE=64 -D DATATYPE=QU8 -o src/qu8-vcvt/gen/qu8-vcvt-avx2-u64.c &
 
-################################## WAsm SIMD ##################################
+################################## Wasm SIMD ##################################
 tools/xngen src/qs8-vcvt/wasmsimd.c.in -D BATCH_TILE=8  -D RELAXED=0 -D DATATYPE=QS8 -o src/qs8-vcvt/gen/qs8-vcvt-wasmsimd-u8.c &
 tools/xngen src/qs8-vcvt/wasmsimd.c.in -D BATCH_TILE=16 -D RELAXED=0 -D DATATYPE=QS8 -o src/qs8-vcvt/gen/qs8-vcvt-wasmsimd-u16.c &
 tools/xngen src/qs8-vcvt/wasmsimd.c.in -D BATCH_TILE=32 -D RELAXED=0 -D DATATYPE=QS8 -o src/qs8-vcvt/gen/qs8-vcvt-wasmsimd-u32.c &

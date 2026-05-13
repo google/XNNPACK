@@ -47,19 +47,18 @@ TEST(XnnpackConversionTest, MarksExternalValuesAndCopiesConstants) {
   ASSERT_EQ(graph->values().size(), 3);
 
   LRT_TENSOR_ASSERT_OK_AND_ASSIGN(size_t input_index,
-                                  graph->Lookup(runtime_input.GetRaw()));
+                                  graph->Lookup(runtime_input));
   const XnnpackValue& input_value = graph->values()[input_index];
   EXPECT_NE(input_value.flags & XNN_VALUE_FLAG_EXTERNAL_INPUT, 0);
   EXPECT_EQ(input_value.flags & XNN_VALUE_FLAG_EXTERNAL_OUTPUT, 0);
 
   LRT_TENSOR_ASSERT_OK_AND_ASSIGN(size_t bias_index,
-                                  graph->Lookup(constant_bias.GetRaw()));
+                                  graph->Lookup(constant_bias));
   const XnnpackValue& bias_value = graph->values()[bias_index];
   EXPECT_EQ(bias_value.flags, 0);
   EXPECT_EQ(bias_value.data.size(), sizeof(float) * 3);
 
-  LRT_TENSOR_ASSERT_OK_AND_ASSIGN(size_t output_index,
-                                  graph->Lookup(sum.GetRaw()));
+  LRT_TENSOR_ASSERT_OK_AND_ASSIGN(size_t output_index, graph->Lookup(sum));
   const XnnpackValue& output_value = graph->values()[output_index];
   EXPECT_NE(output_value.flags & XNN_VALUE_FLAG_EXTERNAL_OUTPUT, 0);
 }
@@ -203,7 +202,7 @@ TEST(XnnpackConversionTest, L2NormalizationReturnsUnimplemented) {
 //
 //   LRT_TENSOR_ASSERT_OK_AND_ASSIGN(auto graph, BuildXnnpackGraph({output}));
 //   LRT_TENSOR_ASSERT_OK_AND_ASSIGN(size_t weights_index,
-//   graph->Lookup(weights.GetRaw())); const XnnpackValue& weights_value =
+//   graph->Lookup(weights)); const XnnpackValue& weights_value =
 //   graph->values()[weights_index]; ASSERT_EQ(weights_value.buffer.size(),
 //   sizeof(float) * 8); EXPECT_EQ(weights_value.info.type, Type::kFP32);
 //

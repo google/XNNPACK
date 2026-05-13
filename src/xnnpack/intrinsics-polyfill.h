@@ -12,6 +12,9 @@
 #define XNNPACK_SRC_XNNPACK_INTRINSICS_POLYFILL_H_
 
 #include "src/xnnpack/common.h"
+#if XNN_ARCH_HEXAGON
+#include "src/xnnpack/math.h"
+#endif  // XNN_ARCH_HEXAGON
 #include "src/xnnpack/unaligned.h"
 
 static XNN_INTRINSIC uint32_t broadcast2x_uint16(uint16_t x) {
@@ -406,18 +409,15 @@ static XNN_INTRINSIC void Q6_V_vstu_variable(void* addr, uint32_t n,
 static XNN_INTRINSIC HVX_Vector fast_inverse__vsf(xnn_hvx_vector_t vin) {
   const uint32_t fp_exp_norm = 0x7F000000;  // IEEE sf: sign=0, exp=254, mant=0
   const uint32_t fp_exp_mask = 0xFF800000;  // mask for IEEE sf exp
-  const uint32_t nr_T1 = 0x5a5a5a7f;   // Newton Raphson T1=24.0/17.0 (qf32)
-  const uint32_t nr_T2 = 0x8787877d;   // Newton Raphson T2=-8.0/17.0 (qf32)
-  const uint32_t qf_one = 0x4000007F;  // 1.0 (qf32)
 
   xnn_hvx_vector_t vfp_exp_norm = Q6_V_vsplat_R(fp_exp_norm);
   xnn_hvx_vector_t vfp_exp_mask = Q6_V_vsplat_R(fp_exp_mask);
 
-  xnn_hvx_vector_t vnr_T1 = Q6_V_vsplat_R(nr_T1);
-  xnn_hvx_vector_t vnr_T2 = Q6_V_vsplat_R(nr_T2);
-
-  xnn_hvx_vector_t vone = Q6_V_vsplat_R(qf_one);
   xnn_hvx_vector_t vzero = Q6_V_vzero();
+
+  xnn_hvx_vector_t vnr_T1 = Q6_Vqf32_vadd_VsfVsf(Q6_V_vsplat_R(float_as_uint32(24.0f / 17.0f)), vzero);
+  xnn_hvx_vector_t vnr_T2 = Q6_Vqf32_vadd_VsfVsf(Q6_V_vsplat_R(float_as_uint32(-8.0f / 17.0f)), vzero);
+  xnn_hvx_vector_t vone = Q6_Vqf32_vadd_VsfVsf(Q6_V_vsplat_R(float_as_uint32(1.0f)), vzero);
 
   // IEEE sf: sign[i] = sign(den[i]), exp[i] = exp(den[i]), mant = 0
   xnn_hvx_vector_t vfp_exp = Q6_V_vand_VV(vin, vfp_exp_mask);

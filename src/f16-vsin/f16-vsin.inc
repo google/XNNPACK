@@ -30,3 +30,10 @@ XNN_UKERNEL(xnn_arch_x86_avx512fp16, xnn_f16_vsin_ukernel__avx512fp16_rational_3
 XNN_UKERNEL(xnn_arch_x86_avx512fp16, xnn_f16_vsin_ukernel__avx512fp16_rational_3_2_div_u64, 64, false, xnn_float16, struct xnn_f16_default_params, NULL)
 XNN_UKERNEL(xnn_arch_x86_avx512fp16, xnn_f16_vsin_ukernel__avx512fp16_rational_3_2_div_u96, 96, false, xnn_float16, struct xnn_f16_default_params, NULL)
 #endif  // XNN_ENABLE_AVX512FP16 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+
+#if XNN_ARCH_RISCV && XNN_ENABLE_RISCV_FP16_VECTOR
+XNN_UKERNEL(xnn_arch_riscv_vector_fp16_arith, xnn_f16_vsin_ukernel__rvvfp16arith_rational_3_2_div_u1v, 1, true, xnn_float16, struct xnn_f16_default_params, NULL)
+XNN_UKERNEL(xnn_arch_riscv_vector_fp16_arith, xnn_f16_vsin_ukernel__rvvfp16arith_rational_3_2_div_u2v, 2, true, xnn_float16, struct xnn_f16_default_params, NULL)
+XNN_UKERNEL(xnn_arch_riscv_vector_fp16_arith, xnn_f16_vsin_ukernel__rvvfp16arith_rational_3_2_div_u4v, 4, true, xnn_float16, struct xnn_f16_default_params, NULL)
+XNN_UKERNEL(xnn_arch_riscv_vector_fp16_arith, xnn_f16_vsin_ukernel__rvvfp16arith_rational_3_2_div_u8v, 8, true, xnn_float16, struct xnn_f16_default_params, NULL)
+#endif  // XNN_ARCH_RISCV && XNN_ENABLE_RISCV_FP16_VECTOR

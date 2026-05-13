@@ -103,9 +103,11 @@ void define_stencil_copy(ynn_subgraph& subgraph, ynn_node& node,
       const int rank = input.rank();
       std::vector<slinky::var> dims = runtime.globals.make_dims(rank);
       slinky::func::input func_input{
-          input_buffer, make_elementwise_bounds(dims, input.extents)};
+          input_buffer,
+          make_elementwise_bounds(dims, input.physical_extents())};
       slinky::func::input func_padding{
-          padding.buffer, make_elementwise_bounds(dims, padding.extents)};
+          padding.buffer,
+          make_elementwise_bounds(dims, padding.physical_extents())};
       func_input.input_crop.resize(rank);
       for (int d = 0; d < rank; ++d) {
         auto stencil = std::find_if(
@@ -113,10 +115,10 @@ void define_stencil_copy(ynn_subgraph& subgraph, ynn_node& node,
             [d](const stencil_info& stencil) { return stencil.axis == d; });
         if (stencil == op.stencils.end()) continue;
         slinky::expr pre_padding =
-            compute_same_padding_min(*stencil, input.extents[d]);
+            compute_same_padding_min(*stencil, input.physical_extent(d));
         func_input.bounds[d] -= pre_padding;
-        if (input.extents[d].defined()) {
-          func_input.input_crop[d] = all_bounds(input.extents[d]);
+        if (input.physical_extent(d).defined()) {
+          func_input.input_crop[d] = all_bounds(input.physical_extent(d));
         }
         func_padding.bounds[d] -= pre_padding;
       }
@@ -139,7 +141,7 @@ void define_stencil_copy(ynn_subgraph& subgraph, ynn_node& node,
     }
 
     slinky::box_expr bounds =
-        make_elementwise_bounds(input_dims, input.extents);
+        make_elementwise_bounds(input_dims, input.physical_extents());
     for (const stencil_info& i : op.stencils) {
       bounds[i.axis] *= i.stride;
     }

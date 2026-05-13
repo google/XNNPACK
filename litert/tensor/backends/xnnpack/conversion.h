@@ -50,7 +50,7 @@ class XnnpackGraph {
   const std::vector<XnnpackValue>& values() const { return values_; }
 
   // Looks up the index of the given tensor in the XNNPACK graph.
-  absl::StatusOr<size_t> Lookup(const graph::Tensor& tensor) const;
+  absl::StatusOr<size_t> Lookup(const TensorHandle& tensor) const;
 
   // Returns the external outputs of the XNNPACK graph.
   const absl::flat_hash_set<graph::Tensor>& external_outputs() const {

@@ -30,3 +30,17 @@ def convert_fp32_to_bf16(a, x):
 @operator_name("convert")
 def convert_bf16_to_fp32(a, x):
   return store(cast(Float(32), load(a)), x)
+
+
+@const_buffer("a", Float(64))
+@buffer("x", Float(32))
+@operator_name("convert")
+def convert_fp64_to_fp32(a, x):
+  return store(cast(Float(32), load(a)), x)
+
+
+@const_buffer("a", Float(32))
+@buffer("x", Float(64))
+@operator_name("convert")
+def convert_fp32_to_fp64(a, x):
+  return store(cast(Float(64), load(a)), x)

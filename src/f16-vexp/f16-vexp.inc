@@ -18,3 +18,10 @@ XNN_UKERNEL(xnn_arch_arm_neon_fp16_arith, xnn_f16_vexp_ukernel__neonfp16arith_po
 XNN_UKERNEL(xnn_arch_arm_neon_fp16_arith, xnn_f16_vexp_ukernel__neonfp16arith_poly_3_u16, 16, false, xnn_float16, struct xnn_f16_default_params, NULL)
 XNN_UKERNEL(xnn_arch_arm_neon_fp16_arith, xnn_f16_vexp_ukernel__neonfp16arith_poly_3_u32, 32, false, xnn_float16, struct xnn_f16_default_params, NULL)
 #endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+
+#if XNN_ARCH_RISCV && XNN_ENABLE_RISCV_FP16_VECTOR
+XNN_UKERNEL(xnn_arch_riscv_vector_fp16_arith, xnn_f16_vexp_ukernel__rvvfp16arith_poly_3_u1v, 1, true, xnn_float16, struct xnn_f16_default_params, NULL)
+XNN_UKERNEL(xnn_arch_riscv_vector_fp16_arith, xnn_f16_vexp_ukernel__rvvfp16arith_poly_3_u2v, 2, true, xnn_float16, struct xnn_f16_default_params, NULL)
+XNN_UKERNEL(xnn_arch_riscv_vector_fp16_arith, xnn_f16_vexp_ukernel__rvvfp16arith_poly_3_u4v, 4, true, xnn_float16, struct xnn_f16_default_params, NULL)
+XNN_UKERNEL(xnn_arch_riscv_vector_fp16_arith, xnn_f16_vexp_ukernel__rvvfp16arith_poly_3_u8v, 8, true, xnn_float16, struct xnn_f16_default_params, NULL)
+#endif  // XNN_ARCH_RISCV && XNN_ENABLE_RISCV_FP16_VECTOR

@@ -100,33 +100,6 @@ TEST(fusion, negate_multiply) {
                     InputsInclude(a_id, b_id)));
 }
 
-TEST(fusion, multiply_multiply) {
-  // multiply(mul(a, b), c) -> multiply(a, b, c)
-  const uint32_t a_id = 0;
-  const uint32_t b_id = 1;
-  const uint32_t c_id = 2;
-  const uint32_t x_id = 3;
-  SubgraphBuilder builder(4);
-  uint32_t ab_id = YNN_INVALID_VALUE_ID;
-  builder.AddInput(ynn_type_fp32, 2, a_id)
-      .AddInput(ynn_type_fp32, 2, b_id)
-      .AddInput(ynn_type_fp32, 2, c_id)
-      .AddOutput(ynn_type_fp32, 2, x_id)
-      .AddTensor(ynn_type_fp32, 2, ab_id);
-  builder.AddBinary(ynn_binary_multiply, a_id, b_id, ab_id)
-      .AddBinary(ynn_binary_multiply, ab_id, c_id, x_id);
-
-  ynn_subgraph& subgraph = *builder.GetSubgraph();
-
-  subgraph.fusion();
-  subgraph.invalidate_dead_values();
-
-  ASSERT_THAT(subgraph, AllOf(HasValidNodeCount(1), HasValidValueCount(4)));
-  EXPECT_THAT(
-      ProducerOf(x_id, subgraph),
-      AllOf(IsTernary(ternary_op::multiply), InputsInclude(a_id, b_id, c_id)));
-}
-
 TEST(fusion, exp_multiplier) {
   // exp(multiply(a, C)) -> exp(a, multiplier = log2(e) * C)
   const uint32_t a_id = 0;

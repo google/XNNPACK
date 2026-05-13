@@ -39,9 +39,9 @@ void bench(benchmark::State& state, uint64_t arch_flags,
   broadcast_extent_1(b);
 
   for (auto _ : state) {
-    kernel(m, n, a.stride(0) * sizeof(A), a.stride(1) * sizeof(A), a.base(),
-           b.stride(0) * sizeof(B), b.stride(1) * sizeof(B), b.base(),
-           x.stride(0) * sizeof(X), x.base(), nullptr);
+    kernel(m, n, a.stride_bytes(0), a.stride_bytes(1), a.base(),
+           b.stride_bytes(0), b.stride_bytes(1), b.base(),
+           x.stride_bytes(0), x.base(), nullptr);
   }
 
   const size_t ops = m * n;
@@ -54,8 +54,9 @@ void bench(benchmark::State& state, uint64_t arch_flags,
                                                benchmark::Counter::kIsRate);
 }
 
+template <typename T>
 void bench_reference(benchmark::State& state, binary_kernel_fn kernel) {
-  return bench(state, arch_flag::none, kernel, float{}, float{}, float{});
+  return bench(state, arch_flag::none, kernel, T{}, T{}, T{});
 }
 
 template <typename A, typename B, typename X>
@@ -74,21 +75,25 @@ void Params(benchmark::Benchmark* b) {
 
 #define BENCHMARK_REFERENCE(op, type)                                \
   BENCHMARK_CAPTURE(                                                 \
-      bench_reference, #op,                                          \
+      bench_reference<type>, op##_##type,                            \
       get_binary_reference_kernel(ynn_binary_##op, type_of<type>())) \
       ->Apply(Params<type, type, type>)                              \
       ->UseRealTime();
 
-BENCHMARK_REFERENCE(add, float);
-BENCHMARK_REFERENCE(copysign, float);
-BENCHMARK_REFERENCE(divide, float);
-BENCHMARK_REFERENCE(max, float);
-BENCHMARK_REFERENCE(min, float);
-BENCHMARK_REFERENCE(multiply, float);
-BENCHMARK_REFERENCE(pow, float);
-BENCHMARK_REFERENCE(squared_difference, float);
-BENCHMARK_REFERENCE(subtract, float);
-BENCHMARK_REFERENCE(leaky_relu, float);
+#define BENCHMARK_FLOAT_REFERENCE(op) \
+  BENCHMARK_REFERENCE(op, float);     \
+  BENCHMARK_REFERENCE(op, double);
+
+BENCHMARK_FLOAT_REFERENCE(add);
+BENCHMARK_FLOAT_REFERENCE(copysign);
+BENCHMARK_FLOAT_REFERENCE(divide);
+BENCHMARK_FLOAT_REFERENCE(max);
+BENCHMARK_FLOAT_REFERENCE(min);
+BENCHMARK_FLOAT_REFERENCE(multiply);
+BENCHMARK_FLOAT_REFERENCE(pow);
+BENCHMARK_FLOAT_REFERENCE(squared_difference);
+BENCHMARK_FLOAT_REFERENCE(subtract);
+BENCHMARK_FLOAT_REFERENCE(leaky_relu);
 
 BENCHMARK_REFERENCE(add, int32_t);
 BENCHMARK_REFERENCE(divide, int32_t);

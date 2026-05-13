@@ -82,12 +82,11 @@ struct InitQuantizationParams {
 
 template <typename InputT, typename OutputT, typename qs8_cvt_params_t,
           typename InitQuantizationParams<InputT>::fn init_quantization_params>
-static void pack_lh_fx_qd(size_t m, size_t k, size_t mr_packed, size_t kr,
-                          size_t sr, size_t m_idx_start, const InputT* lhs,
-                          size_t lhs_stride, void* lhs_packed,
-                          xnn_vunary_ukernel_fn convert_ukernel,
-                          xnn_reduce_ukernel_fn minmax_ukernel,
-                          xnn_reduce_ukernel_fn rsum_ukernel) {
+static XNN_NO_SANITIZE_FUNCTION void pack_lh_fx_qd(
+    size_t m, size_t k, size_t mr_packed, size_t kr, size_t sr,
+    size_t m_idx_start, const InputT* lhs, size_t lhs_stride, void* lhs_packed,
+    xnn_vunary_ukernel_fn convert_ukernel, xnn_reduce_ukernel_fn minmax_ukernel,
+    xnn_reduce_ukernel_fn rsum_ukernel) {
   assert(m_idx_start == 0);
 
   struct xnn_f32_default_params minmax_params;

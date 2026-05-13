@@ -150,7 +150,7 @@ tools/xngen src/f32-gemm/neon-shuffle.c.in   -D MR=6 -D NR=8  -D FMA=1 -D INC=0 
 tools/xngen src/f32-gemm/neon-shuffle.c.in   -D MR=8 -D NR=8  -D FMA=0 -D INC=0 -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-8x8s4-minmax-neon.c &
 tools/xngen src/f32-gemm/neon-shuffle.c.in   -D MR=8 -D NR=8  -D FMA=1 -D INC=0 -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-8x8s4-minmax-neonfma.c &
 
-################################## WAsm SIMD ##################################
+################################## Wasm SIMD ##################################
 ### LOAD1+BROADCAST micro-kernels
 tools/xngen src/f32-gemm/wasmsimd-loadsplat.c.in -D MR=1 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=MINMAX -D ARCH=ARM     -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-1x8-minmax-wasmsimd-arm-loadsplat.c &
 

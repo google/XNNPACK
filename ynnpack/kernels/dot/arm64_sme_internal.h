@@ -18,8 +18,8 @@ namespace ynn {
 #define YNN_SME_HELPER __arm_streaming __arm_inout("za")
 
 // Helpers to call the right SME intrinsics from overloads based on the type.
-inline size_t svcnt(float) { return svcntsw(); }
-inline size_t svcnt(int32_t) { return svcntsw(); }
+inline size_t svcnts(float) { return svcntsw(); }
+inline size_t svcnts(int32_t) { return svcntsw(); }
 
 template <uint64_t tile>
 YNN_ALWAYS_INLINE void svmopa(svbool_t pn, svbool_t pm, svfloat32_t zn,

@@ -130,6 +130,9 @@ template <typename T, size_t N>
 vec<T, N> floor(vec<T, N> a);
 template <typename T, size_t N>
 vec<T, N> floor_log2(vec<T, N> a);
+// This function is permitted to use any rounding mode.
+template <typename T, size_t N>
+vec<T, N> exp2_round(vec<T, N> a);
 template <typename T, size_t N>
 vec<T, N> ceil(vec<T, N> a);
 template <typename T, size_t N>
@@ -163,6 +166,18 @@ YNN_ALWAYS_INLINE vec<T, N> saturate_cast(vec<T, N> from, T = {}) {
 
 template <typename To, typename From, size_t N>
 vec<To, N> round_float_to_int(vec<From, N> from, To = {});
+
+// horizontal_sum must be numerically equivalent to slicing the vector in half,
+// adding the halves, and repeating until the result is a scalar.
+template <typename T, size_t N>
+T horizontal_sum(vec<T, N> x);
+template <typename T, size_t N>
+T horizontal_min(vec<T, N> x);
+template <typename T, size_t N>
+T horizontal_max(vec<T, N> x);
+
+template <typename T, size_t N>
+void kahan_sum(vec<T, N> a, vec<T, N>& acc, vec<T, N>& error);
 
 namespace internal {
 
@@ -317,7 +332,11 @@ YNN_ALWAYS_INLINE vec<T, 1> sub_sat(vec<T, 1> a, vec<T, 1> b) {
 }
 template <typename T>
 YNN_ALWAYS_INLINE vec<T, 1> floor_log2(vec<T, 1> a) {
-  return vec<T, 1>{floor_log2(a.v)};
+  return vec<T, 1>{ynn::floor_log2(a.v)};
+}
+template <typename T>
+YNN_ALWAYS_INLINE vec<T, 1> exp2_round(vec<T, 1> a) {
+  return vec<T, 1>{ynn::exp2_round(a.v)};
 }
 
 template <typename To, typename From>
@@ -377,6 +396,12 @@ YNN_ALWAYS_INLINE T horizontal_min(vec<T, 1> x) {
 template <typename T>
 YNN_ALWAYS_INLINE T horizontal_max(vec<T, 1> x) {
   return x.v;
+}
+
+template <typename T>
+YNN_ALWAYS_INLINE void kahan_sum(vec<T, 1> a, vec<T, 1>& acc,
+                                 vec<T, 1>& error) {
+  ynn::kahan_sum(a.v, acc.v, error.v);
 }
 
 }  // namespace simd

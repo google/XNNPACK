@@ -956,6 +956,41 @@ YNN_ALWAYS_INLINE f64x8 floor_log2(f64x8 a) {
       negative, res, _mm512_set1_pd(std::numeric_limits<double>::quiet_NaN()))};
 }
 
+YNN_ALWAYS_INLINE f32x16 exp2_round(f32x16 a) {
+  const __m512 magic = _mm512_set1_ps(127.0f + static_cast<float>(1 << 23));
+  const __m512 res_bits = _mm512_add_ps(a.v, magic);
+  return f32x16{_mm512_castsi512_ps(
+      _mm512_slli_epi32(_mm512_castps_si512(res_bits), 23))};
+}
+YNN_ALWAYS_INLINE f64x8 exp2_round(f64x8 a) {
+  const __m512d magic = _mm512_set1_pd(1023.0 + static_cast<double>(1ll << 52));
+  const __m512d res_bits = _mm512_add_pd(a.v, magic);
+  return f64x8{_mm512_castsi512_pd(
+      _mm512_slli_epi64(_mm512_castpd_si512(res_bits), 52))};
+}
+
+YNN_ALWAYS_INLINE void kahan_sum(f32x16 a, f32x16& acc, f32x16& error) {
+  f32x16 y = a - error;
+  f32x16 t = acc + y;
+  error = (t - acc) - y;
+  __m512 mask = _mm512_set1_ps(std::numeric_limits<float>::infinity());
+  __mmask16 m =
+      _mm512_cmp_ps_mask(_mm512_and_ps(error.v, mask), mask, _CMP_NEQ_OQ);
+  error = f32x16{_mm512_maskz_mov_ps(m, error.v)};
+  acc = t;
+}
+
+YNN_ALWAYS_INLINE void kahan_sum(f64x8 a, f64x8& acc, f64x8& error) {
+  f64x8 y = a - error;
+  f64x8 t = acc + y;
+  error = (t - acc) - y;
+  __m512d mask = _mm512_set1_pd(std::numeric_limits<double>::infinity());
+  __mmask8 m =
+      _mm512_cmp_pd_mask(_mm512_and_pd(error.v, mask), mask, _CMP_NEQ_OQ);
+  error = f64x8{_mm512_maskz_mov_pd(m, error.v)};
+  acc = t;
+}
+
 template <int Index>
 YNN_ALWAYS_INLINE s32x4 extract(s32x16 x, decltype(s32x4::N)) {
   return s32x4{_mm512_extracti32x4_epi32(x.v, Index)};
@@ -1095,9 +1130,15 @@ YNN_ALWAYS_INLINE s16x32 cast(u8x32 a, int16_t) {
 YNN_ALWAYS_INLINE f32x16 cast(s32x16 x, float) {
   return f32x16{_mm512_cvtepi32_ps(x.v)};
 }
-
 YNN_ALWAYS_INLINE s32x16 cast(f32x16 x, int32_t) {
   return s32x16{_mm512_cvttps_epi32(x.v)};
+}
+
+YNN_ALWAYS_INLINE f64x8 cast(f32x8 a, double) {
+  return f64x8{_mm512_cvtps_pd(a.v)};
+}
+YNN_ALWAYS_INLINE f32x8 cast(f64x8 a, float) {
+  return f32x8{_mm512_cvtpd_ps(a.v)};
 }
 
 YNN_ALWAYS_INLINE s16x32 saturate_cast(s32x32 a, int16_t) {

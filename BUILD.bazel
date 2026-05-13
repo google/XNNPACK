@@ -904,7 +904,6 @@ xnnpack_cc_library(
         ":xnnpack_h",
         "//src/configs:config_hdrs",
         "//src/configs:hardware_config",
-        "//src/configs:microkernel_configs",
         "@pthreadpool",
     ],
 )
@@ -1149,6 +1148,18 @@ config_setting(
 config_setting(
     name = "xnn_enable_avx512fp16_explicit_false",
     define_values = {"xnn_enable_avx512fp16": "false"},
+)
+
+# Enables usage of WebAssembly Relaxed SIMD FP16 (fp16 arithmetic) kernels.
+config_setting(
+    name = "xnn_enable_wasmrelaxedsimdfp16_explicit_true",
+    define_values = {"xnn_enable_wasmrelaxedsimdfp16": "true"},
+)
+
+# Disables usage of WebAssembly Relaxed SIMD FP16 (fp16 arithmetic) kernels.
+config_setting(
+    name = "xnn_enable_wasmrelaxedsimdfp16_explicit_false",
+    define_values = {"xnn_enable_wasmrelaxedsimdfp16": "false"},
 )
 
 # Enables usage of Intel AVX512-BF16 (bf16 arithmetic) kernels.
@@ -1746,6 +1757,21 @@ alias(
         ":xnn_enable_avx512fp16_explicit_true": ":xnn_enable_avx512fp16_explicit_true",
         ":xnn_enable_avx512fp16_explicit_false": ":xnn_enable_avx512fp16_explicit_true",
         "//conditions:default": ":avx512fp16_enabled_by_default",
+    }),
+)
+
+selects.config_setting_group(
+    name = "wasmrelaxedsimdfp16_enabled_by_default",
+    match_any = [
+        "//build_config:emscripten_wasmrelaxedsimd",
+    ],
+)
+
+alias(
+    name = "wasmrelaxedsimdfp16_enabled",
+    actual = select({
+        ":xnn_enable_wasmrelaxedsimdfp16_explicit_true": ":xnn_enable_wasmrelaxedsimdfp16_explicit_true",
+        "//conditions:default": ":xnn_enable_wasmrelaxedsimdfp16_explicit_false",
     }),
 )
 

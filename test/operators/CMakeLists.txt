@@ -18,6 +18,7 @@ IF(XNNPACK_BUILD_LIBRARY)
     binary-elementwise-nd
     constant-pad-nd-eager
     constant-pad-nd
+    convert-nc
     convolution-nchw
     convolution-nhwc
     copy-nc-eager

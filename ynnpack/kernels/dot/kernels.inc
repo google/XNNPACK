@@ -177,4 +177,4 @@ YNN_DOT_KERNEL(arch_flag::none, dot_uint8_int8_int32_1x128x1_1x1x1,
                dot_flag::consistent_arithmetic, uint8_t, int8_t, int32_t)
 YNN_DOT_KERNEL(arch_flag::none, dot_int8_int4_int32_1x128x2_1x1x2,
                1, 128, 2, 1, 1, 2,
-               dot_flag::consistent_arithmetic, uint8_t, int4x2, int32_t)
+               dot_flag::consistent_arithmetic, int8_t, int4x2, int32_t)

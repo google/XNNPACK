@@ -581,12 +581,6 @@ enum xnn_status xnn_create_runtime_v4(
 
   xnn_subgraph_rewrite_ssa(subgraph);
 
-  status = xnn_subgraph_rewrite_for_row_sum(subgraph);
-  if (status != xnn_status_success) {
-    xnn_log_error("failed to rewrite subgraph for row_sum");
-    goto error;
-  }
-
   const uint32_t optimization_flags =
       XNN_FLAG_HINT_SPARSE_INFERENCE | XNN_FLAG_HINT_FP16_INFERENCE |
       XNN_FLAG_FORCE_FP16_INFERENCE | XNN_FLAG_NO_OPERATOR_FUSION |
@@ -595,6 +589,12 @@ enum xnn_status xnn_create_runtime_v4(
   status = xnn_subgraph_optimize(subgraph, flags & optimization_flags);
   if (status != xnn_status_success) {
     xnn_log_error("failed to optimize subgraph");
+    goto error;
+  }
+
+  status = xnn_subgraph_rewrite_for_row_sum(subgraph);
+  if (status != xnn_status_success) {
+    xnn_log_error("failed to rewrite subgraph for row_sum");
     goto error;
   }
 
@@ -883,6 +883,26 @@ enum xnn_status xnn_reshape_runtime(xnn_runtime_t runtime) {
           "Operator #%u: %s failed reshape", opdata_id,
           xnn_operator_type_to_string_v2(opdata->operator_objects[0]));
       return status;
+    }
+
+    for (size_t i = 0; i < opdata->num_inputs && !reallocation_required; i++) {
+      const uint32_t input_id = opdata->inputs[i];
+      if (input_id == XNN_INVALID_VALUE_ID) {
+        continue;
+      }
+      for (size_t j = 0; j < opdata->num_outputs && !reallocation_required; j++) {
+        const uint32_t output_id = opdata->outputs[j];
+        if (output_id == XNN_INVALID_VALUE_ID) {
+          continue;
+        }
+        const struct xnn_runtime_value* input = &runtime->values[input_id];
+        const struct xnn_runtime_value* output = &runtime->values[output_id];
+        if (input->data != NULL && input->data == output->data) {
+          if (xnn_runtime_tensor_get_size(input) != xnn_runtime_tensor_get_size(output)) {
+            reallocation_required = true;
+          }
+        }
+      }
     }
   }
   if (reallocation_required || !runtime->memory_planned) {

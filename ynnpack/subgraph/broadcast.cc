@@ -94,7 +94,8 @@ ynn_status ynn_define_broadcast(ynn_subgraph_t subgraph, size_t num_axes,
     output.make_buffer(runtime, input.buffer->elem_size());
 
     std::vector<slinky::var> dims = runtime.globals.make_dims(output.rank());
-    slinky::box_expr bounds = make_elementwise_bounds(dims, input.extents);
+    slinky::box_expr bounds =
+        make_elementwise_bounds(dims, input.physical_extents());
 
     for (size_t i = 0; i < std::min(bounds.size(), axes.size()); ++i) {
       if (!axes[i]) continue;

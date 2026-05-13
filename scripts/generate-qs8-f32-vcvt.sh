@@ -75,7 +75,7 @@ tools/xngen src/qs8-f32-vcvt/avx512skx.c.in -D BATCH_TILE=32 -D DATATYPE=QU8 -o 
 tools/xngen src/qs8-f32-vcvt/avx512skx.c.in -D BATCH_TILE=48 -D DATATYPE=QU8 -o src/qu8-f32-vcvt/gen/qu8-f32-vcvt-avx512skx-u48.c &
 tools/xngen src/qs8-f32-vcvt/avx512skx.c.in -D BATCH_TILE=64 -D DATATYPE=QU8 -o src/qu8-f32-vcvt/gen/qu8-f32-vcvt-avx512skx-u64.c &
 
-################################## WAsm SIMD ##################################
+################################## Wasm SIMD ##################################
 tools/xngen src/qs8-f32-vcvt/wasmsimd.c.in -D BATCH_TILE=8  -D DATATYPE=QS8 -o src/qs8-f32-vcvt/gen/qs8-f32-vcvt-wasmsimd-u8.c &
 tools/xngen src/qs8-f32-vcvt/wasmsimd.c.in -D BATCH_TILE=16 -D DATATYPE=QS8 -o src/qs8-f32-vcvt/gen/qs8-f32-vcvt-wasmsimd-u16.c &
 tools/xngen src/qs8-f32-vcvt/wasmsimd.c.in -D BATCH_TILE=24 -D DATATYPE=QS8 -o src/qs8-f32-vcvt/gen/qs8-f32-vcvt-wasmsimd-u24.c &

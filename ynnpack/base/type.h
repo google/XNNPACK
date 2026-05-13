@@ -30,6 +30,11 @@ using uint32x1_t = uint32_t;
 using float16x1_t = half;
 using bfloat16x1_t = bfloat16;
 using float32x1_t = float;
+using float64x1_t = double;
+
+// TODO: b/501068911 - When we have an option to disable fp64 support, we should
+// make this float when fp64 is disabled.
+using real = double;
 
 // Returns true if the type is an integer type.
 bool type_is_integral(ynn_type t);
@@ -337,6 +342,8 @@ constexpr decltype(auto) SwitchRealType(ynn_type type, F&& f) {
       return std::forward<F>(f)(bfloat16());
     case ynn_type_fp32:
       return std::forward<F>(f)(float());
+    case ynn_type_fp64:
+      return std::forward<F>(f)(double());
     default:
       YNN_UNREACHABLE;
   }
@@ -361,7 +368,9 @@ class type_info {
  public:
   using element_type = T;
 
-  static constexpr T epsilon() { return std::numeric_limits<T>::epsilon(); }
+  static constexpr T epsilon() {
+    return std::is_integral_v<T> ? 1 : std::numeric_limits<T>::epsilon();
+  }
   static constexpr T infinity() { return std::numeric_limits<T>::infinity(); }
   static constexpr T nan() { return std::numeric_limits<T>::quiet_NaN(); }
   static constexpr T min() { return std::numeric_limits<T>::lowest(); }
@@ -521,11 +530,12 @@ class type_info<int4x2> {
  public:
   using element_type = int8_t;
 
-  static int32_t min() { return -8; }
-  static int32_t max() { return 7; }
-  static int32_t smallest_normal() { return 0; }
-  static int32_t min_identity() { return max(); }
-  static int32_t max_identity() { return min(); }
+  static constexpr int32_t epsilon() { return 1; }
+  static constexpr int32_t min() { return -8; }
+  static constexpr int32_t max() { return 7; }
+  static constexpr int32_t smallest_normal() { return 0; }
+  static constexpr int32_t min_identity() { return max(); }
+  static constexpr int32_t max_identity() { return min(); }
 
   static constexpr size_t element_count() { return 2; }
 
@@ -545,11 +555,12 @@ class type_info<int2x4> {
  public:
   using element_type = int8_t;
 
-  static int32_t min() { return -2; }
-  static int32_t max() { return 1; }
-  static int32_t smallest_normal() { return 0; }
-  static int32_t min_identity() { return max(); }
-  static int32_t max_identity() { return min(); }
+  static constexpr int32_t epsilon() { return 1; }
+  static constexpr int32_t min() { return -2; }
+  static constexpr int32_t max() { return 1; }
+  static constexpr int32_t smallest_normal() { return 0; }
+  static constexpr int32_t min_identity() { return max(); }
+  static constexpr int32_t max_identity() { return min(); }
 
   static constexpr size_t element_count() { return 4; }
 
@@ -569,11 +580,12 @@ class type_info<uint4x2> {
  public:
   using element_type = uint8_t;
 
-  static int32_t min() { return 0; }
-  static int32_t max() { return 15; }
-  static int32_t smallest_normal() { return 0; }
-  static int32_t min_identity() { return max(); }
-  static int32_t max_identity() { return min(); }
+  static constexpr int32_t epsilon() { return 1; }
+  static constexpr int32_t min() { return 0; }
+  static constexpr int32_t max() { return 15; }
+  static constexpr int32_t smallest_normal() { return 0; }
+  static constexpr int32_t min_identity() { return max(); }
+  static constexpr int32_t max_identity() { return min(); }
 
   static constexpr size_t element_count() { return 2; }
 
@@ -593,11 +605,12 @@ class type_info<uint2x4> {
  public:
   using element_type = uint8_t;
 
-  static int32_t min() { return 0; }
-  static int32_t max() { return 3; }
-  static int32_t smallest_normal() { return 0; }
-  static int32_t min_identity() { return max(); }
-  static int32_t max_identity() { return min(); }
+  static constexpr int32_t epsilon() { return 1; }
+  static constexpr int32_t min() { return 0; }
+  static constexpr int32_t max() { return 3; }
+  static constexpr int32_t smallest_normal() { return 0; }
+  static constexpr int32_t min_identity() { return max(); }
+  static constexpr int32_t max_identity() { return min(); }
 
   static constexpr size_t element_count() { return 4; }
 
@@ -617,6 +630,7 @@ class type_info<quantized<T>> {
  public:
   using element_type = quantized<typename type_info<T>::element_type>;
 
+  static quantized<T> epsilon() { return {type_info<T>::epsilon()}; }
   static quantized<T> min() { return {type_info<T>::min()}; }
   static quantized<T> max() { return {type_info<T>::max()}; }
   static quantized<T> smallest_normal() { return {0}; }
@@ -674,21 +688,6 @@ template <>
 struct is_integral<uint2x4> {
   static constexpr bool value = true;
 };
-
-inline float epsilon(ynn_type type) {
-  switch (type) {
-    case ynn_type_fp64:
-      return type_info<double>::epsilon();
-    case ynn_type_fp32:
-      return type_info<float>::epsilon();
-    case ynn_type_fp16:
-      return type_info<half>::epsilon();
-    case ynn_type_bf16:
-      return type_info<bfloat16>::epsilon();
-    default:
-      return 1.0f;
-  }
-}
 
 struct quantization_params {
   int32_t zero_point = 0;
