@@ -14,6 +14,7 @@
 #include <variant>
 #include <vector>
 
+#include "ynnpack/base/algorithm.h"
 #include "ynnpack/base/log.h"
 #include "ynnpack/base/span.h"
 #include "ynnpack/base/to_string.h"
@@ -697,26 +698,38 @@ bool remove_static_broadcast_from_elementwise(ynn_subgraph& subgraph,
         std::get_if<ynn_node::static_broadcast>(&producer->op);
     if (broadcast == nullptr) continue;
 
-    for (size_t d = 0; d < broadcast->new_dims.size(); ++d) {
-      if (!broadcast->new_dims[d]) continue;
+    if (!can_implicitly_broadcast(node, input_id)) continue;
 
-      if (std::any_of(node.inputs.begin(), node.inputs.end(), [&](uint32_t id) {
-            if (id == input_id) return false;
-
-            slinky::expr extent_d = subgraph.value(id).extent(d);
-            return slinky::prove_true(extent_d == broadcast->new_dims[d]);
-          })) {
-        // This dimension of the broadcast is not needed because it is implied
-        // by another operand of the elementwise op.
-      } else {
-        // This broadcast is needed
+    const ynn_value& broadcasted = subgraph.value(producer->inputs[0]);
+    auto broadcast_needed = [&](size_t d) {
+      if (!broadcast->new_dims[d]) {
+        // This dimension is not broadcasted, we can drop this dimension.
         return false;
       }
-    }
 
-    YNN_LOG_DEBUG() << "Removing static_broadcast from elementwise input.";
-    input_id = producer->inputs[0];
-    change = true;
+      if (d < broadcasted.rank() && broadcasted.extents[d].defined()) {
+        // This dimension has an explicit extent, we can't implicitly broadcast
+        // it.
+        return true;
+      }
+
+      // We weed the broadcast if this dimension is not implicitly broadcasted
+      // by any other input.
+      auto implicitly_broadcasts = [&](uint32_t id) {
+        if (id == input_id) return false;
+
+        const ynn_value& input = subgraph.value(id);
+        return d < input.extents.size() &&
+               slinky::prove_true(input.extents[d] == broadcast->new_dims[d]);
+      };
+      return !std::any_of(node.inputs.begin(), node.inputs.end(),
+                          implicitly_broadcasts);
+    };
+    if (!any_n(broadcast->new_dims.size(), broadcast_needed)) {
+      YNN_LOG_DEBUG() << "Removing static_broadcast from elementwise input.";
+      input_id = producer->inputs[0];
+      change = true;
+    }
   }
 
   return change;
@@ -1819,7 +1832,8 @@ ynn_status ynn_subgraph::fusion() {
                 ynn::rewrite_transpose_stencil_copy(*this, node, analysis) ||
                 ynn::rewrite_reduce_sum_of_squared(*this, node, analysis) ||
                 ynn::rewrite_reduce_sum_convert(*this, node, analysis) ||
-                ynn::rewrite_reduce_static_transpose(*this, node, analysis);
+                ynn::rewrite_reduce_static_transpose(*this, node, analysis) ||
+                false;
 
       if (!analysis.is_valid) {
         break;

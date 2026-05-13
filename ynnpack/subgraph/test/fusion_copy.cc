@@ -236,6 +236,33 @@ TEST(fusion, remove_static_broadcast_from_elementwise_binary) {
               AllOf(IsBinary(ynn_binary_add), InputsInclude(x_id, y_id)));
 }
 
+TEST(fusion, keep_new_dims_static_broadcast) {
+  const uint32_t x_id = 0;
+  const uint32_t y_id = 1;
+  const uint32_t out_id = 2;
+  SubgraphBuilder builder(3);
+  uint32_t broadcast_x_id = YNN_INVALID_VALUE_ID;
+
+  builder.AddInput(ynn_type_fp32, {1, 10}, x_id)
+      .AddInput(ynn_type_fp32, {5, 10}, y_id)
+      .AddOutput(ynn_type_fp32, {5, 10, 1}, out_id)
+      .AddTensor(ynn_type_fp32, {5, 10}, broadcast_x_id);
+
+  builder.AddStaticBroadcast({5, 0, 1}, x_id, broadcast_x_id)
+      .AddBinary(ynn_binary_add, broadcast_x_id, y_id, out_id);
+
+  ynn_subgraph& subgraph = *builder.GetSubgraph();
+
+  subgraph.fusion();
+  subgraph.invalidate_dead_values();
+
+  // The static_broadcast should not be removed because the broadcast adds a
+  // new trailing dimension.
+  EXPECT_THAT(
+      ProducerOf(out_id, subgraph),
+      AllOf(IsBinary(ynn_binary_add), InputsInclude(broadcast_x_id, y_id)));
+}
+
 TEST(fusion, keep_static_broadcast_from_dynamic_shape_elementwise_binary) {
   const uint32_t x_id = 0;
   const uint32_t y_id = 1;
