@@ -82,8 +82,7 @@ ynn_type product_type(ynn_type a, ynn_type b) {
 ynn_status subtract_a_times_sum_b(xnn_subgraph_t subgraph, size_t num_k_dims,
                                   const int32_t* a_k_dims,
                                   const int32_t* b_k_dims, uint32_t a_id,
-                                  uint32_t b_id, uint32_t* output_id,
-                                  bool expand_sum) {
+                                  uint32_t b_id, uint32_t* output_id) {
   if (a_id == YNN_INVALID_VALUE_ID) {
     return ynn_status_success;
   }
@@ -113,15 +112,12 @@ ynn_status subtract_a_times_sum_b(xnn_subgraph_t subgraph, size_t num_k_dims,
     return status;
   }
 
-  // Put one of the k dims back (to be broadcasted) if needed
-  uint32_t sum_id = sum_sliced_id;
-  if (expand_sum) {
-    sum_id = YNN_INVALID_VALUE_ID;
-    status = ynn_define_static_expand_dims(subgraph->ynn, 1, &b_k_dims[0],
-                                           sum_sliced_id, &sum_id, /*flags=*/0);
-    if (status != ynn_status_success) {
-      return status;
-    }
+  // Put one of the k dims back (to be broadcasted).
+  uint32_t sum_id = YNN_INVALID_VALUE_ID;
+  status = ynn_define_static_expand_dims(subgraph->ynn, 1, &b_k_dims[0],
+                                         sum_sliced_id, &sum_id, /*flags=*/0);
+  if (status != ynn_status_success) {
+    return status;
   }
 
   uint32_t zero_times_sum_id = YNN_INVALID_VALUE_ID;
@@ -273,20 +269,16 @@ ynn_status define_xnn_accumulator_for_quantized_dot(
 
   // We need to add a_zero_point * sum(b) to the accumulator initialization.
   // This product is missing dimension 0 from the result of the dot product.
-  bool a_has_outer_dims = rank_of_value(subgraph, a_id) > num_k_dims;
   status = subtract_a_times_sum_b(subgraph, num_k_dims, a_k_dims, b_k_dims,
-                                  a_zero_point_id, b_id, init_output_id,
-                                  a_has_outer_dims);
+                                  a_zero_point_id, b_id, init_output_id);
   if (status != ynn_status_success) {
     return status;
   }
 
   // We need to add b_zero_point * sum(a) to the accumulator initialization.
   // This product is missing dimension 1 from the result of the dot product.
-  bool b_has_outer_dims = rank_of_value(subgraph, b_id) > num_k_dims;
   status = subtract_a_times_sum_b(subgraph, num_k_dims, b_k_dims, a_k_dims,
-                                  b_zero_point_id, a_id, init_output_id,
-                                  b_has_outer_dims);
+                                  b_zero_point_id, a_id, init_output_id);
   if (status != ynn_status_success) {
     return status;
   }
