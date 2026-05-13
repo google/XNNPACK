@@ -54,6 +54,7 @@ extern "C" {
 #include "src/f16-vexp/f16-vexp.inc"
 #include "src/f16-vgelu/f16-vgelu.inc"
 #include "src/f16-vhswish/f16-vhswish.inc"
+#include "src/f16-vlog/f16-vlog.inc"
 #include "src/f16-vlrelu/f16-vlrelu.inc"
 #include "src/f16-vneg/f16-vneg.inc"
 #include "src/f16-vrnd/f16-vrndd.inc"

@@ -8,6 +8,7 @@
 PROD_WASMRELAXEDSIMD_MICROKERNEL_SRCS = [
     "src/f16-f32-vcvt/gen/f16-f32-vcvt-wasmrelaxedsimd-int16-u16.c",
     "src/f16-vcos/gen/f16-vcos-wasmrelaxedsimd-rational-3-2-div.c",
+    "src/f16-vlog/gen/f16-vlog-wasmrelaxedsimd-rational-3-3-div.c",
     "src/f16-vsin/gen/f16-vsin-wasmrelaxedsimd-rational-3-2-div.c",
     "src/f16-vsqrt/gen/f16-vsqrt-wasmrelaxedsimd-sqrt.c",
     "src/f16-vtanh/gen/f16-vtanh-wasmrelaxedsimd-expm1minus-rr1-p3h2ts-div.c",

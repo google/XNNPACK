@@ -144,6 +144,7 @@ MICROKERNEL_DEFS = [
     "src/f16-vexp/f16-vexp.inc",
     "src/f16-vgelu/f16-vgelu.inc",
     "src/f16-vhswish/f16-vhswish.inc",
+    "src/f16-vlog/f16-vlog.inc",
     "src/f16-vlrelu/f16-vlrelu.inc",
     "src/f16-vmulcaddc/f16-vmulcaddc.inc",
     "src/f16-vneg/f16-vneg.inc",
