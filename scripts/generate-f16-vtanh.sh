@@ -62,6 +62,11 @@ tools/xngen src/f16-vtanh/neonfp16arith-expm1minus.c.in -D P=3 -D H=2 -D PS=0 -D
 tools/xngen src/f16-vtanh/neonfp16arith-expm1minus.c.in -D P=3 -D H=2 -D PS=0 -D BATCH_TILE=24 -D SAT=MINMAX -D DIV=RECPEADJ -o src/f16-vtanh/gen/f16-vtanh-neonfp16arith-expm1minus-rr1-p3h2ts-recpeadj-u24.c &
 tools/xngen src/f16-vtanh/neonfp16arith-expm1minus.c.in -D P=3 -D H=2 -D PS=0 -D BATCH_TILE=32 -D SAT=MINMAX -D DIV=RECPEADJ -o src/f16-vtanh/gen/f16-vtanh-neonfp16arith-expm1minus-rr1-p3h2ts-recpeadj-u32.c &
 
+################################## RISC-V Vector ##############################
+tools/xngen src/f16-vtanh/rvvfp16arith-expm1minus-rr1-p3h2ts.c.in -D LMUL=1 -o src/f16-vtanh/gen/f16-vtanh-rvvfp16arith-expm1minus-rr1-p3h2ts-div-u1v.c &
+tools/xngen src/f16-vtanh/rvvfp16arith-expm1minus-rr1-p3h2ts.c.in -D LMUL=2 -o src/f16-vtanh/gen/f16-vtanh-rvvfp16arith-expm1minus-rr1-p3h2ts-div-u2v.c &
+tools/xngen src/f16-vtanh/rvvfp16arith-expm1minus-rr1-p3h2ts.c.in -D LMUL=4 -o src/f16-vtanh/gen/f16-vtanh-rvvfp16arith-expm1minus-rr1-p3h2ts-div-u4v.c &
+
 ################################ Portable SIMD ################################
 tools/xngen src/f16-vtanh/simd-expm1minus.c.in -D ARCH=scalar -D P=3 -D H=2 -D PS=0 -D BATCH_TILES=1,2,4 -D DIV=DIV -o src/f16-vtanh/gen/f16-vtanh-scalar-expm1minus-rr1-p3h2ts-div.c &
 tools/xngen src/f16-vtanh/simd-expm1minus.c.in -D ARCH=avx512fp16 -D P=3 -D H=2 -D PS=0 -D BATCH_TILES=32,64 -D DIV=DIV -o src/f16-vtanh/gen/f16-vtanh-avx512fp16-expm1minus-rr1-p3h2ts-div.c &

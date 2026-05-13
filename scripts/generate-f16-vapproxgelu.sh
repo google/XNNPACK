@@ -8,4 +8,9 @@
 tools/xngen src/f16-vapproxgelu/rational-6-4.c.in -D ARCH=scalar -D BATCH_TILES=1,2,4,8 -o src/f16-vapproxgelu/gen/f16-vapproxgelu-scalar-rational-6-4-div.c &
 tools/xngen src/f16-vapproxgelu/rational-6-4.c.in -D ARCH=neonfp16arith -D BATCH_TILES=8,16,32 -o src/f16-vapproxgelu/gen/f16-vapproxgelu-neonfp16arith-rational-6-4-div.c &
 
+################################## RISC-V Vector ###############################
+tools/xngen src/f16-vapproxgelu/rvvfp16arith-rational-6-4.c.in -D LMUL=1 -o src/f16-vapproxgelu/gen/f16-vapproxgelu-rvvfp16arith-rational-6-4-div-u1v.c &
+tools/xngen src/f16-vapproxgelu/rvvfp16arith-rational-6-4.c.in -D LMUL=2 -o src/f16-vapproxgelu/gen/f16-vapproxgelu-rvvfp16arith-rational-6-4-div-u2v.c &
+tools/xngen src/f16-vapproxgelu/rvvfp16arith-rational-6-4.c.in -D LMUL=4 -o src/f16-vapproxgelu/gen/f16-vapproxgelu-rvvfp16arith-rational-6-4-div-u4v.c &
+
 wait
