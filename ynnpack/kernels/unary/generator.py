@@ -33,7 +33,7 @@ def main(argv: Sequence[str]) -> None:
           (erf_fp32, (16, 1)),
           (exp_fp32, (16, 1)),
           (exp_fp64, (8, 1)),
-          (log_fp32, (8, 1)),
+          (log_fp32, (16, 1)),
           (negate_fp32, (8, 1)),
           (negate_fp64, (4, 1)),
           (poly3_fp32, (16, 1)),
