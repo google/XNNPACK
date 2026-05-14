@@ -198,7 +198,8 @@ cc_test(
     "static_expand_dims",
     "static_pad",
     "static_reshape",
-    "static_slice",
+    # Re-enable when the slinky copy aliasing bug is fixed.
+    # "static_slice",
     "slice_like",
     "static_transpose",
     "stencil_copy",
