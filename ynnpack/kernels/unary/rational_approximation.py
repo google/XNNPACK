@@ -87,3 +87,27 @@ x_test = np.linspace(x_min, x_max, 5000)
 approx = poly_eval(p, x_test) / poly_eval(q, x_test)
 max_err = np.max(np.abs(approx - f(x_test)))
 print(f"\nMaximum absolute error (float64): {max_err:.2e}")
+
+
+# %%
+import math
+
+# fp32 log2(x + 1)
+f = lambda x: np.where(x == 0, 1.0/np.log(2), np.log1p(x) / (x*np.log(2)))
+numerator_degree, denominator_degree = 2, 3
+x_min, x_max = 0, 1
+p, q = rational_approximation(
+    f, x_min, x_max, numerator_degree, denominator_degree
+)
+
+for i, val in enumerate(p):
+  print(f"  valpha_{i+1} = {val:.10e}")
+
+for i, val in enumerate(q):
+  print(f"  vbeta_{i} = {val:.10e}")
+
+# Evaluate final error
+x_test = np.linspace(x_min, x_max, 5000)
+approx = x_test * poly_eval(p, x_test) / poly_eval(q, x_test)
+max_err = np.max(np.abs(approx - np.log2(x_test + 1)))
+print(f"\nMaximum absolute error (float64): {max_err:.2e}")

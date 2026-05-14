@@ -196,35 +196,33 @@ def log_fp32(a, x, input_multiplier, output_multiplier):
   # Some useful constants.
   vmantissa_mask = i32(0x007FFFFF)
 
-  vsqrt1_2 = 1 / float(math.sqrt(2.0))
-
   # The monomial coefficients of the numerator polynomial.
-  valpha_3 = 1.824996918440e-01
+  valpha_1 = 1.4426950180e+00
+  valpha_2 = 1.2540218881e+00
+  valpha_3 = 1.7968840189e-01
 
   # The monomial coefficients of the denominator polynomial.
-  vbeta_1 = 1.5
-  vbeta_2 = 0.599170029163
-  vbeta_3 = 0.049584995955
+  vbeta_1 = 1.3692200200e+00
+  vbeta_2 = 4.7585666772e-01
+  vbeta_3 = 3.1328686121e-02
 
-  # Scale `x` with `sqrt(2)` so that the exponent is rounded up.
   vx = load(a) * input_multiplier
 
-  # Start with floor_log2(vx)
+  # log2(x) = log2(x'*2^exp) = log2(x') + exp where x' is in [1, 2) and exp is
+  # an integer. x' is the mantissa with an exponent of 0, and exp is
+  # floor(log2(x)).
   vexp = floor_log2(vx)
-
-  # Normalize `x` to an exponent of zero.
   vx_bits = reinterpret_cast(Int(32), vx)
   one_bits = reinterpret_cast(Int(32), f32(1.0))
   vx_norm_bits = (vx_bits & vmantissa_mask) | one_bits
   vx_norm = reinterpret_cast(Float(32), vx_norm_bits)
 
-  # Scale `x` back with `1/sqrt(2)` and subtract `1.0`.
-  # Range: [sqrt(1/2) - 1, sqrt(2) - 1).
-  vr = (vx_norm * vsqrt1_2) - 1.0
+  # Our polynomial approximates log2(x + 1)
+  vr = vx_norm - 1.0
 
   # Evaluate the numerator polynomial p.
-  vp = multiply_add(vr, valpha_3, 1.0)
-  vp = multiply_add(vr, vp, 1.0)
+  vp = multiply_add(vr, valpha_3, valpha_2)
+  vp = multiply_add(vr, vp, valpha_1)
   vp = vr * vp
 
   # Evaluate the denominator polynomial q.
@@ -235,7 +233,7 @@ def log_fp32(a, x, input_multiplier, output_multiplier):
   # Divide the numerator by the denominator.
   vy = vp / vq
 
-  # Put it all together, i.e. `log(x) = `log(2)*exp + y`.
-  vy = multiply_add(vexp, output_multiplier, vy)
+  # log2(x') = vy
+  vy = (vexp + vy) * output_multiplier
 
   return store(vy, x)

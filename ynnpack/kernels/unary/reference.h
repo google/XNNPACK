@@ -315,16 +315,16 @@ struct log : public unary_op_info {
 
   explicit log(const unary_params& params) : params(params.log) {}
   float operator()(float x) const override {
-    return std::log2(x * params.input_multiplier / std::sqrt(2.0f)) *
+    return std::log2(x * params.input_multiplier) *
            params.output_multiplier;
   }
   double operator()(double x) const override {
-    return std::log2(x * params.input_multiplier / std::sqrt(2.0)) *
+    return std::log2(x * params.input_multiplier) *
            params.output_multiplier;
   }
 
   tolerance_spec tolerance(ynn_type /*type*/) const override {
-    return tolerance_spec{/*relative=*/6.0f, /*absolute=*/2.0f};
+    return tolerance_spec{/*relative=*/1.5f, /*absolute=*/1.0f};
   }
 
   interval domain(ynn_type type) const override {
