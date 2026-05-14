@@ -193,9 +193,9 @@ void fill_random(T* data, size_t size, Rng& rng, double min, double max,
   } else {
     if constexpr (is_integral<T>::value || is_quantized<T>::value) {
       std::uniform_int_distribution<int> dist(
-          std::max<int>(round_float_to_int<int>(static_cast<float>(min)),
+          std::max<int>(cast<int>(static_cast<float>(min)),
                         type_info<T>::min()),
-          std::min<int>(round_float_to_int<int>(static_cast<float>(max)),
+          std::min<int>(cast<int>(static_cast<float>(max)),
                         type_info<T>::max()));
       for (size_t i = 0; i < size; ++i) {
         type_info<T>::set(data, i, dist(rng));

@@ -672,9 +672,9 @@ YNN_ALWAYS_INLINE std::array<s32x4, 4> transpose<int32_t>(
 YNN_ALWAYS_INLINE f32x4 cast(s32x4 x, float) {
   return f32x4{_mm_cvtepi32_ps(x.v)};
 }
-
 YNN_ALWAYS_INLINE s32x4 cast(f32x4 x, int32_t) {
-  return s32x4{_mm_cvttps_epi32(x.v)};
+  const __m128 max_int32 = _mm_set1_ps((1ull << 31) - 128);
+  return s32x4{_mm_cvtps_epi32(_mm_min_ps(x.v, max_int32))};
 }
 
 }  // namespace simd

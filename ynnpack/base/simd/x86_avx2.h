@@ -46,10 +46,6 @@ YNN_ALWAYS_INLINE f32x8 cast(s32x8 x, float) {
   return f32x8{_mm256_cvtepi32_ps(x.v)};
 }
 
-YNN_ALWAYS_INLINE s32x8 cast(f32x8 x, int32_t) {
-  return s32x8{_mm256_cvttps_epi32(x.v)};
-}
-
 YNN_ALWAYS_INLINE bf16x16 cast(f32x16 a, bfloat16) {
   const __m256 rounding_multiplier =
       _mm256_set1_ps(bfloat16::rounding_multiplier);
@@ -61,37 +57,40 @@ YNN_ALWAYS_INLINE bf16x16 cast(f32x16 a, bfloat16) {
   return bf16x16{_mm256_permute4x64_epi64(d, _MM_SHUFFLE(3, 1, 2, 0))};
 }
 
-YNN_ALWAYS_INLINE s16x16 saturate_cast(s32x16 a, int16_t) {
+YNN_ALWAYS_INLINE s16x16 cast(s32x16 a, int16_t) {
   const __m256i r = _mm256_packs_epi32(a.lo().v, a.hi().v);
   return s16x16{_mm256_permute4x64_epi64(r, _MM_SHUFFLE(3, 1, 2, 0))};
 }
 
-YNN_ALWAYS_INLINE s8x32 saturate_cast(s16x32 a, int8_t) {
+YNN_ALWAYS_INLINE s8x32 cast(s16x32 a, int8_t) {
   const __m256i r = _mm256_packs_epi16(a.lo().v, a.hi().v);
   return s8x32{_mm256_permute4x64_epi64(r, _MM_SHUFFLE(3, 1, 2, 0))};
 }
 
-YNN_ALWAYS_INLINE u8x32 saturate_cast(s16x32 a, uint8_t) {
+YNN_ALWAYS_INLINE u8x32 cast(s16x32 a, uint8_t) {
   const __m256i r = _mm256_packus_epi16(a.lo().v, a.hi().v);
   return u8x32{_mm256_permute4x64_epi64(r, _MM_SHUFFLE(3, 1, 2, 0))};
 }
 
-YNN_ALWAYS_INLINE s16x16 round_float_to_int(f32x16 f, int16_t) {
+YNN_ALWAYS_INLINE s32x8 cast(f32x8 f, int32_t) {
+  const __m256 max_int32 = _mm256_set1_ps((1ull << 31) - 128);
+  return s32x8{_mm256_cvtps_epi32(_mm256_min_ps(f.v, max_int32))};
+}
+
+YNN_ALWAYS_INLINE s16x16 cast(f32x16 f, int16_t) {
   const __m256 max_int16 = _mm256_set1_ps((float)((1 << 15) - 1));
   const __m256i i0 = _mm256_cvtps_epi32(_mm256_min_ps(f.lo().v, max_int16));
   const __m256i i1 = _mm256_cvtps_epi32(_mm256_min_ps(f.hi().v, max_int16));
-  return saturate_cast(s32x16(s32x8(i0), s32x8(i1)), int16_t());
+  return cast(s32x16(s32x8(i0), s32x8(i1)), int16_t());
 }
 
-YNN_ALWAYS_INLINE s8x32 round_float_to_int(f32x32 f, int8_t) {
-  const s16x16 i01 =
-      round_float_to_int(f32x16(f.lo().lo(), f.lo().hi()), int16_t());
-  const s16x16 i23 =
-      round_float_to_int(f32x16(f.hi().lo(), f.hi().hi()), int16_t());
-  return saturate_cast(s16x32(i01, i23), int8_t());
+YNN_ALWAYS_INLINE s8x32 cast(f32x32 f, int8_t) {
+  const s16x16 i01 = cast(f32x16(f.lo().lo(), f.lo().hi()), int16_t());
+  const s16x16 i23 = cast(f32x16(f.hi().lo(), f.hi().hi()), int16_t());
+  return cast(s16x32(i01, i23), int8_t());
 }
 
-YNN_ALWAYS_INLINE u8x32 round_float_to_int(f32x32 f, uint8_t) {
+YNN_ALWAYS_INLINE u8x32 cast(f32x32 f, uint8_t) {
   const __m256 max_uint16 = _mm256_set1_ps((float)((1 << 16) - 1));
   const __m256i i0 =
       _mm256_cvtps_epi32(_mm256_min_ps(f.lo().lo().v, max_uint16));

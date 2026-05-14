@@ -516,7 +516,7 @@ void check_results(const unary_op_info& op, Tensor<A> a, Tensor<X> x,
         // Integral output, non-integral a. We need to potentially
         // dequantize the a, and avoid UB when converting to int.
         const Float input_i = dequantize(a(i), a_quantization);
-        const int32_t expected = round_float_to_int<X>(op(input_i));
+        const int32_t expected = cast<X>(op(input_i));
         ASSERT_EQ(expected, x(i))
             << "i = " << index_to_string(i) << ", a(i) = " << input_i << " ("
             << static_cast<Float>(a(i)) << ")";

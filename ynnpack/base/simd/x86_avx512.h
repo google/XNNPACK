@@ -1130,9 +1130,6 @@ YNN_ALWAYS_INLINE s16x32 cast(u8x32 a, int16_t) {
 YNN_ALWAYS_INLINE f32x16 cast(s32x16 x, float) {
   return f32x16{_mm512_cvtepi32_ps(x.v)};
 }
-YNN_ALWAYS_INLINE s32x16 cast(f32x16 x, int32_t) {
-  return s32x16{_mm512_cvttps_epi32(x.v)};
-}
 
 YNN_ALWAYS_INLINE f64x8 cast(f32x8 a, double) {
   return f64x8{_mm512_cvtps_pd(a.v)};
@@ -1141,32 +1138,37 @@ YNN_ALWAYS_INLINE f32x8 cast(f64x8 a, float) {
   return f32x8{_mm512_cvtpd_ps(a.v)};
 }
 
-YNN_ALWAYS_INLINE s16x32 saturate_cast(s32x32 a, int16_t) {
+YNN_ALWAYS_INLINE s16x32 cast(s32x32 a, int16_t) {
   const __m512i r = _mm512_packs_epi32(a.lo().v, a.hi().v);
   return s16x32{
       _mm512_permutexvar_epi64(_mm512_setr_epi64(0, 2, 4, 6, 1, 3, 5, 7), r)};
 }
 
-YNN_ALWAYS_INLINE s8x64 saturate_cast(s16x64 a, int8_t) {
+YNN_ALWAYS_INLINE s8x64 cast(s16x64 a, int8_t) {
   const __m512i r = _mm512_packs_epi16(a.lo().v, a.hi().v);
   return s8x64{
       _mm512_permutexvar_epi64(_mm512_setr_epi64(0, 2, 4, 6, 1, 3, 5, 7), r)};
 }
 
-YNN_ALWAYS_INLINE u8x64 saturate_cast(s16x64 a, uint8_t) {
+YNN_ALWAYS_INLINE u8x64 cast(s16x64 a, uint8_t) {
   const __m512i r = _mm512_packus_epi16(a.lo().v, a.hi().v);
   return u8x64{
       _mm512_permutexvar_epi64(_mm512_setr_epi64(0, 2, 4, 6, 1, 3, 5, 7), r)};
 }
 
-YNN_ALWAYS_INLINE s16x32 round_float_to_int(f32x32 f, int16_t) {
+YNN_ALWAYS_INLINE s32x16 cast(f32x16 f, int32_t) {
+  const __m512 max_int32 = _mm512_set1_ps((1ull << 31) - 128);
+  return s32x16{_mm512_cvtps_epi32(_mm512_min_ps(f.v, max_int32))};
+}
+
+YNN_ALWAYS_INLINE s16x32 cast(f32x32 f, int16_t) {
   const __m512 max_int16 = _mm512_set1_ps((1 << 15) - 1);
   const __m512i i0 = _mm512_cvtps_epi32(_mm512_min_ps(f.lo().v, max_int16));
   const __m512i i1 = _mm512_cvtps_epi32(_mm512_min_ps(f.hi().v, max_int16));
-  return saturate_cast(s32x32(s32x16(i0), s32x16(i1)), int16_t());
+  return cast(s32x32(s32x16(i0), s32x16(i1)), int16_t());
 }
 
-YNN_ALWAYS_INLINE u8x64 round_float_to_int(f32x64 f, uint8_t) {
+YNN_ALWAYS_INLINE u8x64 cast(f32x64 f, uint8_t) {
   const __m512 max_uint16 = _mm512_set1_ps((1 << 16) - 1);
   const __m512i i0 =
       _mm512_cvtps_epi32(_mm512_min_ps(f.lo().lo().v, max_uint16));
@@ -1184,7 +1186,7 @@ YNN_ALWAYS_INLINE u8x64 round_float_to_int(f32x64 f, uint8_t) {
   return u8x64{_mm512_permutexvar_epi32(idx, r)};
 }
 
-YNN_ALWAYS_INLINE s8x64 round_float_to_int(f32x64 f, int8_t) {
+YNN_ALWAYS_INLINE s8x64 cast(f32x64 f, int8_t) {
   const __m512 max_int16 = _mm512_set1_ps((1 << 15) - 1);
   const __m512i i0 =
       _mm512_cvtps_epi32(_mm512_min_ps(f.lo().lo().v, max_int16));

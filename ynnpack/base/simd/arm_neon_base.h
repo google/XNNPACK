@@ -1150,47 +1150,45 @@ YNN_ALWAYS_INLINE f32x2 cast(f64x2 a, float) {
 }
 #endif  // YNN_ARCH_ARM64
 
-YNN_ALWAYS_INLINE s32x4 cast(f32x4 x, int32_t) {
-  return s32x4{vcvtq_s32_f32(x.v)};
-}
-
-YNN_ALWAYS_INLINE s16x8 saturate_cast(s32x8 a, int16_t) {
+YNN_ALWAYS_INLINE s16x8 cast(s32x8 a, int16_t) {
   return s16x8{vcombine_s16(vqmovn_s32(a.lo().v), vqmovn_s32(a.hi().v))};
 }
 
-YNN_ALWAYS_INLINE s8x16 saturate_cast(s16x16 a, int8_t) {
+YNN_ALWAYS_INLINE s8x16 cast(s16x16 a, int8_t) {
   return s8x16{vcombine_s8(vqmovn_s16(a.lo().v), vqmovn_s16(a.hi().v))};
 }
 
-YNN_ALWAYS_INLINE u8x16 saturate_cast(s16x16 a, uint8_t) {
+YNN_ALWAYS_INLINE u8x16 cast(s16x16 a, uint8_t) {
   return u8x16{vcombine_u8(vqmovun_s16(a.lo().v), vqmovun_s16(a.hi().v))};
 }
 
-YNN_ALWAYS_INLINE s16x8 round_float_to_int(f32x8 f, int16_t) {
+YNN_ALWAYS_INLINE s32x4 cast(f32x4 f, int32_t) {
+#if defined(__ARM_ARCH) && __ARM_ARCH < 8
+  return s32x4{vcvtq_s32_f32(round(f).v)};
+#else
+  return s32x4{vcvtnq_s32_f32(f.v)};
+#endif
+}
+
+YNN_ALWAYS_INLINE s16x8 cast(f32x8 f, int16_t) {
 #if defined(__ARM_ARCH) && __ARM_ARCH < 8
   s32x4 a1 = cast(round(f.lo()), int32_t{});
   s32x4 a2 = cast(round(f.hi()), int32_t{});
-  return saturate_cast(s32x8{a1, a2}, int16_t{});
+  return cast(s32x8{a1, a2}, int16_t{});
 #else
   return s16x8{vcombine_s16(vqmovn_s32(vcvtnq_s32_f32(f.lo().v)),
                             vqmovn_s32(vcvtnq_s32_f32(f.hi().v)))};
 #endif
 }
 
-YNN_ALWAYS_INLINE s8x16 round_float_to_int(f32x16 f, int8_t) {
-  s16x16 f_s16 = {
-      round_float_to_int(f.lo(), int16_t{}),
-      round_float_to_int(f.hi(), int16_t{}),
-  };
-  return saturate_cast(f_s16, int8_t{});
+YNN_ALWAYS_INLINE s8x16 cast(f32x16 f, int8_t) {
+  s16x16 f_s16 = {cast(f.lo(), int16_t{}), cast(f.hi(), int16_t{})};
+  return cast(f_s16, int8_t{});
 }
 
-YNN_ALWAYS_INLINE u8x16 round_float_to_int(f32x16 f, uint8_t) {
-  s16x16 f_s16 = {
-      round_float_to_int(f.lo(), int16_t{}),
-      round_float_to_int(f.hi(), int16_t{}),
-  };
-  return saturate_cast(f_s16, uint8_t{});
+YNN_ALWAYS_INLINE u8x16 cast(f32x16 f, uint8_t) {
+  s16x16 f_s16 = {cast(f.lo(), int16_t{}), cast(f.hi(), int16_t{})};
+  return cast(f_s16, uint8_t{});
 }
 
 }  // namespace simd
