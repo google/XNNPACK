@@ -28,3 +28,10 @@ XNN_UKERNEL(xnn_arch_none, xnn_f16_vlog_ukernel__wasmrelaxedsimd_rational_3_3_di
 XNN_UKERNEL(xnn_arch_none, xnn_f16_vlog_ukernel__wasmrelaxedsimd_rational_3_3_div_u24, 24, false, xnn_float16, struct xnn_f16_default_params, NULL)
 XNN_UKERNEL(xnn_arch_none, xnn_f16_vlog_ukernel__wasmrelaxedsimd_rational_3_3_div_u32, 32, false, xnn_float16, struct xnn_f16_default_params, NULL)
 #endif  // XNN_ARCH_WASMRELAXEDSIMDFP16
+
+#if XNN_ARCH_RISCV && XNN_ENABLE_RISCV_FP16_VECTOR
+XNN_UKERNEL(xnn_arch_riscv_vector_fp16_arith, xnn_f16_vlog_ukernel__rvvfp16arith_rational_3_3_div_u1v, 1, true, xnn_float16, struct xnn_f16_default_params, NULL)
+XNN_UKERNEL(xnn_arch_riscv_vector_fp16_arith, xnn_f16_vlog_ukernel__rvvfp16arith_rational_3_3_div_u2v, 2, true, xnn_float16, struct xnn_f16_default_params, NULL)
+XNN_UKERNEL(xnn_arch_riscv_vector_fp16_arith, xnn_f16_vlog_ukernel__rvvfp16arith_rational_3_3_div_u4v, 4, true, xnn_float16, struct xnn_f16_default_params, NULL)
+XNN_UKERNEL(xnn_arch_riscv_vector_fp16_arith, xnn_f16_vlog_ukernel__rvvfp16arith_rational_3_3_div_u8v, 8, true, xnn_float16, struct xnn_f16_default_params, NULL)
+#endif  // XNN_ARCH_RISCV && XNN_ENABLE_RISCV_FP16_VECTOR
