@@ -51,6 +51,7 @@ import("gen/avx256vnni_microkernels.bzl")
 import("gen/avx256vnnigfni_microkernels.bzl")
 import("gen/avx2_microkernels.bzl")
 import("gen/avx512amx_microkernels.bzl")
+import("gen/avx512bf16_microkernels.bzl")
 import("gen/avx512f_microkernels.bzl")
 import("gen/avx512fp16_microkernels.bzl")
 import("gen/avx512skx_microkernels.bzl")
@@ -617,14 +618,11 @@ if (current_cpu == "x64" || current_cpu == "x86") {
     sources += ALL_AVX512AMX_MICROKERNEL_SRCS
     sources += ALL_AVX512SKX_MICROKERNEL_SRCS
     sources += ALL_AVX512VBMI_MICROKERNEL_SRCS
-
-    if (current_cpu == "x64") {
-      # VNNI extensions are only supported for x64
-      sources += ALL_AVX256VNNI_MICROKERNEL_SRCS
-      sources += ALL_AVX256VNNIGFNI_MICROKERNEL_SRCS
-      sources += ALL_AVX512VNNI_MICROKERNEL_SRCS
-      sources += ALL_AVX512VNNIGFNI_MICROKERNEL_SRCS
-    }
+    sources += ALL_AVX512BF16_MICROKERNEL_SRCS
+    sources += ALL_AVX256VNNI_MICROKERNEL_SRCS
+    sources += ALL_AVX256VNNIGFNI_MICROKERNEL_SRCS
+    sources += ALL_AVX512VNNI_MICROKERNEL_SRCS
+    sources += ALL_AVX512VNNIGFNI_MICROKERNEL_SRCS
 
     cflags = [
       "-mavx512f",
@@ -635,14 +633,11 @@ if (current_cpu == "x64" || current_cpu == "x86") {
       "-mamx-int8",
       "-mgfni",
       "-mavx512vbmi",
+      "-mavx512bf16",
+      "-mavxvnniint8",
+      "-mavxvnni",
+      "-mavx512vnni",
     ]
-    if (current_cpu == "x64") {
-      cflags += [
-        "-mavxvnniint8",
-        "-mavxvnni",
-        "-mavx512vnni",
-      ]
-    }
   }
   xnnpack_source_set("avx_microkernels") {
     deps = [

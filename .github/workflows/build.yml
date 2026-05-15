@@ -380,11 +380,19 @@ jobs:
         run: |
           git cl format --presubmit --no-clang-format --no-python --diff
         working-directory: ${{ github.workspace }}/xnnpack
-      - name: Generate build files
+      - name: Generate build files (with AVX512)
+        run: |
+          gn gen --check --args="is_debug=false clang_use_chrome_plugins=false dcheck_always_on=true cc_wrapper=\"ccache\" symbol_level=0 xnnpack_enable_avx512=true target_cpu=\"x64\" use_siso=true" out/x64.dchecks
+        working-directory: ${{ github.workspace }}/xnnpack
+      - name: Build all targets (Release + debug checks, with AVX512)
+        run: |
+          autoninja -C out/x64.dchecks
+        working-directory: ${{ github.workspace }}/xnnpack
+      - name: Generate build files (no AVX512)
         run: |
           gn gen --check --args="is_debug=false clang_use_chrome_plugins=false dcheck_always_on=true cc_wrapper=\"ccache\" symbol_level=0 xnnpack_enable_avx512=false target_cpu=\"x64\" use_siso=true" out/x64.dchecks
         working-directory: ${{ github.workspace }}/xnnpack
-      - name: Build all targets (Release + debug checks)
+      - name: Build all targets (Release + debug checks, without AVX512)
         run: |
           autoninja -C out/x64.dchecks
         working-directory: ${{ github.workspace }}/xnnpack
