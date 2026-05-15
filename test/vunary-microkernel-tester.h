@@ -230,17 +230,20 @@ class VUnaryMicrokernelTester {
     ukernel(outputs.size() * sizeof(In), inputs.data(), outputs.data(),
             (UKernelParamsType*)&uparams);
     for (size_t i = 0; i < outputs.size(); i++) {
-      if (std::isfinite(expected[i])) {
-        ASSERT_NEAR(expected[i], outputs[i],
-                    tolerance_ulp * std::abs(expected[i]) *
+      if (std::isfinite(static_cast<float>(expected[i]))) {
+        ASSERT_NEAR(static_cast<float>(expected[i]),
+                    static_cast<float>(outputs[i]),
+                    tolerance_ulp * std::abs(static_cast<float>(expected[i])) *
                         std::numeric_limits<float>::epsilon())
-            << "for input " << inputs[i];
+            << "for input " << static_cast<float>(inputs[i]);
       } else {
-        EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
-            << "for input " << inputs[i] << " and output " << outputs[i]
-            << " (FP_INFINITE=" << FP_INFINITE << ", FP_NAN=" << FP_NAN
-            << ", FP_NORMAL=" << FP_NORMAL << ", FP_SUBNORMAL=" << FP_SUBNORMAL
-            << ", FP_ZERO=" << FP_ZERO << ")";
+        EXPECT_EQ(std::fpclassify(static_cast<float>(expected[i])),
+                  std::fpclassify(static_cast<float>(outputs[i])))
+            << "for input " << static_cast<float>(inputs[i]) << " and output "
+            << static_cast<float>(outputs[i]) << " (FP_INFINITE=" << FP_INFINITE
+            << ", FP_NAN=" << FP_NAN << ", FP_NORMAL=" << FP_NORMAL
+            << ", FP_SUBNORMAL=" << FP_SUBNORMAL << ", FP_ZERO=" << FP_ZERO
+            << ")";
       }
     }
   }
