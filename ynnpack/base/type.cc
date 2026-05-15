@@ -166,7 +166,7 @@ namespace {
 template <typename T>
 void convert_to_int(const float* src, size_t n, T* dst) {
   for (size_t i = 0; i < n; ++i) {
-    type_info<T>::set(dst, i, round_float_to_int<T>(src[i]));
+    type_info<T>::set(dst, i, cast<T>(src[i]));
   }
 }
 

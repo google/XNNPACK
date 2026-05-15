@@ -154,18 +154,17 @@ template <int Index, typename T, size_t N, typename SliceN>
 auto extract(vec<T, N>, SliceN);
 
 template <typename To, typename From, size_t N>
-vec<To, N> cast(vec<From, N> from, To = {});
-
-template <typename To, typename From, size_t N>
-vec<To, N> saturate_cast(vec<From, N> from, To = {});
-
-template <typename T, size_t N>
-YNN_ALWAYS_INLINE vec<T, N> saturate_cast(vec<T, N> from, T = {}) {
-  return from;
+YNN_ALWAYS_INLINE vec<To, N> cast(vec<From, N> from) {
+  return cast(from, To{});
 }
 
 template <typename To, typename From, size_t N>
-vec<To, N> round_float_to_int(vec<From, N> from, To = {});
+vec<To, N> cast(vec<From, N> from, To);
+
+template <typename T, size_t N>
+YNN_ALWAYS_INLINE vec<T, N> cast(vec<T, N> from, T) {
+  return from;
+}
 
 // horizontal_sum must be numerically equivalent to slicing the vector in half,
 // adding the halves, and repeating until the result is a scalar.
@@ -339,29 +338,14 @@ YNN_ALWAYS_INLINE vec<T, 1> exp2_round(vec<T, 1> a) {
   return vec<T, 1>{ynn::exp2_round(a.v)};
 }
 
-template <typename To, typename From>
-YNN_ALWAYS_INLINE vec<To, 1> cast(vec<From, 1> from, To) {
-  return vec<To, 1>{static_cast<To>(from.v)};
-}
-
 template <typename T>
 YNN_ALWAYS_INLINE vec<T, 1> cast(vec<T, 1> from, T) {
   return from;
 }
 
 template <typename To, typename From>
-YNN_ALWAYS_INLINE vec<To, 1> saturate_cast(vec<From, 1> from, To) {
-  return vec<To, 1>{saturate_cast<To>(from.v)};
-}
-
-template <typename T>
-YNN_ALWAYS_INLINE vec<T, 1> saturate_cast(vec<T, 1> from, T) {
-  return from;
-}
-
-template <typename To, typename From>
-YNN_ALWAYS_INLINE vec<To, 1> round_float_to_int(vec<From, 1> from, To) {
-  return vec<To, 1>{round_float_to_int<To>(from.v)};
+YNN_ALWAYS_INLINE vec<To, 1> cast(vec<From, 1> from, To) {
+  return vec<To, 1>{ynn::cast<To>(from.v)};
 }
 
 template <typename T>

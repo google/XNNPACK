@@ -6,13 +6,14 @@
 #ifndef XNNPACK_YNNPACK_BASE_ARITHMETIC_H_
 #define XNNPACK_YNNPACK_BASE_ARITHMETIC_H_
 
-#include <algorithm>
 #include <cassert>
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
 #include <limits>
 
+#include "ynnpack/base/bfloat16.h"
+#include "ynnpack/base/half.h"
 #include "ynnpack/base/type.h"
 
 namespace ynn {
@@ -36,12 +37,46 @@ float clamp_float_to_int(float x) {
 // - Rounds to nearest integer
 // - Replaces NaN with 0
 // - Saturates to the bounds of the result type
-template <typename Int>
-int round_float_to_int(float x) {
-  x = std::isnan(x) ? 0.0f : x;
-  x = std::nearbyint(x);
-  x = clamp_float_to_int<Int>(x);
-  return static_cast<int>(x);
+template <typename To>
+auto cast(float x) {
+  using ToInfo = type_info<To>;
+  using Element = typename ToInfo::element_type;
+  using Unwrapped = typename unwrap_quantized<Element>::type;
+  if constexpr (is_integral<Unwrapped>::value) {
+    x = std::isnan(x) ? 0.0f : x;
+    x = std::nearbyint(x);
+    constexpr int half_mantissa = sizeof(Unwrapped) * 8 > 23 ? 127 : 0;
+    if (x > type_info<Unwrapped>::max() - half_mantissa) {
+      return static_cast<Element>(type_info<Unwrapped>::max());
+    }
+    if (x < type_info<Unwrapped>::min()) {
+      return static_cast<Element>(type_info<Unwrapped>::min());
+    }
+    return static_cast<Element>(
+        static_cast<typename unwrap_quantized<Element>::type>(x));
+  } else {
+    return static_cast<Element>(x);
+  }
+}
+
+template <typename To>
+auto cast(half x) {
+  return cast<To>(static_cast<float>(x));
+}
+
+template <typename To>
+auto cast(bfloat16 x) {
+  return cast<To>(static_cast<float>(x));
+}
+
+// std::saturate_cast is C++26
+template <typename T, typename U>
+constexpr T cast(U x) noexcept {
+  if constexpr (is_integral<T>::value) {
+    if (x > type_info<T>::max()) return type_info<T>::max();
+    if (x < type_info<T>::min()) return type_info<T>::min();
+  }
+  return static_cast<T>(x);
 }
 
 template <typename T>
@@ -58,7 +93,7 @@ auto dequantize(T x, const quantization_params& params) {
 
 template <typename T>
 T quantize(float x, float inv_scale, float zero_point) {
-  return round_float_to_int<T>(x * inv_scale + zero_point);
+  return cast<T>(x * inv_scale + zero_point);
 }
 inline double quantize(double x, double inv_scale, double zero_point) {
   return std::nearbyint(x * inv_scale + zero_point);
@@ -200,26 +235,14 @@ const T* offset_bytes(const T* ptr, ptrdiff_t offset) {
 // std::sub_sat is in C++26, we can use that in a few decades maybe.
 inline size_t sub_sat(size_t a, size_t b) { return a > b ? a - b : 0; }
 
-// std::saturate_cast is C++26
-template <typename T, typename U>
-constexpr T saturate_cast(U x) noexcept {
-  // Using `std::min`/`std::max`/`std::clamp` here requires choosing a type to
-  // use, which is tricky. Writing it this way is basically using comparisons of
-  // `constexpr` values, hopefully the compiler can choose a reasonable type for
-  // the comparison.
-  if (x > type_info<T>::max()) return type_info<T>::max();
-  if (x < type_info<T>::min()) return type_info<T>::min();
-  return static_cast<T>(x);
-}
-
 template <typename T>
 T add_sat(T a, T b) {
-  return saturate_cast<T>(static_cast<int64_t>(a) + static_cast<int64_t>(b));
+  return cast<T>(static_cast<int64_t>(a) + static_cast<int64_t>(b));
 }
 
 template <typename T>
 T sub_sat(T a, T b) {
-  return saturate_cast<T>(static_cast<int64_t>(a) - static_cast<int64_t>(b));
+  return cast<T>(static_cast<int64_t>(a) - static_cast<int64_t>(b));
 }
 
 template <typename T>

@@ -1067,9 +1067,9 @@ class Target:
           f" {self.legalize_type(op.args[0].ty)}>"
       )
     elif op.name == "saturating_cast":
-      return "simd::saturate_cast"
+      return "simd::cast"
     elif op.name == "saturating_rounding_cast":
-      return "round_float_to_int"
+      return "simd::cast"
     elif op.name == "min" or op.name == "max":
       return f"simd::{op.name}"
     return op.name

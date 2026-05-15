@@ -156,13 +156,12 @@ TEST_CAST(wasm_simd128, u16, u8x16);
 TEST_CAST(wasm_simd128, s32, s16x8);
 TEST_CAST(wasm_simd128, s32, u16x8);
 
-TEST_SATURATE_CAST(wasm_simd128, s16, s32x8);
-TEST_SATURATE_CAST(wasm_simd128, s8, s16x16);
-TEST_SATURATE_CAST(wasm_simd128, u8, s16x16);
-
-TEST_ROUND_FLOAT_TO_INT(wasm_simd128, s16, f32x8);
-TEST_ROUND_FLOAT_TO_INT(wasm_simd128, s8, f32x16);
-TEST_ROUND_FLOAT_TO_INT(wasm_simd128, u8, f32x16);
+TEST_CAST(wasm_simd128, s16, s32x8);
+TEST_CAST(wasm_simd128, s8, s16x16);
+TEST_CAST(wasm_simd128, u8, s16x16);
+TEST_CAST(wasm_simd128, s16, f32x8);
+TEST_CAST(wasm_simd128, s8, f32x16);
+TEST_CAST(wasm_simd128, u8, f32x16);
 
 }  // namespace simd
 }  // namespace ynn

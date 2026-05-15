@@ -34,5 +34,7 @@ BENCH_UNARY(avx512, floor_log2, f64, 2);
 BENCH_UNARY(avx512, exp2_round, f32, 16);
 BENCH_UNARY(avx512, exp2_round, f64, 8);
 
+BENCH_CAST(avx512, f32, bf16, 32);
+
 }  // namespace simd
 }  // namespace ynn

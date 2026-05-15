@@ -712,78 +712,25 @@ template <typename To, typename From>
 void test_cast() {
   using FromScalar = typename From::value_type;
   static constexpr size_t N = From::N;
+  using vector = vec<FromScalar, N>;
 
-  FromScalar src[N];
-  for (size_t i = 0; i < N; ++i) {
-    src[i] = static_cast<FromScalar>(i);
+  ReplicableRandomDevice rng;
+  for (auto _ : FuzzTest(std::chrono::milliseconds(100))) {
+    FromScalar src[N];
+    fill_random(src, N, rng);
+    From from_v = load(src, vector::N);
+    auto to_v = cast(from_v, To{});
+
+    To dst[N];
+    store(dst, to_v);
+    for (size_t i = 0; i < N; ++i) {
+      ASSERT_EQ(dst[i], ynn::cast<To>(src[i]));
+    }
   }
-  From from_v = load(src, From::N);
-  auto to_v = cast(from_v, To{});
-
-  To dst[N];
-  store(dst, to_v);
-
-  To ref[N];
-  for (size_t i = 0; i < N; ++i) {
-    ref[i] = static_cast<To>(src[i]);
-  }
-  EXPECT_THAT(dst, ElementsAreArray(ref, N));
 }
 
 #define TEST_CAST(test_class, to, from) \
   TEST_F(test_class, cast_##to##_##from) { test_cast<to, from>(); }
-
-template <typename To, typename From>
-void test_saturate_cast() {
-  using FromScalar = typename From::value_type;
-  static constexpr size_t N = From::N;
-  using vector = vec<FromScalar, N>;
-
-  ReplicableRandomDevice rng;
-  for (auto _ : FuzzTest(std::chrono::milliseconds(100))) {
-    FromScalar src[N];
-    fill_random(src, N, rng);
-    From from_v = load(src, vector::N);
-    auto to_v = saturate_cast(from_v, To{});
-
-    To dst[N];
-    store(dst, to_v);
-    for (size_t i = 0; i < N; ++i) {
-      ASSERT_EQ(dst[i], ynn::saturate_cast<To>(src[i]));
-    }
-  }
-}
-
-#define TEST_SATURATE_CAST(test_class, to, from)    \
-  TEST_F(test_class, saturate_cast_##to##_##from) { \
-    test_saturate_cast<to, from>();                 \
-  }
-
-template <typename To, typename From>
-void test_round_float_to_int() {
-  using FromScalar = typename From::value_type;
-  static constexpr size_t N = From::N;
-  using vector = vec<FromScalar, N>;
-
-  ReplicableRandomDevice rng;
-  for (auto _ : FuzzTest(std::chrono::milliseconds(100))) {
-    FromScalar src[N];
-    fill_random(src, N, rng);
-    From from_v = load(src, vector::N);
-    auto to_v = round_float_to_int(from_v, To{});
-
-    To dst[N];
-    store(dst, to_v);
-    for (size_t i = 0; i < N; ++i) {
-      ASSERT_EQ(dst[i], ynn::round_float_to_int<To>(src[i]));
-    }
-  }
-}
-
-#define TEST_ROUND_FLOAT_TO_INT(test_class, to, from)    \
-  TEST_F(test_class, round_float_to_int_##to##_##from) { \
-    test_round_float_to_int<to, from>();                 \
-  }
 
 template <typename scalar, size_t N>
 void test_horizontal_sum() {

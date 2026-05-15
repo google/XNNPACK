@@ -20,8 +20,15 @@ class bfloat16 {
 
  public:
   bfloat16() = default;
-  bfloat16(float x)  // NOLINT
-      : bits_(bit_cast<uint32_t>(x * rounding_multiplier) >> 16) {}
+  bfloat16(float x) {  // NOLINT
+    const uint32_t u = bit_cast<uint32_t>(x);
+    if ((u << 1) > 0xFF000000u) {
+      // Handle the denormal case.
+      bits_ = (u >> 16) | 1;
+    } else {
+      bits_ = (u + 0x7FFF + ((u >> 16) & 1)) >> 16;
+    }
+  }
 
   operator float() const {  // NOLINT
     return bit_cast<float>(static_cast<uint32_t>(bits_) << 16);
@@ -46,15 +53,6 @@ class bfloat16 {
   // - via .bazelrc, because it then applies to C code, and the compiler says
   //   this flag is not valid in C.
   uint16_t bits_;
-
-  // When rounding a float to bfloat16, we want to add 1 to the bit after the
-  // last bit in the mantissa. We can make the floating point hardware do this
-  // for us, by multiplying by 1 + 0.5*epsilon:
-  // a*rounding_multiplier = a*(1 + 0.5*epsilon) = a + a*0.5*epsilon.
-  // 0.5*epsilon is a power of 2, so this is effectively moving the leading 1
-  // from the mantissa to the bit after the last bit of the mantissa, and then
-  // adding it.
-  static constexpr float rounding_multiplier = 1.0f + 0.5f / 128.0f;
 };
 
 }  // namespace ynn

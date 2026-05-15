@@ -672,9 +672,13 @@ YNN_ALWAYS_INLINE std::array<s32x4, 4> transpose<int32_t>(
 YNN_ALWAYS_INLINE f32x4 cast(s32x4 x, float) {
   return f32x4{_mm_cvtepi32_ps(x.v)};
 }
-
 YNN_ALWAYS_INLINE s32x4 cast(f32x4 x, int32_t) {
-  return s32x4{_mm_cvttps_epi32(x.v)};
+  const __m128 threshold = _mm_set1_ps(2147483520.0f);
+  const __m128 mask = _mm_cmpgt_ps(x.v, threshold);
+  const __m128i res = _mm_cvtps_epi32(x.v);
+  const __m128i imask = _mm_castps_si128(mask);
+  return s32x4{_mm_or_si128(_mm_andnot_si128(imask, res),
+                             _mm_and_si128(imask, _mm_set1_epi32(0x7fffffff)))};
 }
 
 }  // namespace simd

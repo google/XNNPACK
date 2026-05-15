@@ -31,6 +31,7 @@ package(default_visibility = ["//ynnpack:__subpackages__"])
             arch + ".cc",
         ],
     ),
+    args = ["--benchmark_min_time=1x"],
     copts = ynn_arch_copts(arch),
     features = [
         # We can't use copts with header modules...?

@@ -594,37 +594,35 @@ YNN_ALWAYS_INLINE f32x4 cast(s32x4 x, float) {
   return f32x4{wasm_f32x4_convert_i32x4(x.v)};
 }
 
-YNN_ALWAYS_INLINE s32x4 cast(f32x4 x, int32_t) {
-  return s32x4{wasm_i32x4_trunc_sat_f32x4(x.v)};
-}
-
-YNN_ALWAYS_INLINE s16x8 saturate_cast(s32x8 a, int16_t) {
+YNN_ALWAYS_INLINE s16x8 cast(s32x8 a, int16_t) {
   return s16x8{wasm_i16x8_narrow_i32x4(a.lo().v, a.hi().v)};
 }
 
-YNN_ALWAYS_INLINE s8x16 saturate_cast(s16x16 a, int8_t) {
+YNN_ALWAYS_INLINE s8x16 cast(s16x16 a, int8_t) {
   return s8x16{wasm_i8x16_narrow_i16x8(a.lo().v, a.hi().v)};
 }
 
-YNN_ALWAYS_INLINE u8x16 saturate_cast(s16x16 a, uint8_t) {
+YNN_ALWAYS_INLINE u8x16 cast(s16x16 a, uint8_t) {
   return u8x16{wasm_u8x16_narrow_i16x8(a.lo().v, a.hi().v)};
 }
 
-YNN_ALWAYS_INLINE s16x8 round_float_to_int(f32x8 f, int16_t) {
+YNN_ALWAYS_INLINE s32x4 cast(f32x4 f, int32_t) {
+  return s32x4{wasm_i32x4_trunc_sat_f32x4(wasm_f32x4_nearest(f.v))};
+}
+
+YNN_ALWAYS_INLINE s16x8 cast(f32x8 f, int16_t) {
   const v128_t i0 = wasm_i32x4_trunc_sat_f32x4(wasm_f32x4_nearest(f.lo().v));
   const v128_t i1 = wasm_i32x4_trunc_sat_f32x4(wasm_f32x4_nearest(f.hi().v));
-  return saturate_cast(s32x8(s32x4(i0), s32x4(i1)), int16_t());
+  return cast(s32x8(s32x4(i0), s32x4(i1)), int16_t());
 }
 
-YNN_ALWAYS_INLINE s8x16 round_float_to_int(f32x16 f, int8_t) {
-  const s16x8 i01 =
-      round_float_to_int(f32x8(f.lo().lo(), f.lo().hi()), int16_t());
-  const s16x8 i23 =
-      round_float_to_int(f32x8(f.hi().lo(), f.hi().hi()), int16_t());
-  return saturate_cast(s16x16(i01, i23), int8_t());
+YNN_ALWAYS_INLINE s8x16 cast(f32x16 f, int8_t) {
+  const s16x8 i01 = cast(f32x8(f.lo().lo(), f.lo().hi()), int16_t());
+  const s16x8 i23 = cast(f32x8(f.hi().lo(), f.hi().hi()), int16_t());
+  return cast(s16x16(i01, i23), int8_t());
 }
 
-YNN_ALWAYS_INLINE u8x16 round_float_to_int(f32x16 f, uint8_t) {
+YNN_ALWAYS_INLINE u8x16 cast(f32x16 f, uint8_t) {
   const v128_t i0 =
       wasm_i32x4_trunc_sat_f32x4(wasm_f32x4_nearest(f.lo().lo().v));
   const v128_t i1 =

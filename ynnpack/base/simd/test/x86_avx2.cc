@@ -79,12 +79,12 @@ TEST_CAST(x86_avx2, s32, s8x16);
 TEST_CAST(x86_avx2, f32, s32x8);
 TEST_CAST(x86_avx2, s32, f32x8);
 
-TEST_SATURATE_CAST(x86_avx2, s16, s32x16);
-TEST_SATURATE_CAST(x86_avx2, u8, s16x32);
-TEST_SATURATE_CAST(x86_avx2, s8, s16x32);
-TEST_ROUND_FLOAT_TO_INT(x86_avx2, u8, f32x32);
-TEST_ROUND_FLOAT_TO_INT(x86_avx2, s8, f32x32);
-TEST_ROUND_FLOAT_TO_INT(x86_avx2, s16, f32x16);
+TEST_CAST(x86_avx2, s16, s32x16);
+TEST_CAST(x86_avx2, u8, s16x32);
+TEST_CAST(x86_avx2, s8, s16x32);
+TEST_CAST(x86_avx2, u8, f32x32);
+TEST_CAST(x86_avx2, s8, f32x32);
+TEST_CAST(x86_avx2, s16, f32x16);
 
 }  // namespace simd
 }  // namespace ynn

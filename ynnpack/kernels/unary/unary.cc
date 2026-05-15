@@ -63,20 +63,7 @@ struct convert_op {
 
   template <typename TIn>
   TOut operator()(TIn x) const {
-    if constexpr (is_integral<TOut>::value) {
-      if constexpr (is_integral<TIn>::value) {
-        return saturate_cast<TOut>(x);
-      } else {
-        return round_float_to_int<TOut>(x);
-      }
-    } else {
-      return static_cast<TOut>(x);
-    }
-  }
-
-  // We need to give the compiler a little help for bf16 -> fp16
-  TOut operator()(bfloat16 x) const {
-    return operator()(static_cast<float>(x));
+    return cast<TOut>(x);
   }
 };
 
