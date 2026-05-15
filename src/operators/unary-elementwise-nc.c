@@ -178,6 +178,8 @@ static const struct xnn_unary_elementwise_config* get_config(
         return xnn_init_f16_hswish_config();
       case xnn_unary_leaky_relu:
         return xnn_init_f16_lrelu_config();
+      case xnn_unary_log:
+        return xnn_init_f16_log_config();
       case xnn_unary_negate:
         return xnn_init_f16_neg_config();
       case xnn_unary_reciprocal_square_root:
