@@ -178,6 +178,15 @@ YNN_ALWAYS_INLINE f64x4 exp2_round(f64x4 a) {
       _mm256_slli_epi64(_mm256_castpd_si256(res_bits), 52))};
 }
 
+YNN_ALWAYS_INLINE f32x8 copynan(f32x8 x, f32x8 nan) {
+  return f32x8{
+      _mm256_blendv_ps(x.v, nan.v, _mm256_cmp_ps(nan.v, nan.v, _CMP_UNORD_Q))};
+}
+YNN_ALWAYS_INLINE f64x4 copynan(f64x4 x, f64x4 nan) {
+  return f64x4{
+      _mm256_blendv_pd(x.v, nan.v, _mm256_cmp_pd(nan.v, nan.v, _CMP_UNORD_Q))};
+}
+
 }  // namespace simd
 
 }  // namespace ynn

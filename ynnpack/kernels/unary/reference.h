@@ -256,7 +256,8 @@ struct tanh : public unary_op_info {
 
   explicit tanh(const unary_params& params = {}) : params(params.tanh) {}
   float operator()(float x) const override {
-    return std::tanh(x) * params.output_multiplier + params.output_offset;
+    return std::tanh(x) * static_cast<float>(params.output_multiplier) +
+           static_cast<float>(params.output_offset);
   }
   double operator()(double x) const override {
     return std::tanh(x) * params.output_multiplier + params.output_offset;
@@ -315,8 +316,8 @@ struct log : public unary_op_info {
 
   explicit log(const unary_params& params) : params(params.log) {}
   float operator()(float x) const override {
-    return std::log2(x * params.input_multiplier) *
-           params.output_multiplier;
+    return std::log2(x * static_cast<float>(params.input_multiplier)) *
+           static_cast<float>(params.output_multiplier);
   }
   double operator()(double x) const override {
     return std::log2(x * params.input_multiplier) *
@@ -337,7 +338,8 @@ struct exp : public unary_op_info {
 
   explicit exp(const unary_params& params) : params(params.exp) {}
   float operator()(float x) const override {
-    return std::exp2(params.input_multiplier * x) * params.output_multiplier;
+    return std::exp2(static_cast<float>(params.input_multiplier) * x) *
+           static_cast<float>(params.output_multiplier);
   }
   double operator()(double x) const override {
     return std::exp2(params.input_multiplier * x) * params.output_multiplier;
@@ -381,8 +383,9 @@ struct erf : public unary_op_info {
 
   explicit erf(const unary_params& params) : params(params.erf) {}
   float operator()(float x) const override {
-    return std::erf(params.input_multiplier * x) * params.output_multiplier +
-           params.output_offset;
+    return std::erf(static_cast<float>(params.input_multiplier) * x) *
+               static_cast<float>(params.output_multiplier) +
+           static_cast<float>(params.output_offset);
   }
   double operator()(double x) const override {
     return std::erf(params.input_multiplier * x) * params.output_multiplier +
@@ -407,10 +410,16 @@ struct cube_root : public unary_op_info {
 struct sign : public unary_op_info {
   explicit sign(const unary_params& = {}) {}
   float operator()(float x) const override {
-    return x < 0 ? -1.0f : (x > 0 ? 1.0f : 0.0f);
+    if (std::isnan(x)) return x;
+    if (x < 0.0f) return -1.0f;
+    if (x > 0.0f) return 1.0f;
+    return 0.0f;
   }
   double operator()(double x) const override {
-    return x < 0 ? -1.0 : (x > 0 ? 1.0 : 0.0);
+    if (std::isnan(x)) return x;
+    if (x < 0.0) return -1.0;
+    if (x > 0.0) return 1.0;
+    return 0.0;
   }
   int32_t operator()(int32_t x) const override {
     return x < 0 ? -1 : (x > 0 ? 1 : 0);
@@ -431,7 +440,8 @@ struct sine : public trig {
 
   explicit sine(const unary_params& params = {}) : params(params.sine) {}
   float operator()(float x) const override {
-    return std::sin(x) * params.output_multiplier + params.output_offset;
+    return std::sin(x) * static_cast<float>(params.output_multiplier) +
+           static_cast<float>(params.output_offset);
   }
   double operator()(double x) const override {
     return std::sin(x) * params.output_multiplier + params.output_offset;
@@ -443,7 +453,8 @@ struct cosine : public trig {
 
   explicit cosine(const unary_params& params = {}) : params(params.cosine) {}
   float operator()(float x) const override {
-    return std::cos(x) * params.output_multiplier + params.output_offset;
+    return std::cos(x) * static_cast<float>(params.output_multiplier) +
+           static_cast<float>(params.output_offset);
   }
   double operator()(double x) const override {
     return std::cos(x) * params.output_multiplier + params.output_offset;
@@ -471,15 +482,15 @@ struct poly3 : public unary_op_info {
 
   explicit poly3(const unary_params& params) : params(params.poly3) {}
   float operator()(float x) const override {
-    return ((params.c3 * x + params.c2) * x + params.c1) * x + params.c0;
+    return ((static_cast<float>(params.c3) * x +
+             static_cast<float>(params.c2)) *
+                x +
+            static_cast<float>(params.c1)) *
+               x +
+           static_cast<float>(params.c0);
   }
   double operator()(double x) const override {
-    return ((static_cast<double>(params.c3) * x +
-             static_cast<double>(params.c2)) *
-                x +
-            static_cast<double>(params.c1)) *
-               x +
-           static_cast<double>(params.c0);
+    return ((params.c3 * x + params.c2) * x + params.c1) * x + params.c0;
   }
 
   // Polynomials are tricky to test, because the tolerance should be based on

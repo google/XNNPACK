@@ -145,6 +145,7 @@ TEST_ABS(arm_neon, f32, 4);
 
 TEST_FLOOR_LOG2(arm_neon, f32, 4);
 TEST_EXP2_ROUND(arm_neon, f32, 4);
+TEST_COPYNAN(arm_neon, f32, 4);
 
 TEST_HORIZONTAL_MIN(arm_neon, u8, 16);
 TEST_HORIZONTAL_MIN(arm_neon, s8, 16);

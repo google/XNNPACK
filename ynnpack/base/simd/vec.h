@@ -134,6 +134,8 @@ vec<T, N> floor_log2(vec<T, N> a);
 template <typename T, size_t N>
 vec<T, N> exp2_round(vec<T, N> a);
 template <typename T, size_t N>
+vec<T, N> copynan(vec<T, N> x, vec<T, N> nan);
+template <typename T, size_t N>
 vec<T, N> ceil(vec<T, N> a);
 template <typename T, size_t N>
 vec<T, N> round(vec<T, N> a);
@@ -336,6 +338,10 @@ YNN_ALWAYS_INLINE vec<T, 1> floor_log2(vec<T, 1> a) {
 template <typename T>
 YNN_ALWAYS_INLINE vec<T, 1> exp2_round(vec<T, 1> a) {
   return vec<T, 1>{ynn::exp2_round(a.v)};
+}
+template <typename T>
+YNN_ALWAYS_INLINE vec<T, 1> copynan(vec<T, 1> x, vec<T, 1> nan) {
+  return vec<T, 1>{ynn::copynan(x.v, nan.v)};
 }
 
 template <typename T>

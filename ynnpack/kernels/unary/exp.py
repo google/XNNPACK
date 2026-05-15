@@ -27,14 +27,16 @@ def qd_round_f64(a):
 @operator_name("exp")
 def exp_fp32(a, x, output_multiplier, input_multiplier):
   # The monomial coefficients of the numerator polynomial.
-  valpha_0 = output_multiplier
-  valpha_1 = 4.1594290733e-01 * output_multiplier
-  valpha_2 = 7.2068706155e-02 * output_multiplier
-  valpha_3 = 5.5380910635e-03 * output_multiplier
+  valpha_0 = 1.0000000000e+00 * output_multiplier
+  valpha_1 = 3.4687127263e-01 * output_multiplier
+  valpha_2 = 4.8136494726e-02 * output_multiplier
+  valpha_3 = 2.7829586270e-03 * output_multiplier
 
-  # The monomial coefficients of the denominator polynomial (`vbeta_0 = 1.0).
-  vbeta_1 = -2.7720427513e-01
-  vbeta_2 = 2.3986088112e-02
+  # The monomial coefficients of the denominator polynomial.
+  vbeta_0 = 1.0000000000e+00
+  vbeta_1 = -3.4627590669e-01
+  vbeta_2 = 4.7930158912e-02
+  vbeta_3 = -2.7591929194e-03
 
   va = load(a) * input_multiplier
   # Clamp `vz_prime = x * log2(e)` to the maximum exponents [-127, 128].
@@ -46,6 +48,7 @@ def exp_fp32(a, x, output_multiplier, input_multiplier):
 
   # Compute 2^z.
   v2z = exp2_round(vz)
+  v2z = copynan(v2z, va)
 
   # Evaluate the numerator polynomial p(f).
   vp = multiply_add(vr, valpha_3, valpha_2)
@@ -53,8 +56,9 @@ def exp_fp32(a, x, output_multiplier, input_multiplier):
   vp = multiply_add(vr, vp, valpha_0)
 
   # Evaluate the denominator polynomial q(r).
-  vq = multiply_add(vr, vbeta_2, vbeta_1)
-  vq = multiply_add(vr, vq, 1.0)
+  vq = multiply_add(vr, vbeta_3, vbeta_2)
+  vq = multiply_add(vr, vq, vbeta_1)
+  vq = multiply_add(vr, vq, vbeta_0)
 
   # Divide the numerator by the denominator, obtaining 2^r.
   v2r = vp / vq
@@ -101,6 +105,7 @@ def exp_fp64(a, x, output_multiplier, input_multiplier):
 
   # Compute 2^z.
   v2z = exp2_round(vz)
+  v2z = copynan(v2z, va)
 
   # Evaluate the numerator polynomial p(f).
   vp = multiply_add(vr, valpha_7, valpha_6)

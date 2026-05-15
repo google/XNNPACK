@@ -216,6 +216,10 @@ YNN_ALWAYS_INLINE vec<T, N> exp2_round(vec<T, N> a) {
   return {exp2_round(a.lo()), exp2_round(a.hi())};
 }
 template <typename T, size_t N>
+YNN_ALWAYS_INLINE vec<T, N> copynan(vec<T, N> x, vec<T, N> nan) {
+  return {copynan(x.lo(), nan.lo()), copynan(x.hi(), nan.hi())};
+}
+template <typename T, size_t N>
 YNN_ALWAYS_INLINE vec<T, N> ceil(vec<T, N> a) {
   return {ceil(a.lo()), ceil(a.hi())};
 }

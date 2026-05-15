@@ -451,6 +451,11 @@ def exp2_round(value):
 
 
 @intrinsic
+def copynan(value, nan):
+  return Op(value.ty, "copynan", [value, nan])
+
+
+@intrinsic
 def sqrt(value):
   return Op(value.ty, "sqrt", [value])
 
@@ -1002,6 +1007,7 @@ class Target:
         "floor",
         "floor_log2",
         "exp2_round",
+        "copynan",
         "ceil",
         "sqrt",
         "reinterpret_cast",

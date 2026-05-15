@@ -153,7 +153,8 @@ struct tanh_op {
 
   explicit tanh_op(const unary_params& params) : params(params.tanh) {}
   float operator()(float x) const {
-    return std::tanh(x) * params.output_multiplier + params.output_offset;
+    return std::tanh(x) * static_cast<float>(params.output_multiplier) +
+           static_cast<float>(params.output_offset);
   }
   double operator()(double x) const {
     return std::tanh(x) * params.output_multiplier + params.output_offset;
@@ -171,8 +172,8 @@ struct log_op {
 
   explicit log_op(const unary_params& params) : params(params.log) {}
   float operator()(float x) const {
-    return std::log2(x * params.input_multiplier) *
-           params.output_multiplier;
+    return std::log2(x * static_cast<float>(params.input_multiplier)) *
+           static_cast<float>(params.output_multiplier);
   }
   double operator()(double x) const {
     return std::log2(x * params.input_multiplier) *
@@ -191,7 +192,8 @@ struct exp_op {
 
   explicit exp_op(const unary_params& params) : params(params.exp) {}
   float operator()(float x) const {
-    return std::exp2(params.input_multiplier * x) * params.output_multiplier;
+    return std::exp2(static_cast<float>(params.input_multiplier) * x) *
+           static_cast<float>(params.output_multiplier);
   }
   double operator()(double x) const {
     return std::exp2(params.input_multiplier * x) * params.output_multiplier;
@@ -209,8 +211,9 @@ struct erf_op {
 
   explicit erf_op(const unary_params& params) : params(params.erf) {}
   float operator()(float x) const {
-    return std::erf(params.input_multiplier * x) * params.output_multiplier +
-           params.output_offset;
+    return std::erf(static_cast<float>(params.input_multiplier) * x) *
+               static_cast<float>(params.output_multiplier) +
+           static_cast<float>(params.output_offset);
   }
   double operator()(double x) const {
     return std::erf(params.input_multiplier * x) * params.output_multiplier +
@@ -221,9 +224,17 @@ struct erf_op {
 struct sign_op {
   explicit sign_op(const unary_params& = {}) {}
   float operator()(float x) const {
-    return x < 0 ? -1.0f : x > 0 ? 1.0f : 0.0f;
+    if (std::isnan(x)) return x;
+    if (x < 0.0f) return -1.0f;
+    if (x > 0.0f) return 1.0f;
+    return 0.0f;
   }
-  double operator()(double x) const { return x < 0 ? -1.0 : x > 0 ? 1.0 : 0.0; }
+  double operator()(double x) const {
+    if (std::isnan(x)) return x;
+    if (x < 0.0) return -1.0;
+    if (x > 0.0) return 1.0;
+    return 0.0;
+  }
   int32_t operator()(int32_t x) const { return x < 0 ? -1 : x > 0 ? 1 : 0; }
 };
 
@@ -232,7 +243,8 @@ struct sine_op {
 
   explicit sine_op(const unary_params& params) : params(params.sine) {}
   float operator()(float x) const {
-    return std::sin(x) * params.output_multiplier + params.output_offset;
+    return std::sin(x) * static_cast<float>(params.output_multiplier) +
+           static_cast<float>(params.output_offset);
   }
   double operator()(double x) const {
     return std::sin(x) * params.output_multiplier + params.output_offset;
@@ -244,7 +256,8 @@ struct cosine_op {
 
   explicit cosine_op(const unary_params& params) : params(params.cosine) {}
   float operator()(float x) const {
-    return std::cos(x) * params.output_multiplier + params.output_offset;
+    return std::cos(x) * static_cast<float>(params.output_multiplier) +
+           static_cast<float>(params.output_offset);
   }
   double operator()(double x) const {
     return std::cos(x) * params.output_multiplier + params.output_offset;
@@ -272,7 +285,12 @@ struct poly3_op {
 
   explicit poly3_op(const unary_params& params) : params(params.poly3) {}
   float operator()(float x) const {
-    return ((params.c3 * x + params.c2) * x + params.c1) * x + params.c0;
+    return ((static_cast<float>(params.c3) * x +
+             static_cast<float>(params.c2)) *
+                x +
+            static_cast<float>(params.c1)) *
+               x +
+           static_cast<float>(params.c0);
   }
   double operator()(double x) const {
     return ((params.c3 * x + params.c2) * x + params.c1) * x + params.c0;

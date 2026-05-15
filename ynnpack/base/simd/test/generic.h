@@ -13,6 +13,7 @@
 #include <cstdint>
 #include <cstdlib>
 #include <cstring>
+#include <limits>
 #include <type_traits>
 #include <utility>
 
@@ -466,6 +467,33 @@ void test_exp2_round() {
 
 #define TEST_EXP2_ROUND(test_class, type, N) \
   TEST_F(test_class, exp2_round_##type##x##N) { test_exp2_round<type, N>(); }
+
+template <typename scalar, size_t N>
+void test_copynan() {
+  using vector = vec<scalar, N>;
+
+  scalar x[vector::N];
+  std::iota(x, x + vector::N, static_cast<scalar>(0));
+
+  scalar nan[vector::N];
+  for (size_t i = 0; i < vector::N; ++i) {
+    nan[i] = i % 3 == 0 ? type_info<scalar>::nan() : static_cast<scalar>(i);
+  }
+
+  scalar result[vector::N];
+  store(result, copynan(load(x, vector::N), load(nan, vector::N)));
+
+  for (size_t i = 0; i < vector::N; ++i) {
+    if (i % 3 == 0) {
+      ASSERT_TRUE(std::isnan(result[i]));
+    } else {
+      ASSERT_EQ(result[i], static_cast<scalar>(i));
+    }
+  }
+}
+
+#define TEST_COPYNAN(test_class, type, N) \
+  TEST_F(test_class, copynan_##type##x##N) { test_copynan<type, N>(); }
 
 struct min_op {
   template <typename T>

@@ -1,3 +1,4 @@
+# %%
 # pylint: disable=all
 
 # %%
@@ -68,19 +69,19 @@ def poly_eval(c, x):
 
 
 # %%
-# fp64 exp2
-f = np.exp2
-numerator_degree, denominator_degree = 7, 5
+# fp32 exp2
+f = lambda x: np.exp2(x)
+numerator_degree, denominator_degree = 3, 3
 x_min, x_max = -0.5, 0.5
 p, q = rational_approximation(
     f, x_min, x_max, numerator_degree, denominator_degree
 )
 
 for i, val in enumerate(p):
-  print(f"valpha_{i} = f64({val:.16e}) * output_multiplier")
+  print(f"valpha_{i} = {val:.10e} * output_multiplier")
 
 for i, val in enumerate(q):
-  print(f"vbeta_{i} = f64({val:.16e})")
+  print(f"vbeta_{i} = {val:.10e}")
 
 # Evaluate final error
 x_test = np.linspace(x_min, x_max, 5000)
@@ -110,4 +111,25 @@ for i, val in enumerate(q):
 x_test = np.linspace(x_min, x_max, 5000)
 approx = x_test * poly_eval(p, x_test) / poly_eval(q, x_test)
 max_err = np.max(np.abs(approx - np.log2(x_test + 1)))
+print(f"\nMaximum absolute error (float64): {max_err:.2e}")
+
+# %%
+# fp64 exp2
+f = np.exp2
+numerator_degree, denominator_degree = 7, 5
+x_min, x_max = -0.5, 0.5
+p, q = rational_approximation(
+    f, x_min, x_max, numerator_degree, denominator_degree
+)
+
+for i, val in enumerate(p):
+  print(f"valpha_{i} = f64({val:.16e}) * output_multiplier")
+
+for i, val in enumerate(q):
+  print(f"vbeta_{i} = f64({val:.16e})")
+
+# Evaluate final error
+x_test = np.linspace(x_min, x_max, 5000)
+approx = poly_eval(p, x_test) / poly_eval(q, x_test)
+max_err = np.max(np.abs(approx - f(x_test)))
 print(f"\nMaximum absolute error (float64): {max_err:.2e}")

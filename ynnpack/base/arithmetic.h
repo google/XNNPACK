@@ -261,6 +261,12 @@ T exp2_round(T a) {
   return std::ldexp(static_cast<T>(1.0), static_cast<int>(std::nearbyint(a)));
 }
 
+// Kinda like std::copysign, but copies NaN-ness instead.
+template <typename T>
+T copynan(T x, T nan) {
+  return std::isnan(nan) ? nan : x;
+}
+
 template <typename T>
 void kahan_sum(T a, T& acc, T& error) {
   T y = a - error;

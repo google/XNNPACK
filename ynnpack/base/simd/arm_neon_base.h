@@ -727,6 +727,15 @@ YNN_ALWAYS_INLINE u8x16 abs(s8x16 a) {
   return u8x16{vreinterpretq_u8_s8(vabsq_s8(a.v))};
 }
 
+YNN_ALWAYS_INLINE f32x4 copynan(f32x4 x, f32x4 nan) {
+  return f32x4{vbslq_f32(vceqq_f32(nan.v, nan.v), x.v, nan.v)};
+}
+#ifdef YNN_ARCH_ARM64
+YNN_ALWAYS_INLINE f64x2 copynan(f64x2 x, f64x2 nan) {
+  return f64x2{vbslq_f64(vceqq_f64(nan.v, nan.v), x.v, nan.v)};
+}
+#endif
+
 YNN_ALWAYS_INLINE f32x4 floor_log2(f32x4 a) {
   uint32x4_t is_zero = vceqq_f32(a.v, vdupq_n_f32(0.0f));
   a.v = vreinterpretq_f32_u32(

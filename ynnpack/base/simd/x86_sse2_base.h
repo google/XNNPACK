@@ -519,7 +519,7 @@ YNN_ALWAYS_INLINE f64x2 abs(f64x2 a) {
 }
 
 YNN_ALWAYS_INLINE f32x4 exp2_round(f32x4 a) {
-  const __m128 magic = _mm_set1_ps(127.0 + static_cast<float>(1 << 23));
+  const __m128 magic = _mm_set1_ps(127.0f + static_cast<float>(1 << 23));
   const __m128 res_bits = _mm_add_ps(a.v, magic);
   return f32x4{
       _mm_castsi128_ps(_mm_slli_epi32(_mm_castps_si128(res_bits), 23))};
@@ -529,6 +529,17 @@ YNN_ALWAYS_INLINE f64x2 exp2_round(f64x2 a) {
   const __m128d res_bits = _mm_add_pd(a.v, magic);
   return f64x2{
       _mm_castsi128_pd(_mm_slli_epi64(_mm_castpd_si128(res_bits), 52))};
+}
+
+YNN_ALWAYS_INLINE f32x4 copynan(f32x4 x, f32x4 nan) {
+  const __m128 is_nan = _mm_cmpunord_ps(nan.v, nan.v);
+  return f32x4{
+      _mm_or_ps(_mm_and_ps(is_nan, nan.v), _mm_andnot_ps(is_nan, x.v))};
+}
+YNN_ALWAYS_INLINE f64x2 copynan(f64x2 x, f64x2 nan) {
+  const __m128d is_nan = _mm_cmpunord_pd(nan.v, nan.v);
+  return f64x2{
+      _mm_or_pd(_mm_and_pd(is_nan, nan.v), _mm_andnot_pd(is_nan, x.v))};
 }
 
 YNN_ALWAYS_INLINE void kahan_sum(f32x4 a, f32x4& acc, f32x4& error) {

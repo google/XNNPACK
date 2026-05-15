@@ -124,6 +124,8 @@ TEST_FLOOR_LOG2(wasm_simd128, f32, 4);
 TEST_FLOOR_LOG2(wasm_simd128, f64, 2);
 TEST_EXP2_ROUND(wasm_simd128, f32, 4);
 TEST_EXP2_ROUND(wasm_simd128, f64, 2);
+TEST_COPYNAN(wasm_simd128, f32, 4);
+TEST_COPYNAN(wasm_simd128, f64, 2);
 
 TEST_ABS(wasm_simd128, s8, 16);
 TEST_ABS(wasm_simd128, s16, 8);

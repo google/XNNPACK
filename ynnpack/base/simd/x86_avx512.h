@@ -969,6 +969,15 @@ YNN_ALWAYS_INLINE f64x8 exp2_round(f64x8 a) {
       _mm512_slli_epi64(_mm512_castpd_si512(res_bits), 52))};
 }
 
+YNN_ALWAYS_INLINE f32x16 copynan(f32x16 x, f32x16 nan) {
+  __mmask16 is_nan = _mm512_fpclass_ps_mask(nan.v, 0x81);
+  return f32x16{_mm512_mask_mov_ps(x.v, is_nan, nan.v)};
+}
+YNN_ALWAYS_INLINE f64x8 copynan(f64x8 x, f64x8 nan) {
+  __mmask8 is_nan = _mm512_fpclass_pd_mask(nan.v, 0x81);
+  return f64x8{_mm512_mask_mov_pd(x.v, is_nan, nan.v)};
+}
+
 YNN_ALWAYS_INLINE void kahan_sum(f32x16 a, f32x16& acc, f32x16& error) {
   f32x16 y = a - error;
   f32x16 t = acc + y;

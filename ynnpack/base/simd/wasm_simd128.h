@@ -15,6 +15,7 @@
 #include <tuple>
 #include <type_traits>
 
+#include "ynnpack/base/arithmetic.h"
 #include "ynnpack/base/base.h"
 #include "ynnpack/base/bfloat16.h"
 #include "ynnpack/base/half.h"
@@ -555,11 +556,17 @@ YNN_ALWAYS_INLINE f32x4 exp2_round(f32x4 a) {
   const v128_t res_bits = wasm_f32x4_add(a.v, magic);
   return f32x4{wasm_i32x4_shl(res_bits, 23)};
 }
-
 YNN_ALWAYS_INLINE f64x2 exp2_round(f64x2 a) {
   return f64x2{wasm_f64x2_make(
       ynn::exp2_round(wasm_f64x2_extract_lane(a.v, 0)),
       ynn::exp2_round(wasm_f64x2_extract_lane(a.v, 1)))};
+}
+
+YNN_ALWAYS_INLINE f32x4 copynan(f32x4 x, f32x4 nan) {
+  return f32x4{wasm_v128_bitselect(nan.v, x.v, wasm_f32x4_ne(nan.v, nan.v))};
+}
+YNN_ALWAYS_INLINE f64x2 copynan(f64x2 x, f64x2 nan) {
+  return f64x2{wasm_v128_bitselect(nan.v, x.v, wasm_f64x2_ne(nan.v, nan.v))};
 }
 
 YNN_ALWAYS_INLINE s16x16 cast(s8x16 a, int16_t) {
