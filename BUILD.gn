@@ -360,6 +360,20 @@ xnnpack_source_set("operators") {
   }
 }
 
+xnnpack_source_set("subgraph_matchers") {
+  sources = [
+    "test/subgraph/rewrites/subgraph_matcher.cc",
+    "test/subgraph/rewrites/subgraph_matcher.h",
+  ]
+
+  public_deps = [
+    ":xnnpack_headers",
+    "//third_party/googletest:gtest",
+  ]
+
+  testonly = true
+}
+
 xnnpack_source_set("subgraph") {
   deps = [
     ":microkernel_headers",
