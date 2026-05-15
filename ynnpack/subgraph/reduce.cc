@@ -551,6 +551,15 @@ ynn_status ynn_define_reduce(ynn_subgraph_t subgraph, ynn_reduce_operator op,
     });
 
     if (partial_reduction) {
+      for (size_t i = 0; i < split_factors.size(); ++i) {
+        // We need to create a separate variable for the partial reduction
+        // splits to make them symbolic, so they can be overridden by the
+        // scheduling algorithm later.
+        if (k_dims[i] && split_factors[i].defined()) {
+          split_factors[i] =
+              subgraph->globals.make_split_var(split_factors[i], "pr_split");
+        }
+      }
       // We want to parallelize the reduction. If so, we need to split it into
       // two reductions: a parallelized reduction that produces partial
       // reductions of the result, and a secondary reduction that reduces the

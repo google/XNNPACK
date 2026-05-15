@@ -279,6 +279,14 @@ void ynn_runtime::schedule() {
           // We can overwrite the current loop step if it's not required, but
           // this one is.
           if (split.step_is_required) {
+            if (std::optional<slinky::var> v =
+                    slinky::as_variable(global_loop.step)) {
+              // This is a special variable which defines partial reduction
+              // bounds, so we need to override to match the loop step.
+              if (globals.symbols.name(*v).rfind("pr_split", 0) == 0) {
+                globals.update_let(*v, split.step);
+              }
+            }
             global_loop.step = split.step;
             global_loop.step_is_required = true;
           }

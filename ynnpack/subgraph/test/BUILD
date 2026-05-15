@@ -203,6 +203,7 @@ cc_test(
     "static_transpose",
     "stencil_copy",
     "polynomial",
+    "partial_reduce_dot",
 ]]
 
 cc_test(

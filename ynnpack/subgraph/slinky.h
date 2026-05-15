@@ -38,6 +38,12 @@ class slinky_globals {
   // expressions to the same variable.
   slinky::expr get(slinky::expr value, const char* prefix);
 
+  // Unconditionally create a new global variable for the given expression.
+  slinky::expr make_split_var(slinky::expr value, const char* prefix);
+
+  // Update the value of an existing global variable.
+  bool update_let(slinky::var sym, slinky::expr new_value);
+
   // Make a single dimension with index `d`.
   slinky::var make_dim(int d, const char* prefix = pure_dim_prefix);
   slinky::var make_reduction_dim(int d);
