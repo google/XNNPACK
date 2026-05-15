@@ -135,6 +135,18 @@ struct vec<int8_t, 16> {
   __m128i v;
 };
 
+struct s2x64 {
+  __m128i v;
+};
+
+struct s2x32 {
+  uint64_t v;
+};
+
+struct s4x32 {
+  __m128i v;
+};
+
 template <>
 struct vec<double, 2> {
   using value_type = double;

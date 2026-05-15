@@ -304,6 +304,23 @@ const std::vector<Shape> all_shapes = []() {
   return shapes;
 }();
 
+template <typename T>
+std::vector<Shape> get_test_shapes() {
+  if constexpr (type_info<T>::element_count() == 1) {
+    return all_shapes;
+  } else {
+    std::vector<Shape> result;
+    for (const auto& s : all_shapes) {
+      if (s.n % type_info<T>::element_count() == 0 &&
+          s.padding_a % type_info<T>::element_count() == 0 &&
+          s.padding_x % type_info<T>::element_count() == 0) {
+        result.push_back(s);
+      }
+    }
+    return result;
+  }
+}
+
 #define YNN_ELEMENTWISE_KERNEL(arch_flags, kernel, op, type_a, type_x)  \
   class kernel##_test : public testing::TestWithParam<ynn::Shape> {};   \
   TEST_P(kernel##_test, no_broadcast) {                                 \
@@ -314,7 +331,7 @@ const std::vector<Shape> all_shapes = []() {
     }                                                                   \
   }                                                                     \
   INSTANTIATE_TEST_SUITE_P(                                             \
-      test, kernel##_test, ValuesIn(ynn::all_shapes),                   \
+      test, kernel##_test, ValuesIn(ynn::get_test_shapes<type_a>()),    \
       [](const auto& i) { return ynn::to_string(i.param); });
 #include "ynnpack/kernels/unary/kernels.inc"
 #undef YNN_ELEMENTWISE_KERNEL

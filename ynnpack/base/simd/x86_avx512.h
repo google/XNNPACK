@@ -1215,6 +1215,58 @@ YNN_ALWAYS_INLINE s8x64 cast(f32x64 f, int8_t) {
   return s8x64{_mm512_permutexvar_epi32(idx, r)};
 }
 
+YNN_ALWAYS_INLINE s8x64 cast(s2x64 from, int8_t) {
+  // 1. Broadcast the 128-bit input across all four 128-bit lanes of YMM.
+  __m512i dup = _mm512_broadcast_i32x4(from.v);
+
+  // 2. Duplicate the bytes so each 2-bit value has its own 8-bit lane.
+  const __m512i mask_dup = _mm512_set_epi8(
+      15, 15, 15, 15, 14, 14, 14, 14, 13, 13, 13, 13, 12, 12, 12, 12, 11, 11,
+      11, 11, 10, 10, 10, 10, 9, 9, 9, 9, 8, 8, 8, 8, 7, 7, 7, 7, 6, 6, 6, 6, 5,
+      5, 5, 5, 4, 4, 4, 4, 3, 3, 3, 3, 2, 2, 2, 2, 1, 1, 1, 1, 0, 0, 0, 0);
+  dup = _mm512_shuffle_epi8(dup, mask_dup);
+
+  // 3. The cross-byte spill trick.
+  __m512i shifted = _mm512_srli_epi32(dup, 4);
+  __m512i blended = _mm512_mask_blend_epi16(0xAAAAAAAA, dup, shifted);
+  __m512i masked = _mm512_and_si512(blended, _mm512_set1_epi32(0x0C030C03));
+
+  // 4. Final sign-extension LUT
+  const __m512i lut = _mm512_set_epi8(
+      0, 0, 0, -1, 0, 0, 0, -2, 0, 0, 0, 1, -1, -2, 1, 0, 0, 0, 0, -1, 0, 0, 0,
+      -2, 0, 0, 0, 1, -1, -2, 1, 0, 0, 0, 0, -1, 0, 0, 0, -2, 0, 0, 0, 1, -1,
+      -2, 1, 0, 0, 0, 0, -1, 0, 0, 0, -2, 0, 0, 0, 1, -1, -2, 1, 0);
+
+  return s8x64{_mm512_shuffle_epi8(lut, masked)};
+}
+
+YNN_ALWAYS_INLINE s8x64 cast(s4x64 from, int8_t) {
+  // 1. Broadcast the 256-bit input to both halves of the 512-bit register.
+  __m512i from512 = _mm512_castsi256_si512(from.v);
+  __m512i dup = _mm512_shuffle_i64x2(from512, from512, _MM_SHUFFLE(1, 1, 0, 0));
+
+  // 2. Duplicate each byte 2 times inside each 128-bit lane.
+  const __m512i mask_dup = _mm512_set_epi8(
+      15, 15, 14, 14, 13, 13, 12, 12, 11, 11, 10, 10, 9, 9, 8, 8, 7, 7, 6, 6, 5,
+      5, 4, 4, 3, 3, 2, 2, 1, 1, 0, 0, 15, 15, 14, 14, 13, 13, 12, 12, 11, 11,
+      10, 10, 9, 9, 8, 8, 7, 7, 6, 6, 5, 5, 4, 4, 3, 3, 2, 2, 1, 1, 0, 0);
+  dup = _mm512_shuffle_epi8(dup, mask_dup);
+
+  // 3. Shift right and mask-blend bytes
+  __mmask64 mask1 = 0xAAAAAAAAAAAAAAAAULL;
+  __m512i shifted = _mm512_srli_epi16(dup, 4);
+  __m512i blended = _mm512_mask_blend_epi8(mask1, dup, shifted);
+
+  // 4. Mask indices and perform sign-extension LUT
+  __m512i indices = _mm512_and_si512(blended, _mm512_set1_epi8(0x0f));
+  const __m512i lut =
+      _mm512_set_epi8(-1, -2, -3, -4, -5, -6, -7, -8, 7, 6, 5, 4, 3, 2, 1, 0,
+                      -1, -2, -3, -4, -5, -6, -7, -8, 7, 6, 5, 4, 3, 2, 1, 0,
+                      -1, -2, -3, -4, -5, -6, -7, -8, 7, 6, 5, 4, 3, 2, 1, 0,
+                      -1, -2, -3, -4, -5, -6, -7, -8, 7, 6, 5, 4, 3, 2, 1, 0);
+
+  return s8x64{_mm512_shuffle_epi8(lut, indices)};
+}
 }  // namespace simd
 
 }  // namespace ynn

@@ -147,6 +147,58 @@ YNN_ALWAYS_INLINE f64x2 floor_log2(f64x2 a) {
   return f64x2(_mm_set_pd(ynn::floor_log2(a1), ynn::floor_log2(a0)));
 }
 
+YNN_ALWAYS_INLINE s8x32 cast(s2x32 from, int8_t) {
+  // 1. Broadcast the 64-bit GPR directly across the entire 256-bit register.
+  __m256i dup = _mm256_set1_epi64x(static_cast<long long>(from.v));
+
+  // 2. Duplicate the bytes so each 2-bit value has its own 8-bit lane.
+  const __m256i mask_dup =
+      _mm256_set_epi8(7, 7, 7, 7, 6, 6, 6, 6, 5, 5, 5, 5, 4, 4, 4, 4, 3, 3, 3,
+                      3, 2, 2, 2, 2, 1, 1, 1, 1, 0, 0, 0, 0);
+  dup = _mm256_shuffle_epi8(dup, mask_dup);
+
+  // 3. The cross-byte spill trick.
+  __m256i shifted = _mm256_srli_epi32(dup, 4);
+  __m256i blended = _mm256_blend_epi16(dup, shifted, 0xAA);
+  __m256i masked = _mm256_and_si256(blended, _mm256_set1_epi32(0x0C030C03));
+
+  // 4. Final sign-extension LUT
+  const __m256i lut =
+      _mm256_set_epi8(0, 0, 0, -1, 0, 0, 0, -2, 0, 0, 0, 1, -1, -2, 1, 0, 0, 0,
+                      0, -1, 0, 0, 0, -2, 0, 0, 0, 1, -1, -2, 1, 0);
+
+  return s8x32{_mm256_shuffle_epi8(lut, masked)};
+}
+
+YNN_ALWAYS_INLINE s8x32 cast(s4x32 from, int8_t) {
+  // 1. Broadcast the 128-bit input to both lanes of the 256-bit register.
+  __m256i dup = _mm256_broadcastsi128_si256(from.v);
+
+  // 2. Duplicate each byte 2 times inside each 128-bit lane.
+  const __m256i mask_dup =
+      _mm256_setr_epi8(0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9,
+                       9, 10, 10, 11, 11, 12, 12, 13, 13, 14, 14, 15, 15);
+  dup = _mm256_shuffle_epi8(dup, mask_dup);
+
+  // 3. Shift right and mask-blend bytes
+  __m256i shifted = _mm256_srli_epi16(dup, 4);
+
+  __m256i sel0 = _mm256_setr_epi8(
+      0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0,
+      0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0);
+  __m256i sel1 = _mm256_setr_epi8(
+      0, 0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0,
+      0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0, 0xff);
+  __m256i blended = _mm256_or_si256(_mm256_and_si256(dup, sel0),
+                                    _mm256_and_si256(shifted, sel1));
+
+  __m256i indices = _mm256_and_si256(blended, _mm256_set1_epi8(0x0f));
+  const __m256i lut = _mm256_broadcastsi128_si256(
+      _mm_setr_epi8(0, 1, 2, 3, 4, 5, 6, 7, -8, -7, -6, -5, -4, -3, -2, -1));
+
+  return s8x32{_mm256_shuffle_epi8(lut, indices)};
+}
+
 }  // namespace simd
 
 }  // namespace ynn

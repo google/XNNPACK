@@ -215,6 +215,14 @@ struct vec<int8_t, 32> {
   YNN_ALWAYS_INLINE s8x16 hi() const { return s8x16{internal::hi(v)}; }
 };
 
+struct s2x128 {
+  __m256i v;
+};
+
+struct s4x64 {
+  __m256i v;
+};
+
 using f64x4 = vec<double, 4>;
 using f32x8 = vec<float, 8>;
 using u32x8 = vec<uint32_t, 8>;

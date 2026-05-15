@@ -38,7 +38,19 @@ class Type:
     return self.type_class in ("float", "bfloat")
 
   def __str__(self):
-    return f"{self.type_class}{self.size}x{self.lanes}_t"
+    if self.lanes == 1:
+      if self.type_class == "int" and self.size == 2:
+        return "int2x4"
+      elif self.type_class == "uint" and self.size == 2:
+        return "uint2x4"
+      elif self.type_class == "int" and self.size == 4:
+        return "int4x2"
+      elif self.type_class == "uint" and self.size == 4:
+        return "uint4x2"
+      else:
+        return self.to_c_decl(False)
+    else:
+      return f"{self.type_class}{self.size}x{self.lanes}_t"
 
   def __repr__(self):
     return str(self)
@@ -1052,6 +1064,10 @@ class Target:
     if ty.lanes == 1:
       return ty.to_c_decl(is_const)
     else:
+      if ty.type_class == "int" and ty.size == 2:
+        return f"simd::s2x{ty.lanes}"
+      elif ty.type_class == "int" and ty.size == 4:
+        return f"simd::s4x{ty.lanes}"
       return f"simd::vec<{ty.scalar().to_c_decl(is_const)}, {ty.lanes}>"
 
   def legalize_op(self, op):
@@ -1309,10 +1325,18 @@ class Target:
         self.result += "\n"
 
   def advance_pointers(self, buffers, var, step):
+    """Emit code to advance pointers."""
     for b in buffers:
       stride = ""
       if b.broadcast_mode == BroadcastMode.NONE:
-        stride = str(b.ty.size // 8)
+        if b.ty.size < 8:
+          self.result += (
+              f"{self.indent()} {b.name} = offset_bytes({b.name},"
+              f" ({step} * {b.ty.size}) / 8);\n"
+          )
+          continue
+        else:
+          stride = str(b.ty.size // 8)
       elif b.broadcast_mode == BroadcastMode.ALWAYS:
         stride = "0"
       else:
@@ -1380,9 +1404,12 @@ class Target:
     for arg in args:
       b = self.as_buffer(arg, buffers)
       if b is not None:
-        t = self.legalize_type(b.ty, False)
-        if is_load:
-          t = "const " + t
+        if is_load and b.ty.size < 8:
+          t = "const int8_t"
+        else:
+          t = self.legalize_type(b.ty, False)
+          if is_load:
+            t = "const " + t
         row_offset = "0"
         stride_n = ""
         if b.broadcast_mode == BroadcastMode.NONE:
@@ -1418,11 +1445,20 @@ class Target:
     mem_op = ""
     if is_load:
       mem_op = "simd::load"
-      if is_rem_width:
-        str_args.append("j")
-        str_args.append(f"simd::undef<{op.ty.lanes}>()")
+      b = self.as_buffer(op.index, buffers)
+      if b is not None and b.ty.size < 8:
+        byte_lanes = tile_width * b.ty.size // 8
+        if is_rem_width:
+          str_args.append(f"ceil_div<size_t>(j * {b.ty.size}, 8)")
+          str_args.append(f"simd::undef<{byte_lanes}>()")
+        else:
+          str_args.append(f"simd::vec<int8_t, {byte_lanes}>::N")
       else:
-        str_args.append(f"{self.legalize_type(op.ty)}::N")
+        if is_rem_width:
+          str_args.append("j")
+          str_args.append(f"simd::undef<{op.ty.lanes}>()")
+        else:
+          str_args.append(f"{self.legalize_type(op.ty)}::N")
     elif is_store:
       mem_op = "simd::store"
       if is_rem_width:
@@ -1438,7 +1474,17 @@ class Target:
         str_args.append(f"{self.legalize_type(op.ty.scalar())}{{}}")
       mem_op = self.legalize_op(op)
 
-    if op.name in self.infix_ops:
+    b = None
+    if is_load:
+      b = self.as_buffer(op.index, buffers)
+
+    if is_load and b is not None and b.ty.size < 8:
+      byte_lanes = tile_width * b.ty.size // 8
+      self.result += (
+          f"bit_cast<{result_type}, simd::vec<int8_t,"
+          f" {byte_lanes}>>({mem_op}({', '.join(str_args)}));\n"
+      )
+    elif op.name in self.infix_ops:
       self.result += f"{str_args[0]} {self.infix_ops[op.name]} {str_args[1]};\n"
     elif self.needs_simd_wrapper(op):
       self.result += f"{result_type}({mem_op}({', '.join(str_args)}));\n"

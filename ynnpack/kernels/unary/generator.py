@@ -90,6 +90,8 @@ def main(argv: Sequence[str]) -> None:
           (exp_fp64, (16, 1)),
           (log_fp32, (32, 1)),
           (sigmoid_fp32, (16, 1)),
+          (convert_int2_to_int8, (32, 1)),
+          (convert_int4_to_int8, (32, 1)),
       ],
       "x86_fma3": [
           (cosine_fp32, (16, 1)),
@@ -136,6 +138,8 @@ def main(argv: Sequence[str]) -> None:
           (square_root_fp64, (16, 1)),
           (sigmoid_fp32, (32, 1)),
           (tanh_fp32, (32, 1)),
+          (convert_int2_to_int8, (64, 1)),
+          (convert_int4_to_int8, (64, 1)),
       ],
       "x86_avx512bf16": [
           (convert_fp32_to_bf16, (32, 1)),
