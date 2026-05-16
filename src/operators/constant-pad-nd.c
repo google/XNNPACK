@@ -16,6 +16,7 @@
 #include "src/xnnpack/config-types.h"
 #include "src/xnnpack/config.h"
 #include "src/xnnpack/log.h"
+#include "src/xnnpack/math.h"
 #include "src/xnnpack/operator-type.h"
 #include "src/xnnpack/operator-utils.h"
 #include "src/xnnpack/operator.h"
@@ -183,9 +184,20 @@ static enum xnn_status reshape_constant_pad_nd(
 
     const bool is_current_dim_padded = (pre_padding | post_padding) != 0;
     if (is_current_dim_padded || is_previous_dim_padded) {
+      size_t output_dim;
+      if (!xnn_safe_add(pre_padding, input_dim, &output_dim) ||
+          !xnn_safe_add(output_dim, post_padding, &output_dim)) {
+        xnn_log_error(
+            "failed to setup %s operator: output dimension overflow in "
+            "dimension %zu (pre_padding=%zu + input_dim=%zu + "
+            "post_padding=%zu overflows size_t)",
+            xnn_operator_type_to_string_v2(constant_pad_op),
+            num_dims - 1 - i, pre_padding, input_dim, post_padding);
+        return xnn_status_invalid_parameter;
+      }
       normalized_pre_paddings[XNN_MAX_TENSOR_DIMS - 1 - num_squeezed_dims] = pre_padding;
       normalized_input_shape[XNN_MAX_TENSOR_DIMS - 1 - num_squeezed_dims] = input_dim;
-      normalized_output_shape[XNN_MAX_TENSOR_DIMS - 1 - num_squeezed_dims] = pre_padding + input_dim + post_padding;
+      normalized_output_shape[XNN_MAX_TENSOR_DIMS - 1 - num_squeezed_dims] = output_dim;
 
       num_squeezed_dims += 1;
       is_previous_dim_padded = is_current_dim_padded;
