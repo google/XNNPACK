@@ -335,6 +335,69 @@ jobs:
         run: cmake --build build/ios/arm64 --parallel $(sysctl -n hw.ncpu) -- -quiet
         working-directory: ${{ github.workspace }}
 
+  gn-linux-arm:
+    runs-on: 'ubuntu-24.04-8core'
+    timeout-minutes: 15
+    env:
+      CCACHE_SLOPPINESS: time_macros,modules
+      CCACHE_DIR: /home/runner/.cache/ccache
+      CCACHE_DEPEND: 1
+      CCACHE_MAX_SIZE: 5G
+      CCACHE_COMPILERCHECK: content
+    steps:
+      - name: Restore ccache
+        id: cache-ccache-restore
+        uses: actions/cache@v5
+        with:
+          path: |
+            /home/runner/.cache/ccache
+          key: ccache-linux-arm-${{ github.ref_name }}-${{ github.sha }}
+          restore-keys: |
+            ccache-linux-arm-${{ github.ref_name }}-
+            ccache-linux-arm-master-
+      - name: Install system dependencies
+        run: |
+          sudo apt-get install -y ccache qemu-user qemu-user-static g++-arm-linux-gnueabihf
+      - name: Install Depot Tools
+        uses: newkdev/setup-depot-tools@v1.0.1
+      - name: Write .gclient
+        run: |
+          cat <<EOF > .gclient
+          solutions = [
+            { "name"        : 'xnnpack',
+              "url"         : 'https://github.com/google/XNNPACK',
+              "deps_file"   : 'DEPS',
+              "managed"     : False,
+              "custom_deps" : {
+            },
+            "custom_vars": {},
+            },
+          ]
+          EOF
+      - name: Sync to commit and run hooks
+        run: gclient sync --reset --force --upstream --revision $GITHUB_SHA
+      - name: Install sysroot
+        run: ./build/linux/sysroot_scripts/install-sysroot.py --arch=armhf
+        working-directory: ${{ github.workspace }}/xnnpack
+      - name: Check GN formatting
+        run: |
+          git cl format --presubmit --no-clang-format --no-python --diff
+        working-directory: ${{ github.workspace }}/xnnpack
+      - name: Generate build files
+        run: |
+          gn gen --check --args="is_debug=false clang_use_chrome_plugins=false dcheck_always_on=true cc_wrapper=\"ccache\" symbol_level=0 target_cpu=\"arm\" use_siso=true" out/arm.dchecks
+        working-directory: ${{ github.workspace }}/xnnpack
+      - name: Build all targets (Release + debug checks)
+        run: |
+          autoninja -C out/arm.dchecks
+        working-directory: ${{ github.workspace }}/xnnpack
+      - name: Print ccache stats
+        run: ccache -s
+      - name: Run tests
+        run: |
+          python3 scripts/run-gn-tests.py out/arm.dchecks --sysroot=/usr/arm-linux-gnueabihf --architecture=arm --shards=32
+        working-directory: ${{ github.workspace }}/xnnpack
+
   gn-linux-x86_64:
     runs-on: 'ubuntu-24.04-8core'
     timeout-minutes: 15

@@ -28,7 +28,10 @@ if (is_clang) {
 # can be read with GN too.
 import("gen/scalar_microkernels.bzl")
 
+import("gen/aarch32_microkernels.bzl")
 import("gen/aarch64_microkernels.bzl")
+import("gen/armsimd32_microkernels.bzl")
+import("gen/fp16arith_microkernels.bzl")
 import("gen/neon_aarch64_microkernels.bzl")
 import("gen/neon_microkernels.bzl")
 import("gen/neonbf16_microkernels.bzl")
@@ -117,7 +120,8 @@ declare_args() {
   xnnpack_enable_arm_dotprod = false
 }
 
-assert(target_cpu == "arm64" || target_cpu == "x64" || target_cpu == "x86",
+assert(target_cpu == "arm64" || target_cpu == "x64" || target_cpu == "x86" ||
+           target_cpu == "arm",
        "Unsupported target_cpu '${target_cpu}'.")
 
 assert(!xnnpack_enable_arm_kleidiai || target_cpu == "arm64",
@@ -194,6 +198,14 @@ config("xnnpack_private_config") {
     } else {
       defines += [ "XNN_ENABLE_ARM_SME2=0" ]
     }
+  } else if (current_cpu == "arm") {
+    defines += [
+      "XNN_ENABLE_ARM_BF16=1",
+      "XNN_ENABLE_ARM_DOTPROD=1",
+      "XNN_ENABLE_ARM_FP16_SCALAR=1",
+      "XNN_ENABLE_ARM_FP16_VECTOR=1",
+      "XNN_ENABLE_ASSEMBLY=1",
+    ]
   } else if (current_cpu == "x64" || current_cpu == "x86") {
     # x64 support baseline, which is SSSE3 and below to match Chromium.
     defines += [
@@ -359,20 +371,6 @@ xnnpack_source_set("operators") {
   } else {
     deps += [ "//third_party/pthreadpool" ]
   }
-}
-
-xnnpack_source_set("subgraph_matchers") {
-  sources = [
-    "test/subgraph/rewrites/subgraph_matcher.cc",
-    "test/subgraph/rewrites/subgraph_matcher.h",
-  ]
-
-  public_deps = [
-    ":xnnpack_headers",
-    "//third_party/googletest:gtest",
-  ]
-
-  testonly = true
 }
 
 xnnpack_source_set("subgraph") {
@@ -573,6 +571,223 @@ if (current_cpu == "arm64") {
   }
 }
 
+if (current_cpu == "arm") {
+  config("armsimd32_config") {
+    cflags = [
+      "-marm",
+      "-mfpu=vfp",
+      "-munaligned-access",
+    ]
+  }
+
+  config("aarch32_asm_config") {
+    asmflags = [
+      "-marm",
+      "-march=armv8.2-a+dotprod+fp16",
+      "-mfpu=neon-fp-armv8",
+    ]
+  }
+
+  config("neon_config") {
+    cflags = [
+      "-marm",
+      "-march=armv7-a",
+      "-mfpu=neon",
+    ]
+  }
+
+  config("neonfp16_config") {
+    cflags = [
+      "-marm",
+      "-march=armv7-a",
+      "-mfpu=neon-fp16",
+    ]
+  }
+
+  config("neonfma_config") {
+    cflags = [
+      "-marm",
+      "-march=armv7-a",
+      "-mfpu=neon-vfpv4",
+    ]
+  }
+
+  config("neonv8_config") {
+    cflags = [
+      "-marm",
+      "-march=armv8-a",
+      "-mfpu=neon-fp-armv8",
+    ]
+  }
+
+  config("fp16arith_config") {
+    cflags = [
+      "-marm",
+      "-march=armv8.2-a+fp16",
+      "-mfpu=neon-fp-armv8",
+      "-Xclang",
+      "-target-feature",
+      "-Xclang",
+      "+fullfp16",
+    ]
+  }
+
+  config("neonfp16arith_config") {
+    cflags = [
+      "-marm",
+      "-march=armv8.2-a+fp16",
+      "-mfpu=neon-fp-armv8",
+      "-Xclang",
+      "-target-feature",
+      "-Xclang",
+      "+fullfp16",
+    ]
+  }
+
+  config("neon_dotprod_config") {
+    cflags = [
+      "-marm",
+      "-march=armv8.2-a+dotprod",
+      "-mfpu=neon-fp-armv8",
+      "-Xclang",
+      "-target-feature",
+      "-Xclang",
+      "+dotprod",
+    ]
+  }
+
+  config("neon_dotprodfp16arith_config") {
+    cflags = [
+      "-marm",
+      "-march=armv8.2-a+dotprod+fp16",
+      "-mfpu=neon-fp-armv8",
+      "-Xclang",
+      "-target-feature",
+      "-Xclang",
+      "+dotprod",
+      "-Xclang",
+      "-target-feature",
+      "-Xclang",
+      "+fullfp16",
+    ]
+  }
+
+  config("neon_bf16_config") {
+    cflags = [
+      "-marm",
+      "-march=armv8.2-a+bf16",
+      "-mfpu=neon-fp-armv8",
+      "-Xclang",
+      "-target-feature",
+      "-Xclang",
+      "+dotprod",
+      "-Xclang",
+      "-target-feature",
+      "-Xclang",
+      "+fullfp16",
+    ]
+  }
+
+  xnnpack_source_set("armsimd32_microkernels") {
+    deps = [
+      ":microkernel_defs",
+      ":microkernel_headers",
+    ]
+    sources = ALL_ARMSIMD32_MICROKERNEL_SRCS
+    configs = [ ":armsimd32_config" ]
+  }
+
+  xnnpack_source_set("aarch32_asm_microkernels") {
+    deps = [
+      ":microkernel_defs",
+      ":microkernel_headers",
+    ]
+    sources = AARCH32_ASM_MICROKERNEL_SRCS
+    configs = [ ":aarch32_asm_config" ]
+  }
+
+  xnnpack_source_set("neon_microkernels") {
+    deps = [
+      ":microkernel_defs",
+      ":microkernel_headers",
+    ]
+    sources = ALL_NEON_MICROKERNEL_SRCS
+    configs = [ ":neon_config" ]
+  }
+
+  xnnpack_source_set("neonfp16_microkernels") {
+    deps = [
+      ":microkernel_defs",
+      ":microkernel_headers",
+    ]
+    sources = ALL_NEONFP16_MICROKERNEL_SRCS
+    configs = [ ":neonfp16_config" ]
+  }
+
+  xnnpack_source_set("neonfma_microkernels") {
+    deps = [
+      ":microkernel_defs",
+      ":microkernel_headers",
+    ]
+    sources = ALL_NEONFMA_MICROKERNEL_SRCS
+    configs = [ ":neonfma_config" ]
+  }
+
+  xnnpack_source_set("neonv8_microkernels") {
+    deps = [
+      ":microkernel_defs",
+      ":microkernel_headers",
+    ]
+    sources = ALL_NEONV8_MICROKERNEL_SRCS
+    configs = [ ":neonv8_config" ]
+  }
+
+  xnnpack_source_set("fp16arith_microkernels") {
+    deps = [
+      ":microkernel_defs",
+      ":microkernel_headers",
+    ]
+    sources = ALL_FP16ARITH_MICROKERNEL_SRCS
+    configs = [ ":fp16arith_config" ]
+  }
+
+  xnnpack_source_set("neonfp16arith_microkernels") {
+    deps = [
+      ":microkernel_defs",
+      ":microkernel_headers",
+    ]
+    sources = ALL_NEONFP16ARITH_MICROKERNEL_SRCS
+    configs = [ ":neonfp16arith_config" ]
+  }
+
+  xnnpack_source_set("neon_dotprod_microkernels") {
+    deps = [
+      ":microkernel_defs",
+      ":microkernel_headers",
+    ]
+    sources = ALL_NEONDOT_MICROKERNEL_SRCS
+    configs = [ ":neon_dotprod_config" ]
+  }
+
+  xnnpack_source_set("neon_dotprodfp16arith_microkernels") {
+    deps = [
+      ":microkernel_defs",
+      ":microkernel_headers",
+    ]
+    sources = ALL_NEONDOTFP16ARITH_MICROKERNEL_SRCS
+    configs = [ ":neon_dotprodfp16arith_config" ]
+  }
+
+  xnnpack_source_set("neon_bf16_microkernels") {
+    deps = [
+      ":microkernel_defs",
+      ":microkernel_headers",
+    ]
+    sources = ALL_NEONBF16_MICROKERNEL_SRCS
+    configs = [ ":neon_bf16_config" ]
+  }
+}
+
 if (current_cpu == "x64" || current_cpu == "x86") {
   xnnpack_source_set("avxvnni_microkernels") {
     deps = [
@@ -766,6 +981,20 @@ xnnpack_source_set("xnnpack") {
     if (xnnpack_enable_arm_sme2) {
       deps += [ ":sme2_microkernels" ]
     }
+  } else if (current_cpu == "arm") {
+    deps += [
+      ":aarch32_asm_microkernels",
+      ":armsimd32_microkernels",
+      ":fp16arith_microkernels",
+      ":neon_bf16_microkernels",
+      ":neon_dotprod_microkernels",
+      ":neon_dotprodfp16arith_microkernels",
+      ":neon_microkernels",
+      ":neonfma_microkernels",
+      ":neonfp16_microkernels",
+      ":neonfp16arith_microkernels",
+      ":neonv8_microkernels",
+    ]
   } else if (current_cpu == "x64" || current_cpu == "x86") {
     if (xnnpack_enable_avx) {
       deps += [ ":avx_microkernels" ]
