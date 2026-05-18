@@ -22,6 +22,7 @@
 #include "ynnpack/include/ynnpack.h"
 #include "ynnpack/kernels/binary/binary.h"
 #include "ynnpack/kernels/dequantize_dot/dequantize_dot.h"
+#include "ynnpack/kernels/reduce/reduce.h"
 #include "ynnpack/kernels/ternary/ternary.h"
 #include "ynnpack/kernels/unary/unary.h"
 #include "ynnpack/subgraph/copy.h"
@@ -984,15 +985,10 @@ bool rewrite_reduce_sum_of_squared(ynn_subgraph& subgraph, ynn_node& node,
 //   ynn_reduce_sum(f32(x_fp16)) -> ynn_reduce_sum(x_fp16)
 //   ynn_reduce_sum(f32(x_bf16)) -> ynn_reduce_sum(x_bf16)
 //   ynn_reduce_sum(int32(x_int8)) -> ynn_reduce_sum(x_int8)
-bool rewrite_reduce_sum_convert(ynn_subgraph& subgraph, ynn_node& node,
-                                subgraph_analysis& analysis) {
+bool rewrite_reduce_convert(ynn_subgraph& subgraph, ynn_node& node,
+                            subgraph_analysis& analysis) {
   const ynn_node::reduce* reduce_op = std::get_if<ynn_node::reduce>(&node.op);
   if (!reduce_op) return false;
-
-  if (reduce_op->op != ynn_reduce_sum &&
-      reduce_op->op != ynn_reduce_sum_squared) {
-    return false;
-  }
 
   ynn_node* convert = analysis.producer_of(node.inputs[0]);
   if (!convert || !is_unary_node(*convert, ynn_unary_convert)) {
@@ -1001,20 +997,16 @@ bool rewrite_reduce_sum_convert(ynn_subgraph& subgraph, ynn_node& node,
 
   const ynn_value& x = subgraph.value(convert->inputs[0]);
   const ynn_value& converted_x = subgraph.value(convert->outputs[0]);
+  if (x.scale_id != converted_x.scale_id ||
+      x.zero_point_id != converted_x.zero_point_id) {
+    // Don't rewrite quantization changes.
+    return false;
+  }
 
-  if (converted_x.type == ynn_type_fp32) {
-    if (!ynn::type_is_floating_point(x.type)) {
-      return false;
-    }
-  } else if (converted_x.type == ynn_type_int32) {
-    if (!ynn::type_is_integral(x.type)) {
-      return false;
-    }
-    if (x.scale_id != YNN_INVALID_VALUE_ID ||
-        x.zero_point_id != YNN_INVALID_VALUE_ID) {
-      return false;
-    }
-  } else {
+  const ynn_value& output = subgraph.value(node.outputs[0]);
+  reduce_kernel kernel = get_reduce_kernel(reduce_op->op, x.type, output.type);
+  if (!kernel.k1 || !kernel.kn) {
+    // We don't have a kernel for this converted reduction.
     return false;
   }
 
@@ -1841,7 +1833,7 @@ ynn_status ynn_subgraph::fusion() {
                                                               analysis) ||
                 ynn::rewrite_transpose_stencil_copy(*this, node, analysis) ||
                 ynn::rewrite_reduce_sum_of_squared(*this, node, analysis) ||
-                ynn::rewrite_reduce_sum_convert(*this, node, analysis) ||
+                ynn::rewrite_reduce_convert(*this, node, analysis) ||
                 ynn::rewrite_reduce_static_transpose(*this, node, analysis) ||
                 false;
 
