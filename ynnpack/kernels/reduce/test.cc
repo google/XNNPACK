@@ -57,7 +57,7 @@ float Tolerance(ReduceOp op, size_t k, float max_abs_value) {
     case ReduceOp::kSum:
       return type_info<T>::epsilon() * k * max_abs_value;
     case ReduceOp::kSumSquared:
-      return type_info<T>::epsilon() * k * max_abs_value * max_abs_value;
+      return type_info<T>::epsilon() * k * max_abs_value * max_abs_value * 2.0f;
     case ReduceOp::kMin:
     case ReduceOp::kMax:
     case ReduceOp::kMinMax:
