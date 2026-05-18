@@ -324,12 +324,12 @@ struct log : public unary_op_info {
            params.output_multiplier;
   }
 
-  tolerance_spec tolerance(ynn_type /*type*/) const override {
-    return tolerance_spec{/*relative=*/1.5f, /*absolute=*/1.0f};
-  }
-
-  interval domain(ynn_type type) const override {
-    return {type_info<float>::epsilon(), 1000.0f};
+  tolerance_spec tolerance(ynn_type type) const override {
+    if (type == ynn_type_fp64) {
+      return tolerance_spec{/*relative=*/4.0f, /*absolute=*/3.0f};
+    } else {
+      return tolerance_spec{/*relative=*/1.5f, /*absolute=*/1.0f};
+    }
   }
 };
 
@@ -346,10 +346,8 @@ struct exp : public unary_op_info {
   }
 
   tolerance_spec tolerance(ynn_type /*type*/) const override {
-    return tolerance_spec{/*relative=*/6.0f, /*absolute=*/2.0f};
+    return tolerance_spec{/*relative=*/1.5f};
   }
-
-  interval domain(ynn_type) const override { return {-10.0f, 10.0f}; }
 };
 
 struct log1p : public unary_op_info {
@@ -361,10 +359,6 @@ struct log1p : public unary_op_info {
   tolerance_spec tolerance(ynn_type /*type*/) const override {
     return tolerance_spec{/*relative=*/2.0f};
   }
-
-  interval domain(ynn_type type) const override {
-    return {type_info<float>::epsilon(), 1000.0f};
-  }
 };
 
 struct expm1 : public unary_op_info {
@@ -375,7 +369,6 @@ struct expm1 : public unary_op_info {
   tolerance_spec tolerance(ynn_type type) const override {
     return tolerance_spec{/*relative=*/1.0f, /*absolute=*/2.0f};
   }
-  interval domain(ynn_type) const override { return {-10.0f, 10.0f}; }
 };
 
 struct erf : public unary_op_info {
@@ -551,15 +544,19 @@ void check_results(const unary_op_info& op, Tensor<A> a, Tensor<X> x,
       Float expected = op(input_i);
       // Force overflow to infinity if that is what should happen.
       expected = static_cast<Float>(static_cast<X>(expected));
-      if (std::abs(expected) < type_info<X>::smallest_normal()) {
-        // Flush denormals to 0
-        expected = 0.0f;
-      }
       if (op.is_in_supported_range(expected)) {
         if (std::isnan(static_cast<Float>(expected))) {
           ASSERT_TRUE(std::isnan(static_cast<Float>(x(i))));
+        } else if (!std::isinf(expected) && std::isinf(expected * 2) &&
+                   std::isinf(x(i))) {
+          // The expected value is close to infinity, allow our output to be
+          // infinity.
         } else {
-          ASSERT_NEAR(expected, x(i), tol.absolute_error<X>(expected))
+          auto tolerance = tol.absolute_error<X>(expected);
+          if (std::abs(expected) <= type_info<X>::smallest_normal()) {
+            tolerance += type_info<X>::smallest_normal();
+          }
+          ASSERT_NEAR(expected, x(i), tolerance)
               << "i = " << index_to_string(i) << ", a(i) = " << input_i << " ("
               << static_cast<Float>(a(i)) << ")";
         }

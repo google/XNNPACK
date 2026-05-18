@@ -14,12 +14,15 @@ py_binary(
     name = "generator",
     srcs = [
         "convert.py",
+        "erf.py",
         "exp.py",
         "generator.py",
         "kernels.py",
+        "log.py",
         "sigmoid.py",
         "sine_cosine.py",
         "tanh.py",
+        "util.py",
     ],
     tags = [
         "manual",

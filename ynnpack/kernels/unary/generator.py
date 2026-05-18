@@ -12,8 +12,10 @@ import sys
 
 from ynnpack.kernels.elementwise.generator import generate_elementwise_kernels
 from ynnpack.kernels.unary.convert import *  # pylint: disable=wildcard-import
+from ynnpack.kernels.unary.erf import *  # pylint: disable=wildcard-import
 from ynnpack.kernels.unary.exp import *  # pylint: disable=wildcard-import
 from ynnpack.kernels.unary.kernels import *  # pylint: disable=wildcard-import
+from ynnpack.kernels.unary.log import *  # pylint: disable=wildcard-import
 from ynnpack.kernels.unary.sigmoid import *  # pylint: disable=wildcard-import
 from ynnpack.kernels.unary.sine_cosine import *  # pylint: disable=wildcard-import
 from ynnpack.kernels.unary.tanh import *  # pylint: disable=wildcard-import
@@ -34,6 +36,7 @@ def main(argv: Sequence[str]) -> None:
           (exp_fp32, (16, 1)),
           (exp_fp64, (8, 1)),
           (log_fp32, (16, 1)),
+          (log_fp64, (4, 1)),
           (negate_fp32, (8, 1)),
           (negate_fp64, (4, 1)),
           (poly3_fp32, (16, 1)),
@@ -89,6 +92,7 @@ def main(argv: Sequence[str]) -> None:
           (exp_fp32, (16, 1)),
           (exp_fp64, (16, 1)),
           (log_fp32, (32, 1)),
+          (log_fp64, (16, 1)),
           (sigmoid_fp32, (16, 1)),
           (convert_int2_to_int8, (32, 1)),
           (convert_int4_to_int8, (32, 1)),
@@ -121,6 +125,7 @@ def main(argv: Sequence[str]) -> None:
           (exp_fp32, (32, 1)),
           (exp_fp64, (16, 1)),
           (log_fp32, (32, 1)),
+          (log_fp64, (16, 1)),
           (floor_fp32, (32, 1)),
           (floor_fp64, (16, 1)),
           (negate_fp32, (32, 1)),
@@ -170,6 +175,7 @@ def main(argv: Sequence[str]) -> None:
           (convert_fp32_to_fp64, (16, 1)),
           (convert_fp64_to_fp32, (16, 1)),
           (exp_fp64, (8, 1)),
+          (log_fp64, (8, 1)),
           (floor_fp64, (4, 1)),
           (negate_fp64, (4, 1)),
           (poly3_fp64, (16, 1)),
