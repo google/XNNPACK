@@ -662,17 +662,17 @@ ynn_status ynn_define_convert(ynn_subgraph_t subgraph, uint32_t input_id,
     // We either have quantization data to handle for a requantization, or we
     // don't have a kernel for this conversion. Handle it by converting to an
     // intermediate float.
-    uint32_t intermediate_id = YNN_INVALID_VALUE_ID;
-    ynn_status status =
-        ynn_define_tensor(subgraph, ynn_type_fp32, /*rank=*/0, /*dims=*/nullptr,
-                          /*data=*/nullptr, /*flags=*/0, &intermediate_id);
-    if (status != ynn_status_success) {
-      return status;
+    if (a.type == ynn_type_fp32) {
+      // This was already float, we must not support this conversion.
+      YNN_LOG_ERROR() << "Unsupported conversion from fp32 to "
+                      << to_string(x.type);
+      return ynn_status_unsupported_parameter;
     }
 
-    status = ynn_define_convert_v2(subgraph, input_id, ynn_type_fp32,
-                                   &intermediate_id,
-                                   /*flags=*/0);
+    uint32_t intermediate_id = YNN_INVALID_VALUE_ID;
+    ynn_status status = ynn_define_convert_v2(subgraph, input_id, ynn_type_fp32,
+                                              &intermediate_id,
+                                              /*flags=*/0);
     if (status != ynn_status_success) {
       return status;
     }
