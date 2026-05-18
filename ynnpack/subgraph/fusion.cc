@@ -1039,16 +1039,24 @@ bool fuse_converts(ynn_subgraph& subgraph, ynn_node& node,
   assert(producer->outputs[0] == node.inputs[0]);
   const ynn_value& intermediate = subgraph.value(node.inputs[0]);
   if (!is_convert_lossless(input.type, intermediate.type) &&
-      ((subgraph.flags & YNN_FLAG_CONSISTENT_ARITHMETIC) != 0 ||
-       (subgraph.flags & YNN_FLAG_NO_EXCESS_PRECISION) != 0)) {
+      (subgraph.flags & YNN_FLAG_NO_EXCESS_PRECISION) != 0) {
+    if (intermediate.type == ynn_type_bf16) {
+      unary_kernel_fn kernel = ynn::get_unary_kernel(ynn_unary_round_to_bf16,
+                                                     input.type, output.type);
+      if (kernel) {
+        YNN_LOG_DEBUG() << "Rewriting convert(" << to_string(input.type)
+                        << ", convert(bf16, x)) to round_to_bf16(x)";
+        define_unary(subgraph, node, producer->inputs[0], node.outputs[0],
+                     ynn_unary_round_to_bf16, kernel);
+        return true;
+      }
+    }
+
     // This conversion loses information, and the converts might have been
-    // inserted because we don't have a kernel for this type, which could vary
-    // depending on the machine we're running on.
-    // TODO(dsharlet): We could add a `round_to` operator for this case to fuse
-    // two operators into one.
-    YNN_LOG_DEBUG() << "Not fusing converts because "
-                       "YNN_FLAG_CONSISTENT_ARITHMETIC or "
-                       "YNN_FLAG_NO_EXCESS_PRECISION is set.";
+    // inserted because we don't have a kernel for this type.
+    YNN_LOG_DEBUG()
+        << "Not fusing no-op converts because YNN_FLAG_NO_EXCESS_PRECISION "
+           "is set.";
     return false;
   }
 

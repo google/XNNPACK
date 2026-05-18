@@ -252,6 +252,7 @@ const ynn_unary_operator all_real_ops[] = {
     ynn_unary_cosine,
     ynn_unary_sigmoid,
     ynn_unary_hardswish,
+    ynn_unary_round_to_bf16,
 };
 
 const ynn_unary_operator all_integer_ops[] = {

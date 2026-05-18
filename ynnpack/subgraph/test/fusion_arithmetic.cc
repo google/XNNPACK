@@ -466,9 +466,9 @@ TEST(fusion, convert_convert) {
     subgraph.invalidate_dead_values();
 
     if ((flags & YNN_FLAG_NO_EXCESS_PRECISION) != 0) {
-      ASSERT_THAT(subgraph, AllOf(HasValidNodeCount(3), HasValidValueCount(4)));
+      ASSERT_THAT(subgraph, AllOf(HasValidNodeCount(2), HasValidValueCount(3)));
       EXPECT_THAT(ProducerOf(x_id, subgraph),
-                  AllOf(IsUnary(ynn_unary_convert)));
+                  AllOf(IsUnary(ynn_unary_round_to_bf16)));
     } else {
       ASSERT_THAT(subgraph, AllOf(HasValidNodeCount(1), HasValidValueCount(2)));
       EXPECT_THAT(ProducerOf(x_id, subgraph),
@@ -507,14 +507,14 @@ TEST(fusion, dequantize_quantize) {
 }
 
 TEST(fusion, bf16_elementwise) {
-  for (bool consistent_arithmetic : {false, true}) {
+  for (bool no_excess_precision : {false, true}) {
     // We don't have bf16 binary elementwise ops, we will insert converts to
     // make this work, and then adjacent elementwise ops can be simplified.
     const uint32_t a_id = 0;
     const uint32_t b_id = 1;
     const uint32_t x_id = 2;
     SubgraphBuilder builder(
-        3, consistent_arithmetic ? YNN_FLAG_CONSISTENT_ARITHMETIC : 0);
+        3, no_excess_precision ? YNN_FLAG_NO_EXCESS_PRECISION : 0);
     uint32_t c_id = YNN_INVALID_VALUE_ID;
     builder.AddInput(ynn_type_bf16, 2, a_id)
         .AddInput(ynn_type_bf16, 2, b_id)
@@ -534,13 +534,13 @@ TEST(fusion, bf16_elementwise) {
     subgraph.eliminate_common_subgraphs();
     subgraph.invalidate_dead_values();
 
-    if (consistent_arithmetic) {
+    if (no_excess_precision) {
       // The graph should now be:
       // a_fp32 = convert<fp32>(a_bf16)
-      // c_bf16 = convert<bf16>(a_fp32 * convert<fp32>(b_bf16))
-      // x_bf16 = convert<bf16>(a_fp32 + convert<fp32>(c_bf16))
-      ASSERT_THAT(subgraph, HasValidNodeCount(7));
-      EXPECT_THAT(ProducerOf(c_id, subgraph), IsUnary(ynn_unary_convert));
+      // c = round_to_bf16(a_fp32 * convert<fp32>(b_bf16))
+      // x_bf16 = convert<bf16>(a_fp32 + c)
+      ASSERT_THAT(subgraph, HasValidNodeCount(6));
+      EXPECT_FALSE(subgraph.value(c_id).is_valid());
     } else {
       // The graph should now be:
       // a_fp32 = convert<fp32>(a_bf16)

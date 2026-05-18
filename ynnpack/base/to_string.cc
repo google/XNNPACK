@@ -56,6 +56,8 @@ const char* to_string(enum ynn_unary_operator op) {
       return "hardswish";
     case ynn_unary_poly3:
       return "poly3";
+    case ynn_unary_round_to_bf16:
+      return "round_to_bf16";
     case ynn_unary_invalid:
       return "invalid";
   }

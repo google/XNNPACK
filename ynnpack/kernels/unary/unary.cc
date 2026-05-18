@@ -17,6 +17,7 @@
 #include "ynnpack/base/arithmetic.h"
 #include "ynnpack/base/base.h"
 #include "ynnpack/base/bfloat16.h"
+#include "ynnpack/base/bit_cast.h"
 #include "ynnpack/base/half.h"
 #include "ynnpack/base/log.h"
 #include "ynnpack/base/type.h"
@@ -112,6 +113,14 @@ struct round_op {
   explicit round_op(const unary_params& = {}) {}
   float operator()(float x) const { return std::nearbyint(x); }
   double operator()(double x) const { return std::nearbyint(x); }
+};
+
+struct round_to_bf16_op {
+  explicit round_to_bf16_op(const unary_params& = {}) {}
+
+  float operator()(float x) const {
+    return static_cast<float>(bfloat16(x));
+  }
 };
 
 struct ceil_op {
@@ -342,6 +351,8 @@ unary_kernel_fn get_float_unary_reference_kernel(ynn_unary_operator op) {
       return unary_impl<T, T, hardswish_op>;
     case ynn_unary_poly3:
       return unary_impl<T, T, poly3_op>;
+    case ynn_unary_round_to_bf16:
+      return unary_impl<T, T, round_to_bf16_op>;
     case ynn_unary_convert:
     default:
       break;

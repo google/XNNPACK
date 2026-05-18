@@ -165,6 +165,15 @@ struct floor : public unary_op_info {
   }
 };
 
+struct round_to_bf16 : public unary_op_info {
+  explicit round_to_bf16(const unary_params& = {}) {}
+  float operator()(float x) const override { return bfloat16{x}; }
+
+  tolerance_spec tolerance(ynn_type type) const override {
+    return tolerance_spec{/*relative=*/type_info<bfloat16>::epsilon()};
+  }
+};
+
 struct sigmoid : public unary_op_info {
   explicit sigmoid(const unary_params& = {}) {}
   float operator()(float x) const override {

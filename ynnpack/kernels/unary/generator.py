@@ -89,13 +89,14 @@ def main(argv: Sequence[str]) -> None:
       "x86_avx2": [
           (convert_bf16_to_fp32, (16, 1)),
           (convert_fp32_to_bf16, (16, 1)),
+          (convert_int2_to_int8, (32, 1)),
+          (convert_int4_to_int8, (32, 1)),
           (exp_fp32, (16, 1)),
           (exp_fp64, (16, 1)),
           (log_fp32, (32, 1)),
           (log_fp64, (16, 1)),
+          (round_to_bf16_fp32, (16, 1)),
           (sigmoid_fp32, (16, 1)),
-          (convert_int2_to_int8, (32, 1)),
-          (convert_int4_to_int8, (32, 1)),
       ],
       "x86_fma3": [
           (cosine_fp32, (16, 1)),
@@ -136,6 +137,7 @@ def main(argv: Sequence[str]) -> None:
           (reciprocal_square_root_fp64, (32, 1)),
           (round_fp32, (32, 1)),
           (round_fp64, (16, 1)),
+          (round_to_bf16_fp32, (32, 1)),
           (sine_fp32, (32, 1)),
           (square_fp32, (32, 1)),
           (square_fp64, (16, 1)),
@@ -148,6 +150,7 @@ def main(argv: Sequence[str]) -> None:
       ],
       "x86_avx512bf16": [
           (convert_fp32_to_bf16, (32, 1)),
+          (round_to_bf16_fp32, (32, 1)),
       ],
       "arm_neon": [
           (abs_fp32, (8, 1)),
@@ -163,6 +166,7 @@ def main(argv: Sequence[str]) -> None:
           (poly3_fp32, (32, 1)),
           (reciprocal_square_root_fp32, (8, 1)),
           (round_fp32, (8, 1)),
+          (round_to_bf16_fp32, (16, 1)),
           (sine_fp32, (32, 1)),
           (square_fp32, (8, 1)),
           (square_root_fp32, (8, 1)),
@@ -186,6 +190,7 @@ def main(argv: Sequence[str]) -> None:
       ],
       "arm_neonbf16": [
           (convert_fp32_to_bf16, (64, 1)),
+          (round_to_bf16_fp32, (64, 1)),
       ],
       "arm_neonfp16": [
           (convert_fp16_to_fp32, (16, 1)),

@@ -59,6 +59,8 @@ std::unique_ptr<unary_op_info> get_unary_op_info(ynn_unary_operator op,
       return std::make_unique<hardswish>(params);
     case ynn_unary_poly3:
       return std::make_unique<poly3>(params);
+    case ynn_unary_round_to_bf16:
+      return std::make_unique<round_to_bf16>(params);
     case ynn_unary_invalid:
       return nullptr;
   }
