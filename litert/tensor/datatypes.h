@@ -22,6 +22,10 @@ limitations under the License.
 
 #include "litert/tensor/internal/fp16.h"
 
+namespace tflite {
+struct half;
+}
+
 namespace litert::tensor {
 
 enum class Type {
@@ -265,6 +269,9 @@ struct ApiType<bf16_t> : internal::StorageImpl<Type::kBF16, bf16_t> {};
 
 template <>
 struct ApiType<fp16_t> : internal::StorageImpl<Type::kFP16, fp16_t> {};
+
+template <>
+struct ApiType<tflite::half> : internal::StorageImpl<Type::kFP16, fp16_t> {};
 
 template <>
 struct ApiType<float> : internal::StorageImpl<Type::kFP32, float> {};
