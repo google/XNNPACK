@@ -69,9 +69,6 @@ struct vec<double, 8> {
   vec(double x) : v(_mm512_set1_pd(x)) {}  // NOLINT
 
   __m512d v;
-
-  YNN_ALWAYS_INLINE f64x4 lo() const { return f64x4{internal::lo(v)}; }
-  YNN_ALWAYS_INLINE f64x4 hi() const { return f64x4{internal::hi(v)}; }
 };
 
 template <>
@@ -85,9 +82,6 @@ struct vec<float, 16> {
   vec(float x) : v(_mm512_set1_ps(x)) {}  // NOLINT
 
   __m512 v;
-
-  YNN_ALWAYS_INLINE f32x8 lo() const { return f32x8{internal::lo(v)}; }
-  YNN_ALWAYS_INLINE f32x8 hi() const { return f32x8{internal::hi(v)}; }
 };
 
 template <>
@@ -101,9 +95,6 @@ struct vec<uint32_t, 16> {
   vec(uint32_t x) : v(_mm512_set1_epi32(x)) {}  // NOLINT
 
   __m512i v;
-
-  YNN_ALWAYS_INLINE u32x8 lo() const { return u32x8{internal::lo(v)}; }
-  YNN_ALWAYS_INLINE u32x8 hi() const { return u32x8{internal::hi(v)}; }
 };
 
 template <>
@@ -117,9 +108,6 @@ struct vec<int32_t, 16> {
   vec(int32_t x) : v(_mm512_set1_epi32(x)) {}  // NOLINT
 
   __m512i v;
-
-  YNN_ALWAYS_INLINE s32x8 lo() const { return s32x8{internal::lo(v)}; }
-  YNN_ALWAYS_INLINE s32x8 hi() const { return s32x8{internal::hi(v)}; }
 };
 
 template <>
@@ -133,9 +121,6 @@ struct vec<bfloat16, 32> {
   vec(bfloat16 x) : v(_mm512_set1_epi16(x.to_bits())) {}  // NOLINT
 
   __m512i v;
-
-  YNN_ALWAYS_INLINE bf16x16 lo() const { return bf16x16{internal::lo(v)}; }
-  YNN_ALWAYS_INLINE bf16x16 hi() const { return bf16x16{internal::hi(v)}; }
 };
 
 template <>
@@ -149,9 +134,6 @@ struct vec<half, 32> {
   vec(half x) : v(_mm512_set1_epi16(x.to_bits())) {}  // NOLINT
 
   __m512i v;
-
-  YNN_ALWAYS_INLINE f16x16 lo() const { return f16x16{internal::lo(v)}; }
-  YNN_ALWAYS_INLINE f16x16 hi() const { return f16x16{internal::hi(v)}; }
 };
 
 template <>
@@ -165,9 +147,6 @@ struct vec<uint16_t, 32> {
   vec(uint16_t x) : v(_mm512_set1_epi16(x)) {}  // NOLINT
 
   __m512i v;
-
-  YNN_ALWAYS_INLINE u16x16 lo() const { return u16x16{internal::lo(v)}; }
-  YNN_ALWAYS_INLINE u16x16 hi() const { return u16x16{internal::hi(v)}; }
 };
 
 template <>
@@ -181,9 +160,6 @@ struct vec<int16_t, 32> {
   vec(int16_t x) : v(_mm512_set1_epi16(x)) {}  // NOLINT
 
   __m512i v;
-
-  YNN_ALWAYS_INLINE s16x16 lo() const { return s16x16{internal::lo(v)}; }
-  YNN_ALWAYS_INLINE s16x16 hi() const { return s16x16{internal::hi(v)}; }
 };
 
 template <>
@@ -197,9 +173,6 @@ struct vec<uint8_t, 64> {
   vec(uint8_t x) : v(_mm512_set1_epi8(x)) {}  // NOLINT
 
   __m512i v;
-
-  YNN_ALWAYS_INLINE u8x32 lo() const { return u8x32{internal::lo(v)}; }
-  YNN_ALWAYS_INLINE u8x32 hi() const { return u8x32{internal::hi(v)}; }
 };
 
 template <>
@@ -213,9 +186,6 @@ struct vec<int8_t, 64> {
   vec(int8_t x) : v(_mm512_set1_epi8(x)) {}  // NOLINT
 
   __m512i v;
-
-  YNN_ALWAYS_INLINE s8x32 lo() const { return s8x32{internal::lo(v)}; }
-  YNN_ALWAYS_INLINE s8x32 hi() const { return s8x32{internal::hi(v)}; }
 };
 
 using f64x8 = vec<double, 8>;
@@ -229,6 +199,27 @@ using s16x32 = vec<int16_t, 32>;
 using u8x64 = vec<uint8_t, 64>;
 using s8x64 = vec<int8_t, 64>;
 using f32x64 = vec<float, 64>;
+
+YNN_ALWAYS_INLINE f64x4 lo(f64x8 x) { return f64x4{internal::lo(x.v)}; }
+YNN_ALWAYS_INLINE f64x4 hi(f64x8 x) { return f64x4{internal::hi(x.v)}; }
+YNN_ALWAYS_INLINE f32x8 lo(f32x16 x) { return f32x8{internal::lo(x.v)}; }
+YNN_ALWAYS_INLINE f32x8 hi(f32x16 x) { return f32x8{internal::hi(x.v)}; }
+YNN_ALWAYS_INLINE u32x8 lo(u32x16 x) { return u32x8{internal::lo(x.v)}; }
+YNN_ALWAYS_INLINE u32x8 hi(u32x16 x) { return u32x8{internal::hi(x.v)}; }
+YNN_ALWAYS_INLINE s32x8 lo(s32x16 x) { return s32x8{internal::lo(x.v)}; }
+YNN_ALWAYS_INLINE s32x8 hi(s32x16 x) { return s32x8{internal::hi(x.v)}; }
+YNN_ALWAYS_INLINE bf16x16 lo(bf16x32 x) { return bf16x16{internal::lo(x.v)}; }
+YNN_ALWAYS_INLINE bf16x16 hi(bf16x32 x) { return bf16x16{internal::hi(x.v)}; }
+YNN_ALWAYS_INLINE f16x16 lo(f16x32 x) { return f16x16{internal::lo(x.v)}; }
+YNN_ALWAYS_INLINE f16x16 hi(f16x32 x) { return f16x16{internal::hi(x.v)}; }
+YNN_ALWAYS_INLINE u16x16 lo(u16x32 x) { return u16x16{internal::lo(x.v)}; }
+YNN_ALWAYS_INLINE u16x16 hi(u16x32 x) { return u16x16{internal::hi(x.v)}; }
+YNN_ALWAYS_INLINE s16x16 lo(s16x32 x) { return s16x16{internal::lo(x.v)}; }
+YNN_ALWAYS_INLINE s16x16 hi(s16x32 x) { return s16x16{internal::hi(x.v)}; }
+YNN_ALWAYS_INLINE u8x32 lo(u8x64 x) { return u8x32{internal::lo(x.v)}; }
+YNN_ALWAYS_INLINE u8x32 hi(u8x64 x) { return u8x32{internal::hi(x.v)}; }
+YNN_ALWAYS_INLINE s8x32 lo(s8x64 x) { return s8x32{internal::lo(x.v)}; }
+YNN_ALWAYS_INLINE s8x32 hi(s8x64 x) { return s8x32{internal::hi(x.v)}; }
 
 YNN_ALWAYS_INLINE f64x8 load_aligned(const double* ptr, decltype(f64x8::N),
                                      f64x8 = {}) {
@@ -1094,10 +1085,10 @@ YNN_ALWAYS_INLINE f32x16 cast(bf16x16 a, float) {
 
 YNN_ALWAYS_INLINE bf16x32 cast(f32x32 a, bfloat16) {
 #ifdef YNN_ARCH_X86_AVX512BF16
-  return bf16x32{(__m512i)_mm512_cvtne2ps_pbh(a.hi().v, a.lo().v)};
+  return bf16x32{(__m512i)_mm512_cvtne2ps_pbh(hi(a).v, lo(a).v)};
 #else
-  __m512i u_lo = _mm512_castps_si512(a.lo().v);
-  __mmask16 nan_mask_lo = _mm512_cmp_ps_mask(a.lo().v, a.lo().v, _CMP_UNORD_Q);
+  __m512i u_lo = _mm512_castps_si512(lo(a).v);
+  __mmask16 nan_mask_lo = _mm512_cmp_ps_mask(lo(a).v, lo(a).v, _CMP_UNORD_Q);
   __m512i lsb_lo =
       _mm512_and_si512(_mm512_srli_epi32(u_lo, 16), _mm512_set1_epi32(1));
   __m512i bias_lo = _mm512_add_epi32(_mm512_set1_epi32(0x7FFF), lsb_lo);
@@ -1106,8 +1097,8 @@ YNN_ALWAYS_INLINE bf16x32 cast(f32x32 a, bfloat16) {
                            _mm512_set1_epi32(0x00010000));
   __m512i c1 = _mm512_srli_epi32(res_lo, 16);
 
-  __m512i u_hi = _mm512_castps_si512(a.hi().v);
-  __mmask16 nan_mask_hi = _mm512_cmp_ps_mask(a.hi().v, a.hi().v, _CMP_UNORD_Q);
+  __m512i u_hi = _mm512_castps_si512(hi(a).v);
+  __mmask16 nan_mask_hi = _mm512_cmp_ps_mask(hi(a).v, hi(a).v, _CMP_UNORD_Q);
   __m512i lsb_hi =
       _mm512_and_si512(_mm512_srli_epi32(u_hi, 16), _mm512_set1_epi32(1));
   __m512i bias_hi = _mm512_add_epi32(_mm512_set1_epi32(0x7FFF), lsb_hi);
@@ -1166,19 +1157,19 @@ YNN_ALWAYS_INLINE f32x8 cast(f64x8 a, float) {
 }
 
 YNN_ALWAYS_INLINE s16x32 cast(s32x32 a, int16_t) {
-  const __m512i r = _mm512_packs_epi32(a.lo().v, a.hi().v);
+  const __m512i r = _mm512_packs_epi32(lo(a).v, hi(a).v);
   return s16x32{
       _mm512_permutexvar_epi64(_mm512_setr_epi64(0, 2, 4, 6, 1, 3, 5, 7), r)};
 }
 
 YNN_ALWAYS_INLINE s8x64 cast(s16x64 a, int8_t) {
-  const __m512i r = _mm512_packs_epi16(a.lo().v, a.hi().v);
+  const __m512i r = _mm512_packs_epi16(lo(a).v, hi(a).v);
   return s8x64{
       _mm512_permutexvar_epi64(_mm512_setr_epi64(0, 2, 4, 6, 1, 3, 5, 7), r)};
 }
 
 YNN_ALWAYS_INLINE u8x64 cast(s16x64 a, uint8_t) {
-  const __m512i r = _mm512_packus_epi16(a.lo().v, a.hi().v);
+  const __m512i r = _mm512_packus_epi16(lo(a).v, hi(a).v);
   return u8x64{
       _mm512_permutexvar_epi64(_mm512_setr_epi64(0, 2, 4, 6, 1, 3, 5, 7), r)};
 }
@@ -1193,16 +1184,16 @@ YNN_ALWAYS_INLINE s32x16 cast(f32x16 f, int32_t) {
 }
 
 YNN_ALWAYS_INLINE s16x32 cast(f32x32 f, int16_t) {
-  const s32x16 i0 = cast(f.lo(), int32_t());
-  const s32x16 i1 = cast(f.hi(), int32_t());
+  const s32x16 i0 = cast(lo(f), int32_t());
+  const s32x16 i1 = cast(hi(f), int32_t());
   return cast(s32x32(i0, i1), int16_t());
 }
 
 YNN_ALWAYS_INLINE u8x64 cast(f32x64 f, uint8_t) {
-  const s32x16 i0 = cast(f.lo().lo(), int32_t());
-  const s32x16 i1 = cast(f.lo().hi(), int32_t());
-  const s32x16 i2 = cast(f.hi().lo(), int32_t());
-  const s32x16 i3 = cast(f.hi().hi(), int32_t());
+  const s32x16 i0 = cast(lo(lo(f)), int32_t());
+  const s32x16 i1 = cast(hi(lo(f)), int32_t());
+  const s32x16 i2 = cast(lo(hi(f)), int32_t());
+  const s32x16 i3 = cast(hi(hi(f)), int32_t());
   const __m512i i01_16 = _mm512_packs_epi32(i0.v, i1.v);
   const __m512i i23_16 = _mm512_packs_epi32(i2.v, i3.v);
   const __m512i r = _mm512_packus_epi16(i01_16, i23_16);
@@ -1212,10 +1203,10 @@ YNN_ALWAYS_INLINE u8x64 cast(f32x64 f, uint8_t) {
 }
 
 YNN_ALWAYS_INLINE s8x64 cast(f32x64 f, int8_t) {
-  const s32x16 i0 = cast(f.lo().lo(), int32_t());
-  const s32x16 i1 = cast(f.lo().hi(), int32_t());
-  const s32x16 i2 = cast(f.hi().lo(), int32_t());
-  const s32x16 i3 = cast(f.hi().hi(), int32_t());
+  const s32x16 i0 = cast(lo(lo(f)), int32_t());
+  const s32x16 i1 = cast(hi(lo(f)), int32_t());
+  const s32x16 i2 = cast(lo(hi(f)), int32_t());
+  const s32x16 i3 = cast(hi(hi(f)), int32_t());
   const __m512i i01_16 = _mm512_packs_epi32(i0.v, i1.v);
   const __m512i i23_16 = _mm512_packs_epi32(i2.v, i3.v);
   const __m512i r = _mm512_packs_epi16(i01_16, i23_16);

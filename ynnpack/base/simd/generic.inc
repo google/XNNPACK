@@ -52,9 +52,9 @@ template <typename T, size_t N>
 YNN_ALWAYS_INLINE vec<T, N> load(const T* ptr, size_t n, vec<T, N> src) {
   std::integral_constant<size_t, N / 2> n2 = {};
   if (n < n2) {
-    return {load(ptr, n, src.lo()), src.hi()};
+    return {load(ptr, n, lo(src)), hi(src)};
   } else {
-    return {load(ptr, n2), load(ptr + n2, n - n2, src.hi())};
+    return {load(ptr, n2), load(ptr + n2, n - n2, hi(src))};
   }
 }
 template <typename T, size_t N>
@@ -81,43 +81,43 @@ template <typename T, size_t N>
 YNN_ALWAYS_INLINE void store(T* ptr, vec<T, N> value,
                              std::integral_constant<size_t, N> n) {
   std::integral_constant<size_t, N / 2> n2 = {};
-  store(ptr, value.lo(), n2);
-  store(ptr + n2, value.hi(), n2);
+  store(ptr, lo(value), n2);
+  store(ptr + n2, hi(value), n2);
 }
 template <typename T, size_t N>
 YNN_ALWAYS_INLINE void store_aligned(T* ptr, vec<T, N> value,
                                      std::integral_constant<size_t, N> n) {
   std::integral_constant<size_t, N / 2> n2 = {};
-  store_aligned(ptr, value.lo(), n2);
-  store_aligned(ptr + n2, value.hi(), n2);
+  store_aligned(ptr, lo(value), n2);
+  store_aligned(ptr + n2, hi(value), n2);
 }
 template <typename T, size_t N>
 YNN_ALWAYS_INLINE void store(T* ptr, vec<T, N> value, size_t n) {
   std::integral_constant<size_t, N / 2> n2 = {};
   if (n < n2) {
-    store(ptr, value.lo(), n);
+    store(ptr, lo(value), n);
   } else {
-    store(ptr, value.lo(), n2);
-    store(ptr + n2, value.hi(), n - n2);
+    store(ptr, lo(value), n2);
+    store(ptr + n2, hi(value), n - n2);
   }
 }
 
 // Arithmetic operators.
 template <typename T, size_t N>
 YNN_ALWAYS_INLINE vec<T, N> operator+(vec<T, N> a, vec<T, N> b) {
-  return {a.lo() + b.lo(), a.hi() + b.hi()};
+  return {lo(a) + lo(b), hi(a) + hi(b)};
 }
 template <typename T, size_t N>
 YNN_ALWAYS_INLINE vec<T, N> operator-(vec<T, N> a, vec<T, N> b) {
-  return {a.lo() - b.lo(), a.hi() - b.hi()};
+  return {lo(a) - lo(b), hi(a) - hi(b)};
 }
 template <typename T, size_t N>
 YNN_ALWAYS_INLINE vec<T, N> operator*(vec<T, N> a, vec<T, N> b) {
-  return {a.lo() * b.lo(), a.hi() * b.hi()};
+  return {lo(a) * lo(b), hi(a) * hi(b)};
 }
 template <typename T, size_t N>
 YNN_ALWAYS_INLINE vec<T, N> operator/(vec<T, N> a, vec<T, N> b) {
-  return {a.lo() / b.lo(), a.hi() / b.hi()};
+  return {lo(a) / lo(b), hi(a) / hi(b)};
 }
 
 template <typename T, size_t N>
@@ -144,23 +144,23 @@ YNN_ALWAYS_INLINE vec<T, N>& operator/=(vec<T, N>& a, vec<T, N> b) {
 // Boolean operators.
 template <typename T, size_t N>
 YNN_ALWAYS_INLINE vec<T, N> operator&(vec<T, N> a, vec<T, N> b) {
-  return {a.lo() & b.lo(), a.hi() & b.hi()};
+  return {lo(a) & lo(b), hi(a) & hi(b)};
 }
 template <typename T, size_t N>
 YNN_ALWAYS_INLINE vec<T, N> operator|(vec<T, N> a, vec<T, N> b) {
-  return {a.lo() | b.lo(), a.hi() | b.hi()};
+  return {lo(a) | lo(b), hi(a) | hi(b)};
 }
 template <typename T, size_t N>
 YNN_ALWAYS_INLINE vec<T, N> operator^(vec<T, N> a, vec<T, N> b) {
-  return {a.lo() ^ b.lo(), a.hi() ^ b.hi()};
+  return {lo(a) ^ lo(b), hi(a) ^ hi(b)};
 }
 template <typename T, size_t N>
 YNN_ALWAYS_INLINE vec<T, N> operator~(vec<T, N> a) {
-  return {~a.lo(), ~a.hi()};
+  return {~lo(a), ~hi(a)};
 }
 template <typename T, size_t N>
 YNN_ALWAYS_INLINE vec<T, N> operator<<(vec<T, N> a, int b) {
-  return {a.lo() << b, a.hi() << b};
+  return {lo(a) << b, hi(a) << b};
 }
 
 template <typename T, size_t N>
@@ -180,60 +180,60 @@ YNN_ALWAYS_INLINE vec<T, N>& operator^=(vec<T, N>& a, vec<T, N> b) {
 }
 template <typename T, size_t N>
 YNN_ALWAYS_INLINE vec<T, N> min(vec<T, N> a, vec<T, N> b) {
-  return {min(a.lo(), b.lo()), min(a.hi(), b.hi())};
+  return {min(lo(a), lo(b)), min(hi(a), hi(b))};
 }
 template <typename T, size_t N>
 YNN_ALWAYS_INLINE vec<T, N> max(vec<T, N> a, vec<T, N> b) {
-  return {max(a.lo(), b.lo()), max(a.hi(), b.hi())};
+  return {max(lo(a), lo(b)), max(hi(a), hi(b))};
 }
 template <typename T, size_t N>
 YNN_ALWAYS_INLINE vec<T, N> copysign(vec<T, N> mag, vec<T, N> sgn) {
-  return {copysign(mag.lo(), sgn.lo()), copysign(mag.hi(), sgn.hi())};
+  return {copysign(lo(mag), lo(sgn)), copysign(hi(mag), hi(sgn))};
 };
 template <typename T, size_t N>
 YNN_ALWAYS_INLINE vec<T, N> abs(vec<T, N> a) {
-  return {abs(a.lo()), abs(a.hi())};
+  return {abs(lo(a)), abs(hi(a))};
 }
 template <typename T, size_t N>
 YNN_ALWAYS_INLINE vec<T, N> add_sat(vec<T, N> a, vec<T, N> b) {
-  return {add_sat(a.lo(), b.lo()), add_sat(a.hi(), b.hi())};
+  return {add_sat(lo(a), lo(b)), add_sat(hi(a), hi(b))};
 }
 template <typename T, size_t N>
 YNN_ALWAYS_INLINE vec<T, N> sub_sat(vec<T, N> a, vec<T, N> b) {
-  return {sub_sat(a.lo(), b.lo()), sub_sat(a.hi(), b.hi())};
+  return {sub_sat(lo(a), lo(b)), sub_sat(hi(a), hi(b))};
 }
 template <typename T, size_t N>
 YNN_ALWAYS_INLINE vec<T, N> floor(vec<T, N> a) {
-  return {floor(a.lo()), floor(a.hi())};
+  return {floor(lo(a)), floor(hi(a))};
 }
 template <typename T, size_t N>
 YNN_ALWAYS_INLINE vec<T, N> floor_log2(vec<T, N> a) {
-  return {floor_log2(a.lo()), floor_log2(a.hi())};
+  return {floor_log2(lo(a)), floor_log2(hi(a))};
 }
 
 template <typename T, size_t N>
 YNN_ALWAYS_INLINE vec<T, N> exp2_round(vec<T, N> a) {
-  return {exp2_round(a.lo()), exp2_round(a.hi())};
+  return {exp2_round(lo(a)), exp2_round(hi(a))};
 }
 template <typename T, size_t N>
 YNN_ALWAYS_INLINE vec<T, N> copynan(vec<T, N> x, vec<T, N> nan) {
-  return {copynan(x.lo(), nan.lo()), copynan(x.hi(), nan.hi())};
+  return {copynan(lo(x), lo(nan)), copynan(hi(x), hi(nan))};
 }
 template <typename T, size_t N>
 YNN_ALWAYS_INLINE vec<T, N> ceil(vec<T, N> a) {
-  return {ceil(a.lo()), ceil(a.hi())};
+  return {ceil(lo(a)), ceil(hi(a))};
 }
 template <typename T, size_t N>
 YNN_ALWAYS_INLINE vec<T, N> round(vec<T, N> a) {
-  return {round(a.lo()), round(a.hi())};
+  return {round(lo(a)), round(hi(a))};
 }
 template <typename T, size_t N>
 YNN_ALWAYS_INLINE vec<T, N> sqrt(vec<T, N> a) {
-  return {sqrt(a.lo()), sqrt(a.hi())};
+  return {sqrt(lo(a)), sqrt(hi(a))};
 }
 template <typename T, size_t N>
 YNN_ALWAYS_INLINE vec<T, N> fma(vec<T, N> a, vec<T, N> b, vec<T, N> acc) {
-  return {fma(a.lo(), b.lo(), acc.lo()), fma(a.hi(), b.hi(), acc.hi())};
+  return {fma(lo(a), lo(b), lo(acc)), fma(hi(a), hi(b), hi(acc))};
 }
 
 template <int Index, typename T, size_t N>
@@ -246,7 +246,7 @@ template <int Index, typename T, size_t N>
 YNN_ALWAYS_INLINE vec<T, N / 2> extract(vec<T, N> x,
                                         std::integral_constant<size_t, N / 2>) {
   static_assert(Index == 0 || Index == 1, "");
-  return Index == 0 ? x.lo() : x.hi();
+  return Index == 0 ? lo(x) : hi(x);
 }
 template <int Index, typename T, size_t N>
 YNN_ALWAYS_INLINE vec<T, N / 4> extract(vec<T, N> x,
@@ -263,31 +263,31 @@ YNN_ALWAYS_INLINE vec<T, N*2> concat(vec<T, N> a, vec<T, N> b) {
 
 template <typename To, typename From, size_t N>
 YNN_ALWAYS_INLINE vec<To, N> cast(vec<From, N> from, To) {
-  return {cast(from.lo(), To()), cast(from.hi(), To())};
+  return {cast(lo(from), To()), cast(hi(from), To())};
 }
 
 template <typename T, size_t N>
 YNN_ALWAYS_INLINE T horizontal_sum(vec<T, N> x) {
-  return horizontal_sum(x.lo() + x.hi());
+  return horizontal_sum(lo(x) + hi(x));
 }
 template <typename T, size_t N>
 YNN_ALWAYS_INLINE T horizontal_min(vec<T, N> x) {
-  return horizontal_min(min(x.lo(), x.hi()));
+  return horizontal_min(min(lo(x), hi(x)));
 }
 template <typename T, size_t N>
 YNN_ALWAYS_INLINE T horizontal_max(vec<T, N> x) {
-  return horizontal_max(max(x.lo(), x.hi()));
+  return horizontal_max(max(lo(x), hi(x)));
 }
 
 template <typename T, size_t N>
 YNN_ALWAYS_INLINE void kahan_sum(vec<T, N> a, vec<T, N>& acc,
                                  vec<T, N>& error) {
-  vec<T, N / 2> acc_lo = acc.lo();
-  vec<T, N / 2> acc_hi = acc.hi();
-  vec<T, N / 2> error_lo = error.lo();
-  vec<T, N / 2> error_hi = error.hi();
-  kahan_sum(a.lo(), acc_lo, error_lo);
-  kahan_sum(a.hi(), acc_hi, error_hi);
+  vec<T, N / 2> acc_lo = lo(acc);
+  vec<T, N / 2> acc_hi = hi(acc);
+  vec<T, N / 2> error_lo = lo(error);
+  vec<T, N / 2> error_hi = hi(error);
+  kahan_sum(lo(a), acc_lo, error_lo);
+  kahan_sum(hi(a), acc_hi, error_hi);
   acc = concat(acc_lo, acc_hi);
   error = concat(error_lo, error_hi);
 }

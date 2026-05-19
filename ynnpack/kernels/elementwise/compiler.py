@@ -846,8 +846,8 @@ YNN_INTRINSIC simd::vec<T, 1> select_greater_than(simd::vec<T, 1> a, simd::vec<T
 
 template <typename T, size_t N>
 YNN_INTRINSIC simd::vec<T, N> select_greater_than(simd::vec<T, N> a, simd::vec<T, N> b, simd::vec<T, N> c, simd::vec<T, N> d) {
-    return simd::vec<T, N>(select_greater_than(a.lo(), b.lo(), c.lo(), d.lo()),
-                           select_greater_than(a.hi(), b.hi(), c.hi(), d.hi()));
+    return simd::vec<T, N>(select_greater_than(lo(a), lo(b), lo(c), lo(d)),
+                           select_greater_than(hi(a), hi(b), hi(c), hi(d)));
 }
 
 } // namespace

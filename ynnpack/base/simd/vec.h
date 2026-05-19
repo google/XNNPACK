@@ -68,11 +68,6 @@ struct vec {
 
   subvec v[2];
 
-  subvec& lo() { return v[0]; }
-  const subvec& lo() const { return v[0]; }
-  subvec& hi() { return v[1]; }
-  const subvec& hi() const { return v[1]; }
-
   vec() = default;
   YNN_ALWAYS_INLINE explicit vec(value_type x) : v{subvec{x}, subvec{x}} {}
   YNN_ALWAYS_INLINE vec(subvec v0, subvec v1) : v{v0, v1} {}
@@ -80,6 +75,26 @@ struct vec {
   YNN_ALWAYS_INLINE subvec& operator[](size_t i) { return v[i]; }
   YNN_ALWAYS_INLINE const subvec& operator[](size_t i) const { return v[i]; }
 };
+
+template <typename T, size_t N>
+YNN_ALWAYS_INLINE vec<T, N / 2>& lo(vec<T, N>& x) {
+  return x.v[0];
+}
+
+template <typename T, size_t N>
+YNN_ALWAYS_INLINE const vec<T, N / 2>& lo(const vec<T, N>& x) {
+  return x.v[0];
+}
+
+template <typename T, size_t N>
+YNN_ALWAYS_INLINE vec<T, N / 2>& hi(vec<T, N>& x) {
+  return x.v[1];
+}
+
+template <typename T, size_t N>
+YNN_ALWAYS_INLINE const vec<T, N / 2>& hi(const vec<T, N>& x) {
+  return x.v[1];
+}
 
 template <size_t N, typename T>
 YNN_ALWAYS_INLINE vec<T, N> broadcast(T x) {

@@ -34,7 +34,7 @@ YNN_ALWAYS_INLINE f16x4 cast(f32x4 a, half) {
 
 YNN_ALWAYS_INLINE f16x8 cast(f32x8 a, half) {
   return f16x8{vreinterpretq_u16_f16(
-      vcombine_f16(vcvt_f16_f32(a.lo().v), vcvt_f16_f32(a.hi().v)))};
+      vcombine_f16(vcvt_f16_f32(lo(a).v), vcvt_f16_f32(hi(a).v)))};
 }
 
 }  // namespace simd

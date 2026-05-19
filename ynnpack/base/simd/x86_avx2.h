@@ -47,8 +47,8 @@ YNN_ALWAYS_INLINE f32x8 cast(s32x8 x, float) {
 }
 
 YNN_ALWAYS_INLINE bf16x16 cast(f32x16 a, bfloat16) {
-  __m256 nan_mask_lo = _mm256_cmp_ps(a.lo().v, a.lo().v, _CMP_UNORD_Q);
-  __m256i u_lo = _mm256_castps_si256(a.lo().v);
+  __m256 nan_mask_lo = _mm256_cmp_ps(lo(a).v, lo(a).v, _CMP_UNORD_Q);
+  __m256i u_lo = _mm256_castps_si256(lo(a).v);
   __m256i lsb_lo =
       _mm256_and_si256(_mm256_srli_epi32(u_lo, 16), _mm256_set1_epi32(1));
   __m256i bias_lo = _mm256_add_epi32(_mm256_set1_epi32(0x7FFF), lsb_lo);
@@ -58,8 +58,8 @@ YNN_ALWAYS_INLINE bf16x16 cast(f32x16 a, bfloat16) {
       nan_mask_lo));
   __m256i c1 = _mm256_srli_epi32(res_lo, 16);
 
-  __m256 nan_mask_hi = _mm256_cmp_ps(a.hi().v, a.hi().v, _CMP_UNORD_Q);
-  __m256i u_hi = _mm256_castps_si256(a.hi().v);
+  __m256 nan_mask_hi = _mm256_cmp_ps(hi(a).v, hi(a).v, _CMP_UNORD_Q);
+  __m256i u_hi = _mm256_castps_si256(hi(a).v);
   __m256i lsb_hi =
       _mm256_and_si256(_mm256_srli_epi32(u_hi, 16), _mm256_set1_epi32(1));
   __m256i bias_hi = _mm256_add_epi32(_mm256_set1_epi32(0x7FFF), lsb_hi);
@@ -74,17 +74,17 @@ YNN_ALWAYS_INLINE bf16x16 cast(f32x16 a, bfloat16) {
 }
 
 YNN_ALWAYS_INLINE s16x16 cast(s32x16 a, int16_t) {
-  const __m256i r = _mm256_packs_epi32(a.lo().v, a.hi().v);
+  const __m256i r = _mm256_packs_epi32(lo(a).v, hi(a).v);
   return s16x16{_mm256_permute4x64_epi64(r, _MM_SHUFFLE(3, 1, 2, 0))};
 }
 
 YNN_ALWAYS_INLINE s8x32 cast(s16x32 a, int8_t) {
-  const __m256i r = _mm256_packs_epi16(a.lo().v, a.hi().v);
+  const __m256i r = _mm256_packs_epi16(lo(a).v, hi(a).v);
   return s8x32{_mm256_permute4x64_epi64(r, _MM_SHUFFLE(3, 1, 2, 0))};
 }
 
 YNN_ALWAYS_INLINE u8x32 cast(s16x32 a, uint8_t) {
-  const __m256i r = _mm256_packus_epi16(a.lo().v, a.hi().v);
+  const __m256i r = _mm256_packus_epi16(lo(a).v, hi(a).v);
   return u8x32{_mm256_permute4x64_epi64(r, _MM_SHUFFLE(3, 1, 2, 0))};
 }
 
@@ -99,22 +99,22 @@ YNN_ALWAYS_INLINE s32x8 cast(f32x8 f, int32_t) {
 }
 
 YNN_ALWAYS_INLINE s16x16 cast(f32x16 f, int16_t) {
-  const s32x8 i0 = cast(f.lo(), int32_t());
-  const s32x8 i1 = cast(f.hi(), int32_t());
+  const s32x8 i0 = cast(lo(f), int32_t());
+  const s32x8 i1 = cast(hi(f), int32_t());
   return cast(s32x16(i0, i1), int16_t());
 }
 
 YNN_ALWAYS_INLINE s8x32 cast(f32x32 f, int8_t) {
-  const s16x16 i01 = cast(f.lo(), int16_t());
-  const s16x16 i23 = cast(f.hi(), int16_t());
+  const s16x16 i01 = cast(lo(f), int16_t());
+  const s16x16 i23 = cast(hi(f), int16_t());
   return cast(s16x32(i01, i23), int8_t());
 }
 
 YNN_ALWAYS_INLINE u8x32 cast(f32x32 f, uint8_t) {
-  const s32x8 i0 = cast(f.lo().lo(), int32_t());
-  const s32x8 i1 = cast(f.lo().hi(), int32_t());
-  const s32x8 i2 = cast(f.hi().lo(), int32_t());
-  const s32x8 i3 = cast(f.hi().hi(), int32_t());
+  const s32x8 i0 = cast(lo(lo(f)), int32_t());
+  const s32x8 i1 = cast(hi(lo(f)), int32_t());
+  const s32x8 i2 = cast(lo(hi(f)), int32_t());
+  const s32x8 i3 = cast(hi(hi(f)), int32_t());
   const __m256i i01_16 = _mm256_packs_epi32(i0.v, i1.v);
   const __m256i i23_16 = _mm256_packs_epi32(i2.v, i3.v);
   const __m256i r = _mm256_packus_epi16(i01_16, i23_16);

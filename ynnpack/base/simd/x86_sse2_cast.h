@@ -34,34 +34,34 @@ using f32x16 = vec<float, 16>;
 using s32x16 = vec<int32_t, 16>;
 
 YNN_ALWAYS_INLINE s16x8 cast(s32x8 a, int16_t) {
-  return s16x8{_mm_packs_epi32(a.lo().v, a.hi().v)};
+  return s16x8{_mm_packs_epi32(lo(a).v, hi(a).v)};
 }
 
 YNN_ALWAYS_INLINE s8x16 cast(s16x16 a, int8_t) {
-  return s8x16{_mm_packs_epi16(a.lo().v, a.hi().v)};
+  return s8x16{_mm_packs_epi16(lo(a).v, hi(a).v)};
 }
 
 YNN_ALWAYS_INLINE u8x16 cast(s16x16 a, uint8_t) {
-  return u8x16{_mm_packus_epi16(a.lo().v, a.hi().v)};
+  return u8x16{_mm_packus_epi16(lo(a).v, hi(a).v)};
 }
 
 YNN_ALWAYS_INLINE s16x8 cast(f32x8 f, int16_t) {
-  const s32x4 i0 = cast(f.lo(), int32_t());
-  const s32x4 i1 = cast(f.hi(), int32_t());
+  const s32x4 i0 = cast(lo(f), int32_t());
+  const s32x4 i1 = cast(hi(f), int32_t());
   return cast(s32x8(i0, i1), int16_t());
 }
 
 YNN_ALWAYS_INLINE s8x16 cast(f32x16 f, int8_t) {
-  const s16x8 i01 = cast(f.lo(), int16_t());
-  const s16x8 i23 = cast(f.hi(), int16_t());
+  const s16x8 i01 = cast(lo(f), int16_t());
+  const s16x8 i23 = cast(hi(f), int16_t());
   return cast(s16x16(i01, i23), int8_t());
 }
 
 YNN_ALWAYS_INLINE u8x16 cast(f32x16 f, uint8_t) {
-  const s32x4 i0 = cast(f.lo().lo(), int32_t());
-  const s32x4 i1 = cast(f.lo().hi(), int32_t());
-  const s32x4 i2 = cast(f.hi().lo(), int32_t());
-  const s32x4 i3 = cast(f.hi().hi(), int32_t());
+  const s32x4 i0 = cast(lo(lo(f)), int32_t());
+  const s32x4 i1 = cast(hi(lo(f)), int32_t());
+  const s32x4 i2 = cast(lo(hi(f)), int32_t());
+  const s32x4 i3 = cast(hi(hi(f)), int32_t());
   const __m128i i01_16 = _mm_packs_epi32(i0.v, i1.v);
   const __m128i i23_16 = _mm_packs_epi32(i2.v, i3.v);
   return u8x16{_mm_packus_epi16(i01_16, i23_16)};

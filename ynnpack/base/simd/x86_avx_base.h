@@ -38,6 +38,9 @@ YNN_ALWAYS_INLINE __m128i hi(__m256i x) {
   return _mm_castps_si128(_mm256_extractf128_ps(_mm256_castsi256_ps(x), 1));
 }
 
+YNN_ALWAYS_INLINE __m128d lo(__m256d x) {return _mm256_castpd256_pd128(x); }
+YNN_ALWAYS_INLINE __m128d hi(__m256d x) { return _mm256_extractf128_pd(x, 1); }
+
 YNN_ALWAYS_INLINE __m256 concat(__m128 lo, __m128 hi) {
   return _mm256_insertf128_ps(_mm256_castps128_ps256(lo), hi, 1);
 }
@@ -62,13 +65,6 @@ struct vec<double, 4> {
   vec(double x) : v(_mm256_set1_pd(x)) {}  // NOLINT
 
   __m256d v;
-
-  YNN_ALWAYS_INLINE f64x2 lo() const {
-    return f64x2{_mm256_castpd256_pd128(v)};
-  }
-  YNN_ALWAYS_INLINE f64x2 hi() const {
-    return f64x2{_mm256_extractf128_pd(v, 1)};
-  }
 };
 
 template <>
@@ -82,9 +78,6 @@ struct vec<float, 8> {
   vec(float x) : v(_mm256_set1_ps(x)) {}  // NOLINT
 
   __m256 v;
-
-  YNN_ALWAYS_INLINE f32x4 lo() const { return f32x4{internal::lo(v)}; }
-  YNN_ALWAYS_INLINE f32x4 hi() const { return f32x4{internal::hi(v)}; }
 };
 
 template <>
@@ -98,9 +91,6 @@ struct vec<uint32_t, 8> {
   vec(uint32_t x) : v(_mm256_set1_epi32(x)) {}  // NOLINT
 
   __m256i v;
-
-  YNN_ALWAYS_INLINE u32x4 lo() const { return u32x4{internal::lo(v)}; }
-  YNN_ALWAYS_INLINE u32x4 hi() const { return u32x4{internal::hi(v)}; }
 };
 
 template <>
@@ -114,9 +104,6 @@ struct vec<int32_t, 8> {
   vec(int32_t x) : v(_mm256_set1_epi32(x)) {}  // NOLINT
 
   __m256i v;
-
-  YNN_ALWAYS_INLINE s32x4 lo() const { return s32x4{internal::lo(v)}; }
-  YNN_ALWAYS_INLINE s32x4 hi() const { return s32x4{internal::hi(v)}; }
 };
 
 template <>
@@ -130,9 +117,6 @@ struct vec<bfloat16, 16> {
   vec(bfloat16 x) : v(_mm256_set1_epi16(x.to_bits())) {}  // NOLINT
 
   __m256i v;
-
-  YNN_ALWAYS_INLINE bf16x8 lo() const { return bf16x8{internal::lo(v)}; }
-  YNN_ALWAYS_INLINE bf16x8 hi() const { return bf16x8{internal::hi(v)}; }
 };
 
 template <>
@@ -146,9 +130,6 @@ struct vec<half, 16> {
   vec(half x) : v(_mm256_set1_epi16(x.to_bits())) {}  // NOLINT
 
   __m256i v;
-
-  YNN_ALWAYS_INLINE f16x8 lo() const { return f16x8{internal::lo(v)}; }
-  YNN_ALWAYS_INLINE f16x8 hi() const { return f16x8{internal::hi(v)}; }
 };
 
 template <>
@@ -162,9 +143,6 @@ struct vec<uint16_t, 16> {
   vec(uint16_t x) : v(_mm256_set1_epi16(x)) {}  // NOLINT
 
   __m256i v;
-
-  YNN_ALWAYS_INLINE u16x8 lo() const { return u16x8{internal::lo(v)}; }
-  YNN_ALWAYS_INLINE u16x8 hi() const { return u16x8{internal::hi(v)}; }
 };
 
 template <>
@@ -178,9 +156,6 @@ struct vec<int16_t, 16> {
   vec(int16_t x) : v(_mm256_set1_epi16(x)) {}  // NOLINT
 
   __m256i v;
-
-  YNN_ALWAYS_INLINE s16x8 lo() const { return s16x8{internal::lo(v)}; }
-  YNN_ALWAYS_INLINE s16x8 hi() const { return s16x8{internal::hi(v)}; }
 };
 
 template <>
@@ -194,9 +169,6 @@ struct vec<uint8_t, 32> {
   vec(uint8_t x) : v(_mm256_set1_epi8(x)) {}  // NOLINT
 
   __m256i v;
-
-  YNN_ALWAYS_INLINE u8x16 lo() const { return u8x16{internal::lo(v)}; }
-  YNN_ALWAYS_INLINE u8x16 hi() const { return u8x16{internal::hi(v)}; }
 };
 
 template <>
@@ -210,9 +182,6 @@ struct vec<int8_t, 32> {
   vec(int8_t x) : v(_mm256_set1_epi8(x)) {}  // NOLINT
 
   __m256i v;
-
-  YNN_ALWAYS_INLINE s8x16 lo() const { return s8x16{internal::lo(v)}; }
-  YNN_ALWAYS_INLINE s8x16 hi() const { return s8x16{internal::hi(v)}; }
 };
 
 struct s2x128 {
@@ -233,6 +202,27 @@ using u16x16 = vec<uint16_t, 16>;
 using s16x16 = vec<int16_t, 16>;
 using u8x32 = vec<uint8_t, 32>;
 using s8x32 = vec<int8_t, 32>;
+
+YNN_ALWAYS_INLINE f64x2 lo(f64x4 x) { return f64x2{internal::lo(x.v)}; }
+YNN_ALWAYS_INLINE f64x2 hi(f64x4 x) { return f64x2{internal::hi(x.v)}; }
+YNN_ALWAYS_INLINE f32x4 lo(f32x8 x) { return f32x4{internal::lo(x.v)}; }
+YNN_ALWAYS_INLINE f32x4 hi(f32x8 x) { return f32x4{internal::hi(x.v)}; }
+YNN_ALWAYS_INLINE u32x4 lo(u32x8 x) { return u32x4{internal::lo(x.v)}; }
+YNN_ALWAYS_INLINE u32x4 hi(u32x8 x) { return u32x4{internal::hi(x.v)}; }
+YNN_ALWAYS_INLINE s32x4 lo(s32x8 x) { return s32x4{internal::lo(x.v)}; }
+YNN_ALWAYS_INLINE s32x4 hi(s32x8 x) { return s32x4{internal::hi(x.v)}; }
+YNN_ALWAYS_INLINE bf16x8 lo(bf16x16 x) { return bf16x8{internal::lo(x.v)}; }
+YNN_ALWAYS_INLINE bf16x8 hi(bf16x16 x) { return bf16x8{internal::hi(x.v)}; }
+YNN_ALWAYS_INLINE f16x8 lo(f16x16 x) { return f16x8{internal::lo(x.v)}; }
+YNN_ALWAYS_INLINE f16x8 hi(f16x16 x) { return f16x8{internal::hi(x.v)}; }
+YNN_ALWAYS_INLINE u16x8 lo(u16x16 x) { return u16x8{internal::lo(x.v)}; }
+YNN_ALWAYS_INLINE u16x8 hi(u16x16 x) { return u16x8{internal::hi(x.v)}; }
+YNN_ALWAYS_INLINE s16x8 lo(s16x16 x) { return s16x8{internal::lo(x.v)}; }
+YNN_ALWAYS_INLINE s16x8 hi(s16x16 x) { return s16x8{internal::hi(x.v)}; }
+YNN_ALWAYS_INLINE u8x16 lo(u8x32 x) { return u8x16{internal::lo(x.v)}; }
+YNN_ALWAYS_INLINE u8x16 hi(u8x32 x) { return u8x16{internal::hi(x.v)}; }
+YNN_ALWAYS_INLINE s8x16 lo(s8x32 x) { return s8x16{internal::lo(x.v)}; }
+YNN_ALWAYS_INLINE s8x16 hi(s8x32 x) { return s8x16{internal::hi(x.v)}; }
 
 namespace internal {
 
