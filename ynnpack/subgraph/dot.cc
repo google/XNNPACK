@@ -501,6 +501,24 @@ uint32_t define_pack_b(ynn_subgraph_t subgraph, const dot_type& type,
     if (num_k_dims > 1) {
       sched->force_root = true;
     }
+    // Use "identity" splits where step == extent which will always fuse into
+    // parent loop as long as extents match.
+    // TODO(vksnk): Ideally we should select better steps, so the packing is
+    // parallelized even if it's not fused.
+    for (int i = 0; i < output.extents.size(); i++) {
+      sched->loop_splits.push_back({dims[i], output.physical_extent(i),
+                                    slinky::loop::serial,
+                                    output.physical_extent(i),
+                                    /*step_is_required=*/false});
+    }
+    // ki (dim 0) and ko (dim 2) must not be split.
+    // We enforce this by requiring their step to be equal to their extent.
+    sched->loop_splits[0].step_is_required = true;
+    sched->loop_splits[2].step_is_required = true;
+    // We split the n into no and ni, so in order to be able to fuse it with
+    // n-loop we trick scheduler into thinking that extent is matching n-extent.
+    sched->loop_splits[3].extent = input.extent(0);
+
     func.user_data() = sched.get();
     runtime.scheduling_info_storage.push_back(std::move(sched));
 
