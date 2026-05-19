@@ -236,7 +236,11 @@ ynn_status create_unary(const ynn_node& node, ynn_runtime& runtime,
   x.make_buffer(runtime);
   std::vector<slinky::var> dims = runtime.globals.make_dims(x.rank());
   slinky::box_expr bounds = make_elementwise_bounds(dims, a.physical_extents());
-
+  if (!bounds.empty() &&
+      type_element_count(a.type) > type_element_count(x.type)) {
+    bounds[0] =
+        (bounds[0] * type_element_count(x.type)) / type_element_count(a.type);
+  }
   slinky::call_stmt::attributes attrs;
   attrs.name = to_string(std::get<ynn_node::unary_elementwise>(node.op).op);
   attrs.allow_in_place = compute_allow_in_place(node, *runtime.subgraph);
