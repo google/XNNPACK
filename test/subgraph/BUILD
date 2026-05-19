@@ -153,6 +153,7 @@ NO_YNNPACK = [
 xnnpack_unit_test(
     name = "fp16_to_fp32_fallback_test",
     srcs = ["fp16-to-fp32-fallback.cc"],
+    tags = ["no_ynnpack"],
     deps = [
         "//:XNNPACK",
         "//:node_type",
