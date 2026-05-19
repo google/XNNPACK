@@ -776,11 +776,27 @@ YNN_ALWAYS_INLINE f32x4 exp2_round(f32x4 a) {
 }
 #ifdef YNN_ARCH_ARM64
 YNN_ALWAYS_INLINE f64x2 floor_log2(f64x2 a) {
-  const double result[] = {
-      ynn::floor_log2(vgetq_lane_f64(a.v, 0)),
-      ynn::floor_log2(vgetq_lane_f64(a.v, 1)),
-  };
-  return f64x2{vld1q_f64(result)};
+  uint64x2_t is_zero = vceqq_f64(a.v, vdupq_n_f64(0.0));
+  a.v = vreinterpretq_f64_u64(
+      vorrq_u64(vandq_u64(is_zero, vreinterpretq_u64_f64(vdupq_n_f64(-0.0))),
+                vreinterpretq_u64_f64(a.v)));
+
+  uint64x2_t sign_and_exp_mask = vdupq_n_u64(0xFFF0000000000000ULL);
+  int64x2_t exp = vreinterpretq_s64_u64(
+      vandq_u64(vreinterpretq_u64_f64(a.v), sign_and_exp_mask));
+
+  float64x2_t infinity = vdupq_n_f64(std::numeric_limits<double>::infinity());
+  uint64x2_t is_inf = vceqq_f64(a.v, infinity);
+
+  exp = vshrq_n_s64(exp, 11);
+
+  float64x2_t bias_2048 = vdupq_n_f64(2048.0);
+  float64x2_t bias_3071 = vdupq_n_f64(3071.0);
+  float64x2_t res = vsubq_f64(
+      vreinterpretq_f64_u64(vorrq_u64(vreinterpretq_u64_f64(bias_2048),
+                                      vreinterpretq_u64_s64(exp))),
+      bias_3071);
+  return f64x2{vbslq_f64(is_inf, infinity, res)};
 }
 YNN_ALWAYS_INLINE f64x2 exp2_round(f64x2 a) {
   float64x2_t magic = vdupq_n_f64(1023.0 + static_cast<double>(1ll << 52));

@@ -141,10 +141,24 @@ YNN_ALWAYS_INLINE f32x8 floor_log2(f32x8 a) {
       _mm256_sub_ps(_mm256_or_ps(bias_256, _mm256_castsi256_ps(exp)), bias_383);
   return f32x8{_mm256_blendv_ps(res, infinity, is_inf)};
 }
-YNN_ALWAYS_INLINE f64x2 floor_log2(f64x2 a) {
-  double a0 = _mm_cvtsd_f64(a.v);
-  double a1 = _mm_cvtsd_f64(_mm_shuffle_pd(a.v, a.v, _MM_SHUFFLE2(1, 1)));
-  return f64x2(_mm_set_pd(ynn::floor_log2(a1), ynn::floor_log2(a0)));
+YNN_ALWAYS_INLINE f64x4 floor_log2(f64x4 a) {
+  __m256d sign_mask = _mm256_set1_pd(-0.0);
+  __m256d is_zero = _mm256_cmp_pd(a.v, _mm256_setzero_pd(), _CMP_EQ_OQ);
+  a.v = _mm256_or_pd(_mm256_and_pd(is_zero, sign_mask), a.v);
+
+  __m256i sign_and_exp_mask = _mm256_set1_epi64x(0xFFF0000000000000);
+  __m256i exp = _mm256_and_si256(_mm256_castpd_si256(a.v), sign_and_exp_mask);
+
+  __m256d infinity = _mm256_set1_pd(std::numeric_limits<double>::infinity());
+  __m256d is_inf = _mm256_cmp_pd(a.v, infinity, _CMP_EQ_OQ);
+
+  exp = _mm256_srai_epi32(exp, 11);
+
+  __m256d bias_2048 = _mm256_set1_pd(2048.0);
+  __m256d bias_3071 = _mm256_set1_pd(3071.0);
+  __m256d res = _mm256_sub_pd(_mm256_or_pd(bias_2048, _mm256_castsi256_pd(exp)),
+                              bias_3071);
+  return f64x4{_mm256_blendv_pd(res, infinity, is_inf)};
 }
 
 YNN_ALWAYS_INLINE s8x32 cast(s2x32 from, int8_t) {

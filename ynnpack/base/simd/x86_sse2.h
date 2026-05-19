@@ -9,7 +9,6 @@
 #include <cstdint>
 #include <limits>
 
-#include "ynnpack/base/arithmetic.h"
 #include "ynnpack/base/base.h"
 #include "ynnpack/base/bfloat16.h"
 #include "ynnpack/base/half.h"
@@ -95,9 +94,24 @@ YNN_ALWAYS_INLINE f32x4 floor_log2(f32x4 a) {
       _mm_or_ps(_mm_andnot_ps(is_inf, res), _mm_and_ps(is_inf, infinity))};
 }
 YNN_ALWAYS_INLINE f64x2 floor_log2(f64x2 a) {
-  double a0 = _mm_cvtsd_f64(a.v);
-  double a1 = _mm_cvtsd_f64(_mm_shuffle_pd(a.v, a.v, _MM_SHUFFLE2(1, 1)));
-  return f64x2(_mm_set_pd(ynn::floor_log2(a1), ynn::floor_log2(a0)));
+  __m128d sign_mask = _mm_set1_pd(-0.0);
+  __m128d is_zero = _mm_cmpeq_pd(a.v, _mm_setzero_pd());
+  a.v = _mm_or_pd(_mm_and_pd(is_zero, sign_mask), a.v);
+
+  __m128i sign_and_exp_mask = _mm_set1_epi64x(0xFFF0000000000000);
+  __m128i exp = _mm_and_si128(_mm_castpd_si128(a.v), sign_and_exp_mask);
+
+  __m128d infinity = _mm_set1_pd(std::numeric_limits<double>::infinity());
+  __m128d is_inf = _mm_cmpeq_pd(a.v, infinity);
+
+  exp = _mm_srai_epi32(exp, 11);
+
+  __m128d bias_2048 = _mm_set1_pd(2048.0);
+  __m128d bias_3071 = _mm_set1_pd(3071.0);
+  __m128d res =
+      _mm_sub_pd(_mm_or_pd(bias_2048, _mm_castsi128_pd(exp)), bias_3071);
+  return f64x2{
+      _mm_or_pd(_mm_andnot_pd(is_inf, res), _mm_and_pd(is_inf, infinity))};
 }
 
 }  // namespace simd

@@ -546,9 +546,23 @@ YNN_ALWAYS_INLINE f32x4 floor_log2(f32x4 a) {
 }
 
 YNN_ALWAYS_INLINE f64x2 floor_log2(f64x2 a) {
-  return f64x2{wasm_f64x2_make(
-      ynn::floor_log2(wasm_f64x2_extract_lane(a.v, 0)),
-      ynn::floor_log2(wasm_f64x2_extract_lane(a.v, 1)))};
+  const v128_t sign_mask = wasm_f64x2_splat(-0.0);
+  const v128_t is_zero = wasm_f64x2_eq(a.v, wasm_f64x2_splat(0.0));
+  a.v = wasm_v128_or(wasm_v128_and(is_zero, sign_mask), a.v);
+
+  const v128_t sign_and_exp_mask = wasm_i64x2_splat(0xFFF0000000000000ULL);
+  v128_t exp = wasm_v128_and(a.v, sign_and_exp_mask);
+
+  const v128_t infinity =
+      wasm_f64x2_splat(std::numeric_limits<double>::infinity());
+  const v128_t is_inf = wasm_f64x2_eq(a.v, infinity);
+
+  exp = wasm_i64x2_shr(exp, 11);
+
+  const v128_t bias_2048 = wasm_f64x2_splat(2048.0);
+  const v128_t bias_3071 = wasm_f64x2_splat(3071.0);
+  const v128_t res = wasm_f64x2_sub(wasm_v128_or(bias_2048, exp), bias_3071);
+  return f64x2{wasm_v128_bitselect(infinity, res, is_inf)};
 }
 
 YNN_ALWAYS_INLINE f32x4 exp2_round(f32x4 a) {
