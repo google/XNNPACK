@@ -184,16 +184,7 @@ struct sigmoid : public unary_op_info {
   }
 
   tolerance_spec tolerance(ynn_type /*type*/) const override {
-    return tolerance_spec{/*relative=*/1.0f, /*absolute=*/1.0f};
-  }
-
-  interval domain(ynn_type type) const override {
-    switch (type) {
-      case ynn_type_fp16:
-        return {-25.0f, 25.0f};
-      default:
-        return {-125.0f, 125.0f};
-    }
+    return tolerance_spec{/*relative=*/2.0f, /*absolute=*/1e-2f};
   }
 };
 
