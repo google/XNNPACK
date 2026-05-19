@@ -275,15 +275,6 @@ struct tanh : public unary_op_info {
   tolerance_spec tolerance(ynn_type /*type*/) const override {
     return tolerance_spec{/*relative=*/5.0f, /*absolute=*/1.0f};
   }
-
-  interval domain(ynn_type type) const override {
-    switch (type) {
-      case ynn_type_fp16:
-        return {-5.0f, 5.0f};
-      default:
-        return {-10.0f, 10.0f};
-    }
-  }
 };
 
 struct reciprocal_square_root : public unary_op_info {

@@ -49,6 +49,7 @@ def main(argv: Sequence[str]) -> None:
           (square_root_fp64, (4, 1)),
           (sigmoid_fp32, (32, 1)),
           (tanh_fp32, (16, 1)),
+          (tanh_fp64, (8, 1)),
       ],
       "x86_sse41": [
           (ceil_fp32, (8, 1)),
@@ -85,6 +86,7 @@ def main(argv: Sequence[str]) -> None:
           (square_root_fp32, (16, 1)),
           (square_root_fp64, (8, 1)),
           (tanh_fp32, (32, 1)),
+          (tanh_fp64, (16, 1)),
       ],
       "x86_avx2": [
           (convert_bf16_to_fp32, (16, 1)),
@@ -145,6 +147,7 @@ def main(argv: Sequence[str]) -> None:
           (square_root_fp64, (16, 1)),
           (sigmoid_fp32, (32, 1)),
           (tanh_fp32, (32, 1)),
+          (tanh_fp64, (16, 1)),
           (convert_int2_to_int8, (64, 1)),
           (convert_int4_to_int8, (64, 1)),
       ],
@@ -187,6 +190,7 @@ def main(argv: Sequence[str]) -> None:
           (round_fp64, (4, 1)),
           (square_fp64, (4, 1)),
           (square_root_fp64, (4, 1)),
+          (tanh_fp64, (8, 1)),
       ],
       "arm_neonbf16": [
           (convert_fp32_to_bf16, (64, 1)),

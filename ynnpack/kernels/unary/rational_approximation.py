@@ -218,3 +218,36 @@ x_test = np.linspace(x_min, x_max, 5000)
 approx = x_test * poly_eval(p, x_test) / poly_eval(q, x_test)
 plot_error(lambda x: np.log2(x + 1), x_test, approx)
 # %%
+import numpy as np
+
+
+# Target: tanh(sqrt(x)) / sqrt(x)
+# This transformation forces the resulting tanh(t) to have
+# an odd numerator and even denominator when t^2 = x.
+def f_target(x):
+  sqrt_x = np.sqrt(np.maximum(x, 1e-15))
+  return np.tanh(sqrt_x) / sqrt_x
+
+
+p_degree, q_degree = 4, 4
+x_min, x_max = 0, 8**2
+
+p, q = rational_approximation(
+    f_target, x_min, x_max, p_degree, q_degree, dtype=np.float32
+)
+
+print_polynomial("p", p, output_multiplier=True)
+print_polynomial("q", q)
+
+# Evaluate final error for tanh(t)
+t_test = np.linspace(-8, 8, 5000).astype(np.float32)
+x_test = t_test**2
+approx = t_test * (poly_eval(p, x_test) / poly_eval(q, x_test))
+
+plot_error(
+    np.tanh,
+    t_test,
+    approx,
+    title="Relative Error for tanh(t) via tanh(sqrt(x))/sqrt(x)",
+)
+# %%

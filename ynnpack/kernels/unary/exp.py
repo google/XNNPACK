@@ -6,19 +6,6 @@ from ynnpack.kernels.elementwise.compiler import *  # pylint: disable=wildcard-i
 from ynnpack.kernels.unary.util import *  # pylint: disable=wildcard-import
 
 
-def qd_round_f32(a):
-  # If `x` is an floating point value in the range `[2^-22, 2^22)`, then
-  # `(x + magic) - magic`` will generate the floating point value corresponding
-  # to `round(x)`.
-  vmagic = 1.5*(2**23)
-  return (vmagic + a) - vmagic
-
-
-def qd_round_f64(a):
-  vmagic = 1.5*(2**52)
-  return (vmagic + a) - vmagic
-
-
 @const_buffer("a", Float(32))
 @buffer("x", Float(32))
 @params(
@@ -46,7 +33,7 @@ def exp_fp32(a, x, output_multiplier, input_multiplier):
   vz_prime = min(max(va, -127.0), 128.0)
 
   # Decompose x * log2e into `z` (integer part) and `r` (remainder).
-  vz = qd_round_f32(vz_prime)
+  vz = round_small_fp32(vz_prime)
   vr = vz_prime - vz
 
   # Compute 2^z.
@@ -97,7 +84,7 @@ def exp_fp64(a, x, output_multiplier, input_multiplier):
   vz_prime = min(max(va, -1023.0), 1024.0)
 
   # Decompose x * log2e into `z` (integer part) and `r` (remainder).
-  vz = qd_round_f64(vz_prime)
+  vz = round_small_fp64(vz_prime)
   vr = vz_prime - vz
 
   # Compute 2^z.

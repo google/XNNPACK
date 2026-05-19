@@ -21,3 +21,15 @@ def eval_polynomial(x, coeffs):
     else:
       y = multiply_add(x, y, coeffs[i])
   return y
+
+
+def round_small_fp32(a):
+  """Round a float in [2^-22, 2^22) to the nearest whole number."""
+  vmagic = 1.5 * (2**23)
+  return (vmagic + a) - vmagic
+
+
+def round_small_fp64(a):
+  """Round a float in [2^-51, 2^51) to the nearest whole number."""
+  vmagic = 1.5 * (2**52)
+  return (vmagic + a) - vmagic
