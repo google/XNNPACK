@@ -6,6 +6,41 @@ from ynnpack.kernels.elementwise.compiler import *  # pylint: disable=wildcard-i
 from ynnpack.kernels.unary.util import *  # pylint: disable=wildcard-import
 
 
+def log_impl(a, p, q, ln2_hi, ln2_lo):
+  # log(a) = log2(m) * ln2 + e * ln2 = (e + log2(m)) * ln2
+  vexp = floor_log2(a)
+
+  if a.ty == Float(32):
+    vmantissa_mask = i32(0x007FFFFF)
+    one_bits = i32(0x3F800000)
+    vx_bits = reinterpret_cast(Int(32), a)
+    vx_norm = reinterpret_cast(Float(32), (vx_bits & vmantissa_mask) | one_bits)
+  else:
+    vmantissa_mask = i64(0x000FFFFFFFFFFFFF)
+    one_bits = i64(0x3FF0000000000000)
+    vx_bits = reinterpret_cast(Int(64), a)
+    vx_norm = reinterpret_cast(Float(64), (vx_bits & vmantissa_mask) | one_bits)
+
+  # Adjust the mantissa to the range [1/sqrt(2), sqrt(2)].
+  cond = vx_norm > math.sqrt(2.0)
+  vx_norm = select(cond, vx_norm * 0.5, vx_norm)
+  vexp = select(cond, vexp + 1, vexp)
+
+  if a.ty == Float(64):
+    vr = vx_norm - f64(1.0)
+  else:
+    vr = vx_norm - 1.0
+
+  vp = eval_polynomial(vr, p)
+  vq = eval_polynomial(vr, q)
+  vy = vp / vq
+
+  # result = (vexp + vy) * ln2
+  # order: (vexp + vy) * ln2_hi + (vexp + vy) * ln2_lo
+  vlog2 = vexp + vy
+  return multiply_add(vlog2, ln2_lo, vlog2 * ln2_hi)
+
+
 @const_buffer("a", Float(32))
 @buffer("x", Float(32))
 @params(
@@ -13,48 +48,27 @@ from ynnpack.kernels.unary.util import *  # pylint: disable=wildcard-import
     Scalar("output_multiplier", Float(32)),
 )
 @operator_name("log")
-def log_fp32(a, x, input_multiplier, output_multiplier):
-  # Some useful constants.
-  vmantissa_mask = i32(0x007FFFFF)
-
-  # Polynomial coefficients
+def log_fp32(a_buf, x_buf, input_multiplier, output_multiplier):
+  # Polynomial coefficients for log2(1+x)/x on [-0.3, 0.42]
   p = [
-      1.7932410538e-01,
-      1.2533404827e00,
+      2.9484698176e-01,
+      1.5053815842e00,
       1.4426950216e00,
       0.0000000000e00,
   ]
   q = [
-      3.1246891245e-02,
-      4.7536420822e-01,
-      1.3687485456e00,
+      5.6864939630e-02,
+      6.4276754856e-01,
+      1.5434517860e00,
       1.0000000000e00,
   ]
 
-  vx = load(a) * input_multiplier
+  ln2_hi = 0.693145751953125
+  ln2_lo = 1.4286067653e-06
 
-  # log2(x) = log2(x'*2^exp) = log2(x') + exp where x' is in [1, 2) and exp is
-  # an integer. x' is the mantissa with an exponent of 0, and exp is
-  # floor(log2(x)).
-  vexp = floor_log2(vx)
-  vx_bits = reinterpret_cast(Int(32), vx)
-  one_bits = reinterpret_cast(Int(32), f32(1.0))
-  vx_norm_bits = (vx_bits & vmantissa_mask) | one_bits
-  vx_norm = reinterpret_cast(Float(32), vx_norm_bits)
-
-  # Our polynomial approximates log2(x + 1) on the interval [0, 1]
-  vr = vx_norm - 1.0
-
-  vp = eval_polynomial(vr, p)
-  vq = eval_polynomial(vr, q)
-
-  # Divide the numerator by the denominator.
-  vy = vp / vq
-
-  # log2(x') = vy
-  vy = (vexp + vy) * output_multiplier
-
-  return store(vy, x)
+  a = load(a_buf) * input_multiplier
+  x = log_impl(a, p, q, ln2_hi, ln2_lo)
+  return store(x * output_multiplier, x_buf)
 
 
 @const_buffer("a", Float(64))
@@ -64,53 +78,29 @@ def log_fp32(a, x, input_multiplier, output_multiplier):
     Scalar("output_multiplier", Float(64)),
 )
 @operator_name("log")
-def log_fp64(a, x, input_multiplier, output_multiplier):
-  # Some useful constants.
-  vmantissa_mask = i64(0x000FFFFFFFFFFFFF)
-
-  # Polynomial coefficients
+def log_fp64(a_buf, x_buf, input_multiplier, output_multiplier):
+  # Polynomial coefficients for log2(1+x)/x on [-0.3, 0.42]
   p = [
-      f64(-2.527446318229127544e-03),
-      f64(-8.135266103629081036e-02),
-      f64(-5.867592932264611427e-01),
-      f64(-1.284504598302105949e00),
-      f64(-1.400574861027075180e-01),
-      f64(2.047856959129240373e00),
-      f64(1.442695040888963165e00),
-      f64(0.0),
+      f64(7.343492468411156292e-03),
+      f64(1.857349351736143628e-01),
+      f64(1.229266931139749275e00),
+      f64(3.212163638325623349e00),
+      f64(3.596265560063666378e00),
+      f64(1.442695040888963831e00),
+      f64(0.000000000000000000e00),
   ]
   q = [
-      f64(-3.354382895618343314e-04),
-      f64(-1.824426552234581847e-02),
-      f64(-2.083019139798093777e-01),
-      f64(-8.110403419400664671e-01),
-      f64(-1.015513156413926588e00),
-      f64(5.293193537676974536e-01),
-      f64(1.919466277410421862e00),
+      f64(1.034012664071056126e-03),
+      f64(4.419595181114822913e-02),
+      f64(4.467065862797955367e-01),
+      f64(1.799252214383866288e00),
+      f64(3.389539502820695382e00),
+      f64(2.992741333502965340e00),
       f64(1.000000000000000000e00),
   ]
+  ln2_hi = f64(6.93147180369123816490e-01)
+  ln2_lo = f64(1.90821492927058770002e-10)
 
-  vx = load(a) * input_multiplier
-
-  # log2(x) = log2(x'*2^exp) = log2(x') + exp where x' is in [1, 2) and exp is
-  # an integer. x' is the mantissa with an exponent of 0, and exp is
-  # floor(log2(x)).
-  vexp = floor_log2(vx)
-  vx_bits = reinterpret_cast(Int(64), vx)
-  one_bits = reinterpret_cast(Int(64), f64(1.0))
-  vx_norm_bits = (vx_bits & vmantissa_mask) | one_bits
-  vx_norm = reinterpret_cast(Float(64), vx_norm_bits)
-
-  # Our polynomial approximates log2(x + 1)
-  vr = vx_norm - f64(1.0)
-
-  vp = eval_polynomial(vr, p)
-  vq = eval_polynomial(vr, q)
-
-  # Divide the numerator by the denominator.
-  vy = vp / vq
-
-  # log2(x') = vy
-  vy = (vexp + vy) * output_multiplier
-
-  return store(vy, x)
+  a = load(a_buf) * input_multiplier
+  x = log_impl(a, p, q, ln2_hi, ln2_lo)
+  return store(x * output_multiplier, x_buf)

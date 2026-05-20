@@ -155,33 +155,6 @@ x_test = np.linspace(x_min, x_max, 5000)
 approx = poly_eval(p, x_test) / poly_eval(q, x_test)
 plot_error(f, x_test, approx)
 # %%
-import math
-
-# Target: R(x) = log2(x + 1) / x
-# This ensures x * R(x) = log2(x + 1)
-def f(x):
-  with np.errstate(divide="ignore", invalid="ignore"):
-    return np.where(x == 0, 1.0 / np.log(2), np.log1p(x) / (x * np.log(2)))
-
-
-p_degree, q_degree = 2, 3
-# Standard range for a log approximation part (e.g., after range reduction)
-x_min, x_max = 0, 1
-
-p, q = rational_approximation(
-    f, x_min, x_max, p_degree, q_degree, dtype=np.float32
-)
-p = np.insert(p, 0, [0])
-
-print_polynomial("p", p)
-print_polynomial("q", q)
-
-x_test = np.linspace(x_min, x_max, 5000)
-approx = poly_eval(p, x_test) / poly_eval(q, x_test)
-target = np.log2(x_test + 1)
-
-plot_error(lambda x: np.log2(x + 1), x_test, approx)
-# %%
 # fp64 exp
 f = np.exp
 p_degree, q_degree = 5, 5
@@ -200,20 +173,46 @@ plot_error(f, x_test, approx)
 # %%
 import math
 
+# Target: R(x) = log2(x + 1) / x
+# This ensures x * R(x) = log2(x + 1)
+def f(x):
+  return np.log1p(x) / (x * np.log(2))
+
+
+p_degree, q_degree = 2, 3
+# Standard range for a log approximation part (e.g., after range reduction)
+x_min, x_max = -0.3, 0.42
+
+
+p, q = rational_approximation(
+    f, x_min, x_max, p_degree, q_degree, dtype=np.float32
+)
+p = np.insert(p, 0, [0])
+
+print_polynomial("p", p)
+print_polynomial("q", q)
+
+x_test = np.linspace(x_min, x_max, 5000)
+approx = poly_eval(p, x_test) / poly_eval(q, x_test)
+plot_error(lambda x: np.log2(x + 1), x_test, approx)
+# %%
+import math
+
 # fp64 log2(x + 1)
-f = lambda x: np.where(x == 0, 1.0 / np.log(2), np.log1p(x) / (x * np.log(2)))
-p_degree, q_degree = 6, 7
-x_min, x_max = 0, 1
+f = lambda x: np.log1p(x) / (x * np.log(2))
+p_degree, q_degree = 5, 6
+x_min, x_max = -0.3, 0.42
 p, q = rational_approximation(
     f, x_min, x_max, p_degree, q_degree, dtype=np.float64
 )
 
+p = np.insert(p, 0, [0])
 print_polynomial("p", p)
 print_polynomial("q", q)
 
 # Evaluate final error
 x_test = np.linspace(x_min, x_max, 5000)
-approx = x_test * poly_eval(p, x_test) / poly_eval(q, x_test)
+approx = poly_eval(p, x_test) / poly_eval(q, x_test)
 plot_error(lambda x: np.log2(x + 1), x_test, approx)
 # %%
 import numpy as np

@@ -282,7 +282,7 @@ class Value:
 
   def __lt__(self, y):
     x_pr, y_pr = promote_types(self, wrap(y))
-    return Op(get_cmp_type(x_pr), "less_than", [x_pr, y_pr])
+    return Op(get_cmp_type(x_pr), "less", [x_pr, y_pr])
 
   def __le__(self, y):
     x_pr, y_pr = promote_types(self, wrap(y))
@@ -290,7 +290,7 @@ class Value:
 
   def __gt__(self, y):
     x_pr, y_pr = promote_types(self, wrap(y))
-    opp = Op(get_cmp_type(x_pr), "greater_than", [x_pr, y_pr])
+    opp = Op(get_cmp_type(x_pr), "greater", [x_pr, y_pr])
     return opp
 
   def __ge__(self, y):
