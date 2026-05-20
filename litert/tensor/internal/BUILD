@@ -80,11 +80,11 @@ cc_library(
     name = "graph",
     srcs = ["graph.cc"],
     hdrs = ["graph.h"],
-    # copybara:uncomment includes = ["../utils"],
     defines = select({
         ":op_debugger_enabled": ["LITERT_OP_DEBUGGER_ENABLED=1"],
         "//conditions:default": [],
     }),
+    # copybara:uncomment includes = ["../utils"],
     deps = [
         "//litert/tensor:buffer",
         "//litert/tensor:datatypes",
