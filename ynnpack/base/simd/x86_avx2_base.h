@@ -165,6 +165,30 @@ YNN_ALWAYS_INLINE f32x8 cast(bf16x8 a, float) {
       16))};
 }
 
+YNN_ALWAYS_INLINE s32x8 operator==(s32x8 a, s32x8 b) {
+  return s32x8{_mm256_cmpeq_epi32(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE s32x8 operator>(s32x8 a, s32x8 b) {
+  return s32x8{_mm256_cmpgt_epi32(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE s32x8 operator<(s32x8 a, s32x8 b) { return b > a; }
+
+YNN_ALWAYS_INLINE s16x16 operator==(s16x16 a, s16x16 b) {
+  return s16x16{_mm256_cmpeq_epi16(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE s16x16 operator>(s16x16 a, s16x16 b) {
+  return s16x16{_mm256_cmpgt_epi16(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE s16x16 operator<(s16x16 a, s16x16 b) { return b > a; }
+
+YNN_ALWAYS_INLINE s8x32 operator==(s8x32 a, s8x32 b) {
+  return s8x32{_mm256_cmpeq_epi8(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE s8x32 operator>(s8x32 a, s8x32 b) {
+  return s8x32{_mm256_cmpgt_epi8(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE s8x32 operator<(s8x32 a, s8x32 b) { return b > a; }
+
 YNN_ALWAYS_INLINE f32x8 exp2_round(f32x8 a) {
   const __m256 magic = _mm256_set1_ps(127.0f + static_cast<float>(1 << 23));
   const __m256 res_bits = _mm256_add_ps(a.v, magic);
@@ -176,15 +200,6 @@ YNN_ALWAYS_INLINE f64x4 exp2_round(f64x4 a) {
   const __m256d res_bits = _mm256_add_pd(a.v, magic);
   return f64x4{_mm256_castsi256_pd(
       _mm256_slli_epi64(_mm256_castpd_si256(res_bits), 52))};
-}
-
-YNN_ALWAYS_INLINE f32x8 copynan(f32x8 x, f32x8 nan) {
-  return f32x8{
-      _mm256_blendv_ps(x.v, nan.v, _mm256_cmp_ps(nan.v, nan.v, _CMP_UNORD_Q))};
-}
-YNN_ALWAYS_INLINE f64x4 copynan(f64x4 x, f64x4 nan) {
-  return f64x4{
-      _mm256_blendv_pd(x.v, nan.v, _mm256_cmp_pd(nan.v, nan.v, _CMP_UNORD_Q))};
 }
 
 }  // namespace simd

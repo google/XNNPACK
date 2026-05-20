@@ -149,8 +149,6 @@ vec<T, N> floor_log2(vec<T, N> a);
 template <typename T, size_t N>
 vec<T, N> exp2_round(vec<T, N> a);
 template <typename T, size_t N>
-vec<T, N> copynan(vec<T, N> x, vec<T, N> nan);
-template <typename T, size_t N>
 vec<T, N> ceil(vec<T, N> a);
 template <typename T, size_t N>
 vec<T, N> round(vec<T, N> a);
@@ -164,6 +162,32 @@ template <typename T, size_t N>
 vec<T, N> sub_sat(vec<T, N> a, vec<T, N> b);
 template <typename T, size_t N>
 vec<T, N> operator<<(vec<T, N> a, int b);
+
+// Condition vectors are typed differently depending on the implementation. They
+// should be assigned to `auto` declarations, or just used directly without
+// assignment. `select` is the only operation that can consume comparison and
+// boolean logic operations.
+template <typename T, size_t N>
+auto operator==(vec<T, N> a, vec<T, N> b);
+template <typename T, size_t N>
+auto operator!=(vec<T, N> a, vec<T, N> b);
+template <typename T, size_t N>
+auto operator<(vec<T, N> a, vec<T, N> b);
+template <typename T, size_t N>
+auto operator<=(vec<T, N> a, vec<T, N> b);
+template <typename T, size_t N>
+auto operator>(vec<T, N> a, vec<T, N> b);
+template <typename T, size_t N>
+auto operator>=(vec<T, N> a, vec<T, N> b);
+template <typename T, size_t N>
+auto isinf(vec<T, N> a);
+template <typename T, size_t N>
+auto isnan(vec<T, N> a);
+template <typename T, size_t N>
+auto isfinite(vec<T, N> a);
+
+template <typename T, size_t N, typename M>
+vec<T, N> select(M cond, vec<T, N> a, vec<T, N> b);
 
 template <typename T>
 std::array<vec<T, 4>, 4> transpose(std::array<vec<T, 4>, 4> x);
@@ -191,9 +215,6 @@ template <typename T, size_t N>
 T horizontal_min(vec<T, N> x);
 template <typename T, size_t N>
 T horizontal_max(vec<T, N> x);
-
-template <typename T, size_t N>
-void kahan_sum(vec<T, N> a, vec<T, N>& acc, vec<T, N>& error);
 
 namespace internal {
 
@@ -354,10 +375,6 @@ template <typename T>
 YNN_ALWAYS_INLINE vec<T, 1> exp2_round(vec<T, 1> a) {
   return vec<T, 1>{ynn::exp2_round(a.v)};
 }
-template <typename T>
-YNN_ALWAYS_INLINE vec<T, 1> copynan(vec<T, 1> x, vec<T, 1> nan) {
-  return vec<T, 1>{ynn::copynan(x.v, nan.v)};
-}
 
 template <typename T>
 YNN_ALWAYS_INLINE vec<T, 1> cast(vec<T, 1> from, T) {
@@ -391,6 +408,50 @@ YNN_ALWAYS_INLINE vec<T, 1> operator<<(vec<T, 1> a, int bits) {
 }
 
 template <typename T>
+YNN_ALWAYS_INLINE vec<bool, 1> isinf(vec<T, 1> a) {
+  return vec<bool, 1>{std::isinf(a.v)};
+}
+template <typename T>
+YNN_ALWAYS_INLINE vec<bool, 1> isnan(vec<T, 1> a) {
+  return vec<bool, 1>{std::isnan(a.v)};
+}
+template <typename T>
+YNN_ALWAYS_INLINE vec<bool, 1> isfinite(vec<T, 1> a) {
+  return vec<bool, 1>{std::isfinite(a.v)};
+}
+
+template <typename T>
+YNN_ALWAYS_INLINE vec<bool, 1> operator==(vec<T, 1> a, vec<T, 1> b) {
+  return vec<bool, 1>{a.v == b.v};
+}
+template <typename T>
+YNN_ALWAYS_INLINE vec<bool, 1> operator!=(vec<T, 1> a, vec<T, 1> b) {
+  return vec<bool, 1>{a.v != b.v};
+}
+template <typename T>
+YNN_ALWAYS_INLINE vec<bool, 1> operator<(vec<T, 1> a, vec<T, 1> b) {
+  return vec<bool, 1>{a.v < b.v};
+}
+template <typename T>
+YNN_ALWAYS_INLINE vec<bool, 1> operator<=(vec<T, 1> a, vec<T, 1> b) {
+  return vec<bool, 1>{a.v <= b.v};
+}
+template <typename T>
+YNN_ALWAYS_INLINE vec<bool, 1> operator>(vec<T, 1> a, vec<T, 1> b) {
+  return vec<bool, 1>{a.v > b.v};
+}
+template <typename T>
+YNN_ALWAYS_INLINE vec<bool, 1> operator>=(vec<T, 1> a, vec<T, 1> b) {
+  return vec<bool, 1>{a.v >= b.v};
+}
+
+template <typename T>
+YNN_ALWAYS_INLINE vec<T, 1> select(vec<bool, 1> cond, vec<T, 1> a,
+                                   vec<T, 1> b) {
+  return vec<T, 1>{cond.v ? a : b};
+}
+
+template <typename T>
 YNN_ALWAYS_INLINE T horizontal_sum(vec<T, 1> x) {
   return x.v;
 }
@@ -401,12 +462,6 @@ YNN_ALWAYS_INLINE T horizontal_min(vec<T, 1> x) {
 template <typename T>
 YNN_ALWAYS_INLINE T horizontal_max(vec<T, 1> x) {
   return x.v;
-}
-
-template <typename T>
-YNN_ALWAYS_INLINE void kahan_sum(vec<T, 1> a, vec<T, 1>& acc,
-                                 vec<T, 1>& error) {
-  ynn::kahan_sum(a.v, acc.v, error.v);
 }
 
 }  // namespace simd

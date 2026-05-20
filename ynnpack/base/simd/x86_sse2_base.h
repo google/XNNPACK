@@ -12,7 +12,6 @@
 #include <cassert>
 #include <cstddef>
 #include <cstdint>
-#include <limits>
 #include <tuple>
 #include <type_traits>
 
@@ -135,6 +134,18 @@ struct vec<int8_t, 16> {
   __m128i v;
 };
 
+template <>
+struct vec<int64_t, 2> {
+  using value_type = int64_t;
+  static constexpr std::integral_constant<size_t, 2> N = {};
+
+  vec() = default;
+  explicit vec(__m128i v) : v(v) {}
+  vec(int64_t x) : v(_mm_set1_epi64x(x)) {}  // NOLINT
+
+  __m128i v;
+};
+
 struct s2x64 {
   __m128i v;
 };
@@ -167,6 +178,14 @@ YNN_ALWAYS_INLINE vec<double, 1> hi(vec<double, 2> x) {
   return vec<double, 1>{_mm_cvtsd_f64(_mm_unpackhi_pd(x.v, x.v))};
 }
 
+YNN_ALWAYS_INLINE vec<int64_t, 1> lo(vec<int64_t, 2> x) {
+  return vec<int64_t, 1>{_mm_cvtsi128_si64(x.v)};
+}
+YNN_ALWAYS_INLINE vec<int64_t, 1> hi(vec<int64_t, 2> x) {
+  return vec<int64_t, 1>{_mm_cvtsi128_si64(_mm_unpackhi_epi64(x.v, x.v))};
+}
+
+using s64x2 = vec<int64_t, 2>;
 using f64x2 = vec<double, 2>;
 using f32x4 = vec<float, 4>;
 using u32x4 = vec<uint32_t, 4>;
@@ -477,6 +496,49 @@ YNN_ALWAYS_INLINE s8x16 operator~(s8x16 a) {
   return s8x16{_mm_xor_si128(a.v, _mm_set1_epi32(-1))};
 }
 
+YNN_ALWAYS_INLINE u32x4 operator&(u32x4 a, u32x4 b) {
+  return u32x4{_mm_and_si128(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE u32x4 operator|(u32x4 a, u32x4 b) {
+  return u32x4{_mm_or_si128(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE u32x4 operator^(u32x4 a, u32x4 b) {
+  return u32x4{_mm_xor_si128(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE u32x4 operator~(u32x4 a) {
+  return u32x4{_mm_xor_si128(a.v, _mm_set1_epi32(-1))};
+}
+
+YNN_ALWAYS_INLINE u16x8 operator&(u16x8 a, u16x8 b) {
+  return u16x8{_mm_and_si128(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE u16x8 operator|(u16x8 a, u16x8 b) {
+  return u16x8{_mm_or_si128(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE u16x8 operator^(u16x8 a, u16x8 b) {
+  return u16x8{_mm_xor_si128(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE u16x8 operator~(u16x8 a) {
+  return u16x8{_mm_xor_si128(a.v, _mm_set1_epi32(-1))};
+}
+
+YNN_ALWAYS_INLINE vec<int64_t, 2> operator&(s64x2 a, s64x2 b) {
+  return s64x2{_mm_and_si128(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE s64x2 operator|(s64x2 a, s64x2 b) {
+  return s64x2{_mm_or_si128(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE s64x2 operator^(s64x2 a, s64x2 b) {
+  return s64x2{_mm_xor_si128(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE s64x2 operator~(s64x2 a) {
+  return s64x2{_mm_xor_si128(a.v, _mm_set1_epi32(-1))};
+}
+
+YNN_ALWAYS_INLINE s16x8 operator&(s16x8 a, int b) {
+  return a & s16x8((int16_t)b);
+}
+
 YNN_ALWAYS_INLINE f32x4 min(f32x4 a, f32x4 b) {
   return f32x4{_mm_min_ps(a.v, b.v)};
 }
@@ -531,36 +593,93 @@ YNN_ALWAYS_INLINE f64x2 exp2_round(f64x2 a) {
       _mm_castsi128_pd(_mm_slli_epi64(_mm_castpd_si128(res_bits), 52))};
 }
 
-YNN_ALWAYS_INLINE f32x4 copynan(f32x4 x, f32x4 nan) {
-  const __m128 is_nan = _mm_cmpunord_ps(nan.v, nan.v);
-  return f32x4{
-      _mm_or_ps(_mm_and_ps(is_nan, nan.v), _mm_andnot_ps(is_nan, x.v))};
+YNN_ALWAYS_INLINE s32x4 operator==(f32x4 a, f32x4 b) {
+  return s32x4{_mm_castps_si128(_mm_cmpeq_ps(a.v, b.v))};
 }
-YNN_ALWAYS_INLINE f64x2 copynan(f64x2 x, f64x2 nan) {
-  const __m128d is_nan = _mm_cmpunord_pd(nan.v, nan.v);
-  return f64x2{
-      _mm_or_pd(_mm_and_pd(is_nan, nan.v), _mm_andnot_pd(is_nan, x.v))};
+YNN_ALWAYS_INLINE s32x4 operator!=(f32x4 a, f32x4 b) {
+  return s32x4{_mm_castps_si128(_mm_cmpneq_ps(a.v, b.v))};
+}
+YNN_ALWAYS_INLINE s32x4 operator<(f32x4 a, f32x4 b) {
+  return s32x4{_mm_castps_si128(_mm_cmplt_ps(a.v, b.v))};
+}
+YNN_ALWAYS_INLINE s32x4 operator<=(f32x4 a, f32x4 b) {
+  return s32x4{_mm_castps_si128(_mm_cmple_ps(a.v, b.v))};
+}
+YNN_ALWAYS_INLINE s32x4 operator>(f32x4 a, f32x4 b) {
+  return s32x4{_mm_castps_si128(_mm_cmpgt_ps(a.v, b.v))};
+}
+YNN_ALWAYS_INLINE s32x4 operator>=(f32x4 a, f32x4 b) {
+  return s32x4{_mm_castps_si128(_mm_cmpge_ps(a.v, b.v))};
+}
+YNN_ALWAYS_INLINE s32x4 isnan(f32x4 a) {
+  return s32x4{_mm_castps_si128(_mm_cmpunord_ps(a.v, a.v))};
+}
+YNN_ALWAYS_INLINE s32x4 isinf(f32x4 a) {
+  __m128 mask = _mm_castsi128_ps(_mm_set1_epi32(0x7FFFFFFF));
+  __m128 inf = _mm_castsi128_ps(_mm_set1_epi32(0x7F800000));
+  return s32x4{_mm_castps_si128(_mm_cmpeq_ps(_mm_and_ps(a.v, mask), inf))};
+}
+YNN_ALWAYS_INLINE s32x4 isfinite(f32x4 a) {
+  __m128 mask = _mm_castsi128_ps(_mm_set1_epi32(0x7FFFFFFF));
+  __m128 inf = _mm_castsi128_ps(_mm_set1_epi32(0x7F800000));
+  return s32x4{_mm_castps_si128(_mm_cmplt_ps(_mm_and_ps(a.v, mask), inf))};
 }
 
-YNN_ALWAYS_INLINE void kahan_sum(f32x4 a, f32x4& acc, f32x4& error) {
-  f32x4 y = a - error;
-  f32x4 t = acc + y;
-  error = (t - acc) - y;
-  __m128 mask = _mm_set1_ps(std::numeric_limits<float>::infinity());
-  error = f32x4{
-      _mm_and_ps(error.v, _mm_cmpneq_ps(_mm_and_ps(error.v, mask), mask))};
-  acc = t;
+YNN_ALWAYS_INLINE s64x2 operator==(f64x2 a, f64x2 b) {
+  return s64x2{_mm_castpd_si128(_mm_cmpeq_pd(a.v, b.v))};
+}
+YNN_ALWAYS_INLINE s64x2 operator!=(f64x2 a, f64x2 b) {
+  return s64x2{_mm_castpd_si128(_mm_cmpneq_pd(a.v, b.v))};
+}
+YNN_ALWAYS_INLINE s64x2 operator<(f64x2 a, f64x2 b) {
+  return s64x2{_mm_castpd_si128(_mm_cmplt_pd(a.v, b.v))};
+}
+YNN_ALWAYS_INLINE s64x2 operator<=(f64x2 a, f64x2 b) {
+  return s64x2{_mm_castpd_si128(_mm_cmple_pd(a.v, b.v))};
+}
+YNN_ALWAYS_INLINE s64x2 operator>(f64x2 a, f64x2 b) {
+  return s64x2{_mm_castpd_si128(_mm_cmpgt_pd(a.v, b.v))};
+}
+YNN_ALWAYS_INLINE s64x2 operator>=(f64x2 a, f64x2 b) {
+  return s64x2{_mm_castpd_si128(_mm_cmpge_pd(a.v, b.v))};
+}
+YNN_ALWAYS_INLINE s64x2 isnan(f64x2 a) {
+  return s64x2{_mm_castpd_si128(_mm_cmpunord_pd(a.v, a.v))};
+}
+YNN_ALWAYS_INLINE s64x2 isinf(f64x2 a) {
+  __m128d mask = _mm_castsi128_pd(_mm_set1_epi64x(0x7FFFFFFFFFFFFFFFULL));
+  __m128d inf = _mm_castsi128_pd(_mm_set1_epi64x(0x7FF0000000000000ULL));
+  return s64x2{_mm_castpd_si128(_mm_cmpeq_pd(_mm_and_pd(a.v, mask), inf))};
+}
+YNN_ALWAYS_INLINE s64x2 isfinite(f64x2 a) {
+  __m128d mask = _mm_castsi128_pd(_mm_set1_epi64x(0x7FFFFFFFFFFFFFFFULL));
+  __m128d inf = _mm_castsi128_pd(_mm_set1_epi64x(0x7FF0000000000000ULL));
+  return s64x2{_mm_castpd_si128(_mm_cmplt_pd(_mm_and_pd(a.v, mask), inf))};
 }
 
-YNN_ALWAYS_INLINE void kahan_sum(f64x2 a, f64x2& acc, f64x2& error) {
-  f64x2 y = a - error;
-  f64x2 t = acc + y;
-  error = (t - acc) - y;
-  __m128d mask = _mm_set1_pd(std::numeric_limits<double>::infinity());
-  error = f64x2{
-      _mm_and_pd(error.v, _mm_cmpneq_pd(_mm_and_pd(error.v, mask), mask))};
-  acc = t;
+YNN_ALWAYS_INLINE s32x4 operator==(s32x4 a, s32x4 b) {
+  return s32x4{_mm_cmpeq_epi32(a.v, b.v)};
 }
+YNN_ALWAYS_INLINE s32x4 operator>(s32x4 a, s32x4 b) {
+  return s32x4{_mm_cmpgt_epi32(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE s32x4 operator<(s32x4 a, s32x4 b) { return b > a; }
+
+YNN_ALWAYS_INLINE s16x8 operator==(s16x8 a, s16x8 b) {
+  return s16x8{_mm_cmpeq_epi16(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE s16x8 operator>(s16x8 a, s16x8 b) {
+  return s16x8{_mm_cmpgt_epi16(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE s16x8 operator<(s16x8 a, s16x8 b) { return b > a; }
+
+YNN_ALWAYS_INLINE s8x16 operator==(s8x16 a, s8x16 b) {
+  return s8x16{_mm_cmpeq_epi8(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE s8x16 operator>(s8x16 a, s8x16 b) {
+  return s8x16{_mm_cmpgt_epi8(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE s8x16 operator<(s8x16 a, s8x16 b) { return b > a; }
 
 YNN_ALWAYS_INLINE double horizontal_sum(f64x2 a) {
   return _mm_cvtsd_f64(_mm_add_sd(a.v, _mm_shuffle_pd(a.v, a.v, 1)));

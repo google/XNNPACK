@@ -124,8 +124,12 @@ TEST_FLOOR_LOG2(wasm_simd128, f32, 4);
 TEST_FLOOR_LOG2(wasm_simd128, f64, 2);
 TEST_EXP2_ROUND(wasm_simd128, f32, 4);
 TEST_EXP2_ROUND(wasm_simd128, f64, 2);
-TEST_COPYNAN(wasm_simd128, f32, 4);
-TEST_COPYNAN(wasm_simd128, f64, 2);
+TEST_COMPARISONS(wasm_simd128, f32, 4);
+TEST_COMPARISONS(wasm_simd128, f64, 2);
+TEST_ISNAN(wasm_simd128, f32, 4);
+TEST_ISNAN(wasm_simd128, f64, 2);
+TEST_ISFINITE(wasm_simd128, f32, 4);
+TEST_ISFINITE(wasm_simd128, f64, 2);
 
 TEST_ABS(wasm_simd128, s8, 16);
 TEST_ABS(wasm_simd128, s16, 8);
@@ -146,8 +150,6 @@ TEST_HORIZONTAL_MAX(wasm_simd128, s8, 16);
 TEST_HORIZONTAL_MAX(wasm_simd128, s16, 8);
 TEST_HORIZONTAL_MAX(wasm_simd128, f32, 4);
 TEST_HORIZONTAL_MAX(wasm_simd128, s32, 4);
-
-TEST_KAHAN_SUM(wasm_simd128, f32, 4);
 
 TEST_CAST(wasm_simd128, s32, f32x4);
 TEST_CAST(wasm_simd128, f32, s32x4);

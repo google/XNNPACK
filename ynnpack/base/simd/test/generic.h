@@ -469,31 +469,76 @@ void test_exp2_round() {
   TEST_F(test_class, exp2_round_##type##x##N) { test_exp2_round<type, N>(); }
 
 template <typename scalar, size_t N>
-void test_copynan() {
+void test_comparisons() {
   using vector = vec<scalar, N>;
-
-  scalar x[vector::N];
-  std::iota(x, x + vector::N, static_cast<scalar>(0));
-
-  scalar nan[vector::N];
+  scalar a[vector::N];
+  scalar b[vector::N];
   for (size_t i = 0; i < vector::N; ++i) {
-    nan[i] = i % 3 == 0 ? type_info<scalar>::nan() : static_cast<scalar>(i);
+    a[i] = static_cast<scalar>(i);
+    b[i] = static_cast<scalar>(vector::N / 2);
   }
+  auto mask_eq = load(a, vector::N) == load(b, vector::N);
+  auto mask_gt = load(a, vector::N) > load(b, vector::N);
 
-  scalar result[vector::N];
-  store(result, copynan(load(x, vector::N), load(nan, vector::N)));
+  scalar res_eq[vector::N];
+  scalar res_gt[vector::N];
+  store(res_eq, select(mask_eq, broadcast<vector::N>(static_cast<scalar>(1)),
+                       broadcast<vector::N>(static_cast<scalar>(0))));
+  store(res_gt, select(mask_gt, broadcast<vector::N>(static_cast<scalar>(1)),
+                       broadcast<vector::N>(static_cast<scalar>(0))));
 
   for (size_t i = 0; i < vector::N; ++i) {
-    if (i % 3 == 0) {
-      ASSERT_TRUE(std::isnan(result[i]));
-    } else {
-      ASSERT_EQ(result[i], static_cast<scalar>(i));
-    }
+    ASSERT_EQ(res_eq[i], a[i] == b[i] ? 1 : 0) << "at index " << i;
+    ASSERT_EQ(res_gt[i], a[i] > b[i] ? 1 : 0) << "at index " << i;
   }
 }
 
-#define TEST_COPYNAN(test_class, type, N) \
-  TEST_F(test_class, copynan_##type##x##N) { test_copynan<type, N>(); }
+#define TEST_COMPARISONS(test_class, type, N) \
+  TEST_F(test_class, comparisons_##type##x##N) { test_comparisons<type, N>(); }
+
+template <typename scalar, size_t N>
+void test_isnan() {
+  using vector = vec<scalar, N>;
+  scalar a[vector::N];
+  for (size_t i = 0; i < vector::N; ++i) {
+    a[i] = i % 2 == 0 ? type_info<scalar>::nan() : static_cast<scalar>(i);
+  }
+  auto mask = isnan(load(a, vector::N));
+  scalar result[vector::N];
+  store(result, select(mask, broadcast<vector::N>(static_cast<scalar>(1)),
+                       broadcast<vector::N>(static_cast<scalar>(0))));
+  for (size_t i = 0; i < vector::N; ++i) {
+    ASSERT_EQ(result[i], i % 2 == 0 ? 1 : 0) << "at index " << i;
+  }
+}
+
+#define TEST_ISNAN(test_class, type, N) \
+  TEST_F(test_class, isnan_##type##x##N) { test_isnan<type, N>(); }
+
+template <typename scalar, size_t N>
+void test_isfinite() {
+  using vector = vec<scalar, N>;
+  scalar a[vector::N];
+  for (size_t i = 0; i < vector::N; ++i) {
+    if (i % 3 == 0) {
+      a[i] = type_info<scalar>::nan();
+    } else if (i % 3 == 1) {
+      a[i] = type_info<scalar>::infinity();
+    } else {
+      a[i] = static_cast<scalar>(i);
+    }
+  }
+  auto mask = isfinite(load(a, vector::N));
+  scalar result[vector::N];
+  store(result, select(mask, broadcast<vector::N>(static_cast<scalar>(1)),
+                       broadcast<vector::N>(static_cast<scalar>(0))));
+  for (size_t i = 0; i < vector::N; ++i) {
+    ASSERT_EQ(result[i], i % 3 == 2 ? 1 : 0) << "at index " << i;
+  }
+}
+
+#define TEST_ISFINITE(test_class, type, N) \
+  TEST_F(test_class, isfinite_##type##x##N) { test_isfinite<type, N>(); }
 
 struct min_op {
   template <typename T>
@@ -849,51 +894,6 @@ void test_fma() {
 
 #define TEST_FMA(test_class, type, N) \
   TEST_F(test_class, fma_##type##x##N) { test_fma<type, N>(); }
-
-template <typename scalar, size_t N>
-void test_kahan_sum() {
-  using vector = vec<scalar, N>;
-
-  ReplicableRandomDevice rng;
-  for (auto _ : FuzzTest(std::chrono::milliseconds(100))) {
-    scalar a[vector::N];
-    scalar b[vector::N];
-    fill_random(a, vector::N, rng);
-    fill_random(b, vector::N, rng);
-
-    vector acc = broadcast<N>(static_cast<scalar>(0));
-    vector error = broadcast<N>(static_cast<scalar>(0));
-    kahan_sum(load(a, vector::N), acc, error);
-    kahan_sum(load(b, vector::N), acc, error);
-
-    scalar sum[vector::N];
-    store(sum, acc);
-
-    for (size_t i = 0; i < vector::N; ++i) {
-      scalar a_i = a[i];
-      scalar b_i = b[i];
-      scalar expected = a_i + b_i;
-
-#ifdef YNN_ARCH_ARM32
-      if (std::abs(expected) < type_info<scalar>::smallest_normal()) {
-        // ARM32 flushes denormals to 0(?).
-        continue;
-      }
-#endif  // YNN_ARCH_ARM32
-
-      if (std::isnan(expected)) {
-        ASSERT_TRUE(std::isnan(sum[i]));
-      } else {
-        scalar tolerance = type_info<scalar>::epsilon() *
-                           std::max(std::abs(a_i), std::abs(b_i));
-        ASSERT_NEAR(sum[i], expected, tolerance);
-      }
-    }
-  }
-}
-
-#define TEST_KAHAN_SUM(test_class, type, N) \
-  TEST_F(test_class, kahan_sum_##type##x##N) { test_kahan_sum<type, N>(); }
 
 template <typename scalar, size_t N>
 void test_add_sat() {

@@ -261,31 +261,6 @@ T exp2_round(T a) {
   return std::ldexp(static_cast<T>(1.0), static_cast<int>(std::nearbyint(a)));
 }
 
-// Kinda like std::copysign, but copies NaN-ness instead.
-template <typename T>
-T copynan(T x, T nan) {
-  return std::isnan(nan) ? nan : x;
-}
-
-template <typename T>
-void kahan_sum(T a, T& acc, T& error) {
-  T y = a - error;
-  T t = acc + y;
-  error = (t - acc) - y;
-  if (!std::isfinite(error)) {
-    // If the error is infinity or NaN, we don't want to know about it. The
-    // accumulator will be infinity anyways, and we might corrupt the result
-    // to be NaN.
-    error = static_cast<T>(0);
-  }
-  acc = t;
-}
-
-inline void kahan_sum(int a, int& acc, int&) {
-  // Provide a silly integer overload for template code to use.
-  acc += a;
-}
-
 constexpr size_t pow(size_t base, size_t exp) {
   return (exp == 0) ? 1 : base * pow(base, exp - 1);
 }

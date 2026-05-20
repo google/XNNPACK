@@ -84,11 +84,7 @@ def add_fma_rules():
 
 def add_select_rules():
   """Adds generic select rewrite patterns."""
-  x = WildCard()
-  y = WildCard()
-  z = WildCard()
-  w = WildCard()
-  return [Rule(select(x > y, z, w), select_greater_than(x, y, z, w))]
+  return []
 
 
 def add_shift_rules():

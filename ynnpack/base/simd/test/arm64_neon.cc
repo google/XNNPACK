@@ -40,13 +40,13 @@ TEST_SQRT(arm_neon, f64, 2);
 TEST_ABS(arm_neon, f64, 2);
 TEST_FLOOR_LOG2(arm_neon, f64, 2);
 TEST_EXP2_ROUND(arm_neon, f64, 2);
-TEST_COPYNAN(arm_neon, f64, 2);
+TEST_COMPARISONS(arm_neon, f64, 2);
+TEST_ISNAN(arm_neon, f64, 2);
+TEST_ISFINITE(arm_neon, f64, 2);
 
 TEST_HORIZONTAL_MIN(arm_neon, f64, 2);
 TEST_HORIZONTAL_MAX(arm_neon, f64, 2);
 TEST_HORIZONTAL_SUM(arm_neon, f64, 2);
-
-TEST_KAHAN_SUM(arm_neon, f64, 2);
 
 TEST_CAST(arm_neon, f64, f32x2);
 TEST_CAST(arm_neon, f64, f32x4);

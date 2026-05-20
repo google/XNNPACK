@@ -73,6 +73,25 @@ span<T> row(Tensor<T> t, size_t i) {
   return span<T>(&t(i, 0), t.extent(1));
 }
 
+template <typename T>
+void kahan_sum(T a, T& acc, T& error) {
+  T y = a - error;
+  T t = acc + y;
+  error = (t - acc) - y;
+  if (!std::isfinite(error)) {
+    // If the error is infinity or NaN, we don't want to know about it. The
+    // accumulator will be infinity anyways, and we might corrupt the result
+    // to be NaN.
+    error = static_cast<T>(0);
+  }
+  acc = t;
+}
+
+inline void kahan_sum(int a, int& acc, int&) {
+  // Provide a silly integer overload for template code to use.
+  acc += a;
+}
+
 template <typename AT, typename CT>
 YNN_ALWAYS_INLINE void ReduceRow(ReduceOp op, size_t n, const AT* a,
                                  size_t c_row_stride, CT* c_0, CT* c_1) {

@@ -101,8 +101,22 @@ struct vec<double, 2> {
   vec() = default;
   explicit vec(float64x2_t v) : v(v) {}
   vec(double x) : v(vdupq_n_f64(x)) {}  // NOLINT
+  vec(vec<double, 1> lo, vec<double, 1> hi) : v{lo.v, hi.v} {}
 
   float64x2_t v;
+};
+
+template <>
+struct vec<int64_t, 2> {
+  using value_type = int64_t;
+  static constexpr std::integral_constant<size_t, 2> N = {};
+
+  vec() = default;
+  explicit vec(int64x2_t v) : v(v) {}
+  vec(int64_t x) : v(vdupq_n_s64(x)) {}  // NOLINT
+  vec(vec<int64_t, 1> lo, vec<int64_t, 1> hi) : v{lo.v, hi.v} {}
+
+  int64x2_t v;
 };
 #endif
 
@@ -207,6 +221,7 @@ struct vec<int8_t, 16> {
 using f32x4 = vec<float, 4>;
 #ifdef YNN_ARCH_ARM64
 using f64x2 = vec<double, 2>;
+using s64x2 = vec<int64_t, 2>;
 #endif
 using u32x4 = vec<uint32_t, 4>;
 using s32x4 = vec<int32_t, 4>;
@@ -223,6 +238,20 @@ YNN_ALWAYS_INLINE bf16x4 lo(bf16x8 x) { return bf16x4{vget_low_u16(x.v)}; }
 YNN_ALWAYS_INLINE bf16x4 hi(bf16x8 x) { return bf16x4{vget_high_u16(x.v)}; }
 YNN_ALWAYS_INLINE u8x8 lo(u8x16 x) { return u8x8{vget_low_u8(x.v)}; }
 YNN_ALWAYS_INLINE u8x8 hi(u8x16 x) { return u8x8{vget_high_u8(x.v)}; }
+#ifdef YNN_ARCH_ARM64
+YNN_ALWAYS_INLINE vec<double, 1> lo(f64x2 x) {
+  return vec<double, 1>{vgetq_lane_f64(x.v, 0)};
+}
+YNN_ALWAYS_INLINE vec<double, 1> hi(f64x2 x) {
+  return vec<double, 1>{vgetq_lane_f64(x.v, 1)};
+}
+YNN_ALWAYS_INLINE vec<int64_t, 1> lo(s64x2 x) {
+  return vec<int64_t, 1>{vgetq_lane_s64(x.v, 0)};
+}
+YNN_ALWAYS_INLINE vec<int64_t, 1> hi(s64x2 x) {
+  return vec<int64_t, 1>{vgetq_lane_s64(x.v, 1)};
+}
+#endif
 
 namespace internal {
 
@@ -616,6 +645,21 @@ YNN_ALWAYS_INLINE s32x4 operator<<(s32x4 a, int b) {
   return s32x4{vshlq_s32(a.v, vdupq_n_s32(b))};
 }
 
+#ifdef YNN_ARCH_ARM64
+YNN_ALWAYS_INLINE s64x2 operator&(s64x2 a, s64x2 b) {
+  return s64x2{vandq_s64(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE s64x2 operator|(s64x2 a, s64x2 b) {
+  return s64x2{vorrq_s64(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE s64x2 operator^(s64x2 a, s64x2 b) {
+  return s64x2{veorq_s64(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE s64x2 operator~(s64x2 a) {
+  return s64x2{vreinterpretq_s64_s8(vmvnq_s8(vreinterpretq_s8_s64(a.v)))};
+}
+#endif  // YNN_ARCH_ARM64
+
 YNN_ALWAYS_INLINE s32x4 operator&(s32x4 a, s32x4 b) {
   return s32x4{vandq_s32(a.v, b.v)};
 }
@@ -727,14 +771,124 @@ YNN_ALWAYS_INLINE u8x16 abs(s8x16 a) {
   return u8x16{vreinterpretq_u8_s8(vabsq_s8(a.v))};
 }
 
-YNN_ALWAYS_INLINE f32x4 copynan(f32x4 x, f32x4 nan) {
-  return f32x4{vbslq_f32(vceqq_f32(nan.v, nan.v), x.v, nan.v)};
+YNN_ALWAYS_INLINE s32x4 operator==(f32x4 a, f32x4 b) {
+  return s32x4{vreinterpretq_s32_u32(vceqq_f32(a.v, b.v))};
 }
+YNN_ALWAYS_INLINE s32x4 operator!=(f32x4 a, f32x4 b) { return ~(a == b); }
+YNN_ALWAYS_INLINE s32x4 operator<(f32x4 a, f32x4 b) {
+  return s32x4{vreinterpretq_s32_u32(vcltq_f32(a.v, b.v))};
+}
+YNN_ALWAYS_INLINE s32x4 operator<=(f32x4 a, f32x4 b) {
+  return s32x4{vreinterpretq_s32_u32(vcleq_f32(a.v, b.v))};
+}
+YNN_ALWAYS_INLINE s32x4 operator>(f32x4 a, f32x4 b) {
+  return s32x4{vreinterpretq_s32_u32(vcgtq_f32(a.v, b.v))};
+}
+YNN_ALWAYS_INLINE s32x4 operator>=(f32x4 a, f32x4 b) {
+  return s32x4{vreinterpretq_s32_u32(vcgeq_f32(a.v, b.v))};
+}
+YNN_ALWAYS_INLINE s32x4 isnan(f32x4 a) { return ~(a == a); }
+YNN_ALWAYS_INLINE s32x4 isinf(f32x4 a) {
+  uint32x4_t mask = vdupq_n_u32(0x7FFFFFFF);
+  uint32x4_t inf = vdupq_n_u32(0x7F800000);
+  return s32x4{vreinterpretq_s32_u32(
+      vceqq_u32(vandq_u32(vreinterpretq_u32_f32(a.v), mask), inf))};
+}
+YNN_ALWAYS_INLINE s32x4 isfinite(f32x4 a) {
+  uint32x4_t mask = vdupq_n_u32(0x7FFFFFFF);
+  uint32x4_t inf = vdupq_n_u32(0x7F800000);
+  return s32x4{vreinterpretq_s32_u32(
+      vcltq_u32(vandq_u32(vreinterpretq_u32_f32(a.v), mask), inf))};
+}
+
 #ifdef YNN_ARCH_ARM64
-YNN_ALWAYS_INLINE f64x2 copynan(f64x2 x, f64x2 nan) {
-  return f64x2{vbslq_f64(vceqq_f64(nan.v, nan.v), x.v, nan.v)};
+YNN_ALWAYS_INLINE s64x2 operator==(f64x2 a, f64x2 b) {
+  return s64x2{vreinterpretq_s64_u64(vceqq_f64(a.v, b.v))};
+}
+YNN_ALWAYS_INLINE s64x2 operator!=(f64x2 a, f64x2 b) { return ~(a == b); }
+YNN_ALWAYS_INLINE s64x2 operator<(f64x2 a, f64x2 b) {
+  return s64x2{vreinterpretq_s64_u64(vcltq_f64(a.v, b.v))};
+}
+YNN_ALWAYS_INLINE s64x2 operator<=(f64x2 a, f64x2 b) {
+  return s64x2{vreinterpretq_s64_u64(vcleq_f64(a.v, b.v))};
+}
+YNN_ALWAYS_INLINE s64x2 operator>(f64x2 a, f64x2 b) {
+  return s64x2{vreinterpretq_s64_u64(vcgtq_f64(a.v, b.v))};
+}
+YNN_ALWAYS_INLINE s64x2 operator>=(f64x2 a, f64x2 b) {
+  return s64x2{vreinterpretq_s64_u64(vcgeq_f64(a.v, b.v))};
+}
+YNN_ALWAYS_INLINE s64x2 isnan(f64x2 a) { return ~(a == a); }
+YNN_ALWAYS_INLINE s64x2 isinf(f64x2 a) {
+  uint64x2_t mask = vdupq_n_u64(0x7FFFFFFFFFFFFFFFULL);
+  uint64x2_t inf = vdupq_n_u64(0x7FF0000000000000ULL);
+  return s64x2{vreinterpretq_s64_u64(
+      vceqq_u64(vandq_u64(vreinterpretq_u64_f64(a.v), mask), inf))};
+}
+YNN_ALWAYS_INLINE s64x2 isfinite(f64x2 a) {
+  uint64x2_t mask = vdupq_n_u64(0x7FFFFFFFFFFFFFFFULL);
+  uint64x2_t inf = vdupq_n_u64(0x7FF0000000000000ULL);
+  return s64x2{vreinterpretq_s64_u64(
+      vcltq_u64(vandq_u64(vreinterpretq_u64_f64(a.v), mask), inf))};
 }
 #endif
+
+YNN_ALWAYS_INLINE s32x4 operator==(s32x4 a, s32x4 b) {
+  return s32x4{vreinterpretq_s32_u32(vceqq_s32(a.v, b.v))};
+}
+YNN_ALWAYS_INLINE s32x4 operator>(s32x4 a, s32x4 b) {
+  return s32x4{vreinterpretq_s32_u32(vcgtq_s32(a.v, b.v))};
+}
+YNN_ALWAYS_INLINE s32x4 operator<(s32x4 a, s32x4 b) { return b > a; }
+
+YNN_ALWAYS_INLINE s16x8 operator==(s16x8 a, s16x8 b) {
+  return s16x8{vreinterpretq_s16_u16(vceqq_s16(a.v, b.v))};
+}
+YNN_ALWAYS_INLINE s16x8 operator>(s16x8 a, s16x8 b) {
+  return s16x8{vreinterpretq_s16_u16(vcgtq_s16(a.v, b.v))};
+}
+YNN_ALWAYS_INLINE s16x8 operator<(s16x8 a, s16x8 b) { return b > a; }
+
+YNN_ALWAYS_INLINE s8x16 operator==(s8x16 a, s8x16 b) {
+  return s8x16{vreinterpretq_s8_u8(vceqq_s8(a.v, b.v))};
+}
+YNN_ALWAYS_INLINE s8x16 operator>(s8x16 a, s8x16 b) {
+  return s8x16{vreinterpretq_s8_u8(vcgtq_s8(a.v, b.v))};
+}
+YNN_ALWAYS_INLINE s8x16 operator<(s8x16 a, s8x16 b) { return b > a; }
+
+YNN_ALWAYS_INLINE f32x4 select(s32x4 cond, f32x4 a, f32x4 b) {
+  return f32x4{vbslq_f32(vreinterpretq_u32_s32(cond.v), a.v, b.v)};
+}
+#ifdef YNN_ARCH_ARM64
+YNN_ALWAYS_INLINE f64x2 select(s64x2 cond, f64x2 a, f64x2 b) {
+  return f64x2{vbslq_f64(vreinterpretq_u64_s64(cond.v), a.v, b.v)};
+}
+#endif
+YNN_ALWAYS_INLINE s32x4 select(s32x4 cond, s32x4 a, s32x4 b) {
+  return s32x4{vreinterpretq_s32_u32(vbslq_u32(vreinterpretq_u32_s32(cond.v),
+                                               vreinterpretq_u32_s32(a.v),
+                                               vreinterpretq_u32_s32(b.v)))};
+}
+YNN_ALWAYS_INLINE u32x4 select(s32x4 cond, u32x4 a, u32x4 b) {
+  return u32x4{vbslq_u32(vreinterpretq_u32_s32(cond.v), a.v, b.v)};
+}
+YNN_ALWAYS_INLINE s16x8 select(s16x8 cond, s16x8 a, s16x8 b) {
+  return s16x8{vreinterpretq_s16_u16(vbslq_u16(vreinterpretq_u16_s16(cond.v),
+                                               vreinterpretq_u16_s16(a.v),
+                                               vreinterpretq_u16_s16(b.v)))};
+}
+YNN_ALWAYS_INLINE u16x8 select(s16x8 cond, u16x8 a, u16x8 b) {
+  return u16x8{vbslq_u16(vreinterpretq_u16_s16(cond.v), a.v, b.v)};
+}
+YNN_ALWAYS_INLINE s8x16 select(s8x16 cond, s8x16 a, s8x16 b) {
+  return s8x16{vreinterpretq_s8_u8(vbslq_u8(vreinterpretq_u8_s8(cond.v),
+                                            vreinterpretq_u8_s8(a.v),
+                                            vreinterpretq_u8_s8(b.v)))};
+}
+YNN_ALWAYS_INLINE u8x16 select(s8x16 cond, u8x16 a, u8x16 b) {
+  return u8x16{vbslq_u8(vreinterpretq_u8_s8(cond.v), a.v, b.v)};
+}
 
 YNN_ALWAYS_INLINE f32x4 floor_log2(f32x4 a) {
   uint32x4_t is_zero = vceqq_f32(a.v, vdupq_n_f32(0.0f));
@@ -922,30 +1076,6 @@ YNN_ALWAYS_INLINE f32x4 sqrt(f32x4 a) {
 
 #ifdef YNN_ARCH_ARM64
 YNN_ALWAYS_INLINE f64x2 sqrt(f64x2 a) { return f64x2{vsqrtq_f64(a.v)}; }
-#endif
-
-YNN_ALWAYS_INLINE void kahan_sum(f32x4 a, f32x4& acc, f32x4& error) {
-  f32x4 y = a - error;
-  f32x4 t = acc + y;
-  error = (t - acc) - y;
-  uint32x4_t mask = vdupq_n_u32(0x7F800000);
-  uint32x4_t error_u = vreinterpretq_u32_f32(error.v);
-  uint32x4_t is_inf = vceqq_u32(vandq_u32(error_u, mask), mask);
-  error = f32x4{vreinterpretq_f32_u32(vbicq_u32(error_u, is_inf))};
-  acc = t;
-}
-
-#ifdef YNN_ARCH_ARM64
-YNN_ALWAYS_INLINE void kahan_sum(f64x2 a, f64x2& acc, f64x2& error) {
-  f64x2 y = a - error;
-  f64x2 t = acc + y;
-  error = (t - acc) - y;
-  uint64x2_t mask = vdupq_n_u64(0x7FF0000000000000ULL);
-  uint64x2_t error_u = vreinterpretq_u64_f64(error.v);
-  uint64x2_t is_inf = vceqq_u64(vandq_u64(error_u, mask), mask);
-  error = f64x2{vreinterpretq_f64_u64(vbicq_u64(error_u, is_inf))};
-  acc = t;
-}
 #endif
 
 #ifdef YNN_ARCH_ARM32

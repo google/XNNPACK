@@ -114,6 +114,39 @@ YNN_ALWAYS_INLINE f64x2 floor_log2(f64x2 a) {
       _mm_or_pd(_mm_andnot_pd(is_inf, res), _mm_and_pd(is_inf, infinity))};
 }
 
+YNN_ALWAYS_INLINE f32x4 select(s32x4 cond, f32x4 a, f32x4 b) {
+  __m128 m = _mm_castsi128_ps(cond.v);
+  return f32x4{_mm_or_ps(_mm_and_ps(m, a.v), _mm_andnot_ps(m, b.v))};
+}
+YNN_ALWAYS_INLINE f64x2 select(s64x2 cond, f64x2 a, f64x2 b) {
+  __m128d m = _mm_castsi128_pd(cond.v);
+  return f64x2{_mm_or_pd(_mm_and_pd(m, a.v), _mm_andnot_pd(m, b.v))};
+}
+YNN_ALWAYS_INLINE s32x4 select(s32x4 cond, s32x4 a, s32x4 b) {
+  return s32x4{
+      _mm_or_si128(_mm_and_si128(cond.v, a.v), _mm_andnot_si128(cond.v, b.v))};
+}
+YNN_ALWAYS_INLINE u32x4 select(s32x4 cond, u32x4 a, u32x4 b) {
+  return u32x4{
+      _mm_or_si128(_mm_and_si128(cond.v, a.v), _mm_andnot_si128(cond.v, b.v))};
+}
+YNN_ALWAYS_INLINE s16x8 select(s16x8 cond, s16x8 a, s16x8 b) {
+  return s16x8{
+      _mm_or_si128(_mm_and_si128(cond.v, a.v), _mm_andnot_si128(cond.v, b.v))};
+}
+YNN_ALWAYS_INLINE u16x8 select(s16x8 cond, u16x8 a, u16x8 b) {
+  return u16x8{
+      _mm_or_si128(_mm_and_si128(cond.v, a.v), _mm_andnot_si128(cond.v, b.v))};
+}
+YNN_ALWAYS_INLINE s8x16 select(s8x16 cond, s8x16 a, s8x16 b) {
+  return s8x16{
+      _mm_or_si128(_mm_and_si128(cond.v, a.v), _mm_andnot_si128(cond.v, b.v))};
+}
+YNN_ALWAYS_INLINE u8x16 select(s8x16 cond, u8x16 a, u8x16 b) {
+  return u8x16{
+      _mm_or_si128(_mm_and_si128(cond.v, a.v), _mm_andnot_si128(cond.v, b.v))};
+}
+
 }  // namespace simd
 
 }  // namespace ynn

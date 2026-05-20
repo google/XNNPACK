@@ -214,6 +214,18 @@ constexpr size_t level_mask(size_t level) {
   return pow(tree_degree, level) - 1;
 }
 
+template <typename T>
+YNN_ALWAYS_INLINE static void kahan_sum(T a, T& acc, T& error) {
+  T y = a - error;
+  T t = acc + y;
+  error = (t - acc) - y;
+  // If the error is infinity or NaN, we don't want to know about it. The
+  // accumulator will be infinity anyways, and we might corrupt the result
+  // to be NaN.
+  error = select(isfinite(error), error, static_cast<T>(0));
+  acc = t;
+}
+
 template <size_t K_, typename AccT, typename T, size_t N, typename MapFn>
 static void sum_float_k1(size_t k, const T* __restrict a,
                          simd::vec<AccT, N>& x0, MapFn map_fn) {

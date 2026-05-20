@@ -38,7 +38,7 @@ def exp_fp32(a, x, output_multiplier, input_multiplier):
 
   # Compute 2^z.
   v2z = exp2_round(vz)
-  v2z = copynan(v2z, va)
+  v2z = select(isnan(va), va, v2z)
 
   vp = eval_polynomial(vr, p)
   vq = eval_polynomial(vr, q)
@@ -89,7 +89,7 @@ def exp_fp64(a, x, output_multiplier, input_multiplier):
 
   # Compute 2^z.
   v2z = exp2_round(vz)
-  v2z = copynan(v2z, va)
+  v2z = select(isnan(va), va, v2z)
 
   vp = eval_polynomial(vr, p)
   vq = eval_polynomial(vr, q)

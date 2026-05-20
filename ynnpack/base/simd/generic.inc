@@ -216,10 +216,6 @@ YNN_ALWAYS_INLINE vec<T, N> exp2_round(vec<T, N> a) {
   return {exp2_round(lo(a)), exp2_round(hi(a))};
 }
 template <typename T, size_t N>
-YNN_ALWAYS_INLINE vec<T, N> copynan(vec<T, N> x, vec<T, N> nan) {
-  return {copynan(lo(x), lo(nan)), copynan(hi(x), hi(nan))};
-}
-template <typename T, size_t N>
 YNN_ALWAYS_INLINE vec<T, N> ceil(vec<T, N> a) {
   return {ceil(lo(a)), ceil(hi(a))};
 }
@@ -234,6 +230,48 @@ YNN_ALWAYS_INLINE vec<T, N> sqrt(vec<T, N> a) {
 template <typename T, size_t N>
 YNN_ALWAYS_INLINE vec<T, N> fma(vec<T, N> a, vec<T, N> b, vec<T, N> acc) {
   return {fma(lo(a), lo(b), lo(acc)), fma(hi(a), hi(b), hi(acc))};
+}
+
+template <typename T, size_t N>
+YNN_ALWAYS_INLINE auto operator==(vec<T, N> a, vec<T, N> b) {
+  return concat(lo(a) == lo(b), hi(a) == hi(b));
+}
+template <typename T, size_t N>
+YNN_ALWAYS_INLINE auto operator!=(vec<T, N> a, vec<T, N> b) {
+  return concat(lo(a) != lo(b), hi(a) != hi(b));
+}
+template <typename T, size_t N>
+YNN_ALWAYS_INLINE auto operator<(vec<T, N> a, vec<T, N> b) {
+  return concat(lo(a) < lo(b), hi(a) < hi(b));
+}
+template <typename T, size_t N>
+YNN_ALWAYS_INLINE auto operator<=(vec<T, N> a, vec<T, N> b) {
+  return concat(lo(a) <= lo(b), hi(a) <= hi(b));
+}
+template <typename T, size_t N>
+YNN_ALWAYS_INLINE auto operator>(vec<T, N> a, vec<T, N> b) {
+  return concat(lo(a) > lo(b), hi(a) > hi(b));
+}
+template <typename T, size_t N>
+YNN_ALWAYS_INLINE auto operator>=(vec<T, N> a, vec<T, N> b) {
+  return concat(lo(a) >= lo(b), hi(a) >= hi(b));
+}
+template <typename T, size_t N>
+YNN_ALWAYS_INLINE auto isinf(vec<T, N> a) {
+  return concat(isinf(lo(a)), isinf(hi(a)));
+}
+template <typename T, size_t N>
+YNN_ALWAYS_INLINE auto isnan(vec<T, N> a) {
+  return concat(isnan(lo(a)), isnan(hi(a)));
+}
+template <typename T, size_t N>
+YNN_ALWAYS_INLINE auto isfinite(vec<T, N> a) {
+  return concat(isfinite(lo(a)), isfinite(hi(a)));
+}
+
+template <typename T, size_t N, typename M>
+YNN_ALWAYS_INLINE vec<T, N> select(M cond, vec<T, N> a, vec<T, N> b) {
+  return {select(lo(cond), lo(a), lo(b)), select(hi(cond), hi(a), hi(b))};
 }
 
 template <int Index, typename T, size_t N>
@@ -277,19 +315,6 @@ YNN_ALWAYS_INLINE T horizontal_min(vec<T, N> x) {
 template <typename T, size_t N>
 YNN_ALWAYS_INLINE T horizontal_max(vec<T, N> x) {
   return horizontal_max(max(lo(x), hi(x)));
-}
-
-template <typename T, size_t N>
-YNN_ALWAYS_INLINE void kahan_sum(vec<T, N> a, vec<T, N>& acc,
-                                 vec<T, N>& error) {
-  vec<T, N / 2> acc_lo = lo(acc);
-  vec<T, N / 2> acc_hi = hi(acc);
-  vec<T, N / 2> error_lo = lo(error);
-  vec<T, N / 2> error_hi = hi(error);
-  kahan_sum(lo(a), acc_lo, error_lo);
-  kahan_sum(hi(a), acc_hi, error_hi);
-  acc = concat(acc_lo, acc_hi);
-  error = concat(error_lo, error_hi);
 }
 
 }  // namespace simd

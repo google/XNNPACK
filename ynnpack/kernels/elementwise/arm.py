@@ -10,17 +10,6 @@ class ARM(Target):
 
   def update_for_neon(self):
     """Updates the target for NEON support."""
-    self.header += """
-namespace ynn {
-namespace {
-template <>
-YNN_INTRINSIC simd::vec<float, 4> select_greater_than(simd::vec<float, 4> a, simd::vec<float, 4> b, simd::vec<float, 4> c, simd::vec<float, 4> d) {
-  uint32x4_t mask = vcgtq_f32(a.v, b.v);
-  return simd::vec<float, 4>{vbslq_f32(mask, c.v, d.v)};
-}
-}
-} // namespace ynn
-"""
 
   def update_for_fp16(self):
     """Updates the target for FP16 support."""

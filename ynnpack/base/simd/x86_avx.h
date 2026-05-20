@@ -36,6 +36,14 @@ YNN_ALWAYS_INLINE f32x4 cast(f64x4 a, float) {
   return f32x4{_mm256_cvtpd_ps(a.v)};
 }
 
+YNN_ALWAYS_INLINE s32x8 select(s32x8 cond, s32x8 a, s32x8 b) {
+  __m256 mc = _mm256_castsi256_ps(cond.v);
+  __m256 ma = _mm256_castsi256_ps(a.v);
+  __m256 mb = _mm256_castsi256_ps(b.v);
+  return s32x8{_mm256_castps_si256(
+      _mm256_or_ps(_mm256_and_ps(mc, ma), _mm256_andnot_ps(mc, mb)))};
+}
+
 }  // namespace simd
 
 }  // namespace ynn

@@ -145,7 +145,9 @@ TEST_ABS(arm_neon, f32, 4);
 
 TEST_FLOOR_LOG2(arm_neon, f32, 4);
 TEST_EXP2_ROUND(arm_neon, f32, 4);
-TEST_COPYNAN(arm_neon, f32, 4);
+TEST_COMPARISONS(arm_neon, f32, 4);
+TEST_ISNAN(arm_neon, f32, 4);
+TEST_ISFINITE(arm_neon, f32, 4);
 
 TEST_HORIZONTAL_MIN(arm_neon, u8, 16);
 TEST_HORIZONTAL_MIN(arm_neon, s8, 16);
@@ -158,11 +160,6 @@ TEST_HORIZONTAL_MAX(arm_neon, s8, 16);
 TEST_HORIZONTAL_MAX(arm_neon, s16, 8);
 TEST_HORIZONTAL_MAX(arm_neon, f32, 4);
 TEST_HORIZONTAL_MAX(arm_neon, s32, 4);
-
-TEST_KAHAN_SUM(arm_neon, f32, 4);
-
-TEST_HORIZONTAL_SUM(arm_neon, f32, 4);
-TEST_HORIZONTAL_SUM(arm_neon, s32, 4);
 
 TEST_CAST(arm_neon, s32, s8x16);
 TEST_CAST(arm_neon, s32, u8x16);

@@ -192,6 +192,8 @@ def promote_types(a, b):
 
 
 def get_cmp_type(x):
+  if x.ty.is_float():
+    return Int(x.ty.size, x.ty.lanes)
   return x.ty
 
 
@@ -451,8 +453,24 @@ def exp2_round(value):
 
 
 @intrinsic
-def copynan(value, nan):
-  return Op(value.ty, "copynan", [value, nan])
+def isnan(value):
+  return Op(get_cmp_type(value), "isnan", [value])
+
+
+@intrinsic
+def isinf(value):
+  return Op(get_cmp_type(value), "isinf", [value])
+
+
+@intrinsic
+def isfinite(value):
+  return Op(get_cmp_type(value), "isfinite", [value])
+
+
+@intrinsic
+def select(cond, x, y):
+  x_pr, y_pr = promote_types(wrap(x), wrap(y))
+  return Op(x_pr.ty, "select", [cond, x_pr, y_pr])
 
 
 @intrinsic
@@ -597,33 +615,6 @@ def lower_select_bits(mask, x, y):
     return y ^ ((x ^ y) & mask)
 
 
-@intrinsic
-def select(cond, x, y):
-  assert x.ty == y.ty
-  return Op(x.ty, "select", [cond, x, y])
-
-
-@intrinsic
-def select_greater_than(a, b, x, y):
-  assert x.ty == y.ty
-  a_pr, b_pr = promote_types(a, b)
-  return Op(x.ty, "select_greater_than", [a_pr, b_pr, x, y])
-
-
-# We assume that cond produces a mask.
-def lower_select(cond, x, y):
-  if x.ty.is_float():
-    ity = Int(x.ty.size, x.ty.lanes)
-    icond = reinterpret_cast(ity, cond)
-    return reinterpret_cast(
-        x.ty,
-        (reinterpret_cast(ity, x) & icond)
-        | (reinterpret_cast(ity, y) & ~icond),
-    )
-  else:
-    return (x & cond) | (y & ~cond)
-
-
 def load(x):
   return Load(x.ty, x)
 
@@ -670,7 +661,6 @@ lowering_funcs = {
     "widening_sub": lower_widening_sub,
     "widening_mul": lower_widening_mul,
     "select_bits": lower_select_bits,
-    "select": lower_select,
     "multiply_add": lower_multiply_add,
     "multiply_sub": lower_multiply_sub,
 }
@@ -1007,7 +997,6 @@ class Target:
         "floor",
         "floor_log2",
         "exp2_round",
-        "copynan",
         "ceil",
         "sqrt",
         "reinterpret_cast",
@@ -1018,6 +1007,11 @@ class Target:
         "saturating_rounding_cast",
         "fma",
         "select_greater_than",
+        "isnan",
+        "isinf",
+        "isfinite",
+        "select",
+        "~",
     }
     self.infix_ops = {
         "add": "+",
@@ -1028,6 +1022,12 @@ class Target:
         "bitwise_or": "|",
         "bitwise_xor": "^",
         "logical_shift_left": "<<",
+        "equal": "==",
+        "not_equal": "!=",
+        "less": "<",
+        "less_equal": "<=",
+        "greater": ">",
+        "greater_equal": ">=",
     }
 
   def indent(self):
@@ -1385,7 +1385,10 @@ class Target:
     self.result += self.indent()
     result_type = ""
     if i[0] is not None:
-      result_type = self.legalize_type(op.ty.with_lanes(tile_width))
+      if op.name in self.infix_ops or op.name in {"isnan", "isinf", "isfinite"}:
+        result_type = "auto"
+      else:
+        result_type = self.legalize_type(op.ty.with_lanes(tile_width))
       self.result += f"{result_type} {i[0]}_{j}"
 
     is_load = isinstance(op, Load)

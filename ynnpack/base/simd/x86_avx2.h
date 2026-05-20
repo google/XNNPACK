@@ -213,6 +213,25 @@ YNN_ALWAYS_INLINE s8x32 cast(s4x32 from, int8_t) {
   return s8x32{_mm256_shuffle_epi8(lut, indices)};
 }
 
+YNN_ALWAYS_INLINE s32x8 select(s32x8 cond, s32x8 a, s32x8 b) {
+  return s32x8{_mm256_blendv_epi8(b.v, a.v, cond.v)};
+}
+YNN_ALWAYS_INLINE u32x8 select(s32x8 cond, u32x8 a, u32x8 b) {
+  return u32x8{_mm256_blendv_epi8(b.v, a.v, cond.v)};
+}
+YNN_ALWAYS_INLINE s16x16 select(s16x16 cond, s16x16 a, s16x16 b) {
+  return s16x16{_mm256_blendv_epi8(b.v, a.v, cond.v)};
+}
+YNN_ALWAYS_INLINE u16x16 select(s16x16 cond, u16x16 a, u16x16 b) {
+  return u16x16{_mm256_blendv_epi8(b.v, a.v, cond.v)};
+}
+YNN_ALWAYS_INLINE s8x32 select(s8x32 cond, s8x32 a, s8x32 b) {
+  return s8x32{_mm256_blendv_epi8(b.v, a.v, cond.v)};
+}
+YNN_ALWAYS_INLINE u8x32 select(s8x32 cond, u8x32 a, u8x32 b) {
+  return u8x32{_mm256_blendv_epi8(b.v, a.v, cond.v)};
+}
+
 }  // namespace simd
 
 }  // namespace ynn
