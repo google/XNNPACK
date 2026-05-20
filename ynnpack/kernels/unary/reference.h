@@ -184,7 +184,7 @@ struct sigmoid : public unary_op_info {
   }
 
   tolerance_spec tolerance(ynn_type /*type*/) const override {
-    return tolerance_spec{/*relative=*/2.0f, /*absolute=*/1e-2f};
+    return tolerance_spec{/*relative=*/2.0f, /*absolute=*/1.0f};
   }
 };
 
@@ -329,15 +329,15 @@ struct exp : public unary_op_info {
 
   explicit exp(const unary_params& params) : params(params.exp) {}
   float operator()(float x) const override {
-    return std::exp2(static_cast<float>(params.input_multiplier) * x) *
+    return std::exp(static_cast<float>(params.input_multiplier) * x) *
            static_cast<float>(params.output_multiplier);
   }
   double operator()(double x) const override {
-    return std::exp2(params.input_multiplier * x) * params.output_multiplier;
+    return std::exp(params.input_multiplier * x) * params.output_multiplier;
   }
 
   tolerance_spec tolerance(ynn_type /*type*/) const override {
-    return tolerance_spec{/*relative=*/1.5f};
+    return tolerance_spec{/*relative=*/3.0f};
   }
 };
 

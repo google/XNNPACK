@@ -201,11 +201,11 @@ struct exp_op {
 
   explicit exp_op(const unary_params& params) : params(params.exp) {}
   float operator()(float x) const {
-    return std::exp2(static_cast<float>(params.input_multiplier) * x) *
+    return std::exp(static_cast<float>(params.input_multiplier) * x) *
            static_cast<float>(params.output_multiplier);
   }
   double operator()(double x) const {
-    return std::exp2(params.input_multiplier * x) * params.output_multiplier;
+    return std::exp(params.input_multiplier * x) * params.output_multiplier;
   }
 };
 
@@ -445,7 +445,7 @@ unary_params get_unary_params(ynn_unary_operator op) {
           .exp = exp_params{
               ._ = 0.0,
               .output_multiplier = 1.0,
-              .input_multiplier = static_cast<real>(std::log2(std::exp(1.0))),
+              .input_multiplier = 1.0,
           }};
     case ynn_unary_log:
       return unary_params{

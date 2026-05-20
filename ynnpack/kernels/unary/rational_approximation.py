@@ -95,7 +95,7 @@ def rational_approximation(
   return best_p, best_q
 
 
-def print_polynomial(name, coeffs, output_multiplier=False):
+def print_polynomial(name, coeffs):
   # Determine precision and wrapper based on dtype
   if coeffs.dtype == np.float32:
     precision = 10
@@ -108,14 +108,13 @@ def print_polynomial(name, coeffs, output_multiplier=False):
 
   # Reversing to put constant coefficient last (p_n, ..., p_1, p_0)
   rev_coeffs = coeffs[::-1]
-  multiplier_str = " * output_multiplier" if output_multiplier else ""
 
   print(f"  {name} = [")
   for i, val in enumerate(rev_coeffs):
     comma = "," if i < len(rev_coeffs) - 1 else ""
     print(
         "     "
-        f" {wrapper_start}{val:.{precision}e}{wrapper_end}{multiplier_str}{comma}"
+        f" {wrapper_start}{val:.{precision}e}{wrapper_end}{comma}"
     )
   print("  ]")
 
@@ -140,15 +139,15 @@ def plot_error(f, x, approx, title="Relative Error"):
 
 
 # %%
-# fp32 exp2
-f = lambda x: np.exp2(x)
+# fp32 exp
+f = lambda x: np.exp(x)
 p_degree, q_degree = 3, 3
 x_min, x_max = -0.5, 0.5
 p, q = rational_approximation(
     f, x_min, x_max, p_degree, q_degree, dtype=np.float32
 )
 
-print_polynomial("p", p, output_multiplier=True)
+print_polynomial("p", p)
 print_polynomial("q", q)
 
 # Evaluate final error
@@ -157,7 +156,6 @@ approx = poly_eval(p, x_test) / poly_eval(q, x_test)
 plot_error(f, x_test, approx)
 # %%
 import math
-
 
 # Target: R(x) = log2(x + 1) / x
 # This ensures x * R(x) = log2(x + 1)
@@ -184,15 +182,15 @@ target = np.log2(x_test + 1)
 
 plot_error(lambda x: np.log2(x + 1), x_test, approx)
 # %%
-# fp64 exp2
-f = np.exp2
+# fp64 exp
+f = np.exp
 p_degree, q_degree = 5, 5
 x_min, x_max = -0.5, 0.5
 p, q = rational_approximation(
     f, x_min, x_max, p_degree, q_degree, dtype=np.float64
 )
 
-print_polynomial("p", p, output_multiplier=True)
+print_polynomial("p", p)
 print_polynomial("q", q)
 
 # Evaluate final error
@@ -236,7 +234,7 @@ p, q = rational_approximation(
     f_target, x_min, x_max, p_degree, q_degree, dtype=np.float32
 )
 
-print_polynomial("p", p, output_multiplier=True)
+print_polynomial("p", p)
 print_polynomial("q", q)
 
 # Evaluate final error for tanh(t)

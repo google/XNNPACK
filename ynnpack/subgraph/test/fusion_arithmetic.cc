@@ -124,8 +124,7 @@ TEST(fusion, exp_multiplier) {
   const ynn_node& node = ProducerOf(x_id, subgraph);
   EXPECT_THAT(node, IsUnary(ynn_unary_exp));
   const auto& unary = std::get<ynn_node::unary_elementwise>(node.op);
-  EXPECT_NEAR(unary.params.exp.input_multiplier, std::log2(std::exp(1.0f)) * c,
-              1e-6f);
+  EXPECT_NEAR(unary.params.exp.input_multiplier, c, 1e-6f);
 }
 
 TEST(fusion, exp_negate) {
@@ -149,8 +148,7 @@ TEST(fusion, exp_negate) {
   const ynn_node& node = ProducerOf(x_id, subgraph);
   EXPECT_THAT(node, IsUnary(ynn_unary_exp));
   const auto& unary = std::get<ynn_node::unary_elementwise>(node.op);
-  EXPECT_NEAR(unary.params.exp.input_multiplier, -std::log2(std::exp(1.0f)),
-              1e-6f);
+  EXPECT_NEAR(unary.params.exp.input_multiplier, -1.0f, 1e-6f);
 }
 
 TEST(fusion, subtract_multiply) {

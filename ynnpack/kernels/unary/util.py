@@ -1,6 +1,9 @@
 """Helpers for unary kernels."""
 
-from ynnpack.kernels.elementwise.compiler import multiply_add  # pylint: disable=g-importing-member
+# pylint: disable=wildcard-import
+# pylint: disable=undefined-variable
+# pylint: disable=missing-function-docstring
+from ynnpack.kernels.elementwise.compiler import *
 
 
 def eval_polynomial(x, coeffs):
@@ -33,3 +36,13 @@ def round_small_fp64(a):
   """Round a float in [2^-51, 2^51) to the nearest whole number."""
   vmagic = 1.5 * (2**52)
   return (vmagic + a) - vmagic
+
+
+def round_small(a):
+  """Round a float to the nearest whole number."""
+  if a.ty == Float(32):
+    return round_small_fp32(a)
+  elif a.ty == Float(64):
+    return round_small_fp64(a)
+  else:
+    raise ValueError("Unsupported dtype: %s" % a.ty)
