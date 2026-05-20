@@ -10,8 +10,6 @@
 
 #include <assert.h>
 #include <stddef.h>
-#include <stdint.h>
-
 #include <riscv_vector.h>
 
 #include "src/xnnpack/common.h"
@@ -31,11 +29,11 @@ void xnn_f16_vtanh_ukernel__rvvfp16arith_expm1minus_rr1_p3h2ts_div_u4v(
   assert(output != NULL);
 
   const xnn_float16 vsat_cutoff = 0x1.208p+2f;
-  const xnn_float16 vmagic_bias = 0x1.83Cp+10f;
+  const xnn_float16 vmagic_bias = 0x1.83Cp+9f;
   const xnn_float16 vminus_log2e = -0x1.714p+0f;
   const xnn_float16 vln2 = 0x1.630p-1f;
-  const xnn_float16 vc3 = -0x1.56Cp-3f;
-  const xnn_float16 vc2 = 0x1.020p+0f;
+  const xnn_float16 vc3 = -0x1.56Cp+0f;
+  const xnn_float16 vc2 = 0x1.020p+1f;
 
   batch >>= XNN_LOG2_SIZEOF_FLOAT16;
   do {
@@ -44,11 +42,9 @@ void xnn_f16_vtanh_ukernel__rvvfp16arith_expm1minus_rr1_p3h2ts_div_u4v(
     vfloat16m4_t vx = __riscv_vle16_v_f16m4(input, n);
     input += n;
 
-    // Extract sign and compute z = -|x|.
-    vuint16m4_t vux = __riscv_vreinterpret_u16m4(vx);
-    vuint16m4_t vsign = __riscv_vand(vux, 0x8000, n);
-    vfloat16m4_t vz = __riscv_vfneg(__riscv_vfabs(vx, n), n);
-    vz = __riscv_vfmax(vz, -vsat_cutoff, n);
+    // Compute |x|.
+    vfloat16m4_t vz = __riscv_vfabs(vx, n);
+    vz = __riscv_vfmin(vz, vsat_cutoff, n);
 
     // Compute n = round(z * (-log2e)) + magic_bias.
     vfloat16m4_t vn = __riscv_vfmv_v_f_f16m4(vmagic_bias, n);
@@ -66,22 +62,19 @@ void xnn_f16_vtanh_ukernel__rvvfp16arith_expm1minus_rr1_p3h2ts_div_u4v(
     // Degree-3 polynomial for exp(t)-1.
     vfloat16m4_t vp = __riscv_vfmv_v_f_f16m4(vc2, n);
     vp = __riscv_vfmacc(vp, vc3, vt, n);
-    vp = __riscv_vfmul(vp, vt, n);
+    vp = __riscv_vfrsub(__riscv_vfmul(vp, vt, n), 2.0f, n);
 
-    // Reconstruct: expm1 = (p * t + t) * s + (s - 1)
+    // Reconstruct: expm1 = (s - 1) - (2 - p * t) * (t * s)
     vt = __riscv_vfmul(vt, vs, n);
     vs = __riscv_vfsub(vs, 1.0f, n);
-    vp = __riscv_vfmadd(vp, vt, vt, n);
-    vfloat16m4_t vexpm1 = __riscv_vfadd(vp, vs, n);
+    vfloat16m4_t vexpm1 = __riscv_vfnmsac(vs, vp, vt, n);
 
     // tanh = expm1 / (expm1 + 2).
     vfloat16m4_t vy = __riscv_vfdiv(vexpm1,
         __riscv_vfadd(vexpm1, 2.0f, n), n);
 
-    // Restore sign.
-    vuint16m4_t vuy = __riscv_vreinterpret_u16m4(vy);
-    vuy = __riscv_vxor(vuy, vsign, n);
-    vy = __riscv_vreinterpret_f16m4(vuy);
+    // Copy the original input sign onto the reconstructed magnitude.
+    vy = __riscv_vfsgnj(vy, vx, n);
 
     __riscv_vse16(output, vy, n);
     output += n;

@@ -24,13 +24,13 @@ void xnn_f16_vapproxgelu_ukernel__rvvfp16arith_rational_6_4_div_u${LMUL}v(
   assert(input != NULL);
   assert(output != NULL);
 
-  const xnn_float16 vmax_x = 3.28125f;
-  const xnn_float16 vmin_x = -3.28125f;
-  const xnn_float16 valpha_1 = 7.9788458347e-01f;
-  const xnn_float16 valpha_3 = 1.4085319638e-01f;
-  const xnn_float16 valpha_5 = 4.5562628657e-03f;
-  const xnn_float16 vbeta_2 = 3.4839591384e-01f;
-  const xnn_float16 vbeta_4 = 4.0435642004e-02f;
+  const xnn_float16 vmax_x = 3.26367188e+00f;
+  const xnn_float16 vmin_x = -3.26367188e+00f;
+  const xnn_float16 valpha_1 = 7.9763704538e-01f;
+  const xnn_float16 valpha_3 = 1.4811584353e-01f;
+  const xnn_float16 valpha_5 = 4.3507730588e-03f;
+  const xnn_float16 vbeta_2 = 3.5130375624e-01f;
+  const xnn_float16 vbeta_4 = 4.0821321309e-02f;
 
   batch >>= XNN_LOG2_SIZEOF_FLOAT16;
   do {
