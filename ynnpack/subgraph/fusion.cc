@@ -1243,6 +1243,7 @@ bool fold_unary_input(ynn_subgraph& subgraph, ynn_node& node,
   }
   switch (unary->op) {
     case ynn_unary_exp:
+    case ynn_unary_expm1:
     case ynn_unary_log:
     case ynn_unary_erf:
       break;
@@ -1261,7 +1262,7 @@ bool fold_unary_input(ynn_subgraph& subgraph, ynn_node& node,
     }
     YNN_LOG_DEBUG() << "Folding multiply by " << mul->a << " into "
                     << to_string(unary->op) << ".";
-    if (unary->op == ynn_unary_exp) {
+    if (unary->op == ynn_unary_exp || unary->op == ynn_unary_expm1) {
       unary->params.exp.input_multiplier *= mul->a;
     } else {
       unary->params.erf.input_multiplier *= mul->a;
@@ -1287,6 +1288,7 @@ bool fold_unary_output(ynn_subgraph& subgraph, ynn_node& node,
 
   switch (unary->op) {
     case ynn_unary_exp:
+    case ynn_unary_expm1:
     case ynn_unary_log:
       if (scalar_arithmetic->b != 0.0f) {
         // exp/log does not support output offset

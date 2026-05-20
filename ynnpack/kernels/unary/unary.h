@@ -33,6 +33,7 @@ struct log_exp_params {
 };
 
 using exp_params = log_exp_params;
+using expm1_params = log_exp_params;
 using log_params = log_exp_params;
 
 struct erf_params {
@@ -83,6 +84,7 @@ struct poly3_params {
 
 union unary_params {
   exp_params exp;
+  expm1_params expm1;
   log_params log;
 
   // All of these params have the first two params a, b, such that they form

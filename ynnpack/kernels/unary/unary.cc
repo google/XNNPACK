@@ -210,9 +210,16 @@ struct exp_op {
 };
 
 struct expm1_op {
-  explicit expm1_op(const unary_params& = {}) {}
-  float operator()(float x) const { return std::expm1(x); }
-  double operator()(double x) const { return std::expm1(x); }
+  exp_params params;
+
+  explicit expm1_op(const unary_params& params) : params(params.expm1) {}
+  float operator()(float x) const {
+    return std::expm1(static_cast<float>(params.input_multiplier) * x) *
+           static_cast<float>(params.output_multiplier);
+  }
+  double operator()(double x) const {
+    return std::expm1(params.input_multiplier * x) * params.output_multiplier;
+  }
 };
 
 struct erf_op {
@@ -441,6 +448,7 @@ unary_kernel_fn get_unary_kernel(ynn_unary_operator op, ynn_type a_type,
 unary_params get_unary_params(ynn_unary_operator op) {
   switch (op) {
     case ynn_unary_exp:
+    case ynn_unary_expm1:
       return unary_params{
           .exp = exp_params{
               ._ = 0.0,

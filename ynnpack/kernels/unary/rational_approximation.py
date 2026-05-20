@@ -14,12 +14,16 @@ def poly_eval(c, x):
     res += v * (x**i).astype(c.dtype)
   return res
 
-
 def rational_approximation(
-    f, x_min, x_max, p_degree, q_degree, dtype=np.float64
+    f, x_min, x_max, p_degree, q_degree, dtype=np.float64, force_zero=False
 ):
-  """Implementation of the Remez exchange algorithm using the target dtype internally."""
-  n_points = p_degree + q_degree + 2
+  """Implementation of the Remez exchange algorithm.
+
+  If force_zero=True, ensures the approximation is exact at x=0 by fixing p0 = f(0).
+  """
+  # If forced, we have one less degree of freedom to solve for
+  n_points = p_degree + q_degree + (1 if force_zero else 2)
+
   # Initial guess for exchange points
   nodes = (
       0.5 * (x_min + x_max)
@@ -30,20 +34,32 @@ def rational_approximation(
 
   best_p, best_q = None, None
   last_max_err = np.inf
+  f0 = dtype(f(0))
 
   for iteration in range(25):
-    # Set up system using target dtype
     A = np.zeros((n_points, n_points), dtype=dtype)
     b = np.zeros(n_points, dtype=dtype)
     y_nodes = f(nodes).astype(dtype)
 
     for i in range(n_points):
-      for j in range(p_degree + 1):
-        A[i, j] = nodes[i] ** j
-      for j in range(1, q_degree + 1):
-        A[i, p_degree + j] = -y_nodes[i] * (nodes[i] ** j)
-      A[i, -1] = -((-1) ** i)
-      b[i] = y_nodes[i]
+      if force_zero:
+        # p0 is fixed to f0. System solves for p1...pn
+        # P(x) - f(x)Q(x) = +/- E * Q(x)
+        # (f0 + p1*x + ...) - f(x)(1 + q1*x + ...) = +/- E * (1 + q1*x + ...)
+        # p1*x + ... - f(x)(q1*x + ...) - +/- E * (1 + q1*x + ...) = f(x) - f0
+        for j in range(1, p_degree + 1):
+          A[i, j-1] = nodes[i] ** j
+        for j in range(1, q_degree + 1):
+          A[i, p_degree + j - 1] = -y_nodes[i] * (nodes[i] ** j)
+        A[i, -1] = -((-1) ** i)
+        b[i] = y_nodes[i] - f0
+      else:
+        for j in range(p_degree + 1):
+          A[i, j] = nodes[i] ** j
+        for j in range(1, q_degree + 1):
+          A[i, p_degree + j] = -y_nodes[i] * (nodes[i] ** j)
+        A[i, -1] = -((-1) ** i)
+        b[i] = y_nodes[i]
 
     try:
       sol = np.linalg.solve(A, b)
@@ -51,15 +67,15 @@ def rational_approximation(
       sol, _, _, _ = np.linalg.lstsq(A, b, rcond=None)
 
     sol = sol.astype(dtype)
-    p_coeffs = sol[: p_degree + 1]
-    q_coeffs = np.concatenate(([dtype(1.0)], sol[p_degree + 1 : -1])).astype(
-        dtype
-    )
+    if force_zero:
+        p_coeffs = np.concatenate(([f0], sol[:p_degree]))
+        q_coeffs = np.concatenate(([dtype(1.0)], sol[p_degree : -1]))
+    else:
+        p_coeffs = sol[: p_degree + 1]
+        q_coeffs = np.concatenate(([dtype(1.0)], sol[p_degree + 1 : -1]))
 
-    # Evaluate error on fine grid using target dtype to account for rounding
     x_fine = np.linspace(x_min, x_max, 20000).astype(dtype)
     f_fine = f(x_fine).astype(dtype)
-
     approx_fine = poly_eval(p_coeffs, x_fine) / poly_eval(q_coeffs, x_fine)
     err_fine = approx_fine - f_fine
     abs_err = np.abs(err_fine)
@@ -71,20 +87,15 @@ def rational_approximation(
     last_max_err = current_max_err
     best_p, best_q = p_coeffs, q_coeffs
 
-    # Exchange Step
     new_nodes = []
-    if abs_err[0] > abs_err[1]:
-      new_nodes.append(x_fine[0])
+    if abs_err[0] > abs_err[1]: new_nodes.append(x_fine[0])
     for i in range(1, len(x_fine) - 1):
       if abs_err[i] > abs_err[i - 1] and abs_err[i] > abs_err[i + 1]:
         new_nodes.append(x_fine[i])
-    if abs_err[-1] > abs_err[-2]:
-      new_nodes.append(x_fine[-1])
+    if abs_err[-1] > abs_err[-2]: new_nodes.append(x_fine[-1])
 
     if len(new_nodes) >= n_points:
-      idx = np.argsort(np.abs(err_fine[np.searchsorted(x_fine, new_nodes)]))[
-          -n_points:
-      ]
+      idx = np.argsort(np.abs(err_fine[np.searchsorted(x_fine, new_nodes)]))[-n_points:]
       nodes = np.sort([new_nodes[i] for i in idx])
     else:
       max_err_x = x_fine[np.argmax(abs_err)]
@@ -155,6 +166,54 @@ x_test = np.linspace(x_min, x_max, 5000)
 approx = poly_eval(p, x_test) / poly_eval(q, x_test)
 plot_error(f, x_test, approx)
 # %%
+# fp32 expm1
+f = lambda x: np.expm1(x)
+p_degree, q_degree = 3, 3
+x_min, x_max = -0.5, 0.5
+p, q = rational_approximation(
+    f, x_min, x_max, p_degree, q_degree, dtype=np.float32, force_zero=True
+)
+
+print_polynomial("p", p)
+print_polynomial("q", q)
+
+# Evaluate final error
+x_test = np.linspace(x_min, x_max, 5000)
+approx = poly_eval(p, x_test) / poly_eval(q, x_test)
+plot_error(f, x_test, approx)
+# %%
+# fp64 exp
+f = np.exp
+p_degree, q_degree = 5, 5
+x_min, x_max = -0.5, 0.5
+p, q = rational_approximation(
+    f, x_min, x_max, p_degree, q_degree, dtype=np.float64
+)
+
+print_polynomial("p", p)
+print_polynomial("q", q)
+
+# Evaluate final error
+x_test = np.linspace(x_min, x_max, 5000)
+approx = poly_eval(p, x_test) / poly_eval(q, x_test)
+plot_error(f, x_test, approx)
+# %%
+# fp64 expm1
+f = np.expm1
+p_degree, q_degree = 6, 6
+x_min, x_max = -0.5, 0.5
+p, q = rational_approximation(
+    f, x_min, x_max, p_degree, q_degree, dtype=np.float64, force_zero=True
+)
+
+print_polynomial("p", p)
+print_polynomial("q", q)
+
+# Evaluate final error
+x_test = np.linspace(x_min, x_max, 5000)
+approx = poly_eval(p, x_test) / poly_eval(q, x_test)
+plot_error(f, x_test, approx)
+# %%
 import math
 
 # Target: R(x) = log2(x + 1) / x
@@ -181,22 +240,6 @@ approx = poly_eval(p, x_test) / poly_eval(q, x_test)
 target = np.log2(x_test + 1)
 
 plot_error(lambda x: np.log2(x + 1), x_test, approx)
-# %%
-# fp64 exp
-f = np.exp
-p_degree, q_degree = 5, 5
-x_min, x_max = -0.5, 0.5
-p, q = rational_approximation(
-    f, x_min, x_max, p_degree, q_degree, dtype=np.float64
-)
-
-print_polynomial("p", p)
-print_polynomial("q", q)
-
-# Evaluate final error
-x_test = np.linspace(x_min, x_max, 5000)
-approx = poly_eval(p, x_test) / poly_eval(q, x_test)
-plot_error(f, x_test, approx)
 # %%
 import math
 

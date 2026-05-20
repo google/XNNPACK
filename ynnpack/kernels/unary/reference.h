@@ -353,12 +353,19 @@ struct log1p : public unary_op_info {
 };
 
 struct expm1 : public unary_op_info {
-  explicit expm1(const unary_params& = {}) {}
-  float operator()(float x) const override { return std::expm1(x); }
-  double operator()(double x) const override { return std::expm1(x); }
+  exp_params params;
+
+  explicit expm1(const unary_params& params) : params(params.expm1) {}
+  float operator()(float x) const override {
+    return std::expm1(static_cast<float>(params.input_multiplier) * x) *
+           static_cast<float>(params.output_multiplier);
+  }
+  double operator()(double x) const override {
+    return std::expm1(params.input_multiplier * x) * params.output_multiplier;
+  }
 
   tolerance_spec tolerance(ynn_type type) const override {
-    return tolerance_spec{/*relative=*/1.0f, /*absolute=*/2.0f};
+    return tolerance_spec{/*relative=*/3.0f};
   }
 };
 
