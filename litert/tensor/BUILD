@@ -121,11 +121,12 @@ cc_test(
     srcs = ["tensor_test.cc"],
     deps = [
         ":arithmetic",
+        ":buffer",
+        ":datatypes",
         ":tensor",
-        "//litert/tensor:buffer",
-        "//litert/tensor:datatypes",
         "//litert/tensor/internal:graph",
         "//litert/tensor/utils:matchers",
+        "@abseil-cpp//absl/strings:string_view",
         "@com_google_googletest//:gtest_main",  # gunit
     ],
 )
