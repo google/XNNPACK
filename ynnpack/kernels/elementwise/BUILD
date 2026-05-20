@@ -12,6 +12,7 @@ py_library(
         "arm.py",
         "compiler.py",
         "generator.py",
+        "hexagon.py",
         "rules.py",
         "wasm.py",
         "x86.py",
