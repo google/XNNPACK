@@ -91,32 +91,33 @@ struct KernelInfo {
 };
 
 std::vector<unary_params> get_params_for_op(ynn_unary_operator op) {
+  // These parameters need to be chosen carefully so they do not invalidate the
+  // tolerances the op uses to check the results.
   switch (op) {
     case ynn_unary_exp:
       return {
-          unary_params{.exp =
-                           exp_params{0.0f, 1.0f, std::log2(std::exp(1.0f))}},
-          unary_params{.exp = exp_params{0.1f, 0.7f, 0.8f}},
+          unary_params{.exp = exp_params{0.0f, 1.0f, 1.0f}},
+          unary_params{.exp = exp_params{0.1f, 1.1f, 1.2f}},
       };
     case ynn_unary_erf:
       return {
           unary_params{.erf = erf_params{0.0f, 1.0f, 1.0f}},
-          unary_params{.erf = erf_params{0.5f, 0.6f, 0.7f}},
+          unary_params{.erf = erf_params{0.5f, 1.1f, 1.2f}},
       };
     case ynn_unary_tanh:
       return {
           unary_params{.tanh = tanh_params{0.0f, 1.0f}},
-          unary_params{.tanh = tanh_params{0.2f, 0.5f}},
+          unary_params{.tanh = tanh_params{2.0f, 1.1f}},
       };
     case ynn_unary_sine:
       return {
           unary_params{.sine = sine_params{0.0f, 1.0f}},
-          unary_params{.sine = sine_params{0.2f, 0.5f}},
+          unary_params{.sine = sine_params{2.0f, 0.5f}},
       };
     case ynn_unary_cosine:
       return {
           unary_params{.cosine = cosine_params{0.0f, 1.0f}},
-          unary_params{.cosine = cosine_params{0.2f, 0.5f}},
+          unary_params{.cosine = cosine_params{2.0f, 0.5f}},
       };
     case ynn_unary_poly3:
       return {
