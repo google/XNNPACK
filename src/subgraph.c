@@ -1905,7 +1905,6 @@ static bool replace_node_with_lut(xnn_subgraph_t subgraph,
                                   struct xnn_node* node, uint32_t input_id,
                                   uint32_t unary_input_id,
                                   xnn_subgraph_t unary_subgraph) {
-  XNN_RETURN_IF_ERROR(xnn_subgraph_reserve_nodes(subgraph, 1));
   XNN_RETURN_IF_ERROR(xnn_subgraph_reserve_values(subgraph, 1));
 
   const uint32_t unary_output_id =
