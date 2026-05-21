@@ -6,8 +6,8 @@
 #include "ynnpack/base/simd/x86_sse2.h"
 
 #include <gtest/gtest.h>
+#include "ynnpack/base/simd/emulate_fma.h"
 #include "ynnpack/base/simd/test/generic.h"
-#include "ynnpack/base/simd/x86_sse2_fma.h"
 
 namespace ynn {
 namespace simd {
@@ -152,7 +152,7 @@ TEST_CAST(x86_sse2, u8, f32x16);
 TEST_CAST(x86_sse2, s8, f32x16);
 TEST_CAST(x86_sse2, s16, f32x8);
 
-TEST_FMA(x86_sse2, f32, 4);
+TEST_EMULATE_FMA(x86_sse2, f32, 4);
 
 }  // namespace simd
 }  // namespace ynn

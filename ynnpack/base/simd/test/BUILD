@@ -31,6 +31,7 @@ package(default_visibility = ["//ynnpack:__subpackages__"])
     deps = [
         "//ynnpack/base",  # buildcleaner:keep
         "//ynnpack/base/simd",  # buildcleaner:keep
+        "//ynnpack/base/simd:emulate_fma",
         "//ynnpack/base/test:fuzz_test",
         "//ynnpack/base/test:random",
         "@slinky//slinky/base",

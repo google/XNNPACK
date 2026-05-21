@@ -6,8 +6,8 @@
 #include "ynnpack/base/simd/x86_sse2.h"
 
 #include "ynnpack/base/arch.h"
+#include "ynnpack/base/simd/emulate_fma.h"
 #include "ynnpack/base/simd/bench/generic.h"
-#include "ynnpack/base/simd/x86_sse2_fma.h"
 
 namespace ynn {
 namespace simd {
@@ -16,7 +16,7 @@ BENCH_PARTIAL_LOAD_STORE(sse2, s8, 16);
 BENCH_PARTIAL_LOAD_STORE(sse2, s16, 8);
 BENCH_PARTIAL_LOAD_STORE(sse2, s32, 4);
 
-BENCH_FMA(sse2, f32, 4);
+BENCH_EMULATE_FMA(sse2, f32, 4);
 
 BENCH_UNARY(sse2, floor_log2, f32, 4);
 BENCH_UNARY(sse2, floor_log2, f64, 2);

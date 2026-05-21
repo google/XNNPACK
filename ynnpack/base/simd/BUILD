@@ -57,9 +57,17 @@ cc_library(
         "x86_f16c.h",
         "x86_fma3.h",
         "x86_sse2.h",
-        "x86_sse2_fma.h",
         "x86_sse41.h",
         "wasm_simd128.h",
     ],
     deps = ["//ynnpack/base"],
+)
+
+cc_library(
+    name = "emulate_fma",
+    hdrs = ["emulate_fma.h"],
+    deps = [
+        ":simd",
+        "//ynnpack/base",
+    ],
 )
