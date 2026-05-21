@@ -578,6 +578,17 @@ YNN_ALWAYS_INLINE f64x2 operator/(f64x2 a, f64x2 b) {
 }
 #endif
 
+#ifdef __ARM_FEATURE_FMA
+YNN_ALWAYS_INLINE f32x4 fma(f32x4 a, f32x4 b, f32x4 acc) {
+  return f32x4{vfmaq_f32(acc.v, a.v, b.v)};
+}
+#ifdef YNN_ARCH_ARM64
+YNN_ALWAYS_INLINE f64x2 fma(f64x2 a, f64x2 b, f64x2 acc) {
+  return f64x2{vfmaq_f64(acc.v, a.v, b.v)};
+}
+#endif
+#endif  // __ARM_FEATURE_FMA
+
 YNN_ALWAYS_INLINE s32x4 operator*(s32x4 a, s32x4 b) {
   return s32x4{vmulq_s32(a.v, b.v)};
 }
@@ -1380,6 +1391,30 @@ YNN_ALWAYS_INLINE u8x16 cast(f32x16 f, uint8_t) {
   };
   return cast(f_s16, uint8_t{});
 }
+
+#ifdef YNN_ARCH_ARM_NEONFP16
+using f32x8 = vec<float, 8>;
+
+YNN_ALWAYS_INLINE f32x4 cast(f16x4 a, float) {
+  return f32x4{vcvt_f32_f16(vreinterpret_f16_u16(a.v))};
+}
+
+YNN_ALWAYS_INLINE f32x8 cast(f16x8 a, float) {
+  return {
+      f32x4{vcvt_f32_f16(vreinterpret_f16_u16(vget_low_u16(a.v)))},
+      f32x4{vcvt_f32_f16(vreinterpret_f16_u16(vget_high_u16(a.v)))},
+  };
+}
+
+YNN_ALWAYS_INLINE f16x4 cast(f32x4 a, half) {
+  return f16x4{vreinterpret_u16_f16(vcvt_f16_f32(a.v))};
+}
+
+YNN_ALWAYS_INLINE f16x8 cast(f32x8 a, half) {
+  return f16x8{vreinterpretq_u16_f16(
+      vcombine_f16(vcvt_f16_f32(lo(a).v), vcvt_f16_f32(hi(a).v)))};
+}
+#endif
 
 }  // namespace simd
 

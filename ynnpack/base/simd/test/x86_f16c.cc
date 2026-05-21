@@ -3,7 +3,7 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include "ynnpack/base/simd/x86_f16c.h"
+#include "ynnpack/base/simd/x86_avx.h"
 
 #include <gtest/gtest.h>
 #include "ynnpack/base/arch.h"

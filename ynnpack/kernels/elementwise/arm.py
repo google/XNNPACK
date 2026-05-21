@@ -52,16 +52,10 @@ class ARM(Target):
     if "NEON" in all_features:
       self.update_for_neon()
     if "NEONFP16" in all_features:
-      self.header += (
-          '#include "ynnpack/base/simd/arm_neonfp16.h"\n'
-      )
       self.update_for_fp16()
     if "NEONBF16" in all_features:
       self.update_for_bf16()
     if "FMA" in all_features:
-      self.header += (
-          '#include "ynnpack/base/simd/arm_neonfma.h"\n'
-      )
       self.update_for_fma()
 
   def arch_flags(self):

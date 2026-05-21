@@ -36,6 +36,15 @@ YNN_ALWAYS_INLINE f32x4 cast(f64x4 a, float) {
   return f32x4{_mm256_cvtpd_ps(a.v)};
 }
 
+#ifdef __F16C__
+YNN_ALWAYS_INLINE f32x8 cast(f16x8 a, float) {
+  return f32x8{_mm256_cvtph_ps(a.v)};
+}
+YNN_ALWAYS_INLINE f16x8 cast(f32x8 a, half) {
+  return f16x8{_mm256_cvtps_ph(a.v, _MM_FROUND_TO_NEAREST_INT)};
+}
+#endif  // __F16C__
+
 YNN_ALWAYS_INLINE s32x8 select(s32x8 cond, s32x8 a, s32x8 b) {
   __m256 mc = _mm256_castsi256_ps(cond.v);
   __m256 ma = _mm256_castsi256_ps(a.v);

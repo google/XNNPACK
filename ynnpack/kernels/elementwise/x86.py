@@ -102,10 +102,6 @@ class X86(Target):
         f'#include "ynnpack/base/simd/{simd_header}"\n'
     )
 
-    if "F16C" in all_features:
-      self.header += (
-          '#include "ynnpack/base/simd/x86_f16c.h"\n'
-      )
     if "AVX512BW" in all_features:
       self.update_for_avx512bw()
     if "AVX512BF16" in all_features:
@@ -113,9 +109,6 @@ class X86(Target):
     if "AVX512F" in all_features:
       self.update_for_avx512f()
     if "FMA3" in all_features:
-      self.header += (
-          '#include "ynnpack/base/simd/x86_fma3.h"\n'
-      )
       self.update_for_fma3()
     if "F16C" in all_features:
       self.update_for_f16c()
