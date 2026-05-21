@@ -615,21 +615,6 @@ YNN_ALWAYS_INLINE f64x4 select(s64x4 cond, f64x4 a, f64x4 b) {
   return f64x4{_mm256_blendv_pd(b.v, a.v, _mm256_castsi256_pd(cond.v))};
 }
 
-template <>
-YNN_ALWAYS_INLINE std::array<f64x4, 4> transpose<double>(
-    std::array<f64x4, 4> x) {
-  __m256d t0 = _mm256_unpacklo_pd(x[0].v, x[1].v);
-  __m256d t1 = _mm256_unpackhi_pd(x[0].v, x[1].v);
-  __m256d t2 = _mm256_unpacklo_pd(x[2].v, x[3].v);
-  __m256d t3 = _mm256_unpackhi_pd(x[2].v, x[3].v);
-  return {{
-      f64x4{_mm256_permute2f128_pd(t0, t2, 0x20)},
-      f64x4{_mm256_permute2f128_pd(t1, t3, 0x20)},
-      f64x4{_mm256_permute2f128_pd(t0, t2, 0x31)},
-      f64x4{_mm256_permute2f128_pd(t1, t3, 0x31)},
-  }};
-}
-
 #ifdef __FMA__
 YNN_ALWAYS_INLINE f64x4 fma(f64x4 a, f64x4 b, f64x4 acc) {
   return f64x4{_mm256_fmadd_pd(a.v, b.v, acc.v)};

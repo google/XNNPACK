@@ -782,35 +782,6 @@ YNN_ALWAYS_INLINE std::tuple<u8x16, u8x16> interleave(
                     u8x16{_mm_or_si128(odd1, _mm_srli_epi16(odd0, 2))});
 }
 
-template <>
-YNN_ALWAYS_INLINE std::array<f32x4, 4> transpose<float>(
-    std::array<f32x4, 4> x) {
-  f32x4 t0{_mm_unpacklo_ps(x[0].v, x[1].v)};
-  f32x4 t1{_mm_unpacklo_ps(x[2].v, x[3].v)};
-  f32x4 t2{_mm_unpackhi_ps(x[0].v, x[1].v)};
-  f32x4 t3{_mm_unpackhi_ps(x[2].v, x[3].v)};
-  return {{
-      f32x4{_mm_movelh_ps(t0.v, t1.v)},
-      f32x4{_mm_movehl_ps(t1.v, t0.v)},
-      f32x4{_mm_movelh_ps(t2.v, t3.v)},
-      f32x4{_mm_movehl_ps(t3.v, t2.v)},
-  }};
-}
-template <>
-YNN_ALWAYS_INLINE std::array<s32x4, 4> transpose<int32_t>(
-    std::array<s32x4, 4> x) {
-  s32x4 t0{_mm_unpacklo_epi32(x[0].v, x[1].v)};
-  s32x4 t1{_mm_unpacklo_epi32(x[2].v, x[3].v)};
-  s32x4 t2{_mm_unpackhi_epi32(x[0].v, x[1].v)};
-  s32x4 t3{_mm_unpackhi_epi32(x[2].v, x[3].v)};
-  return {{
-      s32x4{internal::movelh(t0.v, t1.v)},
-      s32x4{internal::movehl(t1.v, t0.v)},
-      s32x4{internal::movelh(t2.v, t3.v)},
-      s32x4{internal::movehl(t3.v, t2.v)},
-  }};
-}
-
 YNN_ALWAYS_INLINE f32x4 cast(s32x4 x, float) {
   return f32x4{_mm_cvtepi32_ps(x.v)};
 }

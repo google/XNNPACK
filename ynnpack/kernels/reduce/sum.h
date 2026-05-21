@@ -17,7 +17,6 @@
 
 namespace ynn {
 
-using simd::transpose;
 using simd::extract;
 
 struct identity {

@@ -189,8 +189,6 @@ auto isfinite(vec<T, N> a);
 template <typename T, size_t N, typename M>
 vec<T, N> select(M cond, vec<T, N> a, vec<T, N> b);
 
-template <typename T>
-std::array<vec<T, 4>, 4> transpose(std::array<vec<T, 4>, 4> x);
 template <int Index, typename T, size_t N, typename SliceN>
 auto extract(vec<T, N>, SliceN);
 

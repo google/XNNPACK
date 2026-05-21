@@ -840,21 +840,6 @@ YNN_ALWAYS_INLINE std::tuple<u8x16, u8x16> interleave(
   return interleave(std::integral_constant<size_t, 8>{}, t0, t1);
 }
 
-template <typename T>
-YNN_ALWAYS_INLINE std::array<vec<T, 4>, 4> transpose(
-    std::array<vec<T, 4>, 4> x) {
-  vec<T, 4> t0{internal::unpacklo_x32x4(x[0].v, x[1].v)};
-  vec<T, 4> t1{internal::unpacklo_x32x4(x[2].v, x[3].v)};
-  vec<T, 4> t2{internal::unpackhi_x32x4(x[0].v, x[1].v)};
-  vec<T, 4> t3{internal::unpackhi_x32x4(x[2].v, x[3].v)};
-  return {{
-      vec<T, 4>{internal::movelh(t0.v, t1.v)},
-      vec<T, 4>{internal::movehl(t1.v, t0.v)},
-      vec<T, 4>{internal::movelh(t2.v, t3.v)},
-      vec<T, 4>{internal::movehl(t3.v, t2.v)},
-  }};
-}
-
 }  // namespace simd
 
 }  // namespace ynn

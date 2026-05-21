@@ -1257,24 +1257,6 @@ YNN_ALWAYS_INLINE std::tuple<u8x8, u8x8> interleave(
                     u8x8{vbsl_u8(vdup_n_u8(0xcc), x1.v, vshr_n_u8(x0.v, 2))});
 }
 
-template <typename T>
-YNN_ALWAYS_INLINE std::array<vec<T, 4>, 4> transpose(
-    std::array<vec<T, 4>, 4> x) {
-  using internal::vcombine;
-  using internal::vget_high;
-  using internal::vget_low;
-  using internal::vtrn;
-
-  auto t01 = vtrn(x[0].v, x[1].v);
-  auto t23 = vtrn(x[2].v, x[3].v);
-  return {{
-      vec<T, 4>{vcombine(vget_low(t01.val[0]), vget_low(t23.val[0]))},
-      vec<T, 4>{vcombine(vget_low(t01.val[1]), vget_low(t23.val[1]))},
-      vec<T, 4>{vcombine(vget_high(t01.val[0]), vget_high(t23.val[0]))},
-      vec<T, 4>{vcombine(vget_high(t01.val[1]), vget_high(t23.val[1]))},
-  }};
-}
-
 using f32x8 = vec<float, 8>;
 #ifdef YNN_ARCH_ARM64
 using f64x4 = vec<double, 4>;
