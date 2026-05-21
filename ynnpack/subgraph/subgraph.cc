@@ -646,9 +646,21 @@ ynn_status ynn_subgraph::fold_constants(slinky::thread_pool* threadpool) {
     return ynn_status_success;
   }
 
+  // Find which constant values are actually needed by the remaining active
+  // nodes of the main subgraph.
+  std::set<uint32_t> needed_constants;
+  for (const ynn_node& node : nodes) {
+    if (!node.is_valid()) continue;
+    for (uint32_t i : node.inputs) {
+      if (i != YNN_INVALID_VALUE_ID && to_fold.count(i)) {
+        needed_constants.insert(i);
+      }
+    }
+  }
+
   // Mark these values as external outputs in `constants` so we can reshape and
   // learn the shape of the constants.
-  for (uint32_t i : to_fold) {
+  for (uint32_t i : needed_constants) {
     constants->values[i].flags |= YNN_VALUE_FLAG_EXTERNAL_OUTPUT;
   }
 
@@ -671,7 +683,7 @@ ynn_status ynn_subgraph::fold_constants(slinky::thread_pool* threadpool) {
   }
 
   // Use the results of reshape to allocate static buffers for the constants.
-  for (uint32_t i : to_fold) {
+  for (uint32_t i : needed_constants) {
     ynn_runtime_value& folded = runtime.value(i);
     assert(values[i].extents.size() == folded.data->rank);
     for (size_t d = 0; d < folded.data->rank; ++d) {
