@@ -698,11 +698,36 @@ xnn_status xnn_define_fully_connected(xnn_subgraph_t subgraph, float output_min,
     filter_id = filter_id_transposed;
   }
 
+  uint32_t output_unfused_id = output_id;
+  if (output_min != -INFINITY || output_max != INFINITY) {
+    // If there is fusion, compute the unfused output.
+    output_unfused_id = YNN_INVALID_VALUE_ID;
+  }
+
+  uint32_t dot_output_id = output_unfused_id;
+  size_t inferred_rank = std::max(ynn::rank_of_value(subgraph, input_id),
+                                  ynn::rank_of_value(subgraph, filter_id));
+  if (inferred_rank != ynn::rank_of_value(subgraph, output_id)) {
+    dot_output_id = YNN_INVALID_VALUE_ID;
+    ynn_status status = ynn_define_tensor(
+        subgraph->ynn, ynn::type_of_value(subgraph, output_id), 0, nullptr,
+        nullptr, 0, &dot_output_id);
+    if (status != ynn_status_success) return ynn::xnn_status_from_ynn(status);
+  }
+
   ynn_status status = ynn::define_xnn_dot(subgraph,
                                           /*num_k_dims=*/1, input_id, filter_id,
-                                          bias_id, output_id);
+                                          bias_id, dot_output_id);
   if (status != ynn_status_success) {
     return ynn::xnn_status_from_ynn(status);
+  }
+
+  if (dot_output_id != output_unfused_id) {
+    status = ynn_define_static_reshape(subgraph->ynn, 0, nullptr, dot_output_id,
+                                       &output_unfused_id, /*flags=*/0);
+    if (status != ynn_status_success) {
+      return ynn::xnn_status_from_ynn(status);
+    }
   }
 
   return ynn::xnn_status_from_ynn(

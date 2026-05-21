@@ -165,6 +165,12 @@ struct ynn_value {
 
   std::vector<slinky::expr> physical_extents() const {
     std::vector<slinky::expr> phys = extents;
+    if (phys.empty() && data) {
+      phys.resize(data->rank);
+      for (int i = 0; i < data->rank; ++i) {
+        phys[i] = data->dim(i).extent();
+      }
+    }
     if (!phys.empty()) {
       if (phys[0].defined() || ynn::type_element_count(type) != 1) {
         phys[0] = physical_extent(0);
