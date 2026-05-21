@@ -745,6 +745,13 @@ YNN_ALWAYS_INLINE u8x64 operator-(u8x64 a, u8x64 b) {
   return u8x64{_mm512_sub_epi8(a.v, b.v)};
 }
 
+YNN_ALWAYS_INLINE f64x8 operator-(f64x8 a) {
+  return f64x8{_mm512_sub_pd(_mm512_setzero_pd(), a.v)};
+}
+YNN_ALWAYS_INLINE f32x16 operator-(f32x16 a) {
+  return f32x16{_mm512_sub_ps(_mm512_setzero_ps(), a.v)};
+}
+
 YNN_ALWAYS_INLINE s16x32 add_sat(s16x32 a, s16x32 b) {
   return s16x32{_mm512_adds_epi16(a.v, b.v)};
 }
@@ -854,7 +861,6 @@ YNN_ALWAYS_INLINE s8x64 operator~(s8x64 a) {
 YNN_ALWAYS_INLINE f64x8 fma(f64x8 a, f64x8 b, f64x8 acc) {
   return f64x8{_mm512_fmadd_pd(a.v, b.v, acc.v)};
 }
-
 YNN_ALWAYS_INLINE f32x16 fma(f32x16 a, f32x16 b, f32x16 acc) {
   return f32x16{_mm512_fmadd_ps(a.v, b.v, acc.v)};
 }

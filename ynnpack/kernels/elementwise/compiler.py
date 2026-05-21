@@ -479,6 +479,26 @@ def sqrt(value):
 
 
 @intrinsic
+def exp(value):
+  return Op(value.ty, "exp", [value])
+
+
+@intrinsic
+def expm1(value):
+  return Op(value.ty, "expm1", [value])
+
+
+@intrinsic
+def log(value):
+  return Op(value.ty, "log", [value])
+
+
+@intrinsic
+def log1p(value):
+  return Op(value.ty, "log1p", [value])
+
+
+@intrinsic
 def cast(ty, value):
   """Casts value to a given type."""
   # This is no-op.
@@ -1012,6 +1032,10 @@ class Target:
         "isfinite",
         "select",
         "~",
+        "exp",
+        "expm1",
+        "log",
+        "log1p",
     }
     self.infix_ops = {
         "add": "+",

@@ -5,6 +5,8 @@
 
 #include "ynnpack/base/simd/x86_avx512.h"
 
+#include <cmath>
+
 #include <gtest/gtest.h>
 #include "ynnpack/base/arch.h"
 #include "ynnpack/base/simd/test/generic.h"
@@ -224,6 +226,15 @@ TEST_CAST(x86_avx512, s8, s16x64);
 TEST_CAST(x86_avx512, u8, f32x64);
 TEST_CAST(x86_avx512, s8, f32x64);
 TEST_CAST(x86_avx512, s16, f32x32);
+
+TEST_UNARY(x86_avx512, exp, f32, 16, std::exp, 3);
+TEST_UNARY(x86_avx512, exp, f64, 8, std::exp, 3);
+TEST_UNARY(x86_avx512, expm1, f32, 16, std::expm1, 3);
+TEST_UNARY(x86_avx512, expm1, f64, 8, std::expm1, 3);
+TEST_UNARY(x86_avx512, log, f32, 16, std::log, 3);
+TEST_UNARY(x86_avx512, log, f64, 8, std::log, 3);
+TEST_UNARY(x86_avx512, log1p, f32, 16, std::log1p, 3);
+TEST_UNARY(x86_avx512, log1p, f64, 8, std::log1p, 3);
 
 }  // namespace simd
 }  // namespace ynn

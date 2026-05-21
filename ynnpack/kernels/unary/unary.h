@@ -35,6 +35,7 @@ struct log_exp_params {
 using exp_params = log_exp_params;
 using expm1_params = log_exp_params;
 using log_params = log_exp_params;
+using log1p_params = log_exp_params;
 
 struct erf_params {
   real output_offset;
@@ -86,6 +87,7 @@ union unary_params {
   exp_params exp;
   expm1_params expm1;
   log_params log;
+  log1p_params log1p;
 
   // All of these params have the first two params a, b, such that they form
   // output offset and output scale parameters, respectively. We use this fact

@@ -3,11 +3,12 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include "ynnpack/base/simd/x86_avx.h"
+#include <cmath>
 
 #include <gtest/gtest.h>
 #include "ynnpack/base/arch.h"
 #include "ynnpack/base/simd/test/generic.h"
+#include "ynnpack/base/simd/x86_avx.h"
 
 namespace ynn {
 namespace simd {
@@ -21,6 +22,15 @@ class x86_fma3 : public ::testing::Test {
 };
 
 TEST_FMA(x86_fma3, f32, 8);
+
+TEST_UNARY(x86_fma3, exp, f32, 8, std::exp, 3);
+TEST_UNARY(x86_fma3, exp, f64, 4, std::exp, 3);
+TEST_UNARY(x86_fma3, expm1, f32, 8, std::expm1, 3);
+TEST_UNARY(x86_fma3, expm1, f64, 4, std::expm1, 3);
+TEST_UNARY(x86_fma3, log, f32, 8, std::log, 3);
+TEST_UNARY(x86_fma3, log, f64, 4, std::log, 3);
+TEST_UNARY(x86_fma3, log1p, f32, 8, std::log1p, 3);
+TEST_UNARY(x86_fma3, log1p, f64, 4, std::log1p, 3);
 
 }  // namespace simd
 }  // namespace ynn

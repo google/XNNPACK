@@ -5,6 +5,8 @@
 
 #include "ynnpack/base/simd/x86_sse2.h"
 
+#include <cmath>
+
 #include <gtest/gtest.h>
 #include "ynnpack/base/simd/emulate_fma.h"
 #include "ynnpack/base/simd/test/generic.h"
@@ -153,6 +155,15 @@ TEST_CAST(x86_sse2, s8, f32x16);
 TEST_CAST(x86_sse2, s16, f32x8);
 
 TEST_EMULATE_FMA(x86_sse2, f32, 4);
+
+TEST_UNARY(x86_sse2, exp, f32, 4, std::exp, 3);
+TEST_UNARY(x86_sse2, exp, f64, 2, std::exp, 3);
+TEST_UNARY(x86_sse2, expm1, f32, 4, std::expm1, 3);
+TEST_UNARY(x86_sse2, expm1, f64, 2, std::expm1, 3);
+TEST_UNARY(x86_sse2, log, f32, 4, std::log, 3);
+TEST_UNARY(x86_sse2, log, f64, 2, std::log, 3);
+TEST_UNARY(x86_sse2, log1p, f32, 4, std::log1p, 3);
+TEST_UNARY(x86_sse2, log1p, f64, 2, std::log1p, 3);
 
 }  // namespace simd
 }  // namespace ynn

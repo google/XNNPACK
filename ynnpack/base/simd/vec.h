@@ -69,7 +69,7 @@ struct vec {
   subvec v[2];
 
   vec() = default;
-  YNN_ALWAYS_INLINE explicit vec(value_type x) : v{subvec{x}, subvec{x}} {}
+  YNN_ALWAYS_INLINE vec(value_type x) : v{subvec{x}, subvec{x}} {}  // NOLINT
   YNN_ALWAYS_INLINE vec(subvec v0, subvec v1) : v{v0, v1} {}
 
   YNN_ALWAYS_INLINE subvec& operator[](size_t i) { return v[i]; }

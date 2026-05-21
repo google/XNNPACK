@@ -181,19 +181,25 @@ struct log_op {
 
   explicit log_op(const unary_params& params) : params(params.log) {}
   float operator()(float x) const {
-    return std::log2(x * static_cast<float>(params.input_multiplier)) *
+    return std::log(x * static_cast<float>(params.input_multiplier)) *
            static_cast<float>(params.output_multiplier);
   }
   double operator()(double x) const {
-    return std::log2(x * params.input_multiplier) *
-           params.output_multiplier;
+    return std::log(x * params.input_multiplier) * params.output_multiplier;
   }
 };
 
 struct log1p_op {
-  explicit log1p_op(const unary_params& = {}) {}
-  float operator()(float x) const { return std::log1p(x); }
-  double operator()(double x) const { return std::log1p(x); }
+  log1p_params params;
+
+  explicit log1p_op(const unary_params& params) : params(params.log1p) {}
+  float operator()(float x) const {
+    return std::log1p(x * static_cast<float>(params.input_multiplier)) *
+           static_cast<float>(params.output_multiplier);
+  }
+  double operator()(double x) const {
+    return std::log1p(x * params.input_multiplier) * params.output_multiplier;
+  }
 };
 
 struct exp_op {
@@ -456,12 +462,12 @@ unary_params get_unary_params(ynn_unary_operator op) {
               .input_multiplier = 1.0,
           }};
     case ynn_unary_log:
-      return unary_params{
-          .log = log_params{
-              ._ = 0.0,
-              .output_multiplier = static_cast<real>(std::log(2.0)),
-              .input_multiplier = 1.0,
-          }};
+    case ynn_unary_log1p:
+      return unary_params{.log = log_params{
+                              ._ = 0.0,
+                              .output_multiplier = 1.0,
+                              .input_multiplier = 1.0,
+                          }};
     case ynn_unary_erf:
       return unary_params{.erf = erf_params{.output_offset = 0.0,
                                             .output_multiplier = 1.0,

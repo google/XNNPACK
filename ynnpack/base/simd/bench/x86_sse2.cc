@@ -23,5 +23,14 @@ BENCH_UNARY(sse2, floor_log2, f64, 2);
 BENCH_UNARY(sse2, exp2_round, f32, 4);
 BENCH_UNARY(sse2, exp2_round, f64, 2);
 
+BENCH_UNARY(sse2, exp, f32, 4);
+BENCH_UNARY(sse2, exp, f64, 2);
+BENCH_UNARY(sse2, expm1, f32, 4);
+BENCH_UNARY(sse2, expm1, f64, 2);
+BENCH_UNARY(sse2, log, f32, 4);
+BENCH_UNARY(sse2, log, f64, 2);
+BENCH_UNARY(sse2, log1p, f32, 4);
+BENCH_UNARY(sse2, log1p, f64, 2);
+
 }  // namespace simd
 }  // namespace ynn

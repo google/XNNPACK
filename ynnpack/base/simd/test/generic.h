@@ -944,6 +944,67 @@ void test_sub_sat() {
 #define TEST_SUB_SAT(test_class, type, N) \
   TEST_F(test_class, sub_sat_##type##x##N) { test_sub_sat<type, N>(); }
 
+template <typename scalar, size_t N, typename F, typename Ref>
+void test_unary(F f, Ref ref, float epsilons) {
+  using vector = vec<scalar, N>;
+  using scalar_info = type_info<scalar>;
+
+  scalar special_values[] = {
+      static_cast<scalar>(0.0),
+      static_cast<scalar>(-0.0),
+      scalar_info::smallest_normal(),
+      scalar_info::max(),
+      -scalar_info::max(),
+      scalar_info::infinity(),
+      -scalar_info::infinity(),
+  };
+
+  for (scalar input : special_values) {
+    scalar expected = ref(input);
+    scalar a[vector::N];
+    std::fill_n(a, vector::N, input);
+
+    scalar result[vector::N];
+    store(result, f(load(a, vector::N)));
+    if (std::isnan(expected)) {
+      ASSERT_TRUE(std::isnan(result[0])) << input;
+    } else {
+      ASSERT_NEAR(result[0], expected, scalar_info::epsilon()) << input;
+    }
+  }
+
+  ReplicableRandomDevice rng;
+  for (auto _ : FuzzTest(std::chrono::milliseconds(100))) {
+    scalar a[vector::N];
+    fill_random(a, vector::N, rng);
+
+    scalar result[vector::N];
+    store(result, f(load(a, vector::N)));
+
+    for (size_t i = 0; i < vector::N; ++i) {
+      auto k = ref(a[i]);
+      if (std::isnan(k)) {
+        ASSERT_TRUE(std::isnan(result[i])) << a[i];
+      } else if (std::abs(k) <= scalar_info::smallest_normal()) {
+        // Treat all denormals as equal.
+        ASSERT_LE(result[i], scalar_info::smallest_normal()) << a[i];
+      } else {
+        const scalar abs_error =
+            std::abs(k) * epsilons * scalar_info::epsilon();
+        ASSERT_NEAR(result[i], k, abs_error) << a[i];
+      }
+    }
+  }
+}
+
+// Test that |op(x) - ref(x)| <= `epsilons`*epsilon where epsilon is the epsilon
+// of `type`.
+#define TEST_UNARY(test_class, op, type, N, ref, epsilons)        \
+  TEST_F(test_class, op##_##type##x##N) {                         \
+    test_unary<type, N>([](vec<type, N> x) { return op(x); },     \
+                        [](type x) { return ref(x); }, epsilons); \
+  }
+
 }  // namespace simd
 
 }  // namespace ynn

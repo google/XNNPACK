@@ -1245,6 +1245,7 @@ bool fold_unary_input(ynn_subgraph& subgraph, ynn_node& node,
     case ynn_unary_exp:
     case ynn_unary_expm1:
     case ynn_unary_log:
+    case ynn_unary_log1p:
     case ynn_unary_erf:
       break;
     default:
@@ -1290,6 +1291,7 @@ bool fold_unary_output(ynn_subgraph& subgraph, ynn_node& node,
     case ynn_unary_exp:
     case ynn_unary_expm1:
     case ynn_unary_log:
+    case ynn_unary_log1p:
       if (scalar_arithmetic->b != 0.0f) {
         // exp/log does not support output offset
         return false;

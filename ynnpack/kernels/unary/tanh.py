@@ -5,8 +5,6 @@
 
 """Definition of tanh kernels."""
 
-import math
-
 # pylint: disable=undefined-variable
 # pylint: disable=missing-function-docstring
 from ynnpack.kernels.elementwise.compiler import *  # pylint: disable=wildcard-import
@@ -65,57 +63,8 @@ def tanh_fp32(a, x, output_offset, output_multiplier):
 )
 @operator_name("tanh")
 def tanh_fp64(a, x, output_offset, output_multiplier):
-  # Polynomial coefficients for 2^r approx. These are the same coefficients as
-  # exp_fp64
-  p = [
-      f64(3.430671987749682348e-06),
-      f64(1.754214714900316551e-04),
-      f64(3.930681642138933278e-03),
-      f64(4.871246780757146344e-02),
-      f64(3.331084219217221309e-01),
-      f64(9.999999999999998890e-01),
-  ]
-  q = [
-      f64(-7.126417699553038831e-06),
-      f64(2.821496207245147419e-04),
-      f64(-5.316864104706260294e-03),
-      f64(5.804581129084830649e-02),
-      f64(-3.600387586382234328e-01),
-      f64(1.000000000000000000e00),
-  ]
-
-  log2_e = f64(math.log2(math.e))
-
-  va = load(a)
-  # tanh(x) is ~1 for large inputs, we can avoid numerical issues by just
-  # clamping before that happens.
-  va = max(min(va, f64(100)), f64(-100))
-
-  v_prime = va * log2_e
-  vz = round_small_fp64(v_prime)
-  vr = v_prime - vz
-  vr2 = vr * vr
-
-  # exp(a) = 2^vz * vp_pos / vq_pos
-  # exp(-a) = 2^-vz * vp_neg / vq_neg
-  #
-  # vx = (exp(a) - exp(-a)) / (exp(a) + exp(-a))
-  # vx = (2^{2*vz} * vp_pos * vq_neg - vp_neg * vq_pos) /
-  #      (2^{2*vz} * vp_pos * vq_neg + vp_neg * vq_pos)
-  vp_even = eval_polynomial(vr2, [p[1], p[3], p[5]])
-  vp_odd = eval_polynomial(vr2, [p[0], p[2], p[4]]) * vr
-  vp_pos = vp_even + vp_odd
-  vp_neg = vp_even - vp_odd
-
-  vq_even = eval_polynomial(vr2, [q[1], q[3], q[5]])
-  vq_odd = eval_polynomial(vr2, [q[0], q[2], q[4]]) * vr
-  vq_pos = vq_even + vq_odd
-  vq_neg = vq_even - vq_odd
-
-  v2z2 = exp2_round(vz + vz)
-  v_num_pos = v2z2 * vp_pos * vq_neg
-  v_num_neg = vp_neg * vq_pos
-
-  vx = (v_num_pos - v_num_neg) / (v_num_pos + v_num_neg)
-
-  return store(vx * output_multiplier + output_offset, x)
+  # tanh(x) ~= 1 for large x, and we can avoid Inf/Inf = NaN by limiting x such
+  # that exp(x*2) does not overflow a double
+  e2a = expm1(min(load(a) * 2, 300))
+  result = e2a / (e2a + 2)
+  return store(multiply_add(result, output_multiplier, output_offset), x)

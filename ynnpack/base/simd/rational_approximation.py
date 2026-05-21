@@ -110,24 +110,20 @@ def print_polynomial(name, coeffs):
   # Determine precision and wrapper based on dtype
   if coeffs.dtype == np.float32:
     precision = 10
-    wrapper_start = ""
-    wrapper_end = ""
+    suffix = "f"
+    ty = "float"
   else:
     precision = 18
-    wrapper_start = "f64("
-    wrapper_end = ")"
+    suffix = ""
+    ty = "double"
 
   # Reversing to put constant coefficient last (p_n, ..., p_1, p_0)
   rev_coeffs = coeffs[::-1]
 
-  print(f"  {name} = [")
+  print(f"  std::array<{ty}, {len(rev_coeffs + 1)}> {name} = {{")
   for i, val in enumerate(rev_coeffs):
-    comma = "," if i < len(rev_coeffs) - 1 else ""
-    print(
-        "     "
-        f" {wrapper_start}{val:.{precision}e}{wrapper_end}{comma}"
-    )
-  print("  ]")
+    print(f"      {val:.{precision}e}{suffix},")
+  print("  };")
 
 
 def plot_error(f, x, approx, title="Relative Error"):
@@ -216,79 +212,37 @@ plot_error(f, x_test, approx)
 # %%
 import math
 
-# Target: R(x) = log2(x + 1) / x
-# This ensures x * R(x) = log2(x + 1)
-def f(x):
-  with np.errstate(divide="ignore", invalid="ignore"):
-    return np.where(x == 0, 1.0 / np.log(2), np.log1p(x) / (x * np.log(2)))
-
-
-p_degree, q_degree = 2, 3
-# Standard range for a log approximation part (e.g., after range reduction)
-x_min, x_max = 0, 1
-
+# fp64 log2(x + 1) ~= x + x^2*P(x)/Q(x)
+f = lambda x: (np.log1p(x) - x) / x**2
+p_degree, q_degree = 2, 2
+x_min, x_max = np.sqrt(2) / 2 - 1, np.sqrt(2) - 1
 p, q = rational_approximation(
     f, x_min, x_max, p_degree, q_degree, dtype=np.float32
 )
-p = np.insert(p, 0, [0])
 
-print_polynomial("p", p)
-print_polynomial("q", q)
+print_polynomial("P", p)
+print_polynomial("Q", q)
 
+# Evaluate final error
 x_test = np.linspace(x_min, x_max, 5000)
-approx = poly_eval(p, x_test) / poly_eval(q, x_test)
-target = np.log2(x_test + 1)
-
-plot_error(lambda x: np.log2(x + 1), x_test, approx)
+approx = x_test**2 * poly_eval(p, x_test) / poly_eval(q, x_test) + x_test
+plot_error(lambda x: np.log1p(x), x_test, approx)
 # %%
 import math
 
-# fp64 log2(x + 1)
-f = lambda x: np.where(x == 0, 1.0 / np.log(2), np.log1p(x) / (x * np.log(2)))
-p_degree, q_degree = 6, 7
-x_min, x_max = 0, 1
+# fp64 log2(x + 1) ~= x + x^2*P(x)/Q(x)
+f = lambda x: (np.log1p(x) - x) / x**2
+p_degree, q_degree = 5, 6
+x_min, x_max = np.sqrt(2) / 2 - 1, np.sqrt(2) - 1
 p, q = rational_approximation(
     f, x_min, x_max, p_degree, q_degree, dtype=np.float64
 )
 
-print_polynomial("p", p)
-print_polynomial("q", q)
+print_polynomial("P", p)
+print_polynomial("Q", q)
 
 # Evaluate final error
 x_test = np.linspace(x_min, x_max, 5000)
-approx = x_test * poly_eval(p, x_test) / poly_eval(q, x_test)
-plot_error(lambda x: np.log2(x + 1), x_test, approx)
-# %%
-import numpy as np
-
-
-# Target: tanh(sqrt(x)) / sqrt(x)
-# This transformation forces the resulting tanh(t) to have
-# an odd numerator and even denominator when t^2 = x.
-def f_target(x):
-  sqrt_x = np.sqrt(np.maximum(x, 1e-15))
-  return np.tanh(sqrt_x) / sqrt_x
-
-
-p_degree, q_degree = 4, 4
-x_min, x_max = 0, 8**2
-
-p, q = rational_approximation(
-    f_target, x_min, x_max, p_degree, q_degree, dtype=np.float32
-)
-
-print_polynomial("p", p)
-print_polynomial("q", q)
-
-# Evaluate final error for tanh(t)
-t_test = np.linspace(-8, 8, 5000).astype(np.float32)
-x_test = t_test**2
-approx = t_test * (poly_eval(p, x_test) / poly_eval(q, x_test))
-
-plot_error(
-    np.tanh,
-    t_test,
-    approx,
-    title="Relative Error for tanh(t) via tanh(sqrt(x))/sqrt(x)",
-)
+approx = x_test**2 * poly_eval(p, x_test) / poly_eval(q, x_test) + x_test
+plot_error(lambda x: np.log1p(x), x_test, approx)
 # %%

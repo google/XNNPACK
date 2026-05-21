@@ -177,14 +177,14 @@ struct round_to_bf16 : public unary_op_info {
 struct sigmoid : public unary_op_info {
   explicit sigmoid(const unary_params& = {}) {}
   float operator()(float x) const override {
-    return static_cast<float>(1.0 / (1.0 + std::exp(static_cast<double>(-x))));
+    return 1.0f / (1.0f + std::exp(-x));
   }
   double operator()(double x) const override {
     return 1.0 / (1.0 + std::exp(-x));
   }
 
   tolerance_spec tolerance(ynn_type /*type*/) const override {
-    return tolerance_spec{/*relative=*/2.0f, /*absolute=*/1.0f};
+    return tolerance_spec{/*relative=*/4.0f};
   }
 };
 
@@ -264,7 +264,7 @@ struct tanh : public unary_op_info {
   }
 
   tolerance_spec tolerance(ynn_type /*type*/) const override {
-    return tolerance_spec{/*relative=*/5.0f, /*absolute=*/1.0f};
+    return tolerance_spec{/*relative=*/5.0f};
   }
 };
 
@@ -307,20 +307,36 @@ struct log : public unary_op_info {
 
   explicit log(const unary_params& params) : params(params.log) {}
   float operator()(float x) const override {
-    return std::log2(x * static_cast<float>(params.input_multiplier)) *
+    return std::log(x * static_cast<float>(params.input_multiplier)) *
            static_cast<float>(params.output_multiplier);
   }
   double operator()(double x) const override {
-    return std::log2(x * params.input_multiplier) *
-           params.output_multiplier;
+    return std::log(x * params.input_multiplier) * params.output_multiplier;
   }
 
   tolerance_spec tolerance(ynn_type type) const override {
     if (type == ynn_type_fp64) {
-      return tolerance_spec{/*relative=*/4.0f, /*absolute=*/3.0f};
+      return tolerance_spec{/*relative=*/4.0f};
     } else {
-      return tolerance_spec{/*relative=*/1.5f, /*absolute=*/1.0f};
+      return tolerance_spec{/*relative=*/1.5f};
     }
+  }
+};
+
+struct log1p : public unary_op_info {
+  log1p_params params;
+
+  explicit log1p(const unary_params& params) : params(params.log1p) {}
+  float operator()(float x) const override {
+    return std::log1p(x * static_cast<float>(params.input_multiplier)) *
+           static_cast<float>(params.output_multiplier);
+  }
+  double operator()(double x) const override {
+    return std::log1p(x * params.input_multiplier) * params.output_multiplier;
+  }
+
+  tolerance_spec tolerance(ynn_type type) const override {
+    return tolerance_spec{/*relative=*/3.0f};
   }
 };
 
@@ -338,17 +354,6 @@ struct exp : public unary_op_info {
 
   tolerance_spec tolerance(ynn_type /*type*/) const override {
     return tolerance_spec{/*relative=*/3.0f};
-  }
-};
-
-struct log1p : public unary_op_info {
-  explicit log1p(const unary_params& = {}) {}
-  float operator()(float x) const override { return std::log1p(x); }
-  double operator()(double x) const override { return std::log1p(x); }
-
-
-  tolerance_spec tolerance(ynn_type /*type*/) const override {
-    return tolerance_spec{/*relative=*/2.0f};
   }
 };
 

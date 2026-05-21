@@ -13,5 +13,14 @@ namespace simd {
 
 BENCH_FMA(fma3, f32, 8);
 
+BENCH_UNARY(fma3, exp, f32, 8);
+BENCH_UNARY(fma3, exp, f64, 4);
+BENCH_UNARY(fma3, expm1, f32, 8);
+BENCH_UNARY(fma3, expm1, f64, 4);
+BENCH_UNARY(fma3, log, f32, 8);
+BENCH_UNARY(fma3, log, f64, 4);
+BENCH_UNARY(fma3, log1p, f32, 8);
+BENCH_UNARY(fma3, log1p, f64, 4);
+
 }  // namespace simd
 }  // namespace ynn

@@ -5,6 +5,8 @@
 
 #include "ynnpack/base/simd/x86_avx.h"
 
+#include <cmath>
+
 #include <gtest/gtest.h>
 #include "ynnpack/base/arch.h"
 #include "ynnpack/base/simd/test/generic.h"
@@ -123,6 +125,15 @@ TEST_HORIZONTAL_MAX(x86_avx, f64, 4);
 TEST_CAST(x86_avx, f64, f32x4);
 TEST_CAST(x86_avx, f64, f32x8);
 TEST_CAST(x86_avx, f32, f64x4);
+
+TEST_UNARY(x86_avx, exp, f32, 8, std::exp, 3);
+TEST_UNARY(x86_avx, exp, f64, 4, std::exp, 3);
+TEST_UNARY(x86_avx, expm1, f32, 8, std::expm1, 3);
+TEST_UNARY(x86_avx, expm1, f64, 4, std::expm1, 3);
+TEST_UNARY(x86_avx, log, f32, 8, std::log, 3);
+TEST_UNARY(x86_avx, log, f64, 4, std::log, 3);
+TEST_UNARY(x86_avx, log1p, f32, 8, std::log1p, 3);
+TEST_UNARY(x86_avx, log1p, f64, 4, std::log1p, 3);
 
 }  // namespace simd
 }  // namespace ynn

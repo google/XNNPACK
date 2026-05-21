@@ -794,6 +794,21 @@ YNN_ALWAYS_INLINE s32x4 cast(f32x4 x, int32_t) {
                              _mm_and_si128(imask, _mm_set1_epi32(0x7fffffff)))};
 }
 
+YNN_ALWAYS_INLINE f64x2 fma(f64x2 a, f64x2 b, f64x2 acc) {
+#ifdef __FMA__
+  return f64x2{_mm_fmadd_pd(a.v, b.v, acc.v)};
+#else
+  return a * b + acc;
+#endif
+}
+YNN_ALWAYS_INLINE f32x4 fma(f32x4 a, f32x4 b, f32x4 acc) {
+#ifdef __FMA__
+  return f32x4{_mm_fmadd_ps(a.v, b.v, acc.v)};
+#else
+  return a * b + acc;
+#endif
+}
+
 }  // namespace simd
 
 }  // namespace ynn
