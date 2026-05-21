@@ -2414,6 +2414,13 @@ enum xnn_profile_info {
   xnn_profile_info_operator_name,
   /// Returns a uint64_t[] with the runtimes of all operators in the same order as xnn_profile_info_operator_name.
   xnn_profile_info_operator_timing,
+  /// Returns a char[] of null-separated C symbol names for the microkernel dispatched by each operator, in
+  /// the same order as xnn_profile_info_operator_name. Operators that don't go through the XNN_INIT_*_UKERNEL
+  /// macros contribute an empty string.
+  xnn_profile_info_microkernel_name,
+  /// Returns a uint64_t[] of accumulated microkernel wall time in microseconds, in the same order as
+  /// xnn_profile_info_microkernel_name. Zeroes when XNNPACK was built without -DXNN_ENABLE_UKERNEL_TIMING=1.
+  xnn_profile_info_microkernel_timing,
 };
 
 /// Return profile information for all operators.

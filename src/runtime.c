@@ -31,12 +31,14 @@
 #include "src/xnnpack/math.h"
 #include "src/xnnpack/memory-planner.h"
 #include "src/xnnpack/memory.h"
+#include "src/xnnpack/microkernel-name-registry.h"
 #include "src/xnnpack/microkernel-type.h"
 #include "src/xnnpack/node-type.h"
 #include "src/xnnpack/operator-utils.h"
 #include "src/xnnpack/operator.h"
 #include "src/xnnpack/params.h"
 #include "src/xnnpack/subgraph.h"
+#include "src/xnnpack/timer.h"
 #include <pthreadpool.h>
 
 enum xnn_status xnn_reshape_external_value(
@@ -979,53 +981,155 @@ enum xnn_status xnn_setup_runtime_v2(
   return setup_runtime(runtime);
 }
 
-static xnn_timestamp xnn_read_timer() {
-  xnn_timestamp timestamp;
-#ifdef __MACH__
-  timestamp = clock_gettime_nsec_np(CLOCK_UPTIME_RAW);
-  if (timestamp == 0) {
-    xnn_log_warning("clock_gettime failed: error code %d", errno);
+// Returns the C symbol of whichever ukernel the operator currently
+// dispatches to, or "" if it can't be recovered. GEMM/IGEMM report the
+// bulk-loop ukernel (configured max MR); HMP returns the default-uarch
+// slot.
+static const char* resolve_operator_microkernel_name(
+    const struct xnn_operator* op) {
+  if (op == NULL) {
+    return "";
   }
-#elif __EMSCRIPTEN__
-  timestamp = emscripten_get_now();
-#elif XNN_PLATFORM_WINDOWS
-  BOOL res = QueryPerformanceCounter(&timestamp);
-  if (!res) {
-    xnn_log_error("QueryPerformanceCounter failed: error code %u", GetLastError());
-    memset(&timestamp, 0, sizeof(timestamp));
+  const void* fn = NULL;
+  switch (op->ukernel.type) {
+    case xnn_microkernel_type_gemm: {
+      const struct xnn_ukernel_gemm* g =
+          op->ukernel.gemm_ukernels ? &op->ukernel.gemm_ukernels->gemm : NULL;
+      if (g != NULL && g->mr > 0) {
+        fn = (const void*)g->gemm_cases[g->mr - 1].function[XNN_UARCH_DEFAULT];
+      }
+      break;
+    }
+    case xnn_microkernel_type_igemm: {
+      const struct xnn_ukernel_igemm* ig = op->ukernel.igemm;
+      if (ig != NULL && ig->mr > 0) {
+        fn = (const void*)ig->igemm_cases[ig->mr - 1]
+                 .function[XNN_UARCH_DEFAULT];
+      }
+      break;
+    }
+    case xnn_microkernel_type_dwconv:
+      fn = (const void*)op->ukernel.dwconv.ukernel;
+      break;
+    case xnn_microkernel_type_spmm:
+      fn = (const void*)op->ukernel.spmm.function;
+      break;
+    case xnn_microkernel_type_vmulcaddc:
+      fn = (const void*)op->ukernel.vmulcaddc.function;
+      break;
+    case xnn_microkernel_type_conv2d_hwc2chw:
+      fn = (const void*)op->ukernel.conv2d.hwc2chw_fn;
+      break;
+    case xnn_microkernel_type_default:
+      // vbinary/vunary install the selected fn on the per-execute compute
+      // context, not on op->ukernel.
+      switch (op->type) {
+        case xnn_operator_type_binary_elementwise:
+          fn = (const void*)op->context.elementwise_binary.ukernel;
+          break;
+        case xnn_operator_type_unary_elementwise:
+          // univector_{contiguous,strided} alias the same union slot.
+          fn = (const void*)op->context.univector_contiguous.ukernel;
+          break;
+        default:
+          if (op->ukernel.vunary.function != NULL) {
+            fn = (const void*)op->ukernel.vunary.function;
+          } else if (op->ukernel.vbinary.op_fn != NULL) {
+            fn = (const void*)op->ukernel.vbinary.op_fn;
+          }
+          break;
+      }
+      break;
+    case xnn_microkernel_type_transpose:
+      // const_size and variable_size alias the same union slot.
+      fn = (const void*)op->context.transpose.const_size_ukernel;
+      break;
+    case xnn_microkernel_type_reduce:
+    case xnn_microkernel_type_reduce2: {
+      // The three .ukernel union variants alias the same offset.
+      const struct reduce_context* rc = op->dynamic_context.reduce;
+      if (rc != NULL) {
+        fn = (const void*)rc->ukernel.contiguous_reduce;
+      }
+      break;
+    }
+    default:
+      // Pooling / subconv2d keep their fn on a config struct; not wired yet.
+      break;
   }
-#else
-  int res = clock_gettime(CLOCK_MONOTONIC, &timestamp);
-  if (res != 0) {
-    xnn_log_error("clock_gettime failed: error code %d", errno);
-    memset(&timestamp, 0, sizeof(timestamp));
-  }
-#endif
-  return timestamp;
+  const char* name = xnn_lookup_microkernel_name(fn);
+  return name != NULL ? name : "";
 }
 
-static inline uint64_t xnn_get_elapsed_time(const xnn_timestamp* start, const xnn_timestamp* end) {
-#ifdef __MACH__
-  const uint64_t kMicrosInNanos = 1000;
-  return (*end - *start) / kMicrosInNanos;
-#elif __EMSCRIPTEN__
-  const double kMillisInMicros = 1.0e3;
-  return (uint64_t) ((*end - *start) * kMillisInMicros);
-#elif XNN_PLATFORM_WINDOWS
-  const uint64_t kMicrosInSec = 1000 * 1000;
-  LARGE_INTEGER frequency;
-  BOOL res = QueryPerformanceFrequency(&frequency);
-  if (!res) {
-    xnn_log_error("QueryPerformanceFrequency failed: error code %u", GetLastError());
+// Microseconds summed across every ukernel-slot accumulator the operator
+// could have written to. Returns 0 when XNN_ENABLE_UKERNEL_TIMING is off
+// or when the op family hasn't been wired yet; callers can fall back to
+// the operator-level wall time.
+static uint64_t resolve_operator_microkernel_elapsed_us(
+    const struct xnn_operator* op) {
+#if XNN_ENABLE_UKERNEL_TIMING
+  if (op == NULL) {
     return 0;
   }
-  return ((end->QuadPart - start->QuadPart) * kMicrosInSec) / frequency.QuadPart;
+  uint64_t total = 0;
+  switch (op->ukernel.type) {
+    case xnn_microkernel_type_gemm: {
+      const struct gemm_op_context* goc = op->dynamic_context.gemm;
+      if (goc != NULL) {
+        for (size_t u = 0; u < XNN_MAX_UARCH_TYPES; u++) {
+          total += goc->gemm.ukernel_elapsed_us[u];
+        }
+      }
+      break;
+    }
+    case xnn_microkernel_type_igemm: {
+      const struct igemm_op_context* ioc = op->dynamic_context.igemm;
+      if (ioc != NULL) {
+        for (size_t u = 0; u < XNN_MAX_UARCH_TYPES; u++) {
+          total += ioc->igemm.ukernel_elapsed_us[u];
+        }
+      }
+      break;
+    }
+    case xnn_microkernel_type_default:
+      switch (op->type) {
+        case xnn_operator_type_binary_elementwise:
+          total = op->context.elementwise_binary.ukernel_elapsed_us;
+          break;
+        case xnn_operator_type_unary_elementwise:
+          // univector_{contiguous,strided} alias the same union slot.
+          total = op->context.univector_contiguous.ukernel_elapsed_us;
+          break;
+        default:
+          break;
+      }
+      break;
+    case xnn_microkernel_type_dwconv: {
+      const struct dwconv_op_context* doc = op->dynamic_context.dwconv;
+      if (doc != NULL) {
+        total = doc->dwconv.ukernel_elapsed_us;
+      }
+      break;
+    }
+    case xnn_microkernel_type_transpose:
+      total = op->context.transpose.ukernel_elapsed_us;
+      break;
+    case xnn_microkernel_type_reduce:
+    case xnn_microkernel_type_reduce2: {
+      const struct reduce_context* rc = op->dynamic_context.reduce;
+      if (rc != NULL) {
+        total = rc->ukernel_elapsed_us;
+      }
+      break;
+    }
+    default:
+      // Pooling / subconv2d keep their fn on a config struct; not wired yet.
+      break;
+  }
+  return total;
 #else
-  const uint64_t kNanosInMicro = UINT64_C(1000);
-  const uint64_t kNanosInSec = UINT64_C(1000000000);
-  const uint64_t secs = (end->tv_sec - start->tv_sec) * kNanosInSec;
-  const uint64_t ns_secs = (end->tv_nsec - start->tv_nsec);
-  return (secs + ns_secs) / kNanosInMicro;
+  (void)op;
+  return 0;
 #endif
 }
 
@@ -1116,6 +1220,62 @@ enum xnn_status xnn_get_runtime_profiling_info(xnn_runtime_t runtime,
               }
             }
             *data++ = op_time;
+          }
+        }
+      }
+      break;
+    }
+    case xnn_profile_info_microkernel_timing: {
+      // Same layout as xnn_profile_info_operator_timing; values are 0 when
+      // XNN_ENABLE_UKERNEL_TIMING is off.
+      size_t num_valid_ops = 0;
+      for (size_t i = 0; i < runtime->num_ops; ++i) {
+        if (opdata[i].operator_objects[0] != NULL) {
+          num_valid_ops += 1;
+        }
+      }
+      required_size = num_valid_ops * sizeof(uint64_t);
+      if (param_value_size < required_size) {
+        *param_value_size_ret = required_size;
+        status = xnn_status_out_of_memory;
+      } else {
+        uint64_t* data = (uint64_t*)param_value;
+        for (size_t i = 0; i < runtime->num_ops; ++i) {
+          if (opdata[i].operator_objects[0] != NULL) {
+            uint64_t op_us = 0;
+            for (size_t j = 0; j < XNN_MAX_OPERATOR_OBJECTS; j++) {
+              if (opdata[i].operator_objects[j] != NULL) {
+                op_us += resolve_operator_microkernel_elapsed_us(
+                    opdata[i].operator_objects[j]);
+              }
+            }
+            *data++ = op_us;
+          }
+        }
+      }
+      break;
+    }
+    case xnn_profile_info_microkernel_name: {
+      // Same NUL-separated layout as xnn_profile_info_operator_name.
+      for (size_t i = 0; i < runtime->num_ops; ++i) {
+        if (opdata[i].operator_objects[0] != NULL) {
+          const char* name =
+              resolve_operator_microkernel_name(opdata[i].operator_objects[0]);
+          required_size += strlen(name) + 1;
+        }
+      }
+      if (param_value_size < required_size) {
+        *param_value_size_ret = required_size;
+        status = xnn_status_out_of_memory;
+      } else {
+        char* out = (char*)param_value;
+        for (size_t i = 0; i < runtime->num_ops; ++i) {
+          if (opdata[i].operator_objects[0] != NULL) {
+            const char* name = resolve_operator_microkernel_name(
+                opdata[i].operator_objects[0]);
+            size_t n = strlen(name) + 1;
+            memcpy(out, name, n);
+            out += n;
           }
         }
       }
