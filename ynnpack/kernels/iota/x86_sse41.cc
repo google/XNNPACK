@@ -3,11 +3,10 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include "ynnpack/base/simd/x86_sse41.h"
-
 #include <cstddef>
 #include <cstdint>
 
+#include "ynnpack/base/simd/x86_vec128.h"
 #include "ynnpack/kernels/iota/generic.h"
 #include "ynnpack/kernels/iota/iota.h"
 

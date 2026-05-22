@@ -3,10 +3,11 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include "ynnpack/base/simd/x86_avx2.h"
-
 #include <gtest/gtest.h>
 #include "ynnpack/base/arch.h"
+#include "ynnpack/base/simd/x86_vec256.h"
+
+// This must be included last
 #include "ynnpack/base/simd/test/generic.h"
 
 namespace ynn {

@@ -8,6 +8,8 @@
 #include <gtest/gtest.h>
 #include "ynnpack/base/arch.h"
 #include "ynnpack/base/simd/arm_vec128.h"
+
+// This must be included last
 #include "ynnpack/base/simd/test/generic.h"
 
 namespace ynn {

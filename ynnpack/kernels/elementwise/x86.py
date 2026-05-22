@@ -78,23 +78,23 @@ class X86(Target):
 
     simd_header = ""
     if "AVX512F" in all_features:
-      simd_header = "x86_avx512.h"
+      simd_header = "x86_vec512.h"
       self.tail_strategy = TailStrategy.VECTOR
       self.vector_bits = 512
     elif "AVX2" in all_features:
-      simd_header = "x86_avx2.h"
+      simd_header = "x86_vec256.h"
       self.tail_strategy = TailStrategy.VECTOR
       self.vector_bits = 256
     elif "AVX" in all_features:
-      simd_header = "x86_avx.h"
+      simd_header = "x86_vec256.h"
       self.tail_strategy = TailStrategy.VECTOR
       self.vector_bits = 256
     elif "SSE41" in all_features:
-      simd_header = "x86_sse41.h"
+      simd_header = "x86_vec128.h"
       self.tail_strategy = TailStrategy.VECTOR
       self.vector_bits = 128
     elif "SSE2" in all_features:
-      simd_header = "x86_sse2.h"
+      simd_header = "x86_vec128.h"
       self.tail_strategy = TailStrategy.VECTOR
       self.vector_bits = 128
 

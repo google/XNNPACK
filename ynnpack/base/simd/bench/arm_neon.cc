@@ -7,6 +7,8 @@
 
 #include "ynnpack/base/arch.h"
 #include "ynnpack/base/simd/arm_vec128.h"
+
+// This must be included last
 #include "ynnpack/base/simd/bench/generic.h"
 
 namespace ynn {

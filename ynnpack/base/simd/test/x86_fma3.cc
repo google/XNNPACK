@@ -7,8 +7,10 @@
 
 #include <gtest/gtest.h>
 #include "ynnpack/base/arch.h"
+#include "ynnpack/base/simd/x86_vec256.h"
+
+// This must be included last
 #include "ynnpack/base/simd/test/generic.h"
-#include "ynnpack/base/simd/x86_avx.h"
 
 namespace ynn {
 namespace simd {

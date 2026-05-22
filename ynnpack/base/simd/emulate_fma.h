@@ -3,8 +3,8 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#ifndef XNNPACK_YNNPACK_BASE_SIMD_X86_SSE2_FMA_H_
-#define XNNPACK_YNNPACK_BASE_SIMD_X86_SSE2_FMA_H_
+#ifndef XNNPACK_YNNPACK_BASE_SIMD_EMULATE_FMA_H_
+#define XNNPACK_YNNPACK_BASE_SIMD_EMULATE_FMA_H_
 
 #include <cstddef>
 #include <cstdint>
@@ -63,4 +63,4 @@ inline vec<float, N> emulate_fma(vec<float, N> a, vec<float, N> b,
 
 }  // namespace ynn
 
-#endif  // XNNPACK_YNNPACK_BASE_SIMD_X86_SSE2_FMA_H_
+#endif  // XNNPACK_YNNPACK_BASE_SIMD_EMULATE_FMA_H_
