@@ -28,9 +28,6 @@ cc_library(
     # These headers need to be textual because we can't compile them with the appropriate copts.
     textual_hdrs = [
         # These headers should not be directly included.
-        "arm_neon_base.h",
-        "arm_neon_partial_load_store.h",
-        "arm64_sve_partial_load_store.h",
         "x86_avx2_base.h",
         "x86_avx_base.h",
         "x86_sse2_base.h",
@@ -45,8 +42,7 @@ cc_library(
         # avx as two 256-bit vectors, and the `concat` operation of two f32x8 values is implemented
         # appropriately for that type.
         "byte_vec.h",
-        "arm_neon.h",
-        "arm64_sve.h",
+        "arm_vec128.h",
         "hexagon_hvx.h",
         "scalar.h",
         "x86_avx.h",

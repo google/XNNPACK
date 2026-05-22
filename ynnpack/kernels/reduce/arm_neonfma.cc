@@ -3,14 +3,13 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include "ynnpack/base/simd/arm_neon.h"
-
 #include <arm_neon.h>
 
 #include <cstddef>
 #include <type_traits>
 
 #include "ynnpack/base/bfloat16.h"
+#include "ynnpack/base/simd/arm_vec128.h"
 #include "ynnpack/kernels/reduce/generic.h"
 #include "ynnpack/kernels/reduce/reduce.h"
 #include "ynnpack/kernels/reduce/sum.h"

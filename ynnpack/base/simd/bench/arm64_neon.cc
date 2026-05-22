@@ -6,7 +6,7 @@
 #include <cstdint>
 
 #include "ynnpack/base/arch.h"
-#include "ynnpack/base/simd/arm_neon.h"
+#include "ynnpack/base/simd/arm_vec128.h"
 #include "ynnpack/base/simd/bench/generic.h"
 
 namespace ynn {

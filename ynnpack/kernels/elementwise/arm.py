@@ -46,7 +46,7 @@ class ARM(Target):
 
     self.header += "#include <arm_neon.h>\n"
     self.header += (
-        '#include "ynnpack/base/simd/arm_neon.h"\n'
+        '#include "ynnpack/base/simd/arm_vec128.h"\n'
     )
 
     if "NEON" in all_features:
