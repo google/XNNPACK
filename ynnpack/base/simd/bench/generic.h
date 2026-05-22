@@ -107,13 +107,13 @@ static void partial_load_store_params(benchmark::Benchmark* b) {
   BENCHMARK(BM_partial_store_##type##x##N##_##arch)                           \
       ->Apply(partial_load_store_params<N>);
 
-template <typename T, typename Fma>
-YNN_NO_INLINE static T fma_no_inline(T a, T b, T acc, Fma fma) {
+template <typename T>
+YNN_NO_INLINE static T fma_no_inline(T a, T b, T acc) {
   return fma(a, b, acc);
 }
 
-template <typename scalar, size_t N, typename Fma>
-static void BM_fma(benchmark::State& state, Fma fma) {
+template <typename scalar, size_t N>
+static void BM_fma(benchmark::State& state) {
   using vector = vec<scalar, N>;
 
   vector a{1};
@@ -124,24 +124,15 @@ static void BM_fma(benchmark::State& state, Fma fma) {
   benchmark::DoNotOptimize(b);
   benchmark::DoNotOptimize(acc);
   for (auto _ : state) {
-    benchmark::DoNotOptimize(fma_no_inline(a, b, acc, fma));
+    benchmark::DoNotOptimize(fma_no_inline(a, b, acc));
   }
 }
 
-#define BENCH_FMA(arch, type, N)                                              \
-  void BM_fma_##type##x##N##_##arch(benchmark::State& state) {                \
-    BM_fma<type, N>(state,                                                    \
-                    [](auto a, auto b, auto acc) { return fma(a, b, acc); }); \
-  }                                                                           \
+#define BENCH_FMA(arch, type, N)                               \
+  void BM_fma_##type##x##N##_##arch(benchmark::State& state) { \
+    BM_fma<type, N>(state);                                    \
+  }                                                            \
   BENCHMARK(BM_fma_##type##x##N##_##arch);
-
-#define BENCH_EMULATE_FMA(arch, type, N)                               \
-  void BM_emulate_fma_##type##x##N##_##arch(benchmark::State& state) { \
-    BM_fma<type, N>(state, [](auto a, auto b, auto acc) {              \
-      return emulate_fma(a, b, acc);                                   \
-    });                                                                \
-  }                                                                    \
-  BENCHMARK(BM_emulate_fma_##type##x##N##_##arch);
 
 template <typename scalar, size_t N, typename Fn>
 static void BM_unary(benchmark::State& state, Fn fn) {

@@ -613,6 +613,7 @@ YNN_ALWAYS_INLINE f64x8 fma(f64x8 a, f64x8 b, f64x8 acc) {
 YNN_ALWAYS_INLINE f32x16 fma(f32x16 a, f32x16 b, f32x16 acc) {
   return f32x16{_mm512_fmadd_ps(a.v, b.v, acc.v)};
 }
+#define YNN_HAVE_FMA
 
 YNN_ALWAYS_INLINE f64x8 min(f64x8 a, f64x8 b) {
   return f64x8{_mm512_min_pd(a.v, b.v)};

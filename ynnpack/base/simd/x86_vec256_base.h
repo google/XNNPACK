@@ -1011,7 +1011,7 @@ YNN_ALWAYS_INLINE s8x32 select(s8x32 cond, s8x32 a, s8x32 b) {
 YNN_ALWAYS_INLINE u8x32 select(s8x32 cond, u8x32 a, u8x32 b) {
   return u8x32{_mm256_blendv_epi8(b.v, a.v, cond.v)};
 }
-#else   // YNN_ARCH_X86_AVX2
+#else  // YNN_ARCH_X86_AVX2
 YNN_ALWAYS_INLINE s32x8 select(s32x8 cond, s32x8 a, s32x8 b) {
   __m256 mc = _mm256_castsi256_ps(cond.v);
   __m256 ma = _mm256_castsi256_ps(a.v);
@@ -1020,20 +1020,15 @@ YNN_ALWAYS_INLINE s32x8 select(s32x8 cond, s32x8 a, s32x8 b) {
 }
 #endif  // YNN_ARCH_X86_AVX2
 
-YNN_ALWAYS_INLINE f64x4 fma(f64x4 a, f64x4 b, f64x4 acc) {
 #ifdef YNN_ARCH_X86_FMA3
+YNN_ALWAYS_INLINE f64x4 fma(f64x4 a, f64x4 b, f64x4 acc) {
   return f64x4{_mm256_fmadd_pd(a.v, b.v, acc.v)};
-#else
-  return a * b + acc;
-#endif
 }
 YNN_ALWAYS_INLINE f32x8 fma(f32x8 a, f32x8 b, f32x8 acc) {
-#ifdef YNN_ARCH_X86_FMA3
   return f32x8{_mm256_fmadd_ps(a.v, b.v, acc.v)};
-#else
-  return a * b + acc;
-#endif
 }
+#define YNN_HAVE_FMA
+#endif
 
 YNN_ALWAYS_INLINE f64x4 cast(f32x4 a, double) {
   return f64x4{_mm256_cvtps_pd(a.v)};

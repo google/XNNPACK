@@ -15,6 +15,7 @@
 
 #include "ynnpack/base/base.h"
 #include "ynnpack/base/bit_cast.h"
+#include "ynnpack/base/simd/emulate_fma.h"
 #include "ynnpack/base/simd/vec.h"
 
 // This header provides generic implementations of vec<> operations that work by
@@ -230,10 +231,33 @@ template <typename T, size_t N>
 YNN_ALWAYS_INLINE vec<T, N> sqrt(vec<T, N> a) {
   return {sqrt(lo(a)), sqrt(hi(a))};
 }
+
+#ifdef YNN_HAVE_FMA
 template <typename T, size_t N>
 YNN_ALWAYS_INLINE vec<T, N> fma(vec<T, N> a, vec<T, N> b, vec<T, N> acc) {
   return {fma(lo(a), lo(b), lo(acc)), fma(hi(a), hi(b), hi(acc))};
 }
+#elif defined(YNN_ARCH_EMULATE_FMA)
+template <typename T, size_t N>
+YNN_ALWAYS_INLINE vec<T, N> fma(vec<T, N> a, vec<T, N> b, vec<T, N> acc) {
+  return emulate_fma(a, b, acc);
+}
+#define YNN_HAVE_FMA
+#endif
+
+#ifdef YNN_HAVE_FMA
+template <typename T, size_t N>
+YNN_ALWAYS_INLINE vec<T, N> multiply_add(vec<T, N> a, vec<T, N> b,
+                                         vec<T, N> acc) {
+  return fma(a, b, acc);
+}
+#else
+template <typename T, size_t N>
+YNN_ALWAYS_INLINE vec<T, N> multiply_add(vec<T, N> a, vec<T, N> b,
+                                         vec<T, N> acc) {
+  return a * b + acc;
+}
+#endif
 
 template <typename T, size_t N>
 YNN_ALWAYS_INLINE auto operator==(vec<T, N> a, vec<T, N> b) {
@@ -329,7 +353,7 @@ YNN_ALWAYS_INLINE vec<T, N> eval_polynomial(const std::array<T, Degree>& p,
                                             vec<T, N> x) {
   auto y = broadcast<N>(p[0]);
   for (size_t i = 1; i < p.size(); ++i) {
-    y = fma(x, y, broadcast<N>(p[i]));
+    y = multiply_add(x, y, broadcast<N>(p[i]));
   }
   return y;
 }
@@ -355,8 +379,8 @@ YNN_ALWAYS_INLINE vec<T, N> exp_impl(vec<T, N> x, const P& p, const Q& q,
   auto b = round_small(x_clamped * broadcast<N>(log2e));
   // Compute b * ln2 with extra precision using both ln2 and the residual
   // T(ln(2)) - ln2_hi
-  auto x_prime = fma(b, broadcast<N>(-ln2_hi), x_clamped);
-  x_prime = fma(b, broadcast<N>(-ln2_lo), x_prime);
+  auto x_prime = multiply_add(b, broadcast<N>(-ln2_hi), x_clamped);
+  x_prime = multiply_add(b, broadcast<N>(-ln2_lo), x_prime);
 
   // Compute 2^b.
   auto exp2b = exp2_round(b);
@@ -374,7 +398,7 @@ YNN_ALWAYS_INLINE vec<T, N> exp_impl(vec<T, N> x, const P& p, const Q& q,
     // 2^b = 1 we keep the low bits of the result.
     //
     auto expm1_a =
-        fma(exp2b, exp_a_prime, exp2b - broadcast<N>(static_cast<T>(1)));
+        multiply_add(exp2b, exp_a_prime, exp2b - broadcast<N>(static_cast<T>(1)));
     return select(isinf(exp2b), exp2b, expm1_a);
   } else {
     // Compute 2^b * exp(a_prime).
@@ -529,7 +553,7 @@ YNN_ALWAYS_INLINE vec<T, N> log_impl(vec<T, N> x, const P& poly_p,
   auto log_r = r + log_r_n / log_r_d;
 
   constexpr T ln2 = 6.93147180559945309e-01;
-  return fma(exp, broadcast<N>(ln2), log_r);
+  return multiply_add(exp, broadcast<N>(ln2), log_r);
 }
 
 template <int p, size_t N>

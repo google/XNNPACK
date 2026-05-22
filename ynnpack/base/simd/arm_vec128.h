@@ -990,21 +990,16 @@ YNN_ALWAYS_INLINE f64x2 operator/(f64x2 a, f64x2 b) {
 }
 #endif
 
-YNN_ALWAYS_INLINE f32x4 fma(f32x4 a, f32x4 b, f32x4 acc) {
 #ifdef YNN_ARCH_ARM_NEONFMA
+YNN_ALWAYS_INLINE f32x4 fma(f32x4 a, f32x4 b, f32x4 acc) {
   return f32x4{vfmaq_f32(acc.v, a.v, b.v)};
-#else
-  return a * b + acc;
-#endif
 }
 #ifdef YNN_ARCH_ARM64
 YNN_ALWAYS_INLINE f64x2 fma(f64x2 a, f64x2 b, f64x2 acc) {
-#ifdef YNN_ARCH_ARM_NEONFMA
   return f64x2{vfmaq_f64(acc.v, a.v, b.v)};
-#else
-  return a * b + acc;
-#endif
 }
+#endif
+#define YNN_HAVE_FMA
 #endif
 
 YNN_ALWAYS_INLINE s32x4 operator*(s32x4 a, s32x4 b) {

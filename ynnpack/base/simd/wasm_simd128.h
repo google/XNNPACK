@@ -442,8 +442,6 @@ YNN_ALWAYS_INLINE s8x16 operator^(s8x16 a, s8x16 b) {
 }
 YNN_ALWAYS_INLINE s8x16 operator~(s8x16 a) { return s8x16{wasm_v128_not(a.v)}; }
 
-YNN_ALWAYS_INLINE f32x4 fma(f32x4 a, f32x4 b, f32x4 acc) { return a * b + acc; }
-
 YNN_ALWAYS_INLINE f32x4 min(f32x4 a, f32x4 b) {
   return f32x4{wasm_f32x4_min(a.v, b.v)};
 }

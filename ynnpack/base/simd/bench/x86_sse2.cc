@@ -17,8 +17,6 @@ BENCH_PARTIAL_LOAD_STORE(sse2, s8, 16);
 BENCH_PARTIAL_LOAD_STORE(sse2, s16, 8);
 BENCH_PARTIAL_LOAD_STORE(sse2, s32, 4);
 
-BENCH_EMULATE_FMA(sse2, f32, 4);
-
 BENCH_UNARY(sse2, floor_log2, f32, 4);
 BENCH_UNARY(sse2, floor_log2, f64, 2);
 BENCH_UNARY(sse2, exp2_round, f32, 4);

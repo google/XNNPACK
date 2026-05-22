@@ -861,8 +861,8 @@ void test_horizontal_max() {
     test_horizontal_max<type, N>();                 \
   }
 
-template <typename scalar, size_t N, typename Fma>
-void test_fma(Fma fma) {
+template <typename scalar, size_t N>
+void test_fma() {
   using vector = vec<scalar, N>;
 
   ReplicableRandomDevice rng;
@@ -894,13 +894,7 @@ void test_fma(Fma fma) {
 
 #define TEST_FMA(test_class, type, N)                             \
   TEST_F(test_class, fma_##type##x##N) {                          \
-    test_fma<type, N>(                                            \
-        [](auto a, auto b, auto acc) { return fma(a, b, acc); }); \
-  }
-#define TEST_EMULATE_FMA(test_class, type, N)                             \
-  TEST_F(test_class, emulate_fma_##type##x##N) {                          \
-    test_fma<type, N>(                                                    \
-        [](auto a, auto b, auto acc) { return emulate_fma(a, b, acc); }); \
+    test_fma<type, N>(); \
   }
 
 template <typename scalar, size_t N>

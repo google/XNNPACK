@@ -579,12 +579,12 @@ YNN_ALWAYS_INLINE void copy_n_small(const T* src, size_t n, T* dst,
                                     std::integral_constant<size_t, 4>) {
   assert(n <= 4);
   switch (n) {
-      // clang-format off
+    // clang-format off
     case 4: dst[3] = src[3]; [[fallthrough]];
     case 3: dst[2] = src[2]; [[fallthrough]];
     case 2: dst[1] = src[1]; [[fallthrough]];
     case 1: dst[0] = src[0];
-      // clang-format on
+    // clang-format on
   }
 }
 
@@ -1162,20 +1162,15 @@ YNN_ALWAYS_INLINE f64x2 exp2_round(f64x2 a) {
       _mm_castsi128_pd(_mm_slli_epi64(_mm_castpd_si128(res_bits), 52))};
 }
 
-YNN_ALWAYS_INLINE f64x2 fma(f64x2 a, f64x2 b, f64x2 acc) {
 #ifdef YNN_ARCH_X86_FMA3
+YNN_ALWAYS_INLINE f64x2 fma(f64x2 a, f64x2 b, f64x2 acc) {
   return f64x2{_mm_fmadd_pd(a.v, b.v, acc.v)};
-#else
-  return a * b + acc;
-#endif
 }
 YNN_ALWAYS_INLINE f32x4 fma(f32x4 a, f32x4 b, f32x4 acc) {
-#ifdef YNN_ARCH_X86_FMA3
   return f32x4{_mm_fmadd_ps(a.v, b.v, acc.v)};
-#else
-  return a * b + acc;
-#endif
 }
+#define YNN_HAVE_FMA
+#endif
 
 YNN_ALWAYS_INLINE s32x4 operator==(f32x4 a, f32x4 b) {
   return s32x4{_mm_castps_si128(_mm_cmpeq_ps(a.v, b.v))};
