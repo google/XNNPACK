@@ -249,8 +249,20 @@ ynn_status create_unary(const ynn_node& node, ynn_runtime& runtime,
       make_unary_elementwise_impl(kernel, params),
       {{a.buffer, std::move(bounds)}}, {{x.buffer, dims}}, std::move(attrs));
 
-  auto sched =
-      runtime.make_schedule(dims, x.physical_extents(), x.buffer->elem_size());
+  std::vector<slinky::expr> given_splits = {};
+  // We don't want to split the innermost dimension if the type of the input is
+  // sub-byte.
+  if (type_element_count(a.type) > type_element_count(x.type)) {
+    given_splits.push_back(x.physical_extent(0));
+  }
+  auto sched = runtime.make_schedule(dims, x.physical_extents(),
+                                     x.buffer->elem_size(), given_splits);
+
+  if (sched && !sched->loop_splits.empty() &&
+      type_element_count(a.type) > type_element_count(x.type)) {
+    sched->loop_splits[0].step_is_required = true;
+  }
+
   func.user_data() = sched.get();
   runtime.scheduling_info_storage.push_back(std::move(sched));
 
