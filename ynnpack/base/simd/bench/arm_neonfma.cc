@@ -14,19 +14,10 @@
 namespace ynn {
 namespace simd {
 
-BENCH_PARTIAL_LOAD_STORE(neon, s8, 16);
-BENCH_PARTIAL_LOAD_STORE(neon, s16, 8);
-BENCH_PARTIAL_LOAD_STORE(neon, s32, 4);
-
-BENCH_UNARY(neon, floor_log2, f32, 4);
-BENCH_UNARY(neon, exp2_round, f32, 4);
-
-BENCH_CAST(neon, f32, bf16, 4);
-
-BENCH_UNARY(neon, exp, f32, 4);
-BENCH_UNARY(neon, expm1, f32, 4);
-BENCH_UNARY(neon, log, f32, 4);
-BENCH_UNARY(neon, log1p, f32, 4);
+BENCH_UNARY(neonfma, exp, f32, 4);
+BENCH_UNARY(neonfma, expm1, f32, 4);
+BENCH_UNARY(neonfma, log, f32, 4);
+BENCH_UNARY(neonfma, log1p, f32, 4);
 
 }  // namespace simd
 }  // namespace ynn

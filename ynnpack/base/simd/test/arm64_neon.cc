@@ -55,5 +55,10 @@ TEST_CAST(arm_neon, f64, f32x4);
 TEST_CAST(arm_neon, f32, f64x2);
 TEST_CAST(arm_neon, f32, f64x4);
 
+TEST_UNARY(arm_neon, exp, f64, 2, std::exp, 3);
+TEST_UNARY(arm_neon, expm1, f64, 2, std::expm1, 3);
+TEST_UNARY(arm_neon, log, f64, 2, std::log, 2);
+TEST_UNARY(arm_neon, log1p, f64, 2, std::log1p, 3);
+
 }  // namespace simd
 }  // namespace ynn
