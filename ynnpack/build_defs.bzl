@@ -92,7 +92,7 @@ _YNN_IMPLIED_ARCHS = {
     "x86_avx": ["x86_sse41"],
     "x86_sse41": ["x86_ssse3"],
     "x86_ssse3": ["x86_sse2"],
-    "x86_sse2fma": ["x86_sse2"],
+    "x86_sse2_fma": ["x86_sse2"],
 }
 
 _YNN_PARAMS_FOR_ARCH = {
@@ -212,10 +212,10 @@ _YNN_PARAMS_FOR_ARCH = {
         "arch_copts": _copts_for_compiler(["-msse2", "-mno-ssse3"]),
         "arch_flag": "sse2",
     },
-    "x86_sse2fma": {
-        "cond": "//ynnpack:ynn_enable_x86_sse2fma",
+    "x86_sse2_fma": {
+        "cond": "//ynnpack:ynn_enable_x86_sse2_fma",
         "arch_copts": _copts_for_compiler(["-msse2"]),
-        "arch_flag": "sse2fma",
+        "arch_flag": "sse2_fma",
         "arch_defines": ["YNN_ARCH_EMULATE_FMA"],
     },
     "x86_ssse3": {

@@ -83,6 +83,6 @@ TEST_P(LutTest, kernel) {
               Values(KernelInfo{kernel}), ValuesIn(simd_sizes_up_to(2048))), \
       test_param_to_string<LutTest::ParamType>);
 #include "ynnpack/kernels/lut/kernels.inc"
-#undef YNN_ELEMENTWISE_KERNEL
+#undef YNN_LUT_KERNEL
 
 }  // namespace ynn

@@ -136,10 +136,10 @@ BENCHMARK_REFERENCE_CONVERT_FROM(int32_t);
 BENCHMARK_REFERENCE_CONVERT(int4x2, int8_t);
 BENCHMARK_REFERENCE_CONVERT(int2x4, int8_t);
 
-#define YNN_ELEMENTWISE_KERNEL(arch_flags, kernel, op, type_a, type_x)    \
-  BENCHMARK_CAPTURE(bench, kernel, arch_flags, kernel,                    \
-                    get_unary_params(ynn_unary_##op), type_a(), type_x()) \
-      ->Apply(Params<type_a, type_x>)                                     \
+#define YNN_ELEMENTWISE_KERNEL(arch_flags, kernel, op, flags, type_a, type_x) \
+  BENCHMARK_CAPTURE(bench, kernel, arch_flags, kernel,                        \
+                    get_unary_params(ynn_unary_##op), type_a(), type_x())     \
+      ->Apply(Params<type_a, type_x>)                                         \
       ->UseRealTime();
 #include "ynnpack/kernels/unary/kernels.inc"
 #undef YNN_ELEMENTWISE_KERNEL

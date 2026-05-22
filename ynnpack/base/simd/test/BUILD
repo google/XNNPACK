@@ -41,7 +41,7 @@ package(default_visibility = ["//ynnpack:__subpackages__"])
     "arm64_neon",
     "arm64_sve",
     "x86_sse2",
-    "x86_sse2fma",
+    "x86_sse2_fma",
     "x86_sse41",
     "x86_avx",
     "x86_avx2",

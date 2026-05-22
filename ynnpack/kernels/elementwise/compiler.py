@@ -577,14 +577,6 @@ def multiply_add(x, y, z):
   return Op(x.ty, "multiply_add", [x, y, z])
 
 
-# Computes x * y - z
-@intrinsic
-def multiply_sub(x, y, z):
-  assert x.ty == y.ty
-  assert x.ty == z.ty
-  return Op(x.ty, "multiply_sub", [x, y, z])
-
-
 def halving_add(x, y):
   assert x.ty == y.ty
   return Op(x.ty, "halving_add", [x, y])
@@ -651,10 +643,6 @@ def lower_widening_mul(x, y):
   return widen(x) * widen(y)
 
 
-def lower_multiply_add(x, y, z):
-  return x * y + z
-
-
 def lower_multiply_sub(x, y, z):
   return x * y - z
 
@@ -681,8 +669,6 @@ lowering_funcs = {
     "widening_sub": lower_widening_sub,
     "widening_mul": lower_widening_mul,
     "select_bits": lower_select_bits,
-    "multiply_add": lower_multiply_add,
-    "multiply_sub": lower_multiply_sub,
 }
 
 
@@ -1026,6 +1012,7 @@ class Target:
         "saturating_cast",
         "saturating_rounding_cast",
         "fma",
+        "multiply_add",
         "select_greater_than",
         "isnan",
         "isinf",
@@ -1742,7 +1729,8 @@ class Target:
     else:
       assert False, "Unsupported number of buffers."
 
-  def compile_function(self, name, fn, tile_shapes):
+  def compile_function(self, name, fn, tile_shapes, flags):
+    """Compile a function for a set of tile shapes."""
     self.result = ""
     buffer_args.clear()
     scalar_args.clear()
@@ -1780,7 +1768,7 @@ class Target:
 
     inc = (
         f"YNN_ELEMENTWISE_KERNEL({self.arch_flags()}, {func_name}, {op_name},"
-        f" {types})\n"
+        f" {flags}, {types})\n"
     )
 
     return src, inc

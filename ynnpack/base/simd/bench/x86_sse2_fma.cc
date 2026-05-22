@@ -12,12 +12,12 @@
 namespace ynn {
 namespace simd {
 
-BENCH_FMA(sse2fma, f32, 4);
+BENCH_FMA(sse2_fma, f32, 4);
 
-BENCH_UNARY(sse2fma, exp, f32, 4);
-BENCH_UNARY(sse2fma, expm1, f32, 4);
-BENCH_UNARY(sse2fma, log, f32, 4);
-BENCH_UNARY(sse2fma, log1p, f32, 4);
+BENCH_UNARY(sse2_fma, exp, f32, 4);
+BENCH_UNARY(sse2_fma, expm1, f32, 4);
+BENCH_UNARY(sse2_fma, log, f32, 4);
+BENCH_UNARY(sse2_fma, log1p, f32, 4);
 
 }  // namespace simd
 }  // namespace ynn

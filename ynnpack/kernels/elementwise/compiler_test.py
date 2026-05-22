@@ -44,21 +44,6 @@ class RewriteTest(unittest.TestCase):
     r = rewrite(f32_a + f32_b, Op(Float(32), "test_add", [f32_a, f32_b]), x + y)
     self.assertTrue(compare_ops(r, Op(Float(32), "test_add", [x, y])))
 
-    r = rewrite(
-        f32_a * f32_b + f32_c, multiply_add(f32_a, f32_b, f32_c), x * y + z
-    )
-    self.assertTrue(compare_ops(r, multiply_add(x, y, z)))
-
-    r = rewrite(
-        f32_a * f32_b - f32_c, multiply_sub(f32_a, f32_b, f32_c), x * y - z
-    )
-    self.assertTrue(compare_ops(r, multiply_sub(x, y, z)))
-
-    r = rewrite(
-        f32_a * f32_b - f32_c, multiply_sub(f32_a, f32_b, f32_c), x * y + z
-    )
-    self.assertIsNone(r)
-
 
 class FindIntrinsicsTest(unittest.TestCase):
   """Check that that find_intrinsics produces expressions we're expecting."""

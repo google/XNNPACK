@@ -63,6 +63,7 @@ class X86(Target):
 
     known_features = [
         "SSE2",
+        "SSE2_FMA",
         "SSE41",
         "AVX",
         "AVX2",
@@ -90,6 +91,10 @@ class X86(Target):
       self.tail_strategy = TailStrategy.VECTOR
       self.vector_bits = 256
     elif "SSE41" in all_features:
+      simd_header = "x86_vec128.h"
+      self.tail_strategy = TailStrategy.VECTOR
+      self.vector_bits = 128
+    elif "SSE2_FMA" in all_features:
       simd_header = "x86_vec128.h"
       self.tail_strategy = TailStrategy.VECTOR
       self.vector_bits = 128

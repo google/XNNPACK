@@ -320,7 +320,29 @@ struct poly3_op {
 };
 
 template <typename T>
-unary_kernel_fn get_float_unary_reference_kernel(ynn_unary_operator op) {
+unary_kernel_fn get_float_unary_reference_kernel(ynn_unary_operator op,
+                                                 uint32_t required_flags) {
+  if (required_flags & unary_flag::consistent_arithmetic) {
+    switch (op) {
+      case ynn_unary_abs:
+      case ynn_unary_round:
+      case ynn_unary_ceil:
+      case ynn_unary_floor:
+      case ynn_unary_negate:
+#ifndef YNN_ARCH_ARM32
+      // 32-bit ARM handles denormals differently between scalar and NEON.
+      case ynn_unary_square:
+#endif  // !YNN_ARCH_ARM32
+      case ynn_unary_sign:
+      case ynn_unary_round_to_bf16:
+      case ynn_unary_convert:
+        // We assume these kernels are exact and thus numerically consistent.
+        break;
+      default:
+        // We call into cmath, which might not be numerically consistent.
+        return nullptr;
+    }
+  }
   switch (op) {
     case ynn_unary_abs:
       return unary_impl<T, T, abs_op>;
@@ -367,7 +389,7 @@ unary_kernel_fn get_float_unary_reference_kernel(ynn_unary_operator op) {
     case ynn_unary_round_to_bf16:
       return unary_impl<T, T, round_to_bf16_op>;
     case ynn_unary_convert:
-    default:
+    case ynn_unary_invalid:
       break;
   }
   return nullptr;
@@ -375,12 +397,12 @@ unary_kernel_fn get_float_unary_reference_kernel(ynn_unary_operator op) {
 
 }  // namespace
 
-unary_kernel_fn get_unary_reference_kernel(ynn_unary_operator op,
-                                           ynn_type type) {
+unary_kernel_fn get_unary_reference_kernel(ynn_unary_operator op, ynn_type type,
+                                           uint32_t required_flags) {
   if (type == ynn_type_fp32) {
-    return get_float_unary_reference_kernel<float>(op);
+    return get_float_unary_reference_kernel<float>(op, required_flags);
   } else if (type == ynn_type_fp64) {
-    return get_float_unary_reference_kernel<double>(op);
+    return get_float_unary_reference_kernel<double>(op, required_flags);
   } else if (type == ynn_type_int32) {
     switch (op) {
       case ynn_unary_abs:
@@ -398,7 +420,8 @@ unary_kernel_fn get_unary_reference_kernel(ynn_unary_operator op,
   return nullptr;
 }
 
-unary_kernel_fn get_convert_reference_kernel(ynn_type a_type, ynn_type x_type) {
+unary_kernel_fn get_convert_reference_kernel(ynn_type a_type, ynn_type x_type,
+                                             uint32_t required_flags) {
   switch (a_type) {
     case ynn_type_fp64:
       return get_convert_kernel<double>(x_type);
@@ -424,28 +447,29 @@ unary_kernel_fn get_convert_reference_kernel(ynn_type a_type, ynn_type x_type) {
 }
 
 unary_kernel_fn get_unary_kernel(ynn_unary_operator op, ynn_type a_type,
-                                 ynn_type x_type,
+                                 ynn_type x_type, uint32_t required_flags,
                                  uint64_t supported_arch_flags) {
   // TODO(vksnk): select a better kernel based on the passed size.
-#define YNN_ELEMENTWISE_KERNEL(arch, name, op_type, type_a, type_x) \
-  if (a_type == type_of<type_a>() && x_type == type_of<type_x>() && \
-      op == ynn_unary_##op_type &&                                  \
-      is_arch_supported(arch, supported_arch_flags)) {              \
-    YNN_LOG_DEBUG() << "Using unary kernel " << #name;              \
-    return &name;                                                   \
+#define YNN_ELEMENTWISE_KERNEL(arch, name, op_type, flags, type_a, type_x) \
+  if (a_type == type_of<type_a>() && x_type == type_of<type_x>() &&        \
+      op == ynn_unary_##op_type &&                                         \
+      (flags & required_flags) == required_flags &&                        \
+      is_arch_supported(arch, supported_arch_flags)) {                     \
+    YNN_LOG_DEBUG() << "Using unary kernel " << #name;                     \
+    return &name;                                                          \
   }
 
 #include "ynnpack/kernels/unary/kernels.inc"
 #undef YNN_ELEMENTWISE_KERNEL
 
   if (op == ynn_unary_convert) {
-    return get_convert_reference_kernel(a_type, x_type);
+    return get_convert_reference_kernel(a_type, x_type, required_flags);
   } else if (a_type == ynn_type_fp64 && x_type == ynn_type_fp64) {
-    return get_unary_reference_kernel(op, x_type);
+    return get_unary_reference_kernel(op, x_type, required_flags);
   } else if (a_type == ynn_type_fp32 && x_type == ynn_type_fp32) {
-    return get_unary_reference_kernel(op, x_type);
+    return get_unary_reference_kernel(op, x_type, required_flags);
   } else if (a_type == ynn_type_int32 && x_type == ynn_type_int32) {
-    return get_unary_reference_kernel(op, x_type);
+    return get_unary_reference_kernel(op, x_type, required_flags);
   } else {
     return nullptr;
   }

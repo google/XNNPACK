@@ -103,10 +103,11 @@ BENCHMARK_REFERENCE(multiply, int32_t);
 BENCHMARK_REFERENCE(pow, int32_t);
 BENCHMARK_REFERENCE(subtract, int32_t);
 
-#define YNN_ELEMENTWISE_KERNEL(arch_flags, kernel, op, type_a, type_b, type_c) \
-  BENCHMARK_CAPTURE(bench, kernel, arch_flags, kernel, type_a(), type_b(),     \
-                    type_c())                                                  \
-      ->Apply(Params<type_a, type_b, type_c>)                                  \
+#define YNN_ELEMENTWISE_KERNEL(arch_flags, kernel, op, flags, type_a, type_b, \
+                               type_c)                                        \
+  BENCHMARK_CAPTURE(bench, kernel, arch_flags, kernel, type_a(), type_b(),    \
+                    type_c())                                                 \
+      ->Apply(Params<type_a, type_b, type_c>)                                 \
       ->UseRealTime();
 #include "ynnpack/kernels/binary/kernels.inc"
 #undef YNN_ELEMENTWISE_KERNEL
