@@ -4,7 +4,7 @@
 # LICENSE file in the root directory of this source tree.
 
 load("@rules_cc//cc:cc_binary.bzl", "cc_binary")
-load("//ynnpack:build_defs.bzl", "ynn_arch_copts", "ynn_arch_flag", "ynn_benchmark_deps", "ynn_binary_linkopts", "ynn_binary_malloc", "ynn_if_arch")
+load("//ynnpack:build_defs.bzl", "ynn_arch_copts", "ynn_arch_defines", "ynn_benchmark_deps", "ynn_binary_linkopts", "ynn_binary_malloc", "ynn_if_arch")
 
 package(default_visibility = ["//ynnpack:__subpackages__"])
 
@@ -38,10 +38,7 @@ package(default_visibility = ["//ynnpack:__subpackages__"])
         "-use_header_modules",
     ],
     linkopts = ynn_binary_linkopts(),
-    local_defines = ynn_if_arch(
-        arch,
-        ["YNN_ARCH=" + ynn_arch_flag(arch)],
-    ),
+    local_defines = ynn_arch_defines(arch),
     malloc = ynn_binary_malloc(),
     deps = [
         "//ynnpack/base",
