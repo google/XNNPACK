@@ -184,9 +184,9 @@ static enum xnn_status reshape_constant_pad_nd(
 
     const bool is_current_dim_padded = (pre_padding | post_padding) != 0;
     if (is_current_dim_padded || is_previous_dim_padded) {
-      size_t output_dim;
-      if (!xnn_safe_add(pre_padding, input_dim, &output_dim) ||
-          !xnn_safe_add(output_dim, post_padding, &output_dim)) {
+      size_t pre_input_sum, output_dim;
+      if (!xnn_safe_add(pre_padding, input_dim, &pre_input_sum) ||
+          !xnn_safe_add(pre_input_sum, post_padding, &output_dim)) {
         xnn_log_error(
             "failed to setup %s operator: output dimension overflow in "
             "dimension %zu (pre_padding=%zu + input_dim=%zu + "
