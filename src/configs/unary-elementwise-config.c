@@ -451,50 +451,43 @@ static void init_f16_hswish_config(void) {
 }
 
 static void init_f16_log_config(void) {
-  #if XNN_ENABLE_ARM_FP16_SCALAR && XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-    assert(hardware_config != NULL);
-    (void) hardware_config;  // May be unused.
-    if (hardware_config->arch_flags & xnn_arch_arm_neon_fp16_arith) {
-      f16_log_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f16_vlog_ukernel__neonfp16arith_rational_3_3_div_u16);
-      f16_log_config.element_tile = 16;
-    } else {
-      f16_log_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f16_vlog_ukernel__scalar_rational_3_3_div_u4);
-      f16_log_config.element_tile = 4;
-    }
-  #elif XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM64
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-    assert(hardware_config != NULL);
-    (void) hardware_config;  // May be unused.
-    if (hardware_config->arch_flags & xnn_arch_arm_neon_fp16_arith) {
-      f16_log_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f16_vlog_ukernel__neonfp16arith_rational_3_3_div_u16);
-      f16_log_config.element_tile = 16;
-    } else {
-      f16_log_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f16_vlog_ukernel__scalar_rational_3_3_div_u4);
-      f16_log_config.element_tile = 4;
-    }
-  #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-    assert(hardware_config != NULL);
-    (void) hardware_config;  // May be unused.
-    #if XNN_ENABLE_AVX512FP16
-      if (hardware_config->arch_flags & xnn_arch_x86_avx512fp16) {
-        f16_log_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f16_vlog_ukernel__avx512fp16_rational_3_3_div_u32);
-        f16_log_config.element_tile = 32;
-      } else
-    #endif
-    {
-      f16_log_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f16_vlog_ukernel__scalar_rational_3_3_div_u4);
-      f16_log_config.element_tile = 4;
-    }
-  #elif XNN_ARCH_WASMRELAXEDSIMDFP16
-    f16_log_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f16_vlog_ukernel__wasmrelaxedsimd_rational_3_3_div_u16);
+#if (XNN_ARCH_ARM && XNN_ENABLE_ARM_FP16_VECTOR && XNN_ENABLE_ARM_FP16_SCALAR) || \
+    (XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM64)
+  const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+  assert(hardware_config != NULL);
+  if (hardware_config->arch_flags & xnn_arch_arm_neon_fp16_arith) {
+    f16_log_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f16_vlog_ukernel__neonfp16arith_rational_1_3_div_u16);
     f16_log_config.element_tile = 16;
-  #else
-    f16_log_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f16_vlog_ukernel__scalar_rational_3_3_div_u4);
+  } else {
+    f16_log_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f16_vlog_ukernel__scalar_rational_1_3_div_u4);
     f16_log_config.element_tile = 4;
+  }
+#elif XNN_ARCH_X86 || XNN_ARCH_X86_64
+  const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+  assert(hardware_config != NULL);
+  (void) hardware_config;  // May be unused.
+  #if XNN_ENABLE_AVX512FP16
+    if (hardware_config->arch_flags & xnn_arch_x86_avx512fp16) {
+      f16_log_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f16_vlog_ukernel__avx512fp16_rational_1_3_div_u32);
+      f16_log_config.element_tile = 32;
+    } else
   #endif
+  if (hardware_config->arch_flags & xnn_arch_x86_f16c) {
+    f16_log_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f16_vlog_ukernel__f16c_rational_1_3_div_u16);
+    f16_log_config.element_tile = 16;
+  } else {
+    f16_log_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f16_vlog_ukernel__scalar_rational_1_3_div_u4);
+    f16_log_config.element_tile = 4;
+  }
+#elif XNN_ARCH_WASMRELAXEDSIMDFP16
+  f16_log_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f16_vlog_ukernel__wasmrelaxedsimd_rational_1_3_div_u16);
+  f16_log_config.element_tile = 16;
+#else
+  f16_log_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f16_vlog_ukernel__scalar_rational_1_3_div_u4);
+  f16_log_config.element_tile = 4;
+#endif
 }
+
 
 static void init_f16_lrelu_config(void) {
   #if XNN_ENABLE_ARM_FP16_SCALAR && XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM

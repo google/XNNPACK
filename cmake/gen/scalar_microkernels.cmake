@@ -27,7 +27,7 @@ SET(PROD_SCALAR_MICROKERNEL_SRCS
   src/f16-vcos/gen/f16-vcos-scalar-rational-3-2-div.c
   src/f16-vexp/gen/f16-vexp-scalar-poly-3.c
   src/f16-vgelu/gen/f16-vgelu-scalar-rational-6-4-div.c
-  src/f16-vlog/gen/f16-vlog-scalar-rational-3-3-div.c
+  src/f16-vlog/gen/f16-vlog-scalar-rational-1-3-div.c
   src/f16-vsin/gen/f16-vsin-scalar-rational-3-2-div.c
   src/f16-vsqrt/gen/f16-vsqrt-scalar-sqrt.c
   src/f16-vtanh/gen/f16-vtanh-scalar-expm1minus-rr1-p3h2ts-div.c

@@ -34,6 +34,7 @@ PROD_F16C_MICROKERNEL_SRCS = [
     "src/f16-vbinary/gen/f16-vsubc-f16c-u16.c",
     "src/f16-vclamp/gen/f16-vclamp-f16c-u16.c",
     "src/f16-vhswish/gen/f16-vhswish-f16c-u16.c",
+    "src/f16-vlog/gen/f16-vlog-f16c-rational-1-3-div.c",
     "src/f16-vlrelu/gen/f16-vlrelu-f16c-u16.c",
     "src/f16-vrnd/gen/f16-vrndd-f16c-u16.c",
     "src/f16-vrnd/gen/f16-vrndne-f16c-u16.c",
