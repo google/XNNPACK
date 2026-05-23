@@ -94,6 +94,10 @@ slinky::func make_reshape(ynn_runtime& runtime,
                           const std::vector<slinky::expr>& output_extents) {
   const size_t in_rank = input_buf->rank();
   const size_t out_rank = output_extents.size();
+  if (out_rank != output_buf->rank()) {
+    YNN_LOG_ERROR() << "out_rank = " << out_rank
+                    << ", output_buf->rank() = " << output_buf->rank();
+  }
   assert(out_rank == output_buf->rank());
 
   std::vector<slinky::var> dims = runtime.globals.make_dims(out_rank);
@@ -222,12 +226,14 @@ void define_copy(ynn_subgraph& subgraph, ynn_node& node, uint32_t input_id,
     return ynn_status_success;
   };
 }
-
 void define_static_expand_dims(ynn_subgraph& subgraph, ynn_node& node,
                                uint32_t input_id, uint32_t* output_id,
-                               const axes_set& new_axes) {
+                               const ynn::axes_set& new_axes) {
+  YNN_LOG_ERROR() << "define_static_expand_dims called with input_id="
+                  << input_id << " output_id=" << *output_id;
   const ynn_value& input = subgraph.value(input_id);
   ynn_value& output = subgraph.get_output_value(output_id, input);
+  output.data = nullptr;
 
   ynn_node::static_expand_dims op;
   op.new_axes = new_axes;
@@ -240,10 +246,11 @@ void define_static_expand_dims(ynn_subgraph& subgraph, ynn_node& node,
   // Propagate shape.
   output.extents.resize(new_rank);
   auto input_d = input.extents.begin();
-  for (size_t d = 0; d < output.rank() && input_d != input.extents.end(); ++d) {
+  for (size_t d = 0; d < output.rank(); ++d) {
     if (new_axes[d]) {
-      output.extents[d] = {};
+      output.extents[d] = 1;
     } else {
+      assert(input_d != input.extents.end());
       output.extents[d] = *input_d++;
     }
   }
@@ -254,6 +261,13 @@ void define_static_expand_dims(ynn_subgraph& subgraph, ynn_node& node,
     const ynn_runtime_value& input = runtime.value(node.inputs[0]);
     ynn_runtime_value& output = runtime.value(node.outputs[0]);
     assert(input.rank() == input.extents.size());
+    if (output.rank() != input.rank() + new_axes.count()) {
+      YNN_LOG_ERROR() << "output.rank() = " << output.rank()
+                      << " input.rank() = " << input.rank()
+                      << " new_axes.count() = " << new_axes.count()
+                      << " input_id = " << node.inputs[0]
+                      << " output_id = " << node.outputs[0];
+    }
     assert(output.rank() == input.rank() + new_axes.count());
 
     std::vector<slinky::var> dims = runtime.globals.make_dims(output.rank());

@@ -221,16 +221,15 @@ xnn_status xnn_define_dynamically_quantized_tensor_value(
   // The quantization data is computed later, when a convert node with this
   // tensor as an output is defined.
   uint32_t zero_point_id = YNN_INVALID_VALUE_ID;
-  ynn_status status =
-      ynn_define_tensor(subgraph->ynn, ynn_type_int32, num_nonbatch_dims,
-                        /*dims=*/nullptr, /*data=*/nullptr,
-                        /*flags=*/0, &zero_point_id);
+  ynn_status status = ynn_define_tensor(subgraph->ynn, ynn_type_int32, num_dims,
+                                        /*dims=*/nullptr, /*data=*/nullptr,
+                                        /*flags=*/0, &zero_point_id);
   if (status != ynn_status_success) {
     return ynn::xnn_status_from_ynn(status);
   }
 
   uint32_t scale_id = YNN_INVALID_VALUE_ID;
-  status = ynn_define_tensor(subgraph->ynn, ynn_type_fp32, num_nonbatch_dims,
+  status = ynn_define_tensor(subgraph->ynn, ynn_type_fp32, num_dims,
                              /*dims=*/nullptr, /*data=*/nullptr,
                              /*flags=*/0, &scale_id);
   if (status != ynn_status_success) {
@@ -244,6 +243,19 @@ xnn_status xnn_define_dynamically_quantized_tensor_value(
                              /*data=*/nullptr, flags, id_out);
   if (status != ynn_status_success) {
     return ynn::xnn_status_from_ynn(status);
+  }
+
+  // Set the shapes of zero_point_id and scale_id to match the batch dimensions
+  // of id_out. In Slinky, the batch dimensions are at the end (outermost).
+  for (uint32_t q_id : {zero_point_id, scale_id}) {
+    auto& q_value = subgraph->ynn->values[q_id];
+    q_value.extents.resize(num_dims);
+    for (size_t i = 0; i < num_nonbatch_dims; ++i) {
+      q_value.extents[i] = 1;
+    }
+    for (size_t i = num_nonbatch_dims; i < num_dims; ++i) {
+      q_value.extents[i] = subgraph->ynn->values[*id_out].extents[i];
+    }
   }
 
   // Store the number of non-batch dimensions where we can find it again.

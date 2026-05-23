@@ -82,7 +82,8 @@ ynn_type product_type(ynn_type a, ynn_type b) {
 ynn_status subtract_a_times_sum_b(xnn_subgraph_t subgraph, size_t num_k_dims,
                                   const int32_t* a_k_dims,
                                   const int32_t* b_k_dims, uint32_t a_id,
-                                  uint32_t b_id, uint32_t* output_id) {
+                                  uint32_t b_id, uint32_t* output_id,
+                                  bool expand_a, bool expand_sum) {
   if (a_id == YNN_INVALID_VALUE_ID) {
     return ynn_status_success;
   }
@@ -114,16 +115,33 @@ ynn_status subtract_a_times_sum_b(xnn_subgraph_t subgraph, size_t num_k_dims,
 
   // Put one of the k dims back (to be broadcasted).
   uint32_t sum_id = YNN_INVALID_VALUE_ID;
-  status = ynn_define_static_expand_dims(subgraph->ynn, 1, &b_k_dims[0],
-                                         sum_sliced_id, &sum_id, /*flags=*/0);
-  if (status != ynn_status_success) {
-    return status;
+  if (expand_sum) {
+    int32_t axis = -1;  // index 0 in Slinky
+    status = ynn_define_static_expand_dims(subgraph->ynn, 1, &axis,
+                                           sum_sliced_id, &sum_id, /*flags=*/0);
+    if (status != ynn_status_success) {
+      return status;
+    }
+  } else {
+    sum_id = sum_sliced_id;
+  }
+
+  uint32_t a_expanded_id = YNN_INVALID_VALUE_ID;
+  if (expand_a) {
+    int32_t axis = -1;  // index 0 in Slinky
+    status = ynn_define_static_expand_dims(subgraph->ynn, 1, &axis, a_id,
+                                           &a_expanded_id, /*flags=*/0);
+    if (status != ynn_status_success) {
+      return status;
+    }
+  } else {
+    a_expanded_id = a_id;
   }
 
   uint32_t zero_times_sum_id = YNN_INVALID_VALUE_ID;
-  status =
-      define_binary_with_broadcasting(subgraph, ynn_binary_multiply, a_id,
-                                      sum_id, &zero_times_sum_id, /*flags=*/0);
+  status = define_binary_with_broadcasting(subgraph, ynn_binary_multiply,
+                                           a_expanded_id, sum_id,
+                                           &zero_times_sum_id, /*flags=*/0);
   if (status != ynn_status_success) {
     return status;
   }
@@ -215,11 +233,12 @@ ynn_status define_xnn_accumulator_for_quantized_dot(
   int32_t a_k_dims[YNN_MAX_TENSOR_RANK];
   int32_t b_k_dims[YNN_MAX_TENSOR_RANK];
   std::iota(a_k_dims, a_k_dims + num_k_dims, -static_cast<int>(num_k_dims));
-  std::iota(b_k_dims, b_k_dims + num_k_dims, -static_cast<int>(num_k_dims) - 1);
+  std::iota(b_k_dims, b_k_dims + num_k_dims, -static_cast<int>(num_k_dims));
   std::reverse(a_k_dims, a_k_dims + num_k_dims);
   std::reverse(b_k_dims, b_k_dims + num_k_dims);
 
   ynn_status status = ynn_status_success;
+  bool has_batch_dims = ynn::rank_of_value(subgraph, a_id) > num_k_dims;
 
   if (a_zero_point_id != YNN_INVALID_VALUE_ID &&
       b_zero_point_id != YNN_INVALID_VALUE_ID) {
@@ -238,10 +257,9 @@ ynn_status define_xnn_accumulator_for_quantized_dot(
       return status;
     }
 
-    status = define_binary_with_broadcasting(subgraph, ynn_binary_multiply,
-                                             a_zero_point_id, b_zero_point_id,
-                                             &a_times_b_zero_point_no_k_id,
-                                             /*flags=*/0);
+    status = define_binary_with_broadcasting(
+        subgraph, ynn_binary_multiply, a_zero_point_id, b_zero_point_id,
+        &a_times_b_zero_point_no_k_id, /*flags=*/0);
     if (status != ynn_status_success) {
       return status;
     }
@@ -269,16 +287,20 @@ ynn_status define_xnn_accumulator_for_quantized_dot(
 
   // We need to add a_zero_point * sum(b) to the accumulator initialization.
   // This product is missing dimension 0 from the result of the dot product.
-  status = subtract_a_times_sum_b(subgraph, num_k_dims, a_k_dims, b_k_dims,
-                                  a_zero_point_id, b_id, init_output_id);
+  status =
+      subtract_a_times_sum_b(subgraph, num_k_dims, a_k_dims, b_k_dims,
+                             a_zero_point_id, b_id, init_output_id,
+                             /*expand_a=*/has_batch_dims, /*expand_sum=*/false);
   if (status != ynn_status_success) {
     return status;
   }
 
   // We need to add b_zero_point * sum(a) to the accumulator initialization.
   // This product is missing dimension 1 from the result of the dot product.
-  status = subtract_a_times_sum_b(subgraph, num_k_dims, b_k_dims, a_k_dims,
-                                  b_zero_point_id, a_id, init_output_id);
+  status =
+      subtract_a_times_sum_b(subgraph, num_k_dims, b_k_dims, a_k_dims,
+                             b_zero_point_id, a_id, init_output_id,
+                             /*expand_a=*/false, /*expand_sum=*/has_batch_dims);
   if (status != ynn_status_success) {
     return status;
   }
@@ -334,7 +356,7 @@ ynn_status convert_to(xnn_subgraph_t subgraph, uint32_t* value_id,
 
 ynn_status define_xnn_dot_float(xnn_subgraph_t subgraph, size_t num_k_dims,
                                 uint32_t a_id, uint32_t b_id, uint32_t bias_id,
-                                uint32_t output_id) {
+                                uint32_t* output_id) {
   // 1. Convert input types to match.
 
   // XNNPACK allows a mix of fp16 and fp32 inputs, and it always converts the
@@ -358,21 +380,22 @@ ynn_status define_xnn_dot_float(xnn_subgraph_t subgraph, size_t num_k_dims,
 
   // 2. Define the dot product.
 
-  // If `output_id` is not fp32, we need to create an accumulator as fp32 and
-  // convert the result to the output type. Otherwise, we can reuse `output_id`
+  // If `*output_id` is not fp32, we need to create an accumulator as fp32 and
+  // convert the result to the output type. Otherwise, we can reuse `*output_id`
   // as the accumulator and avoid the conversion.
-  if (type_of_value(subgraph, output_id) != ynn_type_fp32) {
+  if (*output_id == YNN_INVALID_VALUE_ID ||
+      type_of_value(subgraph, *output_id) != ynn_type_fp32) {
     uint32_t accumulator_id = YNN_INVALID_VALUE_ID;
     status = ynn_define_dot(subgraph->ynn, num_k_dims, a_id, b_id, bias_id,
                             &accumulator_id, /*flags=*/0);
     if (status != ynn_status_success) return status;
 
     status = ynn_define_unary(subgraph->ynn, ynn_unary_convert, accumulator_id,
-                              &output_id, /*flags=*/0);
+                              output_id, /*flags=*/0);
     if (status != ynn_status_success) return status;
   } else {
     status = ynn_define_dot(subgraph->ynn, num_k_dims, a_id, b_id, bias_id,
-                            &output_id, /*flags=*/0);
+                            output_id, /*flags=*/0);
     if (status != ynn_status_success) return status;
   }
   return ynn_status_success;

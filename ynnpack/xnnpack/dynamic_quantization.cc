@@ -128,6 +128,20 @@ auto make_compute_qd8_params_impl(int32_t output_zero_point) {
   };
 }
 
+void infer_shape(ynn_node& node, ynn_subgraph& subgraph) {
+  const ynn_value& min_max_val = subgraph.value(node.inputs[0]);
+  ynn_value& scale_val = subgraph.value(node.outputs[0]);
+  ynn_value& zp_val = subgraph.value(node.outputs[1]);
+  for (size_t d = 0; d < scale_val.rank(); ++d) {
+    if (!scale_val.extents[d].defined()) {
+      scale_val.extents[d] = min_max_val.extents[d + 1];
+    }
+    if (!zp_val.extents[d].defined()) {
+      zp_val.extents[d] = min_max_val.extents[d + 1];
+    }
+  }
+}
+
 ynn_status define_qd8_params(ynn_subgraph_t subgraph, size_t num_nonbatch_axes,
                              const int32_t* nonbatch_axes,
                              int32_t output_zero_point, uint32_t min_max_id,
@@ -154,6 +168,8 @@ ynn_status define_qd8_params(ynn_subgraph_t subgraph, size_t num_nonbatch_axes,
   node.inputs = {min_max_id};
   node.outputs = {scale_id, zero_point_id};
   node.op = ynn_node::opaque{"compute_qd8_params"};
+
+  infer_shape(node, *subgraph);
   node.create = [output_zero_point](const ynn_node& node,
                                     ynn_runtime& runtime) {
     const ynn_runtime_value& min_max = runtime.value(node.inputs[0]);
@@ -164,9 +180,11 @@ ynn_status define_qd8_params(ynn_subgraph_t subgraph, size_t num_nonbatch_axes,
     zero_point.make_buffer(runtime);
 
     std::vector<slinky::var> dims = runtime.globals.make_dims(scale.rank());
-    slinky::box_expr min_max_bounds =
-        make_elementwise_bounds(dims, min_max.extents);
-    min_max_bounds.push_back(slinky::bounds(0, 1));
+    slinky::box_expr min_max_bounds(min_max.rank());
+    min_max_bounds[0] = slinky::bounds(0, 1);  // reduction dim
+    for (size_t i = 0; i < scale.rank(); ++i) {
+      min_max_bounds[i + 1] = slinky::bounds(0, dims[i]);
+    }
 
     slinky::func func;
     slinky::call_stmt::attributes attrs;

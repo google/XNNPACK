@@ -40,8 +40,8 @@ ynn_status ynn_define_broadcast_like(ynn_subgraph_t subgraph, size_t num_axes,
   const ynn_value& template_value = subgraph->value(template_id);
   ynn::axes_set axes_set;
   for (size_t i = 0; i < num_axes; ++i) {
-    const int axis = axis_to_slinky_dim(input.rank(), axes[i]);
-    if (axis < template_value.rank()) {
+    const int axis = axis_to_slinky_dim(template_value.rank(), axes[i]);
+    if (axis >= 0 && axis < template_value.rank()) {
       axes_set[axis] = true;
     }
   }
@@ -100,6 +100,7 @@ ynn_status ynn_define_broadcast_like(ynn_subgraph_t subgraph, size_t num_axes,
   }
 
   ynn_value& output = subgraph->get_output_value(output_id, input);
+  output.data = nullptr;
   output.extents = std::move(output_extents);
 
   // Note the template is not an input to the node, we only needed its shape.

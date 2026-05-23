@@ -43,7 +43,7 @@ ynn_type accumulator_for_type(ynn_type type);
 // quantization that XNNPACK does.
 ynn_status define_xnn_dot(xnn_subgraph_t subgraph, size_t num_k_dims,
                           uint32_t a_id, uint32_t b_id, uint32_t bias_id,
-                          uint32_t output_id);
+                          uint32_t* output_id);
 
 ynn_status define_binary_scalar_a(xnn_subgraph_t subgraph,
                                   ynn_binary_operator op, float scalar_a,
