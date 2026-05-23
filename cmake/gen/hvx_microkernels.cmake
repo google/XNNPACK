@@ -247,6 +247,14 @@ SET(NON_PROD_HVX_MICROKERNEL_SRCS
   src/f32-vtanh/gen/f32-vtanh-hvx-rational-9-8-nr.c
   src/qs8-packw/gen/qs8-packw-x96c4-gemm-gio-hvx.c
   src/qs8-packw/gen/qs8-packw-x96c4-gemm-goi-hvx.c
+  src/qs8-qc4w-gemm/gen/qs8-qc4w-gemm-1x128c4-minmax-fp32-hvx.c
+  src/qs8-qc4w-gemm/gen/qs8-qc4w-gemm-2x128c4-minmax-fp32-hvx.c
+  src/qs8-qc4w-gemm/gen/qs8-qc4w-gemm-3x128c4-minmax-fp32-hvx.c
+  src/qs8-qc4w-gemm/gen/qs8-qc4w-gemm-4x128c4-minmax-fp32-hvx.c
+  src/qs8-qc4w-gemm/gen/qs8-qc4w-gemm-5x128c4-minmax-fp32-hvx.c
+  src/qs8-qc4w-gemm/gen/qs8-qc4w-gemm-6x128c4-minmax-fp32-hvx.c
+  src/qs8-qc4w-gemm/gen/qs8-qc4w-gemm-7x128c4-minmax-fp32-hvx.c
+  src/qs8-qc4w-gemm/gen/qs8-qc4w-gemm-8x128c4-minmax-fp32-hvx.c
   src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-1x32c4-minmax-fp32-hvx.c
   src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-1x64c4-minmax-fp32-hvx.c
   src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-1x128c4-minmax-fp32-hvx-prfm.c
