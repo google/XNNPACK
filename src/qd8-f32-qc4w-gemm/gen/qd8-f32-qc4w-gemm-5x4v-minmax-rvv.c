@@ -199,6 +199,29 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_5x4v__rvv(
     a2 = (const int8_t*) ((uintptr_t) a2 - kc);
     a3 = (const int8_t*) ((uintptr_t) a3 - kc);
     a4 = (const int8_t*) ((uintptr_t) a4 - kc);
+  
+      vint8m1_t vout80 = __riscv_vncvt_x(vout0, vl);
+      vint8m1_t vout81 = __riscv_vncvt_x(vout1, vl);
+      vint8m1_t vout82 = __riscv_vncvt_x(vout2, vl);
+      vint8m1_t vout83 = __riscv_vncvt_x(vout3, vl);
+      vint8m1_t vout84 = __riscv_vncvt_x(vout4, vl);
+
+      __riscv_vse8(c0, vout80, vl);
+      c0 = (int8_t*) ((uintptr_t) c0 + cn_stride);
+      __riscv_vse8(c1, vout81, vl);
+      c1 = (int8_t*) ((uintptr_t) c1 + cn_stride);
+      __riscv_vse8(c2, vout82, vl);
+      c2 = (int8_t*) ((uintptr_t) c2 + cn_stride);
+      __riscv_vse8(c3, vout83, vl);
+      c3 = (int8_t*) ((uintptr_t) c3 + cn_stride);
+      __riscv_vse8(c4, vout84, vl);
+      c4 = (int8_t*) ((uintptr_t) c4 + cn_stride);
+
+      a0 = (const int8_t*) ((uintptr_t) a0 - kc);
+      a1 = (const int8_t*) ((uintptr_t) a1 - kc);
+      a2 = (const int8_t*) ((uintptr_t) a2 - kc);
+      a3 = (const int8_t*) ((uintptr_t) a3 - kc);
+      a4 = (const int8_t*) ((uintptr_t) a4 - kc);
 
   } while (nc != 0);
 }

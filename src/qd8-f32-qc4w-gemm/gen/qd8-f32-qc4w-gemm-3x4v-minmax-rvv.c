@@ -147,6 +147,21 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_3x4v__rvv(
     a0 = (const int8_t*) ((uintptr_t) a0 - kc);
     a1 = (const int8_t*) ((uintptr_t) a1 - kc);
     a2 = (const int8_t*) ((uintptr_t) a2 - kc);
+  
+      vint8m1_t vout80 = __riscv_vncvt_x(vout0, vl);
+      vint8m1_t vout81 = __riscv_vncvt_x(vout1, vl);
+      vint8m1_t vout82 = __riscv_vncvt_x(vout2, vl);
+
+      __riscv_vse8(c0, vout80, vl);
+      c0 = (int8_t*) ((uintptr_t) c0 + cn_stride);
+      __riscv_vse8(c1, vout81, vl);
+      c1 = (int8_t*) ((uintptr_t) c1 + cn_stride);
+      __riscv_vse8(c2, vout82, vl);
+      c2 = (int8_t*) ((uintptr_t) c2 + cn_stride);
+
+      a0 = (const int8_t*) ((uintptr_t) a0 - kc);
+      a1 = (const int8_t*) ((uintptr_t) a1 - kc);
+      a2 = (const int8_t*) ((uintptr_t) a2 - kc);
 
   } while (nc != 0);
 }
