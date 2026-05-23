@@ -14,13 +14,16 @@ IF(NOT TARGET benchmark)
     SET(BENCHMARK_ENABLE_TESTING OFF CACHE BOOL "")
     ADD_SUBDIRECTORY(
       "${GOOGLEBENCHMARK_SOURCE_DIR}"
-      "${CONFU_DEPENDENCIES_BINARY_DIR}/googlebenchmark")
+      "${CMAKE_BINARY_DIR}/googlebenchmark")
   ENDIF()
 ENDIF()
 
 ADD_LIBRARY(xnnpack-bench-utils STATIC utils.cc)
-TARGET_LINK_LIBRARIES(xnnpack-bench-utils PRIVATE benchmark::benchmark cpuinfo pthreadpool)
+TARGET_LINK_LIBRARIES(xnnpack-bench-utils PRIVATE benchmark::benchmark pthreadpool)
 TARGET_LINK_LIBRARIES(xnnpack-bench-utils PRIVATE xnnpack-base xnnpack-hardware-config)
+IF(XNNPACK_ENABLE_CPUINFO)
+   TARGET_LINK_LIBRARIES(xnnpack-bench-utils PRIVATE cpuinfo)
+ENDIF()
 IF(XNNPACK_BUILD_LIBRARY)
   TARGET_LINK_LIBRARIES(xnnpack-bench-utils PRIVATE xnnpack-logging xnnpack-memory xnnpack-test)
 ENDIF()
