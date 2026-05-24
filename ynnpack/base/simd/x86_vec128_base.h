@@ -1117,15 +1117,16 @@ YNN_ALWAYS_INLINE f32x4 floor_log2(f32x4 a) {
   __m128i exp = _mm_and_si128(_mm_castps_si128(a.v), sign_and_exp_mask);
 
   __m128 infinity = _mm_set1_ps(std::numeric_limits<float>::infinity());
-  __m128 is_inf = _mm_cmpeq_ps(a.v, infinity);
+  __m128 is_inf_or_nan =
+      _mm_or_ps(_mm_cmpeq_ps(a.v, infinity), _mm_cmpunord_ps(a.v, a.v));
 
   exp = _mm_srai_epi32(exp, 8);
 
   __m128 bias_256 = _mm_set1_ps(256.0f);
   __m128 bias_383 = _mm_set1_ps(383.0f);
   __m128 res = _mm_sub_ps(_mm_or_ps(bias_256, _mm_castsi128_ps(exp)), bias_383);
-  return f32x4{
-      _mm_or_ps(_mm_andnot_ps(is_inf, res), _mm_and_ps(is_inf, infinity))};
+  return f32x4{_mm_or_ps(_mm_andnot_ps(is_inf_or_nan, res),
+                         _mm_and_ps(is_inf_or_nan, a.v))};
 }
 YNN_ALWAYS_INLINE f64x2 floor_log2(f64x2 a) {
   __m128d sign_mask = _mm_set1_pd(-0.0);
@@ -1136,7 +1137,8 @@ YNN_ALWAYS_INLINE f64x2 floor_log2(f64x2 a) {
   __m128i exp = _mm_and_si128(_mm_castpd_si128(a.v), sign_and_exp_mask);
 
   __m128d infinity = _mm_set1_pd(std::numeric_limits<double>::infinity());
-  __m128d is_inf = _mm_cmpeq_pd(a.v, infinity);
+  __m128d is_inf_or_nan =
+      _mm_or_pd(_mm_cmpeq_pd(a.v, infinity), _mm_cmpunord_pd(a.v, a.v));
 
   exp = _mm_srai_epi32(exp, 11);
 
@@ -1144,8 +1146,8 @@ YNN_ALWAYS_INLINE f64x2 floor_log2(f64x2 a) {
   __m128d bias_3071 = _mm_set1_pd(3071.0);
   __m128d res =
       _mm_sub_pd(_mm_or_pd(bias_2048, _mm_castsi128_pd(exp)), bias_3071);
-  return f64x2{
-      _mm_or_pd(_mm_andnot_pd(is_inf, res), _mm_and_pd(is_inf, infinity))};
+  return f64x2{_mm_or_pd(_mm_andnot_pd(is_inf_or_nan, res),
+                         _mm_and_pd(is_inf_or_nan, a.v))};
 }
 #endif  // YNN_ARCH_X86_AVX512
 

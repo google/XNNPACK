@@ -1325,7 +1325,8 @@ YNN_ALWAYS_INLINE f32x4 floor_log2(f32x4 a) {
       vandq_u32(vreinterpretq_u32_f32(a.v), sign_and_exp_mask));
 
   float32x4_t infinity = vdupq_n_f32(std::numeric_limits<float>::infinity());
-  uint32x4_t is_inf = vceqq_f32(a.v, infinity);
+  uint32x4_t is_inf_or_nan =
+      vorrq_u32(vceqq_f32(a.v, infinity), vmvnq_u32(vceqq_f32(a.v, a.v)));
 
   exp = vshrq_n_s32(exp, 8);
 
@@ -1335,7 +1336,7 @@ YNN_ALWAYS_INLINE f32x4 floor_log2(f32x4 a) {
       vsubq_f32(vreinterpretq_f32_u32(vorrq_u32(vreinterpretq_u32_f32(bias_256),
                                                 vreinterpretq_u32_s32(exp))),
                 bias_383);
-  return f32x4{vbslq_f32(is_inf, infinity, res)};
+  return f32x4{vbslq_f32(is_inf_or_nan, a.v, res)};
 }
 YNN_ALWAYS_INLINE f32x4 exp2_round(f32x4 a) {
 #if defined(__ARM_ARCH) && __ARM_ARCH < 8
@@ -1364,7 +1365,10 @@ YNN_ALWAYS_INLINE f64x2 floor_log2(f64x2 a) {
       vandq_u64(vreinterpretq_u64_f64(a.v), sign_and_exp_mask));
 
   float64x2_t infinity = vdupq_n_f64(std::numeric_limits<double>::infinity());
-  uint64x2_t is_inf = vceqq_f64(a.v, infinity);
+  uint64x2_t is_inf_or_nan =
+      vorrq_u64(vceqq_f64(a.v, infinity),
+                vreinterpretq_u64_u32(
+                    vmvnq_u32(vreinterpretq_u32_u64(vceqq_f64(a.v, a.v)))));
 
   exp = vshrq_n_s64(exp, 11);
 
@@ -1374,7 +1378,7 @@ YNN_ALWAYS_INLINE f64x2 floor_log2(f64x2 a) {
       vreinterpretq_f64_u64(vorrq_u64(vreinterpretq_u64_f64(bias_2048),
                                       vreinterpretq_u64_s64(exp))),
       bias_3071);
-  return f64x2{vbslq_f64(is_inf, infinity, res)};
+  return f64x2{vbslq_f64(is_inf_or_nan, a.v, res)};
 }
 YNN_ALWAYS_INLINE f64x2 exp2_round(f64x2 a) {
   float64x2_t magic = vdupq_n_f64(1023.0 + static_cast<double>(1ll << 52));

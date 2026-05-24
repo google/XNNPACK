@@ -496,14 +496,15 @@ YNN_ALWAYS_INLINE f32x4 floor_log2(f32x4 a) {
 
   const v128_t infinity =
       wasm_f32x4_splat(std::numeric_limits<float>::infinity());
-  const v128_t is_inf = wasm_f32x4_eq(a.v, infinity);
+  const v128_t is_inf_or_nan = wasm_v128_or(
+      wasm_f32x4_eq(a.v, infinity), wasm_v128_not(wasm_f32x4_eq(a.v, a.v)));
 
   exp = wasm_i32x4_shr(exp, 8);
 
   const v128_t bias_256 = wasm_f32x4_splat(256.0f);
   const v128_t bias_383 = wasm_f32x4_splat(383.0f);
-  const v128_t res = wasm_f32x4_sub(wasm_v128_or(bias_256, exp), bias_383);
-  return f32x4{wasm_v128_bitselect(infinity, res, is_inf)};
+  v128_t res = wasm_f32x4_sub(wasm_v128_or(bias_256, exp), bias_383);
+  return f32x4{wasm_v128_bitselect(a.v, res, is_inf_or_nan)};
 }
 
 YNN_ALWAYS_INLINE f32x4 exp2_round(f32x4 a) {

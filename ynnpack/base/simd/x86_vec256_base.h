@@ -1086,7 +1086,8 @@ YNN_ALWAYS_INLINE f32x8 floor_log2(f32x8 a) {
   __m256i exp = _mm256_and_si256(_mm256_castps_si256(a.v), sign_and_exp_mask);
 
   __m256 infinity = _mm256_set1_ps(std::numeric_limits<float>::infinity());
-  __m256 is_inf = _mm256_cmp_ps(a.v, infinity, _CMP_EQ_OQ);
+  __m256 is_inf_or_nan = _mm256_or_ps(_mm256_cmp_ps(a.v, infinity, _CMP_EQ_OQ),
+                                      _mm256_cmp_ps(a.v, a.v, _CMP_UNORD_Q));
 
   exp = _mm256_srai_epi32(exp, 8);
 
@@ -1094,7 +1095,7 @@ YNN_ALWAYS_INLINE f32x8 floor_log2(f32x8 a) {
   __m256 bias_383 = _mm256_set1_ps(383.0f);
   __m256 res =
       _mm256_sub_ps(_mm256_or_ps(bias_256, _mm256_castsi256_ps(exp)), bias_383);
-  return f32x8{_mm256_blendv_ps(res, infinity, is_inf)};
+  return f32x8{_mm256_blendv_ps(res, a.v, is_inf_or_nan)};
 }
 YNN_ALWAYS_INLINE f64x4 floor_log2(f64x4 a) {
   __m256d sign_mask = _mm256_set1_pd(-0.0);
@@ -1105,7 +1106,8 @@ YNN_ALWAYS_INLINE f64x4 floor_log2(f64x4 a) {
   __m256i exp = _mm256_and_si256(_mm256_castpd_si256(a.v), sign_and_exp_mask);
 
   __m256d infinity = _mm256_set1_pd(std::numeric_limits<double>::infinity());
-  __m256d is_inf = _mm256_cmp_pd(a.v, infinity, _CMP_EQ_OQ);
+  __m256d is_inf_or_nan = _mm256_or_pd(_mm256_cmp_pd(a.v, infinity, _CMP_EQ_OQ),
+                                       _mm256_cmp_pd(a.v, a.v, _CMP_UNORD_Q));
 
   exp = _mm256_srai_epi32(exp, 11);
 
@@ -1113,7 +1115,7 @@ YNN_ALWAYS_INLINE f64x4 floor_log2(f64x4 a) {
   __m256d bias_3071 = _mm256_set1_pd(3071.0);
   __m256d res = _mm256_sub_pd(_mm256_or_pd(bias_2048, _mm256_castsi256_pd(exp)),
                               bias_3071);
-  return f64x4{_mm256_blendv_pd(res, infinity, is_inf)};
+  return f64x4{_mm256_blendv_pd(res, a.v, is_inf_or_nan)};
 }
 #endif  // YNN_ARCH_X86_AVX2
 

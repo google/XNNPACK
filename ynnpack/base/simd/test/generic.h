@@ -407,6 +407,7 @@ void test_floor_log2() {
       {static_cast<scalar>(-1.0), type_info<scalar>::nan()},
       {-type_info<scalar>::infinity(), type_info<scalar>::nan()},
       {-type_info<scalar>::max(), type_info<scalar>::nan()},
+      {type_info<scalar>::nan(), type_info<scalar>::nan()},
   };
 
   for (const auto& [input, expected] : special_values) {
@@ -951,6 +952,7 @@ void test_unary(F f, Ref ref, float epsilons) {
       -scalar_info::max(),
       scalar_info::infinity(),
       -scalar_info::infinity(),
+      scalar_info::nan(),
   };
 
   for (scalar input : special_values) {
