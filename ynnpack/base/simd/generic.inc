@@ -371,79 +371,50 @@ vec<double, N> round_small(vec<double, N> a) {
   return (magic + a) - magic;
 }
 
+// Implements exp(x) (m = 0) or expm1(x) (m = 1), given polynomials
+// such that expm1(x) ~= x*P(x)/Q(x) for x in [-0.5, 0.5].
+// See rational_approximation.py for the polynomial generation logic.
 template <int m, typename T, size_t N, typename P, typename Q>
 YNN_ALWAYS_INLINE vec<T, N> exp_impl(vec<T, N> x, const P& p, const Q& q,
                                      T min_x, T max_x, T log2e,
                                      T ln2_hi, T ln2_lo) {
   auto x_clamped = min(max(x, broadcast<N>(min_x)), broadcast<N>(max_x));
   auto b = round_small(x_clamped * broadcast<N>(log2e));
-  // Compute b * ln2 with extra precision using both ln2 and the residual
-  // T(ln(2)) - ln2_hi
-  auto x_prime = multiply_add(b, broadcast<N>(-ln2_hi), x_clamped);
-  x_prime = multiply_add(b, broadcast<N>(-ln2_lo), x_prime);
+  // Compute r = (b - x_clamped) * ln2 with extra precision using both ln2 and
+  // the residual T(ln(2)) - ln2_hi
+  auto r = multiply_add(b, broadcast<N>(-ln2_hi), x_clamped);
+  r = multiply_add(b, broadcast<N>(-ln2_lo), r);
 
   // Compute 2^b.
-  auto exp2b = exp2_round(b);
-  exp2b = select(isnan(x), x, exp2b);
+  auto exp2_b = exp2_round(b);
+  exp2_b = select(isnan(x), x, exp2_b);
 
-  auto p_a_prime = eval_polynomial(p, x_prime);
-  auto q_a_prime = eval_polynomial(q, x_prime);
+  auto p_r = eval_polynomial(p, r) * r;
+  auto q_r = eval_polynomial(q, r);
 
   // Divide the numerator by the denominator, obtaining exp(r).
-  auto exp_a_prime = p_a_prime / q_a_prime;
+  auto exp_r = p_r / q_r;
 
-  if (m == 1) {
-    // Compute 2^b * (exp(a_prime) + 1) - 1. We avoid catastrophic cancellation
-    // by distributing 2^b, and then reassociating the subtraction, so when
-    // 2^b = 1 we keep the low bits of the result.
-    //
-    auto expm1_a =
-        multiply_add(exp2b, exp_a_prime, exp2b - broadcast<N>(static_cast<T>(1)));
-    return select(isinf(exp2b), exp2b, expm1_a);
-  } else {
-    // Compute 2^b * exp(a_prime).
-    return exp2b * exp_a_prime;
-  }
+  // Compute 2^b * (exp(r) + 1) - m. We avoid catastrophic cancellation
+  // by distributing 2^b, and then reassociating the subtraction, so when
+  // 2^b = m we keep the low bits of the result.
+  auto exp_x =
+      multiply_add(exp2_b, exp_r, exp2_b - broadcast<N>(static_cast<T>(m)));
+  return select(isinf(exp2_b), exp2_b, exp_x);
 }
 
-}  // namespace internal
-
-template <size_t N>
-static vec<float, N> exp(vec<float, N> x) {
-  constexpr std::array<float, 4> p = {
-      1.0244545527e-02f,
-      1.1163228750e-01f,
-      5.2334904671e-01f,
-      1.0000000000e+00f
-  };
-  constexpr std::array<float, 4> q = {
-      -6.3802185468e-03f,
-      +8.8284827769e-02f,
-      -4.7665113211e-01f,
-      +1.0000000000e+00f
-  };
-  constexpr float log2e = 1.4426950408889634f;
-  constexpr float ln2_hi = 0.693145751953125f;
-  constexpr float ln2_lo = 1.4286067653e-06f;
-  constexpr float min_x = -88.02969360351562f;
-  constexpr float max_x = 88.72283935546875f;
-
-  return internal::exp_impl<0>(x, p, q, min_x, max_x, log2e, ln2_hi, ln2_lo);
-}
-
-template <size_t N>
-static vec<float, N> expm1(vec<float, N> x) {
-  constexpr std::array<float, 4> p = {
+template <int m, size_t N>
+static vec<float, N> exp_impl(vec<float, N> x) {
+  constexpr std::array<float, 3> p = {
       1.6622614115e-02f,
       3.3290067222e-04f,
       1.0000000000e+00f,
-      0.0000000000e+00f
   };
   constexpr std::array<float, 4> q = {
       -8.2832705230e-03f,
       +9.9789284170e-02f,
       -4.9966722727e-01f,
-      +1.0000000000e+00f
+      +1.0000000000e+00f,
   };
   constexpr float log2e = 1.4426950408889634f;
   constexpr float ln2_hi = 6.9314575195e-01f;
@@ -451,46 +422,18 @@ static vec<float, N> expm1(vec<float, N> x) {
   constexpr float min_x = -88.02969360351562f;
   constexpr float max_x = 88.72283935546875f;
 
-  return internal::exp_impl<1>(x, p, q, min_x, max_x, log2e, ln2_hi, ln2_lo);
+  return exp_impl<m>(x, p, q, min_x, max_x, log2e, ln2_hi, ln2_lo);
 }
 
-template <size_t N>
-static vec<double, N> exp(vec<double, N> x) {
+template <int m, size_t N>
+static vec<double, N> exp_impl(vec<double, N> x) {
   constexpr std::array<double, 6> p = {
-      3.239974270508748009e-05,
-      9.791151627310745124e-04,
-      1.377501781822836231e-02,
-      1.105887196698455144e-01,
-      4.989688485947128549e-01,
-      9.999999999999998890e-01,
-  };
-  constexpr std::array<double, 6> q = {
-      -3.362442950087436857e-05,
-      +1.003649080773944512e-03,
-      -1.399594422100019359e-02,
-      +1.116198710751181572e-01,
-      -5.010311514052862014e-01,
-      +1.000000000000000000e+00,
-  };
-  constexpr double log2e = 1.4426950408889634;
-  constexpr double ln2_hi = 6.93147180369123816490e-01;
-  constexpr double ln2_lo = 1.90821492927058770002e-10;
-  constexpr double min_x = -709.0895657128241;
-  constexpr double max_x = 709.782712893384;
-
-  return internal::exp_impl<0>(x, p, q, min_x, max_x, log2e, ln2_hi, ln2_lo);
-}
-
-template <size_t N>
-static vec<double, N> expm1(vec<double, N> x) {
-  constexpr std::array<double, 7> p = {
       -4.030667112776999258e-05,
       +7.475144792880859031e-05,
       -1.694975752712946787e-02,
       +2.813794733261987951e-02,
       -6.103171905131150599e-01,
       +9.999999999999998890e-01,
-      +0.000000000000000000e+00,
   };
   constexpr std::array<double, 7> q = {
       +2.037091193345233258e-05,
@@ -507,7 +450,29 @@ static vec<double, N> expm1(vec<double, N> x) {
   constexpr double min_x = -709.0895657128241;
   constexpr double max_x = 709.782712893384;
 
-  return internal::exp_impl<1>(x, p, q, min_x, max_x, log2e, ln2_hi, ln2_lo);
+  return exp_impl<m>(x, p, q, min_x, max_x, log2e, ln2_hi, ln2_lo);
+}
+
+}  // namespace internal
+
+template <size_t N>
+static vec<float, N> exp(vec<float, N> x) {
+  return internal::exp_impl<0>(x);
+}
+
+template <size_t N>
+static vec<float, N> expm1(vec<float, N> x) {
+  return internal::exp_impl<1>(x);
+}
+
+template <size_t N>
+static vec<double, N> exp(vec<double, N> x) {
+  return internal::exp_impl<0>(x);
+}
+
+template <size_t N>
+static vec<double, N> expm1(vec<double, N> x) {
+  return internal::exp_impl<1>(x);
 }
 
 namespace internal {
@@ -619,4 +584,4 @@ static vec<double, N> log1p(vec<double, N> x) {
 
 }  // namespace ynn
 
-#endif  // THIRD_PARTY_XNNPACK_YNNPACK_BASE_SIMD_VEC_INC_
+#endif  // THIRD_PARTY_XNNPACK_YNNPACK_BASE_SIMD_GENERIC_INC_

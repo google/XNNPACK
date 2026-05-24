@@ -25,8 +25,8 @@ class x86_fma3 : public ::testing::Test {
 
 TEST_FMA(x86_fma3, f32, 8);
 
-TEST_UNARY(x86_fma3, exp, f32, 8, std::exp, 3);
-TEST_UNARY(x86_fma3, exp, f64, 4, std::exp, 3);
+TEST_UNARY(x86_fma3, exp, f32, 8, std::exp, 2);
+TEST_UNARY(x86_fma3, exp, f64, 4, std::exp, 2);
 TEST_UNARY(x86_fma3, expm1, f32, 8, std::expm1, 3);
 TEST_UNARY(x86_fma3, expm1, f64, 4, std::expm1, 3);
 TEST_UNARY(x86_fma3, log, f32, 8, std::log, 2);

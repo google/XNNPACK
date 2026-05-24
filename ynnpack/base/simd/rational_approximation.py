@@ -146,44 +146,12 @@ def plot_error(f, x, approx, title="Relative Error"):
 
 
 # %%
-# fp32 exp
-f = lambda x: np.exp(x)
-p_degree, q_degree = 3, 3
-x_min, x_max = -0.5, 0.5
-p, q = rational_approximation(
-    f, x_min, x_max, p_degree, q_degree, dtype=np.float32
-)
-
-print_polynomial("p", p)
-print_polynomial("q", q)
-
-# Evaluate final error
-x_test = np.linspace(x_min, x_max, 5000)
-approx = poly_eval(p, x_test) / poly_eval(q, x_test)
-plot_error(f, x_test, approx)
-# %%
 # fp32 expm1
 f = lambda x: np.expm1(x)
 p_degree, q_degree = 3, 3
 x_min, x_max = -0.5, 0.5
 p, q = rational_approximation(
     f, x_min, x_max, p_degree, q_degree, dtype=np.float32, force_zero=True
-)
-
-print_polynomial("p", p)
-print_polynomial("q", q)
-
-# Evaluate final error
-x_test = np.linspace(x_min, x_max, 5000)
-approx = poly_eval(p, x_test) / poly_eval(q, x_test)
-plot_error(f, x_test, approx)
-# %%
-# fp64 exp
-f = np.exp
-p_degree, q_degree = 5, 5
-x_min, x_max = -0.5, 0.5
-p, q = rational_approximation(
-    f, x_min, x_max, p_degree, q_degree, dtype=np.float64
 )
 
 print_polynomial("p", p)
