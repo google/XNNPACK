@@ -20,7 +20,7 @@ class x86_sse2_fma : public ::testing::Test {};
 TEST_FMA(x86_sse2_fma, f32, 4);
 
 TEST_UNARY(x86_sse2_fma, exp, f32, 4, std::exp, 2);
-TEST_UNARY(x86_sse2_fma, expm1, f32, 4, std::expm1, 3);
+TEST_UNARY(x86_sse2_fma, expm1, f32, 4, std::expm1, 2);
 TEST_UNARY(x86_sse2_fma, log, f32, 4, std::log, 2);
 TEST_UNARY(x86_sse2_fma, log1p, f32, 4, std::log1p, 3);
 

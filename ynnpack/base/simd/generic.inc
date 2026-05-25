@@ -372,7 +372,9 @@ vec<double, N> round_small(vec<double, N> a) {
 }
 
 // Implements exp(x) (m = 0) or expm1(x) (m = 1), given polynomials
-// such that expm1(x) ~= x*P(x)/Q(x) for x in [-0.5, 0.5].
+// such that expm1(x) ~= x + x^2*P(x)/Q(x) for x in [-0.5, 0.5], i.e. the
+// polynomials P(x)/Q(x) approximate the error after 2 terms of the Taylor
+// series.
 // See rational_approximation.py for the polynomial generation logic.
 template <int m, typename T, size_t N, typename P, typename Q>
 YNN_ALWAYS_INLINE vec<T, N> exp_impl(vec<T, N> x, const P& p, const Q& q,
@@ -389,32 +391,29 @@ YNN_ALWAYS_INLINE vec<T, N> exp_impl(vec<T, N> x, const P& p, const Q& q,
   auto exp2_b = exp2_round(b);
   exp2_b = select(isnan(x), x, exp2_b);
 
-  auto p_r = eval_polynomial(p, r) * r;
+  auto p_r = eval_polynomial(p, r);
   auto q_r = eval_polynomial(q, r);
-
-  // Divide the numerator by the denominator, obtaining exp(r).
-  auto exp_r = p_r / q_r;
+  auto exp2_r = multiply_add(r, r * p_r / q_r, r);  // r^2 * p_r / q_r + r
 
   // Compute 2^b * (exp(r) + 1) - m. We avoid catastrophic cancellation
   // by distributing 2^b, and then reassociating the subtraction, so when
   // 2^b = m we keep the low bits of the result.
   auto exp_x =
-      multiply_add(exp2_b, exp_r, exp2_b - broadcast<N>(static_cast<T>(m)));
+      multiply_add(exp2_b, exp2_r, exp2_b - broadcast<N>(static_cast<T>(m)));
   return select(isinf(exp2_b), exp2_b, exp_x);
 }
 
 template <int m, size_t N>
 static vec<float, N> exp_impl(vec<float, N> x) {
-  constexpr std::array<float, 3> p = {
-      1.6622614115e-02f,
-      3.3290067222e-04f,
-      1.0000000000e+00f,
+  std::array<float, 2> p = {
+      4.7195836902e-02f,
+      5.0000029802e-01f,
   };
-  constexpr std::array<float, 4> q = {
-      -8.2832705230e-03f,
-      +9.9789284170e-02f,
-      -4.9966722727e-01f,
-      +1.0000000000e+00f,
+  std::array<float, 4> q = {
+      4.4524371624e-03f,
+      -3.6790699232e-03f,
+      -2.3893947899e-01f,
+      1.0000000000e+00f,
   };
   constexpr float log2e = 1.4426950408889634f;
   constexpr float ln2_hi = 6.9314575195e-01f;
@@ -427,22 +426,21 @@ static vec<float, N> exp_impl(vec<float, N> x) {
 
 template <int m, size_t N>
 static vec<double, N> exp_impl(vec<double, N> x) {
-  constexpr std::array<double, 6> p = {
-      -4.030667112776999258e-05,
-      +7.475144792880859031e-05,
-      -1.694975752712946787e-02,
-      +2.813794733261987951e-02,
-      -6.103171905131150599e-01,
-      +9.999999999999998890e-01,
+  std::array<double, 5> p = {
+      3.189423583383155193e-05,
+      -5.369804484916617217e-04,
+      1.203759868809133396e-02,
+      -5.944370907454595010e-02,
+      4.999999999999993894e-01,
   };
-  constexpr std::array<double, 7> q = {
-      +2.037091193345233258e-05,
-      -6.424994246691768203e-04,
-      +9.505570268034290587e-03,
-      -8.187849706955278861e-02,
-      +4.166298759224764670e-01,
-      -1.110317190513113950e+00,
-      +1.000000000000000000e+00,
+  std::array<double, 7> q = {
+      1.911144132555465737e-07,
+      -2.490765187781299091e-05,
+      7.160480469716202232e-04,
+      -1.054960311820526096e-02,
+      9.148211453696809825e-02,
+      -4.522207514824481689e-01,
+      1.000000000000000000e+00,
   };
   constexpr double log2e = 1.4426950408889634;
   constexpr double ln2_hi = 6.93147180369123816490e-01;
@@ -480,7 +478,8 @@ namespace internal {
 constexpr int32_t mantissa_mask(float) { return 0x007FFFFF; }
 constexpr int64_t mantissa_mask(double) { return 0x000FFFFFFFFFFFFFll; }
 
-// log(x) ~= x + x^2*P(x)/Q(x)
+// log(x) ~= x + x^2*P(x)/Q(x), i.e. approximating the error after 2 terms of
+// the Taylor series.
 template <int p, typename Int, typename T, size_t N, typename P, typename Q>
 YNN_ALWAYS_INLINE vec<T, N> log_impl(vec<T, N> x, const P& poly_p,
                                      const Q& poly_q) {

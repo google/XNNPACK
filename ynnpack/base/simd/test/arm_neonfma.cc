@@ -31,7 +31,7 @@ TEST_ROUND(arm_neonfma, f32, 4);
 TEST_SQRT(arm_neonfma, f32, 4);
 
 TEST_UNARY(arm_neonfma, exp, f32, 4, std::exp, 2);
-TEST_UNARY(arm_neonfma, expm1, f32, 4, std::expm1, 3);
+TEST_UNARY(arm_neonfma, expm1, f32, 4, std::expm1, 2);
 TEST_UNARY(arm_neonfma, log, f32, 4, std::log, 2);
 TEST_UNARY(arm_neonfma, log1p, f32, 4, std::log1p, 3);
 

@@ -353,7 +353,12 @@ struct exp : public unary_op_info {
   }
 
   tolerance_spec tolerance(ynn_type /*type*/) const override {
+#ifdef YNN_ARCH_ARM32
+    // 32-bit ARM is weird about denormals.
+    return tolerance_spec{/*relative=*/3.0f, /*absolute=*/1.0f};
+#else
     return tolerance_spec{/*relative=*/3.0f};
+#endif
   }
 };
 
