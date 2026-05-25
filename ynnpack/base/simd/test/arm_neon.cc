@@ -144,6 +144,8 @@ TEST_ABS(arm_neon, s16, 8);
 TEST_ABS(arm_neon, s32, 4);
 TEST_ABS(arm_neon, f32, 4);
 
+TEST_COPYSIGN(arm_neon, f32, 4);
+
 TEST_FLOOR_LOG2(arm_neon, f32, 4);
 TEST_EXP2_ROUND(arm_neon, f32, 4);
 TEST_COMPARISONS(arm_neon, f32, 4);
@@ -189,6 +191,9 @@ TEST_UNARY(arm_neon, exp, f32, 4, std::exp, 2);
 TEST_UNARY(arm_neon, expm1, f32, 4, std::expm1, 2);
 TEST_UNARY(arm_neon, log, f32, 4, std::log, 2);
 TEST_UNARY(arm_neon, log1p, f32, 4, std::log1p, 3);
+TEST_UNARY(arm_neon, erf, f32, 4, std::erf, 2);
+
+TEST_UNARY(arm_neon, fast_erf, f32, 4, std::erf, 5);
 
 }  // namespace simd
 }  // namespace ynn

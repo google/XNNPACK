@@ -123,6 +123,10 @@ template <typename T, size_t N>
 YNN_ALWAYS_INLINE vec<T, N> operator/(vec<T, N> a, vec<T, N> b) {
   return {lo(a) / lo(b), hi(a) / hi(b)};
 }
+template <typename T, size_t N>
+YNN_ALWAYS_INLINE vec<T, N> operator-(vec<T, N> a) {
+  return {-lo(a), -hi(a)};
+}
 
 template <typename T, size_t N>
 YNN_ALWAYS_INLINE vec<T, N>& operator+=(vec<T, N>& a, vec<T, N> b) {
@@ -193,7 +197,7 @@ YNN_ALWAYS_INLINE vec<T, N> max(vec<T, N> a, vec<T, N> b) {
 template <typename T, size_t N>
 YNN_ALWAYS_INLINE vec<T, N> copysign(vec<T, N> mag, vec<T, N> sgn) {
   return {copysign(lo(mag), lo(sgn)), copysign(hi(mag), hi(sgn))};
-};
+}
 template <typename T, size_t N>
 YNN_ALWAYS_INLINE vec<T, N> abs(vec<T, N> a) {
   return {abs(lo(a)), abs(hi(a))};
@@ -577,6 +581,180 @@ static vec<double, N> log(vec<double, N> x) {
 template <size_t N>
 static vec<double, N> log1p(vec<double, N> x) {
   return internal::log_impl<1>(x);
+}
+
+namespace internal {
+
+// Approximate erf(x) ~= x*P(x^2)/Q(x^2)
+template <typename T, size_t N, typename P, typename Q>
+static vec<T, N> erf_impl(vec<T, N> x, const P& p, const Q& q, T max_abs_x) {
+  auto x_clamped = min(max(x, -max_abs_x), max_abs_x);
+  auto x2 = x_clamped * x_clamped;
+  auto p_x2 = internal::eval_polynomial(p, x2);
+  auto q_x2 = internal::eval_polynomial(q, x2);
+  return select(isnan(x), x, x_clamped * p_x2 / q_x2);
+}
+
+// Approximate erf(x) piecewise. When |x| < max_abs_x1, we approximate erf(x)
+// directly which is an odd function: erf(x) ~= x*P(x^2)/Q(x^2)
+//
+// When |x| < max_abs_x2, we approximate erf(x) ~= 1 - exp(-x^2)*R(x)/S(x), i.e.
+// R(x)/s(x) ~= exp(x^2)*erfc(x), the "scaled" error function.
+template <typename T, size_t N, typename P, typename Q, typename R, typename S>
+static vec<T, N> erf_impl(vec<T, N> x, const P& p, const Q& q, const R& r,
+                          const S& s, T max_abs_x1, T max_abs_x2) {
+  auto abs_x = min(abs(x), broadcast<N>(max_abs_x2));
+  auto x2 = abs_x * abs_x;
+
+  auto p_x2 = internal::eval_polynomial(p, x2);
+  auto q_x2 = internal::eval_polynomial(q, x2);
+  auto erf_x_small = abs_x * p_x2 / q_x2;
+
+  auto r_x = internal::eval_polynomial(r, abs_x);
+  auto s_x = internal::eval_polynomial(s, abs_x);
+  auto erfc_x = exp(-x2) * r_x / s_x;
+  auto erf_x_large = broadcast<N>(static_cast<T>(1.0)) - erfc_x;
+  auto erf_x =
+      select(abs_x < broadcast<N>(max_abs_x1), erf_x_small, erf_x_large);
+
+  // Restore the sign of the original function.
+  return select(isnan(x), x, copysign(erf_x, x));
+}
+
+// Approximate erf(x) piecewise. When |x| < max_abs_x1, we approximate erf(x)
+// directly which is an odd function: erf(x) ~= x*P(x^2)
+//
+// When |x| < max_abs_x2, we approximate erf(x) ~= 1 - exp(-x^2)*Q(x), i.e.
+// Q(x) ~= exp(x^2)*erfc(x), the "scaled" error function.
+//
+// R(x) is the same as Q(x), but for |x| < max_abs_x3.
+template <typename T, size_t N, typename P, typename Q, typename R>
+static vec<T, N> erf_impl(vec<T, N> x, const P& p, const Q& q, const R& r,
+                          T max_abs_x1, T max_abs_x2, T max_abs_x3) {
+  auto abs_x = min(abs(x), broadcast<N>(max_abs_x3));
+  auto x2 = abs_x * abs_x;
+
+  auto p_x2 = internal::eval_polynomial(p, x2);
+  auto erf_x_small = abs_x * p_x2;
+
+  auto q_x = internal::eval_polynomial(q, abs_x);
+  auto r_x = internal::eval_polynomial(r, abs_x);
+  auto erfc_x = exp(-x2) * select(abs_x < broadcast<N>(max_abs_x2), q_x, r_x);
+  auto erf_x_large = broadcast<N>(static_cast<T>(1.0)) - erfc_x;
+  auto erf_x =
+      select(abs_x < broadcast<N>(max_abs_x1), erf_x_small, erf_x_large);
+
+  // Restore the sign of the original function.
+  return select(isnan(x), x, copysign(erf_x, x));
+}
+
+}  // namespace internal
+
+template <size_t N>
+static vec<float, N> erf(vec<float, N> x) {
+  // For floats, we use a piecewise (non-rational) polynomial approximation.
+  std::array<float, 7> P = {
+      -5.3975224728e-04f,
+      3.3581661410e-04f,
+      4.4070379809e-03f,
+      -2.6605917141e-02f,
+      1.1280037463e-01f,
+      -3.7612470984e-01f,
+      1.1283792257e+00f,
+  };
+  std::array<float, 7> Q = {
+      4.4372659177e-03f,
+      -4.2624399066e-02f,
+      1.8425463140e-01f,
+      -4.7879990935e-01f,
+      8.4492594004e-01f,
+      -1.0771834850e+00f,
+      9.9257355928e-01f,
+  };
+  std::array<float, 7> R = {
+      1.7328218382e-04f,
+      -3.4217946231e-03f,
+      2.9065947980e-02f,
+      -1.3891060650e-01f,
+      4.0989130735e-01f,
+      -7.6906991005e-01f,
+      8.9860576391e-01f,
+  };
+  constexpr float max_abs_x1 = 0.8f;
+  constexpr float max_abs_x2 = 1.6f;
+  constexpr float max_abs_x3 = 3.8f;
+  return internal::erf_impl(x, P, Q, R, max_abs_x1, max_abs_x2, max_abs_x3);
+}
+
+template <size_t N>
+static vec<double, N> erf(vec<double, N> x) {
+  std::array<double, 6> P = {
+      4.707472733925238136e-06,
+      3.014938943048711055e-04,
+      4.833419366839060254e-03,
+      5.586134426461496910e-02,
+      2.245425768504930031e-01,
+      1.128379167095512559e+00,
+  };
+  std::array<double, 6> Q = {
+      4.976158428165628768e-05,
+      1.342648224661756101e-03,
+      1.717640610916350632e-02,
+      1.269488309955372762e-01,
+      5.323290108487849226e-01,
+      1.000000000000000000e+00,
+  };
+  std::array<double, 9> R = {
+      1.042556497169926936e-11,
+      -6.304186434426881222e-04,
+      -3.920088302332867466e-03,
+      -3.103366730622623363e-03,
+      6.629233211348599386e-02,
+      3.689538153966010481e-01,
+      9.764178805043777221e-01,
+      1.425066041265239392e+00,
+      1.000000055826762768e+00,
+  };
+  std::array<double, 9> S = {
+      -1.117386819582624584e-03,
+      -6.948208453039030758e-03,
+      -6.058667712054027939e-03,
+      1.140182429407544523e-01,
+      6.518376428169493364e-01,
+      1.792305339163592581e+00,
+      2.857670033198485893e+00,
+      2.553445786610691215e+00,
+      1.000000000000000000e+00,
+  };
+  constexpr double max_abs_x2 = 5.921591921591922159e+00;
+  constexpr double max_abs_x1 = 0.9;
+  return internal::erf_impl(x, P, Q, R, S, max_abs_x1, max_abs_x2);
+}
+
+// ~3x faster than erf(x), ~2x worse error (~5 ULPs vs. ~2 ULPs), and does not
+// preserve NaN.
+template <size_t N>
+static vec<float, N> fast_erf(vec<float, N> x) {
+  // Rational polynomial approximation of erf(x) for [-max_abs_x, max_abs_x]
+  constexpr float max_abs_x = 3.8f;
+  // erf(x) ~= x*P(x^2)/Q(x^2)
+  std::array<float, 6> P = {
+      1.6449823761e-06f,
+      3.0145223718e-04f,
+      5.0891782157e-03f,
+      5.6909475476e-02f,
+      2.2295241058e-01f,
+      1.1283794641e+00f,
+  };
+  std::array<float, 6> Q = {
+      3.4724384022e-05f,
+      1.4562678989e-03f,
+      1.7675759271e-02f,
+      1.2741664052e-01f,
+      5.3092014790e-01f,
+      1.0000000000e+00f,
+  };
+  return internal::erf_impl(x, P, Q, max_abs_x);
 }
 
 }  // namespace simd

@@ -948,6 +948,7 @@ void test_unary(F f, Ref ref, float epsilons) {
       static_cast<scalar>(0.0),
       static_cast<scalar>(-0.0),
       scalar_info::smallest_normal(),
+      -scalar_info::smallest_normal(),
       scalar_info::max(),
       -scalar_info::max(),
       scalar_info::infinity(),

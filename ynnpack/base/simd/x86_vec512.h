@@ -495,10 +495,10 @@ YNN_ALWAYS_INLINE u8x64 operator-(u8x64 a, u8x64 b) {
 }
 
 YNN_ALWAYS_INLINE f64x8 operator-(f64x8 a) {
-  return f64x8{_mm512_sub_pd(_mm512_setzero_pd(), a.v)};
+  return f64x8{_mm512_xor_pd(_mm512_set1_pd(-0.0), a.v)};
 }
 YNN_ALWAYS_INLINE f32x16 operator-(f32x16 a) {
-  return f32x16{_mm512_sub_ps(_mm512_setzero_ps(), a.v)};
+  return f32x16{_mm512_xor_ps(_mm512_set1_ps(-0.0f), a.v)};
 }
 
 YNN_ALWAYS_INLINE s16x32 add_sat(s16x32 a, s16x32 b) {
@@ -669,6 +669,17 @@ YNN_ALWAYS_INLINE s8x64 max(s8x64 a, s8x64 b) {
 }
 YNN_ALWAYS_INLINE u8x64 max(u8x64 a, u8x64 b) {
   return u8x64{_mm512_max_epu8(a.v, b.v)};
+}
+
+YNN_ALWAYS_INLINE f32x16 copysign(f32x16 mag, f32x16 sgn) {
+  __m512 sign_mask = _mm512_set1_ps(-0.0f);
+  return f32x16{_mm512_or_ps(_mm512_and_ps(sign_mask, sgn.v),
+                             _mm512_andnot_ps(sign_mask, mag.v))};
+}
+YNN_ALWAYS_INLINE f64x8 copysign(f64x8 mag, f64x8 sgn) {
+  __m512d sign_mask = _mm512_set1_pd(-0.0);
+  return f64x8{_mm512_or_pd(_mm512_and_pd(sign_mask, sgn.v),
+                            _mm512_andnot_pd(sign_mask, mag.v))};
 }
 
 YNN_ALWAYS_INLINE u8x64 abs(s8x64 a) { return u8x64{_mm512_abs_epi8(a.v)}; }

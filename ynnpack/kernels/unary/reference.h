@@ -394,7 +394,7 @@ struct erf : public unary_op_info {
   }
 
   tolerance_spec tolerance(ynn_type /*type*/) const override {
-    return tolerance_spec{/*relative=*/1.0f, /*absolute=*/3.0f};
+    return tolerance_spec{/*relative=*/4.0f};
   }
 };
 

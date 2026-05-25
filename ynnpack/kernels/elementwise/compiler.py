@@ -479,6 +479,11 @@ def sqrt(value):
 
 
 @intrinsic
+def erf(value):
+  return Op(value.ty, "erf", [value])
+
+
+@intrinsic
 def exp(value):
   return Op(value.ty, "exp", [value])
 
@@ -1019,6 +1024,7 @@ class Target:
         "isfinite",
         "select",
         "~",
+        "erf",
         "exp",
         "expm1",
         "log",

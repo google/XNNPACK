@@ -983,6 +983,11 @@ YNN_ALWAYS_INLINE f64x2 operator*(f64x2 a, f64x2 b) {
 }
 #endif
 
+YNN_ALWAYS_INLINE f32x4 operator-(f32x4 a) { return f32x4{vnegq_f32(a.v)}; }
+#ifdef YNN_ARCH_ARM64
+YNN_ALWAYS_INLINE f64x2 operator-(f64x2 a) { return f64x2{vnegq_f64(a.v)}; }
+#endif
+
 YNN_ALWAYS_INLINE f32x4 operator/(f32x4 a, f32x4 b) { return f32x4{a.v / b.v}; }
 #ifdef YNN_ARCH_ARM64
 YNN_ALWAYS_INLINE f64x2 operator/(f64x2 a, f64x2 b) {
@@ -1184,6 +1189,17 @@ YNN_ALWAYS_INLINE s8x16 max(s8x16 a, s8x16 b) {
 YNN_ALWAYS_INLINE f32x4 abs(f32x4 a) { return f32x4{vabsq_f32(a.v)}; }
 #ifdef YNN_ARCH_ARM64
 YNN_ALWAYS_INLINE f64x2 abs(f64x2 a) { return f64x2{vabsq_f64(a.v)}; }
+#endif
+
+YNN_ALWAYS_INLINE f32x4 copysign(f32x4 mag, f32x4 sgn) {
+  uint32x4_t sign_mask = vdupq_n_u32(0x80000000u);
+  return f32x4{vbslq_f32(sign_mask, sgn.v, mag.v)};
+}
+#ifdef YNN_ARCH_ARM64
+YNN_ALWAYS_INLINE f64x2 copysign(f64x2 mag, f64x2 sgn) {
+  uint64x2_t sign_mask = vdupq_n_u64(0x8000000000000000ULL);
+  return f64x2{vbslq_f64(sign_mask, sgn.v, mag.v)};
+}
 #endif
 YNN_ALWAYS_INLINE u32x4 abs(s32x4 a) {
   return u32x4{vreinterpretq_u32_s32(vabsq_s32(a.v))};

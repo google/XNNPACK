@@ -40,6 +40,7 @@ TEST_CEIL(arm_neon, f64, 2);
 TEST_ROUND(arm_neon, f64, 2);
 TEST_SQRT(arm_neon, f64, 2);
 TEST_ABS(arm_neon, f64, 2);
+TEST_COPYSIGN(arm_neon, f64, 2);
 TEST_FLOOR_LOG2(arm_neon, f64, 2);
 TEST_EXP2_ROUND(arm_neon, f64, 2);
 TEST_COMPARISONS(arm_neon, f64, 2);
@@ -59,6 +60,7 @@ TEST_UNARY(arm_neon, exp, f64, 2, std::exp, 2);
 TEST_UNARY(arm_neon, expm1, f64, 2, std::expm1, 2);
 TEST_UNARY(arm_neon, log, f64, 2, std::log, 2);
 TEST_UNARY(arm_neon, log1p, f64, 2, std::log1p, 3);
+TEST_UNARY(arm_neon, erf, f64, 2, std::erf, 3);
 
 }  // namespace simd
 }  // namespace ynn

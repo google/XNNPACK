@@ -5,11 +5,13 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <random>
 #include <string>
 
 #include "ynnpack/base/arch.h"
 #include "ynnpack/base/bfloat16.h"
 #include "ynnpack/base/half.h"
+#include "ynnpack/base/test/random.h"
 #include "ynnpack/base/test/tensor.h"
 #include "ynnpack/base/type.h"
 #include "ynnpack/kernels/unary/unary.h"
@@ -30,7 +32,8 @@ void bench(benchmark::State& state, uint64_t arch_flags, unary_kernel_fn kernel,
 
   Tensor<TA> a({m, n});
   Tensor<TX> x({m, n});
-  a.fill(1);
+  std::mt19937 rng(0);
+  fill_random(a.data(), a.size(), rng, 0, 1);
   x.fill(1);
   broadcast_extent_1(a);
   broadcast_extent_1(x);

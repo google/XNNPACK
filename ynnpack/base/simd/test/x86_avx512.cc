@@ -237,6 +237,10 @@ TEST_UNARY(x86_avx512, log, f32, 16, std::log, 2);
 TEST_UNARY(x86_avx512, log, f64, 8, std::log, 2);
 TEST_UNARY(x86_avx512, log1p, f32, 16, std::log1p, 3);
 TEST_UNARY(x86_avx512, log1p, f64, 8, std::log1p, 3);
+TEST_UNARY(x86_avx512, erf, f32, 16, std::erf, 2);
+TEST_UNARY(x86_avx512, erf, f64, 8, std::erf, 3);
+
+TEST_UNARY(x86_avx512, fast_erf, f32, 16, std::erf, 5);
 
 }  // namespace simd
 }  // namespace ynn

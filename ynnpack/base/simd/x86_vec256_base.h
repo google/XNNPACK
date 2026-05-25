@@ -671,6 +671,13 @@ YNN_ALWAYS_INLINE f32x8 operator/(f32x8 a, f32x8 b) {
   return f32x8{_mm256_div_ps(a.v, b.v)};
 }
 
+YNN_ALWAYS_INLINE f64x4 operator-(f64x4 a) {
+  return f64x4{_mm256_xor_pd(_mm256_set1_pd(-0.0), a.v)};
+}
+YNN_ALWAYS_INLINE f32x8 operator-(f32x8 a) {
+  return f32x8{_mm256_xor_ps(_mm256_set1_ps(-0.0f), a.v)};
+}
+
 #ifdef YNN_ARCH_X86_AVX2
 YNN_ALWAYS_INLINE s32x8 operator+(s32x8 a, s32x8 b) {
   return s32x8{_mm256_add_epi32(a.v, b.v)};
@@ -770,20 +777,33 @@ YNN_ALWAYS_INLINE f64x4 round(f64x4 a) {
   return f64x4{
       _mm256_round_pd(a.v, _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC)};
 }
-YNN_ALWAYS_INLINE f64x4 sqrt(f64x4 a) { return f64x4{_mm256_sqrt_pd(a.v)}; }
-YNN_ALWAYS_INLINE f64x4 abs(f64x4 a) {
-  return f64x4{_mm256_and_pd(
-      a.v, _mm256_castsi256_pd(_mm256_set1_epi64x(0x7FFFFFFFFFFFFFFF)))};
-}
 YNN_ALWAYS_INLINE f32x8 floor(f32x8 a) { return f32x8{_mm256_floor_ps(a.v)}; }
 YNN_ALWAYS_INLINE f32x8 ceil(f32x8 a) { return f32x8{_mm256_ceil_ps(a.v)}; }
 YNN_ALWAYS_INLINE f32x8 round(f32x8 a) {
   return f32x8{
       _mm256_round_ps(a.v, _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC)};
 }
+
+YNN_ALWAYS_INLINE f64x4 sqrt(f64x4 a) { return f64x4{_mm256_sqrt_pd(a.v)}; }
 YNN_ALWAYS_INLINE f32x8 sqrt(f32x8 a) { return f32x8{_mm256_sqrt_ps(a.v)}; }
+
+YNN_ALWAYS_INLINE f32x8 copysign(f32x8 mag, f32x8 sgn) {
+  __m256 sign_mask = _mm256_set1_ps(-0.0f);
+  return f32x8{_mm256_or_ps(_mm256_and_ps(sign_mask, sgn.v),
+                            _mm256_andnot_ps(sign_mask, mag.v))};
+}
+YNN_ALWAYS_INLINE f64x4 copysign(f64x4 mag, f64x4 sgn) {
+  __m256d sign_mask = _mm256_set1_pd(-0.0);
+  return f64x4{_mm256_or_pd(_mm256_and_pd(sign_mask, sgn.v),
+                            _mm256_andnot_pd(sign_mask, mag.v))};
+}
+
 YNN_ALWAYS_INLINE f32x8 abs(f32x8 a) {
   return f32x8{_mm256_and_ps(a.v, _mm256_set1_ps(bit_cast<float>(0x7FFFFFFF)))};
+}
+YNN_ALWAYS_INLINE f64x4 abs(f64x4 a) {
+  return f64x4{_mm256_and_pd(
+      a.v, _mm256_castsi256_pd(_mm256_set1_epi64x(0x7FFFFFFFFFFFFFFF)))};
 }
 #ifdef YNN_ARCH_X86_AVX2
 YNN_ALWAYS_INLINE u8x32 abs(s8x32 a) { return u8x32{_mm256_abs_epi8(a.v)}; }

@@ -868,6 +868,13 @@ YNN_ALWAYS_INLINE u8x16 operator-(u8x16 a, u8x16 b) {
   return u8x16{_mm_sub_epi8(a.v, b.v)};
 }
 
+YNN_ALWAYS_INLINE f64x2 operator-(f64x2 a) {
+  return f64x2{_mm_xor_pd(_mm_set1_pd(-0.0f), a.v)};
+}
+YNN_ALWAYS_INLINE f32x4 operator-(f32x4 a) {
+  return f32x4{_mm_xor_ps(_mm_set1_ps(-0.0f), a.v)};
+}
+
 #ifdef YNN_ARCH_X86_SSE41
 YNN_ALWAYS_INLINE s32x4& operator*=(s32x4& a, s32x4 b) {
   a.v = _mm_mullo_epi32(a.v, b.v);
@@ -1059,13 +1066,19 @@ YNN_ALWAYS_INLINE s32x4 max(s32x4 a, s32x4 b) {
 }
 #endif  // YNN_ARCH_X86_SSE41
 
+YNN_ALWAYS_INLINE f32x4 sqrt(f32x4 a) { return f32x4{_mm_sqrt_ps(a.v)}; }
+YNN_ALWAYS_INLINE f64x2 sqrt(f64x2 a) { return f64x2{_mm_sqrt_pd(a.v)}; }
+
+YNN_ALWAYS_INLINE f32x4 copysign(f32x4 mag, f32x4 sgn) {
+  __m128 sign_mask = _mm_set1_ps(-0.0f);
+  return f32x4{
+      _mm_or_ps(_mm_and_ps(sign_mask, sgn.v), _mm_andnot_ps(sign_mask, mag.v))};
+}
 YNN_ALWAYS_INLINE f64x2 copysign(f64x2 mag, f64x2 sgn) {
   __m128d sign_mask = _mm_set1_pd(-0.0);
   return f64x2{
       _mm_or_pd(_mm_and_pd(sign_mask, sgn.v), _mm_andnot_pd(sign_mask, mag.v))};
 }
-YNN_ALWAYS_INLINE f32x4 sqrt(f32x4 a) { return f32x4{_mm_sqrt_ps(a.v)}; }
-YNN_ALWAYS_INLINE f64x2 sqrt(f64x2 a) { return f64x2{_mm_sqrt_pd(a.v)}; }
 
 YNN_ALWAYS_INLINE f32x4 abs(f32x4 a) {
   return f32x4{_mm_andnot_ps(_mm_set1_ps(-0.0), a.v)};

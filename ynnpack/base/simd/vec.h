@@ -157,6 +157,8 @@ vec<T, N> sqrt(vec<T, N> a);
 template <typename T, size_t N>
 vec<T, N> abs(vec<T, N> a);
 template <typename T, size_t N>
+vec<T, N> copysign(vec<T, N> mag, vec<T, N> sgn);
+template <typename T, size_t N>
 vec<T, N> add_sat(vec<T, N> a, vec<T, N> b);
 template <typename T, size_t N>
 vec<T, N> sub_sat(vec<T, N> a, vec<T, N> b);
@@ -356,6 +358,11 @@ YNN_ALWAYS_INLINE vec<T, 1> sqrt(vec<T, 1> a) {
 template <typename T>
 YNN_ALWAYS_INLINE vec<T, 1> abs(vec<T, 1> a) {
   return vec<T, 1>{std::abs(a.v)};
+}
+template <typename T>
+YNN_ALWAYS_INLINE vec<T, 1> copysign(vec<T, 1> mag, vec<T, 1> sgn) {
+  using std::copysign;
+  return vec<T, 1>{static_cast<T>(copysign(mag.v, sgn.v))};
 }
 template <typename T>
 YNN_ALWAYS_INLINE vec<T, 1> add_sat(vec<T, 1> a, vec<T, 1> b) {

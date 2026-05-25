@@ -119,6 +119,7 @@ cc_test(
     deps = [
         ":unary",
         "//ynnpack/base",
+        "//ynnpack/base/test:random",
         "//ynnpack/base/test:tensor",
     ] + ynn_benchmark_deps(),
 )

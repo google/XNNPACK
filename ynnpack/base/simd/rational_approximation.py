@@ -13,6 +13,7 @@ def poly_eval(c, x):
     res += v * (x**i).astype(c.dtype)
   return res
 
+
 def rational_approximation(
     f, x_min, x_max, p_degree, q_degree, dtype=np.float64
 ):
@@ -197,3 +198,104 @@ x_test = np.linspace(x_min, x_max, 5000)
 approx = x_test**2 * poly_eval(p, x_test) / poly_eval(q, x_test) + x_test
 plot_error(lambda x: np.log1p(x), x_test, approx)
 # %%
+import scipy.special
+
+# fp32 erf(x) ~= x*P(x^2)/Q(x^2)
+f = lambda t: scipy.special.erf(np.sqrt(t)) / np.sqrt(t)
+
+p_degree, q_degree = 5, 5
+x_min, x_max = 1e-7, 3.8
+
+p, q = rational_approximation(
+    f, x_min, x_max**2, p_degree, q_degree, dtype=np.float32
+)
+
+print_polynomial("P", p)
+print_polynomial("Q", q)
+
+# Evaluate and plot relative error for erf(x)
+x_test = np.linspace(x_min, x_max, 5000)
+t_test = x_test**2
+approx = x_test * (poly_eval(p, t_test) / poly_eval(q, t_test))
+plot_error(
+    scipy.special.erf,
+    x_test,
+    approx,
+    title="Relative Error for erf(x) (Odd Approximation)",
+)
+# %%
+# Manual Exploration: 3-Piece erf Approximation
+x_min, x_limit = 1e-7, 3.8
+dtype = np.float32
+
+# These specific thresholds and degrees achieved 2.22e-07 in the search
+x1, x2 = 0.8, 1.6
+p_deg, q_deg, r_deg = 6, 6, 6
+
+# Generate Approximations
+f = lambda t: scipy.special.erf(np.sqrt(t)) / np.sqrt(t)
+g = lambda t: scipy.special.erfcx(t)
+
+# Regenerate coefficients
+p, _ = rational_approximation(f, x_min**2, x1**2, p_deg, 0, dtype=dtype)
+q, _ = rational_approximation(g, x1, x2, q_deg, 0, dtype=dtype)
+r, _ = rational_approximation(g, x2, x_limit, r_deg, 0, dtype=dtype)
+
+# Verify on a high-density grid
+x_test = np.linspace(x_min, x_limit, 10000)
+t_test = x_test**2
+approx1 = x_test * poly_eval(p, t_test)
+approx2 = 1 - np.exp(-t_test) * poly_eval(q, x_test)
+approx3 = 1 - np.exp(-t_test) * poly_eval(r, x_test)
+
+approx = np.where(x_test < x1, approx1, np.where(x_test < x2, approx2, approx3))
+
+# Plot and Print
+plot_error(
+    scipy.special.erf,
+    x_test,
+    approx,
+    title=f"Refined 3-Piece erf (P={p_deg}, Q={q_deg}, R={r_deg})",
+)
+
+print("Final Optimized 3-Piece Coefficients:")
+print_polynomial("P", p)
+print_polynomial("Q", q)
+print_polynomial("R", r)
+# %%
+import scipy.special
+
+# fp64 erf(x) ~= x*P(x^2)/Q(x^2) for small x
+f = lambda t: scipy.special.erf(np.sqrt(t)) / np.sqrt(t)
+# For large x, we approximate erf(x) = 1 - exp(-x^2)*erfcx(x)
+g = lambda t: scipy.special.erfcx(t)
+
+p_degree, q_degree = 5, 5
+r_degree, s_degree = 8, 8
+x_min, x_max, x_max2 = 1e-16, 0.9, 5.9
+
+p, q = rational_approximation(
+    f, x_min**2, x_max**2, p_degree, q_degree, dtype=np.float64
+)
+
+r, s = rational_approximation(
+    g, x_max, x_max2, r_degree, s_degree, dtype=np.float64
+)
+
+# Evaluate and plot relative error for erf(x)
+x_test = np.linspace(x_min, x_max2, 5000)
+t_test = x_test**2
+approx1 = x_test * (poly_eval(p, t_test) / poly_eval(q, t_test))
+approx2 = 1 - np.exp(-t_test) * poly_eval(r, x_test) / poly_eval(s, x_test)
+approx = np.where(x_test < x_max, approx1, approx2)
+plot_error(
+    scipy.special.erf,
+    x_test,
+    approx,
+    title="Relative Error for erf(x) (Combined Approximation)",
+)
+
+print_polynomial("P", p)
+print_polynomial("Q", q)
+print_polynomial("R", r)
+print_polynomial("S", s)

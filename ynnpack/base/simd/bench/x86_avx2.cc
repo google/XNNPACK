@@ -26,6 +26,10 @@ BENCH_UNARY(avx2, log, f32, 8);
 BENCH_UNARY(avx2, log, f64, 4);
 BENCH_UNARY(avx2, log1p, f32, 8);
 BENCH_UNARY(avx2, log1p, f64, 4);
+BENCH_UNARY(avx2, erf, f32, 8);
+BENCH_UNARY(avx2, erf, f64, 4);
+
+BENCH_UNARY(avx2, fast_erf, f32, 8);
 
 }  // namespace simd
 }  // namespace ynn

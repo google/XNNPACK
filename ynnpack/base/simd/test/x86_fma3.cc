@@ -33,6 +33,10 @@ TEST_UNARY(x86_fma3, log, f32, 8, std::log, 2);
 TEST_UNARY(x86_fma3, log, f64, 4, std::log, 2);
 TEST_UNARY(x86_fma3, log1p, f32, 8, std::log1p, 3);
 TEST_UNARY(x86_fma3, log1p, f64, 4, std::log1p, 3);
+TEST_UNARY(x86_fma3, erf, f32, 8, std::erf, 2);
+TEST_UNARY(x86_fma3, erf, f64, 4, std::erf, 3);
+
+TEST_UNARY(x86_fma3, fast_erf, f32, 8, std::erf, 5);
 
 }  // namespace simd
 }  // namespace ynn

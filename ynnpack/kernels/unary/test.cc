@@ -102,7 +102,7 @@ std::vector<unary_params> get_params_for_op(ynn_unary_operator op) {
     case ynn_unary_erf:
       return {
           unary_params{.erf = erf_params{0.0f, 1.0f, 1.0f}},
-          unary_params{.erf = erf_params{0.5f, 1.1f, 1.2f}},
+          unary_params{.erf = erf_params{2.0f, 1.1f, 1.2f}},
       };
     case ynn_unary_tanh:
       return {

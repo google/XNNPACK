@@ -22,6 +22,10 @@ BENCH_UNARY(fma3, log, f32, 8);
 BENCH_UNARY(fma3, log, f64, 4);
 BENCH_UNARY(fma3, log1p, f32, 8);
 BENCH_UNARY(fma3, log1p, f64, 4);
+BENCH_UNARY(fma3, erf, f32, 8);
+BENCH_UNARY(fma3, erf, f64, 4);
+
+BENCH_UNARY(fma3, fast_erf, f32, 8);
 
 }  // namespace simd
 }  // namespace ynn
