@@ -17,6 +17,7 @@
 #include <cstdint>
 #include <limits>
 #include <tuple>
+#include <type_traits>
 
 #include "ynnpack/base/base.h"
 #include "ynnpack/base/bfloat16.h"
@@ -541,6 +542,28 @@ YNN_ALWAYS_INLINE f32x16 operator/(f32x16 a, f32x16 b) {
   return f32x16{_mm512_div_ps(a.v, b.v)};
 }
 
+#ifdef YNN_ARCH_FP16_ARITHMETIC
+YNN_ALWAYS_INLINE f16x32 operator+(f16x32 a, f16x32 b) {
+  return f16x32{_mm512_castph_si512(
+      _mm512_add_ph(_mm512_castsi512_ph(a.v), _mm512_castsi512_ph(b.v)))};
+}
+YNN_ALWAYS_INLINE f16x32 operator-(f16x32 a, f16x32 b) {
+  return f16x32{_mm512_castph_si512(
+      _mm512_sub_ph(_mm512_castsi512_ph(a.v), _mm512_castsi512_ph(b.v)))};
+}
+YNN_ALWAYS_INLINE f16x32 operator*(f16x32 a, f16x32 b) {
+  return f16x32{_mm512_castph_si512(
+      _mm512_mul_ph(_mm512_castsi512_ph(a.v), _mm512_castsi512_ph(b.v)))};
+}
+YNN_ALWAYS_INLINE f16x32 operator/(f16x32 a, f16x32 b) {
+  return f16x32{_mm512_castph_si512(
+      _mm512_div_ph(_mm512_castsi512_ph(a.v), _mm512_castsi512_ph(b.v)))};
+}
+YNN_ALWAYS_INLINE f16x32 operator-(f16x32 a) {
+  return f16x32{_mm512_xor_si512(_mm512_set1_epi16(0x8000), a.v)};
+}
+#endif
+
 YNN_ALWAYS_INLINE s32x16 operator*(s32x16 a, s32x16 b) {
   return s32x16{_mm512_mullo_epi32(a.v, b.v)};
 }
@@ -614,7 +637,25 @@ YNN_ALWAYS_INLINE f64x8 fma(f64x8 a, f64x8 b, f64x8 acc) {
 YNN_ALWAYS_INLINE f32x16 fma(f32x16 a, f32x16 b, f32x16 acc) {
   return f32x16{_mm512_fmadd_ps(a.v, b.v, acc.v)};
 }
+#ifdef YNN_ARCH_FP16_ARITHMETIC
+YNN_ALWAYS_INLINE f16x32 fma(f16x32 a, f16x32 b, f16x32 acc) {
+  return f16x32{_mm512_castph_si512(
+      _mm512_fmadd_ph(_mm512_castsi512_ph(a.v), _mm512_castsi512_ph(b.v),
+                      _mm512_castsi512_ph(acc.v)))};
+}
+#endif
 #define YNN_HAVE_FMA
+
+#ifdef YNN_ARCH_FP16_ARITHMETIC
+YNN_ALWAYS_INLINE f16x32 min(f16x32 a, f16x32 b) {
+  return f16x32{_mm512_castph_si512(
+      _mm512_min_ph(_mm512_castsi512_ph(a.v), _mm512_castsi512_ph(b.v)))};
+}
+YNN_ALWAYS_INLINE f16x32 max(f16x32 a, f16x32 b) {
+  return f16x32{_mm512_castph_si512(
+      _mm512_max_ph(_mm512_castsi512_ph(a.v), _mm512_castsi512_ph(b.v)))};
+}
+#endif
 
 YNN_ALWAYS_INLINE f64x8 min(f64x8 a, f64x8 b) {
   return f64x8{_mm512_min_pd(a.v, b.v)};
@@ -644,6 +685,16 @@ YNN_ALWAYS_INLINE f32x16 max(f32x16 a, float b) {
 YNN_ALWAYS_INLINE f64x8 max(f64x8 a, double b) {
   return f64x8{_mm512_max_pd(_mm512_set1_pd(b), a.v)};
 }
+#ifdef YNN_ARCH_FP16_ARITHMETIC
+YNN_ALWAYS_INLINE f16x32 min(f16x32 a, half b) {
+  return f16x32{_mm512_castph_si512(
+      _mm512_min_ph(_mm512_set1_ph(b), _mm512_castsi512_ph(a.v)))};
+}
+YNN_ALWAYS_INLINE f16x32 max(f16x32 a, half b) {
+  return f16x32{_mm512_castph_si512(
+      _mm512_max_ph(_mm512_set1_ph(b), _mm512_castsi512_ph(a.v)))};
+}
+#endif
 
 YNN_ALWAYS_INLINE s32x16 min(s32x16 a, s32x16 b) {
   return s32x16{_mm512_min_epi32(a.v, b.v)};
@@ -705,6 +756,16 @@ YNN_ALWAYS_INLINE u32x16 abs(s32x16 a) { return u32x16{_mm512_abs_epi32(a.v)}; }
 YNN_ALWAYS_INLINE f64x8 abs(f64x8 a) { return f64x8{_mm512_abs_pd(a.v)}; }
 YNN_ALWAYS_INLINE f32x16 abs(f32x16 a) { return f32x16{_mm512_abs_ps(a.v)}; }
 
+#ifdef YNN_ARCH_FP16_ARITHMETIC
+YNN_ALWAYS_INLINE f16x32 floor_log2(f16x32 a) {
+  // getexp handles 0 correctly, but not negative numbers.
+  __m512h res = _mm512_getexp_ph(_mm512_castsi512_ph(a.v));
+  __mmask32 negative = _mm512_cmp_ph_mask(_mm512_castsi512_ph(a.v),
+                                          _mm512_setzero_ph(), _CMP_LT_OQ);
+  return f16x32{_mm512_castph_si512(_mm512_mask_blend_ph(
+      negative, res, _mm512_set1_ph(std::numeric_limits<float>::quiet_NaN())))};
+}
+#endif
 YNN_ALWAYS_INLINE f32x16 floor_log2(f32x16 a) {
   // getexp handles 0 correctly, but not negative numbers.
   __m512 res = _mm512_getexp_ps(a.v);
@@ -720,6 +781,13 @@ YNN_ALWAYS_INLINE f64x8 floor_log2(f64x8 a) {
       negative, res, _mm512_set1_pd(std::numeric_limits<double>::quiet_NaN()))};
 }
 
+#ifdef YNN_ARCH_FP16_ARITHMETIC
+YNN_ALWAYS_INLINE f16x32 exp2_round(f16x32 a) {
+  const __m512h magic = _mm512_set1_ph(15.0f + static_cast<float>(1 << 10));
+  const __m512h res_bits = _mm512_add_ph(_mm512_castsi512_ph(a.v), magic);
+  return f16x32{_mm512_slli_epi16(_mm512_castph_si512(res_bits), 10)};
+}
+#endif
 YNN_ALWAYS_INLINE f32x16 exp2_round(f32x16 a) {
   const __m512 magic = _mm512_set1_ps(127.0f + static_cast<float>(1 << 23));
   const __m512 res_bits = _mm512_add_ps(a.v, magic);
@@ -732,6 +800,42 @@ YNN_ALWAYS_INLINE f64x8 exp2_round(f64x8 a) {
   return f64x8{_mm512_castsi512_pd(
       _mm512_slli_epi64(_mm512_castpd_si512(res_bits), 52))};
 }
+
+#ifdef YNN_ARCH_FP16_ARITHMETIC
+YNN_ALWAYS_INLINE __mmask32 operator==(f16x32 a, f16x32 b) {
+  return _mm512_cmp_ph_mask(_mm512_castsi512_ph(a.v), _mm512_castsi512_ph(b.v),
+                            _CMP_EQ_OQ);
+}
+YNN_ALWAYS_INLINE __mmask32 operator!=(f16x32 a, f16x32 b) {
+  return _mm512_cmp_ph_mask(_mm512_castsi512_ph(a.v), _mm512_castsi512_ph(b.v),
+                            _CMP_NEQ_OQ);
+}
+YNN_ALWAYS_INLINE __mmask32 operator<(f16x32 a, f16x32 b) {
+  return _mm512_cmp_ph_mask(_mm512_castsi512_ph(a.v), _mm512_castsi512_ph(b.v),
+                            _CMP_LT_OQ);
+}
+YNN_ALWAYS_INLINE __mmask32 operator<=(f16x32 a, f16x32 b) {
+  return _mm512_cmp_ph_mask(_mm512_castsi512_ph(a.v), _mm512_castsi512_ph(b.v),
+                            _CMP_LE_OQ);
+}
+YNN_ALWAYS_INLINE __mmask32 operator>(f16x32 a, f16x32 b) {
+  return _mm512_cmp_ph_mask(_mm512_castsi512_ph(a.v), _mm512_castsi512_ph(b.v),
+                            _CMP_GT_OQ);
+}
+YNN_ALWAYS_INLINE __mmask32 operator>=(f16x32 a, f16x32 b) {
+  return _mm512_cmp_ph_mask(_mm512_castsi512_ph(a.v), _mm512_castsi512_ph(b.v),
+                            _CMP_GE_OQ);
+}
+YNN_ALWAYS_INLINE __mmask32 isnan(f16x32 a) {
+  return _mm512_fpclass_ph_mask(_mm512_castsi512_ph(a.v), 0x81);
+}
+YNN_ALWAYS_INLINE __mmask32 isinf(f16x32 a) {
+  return _mm512_fpclass_ph_mask(_mm512_castsi512_ph(a.v), 0x18);
+}
+YNN_ALWAYS_INLINE __mmask32 isfinite(f16x32 a) {
+  return ~_mm512_fpclass_ph_mask(_mm512_castsi512_ph(a.v), 0x99);
+}
+#endif  // YNN_ARCH_FP16_ARITHMETIC
 
 YNN_ALWAYS_INLINE __mmask16 operator==(f32x16 a, f32x16 b) {
   return _mm512_cmp_ps_mask(a.v, b.v, _CMP_EQ_OQ);
@@ -846,6 +950,12 @@ YNN_ALWAYS_INLINE __mmask64 operator>=(s8x64 a, s8x64 b) {
   return _mm512_cmpge_epi8_mask(a.v, b.v);
 }
 
+#ifdef YNN_ARCH_FP16_ARITHMETIC
+YNN_ALWAYS_INLINE f16x32 select(__mmask32 cond, f16x32 a, f16x32 b) {
+  return f16x32{_mm512_castph_si512(_mm512_mask_blend_ph(
+      cond, _mm512_castsi512_ph(b.v), _mm512_castsi512_ph(a.v)))};
+}
+#endif
 YNN_ALWAYS_INLINE f32x16 select(__mmask16 cond, f32x16 a, f32x16 b) {
   return f32x16{_mm512_mask_blend_ps(cond, b.v, a.v)};
 }

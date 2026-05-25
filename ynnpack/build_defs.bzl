@@ -157,6 +157,7 @@ _YNN_PARAMS_FOR_ARCH = {
             "//conditions:default": [],
         }),
         "arch_flag": "neonfp16arith",
+        "arch_defines": ["YNN_ARCH_FP16_ARITHMETIC"],
     },
     "arm_neonbf16": {
         "cond": "//ynnpack:ynn_enable_arm_neonbf16",
@@ -272,6 +273,7 @@ _YNN_PARAMS_FOR_ARCH = {
         "cond": "//ynnpack:ynn_enable_x86_avx512fp16",
         "arch_copts": _copts_for_compiler(_AVX512_COPTS + ["-mavx512fp16"]),
         "arch_flag": "avx512fp16",
+        "arch_defines": ["YNN_ARCH_FP16_ARITHMETIC"],
     },
     "x86_avx512vnni": {
         "cond": "//ynnpack:ynn_enable_x86_avx512vnni",

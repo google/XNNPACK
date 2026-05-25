@@ -146,13 +146,14 @@ T random_normal_float(Rng& rng) {
 
 template <typename T>
 void replace_denormals_and_nans(T* data, size_t size) {
-  if (type_info<T>::smallest_normal() <= 0) {
+  if (type_info<T>::smallest_normal() <= static_cast<T>(0)) {
     // There are no denormals for this type.
     return;
   }
   for (size_t i = 0; i < size; ++i) {
     float data_i = static_cast<float>(type_info<T>::get(data, i));
-    if (std::abs(data_i) >= type_info<T>::smallest_normal()) {
+    if (std::abs(data_i) >=
+        static_cast<float>(type_info<T>::smallest_normal())) {
       // This is a normal float, or infinity.
     } else {
       type_info<T>::set(data, i, static_cast<T>(0));
@@ -187,7 +188,8 @@ void fill_random(T* data, size_t size, Rng& rng,
 template <typename T, typename Rng>
 void fill_random(T* data, size_t size, Rng& rng, double min, double max,
                  const quantization_params& params = {}) {
-  if (min <= type_info<T>::min() && max >= type_info<T>::max()) {
+  if (min <= static_cast<double>(type_info<T>::min()) &&
+      max >= static_cast<double>(type_info<T>::max())) {
     // [min, max] exceeds the range of T, just fill it with random bits.
     fill_random(data, size, rng);
   } else {

@@ -18,14 +18,19 @@ BENCH_UNARY(avx2, exp2_round, f64, 4);
 
 BENCH_CAST(avx2, f32, bf16, 16);
 
+BENCH_UNARY(avx2, exp, bf16, 16);
 BENCH_UNARY(avx2, exp, f32, 8);
 BENCH_UNARY(avx2, exp, f64, 4);
+BENCH_UNARY(avx2, expm1, bf16, 16);
 BENCH_UNARY(avx2, expm1, f32, 8);
 BENCH_UNARY(avx2, expm1, f64, 4);
+BENCH_UNARY(avx2, log, bf16, 16);
 BENCH_UNARY(avx2, log, f32, 8);
 BENCH_UNARY(avx2, log, f64, 4);
+BENCH_UNARY(avx2, log1p, bf16, 16);
 BENCH_UNARY(avx2, log1p, f32, 8);
 BENCH_UNARY(avx2, log1p, f64, 4);
+BENCH_UNARY(avx2, erf, bf16, 16);
 BENCH_UNARY(avx2, erf, f32, 8);
 BENCH_UNARY(avx2, erf, f64, 4);
 BENCH_UNARY(avx2, tanh, f32, 8);

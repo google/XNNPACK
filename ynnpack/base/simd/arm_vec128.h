@@ -995,6 +995,54 @@ YNN_ALWAYS_INLINE f64x2 operator/(f64x2 a, f64x2 b) {
 }
 #endif
 
+#ifdef YNN_ARCH_FP16_ARITHMETIC
+YNN_ALWAYS_INLINE f16x8 operator+(f16x8 a, f16x8 b) {
+  return f16x8{vreinterpretq_u16_f16(
+      vaddq_f16(vreinterpretq_f16_u16(a.v), vreinterpretq_f16_u16(b.v)))};
+}
+YNN_ALWAYS_INLINE f16x8 operator-(f16x8 a, f16x8 b) {
+  return f16x8{vreinterpretq_u16_f16(
+      vsubq_f16(vreinterpretq_f16_u16(a.v), vreinterpretq_f16_u16(b.v)))};
+}
+YNN_ALWAYS_INLINE f16x8 operator*(f16x8 a, f16x8 b) {
+  return f16x8{vreinterpretq_u16_f16(
+      vmulq_f16(vreinterpretq_f16_u16(a.v), vreinterpretq_f16_u16(b.v)))};
+}
+#ifdef YNN_ARCH_ARM64
+YNN_ALWAYS_INLINE f16x8 operator/(f16x8 a, f16x8 b) {
+  return f16x8{vreinterpretq_u16_f16(
+      vdivq_f16(vreinterpretq_f16_u16(a.v), vreinterpretq_f16_u16(b.v)))};
+}
+#endif
+YNN_ALWAYS_INLINE f16x8 operator-(f16x8 a) {
+  return f16x8{vreinterpretq_u16_f16(vnegq_f16(vreinterpretq_f16_u16(a.v)))};
+}
+
+YNN_ALWAYS_INLINE f16x8 fma(f16x8 a, f16x8 b, f16x8 acc) {
+  return f16x8{vreinterpretq_u16_f16(vfmaq_f16(vreinterpretq_f16_u16(acc.v),
+                                               vreinterpretq_f16_u16(a.v),
+                                               vreinterpretq_f16_u16(b.v)))};
+}
+
+YNN_ALWAYS_INLINE f16x8 min(f16x8 a, f16x8 b) {
+  return f16x8{vreinterpretq_u16_f16(
+      vminq_f16(vreinterpretq_f16_u16(a.v), vreinterpretq_f16_u16(b.v)))};
+}
+YNN_ALWAYS_INLINE f16x8 max(f16x8 a, f16x8 b) {
+  return f16x8{vreinterpretq_u16_f16(
+      vmaxq_f16(vreinterpretq_f16_u16(a.v), vreinterpretq_f16_u16(b.v)))};
+}
+
+YNN_ALWAYS_INLINE f16x8 min(f16x8 a, half b) {
+  return f16x8{vreinterpretq_u16_f16(vminq_f16(
+      vreinterpretq_f16_u16(a.v), vdupq_n_f16(static_cast<float>(b))))};
+}
+YNN_ALWAYS_INLINE f16x8 max(f16x8 a, half b) {
+  return f16x8{vreinterpretq_u16_f16(vmaxq_f16(
+      vreinterpretq_f16_u16(a.v), vdupq_n_f16(static_cast<float>(b))))};
+}
+#endif
+
 #ifdef YNN_ARCH_ARM_NEONFMA
 YNN_ALWAYS_INLINE f32x4 fma(f32x4 a, f32x4 b, f32x4 acc) {
   return f32x4{vfmaq_f32(acc.v, a.v, b.v)};
@@ -1288,6 +1336,41 @@ YNN_ALWAYS_INLINE s64x2 isfinite(f64x2 a) {
 }
 #endif
 
+#ifdef YNN_ARCH_FP16_ARITHMETIC
+YNN_ALWAYS_INLINE s16x8 operator==(f16x8 a, f16x8 b) {
+  return s16x8{vreinterpretq_s16_u16(
+      vceqq_f16(vreinterpretq_f16_u16(a.v), vreinterpretq_f16_u16(b.v)))};
+}
+YNN_ALWAYS_INLINE s16x8 operator!=(f16x8 a, f16x8 b) { return ~(a == b); }
+YNN_ALWAYS_INLINE s16x8 operator<(f16x8 a, f16x8 b) {
+  return s16x8{vreinterpretq_s16_u16(
+      vcltq_f16(vreinterpretq_f16_u16(a.v), vreinterpretq_f16_u16(b.v)))};
+}
+YNN_ALWAYS_INLINE s16x8 operator<=(f16x8 a, f16x8 b) {
+  return s16x8{vreinterpretq_s16_u16(
+      vcleq_f16(vreinterpretq_f16_u16(a.v), vreinterpretq_f16_u16(b.v)))};
+}
+YNN_ALWAYS_INLINE s16x8 operator>(f16x8 a, f16x8 b) {
+  return s16x8{vreinterpretq_s16_u16(
+      vcgtq_f16(vreinterpretq_f16_u16(a.v), vreinterpretq_f16_u16(b.v)))};
+}
+YNN_ALWAYS_INLINE s16x8 operator>=(f16x8 a, f16x8 b) {
+  return s16x8{vreinterpretq_s16_u16(
+      vcgeq_f16(vreinterpretq_f16_u16(a.v), vreinterpretq_f16_u16(b.v)))};
+}
+YNN_ALWAYS_INLINE s16x8 isnan(f16x8 a) { return ~(a == a); }
+YNN_ALWAYS_INLINE s16x8 isinf(f16x8 a) {
+  uint16x8_t mask = vdupq_n_u16(0x7FFF);
+  uint16x8_t inf = vdupq_n_u16(0x7C00);
+  return s16x8{vreinterpretq_s16_u16(vceqq_u16(vandq_u16(a.v, mask), inf))};
+}
+YNN_ALWAYS_INLINE s16x8 isfinite(f16x8 a) {
+  uint16x8_t mask = vdupq_n_u16(0x7FFF);
+  uint16x8_t inf = vdupq_n_u16(0x7C00);
+  return s16x8{vreinterpretq_s16_u16(vcgtq_u16(inf, vandq_u16(a.v, mask)))};
+}
+#endif
+
 YNN_ALWAYS_INLINE s32x4 operator==(s32x4 a, s32x4 b) {
   return s32x4{vreinterpretq_s32_u32(vceqq_s32(a.v, b.v))};
 }
@@ -1315,6 +1398,12 @@ YNN_ALWAYS_INLINE s8x16 operator<(s8x16 a, s8x16 b) { return b > a; }
 YNN_ALWAYS_INLINE f32x4 select(s32x4 cond, f32x4 a, f32x4 b) {
   return f32x4{vbslq_f32(vreinterpretq_u32_s32(cond.v), a.v, b.v)};
 }
+
+#ifdef YNN_ARCH_FP16_ARITHMETIC
+YNN_ALWAYS_INLINE f16x8 select(s16x8 cond, f16x8 a, f16x8 b) {
+  return f16x8{vbslq_u16(vreinterpretq_u16_s16(cond.v), a.v, b.v)};
+}
+#endif
 #ifdef YNN_ARCH_ARM64
 YNN_ALWAYS_INLINE f64x2 select(s64x2 cond, f64x2 a, f64x2 b) {
   return f64x2{vbslq_f64(vreinterpretq_u64_s64(cond.v), a.v, b.v)};
@@ -1344,6 +1433,45 @@ YNN_ALWAYS_INLINE s8x16 select(s8x16 cond, s8x16 a, s8x16 b) {
 YNN_ALWAYS_INLINE u8x16 select(s8x16 cond, u8x16 a, u8x16 b) {
   return u8x16{vbslq_u8(vreinterpretq_u8_s8(cond.v), a.v, b.v)};
 }
+
+#ifdef YNN_ARCH_FP16_ARITHMETIC
+YNN_ALWAYS_INLINE f16x8 floor_log2(f16x8 a) {
+  float16x8_t a_f16 = vreinterpretq_f16_u16(a.v);
+  uint16x8_t is_zero = vceqq_f16(a_f16, vdupq_n_f16(0.0f));
+  a.v = vorrq_u16(vandq_u16(is_zero, vdupq_n_u16(0x8000)), a.v);
+
+  a_f16 = vreinterpretq_f16_u16(a.v);
+
+  uint16x8_t sign_and_exp_mask = vdupq_n_u16(0xFC00);
+  int16x8_t exp =
+      vshrq_n_s16(vreinterpretq_s16_u16(vandq_u16(a.v, sign_and_exp_mask)), 5);
+
+  uint16x8_t infinity = vdupq_n_u16(0x7C00);
+  uint16x8_t is_nan = vmvnq_u16(vceqq_f16(a_f16, a_f16));
+  uint16x8_t is_inf = vceqq_f16(a_f16, vreinterpretq_f16_u16(infinity));
+  uint16x8_t is_inf_or_nan = vorrq_u16(is_inf, is_nan);
+
+  uint16x8_t is_negative = vcltq_f16(a_f16, vdupq_n_f16(0.0f));
+
+  uint16x8_t bias_32 = vdupq_n_u16(0x5000);
+  uint16x8_t bias_47 = vdupq_n_u16(0x51E0);
+
+  float16x8_t res = vsubq_f16(
+      vreinterpretq_f16_u16(vorrq_u16(bias_32, vreinterpretq_u16_s16(exp))),
+      vreinterpretq_f16_u16(bias_47));
+
+  uint16x8_t nan_val = vdupq_n_u16(0x7E00);
+  uint16x8_t tmp = vbslq_u16(is_negative, nan_val, vreinterpretq_u16_f16(res));
+  return f16x8{vbslq_u16(is_inf_or_nan, a.v, tmp)};
+}
+
+YNN_ALWAYS_INLINE f16x8 exp2_round(f16x8 a) {
+  float16x8_t magic = vdupq_n_f16(15.0f + static_cast<float>(1 << 10));
+  int16x8_t res_bits =
+      vreinterpretq_s16_f16(vaddq_f16(vreinterpretq_f16_u16(a.v), magic));
+  return f16x8{vreinterpretq_u16_s16(vshlq_n_s16(res_bits, 10))};
+}
+#endif
 
 YNN_ALWAYS_INLINE f32x4 floor_log2(f32x4 a) {
   uint32x4_t is_zero = vceqq_f32(a.v, vdupq_n_f32(0.0f));

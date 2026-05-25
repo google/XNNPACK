@@ -49,6 +49,7 @@ package(default_visibility = ["//ynnpack:__subpackages__"])
 ) for arch in [
     "arm_neon",
     "arm_neonfma",
+    "arm_neonfp16arith",
     "arm64_neon",
     "arm64_sve",
     "hexagon_hvx",
@@ -56,6 +57,8 @@ package(default_visibility = ["//ynnpack:__subpackages__"])
     "x86_sse2_fma",
     "x86_avx",
     "x86_avx2",
+    "x86_avx2_fma3",
     "x86_avx512",
+    "x86_avx512fp16",
     "x86_fma3",
 ]]
