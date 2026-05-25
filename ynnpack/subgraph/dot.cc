@@ -584,6 +584,7 @@ auto make_transpose_a_impl(int m_dim) {
 void define_transpose_a(ynn_subgraph& subgraph, ynn_node& node, index_t tile_k,
                         int m_dim, uint32_t input_a_id, uint32_t output_id) {
   const ynn_value& a = subgraph.value(input_a_id);
+  assert(m_dim < a.rank());
   ynn_value& output = subgraph.get_output_value(&output_id, a.type);
   output.type = a.type;
 
@@ -990,8 +991,10 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
     assert(a.rank() >= 2);
 
     // The kernel we want to use has a transposed a.
+    // By definition, `m_dim` is the first dimension after the k dims.
+    const int m_dim = num_k_dims;
     node.inputs[0] =
-        define_transpose_a(subgraph, kernel.tile_k, num_k_dims, input_a_id);
+        define_transpose_a(subgraph, kernel.tile_k, m_dim, input_a_id);
   }
 
   // If we're using an unpacked kernel, we'll be reading columns of B, make sure
