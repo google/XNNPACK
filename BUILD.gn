@@ -177,6 +177,7 @@ config("xnnpack_private_config") {
       "XNN_ENABLE_ARM_I8MM=1",
       "XNN_ENABLE_ASSEMBLY=1",
       "XNN_ENABLE_ARM_FP16_VECTOR=1",
+      "XNN_ENABLE_RNDNU16=1",
     ]
     if (xnnpack_enable_arm_kleidiai) {
       defines += [ "XNN_ENABLE_KLEIDIAI=1" ]
