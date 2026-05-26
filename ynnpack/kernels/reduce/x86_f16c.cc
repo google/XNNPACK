@@ -17,7 +17,6 @@ namespace ynn {
 using simd::f16x8;
 using simd::f16x16;
 using simd::f32x8;
-using simd::f32x16;
 
 SUM_FLOAT_K1_KERNEL(sum_k1_fp16_fp32_f16c, half, float, 0, 1, identity);
 SUM_FLOAT_KN_KERNEL(sum_kn_fp16_fp32_f16c, half, float, 16, identity);

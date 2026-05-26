@@ -14,7 +14,6 @@
 
 namespace ynn {
 
-using simd::f32x16;
 using simd::f32x8;
 using simd::f64x4;
 

@@ -1277,7 +1277,6 @@ YNN_ALWAYS_INLINE std::tuple<u8x32, u8x32> interleave(
                     u8x32{_mm256_or_si256(_mm256_slli_epi16(even1, 2), even0)},
                     u8x32{_mm256_or_si256(odd1, _mm256_srli_epi16(odd0, 2))});
 }
-#endif  // YNN_ARCH_X86_AVX2
 
 #ifndef YNN_ARCH_X86_AVX512
 // AVX512 provides better versions of these casts.
@@ -1368,6 +1367,7 @@ YNN_ALWAYS_INLINE u8x32 cast(f32x32 f, uint8_t) {
       r, _mm256_setr_epi32(0, 4, 1, 5, 2, 6, 3, 7))};
 }
 #endif  // YNN_ARCH_X86_AVX512
+#endif  // YNN_ARCH_X86_AVX2
 
 }  // namespace simd
 
