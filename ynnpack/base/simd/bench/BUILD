@@ -48,6 +48,7 @@ package(default_visibility = ["//ynnpack:__subpackages__"])
     ] + ynn_benchmark_deps(),
 ) for arch in [
     "arm_neon",
+    "arm_neonfma",
     "arm64_neon",
     "arm64_sve",
     "hexagon_hvx",
