@@ -239,10 +239,11 @@ TEST_UNARY(x86_avx512, log1p, f32, 16, std::log1p, 3);
 TEST_UNARY(x86_avx512, log1p, f64, 8, std::log1p, 3);
 TEST_UNARY(x86_avx512, erf, f32, 16, std::erf, 2);
 TEST_UNARY(x86_avx512, erf, f64, 8, std::erf, 3);
-TEST_UNARY(x86_avx512, tanh, f32, 16, std::tanh, 5);
+TEST_UNARY(x86_avx512, tanh, f32, 16, std::tanh, 2);
 TEST_UNARY(x86_avx512, tanh, f64, 8, std::tanh, 4);
 
-TEST_UNARY(x86_avx512, fast_erf, f32, 16, std::erf, 5);
+TEST_UNARY(x86_avx512, approx_erf, f32, 16, std::erf, 5);
+TEST_UNARY(x86_avx512, approx_tanh, f32, 16, std::tanh, 5);
 
 }  // namespace simd
 }  // namespace ynn

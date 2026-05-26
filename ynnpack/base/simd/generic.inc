@@ -787,10 +787,9 @@ static vec<double, N> erf(vec<double, N> x) {
   return internal::erf_impl(x, P, Q, R, S, max_abs_x1, max_abs_x2);
 }
 
-// ~3x faster than erf(x), ~2x worse error (~5 ULPs vs. ~2 ULPs), and does not
-// preserve NaN.
+// ~3x faster than erf(x), ~2x worse error (~5 ULPs vs. ~2 ULPs).
 template <size_t N>
-static vec<float, N> fast_erf(vec<float, N> x) {
+static vec<float, N> approx_erf(vec<float, N> x) {
   // Rational polynomial approximation of erf(x) for [-max_abs_x, max_abs_x]
   constexpr float max_abs_x = 3.8f;
   // erf(x) ~= x*P(x^2)/Q(x^2)
@@ -815,6 +814,23 @@ static vec<float, N> fast_erf(vec<float, N> x) {
 
 template <size_t N>
 static vec<float, N> tanh(vec<float, N> x) {
+  auto two = broadcast<N>(2.0f);
+  // Clamp large x to avoid Inf/Inf = NaN.
+  auto expm1_2x = expm1(min(two*x, 80.0f));
+  return expm1_2x / (expm1_2x + two);
+}
+
+template <size_t N>
+static vec<double, N> tanh(vec<double, N> x) {
+  auto two = broadcast<N>(2.0);
+  // Clamp large x to avoid Inf/Inf = NaN.
+  auto expm1_2x = expm1(min(two*x, 300.0));
+  return expm1_2x / (expm1_2x + two);
+}
+
+// ~2x faster than tanh(x), ~2x worse error (~5 ULPs vs. ~2 ULPs).
+template <size_t N>
+static vec<float, N> approx_tanh(vec<float, N> x) {
   static std::array<float, 5> P = {
       2.0879960871e-08f,
       2.5928242394e-05f,
@@ -829,6 +845,8 @@ static vec<float, N> tanh(vec<float, N> x) {
       4.6984484792e-01f,
       1.0000000000e+00f,
   };
+  // When x is small, tanh(x) ~= x, and this avoids denormal numerical issues.
+  constexpr float min_abs_x = 1e-12f;
   constexpr float max_abs_x = 7.9974925518035889f;
 
   auto x_clamped = max(min(x, max_abs_x), -max_abs_x);
@@ -836,15 +854,7 @@ static vec<float, N> tanh(vec<float, N> x) {
   auto x2 = x_clamped * x_clamped;
   auto p_x = internal::eval_polynomial(P, x2) * x_clamped;
   auto q_x = internal::eval_polynomial(Q, x2);
-  return p_x / q_x;
-}
-
-template <size_t N>
-static vec<double, N> tanh(vec<double, N> x) {
-  auto two = broadcast<N>(2.0);
-  // Clamp large x to avoid Inf/Inf = NaN.
-  auto expm1_2x = expm1(min(two*x, 300.0));
-  return expm1_2x / (expm1_2x + two);
+  return select(abs(x_clamped) < min_abs_x, x, p_x / q_x);
 }
 
 }  // namespace simd

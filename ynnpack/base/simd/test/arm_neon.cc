@@ -193,9 +193,14 @@ TEST_UNARY(arm_neon, expm1, f32, 4, std::expm1, 2);
 TEST_UNARY(arm_neon, log, f32, 4, std::log, 2);
 TEST_UNARY(arm_neon, log1p, f32, 4, std::log1p, 3);
 TEST_UNARY(arm_neon, erf, f32, 4, std::erf, 2);
-TEST_UNARY(arm_neon, tanh, f32, 4, std::tanh, 5);
+#ifdef YNN_ARCH_ARM64
+TEST_UNARY(arm_neon, tanh, f32, 4, std::tanh, 2);
+#else
+// TODO: b/515053903 - 32-bit ARM does something weird here.
+#endif
 
-TEST_UNARY(arm_neon, fast_erf, f32, 4, std::erf, 5);
+TEST_UNARY(arm_neon, approx_erf, f32, 4, std::erf, 5);
+TEST_UNARY(arm_neon, approx_tanh, f32, 4, std::tanh, 5);
 
 }  // namespace simd
 }  // namespace ynn

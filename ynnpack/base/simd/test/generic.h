@@ -995,11 +995,14 @@ void test_unary(F f, Ref ref, float epsilons) {
 }
 
 // Test that |op(x) - ref(x)| <= `epsilons`*epsilon where epsilon is the epsilon
-// of `type`.
-#define TEST_UNARY(test_class, op, type, N, ref, epsilons)        \
-  TEST_F(test_class, op##_##type##x##N) {                         \
-    test_unary<type, N>([](vec<type, N> x) { return op(x); },     \
-                        [](type x) { return ref(x); }, epsilons); \
+// of `type`. Use the double version of cmath's functions, to avoid inaccurate
+// libm functions to the extent we can.
+#define TEST_UNARY(test_class, op, type, N, ref, epsilons)                     \
+  TEST_F(test_class, op##_##type##x##N) {                                      \
+    test_unary<type, N>(                                                       \
+        [](vec<type, N> x) { return op(x); },                                  \
+        [](type x) { return static_cast<type>(ref(static_cast<double>(x))); }, \
+        epsilons);                                                             \
   }
 
 }  // namespace simd

@@ -21,7 +21,8 @@ BENCH_UNARY(neonfma, log1p, f32, 4);
 BENCH_UNARY(neonfma, erf, f32, 4);
 BENCH_UNARY(neonfma, tanh, f32, 4);
 
-BENCH_UNARY(neonfma, fast_erf, f32, 4);
+BENCH_UNARY(neonfma, approx_erf, f32, 4);
+BENCH_UNARY(neonfma, approx_tanh, f32, 4);
 
 }  // namespace simd
 }  // namespace ynn

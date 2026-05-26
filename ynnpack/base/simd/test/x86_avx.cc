@@ -137,10 +137,11 @@ TEST_UNARY(x86_avx, log1p, f32, 8, std::log1p, 3);
 TEST_UNARY(x86_avx, log1p, f64, 4, std::log1p, 3);
 TEST_UNARY(x86_avx, erf, f32, 8, std::erf, 2);
 TEST_UNARY(x86_avx, erf, f64, 4, std::erf, 3);
-TEST_UNARY(x86_avx, tanh, f32, 8, std::tanh, 5);
+TEST_UNARY(x86_avx, tanh, f32, 8, std::tanh, 2);
 TEST_UNARY(x86_avx, tanh, f64, 4, std::tanh, 4);
 
-TEST_UNARY(x86_avx, fast_erf, f32, 8, std::erf, 5);
+TEST_UNARY(x86_avx, approx_erf, f32, 8, std::erf, 5);
+TEST_UNARY(x86_avx, approx_tanh, f32, 8, std::tanh, 5);
 
 }  // namespace simd
 }  // namespace ynn

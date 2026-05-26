@@ -30,7 +30,8 @@ BENCH_UNARY(neon, log1p, f32, 4);
 BENCH_UNARY(neon, erf, f32, 4);
 BENCH_UNARY(neon, tanh, f32, 4);
 
-BENCH_UNARY(neon, fast_erf, f32, 4);
+BENCH_UNARY(neon, approx_erf, f32, 4);
+BENCH_UNARY(neon, approx_tanh, f32, 4);
 
 }  // namespace simd
 }  // namespace ynn
