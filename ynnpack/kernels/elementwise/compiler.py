@@ -1760,8 +1760,6 @@ class Target:
     func_name = (
         name
         + "_"
-        + "x".join([str(i) for i in tile_shapes[0]])
-        + "_"
         + self.arch_string()
     )
 
