@@ -362,6 +362,48 @@ YNN_ALWAYS_INLINE vec<T, N> eval_polynomial(const std::array<T, Degree>& p,
   return y;
 }
 
+// Similar to the above, uses x^2 as well. This has better ILP.
+template <typename T, size_t N, size_t Degree>
+YNN_ALWAYS_INLINE vec<T, N> eval_polynomial(const std::array<T, Degree>& p,
+                                            vec<T, N> x, vec<T, N> x2) {
+  auto y0 = broadcast<N>(p[0]);
+  auto y1 = broadcast<N>(p[1]);
+  for (size_t i = 2; i < p.size(); i += 2) {
+    y0 = multiply_add(x2, y0, broadcast<N>(p[i + 0]));
+    if (i + 1 < p.size()) {
+      y1 = multiply_add(x2, y1, broadcast<N>(p[i + 1]));
+    }
+  }
+  if (Degree % 2 == 1) {
+    return multiply_add(x, y1, y0);
+  } else {
+    return multiply_add(x, y0, y1);
+  }
+}
+
+template <typename T, size_t N>
+YNN_ALWAYS_INLINE vec<T, N> divide(vec<T, N> a, vec<T, N> b) {
+  return a / b;
+}
+
+// A placeholder indicating that a polynomial (usually a denominator polynomial)
+// is one.
+constexpr std::integral_constant<int, 1> one = {};
+
+// Overloads of `eval_polynomial` and `divide` for the constant one polynomial.
+template <typename T, size_t N>
+YNN_ALWAYS_INLINE auto eval_polynomial(decltype(one), vec<T, N>) {
+  return one;
+}
+template <typename T, size_t N>
+YNN_ALWAYS_INLINE auto eval_polynomial(decltype(one), vec<T, N>, vec<T, N>) {
+  return one;
+}
+template <typename T, size_t N>
+YNN_ALWAYS_INLINE vec<T, N> divide(vec<T, N> a, decltype(one)) {
+  return a;
+}
+
 // Round floating point values assuming the integer value can fit in the
 // mantissa of the result.
 template <size_t N>
@@ -395,9 +437,10 @@ YNN_ALWAYS_INLINE vec<T, N> exp_impl(vec<T, N> x, const P& p, const Q& q,
   auto exp2_b = exp2_round(b);
   exp2_b = select(isnan(x), x, exp2_b);
 
-  auto p_r = eval_polynomial(p, r);
-  auto q_r = eval_polynomial(q, r);
-  auto exp2_r = multiply_add(r, r * p_r / q_r, r);  // r^2 * p_r / q_r + r
+  auto r2 = r * r;
+  auto p_r = eval_polynomial(p, r, r2);
+  auto q_r = eval_polynomial(q, r, r2);
+  auto exp2_r = multiply_add(r2, divide(p_r, q_r), r);  // r^2 * p_r + r
 
   // Compute 2^b * (exp(r) + 1) - m. We avoid catastrophic cancellation
   // by distributing 2^b, and then reassociating the subtraction, so when
@@ -409,15 +452,14 @@ YNN_ALWAYS_INLINE vec<T, N> exp_impl(vec<T, N> x, const P& p, const Q& q,
 
 template <int m, size_t N>
 static vec<float, N> exp_impl(vec<float, N> x) {
-  std::array<float, 2> p = {
-      4.7195836902e-02f,
-      5.0000029802e-01f,
-  };
-  std::array<float, 4> q = {
-      4.4524371624e-03f,
-      -3.6790699232e-03f,
-      -2.3893947899e-01f,
-      1.0000000000e+00f,
+  std::array<float, 7> p = {
+      -4.9866619520e-05f,
+      2.2773783712e-04f,
+      1.4132461511e-03f,
+      8.3242934197e-03f,
+      4.1665628552e-02f,
+      1.6666725278e-01f,
+      4.9999994040e-01f,
   };
   constexpr float log2e = 1.4426950408889634f;
   constexpr float ln2_hi = 6.9314575195e-01f;
@@ -425,26 +467,23 @@ static vec<float, N> exp_impl(vec<float, N> x) {
   constexpr float min_x = -88.02969360351562f;
   constexpr float max_x = 88.72283935546875f;
 
-  return exp_impl<m>(x, p, q, min_x, max_x, log2e, ln2_hi, ln2_lo);
+  return exp_impl<m>(x, p, /*q=*/one, min_x, max_x, log2e, ln2_hi, ln2_lo);
 }
 
 template <int m, size_t N>
 static vec<double, N> exp_impl(vec<double, N> x) {
-  std::array<double, 5> p = {
-      3.189423583383155193e-05,
-      -5.369804484916617217e-04,
-      1.203759868809133396e-02,
-      -5.944370907454595010e-02,
-      4.999999999999993894e-01,
-  };
-  std::array<double, 7> q = {
-      1.911144132555465737e-07,
-      -2.490765187781299091e-05,
-      7.160480469716202232e-04,
-      -1.054960311820526096e-02,
-      9.148211453696809825e-02,
-      -4.522207514824481689e-01,
-      1.000000000000000000e+00,
+  std::array<double, 11> p = {
+      2.119890244143296032e-09,
+      2.521079371356939368e-08,
+      2.755585399809175769e-07,
+      2.755675838881680360e-06,
+      2.480158976814372031e-05,
+      1.984127071808468106e-04,
+      1.388888888680978647e-03,
+      8.333333332743943569e-03,
+      4.166666666668113195e-02,
+      1.666666666666796748e-01,
+      4.999999999999995559e-01,
   };
   constexpr double log2e = 1.4426950408889634;
   constexpr double ln2_hi = 6.93147180369123816490e-01;
@@ -452,7 +491,7 @@ static vec<double, N> exp_impl(vec<double, N> x) {
   constexpr double min_x = -709.0895657128241;
   constexpr double max_x = 709.782712893384;
 
-  return exp_impl<m>(x, p, q, min_x, max_x, log2e, ln2_hi, ln2_lo);
+  return exp_impl<m>(x, p, /*q=*/one, min_x, max_x, log2e, ln2_hi, ln2_lo);
 }
 
 }  // namespace internal
@@ -516,9 +555,10 @@ YNN_ALWAYS_INLINE vec<T, N> log_impl(vec<T, N> x, const P& poly_p,
   // We approximate log(1 + x) ~= x + x^2*P(x)/Q(x). This is similar to how it
   // is done in Eigen, but with higher degree polynomials instead of an x^3
   // term.
-  auto log_r_n = eval_polynomial(poly_p, r) * (r * r);
-  auto log_r_d = eval_polynomial(poly_q, r);
-  auto log_r = r + log_r_n / log_r_d;
+  auto r2 = r * r;
+  auto p_r = eval_polynomial(poly_p, r, r2);
+  auto q_r = eval_polynomial(poly_q, r, r2);
+  auto log_r = multiply_add(r2, divide(p_r, q_r), r);
 
   constexpr T ln2 = 6.93147180559945309e-01;
   return multiply_add(exp, broadcast<N>(ln2), log_r);
@@ -608,11 +648,11 @@ static vec<T, N> erf_impl(vec<T, N> x, const P& p, const Q& q, const R& r,
 
   auto p_x2 = internal::eval_polynomial(p, x2);
   auto q_x2 = internal::eval_polynomial(q, x2);
-  auto erf_x_small = abs_x * p_x2 / q_x2;
+  auto erf_x_small = abs_x * divide(p_x2, q_x2);
 
   auto r_x = internal::eval_polynomial(r, abs_x);
   auto s_x = internal::eval_polynomial(s, abs_x);
-  auto erfc_x = exp(-x2) * r_x / s_x;
+  auto erfc_x = exp(-x2) * divide(r_x, s_x);
   auto erf_x_large = broadcast<N>(static_cast<T>(1.0)) - erfc_x;
   auto erf_x =
       select(abs_x < broadcast<N>(max_abs_x1), erf_x_small, erf_x_large);

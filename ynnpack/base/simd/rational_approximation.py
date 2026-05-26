@@ -129,25 +129,24 @@ def plot_error(f, x, approx, title="Relative Error"):
 # fp32 expm1
 # We approximate (expm1(x) - x) / x^2 to model the higher order terms
 f = lambda x: np.where(x == 0, 0, (np.expm1(x) - x) / x**2)
-p_degree, q_degree = 1, 3
+p_degree, q_degree = 6, 0
 x_min, x_max = -0.5, 0.5
 p, q = rational_approximation(
     f, x_min, x_max, p_degree, q_degree, dtype=np.float32
 )
 
 print_polynomial("p", p)
-print_polynomial("q", q)
 
 # Evaluate final error
 # expm1(x) ~= x + x^2 * (P(x)/Q(x))
 x_test = np.linspace(x_min, x_max, 5000)
-approx = x_test**2 * poly_eval(p, x_test) / poly_eval(q, x_test) + x_test
+approx = x_test**2 * poly_eval(p, x_test) + x_test
 plot_error(np.expm1, x_test, approx)
 # %%
 # fp64 expm1
 # We approximate (expm1(x) - x) / x^2 to model the higher order terms
 f = lambda x: np.where(x == 0, 0, (np.expm1(x) - x) / x**2)
-p_degree, q_degree = 4, 6
+p_degree, q_degree = 10, 0
 x_min, x_max = -0.5, 0.5
 p, q = rational_approximation(
     f, x_min, x_max, p_degree, q_degree, dtype=np.float64
@@ -164,7 +163,7 @@ plot_error(np.expm1, x_test, approx)
 # %%
 import math
 
-# fp64 log2(x + 1) ~= x + x^2*P(x)/Q(x)
+# fp32 log2(x + 1) ~= x + x^2*P(x)/Q(x)
 f = lambda x: (np.log1p(x) - x) / x**2
 p_degree, q_degree = 2, 2
 x_min, x_max = np.sqrt(2) / 2 - 1, np.sqrt(2) - 1
