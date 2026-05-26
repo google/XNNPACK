@@ -31,4 +31,9 @@ tools/xngen src/f16-vsigmoid/avx2.c.in -D BATCH_TILE=16 -D DIV_ALGO=rcp -o src/f
 tools/xngen src/f16-vsigmoid/avx2.c.in -D BATCH_TILE=24 -D DIV_ALGO=rcp -o src/f16-vsigmoid/gen/f16-vsigmoid-avx2-rr1-p2-rcp-u24.c &
 tools/xngen src/f16-vsigmoid/avx2.c.in -D BATCH_TILE=32 -D DIV_ALGO=rcp -o src/f16-vsigmoid/gen/f16-vsigmoid-avx2-rr1-p2-rcp-u32.c &
 
+################################## RISC-V Vector ##############################
+tools/xngen src/f16-vsigmoid/rvvfp16arith-rr2-p2.c.in -D LMUL=1 -o src/f16-vsigmoid/gen/f16-vsigmoid-rvvfp16arith-rr2-p2-u1v.c &
+tools/xngen src/f16-vsigmoid/rvvfp16arith-rr2-p2.c.in -D LMUL=2 -o src/f16-vsigmoid/gen/f16-vsigmoid-rvvfp16arith-rr2-p2-u2v.c &
+tools/xngen src/f16-vsigmoid/rvvfp16arith-rr2-p2.c.in -D LMUL=4 -o src/f16-vsigmoid/gen/f16-vsigmoid-rvvfp16arith-rr2-p2-u4v.c &
+
 wait
