@@ -319,6 +319,7 @@ source_set("xnnpack_headers") {
 
 xnnpack_source_set("configs") {
   deps = [
+    ":init_once",
     ":microkernel_headers",
     ":xnnpack_headers",
     "//third_party/cpuinfo",
@@ -355,6 +356,7 @@ xnnpack_source_set("configs") {
 
 xnnpack_source_set("operators") {
   deps = [
+    ":init_once",
     ":microkernel_headers",
     ":xnnpack_headers",
   ]
@@ -920,6 +922,14 @@ xnnpack_source_set("scalar_microkernels") {
   sources = ALL_SCALAR_MICROKERNEL_SRCS
 }
 
+xnnpack_source_set("init_once") {
+  sources = [
+    "src/xnnpack/init-once.c",
+    "src/xnnpack/init-once.h",
+  ]
+  deps = [ ":xnnpack_headers" ]
+}
+
 xnnpack_source_set("xnnpack") {
   # The core set of C/C++ files and kernels
   sources = [
@@ -947,6 +957,7 @@ xnnpack_source_set("xnnpack") {
   public_deps = [ ":xnnpack_headers" ]
   deps = [
     ":configs",
+    ":init_once",
     ":logging",
     ":microkernel_defs",
     ":microkernel_headers",
