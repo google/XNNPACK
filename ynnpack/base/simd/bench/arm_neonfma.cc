@@ -19,6 +19,7 @@ BENCH_UNARY(neonfma, expm1, f32, 4);
 BENCH_UNARY(neonfma, log, f32, 4);
 BENCH_UNARY(neonfma, log1p, f32, 4);
 BENCH_UNARY(neonfma, erf, f32, 4);
+BENCH_UNARY(neonfma, tanh, f32, 4);
 
 BENCH_UNARY(neonfma, fast_erf, f32, 4);
 

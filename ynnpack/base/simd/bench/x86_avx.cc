@@ -26,6 +26,8 @@ BENCH_UNARY(avx, log1p, f32, 8);
 BENCH_UNARY(avx, log1p, f64, 4);
 BENCH_UNARY(avx, erf, f32, 8);
 BENCH_UNARY(avx, erf, f64, 4);
+BENCH_UNARY(avx, tanh, f32, 8);
+BENCH_UNARY(avx, tanh, f64, 4);
 
 BENCH_UNARY(avx, fast_erf, f32, 8);
 

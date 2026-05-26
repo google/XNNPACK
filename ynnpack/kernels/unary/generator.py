@@ -136,7 +136,7 @@ def main(argv: Sequence[str]) -> None:
       ],
       "x86_fma3": [
           (cosine_fp32, (16, 1), consistent),
-          (erf_fp32, (16, 1), consistent),
+          (erf_fp32, (32, 1), consistent),
           (erf_fp64, (8, 1)),
           (poly3_fp32, (16, 1), consistent),
           (poly3_fp64, (16, 1)),

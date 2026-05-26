@@ -743,6 +743,22 @@ YNN_ALWAYS_INLINE f32x8 max(f32x8 a, f32x8 b) {
   return f32x8{_mm256_max_ps(a.v, b.v)};
 }
 
+// x86 min/max only preserve NaN if it is the second argument. So, rewrite
+// min/max with constant RHS to put the constant on the LHS instead. This avoids
+// the need for explicit NaN propagation logic.
+YNN_ALWAYS_INLINE f32x8 min(f32x8 a, float b) {
+  return f32x8{_mm256_min_ps(_mm256_set1_ps(b), a.v)};
+}
+YNN_ALWAYS_INLINE f64x4 min(f64x4 a, double b) {
+  return f64x4{_mm256_min_pd(_mm256_set1_pd(b), a.v)};
+}
+YNN_ALWAYS_INLINE f32x8 max(f32x8 a, float b) {
+  return f32x8{_mm256_max_ps(_mm256_set1_ps(b), a.v)};
+}
+YNN_ALWAYS_INLINE f64x4 max(f64x4 a, double b) {
+  return f64x4{_mm256_max_pd(_mm256_set1_pd(b), a.v)};
+}
+
 #ifdef YNN_ARCH_X86_AVX2
 YNN_ALWAYS_INLINE s32x8 min(s32x8 a, s32x8 b) {
   return s32x8{_mm256_min_epi32(a.v, b.v)};
@@ -799,11 +815,10 @@ YNN_ALWAYS_INLINE f64x4 copysign(f64x4 mag, f64x4 sgn) {
 }
 
 YNN_ALWAYS_INLINE f32x8 abs(f32x8 a) {
-  return f32x8{_mm256_and_ps(a.v, _mm256_set1_ps(bit_cast<float>(0x7FFFFFFF)))};
+  return f32x8{_mm256_andnot_ps(_mm256_set1_ps(-0.0), a.v)};
 }
 YNN_ALWAYS_INLINE f64x4 abs(f64x4 a) {
-  return f64x4{_mm256_and_pd(
-      a.v, _mm256_castsi256_pd(_mm256_set1_epi64x(0x7FFFFFFFFFFFFFFF)))};
+  return f64x4{_mm256_andnot_pd(_mm256_set1_pd(-0.0), a.v)};
 }
 #ifdef YNN_ARCH_X86_AVX2
 YNN_ALWAYS_INLINE u8x32 abs(s8x32 a) { return u8x32{_mm256_abs_epi8(a.v)}; }
@@ -980,29 +995,29 @@ YNN_ALWAYS_INLINE s64x4 isnan(f64x4 a) {
 }
 
 YNN_ALWAYS_INLINE s32x8 isinf(f32x8 a) {
-  __m256 mask = _mm256_set1_ps(bit_cast<float>(0x7FFFFFFF));
-  __m256 inf = _mm256_set1_ps(bit_cast<float>(0x7F800000));
+  __m256 mask = _mm256_set1_ps(-0.0f);
+  __m256 inf = _mm256_set1_ps(std::numeric_limits<float>::infinity());
   return s32x8{_mm256_castps_si256(
-      _mm256_cmp_ps(_mm256_and_ps(a.v, mask), inf, _CMP_EQ_OQ))};
+      _mm256_cmp_ps(_mm256_andnot_ps(mask, a.v), inf, _CMP_EQ_OQ))};
 }
 YNN_ALWAYS_INLINE s64x4 isinf(f64x4 a) {
-  __m256d mask = _mm256_set1_pd(bit_cast<double>(0x7FFFFFFFFFFFFFFFULL));
-  __m256d inf = _mm256_set1_pd(bit_cast<double>(0x7FF0000000000000ULL));
+  __m256d mask = _mm256_set1_pd(-0.0);
+  __m256d inf = _mm256_set1_pd(std::numeric_limits<double>::infinity());
   return s64x4{_mm256_castpd_si256(
-      _mm256_cmp_pd(_mm256_and_pd(a.v, mask), inf, _CMP_EQ_OQ))};
+      _mm256_cmp_pd(_mm256_andnot_pd(mask, a.v), inf, _CMP_EQ_OQ))};
 }
 
 YNN_ALWAYS_INLINE s32x8 isfinite(f32x8 a) {
-  __m256 mask = _mm256_set1_ps(bit_cast<float>(0x7FFFFFFF));
-  __m256 inf = _mm256_set1_ps(bit_cast<float>(0x7F800000));
+  __m256 mask = _mm256_set1_ps(-0.0f);
+  __m256 inf = _mm256_set1_ps(std::numeric_limits<float>::infinity());
   return s32x8{_mm256_castps_si256(
-      _mm256_cmp_ps(_mm256_and_ps(a.v, mask), inf, _CMP_LT_OQ))};
+      _mm256_cmp_ps(_mm256_andnot_ps(mask, a.v), inf, _CMP_LT_OQ))};
 }
 YNN_ALWAYS_INLINE s64x4 isfinite(f64x4 a) {
-  __m256d mask = _mm256_set1_pd(bit_cast<double>(0x7FFFFFFFFFFFFFFFULL));
-  __m256d inf = _mm256_set1_pd(bit_cast<double>(0x7FF0000000000000ULL));
+  __m256d mask = _mm256_set1_pd(-0.0);
+  __m256d inf = _mm256_set1_pd(std::numeric_limits<double>::infinity());
   return s64x4{_mm256_castpd_si256(
-      _mm256_cmp_pd(_mm256_and_pd(a.v, mask), inf, _CMP_LT_OQ))};
+      _mm256_cmp_pd(_mm256_andnot_pd(mask, a.v), inf, _CMP_LT_OQ))};
 }
 
 YNN_ALWAYS_INLINE f32x8 select(s32x8 cond, f32x8 a, f32x8 b) {

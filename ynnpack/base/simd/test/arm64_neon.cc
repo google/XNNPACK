@@ -61,6 +61,7 @@ TEST_UNARY(arm_neon, expm1, f64, 2, std::expm1, 2);
 TEST_UNARY(arm_neon, log, f64, 2, std::log, 2);
 TEST_UNARY(arm_neon, log1p, f64, 2, std::log1p, 3);
 TEST_UNARY(arm_neon, erf, f64, 2, std::erf, 3);
+TEST_UNARY(arm_neon, tanh, f64, 2, std::tanh, 4);
 
 }  // namespace simd
 }  // namespace ynn

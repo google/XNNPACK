@@ -28,6 +28,7 @@ BENCH_UNARY(neon, expm1, f32, 4);
 BENCH_UNARY(neon, log, f32, 4);
 BENCH_UNARY(neon, log1p, f32, 4);
 BENCH_UNARY(neon, erf, f32, 4);
+BENCH_UNARY(neon, tanh, f32, 4);
 
 BENCH_UNARY(neon, fast_erf, f32, 4);
 

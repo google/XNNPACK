@@ -15,6 +15,7 @@
 #include <cassert>
 #include <cstddef>
 #include <cstdint>
+#include <limits>
 #include <tuple>
 
 #include "ynnpack/base/base.h"
@@ -621,19 +622,55 @@ YNN_ALWAYS_INLINE f64x8 min(f64x8 a, f64x8 b) {
 YNN_ALWAYS_INLINE f32x16 min(f32x16 a, f32x16 b) {
   return f32x16{_mm512_min_ps(a.v, b.v)};
 }
-YNN_ALWAYS_INLINE s32x16 min(s32x16 a, s32x16 b) {
-  return s32x16{_mm512_min_epi32(a.v, b.v)};
-}
-
 YNN_ALWAYS_INLINE f64x8 max(f64x8 a, f64x8 b) {
   return f64x8{_mm512_max_pd(a.v, b.v)};
 }
 YNN_ALWAYS_INLINE f32x16 max(f32x16 a, f32x16 b) {
   return f32x16{_mm512_max_ps(a.v, b.v)};
 }
+
+// x86 min/max only preserve NaN if it is the second argument. So, rewrite
+// min/max with constant RHS to put the constant on the LHS instead. This avoids
+// the need for explicit NaN propagation logic.
+YNN_ALWAYS_INLINE f32x16 min(f32x16 a, float b) {
+  return f32x16{_mm512_min_ps(_mm512_set1_ps(b), a.v)};
+}
+YNN_ALWAYS_INLINE f64x8 min(f64x8 a, double b) {
+  return f64x8{_mm512_min_pd(_mm512_set1_pd(b), a.v)};
+}
+YNN_ALWAYS_INLINE f32x16 max(f32x16 a, float b) {
+  return f32x16{_mm512_max_ps(_mm512_set1_ps(b), a.v)};
+}
+YNN_ALWAYS_INLINE f64x8 max(f64x8 a, double b) {
+  return f64x8{_mm512_max_pd(_mm512_set1_pd(b), a.v)};
+}
+
+YNN_ALWAYS_INLINE s32x16 min(s32x16 a, s32x16 b) {
+  return s32x16{_mm512_min_epi32(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE s16x32 min(s16x32 a, s16x32 b) {
+  return s16x32{_mm512_min_epi16(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE s8x64 min(s8x64 a, s8x64 b) {
+  return s8x64{_mm512_min_epi8(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE u8x64 min(u8x64 a, u8x64 b) {
+  return u8x64{_mm512_min_epu8(a.v, b.v)};
+}
+
 YNN_ALWAYS_INLINE s32x16 max(s32x16 a, s32x16 b) {
   return s32x16{_mm512_max_epi32(a.v, b.v)};
 }
+YNN_ALWAYS_INLINE s16x32 max(s16x32 a, s16x32 b) {
+  return s16x32{_mm512_max_epi16(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE s8x64 max(s8x64 a, s8x64 b) {
+  return s8x64{_mm512_max_epi8(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE u8x64 max(u8x64 a, u8x64 b) {
+  return u8x64{_mm512_max_epu8(a.v, b.v)};
+}
+
 YNN_ALWAYS_INLINE f64x8 floor(f64x8 a) { return f64x8{_mm512_floor_pd(a.v)}; }
 YNN_ALWAYS_INLINE f64x8 ceil(f64x8 a) { return f64x8{_mm512_ceil_pd(a.v)}; }
 YNN_ALWAYS_INLINE f64x8 round(f64x8 a) {
@@ -650,26 +687,6 @@ YNN_ALWAYS_INLINE f32x16 round(f32x16 a) {
       _mm512_roundscale_ps(a.v, _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC)};
 }
 YNN_ALWAYS_INLINE f32x16 sqrt(f32x16 a) { return f32x16{_mm512_sqrt_ps(a.v)}; }
-
-YNN_ALWAYS_INLINE s16x32 min(s16x32 a, s16x32 b) {
-  return s16x32{_mm512_min_epi16(a.v, b.v)};
-}
-YNN_ALWAYS_INLINE s8x64 min(s8x64 a, s8x64 b) {
-  return s8x64{_mm512_min_epi8(a.v, b.v)};
-}
-YNN_ALWAYS_INLINE u8x64 min(u8x64 a, u8x64 b) {
-  return u8x64{_mm512_min_epu8(a.v, b.v)};
-}
-
-YNN_ALWAYS_INLINE s16x32 max(s16x32 a, s16x32 b) {
-  return s16x32{_mm512_max_epi16(a.v, b.v)};
-}
-YNN_ALWAYS_INLINE s8x64 max(s8x64 a, s8x64 b) {
-  return s8x64{_mm512_max_epi8(a.v, b.v)};
-}
-YNN_ALWAYS_INLINE u8x64 max(u8x64 a, u8x64 b) {
-  return u8x64{_mm512_max_epu8(a.v, b.v)};
-}
 
 YNN_ALWAYS_INLINE f32x16 copysign(f32x16 mag, f32x16 sgn) {
   __m512 sign_mask = _mm512_set1_ps(-0.0f);

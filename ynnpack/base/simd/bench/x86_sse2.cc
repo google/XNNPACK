@@ -32,6 +32,8 @@ BENCH_UNARY(sse2, log1p, f32, 4);
 BENCH_UNARY(sse2, log1p, f64, 2);
 BENCH_UNARY(sse2, erf, f32, 4);
 BENCH_UNARY(sse2, erf, f64, 2);
+BENCH_UNARY(sse2, tanh, f32, 4);
+BENCH_UNARY(sse2, tanh, f64, 2);
 
 BENCH_UNARY(sse2, fast_erf, f32, 4);
 

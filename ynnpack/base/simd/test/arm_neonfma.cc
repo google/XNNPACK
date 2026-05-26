@@ -3,6 +3,7 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+#include <cmath>
 #include <cstdint>
 
 #include <gtest/gtest.h>
@@ -35,6 +36,7 @@ TEST_UNARY(arm_neonfma, expm1, f32, 4, std::expm1, 2);
 TEST_UNARY(arm_neonfma, log, f32, 4, std::log, 2);
 TEST_UNARY(arm_neonfma, log1p, f32, 4, std::log1p, 3);
 TEST_UNARY(arm_neonfma, erf, f32, 4, std::erf, 2);
+TEST_UNARY(arm_neonfma, tanh, f32, 4, std::tanh, 5);
 
 TEST_UNARY(arm_neonfma, fast_erf, f32, 4, std::erf, 5);
 

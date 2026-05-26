@@ -1186,6 +1186,21 @@ YNN_ALWAYS_INLINE s8x16 max(s8x16 a, s8x16 b) {
   return s8x16{vmaxq_s8(a.v, b.v)};
 }
 
+YNN_ALWAYS_INLINE f32x4 min(f32x4 a, float b) {
+  return f32x4{vminq_f32(vdupq_n_f32(b), a.v)};
+}
+YNN_ALWAYS_INLINE f32x4 max(f32x4 a, float b) {
+  return f32x4{vmaxq_f32(vdupq_n_f32(b), a.v)};
+}
+#ifdef YNN_ARCH_ARM64
+YNN_ALWAYS_INLINE f64x2 min(f64x2 a, double b) {
+  return f64x2{vminq_f64(vdupq_n_f64(b), a.v)};
+}
+YNN_ALWAYS_INLINE f64x2 max(f64x2 a, double b) {
+  return f64x2{vmaxq_f64(vdupq_n_f64(b), a.v)};
+}
+#endif
+
 YNN_ALWAYS_INLINE f32x4 abs(f32x4 a) { return f32x4{vabsq_f32(a.v)}; }
 #ifdef YNN_ARCH_ARM64
 YNN_ALWAYS_INLINE f64x2 abs(f64x2 a) { return f64x2{vabsq_f64(a.v)}; }

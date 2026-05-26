@@ -191,8 +191,24 @@ YNN_ALWAYS_INLINE vec<T, N> min(vec<T, N> a, vec<T, N> b) {
   return {min(lo(a), lo(b)), min(hi(a), hi(b))};
 }
 template <typename T, size_t N>
+YNN_ALWAYS_INLINE vec<T, N> min(vec<T, N> a, T b) {
+  return {min(lo(a), b), min(hi(a), b)};
+}
+template <typename T, size_t N>
+YNN_ALWAYS_INLINE vec<T, N> min(T a, vec<T, N> b) {
+  return {min(a, lo(b)), min(a, hi(b))};
+}
+template <typename T, size_t N>
 YNN_ALWAYS_INLINE vec<T, N> max(vec<T, N> a, vec<T, N> b) {
   return {max(lo(a), lo(b)), max(hi(a), hi(b))};
+}
+template <typename T, size_t N>
+YNN_ALWAYS_INLINE vec<T, N> max(vec<T, N> a, T b) {
+  return {max(lo(a), b), max(hi(a), b)};
+}
+template <typename T, size_t N>
+YNN_ALWAYS_INLINE vec<T, N> max(T a, vec<T, N> b) {
+  return {max(a, lo(b)), max(a, hi(b))};
 }
 template <typename T, size_t N>
 YNN_ALWAYS_INLINE vec<T, N> copysign(vec<T, N> mag, vec<T, N> sgn) {
@@ -426,7 +442,7 @@ template <int m, typename T, size_t N, typename P, typename Q>
 YNN_ALWAYS_INLINE vec<T, N> exp_impl(vec<T, N> x, const P& p, const Q& q,
                                      T min_x, T max_x, T log2e,
                                      T ln2_hi, T ln2_lo) {
-  auto x_clamped = min(max(x, broadcast<N>(min_x)), broadcast<N>(max_x));
+  auto x_clamped = min(max(x, min_x), max_x);
   auto b = round_small(x_clamped * broadcast<N>(log2e));
   // Compute r = (b - x_clamped) * ln2 with extra precision using both ln2 and
   // the residual T(ln(2)) - ln2_hi
@@ -632,7 +648,7 @@ static vec<T, N> erf_impl(vec<T, N> x, const P& p, const Q& q, T max_abs_x) {
   auto x2 = x_clamped * x_clamped;
   auto p_x2 = internal::eval_polynomial(p, x2);
   auto q_x2 = internal::eval_polynomial(q, x2);
-  return select(isnan(x), x, x_clamped * p_x2 / q_x2);
+  return x_clamped * p_x2 / q_x2;
 }
 
 // Approximate erf(x) piecewise. When |x| < max_abs_x1, we approximate erf(x)
@@ -643,7 +659,7 @@ static vec<T, N> erf_impl(vec<T, N> x, const P& p, const Q& q, T max_abs_x) {
 template <typename T, size_t N, typename P, typename Q, typename R, typename S>
 static vec<T, N> erf_impl(vec<T, N> x, const P& p, const Q& q, const R& r,
                           const S& s, T max_abs_x1, T max_abs_x2) {
-  auto abs_x = min(abs(x), broadcast<N>(max_abs_x2));
+  auto abs_x = min(abs(x), max_abs_x2);
   auto x2 = abs_x * abs_x;
 
   auto p_x2 = internal::eval_polynomial(p, x2);
@@ -658,7 +674,7 @@ static vec<T, N> erf_impl(vec<T, N> x, const P& p, const Q& q, const R& r,
       select(abs_x < broadcast<N>(max_abs_x1), erf_x_small, erf_x_large);
 
   // Restore the sign of the original function.
-  return select(isnan(x), x, copysign(erf_x, x));
+  return copysign(erf_x, x);
 }
 
 // Approximate erf(x) piecewise. When |x| < max_abs_x1, we approximate erf(x)
@@ -671,7 +687,7 @@ static vec<T, N> erf_impl(vec<T, N> x, const P& p, const Q& q, const R& r,
 template <typename T, size_t N, typename P, typename Q, typename R>
 static vec<T, N> erf_impl(vec<T, N> x, const P& p, const Q& q, const R& r,
                           T max_abs_x1, T max_abs_x2, T max_abs_x3) {
-  auto abs_x = min(abs(x), broadcast<N>(max_abs_x3));
+  auto abs_x = min(abs(x), max_abs_x3);
   auto x2 = abs_x * abs_x;
 
   auto p_x2 = internal::eval_polynomial(p, x2);
@@ -685,7 +701,7 @@ static vec<T, N> erf_impl(vec<T, N> x, const P& p, const Q& q, const R& r,
       select(abs_x < broadcast<N>(max_abs_x1), erf_x_small, erf_x_large);
 
   // Restore the sign of the original function.
-  return select(isnan(x), x, copysign(erf_x, x));
+  return copysign(erf_x, x);
 }
 
 }  // namespace internal
@@ -795,6 +811,40 @@ static vec<float, N> fast_erf(vec<float, N> x) {
       1.0000000000e+00f,
   };
   return internal::erf_impl(x, P, Q, max_abs_x);
+}
+
+template <size_t N>
+static vec<float, N> tanh(vec<float, N> x) {
+  static std::array<float, 5> P = {
+      2.0879960871e-08f,
+      2.5928242394e-05f,
+      3.8165273145e-03f,
+      1.3651061058e-01f,
+      1.0000001192e+00f,
+  };
+  static std::array<float, 5> Q = {
+      1.0818475857e-06f,
+      3.8116905489e-04f,
+      2.7097105980e-02f,
+      4.6984484792e-01f,
+      1.0000000000e+00f,
+  };
+  constexpr float max_abs_x = 7.9974925518035889f;
+
+  auto x_clamped = max(min(x, max_abs_x), -max_abs_x);
+
+  auto x2 = x_clamped * x_clamped;
+  auto p_x = internal::eval_polynomial(P, x2) * x_clamped;
+  auto q_x = internal::eval_polynomial(Q, x2);
+  return p_x / q_x;
+}
+
+template <size_t N>
+static vec<double, N> tanh(vec<double, N> x) {
+  auto two = broadcast<N>(2.0);
+  // Clamp large x to avoid Inf/Inf = NaN.
+  auto expm1_2x = expm1(min(two*x, 300.0));
+  return expm1_2x / (expm1_2x + two);
 }
 
 }  // namespace simd

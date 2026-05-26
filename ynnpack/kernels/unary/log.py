@@ -3,7 +3,6 @@
 # pylint: disable=undefined-variable
 # pylint: disable=missing-function-docstring
 from ynnpack.kernels.elementwise.compiler import *  # pylint: disable=wildcard-import
-from ynnpack.kernels.unary.util import *  # pylint: disable=wildcard-import
 
 
 @const_buffer("a", Float(32))

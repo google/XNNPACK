@@ -3,7 +3,6 @@
 # pylint: disable=undefined-variable
 # pylint: disable=missing-function-docstring
 from ynnpack.kernels.elementwise.compiler import *  # pylint: disable=wildcard-import
-from ynnpack.kernels.unary.util import *  # pylint: disable=wildcard-import
 
 
 @const_buffer("a", Float(32))
@@ -16,7 +15,7 @@ from ynnpack.kernels.unary.util import *  # pylint: disable=wildcard-import
 @operator_name("erf")
 def erf_fp32(a, x, output_offset, output_multiplier, input_multiplier):
   va = load(a) * input_multiplier
-  return store(erf(va) * output_multiplier + output_offset, x)
+  return store(multiply_add(erf(va), output_multiplier, output_offset), x)
 
 
 @const_buffer("a", Float(64))
@@ -29,4 +28,4 @@ def erf_fp32(a, x, output_offset, output_multiplier, input_multiplier):
 @operator_name("erf")
 def erf_fp64(a, x, output_offset, output_multiplier, input_multiplier):
   va = load(a) * input_multiplier
-  return store(erf(va) * output_multiplier + output_offset, x)
+  return store(multiply_add(erf(va), output_multiplier, output_offset), x)

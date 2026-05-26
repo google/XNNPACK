@@ -1051,6 +1051,22 @@ YNN_ALWAYS_INLINE u8x16 max(u8x16 a, u8x16 b) {
   return u8x16{_mm_max_epu8(a.v, b.v)};
 }
 
+// x86 min/max only preserve NaN if it is the second argument. So, rewrite
+// min/max with constant RHS to put the constant on the LHS instead. This avoids
+// the need for explicit NaN propagation logic.
+YNN_ALWAYS_INLINE f32x4 min(f32x4 a, float b) {
+  return f32x4{_mm_min_ps(_mm_set1_ps(b), a.v)};
+}
+YNN_ALWAYS_INLINE f64x2 min(f64x2 a, double b) {
+  return f64x2{_mm_min_pd(_mm_set1_pd(b), a.v)};
+}
+YNN_ALWAYS_INLINE f32x4 max(f32x4 a, float b) {
+  return f32x4{_mm_max_ps(_mm_set1_ps(b), a.v)};
+}
+YNN_ALWAYS_INLINE f64x2 max(f64x2 a, double b) {
+  return f64x2{_mm_max_pd(_mm_set1_pd(b), a.v)};
+}
+
 #ifdef YNN_ARCH_X86_SSE41
 YNN_ALWAYS_INLINE s8x16 min(s8x16 a, s8x16 b) {
   return s8x16{_mm_min_epi8(a.v, b.v)};
@@ -1205,19 +1221,6 @@ YNN_ALWAYS_INLINE s32x4 operator>(f32x4 a, f32x4 b) {
 YNN_ALWAYS_INLINE s32x4 operator>=(f32x4 a, f32x4 b) {
   return s32x4{_mm_castps_si128(_mm_cmpge_ps(a.v, b.v))};
 }
-YNN_ALWAYS_INLINE s32x4 isnan(f32x4 a) {
-  return s32x4{_mm_castps_si128(_mm_cmpunord_ps(a.v, a.v))};
-}
-YNN_ALWAYS_INLINE s32x4 isinf(f32x4 a) {
-  __m128 mask = _mm_castsi128_ps(_mm_set1_epi32(0x7FFFFFFF));
-  __m128 inf = _mm_castsi128_ps(_mm_set1_epi32(0x7F800000));
-  return s32x4{_mm_castps_si128(_mm_cmpeq_ps(_mm_and_ps(a.v, mask), inf))};
-}
-YNN_ALWAYS_INLINE s32x4 isfinite(f32x4 a) {
-  __m128 mask = _mm_castsi128_ps(_mm_set1_epi32(0x7FFFFFFF));
-  __m128 inf = _mm_castsi128_ps(_mm_set1_epi32(0x7F800000));
-  return s32x4{_mm_castps_si128(_mm_cmplt_ps(_mm_and_ps(a.v, mask), inf))};
-}
 
 YNN_ALWAYS_INLINE s64x2 operator==(f64x2 a, f64x2 b) {
   return s64x2{_mm_castpd_si128(_mm_cmpeq_pd(a.v, b.v))};
@@ -1262,18 +1265,31 @@ YNN_ALWAYS_INLINE s8x16 operator>(s8x16 a, s8x16 b) {
 }
 YNN_ALWAYS_INLINE s8x16 operator<(s8x16 a, s8x16 b) { return b > a; }
 
+YNN_ALWAYS_INLINE s32x4 isnan(f32x4 a) {
+  return s32x4{_mm_castps_si128(_mm_cmpunord_ps(a.v, a.v))};
+}
 YNN_ALWAYS_INLINE s64x2 isnan(f64x2 a) {
   return s64x2{_mm_castpd_si128(_mm_cmpunord_pd(a.v, a.v))};
 }
+YNN_ALWAYS_INLINE s32x4 isinf(f32x4 a) {
+  __m128 mask = _mm_set1_ps(-0.0f);
+  __m128 inf = _mm_set1_ps(std::numeric_limits<float>::infinity());
+  return s32x4{_mm_castps_si128(_mm_cmpeq_ps(_mm_andnot_ps(mask, a.v), inf))};
+}
 YNN_ALWAYS_INLINE s64x2 isinf(f64x2 a) {
-  __m128d mask = _mm_castsi128_pd(_mm_set1_epi64x(0x7FFFFFFFFFFFFFFFULL));
-  __m128d inf = _mm_castsi128_pd(_mm_set1_epi64x(0x7FF0000000000000ULL));
-  return s64x2{_mm_castpd_si128(_mm_cmpeq_pd(_mm_and_pd(a.v, mask), inf))};
+  __m128d mask = _mm_set1_pd(-0.0);
+  __m128d inf = _mm_set1_pd(std::numeric_limits<double>::infinity());
+  return s64x2{_mm_castpd_si128(_mm_cmpeq_pd(_mm_andnot_pd(mask, a.v), inf))};
+}
+YNN_ALWAYS_INLINE s32x4 isfinite(f32x4 a) {
+  __m128 mask = _mm_set1_ps(-0.0f);
+  __m128 inf = _mm_set1_ps(std::numeric_limits<float>::infinity());
+  return s32x4{_mm_castps_si128(_mm_cmplt_ps(_mm_andnot_ps(mask, a.v), inf))};
 }
 YNN_ALWAYS_INLINE s64x2 isfinite(f64x2 a) {
-  __m128d mask = _mm_castsi128_pd(_mm_set1_epi64x(0x7FFFFFFFFFFFFFFFULL));
-  __m128d inf = _mm_castsi128_pd(_mm_set1_epi64x(0x7FF0000000000000ULL));
-  return s64x2{_mm_castpd_si128(_mm_cmplt_pd(_mm_and_pd(a.v, mask), inf))};
+  __m128d mask = _mm_set1_pd(-0.0);
+  __m128d inf = _mm_set1_pd(std::numeric_limits<double>::infinity());
+  return s64x2{_mm_castpd_si128(_mm_cmplt_pd(_mm_andnot_pd(mask, a.v), inf))};
 }
 
 YNN_ALWAYS_INLINE double horizontal_sum(f64x2 a) {

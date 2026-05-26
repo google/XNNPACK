@@ -212,6 +212,10 @@ p, q = rational_approximation(
 print_polynomial("P", p)
 print_polynomial("Q", q)
 
+one_test = np.linspace(x_max - 0.15, x_max + 0.15, num=1000000).astype(np.float32)
+approx = one_test * (poly_eval(p, one_test**2) / poly_eval(q, one_test**2))
+print(f"  constexpr float max_abs_x = {one_test[list(approx).index(1)]}f;")
+
 # Evaluate and plot relative error for erf(x)
 x_test = np.linspace(x_min, x_max, 5000)
 t_test = x_test**2
@@ -298,3 +302,29 @@ print_polynomial("P", p)
 print_polynomial("Q", q)
 print_polynomial("R", r)
 print_polynomial("S", s)
+
+# %%
+import numpy as np
+
+# tanh(x) fp32 approximation
+f = lambda x: np.tanh(np.sqrt(x)) / np.sqrt(x)
+u_min, u_max = 1e-5, 8
+p_degree_u, q_degree_u = 4, 4
+
+p_u, q_u = rational_approximation(
+    f, u_min**2, u_max**2, p_degree_u, q_degree_u, dtype=np.float32
+)
+
+print("Polynomials for g(u) where tanh(x) ~= x * P(x^2)/Q(x^2):")
+print_polynomial("P", p_u)
+print_polynomial("Q", q_u)
+
+one_test = np.linspace(u_max - 0.15, u_max + 0.15, num=1000000).astype(np.float32)
+approx = one_test * (poly_eval(p_u, one_test**2) / poly_eval(q_u, one_test**2))
+print(f"  constexpr float max_abs_x = {one_test[list(approx).index(1)]}f;")
+
+# Evaluate final error for tanh(x)
+x_test = np.linspace(u_min, u_max, 5000).astype(np.float32)
+approx = x_test * (poly_eval(p_u, x_test**2) / poly_eval(q_u, x_test**2))
+plot_error(np.tanh, x_test, approx, title="Odd tanh(x) Relative Error (fp32)")
+

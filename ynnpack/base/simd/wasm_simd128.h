@@ -478,6 +478,14 @@ YNN_ALWAYS_INLINE s8x16 max(s8x16 a, s8x16 b) {
   return s8x16{wasm_i8x16_max(a.v, b.v)};
 }
 
+// TODO: b/515053903 - Use pmin/max when we know where NaN might be.
+YNN_ALWAYS_INLINE f32x4 min(f32x4 a, float b) {
+  return f32x4{wasm_f32x4_min(wasm_f32x4_splat(b), a.v)};
+}
+YNN_ALWAYS_INLINE f32x4 max(f32x4 a, float b) {
+  return f32x4{wasm_f32x4_max(wasm_f32x4_splat(b), a.v)};
+}
+
 YNN_ALWAYS_INLINE f32x4 copysign(f32x4 mag, f32x4 sgn) {
   v128_t sign_mask = wasm_i32x4_splat(0x80000000);
   return f32x4{wasm_v128_bitselect(sgn.v, mag.v, sign_mask)};

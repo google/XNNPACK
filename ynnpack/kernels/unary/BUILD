@@ -22,7 +22,6 @@ py_binary(
         "sigmoid.py",
         "sine_cosine.py",
         "tanh.py",
-        "util.py",
     ],
     tags = [
         "manual",

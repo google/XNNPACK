@@ -494,6 +494,11 @@ def expm1(value):
 
 
 @intrinsic
+def tanh(value):
+  return Op(value.ty, "tanh", [value])
+
+
+@intrinsic
 def log(value):
   return Op(value.ty, "log", [value])
 
@@ -1027,6 +1032,7 @@ class Target:
         "erf",
         "exp",
         "expm1",
+        "tanh",
         "log",
         "log1p",
     }
