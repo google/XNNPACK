@@ -47,6 +47,7 @@ cc_library(
     # copybara:uncomment includes = ["utils"],
     deps = [
         "//litert/tensor:datatypes",
+        "//litert/tensor/internal:type_id",
         "@abseil-cpp//absl/status",
         "@abseil-cpp//absl/status:statusor",
         "@abseil-cpp//absl/types:span",
@@ -60,6 +61,7 @@ cc_test(
         ":buffer",
         "//litert/tensor:datatypes",
         "//litert/tensor/internal:matchers",
+        "//litert/tensor/internal:type_id",
         "//litert/tensor/utils:matchers",
         "@abseil-cpp//absl/algorithm:container",
         "@com_google_googletest//:gtest_main",  # gunit
