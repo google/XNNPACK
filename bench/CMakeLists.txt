@@ -104,6 +104,7 @@ SET(MICROKERNEL_BENCHMARKS
     x8-packw
     vunary
     vbinary
+    indirection
     xN-transposec
     xx-transposev)
 FOREACH(BENCH ${MICROKERNEL_BENCHMARKS})

@@ -1411,6 +1411,7 @@ if (!build_with_chromium) {
   }
 
   BENCHMARKS = [
+    "bench/indirection.cc",
     "bench/bf16-gemm.cc",
     "bench/f16-conv-hwc2chw.cc",
     "bench/f16-dwconv.cc",
