@@ -152,7 +152,12 @@ double run_benchmark(TA, TB, TC, const kernel_info& kernel, size_t m, size_t n,
           size_t a_stride_m, span<const size_t> a_k_strides, const void* b_ptr,
           span<const size_t> b_k_strides, size_t init_c_stride_m,
           const void* init_c, void* c_ptr) {
-        kernel.kernel(m, n, k[2], k[1], k[0], a_stride_m,
+        // For dot_flag::transpose_a kernels, the 6th kernel arg is the
+        // stride of the k1/tile_k dimension of the packed A (see dot.h),
+        // not the m stride. subgraph/dot.cc does the same swap — mirror
+        // it here.
+        kernel.kernel(m, n, k[2], k[1], k[0],
+                      pack_a ? a_k_strides[0] : a_stride_m,
                       a_k_strides[2], a_k_strides[1], a_ptr, b_k_strides[2],
                       b_k_strides[1], b_k_strides[0], b_ptr, init_c_stride_m,
                       init_c, c.stride(0) * sizeof(TC), c_ptr);
