@@ -503,6 +503,17 @@ ynn_status ynn_define_reduce(ynn_subgraph_t subgraph, ynn_reduce_operator op,
   YNN_RETURN_IF_ERROR(
       validate_output_tensor("reduce", subgraph, "output_id", output_id));
 
+  // We currently don't have reduce kernels for sub-byte datatypes, so need to
+  // convert.
+  if (type_size_bits(subgraph->value(input_a_id).type) < 8) {
+    const ynn_value& a = subgraph->value(input_a_id);
+    uint32_t converted_a_id = YNN_INVALID_VALUE_ID;
+    YNN_RETURN_IF_ERROR(ynn_define_convert(subgraph, input_a_id, ynn_type_int8,
+                                           a.zero_point_id, a.scale_id,
+                                           &converted_a_id, flags));
+    input_a_id = converted_a_id;
+  }
+
   const ynn_value& a = subgraph->value(input_a_id);
 
   ynn::axes_set k_dims;

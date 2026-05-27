@@ -78,7 +78,9 @@ auto make_transpose_impl(int elem_count, std::vector<int32_t> permutation) {
     assert(kernel);
 
     const slinky::index_t m = sliced_output.dim(input_dim0).extent();
-    const slinky::index_t n = sliced_output.dim(0).extent() * elem_count;
+    const slinky::index_t n =
+        std::min(sliced_input.dim(0).extent(),
+                 sliced_output.dim(0).extent() * elem_count);
     const slinky::index_t n_bytes_a = m * output.elem_size;
     assert(is_contiguous(sliced_input.dim(input_dim0), output.elem_size));
     const slinky::index_t input_stride = sliced_input.dim(0).stride();
@@ -131,18 +133,6 @@ void define_static_transpose(ynn_subgraph& subgraph, ynn_node& node,
     }
     output_extents[d] = input_extent;
   }
-  if (elem_count != 1 && !output_extents.empty() &&
-      output_extents[0].defined()) {
-    // And convert back to a physical shape after converting to a logical
-    // shape above. This could fail if the user transposes a dimension with an
-    // extent that is not aligned to `elem_count`.
-    node.checks.push_back(ynn_node::check{
-        output_extents[0] % elem_count == 0,
-        {"For node 'static_transpose', dimension 0 extent (", output_extents[0],
-         ") of ", ynn_node::output_idx{0},
-         " is not aligned to an instance of type ", to_string(input.type)},
-    });
-  }
 
   if (identity && output_id == YNN_INVALID_VALUE_ID) {
     output_id = input_id;
@@ -155,8 +145,8 @@ void define_static_transpose(ynn_subgraph& subgraph, ynn_node& node,
   // We can alias if we aren't rearranging the stride 1 dimension from the
   // input.
   alias = alias || permutation.empty() ||
-          first_non_trivial_dim >= permutation.size() ||
-          permutation[first_non_trivial_dim] == 0;
+          (elem_count == 1 && (first_non_trivial_dim >= permutation.size() ||
+                               permutation[first_non_trivial_dim] == 0));
 
   node.inputs = {input_id};
   node.outputs = {output_id};
