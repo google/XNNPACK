@@ -1381,6 +1381,9 @@ YNN_ALWAYS_INLINE int32_t horizontal_min(s32x4 a) {
 YNN_ALWAYS_INLINE f32x4 select(s32x4 cond, f32x4 a, f32x4 b) {
   return f32x4{_mm_blendv_ps(b.v, a.v, _mm_castsi128_ps(cond.v))};
 }
+YNN_ALWAYS_INLINE f64x2 select(s64x2 cond, f64x2 a, f64x2 b) {
+  return f64x2{_mm_blendv_pd(b.v, a.v, _mm_castsi128_pd(cond.v))};
+}
 YNN_ALWAYS_INLINE s32x4 select(s32x4 cond, s32x4 a, s32x4 b) {
   return s32x4{_mm_blendv_epi8(b.v, a.v, cond.v)};
 }
