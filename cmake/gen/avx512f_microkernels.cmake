@@ -85,6 +85,8 @@ SET(PROD_AVX512F_MICROKERNEL_SRCS
   src/x32-packw/gen/x32-packw-x32c2-gemm-goi-avx512f-u4-prfm.c)
 
 SET(NON_PROD_AVX512F_MICROKERNEL_SRCS
+  src/f16-vtanh/gen/f16-f32acc-vtanh-avx512f-rational-5-4-div.c
+  src/f16-vtanh/gen/f16-f32acc-vtanh-avx512f-rational-5-4-nr.c
   src/f32-dwconv/gen/f32-dwconv-3p16c-minmax-avx512f-acc2.c
   src/f32-dwconv/gen/f32-dwconv-3p32c-minmax-avx512f-acc2.c
   src/f32-dwconv/gen/f32-dwconv-3p32c-minmax-avx512f.c
