@@ -637,14 +637,17 @@ bool is_expand_dims_noop(const ynn_value& input,
 
 bool remove_broadcast_expand_dims(ynn_subgraph& subgraph, ynn_node& node,
                                   subgraph_analysis& analysis) {
-  auto* expand_dims = std::get_if<ynn_node::static_expand_dims>(&node.op);
-  if (!expand_dims) return false;
+  auto* transpose = std::get_if<ynn_node::static_transpose>(&node.op);
+  if (!transpose) return false;
 
   const ynn_value& input = subgraph.value(node.inputs[0]);
+  auto expand_dims_axes = get_static_expand_dims_axes(*transpose, input.rank());
+  if (!expand_dims_axes) return false;
+
   ynn_value& output = subgraph.value(node.outputs[0]);
   if (output.is_external_output()) return false;
 
-  if (!is_expand_dims_noop(input, expand_dims->new_axes)) return false;
+  if (!is_expand_dims_noop(input, *expand_dims_axes)) return false;
 
   std::vector<ynn_node*>& consumers = analysis.consumers[node.outputs[0]];
   if (!std::all_of(consumers.begin(), consumers.end(), [&](const ynn_node* i) {
@@ -877,9 +880,12 @@ ynn_node* find_non_copy_producer(const ynn_subgraph& subgraph,
 // Rewrite static_expand_dims(reduce(x)) to reduce(x, keep_dims=true)
 bool rewrite_expand_dims_reduce(ynn_subgraph& subgraph, ynn_node& node,
                                 subgraph_analysis& analysis) {
-  ynn_node::static_expand_dims* expand =
-      std::get_if<ynn_node::static_expand_dims>(&node.op);
-  if (!expand) return false;
+  auto* transpose = std::get_if<ynn_node::static_transpose>(&node.op);
+  if (!transpose) return false;
+
+  const ynn_value& input = subgraph.value(node.inputs[0]);
+  auto expand_dims_axes = get_static_expand_dims_axes(*transpose, input.rank());
+  if (!expand_dims_axes) return false;
 
   ynn_node* producer = analysis.producer_of(node.inputs[0]);
   if (!producer) return false;
@@ -887,7 +893,7 @@ bool rewrite_expand_dims_reduce(ynn_subgraph& subgraph, ynn_node& node,
   ynn_node::reduce* reduce = std::get_if<ynn_node::reduce>(&producer->op);
   if (!reduce || reduce->keep_dims) return false;
 
-  if (expand->new_axes != reduce->k_dims) return false;
+  if (*expand_dims_axes != reduce->k_dims) return false;
 
   // Check that the intermediate output has exactly one consumer
   // and is not an external output.
@@ -897,18 +903,18 @@ bool rewrite_expand_dims_reduce(ynn_subgraph& subgraph, ynn_node& node,
     return false;
   }
 
-  YNN_LOG_DEBUG() << "Fusing static_expand_dims and " << to_string(reduce->op)
+  YNN_LOG_DEBUG() << "Fusing expand_dims and " << to_string(reduce->op)
                   << " to " << to_string(reduce->op) << "(keep_dims=true)";
 
   std::get<ynn_node::reduce>(producer->op).keep_dims = true;
   producer->outputs[0] = node.outputs[0];
   if (producer->inputs[1] != YNN_INVALID_VALUE_ID) {
     const ynn_value& init = subgraph.value(producer->inputs[1]);
-    if (!is_expand_dims_noop(init, expand->new_axes)) {
+    if (!is_expand_dims_noop(init, *expand_dims_axes)) {
       // We need to move the expand_dims to the initializer input.
       uint32_t expanded_id = node.inputs[0];
       ynn::define_static_expand_dims(subgraph, node, producer->inputs[1],
-                                     &expanded_id, expand->new_axes);
+                                     &expanded_id, *expand_dims_axes);
       producer->inputs[1] = expanded_id;
       // Swap the nodes to maintain topological order.
       std::swap(node, *producer);
@@ -1378,7 +1384,7 @@ bool rewrite_binary(ynn_subgraph& subgraph, ynn_node& node,
   return false;
 }
 
-// Rewrite reshape to expand_dims or slice if possible.
+// Rewrite reshape to static_transpose if possible.
 bool rewrite_reshape(ynn_subgraph& subgraph, ynn_node& node,
                      subgraph_analysis& analysis) {
   const ynn_node::static_reshape* reshape =
@@ -1386,56 +1392,40 @@ bool rewrite_reshape(ynn_subgraph& subgraph, ynn_node& node,
   if (!reshape) return false;
 
   const ynn_value& input = subgraph.value(node.inputs[0]);
-  const ynn_value& output = subgraph.value(node.outputs[0]);
+  ynn_value& output = subgraph.value(node.outputs[0]);
 
-  bool is_expand_dims = output.rank() >= input.rank();
-  bool is_slice = output.rank() <= input.rank();
-  ynn::axes_set new_axes;
-  std::vector<ynn_node::static_slice::slice> slices;
+  std::vector<int32_t> permutation;
 
   size_t i = 0;
   size_t o = 0;
-  while (o < output.rank() && i < input.rank()) {
-    if (slinky::prove_true(output.extent(o) == input.extent(i))) {
+  while (o < output.rank()) {
+    if (i < input.rank() &&
+        slinky::prove_true(output.extent(o) == input.extent(i))) {
+      permutation.push_back(i);
       ++i;
       ++o;
     } else if (slinky::prove_true(output.extent(o) == 1)) {
-      new_axes[o] = true;
-      is_slice = false;
+      permutation.push_back(input.rank());
       ++o;
-    } else if (slinky::prove_true(input.extent(i) == 1)) {
-      slices.push_back({static_cast<int32_t>(i), 0, 0, 0});
-      is_expand_dims = false;
+    } else if (i < input.rank() && slinky::prove_true(input.extent(i) == 1)) {
       ++i;
     } else {
       return false;
     }
   }
-  for (; i < input.rank(); ++i) {
-    if (!slinky::prove_true(input.extent(i) == 1)) return false;
-    slices.push_back({static_cast<int32_t>(i), 0, 0, 0});
-    is_expand_dims = false;
-  }
-  for (; o < output.rank(); ++o) {
-    if (!slinky::prove_true(output.extent(o) == 1)) return false;
-    new_axes[o] = true;
-    is_slice = false;
+
+  while (i < input.rank()) {
+    if (slinky::prove_true(input.extent(i) == 1)) {
+      ++i;
+    } else {
+      return false;
+    }
   }
 
-  uint32_t output_id = output.id;
-  if (is_expand_dims) {
-    YNN_LOG_DEBUG() << "Rewriting reshape to static_expand_dims";
-    ynn::define_static_expand_dims(subgraph, node, input.id, &output_id,
-                                   new_axes);
-    return true;
-  } else if (is_slice) {
-    YNN_LOG_DEBUG() << "Rewriting reshape to static_slice";
-    ynn::define_static_slice(subgraph, node, input.id, &output_id,
-                             std::move(slices), /*slice_dims=*/true);
-    return true;
-  }
-
-  return false;
+  YNN_LOG_DEBUG() << "Rewriting reshape to static_transpose";
+  ynn::define_static_transpose(subgraph, node, std::move(permutation),
+                               input.id, &output.id);
+  return true;
 }
 
 // Rewrite op(reduce_op(x, identity), y) to reduce_op(x, y)
@@ -1592,7 +1582,7 @@ bool rewrite_reduce_static_transpose(ynn_subgraph& subgraph, ynn_node& node,
 
     // Redefine the old reduce node as a transpose node
     ynn::define_static_transpose(subgraph, node, std::move(new_perm), r_id,
-                                 y_id, alias);
+                                 &y_id, alias);
   }
 
   return true;
@@ -1721,8 +1711,8 @@ bool rewrite_sum_to_dot(ynn_subgraph& subgraph, ynn_node& node,
   uint32_t a_t_id = YNN_INVALID_VALUE_ID;
   uint32_t b_t_id = YNN_INVALID_VALUE_ID;
   ynn_node transpose_a, transpose_b;
-  define_static_transpose(subgraph, transpose_a, perm_a, a_id, a_t_id);
-  define_static_transpose(subgraph, transpose_b, perm_b, b_id, b_t_id);
+  define_static_transpose(subgraph, transpose_a, perm_a, a_id, &a_t_id);
+  define_static_transpose(subgraph, transpose_b, perm_b, b_id, &b_t_id);
   if (a_t_id != a_id) subgraph.add_node(std::move(transpose_a));
   if (b_t_id != b_id) subgraph.add_node(std::move(transpose_b));
 
@@ -1784,7 +1774,7 @@ bool rewrite_sum_to_dot(ynn_subgraph& subgraph, ynn_node& node,
     }
     ynn_node transpose_init;
     define_static_transpose(subgraph, transpose_init, perm_init, init_id,
-                            init_t_id);
+                            &init_t_id);
     if (init_t_id != init_id) {
       subgraph.add_node(std::move(transpose_init));
     }
@@ -1800,7 +1790,7 @@ bool rewrite_sum_to_dot(ynn_subgraph& subgraph, ynn_node& node,
     // Transpose the output back to the original layout.
     ynn_node transpose;
     define_static_transpose(subgraph, transpose, perm_output, dot_id,
-                            output_id);
+                            &output_id);
     subgraph.add_node(std::move(transpose));
   }
 

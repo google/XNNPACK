@@ -360,7 +360,7 @@ TEST(fusion, reshape_to_expand_dims) {
   ynn_subgraph& subgraph = *builder.GetSubgraph();
   subgraph.fusion();
 
-  EXPECT_THAT(ProducerOf(out_id, subgraph), IsStaticExpandDims());
+  EXPECT_THAT(ProducerOf(out_id, subgraph), IsExpandDims(subgraph));
 }
 
 TEST(fusion, reshape_to_slice) {
@@ -376,9 +376,7 @@ TEST(fusion, reshape_to_slice) {
   ynn_subgraph& subgraph = *builder.GetSubgraph();
   subgraph.fusion();
 
-  EXPECT_THAT(ProducerOf(out_id, subgraph), IsStaticSlice());
-  EXPECT_TRUE(std::get<ynn_node::static_slice>(ProducerOf(out_id, subgraph).op)
-                  .slice_dims);
+  EXPECT_THAT(ProducerOf(out_id, subgraph), IsStaticTranspose());
 }
 
 }  // namespace ynn

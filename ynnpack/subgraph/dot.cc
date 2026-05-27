@@ -790,7 +790,7 @@ ynn_status always_alias_transpose(ynn_subgraph& subgraph, uint32_t& id) {
       id = YNN_INVALID_VALUE_ID;
       ynn_node node;
       define_static_transpose(subgraph, node, op.permutation,
-                              b_producer->inputs[0], id,
+                              b_producer->inputs[0], &id,
                               /*alias=*/true);
       subgraph.add_node(std::move(node));
       return ynn_status_success;
