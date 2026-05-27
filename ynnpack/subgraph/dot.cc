@@ -691,7 +691,7 @@ uint32_t define_transpose_a(ynn_subgraph& subgraph, index_t tile_k,
 
 std::tuple<slinky::expr, slinky::expr, slinky::expr> choose_split_factors(
     ynn_runtime& runtime, slinky::expr m, slinky::expr n, slinky::expr k,
-    slinky::expr block_n, int32_t k_alignment) {
+    slinky::expr block_n) {
   // We can only return a scalar from a slinky expression, so we pack the
   // splits into one integer.
   auto impl = [](const slinky::call* op, slinky::eval_context& ctx) {
@@ -754,12 +754,12 @@ std::tuple<slinky::expr, slinky::expr, slinky::expr> choose_split_factors(
   splits = runtime.globals.get(splits, "dot_splits");
   slinky::expr split_m = splits / 65536;
   slinky::expr split_n = splits % 65536;
-  slinky::expr split_k = k;
+  // Align `split_k` to be a multiple of possible values of `tile_k`. We cannot
+  // use the value of `tile_k` directly since this varies by CPU, so we use 64
+  // as a heuristic.
+  slinky::expr split_k = slinky::select(k >= 64, slinky::align_up(k, 64), k);
   split_m = runtime.globals.get(split_m, "split_m");
   split_n = runtime.globals.get(split_n, "split_n");
-  // Ensure the K split is a multiple of tile_k so that the microkernels can
-  // process full blocks.
-  split_k = slinky::align_up(split_k, k_alignment);
   split_k = runtime.globals.get(split_k, "split_k");
   return {split_n, split_m, split_k};
 }
@@ -1198,13 +1198,9 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
       k *= packed_b.extent(3 + d);
     }
 
-    int k_alignment = pack_b ? tile_k : 1;
-    if (transpose_a) {
-      k_alignment = std::max(k_alignment, tile_k);
-    }
     slinky::expr split_n, split_m, split_k;
     std::tie(split_n, split_m, split_k) =
-        choose_split_factors(runtime, m, n, k, block_n, k_alignment);
+        choose_split_factors(runtime, m, n, k, block_n);
 
     if (slinky::prove_true(n <= block_n)) {
       // We know n is smaller than the side of the area we want to compute,
