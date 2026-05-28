@@ -223,6 +223,77 @@ void define_copy(ynn_subgraph& subgraph, ynn_node& node, uint32_t input_id,
   };
 }
 
+void define_static_broadcast(ynn_subgraph& subgraph, ynn_node& node,
+                             std::vector<size_t> new_dims, uint32_t input_id,
+                             uint32_t* output_id) {
+  // Propagate shape.
+  const ynn_value& input = subgraph.value(input_id);
+  ynn_node::static_broadcast op;
+  op.new_dims = std::move(new_dims);
+  std::vector<slinky::expr> output_extents = input.extents;
+  bool noop = true;
+  for (size_t d = 0; d < std::min(output_extents.size(), op.new_dims.size());
+       ++d) {
+    if (slinky::prove_true(output_extents[d] ==
+                           static_cast<slinky::index_t>(op.new_dims[d]))) {
+      // This dimension is a no-op.
+      op.new_dims[d] = 0;
+      continue;
+    }
+
+    const slinky::index_t new_dim_d = op.new_dims[d];
+    if (new_dim_d != 0) {
+      noop = false;
+      output_extents[d] = new_dim_d;
+      if (d < input.rank() && input.extents[d].defined()) {
+        node.checks.push_back({
+            input.extents[d] == 1 || input.extents[d] == new_dim_d,
+            {"invalid broadcast in dimension ", d, " of ",
+             ynn_node::input_idx{0}},
+        });
+      }
+    }
+  }
+  for (size_t d = output_extents.size(); d < op.new_dims.size(); ++d) {
+    // This is a new trailing dimension.
+    output_extents.push_back(op.new_dims[d]);
+    noop = false;
+  }
+
+  if (noop && *output_id == YNN_INVALID_VALUE_ID) {
+    // This node is a no-op, skip it.
+    *output_id = input_id;
+    return;
+  }
+
+  // Remove no-op trailing broadcasts.
+  while (!op.new_dims.empty() && op.new_dims.back() == 0) {
+    op.new_dims.pop_back();
+  }
+
+  ynn_value& output = subgraph.get_output_value(output_id, input);
+  output.extents = std::move(output_extents);
+
+  node.inputs = {input_id};
+  node.outputs = {*output_id};
+  node.op = std::move(op);
+  node.create = [](const ynn_node& node, ynn_runtime& runtime) {
+    const int input_id = node.inputs[0];
+    const ynn_runtime_value& input = runtime.value(input_id);
+    ynn_runtime_value& output = runtime.value(node.outputs[0]);
+
+    std::vector<slinky::var> dims = runtime.globals.make_dims(output.rank());
+    slinky::box_expr bounds = make_broadcast_bounds(
+        dims, input.physical_extents(), output.physical_extents());
+
+    output.make_buffer(runtime, input.buffer->elem_size());
+    auto func = slinky::func::make_copy({input.buffer, std::move(bounds)},
+                                        {output.buffer, std::move(dims)});
+    runtime.funcs.push_back(std::move(func));
+    return ynn_status_success;
+  };
+}
+
 extern "C" {
 
 ynn_status ynn_define_copy(ynn_subgraph_t subgraph, uint32_t input_id,
@@ -298,76 +369,14 @@ ynn_status ynn_define_static_broadcast(ynn_subgraph_t subgraph, size_t rank,
                                              "output_id", output_id));
   YNN_RETURN_IF_ERROR(validate_new_shape("static_broadcast", rank, new_dims));
 
+  std::vector<size_t> op_new_dims(new_dims, new_dims + rank);
+  std::reverse(op_new_dims.begin(), op_new_dims.end());
   ynn_node node;
-
-  // Propagate shape.
-  const ynn_value& input = subgraph->value(input_id);
-  ynn_node::static_broadcast op;
-  op.new_dims.assign(new_dims, new_dims + rank);
-  std::reverse(op.new_dims.begin(), op.new_dims.end());
-  std::vector<slinky::expr> output_extents = input.extents;
-  bool noop = true;
-  for (size_t d = 0; d < std::min(output_extents.size(), op.new_dims.size());
-       ++d) {
-    if (slinky::prove_true(output_extents[d] ==
-                           static_cast<slinky::index_t>(op.new_dims[d]))) {
-      // This dimension is a no-op.
-      op.new_dims[d] = 0;
-      continue;
-    }
-
-    const slinky::index_t new_dim_d = op.new_dims[d];
-    if (new_dim_d != 0) {
-      noop = false;
-      output_extents[d] = new_dim_d;
-      if (d < input.rank() && input.extents[d].defined()) {
-        node.checks.push_back({
-            input.extents[d] == 1 || input.extents[d] == new_dim_d,
-            {"invalid broadcast in dimension ", d, " of ",
-             ynn_node::input_idx{0}},
-        });
-      }
-    }
+  define_static_broadcast(*subgraph, node, std::move(op_new_dims), input_id,
+                          output_id);
+  if (node.is_valid()) {
+    subgraph->add_node(std::move(node));
   }
-  for (size_t d = output_extents.size(); d < op.new_dims.size(); ++d) {
-    // This is a new trailing dimension.
-    output_extents.push_back(op.new_dims[d]);
-    noop = false;
-  }
-
-  if (noop && *output_id == YNN_INVALID_VALUE_ID) {
-    // This node is a no-op, skip it.
-    *output_id = input_id;
-    return ynn_status_success;
-  }
-
-  // Remove no-op trailing broadcasts.
-  while (!op.new_dims.empty() && op.new_dims.back() == 0) {
-    op.new_dims.pop_back();
-  }
-
-  ynn_value& output = subgraph->get_output_value(output_id, input);
-  output.extents = std::move(output_extents);
-
-  node.inputs = {input_id};
-  node.outputs = {*output_id};
-  node.op = std::move(op);
-  node.create = [](const ynn_node& node, ynn_runtime& runtime) {
-    const int input_id = node.inputs[0];
-    const ynn_runtime_value& input = runtime.value(input_id);
-    ynn_runtime_value& output = runtime.value(node.outputs[0]);
-
-    std::vector<slinky::var> dims = runtime.globals.make_dims(output.rank());
-    slinky::box_expr bounds = make_broadcast_bounds(
-        dims, input.physical_extents(), output.physical_extents());
-
-    output.make_buffer(runtime, input.buffer->elem_size());
-    auto func = slinky::func::make_copy({input.buffer, std::move(bounds)},
-                                        {output.buffer, std::move(dims)});
-    runtime.funcs.push_back(std::move(func));
-    return ynn_status_success;
-  };
-  subgraph->add_node(std::move(node));
   return ynn_status_success;
 }
 

@@ -1638,6 +1638,64 @@ bool rewrite_reduce_static_transpose(ynn_subgraph& subgraph, ynn_node& node,
   return true;
 }
 
+// Rewrite static_transpose(static_broadcast(x)) to
+// static_broadcast(static_transpose(x))
+bool rewrite_transpose_broadcast(ynn_subgraph& subgraph, ynn_node& node,
+                                 subgraph_analysis& analysis) {
+  ynn_node::static_transpose* transpose =
+      std::get_if<ynn_node::static_transpose>(&node.op);
+  if (!transpose) return false;
+
+  ynn_node* broadcast_node = analysis.producer_of(node.inputs[0]);
+  if (!broadcast_node) return false;
+
+  ynn_node::static_broadcast* broadcast =
+      std::get_if<ynn_node::static_broadcast>(&broadcast_node->op);
+  if (broadcast == nullptr) return false;
+
+  // Only do this rewrite if we won't break other consumers of the broadcast.
+  if (analysis.consumers[broadcast_node->outputs[0]].size() != 1 ||
+      subgraph.value(broadcast_node->outputs[0]).is_external_output()) {
+    return false;
+  }
+
+  uint32_t x_id = broadcast_node->inputs[0];
+  uint32_t z_id = node.outputs[0];
+
+  const size_t rank_y = broadcast->new_dims.size();
+  std::vector<int32_t> perm = transpose->permutation;
+
+  const ynn_value& z = subgraph.value(z_id);
+  std::vector<size_t> new_dims(z.rank());
+  for (size_t i = 0; i < new_dims.size(); ++i) {
+    int32_t src_dim_in_y = perm[i];
+    if (src_dim_in_y < rank_y) {
+      new_dims[i] = broadcast->new_dims[src_dim_in_y];
+    } else {
+      new_dims[i] = 0;
+    }
+  }
+
+  YNN_LOG_DEBUG() << "Rewriting transpose(static_broadcast(x)) to "
+                     "static_broadcast(transpose(x))";
+
+  broadcast_node->checks.clear();
+  node.checks.clear();
+
+  // Redefine B (broadcast_node) to be T' (new_transpose)
+  uint32_t y_prime_id = YNN_INVALID_VALUE_ID;
+  ynn::define_static_transpose(subgraph, *broadcast_node, std::move(perm), x_id,
+                               &y_prime_id, transpose->alias);
+
+  // Redefine T (node) to be B' (new_broadcast)
+  ynn::define_static_broadcast(subgraph, node, std::move(new_dims), y_prime_id,
+                               &z_id);
+
+  analysis.invalidate();
+
+  return true;
+}
+
 // Rewrites sum(a * b) to dot(a, b).
 // dot(a, b) is sum(a(., k1, k2, k3, i, ...) * b(j, k1, k2, k3, ., ...)) where .
 // indicates a new dimension. This rewrite looks for sums that can be transposed
@@ -1882,6 +1940,7 @@ ynn_status ynn_subgraph::fusion() {
                 ynn::rewrite_get_tensor_shape_of_unary(*this, node, analysis) ||
                 ynn::move_broadcast_to_output(*this, node, analysis) ||
                 ynn::remove_broadcast(*this, node, analysis) ||
+                ynn::rewrite_transpose_broadcast(*this, node, analysis) ||
                 ynn::remove_static_broadcast_from_elementwise(*this, node,
                                                               analysis) ||
                 ynn::rewrite_transpose_stencil_copy(*this, node, analysis) ||
