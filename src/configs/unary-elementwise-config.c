@@ -490,6 +490,16 @@ static void init_f16_log_config(void) {
   #elif XNN_ARCH_WASMRELAXEDSIMDFP16
     f16_log_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f16_vlog_ukernel__wasmrelaxedsimd_rational_3_3_div_u16);
     f16_log_config.element_tile = 16;
+  #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_FP16_VECTOR
+    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    assert(hardware_config != NULL);
+    if (hardware_config->arch_flags & xnn_arch_riscv_vector_fp16_arith) {
+      f16_log_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f16_vlog_ukernel__rvvfp16arith_rational_3_3_div_u8v);
+      f16_log_config.element_tile = 8 * hardware_config->vlenb / sizeof(xnn_float16);
+    } else {
+      f16_log_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f16_vlog_ukernel__scalar_rational_3_3_div_u4);
+      f16_log_config.element_tile = 4;
+    }
   #else
     f16_log_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f16_vlog_ukernel__scalar_rational_3_3_div_u4);
     f16_log_config.element_tile = 4;
