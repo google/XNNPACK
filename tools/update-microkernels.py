@@ -191,7 +191,17 @@ def main(args):
   asm_microkernels_per_arch = {arch: [] for arch in _ARCH_LIST}
   microkernel_name_to_filename = dict()
   for root, _, files in os.walk(src_dir, topdown=False):
-    if root in ignore_roots:
+    skip = False
+    for ignore_root in ignore_roots:
+      if ignore_root == src_dir:
+        if root == src_dir:
+          skip = True
+          break
+      else:
+        if root == ignore_root or root.startswith(ignore_root + os.sep):
+          skip = True
+          break
+    if skip:
       continue
 
     for name in files:
