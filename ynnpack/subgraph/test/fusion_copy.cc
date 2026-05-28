@@ -379,4 +379,101 @@ TEST(fusion, reshape_to_slice) {
   EXPECT_THAT(ProducerOf(out_id, subgraph), IsStaticTranspose());
 }
 
+TEST(fusion, transpose_transpose) {
+  // rewrite transpose(transpose(x)) -> transpose(x)
+  const uint32_t x_id = 0;
+  const uint32_t out_id = 1;
+  SubgraphBuilder builder(2);
+  uint32_t intermediate_id = YNN_INVALID_VALUE_ID;
+
+  builder.AddInput(ynn_type_fp32, {10, 20, 30}, x_id)
+      .AddOutput(ynn_type_fp32, {30, 10, 20}, out_id)
+      .AddTensor(ynn_type_fp32, {20, 30, 10}, intermediate_id);
+
+  builder.AddTranspose({1, 2, 0}, x_id, intermediate_id);
+  builder.AddTranspose({1, 2, 0}, intermediate_id, out_id);
+
+  ynn_subgraph& subgraph = *builder.GetSubgraph();
+
+  subgraph.fusion();
+  subgraph.invalidate_dead_values();
+
+  EXPECT_THAT(subgraph, AllOf(HasValidNodeCount(1), HasValidValueCount(2)));
+  EXPECT_THAT(ProducerOf(out_id, subgraph),
+              AllOf(IsStaticTransposeWithPerm(testing::ElementsAre(1, 2, 0)),
+                    InputsAre(x_id)));
+}
+
+TEST(fusion, transpose_expand_dims_fuse) {
+  // T1: expand_dims, T2: transpose
+  const uint32_t x_id = 0;
+  const uint32_t out_id = 1;
+  SubgraphBuilder builder(2);
+  uint32_t intermediate_id = YNN_INVALID_VALUE_ID;
+
+  builder.AddInput(ynn_type_fp32, {10, 20}, x_id)
+      .AddOutput(ynn_type_fp32, {20, 10, 1}, out_id)
+      .AddTensor(ynn_type_fp32, {10, 1, 20}, intermediate_id);
+
+  builder.AddExpandDims({1}, x_id, intermediate_id);
+  builder.AddTranspose({2, 0, 1}, intermediate_id, out_id);
+
+  ynn_subgraph& subgraph = *builder.GetSubgraph();
+  subgraph.fusion();
+  subgraph.invalidate_dead_values();
+
+  EXPECT_THAT(subgraph, AllOf(HasValidNodeCount(1), HasValidValueCount(2)));
+  EXPECT_THAT(ProducerOf(out_id, subgraph),
+              AllOf(IsStaticTransposeWithPerm(testing::ElementsAre(2, 1, 0)),
+                    InputsAre(x_id)));
+}
+
+TEST(fusion, transpose_transpose_expand_dims) {
+  // T1: transpose, T2: expand_dims
+  const uint32_t x_id = 0;
+  const uint32_t out_id = 1;
+  SubgraphBuilder builder(2);
+  uint32_t intermediate_id = YNN_INVALID_VALUE_ID;
+
+  builder.AddInput(ynn_type_fp32, {10, 20}, x_id)
+      .AddOutput(ynn_type_fp32, {1, 20, 10}, out_id)
+      .AddTensor(ynn_type_fp32, {20, 10}, intermediate_id);
+
+  builder.AddTranspose({1, 0}, x_id, intermediate_id);
+  builder.AddExpandDims({0}, intermediate_id, out_id);
+
+  ynn_subgraph& subgraph = *builder.GetSubgraph();
+  subgraph.fusion();
+  subgraph.invalidate_dead_values();
+
+  EXPECT_THAT(subgraph, AllOf(HasValidNodeCount(1), HasValidValueCount(2)));
+  EXPECT_THAT(ProducerOf(out_id, subgraph),
+              AllOf(IsStaticTransposeWithPerm(testing::ElementsAre(1, 0, 2)),
+                    InputsAre(x_id)));
+}
+
+TEST(fusion, transpose_reshape_shrink_fuse) {
+  // T1: transpose, T2: reshape (shrinks rank)
+  const uint32_t x_id = 0;
+  const uint32_t out_id = 1;
+  SubgraphBuilder builder(2);
+  uint32_t intermediate_id = YNN_INVALID_VALUE_ID;
+
+  builder.AddInput(ynn_type_fp32, {10, 1, 20}, x_id)
+      .AddOutput(ynn_type_fp32, {20, 10}, out_id)
+      .AddTensor(ynn_type_fp32, {20, 1, 10}, intermediate_id);
+
+  builder.AddTranspose({2, 1, 0}, x_id, intermediate_id);
+  builder.AddReshape({20, 10}, intermediate_id, out_id);
+
+  ynn_subgraph& subgraph = *builder.GetSubgraph();
+  subgraph.fusion();
+  subgraph.invalidate_dead_values();
+
+  EXPECT_THAT(subgraph, AllOf(HasValidNodeCount(1), HasValidValueCount(2)));
+  EXPECT_THAT(ProducerOf(out_id, subgraph),
+              AllOf(IsStaticTransposeWithPerm(testing::ElementsAre(2, 0)),
+                    InputsAre(x_id)));
+}
+
 }  // namespace ynn

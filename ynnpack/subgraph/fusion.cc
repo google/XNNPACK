@@ -1428,6 +1428,57 @@ bool rewrite_reshape(ynn_subgraph& subgraph, ynn_node& node,
   return true;
 }
 
+// Rewrite transpose(transpose(x)) to transpose(x)
+bool rewrite_transpose_transpose(ynn_subgraph& subgraph, ynn_node& node,
+                                 subgraph_analysis& analysis) {
+  auto* transpose2 = std::get_if<ynn_node::static_transpose>(&node.op);
+  if (!transpose2) return false;
+
+  ynn_node* producer = analysis.producer_of(node.inputs[0]);
+  if (!producer) return false;
+
+  auto* transpose1 = std::get_if<ynn_node::static_transpose>(&producer->op);
+  if (!transpose1) return false;
+
+  // Only rewrite if the intermediate value is not an external output
+  // and has no other consumers.
+  uint32_t intermediate_id = producer->outputs[0];
+  if (analysis.consumers[intermediate_id].size() != 1 ||
+      subgraph.value(intermediate_id).is_external_output()) {
+    return false;
+  }
+
+  const ynn_value& input = subgraph.value(producer->inputs[0]);
+  const ynn_value& intermediate = subgraph.value(intermediate_id);
+
+  int32_t R_in = input.rank();
+  int32_t R_int = intermediate.rank();
+
+  std::vector<int32_t> combined_perm(transpose2->permutation.size());
+  for (size_t i = 0; i < combined_perm.size(); ++i) {
+    int32_t idx = transpose2->permutation[i];
+    if (idx < R_int) {
+      combined_perm[i] = transpose1->permutation[idx];
+      if (combined_perm[i] >= R_in) {
+        combined_perm[i] = R_in;
+      }
+    } else {
+      combined_perm[i] = R_in;
+    }
+  }
+
+  YNN_LOG_DEBUG() << "Rewriting transpose(transpose(x)) to transpose(x)";
+
+  uint32_t output_id = node.outputs[0];
+  ynn::define_static_transpose(subgraph, node, std::move(combined_perm),
+                               producer->inputs[0], &output_id,
+                               transpose1->alias && transpose2->alias);
+
+  producer->invalidate();
+  analysis.invalidate();
+  return true;
+}
+
 // Rewrite op(reduce_op(x, identity), y) to reduce_op(x, y)
 bool rewrite_reduce_binary_identity(ynn_subgraph& subgraph, ynn_node& node,
                                     subgraph_analysis& analysis) {
@@ -1820,6 +1871,7 @@ ynn_status ynn_subgraph::fusion() {
                 ynn::rewrite_reduce_binary_identity(*this, node, analysis) ||
                 ynn::rewrite_expand_dims_reduce(*this, node, analysis) ||
                 ynn::rewrite_reshape(*this, node, analysis) ||
+                ynn::rewrite_transpose_transpose(*this, node, analysis) ||
                 ynn::rewrite_divide_sqrt(*this, node, analysis) ||
                 ynn::rewrite_sum_to_dot(*this, node, analysis) ||
                 ynn::rewrite_ternary(*this, node, analysis) ||
