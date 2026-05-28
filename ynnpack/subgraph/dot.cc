@@ -1229,6 +1229,10 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
       }
     }
     splits.push_back(split_k);
+    for (size_t i = 1; i < num_k_dims; ++i) {
+      // Do not create loops for the remaining k dims.
+      splits.push_back({});
+    }
 
     auto sched = runtime.make_schedule(
         all_dims, all_extents, output.buffer->elem_size(), splits, loop_order);
