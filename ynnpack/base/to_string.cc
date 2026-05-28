@@ -58,6 +58,8 @@ const char* to_string(enum ynn_unary_operator op) {
       return "poly3";
     case ynn_unary_round_to_bf16:
       return "round_to_bf16";
+    case ynn_unary_approx_erf:
+      return "approx_erf";
     case ynn_unary_invalid:
       return "invalid";
   }

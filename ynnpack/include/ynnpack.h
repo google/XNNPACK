@@ -29,6 +29,9 @@ extern "C" {
 // specified.
 #define YNN_FLAG_NO_EXCESS_PRECISION (1 << 2)
 
+// Allows fast, lower-accuracy approximations for transcendental functions.
+#define YNN_FLAG_FAST_MATH (1 << 3)
+
 #ifdef __GNUC__
 #define YNN_DEPRECATED __attribute__((deprecated))
 #else
@@ -165,6 +168,7 @@ enum ynn_unary_operator {
   ynn_unary_tanh,
   ynn_unary_poly3,
   ynn_unary_round_to_bf16,
+  ynn_unary_approx_erf,
 };
 
 // Defines a unary operation of a single input to a single output.

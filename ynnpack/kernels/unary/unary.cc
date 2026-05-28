@@ -356,6 +356,8 @@ unary_kernel_fn get_float_unary_reference_kernel(ynn_unary_operator op,
       return unary_impl<T, T, expm1_op>;
     case ynn_unary_erf:
       return unary_impl<T, T, erf_op>;
+    case ynn_unary_approx_erf:
+      return unary_impl<T, T, erf_op>;
     case ynn_unary_floor:
       return unary_impl<T, T, floor_op>;
     case ynn_unary_log:
@@ -462,16 +464,21 @@ unary_kernel_fn get_unary_kernel(ynn_unary_operator op, ynn_type a_type,
 #include "ynnpack/kernels/unary/kernels.inc"
 #undef YNN_ELEMENTWISE_KERNEL
 
-  if (op == ynn_unary_convert) {
-    return get_convert_reference_kernel(a_type, x_type, required_flags);
-  } else if (a_type == ynn_type_fp64 && x_type == ynn_type_fp64) {
-    return get_unary_reference_kernel(op, x_type, required_flags);
-  } else if (a_type == ynn_type_fp32 && x_type == ynn_type_fp32) {
-    return get_unary_reference_kernel(op, x_type, required_flags);
-  } else if (a_type == ynn_type_int32 && x_type == ynn_type_int32) {
-    return get_unary_reference_kernel(op, x_type, required_flags);
-  } else {
-    return nullptr;
+  switch (op) {
+    case ynn_unary_approx_erf:
+      return get_unary_kernel(ynn_unary_erf, a_type, x_type, required_flags,
+                              supported_arch_flags);
+    case ynn_unary_convert:
+      return get_convert_reference_kernel(a_type, x_type, required_flags);
+    default:
+      if (a_type == ynn_type_fp64 && x_type == ynn_type_fp64) {
+        return get_unary_reference_kernel(op, x_type, required_flags);
+      } else if (a_type == ynn_type_fp32 && x_type == ynn_type_fp32) {
+        return get_unary_reference_kernel(op, x_type, required_flags);
+      } else if (a_type == ynn_type_int32 && x_type == ynn_type_int32) {
+        return get_unary_reference_kernel(op, x_type, required_flags);
+      }
+      return nullptr;
   }
 }
 
@@ -496,6 +503,11 @@ unary_params get_unary_params(ynn_unary_operator op) {
       return unary_params{.erf = erf_params{.output_offset = 0.0,
                                             .output_multiplier = 1.0,
                                             .input_multiplier = 1.0}};
+    case ynn_unary_approx_erf:
+      return unary_params{.approx_erf =
+                              approx_erf_params{.output_offset = 0.0,
+                                                .output_multiplier = 1.0,
+                                                .input_multiplier = 1.0}};
     case ynn_unary_tanh:
       return unary_params{
           .tanh = tanh_params{.output_offset = 0.0, .output_multiplier = 1.0}};

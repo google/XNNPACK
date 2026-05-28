@@ -1252,6 +1252,7 @@ bool fold_unary_input(ynn_subgraph& subgraph, ynn_node& node,
     case ynn_unary_log:
     case ynn_unary_log1p:
     case ynn_unary_erf:
+    case ynn_unary_approx_erf:
       break;
     default:
       return false;
@@ -1270,6 +1271,8 @@ bool fold_unary_input(ynn_subgraph& subgraph, ynn_node& node,
                     << to_string(unary->op) << ".";
     if (unary->op == ynn_unary_exp || unary->op == ynn_unary_expm1) {
       unary->params.exp.input_multiplier *= mul->a;
+    } else if (unary->op == ynn_unary_approx_erf) {
+      unary->params.approx_erf.input_multiplier *= mul->a;
     } else {
       unary->params.erf.input_multiplier *= mul->a;
     }
@@ -1303,6 +1306,7 @@ bool fold_unary_output(ynn_subgraph& subgraph, ynn_node& node,
       }
       break;
     case ynn_unary_erf:
+    case ynn_unary_approx_erf:
     case ynn_unary_tanh:
     case ynn_unary_sine:
     case ynn_unary_cosine:
@@ -1904,8 +1908,33 @@ bool rewrite_sum_to_dot(ynn_subgraph& subgraph, ynn_node& node,
 
   subgraph.topological_sort();
   analysis.invalidate();
-
   return true;
+}
+
+bool rewrite_fast_math(ynn_subgraph& subgraph, ynn_node& node,
+                       subgraph_analysis& analysis) {
+  if ((subgraph.flags & YNN_FLAG_FAST_MATH) == 0) return false;
+
+  ynn_node::unary_elementwise* unary =
+      std::get_if<ynn_node::unary_elementwise>(&node.op);
+  if (!unary) return false;
+
+  if (unary->op == ynn_unary_erf) {
+    const ynn_value& input = subgraph.value(node.inputs[0]);
+    const ynn_value& output = subgraph.value(node.outputs[0]);
+    const ynn::unary_kernel_fn kernel =
+        ynn::get_unary_kernel(ynn_unary_approx_erf, input.type, output.type);
+    if (kernel) {
+      YNN_LOG_DEBUG() << "Rewriting erf to approx_erf (fast math)";
+      unary_params new_params;
+      new_params.approx_erf = unary->params.erf;
+
+      ynn::define_unary(subgraph, node, node.inputs[0], node.outputs[0],
+                        ynn_unary_approx_erf, kernel, new_params);
+      return true;
+    }
+  }
+  return false;
 }
 
 }  // namespace
@@ -1947,7 +1976,7 @@ ynn_status ynn_subgraph::fusion() {
                 ynn::rewrite_reduce_sum_of_squared(*this, node, analysis) ||
                 ynn::rewrite_reduce_convert(*this, node, analysis) ||
                 ynn::rewrite_reduce_static_transpose(*this, node, analysis) ||
-                false;
+                ynn::rewrite_fast_math(*this, node, analysis) || false;
 
       if (!analysis.is_valid) {
         break;

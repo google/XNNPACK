@@ -104,6 +104,11 @@ std::vector<unary_params> get_params_for_op(ynn_unary_operator op) {
           unary_params{.erf = erf_params{0.0f, 1.0f, 1.0f}},
           unary_params{.erf = erf_params{2.0f, 1.1f, 1.2f}},
       };
+    case ynn_unary_approx_erf:
+      return {
+          unary_params{.approx_erf = approx_erf_params{0.0f, 1.0f, 1.0f}},
+          unary_params{.approx_erf = approx_erf_params{2.0f, 1.1f, 1.2f}},
+      };
     case ynn_unary_tanh:
       return {
           unary_params{.tanh = tanh_params{0.0f, 1.0f}},
@@ -247,6 +252,7 @@ const ynn_unary_operator all_real_ops[] = {
     ynn_unary_exp,
     ynn_unary_expm1,
     ynn_unary_erf,
+    ynn_unary_approx_erf,
     ynn_unary_tanh,
     ynn_unary_sign,
     ynn_unary_sine,

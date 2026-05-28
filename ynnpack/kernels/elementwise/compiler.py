@@ -484,6 +484,11 @@ def erf(value):
 
 
 @intrinsic
+def approx_erf(value):
+  return Op(value.ty, "approx_erf", [value])
+
+
+@intrinsic
 def exp(value):
   return Op(value.ty, "exp", [value])
 
@@ -1030,6 +1035,7 @@ class Target:
         "select",
         "~",
         "erf",
+        "approx_erf",
         "exp",
         "expm1",
         "tanh",

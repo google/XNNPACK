@@ -68,6 +68,8 @@ struct erf_params {
   }
 };
 
+using approx_erf_params = erf_params;
+
 struct affine_output_params {
   real output_offset;
   real output_multiplier;
@@ -109,6 +111,7 @@ union unary_params {
   // output offset and output scale parameters, respectively. We use this fact
   // to support all of them via poly3's parameters.
   erf_params erf;
+  approx_erf_params approx_erf;
   tanh_params tanh;
   sine_params sine;
   cosine_params cosine;
