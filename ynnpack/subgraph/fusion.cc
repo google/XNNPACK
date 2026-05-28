@@ -676,7 +676,6 @@ bool remove_broadcast(ynn_subgraph& subgraph, ynn_node& node,
   // expand_dims is often used to broadcast trailing dimensions and not needed
   // in this case.
   return remove_broadcast_expand_dims(subgraph, node, analysis) ||
-         remove_broadcast<ynn_node::broadcast>(subgraph, node, analysis) ||
          remove_broadcast<ynn_node::broadcast_like>(subgraph, node, analysis);
 }
 

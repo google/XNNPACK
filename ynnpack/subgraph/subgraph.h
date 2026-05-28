@@ -203,16 +203,7 @@ struct ynn_node {
       return std::string_view(a.name) < std::string_view(b.name);
     }
   };
-  struct broadcast {
-    // The dimensions to broadcast.
-    ynn::axes_set axes;
-    friend bool operator==(const broadcast& a, const broadcast& b) {
-      return a.axes == b.axes;
-    }
-    friend bool operator<(const broadcast& a, const broadcast& b) {
-      return a.axes < b.axes;
-    }
-  };
+
   struct broadcast_like {
     // The dimensions to attempt to broadcast.
     ynn::axes_set axes;
@@ -558,13 +549,12 @@ struct ynn_node {
   // TODO: We need an absl::InlinedVector for things like this.
   std::vector<uint32_t> inputs;
   std::vector<uint32_t> outputs;
-  std::variant<invalid, opaque, broadcast, broadcast_like, concatenate,
-               even_split, copy, split_dim, fuse_dim, fuse_dims, split_dims,
-               stack, static_reshape, static_broadcast, static_pad,
-               static_slice, slice_like, static_transpose, stencil_copy,
-               unary_elementwise, lut, binary_elementwise, ternary_elementwise,
-               dot, iota, pack_b, transpose_a, get_tensor_shape, reduce,
-               dequantize_dot>
+  std::variant<invalid, opaque, broadcast_like, concatenate, even_split, copy,
+               split_dim, fuse_dim, fuse_dims, split_dims, stack,
+               static_reshape, static_broadcast, static_pad, static_slice,
+               slice_like, static_transpose, stencil_copy, unary_elementwise,
+               lut, binary_elementwise, ternary_elementwise, dot, iota, pack_b,
+               transpose_a, get_tensor_shape, reduce, dequantize_dot>
       op;
 
   const char* name() const;

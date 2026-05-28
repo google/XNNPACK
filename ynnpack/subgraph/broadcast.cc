@@ -3,21 +3,16 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include <algorithm>
 #include <cassert>
 #include <cstddef>
 #include <cstdint>
-#include <functional>
-#include <memory>
 #include <utility>
 #include <vector>
 
 #include "ynnpack/include/ynnpack.h"
-#include "ynnpack/subgraph/runtime.h"
 #include "ynnpack/subgraph/slinky.h"
+#include "ynnpack/subgraph/static_transpose.h"
 #include "ynnpack/subgraph/subgraph.h"
-#include "slinky/builder/pipeline.h"
-#include "slinky/builder/simplify.h"
 #include "slinky/runtime/expr.h"
 
 namespace ynn {
@@ -42,11 +37,7 @@ ynn_status ynn_define_broadcast(ynn_subgraph_t subgraph, size_t num_axes,
 
   ynn_node node;
 
-  // Propagate shape.
-  // Any dimensions the template has that the input does not are broadcasted.
-  std::vector<slinky::expr> output_extents = input.extents;
-
-  for (int d = 0; d < output_extents.size(); ++d) {
+  for (int d = 0; d < input.rank(); ++d) {
     if (!axes_set[d]) {
       // Not broadcasting this dimension.
       continue;
@@ -56,8 +47,6 @@ ynn_status ynn_define_broadcast(ynn_subgraph_t subgraph, size_t num_axes,
       axes_set[d] = false;
       continue;
     }
-
-    output_extents[d] = slinky::expr();
 
     node.checks.push_back({
         input.extents[d] == 1,
@@ -72,46 +61,17 @@ ynn_status ynn_define_broadcast(ynn_subgraph_t subgraph, size_t num_axes,
     return ynn_status_success;
   }
 
-  ynn_value& output = subgraph->get_output_value(output_id, input);
-  output.extents = std::move(output_extents);
-
-  node.inputs = {input_id};
-  node.outputs = {*output_id};
-  node.op = ynn_node::broadcast{axes_set};
-  node.create = [](const ynn_node& node, ynn_runtime& runtime) {
-    const ynn::axes_set& axes = std::get<ynn_node::broadcast>(node.op).axes;
-    const int input_id = node.inputs[0];
-    const int output_id = node.outputs[0];
-    const ynn_runtime_value& input = runtime.value(input_id);
-    ynn_runtime_value& output = runtime.value(output_id);
-
-    if (!axes.any() && !output.is_external_output()) {
-      // This node is a no-op, skip it.
-      output.buffer = input.buffer;
-      return ynn_status_success;
+  std::vector<int32_t> permutation(input.rank());
+  for (size_t i = 0; i < permutation.size(); ++i) {
+    if (axes_set[i]) {
+      permutation[i] = input.rank();
+    } else {
+      permutation[i] = i;
     }
+  }
 
-    output.make_buffer(runtime, input.buffer->elem_size());
-
-    std::vector<slinky::var> dims = runtime.globals.make_dims(output.rank());
-    slinky::box_expr bounds =
-        make_elementwise_bounds(dims, input.physical_extents());
-
-    for (size_t i = 0; i < std::min(bounds.size(), axes.size()); ++i) {
-      if (!axes[i]) continue;
-      bounds[i] = slinky::point(0);
-    }
-
-    if (bounds.size() > input.rank()) {
-      bounds.resize(input.rank());
-    }
-
-    auto func = slinky::func::make_copy({input.buffer, std::move(bounds)},
-                                        {output.buffer, std::move(dims)});
-    runtime.funcs.push_back(std::move(func));
-
-    return ynn_status_success;
-  };
+  ynn::define_static_transpose(*subgraph, node, std::move(permutation),
+                               input_id, output_id, /*alias=*/true);
   subgraph->add_node(std::move(node));
   return ynn_status_success;
 }

@@ -483,8 +483,7 @@ size_t static_size_of_inputs(const ynn_subgraph& subgraph,
 }
 
 bool should_constant_fold(const ynn_subgraph& subgraph, const ynn_node& node) {
-  if (std::holds_alternative<ynn_node::broadcast>(node.op) ||
-      std::holds_alternative<ynn_node::broadcast_like>(node.op) ||
+  if (std::holds_alternative<ynn_node::broadcast_like>(node.op) ||
       std::holds_alternative<ynn_node::fuse_dim>(node.op) ||
       std::holds_alternative<ynn_node::fuse_dims>(node.op) ||
       std::holds_alternative<ynn_node::split_dim>(node.op) ||
@@ -956,7 +955,6 @@ const char* name_of(const ynn_node::ternary_elementwise&) {
   return "ternary_elementwise";
 }
 const char* name_of(const ynn_node::reduce&) { return "reduce"; }
-const char* name_of(const ynn_node::broadcast&) { return "broadcast"; }
 const char* name_of(const ynn_node::broadcast_like&) {
   return "broadcast_like";
 }
@@ -1067,10 +1065,6 @@ void print(std::ostream& os, const ynn_node::reduce& op) {
   if (op.keep_dims) {
     os << " keep_dims";
   }
-}
-
-void print(std::ostream& os, const ynn_node::broadcast& op) {
-  os << "axes=" << op.axes;
 }
 
 void print(std::ostream& os, const ynn_node::broadcast_like& op) {
