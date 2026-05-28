@@ -135,6 +135,8 @@ xnn_init_bf16_to_f32_cvt_config();
 XNN_INTERNAL const struct xnn_unary_elementwise_config*
 xnn_init_bf16_to_qs8_cvt_config();
 XNN_INTERNAL const struct xnn_unary_elementwise_config*
+xnn_init_bf16_to_qu8_cvt_config();
+XNN_INTERNAL const struct xnn_unary_elementwise_config*
 xnn_init_f16_to_f32_cvt_config();
 XNN_INTERNAL const struct xnn_unary_elementwise_config*
 xnn_init_f16_to_qs8_cvt_config();
