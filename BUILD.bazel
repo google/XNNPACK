@@ -530,7 +530,6 @@ xnnpack_cc_library(
         ":microparams_h",
         ":operator_h",
         ":xnnpack_h",
-        "@FXdiv",
     ],
 )
 
