@@ -196,7 +196,6 @@ void define_static_transpose(ynn_subgraph& subgraph, ynn_node& node,
     if (op.alias) {
       f = slinky::func::make_copy({input.buffer, std::move(bounds)},
                                   {output.buffer, output_dims});
-      sched->force_root = true;
     } else {
       slinky::call_stmt::attributes attrs;
       attrs.name = "transpose";
