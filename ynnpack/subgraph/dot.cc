@@ -1047,7 +1047,7 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
                                          ynn_runtime& runtime) {
     const ynn_node::dot& op = std::get<ynn_node::dot>(node.op);
     const size_t num_k_dims = op.num_k_dims;
-    const ynn_runtime_value& input_a = runtime.value(node.inputs[0]);
+    ynn_runtime_value& input_a = runtime.value(node.inputs[0]);
     ynn_runtime_value input_c;
     if (node.inputs[1] != YNN_INVALID_VALUE_ID) {
       input_c = runtime.value(node.inputs[1]);
@@ -1057,6 +1057,7 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
     ynn_runtime_value& packed_b = runtime.value(node.inputs[2]);
     ynn_runtime_value& output = runtime.value(node.outputs[0]);
 
+    require_contiguous(*input_a.buffer, 1);
     if (pack_b) {
       require_contiguous(*packed_b.buffer, 3);
     }
