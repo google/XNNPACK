@@ -3,9 +3,11 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+#include <climits>
 #include <cstddef>
 
 #include <gtest/gtest.h>
+#include "include/xnnpack.h"
 #include "test/operators/constant-pad-operator-tester.h"
 
 constexpr size_t kDim1 = 2;
@@ -601,4 +603,26 @@ TEST(CONSTANT_PAD_ND_X32, constant_pad_6d) {
       }
     }
   }
+}
+
+TEST(CONSTANT_PAD_ND_X32, reshape_output_dimension_overflow) {
+  // pre_padding + input_dim would overflow size_t; verify that reshape returns
+  // xnn_status_invalid_parameter rather than silently wrapping around.
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
+
+  xnn_operator_t op = nullptr;
+  const uint32_t padding_value = 0;
+  ASSERT_EQ(xnn_status_success,
+            xnn_create_constant_pad_nd_x32(&padding_value, /*flags=*/0, &op));
+  ASSERT_NE(nullptr, op);
+
+  const size_t input_shape[]  = {2};
+  const size_t pre_paddings[]  = {SIZE_MAX - 1};
+  const size_t post_paddings[] = {0};
+
+  EXPECT_EQ(xnn_status_invalid_parameter,
+            xnn_reshape_constant_pad_nd_x32(op, /*num_dims=*/1, input_shape,
+                                            pre_paddings, post_paddings,
+                                            /*threadpool=*/nullptr));
+  xnn_delete_operator(op);
 }
