@@ -417,6 +417,24 @@ struct approx_erf : public unary_op_info {
   }
 };
 
+struct approx_tanh : public unary_op_info {
+  approx_tanh_params params;
+
+  explicit approx_tanh(const unary_params& params)
+      : params(params.approx_tanh) {}
+  float operator()(float x) const override {
+    return std::tanh(x) * static_cast<float>(params.output_multiplier) +
+           static_cast<float>(params.output_offset);
+  }
+  double operator()(double x) const override {
+    return std::tanh(x) * params.output_multiplier + params.output_offset;
+  }
+
+  tolerance_spec tolerance(ynn_type /*type*/) const override {
+    return tolerance_spec{/*relative=*/5.0f};
+  }
+};
+
 struct cube_root : public unary_op_info {
   explicit cube_root(const unary_params& = {}) {}
   float operator()(float x) const override { return std::cbrt(x); }

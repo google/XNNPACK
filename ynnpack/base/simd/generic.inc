@@ -854,7 +854,7 @@ static vec<float, N> approx_tanh(vec<float, N> x) {
   auto x2 = x_clamped * x_clamped;
   auto p_x = internal::eval_polynomial(P, x2) * x_clamped;
   auto q_x = internal::eval_polynomial(Q, x2);
-  return select(abs(x_clamped) < min_abs_x, x, p_x / q_x);
+  return select(abs(x_clamped) < broadcast<N>(min_abs_x), x, p_x / q_x);
 }
 
 }  // namespace simd

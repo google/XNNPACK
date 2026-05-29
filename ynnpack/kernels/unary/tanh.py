@@ -32,3 +32,17 @@ def tanh_fp32(a, x, output_offset, output_multiplier):
 def tanh_fp64(a, x, output_offset, output_multiplier):
   va = load(a)
   return store(multiply_add(tanh(va), output_multiplier, output_offset), x)
+
+
+@const_buffer("a", Float(32))
+@buffer("x", Float(32))
+@params(
+    Scalar("output_offset", Float(32)),
+    Scalar("output_multiplier", Float(32)),
+)
+@operator_name("approx_tanh")
+def approx_tanh_fp32(a, x, output_offset, output_multiplier):
+  va = load(a)
+  return store(
+      multiply_add(approx_tanh(va), output_multiplier, output_offset), x
+  )

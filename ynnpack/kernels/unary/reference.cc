@@ -31,6 +31,8 @@ std::unique_ptr<unary_op_info> get_unary_op_info(ynn_unary_operator op,
       return std::make_unique<erf>(params);
     case ynn_unary_approx_erf:
       return std::make_unique<approx_erf>(params);
+    case ynn_unary_approx_tanh:
+      return std::make_unique<approx_tanh>(params);
     case ynn_unary_floor:
       return std::make_unique<floor>(params);
     case ynn_unary_log:

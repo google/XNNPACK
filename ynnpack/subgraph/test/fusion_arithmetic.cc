@@ -650,13 +650,13 @@ TEST(fusion, fast_math_erf) {
   EXPECT_THAT(node, IsUnary(ynn_unary_approx_erf));
 }
 
-TEST(fusion, no_fast_math_erf) {
+TEST(fusion, no_fast_math_tanh) {
   const uint32_t a_id = 0;
   const uint32_t x_id = 1;
   SubgraphBuilder builder(2, 0);
   builder.AddInput(ynn_type_fp32, 2, a_id)
       .AddOutput(ynn_type_fp32, 2, x_id)
-      .AddUnary(ynn_unary_erf, a_id, x_id);
+      .AddUnary(ynn_unary_tanh, a_id, x_id);
 
   ynn_subgraph& subgraph = *builder.GetSubgraph();
 
@@ -665,7 +665,7 @@ TEST(fusion, no_fast_math_erf) {
 
   ASSERT_THAT(subgraph, AllOf(HasValidNodeCount(1), HasValidValueCount(2)));
   const ynn_node& node = ProducerOf(x_id, subgraph);
-  EXPECT_THAT(node, IsUnary(ynn_unary_erf));
+  EXPECT_THAT(node, IsUnary(ynn_unary_tanh));
 }
 
 TEST(fusion, fast_math_erf_fp64) {
@@ -731,6 +731,46 @@ TEST(fusion, fast_math_erf_folded) {
   EXPECT_NEAR(unary.params.approx_erf.input_multiplier, c, 1e-6f);
   EXPECT_NEAR(unary.params.approx_erf.output_multiplier, a, 1e-6f);
   EXPECT_NEAR(unary.params.approx_erf.output_offset, b, 1e-6f);
+}
+
+
+
+TEST(fusion, fast_math_tanh_folded) {
+  const uint32_t x_id = 0;
+  const uint32_t a_id = 1;
+  const uint32_t b_id = 2;
+  const uint32_t y_id = 3;
+
+  SubgraphBuilder builder(4, YNN_FLAG_FAST_MATH);
+  uint32_t tanh_out_id = YNN_INVALID_VALUE_ID;
+  uint32_t mul_out_id = YNN_INVALID_VALUE_ID;
+
+  float a = 2.0f;
+  float b = 1.5f;
+
+  builder.AddInput(ynn_type_fp32, 2, x_id)
+      .AddScalar(a, a_id)
+      .AddScalar(b, b_id)
+      .AddOutput(ynn_type_fp32, 2, y_id)
+      .AddTensor(ynn_type_fp32, 2, tanh_out_id)
+      .AddTensor(ynn_type_fp32, 2, mul_out_id);
+
+  builder.AddUnary(ynn_unary_tanh, x_id, tanh_out_id)
+      .AddBinary(ynn_binary_multiply, tanh_out_id, a_id, mul_out_id)
+      .AddBinary(ynn_binary_add, mul_out_id, b_id, y_id);
+
+  ynn_subgraph& subgraph = *builder.GetSubgraph();
+
+  subgraph.fusion();
+  subgraph.invalidate_dead_values();
+
+  ASSERT_THAT(subgraph, AllOf(HasValidNodeCount(1), HasValidValueCount(2)));
+  const ynn_node& node = ProducerOf(y_id, subgraph);
+  EXPECT_THAT(node, IsUnary(ynn_unary_approx_tanh));
+
+  const auto& unary = std::get<ynn_node::unary_elementwise>(node.op);
+  EXPECT_NEAR(unary.params.approx_tanh.output_multiplier, a, 1e-6f);
+  EXPECT_NEAR(unary.params.approx_tanh.output_offset, b, 1e-6f);
 }
 
 }  // namespace ynn

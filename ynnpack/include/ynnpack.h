@@ -169,6 +169,7 @@ enum ynn_unary_operator {
   ynn_unary_poly3,
   ynn_unary_round_to_bf16,
   ynn_unary_approx_erf,
+  ynn_unary_approx_tanh,
 };
 
 // Defines a unary operation of a single input to a single output.

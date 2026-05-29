@@ -1308,6 +1308,7 @@ bool fold_unary_output(ynn_subgraph& subgraph, ynn_node& node,
     case ynn_unary_erf:
     case ynn_unary_approx_erf:
     case ynn_unary_tanh:
+    case ynn_unary_approx_tanh:
     case ynn_unary_sine:
     case ynn_unary_cosine:
     case ynn_unary_poly3:
@@ -1919,19 +1920,30 @@ bool rewrite_fast_math(ynn_subgraph& subgraph, ynn_node& node,
       std::get_if<ynn_node::unary_elementwise>(&node.op);
   if (!unary) return false;
 
-  if (unary->op == ynn_unary_erf) {
-    const ynn_value& input = subgraph.value(node.inputs[0]);
-    const ynn_value& output = subgraph.value(node.outputs[0]);
-    const ynn::unary_kernel_fn kernel =
-        ynn::get_unary_kernel(ynn_unary_approx_erf, input.type, output.type);
-    if (kernel) {
-      YNN_LOG_DEBUG() << "Rewriting erf to approx_erf (fast math)";
-      unary_params new_params;
-      new_params.approx_erf = unary->params.erf;
+  struct FastMathOpRewrite {
+    ynn_unary_operator op;
+    ynn_unary_operator fast_op;
+  };
+  constexpr FastMathOpRewrite kFastMathRewrites[] = {
+      {ynn_unary_erf, ynn_unary_approx_erf},
+      {ynn_unary_tanh, ynn_unary_approx_tanh},
+  };
 
-      ynn::define_unary(subgraph, node, node.inputs[0], node.outputs[0],
-                        ynn_unary_approx_erf, kernel, new_params);
-      return true;
+  for (const auto& rewrite : kFastMathRewrites) {
+    if (unary->op == rewrite.op) {
+      const ynn_value& input = subgraph.value(node.inputs[0]);
+      const ynn_value& output = subgraph.value(node.outputs[0]);
+      const ynn::unary_kernel_fn kernel =
+          ynn::get_unary_kernel(rewrite.fast_op, input.type, output.type);
+      if (kernel) {
+        YNN_LOG_DEBUG() << "Rewriting " << to_string(rewrite.op) << " to "
+                        << to_string(rewrite.fast_op) << " (fast math)";
+        unary_params new_params = unary->params;
+
+        ynn::define_unary(subgraph, node, node.inputs[0], node.outputs[0],
+                          rewrite.fast_op, kernel, new_params);
+        return true;
+      }
     }
   }
   return false;
