@@ -38,16 +38,33 @@ span<dot_loop> schedule_dot(span<const size_t> cache_sizes, size_t m, size_t n,
     *loop++ = dot_loop{dot_loop::n, blocks};
     n = block_n * blocks;
   };
-  auto make_k_loop = [&](size_t blocks) {
-    if (blocks == 0 || k1 <= block_k * blocks) return;
+  auto make_k_loop = [&](size_t blocks_max) {
+    if (blocks_max == 0) return;
+    const size_t k_blocks = ceil_div(k1, block_k);
+    // Fits in a single iteration — no loop needed.
+    if (k_blocks <= blocks_max) return;
+    // Split into N near-equal iterations rather than one cache-max iter plus
+    // a tail. Two reasons: (1) a small tail amortises kernel-call overhead
+    // poorly, and (2) a kc that almost-fills the cache with no headroom
+    // causes the B stripe to spill into the outer cache, which has much
+    // higher variance than a slightly smaller stripe that fits cleanly.
+    const size_t niter = ceil_div(k_blocks, blocks_max);
+    const size_t blocks = ceil_div(k_blocks, niter);
     *loop++ = dot_loop{dot_loop::k, blocks};
     k1 = block_k * blocks;
   };
 
   for (size_t cache_size : cache_sizes) {
-    // TODO(b/447988052): We can be way smarter about this than we are now.
-    make_k_loop(
-        floor_div(cache_size, k2 * block_n * b_elem_size * block_k));
+    // Size kc so that a (kc × n) stripe of B fits in this cache. Inside each
+    // outer k-iteration we sweep all (m, n) tiles; the B stripe is loaded
+    // once from memory on the first m-iteration and reused from cache on
+    // subsequent m-iterations, so what matters is kc×n×b_elem_size, not the
+    // per-kernel-call kc×block_n stripe.
+    // ~6% headroom so the B stripe doesn't exactly fill the budget — at
+    // that boundary, concurrent A/C/TLB traffic evicts B into the outer
+    // cache, hurting both mean and run-to-run variance.
+    const size_t kc_budget = cache_size - cache_size / 16;
+    make_k_loop(floor_div(kc_budget, k2 * n * b_elem_size * block_k));
     if (n * b_elem_size <= m * a_elem_size) {
       // Tiles of B are smaller than tiles of A, we should assume B fits in
       // cache.
