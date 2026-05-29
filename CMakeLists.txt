@@ -607,6 +607,7 @@ SET(XNNPACK_SRCS
   src/configs/xx-pad-config.c
   src/configs/x8-lut-config.c
   src/init.c
+  src/microkernel-name-registry.c
   src/params.c
   "${PROJECT_BINARY_DIR}/build_identifier.c")
 

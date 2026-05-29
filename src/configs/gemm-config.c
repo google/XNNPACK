@@ -17,6 +17,7 @@
 #include "src/xnnpack/log.h"
 #include "src/xnnpack/math.h"
 #include "src/xnnpack/microfnptr.h"
+#include "src/xnnpack/microkernel-name-registry.h"
 #include "src/xnnpack/microparams-init.h"
 #include "src/xnnpack/pack.h"
 #include "src/xnnpack/packw.h"
@@ -105,52 +106,62 @@ XNN_INIT_ONCE_GUARD(qs8_qc8w_gemm);
 XNN_INIT_ONCE_GUARD(qu8_gemm);
 
 // Macros to log the microkernel names if and when they are registered.
-#define XNN_INIT_GEMM_UKERNEL(ukernel) \
-  (xnn_gemm_ukernel_fn) ukernel;       \
-  xnn_log_info("Using gemm microkernel '%s'.", #ukernel);
+#define XNN_INIT_GEMM_UKERNEL(ukernel)                    \
+  (xnn_gemm_ukernel_fn) ukernel;                          \
+  xnn_log_info("Using gemm microkernel '%s'.", #ukernel); \
+  XNN_REGISTER_UKERNEL_NAME(ukernel);
 
 #define XNN_INIT_HMP_GEMM_UKERNEL(ukernel)                 \
   xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn)ukernel); \
-  xnn_log_info("Using gemm microkernel '%s'.", #ukernel);
+  xnn_log_info("Using gemm microkernel '%s'.", #ukernel);  \
+  XNN_REGISTER_UKERNEL_NAME(ukernel);
 
-#define XNN_INIT_IGEMM_UKERNEL(ukernel) \
-  (xnn_igemm_ukernel_fn) ukernel;       \
-  xnn_log_info("Using igemm microkernel '%s'.", #ukernel);
+#define XNN_INIT_IGEMM_UKERNEL(ukernel)                    \
+  (xnn_igemm_ukernel_fn) ukernel;                          \
+  xnn_log_info("Using igemm microkernel '%s'.", #ukernel); \
+  XNN_REGISTER_UKERNEL_NAME(ukernel);
 
 #define XNN_INIT_HMP_IGEMM_UKERNEL(ukernel)                  \
   xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_fn)ukernel); \
-  xnn_log_info("Using igemm microkernel '%s'.", #ukernel);
+  xnn_log_info("Using igemm microkernel '%s'.", #ukernel);   \
+  XNN_REGISTER_UKERNEL_NAME(ukernel);
 
-#define XNN_INIT_DQGEMM_UKERNEL(ukernel) \
-  (xnn_dqgemm_ukernel_fn) ukernel;       \
-  xnn_log_info("Using dqgemm microkernel '%s'.", #ukernel);
+#define XNN_INIT_DQGEMM_UKERNEL(ukernel)                    \
+  (xnn_dqgemm_ukernel_fn) ukernel;                          \
+  xnn_log_info("Using dqgemm microkernel '%s'.", #ukernel); \
+  XNN_REGISTER_UKERNEL_NAME(ukernel);
 
 #define XNN_INIT_HMP_DQGEMM_UKERNEL(ukernel)                   \
   xnn_init_hmp_dqgemm_ukernel((xnn_dqgemm_ukernel_fn)ukernel); \
-  xnn_log_info("Using dqgemm microkernel '%s'.", #ukernel);
+  xnn_log_info("Using dqgemm microkernel '%s'.", #ukernel);    \
+  XNN_REGISTER_UKERNEL_NAME(ukernel);
 
-#define XNN_INIT_DQIGEMM_UKERNEL(ukernel) \
-  (xnn_dqigemm_ukernel_fn) ukernel;       \
-  xnn_log_info("Using dqigemm microkernel '%s'.", #ukernel);
+#define XNN_INIT_DQIGEMM_UKERNEL(ukernel)                    \
+  (xnn_dqigemm_ukernel_fn) ukernel;                          \
+  xnn_log_info("Using dqigemm microkernel '%s'.", #ukernel); \
+  XNN_REGISTER_UKERNEL_NAME(ukernel);
 
 #define XNN_INIT_HMP_DQIGEMM_UKERNEL(ukernel)                    \
   xnn_init_hmp_dqigemm_ukernel((xnn_dqigemm_ukernel_fn)ukernel); \
-  xnn_log_info("Using dqigemm microkernel '%s'.", #ukernel);
+  xnn_log_info("Using dqigemm microkernel '%s'.", #ukernel);     \
+  XNN_REGISTER_UKERNEL_NAME(ukernel);
 
-#define XNN_INIT_HMP_QP8GEMM_UKERNEL(ukernel)            \
-  xnn_init_hmp_qp8gemm_ukernel(                          \
-      (xnn_qp8_f32_qc4w_gemm_minmax_ukernel_fn)ukernel); \
-  xnn_log_info("Using qp8gemm microkernel '%s'.", #ukernel);
+#define XNN_INIT_HMP_QP8GEMM_UKERNEL(ukernel)                \
+  xnn_init_hmp_qp8gemm_ukernel(                              \
+      (xnn_qp8_f32_qc4w_gemm_minmax_ukernel_fn)ukernel);     \
+  xnn_log_info("Using qp8gemm microkernel '%s'.", #ukernel); \
+  XNN_REGISTER_UKERNEL_NAME(ukernel);
 
-#define XNN_INIT_HMP_QP8GEMM_BL_UKERNEL(ukernel)         \
-  xnn_init_hmp_qp8gemm_bl_ukernel(                       \
-      (xnn_qp8_f32_qb4w_gemm_minmax_ukernel_fn)ukernel); \
-  xnn_log_info("Using qp8gemm_bl microkernel '%s'.", #ukernel);
+#define XNN_INIT_HMP_QP8GEMM_BL_UKERNEL(ukernel)                \
+  xnn_init_hmp_qp8gemm_bl_ukernel(                              \
+      (xnn_qp8_f32_qb4w_gemm_minmax_ukernel_fn)ukernel);        \
+  xnn_log_info("Using qp8gemm_bl microkernel '%s'.", #ukernel); \
+  XNN_REGISTER_UKERNEL_NAME(ukernel);
 
-#define XNN_INIT_HMP_PACKED_IGEMM_UKERNEL(ukernel)                    \
-  xnn_init_hmp_packed_igemm_ukernel(                                  \
-      (xnn_packed_lhs_igemm_ukernel_fn)ukernel);                      \
-  xnn_log_info("Using igemm microkernel '%s'.", #ukernel);
+#define XNN_INIT_HMP_PACKED_IGEMM_UKERNEL(ukernel)                             \
+  xnn_init_hmp_packed_igemm_ukernel((xnn_packed_lhs_igemm_ukernel_fn)ukernel); \
+  xnn_log_info("Using igemm microkernel '%s'.", #ukernel);                     \
+  XNN_REGISTER_UKERNEL_NAME(ukernel);
 
 static void init_f16_gemm_config(void) {
   // Common parameters.
