@@ -56,7 +56,7 @@ void dequantize(size_t m, size_t n, size_t stride_a_m, size_t stride_a_n,
                 const int32_t* b, size_t stride_c_m, size_t stride_c_n,
                 const float* c, size_t stride_x_m, X* x,
                 const ternary_params* params) {
-  assert(stride_a_n == 0 || stride_a_n == sizeof(A));
+  assert(stride_a_n == 0 || stride_a_n == sizeof(A) || n == 1);
   if (stride_a_n != 0) stride_a_n = 1;
 
   for (size_t i = 0; i < m; ++i) {
