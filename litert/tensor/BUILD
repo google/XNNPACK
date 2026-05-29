@@ -91,7 +91,6 @@ cc_library(
     deps = [
         "//litert/tensor:datatypes",
         "//litert/tensor/internal:graph",
-        "//litert/tensor/internal:mixin",
         "@abseil-cpp//absl/strings:string_view",
     ],
 )
@@ -143,6 +142,7 @@ cc_test(
         "//litert/tensor:buffer",
         "//litert/tensor:datatypes",
         "//litert/tensor/internal:graph",
+        "//litert/tensor/internal:type_id",
         "//litert/tensor/utils:matchers",
         "@abseil-cpp//absl/status",
         "@abseil-cpp//absl/strings:string_view",

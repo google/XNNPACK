@@ -29,6 +29,7 @@ cc_library(
         "//litert/tensor:datatypes",
         "//litert/tensor/internal:graph",
         "//litert/tensor/internal:mixin",
+        "//litert/tensor/internal:type_id",
         "//litert/tensor/utils:macros",
         "@abseil-cpp//absl/container:flat_hash_map",
         "@abseil-cpp//absl/container:flat_hash_set",

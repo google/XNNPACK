@@ -44,6 +44,7 @@ cc_library(
     hdrs = ["arithmetic_helpers.h"],
     deps = [
         ":graph",
+        ":mixin",
         ":shape",
         ":utils",
         "//litert/tensor",
@@ -108,6 +109,7 @@ cc_library(
         "//litert/tensor:datatypes",
         "//litert/tensor/utils:macros",
         "//litert/tensor/utils:source_location",
+        "@abseil-cpp//absl/container:inlined_vector",
         "@abseil-cpp//absl/log:absl_log",
         "@abseil-cpp//absl/status",
         "@abseil-cpp//absl/status:statusor",
