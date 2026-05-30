@@ -48,7 +48,6 @@ if (build_with_chromium) {
 
     deps = [
       "//base",
-      "//third_party/fxdiv",
     ]
   }
 
@@ -101,5 +100,5 @@ source_set("pthreadpool_standalone") {
 
   public_configs = [ ":pthreadpool_standalone_config" ]
 
-  deps = [ "//third_party/fxdiv" ]
+  deps = []
 }

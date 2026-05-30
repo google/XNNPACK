@@ -64,13 +64,7 @@ http_archive(
     urls = ["https://github.com/google/benchmark/archive/7da00e8f6763d6e8c284d172c9cfcc5ae0ce9b7a.zip"],
 )
 # LINT.ThenChange(cmake/DownloadGoogleBenchmark.cmake)
-# FXdiv library, used for repeated integer division by the same factor
-http_archive(
-    name = "FXdiv",
-    sha256 = "ab7dfb08829bee33dca38405d647868fb214ac685e379ec7ef2bebcd234cd44d",
-    strip_prefix = "FXdiv-b408327ac2a15ec3e43352421954f5b1967701d1",
-    urls = ["https://github.com/Maratyszcza/FXdiv/archive/b408327ac2a15ec3e43352421954f5b1967701d1.zip"],
-)
+
 
 
 
