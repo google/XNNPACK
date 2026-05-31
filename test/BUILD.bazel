@@ -1112,3 +1112,15 @@ xnnpack_unit_test(
         "//:XNNPACK",
     ],
 )
+
+xnnpack_unit_test(
+    name = "hardware_config_reset_test",
+    srcs = ["hardware-config-reset.cc"],
+    tags = ["no_ynnpack"],
+    deps = [
+        "//:common",
+        "//src/configs:config_hdrs",
+        "//src/configs:hardware_config",
+        "//src/configs:microkernel_configs",
+    ],
+)

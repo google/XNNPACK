@@ -180,11 +180,9 @@ xnnpack_cc_library(
 
 xnnpack_cc_library(
     name = "init_once",
+    srcs = ["src/xnnpack/init-once.c"],
     hdrs = ["src/xnnpack/init-once.h"],
-    deps = [
-        ":common",
-        ":xnnpack_h",
-    ],
+    deps = [":common"],
 )
 
 xnnpack_cc_library(
