@@ -117,7 +117,16 @@ static enum xnn_status reshape_constant_pad_operator(
   struct xnn_runtime_value* output_value = values + output_id;
   output_value->shape.num_dims = input_value->shape.num_dims;
   for (size_t i = 0; i < input_value->shape.num_dims; ++i) {
-    output_value->shape.dim[i] = input_value->shape.dim[i] + opdata->pre_paddings[i] + opdata->post_paddings[i];
+    size_t output_dim;
+    if (!xnn_safe_add(input_value->shape.dim[i], opdata->pre_paddings[i], &output_dim) ||
+        !xnn_safe_add(output_dim, opdata->post_paddings[i], &output_dim)) {
+      xnn_log_error(
+          "failed to reshape %s operator with output ID #%" PRIu32
+          ": padded dimension #%zu overflows size_t",
+          xnn_node_type_to_string(xnn_node_type_static_constant_pad), output_id, i);
+      return xnn_status_invalid_parameter;
+    }
+    output_value->shape.dim[i] = output_dim;
   }
   const size_t new_size = xnn_runtime_tensor_get_size(output_value);
   if (new_size > output_value->size || opdata->workspace_size > old_workspace_size) {
