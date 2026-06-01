@@ -7,13 +7,11 @@
 #define XNNPACK_YNNPACK_BASE_SIMD_VEC_H_
 
 #include <algorithm>
-#include <array>
 #include <cassert>
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
-#include <limits>
 #include <type_traits>
 
 #include "ynnpack/base/arithmetic.h"

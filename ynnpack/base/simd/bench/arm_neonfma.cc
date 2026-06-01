@@ -14,10 +14,15 @@
 namespace ynn {
 namespace simd {
 
+BENCH_UNARY(neonfma, exp, bf16, 8);
 BENCH_UNARY(neonfma, exp, f32, 4);
+BENCH_UNARY(neonfma, expm1, bf16, 8);
 BENCH_UNARY(neonfma, expm1, f32, 4);
+BENCH_UNARY(neonfma, log, bf16, 8);
 BENCH_UNARY(neonfma, log, f32, 4);
+BENCH_UNARY(neonfma, log1p, bf16, 8);
 BENCH_UNARY(neonfma, log1p, f32, 4);
+BENCH_UNARY(neonfma, erf, bf16, 8);
 BENCH_UNARY(neonfma, erf, f32, 4);
 BENCH_UNARY(neonfma, tanh, f32, 4);
 

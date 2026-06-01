@@ -37,16 +37,28 @@ BENCH_UNARY(avx512, floor_log2, f64, 2);
 BENCH_UNARY(avx512, exp2_round, f32, 16);
 BENCH_UNARY(avx512, exp2_round, f64, 8);
 
+BENCH_UNARY(avx512, exp, f16, 16);
+BENCH_UNARY(avx512, exp, bf16, 16);
 BENCH_UNARY(avx512, exp, f32, 16);
 BENCH_UNARY(avx512, exp, f64, 8);
+BENCH_UNARY(avx512, expm1, f16, 16);
+BENCH_UNARY(avx512, expm1, bf16, 16);
 BENCH_UNARY(avx512, expm1, f32, 16);
 BENCH_UNARY(avx512, expm1, f64, 8);
+BENCH_UNARY(avx512, log, f16, 16);
+BENCH_UNARY(avx512, log, bf16, 16);
 BENCH_UNARY(avx512, log, f32, 16);
 BENCH_UNARY(avx512, log, f64, 8);
+BENCH_UNARY(avx512, log1p, f16, 16);
+BENCH_UNARY(avx512, log1p, bf16, 16);
 BENCH_UNARY(avx512, log1p, f32, 16);
 BENCH_UNARY(avx512, log1p, f64, 8);
+BENCH_UNARY(avx512, erf, f16, 16);
+BENCH_UNARY(avx512, erf, bf16, 16);
 BENCH_UNARY(avx512, erf, f32, 16);
 BENCH_UNARY(avx512, erf, f64, 8);
+BENCH_UNARY(avx512, tanh, f16, 16);
+BENCH_UNARY(avx512, tanh, bf16, 16);
 BENCH_UNARY(avx512, tanh, f32, 16);
 BENCH_UNARY(avx512, tanh, f64, 8);
 

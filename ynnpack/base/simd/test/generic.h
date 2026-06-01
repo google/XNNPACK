@@ -570,6 +570,9 @@ struct add_op {
   T operator()(T a, T b) {
     return a + b;
   }
+  half operator()(half a, half b) {
+    return static_cast<half>(static_cast<float>(a) + static_cast<float>(b));
+  }
   int32_t operator()(int32_t a, int32_t b) {
     // For integers, don't hit signed integer overflow.
     return static_cast<int64_t>(a) + static_cast<int64_t>(b);
@@ -580,6 +583,9 @@ struct sub_op {
   template <typename T>
   T operator()(T a, T b) {
     return a - b;
+  }
+  half operator()(half a, half b) {
+    return static_cast<half>(static_cast<float>(a) - static_cast<float>(b));
   }
   int32_t operator()(int32_t a, int32_t b) {
     // For integers, don't hit signed integer overflow.
@@ -592,6 +598,9 @@ struct multiply_op {
   T operator()(T a, T b) {
     return a * b;
   }
+  half operator()(half a, half b) {
+    return static_cast<half>(static_cast<float>(a) * static_cast<float>(b));
+  }
   int32_t operator()(int32_t a, int32_t b) {
     // For integers, don't hit signed integer overflow.
     return static_cast<int64_t>(a) * static_cast<int64_t>(b);
@@ -602,6 +611,9 @@ struct divide_op {
   template <typename T>
   T operator()(T a, T b) {
     return a / b;
+  }
+  half operator()(half a, half b) {
+    return static_cast<half>(static_cast<float>(a) / static_cast<float>(b));
   }
 };
 

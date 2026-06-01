@@ -398,6 +398,7 @@ class type_info<half> {
 
   static constexpr half epsilon() { return half::epsilon(); }
   static constexpr half infinity() { return half::infinity(); }
+  static constexpr half nan() { return half::nan(); }
   static constexpr half min() { return half::min(); }
   static constexpr half max() { return half::max(); }
   static constexpr half smallest_normal() { return half::smallest_normal(); }
@@ -423,6 +424,7 @@ class type_info<bfloat16> {
     return bfloat16::from_bits(0x3c00);  // 2^-7 = 0.0078125
   }
   static constexpr bfloat16 infinity() { return bfloat16::from_bits(0x7f80); }
+  static constexpr bfloat16 nan() { return bfloat16::from_bits(0x7fc0); }
   static constexpr bfloat16 min() { return bfloat16::from_bits(0xff7f); }
   static constexpr bfloat16 max() { return bfloat16::from_bits(0x7f7f); }
   static constexpr bfloat16 smallest_normal() {

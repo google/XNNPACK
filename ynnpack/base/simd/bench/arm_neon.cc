@@ -23,10 +23,15 @@ BENCH_UNARY(neon, exp2_round, f32, 4);
 
 BENCH_CAST(neon, f32, bf16, 4);
 
+BENCH_UNARY(neon, exp, bf16, 8);
 BENCH_UNARY(neon, exp, f32, 4);
+BENCH_UNARY(neon, expm1, bf16, 8);
 BENCH_UNARY(neon, expm1, f32, 4);
+BENCH_UNARY(neon, log, bf16, 8);
 BENCH_UNARY(neon, log, f32, 4);
+BENCH_UNARY(neon, log1p, bf16, 8);
 BENCH_UNARY(neon, log1p, f32, 4);
+BENCH_UNARY(neon, erf, bf16, 8);
 BENCH_UNARY(neon, erf, f32, 4);
 BENCH_UNARY(neon, tanh, f32, 4);
 

@@ -31,11 +31,17 @@ TEST_CEIL(arm_neonfma, f32, 4);
 TEST_ROUND(arm_neonfma, f32, 4);
 TEST_SQRT(arm_neonfma, f32, 4);
 
+TEST_UNARY(arm_neonfma, exp, bf16, 8, std::exp, 2);
 TEST_UNARY(arm_neonfma, exp, f32, 4, std::exp, 2);
+TEST_UNARY(arm_neonfma, expm1, bf16, 8, std::expm1, 2);
 TEST_UNARY(arm_neonfma, expm1, f32, 4, std::expm1, 2);
+TEST_UNARY(arm_neonfma, log, bf16, 8, std::log, 1);
 TEST_UNARY(arm_neonfma, log, f32, 4, std::log, 2);
+TEST_UNARY(arm_neonfma, log1p, bf16, 8, std::log1p, 1);
 TEST_UNARY(arm_neonfma, log1p, f32, 4, std::log1p, 3);
+TEST_UNARY(arm_neonfma, erf, bf16, 8, std::erf, 1);
 TEST_UNARY(arm_neonfma, erf, f32, 4, std::erf, 2);
+TEST_UNARY(arm_neonfma, tanh, bf16, 8, std::tanh, 1);
 TEST_UNARY(arm_neonfma, tanh, f32, 4, std::tanh, 2);
 
 TEST_UNARY(arm_neonfma, approx_erf, f32, 4, std::erf, 5);
