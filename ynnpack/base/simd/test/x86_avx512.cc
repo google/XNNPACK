@@ -244,6 +244,8 @@ TEST_UNARY(x86_avx512, tanh, f64, 8, std::tanh, 4);
 
 TEST_UNARY(x86_avx512, approx_erf, f32, 16, std::erf, 5);
 TEST_UNARY(x86_avx512, approx_tanh, f32, 16, std::tanh, 5);
+TEST_UNARY(x86_avx512, approx_exp, f32, 16, std::exp, 3);
+TEST_UNARY(x86_avx512, approx_expm1, f32, 16, std::expm1, 3);
 
 }  // namespace simd
 }  // namespace ynn

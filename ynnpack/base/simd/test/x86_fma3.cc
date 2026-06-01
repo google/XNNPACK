@@ -40,6 +40,8 @@ TEST_UNARY(x86_fma3, tanh, f64, 4, std::tanh, 4);
 
 TEST_UNARY(x86_fma3, approx_erf, f32, 8, std::erf, 5);
 TEST_UNARY(x86_fma3, approx_tanh, f32, 8, std::tanh, 5);
+TEST_UNARY(x86_fma3, approx_exp, f32, 8, std::exp, 3);
+TEST_UNARY(x86_fma3, approx_expm1, f32, 8, std::expm1, 3);
 
 }  // namespace simd
 }  // namespace ynn

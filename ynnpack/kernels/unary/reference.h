@@ -379,6 +379,41 @@ struct expm1 : public unary_op_info {
   }
 };
 
+struct approx_exp : public unary_op_info {
+  exp_params params;
+
+  explicit approx_exp(const unary_params& params) : params(params.approx_exp) {}
+  float operator()(float x) const override {
+    return std::exp(static_cast<float>(params.input_multiplier) * x) *
+           static_cast<float>(params.output_multiplier);
+  }
+  double operator()(double x) const override {
+    return std::exp(params.input_multiplier * x) * params.output_multiplier;
+  }
+
+  tolerance_spec tolerance(ynn_type type) const override {
+    return tolerance_spec{/*relative=*/5.0f, /*absolute=*/1.0f};
+  }
+};
+
+struct approx_expm1 : public unary_op_info {
+  expm1_params params;
+
+  explicit approx_expm1(const unary_params& params)
+      : params(params.approx_expm1) {}
+  float operator()(float x) const override {
+    return std::expm1(static_cast<float>(params.input_multiplier) * x) *
+           static_cast<float>(params.output_multiplier);
+  }
+  double operator()(double x) const override {
+    return std::expm1(params.input_multiplier * x) * params.output_multiplier;
+  }
+
+  tolerance_spec tolerance(ynn_type type) const override {
+    return tolerance_spec{/*relative=*/5.0f, /*absolute=*/1.0f};
+  }
+};
+
 struct erf : public unary_op_info {
   erf_params params;
 

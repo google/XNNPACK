@@ -62,6 +62,10 @@ const char* to_string(enum ynn_unary_operator op) {
       return "approx_erf";
     case ynn_unary_approx_tanh:
       return "approx_tanh";
+    case ynn_unary_approx_exp:
+      return "approx_exp";
+    case ynn_unary_approx_expm1:
+      return "approx_expm1";
     case ynn_unary_invalid:
       return "invalid";
   }
