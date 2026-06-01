@@ -573,11 +573,11 @@ void check_results(const unary_op_info& op, Tensor<A> a, Tensor<X> x,
     } else if constexpr (is_quantized<X>()) {
       const Float input_i = dequantize(a(i), a_quantization);
       Float expected = op(input_i);
-      expected = fake_quantize(expected, x_quantization);
-      expected = clamp_float_to_int<X>(expected);
       if (std::isnan(expected)) {
         // This is expected to overflow.
       } else {
+        expected = fake_quantize(expected, x_quantization);
+        expected = clamp_float_to_int<X>(expected);
         ASSERT_NEAR(expected, x(i), tol.absolute_error<X>(expected))
             << "i = " << index_to_string(i) << ", a(i) = " << input_i << " ("
             << static_cast<Float>(a(i)) << ")"
