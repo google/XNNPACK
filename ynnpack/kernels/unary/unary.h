@@ -70,6 +70,9 @@ struct erf_params {
 
 using approx_erf_params = erf_params;
 
+using approx_exp_params = exp_params;
+using approx_expm1_params = expm1_params;
+
 struct affine_output_params {
   real output_offset;
   real output_multiplier;
@@ -113,6 +116,8 @@ union unary_params {
   // to support all of them via poly3's parameters.
   erf_params erf;
   approx_erf_params approx_erf;
+  approx_exp_params approx_exp;
+  approx_expm1_params approx_expm1;
   approx_tanh_params approx_tanh;
   tanh_params tanh;
   sine_params sine;

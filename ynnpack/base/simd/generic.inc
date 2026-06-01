@@ -857,6 +857,49 @@ static vec<float, N> approx_tanh(vec<float, N> x) {
   return select(abs(x_clamped) < broadcast<N>(min_abs_x), x, p_x / q_x);
 }
 
+// Fast approximation: ~13% faster than exp(x), ~3 ULPs vs. ~2 ULPs error.
+template <size_t N>
+static vec<float, N> approx_exp(vec<float, N> x) {
+  constexpr std::array<float, 2> p = {
+      4.7195836902e-02f,
+      5.0000029802e-01f,
+  };
+  constexpr std::array<float, 4> q = {
+      4.4524371624e-03f,
+      -3.6790699232e-03f,
+      -2.3893947899e-01f,
+      1.0000000000e+00f,
+  };
+  constexpr float log2e = 1.4426950408889634f;
+  constexpr float ln2_hi = 6.9314575195e-01f;
+  constexpr float ln2_lo = 1.4286067653e-06f;
+  constexpr float min_x = -88.02969360351562f;
+  constexpr float max_x = 88.72283935546875f;
+
+  return internal::exp_impl<0>(x, p, q, min_x, max_x, log2e, ln2_hi, ln2_lo);
+}
+
+template <size_t N>
+static vec<float, N> approx_expm1(vec<float, N> x) {
+  constexpr std::array<float, 2> p = {
+      4.7195836902e-02f,
+      5.0000029802e-01f,
+  };
+  constexpr std::array<float, 4> q = {
+      4.4524371624e-03f,
+      -3.6790699232e-03f,
+      -2.3893947899e-01f,
+      1.0000000000e+00f,
+  };
+  constexpr float log2e = 1.4426950408889634f;
+  constexpr float ln2_hi = 6.9314575195e-01f;
+  constexpr float ln2_lo = 1.4286067653e-06f;
+  constexpr float min_x = -88.02969360351562f;
+  constexpr float max_x = 88.72283935546875f;
+
+  return internal::exp_impl<1>(x, p, q, min_x, max_x, log2e, ln2_hi, ln2_lo);
+}
+
 }  // namespace simd
 
 }  // namespace ynn

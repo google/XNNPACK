@@ -40,6 +40,8 @@ TEST_UNARY(arm_neonfma, tanh, f32, 4, std::tanh, 2);
 
 TEST_UNARY(arm_neonfma, approx_erf, f32, 4, std::erf, 5);
 TEST_UNARY(arm_neonfma, approx_tanh, f32, 4, std::tanh, 5);
+TEST_UNARY(arm_neonfma, approx_exp, f32, 4, std::exp, 3);
+TEST_UNARY(arm_neonfma, approx_expm1, f32, 4, std::expm1, 3);
 
 }  // namespace simd
 }  // namespace ynn
