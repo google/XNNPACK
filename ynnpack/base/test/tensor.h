@@ -350,7 +350,8 @@ class Tensor {
 
   // This uses the same rules for indexing as numpy, i.e. negative numbers are
   // offset are added to the extents.
-  Tensor<T> slice(size_t dim, int64_t begin, int64_t end) const {
+  Tensor<T> slice(size_t dim, int64_t begin, int64_t end,
+                  int64_t stride = 1) const {
     assert(dim < rank());
 
     begin = begin < 0 ? extents_[dim] + begin : begin;
@@ -360,22 +361,25 @@ class Tensor {
     end = std::max<int64_t>(std::min<int64_t>(end, extents_[dim]), begin);
 
     Tensor<T> result(*this);
-    result.extents_[dim] = end - begin;
+    result.extents_[dim] = ceil_div(end - begin, stride);
     result.begin_ = begin_ + strides_[dim] * begin;
-    result.end_ = begin_ + strides_[dim] * end;
+    result.strides_[dim] *= stride;
+    result.end_ = result.begin_ + result.strides_[dim] * result.extents_[dim];
 
     return result;
   }
 
   // This is similar to above, but slices all dimensions.
   Tensor<T> slice(const std::vector<int64_t>& begins,
-                  const std::vector<int64_t>& ends) const {
+                  const std::vector<int64_t>& ends,
+                  const std::vector<int64_t>& strides = {}) const {
     assert(rank() == begins.size());
     assert(rank() == ends.size());
 
     Tensor<T> result(*this);
     for (size_t i = 0; i < rank(); ++i) {
-      result = result.slice(i, begins[i], ends[i]);
+      result = result.slice(i, begins[i], ends[i],
+                            i < strides.size() ? strides[i] : 1);
     }
 
     return result;

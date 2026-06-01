@@ -44,3 +44,17 @@ def convert_fp64_to_fp32(a, x):
 @operator_name("convert")
 def convert_fp32_to_fp64(a, x):
   return store(cast(Float(64), load(a)), x)
+
+
+@const_buffer("a", Int(2))
+@buffer("x", Int(8))
+@operator_name("convert")
+def convert_int2_to_int8(a, x):
+  return store(cast(Int(8), load(a)), x)
+
+
+@const_buffer("a", Int(4))
+@buffer("x", Int(8))
+@operator_name("convert")
+def convert_int4_to_int8(a, x):
+  return store(cast(Int(8), load(a)), x)

@@ -192,9 +192,6 @@ void ynn_runtime::schedule() {
     // loop nest (this is currently done by comparing extents computed in
     // forward bounds).
     int splits_match = 0;
-    // This is a product of matched extents which we can use to decide if we
-    // should add remaining (not-matched) loops of the function.
-    slinky::expr match_volume = 1;
   };
 
   // This a list of indices of consumers of a given buffer.
@@ -247,7 +244,6 @@ void ynn_runtime::schedule() {
     // The total number of elements shared between the producer and consumer
     // at the proposed compute_at level.
     sched_data.splits_match = 0;
-    sched_data.match_volume = 1;
     ynn::scheduling_info* sched =
         static_cast<ynn::scheduling_info*>(f.user_data());
 
@@ -283,6 +279,14 @@ void ynn_runtime::schedule() {
           // We can overwrite the current loop step if it's not required, but
           // this one is.
           if (split.step_is_required) {
+            if (std::optional<slinky::var> v =
+                    slinky::as_variable(global_loop.step)) {
+              // This is a special variable which defines partial reduction
+              // bounds, so we need to override to match the loop step.
+              if (globals.symbols.name(*v).rfind("pr_split", 0) == 0) {
+                globals.update_let(*v, split.step);
+              }
+            }
             global_loop.step = split.step;
             global_loop.step_is_required = true;
           }
@@ -291,9 +295,8 @@ void ynn_runtime::schedule() {
           // global_loop_nest[loop_nest[compute_at]].step = slinky::simplify(
           //     slinky::min(global_loop_nest[loop_nest[compute_at]].step,
           //                 loop_splits[splits_match].step));
-          sched_data.match_volume *= global_loop.extent;
           compute_at++;
-          sched_data.splits_match = split_i;
+          sched_data.splits_match = split_i + 1;
         }
       }
       // Remove the inner part of the loop nest which we were not able to
@@ -313,8 +316,7 @@ void ynn_runtime::schedule() {
     // computing by keeping a sum of compute amounts for each of the functions
     // inside of this loop and only schedule loops which have more
     // computations than certain threshold.
-    if (sched && !sched->loop_splits.empty() &&
-        prove_true(sched_data.match_volume == 1)) {
+    if (sched && !sched->loop_splits.empty()) {
       const std::vector<ynn::scheduling_split>& loop_splits =
           sched->loop_splits;
       // Update the global loop nest by adding loops of this function.
@@ -340,7 +342,6 @@ void ynn_runtime::schedule() {
     ynn::scheduling_info* sched =
         static_cast<ynn::scheduling_info*>(f.user_data());
     int compute_at = sched_data.compute_at;
-    const slinky::expr& match_volume = sched_data.match_volume;
     // Now we know a compute_at location of this function
     if (compute_at == 0) {
       f.compute_root();
@@ -368,7 +369,7 @@ void ynn_runtime::schedule() {
       }
     }
 
-    if (sched && !sched->loop_splits.empty() && prove_true(match_volume == 1)) {
+    if (sched && !sched->loop_splits.empty()) {
       std::vector<ynn::scheduling_split>& loop_splits = sched->loop_splits;
       const std::vector<int>& loop_nest = sched_data.loop_nest;
       // Reverse it back.

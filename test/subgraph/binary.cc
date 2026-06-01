@@ -240,14 +240,14 @@ void TestImpl(const Param& p) {
             const float a_i = dequantize(a(i), a_quantization);
             const float b_i = dequantize(b(i), b_quantization);
             float expected = compute_float(p.op, a_i, b_i);
-            expected = std::max<float>(expected, params.output_min);
-            expected = std::min<float>(expected, params.output_max);
-            expected = fake_quantize(expected, output_quantization);
-            expected = std::max<float>(expected, NumericLimits<T>::min());
-            expected = std::min<float>(expected, NumericLimits<T>::max());
             if (std::isnan(expected)) {
               // We don't know how to represent NaN for quantized datatypes.
             } else {
+              expected = std::max<float>(expected, params.output_min);
+              expected = std::min<float>(expected, params.output_max);
+              expected = fake_quantize(expected, output_quantization);
+              expected = std::max<float>(expected, NumericLimits<T>::min());
+              expected = std::min<float>(expected, NumericLimits<T>::max());
               ASSERT_NEAR(expected, output(i), 1)
                   << "i = " << index_to_string(i)
                   << ", a_shape=" << index_to_string(a_shape)

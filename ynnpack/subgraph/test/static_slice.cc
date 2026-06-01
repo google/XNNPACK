@@ -30,16 +30,20 @@ template <typename T>
 void TestKeepDims(T, size_t rank) {
   ReplicableRandomDevice rng;
 
+  std::uniform_int_distribution<int64_t> stride_dist(1, 3);
+
   for (auto _ : FuzzTest(std::chrono::milliseconds(100))) {
-    std::vector<size_t> dims = random_shape(rng, rank);
+    constexpr size_t max_dim = 20;
+    std::vector<size_t> dims = random_shape(rng, rank, 1, max_dim);
 
     std::vector<int32_t> axes(dims.size());
     std::iota(axes.begin(), axes.end(), 0);
     std::vector<int64_t> begins(dims.size());
     std::vector<int64_t> ends(dims.size());
+    std::vector<int64_t> strides(dims.size());
     for (size_t i = 0; i < dims.size(); i++) {
       // Test out of bounds slices too.
-      const int64_t range = dims[i] * 2;
+      const int64_t range = dims[i] == 0 ? max_dim * 2 : dims[i];
       auto begin_dist =
           std::uniform_int_distribution<int64_t>(-range, range - 1);
       begins[i] = begin_dist(rng);
@@ -55,12 +59,12 @@ void TestKeepDims(T, size_t rank) {
         end_dist = std::uniform_int_distribution<int64_t>(begins[i], range);
       }
       ends[i] = end_dist(rng);
+      strides[i] = stride_dist(rng);
     }
 
-    std::vector<int64_t> strides(dims.size(), 1);
     // Define subgraph
     SubgraphBuilder subgraph(2);
-    subgraph.AddInput(type_of<T>(), rank, 0)
+    subgraph.AddInput(type_of<T>(), dims, 0)
         .AddOutput(type_of<T>(), rank, 1)
         .AddSlice(axes, begins, ends, strides, 0, 1);
 
@@ -68,16 +72,13 @@ void TestKeepDims(T, size_t rank) {
     ASSERT_EQ(runtime.Status(), ynn_status_success);
 
     for (int reshape = 0; reshape < 2; ++reshape) {
-      std::vector<size_t> shape = random_shape(rng, rank);
-      for (size_t i = 0; i < rank; ++i) {
-        shape[i] += dims[i];
-      }
+      std::vector<size_t> shape = random_shape(rng, dims);
 
       Tensor<T> input(shape);
       fill_random(input.data(), input.size(), rng);
 
       // Make a deep copy so the expected result is contiguous.
-      Tensor<T> expected = input.slice(begins, ends).deep_copy();
+      Tensor<T> expected = input.slice(begins, ends, strides).deep_copy();
 
       // Check reshape is correct
       runtime.ReshapeExternalTensor(shape, input.base(), 0).ReshapeRuntime();

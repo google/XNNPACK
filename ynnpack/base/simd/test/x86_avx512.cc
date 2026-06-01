@@ -3,10 +3,14 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include "ynnpack/base/simd/x86_avx512.h"
+#include <cmath>
 
+#include <iomanip>
 #include <gtest/gtest.h>
 #include "ynnpack/base/arch.h"
+#include "ynnpack/base/simd/x86_vec512.h"
+
+// This must be included last
 #include "ynnpack/base/simd/test/generic.h"
 
 namespace ynn {
@@ -147,6 +151,12 @@ TEST_FLOOR_LOG2(x86_avx512, f64, 4);
 TEST_FLOOR_LOG2(x86_avx512, f64, 2);
 TEST_EXP2_ROUND(x86_avx512, f32, 16);
 TEST_EXP2_ROUND(x86_avx512, f64, 8);
+TEST_COMPARISONS(x86_avx512, f32, 16);
+TEST_COMPARISONS(x86_avx512, f64, 8);
+TEST_ISNAN(x86_avx512, f32, 16);
+TEST_ISNAN(x86_avx512, f64, 8);
+TEST_ISFINITE(x86_avx512, f32, 16);
+TEST_ISFINITE(x86_avx512, f64, 8);
 
 TEST_FLOOR(x86_avx512, f32, 16);
 TEST_FLOOR(x86_avx512, f64, 8);
@@ -198,9 +208,6 @@ TEST_HORIZONTAL_MAX(x86_avx512, s32, 16);
 TEST_HORIZONTAL_MAX(x86_avx512, f32, 16);
 TEST_HORIZONTAL_MAX(x86_avx512, f64, 8);
 
-TEST_KAHAN_SUM(x86_avx512, f32, 16);
-TEST_KAHAN_SUM(x86_avx512, f64, 8);
-
 TEST_CAST(x86_avx512, f32, bf16x16);
 TEST_CAST(x86_avx512, f32, f16x16);
 TEST_CAST(x86_avx512, bf16, f32x32);
@@ -215,12 +222,28 @@ TEST_CAST(x86_avx512, f64, f32x8);
 TEST_CAST(x86_avx512, f64, f32x16);
 TEST_CAST(x86_avx512, f32, f64x8);
 
-TEST_SATURATE_CAST(x86_avx512, s16, s32x32);
-TEST_SATURATE_CAST(x86_avx512, u8, s16x64);
-TEST_SATURATE_CAST(x86_avx512, s8, s16x64);
-TEST_ROUND_FLOAT_TO_INT(x86_avx512, u8, f32x64);
-TEST_ROUND_FLOAT_TO_INT(x86_avx512, s8, f32x64);
-TEST_ROUND_FLOAT_TO_INT(x86_avx512, s16, f32x32);
+TEST_CAST(x86_avx512, s16, s32x32);
+TEST_CAST(x86_avx512, u8, s16x64);
+TEST_CAST(x86_avx512, s8, s16x64);
+TEST_CAST(x86_avx512, u8, f32x64);
+TEST_CAST(x86_avx512, s8, f32x64);
+TEST_CAST(x86_avx512, s16, f32x32);
+
+TEST_UNARY(x86_avx512, exp, f32, 16, std::exp, 2);
+TEST_UNARY(x86_avx512, exp, f64, 8, std::exp, 2);
+TEST_UNARY(x86_avx512, expm1, f32, 16, std::expm1, 2);
+TEST_UNARY(x86_avx512, expm1, f64, 8, std::expm1, 2);
+TEST_UNARY(x86_avx512, log, f32, 16, std::log, 2);
+TEST_UNARY(x86_avx512, log, f64, 8, std::log, 2);
+TEST_UNARY(x86_avx512, log1p, f32, 16, std::log1p, 3);
+TEST_UNARY(x86_avx512, log1p, f64, 8, std::log1p, 3);
+TEST_UNARY(x86_avx512, erf, f32, 16, std::erf, 2);
+TEST_UNARY(x86_avx512, erf, f64, 8, std::erf, 3);
+TEST_UNARY(x86_avx512, tanh, f32, 16, std::tanh, 2);
+TEST_UNARY(x86_avx512, tanh, f64, 8, std::tanh, 4);
+
+TEST_UNARY(x86_avx512, approx_erf, f32, 16, std::erf, 5);
+TEST_UNARY(x86_avx512, approx_tanh, f32, 16, std::tanh, 5);
 
 }  // namespace simd
 }  // namespace ynn

@@ -15,33 +15,26 @@
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/math.h"
 
-// SIMD vector type for f16 using WASMSIMD.
+// SIMD vector type for f16 using WASMRELAXEDSIMD.
 typedef v128_t xnn_simd_f16_t;
 #define xnn_simd_size_f16 8
 #define xnn_simd_log2_size_f16 3
-#define xnn_simd_bytes_f16 (xnn_simd_size_f16 * sizeof(xnn_float16))
+#define xnn_simd_bytes_f16 (xnn_simd_size_f16 * sizeof(uint16_t))
+
+#define XNN_SIMD_HAS_NATIVE_FMA 1
 
 #define XNN_SIMD_CONST_F16(var, val) \
-  const xnn_simd_f16_t var = (xnn_simd_f16_t)wasm_i16x8_splat(val);
+  const xnn_simd_f16_t var = wasm_i16x8_splat(val);
 
 #define XNN_SIMD_CONST_F16_FROM_INT16(var, val) \
-  const xnn_simd_f16_t var = (xnn_simd_f16_t)wasm_i16x8_splat(val);
+  const xnn_simd_f16_t var = wasm_i16x8_splat(val);
 
-#if XNN_HAVE_FLOAT16
 #define XNN_SIMD_CONST_F16_FROM_FLOAT(var, val) \
-  const xnn_simd_f16_t var = (xnn_simd_f16_t)wasm_i16x8_splat(xnn_float16_to_bits(xnn_float16_from_float(val)));
-#else
-#define XNN_SIMD_CONST_F16_FROM_FLOAT(var, val) \
-  XNN_SIMD_CONST_F16_FROM_INT16(                \
-      var, xnn_float16_to_bits(xnn_float16_from_float(val)))
-#endif  // XNN_HAVE_FLOAT16
-
-// Whether or not this architecture has native fused multiply-add support.
-#define XNN_SIMD_HAS_NATIVE_FMA 1
+  const xnn_simd_f16_t var = wasm_i16x8_splat(xnn_float16_to_bits(xnn_float16_from_float(val)));
 
 // Arithmetic operations.
 static XNN_INLINE xnn_simd_f16_t xnn_zero_f16() {
-  return wasm_i16x8_splat(0);
+  return wasm_i16x8_const_splat(0);
 }
 
 static XNN_INLINE xnn_simd_f16_t xnn_add_f16(xnn_simd_f16_t a,
@@ -80,6 +73,10 @@ static XNN_INLINE xnn_simd_f16_t xnn_sub_f16(xnn_simd_f16_t a,
 static XNN_INLINE xnn_simd_f16_t xnn_div_f16(xnn_simd_f16_t a,
                                              xnn_simd_f16_t b) {
   return wasm_f16x8_div(a, b);
+}
+
+static XNN_INLINE xnn_simd_f16_t xnn_rcp_f16(xnn_simd_f16_t a) {
+  return wasm_f16x8_div(wasm_i16x8_const_splat(0x3C00), a);
 }
 
 static XNN_INLINE xnn_simd_f16_t xnn_max_f16(xnn_simd_f16_t a,
@@ -136,6 +133,7 @@ static XNN_INLINE xnn_simd_f16_t xnn_sra_f16(xnn_simd_f16_t a, uint8_t bits) {
   return wasm_i16x8_shr(a, bits);
 }
 
+// TODO: use wasm_f16x8_eq once bug is fixed.
 static XNN_INLINE xnn_simd_f16_t xnn_cmpeq_f16(xnn_simd_f16_t a,
                                                xnn_simd_f16_t b) {
   const xnn_simd_f16_t abs_mask = wasm_i16x8_splat(0x7FFF);
@@ -178,8 +176,8 @@ static XNN_INLINE xnn_simd_f16_t xnn_set1_f16(xnn_float16 v) {
 }
 
 // Tail load/store operations.
-static XNN_INLINE xnn_simd_f16_t xnn_load_tail_f16(const xnn_float16* input,
-                                                   size_t num_elements) {
+static XNN_INLINE xnn_simd_f16_t
+xnn_load_tail_f16(const xnn_float16* input, size_t num_elements) {
   assert(num_elements > 0);
   assert(num_elements < xnn_simd_size_f16);
 
@@ -204,11 +202,9 @@ static XNN_INLINE xnn_simd_f16_t xnn_load_tail_f16(const xnn_float16* input,
     case 2:
       *dst++ = *input++;
       XNN_FALLTHROUGH
-    case 1:
+    default:
       *dst++ = *input++;
       break;
-    default:
-      XNN_UNREACHABLE;
   }
   return wasm_v128_load(padded);
 }
@@ -220,17 +216,43 @@ static XNN_INLINE void xnn_store_tail_f16(xnn_float16* output, xnn_simd_f16_t v,
 
   if (num_elements & 4) {
     wasm_v128_store64_lane(output, v, 0);
-    v = wasm_i64x2_shuffle(v, v, 1, 1);
+    v = wasm_v64x2_shuffle(v, v, 1, 1);
     output += 4;
   }
   if (num_elements & 2) {
     wasm_v128_store32_lane(output, v, 0);
-    v = wasm_i32x4_shuffle(v, v, 1, 1, 1, 1);
+    v = wasm_v32x4_shuffle(v, v, 1, 1, 1, 1);
     output += 2;
   }
   if (num_elements & 1) {
     wasm_v128_store16_lane(output, v, 0);
   }
+}
+
+// Conversion operations.
+// TODO: Remove __builtin_convertvector once the wasm header is fixed.
+typedef __fp16 xnn_f16x4 __attribute__((__vector_size__(8), __aligned__(8)));
+
+static XNN_INLINE v128_t xnn_wasm_f32x4_promote_low_f16x8(v128_t __a) {
+  return (v128_t) __builtin_convertvector(
+      (xnn_f16x4){((__f16x8)__a)[0], ((__f16x8)__a)[1], ((__f16x8)__a)[2],
+                  ((__f16x8)__a)[3]},
+      __f32x4);
+}
+
+static XNN_INLINE v128_t xnn_wasm_f16x8_demote_f32x4_zero(v128_t __a) {
+  return (v128_t) __builtin_convertvector(
+      __builtin_shufflevector((__f32x4)__a, (__f32x4){0.0f, 0.0f, 0.0f, 0.0f},
+                              0, 1, 2, 3, 4, 5, 6, 7),
+      __f16x8);
+}
+
+static XNN_INLINE v128_t xnn_cvt_f32_f16(v128_t h) {
+  return xnn_wasm_f32x4_promote_low_f16x8(h);
+}
+
+static XNN_INLINE v128_t xnn_cvt_f16_f32(v128_t f) {
+  return xnn_wasm_f16x8_demote_f32x4_zero(f);
 }
 
 #endif  // XNNPACK_SRC_XNNPACK_SIMD_F16_WASMRELAXEDSIMD_H_

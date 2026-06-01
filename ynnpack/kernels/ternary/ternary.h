@@ -26,11 +26,12 @@ typedef void (*ternary_kernel_fn)(size_t m, size_t n, size_t stride_a_m,
                                   size_t stride_x_m, void* x,
                                   const ternary_params* params);
 
-#define YNN_ELEMENTWISE_KERNEL(arch, name, op, type_a, type_b, type_c, type_x) \
-  void name(size_t m, size_t n, size_t stride_a_m, size_t stride_a_n,          \
-            const void* a, size_t stride_b_m, size_t stride_b_n,               \
-            const void* b, size_t stride_c_m, size_t stride_c_n,               \
-            const void* c, size_t stride_x_m, void* x,                         \
+#define YNN_ELEMENTWISE_KERNEL(arch, name, op, flags, type_a, type_b, type_c, \
+                               type_x)                                        \
+  void name(size_t m, size_t n, size_t stride_a_m, size_t stride_a_n,         \
+            const void* a, size_t stride_b_m, size_t stride_b_n,              \
+            const void* b, size_t stride_c_m, size_t stride_c_n,              \
+            const void* c, size_t stride_x_m, void* x,                        \
             const ternary_params* params);
 #include "ynnpack/kernels/ternary/kernels.inc"
 #undef YNN_ELEMENTWISE_KERNEL

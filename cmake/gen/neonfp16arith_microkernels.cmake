@@ -68,6 +68,7 @@ SET(PROD_NEONFP16ARITH_MICROKERNEL_SRCS
   src/f16-vexp/gen/f16-vexp-neonfp16arith-poly-3.c
   src/f16-vgelu/gen/f16-vgelu-neonfp16arith-rational-6-4-div.c
   src/f16-vhswish/gen/f16-vhswish-neonfp16arith-u16.c
+  src/f16-vlog/gen/f16-vlog-neonfp16arith-rational-3-3-div.c
   src/f16-vlrelu/gen/f16-vlrelu-neonfp16arith-u16.c
   src/f16-vmulcaddc/gen/f16-vmulcaddc-c8-minmax-neonfp16arith-2x.c
   src/f16-vrnd/gen/f16-vrndd-neonfp16arith-u16.c
@@ -79,7 +80,7 @@ SET(PROD_NEONFP16ARITH_MICROKERNEL_SRCS
   src/f16-vsigmoid/gen/f16-vsigmoid-neonfp16arith-rr2-p2-nr1recps-u16.c
   src/f16-vsin/gen/f16-vsin-neonfp16arith-rational-3-2-div.c
   src/f16-vsqrt/gen/f16-vsqrt-neonfp16arith-nr1fma1adj-u8.c
-  src/f16-vtanh/gen/f16-vtanh-neonfp16arith-expm1minus-rr1-p3h2ts-nr1fma-u32.c
+  src/f16-vtanh/gen/f16-vtanh-neonfp16arith-rational-5-4-div.c
   src/f16-vunary/gen/f16-vabs-neonfp16arith-u16.c
   src/f16-vunary/gen/f16-vneg-neonfp16arith-u16.c
   src/f16-vunary/gen/f16-vsqr-neonfp16arith-u16.c
@@ -240,17 +241,7 @@ SET(NON_PROD_NEONFP16ARITH_MICROKERNEL_SRCS
   src/f16-vsigmoid/gen/f16-vsigmoid-neonfp16arith-rr2-p2-nr1recps-u32.c
   src/f16-vsqrt/gen/f16-vsqrt-neonfp16arith-nr1fma1adj-u16.c
   src/f16-vsqrt/gen/f16-vsqrt-neonfp16arith-nr1fma1adj-u32.c
-  src/f16-vtanh/gen/f16-vtanh-neonfp16arith-expm1minus-rr1-p3h2ts-nr1fma-u8.c
-  src/f16-vtanh/gen/f16-vtanh-neonfp16arith-expm1minus-rr1-p3h2ts-nr1fma-u16.c
-  src/f16-vtanh/gen/f16-vtanh-neonfp16arith-expm1minus-rr1-p3h2ts-nr1fma-u24.c
-  src/f16-vtanh/gen/f16-vtanh-neonfp16arith-expm1minus-rr1-p3h2ts-nr1recps-u8.c
-  src/f16-vtanh/gen/f16-vtanh-neonfp16arith-expm1minus-rr1-p3h2ts-nr1recps-u16.c
-  src/f16-vtanh/gen/f16-vtanh-neonfp16arith-expm1minus-rr1-p3h2ts-nr1recps-u24.c
-  src/f16-vtanh/gen/f16-vtanh-neonfp16arith-expm1minus-rr1-p3h2ts-nr1recps-u32.c
-  src/f16-vtanh/gen/f16-vtanh-neonfp16arith-expm1minus-rr1-p3h2ts-recpeadj-u8.c
-  src/f16-vtanh/gen/f16-vtanh-neonfp16arith-expm1minus-rr1-p3h2ts-recpeadj-u16.c
-  src/f16-vtanh/gen/f16-vtanh-neonfp16arith-expm1minus-rr1-p3h2ts-recpeadj-u24.c
-  src/f16-vtanh/gen/f16-vtanh-neonfp16arith-expm1minus-rr1-p3h2ts-recpeadj-u32.c
+  src/f16-vtanh/gen/f16-vtanh-neonfp16arith-rational-5-4-nr.c
   src/f16-vunary/gen/f16-vabs-neonfp16arith-u8.c
   src/f16-vunary/gen/f16-vneg-neonfp16arith-u8.c
   src/f16-vunary/gen/f16-vsqr-neonfp16arith-u8.c

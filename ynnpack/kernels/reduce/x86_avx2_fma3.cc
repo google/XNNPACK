@@ -10,8 +10,7 @@
 
 #include "ynnpack/base/bfloat16.h"
 #include "ynnpack/base/simd/vec.h"
-#include "ynnpack/base/simd/x86_avx2.h"
-#include "ynnpack/base/simd/x86_fma3.h"
+#include "ynnpack/base/simd/x86_vec256.h"
 #include "ynnpack/kernels/reduce/generic.h"
 #include "ynnpack/kernels/reduce/sum.h"
 

@@ -173,13 +173,12 @@ def main(args):
   if not os.path.exists(cmake_gen_dir):
     os.makedirs(cmake_gen_dir, exist_ok=True)
   ignore_roots = {
-      src_dir,
-      os.path.join(src_dir, 'configs'),
-      os.path.join(src_dir, 'enums'),
-      os.path.join(src_dir, 'operators'),
-      os.path.join(src_dir, 'subgraph'),
-      os.path.join(src_dir, 'tables'),
-      os.path.join(src_dir, 'xnnpack'),
+      os.path.join(src_dir, 'configs') + os.sep,
+      os.path.join(src_dir, 'enums') + os.sep,
+      os.path.join(src_dir, 'operators') + os.sep,
+      os.path.join(src_dir, 'subgraph') + os.sep,
+      os.path.join(src_dir, 'tables') + os.sep,
+      os.path.join(src_dir, 'xnnpack') + os.sep,
   }
   c_microkernels_per_isa = {isa: [] for isa in _ISA_LIST if isa not in _ISA_MAP}
   c_microkernels_per_isa['neon_aarch64'] = list()
@@ -191,7 +190,9 @@ def main(args):
   asm_microkernels_per_arch = {arch: [] for arch in _ARCH_LIST}
   microkernel_name_to_filename = dict()
   for root, _, files in os.walk(src_dir, topdown=False):
-    if root in ignore_roots:
+    if root == src_dir:
+      continue
+    if any((root + os.sep).startswith(ignored_root) for ignored_root in ignore_roots):
       continue
 
     for name in files:

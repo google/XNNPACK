@@ -42,7 +42,7 @@ ENDIF()
 
 SET(CMAKE_C_STANDARD 99)
 SET(CMAKE_C_EXTENSIONS NO)
-SET(CMAKE_CXX_STANDARD 14)
+SET(CMAKE_CXX_STANDARD 17)
 SET(CMAKE_CXX_STANDARD_REQUIRED YES)
 SET(CMAKE_CXX_EXTENSIONS NO)
 
@@ -52,8 +52,10 @@ SET_PROPERTY(CACHE XNNPACK_LIBRARY_TYPE PROPERTY STRINGS default static shared)
 IF(CMAKE_C_COMPILER_ID STREQUAL "MSVC")
   # Disable assembly when using MSVC until support is added.
   OPTION(XNNPACK_ENABLE_ASSEMBLY "Build XNNPACK with assembly micro-kernels" OFF)
+  OPTION(XNNPACK_ENABLE_RNDNU16 "Build XNNPACK with RNDNU16 micro-kernels" OFF)
 ELSE()
   OPTION(XNNPACK_ENABLE_ASSEMBLY "Build XNNPACK with assembly micro-kernels" ON)
+  OPTION(XNNPACK_ENABLE_RNDNU16 "Build XNNPACK with RNDNU16 micro-kernels" ON)
 ENDIF()
 OPTION(XNNPACK_ENABLE_MEMOPT "Build XNNPACK with optimized memory allocation scheme" ON)
 OPTION(XNNPACK_ENABLE_SPARSE "Build XNNPACK with graph rewriting for sparse inference" ON)
@@ -363,6 +365,7 @@ ADD_COMPILE_DEFINITIONS("XNN_ENABLE_AVX512BF16=$<BOOL:${XNNPACK_ENABLE_AVX512BF1
 ADD_COMPILE_DEFINITIONS("XNN_ENABLE_VSX=$<BOOL:${XNNPACK_ENABLE_VSX}>")
 ADD_COMPILE_DEFINITIONS("XNN_ENABLE_ASSEMBLY=$<BOOL:${XNNPACK_ENABLE_ASSEMBLY}>")
 ADD_COMPILE_DEFINITIONS("XNN_ENABLE_SPARSE=$<BOOL:${XNNPACK_ENABLE_SPARSE}>")
+ADD_COMPILE_DEFINITIONS("XNN_ENABLE_RNDNU16=$<BOOL:${XNNPACK_ENABLE_RNDNU16}>")
 ADD_COMPILE_DEFINITIONS("XNN_ENABLE_HVX=$<BOOL:${XNNPACK_ENABLE_HVX}>")
 ADD_COMPILE_DEFINITIONS("XNN_ENABLE_KLEIDIAI=$<BOOL:${XNNPACK_ENABLE_KLEIDIAI}>")
 ADD_COMPILE_DEFINITIONS("XNN_ENABLE_WASM_REVECTORIZE=$<BOOL:${XNNPACK_ENABLE_WASM_REVECTORIZE}>")
@@ -442,16 +445,7 @@ IF(NOT XNNPACK_USE_SYSTEM_LIBS)
     EXECUTE_PROCESS(COMMAND "${CMAKE_COMMAND}" --build .
       WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/cpuinfo-download")
     SET(CPUINFO_SOURCE_DIR "${CMAKE_BINARY_DIR}/cpuinfo-source" CACHE STRING "cpuinfo source directory")
-  ENDIF()
 
-  IF(NOT DEFINED FXDIV_SOURCE_DIR)
-    MESSAGE(STATUS "Downloading FXdiv to ${CMAKE_BINARY_DIR}/FXdiv-source (define FXDIV_SOURCE_DIR to avoid it)")
-    CONFIGURE_FILE(cmake/DownloadFXdiv.cmake "${CMAKE_BINARY_DIR}/FXdiv-download/CMakeLists.txt")
-    EXECUTE_PROCESS(COMMAND "${CMAKE_COMMAND}" -G "${CMAKE_GENERATOR}" .
-      WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/FXdiv-download")
-    EXECUTE_PROCESS(COMMAND "${CMAKE_COMMAND}" --build .
-      WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/FXdiv-download")
-    SET(FXDIV_SOURCE_DIR "${CMAKE_BINARY_DIR}/FXdiv-source" CACHE STRING "FXdiv source directory")
   ENDIF()
 
   IF(NOT DEFINED PTHREADPOOL_SOURCE_DIR)
@@ -565,6 +559,7 @@ SET(SUBGRAPH_SRCS
   src/subgraph/max-pooling-2d.c
   src/subgraph/pack-lh.c
   src/subgraph/reshape-helpers.c
+  src/subgraph/rewrites/fp16_to_fp32.cc
   src/subgraph/rope.c
   src/subgraph/softmax.c
   src/subgraph/space-to-depth-2d.c
@@ -996,7 +991,7 @@ IF(XNNPACK_BUILD_LIBRARY)
   TARGET_LINK_LIBRARIES(xnnpack-operator-run PRIVATE xnnpack-base xnnpack-logging)
   TARGET_LINK_LIBRARIES(xnnpack-operator-utils PRIVATE xnnpack-base xnnpack-logging)
   TARGET_LINK_LIBRARIES(xnnpack-reference-ukernels PRIVATE xnnpack-base xnnpack-datatype)
-  TARGET_LINK_LIBRARIES(xnnpack-subgraph PRIVATE xnnpack-base xnnpack-allocator xnnpack-logging xnnpack-memory xnnpack-mutex xnnpack-operators xnnpack-operator-run xnnpack-datatype)
+  TARGET_LINK_LIBRARIES(xnnpack-subgraph PRIVATE xnnpack-base xnnpack-allocator xnnpack-cache xnnpack-logging xnnpack-memory xnnpack-mutex xnnpack-operators xnnpack-operator-run xnnpack-datatype)
   TARGET_LINK_LIBRARIES(XNNPACK PRIVATE xnnpack-base xnnpack-allocator xnnpack-cache
       xnnpack-hardware-config xnnpack-indirection xnnpack-memory xnnpack-microkernel-utils xnnpack-microparams-init
       xnnpack-mutex xnnpack-normalization xnnpack-operators xnnpack-operator-run
@@ -1305,32 +1300,7 @@ IF(NOT TARGET pthreadpool)
 ENDIF()
 TARGET_LINK_LIBRARIES(xnnpack-base INTERFACE pthreadpool)
 
-# ---[ Configure FXdiv
-IF(NOT TARGET fxdiv)
-  IF(NOT XNNPACK_USE_SYSTEM_LIBS)
-    SET(FXDIV_BUILD_TESTS OFF CACHE BOOL "")
-    SET(FXDIV_BUILD_BENCHMARKS OFF CACHE BOOL "")
-    ADD_SUBDIRECTORY(
-      "${FXDIV_SOURCE_DIR}"
-      "${CMAKE_BINARY_DIR}/FXdiv")
-  ELSE()
-    FIND_FILE(FXDIV_HDR fxdiv.h PATH_SUFFIXES include PATHS "${FXDIV_SOURCE_DIR}")
-    IF(NOT FXDIV_HDR)
-      MESSAGE(FATAL_ERROR "Cannot find fxdiv")
-    ENDIF()
-    ADD_LIBRARY(fxdiv STATIC "${FXDIV_HDR}")
-    TARGET_INCLUDE_DIRECTORIES(fxdiv INTERFACE "${FXDIV_SOURCE_DIR}/include")
-    SET_PROPERTY(TARGET fxdiv PROPERTY LINKER_LANGUAGE C)
-  ENDIF()
-ENDIF()
-IF(XNNPACK_BUILD_ALL_MICROKERNELS)
-  TARGET_LINK_LIBRARIES(xnnpack-microkernels-all PRIVATE fxdiv)
-ENDIF()
-TARGET_LINK_LIBRARIES(xnnpack-microkernels-prod PRIVATE fxdiv)
-TARGET_LINK_LIBRARIES(xnnpack-indirection PRIVATE fxdiv)
-IF(XNNPACK_BUILD_LIBRARY)
-  TARGET_LINK_LIBRARIES(XNNPACK PRIVATE fxdiv)
-ENDIF()
+
 
 IF(XNNPACK_BUILD_LIBRARY)
   INSTALL(TARGETS XNNPACK xnnpack-microkernels-prod
@@ -1370,3 +1340,4 @@ ENDIF()
 IF(XNNPACK_BUILD_BENCHMARKS)
   ADD_SUBDIRECTORY(bench)
 ENDIF()
+

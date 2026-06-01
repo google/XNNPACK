@@ -30,7 +30,6 @@ bazel_dep(name = "bazel_skylib", version = "1.8.2")
 
 # Bazel Platforms
 bazel_dep(name = "platforms", version = "1.0.0")
-
 bazel_dep(name = "abseil-cpp", version = "20260107.1")
 
 # TODO: some (most? all?) of the http_archive() calls below could become bazel_dep() calls,
@@ -65,8 +64,6 @@ http_archive(
     urls = ["https://github.com/google/benchmark/archive/7da00e8f6763d6e8c284d172c9cfcc5ae0ce9b7a.zip"],
 )
 # LINT.ThenChange(cmake/DownloadGoogleBenchmark.cmake)
-
-# LINT.IfChange(FXdiv)
 # FXdiv library, used for repeated integer division by the same factor
 http_archive(
     name = "FXdiv",
@@ -74,7 +71,8 @@ http_archive(
     strip_prefix = "FXdiv-b408327ac2a15ec3e43352421954f5b1967701d1",
     urls = ["https://github.com/Maratyszcza/FXdiv/archive/b408327ac2a15ec3e43352421954f5b1967701d1.zip"],
 )
-# LINT.ThenChange(cmake/DownloadFXdiv.cmake)
+
+
 
 # LINT.IfChange(pthreadpool)
 # pthreadpool library, used for parallelization
@@ -102,10 +100,10 @@ http_archive(
 # KleidiAI library, used for ARM microkernels.
 http_archive(
     name = "KleidiAI",
-    sha256 = "c4651f5071a3ae48e9a0a7a0342bbaf7563260bf3623e327047b75fb31093d65",
-    strip_prefix = "kleidiai-85862cd68f8d7496e44b1fd489d82794c5cf5d3e",
+    sha256 = "9b8d0df9bab42d1d19acb571337cbaa527027cae0efd361d75dfb9b10fd7dc4e",
+    strip_prefix = "kleidiai-51f7190558e51b7415d9ba24994fb477d7371446",
     urls = [
-        "https://github.com/ARM-software/kleidiai/archive/85862cd68f8d7496e44b1fd489d82794c5cf5d3e.zip",
+        "https://github.com/ARM-software/kleidiai/archive/51f7190558e51b7415d9ba24994fb477d7371446.zip",
     ],
 )
 # LINT.ThenChange(cmake/DownloadKleidiAI.cmake)
@@ -122,9 +120,9 @@ http_archive(
 
 http_archive(
     name = "slinky",
-    sha256 = "be1da0df6555924ede8ddfc43495dd61b1eda3654263063931424bced1de3bc9",
-    strip_prefix = "slinky-1032be67d7033d736eb6afbb9b51865baa5c77ae",
+    sha256 = "cd84dd2ff1956480fac6e50f477441d74e0ad08e34e863ffad2a1d3adf043dc2",
+    strip_prefix = "slinky-eb004cb32169f87a4d95ee73af4eb9cf3df42868",
     urls = [
-        "https://github.com/dsharlet/slinky/archive/1032be67d7033d736eb6afbb9b51865baa5c77ae.zip",
+        "https://github.com/dsharlet/slinky/archive/eb004cb32169f87a4d95ee73af4eb9cf3df42868.zip",
     ],
 )

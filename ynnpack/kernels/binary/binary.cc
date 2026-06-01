@@ -206,14 +206,14 @@ binary_kernel_fn get_binary_reference_kernel(ynn_binary_operator op,
 binary_kernel_fn get_binary_kernel(ynn_binary_operator op, ynn_type type_a,
                                    ynn_type type_b, ynn_type type_x,
                                    uint64_t supported_arch_flags) {
-#define YNN_ELEMENTWISE_KERNEL(arch, name, op_type, A, B, X) \
-  if (is_arch_supported(arch, supported_arch_flags) &&       \
-      op == ynn_binary_##op_type) {                          \
-    if (type_of<A>() == type_a && type_of<B>() == type_b &&  \
-        type_of<X>() == type_x) {                            \
-      YNN_LOG_DEBUG() << "Using binary kernel " << #name;    \
-      return name;                                           \
-    }                                                        \
+#define YNN_ELEMENTWISE_KERNEL(arch, name, op_type, flags, A, B, X) \
+  if (is_arch_supported(arch, supported_arch_flags) &&              \
+      op == ynn_binary_##op_type) {                                 \
+    if (type_of<A>() == type_a && type_of<B>() == type_b &&         \
+        type_of<X>() == type_x) {                                   \
+      YNN_LOG_DEBUG() << "Using binary kernel " << #name;           \
+      return name;                                                  \
+    }                                                               \
   }
 #include "ynnpack/kernels/binary/kernels.inc"
 #undef YNN_ELEMENTWISE_KERNEL

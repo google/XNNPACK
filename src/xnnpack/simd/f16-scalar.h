@@ -22,6 +22,8 @@ typedef xnn_float16 xnn_simd_f16_t;
 
 #define XNN_SIMD_CONST_F16(var, val) static const xnn_simd_f16_t var = val;
 
+#define XNN_SIMD_CONST_F16_FROM_INT16(var, val) \
+  const xnn_simd_f16_t var = xnn_float16_from_bits(val);
 #define XNN_SIMD_CONST_F16_FROM_FLOAT(var, val) \
   const xnn_simd_f16_t var = xnn_float16_from_float(val);
 
@@ -196,6 +198,10 @@ static XNN_INLINE xnn_simd_f16_t xnn_srl_f16(xnn_simd_f16_t a, uint8_t bits) {
   return xnn_float16_from_bits(xnn_float16_to_bits(a) >> bits);
 }
 
+static XNN_INLINE xnn_simd_f16_t xnn_sra_f16(xnn_simd_f16_t a, uint8_t bits) {
+  return xnn_float16_from_bits((uint16_t)((int16_t)xnn_float16_to_bits(a) >> bits));
+}
+
 static XNN_INLINE xnn_simd_f16_t xnn_cmpeq_f16(xnn_simd_f16_t a,
                                                xnn_simd_f16_t b) {
   XNN_SIMD_CONST_U16(ones, UINT16_C(0xFFFF));
@@ -245,6 +251,14 @@ static XNN_INLINE void xnn_store_tail_f16(xnn_simd_f16_t *output,
                                           xnn_simd_f16_t v,
                                           size_t num_elements) {
   *output = v;
+}
+
+// Conversion operations.
+static XNN_INLINE float xnn_cvt_f32_f16(xnn_simd_f16_t a) {
+  return xnn_float16_to_float(a);
+}
+static XNN_INLINE xnn_simd_f16_t xnn_cvt_f16_f32(float a) {
+  return xnn_float16_from_float(a);
 }
 
 #endif  // XNNPACK_SRC_XNNPACK_SIMD_F16_SCALAR_H_

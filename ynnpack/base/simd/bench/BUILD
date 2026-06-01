@@ -4,7 +4,7 @@
 # LICENSE file in the root directory of this source tree.
 
 load("@rules_cc//cc:cc_binary.bzl", "cc_binary")
-load("//ynnpack:build_defs.bzl", "ynn_arch_copts", "ynn_arch_flag", "ynn_benchmark_deps", "ynn_binary_linkopts", "ynn_binary_malloc", "ynn_if_arch")
+load("//ynnpack:build_defs.bzl", "ynn_arch_copts", "ynn_arch_defines", "ynn_benchmark_deps", "ynn_binary_linkopts", "ynn_binary_malloc", "ynn_if_arch")
 
 package(default_visibility = ["//ynnpack:__subpackages__"])
 
@@ -31,28 +31,29 @@ package(default_visibility = ["//ynnpack:__subpackages__"])
             arch + ".cc",
         ],
     ),
+    args = ["--benchmark_min_time=1x"],
     copts = ynn_arch_copts(arch),
     features = [
         # We can't use copts with header modules...?
         "-use_header_modules",
     ],
     linkopts = ynn_binary_linkopts(),
-    local_defines = ynn_if_arch(
-        arch,
-        ["YNN_ARCH=" + ynn_arch_flag(arch)],
-    ),
+    local_defines = ynn_arch_defines(arch),
     malloc = ynn_binary_malloc(),
     deps = [
         "//ynnpack/base",
         "//ynnpack/base/simd",
+        "//ynnpack/base/simd:emulate_fma",
         "@slinky//slinky/base",
     ] + ynn_benchmark_deps(),
 ) for arch in [
     "arm_neon",
+    "arm_neonfma",
     "arm64_neon",
     "arm64_sve",
     "hexagon_hvx",
     "x86_sse2",
+    "x86_sse2_fma",
     "x86_avx",
     "x86_avx2",
     "x86_avx512",

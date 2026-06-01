@@ -75,7 +75,6 @@ cc_library(
         "static_slice.cc",
         "static_slice.h",
         "static_transpose.cc",
-        "static_transpose.h",
         "stencil_copy.cc",
         "stencil_copy.h",
         "subgraph.cc",
@@ -87,6 +86,7 @@ cc_library(
         "elementwise.h",  # Only public for tests...
         "runtime.h",
         "slinky.h",
+        "static_transpose.h",  # Only public for tests...
         "subgraph.h",
         "tensor.h",
         "utils.h",

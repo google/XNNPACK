@@ -5,11 +5,13 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <random>
 #include <string>
 
 #include "ynnpack/base/arch.h"
 #include "ynnpack/base/bfloat16.h"
 #include "ynnpack/base/half.h"
+#include "ynnpack/base/test/random.h"
 #include "ynnpack/base/test/tensor.h"
 #include "ynnpack/base/type.h"
 #include "ynnpack/kernels/unary/unary.h"
@@ -30,7 +32,8 @@ void bench(benchmark::State& state, uint64_t arch_flags, unary_kernel_fn kernel,
 
   Tensor<TA> a({m, n});
   Tensor<TX> x({m, n});
-  a.fill(1);
+  std::mt19937 rng(0);
+  fill_random(a.data(), a.size(), rng, 0, 1);
   x.fill(1);
   broadcast_extent_1(a);
   broadcast_extent_1(x);
@@ -91,7 +94,9 @@ BENCHMARK_FLOAT_REFERENCE(square_root);
 BENCHMARK_FLOAT_REFERENCE(cube_root);
 BENCHMARK_FLOAT_REFERENCE(reciprocal_square_root);
 BENCHMARK_FLOAT_REFERENCE(log);
+BENCHMARK_FLOAT_REFERENCE(log1p);
 BENCHMARK_FLOAT_REFERENCE(exp);
+BENCHMARK_FLOAT_REFERENCE(expm1);
 BENCHMARK_FLOAT_REFERENCE(erf);
 BENCHMARK_FLOAT_REFERENCE(tanh);
 BENCHMARK_FLOAT_REFERENCE(sign);
@@ -99,6 +104,9 @@ BENCHMARK_FLOAT_REFERENCE(sine);
 BENCHMARK_FLOAT_REFERENCE(cosine);
 BENCHMARK_FLOAT_REFERENCE(sigmoid);
 BENCHMARK_FLOAT_REFERENCE(hardswish);
+BENCHMARK_FLOAT_REFERENCE(poly3);
+
+BENCHMARK_REFERENCE(round_to_bf16, float);
 
 BENCHMARK_REFERENCE(abs, int32_t);
 BENCHMARK_REFERENCE(negate, int32_t);
@@ -131,10 +139,10 @@ BENCHMARK_REFERENCE_CONVERT_FROM(int32_t);
 BENCHMARK_REFERENCE_CONVERT(int4x2, int8_t);
 BENCHMARK_REFERENCE_CONVERT(int2x4, int8_t);
 
-#define YNN_ELEMENTWISE_KERNEL(arch_flags, kernel, op, type_a, type_x)    \
-  BENCHMARK_CAPTURE(bench, kernel, arch_flags, kernel,                    \
-                    get_unary_params(ynn_unary_##op), type_a(), type_x()) \
-      ->Apply(Params<type_a, type_x>)                                     \
+#define YNN_ELEMENTWISE_KERNEL(arch_flags, kernel, op, flags, type_a, type_x) \
+  BENCHMARK_CAPTURE(bench, kernel, arch_flags, kernel,                        \
+                    get_unary_params(ynn_unary_##op), type_a(), type_x())     \
+      ->Apply(Params<type_a, type_x>)                                         \
       ->UseRealTime();
 #include "ynnpack/kernels/unary/kernels.inc"
 #undef YNN_ELEMENTWISE_KERNEL

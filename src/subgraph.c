@@ -15,6 +15,7 @@
 
 #include "include/experimental.h"
 #include "include/xnnpack.h"
+#include "src/subgraph/rewrites/fp16_to_fp32.h"
 #include "src/xnnpack/allocation-type.h"
 #include "src/xnnpack/allocator.h"
 #include "src/xnnpack/common.h"
@@ -1905,7 +1906,6 @@ static bool replace_node_with_lut(xnn_subgraph_t subgraph,
                                   struct xnn_node* node, uint32_t input_id,
                                   uint32_t unary_input_id,
                                   xnn_subgraph_t unary_subgraph) {
-  XNN_RETURN_IF_ERROR(xnn_subgraph_reserve_nodes(subgraph, 1));
   XNN_RETURN_IF_ERROR(xnn_subgraph_reserve_values(subgraph, 1));
 
   const uint32_t unary_output_id =
@@ -4589,6 +4589,10 @@ enum xnn_status xnn_subgraph_optimize(xnn_subgraph_t subgraph,
 
   XNN_RETURN_IF_ERROR(
       xnn_subgraph_optimize_packed_lhs(subgraph, optimization_flags));
+
+  if (!xnn_is_f16_supported_natively(hardware_config) && !force_fp16) {
+    XNN_RETURN_IF_ERROR(xnn_subgraph_fallback_from_fp16_to_fp32(subgraph, optimization_flags));
+  }
 
   return xnn_status_success;
 }

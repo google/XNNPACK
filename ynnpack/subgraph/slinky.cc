@@ -42,6 +42,25 @@ slinky::expr slinky_globals::get(slinky::expr value, const char* prefix) {
   }
 }
 
+slinky::expr slinky_globals::make_split_var(slinky::expr value,
+                                            const char* prefix) {
+  value = slinky::simplify(value);
+  assert(value.defined());
+  slinky::var r = symbols.insert_unique(prefix);
+  lets.push_back(std::make_pair(r, value));
+  return r;
+}
+
+bool slinky_globals::update_let(slinky::var sym, slinky::expr new_value) {
+  auto i = std::find_if(lets.begin(), lets.end(),
+                        [&](const auto& j) { return j.first == sym; });
+  if (i != lets.end()) {
+    i->second = slinky::simplify(new_value);
+    return true;
+  }
+  return false;
+}
+
 slinky::buffer_expr_ptr slinky_globals::make_buffer_expr(
     const std::string& name, int rank, slinky::expr elem_size) {
   return ynn::make_buffer_expr(symbols.insert_unique(name), rank, elem_size);

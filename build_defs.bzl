@@ -28,6 +28,10 @@ def xnnpack_configurable_defines():
         ["XNN_ENABLE_ASSEMBLY=1"],
         ["XNN_ENABLE_ASSEMBLY=0"],
     ) + xnnpack_select_if(
+        "//:rndnu16_enabled",
+        ["XNN_ENABLE_RNDNU16=1"],
+        ["XNN_ENABLE_RNDNU16=0"],
+    ) + xnnpack_select_if(
         "//:arm_fp16_scalar_enabled",
         ["XNN_ENABLE_ARM_FP16_SCALAR=1"],
         ["XNN_ENABLE_ARM_FP16_SCALAR=0"],

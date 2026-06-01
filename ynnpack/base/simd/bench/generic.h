@@ -152,6 +152,12 @@ static void BM_unary(benchmark::State& state, Fn fn) {
   }                                                                 \
   BENCHMARK(BM_##op##_##type##x##N##_##arch);
 
+#define BENCH_CAST(arch, from, to, N)                                     \
+  void BM_cast_##from##x##N##_##to##_##arch(benchmark::State& state) {    \
+    BM_unary<from, N>(state, [](vec<from, N> a) { return cast<to>(a); }); \
+  }                                                                       \
+  BENCHMARK(BM_cast_##from##x##N##_##to##_##arch);
+
 }  // namespace simd
 
 }  // namespace ynn

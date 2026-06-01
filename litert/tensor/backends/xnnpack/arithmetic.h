@@ -30,6 +30,7 @@ limitations under the License.
 #include "litert/tensor/buffer.h"
 #include "litert/tensor/internal/graph.h"
 #include "litert/tensor/internal/mixin.h"
+#include "litert/tensor/internal/type_id.h"
 
 struct xnn_subgraph;
 
@@ -77,355 +78,406 @@ class XnnpackBuildContext {
 };
 
 // Base class for XNNPACK operations.
-class XnnpackOperation : virtual public graph::Operation {
+class XnnpackOperation : public graph::BackendExtension {
  public:
+  internal::TypeId GetTypeId() const override {
+    return internal::TypeId::Get<XnnpackOperation>();
+  }
   // Converts the operation to XNNPACK.
-  virtual absl::Status ToXnnpack(XnnpackBuildContext& ctx) const = 0;
+  virtual absl::Status ToXnnpack(const graph::Operation& op,
+                                 XnnpackBuildContext& ctx) const = 0;
 };
 
 namespace graph {
 
 // XNNPACK mixin for the Add operation.
 template <>
-class OpMixin<AddOperationTag, XnnpackMixinTag> : public XnnpackOperation {
+class OpMixin<AddOperation, XnnpackMixinTag> : public XnnpackOperation {
  public:
-  // Converts the Add operation to XNNPACK.
-  absl::Status ToXnnpack(XnnpackBuildContext& ctx) const override;
+  absl::Status ToXnnpack(const graph::Operation& op,
+                         XnnpackBuildContext& ctx) const override;
 };
 
 template <>
-class OpMixin<MulOperationTag, XnnpackMixinTag> : public XnnpackOperation {
+class OpMixin<MulOperation, XnnpackMixinTag> : public XnnpackOperation {
  public:
-  absl::Status ToXnnpack(XnnpackBuildContext& ctx) const override;
+  absl::Status ToXnnpack(const graph::Operation& op,
+                         XnnpackBuildContext& ctx) const override;
 };
 
 template <>
-class OpMixin<SubOperationTag, XnnpackMixinTag> : public XnnpackOperation {
+class OpMixin<SubOperation, XnnpackMixinTag> : public XnnpackOperation {
  public:
-  absl::Status ToXnnpack(XnnpackBuildContext& ctx) const override;
+  absl::Status ToXnnpack(const graph::Operation& op,
+                         XnnpackBuildContext& ctx) const override;
 };
 
 template <>
-class OpMixin<DivOperationTag, XnnpackMixinTag> : public XnnpackOperation {
+class OpMixin<DivOperation, XnnpackMixinTag> : public XnnpackOperation {
  public:
-  absl::Status ToXnnpack(XnnpackBuildContext& ctx) const override;
+  absl::Status ToXnnpack(const graph::Operation& op,
+                         XnnpackBuildContext& ctx) const override;
 };
 
 template <>
-class OpMixin<MaximumOperationTag, XnnpackMixinTag> : public XnnpackOperation {
+class OpMixin<MaximumOperation, XnnpackMixinTag> : public XnnpackOperation {
  public:
-  absl::Status ToXnnpack(XnnpackBuildContext& ctx) const override;
+  absl::Status ToXnnpack(const graph::Operation& op,
+                         XnnpackBuildContext& ctx) const override;
 };
 
 template <>
-class OpMixin<MinimumOperationTag, XnnpackMixinTag> : public XnnpackOperation {
+class OpMixin<MinimumOperation, XnnpackMixinTag> : public XnnpackOperation {
  public:
-  absl::Status ToXnnpack(XnnpackBuildContext& ctx) const override;
+  absl::Status ToXnnpack(const graph::Operation& op,
+                         XnnpackBuildContext& ctx) const override;
 };
 
 template <>
-class OpMixin<PowOperationTag, XnnpackMixinTag> : public XnnpackOperation {
+class OpMixin<PowOperation, XnnpackMixinTag> : public XnnpackOperation {
  public:
-  absl::Status ToXnnpack(XnnpackBuildContext& ctx) const override;
+  absl::Status ToXnnpack(const graph::Operation& op,
+                         XnnpackBuildContext& ctx) const override;
 };
 
 template <>
-class OpMixin<AbsOperationTag, XnnpackMixinTag> : public XnnpackOperation {
+class OpMixin<AbsOperation, XnnpackMixinTag> : public XnnpackOperation {
  public:
-  absl::Status ToXnnpack(XnnpackBuildContext& ctx) const override;
+  absl::Status ToXnnpack(const graph::Operation& op,
+                         XnnpackBuildContext& ctx) const override;
 };
 
 template <>
-class OpMixin<SquareOperationTag, XnnpackMixinTag> : public XnnpackOperation {
+class OpMixin<SquareOperation, XnnpackMixinTag> : public XnnpackOperation {
  public:
-  absl::Status ToXnnpack(XnnpackBuildContext& ctx) const override;
+  absl::Status ToXnnpack(const graph::Operation& op,
+                         XnnpackBuildContext& ctx) const override;
 };
 
 template <>
-class OpMixin<RsqrtOperationTag, XnnpackMixinTag> : public XnnpackOperation {
+class OpMixin<RsqrtOperation, XnnpackMixinTag> : public XnnpackOperation {
  public:
-  absl::Status ToXnnpack(XnnpackBuildContext& ctx) const override;
+  absl::Status ToXnnpack(const graph::Operation& op,
+                         XnnpackBuildContext& ctx) const override;
 };
 
 template <>
-class OpMixin<SqrtOperationTag, XnnpackMixinTag> : public XnnpackOperation {
+class OpMixin<SqrtOperation, XnnpackMixinTag> : public XnnpackOperation {
  public:
-  absl::Status ToXnnpack(XnnpackBuildContext& ctx) const override;
+  absl::Status ToXnnpack(const graph::Operation& op,
+                         XnnpackBuildContext& ctx) const override;
 };
 
 template <>
-class OpMixin<ExpOperationTag, XnnpackMixinTag> : public XnnpackOperation {
+class OpMixin<ExpOperation, XnnpackMixinTag> : public XnnpackOperation {
  public:
-  absl::Status ToXnnpack(XnnpackBuildContext& ctx) const override;
+  absl::Status ToXnnpack(const graph::Operation& op,
+                         XnnpackBuildContext& ctx) const override;
 };
 
 template <>
-class OpMixin<LogOperationTag, XnnpackMixinTag> : public XnnpackOperation {
+class OpMixin<LogOperation, XnnpackMixinTag> : public XnnpackOperation {
  public:
-  absl::Status ToXnnpack(XnnpackBuildContext& ctx) const override;
+  absl::Status ToXnnpack(const graph::Operation& op,
+                         XnnpackBuildContext& ctx) const override;
 };
 
 template <>
-class OpMixin<CeilOperationTag, XnnpackMixinTag> : public XnnpackOperation {
+class OpMixin<CeilOperation, XnnpackMixinTag> : public XnnpackOperation {
  public:
-  absl::Status ToXnnpack(XnnpackBuildContext& ctx) const override;
+  absl::Status ToXnnpack(const graph::Operation& op,
+                         XnnpackBuildContext& ctx) const override;
 };
 
 template <>
-class OpMixin<FloorOperationTag, XnnpackMixinTag> : public XnnpackOperation {
+class OpMixin<FloorOperation, XnnpackMixinTag> : public XnnpackOperation {
  public:
-  absl::Status ToXnnpack(XnnpackBuildContext& ctx) const override;
+  absl::Status ToXnnpack(const graph::Operation& op,
+                         XnnpackBuildContext& ctx) const override;
 };
 
 template <>
-class OpMixin<SignOperationTag, XnnpackMixinTag> : public XnnpackOperation {
+class OpMixin<SignOperation, XnnpackMixinTag> : public XnnpackOperation {
  public:
-  absl::Status ToXnnpack(XnnpackBuildContext& ctx) const override;
+  absl::Status ToXnnpack(const graph::Operation& op,
+                         XnnpackBuildContext& ctx) const override;
 };
 
 template <>
-class OpMixin<RoundOperationTag, XnnpackMixinTag> : public XnnpackOperation {
+class OpMixin<RoundOperation, XnnpackMixinTag> : public XnnpackOperation {
  public:
-  absl::Status ToXnnpack(XnnpackBuildContext& ctx) const override;
+  absl::Status ToXnnpack(const graph::Operation& op,
+                         XnnpackBuildContext& ctx) const override;
 };
 
 template <>
-class OpMixin<NegOperationTag, XnnpackMixinTag> : public XnnpackOperation {
+class OpMixin<NegOperation, XnnpackMixinTag> : public XnnpackOperation {
  public:
-  absl::Status ToXnnpack(XnnpackBuildContext& ctx) const override;
+  absl::Status ToXnnpack(const graph::Operation& op,
+                         XnnpackBuildContext& ctx) const override;
 };
 
 template <>
-class OpMixin<TanhOperationTag, XnnpackMixinTag> : public XnnpackOperation {
+class OpMixin<TanhOperation, XnnpackMixinTag> : public XnnpackOperation {
  public:
-  absl::Status ToXnnpack(XnnpackBuildContext& ctx) const override;
+  absl::Status ToXnnpack(const graph::Operation& op,
+                         XnnpackBuildContext& ctx) const override;
 };
 
 template <>
-class OpMixin<LogisticOperationTag, XnnpackMixinTag> : public XnnpackOperation {
+class OpMixin<LogisticOperation, XnnpackMixinTag> : public XnnpackOperation {
  public:
-  absl::Status ToXnnpack(XnnpackBuildContext& ctx) const override;
+  absl::Status ToXnnpack(const graph::Operation& op,
+                         XnnpackBuildContext& ctx) const override;
 };
 
 template <>
-class OpMixin<CosOperationTag, XnnpackMixinTag> : public XnnpackOperation {
+class OpMixin<CosOperation, XnnpackMixinTag> : public XnnpackOperation {
  public:
-  absl::Status ToXnnpack(XnnpackBuildContext& ctx) const override;
+  absl::Status ToXnnpack(const graph::Operation& op,
+                         XnnpackBuildContext& ctx) const override;
 };
 
 template <>
-class OpMixin<CastOperationTag, XnnpackMixinTag> : public XnnpackOperation {
+class OpMixin<CastOperation, XnnpackMixinTag> : public XnnpackOperation {
  public:
-  absl::Status ToXnnpack(XnnpackBuildContext& ctx) const override;
+  absl::Status ToXnnpack(const graph::Operation& op,
+                         XnnpackBuildContext& ctx) const override;
 };
 
 template <>
-class OpMixin<ReluOperationTag, XnnpackMixinTag> : public XnnpackOperation {
+class OpMixin<ReluOperation, XnnpackMixinTag> : public XnnpackOperation {
  public:
-  absl::Status ToXnnpack(XnnpackBuildContext& ctx) const override;
+  absl::Status ToXnnpack(const graph::Operation& op,
+                         XnnpackBuildContext& ctx) const override;
 };
 
 template <>
-class OpMixin<Relu6OperationTag, XnnpackMixinTag> : public XnnpackOperation {
+class OpMixin<Relu6Operation, XnnpackMixinTag> : public XnnpackOperation {
  public:
-  absl::Status ToXnnpack(XnnpackBuildContext& ctx) const override;
+  absl::Status ToXnnpack(const graph::Operation& op,
+                         XnnpackBuildContext& ctx) const override;
 };
 
 template <>
-class OpMixin<LeakyReluOperationTag, XnnpackMixinTag>
+class OpMixin<LeakyReluOperation, XnnpackMixinTag> : public XnnpackOperation {
+ public:
+  absl::Status ToXnnpack(const graph::Operation& op,
+                         XnnpackBuildContext& ctx) const override;
+};
+
+template <>
+class OpMixin<EluOperation, XnnpackMixinTag> : public XnnpackOperation {
+ public:
+  absl::Status ToXnnpack(const graph::Operation& op,
+                         XnnpackBuildContext& ctx) const override;
+};
+
+template <>
+class OpMixin<HardSwishOperation, XnnpackMixinTag> : public XnnpackOperation {
+ public:
+  absl::Status ToXnnpack(const graph::Operation& op,
+                         XnnpackBuildContext& ctx) const override;
+};
+
+template <>
+class OpMixin<PReluOperation, XnnpackMixinTag> : public XnnpackOperation {
+ public:
+  absl::Status ToXnnpack(const graph::Operation& op,
+                         XnnpackBuildContext& ctx) const override;
+};
+
+template <>
+class OpMixin<L2NormalizationOperation, XnnpackMixinTag>
     : public XnnpackOperation {
  public:
-  absl::Status ToXnnpack(XnnpackBuildContext& ctx) const override;
+  absl::Status ToXnnpack(const graph::Operation& op,
+                         XnnpackBuildContext& ctx) const override;
 };
 
 template <>
-class OpMixin<EluOperationTag, XnnpackMixinTag> : public XnnpackOperation {
+class OpMixin<SinOperation, XnnpackMixinTag> : public XnnpackOperation {
  public:
-  absl::Status ToXnnpack(XnnpackBuildContext& ctx) const override;
+  absl::Status ToXnnpack(const graph::Operation& op,
+                         XnnpackBuildContext& ctx) const override;
 };
 
 template <>
-class OpMixin<HardSwishOperationTag, XnnpackMixinTag>
+class OpMixin<GeluOperation, XnnpackMixinTag> : public XnnpackOperation {
+ public:
+  absl::Status ToXnnpack(const graph::Operation& op,
+                         XnnpackBuildContext& ctx) const override;
+};
+
+template <>
+class OpMixin<SoftmaxOperation, XnnpackMixinTag> : public XnnpackOperation {
+ public:
+  absl::Status ToXnnpack(const graph::Operation& op,
+                         XnnpackBuildContext& ctx) const override;
+};
+
+template <>
+class OpMixin<AveragePool2DOperation, XnnpackMixinTag>
     : public XnnpackOperation {
  public:
-  absl::Status ToXnnpack(XnnpackBuildContext& ctx) const override;
+  absl::Status ToXnnpack(const graph::Operation& op,
+                         XnnpackBuildContext& ctx) const override;
 };
 
 template <>
-class OpMixin<PReluOperationTag, XnnpackMixinTag> : public XnnpackOperation {
+class OpMixin<MaxPool2DOperation, XnnpackMixinTag> : public XnnpackOperation {
  public:
-  absl::Status ToXnnpack(XnnpackBuildContext& ctx) const override;
+  absl::Status ToXnnpack(const graph::Operation& op,
+                         XnnpackBuildContext& ctx) const override;
 };
 
 template <>
-class OpMixin<L2NormalizationOperationTag, XnnpackMixinTag>
+class OpMixin<Conv2DOperation, XnnpackMixinTag> : public XnnpackOperation {
+ public:
+  absl::Status ToXnnpack(const graph::Operation& op,
+                         XnnpackBuildContext& ctx) const override;
+};
+
+template <>
+class OpMixin<DepthwiseConv2DOperation, XnnpackMixinTag>
     : public XnnpackOperation {
  public:
-  absl::Status ToXnnpack(XnnpackBuildContext& ctx) const override;
+  absl::Status ToXnnpack(const graph::Operation& op,
+                         XnnpackBuildContext& ctx) const override;
 };
 
 template <>
-class OpMixin<SinOperationTag, XnnpackMixinTag> : public XnnpackOperation {
- public:
-  absl::Status ToXnnpack(XnnpackBuildContext& ctx) const override;
-};
-
-template <>
-class OpMixin<GeluOperationTag, XnnpackMixinTag> : public XnnpackOperation {
- public:
-  absl::Status ToXnnpack(XnnpackBuildContext& ctx) const override;
-};
-
-template <>
-class OpMixin<SoftmaxOperationTag, XnnpackMixinTag> : public XnnpackOperation {
- public:
-  absl::Status ToXnnpack(XnnpackBuildContext& ctx) const override;
-};
-
-template <>
-class OpMixin<AveragePool2DOperationTag, XnnpackMixinTag>
+class OpMixin<FullyConnectedOperation, XnnpackMixinTag>
     : public XnnpackOperation {
  public:
-  absl::Status ToXnnpack(XnnpackBuildContext& ctx) const override;
+  absl::Status ToXnnpack(const graph::Operation& op,
+                         XnnpackBuildContext& ctx) const override;
 };
 
 template <>
-class OpMixin<MaxPool2DOperationTag, XnnpackMixinTag>
+class OpMixin<BatchMatMulOperation, XnnpackMixinTag> : public XnnpackOperation {
+ public:
+  absl::Status ToXnnpack(const graph::Operation& op,
+                         XnnpackBuildContext& ctx) const override;
+};
+
+template <>
+class OpMixin<TransposeOperation, XnnpackMixinTag> : public XnnpackOperation {
+ public:
+  absl::Status ToXnnpack(const graph::Operation& op,
+                         XnnpackBuildContext& ctx) const override;
+};
+
+template <>
+class OpMixin<MeanOperation, XnnpackMixinTag> : public XnnpackOperation {
+ public:
+  absl::Status ToXnnpack(const graph::Operation& op,
+                         XnnpackBuildContext& ctx) const override;
+};
+
+template <>
+class OpMixin<SliceOperation, XnnpackMixinTag> : public XnnpackOperation {
+ public:
+  absl::Status ToXnnpack(const graph::Operation& op,
+                         XnnpackBuildContext& ctx) const override;
+};
+
+template <>
+class OpMixin<ConcatenationOperation, XnnpackMixinTag>
     : public XnnpackOperation {
  public:
-  absl::Status ToXnnpack(XnnpackBuildContext& ctx) const override;
+  absl::Status ToXnnpack(const graph::Operation& op,
+                         XnnpackBuildContext& ctx) const override;
 };
 
 template <>
-class OpMixin<Conv2DOperationTag, XnnpackMixinTag> : public XnnpackOperation {
+class OpMixin<ReshapeOperation, XnnpackMixinTag> : public XnnpackOperation {
  public:
-  absl::Status ToXnnpack(XnnpackBuildContext& ctx) const override;
+  absl::Status ToXnnpack(const graph::Operation& op,
+                         XnnpackBuildContext& ctx) const override;
 };
 
 template <>
-class OpMixin<DepthwiseConv2DOperationTag, XnnpackMixinTag>
+class OpMixin<SqueezeOperation, XnnpackMixinTag> : public XnnpackOperation {
+ public:
+  absl::Status ToXnnpack(const graph::Operation& op,
+                         XnnpackBuildContext& ctx) const override;
+};
+
+template <>
+class OpMixin<ExpandDimsOperation, XnnpackMixinTag> : public XnnpackOperation {
+ public:
+  absl::Status ToXnnpack(const graph::Operation& op,
+                         XnnpackBuildContext& ctx) const override;
+};
+
+template <>
+class OpMixin<TileOperation, XnnpackMixinTag> : public XnnpackOperation {
+ public:
+  absl::Status ToXnnpack(const graph::Operation& op,
+                         XnnpackBuildContext& ctx) const override;
+};
+
+template <>
+class OpMixin<ResizeBilinearOperation, XnnpackMixinTag>
     : public XnnpackOperation {
  public:
-  absl::Status ToXnnpack(XnnpackBuildContext& ctx) const override;
+  absl::Status ToXnnpack(const graph::Operation& op,
+                         XnnpackBuildContext& ctx) const override;
 };
 
 template <>
-class OpMixin<FullyConnectedOperationTag, XnnpackMixinTag>
+class OpMixin<ResizeNearestNeighborOperation, XnnpackMixinTag>
     : public XnnpackOperation {
  public:
-  absl::Status ToXnnpack(XnnpackBuildContext& ctx) const override;
+  absl::Status ToXnnpack(const graph::Operation& op,
+                         XnnpackBuildContext& ctx) const override;
 };
 
 template <>
-class OpMixin<BatchMatMulOperationTag, XnnpackMixinTag>
+class OpMixin<TransposeConvOperation, XnnpackMixinTag>
     : public XnnpackOperation {
  public:
-  absl::Status ToXnnpack(XnnpackBuildContext& ctx) const override;
+  absl::Status ToXnnpack(const graph::Operation& op,
+                         XnnpackBuildContext& ctx) const override;
 };
 
 template <>
-class OpMixin<TransposeOperationTag, XnnpackMixinTag>
+class OpMixin<TransposeConv2DOperation, XnnpackMixinTag>
     : public XnnpackOperation {
  public:
-  absl::Status ToXnnpack(XnnpackBuildContext& ctx) const override;
+  absl::Status ToXnnpack(const graph::Operation& op,
+                         XnnpackBuildContext& ctx) const override;
 };
 
 template <>
-class OpMixin<MeanOperationTag, XnnpackMixinTag> : public XnnpackOperation {
+class OpMixin<GatherOperation, XnnpackMixinTag> : public XnnpackOperation {
  public:
-  absl::Status ToXnnpack(XnnpackBuildContext& ctx) const override;
+  absl::Status ToXnnpack(const graph::Operation& op,
+                         XnnpackBuildContext& ctx) const override;
 };
 
 template <>
-class OpMixin<SliceOperationTag, XnnpackMixinTag> : public XnnpackOperation {
- public:
-  absl::Status ToXnnpack(XnnpackBuildContext& ctx) const override;
-};
-
-template <>
-class OpMixin<ConcatenationOperationTag, XnnpackMixinTag>
+class OpMixin<SpaceToDepthOperation, XnnpackMixinTag>
     : public XnnpackOperation {
  public:
-  absl::Status ToXnnpack(XnnpackBuildContext& ctx) const override;
+  absl::Status ToXnnpack(const graph::Operation& op,
+                         XnnpackBuildContext& ctx) const override;
 };
 
 template <>
-class OpMixin<ReshapeOperationTag, XnnpackMixinTag> : public XnnpackOperation {
- public:
-  absl::Status ToXnnpack(XnnpackBuildContext& ctx) const override;
-};
-
-template <>
-class OpMixin<SqueezeOperationTag, XnnpackMixinTag> : public XnnpackOperation {
- public:
-  absl::Status ToXnnpack(XnnpackBuildContext& ctx) const override;
-};
-
-template <>
-class OpMixin<ExpandDimsOperationTag, XnnpackMixinTag>
+class OpMixin<DepthToSpaceOperation, XnnpackMixinTag>
     : public XnnpackOperation {
  public:
-  absl::Status ToXnnpack(XnnpackBuildContext& ctx) const override;
+  absl::Status ToXnnpack(const graph::Operation& op,
+                         XnnpackBuildContext& ctx) const override;
 };
 
 template <>
-class OpMixin<TileOperationTag, XnnpackMixinTag> : public XnnpackOperation {
+class OpMixin<SplitOperation, XnnpackMixinTag> : public XnnpackOperation {
  public:
-  absl::Status ToXnnpack(XnnpackBuildContext& ctx) const override;
-};
-
-template <>
-class OpMixin<ResizeBilinearOperationTag, XnnpackMixinTag>
-    : public XnnpackOperation {
- public:
-  absl::Status ToXnnpack(XnnpackBuildContext& ctx) const override;
-};
-
-template <>
-class OpMixin<ResizeNearestNeighborOperationTag, XnnpackMixinTag>
-    : public XnnpackOperation {
- public:
-  absl::Status ToXnnpack(XnnpackBuildContext& ctx) const override;
-};
-
-template <>
-class OpMixin<TransposeConvOperationTag, XnnpackMixinTag>
-    : public XnnpackOperation {
- public:
-  absl::Status ToXnnpack(XnnpackBuildContext& ctx) const override;
-};
-
-template <>
-class OpMixin<TransposeConv2DOperationTag, XnnpackMixinTag>
-    : public XnnpackOperation {
- public:
-  absl::Status ToXnnpack(XnnpackBuildContext& ctx) const override;
-};
-
-template <>
-class OpMixin<GatherOperationTag, XnnpackMixinTag> : public XnnpackOperation {
- public:
-  absl::Status ToXnnpack(XnnpackBuildContext& ctx) const override;
-};
-
-template <>
-class OpMixin<SpaceToDepthOperationTag, XnnpackMixinTag>
-    : public XnnpackOperation {
- public:
-  absl::Status ToXnnpack(XnnpackBuildContext& ctx) const override;
-};
-
-template <>
-class OpMixin<DepthToSpaceOperationTag, XnnpackMixinTag>
-    : public XnnpackOperation {
- public:
-  absl::Status ToXnnpack(XnnpackBuildContext& ctx) const override;
-};
-
-template <>
-class OpMixin<SplitOperationTag, XnnpackMixinTag> : public XnnpackOperation {
- public:
-  absl::Status ToXnnpack(XnnpackBuildContext& ctx) const override;
+  absl::Status ToXnnpack(const graph::Operation& op,
+                         XnnpackBuildContext& ctx) const override;
 };
 }  // namespace graph
 

@@ -126,19 +126,12 @@ MIN_MAX_KN_KERNEL_SCALAR(min_max_kn_uint8, uint8_t);
 reduce_kernel get_sum_kernel(ynn_type a_type, ynn_type c_type) {
   reduce_kernel res = {};
 #include "ynnpack/kernels/reduce/sum.inc"
-  if (!res.k1 || !res.kn) {
-    YNN_LOG_ERROR() << "Unsupported sum type " << a_type << "_" << c_type;
-  }
   return res;
 }
 
 reduce_kernel get_sum_squared_kernel(ynn_type a_type, ynn_type c_type) {
   reduce_kernel res = {};
 #include "ynnpack/kernels/reduce/sum_squared.inc"
-  if (!res.k1 || !res.kn) {
-    YNN_LOG_ERROR() << "Unsupported sum_squared type " << a_type << "_"
-                    << c_type;
-  }
   return res;
 }
 
@@ -160,30 +153,39 @@ reduce_kernel get_sum_squared_kernel(ynn_type a_type, ynn_type c_type) {
 reduce_kernel get_min_kernel(ynn_type type) {
   reduce_kernel res = {};
 #include "ynnpack/kernels/reduce/min.inc"
-  if (!res.k1 || !res.kn) {
-    YNN_LOG_ERROR() << "Unsupported min type " << type;
-  }
   return res;
 }
 
 reduce_kernel get_max_kernel(ynn_type type) {
   reduce_kernel res = {};
 #include "ynnpack/kernels/reduce/max.inc"
-  if (!res.k1 || !res.kn) {
-    YNN_LOG_ERROR() << "Unsupported max type " << type;
-  }
   return res;
 }
 
 reduce_kernel get_min_max_kernel(ynn_type type) {
   reduce_kernel res = {};
 #include "ynnpack/kernels/reduce/min_max.inc"
-  if (!res.k1 || !res.kn) {
-    YNN_LOG_ERROR() << "Unsupported min_max type " << type;
-  }
   return res;
 }
 
 #undef YNN_REDUCE_KERNEL
+
+reduce_kernel get_reduce_kernel(ynn_reduce_operator op, ynn_type a_type,
+                                ynn_type c_type) {
+  if (op == ynn_reduce_sum) {
+    return get_sum_kernel(a_type, c_type);
+  } else if (op == ynn_reduce_sum_squared) {
+    return get_sum_squared_kernel(a_type, c_type);
+  } else if (a_type == c_type) {
+    if (op == ynn_reduce_max) {
+      return get_max_kernel(c_type);
+    } else if (op == ynn_reduce_min) {
+      return get_min_kernel(c_type);
+    } else if (op == ynn_reduce_min_max) {
+      return get_min_max_kernel(c_type);
+    }
+  }
+  return {};
+}
 
 }  // namespace ynn

@@ -17,7 +17,6 @@
 
 namespace ynn {
 
-using simd::transpose;
 using simd::extract;
 
 struct identity {
@@ -206,22 +205,34 @@ static void sum_kn(size_t n, size_t k, size_t a_stride_k, const T* a, AccT* acc,
 // In this implementation, there are some details to the above:
 // - The accumulators are SIMD vectors. This doesn't change anything about the
 //   algorithm above.
-// - We use a degree 32 tree.
-// - We only have two levels in the tree.
-constexpr size_t tree_degree = 32;
+// - We use a degree 16 tree.
+// - We have three levels in the tree.
+constexpr size_t tree_degree = 16;
 
 constexpr size_t level_mask(size_t level) {
   return pow(tree_degree, level) - 1;
+}
+
+template <typename T>
+YNN_ALWAYS_INLINE static void kahan_sum(T a, T& acc, T& error) {
+  T y = a - error;
+  T t = acc + y;
+  error = (t - acc) - y;
+  // If the error is infinity or NaN, we don't want to know about it. The
+  // accumulator will be infinity anyways, and we might corrupt the result
+  // to be NaN.
+  error = select(isfinite(error), error, static_cast<T>(0));
+  acc = t;
 }
 
 template <size_t K_, typename AccT, typename T, size_t N, typename MapFn>
 static void sum_float_k1(size_t k, const T* __restrict a,
                          simd::vec<AccT, N>& x0, MapFn map_fn) {
   constexpr std::integral_constant<size_t, K_> K = {};
-  constexpr std::integral_constant<size_t, N * K> NK = {};
   constexpr std::integral_constant<size_t, N * K * 4> NK4 = {};
 
   simd::vec<AccT, N> acc[] = {
+      simd::vec<AccT, N>{0},
       simd::vec<AccT, N>{0},
       simd::vec<AccT, N>{0},
   };
@@ -232,17 +243,23 @@ static void sum_float_k1(size_t k, const T* __restrict a,
   // Update the tree of accumulators according to the mask.
   auto accumulate = [&](size_t clock = 0) {
     if ((clock & level_mask(1)) == 0) {
-      // Use Kahan summation for the last level of the acc.
-      kahan_sum(acc[0], acc[1], error);
+      acc[1] += acc[0];
       acc[0] = simd::broadcast<N>(static_cast<AccT>(0));
+      if ((clock & level_mask(2)) == 0) {
+        // Use Kahan summation for the last level of the acc.
+        kahan_sum(acc[1], acc[2], error);
+        acc[1] = simd::broadcast<N>(static_cast<AccT>(0));
+      }
     }
   };
 
-  // We accumulate when clock & level_mask == 0, so we accumulate at every level
-  // on tick 0. This is wasteful for small reductions, so we start the clock at
-  // one past tick 0. The first loop here is unrolled by 4, so start at tick 4.
-  size_t clock = 16;
-  while (k >= NK * 16) {
+  // The clock is based on the number of outputs, not the number of inputs
+  // which would be N*K. This both avoids excessive accumulation for bf16 and
+  // fp16 (since there is plenty of precision in the wider accumulator), and
+  // makes the k1 reductions consistent with kn reductions, which don't have a K
+  // factor.
+  size_t clock = 0;
+  while (k >= NK4 * 4) {
     // Unroll level 1 of the tree while we can.
     partial_sum_k1<K>(NK4, a, acc[0], map_fn);
     a = offset_bytes(a, NK4 * sizeof(T));
@@ -252,17 +269,17 @@ static void sum_float_k1(size_t k, const T* __restrict a,
     a = offset_bytes(a, NK4 * sizeof(T));
     partial_sum_k1<K>(NK4, a, acc[0], map_fn);
     a = offset_bytes(a, NK4 * sizeof(T));
-    k -= NK * 16;
+    k -= NK4 * 4;
 
-    clock += 16;
+    clock += N * 4;
     accumulate(clock);
   }
-  while (k >= NK * 4) {
+  while (k >= NK4) {
     partial_sum_k1<K>(NK4, a, acc[0], map_fn);
     a = offset_bytes(a, NK4 * sizeof(T));
-    k = sub_sat(k, NK * 4);
+    k = sub_sat(k, NK4);
 
-    clock += 4;
+    clock += N;
     accumulate(clock);
   }
   if (k > 0) {
@@ -273,7 +290,7 @@ static void sum_float_k1(size_t k, const T* __restrict a,
   // Flush the accumulators in the tree order.
   accumulate();
 
-  x0 = x0 + acc[1];
+  x0 = x0 + acc[2];
 }
 
 template <size_t N, size_t K, typename AccT, typename MapFn, typename AT>
@@ -352,28 +369,28 @@ static void sum_float_kn_tile(size_t n, size_t k, size_t a_stride_k, const T* a,
                               AccT* x0, MapFn map_fn) {
   assert(n <= MaxN);
 
-  AccT acc[2][MaxN];
+  AccT acc[3][MaxN];
   std::fill_n(&acc[0][0], n, static_cast<AccT>(0));
   std::fill_n(&acc[1][0], n, static_cast<AccT>(0));
+  std::fill_n(&acc[2][0], n, static_cast<AccT>(0));
   // Kahan summation error, applied to the last level of the tree of
   // accumulators.
   AccT error[MaxN];
   std::fill_n(error, n, static_cast<AccT>(0));
 
-  // Update the tree of accumulators according to the mask. Every 2 bits of the
-  // mask corresponds to one level of the tree.
+  // Update the tree of accumulators according to the mask.
   auto accumulate = [&](size_t clock = 0) {
     if ((clock & level_mask(1)) == 0) {
-      // Use Kahan summation for the last level of the accumulators.
-      kahan_sum_n<N>(n, acc[0], acc[1], error);
+      sum_n<N>(n, acc[0], acc[1]);
+      if ((clock & level_mask(2)) == 0) {
+        // Use Kahan summation for the last level of the accumulators.
+        kahan_sum_n<N>(n, acc[1], acc[2], error);
+      }
     }
   };
 
-  // We accumulate when clock & level_mask == 0, so we accumulate at every level
-  // on tick 0. This is wasteful for small reductions, so we start the clock at
-  // one past tick 0.
   static constexpr std::integral_constant<size_t, 4> K = {};
-  size_t clock = K;
+  size_t clock = 0;
   while (k >= K) {
     partial_sum_kn<N>(n, K, a_stride_k, a, acc[0], map_fn);
     a = offset_bytes(a, a_stride_k * 4);
@@ -390,7 +407,7 @@ static void sum_float_kn_tile(size_t n, size_t k, size_t a_stride_k, const T* a,
   // Flush the accumulators in the tree order.
   accumulate();
 
-  sum_n<N>(n, acc[1], x0);
+  sum_n<N>(n, acc[2], x0);
 }
 
 template <size_t N, typename AccT, typename T, typename MapFn>

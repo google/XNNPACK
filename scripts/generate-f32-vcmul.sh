@@ -43,6 +43,10 @@ tools/xngen src/f32-vcmul/rvv.c.in -D LMUL=1 -o src/f32-vcmul/gen/f32-vcmul-rvv-
 tools/xngen src/f32-vcmul/rvv.c.in -D LMUL=2 -o src/f32-vcmul/gen/f32-vcmul-rvv-u2v.c &
 tools/xngen src/f32-vcmul/rvv.c.in -D LMUL=4 -o src/f32-vcmul/gen/f32-vcmul-rvv-u4v.c &
 
+tools/xngen src/f16-vcmul/rvv.c.in -D LMUL=1 -o src/f16-vcmul/gen/f16-vcmul-rvvfp16arith-u1v.c &
+tools/xngen src/f16-vcmul/rvv.c.in -D LMUL=2 -o src/f16-vcmul/gen/f16-vcmul-rvvfp16arith-u2v.c &
+tools/xngen src/f16-vcmul/rvv.c.in -D LMUL=4 -o src/f16-vcmul/gen/f16-vcmul-rvvfp16arith-u4v.c &
+
 #################################### Scalar ###################################
 tools/xngen src/f32-vcmul/scalar.c.in -D BATCH_TILE=1 -o src/f32-vcmul/gen/f32-vcmul-scalar-u1.c &
 tools/xngen src/f32-vcmul/scalar.c.in -D BATCH_TILE=2 -o src/f32-vcmul/gen/f32-vcmul-scalar-u2.c &

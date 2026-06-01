@@ -16,6 +16,7 @@
 #include "ynnpack/subgraph/runtime.h"
 #include "ynnpack/subgraph/slinky.h"
 #include "ynnpack/subgraph/subgraph.h"
+#include "slinky/base/arithmetic.h"
 #include "slinky/builder/pipeline.h"
 #include "slinky/builder/simplify.h"
 #include "slinky/runtime/expr.h"
@@ -28,6 +29,9 @@ using slice_info = ynn_node::static_slice::slice;
 
 std::pair<slinky::expr, slinky::expr> calc_begin_end(const slice_info& slice,
                                                      slinky::expr extent) {
+  if (!extent.defined()) {
+    extent = 1;
+  }
   slinky::expr begin_expr, end_expr;
 
   if (slice.begin < 0) {
@@ -80,7 +84,8 @@ void define_static_slice(ynn_subgraph& subgraph, ynn_node& node,
           slice.stride == 1) {
         i = op.slices.erase(i);
       } else {
-        output_extents[slice.axis] = slinky::simplify(end - begin);
+        output_extents[slice.axis] = slinky::simplify(
+            slinky::ceil_div<slinky::expr>(max(end - begin, 0), slice.stride));
         if (slinky::prove_true(output_extents[slice.axis] == 1)) {
           output_extents[slice.axis] = {};
         }
@@ -124,12 +129,12 @@ void define_static_slice(ynn_subgraph& subgraph, ynn_node& node,
     for (const slice_info& slice : op.slices) {
       const int d = slice.axis;
       auto begin_end = calc_begin_end(slice, input.physical_extent(d));
+      const slinky::expr& begin = begin_end.first;
       if (op.slice_dims) {
         dims.erase(dims.begin() + d);
-        func_input.bounds[d] = slinky::point(begin_end.first);
+        func_input.bounds[d] = slinky::point(begin);
       } else {
-        const slinky::expr& begin = begin_end.first;
-        func_input.bounds[d] = func_input.bounds[d] + begin;
+        func_input.bounds[d] = func_input.bounds[d] * slice.stride + begin;
         func_input.output_crop[d] = all_bounds(output.physical_extent(d));
       }
     }

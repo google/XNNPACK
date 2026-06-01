@@ -91,32 +91,43 @@ struct KernelInfo {
 };
 
 std::vector<unary_params> get_params_for_op(ynn_unary_operator op) {
+  // These parameters need to be chosen carefully so they do not invalidate the
+  // tolerances the op uses to check the results.
   switch (op) {
     case ynn_unary_exp:
       return {
-          unary_params{.exp =
-                           exp_params{0.0f, 1.0f, std::log2(std::exp(1.0f))}},
-          unary_params{.exp = exp_params{0.1f, 0.7f, 0.8f}},
+          unary_params{.exp = exp_params{0.0f, 1.0f, 1.0f}},
+          unary_params{.exp = exp_params{0.1f, 1.1f, 1.2f}},
       };
     case ynn_unary_erf:
       return {
           unary_params{.erf = erf_params{0.0f, 1.0f, 1.0f}},
-          unary_params{.erf = erf_params{0.5f, 0.6f, 0.7f}},
+          unary_params{.erf = erf_params{2.0f, 1.1f, 1.2f}},
+      };
+    case ynn_unary_approx_erf:
+      return {
+          unary_params{.approx_erf = approx_erf_params{0.0f, 1.0f, 1.0f}},
+          unary_params{.approx_erf = approx_erf_params{2.0f, 1.1f, 1.2f}},
+      };
+    case ynn_unary_approx_tanh:
+      return {
+          unary_params{.approx_tanh = approx_tanh_params{0.0f, 1.0f}},
+          unary_params{.approx_tanh = approx_tanh_params{2.0f, 1.1f}},
       };
     case ynn_unary_tanh:
       return {
           unary_params{.tanh = tanh_params{0.0f, 1.0f}},
-          unary_params{.tanh = tanh_params{0.2f, 0.5f}},
+          unary_params{.tanh = tanh_params{2.0f, 1.1f}},
       };
     case ynn_unary_sine:
       return {
           unary_params{.sine = sine_params{0.0f, 1.0f}},
-          unary_params{.sine = sine_params{0.2f, 0.5f}},
+          unary_params{.sine = sine_params{2.0f, 0.5f}},
       };
     case ynn_unary_cosine:
       return {
           unary_params{.cosine = cosine_params{0.0f, 1.0f}},
-          unary_params{.cosine = cosine_params{0.2f, 0.5f}},
+          unary_params{.cosine = cosine_params{2.0f, 0.5f}},
       };
     case ynn_unary_poly3:
       return {
@@ -246,12 +257,15 @@ const ynn_unary_operator all_real_ops[] = {
     ynn_unary_exp,
     ynn_unary_expm1,
     ynn_unary_erf,
+    ynn_unary_approx_erf,
+    ynn_unary_approx_tanh,
     ynn_unary_tanh,
     ynn_unary_sign,
     ynn_unary_sine,
     ynn_unary_cosine,
     ynn_unary_sigmoid,
     ynn_unary_hardswish,
+    ynn_unary_round_to_bf16,
 };
 
 const ynn_unary_operator all_integer_ops[] = {
@@ -304,17 +318,34 @@ const std::vector<Shape> all_shapes = []() {
   return shapes;
 }();
 
-#define YNN_ELEMENTWISE_KERNEL(arch_flags, kernel, op, type_a, type_x)  \
-  class kernel##_test : public testing::TestWithParam<ynn::Shape> {};   \
-  TEST_P(kernel##_test, no_broadcast) {                                 \
-    ynn::KernelInfo kernel_info(arch_flags, kernel);                    \
-    for (const auto& params : ynn::get_params_for_op(ynn_unary_##op)) { \
-      ynn::TestImpl(type_a{}, type_x{}, kernel_info, ynn::op(params),   \
-                    GetParam(), params);                                \
-    }                                                                   \
-  }                                                                     \
-  INSTANTIATE_TEST_SUITE_P(                                             \
-      test, kernel##_test, ValuesIn(ynn::all_shapes),                   \
+template <typename T>
+std::vector<Shape> get_test_shapes() {
+  if constexpr (type_info<T>::element_count() == 1) {
+    return all_shapes;
+  } else {
+    std::vector<Shape> result;
+    for (const auto& s : all_shapes) {
+      if (s.n % type_info<T>::element_count() == 0 &&
+          s.padding_a % type_info<T>::element_count() == 0 &&
+          s.padding_x % type_info<T>::element_count() == 0) {
+        result.push_back(s);
+      }
+    }
+    return result;
+  }
+}
+
+#define YNN_ELEMENTWISE_KERNEL(arch_flags, kernel, op, flags, type_a, type_x) \
+  class kernel##_test : public testing::TestWithParam<ynn::Shape> {};         \
+  TEST_P(kernel##_test, no_broadcast) {                                       \
+    ynn::KernelInfo kernel_info(arch_flags, kernel);                          \
+    for (const auto& params : ynn::get_params_for_op(ynn_unary_##op)) {       \
+      ynn::TestImpl(type_a{}, type_x{}, kernel_info, ynn::op(params),         \
+                    GetParam(), params);                                      \
+    }                                                                         \
+  }                                                                           \
+  INSTANTIATE_TEST_SUITE_P(                                                   \
+      test, kernel##_test, ValuesIn(ynn::get_test_shapes<type_a>()),          \
       [](const auto& i) { return ynn::to_string(i.param); });
 #include "ynnpack/kernels/unary/kernels.inc"
 #undef YNN_ELEMENTWISE_KERNEL

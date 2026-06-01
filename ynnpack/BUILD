@@ -198,6 +198,11 @@ define_build_option(
 )
 
 define_build_option(
+    name = "ynn_enable_x86_sse2_fma",
+    default_all = [":ynn_enable_x86_sse2"],
+)
+
+define_build_option(
     name = "ynn_enable_x86_ssse3",
     default_all = [":ynn_enable_x86_sse"],
 )

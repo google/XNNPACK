@@ -67,6 +67,34 @@ def _copts_for_compiler(copts):
         "//conditions:default": copts,
     })
 
+_YNN_IMPLIED_ARCHS = {
+    "arm_neonfma": ["arm_neon"],
+    "arm_neonfp16": ["arm_neon"],
+    "arm_neonfp16arith": ["arm_neon"],
+    "arm_neonbf16": ["arm_neon"],
+    "arm64_neon": ["arm_neonfma"],
+    "arm64_neoni8mm": ["arm64_neon"],
+    "arm64_sme": ["arm64_neon"],
+    "arm64_sme2": ["arm64_neon"],
+    "arm64_sve": ["arm64_neon"],
+    "x86_avx2_fma3": ["x86_avx2", "x86_fma3"],
+    "x86_avx512": ["x86_fma3", "x86_avx2", "x86_f16c"],
+    "x86_avx512bf16": ["x86_avx512"],
+    "x86_avx512fp16": ["x86_avx512"],
+    "x86_avx512vnni": ["x86_avx512"],
+    "x86_amxbf16": ["x86_avx512"],
+    "x86_amxfp16": ["x86_avx512"],
+    "x86_amxint8": ["x86_avx512"],
+    "x86_avx2": ["x86_avx"],
+    "x86_fma3": ["x86_avx"],
+    "x86_f16c": ["x86_avx"],
+    "x86_f16c_fma3": ["x86_avx", "x86_fma3"],
+    "x86_avx": ["x86_sse41"],
+    "x86_sse41": ["x86_ssse3"],
+    "x86_ssse3": ["x86_sse2"],
+    "x86_sse2_fma": ["x86_sse2"],
+}
+
 _YNN_PARAMS_FOR_ARCH = {
     "arm_neon": {
         "cond": "//ynnpack:ynn_enable_arm_neon",
@@ -184,6 +212,12 @@ _YNN_PARAMS_FOR_ARCH = {
         "arch_copts": _copts_for_compiler(["-msse2", "-mno-ssse3"]),
         "arch_flag": "sse2",
     },
+    "x86_sse2_fma": {
+        "cond": "//ynnpack:ynn_enable_x86_sse2_fma",
+        "arch_copts": _copts_for_compiler(["-msse2"]),
+        "arch_flag": "sse2_fma",
+        "arch_defines": ["YNN_ARCH_EMULATE_FMA"],
+    },
     "x86_ssse3": {
         "cond": "//ynnpack:ynn_enable_x86_ssse3",
         "arch_copts": _copts_for_compiler(["-mssse3", "-mno-sse4.1"]),
@@ -283,6 +317,26 @@ def ynn_arch_copts(arch):
 def ynn_arch_flag(arch):
     return _YNN_PARAMS_FOR_ARCH[arch].get("arch_flag", "")
 
+def ynn_arch_defines(arch):
+    """Returns a list of architecture-specific macros to define."""
+    archs = {arch: True}
+    for _ in range(10):
+        new_archs = {}
+        for a in archs:
+            for implied in _YNN_IMPLIED_ARCHS.get(a, []):
+                if implied not in archs:
+                    new_archs[implied] = True
+        if not new_archs:
+            break
+        archs.update(new_archs)
+
+    all_defines = {}
+    for a in archs:
+        all_defines["YNN_ARCH_" + a.upper()] = True
+        for extra_define in _YNN_PARAMS_FOR_ARCH[a].get("arch_defines", []):
+            all_defines[extra_define] = True
+    return list(all_defines.keys())
+
 def ynn_kernel_copts(unroll_loops = True):
     return select({
         "//ynnpack:msvc": ["/O2"],
@@ -367,8 +421,8 @@ def ynn_cc_library(
         cc_library(
             name = name + "_" + arch,
             srcs = ynn_if_arch(arch, arch_srcs, []),
-            defines = defines + ["YNN_ARCH_" + arch.upper()],
-            local_defines = local_defines + ["ARCH=" + arch],
+            defines = defines + ynn_if_arch(arch, ynn_arch_defines(arch)),
+            local_defines = local_defines + ynn_arch_defines(arch),
             copts = copts + arch_copts,
             hdrs_check = "strict",
             deps = deps,

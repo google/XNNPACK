@@ -1,71 +1,38 @@
 #!/bin/sh
-# Copyright 2023 Google LLC
+# Copyright 2026 Google LLC
 #
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
 
-################################### x86 AVX ###################################
-tools/xngen src/f16-vtanh/avx-expm1minus.c.in -D P=3 -D H=2 -D PS=0 -D BATCH_TILE=8  -D DIV=DIV -D SAT=MINMAX -D AVX=1 -D FMA=0 -o src/f16-vtanh/gen/f16-vtanh-f16c-expm1minus-rr1-p3h2ts-div-u8.c &
-tools/xngen src/f16-vtanh/avx-expm1minus.c.in -D P=3 -D H=2 -D PS=0 -D BATCH_TILE=16 -D DIV=DIV -D SAT=MINMAX -D AVX=1 -D FMA=0 -o src/f16-vtanh/gen/f16-vtanh-f16c-expm1minus-rr1-p3h2ts-div-u16.c &
-tools/xngen src/f16-vtanh/avx-expm1minus.c.in -D P=3 -D H=2 -D PS=0 -D BATCH_TILE=24 -D DIV=DIV -D SAT=MINMAX -D AVX=1 -D FMA=0 -o src/f16-vtanh/gen/f16-vtanh-f16c-expm1minus-rr1-p3h2ts-div-u24.c &
-tools/xngen src/f16-vtanh/avx-expm1minus.c.in -D P=3 -D H=2 -D PS=0 -D BATCH_TILE=32 -D DIV=DIV -D SAT=MINMAX -D AVX=1 -D FMA=0 -o src/f16-vtanh/gen/f16-vtanh-f16c-expm1minus-rr1-p3h2ts-div-u32.c &
-tools/xngen src/f16-vtanh/avx-expm1minus.c.in -D P=3 -D H=2 -D PS=0 -D BATCH_TILE=8  -D DIV=RCP -D SAT=SELECT -D AVX=1 -D FMA=0 -o src/f16-vtanh/gen/f16-vtanh-f16c-expm1minus-rr1-p3h2ts-rcp-u8.c &
-tools/xngen src/f16-vtanh/avx-expm1minus.c.in -D P=3 -D H=2 -D PS=0 -D BATCH_TILE=16 -D DIV=RCP -D SAT=SELECT -D AVX=1 -D FMA=0 -o src/f16-vtanh/gen/f16-vtanh-f16c-expm1minus-rr1-p3h2ts-rcp-u16.c &
-tools/xngen src/f16-vtanh/avx-expm1minus.c.in -D P=3 -D H=2 -D PS=0 -D BATCH_TILE=24 -D DIV=RCP -D SAT=SELECT -D AVX=1 -D FMA=0 -o src/f16-vtanh/gen/f16-vtanh-f16c-expm1minus-rr1-p3h2ts-rcp-u24.c &
-tools/xngen src/f16-vtanh/avx-expm1minus.c.in -D P=3 -D H=2 -D PS=0 -D BATCH_TILE=32 -D DIV=RCP -D SAT=SELECT -D AVX=1 -D FMA=0 -o src/f16-vtanh/gen/f16-vtanh-f16c-expm1minus-rr1-p3h2ts-rcp-u32.c &
+################################ Direct FP16 ###################################
+tools/xngen src/f16-vtanh/rational-5-4.c.in -D ARCH=scalar          -D BATCH_TILES=1,2,4     -D DIV=DIV -o src/f16-vtanh/gen/f16-vtanh-scalar-rational-5-4-div.c &
+tools/xngen src/f16-vtanh/rational-5-4.c.in -D ARCH=wasmrelaxedsimd -D BATCH_TILES=8,16,32   -D DIV=DIV -o src/f16-vtanh/gen/f16-vtanh-wasmrelaxedsimd-rational-5-4-div.c &
+tools/xngen src/f16-vtanh/rational-5-4.c.in -D ARCH=wasmrelaxedsimd -D BATCH_TILES=8,16,32   -D DIV=NR  -o src/f16-vtanh/gen/f16-vtanh-wasmrelaxedsimd-rational-5-4-nr.c &
+tools/xngen src/f16-vtanh/rational-5-4.c.in -D ARCH=neonfp16arith   -D BATCH_TILES=8,16,32   -D DIV=DIV -o src/f16-vtanh/gen/f16-vtanh-neonfp16arith-rational-5-4-div.c &
+tools/xngen src/f16-vtanh/rational-5-4.c.in -D ARCH=neonfp16arith   -D BATCH_TILES=8,16,32   -D DIV=NR  -o src/f16-vtanh/gen/f16-vtanh-neonfp16arith-rational-5-4-nr.c &
+tools/xngen src/f16-vtanh/rational-5-4.c.in -D ARCH=avx512fp16      -D BATCH_TILES=32,64,128 -D DIV=DIV -o src/f16-vtanh/gen/f16-vtanh-avx512fp16-rational-5-4-div.c &
+tools/xngen src/f16-vtanh/rational-5-4.c.in -D ARCH=avx512fp16      -D BATCH_TILES=32,64,128 -D DIV=NR  -o src/f16-vtanh/gen/f16-vtanh-avx512fp16-rational-5-4-nr.c &
 
-tools/xngen src/f16-vtanh/avx-expm1minus.c.in -D P=3 -D H=2 -D PS=0 -D BATCH_TILE=8  -D DIV=DIV -D SAT=MINMAX -D AVX=1 -D FMA=3 -o src/f16-vtanh/gen/f16-vtanh-fma3-expm1minus-rr1-p3h2ts-div-u8.c &
-tools/xngen src/f16-vtanh/avx-expm1minus.c.in -D P=3 -D H=2 -D PS=0 -D BATCH_TILE=16 -D DIV=DIV -D SAT=MINMAX -D AVX=1 -D FMA=3 -o src/f16-vtanh/gen/f16-vtanh-fma3-expm1minus-rr1-p3h2ts-div-u16.c &
-tools/xngen src/f16-vtanh/avx-expm1minus.c.in -D P=3 -D H=2 -D PS=0 -D BATCH_TILE=24 -D DIV=DIV -D SAT=MINMAX -D AVX=1 -D FMA=3 -o src/f16-vtanh/gen/f16-vtanh-fma3-expm1minus-rr1-p3h2ts-div-u24.c &
-tools/xngen src/f16-vtanh/avx-expm1minus.c.in -D P=3 -D H=2 -D PS=0 -D BATCH_TILE=32 -D DIV=DIV -D SAT=MINMAX -D AVX=1 -D FMA=3 -o src/f16-vtanh/gen/f16-vtanh-fma3-expm1minus-rr1-p3h2ts-div-u32.c &
-tools/xngen src/f16-vtanh/avx-expm1minus.c.in -D P=3 -D H=2 -D PS=0 -D BATCH_TILE=8  -D DIV=RCP -D SAT=SELECT -D AVX=1 -D FMA=3 -o src/f16-vtanh/gen/f16-vtanh-fma3-expm1minus-rr1-p3h2ts-rcp-u8.c &
-tools/xngen src/f16-vtanh/avx-expm1minus.c.in -D P=3 -D H=2 -D PS=0 -D BATCH_TILE=16 -D DIV=RCP -D SAT=SELECT -D AVX=1 -D FMA=3 -o src/f16-vtanh/gen/f16-vtanh-fma3-expm1minus-rr1-p3h2ts-rcp-u16.c &
-tools/xngen src/f16-vtanh/avx-expm1minus.c.in -D P=3 -D H=2 -D PS=0 -D BATCH_TILE=24 -D DIV=RCP -D SAT=SELECT -D AVX=1 -D FMA=3 -o src/f16-vtanh/gen/f16-vtanh-fma3-expm1minus-rr1-p3h2ts-rcp-u24.c &
-tools/xngen src/f16-vtanh/avx-expm1minus.c.in -D P=3 -D H=2 -D PS=0 -D BATCH_TILE=32 -D DIV=RCP -D SAT=SELECT -D AVX=1 -D FMA=3 -o src/f16-vtanh/gen/f16-vtanh-fma3-expm1minus-rr1-p3h2ts-rcp-u32.c &
+############################### FP32 Accumulation ##############################
+tools/xngen src/f16-vtanh/f16-f32acc-rational-5-4.c.in -D ARCH=scalar          -D BATCH_TILES=1,2,4    -D DIV=DIV -o src/f16-vtanh/gen/f16-f32acc-vtanh-scalar-rational-5-4-div.c &
+tools/xngen src/f16-vtanh/f16-f32acc-rational-5-4.c.in -D ARCH=wasmrelaxedsimd -D BATCH_TILES=4,8,16    -D DIV=DIV -o src/f16-vtanh/gen/f16-f32acc-vtanh-wasmrelaxedsimd-rational-5-4-div.c &
+tools/xngen src/f16-vtanh/f16-f32acc-rational-5-4.c.in -D ARCH=wasmrelaxedsimd -D BATCH_TILES=4,8,16    -D DIV=NR  -o src/f16-vtanh/gen/f16-f32acc-vtanh-wasmrelaxedsimd-rational-5-4-nr.c &
+tools/xngen src/f16-vtanh/f16-f32acc-rational-5-4.c.in -D ARCH=neonfp16        -D BATCH_TILES=4,8,16    -D DIV=DIV -o src/f16-vtanh/gen/f16-f32acc-vtanh-neonfp16-rational-5-4-div.c &
+tools/xngen src/f16-vtanh/f16-f32acc-rational-5-4.c.in -D ARCH=neonfp16        -D BATCH_TILES=4,8,16    -D DIV=NR  -o src/f16-vtanh/gen/f16-f32acc-vtanh-neonfp16-rational-5-4-nr.c &
+tools/xngen src/f16-vtanh/f16-f32acc-rational-5-4.c.in -D ARCH=f16c            -D BATCH_TILES=8,16,32   -D DIV=DIV -o src/f16-vtanh/gen/f16-f32acc-vtanh-f16c-rational-5-4-div.c &
+tools/xngen src/f16-vtanh/f16-f32acc-rational-5-4.c.in -D ARCH=f16c            -D BATCH_TILES=8,16,32   -D DIV=NR  -o src/f16-vtanh/gen/f16-f32acc-vtanh-f16c-rational-5-4-nr.c &
+tools/xngen src/f16-vtanh/f16-f32acc-rational-5-4.c.in -D ARCH=avx512f         -D BATCH_TILES=16,32,64  -D DIV=DIV -o src/f16-vtanh/gen/f16-f32acc-vtanh-avx512f-rational-5-4-div.c &
+tools/xngen src/f16-vtanh/f16-f32acc-rational-5-4.c.in -D ARCH=avx512f         -D BATCH_TILES=16,32,64  -D DIV=NR  -o src/f16-vtanh/gen/f16-f32acc-vtanh-avx512f-rational-5-4-nr.c &
 
-tools/xngen src/f16-vtanh/avx-expm1minus.c.in -D P=3 -D H=2 -D PS=0 -D BATCH_TILE=8  -D DIV=DIV -D SAT=MINMAX -D AVX=2 -D FMA=3 -o src/f16-vtanh/gen/f16-vtanh-avx2-expm1minus-rr1-p3h2ts-div-u8.c &
-tools/xngen src/f16-vtanh/avx-expm1minus.c.in -D P=3 -D H=2 -D PS=0 -D BATCH_TILE=16 -D DIV=DIV -D SAT=MINMAX -D AVX=2 -D FMA=3 -o src/f16-vtanh/gen/f16-vtanh-avx2-expm1minus-rr1-p3h2ts-div-u16.c &
-tools/xngen src/f16-vtanh/avx-expm1minus.c.in -D P=3 -D H=2 -D PS=0 -D BATCH_TILE=24 -D DIV=DIV -D SAT=MINMAX -D AVX=2 -D FMA=3 -o src/f16-vtanh/gen/f16-vtanh-avx2-expm1minus-rr1-p3h2ts-div-u24.c &
-tools/xngen src/f16-vtanh/avx-expm1minus.c.in -D P=3 -D H=2 -D PS=0 -D BATCH_TILE=32 -D DIV=DIV -D SAT=MINMAX -D AVX=2 -D FMA=3 -o src/f16-vtanh/gen/f16-vtanh-avx2-expm1minus-rr1-p3h2ts-div-u32.c &
-tools/xngen src/f16-vtanh/avx-expm1minus.c.in -D P=3 -D H=2 -D PS=0 -D BATCH_TILE=8  -D DIV=RCP -D SAT=SELECT -D AVX=2 -D FMA=3 -o src/f16-vtanh/gen/f16-vtanh-avx2-expm1minus-rr1-p3h2ts-rcp-u8.c &
-tools/xngen src/f16-vtanh/avx-expm1minus.c.in -D P=3 -D H=2 -D PS=0 -D BATCH_TILE=16 -D DIV=RCP -D SAT=SELECT -D AVX=2 -D FMA=3 -o src/f16-vtanh/gen/f16-vtanh-avx2-expm1minus-rr1-p3h2ts-rcp-u16.c &
-tools/xngen src/f16-vtanh/avx-expm1minus.c.in -D P=3 -D H=2 -D PS=0 -D BATCH_TILE=24 -D DIV=RCP -D SAT=SELECT -D AVX=2 -D FMA=3 -o src/f16-vtanh/gen/f16-vtanh-avx2-expm1minus-rr1-p3h2ts-rcp-u24.c &
-tools/xngen src/f16-vtanh/avx-expm1minus.c.in -D P=3 -D H=2 -D PS=0 -D BATCH_TILE=32 -D DIV=RCP -D SAT=SELECT -D AVX=2 -D FMA=3 -o src/f16-vtanh/gen/f16-vtanh-avx2-expm1minus-rr1-p3h2ts-rcp-u32.c &
+################################### RISC-V Vector ##############################
+tools/xngen src/f16-vtanh/rvv-rational-5-4.c.in -D LMUL=1 -D DIV=DIV -o src/f16-vtanh/gen/f16-vtanh-rvvfp16arith-rational-5-4-div-u1v.c &
+tools/xngen src/f16-vtanh/rvv-rational-5-4.c.in -D LMUL=2 -D DIV=DIV -o src/f16-vtanh/gen/f16-vtanh-rvvfp16arith-rational-5-4-div-u2v.c &
+tools/xngen src/f16-vtanh/rvv-rational-5-4.c.in -D LMUL=4 -D DIV=DIV -o src/f16-vtanh/gen/f16-vtanh-rvvfp16arith-rational-5-4-div-u4v.c &
+tools/xngen src/f16-vtanh/rvv-rational-5-4.c.in -D LMUL=8 -D DIV=DIV -o src/f16-vtanh/gen/f16-vtanh-rvvfp16arith-rational-5-4-div-u8v.c &
 
-tools/xngen src/f16-vtanh/avx-polynomial.c.in -D P=19 -D H=9 -D BATCH_TILE=8  -D FMA=0 -o src/f16-vtanh/gen/f16-vtanh-f16c-polynomial-p19h9t2-u8.c &
-tools/xngen src/f16-vtanh/avx-polynomial.c.in -D P=19 -D H=9 -D BATCH_TILE=16 -D FMA=0 -o src/f16-vtanh/gen/f16-vtanh-f16c-polynomial-p19h9t2-u16.c &
-tools/xngen src/f16-vtanh/avx-polynomial.c.in -D P=19 -D H=9 -D BATCH_TILE=24 -D FMA=0 -o src/f16-vtanh/gen/f16-vtanh-f16c-polynomial-p19h9t2-u24.c &
-tools/xngen src/f16-vtanh/avx-polynomial.c.in -D P=19 -D H=9 -D BATCH_TILE=32 -D FMA=0 -o src/f16-vtanh/gen/f16-vtanh-f16c-polynomial-p19h9t2-u32.c &
-
-tools/xngen src/f16-vtanh/avx-polynomial.c.in -D P=19 -D H=9 -D BATCH_TILE=8  -D FMA=3 -o src/f16-vtanh/gen/f16-vtanh-fma3-polynomial-p19h9t2-u8.c &
-tools/xngen src/f16-vtanh/avx-polynomial.c.in -D P=19 -D H=9 -D BATCH_TILE=16 -D FMA=3 -o src/f16-vtanh/gen/f16-vtanh-fma3-polynomial-p19h9t2-u16.c &
-tools/xngen src/f16-vtanh/avx-polynomial.c.in -D P=19 -D H=9 -D BATCH_TILE=24 -D FMA=3 -o src/f16-vtanh/gen/f16-vtanh-fma3-polynomial-p19h9t2-u24.c &
-tools/xngen src/f16-vtanh/avx-polynomial.c.in -D P=19 -D H=9 -D BATCH_TILE=32 -D FMA=3 -o src/f16-vtanh/gen/f16-vtanh-fma3-polynomial-p19h9t2-u32.c &
-
-tools/xngen src/f16-vtanh/neonfp16arith-expm1minus.c.in -D P=3 -D H=2 -D PS=0 -D BATCH_TILE=8  -D SAT=MINMAX -D DIV=DIV      -o src/f16-vtanh/gen/f16-vtanh-aarch64-neonfp16arith-expm1minus-rr1-p3h2ts-div-u8.c &
-tools/xngen src/f16-vtanh/neonfp16arith-expm1minus.c.in -D P=3 -D H=2 -D PS=0 -D BATCH_TILE=16 -D SAT=MINMAX -D DIV=DIV      -o src/f16-vtanh/gen/f16-vtanh-aarch64-neonfp16arith-expm1minus-rr1-p3h2ts-div-u16.c &
-tools/xngen src/f16-vtanh/neonfp16arith-expm1minus.c.in -D P=3 -D H=2 -D PS=0 -D BATCH_TILE=24 -D SAT=MINMAX -D DIV=DIV      -o src/f16-vtanh/gen/f16-vtanh-aarch64-neonfp16arith-expm1minus-rr1-p3h2ts-div-u24.c &
-tools/xngen src/f16-vtanh/neonfp16arith-expm1minus.c.in -D P=3 -D H=2 -D PS=0 -D BATCH_TILE=32 -D SAT=MINMAX -D DIV=DIV      -o src/f16-vtanh/gen/f16-vtanh-aarch64-neonfp16arith-expm1minus-rr1-p3h2ts-div-u32.c &
-
-tools/xngen src/f16-vtanh/neonfp16arith-expm1minus.c.in -D P=3 -D H=2 -D PS=0 -D BATCH_TILE=8  -D SAT=MINMAX -D DIV=NR1FMA   -o src/f16-vtanh/gen/f16-vtanh-neonfp16arith-expm1minus-rr1-p3h2ts-nr1fma-u8.c &
-tools/xngen src/f16-vtanh/neonfp16arith-expm1minus.c.in -D P=3 -D H=2 -D PS=0 -D BATCH_TILE=16 -D SAT=MINMAX -D DIV=NR1FMA   -o src/f16-vtanh/gen/f16-vtanh-neonfp16arith-expm1minus-rr1-p3h2ts-nr1fma-u16.c &
-tools/xngen src/f16-vtanh/neonfp16arith-expm1minus.c.in -D P=3 -D H=2 -D PS=0 -D BATCH_TILE=24 -D SAT=MINMAX -D DIV=NR1FMA   -o src/f16-vtanh/gen/f16-vtanh-neonfp16arith-expm1minus-rr1-p3h2ts-nr1fma-u24.c &
-tools/xngen src/f16-vtanh/neonfp16arith-expm1minus.c.in -D P=3 -D H=2 -D PS=0 -D BATCH_TILE=32 -D SAT=MINMAX -D DIV=NR1FMA   -o src/f16-vtanh/gen/f16-vtanh-neonfp16arith-expm1minus-rr1-p3h2ts-nr1fma-u32.c &
-
-tools/xngen src/f16-vtanh/neonfp16arith-expm1minus.c.in -D P=3 -D H=2 -D PS=0 -D BATCH_TILE=8  -D SAT=MINMAX -D DIV=NR1RECPS -o src/f16-vtanh/gen/f16-vtanh-neonfp16arith-expm1minus-rr1-p3h2ts-nr1recps-u8.c &
-tools/xngen src/f16-vtanh/neonfp16arith-expm1minus.c.in -D P=3 -D H=2 -D PS=0 -D BATCH_TILE=16 -D SAT=MINMAX -D DIV=NR1RECPS -o src/f16-vtanh/gen/f16-vtanh-neonfp16arith-expm1minus-rr1-p3h2ts-nr1recps-u16.c &
-tools/xngen src/f16-vtanh/neonfp16arith-expm1minus.c.in -D P=3 -D H=2 -D PS=0 -D BATCH_TILE=24 -D SAT=MINMAX -D DIV=NR1RECPS -o src/f16-vtanh/gen/f16-vtanh-neonfp16arith-expm1minus-rr1-p3h2ts-nr1recps-u24.c &
-tools/xngen src/f16-vtanh/neonfp16arith-expm1minus.c.in -D P=3 -D H=2 -D PS=0 -D BATCH_TILE=32 -D SAT=MINMAX -D DIV=NR1RECPS -o src/f16-vtanh/gen/f16-vtanh-neonfp16arith-expm1minus-rr1-p3h2ts-nr1recps-u32.c &
-
-tools/xngen src/f16-vtanh/neonfp16arith-expm1minus.c.in -D P=3 -D H=2 -D PS=0 -D BATCH_TILE=8  -D SAT=MINMAX -D DIV=RECPEADJ -o src/f16-vtanh/gen/f16-vtanh-neonfp16arith-expm1minus-rr1-p3h2ts-recpeadj-u8.c &
-tools/xngen src/f16-vtanh/neonfp16arith-expm1minus.c.in -D P=3 -D H=2 -D PS=0 -D BATCH_TILE=16 -D SAT=MINMAX -D DIV=RECPEADJ -o src/f16-vtanh/gen/f16-vtanh-neonfp16arith-expm1minus-rr1-p3h2ts-recpeadj-u16.c &
-tools/xngen src/f16-vtanh/neonfp16arith-expm1minus.c.in -D P=3 -D H=2 -D PS=0 -D BATCH_TILE=24 -D SAT=MINMAX -D DIV=RECPEADJ -o src/f16-vtanh/gen/f16-vtanh-neonfp16arith-expm1minus-rr1-p3h2ts-recpeadj-u24.c &
-tools/xngen src/f16-vtanh/neonfp16arith-expm1minus.c.in -D P=3 -D H=2 -D PS=0 -D BATCH_TILE=32 -D SAT=MINMAX -D DIV=RECPEADJ -o src/f16-vtanh/gen/f16-vtanh-neonfp16arith-expm1minus-rr1-p3h2ts-recpeadj-u32.c &
-
-################################ Portable SIMD ################################
-tools/xngen src/f16-vtanh/simd-expm1minus.c.in -D ARCH=scalar -D P=3 -D H=2 -D PS=0 -D BATCH_TILES=1,2,4 -D DIV=DIV -o src/f16-vtanh/gen/f16-vtanh-scalar-expm1minus-rr1-p3h2ts-div.c &
-tools/xngen src/f16-vtanh/simd-expm1minus.c.in -D ARCH=avx512fp16 -D P=3 -D H=2 -D PS=0 -D BATCH_TILES=32,64 -D DIV=DIV -o src/f16-vtanh/gen/f16-vtanh-avx512fp16-expm1minus-rr1-p3h2ts-div.c &
-tools/xngen src/f16-vtanh/simd-expm1minus.c.in -D ARCH=wasmrelaxedsimd -D P=3 -D H=2 -D PS=0 -D BATCH_TILES=8,16,24,32 -D DIV=DIV -o src/f16-vtanh/gen/f16-vtanh-wasmrelaxedsimd-expm1minus-rr1-p3h2ts-div.c &
-# TODO: add hvx generator
+tools/xngen src/f16-vtanh/rvv-rational-5-4.c.in -D LMUL=1 -D DIV=NR -o src/f16-vtanh/gen/f16-vtanh-rvvfp16arith-rational-5-4-nr-u1v.c &
+tools/xngen src/f16-vtanh/rvv-rational-5-4.c.in -D LMUL=2 -D DIV=NR -o src/f16-vtanh/gen/f16-vtanh-rvvfp16arith-rational-5-4-nr-u2v.c &
+tools/xngen src/f16-vtanh/rvv-rational-5-4.c.in -D LMUL=4 -D DIV=NR -o src/f16-vtanh/gen/f16-vtanh-rvvfp16arith-rational-5-4-nr-u4v.c &
+tools/xngen src/f16-vtanh/rvv-rational-5-4.c.in -D LMUL=8 -D DIV=NR -o src/f16-vtanh/gen/f16-vtanh-rvvfp16arith-rational-5-4-nr-u8v.c &
 
 wait

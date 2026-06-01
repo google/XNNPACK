@@ -324,13 +324,13 @@ absl::StatusOr<std::unique_ptr<XnnpackGraph>> BuildXnnpackGraph(
   LRT_TENSOR_RETURN_IF_ERROR(ctx.Init());
 
   for (const graph::Operation* op : plan) {
-    auto xnn_op = dynamic_cast<const XnnpackOperation*>(op);
+    auto xnn_op = op->GetExtension<XnnpackOperation>();
     if (xnn_op == nullptr) {
       return absl::InvalidArgumentError(
           absl::StrCat("Operation ", op->GetName(),
                        " does not implement XnnpackOperation."));
     }
-    LRT_TENSOR_RETURN_IF_ERROR(xnn_op->ToXnnpack(ctx))
+    LRT_TENSOR_RETURN_IF_ERROR(xnn_op->ToXnnpack(*op, ctx))
         << "Failed to convert " << op->GetName() << " to XNNPack.";
   }
 

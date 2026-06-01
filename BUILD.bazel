@@ -530,7 +530,6 @@ xnnpack_cc_library(
         ":microparams_h",
         ":operator_h",
         ":xnnpack_h",
-        "@FXdiv",
     ],
 )
 
@@ -904,6 +903,7 @@ xnnpack_cc_library(
         ":xnnpack_h",
         "//src/configs:config_hdrs",
         "//src/configs:hardware_config",
+        "//src/subgraph/rewrites:fp16_to_fp32",
         "@pthreadpool",
     ],
 )
@@ -1040,6 +1040,18 @@ config_setting(
 config_setting(
     name = "xnn_enable_arm_i8mm_explicit_false",
     define_values = {"xnn_enable_arm_i8mm": "false"},
+)
+
+# Enables usage of RNDNU16 kernels.
+config_setting(
+    name = "xnn_enable_rndnu16_explicit_true",
+    define_values = {"xnn_enable_rndnu16": "true"},
+)
+
+# Disables usage of RNDNU16 kernels.
+config_setting(
+    name = "xnn_enable_rndnu16_explicit_false",
+    define_values = {"xnn_enable_rndnu16": "false"},
 )
 
 # Enables usage of ARM SME kernels.
@@ -2085,6 +2097,22 @@ alias(
         ":xnn_enable_assembly_explicit_true": ":xnn_enable_assembly_explicit_true",
         ":xnn_enable_assembly_explicit_false": ":xnn_enable_assembly_explicit_true",
         "//conditions:default": ":assembly_enabled_by_default",
+    }),
+)
+
+selects.config_setting_group(
+    name = "rndnu16_enabled_by_default",
+    match_any = [
+        "//conditions:default",
+    ],
+)
+
+alias(
+    name = "rndnu16_enabled",
+    actual = select({
+        ":xnn_enable_rndnu16_explicit_true": ":xnn_enable_rndnu16_explicit_true",
+        ":xnn_enable_rndnu16_explicit_false": ":xnn_enable_rndnu16_explicit_true",
+        "//conditions:default": ":rndnu16_enabled_by_default",
     }),
 )
 

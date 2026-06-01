@@ -41,10 +41,17 @@ class TestResult:
     return self.exit_code == 0
 
 
+@dataclasses.dataclass
+class QemuConfig:
+  architecture: str
+  sysroot_path: str
+
+
 async def run_one_test(
     path_to_executable: os.PathLike[str],
     lock: asyncio.Semaphore,
     *,
+    qemu_config: QemuConfig | None,
     current_shard: int,
     total_shards: int,
 ) -> TestResult:
@@ -60,7 +67,22 @@ async def run_one_test(
     A TestResult structure.
   """
   # Prepare arguments etc
-  args = ['gtest_brief=1', 'gtest_color=0']
+  args = []
+  binary_tested = os.path.basename(path_to_executable)
+  if qemu_config:
+    args += [
+        '-L',
+        qemu_config.sysroot_path,
+        path_to_executable
+    ]
+    if qemu_config.architecture == 'arm64':
+      path_to_executable = 'qemu-arm64'
+    elif qemu_config.architecture == 'arm':
+      path_to_executable = 'qemu-arm'
+    else:
+      raise ValueError(f'Unsupported architecture: {qemu_config.architecture}')
+
+  args += ['gtest_brief=1', 'gtest_color=0']
   env = {
       'GTEST_TOTAL_SHARDS': str(total_shards),
       'GTEST_SHARD_INDEX': str(current_shard),
@@ -85,7 +107,7 @@ async def run_one_test(
     return TestResult(
         stdout=stdout.decode('ascii').splitlines(),
         stderr=stderr.decode('ascii').splitlines(),
-        suite=os.path.basename(path_to_executable),
+        suite=binary_tested,
         exit_code=process.returncode,
         duration_seconds=duration,
         shard=current_shard,
@@ -119,6 +141,13 @@ async def main() -> None:
       action='store_true',
       help="Prints test output as they're executing",
   )
+  parser.add_argument(
+      '--sysroot', help='If specified, the tests will be run under qemu-user'
+  )
+  parser.add_argument(
+      '--architecture',
+      help='The architecture to use with QEMU (e.g. arm)',
+  )
 
   args = parser.parse_args()
 
@@ -133,6 +162,15 @@ async def main() -> None:
   # The semaphore controls the number of tests that can run.
   semaphore = asyncio.Semaphore(concurrency)
 
+  qemu_config = None
+  if args.sysroot or args.architecture:
+    assert args.sysroot and args.architecture, \
+      '--sysroot and --architecture must be used together'
+    qemu_config = QemuConfig(
+        architecture=args.architecture,
+        sysroot_path=args.sysroot
+    )
+
   # Pick up the executables - must be named in this way to work
   test_suites = list(sorted(glob.glob(args.out_dir + '/xnnpack_*_test')))
 
@@ -146,6 +184,7 @@ async def main() -> None:
           run_one_test(
               suite,
               semaphore,
+              qemu_config=qemu_config,
               current_shard=shard,
               total_shards=num_shards,
           )
