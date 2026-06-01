@@ -1505,6 +1505,15 @@ using f64x4 = vec<double, 4>;
 using f32x16 = vec<float, 16>;
 using s32x16 = vec<int32_t, 16>;
 
+YNN_ALWAYS_INLINE f32x8 cast(bf16x8 b, float) {
+  __m128i zero = _mm_setzero_si128();
+
+  return {
+      f32x4{_mm_castsi128_ps(_mm_unpacklo_epi16(zero, b.v))},
+      f32x4{_mm_castsi128_ps(_mm_unpackhi_epi16(zero, b.v))},
+  };
+}
+
 #ifdef YNN_ARCH_X86_SSE41
 
 YNN_ALWAYS_INLINE s32x16 cast(s8x16 a, int32_t) {
@@ -1526,15 +1535,6 @@ YNN_ALWAYS_INLINE s32x16 cast(u8x16 a, int32_t) {
 }
 
 #else
-
-YNN_ALWAYS_INLINE f32x8 cast(bf16x8 b, float) {
-  __m128i zero = _mm_setzero_si128();
-
-  return {
-      f32x4{_mm_castsi128_ps(_mm_unpacklo_epi16(zero, b.v))},
-      f32x4{_mm_castsi128_ps(_mm_unpackhi_epi16(zero, b.v))},
-  };
-}
 
 YNN_ALWAYS_INLINE s32x16 cast(s8x16 a, int32_t) {
   __m128i i8_lo = _mm_unpacklo_epi8(a.v, a.v);

@@ -1174,6 +1174,26 @@ YNN_ALWAYS_INLINE f32x8 cast(bf16x8 a, float) {
       _mm256_castsi256_ps(_mm256_slli_epi32(_mm256_cvtepu16_epi32(a.v), 16))};
 }
 
+YNN_ALWAYS_INLINE bf16x8 cast(f32x8 a, bfloat16) {
+#ifdef YNN_ARCH_X86_AVX512BF16
+  return bf16x8{
+      (__m128i)_mm_cvtne2ps_pbh(internal::hi(a.v), internal::lo(a.v))};
+#else
+  __m256 nan_mask = _mm256_cmp_ps(a.v, a.v, _CMP_UNORD_Q);
+  __m256i u = _mm256_castps_si256(a.v);
+  __m256i lsb =
+      _mm256_and_si256(_mm256_srli_epi32(u, 16), _mm256_set1_epi32(1));
+  __m256i bias = _mm256_add_epi32(_mm256_set1_epi32(0x7FFF), lsb);
+  __m256i res = _mm256_castps_si256(_mm256_blendv_ps(
+      _mm256_castsi256_ps(_mm256_add_epi32(u, bias)),
+      _mm256_castsi256_ps(_mm256_or_si256(u, _mm256_set1_epi32(0x00010000))),
+      nan_mask));
+  res = _mm256_srli_epi32(res, 16);
+
+  return bf16x8{_mm_packus_epi32(internal::lo(res), internal::hi(res))};
+#endif
+}
+
 YNN_ALWAYS_INLINE s8x32 cast(s2x32 from, int8_t) {
   // 1. Broadcast the 64-bit GPR directly across the entire 256-bit register.
   __m256i dup = _mm256_set1_epi64x(static_cast<long long>(from.v));

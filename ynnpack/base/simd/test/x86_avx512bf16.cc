@@ -23,6 +23,7 @@ class x86_avx512bf16 : public ::testing::Test {
 
 TEST_CAST(x86_avx512bf16, bf16, f32x32);
 TEST_CAST(x86_avx512bf16, bf16, f32x16);
+TEST_CAST(x86_avx512bf16, bf16, f32x8);
 
 }  // namespace simd
 }  // namespace ynn
