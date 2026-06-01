@@ -6,7 +6,6 @@
 #include "ynnpack/subgraph/reduce.h"
 
 #include <cassert>
-#include <cmath>
 #include <cstddef>
 #include <cstdint>
 #include <functional>
@@ -47,7 +46,7 @@ float get_reduce_identity(ynn_reduce_operator op) {
     case ynn_reduce_min:
       return std::numeric_limits<float>::infinity();
     default:
-      return std::nan("");
+      return std::numeric_limits<float>::quiet_NaN();
   }
 }
 

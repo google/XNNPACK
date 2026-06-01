@@ -922,6 +922,28 @@ YNN_ALWAYS_INLINE f64x2 operator/(f64x2 a, f64x2 b) {
   return f64x2{_mm_div_pd(a.v, b.v)};
 }
 
+#ifdef YNN_ARCH_FP16_ARITHMETIC
+YNN_ALWAYS_INLINE f16x8 operator+(f16x8 a, f16x8 b) {
+  return f16x8{_mm_castph_si128(
+      _mm_add_ph(_mm_castsi128_ph(a.v), _mm_castsi128_ph(b.v)))};
+}
+YNN_ALWAYS_INLINE f16x8 operator-(f16x8 a, f16x8 b) {
+  return f16x8{_mm_castph_si128(
+      _mm_sub_ph(_mm_castsi128_ph(a.v), _mm_castsi128_ph(b.v)))};
+}
+YNN_ALWAYS_INLINE f16x8 operator*(f16x8 a, f16x8 b) {
+  return f16x8{_mm_castph_si128(
+      _mm_mul_ph(_mm_castsi128_ph(a.v), _mm_castsi128_ph(b.v)))};
+}
+YNN_ALWAYS_INLINE f16x8 operator/(f16x8 a, f16x8 b) {
+  return f16x8{_mm_castph_si128(
+      _mm_div_ph(_mm_castsi128_ph(a.v), _mm_castsi128_ph(b.v)))};
+}
+YNN_ALWAYS_INLINE f16x8 operator-(f16x8 a) {
+  return f16x8{_mm_xor_si128(_mm_set1_epi16(0x8000), a.v)};
+}
+#endif
+
 YNN_ALWAYS_INLINE s16x8 operator&(s16x8 a, s16x8 b) {
   return s16x8{_mm_and_si128(a.v, b.v)};
 }
@@ -1067,6 +1089,25 @@ YNN_ALWAYS_INLINE f64x2 max(f64x2 a, double b) {
   return f64x2{_mm_max_pd(_mm_set1_pd(b), a.v)};
 }
 
+#ifdef YNN_ARCH_FP16_ARITHMETIC
+YNN_ALWAYS_INLINE f16x8 min(f16x8 a, f16x8 b) {
+  return f16x8{_mm_castph_si128(
+      _mm_min_ph(_mm_castsi128_ph(a.v), _mm_castsi128_ph(b.v)))};
+}
+YNN_ALWAYS_INLINE f16x8 max(f16x8 a, f16x8 b) {
+  return f16x8{_mm_castph_si128(
+      _mm_max_ph(_mm_castsi128_ph(a.v), _mm_castsi128_ph(b.v)))};
+}
+YNN_ALWAYS_INLINE f16x8 min(f16x8 a, half b) {
+  return f16x8{
+      _mm_castph_si128(_mm_min_ph(_mm_set1_ph(b), _mm_castsi128_ph(a.v)))};
+}
+YNN_ALWAYS_INLINE f16x8 max(f16x8 a, half b) {
+  return f16x8{
+      _mm_castph_si128(_mm_max_ph(_mm_set1_ph(b), _mm_castsi128_ph(a.v)))};
+}
+#endif
+
 #ifdef YNN_ARCH_X86_SSE41
 YNN_ALWAYS_INLINE s8x16 min(s8x16 a, s8x16 b) {
   return s8x16{_mm_min_epi8(a.v, b.v)};
@@ -1136,6 +1177,17 @@ YNN_ALWAYS_INLINE f64x2 floor_log2(f64x2 a) {
   return f64x2{_mm_mask_blend_pd(
       negative, res, _mm_set1_pd(std::numeric_limits<double>::quiet_NaN()))};
 }
+
+#ifdef YNN_ARCH_FP16_ARITHMETIC
+YNN_ALWAYS_INLINE f16x8 floor_log2(f16x8 a) {
+  // getexp handles 0 correctly, but not negative numbers.
+  __m128h res = _mm_getexp_ph(_mm_castsi128_ph(a.v));
+  __mmask8 negative =
+      _mm_cmp_ph_mask(_mm_castsi128_ph(a.v), _mm_setzero_ph(), _CMP_LT_OQ);
+  return f16x8{_mm_castph_si128(_mm_mask_blend_ph(
+      negative, res, _mm_set1_ph(std::numeric_limits<float>::quiet_NaN())))};
+}
+#endif
 #else
 YNN_ALWAYS_INLINE f32x4 floor_log2(f32x4 a) {
   __m128 sign_mask = _mm_set1_ps(-0.0f);
@@ -1193,6 +1245,14 @@ YNN_ALWAYS_INLINE f64x2 exp2_round(f64x2 a) {
       _mm_castsi128_pd(_mm_slli_epi64(_mm_castpd_si128(res_bits), 52))};
 }
 
+#ifdef YNN_ARCH_FP16_ARITHMETIC
+YNN_ALWAYS_INLINE f16x8 exp2_round(f16x8 a) {
+  const __m128h magic = _mm_set1_ph(15.0f + static_cast<float>(1 << 10));
+  const __m128h res_bits = _mm_add_ph(_mm_castsi128_ph(a.v), magic);
+  return f16x8{_mm_slli_epi16(_mm_castph_si128(res_bits), 10)};
+}
+#endif
+
 #ifdef YNN_ARCH_X86_FMA3
 YNN_ALWAYS_INLINE f64x2 fma(f64x2 a, f64x2 b, f64x2 acc) {
   return f64x2{_mm_fmadd_pd(a.v, b.v, acc.v)};
@@ -1201,6 +1261,13 @@ YNN_ALWAYS_INLINE f32x4 fma(f32x4 a, f32x4 b, f32x4 acc) {
   return f32x4{_mm_fmadd_ps(a.v, b.v, acc.v)};
 }
 #define YNN_HAVE_FMA
+#endif
+
+#ifdef YNN_ARCH_FP16_ARITHMETIC
+YNN_ALWAYS_INLINE f16x8 fma(f16x8 a, f16x8 b, f16x8 acc) {
+  return f16x8{_mm_castph_si128(_mm_fmadd_ph(
+      _mm_castsi128_ph(a.v), _mm_castsi128_ph(b.v), _mm_castsi128_ph(acc.v)))};
+}
 #endif
 
 YNN_ALWAYS_INLINE s32x4 operator==(f32x4 a, f32x4 b) {
@@ -1291,6 +1358,42 @@ YNN_ALWAYS_INLINE s64x2 isfinite(f64x2 a) {
   __m128d inf = _mm_set1_pd(std::numeric_limits<double>::infinity());
   return s64x2{_mm_castpd_si128(_mm_cmplt_pd(_mm_andnot_pd(mask, a.v), inf))};
 }
+
+#ifdef YNN_ARCH_FP16_ARITHMETIC
+YNN_ALWAYS_INLINE __mmask8 operator==(f16x8 a, f16x8 b) {
+  return _mm_cmp_ph_mask(_mm_castsi128_ph(a.v), _mm_castsi128_ph(b.v),
+                         _CMP_EQ_OQ);
+}
+YNN_ALWAYS_INLINE __mmask8 operator!=(f16x8 a, f16x8 b) {
+  return _mm_cmp_ph_mask(_mm_castsi128_ph(a.v), _mm_castsi128_ph(b.v),
+                         _CMP_NEQ_OQ);
+}
+YNN_ALWAYS_INLINE __mmask8 operator<(f16x8 a, f16x8 b) {
+  return _mm_cmp_ph_mask(_mm_castsi128_ph(a.v), _mm_castsi128_ph(b.v),
+                         _CMP_LT_OQ);
+}
+YNN_ALWAYS_INLINE __mmask8 operator<=(f16x8 a, f16x8 b) {
+  return _mm_cmp_ph_mask(_mm_castsi128_ph(a.v), _mm_castsi128_ph(b.v),
+                         _CMP_LE_OQ);
+}
+YNN_ALWAYS_INLINE __mmask8 operator>(f16x8 a, f16x8 b) {
+  return _mm_cmp_ph_mask(_mm_castsi128_ph(a.v), _mm_castsi128_ph(b.v),
+                         _CMP_GT_OQ);
+}
+YNN_ALWAYS_INLINE __mmask8 operator>=(f16x8 a, f16x8 b) {
+  return _mm_cmp_ph_mask(_mm_castsi128_ph(a.v), _mm_castsi128_ph(b.v),
+                         _CMP_GE_OQ);
+}
+YNN_ALWAYS_INLINE __mmask8 isnan(f16x8 a) {
+  return _mm_fpclass_ph_mask(_mm_castsi128_ph(a.v), 0x81);
+}
+YNN_ALWAYS_INLINE __mmask8 isinf(f16x8 a) {
+  return _mm_fpclass_ph_mask(_mm_castsi128_ph(a.v), 0x18);
+}
+YNN_ALWAYS_INLINE __mmask8 isfinite(f16x8 a) {
+  return ~_mm_fpclass_ph_mask(_mm_castsi128_ph(a.v), 0x99);
+}
+#endif
 
 YNN_ALWAYS_INLINE double horizontal_sum(f64x2 a) {
   return _mm_cvtsd_f64(_mm_add_sd(a.v, _mm_shuffle_pd(a.v, a.v, 1)));
@@ -1436,6 +1539,13 @@ YNN_ALWAYS_INLINE u8x16 select(s8x16 cond, u8x16 a, u8x16 b) {
       _mm_or_si128(_mm_and_si128(cond.v, a.v), _mm_andnot_si128(cond.v, b.v))};
 }
 #endif  // YNN_ARCH_X86_SSE41
+
+#ifdef YNN_ARCH_FP16_ARITHMETIC
+YNN_ALWAYS_INLINE f16x8 select(__mmask8 cond, f16x8 a, f16x8 b) {
+  return f16x8{_mm_castph_si128(
+      _mm_mask_blend_ph(cond, _mm_castsi128_ph(b.v), _mm_castsi128_ph(a.v)))};
+}
+#endif
 
 YNN_ALWAYS_INLINE std::tuple<u8x16, u8x16> interleave(
     std::integral_constant<size_t, 64>, u8x16 x0, u8x16 x1) {

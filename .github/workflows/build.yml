@@ -474,6 +474,8 @@ jobs:
     env:
       CC: clang-18
       CXX: clang++-18
+      BAZEL_DEFINES: |
+        --define=ynn_enable_x86_avx512fp16=false
     steps:
       - uses: actions/checkout@v6
       - name: Mount Bazel Cache
@@ -494,6 +496,7 @@ jobs:
               --disk_cache=/home/xnnpack/.cache/bazel/disk_cache \
               --repository_cache=/home/xnnpack/.cache/bazel/repo_cache \
               --test_output=errors \
+              ${BAZEL_DEFINES} \
               -- \
               //test/... \
               //bench/... \
@@ -508,6 +511,7 @@ jobs:
               --repository_cache=/home/xnnpack/.cache/bazel/repo_cache \
               --test_output=errors \
               --local_test_jobs=HOST_CPUS \
+              ${BAZEL_DEFINES} \
               -- \
               //test/... \
               //bench/... \

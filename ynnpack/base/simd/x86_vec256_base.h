@@ -678,6 +678,28 @@ YNN_ALWAYS_INLINE f32x8 operator-(f32x8 a) {
   return f32x8{_mm256_xor_ps(_mm256_set1_ps(-0.0f), a.v)};
 }
 
+#ifdef YNN_ARCH_FP16_ARITHMETIC
+YNN_ALWAYS_INLINE f16x16 operator+(f16x16 a, f16x16 b) {
+  return f16x16{_mm256_castph_si256(
+      _mm256_add_ph(_mm256_castsi256_ph(a.v), _mm256_castsi256_ph(b.v)))};
+}
+YNN_ALWAYS_INLINE f16x16 operator-(f16x16 a, f16x16 b) {
+  return f16x16{_mm256_castph_si256(
+      _mm256_sub_ph(_mm256_castsi256_ph(a.v), _mm256_castsi256_ph(b.v)))};
+}
+YNN_ALWAYS_INLINE f16x16 operator*(f16x16 a, f16x16 b) {
+  return f16x16{_mm256_castph_si256(
+      _mm256_mul_ph(_mm256_castsi256_ph(a.v), _mm256_castsi256_ph(b.v)))};
+}
+YNN_ALWAYS_INLINE f16x16 operator/(f16x16 a, f16x16 b) {
+  return f16x16{_mm256_castph_si256(
+      _mm256_div_ph(_mm256_castsi256_ph(a.v), _mm256_castsi256_ph(b.v)))};
+}
+YNN_ALWAYS_INLINE f16x16 operator-(f16x16 a) {
+  return f16x16{_mm256_xor_si256(_mm256_set1_epi16(0x8000), a.v)};
+}
+#endif
+
 #ifdef YNN_ARCH_X86_AVX2
 YNN_ALWAYS_INLINE s32x8 operator+(s32x8 a, s32x8 b) {
   return s32x8{_mm256_add_epi32(a.v, b.v)};
@@ -758,6 +780,24 @@ YNN_ALWAYS_INLINE f32x8 max(f32x8 a, float b) {
 YNN_ALWAYS_INLINE f64x4 max(f64x4 a, double b) {
   return f64x4{_mm256_max_pd(_mm256_set1_pd(b), a.v)};
 }
+#ifdef YNN_ARCH_FP16_ARITHMETIC
+YNN_ALWAYS_INLINE f16x16 min(f16x16 a, f16x16 b) {
+  return f16x16{_mm256_castph_si256(
+      _mm256_min_ph(_mm256_castsi256_ph(a.v), _mm256_castsi256_ph(b.v)))};
+}
+YNN_ALWAYS_INLINE f16x16 max(f16x16 a, f16x16 b) {
+  return f16x16{_mm256_castph_si256(
+      _mm256_max_ph(_mm256_castsi256_ph(a.v), _mm256_castsi256_ph(b.v)))};
+}
+YNN_ALWAYS_INLINE f16x16 min(f16x16 a, half b) {
+  return f16x16{_mm256_castph_si256(
+      _mm256_min_ph(_mm256_set1_ph(b), _mm256_castsi256_ph(a.v)))};
+}
+YNN_ALWAYS_INLINE f16x16 max(f16x16 a, half b) {
+  return f16x16{_mm256_castph_si256(
+      _mm256_max_ph(_mm256_set1_ph(b), _mm256_castsi256_ph(a.v)))};
+}
+#endif
 
 #ifdef YNN_ARCH_X86_AVX2
 YNN_ALWAYS_INLINE s32x8 min(s32x8 a, s32x8 b) {
@@ -1020,12 +1060,55 @@ YNN_ALWAYS_INLINE s64x4 isfinite(f64x4 a) {
       _mm256_cmp_pd(_mm256_andnot_pd(mask, a.v), inf, _CMP_LT_OQ))};
 }
 
+#ifdef YNN_ARCH_FP16_ARITHMETIC
+YNN_ALWAYS_INLINE __mmask16 operator==(f16x16 a, f16x16 b) {
+  return _mm256_cmp_ph_mask(_mm256_castsi256_ph(a.v), _mm256_castsi256_ph(b.v),
+                            _CMP_EQ_OQ);
+}
+YNN_ALWAYS_INLINE __mmask16 operator!=(f16x16 a, f16x16 b) {
+  return _mm256_cmp_ph_mask(_mm256_castsi256_ph(a.v), _mm256_castsi256_ph(b.v),
+                            _CMP_NEQ_OQ);
+}
+YNN_ALWAYS_INLINE __mmask16 operator<(f16x16 a, f16x16 b) {
+  return _mm256_cmp_ph_mask(_mm256_castsi256_ph(a.v), _mm256_castsi256_ph(b.v),
+                            _CMP_LT_OQ);
+}
+YNN_ALWAYS_INLINE __mmask16 operator<=(f16x16 a, f16x16 b) {
+  return _mm256_cmp_ph_mask(_mm256_castsi256_ph(a.v), _mm256_castsi256_ph(b.v),
+                            _CMP_LE_OQ);
+}
+YNN_ALWAYS_INLINE __mmask16 operator>(f16x16 a, f16x16 b) {
+  return _mm256_cmp_ph_mask(_mm256_castsi256_ph(a.v), _mm256_castsi256_ph(b.v),
+                            _CMP_GT_OQ);
+}
+YNN_ALWAYS_INLINE __mmask16 operator>=(f16x16 a, f16x16 b) {
+  return _mm256_cmp_ph_mask(_mm256_castsi256_ph(a.v), _mm256_castsi256_ph(b.v),
+                            _CMP_GE_OQ);
+}
+YNN_ALWAYS_INLINE __mmask16 isnan(f16x16 a) {
+  return _mm256_fpclass_ph_mask(_mm256_castsi256_ph(a.v), 0x81);
+}
+YNN_ALWAYS_INLINE __mmask16 isinf(f16x16 a) {
+  return _mm256_fpclass_ph_mask(_mm256_castsi256_ph(a.v), 0x18);
+}
+YNN_ALWAYS_INLINE __mmask16 isfinite(f16x16 a) {
+  return ~_mm256_fpclass_ph_mask(_mm256_castsi256_ph(a.v), 0x99);
+}
+#endif
+
 YNN_ALWAYS_INLINE f32x8 select(s32x8 cond, f32x8 a, f32x8 b) {
   return f32x8{_mm256_blendv_ps(b.v, a.v, _mm256_castsi256_ps(cond.v))};
 }
 YNN_ALWAYS_INLINE f64x4 select(s64x4 cond, f64x4 a, f64x4 b) {
   return f64x4{_mm256_blendv_pd(b.v, a.v, _mm256_castsi256_pd(cond.v))};
 }
+
+#ifdef YNN_ARCH_FP16_ARITHMETIC
+YNN_ALWAYS_INLINE f16x16 select(__mmask16 cond, f16x16 a, f16x16 b) {
+  return f16x16{_mm256_castph_si256(_mm256_mask_blend_ph(
+      cond, _mm256_castsi256_ph(b.v), _mm256_castsi256_ph(a.v)))};
+}
+#endif
 
 #ifdef YNN_ARCH_X86_AVX2
 YNN_ALWAYS_INLINE s32x8 select(s32x8 cond, s32x8 a, s32x8 b) {
@@ -1065,6 +1148,14 @@ YNN_ALWAYS_INLINE f32x8 fma(f32x8 a, f32x8 b, f32x8 acc) {
 #define YNN_HAVE_FMA
 #endif
 
+#ifdef YNN_ARCH_FP16_ARITHMETIC
+YNN_ALWAYS_INLINE f16x16 fma(f16x16 a, f16x16 b, f16x16 acc) {
+  return f16x16{_mm256_castph_si256(
+      _mm256_fmadd_ph(_mm256_castsi256_ph(a.v), _mm256_castsi256_ph(b.v),
+                      _mm256_castsi256_ph(acc.v)))};
+}
+#endif
+
 YNN_ALWAYS_INLINE f64x4 cast(f32x4 a, double) {
   return f64x4{_mm256_cvtps_pd(a.v)};
 }
@@ -1094,6 +1185,14 @@ YNN_ALWAYS_INLINE f64x4 exp2_round(f64x4 a) {
   return f64x4{_mm256_castsi256_pd(
       _mm256_slli_epi64(_mm256_castpd_si256(res_bits), 52))};
 }
+
+#ifdef YNN_ARCH_FP16_ARITHMETIC
+YNN_ALWAYS_INLINE f16x16 exp2_round(f16x16 a) {
+  const __m256h magic = _mm256_set1_ph(15.0f + static_cast<float>(1 << 10));
+  const __m256h res_bits = _mm256_add_ph(_mm256_castsi256_ph(a.v), magic);
+  return f16x16{_mm256_slli_epi16(_mm256_castph_si256(res_bits), 10)};
+}
+#endif
 #endif  // YNN_ARCH_X86_AVX2
 
 #ifdef YNN_ARCH_X86_AVX512
@@ -1111,6 +1210,17 @@ YNN_ALWAYS_INLINE f64x4 floor_log2(f64x4 a) {
   return f64x4{_mm256_mask_blend_pd(
       negative, res, _mm256_set1_pd(std::numeric_limits<double>::quiet_NaN()))};
 }
+
+#ifdef YNN_ARCH_FP16_ARITHMETIC
+YNN_ALWAYS_INLINE f16x16 floor_log2(f16x16 a) {
+  // getexp handles 0 correctly, but not negative numbers.
+  __m256h res = _mm256_getexp_ph(_mm256_castsi256_ph(a.v));
+  __mmask16 negative = _mm256_cmp_ph_mask(_mm256_castsi256_ph(a.v),
+                                          _mm256_setzero_ph(), _CMP_LT_OQ);
+  return f16x16{_mm256_castph_si256(_mm256_mask_blend_ph(
+      negative, res, _mm256_set1_ph(std::numeric_limits<float>::quiet_NaN())))};
+}
+#endif
 #elif defined(YNN_ARCH_X86_AVX2)
 YNN_ALWAYS_INLINE f32x8 floor_log2(f32x8 a) {
   __m256 sign_mask = _mm256_set1_ps(-0.0f);
