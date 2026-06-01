@@ -49,3 +49,29 @@ def expm1_fp32(a_buf, x_buf, output_multiplier, input_multiplier):
 @operator_name("expm1")
 def expm1_fp64(a_buf, x_buf, output_multiplier, input_multiplier):
   return store(expm1(load(a_buf) * input_multiplier) * output_multiplier, x_buf)
+
+
+@const_buffer("a", Float(32))
+@buffer("x", Float(32))
+@params(
+    Scalar("output_multiplier", Float(32)),
+    Scalar("input_multiplier", Float(32)),
+)
+@operator_name("approx_exp")
+def approx_exp_fp32(a_buf, x_buf, output_multiplier, input_multiplier):
+  return store(
+      approx_exp(load(a_buf) * input_multiplier) * output_multiplier, x_buf
+  )
+
+
+@const_buffer("a", Float(32))
+@buffer("x", Float(32))
+@params(
+    Scalar("output_multiplier", Float(32)),
+    Scalar("input_multiplier", Float(32)),
+)
+@operator_name("approx_expm1")
+def approx_expm1_fp32(a_buf, x_buf, output_multiplier, input_multiplier):
+  return store(
+      approx_expm1(load(a_buf) * input_multiplier) * output_multiplier, x_buf
+  )

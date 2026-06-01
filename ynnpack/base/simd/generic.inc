@@ -510,6 +510,46 @@ static vec<double, N> exp_impl(vec<double, N> x) {
   return exp_impl<m>(x, p, /*q=*/one, min_x, max_x, log2e, ln2_hi, ln2_lo);
 }
 
+// Fast math approximation helper for exp(x) (m = 0) and expm1(x) (m = 1).
+//
+// This implementation targets ~3 ULPs of relative precision (about 22.5 bits
+// of true float32 precision), yielding a ~13% performance speedup.
+//
+// Derivation details:
+// The function computes exp(x) = 2^b * exp(r) where r = x - b * ln(2) lies in
+// the range [-0.5, 0.5]. We approximate exp(r) using a rational minimax
+// polynomial approximation of degree (2, 3) for (exp(r) - 1 - r) / r^2:
+//
+//   (exp(r) - 1 - r) / r^2  ~=  P(r^2) / Q(r^2)
+//
+// P and Q are polynomials in r^2 (since exp(r)'s odd-degree components are
+// captured). This degree (2, 3) choice is optimized to require minimal FMA
+// (Fused Multiply-Add) instruction depth while remaining strictly within our
+// 3 ULPs error budget.
+//
+// The coefficients were computed via the Remez exchange algorithm in
+// cl/924803548.
+template <int m, size_t N>
+YNN_ALWAYS_INLINE vec<float, N> approx_exp_impl(vec<float, N> x) {
+  constexpr std::array<float, 2> p = {
+      4.7195836902e-02f,
+      5.0000029802e-01f,
+  };
+  constexpr std::array<float, 4> q = {
+      4.4524371624e-03f,
+      -3.6790699232e-03f,
+      -2.3893947899e-01f,
+      1.0000000000e+00f,
+  };
+  constexpr float log2e = 1.4426950408889634f;
+  constexpr float ln2_hi = 6.9314575195e-01f;
+  constexpr float ln2_lo = 1.4286067653e-06f;
+  constexpr float min_x = -88.02969360351562f;
+  constexpr float max_x = 88.72283935546875f;
+
+  return exp_impl<m>(x, p, q, min_x, max_x, log2e, ln2_hi, ln2_lo);
+}
+
 }  // namespace internal
 
 template <size_t N>
@@ -855,6 +895,17 @@ static vec<float, N> approx_tanh(vec<float, N> x) {
   auto p_x = internal::eval_polynomial(P, x2) * x_clamped;
   auto q_x = internal::eval_polynomial(Q, x2);
   return select(abs(x_clamped) < broadcast<N>(min_abs_x), x, p_x / q_x);
+}
+
+// Fast approximation: ~13% faster than exp(x), ~3 ULPs vs. ~2 ULPs error.
+template <size_t N>
+static vec<float, N> approx_exp(vec<float, N> x) {
+  return internal::approx_exp_impl<0>(x);
+}
+
+template <size_t N>
+static vec<float, N> approx_expm1(vec<float, N> x) {
+  return internal::approx_exp_impl<1>(x);
 }
 
 }  // namespace simd

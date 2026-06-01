@@ -1248,6 +1248,8 @@ bool fold_unary_input(ynn_subgraph& subgraph, ynn_node& node,
   switch (unary->op) {
     case ynn_unary_exp:
     case ynn_unary_expm1:
+    case ynn_unary_approx_exp:
+    case ynn_unary_approx_expm1:
     case ynn_unary_log:
     case ynn_unary_log1p:
     case ynn_unary_erf:
@@ -1270,6 +1272,9 @@ bool fold_unary_input(ynn_subgraph& subgraph, ynn_node& node,
                     << to_string(unary->op) << ".";
     if (unary->op == ynn_unary_exp || unary->op == ynn_unary_expm1) {
       unary->params.exp.input_multiplier *= mul->a;
+    } else if (unary->op == ynn_unary_approx_exp ||
+               unary->op == ynn_unary_approx_expm1) {
+      unary->params.approx_exp.input_multiplier *= mul->a;
     } else if (unary->op == ynn_unary_approx_erf) {
       unary->params.approx_erf.input_multiplier *= mul->a;
     } else {
@@ -1297,6 +1302,8 @@ bool fold_unary_output(ynn_subgraph& subgraph, ynn_node& node,
   switch (unary->op) {
     case ynn_unary_exp:
     case ynn_unary_expm1:
+    case ynn_unary_approx_exp:
+    case ynn_unary_approx_expm1:
     case ynn_unary_log:
     case ynn_unary_log1p:
       if (scalar_arithmetic->b != 0.0f) {
@@ -1926,6 +1933,8 @@ bool rewrite_fast_math(ynn_subgraph& subgraph, ynn_node& node,
   constexpr FastMathOpRewrite kFastMathRewrites[] = {
       {ynn_unary_erf, ynn_unary_approx_erf},
       {ynn_unary_tanh, ynn_unary_approx_tanh},
+      {ynn_unary_exp, ynn_unary_approx_exp},
+      {ynn_unary_expm1, ynn_unary_approx_expm1},
   };
 
   for (const auto& rewrite : kFastMathRewrites) {
