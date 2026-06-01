@@ -553,4 +553,33 @@ TEST(fusion, transpose_broadcast_insert_dim) {
   EXPECT_EQ(ProducerOf(transpose_out_id, subgraph).inputs[0], x_id);
 }
 
+TEST(fusion, move_broadcast_to_output_topological_order) {
+  const uint32_t x_id = 0;
+  const uint32_t v_id = 1;
+  const uint32_t out_id = 2;
+  SubgraphBuilder builder(3);
+  uint32_t broadcast_x_id = YNN_INVALID_VALUE_ID;
+  uint32_t w_id = YNN_INVALID_VALUE_ID;
+
+  builder.AddInput(ynn_type_fp32, {1, 10}, x_id)
+      .AddInput(ynn_type_fp32, {1, 10}, v_id)
+      .AddOutput(ynn_type_fp32, {5, 10}, out_id)
+      .AddTensor(ynn_type_fp32, {5, 10}, broadcast_x_id)
+      .AddTensor(ynn_type_fp32, {1, 10}, w_id);
+
+  builder.AddStaticBroadcast({5, 0}, x_id, broadcast_x_id)
+      .AddUnary(ynn_unary_abs, v_id, w_id)
+      .AddBinary(ynn_binary_add, broadcast_x_id, w_id, out_id);
+
+  ynn_subgraph& subgraph = *builder.GetSubgraph();
+
+  subgraph.fusion();
+  subgraph.invalidate_dead_values();
+
+  ASSERT_EQ(subgraph.nodes.size(), 3);
+  EXPECT_THAT(subgraph.nodes[0], IsUnary(ynn_unary_abs));
+  EXPECT_THAT(subgraph.nodes[1], IsBinary(ynn_binary_add));
+  EXPECT_THAT(subgraph.nodes[2], IsStaticBroadcast());
+}
+
 }  // namespace ynn

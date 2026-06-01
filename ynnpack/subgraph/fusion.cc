@@ -555,9 +555,8 @@ bool move_broadcast_to_output(ynn_subgraph& subgraph, ynn_node& broadcast,
 
   broadcast.inputs[0] = broadcast.outputs[0];
   std::swap(consumer->outputs[0], broadcast.outputs[0]);
-
-  // Maintain topological order
-  std::swap(broadcast, *consumer);
+  subgraph.topological_sort();
+  analysis.invalidate();
 
   return true;
 }
@@ -915,8 +914,8 @@ bool rewrite_expand_dims_reduce(ynn_subgraph& subgraph, ynn_node& node,
       ynn::define_static_expand_dims(subgraph, node, producer->inputs[1],
                                      &expanded_id, *expand_dims_axes);
       producer->inputs[1] = expanded_id;
-      // Swap the nodes to maintain topological order.
-      std::swap(node, *producer);
+      subgraph.topological_sort();
+      analysis.invalidate();
       return true;
     }
   }
