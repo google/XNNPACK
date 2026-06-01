@@ -1,0 +1,39 @@
+diff --git a/BUILD.bazel b/BUILD.bazel
+index d78fb2de..6d3afe99 100644
+--- a/BUILD.bazel
++++ b/BUILD.bazel
+@@ -199,6 +199,10 @@ cc_library(
+         ":macos_x86_64_legacy": False,
+         "//conditions:default": True,
+     }),
++    linkopts = select({
++        ":windows_arm64": ["Advapi32.lib"],
++        "//conditions:default": [],
++    }),
+     # Headers must be in textual_hdrs to allow us to set the standard to C99
+     textual_hdrs = [
+         "include/cpuinfo.h",
+@@ -217,6 +217,7 @@ cc_library(
+         "src/arm/android/api.h",
+         "src/arm/linux/api.h",
+         "src/arm/linux/cp.h",
++        "src/arm/windows/windows-arm-init.h",
+         "src/arm/api.h",
+         "src/arm/midr.h",
+         "src/riscv/api.h",
+diff --git a/src/arm/cache.c b/src/arm/cache.c
+index 9878223d..16fb6b14 100644
+--- a/src/arm/cache.c
++++ b/src/arm/cache.c
+@@ -13 +13 @@ void cpuinfo_arm_decode_cache(
+-	const struct cpuinfo_arm_chipset chipset[restrict static 1],
++	const struct cpuinfo_arm_chipset chipset[RESTRICT_STATIC 1],
+@@ -16,4 +16,4 @@ void cpuinfo_arm_decode_cache(
+-	struct cpuinfo_cache l1i[restrict static 1],
+-	struct cpuinfo_cache l1d[restrict static 1],
+-	struct cpuinfo_cache l2[restrict static 1],
+-	struct cpuinfo_cache l3[restrict static 1]) {
++	struct cpuinfo_cache l1i[RESTRICT_STATIC 1],
++	struct cpuinfo_cache l1d[RESTRICT_STATIC 1],
++	struct cpuinfo_cache l2[RESTRICT_STATIC 1],
++	struct cpuinfo_cache l3[RESTRICT_STATIC 1]) {
