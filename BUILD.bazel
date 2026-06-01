@@ -1515,6 +1515,8 @@ alias(
     actual = select({
         ":xnn_enable_arm_fp16_scalar_explicit_true": ":xnn_enable_arm_fp16_scalar_explicit_true",
         ":xnn_enable_arm_fp16_scalar_explicit_false": ":xnn_enable_arm_fp16_scalar_explicit_true",
+        # Disable for Windows ARM64 MSVC unless explicitly enabled
+        "//build_config:windows_arm64": ":xnn_enable_arm_fp16_scalar_explicit_true",
         "//conditions:default": ":arm_fp16_scalar_enabled_by_default",
     }),
 )
@@ -1580,6 +1582,8 @@ alias(
     actual = select({
         ":xnn_enable_arm_bf16_explicit_true": ":xnn_enable_arm_bf16_explicit_true",
         ":xnn_enable_arm_bf16_explicit_false": ":xnn_enable_arm_bf16_explicit_true",
+        # Disable for Windows ARM64 MSVC unless explicitly enabled
+        "//build_config:windows_arm64": ":xnn_enable_arm_bf16_explicit_true",
         "//conditions:default": ":arm_bf16_enabled_by_default",
     }),
 )
@@ -2077,7 +2081,7 @@ alias(
         ":xnn_enable_kleidiai_explicit_true": ":xnn_enable_kleidiai_explicit_true",
         ":xnn_enable_kleidiai_explicit_false": ":xnn_enable_kleidiai_explicit_true",
         # Disable for Windows ARM64 unless explicitly enabled
-        "//build_config:windows_aarch64": ":xnn_enable_kleidiai_explicit_true",
+        "//build_config:windows_arm64": ":xnn_enable_kleidiai_explicit_true",
         "//conditions:default": ":kleidiai_enabled_by_default",
     }),
 )
@@ -2094,6 +2098,8 @@ alias(
     actual = select({
         ":xnn_enable_assembly_explicit_true": ":xnn_enable_assembly_explicit_true",
         ":xnn_enable_assembly_explicit_false": ":xnn_enable_assembly_explicit_true",
+        # Disable for Windows ARM64 unless explicitly enabled
+        "//build_config:windows_arm64": ":xnn_enable_assembly_explicit_true",
         "//conditions:default": ":assembly_enabled_by_default",
     }),
 )
