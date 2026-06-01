@@ -120,3 +120,41 @@
   init: xnn_init_f32_minmax_scalar_params
   pack: xnn_pack_f32_gemm_goi_w
   k-block: 1
+
+# RISC-V
+- name: xnn_f32_ppmm_minmax_ukernel_1x1v__rvv
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_f32_gemm_goi_w
+  k-block: 1
+- name: xnn_f32_ppmm_minmax_ukernel_1x2v__rvv
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_f32_gemm_goi_w
+  k-block: 1
+- name: xnn_f32_ppmm_minmax_ukernel_1x4v__rvv
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_f32_gemm_goi_w
+  k-block: 1
+- name: xnn_f32_ppmm_minmax_ukernel_2x1v__rvv
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_f32_gemm_goi_w
+  k-block: 1
+- name: xnn_f32_ppmm_minmax_ukernel_2x2v__rvv
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_f32_gemm_goi_w
+  k-block: 1
+- name: xnn_f32_ppmm_minmax_ukernel_2x4v__rvv
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_f32_gemm_goi_w
+  k-block: 1
+- name: xnn_f32_ppmm_minmax_ukernel_4x1v__rvv
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_f32_gemm_goi_w
+  k-block: 1
+- name: xnn_f32_ppmm_minmax_ukernel_4x2v__rvv
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_f32_gemm_goi_w
+  k-block: 1
+- name: xnn_f32_ppmm_minmax_ukernel_4x4v__rvv
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_f32_gemm_goi_w
+  k-block: 1
