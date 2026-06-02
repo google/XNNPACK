@@ -34,5 +34,12 @@ TEST_MAX(arm_neonfp16arith, f16, 8);
 TEST_FLOOR_LOG2(arm_neonfp16arith, f16, 8);
 TEST_EXP2_ROUND(arm_neonfp16arith, f16, 8);
 
+TEST_UNARY(arm_neonfp16arith, approx_log, f16, 8, std::log, 2);
+TEST_UNARY(arm_neonfp16arith, approx_log1p, f16, 8, std::log1p, 3);
+#ifdef YNN_ARCH_ARM64
+TEST_UNARY(arm_neonfp16arith, approx_erf, f16, 8, std::erf, 3);
+TEST_UNARY(arm_neonfp16arith, approx_tanh, f16, 8, std::tanh, 3);
+#endif
+
 }  // namespace simd
 }  // namespace ynn

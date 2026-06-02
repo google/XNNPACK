@@ -15,5 +15,12 @@ namespace simd {
 BENCH_UNARY(arm_neonfp16arith, floor_log2, f16, 32);
 BENCH_UNARY(arm_neonfp16arith, exp2_round, f16, 32);
 
+BENCH_UNARY(arm_neonfp16arith, approx_log, f16, 32);
+BENCH_UNARY(arm_neonfp16arith, approx_log1p, f16, 32);
+#ifdef YNN_ARCH_ARM64
+BENCH_UNARY(arm_neonfp16arith, approx_erf, f16, 32);
+BENCH_UNARY(arm_neonfp16arith, approx_tanh, f16, 32);
+#endif
+
 }  // namespace simd
 }  // namespace ynn

@@ -21,6 +21,10 @@ def rational_approximation(
   """
   n_points = p_degree + q_degree + 2
 
+  out_dtype = dtype
+  if dtype == np.float16:
+    dtype = np.float32
+
   # Initial guess for exchange points
   nodes = (
       0.5 * (x_min + x_max)
@@ -83,12 +87,16 @@ def rational_approximation(
       nodes[closest_node_idx] = max_err_x
       nodes = np.sort(nodes)
 
-  return best_p, best_q
+  return best_p.astype(out_dtype), best_q.astype(out_dtype)
 
 
 def print_polynomial(name, coeffs):
   # Determine precision and wrapper based on dtype
-  if coeffs.dtype == np.float32:
+  if coeffs.dtype == np.float16:
+    precision = 6
+    suffix = "f"
+    ty = "half"
+  elif coeffs.dtype == np.float32:
     precision = 10
     suffix = "f"
     ty = "float"
@@ -100,13 +108,13 @@ def print_polynomial(name, coeffs):
   # Reversing to put constant coefficient last (p_n, ..., p_1, p_0)
   rev_coeffs = coeffs[::-1]
 
-  print(f"  std::array<{ty}, {len(rev_coeffs + 1)}> {name} = {{")
+  print(f"  std::array<{ty}, {len(rev_coeffs)}> {name} = {{")
   for i, val in enumerate(rev_coeffs):
     print(f"      {val:.{precision}e}{suffix},")
   print("  };")
 
 
-def plot_error(f, x, approx, title="Relative Error"):
+def plot_error(f, x, approx, title="Relative Error", epsilon=None):
   target = f(x)
   # Use a small epsilon for division safety if target is zero
   with np.errstate(divide="ignore", invalid="ignore"):
@@ -120,11 +128,33 @@ def plot_error(f, x, approx, title="Relative Error"):
   plt.figure(figsize=(10, 5))
   plt.plot(x, error)
   plt.axhline(0, color="black", lw=1, alpha=0.5)
+  if epsilon is not None:
+    for i in range(-3, 4):
+      plt.axhline(i * epsilon, color="red", linestyle="--", alpha=0.3)
+    plt.legend()
   plt.title(f"{title} (Max Rel Error: {max_err:.2e})")
   plt.grid(True)
   plt.show()
 
 
+# %%
+# expm1, >=12 bits of precision
+# We approximate expm1(x) / x
+f = lambda x: np.where(x == 0, 0, np.expm1(x) / x)
+p_degree, q_degree = 3, 0
+x_min, x_max = -0.5, 0.5
+p, q = rational_approximation(
+    f, x_min, x_max, p_degree, q_degree, dtype=np.float32
+)
+
+print_polynomial("p", p)
+print_polynomial("q", q)
+
+# Evaluate final error
+# expm1(x) ~= x*(P(x)/Q(x))
+x_test = np.linspace(x_min, x_max, 5000)
+approx = x_test * poly_eval(p, x_test) / poly_eval(q, x_test)
+plot_error(np.expm1, x_test, approx, epsilon=2**-12)
 # %%
 # fp32 expm1
 # We approximate (expm1(x) - x) / x^2 to model the higher order terms
@@ -141,7 +171,7 @@ print_polynomial("p", p)
 # expm1(x) ~= x + x^2 * (P(x)/Q(x))
 x_test = np.linspace(x_min, x_max, 5000)
 approx = x_test**2 * poly_eval(p, x_test) + x_test
-plot_error(np.expm1, x_test, approx)
+plot_error(np.expm1, x_test, approx, epsilon=2**-24)
 # %%
 # fp64 expm1
 # We approximate (expm1(x) - x) / x^2 to model the higher order terms
@@ -159,7 +189,26 @@ print_polynomial("q", q)
 # expm1(x) ~= x + x^2 * (P(x)/Q(x))
 x_test = np.linspace(x_min, x_max, 5000)
 approx = x_test**2 * poly_eval(p, x_test) / poly_eval(q, x_test) + x_test
-plot_error(np.expm1, x_test, approx)
+plot_error(np.expm1, x_test, approx, epsilon=2**-53)
+# %%
+import math
+
+# log, 12 bits of accuracy
+# log(x + 1) ~= x + x^2*P(x)/Q(x)
+f = lambda x: (np.log1p(x) - x) / x**2
+p_degree, q_degree = 3, 0
+x_min, x_max = np.sqrt(2) / 2 - 1, np.sqrt(2) - 1
+p, q = rational_approximation(
+    f, x_min, x_max, p_degree, q_degree, dtype=np.float16
+)
+
+print_polynomial("P", p)
+print_polynomial("Q", q)
+
+# Evaluate final error
+x_test = np.linspace(x_min, x_max, 5000).astype(np.float16)
+approx = x_test**2 * poly_eval(p, x_test) / poly_eval(q, x_test) + x_test
+plot_error(np.log1p, x_test, approx, epsilon=2**-12)
 # %%
 import math
 
@@ -177,7 +226,7 @@ print_polynomial("Q", q)
 # Evaluate final error
 x_test = np.linspace(x_min, x_max, 5000)
 approx = x_test**2 * poly_eval(p, x_test) / poly_eval(q, x_test) + x_test
-plot_error(lambda x: np.log1p(x), x_test, approx)
+plot_error(np.log1p, x_test, approx, epsilon=2**-24)
 # %%
 import math
 
@@ -195,7 +244,35 @@ print_polynomial("Q", q)
 # Evaluate final error
 x_test = np.linspace(x_min, x_max, 5000)
 approx = x_test**2 * poly_eval(p, x_test) / poly_eval(q, x_test) + x_test
-plot_error(lambda x: np.log1p(x), x_test, approx)
+plot_error(np.log1p, x_test, approx, epsilon=2**-53)
+# %%
+import scipy.special
+
+# erf(x), >12 bits of precision
+# fp32 erf(x) ~= x*P(x^2)/Q(x^2)
+f = lambda t: scipy.special.erf(np.sqrt(t)) / np.sqrt(t)
+
+p_degree, q_degree = 3, 2
+x_min, x_max = 1e-7, 2.5
+
+p, q = rational_approximation(
+    f, x_min, x_max**2, p_degree, q_degree, dtype=np.float32
+)
+
+print_polynomial("P", p)
+print_polynomial("Q", q)
+
+# Evaluate and plot relative error for erf(x)
+x_test = np.linspace(x_min, x_max, 5000)
+t_test = x_test**2
+approx = x_test * (poly_eval(p, t_test) / poly_eval(q, t_test))
+plot_error(
+    scipy.special.erf,
+    x_test,
+    approx,
+    title="Relative Error for erf(x) (Odd Approximation)",
+    epsilon=2**-12,
+)
 # %%
 import scipy.special
 
@@ -225,6 +302,7 @@ plot_error(
     x_test,
     approx,
     title="Relative Error for erf(x) (Odd Approximation)",
+    epsilon=2**-24,
 )
 # %%
 # Manual Exploration: 3-Piece erf Approximation
@@ -259,6 +337,7 @@ plot_error(
     x_test,
     approx,
     title=f"Refined 3-Piece erf (P={p_deg}, Q={q_deg}, R={r_deg})",
+    epsilon=2**-24,
 )
 
 print("Final Optimized 3-Piece Coefficients:")
@@ -296,16 +375,45 @@ plot_error(
     x_test,
     approx,
     title="Relative Error for erf(x) (Combined Approximation)",
+    epsilon=2**-53,
 )
 
 print_polynomial("P", p)
 print_polynomial("Q", q)
 print_polynomial("R", r)
 print_polynomial("S", s)
-
 # %%
 import numpy as np
 
+
+# tanh(x) 12-bit approximation
+f = lambda x: np.tanh(np.sqrt(x)) / np.sqrt(x)
+u_min, u_max = 1e-5, 5
+p_degree_u, q_degree_u = 2, 2
+
+p_u, q_u = rational_approximation(
+    f, u_min**2, u_max**2, p_degree_u, q_degree_u, dtype=np.float32
+)
+
+print("Polynomials for g(u) where tanh(x) ~= x * P(x^2)/Q(x^2):")
+print_polynomial("P", p_u)
+print_polynomial("Q", q_u)
+
+one_test = np.linspace(u_max - 0.5, u_max + 0.5, num=1000000).astype(np.float32)
+approx = one_test * (poly_eval(p_u, one_test**2) / poly_eval(q_u, one_test**2))
+# print(f"  constexpr float max_abs_x = {one_test[list(approx).index(1 - 3*2**-11)]}f;")
+
+# Evaluate final error for tanh(x)
+x_test = np.linspace(u_min, u_max, 5000).astype(np.float32)
+approx = x_test * (poly_eval(p_u, x_test**2) / poly_eval(q_u, x_test**2))
+plot_error(
+    np.tanh,
+    x_test,
+    approx,
+    title="Odd tanh(x) Relative Error (fp32)",
+    epsilon=2**-12,
+)
+# %%
 # tanh(x) fp32 approximation
 f = lambda x: np.tanh(np.sqrt(x)) / np.sqrt(x)
 u_min, u_max = 1e-5, 8
@@ -326,5 +434,10 @@ print(f"  constexpr float max_abs_x = {one_test[list(approx).index(1)]}f;")
 # Evaluate final error for tanh(x)
 x_test = np.linspace(u_min, u_max, 5000).astype(np.float32)
 approx = x_test * (poly_eval(p_u, x_test**2) / poly_eval(q_u, x_test**2))
-plot_error(np.tanh, x_test, approx, title="Odd tanh(x) Relative Error (fp32)")
-
+plot_error(
+    np.tanh,
+    x_test,
+    approx,
+    title="Odd tanh(x) Relative Error (fp32)",
+    epsilon=2**-24,
+)

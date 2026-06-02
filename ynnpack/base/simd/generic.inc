@@ -14,7 +14,9 @@
 #include <type_traits>
 
 #include "ynnpack/base/base.h"
+#include "ynnpack/base/bfloat16.h"
 #include "ynnpack/base/bit_cast.h"
+#include "ynnpack/base/half.h"
 #include "ynnpack/base/simd/emulate_fma.h"
 #include "ynnpack/base/simd/vec.h"
 
@@ -364,6 +366,13 @@ YNN_ALWAYS_INLINE T horizontal_max(vec<T, N> x) {
   return horizontal_max(max(lo(x), hi(x)));
 }
 
+// A tag type indicating the result should have 12 bits of precision. We target
+// 12 bits of precision because:
+// - For fp16, We need 11 bits, plus a bit to try to determine how to round.
+// - For bf16, it's overkill, but there is probably not much benefit to trying
+//   to target only 8 or 9 bits instead.
+struct precision12 {};
+
 namespace internal {
 
 // Evaluate a polynomial with coefficients `p` at `x`, where the terms are
@@ -423,6 +432,11 @@ YNN_ALWAYS_INLINE vec<T, N> divide(vec<T, N> a, decltype(one)) {
 // Round floating point values assuming the integer value can fit in the
 // mantissa of the result.
 template <size_t N>
+vec<half, N> round_small(vec<half, N> a) {
+  const auto magic = broadcast<N>(static_cast<half>(1.5f * (1 << 10)));
+  return (magic + a) - magic;
+}
+template <size_t N>
 vec<float, N> round_small(vec<float, N> a) {
   const auto magic = broadcast<N>(1.5f * (1 << 23));
   return (magic + a) - magic;
@@ -434,14 +448,44 @@ vec<double, N> round_small(vec<double, N> a) {
 }
 
 // Implements exp(x) (m = 0) or expm1(x) (m = 1), given polynomials
-// such that expm1(x) ~= x + x^2*P(x)/Q(x) for x in [-0.5, 0.5], i.e. the
+// such that expm1(x) ~= x*P(x)/Q(x) for x in [-0.5, 0.5], i.e. the
+// polynomials P(x)/Q(x) approximate the error after 1 term of the Taylor
+// series.
+// See rational_approximation.py for the polynomial generation logic.
+template <int m, typename T, size_t N, typename P>
+YNN_ALWAYS_INLINE vec<T, N> exp_taylor1(vec<T, N> x, const P& p,
+                                        T min_x, T max_x, T log2e,
+                                        T ln2_hi, T ln2_lo) {
+  auto x_clamped = min(max(x, min_x), max_x);
+  auto b = round_small(x_clamped * broadcast<N>(log2e));
+  // Compute r = (b - x_clamped) * ln2 with extra precision using both ln2 and
+  // the residual T(ln(2)) - ln2_hi
+  auto r = multiply_add(b, broadcast<N>(-ln2_hi), x_clamped);
+  r = multiply_add(b, broadcast<N>(-ln2_lo), r);
+
+  // Compute 2^b.
+  auto exp2_b = exp2_round(b);
+  exp2_b = select(isnan(x), x, exp2_b);
+
+  auto exp2_r = eval_polynomial(p, r) * r;
+
+  // Compute 2^b * (exp(r) + 1) - m. We avoid catastrophic cancellation
+  // by distributing 2^b, and then reassociating the subtraction, so when
+  // 2^b = m we keep the low bits of the result.
+  auto exp_x =
+      multiply_add(exp2_b, exp2_r, exp2_b - broadcast<N>(static_cast<T>(m)));
+  return select(isinf(exp2_b), exp2_b, exp_x);
+}
+
+// Implements exp(x) (m = 0) or expm1(x) (m = 1), given a polynomial
+// such that expm1(x) ~= x + x^2*P(x) for x in [-0.5, 0.5], i.e. the
 // polynomials P(x)/Q(x) approximate the error after 2 terms of the Taylor
 // series.
 // See rational_approximation.py for the polynomial generation logic.
 template <int m, typename T, size_t N, typename P, typename Q>
-YNN_ALWAYS_INLINE vec<T, N> exp_impl(vec<T, N> x, const P& p, const Q& q,
-                                     T min_x, T max_x, T log2e,
-                                     T ln2_hi, T ln2_lo) {
+YNN_ALWAYS_INLINE vec<T, N> exp_taylor2(vec<T, N> x, const P& p, const Q& q,
+                                        T min_x, T max_x, T log2e,
+                                        T ln2_hi, T ln2_lo) {
   auto x_clamped = min(max(x, min_x), max_x);
   auto b = round_small(x_clamped * broadcast<N>(log2e));
   // Compute r = (b - x_clamped) * ln2 with extra precision using both ln2 and
@@ -466,6 +510,26 @@ YNN_ALWAYS_INLINE vec<T, N> exp_impl(vec<T, N> x, const P& p, const Q& q,
   return select(isinf(exp2_b), exp2_b, exp_x);
 }
 
+// TODO: b/515053903 - We should be able to make an `exp_impl` that works with
+// fp16 arithmetic, not just lower precision.
+
+template <int m, size_t N>
+static vec<float, N> exp_impl(vec<float, N> x, precision12) {
+  std::array<float, 4> p = {
+      4.2190749198e-02f,
+      1.6876244545e-01f,
+      4.9995619059e-01f,
+      9.9993431568e-01f,
+  };
+  constexpr float log2e = 1.4426950408889634f;
+  constexpr float ln2_hi = 6.9314575195e-01f;
+  constexpr float ln2_lo = 1.4286067653e-06f;
+  constexpr float min_x = -88.02969360351562f;
+  constexpr float max_x = 88.72283935546875f;
+
+  return exp_taylor1<m>(x, p, min_x, max_x, log2e, ln2_hi, ln2_lo);
+}
+
 template <int m, size_t N>
 static vec<float, N> exp_impl(vec<float, N> x) {
   std::array<float, 7> p = {
@@ -483,7 +547,7 @@ static vec<float, N> exp_impl(vec<float, N> x) {
   constexpr float min_x = -88.02969360351562f;
   constexpr float max_x = 88.72283935546875f;
 
-  return exp_impl<m>(x, p, /*q=*/one, min_x, max_x, log2e, ln2_hi, ln2_lo);
+  return exp_taylor2<m>(x, p, /*q=*/one, min_x, max_x, log2e, ln2_hi, ln2_lo);
 }
 
 template <int m, size_t N>
@@ -507,16 +571,43 @@ static vec<double, N> exp_impl(vec<double, N> x) {
   constexpr double min_x = -709.0895657128241;
   constexpr double max_x = 709.782712893384;
 
-  return exp_impl<m>(x, p, /*q=*/one, min_x, max_x, log2e, ln2_hi, ln2_lo);
+  return exp_taylor2<m>(x, p, /*q=*/one, min_x, max_x, log2e, ln2_hi, ln2_lo);
 }
 
 }  // namespace internal
+
+// exp with 12 bits of accuracy, suitable for half or bf16 output.
+template <size_t N>
+static vec<float, N> exp(vec<float, N> x, precision12) {
+  return internal::exp_impl<0>(x, precision12{});
+}
+template <size_t N>
+static vec<float, N> expm1(vec<float, N> x, precision12) {
+  return internal::exp_impl<1>(x, precision12{});
+}
+
+template <size_t N>
+static vec<bfloat16, N> exp(vec<bfloat16, N> x) {
+  return cast(exp(cast(x, float{}), precision12{}), bfloat16{});
+}
+template <size_t N>
+static vec<bfloat16, N> expm1(vec<bfloat16, N> x) {
+  return cast(expm1(cast(x, float{}), precision12{}), bfloat16{});
+}
+
+template <size_t N>
+static vec<half, N> exp(vec<half, N> x) {
+  return cast(exp(cast(x, float{}), precision12{}), half{});
+}
+template <size_t N>
+static vec<half, N> expm1(vec<half, N> x) {
+  return cast(expm1(cast(x, float{}), precision12{}), half{});
+}
 
 template <size_t N>
 static vec<float, N> exp(vec<float, N> x) {
   return internal::exp_impl<0>(x);
 }
-
 template <size_t N>
 static vec<float, N> expm1(vec<float, N> x) {
   return internal::exp_impl<1>(x);
@@ -526,7 +617,6 @@ template <size_t N>
 static vec<double, N> exp(vec<double, N> x) {
   return internal::exp_impl<0>(x);
 }
-
 template <size_t N>
 static vec<double, N> expm1(vec<double, N> x) {
   return internal::exp_impl<1>(x);
@@ -534,14 +624,15 @@ static vec<double, N> expm1(vec<double, N> x) {
 
 namespace internal {
 
+constexpr int16_t mantissa_mask(half) { return 0x03FF; }
 constexpr int32_t mantissa_mask(float) { return 0x007FFFFF; }
 constexpr int64_t mantissa_mask(double) { return 0x000FFFFFFFFFFFFFll; }
 
 // log(x) ~= x + x^2*P(x)/Q(x), i.e. approximating the error after 2 terms of
 // the Taylor series.
 template <int p, typename Int, typename T, size_t N, typename P, typename Q>
-YNN_ALWAYS_INLINE vec<T, N> log_impl(vec<T, N> x, const P& poly_p,
-                                     const Q& poly_q) {
+YNN_ALWAYS_INLINE vec<T, N> log_taylor2(vec<T, N> x, const P& poly_p,
+                                        const Q& poly_q = one) {
   vec<T, N> zero(0);
   vec<T, N> half(0.5);
   vec<T, N> one(1);
@@ -559,7 +650,7 @@ YNN_ALWAYS_INLINE vec<T, N> log_impl(vec<T, N> x, const P& poly_p,
   auto y_norm = bit_cast<vec<T, N>>(y_norm_bits);
 
   // Normalize such that r is in [sqrt(2)/2 - 1, sqrt(2) - 1]
-  constexpr T sqrt2 = 1.41421356237309504880;
+  const T sqrt2 = 1.41421356237309504880;
   auto large = y_norm > broadcast<N>(sqrt2);
   exp = select(large, exp + one, exp);
   y_norm = select(large, y_norm * half, y_norm);
@@ -576,8 +667,30 @@ YNN_ALWAYS_INLINE vec<T, N> log_impl(vec<T, N> x, const P& poly_p,
   auto q_r = eval_polynomial(poly_q, r, r2);
   auto log_r = multiply_add(r2, divide(p_r, q_r), r);
 
-  constexpr T ln2 = 6.93147180559945309e-01;
+  const T ln2 = 6.93147180559945309e-01;
   return multiply_add(exp, broadcast<N>(ln2), log_r);
+}
+
+template <int p, size_t N>
+static vec<half, N> log_impl(vec<half, N> x, precision12) {
+  std::array<half, 4> P = {
+      1.861572e-01f,
+      -2.685547e-01f,
+      3.347168e-01f,
+      -4.997559e-01f,
+  };
+  return log_taylor2<p, int16_t>(x, P, one);
+}
+
+template <int p, size_t N>
+static vec<float, N> log_impl(vec<float, N> x, precision12) {
+  std::array<float, 4> P = {
+      1.8616893888e-01f,
+      -2.6853996515e-01f,
+      3.3465734124e-01f,
+      -4.9972257018e-01f,
+  };
+  return log_taylor2<p, int32_t>(x, P, one);
 }
 
 template <int p, size_t N>
@@ -592,7 +705,7 @@ static vec<float, N> log_impl(vec<float, N> x) {
       1.3292170763e+00f,
       1.0000000000e+00f,
   };
-  return log_impl<p, int32_t>(x, P, Q);
+  return log_taylor2<p, int32_t>(x, P, Q);
 }
 
 template <int p, size_t N>
@@ -614,16 +727,51 @@ static vec<double, N> log_impl(vec<double, N> x) {
       3.152649269343555716e+00,
       1.000000000000000000e+00,
   };
-  return log_impl<p, int64_t>(x, P, Q);
+  return log_taylor2<p, int64_t>(x, P, Q);
 }
 
 }  // namespace internal
 
 template <size_t N>
+static vec<float, N> log(vec<float, N> x, precision12) {
+  return internal::log_impl<0>(x, precision12{});
+}
+template <size_t N>
+static vec<float, N> log1p(vec<float, N> x, precision12) {
+  return internal::log_impl<1>(x, precision12{});
+}
+
+template <size_t N>
+static vec<bfloat16, N> log(vec<bfloat16, N> x) {
+  return cast(log(cast(x, float{}), precision12{}), bfloat16{});
+}
+template <size_t N>
+static vec<bfloat16, N> log1p(vec<bfloat16, N> x) {
+  return cast(log1p(cast(x, float{}), precision12{}), bfloat16{});
+}
+
+template <size_t N>
+static vec<half, N> log(vec<half, N> x) {
+  return cast(log(cast(x, float{}), precision12{}), half{});
+}
+template <size_t N>
+static vec<half, N> log1p(vec<half, N> x) {
+  return cast(log1p(cast(x, float{}), precision12{}), half{});
+}
+
+template <size_t N>
+static vec<half, N> approx_log(vec<half, N> x) {
+  return internal::log_impl<0>(x, precision12{});
+}
+template <size_t N>
+static vec<half, N> approx_log1p(vec<half, N> x) {
+  return internal::log_impl<1>(x, precision12{});
+}
+
+template <size_t N>
 static vec<float, N> log(vec<float, N> x) {
   return internal::log_impl<0>(x);
 }
-
 template <size_t N>
 static vec<float, N> log1p(vec<float, N> x) {
   return internal::log_impl<1>(x);
@@ -633,7 +781,6 @@ template <size_t N>
 static vec<double, N> log(vec<double, N> x) {
   return internal::log_impl<0>(x);
 }
-
 template <size_t N>
 static vec<double, N> log1p(vec<double, N> x) {
   return internal::log_impl<1>(x);
@@ -705,6 +852,40 @@ static vec<T, N> erf_impl(vec<T, N> x, const P& p, const Q& q, const R& r,
 }
 
 }  // namespace internal
+
+template <typename T, size_t N>
+static vec<T, N> erf(vec<T, N> x, precision12) {
+  // Rational polynomial approximation of erf(x) for [-max_abs_x, max_abs_x]
+  const T max_abs_x = 2.7f;
+  // erf(x) ~= x*P(x^2)/Q(x^2)
+  std::array<T, 4> P = {
+      -5.2349315956e-04f,
+      2.0557025447e-02f,
+      1.5668566525e-01f,
+      1.1283479929e+00f,
+  };
+  std::array<T, 3> Q = {
+      7.7118203044e-02f,
+      4.7161144018e-01f,
+      1.0000000000e+00f,
+  };
+  return internal::erf_impl(x, P, Q, max_abs_x);
+}
+
+template <size_t N>
+static vec<bfloat16, N> erf(vec<bfloat16, N> x) {
+  return cast(erf(cast(x, float{}), precision12{}), bfloat16{});
+}
+
+template <size_t N>
+static vec<half, N> erf(vec<half, N> x) {
+  return cast(erf(cast(x, float{}), precision12{}), half{});
+}
+
+template <size_t N>
+static vec<half, N> approx_erf(vec<half, N> x) {
+  return erf(x, precision12{});
+}
 
 template <size_t N>
 static vec<float, N> erf(vec<float, N> x) {
@@ -812,6 +993,38 @@ static vec<float, N> approx_erf(vec<float, N> x) {
   return internal::erf_impl(x, P, Q, max_abs_x);
 }
 
+template <typename T, size_t N>
+static vec<T, N> tanh(vec<T, N> x, precision12) {
+  std::array<T, 3> P = {
+      6.2415382126e-04f,
+      1.0060210526e-01f,
+      9.9993735552e-01f,
+  };
+  std::array<T, 3> Q = {
+      1.2310016900e-02f,
+      4.3332517147e-01f,
+      1.0000000000e+00f,
+  };
+  const T max_abs_x = 4.0f;
+
+  auto x_clamped = max(min(x, max_abs_x), -max_abs_x);
+
+  auto x2 = x_clamped * x_clamped;
+  auto p_x = internal::eval_polynomial(P, x2) * x_clamped;
+  auto q_x = internal::eval_polynomial(Q, x2);
+  return p_x / q_x;
+}
+
+template <size_t N>
+static vec<bfloat16, N> tanh(vec<bfloat16, N> x) {
+  return cast(tanh(cast(x, float{}), precision12{}), bfloat16{});
+}
+
+template <size_t N>
+static vec<half, N> tanh(vec<half, N> x) {
+  return cast(tanh(cast(x, float{}), precision12{}), half{});
+}
+
 template <size_t N>
 static vec<float, N> tanh(vec<float, N> x) {
   auto two = broadcast<N>(2.0f);
@@ -855,6 +1068,11 @@ static vec<float, N> approx_tanh(vec<float, N> x) {
   auto p_x = internal::eval_polynomial(P, x2) * x_clamped;
   auto q_x = internal::eval_polynomial(Q, x2);
   return select(abs(x_clamped) < broadcast<N>(min_abs_x), x, p_x / q_x);
+}
+
+template <size_t N>
+static vec<half, N> approx_tanh(vec<half, N> x) {
+  return tanh(x, precision12{});
 }
 
 }  // namespace simd

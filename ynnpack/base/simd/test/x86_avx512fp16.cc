@@ -59,5 +59,10 @@ TEST_EXP2_ROUND(x86_avx512fp16, f16, 8);
 TEST_EXP2_ROUND(x86_avx512fp16, f16, 16);
 TEST_EXP2_ROUND(x86_avx512fp16, f16, 32);
 
+TEST_UNARY(x86_avx512fp16, approx_log, f16, 32, std::log, 2);
+TEST_UNARY(x86_avx512fp16, approx_log1p, f16, 32, std::log1p, 3);
+TEST_UNARY(x86_avx512fp16, approx_erf, f16, 32, std::erf, 3);
+TEST_UNARY(x86_avx512fp16, approx_tanh, f16, 32, std::tanh, 3);
+
 }  // namespace simd
 }  // namespace ynn

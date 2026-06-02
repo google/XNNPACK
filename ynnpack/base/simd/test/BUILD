@@ -46,6 +46,7 @@ package(default_visibility = ["//ynnpack:__subpackages__"])
     "x86_sse41",
     "x86_avx",
     "x86_avx2",
+    "x86_avx2_fma3",
     "x86_avx512",
     "x86_avx512bf16",
     "x86_avx512fp16",

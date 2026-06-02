@@ -229,16 +229,28 @@ TEST_CAST(x86_avx512, u8, f32x64);
 TEST_CAST(x86_avx512, s8, f32x64);
 TEST_CAST(x86_avx512, s16, f32x32);
 
+TEST_UNARY(x86_avx512, exp, f16, 16, std::exp, 2);
+TEST_UNARY(x86_avx512, exp, bf16, 16, std::exp, 2);
 TEST_UNARY(x86_avx512, exp, f32, 16, std::exp, 2);
 TEST_UNARY(x86_avx512, exp, f64, 8, std::exp, 2);
+TEST_UNARY(x86_avx512, expm1, f16, 16, std::expm1, 2);
+TEST_UNARY(x86_avx512, expm1, bf16, 16, std::expm1, 2);
 TEST_UNARY(x86_avx512, expm1, f32, 16, std::expm1, 2);
 TEST_UNARY(x86_avx512, expm1, f64, 8, std::expm1, 2);
+TEST_UNARY(x86_avx512, log, f16, 16, std::log, 1);
+TEST_UNARY(x86_avx512, log, bf16, 16, std::log, 1);
 TEST_UNARY(x86_avx512, log, f32, 16, std::log, 2);
 TEST_UNARY(x86_avx512, log, f64, 8, std::log, 2);
+TEST_UNARY(x86_avx512, log1p, f16, 16, std::log1p, 1);
+TEST_UNARY(x86_avx512, log1p, bf16, 16, std::log1p, 1);
 TEST_UNARY(x86_avx512, log1p, f32, 16, std::log1p, 3);
 TEST_UNARY(x86_avx512, log1p, f64, 8, std::log1p, 3);
+TEST_UNARY(x86_avx512, erf, f16, 16, std::erf, 1);
+TEST_UNARY(x86_avx512, erf, bf16, 16, std::erf, 1);
 TEST_UNARY(x86_avx512, erf, f32, 16, std::erf, 2);
 TEST_UNARY(x86_avx512, erf, f64, 8, std::erf, 3);
+TEST_UNARY(x86_avx512, tanh, f16, 16, std::tanh, 1);
+TEST_UNARY(x86_avx512, tanh, bf16, 16, std::tanh, 1);
 TEST_UNARY(x86_avx512, tanh, f32, 16, std::tanh, 2);
 TEST_UNARY(x86_avx512, tanh, f64, 8, std::tanh, 4);
 

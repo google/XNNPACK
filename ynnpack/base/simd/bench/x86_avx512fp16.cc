@@ -15,5 +15,10 @@ namespace simd {
 BENCH_UNARY(x86_avx512fp16, floor_log2, f16, 32);
 BENCH_UNARY(x86_avx512fp16, exp2_round, f16, 32);
 
+BENCH_UNARY(x86_avx512fp16, approx_log, f16, 32);
+BENCH_UNARY(x86_avx512fp16, approx_log1p, f16, 32);
+BENCH_UNARY(x86_avx512fp16, approx_erf, f16, 32);
+BENCH_UNARY(x86_avx512fp16, approx_tanh, f16, 32);
+
 }  // namespace simd
 }  // namespace ynn
