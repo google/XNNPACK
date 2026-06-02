@@ -114,9 +114,12 @@ ELSE()
 ENDIF()
 MESSAGE(STATUS "Building for XNNPACK_TARGET_PROCESSOR: ${XNNPACK_TARGET_PROCESSOR}")
 
-# Match Bazel's //build_config:aarch64 defaults. This includes arm64e and
-# arm64_32 Apple targets, but excludes Windows ARM64.
-IF(XNNPACK_TARGET_PROCESSOR MATCHES "^arm64" AND NOT CMAKE_SYSTEM_NAME STREQUAL "Windows")
+# Match Bazel's //build_config:aarch64 defaults plus Windows ARM64.
+# Snapdragon X / Copilot+ class CPUs implement FEAT_I8MM and FEAT_BF16;
+# Windows reports them via IsProcessorFeaturePresent, so cpuinfo picks
+# them up at runtime and the corresponding micro-kernels can be enabled
+# at compile time.
+IF(XNNPACK_TARGET_PROCESSOR MATCHES "^arm64")
   SET(XNNPACK_TARGET_PROCESSOR_AARCH64_DEFAULTS ON)
 ELSE()
   SET(XNNPACK_TARGET_PROCESSOR_AARCH64_DEFAULTS OFF)
