@@ -1,0 +1,45 @@
+# Copyright 2026 Google LLC
+#
+# This source code is licensed under the BSD-style license found in the
+# LICENSE file in the root directory of this source tree.
+
+# Native ARM64 host targeting ARM64, using clang-cl (the LLVM-based MSVC-
+# compatible driver) as both the C/C++ and assembler. Pair this with
+# scripts/build-windows-arm64-clang.cmd, which calls
+# vcvarsall arm64 first so the MSVC headers / link.exe / arm64 libs are
+# on PATH, then drives cmake with this file.
+#
+# Two reasons to use clang-cl over the cl.exe default on Windows ARM64:
+#
+#   1. cl.exe (VS 17.14) refuses to assemble the GNU-syntax .S files
+#      under src/...-aarch*; clang-cl handles them, so this toolchain
+#      pairs with XNNPACK_ENABLE_ASSEMBLY=ON.
+#   2. cl.exe does not implement the __fp16 scalar / vector intrinsics;
+#      clang-cl does, so this toolchain pairs with
+#      XNNPACK_ENABLE_ARM_FP16_SCALAR=ON and _VECTOR=ON.
+
+SET(CMAKE_SYSTEM_NAME      Windows)
+SET(CMAKE_SYSTEM_PROCESSOR ARM64)
+
+SET(CMAKE_C_COMPILER       clang-cl)
+SET(CMAKE_CXX_COMPILER     clang-cl)
+SET(CMAKE_ASM_COMPILER     clang-cl)
+
+SET(CMAKE_C_COMPILER_TARGET   aarch64-pc-windows-msvc)
+SET(CMAKE_CXX_COMPILER_TARGET aarch64-pc-windows-msvc)
+SET(CMAKE_ASM_COMPILER_TARGET aarch64-pc-windows-msvc)
+
+# clang-cl defaults to generic AArch64 (no FP16 / no dotprod). Walk up to
+# the conservative WoA baseline: armv8.2-a + FP16 + dotprod is implemented
+# on every shipping Windows-on-ARM SKU (Snapdragon 8cx Gen 1 and later,
+# including all Copilot+ devices). i8mm / bf16 require armv8.4+; that is
+# left for a downstream toolchain or command-line override since the
+# default in CMakeLists.txt currently gates those off on Windows.
+ADD_COMPILE_OPTIONS(/clang:-march=armv8.2-a+fp16+dotprod)
+
+# Disable FMA contraction across statements so floating-point semantics
+# match MSVC (and the Linux gcc baseline used by upstream CI). Without
+# this, clang's default -ffp-contract=on reassociates the rational
+# polynomial in xnn_f32_vgelu_ukernel__scalar_rational_12_10_div_u*,
+# producing tail-region numerical drift > the f32-vgelu test tolerance.
+ADD_COMPILE_OPTIONS(/clang:-ffp-contract=off)
