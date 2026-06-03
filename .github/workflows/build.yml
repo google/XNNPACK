@@ -484,7 +484,7 @@ jobs:
           path: |
             /home/xnnpack/.cache/bazel/disk_cache
             /home/xnnpack/.cache/bazel/repo_cache
-          key: bazel-clang18-opt-${{ runner.os }}-${{ github.job }}-${{ github.run_id }}
+          key: bazel-clang18-opt-${{ runner.os }}-${{ github.job }}-${{ hashFiles('WORKSPACE', 'WORKSPACE.bazel', 'MODULE.bazel') }}
           restore-keys: |
             bazel-clang18-opt-${{ runner.os }}-${{ github.job }}-
 
@@ -553,7 +553,7 @@ jobs:
           path: |
             /home/xnnpack/.cache/bazel/disk_cache
             /home/xnnpack/.cache/bazel/repo_cache
-          key: bazel-gcc9-opt-${{ runner.os }}-${{ github.job }}-${{ github.run_id }}
+          key: bazel-gcc9-opt-${{ runner.os }}-${{ github.job }}-${{ hashFiles('WORKSPACE', 'WORKSPACE.bazel', 'MODULE.bazel') }}
           restore-keys: |
             bazel-gcc9-opt-${{ runner.os }}-${{ github.job }}-
 
@@ -609,7 +609,7 @@ jobs:
           path: |
             /home/xnnpack/.cache/bazel/disk_cache
             /home/xnnpack/.cache/bazel/repo_cache
-          key: bazel-clang18-opt-${{ runner.os }}-${{ github.job }}-${{ github.run_id }}
+          key: bazel-clang18-opt-${{ runner.os }}-${{ github.job }}-${{ hashFiles('WORKSPACE', 'WORKSPACE.bazel', 'MODULE.bazel') }}
           restore-keys: |
             bazel-clang18-opt-${{ runner.os }}-${{ github.job }}-
 
@@ -669,7 +669,7 @@ jobs:
           path: |
             /home/xnnpack/.cache/bazel/disk_cache
             /home/xnnpack/.cache/bazel/repo_cache
-          key: bazel-gcc13-opt-${{ runner.os }}-${{ github.job }}-${{ github.run_id }}
+          key: bazel-gcc13-opt-${{ runner.os }}-${{ github.job }}-${{ hashFiles('WORKSPACE', 'WORKSPACE.bazel', 'MODULE.bazel') }}
           restore-keys: |
             bazel-gcc13-opt-${{ runner.os }}-${{ github.job }}-
 
@@ -726,7 +726,7 @@ jobs:
         uses: actions/cache@v5
         with:
           path: "/home/xnnpack/.cache/bazel"
-          key: bazel-clang20-opt-sme2-${{ runner.os }}-${{ github.job }}-${{ github.run_id }}
+          key: bazel-clang20-opt-sme2-${{ runner.os }}-${{ github.job }}-${{ hashFiles('WORKSPACE', 'WORKSPACE.bazel', 'MODULE.bazel') }}
           restore-keys: bazel-clang20-opt-sme2-${{ runner.os }}-${{ github.job }}-
 
       - name: Build microkernel and subgraph tests
