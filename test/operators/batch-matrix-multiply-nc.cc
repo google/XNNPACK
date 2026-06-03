@@ -232,6 +232,19 @@ TEST_P(BatchMatMulTest, TestQP8F32QC8W) {
       .TestQP8F32QC8W();
 }
 
+TEST_P(BatchMatMulTest, TestF32QC8W) {
+  const BatchMatMulTesterParams& params = GetParam();
+  BatchMatMulOperatorTester()
+      .batch_dims_a(params.batch_dims_a)
+      .batch_dims_b(params.batch_dims_b)
+      .m(params.m)
+      .k(params.k)
+      .n(params.n)
+      .transpose_b(params.transpose_b)
+      .expected_status_reshape(params.expected_status_reshape)
+      .TestF32QC8W();
+}
+
 // Create tests for different batch sizes with different amounts of
 // broadcasting, with and without transposition.
 INSTANTIATE_TEST_SUITE_P(
