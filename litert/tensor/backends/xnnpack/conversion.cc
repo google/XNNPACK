@@ -15,7 +15,6 @@ limitations under the License.
 
 #include "litert/tensor/backends/xnnpack/conversion.h"
 
-#include <algorithm>
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
@@ -29,7 +28,6 @@ limitations under the License.
 #include "absl/base/no_destructor.h"
 #include "absl/container/flat_hash_map.h"
 #include "absl/container/flat_hash_set.h"
-#include "absl/hash/hash.h"
 #include "absl/status/status.h"
 #include "absl/status/statusor.h"
 #include "absl/strings/str_cat.h"
@@ -282,42 +280,27 @@ absl::StatusOr<std::unique_ptr<XnnpackGraph>> BuildXnnpackGraph(
     std::vector<TensorHandle> outputs) {
   LRT_TENSOR_ASSIGN_OR_RETURN(auto plan, GetExecutionPlan(outputs));
 
-  absl::flat_hash_set<graph::Tensor> external_tensors;
-  external_tensors.reserve(32);
+  uint32_t next_id = 0;
+  absl::flat_hash_map<graph::Tensor, uint32_t> external_ids;
   for (const TensorHandle& out : outputs) {
-    external_tensors.insert(out.GetRaw());
+    auto [it, inserted] = external_ids.insert({out.GetRaw(), next_id});
+    next_id += inserted;
   }
   for (const graph::Operation* op : plan) {
     for (const graph::Tensor& t : op->inputs) {
-      auto info_or = graph::GetInfo(t);
-      if (!info_or.ok()) {
+      if (auto info_or = graph::GetInfo(t);
+          !info_or.ok() || info_or->buffer != nullptr) {
         continue;
       }
-      const graph::TensorInformation& info = *info_or;
-      if (info.buffer != nullptr) {
+      // If the tensor doesn't have a producer, then it's an external input to
+      // the graph.
+      if (auto producer_or = graph::GetProducer(t);
+          producer_or.ok() && *producer_or != nullptr) {
         continue;
       }
-      auto producer_or = graph::GetProducer(t);
-      if (producer_or.ok() && *producer_or != nullptr) {
-        continue;
-      }
-      external_tensors.insert(t);
+      auto [it, inserted] = external_ids.insert({t, next_id});
+      next_id += inserted;
     }
-  }
-
-  // Assign stable reserved external IDs to each external value.
-  std::vector<graph::Tensor> external_sorted(external_tensors.begin(),
-                                             external_tensors.end());
-  // TODO: b/493560478 - This isn't a stable sort. The hash values of pointers
-  // are not consistent between runs.
-  std::sort(external_sorted.begin(), external_sorted.end(),
-            [](const graph::Tensor& a, const graph::Tensor& b) {
-              return absl::HashOf(a) < absl::HashOf(b);
-            });
-  absl::flat_hash_map<graph::Tensor, uint32_t> external_ids;
-  external_ids.reserve(external_sorted.size());
-  for (uint32_t i = 0; i < external_sorted.size(); ++i) {
-    external_ids.emplace(external_sorted[i], i);
   }
 
   XnnpackBuildContext ctx(std::move(outputs), std::move(external_ids));
