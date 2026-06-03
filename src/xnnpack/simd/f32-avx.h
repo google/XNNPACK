@@ -74,4 +74,44 @@ static XNN_INLINE xnn_simd_f32_t xnn_cmpneq_f32(xnn_simd_f32_t a,
 return _mm256_cmp_ps(a, b, _CMP_NEQ_OQ);
 }
 
+#if XNN_ENABLE_F16C || defined(__F16C__)
+#include "src/xnnpack/math.h"
+
+typedef __m128i xnn_simd_f16_t;
+
+static XNN_INLINE xnn_simd_f16_t xnn_loadu_f16(const xnn_float16* ptr) {
+  return _mm_loadu_si128((const __m128i*)ptr);
+}
+
+static XNN_INLINE void xnn_storeu_f16(xnn_float16* ptr, xnn_simd_f16_t v) {
+  _mm_storeu_si128((__m128i*)ptr, v);
+}
+
+static XNN_INLINE xnn_simd_f32_t xnn_cvt_f32_f16(xnn_simd_f16_t a) {
+  return _mm256_cvtph_ps(a);
+}
+
+static XNN_INLINE xnn_simd_f16_t xnn_cvt_f16_f32(xnn_simd_f32_t a) {
+  return _mm256_cvtps_ph(a, _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC);
+}
+
+static XNN_INLINE xnn_simd_f16_t xnn_load_tail_f16(const xnn_float16* input,
+                                                   size_t num_elements) {
+  XNN_ALIGN(16) xnn_float16 padded[8] = {0};
+  memcpy(padded, input, num_elements * sizeof(xnn_float16));
+  return _mm_loadu_si128((const __m128i*)padded);
+}
+
+static XNN_INLINE void xnn_store_tail_f16(xnn_float16* output, xnn_simd_f16_t v,
+                                          size_t num_elements) {
+  if (num_elements == 8) {
+    _mm_storeu_si128((__m128i*)output, v);
+  } else {
+    XNN_ALIGN(16) xnn_float16 padded[8];
+    _mm_storeu_si128((__m128i*)padded, v);
+    memcpy(output, padded, num_elements * sizeof(xnn_float16));
+  }
+}
+#endif  // XNN_ENABLE_F16C || defined(__F16C__)
+
 #endif  // XNNPACK_SRC_XNNPACK_SIMD_F32_AVX_H_

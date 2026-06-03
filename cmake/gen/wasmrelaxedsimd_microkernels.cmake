@@ -12,7 +12,8 @@
 SET(PROD_WASMRELAXEDSIMD_MICROKERNEL_SRCS
   src/f16-f32-vcvt/gen/f16-f32-vcvt-wasmrelaxedsimd-int16-u16.c
   src/f16-vcos/gen/f16-vcos-wasmrelaxedsimd-rational-3-2-div.c
-  src/f16-vlog/gen/f16-vlog-wasmrelaxedsimd-rational-3-3-div.c
+  src/f16-vlog/gen/f16-f32acc-vlog-wasmrelaxedsimd-rational-1-3-div.c
+  src/f16-vlog/gen/f16-vlog-wasmrelaxedsimd-rational-1-3-div.c
   src/f16-vsin/gen/f16-vsin-wasmrelaxedsimd-rational-3-2-div.c
   src/f16-vsqrt/gen/f16-vsqrt-wasmrelaxedsimd-sqrt.c
   src/f16-vtanh/gen/f16-vtanh-wasmrelaxedsimd-rational-5-4-div.c
@@ -138,6 +139,8 @@ SET(NON_PROD_WASMRELAXEDSIMD_MICROKERNEL_SRCS
   src/f16-igemm/gen/f16-igemm-6x16-minmax-wasmrelaxedsimd-splat.c
   src/f16-igemm/gen/f16-igemm-8x8-minmax-wasmrelaxedsimd-splat.c
   src/f16-igemm/gen/f16-igemm-8x16-minmax-wasmrelaxedsimd-splat.c
+  src/f16-vlog/gen/f16-f32acc-vlog-wasmrelaxedsimd-rational-1-3-nr.c
+  src/f16-vlog/gen/f16-vlog-wasmrelaxedsimd-rational-1-3-nr.c
   src/f16-vtanh/gen/f16-f32acc-vtanh-wasmrelaxedsimd-rational-5-4-div.c
   src/f16-vtanh/gen/f16-f32acc-vtanh-wasmrelaxedsimd-rational-5-4-nr.c
   src/f16-vtanh/gen/f16-vtanh-wasmrelaxedsimd-rational-5-4-nr.c

@@ -1,6 +1,6 @@
 // clang-format off
 // Auto-generated file. Do not edit!
-//   Template: src/f16-vlog/rational-3-3.c.in
+//   Template: src/f16-vlog/rational-1-3.c.in
 //   Generator: tools/xngen
 //
 // Copyright 2026 Google LLC
@@ -51,7 +51,7 @@ static XNN_INLINE xnn_simd_f16_t xnn_signed_getexp_f16(xnn_simd_f16_t a) {
 #endif  // HAVE_XNN_SIGNED_GETEXP_F16
 
 
-void xnn_f16_vlog_ukernel__scalar_rational_3_3_div_u1(
+void xnn_f16_vlog_ukernel__scalar_rational_1_3_div_u1(
     size_t batch,
     const xnn_float16* input,
     xnn_float16* output,
@@ -74,10 +74,9 @@ void xnn_f16_vlog_ukernel__scalar_rational_3_3_div_u1(
   XNN_SIMD_CONST_F16_FROM_FLOAT(vsqrt2, 1.41421356f);
   XNN_SIMD_CONST_F16_FROM_FLOAT(vsqrt1_2, 0.70710678f);
 
-  XNN_SIMD_CONST_F16_FROM_FLOAT(valpha_3, 0.18249969f);
-  XNN_SIMD_CONST_F16_FROM_FLOAT(vbeta_1, 1.5f);
-  XNN_SIMD_CONST_F16_FROM_FLOAT(vbeta_2, 0.59917002f);
-  XNN_SIMD_CONST_F16_FROM_FLOAT(vbeta_3, 0.04958499f);
+  XNN_SIMD_CONST_F16_FROM_FLOAT(vbeta_1, 4.9951171875e-01f);
+  XNN_SIMD_CONST_F16_FROM_FLOAT(vbeta_2, -8.8439941406e-02f);
+  XNN_SIMD_CONST_F16_FROM_FLOAT(vbeta_3, 4.8828125000e-02f);
 
 
   for (; batch >= xnn_simd_bytes_f16; batch -= xnn_simd_bytes_f16) {
@@ -89,9 +88,7 @@ void xnn_f16_vlog_ukernel__scalar_rational_3_3_div_u1(
     vx = xnn_or_f16(xnn_and_f16(vx, vmantissa_bits_mask), vone);
     vx = xnn_sub_f16(xnn_mul_f16(vx, vsqrt1_2), vone);
 
-    xnn_simd_f16_t vp = xnn_fmadd_f16(vx, valpha_3, vone);
-    vp = xnn_fmadd_f16(vx, vp, vone);
-    vp = xnn_mul_f16(vx, vp);
+    xnn_simd_f16_t vp = vx;
 
     xnn_simd_f16_t vq = xnn_fmadd_f16(vx, vbeta_3, vbeta_2);
     vq = xnn_fmadd_f16(vx, vq, vbeta_1);
@@ -105,7 +102,7 @@ void xnn_f16_vlog_ukernel__scalar_rational_3_3_div_u1(
   }
 }
 
-void xnn_f16_vlog_ukernel__scalar_rational_3_3_div_u2(
+void xnn_f16_vlog_ukernel__scalar_rational_1_3_div_u2(
     size_t batch,
     const xnn_float16* input,
     xnn_float16* output,
@@ -128,10 +125,9 @@ void xnn_f16_vlog_ukernel__scalar_rational_3_3_div_u2(
   XNN_SIMD_CONST_F16_FROM_FLOAT(vsqrt2, 1.41421356f);
   XNN_SIMD_CONST_F16_FROM_FLOAT(vsqrt1_2, 0.70710678f);
 
-  XNN_SIMD_CONST_F16_FROM_FLOAT(valpha_3, 0.18249969f);
-  XNN_SIMD_CONST_F16_FROM_FLOAT(vbeta_1, 1.5f);
-  XNN_SIMD_CONST_F16_FROM_FLOAT(vbeta_2, 0.59917002f);
-  XNN_SIMD_CONST_F16_FROM_FLOAT(vbeta_3, 0.04958499f);
+  XNN_SIMD_CONST_F16_FROM_FLOAT(vbeta_1, 4.9951171875e-01f);
+  XNN_SIMD_CONST_F16_FROM_FLOAT(vbeta_2, -8.8439941406e-02f);
+  XNN_SIMD_CONST_F16_FROM_FLOAT(vbeta_3, 4.8828125000e-02f);
 
 
   for (; batch >= 2 * sizeof(uint16_t); batch -= 2 * sizeof(uint16_t)) {
@@ -154,21 +150,12 @@ void xnn_f16_vlog_ukernel__scalar_rational_3_3_div_u2(
     // Scale `x` back with `1/sqrt(2)` to move its range from `[1.0, 2.0)` to
     // `[sqrt(1/2), sqrt(2))`, and further subtract `1.0` so that it is around
     // zero, i.e. `[sqrt(1/2) - 1, sqrt(2) - 1)`, or `[−0.29289, 0.4142136)`.
-
-    // TODO: A 3/3 rational polynomial is mathematically overkill for FP16 precision
-    // and requires an expensive division. Consider switching to a degree-4 pure
-    // minimax polynomial (e.g. Remez) to eliminate the denominator evaluation and
-    // the division/NR steps, which will significantly improve throughput.
     vx_0 = xnn_sub_f16(xnn_mul_f16(vx_0, vsqrt1_2), vone);
     vx_1 = xnn_sub_f16(xnn_mul_f16(vx_1, vsqrt1_2), vone);
 
     // Evaluate the numerator polynomial p.
-    xnn_simd_f16_t vp_0 = xnn_fmadd_f16(vx_0, valpha_3, vone);
-    xnn_simd_f16_t vp_1 = xnn_fmadd_f16(vx_1, valpha_3, vone);
-    vp_0 = xnn_fmadd_f16(vx_0, vp_0, vone);
-    vp_1 = xnn_fmadd_f16(vx_1, vp_1, vone);
-    vp_0 = xnn_mul_f16(vx_0, vp_0);
-    vp_1 = xnn_mul_f16(vx_1, vp_1);
+    xnn_simd_f16_t vp_0 = vx_0;
+    xnn_simd_f16_t vp_1 = vx_1;
 
     // Evaluate the denominator polynomial q.
     xnn_simd_f16_t vq_0 = xnn_fmadd_f16(vx_0, vbeta_3, vbeta_2);
@@ -199,9 +186,7 @@ void xnn_f16_vlog_ukernel__scalar_rational_3_3_div_u2(
     vx = xnn_or_f16(xnn_and_f16(vx, vmantissa_bits_mask), vone);
     vx = xnn_sub_f16(xnn_mul_f16(vx, vsqrt1_2), vone);
 
-    xnn_simd_f16_t vp = xnn_fmadd_f16(vx, valpha_3, vone);
-    vp = xnn_fmadd_f16(vx, vp, vone);
-    vp = xnn_mul_f16(vx, vp);
+    xnn_simd_f16_t vp = vx;
 
     xnn_simd_f16_t vq = xnn_fmadd_f16(vx, vbeta_3, vbeta_2);
     vq = xnn_fmadd_f16(vx, vq, vbeta_1);
@@ -215,7 +200,7 @@ void xnn_f16_vlog_ukernel__scalar_rational_3_3_div_u2(
   }
 }
 
-void xnn_f16_vlog_ukernel__scalar_rational_3_3_div_u4(
+void xnn_f16_vlog_ukernel__scalar_rational_1_3_div_u4(
     size_t batch,
     const xnn_float16* input,
     xnn_float16* output,
@@ -238,10 +223,9 @@ void xnn_f16_vlog_ukernel__scalar_rational_3_3_div_u4(
   XNN_SIMD_CONST_F16_FROM_FLOAT(vsqrt2, 1.41421356f);
   XNN_SIMD_CONST_F16_FROM_FLOAT(vsqrt1_2, 0.70710678f);
 
-  XNN_SIMD_CONST_F16_FROM_FLOAT(valpha_3, 0.18249969f);
-  XNN_SIMD_CONST_F16_FROM_FLOAT(vbeta_1, 1.5f);
-  XNN_SIMD_CONST_F16_FROM_FLOAT(vbeta_2, 0.59917002f);
-  XNN_SIMD_CONST_F16_FROM_FLOAT(vbeta_3, 0.04958499f);
+  XNN_SIMD_CONST_F16_FROM_FLOAT(vbeta_1, 4.9951171875e-01f);
+  XNN_SIMD_CONST_F16_FROM_FLOAT(vbeta_2, -8.8439941406e-02f);
+  XNN_SIMD_CONST_F16_FROM_FLOAT(vbeta_3, 4.8828125000e-02f);
 
 
   for (; batch >= 4 * sizeof(uint16_t); batch -= 4 * sizeof(uint16_t)) {
@@ -272,29 +256,16 @@ void xnn_f16_vlog_ukernel__scalar_rational_3_3_div_u4(
     // Scale `x` back with `1/sqrt(2)` to move its range from `[1.0, 2.0)` to
     // `[sqrt(1/2), sqrt(2))`, and further subtract `1.0` so that it is around
     // zero, i.e. `[sqrt(1/2) - 1, sqrt(2) - 1)`, or `[−0.29289, 0.4142136)`.
-
-    // TODO: A 3/3 rational polynomial is mathematically overkill for FP16 precision
-    // and requires an expensive division. Consider switching to a degree-4 pure
-    // minimax polynomial (e.g. Remez) to eliminate the denominator evaluation and
-    // the division/NR steps, which will significantly improve throughput.
     vx_0 = xnn_sub_f16(xnn_mul_f16(vx_0, vsqrt1_2), vone);
     vx_1 = xnn_sub_f16(xnn_mul_f16(vx_1, vsqrt1_2), vone);
     vx_2 = xnn_sub_f16(xnn_mul_f16(vx_2, vsqrt1_2), vone);
     vx_3 = xnn_sub_f16(xnn_mul_f16(vx_3, vsqrt1_2), vone);
 
     // Evaluate the numerator polynomial p.
-    xnn_simd_f16_t vp_0 = xnn_fmadd_f16(vx_0, valpha_3, vone);
-    xnn_simd_f16_t vp_1 = xnn_fmadd_f16(vx_1, valpha_3, vone);
-    xnn_simd_f16_t vp_2 = xnn_fmadd_f16(vx_2, valpha_3, vone);
-    xnn_simd_f16_t vp_3 = xnn_fmadd_f16(vx_3, valpha_3, vone);
-    vp_0 = xnn_fmadd_f16(vx_0, vp_0, vone);
-    vp_1 = xnn_fmadd_f16(vx_1, vp_1, vone);
-    vp_2 = xnn_fmadd_f16(vx_2, vp_2, vone);
-    vp_3 = xnn_fmadd_f16(vx_3, vp_3, vone);
-    vp_0 = xnn_mul_f16(vx_0, vp_0);
-    vp_1 = xnn_mul_f16(vx_1, vp_1);
-    vp_2 = xnn_mul_f16(vx_2, vp_2);
-    vp_3 = xnn_mul_f16(vx_3, vp_3);
+    xnn_simd_f16_t vp_0 = vx_0;
+    xnn_simd_f16_t vp_1 = vx_1;
+    xnn_simd_f16_t vp_2 = vx_2;
+    xnn_simd_f16_t vp_3 = vx_3;
 
     // Evaluate the denominator polynomial q.
     xnn_simd_f16_t vq_0 = xnn_fmadd_f16(vx_0, vbeta_3, vbeta_2);
@@ -337,9 +308,7 @@ void xnn_f16_vlog_ukernel__scalar_rational_3_3_div_u4(
     vx = xnn_or_f16(xnn_and_f16(vx, vmantissa_bits_mask), vone);
     vx = xnn_sub_f16(xnn_mul_f16(vx, vsqrt1_2), vone);
 
-    xnn_simd_f16_t vp = xnn_fmadd_f16(vx, valpha_3, vone);
-    vp = xnn_fmadd_f16(vx, vp, vone);
-    vp = xnn_mul_f16(vx, vp);
+    xnn_simd_f16_t vp = vx;
 
     xnn_simd_f16_t vq = xnn_fmadd_f16(vx, vbeta_3, vbeta_2);
     vq = xnn_fmadd_f16(vx, vq, vbeta_1);
@@ -353,7 +322,7 @@ void xnn_f16_vlog_ukernel__scalar_rational_3_3_div_u4(
   }
 }
 
-void xnn_f16_vlog_ukernel__scalar_rational_3_3_div_u8(
+void xnn_f16_vlog_ukernel__scalar_rational_1_3_div_u8(
     size_t batch,
     const xnn_float16* input,
     xnn_float16* output,
@@ -376,10 +345,9 @@ void xnn_f16_vlog_ukernel__scalar_rational_3_3_div_u8(
   XNN_SIMD_CONST_F16_FROM_FLOAT(vsqrt2, 1.41421356f);
   XNN_SIMD_CONST_F16_FROM_FLOAT(vsqrt1_2, 0.70710678f);
 
-  XNN_SIMD_CONST_F16_FROM_FLOAT(valpha_3, 0.18249969f);
-  XNN_SIMD_CONST_F16_FROM_FLOAT(vbeta_1, 1.5f);
-  XNN_SIMD_CONST_F16_FROM_FLOAT(vbeta_2, 0.59917002f);
-  XNN_SIMD_CONST_F16_FROM_FLOAT(vbeta_3, 0.04958499f);
+  XNN_SIMD_CONST_F16_FROM_FLOAT(vbeta_1, 4.9951171875e-01f);
+  XNN_SIMD_CONST_F16_FROM_FLOAT(vbeta_2, -8.8439941406e-02f);
+  XNN_SIMD_CONST_F16_FROM_FLOAT(vbeta_3, 4.8828125000e-02f);
 
 
   for (; batch >= 8 * sizeof(uint16_t); batch -= 8 * sizeof(uint16_t)) {
@@ -426,11 +394,6 @@ void xnn_f16_vlog_ukernel__scalar_rational_3_3_div_u8(
     // Scale `x` back with `1/sqrt(2)` to move its range from `[1.0, 2.0)` to
     // `[sqrt(1/2), sqrt(2))`, and further subtract `1.0` so that it is around
     // zero, i.e. `[sqrt(1/2) - 1, sqrt(2) - 1)`, or `[−0.29289, 0.4142136)`.
-
-    // TODO: A 3/3 rational polynomial is mathematically overkill for FP16 precision
-    // and requires an expensive division. Consider switching to a degree-4 pure
-    // minimax polynomial (e.g. Remez) to eliminate the denominator evaluation and
-    // the division/NR steps, which will significantly improve throughput.
     vx_0 = xnn_sub_f16(xnn_mul_f16(vx_0, vsqrt1_2), vone);
     vx_1 = xnn_sub_f16(xnn_mul_f16(vx_1, vsqrt1_2), vone);
     vx_2 = xnn_sub_f16(xnn_mul_f16(vx_2, vsqrt1_2), vone);
@@ -441,30 +404,14 @@ void xnn_f16_vlog_ukernel__scalar_rational_3_3_div_u8(
     vx_7 = xnn_sub_f16(xnn_mul_f16(vx_7, vsqrt1_2), vone);
 
     // Evaluate the numerator polynomial p.
-    xnn_simd_f16_t vp_0 = xnn_fmadd_f16(vx_0, valpha_3, vone);
-    xnn_simd_f16_t vp_1 = xnn_fmadd_f16(vx_1, valpha_3, vone);
-    xnn_simd_f16_t vp_2 = xnn_fmadd_f16(vx_2, valpha_3, vone);
-    xnn_simd_f16_t vp_3 = xnn_fmadd_f16(vx_3, valpha_3, vone);
-    xnn_simd_f16_t vp_4 = xnn_fmadd_f16(vx_4, valpha_3, vone);
-    xnn_simd_f16_t vp_5 = xnn_fmadd_f16(vx_5, valpha_3, vone);
-    xnn_simd_f16_t vp_6 = xnn_fmadd_f16(vx_6, valpha_3, vone);
-    xnn_simd_f16_t vp_7 = xnn_fmadd_f16(vx_7, valpha_3, vone);
-    vp_0 = xnn_fmadd_f16(vx_0, vp_0, vone);
-    vp_1 = xnn_fmadd_f16(vx_1, vp_1, vone);
-    vp_2 = xnn_fmadd_f16(vx_2, vp_2, vone);
-    vp_3 = xnn_fmadd_f16(vx_3, vp_3, vone);
-    vp_4 = xnn_fmadd_f16(vx_4, vp_4, vone);
-    vp_5 = xnn_fmadd_f16(vx_5, vp_5, vone);
-    vp_6 = xnn_fmadd_f16(vx_6, vp_6, vone);
-    vp_7 = xnn_fmadd_f16(vx_7, vp_7, vone);
-    vp_0 = xnn_mul_f16(vx_0, vp_0);
-    vp_1 = xnn_mul_f16(vx_1, vp_1);
-    vp_2 = xnn_mul_f16(vx_2, vp_2);
-    vp_3 = xnn_mul_f16(vx_3, vp_3);
-    vp_4 = xnn_mul_f16(vx_4, vp_4);
-    vp_5 = xnn_mul_f16(vx_5, vp_5);
-    vp_6 = xnn_mul_f16(vx_6, vp_6);
-    vp_7 = xnn_mul_f16(vx_7, vp_7);
+    xnn_simd_f16_t vp_0 = vx_0;
+    xnn_simd_f16_t vp_1 = vx_1;
+    xnn_simd_f16_t vp_2 = vx_2;
+    xnn_simd_f16_t vp_3 = vx_3;
+    xnn_simd_f16_t vp_4 = vx_4;
+    xnn_simd_f16_t vp_5 = vx_5;
+    xnn_simd_f16_t vp_6 = vx_6;
+    xnn_simd_f16_t vp_7 = vx_7;
 
     // Evaluate the denominator polynomial q.
     xnn_simd_f16_t vq_0 = xnn_fmadd_f16(vx_0, vbeta_3, vbeta_2);
@@ -531,9 +478,7 @@ void xnn_f16_vlog_ukernel__scalar_rational_3_3_div_u8(
     vx = xnn_or_f16(xnn_and_f16(vx, vmantissa_bits_mask), vone);
     vx = xnn_sub_f16(xnn_mul_f16(vx, vsqrt1_2), vone);
 
-    xnn_simd_f16_t vp = xnn_fmadd_f16(vx, valpha_3, vone);
-    vp = xnn_fmadd_f16(vx, vp, vone);
-    vp = xnn_mul_f16(vx, vp);
+    xnn_simd_f16_t vp = vx;
 
     xnn_simd_f16_t vq = xnn_fmadd_f16(vx, vbeta_3, vbeta_2);
     vq = xnn_fmadd_f16(vx, vq, vbeta_1);

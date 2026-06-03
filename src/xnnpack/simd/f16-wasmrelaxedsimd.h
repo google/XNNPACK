@@ -76,6 +76,8 @@ static XNN_INLINE xnn_simd_f16_t xnn_div_f16(xnn_simd_f16_t a,
   return wasm_f16x8_div(a, b);
 }
 
+#define XNN_SIMD_HAVE_RCP_F16 1
+#define XNN_SIMD_NUM_RCP_ITER_F16 0
 static XNN_INLINE xnn_simd_f16_t xnn_rcp_f16(xnn_simd_f16_t a) {
   return wasm_f16x8_div(wasm_i16x8_const_splat(0x3C00), a);
 }
