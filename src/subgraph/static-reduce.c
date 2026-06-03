@@ -134,6 +134,14 @@ static enum xnn_status reshape_reduce_operator(
     reduction_axes[i] = 0 <= opdata->reduction_axes[i]
                             ? opdata->reduction_axes[i]
                             : input_num_dims + opdata->reduction_axes[i];
+    if (reduction_axes[i] < 0 || reduction_axes[i] >= (int64_t) input_num_dims) {
+      xnn_log_error(
+          "failed to reshape Reduce operator with input ID #%" PRIu32
+          ": reduction axis #%d (%" PRId64
+          ") is out of bounds for a %zu-dimensional input",
+          input_id, i, reduction_axes[i], input_num_dims);
+      return xnn_status_invalid_parameter;
+    }
   }
   size_t input_dims[XNN_MAX_TENSOR_DIMS];
   memcpy(input_dims, input_value->shape.dim, input_num_dims * sizeof(size_t));
