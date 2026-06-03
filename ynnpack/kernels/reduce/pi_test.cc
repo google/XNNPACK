@@ -43,10 +43,15 @@ void pi_sum(uint64_t arch_flags, reduce_kernel_fn kernel) {
       terms[i] = static_cast<AT>(0.5 / ((i + 0.25) * (i + 0.75)));
     }
 
-    CT result = 0;
-    kernel(1, n, sizeof(AT), terms.data(), &result, nullptr);
+    for (bool ascending : {true, false}) {
+      CT result = 0;
+      kernel(1, n, sizeof(AT), terms.data(), &result, nullptr);
 
-    EXPECT_NEAR(result, expected, tolerance);
+      EXPECT_NEAR(result, expected, tolerance)
+          << (ascending ? "ascending" : "descending");
+
+      std::reverse(terms.begin(), terms.end());
+    }
   }
 }
 
@@ -77,10 +82,15 @@ void pi_sum_squared(uint64_t arch_flags, reduce_kernel_fn kernel) {
       terms[i] = static_cast<AT>(1.0 / (i + 1));
     }
 
-    CT result = 0;
-    kernel(1, n, sizeof(AT), terms.data(), &result, nullptr);
+    for (bool ascending : {true, false}) {
+      CT result = 0;
+      kernel(1, n, sizeof(AT), terms.data(), &result, nullptr);
 
-    EXPECT_NEAR(result, expected, tolerance);
+      EXPECT_NEAR(result, expected, tolerance)
+          << (ascending ? "ascending" : "descending");
+
+      std::reverse(terms.begin(), terms.end());
+    }
   }
 }
 
