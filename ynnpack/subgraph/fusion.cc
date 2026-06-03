@@ -1767,33 +1767,34 @@ bool rewrite_sum_to_dot(ynn_subgraph& subgraph, ynn_node& node,
     }
   }
 
-  // Helper to find a broadcast dimension.
+  // Helper to find a broadcast dimension in a, and not a broadcast in b.
   // TODO: dsharlet - This should find the broadcast with the biggest extent in
   // the other buffer to maximize the value of the dot.
-  auto find_broadcast = [&](const ynn_value& v, ynn::span<const int32_t> perm,
+  auto find_broadcast = [&](const ynn_value& a, const ynn_value& b,
+                            ynn::span<const int32_t> perm,
                             int exclude = -1) -> int {
     for (size_t i = num_k_dims; i < perm.size(); ++i) {
       if (static_cast<int>(i) != exclude &&
-          slinky::prove_true(v.extent(perm[i]) == 1)) {
+          slinky::prove_true(a.extent(perm[i]) == 1) &&
+          !slinky::prove_true(b.extent(perm[i]) == 1)) {
         return i;
       }
     }
     return -1;
   };
-  std::vector<int32_t> perm_b = perm_a;
-
   // 2. Find broadcasts from b to move into the i dimension for a, and from a to
   // move into the j dimension for b.
   // sum(a(., k1, k2, i, ..., d1, d2, ...) * b(j, k1, k2, ., ..., d1, d2, ...))
-  int i_dim = find_broadcast(b, perm_b);
-  int j_dim = find_broadcast(a, perm_a, i_dim);
-
+  int i_dim = find_broadcast(b, a, perm_a);
+  int j_dim = find_broadcast(a, b, perm_a, i_dim);
   if (i_dim == -1 && j_dim == -1) {
     YNN_LOG_DEBUG()
         << "Not rewriting sum(a*b) to dot(a, b) because there are no "
            "broadcast dimensions.";
     return false;
   }
+
+  std::vector<int32_t> perm_b = perm_a;
 
   if (i_dim != -1) {
     std::rotate(perm_a.begin() + num_k_dims, perm_a.begin() + i_dim,
