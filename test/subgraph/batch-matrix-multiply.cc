@@ -108,46 +108,7 @@ void ReferenceImpl(Tensor<InputA> input_a, Tensor<InputB> input_b,
   }
 }
 
-template <>
-void ReferenceImpl<float, qcint8>(Tensor<float> input_a, Tensor<qcint8> input_b,
-                   const xnn_quantization_params& input_a_quantization,
-                   int32_t input_b_zero_point, Tensor<float> input_b_scale,
-                   Tensor<float> output) {
-  assert(input_a.rank() == 2);
-  assert(input_b.rank() == 2);
-  assert(output.rank() == 2);
-  assert(input_a.extent(0) == output.extent(0));
-  assert(input_b.extent(1) == output.extent(1));
-  assert(input_a.extent(1) == input_b.extent(0));
 
-  for (size_t i = 0; i < output.extent(0); ++i) {
-    float rmin = INFINITY;
-    float rmax = -INFINITY;
-    for (size_t k = 0; k < input_a.extent(1); ++k) {
-      rmin = std::min(rmin, input_a(i, k));
-      rmax = std::max(rmax, input_a(i, k));
-    }
-    float scale_row;
-    struct xnn_qd8_quantization_params qp =
-        xnn_f32_qd8_asymmetric_quantization_params(rmin, rmax, &scale_row);
-
-    for (size_t j = 0; j < output.extent(1); ++j) {
-      int32_t sum = 0;
-      for (size_t k = 0; k < input_a.extent(1); ++k) {
-        int32_t q_a = lrintf(input_a(i, k) * scale_row) + qp.zero_point;
-        q_a = std::min(std::max(q_a, -128), 127);
-
-        float b_float = dequantize(
-            input_b(k, j), input_b_scale(k, j), input_b_zero_point);
-        int32_t q_b = lrintf(b_float / input_b_scale(k, j));
-
-        sum += (q_a - qp.zero_point) * q_b;
-      }
-      output(i, j) =
-          static_cast<float>(sum) * qp.inv_scale * input_b_scale(0, j);
-    }
-  }
-}
 
 template <typename InputA, typename InputB>
 Tensor<float> ReferenceImpl(Tensor<InputA> input_a, Tensor<InputB> input_b,
@@ -443,6 +404,16 @@ TEST(BatchMatrixMultiplyQD8F32, dont_inline_lhs_dynamic_b) {
                                 XNN_FLAG_NO_INLINED_LHS_PACKING);
 }
 
+TEST(BatchMatrixMultiplyF32QC8W, dynamic_b) {
+  TestDynamicB<float, qcint8>();
+}
+
+TEST(BatchMatrixMultiplyF32QC8W, dont_inline_lhs_dynamic_b) {
+  TestDynamicB<float, qcint8>(/*convert_to=*/xnn_datatype_invalid,
+                              /*runtime_flags=*/xnn_test_runtime_flags() |
+                                XNN_FLAG_NO_INLINED_LHS_PACKING);
+}
+
 TEST(BatchMatrixMultiplyF16, dont_inline_lhs_dynamic_b) {
   TestDynamicB<xnn_float16>(
       /*convert_to=*/xnn_datatype_invalid,
@@ -671,6 +642,16 @@ TEST(BatchMatrixMultiplyQD8F32, static_b) {
 
 TEST(BatchMatrixMultiplyQD8F32, dont_inline_lhs_static_b) {
   TestStaticB<float, qcint8>(/*convert_to=*/xnn_datatype_qdint8,
+                             /*runtime_flags=*/xnn_test_runtime_flags() |
+                                XNN_FLAG_NO_INLINED_LHS_PACKING);
+}
+
+TEST(BatchMatrixMultiplyF32QC8W, static_b) {
+  TestStaticB<float, qcint8>();
+}
+
+TEST(BatchMatrixMultiplyF32QC8W, dont_inline_lhs_static_b) {
+  TestStaticB<float, qcint8>(/*convert_to=*/xnn_datatype_invalid,
                              /*runtime_flags=*/xnn_test_runtime_flags() |
                                 XNN_FLAG_NO_INLINED_LHS_PACKING);
 }
