@@ -257,6 +257,19 @@ static XNN_INTRINSIC __m128i _mm_dpbusd_epi32_madd(__m128i i32,
   return _mm_sub_epi32(i32, v);
 }
 
+// SSE VNNI replacement for 2 bit.
+// u2 is uint2 in lower 2 bits.
+static XNN_INTRINSIC __m128i _mm_dpbusd_epi32_madd_kzp2(__m128i i32,
+                                                   const __m128i u8,
+                                                   const __m128i u2) {
+  const __m128i vzero_point = _mm_set1_epi8(2);
+  const __m128i vminus_one = _mm_set1_epi16(-1);
+  const __m128i i2 = _mm_sub_epi8(u2, vzero_point);  // convert uint2 to int2
+  const __m128i i10 = _mm_maddubs_epi16(u8, i2);     // u8 * i2 = i10
+  const __m128i v = _mm_madd_epi16(i10, vminus_one);  // convert 16 bits to 32 bits
+  return _mm_sub_epi32(i32, v);
+}
+
 #endif  // defined(__SSSE3__) || defined _M_X64 || (defined _M_IX86_FP &&
         // _M_IX86_FP >= 2)
 

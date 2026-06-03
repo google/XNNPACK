@@ -171,6 +171,38 @@
   k-block: 32
   planes: 4
 
+# SSSE3 MADD
+- name: xnn_qs8_qc2w_gemm_minmax_fp32_ukernel_1x4c8__ssse3_madd
+  init: xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params
+  pack: xnn_pack_qs8_to_qu8_qc2w_gemm_goi_w
+  k-block: 16
+  planes: 4
+- name: xnn_qs8_qc2w_gemm_minmax_fp32_ukernel_2x4c8__ssse3_madd
+  init: xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params
+  pack: xnn_pack_qs8_to_qu8_qc2w_gemm_goi_w
+  k-block: 16
+  planes: 4
+- name: xnn_qs8_qc2w_gemm_minmax_fp32_ukernel_3x4c8__ssse3_madd
+  init: xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params
+  pack: xnn_pack_qs8_to_qu8_qc2w_gemm_goi_w
+  k-block: 16
+  planes: 4
+- name: xnn_qs8_qc2w_gemm_minmax_fp32_ukernel_4x4c8__ssse3_madd
+  init: xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params
+  pack: xnn_pack_qs8_to_qu8_qc2w_gemm_goi_w
+  k-block: 16
+  planes: 4
+- name: xnn_qs8_qc2w_gemm_minmax_fp32_ukernel_5x4c8__ssse3_madd
+  init: xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params
+  pack: xnn_pack_qs8_to_qu8_qc2w_gemm_goi_w
+  k-block: 16
+  planes: 4
+- name: xnn_qs8_qc2w_gemm_minmax_fp32_ukernel_6x4c8__ssse3_madd
+  init: xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params
+  pack: xnn_pack_qs8_to_qu8_qc2w_gemm_goi_w
+  k-block: 16
+  planes: 4
+
 # Scalar
 - name: xnn_qs8_qc2w_gemm_minmax_fp32_ukernel_1x2__scalar_lrintf
   init: xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params
