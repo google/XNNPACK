@@ -383,7 +383,7 @@ absl::Status OpMixin<ReluOperation, XnnpackMixinTag>::ToXnnpack(
     const graph::Operation& op, XnnpackBuildContext& ctx) const {
   const absl::string_view op_name = op.GetName();
   LRT_TENSOR_ASSIGN_OR_RETURN(auto io, PrepareUnaryIO(op, ctx, op_name));
-  xnn_unary_params params;
+  xnn_unary_params params{};
   params.clamp.min = 0.0f;
   params.clamp.max = std::numeric_limits<float>::infinity();
   return AddUnaryNode(xnn_unary_clamp, io, ctx, op_name, &params);
@@ -393,7 +393,7 @@ absl::Status OpMixin<Relu6Operation, XnnpackMixinTag>::ToXnnpack(
     const graph::Operation& op, XnnpackBuildContext& ctx) const {
   const absl::string_view op_name = op.GetName();
   LRT_TENSOR_ASSIGN_OR_RETURN(auto io, PrepareUnaryIO(op, ctx, op_name));
-  xnn_unary_params params;
+  xnn_unary_params params{};
   params.clamp.min = 0.0f;
   params.clamp.max = 6.0f;
   return AddUnaryNode(xnn_unary_clamp, io, ctx, op_name, &params);
@@ -405,7 +405,7 @@ absl::Status OpMixin<LeakyReluOperation, XnnpackMixinTag>::ToXnnpack(
   LRT_TENSOR_ASSIGN_OR_RETURN(auto io, PrepareUnaryIO(op, ctx, op_name));
   LRT_TENSOR_ASSIGN_OR_RETURN(const LeakyReluOperation& data,
                               op.As<LeakyReluOperation>());
-  xnn_unary_params params;
+  xnn_unary_params params{};
   params.leaky_relu.negative_slope = data.alpha;
   return AddUnaryNode(xnn_unary_leaky_relu, io, ctx, op_name, &params);
 }
@@ -414,7 +414,7 @@ absl::Status OpMixin<EluOperation, XnnpackMixinTag>::ToXnnpack(
     const graph::Operation& op, XnnpackBuildContext& ctx) const {
   const absl::string_view op_name = op.GetName();
   LRT_TENSOR_ASSIGN_OR_RETURN(auto io, PrepareUnaryIO(op, ctx, op_name));
-  xnn_unary_params params;
+  xnn_unary_params params{};
   params.elu.alpha = 1.0f;
   return AddUnaryNode(xnn_unary_elu, io, ctx, op_name, &params);
 }
