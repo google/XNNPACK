@@ -28,7 +28,7 @@ class slinky_thread_pool : public slinky::thread_pool {
 
   int thread_count() const override;
   slinky::ref_count<task> enqueue(size_t n, task_body t,
-                                  int32_t max_workers) override;
+                                  int max_workers) override;
   void wait_for(task* t) override;
   void wait_for(predicate_ref condition) override;
   void atomic_call(slinky::function_ref<void()> t) override;

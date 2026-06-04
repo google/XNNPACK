@@ -42,7 +42,7 @@ slinky_thread_pool::~slinky_thread_pool() {
 int slinky_thread_pool::thread_count() const { return num_threads_; }
 
 slinky::ref_count<slinky::thread_pool::task> slinky_thread_pool::enqueue(
-    size_t n, task_body t, int32_t max_workers) {
+    size_t n, task_body t, int max_workers) {
   auto result = impl_.enqueue(n, t, max_workers);
   if (scheduler_) {
     // Atomically increment the expected workers, so we know how many workers
