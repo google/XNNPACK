@@ -134,9 +134,14 @@ size_t xnn_init_qu8_conv_minmax_rndnu16_scalar_params(
   struct ExpMul f32 = parse_f32(scale);
 
   int exp = f32.exp;
+  // multiplier_q15 is in the range [2^14, 2^15]
+  int32_t multiplier_q15_32 = math_asr_s32_rounding(f32.multiplier_q24, 9);
+  int16_t multiplier_q15 = (int16_t) multiplier_q15_32;
+  if (multiplier_q15_32 == 32768) {
+    multiplier_q15 = 16384;
+    exp++;
+  }
   int left_pre_shift = exp + 1;
-  // multiplier_q15 is in the range [2^14, 2^15 - 1]
-  int16_t multiplier_q15 = math_min_s32((1 << 15) - 1, math_asr_s32_rounding(f32.multiplier_q24, 9));
 
   params->rndnu16_scalar.kernel_zero_point = kernel_zero_point;
   params->rndnu16_scalar.multiplier = multiplier_q15;

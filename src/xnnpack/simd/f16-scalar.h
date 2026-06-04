@@ -253,4 +253,12 @@ static XNN_INLINE void xnn_store_tail_f16(xnn_simd_f16_t *output,
   *output = v;
 }
 
+// Conversion operations.
+static XNN_INLINE float xnn_cvt_f32_f16(xnn_simd_f16_t a) {
+  return xnn_float16_to_float(a);
+}
+static XNN_INLINE xnn_simd_f16_t xnn_cvt_f16_f32(float a) {
+  return xnn_float16_from_float(a);
+}
+
 #endif  // XNNPACK_SRC_XNNPACK_SIMD_F16_SCALAR_H_

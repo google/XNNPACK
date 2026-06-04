@@ -8,7 +8,7 @@ files:
 
 ```bash
 # Run all GEMM layers for MobileNet V2
-bazel run -c opt //bench:f32_gemm_bench -- $(cat bench/models/mobilenet_v2.txt)
+bazel run -c opt //bench:f32_gemm_bench -- $(cat bench/models/mobilenet_v2_gemm.txt)
 
 # Run a custom Convolution shape (H W KH KW PH PW S D GCin GCout)
 bazel run -c opt //bench:f32_conv_hwc_bench -- 224 224 3 3 1 1 2 1 3 32
@@ -33,9 +33,9 @@ Representative shapes for various models are provided in the `models/`
 subdirectory.
 
 ### Common Models (`models/`)
-- **MobileNet**: `mobilenet_v1.txt`, `mobilenet_v2.txt`, `mobilenet_v3_small.txt`, `mobilenet_v3_large.txt` (and variants for `_conv.txt`, `_dwconv.txt`, `_spmm.txt`)
-- **ResNet**: `resnet18_gemm.txt`, `resnet50.txt`
-- **ShuffleNet**: `shufflenet_v1_g*.txt`, `shufflenet_v2_x*.txt`
+- **MobileNet**: `mobilenet_v1_gemm.txt`, `mobilenet_v2_gemm.txt`, `mobilenet_v3_small_gemm.txt`, `mobilenet_v3_large_gemm.txt` (and variants for `_conv.txt`, `_dwconv.txt`, `_spmm.txt`)
+- **ResNet**: `resnet18_gemm.txt`, `resnet50_gemm.txt`
+- **ShuffleNet**: `shufflenet_v1_g*_gemm.txt`, `shufflenet_v2_x*_gemm.txt`
 - **Inception**: `inception_v3_gemm.txt`
 - **LLM / Attention**: `llm_gemm.txt`, `attention_bgemm.txt`, `sd1x_diffusion_bgemm.txt`
 

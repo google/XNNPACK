@@ -28,38 +28,32 @@ cc_library(
     # These headers need to be textual because we can't compile them with the appropriate copts.
     textual_hdrs = [
         # These headers should not be directly included.
-        "arm_neon_base.h",
-        "arm_neon_partial_load_store.h",
-        "arm64_sve_partial_load_store.h",
-        "x86_avx2_base.h",
-        "x86_avx_base.h",
-        "x86_sse2_base.h",
-        "x86_sse41_base.h",
-        "x86_avx_partial_load_store.h",
-        "x86_sse2_partial_load_store.h",
-        "x86_sse2_cast.h",
         "generic.inc",
+        "x86_vec128_base.h",
+        "x86_vec256_base.h",
+        "emulate_fma.h",
         # For the most part, only one of these headers should be included. Multiple of these headers
         # may define the same operation and type, using a different implementation, depending on the
         # target. For example, f32x16 is provided by both avx512 as a single 512-bit vector, and
         # avx as two 256-bit vectors, and the `concat` operation of two f32x8 values is implemented
         # appropriately for that type.
         "byte_vec.h",
-        "arm_neon.h",
-        "arm64_sve.h",
-        "arm_neonfma.h",
-        "arm_neonfp16.h",
+        "arm_vec128.h",
         "hexagon_hvx.h",
         "scalar.h",
-        "x86_avx.h",
-        "x86_avx2.h",
-        "x86_avx512.h",
-        "x86_f16c.h",
-        "x86_fma3.h",
-        "x86_sse2.h",
-        "x86_sse2_fma.h",
-        "x86_sse41.h",
+        "x86_vec128.h",
+        "x86_vec256.h",
+        "x86_vec512.h",
         "wasm_simd128.h",
     ],
     deps = ["//ynnpack/base"],
+)
+
+cc_library(
+    name = "emulate_fma",
+    hdrs = ["emulate_fma.h"],
+    deps = [
+        ":simd",
+        "//ynnpack/base",
+    ],
 )

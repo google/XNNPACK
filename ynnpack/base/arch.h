@@ -35,6 +35,7 @@ enum {
   amxint8 = 1 << 16,
 
   avx2_fma3 = avx2 | fma3,
+  sse2_fma = sse2,
   avx512 = avx512f | avx512bw | avx512vl | avx512dq,
 #endif  // YNN_ARCH_X86
 #ifdef YNN_ARCH_ARM

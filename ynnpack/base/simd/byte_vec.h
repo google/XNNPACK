@@ -46,13 +46,15 @@ struct vec<uint8_t, 8> {
   explicit vec(uint64_t v) : v(v) {}
   vec(u8x4 x0, u8x4 x1) : v((static_cast<uint64_t>(x1.v) << 32) | x0.v) {}
 
-  u8x4 lo() const { return u8x4{static_cast<uint32_t>(v)}; }
-  u8x4 hi() const { return u8x4{static_cast<uint32_t>(v >> 32)}; }
-
   uint64_t v;
 };
 
 using u8x8 = vec<uint8_t, 8>;
+
+YNN_ALWAYS_INLINE u8x4 lo(u8x8 x) { return u8x4{static_cast<uint32_t>(x.v)}; }
+YNN_ALWAYS_INLINE u8x4 hi(u8x8 x) {
+  return u8x4{static_cast<uint32_t>(x.v >> 32)};
+}
 
 YNN_ALWAYS_INLINE u8x4 load_aligned(const uint8_t* ptr, decltype(u8x4::N),
                                     u8x4 = {}) {

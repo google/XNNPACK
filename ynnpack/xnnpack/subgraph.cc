@@ -44,6 +44,9 @@ bool xnn_experimental_check_build_identifier(const void* data, size_t size) {
 
 xnn_status xnn_create_subgraph(uint32_t external_value_ids, uint32_t flags,
                                xnn_subgraph_t* subgraph_out) {
+  // YNNPACK's "fast math" kernels are more similar to XNNPACK's accuracy.
+  flags |= YNN_FLAG_FAST_MATH;
+
   *subgraph_out = new xnn_subgraph();
   return ynn::xnn_status_from_ynn(
       ynn_create_subgraph(external_value_ids, flags, &(*subgraph_out)->ynn));

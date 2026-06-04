@@ -26,6 +26,8 @@ XNN_ENUM_ITEM(xnn_operator_type_batch_matrix_multiply_nc_f32,
               "Batch Matrix Multiply (NC, F32)")
 XNN_ENUM_ITEM(xnn_operator_type_batch_matrix_multiply_nc_pf32,
               "Batch Matrix Multiply (NC, PF32)")
+XNN_ENUM_ITEM(xnn_operator_type_batch_matrix_multiply_nc_f32_qc8w,
+              "Batch Matrix Multiply (NC, F32, QC8W)")
 XNN_ENUM_ITEM(xnn_operator_type_batch_matrix_multiply_nc_qd8_f32_qc8w,
               "Batch Matrix Multiply (NC, QD8, F32, QC8W)")
 XNN_ENUM_ITEM(xnn_operator_type_batch_matrix_multiply_nc_qdu8_f32_qc8w,

@@ -165,26 +165,26 @@ struct floor : public unary_op_info {
   }
 };
 
+struct round_to_bf16 : public unary_op_info {
+  explicit round_to_bf16(const unary_params& = {}) {}
+  float operator()(float x) const override { return bfloat16{x}; }
+
+  tolerance_spec tolerance(ynn_type type) const override {
+    return tolerance_spec{/*relative=*/type_info<bfloat16>::epsilon()};
+  }
+};
+
 struct sigmoid : public unary_op_info {
   explicit sigmoid(const unary_params& = {}) {}
   float operator()(float x) const override {
-    return static_cast<float>(1.0 / (1.0 + std::exp(static_cast<double>(-x))));
+    return 1.0f / (1.0f + std::exp(-x));
   }
   double operator()(double x) const override {
     return 1.0 / (1.0 + std::exp(-x));
   }
 
   tolerance_spec tolerance(ynn_type /*type*/) const override {
-    return tolerance_spec{/*relative=*/1.0f, /*absolute=*/1.0f};
-  }
-
-  interval domain(ynn_type type) const override {
-    switch (type) {
-      case ynn_type_fp16:
-        return {-25.0f, 25.0f};
-      default:
-        return {-125.0f, 125.0f};
-    }
+    return tolerance_spec{/*relative=*/4.0f};
   }
 };
 
@@ -264,16 +264,7 @@ struct tanh : public unary_op_info {
   }
 
   tolerance_spec tolerance(ynn_type /*type*/) const override {
-    return tolerance_spec{/*relative=*/5.0f, /*absolute=*/1.0f};
-  }
-
-  interval domain(ynn_type type) const override {
-    switch (type) {
-      case ynn_type_fp16:
-        return {-5.0f, 5.0f};
-      default:
-        return {-10.0f, 10.0f};
-    }
+    return tolerance_spec{/*relative=*/5.0f};
   }
 };
 
@@ -316,20 +307,36 @@ struct log : public unary_op_info {
 
   explicit log(const unary_params& params) : params(params.log) {}
   float operator()(float x) const override {
-    return std::log2(x * static_cast<float>(params.input_multiplier)) *
+    return std::log(x * static_cast<float>(params.input_multiplier)) *
            static_cast<float>(params.output_multiplier);
   }
   double operator()(double x) const override {
-    return std::log2(x * params.input_multiplier) *
-           params.output_multiplier;
+    return std::log(x * params.input_multiplier) * params.output_multiplier;
   }
 
-  tolerance_spec tolerance(ynn_type /*type*/) const override {
-    return tolerance_spec{/*relative=*/1.5f, /*absolute=*/1.0f};
+  tolerance_spec tolerance(ynn_type type) const override {
+    if (type == ynn_type_fp64) {
+      return tolerance_spec{/*relative=*/4.0f};
+    } else {
+      return tolerance_spec{/*relative=*/1.5f};
+    }
+  }
+};
+
+struct log1p : public unary_op_info {
+  log1p_params params;
+
+  explicit log1p(const unary_params& params) : params(params.log1p) {}
+  float operator()(float x) const override {
+    return std::log1p(x * static_cast<float>(params.input_multiplier)) *
+           static_cast<float>(params.output_multiplier);
+  }
+  double operator()(double x) const override {
+    return std::log1p(x * params.input_multiplier) * params.output_multiplier;
   }
 
-  interval domain(ynn_type type) const override {
-    return {type_info<float>::epsilon(), 1000.0f};
+  tolerance_spec tolerance(ynn_type type) const override {
+    return tolerance_spec{/*relative=*/3.0f};
   }
 };
 
@@ -338,44 +345,38 @@ struct exp : public unary_op_info {
 
   explicit exp(const unary_params& params) : params(params.exp) {}
   float operator()(float x) const override {
-    return std::exp2(static_cast<float>(params.input_multiplier) * x) *
+    return std::exp(static_cast<float>(params.input_multiplier) * x) *
            static_cast<float>(params.output_multiplier);
   }
   double operator()(double x) const override {
-    return std::exp2(params.input_multiplier * x) * params.output_multiplier;
+    return std::exp(params.input_multiplier * x) * params.output_multiplier;
   }
 
   tolerance_spec tolerance(ynn_type /*type*/) const override {
-    return tolerance_spec{/*relative=*/6.0f, /*absolute=*/2.0f};
-  }
-
-  interval domain(ynn_type) const override { return {-10.0f, 10.0f}; }
-};
-
-struct log1p : public unary_op_info {
-  explicit log1p(const unary_params& = {}) {}
-  float operator()(float x) const override { return std::log1p(x); }
-  double operator()(double x) const override { return std::log1p(x); }
-
-
-  tolerance_spec tolerance(ynn_type /*type*/) const override {
-    return tolerance_spec{/*relative=*/2.0f};
-  }
-
-  interval domain(ynn_type type) const override {
-    return {type_info<float>::epsilon(), 1000.0f};
+#ifdef YNN_ARCH_ARM32
+    // 32-bit ARM is weird about denormals.
+    return tolerance_spec{/*relative=*/3.0f, /*absolute=*/1.0f};
+#else
+    return tolerance_spec{/*relative=*/3.0f};
+#endif
   }
 };
 
 struct expm1 : public unary_op_info {
-  explicit expm1(const unary_params& = {}) {}
-  float operator()(float x) const override { return std::expm1(x); }
-  double operator()(double x) const override { return std::expm1(x); }
+  exp_params params;
+
+  explicit expm1(const unary_params& params) : params(params.expm1) {}
+  float operator()(float x) const override {
+    return std::expm1(static_cast<float>(params.input_multiplier) * x) *
+           static_cast<float>(params.output_multiplier);
+  }
+  double operator()(double x) const override {
+    return std::expm1(params.input_multiplier * x) * params.output_multiplier;
+  }
 
   tolerance_spec tolerance(ynn_type type) const override {
-    return tolerance_spec{/*relative=*/1.0f, /*absolute=*/2.0f};
+    return tolerance_spec{/*relative=*/3.0f};
   }
-  interval domain(ynn_type) const override { return {-10.0f, 10.0f}; }
 };
 
 struct erf : public unary_op_info {
@@ -393,7 +394,44 @@ struct erf : public unary_op_info {
   }
 
   tolerance_spec tolerance(ynn_type /*type*/) const override {
-    return tolerance_spec{/*relative=*/1.0f, /*absolute=*/3.0f};
+    return tolerance_spec{/*relative=*/4.0f};
+  }
+};
+
+struct approx_erf : public unary_op_info {
+  approx_erf_params params;
+
+  explicit approx_erf(const unary_params& params) : params(params.approx_erf) {}
+  float operator()(float x) const override {
+    return std::erf(static_cast<float>(params.input_multiplier) * x) *
+               static_cast<float>(params.output_multiplier) +
+           static_cast<float>(params.output_offset);
+  }
+  double operator()(double x) const override {
+    return std::erf(params.input_multiplier * x) * params.output_multiplier +
+           params.output_offset;
+  }
+
+  tolerance_spec tolerance(ynn_type /*type*/) const override {
+    return tolerance_spec{/*relative=*/5.0f};
+  }
+};
+
+struct approx_tanh : public unary_op_info {
+  approx_tanh_params params;
+
+  explicit approx_tanh(const unary_params& params)
+      : params(params.approx_tanh) {}
+  float operator()(float x) const override {
+    return std::tanh(x) * static_cast<float>(params.output_multiplier) +
+           static_cast<float>(params.output_offset);
+  }
+  double operator()(double x) const override {
+    return std::tanh(x) * params.output_multiplier + params.output_offset;
+  }
+
+  tolerance_spec tolerance(ynn_type /*type*/) const override {
+    return tolerance_spec{/*relative=*/5.0f};
   }
 };
 
@@ -535,11 +573,11 @@ void check_results(const unary_op_info& op, Tensor<A> a, Tensor<X> x,
     } else if constexpr (is_quantized<X>()) {
       const Float input_i = dequantize(a(i), a_quantization);
       Float expected = op(input_i);
-      expected = fake_quantize(expected, x_quantization);
-      expected = clamp_float_to_int<X>(expected);
       if (std::isnan(expected)) {
         // This is expected to overflow.
       } else {
+        expected = fake_quantize(expected, x_quantization);
+        expected = clamp_float_to_int<X>(expected);
         ASSERT_NEAR(expected, x(i), tol.absolute_error<X>(expected))
             << "i = " << index_to_string(i) << ", a(i) = " << input_i << " ("
             << static_cast<Float>(a(i)) << ")"
@@ -551,15 +589,19 @@ void check_results(const unary_op_info& op, Tensor<A> a, Tensor<X> x,
       Float expected = op(input_i);
       // Force overflow to infinity if that is what should happen.
       expected = static_cast<Float>(static_cast<X>(expected));
-      if (std::abs(expected) < type_info<X>::smallest_normal()) {
-        // Flush denormals to 0
-        expected = 0.0f;
-      }
       if (op.is_in_supported_range(expected)) {
         if (std::isnan(static_cast<Float>(expected))) {
           ASSERT_TRUE(std::isnan(static_cast<Float>(x(i))));
+        } else if (!std::isinf(expected) && std::isinf(expected * 2) &&
+                   std::isinf(x(i))) {
+          // The expected value is close to infinity, allow our output to be
+          // infinity.
         } else {
-          ASSERT_NEAR(expected, x(i), tol.absolute_error<X>(expected))
+          auto tolerance = tol.absolute_error<X>(expected);
+          if (std::abs(expected) <= type_info<X>::smallest_normal()) {
+            tolerance += type_info<X>::smallest_normal();
+          }
+          ASSERT_NEAR(expected, x(i), tolerance)
               << "i = " << index_to_string(i) << ", a(i) = " << input_i << " ("
               << static_cast<Float>(a(i)) << ")";
         }

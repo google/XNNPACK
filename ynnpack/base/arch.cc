@@ -51,6 +51,7 @@ uint64_t get_supported_arch_flags() {
 
 #ifdef YNN_ARCH_X86
     result |= arch_flag::sse2;
+    result |= arch_flag::sse2_fma;
     if (cpuinfo_has_x86_ssse3()) result |= arch_flag::ssse3;
     if (cpuinfo_has_x86_sse4_1()) result |= arch_flag::sse41;
     if (cpuinfo_has_x86_avx()) result |= arch_flag::avx;

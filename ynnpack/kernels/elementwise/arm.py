@@ -10,17 +10,6 @@ class ARM(Target):
 
   def update_for_neon(self):
     """Updates the target for NEON support."""
-    self.header += """
-namespace ynn {
-namespace {
-template <>
-YNN_INTRINSIC simd::vec<float, 4> select_greater_than(simd::vec<float, 4> a, simd::vec<float, 4> b, simd::vec<float, 4> c, simd::vec<float, 4> d) {
-  uint32x4_t mask = vcgtq_f32(a.v, b.v);
-  return simd::vec<float, 4>{vbslq_f32(mask, c.v, d.v)};
-}
-}
-} // namespace ynn
-"""
 
   def update_for_fp16(self):
     """Updates the target for FP16 support."""
@@ -57,22 +46,16 @@ YNN_INTRINSIC simd::vec<float, 4> select_greater_than(simd::vec<float, 4> a, sim
 
     self.header += "#include <arm_neon.h>\n"
     self.header += (
-        '#include "ynnpack/base/simd/arm_neon.h"\n'
+        '#include "ynnpack/base/simd/arm_vec128.h"\n'
     )
 
     if "NEON" in all_features:
       self.update_for_neon()
     if "NEONFP16" in all_features:
-      self.header += (
-          '#include "ynnpack/base/simd/arm_neonfp16.h"\n'
-      )
       self.update_for_fp16()
     if "NEONBF16" in all_features:
       self.update_for_bf16()
     if "FMA" in all_features:
-      self.header += (
-          '#include "ynnpack/base/simd/arm_neonfma.h"\n'
-      )
       self.update_for_fma()
 
   def arch_flags(self):

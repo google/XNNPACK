@@ -181,11 +181,11 @@ void check_results(const OpInfo& op, const Tensor<quantized<A>>& a,
     const float a_i = dequantize(a(i), a_quantization);
     const float b_i = dequantize(b(i), b_quantization);
     float expected = op(a_i, b_i);
-    expected = fake_quantize(expected, x_quantization);
-    expected = clamp_float_to_int<X>(expected);
     if (std::isnan(expected)) {
       // We don't know how to represent NaN for quantized types.
     } else {
+      expected = fake_quantize(expected, x_quantization);
+      expected = clamp_float_to_int<X>(expected);
       ASSERT_NEAR(expected, x(i), 1)
           << "i = " << index_to_string(i) << ", a(i) = " << a_i << " ("
           << static_cast<int32_t>(a(i)) << ")"

@@ -212,7 +212,6 @@ XNNPACK_PARAMS_FOR_ARCH = {
         ],
         extra_deps = [
             "//src/configs:config_hdrs",
-            "@FXdiv",
         ],
     ),
 

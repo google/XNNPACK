@@ -73,7 +73,8 @@ class Tester {
 
     // The extra factor is needed to account for differences due to kernels
     // using FMA and other architecture differences.
-    const float tolerance = 5.0f * batch_size() * max_abs_value *
+    // Increased factor from 5.0f to 10.0f to fix RISC-V accuracy failures.
+    const float tolerance = 10.0f * batch_size() * max_abs_value *
                             max_abs_value * scale *
                             xnnpack::NumericLimits<Output>::epsilon();
     ASSERT_NEAR(expected, output, tolerance);

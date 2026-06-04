@@ -11,9 +11,9 @@ namespace ynn {
 void define_copy(ynn_subgraph& subgraph, ynn_node& node, uint32_t input_id,
                  uint32_t output_id, uint32_t flags);
 
-void define_static_expand_dims(ynn_subgraph& subgraph, ynn_node& node,
-                               uint32_t input_id, uint32_t* output_id,
-                               const axes_set& new_axes);
+void define_static_broadcast(ynn_subgraph& subgraph, ynn_node& node,
+                             std::vector<size_t> new_dims, uint32_t input_id,
+                             uint32_t* output_id);
 
 }  // namespace ynn
 

@@ -126,6 +126,37 @@ static enum xnn_status reshape_concatenate_operator(
   if (axis < 0) {
     axis += values[input_id[0]].shape.num_dims;
   }
+
+  // All inputs must share the same rank and identical dimensions on every axis
+  // except the concatenation axis. Without this check, an input whose post-axis
+  // dimensions differ from input0's would make the per-row copy stride exceed
+  // the output buffer size computed below (which is derived from input0's
+  // shape), producing an out-of-bounds write in the copy micro-kernel.
+  const size_t num_dims = values[input_id[0]].shape.num_dims;
+  for (size_t i = 1; i < num_inputs; ++i) {
+    if (values[input_id[i]].shape.num_dims != num_dims) {
+      xnn_log_error(
+          "failed to reshape %s operator: input #%zu has %zu dimensions but "
+          "input #0 has %zu dimensions; all inputs must have the same rank",
+          xnn_node_type_to_string(xnn_node_type_concatenate), i,
+          values[input_id[i]].shape.num_dims, num_dims);
+      return xnn_status_invalid_parameter;
+    }
+    for (size_t j = 0; j < num_dims; ++j) {
+      if ((int32_t) j != axis &&
+          values[input_id[i]].shape.dim[j] != values[input_id[0]].shape.dim[j]) {
+        xnn_log_error(
+            "failed to reshape %s operator: input #%zu dimension %zu (%zu) does "
+            "not match input #0 dimension %zu (%zu); all inputs must have "
+            "identical dimensions except along the concatenation axis (%d)",
+            xnn_node_type_to_string(xnn_node_type_concatenate), i, j,
+            values[input_id[i]].shape.dim[j], j,
+            values[input_id[0]].shape.dim[j], axis);
+        return xnn_status_invalid_parameter;
+      }
+    }
+  }
+
   size_t output_stride = 0;
   for (size_t i = 0; i < num_inputs; ++i) {
     for (size_t j = axis; j < values[input_id[0]].shape.num_dims; j++) {

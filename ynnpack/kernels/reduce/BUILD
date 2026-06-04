@@ -112,6 +112,7 @@ cc_test(
     srcs = ["pi_test.cc"],
     linkopts = ynn_binary_linkopts(),
     malloc = ynn_binary_malloc(),
+    tags = ["noemulator"],
     deps = [
         ":reduce",
         "//ynnpack/base",

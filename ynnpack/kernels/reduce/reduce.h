@@ -52,6 +52,9 @@ reduce_kernel get_min_kernel(ynn_type type);
 reduce_kernel get_max_kernel(ynn_type type);
 reduce_kernel get_min_max_kernel(ynn_type type);
 
+reduce_kernel get_reduce_kernel(ynn_reduce_operator op, ynn_type a_type,
+                                ynn_type c_type);
+
 }  // namespace ynn
 
 #endif  // XNNPACK_YNNPACK_KERNELS_REDUCE_REDUCE_H_

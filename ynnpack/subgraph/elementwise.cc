@@ -236,7 +236,11 @@ ynn_status create_unary(const ynn_node& node, ynn_runtime& runtime,
   x.make_buffer(runtime);
   std::vector<slinky::var> dims = runtime.globals.make_dims(x.rank());
   slinky::box_expr bounds = make_elementwise_bounds(dims, a.physical_extents());
-
+  if (!bounds.empty() &&
+      type_element_count(a.type) > type_element_count(x.type)) {
+    bounds[0] =
+        (bounds[0] * type_element_count(x.type)) / type_element_count(a.type);
+  }
   slinky::call_stmt::attributes attrs;
   attrs.name = to_string(std::get<ynn_node::unary_elementwise>(node.op).op);
   attrs.allow_in_place = compute_allow_in_place(node, *runtime.subgraph);
@@ -245,8 +249,20 @@ ynn_status create_unary(const ynn_node& node, ynn_runtime& runtime,
       make_unary_elementwise_impl(kernel, params),
       {{a.buffer, std::move(bounds)}}, {{x.buffer, dims}}, std::move(attrs));
 
-  auto sched =
-      runtime.make_schedule(dims, x.physical_extents(), x.buffer->elem_size());
+  std::vector<slinky::expr> given_splits = {};
+  // We don't want to split the innermost dimension if the type of the input is
+  // sub-byte.
+  if (type_element_count(a.type) > type_element_count(x.type)) {
+    given_splits.push_back(x.physical_extent(0));
+  }
+  auto sched = runtime.make_schedule(dims, x.physical_extents(),
+                                     x.buffer->elem_size(), given_splits);
+
+  if (sched && !sched->loop_splits.empty() &&
+      type_element_count(a.type) > type_element_count(x.type)) {
+    sched->loop_splits[0].step_is_required = true;
+  }
+
   func.user_data() = sched.get();
   runtime.scheduling_info_storage.push_back(std::move(sched));
 
@@ -662,17 +678,17 @@ ynn_status ynn_define_convert(ynn_subgraph_t subgraph, uint32_t input_id,
     // We either have quantization data to handle for a requantization, or we
     // don't have a kernel for this conversion. Handle it by converting to an
     // intermediate float.
-    uint32_t intermediate_id = YNN_INVALID_VALUE_ID;
-    ynn_status status =
-        ynn_define_tensor(subgraph, ynn_type_fp32, /*rank=*/0, /*dims=*/nullptr,
-                          /*data=*/nullptr, /*flags=*/0, &intermediate_id);
-    if (status != ynn_status_success) {
-      return status;
+    if (a.type == ynn_type_fp32) {
+      // This was already float, we must not support this conversion.
+      YNN_LOG_ERROR() << "Unsupported conversion from fp32 to "
+                      << to_string(x.type);
+      return ynn_status_unsupported_parameter;
     }
 
-    status = ynn_define_convert_v2(subgraph, input_id, ynn_type_fp32,
-                                   &intermediate_id,
-                                   /*flags=*/0);
+    uint32_t intermediate_id = YNN_INVALID_VALUE_ID;
+    ynn_status status = ynn_define_convert_v2(subgraph, input_id, ynn_type_fp32,
+                                              &intermediate_id,
+                                              /*flags=*/0);
     if (status != ynn_status_success) {
       return status;
     }

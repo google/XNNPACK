@@ -4,7 +4,7 @@
 # LICENSE file in the root directory of this source tree.
 
 load("@rules_cc//cc:cc_test.bzl", "cc_test")
-load("//ynnpack:build_defs.bzl", "ynn_arch_copts", "ynn_arch_flag", "ynn_binary_linkopts", "ynn_binary_malloc", "ynn_if_arch", "ynn_test_deps")
+load("//ynnpack:build_defs.bzl", "ynn_arch_copts", "ynn_arch_defines", "ynn_binary_linkopts", "ynn_binary_malloc", "ynn_if_arch", "ynn_test_deps")
 
 package(default_visibility = ["//ynnpack:__subpackages__"])
 
@@ -23,14 +23,12 @@ package(default_visibility = ["//ynnpack:__subpackages__"])
         "-use_header_modules",
     ],
     linkopts = ynn_binary_linkopts(),
-    local_defines = ynn_if_arch(
-        arch,
-        ["YNN_ARCH=" + ynn_arch_flag(arch)],
-    ) + ["YNN_ARCH_" + arch.upper()],
+    local_defines = ynn_arch_defines(arch),
     malloc = ynn_binary_malloc(),
     deps = [
         "//ynnpack/base",  # buildcleaner:keep
         "//ynnpack/base/simd",  # buildcleaner:keep
+        "//ynnpack/base/simd:emulate_fma",
         "//ynnpack/base/test:fuzz_test",
         "//ynnpack/base/test:random",
         "@slinky//slinky/base",
@@ -39,15 +37,19 @@ package(default_visibility = ["//ynnpack:__subpackages__"])
     "arm_neon",
     "arm_neonbf16",
     "arm_neonfp16",
+    "arm_neonfp16arith",
     "arm_neonfma",
     "arm64_neon",
     "arm64_sve",
     "x86_sse2",
+    "x86_sse2_fma",
     "x86_sse41",
     "x86_avx",
     "x86_avx2",
+    "x86_avx2_fma3",
     "x86_avx512",
     "x86_avx512bf16",
+    "x86_avx512fp16",
     "x86_f16c",
     "x86_fma3",
     "hexagon_hvx",

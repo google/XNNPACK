@@ -27,6 +27,9 @@
 #ifdef YNN_ARCH_X86_SSE2
 #include "ynnpack/kernels/unary/x86_sse2.inc"
 #endif  // YNN_ARCH_X86_SSE2
+#ifdef YNN_ARCH_X86_SSE2_FMA
+#include "ynnpack/kernels/unary/x86_sse2_fma.inc"
+#endif  // YNN_ARCH_X86_SSE2_FMA
 
 #ifdef YNN_ARCH_ARM_NEONBF16
 #include "ynnpack/kernels/unary/arm_neonbf16.inc"

@@ -101,6 +101,8 @@ xnn_init_f16_gelu_config();
 XNN_INTERNAL const struct xnn_unary_elementwise_config*
 xnn_init_f16_hswish_config();
 XNN_INTERNAL const struct xnn_unary_elementwise_config*
+xnn_init_f16_log_config();
+XNN_INTERNAL const struct xnn_unary_elementwise_config*
 xnn_init_f16_lrelu_config();
 XNN_INTERNAL const struct xnn_unary_elementwise_config*
 xnn_init_f16_log_config();

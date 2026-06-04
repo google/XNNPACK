@@ -426,4 +426,83 @@ static XNN_INLINE void xnn_store_tail_f32(float* output, xnn_simd_f32_t v,
   return Q6_V_vstu_variable(output, num_elements << XNN_LOG2_SIZEOF_FLOAT, v);
 }
 
+// SIMD vector type for f16 using HVX.
+typedef HVX_Vector xnn_simd_f16_t;
+
+#if __HVX_ARCH__ >= 81
+static XNN_INLINE xnn_simd_f16_t xnn_loadu_f16(const xnn_float16* ptr) {
+  return *((const HVX_UVector*)ptr);
+}
+
+static XNN_INLINE void xnn_storeu_f16(xnn_float16* ptr, xnn_simd_f16_t v) {
+  *((HVX_UVector*)ptr) = v;
+}
+
+static XNN_INLINE xnn_simd_f32_t xnn_cvt_f32_f16(xnn_simd_f16_t a) {
+  return Q6_V_lo_W(Q6_Wsf_vcvt_Vhf(a));
+}
+
+static XNN_INLINE xnn_simd_f16_t xnn_cvt_f16_f32(xnn_simd_f32_t a) {
+  return Q6_Vhf_vcvt_VsfVsf(a, Q6_V_vzero());
+}
+
+static XNN_INLINE xnn_simd_f16_t xnn_load_tail_f16(const xnn_float16* input,
+                                                   size_t num_elements) {
+  XNN_ALIGN(128) xnn_float16 padded[64] = {0};
+  memcpy(padded, input, num_elements * sizeof(xnn_float16));
+  return *(const HVX_Vector*)padded;
+}
+
+static XNN_INLINE void xnn_store_tail_f16(xnn_float16* output, xnn_simd_f16_t v,
+                                          size_t num_elements) {
+  Q6_V_vstu_variable(output, num_elements * sizeof(xnn_float16), v);
+}
+#else   // __HVX_ARCH__ < 81
+static XNN_INLINE xnn_simd_f16_t xnn_loadu_f16(const xnn_float16* ptr) {
+  XNN_ALIGN(128) xnn_float16 padded[64] = {0};
+  memcpy(padded, ptr, 32 * sizeof(xnn_float16));
+  return *(const HVX_Vector*)padded;
+}
+
+static XNN_INLINE void xnn_storeu_f16(xnn_float16* ptr, xnn_simd_f16_t v) {
+  XNN_ALIGN(128) xnn_float16 padded[64];
+  *(HVX_Vector*)padded = v;
+  memcpy(ptr, padded, 32 * sizeof(xnn_float16));
+}
+
+static XNN_INLINE xnn_simd_f32_t xnn_cvt_f32_f16(xnn_simd_f16_t a) {
+  XNN_ALIGN(128) xnn_float16 input[64];
+  XNN_ALIGN(128) float output[32];
+  *(HVX_Vector*)input = a;
+  for (size_t k = 0; k < 32; ++k) {
+    output[k] = xnn_float16_to_float(input[k]);
+  }
+  return *(const HVX_Vector*)output;
+}
+
+static XNN_INLINE xnn_simd_f16_t xnn_cvt_f16_f32(xnn_simd_f32_t a) {
+  XNN_ALIGN(128) float input[32];
+  XNN_ALIGN(128) xnn_float16 output[64] = {0};
+  *(HVX_Vector*)input = a;
+  for (size_t k = 0; k < 32; ++k) {
+    output[k] = xnn_float16_from_float(input[k]);
+  }
+  return *(const HVX_Vector*)output;
+}
+
+static XNN_INLINE xnn_simd_f16_t xnn_load_tail_f16(const xnn_float16* input,
+                                                   size_t num_elements) {
+  XNN_ALIGN(128) xnn_float16 padded[64] = {0};
+  memcpy(padded, input, num_elements * sizeof(xnn_float16));
+  return *(const HVX_Vector*)padded;
+}
+
+static XNN_INLINE void xnn_store_tail_f16(xnn_float16* output, xnn_simd_f16_t v,
+                                          size_t num_elements) {
+  XNN_ALIGN(128) xnn_float16 padded[64];
+  *(HVX_Vector*)padded = v;
+  memcpy(output, padded, num_elements * sizeof(xnn_float16));
+}
+#endif  // __HVX_ARCH__ >= 81
+
 #endif  // XNNPACK_SRC_XNNPACK_SIMD_F32_HVX_H_

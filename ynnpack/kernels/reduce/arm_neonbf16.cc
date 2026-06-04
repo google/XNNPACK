@@ -9,7 +9,7 @@
 #include <type_traits>
 
 #include "ynnpack/base/arithmetic.h"
-#include "ynnpack/base/simd/arm_neon.h"
+#include "ynnpack/base/simd/arm_vec128.h"
 #include "ynnpack/kernels/reduce/generic.h"
 #include "ynnpack/kernels/reduce/min_max.h"
 #include "ynnpack/kernels/reduce/reduce.h"

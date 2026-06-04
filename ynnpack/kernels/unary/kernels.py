@@ -153,3 +153,10 @@ def poly3_fp64(a, x, c0, c1, c2, c3):
   vp = multiply_add(vx, vp, c1)
   vp = multiply_add(vx, vp, c0)
   return store(vp, x)
+
+
+@const_buffer("a", Float(32))
+@buffer("x", Float(32))
+@operator_name("round_to_bf16")
+def round_to_bf16_fp32(a, x):
+  return store(cast(Float(32), cast(BFloat(16), load(a))), x)
