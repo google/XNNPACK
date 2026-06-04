@@ -4179,11 +4179,11 @@ static bool is_qs8_to_f32_dequant(const struct xnn_subgraph* subgraph,
 }
 
 static bool rewrite_dequant_bmm_at(xnn_subgraph_t subgraph, uint32_t node_id) {
-  // Reserve space upfront (we'll add 1 value + 1 node) so the later
+  // Reserve space upfront (we'll add 2 values + 2 nodes) so the later
   // `xnn_subgraph_new_internal_value` / `xnn_subgraph_new_node` calls do not
   // each trigger an additional reallocation or invalidate pointers.
-  if (xnn_subgraph_reserve_values(subgraph, 1) != xnn_status_success ||
-      xnn_subgraph_reserve_nodes(subgraph, 1) != xnn_status_success) {
+  if (xnn_subgraph_reserve_values(subgraph, 2) != xnn_status_success ||
+      xnn_subgraph_reserve_nodes(subgraph, 2) != xnn_status_success) {
     return false;
   }
 
@@ -4250,6 +4250,7 @@ static bool rewrite_dequant_bmm_at(xnn_subgraph_t subgraph, uint32_t node_id) {
   }
 
   const struct xnn_shape b_shape = b_qint8_value->shape;
+  const struct xnn_shape a_shape = a_value->shape;
 
   // Create new internal value: b in qcint8. Channelwise scale array is left
   // null here; `convert(qint8 -> qcint8)` populates it at reshape.
@@ -4268,6 +4269,23 @@ static bool rewrite_dequant_bmm_at(xnn_subgraph_t subgraph, uint32_t node_id) {
   b_qcint8_value->allocation_type = xnn_allocation_type_workspace;
   const uint32_t b_qcint8_id = b_qcint8_value->id;
 
+  // Create new internal value: a in qdint8.
+  struct xnn_value* a_qdint8_value = xnn_subgraph_new_internal_value(subgraph);
+  if (a_qdint8_value == NULL) {
+    return false;
+  }
+  a_qdint8_value->type = xnn_value_type_dense_tensor;
+  a_qdint8_value->datatype = xnn_datatype_qdint8;
+  a_qdint8_value->quantization.num_nonbatch_dims = 2;
+  a_qdint8_value->shape = a_shape;
+  a_qdint8_value->size = xnn_tensor_get_size(a_qdint8_value);
+  a_qdint8_value->quantization.dynamic_params_size =
+      xnn_tensor_get_dynamic_quant_param_size(
+          a_qdint8_value->datatype, &a_qdint8_value->shape,
+          a_qdint8_value->quantization.num_nonbatch_dims);
+  a_qdint8_value->allocation_type = xnn_allocation_type_workspace;
+  const uint32_t a_qdint8_id = a_qdint8_value->id;
+
   struct xnn_node* qs8_to_qc8_node = xnn_subgraph_new_node(subgraph);
 
   if (qs8_to_qc8_node == NULL) {
@@ -4277,12 +4295,24 @@ static bool rewrite_dequant_bmm_at(xnn_subgraph_t subgraph, uint32_t node_id) {
   xnn_init_convert_node(qs8_to_qc8_node, b_qint8_id, b_qcint8_id,
                         /*flags=*/0);
 
+  struct xnn_node* f32_to_qd8_node = xnn_subgraph_new_node(subgraph);
+
+  if (f32_to_qd8_node == NULL) {
+    return false;
+  }
+
+  xnn_init_convert_node(f32_to_qd8_node, input_a_id, a_qdint8_id,
+                        /*flags=*/0);
+
   node = &subgraph->nodes[node_id];
+  node->inputs[0] = a_qdint8_id;
   node->inputs[1] = b_qcint8_id;
 
-  xnn_log_info("Rewrote bmm Node #%" PRIu32 ": dequant(qint8 #%" PRIu32
-               ") -> qcint8 #%" PRIu32,
-               node_id, b_qint8_id, b_qcint8_id);
+  xnn_log_info(
+      "Rewrote bmm Node #%" PRIu32
+      ": dequant(qint8 #%" PRIu32 ") -> qcint8 #%" PRIu32
+      ", a:f32 #%" PRIu32 " -> qdint8 #%" PRIu32,
+      node_id, b_qint8_id, b_qcint8_id, input_a_id, a_qdint8_id);
   return true;
 }
 
@@ -4556,8 +4586,6 @@ enum xnn_status xnn_subgraph_optimize(xnn_subgraph_t subgraph,
     xnn_subgraph_rewrite_for_nchw(subgraph);
   }
 #endif
-
-  XNN_RETURN_IF_ERROR(xnn_subgraph_rewrite_dequant_bmm(subgraph));
 
   XNN_RETURN_IF_ERROR(
       xnn_subgraph_optimize_packed_lhs(subgraph, optimization_flags));

@@ -660,60 +660,65 @@ TEST(BatchMatrixMultiplyF32QC8W, dont_inline_lhs_static_b) {
 }
 #endif  // XNNPACK_USE_YNNPACK
 
-#ifndef XNNPACK_USE_YNNPACK
-// Verifies the `bmm(a:f32, dequant(b:qint8):f32)` -> `bmm(a:f32, b:qcint8)`
-// rewrite at the subgraph level.
-TEST(BatchMatrixMultiplyDequantBmmRewrite, dynamic_b) {
-  const uint32_t external_input_a = 0;
-  const uint32_t external_input_b = 1;
-  const uint32_t external_output = 2;
-  uint32_t internal_b_f32 = XNN_INVALID_VALUE_ID;
-  const uint32_t flags =
-      xnn_test_runtime_flags() | XNN_FLAG_NO_INLINED_LHS_PACKING;
-  SubgraphTester tester(/*external_value_ids=*/3, flags);
-  tester.AddInputTensorF32({2, 3, 4}, external_input_a)
-      .AddInputTensorQS8(/*zero_point=*/0, /*scale=*/0.125f, {2, 4, 5},
-                         external_input_b)
-      .AddInternalDynamicTensorF32({2, 4, 5}, &internal_b_f32)
-      .AddOutputTensor({2, 3, 5}, xnn_datatype_fp32, external_output)
-      .AddConvert(external_input_b, internal_b_f32)
-      .AddBatchMatrixMultiply(external_input_a, internal_b_f32, external_output)
-      .Optimize(flags);
+// TODO(aelphy): Re-enable this test once gemma 4 precision is fixed or rewrite
+// is behind a flag.
+// #ifndef XNNPACK_USE_YNNPACK
+// // Verifies the `bmm(a:f32, dequant(b:qint8):f32)` -> `bmm(qdint8, qcint8)`
+// // rewrite at the subgraph level. With `XNN_FLAG_NO_INLINED_LHS_PACKING` we
+// // keep the inserted `convert(f32 -> qdint8)` as a standalone node so the
+// // rewrite is observable without further coalescing by `optimize_packed_lhs`.
+// TEST(BatchMatrixMultiplyDequantBmmRewrite, dynamic_b) {
+//   const uint32_t external_input_a = 0;
+//   const uint32_t external_input_b = 1;
+//   const uint32_t external_output = 2;
+//   uint32_t internal_b_f32 = XNN_INVALID_VALUE_ID;
+//   const uint32_t flags =
+//       xnn_test_runtime_flags() | XNN_FLAG_NO_INLINED_LHS_PACKING;
+//   SubgraphTester tester(/*external_value_ids=*/3, flags);
+//   tester.AddInputTensorF32({2, 3, 4}, external_input_a)
+//       .AddInputTensorQS8(/*zero_point=*/0, /*scale=*/0.125f, {2, 4, 5},
+//                          external_input_b)
+//       .AddInternalDynamicTensorF32({2, 4, 5}, &internal_b_f32)
+//       .AddOutputTensor({2, 3, 5}, xnn_datatype_fp32, external_output)
+//       .AddConvert(external_input_b, internal_b_f32)
+//       .AddBatchMatrixMultiply(external_input_a, internal_b_f32, external_output)
+//       .Optimize(flags);
 
-  const xnn_node* bmm_node = nullptr;
-  for (size_t i = 0; i < tester.NumNodes(); i++) {
-    const xnn_node* n = tester.Node(i);
-    if (n->type == xnn_node_type_batch_matrix_multiply) {
-      bmm_node = n;
-      break;
-    }
-  }
-  ASSERT_NE(bmm_node, nullptr) << "bmm node missing after rewrite";
-  const enum xnn_datatype a_dt = tester.Value(bmm_node->inputs[0])->datatype;
-  ASSERT_EQ(a_dt, xnn_datatype_fp32)
-      << "bmm input A should remain fp32, got " << a_dt;
-  const xnn_value* b_qcint8 = tester.Value(bmm_node->inputs[1]);
-  ASSERT_EQ(b_qcint8->datatype, xnn_datatype_qcint8)
-      << "bmm input B should be rewritten to qcint8";
-  // Channel dimension is set structurally by the rewrite; the per-channel
-  // scale array is materialized later by the convert operator at reshape.
-  ASSERT_EQ(b_qcint8->quantization.channel_dimension,
-            b_qcint8->shape.num_dims - 1)
-      << "qcint8 channel_dimension should track the bmm output dim";
+//   const xnn_node* bmm_node = nullptr;
+//   for (size_t i = 0; i < tester.NumNodes(); i++) {
+//     const xnn_node* n = tester.Node(i);
+//     if (n->type == xnn_node_type_batch_matrix_multiply) {
+//       bmm_node = n;
+//       break;
+//     }
+//   }
+//   ASSERT_NE(bmm_node, nullptr) << "bmm node missing after rewrite";
+//   const enum xnn_datatype a_dt = tester.Value(bmm_node->inputs[0])->datatype;
+//   ASSERT_TRUE(a_dt == xnn_datatype_qdint8 || a_dt == xnn_datatype_qduint8
+//                                           || a_dt == xnn_datatype_qpint8)
+//       << "bmm input A should be rewritten to qdXint8 or qpint8, got " << a_dt;
+//   const xnn_value* b_qcint8 = tester.Value(bmm_node->inputs[1]);
+//   ASSERT_EQ(b_qcint8->datatype, xnn_datatype_qcint8)
+//       << "bmm input B should be rewritten to qcint8";
+//   // Channel dimension is set structurally by the rewrite; the per-channel
+//   // scale array is materialized later by the convert operator at reshape.
+//   ASSERT_EQ(b_qcint8->quantization.channel_dimension,
+//             b_qcint8->shape.num_dims - 1)
+//       << "qcint8 channel_dimension should track the bmm output dim";
 
-  // The original dequant convert (qint8 -> f32) should be gone.
-  for (size_t i = 0; i < tester.NumNodes(); i++) {
-    const xnn_node* n = tester.Node(i);
-    if (n->type == xnn_node_type_unary_elementwise &&
-        n->unary_operator == xnn_unary_convert) {
-      const xnn_value* in = tester.Value(n->inputs[0]);
-      const xnn_value* out = tester.Value(n->outputs[0]);
-      EXPECT_FALSE(in->datatype == xnn_datatype_qint8 &&
-                   out->datatype == xnn_datatype_fp32)
-          << "stale dequant(qint8 -> f32) survived rewrite";
-    }
-  }
-}
-#endif  // XNNPACK_USE_YNNPACK
+//   // The original dequant convert (qint8 -> f32) should be gone.
+//   for (size_t i = 0; i < tester.NumNodes(); i++) {
+//     const xnn_node* n = tester.Node(i);
+//     if (n->type == xnn_node_type_unary_elementwise &&
+//         n->unary_operator == xnn_unary_convert) {
+//       const xnn_value* in = tester.Value(n->inputs[0]);
+//       const xnn_value* out = tester.Value(n->outputs[0]);
+//       EXPECT_FALSE(in->datatype == xnn_datatype_qint8 &&
+//                    out->datatype == xnn_datatype_fp32)
+//           << "stale dequant(qint8 -> f32) survived rewrite";
+//     }
+//   }
+// }
+// #endif  // XNNPACK_USE_YNNPACK
 
 }  // namespace xnnpack
