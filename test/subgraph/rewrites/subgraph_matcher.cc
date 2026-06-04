@@ -490,16 +490,16 @@ class LogGraphStreamAdapter {
     // Get position in file for length.
     int64_t pos = _ftelli64(out);
     // Allocate buffer.
-    str = malloc(pos + 1, sizeof(char));
+    str = reinterpret_cast<char*>(malloc(pos + 1));
     // Read temp file.
     fseek(out, 0, SEEK_SET);
-    len = fread(str, pos, sizeof(char), pos, out);
+    len = fread(str, sizeof(char), static_cast<size_t>(pos), out);
     if (len == 0 && errno == EINVAL) {
       const char error_msg[] = "<error reading tmp file to get graph log>";
-      str = malloc(sizeof(error_msg));
+      str = reinterpret_cast<char*>(malloc(sizeof(error_msg)));
       std::memcpy(str, error_msg, sizeof(error_msg));
     } else {
-      str[bytes_read] = '\0';
+      str[len] = '\0';
     }
 #endif
     fclose(out);
