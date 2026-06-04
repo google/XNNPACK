@@ -12,6 +12,7 @@
 #endif  // XNN_ENABLE_CPUINFO
 
 #include "src/xnnpack/common.h"
+#include "src/xnnpack/init-once.h"
 
 #if _WIN32
   #include <windows.h>
@@ -187,6 +188,9 @@ static bool supports_rvv_fp16() {
 
 static struct xnn_hardware_config hardware_config = {0};
 
+static struct xnn_hardware_config original_hardware_config = {0};
+static bool original_hardware_config_saved = false;
+
 XNN_INIT_ONCE_GUARD(hardware);
 
 static void set_arch_flag(uint64_t flag, bool value) {
@@ -198,6 +202,9 @@ static void set_arch_flag(uint64_t flag, bool value) {
 }
 
 static void init_hardware_config(void) {
+  if (original_hardware_config_saved) {
+    return;
+  }
   hardware_config.arch_flags = 0;
 #if (XNN_ARCH_ARM64 || XNN_ARCH_ARM) && XNN_ENABLE_CPUINFO
 #if XNN_PLATFORM_WINDOWS
@@ -537,4 +544,26 @@ const struct xnn_hardware_config* xnn_init_hardware_config() {
 
   XNN_INIT_ONCE(hardware);
   return &hardware_config;
+}
+
+void xnn_set_hardware_config(const struct xnn_hardware_config* config) {
+  const struct xnn_hardware_config* current = xnn_init_hardware_config();
+  if (current != NULL && !original_hardware_config_saved) {
+    original_hardware_config = hardware_config;
+    original_hardware_config_saved = true;
+  }
+  if (config != NULL) {
+    hardware_config = *config;
+  }
+  xnn_reset_all_init_guards();
+}
+
+void xnn_reset_hardware_config(void) {
+  if (original_hardware_config_saved) {
+    hardware_config = original_hardware_config;
+    original_hardware_config_saved = false;
+  } else {
+    xnn_init_hardware_config();
+  }
+  xnn_reset_all_init_guards();
 }

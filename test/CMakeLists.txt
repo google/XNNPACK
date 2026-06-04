@@ -389,6 +389,7 @@ SET(MICROKERNEL_VUNARY_TESTS
     f16-vexp
     f16-vgelu
     f16-vhswish
+    f16-vlog
     f16-vlrelu
     f16-vneg
     f16-vrndd

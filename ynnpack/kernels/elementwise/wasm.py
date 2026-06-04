@@ -10,17 +10,6 @@ class WASM(Target):
 
   def update_for_simd128(self):
     """Updates the target for WASM SIMD128 support."""
-    self.header += """
-namespace ynn {
-namespace {
-template <>
-YNN_INTRINSIC simd::vec<float, 4> select_greater_than(simd::vec<float, 4> a, simd::vec<float, 4> b, simd::vec<float, 4> c, simd::vec<float, 4> d) {
-  v128_t mask = wasm_f32x4_gt(a.v, b.v);
-  return simd::vec<float, 4>{wasm_v128_bitselect(c.v, d.v, mask)};
-}
-}
-} // namespace ynn
-"""
 
   def __init__(self, features):
     Target.__init__(self)

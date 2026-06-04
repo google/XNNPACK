@@ -7,6 +7,7 @@
 #define XNNPACK_YNNPACK_BASE_HALF_H_
 
 #include <cstdint>
+#include <type_traits>
 
 // We want to use _Float16 if the compiler supports it fully, but it's
 // tricky to do this detection; there are compiler versions that define the
@@ -62,6 +63,8 @@ class half {
 
   constexpr operator float() const { return value_; }  // NOLINT
 
+  constexpr half operator-() const { return half(-static_cast<float>(value_)); }
+
   static half from_bits(uint16_t bits) {
     half result;
     result.value_ = bit_cast<_Float16>(bits);
@@ -76,12 +79,21 @@ class half {
   // the various tools for doing that are not constepxr (bit_cast,
   // std::numeric_limits, etc.).
   static constexpr half epsilon() { return 0.0009765625f; }
-  static constexpr half infinity() { return INFINITY; }
+  static constexpr half infinity() {
+    return std::numeric_limits<float>::infinity();
+  }
+  static constexpr half nan() {
+    return std::numeric_limits<float>::quiet_NaN();
+  }
   static constexpr half min() { return -65504.0f; }
   static constexpr half max() { return 65504.0f; }
   static constexpr half smallest_normal() { return 0.00006103515625f; }
-  static constexpr half min_identity() { return INFINITY; }
-  static constexpr half max_identity() { return -INFINITY; }
+  static constexpr half min_identity() {
+    return std::numeric_limits<float>::infinity();
+  }
+  static constexpr half max_identity() {
+    return -std::numeric_limits<float>::infinity();
+  }
   static constexpr half sum_identity() { return 0.0f; }
 
   // Not private due to -Werror=class-memaccess, which can't be disabled:
@@ -111,6 +123,8 @@ class half {
 
   operator float() const { return fp16_ieee_to_fp32_value(bits_); }  // NOLINT
 
+  constexpr half operator-() const { return half::from_bits(bits_ ^ 0x8000); }
+
   static constexpr half from_bits(uint16_t bits) {
     half result{zero_initializer{}};
     result.bits_ = bits;
@@ -129,6 +143,7 @@ class half {
     return half::from_bits(0x1400);  // 2^-10 = 0.0009765625
   }
   static constexpr half infinity() { return from_bits(0x7c00); }
+  static constexpr half nan() { return from_bits(0x7e00); }
   static constexpr half min() { return from_bits(0xfbff); }
   static constexpr half max() { return from_bits(0x7bff); }
   static constexpr half smallest_normal() {

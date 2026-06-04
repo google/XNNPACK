@@ -483,14 +483,12 @@ size_t static_size_of_inputs(const ynn_subgraph& subgraph,
 }
 
 bool should_constant_fold(const ynn_subgraph& subgraph, const ynn_node& node) {
-  if (std::holds_alternative<ynn_node::broadcast>(node.op) ||
-      std::holds_alternative<ynn_node::broadcast_like>(node.op) ||
+  if (std::holds_alternative<ynn_node::broadcast_like>(node.op) ||
       std::holds_alternative<ynn_node::fuse_dim>(node.op) ||
       std::holds_alternative<ynn_node::fuse_dims>(node.op) ||
       std::holds_alternative<ynn_node::split_dim>(node.op) ||
       std::holds_alternative<ynn_node::split_dims>(node.op) ||
       std::holds_alternative<ynn_node::static_broadcast>(node.op) ||
-      std::holds_alternative<ynn_node::static_expand_dims>(node.op) ||
       std::holds_alternative<ynn_node::static_reshape>(node.op) ||
       std::holds_alternative<ynn_node::static_transpose>(node.op)) {
     // Don't constant fold these "free" ops. If we allowed them to constant
@@ -646,9 +644,21 @@ ynn_status ynn_subgraph::fold_constants(slinky::thread_pool* threadpool) {
     return ynn_status_success;
   }
 
+  // Find which constant values are actually needed by the remaining active
+  // nodes of the main subgraph.
+  std::set<uint32_t> needed_constants;
+  for (const ynn_node& node : nodes) {
+    if (!node.is_valid()) continue;
+    for (uint32_t i : node.inputs) {
+      if (i != YNN_INVALID_VALUE_ID && to_fold.count(i)) {
+        needed_constants.insert(i);
+      }
+    }
+  }
+
   // Mark these values as external outputs in `constants` so we can reshape and
   // learn the shape of the constants.
-  for (uint32_t i : to_fold) {
+  for (uint32_t i : needed_constants) {
     constants->values[i].flags |= YNN_VALUE_FLAG_EXTERNAL_OUTPUT;
   }
 
@@ -671,7 +681,7 @@ ynn_status ynn_subgraph::fold_constants(slinky::thread_pool* threadpool) {
   }
 
   // Use the results of reshape to allocate static buffers for the constants.
-  for (uint32_t i : to_fold) {
+  for (uint32_t i : needed_constants) {
     ynn_runtime_value& folded = runtime.value(i);
     assert(values[i].extents.size() == folded.data->rank);
     for (size_t d = 0; d < folded.data->rank; ++d) {
@@ -945,7 +955,6 @@ const char* name_of(const ynn_node::ternary_elementwise&) {
   return "ternary_elementwise";
 }
 const char* name_of(const ynn_node::reduce&) { return "reduce"; }
-const char* name_of(const ynn_node::broadcast&) { return "broadcast"; }
 const char* name_of(const ynn_node::broadcast_like&) {
   return "broadcast_like";
 }
@@ -962,9 +971,6 @@ const char* name_of(const ynn_node::static_reshape&) {
 }
 const char* name_of(const ynn_node::static_broadcast&) {
   return "static_broadcast";
-}
-const char* name_of(const ynn_node::static_expand_dims&) {
-  return "static_expand_dims";
 }
 const char* name_of(const ynn_node::static_pad&) { return "static_pad"; }
 const char* name_of(const ynn_node::static_slice&) { return "static_slice"; }
@@ -1061,10 +1067,6 @@ void print(std::ostream& os, const ynn_node::reduce& op) {
   }
 }
 
-void print(std::ostream& os, const ynn_node::broadcast& op) {
-  os << "axes=" << op.axes;
-}
-
 void print(std::ostream& os, const ynn_node::broadcast_like& op) {
   os << "axes=" << op.axes;
 }
@@ -1105,10 +1107,6 @@ void print(std::ostream& os, const ynn_node::static_reshape& op) {
 
 void print(std::ostream& os, const ynn_node::static_broadcast& op) {
   os << "new_dims=" << op.new_dims;
-}
-
-void print(std::ostream& os, const ynn_node::static_expand_dims& op) {
-  os << "new_axes=" << op.new_axes;
 }
 
 void print(std::ostream& os, const ynn_node::static_pad& op) {

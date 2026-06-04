@@ -1057,6 +1057,123 @@ class BatchMatMulOperatorTester {
     }
   }
 
+  void TestF32QC8W() const {
+    const struct xnn_gemm_config* gemm_config =
+        xnn_init_f32_qc8w_gemm_config();
+    if (gemm_config == nullptr) {
+      GTEST_SKIP();
+    }
+
+    ASSERT_EQ(batch_dims_a().size(), batch_dims_b().size());
+    const size_t num_batch_dims = batch_dims_a().size();
+
+    xnnpack::ReplicableRandomDevice rng;
+    std::uniform_real_distribution<float> f32dist(range_f32_.first,
+                                                  range_f32_.second);
+
+    size_t batch_size_a = 1;
+    for (int k = 0; k < num_batch_dims; k++) {
+      batch_size_a *= batch_dims_a()[k];
+    }
+    size_t batch_size_b = 1;
+    for (int k = 0; k < num_batch_dims; k++) {
+      batch_size_b *= batch_dims_b()[k];
+    }
+    std::vector<size_t> batch_dims_output(num_batch_dims);
+    size_t batch_size_output = 1;
+    for (int k = 0; k < num_batch_dims; k++) {
+      batch_dims_output[k] = std::max(batch_dims_a()[k], batch_dims_b()[k]);
+      batch_size_output *= batch_dims_output[k];
+    }
+
+    xnnpack::Buffer<float> input_a(batch_size_a * m() * k(),
+                                   xnnpack::XnnExtraBytes);
+    xnnpack::Buffer<float> input_b(batch_size_b * k() * n(),
+                                   xnnpack::XnnExtraBytes);
+    xnnpack::Buffer<float> output(batch_size_output * m() * n());
+    xnnpack::Buffer<float> output_ref(batch_size_output * m() * n());
+
+    for (bool const_weights : {true, false}) {
+      for (size_t iteration = 0; iteration < kIterations; iteration++) {
+        std::generate(input_a.begin(), input_a.end(),
+                      [&]() { return f32dist(rng); });
+        std::generate(input_b.begin(), input_b.end(),
+                      [&]() { return f32dist(rng); });
+
+        ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+
+        xnnpack::Buffer<int8_t> input_b_qc8(batch_size_b * k() * n(),
+                                            xnnpack::XnnExtraBytes);
+        xnnpack::Buffer<float> channelwise_scale_b(batch_size_b * n(),
+                                                   xnnpack::XnnExtraBytes);
+        ComputeQC8W(input_b, batch_size_b, input_b_qc8, channelwise_scale_b);
+
+        ComputeReference(batch_dims_output, input_a.data(), input_b.data(),
+                         output_ref.data(), ComputeRef<float>);
+
+        xnn_operator_t batch_matrix_multiply_op = nullptr;
+
+        xnn_status status;
+        if (const_weights) {
+          status =
+              xnn_create_batch_matrix_multiply_nc_f32_qc8w_const_weights(
+                  batch_size_b, k(), n(), input_b_qc8.data(),
+                  channelwise_scale_b.data(), flags(),
+                  &batch_matrix_multiply_op);
+        } else {
+          status = xnn_create_batch_matrix_multiply_nc_f32_qc8w(
+              flags(), &batch_matrix_multiply_op);
+        }
+
+
+        if (status == xnn_status_unsupported_hardware) {
+          GTEST_SKIP();
+        }
+        ASSERT_EQ(xnn_status_success, status);
+        ASSERT_NE(nullptr, batch_matrix_multiply_op);
+
+        std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)>
+            auto_batch_matrix_multiply_op(batch_matrix_multiply_op,
+                                          xnn_delete_operator);
+
+        size_t workspace_size = 0;
+        if (const_weights) {
+          ASSERT_EQ(
+              expected_status_reshape(),
+              xnn_reshape_batch_matrix_multiply_nc_f32_qc8w_const_weights(
+                  batch_matrix_multiply_op, num_batch_dims,
+                  batch_dims_a().data(), batch_dims_b().data(), m(), k(), n(),
+                  &workspace_size, /*threadpool=*/nullptr));
+        } else {
+          ASSERT_EQ(expected_status_reshape(),
+                    xnn_reshape_batch_matrix_multiply_nc_f32_qc8w(
+                        batch_matrix_multiply_op, num_batch_dims,
+                        batch_dims_a().data(), batch_dims_b().data(), m(), k(),
+                        n(), channelwise_scale_b.data(), &workspace_size,
+                        /*threadpool=*/nullptr));
+        }
+        if (expected_status_reshape() != xnn_status_success) {
+          return;
+        }
+        xnnpack::Buffer<uint8_t, XNN_ALLOCATION_ALIGNMENT> workspace(
+            workspace_size);
+        std::fill(workspace.begin(), workspace.end(), 0);
+
+        ASSERT_EQ(xnn_status_success,
+                  xnn_setup_batch_matrix_multiply_nc_f32_qc8w(
+                      batch_matrix_multiply_op, workspace.data(),
+                      input_a.data(),
+                      input_b_qc8.data(),
+                      output.data()));
+
+        ASSERT_EQ(xnn_status_success, xnn_run_operator(batch_matrix_multiply_op,
+                                                       /*threadpool=*/nullptr));
+
+        VerifyF32QC8W(output, output_ref);
+      }
+    }
+  }
+
   void VerifyF16(const xnnpack::Buffer<xnn_float16>& output,
                  const xnnpack::Buffer<float>& output_ref) const {
     const size_t batch_size_output = output.size() / (m() * n());
@@ -1152,6 +1269,29 @@ class BatchMatMulOperatorTester {
         k() * (delta_a * max_abs_b + delta_b * max_abs_a + delta_a * delta_b);
 
     // Verify results.
+    const size_t batch_size_output = output.size() / (m() * n());
+    for (size_t bi = 0; bi < batch_size_output; bi++) {
+      for (size_t mi = 0; mi < m(); mi++) {
+        for (size_t ni = 0; ni < n(); ni++) {
+          ASSERT_NEAR(output_ref[bi * m() * n() + mi * n() + ni],
+                      output[bi * m() * n() + mi * n() + ni], max_abs_err)
+              << "batch = " << bi << " / " << batch_size_output
+              << ", m = " << mi << " / " << m() << ", n = " << ni << " / "
+              << n();
+        }
+      }
+    }
+  }
+
+  void VerifyF32QC8W(const xnnpack::Buffer<float>& output,
+                     const xnnpack::Buffer<float>& output_ref) const {
+    const float max_abs_a =
+        std::max(std::abs(range_f32_.first), std::abs(range_f32_.second));
+    const float max_abs_b =
+        std::max(std::abs(range_f32_.first), std::abs(range_f32_.second));
+    const float delta_b = 0.5f * max_abs_b / std::numeric_limits<int8_t>::max();
+    const float max_abs_err = k() * delta_b * max_abs_a;
+
     const size_t batch_size_output = output.size() / (m() * n());
     for (size_t bi = 0; bi < batch_size_output; bi++) {
       for (size_t mi = 0; mi < m(); mi++) {

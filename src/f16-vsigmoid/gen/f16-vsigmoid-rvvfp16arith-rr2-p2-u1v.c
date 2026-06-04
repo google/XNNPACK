@@ -35,7 +35,7 @@ void xnn_f16_vsigmoid_ukernel__rvvfp16arith_rr2_p2_u1v(
   const xnn_float16 vln2_lo = -0x1.BD0p-13f;
   const xnn_float16 vc2 = 0x1.FE4p-2f;
   const xnn_float16 vc1 = -0x1.038p+0f;
-  const xnn_float16 vdenorm_cutoff = -0x1.368p+3f;
+  const xnn_float16 vdenorm_cutoff = 0x1.368p+3f;
 
   batch >>= XNN_LOG2_SIZEOF_FLOAT16;
   do {
@@ -44,21 +44,7 @@ void xnn_f16_vsigmoid_ukernel__rvvfp16arith_rr2_p2_u1v(
     vfloat16m1_t vx = __riscv_vle16_v_f16m1(input, n);
     input += n;
 
-    // General sigmoid: 1/(1+exp(-x)) = exp(-|x|) / (1+exp(-|x|)) for x>=0
-    // or 1/(1+exp(-x)) = 1 - exp(x) / (1+exp(x)) ... but simpler:
-    // We compute exp(-|x|), then sigmoid = exp(-|x|) / (1 + exp(-|x|)) for x>=0
-    // and sigmoid = 1 / (1 + exp(-|x|)) for x<0... actually:
-    // sigmoid(x) = 1/(1+exp(-x)). Let z = -|x| (always <=0), then
-    // exp(z) is safe. sigmoid(x) = x>=0 ? exp(z)/(1+exp(z)) : 1/(1+exp(z)) NO.
-    // Actually: sigmoid(x) = x>=0 ? 1/(1+exp(-x)) : exp(x)/(1+exp(x))
-    // With z = -|x|: sigmoid = (x>=0) ? exp(z)/(1+exp(z)) is wrong.
-    // Let's use: z = -|x|, compute f=exp(z), sigmoid = f/(1+f) if x>=0, else 1/(1+f)... NO
-    // Correct: sigmoid(x) = 1/(1+exp(-x))
-    //   if x >= 0: exp(-x) = exp(-|x|) = exp(z), sigmoid = 1/(1+exp(z))... nope.
-    // Just do: z = -|x|, f=exp(z). If x<0: sig = f/(1+f). If x>=0: sig = 1/(1+f).
-    // But 1/(1+f) = 1-f/(1+f). So we compute e=f/(1+f), then sig = x<0 ? e : 1-e.
-
-    vfloat16m1_t vz = __riscv_vfneg(__riscv_vfabs(vx, n), n);
+    vfloat16m1_t vz = __riscv_vfabs(vx, n);
 
     // Compute n = round(z * (-log2e)) + magic_bias.
     vfloat16m1_t vn = __riscv_vfmv_v_f_f16m1(vmagic_bias, n);
@@ -83,7 +69,7 @@ void xnn_f16_vsigmoid_ukernel__rvvfp16arith_rr2_p2_u1v(
     vfloat16m1_t vf = __riscv_vfmacc(vs, vp, vt, n);
 
     // Flush denorms.
-    vbool16_t vdenorm_mask = __riscv_vmflt(vz, vdenorm_cutoff, n);
+    vbool16_t vdenorm_mask = __riscv_vmfgt(vz, vdenorm_cutoff, n);
     vf = __riscv_vfmerge(vf, 0.0f, vdenorm_mask, n);
 
     // sigmoid = f / (1 + f).
@@ -91,15 +77,8 @@ void xnn_f16_vsigmoid_ukernel__rvvfp16arith_rr2_p2_u1v(
 
     // Fix sign: if x >= 0, sigmoid = 1 - vy.
     vbool16_t vsign_mask = __riscv_vmfge(vx, 0.0f, n);
-    vy = __riscv_vfmerge(vy, 0.0f, vsign_mask, n);
-    vfloat16m1_t vy_compl = __riscv_vfsub(
-        __riscv_vfdiv(vf, __riscv_vfadd(vf, 1.0f, n), n), 1.0f, n);
-    // Actually cleaner: for x>=0, sig = 1 - f/(1+f) = 1/(1+f)
-    vfloat16m1_t vsig_pos = __riscv_vfdiv(
-        __riscv_vfmv_v_f_f16m1(1.0f, n),
-        __riscv_vfadd(vf, 1.0f, n), n);
-    vfloat16m1_t vsig_neg = __riscv_vfdiv(vf, __riscv_vfadd(vf, 1.0f, n), n);
-    vy = __riscv_vmerge(vsig_neg, vsig_pos, vsign_mask, n);
+    vfloat16m1_t vy_pos = __riscv_vfrsub(vy, 1.0f, n);
+    vy = __riscv_vmerge(vy, vy_pos, vsign_mask, n);
 
     __riscv_vse16(output, vy, n);
     output += n;

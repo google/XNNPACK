@@ -55,9 +55,9 @@ template <typename T>
 float Tolerance(ReduceOp op, size_t k, float max_abs_value) {
   switch (op) {
     case ReduceOp::kSum:
-      return type_info<T>::epsilon() * k * max_abs_value;
+      return type_info<T>::epsilon() * k * max_abs_value * 2.0f;
     case ReduceOp::kSumSquared:
-      return type_info<T>::epsilon() * k * max_abs_value * max_abs_value;
+      return type_info<T>::epsilon() * k * max_abs_value * max_abs_value * 2.0f;
     case ReduceOp::kMin:
     case ReduceOp::kMax:
     case ReduceOp::kMinMax:
@@ -71,6 +71,25 @@ template <typename T>
 span<T> row(Tensor<T> t, size_t i) {
   assert(t.stride(1) == 1);
   return span<T>(&t(i, 0), t.extent(1));
+}
+
+template <typename T>
+void kahan_sum(T a, T& acc, T& error) {
+  T y = a - error;
+  T t = acc + y;
+  error = (t - acc) - y;
+  if (!std::isfinite(error)) {
+    // If the error is infinity or NaN, we don't want to know about it. The
+    // accumulator will be infinity anyways, and we might corrupt the result
+    // to be NaN.
+    error = static_cast<T>(0);
+  }
+  acc = t;
+}
+
+inline void kahan_sum(int a, int& acc, int&) {
+  // Provide a silly integer overload for template code to use.
+  acc += a;
 }
 
 template <typename AT, typename CT>

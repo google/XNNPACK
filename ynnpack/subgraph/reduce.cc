@@ -3,10 +3,9 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include "ynnpack/kernels/reduce/reduce.h"
+#include "ynnpack/subgraph/reduce.h"
 
 #include <cassert>
-#include <cmath>
 #include <cstddef>
 #include <cstdint>
 #include <functional>
@@ -18,10 +17,12 @@
 #include "ynnpack/base/algorithm.h"
 #include "ynnpack/base/arithmetic.h"
 #include "ynnpack/base/base.h"
+#include "ynnpack/base/log.h"
 #include "ynnpack/base/span.h"
+#include "ynnpack/base/to_string.h"
 #include "ynnpack/base/type.h"
 #include "ynnpack/include/ynnpack.h"
-#include "ynnpack/subgraph/reduce.h"
+#include "ynnpack/kernels/reduce/reduce.h"
 #include "ynnpack/subgraph/runtime.h"
 #include "ynnpack/subgraph/slinky.h"
 #include "ynnpack/subgraph/subgraph.h"
@@ -45,29 +46,11 @@ float get_reduce_identity(ynn_reduce_operator op) {
     case ynn_reduce_min:
       return std::numeric_limits<float>::infinity();
     default:
-      return std::nan("");
+      return std::numeric_limits<float>::quiet_NaN();
   }
 }
 
 namespace {
-
-reduce_kernel get_reduce_kernel(ynn_reduce_operator op, ynn_type a_type,
-                                ynn_type c_type) {
-  switch (op) {
-    case ynn_reduce_sum:
-      return get_sum_kernel(a_type, c_type);
-    case ynn_reduce_sum_squared:
-      return get_sum_squared_kernel(a_type, c_type);
-    case ynn_reduce_max:
-      return get_max_kernel(c_type);
-    case ynn_reduce_min:
-      return get_min_kernel(c_type);
-    case ynn_reduce_min_max:
-      return get_min_max_kernel(c_type);
-    default:
-      return {};
-  }
-}
 
 // The wrapper for the kernel we use when we actually want to run a reduce
 // kernel on some buffers.
@@ -398,8 +381,12 @@ void define_reduce(ynn_subgraph& subgraph, ynn_node& node,
 
     // Get the reduce kernel we are going to use.
     reduce_kernel kernel = get_reduce_kernel(op.op, input_a.type, output.type);
-    assert(kernel.k1);
-    assert(kernel.kn);
+    if (!kernel.k1 || !kernel.kn) {
+      YNN_LOG_ERROR() << "Unsupported reduction " << to_string(op.op) << " for "
+                      << to_string(input_a.type) << " to "
+                      << to_string(output.type);
+      return ynn_status_unsupported_parameter;
+    }
 
     auto identity_buffer = slinky::buffer_expr::make_constant(
         runtime.globals.symbols, "identity",

@@ -203,16 +203,7 @@ struct ynn_node {
       return std::string_view(a.name) < std::string_view(b.name);
     }
   };
-  struct broadcast {
-    // The dimensions to broadcast.
-    ynn::axes_set axes;
-    friend bool operator==(const broadcast& a, const broadcast& b) {
-      return a.axes == b.axes;
-    }
-    friend bool operator<(const broadcast& a, const broadcast& b) {
-      return a.axes < b.axes;
-    }
-  };
+
   struct broadcast_like {
     // The dimensions to attempt to broadcast.
     ynn::axes_set axes;
@@ -261,6 +252,10 @@ struct ynn_node {
           return a.params.exp == b.params.exp;
         case ynn_unary_erf:
           return a.params.erf == b.params.erf;
+        case ynn_unary_approx_erf:
+          return a.params.approx_erf == b.params.approx_erf;
+        case ynn_unary_approx_tanh:
+          return a.params.approx_tanh == b.params.approx_tanh;
         case ynn_unary_tanh:
           return a.params.tanh == b.params.tanh;
         case ynn_unary_poly3:
@@ -278,6 +273,10 @@ struct ynn_node {
           return a.params.exp < b.params.exp;
         case ynn_unary_erf:
           return a.params.erf < b.params.erf;
+        case ynn_unary_approx_erf:
+          return a.params.approx_erf < b.params.approx_erf;
+        case ynn_unary_approx_tanh:
+          return a.params.approx_tanh < b.params.approx_tanh;
         case ynn_unary_tanh:
           return a.params.tanh < b.params.tanh;
         case ynn_unary_poly3:
@@ -392,17 +391,6 @@ struct ynn_node {
     friend bool operator<(const static_broadcast& a,
                           const static_broadcast& b) {
       return a.new_dims < b.new_dims;
-    }
-  };
-  struct static_expand_dims {
-    ynn::axes_set new_axes;
-    friend bool operator==(const static_expand_dims& a,
-                           const static_expand_dims& b) {
-      return a.new_axes == b.new_axes;
-    }
-    friend bool operator<(const static_expand_dims& a,
-                          const static_expand_dims& b) {
-      return a.new_axes < b.new_axes;
     }
   };
   struct static_pad {
@@ -569,13 +557,12 @@ struct ynn_node {
   // TODO: We need an absl::InlinedVector for things like this.
   std::vector<uint32_t> inputs;
   std::vector<uint32_t> outputs;
-  std::variant<invalid, opaque, broadcast, broadcast_like, concatenate,
-               even_split, copy, split_dim, fuse_dim, fuse_dims, split_dims,
-               stack, static_reshape, static_broadcast, static_expand_dims,
-               static_pad, static_slice, slice_like, static_transpose,
-               stencil_copy, unary_elementwise, lut, binary_elementwise,
-               ternary_elementwise, dot, iota, pack_b, transpose_a,
-               get_tensor_shape, reduce, dequantize_dot>
+  std::variant<invalid, opaque, broadcast_like, concatenate, even_split, copy,
+               split_dim, fuse_dim, fuse_dims, split_dims, stack,
+               static_reshape, static_broadcast, static_pad, static_slice,
+               slice_like, static_transpose, stencil_copy, unary_elementwise,
+               lut, binary_elementwise, ternary_elementwise, dot, iota, pack_b,
+               transpose_a, get_tensor_shape, reduce, dequantize_dot>
       op;
 
   const char* name() const;

@@ -128,8 +128,12 @@ static XNN_INLINE xnn_simd_f32_t xnn_cmpneq_f32(xnn_simd_f32_t a,
 }
 
 // Special functions.
-#define XNN_SIMD_HAVE_RCP_F32 0
+#define XNN_SIMD_HAVE_RCP_F32 1
 #define XNN_SIMD_HAVE_RSQRT_F32 0
+
+static XNN_INLINE xnn_simd_f32_t xnn_rcp_f32(xnn_simd_f32_t a) {
+  return wasm_f32x4_div(wasm_f32x4_const_splat(1.0f), a);
+}
 
 static XNN_INLINE xnn_simd_f32_t xnn_sqrt_f32(xnn_simd_f32_t a) {
   return wasm_f32x4_sqrt(a);

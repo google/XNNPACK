@@ -72,11 +72,11 @@ void Params(benchmark::Benchmark* b) {
   b->Args({16, 256, 0, 0, 1});
 }
 
-#define YNN_ELEMENTWISE_KERNEL(arch_flags, kernel, op, type_a, type_b, type_c, \
-                               type_x)                                         \
-  BENCHMARK_CAPTURE(bench, kernel, arch_flags, kernel, type_a(), type_b(),     \
-                    type_c(), type_x())                                        \
-      ->Apply(Params<type_a, type_b, type_c, type_x>)                          \
+#define YNN_ELEMENTWISE_KERNEL(arch_flags, kernel, op, flags, type_a, type_b, \
+                               type_c, type_x)                                \
+  BENCHMARK_CAPTURE(bench, kernel, arch_flags, kernel, type_a(), type_b(),    \
+                    type_c(), type_x())                                       \
+      ->Apply(Params<type_a, type_b, type_c, type_x>)                         \
       ->UseRealTime();
 #include "ynnpack/kernels/ternary/kernels.inc"
 #undef YNN_ELEMENTWISE_KERNEL

@@ -226,8 +226,7 @@ bool allow_in_place(uint32_t input_id, uint32_t output_id,
     return false;
   }
 
-  if (is_broadcast_op<ynn_node::broadcast>(*producer) ||
-      is_broadcast_op<ynn_node::broadcast_like>(*producer)) {
+  if (is_broadcast_op<ynn_node::broadcast_like>(*producer)) {
     // We can't compute in place with a broadcast input.
     return false;
   }

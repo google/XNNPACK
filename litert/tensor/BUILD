@@ -47,6 +47,7 @@ cc_library(
     # copybara:uncomment includes = ["utils"],
     deps = [
         "//litert/tensor:datatypes",
+        "//litert/tensor/internal:type_id",
         "@abseil-cpp//absl/status",
         "@abseil-cpp//absl/status:statusor",
         "@abseil-cpp//absl/types:span",
@@ -60,6 +61,7 @@ cc_test(
         ":buffer",
         "//litert/tensor:datatypes",
         "//litert/tensor/internal:matchers",
+        "//litert/tensor/internal:type_id",
         "//litert/tensor/utils:matchers",
         "@abseil-cpp//absl/algorithm:container",
         "@com_google_googletest//:gtest_main",  # gunit
@@ -89,7 +91,6 @@ cc_library(
     deps = [
         "//litert/tensor:datatypes",
         "//litert/tensor/internal:graph",
-        "//litert/tensor/internal:mixin",
         "@abseil-cpp//absl/strings:string_view",
     ],
 )
@@ -121,11 +122,12 @@ cc_test(
     srcs = ["tensor_test.cc"],
     deps = [
         ":arithmetic",
+        ":buffer",
+        ":datatypes",
         ":tensor",
-        "//litert/tensor:buffer",
-        "//litert/tensor:datatypes",
         "//litert/tensor/internal:graph",
         "//litert/tensor/utils:matchers",
+        "@abseil-cpp//absl/strings:string_view",
         "@com_google_googletest//:gtest_main",  # gunit
     ],
 )
@@ -140,6 +142,7 @@ cc_test(
         "//litert/tensor:buffer",
         "//litert/tensor:datatypes",
         "//litert/tensor/internal:graph",
+        "//litert/tensor/internal:type_id",
         "//litert/tensor/utils:matchers",
         "@abseil-cpp//absl/status",
         "@abseil-cpp//absl/strings:string_view",

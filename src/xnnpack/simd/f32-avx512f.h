@@ -227,4 +227,42 @@ static XNN_INLINE void xnn_store_tail_f32(float* output, xnn_simd_f32_t v,
   _mm512_mask_storeu_ps(output, vmask, v);
 }
 
+#include "src/xnnpack/math.h"
+
+typedef __m256i xnn_simd_f16_t;
+
+static XNN_INLINE xnn_simd_f16_t xnn_loadu_f16(const xnn_float16* ptr) {
+  return _mm256_loadu_si256((const __m256i*)ptr);
+}
+
+static XNN_INLINE void xnn_storeu_f16(xnn_float16* ptr, xnn_simd_f16_t v) {
+  _mm256_storeu_si256((__m256i*)ptr, v);
+}
+
+static XNN_INLINE xnn_simd_f32_t xnn_cvt_f32_f16(xnn_simd_f16_t a) {
+  return _mm512_cvtph_ps(a);
+}
+
+static XNN_INLINE xnn_simd_f16_t xnn_cvt_f16_f32(xnn_simd_f32_t a) {
+  return _mm512_cvtps_ph(a, _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC);
+}
+
+static XNN_INLINE xnn_simd_f16_t xnn_load_tail_f16(const xnn_float16* input,
+                                                   size_t num_elements) {
+  XNN_ALIGN(32) xnn_float16 padded[16] = {0};
+  memcpy(padded, input, num_elements * sizeof(xnn_float16));
+  return _mm256_loadu_si256((const __m256i*)padded);
+}
+
+static XNN_INLINE void xnn_store_tail_f16(xnn_float16* output, xnn_simd_f16_t v,
+                                          size_t num_elements) {
+  if (num_elements == 16) {
+    _mm256_storeu_si256((__m256i*)output, v);
+  } else {
+    XNN_ALIGN(32) xnn_float16 padded[16];
+    _mm256_storeu_si256((__m256i*)padded, v);
+    memcpy(output, padded, num_elements * sizeof(xnn_float16));
+  }
+}
+
 #endif  // XNNPACK_SRC_XNNPACK_SIMD_F32_AVX512F_H_

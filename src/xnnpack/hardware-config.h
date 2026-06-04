@@ -147,6 +147,24 @@ struct xnn_hardware_config {
 
 XNN_INTERNAL const struct xnn_hardware_config* xnn_init_hardware_config();
 
+// Manually sets the hardware configuration.
+//
+// Warning: Using this for anything other than testing is unsupported.
+//
+// Warning: XNNPack runtime objects rely on the hardware config being stable
+// throughout their lifetime. Don't call this function if you cannot ensure that
+// all existing runtimes have already been destroyed.
+XNN_INTERNAL void xnn_set_hardware_config(const struct xnn_hardware_config* config);
+
+// Resets the hardware configuration to the auto-detected one.
+//
+// Warning: Using this for anything other than testing is unsupported.
+//
+// Warning: XNNPack runtime objects rely on the hardware config being stable
+// throughout their lifetime. Don't call this function if you cannot ensure that
+// all existing runtimes have already been destroyed.
+XNN_INTERNAL void xnn_reset_hardware_config(void);
+
 static inline bool xnn_is_bf16_compatible_config(
     const struct xnn_hardware_config* hardware_config) {
 #if XNN_ARCH_X86_64

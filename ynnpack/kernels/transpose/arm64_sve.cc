@@ -3,13 +3,12 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include "ynnpack/base/simd/arm64_sve.h"
-
 #include <array>
 #include <cstddef>
 #include <cstring>
 
 #include "ynnpack/base/arithmetic.h"
+#include "ynnpack/base/simd/arm_vec128.h"
 #include "ynnpack/kernels/transpose/generic.h"
 #include "ynnpack/kernels/transpose/interleave.h"
 #include "ynnpack/kernels/transpose/transpose.h"

@@ -173,6 +173,23 @@ struct SortNode : ValueOrNode {
     switch (type) {
       case Type::kNode:
         hash = murmur_hash3(&node->type, sizeof(node->type), hash);
+        switch (node->type) {
+          case xnn_node_type_unary_elementwise:
+            hash = murmur_hash3(&node->unary_operator,
+                                sizeof(node->unary_operator), hash);
+            break;
+          case xnn_node_type_binary_elementwise:
+            hash = murmur_hash3(&node->binary_operator,
+                                sizeof(node->binary_operator), hash);
+            break;
+          case xnn_node_type_fully_connected:
+          case xnn_node_type_batch_matrix_multiply:
+            hash = murmur_hash3(&node->packed_input_datatype,
+                                sizeof(node->packed_input_datatype), hash);
+            break;
+          default:
+            break;
+        }
         // When a node is created, it is memset to 0. This means that there are
         // no uninitialised padding bytes in a union and hashing the full union
         // is safe.
@@ -377,11 +394,7 @@ SortedGraphView ComputeSortedView(xnn_subgraph_t subgraph) {
   // Mapping from the subgraph values to their new positions.
   SortedIndexMap sorted_index_map(subgraph);
   size_t node_idx = 0;
-  // Skip level 0 to ensure we always have a parent.
   auto level_it = nodes.begin();
-  for (; level_it != nodes.end() && level_it->level == 0; ++level_it) {
-    sorted_index_map.Set(*level_it, node_idx++);
-  }
   auto level_it_end = level_it;
   while (level_it_end != nodes.end() && level_it_end->level <= max_level) {
     while (level_it_end != nodes.end() &&
@@ -477,16 +490,16 @@ class LogGraphStreamAdapter {
     // Get position in file for length.
     int64_t pos = _ftelli64(out);
     // Allocate buffer.
-    str = malloc(pos + 1, sizeof(char));
+    str = reinterpret_cast<char*>(malloc(pos + 1));
     // Read temp file.
     fseek(out, 0, SEEK_SET);
-    len = fread(str, pos, sizeof(char), pos, out);
+    len = fread(str, sizeof(char), static_cast<size_t>(pos), out);
     if (len == 0 && errno == EINVAL) {
       const char error_msg[] = "<error reading tmp file to get graph log>";
-      str = malloc(sizeof(error_msg));
+      str = reinterpret_cast<char*>(malloc(sizeof(error_msg)));
       std::memcpy(str, error_msg, sizeof(error_msg));
     } else {
-      str[bytes_read] = '\0';
+      str[len] = '\0';
     }
 #endif
     fclose(out);

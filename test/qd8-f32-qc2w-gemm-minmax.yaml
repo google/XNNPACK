@@ -228,3 +228,42 @@
   k-block: 32
   planes: 4
   unsigned-inputs: True
+
+# SSSE3 MADD
+- name: xnn_qd8_f32_qc2w_gemm_minmax_ukernel_1x4c8__ssse3_madd
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_qd8_qc2w_gemm_goi_w
+  k-block: 32
+  planes: 4
+  unsigned-inputs: True
+- name: xnn_qd8_f32_qc2w_gemm_minmax_ukernel_2x4c8__ssse3_madd
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_qd8_qc2w_gemm_goi_w
+  k-block: 32
+  planes: 4
+  unsigned-inputs: True
+- name: xnn_qd8_f32_qc2w_gemm_minmax_ukernel_3x4c8__ssse3_madd
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_qd8_qc2w_gemm_goi_w
+  k-block: 32
+  planes: 4
+  unsigned-inputs: True
+- name: xnn_qd8_f32_qc2w_gemm_minmax_ukernel_4x4c8__ssse3_madd
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_qd8_qc2w_gemm_goi_w
+  k-block: 32
+  planes: 4
+  unsigned-inputs: True
+- name: xnn_qd8_f32_qc2w_gemm_minmax_ukernel_5x4c8__ssse3_madd
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_qd8_qc2w_gemm_goi_w
+  k-block: 32
+  planes: 4
+  unsigned-inputs: True
+- name: xnn_qd8_f32_qc2w_gemm_minmax_ukernel_6x4c8__ssse3_madd
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_qd8_qc2w_gemm_goi_w
+  k-block: 32
+  planes: 4
+  unsigned-inputs: True
+

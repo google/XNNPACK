@@ -78,6 +78,7 @@ static enum xnn_status check_zero_point(
         return xnn_status_invalid_parameter;
       }
       break;
+    case xnn_datatype_qint2:
     case xnn_datatype_qcint2:
     case xnn_datatype_qcint8:
     case xnn_datatype_qcint32:

@@ -3,10 +3,6 @@
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
 
-# This algorithm is a scalar implementation of the rational polynomial
-# approximation of `tanh(x)` from
-# `src/f32-vtanh/rational-9-8.c.in`.
-
 """Definition of tanh kernels."""
 
 # pylint: disable=undefined-variable
@@ -22,49 +18,31 @@ from ynnpack.kernels.elementwise.compiler import *  # pylint: disable=wildcard-i
 )
 @operator_name("tanh")
 def tanh_fp32(a, x, output_offset, output_multiplier):
-  # Cap the inputs to this value as `tanh(x)` will always be `+/-1.0f` beyond
-  # this point. This value is chosen as the first floating point number as of
-  # which the interpolation returns 1.0f.
-  vmax_x = 7.9807181358e00
-  vmin_x = -7.9807181358e00
-
-  # The monomial coefficients of the numerator polynomial (odd).
-  # We distribute the output_multiplier into the coefficients, these multiplies
-  # are evaluated outside the loop over the output.
-  valpha_1 = output_multiplier
-  valpha_3 = 1.3412411511e-01 * output_multiplier
-  valpha_5 = 3.5330520477e-03 * output_multiplier
-  valpha_7 = 2.1235626264e-05 * output_multiplier
-  valpha_9 = 1.4248920266e-08 * output_multiplier
-
-  # The monomial coefficients of the denominator polynomial (even).
-  vbeta_2 = 4.6745735407e-01
-  vbeta_4 = 2.6018999517e-02
-  vbeta_6 = 3.3472978976e-04
-  vbeta_8 = 8.1365948290e-07
-
   va = load(a)
+  return store(multiply_add(tanh(va), output_multiplier, output_offset), x)
 
-  # Clamp the inputs to the interpolation range.
-  vx = min(vmax_x, va)
-  vx = max(vmin_x, vx)
 
-  # Since the polynomials are odd/even, we need x^2.
-  vx2 = vx * vx
+@const_buffer("a", Float(64))
+@buffer("x", Float(64))
+@params(
+    Scalar("output_offset", Float(64)),
+    Scalar("output_multiplier", Float(64)),
+)
+@operator_name("tanh")
+def tanh_fp64(a, x, output_offset, output_multiplier):
+  va = load(a)
+  return store(multiply_add(tanh(va), output_multiplier, output_offset), x)
 
-  # Evaluate the numerator polynomial p.
-  # p = x * (1 + x^2 * (alpha_3 + x^2 * (alpha_5 + x^2 * (alpha_7 + x^2 * alpha_9))))
-  vp = multiply_add(vx2, valpha_9, valpha_7)
-  vp = multiply_add(vx2, vp, valpha_5)
-  vp = multiply_add(vx2, vp, valpha_3)
-  vp = multiply_add(vx2, vp, valpha_1)
-  vp = vx * vp
 
-  # Evaluate the denominator polynomial q.
-  # q = 1 + x^2 * (beta_2 + x^2 * (beta_4 + x^2 * (beta_6 + x^2 * beta_8)))
-  vq = multiply_add(vx2, vbeta_8, vbeta_6)
-  vq = multiply_add(vx2, vq, vbeta_4)
-  vq = multiply_add(vx2, vq, vbeta_2)
-  vq = multiply_add(vx2, vq, 1.0)
-
-  return store(vp / vq + output_offset, x)
+@const_buffer("a", Float(32))
+@buffer("x", Float(32))
+@params(
+    Scalar("output_offset", Float(32)),
+    Scalar("output_multiplier", Float(32)),
+)
+@operator_name("approx_tanh")
+def approx_tanh_fp32(a, x, output_offset, output_multiplier):
+  va = load(a)
+  return store(
+      multiply_add(approx_tanh(va), output_multiplier, output_offset), x
+  )

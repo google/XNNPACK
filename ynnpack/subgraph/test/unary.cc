@@ -39,7 +39,12 @@ template <typename A, typename X>
 void TestOp(A, X, const unary_op_info& op_info, ynn_unary_operator op) {
   ReplicableRandomDevice rng;
   std::uniform_int_distribution<size_t> rank_dist(1, YNN_MAX_TENSOR_RANK);
+  std::bernoulli_distribution bool_dist;
   for (auto _ : FuzzTest(std::chrono::milliseconds(100))) {
+    uint32_t flags = 0;
+    if (bool_dist(rng)) {
+      flags |= YNN_FLAG_CONSISTENT_ARITHMETIC;
+    }
     size_t rank = rank_dist(rng);
     // We want the total number of elements to be reasonable, so choose max_dim
     // such that a random shape of rank `p.rank` produces this max size.
@@ -53,7 +58,7 @@ void TestOp(A, X, const unary_op_info& op_info, ynn_unary_operator op) {
     uint32_t input_id = 0;
     uint32_t output_id = 1;
     std::vector<size_t> input_shape = random_shape(rng, rank, 0, max_dim);
-    SubgraphBuilder subgraph(2);
+    SubgraphBuilder subgraph(2, flags);
     if (is_quantized<A>() || is_quantized<X>()) {
       uint32_t a_id = YNN_INVALID_VALUE_ID;
       uint32_t x_id = YNN_INVALID_VALUE_ID;

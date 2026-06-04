@@ -474,6 +474,8 @@ jobs:
     env:
       CC: clang-18
       CXX: clang++-18
+      BAZEL_DEFINES: |
+        --define=ynn_enable_x86_avx512fp16=false
     steps:
       - uses: actions/checkout@v6
       - name: Mount Bazel Cache
@@ -482,7 +484,7 @@ jobs:
           path: |
             /home/xnnpack/.cache/bazel/disk_cache
             /home/xnnpack/.cache/bazel/repo_cache
-          key: bazel-clang18-opt-${{ runner.os }}-${{ github.job }}-${{ github.run_id }}
+          key: bazel-clang18-opt-${{ runner.os }}-${{ github.job }}-${{ hashFiles('WORKSPACE', 'WORKSPACE.bazel', 'MODULE.bazel') }}
           restore-keys: |
             bazel-clang18-opt-${{ runner.os }}-${{ github.job }}-
 
@@ -494,6 +496,7 @@ jobs:
               --disk_cache=/home/xnnpack/.cache/bazel/disk_cache \
               --repository_cache=/home/xnnpack/.cache/bazel/repo_cache \
               --test_output=errors \
+              ${BAZEL_DEFINES} \
               -- \
               //test/... \
               //bench/... \
@@ -508,6 +511,7 @@ jobs:
               --repository_cache=/home/xnnpack/.cache/bazel/repo_cache \
               --test_output=errors \
               --local_test_jobs=HOST_CPUS \
+              ${BAZEL_DEFINES} \
               -- \
               //test/... \
               //bench/... \
@@ -549,7 +553,7 @@ jobs:
           path: |
             /home/xnnpack/.cache/bazel/disk_cache
             /home/xnnpack/.cache/bazel/repo_cache
-          key: bazel-gcc9-opt-${{ runner.os }}-${{ github.job }}-${{ github.run_id }}
+          key: bazel-gcc9-opt-${{ runner.os }}-${{ github.job }}-${{ hashFiles('WORKSPACE', 'WORKSPACE.bazel', 'MODULE.bazel') }}
           restore-keys: |
             bazel-gcc9-opt-${{ runner.os }}-${{ github.job }}-
 
@@ -605,7 +609,7 @@ jobs:
           path: |
             /home/xnnpack/.cache/bazel/disk_cache
             /home/xnnpack/.cache/bazel/repo_cache
-          key: bazel-clang18-opt-${{ runner.os }}-${{ github.job }}-${{ github.run_id }}
+          key: bazel-clang18-opt-${{ runner.os }}-${{ github.job }}-${{ hashFiles('WORKSPACE', 'WORKSPACE.bazel', 'MODULE.bazel') }}
           restore-keys: |
             bazel-clang18-opt-${{ runner.os }}-${{ github.job }}-
 
@@ -665,7 +669,7 @@ jobs:
           path: |
             /home/xnnpack/.cache/bazel/disk_cache
             /home/xnnpack/.cache/bazel/repo_cache
-          key: bazel-gcc13-opt-${{ runner.os }}-${{ github.job }}-${{ github.run_id }}
+          key: bazel-gcc13-opt-${{ runner.os }}-${{ github.job }}-${{ hashFiles('WORKSPACE', 'WORKSPACE.bazel', 'MODULE.bazel') }}
           restore-keys: |
             bazel-gcc13-opt-${{ runner.os }}-${{ github.job }}-
 
@@ -722,7 +726,7 @@ jobs:
         uses: actions/cache@v5
         with:
           path: "/home/xnnpack/.cache/bazel"
-          key: bazel-clang20-opt-sme2-${{ runner.os }}-${{ github.job }}-${{ github.run_id }}
+          key: bazel-clang20-opt-sme2-${{ runner.os }}-${{ github.job }}-${{ hashFiles('WORKSPACE', 'WORKSPACE.bazel', 'MODULE.bazel') }}
           restore-keys: bazel-clang20-opt-sme2-${{ runner.os }}-${{ github.job }}-
 
       - name: Build microkernel and subgraph tests

@@ -7,7 +7,9 @@
 
 #include <gtest/gtest.h>
 #include "ynnpack/base/arch.h"
-#include "ynnpack/base/simd/arm_neon.h"
+#include "ynnpack/base/simd/arm_vec128.h"
+
+// This must be included last
 #include "ynnpack/base/simd/test/generic.h"
 
 namespace ynn {
@@ -38,20 +40,28 @@ TEST_CEIL(arm_neon, f64, 2);
 TEST_ROUND(arm_neon, f64, 2);
 TEST_SQRT(arm_neon, f64, 2);
 TEST_ABS(arm_neon, f64, 2);
+TEST_COPYSIGN(arm_neon, f64, 2);
 TEST_FLOOR_LOG2(arm_neon, f64, 2);
 TEST_EXP2_ROUND(arm_neon, f64, 2);
-TEST_COPYNAN(arm_neon, f64, 2);
+TEST_COMPARISONS(arm_neon, f64, 2);
+TEST_ISNAN(arm_neon, f64, 2);
+TEST_ISFINITE(arm_neon, f64, 2);
 
 TEST_HORIZONTAL_MIN(arm_neon, f64, 2);
 TEST_HORIZONTAL_MAX(arm_neon, f64, 2);
 TEST_HORIZONTAL_SUM(arm_neon, f64, 2);
 
-TEST_KAHAN_SUM(arm_neon, f64, 2);
-
 TEST_CAST(arm_neon, f64, f32x2);
 TEST_CAST(arm_neon, f64, f32x4);
 TEST_CAST(arm_neon, f32, f64x2);
 TEST_CAST(arm_neon, f32, f64x4);
+
+TEST_UNARY(arm_neon, exp, f64, 2, std::exp, 2);
+TEST_UNARY(arm_neon, expm1, f64, 2, std::expm1, 2);
+TEST_UNARY(arm_neon, log, f64, 2, std::log, 2);
+TEST_UNARY(arm_neon, log1p, f64, 2, std::log1p, 3);
+TEST_UNARY(arm_neon, erf, f64, 2, std::erf, 3);
+TEST_UNARY(arm_neon, tanh, f64, 2, std::tanh, 4);
 
 }  // namespace simd
 }  // namespace ynn

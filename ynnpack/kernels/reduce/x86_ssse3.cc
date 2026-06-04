@@ -9,7 +9,7 @@
 #include <cstdint>
 #include <type_traits>
 
-#include "ynnpack/base/simd/x86_sse2.h"
+#include "ynnpack/base/simd/x86_vec128.h"
 #include "ynnpack/kernels/reduce/generic.h"
 #include "ynnpack/kernels/reduce/sum.h"
 

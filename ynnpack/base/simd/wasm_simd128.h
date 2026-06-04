@@ -12,6 +12,7 @@
 #include <cassert>
 #include <cstddef>
 #include <cstdint>
+#include <limits>
 #include <tuple>
 #include <type_traits>
 
@@ -111,18 +112,6 @@ struct vec<float, 4> {
   v128_t v;
 };
 
-template <>
-struct vec<double, 2> {
-  using value_type = double;
-  static constexpr std::integral_constant<size_t, 2> N = {};
-
-  vec() = default;
-  explicit vec(v128_t v) : v(v) {}
-  vec(double x) : v(wasm_f64x2_splat(x)) {}  // NOLINT
-
-  v128_t v;
-};
-
 using s8x16 = vec<int8_t, 16>;
 using u8x16 = vec<uint8_t, 16>;
 using s16x8 = vec<int16_t, 8>;
@@ -130,7 +119,6 @@ using u16x8 = vec<uint16_t, 8>;
 using s32x4 = vec<int32_t, 4>;
 using u32x4 = vec<uint32_t, 4>;
 using f32x4 = vec<float, 4>;
-using f64x2 = vec<double, 2>;
 
 using s32x16 = vec<int32_t, 16>;
 using u32x16 = vec<uint32_t, 16>;
@@ -141,10 +129,6 @@ using s32x8 = vec<int32_t, 8>;
 using u32x8 = vec<uint32_t, 8>;
 using f32x8 = vec<float, 8>;
 
-YNN_ALWAYS_INLINE f64x2 load_aligned(const double* ptr, decltype(f64x2::N),
-                                     f64x2 = {}) {
-  return f64x2{wasm_v128_load(ptr)};
-}
 YNN_ALWAYS_INLINE f32x4 load_aligned(const float* ptr, decltype(f32x4::N),
                                      f32x4 = {}) {
   return f32x4{wasm_v128_load(ptr)};
@@ -174,10 +158,6 @@ YNN_ALWAYS_INLINE s8x16 load_aligned(const int8_t* ptr, decltype(s8x16::N),
   return s8x16{wasm_v128_load(ptr)};
 }
 
-YNN_ALWAYS_INLINE void store_aligned(double* ptr, f64x2 b,
-                                     decltype(f64x2::N) = {}) {
-  wasm_v128_store(ptr, b.v);
-}
 YNN_ALWAYS_INLINE void store_aligned(float* ptr, f32x4 b,
                                      decltype(f32x4::N) = {}) {
   wasm_v128_store(ptr, b.v);
@@ -234,10 +214,6 @@ YNN_ALWAYS_INLINE u32x4 load(const uint32_t* ptr, decltype(u32x4::N),
 YNN_ALWAYS_INLINE f32x4 load(const float* ptr, decltype(f32x4::N), f32x4 = {}) {
   return f32x4{wasm_v128_load(ptr)};
 }
-YNN_ALWAYS_INLINE f64x2 load(const double* ptr, decltype(f64x2::N),
-                             f64x2 = {}) {
-  return f64x2{wasm_v128_load(ptr)};
-}
 
 YNN_ALWAYS_INLINE void store(uint8_t* ptr, u8x16 b, decltype(u8x16::N) = {}) {
   wasm_v128_store(ptr, b.v);
@@ -258,9 +234,6 @@ YNN_ALWAYS_INLINE void store(uint32_t* ptr, u32x4 b, decltype(u32x4::N) = {}) {
   wasm_v128_store(ptr, b.v);
 }
 YNN_ALWAYS_INLINE void store(float* ptr, f32x4 b, decltype(f32x4::N) = {}) {
-  wasm_v128_store(ptr, b.v);
-}
-YNN_ALWAYS_INLINE void store(double* ptr, f64x2 b, decltype(f64x2::N) = {}) {
   wasm_v128_store(ptr, b.v);
 }
 
@@ -328,9 +301,6 @@ YNN_ALWAYS_INLINE void store(int8_t* ptr, s8x16 value, size_t n) {
   internal::partial_store_memcpy(ptr, value, n);
 }
 
-YNN_ALWAYS_INLINE f64x2 operator+(f64x2 a, f64x2 b) {
-  return f64x2{wasm_f64x2_add(a.v, b.v)};
-}
 YNN_ALWAYS_INLINE f32x4 operator+(f32x4 a, f32x4 b) {
   return f32x4{wasm_f32x4_add(a.v, b.v)};
 }
@@ -353,9 +323,6 @@ YNN_ALWAYS_INLINE u8x16 operator+(u8x16 a, u8x16 b) {
   return u8x16{wasm_i8x16_add(a.v, b.v)};
 }
 
-YNN_ALWAYS_INLINE f64x2 operator-(f64x2 a, f64x2 b) {
-  return f64x2{wasm_f64x2_sub(a.v, b.v)};
-}
 YNN_ALWAYS_INLINE f32x4 operator-(f32x4 a, f32x4 b) {
   return f32x4{wasm_f32x4_sub(a.v, b.v)};
 }
@@ -376,6 +343,10 @@ YNN_ALWAYS_INLINE s8x16 operator-(s8x16 a, s8x16 b) {
 }
 YNN_ALWAYS_INLINE u8x16 operator-(u8x16 a, u8x16 b) {
   return u8x16{wasm_i8x16_sub(a.v, b.v)};
+}
+
+YNN_ALWAYS_INLINE f32x4 operator-(f32x4 a) {
+  return f32x4{wasm_f32x4_neg(a.v)};
 }
 
 YNN_ALWAYS_INLINE s16x8 add_sat(s16x8 a, s16x8 b) {
@@ -403,9 +374,6 @@ YNN_ALWAYS_INLINE u8x16 sub_sat(u8x16 a, u8x16 b) {
   return u8x16{wasm_u8x16_sub_sat(a.v, b.v)};
 }
 
-YNN_ALWAYS_INLINE f64x2 operator*(f64x2 a, f64x2 b) {
-  return f64x2{wasm_f64x2_mul(a.v, b.v)};
-}
 YNN_ALWAYS_INLINE f32x4 operator*(f32x4 a, f32x4 b) {
   return f32x4{wasm_f32x4_mul(a.v, b.v)};
 }
@@ -422,9 +390,6 @@ YNN_ALWAYS_INLINE u16x8 operator*(u16x8 a, u16x8 b) {
   return u16x8{wasm_i16x8_mul(a.v, b.v)};
 }
 
-YNN_ALWAYS_INLINE f64x2 operator/(f64x2 a, f64x2 b) {
-  return f64x2{wasm_f64x2_div(a.v, b.v)};
-}
 YNN_ALWAYS_INLINE f32x4 operator/(f32x4 a, f32x4 b) {
   return f32x4{wasm_f32x4_div(a.v, b.v)};
 }
@@ -513,6 +478,19 @@ YNN_ALWAYS_INLINE s8x16 max(s8x16 a, s8x16 b) {
   return s8x16{wasm_i8x16_max(a.v, b.v)};
 }
 
+// TODO: b/515053903 - Use pmin/max when we know where NaN might be.
+YNN_ALWAYS_INLINE f32x4 min(f32x4 a, float b) {
+  return f32x4{wasm_f32x4_min(wasm_f32x4_splat(b), a.v)};
+}
+YNN_ALWAYS_INLINE f32x4 max(f32x4 a, float b) {
+  return f32x4{wasm_f32x4_max(wasm_f32x4_splat(b), a.v)};
+}
+
+YNN_ALWAYS_INLINE f32x4 copysign(f32x4 mag, f32x4 sgn) {
+  v128_t sign_mask = wasm_i32x4_splat(0x80000000);
+  return f32x4{wasm_v128_bitselect(sgn.v, mag.v, sign_mask)};
+}
+
 YNN_ALWAYS_INLINE f32x4 abs(f32x4 a) { return f32x4{wasm_f32x4_abs(a.v)}; }
 YNN_ALWAYS_INLINE u32x4 abs(s32x4 a) { return u32x4{wasm_i32x4_abs(a.v)}; }
 YNN_ALWAYS_INLINE u16x8 abs(s16x8 a) { return u16x8{wasm_i16x8_abs(a.v)}; }
@@ -535,20 +513,15 @@ YNN_ALWAYS_INLINE f32x4 floor_log2(f32x4 a) {
 
   const v128_t infinity =
       wasm_f32x4_splat(std::numeric_limits<float>::infinity());
-  const v128_t is_inf = wasm_f32x4_eq(a.v, infinity);
+  const v128_t is_inf_or_nan = wasm_v128_or(
+      wasm_f32x4_eq(a.v, infinity), wasm_v128_not(wasm_f32x4_eq(a.v, a.v)));
 
   exp = wasm_i32x4_shr(exp, 8);
 
   const v128_t bias_256 = wasm_f32x4_splat(256.0f);
   const v128_t bias_383 = wasm_f32x4_splat(383.0f);
-  const v128_t res = wasm_f32x4_sub(wasm_v128_or(bias_256, exp), bias_383);
-  return f32x4{wasm_v128_bitselect(infinity, res, is_inf)};
-}
-
-YNN_ALWAYS_INLINE f64x2 floor_log2(f64x2 a) {
-  return f64x2{wasm_f64x2_make(
-      ynn::floor_log2(wasm_f64x2_extract_lane(a.v, 0)),
-      ynn::floor_log2(wasm_f64x2_extract_lane(a.v, 1)))};
+  v128_t res = wasm_f32x4_sub(wasm_v128_or(bias_256, exp), bias_383);
+  return f32x4{wasm_v128_bitselect(a.v, res, is_inf_or_nan)};
 }
 
 YNN_ALWAYS_INLINE f32x4 exp2_round(f32x4 a) {
@@ -556,17 +529,87 @@ YNN_ALWAYS_INLINE f32x4 exp2_round(f32x4 a) {
   const v128_t res_bits = wasm_f32x4_add(a.v, magic);
   return f32x4{wasm_i32x4_shl(res_bits, 23)};
 }
-YNN_ALWAYS_INLINE f64x2 exp2_round(f64x2 a) {
-  return f64x2{wasm_f64x2_make(
-      ynn::exp2_round(wasm_f64x2_extract_lane(a.v, 0)),
-      ynn::exp2_round(wasm_f64x2_extract_lane(a.v, 1)))};
+
+YNN_ALWAYS_INLINE s32x4 operator==(f32x4 a, f32x4 b) {
+  return s32x4{wasm_f32x4_eq(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE s32x4 operator!=(f32x4 a, f32x4 b) {
+  return s32x4{wasm_f32x4_ne(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE s32x4 operator<(f32x4 a, f32x4 b) {
+  return s32x4{wasm_f32x4_lt(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE s32x4 operator<=(f32x4 a, f32x4 b) {
+  return s32x4{wasm_f32x4_le(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE s32x4 operator>(f32x4 a, f32x4 b) {
+  return s32x4{wasm_f32x4_gt(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE s32x4 operator>=(f32x4 a, f32x4 b) {
+  return s32x4{wasm_f32x4_ge(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE s32x4 isnan(f32x4 a) { return a != a; }
+YNN_ALWAYS_INLINE s32x4 isinf(f32x4 a) {
+  v128_t mask = wasm_i32x4_splat(0x7FFFFFFF);
+  v128_t inf = wasm_i32x4_splat(0x7F800000);
+  return s32x4{wasm_i32x4_eq(wasm_v128_and(a.v, mask), inf)};
+}
+YNN_ALWAYS_INLINE s32x4 isfinite(f32x4 a) {
+  v128_t mask = wasm_i32x4_splat(0x7FFFFFFF);
+  v128_t inf = wasm_i32x4_splat(0x7F800000);
+  return s32x4{wasm_i32x4_lt(wasm_v128_and(a.v, mask), inf)};
 }
 
-YNN_ALWAYS_INLINE f32x4 copynan(f32x4 x, f32x4 nan) {
-  return f32x4{wasm_v128_bitselect(nan.v, x.v, wasm_f32x4_ne(nan.v, nan.v))};
+YNN_ALWAYS_INLINE s32x4 operator==(s32x4 a, s32x4 b) {
+  return s32x4{wasm_i32x4_eq(a.v, b.v)};
 }
-YNN_ALWAYS_INLINE f64x2 copynan(f64x2 x, f64x2 nan) {
-  return f64x2{wasm_v128_bitselect(nan.v, x.v, wasm_f64x2_ne(nan.v, nan.v))};
+YNN_ALWAYS_INLINE s32x4 operator>(s32x4 a, s32x4 b) {
+  return s32x4{wasm_i32x4_gt(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE s32x4 operator<(s32x4 a, s32x4 b) {
+  return s32x4{wasm_i32x4_lt(a.v, b.v)};
+}
+
+YNN_ALWAYS_INLINE s16x8 operator==(s16x8 a, s16x8 b) {
+  return s16x8{wasm_i16x8_eq(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE s16x8 operator>(s16x8 a, s16x8 b) {
+  return s16x8{wasm_i16x8_gt(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE s16x8 operator<(s16x8 a, s16x8 b) {
+  return s16x8{wasm_i16x8_lt(a.v, b.v)};
+}
+
+YNN_ALWAYS_INLINE s8x16 operator==(s8x16 a, s8x16 b) {
+  return s8x16{wasm_i8x16_eq(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE s8x16 operator>(s8x16 a, s8x16 b) {
+  return s8x16{wasm_i8x16_gt(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE s8x16 operator<(s8x16 a, s8x16 b) {
+  return s8x16{wasm_i8x16_lt(a.v, b.v)};
+}
+
+YNN_ALWAYS_INLINE f32x4 select(s32x4 cond, f32x4 a, f32x4 b) {
+  return f32x4{wasm_v128_bitselect(a.v, b.v, cond.v)};
+}
+YNN_ALWAYS_INLINE s32x4 select(s32x4 cond, s32x4 a, s32x4 b) {
+  return s32x4{wasm_v128_bitselect(a.v, b.v, cond.v)};
+}
+YNN_ALWAYS_INLINE u32x4 select(s32x4 cond, u32x4 a, u32x4 b) {
+  return u32x4{wasm_v128_bitselect(a.v, b.v, cond.v)};
+}
+YNN_ALWAYS_INLINE s16x8 select(s16x8 cond, s16x8 a, s16x8 b) {
+  return s16x8{wasm_v128_bitselect(a.v, b.v, cond.v)};
+}
+YNN_ALWAYS_INLINE u16x8 select(s16x8 cond, u16x8 a, u16x8 b) {
+  return u16x8{wasm_v128_bitselect(a.v, b.v, cond.v)};
+}
+YNN_ALWAYS_INLINE s8x16 select(s8x16 cond, s8x16 a, s8x16 b) {
+  return s8x16{wasm_v128_bitselect(a.v, b.v, cond.v)};
+}
+YNN_ALWAYS_INLINE u8x16 select(s8x16 cond, u8x16 a, u8x16 b) {
+  return u8x16{wasm_v128_bitselect(a.v, b.v, cond.v)};
 }
 
 YNN_ALWAYS_INLINE s16x16 cast(s8x16 a, int16_t) {
@@ -602,15 +645,15 @@ YNN_ALWAYS_INLINE f32x4 cast(s32x4 x, float) {
 }
 
 YNN_ALWAYS_INLINE s16x8 cast(s32x8 a, int16_t) {
-  return s16x8{wasm_i16x8_narrow_i32x4(a.lo().v, a.hi().v)};
+  return s16x8{wasm_i16x8_narrow_i32x4(lo(a).v, hi(a).v)};
 }
 
 YNN_ALWAYS_INLINE s8x16 cast(s16x16 a, int8_t) {
-  return s8x16{wasm_i8x16_narrow_i16x8(a.lo().v, a.hi().v)};
+  return s8x16{wasm_i8x16_narrow_i16x8(lo(a).v, hi(a).v)};
 }
 
 YNN_ALWAYS_INLINE u8x16 cast(s16x16 a, uint8_t) {
-  return u8x16{wasm_u8x16_narrow_i16x8(a.lo().v, a.hi().v)};
+  return u8x16{wasm_u8x16_narrow_i16x8(lo(a).v, hi(a).v)};
 }
 
 YNN_ALWAYS_INLINE s32x4 cast(f32x4 f, int32_t) {
@@ -618,39 +661,25 @@ YNN_ALWAYS_INLINE s32x4 cast(f32x4 f, int32_t) {
 }
 
 YNN_ALWAYS_INLINE s16x8 cast(f32x8 f, int16_t) {
-  const v128_t i0 = wasm_i32x4_trunc_sat_f32x4(wasm_f32x4_nearest(f.lo().v));
-  const v128_t i1 = wasm_i32x4_trunc_sat_f32x4(wasm_f32x4_nearest(f.hi().v));
+  const v128_t i0 = wasm_i32x4_trunc_sat_f32x4(wasm_f32x4_nearest(lo(f).v));
+  const v128_t i1 = wasm_i32x4_trunc_sat_f32x4(wasm_f32x4_nearest(hi(f).v));
   return cast(s32x8(s32x4(i0), s32x4(i1)), int16_t());
 }
 
 YNN_ALWAYS_INLINE s8x16 cast(f32x16 f, int8_t) {
-  const s16x8 i01 = cast(f32x8(f.lo().lo(), f.lo().hi()), int16_t());
-  const s16x8 i23 = cast(f32x8(f.hi().lo(), f.hi().hi()), int16_t());
+  const s16x8 i01 = cast(f32x8(lo(lo(f)), hi(lo(f))), int16_t());
+  const s16x8 i23 = cast(f32x8(lo(hi(f)), hi(hi(f))), int16_t());
   return cast(s16x16(i01, i23), int8_t());
 }
 
 YNN_ALWAYS_INLINE u8x16 cast(f32x16 f, uint8_t) {
-  const v128_t i0 =
-      wasm_i32x4_trunc_sat_f32x4(wasm_f32x4_nearest(f.lo().lo().v));
-  const v128_t i1 =
-      wasm_i32x4_trunc_sat_f32x4(wasm_f32x4_nearest(f.lo().hi().v));
-  const v128_t i2 =
-      wasm_i32x4_trunc_sat_f32x4(wasm_f32x4_nearest(f.hi().lo().v));
-  const v128_t i3 =
-      wasm_i32x4_trunc_sat_f32x4(wasm_f32x4_nearest(f.hi().hi().v));
+  const v128_t i0 = wasm_i32x4_trunc_sat_f32x4(wasm_f32x4_nearest(lo(lo(f)).v));
+  const v128_t i1 = wasm_i32x4_trunc_sat_f32x4(wasm_f32x4_nearest(hi(lo(f)).v));
+  const v128_t i2 = wasm_i32x4_trunc_sat_f32x4(wasm_f32x4_nearest(lo(hi(f)).v));
+  const v128_t i3 = wasm_i32x4_trunc_sat_f32x4(wasm_f32x4_nearest(hi(hi(f)).v));
   const v128_t i01_16 = wasm_i16x8_narrow_i32x4(i0, i1);
   const v128_t i23_16 = wasm_i16x8_narrow_i32x4(i2, i3);
   return u8x16{wasm_u8x16_narrow_i16x8(i01_16, i23_16)};
-}
-
-YNN_ALWAYS_INLINE void kahan_sum(f32x4 a, f32x4& acc, f32x4& error) {
-  f32x4 y = a - error;
-  f32x4 t = acc + y;
-  error = (t - acc) - y;
-  v128_t mask = wasm_i32x4_splat(0x7F800000);
-  v128_t is_inf = wasm_i32x4_eq(wasm_v128_and(error.v, mask), mask);
-  error = f32x4{wasm_v128_andnot(error.v, is_inf)};
-  acc = t;
 }
 
 YNN_ALWAYS_INLINE float horizontal_sum(f32x4 a) {
@@ -827,21 +856,6 @@ YNN_ALWAYS_INLINE std::tuple<u8x16, u8x16> interleave(
   u8x16 t0{wasm_v128_bitselect(x1_shl, x0.v, mask)};
   u8x16 t1{wasm_v128_bitselect(x1.v, x0_shr, mask)};
   return interleave(std::integral_constant<size_t, 8>{}, t0, t1);
-}
-
-template <typename T>
-YNN_ALWAYS_INLINE std::array<vec<T, 4>, 4> transpose(
-    std::array<vec<T, 4>, 4> x) {
-  vec<T, 4> t0{internal::unpacklo_x32x4(x[0].v, x[1].v)};
-  vec<T, 4> t1{internal::unpacklo_x32x4(x[2].v, x[3].v)};
-  vec<T, 4> t2{internal::unpackhi_x32x4(x[0].v, x[1].v)};
-  vec<T, 4> t3{internal::unpackhi_x32x4(x[2].v, x[3].v)};
-  return {{
-      vec<T, 4>{internal::movelh(t0.v, t1.v)},
-      vec<T, 4>{internal::movehl(t1.v, t0.v)},
-      vec<T, 4>{internal::movelh(t2.v, t3.v)},
-      vec<T, 4>{internal::movehl(t3.v, t2.v)},
-  }};
 }
 
 }  // namespace simd

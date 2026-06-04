@@ -116,9 +116,13 @@ static inline uint8_t xnn_qu8_requantize_rndnu16(int32_t input, float scale,
   assert(exp < 8);
   assert(exp >= -32);
 
-  // multiplier_q15 is in the range [2^14, 2^15 - 1]
-  int16_t multiplier_q15 =
-      math_min_s32((1 << 15) - 1, math_asr_s32_rounding(f32.multiplier_q24, 9));
+  // multiplier_q15 is in the range [2^14, 2^15]
+  int32_t multiplier_q15_32 = math_asr_s32_rounding(f32.multiplier_q24, 9);
+  int16_t multiplier_q15 = (int16_t) multiplier_q15_32;
+  if (multiplier_q15_32 == 32768) {
+    multiplier_q15 = 16384;
+    exp++;
+  }
 
   // Desired product: P = input * 2^exp * multiplier_q15 * 2^-14
   // We care about the lower 8 bits of P with saturation,

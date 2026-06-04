@@ -177,6 +177,7 @@ config("xnnpack_private_config") {
       "XNN_ENABLE_ARM_I8MM=1",
       "XNN_ENABLE_ASSEMBLY=1",
       "XNN_ENABLE_ARM_FP16_VECTOR=1",
+      "XNN_ENABLE_RNDNU16=1",
     ]
     if (xnnpack_enable_arm_kleidiai) {
       defines += [ "XNN_ENABLE_KLEIDIAI=1" ]
@@ -318,6 +319,7 @@ source_set("xnnpack_headers") {
 
 xnnpack_source_set("configs") {
   deps = [
+    ":init_once",
     ":microkernel_headers",
     ":xnnpack_headers",
     "//third_party/cpuinfo",
@@ -354,6 +356,7 @@ xnnpack_source_set("configs") {
 
 xnnpack_source_set("operators") {
   deps = [
+    ":init_once",
     ":microkernel_headers",
     ":xnnpack_headers",
   ]
@@ -381,6 +384,10 @@ xnnpack_source_set("subgraph") {
 
   # From build_srcs.bzl
   sources = SUBGRAPH_SRCS
+  sources += [
+    "src/subgraph/rewrites/fp16_to_fp32.cc",
+    "src/subgraph/rewrites/fp16_to_fp32.h",
+  ]
 }
 
 xnnpack_source_set("table") {
@@ -911,9 +918,16 @@ xnnpack_source_set("scalar_microkernels") {
   deps = [
     ":microkernel_defs",
     ":microkernel_headers",
-    "//third_party/fxdiv",
   ]
   sources = ALL_SCALAR_MICROKERNEL_SRCS
+}
+
+xnnpack_source_set("init_once") {
+  sources = [
+    "src/xnnpack/init-once.c",
+    "src/xnnpack/init-once.h",
+  ]
+  deps = [ ":xnnpack_headers" ]
 }
 
 xnnpack_source_set("xnnpack") {
@@ -943,6 +957,7 @@ xnnpack_source_set("xnnpack") {
   public_deps = [ ":xnnpack_headers" ]
   deps = [
     ":configs",
+    ":init_once",
     ":logging",
     ":microkernel_defs",
     ":microkernel_headers",
@@ -950,7 +965,6 @@ xnnpack_source_set("xnnpack") {
     ":scalar_microkernels",
     ":subgraph",
     ":table",
-    "//third_party/fxdiv",
   ]
   if (xnnpack_enable_arm_kleidiai) {
     deps += [ "//third_party/kleidiai" ]
@@ -1406,6 +1420,7 @@ if (!build_with_chromium) {
   }
 
   BENCHMARKS = [
+    "bench/indirection.cc",
     "bench/bf16-gemm.cc",
     "bench/f16-conv-hwc2chw.cc",
     "bench/f16-dwconv.cc",
