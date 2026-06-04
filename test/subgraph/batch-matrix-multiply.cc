@@ -404,6 +404,7 @@ TEST(BatchMatrixMultiplyQD8F32, dont_inline_lhs_dynamic_b) {
                                 XNN_FLAG_NO_INLINED_LHS_PACKING);
 }
 
+#ifndef XNNPACK_USE_YNNPACK
 TEST(BatchMatrixMultiplyF32QC8W, dynamic_b) {
   TestDynamicB<float, qcint8>();
 }
@@ -413,6 +414,7 @@ TEST(BatchMatrixMultiplyF32QC8W, dont_inline_lhs_dynamic_b) {
                               /*runtime_flags=*/xnn_test_runtime_flags() |
                                 XNN_FLAG_NO_INLINED_LHS_PACKING);
 }
+#endif  // XNNPACK_USE_YNNPACK
 
 TEST(BatchMatrixMultiplyF16, dont_inline_lhs_dynamic_b) {
   TestDynamicB<xnn_float16>(
@@ -646,6 +648,7 @@ TEST(BatchMatrixMultiplyQD8F32, dont_inline_lhs_static_b) {
                                 XNN_FLAG_NO_INLINED_LHS_PACKING);
 }
 
+#ifndef XNNPACK_USE_YNNPACK
 TEST(BatchMatrixMultiplyF32QC8W, static_b) {
   TestStaticB<float, qcint8>();
 }
@@ -655,6 +658,7 @@ TEST(BatchMatrixMultiplyF32QC8W, dont_inline_lhs_static_b) {
                              /*runtime_flags=*/xnn_test_runtime_flags() |
                                 XNN_FLAG_NO_INLINED_LHS_PACKING);
 }
+#endif  // XNNPACK_USE_YNNPACK
 
 // TODO(aelphy): Re-enable this test once gemma 4 precision is fixed or rewrite
 // is behind a flag.
