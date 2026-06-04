@@ -5,16 +5,21 @@
 #include <cinttypes>
 #include <cstddef>
 #include <cstdint>
+#include <type_traits>
+#include <utility>
 #include <vector>
 
 #include "include/xnnpack.h"
 #include "src/xnnpack/allocation-type.h"
 #include "src/xnnpack/allocator.h"
 #include "src/xnnpack/cache.h"
+#include "src/xnnpack/config-types.h"
+#include "src/xnnpack/config.h"
 #include "src/xnnpack/fp16.h"
 #include "src/xnnpack/internal.h"
 #include "src/xnnpack/log.h"
 #include "src/xnnpack/node-type.h"
+#include "src/xnnpack/operator.h"
 #include "src/xnnpack/subgraph.h"
 
 namespace xnnpack {
@@ -46,20 +51,94 @@ enum class OpAction {
   kElide,        // This op should be removed (eg. convert(fp32, fp32)).
 };
 
+template <class T, class = void>
+struct HasUKernel : std::false_type {};
+
+template <class T>
+struct HasUKernel<T, std::void_t<decltype(T::ukernel)>> : std::true_type {};
+
+template <class Config>
+bool IsValid(const Config* config) {
+  if constexpr (HasUKernel<Config>::value) {
+    return config && config->ukernel;
+  } else if constexpr (std::is_same_v<Config, xnn_dwconv_config>) {
+    return config && config->minmax;
+  } else if constexpr (std::is_same_v<Config, xnn_gemm_config>) {
+    return config && config->minmax.gemm[0].function[0];
+  } else {
+    return config && config->op_ukernel;
+  }
+}
+
+#define XNN_EXPAND(x) x
+
+#define XNN_OP_ACTION_CASE(prefix, ...)                                    \
+  XNN_EXPAND(XNN_OP_ACTION_CASE_IMPL_OVERLOAD(__VA_ARGS__, 5, 4, 3, 2, 1)( \
+      prefix, __VA_ARGS__))
+
+#define XNN_OP_ACTION_CASE_IMPL_OVERLOAD(op, i, i2, i3, i4, count, ...) \
+  XNN_OP_ACTION_CASE_IMPL_##count
+
+#define XNN_OP_ACTION_CASE_IMPL_1(prefix, op) \
+  XNN_OP_ACTION_CASE_IMPL_2(prefix, op, op)
+
+#define XNN_OP_ACTION_CASE_IMPL_2(prefix, op, impl) \
+  case xnn_##prefix##_##op: {                       \
+    if (IsValid(xnn_init_f16_##impl##_config())) {  \
+      return OpAction::kTransparent;                \
+    }                                               \
+  } break
+
+#define XNN_OP_ACTION_CASE_IMPL_3(prefix, op, impl1, impl2) \
+  case xnn_##prefix##_##op: {                               \
+    if (IsValid(xnn_init_f16_##impl1##_config()) &&         \
+        IsValid(xnn_init_f16_##impl2##_config())) {         \
+      return OpAction::kTransparent;                        \
+    }                                                       \
+  } break
+
+#define XNN_OP_ACTION_CASE_IMPL_4(prefix, op, impl1, impl2, impl3) \
+  case xnn_##prefix##_##op: {                                      \
+    if (IsValid(xnn_init_f16_##impl1##_config()) &&                \
+        IsValid(xnn_init_f16_##impl2##_config()) &&                \
+        IsValid(xnn_init_f16_##impl3##_config())) {                \
+      return OpAction::kTransparent;                               \
+    }                                                              \
+  } break
+
 // Is this op supported when fp16 hardware is missing (allow-list).
-// TODO: b/487077315 - Add allow list for supported ops.
 OpAction GetOpAction(const xnn_subgraph_t subgraph, const xnn_node& node) {
   switch (node.type) {
-    case xnn_node_type_unary_elementwise: {
+    case xnn_node_type_unary_elementwise:
       switch (node.unary_operator) {
+        XNN_OP_ACTION_CASE(unary, abs);
+        XNN_OP_ACTION_CASE(unary, clamp);
+        XNN_OP_ACTION_CASE(unary, elu);
+        XNN_OP_ACTION_CASE(unary, approxgelu);
+        XNN_OP_ACTION_CASE(unary, cosine);
+        XNN_OP_ACTION_CASE(unary, exp);
+        XNN_OP_ACTION_CASE(unary, gelu);
+        XNN_OP_ACTION_CASE(unary, hardswish, hswish);
+        XNN_OP_ACTION_CASE(unary, leaky_relu, lrelu);
+        XNN_OP_ACTION_CASE(unary, log);
+        XNN_OP_ACTION_CASE(unary, negate, neg);
+        XNN_OP_ACTION_CASE(unary, sigmoid);
+        XNN_OP_ACTION_CASE(unary, sine);
+        XNN_OP_ACTION_CASE(unary, square, sqr);
+        XNN_OP_ACTION_CASE(unary, square_root, sqrt);
+        XNN_OP_ACTION_CASE(unary, tanh);
+        XNN_OP_ACTION_CASE(unary, reciprocal_square_root, rsqrt);
+        XNN_OP_ACTION_CASE(unary, ceiling, rndu);
+        XNN_OP_ACTION_CASE(unary, floor, rndd);
+        XNN_OP_ACTION_CASE(unary, bankers_rounding, rndne);
         case xnn_unary_convert: {
           const xnn_value& output = subgraph->values[node.outputs[0]];
           const xnn_value& input = subgraph->values[node.inputs[0]];
-          // Elide converts from T to T. These are no-ops that may be introduced
-          // by the rewrite.
           if (output.datatype == input.datatype &&
               (output.datatype == xnn_datatype_fp16 ||
                output.datatype == xnn_datatype_fp32)) {
+            // Elide converts from T to T. These are no-ops that may be
+            // introduced by the rewrite.
             return OpAction::kElide;
           }
           if (output.datatype == xnn_datatype_fp16 ||
@@ -70,7 +149,68 @@ OpAction GetOpAction(const xnn_subgraph_t subgraph, const xnn_node& node) {
         default:
           break;
       }
-    } break;
+      break;
+    case xnn_node_type_binary_elementwise:
+      switch (node.binary_operator) {
+        XNN_OP_ACTION_CASE(binary, add, vadd);
+        XNN_OP_ACTION_CASE(binary, subtract, vsub);
+        XNN_OP_ACTION_CASE(binary, multiply, vmul);
+        XNN_OP_ACTION_CASE(binary, divide, vdiv);
+        XNN_OP_ACTION_CASE(binary, maximum, vmax);
+        XNN_OP_ACTION_CASE(binary, minimum, vmin);
+        XNN_OP_ACTION_CASE(binary, prelu, vprelu);
+        XNN_OP_ACTION_CASE(binary, squared_difference, vsqrdiff);
+        default:
+          break;
+      }
+      break;
+
+      XNN_OP_ACTION_CASE(node_type, softmax, rmax, raddstoreexpminusmax, vmul);
+      XNN_OP_ACTION_CASE(node_type, static_resize_bilinear_2d, ibilinear,
+                         ibilinear_chw);
+      XNN_OP_ACTION_CASE(node_type, rope, cmul);
+      XNN_OP_ACTION_CASE(node_type, average_pooling_2d, avgpool);
+      XNN_OP_ACTION_CASE(node_type, global_average_pooling_1d, avgpool);
+      XNN_OP_ACTION_CASE(node_type, global_average_pooling_2d, avgpool);
+      XNN_OP_ACTION_CASE(node_type, max_pooling_2d, maxpool);
+      XNN_OP_ACTION_CASE(node_type, static_mean, f32acc_rsum);
+      XNN_OP_ACTION_CASE(node_type, static_sum, f32acc_rsum);
+      XNN_OP_ACTION_CASE(node_type, global_sum_pooling_1d, f32acc_rsum);
+      XNN_OP_ACTION_CASE(node_type, global_sum_pooling_2d, f32acc_rsum);
+      XNN_OP_ACTION_CASE(node_type, static_reduce_max, rmax);
+      XNN_OP_ACTION_CASE(node_type, static_reduce_min, rmin);
+    case xnn_node_type_fully_connected:
+    case xnn_node_type_batch_matrix_multiply:
+    case xnn_node_type_deconvolution_2d: {
+      if (node.flags & XNN_FLAG_INLINE_LHS_PACKING) {
+        if (IsValid(xnn_init_pf16_gemm_config())) {
+          return OpAction::kTransparent;
+        }
+      } else {
+        if (IsValid(xnn_init_f16_gemm_config())) {
+          return OpAction::kTransparent;
+        }
+      }
+      break;
+    }
+    case xnn_node_type_convolution_2d: {
+      if (node.flags & XNN_FLAG_INLINE_LHS_PACKING) {
+        if (IsValid(xnn_init_pf16_gemm_config()) &&
+            IsValid(xnn_init_f16_vmulcaddc_config()) &&
+            IsValid(xnn_init_f16_dwconv_config())) {
+          return OpAction::kTransparent;
+        }
+      } else {
+        if (IsValid(xnn_init_f16_gemm_config()) &&
+            IsValid(xnn_init_f16_vmulcaddc_config()) &&
+            IsValid(xnn_init_f16_dwconv_config())) {
+          return OpAction::kTransparent;
+        }
+      }
+      break;
+    }
+      XNN_OP_ACTION_CASE(node_type, depthwise_convolution_2d, dwconv);
+      XNN_OP_ACTION_CASE(node_type, fully_connected_sparse, spmm);
     case xnn_node_type_static_reshape:
     case xnn_node_type_static_transpose:
     case xnn_node_type_even_split:
@@ -83,6 +223,8 @@ OpAction GetOpAction(const xnn_subgraph_t subgraph, const xnn_node& node) {
     case xnn_node_type_fuse_dims:
     case xnn_node_type_split_dims:
     case xnn_node_type_static_broadcast:
+    case xnn_node_type_static_constant_pad:
+    case xnn_node_type_pack_lh:
       return OpAction::kTransparent;
     default:
       break;

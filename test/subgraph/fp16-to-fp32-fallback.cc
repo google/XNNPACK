@@ -3,14 +3,19 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+#include <functional>
 #include <memory>
 #include <ostream>
+#include <string>
 #include <vector>
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include "include/xnnpack.h"
 #include "src/subgraph/rewrites/fp16_to_fp32.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/config.h"
+#include "src/xnnpack/hardware-config.h"
 #include "src/xnnpack/node-type.h"
 #include "src/xnnpack/operator-utils.h"
 #include "src/xnnpack/subgraph.h"
@@ -52,7 +57,19 @@ using litert::tensor::XnnpackGraph;
 using testing::Eq;
 using xnnpack::IsIsomorphicTo;
 
-TEST(Fp16ToFp32FallbackTest, SingleOpRewrite) {
+class Fp16ToFp32FallbackTest : public testing::Test {
+ public:
+  void SetUp() override {
+    // Use an empty config to disable FP16 support.
+    xnn_set_hardware_config(&mock_config_);
+  }
+
+  void TearDown() override { xnn_reset_hardware_config(); }
+
+  xnn_hardware_config mock_config_{};
+};
+
+TEST_F(Fp16ToFp32FallbackTest, SingleOpRewrite) {
   // A single op rewrite should add convert nodes for the fp32 inputs (to fp32)
   // and outputs (from fp32) that are fp16.
   //
@@ -142,7 +159,7 @@ TEST(Fp16ToFp32FallbackTest, SingleOpRewrite) {
   EXPECT_THAT(graph, IsIsomorphicTo(expected_graph));
 }
 
-TEST(Fp16ToFp32FallbackTest, OpChainRewrite) {
+TEST_F(Fp16ToFp32FallbackTest, OpChainRewrite) {
   // - An op chain rewrite should add convert fp16 operations to fp32 and insert
   //   conversions from fp16 inputs and to fp16 outputs.
   // - The intermediate values should stay as fp32.
@@ -182,7 +199,7 @@ TEST(Fp16ToFp32FallbackTest, OpChainRewrite) {
   EXPECT_THAT(graph, IsIsomorphicTo(expected_graph));
 }
 
-TEST(Fp16ToFp32FallbackTest, ReshapeAllowsFp16Inputs) {
+TEST_F(Fp16ToFp32FallbackTest, ReshapeAllowsFp16Inputs) {
   // Reshape is transparent: if its inputs are fp16, it isn't rewritten.
   std::unique_ptr<XnnpackGraph> graph;
   {
@@ -209,7 +226,7 @@ TEST(Fp16ToFp32FallbackTest, ReshapeAllowsFp16Inputs) {
   EXPECT_THAT(graph, IsIsomorphicTo(expected_graph));
 }
 
-TEST(Fp16ToFp32FallbackTest, ReshapeHandlesRewrittenInputs) {
+TEST_F(Fp16ToFp32FallbackTest, ReshapeHandlesRewrittenInputs) {
   // Reshape is transparent: if its inputs have been converted from fp16 to
   // fp32, it is rewritten to output fp32.
   std::unique_ptr<XnnpackGraph> graph;
@@ -237,7 +254,7 @@ TEST(Fp16ToFp32FallbackTest, ReshapeHandlesRewrittenInputs) {
   EXPECT_THAT(graph, IsIsomorphicTo(expected_graph));
 }
 
-TEST(Fp16ToFp32FallbackTest, DontInsertConvertFp32Fp32) {
+TEST_F(Fp16ToFp32FallbackTest, DontInsertConvertFp32Fp32) {
   std::unique_ptr<XnnpackGraph> graph;
   {
     XnnTensor a({.type = Type::kFP16, .shape = {3, 4}});
@@ -261,7 +278,7 @@ TEST(Fp16ToFp32FallbackTest, DontInsertConvertFp32Fp32) {
   EXPECT_THAT(graph, IsIsomorphicTo(expected_graph));
 }
 
-TEST(Fp16ToFp32FallbackTest, Fp16ToFp16HandleExternalInput) {
+TEST_F(Fp16ToFp32FallbackTest, Fp16ToFp16HandleExternalInput) {
   std::unique_ptr<XnnpackGraph> graph;
   {
     XnnTensor a({.type = Type::kFP16, .shape = {3, 4}});
@@ -286,7 +303,7 @@ TEST(Fp16ToFp32FallbackTest, Fp16ToFp16HandleExternalInput) {
   EXPECT_THAT(graph, IsIsomorphicTo(expected_graph));
 }
 
-TEST(Fp16ToFp32FallbackTest, Fp16ToFp16HandleExternalOutput) {
+TEST_F(Fp16ToFp32FallbackTest, Fp16ToFp16HandleExternalOutput) {
   std::unique_ptr<XnnpackGraph> graph;
   {
     XnnTensor a({.type = Type::kFP16, .shape = {3, 4}});
@@ -311,8 +328,8 @@ TEST(Fp16ToFp32FallbackTest, Fp16ToFp16HandleExternalOutput) {
   EXPECT_THAT(graph, IsIsomorphicTo(expected_graph));
 }
 
-TEST(Fp16ToFp32FallbackTest,
-     DontElideConvertFp16ToFp16WhenExternalInputToExternalOutput) {
+TEST_F(Fp16ToFp32FallbackTest,
+       DontElideConvertFp16ToFp16WhenExternalInputToExternalOutput) {
   std::unique_ptr<XnnpackGraph> graph;
   {
     XnnTensor a({.type = Type::kFP16, .shape = {3, 4}});
@@ -334,7 +351,7 @@ TEST(Fp16ToFp32FallbackTest,
   EXPECT_THAT(graph, IsIsomorphicTo(expected_graph));
 }
 
-TEST(Fp16ToFp32FallbackTest, HandleExternalOutputThatIsReused) {
+TEST_F(Fp16ToFp32FallbackTest, HandleExternalOutputThatIsReused) {
   std::unique_ptr<XnnpackGraph> graph;
   {
     XnnTensor a({.type = Type::kFP16, .shape = {3, 4}});
@@ -359,7 +376,7 @@ TEST(Fp16ToFp32FallbackTest, HandleExternalOutputThatIsReused) {
   EXPECT_THAT(graph, IsIsomorphicTo(expected_graph));
 }
 
-TEST(Fp16ToFp32FallbackTest, TransposeAllowsFp16Inputs) {
+TEST_F(Fp16ToFp32FallbackTest, TransposeAllowsFp16Inputs) {
   // Transpose is transparent: if its inputs are fp16, it isn't rewritten.
   std::unique_ptr<XnnpackGraph> graph;
   {
@@ -386,7 +403,7 @@ TEST(Fp16ToFp32FallbackTest, TransposeAllowsFp16Inputs) {
   EXPECT_THAT(graph, IsIsomorphicTo(expected_graph));
 }
 
-TEST(Fp16ToFp32FallbackTest, TransposeHandlesRewrittenInputs) {
+TEST_F(Fp16ToFp32FallbackTest, TransposeHandlesRewrittenInputs) {
   // Transpose is transparent: if its inputs have been converted from fp16 to
   // fp32, it is rewritten to output fp32.
   std::unique_ptr<XnnpackGraph> graph;
@@ -414,7 +431,7 @@ TEST(Fp16ToFp32FallbackTest, TransposeHandlesRewrittenInputs) {
   EXPECT_THAT(graph, IsIsomorphicTo(expected_graph));
 }
 
-TEST(Fp16ToFp32FallbackTest, ReuseConvertedFp32ValueForMultipleConsumers) {
+TEST_F(Fp16ToFp32FallbackTest, ReuseConvertedFp32ValueForMultipleConsumers) {
   // If an fp16 input is consumed by multiple rewritten ops, the convert node to
   // fp32 should be reused.
   std::unique_ptr<XnnpackGraph> graph;
@@ -444,7 +461,7 @@ TEST(Fp16ToFp32FallbackTest, ReuseConvertedFp32ValueForMultipleConsumers) {
   EXPECT_THAT(graph, IsIsomorphicTo(expected_graph));
 }
 
-TEST(Fp16ToFp32FallbackTest, SplitAllowsFp16Inputs) {
+TEST_F(Fp16ToFp32FallbackTest, SplitAllowsFp16Inputs) {
   // Split is transparent: if its inputs are fp16, it isn't rewritten.
   std::unique_ptr<XnnpackGraph> graph;
   {
@@ -486,7 +503,7 @@ TEST(Fp16ToFp32FallbackTest, SplitAllowsFp16Inputs) {
   EXPECT_THAT(graph, IsIsomorphicTo(expected_graph));
 }
 
-TEST(Fp16ToFp32FallbackTest, SplitHandlesRewrittenInputs) {
+TEST_F(Fp16ToFp32FallbackTest, SplitHandlesRewrittenInputs) {
   // Split is transparent: if its inputs have been converted from fp16 to
   // fp32, it is rewritten to output fp32.
   std::unique_ptr<XnnpackGraph> graph;
@@ -526,7 +543,7 @@ TEST(Fp16ToFp32FallbackTest, SplitHandlesRewrittenInputs) {
   EXPECT_THAT(graph, IsIsomorphicTo(expected_graph));
 }
 
-TEST(Fp16ToFp32FallbackTest, FullyConnectedWithBias) {
+TEST_F(Fp16ToFp32FallbackTest, FullyConnectedWithBias) {
   std::unique_ptr<XnnpackGraph> graph;
   {
     XnnTensor input({.type = Type::kFP16, .shape = {3, 4}});
@@ -566,5 +583,541 @@ TEST(Fp16ToFp32FallbackTest, FullyConnectedWithBias) {
 
   EXPECT_THAT(graph, IsIsomorphicTo(expected_graph));
 }
+
+TEST_F(Fp16ToFp32FallbackTest, BatchMatMul) {
+  std::unique_ptr<XnnpackGraph> graph;
+  {
+    XnnTensor x({.type = Type::kFP16, .shape = {1, 3, 4}});
+    XnnTensor y({.type = Type::kFP16, .shape = {1, 4, 2}});
+    XnnTensor output = BatchMatMul(x, y);
+    LRT_TENSOR_ASSERT_OK_AND_ASSIGN(graph, BuildXnnpackGraph({output}));
+  }
+
+  std::unique_ptr<XnnpackGraph> expected_graph;
+  {
+    XnnTensor x({.type = Type::kFP16, .shape = {1, 3, 4}});
+    XnnTensor y({.type = Type::kFP16, .shape = {1, 4, 2}});
+    XnnTensor x_fp32 = Cast(x, Type::kFP32);
+    XnnTensor y_fp32 = Cast(y, Type::kFP32);
+    XnnTensor output = BatchMatMul(x_fp32, y_fp32);
+    output = Cast(output, Type::kFP16);
+    LRT_TENSOR_ASSERT_OK_AND_ASSIGN(expected_graph,
+                                    BuildXnnpackGraph({output}));
+  }
+
+  ASSERT_THAT(xnn_subgraph_fallback_from_fp16_to_fp32(graph->subgraph(),
+                                                      /*optimization_flags=*/0),
+              Eq(xnn_status_success));
+
+  EXPECT_THAT(graph, IsIsomorphicTo(expected_graph));
+}
+
+TEST_F(Fp16ToFp32FallbackTest, TransposeConv2D) {
+  std::unique_ptr<XnnpackGraph> graph;
+  {
+    XnnTensor filter({.type = Type::kFP32,
+                      .shape = {8, 3, 3, 3},
+                      .buffer = OwningCpuBuffer::Copy<Type::kFP32>(
+                          std::vector<float>(8 * 3 * 3 * 3, 1.0f))});
+    XnnTensor input({.type = Type::kFP16, .shape = {1, 5, 5, 3}});
+    XnnTensor bias({.type = Type::kFP16,
+                    .shape = {8},
+                    .buffer = OwningCpuBuffer::Copy<Type::kFP16>(
+                        std::vector<float>(8, 1.0f))});
+    XnnTensor output = TransposeConv2D(filter, input, bias, {1, 5, 5, 8},
+                                       litert::tensor::kPaddingSame,
+                                       /*stride_h=*/1, /*stride_w=*/1);
+    LRT_TENSOR_ASSERT_OK_AND_ASSIGN(graph, BuildXnnpackGraph({output}));
+  }
+
+  std::unique_ptr<XnnpackGraph> expected_graph;
+  {
+    XnnTensor filter({.type = Type::kFP32,
+                      .shape = {8, 3, 3, 3},
+                      .buffer = OwningCpuBuffer::Copy<Type::kFP32>(
+                          std::vector<float>(8 * 3 * 3 * 3, 1.0f))});
+    XnnTensor input({.type = Type::kFP16, .shape = {1, 5, 5, 3}});
+    XnnTensor input_fp32 = Cast(input, Type::kFP32);
+    XnnTensor bias({.type = Type::kFP32,
+                    .shape = {8},
+                    .buffer = OwningCpuBuffer::Copy<Type::kFP32>(
+                        std::vector<float>(8, 1.0f))});
+    XnnTensor output = TransposeConv2D(filter, input_fp32, bias, {1, 5, 5, 8},
+                                       litert::tensor::kPaddingSame,
+                                       /*stride_h=*/1, /*stride_w=*/1);
+    output = Cast(output, Type::kFP16);
+    LRT_TENSOR_ASSERT_OK_AND_ASSIGN(expected_graph,
+                                    BuildXnnpackGraph({output}));
+  }
+
+  ASSERT_THAT(xnn_subgraph_fallback_from_fp16_to_fp32(graph->subgraph(),
+                                                      /*optimization_flags=*/0),
+              Eq(xnn_status_success));
+
+  EXPECT_THAT(graph, IsIsomorphicTo(expected_graph));
+}
+
+TEST_F(Fp16ToFp32FallbackTest, Conv2D) {
+  std::unique_ptr<XnnpackGraph> graph;
+  {
+    XnnTensor input({.type = Type::kFP16, .shape = {1, 5, 5, 3}});
+    XnnTensor filter({.type = Type::kFP32,
+                      .shape = {8, 3, 3, 3},
+                      .buffer = OwningCpuBuffer::Copy<Type::kFP32>(
+                          std::vector<float>(8 * 3 * 3 * 3, 1.0f))});
+    XnnTensor bias({.type = Type::kFP32,
+                    .shape = {8},
+                    .buffer = OwningCpuBuffer::Copy<Type::kFP32>(
+                        std::vector<float>(8, 1.0f))});
+    XnnTensor output = Conv2D(input, filter, bias, /*stride_h=*/1,
+                              /*stride_w=*/1, litert::tensor::kPaddingSame);
+    LRT_TENSOR_ASSERT_OK_AND_ASSIGN(graph, BuildXnnpackGraph({output}));
+  }
+
+  std::unique_ptr<XnnpackGraph> expected_graph;
+  {
+    XnnTensor input({.type = Type::kFP16, .shape = {1, 5, 5, 3}});
+    XnnTensor input_fp32 = Cast(input, Type::kFP32);
+    XnnTensor filter({.type = Type::kFP32,
+                      .shape = {8, 3, 3, 3},
+                      .buffer = OwningCpuBuffer::Copy<Type::kFP32>(
+                          std::vector<float>(8 * 3 * 3 * 3, 1.0f))});
+    XnnTensor bias({.type = Type::kFP32,
+                    .shape = {8},
+                    .buffer = OwningCpuBuffer::Copy<Type::kFP32>(
+                        std::vector<float>(8, 1.0f))});
+    XnnTensor output = Conv2D(input_fp32, filter, bias, /*stride_h=*/1,
+                              /*stride_w=*/1, litert::tensor::kPaddingSame);
+    output = Cast(output, Type::kFP16);
+    LRT_TENSOR_ASSERT_OK_AND_ASSIGN(expected_graph,
+                                    BuildXnnpackGraph({output}));
+  }
+
+  ASSERT_THAT(xnn_subgraph_fallback_from_fp16_to_fp32(graph->subgraph(),
+                                                      /*optimization_flags=*/0),
+              Eq(xnn_status_success));
+
+  EXPECT_THAT(graph, IsIsomorphicTo(expected_graph));
+}
+
+class Fp16ToFp32FineGrainedOpSupportTest : public testing::Test {
+ public:
+  void SetUp() override {
+#if XNN_ARCH_ARM64
+    mock_config_.arch_flags |= xnn_arch_arm_neon_fp16_arith;
+#elif XNN_ARCH_X86_64
+    mock_config_.arch_flags |= xnn_arch_x86_sse2;
+    mock_config_.arch_flags |= xnn_arch_x86_avx;
+    mock_config_.arch_flags |= xnn_arch_x86_f16c;
+    mock_config_.arch_flags |= xnn_arch_x86_fma3;
+    mock_config_.arch_flags |= xnn_arch_x86_avx2;
+#else
+    GTEST_SKIP();
+#endif
+  }
+
+  void TearDown() override { xnn_reset_hardware_config(); }
+
+  xnn_hardware_config mock_config_{};
+};
+
+TEST_F(Fp16ToFp32FineGrainedOpSupportTest, AbsAndElu) {
+  xnn_set_hardware_config(&mock_config_);
+
+  LRT_TENSOR_ASSERT_OK_AND_ASSIGN(
+      std::unique_ptr<XnnpackGraph> graph, BuildXnnpackGraph([] {
+        XnnTensor input({.type = Type::kFP16, .shape = {3, 4}});
+        XnnTensor output = Abs(input);
+        output = Elu(output);
+        return std::vector<litert::tensor::TensorHandle>({output});
+      }()));
+
+  LRT_TENSOR_ASSERT_OK_AND_ASSIGN(
+      std::unique_ptr<XnnpackGraph> expected_graph, BuildXnnpackGraph([] {
+        XnnTensor input({.type = Type::kFP16, .shape = {3, 4}});
+        XnnTensor output = Abs(input);
+        output = Elu(output);
+        return std::vector<litert::tensor::TensorHandle>({output});
+      }()));
+
+  ASSERT_THAT(xnn_subgraph_fallback_from_fp16_to_fp32(graph->subgraph(),
+                                                      /*optimization_flags=*/0),
+              Eq(xnn_status_success));
+
+  EXPECT_THAT(graph, IsIsomorphicTo(expected_graph));
+}
+
+TEST_F(Fp16ToFp32FineGrainedOpSupportTest,
+       TransparentAbsHandlesRewrittenInputs) {
+  xnn_set_hardware_config(&mock_config_);
+
+  LRT_TENSOR_ASSERT_OK_AND_ASSIGN(
+      std::unique_ptr<XnnpackGraph> graph, BuildXnnpackGraph([] {
+        XnnTensor input({.type = Type::kFP16, .shape = {3, 4}});
+        XnnTensor output = Elu(input);
+        output = Abs(output);
+        return std::vector<litert::tensor::TensorHandle>({output});
+      }()));
+
+  LRT_TENSOR_ASSERT_OK_AND_ASSIGN(
+      std::unique_ptr<XnnpackGraph> expected_graph, BuildXnnpackGraph([] {
+        XnnTensor input({.type = Type::kFP16, .shape = {3, 4}});
+        XnnTensor output = Elu(input);
+        output = Abs(output);
+        return std::vector<litert::tensor::TensorHandle>({output});
+      }()));
+
+  ASSERT_THAT(xnn_subgraph_fallback_from_fp16_to_fp32(graph->subgraph(),
+                                                      /*optimization_flags=*/0),
+              Eq(xnn_status_success));
+
+  EXPECT_THAT(graph, IsIsomorphicTo(expected_graph));
+
+  xnn_reset_hardware_config();
+}
+
+TEST_F(Fp16ToFp32FineGrainedOpSupportTest, NegLogisticAdd) {
+  xnn_set_hardware_config(&mock_config_);
+
+  LRT_TENSOR_ASSERT_OK_AND_ASSIGN(
+      std::unique_ptr<XnnpackGraph> graph, BuildXnnpackGraph([] {
+        XnnTensor a({.type = Type::kFP16, .shape = {3, 4}});
+        XnnTensor b({.type = Type::kFP16, .shape = {3, 4}});
+        XnnTensor a_neg = Neg(a);
+        XnnTensor a_sig = Logistic(a_neg);
+        XnnTensor b_neg = Neg(b);
+        XnnTensor output = Add(a_sig, b_neg);
+        return std::vector<litert::tensor::TensorHandle>({output});
+      }()));
+
+  LRT_TENSOR_ASSERT_OK_AND_ASSIGN(
+      std::unique_ptr<XnnpackGraph> expected_graph, BuildXnnpackGraph([] {
+        XnnTensor a({.type = Type::kFP16, .shape = {3, 4}});
+        XnnTensor b({.type = Type::kFP16, .shape = {3, 4}});
+        XnnTensor a_neg = Neg(a);
+        XnnTensor a_sig = Logistic(a_neg);
+        XnnTensor b_neg = Neg(b);
+        XnnTensor output = Add(a_sig, b_neg);
+        return std::vector<litert::tensor::TensorHandle>({output});
+      }()));
+
+  ASSERT_THAT(xnn_subgraph_fallback_from_fp16_to_fp32(graph->subgraph(),
+                                                      /*optimization_flags=*/0),
+              Eq(xnn_status_success));
+
+  EXPECT_THAT(graph, IsIsomorphicTo(expected_graph));
+
+  xnn_reset_hardware_config();
+}
+
+TEST_F(Fp16ToFp32FineGrainedOpSupportTest, SoftmaxTest) {
+  xnn_set_hardware_config(&mock_config_);
+
+  LRT_TENSOR_ASSERT_OK_AND_ASSIGN(std::unique_ptr<XnnpackGraph> graph, [] {
+    XnnTensor input({.type = Type::kFP16, .shape = {3, 4}});
+    XnnTensor output = Softmax(input);
+    return BuildXnnpackGraph({output});
+  }());
+
+  LRT_TENSOR_ASSERT_OK_AND_ASSIGN(
+      std::unique_ptr<XnnpackGraph> expected_graph, [] {
+        XnnTensor input({.type = Type::kFP16, .shape = {3, 4}});
+        XnnTensor output = Softmax(input);
+        return BuildXnnpackGraph({output});
+      }());
+
+  ASSERT_THAT(xnn_subgraph_fallback_from_fp16_to_fp32(graph->subgraph(),
+                                                      /*optimization_flags=*/0),
+              Eq(xnn_status_success));
+
+  EXPECT_THAT(graph, IsIsomorphicTo(expected_graph));
+
+  xnn_reset_hardware_config();
+}
+
+TEST_F(Fp16ToFp32FineGrainedOpSupportTest, FullyConnected) {
+  xnn_set_hardware_config(&mock_config_);
+
+  LRT_TENSOR_ASSERT_OK_AND_ASSIGN(
+      std::unique_ptr<XnnpackGraph> graph, BuildXnnpackGraph([] {
+        XnnTensor input({.type = Type::kFP16, .shape = {3, 4}});
+        XnnTensor weights({.type = Type::kFP16,
+                           .shape = {2, 4},
+                           .buffer = OwningCpuBuffer::Copy<Type::kFP16>(
+                               {1, 2, 3, 4, 5, 6, 7, 8})});
+        XnnTensor output = FullyConnected(input, weights);
+        return std::vector<litert::tensor::TensorHandle>({output});
+      }()));
+
+  LRT_TENSOR_ASSERT_OK_AND_ASSIGN(
+      std::unique_ptr<XnnpackGraph> expected_graph, BuildXnnpackGraph([] {
+        XnnTensor input({.type = Type::kFP16, .shape = {3, 4}});
+        XnnTensor weights({.type = Type::kFP16,
+                           .shape = {2, 4},
+                           .buffer = OwningCpuBuffer::Copy<Type::kFP16>(
+                               {1, 2, 3, 4, 5, 6, 7, 8})});
+        XnnTensor output = FullyConnected(input, weights);
+        return std::vector<litert::tensor::TensorHandle>({output});
+      }()));
+
+  ASSERT_THAT(xnn_subgraph_fallback_from_fp16_to_fp32(graph->subgraph(),
+                                                      /*optimization_flags=*/0),
+              Eq(xnn_status_success));
+
+  EXPECT_THAT(graph, IsIsomorphicTo(expected_graph));
+
+  xnn_reset_hardware_config();
+}
+
+TEST_F(Fp16ToFp32FineGrainedOpSupportTest, BatchMatMul) {
+  xnn_set_hardware_config(&mock_config_);
+
+  LRT_TENSOR_ASSERT_OK_AND_ASSIGN(
+      std::unique_ptr<XnnpackGraph> graph, BuildXnnpackGraph([] {
+        XnnTensor x({.type = Type::kFP16, .shape = {1, 3, 4}});
+        XnnTensor y({.type = Type::kFP16, .shape = {1, 4, 2}});
+        XnnTensor output = BatchMatMul(x, y);
+        return std::vector<litert::tensor::TensorHandle>({output});
+      }()));
+
+  LRT_TENSOR_ASSERT_OK_AND_ASSIGN(
+      std::unique_ptr<XnnpackGraph> expected_graph, BuildXnnpackGraph([] {
+        XnnTensor x({.type = Type::kFP16, .shape = {1, 3, 4}});
+        XnnTensor y({.type = Type::kFP16, .shape = {1, 4, 2}});
+        XnnTensor output = BatchMatMul(x, y);
+        return std::vector<litert::tensor::TensorHandle>({output});
+      }()));
+
+  ASSERT_THAT(xnn_subgraph_fallback_from_fp16_to_fp32(graph->subgraph(),
+                                                      /*optimization_flags=*/0),
+              Eq(xnn_status_success));
+
+  EXPECT_THAT(graph, IsIsomorphicTo(expected_graph));
+
+  xnn_reset_hardware_config();
+}
+
+TEST_F(Fp16ToFp32FineGrainedOpSupportTest, TransposeConv2D) {
+  xnn_set_hardware_config(&mock_config_);
+
+  LRT_TENSOR_ASSERT_OK_AND_ASSIGN(
+      std::unique_ptr<XnnpackGraph> graph, BuildXnnpackGraph([] {
+        XnnTensor filter({.type = Type::kFP32,
+                          .shape = {8, 3, 3, 3},
+                          .buffer = OwningCpuBuffer::Copy<Type::kFP32>(
+                              std::vector<float>(8 * 3 * 3 * 3, 1.0f))});
+        XnnTensor input({.type = Type::kFP16, .shape = {1, 5, 5, 3}});
+        XnnTensor bias({.type = Type::kFP16,
+                        .shape = {8},
+                        .buffer = OwningCpuBuffer::Copy<Type::kFP16>(
+                            std::vector<float>(8, 1.0f))});
+        XnnTensor output = TransposeConv2D(filter, input, bias, {1, 5, 5, 8},
+                                           litert::tensor::kPaddingSame,
+                                           /*stride_h=*/1, /*stride_w=*/1);
+        return std::vector<litert::tensor::TensorHandle>({output});
+      }()));
+
+  LRT_TENSOR_ASSERT_OK_AND_ASSIGN(
+      std::unique_ptr<XnnpackGraph> expected_graph, BuildXnnpackGraph([] {
+        XnnTensor filter({.type = Type::kFP32,
+                          .shape = {8, 3, 3, 3},
+                          .buffer = OwningCpuBuffer::Copy<Type::kFP32>(
+                              std::vector<float>(8 * 3 * 3 * 3, 1.0f))});
+        XnnTensor input({.type = Type::kFP16, .shape = {1, 5, 5, 3}});
+        XnnTensor bias({.type = Type::kFP16,
+                        .shape = {8},
+                        .buffer = OwningCpuBuffer::Copy<Type::kFP16>(
+                            std::vector<float>(8, 1.0f))});
+        XnnTensor output = TransposeConv2D(filter, input, bias, {1, 5, 5, 8},
+                                           litert::tensor::kPaddingSame,
+                                           /*stride_h=*/1, /*stride_w=*/1);
+        return std::vector<litert::tensor::TensorHandle>({output});
+      }()));
+
+  ASSERT_THAT(xnn_subgraph_fallback_from_fp16_to_fp32(graph->subgraph(),
+                                                      /*optimization_flags=*/0),
+              Eq(xnn_status_success));
+
+  EXPECT_THAT(graph, IsIsomorphicTo(expected_graph));
+
+  xnn_reset_hardware_config();
+}
+
+TEST_F(Fp16ToFp32FineGrainedOpSupportTest, Conv2D) {
+  xnn_set_hardware_config(&mock_config_);
+
+  const bool vmulcaddc_supported = xnn_init_f16_vmulcaddc_config() != nullptr;
+
+  LRT_TENSOR_ASSERT_OK_AND_ASSIGN(
+      std::unique_ptr<XnnpackGraph> graph, BuildXnnpackGraph([] {
+        XnnTensor input({.type = Type::kFP16, .shape = {1, 5, 5, 3}});
+        XnnTensor filter({.type = Type::kFP32,
+                          .shape = {8, 3, 3, 3},
+                          .buffer = OwningCpuBuffer::Copy<Type::kFP32>(
+                              std::vector<float>(8 * 3 * 3 * 3, 1.0f))});
+        XnnTensor bias({.type = Type::kFP32,
+                        .shape = {8},
+                        .buffer = OwningCpuBuffer::Copy<Type::kFP32>(
+                            std::vector<float>(8, 1.0f))});
+        XnnTensor output = Conv2D(input, filter, bias, /*stride_h=*/1,
+                                  /*stride_w=*/1, litert::tensor::kPaddingSame);
+        return std::vector<litert::tensor::TensorHandle>({output});
+      }()));
+
+  LRT_TENSOR_ASSERT_OK_AND_ASSIGN(
+      std::unique_ptr<XnnpackGraph> expected_graph,
+      BuildXnnpackGraph([vmulcaddc_supported] {
+        XnnTensor input({.type = Type::kFP16, .shape = {1, 5, 5, 3}});
+        XnnTensor filter({.type = Type::kFP32,
+                          .shape = {8, 3, 3, 3},
+                          .buffer = OwningCpuBuffer::Copy<Type::kFP32>(
+                              std::vector<float>(8 * 3 * 3 * 3, 1.0f))});
+        XnnTensor bias({.type = Type::kFP32,
+                        .shape = {8},
+                        .buffer = OwningCpuBuffer::Copy<Type::kFP32>(
+                            std::vector<float>(8, 1.0f))});
+        if (vmulcaddc_supported) {
+          XnnTensor output =
+              Conv2D(input, filter, bias, /*stride_h=*/1,
+                     /*stride_w=*/1, litert::tensor::kPaddingSame);
+          return std::vector<litert::tensor::TensorHandle>({output});
+        } else {
+          XnnTensor input_fp32 = Cast(input, Type::kFP32);
+          XnnTensor output = Conv2D(input_fp32, filter, bias,
+                                    /*stride_h=*/1, /*stride_w=*/1,
+                                    litert::tensor::kPaddingSame);
+          output = Cast(output, Type::kFP16);
+          return std::vector<litert::tensor::TensorHandle>({output});
+        }
+      }()));
+
+  ASSERT_THAT(xnn_subgraph_fallback_from_fp16_to_fp32(graph->subgraph(),
+                                                      /*optimization_flags=*/0),
+              Eq(xnn_status_success));
+
+  EXPECT_THAT(graph, IsIsomorphicTo(expected_graph));
+
+  xnn_reset_hardware_config();
+}
+
+struct UnaryOpParam {
+  std::string name;
+  std::function<XnnTensor(XnnTensor)> op_builder;
+};
+
+class Fp16ToFp32FallbackUnaryOpTest
+    : public Fp16ToFp32FallbackTest,
+      public testing::WithParamInterface<UnaryOpParam> {};
+
+TEST_P(Fp16ToFp32FallbackUnaryOpTest, Rewrite) {
+  const auto& param = GetParam();
+  LRT_TENSOR_ASSERT_OK_AND_ASSIGN(std::unique_ptr<XnnpackGraph> graph, [&] {
+    XnnTensor input({.type = Type::kFP16, .shape = {3, 4}});
+    XnnTensor output = param.op_builder(input);
+    return BuildXnnpackGraph({output});
+  }());
+
+  LRT_TENSOR_ASSERT_OK_AND_ASSIGN(
+      std::unique_ptr<XnnpackGraph> expected_graph, [&] {
+        XnnTensor input({.type = Type::kFP16, .shape = {3, 4}});
+        // These ops have software emulation fallbacks and will therefore not be
+        // converted.
+        if (param.name == "Cos" || param.name == "Sin") {
+          XnnTensor output = param.op_builder(input);
+          return BuildXnnpackGraph({output});
+        } else {
+          XnnTensor input_fp32 = Cast(input, Type::kFP32);
+          XnnTensor output_fp32 = param.op_builder(input_fp32);
+          XnnTensor output = Cast(output_fp32, Type::kFP16);
+          return BuildXnnpackGraph({output});
+        }
+      }());
+
+  ASSERT_THAT(xnn_subgraph_fallback_from_fp16_to_fp32(graph->subgraph(),
+                                                      /*optimization_flags=*/0),
+              Eq(xnn_status_success));
+
+  EXPECT_THAT(graph, IsIsomorphicTo(expected_graph));
+}
+
+INSTANTIATE_TEST_SUITE_P(
+    UnaryOps, Fp16ToFp32FallbackUnaryOpTest,
+    testing::ValuesIn<UnaryOpParam>({
+        {"Abs", [](XnnTensor x) { return Abs(x); }},
+        {"Relu", [](XnnTensor x) { return Relu(x); }},
+        {"Elu", [](XnnTensor x) { return Elu(x); }},
+        {"ApproxGelu",
+         [](XnnTensor x) { return Gelu(x, /*approximate=*/true); }},
+        {"Cos", [](XnnTensor x) { return Cos(x); }},
+        {"Exp", [](XnnTensor x) { return Exp(x); }},
+        {"Gelu", [](XnnTensor x) { return Gelu(x, /*approximate=*/false); }},
+        {"HardSwish", [](XnnTensor x) { return HardSwish(x); }},
+        {"LeakyRelu", [](XnnTensor x) { return LeakyRelu(x); }},
+        {"Log", [](XnnTensor x) { return Log(x); }},
+        {"Neg", [](XnnTensor x) { return Neg(x); }},
+        {"Logistic", [](XnnTensor x) { return Logistic(x); }},
+        {"Sin", [](XnnTensor x) { return Sin(x); }},
+        {"Square", [](XnnTensor x) { return Square(x); }},
+        {"Sqrt", [](XnnTensor x) { return Sqrt(x); }},
+        {"Tanh", [](XnnTensor x) { return Tanh(x); }},
+        {"Rsqrt", [](XnnTensor x) { return Rsqrt(x); }},
+        {"Ceil", [](XnnTensor x) { return Ceil(x); }},
+        {"Floor", [](XnnTensor x) { return Floor(x); }},
+        {"Round", [](XnnTensor x) { return Round(x); }},
+    }),
+    [](const testing::TestParamInfo<Fp16ToFp32FallbackUnaryOpTest::ParamType>&
+           info) { return info.param.name; });
+
+struct BinaryOpParam {
+  std::string name;
+  std::function<XnnTensor(XnnTensor, XnnTensor)> op_builder;
+};
+
+class Fp16ToFp32FallbackBinaryOpTest
+    : public Fp16ToFp32FallbackTest,
+      public testing::WithParamInterface<BinaryOpParam> {};
+
+TEST_P(Fp16ToFp32FallbackBinaryOpTest, Rewrite) {
+  const auto& param = GetParam();
+  std::unique_ptr<XnnpackGraph> graph;
+  {
+    XnnTensor a({.type = Type::kFP16, .shape = {3, 4}});
+    XnnTensor b({.type = Type::kFP16, .shape = {3, 4}});
+    XnnTensor output = param.op_builder(a, b);
+    LRT_TENSOR_ASSERT_OK_AND_ASSIGN(graph, BuildXnnpackGraph({output}));
+  }
+
+  std::unique_ptr<XnnpackGraph> expected_graph;
+  {
+    XnnTensor a({.type = Type::kFP16, .shape = {3, 4}});
+    XnnTensor a_fp32 = Cast(a, Type::kFP32);
+    XnnTensor b({.type = Type::kFP16, .shape = {3, 4}});
+    XnnTensor b_fp32 = Cast(b, Type::kFP32);
+    XnnTensor output_fp32 = param.op_builder(a_fp32, b_fp32);
+    XnnTensor output = Cast(output_fp32, Type::kFP16);
+    LRT_TENSOR_ASSERT_OK_AND_ASSIGN(expected_graph,
+                                    BuildXnnpackGraph({output}));
+  }
+
+  ASSERT_THAT(xnn_subgraph_fallback_from_fp16_to_fp32(graph->subgraph(),
+                                                      /*optimization_flags=*/0),
+              Eq(xnn_status_success));
+
+  EXPECT_THAT(graph, IsIsomorphicTo(expected_graph));
+}
+
+INSTANTIATE_TEST_SUITE_P(
+    BinaryOps, Fp16ToFp32FallbackBinaryOpTest,
+    testing::ValuesIn<BinaryOpParam>({
+        {"Add", [](XnnTensor a, XnnTensor b) { return Add(a, b); }},
+        {"Sub", [](XnnTensor a, XnnTensor b) { return Sub(a, b); }},
+        {"Mul", [](XnnTensor a, XnnTensor b) { return Mul(a, b); }},
+        {"Div", [](XnnTensor a, XnnTensor b) { return Div(a, b); }},
+        {"Maximum", [](XnnTensor a, XnnTensor b) { return Maximum(a, b); }},
+        {"Minimum", [](XnnTensor a, XnnTensor b) { return Minimum(a, b); }},
+        {"PRelu", [](XnnTensor a, XnnTensor b) { return PRelu(a, b); }},
+    }),
+    [](const testing::TestParamInfo<Fp16ToFp32FallbackBinaryOpTest::ParamType>&
+           info) { return info.param.name; });
 
 }  // namespace
