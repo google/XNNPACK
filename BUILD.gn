@@ -1181,6 +1181,7 @@ SUBGRAPH_SEPARATE_TESTS = [
   "concatenate",
   "copy",
   "even_split",
+  "fp16_to_fp32_fallback",
   "softmax",
   "space_to_depth_2d",
   "static_constant_pad",
