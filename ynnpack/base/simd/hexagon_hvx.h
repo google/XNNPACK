@@ -97,7 +97,7 @@ struct vec<int32_t, 32> {
 
   vec() = default;
   explicit vec(HVX_Vector v) : v(v) {}
-  vec(int16_t x) : v(Q6_V_vsplat_R(x)) {}  // NOLINT
+  vec(int32_t x) : v(Q6_V_vsplat_R(x)) {}  // NOLINT
 
   HVX_Vector v;
 };
@@ -109,7 +109,7 @@ struct vec<uint8_t, 128> {
 
   vec() = default;
   explicit vec(HVX_Vector v) : v(v) {}
-  vec(int16_t x) : v(Q6_V_vsplat_R(internal::splat8x4(x))) {}  // NOLINT
+  vec(uint8_t x) : v(Q6_V_vsplat_R(internal::splat8x4(x))) {}  // NOLINT
 
   HVX_Vector v;
 };
@@ -121,7 +121,7 @@ struct vec<int8_t, 128> {
 
   vec() = default;
   explicit vec(HVX_Vector v) : v(v) {}
-  vec(int16_t x) : v(Q6_V_vsplat_R(internal::splat8x4(x))) {}  // NOLINT
+  vec(int8_t x) : v(Q6_V_vsplat_R(internal::splat8x4(x))) {}  // NOLINT
 
   HVX_Vector v;
 };
