@@ -175,12 +175,20 @@ static enum xnn_status resize_expand_dims_output_tensor(
     return xnn_status_success;
   }
   for (int i = 0; i < num_output_dims; ++i) {
-    if (new_axes[axes_iter] == i) {
+    if (axes_iter < opdata->num_reshape_dims && new_axes[axes_iter] == i) {
       output_shape->dim[i] = 1;
       ++axes_iter;
     } else {
       output_shape->dim[i] = input_shape->dim[input_iter++];
     }
+  }
+  if (axes_iter != opdata->num_reshape_dims) {
+    xnn_log_error("failed to expand dims in %s operator with input ID #%" PRIu32
+                  " and output ID #%" PRIu32
+                  ": expansion axes must be sorted and within [0, %zu)",
+                  xnn_node_type_to_string(xnn_node_type_static_expand_dims),
+                  input_id, output_id, num_output_dims);
+    return xnn_status_invalid_parameter;
   }
 
   const size_t new_size = xnn_runtime_tensor_get_size(output);
