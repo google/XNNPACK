@@ -53,6 +53,9 @@ class XnnpackRunner {
   // Sets the input data for a given tensor.
   absl::Status SetInput(const TensorHandle& tensor,
                         absl::Span<const std::byte> data);
+  // Sets the output buffer for a given tensor.
+  absl::Status SetOutput(const TensorHandle& tensor,
+                         absl::Span<std::byte> data);
   // Updates the shape for an external input tensor.
   absl::Status ReshapeInput(const TensorHandle& tensor,
                             absl::Span<const int32_t> shape);
@@ -67,6 +70,23 @@ class XnnpackRunner {
 
  private:
   explicit XnnpackRunner(std::unique_ptr<XnnpackGraph> graph);
+
+  // External buffer that can be either an external view or an owned buffer.
+  class ExternalBuffer {
+   public:
+    // Gets a span of either the external view or the owned buffer.
+    absl::Span<std::byte> data();
+    absl::Span<const std::byte> data() const;
+
+    void SetExternalView(absl::Span<const std::byte> data);
+    void SetOwnedBuffer(absl::Span<const std::byte> data);
+    absl::Status Resize(size_t new_size);
+    bool IsOwned() const { return external_view_.data() == nullptr; }
+
+   private:
+    absl::Span<std::byte> external_view_;
+    std::vector<std::byte> owned_buffer_;
+  };
 
 #define TENSOR_API_UNIQUE_PTR_WITH_DELETER(NAME, TYPE, DEL_FUNC) \
   struct NAME##Deleter {                                         \
@@ -85,7 +105,7 @@ class XnnpackRunner {
 
   RuntimePtr runtime_ = nullptr;
   std::unique_ptr<XnnpackGraph> graph_;
-  absl::flat_hash_map<uint32_t, std::vector<std::byte>> external_buffers_;
+  absl::flat_hash_map<uint32_t, ExternalBuffer> external_buffers_;
   ThreadpoolPtr threadpool_ = nullptr;
   size_t num_threads_ = 1;
 };

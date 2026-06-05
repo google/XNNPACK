@@ -26,6 +26,7 @@ limitations under the License.
 #include "absl/algorithm/container.h"
 #include "absl/status/status.h"
 #include "absl/status/statusor.h"
+#include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
 #include "absl/types/span.h"
 #include "litert/tensor/backends/xnnpack/arithmetic.h"
@@ -82,9 +83,27 @@ absl::Status XnnpackRunner::SetInput(const TensorHandle& tensor,
     return absl::InvalidArgumentError("Tensor is not marked as external input");
   }
   if (ByteSize(value.info) != data.size()) {
-    return absl::InvalidArgumentError("Mismatched input size");
+    return absl::InvalidArgumentError(
+        absl::StrCat("Mismatched input size: expected ", ByteSize(value.info),
+                     ", got ", data.size()));
   }
-  external_buffers_[value.id].assign(data.begin(), data.end());
+  external_buffers_[value.id].SetExternalView(data);
+  return absl::OkStatus();
+}
+
+absl::Status XnnpackRunner::SetOutput(const TensorHandle& tensor,
+                                      absl::Span<std::byte> data) {
+  LRT_TENSOR_ASSIGN_OR_RETURN(size_t index, graph_->Lookup(tensor));
+  XnnpackValue& value = graph_->mutable_values()[index];
+  if ((value.flags & XNN_VALUE_FLAG_EXTERNAL_OUTPUT) == 0) {
+    return absl::InvalidArgumentError("Tensor is not marked as output");
+  }
+  if (ByteSize(value.info) != data.size()) {
+    return absl::InvalidArgumentError(
+        absl::StrCat("Mismatched output size: expected ", ByteSize(value.info),
+                     ", got ", data.size()));
+  }
+  external_buffers_[value.id].SetExternalView(data);
   return absl::OkStatus();
 }
 
@@ -96,8 +115,7 @@ absl::Status XnnpackRunner::ReshapeInput(const TensorHandle& tensor,
     return absl::InvalidArgumentError("Tensor is not marked as external input");
   }
   value.info.shape.assign(shape.begin(), shape.end());
-  external_buffers_[value.id].resize(ByteSize(value.info));
-  return absl::OkStatus();
+  return external_buffers_[value.id].Resize(ByteSize(value.info));
 }
 
 absl::Status XnnpackRunner::WriteInput(const TensorHandle& tensor,
@@ -108,7 +126,7 @@ absl::Status XnnpackRunner::WriteInput(const TensorHandle& tensor,
   if ((value.flags & XNN_VALUE_FLAG_EXTERNAL_INPUT) == 0) {
     return absl::InvalidArgumentError("Tensor is not marked as external input");
   }
-  std::vector<std::byte>& buffer = external_buffers_[value.id];
+  auto buffer = external_buffers_[value.id].data();
   if (offset_bytes > buffer.size() ||
       data.size() > buffer.size() - offset_bytes) {
     return absl::InvalidArgumentError("WriteInput out of bounds");
@@ -144,7 +162,8 @@ absl::Status XnnpackRunner::Run() {
                                    dims.empty() ? nullptr : dims.data()))
         << "xnn_reshape_external_value";
 
-    external_buffers_[value.id].resize(ByteSize(value.info));
+    LRT_TENSOR_RETURN_IF_ERROR(
+        external_buffers_[value.id].Resize(ByteSize(value.info)));
   }
 
   // Reshape the runtime (propagates input shapes through the graph).
@@ -168,7 +187,8 @@ absl::Status XnnpackRunner::Run() {
       value.info.shape.push_back(static_cast<int32_t>(dims[i]));
     }
 
-    external_buffers_[value.id].resize(ByteSize(value.info));
+    LRT_TENSOR_RETURN_IF_ERROR(
+        external_buffers_[value.id].Resize(ByteSize(value.info)));
   }
 
   // Prepare external values for the runtime.
@@ -178,13 +198,12 @@ absl::Status XnnpackRunner::Run() {
     if (value.flags == 0) {
       continue;
     }
-    std::vector<std::byte>& buffer = external_buffers_[value.id];
-    if (buffer.empty()) {
+    auto buffer = external_buffers_[value.id].data();
+    if (buffer.data() == nullptr) {
       return absl::FailedPreconditionError(
           "External value missing host buffer");
     }
-    externals.push_back(
-        {.id = value.id, .data = static_cast<void*>(buffer.data())});
+    externals.push_back({.id = value.id, .data = buffer.data()});
   }
 
   // Setup the runtime with the external values.
@@ -208,12 +227,48 @@ absl::StatusOr<LockedBufferSpan<const std::byte>> XnnpackRunner::ReadOutput(
   if (buffer_it == external_buffers_.end()) {
     return absl::FailedPreconditionError("Tensor is not an output buffer");
   }
-  if (buffer_it->second.empty()) {
+  auto buffer = buffer_it->second.data();
+  if (buffer.empty()) {
     return absl::FailedPreconditionError("No buffer available for output");
   }
   return LockedBufferSpan<const std::byte>(
-      buffer_it->second.data(), [](const std::byte*) {},
-      buffer_it->second.size());
+      buffer.data(), [](const std::byte*) {}, buffer.size());
+}
+
+absl::Span<std::byte> XnnpackRunner::ExternalBuffer::data() {
+  return IsOwned() ? absl::MakeSpan(owned_buffer_.data(), owned_buffer_.size())
+                   : external_view_;
+}
+
+absl::Span<const std::byte> XnnpackRunner::ExternalBuffer::data() const {
+  return IsOwned() ? absl::MakeSpan(owned_buffer_.data(), owned_buffer_.size())
+                   : external_view_;
+}
+
+void XnnpackRunner::ExternalBuffer::SetExternalView(
+    absl::Span<const std::byte> data) {
+  external_view_ =
+      absl::MakeSpan(const_cast<std::byte*>(data.data()), data.size());
+  owned_buffer_.clear();
+}
+
+void XnnpackRunner::ExternalBuffer::SetOwnedBuffer(
+    absl::Span<const std::byte> data) {
+  owned_buffer_.assign(data.begin(), data.end());
+  external_view_ = {};
+}
+
+absl::Status XnnpackRunner::ExternalBuffer::Resize(size_t new_size) {
+  if (IsOwned()) {
+    owned_buffer_.resize(new_size);
+  } else if (new_size > external_view_.size()) {
+    return absl::FailedPreconditionError(absl::StrCat(
+        "External buffer is too small: buffer=", external_view_.size(),
+        ", requested=", new_size));
+  } else {
+    external_view_ = absl::MakeSpan(external_view_.data(), new_size);
+  }
+  return absl::OkStatus();
 }
 
 }  // namespace litert::tensor
