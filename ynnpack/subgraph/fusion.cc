@@ -232,19 +232,31 @@ bool rewrite_ternary(ynn_subgraph& subgraph, ynn_node& node,
   for (int i : {0, 1}) {
     ynn_node* producer = analysis.producer_of(node.inputs[i]);
     if (!producer) continue;
-    const auto* inner =
-        std::get_if<ynn_node::binary_elementwise>(&producer->op);
-    if (!inner) continue;
+    ynn_binary_operator inner;
+    if (const auto* unary =
+            std::get_if<ynn_node::unary_elementwise>(&producer->op)) {
+      if (unary->op == ynn_unary_square) {
+        inner = ynn_binary_multiply;
+      } else {
+        continue;
+      }
+    } else if (const auto* binary =
+                   std::get_if<ynn_node::binary_elementwise>(&producer->op)) {
+      inner = binary->op;
+    } else {
+      continue;
+    }
 
     if (analysis.consumers[producer->outputs[0]].size() != 1) continue;
 
-    ternary_rewrite r = get_ternary_rewrite(outer->op, inner->op);
+    ternary_rewrite r = get_ternary_rewrite(outer->op, inner);
     if (r.op == ternary_op::invalid) continue;
     if (r.inner_operand && r.inner_operand != i) continue;
 
+    // If the inner operator was a unary op, we duplicate the operand.
     const uint32_t ops[] = {
         producer->inputs[0],
-        producer->inputs[1],
+        producer->inputs[producer->inputs.size() == 1 ? 0 : 1],
         node.inputs[1 - i],
     };
 
@@ -258,7 +270,7 @@ bool rewrite_ternary(ynn_subgraph& subgraph, ynn_node& node,
     if (kernel != nullptr) {
       // Yes we do. Rewrite this to a ternary op.
       YNN_LOG_DEBUG() << "Rewriting " << to_string(outer->op) << "("
-                      << to_string(inner->op) << "(a, b), c) to "
+                      << to_string(inner) << "(a, b), c) to "
                       << to_string(r.op) << "(a, b, c)";
       ynn::define_ternary(subgraph, node, a.id, b.id, c.id, x.id, r.op, kernel);
       return true;

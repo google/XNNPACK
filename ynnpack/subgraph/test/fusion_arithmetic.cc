@@ -47,6 +47,31 @@ TEST(fusion, multiply_add) {
               AllOf(IsTernary(ternary_op::multiply_add), HasInputCount(3)));
 }
 
+TEST(fusion, square_add) {
+  // rewrite add(square(a), c) -> multiply_add(a, a, c)
+  const uint32_t a_id = 0;
+  const uint32_t c_id = 1;
+  const uint32_t x_id = 2;
+  SubgraphBuilder builder(3);
+  uint32_t a2_id = YNN_INVALID_VALUE_ID;
+  builder.AddInput(ynn_type_fp32, 2, a_id)
+      .AddInput(ynn_type_fp32, 2, c_id)
+      .AddOutput(ynn_type_fp32, 2, x_id)
+      .AddTensor(ynn_type_fp32, 2, a2_id);
+  builder.AddUnary(ynn_unary_square, a_id, a2_id)
+      .AddBinary(ynn_binary_add, a2_id, c_id, x_id);
+
+  ynn_subgraph& subgraph = *builder.GetSubgraph();
+
+  subgraph.fusion();
+  subgraph.invalidate_dead_values();
+
+  ASSERT_THAT(subgraph, AllOf(HasValidNodeCount(1), HasValidValueCount(3)));
+  EXPECT_THAT(
+      ProducerOf(x_id, subgraph),
+      AllOf(IsTernary(ternary_op::multiply_add), InputsAre(a_id, a_id, c_id)));
+}
+
 TEST(fusion, divide_sqrt) {
   // rewrite x/sqrt(y) -> x*rsqrt(y)
   const uint32_t x_id = 0;
