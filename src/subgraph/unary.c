@@ -188,8 +188,7 @@ static enum xnn_status reshape_convert_operator(
               ? output->shape.dim[channel_dimension] : 0;
       if (num_channels > 0 && dq_batch_size > 0) {
         xnn_operator_t op = opdata->operator_objects[0];
-        const size_t bytes_needed =
-            num_channels * dq_batch_size * sizeof(float);
+        const size_t bytes_needed = num_channels * sizeof(float);
         if (op->channelwise_quantization_buffer_capacity < bytes_needed) {
           xnn_release_memory(op->channelwise_quantization_buffer);
           op->channelwise_quantization_buffer = xnn_allocate_memory(bytes_needed);
