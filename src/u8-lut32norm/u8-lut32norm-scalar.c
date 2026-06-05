@@ -8,6 +8,8 @@
 
 #include <assert.h>
 
+#include <fxdiv.h>
+
 #include "src/xnnpack/lut.h"
 
 
@@ -37,11 +39,12 @@ void xnn_u8_lut32norm_ukernel__scalar(
   const uint32_t vsum = compute_sum(n, x, t);
   assert(vsum != 0);
 
+  struct fxdiv_divisor_uint32_t vsum_divisor = fxdiv_init_uint32_t(vsum);
   const uint32_t vrounding = (vsum >> 1);
   do {
     const size_t vx = *x++;
     const uint32_t vt = t[vx];
-    const uint32_t vq = ((vt << 8) + vrounding) / vsum;
+    const uint32_t vq = fxdiv_quotient_uint32_t((vt << 8) + vrounding, vsum_divisor);
     const uint8_t vy = vq > 255 ? UINT8_C(255) : (uint8_t) vq;
     *y++ = vy;
   } while (--n != 0);
