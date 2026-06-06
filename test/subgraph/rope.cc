@@ -117,4 +117,36 @@ void TestImpl() {
 TEST(RoPEF16, test) { TestImpl<xnn_float16>(); }
 TEST(RoPEF32, test) { TestImpl<float>(); }
 
+TEST(RoPEF32, reshape_rejects_tokens_exceeding_weights) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+
+  SubgraphTester subgraph(3);
+  subgraph.AddInputTensor(4, xnn_datatype_fp32, 0)
+      .AddInputTensor(2, xnn_datatype_fp32, 1)
+      .AddOutputTensor(4, xnn_datatype_fp32, 2)
+      .AddRoPE(0, 1, 2);
+  const xnn_status create_status = subgraph.CreateRuntime();
+  if (create_status == xnn_status_unsupported_hardware) {
+    GTEST_SKIP();
+    return;
+  }
+  ASSERT_EQ(create_status, xnn_status_success);
+
+  const size_t batch_size = 1;
+  const size_t heads = 2;
+  const size_t channels = 4;
+  const size_t weights_tokens = 4;
+  const size_t input_tokens = 16;  // more tokens than the weights table holds
+
+  Tensor<float> input({batch_size, input_tokens, heads, channels},
+                      XnnExtraBytes);
+  Tensor<float> weights({weights_tokens, channels}, XnnExtraBytes);
+
+  subgraph
+      .ReshapeExternalTensor({batch_size, input_tokens, heads, channels},
+                             input.base(), 0)
+      .ReshapeExternalTensor({weights_tokens, channels}, weights.base(), 1);
+  ASSERT_EQ(subgraph.ReshapeRuntime().Status(), xnn_status_invalid_parameter);
+}
+
 }  // namespace xnnpack

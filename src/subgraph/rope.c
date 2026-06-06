@@ -100,6 +100,26 @@ static enum xnn_status reshape_rope_operator(
   if (status != xnn_status_success) {
     return status;
   }
+
+  // The rotation table is addressed per token: the microkernel reads `channels`
+  // weight elements at offset `token * channels` for every token in
+  // [0, tokens). A runtime input carrying more tokens than the weights tensor
+  // was built for therefore walks off the end of the weights buffer. Reject it
+  // here, where both shapes are known, rather than reading out of bounds.
+  const uint32_t weights_id = opdata->inputs[1];
+  assert(weights_id < num_values);
+  const struct xnn_runtime_value* weights_value = values + weights_id;
+  const size_t weights_elements =
+    xnn_shape_multiply_all_dims(&weights_value->shape);
+  if (weights_elements / channels < tokens) {
+    xnn_log_error(
+      "failed to reshape %s operator with input ID #%" PRIu32
+      ": %zu tokens of %zu channels exceed the %zu-element weights tensor",
+      xnn_node_type_to_string(xnn_node_type_rope),
+      input_id, tokens, channels, weights_elements);
+    return xnn_status_invalid_parameter;
+  }
+
   const uint32_t output_id = opdata->outputs[0];
   assert(output_id < num_values);
   struct xnn_runtime_value* output_value = values + output_id;
