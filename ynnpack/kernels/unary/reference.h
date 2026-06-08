@@ -548,7 +548,7 @@ void check_results(const unary_op_info& op, Tensor<A> a, Tensor<X> x,
     } else if constexpr (is_quantized<X>()) {
       const Float input_i = dequantize(a(i), a_quantization);
       Float expected = op(input_i);
-      if (std::isnan(expected)) {
+      if (isnan(expected)) {
         // This is expected to overflow.
       } else {
         expected = fake_quantize(expected, x_quantization);
@@ -565,10 +565,9 @@ void check_results(const unary_op_info& op, Tensor<A> a, Tensor<X> x,
       // Force overflow to infinity if that is what should happen.
       expected = static_cast<Float>(static_cast<X>(expected));
       if (op.is_in_supported_range(expected)) {
-        if (std::isnan(static_cast<Float>(expected))) {
-          ASSERT_TRUE(std::isnan(static_cast<Float>(x(i))));
-        } else if (!std::isinf(expected) && std::isinf(expected * 2) &&
-                   std::isinf(x(i))) {
+        if (isnan(expected)) {
+          ASSERT_TRUE(isnan(x(i)));
+        } else if (!isinf(expected) && isinf(expected * 2) && isinf(x(i))) {
           // The expected value is close to infinity, allow our output to be
           // infinity.
         } else {

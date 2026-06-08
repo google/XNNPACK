@@ -6,6 +6,7 @@
 #ifndef XNNPACK_YNNPACK_BASE_BFLOAT16_H_
 #define XNNPACK_YNNPACK_BASE_BFLOAT16_H_
 
+#include <cmath>
 #include <cstdint>
 
 #include "ynnpack/base/bit_cast.h"
@@ -54,6 +55,14 @@ class bfloat16 {
   //   this flag is not valid in C.
   uint16_t bits_;
 };
+
+inline bool isfinite(bfloat16 x) { return (x.to_bits() & 0x7f80) != 0x7f80; }
+inline bool isnan(bfloat16 x) {
+  return !isfinite(x) && (x.to_bits() & 0x007f) != 0;
+}
+inline bool isinf(bfloat16 x) {
+  return !isfinite(x) && (x.to_bits() & 0x007f) == 0;
+}
 
 }  // namespace ynn
 

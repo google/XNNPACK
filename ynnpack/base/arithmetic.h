@@ -265,6 +265,14 @@ constexpr size_t pow(size_t base, size_t exp) {
   return (exp == 0) ? 1 : base * pow(base, exp - 1);
 }
 
+using std::isfinite;
+using std::isinf;
+using std::isnan;
+
+inline bool isinf(int x) { return false; }
+inline bool isnan(int x) { return false; }
+inline bool isfinite(int x) { return true; }
+
 }  // namespace ynn
 
 #endif  // XNNPACK_YNNPACK_BASE_ARITHMETIC_H_

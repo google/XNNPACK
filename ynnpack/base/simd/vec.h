@@ -352,7 +352,7 @@ YNN_ALWAYS_INLINE vec<T, 1> ceil(vec<T, 1> a) {
 }
 template <typename T>
 YNN_ALWAYS_INLINE vec<T, 1> round(vec<T, 1> a) {
-  return vec<T, 1>{std::round(a.v)};
+  return vec<T, 1>{std::nearbyint(a.v)};
 }
 template <typename T>
 YNN_ALWAYS_INLINE vec<T, 1> sqrt(vec<T, 1> a) {
@@ -417,15 +417,15 @@ YNN_ALWAYS_INLINE vec<T, 1> operator<<(vec<T, 1> a, int bits) {
 
 template <typename T>
 YNN_ALWAYS_INLINE vec<bool, 1> isinf(vec<T, 1> a) {
-  return vec<bool, 1>{std::isinf(a.v)};
+  return vec<bool, 1>{ynn::isinf(a.v)};
 }
 template <typename T>
 YNN_ALWAYS_INLINE vec<bool, 1> isnan(vec<T, 1> a) {
-  return vec<bool, 1>{std::isnan(a.v)};
+  return vec<bool, 1>{ynn::isnan(a.v)};
 }
 template <typename T>
 YNN_ALWAYS_INLINE vec<bool, 1> isfinite(vec<T, 1> a) {
-  return vec<bool, 1>{std::isfinite(a.v)};
+  return vec<bool, 1>{ynn::isfinite(a.v)};
 }
 
 template <typename T>

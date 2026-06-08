@@ -16,6 +16,7 @@
 
 #include <gtest/gtest.h>
 #include "ynnpack/base/arch.h"
+#include "ynnpack/base/arithmetic.h"
 #include "ynnpack/base/test/fuzz_test.h"
 #include "ynnpack/base/test/random.h"
 #include "ynnpack/base/test/tensor.h"
@@ -111,8 +112,8 @@ void TestReduce(AT, CT, ynn_reduce_operator op, size_t n, size_t k, int k_dim) {
     if (c.base()) {
       int finite = 0;
       for (size_t i = 0; i < c_n * kernel_c.extent(1); ++i) {
-        bool c_finite = std::isfinite(c[i]);
-        bool kernel_c_finite = std::isfinite(kernel_c[i]);
+        bool c_finite = isfinite(c[i]);
+        bool kernel_c_finite = isfinite(kernel_c[i]);
         if (c_finite && kernel_c_finite) {
           ASSERT_EQ(c[i], kernel_c[i])
               << "Mismatch between " << reference_kernel_name << " and "

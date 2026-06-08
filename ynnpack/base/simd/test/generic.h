@@ -239,8 +239,8 @@ void test_op() {
         continue;
       }
 #endif  // YNN_ARCH_ARM32
-      if (std::isnan(expected)) {
-        ASSERT_TRUE(std::isnan(result[i]));
+      if (ynn::isnan(expected)) {
+        ASSERT_TRUE(ynn::isnan(result[i]));
       } else {
         ASSERT_EQ(result[i], expected);
       }
@@ -338,13 +338,14 @@ void test_abs() {
   TEST_F(test_class, abs_##type##x##N) { test_abs<type, N>(); }
 
 namespace internal {
-float tol_relative(float y_ref, float rel_tol) {
+
+static float tol_relative(float y_ref, float rel_tol) {
   // Note that `y_ref * rel_tol`, i.e. the expected absolute difference,
   // may round differently than `y_ref * (1 + rel_tol) - y_ref`, i.e. the
   // effective absolute difference computed in `float`s. We therefore use
   // the latter form since it is the true difference between two `float`s
   // within the given relative tolerance.
-  if (!std::isfinite(y_ref)) {
+  if (!ynn::isfinite(y_ref)) {
     // If the reference value is infinity, the computation below will produce
     // NaN. We probably want to compute the tolerance as if the value is the
     // largest value, not infinity.
@@ -352,6 +353,7 @@ float tol_relative(float y_ref, float rel_tol) {
   }
   return std::abs(y_ref * (1.0f + rel_tol)) - std::abs(y_ref);
 }
+
 }  // namespace internal
 
 template <typename scalar, size_t N>
@@ -377,14 +379,14 @@ void test_sqrt() {
 
     for (size_t i = 0; i < vector::N; ++i) {
       scalar expected = std::sqrt(a[i]);
-      if (std::isnan(expected)) {
-        ASSERT_TRUE(std::isnan(result[i]));
+      if (ynn::isnan(expected)) {
+        ASSERT_TRUE(ynn::isnan(result[i]));
       } else {
         if constexpr (std::is_same_v<scalar, float>) {
           ASSERT_NEAR(result[i], expected,
                       internal::tol_relative(
                           expected, 2.0f * type_info<float>::epsilon()))
-              << a[i] << " " << result[i];
+              << a[i];
         } else {
           ASSERT_EQ(result[i], expected);
         }
@@ -416,8 +418,8 @@ void test_floor_log2() {
 
     scalar result[vector::N];
     store(result, floor_log2(load(a, vector::N)));
-    if (std::isnan(expected)) {
-      ASSERT_TRUE(std::isnan(result[0])) << input;
+    if (ynn::isnan(expected)) {
+      ASSERT_TRUE(ynn::isnan(result[0])) << input;
     } else {
       ASSERT_EQ(result[0], expected) << input;
     }
@@ -976,8 +978,8 @@ void test_unary(F f, Ref ref, float epsilons) {
 
     scalar result[vector::N];
     store(result, f(load(a, vector::N)));
-    if (std::isnan(expected)) {
-      ASSERT_TRUE(std::isnan(result[0])) << input;
+    if (ynn::isnan(expected)) {
+      ASSERT_TRUE(ynn::isnan(result[0])) << input;
     } else {
       ASSERT_NEAR(result[0], expected, scalar_info::epsilon()) << input;
     }
@@ -993,8 +995,8 @@ void test_unary(F f, Ref ref, float epsilons) {
 
     for (size_t i = 0; i < vector::N; ++i) {
       auto k = ref(a[i]);
-      if (std::isnan(k)) {
-        ASSERT_TRUE(std::isnan(result[i])) << a[i];
+      if (ynn::isnan(k)) {
+        ASSERT_TRUE(ynn::isnan(result[i])) << a[i];
       } else if (std::abs(k) <= scalar_info::smallest_normal()) {
         // Treat all denormals as equal.
         ASSERT_LE(result[i], scalar_info::smallest_normal()) << a[i];

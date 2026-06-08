@@ -159,7 +159,7 @@ void check_results(const OpInfo& op, const Tensor<A>& a, const Tensor<B>& b,
       if (expected > type_info<X>::max()) {
         expected = type_info<Float>::infinity();
       }
-      if (std::isnan(expected)) {
+      if (isnan(expected)) {
         // Checking the x is NaN could make sense, but it fails in
         // a variety of cases.
       } else {

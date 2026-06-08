@@ -245,7 +245,7 @@ void TestReduce(A, C, ynn_reduce_operator op) {
         } else {
           const float tolerance =
               Tolerance<C>(op, num_k_elements + 1, max_abs_value);
-          if (std::isfinite(c(i)) || !std::isfinite(expected(i))) {
+          if (isfinite(c(i)) || !isfinite(expected(i))) {
             ASSERT_NEAR(c(i), expected(i), tolerance);
           } else {
             // When the output type is fp16, the kernel might produce infinity

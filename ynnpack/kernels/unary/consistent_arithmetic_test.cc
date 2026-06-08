@@ -4,8 +4,6 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <cassert>
-#include <cmath>
-#include <cstddef>
 #include <cstdint>
 #include <cstring>
 #include <set>
@@ -15,6 +13,7 @@
 
 #include <gtest/gtest.h>
 #include "ynnpack/base/arch.h"
+#include "ynnpack/base/arithmetic.h"
 #include "ynnpack/base/base.h"
 #include "ynnpack/base/bfloat16.h"
 #include "ynnpack/base/half.h"
@@ -131,10 +130,10 @@ void TestUnary(AT, XT, ynn_unary_operator op, size_t n) {
 
     if (reference_x.base()) {
       for (size_t i = 0; i < n; ++i) {
-        if (std::isnan(static_cast<float>(reference_x[i]))) {
-          ASSERT_TRUE(std::isnan(static_cast<float>(kernel_x[i])))
-              << "kernel `"
-              << kernel.name << "` is inconsistent with reference kernel `"
+        if (isnan(reference_x[i])) {
+          ASSERT_TRUE(isnan(kernel_x[i]))
+              << "kernel `" << kernel.name
+              << "` is inconsistent with reference kernel `"
               << reference_kernel_name << "`";
         } else {
           ASSERT_EQ(reference_x[i], kernel_x[i])

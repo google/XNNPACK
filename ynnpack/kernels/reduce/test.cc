@@ -78,7 +78,7 @@ void kahan_sum(T a, T& acc, T& error) {
   T y = a - error;
   T t = acc + y;
   error = (t - acc) - y;
-  if (!std::isfinite(error)) {
+  if (!isfinite(error)) {
     // If the error is infinity or NaN, we don't want to know about it. The
     // accumulator will be infinity anyways, and we might corrupt the result
     // to be NaN.

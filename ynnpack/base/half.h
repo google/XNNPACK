@@ -6,8 +6,8 @@
 #ifndef XNNPACK_YNNPACK_BASE_HALF_H_
 #define XNNPACK_YNNPACK_BASE_HALF_H_
 
+#include <cmath>
 #include <cstdint>
-#include <type_traits>
 
 // We want to use _Float16 if the compiler supports it fully, but it's
 // tricky to do this detection; there are compiler versions that define the
@@ -50,7 +50,8 @@
 
 #if YNN_ARCH_FLOAT16
 
-#include <cmath>
+#include <limits>
+#include <type_traits>
 
 #include "ynnpack/base/bit_cast.h"
 
@@ -163,5 +164,17 @@ class half {
 }  // namespace ynn
 
 #endif  // YNN_ARCH_FLOAT16
+
+namespace ynn {
+
+inline bool isfinite(half x) { return (x.to_bits() & 0x7c00) != 0x7c00; }
+inline bool isnan(half x) {
+  return !isfinite(x) && (x.to_bits() & 0x03ff) != 0;
+}
+inline bool isinf(half x) {
+  return !isfinite(x) && (x.to_bits() & 0x03ff) == 0;
+}
+
+}  // namespace ynn
 
 #endif  // XNNPACK_YNNPACK_BASE_HALF_H_

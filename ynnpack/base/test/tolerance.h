@@ -4,6 +4,7 @@
 #include <cmath>
 #include <type_traits>
 
+#include "ynnpack/base/arithmetic.h"
 #include "ynnpack/base/type.h"
 
 namespace ynn {
