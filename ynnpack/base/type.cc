@@ -32,7 +32,6 @@ bool type_is_integral(ynn_type t) {
     case ynn_type_fp32:
     case ynn_type_fp16:
     case ynn_type_bf16:
-    case ynn_type_opaque:
     case ynn_type_invalid:
       return false;
   }
@@ -54,7 +53,6 @@ bool type_is_floating_point(ynn_type t) {
     case ynn_type_int8:
     case ynn_type_uint8:
     case ynn_type_int32:
-    case ynn_type_opaque:
     case ynn_type_invalid:
       return false;
   }
@@ -81,8 +79,6 @@ size_t type_size_bits(ynn_type t) {
       return 32;
     case ynn_type_fp64:
       return 64;
-    case ynn_type_opaque:
-      return 0;
     case ynn_type_invalid:
       break;
   }
@@ -132,8 +128,6 @@ const char* to_string(ynn_type type) {
   switch (type) {
     case ynn_type_invalid:
       return "invalid";
-    case ynn_type_opaque:
-      return "opaque";
     case ynn_type_int2:
       return "int2";
     case ynn_type_uint2:
@@ -207,7 +201,6 @@ void convert_n(const float* src, size_t n, ynn_type type, void* dst) {
     case ynn_type_int32:
       convert_to_int<int32_t>(src, n, (int32_t*)dst);
       return;
-    case ynn_type_opaque:
     case ynn_type_invalid:
       break;
   }

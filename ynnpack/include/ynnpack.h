@@ -40,10 +40,10 @@ extern "C" {
 
 enum ynn_status {
   ynn_status_success = 0,
-  ynn_status_error,
-  ynn_status_invalid_parameter,
-  ynn_status_unsupported_parameter,
-  ynn_status_deprecated,
+  ynn_status_error = 1,
+  ynn_status_invalid_parameter = 2,
+  ynn_status_unsupported_parameter = 3,
+  ynn_status_deprecated = 4,
 };
 
 typedef struct ynn_subgraph* ynn_subgraph_t;
@@ -69,20 +69,17 @@ ynn_status ynn_optimize_subgraph(ynn_subgraph_t subgraph,
 enum ynn_type {
   ynn_type_invalid = -1,
 
-  ynn_type_int2,
-  ynn_type_uint2,
-  ynn_type_int4,
-  ynn_type_uint4,
-  ynn_type_int8,
-  ynn_type_uint8,
-  ynn_type_int32,
-  ynn_type_fp16,
-  ynn_type_bf16,
-  ynn_type_fp32,
-  ynn_type_fp64,
-
-  // For internal use only.
-  ynn_type_opaque,
+  ynn_type_int2 = 0,
+  ynn_type_uint2 = 1,
+  ynn_type_int4 = 2,
+  ynn_type_uint4 = 3,
+  ynn_type_int8 = 4,
+  ynn_type_uint8 = 5,
+  ynn_type_int32 = 6,
+  ynn_type_fp16 = 7,
+  ynn_type_bf16 = 8,
+  ynn_type_fp32 = 9,
+  ynn_type_fp64 = 10,
 };
 
 #define YNN_VALUE_FLAG_EXTERNAL_INPUT (1 << 0)
@@ -145,31 +142,31 @@ enum ynn_status ynn_define_iota(ynn_subgraph_t subgraph, enum ynn_type type,
 enum ynn_unary_operator {
   ynn_unary_invalid = 0,
 
-  ynn_unary_abs,
-  ynn_unary_ceil,
-  ynn_unary_convert,
-  ynn_unary_cosine,
-  ynn_unary_cube_root,
-  ynn_unary_erf,
-  ynn_unary_exp,
-  ynn_unary_expm1,
-  ynn_unary_floor,
-  ynn_unary_hardswish,
-  ynn_unary_log,
-  ynn_unary_log1p,
-  ynn_unary_negate,
-  ynn_unary_reciprocal_square_root,
-  ynn_unary_round,
-  ynn_unary_sigmoid,
-  ynn_unary_sign,
-  ynn_unary_sine,
-  ynn_unary_square,
-  ynn_unary_square_root,
-  ynn_unary_tanh,
-  ynn_unary_poly3,
-  ynn_unary_round_to_bf16,
-  ynn_unary_approx_erf,
-  ynn_unary_approx_tanh,
+  ynn_unary_abs = 1,
+  ynn_unary_ceil = 2,
+  ynn_unary_convert = 3,
+  ynn_unary_cosine = 4,
+  ynn_unary_cube_root = 5,
+  ynn_unary_erf = 6,
+  ynn_unary_exp = 7,
+  ynn_unary_expm1 = 8,
+  ynn_unary_floor = 9,
+  ynn_unary_hardswish = 10,
+  ynn_unary_log = 11,
+  ynn_unary_log1p = 12,
+  ynn_unary_negate = 13,
+  ynn_unary_reciprocal_square_root = 14,
+  ynn_unary_round = 15,
+  ynn_unary_sigmoid = 16,
+  ynn_unary_sign = 17,
+  ynn_unary_sine = 18,
+  ynn_unary_square = 19,
+  ynn_unary_square_root = 20,
+  ynn_unary_tanh = 21,
+  ynn_unary_poly3 = 22,
+  ynn_unary_round_to_bf16 = 23,
+  ynn_unary_approx_erf = 24,
+  ynn_unary_approx_tanh = 25,
 };
 
 // Defines a unary operation of a single input to a single output.
@@ -229,16 +226,16 @@ enum ynn_status ynn_define_dequantize(ynn_subgraph_t subgraph,
 enum ynn_binary_operator {
   ynn_binary_invalid = 0,
 
-  ynn_binary_add,
-  ynn_binary_copysign,
-  ynn_binary_divide,
-  ynn_binary_leaky_relu,  // computes a < 0 ? a * b : a
-  ynn_binary_max,
-  ynn_binary_min,
-  ynn_binary_multiply,
-  ynn_binary_pow,
-  ynn_binary_squared_difference,
-  ynn_binary_subtract,
+  ynn_binary_add = 1,
+  ynn_binary_copysign = 2,
+  ynn_binary_divide = 3,
+  ynn_binary_leaky_relu = 4,  // computes a < 0 ? a * b : a
+  ynn_binary_max = 5,
+  ynn_binary_min = 6,
+  ynn_binary_multiply = 7,
+  ynn_binary_pow = 8,
+  ynn_binary_squared_difference = 9,
+  ynn_binary_subtract = 10,
 };
 
 // Defines a binary operation of two inputs to a single output. The two inputs
@@ -439,11 +436,11 @@ enum ynn_status ynn_define_dot(ynn_subgraph_t subgraph, size_t num_k_dims,
 enum ynn_reduce_operator {
   ynn_reduce_invalid = 0,
 
-  ynn_reduce_max,
-  ynn_reduce_min,
-  ynn_reduce_min_max,
-  ynn_reduce_sum,
-  ynn_reduce_sum_squared,
+  ynn_reduce_max = 1,
+  ynn_reduce_min = 2,
+  ynn_reduce_min_max = 3,
+  ynn_reduce_sum = 4,
+  ynn_reduce_sum_squared = 5,
 };
 
 // Performs the operation:

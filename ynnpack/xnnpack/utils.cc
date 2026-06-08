@@ -1189,7 +1189,6 @@ xnn_datatype xnn_datatype_from_ynn(ynn_type type) {
     case ynn_type_bf16:
       return xnn_datatype_bf16;
     case ynn_type_fp64:
-    case ynn_type_opaque:
     case ynn_type_invalid:
       break;
   }

@@ -255,7 +255,6 @@ std::optional<ynn::real> ynn_value::as_scalar() const {
     case ynn_type_int2:
     case ynn_type_uint2:
       // int4 & int2 values can't be scalars.
-    case ynn_type_opaque:
     case ynn_type_invalid:
       break;
   }
