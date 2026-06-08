@@ -138,6 +138,7 @@ enum ynn_status ynn_define_iota(ynn_subgraph_t subgraph, enum ynn_type type,
 #define YNN_NODE_FLAG_KEEP_DIMS (1 << 0)
 #define YNN_NODE_FLAG_SLICE_DIMS (1 << 0)
 #define YNN_NODE_FLAG_RESHAPE_1D (1 << 0)
+#define YNN_NODE_FLAG_APPROX (1 << 0)
 
 enum ynn_unary_operator {
   ynn_unary_invalid = 0,
@@ -165,11 +166,11 @@ enum ynn_unary_operator {
   ynn_unary_tanh = 21,
   ynn_unary_poly3 = 22,
   ynn_unary_round_to_bf16 = 23,
-  ynn_unary_approx_erf = 24,
-  ynn_unary_approx_tanh = 25,
 };
 
-// Defines a unary operation of a single input to a single output.
+// Defines a unary operation of a single input to a single output. If the
+// `YNN_NODE_FLAG_APPROX` flag is specified, the operation will be implemented
+// with faster, lower accuracy implementations when available.
 enum ynn_status ynn_define_unary(ynn_subgraph_t subgraph,
                                  enum ynn_unary_operator op,
                                  uint32_t input_a_id, uint32_t* output_id,

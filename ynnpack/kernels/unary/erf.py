@@ -38,7 +38,8 @@ def erf_fp64(a, x, output_offset, output_multiplier, input_multiplier):
     Scalar("output_multiplier", Float(32)),
     Scalar("input_multiplier", Float(32)),
 )
-@operator_name("approx_erf")
+@operator_name("erf")
+@kernel_flags("unary_flag::precision_approx")
 def approx_erf_fp32(a, x, output_offset, output_multiplier, input_multiplier):
   va = load(a) * input_multiplier
   return store(

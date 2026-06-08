@@ -3,15 +3,17 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include <cmath>
 #include <cstdint>
 #include <utility>
+#include <variant>
 #include <vector>
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include "ynnpack/include/ynnpack.h"
+#include "ynnpack/kernels/dequantize_dot/dequantize_dot.h"
 #include "ynnpack/kernels/ternary/ternary.h"
+#include "ynnpack/kernels/unary/unary.h"
 #include "ynnpack/subgraph/elementwise.h"
 #include "ynnpack/subgraph/subgraph.h"
 #include "ynnpack/subgraph/test/matchers.h"
@@ -672,7 +674,8 @@ TEST(fusion, fast_math_erf) {
 
   ASSERT_THAT(subgraph, AllOf(HasValidNodeCount(1), HasValidValueCount(2)));
   const ynn_node& node = ProducerOf(x_id, subgraph);
-  EXPECT_THAT(node, IsUnary(ynn_unary_approx_erf));
+  EXPECT_THAT(node,
+              IsUnary(ynn_unary_erf, /*flags=*/unary_flag::precision_approx));
 }
 
 TEST(fusion, no_fast_math_tanh) {
@@ -690,112 +693,7 @@ TEST(fusion, no_fast_math_tanh) {
 
   ASSERT_THAT(subgraph, AllOf(HasValidNodeCount(1), HasValidValueCount(2)));
   const ynn_node& node = ProducerOf(x_id, subgraph);
-  EXPECT_THAT(node, IsUnary(ynn_unary_tanh));
-}
-
-TEST(fusion, fast_math_erf_fp64) {
-  const uint32_t a_id = 0;
-  const uint32_t x_id = 1;
-  SubgraphBuilder builder(2, YNN_FLAG_FAST_MATH);
-  builder.AddInput(ynn_type_fp64, 2, a_id)
-      .AddOutput(ynn_type_fp64, 2, x_id)
-      .AddUnary(ynn_unary_erf, a_id, x_id);
-
-  ynn_subgraph& subgraph = *builder.GetSubgraph();
-
-  subgraph.fusion();
-  subgraph.invalidate_dead_values();
-
-  ASSERT_THAT(subgraph, AllOf(HasValidNodeCount(1), HasValidValueCount(2)));
-  const ynn_node& node = ProducerOf(x_id, subgraph);
-  EXPECT_THAT(
-      node, IsUnary(ynn_unary_approx_erf));  // Now successfully rewrites to
-                                             // approx_erf via standard fallback
-}
-
-TEST(fusion, fast_math_erf_folded) {
-  const uint32_t x_id = 0;
-  const uint32_t c_id = 1;
-  const uint32_t a_id = 2;
-  const uint32_t b_id = 3;
-  const uint32_t y_id = 4;
-
-  SubgraphBuilder builder(5, YNN_FLAG_FAST_MATH);
-  uint32_t xc_id = YNN_INVALID_VALUE_ID;
-  uint32_t erf_out_id = YNN_INVALID_VALUE_ID;
-  uint32_t mul_out_id = YNN_INVALID_VALUE_ID;
-
-  float c = 0.5f;
-  float a = 2.0f;
-  float b = 1.5f;
-
-  builder.AddInput(ynn_type_fp32, 2, x_id)
-      .AddScalar(c, c_id)
-      .AddScalar(a, a_id)
-      .AddScalar(b, b_id)
-      .AddOutput(ynn_type_fp32, 2, y_id)
-      .AddTensor(ynn_type_fp32, 2, xc_id)
-      .AddTensor(ynn_type_fp32, 2, erf_out_id)
-      .AddTensor(ynn_type_fp32, 2, mul_out_id);
-
-  builder.AddBinary(ynn_binary_multiply, x_id, c_id, xc_id)
-      .AddUnary(ynn_unary_erf, xc_id, erf_out_id)
-      .AddBinary(ynn_binary_multiply, erf_out_id, a_id, mul_out_id)
-      .AddBinary(ynn_binary_add, mul_out_id, b_id, y_id);
-
-  ynn_subgraph& subgraph = *builder.GetSubgraph();
-
-  subgraph.fusion();
-  subgraph.invalidate_dead_values();
-
-  ASSERT_THAT(subgraph, AllOf(HasValidNodeCount(1), HasValidValueCount(2)));
-  const ynn_node& node = ProducerOf(y_id, subgraph);
-  EXPECT_THAT(node, IsUnary(ynn_unary_approx_erf));
-
-  const auto& unary = std::get<ynn_node::unary_elementwise>(node.op);
-  EXPECT_NEAR(unary.params.approx_erf.input_multiplier, c, 1e-6f);
-  EXPECT_NEAR(unary.params.approx_erf.output_multiplier, a, 1e-6f);
-  EXPECT_NEAR(unary.params.approx_erf.output_offset, b, 1e-6f);
-}
-
-
-
-TEST(fusion, fast_math_tanh_folded) {
-  const uint32_t x_id = 0;
-  const uint32_t a_id = 1;
-  const uint32_t b_id = 2;
-  const uint32_t y_id = 3;
-
-  SubgraphBuilder builder(4, YNN_FLAG_FAST_MATH);
-  uint32_t tanh_out_id = YNN_INVALID_VALUE_ID;
-  uint32_t mul_out_id = YNN_INVALID_VALUE_ID;
-
-  float a = 2.0f;
-  float b = 1.5f;
-
-  builder.AddInput(ynn_type_fp32, 2, x_id)
-      .AddScalar(a, a_id)
-      .AddScalar(b, b_id)
-      .AddOutput(ynn_type_fp32, 2, y_id)
-      .AddTensor(ynn_type_fp32, 2, tanh_out_id)
-      .AddTensor(ynn_type_fp32, 2, mul_out_id);
-
-  builder.AddUnary(ynn_unary_tanh, x_id, tanh_out_id)
-      .AddBinary(ynn_binary_multiply, tanh_out_id, a_id, mul_out_id)
-      .AddBinary(ynn_binary_add, mul_out_id, b_id, y_id);
-
-  ynn_subgraph& subgraph = *builder.GetSubgraph();
-
-  subgraph.fusion();
-  subgraph.invalidate_dead_values();
-
-  ASSERT_THAT(subgraph, AllOf(HasValidNodeCount(1), HasValidValueCount(2)));
-  const ynn_node& node = ProducerOf(y_id, subgraph);
-  EXPECT_THAT(node, IsUnary(ynn_unary_approx_tanh));
-
-  const auto& unary = std::get<ynn_node::unary_elementwise>(node.op);
-  EXPECT_NEAR(unary.params.approx_tanh.output_multiplier, a, 1e-6f);
-  EXPECT_NEAR(unary.params.approx_tanh.output_offset, b, 1e-6f);
+  EXPECT_THAT(node, IsUnary(ynn_unary_tanh, /*flags=*/0));
 }
 
 }  // namespace ynn

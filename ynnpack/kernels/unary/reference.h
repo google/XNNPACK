@@ -92,7 +92,7 @@ struct unary_op_info {
 };
 
 struct convert : public unary_op_info {
-  explicit convert(const unary_params& = {}) {}
+  explicit convert(uint32_t flags = 0, const unary_params& = {}) {}
   float operator()(float x) const override { return x; }
   double operator()(double x) const override { return x; }
   int32_t operator()(int32_t x) const override { return x; }
@@ -109,7 +109,7 @@ struct convert : public unary_op_info {
 };
 
 struct abs : public unary_op_info {
-  explicit abs(const unary_params& = {}) {}
+  explicit abs(uint32_t flags = 0, const unary_params& = {}) {}
   float operator()(float x) const override { return std::abs(x); }
   double operator()(double x) const override { return std::abs(x); }
   int32_t operator()(int32_t x) const override { return std::abs(x); }
@@ -121,7 +121,7 @@ struct abs : public unary_op_info {
 };
 
 struct negate : public unary_op_info {
-  explicit negate(const unary_params& = {}) {}
+  explicit negate(uint32_t flags = 0, const unary_params& = {}) {}
   float operator()(float x) const override { return -x; }
   double operator()(double x) const override { return -x; }
   int32_t operator()(int32_t x) const override { return -x; }
@@ -133,7 +133,7 @@ struct negate : public unary_op_info {
 };
 
 struct round : public unary_op_info {
-  explicit round(const unary_params& = {}) {}
+  explicit round(uint32_t flags = 0, const unary_params& = {}) {}
   float operator()(float x) const override { return std::nearbyint(x); }
   double operator()(double x) const override { return std::nearbyint(x); }
 
@@ -144,7 +144,7 @@ struct round : public unary_op_info {
 };
 
 struct ceil : public unary_op_info {
-  explicit ceil(const unary_params& = {}) {}
+  explicit ceil(uint32_t flags = 0, const unary_params& = {}) {}
   float operator()(float x) const override { return std::ceil(x); }
   double operator()(double x) const override { return std::ceil(x); }
 
@@ -155,7 +155,7 @@ struct ceil : public unary_op_info {
 };
 
 struct floor : public unary_op_info {
-  explicit floor(const unary_params& = {}) {}
+  explicit floor(uint32_t flags = 0, const unary_params& = {}) {}
   float operator()(float x) const override { return std::floor(x); }
   double operator()(double x) const override { return std::floor(x); }
 
@@ -166,7 +166,7 @@ struct floor : public unary_op_info {
 };
 
 struct round_to_bf16 : public unary_op_info {
-  explicit round_to_bf16(const unary_params& = {}) {}
+  explicit round_to_bf16(uint32_t flags = 0, const unary_params& = {}) {}
   float operator()(float x) const override { return bfloat16{x}; }
 
   tolerance_spec tolerance(ynn_type type) const override {
@@ -175,7 +175,7 @@ struct round_to_bf16 : public unary_op_info {
 };
 
 struct sigmoid : public unary_op_info {
-  explicit sigmoid(const unary_params& = {}) {}
+  explicit sigmoid(uint32_t flags = 0, const unary_params& = {}) {}
   float operator()(float x) const override {
     return 1.0f / (1.0f + std::exp(-x));
   }
@@ -189,7 +189,7 @@ struct sigmoid : public unary_op_info {
 };
 
 struct square : public unary_op_info {
-  explicit square(const unary_params& = {}) {}
+  explicit square(uint32_t flags = 0, const unary_params& = {}) {}
   float operator()(float x) const override { return x * x; }
   double operator()(double x) const override { return x * x; }
   int32_t operator()(int32_t x) const override {
@@ -208,7 +208,7 @@ struct square : public unary_op_info {
 };
 
 struct square_root : public unary_op_info {
-  explicit square_root(const unary_params& = {}) {}
+  explicit square_root(uint32_t flags = 0, const unary_params& = {}) {}
   float operator()(float x) const override { return std::sqrt(x); }
   double operator()(double x) const override { return std::sqrt(x); }
 
@@ -252,9 +252,11 @@ struct square_root : public unary_op_info {
 };
 
 struct tanh : public unary_op_info {
+  bool approx;
   tanh_params params;
 
-  explicit tanh(const unary_params& params = {}) : params(params.tanh) {}
+  explicit tanh(uint32_t flags, const unary_params& params = {})
+      : approx(flags & unary_flag::precision_approx), params(params.tanh) {}
   float operator()(float x) const override {
     return std::tanh(x) * static_cast<float>(params.output_multiplier) +
            static_cast<float>(params.output_offset);
@@ -269,7 +271,8 @@ struct tanh : public unary_op_info {
 };
 
 struct reciprocal_square_root : public unary_op_info {
-  explicit reciprocal_square_root(const unary_params& = {}) {}
+  explicit reciprocal_square_root(uint32_t flags = 0,
+                                  const unary_params& = {}) {}
   float operator()(float x) const override {
     return static_cast<float>(1.0 / std::sqrt(static_cast<double>(x)));
   }
@@ -305,7 +308,8 @@ struct reciprocal_square_root : public unary_op_info {
 struct log : public unary_op_info {
   log_params params;
 
-  explicit log(const unary_params& params) : params(params.log) {}
+  explicit log(uint32_t flags, const unary_params& params)
+      : params(params.log) {}
   float operator()(float x) const override {
     return std::log(x * static_cast<float>(params.input_multiplier)) *
            static_cast<float>(params.output_multiplier);
@@ -326,7 +330,8 @@ struct log : public unary_op_info {
 struct log1p : public unary_op_info {
   log1p_params params;
 
-  explicit log1p(const unary_params& params) : params(params.log1p) {}
+  explicit log1p(uint32_t flags, const unary_params& params)
+      : params(params.log1p) {}
   float operator()(float x) const override {
     return std::log1p(x * static_cast<float>(params.input_multiplier)) *
            static_cast<float>(params.output_multiplier);
@@ -343,7 +348,8 @@ struct log1p : public unary_op_info {
 struct exp : public unary_op_info {
   exp_params params;
 
-  explicit exp(const unary_params& params) : params(params.exp) {}
+  explicit exp(uint32_t flags, const unary_params& params)
+      : params(params.exp) {}
   float operator()(float x) const override {
     return std::exp(static_cast<float>(params.input_multiplier) * x) *
            static_cast<float>(params.output_multiplier);
@@ -365,7 +371,8 @@ struct exp : public unary_op_info {
 struct expm1 : public unary_op_info {
   exp_params params;
 
-  explicit expm1(const unary_params& params) : params(params.expm1) {}
+  explicit expm1(uint32_t flags, const unary_params& params)
+      : params(params.expm1) {}
   float operator()(float x) const override {
     return std::expm1(static_cast<float>(params.input_multiplier) * x) *
            static_cast<float>(params.output_multiplier);
@@ -380,9 +387,11 @@ struct expm1 : public unary_op_info {
 };
 
 struct erf : public unary_op_info {
+  bool approx;
   erf_params params;
 
-  explicit erf(const unary_params& params) : params(params.erf) {}
+  explicit erf(uint32_t flags, const unary_params& params)
+      : approx(flags & unary_flag::precision_approx), params(params.erf) {}
   float operator()(float x) const override {
     return std::erf(static_cast<float>(params.input_multiplier) * x) *
                static_cast<float>(params.output_multiplier) +
@@ -394,49 +403,12 @@ struct erf : public unary_op_info {
   }
 
   tolerance_spec tolerance(ynn_type /*type*/) const override {
-    return tolerance_spec{/*relative=*/4.0f};
-  }
-};
-
-struct approx_erf : public unary_op_info {
-  approx_erf_params params;
-
-  explicit approx_erf(const unary_params& params) : params(params.approx_erf) {}
-  float operator()(float x) const override {
-    return std::erf(static_cast<float>(params.input_multiplier) * x) *
-               static_cast<float>(params.output_multiplier) +
-           static_cast<float>(params.output_offset);
-  }
-  double operator()(double x) const override {
-    return std::erf(params.input_multiplier * x) * params.output_multiplier +
-           params.output_offset;
-  }
-
-  tolerance_spec tolerance(ynn_type /*type*/) const override {
-    return tolerance_spec{/*relative=*/5.0f};
-  }
-};
-
-struct approx_tanh : public unary_op_info {
-  approx_tanh_params params;
-
-  explicit approx_tanh(const unary_params& params)
-      : params(params.approx_tanh) {}
-  float operator()(float x) const override {
-    return std::tanh(x) * static_cast<float>(params.output_multiplier) +
-           static_cast<float>(params.output_offset);
-  }
-  double operator()(double x) const override {
-    return std::tanh(x) * params.output_multiplier + params.output_offset;
-  }
-
-  tolerance_spec tolerance(ynn_type /*type*/) const override {
-    return tolerance_spec{/*relative=*/5.0f};
+    return tolerance_spec{/*relative=*/approx ? 5.0f : 4.0f};
   }
 };
 
 struct cube_root : public unary_op_info {
-  explicit cube_root(const unary_params& = {}) {}
+  explicit cube_root(uint32_t flags = 0, const unary_params& = {}) {}
   float operator()(float x) const override { return std::cbrt(x); }
   double operator()(double x) const override { return std::cbrt(x); }
 
@@ -446,7 +418,7 @@ struct cube_root : public unary_op_info {
 };
 
 struct sign : public unary_op_info {
-  explicit sign(const unary_params& = {}) {}
+  explicit sign(uint32_t flags = 0, const unary_params& = {}) {}
   float operator()(float x) const override {
     if (std::isnan(x)) return x;
     if (x < 0.0f) return -1.0f;
@@ -465,7 +437,7 @@ struct sign : public unary_op_info {
 };
 
 struct trig : public unary_op_info {
-  explicit trig(const unary_params& = {}) {}
+  explicit trig(uint32_t flags = 0, const unary_params& = {}) {}
   tolerance_spec tolerance(ynn_type /*type*/) const override {
     return tolerance_spec{/*relative=*/5.0f, /*absolute=*/3.0f};
   }
@@ -476,7 +448,8 @@ struct trig : public unary_op_info {
 struct sine : public trig {
   sine_params params;
 
-  explicit sine(const unary_params& params = {}) : params(params.sine) {}
+  explicit sine(uint32_t flags = 0, const unary_params& params = {})
+      : params(params.sine) {}
   float operator()(float x) const override {
     return std::sin(x) * static_cast<float>(params.output_multiplier) +
            static_cast<float>(params.output_offset);
@@ -489,7 +462,8 @@ struct sine : public trig {
 struct cosine : public trig {
   cosine_params params;
 
-  explicit cosine(const unary_params& params = {}) : params(params.cosine) {}
+  explicit cosine(uint32_t flags = 0, const unary_params& params = {})
+      : params(params.cosine) {}
   float operator()(float x) const override {
     return std::cos(x) * static_cast<float>(params.output_multiplier) +
            static_cast<float>(params.output_offset);
@@ -500,7 +474,7 @@ struct cosine : public trig {
 };
 
 struct hardswish : public unary_op_info {
-  explicit hardswish(const unary_params& = {}) {}
+  explicit hardswish(uint32_t flags = 0, const unary_params& = {}) {}
   float operator()(float x) const override {
     return (x / 6.0f) * std::max(std::min(x + 3.0f, 6.0f), 0.0f);
   }
@@ -518,7 +492,8 @@ struct hardswish : public unary_op_info {
 struct poly3 : public unary_op_info {
   poly3_params params;
 
-  explicit poly3(const unary_params& params) : params(params.poly3) {}
+  explicit poly3(uint32_t flags, const unary_params& params)
+      : params(params.poly3) {}
   float operator()(float x) const override {
     return ((static_cast<float>(params.c3) * x +
              static_cast<float>(params.c2)) *
@@ -542,7 +517,7 @@ struct poly3 : public unary_op_info {
 };
 
 std::unique_ptr<unary_op_info> get_unary_op_info(
-    ynn_unary_operator op, const unary_params& params = {});
+    ynn_unary_operator op, uint32_t flags = 0, const unary_params& params = {});
 
 // Check that op(a) == x, within tolerances described by `op`.
 template <typename A, typename X>

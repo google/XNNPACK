@@ -40,7 +40,8 @@ def tanh_fp64(a, x, output_offset, output_multiplier):
     Scalar("output_offset", Float(32)),
     Scalar("output_multiplier", Float(32)),
 )
-@operator_name("approx_tanh")
+@operator_name("tanh")
+@kernel_flags("unary_flag::precision_approx")
 def approx_tanh_fp32(a, x, output_offset, output_multiplier):
   va = load(a)
   return store(

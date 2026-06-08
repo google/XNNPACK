@@ -104,16 +104,6 @@ std::vector<unary_params> get_params_for_op(ynn_unary_operator op) {
           unary_params{.erf = erf_params{0.0f, 1.0f, 1.0f}},
           unary_params{.erf = erf_params{2.0f, 1.1f, 1.2f}},
       };
-    case ynn_unary_approx_erf:
-      return {
-          unary_params{.approx_erf = approx_erf_params{0.0f, 1.0f, 1.0f}},
-          unary_params{.approx_erf = approx_erf_params{2.0f, 1.1f, 1.2f}},
-      };
-    case ynn_unary_approx_tanh:
-      return {
-          unary_params{.approx_tanh = approx_tanh_params{0.0f, 1.0f}},
-          unary_params{.approx_tanh = approx_tanh_params{2.0f, 1.1f}},
-      };
     case ynn_unary_tanh:
       return {
           unary_params{.tanh = tanh_params{0.0f, 1.0f}},
@@ -201,7 +191,7 @@ TEST_P(Reference, op) {
   KernelInfo kernel_info(op, type);
   SwitchType(type, [&](auto type) {
     for (const auto& params : get_params_for_op(op)) {
-      auto op_info = get_unary_op_info(op, params);
+      auto op_info = get_unary_op_info(op, /*flags=*/0, params);
       TestImpl(type, type, kernel_info, *op_info, shape, params);
     }
   });
@@ -257,8 +247,6 @@ const ynn_unary_operator all_real_ops[] = {
     ynn_unary_exp,
     ynn_unary_expm1,
     ynn_unary_erf,
-    ynn_unary_approx_erf,
-    ynn_unary_approx_tanh,
     ynn_unary_tanh,
     ynn_unary_sign,
     ynn_unary_sine,
@@ -340,7 +328,7 @@ std::vector<Shape> get_test_shapes() {
   TEST_P(kernel##_test, no_broadcast) {                                       \
     ynn::KernelInfo kernel_info(arch_flags, kernel);                          \
     for (const auto& params : ynn::get_params_for_op(ynn_unary_##op)) {       \
-      ynn::TestImpl(type_a{}, type_x{}, kernel_info, ynn::op(params),         \
+      ynn::TestImpl(type_a{}, type_x{}, kernel_info, ynn::op(flags, params),  \
                     GetParam(), params);                                      \
     }                                                                         \
   }                                                                           \

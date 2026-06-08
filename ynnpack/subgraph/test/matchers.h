@@ -154,6 +154,12 @@ MATCHER_P(IsUnary, op_type, "") {
       std::get_if<ynn_node::unary_elementwise>(&arg.op);
   return unary && unary->op == op_type;
 }
+MATCHER_P2(IsUnary, op_type, flags, "") {
+  const ynn_node::unary_elementwise* unary =
+      std::get_if<ynn_node::unary_elementwise>(&arg.op);
+  return unary && unary->op == op_type && unary->flags == flags;
+}
+
 
 // Checks that the given node is a transpose_a with the given tile_k and m_dim.
 //
