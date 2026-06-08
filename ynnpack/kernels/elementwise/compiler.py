@@ -1753,7 +1753,7 @@ class Target:
     return "|".join(["arch_flag::" + i.lower() for i in self.features])
 
   def arch_string(self):
-    return "x86_" + "_".join([i.lower() for i in self.features])
+    return "_".join([i.lower() for i in self.features])
 
   def get_arity_string(self, buffers):
     if len(buffers) == 4:
