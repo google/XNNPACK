@@ -30,8 +30,10 @@ namespace ynn {
 
 namespace {
 
-auto make_transpose_impl(int elem_count, std::vector<int32_t> permutation) {
-  return [elem_count, permutation](
+auto make_transpose_impl(int elem_count,
+                         const std::vector<int32_t>& permutation,
+                         int input_packed_dim, int output_packed_dim) {
+  return [elem_count, permutation, input_packed_dim, output_packed_dim](
              const slinky::raw_buffer& input,
              const slinky::raw_buffer& output) -> slinky::index_t {
     // Make a shallow copy of the input buffers. We need to be able to slice
@@ -50,7 +52,7 @@ auto make_transpose_impl(int elem_count, std::vector<int32_t> permutation) {
     for (size_t d = 0; d < permutation.size(); ++d) {
       sliced_input.dims[d] = input.dim(permutation[d]);
       fuse_batch[d] = input_dim0 == -1 ? d : YNN_MAX_TENSOR_RANK;
-      if (permutation[d] == 0) {
+      if (permutation[d] == input_packed_dim) {
         input_dim0 = d;
       }
       // Don't include input_dim0 in the set for fusion.
@@ -79,8 +81,14 @@ auto make_transpose_impl(int elem_count, std::vector<int32_t> permutation) {
     assert(kernel);
 
     const slinky::index_t m = sliced_output.dim(input_dim0).extent();
-    const slinky::index_t n = sliced_output.dim(0).extent() * elem_count;
-    const slinky::index_t n_bytes_a = m * output.elem_size;
+    bool input_dim0_is_packed = (permutation[0] == input_packed_dim);
+    slinky::index_t input_n =
+        sliced_input.dim(0).extent() * (input_dim0_is_packed ? elem_count : 1);
+    bool output_dim0_is_packed = (output_packed_dim == 0);
+    slinky::index_t output_n = sliced_output.dim(0).extent() *
+                               (output_dim0_is_packed ? elem_count : 1);
+    const slinky::index_t n = std::min(input_n, output_n);
+    const slinky::index_t n_bytes_a = m * output.elem_size / elem_count;
     assert(is_contiguous(sliced_input.dim(input_dim0), output.elem_size));
     const slinky::index_t input_stride = sliced_input.dim(0).stride();
     assert(is_contiguous(sliced_output.dim(0), output.elem_size));
@@ -132,18 +140,6 @@ void define_static_transpose(ynn_subgraph& subgraph, ynn_node& node,
     }
     output_extents[d] = input_extent;
   }
-  if (elem_count != 1 && !output_extents.empty() &&
-      output_extents[0].defined()) {
-    // And convert back to a physical shape after converting to a logical
-    // shape above. This could fail if the user transposes a dimension with an
-    // extent that is not aligned to `elem_count`.
-    node.checks.push_back(ynn_node::check{
-        output_extents[0] % elem_count == 0,
-        {"For node 'static_transpose', dimension 0 extent (", output_extents[0],
-         ") of ", ynn_node::output_idx{0},
-         " is not aligned to an instance of type ", to_string(input.type)},
-    });
-  }
 
   if (identity && *output_id == YNN_INVALID_VALUE_ID) {
     *output_id = input_id;
@@ -156,8 +152,8 @@ void define_static_transpose(ynn_subgraph& subgraph, ynn_node& node,
   // We can alias if we aren't rearranging the stride 1 dimension from the
   // input.
   alias = alias || permutation.empty() ||
-          first_non_trivial_dim >= permutation.size() ||
-          permutation[first_non_trivial_dim] == 0;
+          (elem_count == 1 && (first_non_trivial_dim >= permutation.size() ||
+                               permutation[first_non_trivial_dim] == 0));
 
   node.inputs = {input_id};
   node.outputs = {output.id};
@@ -184,11 +180,25 @@ void define_static_transpose(ynn_subgraph& subgraph, ynn_node& node,
       }
     }
 
-    if (elem_count != 1 &&
-        any_n(rank, [&](int d) { return d > 0 && op.permutation[d] == 0; })) {
-      // We're loading the packed dimensions with an index from a non-packed
-      // dimension, adjust for the number of elements.
-      bounds[0] /= (int)elem_count;
+    int input_packed_dim = (type_element_count(input.type) != 1) ? 0 : -1;
+    int output_packed_dim = (elem_count != 1) ? 0 : -1;
+
+    if (elem_count != 1) {
+      if (input_packed_dim >= 0 && any_n(rank, [&](int d) {
+            return d != output_packed_dim &&
+                   op.permutation[d] == input_packed_dim;
+          })) {
+        bounds[input_packed_dim] /= (int)elem_count;
+      }
+      if (output_packed_dim >= 0 &&
+          output_packed_dim < static_cast<int>(op.permutation.size())) {
+        int input_dim = op.permutation[output_packed_dim];
+        if (input_dim != input_packed_dim && input_dim < input.rank()) {
+          bounds[input_dim] = {
+              bounds[input_dim].min * (int)elem_count,
+              (bounds[input_dim].max + 1) * (int)elem_count - 1};
+        }
+      }
     }
 
     slinky::func f;
@@ -200,9 +210,11 @@ void define_static_transpose(ynn_subgraph& subgraph, ynn_node& node,
       slinky::call_stmt::attributes attrs;
       attrs.name = "transpose";
 
-      f = slinky::func::make(make_transpose_impl(elem_count, op.permutation),
-                             {{input.buffer, std::move(bounds)}},
-                             {{output.buffer, output_dims}}, attrs);
+      f = slinky::func::make(
+          make_transpose_impl(elem_count, op.permutation, input_packed_dim,
+                              output_packed_dim),
+          {{input.buffer, std::move(bounds)}}, {{output.buffer, output_dims}},
+          attrs);
     }
 
     f.user_data() = sched.get();

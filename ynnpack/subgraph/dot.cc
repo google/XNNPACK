@@ -437,6 +437,8 @@ uint32_t define_pack_b(ynn_subgraph_t subgraph, const dot_type& type,
 
   ynn_value& packed_b = subgraph->new_internal_value();
   packed_b.type = b.type;
+  packed_b.zero_point_id = b.zero_point_id;
+  packed_b.scale_id = b.scale_id;
   uint32_t packed_b_id = packed_b.id;
 
   const int element_count = type_element_count(b.type);
@@ -502,8 +504,12 @@ uint32_t define_pack_b(ynn_subgraph_t subgraph, const dot_type& type,
     slinky::var ni = dims[1];
     slinky::var ko = dims[2];
     slinky::var no = dims[3];
-    func_input.bounds = {slinky::point(no * block_n + ni),
-                         slinky::point(ko * tile_k + ki)};
+    slinky::expr logical_ki = ki * element_count;
+    slinky::expr logical_tile_k = tile_k * element_count;
+    func_input.bounds = {
+        slinky::point(no * block_n + ni),
+        slinky::bounds(ko * logical_tile_k + logical_ki,
+                       ko * logical_tile_k + logical_ki + element_count - 1)};
     for (size_t i = 4; i < dims.size(); ++i) {
       func_input.bounds.push_back(slinky::point(dims[i]));
     }
@@ -773,6 +779,10 @@ void learn_shape_from_b(dot_shape& shape, size_t num_k_dims,
 }
 
 ynn_status always_alias_transpose(ynn_subgraph& subgraph, uint32_t& id) {
+  const ynn_value& b = subgraph.value(id);
+  if (type_size_bits(b.type) < 8) {
+    return ynn_status_unsupported_parameter;
+  }
   const ynn_node* b_producer = subgraph.get_producer(id);
   if (b_producer && std::get_if<ynn_node::static_transpose>(&b_producer->op)) {
     // The producer of this pack is a transpose. If it is transposing the rows
@@ -888,11 +898,11 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
   assert(subgraph.is_valid_value(input_a_id));
   assert(subgraph.is_valid_value(input_b_id));
   assert(output_id);
-  const bool b_transposed =
-      always_alias_transpose(subgraph, input_b_id) == ynn_status_success;
-
   const ynn_value& a = subgraph.value(input_a_id);
   const ynn_value& b = subgraph.value(input_b_id);
+  const bool is_sub_byte = type_size_bits(b.type) < 8;
+  const bool b_transposed =
+      always_alias_transpose(subgraph, input_b_id) == ynn_status_success;
   const ynn_type c_type = deduce_output_type(a.type, b.type);
   ynn_value& c = subgraph.get_output_value(output_id, c_type);
   if (input_c_id != YNN_INVALID_VALUE_ID) {
@@ -923,6 +933,9 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
   //    compatible with the packed B layout and the transposed-ness of A.
 
   dot_type type = {a.type, b.type, c.type};
+  if (is_sub_byte) {
+    type.b = ynn_type_int8;
+  }
   dot_shape shape;
   learn_shape_from_b(shape, num_k_dims, b);
   static constexpr dot_packed_shape no_tile_k = {0, 1};
@@ -961,8 +974,31 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
     define_static_expand_dims(subgraph, node, input_b_id, &packed_b_id, 0b1001);
     subgraph.add_node(std::move(node));
   } else {
+    const bool do_post_convert =
+        (kernel.tile_k % type_element_count(b.type) == 0);
+
+    if (is_sub_byte && !do_post_convert) {
+      uint32_t converted_b_id = YNN_INVALID_VALUE_ID;
+      ynn_status status = ynn_define_convert(
+          &subgraph, input_b_id, ynn_type_int8, b.zero_point_id, b.scale_id,
+          &converted_b_id, flags);
+      if (status != ynn_status_success) {
+        return status;
+      }
+      input_b_id = converted_b_id;
+    }
     packed_b_id = define_pack_b(&subgraph, type, kernel, num_k_dims,
                                 consistent_arithmetic, input_b_id);
+    if (is_sub_byte && do_post_convert) {
+      uint32_t converted_b_id = YNN_INVALID_VALUE_ID;
+      ynn_status status = ynn_define_convert(
+          &subgraph, packed_b_id, ynn_type_int8, b.zero_point_id, b.scale_id,
+          &converted_b_id, flags);
+      if (status != ynn_status_success) {
+        return status;
+      }
+      packed_b_id = converted_b_id;
+    }
   }
 
   ynn_node node;
