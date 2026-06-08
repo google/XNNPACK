@@ -10,9 +10,7 @@ YNN_REDUCE_KERNEL(arch_flag::neonfp16, sum_kn_fp16_fp32_neonfp16, reduce_dim::kn
 #endif  // YNN_ARCH_ARM_NEONFP16
 #ifdef YNN_ARCH_ARM_NEONDOT
 YNN_REDUCE_KERNEL(arch_flag::neondot, sum_k1_int8_int32_neondot, reduce_dim::k1, int8_t, int32_t)
-YNN_REDUCE_KERNEL(arch_flag::neondot, sum_kn_int8_int32_neondot, reduce_dim::kn, int8_t, int32_t)
 YNN_REDUCE_KERNEL(arch_flag::neondot, sum_k1_uint8_int32_neondot, reduce_dim::k1, uint8_t, int32_t)
-YNN_REDUCE_KERNEL(arch_flag::neondot, sum_kn_uint8_int32_neondot, reduce_dim::kn, uint8_t, int32_t)
 #endif  // YNN_ARCH_ARM_NEONDOT
 #ifdef YNN_ARCH_ARM_NEON
 YNN_REDUCE_KERNEL(arch_flag::neon, sum_k1_fp32_neon, reduce_dim::k1, float, float)
@@ -21,6 +19,8 @@ YNN_REDUCE_KERNEL(arch_flag::neon, sum_k1_int32_neon, reduce_dim::k1, int32_t, i
 YNN_REDUCE_KERNEL(arch_flag::neon, sum_kn_int32_neon, reduce_dim::kn, int32_t, int32_t)
 YNN_REDUCE_KERNEL(arch_flag::neon, sum_k1_bf16_fp32_neon, reduce_dim::k1, bfloat16, float)
 YNN_REDUCE_KERNEL(arch_flag::neon, sum_kn_bf16_fp32_neon, reduce_dim::kn, bfloat16, float)
+YNN_REDUCE_KERNEL(arch_flag::neon, sum_kn_int8_int32_neon, reduce_dim::kn, int8_t, int32_t)
+YNN_REDUCE_KERNEL(arch_flag::neon, sum_kn_uint8_int32_neon, reduce_dim::kn, uint8_t, int32_t)
 #ifdef YNN_ARCH_ARM64
 YNN_REDUCE_KERNEL(arch_flag::neon, sum_k1_fp64_neon, reduce_dim::k1, double, double)
 YNN_REDUCE_KERNEL(arch_flag::neon, sum_kn_fp64_neon, reduce_dim::kn, double, double)
