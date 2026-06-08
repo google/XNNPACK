@@ -89,7 +89,6 @@ struct vec<float, 4> {
   vec() = default;
   explicit vec(float32x4_t v) : v(v) {}
   vec(float x) : v(vdupq_n_f32(x)) {}  // NOLINT
-  vec(f32x2 lo, f32x2 hi) : v(vcombine_f32(lo.v, hi.v)) {}
 
   float32x4_t v;
 };
@@ -103,7 +102,6 @@ struct vec<double, 2> {
   vec() = default;
   explicit vec(float64x2_t v) : v(v) {}
   vec(double x) : v(vdupq_n_f64(x)) {}  // NOLINT
-  vec(vec<double, 1> lo, vec<double, 1> hi) : v{lo.v, hi.v} {}
 
   float64x2_t v;
 };
@@ -116,7 +114,6 @@ struct vec<int64_t, 2> {
   vec() = default;
   explicit vec(int64x2_t v) : v(v) {}
   vec(int64_t x) : v(vdupq_n_s64(x)) {}  // NOLINT
-  vec(vec<int64_t, 1> lo, vec<int64_t, 1> hi) : v{lo.v, hi.v} {}
 
   int64x2_t v;
 };
@@ -154,7 +151,6 @@ struct vec<bfloat16, 8> {
   vec() = default;
   explicit vec(uint16x8_t v) : v(v) {}
   vec(bfloat16 x) : v(vdupq_n_u16(x.to_bits())) {}  // NOLINT
-  vec(bf16x4 lo, bf16x4 hi) : v(vcombine_u16(lo.v, hi.v)) {}
 
   uint16x8_t v;
 };
@@ -202,7 +198,6 @@ struct vec<uint8_t, 16> {
 
   vec() = default;
   explicit vec(uint8x16_t v) : v(v) {}
-  vec(u8x8 lo, u8x8 hi) : v(vcombine_u8(lo.v, hi.v)) {}
   vec(uint8_t x) : v(vdupq_n_u8(x)) {}  // NOLINT
 
   uint8x16_t v;
@@ -252,6 +247,27 @@ YNN_ALWAYS_INLINE vec<int64_t, 1> lo(s64x2 x) {
 }
 YNN_ALWAYS_INLINE vec<int64_t, 1> hi(s64x2 x) {
   return vec<int64_t, 1>{vgetq_lane_s64(x.v, 1)};
+}
+#endif
+
+YNN_ALWAYS_INLINE f32x4 concat(f32x2 lo, f32x2 hi) {
+  return f32x4{vcombine_f32(lo.v, hi.v)};
+}
+YNN_ALWAYS_INLINE bf16x8 concat(bf16x4 lo, bf16x4 hi) {
+  return bf16x8{vcombine_u16(lo.v, hi.v)};
+}
+YNN_ALWAYS_INLINE f16x8 concat(f16x4 lo, f16x4 hi) {
+  return f16x8{vcombine_u16(lo.v, hi.v)};
+}
+YNN_ALWAYS_INLINE u8x16 concat(u8x8 lo, u8x8 hi) {
+  return u8x16{vcombine_u8(lo.v, hi.v)};
+}
+#ifdef YNN_ARCH_ARM64
+YNN_ALWAYS_INLINE f64x2 concat(vec<double, 1> lo, vec<double, 1> hi) {
+  return f64x2{float64x2_t{lo.v, hi.v}};
+}
+YNN_ALWAYS_INLINE s64x2 concat(vec<int64_t, 1> lo, vec<int64_t, 1> hi) {
+  return s64x2{int64x2_t{lo.v, hi.v}};
 }
 #endif
 

@@ -22,12 +22,16 @@ static s32x16 reduce_add(
     s32x16 a, u8x16 b, square /*map_fn*/,
     std::integral_constant<size_t, 1> /*horizontal_factor*/) {
   s32x16 b_s32 = cast(b, int32_t{});
+  s32x4 b0 = extract<0>(b_s32, s32x4::N);
+  s32x4 b1 = extract<1>(b_s32, s32x4::N);
+  s32x4 b2 = extract<2>(b_s32, s32x4::N);
+  s32x4 b3 = extract<3>(b_s32, s32x4::N);
 
   // madd_epi16 works due to extra zeros from uint8 -> int32 conversion.
-  a += s32x16{{s32x4{_mm_madd_epi16(b_s32[0][0].v, b_s32[0][0].v)},
-               s32x4{_mm_madd_epi16(b_s32[0][1].v, b_s32[0][1].v)}},
-              {s32x4{_mm_madd_epi16(b_s32[1][0].v, b_s32[1][0].v)},
-               s32x4{_mm_madd_epi16(b_s32[1][1].v, b_s32[1][1].v)}}};
+  return a + concat(s32x4{_mm_madd_epi16(b0.v, b0.v)},
+                    s32x4{_mm_madd_epi16(b1.v, b1.v)},
+                    s32x4{_mm_madd_epi16(b2.v, b2.v)},
+                    s32x4{_mm_madd_epi16(b3.v, b3.v)});
 
   return a;
 }

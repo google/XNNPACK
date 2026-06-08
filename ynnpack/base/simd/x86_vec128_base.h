@@ -186,7 +186,6 @@ struct vec<double, 2> {
 
   vec() = default;
   explicit vec(__m128d v) : v(v) {}
-  vec(vec<double, 1> lo, vec<double, 1> hi) : v(_mm_set_pd(hi.v, lo.v)) {}
   vec(double x) : v(_mm_set1_pd(x)) {}  // NOLINT
 
   __m128d v;
@@ -216,6 +215,10 @@ YNN_ALWAYS_INLINE vec<int64_t, 1> lo(s64x2 x) {
 }
 YNN_ALWAYS_INLINE vec<int64_t, 1> hi(s64x2 x) {
   return vec<int64_t, 1>{_mm_cvtsi128_si64(_mm_unpackhi_epi64(x.v, x.v))};
+}
+
+YNN_ALWAYS_INLINE f64x2 concat(vec<double, 1> lo, vec<double, 1> hi) {
+  return f64x2{_mm_set_pd(hi.v, lo.v)};
 }
 
 namespace internal {

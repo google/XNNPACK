@@ -29,9 +29,8 @@ static s32x16 reduce_add(
   __m256i b_hi = _mm256_cvtepu8_epi32(_mm_bsrli_si128(b.v, 8));
 
   // madd_epi16 works due to extra zeros from uint8 -> int32 conversion.
-  a[0] += s32x8{_mm256_madd_epi16(b_lo, b_lo)};
-  a[1] += s32x8{_mm256_madd_epi16(b_hi, b_hi)};
-  return a;
+  return a + concat(s32x8{_mm256_madd_epi16(b_lo, b_lo)},
+                    s32x8{_mm256_madd_epi16(b_hi, b_hi)});
 }
 
 static s32x16 reduce_add(s32x16 a, s8x16 b, square map_fn,
@@ -94,7 +93,7 @@ static f32x16 reduce_add(
       reduce_add(extract<0>(a, f32x8::N), extract<0>(b, bf16x16::N), map_fn);
   f32x8 a1 =
       reduce_add(extract<1>(a, f32x8::N), extract<1>(b, bf16x16::N), map_fn);
-  return {a0, a1};
+  return concat(a0, a1);
 }
 
 }  // namespace simd

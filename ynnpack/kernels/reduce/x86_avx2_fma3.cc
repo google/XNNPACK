@@ -40,7 +40,7 @@ static f32x16 reduce_add(
       reduce_add(extract<0>(a, f32x8::N), extract<0>(b, bf16x16::N), map_fn);
   f32x8 a1 =
       reduce_add(extract<1>(a, f32x8::N), extract<1>(b, bf16x16::N), map_fn);
-  return {a0, a1};
+  return concat(a0, a1);
 }
 
 }  // namespace simd

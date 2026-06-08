@@ -33,7 +33,7 @@ YNN_ALWAYS_INLINE vec<T, N> load(const T* ptr,
                                  std::integral_constant<size_t, N> n,
                                  vec<T, N>) {
   std::integral_constant<size_t, N / 2> n2 = {};
-  return {load(ptr, n2), load(ptr + n2, n2)};
+  return concat(load(ptr, n2), load(ptr + n2, n2));
 }
 template <typename T, size_t N>
 YNN_ALWAYS_INLINE vec<T, N> load(const T* ptr,
@@ -52,33 +52,33 @@ YNN_ALWAYS_INLINE vec<T, N> load_aligned(const T* ptr,
                                          std::integral_constant<size_t, N> n,
                                          vec<T, N>) {
   std::integral_constant<size_t, N / 2> n2 = {};
-  return {load_aligned(ptr, n2), load_aligned(ptr + n2, n2)};
+  return concat(load_aligned(ptr, n2), load_aligned(ptr + n2, n2));
 }
 template <typename T, size_t N>
 YNN_ALWAYS_INLINE vec<T, N> load(const T* ptr, size_t n, vec<T, N> src) {
   std::integral_constant<size_t, N / 2> n2 = {};
   if (n < n2) {
-    return {load(ptr, n, lo(src)), hi(src)};
+    return concat(load(ptr, n, lo(src)), hi(src));
   } else {
-    return {load(ptr, n2), load(ptr + n2, n - n2, hi(src))};
+    return concat(load(ptr, n2), load(ptr + n2, n - n2, hi(src)));
   }
 }
 template <typename T, size_t N>
 YNN_ALWAYS_INLINE vec<T, N> load(const T* ptr, size_t n, zeros<N>) {
   std::integral_constant<size_t, N / 2> n2 = {};
   if (n < n2) {
-    return {load(ptr, n, zeros<N / 2>{}), vec<T, N / 2>{T{0}}};
+    return concat(load(ptr, n, zeros<N / 2>{}), vec<T, N / 2>{T{0}});
   } else {
-    return {load(ptr, n2), load(ptr + n2, n - n2, zeros<N / 2>{})};
+    return concat(load(ptr, n2), load(ptr + n2, n - n2, zeros<N / 2>{}));
   }
 }
 template <typename T, size_t N>
 YNN_ALWAYS_INLINE vec<T, N> load(const T* ptr, size_t n, undef<N>) {
   std::integral_constant<size_t, N / 2> n2 = {};
   if (n < n2) {
-    return {load(ptr, n, undef<N / 2>{}), vec<T, N / 2>{}};
+    return concat(load(ptr, n, undef<N / 2>{}), vec<T, N / 2>{});
   } else {
-    return {load(ptr, n2), load(ptr + n2, n - n2, undef<N / 2>{})};
+    return concat(load(ptr, n2), load(ptr + n2, n - n2, undef<N / 2>{}));
   }
 }
 
@@ -111,23 +111,23 @@ YNN_ALWAYS_INLINE void store(T* ptr, vec<T, N> value, size_t n) {
 // Arithmetic operators.
 template <typename T, size_t N>
 YNN_ALWAYS_INLINE vec<T, N> operator+(vec<T, N> a, vec<T, N> b) {
-  return {lo(a) + lo(b), hi(a) + hi(b)};
+  return concat(lo(a) + lo(b), hi(a) + hi(b));
 }
 template <typename T, size_t N>
 YNN_ALWAYS_INLINE vec<T, N> operator-(vec<T, N> a, vec<T, N> b) {
-  return {lo(a) - lo(b), hi(a) - hi(b)};
+  return concat(lo(a) - lo(b), hi(a) - hi(b));
 }
 template <typename T, size_t N>
 YNN_ALWAYS_INLINE vec<T, N> operator*(vec<T, N> a, vec<T, N> b) {
-  return {lo(a) * lo(b), hi(a) * hi(b)};
+  return concat(lo(a) * lo(b), hi(a) * hi(b));
 }
 template <typename T, size_t N>
 YNN_ALWAYS_INLINE vec<T, N> operator/(vec<T, N> a, vec<T, N> b) {
-  return {lo(a) / lo(b), hi(a) / hi(b)};
+  return concat(lo(a) / lo(b), hi(a) / hi(b));
 }
 template <typename T, size_t N>
 YNN_ALWAYS_INLINE vec<T, N> operator-(vec<T, N> a) {
-  return {-lo(a), -hi(a)};
+  return concat(-lo(a), -hi(a));
 }
 
 template <typename T, size_t N>
@@ -154,23 +154,23 @@ YNN_ALWAYS_INLINE vec<T, N>& operator/=(vec<T, N>& a, vec<T, N> b) {
 // Boolean operators.
 template <typename T, size_t N>
 YNN_ALWAYS_INLINE vec<T, N> operator&(vec<T, N> a, vec<T, N> b) {
-  return {lo(a) & lo(b), hi(a) & hi(b)};
+  return concat(lo(a) & lo(b), hi(a) & hi(b));
 }
 template <typename T, size_t N>
 YNN_ALWAYS_INLINE vec<T, N> operator|(vec<T, N> a, vec<T, N> b) {
-  return {lo(a) | lo(b), hi(a) | hi(b)};
+  return concat(lo(a) | lo(b), hi(a) | hi(b));
 }
 template <typename T, size_t N>
 YNN_ALWAYS_INLINE vec<T, N> operator^(vec<T, N> a, vec<T, N> b) {
-  return {lo(a) ^ lo(b), hi(a) ^ hi(b)};
+  return concat(lo(a) ^ lo(b), hi(a) ^ hi(b));
 }
 template <typename T, size_t N>
 YNN_ALWAYS_INLINE vec<T, N> operator~(vec<T, N> a) {
-  return {~lo(a), ~hi(a)};
+  return concat(~lo(a), ~hi(a));
 }
 template <typename T, size_t N>
 YNN_ALWAYS_INLINE vec<T, N> operator<<(vec<T, N> a, int b) {
-  return {lo(a) << b, hi(a) << b};
+  return concat(lo(a) << b, hi(a) << b);
 }
 
 template <typename T, size_t N>
@@ -190,74 +190,74 @@ YNN_ALWAYS_INLINE vec<T, N>& operator^=(vec<T, N>& a, vec<T, N> b) {
 }
 template <typename T, size_t N>
 YNN_ALWAYS_INLINE vec<T, N> min(vec<T, N> a, vec<T, N> b) {
-  return {min(lo(a), lo(b)), min(hi(a), hi(b))};
+  return concat(min(lo(a), lo(b)), min(hi(a), hi(b)));
 }
 template <typename T, size_t N>
 YNN_ALWAYS_INLINE vec<T, N> min(vec<T, N> a, T b) {
-  return {min(lo(a), b), min(hi(a), b)};
+  return concat(min(lo(a), b), min(hi(a), b));
 }
 template <typename T, size_t N>
 YNN_ALWAYS_INLINE vec<T, N> min(T a, vec<T, N> b) {
-  return {min(a, lo(b)), min(a, hi(b))};
+  return concat(min(a, lo(b)), min(a, hi(b)));
 }
 template <typename T, size_t N>
 YNN_ALWAYS_INLINE vec<T, N> max(vec<T, N> a, vec<T, N> b) {
-  return {max(lo(a), lo(b)), max(hi(a), hi(b))};
+  return concat(max(lo(a), lo(b)), max(hi(a), hi(b)));
 }
 template <typename T, size_t N>
 YNN_ALWAYS_INLINE vec<T, N> max(vec<T, N> a, T b) {
-  return {max(lo(a), b), max(hi(a), b)};
+  return concat(max(lo(a), b), max(hi(a), b));
 }
 template <typename T, size_t N>
 YNN_ALWAYS_INLINE vec<T, N> max(T a, vec<T, N> b) {
-  return {max(a, lo(b)), max(a, hi(b))};
+  return concat(max(a, lo(b)), max(a, hi(b)));
 }
 template <typename T, size_t N>
 YNN_ALWAYS_INLINE vec<T, N> copysign(vec<T, N> mag, vec<T, N> sgn) {
-  return {copysign(lo(mag), lo(sgn)), copysign(hi(mag), hi(sgn))};
+  return concat(copysign(lo(mag), lo(sgn)), copysign(hi(mag), hi(sgn)));
 }
 template <typename T, size_t N>
 YNN_ALWAYS_INLINE vec<T, N> abs(vec<T, N> a) {
-  return {abs(lo(a)), abs(hi(a))};
+  return concat(abs(lo(a)), abs(hi(a)));
 }
 template <typename T, size_t N>
 YNN_ALWAYS_INLINE vec<T, N> add_sat(vec<T, N> a, vec<T, N> b) {
-  return {add_sat(lo(a), lo(b)), add_sat(hi(a), hi(b))};
+  return concat(add_sat(lo(a), lo(b)), add_sat(hi(a), hi(b)));
 }
 template <typename T, size_t N>
 YNN_ALWAYS_INLINE vec<T, N> sub_sat(vec<T, N> a, vec<T, N> b) {
-  return {sub_sat(lo(a), lo(b)), sub_sat(hi(a), hi(b))};
+  return concat(sub_sat(lo(a), lo(b)), sub_sat(hi(a), hi(b)));
 }
 template <typename T, size_t N>
 YNN_ALWAYS_INLINE vec<T, N> floor(vec<T, N> a) {
-  return {floor(lo(a)), floor(hi(a))};
+  return concat(floor(lo(a)), floor(hi(a)));
 }
 template <typename T, size_t N>
 YNN_ALWAYS_INLINE vec<T, N> floor_log2(vec<T, N> a) {
-  return {floor_log2(lo(a)), floor_log2(hi(a))};
+  return concat(floor_log2(lo(a)), floor_log2(hi(a)));
 }
 
 template <typename T, size_t N>
 YNN_ALWAYS_INLINE vec<T, N> exp2_round(vec<T, N> a) {
-  return {exp2_round(lo(a)), exp2_round(hi(a))};
+  return concat(exp2_round(lo(a)), exp2_round(hi(a)));
 }
 template <typename T, size_t N>
 YNN_ALWAYS_INLINE vec<T, N> ceil(vec<T, N> a) {
-  return {ceil(lo(a)), ceil(hi(a))};
+  return concat(ceil(lo(a)), ceil(hi(a)));
 }
 template <typename T, size_t N>
 YNN_ALWAYS_INLINE vec<T, N> round(vec<T, N> a) {
-  return {round(lo(a)), round(hi(a))};
+  return concat(round(lo(a)), round(hi(a)));
 }
 template <typename T, size_t N>
 YNN_ALWAYS_INLINE vec<T, N> sqrt(vec<T, N> a) {
-  return {sqrt(lo(a)), sqrt(hi(a))};
+  return concat(sqrt(lo(a)), sqrt(hi(a)));
 }
 
 #ifdef YNN_HAVE_FMA
 template <typename T, size_t N>
 YNN_ALWAYS_INLINE vec<T, N> fma(vec<T, N> a, vec<T, N> b, vec<T, N> acc) {
-  return {fma(lo(a), lo(b), lo(acc)), fma(hi(a), hi(b), hi(acc))};
+  return concat(fma(lo(a), lo(b), lo(acc)), fma(hi(a), hi(b), hi(acc)));
 }
 #elif defined(YNN_ARCH_EMULATE_FMA)
 template <typename T, size_t N>
@@ -320,7 +320,7 @@ YNN_ALWAYS_INLINE auto isfinite(vec<T, N> a) {
 
 template <typename T, size_t N, typename M>
 YNN_ALWAYS_INLINE vec<T, N> select(M cond, vec<T, N> a, vec<T, N> b) {
-  return {select(lo(cond), lo(a), lo(b)), select(hi(cond), hi(a), hi(b))};
+  return concat(select(lo(cond), lo(a), lo(b)), select(hi(cond), hi(a), hi(b)));
 }
 
 template <int Index, typename T, size_t N>
@@ -344,13 +344,14 @@ YNN_ALWAYS_INLINE vec<T, N / 4> extract(vec<T, N> x,
 }
 
 template <typename T, size_t N>
-YNN_ALWAYS_INLINE vec<T, N*2> concat(vec<T, N> a, vec<T, N> b) {
-  return {a, b};
+YNN_ALWAYS_INLINE vec<T, N * 4> concat(vec<T, N> a, vec<T, N> b, vec<T, N> c,
+                                       vec<T, N> d) {
+  return concat(concat(a, b), concat(c, d));
 }
 
 template <typename To, typename From, size_t N>
 YNN_ALWAYS_INLINE vec<To, N> cast(vec<From, N> from, To) {
-  return {cast(lo(from), To()), cast(hi(from), To())};
+  return concat(cast(lo(from), To()), cast(hi(from), To()));
 }
 
 template <typename T, size_t N>

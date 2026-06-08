@@ -67,7 +67,6 @@ struct vec<double, 8> {
 
   vec() = default;
   explicit vec(__m512d v) : v(v) {}
-  vec(f64x4 lo, f64x4 hi) : v(internal::concat(lo.v, hi.v)) {}
   vec(double x) : v(_mm512_set1_pd(x)) {}  // NOLINT
 
   __m512d v;
@@ -80,7 +79,6 @@ struct vec<float, 16> {
 
   vec() = default;
   explicit vec(__m512 v) : v(v) {}
-  vec(f32x8 lo, f32x8 hi) : v(internal::concat(lo.v, hi.v)) {}
   vec(float x) : v(_mm512_set1_ps(x)) {}  // NOLINT
 
   __m512 v;
@@ -93,7 +91,6 @@ struct vec<uint32_t, 16> {
 
   vec() = default;
   explicit vec(__m512i v) : v(v) {}
-  vec(u32x8 lo, u32x8 hi) : v(internal::concat(lo.v, hi.v)) {}
   vec(uint32_t x) : v(_mm512_set1_epi32(x)) {}  // NOLINT
 
   __m512i v;
@@ -106,7 +103,6 @@ struct vec<int32_t, 16> {
 
   vec() = default;
   explicit vec(__m512i v) : v(v) {}
-  vec(s32x8 lo, s32x8 hi) : v(internal::concat(lo.v, hi.v)) {}
   vec(int32_t x) : v(_mm512_set1_epi32(x)) {}  // NOLINT
 
   __m512i v;
@@ -119,7 +115,6 @@ struct vec<bfloat16, 32> {
 
   vec() = default;
   explicit vec(__m512i v) : v(v) {}
-  vec(bf16x16 lo, bf16x16 hi) : v(internal::concat(lo.v, hi.v)) {}
   vec(bfloat16 x) : v(_mm512_set1_epi16(x.to_bits())) {}  // NOLINT
 
   __m512i v;
@@ -132,7 +127,6 @@ struct vec<half, 32> {
 
   vec() = default;
   explicit vec(__m512i v) : v(v) {}
-  vec(f16x16 lo, f16x16 hi) : v(internal::concat(lo.v, hi.v)) {}
   vec(half x) : v(_mm512_set1_epi16(x.to_bits())) {}  // NOLINT
 
   __m512i v;
@@ -145,7 +139,6 @@ struct vec<uint16_t, 32> {
 
   vec() = default;
   explicit vec(__m512i v) : v(v) {}
-  vec(u16x16 lo, u16x16 hi) : v(internal::concat(lo.v, hi.v)) {}
   vec(uint16_t x) : v(_mm512_set1_epi16(x)) {}  // NOLINT
 
   __m512i v;
@@ -158,7 +151,6 @@ struct vec<int16_t, 32> {
 
   vec() = default;
   explicit vec(__m512i v) : v(v) {}
-  vec(s16x16 lo, s16x16 hi) : v(internal::concat(lo.v, hi.v)) {}
   vec(int16_t x) : v(_mm512_set1_epi16(x)) {}  // NOLINT
 
   __m512i v;
@@ -171,7 +163,6 @@ struct vec<uint8_t, 64> {
 
   vec() = default;
   explicit vec(__m512i v) : v(v) {}
-  vec(u8x32 lo, u8x32 hi) : v(internal::concat(lo.v, hi.v)) {}
   vec(uint8_t x) : v(_mm512_set1_epi8(x)) {}  // NOLINT
 
   __m512i v;
@@ -184,7 +175,6 @@ struct vec<int8_t, 64> {
 
   vec() = default;
   explicit vec(__m512i v) : v(v) {}
-  vec(s8x32 lo, s8x32 hi) : v(internal::concat(lo.v, hi.v)) {}
   vec(int8_t x) : v(_mm512_set1_epi8(x)) {}  // NOLINT
 
   __m512i v;
@@ -222,6 +212,37 @@ YNN_ALWAYS_INLINE u8x32 lo(u8x64 x) { return u8x32{internal::lo(x.v)}; }
 YNN_ALWAYS_INLINE u8x32 hi(u8x64 x) { return u8x32{internal::hi(x.v)}; }
 YNN_ALWAYS_INLINE s8x32 lo(s8x64 x) { return s8x32{internal::lo(x.v)}; }
 YNN_ALWAYS_INLINE s8x32 hi(s8x64 x) { return s8x32{internal::hi(x.v)}; }
+
+YNN_ALWAYS_INLINE f64x8 concat(f64x4 lo, f64x4 hi) {
+  return f64x8{internal::concat(lo.v, hi.v)};
+}
+YNN_ALWAYS_INLINE f32x16 concat(f32x8 lo, f32x8 hi) {
+  return f32x16{internal::concat(lo.v, hi.v)};
+}
+YNN_ALWAYS_INLINE u32x16 concat(u32x8 lo, u32x8 hi) {
+  return u32x16{internal::concat(lo.v, hi.v)};
+}
+YNN_ALWAYS_INLINE s32x16 concat(s32x8 lo, s32x8 hi) {
+  return s32x16{internal::concat(lo.v, hi.v)};
+}
+YNN_ALWAYS_INLINE bf16x32 concat(bf16x16 lo, bf16x16 hi) {
+  return bf16x32{internal::concat(lo.v, hi.v)};
+}
+YNN_ALWAYS_INLINE f16x32 concat(f16x16 lo, f16x16 hi) {
+  return f16x32{internal::concat(lo.v, hi.v)};
+}
+YNN_ALWAYS_INLINE u16x32 concat(u16x16 lo, u16x16 hi) {
+  return u16x32{internal::concat(lo.v, hi.v)};
+}
+YNN_ALWAYS_INLINE s16x32 concat(s16x16 lo, s16x16 hi) {
+  return s16x32{internal::concat(lo.v, hi.v)};
+}
+YNN_ALWAYS_INLINE u8x64 concat(u8x32 lo, u8x32 hi) {
+  return u8x64{internal::concat(lo.v, hi.v)};
+}
+YNN_ALWAYS_INLINE s8x64 concat(s8x32 lo, s8x32 hi) {
+  return s8x64{internal::concat(lo.v, hi.v)};
+}
 
 YNN_ALWAYS_INLINE f64x8 load_aligned(const double* ptr, decltype(f64x8::N),
                                      f64x8 = {}) {

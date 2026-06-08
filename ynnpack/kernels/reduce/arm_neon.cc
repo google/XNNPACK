@@ -44,20 +44,30 @@ static f32x4 reduce_add(
   return a;
 }
 
+static s32x8 operator+(s32x8 a, s16x8 b) {
+  a[0].v = vaddw_s16(a[0].v, vget_low_s16(b.v));
+  a[1].v = vaddw_s16(a[1].v, vget_high_s16(b.v));
+  return a;
+}
+
+static s32x8 operator+(s32x8 a, u16x8 b) {
+  a[0].v = vreinterpretq_s32_u32(
+      vaddw_u16(vreinterpretq_u32_s32(a[0].v), vget_low_u16(b.v)));
+  a[1].v = vreinterpretq_s32_u32(
+      vaddw_u16(vreinterpretq_u32_s32(a[1].v), vget_high_u16(b.v)));
+  return a;
+}
+
 static s32x16 reduce_add(
     s32x16 a, s8x16 b, square /*map_fn*/,
     std::integral_constant<size_t, 1> /*horizontal_factor*/) {
   int8x8_t b_lo_s8 = vget_low_s8(b.v);
   int8x8_t b_hi_s8 = vget_high_s8(b.v);
-  int16x8_t sq_lo = vmull_s8(b_lo_s8, b_lo_s8);
-  int16x8_t sq_hi = vmull_s8(b_hi_s8, b_hi_s8);
+  s16x8 sq_lo{vmull_s8(b_lo_s8, b_lo_s8)};
+  s16x8 sq_hi{vmull_s8(b_hi_s8, b_hi_s8)};
 
-  a[0][0].v = vaddw_s16(a[0][0].v, vget_low_s16(sq_lo));
-  a[0][1].v = vaddw_s16(a[0][1].v, vget_high_s16(sq_lo));
-  a[1][0].v = vaddw_s16(a[1][0].v, vget_low_s16(sq_hi));
-  a[1][1].v = vaddw_s16(a[1][1].v, vget_high_s16(sq_hi));
-
-  return a;
+  return concat(extract<0>(a, s32x8::N) + sq_lo,
+                extract<1>(a, s32x8::N) + sq_hi);
 }
 
 static s32x16 reduce_add(
@@ -65,19 +75,11 @@ static s32x16 reduce_add(
     std::integral_constant<size_t, 1> /*horizontal_factor*/) {
   uint8x8_t b_lo_s8 = vget_low_u8(b.v);
   uint8x8_t b_hi_s8 = vget_high_u8(b.v);
-  uint16x8_t sq_lo = vmull_u8(b_lo_s8, b_lo_s8);
-  uint16x8_t sq_hi = vmull_u8(b_hi_s8, b_hi_s8);
+  u16x8 sq_lo{vmull_u8(b_lo_s8, b_lo_s8)};
+  u16x8 sq_hi{vmull_u8(b_hi_s8, b_hi_s8)};
 
-  a[0][0].v = vreinterpretq_s32_u32(
-      vaddw_u16(vreinterpretq_u32_s32(a[0][0].v), vget_low_u16(sq_lo)));
-  a[0][1].v = vreinterpretq_s32_u32(
-      vaddw_u16(vreinterpretq_u32_s32(a[0][1].v), vget_high_u16(sq_lo)));
-  a[1][0].v = vreinterpretq_s32_u32(
-      vaddw_u16(vreinterpretq_u32_s32(a[1][0].v), vget_low_u16(sq_hi)));
-  a[1][1].v = vreinterpretq_s32_u32(
-      vaddw_u16(vreinterpretq_u32_s32(a[1][1].v), vget_high_u16(sq_hi)));
-
-  return a;
+  return concat(extract<0>(a, s32x8::N) + sq_lo,
+                extract<1>(a, s32x8::N) + sq_hi);
 }
 
 }  // namespace simd
