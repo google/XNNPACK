@@ -186,9 +186,11 @@ static enum xnn_status reshape_convert_operator(
       const size_t num_channels =
           output->shape.num_dims > channel_dimension
               ? output->shape.dim[channel_dimension] : 0;
-      if (num_channels > 0 && dq_batch_size > 0) {
+      if (num_channels > 0 && ((num_nonbatch_dims == 0 && batch_size > 0) ||
+                               (num_nonbatch_dims > 0 && dq_batch_size > 0))) {
         xnn_operator_t op = opdata->operator_objects[0];
-        const size_t bytes_needed = num_channels * sizeof(float);
+        const size_t bytes_needed = num_channels * sizeof(float) *
+            (num_nonbatch_dims > 0 ? dq_batch_size : batch_size);
         if (op->channelwise_quantization_buffer_capacity < bytes_needed) {
           xnn_release_memory(op->channelwise_quantization_buffer);
           op->channelwise_quantization_buffer = xnn_allocate_memory(bytes_needed);
@@ -199,8 +201,11 @@ static enum xnn_status reshape_convert_operator(
           op->channelwise_quantization_buffer_capacity = bytes_needed;
         }
         float* channelwise_scale = (float*)op->channelwise_quantization_buffer;
-        for (size_t c = 0; c < num_channels; c++) {
-          channelwise_scale[c] = input_value->quantization.scale;
+        for (size_t b = 0; b < (num_nonbatch_dims > 0 ? dq_batch_size
+                                                      : batch_size); b++) {
+          for (size_t c = 0; c < num_channels; c++) {
+            channelwise_scale[b * num_channels + c] = input_value->quantization.scale;
+          }
         }
         output->quantization.channelwise_scale = channelwise_scale;
         output->quantization.channelwise_zero_point = NULL;
