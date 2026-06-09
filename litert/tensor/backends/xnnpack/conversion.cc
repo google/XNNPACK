@@ -73,7 +73,6 @@ xnn_datatype GetXnnpackType(const XnnpackValue& value) {
       break;
     }
     case Type::kI16:
-    case Type::kI32:
     case Type::kI64:
     case Type::kU4:
     case Type::kU8:
@@ -82,6 +81,8 @@ xnn_datatype GetXnnpackType(const XnnpackValue& value) {
     case Type::kU64:
     case Type::kFP16:
       return xnn_datatype_fp16;
+    case Type::kI32:
+      return xnn_datatype_int32;
     case Type::kFP32:
       return xnn_datatype_fp32;
     case Type::kFP64:

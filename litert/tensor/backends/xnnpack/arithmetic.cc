@@ -1781,4 +1781,33 @@ absl::Status OpMixin<SplitOperation, XnnpackMixinTag>::ToXnnpack(
       << op_name;
   return absl::OkStatus();
 }
+
+absl::Status OpMixin<RopeOperation, XnnpackMixinTag>::ToXnnpack(
+    const graph::Operation& op, XnnpackBuildContext& ctx) const {
+  constexpr absl::string_view op_name = "Rope";
+
+  if (op.inputs.size() != 2) {
+    return absl::InvalidArgumentError(
+        absl::StrFormat("%s expects 2 inputs", op_name));
+  }
+  LRT_TENSOR_ASSIGN_OR_RETURN(uint32_t input_id, ctx.DefineValue(op.inputs[0]));
+  LRT_TENSOR_ASSIGN_OR_RETURN(uint32_t weights_id,
+                              ctx.DefineValue(op.inputs[1]));
+
+  LRT_TENSOR_ASSIGN_OR_RETURN(auto outputs, graph::GetOutputs(op));
+  if (outputs.empty()) {
+    return absl::NotFoundError(absl::StrFormat("%s missing outputs", op_name));
+  }
+  const graph::Tensor& output = outputs.front();
+  LRT_TENSOR_ASSIGN_OR_RETURN(uint32_t output_id, ctx.DefineValue(output));
+
+  LRT_TENSOR_ASSIGN_OR_RETURN(const auto& weights_info,
+                              graph::GetInfo(op.inputs[1]));
+  size_t max_tokens = weights_info.shape[0];
+  LRT_TENSOR_RETURN_IF_ERROR(xnn_define_rope(ctx.subgraph(), max_tokens,
+                                             input_id, weights_id, output_id,
+                                             /*flags=*/0))
+      << op_name;
+  return absl::OkStatus();
+}
 }  // namespace litert::tensor::graph
