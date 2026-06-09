@@ -17,6 +17,7 @@ limitations under the License.
 
 #include <cmath>
 #include <cstddef>
+#include <cstdint>
 #include <ostream>
 #include <string>
 #include <vector>
@@ -660,6 +661,54 @@ TEST(ArithmeticXnnpackTest, Conv2DOp) {
   // input * filter + bias
   // 1*1 + 2*2 + 3*3 + 4*4 + 1 = 1 + 4 + 9 + 16 + 1 = 31
   EXPECT_THAT(output_data, ::testing::ElementsAreArray({31.0f}));
+}
+
+TEST(ArithmeticXnnpackTest, SliceWorks) {
+  XnnTensor input({.name = "input", .type = Type::kFP32, .shape = {3, 2, 4}});
+  XnnTensor output = Slice(input, {0, 0, 0}, {3, 2, 2});
+
+  LRT_TENSOR_ASSERT_OK_AND_ASSIGN(auto runner, XnnpackRunner::Create({output}));
+  std::vector<float> input_data = {
+      1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f, 7.0f, 8.0f, 1.0f, 2.0f, 3.0f, 4.0f,
+      5.0f, 6.0f, 7.0f, 8.0f, 1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f, 7.0f, 8.0f};
+  std::vector<float> expected_output = {1.0f, 2.0f, 5.0f, 6.0f, 1.0f, 2.0f,
+                                        5.0f, 6.0f, 1.0f, 2.0f, 5.0f, 6.0f};
+  ASSERT_THAT(
+      runner.SetInput(input,
+                      absl::Span<const std::byte>(
+                          reinterpret_cast<const std::byte*>(input_data.data()),
+                          input_data.size() * sizeof(float))),
+      IsOk());
+  ASSERT_THAT(runner.Run(), IsOk());
+  LRT_TENSOR_ASSERT_OK_AND_ASSIGN(auto output_bytes, runner.ReadOutput(output));
+  auto output_data =
+      absl::MakeSpan(reinterpret_cast<const float*>(output_bytes.data()),
+                     output_bytes.size() / sizeof(float));
+  EXPECT_THAT(output_data,
+              ::testing::Pointwise(::testing::FloatEq(), expected_output));
+}
+
+TEST(ArithmeticXnnpackTest, CastI32ToF32Works) {
+  XnnTensor input({.name = "input", .type = Type::kI32, .shape = {3}});
+  XnnTensor output = Cast(input, Type::kFP32);
+
+  LRT_TENSOR_ASSERT_OK_AND_ASSIGN(auto runner, XnnpackRunner::Create({output}));
+  std::vector<int32_t> input_data = {0, 1, 2};
+  std::vector<float> expected_output = {0.0f, 1.0f, 2.0f};
+
+  ASSERT_THAT(
+      runner.SetInput(input,
+                      absl::Span<const std::byte>(
+                          reinterpret_cast<const std::byte*>(input_data.data()),
+                          input_data.size() * sizeof(int32_t))),
+      IsOk());
+  ASSERT_THAT(runner.Run(), IsOk());
+  LRT_TENSOR_ASSERT_OK_AND_ASSIGN(auto output_bytes, runner.ReadOutput(output));
+  auto output_data =
+      absl::MakeSpan(reinterpret_cast<const float*>(output_bytes.data()),
+                     output_bytes.size() / sizeof(float));
+  EXPECT_THAT(output_data,
+              ::testing::Pointwise(::testing::FloatEq(), expected_output));
 }
 
 }  // namespace

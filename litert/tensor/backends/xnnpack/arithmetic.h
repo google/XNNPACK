@@ -479,6 +479,13 @@ class OpMixin<SplitOperation, XnnpackMixinTag> : public XnnpackOperation {
   absl::Status ToXnnpack(const graph::Operation& op,
                          XnnpackBuildContext& ctx) const override;
 };
+
+template <>
+class OpMixin<RopeOperation, XnnpackMixinTag> : public XnnpackOperation {
+ public:
+  absl::Status ToXnnpack(const graph::Operation& op,
+                         XnnpackBuildContext& ctx) const override;
+};
 }  // namespace graph
 
 }  // namespace litert::tensor
