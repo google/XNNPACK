@@ -167,6 +167,14 @@ static enum xnn_status reshape_convert_operator(
       break;
     }
     case xnn_operator_type_convert_nc_f32_qp8: {
+      if (num_input_dims < 2) {
+        xnn_log_error(
+          "failed to reshape %s operator with input ID #%" PRIu32
+          ": number of dimensions (%zu) must be at least 2",
+          xnn_node_type_to_string(xnn_node_type_convert), input_id,
+          num_input_dims);
+        return xnn_status_invalid_parameter;
+      }
       size_t num_groups = xnn_shape_multiply_batch_dims(&input_value->shape, 2);
       size_t batch_size = input_value->shape.dim[num_input_dims - 2];
       const size_t channels = input_value->shape.dim[num_input_dims - 1];
