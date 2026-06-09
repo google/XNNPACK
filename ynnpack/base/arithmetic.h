@@ -269,9 +269,11 @@ using std::isfinite;
 using std::isinf;
 using std::isnan;
 
+#ifndef _MSC_VER
 inline bool isinf(int x) { return false; }
 inline bool isnan(int x) { return false; }
 inline bool isfinite(int x) { return true; }
+#endif  // _MSC_VER
 
 }  // namespace ynn
 
