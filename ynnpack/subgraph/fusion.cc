@@ -157,22 +157,22 @@ bool rewrite_divide_sqrt(ynn_subgraph& subgraph, ynn_node& node,
     return false;
   }
 
-  ynn_node* denom = analysis.producer_of(node.inputs[1]);
-  if (!denom) return false;
-  const ynn_node::unary_elementwise* denom_unary =
-      std::get_if<ynn_node::unary_elementwise>(&denom->op);
-  if (!denom_unary || denom_unary->op != ynn_unary_square_root) return false;
+  ynn_node* producer = analysis.producer_of(node.inputs[1]);
+  if (!producer || !is_unary_node(*producer, ynn_unary_square_root)) {
+    // The denominator of the divide is not a square root.
+    return false;
+  }
 
-  if (analysis.consumers[denom->outputs[0]].size() != 1 ||
-      subgraph.value(denom->outputs[0]).is_external_output()) {
+  if (analysis.consumers[producer->outputs[0]].size() != 1 ||
+      subgraph.value(producer->outputs[0]).is_external_output()) {
     // The square root is used by something else.
     return false;
   }
 
   // This is x/sqrt(y).
   const ynn_value& x = subgraph.value(node.inputs[0]);
-  const ynn_value& sqrt_y = subgraph.value(denom->outputs[0]);
-  const ynn_value& y = subgraph.value(denom->inputs[0]);
+  const ynn_value& sqrt_y = subgraph.value(producer->outputs[0]);
+  const ynn_value& y = subgraph.value(producer->inputs[0]);
   const ynn_value& output = subgraph.value(node.outputs[0]);
 
   const ynn::unary_kernel_fn rsqrt_kernel = ynn::get_unary_kernel(
@@ -182,9 +182,8 @@ bool rewrite_divide_sqrt(ynn_subgraph& subgraph, ynn_node& node,
 
   if (rsqrt_kernel != nullptr && multiply_kernel != nullptr) {
     YNN_LOG_DEBUG() << "Rewriting x/sqrt(y) to x*rsqrt(y)";
-    ynn::define_unary(subgraph, *denom, y.id, sqrt_y.id,
-                      ynn_unary_reciprocal_square_root, denom_unary->flags,
-                      rsqrt_kernel);
+    ynn::define_unary(subgraph, *producer, y.id, sqrt_y.id,
+                      ynn_unary_reciprocal_square_root, rsqrt_kernel);
     ynn::define_binary(subgraph, node, x.id, sqrt_y.id, output.id,
                        ynn_binary_multiply, multiply_kernel);
     return true;
@@ -381,13 +380,13 @@ bool rewrite_convert_elementwise(ynn_subgraph& subgraph, ynn_node& node,
     }
 
     ynn::unary_kernel_fn kernel =
-        ynn::get_unary_kernel(unary->op, a.type, x.type, unary->flags);
+        ynn::get_unary_kernel(unary->op, a.type, x.type);
     if (!kernel) return false;
     YNN_LOG_DEBUG() << "Rewriting "
                     << "convert(" << to_string(unary->op) << "(a)) to "
                     << to_string(unary->op) << "(a)";
-    ynn::define_unary(subgraph, node, a.id, x.id, unary->op, unary->flags,
-                      kernel, unary->params);
+    ynn::define_unary(subgraph, node, a.id, x.id, unary->op, kernel,
+                      unary->params);
     return true;
   } else if (const auto* binary =
                  std::get_if<ynn_node::binary_elementwise>(&producer->op)) {
@@ -1064,7 +1063,7 @@ bool fuse_converts(ynn_subgraph& subgraph, ynn_node& node,
         YNN_LOG_DEBUG() << "Rewriting convert(" << to_string(input.type)
                         << ", convert(bf16, x)) to round_to_bf16(x)";
         define_unary(subgraph, node, producer->inputs[0], node.outputs[0],
-                     ynn_unary_round_to_bf16, /*flags=*/0, kernel);
+                     ynn_unary_round_to_bf16, kernel);
         return true;
       }
     }
@@ -1264,6 +1263,7 @@ bool fold_unary_input(ynn_subgraph& subgraph, ynn_node& node,
     case ynn_unary_log:
     case ynn_unary_log1p:
     case ynn_unary_erf:
+    case ynn_unary_approx_erf:
       break;
     default:
       return false;
@@ -1282,6 +1282,8 @@ bool fold_unary_input(ynn_subgraph& subgraph, ynn_node& node,
                     << to_string(unary->op) << ".";
     if (unary->op == ynn_unary_exp || unary->op == ynn_unary_expm1) {
       unary->params.exp.input_multiplier *= mul->a;
+    } else if (unary->op == ynn_unary_approx_erf) {
+      unary->params.approx_erf.input_multiplier *= mul->a;
     } else {
       unary->params.erf.input_multiplier *= mul->a;
     }
@@ -1315,7 +1317,9 @@ bool fold_unary_output(ynn_subgraph& subgraph, ynn_node& node,
       }
       break;
     case ynn_unary_erf:
+    case ynn_unary_approx_erf:
     case ynn_unary_tanh:
+    case ynn_unary_approx_tanh:
     case ynn_unary_sine:
     case ynn_unary_cosine:
     case ynn_unary_poly3:
@@ -1389,7 +1393,7 @@ bool rewrite_binary(ynn_subgraph& subgraph, ynn_node& node,
 
     YNN_LOG_DEBUG() << "Rewriting multiply(x, x) to square(x)";
     define_unary(subgraph, node, node.inputs[0], node.outputs[0],
-                 ynn_unary_square, /*flags=*/0, kernel);
+                 ynn_unary_square, kernel);
     return true;
   }
   return false;
@@ -1927,22 +1931,32 @@ bool rewrite_fast_math(ynn_subgraph& subgraph, ynn_node& node,
   ynn_node::unary_elementwise* unary =
       std::get_if<ynn_node::unary_elementwise>(&node.op);
   if (!unary) return false;
-  if ((unary->flags & unary_flag::precision_approx) != 0) return false;
 
-  uint32_t flags = unary->flags | unary_flag::precision_approx;
+  struct FastMathOpRewrite {
+    ynn_unary_operator op;
+    ynn_unary_operator fast_op;
+  };
+  constexpr FastMathOpRewrite kFastMathRewrites[] = {
+      {ynn_unary_erf, ynn_unary_approx_erf},
+      {ynn_unary_tanh, ynn_unary_approx_tanh},
+  };
 
-  const ynn_value& input = subgraph.value(node.inputs[0]);
-  const ynn_value& output = subgraph.value(node.outputs[0]);
-  const ynn::unary_kernel_fn kernel =
-      ynn::get_unary_kernel(unary->op, input.type, output.type, flags);
-  if (kernel) {
-    YNN_LOG_DEBUG() << "Rewriting " << to_string(unary->op)
-                    << " to use approx kernel (fast math)";
-    unary_params new_params = unary->params;
+  for (const auto& rewrite : kFastMathRewrites) {
+    if (unary->op == rewrite.op) {
+      const ynn_value& input = subgraph.value(node.inputs[0]);
+      const ynn_value& output = subgraph.value(node.outputs[0]);
+      const ynn::unary_kernel_fn kernel =
+          ynn::get_unary_kernel(rewrite.fast_op, input.type, output.type);
+      if (kernel) {
+        YNN_LOG_DEBUG() << "Rewriting " << to_string(rewrite.op) << " to "
+                        << to_string(rewrite.fast_op) << " (fast math)";
+        unary_params new_params = unary->params;
 
-    ynn::define_unary(subgraph, node, node.inputs[0], node.outputs[0],
-                      unary->op, flags, kernel, new_params);
-    return true;
+        ynn::define_unary(subgraph, node, node.inputs[0], node.outputs[0],
+                          rewrite.fast_op, kernel, new_params);
+        return true;
+      }
+    }
   }
   return false;
 }

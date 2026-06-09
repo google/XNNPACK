@@ -404,12 +404,12 @@ void infer_shape(ynn_node& node, ynn_subgraph& subgraph) {
 }  // namespace
 
 void define_unary(ynn_subgraph& subgraph, ynn_node& node, uint32_t input_a_id,
-                  uint32_t output_id, ynn_unary_operator op, uint32_t flags,
+                  uint32_t output_id, ynn_unary_operator op,
                   unary_kernel_fn kernel, const unary_params& params) {
   // Make the node.
   node.inputs = {input_a_id};
   node.outputs = {output_id};
-  node.op = ynn_node::unary_elementwise{op, params, flags};
+  node.op = ynn_node::unary_elementwise{op, params};
   infer_shape(node, subgraph);
   node.create = [kernel](const ynn_node& node, ynn_runtime& runtime) {
     return create_unary(node, runtime, kernel);
@@ -537,13 +537,8 @@ ynn_status define_unary(ynn_subgraph_t subgraph, ynn_unary_operator op,
   const ynn_value& a = subgraph->value(input_a_id);
   ynn_value& x = subgraph->get_output_value(output_id, a);
 
-  uint32_t unary_flags = 0;
-  if (flags & YNN_NODE_FLAG_APPROX) {
-    unary_flags |= unary_flag::precision_approx;
-  }
-
   // Find the kernel.
-  unary_kernel_fn kernel = get_unary_kernel(op, a.type, x.type, unary_flags);
+  unary_kernel_fn kernel = get_unary_kernel(op, a.type, x.type);
   if (!kernel) {
     unary_kernel_fn float_kernel =
         get_unary_kernel(op, ynn_type_fp32, ynn_type_fp32);
@@ -575,8 +570,8 @@ ynn_status define_unary(ynn_subgraph_t subgraph, ynn_unary_operator op,
 
   // Make the node.
   ynn_node node;
-  ynn::define_unary(*subgraph, node, input_a_id, *output_id, op, unary_flags,
-                    kernel, params);
+  ynn::define_unary(*subgraph, node, input_a_id, *output_id, op, kernel,
+                    params);
   subgraph->add_node(std::move(node));
   return ynn_status_success;
 }

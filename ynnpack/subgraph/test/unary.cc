@@ -108,7 +108,7 @@ class RealOps
 
 template <typename T>
 void TestOp(T type, ynn_unary_operator op) {
-  auto op_info = get_unary_op_info(op, /*flags=*/0, get_unary_params(op));
+  auto op_info = get_unary_op_info(op, get_unary_params(op));
   TestOp(type, type, *op_info, op);
 }
 

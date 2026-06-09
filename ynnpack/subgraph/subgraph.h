@@ -244,16 +244,18 @@ struct ynn_node {
   struct unary_elementwise {
     ynn_unary_operator op;
     ynn::unary_params params;
-    uint32_t flags = 0;
     friend bool operator==(const unary_elementwise& a,
                            const unary_elementwise& b) {
       if (a.op != b.op) return false;
-      if (a.flags != b.flags) return false;
       switch (a.op) {
         case ynn_unary_exp:
           return a.params.exp == b.params.exp;
         case ynn_unary_erf:
           return a.params.erf == b.params.erf;
+        case ynn_unary_approx_erf:
+          return a.params.approx_erf == b.params.approx_erf;
+        case ynn_unary_approx_tanh:
+          return a.params.approx_tanh == b.params.approx_tanh;
         case ynn_unary_tanh:
           return a.params.tanh == b.params.tanh;
         case ynn_unary_poly3:
@@ -266,12 +268,15 @@ struct ynn_node {
     friend bool operator<(const unary_elementwise& a,
                           const unary_elementwise& b) {
       if (a.op != b.op) return a.op < b.op;
-      if (a.flags != b.flags) return a.flags < b.flags;
       switch (a.op) {
         case ynn_unary_exp:
           return a.params.exp < b.params.exp;
         case ynn_unary_erf:
           return a.params.erf < b.params.erf;
+        case ynn_unary_approx_erf:
+          return a.params.approx_erf < b.params.approx_erf;
+        case ynn_unary_approx_tanh:
+          return a.params.approx_tanh < b.params.approx_tanh;
         case ynn_unary_tanh:
           return a.params.tanh < b.params.tanh;
         case ynn_unary_poly3:

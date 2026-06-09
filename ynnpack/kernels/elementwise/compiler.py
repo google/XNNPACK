@@ -936,18 +936,6 @@ def operator_name(name):
   return actual_decorator
 
 
-def kernel_flags(flags):
-  def actual_decorator(func):
-    @functools.wraps(func)
-    def wrapper(*args, **kwargs):
-      return func(*args, **kwargs)
-
-    wrapper.kernel_flags = flags
-    return wrapper
-
-  return actual_decorator
-
-
 class TailStrategy(enum.Enum):
   SCALAR = 1
   VECTOR = 2

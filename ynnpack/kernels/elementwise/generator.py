@@ -28,14 +28,6 @@ arch_to_target = {
 }
 
 
-def _combine_flags(f1: str, f2: str) -> str:
-  if f1 == "0":
-    return f2
-  if f2 == "0":
-    return f1
-  return f"{f1} | {f2}"
-
-
 def generate_elementwise_kernels(
     output_src: str,
     output_inc: str,
@@ -53,13 +45,7 @@ def generate_elementwise_kernels(
 
   for kernel in kernels:
     fn, shape = kernel[:2]
-    gen_flags = kernel[2] if len(kernel) > 2 else "0"
-    dec_flags = getattr(fn, "kernel_flags", "0")
-    if callable(gen_flags):
-      gen_flags = gen_flags(target)
-    if callable(dec_flags):
-      dec_flags = dec_flags(target)
-    flags = _combine_flags(gen_flags, dec_flags)
+    flags = kernel[2] if len(kernel) > 2 else "0"
     vectorize, unroll = shape
     name = fn.__name__
     src_i, inc_i = target.compile_function(

@@ -13,55 +13,58 @@
 namespace ynn {
 
 std::unique_ptr<unary_op_info> get_unary_op_info(ynn_unary_operator op,
-                                                 uint32_t flags,
                                                  const unary_params& params) {
   switch (op) {
     case ynn_unary_abs:
-      return std::make_unique<abs>(flags, params);
+      return std::make_unique<abs>(params);
     case ynn_unary_round:
-      return std::make_unique<round>(flags, params);
+      return std::make_unique<round>(params);
     case ynn_unary_ceil:
-      return std::make_unique<ceil>(flags, params);
+      return std::make_unique<ceil>(params);
     case ynn_unary_convert:
-      return std::make_unique<convert>(flags, params);
+      return std::make_unique<convert>(params);
     case ynn_unary_exp:
-      return std::make_unique<exp>(flags, params);
+      return std::make_unique<exp>(params);
     case ynn_unary_expm1:
-      return std::make_unique<expm1>(flags, params);
+      return std::make_unique<expm1>(params);
     case ynn_unary_erf:
-      return std::make_unique<erf>(flags, params);
+      return std::make_unique<erf>(params);
+    case ynn_unary_approx_erf:
+      return std::make_unique<approx_erf>(params);
+    case ynn_unary_approx_tanh:
+      return std::make_unique<approx_tanh>(params);
     case ynn_unary_floor:
-      return std::make_unique<floor>(flags, params);
+      return std::make_unique<floor>(params);
     case ynn_unary_log:
-      return std::make_unique<log>(flags, params);
+      return std::make_unique<log>(params);
     case ynn_unary_log1p:
-      return std::make_unique<log1p>(flags, params);
+      return std::make_unique<log1p>(params);
     case ynn_unary_negate:
-      return std::make_unique<negate>(flags, params);
+      return std::make_unique<negate>(params);
     case ynn_unary_reciprocal_square_root:
-      return std::make_unique<reciprocal_square_root>(flags, params);
+      return std::make_unique<reciprocal_square_root>(params);
     case ynn_unary_square:
-      return std::make_unique<square>(flags, params);
+      return std::make_unique<square>(params);
     case ynn_unary_square_root:
-      return std::make_unique<square_root>(flags, params);
+      return std::make_unique<square_root>(params);
     case ynn_unary_tanh:
-      return std::make_unique<tanh>(flags, params);
+      return std::make_unique<tanh>(params);
     case ynn_unary_cube_root:
-      return std::make_unique<cube_root>(flags, params);
+      return std::make_unique<cube_root>(params);
     case ynn_unary_sign:
-      return std::make_unique<sign>(flags, params);
+      return std::make_unique<sign>(params);
     case ynn_unary_sine:
-      return std::make_unique<sine>(flags, params);
+      return std::make_unique<sine>(params);
     case ynn_unary_cosine:
-      return std::make_unique<cosine>(flags, params);
+      return std::make_unique<cosine>(params);
     case ynn_unary_sigmoid:
-      return std::make_unique<sigmoid>(flags, params);
+      return std::make_unique<sigmoid>(params);
     case ynn_unary_hardswish:
-      return std::make_unique<hardswish>(flags, params);
+      return std::make_unique<hardswish>(params);
     case ynn_unary_poly3:
-      return std::make_unique<poly3>(flags, params);
+      return std::make_unique<poly3>(params);
     case ynn_unary_round_to_bf16:
-      return std::make_unique<round_to_bf16>(flags, params);
+      return std::make_unique<round_to_bf16>(params);
     case ynn_unary_invalid:
       return nullptr;
   }

@@ -29,11 +29,6 @@ enum {
   // targets.
   consistent_arithmetic = 0,
 #endif
-
-  // The kernel computes an approximate result, faster than kernels without this
-  // flag. The meaning of "approximate" varies, but generally, non-approximate
-  // kernels aim for 1 ULP of error, while approximate kernels aim for 5 ULP.
-  precision_approx = 1 << 1,
 };
 
 }  // namespace unary_flag
@@ -73,6 +68,8 @@ struct erf_params {
   }
 };
 
+using approx_erf_params = erf_params;
+
 struct affine_output_params {
   real output_offset;
   real output_multiplier;
@@ -90,6 +87,7 @@ struct affine_output_params {
 };
 
 using tanh_params = affine_output_params;
+using approx_tanh_params = tanh_params;
 using sine_params = affine_output_params;
 using cosine_params = affine_output_params;
 
@@ -114,6 +112,8 @@ union unary_params {
   // output offset and output scale parameters, respectively. We use this fact
   // to support all of them via poly3's parameters.
   erf_params erf;
+  approx_erf_params approx_erf;
+  approx_tanh_params approx_tanh;
   tanh_params tanh;
   sine_params sine;
   cosine_params cosine;
