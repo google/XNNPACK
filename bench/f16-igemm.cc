@@ -253,6 +253,141 @@ namespace {
 #endif  // XNN_ENABLE_AVX512FP16 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 
+#if XNN_ENABLE_AVX512SKX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+  static void f16_igemm_minmax_ukernel_1x16__avx512skx_broadcast(benchmark::State& state) {
+    IGEMMBenchmark(state,
+      xnn_f16_igemm_minmax_ukernel_1x16__avx512skx_broadcast,
+      xnn_init_f16_minmax_scalar_params,
+      xnn_pack_f16_conv_goki_w,
+      /*mr=*/1, /*nr=*/16, /*kr=*/1, /*sr=*/1,
+      /*arch_flags=*/xnn_arch_x86_avx512skx);
+  }
+
+  BENCHMARK_CONV(f16_igemm_minmax_ukernel_1x16__avx512skx_broadcast)
+
+  static void f16_igemm_minmax_ukernel_4x16__avx512skx_broadcast(benchmark::State& state) {
+    IGEMMBenchmark(state,
+      xnn_f16_igemm_minmax_ukernel_4x16__avx512skx_broadcast,
+      xnn_init_f16_minmax_scalar_params,
+      xnn_pack_f16_conv_goki_w,
+      /*mr=*/4, /*nr=*/16, /*kr=*/1, /*sr=*/1,
+      /*arch_flags=*/xnn_arch_x86_avx512skx);
+  }
+
+  BENCHMARK_CONV(f16_igemm_minmax_ukernel_4x16__avx512skx_broadcast)
+
+  static void f16_igemm_minmax_ukernel_5x16__avx512skx_broadcast(benchmark::State& state) {
+    IGEMMBenchmark(state,
+      xnn_f16_igemm_minmax_ukernel_5x16__avx512skx_broadcast,
+      xnn_init_f16_minmax_scalar_params,
+      xnn_pack_f16_conv_goki_w,
+      /*mr=*/5, /*nr=*/16, /*kr=*/1, /*sr=*/1,
+      /*arch_flags=*/xnn_arch_x86_avx512skx);
+  }
+
+  BENCHMARK_CONV(f16_igemm_minmax_ukernel_5x16__avx512skx_broadcast)
+
+  static void f16_igemm_minmax_ukernel_6x16__avx512skx_broadcast(benchmark::State& state) {
+    IGEMMBenchmark(state,
+      xnn_f16_igemm_minmax_ukernel_6x16__avx512skx_broadcast,
+      xnn_init_f16_minmax_scalar_params,
+      xnn_pack_f16_conv_goki_w,
+      /*mr=*/6, /*nr=*/16, /*kr=*/1, /*sr=*/1,
+      /*arch_flags=*/xnn_arch_x86_avx512skx);
+  }
+
+  BENCHMARK_CONV(f16_igemm_minmax_ukernel_6x16__avx512skx_broadcast)
+
+  static void f16_igemm_minmax_ukernel_7x16__avx512skx_broadcast(benchmark::State& state) {
+    IGEMMBenchmark(state,
+      xnn_f16_igemm_minmax_ukernel_7x16__avx512skx_broadcast,
+      xnn_init_f16_minmax_scalar_params,
+      xnn_pack_f16_conv_goki_w,
+      /*mr=*/7, /*nr=*/16, /*kr=*/1, /*sr=*/1,
+      /*arch_flags=*/xnn_arch_x86_avx512skx);
+  }
+
+  BENCHMARK_CONV(f16_igemm_minmax_ukernel_7x16__avx512skx_broadcast)
+
+  static void f16_igemm_minmax_ukernel_8x16__avx512skx_broadcast(benchmark::State& state) {
+    IGEMMBenchmark(state,
+      xnn_f16_igemm_minmax_ukernel_8x16__avx512skx_broadcast,
+      xnn_init_f16_minmax_scalar_params,
+      xnn_pack_f16_conv_goki_w,
+      /*mr=*/8, /*nr=*/16, /*kr=*/1, /*sr=*/1,
+      /*arch_flags=*/xnn_arch_x86_avx512skx);
+  }
+
+  BENCHMARK_CONV(f16_igemm_minmax_ukernel_8x16__avx512skx_broadcast)
+
+  static void f16_igemm_minmax_ukernel_1x32__avx512skx_broadcast(benchmark::State& state) {
+    IGEMMBenchmark(state,
+      xnn_f16_igemm_minmax_ukernel_1x32__avx512skx_broadcast,
+      xnn_init_f16_minmax_scalar_params,
+      xnn_pack_f16_conv_goki_w,
+      /*mr=*/1, /*nr=*/32, /*kr=*/1, /*sr=*/1,
+      /*arch_flags=*/xnn_arch_x86_avx512skx);
+  }
+
+  BENCHMARK_CONV(f16_igemm_minmax_ukernel_1x32__avx512skx_broadcast)
+
+  static void f16_igemm_minmax_ukernel_4x32__avx512skx_broadcast(benchmark::State& state) {
+    IGEMMBenchmark(state,
+      xnn_f16_igemm_minmax_ukernel_4x32__avx512skx_broadcast,
+      xnn_init_f16_minmax_scalar_params,
+      xnn_pack_f16_conv_goki_w,
+      /*mr=*/4, /*nr=*/32, /*kr=*/1, /*sr=*/1,
+      /*arch_flags=*/xnn_arch_x86_avx512skx);
+  }
+
+  BENCHMARK_CONV(f16_igemm_minmax_ukernel_4x32__avx512skx_broadcast)
+
+  static void f16_igemm_minmax_ukernel_5x32__avx512skx_broadcast(benchmark::State& state) {
+    IGEMMBenchmark(state,
+      xnn_f16_igemm_minmax_ukernel_5x32__avx512skx_broadcast,
+      xnn_init_f16_minmax_scalar_params,
+      xnn_pack_f16_conv_goki_w,
+      /*mr=*/5, /*nr=*/32, /*kr=*/1, /*sr=*/1,
+      /*arch_flags=*/xnn_arch_x86_avx512skx);
+  }
+
+  BENCHMARK_CONV(f16_igemm_minmax_ukernel_5x32__avx512skx_broadcast)
+
+  static void f16_igemm_minmax_ukernel_6x32__avx512skx_broadcast(benchmark::State& state) {
+    IGEMMBenchmark(state,
+      xnn_f16_igemm_minmax_ukernel_6x32__avx512skx_broadcast,
+      xnn_init_f16_minmax_scalar_params,
+      xnn_pack_f16_conv_goki_w,
+      /*mr=*/6, /*nr=*/32, /*kr=*/1, /*sr=*/1,
+      /*arch_flags=*/xnn_arch_x86_avx512skx);
+  }
+
+  BENCHMARK_CONV(f16_igemm_minmax_ukernel_6x32__avx512skx_broadcast)
+
+  static void f16_igemm_minmax_ukernel_7x32__avx512skx_broadcast(benchmark::State& state) {
+    IGEMMBenchmark(state,
+      xnn_f16_igemm_minmax_ukernel_7x32__avx512skx_broadcast,
+      xnn_init_f16_minmax_scalar_params,
+      xnn_pack_f16_conv_goki_w,
+      /*mr=*/7, /*nr=*/32, /*kr=*/1, /*sr=*/1,
+      /*arch_flags=*/xnn_arch_x86_avx512skx);
+  }
+
+  BENCHMARK_CONV(f16_igemm_minmax_ukernel_7x32__avx512skx_broadcast)
+
+  static void f16_igemm_minmax_ukernel_8x32__avx512skx_broadcast(benchmark::State& state) {
+    IGEMMBenchmark(state,
+      xnn_f16_igemm_minmax_ukernel_8x32__avx512skx_broadcast,
+      xnn_init_f16_minmax_scalar_params,
+      xnn_pack_f16_conv_goki_w,
+      /*mr=*/8, /*nr=*/32, /*kr=*/1, /*sr=*/1,
+      /*arch_flags=*/xnn_arch_x86_avx512skx);
+  }
+
+  BENCHMARK_CONV(f16_igemm_minmax_ukernel_8x32__avx512skx_broadcast)
+#endif  // XNN_ENABLE_AVX512SKX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+
+
 #if XNN_ENABLE_AVX2 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
   static void f16_igemm_minmax_ukernel_1x8__avx2_broadcast(benchmark::State& state) {
     IGEMMBenchmark(state,

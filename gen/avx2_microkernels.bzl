@@ -89,6 +89,7 @@ PROD_AVX2_MICROKERNEL_SRCS = [
     "src/x8-lut/gen/x8-lut-avx2-u128.c",
     "src/x8-transposec/gen/x8-transposec-32x32-reuse-switch-avx2.c",
     "src/x16-packw/gen/x16-packw-x16-gemm-goi-avx2-u16-prfm.c",
+    "src/x16-packw/gen/x16-packw-x32-gemm-goi-avx2-u16-prfm.c",
     "src/x16-transposec/gen/x16-transposec-16x16-reuse-switch-avx2.c",
 ]
 
@@ -422,6 +423,7 @@ NON_PROD_AVX2_MICROKERNEL_SRCS = [
     "src/x16-packw/gen/x16-packw-x8-gemm-goi-avx2-u16-prfm.c",
     "src/x16-packw/gen/x16-packw-x8-gemm-goi-avx2-u16.c",
     "src/x16-packw/gen/x16-packw-x16-gemm-goi-avx2-u16.c",
+    "src/x16-packw/gen/x16-packw-x32-gemm-goi-avx2-u16.c",
     "src/x16-transposec/gen/x16-transposec-16x16-reuse-mov-avx2.c",
 ]
 
