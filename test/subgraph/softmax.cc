@@ -101,4 +101,22 @@ auto rank_params = testing::Range(1, XNN_MAX_TENSOR_DIMS);
 INSTANTIATE_TEST_SUITE_P(Softmax, SoftmaxF16, rank_params);
 INSTANTIATE_TEST_SUITE_P(Softmax, SoftmaxF32, rank_params);
 
+TEST(Softmax, reshape_rejects_scalar_input) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+
+  SubgraphTester subgraph(2);
+  subgraph.AddInputTensor(1, xnn_datatype_fp32, 0)
+      .AddOutputTensor(1, xnn_datatype_fp32, 1)
+      .AddSoftmax(0, 1);
+  if (subgraph.CreateRuntime() == xnn_status_unsupported_hardware) {
+    GTEST_SKIP();
+  }
+
+  // An external input may be reshaped to a scalar (rank 0) at runtime. The
+  // reshape must reject it, not index shape.dim[num_dims - 1] with num_dims 0.
+  float data = 0.0f;
+  subgraph.ReshapeExternalTensor(TensorShape(), &data, 0).ReshapeRuntime();
+  EXPECT_EQ(subgraph.Status(), xnn_status_invalid_parameter);
+}
+
 }  // namespace xnnpack
