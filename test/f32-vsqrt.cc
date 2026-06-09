@@ -38,8 +38,8 @@ using TestInfo = SquareRoot;
 TEST(ukernel, special_values) {                                                                                         \
   TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                                                                 \
   VUnaryMicrokernelTester().Test<TestInfo, datatype, datatype>(ukernel, init_params,                                    \
-    /*inputs=*/{0.0f, -0.0f, 1.0f, -1.0f},                                                                              \
-    /*outputs=*/{0.0f, -0.0f, 1.0f, NAN},                                                                               \
+    /*inputs=*/{0.0f, -0.0f, 1.0f, -1.0f, INFINITY, NAN},                                                               \
+    /*outputs=*/{0.0f, -0.0f, 1.0f, NAN, INFINITY, NAN},                                                                \
     /*tolerance_ulp=*/1);                                                                                               \
 }
 #include "src/f32-vsqrt/f32-vsqrt.inc"

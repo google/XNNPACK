@@ -186,6 +186,10 @@ static XNN_INLINE float xnn_reduce_max_f32(xnn_simd_f32_t a) {
 #define XNN_SIMD_HAVE_RSQRT_F32 0
 
 static XNN_INLINE xnn_simd_f32_t xnn_sqrt_f32(xnn_simd_f32_t a) {
+  xnn_f32_i32_t ua = {.f = a};
+  if XNN_UNLIKELY(ua.u == 0x7F800000) {
+    return a;
+  }
   return sqrtf(a);
 }
 
