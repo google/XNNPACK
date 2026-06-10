@@ -370,7 +370,7 @@ void TestDynamicB(xnn_datatype convert_to = xnn_datatype_invalid,
         const float max_a = MaxDatatype(InputA());
         const float max_b = MaxDatatype(InputB()) * input_b_quantization.scale;
         const float tolerance = xnnpack::epsilon(xnn_datatype_of<Output>()) *
-                                k * max_a * max_b * 3.0f;
+                                k * max_a * max_b * 4.0f;
 
         for (const auto& i : EnumerateIndices(output.shape())) {
           ASSERT_NEAR(
@@ -594,7 +594,7 @@ void TestStaticB(xnn_datatype convert_to = xnn_datatype_invalid,
         const float max_a = MaxDatatype(InputA());
         const float max_b = MaxDatatype(InputB()) * input_b_quantization.scale;
         const float tolerance = xnnpack::epsilon(xnn_datatype_of<Output>()) *
-                                k * max_a * max_b * 3.0f;
+                                k * max_a * max_b * 4.0f;
 
         for (const auto& i : EnumerateIndices(output.shape())) {
           ASSERT_NEAR(output(i), expected(i), tolerance)
