@@ -2284,15 +2284,18 @@ static bool convert_gemm_to_qduint8(
       }
     }
   }
-
   // If the `qduint8` config is better than the `qdint8` config, use it
   // instead.
   bool convert_to_qu8 = false;
-  if (original_config && unsigned_config) {
-    enum xnn_arch_flags qdu8_arch = unsigned_config->arch;
-    enum xnn_arch_flags qd8_arch = original_config->arch;
-    if (qdu8_arch > qd8_arch) {
+  if (unsigned_config) {
+    if (original_config == NULL) {
       convert_to_qu8 = true;
+    } else {
+      enum xnn_arch_flags qdu8_arch = unsigned_config->arch;
+      enum xnn_arch_flags qd8_arch = original_config->arch;
+      if (qdu8_arch > qd8_arch) {
+        convert_to_qu8 = true;
+      }
     }
   }
   return convert_to_qu8;
