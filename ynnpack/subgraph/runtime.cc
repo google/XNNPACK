@@ -15,6 +15,7 @@
 #include <limits>
 #include <map>
 #include <memory>
+#include <optional>
 #include <sstream>
 #include <string>
 #include <utility>
@@ -24,6 +25,9 @@
 
 #ifdef YNN_ENABLE_PERFETTO
 #include "ynnpack/subgraph/perfetto.h"
+#endif
+#ifdef YNN_ENABLE_TSL_PROFILER
+#include "xla/tsl/profiler/lib/traceme.h"
 #endif
 #include "ynnpack/base/base.h"
 #include "ynnpack/base/log.h"
@@ -478,6 +482,17 @@ auto make_reshape_impl(ynn_runtime* runtime) {
 const char* get_trace_filename() { return getenv("YNN_TRACE"); }
 #endif
 
+#ifdef YNN_ENABLE_TSL_PROFILER
+bool ynn_traceme_enabled() {
+  // We can't use `TraceMe::Active` here, because it returns false when called,
+  // even if it would later return true when we actually want to trace. We
+  // should also gate this behind an extra flag because our tracing might be a
+  // lot higher frequency than other xprof tracing.
+  const char* traceme = getenv("YNN_TRACEME");
+  return traceme && strcmp(traceme, "0") != 0;
+}
+#endif
+
 }  // namespace
 
 extern "C" {
@@ -503,13 +518,30 @@ ynn_runtime::ynn_runtime(ynn::ref_count<const ynn_subgraph> subgraph,
   eval_config.base_alignment = YNN_ALLOCATION_ALIGNMENT;
 
 #ifdef YNN_ENABLE_PERFETTO
-  eval_config.trace_begin = [](const char* name) {
-    ynn::perfetto_session::global()->begin(name);
-    return reinterpret_cast<slinky::index_t>(name);
-  };
-  eval_config.trace_end = [](slinky::index_t token) {
-    ynn::perfetto_session::global()->end();
-  };
+  if (ynn::perfetto_session::global()) {
+    eval_config.trace_begin = [](const char* name) {
+      ynn::perfetto_session::global()->begin(name);
+      return reinterpret_cast<slinky::index_t>(name);
+    };
+    eval_config.trace_end = [](slinky::index_t token) {
+      ynn::perfetto_session::global()->end();
+    };
+  }
+#endif
+#ifdef YNN_ENABLE_TSL_PROFILER
+  if (ynn_traceme_enabled()) {
+    if (ynn::perfetto_session::global()) {
+      YNN_LOG_WARNING() <<
+          "tsl::profiler tracing is overriding perfetto tracing.";
+    }
+    eval_config.trace_begin = [](const char* name) {
+      return static_cast<slinky::index_t>(
+          tsl::profiler::TraceMe::ActivityStart(name));
+    };
+    eval_config.trace_end = [](slinky::index_t token) {
+      tsl::profiler::TraceMe::ActivityEnd(token);
+    };
+  }
 #endif
   eval_context.config = &eval_config;
 
@@ -620,7 +652,10 @@ ynn_status ynn_runtime::build() {
 
   slinky::build_options options;
 #ifdef YNN_ENABLE_PERFETTO
-  options.trace = get_trace_filename() != nullptr;
+  options.trace = options.trace || get_trace_filename() != nullptr;
+#endif
+#ifdef YNN_ENABLE_TSL_PROFILER
+  options.trace = options.trace || ynn_traceme_enabled();
 #endif
 #ifdef NDEBUG
   options.no_checks = true;
