@@ -521,12 +521,6 @@ uint32_t define_pack_b(ynn_subgraph_t subgraph, const dot_type& type,
 
     auto sched = std::make_unique<scheduling_info>();
 
-    // Here we assume that if the packing is static, this scheduling doesn't
-    // matter, and if it is dynamic, that the loop over n is one loop out from
-    // the innermost loop.
-    ynn::scheduled_buffer sched_output_buffer = {output.buffer, 1};
-    sched->scheduled_buffers.push_back(std::move(sched_output_buffer));
-
     // TODO(vksnk): This is a temporary workaround to avoid recomputing packed
     // buffer. The proper fix would probably involve adding a loop splits for
     // the packing function and making scheduler match it.
