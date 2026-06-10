@@ -899,6 +899,15 @@ Tensor<Mixins...> BatchMatMul(
 
   std::vector<int> x_shape = x_info.shape;
   std::vector<int> y_shape = y_info.shape;
+  if (x_shape.size() < 2 || y_shape.size() < 2) {
+    std::string x_shape_str = absl::StrJoin(x_shape, ",");
+    std::string y_shape_str = absl::StrJoin(y_shape, ",");
+    return Tensor<Mixins...>(
+        graph::ErrorTensor(absl::InvalidArgumentError(absl::StrCat(
+            "Input tensors for BatchMatMul must have rank >= 2. x_name: ",
+            x.GetName(), " y_name: ", y.GetName(), " x_shape: ", x_shape_str,
+            " y_shape: ", y_shape_str))));
+  }
   if (adj_x) {
     std::swap(x_shape[x_shape.size() - 2], x_shape[x_shape.size() - 1]);
   }
@@ -916,15 +925,24 @@ Tensor<Mixins...> BatchMatMul(
             " y_shape: ", y_shape_str, " adj_x: ", adj_x, " adj_y: ", adj_y))));
   }
 
-  // Batch dimensions should be broadcastable.
-  if (x_shape.size() != y_shape.size()) {
-    // For now, we only support same rank BatchMatMul.
-    // TODO(piyu): Support different ranks.
-  }
-  output_info.shape.reserve(x_shape.size());
-  for (size_t i = 0; i < x_shape.size() - 2; ++i) {
-    const auto x_dim = x_shape[i];
-    const auto y_dim = y_shape[i];
+  // Compute multi-rank batch broadcasting for the outer dimensions, aligning
+  // dimensions right-to-left and treating missing outer dims as 1.
+  size_t x_rank = x_shape.size();
+  size_t y_rank = y_shape.size();
+  size_t max_rank = std::max(x_rank, y_rank);
+
+  output_info.shape.resize(max_rank);
+  output_info.shape[max_rank - 2] = x_shape[x_rank - 2];
+  output_info.shape[max_rank - 1] = y_shape[y_rank - 1];
+
+  for (size_t i = 1; i <= max_rank - 2; ++i) {
+    int out_idx = max_rank - 2 - i;
+    int x_idx = static_cast<int>(x_rank - 2) - static_cast<int>(i);
+    int y_idx = static_cast<int>(y_rank - 2) - static_cast<int>(i);
+
+    int x_dim = (x_idx >= 0) ? x_shape[x_idx] : 1;
+    int y_dim = (y_idx >= 0) ? y_shape[y_idx] : 1;
+
     if (x_dim != y_dim && x_dim != 1 && y_dim != 1) {
       return Tensor<Mixins...>(graph::ErrorTensor(absl::InvalidArgumentError(
           absl::StrCat("The batch dimensions of the input tensors must be "
@@ -932,10 +950,8 @@ Tensor<Mixins...> BatchMatMul(
                        absl::StrJoin(x_info.shape, ","),
                        " y_shape: ", absl::StrJoin(y_info.shape, ",")))));
     }
-    output_info.shape.push_back(std::max(x_dim, y_dim));
+    output_info.shape[out_idx] = std::max(x_dim, y_dim);
   }
-  output_info.shape.push_back(x_shape[x_shape.size() - 2]);
-  output_info.shape.push_back(y_shape[y_shape.size() - 1]);
 
   output_info.type = x_info.type;
 
@@ -948,11 +964,15 @@ Tensor<Mixins...> FullyConnected(
     Tensor<Mixins...> input, Tensor<Mixins...> weights,
     std::optional<Tensor<Mixins...>> bias,
     FusedActivation activation = kActNone, bool keep_num_dims = true,
+    bool asymmetric_quantize_inputs = false,
+    FullyConnectedWeightsFormat weights_format = kWeightsFormatDefault,
     source_location loc = source_location::current()) {
   auto op = std::make_shared<graph::FullyConnectedOperation>();
   RegisterMixins<Mixins...>(op);
   op->activation = activation;
   op->keep_num_dims = keep_num_dims;
+  op->asymmetric_quantize_inputs = asymmetric_quantize_inputs;
+  op->weights_format = weights_format;
   AddInputs(op, input, weights);
   if (bias.has_value()) {
     AddInputs(op, bias.value());
@@ -965,7 +985,11 @@ Tensor<Mixins...> FullyConnected(
     output_info.shape = input_info.shape;
     output_info.shape.back() = weights_info.shape[0];
   } else {
-    output_info.shape = {input_info.shape[0], weights_info.shape[0]};
+    int batch = 1;
+    for (size_t i = 0; i < input_info.shape.size() - 1; ++i) {
+      batch *= input_info.shape[i];
+    }
+    output_info.shape = {batch, weights_info.shape[0]};
   }
   output_info.type = input_info.type;
 
@@ -977,19 +1001,25 @@ template <class... Mixins>
 Tensor<Mixins...> FullyConnected(
     Tensor<Mixins...> input, Tensor<Mixins...> weights, Tensor<Mixins...> bias,
     FusedActivation activation = kActNone, bool keep_num_dims = true,
+    bool asymmetric_quantize_inputs = false,
+    FullyConnectedWeightsFormat weights_format = kWeightsFormatDefault,
     source_location loc = source_location::current()) {
   return FullyConnected(input, weights, std::optional(std::move(bias)),
-                        activation, keep_num_dims, loc);
+                        activation, keep_num_dims, asymmetric_quantize_inputs,
+                        weights_format, loc);
 }
 
 template <class... Mixins>
 Tensor<Mixins...> FullyConnected(
     Tensor<Mixins...> input, Tensor<Mixins...> weights,
     FusedActivation activation = kActNone, bool keep_num_dims = true,
+    bool asymmetric_quantize_inputs = false,
+    FullyConnectedWeightsFormat weights_format = kWeightsFormatDefault,
     source_location loc = source_location::current()) {
   return FullyConnected(input, weights,
                         /*bias=*/std::optional<Tensor<Mixins...>>(std::nullopt),
-                        activation, keep_num_dims, loc);
+                        activation, keep_num_dims, asymmetric_quantize_inputs,
+                        weights_format, loc);
 }
 
 template <class... Mixins>
