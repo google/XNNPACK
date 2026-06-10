@@ -101,11 +101,12 @@ auto rank_params = testing::Range(1, XNN_MAX_TENSOR_DIMS);
 INSTANTIATE_TEST_SUITE_P(Softmax, SoftmaxF16, rank_params);
 INSTANTIATE_TEST_SUITE_P(Softmax, SoftmaxF32, rank_params);
 
+#ifndef XNNPACK_USE_YNNPACK
 TEST(Softmax, reshape_rejects_scalar_input) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
 
   SubgraphTester subgraph(2);
-  subgraph.AddInputTensor(1, xnn_datatype_fp32, 0)
+  subgraph.AddInputTensor(TensorShape(), xnn_datatype_fp32, 0)
       .AddOutputTensor(1, xnn_datatype_fp32, 1)
       .AddSoftmax(0, 1);
   if (subgraph.CreateRuntime() == xnn_status_unsupported_hardware) {
@@ -118,5 +119,8 @@ TEST(Softmax, reshape_rejects_scalar_input) {
   subgraph.ReshapeExternalTensor(TensorShape(), &data, 0).ReshapeRuntime();
   EXPECT_EQ(subgraph.Status(), xnn_status_invalid_parameter);
 }
+#else
+// This is not an error in YNNPACK (and it doesn't crash either).
+#endif  // XNNPACK_USE_YNNPACK
 
 }  // namespace xnnpack

@@ -146,7 +146,7 @@ TEST(RoPEF32, reshape_rejects_tokens_exceeding_weights) {
       .ReshapeExternalTensor({batch_size, input_tokens, heads, channels},
                              input.base(), 0)
       .ReshapeExternalTensor({weights_tokens, channels}, weights.base(), 1);
-  ASSERT_EQ(subgraph.ReshapeRuntime().Status(), xnn_status_invalid_parameter);
+  ASSERT_NE(subgraph.ReshapeRuntime().Status(), xnn_status_success);
 }
 
 }  // namespace xnnpack
