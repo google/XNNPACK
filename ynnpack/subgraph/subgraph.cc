@@ -250,6 +250,10 @@ std::optional<ynn::real> ynn_value::as_scalar() const {
       return static_cast<ynn::real>(static_scalar_value<int8_t>());
     case ynn_type_uint8:
       return static_cast<ynn::real>(static_scalar_value<uint8_t>());
+    case ynn_type_fp8_e5m2:
+      return static_cast<ynn::real>(static_scalar_value<ynn::fp8_e5m2>());
+    case ynn_type_fp8_e4m3:
+      return static_cast<ynn::real>(static_scalar_value<ynn::fp8_e4m3>());
     case ynn_type_int4:
     case ynn_type_uint4:
     case ynn_type_int2:

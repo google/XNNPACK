@@ -13,6 +13,7 @@
 #include <limits>
 
 #include "ynnpack/base/bfloat16.h"
+#include "ynnpack/base/fp8.h"
 #include "ynnpack/base/half.h"
 #include "ynnpack/base/type.h"
 
@@ -69,6 +70,16 @@ auto cast(bfloat16 x) {
   return cast<To>(static_cast<float>(x));
 }
 
+template <typename To>
+auto cast(fp8_e5m2 x) {
+  return cast<To>(static_cast<half>(x));
+}
+
+template <typename To>
+auto cast(fp8_e4m3 x) {
+  return cast<To>(static_cast<bfloat16>(x));
+}
+
 // std::saturate_cast is C++26
 template <typename T, typename U>
 constexpr T cast(U x) noexcept {
@@ -81,7 +92,7 @@ constexpr T cast(U x) noexcept {
 
 template <typename T>
 float dequantize(T x, float scale, float zero_point) {
-  return (static_cast<float>(x) - zero_point) * scale;
+  return (cast<float>(x) - zero_point) * scale;
 }
 inline double dequantize(double x, float scale, float zero_point) {
   return (x - zero_point) * scale;

@@ -13,6 +13,7 @@
 #include "ynnpack/base/arithmetic.h"
 #include "ynnpack/base/base.h"
 #include "ynnpack/base/bfloat16.h"
+#include "ynnpack/base/fp8.h"
 #include "ynnpack/base/half.h"
 #include "ynnpack/include/ynnpack.h"
 
@@ -32,6 +33,8 @@ bool type_is_integral(ynn_type t) {
     case ynn_type_fp32:
     case ynn_type_fp16:
     case ynn_type_bf16:
+    case ynn_type_fp8_e5m2:
+    case ynn_type_fp8_e4m3:
     case ynn_type_invalid:
       return false;
   }
@@ -45,6 +48,8 @@ bool type_is_floating_point(ynn_type t) {
     case ynn_type_fp32:
     case ynn_type_fp16:
     case ynn_type_bf16:
+    case ynn_type_fp8_e5m2:
+    case ynn_type_fp8_e4m3:
       return true;
     case ynn_type_int2:
     case ynn_type_uint2:
@@ -70,6 +75,8 @@ size_t type_size_bits(ynn_type t) {
       return 4;
     case ynn_type_int8:
     case ynn_type_uint8:
+    case ynn_type_fp8_e5m2:
+    case ynn_type_fp8_e4m3:
       return 8;
     case ynn_type_fp16:
     case ynn_type_bf16:
@@ -90,6 +97,10 @@ size_t type_size_bytes(ynn_type t) { return (type_size_bits(t) + 7) / 8; }
 
 size_t type_mantissa_bits(ynn_type t) {
   switch (t) {
+    case ynn_type_fp8_e5m2:
+      return 3;
+    case ynn_type_fp8_e4m3:
+      return 4;
     case ynn_type_fp16:
       return 11;
     case ynn_type_bf16:
@@ -106,6 +117,9 @@ size_t type_mantissa_bits(ynn_type t) {
 
 size_t type_exponent_bits(ynn_type t) {
   switch (t) {
+    case ynn_type_fp8_e4m3:
+      return 4;
+    case ynn_type_fp8_e5m2:
     case ynn_type_fp16:
       return 5;
     case ynn_type_bf16:
@@ -150,6 +164,10 @@ const char* to_string(ynn_type type) {
       return "fp16";
     case ynn_type_bf16:
       return "bf16";
+    case ynn_type_fp8_e5m2:
+      return "fp8_e5m2";
+    case ynn_type_fp8_e4m3:
+      return "fp8_e4m3";
   }
   YNN_UNREACHABLE;
   return "unknown";
@@ -179,6 +197,12 @@ void convert_n(const float* src, size_t n, ynn_type type, void* dst) {
       return;
     case ynn_type_bf16:
       std::copy_n(src, n, (bfloat16*)dst);
+      return;
+    case ynn_type_fp8_e5m2:
+      std::copy_n(src, n, (fp8_e5m2*)dst);
+      return;
+    case ynn_type_fp8_e4m3:
+      std::copy_n(src, n, (fp8_e4m3*)dst);
       return;
     case ynn_type_int2:
       convert_to_int<int2x4>(src, n, (int2x4*)dst);

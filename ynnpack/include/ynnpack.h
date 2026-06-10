@@ -80,6 +80,8 @@ enum ynn_type {
   ynn_type_bf16 = 8,
   ynn_type_fp32 = 9,
   ynn_type_fp64 = 10,
+  ynn_type_fp8_e5m2 = 11,
+  ynn_type_fp8_e4m3 = 12,
 };
 
 #define YNN_VALUE_FLAG_EXTERNAL_INPUT (1 << 0)

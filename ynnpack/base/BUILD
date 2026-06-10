@@ -84,6 +84,7 @@ cc_library(
         "bfloat16.h",
         "bit_cast.h",
         "fp16.h",
+        "fp8.h",
         "half.h",
         "ref_count.h",
         "span.h",

@@ -18,6 +18,7 @@
 #include "ynnpack/base/arch.h"  // IWYU pragma: keep
 #include "ynnpack/base/base.h"
 #include "ynnpack/base/bfloat16.h"
+#include "ynnpack/base/fp8.h"
 #include "ynnpack/base/half.h"
 #include "ynnpack/base/test/fuzz_test.h"
 #include "ynnpack/base/test/random.h"
@@ -180,6 +181,10 @@ constexpr decltype(auto) SwitchType(ynn_type type, F&& f) {
       return std::forward<F>(f)(half());
     case ynn_type_bf16:
       return std::forward<F>(f)(bfloat16());
+    case ynn_type_fp8_e5m2:
+      return std::forward<F>(f)(fp8_e5m2());
+    case ynn_type_fp8_e4m3:
+      return std::forward<F>(f)(fp8_e4m3());
     case ynn_type_fp32:
       return std::forward<F>(f)(float());
     case ynn_type_int4:
@@ -230,6 +235,8 @@ ynn_type all_convert_input_types[] = {
     ynn_type_int32,
     ynn_type_fp16,
     ynn_type_bf16,
+    ynn_type_fp8_e5m2,
+    ynn_type_fp8_e4m3,
     ynn_type_fp32,
 };
 
@@ -239,6 +246,8 @@ ynn_type all_convert_output_types[] = {
     ynn_type_int32,
     ynn_type_fp16,
     ynn_type_bf16,
+    ynn_type_fp8_e5m2,
+    ynn_type_fp8_e4m3,
     ynn_type_fp32,
 };
 

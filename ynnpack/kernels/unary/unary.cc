@@ -18,6 +18,7 @@
 #include "ynnpack/base/base.h"
 #include "ynnpack/base/bfloat16.h"
 #include "ynnpack/base/bit_cast.h"
+#include "ynnpack/base/fp8.h"
 #include "ynnpack/base/half.h"
 #include "ynnpack/base/log.h"
 #include "ynnpack/base/type.h"
@@ -84,6 +85,10 @@ unary_kernel_fn get_convert_kernel(ynn_type output) {
       return get_convert_kernel(TIn(), half());
     case ynn_type_bf16:
       return get_convert_kernel(TIn(), bfloat16());
+    case ynn_type_fp8_e5m2:
+      return get_convert_kernel(TIn(), fp8_e5m2());
+    case ynn_type_fp8_e4m3:
+      return get_convert_kernel(TIn(), fp8_e4m3());
     case ynn_type_int8:
       return get_convert_kernel(TIn(), int8_t());
     case ynn_type_uint8:
@@ -435,6 +440,10 @@ unary_kernel_fn get_convert_reference_kernel(ynn_type a_type, ynn_type x_type,
       return get_convert_kernel<half>(x_type);
     case ynn_type_bf16:
       return get_convert_kernel<bfloat16>(x_type);
+    case ynn_type_fp8_e5m2:
+      return get_convert_kernel<fp8_e5m2>(x_type);
+    case ynn_type_fp8_e4m3:
+      return get_convert_kernel<fp8_e4m3>(x_type);
     case ynn_type_int8:
       return get_convert_kernel<int8_t>(x_type);
     case ynn_type_uint8:
