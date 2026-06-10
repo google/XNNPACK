@@ -212,6 +212,7 @@ TEST_CAST(x86_avx512, f32, bf16x16);
 TEST_CAST(x86_avx512, f32, f16x16);
 TEST_CAST(x86_avx512, bf16, f32x32);
 TEST_CAST(x86_avx512, bf16, f32x16);
+TEST_CAST(x86_avx512, f16, f32x16);
 TEST_CAST(x86_avx512, s32, s8x16);
 TEST_CAST(x86_avx512, s32, u8x16);
 TEST_CAST(x86_avx512, s32, s8x32);
