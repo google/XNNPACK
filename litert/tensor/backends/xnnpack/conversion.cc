@@ -381,7 +381,8 @@ absl::StatusOr<uint32_t> XnnpackBuildContext::DefineValue(
     const auto& pcq = maybe_pcq.value();
     if (pcq.scales.size() == 1) {
       LRT_TENSOR_RETURN_IF_ERROR(xnn_define_quantized_tensor_value(
-          subgraph_, GetXnnpackType(value), pcq.zero_points[0], pcq.scales[0],
+          subgraph_, GetXnnpackType(value),
+          pcq.zero_points.empty() ? 0 : pcq.zero_points[0], pcq.scales[0],
           dims.size(), dims.empty() ? nullptr : dims.data(), data_ptr,
           external_id, value.flags, &value.id))
           << "Could not define a new quantized tensor value.";
