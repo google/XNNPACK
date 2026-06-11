@@ -18,6 +18,7 @@ limitations under the License.
 #include <array>
 #include <cstddef>
 #include <cstdint>
+#include <cstring>
 #include <memory>
 #include <utility>
 #include <vector>
@@ -262,9 +263,10 @@ absl::Status XnnpackRunner::ExternalBuffer::Resize(size_t new_size) {
   if (IsOwned()) {
     owned_buffer_.resize(new_size);
   } else if (new_size > external_view_.size()) {
-    return absl::FailedPreconditionError(absl::StrCat(
-        "External buffer is too small: buffer=", external_view_.size(),
-        ", requested=", new_size));
+    // Copy the data of the external view to the resized owned buffer.
+    owned_buffer_.resize(new_size);
+    memcpy(owned_buffer_.data(), external_view_.data(), external_view_.size());
+    external_view_ = {};
   } else {
     external_view_ = absl::MakeSpan(external_view_.data(), new_size);
   }
