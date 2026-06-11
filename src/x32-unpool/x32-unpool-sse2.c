@@ -18,6 +18,7 @@ void xnn_x32_unpool_ukernel__sse2(
     const uint32_t* index,
     uint32_t** output)
 {
+  const size_t num_outputs = kernel_elements;
   // Pre-initialize outputs with constant.
   const __m128i vfill = _mm_set1_epi32((int) fill);
   uint32_t** os = output;
@@ -43,7 +44,13 @@ void xnn_x32_unpool_ukernel__sse2(
   size_t offset = 0;
   do {
     const uint32_t i = *index++;
-    *((uint32_t*) ((uintptr_t) output[i] + offset)) = *input++;
+    const uint32_t v = *input++;
+    // Ignore indices outside the kernel_elements output pointers instead of
+    // dereferencing output[i] out of bounds. Valid unpooling indices are
+    // always < kernel_elements, so well-formed input is unaffected.
+    if (i < num_outputs) {
+      *((uint32_t*) ((uintptr_t) output[i] + offset)) = v;
+    }
     offset += sizeof(uint32_t);
   } while (--channels != 0);
 }
