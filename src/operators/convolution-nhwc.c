@@ -2432,8 +2432,14 @@ enum xnn_status xnn_create_convolution2d_nhwc_f32_f16(
   const size_t num_kernel_entries = groups * group_input_channels *
                                     group_output_channels * kernel_width *
                                     kernel_height;
+  if (num_kernel_entries > SIZE_MAX / sizeof(float)) {
+    return xnn_status_out_of_memory;
+  }
   float* fp32_kernel_buffer =
       (float*)xnn_allocate_memory(num_kernel_entries * sizeof(float));
+  if (fp32_kernel_buffer == NULL) {
+    return xnn_status_out_of_memory;
+  }
   const void* bias_buffer = NULL;
   float* fp32_bias_buffer = NULL;
   const xnn_float16* f16_kernel = (const xnn_float16*)kernel;
@@ -2444,6 +2450,10 @@ enum xnn_status xnn_create_convolution2d_nhwc_f32_f16(
   if (bias && !(flags & XNN_FLAG_FP32_STATIC_BIASES)) {
     fp32_bias_buffer = (float*)xnn_allocate_memory(
         groups * group_output_channels * sizeof(float));
+    if (fp32_bias_buffer == NULL) {
+      xnn_release_memory(fp32_kernel_buffer);
+      return xnn_status_out_of_memory;
+    }
     bias_buffer = fp32_bias_buffer;
     for (size_t i = 0; i < groups * group_output_channels; ++i) {
       fp32_bias_buffer[i] = xnn_float16_to_float(f16_bias[i]);
@@ -2503,8 +2513,14 @@ enum xnn_status xnn_create_convolution2d_nhwc_pf32_f16(
   const size_t num_kernel_entries = groups * group_input_channels *
                                     group_output_channels * kernel_width *
                                     kernel_height;
+  if (num_kernel_entries > SIZE_MAX / sizeof(float)) {
+    return xnn_status_out_of_memory;
+  }
   float* fp32_kernel_buffer =
       (float*)xnn_allocate_memory(num_kernel_entries * sizeof(float));
+  if (fp32_kernel_buffer == NULL) {
+    return xnn_status_out_of_memory;
+  }
   const void* bias_buffer = NULL;
   float* fp32_bias_buffer = NULL;
   const xnn_float16* f16_kernel = (const xnn_float16*)kernel;
@@ -2515,6 +2531,10 @@ enum xnn_status xnn_create_convolution2d_nhwc_pf32_f16(
   if (bias && !(flags & XNN_FLAG_FP32_STATIC_BIASES)) {
     fp32_bias_buffer = (float*)xnn_allocate_memory(
         groups * group_output_channels * sizeof(float));
+    if (fp32_bias_buffer == NULL) {
+      xnn_release_memory(fp32_kernel_buffer);
+      return xnn_status_out_of_memory;
+    }
     bias_buffer = fp32_bias_buffer;
     for (size_t i = 0; i < groups * group_output_channels; ++i) {
       fp32_bias_buffer[i] = xnn_float16_to_float(f16_bias[i]);
@@ -3263,9 +3283,16 @@ enum xnn_status reshape_convolution2d_nhwc_qx8_f16_qc8w(
             convolution_op->convolution_op->zero_buffers[i]);
       }
     }
-    convolution_op->convolution_op->zero_buffers =
-        xnn_reallocate_memory(convolution_op->convolution_op->zero_buffers,
-                              batch_size * sizeof(void*));
+    void* zero_buffers = xnn_reallocate_memory(
+        convolution_op->convolution_op->zero_buffers,
+        batch_size * sizeof(void*));
+    if (zero_buffers == NULL) {
+      xnn_log_error("failed to allocate %zu bytes for %s operator zero buffers",
+                    batch_size * sizeof(void*),
+                    xnn_operator_type_to_string(convolution_op->type));
+      return xnn_status_out_of_memory;
+    }
+    convolution_op->convolution_op->zero_buffers = zero_buffers;
     convolution_op->convolution_op->zero_buffers[0] =
         convolution_op->zero_buffer;
     for (size_t i = 1; i < batch_size; ++i) {
@@ -3325,9 +3352,16 @@ enum xnn_status reshape_convolution2d_nhwc_qx8_f32_qc8w(
             convolution_op->convolution_op->zero_buffers[i]);
       }
     }
-    convolution_op->convolution_op->zero_buffers =
-        xnn_reallocate_memory(convolution_op->convolution_op->zero_buffers,
-                              batch_size * sizeof(void*));
+    void* zero_buffers = xnn_reallocate_memory(
+        convolution_op->convolution_op->zero_buffers,
+        batch_size * sizeof(void*));
+    if (zero_buffers == NULL) {
+      xnn_log_error("failed to allocate %zu bytes for %s operator zero buffers",
+                    batch_size * sizeof(void*),
+                    xnn_operator_type_to_string(convolution_op->type));
+      return xnn_status_out_of_memory;
+    }
+    convolution_op->convolution_op->zero_buffers = zero_buffers;
     convolution_op->convolution_op->zero_buffers[0] =
         convolution_op->zero_buffer;
     for (size_t i = 1; i < batch_size; ++i) {

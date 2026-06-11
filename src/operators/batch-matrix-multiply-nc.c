@@ -333,8 +333,11 @@ static enum xnn_status setup_packing_params_qs8(
   } else {  // Non const weights.
     if (context->scale_b != NULL) {
       xnn_operator_t batch_matrix_multiply_op = *context->op_out;
-      xnn_allocate_extra_params(batch_matrix_multiply_op,
-                                /*extra_params_size=*/1);
+      const enum xnn_status alloc_status = xnn_allocate_extra_params(
+          batch_matrix_multiply_op, /*extra_params_size=*/1);
+      if (alloc_status != xnn_status_success) {
+        return alloc_status;
+      }
 
       context->packing_params_.qs8_qc8w = (struct xnn_qs8_qc8w_packing_params){
           .input_zero_point = context->input_zero_point,
@@ -548,7 +551,7 @@ enum xnn_status create_batch_matrix_multiply_nc_helper(
 
 error:
   variant->cleanup(variant, context);
-  return xnn_status_success;
+  return status;
 }
 
 enum xnn_status xnn_create_batch_matrix_multiply_nc_f16(
@@ -1394,6 +1397,13 @@ enum xnn_status xnn_reshape_batch_matrix_multiply_nc_qs8(
     xnn_operator_t batch_matrix_multiply_op, size_t num_batch_dims,
     const size_t* batch_dims_a, const size_t* batch_dims_b, size_t m, size_t k,
     size_t n, size_t* workspace_size, pthreadpool_t threadpool) {
+  if (batch_matrix_multiply_op->extra_params == NULL) {
+    xnn_log_error(
+        "failed to reshape %s operator: missing packing extra params",
+        xnn_operator_type_to_string(
+            xnn_operator_type_batch_matrix_multiply_nc_qs8));
+    return xnn_status_invalid_state;
+  }
   return reshape_batch_matrix_multiply_nc(
       batch_matrix_multiply_op,
       xnn_operator_type_batch_matrix_multiply_nc_qs8,

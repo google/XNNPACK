@@ -2682,12 +2682,22 @@ static enum xnn_status optimize_common_subgraphs_broadcast(
       shape[k] = (new_shape[k] == 0 || new_shape[k] == old_shape[k])
                      ? 1
                      : new_shape[k];
+      if (shape[k] != 0 && num_elements > SIZE_MAX / shape[k]) {
+        return xnn_status_out_of_memory;
+      }
       num_elements *= shape[k];
     }
 
     // Create a static right-hand side value filled with zeros.
-    void* data = xnn_allocate_zero_memory(
-        num_elements * xnn_datatype_size_bytes(input_value->datatype));
+    const size_t datatype_size =
+        xnn_datatype_size_bytes(input_value->datatype);
+    if (datatype_size != 0 && num_elements > SIZE_MAX / datatype_size) {
+      return xnn_status_out_of_memory;
+    }
+    void* data = xnn_allocate_zero_memory(num_elements * datatype_size);
+    if (data == NULL) {
+      return xnn_status_out_of_memory;
+    }
     uint32_t new_value_id;
     XNN_RETURN_IF_ERROR(
         xnn_datatype_is_quantized(input_value->datatype)
