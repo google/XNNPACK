@@ -28,6 +28,7 @@ limitations under the License.
 #include "absl/status/statusor.h"
 #include "litert/tensor/arithmetic_graph.h"
 #include "litert/tensor/buffer.h"
+#include "litert/tensor/datatypes.h"
 #include "litert/tensor/internal/graph.h"
 #include "litert/tensor/internal/mixin.h"
 #include "litert/tensor/internal/type_id.h"
@@ -72,6 +73,7 @@ class XnnpackBuildContext {
   absl::flat_hash_set<graph::Tensor> external_outputs_;
   absl::flat_hash_map<graph::Tensor, uint32_t> external_ids_;
   std::vector<std::vector<float>> dequantized_buffers_;
+  std::vector<std::vector<fp16_t>> fp16_buffers_;
 
   friend absl::StatusOr<std::unique_ptr<XnnpackGraph>> BuildXnnpackGraph(
       std::vector<TensorHandle> outputs);

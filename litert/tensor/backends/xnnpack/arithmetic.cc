@@ -34,6 +34,7 @@ limitations under the License.
 #include "litert/tensor/buffer.h"
 #include "litert/tensor/datatypes.h"
 #include "litert/tensor/internal/graph.h"
+#include "litert/tensor/internal/type_id.h"
 #include "litert/tensor/utils/macros.h"
 
 namespace litert::tensor::graph {
@@ -41,6 +42,22 @@ namespace litert::tensor::graph {
 namespace {
 
 constexpr float kInf = std::numeric_limits<float>::infinity();
+
+absl::StatusOr<uint32_t> DynamicallyQuantizeInput(
+    XnnpackBuildContext& ctx, uint32_t input_id,
+    const graph::TensorInformation& input_info) {
+  uint32_t qd_id = XNN_INVALID_VALUE_ID;
+  std::vector<size_t> dims(input_info.shape.begin(), input_info.shape.end());
+  LRT_TENSOR_RETURN_IF_ERROR(xnn_define_dynamically_quantized_tensor_value(
+      ctx.subgraph(), xnn_datatype_qdint8, dims.size(),
+      /*num_nonbatch_dims=*/1, dims.data(), XNN_INVALID_VALUE_ID, 0, &qd_id))
+      << "Could not define dynamically quantized tensor.";
+  LRT_TENSOR_RETURN_IF_ERROR(xnn_define_unary(
+      ctx.subgraph(), xnn_unary_convert, /*params=*/nullptr, input_id, qd_id,
+      /*flags=*/0))
+      << "Could not define convert node for dynamic quantization.";
+  return qd_id;
+}
 
 template <Type... Types>
 absl::Status ValidateTensorType(const graph::Tensor& tensor,
@@ -807,44 +824,31 @@ absl::Status OpMixin<FullyConnectedOperation, XnnpackMixinTag>::ToXnnpack(
   LRT_TENSOR_ASSIGN_OR_RETURN(uint32_t input_id, ctx.DefineValue(input));
   uint32_t fc_input_id = input_id;
 
-  auto weights_info_or = graph::GetInfo(weights);
-  auto input_info_or = graph::GetInfo(input);
+  auto weights_info = graph::GetInfo(weights);
+  auto input_info = graph::GetInfo(input);
   bool weights_are_quantized = false;
-  if (weights_info_or.ok() && weights_info_or->type == Type::kI8) {
-    if (weights_info_or->quantization) {
-      if (auto pcq_or =
-              weights_info_or->quantization->As<PerChannelAffineQuantization>();
-          pcq_or.ok()) {
-        bool all_zeros = true;
-        for (int64_t zp : pcq_or->zero_points) {
-          if (zp != 0) {
-            all_zeros = false;
-            break;
-          }
+  if (weights_info.ok() && weights_info->quantization &&
+      (weights_info->type == Type::kI8 || weights_info->type == Type::kI4)) {
+    if (auto pcq =
+            weights_info->quantization->As<PerChannelAffineQuantization>();
+        pcq.ok()) {
+      bool all_zeros = true;
+      for (int64_t zp : pcq->zero_points) {
+        if (zp != 0) {
+          all_zeros = false;
+          break;
         }
-        weights_are_quantized = all_zeros;
-      } else {
-        weights_are_quantized = true;
       }
+      weights_are_quantized = all_zeros;
+    } else {
+      weights_are_quantized = true;
     }
   }
 
-  if (weights_are_quantized && input_info_or.ok() &&
-      input_info_or->type == Type::kFP32) {
-    uint32_t qd_id = XNN_INVALID_VALUE_ID;
-    std::vector<size_t> dims(input_info_or->shape.begin(),
-                             input_info_or->shape.end());
-    LRT_TENSOR_RETURN_IF_ERROR(xnn_define_dynamically_quantized_tensor_value(
-        ctx.subgraph(), xnn_datatype_qdint8, dims.size(),
-        /*num_nonbatch_dims=*/1, dims.data(), XNN_INVALID_VALUE_ID, 0, &qd_id))
-        << "Could not define dynamically quantized tensor.";
-
-    LRT_TENSOR_RETURN_IF_ERROR(xnn_define_unary(
-        ctx.subgraph(), xnn_unary_convert, /*params=*/nullptr, input_id, qd_id,
-        /*flags=*/0))
-        << "Could not define convert node for dynamic quantization.";
-
-    fc_input_id = qd_id;
+  if (weights_are_quantized && input_info.ok() &&
+      input_info->type == Type::kFP32) {
+    LRT_TENSOR_ASSIGN_OR_RETURN(
+        fc_input_id, DynamicallyQuantizeInput(ctx, input_id, *input_info));
   }
 
   LRT_TENSOR_ASSIGN_OR_RETURN(uint32_t weights_id, ctx.DefineValue(weights));
@@ -894,6 +898,28 @@ absl::Status OpMixin<BatchMatMulOperation, XnnpackMixinTag>::ToXnnpack(
   }
   const graph::Tensor& output = outputs.front();
   LRT_TENSOR_ASSIGN_OR_RETURN(uint32_t output_id, ctx.DefineValue(output));
+
+  // XNNPACK supports blockwise quantization only with FullyConnected. If
+  // input2 is 2D, and adj_y is true (which means shape is [OC, IC]), we can
+  // lower this to FullyConnected in XNNPACK.
+  LRT_TENSOR_ASSIGN_OR_RETURN(auto info2, graph::GetInfo(input2));
+  if (info2.shape.size() == 2 && !op_data.adj_x && op_data.adj_y &&
+      info2.quantization &&
+      info2.quantization->IsA(internal::TypeId::Get<BlockwiseQuantization>())) {
+    uint32_t fc_input1_id = input1_id;
+    LRT_TENSOR_ASSIGN_OR_RETURN(auto info1, graph::GetInfo(input1));
+    if (info1.type == Type::kFP32) {
+      LRT_TENSOR_ASSIGN_OR_RETURN(
+          fc_input1_id, DynamicallyQuantizeInput(ctx, input1_id, info1));
+    }
+    float output_min = -std::numeric_limits<float>::infinity();
+    float output_max = std::numeric_limits<float>::infinity();
+    LRT_TENSOR_RETURN_IF_ERROR(xnn_define_fully_connected(
+        ctx.subgraph(), output_min, output_max, fc_input1_id, input2_id,
+        /*bias_id=*/XNN_INVALID_VALUE_ID, output_id, /*flags=*/0))
+        << "xnn_define_fully_connected failed (lowered from BatchMatMul)";
+    return absl::OkStatus();
+  }
 
   uint32_t flags = 0;
   if (op_data.adj_x) {

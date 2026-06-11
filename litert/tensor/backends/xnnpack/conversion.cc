@@ -17,6 +17,7 @@ limitations under the License.
 
 #include <cstddef>
 #include <cstdint>
+#include <cstdlib>
 #include <cstring>
 #include <limits>
 #include <memory>
@@ -61,7 +62,15 @@ xnn_datatype GetXnnpackType(const XnnpackValue& value) {
     case Type::kBOOL:
     case Type::kI2:
     case Type::kI4:
-    case Type::kI8: {
+      if (value.info.quantization) {
+        if (value.info.quantization->As<PerChannelAffineQuantization>().ok()) {
+          return xnn_datatype_qcint4;
+        } else if (value.info.quantization->As<BlockwiseQuantization>().ok()) {
+          return xnn_datatype_qbint4;
+        }
+      }
+      break;
+    case Type::kI8:
       if (value.info.quantization) {
         if (auto it =
                 value.info.quantization->As<PerChannelAffineQuantization>();
@@ -71,7 +80,6 @@ xnn_datatype GetXnnpackType(const XnnpackValue& value) {
         }
       }
       break;
-    }
     case Type::kI16:
     case Type::kI64:
     case Type::kU4:
@@ -216,12 +224,14 @@ XnnpackGraph::XnnpackGraph(
     xnn_subgraph* subgraph, std::vector<XnnpackValue> values,
     absl::flat_hash_map<graph::Tensor, size_t> tensor_index,
     absl::flat_hash_set<graph::Tensor> external_outputs,
-    std::vector<std::vector<float>> dequantized_buffers)
+    std::vector<std::vector<float>> dequantized_buffers,
+    std::vector<std::vector<fp16_t>> fp16_buffers)
     : subgraph_(subgraph),
       values_(std::move(values)),
       tensor_index_(std::move(tensor_index)),
       external_outputs_(std::move(external_outputs)),
-      dequantized_buffers_(std::move(dequantized_buffers)) {}
+      dequantized_buffers_(std::move(dequantized_buffers)),
+      fp16_buffers_(std::move(fp16_buffers)) {}
 
 XnnpackGraph::~XnnpackGraph() {
   if (subgraph_ != nullptr) {
@@ -274,7 +284,8 @@ absl::StatusOr<std::unique_ptr<XnnpackGraph>> XnnpackBuildContext::Finalize() {
 
   return std::make_unique<XnnpackGraph>(
       subgraph, std::move(values_), std::move(tensor_index_),
-      std::move(external_outputs_), std::move(dequantized_buffers_));
+      std::move(external_outputs_), std::move(dequantized_buffers_),
+      std::move(fp16_buffers_));
 }
 
 absl::StatusOr<std::unique_ptr<XnnpackGraph>> BuildXnnpackGraph(
@@ -364,48 +375,59 @@ absl::StatusOr<uint32_t> XnnpackBuildContext::DefineValue(
                                 dims.empty() ? nullptr : dims.data(), data_ptr,
                                 external_id, value.flags, &value.id))
         << "Could not define a new tensor value.";
-  } else {
-    auto maybe_pcq = info.quantization->As<PerChannelAffineQuantization>();
-    if (maybe_pcq.ok()) {
-      const auto& pcq = maybe_pcq.value();
-      if (pcq.scales.size() == 1) {
-        LRT_TENSOR_RETURN_IF_ERROR(xnn_define_quantized_tensor_value(
-            subgraph_, GetXnnpackType(value), pcq.zero_points[0], pcq.scales[0],
-            dims.size(), dims.empty() ? nullptr : dims.data(), data_ptr,
-            external_id, value.flags, &value.id))
-            << "Could not define a new quantized tensor value.";
-      } else {
-        bool all_zeros = true;
-        for (int64_t zp : pcq.zero_points) {
-          if (zp != 0) {
-            all_zeros = false;
-            break;
-          }
-        }
-        if (!all_zeros) {
-          LRT_TENSOR_ASSIGN_OR_RETURN(
-              std::vector<float> f32_data,
-              DequantizeInt8ConstantTensor(info, value.data));
-          dequantized_buffers_.push_back(std::move(f32_data));
-          data_ptr = dequantized_buffers_.back().data();
-          LRT_TENSOR_RETURN_IF_ERROR(xnn_define_tensor_value(
-              subgraph_, xnn_datatype_fp32, dims.size(),
-              dims.empty() ? nullptr : dims.data(), data_ptr, external_id,
-              value.flags, &value.id))
-              << "Could not define a new tensor value after dequantization.";
-        } else {
-          LRT_TENSOR_RETURN_IF_ERROR(
-              xnn_define_channelwise_quantized_tensor_value_v3(
-                  subgraph_, GetXnnpackType(value), /*zero_point=*/0,
-                  pcq.scales.data(), dims.size(), pcq.quantized_dimension,
-                  dims.empty() ? nullptr : dims.data(), data_ptr, external_id,
-                  value.flags, &value.id, /*channelwise_zero_point=*/nullptr))
-              << "Could not define a new channelwise quantized tensor value.";
+  } else if (auto maybe_pcq =
+                 info.quantization->As<PerChannelAffineQuantization>();
+             maybe_pcq.ok()) {
+    const auto& pcq = maybe_pcq.value();
+    if (pcq.scales.size() == 1) {
+      LRT_TENSOR_RETURN_IF_ERROR(xnn_define_quantized_tensor_value(
+          subgraph_, GetXnnpackType(value), pcq.zero_points[0], pcq.scales[0],
+          dims.size(), dims.empty() ? nullptr : dims.data(), data_ptr,
+          external_id, value.flags, &value.id))
+          << "Could not define a new quantized tensor value.";
+    } else {
+      bool all_zeros = true;
+      for (int64_t zp : pcq.zero_points) {
+        if (zp != 0) {
+          all_zeros = false;
+          break;
         }
       }
-    } else {
-      return absl::UnimplementedError("Unsupported quantization type.");
+      if (!all_zeros) {
+        LRT_TENSOR_ASSIGN_OR_RETURN(
+            std::vector<float> f32_data,
+            DequantizeInt8ConstantTensor(info, value.data));
+        dequantized_buffers_.push_back(std::move(f32_data));
+        data_ptr = dequantized_buffers_.back().data();
+        LRT_TENSOR_RETURN_IF_ERROR(xnn_define_tensor_value(
+            subgraph_, xnn_datatype_fp32, dims.size(),
+            dims.empty() ? nullptr : dims.data(), data_ptr, external_id,
+            value.flags, &value.id))
+            << "Could not define a new tensor value after dequantization.";
+      } else {
+        LRT_TENSOR_RETURN_IF_ERROR(
+            xnn_define_channelwise_quantized_tensor_value_v3(
+                subgraph_, GetXnnpackType(value), /*zero_point=*/0,
+                pcq.scales.data(), dims.size(), pcq.quantized_dimension,
+                dims.empty() ? nullptr : dims.data(), data_ptr, external_id,
+                value.flags, &value.id, /*channelwise_zero_point=*/nullptr))
+            << "Could not define a new channelwise quantized tensor value.";
+      }
     }
+  } else if (auto maybe_bwq = info.quantization->As<BlockwiseQuantization>();
+             maybe_bwq.ok()) {
+    const auto& bwq = maybe_bwq.value();
+    fp16_buffers_.emplace_back(bwq.scales.begin(), bwq.scales.end());
+    const void* scale_ptr = fp16_buffers_.back().data();
+    int32_t zero_point = bwq.zero_points.empty() ? 0 : bwq.zero_points[0];
+    LRT_TENSOR_RETURN_IF_ERROR(xnn_define_blockwise_quantized_tensor_value_v2(
+        subgraph_, GetXnnpackType(value), zero_point, scale_ptr, dims.size(),
+        bwq.quantized_dimension, bwq.block_size,
+        dims.empty() ? nullptr : dims.data(), data_ptr, external_id,
+        value.flags, xnn_datatype_fp16, &value.id))
+        << "Could not define a new blockwise quantized tensor value.";
+  } else {
+    return absl::UnimplementedError("Unsupported quantization type.");
   }
 
   tensor_index_.emplace(tensor, values_.size());

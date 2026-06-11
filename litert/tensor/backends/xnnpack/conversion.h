@@ -24,6 +24,7 @@ limitations under the License.
 #include "absl/container/flat_hash_set.h"
 #include "absl/status/statusor.h"
 #include "litert/tensor/backends/xnnpack/arithmetic.h"  // IWYU pragma: export
+#include "litert/tensor/datatypes.h"
 #include "litert/tensor/internal/graph.h"
 #include "litert/tensor/tensor.h"
 
@@ -37,7 +38,8 @@ class XnnpackGraph {
   XnnpackGraph(xnn_subgraph* subgraph, std::vector<XnnpackValue> values,
                absl::flat_hash_map<graph::Tensor, size_t> tensor_index,
                absl::flat_hash_set<graph::Tensor> external_outputs,
-               std::vector<std::vector<float>> dequantized_buffers = {});
+               std::vector<std::vector<float>> dequantized_buffers = {},
+               std::vector<std::vector<fp16_t>> fp16_buffers = {});
   ~XnnpackGraph();
 
   // Returns the XNNPACK subgraph.
@@ -63,6 +65,7 @@ class XnnpackGraph {
   absl::flat_hash_map<graph::Tensor, size_t> tensor_index_;
   absl::flat_hash_set<graph::Tensor> external_outputs_;
   std::vector<std::vector<float>> dequantized_buffers_;
+  std::vector<std::vector<fp16_t>> fp16_buffers_;
 };
 
 // Builds an XNNPACK graph from the given outputs.
