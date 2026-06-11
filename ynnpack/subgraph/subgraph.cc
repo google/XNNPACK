@@ -28,11 +28,13 @@
 #include "ynnpack/base/arithmetic.h"
 #include "ynnpack/base/base.h"
 #include "ynnpack/base/bfloat16.h"
+#include "ynnpack/base/fp8.h"
 #include "ynnpack/base/half.h"
 #include "ynnpack/base/log.h"
 #include "ynnpack/base/to_string.h"
 #include "ynnpack/base/type.h"
 #include "ynnpack/include/ynnpack.h"
+#include "ynnpack/kernels/ternary/ternary.h"
 #include "ynnpack/subgraph/runtime.h"
 #include "ynnpack/subgraph/tensor.h"
 #include "slinky/base/ref_count.h"
@@ -989,6 +991,9 @@ const char* name_of(const ynn_node::transpose_a&) { return "transpose_a"; }
 const char* name_of(const ynn_node::dequantize_dot&) {
   return "dequantize_dot";
 }
+const char* name_of(const ynn_node::dynamic_quantization&) {
+  return "dynamic_quantization";
+}
 const char* name_of(const ynn_node::get_tensor_shape&) {
   return "get_tensor_shape";
 }
@@ -1160,6 +1165,9 @@ void print(std::ostream& os, const ynn_node::transpose_a& op) {
 }
 
 void print(std::ostream& os, const ynn_node::dequantize_dot& op) {}
+void print(std::ostream& os, const ynn_node::dynamic_quantization& op) {
+  os << "output_zero_point=" << op.output_zero_point;
+}
 
 void print(std::ostream& os, const ynn_node::get_tensor_shape& op) {
   os << "axes=" << op.axes;

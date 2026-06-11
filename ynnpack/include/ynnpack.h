@@ -225,6 +225,16 @@ enum ynn_status ynn_define_dequantize(ynn_subgraph_t subgraph,
                                       uint32_t scale_id, enum ynn_type type,
                                       uint32_t* output_id, uint32_t flags);
 
+// Define quantization parameters dynamically based on the min and max of a
+// range of values. `min_max_id` should have a leading dimension of extent 2,
+// where index 0 is the min and index 1 is the max (this requirement is
+// satisfied by producing `min_max_id` by `ynn_define_reduce` with the
+// `ynn_reduce_min_max` operator). `zero_point_id` and `scale_id` will have the
+// same dimensions as `min_max_id` except for this leading dimension.
+enum ynn_status ynn_define_dynamic_quantization(
+    ynn_subgraph_t subgraph, uint32_t min_max_id, enum ynn_type type,
+    uint32_t* zero_point_id, uint32_t* scale_id, uint32_t flags);
+
 enum ynn_binary_operator {
   ynn_binary_invalid = 0,
 

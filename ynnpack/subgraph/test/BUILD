@@ -181,6 +181,7 @@ cc_test(
 ) for name in [
     "concatenate",
     "copy",
+    "dynamic_quantization",
     "broadcast_like",
     "errors",
     "even_split",

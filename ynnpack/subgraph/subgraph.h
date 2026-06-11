@@ -552,6 +552,17 @@ struct ynn_node {
       return a.params < b.params;
     }
   };
+  struct dynamic_quantization {
+    int32_t output_zero_point;
+    friend bool operator==(const dynamic_quantization& a,
+                           const dynamic_quantization& b) {
+      return a.output_zero_point == b.output_zero_point;
+    }
+    friend bool operator<(const dynamic_quantization& a,
+                          const dynamic_quantization& b) {
+      return a.output_zero_point < b.output_zero_point;
+    }
+  };
 
   // Value IDs for node inputs and outputs.
   // TODO: We need an absl::InlinedVector for things like this.
@@ -562,7 +573,8 @@ struct ynn_node {
                static_reshape, static_broadcast, static_pad, static_slice,
                slice_like, static_transpose, stencil_copy, unary_elementwise,
                lut, binary_elementwise, ternary_elementwise, dot, iota, pack_b,
-               transpose_a, get_tensor_shape, reduce, dequantize_dot>
+               transpose_a, get_tensor_shape, reduce, dequantize_dot,
+               dynamic_quantization>
       op;
 
   const char* name() const;

@@ -70,6 +70,7 @@ cc_library(
         "copy.h",
         "dot.cc",
         "dot.h",
+        "dynamic_quantization.cc",
         "elementwise.cc",
         "even_split.cc",
         "fusion.cc",
