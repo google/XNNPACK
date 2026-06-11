@@ -46,12 +46,20 @@ auto cast(float x) {
   if constexpr (is_integral<Unwrapped>::value) {
     x = std::isnan(x) ? 0.0f : x;
     x = std::nearbyint(x);
-    constexpr int half_mantissa = sizeof(Unwrapped) * 8 > 23 ? 127 : 0;
-    if (x > type_info<Unwrapped>::max() - half_mantissa) {
-      return static_cast<Element>(type_info<Unwrapped>::max());
-    }
-    if (x < type_info<Unwrapped>::min()) {
-      return static_cast<Element>(type_info<Unwrapped>::min());
+    if constexpr (ToInfo::element_count() > 1 &&
+                  std::is_integral<decltype(ToInfo::max())>::value) {
+      // Packed sub-byte elements saturate to their logical range (e.g. int2
+      // is [-2, 1]), not the range of the byte-sized storage type.
+      if (x > ToInfo::max()) return static_cast<Element>(ToInfo::max());
+      if (x < ToInfo::min()) return static_cast<Element>(ToInfo::min());
+    } else {
+      constexpr int half_mantissa = sizeof(Unwrapped) * 8 > 23 ? 127 : 0;
+      if (x > type_info<Unwrapped>::max() - half_mantissa) {
+        return static_cast<Element>(type_info<Unwrapped>::max());
+      }
+      if (x < type_info<Unwrapped>::min()) {
+        return static_cast<Element>(type_info<Unwrapped>::min());
+      }
     }
     return static_cast<Element>(
         static_cast<typename unwrap_quantized<Element>::type>(x));
