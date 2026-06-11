@@ -190,9 +190,9 @@ class fp8_e4m3 {
 
   // Constants (E4M3FN)
   static constexpr fp8_e4m3 epsilon() { return from_bits(0x20); }  // 2^-3
-  static constexpr fp8_e4m3 infinity() {
-    return from_bits(0x78);
-  }
+  // E4M3FN has no infinity encoding; NaN is the conventional substitute
+  // (matches ml_dtypes float8_e4m3fn).
+  static constexpr fp8_e4m3 infinity() { return from_bits(0x7F); }
   static constexpr fp8_e4m3 min() { return from_bits(0xFE); }  // -448
   static constexpr fp8_e4m3 max() { return from_bits(0x7E); }  // 448
   static constexpr fp8_e4m3 smallest_normal() {
@@ -213,13 +213,11 @@ inline bool isinf(fp8_e5m2 x) {
   return !isfinite(x) && (x.to_bits() & 0x03) == 0;
 }
 
-inline bool isfinite(fp8_e4m3 x) { return (x.to_bits() & 0x78) != 0x78; }
-inline bool isnan(fp8_e4m3 x) {
-  return !isfinite(x) && (x.to_bits() & 0x07) != 0;
-}
-inline bool isinf(fp8_e4m3 x) {
-  return !isfinite(x) && (x.to_bits() & 0x07) == 0;
-}
+// E4M3FN has no infinity: exponent 15 with mantissa < 7 encodes the finite
+// values 256..448, and only 0x7F/0xFF is NaN.
+inline bool isfinite(fp8_e4m3 x) { return (x.to_bits() & 0x7F) != 0x7F; }
+inline bool isnan(fp8_e4m3 x) { return (x.to_bits() & 0x7F) == 0x7F; }
+inline bool isinf(fp8_e4m3 x) { return false; }
 
 }  // namespace ynn
 

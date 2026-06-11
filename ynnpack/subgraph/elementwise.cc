@@ -284,7 +284,7 @@ ynn_status create_lut(const ynn_node& node, ynn_runtime& runtime,
   slinky::box_expr bounds = make_elementwise_bounds(dims, a.physical_extents());
 
   slinky::box_expr lut_bounds = {
-      slinky::interval_expr(0, 1 << type_size_bytes(a.type))};
+      slinky::interval_expr(0, 1 << type_size_bits(a.type))};
 
   slinky::call_stmt::attributes attrs;
   attrs.name = "lut";
