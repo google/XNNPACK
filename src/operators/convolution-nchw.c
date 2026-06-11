@@ -1323,8 +1323,34 @@ static enum xnn_status reshape_convolution2d_nchw(
   convolution_op->convolution_op->input_height = input_height;
   convolution_op->convolution_op->input_width = input_width;
 
+  // The (dilated) kernel must fit inside the padded input. Otherwise
+  // xnn_compute_convolution_output_dimension() clamps the spilled dimension to
+  // 1 via the trailing `+ 1`, producing a phantom output for which no valid
+  // receptive field exists, and the run-time kernel then addresses input
+  // pixels outside the input tensor (out-of-bounds read).
+  const size_t padded_input_height = convolution_op->convolution_op->padding_top +
+      input_height + convolution_op->convolution_op->padding_bottom;
+  const size_t padded_input_width = convolution_op->convolution_op->padding_left +
+      input_width + convolution_op->convolution_op->padding_right;
+  const size_t effective_kernel_height =
+      (convolution_op->convolution_op->kernel_height - 1) *
+          convolution_op->convolution_op->dilation_height + 1;
+  const size_t effective_kernel_width =
+      (convolution_op->convolution_op->kernel_width - 1) *
+          convolution_op->convolution_op->dilation_width + 1;
+  if (padded_input_height < effective_kernel_height ||
+      padded_input_width < effective_kernel_width) {
+    xnn_log_error(
+        "failed to reshape %s operator with %zux%zu input: the padded input "
+        "(%zux%zu) is smaller than the effective kernel (%zux%zu)",
+        xnn_operator_type_to_string_v2(convolution_op), input_width,
+        input_height, padded_input_width, padded_input_height,
+        effective_kernel_width, effective_kernel_height);
+    return xnn_status_invalid_parameter;
+  }
+
   const size_t output_height = xnn_compute_convolution_output_dimension(
-      convolution_op->convolution_op->padding_top + input_height + convolution_op->convolution_op->padding_bottom,
+      padded_input_height,
       convolution_op->convolution_op->kernel_height,
       convolution_op->convolution_op->dilation_height,
       convolution_op->convolution_op->stride_height);
@@ -1332,7 +1358,7 @@ static enum xnn_status reshape_convolution2d_nchw(
     *output_height_out = output_height;
   }
   const size_t output_width = xnn_compute_convolution_output_dimension(
-      convolution_op->convolution_op->padding_left + input_width + convolution_op->convolution_op->padding_right,
+      padded_input_width,
       convolution_op->convolution_op->kernel_width,
       convolution_op->convolution_op->dilation_width,
       convolution_op->convolution_op->stride_width);
