@@ -14,7 +14,7 @@ XNN_UKERNEL(xnn_arch_none, xnn_f16_f32acc_vlog_ukernel__scalar_rational_1_3_div_
 XNN_UKERNEL(xnn_arch_none, xnn_f16_f32acc_vlog_ukernel__scalar_rational_1_3_div_u2, 2, false, xnn_float16, struct xnn_f16_default_params, NULL)
 XNN_UKERNEL(xnn_arch_none, xnn_f16_f32acc_vlog_ukernel__scalar_rational_1_3_div_u4, 4, false, xnn_float16, struct xnn_f16_default_params, NULL)
 
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+#if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 // ARM NEON
 XNN_UKERNEL(xnn_arch_arm_neon_fp16_arith, xnn_f16_vlog_ukernel__neonfp16arith_rational_1_3_div_u8, 8, false, xnn_float16, struct xnn_f16_default_params, NULL)
 XNN_UKERNEL(xnn_arch_arm_neon_fp16_arith, xnn_f16_vlog_ukernel__neonfp16arith_rational_1_3_div_u16, 16, false, xnn_float16, struct xnn_f16_default_params, NULL)
@@ -22,7 +22,9 @@ XNN_UKERNEL(xnn_arch_arm_neon_fp16_arith, xnn_f16_vlog_ukernel__neonfp16arith_ra
 XNN_UKERNEL(xnn_arch_arm_neon_fp16_arith, xnn_f16_vlog_ukernel__neonfp16arith_rational_1_3_nr_u8, 8, false, xnn_float16, struct xnn_f16_default_params, NULL)
 XNN_UKERNEL(xnn_arch_arm_neon_fp16_arith, xnn_f16_vlog_ukernel__neonfp16arith_rational_1_3_nr_u16, 16, false, xnn_float16, struct xnn_f16_default_params, NULL)
 XNN_UKERNEL(xnn_arch_arm_neon_fp16_arith, xnn_f16_vlog_ukernel__neonfp16arith_rational_1_3_nr_u32, 32, false, xnn_float16, struct xnn_f16_default_params, NULL)
+#endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
 XNN_UKERNEL(xnn_arch_arm_neon_fp16, xnn_f16_f32acc_vlog_ukernel__neonfp16_rational_1_3_div_u4, 4, false, xnn_float16, struct xnn_f16_default_params, NULL)
 XNN_UKERNEL(xnn_arch_arm_neon_fp16, xnn_f16_f32acc_vlog_ukernel__neonfp16_rational_1_3_div_u8, 8, false, xnn_float16, struct xnn_f16_default_params, NULL)
 XNN_UKERNEL(xnn_arch_arm_neon_fp16, xnn_f16_f32acc_vlog_ukernel__neonfp16_rational_1_3_div_u16, 16, false, xnn_float16, struct xnn_f16_default_params, NULL)
@@ -31,7 +33,7 @@ XNN_UKERNEL(xnn_arch_arm_neon_fp16, xnn_f16_f32acc_vlog_ukernel__neonfp16_ration
 XNN_UKERNEL(xnn_arch_arm_neon_fp16, xnn_f16_f32acc_vlog_ukernel__neonfp16_rational_1_3_nr_u16, 16, false, xnn_float16, struct xnn_f16_default_params, NULL)
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ENABLE_F16C && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 // X86
 XNN_UKERNEL(xnn_arch_x86_f16c, xnn_f16_f32acc_vlog_ukernel__f16c_rational_1_3_div_u8, 8, false, xnn_float16, struct xnn_f16_default_params, NULL)
 XNN_UKERNEL(xnn_arch_x86_f16c, xnn_f16_f32acc_vlog_ukernel__f16c_rational_1_3_div_u16, 16, false, xnn_float16, struct xnn_f16_default_params, NULL)
@@ -39,16 +41,16 @@ XNN_UKERNEL(xnn_arch_x86_f16c, xnn_f16_f32acc_vlog_ukernel__f16c_rational_1_3_di
 XNN_UKERNEL(xnn_arch_x86_f16c, xnn_f16_f32acc_vlog_ukernel__f16c_rational_1_3_nr_u8, 8, false, xnn_float16, struct xnn_f16_default_params, NULL)
 XNN_UKERNEL(xnn_arch_x86_f16c, xnn_f16_f32acc_vlog_ukernel__f16c_rational_1_3_nr_u16, 16, false, xnn_float16, struct xnn_f16_default_params, NULL)
 XNN_UKERNEL(xnn_arch_x86_f16c, xnn_f16_f32acc_vlog_ukernel__f16c_rational_1_3_nr_u32, 32, false, xnn_float16, struct xnn_f16_default_params, NULL)
+#endif  // XNN_ENABLE_F16C && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
-#if XNN_ENABLE_AVX512F
+#if XNN_ENABLE_AVX512F && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 XNN_UKERNEL(xnn_arch_x86_avx512f, xnn_f16_f32acc_vlog_ukernel__avx512f_rational_1_3_div_u16, 16, false, xnn_float16, struct xnn_f16_default_params, NULL)
 XNN_UKERNEL(xnn_arch_x86_avx512f, xnn_f16_f32acc_vlog_ukernel__avx512f_rational_1_3_div_u32, 32, false, xnn_float16, struct xnn_f16_default_params, NULL)
 XNN_UKERNEL(xnn_arch_x86_avx512f, xnn_f16_f32acc_vlog_ukernel__avx512f_rational_1_3_div_u64, 64, false, xnn_float16, struct xnn_f16_default_params, NULL)
 XNN_UKERNEL(xnn_arch_x86_avx512f, xnn_f16_f32acc_vlog_ukernel__avx512f_rational_1_3_nr_u16, 16, false, xnn_float16, struct xnn_f16_default_params, NULL)
 XNN_UKERNEL(xnn_arch_x86_avx512f, xnn_f16_f32acc_vlog_ukernel__avx512f_rational_1_3_nr_u32, 32, false, xnn_float16, struct xnn_f16_default_params, NULL)
 XNN_UKERNEL(xnn_arch_x86_avx512f, xnn_f16_f32acc_vlog_ukernel__avx512f_rational_1_3_nr_u64, 64, false, xnn_float16, struct xnn_f16_default_params, NULL)
-#endif  // XNN_ENABLE_AVX512F
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif  // XNN_ENABLE_AVX512F && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 #if XNN_ENABLE_AVX512FP16 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 XNN_UKERNEL(xnn_arch_x86_avx512fp16, xnn_f16_vlog_ukernel__avx512fp16_rational_1_3_div_u32, 32, false, xnn_float16, struct xnn_f16_default_params, NULL)
