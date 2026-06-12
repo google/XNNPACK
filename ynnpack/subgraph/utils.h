@@ -7,7 +7,6 @@
 #define XNNPACK_YNNPACK_SUBGRAPH_UTILS_H_
 
 #include <cstdint>
-#include <optional>
 
 #include "ynnpack/subgraph/subgraph.h"
 
@@ -16,6 +15,9 @@ namespace ynn {
 // Determine if we can compute an input and an output value in place or not.
 bool allow_in_place(uint32_t input_id, uint32_t output_id,
                     const ynn_subgraph& subgraph);
+
+// Computes the slinky::call_stmt::attributes::allow_in_place mask for a node.
+int compute_allow_in_place(const ynn_node& node, const ynn_subgraph& subgraph);
 
 // Clone a subset of the subgraph that is required to compute `output_id` from
 // `input_id`.

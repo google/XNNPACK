@@ -78,6 +78,8 @@ cc_library(
         "fusion_lut.h",
         "fusion_types.cc",
         "fusion_types.h",
+        "gather.cc",
+        "gather.h",
         "get_tensor_shape.cc",
         "iota.cc",
         "iota.h",

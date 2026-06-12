@@ -260,11 +260,14 @@ enum ynn_status ynn_define_binary(ynn_subgraph_t subgraph,
                                   uint32_t input_a_id, uint32_t input_b_id,
                                   uint32_t* output_id, uint32_t flags);
 
-// Defines a lookup table operation. `output_id` will have the same shape as
-// `input_id`.
-enum ynn_status ynn_define_lut(ynn_subgraph_t subgraph, uint32_t input_id,
-                               uint32_t lut_id, uint32_t* output_id,
-                               uint32_t flags);
+// Defines a gather operation. This computes:
+// `output[...i, j, ...k] = input[...i, index[...i, j, ...k], ...k]`, where `j`
+// is the `axis` dimension. This operation supports broadcasting of the input,
+// but not the index. Such broadcasting should be performed with a subsequent
+// broadcast operation.
+enum ynn_status ynn_define_gather(ynn_subgraph_t subgraph, int32_t axis,
+                                  uint32_t input_id, uint32_t index_id,
+                                  uint32_t* output_id, uint32_t flags);
 
 // Changes the shape of `input_id` to have the shape `new_dims`, by broadcasting
 // extent 1 dimensions. If `new_dims[d]` is zero, dimension `d` is passed

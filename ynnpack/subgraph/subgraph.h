@@ -287,10 +287,7 @@ struct ynn_node {
       return false;
     }
   };
-  struct lut {
-    friend bool operator==(const lut&, const lut&) { return true; }
-    friend bool operator<(const lut&, const lut&) { return false; }
-  };
+
   struct binary_elementwise {
     ynn_binary_operator op;
     friend bool operator==(const binary_elementwise& a,
@@ -316,6 +313,15 @@ struct ynn_node {
   struct copy {
     friend bool operator==(const copy&, const copy&) { return true; }
     friend bool operator<(const copy&, const copy&) { return false; }
+  };
+  struct gather {
+    int32_t axis;
+    friend bool operator==(const gather& a, const gather& b) {
+      return a.axis == b.axis;
+    }
+    friend bool operator<(const gather& a, const gather& b) {
+      return a.axis < b.axis;
+    }
   };
   struct fuse_dim {
     // Fuse `axes_count` dimensions starting at `axis` into one dimension.
@@ -569,10 +575,10 @@ struct ynn_node {
   std::vector<uint32_t> inputs;
   std::vector<uint32_t> outputs;
   std::variant<invalid, opaque, broadcast_like, concatenate, even_split, copy,
-               split_dim, fuse_dim, fuse_dims, split_dims, stack,
+               gather, split_dim, fuse_dim, fuse_dims, split_dims, stack,
                static_reshape, static_broadcast, static_pad, static_slice,
                slice_like, static_transpose, stencil_copy, unary_elementwise,
-               lut, binary_elementwise, ternary_elementwise, dot, iota, pack_b,
+               binary_elementwise, ternary_elementwise, dot, iota, pack_b,
                transpose_a, get_tensor_shape, reduce, dequantize_dot,
                dynamic_quantization>
       op;

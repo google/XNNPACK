@@ -234,4 +234,15 @@ bool allow_in_place(uint32_t input_id, uint32_t output_id,
   return true;
 }
 
+int compute_allow_in_place(const ynn_node& node, const ynn_subgraph& subgraph) {
+  assert(node.outputs.size() == 1);
+  int result = 0;
+  for (int i = 0; i < node.inputs.size(); ++i) {
+    if (allow_in_place(node.inputs[i], node.outputs[0], subgraph)) {
+      result |= 1 << i;
+    }
+  }
+  return result;
+}
+
 }  // namespace ynn

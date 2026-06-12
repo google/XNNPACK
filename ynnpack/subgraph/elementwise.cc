@@ -8,7 +8,6 @@
 #include <cstddef>
 #include <cstdint>
 #include <utility>
-#include <vector>
 
 #include "ynnpack/base/log.h"
 #include "ynnpack/base/to_string.h"
@@ -16,7 +15,6 @@
 #include "ynnpack/include/ynnpack.h"
 #include "ynnpack/kernels/binary/binary.h"
 #include "ynnpack/kernels/dequantize_dot/dequantize_dot.h"
-#include "ynnpack/kernels/lut/lut.h"
 #include "ynnpack/kernels/ternary/ternary.h"
 #include "ynnpack/kernels/unary/unary.h"
 #include "ynnpack/subgraph/runtime.h"
@@ -62,30 +60,6 @@ auto make_unary_elementwise_impl(unary_kernel_fn kernel, unary_params params) {
   };
 }
 
-// Call a lut kernel.
-auto make_lut_impl(lut_kernel_fn kernel) {
-  return [kernel](slinky::raw_buffer a, slinky::raw_buffer lut,
-                  slinky::raw_buffer x) -> slinky::index_t {
-    slinky::dim a_dims[1], x_dims[1];
-
-    if (!fuse_and_slice_leading_dims<1>(&x_dims[0], x, &a_dims[0], a)) {
-      return 0;
-    }
-
-    // We don't support broadcasting of `a` here in the innermost
-    // dimension (and it would waste computation).
-    assert(is_contiguous(a_dims[0], a.elem_size));
-    assert(is_contiguous(x_dims[0], x.elem_size));
-
-    const slinky::index_t x_n_extent = x_dims[0].extent();
-
-    slinky::for_each_element(
-        [=](void* x, const void* a) { kernel(x_n_extent, a, lut.base, x); }, x,
-        a);
-    return 0;
-  };
-}
-
 // Call a binary kernel.
 auto make_binary_elementwise_impl(binary_kernel_fn kernel) {
   return [kernel](slinky::raw_buffer a, slinky::raw_buffer b,
@@ -113,17 +87,6 @@ auto make_binary_elementwise_impl(binary_kernel_fn kernel) {
         x, a, b);
     return 0;
   };
-}
-
-int compute_allow_in_place(const ynn_node& node, const ynn_subgraph& subgraph) {
-  assert(node.outputs.size() == 1);
-  int result = 0;
-  for (int i = 0; i < node.inputs.size(); ++i) {
-    if (allow_in_place(node.inputs[i], node.outputs[0], subgraph)) {
-      result |= 1 << i;
-    }
-  }
-  return result;
 }
 
 auto make_ternary_elementwise_impl(ternary_kernel_fn kernel) {
@@ -270,40 +233,6 @@ ynn_status create_unary(const ynn_node& node, ynn_runtime& runtime,
   return ynn_status_success;
 }
 
-ynn_status create_lut(const ynn_node& node, ynn_runtime& runtime,
-                      lut_kernel_fn kernel) {
-  assert(node.inputs.size() == 2);
-  assert(node.outputs.size() == 1);
-
-  const ynn_runtime_value& a = runtime.value(node.inputs[0]);
-  const ynn_runtime_value& lut = runtime.value(node.inputs[1]);
-  ynn_runtime_value& x = runtime.value(node.outputs[0]);
-
-  x.make_buffer(runtime);
-  std::vector<slinky::var> dims = runtime.globals.make_dims(x.rank());
-  slinky::box_expr bounds = make_elementwise_bounds(dims, a.physical_extents());
-
-  slinky::box_expr lut_bounds = {
-      slinky::interval_expr(0, 1 << type_size_bytes(a.type))};
-
-  slinky::call_stmt::attributes attrs;
-  attrs.name = "lut";
-  attrs.allow_in_place = compute_allow_in_place(node, *runtime.subgraph);
-
-  auto func = slinky::func::make(
-      make_lut_impl(kernel),
-      {{a.buffer, std::move(bounds)}, {lut.buffer, std::move(lut_bounds)}},
-      {{x.buffer, dims}}, std::move(attrs));
-
-  auto sched =
-      runtime.make_schedule(dims, x.physical_extents(), x.buffer->elem_size());
-  func.user_data() = sched.get();
-  runtime.scheduling_info_storage.push_back(std::move(sched));
-  runtime.funcs.push_back(std::move(func));
-
-  return ynn_status_success;
-}
-
 ynn_status create_binary(const ynn_node& node, ynn_runtime& runtime,
                          binary_kernel_fn kernel) {
   assert(node.inputs.size() == 2);
@@ -438,31 +367,6 @@ void define_ternary(ynn_subgraph& subgraph, ynn_node& node, uint32_t input_a_id,
   infer_shape(node, subgraph);
   node.create = [kernel](const ynn_node& node, ynn_runtime& runtime) {
     return create_ternary(node, runtime, kernel);
-  };
-}
-
-void define_lut(ynn_subgraph& subgraph, ynn_node& node, uint32_t input_id,
-                uint32_t lut_id, uint32_t& output_id) {
-  const ynn_value& a = subgraph.value(input_id);
-  ynn_value& x = subgraph.get_output_value(&output_id, a);
-
-  // Find kernel.
-  lut_kernel_fn kernel = get_lut_kernel(a.type, x.type);
-  assert(kernel);
-
-  node.inputs = {input_id, lut_id};
-  node.outputs = {output_id};
-  node.op = ynn_node::lut{};
-
-  // Propagate shape from A only.
-  x.extents.resize(a.rank());
-  for (size_t d = 0; d < x.rank(); ++d) {
-    subgraph.infer_elementwise_shape(node, /*input_idx=*/0, /*output_idx=*/0,
-                                     /*input_dim=*/d, /*output_dim=*/d);
-  }
-
-  node.create = [kernel](const ynn_node& node, ynn_runtime& runtime) {
-    return create_lut(node, runtime, kernel);
   };
 }
 
@@ -980,38 +884,6 @@ ynn_status ynn_define_binary(ynn_subgraph_t subgraph, ynn_binary_operator op,
   ynn_node node;
   ynn::define_binary(*subgraph, node, input_a_id, input_b_id, *output_id, op,
                      kernel);
-  subgraph->add_node(std::move(node));
-  return ynn_status_success;
-}
-
-ynn_status ynn_define_lut(ynn_subgraph_t subgraph, uint32_t input_id,
-                          uint32_t lut_id, uint32_t* output_id,
-                          uint32_t flags) {
-  YNN_RETURN_IF_ERROR(validate_subgraph("lut", subgraph));
-  YNN_RETURN_IF_ERROR(
-      validate_input_tensor("lut", subgraph, "input_id", input_id));
-  YNN_RETURN_IF_ERROR(validate_input_tensor("lut", subgraph, "lut_id", lut_id));
-  YNN_RETURN_IF_ERROR(
-      validate_output_tensor("lut", subgraph, "output_id", output_id));
-
-  const ynn_value& a = subgraph->value(input_id);
-  const ynn_value& lut = subgraph->value(lut_id);
-
-  if (!ynn::type_is_integral(a.type)) {
-    YNN_LOG_ERROR() << "For node `lut`, input must be integral, got " << a.type;
-    return ynn_status_invalid_parameter;
-  }
-  if (!ynn::type_is_integral(lut.type)) {
-    YNN_LOG_ERROR() << "For node `lut`, lut must be integral, got " << lut.type;
-    return ynn_status_invalid_parameter;
-  }
-  if (lut.rank() != 1) {
-    YNN_LOG_ERROR() << "For node `lut`, lut must be 1D, got " << lut.rank();
-    return ynn_status_invalid_parameter;
-  }
-
-  ynn_node node;
-  define_lut(*subgraph, node, input_id, lut_id, *output_id);
   subgraph->add_node(std::move(node));
   return ynn_status_success;
 }

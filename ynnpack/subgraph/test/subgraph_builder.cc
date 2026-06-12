@@ -178,6 +178,16 @@ SubgraphBuilder& SubgraphBuilder::AddCopy(uint32_t input_id, uint32_t output_id,
   return *this;
 }
 
+SubgraphBuilder& SubgraphBuilder::AddGather(int32_t axis, uint32_t input_id,
+                                            uint32_t index_id,
+                                            uint32_t output_id,
+                                            uint32_t flags) {
+  assert(status_ == ynn_status_success);
+  status_ = ynn_define_gather(subgraph_.get(), axis, input_id, index_id,
+                              &output_id, flags);
+  return *this;
+}
+
 SubgraphBuilder& SubgraphBuilder::AddFuseDim(int32_t first_dim, size_t num_dims,
                                              uint32_t input_id,
                                              uint32_t output_id) {

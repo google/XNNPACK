@@ -113,8 +113,14 @@ MATCHER_P(HasInputCount, count, "") {
 // Checks that the given node is a LUT.
 //
 // Example:
-//   EXPECT_THAT(ProducerOf(y_id, subgraph), IsLut());
-MATCHER(IsLut, "") { return std::holds_alternative<ynn_node::lut>(arg.op); }
+//   EXPECT_THAT(ProducerOf(y_id, subgraph), IsLut(subgraph));
+MATCHER_P(IsLut, subgraph, "") {
+  const auto* g = std::get_if<ynn_node::gather>(&arg.op);
+  if (!g) return false;
+  if (g->axis != 0) return false;
+  const ynn_value& table = subgraph.value(arg.inputs[0]);
+  return table.rank() == 1;
+}
 
 // Checks that the given node is a binary elementwise with the given operator.
 //

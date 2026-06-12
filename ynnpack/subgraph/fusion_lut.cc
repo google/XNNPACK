@@ -15,6 +15,7 @@
 #include "ynnpack/include/ynnpack.h"
 #include "ynnpack/subgraph/elementwise.h"
 #include "ynnpack/subgraph/fusion_types.h"
+#include "ynnpack/subgraph/gather.h"
 #include "ynnpack/subgraph/runtime.h"
 #include "ynnpack/subgraph/subgraph.h"
 #include "ynnpack/subgraph/utils.h"
@@ -328,8 +329,8 @@ bool rewrite_subgraph_for_unary_lut(ynn_subgraph& subgraph,
   // Replace and invalidate all nodes in `candidate` with the new LUT node.
   ynn_node* output_node = analysis.producers[best_candidate.get_output_id()];
 
-  define_lut(subgraph, *output_node, best_candidate.get_input_id(), lut_id,
-             best_candidate.output_id());
+  define_gather(subgraph, *output_node, /*axis=*/0, lut_id,
+                best_candidate.get_input_id(), best_candidate.output_id());
   return true;
 }
 

@@ -109,9 +109,9 @@ TEST(fusion_lut, single_node_simple) {
       output_id, 256, [&](const ynn_subgraph& subgraph) {
         ASSERT_THAT(subgraph, AllOf(HasValidNodeCount(1),
                                     HasValidValueIds(input_id, output_id)));
-        EXPECT_THAT(
-            ProducerOf(output_id, subgraph),
-            AllOf(IsLut(), InputsAre(input_id, IsValidValueIn(subgraph))));
+        EXPECT_THAT(ProducerOf(output_id, subgraph),
+                    AllOf(IsLut(subgraph),
+                          InputsAre(IsValidValueIn(subgraph), input_id)));
       });
 }
 
@@ -157,8 +157,9 @@ TEST(fusion_lut, single_node) {
         ASSERT_THAT(subgraph, AllOf(HasValidNodeCount(9),
                                     HasValidValueIds(a_id, b_id, c_id, d_id)));
         EXPECT_THAT(ProducerOf(x_id, subgraph), IsUnary(ynn_unary_convert));
-        EXPECT_THAT(ProducerOf(y_id, subgraph),
-                    AllOf(IsLut(), InputsAre(x_id, IsValidValueIn(subgraph))));
+        EXPECT_THAT(
+            ProducerOf(y_id, subgraph),
+            AllOf(IsLut(subgraph), InputsAre(IsValidValueIn(subgraph), x_id)));
         EXPECT_THAT(ProducerOf(d_id, subgraph), IsUnary(ynn_unary_convert));
       });
 }
@@ -193,8 +194,9 @@ TEST(fusion_lut, multiple_unary_chain) {
       256, [&](const ynn_subgraph& subgraph) {
         ASSERT_THAT(subgraph,
                     AllOf(HasValidNodeCount(1), HasValidValueIds(x_id, y_id)));
-        EXPECT_THAT(ProducerOf(y_id, subgraph),
-                    AllOf(IsLut(), InputsAre(x_id, IsValidValueIn(subgraph))));
+        EXPECT_THAT(
+            ProducerOf(y_id, subgraph),
+            AllOf(IsLut(subgraph), InputsAre(IsValidValueIn(subgraph), x_id)));
       });
 }
 
@@ -260,8 +262,9 @@ TEST(fusion_lut, elu_chain) {
         ASSERT_THAT(subgraph,
                     AllOf(HasValidNodeCount(1), HasValidValueIds(x_id, y_id)));
         // LUT inputs: First is index (x), second is table (generated const).
-        EXPECT_THAT(ProducerOf(y_id, subgraph),
-                    AllOf(IsLut(), InputsAre(x_id, IsValidValueIn(subgraph))));
+        EXPECT_THAT(
+            ProducerOf(y_id, subgraph),
+            AllOf(IsLut(subgraph), InputsAre(IsValidValueIn(subgraph), x_id)));
       });
 }
 
@@ -293,10 +296,12 @@ TEST(fusion_lut, branching_2_luts) {
     ASSERT_THAT(subgraph,
                 AllOf(HasValidNodeCount(2), HasValidValueIds(x_id, y_id, z_id),
                       Not(HasValidValueId(t_id))));
-    EXPECT_THAT(ProducerOf(y_id, subgraph),
-                AllOf(IsLut(), InputsAre(x_id, IsValidValueIn(subgraph))));
-    EXPECT_THAT(ProducerOf(z_id, subgraph),
-                AllOf(IsLut(), InputsAre(x_id, IsValidValueIn(subgraph))));
+    EXPECT_THAT(
+        ProducerOf(y_id, subgraph),
+        AllOf(IsLut(subgraph), InputsAre(IsValidValueIn(subgraph), x_id)));
+    EXPECT_THAT(
+        ProducerOf(z_id, subgraph),
+        AllOf(IsLut(subgraph), InputsAre(IsValidValueIn(subgraph), x_id)));
   });
 }
 
@@ -321,7 +326,7 @@ TEST(fusion_lut, input_type_unsupported) {
                                 HasValidValueIds(x_id, a_id, y_id)));
     EXPECT_THAT(ProducerOf(a_id, subgraph), IsUnary(ynn_unary_exp));
     EXPECT_THAT(ProducerOf(y_id, subgraph),
-                AllOf(Not(IsLut()), IsUnary(ynn_unary_convert)));
+                AllOf(Not(IsLut(subgraph)), IsUnary(ynn_unary_convert)));
   });
 }
 
@@ -357,8 +362,9 @@ TEST(fusion_lut, binary_scalar_constant) {
       256, [&](const ynn_subgraph& subgraph) {
         ASSERT_THAT(subgraph,
                     AllOf(HasValidNodeCount(1), HasValidValueIds(x_id, y_id)));
-        EXPECT_THAT(ProducerOf(y_id, subgraph),
-                    AllOf(IsLut(), InputsAre(x_id, IsValidValueIn(subgraph))));
+        EXPECT_THAT(
+            ProducerOf(y_id, subgraph),
+            AllOf(IsLut(subgraph), InputsAre(IsValidValueIn(subgraph), x_id)));
       });
 }
 
@@ -397,7 +403,7 @@ TEST(fusion_lut, binary_nonscalar_constant_unsupported) {
       256, [&](const ynn_subgraph& subgraph) {
         ASSERT_THAT(subgraph, HasValidValueIds(x_id, y_id, b_id));
         EXPECT_THAT(ProducerOf(y_id, subgraph),
-                    AllOf(Not(IsLut()), IsUnary(ynn_unary_convert)));
+                    AllOf(Not(IsLut(subgraph)), IsUnary(ynn_unary_convert)));
         EXPECT_THAT(ProducerOf(b_id, subgraph), IsBinary(ynn_binary_add));
       });
 }
