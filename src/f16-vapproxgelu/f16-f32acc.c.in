@@ -1,0 +1,190 @@
+// Copyright 2026 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert DIV in ("DIV", "NR")
+$BATCH_TILES = tuple(int(bt) for bt in BATCH_TILES.split(","))
+$SIMD_SIZE = BATCH_TILES[0]
+#include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
+
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/microparams.h"
+$SIMD_ARCH = {
+$  "f16c": "avx",
+$  "neonfp16": "neon",
+$}.get(ARCH, ARCH)
+#include "src/xnnpack/simd/f32-${SIMD_ARCH}.h"
+
+$if ARCH == "wasmrelaxedsimd":
+  #undef XNN_SIMD_HAS_NATIVE_FMA
+  #include "src/xnnpack/simd/f16-wasmrelaxedsimd.h"
+$elif ARCH == "scalar":
+  #include "src/xnnpack/simd/f16-scalar.h"
+#include "src/xnnpack/vunary.h"
+
+// Helper functions for f16 <-> f32 conversion using xnn_simd_f32_t.
+static XNN_INLINE xnn_simd_f32_t xnn_simd_load_f16_f32(const xnn_float16* ptr) {
+  return xnn_cvt_f32_f16(xnn_loadu_f16(ptr));
+}
+
+static XNN_INLINE void xnn_simd_store_f32_f16(xnn_float16* ptr, xnn_simd_f32_t v) {
+  xnn_store_tail_f16(ptr, xnn_cvt_f16_f32(v), xnn_simd_size_f32);
+}
+
+static XNN_INLINE xnn_simd_f32_t xnn_simd_load_tail_f16_f32(const xnn_float16* ptr, size_t elements) {
+  return xnn_cvt_f32_f16(xnn_load_tail_f16(ptr, elements));
+}
+
+static XNN_INLINE void xnn_simd_store_tail_f32_f16(xnn_float16* ptr, xnn_simd_f32_t v, size_t elements) {
+  xnn_store_tail_f16(ptr, xnn_cvt_f16_f32(v), elements);
+}
+
+$for BATCH_TILE in BATCH_TILES:
+  $assert BATCH_TILE % SIMD_SIZE == 0
+  $assert BATCH_TILE >= SIMD_SIZE
+  $SIMD_TILE = BATCH_TILE // SIMD_SIZE
+
+  void xnn_f16_f32acc_vapproxgelu_ukernel__${ARCH}_rational_6_4_${DIV.lower()}_u${BATCH_TILE}(
+      size_t batch,
+      const xnn_float16* input,
+      xnn_float16* output,
+      const struct xnn_f16_default_params* unused_params)
+  {
+    assert(batch != 0);
+    assert(batch % sizeof(xnn_float16) == 0);
+    assert(input != NULL);
+    assert(output != NULL);
+    assert(xnn_simd_size_f32 == ${SIMD_SIZE});
+
+    const xnn_float16* i = input;
+    xnn_float16* o = output;
+
+    // Cap the inputs to this value as `erf(x/sqrt(2))` will always be `+/-1.0f`
+    // beyond this point. This value is chosen as the first floating point
+    // number as of which the interpolation returns +/-1.0f.
+  #if XNN_SIMD_HAS_NATIVE_FMA
+    XNN_SIMD_CONST_F32(vmax_abs_x, 3.26367188e+00f);
+  #else
+    XNN_SIMD_CONST_F32(vmax_abs_x, 3.26953125e+00f);
+  #endif  // XNN_SIMD_HAS_NATIVE_FMA
+
+    // The monomial coefficients of the numerator polynomial (odd).
+    XNN_SIMD_CONST_F32(valpha_1, 7.9763704538e-01f);
+    XNN_SIMD_CONST_F32(valpha_3, 1.4811584353e-01f);
+    XNN_SIMD_CONST_F32(valpha_5, 4.3507730588e-03f);
+
+    // The monomial coefficients of the denominator polynomial (even).
+    XNN_SIMD_CONST_F32(vbeta_2, 3.5130375624e-01f);
+    XNN_SIMD_CONST_F32(vbeta_4, 4.0821321309e-02f);
+
+    XNN_SIMD_CONST_F32(vone, 1.0f);
+    XNN_SIMD_CONST_F32(vhalf, 0.5f);
+
+    $if SIMD_TILE > 1:
+      for (; batch >= ${BATCH_TILE} * sizeof(xnn_float16); batch -= ${BATCH_TILE} * sizeof(xnn_float16)) {
+        $for N in range(SIMD_TILE):
+          const xnn_simd_f32_t vx_orig_${N} = xnn_simd_load_f16_f32(i + ${N} * xnn_simd_size_f32);
+        i += ${BATCH_TILE};
+
+        // Clamp the inputs to the interpolation range.
+        $for N in range(SIMD_TILE):
+          xnn_simd_f32_t vx_${N} = xnn_min_f32(vmax_abs_x, vx_orig_${N});
+        $for N in range(SIMD_TILE):
+          vx_${N} = xnn_max_f32(xnn_neg_f32(vmax_abs_x), vx_${N});
+
+        // Since the polynomials are odd/even, we need x^2.
+        $for N in range(SIMD_TILE):
+          const xnn_simd_f32_t vx2_${N} = xnn_mul_f32(vx_${N}, vx_${N});
+
+        // Evaluate the numerator polynomial p.
+        $for N in range(SIMD_TILE):
+          xnn_simd_f32_t vp_${N} = xnn_fmadd_f32(vx2_${N}, valpha_5, valpha_3);
+        $for N in range(SIMD_TILE):
+          vp_${N} = xnn_fmadd_f32(vx2_${N}, vp_${N}, valpha_1);
+        $for N in range(SIMD_TILE):
+          vp_${N} = xnn_mul_f32(vx_${N}, vp_${N});
+
+        // Evaluate the denominator polynomial q.
+        $for N in range(SIMD_TILE):
+          xnn_simd_f32_t vq_${N} = xnn_fmadd_f32(vx2_${N}, vbeta_4, vbeta_2);
+        $for N in range(SIMD_TILE):
+          vq_${N} = xnn_fmadd_f32(vx2_${N}, vq_${N}, vone);
+
+        // Divide the numerator by the denominator.
+        $if DIV == "DIV":
+          $for N in range(SIMD_TILE):
+            const xnn_simd_f32_t verf_${N} = xnn_div_f32(vp_${N}, vq_${N});
+        $else:
+          $for N in range(SIMD_TILE):
+            const xnn_simd_f32_t verf_${N} = xnn_mul_f32(vp_${N}, xnn_rcp_f32(vq_${N}));
+
+        // Add one to the rational interpolant, and multiply by 0.5 times the
+        // original input.
+        $for N in range(SIMD_TILE):
+          const xnn_simd_f32_t vy_${N} = xnn_mul_f32(xnn_mul_f32(vx_orig_${N}, vhalf),
+                                              xnn_add_f32(verf_${N}, vone));
+
+        $for N in range(SIMD_TILE):
+          xnn_simd_store_f32_f16(o + ${N} * xnn_simd_size_f32, vy_${N});
+        o += ${BATCH_TILE};
+      }
+    for (; batch >= xnn_simd_size_f32 * sizeof(xnn_float16); batch -= xnn_simd_size_f32 * sizeof(xnn_float16)) {
+      const xnn_simd_f32_t vx_orig = xnn_simd_load_f16_f32(i);
+      i += xnn_simd_size_f32;
+
+      // Clamp the inputs to the interpolation range.
+      xnn_simd_f32_t vx = xnn_min_f32(vmax_abs_x, vx_orig);
+      vx = xnn_max_f32(xnn_neg_f32(vmax_abs_x), vx);
+
+      // Since the polynomials are odd/even, we need x^2.
+      const xnn_simd_f32_t vx2 = xnn_mul_f32(vx, vx);
+
+      // Evaluate the numerator polynomial p.
+      xnn_simd_f32_t vp = xnn_fmadd_f32(vx2, valpha_5, valpha_3);
+      vp = xnn_fmadd_f32(vx2, vp, valpha_1);
+      vp = xnn_mul_f32(vx, vp);
+
+      // Evaluate the denominator polynomial q.
+      xnn_simd_f32_t vq = xnn_fmadd_f32(vx2, vbeta_4, vbeta_2);
+      vq = xnn_fmadd_f32(vx2, vq, vone);
+
+      // Divide the numerator by the denominator.
+      $if DIV == "DIV":
+        const xnn_simd_f32_t verf =  xnn_div_f32(vp, vq);
+      $else:
+        const xnn_simd_f32_t verf = xnn_mul_f32(vp, xnn_rcp_f32(vq));
+
+      // Add one to the rational interpolant, and multiply by 0.5 times the
+      // original input.
+      const xnn_simd_f32_t vy = xnn_mul_f32(xnn_mul_f32(vx_orig, vhalf),
+                                            xnn_add_f32(verf, vone));
+
+      xnn_simd_store_f32_f16(o, vy);
+      o += xnn_simd_size_f32;
+    }
+    $if SIMD_SIZE > 1:
+      if XNN_UNLIKELY(batch != 0) {
+        xnn_simd_f32_t vx_orig = xnn_simd_load_tail_f16_f32(i, batch >> XNN_LOG2_SIZEOF_FLOAT16);
+
+        // See above for comments.
+        xnn_simd_f32_t vx = xnn_min_f32(vmax_abs_x, vx_orig);
+        vx = xnn_max_f32(xnn_neg_f32(vmax_abs_x), vx);
+        const xnn_simd_f32_t vx2 = xnn_mul_f32(vx, vx);
+        xnn_simd_f32_t vp = xnn_fmadd_f32(vx2, valpha_5, valpha_3);
+        vp = xnn_fmadd_f32(vx2, vp, valpha_1);
+        vp = xnn_mul_f32(vx, vp);
+        xnn_simd_f32_t vq = xnn_fmadd_f32(vx2, vbeta_4, vbeta_2);
+        vq = xnn_fmadd_f32(vx2, vq, vone);
+        $if DIV == "DIV":
+          const xnn_simd_f32_t verf =  xnn_div_f32(vp, vq);
+        $else:
+          const xnn_simd_f32_t verf = xnn_mul_f32(vp, xnn_rcp_f32(vq));
+        const xnn_simd_f32_t vy = xnn_mul_f32(xnn_mul_f32(vx_orig, vhalf),
+                                              xnn_add_f32(verf, vone));
+
+        xnn_simd_store_tail_f32_f16(o, vy, batch >> XNN_LOG2_SIZEOF_FLOAT16);
+      }
+  }

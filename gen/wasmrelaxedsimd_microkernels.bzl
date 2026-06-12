@@ -7,6 +7,8 @@
 
 PROD_WASMRELAXEDSIMD_MICROKERNEL_SRCS = [
     "src/f16-f32-vcvt/gen/f16-f32-vcvt-wasmrelaxedsimd-int16-u16.c",
+    "src/f16-vapproxgelu/gen/f16-f32acc-vapproxgelu-wasmrelaxedsimd-rational-6-4-div.c",
+    "src/f16-vapproxgelu/gen/f16-vapproxgelu-wasmrelaxedsimd-rational-6-4-div.c",
     "src/f16-vcos/gen/f16-vcos-wasmrelaxedsimd-rational-3-2-div.c",
     "src/f16-vlog/gen/f16-f32acc-vlog-wasmrelaxedsimd-rational-1-3-div.c",
     "src/f16-vlog/gen/f16-vlog-wasmrelaxedsimd-rational-1-3-div.c",
@@ -136,6 +138,7 @@ NON_PROD_WASMRELAXEDSIMD_MICROKERNEL_SRCS = [
     "src/f16-igemm/gen/f16-igemm-6x16-minmax-wasmrelaxedsimd-splat.c",
     "src/f16-igemm/gen/f16-igemm-8x8-minmax-wasmrelaxedsimd-splat.c",
     "src/f16-igemm/gen/f16-igemm-8x16-minmax-wasmrelaxedsimd-splat.c",
+    "src/f16-vapproxgelu/gen/f16-f32acc-vapproxgelu-wasmrelaxedsimd-rational-6-4-nr.c",
     "src/f16-vlog/gen/f16-f32acc-vlog-wasmrelaxedsimd-rational-1-3-nr.c",
     "src/f16-vlog/gen/f16-vlog-wasmrelaxedsimd-rational-1-3-nr.c",
     "src/f16-vtanh/gen/f16-f32acc-vtanh-wasmrelaxedsimd-rational-5-4-div.c",

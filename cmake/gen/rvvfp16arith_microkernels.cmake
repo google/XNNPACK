@@ -32,7 +32,6 @@ SET(PROD_RVVFP16ARITH_MICROKERNEL_SRCS
   src/f16-rminmax/gen/f16-rmin-rvvfp16arith-u8v.c
   src/f16-rminmax/gen/f16-rminmax-rvvfp16arith-u8v.c
   src/f16-spmm/gen/f16-spmm-8vx1-minmax-rvvfp16arith.c
-  src/f16-vapproxgelu/gen/f16-vapproxgelu-rvvfp16arith-rational-6-4-div-u2v.c
   src/f16-vbinary/gen/f16-vadd-rvvfp16arith-u8v.c
   src/f16-vbinary/gen/f16-vaddc-rvvfp16arith-u8v.c
   src/f16-vbinary/gen/f16-vdiv-rvvfp16arith-u8v.c
@@ -104,6 +103,7 @@ SET(NON_PROD_RVVFP16ARITH_MICROKERNEL_SRCS
   src/f16-spmm/gen/f16-spmm-2vx1-minmax-rvvfp16arith.c
   src/f16-spmm/gen/f16-spmm-4vx1-minmax-rvvfp16arith.c
   src/f16-vapproxgelu/gen/f16-vapproxgelu-rvvfp16arith-rational-6-4-div-u1v.c
+  src/f16-vapproxgelu/gen/f16-vapproxgelu-rvvfp16arith-rational-6-4-div-u2v.c
   src/f16-vapproxgelu/gen/f16-vapproxgelu-rvvfp16arith-rational-6-4-div-u4v.c
   src/f16-vbinary/gen/f16-vadd-rvvfp16arith-u1v.c
   src/f16-vbinary/gen/f16-vadd-rvvfp16arith-u2v.c
