@@ -97,14 +97,18 @@ static enum xnn_status reshape_argmax_pooling_operator(
 
   output_value->shape.num_dims = 4;
   output_index->shape.num_dims = 4;
+  bool reallocation_required = false;
   const size_t new_output_size = xnn_runtime_tensor_get_size(output_value);
   if (new_output_size > output_value->size) {
     output_value->size = new_output_size;
-    return xnn_status_reallocation_required;
+    reallocation_required = true;
   }
   const size_t new_index_size = xnn_runtime_tensor_get_size(output_index);
   if (new_index_size > output_index->size) {
     output_index->size = new_index_size;
+    reallocation_required = true;
+  }
+  if (reallocation_required) {
     return xnn_status_reallocation_required;
   }
   return xnn_status_success;
