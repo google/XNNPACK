@@ -319,6 +319,13 @@ deps = {
 
 hooks = [
   {
+    # Update the Windows toolchain if necessary.
+    'name': 'win_toolchain',
+    'pattern': '.',
+    'condition': 'checkout_win',
+    'action': ['python3', 'build/vs_toolchain.py', 'update', '--force'],
+  },
+  {
     # Update the Mac toolchain if necessary.
     'name': 'mac_toolchain',
     'pattern': '.',
