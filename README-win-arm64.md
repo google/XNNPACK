@@ -139,13 +139,22 @@ On Snapdragon X Plus (X1P-64-100, Surface Laptop 7), Windows 11, LLVM 22.1.6:
 ## Upstreaming
 
 For sending to `google/XNNPACK`, the same work is split into three
-single-purpose branches (preferred by upstream review):
+single-purpose branches (preferred by upstream review). These branches carry
+only the **armv8.2-a baseline** (the conservative Windows-on-ARM target
+supported by every shipping WoA SKU):
 
-| Branch | Scope |
-|---|---|
-| `chrisd/cmake-aarch64-defaults-include-windows` | CMake `AARCH64_DEFAULTS` fix |
-| `chrisd/ci-windows-arm64-native` | native cl.exe build + CI job |
-| `chrisd/clang-cl-arm64-toolchain` | clang-cl toolchain + build script |
+| Branch | Scope | Baseline |
+|---|---|---|
+| `chrisd/cmake-aarch64-defaults-include-windows` | CMake `AARCH64_DEFAULTS` fix | n/a |
+| `chrisd/ci-windows-arm64-native` | native cl.exe build + CI job | MSVC default |
+| `chrisd/clang-cl-arm64-toolchain` | clang-cl toolchain + build script | `armv8.2-a+fp16+dotprod` |
+
+The **armv8.4-a `-v84` profile** (`cmake/clang-cl-arm64-v84.toolchain` +
+`scripts/build-windows-arm64-clang-v84.cmd`, enabling i8mm + bf16) currently
+lives **only on this combined branch**. It is intended as a **future, separate
+upstream split** — once the armv8.2 branches above land, it can be promoted to
+its own single-purpose branch (e.g. `chrisd/clang-cl-arm64-i8mm`) and PR'd on
+top, so reviewers get the higher ISA baseline as an isolated change.
 
 This combined branch is intended for **internal sharing** so co-workers can
 clone one branch and get everything.
