@@ -37,6 +37,7 @@ std::pair<float, int32_t> compute_qd8_params(T min, T max) {
   const float rmin = std::min<float>(0.0f, min);
   const float rmax = std::max<float>(0.0f, max);
   const float scale = rmin == rmax ? 1.f : (qmax - qmin) / (rmax - rmin);
+  const float inv_scale = rmin == rmax ? 1.f : (rmax - rmin) / (qmax - qmin);
   const float descaled_min = rmin * scale;
   const float descaled_max = rmax * scale;
   const float zero_point_from_min_error = qmin + descaled_min;
@@ -52,7 +53,7 @@ std::pair<float, int32_t> compute_qd8_params(T min, T max) {
   // This means we can assume the (float) zero point is positive.
   const int32_t nudged_zero_point =
       static_cast<int32_t>(zero_point + 0.5f) - 128;
-  return {1.0f / scale, nudged_zero_point};
+  return {inv_scale, nudged_zero_point};
 }
 
 // Call compute_qd8_params for each element.
