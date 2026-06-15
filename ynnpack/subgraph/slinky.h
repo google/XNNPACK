@@ -69,7 +69,13 @@ class slinky_globals {
 };
 
 inline int axis_to_slinky_dim(int rank, int axis) {
-  return axis < 0 ? -(axis + 1) : rank - (axis + 1);
+  if (axis < 0) {
+    return -(axis + 1);
+  } else if (axis < rank) {
+    return rank - (axis + 1);
+  } else {
+    return rank;
+  }
 }
 
 slinky::buffer_expr_ptr make_buffer_expr(slinky::var sym, int rank,
