@@ -37,7 +37,11 @@ ynn_type random_type(Rng& rng) {
 }
 
 template <typename T>
-void TestImpl(T, size_t rank, bool output_rank, bool reshape_1d) {
+void TestImpl(T, size_t rank, bool output_rank, bool reshape_1d,
+              bool unique_dims) {
+  if (output_rank == 0 && !reshape_1d && !unique_dims) {
+    return;
+  }
   ReplicableRandomDevice rng;
 
   for (size_t num_axes = 0; num_axes <= rank; ++num_axes) {
@@ -50,7 +54,11 @@ void TestImpl(T, size_t rank, bool output_rank, bool reshape_1d) {
     std::iota(all_axes.begin(), all_axes.end(), 0);
 
     do {
-      std::vector<int32_t> axes(all_axes.begin(), all_axes.begin() + num_axes);
+      std::vector<int32_t> axes(num_axes * 2);
+      for (size_t i = 0; i < num_axes; ++i) {
+        axes[2 * i + 0] = all_axes[i];
+        axes[2 * i + 1] = all_axes[i];
+      }
 
       ynn_type in_type = random_type(rng);
 
@@ -59,7 +67,15 @@ void TestImpl(T, size_t rank, bool output_rank, bool reshape_1d) {
       subgraph.AddInput(in_type, rank, 0)
           .AddOutput(type_of<T>(), output_rank, 1)
           .AddGetTensorShape(axes, type_of<T>(), output_rank, 0, 1,
-                             reshape_1d ? YNN_NODE_FLAG_RESHAPE_1D : 0);
+                             (reshape_1d ? YNN_NODE_FLAG_RESHAPE_1D : 0) |
+                                 (unique_dims ? YNN_NODE_FLAG_UNIQUE_DIMS : 0));
+
+      std::vector<int32_t> expected_axes;
+      if (unique_dims) {
+        expected_axes.assign(all_axes.begin(), all_axes.begin() + num_axes);
+      } else {
+        expected_axes = axes;
+      }
 
       Runtime runtime(subgraph.GetSubgraph());
       ASSERT_EQ(runtime.Status(), ynn_status_success);
@@ -76,7 +92,7 @@ void TestImpl(T, size_t rank, bool output_rank, bool reshape_1d) {
 
         std::vector<size_t> expected_shape;
         if (output_rank != 0) {
-          expected_shape = {reshape_1d ? 1 : axes.size()};
+          expected_shape = {reshape_1d ? 1 : expected_axes.size()};
         }
 
         // Check reshaped shape is correct
@@ -90,13 +106,13 @@ void TestImpl(T, size_t rank, bool output_rank, bool reshape_1d) {
         // Verify results.
         if (reshape_1d) {
           size_t expected_extent = 1;
-          for (size_t i = 0; i < axes.size(); ++i) {
-            expected_extent *= shape[axes[i]];
+          for (size_t i = 0; i < expected_axes.size(); ++i) {
+            expected_extent *= shape[expected_axes[i]];
           }
           ASSERT_EQ(output[0], expected_extent);
         } else {
-          for (size_t i = 0; i < axes.size(); ++i) {
-            ASSERT_EQ(output[i], shape[axes[i]]);
+          for (size_t i = 0; i < expected_axes.size(); ++i) {
+            ASSERT_EQ(output[i], shape[expected_axes[i]]);
           }
         }
       }
@@ -122,28 +138,42 @@ class GetTensorShape
 TEST_P(GetTensorShape, Scalar) {
   SwitchType(std::get<0>(GetParam()), [&](auto a_type) {
     TestImpl(a_type, std::get<1>(GetParam()), /*output_rank=*/0,
-             /*reshape_1d=*/false);
+             /*reshape_1d=*/false, /*unique_dims=*/false);
   });
 }
 
 TEST_P(GetTensorShape, ScalarReshape1D) {
   SwitchType(std::get<0>(GetParam()), [&](auto a_type) {
     TestImpl(a_type, std::get<1>(GetParam()), /*output_rank=*/0,
-             /*reshape_1d=*/true);
+             /*reshape_1d=*/true, /*unique_dims=*/false);
+  });
+}
+
+TEST_P(GetTensorShape, ScalarReshape1DUnique) {
+  SwitchType(std::get<0>(GetParam()), [&](auto a_type) {
+    TestImpl(a_type, std::get<1>(GetParam()), /*output_rank=*/0,
+             /*reshape_1d=*/true, /*unique_dims=*/true);
   });
 }
 
 TEST_P(GetTensorShape, Vector) {
   SwitchType(std::get<0>(GetParam()), [&](auto a_type) {
     TestImpl(a_type, std::get<1>(GetParam()), /*output_rank=*/1,
-             /*reshape_1d=*/false);
+             /*reshape_1d=*/false, /*unique_dims=*/false);
   });
 }
 
 TEST_P(GetTensorShape, VectorReshape1D) {
   SwitchType(std::get<0>(GetParam()), [&](auto a_type) {
     TestImpl(a_type, std::get<1>(GetParam()), /*output_rank=*/1,
-             /*reshape_1d=*/true);
+             /*reshape_1d=*/true, /*unique_dims=*/false);
+  });
+}
+
+TEST_P(GetTensorShape, VectorReshape1DUnique) {
+  SwitchType(std::get<0>(GetParam()), [&](auto a_type) {
+    TestImpl(a_type, std::get<1>(GetParam()), /*output_rank=*/1,
+             /*reshape_1d=*/true, /*unique_dims=*/true);
   });
 }
 

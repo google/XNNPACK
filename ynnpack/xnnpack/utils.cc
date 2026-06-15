@@ -247,10 +247,10 @@ ynn_status define_xnn_accumulator_for_quantized_dot(
     }
 
     uint32_t k_id = YNN_INVALID_VALUE_ID;
-    status = ynn_define_get_tensor_shape(subgraph->ynn, num_k_dims, b_k_dims,
-                                         ynn_type_int32,
-                                         /*rank=*/0, b_id, &k_id,
-                                         /*flags=*/YNN_NODE_FLAG_RESHAPE_1D);
+    status = ynn_define_get_tensor_shape(
+        subgraph->ynn, num_k_dims, b_k_dims, ynn_type_int32,
+        /*rank=*/0, b_id, &k_id,
+        /*flags=*/YNN_NODE_FLAG_RESHAPE_1D | YNN_NODE_FLAG_UNIQUE_DIMS);
     if (status != ynn_status_success) {
       return status;
     }

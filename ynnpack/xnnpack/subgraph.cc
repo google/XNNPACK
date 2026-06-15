@@ -949,10 +949,10 @@ xnn_status xnn_define_static_reduce_v2(xnn_subgraph_t subgraph,
   if (is_mean) {
     // Get the shape of the input axes we reduced.
     uint32_t reduce_size_id = YNN_INVALID_VALUE_ID;
-    status = ynn_define_get_tensor_shape(subgraph->ynn, num_reduction_axes,
-                                         ynn_axes, ynn_type_fp32,
-                                         /*rank=*/0, input_id, &reduce_size_id,
-                                         /*flags=*/YNN_NODE_FLAG_RESHAPE_1D);
+    status = ynn_define_get_tensor_shape(
+        subgraph->ynn, num_reduction_axes, ynn_axes, ynn_type_fp32,
+        /*rank=*/0, input_id, &reduce_size_id,
+        /*flags=*/YNN_NODE_FLAG_RESHAPE_1D | YNN_NODE_FLAG_UNIQUE_DIMS);
     if (status != ynn_status_success) {
       return ynn::xnn_status_from_ynn(status);
     }

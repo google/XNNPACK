@@ -140,6 +140,7 @@ enum ynn_status ynn_define_iota(ynn_subgraph_t subgraph, enum ynn_type type,
 #define YNN_NODE_FLAG_KEEP_DIMS (1 << 0)
 #define YNN_NODE_FLAG_SLICE_DIMS (1 << 0)
 #define YNN_NODE_FLAG_RESHAPE_1D (1 << 0)
+#define YNN_NODE_FLAG_UNIQUE_DIMS (1 << 1)
 
 enum ynn_unary_operator {
   ynn_unary_invalid = 0,
@@ -488,7 +489,8 @@ enum ynn_status ynn_define_reduce(ynn_subgraph_t subgraph,
 
 // Get `axes` dimensions of the shape of `value_id` and store it in `output_id`.
 // If the `YNN_NODE_FLAG_RESHAPE_1D` flag is set, the result will be the product
-// of the selected axes.
+// of the selected axes. If the `YNN_NODE_FLAG_UNIQUE_DIMS` flag is set, axes
+// are deduplicated.
 enum ynn_status ynn_define_get_tensor_shape(ynn_subgraph_t subgraph,
                                             size_t num_axes,
                                             const int32_t* axes, ynn_type type,

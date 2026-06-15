@@ -307,9 +307,10 @@ void define_reduce(ynn_subgraph& subgraph, ynn_node& node,
           for (int i = 0; i < a.rank(); ++i) {
             if (k_dims[i]) axes[num_axes++] = a.rank() - 1 - i;
           }
-          ynn_define_get_tensor_shape(&subgraph, num_axes, axes, ynn_type_int32,
-                                      /*rank=*/0, input_a_id, &reduce_size_id,
-                                      /*flags=*/YNN_NODE_FLAG_RESHAPE_1D);
+          ynn_define_get_tensor_shape(
+              &subgraph, num_axes, axes, ynn_type_int32,
+              /*rank=*/0, input_a_id, &reduce_size_id,
+              /*flags=*/YNN_NODE_FLAG_RESHAPE_1D | YNN_NODE_FLAG_UNIQUE_DIMS);
           ynn_define_binary(&subgraph, ynn_binary_multiply, a.zero_point_id,
                             reduce_size_id, &output.zero_point_id,
                             /*flags=*/0);

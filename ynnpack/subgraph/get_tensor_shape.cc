@@ -77,13 +77,11 @@ ynn_status ynn_define_get_tensor_shape(ynn_subgraph_t subgraph, size_t num_axes,
 
   ynn_node::get_tensor_shape op;
   op.reshape_1d = (flags & YNN_NODE_FLAG_RESHAPE_1D) != 0;
+  op.unique_dims = (flags & YNN_NODE_FLAG_UNIQUE_DIMS) != 0;
+  op.axes.reserve(num_axes);
   for (size_t i = 0; i < num_axes; ++i) {
     int32_t axis = axis_to_slinky_dim(input.rank(), axes[i]);
-    // Most YNNPACK ops treat axes lists as a set, i.e. duplicate axes are
-    // treated as one. However, get_tensor_shape axes are used to produce a
-    // vector. We assume in the reshape_1d case that axes should be treated as a
-    // set, otherwise the operation could not be expressed as a reshape.
-    if (!op.reshape_1d ||
+    if (!op.unique_dims ||
         std::find(op.axes.begin(), op.axes.end(), axis) == op.axes.end()) {
       op.axes.push_back(axis);
     }
