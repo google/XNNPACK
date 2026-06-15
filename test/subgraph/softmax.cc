@@ -119,6 +119,20 @@ TEST(Softmax, reshape_rejects_scalar_input) {
   subgraph.ReshapeExternalTensor(TensorShape(), &data, 0).ReshapeRuntime();
   EXPECT_EQ(subgraph.Status(), xnn_status_invalid_parameter);
 }
+
+TEST(Softmax, define_rejects_input_output_datatype_mismatch) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+
+  // Input fp32, output fp16: the two datatypes are individually valid for
+  // softmax, but they must match. Without the check the f32 kernel would
+  // write 4-byte elements into a buffer sized for 2-byte fp16 elements.
+  SubgraphTester subgraph(2);
+  subgraph.AddInputTensor(1, xnn_datatype_fp32, 0)
+      .AddOutputTensor(1, xnn_datatype_fp16, 1);
+  EXPECT_EQ(
+      xnn_define_softmax(subgraph.Subgraph(), 0, 1, /*flags=*/0),
+      xnn_status_invalid_parameter);
+}
 #else
 // This is not an error in YNNPACK (and it doesn't crash either).
 #endif  // XNNPACK_USE_YNNPACK

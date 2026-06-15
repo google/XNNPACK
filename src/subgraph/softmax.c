@@ -197,6 +197,12 @@ enum xnn_status xnn_define_softmax(
       return xnn_status_invalid_parameter;
   }
 
+  status = xnn_subgraph_check_datatype_matches(
+    xnn_node_type_softmax, input_id, input_value, output_id, output_value);
+  if (status != xnn_status_success) {
+    return status;
+  }
+
   struct xnn_node* node = xnn_subgraph_new_node(subgraph);
   if (node == NULL) {
     return xnn_status_out_of_memory;
