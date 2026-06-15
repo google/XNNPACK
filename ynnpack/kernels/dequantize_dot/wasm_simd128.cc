@@ -9,7 +9,7 @@
 
 namespace ynn {
 
-YNN_DEFINE_DEQUANTIZE_DOT_KERNEL(dequantize_dot_f32_1x16_simd128, float,
+YNN_DEFINE_DEQUANTIZE_DOT_KERNEL(dequantize_dot_f32_simd128, float,
                                  /*n=*/4, /*unroll=*/4);
 
 }  // namespace ynn

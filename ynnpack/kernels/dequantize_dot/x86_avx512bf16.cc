@@ -4,19 +4,12 @@
 // LICENSE file in the root directory of this source tree.
 
 #include "ynnpack/base/bfloat16.h"
-#include "ynnpack/base/half.h"
 #include "ynnpack/base/simd/x86_vec512.h"
 #include "ynnpack/kernels/dequantize_dot/generic.h"
 
 namespace ynn {
 
-YNN_DEFINE_DEQUANTIZE_DOT_KERNEL(dequantize_dot_f32_avx512, float,
-                                 /*n=*/16,
-                                 /*unroll=*/4);
-YNN_DEFINE_DEQUANTIZE_DOT_KERNEL(dequantize_dot_bf16_avx512, bfloat16,
-                                 /*n=*/32,
-                                 /*unroll=*/2);
-YNN_DEFINE_DEQUANTIZE_DOT_KERNEL(dequantize_dot_fp16_avx512, half,
+YNN_DEFINE_DEQUANTIZE_DOT_KERNEL(dequantize_dot_bf16_avx512bf16, bfloat16,
                                  /*n=*/32,
                                  /*unroll=*/2);
 

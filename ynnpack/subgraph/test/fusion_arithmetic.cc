@@ -399,7 +399,7 @@ TEST(fusion, dequantize_dot) {
 
   ASSERT_THAT(subgraph, AllOf(HasValidNodeCount(3), HasValidValueCount(10)));
   EXPECT_THAT(ProducerOf(x_id, subgraph),
-              AllOf(IsRescaleDot(), HasInputCount(6)));
+              AllOf(IsDequantizeDot(), HasInputCount(6)));
 }
 
 TEST(fusion, dequantize_dot_add) {
@@ -440,8 +440,50 @@ TEST(fusion, dequantize_dot_add) {
 
   ASSERT_THAT(subgraph, AllOf(HasValidNodeCount(1), HasValidValueCount(7)));
   const ynn_node& final_node = ProducerOf(out_id, subgraph);
-  EXPECT_THAT(final_node, IsRescaleDot());
+  EXPECT_THAT(final_node, IsDequantizeDot());
   EXPECT_EQ(final_node.inputs[5], x_offset_id);
+}
+
+TEST(fusion, dequantize_dot_convert) {
+  // rewrite convert(dequantize_dot(...)) -> dequantize_dot(...) with new type
+  const uint32_t dot_id = 0;
+  const uint32_t a_offset_id = 1;
+  const uint32_t b_offset_id = 2;
+  const uint32_t a_scale_id = 3;
+  const uint32_t b_scale_id = 4;
+  const uint32_t offset_id = 5;
+  const uint32_t out_id = 6;
+  SubgraphBuilder builder(7);
+
+  uint32_t dequantize_dot_out_id = YNN_INVALID_VALUE_ID;
+
+  builder.AddInput(ynn_type_fp32, 2, dot_id)
+      .AddInput(ynn_type_fp32, 1, a_offset_id)
+      .AddInput(ynn_type_fp32, 1, b_offset_id)
+      .AddInput(ynn_type_fp32, 1, a_scale_id)
+      .AddInput(ynn_type_fp32, 1, b_scale_id)
+      .AddInput(ynn_type_fp32, 2, offset_id)
+      .AddOutput(ynn_type_bf16, 2, out_id)
+      .AddTensor(ynn_type_fp32, 2, dequantize_dot_out_id);
+
+  ynn_subgraph& subgraph = *builder.GetSubgraph();
+  ynn_node rescale_node;
+  ynn::define_dequantize_dot(subgraph, rescale_node, ynn_type_fp32, dot_id,
+                             a_offset_id, b_offset_id, a_scale_id, b_scale_id,
+                             offset_id, dequantize_dot_out_id,
+                             ynn::dequantize_dot_params{});
+  subgraph.add_node(std::move(rescale_node));
+
+  builder.AddUnary(ynn_unary_convert, dequantize_dot_out_id, out_id);
+
+  subgraph.fusion();
+  subgraph.invalidate_dead_values();
+
+  ASSERT_THAT(subgraph, HasValidNodeCount(1));
+  const ynn_node& final_node = ProducerOf(out_id, subgraph);
+  EXPECT_THAT(final_node, IsDequantizeDot());
+
+  EXPECT_EQ(subgraph.value(final_node.outputs[0]).type, ynn_type_bf16);
 }
 
 TEST(fusion, output_convert_convert) {

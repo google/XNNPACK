@@ -1215,9 +1215,9 @@ bool rewrite_dequantize_dot_add(ynn_subgraph& subgraph, ynn_node& node,
     ynn_node* dequantize_dot_node =
         analysis.producer_of(dequantize_dot_output_id);
     if (!dequantize_dot_node) continue;
-    const ynn_node::dequantize_dot* rescale_op =
+    const ynn_node::dequantize_dot* dequantize_dot_op =
         std::get_if<ynn_node::dequantize_dot>(&dequantize_dot_node->op);
-    if (!rescale_op) continue;
+    if (!dequantize_dot_op) continue;
 
     if (analysis.consumers[dequantize_dot_output_id].size() != 1 ||
         subgraph.value(dequantize_dot_output_id).is_external_output()) {
@@ -1240,7 +1240,7 @@ bool rewrite_dequantize_dot_add(ynn_subgraph& subgraph, ynn_node& node,
         subgraph, node, output.type, dequantize_dot_node->inputs[0],
         dequantize_dot_node->inputs[1], dequantize_dot_node->inputs[2],
         dequantize_dot_node->inputs[3], dequantize_dot_node->inputs[4],
-        new_offset_id, node.outputs[0], rescale_op->params);
+        new_offset_id, node.outputs[0], dequantize_dot_op->params);
 
     if (!result) {
       continue;
@@ -1249,6 +1249,43 @@ bool rewrite_dequantize_dot_add(ynn_subgraph& subgraph, ynn_node& node,
     return true;
   }
   return false;
+}
+
+// Rewrite convert(dequantize_dot(...)) to dequantize_dot(...) with the
+// target type if a kernel exists for that type.
+bool rewrite_dequantize_dot_convert(ynn_subgraph& subgraph, ynn_node& node,
+                                    subgraph_analysis& analysis) {
+  if (!is_unary_node(node, ynn_unary_convert)) {
+    return false;
+  }
+
+  uint32_t dequantize_dot_output_id = node.inputs[0];
+  ynn_node* dequantize_dot_node =
+      analysis.producer_of(dequantize_dot_output_id);
+  if (!dequantize_dot_node) return false;
+  const ynn_node::dequantize_dot* dequantize_dot_op =
+      std::get_if<ynn_node::dequantize_dot>(&dequantize_dot_node->op);
+  if (!dequantize_dot_op) return false;
+
+  if (analysis.consumers[dequantize_dot_output_id].size() != 1 ||
+      subgraph.value(dequantize_dot_output_id).is_external_output()) {
+    return false;
+  }
+
+  const ynn_value& output = subgraph.value(node.outputs[0]);
+
+  // Check if we have a dequantize_dot kernel for the target type.
+  dequantize_dot_kernel_fn kernel = get_dequantize_dot_kernel(output.type);
+  if (!kernel) return false;
+
+  YNN_LOG_DEBUG()
+      << "Rewriting convert(dequantize_dot(...)) to dequantize_dot(...) "
+         "with type "
+      << to_string(output.type);
+
+  dequantize_dot_node->outputs[0] = node.outputs[0];
+  node.invalidate();
+  return true;
 }
 
 // Rewrite f(x * C) to fold the arithmetic into the params.
@@ -1992,6 +2029,7 @@ ynn_status ynn_subgraph::fusion() {
                 ynn::rewrite_negate_multiply(*this, node, analysis) ||
                 ynn::rewrite_dequantize_dot(*this, node, analysis) ||
                 ynn::rewrite_dequantize_dot_add(*this, node, analysis) ||
+                ynn::rewrite_dequantize_dot_convert(*this, node, analysis) ||
                 ynn::rewrite_get_tensor_shape_of_unary(*this, node, analysis) ||
                 ynn::move_broadcast_to_output(*this, node, analysis) ||
                 ynn::remove_broadcast(*this, node, analysis) ||

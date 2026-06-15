@@ -231,8 +231,8 @@ MATCHER(IsDequantize, "") {
 // Checks that the given node is a dequantize_dot.
 //
 // Example:
-//   EXPECT_THAT(ProducerOf(y_id, subgraph), IsRescaleDot());
-MATCHER(IsRescaleDot, "") {
+//   EXPECT_THAT(ProducerOf(y_id, subgraph), IsDequantizeDot());
+MATCHER(IsDequantizeDot, "") {
   return std::holds_alternative<ynn_node::dequantize_dot>(arg.op);
 }
 

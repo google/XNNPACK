@@ -392,7 +392,7 @@ bool define_dequantize_dot(ynn_subgraph& subgraph, ynn_node& node,
   node.outputs = {output_id};
   node.op = ynn_node::dequantize_dot{params};
 
-  node.create = [kernel](const ynn_node& node, ynn_runtime& runtime) {
+  node.create = [](const ynn_node& node, ynn_runtime& runtime) {
     const ynn_node::dequantize_dot& op =
         std::get<ynn_node::dequantize_dot>(node.op);
     const ynn_runtime_value& dot = runtime.value(node.inputs[0]);
@@ -404,6 +404,9 @@ bool define_dequantize_dot(ynn_subgraph& subgraph, ynn_node& node,
     ynn_runtime_value& output = runtime.value(node.outputs[0]);
 
     output.make_buffer(runtime);
+
+    dequantize_dot_kernel_fn kernel = get_dequantize_dot_kernel(output.type);
+    assert(kernel != nullptr);
 
     std::vector<slinky::var> dims = runtime.globals.make_dims(output.rank());
 
