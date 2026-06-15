@@ -204,6 +204,7 @@ union xnn_params {
   struct xnn_f16_minmax_params f16_chw;
   struct xnn_f32_minmax_params f32_chw;
   struct xnn_f32_qb4w_minmax_params f32_qb4w_minmax;
+  struct xnn_bf16_qb4w_minmax_params bf16_qb4w_minmax;
   struct xnn_f32_qc4w_minmax_params f32_qc4w_minmax;
   struct xnn_reduce_params reduce;
   union xnn_qs8_conv_minmax_params qs8_conv_minmax;
