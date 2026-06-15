@@ -385,12 +385,12 @@ ENDIF()
 
 IF(CMAKE_C_COMPILER_ID STREQUAL "MSVC")
   # Disable "unary minus operator applied to unsigned type, result still unsigned" warning
-  ADD_COMPILE_OPTIONS("/wd4146")
+  ADD_COMPILE_OPTIONS("$<$<COMPILE_LANGUAGE:C,CXX>:/wd4146>")
   # Test files have many sections, increase the limit. See
   # https://learn.microsoft.com/en-us/cpp/build/reference/bigobj-increase-number-of-sections-in-dot-obj-file.
-  ADD_COMPILE_OPTIONS("/bigobj")
+  ADD_COMPILE_OPTIONS("$<$<COMPILE_LANGUAGE:C,CXX>:/bigobj>")
   # Our float16 datatypes have constructors in C++ and not in C, which prompts a warning in MSVC
-  ADD_COMPILE_OPTIONS("/wd4190")
+  ADD_COMPILE_OPTIONS("$<$<COMPILE_LANGUAGE:C,CXX>:/wd4190>")
 ENDIF()
 
 IF(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
