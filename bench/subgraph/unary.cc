@@ -1,4 +1,4 @@
-// Copyright 2020-2025 Google LLC
+// Copyright 2020-2026 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
@@ -82,6 +82,12 @@ static void FP32Unary(benchmark::State& state) {
                                 state.range(1), state.range(2));
   });
 }
+static void FP16Unary(benchmark::State& state) {
+  xnnpack::RunBenchmark(state, [&state]() {
+    return models::Unary<xnn_float16>(state.range(0), FLAGS_batch_size,
+                                      state.range(1), state.range(2));
+  });
+}
 
 // Initialize a static global variable to trigger the registration.
 // The lambda will be executed only once during static initialization.
@@ -115,12 +121,21 @@ static bool benchmarks_registered = [] {
   for (auto op : real_ops) {
     std::string op_name = xnn_unary_operator_to_string(op);
     auto b = benchmark::RegisterBenchmark("FP32Unary/" + op_name, FP32Unary);
+    auto b_fp16 =
+        benchmark::RegisterBenchmark("FP16Unary/" + op_name, FP16Unary);
     b->Unit(benchmark::kMicrosecond)->MeasureProcessCPUTime()->UseRealTime();
+    b_fp16->Unit(benchmark::kMicrosecond)
+        ->MeasureProcessCPUTime()
+        ->UseRealTime();
     b->ArgNames({"Op", "M", "N"});
+    b_fp16->ArgNames({"Op", "M", "N"});
 
     b->Args({op, 1, 256});
     b->Args({op, 1, 4096});
     b->Args({op, 256, 4096});
+    b_fp16->Args({op, 1, 256});
+    b_fp16->Args({op, 1, 4096});
+    b_fp16->Args({op, 256, 4096});
   }
   return true;
 }();
