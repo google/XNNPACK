@@ -21,6 +21,9 @@ scripts\build-windows-arm64-clang.cmd
 
 :: ...or the cl.exe baseline (smaller feature set, no ASM / FP16)
 scripts\build-windows-arm64-native.cmd
+
+:: ...or the armv8.4-a path (clang-cl + i8mm + bf16; needs a Snapdragon X / armv8.4+ host)
+scripts\build-windows-arm64-clang-v84.cmd
 ```
 
 Run the tests from the build directory:
@@ -28,6 +31,9 @@ Run the tests from the build directory:
 ```bat
 :: clang-cl build
 ctest --test-dir build\windows\arm64-clang -C Release --output-on-failure --parallel %NUMBER_OF_PROCESSORS%
+
+:: clang-cl armv8.4-a build
+ctest --test-dir build\windows\arm64-clang-v84 -C Release --output-on-failure --parallel %NUMBER_OF_PROCESSORS%
 
 :: cl.exe build
 ctest --test-dir build\windows\arm64 -C Release --output-on-failure --parallel %NUMBER_OF_PROCESSORS%
@@ -52,17 +58,23 @@ for you using the `VCVARSALL` environment variable.
 
 ## Build profiles
 
-| Script | Compiler | `-march` | ASM `.S` kernels | FP16 kernels | Output dir |
-|---|---|---|---|---|---|
-| `scripts\build-windows-arm64-native.cmd` | `cl.exe` (native arm64) | MSVC default | off | off | `build\windows\arm64` |
-| `scripts\build-windows-arm64-clang.cmd` | `clang-cl` | `armv8.2-a+fp16+dotprod` | **on** | **on** | `build\windows\arm64-clang` |
+| Script | Compiler | `-march` | ASM `.S` kernels | FP16 kernels | i8mm / bf16 | Output dir |
+|---|---|---|---|---|---|---|
+| `scripts\build-windows-arm64-native.cmd` | `cl.exe` (native arm64) | MSVC default | off | off | off | `build\windows\arm64` |
+| `scripts\build-windows-arm64-clang.cmd` | `clang-cl` | `armv8.2-a+fp16+dotprod` | **on** | **on** | off | `build\windows\arm64-clang` |
+| `scripts\build-windows-arm64-clang-v84.cmd` | `clang-cl` | `armv8.4-a+...+i8mm+bf16` | **on** | **on** | **on** | `build\windows\arm64-clang-v84` |
 
-Both are *native* arm64-on-arm64 builds (no `CMAKE_TOOLCHAIN_FILE` cross), so
-`ctest` can launch the produced binaries directly. The existing
+All three are *native* arm64-on-arm64 builds (no `CMAKE_TOOLCHAIN_FILE` cross),
+so `ctest` can launch the produced binaries directly. The existing
 `scripts\build-windows-arm64.cmd` (x64 → arm64 **cross**) is unchanged and
 still works for x64 hosts; it just can't run the tests.
 
-### Why two scripts?
+> The `-v84` profile raises the ISA baseline to `armv8.4-a`, so its binaries
+> require an armv8.4+ host (Snapdragon X / Oryon and later) and will fault on
+> older Windows-on-ARM SKUs (Snapdragon 8cx Gen 1/2/3). Use the plain
+> `clang` profile for broad compatibility.
+
+### Why separate scripts?
 
 `cl.exe` (VS 17.14) currently **refuses to assemble** the GNU-syntax `.S`
 micro-kernels under `src/...-aarch*`, and **does not implement** the `__fp16`
@@ -73,7 +85,9 @@ scalar/vector intrinsics. So the cl.exe baseline forces
 `clang-cl` handles both, so the clang-cl path turns them **on** and is the
 recommended way to get full performance. On a Snapdragon X Plus it measured
 roughly **+17% throughput** on attention / transformer / mobilenet subgraph
-benches versus the cl.exe baseline.
+benches versus the cl.exe baseline. The `-v84` variant additionally raises the
+`-march` baseline to `armv8.4-a` and enables the i8mm / bf16 matrix-multiply
+micro-kernels.
 
 ## What's in this branch
 
@@ -95,7 +109,7 @@ Three commits, each touching disjoint files:
      the public `windows-11-arm` runner that builds and (when
      `inputs.run-tests` is set) runs `ctest`.
 
-3. **clang-cl toolchain + build.**
+3. **clang-cl toolchains + builds.**
    * `cmake\clang-cl-arm64.toolchain` — clang-cl toolchain pinned to the
      conservative WoA baseline `armv8.2-a+fp16+dotprod` (supported on every
      shipping Windows-on-ARM SKU), with `-ffp-contract=off` so FMA
@@ -103,6 +117,9 @@ Three commits, each touching disjoint files:
      tolerance.
    * `scripts\build-windows-arm64-clang.cmd` — drives the toolchain and
      enables ASM + FP16.
+   * `cmake\clang-cl-arm64-v84.toolchain` + `scripts\build-windows-arm64-clang-v84.cmd`
+     — the same, walked up to `armv8.4-a` with `i8mm` + `bf16` enabled
+     (requires an armv8.4+ host).
 
 ## Validation
 
@@ -114,11 +131,10 @@ On Snapdragon X Plus (X1P-64-100, Surface Laptop 7), Windows 11, LLVM 22.1.6:
   `XNNPACK_ENABLE_ARM_I8MM=ON` (enabled by change #1).
 * No perf regressions on subgraph attention / transformer / mobilenet benches.
 
-> i8mm / bf16 need `armv8.4-a+`. To exercise them, pass a higher `-march` on
-> the cmake line, e.g. append
-> `-- /clang:-march=armv8.4-a+fp16+dotprod+i8mm+bf16 -DXNNPACK_ENABLE_ARM_I8MM=ON`
-> to `scripts\build-windows-arm64-clang.cmd`. SME/SME2 kernels build but stay
-> inert at runtime on pre-SME silicon (Oryon v1 has no SME).
+> i8mm / bf16 need `armv8.4-a+`. Use `scripts\build-windows-arm64-clang-v84.cmd`
+> (or pass a higher `-march` on the cmake line) to exercise them. SME/SME2
+> kernels build but stay inert at runtime on pre-SME silicon (Oryon v1 has no
+> SME).
 
 ## Upstreaming
 
