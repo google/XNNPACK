@@ -263,6 +263,16 @@ static enum xnn_status resize_split_dims_output_tensor(
   const struct xnn_shape* input_shape = &input->shape;
   struct xnn_shape* output_shape = &output->shape;
 
+  if (axis >= input_shape->num_dims) {
+    xnn_log_error("failed to split dims in %s operator with input ID #%" PRIu32
+                  " and output ID #%" PRIu32
+                  ": split axis, %zu, is out of range for an input with %zu "
+                  "dimensions",
+                  xnn_node_type_to_string(xnn_node_type_split_dims),
+                  input_id, output_id, axis, input_shape->num_dims);
+    return xnn_status_invalid_parameter;
+  }
+
   if (input_shape->num_dims - 1 + num_dims > XNN_MAX_TENSOR_DIMS) {
     xnn_log_error("failed to split dims in %s operator with input ID #%" PRIu32
                   " and output ID #%" PRIu32
