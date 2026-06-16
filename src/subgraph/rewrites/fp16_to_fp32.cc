@@ -211,41 +211,6 @@ OpAction GetOpAction(const xnn_subgraph_t subgraph, const xnn_node& node) {
     }
       XNN_OP_ACTION_CASE(node_type, depthwise_convolution_2d, dwconv);
       XNN_OP_ACTION_CASE(node_type, fully_connected_sparse, spmm);
-    case xnn_node_type_convert: {
-      const xnn_value& input = subgraph->values[node.inputs[0]];
-      const xnn_value& output = subgraph->values[node.outputs[0]];
-      if (input.datatype == output.datatype &&
-          (input.datatype == xnn_datatype_fp16 ||
-           input.datatype == xnn_datatype_fp32)) {
-        return OpAction::kElide;
-      }
-      if (input.datatype == xnn_datatype_fp16 &&
-          output.datatype == xnn_datatype_qdint8) {
-        if (IsValid(xnn_init_f16_to_qs8_cvt_config()) &&
-            IsValid(xnn_init_f16_rminmax_config()) &&
-            IsValid(xnn_init_qs8_rsum_config())) {
-          return OpAction::kTransparent;
-        }
-      } else if (input.datatype == xnn_datatype_fp16 &&
-                 output.datatype == xnn_datatype_qduint8) {
-        if (IsValid(xnn_init_f16_to_qu8_cvt_config()) &&
-            IsValid(xnn_init_f16_rminmax_config()) &&
-            IsValid(xnn_init_qu8_rsum_config())) {
-          return OpAction::kTransparent;
-        }
-      } else if (input.datatype == xnn_datatype_fp32 &&
-                 output.datatype == xnn_datatype_fp16) {
-        if (IsValid(xnn_init_f32_to_f16_cvt_config())) {
-          return OpAction::kTransparent;
-        }
-      } else if (input.datatype == xnn_datatype_fp16 &&
-                 output.datatype == xnn_datatype_fp32) {
-        if (IsValid(xnn_init_f16_to_f32_cvt_config())) {
-          return OpAction::kTransparent;
-        }
-      }
-      break;
-    }
     case xnn_node_type_static_reshape:
     case xnn_node_type_static_transpose:
     case xnn_node_type_even_split:
