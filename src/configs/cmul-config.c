@@ -72,7 +72,12 @@ static void init_f32_cmul_config(void) {
     f32_cmul_config.ukernel = XNN_INIT_CMUL_UKERNEL(xnn_f32_vcmul_ukernel__wasmsimd_u8);
   #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-    f32_cmul_config.ukernel = XNN_INIT_CMUL_UKERNEL(xnn_f32_vcmul_ukernel__rvv_u2v);
+    assert(hardware_config != NULL);
+    if (hardware_config->arch_flags & xnn_arch_riscv_vector) {
+      f32_cmul_config.ukernel = XNN_INIT_CMUL_UKERNEL(xnn_f32_vcmul_ukernel__rvv_u2v);
+    } else {
+      f32_cmul_config.ukernel = XNN_INIT_CMUL_UKERNEL(xnn_f32_vcmul_ukernel__scalar_u4);
+    }
   #else
     f32_cmul_config.ukernel = XNN_INIT_CMUL_UKERNEL(xnn_f32_vcmul_ukernel__scalar_u4);
   #endif
