@@ -134,6 +134,9 @@ struct scheduling_split {
   // unless the step matches or the other loop doesn't have required step yet.
   // In the latter case this step will override the existing step of that loop.
   bool step_is_required = false;
+  // If defined, this bound expression is used to infer source regions
+  // during scheduling, instead of evaluating the consumer's input bounds.
+  std::optional<slinky::interval_expr> scheduler_bound;
 };
 
 // A scheduling information for a buffer -- it's expected to be attached to the

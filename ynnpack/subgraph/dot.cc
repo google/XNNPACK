@@ -541,9 +541,9 @@ uint32_t define_pack_b(ynn_subgraph_t subgraph, const dot_type& type,
     // We enforce this by requiring their step to be equal to their extent.
     sched->loop_splits[0].step_is_required = true;
     sched->loop_splits[2].step_is_required = true;
-    // We split the n into no and ni, so in order to be able to fuse it with
-    // n-loop we trick scheduler into thinking that extent is matching n-extent.
-    sched->loop_splits[3].extent = input.extent(0);
+    // n-loop we provide a scheduler bound matching n-extent loop var (d0).
+    sched->loop_splits[3].scheduler_bound = {runtime.globals.make_dim(0),
+                                             runtime.globals.make_dim(0)};
 
     func.user_data() = sched.get();
     runtime.scheduling_info_storage.push_back(std::move(sched));
