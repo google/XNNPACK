@@ -1012,6 +1012,7 @@ static void init_f16_tanh_config(void) {
 #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
   const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
   assert(hardware_config != NULL);
+  (void) hardware_config;  // May be unused.
   #if XNN_ENABLE_AVX512FP16
     if (hardware_config->arch_flags & xnn_arch_x86_avx512fp16) {
       f16_tanh_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f16_vtanh_ukernel__avx512fp16_rational_5_4_div_u128);
