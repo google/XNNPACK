@@ -353,9 +353,10 @@ static enum xnn_status create_convolution_operator(
         if (filter_datatype == xnn_datatype_fp32) {
           flags |= XNN_FLAG_FP32_STATIC_WEIGHTS;
         }
-        if (bias_datatype == xnn_datatype_fp32) {
+        if (bias_datatype == xnn_datatype_fp32 && filter_datatype == xnn_datatype_fp16) {
           flags |= XNN_FLAG_FP32_STATIC_BIASES;
         }
+
         switch (filter_datatype) {
           case xnn_datatype_fp16:
           case xnn_datatype_fp32:
@@ -926,6 +927,10 @@ static inline bool validate_datatypes_with_bias(
                  output_datatype == xnn_datatype_fp32) {
         // Flag: XNN_FLAG_FP32_STATIC_BIASES
         return true;
+      } else if (input_datatype == xnn_datatype_fp16 &&
+                 (bias_datatype == xnn_datatype_fp16 || bias_datatype == xnn_datatype_fp32) &&
+                 output_datatype == xnn_datatype_fp16) {
+        return true;
       }
       break;
     case xnn_datatype_qint8:
@@ -980,6 +985,9 @@ static inline bool validate_datatypes_without_bias(
     case xnn_datatype_fp16:
       if (input_datatype == xnn_datatype_fp32 &&
           output_datatype == xnn_datatype_fp32) {
+        return true;
+      } else if (input_datatype == xnn_datatype_fp16 &&
+                 output_datatype == xnn_datatype_fp16) {
         return true;
       }
       break;

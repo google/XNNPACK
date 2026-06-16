@@ -1686,13 +1686,29 @@ enum xnn_status xnn_create_fully_connected_nc_f16(
     size_t output_stride, const void* kernel, const void* bias,
     float output_min, float output_max, uint32_t flags,
     xnn_weights_cache_t weights_cache, xnn_operator_t* fully_connected_op_out) {
+  const void* bias_to_use = bias;
+  void* allocated_bias = NULL;
+  if (bias != NULL && (flags & XNN_FLAG_FP32_STATIC_BIASES)) {
+    allocated_bias = xnn_allocate_memory(output_channels * sizeof(xnn_float16));
+    if (allocated_bias == NULL) {
+      return xnn_status_out_of_memory;
+    }
+    const float* f32_bias = (const float*)bias;
+    xnn_float16* f16_bias = (xnn_float16*)allocated_bias;
+    for (size_t i = 0; i < output_channels; ++i) {
+      f16_bias[i] = xnn_float16_from_float(f32_bias[i]);
+    }
+    bias_to_use = allocated_bias;
+    flags &= ~XNN_FLAG_FP32_STATIC_BIASES;
+  }
+
   struct fc_context context = {
       .input_channels = input_channels,
       .output_channels = output_channels,
       .input_stride = input_stride,
       .output_stride = output_stride,
       .kernel = kernel,
-      .bias = bias,
+      .bias = bias_to_use,
       .output_min = output_min,
       .output_max = output_max,
       .flags = flags,
@@ -1701,7 +1717,11 @@ enum xnn_status xnn_create_fully_connected_nc_f16(
       .fully_connected_op_out = fully_connected_op_out,
       .should_fingerprint = true,
   };
-  return create_fully_connected_nc_helper(&context);
+  enum xnn_status status = create_fully_connected_nc_helper(&context);
+  if (allocated_bias != NULL) {
+    xnn_release_memory(allocated_bias);
+  }
+  return status;
 }
 
 enum xnn_status xnn_create_fully_connected_nc_pf16(
@@ -1709,13 +1729,29 @@ enum xnn_status xnn_create_fully_connected_nc_pf16(
     size_t output_stride, const void* kernel, const void* bias,
     float output_min, float output_max, uint32_t flags,
     xnn_weights_cache_t weights_cache, xnn_operator_t* fully_connected_op_out) {
+  const void* bias_to_use = bias;
+  void* allocated_bias = NULL;
+  if (bias != NULL && (flags & XNN_FLAG_FP32_STATIC_BIASES)) {
+    allocated_bias = xnn_allocate_memory(output_channels * sizeof(xnn_float16));
+    if (allocated_bias == NULL) {
+      return xnn_status_out_of_memory;
+    }
+    const float* f32_bias = (const float*)bias;
+    xnn_float16* f16_bias = (xnn_float16*)allocated_bias;
+    for (size_t i = 0; i < output_channels; ++i) {
+      f16_bias[i] = xnn_float16_from_float(f32_bias[i]);
+    }
+    bias_to_use = allocated_bias;
+    flags &= ~XNN_FLAG_FP32_STATIC_BIASES;
+  }
+
   struct fc_context context = {
       .input_channels = input_channels,
       .output_channels = output_channels,
       .input_stride = input_stride,
       .output_stride = output_stride,
       .kernel = kernel,
-      .bias = bias,
+      .bias = bias_to_use,
       .output_min = output_min,
       .output_max = output_max,
       .flags = flags,
@@ -1724,7 +1760,11 @@ enum xnn_status xnn_create_fully_connected_nc_pf16(
       .fully_connected_op_out = fully_connected_op_out,
       .should_fingerprint = true,
   };
-  return create_fully_connected_nc_helper(&context);
+  enum xnn_status status = create_fully_connected_nc_helper(&context);
+  if (allocated_bias != NULL) {
+    xnn_release_memory(allocated_bias);
+  }
+  return status;
 }
 
 enum xnn_status xnn_create_fully_connected_nc_qd8_f16_qc2w(

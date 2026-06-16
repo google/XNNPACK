@@ -509,6 +509,9 @@ TEST(FullyConnectedF16F32F16, static_b) {
 TEST(FullyConnectedF16, static_b) {
   TestStaticB<xnn_float16, xnn_float16, xnn_float16>();
 }
+TEST(FullyConnectedF16F16F32, static_b) {
+  TestStaticB<xnn_float16, xnn_float16, float>();
+}
 TEST(FullyConnectedF32, static_b) { TestStaticB<float, float, float>(); }
 TEST(FullyConnectedF32F16F16, static_b) {
   TestStaticB<float, xnn_float16, xnn_float16>();

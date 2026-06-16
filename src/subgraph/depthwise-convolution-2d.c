@@ -190,7 +190,11 @@ static enum xnn_status create_depthwise_convolution_operator(
                 node->flags | XNN_FLAG_DEPTHWISE_CONVOLUTION, weights_cache,
                 &opdata->operator_objects[0]);
             break;
-          case xnn_datatype_fp16:
+          case xnn_datatype_fp16: {
+            uint32_t flags = node->flags | XNN_FLAG_DEPTHWISE_CONVOLUTION;
+            if (bias_datatype == xnn_datatype_fp32) {
+              flags |= XNN_FLAG_FP32_STATIC_BIASES;
+            }
             status = xnn_create_convolution2d_nhwc_f16(
                 node->params.depthwise_convolution_2d.input_padding_top,
                 node->params.depthwise_convolution_2d.input_padding_right,
@@ -214,9 +218,10 @@ static enum xnn_status create_depthwise_convolution_operator(
                         .depth_multiplier /* output_channel_stride */,
                 filter_data, bias_data, node->activation.output_min,
                 node->activation.output_max,
-                node->flags | XNN_FLAG_DEPTHWISE_CONVOLUTION, weights_cache,
+                flags, weights_cache,
                 &opdata->operator_objects[0]);
             break;
+          }
           default:
             XNN_UNREACHABLE;
         }
@@ -610,6 +615,10 @@ static inline bool validate_datatypes_with_bias(
           bias_datatype == xnn_datatype_fp16 &&
           output_datatype == xnn_datatype_fp32) {
         return true;
+      } else if (input_datatype == xnn_datatype_fp16 &&
+                 (bias_datatype == xnn_datatype_fp16 || bias_datatype == xnn_datatype_fp32) &&
+                 output_datatype == xnn_datatype_fp16) {
+        return true;
       }
       break;
     case xnn_datatype_qint8:
@@ -659,6 +668,9 @@ static inline bool validate_datatypes_without_bias(
     case xnn_datatype_fp16:
       if (input_datatype == xnn_datatype_fp32 &&
           output_datatype == xnn_datatype_fp32) {
+        return true;
+      } else if (input_datatype == xnn_datatype_fp16 &&
+                 output_datatype == xnn_datatype_fp16) {
         return true;
       }
       break;

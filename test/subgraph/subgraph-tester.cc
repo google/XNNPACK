@@ -62,7 +62,7 @@ SubgraphTester& SubgraphTester::AddInternalDynamicallyQuantizedTensor(
     const TensorShape& shape, xnn_datatype datatype, size_t num_nonbatch_dims,
     uint32_t* id_out, uint32_t flags) {
   const xnn_status status = xnn_define_dynamically_quantized_tensor_value(
-      subgraph_.get(), xnn_datatype_qdint8, shape.Rank(), num_nonbatch_dims,
+      subgraph_.get(), datatype, shape.Rank(), num_nonbatch_dims,
       shape.Dims(), XNN_INVALID_VALUE_ID, flags, id_out);
   EXPECT_EQ(status, xnn_status_success);
   return *this;

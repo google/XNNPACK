@@ -342,7 +342,8 @@ void TestImpl(xnn_datatype convert_to = xnn_datatype_invalid) {
               << "input_shape=" << index_to_string(input_shape)
               << ", output_shape=" << index_to_string(output_shape)
               << ", filter_shape=" << index_to_string(filter_shape)
-              << ", kh=" << kh << ", kw=" << kw;
+              << ", kh=" << kh << ", kw=" << kw
+              << ", bias_empty=" << bias.empty();
         }
       }
     }
@@ -357,7 +358,13 @@ using qint32 = quantized<int32_t>;
 TEST(Convolution2DQC8, test) { TestImpl<qint8, qcint8, qcint32>(); }
 TEST(Convolution2DQU8, test) { TestImpl<quint8, quint8, qint32>(); }
 TEST(Convolution2DQS8, test) { TestImpl<qint8, qint8, qint32>(); }
-TEST(Convolution2DF16, test) { TestImpl<xnn_float16, float, float>(); }
+TEST(Convolution2DF16, test) {
+  TestImpl<xnn_float16, xnn_float16, xnn_float16>();
+}
+TEST(Convolution2DF16F16F32, test) {
+  TestImpl<xnn_float16, xnn_float16, float>();
+}
+TEST(Convolution2DF16F32, test) { TestImpl<xnn_float16, float, float>(); }
 TEST(Convolution2DF32, test) { TestImpl<float, float, float>(); }
 TEST(Convolution2DF32F16, test) { TestImpl<float, xnn_float16, xnn_float16>(); }
 TEST(Convolution2DQD8F16QC8W, test) {

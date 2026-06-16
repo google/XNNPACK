@@ -2266,6 +2266,23 @@ enum xnn_status xnn_create_convolution2d_nhwc_f16(
     size_t output_channel_stride, const void* kernel, const void* bias,
     float output_min, float output_max, uint32_t flags,
     xnn_weights_cache_t weights_cache, xnn_operator_t* convolution_op_out) {
+  const void* bias_to_use = bias;
+  void* allocated_bias = NULL;
+  if (bias != NULL && (flags & XNN_FLAG_FP32_STATIC_BIASES)) {
+    const size_t bias_size = groups * group_output_channels;
+    allocated_bias = xnn_allocate_memory(bias_size * sizeof(xnn_float16));
+    if (allocated_bias == NULL) {
+      return xnn_status_out_of_memory;
+    }
+    const float* f32_bias = (const float*)bias;
+    xnn_float16* f16_bias = (xnn_float16*)allocated_bias;
+    for (size_t i = 0; i < bias_size; ++i) {
+      f16_bias[i] = xnn_float16_from_float(f32_bias[i]);
+    }
+    bias_to_use = allocated_bias;
+    flags &= ~XNN_FLAG_FP32_STATIC_BIASES;
+  }
+
   struct convolution2d_nhwc_context context = {
       .input_padding_top = input_padding_top,
       .input_padding_right = input_padding_right,
@@ -2283,16 +2300,21 @@ enum xnn_status xnn_create_convolution2d_nhwc_f16(
       .input_channel_stride = input_channel_stride,
       .output_channel_stride = output_channel_stride,
       .kernel = kernel,
-      .bias = bias,
+      .bias = bias_to_use,
       .output_min = output_min,
       .output_max = output_max,
       .flags = flags,
       .weights_cache = weights_cache,
       .operator_type = xnn_operator_type_convolution_nhwc_f16,
   };
-  return create_convolution2d_nhwc_helper(&f16_variant, &context,
-                                          convolution_op_out);
+  enum xnn_status status = create_convolution2d_nhwc_helper(
+      &f16_variant, &context, convolution_op_out);
+  if (allocated_bias != NULL) {
+    xnn_release_memory(allocated_bias);
+  }
+  return status;
 }
+
 
 enum xnn_status xnn_create_convolution2d_nhwc_f32(
     uint32_t input_padding_top, uint32_t input_padding_right,
@@ -2343,6 +2365,23 @@ enum xnn_status xnn_create_convolution2d_nhwc_pf16(
     float output_min, float output_max, uint32_t flags,
     xnn_weights_cache_t weights_cache,
     xnn_operator_t* convolution_op_out) {
+  const void* bias_to_use = bias;
+  void* allocated_bias = NULL;
+  if (bias != NULL && (flags & XNN_FLAG_FP32_STATIC_BIASES)) {
+    const size_t bias_size = groups * group_output_channels;
+    allocated_bias = xnn_allocate_memory(bias_size * sizeof(xnn_float16));
+    if (allocated_bias == NULL) {
+      return xnn_status_out_of_memory;
+    }
+    const float* f32_bias = (const float*)bias;
+    xnn_float16* f16_bias = (xnn_float16*)allocated_bias;
+    for (size_t i = 0; i < bias_size; ++i) {
+      f16_bias[i] = xnn_float16_from_float(f32_bias[i]);
+    }
+    bias_to_use = allocated_bias;
+    flags &= ~XNN_FLAG_FP32_STATIC_BIASES;
+  }
+
   struct convolution2d_nhwc_context context = {
       .input_padding_top = input_padding_top,
       .input_padding_right = input_padding_right,
@@ -2360,16 +2399,21 @@ enum xnn_status xnn_create_convolution2d_nhwc_pf16(
       .input_channel_stride = input_channel_stride,
       .output_channel_stride = output_channel_stride,
       .kernel = kernel,
-      .bias = bias,
+      .bias = bias_to_use,
       .output_min = output_min,
       .output_max = output_max,
       .flags = flags,
       .weights_cache = weights_cache,
       .operator_type = xnn_operator_type_convolution_nhwc_pf16,
   };
-  return create_convolution2d_nhwc_helper(&f16_variant, &context,
-                                          convolution_op_out);
+  enum xnn_status status = create_convolution2d_nhwc_helper(
+      &f16_variant, &context, convolution_op_out);
+  if (allocated_bias != NULL) {
+    xnn_release_memory(allocated_bias);
+  }
+  return status;
 }
+
 
 enum xnn_status xnn_create_convolution2d_nhwc_pf32(
     uint32_t input_padding_top, uint32_t input_padding_right,
