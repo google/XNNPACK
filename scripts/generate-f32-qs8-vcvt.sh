@@ -139,6 +139,11 @@ tools/xngen src/f32-qs8-vcvt/scalar-imagic.c.in -D BATCH_TILE=2 -D IDATATYPE=BF1
 tools/xngen src/f32-qs8-vcvt/scalar-imagic.c.in -D BATCH_TILE=3 -D IDATATYPE=BF16 -D ODATATYPE=QS8 -D WASM=0 -o src/bf16-qs8-vcvt/gen/bf16-qs8-vcvt-scalar-imagic-u3.c &
 tools/xngen src/f32-qs8-vcvt/scalar-imagic.c.in -D BATCH_TILE=4 -D IDATATYPE=BF16 -D ODATATYPE=QS8 -D WASM=0 -o src/bf16-qs8-vcvt/gen/bf16-qs8-vcvt-scalar-imagic-u4.c &
 
+tools/xngen src/f32-qs8-vcvt/scalar-imagic.c.in -D BATCH_TILE=1 -D IDATATYPE=BF16 -D ODATATYPE=QU8 -D WASM=0 -o src/bf16-qu8-vcvt/gen/bf16-qu8-vcvt-scalar-imagic-u1.c &
+tools/xngen src/f32-qs8-vcvt/scalar-imagic.c.in -D BATCH_TILE=2 -D IDATATYPE=BF16 -D ODATATYPE=QU8 -D WASM=0 -o src/bf16-qu8-vcvt/gen/bf16-qu8-vcvt-scalar-imagic-u2.c &
+tools/xngen src/f32-qs8-vcvt/scalar-imagic.c.in -D BATCH_TILE=3 -D IDATATYPE=BF16 -D ODATATYPE=QU8 -D WASM=0 -o src/bf16-qu8-vcvt/gen/bf16-qu8-vcvt-scalar-imagic-u3.c &
+tools/xngen src/f32-qs8-vcvt/scalar-imagic.c.in -D BATCH_TILE=4 -D IDATATYPE=BF16 -D ODATATYPE=QU8 -D WASM=0 -o src/bf16-qu8-vcvt/gen/bf16-qu8-vcvt-scalar-imagic-u4.c &
+
 tools/xngen src/f32-qs8-vcvt/scalar-imagic.c.in -D BATCH_TILE=1 -D IDATATYPE=F16 -D ODATATYPE=QU8 -D WASM=0 -o src/f16-qu8-vcvt/gen/f16-qu8-vcvt-scalar-imagic-u1.c &
 tools/xngen src/f32-qs8-vcvt/scalar-imagic.c.in -D BATCH_TILE=2 -D IDATATYPE=F16 -D ODATATYPE=QU8 -D WASM=0 -o src/f16-qu8-vcvt/gen/f16-qu8-vcvt-scalar-imagic-u2.c &
 tools/xngen src/f32-qs8-vcvt/scalar-imagic.c.in -D BATCH_TILE=3 -D IDATATYPE=F16 -D ODATATYPE=QU8 -D WASM=0 -o src/f16-qu8-vcvt/gen/f16-qu8-vcvt-scalar-imagic-u3.c &
