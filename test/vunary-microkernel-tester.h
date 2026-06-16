@@ -79,12 +79,13 @@ class VUnaryMicrokernelTester {
   //    structure or returns `nullptr` if there is no default initialization.
   template <typename TestInfo, typename In, typename Out,
             typename UKernelParamsType>
-  void Test(void (*ukernel)(size_t,
-                            const typename xnnpack::unwrap_quantized<In>::type*,
-                            typename xnnpack::unwrap_quantized<Out>::type*,
-                            const UKernelParamsType*),
-            xnn_init_unary_uparams_fn init_params,
-            const xnn_unary_params& params) const {
+  XNN_OPTNONE void Test(
+      void (*ukernel)(size_t,
+                      const typename xnnpack::unwrap_quantized<In>::type*,
+                      typename xnnpack::unwrap_quantized<Out>::type*,
+                      const UKernelParamsType*),
+      xnn_init_unary_uparams_fn init_params,
+      const xnn_unary_params& params) const {
     using InKernel = typename xnnpack::unwrap_quantized<In>::type;
     using OutKernel = typename xnnpack::unwrap_quantized<Out>::type;
 
@@ -134,7 +135,7 @@ class VUnaryMicrokernelTester {
 
   template <typename TestInfo, typename In, typename Out,
             typename UKernelParamsType>
-  void TestInPlace(
+  XNN_OPTNONE void TestInPlace(
       void (*ukernel)(size_t,
                       const typename xnnpack::unwrap_quantized<In>::type*,
                       typename xnnpack::unwrap_quantized<Out>::type*,

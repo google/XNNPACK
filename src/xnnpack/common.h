@@ -453,6 +453,12 @@
 #define XNN_UNUSED
 #endif
 
+#if defined(__clang__) && XNN_COMPILER_HAS_ATTRIBUTE(optnone)
+#define XNN_OPTNONE __attribute__((optnone))
+#else
+#define XNN_OPTNONE
+#endif
+
 #define XNN_LOG2_SIZEOF_INT8_T 0    // log2(sizeof(int8_t))
 #define XNN_LOG2_SIZEOF_UINT8_T 0   // log2(sizeof(uint8_t))
 #define XNN_LOG2_SIZEOF_INT16_T 1   // log2(sizeof(int16_t))
