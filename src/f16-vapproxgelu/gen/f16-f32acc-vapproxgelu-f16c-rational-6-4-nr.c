@@ -71,6 +71,7 @@ void xnn_f16_f32acc_vapproxgelu_ukernel__f16c_rational_6_4_nr_u8(
 
   XNN_SIMD_CONST_F32(vone, 1.0f);
   XNN_SIMD_CONST_F32(vhalf, 0.5f);
+  XNN_SIMD_CONST_F32(vtwo, 2.0f);
 
   for (; batch >= xnn_simd_size_f32 * sizeof(xnn_float16); batch -= xnn_simd_size_f32 * sizeof(xnn_float16)) {
     const xnn_simd_f32_t vx_orig = xnn_simd_load_f16_f32(i);
@@ -93,7 +94,11 @@ void xnn_f16_f32acc_vapproxgelu_ukernel__f16c_rational_6_4_nr_u8(
     vq = xnn_fmadd_f32(vx2, vq, vone);
 
     // Divide the numerator by the denominator.
-    const xnn_simd_f32_t verf = xnn_mul_f32(vp, xnn_rcp_f32(vq));
+    xnn_simd_f32_t vrq = xnn_rcp_f32(vq);
+    for (size_t iter = 0; iter < XNN_SIMD_NUM_RCP_ITER_F32; iter++) {
+      vrq = xnn_mul_f32(vrq, xnn_fnmadd_f32(vrq, vq, vtwo));
+    }
+    const xnn_simd_f32_t verf = xnn_mul_f32(vp, vrq);
 
     // Add one to the rational interpolant, and multiply by 0.5 times the
     // original input.
@@ -115,7 +120,11 @@ void xnn_f16_f32acc_vapproxgelu_ukernel__f16c_rational_6_4_nr_u8(
     vp = xnn_mul_f32(vx, vp);
     xnn_simd_f32_t vq = xnn_fmadd_f32(vx2, vbeta_4, vbeta_2);
     vq = xnn_fmadd_f32(vx2, vq, vone);
-    const xnn_simd_f32_t verf = xnn_mul_f32(vp, xnn_rcp_f32(vq));
+    xnn_simd_f32_t vrq = xnn_rcp_f32(vq);
+    for (size_t iter = 0; iter < XNN_SIMD_NUM_RCP_ITER_F32; iter++) {
+      vrq = xnn_mul_f32(vrq, xnn_fnmadd_f32(vrq, vq, vtwo));
+    }
+    const xnn_simd_f32_t verf = xnn_mul_f32(vp, vrq);
     const xnn_simd_f32_t vy = xnn_mul_f32(xnn_mul_f32(vx_orig, vhalf),
                                           xnn_add_f32(verf, vone));
 
@@ -158,6 +167,7 @@ void xnn_f16_f32acc_vapproxgelu_ukernel__f16c_rational_6_4_nr_u16(
 
   XNN_SIMD_CONST_F32(vone, 1.0f);
   XNN_SIMD_CONST_F32(vhalf, 0.5f);
+  XNN_SIMD_CONST_F32(vtwo, 2.0f);
 
   for (; batch >= 16 * sizeof(xnn_float16); batch -= 16 * sizeof(xnn_float16)) {
     const xnn_simd_f32_t vx_orig_0 = xnn_simd_load_f16_f32(i + 0 * xnn_simd_size_f32);
@@ -189,8 +199,14 @@ void xnn_f16_f32acc_vapproxgelu_ukernel__f16c_rational_6_4_nr_u16(
     vq_1 = xnn_fmadd_f32(vx2_1, vq_1, vone);
 
     // Divide the numerator by the denominator.
-    const xnn_simd_f32_t verf_0 = xnn_mul_f32(vp_0, xnn_rcp_f32(vq_0));
-    const xnn_simd_f32_t verf_1 = xnn_mul_f32(vp_1, xnn_rcp_f32(vq_1));
+    xnn_simd_f32_t vrq_0 = xnn_rcp_f32(vq_0);
+    xnn_simd_f32_t vrq_1 = xnn_rcp_f32(vq_1);
+    for (size_t iter = 0; iter < XNN_SIMD_NUM_RCP_ITER_F32; iter++) {
+      vrq_0 = xnn_mul_f32(vrq_0, xnn_fnmadd_f32(vrq_0, vq_0, vtwo));
+      vrq_1 = xnn_mul_f32(vrq_1, xnn_fnmadd_f32(vrq_1, vq_1, vtwo));
+    }
+    const xnn_simd_f32_t verf_0 = xnn_mul_f32(vp_0, vrq_0);
+    const xnn_simd_f32_t verf_1 = xnn_mul_f32(vp_1, vrq_1);
 
     // Add one to the rational interpolant, and multiply by 0.5 times the
     // original input.
@@ -224,7 +240,11 @@ void xnn_f16_f32acc_vapproxgelu_ukernel__f16c_rational_6_4_nr_u16(
     vq = xnn_fmadd_f32(vx2, vq, vone);
 
     // Divide the numerator by the denominator.
-    const xnn_simd_f32_t verf = xnn_mul_f32(vp, xnn_rcp_f32(vq));
+    xnn_simd_f32_t vrq = xnn_rcp_f32(vq);
+    for (size_t iter = 0; iter < XNN_SIMD_NUM_RCP_ITER_F32; iter++) {
+      vrq = xnn_mul_f32(vrq, xnn_fnmadd_f32(vrq, vq, vtwo));
+    }
+    const xnn_simd_f32_t verf = xnn_mul_f32(vp, vrq);
 
     // Add one to the rational interpolant, and multiply by 0.5 times the
     // original input.
@@ -246,7 +266,11 @@ void xnn_f16_f32acc_vapproxgelu_ukernel__f16c_rational_6_4_nr_u16(
     vp = xnn_mul_f32(vx, vp);
     xnn_simd_f32_t vq = xnn_fmadd_f32(vx2, vbeta_4, vbeta_2);
     vq = xnn_fmadd_f32(vx2, vq, vone);
-    const xnn_simd_f32_t verf = xnn_mul_f32(vp, xnn_rcp_f32(vq));
+    xnn_simd_f32_t vrq = xnn_rcp_f32(vq);
+    for (size_t iter = 0; iter < XNN_SIMD_NUM_RCP_ITER_F32; iter++) {
+      vrq = xnn_mul_f32(vrq, xnn_fnmadd_f32(vrq, vq, vtwo));
+    }
+    const xnn_simd_f32_t verf = xnn_mul_f32(vp, vrq);
     const xnn_simd_f32_t vy = xnn_mul_f32(xnn_mul_f32(vx_orig, vhalf),
                                           xnn_add_f32(verf, vone));
 
@@ -289,6 +313,7 @@ void xnn_f16_f32acc_vapproxgelu_ukernel__f16c_rational_6_4_nr_u32(
 
   XNN_SIMD_CONST_F32(vone, 1.0f);
   XNN_SIMD_CONST_F32(vhalf, 0.5f);
+  XNN_SIMD_CONST_F32(vtwo, 2.0f);
 
   for (; batch >= 32 * sizeof(xnn_float16); batch -= 32 * sizeof(xnn_float16)) {
     const xnn_simd_f32_t vx_orig_0 = xnn_simd_load_f16_f32(i + 0 * xnn_simd_size_f32);
@@ -338,10 +363,20 @@ void xnn_f16_f32acc_vapproxgelu_ukernel__f16c_rational_6_4_nr_u32(
     vq_3 = xnn_fmadd_f32(vx2_3, vq_3, vone);
 
     // Divide the numerator by the denominator.
-    const xnn_simd_f32_t verf_0 = xnn_mul_f32(vp_0, xnn_rcp_f32(vq_0));
-    const xnn_simd_f32_t verf_1 = xnn_mul_f32(vp_1, xnn_rcp_f32(vq_1));
-    const xnn_simd_f32_t verf_2 = xnn_mul_f32(vp_2, xnn_rcp_f32(vq_2));
-    const xnn_simd_f32_t verf_3 = xnn_mul_f32(vp_3, xnn_rcp_f32(vq_3));
+    xnn_simd_f32_t vrq_0 = xnn_rcp_f32(vq_0);
+    xnn_simd_f32_t vrq_1 = xnn_rcp_f32(vq_1);
+    xnn_simd_f32_t vrq_2 = xnn_rcp_f32(vq_2);
+    xnn_simd_f32_t vrq_3 = xnn_rcp_f32(vq_3);
+    for (size_t iter = 0; iter < XNN_SIMD_NUM_RCP_ITER_F32; iter++) {
+      vrq_0 = xnn_mul_f32(vrq_0, xnn_fnmadd_f32(vrq_0, vq_0, vtwo));
+      vrq_1 = xnn_mul_f32(vrq_1, xnn_fnmadd_f32(vrq_1, vq_1, vtwo));
+      vrq_2 = xnn_mul_f32(vrq_2, xnn_fnmadd_f32(vrq_2, vq_2, vtwo));
+      vrq_3 = xnn_mul_f32(vrq_3, xnn_fnmadd_f32(vrq_3, vq_3, vtwo));
+    }
+    const xnn_simd_f32_t verf_0 = xnn_mul_f32(vp_0, vrq_0);
+    const xnn_simd_f32_t verf_1 = xnn_mul_f32(vp_1, vrq_1);
+    const xnn_simd_f32_t verf_2 = xnn_mul_f32(vp_2, vrq_2);
+    const xnn_simd_f32_t verf_3 = xnn_mul_f32(vp_3, vrq_3);
 
     // Add one to the rational interpolant, and multiply by 0.5 times the
     // original input.
@@ -381,7 +416,11 @@ void xnn_f16_f32acc_vapproxgelu_ukernel__f16c_rational_6_4_nr_u32(
     vq = xnn_fmadd_f32(vx2, vq, vone);
 
     // Divide the numerator by the denominator.
-    const xnn_simd_f32_t verf = xnn_mul_f32(vp, xnn_rcp_f32(vq));
+    xnn_simd_f32_t vrq = xnn_rcp_f32(vq);
+    for (size_t iter = 0; iter < XNN_SIMD_NUM_RCP_ITER_F32; iter++) {
+      vrq = xnn_mul_f32(vrq, xnn_fnmadd_f32(vrq, vq, vtwo));
+    }
+    const xnn_simd_f32_t verf = xnn_mul_f32(vp, vrq);
 
     // Add one to the rational interpolant, and multiply by 0.5 times the
     // original input.
@@ -403,7 +442,11 @@ void xnn_f16_f32acc_vapproxgelu_ukernel__f16c_rational_6_4_nr_u32(
     vp = xnn_mul_f32(vx, vp);
     xnn_simd_f32_t vq = xnn_fmadd_f32(vx2, vbeta_4, vbeta_2);
     vq = xnn_fmadd_f32(vx2, vq, vone);
-    const xnn_simd_f32_t verf = xnn_mul_f32(vp, xnn_rcp_f32(vq));
+    xnn_simd_f32_t vrq = xnn_rcp_f32(vq);
+    for (size_t iter = 0; iter < XNN_SIMD_NUM_RCP_ITER_F32; iter++) {
+      vrq = xnn_mul_f32(vrq, xnn_fnmadd_f32(vrq, vq, vtwo));
+    }
+    const xnn_simd_f32_t verf = xnn_mul_f32(vp, vrq);
     const xnn_simd_f32_t vy = xnn_mul_f32(xnn_mul_f32(vx_orig, vhalf),
                                           xnn_add_f32(verf, vone));
 
