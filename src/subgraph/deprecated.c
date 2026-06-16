@@ -106,6 +106,12 @@ enum xnn_status xnn_define_global_average_pooling_1d(
   uint32_t output_id,
   uint32_t flags)
 {
+  if (input_id >= subgraph->num_values) {
+    xnn_log_error(
+      "failed to define %s operator with input ID #%" PRIu32 ": invalid Value ID",
+      xnn_node_type_to_string(xnn_node_type_global_average_pooling_1d), input_id);
+    return xnn_status_invalid_parameter;
+  }
   const struct xnn_value* input_value = &subgraph->values[input_id];
 
   size_t reduction_axes[XNN_MAX_TENSOR_DIMS];
@@ -136,6 +142,12 @@ enum xnn_status xnn_define_global_average_pooling_2d(
   uint32_t output_id,
   uint32_t flags)
 {
+  if (input_id >= subgraph->num_values) {
+    xnn_log_error(
+      "failed to define %s operator with input ID #%" PRIu32 ": invalid Value ID",
+      xnn_node_type_to_string(xnn_node_type_global_average_pooling_2d), input_id);
+    return xnn_status_invalid_parameter;
+  }
   const struct xnn_value* input_value = &subgraph->values[input_id];
 
   size_t reduction_axes[XNN_MAX_TENSOR_DIMS];
@@ -167,6 +179,12 @@ enum xnn_status xnn_define_global_sum_pooling_1d(
   uint32_t output_id,
   uint32_t flags)
 {
+  if (input_id >= subgraph->num_values) {
+    xnn_log_error(
+      "failed to define %s operator with input ID #%" PRIu32 ": invalid Value ID",
+      xnn_node_type_to_string(xnn_node_type_global_sum_pooling_1d), input_id);
+    return xnn_status_invalid_parameter;
+  }
   const struct xnn_value* input_value = &subgraph->values[input_id];
   size_t reduction_axes[XNN_MAX_TENSOR_DIMS];
   reduction_axes[0] = input_value->shape.num_dims - 2;
@@ -195,6 +213,12 @@ enum xnn_status xnn_define_global_sum_pooling_2d(
   uint32_t output_id,
   uint32_t flags)
 {
+  if (input_id >= subgraph->num_values) {
+    xnn_log_error(
+      "failed to define %s operator with input ID #%" PRIu32 ": invalid Value ID",
+      xnn_node_type_to_string(xnn_node_type_global_sum_pooling_2d), input_id);
+    return xnn_status_invalid_parameter;
+  }
   const struct xnn_value* input_value = &subgraph->values[input_id];
   size_t reduction_axes[XNN_MAX_TENSOR_DIMS];
   reduction_axes[0] = input_value->shape.num_dims - 3;
