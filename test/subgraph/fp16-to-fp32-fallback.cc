@@ -1106,6 +1106,303 @@ TEST_P(Fp16ToFp32FallbackBinaryOpTest, Rewrite) {
   EXPECT_THAT(graph, IsIsomorphicTo(expected_graph));
 }
 
+TEST_F(Fp16ToFp32FineGrainedOpSupportTest, NoRewriteAfterFp16Rewrite) {
+  xnn_set_hardware_config(&mock_config_);
+
+  std::unique_ptr<XnnpackGraph> graph;
+  {
+    XnnTensor input({.type = Type::kFP32, .shape = {3, 4}});
+    XnnTensor output = Abs(input);
+    LRT_TENSOR_ASSERT_OK_AND_ASSIGN(graph, BuildXnnpackGraph({output}));
+  }
+
+  std::unique_ptr<XnnpackGraph> expected_graph;
+  {
+    XnnTensor input({.type = Type::kFP32, .shape = {3, 4}});
+    XnnTensor output = Abs(input);
+    LRT_TENSOR_ASSERT_OK_AND_ASSIGN(expected_graph,
+                                    BuildXnnpackGraph({output}));
+  }
+
+  // We expect the graph to be in the FP16 state after rewrite.
+  // So we run rewrite on expected_graph too.
+  ASSERT_TRUE(xnn_subgraph_rewrite_for_fp16(expected_graph->subgraph()));
+
+  xnn_subgraph_t subgraph = graph->subgraph();
+
+  // Rewrite to FP16.
+  ASSERT_TRUE(xnn_subgraph_rewrite_for_fp16(subgraph));
+
+  // Run fallback. It should be a no-op because native FP16 is supported.
+  ASSERT_THAT(xnn_subgraph_fallback_from_fp16_to_fp32(subgraph,
+                                                      /*optimization_flags=*/0),
+              Eq(xnn_status_success));
+
+  // The graph should match the rewritten FP16 graph.
+  EXPECT_THAT(graph, IsIsomorphicTo(expected_graph));
+
+  xnn_reset_hardware_config();
+}
+
+struct Qd8FcSubgraph {
+  xnn_subgraph_t subgraph = nullptr;
+  uint32_t input_id = XNN_INVALID_VALUE_ID;
+  uint32_t convert_output_id = XNN_INVALID_VALUE_ID;
+  uint32_t weights_id = XNN_INVALID_VALUE_ID;
+  uint32_t output_id = XNN_INVALID_VALUE_ID;
+  std::vector<float> weights_scale = {1.0f, 1.0f};
+  std::vector<int8_t> weights_data = {1, 2, 3, 4, 5, 6, 7, 8};
+
+  void Build(enum xnn_datatype input_datatype,
+             enum xnn_datatype output_datatype) {
+    ASSERT_EQ(
+        xnn_create_subgraph(/*external_value_ids=*/2, /*flags=*/0, &subgraph),
+        xnn_status_success);
+
+    std::vector<size_t> input_dims = {3, 4};
+    std::vector<size_t> weights_dims = {2, 4};
+    std::vector<size_t> output_dims = {3, 2};
+
+    // Define Input (external)
+    ASSERT_EQ(xnn_define_tensor_value(subgraph, input_datatype,
+                                      input_dims.size(), input_dims.data(),
+                                      /*data=*/nullptr, /*external_id=*/0,
+                                      XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id),
+              xnn_status_success);
+
+    // Define Temp (qdint8, internal)
+    ASSERT_EQ(
+        xnn_define_dynamically_quantized_tensor_value(
+            subgraph, xnn_datatype_qdint8, input_dims.size(),
+            /*num_nonbatch_dims=*/1, input_dims.data(), XNN_INVALID_VALUE_ID,
+            /*flags=*/0, &convert_output_id),
+        xnn_status_success);
+
+    // Define Convert Node (type 6)
+    ASSERT_EQ(xnn_define_unary(subgraph, xnn_unary_convert,
+                               /*params=*/nullptr, input_id, convert_output_id,
+                               /*flags=*/0),
+              xnn_status_success);
+
+    // Define Weights (static, qcint8)
+    ASSERT_EQ(xnn_define_channelwise_quantized_tensor_value(
+                  subgraph, xnn_datatype_qcint8, weights_scale.data(),
+                  weights_dims.size(), /*channel_dim=*/0, weights_dims.data(),
+                  weights_data.data(), XNN_INVALID_VALUE_ID, /*flags=*/0,
+                  &weights_id),
+              xnn_status_success);
+
+    // Define Output (external)
+    ASSERT_EQ(
+        xnn_define_tensor_value(subgraph, output_datatype, output_dims.size(),
+                                output_dims.data(),
+                                /*data=*/nullptr, /*external_id=*/1,
+                                XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id),
+        xnn_status_success);
+
+    // Define Fully Connected Node
+    ASSERT_EQ(xnn_define_fully_connected(
+                  subgraph, -INFINITY, INFINITY, convert_output_id, weights_id,
+                  XNN_INVALID_VALUE_ID, output_id, /*flags=*/0),
+              xnn_status_success);
+  }
+};
+
+TEST_F(Fp16ToFp32FineGrainedOpSupportTest, Fp16ToQdint8Convert) {
+  xnn_set_hardware_config(&mock_config_);
+
+  Qd8FcSubgraph builder;
+  builder.Build(xnn_datatype_fp16, xnn_datatype_fp16);
+  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> subgraph_guard(
+      builder.subgraph, xnn_delete_subgraph);
+
+  Qd8FcSubgraph expected_builder;
+  expected_builder.Build(xnn_datatype_fp16, xnn_datatype_fp16);
+  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)>
+      expected_subgraph_guard(expected_builder.subgraph, xnn_delete_subgraph);
+
+  // Run fallback. Since native FP16 is supported (via mock_config_),
+  // and all ops in the graph (Convert FP16->qd8, FC qd8->f16) are supported,
+  // it should be a no-op (0 changes).
+  ASSERT_THAT(xnn_subgraph_fallback_from_fp16_to_fp32(builder.subgraph,
+                                                      /*optimization_flags=*/0),
+              Eq(xnn_status_success));
+
+  // The graph should match the expected FP16 graph.
+  EXPECT_THAT(builder.subgraph, IsIsomorphicTo(expected_builder.subgraph));
+
+  xnn_reset_hardware_config();
+}
+
+TEST_F(Fp16ToFp32FallbackTest, Fp16ToQdint8ConvertFallback) {
+  Qd8FcSubgraph builder;
+  builder.Build(xnn_datatype_fp16, xnn_datatype_fp16);
+  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> subgraph_guard(
+      builder.subgraph, xnn_delete_subgraph);
+
+  std::unique_ptr<XnnpackGraph> expected_graph;
+  {
+    XnnTensor input({.type = Type::kFP16, .shape = {3, 4}});
+    XnnTensor temp_fp32_in = Cast(input, Type::kFP32);
+
+    XnnTensor weights(
+        {.type = Type::kI8,
+         .shape = {2, 4},
+         .buffer = OwningCpuBuffer::Copy<Type::kI8>({1, 2, 3, 4, 5, 6, 7, 8})});
+    weights.SetQuantization(
+        std::make_shared<litert::tensor::PerChannelAffineQuantization>(
+            /*scales=*/std::vector<float>{1.0f, 1.0f},
+            /*zero_points=*/std::vector<int64_t>{0, 0},
+            /*quantized_dimension=*/0));
+
+    XnnTensor temp_fp32_out = FullyConnected(temp_fp32_in, weights);
+    XnnTensor output = Cast(temp_fp32_out, Type::kFP16);
+
+    LRT_TENSOR_ASSERT_OK_AND_ASSIGN(expected_graph,
+                                    BuildXnnpackGraph({output}));
+  }
+
+  // Run fallback. Since FP16 is disabled, it should rewrite it.
+  ASSERT_THAT(xnn_subgraph_fallback_from_fp16_to_fp32(builder.subgraph,
+                                                      /*optimization_flags=*/0),
+              Eq(xnn_status_success));
+
+  // The graph should match the expected rewritten graph.
+  EXPECT_THAT(builder.subgraph, IsIsomorphicTo(expected_graph));
+}
+
+TEST_F(Fp16ToFp32FineGrainedOpSupportTest, ElideType6Convert) {
+  xnn_set_hardware_config(&mock_config_);
+
+  xnn_subgraph_t subgraph = nullptr;
+  ASSERT_EQ(
+      xnn_create_subgraph(/*external_value_ids=*/2, /*flags=*/0, &subgraph),
+      xnn_status_success);
+  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> subgraph_guard(
+      subgraph, xnn_delete_subgraph);
+
+  std::vector<size_t> dims = {3, 4};
+
+  uint32_t input_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(xnn_define_tensor_value(subgraph, xnn_datatype_fp16, dims.size(),
+                                    dims.data(),
+                                    /*data=*/nullptr, /*external_id=*/0,
+                                    XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id),
+            xnn_status_success);
+
+  uint32_t temp_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(xnn_define_tensor_value(subgraph, xnn_datatype_fp16, dims.size(),
+                                    dims.data(),
+                                    /*data=*/nullptr, XNN_INVALID_VALUE_ID,
+                                    /*flags=*/0, &temp_id),
+            xnn_status_success);
+
+  uint32_t output_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(xnn_define_tensor_value(subgraph, xnn_datatype_fp16, dims.size(),
+                                    dims.data(),
+                                    /*data=*/nullptr, /*external_id=*/1,
+                                    XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id),
+            xnn_status_success);
+
+  // Node 0: Convert (FP16->FP16, type 6)
+  struct xnn_node* node = xnn_subgraph_new_node(subgraph);
+  ASSERT_NE(node, nullptr);
+  xnn_init_convert_node(node, input_id, temp_id, /*flags=*/0);
+
+  // Node 1: Abs (FP16)
+  ASSERT_EQ(xnn_define_unary(subgraph, xnn_unary_abs,
+                             /*params=*/nullptr, temp_id, output_id,
+                             /*flags=*/0),
+            xnn_status_success);
+
+  // Expected graph: Input -> Abs -> Output (no convert)
+  std::unique_ptr<XnnpackGraph> expected_graph;
+  {
+    XnnTensor input({.type = Type::kFP16, .shape = {3, 4}});
+    XnnTensor output = Abs(input);
+    LRT_TENSOR_ASSERT_OK_AND_ASSIGN(expected_graph,
+                                    BuildXnnpackGraph({output}));
+  }
+
+  // Run fallback. Convert should be elided.
+  ASSERT_THAT(xnn_subgraph_fallback_from_fp16_to_fp32(subgraph,
+                                                      /*optimization_flags=*/0),
+              Eq(xnn_status_success));
+
+  // The graph should match the expected graph (only Abs).
+  EXPECT_THAT(subgraph, IsIsomorphicTo(expected_graph));
+
+  xnn_reset_hardware_config();
+}
+
+TEST_F(Fp16ToFp32FineGrainedOpSupportTest, DontElideType6ConvertWhenExternal) {
+  xnn_set_hardware_config(&mock_config_);
+
+  xnn_subgraph_t subgraph = nullptr;
+  ASSERT_EQ(
+      xnn_create_subgraph(/*external_value_ids=*/2, /*flags=*/0, &subgraph),
+      xnn_status_success);
+  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> subgraph_guard(
+      subgraph, xnn_delete_subgraph);
+
+  std::vector<size_t> dims = {3, 4};
+
+  uint32_t input_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(xnn_define_tensor_value(subgraph, xnn_datatype_fp16, dims.size(),
+                                    dims.data(),
+                                    /*data=*/nullptr, /*external_id=*/0,
+                                    XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id),
+            xnn_status_success);
+
+  uint32_t output_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(xnn_define_tensor_value(subgraph, xnn_datatype_fp16, dims.size(),
+                                    dims.data(),
+                                    /*data=*/nullptr, /*external_id=*/1,
+                                    XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id),
+            xnn_status_success);
+
+  // Node 0: Convert (FP16->FP16, type 6)
+  struct xnn_node* node = xnn_subgraph_new_node(subgraph);
+  ASSERT_NE(node, nullptr);
+  xnn_init_convert_node(node, input_id, output_id, /*flags=*/0);
+
+  // Expected graph: same as starting graph (must keep the convert)
+  xnn_subgraph_t expected_subgraph = nullptr;
+  ASSERT_EQ(xnn_create_subgraph(/*external_value_ids=*/2, /*flags=*/0,
+                                &expected_subgraph),
+            xnn_status_success);
+  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)>
+      expected_subgraph_guard(expected_subgraph, xnn_delete_subgraph);
+
+  uint32_t exp_input_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(xnn_define_tensor_value(
+                expected_subgraph, xnn_datatype_fp16, dims.size(), dims.data(),
+                /*data=*/nullptr, /*external_id=*/0,
+                XNN_VALUE_FLAG_EXTERNAL_INPUT, &exp_input_id),
+            xnn_status_success);
+
+  uint32_t exp_output_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(xnn_define_tensor_value(
+                expected_subgraph, xnn_datatype_fp16, dims.size(), dims.data(),
+                /*data=*/nullptr, /*external_id=*/1,
+                XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &exp_output_id),
+            xnn_status_success);
+
+  struct xnn_node* exp_node = xnn_subgraph_new_node(expected_subgraph);
+  ASSERT_NE(exp_node, nullptr);
+  xnn_init_convert_node(exp_node, exp_input_id, exp_output_id, /*flags=*/0);
+
+  // Run fallback. Convert should NOT be elided.
+  ASSERT_THAT(xnn_subgraph_fallback_from_fp16_to_fp32(subgraph,
+                                                      /*optimization_flags=*/0),
+              Eq(xnn_status_success));
+
+  // The graph should still match the expected graph (with convert).
+  EXPECT_THAT(subgraph, IsIsomorphicTo(expected_subgraph));
+
+  xnn_reset_hardware_config();
+}
+
 INSTANTIATE_TEST_SUITE_P(
     BinaryOps, Fp16ToFp32FallbackBinaryOpTest,
     testing::ValuesIn<BinaryOpParam>({
