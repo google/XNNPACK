@@ -28,10 +28,10 @@ cc_library(
     # These headers need to be textual because we can't compile them with the appropriate copts.
     textual_hdrs = [
         # These headers should not be directly included.
-        "generic.inc",
+        "extend_vec.inc",
+        "target_independent.inc",
         "x86_vec128_base.h",
         "x86_vec256_base.h",
-        "emulate_fma.h",
         # For the most part, only one of these headers should be included. Multiple of these headers
         # may define the same operation and type, using a different implementation, depending on the
         # target. For example, f32x16 is provided by both avx512 as a single 512-bit vector, and
@@ -47,13 +47,4 @@ cc_library(
         "wasm_simd128.h",
     ],
     deps = ["//ynnpack/base"],
-)
-
-cc_library(
-    name = "emulate_fma",
-    hdrs = ["emulate_fma.h"],
-    deps = [
-        ":simd",
-        "//ynnpack/base",
-    ],
 )

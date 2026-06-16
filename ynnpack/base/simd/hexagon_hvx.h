@@ -640,6 +640,6 @@ YNN_ALWAYS_INLINE std::tuple<u8x128, u8x128> interleave(
 
 }  // namespace ynn
 
-#include "ynnpack/base/simd/generic.inc"  // IWYU pragma: export
+#include "ynnpack/base/simd/extend_vec.inc"  // IWYU pragma: export
 
 #endif  // XNNPACK_YNNPACK_BASE_SIMD_HEXAGON_HVX_H_

@@ -862,6 +862,7 @@ YNN_ALWAYS_INLINE std::tuple<u8x16, u8x16> interleave(
 
 }  // namespace ynn
 
-#include "ynnpack/base/simd/generic.inc"  // IWYU pragma: export
+#include "ynnpack/base/simd/extend_vec.inc"  // IWYU pragma: export
+#include "ynnpack/base/simd/target_independent.inc"  // IWYU pragma: export
 
 #endif  // XNNPACK_YNNPACK_BASE_SIMD_WASM_SIMD128_H_

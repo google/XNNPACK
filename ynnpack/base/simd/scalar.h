@@ -8,7 +8,8 @@
 
 // clang-format off
 #include "ynnpack/base/simd/vec.h"  // IWYU pragma: export
-#include "ynnpack/base/simd/generic.inc"  // IWYU pragma: export
+#include "ynnpack/base/simd/extend_vec.inc"  // IWYU pragma: export
+#include "ynnpack/base/simd/target_independent.inc"  // IWYU pragma: export
 // clang-format on
 
 #endif  // XNNPACK_YNNPACK_BASE_SIMD_SCALAR_H_

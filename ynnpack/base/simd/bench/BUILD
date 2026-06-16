@@ -43,7 +43,6 @@ package(default_visibility = ["//ynnpack:__subpackages__"])
     deps = [
         "//ynnpack/base",
         "//ynnpack/base/simd",
-        "//ynnpack/base/simd:emulate_fma",
         "@slinky//slinky/base",
     ] + ynn_benchmark_deps(),
 ) for arch in [

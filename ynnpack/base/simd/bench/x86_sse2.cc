@@ -4,7 +4,6 @@
 // LICENSE file in the root directory of this source tree.
 
 #include "ynnpack/base/arch.h"
-#include "ynnpack/base/simd/emulate_fma.h"
 #include "ynnpack/base/simd/x86_vec128.h"
 
 // This must be included last

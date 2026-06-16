@@ -1994,6 +1994,7 @@ YNN_ALWAYS_INLINE f16x8 cast(f32x8 a, half) {
 
 }  // namespace ynn
 
-#include "ynnpack/base/simd/generic.inc"  // IWYU pragma: export
+#include "ynnpack/base/simd/extend_vec.inc"  // IWYU pragma: export
+#include "ynnpack/base/simd/target_independent.inc"  // IWYU pragma: export
 
 #endif  // XNNPACK_YNNPACK_BASE_SIMD_ARM_VEC128_H_

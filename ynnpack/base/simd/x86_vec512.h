@@ -1285,6 +1285,7 @@ YNN_ALWAYS_INLINE s8x64 cast(s4x64 from, int8_t) {
 
 }  // namespace ynn
 
-#include "ynnpack/base/simd/generic.inc"  // IWYU pragma: export
+#include "ynnpack/base/simd/extend_vec.inc"  // IWYU pragma: export
+#include "ynnpack/base/simd/target_independent.inc"  // IWYU pragma: export
 
 #endif  // XNNPACK_YNNPACK_BASE_SIMD_X86_VEC512_H_
