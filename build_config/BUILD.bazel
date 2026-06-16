@@ -142,9 +142,9 @@ config_setting(
 )
 
 config_setting(
-    name = "windows_aarch64",
+    name = "windows_arm64",
     values = {
-         "cpu": "aarch64_windows",
+         "cpu": "arm64_windows",
     },
 )
 
@@ -340,6 +340,7 @@ selects.config_setting_group(
         ":macos_arm64",
         ":tvos_arm64",
         ":watchos_arm64_32",
+        ":windows_arm64",
     ],
 )
 
@@ -348,6 +349,7 @@ selects.config_setting_group(
     match_any = [
         ":aarch32",
         ":aarch64",
+        ":windows_arm64",
     ],
 )
 
