@@ -31,11 +31,11 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - name: Mount ccache
-        uses: actions/cache@v5
+      - name: Restore ccache
+        uses: actions/cache/restore@v5
         with:
           path: /home/xnnpack/.ccache
-          key: ccache-${{ runner.os }}-${{ github.job }}-${{ github.run_id }}
+          key: ccache-${{ runner.os }}-${{ github.job }}-${{ github.run_id }}-${{ github.run_attempt }}
           restore-keys: |
             ccache-${{ runner.os }}-${{ github.job }}-
       - name: Configure ccache limit
@@ -48,6 +48,12 @@ jobs:
         if: ${{ inputs.run-tests }}
         run: ctest --output-on-failure --parallel $(nproc)
         working-directory: build/local
+      - name: Save ccache
+        if: ${{ inputs.update-caches }}
+        uses: actions/cache/save@v5
+        with:
+          path: /home/xnnpack/.ccache
+          key: ccache-${{ runner.os }}-${{ github.job }}-${{ github.run_id }}-${{ github.run_attempt }}
       - name: Print ccache stats
         run: ccache -s
 
@@ -63,11 +69,11 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - name: Mount ccache
-        uses: actions/cache@v5
+      - name: Restore ccache
+        uses: actions/cache/restore@v5
         with:
           path: /home/xnnpack/.ccache
-          key: ccache-${{ runner.os }}-${{ github.job }}-${{ github.run_id }}
+          key: ccache-${{ runner.os }}-${{ github.job }}-${{ github.run_id }}-${{ github.run_attempt }}
           restore-keys: |
             ccache-${{ runner.os }}-${{ github.job }}-
       - name: Configure ccache limit
@@ -80,6 +86,12 @@ jobs:
         if: ${{ inputs.run-tests }}
         run: ctest --output-on-failure --parallel $(nproc)
         working-directory: build/local
+      - name: Save ccache
+        if: ${{ inputs.update-caches }}
+        uses: actions/cache/save@v5
+        with:
+          path: /home/xnnpack/.ccache
+          key: ccache-${{ runner.os }}-${{ github.job }}-${{ github.run_id }}-${{ github.run_attempt }}
       - name: Print ccache stats
         run: ccache -s
 
@@ -95,11 +107,11 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - name: Mount ccache
-        uses: actions/cache@v5
+      - name: Restore ccache
+        uses: actions/cache/restore@v5
         with:
           path: /home/xnnpack/.ccache
-          key: ccache-armhf-${{ runner.os }}-${{ github.job }}-${{ github.run_id }}
+          key: ccache-armhf-${{ runner.os }}-${{ github.job }}-${{ github.run_id }}-${{ github.run_attempt }}
           restore-keys: |
             ccache-armhf-${{ runner.os }}-${{ github.job }}-
 
@@ -116,6 +128,12 @@ jobs:
         run: ctest --output-on-failure --parallel $(nproc)
         working-directory: build/linux/armhf
 
+      - name: Save ccache
+        if: ${{ inputs.update-caches }}
+        uses: actions/cache/save@v5
+        with:
+          path: /home/xnnpack/.ccache
+          key: ccache-armhf-${{ runner.os }}-${{ github.job }}-${{ github.run_id }}-${{ github.run_attempt }}
       - name: Print ccache stats
         run: ccache -s
 
@@ -131,11 +149,11 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - name: Mount ccache
-        uses: actions/cache@v5
+      - name: Restore ccache
+        uses: actions/cache/restore@v5
         with:
           path: /home/xnnpack/.ccache
-          key: ccache-riscv64-${{ runner.os }}-${{ github.job }}-${{ github.run_id }}
+          key: ccache-riscv64-${{ runner.os }}-${{ github.job }}-${{ github.run_id }}-${{ github.run_attempt }}
           restore-keys: |
             ccache-riscv64-${{ runner.os }}-${{ github.job }}-
 
@@ -158,6 +176,12 @@ jobs:
         run: ctest --output-on-failure --label-exclude operator --parallel $(nproc)
         working-directory: build/linux/riscv64
 
+      - name: Save ccache
+        if: ${{ inputs.update-caches }}
+        uses: actions/cache/save@v5
+        with:
+          path: /home/xnnpack/.ccache
+          key: ccache-riscv64-${{ runner.os }}-${{ github.job }}-${{ github.run_id }}-${{ github.run_attempt }}
       - name: Print ccache stats
         run: ccache -s
 
@@ -362,11 +386,11 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - name: Mount ccache
-        uses: actions/cache@v5
+      - name: Restore ccache
+        uses: actions/cache/restore@v5
         with:
           path: /home/xnnpack/.ccache
-          key: ccache-android-${{ matrix.arch }}-${{ github.sha }}
+          key: ccache-android-${{ matrix.arch }}-${{ github.run_id }}-${{ github.run_attempt }}
           restore-keys: |
             ccache-android-${{ matrix.arch }}-
 
@@ -378,6 +402,12 @@ jobs:
       - name: Configure and build
         run: scripts/build-android-${{ matrix.arch }}.sh
 
+      - name: Save ccache
+        if: ${{ inputs.update-caches }}
+        uses: actions/cache/save@v5
+        with:
+          path: /home/xnnpack/.ccache
+          key: ccache-android-${{ matrix.arch }}-${{ github.run_id }}-${{ github.run_attempt }}
       - name: Print ccache stats
         run: ccache -s
 
@@ -408,12 +438,13 @@ jobs:
     steps:
       - name: Restore ccache
         id: cache-ccache-restore
-        uses: actions/cache@v5
+        uses: actions/cache/restore@v5
         with:
           path: |
             /home/runner/.cache/ccache
-          key: ccache-linux-arm-${{ github.ref_name }}-${{ github.sha }}
+          key: ccache-linux-arm-${{ github.ref_name }}-${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
           restore-keys: |
+            ccache-linux-arm-${{ github.ref_name }}-${{ github.sha }}-
             ccache-linux-arm-${{ github.ref_name }}-
             ccache-linux-arm-master-
       - name: Install system dependencies
@@ -452,6 +483,13 @@ jobs:
         run: |
           autoninja -C out/arm.dchecks
         working-directory: ${{ github.workspace }}/xnnpack
+      - name: Save ccache
+        if: ${{ inputs.update-caches }}
+        uses: actions/cache/save@v5
+        with:
+          path: |
+            /home/runner/.cache/ccache
+          key: ccache-linux-arm-${{ github.ref_name }}-${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
       - name: Print ccache stats
         run: ccache -s
       - name: Run tests
@@ -471,12 +509,13 @@ jobs:
     steps:
       - name: Restore ccache
         id: cache-ccache-restore
-        uses: actions/cache@v5
+        uses: actions/cache/restore@v5
         with:
           path: |
             /home/runner/.cache/ccache
-          key: ccache-linux-${{ github.ref_name }}-${{ github.sha }}
+          key: ccache-linux-${{ github.ref_name }}-${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
           restore-keys: |
+            ccache-linux-${{ github.ref_name }}-${{ github.sha }}-
             ccache-linux-${{ github.ref_name }}-
             ccache-linux-master-
       - name: Install ccache
@@ -520,6 +559,13 @@ jobs:
         run: |
           autoninja -C out/x64.dchecks
         working-directory: ${{ github.workspace }}/xnnpack
+      - name: Save ccache
+        if: ${{ inputs.update-caches }}
+        uses: actions/cache/save@v5
+        with:
+          path: |
+            /home/runner/.cache/ccache
+          key: ccache-linux-${{ github.ref_name }}-${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
       - name: Print ccache stats
         run: ccache -s
       - name: Run tests
@@ -539,14 +585,15 @@ jobs:
         --define=ynn_enable_x86_avx512fp16=false
     steps:
       - uses: actions/checkout@v6
-      - name: Mount Bazel Cache
-        uses: actions/cache@v5
+      - name: Restore Bazel Cache
+        uses: actions/cache/restore@v5
         with:
           path: |
             /home/xnnpack/.cache/bazel/disk_cache
             /home/xnnpack/.cache/bazel/repo_cache
-          key: bazel-clang18-opt-${{ runner.os }}-${{ github.job }}-${{ hashFiles('WORKSPACE', 'WORKSPACE.bazel', 'MODULE.bazel') }}
+          key: bazel-clang18-opt-${{ runner.os }}-${{ github.job }}-${{ hashFiles('WORKSPACE', 'WORKSPACE.bazel', 'MODULE.bazel') }}-${{ github.run_id }}-${{ github.run_attempt }}
           restore-keys: |
+            bazel-clang18-opt-${{ runner.os }}-${{ github.job }}-${{ hashFiles('WORKSPACE', 'WORKSPACE.bazel', 'MODULE.bazel') }}-
             bazel-clang18-opt-${{ runner.os }}-${{ github.job }}-
 
       - name: Build tests
@@ -584,6 +631,14 @@ jobs:
         run: |
           mkdir -p /home/xnnpack/.cache/bazel/disk_cache
           find /home/xnnpack/.cache/bazel/disk_cache -type f -atime +7 -delete
+      - name: Save Bazel Cache
+        if: ${{ inputs.update-caches }}
+        uses: actions/cache/save@v5
+        with:
+          path: |
+            /home/xnnpack/.cache/bazel/disk_cache
+            /home/xnnpack/.cache/bazel/repo_cache
+          key: bazel-clang18-opt-${{ runner.os }}-${{ github.job }}-${{ hashFiles('WORKSPACE', 'WORKSPACE.bazel', 'MODULE.bazel') }}-${{ github.run_id }}-${{ github.run_attempt }}
 
   bazel-linux-x86_64-gcc-9:
     runs-on: 'ubuntu-24.04-8core'
@@ -608,14 +663,15 @@ jobs:
         --define=ynn_enable_x86_avx512=false
     steps:
       - uses: actions/checkout@v6
-      - name: Mount Bazel Cache
-        uses: actions/cache@v5
+      - name: Restore Bazel Cache
+        uses: actions/cache/restore@v5
         with:
           path: |
             /home/xnnpack/.cache/bazel/disk_cache
             /home/xnnpack/.cache/bazel/repo_cache
-          key: bazel-gcc9-opt-${{ runner.os }}-${{ github.job }}-${{ hashFiles('WORKSPACE', 'WORKSPACE.bazel', 'MODULE.bazel') }}
+          key: bazel-gcc9-opt-${{ runner.os }}-${{ github.job }}-${{ hashFiles('WORKSPACE', 'WORKSPACE.bazel', 'MODULE.bazel') }}-${{ github.run_id }}-${{ github.run_attempt }}
           restore-keys: |
+            bazel-gcc9-opt-${{ runner.os }}-${{ github.job }}-${{ hashFiles('WORKSPACE', 'WORKSPACE.bazel', 'MODULE.bazel') }}-
             bazel-gcc9-opt-${{ runner.os }}-${{ github.job }}-
 
       - name: Build tests
@@ -653,6 +709,14 @@ jobs:
         run: |
           mkdir -p /home/xnnpack/.cache/bazel/disk_cache
           find /home/xnnpack/.cache/bazel/disk_cache -type f -atime +7 -delete
+      - name: Save Bazel Cache
+        if: ${{ inputs.update-caches }}
+        uses: actions/cache/save@v5
+        with:
+          path: |
+            /home/xnnpack/.cache/bazel/disk_cache
+            /home/xnnpack/.cache/bazel/repo_cache
+          key: bazel-gcc9-opt-${{ runner.os }}-${{ github.job }}-${{ hashFiles('WORKSPACE', 'WORKSPACE.bazel', 'MODULE.bazel') }}-${{ github.run_id }}-${{ github.run_attempt }}
 
   bazel-linux-aarch64-clang18:
     runs-on: 'arm-ubuntu-arm-22.04-8core'
@@ -664,14 +728,15 @@ jobs:
       CXX: clang++-18
     steps:
       - uses: actions/checkout@v6
-      - name: Mount Bazel Cache
-        uses: actions/cache@v5
+      - name: Restore Bazel Cache
+        uses: actions/cache/restore@v5
         with:
           path: |
             /home/xnnpack/.cache/bazel/disk_cache
             /home/xnnpack/.cache/bazel/repo_cache
-          key: bazel-clang18-opt-${{ runner.os }}-${{ github.job }}-${{ hashFiles('WORKSPACE', 'WORKSPACE.bazel', 'MODULE.bazel') }}
+          key: bazel-clang18-opt-${{ runner.os }}-${{ github.job }}-${{ hashFiles('WORKSPACE', 'WORKSPACE.bazel', 'MODULE.bazel') }}-${{ github.run_id }}-${{ github.run_attempt }}
           restore-keys: |
+            bazel-clang18-opt-${{ runner.os }}-${{ github.job }}-${{ hashFiles('WORKSPACE', 'WORKSPACE.bazel', 'MODULE.bazel') }}-
             bazel-clang18-opt-${{ runner.os }}-${{ github.job }}-
 
       - name: Build tests
@@ -708,6 +773,14 @@ jobs:
         run: |
           mkdir -p /home/xnnpack/.cache/bazel/disk_cache
           find /home/xnnpack/.cache/bazel/disk_cache -type f -atime +7 -delete
+      - name: Save Bazel Cache
+        if: ${{ inputs.update-caches }}
+        uses: actions/cache/save@v5
+        with:
+          path: |
+            /home/xnnpack/.cache/bazel/disk_cache
+            /home/xnnpack/.cache/bazel/repo_cache
+          key: bazel-clang18-opt-${{ runner.os }}-${{ github.job }}-${{ hashFiles('WORKSPACE', 'WORKSPACE.bazel', 'MODULE.bazel') }}-${{ github.run_id }}-${{ github.run_attempt }}
 
   bazel-linux-aarch64-gcc13:
     # This ensures we have solid test coverage for _Float16
@@ -724,14 +797,15 @@ jobs:
         --define=ynn_enable_arm64_sve=false
     steps:
       - uses: actions/checkout@v6
-      - name: Mount Bazel Cache
-        uses: actions/cache@v5
+      - name: Restore Bazel Cache
+        uses: actions/cache/restore@v5
         with:
           path: |
             /home/xnnpack/.cache/bazel/disk_cache
             /home/xnnpack/.cache/bazel/repo_cache
-          key: bazel-gcc13-opt-${{ runner.os }}-${{ github.job }}-${{ hashFiles('WORKSPACE', 'WORKSPACE.bazel', 'MODULE.bazel') }}
+          key: bazel-gcc13-opt-${{ runner.os }}-${{ github.job }}-${{ hashFiles('WORKSPACE', 'WORKSPACE.bazel', 'MODULE.bazel') }}-${{ github.run_id }}-${{ github.run_attempt }}
           restore-keys: |
+            bazel-gcc13-opt-${{ runner.os }}-${{ github.job }}-${{ hashFiles('WORKSPACE', 'WORKSPACE.bazel', 'MODULE.bazel') }}-
             bazel-gcc13-opt-${{ runner.os }}-${{ github.job }}-
 
       - name: Build tests
@@ -770,6 +844,14 @@ jobs:
         run: |
           mkdir -p /home/xnnpack/.cache/bazel/disk_cache
           find /home/xnnpack/.cache/bazel/disk_cache -type f -atime +7 -delete
+      - name: Save Bazel Cache
+        if: ${{ inputs.update-caches }}
+        uses: actions/cache/save@v5
+        with:
+          path: |
+            /home/xnnpack/.cache/bazel/disk_cache
+            /home/xnnpack/.cache/bazel/repo_cache
+          key: bazel-gcc13-opt-${{ runner.os }}-${{ github.job }}-${{ hashFiles('WORKSPACE', 'WORKSPACE.bazel', 'MODULE.bazel') }}-${{ github.run_id }}-${{ github.run_attempt }}
 
   bazel-linux-aarch64-sme2-qemu:
     runs-on: "arm-ubuntu-arm-22.04-8core"
@@ -785,12 +867,14 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - name: Mount bazel cache
-        uses: actions/cache@v5
+      - name: Restore bazel cache
+        uses: actions/cache/restore@v5
         with:
           path: "/home/xnnpack/.cache/bazel"
-          key: bazel-clang20-opt-sme2-${{ runner.os }}-${{ github.job }}-${{ hashFiles('WORKSPACE', 'WORKSPACE.bazel', 'MODULE.bazel') }}
-          restore-keys: bazel-clang20-opt-sme2-${{ runner.os }}-${{ github.job }}-
+          key: bazel-clang20-opt-sme2-${{ runner.os }}-${{ github.job }}-${{ hashFiles('WORKSPACE', 'WORKSPACE.bazel', 'MODULE.bazel') }}-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: |
+            bazel-clang20-opt-sme2-${{ runner.os }}-${{ github.job }}-${{ hashFiles('WORKSPACE', 'WORKSPACE.bazel', 'MODULE.bazel') }}-
+            bazel-clang20-opt-sme2-${{ runner.os }}-${{ github.job }}-
 
       - name: Build microkernel and subgraph tests
         if: ${{ !inputs.run-tests }}
@@ -865,3 +949,9 @@ jobs:
         run: |
           mkdir -p /home/xnnpack/.cache/bazel
           find "/home/xnnpack/.cache/bazel" -type f -atime +7 -delete
+      - name: Save Bazel Cache
+        if: ${{ inputs.update-caches }}
+        uses: actions/cache/save@v5
+        with:
+          path: "/home/xnnpack/.cache/bazel"
+          key: bazel-clang20-opt-sme2-${{ runner.os }}-${{ github.job }}-${{ hashFiles('WORKSPACE', 'WORKSPACE.bazel', 'MODULE.bazel') }}-${{ github.run_id }}-${{ github.run_attempt }}
