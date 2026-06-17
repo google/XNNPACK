@@ -1,0 +1,33 @@
+--- a/slinky/runtime/expr.h
++++ b/slinky/runtime/expr.h
+@@ -220,7 +220,10 @@
+   // Make a new constant expression.
+   expr(std::int64_t x);
+   SLINKY_INLINE expr(std::int32_t x) : expr(static_cast<std::int64_t>(x)) {}
+   SLINKY_INLINE expr(std::size_t x) : expr(static_cast<std::int64_t>(x)) {}
++#ifdef __hexagon__
++  SLINKY_INLINE expr(int x) : expr(static_cast<std::int64_t>(x)) {}
++#endif
+   expr(var sym);
+
+   // Make an `expr` referencing an existing node.
+--- a/slinky/builder/rewrite.h
++++ b/slinky/builder/rewrite.h
+@@ -78,6 +78,17 @@
+   static constexpr bool is_canonical = true;
+   static constexpr int matched = 0;
+ };
++#ifdef __hexagon__
++// On Hexagon, std::int32_t is `long`, so `int` literals appearing as template
++// parameters in pattern types fall through to the primary template.
++template <>
++struct pattern_info<int> {
++  static constexpr expr_node_type type = expr_node_type::constant;
++  static constexpr bool is_boolean = false;
++  static constexpr bool is_canonical = true;
++  static constexpr int matched = 0;
++};
++#endif
+ #ifdef __EMSCRIPTEN__
+ template <>
+ struct pattern_info<long> {

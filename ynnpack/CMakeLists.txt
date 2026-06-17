@@ -152,10 +152,60 @@ IF(NOT TARGET slinky_base)
       EXECUTE_PROCESS(COMMAND "${CMAKE_COMMAND}" --build .
         WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/slinky-download")
       SET(SLINKY_SOURCE_DIR "${CMAKE_BINARY_DIR}/slinky-source" CACHE STRING "slinky source directory")
+      # Hexagon clang can't disambiguate `int` -> `slinky::expr` against the
+      # int32_t/int64_t/size_t constructors. Patch in explicit int overloads
+      # guarded by __hexagon__ so other targets see an unmodified slinky.
+      IF(YNNPACK_TARGET_PROCESSOR STREQUAL "hexagon")
+        EXECUTE_PROCESS(
+          COMMAND patch -N -p1 -i "${CMAKE_CURRENT_SOURCE_DIR}/cmake/slinky_hexagon_int_disambiguation.patch"
+          WORKING_DIRECTORY "${SLINKY_SOURCE_DIR}"
+          RESULT_VARIABLE _slinky_patch_result
+          OUTPUT_VARIABLE _slinky_patch_output
+          ERROR_VARIABLE _slinky_patch_output)
+        # patch -N exits 0 on apply, 1 if already applied (treat as success).
+        IF(NOT _slinky_patch_result EQUAL 0 AND NOT _slinky_patch_result EQUAL 1)
+          MESSAGE(FATAL_ERROR "Failed to apply slinky hexagon patch: ${_slinky_patch_output}")
+        ENDIF()
+      ENDIF()
     ENDIF()
-    # Temporarily disable testing while adding slinky to avoid including its tests.
+    # Defer gtest_discover_tests enumeration to test time. Slinky's tests use
+    # POST_BUILD discovery by default, which runs each binary on hexagon-sim at
+    # build time and times out before QuRT finishes booting.
+    SET(CMAKE_GTEST_DISCOVER_TESTS_DISCOVERY_MODE PRE_TEST)
     INCLUDE_DIRECTORIES("${SLINKY_SOURCE_DIR}")
     ADD_SUBDIRECTORY("${SLINKY_SOURCE_DIR}" "${CMAKE_BINARY_DIR}/slinky")
+  ENDIF()
+ENDIF()
+
+# ---[ pthreadpool
+IF(NOT TARGET pthreadpool)
+  IF(XNNPACK_USE_SYSTEM_LIBS)
+    FIND_PACKAGE(Threads REQUIRED)
+    ADD_LIBRARY(pthreadpool SHARED IMPORTED)
+    FIND_LIBRARY(PTHREADPOOL_LIBRARY pthreadpool PATHS "${PTHREADPOOL_SOURCE_DIR}/lib")
+    IF(NOT PTHREADPOOL_LIBRARY)
+      MESSAGE(FATAL_ERROR "Cannot find pthreadpool")
+    ENDIF()
+    TARGET_INCLUDE_DIRECTORIES(pthreadpool INTERFACE "${PTHREADPOOL_SOURCE_DIR}/include")
+    TARGET_LINK_LIBRARIES(pthreadpool INTERFACE Threads::Threads)
+    SET_PROPERTY(TARGET pthreadpool PROPERTY IMPORTED_LOCATION "${PTHREADPOOL_LIBRARY}")
+    SET_PROPERTY(TARGET pthreadpool PROPERTY IMPORTED_IMPLIB "${PTHREADPOOL_LIBRARY}")
+  ELSE()
+    IF(NOT DEFINED PTHREADPOOL_SOURCE_DIR)
+      MESSAGE(STATUS "Downloading pthreadpool to ${CMAKE_BINARY_DIR}/pthreadpool-source (define PTHREADPOOL_SOURCE_DIR to avoid it)")
+      CONFIGURE_FILE(cmake/DownloadPThreadPool.cmake "${CMAKE_BINARY_DIR}/pthreadpool-download/CMakeLists.txt")
+      EXECUTE_PROCESS(COMMAND "${CMAKE_COMMAND}" -G "${CMAKE_GENERATOR}" .
+        WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/pthreadpool-download")
+      EXECUTE_PROCESS(COMMAND "${CMAKE_COMMAND}" --build .
+        WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/pthreadpool-download")
+      SET(PTHREADPOOL_SOURCE_DIR "${CMAKE_BINARY_DIR}/pthreadpool-source" CACHE STRING "pthreadpool source directory")
+    ENDIF()
+    SET(PTHREADPOOL_BUILD_TESTS OFF CACHE BOOL "")
+    SET(PTHREADPOOL_BUILD_BENCHMARKS OFF CACHE BOOL "")
+    SET(PTHREADPOOL_ALLOW_DEPRECATED_API OFF CACHE BOOL "")
+    ADD_SUBDIRECTORY(
+      "${PTHREADPOOL_SOURCE_DIR}"
+      "${CMAKE_BINARY_DIR}/pthreadpool")
   ENDIF()
 ENDIF()
 
