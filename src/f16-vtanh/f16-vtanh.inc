@@ -91,4 +91,11 @@ XNN_UKERNEL(xnn_arch_x86_avx512f, xnn_f16_f32acc_vtanh_ukernel__avx512f_rational
 XNN_UKERNEL(xnn_arch_x86_avx512f, xnn_f16_f32acc_vtanh_ukernel__avx512f_rational_5_4_nr_u64, 64, false, xnn_float16, struct xnn_f16_default_params, NULL)
 #endif  // XNN_ENABLE_AVX512F && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
-
+#if XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
+XNN_UKERNEL(xnn_arch_hvx, xnn_f16_f32acc_vtanh_ukernel__hvx_rational_5_4_div_u32, 32, false, xnn_float16, struct xnn_f16_default_params, NULL)
+XNN_UKERNEL(xnn_arch_hvx, xnn_f16_f32acc_vtanh_ukernel__hvx_rational_5_4_div_u64, 64, false, xnn_float16, struct xnn_f16_default_params, NULL)
+XNN_UKERNEL(xnn_arch_hvx, xnn_f16_f32acc_vtanh_ukernel__hvx_rational_5_4_div_u128, 128, false, xnn_float16, struct xnn_f16_default_params, NULL)
+XNN_UKERNEL(xnn_arch_hvx, xnn_f16_f32acc_vtanh_ukernel__hvx_rational_5_4_nr_u32, 32, false, xnn_float16, struct xnn_f16_default_params, NULL)
+XNN_UKERNEL(xnn_arch_hvx, xnn_f16_f32acc_vtanh_ukernel__hvx_rational_5_4_nr_u64, 64, false, xnn_float16, struct xnn_f16_default_params, NULL)
+XNN_UKERNEL(xnn_arch_hvx, xnn_f16_f32acc_vtanh_ukernel__hvx_rational_5_4_nr_u128, 128, false, xnn_float16, struct xnn_f16_default_params, NULL)
+#endif  // XNN_ARCH_HEXAGON && XNN_ENABLE_HVX

@@ -20,19 +20,24 @@
 #include "src/xnnpack/simd/f32-avx.h"
 
 
-#include <immintrin.h>
-static XNN_INLINE xnn_simd_f32_t xnn_loadu_f16_f32(const xnn_float16* i) { return _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i)); }
-static XNN_INLINE void xnn_store_f32_f16(xnn_float16* o, xnn_simd_f32_t v) { _mm_storeu_si128((__m128i*) o, _mm256_cvtps_ph(v, _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC)); }
-static XNN_INLINE xnn_simd_f32_t xnn_load_f16_f32(const xnn_float16* i, size_t elements) {
-  XNN_ALIGN(16) xnn_float16 h[8] = {0};
-  memcpy(h, i, elements * sizeof(xnn_float16));
-  return _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) h));
+
+// Helper functions for f16 <-> f32 conversion using xnn_simd_f32_t.
+static XNN_INLINE xnn_simd_f32_t xnn_loadu_f16_f32(const xnn_float16* ptr) {
+  return xnn_cvt_f32_f16(xnn_loadu_f16(ptr));
 }
-static XNN_INLINE void xnn_store_f32_f16_tail(xnn_float16* o, xnn_simd_f32_t v, size_t elements) {
-  XNN_ALIGN(16) xnn_float16 h[8];
-  _mm_storeu_si128((__m128i*) h, _mm256_cvtps_ph(v, _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC));
-  memcpy(o, h, elements * sizeof(xnn_float16));
+
+static XNN_INLINE void xnn_store_f32_f16(xnn_float16* ptr, xnn_simd_f32_t v) {
+  xnn_store_tail_f16(ptr, xnn_cvt_f16_f32(v), xnn_simd_size_f32);
 }
+
+static XNN_INLINE xnn_simd_f32_t xnn_load_f16_f32(const xnn_float16* ptr, size_t elements) {
+  return xnn_cvt_f32_f16(xnn_load_tail_f16(ptr, elements));
+}
+
+static XNN_INLINE void xnn_store_f32_f16_tail(xnn_float16* ptr, xnn_simd_f32_t v, size_t elements) {
+  xnn_store_tail_f16(ptr, xnn_cvt_f16_f32(v), elements);
+}
+
 
 
 void xnn_f16_f32acc_vtanh_ukernel__f16c_rational_5_4_div_u8(

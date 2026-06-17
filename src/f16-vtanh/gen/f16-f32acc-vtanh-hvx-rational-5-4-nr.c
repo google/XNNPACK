@@ -17,10 +17,8 @@
 #include "src/xnnpack/microparams.h"
 #include "src/xnnpack/vunary.h"
 
-#include "src/xnnpack/simd/f32-wasmrelaxedsimd.h"
+#include "src/xnnpack/simd/f32-hvx.h"
 
-#undef XNN_SIMD_HAS_NATIVE_FMA
-#include "src/xnnpack/simd/f16-wasmrelaxedsimd.h"
 
 
 // Helper functions for f16 <-> f32 conversion using xnn_simd_f32_t.
@@ -42,7 +40,7 @@ static XNN_INLINE void xnn_store_f32_f16_tail(xnn_float16* ptr, xnn_simd_f32_t v
 
 
 
-void xnn_f16_f32acc_vtanh_ukernel__wasmrelaxedsimd_rational_5_4_div_u4(
+void xnn_f16_f32acc_vtanh_ukernel__hvx_rational_5_4_nr_u32(
     size_t batch,
     const xnn_float16* input,
     xnn_float16* output,
@@ -72,9 +70,9 @@ void xnn_f16_f32acc_vtanh_ukernel__wasmrelaxedsimd_rational_5_4_div_u4(
   // Some useful constants.
   XNN_SIMD_CONST_F32(vone, 1.0f);
 
-  for (; batch >= 4 * sizeof(xnn_float16); batch -= 4 * sizeof(xnn_float16)) {
+  for (; batch >= 32 * sizeof(xnn_float16); batch -= 32 * sizeof(xnn_float16)) {
     xnn_simd_f32_t vx = xnn_loadu_f16_f32(input);
-    input += 4;
+    input += 32;
 
     // Clamp the inputs to the interpolation range.
     vx = xnn_min_f32(vmax_x, vx);
@@ -93,10 +91,10 @@ void xnn_f16_f32acc_vtanh_ukernel__wasmrelaxedsimd_rational_5_4_div_u4(
     vq = xnn_fmadd_f32(vx2, vq, vone);
 
     // Divide the numerator by the denominator.
-    const xnn_simd_f32_t vy =  xnn_div_f32(vp, vq);
+    const xnn_simd_f32_t vy = xnn_mul_f32(vp, xnn_rcp_f32(vq));
 
     xnn_store_f32_f16(output, vy);
-    output += 4;
+    output += 32;
   }
   if (batch != 0) {
     xnn_simd_f32_t vx = xnn_load_f16_f32(input, batch >> XNN_LOG2_SIZEOF_FLOAT16);
@@ -118,13 +116,13 @@ void xnn_f16_f32acc_vtanh_ukernel__wasmrelaxedsimd_rational_5_4_div_u4(
     vq = xnn_fmadd_f32(vx2, vq, vone);
 
     // Divide the numerator by the denominator.
-    const xnn_simd_f32_t vy = xnn_div_f32(vp, vq);
+    const xnn_simd_f32_t vy = xnn_mul_f32(vp, xnn_rcp_f32(vq));
 
     xnn_store_f32_f16_tail(output, vy, batch >> XNN_LOG2_SIZEOF_FLOAT16);
   }
 }
 
-void xnn_f16_f32acc_vtanh_ukernel__wasmrelaxedsimd_rational_5_4_div_u8(
+void xnn_f16_f32acc_vtanh_ukernel__hvx_rational_5_4_nr_u64(
     size_t batch,
     const xnn_float16* input,
     xnn_float16* output,
@@ -154,10 +152,10 @@ void xnn_f16_f32acc_vtanh_ukernel__wasmrelaxedsimd_rational_5_4_div_u8(
   // Some useful constants.
   XNN_SIMD_CONST_F32(vone, 1.0f);
 
-  for (; batch >= 8 * sizeof(xnn_float16); batch -= 8 * sizeof(xnn_float16)) {
-    xnn_simd_f32_t vx_0 = xnn_loadu_f16_f32(input + 0 * 4);
-    xnn_simd_f32_t vx_1 = xnn_loadu_f16_f32(input + 1 * 4);
-    input += 8;
+  for (; batch >= 64 * sizeof(xnn_float16); batch -= 64 * sizeof(xnn_float16)) {
+    xnn_simd_f32_t vx_0 = xnn_loadu_f16_f32(input + 0 * 32);
+    xnn_simd_f32_t vx_1 = xnn_loadu_f16_f32(input + 1 * 32);
+    input += 64;
 
     // Clamp the inputs to the interpolation range.
     vx_0 = xnn_min_f32(vmax_x, vx_0);
@@ -184,16 +182,16 @@ void xnn_f16_f32acc_vtanh_ukernel__wasmrelaxedsimd_rational_5_4_div_u8(
     vq_1 = xnn_fmadd_f32(vx2_1, vq_1, vone);
 
     // Divide the numerator by the denominator.
-    const xnn_simd_f32_t vy_0 = xnn_div_f32(vp_0, vq_0);
-    const xnn_simd_f32_t vy_1 = xnn_div_f32(vp_1, vq_1);
+    const xnn_simd_f32_t vy_0 = xnn_mul_f32(vp_0, xnn_rcp_f32(vq_0));
+    const xnn_simd_f32_t vy_1 = xnn_mul_f32(vp_1, xnn_rcp_f32(vq_1));
 
-    xnn_store_f32_f16(output + 0 * 4, vy_0);
-    xnn_store_f32_f16(output + 1 * 4, vy_1);
-    output += 8;
+    xnn_store_f32_f16(output + 0 * 32, vy_0);
+    xnn_store_f32_f16(output + 1 * 32, vy_1);
+    output += 64;
   }
-  for (; batch >= 4 * sizeof(xnn_float16); batch -= 4 * sizeof(xnn_float16)) {
+  for (; batch >= 32 * sizeof(xnn_float16); batch -= 32 * sizeof(xnn_float16)) {
     xnn_simd_f32_t vx = xnn_loadu_f16_f32(input);
-    input += 4;
+    input += 32;
 
     // Clamp the inputs to the interpolation range.
     vx = xnn_min_f32(vmax_x, vx);
@@ -212,10 +210,10 @@ void xnn_f16_f32acc_vtanh_ukernel__wasmrelaxedsimd_rational_5_4_div_u8(
     vq = xnn_fmadd_f32(vx2, vq, vone);
 
     // Divide the numerator by the denominator.
-    const xnn_simd_f32_t vy =  xnn_div_f32(vp, vq);
+    const xnn_simd_f32_t vy = xnn_mul_f32(vp, xnn_rcp_f32(vq));
 
     xnn_store_f32_f16(output, vy);
-    output += 4;
+    output += 32;
   }
   if (batch != 0) {
     xnn_simd_f32_t vx = xnn_load_f16_f32(input, batch >> XNN_LOG2_SIZEOF_FLOAT16);
@@ -237,13 +235,13 @@ void xnn_f16_f32acc_vtanh_ukernel__wasmrelaxedsimd_rational_5_4_div_u8(
     vq = xnn_fmadd_f32(vx2, vq, vone);
 
     // Divide the numerator by the denominator.
-    const xnn_simd_f32_t vy = xnn_div_f32(vp, vq);
+    const xnn_simd_f32_t vy = xnn_mul_f32(vp, xnn_rcp_f32(vq));
 
     xnn_store_f32_f16_tail(output, vy, batch >> XNN_LOG2_SIZEOF_FLOAT16);
   }
 }
 
-void xnn_f16_f32acc_vtanh_ukernel__wasmrelaxedsimd_rational_5_4_div_u16(
+void xnn_f16_f32acc_vtanh_ukernel__hvx_rational_5_4_nr_u128(
     size_t batch,
     const xnn_float16* input,
     xnn_float16* output,
@@ -273,12 +271,12 @@ void xnn_f16_f32acc_vtanh_ukernel__wasmrelaxedsimd_rational_5_4_div_u16(
   // Some useful constants.
   XNN_SIMD_CONST_F32(vone, 1.0f);
 
-  for (; batch >= 16 * sizeof(xnn_float16); batch -= 16 * sizeof(xnn_float16)) {
-    xnn_simd_f32_t vx_0 = xnn_loadu_f16_f32(input + 0 * 4);
-    xnn_simd_f32_t vx_1 = xnn_loadu_f16_f32(input + 1 * 4);
-    xnn_simd_f32_t vx_2 = xnn_loadu_f16_f32(input + 2 * 4);
-    xnn_simd_f32_t vx_3 = xnn_loadu_f16_f32(input + 3 * 4);
-    input += 16;
+  for (; batch >= 128 * sizeof(xnn_float16); batch -= 128 * sizeof(xnn_float16)) {
+    xnn_simd_f32_t vx_0 = xnn_loadu_f16_f32(input + 0 * 32);
+    xnn_simd_f32_t vx_1 = xnn_loadu_f16_f32(input + 1 * 32);
+    xnn_simd_f32_t vx_2 = xnn_loadu_f16_f32(input + 2 * 32);
+    xnn_simd_f32_t vx_3 = xnn_loadu_f16_f32(input + 3 * 32);
+    input += 128;
 
     // Clamp the inputs to the interpolation range.
     vx_0 = xnn_min_f32(vmax_x, vx_0);
@@ -321,20 +319,20 @@ void xnn_f16_f32acc_vtanh_ukernel__wasmrelaxedsimd_rational_5_4_div_u16(
     vq_3 = xnn_fmadd_f32(vx2_3, vq_3, vone);
 
     // Divide the numerator by the denominator.
-    const xnn_simd_f32_t vy_0 = xnn_div_f32(vp_0, vq_0);
-    const xnn_simd_f32_t vy_1 = xnn_div_f32(vp_1, vq_1);
-    const xnn_simd_f32_t vy_2 = xnn_div_f32(vp_2, vq_2);
-    const xnn_simd_f32_t vy_3 = xnn_div_f32(vp_3, vq_3);
+    const xnn_simd_f32_t vy_0 = xnn_mul_f32(vp_0, xnn_rcp_f32(vq_0));
+    const xnn_simd_f32_t vy_1 = xnn_mul_f32(vp_1, xnn_rcp_f32(vq_1));
+    const xnn_simd_f32_t vy_2 = xnn_mul_f32(vp_2, xnn_rcp_f32(vq_2));
+    const xnn_simd_f32_t vy_3 = xnn_mul_f32(vp_3, xnn_rcp_f32(vq_3));
 
-    xnn_store_f32_f16(output + 0 * 4, vy_0);
-    xnn_store_f32_f16(output + 1 * 4, vy_1);
-    xnn_store_f32_f16(output + 2 * 4, vy_2);
-    xnn_store_f32_f16(output + 3 * 4, vy_3);
-    output += 16;
+    xnn_store_f32_f16(output + 0 * 32, vy_0);
+    xnn_store_f32_f16(output + 1 * 32, vy_1);
+    xnn_store_f32_f16(output + 2 * 32, vy_2);
+    xnn_store_f32_f16(output + 3 * 32, vy_3);
+    output += 128;
   }
-  for (; batch >= 4 * sizeof(xnn_float16); batch -= 4 * sizeof(xnn_float16)) {
+  for (; batch >= 32 * sizeof(xnn_float16); batch -= 32 * sizeof(xnn_float16)) {
     xnn_simd_f32_t vx = xnn_loadu_f16_f32(input);
-    input += 4;
+    input += 32;
 
     // Clamp the inputs to the interpolation range.
     vx = xnn_min_f32(vmax_x, vx);
@@ -353,10 +351,10 @@ void xnn_f16_f32acc_vtanh_ukernel__wasmrelaxedsimd_rational_5_4_div_u16(
     vq = xnn_fmadd_f32(vx2, vq, vone);
 
     // Divide the numerator by the denominator.
-    const xnn_simd_f32_t vy =  xnn_div_f32(vp, vq);
+    const xnn_simd_f32_t vy = xnn_mul_f32(vp, xnn_rcp_f32(vq));
 
     xnn_store_f32_f16(output, vy);
-    output += 4;
+    output += 32;
   }
   if (batch != 0) {
     xnn_simd_f32_t vx = xnn_load_f16_f32(input, batch >> XNN_LOG2_SIZEOF_FLOAT16);
@@ -378,7 +376,7 @@ void xnn_f16_f32acc_vtanh_ukernel__wasmrelaxedsimd_rational_5_4_div_u16(
     vq = xnn_fmadd_f32(vx2, vq, vone);
 
     // Divide the numerator by the denominator.
-    const xnn_simd_f32_t vy = xnn_div_f32(vp, vq);
+    const xnn_simd_f32_t vy = xnn_mul_f32(vp, xnn_rcp_f32(vq));
 
     xnn_store_f32_f16_tail(output, vy, batch >> XNN_LOG2_SIZEOF_FLOAT16);
   }

@@ -23,6 +23,9 @@ tools/xngen src/f16-vtanh/f16-f32acc-rational-5-4.c.in -D ARCH=f16c            -
 tools/xngen src/f16-vtanh/f16-f32acc-rational-5-4.c.in -D ARCH=f16c            -D BATCH_TILES=8,16,32   -D DIV=NR  -o src/f16-vtanh/gen/f16-f32acc-vtanh-f16c-rational-5-4-nr.c &
 tools/xngen src/f16-vtanh/f16-f32acc-rational-5-4.c.in -D ARCH=avx512f         -D BATCH_TILES=16,32,64  -D DIV=DIV -o src/f16-vtanh/gen/f16-f32acc-vtanh-avx512f-rational-5-4-div.c &
 tools/xngen src/f16-vtanh/f16-f32acc-rational-5-4.c.in -D ARCH=avx512f         -D BATCH_TILES=16,32,64  -D DIV=NR  -o src/f16-vtanh/gen/f16-f32acc-vtanh-avx512f-rational-5-4-nr.c &
+tools/xngen src/f16-vtanh/f16-f32acc-rational-5-4.c.in -D ARCH=hvx             -D BATCH_TILES=32,64,128 -D DIV=DIV -o src/f16-vtanh/gen/f16-f32acc-vtanh-hvx-rational-5-4-div.c &
+tools/xngen src/f16-vtanh/f16-f32acc-rational-5-4.c.in -D ARCH=hvx             -D BATCH_TILES=32,64,128 -D DIV=NR  -o src/f16-vtanh/gen/f16-f32acc-vtanh-hvx-rational-5-4-nr.c &
+
 
 ################################### RISC-V Vector ##############################
 tools/xngen src/f16-vtanh/rvv-rational-5-4.c.in -D LMUL=1 -D DIV=DIV -o src/f16-vtanh/gen/f16-vtanh-rvvfp16arith-rational-5-4-div-u1v.c &

@@ -20,19 +20,24 @@
 #include "src/xnnpack/simd/f32-neon.h"
 
 
-#include <arm_neon.h>
-static XNN_INLINE xnn_simd_f32_t xnn_loadu_f16_f32(const xnn_float16* i) { return vcvt_f32_f16(vld1_f16((const void*) i)); }
-static XNN_INLINE void xnn_store_f32_f16(xnn_float16* o, xnn_simd_f32_t v) { vst1_f16((void*) o, vcvt_f16_f32(v)); }
-static XNN_INLINE xnn_simd_f32_t xnn_load_f16_f32(const xnn_float16* i, size_t elements) {
-  XNN_ALIGN(8) xnn_float16 h[4] = {0};
-  memcpy(h, i, elements * sizeof(xnn_float16));
-  return vcvt_f32_f16(vld1_f16((const void*) h));
+
+// Helper functions for f16 <-> f32 conversion using xnn_simd_f32_t.
+static XNN_INLINE xnn_simd_f32_t xnn_loadu_f16_f32(const xnn_float16* ptr) {
+  return xnn_cvt_f32_f16(xnn_loadu_f16(ptr));
 }
-static XNN_INLINE void xnn_store_f32_f16_tail(xnn_float16* o, xnn_simd_f32_t v, size_t elements) {
-  XNN_ALIGN(8) xnn_float16 h[4];
-  vst1_f16((void*) h, vcvt_f16_f32(v));
-  memcpy(o, h, elements * sizeof(xnn_float16));
+
+static XNN_INLINE void xnn_store_f32_f16(xnn_float16* ptr, xnn_simd_f32_t v) {
+  xnn_store_tail_f16(ptr, xnn_cvt_f16_f32(v), xnn_simd_size_f32);
 }
+
+static XNN_INLINE xnn_simd_f32_t xnn_load_f16_f32(const xnn_float16* ptr, size_t elements) {
+  return xnn_cvt_f32_f16(xnn_load_tail_f16(ptr, elements));
+}
+
+static XNN_INLINE void xnn_store_f32_f16_tail(xnn_float16* ptr, xnn_simd_f32_t v, size_t elements) {
+  xnn_store_tail_f16(ptr, xnn_cvt_f16_f32(v), elements);
+}
+
 
 
 void xnn_f16_f32acc_vtanh_ukernel__neonfp16_rational_5_4_div_u4(

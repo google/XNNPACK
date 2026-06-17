@@ -22,10 +22,24 @@
 #undef XNN_SIMD_HAS_NATIVE_FMA
 #include "src/xnnpack/simd/f16-wasmrelaxedsimd.h"
 
-static XNN_INLINE xnn_simd_f32_t xnn_loadu_f16_f32(const xnn_float16* i) { return xnn_cvt_f32_f16(xnn_loadu_f16(i)); }
-static XNN_INLINE void xnn_store_f32_f16(xnn_float16* o, xnn_simd_f32_t v) { xnn_store_tail_f16(o, xnn_cvt_f16_f32(v), 4); }
-static XNN_INLINE xnn_simd_f32_t xnn_load_f16_f32(const xnn_float16* i, size_t elements) { return xnn_cvt_f32_f16(xnn_load_tail_f16(i, elements)); }
-static XNN_INLINE void xnn_store_f32_f16_tail(xnn_float16* o, xnn_simd_f32_t v, size_t elements) { xnn_store_tail_f16(o, xnn_cvt_f16_f32(v), elements); }
+
+// Helper functions for f16 <-> f32 conversion using xnn_simd_f32_t.
+static XNN_INLINE xnn_simd_f32_t xnn_loadu_f16_f32(const xnn_float16* ptr) {
+  return xnn_cvt_f32_f16(xnn_loadu_f16(ptr));
+}
+
+static XNN_INLINE void xnn_store_f32_f16(xnn_float16* ptr, xnn_simd_f32_t v) {
+  xnn_store_tail_f16(ptr, xnn_cvt_f16_f32(v), xnn_simd_size_f32);
+}
+
+static XNN_INLINE xnn_simd_f32_t xnn_load_f16_f32(const xnn_float16* ptr, size_t elements) {
+  return xnn_cvt_f32_f16(xnn_load_tail_f16(ptr, elements));
+}
+
+static XNN_INLINE void xnn_store_f32_f16_tail(xnn_float16* ptr, xnn_simd_f32_t v, size_t elements) {
+  xnn_store_tail_f16(ptr, xnn_cvt_f16_f32(v), elements);
+}
+
 
 
 void xnn_f16_f32acc_vtanh_ukernel__wasmrelaxedsimd_rational_5_4_nr_u4(
