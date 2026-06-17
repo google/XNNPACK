@@ -93,9 +93,9 @@ auto make_transpose_impl(int elem_count, std::vector<int32_t> permutation) {
     // would change the meaning of the input_dim0 index.
     sliced_input.slice(
         input_dim0,
-        slinky::in_bounds{sliced_output.dim(input_dim0).min() / elem_count});
+        sliced_output.dim(input_dim0).min() / elem_count);
     sliced_input.slice(
-        0, slinky::in_bounds{sliced_output.dim(0).min() * elem_count});
+        0, sliced_output.dim(0).min() * elem_count);
     sliced_output.slice({0, static_cast<size_t>(input_dim0)});
 
     slinky::for_each_element(

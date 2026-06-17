@@ -352,7 +352,10 @@ void ynn_runtime::schedule() {
         f.compute_at(lid);
       }
       if (!sched || sched->scheduled_buffers.empty()) {
-        f.store_outputs_innermost();
+        for (const auto& o : f.outputs()) {
+          slinky::buffer_expr_ptr buf = o.buffer;
+          buf->store_at({&f, slinky::var()});
+        }
       } else {
         for (auto& b : sched->scheduled_buffers) {
           if (b.store_at_min_depth == 0) {
@@ -455,9 +458,9 @@ auto make_reshape_impl(ynn_runtime* runtime) {
         for (size_t d = 0; d < i.rank(); ++d) {
           slinky::expr extent_d = i.physical_extent(d);
           if (extent_d.defined()) {
-            i.data->mutable_dim(d).set_min_extent(0, evaluate(extent_d, ctx));
+            i.data->dim(d).set_min_extent(0, evaluate(extent_d, ctx));
           } else {
-            i.data->mutable_dim(d).set_min_extent(0, 1);
+            i.data->dim(d).set_min_extent(0, 1);
           }
         }
         ynn::init_buffer_strides(*i.data);
@@ -527,7 +530,7 @@ ynn_runtime::ynn_runtime(ynn::ref_count<const ynn_subgraph> subgraph,
       for (size_t d = 0; d < value.extents.size(); ++d) {
         if (!value.extents[d].defined() ||
             slinky::is_constant(value.extents[d], 1)) {
-          value.data->mutable_dim(d) = slinky::dim::broadcast();
+          value.data->dim(d) = slinky::dim::broadcast();
         }
       }
 
@@ -607,7 +610,7 @@ ynn_status ynn_runtime::build() {
       for (size_t d = 0; d < value.extents.size(); ++d) {
         if (!value.extents[d].defined() ||
             slinky::is_constant(value.extents[d], 1)) {
-          value.data->mutable_dim(d) = slinky::dim::broadcast();
+          value.data->dim(d) = slinky::dim::broadcast();
         }
       }
     }

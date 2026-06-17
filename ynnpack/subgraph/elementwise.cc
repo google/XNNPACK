@@ -175,7 +175,7 @@ auto make_dequantize_dot_impl(dequantize_dot_kernel_fn kernel,
         is_broadcast(a_offset.dim(0)) && is_broadcast(a_scale.dim(0))) {
       const slinky::dim& n = slice_dim0(output);
       assert(is_contiguous(n, output.elem_size));
-      const slinky::in_bounds n_min{n.min()};
+      const slinky::index_t n_min = n.min();
       n_extent = n.extent();
 
       dot.slice(0, n_min);
@@ -193,7 +193,7 @@ auto make_dequantize_dot_impl(dequantize_dot_kernel_fn kernel,
     if (is_broadcast(b_offset.dim(0)) && is_broadcast(b_scale.dim(0)) &&
         is_broadcast(offset.dim(0))) {
       const slinky::dim& m = slice_dim0(output);
-      const slinky::in_bounds m_min{m.min()};
+      const slinky::index_t m_min = m.min();
       m_extent = m.extent();
       m_stride = m.stride();
       dot_m_stride = slice_dim0(dot, m_min).stride();
