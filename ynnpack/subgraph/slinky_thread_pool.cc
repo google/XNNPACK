@@ -62,7 +62,7 @@ slinky::ref_count<slinky::thread_pool::task> slinky_thread_pool::enqueue(
     // fix this race, it just makes it less bad. Ideally we'd do it atomically,
     // unfortunately there is no saturating atomic add.
     idle_workers_ -= max_workers;
-    for (int32_t i = 0; i < max_workers; ++i) {
+    for (int i = 0; i < max_workers; ++i) {
       // Note that here, every worker is identical, so we can re-use the same
       // context for all scheduled tasks!
       scheduler_->schedule(scheduler_context_, this, [](void* context) {

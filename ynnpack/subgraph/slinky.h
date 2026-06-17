@@ -214,7 +214,7 @@ YNN_ALWAYS_INLINE const slinky::dim& slice_dim0(slinky::raw_buffer& buffer) {
   return dim0;
 }
 YNN_ALWAYS_INLINE const slinky::dim& slice_dim0(slinky::raw_buffer& buffer,
-                                                slinky::in_bounds at) {
+                                                slinky::index_t at) {
   const slinky::dim& dim0 = buffer.dim(0);
   buffer.slice(0, at);
   return dim0;
@@ -254,7 +254,7 @@ bool fuse_and_slice_leading_dim(int i, slinky::dim* x_dims,
                                    slinky::raw_buffer& in_buf) {
         if (in_buf.rank > 0) {
           const slinky::dim& in_dim_0 =
-              slice_dim0(in_buf, slinky::in_bounds{x_min_i});
+              slice_dim0(in_buf, x_min_i);
           in_dims[i] = slinky::fuse(in_dims[i], in_dim_0);
         }
       },
@@ -299,7 +299,7 @@ bool fuse_and_slice_leading_dims(slinky::dim* x_dims, slinky::raw_buffer& x,
     internal::apply_to_pairs(
         [i, x_min_i = x_dims[i].min()](slinky::dim* in_dims,
                                        slinky::raw_buffer& in_buf) {
-          in_dims[i] = slice_dim0(in_buf, slinky::in_bounds{x_min_i});
+          in_dims[i] = slice_dim0(in_buf, x_min_i);
         },
         inputs...);
 

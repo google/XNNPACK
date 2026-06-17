@@ -188,7 +188,7 @@ auto make_unary_reduce_impl(const ynn_node::reduce& op,
           // This is a reduction dimension that is not handled by the kernel.
           if (op.keep_dims) {
             // Replace the existing dimension in c with the reduction dimension.
-            c.mutable_dim(i) = r_dim_i;
+            c.dim(i) = r_dim_i;
           } else {
             // Add the reduction dimension to c.
             c.unslice(i, r_dim_i);
@@ -198,7 +198,7 @@ auto make_unary_reduce_impl(const ynn_node::reduce& op,
           continue;
         }
         // This is a reduction dimension that is handled by the kernel.
-        a.slice(i, slinky::in_bounds{r_dim_i.min()});
+        a.slice(i, r_dim_i.min());
         if (op.keep_dims) {
           // If op.keep_dims is true, that means the buffer has these
           // dimensions, but we don't want them there for dimensions we handle
@@ -230,7 +230,7 @@ auto make_unary_reduce_impl(const ynn_node::reduce& op,
         }
         assert(!a_dim_i.is_folded(c_dim_i));
         assert(!c_dim_i.is_folded());
-        a.slice(i, slinky::in_bounds{c_dim_i.min()});
+        a.slice(i, c_dim_i.min());
         c.slice(i);
         ++sliced;
       }
@@ -277,9 +277,9 @@ slinky::raw_buffer_ptr make_reduce_identity(ynn_type type, int rank,
   if (op == ynn_reduce_min_max) {
     value.rank = rank;
     for (int i = 0; i < rank - 1; ++i) {
-      value.mutable_dim(i) = slinky::dim::broadcast();
+      value.dim(i) = slinky::dim::broadcast();
     }
-    value.mutable_dim(rank - 1) = slinky::dim(0, 1, value.elem_size);
+    value.dim(rank - 1) = slinky::dim(0, 1, value.elem_size);
     value_f32[0] = get_reduce_identity(ynn_reduce_min);
     value_f32[1] = get_reduce_identity(ynn_reduce_max);
     n = 2;
