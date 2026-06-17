@@ -75,7 +75,33 @@ struct vec<half, 4> {
   uint16x4_t v;
 };
 
+template <>
+struct vec<fp8_e4m3, 8> {
+  using value_type = fp8_e4m3;
+  static constexpr std::integral_constant<size_t, 8> N = {};
+
+  vec() = default;
+  explicit vec(uint8x8_t v) : v(v) {}
+  vec(fp8_e4m3 x) : v(vdup_n_u8(x.to_bits())) {}  // NOLINT
+
+  uint8x8_t v;
+};
+
+template <>
+struct vec<fp8_e5m2, 8> {
+  using value_type = fp8_e5m2;
+  static constexpr std::integral_constant<size_t, 8> N = {};
+
+  vec() = default;
+  explicit vec(uint8x8_t v) : v(v) {}
+  vec(fp8_e5m2 x) : v(vdup_n_u8(x.to_bits())) {}  // NOLINT
+
+  uint8x8_t v;
+};
+
 using u8x8 = vec<uint8_t, 8>;
+using f8_e4m3x8 = vec<fp8_e4m3, 8>;
+using f8_e5m2x8 = vec<fp8_e5m2, 8>;
 using f32x2 = vec<float, 2>;
 using bf16x4 = vec<bfloat16, 4>;
 using f16x4 = vec<half, 4>;
@@ -380,6 +406,14 @@ YNN_ALWAYS_INLINE u8x8 load_aligned(const uint8_t* ptr, decltype(u8x8::N),
                                     u8x8 = {}) {
   return u8x8{vld1_u8(ptr)};
 }
+YNN_ALWAYS_INLINE f8_e4m3x8 load_aligned(const fp8_e4m3* ptr,
+                                         decltype(f8_e4m3x8::N), u8x8 = {}) {
+  return f8_e4m3x8{vld1_u8(reinterpret_cast<const uint8_t*>(ptr))};
+}
+YNN_ALWAYS_INLINE f8_e5m2x8 load_aligned(const fp8_e5m2* ptr,
+                                         decltype(f8_e5m2x8::N), u8x8 = {}) {
+  return f8_e5m2x8{vld1_u8(reinterpret_cast<const uint8_t*>(ptr))};
+}
 
 YNN_ALWAYS_INLINE void store_aligned(float* ptr, f32x4 b,
                                      decltype(f32x4::N) = {}) {
@@ -440,6 +474,14 @@ YNN_ALWAYS_INLINE void store_aligned(uint8_t* ptr, u8x8 b,
                                      decltype(u8x8::N) = {}) {
   vst1_u8(ptr, b.v);
 }
+YNN_ALWAYS_INLINE void store_aligned(fp8_e4m3* ptr, f8_e4m3x8 b,
+                                     decltype(f8_e4m3x8::N) = {}) {
+  vst1_u8(reinterpret_cast<uint8_t*>(ptr), b.v);
+}
+YNN_ALWAYS_INLINE void store_aligned(fp8_e5m2* ptr, f8_e5m2x8 b,
+                                     decltype(f8_e5m2x8::N) = {}) {
+  vst1_u8(reinterpret_cast<uint8_t*>(ptr), b.v);
+}
 
 YNN_ALWAYS_INLINE f32x4 load(const float* ptr, decltype(f32x4::N), f32x4 = {}) {
   return f32x4{vld1q_f32(ptr)};
@@ -495,6 +537,14 @@ YNN_ALWAYS_INLINE f16x4 load(const half* ptr, decltype(f16x4::N), f16x4 = {}) {
 YNN_ALWAYS_INLINE u8x8 load(const uint8_t* ptr, decltype(u8x8::N), u8x8 = {}) {
   return u8x8{vld1_u8(ptr)};
 }
+YNN_ALWAYS_INLINE f8_e4m3x8 load(const fp8_e4m3* ptr, decltype(f8_e4m3x8::N),
+                                 f8_e4m3x8 = {}) {
+  return f8_e4m3x8{vld1_u8(reinterpret_cast<const uint8_t*>(ptr))};
+}
+YNN_ALWAYS_INLINE f8_e5m2x8 load(const fp8_e5m2* ptr, decltype(f8_e5m2x8::N),
+                                 f8_e5m2x8 = {}) {
+  return f8_e5m2x8{vld1_u8(reinterpret_cast<const uint8_t*>(ptr))};
+}
 
 YNN_ALWAYS_INLINE void store(float* ptr, f32x4 b, decltype(f32x4::N) = {}) {
   vst1q_f32(ptr, b.v);
@@ -542,6 +592,14 @@ YNN_ALWAYS_INLINE void store(half* ptr, f16x4 b, decltype(f16x4::N) = {}) {
 }
 YNN_ALWAYS_INLINE void store(uint8_t* ptr, u8x8 b, decltype(u8x8::N) = {}) {
   vst1_u8(ptr, b.v);
+}
+YNN_ALWAYS_INLINE void store(fp8_e4m3* ptr, f8_e4m3x8 b,
+                             decltype(f8_e4m3x8::N) = {}) {
+  vst1_u8(reinterpret_cast<uint8_t*>(ptr), b.v);
+}
+YNN_ALWAYS_INLINE void store(fp8_e5m2* ptr, f8_e5m2x8 b,
+                             decltype(f8_e5m2x8::N) = {}) {
+  vst1_u8(reinterpret_cast<uint8_t*>(ptr), b.v);
 }
 
 #ifdef YNN_ARCH_ARM64_SVE
@@ -612,6 +670,14 @@ YNN_ALWAYS_INLINE f16x4 load(const half* ptr, size_t n, zeros<4> src) {
 YNN_ALWAYS_INLINE u8x8 load(const uint8_t* ptr, size_t n, zeros<8> src) {
   return u8x8{vget_low_u8(svget_neonq(svld1(internal::mask_x8(n), ptr)))};
 }
+YNN_ALWAYS_INLINE f8_e4m3x8 load(const fp8_e4m3* ptr, size_t n, zeros<8> src) {
+  return f8_e4m3x8{vget_low_u8(svget_neonq(
+      svld1(internal::mask_x8(n), reinterpret_cast<const uint8_t*>(ptr))))};
+}
+YNN_ALWAYS_INLINE f8_e5m2x8 load(const fp8_e5m2* ptr, size_t n, zeros<8> src) {
+  return f8_e5m2x8{vget_low_u8(svget_neonq(
+      svld1(internal::mask_x8(n), reinterpret_cast<const uint8_t*>(ptr))))};
+}
 
 YNN_ALWAYS_INLINE f32x4 load(const float* ptr, size_t n, f32x4 src) {
   svbool_t m = internal::mask_x32(n);
@@ -661,6 +727,18 @@ YNN_ALWAYS_INLINE u8x8 load(const uint8_t* ptr, size_t n, u8x8 src) {
   return u8x8{vget_low_u8(
       svget_neonq(svsel(m, svld1(m, ptr), internal::to_sve(src.v))))};
 }
+YNN_ALWAYS_INLINE f8_e4m3x8 load(const fp8_e4m3* ptr, size_t n, f8_e4m3x8 src) {
+  svbool_t m = internal::mask_x8(n);
+  return f8_e4m3x8{vget_low_u8(
+      svget_neonq(svsel(m, svld1(m, reinterpret_cast<const uint8_t*>(ptr)),
+                        internal::to_sve(src.v))))};
+}
+YNN_ALWAYS_INLINE f8_e5m2x8 load(const fp8_e5m2* ptr, size_t n, f8_e5m2x8 src) {
+  svbool_t m = internal::mask_x8(n);
+  return f8_e5m2x8{vget_low_u8(
+      svget_neonq(svsel(m, svld1(m, reinterpret_cast<const uint8_t*>(ptr)),
+                        internal::to_sve(src.v))))};
+}
 
 YNN_ALWAYS_INLINE f32x4 load(const float* ptr, size_t n, undef<4>) {
   return load(ptr, n, zeros<4>{});
@@ -691,6 +769,12 @@ YNN_ALWAYS_INLINE f16x4 load(const half* ptr, size_t n, undef<4>) {
   return load(ptr, n, zeros<4>{});
 }
 YNN_ALWAYS_INLINE u8x8 load(const uint8_t* ptr, size_t n, undef<8>) {
+  return load(ptr, n, zeros<8>{});
+}
+YNN_ALWAYS_INLINE f8_e4m3x8 load(const fp8_e4m3* ptr, size_t n, undef<8>) {
+  return load(ptr, n, zeros<8>{});
+}
+YNN_ALWAYS_INLINE f8_e5m2x8 load(const fp8_e5m2* ptr, size_t n, undef<8>) {
   return load(ptr, n, zeros<8>{});
 }
 
@@ -727,6 +811,14 @@ YNN_ALWAYS_INLINE void store(half* ptr, f16x4 value, size_t n) {
 }
 YNN_ALWAYS_INLINE void store(uint8_t* ptr, u8x8 value, size_t n) {
   svst1(internal::mask_x8(n), ptr, internal::to_sve(value.v));
+}
+YNN_ALWAYS_INLINE void store(fp8_e4m3* ptr, f8_e4m3x8 value, size_t n) {
+  svst1(internal::mask_x8(n), reinterpret_cast<uint8_t*>(ptr),
+        internal::to_sve(value.v));
+}
+YNN_ALWAYS_INLINE void store(fp8_e5m2* ptr, f8_e5m2x8 value, size_t n) {
+  svst1(internal::mask_x8(n), reinterpret_cast<uint8_t*>(ptr),
+        internal::to_sve(value.v));
 }
 
 #else
@@ -850,6 +942,12 @@ YNN_ALWAYS_INLINE f16x4 load(const half* ptr, size_t n, f16x4 src) {
 YNN_ALWAYS_INLINE u8x8 load(const uint8_t* ptr, size_t n, u8x8 src) {
   return internal::partial_load_memcpy(ptr, n, src);
 }
+YNN_ALWAYS_INLINE f8_e4m3x8 load(const fp8_e4m3* ptr, size_t n, f8_e4m3x8 src) {
+  return internal::partial_load_memcpy(ptr, n, src);
+}
+YNN_ALWAYS_INLINE f8_e5m2x8 load(const fp8_e5m2* ptr, size_t n, f8_e5m2x8 src) {
+  return internal::partial_load_memcpy(ptr, n, src);
+}
 
 #ifdef YNN_ARCH_ARM64
 YNN_ALWAYS_INLINE f64x2 load(const double* ptr, size_t n, zeros<2> src) {
@@ -883,6 +981,12 @@ YNN_ALWAYS_INLINE f16x4 load(const half* ptr, size_t n, zeros<4> src) {
 }
 YNN_ALWAYS_INLINE u8x8 load(const uint8_t* ptr, size_t n, zeros<8> src) {
   return internal::partial_load_memcpy(ptr, n, u8x8{0});
+}
+YNN_ALWAYS_INLINE f8_e4m3x8 load(const fp8_e4m3* ptr, size_t n, zeros<8> src) {
+  return internal::partial_load_memcpy(ptr, n, f8_e4m3x8{0});
+}
+YNN_ALWAYS_INLINE f8_e5m2x8 load(const fp8_e5m2* ptr, size_t n, zeros<8> src) {
+  return internal::partial_load_memcpy(ptr, n, f8_e5m2x8{0});
 }
 
 #ifdef YNN_ARCH_ARM64
@@ -918,6 +1022,12 @@ YNN_ALWAYS_INLINE s8x16 load(const int8_t* ptr, size_t n, undef<16> src) {
 YNN_ALWAYS_INLINE u8x8 load(const uint8_t* ptr, size_t n, undef<8> src) {
   return internal::partial_load_memcpy(ptr, n, u8x8{});
 }
+YNN_ALWAYS_INLINE f8_e4m3x8 load(const fp8_e4m3* ptr, size_t n, undef<8> src) {
+  return internal::partial_load_memcpy(ptr, n, f8_e4m3x8{});
+}
+YNN_ALWAYS_INLINE f8_e5m2x8 load(const fp8_e5m2* ptr, size_t n, undef<8> src) {
+  return internal::partial_load_memcpy(ptr, n, f8_e5m2x8{});
+}
 
 #ifdef YNN_ARCH_ARM64
 YNN_ALWAYS_INLINE void store(double* ptr, f64x2 value, size_t n) {
@@ -950,6 +1060,12 @@ YNN_ALWAYS_INLINE void store(half* ptr, f16x4 value, size_t n) {
   internal::partial_store_memcpy(ptr, value, n);
 }
 YNN_ALWAYS_INLINE void store(uint8_t* ptr, u8x8 value, size_t n) {
+  internal::partial_store_memcpy(ptr, value, n);
+}
+YNN_ALWAYS_INLINE void store(fp8_e4m3* ptr, f8_e4m3x8 value, size_t n) {
+  internal::partial_store_memcpy(ptr, value, n);
+}
+YNN_ALWAYS_INLINE void store(fp8_e5m2* ptr, f8_e5m2x8 value, size_t n) {
   internal::partial_store_memcpy(ptr, value, n);
 }
 #endif  // YNN_ARCH_ARM64_SVE
@@ -1967,8 +2083,6 @@ YNN_ALWAYS_INLINE u8x16 cast(f32x16 f, uint8_t) {
 }
 
 #ifdef YNN_ARCH_ARM_NEONFP16
-using f32x8 = vec<float, 8>;
-
 YNN_ALWAYS_INLINE f32x4 cast(f16x4 a, float) {
   return f32x4{vcvt_f32_f16(vreinterpret_f16_u16(a.v))};
 }
@@ -1987,6 +2101,86 @@ YNN_ALWAYS_INLINE f16x4 cast(f32x4 a, half) {
 YNN_ALWAYS_INLINE f16x8 cast(f32x8 a, half) {
   return f16x8{vreinterpretq_u16_f16(
       vcombine_f16(vcvt_f16_f32(lo(a).v), vcvt_f16_f32(hi(a).v)))};
+}
+#endif
+
+#ifdef YNN_ARCH_ARM64_NEONFP8
+YNN_ALWAYS_INLINE bf16x8 cast(f8_e4m3x8 a, bfloat16) {
+  fpm_t fpm = __arm_fpm_init();
+  fpm = __arm_set_fpm_src1_format(fpm, __ARM_FPM_E4M3);
+  return bf16x8{vreinterpretq_u16_bf16(
+      vcvt1_bf16_mf8_fpm(vreinterpret_mf8_u8(a.v), fpm))};
+}
+YNN_ALWAYS_INLINE bf16x8 cast(f8_e5m2x8 a, bfloat16) {
+  fpm_t fpm = __arm_fpm_init();
+  fpm = __arm_set_fpm_src1_format(fpm, __ARM_FPM_E5M2);
+  return bf16x8{vreinterpretq_u16_bf16(
+      vcvt1_bf16_mf8_fpm(vreinterpret_mf8_u8(a.v), fpm))};
+}
+YNN_ALWAYS_INLINE f16x8 cast(f8_e4m3x8 a, half) {
+  fpm_t fpm = __arm_fpm_init();
+  fpm = __arm_set_fpm_src1_format(fpm, __ARM_FPM_E4M3);
+  return f16x8{
+      vreinterpretq_u16_f16(vcvt1_f16_mf8_fpm(vreinterpret_mf8_u8(a.v), fpm))};
+}
+YNN_ALWAYS_INLINE f16x8 cast(f8_e5m2x8 a, half) {
+  fpm_t fpm = __arm_fpm_init();
+  fpm = __arm_set_fpm_src1_format(fpm, __ARM_FPM_E5M2);
+  return f16x8{
+      vreinterpretq_u16_f16(vcvt1_f16_mf8_fpm(vreinterpret_mf8_u8(a.v), fpm))};
+}
+
+using f8_e4m3x16 = vec<fp8_e4m3, 16>;
+using f8_e5m2x16 = vec<fp8_e5m2, 16>;
+using f16x16 = vec<half, 16>;
+
+YNN_ALWAYS_INLINE f8_e4m3x8 cast(f32x8 a, fp8_e4m3) {
+  fpm_t fpm = __arm_fpm_init();
+  fpm = __arm_set_fpm_dst_format(fpm, __ARM_FPM_E4M3);
+  fpm = __arm_set_fpm_overflow_cvt(fpm, __ARM_FPM_SATURATE);
+  return f8_e4m3x8{
+      vreinterpret_u8_mf8(vcvt_mf8_f32_fpm(a.v[0].v, a.v[1].v, fpm))};
+}
+YNN_ALWAYS_INLINE f8_e5m2x8 cast(f32x8 a, fp8_e5m2) {
+  fpm_t fpm = __arm_fpm_init();
+  fpm = __arm_set_fpm_dst_format(fpm, __ARM_FPM_E5M2);
+  fpm = __arm_set_fpm_overflow_cvt(fpm, __ARM_FPM_INFNAN);
+  return f8_e5m2x8{
+      vreinterpret_u8_mf8(vcvt_mf8_f32_fpm(a.v[0].v, a.v[1].v, fpm))};
+}
+
+YNN_ALWAYS_INLINE f8_e4m3x8 cast(f16x8 a, fp8_e4m3) {
+  fpm_t fpm = __arm_fpm_init();
+  fpm = __arm_set_fpm_dst_format(fpm, __ARM_FPM_E4M3);
+  fpm = __arm_set_fpm_overflow_cvt(fpm, __ARM_FPM_SATURATE);
+  float16x8_t a_f16 = vreinterpretq_f16_u16(a.v);
+  return f8_e4m3x8{vreinterpret_u8_mf8(
+      vcvt_mf8_f16_fpm(vget_low_f16(a_f16), vget_high_f16(a_f16), fpm))};
+}
+YNN_ALWAYS_INLINE f8_e5m2x8 cast(f16x8 a, fp8_e5m2) {
+  fpm_t fpm = __arm_fpm_init();
+  fpm = __arm_set_fpm_dst_format(fpm, __ARM_FPM_E5M2);
+  fpm = __arm_set_fpm_overflow_cvt(fpm, __ARM_FPM_INFNAN);
+  float16x8_t a_f16 = vreinterpretq_f16_u16(a.v);
+  return f8_e5m2x8{vreinterpret_u8_mf8(
+      vcvt_mf8_f16_fpm(vget_low_f16(a_f16), vget_high_f16(a_f16), fpm))};
+}
+#else
+
+using f8_e5m2x8 = vec<fp8_e5m2, 8>;
+using f16x8 = vec<half, 8>;
+
+YNN_ALWAYS_INLINE f16x8 cast(f8_e5m2x8 a, half) {
+  return f16x8{vshll_n_u8(a.v, 8)};
+}
+YNN_ALWAYS_INLINE f8_e5m2x8 cast(f16x8 a, fp8_e5m2) {
+  uint16x8_t u = a.v;
+  uint16x8_t is_nan = vcgtq_u16(vshlq_n_u16(u, 1), vdupq_n_u16(0xF800));
+  uint16x8_t lsb = vandq_u16(vshrq_n_u16(u, 8), vdupq_n_u16(1));
+  uint16x8_t bias = vaddq_u16(vdupq_n_u16(0x7F), lsb);
+  uint8x8_t rounded = vshrn_n_u16(vaddq_u16(u, bias), 8);
+  uint8x8_t nan_res = vmovn_u16(vorrq_u16(vshrq_n_u16(u, 8), vdupq_n_u16(1)));
+  return f8_e5m2x8{vbsl_u8(vmovn_u16(is_nan), nan_res, rounded)};
 }
 #endif
 

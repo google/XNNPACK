@@ -32,14 +32,66 @@ inline half e5m2_to_half(uint8_t bits) {
   return half::from_bits(static_cast<uint16_t>(bits) << 8);
 }
 
-inline uint8_t float_to_e5m2(float f) { return half_to_e5m2(half(f)); }
+inline uint8_t float_to_e5m2(float f) {
+  // return half_to_e5m2(half(h)) is not correct due to double rounding.
+  uint32_t w = bit_cast<uint32_t>(f);
+  uint32_t sign = (w >> 24) & 0x80;
+  uint32_t nonsign = w & 0x7FFFFFFF;
+
+  if (nonsign >= 0x7F800000) {
+    if (nonsign > 0x7F800000) {
+      return sign | 0x7F;  // NaN
+    } else {
+      return sign | 0x7C;  // Infinity
+    }
+  }
+
+  float abs_f = bit_cast<float>(nonsign);
+
+  if (abs_f < 7.6293945e-6f) {  // 2^-17
+    return sign | 0;
+  }
+
+  if (abs_f < 6.1035156e-5f) {  // 2^-14
+    float scaled = abs_f * 65536.0f;  // / 2^-16
+    int i = (int)scaled;
+    float diff = scaled - i;
+    if (diff > 0.5f) {
+      i++;
+    } else if (diff == 0.5f) {
+      if (i % 2 != 0) {
+        i++;
+      }
+    }
+    return sign | i;
+  }
+
+  uint32_t exp = (nonsign >> 23) & 0xFF;
+  uint32_t mant = nonsign & 0x7FFFFF;
+
+  int e5m2_exp = (int)exp - 127 + 15;
+
+  uint32_t rounding_bias = 0x000FFFFF + ((mant >> 21) & 1);
+  uint32_t rounded_mant = mant + rounding_bias;
+
+  if (rounded_mant & 0x800000) {
+    e5m2_exp++;
+    rounded_mant &= 0x7FFFFF;
+  }
+
+  if (e5m2_exp >= 31) {
+    return sign | 0x7C;  // Infinity
+  }
+
+  return sign | (e5m2_exp << 2) | (rounded_mant >> 21);
+}
 
 inline uint8_t float_to_e4m3(float f) {
   uint32_t w = bit_cast<uint32_t>(f);
   uint32_t sign = (w >> 24) & 0x80;
   uint32_t nonsign = w & 0x7FFFFFFF;
 
-  if (nonsign >= 0x7F800000) {
+  if (nonsign > 0x7F800000) {
     return sign | 0x7F;  // NaN
   }
 

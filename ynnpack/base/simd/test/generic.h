@@ -21,6 +21,7 @@
 #include <gtest/gtest.h>
 #include "ynnpack/base/arithmetic.h"
 #include "ynnpack/base/bfloat16.h"
+#include "ynnpack/base/fp8.h"
 #include "ynnpack/base/half.h"
 #include "ynnpack/base/simd/vec.h"
 #include "ynnpack/base/span.h"
@@ -48,6 +49,8 @@ using u8 = uint8_t;
 using s8 = int8_t;
 using u16 = uint16_t;
 using s16 = int16_t;
+using f8_e4m3 = fp8_e4m3;
+using f8_e5m2 = fp8_e5m2;
 using f16 = half;
 using bf16 = bfloat16;
 using f32 = float;

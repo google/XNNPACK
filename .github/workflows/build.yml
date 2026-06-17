@@ -780,6 +780,8 @@ jobs:
       CC: clang-20
       CXX: clang++-20
       QEMU_ARGS: -cpu max
+      BAZEL_DEFINES: |
+        --define=ynn_enable_arm64_neonfp8=true
     steps:
       - uses: actions/checkout@v6
 
@@ -799,10 +801,10 @@ jobs:
             --copt=-DGOOGLE_COMMANDLINEFLAGS_FULL_API=1 \
             --platforms=//build_config:aarch64_linux \
             --run_under="qemu-aarch64 ${QEMU_ARGS} " \
-            --define xnn_enable_arm_sme2=true \
             --dynamic_mode=off \
             --features=fully_static_link \
             --disk_cache=/home/xnnpack/.cache/bazel/disk_cache \
+            ${BAZEL_DEFINES} \
             //test:qs8_qc8w_igemm_minmax_fp32_test \
             //test:qp8_f32_qc4w_gemm_minmax_test \
             //test:pf32_gemm_minmax_test \
@@ -821,11 +823,11 @@ jobs:
             --copt=-DGOOGLE_COMMANDLINEFLAGS_FULL_API=1 \
             --platforms=//build_config:aarch64_linux \
             --run_under="qemu-aarch64 ${QEMU_ARGS} " \
-            --define xnn_enable_arm_sme2=true \
             --dynamic_mode=off \
             --features=fully_static_link \
             --disk_cache=/home/xnnpack/.cache/bazel/disk_cache \
             --test_tag_filters=-not_run:arm,-noemulator \
+            ${BAZEL_DEFINES} \
             //test:qs8_qc8w_igemm_minmax_fp32_test \
             //test:qp8_f32_qc4w_gemm_minmax_test \
             //test:pf32_gemm_minmax_test \
@@ -846,11 +848,11 @@ jobs:
             --copt=-DGOOGLE_COMMANDLINEFLAGS_FULL_API=1 \
             --platforms=//build_config:aarch64_linux \
             --run_under="qemu-aarch64 ${QEMU_ARGS} " \
-            --define xnn_enable_arm_sme2=true \
             --dynamic_mode=off \
             --features=fully_static_link \
             --disk_cache=/home/xnnpack/.cache/bazel/disk_cache \
             --test_tag_filters=-not_run:arm,-noemulator \
+            ${BAZEL_DEFINES} \
             //test/subgraph/... \
             //ynnpack/... \
             --cache_test_results=no \

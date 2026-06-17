@@ -180,6 +180,9 @@ TEST_CAST(arm_neon, u8, f32x16);
 TEST_CAST(arm_neon, s8, f32x16);
 TEST_CAST(arm_neon, s16, f32x8);
 
+TEST_CAST(arm_neon, f16, f8_e5m2x8);
+TEST_CAST(arm_neon, f8_e5m2, f16x8);
+
 TEST_EXTRACT(arm_neon, u8x16, 8);
 
 TEST_CONCAT(arm_neon, u8x8);
