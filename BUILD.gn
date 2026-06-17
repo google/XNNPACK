@@ -355,25 +355,44 @@ xnnpack_source_set("configs") {
   ]
 }
 
-xnnpack_source_set("operators") {
-  deps = [
-    ":init_once",
-    ":microkernel_headers",
-    ":xnnpack_headers",
-  ]
+template("xnnpack_operators") {
+  xnnpack_source_set(target_name) {
+    deps = [
+      ":init_once",
+      ":microkernel_headers",
+      ":xnnpack_headers",
+      invoker.pthreadpool_dep,
+    ]
 
-  # From build_srcs.bzl
-  sources = OPERATOR_SRCS
-  sources += [
-    "src/operators/fingerprint_cache.c",
-    "src/operators/fingerprint_cache.h",
-    "src/operators/fingerprint_id.c",
-    "src/operators/fingerprint_id.h",
-  ]
+    # From build_srcs.bzl
+    sources = OPERATOR_SRCS
+    sources += [
+      "src/operators/fingerprint_cache.c",
+      "src/operators/fingerprint_cache.h",
+      "src/operators/fingerprint_id.c",
+      "src/operators/fingerprint_id.h",
+    ]
+  }
+}
+
+# The standard operators target. In Chromium, this depends on
+# //third_party/pthreadpool, which wraps task scheduling onto Chromium's //base
+# thread pool.
+xnnpack_operators("operators") {
   if (!build_with_chromium) {
-    deps += [ "//third_party/pthreadpool:pthreadpool_standalone" ]
+    pthreadpool_dep = "//third_party/pthreadpool:pthreadpool_standalone"
   } else {
-    deps += [ "//third_party/pthreadpool" ]
+    pthreadpool_dep = "//third_party/pthreadpool"
+  }
+}
+
+if (build_with_chromium) {
+  # Standalone operators target just for Chromium. This depends on
+  # pthreadpool_standalone, which uses raw pthreads and has no dependency on
+  # //base. This is required for targets that run in environments where //base
+  # cannot be used, such as the internal optimization guide.
+  xnnpack_operators("operators_standalone") {
+    pthreadpool_dep = "//third_party/pthreadpool:pthreadpool_standalone"
   }
 }
 
@@ -932,117 +951,128 @@ xnnpack_source_set("init_once") {
   deps = [ ":xnnpack_headers" ]
 }
 
-xnnpack_source_set("xnnpack") {
-  # The core set of C/C++ files and kernels
-  sources = [
-    "src/allocator.c",
-    "src/cache.c",
-    "src/datatype.c",
-    "src/indirection.c",
-    "src/init.c",
-    "src/memory.c",
-    "src/microkernel-utils.c",
-    "src/microparams-init.c",
-    "src/mutex.c",
-    "src/normalization.c",
-    "src/operator-delete.c",
-    "src/operator-utils.c",
-    "src/pack-lh.cc",
-    "src/params.c",
-    "src/reference/binary-elementwise.cc",
-    "src/reference/packing.cc",
-    "src/reference/unary-elementwise.cc",
-    "src/sanitizers.c",
-    "src/xnnpack/fingerprint_check.c",
-    "src/xx-pad/xx-pad.inc",
-  ]
-  public_deps = [ ":xnnpack_headers" ]
-  deps = [
-    ":configs",
-    ":init_once",
-    ":logging",
-    ":microkernel_defs",
-    ":microkernel_headers",
-    ":operators",
-    ":scalar_microkernels",
-    ":subgraph",
-    ":table",
-    "//third_party/fxdiv",
-  ]
-  if (xnnpack_enable_arm_kleidiai) {
-    deps += [ "//third_party/kleidiai" ]
-  }
-  use_libcxx_modules = false
-  cflags = []
-  if (current_cpu == "arm64") {
-    sources += ALL_NEON_MICROKERNEL_SRCS
-    sources += ALL_NEONFMA_AARCH64_MICROKERNEL_SRCS
-    sources += ALL_NEONFMA_MICROKERNEL_SRCS
-    sources += ALL_NEONV8_MICROKERNEL_SRCS
-    deps += [
-      ":neon_aarch64_microkernels",
-      ":neon_asm_microkernels",
-      ":neon_bf16_microkernels",
-      ":neon_fullfp16_microkernels",
-      ":neon_i8mm_microkernels",
+# Template to compile the core XNNPACK library. Used to build both the standard
+# target (depending on //base via :operators) and the standalone variant
+# (depending on raw pthreads via :operators_standalone), sharing the massive
+# list of microkernels and CPU architecture-specific configurations.
+template("xnnpack_library") {
+  xnnpack_source_set(target_name) {
+    # The core set of C/C++ files and kernels
+    sources = [
+      "src/allocator.c",
+      "src/cache.c",
+      "src/datatype.c",
+      "src/indirection.c",
+      "src/init.c",
+      "src/memory.c",
+      "src/microkernel-utils.c",
+      "src/microparams-init.c",
+      "src/mutex.c",
+      "src/normalization.c",
+      "src/operator-delete.c",
+      "src/operator-utils.c",
+      "src/pack-lh.cc",
+      "src/params.c",
+      "src/reference/binary-elementwise.cc",
+      "src/reference/packing.cc",
+      "src/reference/unary-elementwise.cc",
+      "src/sanitizers.c",
+      "src/xnnpack/fingerprint_check.c",
+      "src/xx-pad/xx-pad.inc",
     ]
-    if (xnnpack_enable_arm_dotprod) {
+    public_deps = [ ":xnnpack_headers" ]
+    public_configs = [ ":xnnpack_public_config" ]
+    deps = [
+      ":configs",
+      ":init_once",
+      ":logging",
+      ":microkernel_defs",
+      ":microkernel_headers",
+      ":scalar_microkernels",
+      ":subgraph",
+      ":table",
+      "//third_party/fxdiv",
+      invoker.operators_dep,
+    ]
+    if (xnnpack_enable_arm_kleidiai) {
+      deps += [ "//third_party/kleidiai" ]
+    }
+    use_libcxx_modules = false
+    cflags = []
+    if (current_cpu == "arm64") {
+      sources += ALL_NEON_MICROKERNEL_SRCS
+      sources += ALL_NEONFMA_AARCH64_MICROKERNEL_SRCS
+      sources += ALL_NEONFMA_MICROKERNEL_SRCS
+      sources += ALL_NEONV8_MICROKERNEL_SRCS
       deps += [
+        ":neon_aarch64_microkernels",
+        ":neon_asm_microkernels",
+        ":neon_bf16_microkernels",
+        ":neon_fullfp16_microkernels",
+        ":neon_i8mm_microkernels",
+      ]
+      if (xnnpack_enable_arm_dotprod) {
+        deps += [
+          ":neon_dotprod_microkernels",
+          ":neon_dotprodfp16arith_microkernels",
+        ]
+      }
+      if (xnnpack_enable_arm_sme) {
+        deps += [ ":sme_microkernels" ]
+      }
+      if (xnnpack_enable_arm_sme2) {
+        deps += [ ":sme2_microkernels" ]
+      }
+    } else if (current_cpu == "arm") {
+      deps += [
+        ":aarch32_asm_microkernels",
+        ":armsimd32_microkernels",
+        ":fp16arith_microkernels",
+        ":neon_bf16_microkernels",
         ":neon_dotprod_microkernels",
         ":neon_dotprodfp16arith_microkernels",
+        ":neon_microkernels",
+        ":neonfma_microkernels",
+        ":neonfp16_microkernels",
+        ":neonfp16arith_microkernels",
+        ":neonv8_microkernels",
       ]
+    } else if (current_cpu == "x64" || current_cpu == "x86") {
+      if (xnnpack_enable_avx) {
+        deps += [ ":avx_microkernels" ]
+      }
+      if (xnnpack_enable_avx2) {
+        deps += [ ":avx2_microkernels" ]
+      }
+      if (xnnpack_enable_avx_vnni) {
+        deps += [ ":avxvnni_microkernels" ]
+      }
+      if (xnnpack_enable_avx_vnni_int8) {
+        deps += [ ":avxvnniint8_microkernels" ]
+      }
+      if (xnnpack_enable_avx512) {
+        deps += [ ":avx512_microkernels" ]
+      }
+      if (!is_win) {
+        sources += AMD64_ASM_MICROKERNEL_SRCS
+      }
+      sources += ALL_SSE_MICROKERNEL_SRCS
+      sources += ALL_SSE2_MICROKERNEL_SRCS
+      sources += ALL_SSE2FMA_MICROKERNEL_SRCS
+      sources += ALL_SSSE3_MICROKERNEL_SRCS
+      if (xnnpack_enable_sse41) {
+        deps += [ ":sse41_microkernels" ]
+      }
+      if (xnnpack_enable_f16c) {
+        deps += [ ":f16c_microkernels" ]
+      }
+      if (xnnpack_enable_fma3) {
+        deps += [ ":fma3_microkernels" ]
+      }
     }
-    if (xnnpack_enable_arm_sme) {
-      deps += [ ":sme_microkernels" ]
-    }
-    if (xnnpack_enable_arm_sme2) {
-      deps += [ ":sme2_microkernels" ]
-    }
-  } else if (current_cpu == "arm") {
-    deps += [
-      ":aarch32_asm_microkernels",
-      ":armsimd32_microkernels",
-      ":fp16arith_microkernels",
-      ":neon_bf16_microkernels",
-      ":neon_dotprod_microkernels",
-      ":neon_dotprodfp16arith_microkernels",
-      ":neon_microkernels",
-      ":neonfma_microkernels",
-      ":neonfp16_microkernels",
-      ":neonfp16arith_microkernels",
-      ":neonv8_microkernels",
-    ]
-  } else if (current_cpu == "x64" || current_cpu == "x86") {
-    if (xnnpack_enable_avx) {
-      deps += [ ":avx_microkernels" ]
-    }
-    if (xnnpack_enable_avx2) {
-      deps += [ ":avx2_microkernels" ]
-    }
-    if (xnnpack_enable_avx_vnni) {
-      deps += [ ":avxvnni_microkernels" ]
-    }
-    if (xnnpack_enable_avx_vnni_int8) {
-      deps += [ ":avxvnniint8_microkernels" ]
-    }
-    if (xnnpack_enable_avx512) {
-      deps += [ ":avx512_microkernels" ]
-    }
-    if (!is_win) {
-      sources += AMD64_ASM_MICROKERNEL_SRCS
-    }
-    sources += ALL_SSE_MICROKERNEL_SRCS
-    sources += ALL_SSE2_MICROKERNEL_SRCS
-    sources += ALL_SSE2FMA_MICROKERNEL_SRCS
-    sources += ALL_SSSE3_MICROKERNEL_SRCS
-    if (xnnpack_enable_sse41) {
-      deps += [ ":sse41_microkernels" ]
-    }
-    if (xnnpack_enable_f16c) {
-      deps += [ ":f16c_microkernels" ]
-    }
-    if (xnnpack_enable_fma3) {
-      deps += [ ":fma3_microkernels" ]
+
+    if (defined(invoker.assert_no_deps)) {
+      assert_no_deps = invoker.assert_no_deps
     }
   }
 }
@@ -1497,4 +1527,23 @@ if (!build_with_chromium) {
       sources = [ benchmark_src ]
     }
   }
+}
+
+if (build_with_chromium) {
+  # Standalone variant of XNNPACK target. This target is built without any
+  # dependency on //base (via operators_standalone and pthreadpool_standalone)
+  # and has assert_no_deps on //base to guarantee it. This target is used
+  # by the internal optimization guide components.
+  xnnpack_library("xnnpack_standalone") {
+    operators_dep = ":operators_standalone"
+    if (!(is_android && use_order_profiling)) {
+      assert_no_deps = [ "//base" ]
+    }
+  }
+}
+
+# The standard XNNPACK target. This target depends on the default operators
+# target (and thus //base), and is used everywhere else.
+xnnpack_library("xnnpack") {
+  operators_dep = ":operators"
 }
