@@ -19,22 +19,22 @@ tools/xngen src/x8-packw/scalar.c.in -D NR=16 -D KBLOCK=4 -D TYPE=int8_t -o src/
 tools/xngen src/x8-packw/scalar.c.in -D NR=32 -D KBLOCK=4 -D TYPE=int8_t -o src/x8-packw/gen/x8-packw-x32-gemm-goi-scalar-u4.c &
 
 ### C4 packing
-tools/xngen src/x8-packw/kr-scalar.c.in -D NR=8   -D KR=4 -D TYPE=int8_t -D IZP=0 -o src/qs8-packw/gen/qs8-packw-x8c4-gemm-goi-scalar.c &
-tools/xngen src/x8-packw/kr-scalar.c.in -D NR=16  -D KR=4 -D TYPE=int8_t -D IZP=0 -o src/qs8-packw/gen/qs8-packw-x16c4-gemm-goi-scalar.c &
-tools/xngen src/x8-packw/kr-scalar.c.in -D NR=32  -D KR=4 -D TYPE=int8_t -D IZP=0 -o src/qs8-packw/gen/qs8-packw-x32c4-gemm-goi-scalar.c &
-tools/xngen src/x8-packw/kr-scalar.c.in -D NR=64  -D KR=4 -D TYPE=int8_t -D IZP=0 -o src/qs8-packw/gen/qs8-packw-x64c4-gemm-goi-scalar.c &
+tools/xngen src/x8-packw/kr-scalar.c.in -D NR=8   -D KR=4 -D DATATYPE=QS8 -D TYPE=int8_t -D IZP=0 -o src/qs8-packw/gen/qs8-packw-x8c4-gemm-goi-scalar.c &
+tools/xngen src/x8-packw/kr-scalar.c.in -D NR=16  -D KR=4 -D DATATYPE=QS8 -D TYPE=int8_t -D IZP=0 -o src/qs8-packw/gen/qs8-packw-x16c4-gemm-goi-scalar.c &
+tools/xngen src/x8-packw/kr-scalar.c.in -D NR=32  -D KR=4 -D DATATYPE=QS8 -D TYPE=int8_t -D IZP=0 -o src/qs8-packw/gen/qs8-packw-x32c4-gemm-goi-scalar.c &
+tools/xngen src/x8-packw/kr-scalar.c.in -D NR=64  -D KR=4 -D DATATYPE=QS8 -D TYPE=int8_t -D IZP=0 -o src/qs8-packw/gen/qs8-packw-x64c4-gemm-goi-scalar.c &
 # The following file names limit these microkernels to hexagon
-tools/xngen src/x8-packw/kr-scalar.c.in -D NR=96  -D KR=4 -D TYPE=int8_t -D IZP=0 -o src/qs8-packw/gen/qs8-packw-x96c4-gemm-goi-hvx.c &
-tools/xngen src/x8-packw/kr-scalar.c.in -D NR=128 -D KR=4 -D TYPE=int8_t -D IZP=0 -o src/qs8-packw/gen/qs8-packw-x128c4-gemm-goi-hvx.c &
+tools/xngen src/x8-packw/kr-scalar.c.in -D NR=96  -D KR=4 -D DATATYPE=QS8 -D TYPE=int8_t -D IZP=0 -o src/qs8-packw/gen/qs8-packw-x96c4-gemm-goi-hvx.c &
+tools/xngen src/x8-packw/kr-scalar.c.in -D NR=128 -D KR=4 -D DATATYPE=QS8 -D TYPE=int8_t -D IZP=0 -o src/qs8-packw/gen/qs8-packw-x128c4-gemm-goi-hvx.c &
 
 ### C8 packing
-tools/xngen src/x8-packw/kr-scalar.c.in -D NR=4  -D KR=8 -D TYPE=int8_t -D IZP=0   -o src/qs8-packw/gen/qs8-packw-x4c8-gemm-goi-scalar.c &
-tools/xngen src/x8-packw/kr-scalar.c.in -D NR=8  -D KR=8 -D TYPE=int8_t -D IZP=0   -o src/qs8-packw/gen/qs8-packw-x8c8-gemm-goi-scalar.c &
-tools/xngen src/x8-packw/kr-scalar.c.in -D NR=16 -D KR=8 -D TYPE=int8_t -D IZP=0   -o src/qs8-packw/gen/qs8-packw-x16c8-gemm-goi-scalar.c &
+tools/xngen src/x8-packw/kr-scalar.c.in -D NR=4  -D KR=8 -D DATATYPE=QS8 -D TYPE=int8_t -D IZP=0   -o src/qs8-packw/gen/qs8-packw-x4c8-gemm-goi-scalar.c &
+tools/xngen src/x8-packw/kr-scalar.c.in -D NR=8  -D KR=8 -D DATATYPE=QS8 -D TYPE=int8_t -D IZP=0   -o src/qs8-packw/gen/qs8-packw-x8c8-gemm-goi-scalar.c &
+tools/xngen src/x8-packw/kr-scalar.c.in -D NR=16 -D KR=8 -D DATATYPE=QS8 -D TYPE=int8_t -D IZP=0   -o src/qs8-packw/gen/qs8-packw-x16c8-gemm-goi-scalar.c &
 
-tools/xngen src/x8-packw/kr-scalar.c.in -D NR=4  -D KR=8 -D TYPE=int8_t -D IZP=128 -o src/qs8-qu8-packw/gen/qs8-qu8-packw-x4c8-gemm-goi-scalar.c &
-tools/xngen src/x8-packw/kr-scalar.c.in -D NR=8  -D KR=8 -D TYPE=int8_t -D IZP=128 -o src/qs8-qu8-packw/gen/qs8-qu8-packw-x8c8-gemm-goi-scalar.c &
-tools/xngen src/x8-packw/kr-scalar.c.in -D NR=16 -D KR=8 -D TYPE=int8_t -D IZP=128 -o src/qs8-qu8-packw/gen/qs8-qu8-packw-x16c8-gemm-goi-scalar.c &
+tools/xngen src/x8-packw/kr-scalar.c.in -D NR=4  -D KR=8 -D DATATYPE=QS8 -D TYPE=int8_t -D IZP=128 -o src/qs8-qu8-packw/gen/qs8-qu8-packw-x4c8-gemm-goi-scalar.c &
+tools/xngen src/x8-packw/kr-scalar.c.in -D NR=8  -D KR=8 -D DATATYPE=QS8 -D TYPE=int8_t -D IZP=128 -o src/qs8-qu8-packw/gen/qs8-qu8-packw-x8c8-gemm-goi-scalar.c &
+tools/xngen src/x8-packw/kr-scalar.c.in -D NR=16 -D KR=8 -D DATATYPE=QS8 -D TYPE=int8_t -D IZP=128 -o src/qs8-qu8-packw/gen/qs8-qu8-packw-x16c8-gemm-goi-scalar.c &
 
 ### C8 GIO packing
 tools/xngen src/x8-packw/kr-gio-scalar.c.in -D NR=8   -D KR=8 -D DATATYPE=X8  -D TYPE=int8_t -D IZP=0   -o src/x8-packw/gen/x8-packw-x8c8-gemm-gio-scalar.c &
@@ -54,6 +54,39 @@ tools/xngen src/x8-packw/kr-gio-scalar.c.in -D NR=16 -D KR=8 -D DATATYPE=QS8 -D 
 tools/xngen src/x8-packw/kr-gio-scalar.c.in -D NR=4  -D KR=8 -D DATATYPE=QS8 -D TYPE=int8_t -D IZP=128   -o src/qs8-qu8-packw/gen/qs8-qu8-packw-x4c8-gemm-gio-scalar.c &
 tools/xngen src/x8-packw/kr-gio-scalar.c.in -D NR=8  -D KR=8 -D DATATYPE=QS8 -D TYPE=int8_t -D IZP=128   -o src/qs8-qu8-packw/gen/qs8-qu8-packw-x8c8-gemm-gio-scalar.c &
 tools/xngen src/x8-packw/kr-gio-scalar.c.in -D NR=16 -D KR=8 -D DATATYPE=QS8 -D TYPE=int8_t -D IZP=128   -o src/qs8-qu8-packw/gen/qs8-qu8-packw-x16c8-gemm-gio-scalar.c &
+
+### QC4W Scalar packing
+tools/xngen src/x8-packw/kr-scalar.c.in -D NR=4  -D KR=8 -D DATATYPE=QS4 -D IZP=0   -o src/qs8-qc4w-packw/gen/qs8-qc4w-packw-x4c8-gemm-goi-scalar.c &
+tools/xngen src/x8-packw/kr-scalar.c.in -D NR=8  -D KR=8 -D DATATYPE=QS4 -D IZP=0   -o src/qs8-qc4w-packw/gen/qs8-qc4w-packw-x8c8-gemm-goi-scalar.c &
+tools/xngen src/x8-packw/kr-scalar.c.in -D NR=16 -D KR=8 -D DATATYPE=QS4 -D IZP=0   -o src/qs8-qc4w-packw/gen/qs8-qc4w-packw-x16c8-gemm-goi-scalar.c &
+
+tools/xngen src/x8-packw/kr-scalar.c.in -D NR=4  -D KR=8 -D DATATYPE=QS4 -D IZP=128 -o src/qs8-qc4w-packw/gen/qs8-to-qu8-qc4w-packw-x4c8-gemm-goi-scalar.c &
+tools/xngen src/x8-packw/kr-scalar.c.in -D NR=8  -D KR=8 -D DATATYPE=QS4 -D IZP=128 -o src/qs8-qc4w-packw/gen/qs8-to-qu8-qc4w-packw-x8c8-gemm-goi-scalar.c &
+tools/xngen src/x8-packw/kr-scalar.c.in -D NR=16 -D KR=8 -D DATATYPE=QS4 -D IZP=128 -o src/qs8-qc4w-packw/gen/qs8-to-qu8-qc4w-packw-x16c8-gemm-goi-scalar.c &
+
+### QC4UW Scalar packing
+tools/xngen src/x8-packw/kr-scalar.c.in -D NR=4  -D KR=8 -D DATATYPE=QC4UW -D IZP=0   -o src/qs8-qc4w-packw/gen/qs8-qc4uw-packw-x4c8-gemm-goi-scalar.c &
+tools/xngen src/x8-packw/kr-scalar.c.in -D NR=8  -D KR=8 -D DATATYPE=QC4UW -D IZP=0   -o src/qs8-qc4w-packw/gen/qs8-qc4uw-packw-x8c8-gemm-goi-scalar.c &
+tools/xngen src/x8-packw/kr-scalar.c.in -D NR=16 -D KR=8 -D DATATYPE=QC4UW -D IZP=0   -o src/qs8-qc4w-packw/gen/qs8-qc4uw-packw-x16c8-gemm-goi-scalar.c &
+
+tools/xngen src/x8-packw/kr-scalar.c.in -D NR=4  -D KR=8 -D DATATYPE=QC4UW -D IZP=128 -o src/qs8-qc4w-packw/gen/qs8-to-qu8-qc4uw-packw-x4c8-gemm-goi-scalar.c &
+tools/xngen src/x8-packw/kr-scalar.c.in -D NR=8  -D KR=8 -D DATATYPE=QC4UW -D IZP=128 -o src/qs8-qc4w-packw/gen/qs8-to-qu8-qc4uw-packw-x8c8-gemm-goi-scalar.c &
+tools/xngen src/x8-packw/kr-scalar.c.in -D NR=16 -D KR=8 -D DATATYPE=QC4UW -D IZP=128 -o src/qs8-qc4w-packw/gen/qs8-to-qu8-qc4uw-packw-x16c8-gemm-goi-scalar.c &
+
+### QC4W SSE2 packing
+tools/xngen src/x8-packw/kr-sse2.c.in -D NR=4  -D KR=8 -D DATATYPE=QS4 -D IZP=0   -o src/qs8-qc4w-packw/gen/qs8-qc4w-packw-x4c8-gemm-goi-sse2.c &
+tools/xngen src/x8-packw/kr-sse2.c.in -D NR=8  -D KR=8 -D DATATYPE=QS4 -D IZP=0   -o src/qs8-qc4w-packw/gen/qs8-qc4w-packw-x8c8-gemm-goi-sse2.c &
+
+tools/xngen src/x8-packw/kr-sse2.c.in -D NR=4  -D KR=8 -D DATATYPE=QS4 -D IZP=128 -o src/qs8-qc4w-packw/gen/qs8-to-qu8-qc4w-packw-x4c8-gemm-goi-sse2.c &
+tools/xngen src/x8-packw/kr-sse2.c.in -D NR=8  -D KR=8 -D DATATYPE=QS4 -D IZP=128 -o src/qs8-qc4w-packw/gen/qs8-to-qu8-qc4w-packw-x8c8-gemm-goi-sse2.c &
+
+### QC4UW SSE2 packing
+tools/xngen src/x8-packw/kr-sse2.c.in -D NR=4  -D KR=8 -D DATATYPE=QC4UW -D IZP=0   -o src/qs8-qc4w-packw/gen/qs8-qc4uw-packw-x4c8-gemm-goi-sse2.c &
+tools/xngen src/x8-packw/kr-sse2.c.in -D NR=8  -D KR=8 -D DATATYPE=QC4UW -D IZP=0   -o src/qs8-qc4w-packw/gen/qs8-qc4uw-packw-x8c8-gemm-goi-sse2.c &
+
+tools/xngen src/x8-packw/kr-sse2.c.in -D NR=4  -D KR=8 -D DATATYPE=QC4UW -D IZP=128 -o src/qs8-qc4w-packw/gen/qs8-to-qu8-qc4uw-packw-x4c8-gemm-goi-sse2.c &
+tools/xngen src/x8-packw/kr-sse2.c.in -D NR=8  -D KR=8 -D DATATYPE=QC4UW -D IZP=128 -o src/qs8-qc4w-packw/gen/qs8-to-qu8-qc4uw-packw-x8c8-gemm-goi-sse2.c &
+
 
 ### AVXVNNI micro-kernels
 ### C4 packing for AMX
@@ -103,15 +136,23 @@ tools/xngen src/x8-packw/kr-avxvnni.c.in -D NR=8  -D KR=8 -D DATATYPE=QS8 -D TYP
 # QC4W
 tools/xngen src/x8-packw/kr-avxvnni.c.in -D NR=8  -D KR=8 -D DATATYPE=QS4 -D TYPE=int8_t -D IZP=0   -D AVX=2  -D VARIANT=     -D PREFETCH=0 -o src/qs8-qc4w-packw/gen/qs8-qc4w-packw-x8c8-gemm-goi-avxvnni.c &
 tools/xngen src/x8-packw/kr-avxvnni.c.in -D NR=8  -D KR=8 -D DATATYPE=QS4 -D TYPE=int8_t -D IZP=0   -D AVX=2  -D VARIANT=     -D PREFETCH=1 -o src/qs8-qc4w-packw/gen/qs8-qc4w-packw-x8c8-gemm-goi-avxvnni-prfm.c &
+tools/xngen src/x8-packw/kr-avxvnni.c.in -D NR=8  -D KR=8 -D DATATYPE=QS4 -D TYPE=int8_t -D IZP=128  -D AVX=2  -D VARIANT=     -D PREFETCH=0 -o src/qs8-qc4w-packw/gen/qs8-to-qu8-qc4w-packw-x8c8-gemm-goi-avxvnni.c &
+tools/xngen src/x8-packw/kr-avxvnni.c.in -D NR=8  -D KR=8 -D DATATYPE=QS4 -D TYPE=int8_t -D IZP=128  -D AVX=2  -D VARIANT=     -D PREFETCH=1 -o src/qs8-qc4w-packw/gen/qs8-to-qu8-qc4w-packw-x8c8-gemm-goi-avxvnni-prfm.c &
 
 tools/xngen src/x8-packw/kr-avxvnni.c.in -D NR=8  -D KR=8 -D DATATYPE=QS4 -D TYPE=int8_t -D IZP=0   -D AVX=10 -D VARIANT=     -D PREFETCH=0 -o src/qs8-qc4w-packw/gen/qs8-qc4w-packw-x8c8-gemm-goi-avx256vnni.c &
 tools/xngen src/x8-packw/kr-avxvnni.c.in -D NR=8  -D KR=8 -D DATATYPE=QS4 -D TYPE=int8_t -D IZP=0   -D AVX=10 -D VARIANT=     -D PREFETCH=1 -o src/qs8-qc4w-packw/gen/qs8-qc4w-packw-x8c8-gemm-goi-avx256vnni-prfm.c &
+tools/xngen src/x8-packw/kr-avxvnni.c.in -D NR=8  -D KR=8 -D DATATYPE=QS4 -D TYPE=int8_t -D IZP=128  -D AVX=10 -D VARIANT=     -D PREFETCH=0 -o src/qs8-qc4w-packw/gen/qs8-to-qu8-qc4w-packw-x8c8-gemm-goi-avx256vnni.c &
+tools/xngen src/x8-packw/kr-avxvnni.c.in -D NR=8  -D KR=8 -D DATATYPE=QS4 -D TYPE=int8_t -D IZP=128  -D AVX=10 -D VARIANT=     -D PREFETCH=1 -o src/qs8-qc4w-packw/gen/qs8-to-qu8-qc4w-packw-x8c8-gemm-goi-avx256vnni-prfm.c &
 
 tools/xngen src/x8-packw/kr-avxvnni.c.in -D NR=16 -D KR=8 -D DATATYPE=QS4 -D TYPE=int8_t -D IZP=0   -D AVX=2  -D VARIANT=     -D PREFETCH=0 -o src/qs8-qc4w-packw/gen/qs8-qc4w-packw-x16c8-gemm-goi-avxvnni.c &
 tools/xngen src/x8-packw/kr-avxvnni.c.in -D NR=16 -D KR=8 -D DATATYPE=QS4 -D TYPE=int8_t -D IZP=0   -D AVX=2  -D VARIANT=     -D PREFETCH=1 -o src/qs8-qc4w-packw/gen/qs8-qc4w-packw-x16c8-gemm-goi-avxvnni-prfm.c &
+tools/xngen src/x8-packw/kr-avxvnni.c.in -D NR=16 -D KR=8 -D DATATYPE=QS4 -D TYPE=int8_t -D IZP=128  -D AVX=2  -D VARIANT=     -D PREFETCH=0 -o src/qs8-qc4w-packw/gen/qs8-to-qu8-qc4w-packw-x16c8-gemm-goi-avxvnni.c &
+tools/xngen src/x8-packw/kr-avxvnni.c.in -D NR=16 -D KR=8 -D DATATYPE=QS4 -D TYPE=int8_t -D IZP=128  -D AVX=2  -D VARIANT=     -D PREFETCH=1 -o src/qs8-qc4w-packw/gen/qs8-to-qu8-qc4w-packw-x16c8-gemm-goi-avxvnni-prfm.c &
 
 tools/xngen src/x8-packw/kr-avxvnni.c.in -D NR=16 -D KR=8 -D DATATYPE=QS4 -D TYPE=int8_t -D IZP=0   -D AVX=10 -D VARIANT=     -D PREFETCH=0 -o src/qs8-qc4w-packw/gen/qs8-qc4w-packw-x16c8-gemm-goi-avx256vnni.c &
 tools/xngen src/x8-packw/kr-avxvnni.c.in -D NR=16 -D KR=8 -D DATATYPE=QS4 -D TYPE=int8_t -D IZP=0   -D AVX=10 -D VARIANT=     -D PREFETCH=1 -o src/qs8-qc4w-packw/gen/qs8-qc4w-packw-x16c8-gemm-goi-avx256vnni-prfm.c &
+tools/xngen src/x8-packw/kr-avxvnni.c.in -D NR=16 -D KR=8 -D DATATYPE=QS4 -D TYPE=int8_t -D IZP=128  -D AVX=10 -D VARIANT=     -D PREFETCH=0 -o src/qs8-qc4w-packw/gen/qs8-to-qu8-qc4w-packw-x16c8-gemm-goi-avx256vnni.c &
+tools/xngen src/x8-packw/kr-avxvnni.c.in -D NR=16 -D KR=8 -D DATATYPE=QS4 -D TYPE=int8_t -D IZP=128  -D AVX=10 -D VARIANT=     -D PREFETCH=1 -o src/qs8-qc4w-packw/gen/qs8-to-qu8-qc4w-packw-x16c8-gemm-goi-avx256vnni-prfm.c &
 
 ### Wasm Relaxed SIMD
 ### C8 packing

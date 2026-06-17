@@ -3958,6 +3958,8 @@ static void init_qdu8_f32_qc4w_gemm_config(void) {
         qdu8_f32_qc4w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_DQGEMM_UKERNEL(xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x16c8__avx512vnnigfni_prfm);
         qdu8_f32_qc4w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(14)] = XNN_INIT_HMP_DQGEMM_UKERNEL(xnn_qd8_f32_qc4w_gemm_minmax_ukernel_14x16c8__avx512vnnigfni_prfm);
         qdu8_f32_qc4w_gemm_config.init.f32_qc4w = xnn_init_f32_qc4w_minmax_scalar_params;
+        qdu8_f32_qc4w_gemm_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_qs8_qc4w_packw_gemm_goi_ukernel_x16c8__avx256vnni;
+        qdu8_f32_qc4w_gemm_config.pack_weights_and_biases = NULL;
         qdu8_f32_qc4w_gemm_config.mr = 14;
         qdu8_f32_qc4w_gemm_config.nr = 16;
         qdu8_f32_qc4w_gemm_config.log2_kr = 3;
@@ -3970,6 +3972,8 @@ static void init_qdu8_f32_qc4w_gemm_config(void) {
         qdu8_f32_qc4w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_DQGEMM_UKERNEL(xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x16c8__avx512vnni_prfm);
         qdu8_f32_qc4w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(8)] = XNN_INIT_HMP_DQGEMM_UKERNEL(xnn_qd8_f32_qc4w_gemm_minmax_ukernel_8x16c8__avx512vnni_prfm);
         qdu8_f32_qc4w_gemm_config.init.f32_qc4w = xnn_init_f32_qc4w_minmax_scalar_params;
+        qdu8_f32_qc4w_gemm_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_qs8_qc4w_packw_gemm_goi_ukernel_x16c8__avx256vnni;
+        qdu8_f32_qc4w_gemm_config.pack_weights_and_biases = NULL;
         qdu8_f32_qc4w_gemm_config.mr = 8;
         qdu8_f32_qc4w_gemm_config.nr = 16;
         qdu8_f32_qc4w_gemm_config.log2_kr = 3;
@@ -3982,6 +3986,8 @@ static void init_qdu8_f32_qc4w_gemm_config(void) {
         qdu8_f32_qc4w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_DQGEMM_UKERNEL(xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x8c8__avxvnni_prfm);
         qdu8_f32_qc4w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(5)] = XNN_INIT_HMP_DQGEMM_UKERNEL(xnn_qd8_f32_qc4w_gemm_minmax_ukernel_5x8c8__avxvnni_prfm);
         qdu8_f32_qc4w_gemm_config.init.f32_qc4w = xnn_init_f32_qc4w_minmax_scalar_params;
+        qdu8_f32_qc4w_gemm_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_qs8_qc4w_packw_gemm_goi_ukernel_x8c8__avxvnni;
+        qdu8_f32_qc4w_gemm_config.pack_weights_and_biases = NULL;
         qdu8_f32_qc4w_gemm_config.mr = 5;
         qdu8_f32_qc4w_gemm_config.nr = 8;
         qdu8_f32_qc4w_gemm_config.log2_kr = 3;
@@ -4043,7 +4049,7 @@ static void init_qdu8_f32_qc4w_gemm_config(void) {
       qdu8_f32_qc4w_gemm_config.pack_weights_and_biases = NULL;  // Override the default packing function.
       qdu8_f32_qc4w_gemm_config.packed_stride_weights_and_biases = NULL;  // Override the default packing function.
       qdu8_f32_qc4w_gemm_config.pack_gemm_gio = (xnn_packw_gemm_gio_ukernel_fn) xnn_pack_qs8_qc4uw_gemm_gio_w;
-      qdu8_f32_qc4w_gemm_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_pack_qs8_qc4uw_gemm_goi_w;
+      qdu8_f32_qc4w_gemm_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_qs8_qc4uw_packw_gemm_goi_ukernel_x4c8__sse2;
       qdu8_f32_qc4w_gemm_config.init.f32_qc4w = xnn_init_f32_qc4w_minmax_scalar_params;
       qdu8_f32_qc4w_gemm_config.mr = 5;
       qdu8_f32_qc4w_gemm_config.nr = 4;
@@ -4768,7 +4774,8 @@ static void init_qs8_qc4w_gemm_config(void) {
         qs8_qc4w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_DQGEMM_UKERNEL(xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_1x16c8__avx512vnnigfni_prfm);
         qs8_qc4w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(7)] = XNN_INIT_HMP_DQGEMM_UKERNEL(xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_7x16c8__avx512vnnigfni_prfm);
         qs8_qc4w_gemm_config.init.qs8_qc8w = xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params;
-        qs8_qc4w_gemm_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_pack_qs8_to_qu8_qc4w_gemm_goi_w;
+        qs8_qc4w_gemm_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_qs8_to_qu8_qc4w_packw_gemm_goi_ukernel_x16c8__avx256vnni;
+        qs8_qc4w_gemm_config.pack_weights_and_biases = NULL;
         qs8_qc4w_gemm_config.planes = 2;
         qs8_qc4w_gemm_config.mr = 7;
         qs8_qc4w_gemm_config.nr = 16;
@@ -4782,7 +4789,8 @@ static void init_qs8_qc4w_gemm_config(void) {
         qs8_qc4w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_DQGEMM_UKERNEL(xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_1x16c8__asm_amd64_avx512vnni);
         qs8_qc4w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(8)] = XNN_INIT_HMP_DQGEMM_UKERNEL(xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_8x16c8__asm_amd64_avx512vnni);
         qs8_qc4w_gemm_config.init.qs8_qc8w = xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params;
-        qs8_qc4w_gemm_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_pack_qs8_to_qu8_qc4w_gemm_goi_w_non_planar_avx512;
+        qs8_qc4w_gemm_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_qs8_to_qu8_qc4w_packw_gemm_goi_ukernel_x16c8__avx256vnni;
+        qs8_qc4w_gemm_config.pack_weights_and_biases = NULL;
         qs8_qc4w_gemm_config.planes = 1;
         qs8_qc4w_gemm_config.mr = 8;
         qs8_qc4w_gemm_config.nr = 16;
@@ -4795,7 +4803,8 @@ static void init_qs8_qc4w_gemm_config(void) {
         qs8_qc4w_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_1x8c8__avx256vnni_prfm);
         qs8_qc4w_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(7)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_7x8c8__avx256vnni_prfm);
         qs8_qc4w_gemm_config.init.qs8_qc8w = xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params;
-        qs8_qc4w_gemm_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_pack_qs8_to_qu8_qc4w_gemm_goi_w;
+        qs8_qc4w_gemm_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_qs8_to_qu8_qc4w_packw_gemm_goi_ukernel_x8c8__avx256vnni;
+        qs8_qc4w_gemm_config.pack_weights_and_biases = NULL;
         qs8_qc4w_gemm_config.planes = 2;
         qs8_qc4w_gemm_config.mr = 7;
         qs8_qc4w_gemm_config.nr = 8;
@@ -4809,7 +4818,8 @@ static void init_qs8_qc4w_gemm_config(void) {
         qs8_qc4w_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_1x8c8__avxvnni_prfm);
         qs8_qc4w_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(5)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_5x8c8__avxvnni_prfm);
         qs8_qc4w_gemm_config.init.qs8_qc8w = xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params;
-        qs8_qc4w_gemm_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_pack_qs8_to_qu8_qc4w_gemm_goi_w;
+        qs8_qc4w_gemm_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_qs8_to_qu8_qc4w_packw_gemm_goi_ukernel_x8c8__avxvnni;
+        qs8_qc4w_gemm_config.pack_weights_and_biases = NULL;
         qs8_qc4w_gemm_config.planes = 2;
         qs8_qc4w_gemm_config.mr = 5;
         qs8_qc4w_gemm_config.nr = 8;
@@ -4861,7 +4871,8 @@ static void init_qs8_qc4w_gemm_config(void) {
         qs8_qc4w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_DQGEMM_UKERNEL(xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_1x4c8__avx_madd_prfm);
         qs8_qc4w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(5)] = XNN_INIT_HMP_DQGEMM_UKERNEL(xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_5x4c8__avx_madd_prfm);
         qs8_qc4w_gemm_config.init.qs8_qc8w = xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params;
-        qs8_qc4w_gemm_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_pack_qs8_to_qu8_qc4uw_gemm_goi_w;
+        qs8_qc4w_gemm_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_qs8_to_qu8_qc4uw_packw_gemm_goi_ukernel_x4c8__sse2;
+        qs8_qc4w_gemm_config.pack_weights_and_biases = NULL;
         qs8_qc4w_gemm_config.planes = 2;
         qs8_qc4w_gemm_config.mr = 5;
         qs8_qc4w_gemm_config.nr = 4;
@@ -4873,7 +4884,8 @@ static void init_qs8_qc4w_gemm_config(void) {
       qs8_qc4w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_DQGEMM_UKERNEL(xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_1x4c8__ssse3_madd_prfm);
       qs8_qc4w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(5)] = XNN_INIT_HMP_DQGEMM_UKERNEL(xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_5x4c8__ssse3_madd_prfm);
       qs8_qc4w_gemm_config.init.qs8_qc8w = xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params;
-      qs8_qc4w_gemm_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_pack_qs8_to_qu8_qc4uw_gemm_goi_w;
+      qs8_qc4w_gemm_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_qs8_to_qu8_qc4uw_packw_gemm_goi_ukernel_x4c8__sse2;
+      qs8_qc4w_gemm_config.pack_weights_and_biases = NULL;
       qs8_qc4w_gemm_config.planes = 2;
       qs8_qc4w_gemm_config.mr = 5;
       qs8_qc4w_gemm_config.nr = 4;

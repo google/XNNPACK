@@ -3065,7 +3065,7 @@ void xnn_qs8_packw_gemm_goi_ukernel_x96c4__scalar(
       }
       out += (96 - n) * sizeof(int32_t);
 
-     // NR remainder has less than 96 rows so last row is not loaded
+      // NR remainder has less than 96 rows so last row is not loaded
       const int8_t* w1 = w0 + kc;
       if XNN_UNPREDICTABLE(n < 2) {
         w1 = w0;

@@ -34,12 +34,16 @@ $if VARIANT == "MADD":
     return _mm256_add_epi32(i32, v);
   }
 
-XNN_INLINE static uint64_t safe_load_u64(const void* address, size_t n) {
-  uint64_t value = 0;
+// Load 'n' bytes from 'address' into a uint64_t, padding the remaining bytes with 'pad_value'.
+// We initialize 'value' by replicating 'pad_value' across all 8 bytes.
+// Then we overwrite the first 'n' bytes with the actual data.
+// This is used for safe loading at the end of a row, ensuring correct padding (e.g. zero point).
+XNN_INLINE static uint64_t safe_load_u64(const void* address, size_t n, uint8_t pad_value) {
+  uint64_t value = (uint64_t)pad_value * 0x0101010101010101ULL;
   assert(n <= sizeof(uint64_t));
   const uint8_t* bytes = (const uint8_t*) address;
   for (size_t i = 0; i < n; ++i) {
-    value |= (uint64_t) bytes[i] << (i * 8);
+    ((uint8_t*)&value)[i] = bytes[i];
   }
   return value;
 }
@@ -48,13 +52,18 @@ $BTYPE = {"QS8": "int32_t", "QS4": "int32_t", "X8": "uint32_t"}[DATATYPE]
 $WTYPE = {"QS8": "int8_t", "QS4": "uint8_t", "X8": "int8_t"}[DATATYPE]
 $PACKEDWTYPE = {"QS8": "int8_t", "QS4": "void", "X8": "int8_t"}[DATATYPE]
 $SCALETYPE = {"QS8": "void", "QS4": "float", "X8": "void"}[DATATYPE]
+// For 4-bit quantization (QS4), each byte contains two 4-bit weights.
+// When padding, we must replicate the 4-bit kernel_zero_point (0-15) into both
+// the low and high nibbles of the pad byte.
+// Multiplying by 0x11 (17) achieves this: ZP * 0x11 = (ZP << 4) | ZP.
+$PAD_VALUE = "params->kernel_zero_point * 0x11" if DATATYPE == "QS4" else "0"
 $PARAMTYPE = {"QS8": "void", "QS4": "struct xnn_qs8_qc4w_packing_params", "X8": "void"}[DATATYPE]
 $if DATATYPE in ["QS8", "QS4"]:
   $_MM256_DPBUSD_EPI32 = "mm256_dpbusd_epi32_madd" if VARIANT == "MADD" else "_mm256_dpbusd_avx_epi32" if AVX == 2 else "_mm256_dpbusd_epi32"
   $ISA = "avx2" if VARIANT == "MADD" else "avxvnni" if AVX == 2 else "avx256vnni"
 $else:
   $ISA = "avx2" if AVX == 2 else "avx256skx"
-$DATATYPE_SPEC = "qs8_to_qu8" if IZP == 128 else {"QS8": "qs8", "QS4": "qs8_qc4w", "X8": "x8"}[DATATYPE]
+$DATATYPE_SPEC = ("qs8_to_qu8_qc4w" if DATATYPE == "QS4" else "qs8_to_qu8") if IZP == 128 else {"QS8": "qs8", "QS4": "qs8_qc4w", "X8": "x8"}[DATATYPE]
 $if DATATYPE in ["QS4"]:
   // Convert a vector from packed nibbles to planar, and accumulate sum
   static XNN_INTRINSIC
@@ -216,10 +225,10 @@ void xnn_${DATATYPE_SPEC}_packw_gemm_goi_ukernel_x${NR}c${KR}__${ISA}${"_madd" i
         assert(k >= 1 && k <= ${KR-1});
 
         $for N in range(0, NR, 4):
-          __m256i v${N} = _mm256_set1_epi64x((int64_t) safe_load_u64(w${N}, k));
-          v${N} = _mm256_blend_epi32(v${N}, _mm256_set1_epi64x((int64_t) safe_load_u64(w${N+1}, k)), 0x0C);
-          v${N} = _mm256_blend_epi32(v${N}, _mm256_set1_epi64x((int64_t) safe_load_u64(w${N+2}, k)), 0x30);
-          v${N} = _mm256_blend_epi32(v${N}, _mm256_set1_epi64x((int64_t) safe_load_u64(w${N+3}, k)), 0xC0);
+          __m256i v${N} = _mm256_set1_epi64x((int64_t) safe_load_u64(w${N}, k, ${PAD_VALUE}));
+          v${N} = _mm256_blend_epi32(v${N}, _mm256_set1_epi64x((int64_t) safe_load_u64(w${N+1}, k, ${PAD_VALUE})), 0x0C);
+          v${N} = _mm256_blend_epi32(v${N}, _mm256_set1_epi64x((int64_t) safe_load_u64(w${N+2}, k, ${PAD_VALUE})), 0x30);
+          v${N} = _mm256_blend_epi32(v${N}, _mm256_set1_epi64x((int64_t) safe_load_u64(w${N+3}, k, ${PAD_VALUE})), 0xC0);
 
         $for N in range(NR):
           w${N} += k;
@@ -367,10 +376,10 @@ void xnn_${DATATYPE_SPEC}_packw_gemm_goi_ukernel_x${NR}c${KR}__${ISA}${"_madd" i
         assert(k >= 1 && k <= ${KR-1});
 
         $for N in range(0, NR, 4):
-          __m256i v${N} = _mm256_set1_epi64x((int64_t) safe_load_u64(w${N}, k));
-          v${N} = _mm256_blend_epi32(v${N}, _mm256_set1_epi64x((int64_t) safe_load_u64(w${N+1}, k)), 0x0C);
-          v${N} = _mm256_blend_epi32(v${N}, _mm256_set1_epi64x((int64_t) safe_load_u64(w${N+2}, k)), 0x30);
-          v${N} = _mm256_blend_epi32(v${N}, _mm256_set1_epi64x((int64_t) safe_load_u64(w${N+3}, k)), 0xC0);
+          __m256i v${N} = _mm256_set1_epi64x((int64_t) safe_load_u64(w${N}, k, ${PAD_VALUE}));
+          v${N} = _mm256_blend_epi32(v${N}, _mm256_set1_epi64x((int64_t) safe_load_u64(w${N+1}, k, ${PAD_VALUE})), 0x0C);
+          v${N} = _mm256_blend_epi32(v${N}, _mm256_set1_epi64x((int64_t) safe_load_u64(w${N+2}, k, ${PAD_VALUE})), 0x30);
+          v${N} = _mm256_blend_epi32(v${N}, _mm256_set1_epi64x((int64_t) safe_load_u64(w${N+3}, k, ${PAD_VALUE})), 0xC0);
 
         $for N in range(NR):
           w${N} += k;

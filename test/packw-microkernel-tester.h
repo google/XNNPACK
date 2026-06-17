@@ -62,6 +62,13 @@ class PackWMicrokernelTester {
 
   size_t izp() const { return this->izp_; }
 
+  PackWMicrokernelTester& unsigned_weight(bool unsigned_weight) {
+    this->unsigned_weight_ = unsigned_weight;
+    return *this;
+  }
+
+  bool unsigned_weight() const { return this->unsigned_weight_; }
+
   PackWMicrokernelTester& n(size_t n) {
     assert(n != 0);
     this->n_ = n;
@@ -314,10 +321,14 @@ class PackWMicrokernelTester {
     std::fill(packed_w_ref.begin(), packed_w_ref.end(), INT8_C(0x7B));
 
     const int32_t* bias_data = nullbias() ? nullptr : bias.data();
-    const xnn_qs8_qc4w_packing_params packing_params = {0};
+    const xnn_qs8_qc4w_packing_params packing_params = {
+        0, static_cast<uint8_t>(kzp())};
 
     // Compute reference results.
-    xnn_pack_qs8_qc4w_gemm_goi_w(
+    auto reference_fn = unsigned_weight() ?
+        (izp() == 128 ? xnn_pack_qs8_to_qu8_qc4uw_gemm_goi_w : xnn_pack_qs8_qc4uw_gemm_goi_w) :
+        (izp() == 128 ? xnn_pack_qs8_to_qu8_qc4w_gemm_goi_w : xnn_pack_qs8_qc4w_gemm_goi_w);
+    reference_fn(
         /*g=*/1, n(), k2, nr(), kr(), sr(), weights.data(), bias_data,
         /*scale=*/nullptr, reinterpret_cast<void*>(packed_w_ref.data()),
         /*extra_bytes=*/0, &packing_params);
@@ -739,6 +750,7 @@ class PackWMicrokernelTester {
   size_t bl_{1};
   bool nullbias_{false};
   size_t izp_{0};
+  bool unsigned_weight_{false};
   size_t kzp_{8};
 };
 

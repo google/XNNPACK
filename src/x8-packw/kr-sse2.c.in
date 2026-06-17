@@ -1,0 +1,369 @@
+// Copyright 2026 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert DATATYPE in ["QS4", "QC4UW"]
+$assert NR > 1
+$assert NR % 2 == 0
+$assert KR == 8
+$assert IZP in [0, 128]
+
+#include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
+
+#include <emmintrin.h>
+
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/microparams.h"
+#include "src/xnnpack/packw.h"
+#include "src/xnnpack/unaligned.h"
+
+$DATATYPE_SPEC = {"QS4": "qs8_to_qu8_qc4w" if IZP == 128 else "qs8_qc4w", "QC4UW": "qs8_to_qu8_qc4uw" if IZP == 128 else "qs8_qc4uw"}[DATATYPE]
+
+void xnn_${DATATYPE_SPEC}_packw_gemm_goi_ukernel_x${NR}c${KR}__sse2(
+  size_t g,
+  size_t nc,
+  size_t kc,
+  size_t nr,
+  size_t kr,
+  size_t sr,
+  const uint8_t* weights,
+  const int32_t* bias,
+  const float* scale,
+  void* packed_weights,
+  size_t extra_bytes,
+  const struct xnn_qs8_qc4w_packing_params* params)
+{
+  assert(g != 0);
+  assert(nc != 0);
+  assert(kc != 0);
+  assert(nr == ${NR});
+  assert(kr == ${KR});
+  assert(sr == 1);
+  assert(weights != NULL);
+  assert(packed_weights != NULL);
+  assert(params != NULL);
+  assert(params->kernel_zero_point == 8 || params->kernel_zero_point == 0);
+  assert(kc % 2 == 0);
+
+  const size_t mock_kc = kc >> 1; // kc in bytes
+  const uint32_t izp = (uint32_t) params->input_zero_point + ${IZP};
+  const uint32_t kernel_zero_point = (uint32_t) params->kernel_zero_point;
+
+  uint8_t* out = (uint8_t*) packed_weights;
+  const int32_t* b = bias;
+
+  const __m128i vmask = _mm_set1_epi8((char)0xF0);
+  const __m128i vkernel_zero_point = _mm_set1_epi8((char)(kernel_zero_point * 0x11));
+  $if DATATYPE == "QC4UW":
+    const __m128i vxor_mask_out = _mm_set1_epi8((char)0x88);
+
+  $BIAS_SCALE = " * 16" if DATATYPE == "QS4" else ""
+
+  do {
+    // NC main loop multiple of ${NR}
+    const uint8_t* w0 = weights;
+    size_t n = nc;
+    for (; n >= ${NR}; n -= ${NR}) {
+      int32_t* packed_b = (int32_t*) out;
+      if (b != NULL) {
+        for (size_t i = 0; i < ${NR}; ++i) {
+          packed_b[i] = b[i]${BIAS_SCALE};
+        }
+        b += ${NR};
+      } else {
+        for (size_t i = 0; i < ${NR}; ++i) {
+          packed_b[i] = 0;
+        }
+      }
+      out += ${NR} * sizeof(int32_t);
+
+      $for N in range(1, NR):
+        const uint8_t* w${N} = w${N-1} + mock_kc;
+
+      $for N in range(NR):
+        __m128i vacc${N} = _mm_setzero_si128();
+
+      // KC main loop multiple of 16 bytes (32 elements = 4 * KR)
+      size_t k = mock_kc;
+      for (; k >= 16; k -= 16) {
+        $for N in range(NR):
+          __m128i v${N} = _mm_loadu_si128((const __m128i*) w${N});
+          if (kernel_zero_point != 0) {
+            v${N} = _mm_xor_si128(v${N}, vkernel_zero_point);
+          }
+          w${N} += 16;
+
+        $for N in range(NR):
+          const __m128i vs${N} = _mm_shuffle_epi32(v${N}, _MM_SHUFFLE(3, 1, 2, 0));
+          const __m128i vt${N} = _mm_slli_epi32(vs${N}, 4);
+          const __m128i vl${N} = _mm_and_si128(vt${N}, vmask);
+          const __m128i vh${N} = _mm_and_si128(vs${N}, vmask);
+          const __m128i v01_${N} = _mm_unpacklo_epi8(vl${N}, vh${N});
+          const __m128i v23_${N} = _mm_unpackhi_epi8(vl${N}, vh${N});
+
+          {
+            const __m128i v_lo = _mm_srai_epi16(_mm_unpacklo_epi8(v01_${N}, v01_${N}), 8);
+            const __m128i v_hi = _mm_srai_epi16(_mm_unpackhi_epi8(v01_${N}, v01_${N}), 8);
+            const __m128i v_sum16 = _mm_add_epi16(v_lo, v_hi);
+            const __m128i v_sum32 = _mm_madd_epi16(v_sum16, _mm_set1_epi16(1));
+            vacc${N} = _mm_add_epi32(vacc${N}, v_sum32);
+          }
+          {
+            const __m128i v_lo = _mm_srai_epi16(_mm_unpacklo_epi8(v23_${N}, v23_${N}), 8);
+            const __m128i v_hi = _mm_srai_epi16(_mm_unpackhi_epi8(v23_${N}, v23_${N}), 8);
+            const __m128i v_sum16 = _mm_add_epi16(v_lo, v_hi);
+            const __m128i v_sum32 = _mm_madd_epi16(v_sum16, _mm_set1_epi16(1));
+            vacc${N} = _mm_add_epi32(vacc${N}, v_sum32);
+          }
+
+          const __m128i vl01_${N} = _mm_srli_epi32(v01_${N}, 4);
+          __m128i vout${N} = _mm_or_si128(vl01_${N}, v23_${N});
+          $if DATATYPE == "QC4UW":
+            vout${N} = _mm_xor_si128(vout${N}, vxor_mask_out);
+
+        $for N in range(0, NR, 2):
+          const __m128i vout01_${N} = _mm_unpacklo_epi64(vout${N}, vout${N+1});
+          const __m128i vout23_${N} = _mm_unpackhi_epi64(vout${N}, vout${N+1});
+          _mm_storeu_si128((__m128i*) &out[${N} * 8], vout01_${N});
+          _mm_storeu_si128((__m128i*) &out[(${NR} + ${N}) * 8], vout23_${N});
+
+        out += ${NR} * 16;
+      }
+
+      // KC remainder of 1..15 bytes
+      if (k != 0) {
+        $for N in range(NR):
+          uint8_t temp_w${N}[16];
+          for (size_t i = 0; i < k; ++i) {
+            temp_w${N}[i] = w${N}[i];
+          }
+          for (size_t i = k; i < 16; ++i) {
+            temp_w${N}[i] = kernel_zero_point * 0x11;
+          }
+          __m128i v${N} = _mm_loadu_si128((const __m128i*) temp_w${N});
+          if (kernel_zero_point != 0) {
+            v${N} = _mm_xor_si128(v${N}, vkernel_zero_point);
+          }
+          w${N} += k;
+
+        $for N in range(NR):
+          const __m128i vs${N} = _mm_shuffle_epi32(v${N}, _MM_SHUFFLE(3, 1, 2, 0));
+          const __m128i vt${N} = _mm_slli_epi32(vs${N}, 4);
+          const __m128i vl${N} = _mm_and_si128(vt${N}, vmask);
+          const __m128i vh${N} = _mm_and_si128(vs${N}, vmask);
+          const __m128i v01_${N} = _mm_unpacklo_epi8(vl${N}, vh${N});
+          const __m128i v23_${N} = _mm_unpackhi_epi8(vl${N}, vh${N});
+
+          {
+            const __m128i v_lo = _mm_srai_epi16(_mm_unpacklo_epi8(v01_${N}, v01_${N}), 8);
+            const __m128i v_hi = _mm_srai_epi16(_mm_unpackhi_epi8(v01_${N}, v01_${N}), 8);
+            const __m128i v_sum16 = _mm_add_epi16(v_lo, v_hi);
+            const __m128i v_sum32 = _mm_madd_epi16(v_sum16, _mm_set1_epi16(1));
+            vacc${N} = _mm_add_epi32(vacc${N}, v_sum32);
+          }
+          {
+            const __m128i v_lo = _mm_srai_epi16(_mm_unpacklo_epi8(v23_${N}, v23_${N}), 8);
+            const __m128i v_hi = _mm_srai_epi16(_mm_unpackhi_epi8(v23_${N}, v23_${N}), 8);
+            const __m128i v_sum16 = _mm_add_epi16(v_lo, v_hi);
+            const __m128i v_sum32 = _mm_madd_epi16(v_sum16, _mm_set1_epi16(1));
+            vacc${N} = _mm_add_epi32(vacc${N}, v_sum32);
+          }
+
+          const __m128i vl01_${N} = _mm_srli_epi32(v01_${N}, 4);
+          __m128i vout${N} = _mm_or_si128(vl01_${N}, v23_${N});
+          $if DATATYPE == "QC4UW":
+            vout${N} = _mm_xor_si128(vout${N}, vxor_mask_out);
+
+        $for N in range(0, NR, 2):
+          const __m128i vout01_${N} = _mm_unpacklo_epi64(vout${N}, vout${N+1});
+          _mm_storeu_si128((__m128i*) &out[${N} * 8], vout01_${N});
+
+        if (k > 8) {
+          $for N in range(0, NR, 2):
+            const __m128i vout23_${N} = _mm_unpackhi_epi64(vout${N}, vout${N+1});
+            _mm_storeu_si128((__m128i*) &out[(${NR} + ${N}) * 8], vout23_${N});
+          out += ${NR} * 16;
+        } else {
+          out += ${NR} * 8;
+        }
+      }
+
+      $for N in range(NR):
+        int32_t ksum${N} = 0;
+        {
+          $if DATATYPE == "QC4UW":
+            __m128i vsum = _mm_srai_epi32(vacc${N}, 4);
+            __m128i sum2 = _mm_add_epi32(vsum, _mm_srli_si128(vsum, 8));
+          $else:
+            __m128i sum2 = _mm_add_epi32(vacc${N}, _mm_srli_si128(vacc${N}, 8));
+          __m128i sum1 = _mm_add_epi32(sum2, _mm_srli_si128(sum2, 4));
+          ksum${N} = _mm_cvtsi128_si32(sum1);
+        }
+
+      $for N in range(NR):
+        packed_b[${N}] -= ksum${N} * izp;
+      out = (uint8_t*) ((uintptr_t) out + extra_bytes);
+      w0 = w${NR-1};
+    }
+
+    // NC remainder (1..${NR-1})
+    if XNN_UNLIKELY(n != 0) {
+      int32_t* packed_b = (int32_t*) out;
+      if (b != NULL) {
+        for (size_t i = 0; i < n; ++i) {
+          packed_b[i] = b[i]${BIAS_SCALE};
+        }
+        b += n;
+      } else {
+        for (size_t i = 0; i < n; ++i) {
+          packed_b[i] = 0;
+        }
+      }
+      out += ${NR} * sizeof(int32_t);
+
+      // Clamp weight pointers
+      $for N in range(1, NR-1):
+        const uint8_t* w${N} = w${N-1} + mock_kc;
+        $if N % 2 == 0:
+          if XNN_UNPREDICTABLE(n <= ${N}) {
+            w${N} = w${N-1};
+          }
+        $else:
+          if XNN_UNPREDICTABLE(n < ${N+1}) {
+            w${N} = w${N-1};
+          }
+
+      $for N in range(NR-1):
+        __m128i vacc${N} = _mm_setzero_si128();
+
+      size_t k = mock_kc;
+      for (; k >= 16; k -= 16) {
+        $for N in range(NR-1):
+          __m128i v${N} = _mm_loadu_si128((const __m128i*) w${N});
+          if (kernel_zero_point != 0) {
+            v${N} = _mm_xor_si128(v${N}, vkernel_zero_point);
+          }
+          w${N} += 16;
+
+        $for N in range(NR-1):
+          const __m128i vs${N} = _mm_shuffle_epi32(v${N}, _MM_SHUFFLE(3, 1, 2, 0));
+          const __m128i vt${N} = _mm_slli_epi32(vs${N}, 4);
+          const __m128i vl${N} = _mm_and_si128(vt${N}, vmask);
+          const __m128i vh${N} = _mm_and_si128(vs${N}, vmask);
+          const __m128i v01_${N} = _mm_unpacklo_epi8(vl${N}, vh${N});
+          const __m128i v23_${N} = _mm_unpackhi_epi8(vl${N}, vh${N});
+
+          {
+            const __m128i v_lo = _mm_srai_epi16(_mm_unpacklo_epi8(v01_${N}, v01_${N}), 8);
+            const __m128i v_hi = _mm_srai_epi16(_mm_unpackhi_epi8(v01_${N}, v01_${N}), 8);
+            const __m128i v_sum16 = _mm_add_epi16(v_lo, v_hi);
+            const __m128i v_sum32 = _mm_madd_epi16(v_sum16, _mm_set1_epi16(1));
+            vacc${N} = _mm_add_epi32(vacc${N}, v_sum32);
+          }
+          {
+            const __m128i v_lo = _mm_srai_epi16(_mm_unpacklo_epi8(v23_${N}, v23_${N}), 8);
+            const __m128i v_hi = _mm_srai_epi16(_mm_unpackhi_epi8(v23_${N}, v23_${N}), 8);
+            const __m128i v_sum16 = _mm_add_epi16(v_lo, v_hi);
+            const __m128i v_sum32 = _mm_madd_epi16(v_sum16, _mm_set1_epi16(1));
+            vacc${N} = _mm_add_epi32(vacc${N}, v_sum32);
+          }
+
+          const __m128i vl01_${N} = _mm_srli_epi32(v01_${N}, 4);
+          __m128i vout${N} = _mm_or_si128(vl01_${N}, v23_${N});
+          $if DATATYPE == "QC4UW":
+            vout${N} = _mm_xor_si128(vout${N}, vxor_mask_out);
+
+        const __m128i vout${NR-1} = _mm_setzero_si128();
+
+        $for N in range(0, NR, 2):
+          const __m128i vout01_${N} = _mm_unpacklo_epi64(vout${N}, vout${N+1});
+          const __m128i vout23_${N} = _mm_unpackhi_epi64(vout${N}, vout${N+1});
+          _mm_storeu_si128((__m128i*) &out[${N} * 8], vout01_${N});
+          _mm_storeu_si128((__m128i*) &out[(${NR} + ${N}) * 8], vout23_${N});
+
+        out += ${NR} * 16;
+      }
+
+      if (k != 0) {
+        $for N in range(NR-1):
+          uint8_t temp_w${N}[16];
+          for (size_t i = 0; i < k; ++i) {
+            temp_w${N}[i] = w${N}[i];
+          }
+          for (size_t i = k; i < 16; ++i) {
+            temp_w${N}[i] = kernel_zero_point * 0x11;
+          }
+          __m128i v${N} = _mm_loadu_si128((const __m128i*) temp_w${N});
+          if (kernel_zero_point != 0) {
+            v${N} = _mm_xor_si128(v${N}, vkernel_zero_point);
+          }
+          w${N} += k;
+
+        $for N in range(NR-1):
+          const __m128i vs${N} = _mm_shuffle_epi32(v${N}, _MM_SHUFFLE(3, 1, 2, 0));
+          const __m128i vt${N} = _mm_slli_epi32(vs${N}, 4);
+          const __m128i vl${N} = _mm_and_si128(vt${N}, vmask);
+          const __m128i vh${N} = _mm_and_si128(vs${N}, vmask);
+          const __m128i v01_${N} = _mm_unpacklo_epi8(vl${N}, vh${N});
+          const __m128i v23_${N} = _mm_unpackhi_epi8(vl${N}, vh${N});
+
+          {
+            const __m128i v_lo = _mm_srai_epi16(_mm_unpacklo_epi8(v01_${N}, v01_${N}), 8);
+            const __m128i v_hi = _mm_srai_epi16(_mm_unpackhi_epi8(v01_${N}, v01_${N}), 8);
+            const __m128i v_sum16 = _mm_add_epi16(v_lo, v_hi);
+            const __m128i v_sum32 = _mm_madd_epi16(v_sum16, _mm_set1_epi16(1));
+            vacc${N} = _mm_add_epi32(vacc${N}, v_sum32);
+          }
+          {
+            const __m128i v_lo = _mm_srai_epi16(_mm_unpacklo_epi8(v23_${N}, v23_${N}), 8);
+            const __m128i v_hi = _mm_srai_epi16(_mm_unpackhi_epi8(v23_${N}, v23_${N}), 8);
+            const __m128i v_sum16 = _mm_add_epi16(v_lo, v_hi);
+            const __m128i v_sum32 = _mm_madd_epi16(v_sum16, _mm_set1_epi16(1));
+            vacc${N} = _mm_add_epi32(vacc${N}, v_sum32);
+          }
+
+          const __m128i vl01_${N} = _mm_srli_epi32(v01_${N}, 4);
+          __m128i vout${N} = _mm_or_si128(vl01_${N}, v23_${N});
+          $if DATATYPE == "QC4UW":
+            vout${N} = _mm_xor_si128(vout${N}, vxor_mask_out);
+
+        const __m128i vout${NR-1} = _mm_setzero_si128();
+
+        $for N in range(0, NR, 2):
+          const __m128i vout01_${N} = _mm_unpacklo_epi64(vout${N}, vout${N+1});
+          _mm_storeu_si128((__m128i*) &out[${N} * 8], vout01_${N});
+
+        if (k > 8) {
+          $for N in range(0, NR, 2):
+            const __m128i vout23_${N} = _mm_unpackhi_epi64(vout${N}, vout${N+1});
+            _mm_storeu_si128((__m128i*) &out[(${NR} + ${N}) * 8], vout23_${N});
+          out += ${NR} * 16;
+        } else {
+          out += ${NR} * 8;
+        }
+      }
+
+      $for N in range(NR-1):
+        int32_t ksum${N} = 0;
+        {
+          $if DATATYPE == "QC4UW":
+            __m128i vsum = _mm_srai_epi32(vacc${N}, 4);
+            __m128i sum2 = _mm_add_epi32(vsum, _mm_srli_si128(vsum, 8));
+          $else:
+            __m128i sum2 = _mm_add_epi32(vacc${N}, _mm_srli_si128(vacc${N}, 8));
+          __m128i sum1 = _mm_add_epi32(sum2, _mm_srli_si128(sum2, 4));
+          ksum${N} = _mm_cvtsi128_si32(sum1);
+        }
+
+      $for N in range(NR-1):
+        if (${N} < n) {
+          packed_b[${N}] -= ksum${N} * izp;
+        }
+      out = (uint8_t*) ((uintptr_t) out + extra_bytes);
+    }
+    weights = (const uint8_t*)((intptr_t) weights + nc * kc);
+  } while (--g != 0);
+}
