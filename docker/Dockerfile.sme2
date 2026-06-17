@@ -23,6 +23,25 @@ RUN git init qemu && \
     git checkout FETCH_HEAD
 
 WORKDIR /src/qemu
+# Patch QEMU to enable SCTLR_EL1.EnFPM by default in user-mode.
+# This prevents SIGILL crashes when EL0 (user-mode) accesses the FPMR register.
+# This is a fix for an omission in QEMU's upstream user-mode emulation.
+RUN git apply <<'EOF'
+diff --git a/target/arm/cpu.c b/target/arm/cpu.c
+index 419e0b3..7314525 100644
+--- a/target/arm/cpu.c
++++ b/target/arm/cpu.c
+@@ -425,6 +425,9 @@ static void arm_cpu_reset_hold(Object *obj, ResetType type)
+         if (cpu_isar_feature(aa64_gcs, cpu)) {
+             env->cp15.gcscr_el[0] = GCSCRE0_NTR;
+         }
++        if (cpu_isar_feature(aa64_fpmr, cpu)) {
++            env->cp15.sctlr_el[1] |= SCTLR_EnFPM;
++        }
+ #else
+         /* Reset into the highest available EL */
+         if (arm_feature(env, ARM_FEATURE_EL3)) {
+EOF
 RUN ./configure \
     --cc=clang \
     --cxx=clang++ \
