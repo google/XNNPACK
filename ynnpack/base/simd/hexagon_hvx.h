@@ -138,12 +138,12 @@ namespace internal {
 
 YNN_ALWAYS_INLINE HVX_Vector load_aligned(const void* ptr) {
   HVX_Vector result;
-  memcpy(&result, reinterpret_cast<const HVX_Vector*>(ptr), sizeof(result));
+  memcpy(&result, ptr, sizeof(result));
   return result;
 }
 
 YNN_ALWAYS_INLINE void store_aligned(void* ptr, HVX_Vector v) {
-  memcpy(reinterpret_cast<HVX_Vector*>(ptr), &v, sizeof(v));
+  memcpy(ptr, &v, sizeof(v));
 }
 
 YNN_ALWAYS_INLINE HVX_UVector load(const void* ptr) {
