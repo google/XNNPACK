@@ -38,6 +38,7 @@ cc_library(
         # avx as two 256-bit vectors, and the `concat` operation of two f32x8 values is implemented
         # appropriately for that type.
         "byte_vec.h",
+        "gnu_vector.h",
         "arm_vec128.h",
         "hexagon_hvx.h",
         "scalar.h",

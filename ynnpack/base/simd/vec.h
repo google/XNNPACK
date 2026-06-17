@@ -94,11 +94,6 @@ YNN_ALWAYS_INLINE const vec<T, N / 2>& hi(const vec<T, N>& x) {
   return x.v[1];
 }
 
-template <typename T, size_t N>
-YNN_ALWAYS_INLINE vec<T, N * 2> concat(vec<T, N> a, vec<T, N> b) {
-  return vec<T, N * 2>{a, b};
-}
-
 template <size_t N, typename T>
 YNN_ALWAYS_INLINE vec<T, N> broadcast(T x) {
   return vec<T, N>{x};

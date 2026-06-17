@@ -61,3 +61,24 @@ package(default_visibility = ["//ynnpack:__subpackages__"])
     "x86_avx512fp16",
     "x86_fma3",
 ]]
+
+cc_binary(
+    name = "gnu_vector",
+    srcs = select({
+        "//ynnpack:ynn_enable_gnu_vector": [
+            "generic.h",
+            "gnu_vector.cc",
+        ],
+        "//conditions:default": [],
+    }),
+    features = [
+        "-use_header_modules",
+    ],
+    linkopts = ynn_binary_linkopts(),
+    malloc = ynn_binary_malloc(),
+    deps = [
+        "//ynnpack/base",
+        "//ynnpack/base/simd",
+        "@slinky//slinky/base",
+    ] + ynn_benchmark_deps(),
+)

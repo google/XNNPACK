@@ -306,3 +306,8 @@ define_build_option(
     name = "ynn_enable_wasm_simd128",
     default_all = [":wasm"],
 )
+
+define_build_option(
+    name = "ynn_enable_gnu_vector",
+    default_all = [],
+)

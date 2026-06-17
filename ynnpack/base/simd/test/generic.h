@@ -237,7 +237,8 @@ void test_op() {
     for (size_t i = 0; i < vector::N; ++i) {
       scalar expected = op(a[i], b[i]);
 #ifdef YNN_ARCH_ARM32
-      if (std::abs(expected) < type_info<scalar>::smallest_normal()) {
+      if (std::abs(static_cast<double>(expected)) <
+          type_info<scalar>::smallest_normal()) {
         // ARM32 flushes denormals to 0(?).
         continue;
       }
@@ -606,6 +607,10 @@ struct multiply_op {
   }
   half operator()(half a, half b) {
     return static_cast<half>(static_cast<float>(a) * static_cast<float>(b));
+  }
+  uint16_t operator()(uint16_t a, uint16_t b) {
+    // For integers, don't hit signed integer overflow.
+    return static_cast<int64_t>(a) * static_cast<int64_t>(b);
   }
   int32_t operator()(int32_t a, int32_t b) {
     // For integers, don't hit signed integer overflow.

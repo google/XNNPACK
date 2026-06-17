@@ -97,3 +97,26 @@ cc_test(
         "@slinky//slinky/base",
     ] + ynn_test_deps(),
 )
+
+cc_test(
+    name = "gnu_vector",
+    srcs = select({
+        "//ynnpack:ynn_enable_gnu_vector": [
+            "generic.h",
+            "gnu_vector.cc",
+        ],
+        "//conditions:default": [],
+    }),
+    features = [
+        "-use_header_modules",
+    ],
+    linkopts = ynn_binary_linkopts(),
+    malloc = ynn_binary_malloc(),
+    deps = [
+        "//ynnpack/base",  # buildcleaner:keep
+        "//ynnpack/base/simd",  # buildcleaner:keep
+        "//ynnpack/base/test:fuzz_test",
+        "//ynnpack/base/test:random",
+        "@slinky//slinky/base",
+    ] + ynn_test_deps(),
+)

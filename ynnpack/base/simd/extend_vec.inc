@@ -23,6 +23,11 @@ namespace ynn {
 namespace simd {
 
 template <typename T, size_t N>
+YNN_ALWAYS_INLINE vec<T, N * 2> concat(vec<T, N> a, vec<T, N> b) {
+  return vec<T, N * 2>{a, b};
+}
+
+template <typename T, size_t N>
 YNN_ALWAYS_INLINE vec<T, N> load(const T* ptr,
                                  std::integral_constant<size_t, N> n,
                                  vec<T, N>) {
