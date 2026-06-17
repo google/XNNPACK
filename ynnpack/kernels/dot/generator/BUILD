@@ -36,6 +36,7 @@ py_library(
     "arm_bf16_bf16_fp32_k4",
     "arm_fp32",
     "arm_fp64",
+    "arm_fp8_fp8_fp32",
     "arm_int8_int8_int32",
 ]]
 

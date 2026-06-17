@@ -82,6 +82,7 @@ uint64_t get_supported_arch_flags() {
     // We need cpuinfo support for neonfp8. Until then, these kernels are
     // disabled in the build by default.
     result |= arch_flag::neonfp8;
+    result |= arch_flag::neonfp8dot4;
 #if !YNN_COMPILER_HAS_FEATURE(memory_sanitizer)
     // msan (understandably) does not support SVE/SME (b/494230133).
     if (cpuinfo_has_arm_sme()) result |= arch_flag::sme;

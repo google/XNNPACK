@@ -16,6 +16,7 @@
 #include <gtest/gtest.h>
 #include "ynnpack/base/base.h"
 #include "ynnpack/base/bfloat16.h"
+#include "ynnpack/base/fp8.h"
 #include "ynnpack/base/half.h"
 #include "ynnpack/base/type.h"
 
@@ -76,6 +77,8 @@ enum class multi_type {
   int8_int8_int32,
   int8_int4_int32,
   uint8_int8_int32,
+  fp8_e5m2_fp8_e5m2_fp32,
+  fp8_e4m3_fp8_e4m3_fp32,
 };
 
 inline multi_type multi_type_of(double, double) { return multi_type::fp64; }
@@ -117,6 +120,12 @@ inline multi_type multi_type_of(uint8_t, int8_t, int32_t) {
 }
 inline multi_type multi_type_of(int8_t, int4x2, int32_t) {
   return multi_type::int8_int4_int32;
+}
+inline multi_type multi_type_of(fp8_e5m2, fp8_e5m2, float) {
+  return multi_type::fp8_e5m2_fp8_e5m2_fp32;
+}
+inline multi_type multi_type_of(fp8_e4m3, fp8_e4m3, float) {
+  return multi_type::fp8_e4m3_fp8_e4m3_fp32;
 }
 
 template <typename F>
@@ -196,6 +205,10 @@ constexpr decltype(auto) SwitchThreeTypes(multi_type type, F&& f) {
       return std::forward<F>(f)(uint8_t(), int8_t(), int32_t());
     case multi_type::int8_int4_int32:
       return std::forward<F>(f)(int8_t(), int4x2(), int32_t());
+    case multi_type::fp8_e5m2_fp8_e5m2_fp32:
+      return std::forward<F>(f)(fp8_e5m2(), fp8_e5m2(), float());
+    case multi_type::fp8_e4m3_fp8_e4m3_fp32:
+      return std::forward<F>(f)(fp8_e4m3(), fp8_e4m3(), float());
     default:
       YNN_UNREACHABLE;
   }
@@ -235,6 +248,10 @@ inline const char* to_string(multi_type type) {
       return "uint8_int8_int32";
     case multi_type::int8_int4_int32:
       return "int8_int4_int32";
+    case multi_type::fp8_e5m2_fp8_e5m2_fp32:
+      return "fp8_e5m2_fp8_e5m2_fp32";
+    case multi_type::fp8_e4m3_fp8_e4m3_fp32:
+      return "fp8_e4m3_fp8_e4m3_fp32";
   }
   YNN_UNREACHABLE;
   return nullptr;

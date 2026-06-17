@@ -382,6 +382,14 @@ dot_kernel get_dot_kernel(const dot_type& type, const dot_shape& shape,
              type.c == ynn_type_int32) {
     return get_dot_kernel<uint8_t, int8_t, int32_t>(
         shape, packed_shape, required_flags, transpose_a, arch_flags);
+  } else if (type.a == ynn_type_fp8_e5m2 && type.b == ynn_type_fp8_e5m2 &&
+             type.c == ynn_type_fp32) {
+    return get_dot_kernel<fp8_e5m2, fp8_e5m2, float>(
+        shape, packed_shape, required_flags, transpose_a, arch_flags);
+  } else if (type.a == ynn_type_fp8_e4m3 && type.b == ynn_type_fp8_e4m3 &&
+             type.c == ynn_type_fp32) {
+    return get_dot_kernel<fp8_e4m3, fp8_e4m3, float>(
+        shape, packed_shape, required_flags, transpose_a, arch_flags);
   } else {
     YNN_LOG_ERROR() << "Unsupported dot type " << type.a << "_" << type.b << "_"
                     << type.c;

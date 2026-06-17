@@ -76,6 +76,18 @@ ynn_generate_srcs(
 )
 
 ynn_generate_srcs(
+    name = "arm_fp8_fp8_fp32",
+    compatible_with = _COMPATIBLE_WITH,
+    generator = "//ynnpack/kernels/dot/generator:arm_fp8_fp8_fp32",
+    output_srcs = [
+        "arm64_neonfp8dot4_fp8_e5m2_fp8_e5m2_fp32.cc",
+        "arm64_neonfp8dot4_fp8_e5m2_fp8_e5m2_fp32.inc",
+        "arm64_neonfp8dot4_fp8_e4m3_fp8_e4m3_fp32.cc",
+        "arm64_neonfp8dot4_fp8_e4m3_fp8_e4m3_fp32.inc",
+    ],
+)
+
+ynn_generate_srcs(
     name = "x86_bf16_bf16_fp32",
     compatible_with = _COMPATIBLE_WITH,
     generator = "//ynnpack/kernels/dot/generator:x86_bf16_bf16_fp32",
@@ -288,6 +300,8 @@ ynn_cc_library(
         "arm64_neon_bf16_bf16_fp32.inc",
         "arm64_neon_fp32.inc",
         "arm64_neon_fp64.inc",
+        "arm64_neonfp8dot4_fp8_e4m3_fp8_e4m3_fp32.inc",
+        "arm64_neonfp8dot4_fp8_e5m2_fp8_e5m2_fp32.inc",
         "arm64_neoni8mm_int8_int8_int32.inc",
         "arm64_sme.h",
         "arm_neon_int8_int8_int32.inc",
@@ -333,6 +347,10 @@ ynn_cc_library(
             "arm64_neon_fp32.cc",
             "arm64_neon_fp64.cc",
             "arm64_neon_bf16_bf16_fp32.cc",
+        ],
+        "arm64_neonfp8dot4": [
+            "arm64_neonfp8dot4_fp8_e4m3_fp8_e4m3_fp32.cc",
+            "arm64_neonfp8dot4_fp8_e5m2_fp8_e5m2_fp32.cc",
         ],
         "arm64_neoni8mm": ["arm64_neoni8mm_int8_int8_int32.cc"],
         "arm64_sme": [

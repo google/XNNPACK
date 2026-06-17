@@ -864,6 +864,7 @@ jobs:
       QEMU_ARGS: -cpu max
       BAZEL_DEFINES: |
         --define=ynn_enable_arm64_neonfp8=true
+        --define=ynn_enable_arm64_neonfp8dot4=true
     steps:
       - uses: actions/checkout@v6
 

@@ -119,6 +119,10 @@ YNN_DOT_KERNEL(arch_flag::sme, dot_int8_int8_int32_sme,
 #endif  // YNN_ARCH_ARM64_SME
 #endif  // YNN_DISABLE_SME
 
+#ifdef YNN_ARCH_ARM64_NEONFP8DOT4
+#include "ynnpack/kernels/dot/arm64_neonfp8dot4_fp8_e5m2_fp8_e5m2_fp32.inc"
+#include "ynnpack/kernels/dot/arm64_neonfp8dot4_fp8_e4m3_fp8_e4m3_fp32.inc"
+#endif  // YNN_ARCH_ARM64_NEONFP8DOT4
 #ifdef YNN_ARCH_ARM64_NEONI8MM
 #include "ynnpack/kernels/dot/arm64_neoni8mm_int8_int8_int32.inc"
 #endif  // YNN_ARCH_ARM64_NEONI8MM
@@ -130,7 +134,7 @@ YNN_DOT_KERNEL(arch_flag::sme, dot_int8_int8_int32_sme,
 #include "ynnpack/kernels/dot/arm64_neon_fp32.inc"
 #include "ynnpack/kernels/dot/arm64_neon_fp64.inc"
 #include "ynnpack/kernels/dot/arm64_neon_bf16_bf16_fp32.inc"
-#endif  // YNN_ARCH_ARM64
+#endif  // YNN_ARCH_ARM64_NEON
 
 #ifdef YNN_ARCH_ARM_NEONDOT
 #include "ynnpack/kernels/dot/arm_neondot_int8_int8_int32.inc"
