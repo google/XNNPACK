@@ -31,11 +31,13 @@ SET(CMAKE_ASM_COMPILER_TARGET aarch64-pc-windows-msvc)
 
 # armv8.4-a adds the I8MM and BF16 matrix-multiply instruction sets on top of
 # the armv8.2-a + FP16 + dotprod Windows-on-ARM baseline.
-ADD_COMPILE_OPTIONS(/clang:-march=armv8.4-a+fp16+dotprod+i8mm+bf16)
+ADD_COMPILE_OPTIONS(
+  "$<$<COMPILE_LANGUAGE:C,CXX,ASM>:/clang:-march=armv8.4-a+fp16+dotprod+i8mm+bf16>")
 
 # Disable FMA contraction across statements so floating-point semantics match
 # MSVC (and the Linux gcc baseline used by upstream CI). Without this, clang's
 # default -ffp-contract=on reassociates the rational polynomial in
 # xnn_f32_vgelu_ukernel__scalar_rational_12_10_div_u*, producing tail-region
 # numerical drift greater than the f32-vgelu test tolerance.
-ADD_COMPILE_OPTIONS(/clang:-ffp-contract=off)
+ADD_COMPILE_OPTIONS(
+  "$<$<COMPILE_LANGUAGE:C,CXX,ASM>:/clang:-ffp-contract=off>")

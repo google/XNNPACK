@@ -13,7 +13,8 @@ rem Set up the CMake arguments. Same minimal feature set as
 rem scripts\build-windows-arm64.cmd so the two cl.exe baselines stay
 rem comparable; clang-cl + ASM + FP16 lives in a separate script.
 set CMAKE_ARGS=-DXNNPACK_LIBRARY_TYPE=static -G="Ninja" -DCMAKE_BUILD_TYPE=Release
-set CMAKE_ARGS=%CMAKE_ARGS% -DXNNPACK_ENABLE_ASSEMBLY=OFF -DXNNPACK_ENABLE_ARM_FP16_SCALAR=OFF -DXNNPACK_ENABLE_ARM_BF16=OFF
+set CMAKE_ARGS=%CMAKE_ARGS% -DXNNPACK_ENABLE_ASSEMBLY=OFF -DXNNPACK_ENABLE_ARM_FP16_SCALAR=OFF -DXNNPACK_ENABLE_ARM_FP16_VECTOR=OFF
+set CMAKE_ARGS=%CMAKE_ARGS% -DXNNPACK_ENABLE_ARM_I8MM=OFF -DXNNPACK_ENABLE_ARM_BF16=OFF -DXNNPACK_ENABLE_KLEIDIAI=OFF
 rem set CMAKE_ARGS=%CMAKE_ARGS% -DCMAKE_VERBOSE_MAKEFILE=ON
 
 rem User-specified CMake arguments go last to allow overriding defaults.

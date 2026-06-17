@@ -13,7 +13,8 @@ From a clone of this branch on an ARM64 Windows machine (see
 [Prerequisites](#prerequisites)):
 
 ```bat
-:: Point VCVARSALL at your VS 2022 install (or run from a Developer Prompt).
+:: Either run from an ARM64 VS Developer Command Prompt, or point VCVARSALL
+:: at your VS 2022 install so the scripts can initialize one.
 for /f "usebackq delims=" %i in (`vswhere -products * -latest -property installationPath`) do set "VCVARSALL=%i\VC\Auxiliary\Build\vcvarsall.bat"
 
 :: Recommended: clang-cl path (ASM + FP16 micro-kernels enabled)
@@ -53,8 +54,9 @@ ctest --test-dir build\windows\arm64 -C Release --output-on-failure --parallel %
   LLVM 22.x install also works. The build script adds the LLVM `bin` directory
   to `PATH` automatically.
 
-`vcvarsall arm64` does **not** need to be run by hand — both scripts call it
-for you using the `VCVARSALL` environment variable.
+Run the scripts from an ARM64 VS Developer Command Prompt, or set `VCVARSALL`
+to your VS 2022 `vcvarsall.bat`. If `VCINSTALLDIR` is already present the
+clang-cl scripts reuse that environment; otherwise they call `VCVARSALL arm64`.
 
 ## Build profiles
 
@@ -73,6 +75,11 @@ still works for x64 hosts; it just can't run the tests.
 > require an armv8.4+ host (Snapdragon X / Oryon and later) and will fault on
 > older Windows-on-ARM SKUs (Snapdragon 8cx Gen 1/2/3). Use the plain
 > `clang` profile for broad compatibility.
+
+The Windows ARM64 scripts keep `XNNPACK_ENABLE_KLEIDIAI=OFF`. KleidiAI's
+MSVC-compatible CMake path currently routes its ARM64 assembly through
+`armasm64.exe`, which rejects the `/arch:armv8.2` source flags used by that
+target.
 
 ### Why separate scripts?
 
@@ -133,8 +140,7 @@ On Snapdragon X Plus (X1P-64-100, Surface Laptop 7), Windows 11, LLVM 22.1.6:
 
 > i8mm / bf16 need `armv8.4-a+`. Use `scripts\build-windows-arm64-clang-v84.cmd`
 > (or pass a higher `-march` on the cmake line) to exercise them. SME/SME2
-> kernels build but stay inert at runtime on pre-SME silicon (Oryon v1 has no
-> SME).
+> are outside this profile and remain disabled by the helper script.
 
 ## Upstreaming
 
