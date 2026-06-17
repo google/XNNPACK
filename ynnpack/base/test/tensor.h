@@ -637,6 +637,14 @@ class Tensor {
     return result;
   }
 
+  // Basically the same as deep_copy, but to a different type.
+  template <typename U>
+  Tensor<U> convert(Alignment alignment = {}) const {
+    Tensor<U> result(extents_, alignment);
+    result.assign(*this);
+    return result;
+  }
+
   // Fill each element of this tensor with the output of g() (compare to
   // std::generate).
   template <typename G>

@@ -13,6 +13,9 @@
 
 #include <gtest/gtest.h>
 #include "ynnpack/base/arch.h"  // IWYU pragma: keep
+#include "ynnpack/base/bfloat16.h"
+#include "ynnpack/base/fp8.h"
+#include "ynnpack/base/half.h"
 #include "ynnpack/base/test/buffer.h"
 #include "ynnpack/base/test/fuzz_test.h"
 #include "ynnpack/base/test/random.h"
@@ -70,6 +73,19 @@ void Reference(Tensor<AT> a, Tensor<BT> b, Tensor<CT> c) {
       }
     }
   }
+}
+
+void Reference(Tensor<half> a, Tensor<half> b, Tensor<float> c) {
+  Reference(a.convert<float>(), b.convert<float>(), c);
+}
+void Reference(Tensor<bfloat16> a, Tensor<bfloat16> b, Tensor<float> c) {
+  Reference(a.convert<float>(), b.convert<float>(), c);
+}
+void Reference(Tensor<fp8_e4m3> a, Tensor<fp8_e4m3> b, Tensor<float> c) {
+  Reference(a.convert<float>(), b.convert<float>(), c);
+}
+void Reference(Tensor<fp8_e5m2> a, Tensor<fp8_e5m2> b, Tensor<float> c) {
+  Reference(a.convert<float>(), b.convert<float>(), c);
 }
 
 struct KernelInfo {
