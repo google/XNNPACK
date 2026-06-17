@@ -192,8 +192,9 @@ static enum xnn_status reshape_convert_operator(
       const size_t channel_dimension =
           output->quantization.channel_dimension;
       const size_t num_channels =
-          output->shape.num_dims > channel_dimension
-              ? output->shape.dim[channel_dimension] : 0;
+          input_value->shape.num_dims > channel_dimension
+              ? input_value->shape.dim[channel_dimension] : 0;
+
       if (num_channels > 0 && ((num_nonbatch_dims == 0 && batch_size > 0) ||
                                (num_nonbatch_dims > 0 && dq_batch_size > 0))) {
         xnn_operator_t op = opdata->operator_objects[0];
