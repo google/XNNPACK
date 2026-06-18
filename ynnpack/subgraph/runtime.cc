@@ -166,6 +166,25 @@ std::pair<slinky::var, int> find_output_dim(const slinky::func* f,
   return {slinky::var(), -1};
 }
 
+// Least common multiple of two (possibly symbolic) loop steps, evaluated at
+// runtime. Used to reconcile two producers that require different tiles for a
+// shared loop: a multiple of both keeps the fused loop an integer number of
+// each producer's tile (and hence a multiple of each kernel's m/n block).
+// If the LCM overflows, it clamps at the max index_t value.
+slinky::expr lcm_sat(ynn::slinky_globals& globals, slinky::expr a,
+                     slinky::expr b) {
+  if (slinky::prove_true(a == b)) return a;
+  auto impl = [](const slinky::call* op,
+                 slinky::eval_context& ctx) -> slinky::index_t {
+    slinky::index_t a_val = slinky::evaluate(op->args[0], ctx);
+    slinky::index_t b_val = slinky::evaluate(op->args[1], ctx);
+    assert(a_val != 0 && b_val != 0);
+    return slinky::mul_sat(a_val / slinky::gcd(a_val, b_val), b_val);
+  };
+  return globals.get(slinky::call::make(impl, {std::move(a), std::move(b)}),
+                     "lcm_sat");
+}
+
 }  // namespace
 
 // Logically this function has multiple separate blocks:
@@ -428,12 +447,6 @@ void ynn_runtime::schedule() {
         }
         int loop_nest_id = loop_nest[compute_at];
         loop_level& global_loop = global_loop_nest[loop_nest_id];
-        if (split.step_is_required && global_loop.step_is_required &&
-            !prove_true(split.step == global_loop.step)) {
-          // Loops can't be shared if the existing loop step and this loop
-          // step are not equal and both are required.
-          break;
-        }
         if (!globals.is_pure_dim(split.var)) {
           // We don't want to fuse a reduction dimension because it is likely
           // being broadcasted here.
@@ -466,18 +479,27 @@ void ynn_runtime::schedule() {
         if (!extents_match) {
           break;
         }
-        // We can overwrite the current loop step if it's not required, but
-        // this one is.
+
         if (split.step_is_required) {
-          if (std::optional<slinky::var> v =
-                  slinky::as_variable(global_loop.step)) {
-            // This is a special variable which defines partial reduction
-            // bounds, so we need to override to match the loop step.
-            if (globals.symbols.name(*v).rfind("pr_split", 0) == 0) {
-              globals.update_let(*v, split.step);
+          if (global_loop.step_is_required &&
+              !prove_true(split.step == global_loop.step)) {
+            // Two producers require different tiles for this shared loop (e.g.
+            // the two attention matmuls pick different query tiles). Use their
+            // least common multiple so the loop is an integer number of *both*
+            // tiles, keeping it a multiple of each kernel's m/n block. If the
+            // LCM overflows, it clamps at max index_t (assuming no splitting).
+            global_loop.step = lcm_sat(globals, global_loop.step, split.step);
+          } else {
+            if (std::optional<slinky::var> v =
+                    slinky::as_variable(global_loop.step)) {
+              // This is a special variable which defines partial reduction
+              // bounds, so we need to override to match the loop step.
+              if (globals.symbols.name(*v).rfind("pr_split", 0) == 0) {
+                globals.update_let(*v, split.step);
+              }
             }
+            global_loop.step = split.step;
           }
-          global_loop.step = split.step;
           global_loop.step_is_required = true;
         }
         compute_at++;
