@@ -614,6 +614,52 @@ class PackWMicrokernelTester {
     }
   }
 
+  void Test(xnn_x16_packw_gemm_gio_ukernel_fn packw) const {
+    xnnpack::Buffer<uint16_t> weights(g() * n() * k());
+    xnnpack::Buffer<uint16_t> padded_weights(g() * n() * packed_k());
+    xnnpack::Buffer<uint16_t> bias(g() * n());
+    xnnpack::Buffer<uint16_t, XNN_ALLOCATION_ALIGNMENT> packed_w(
+        g() * (packed_n() * packed_k() + packed_n()));
+    xnnpack::Buffer<uint16_t> packed_w_ref(
+        g() * (packed_n() * packed_k() + packed_n()));
+
+    const uint16_t pad_value = UINT16_C(0xBEEF);
+    std::iota(weights.begin(), weights.end(), UINT16_C(0x0003));
+    std::iota(bias.begin(), bias.end(), UINT16_C(0x8000));
+    std::fill(packed_w.begin(), packed_w.end(), UINT16_C(0x1234));
+    std::fill(packed_w_ref.begin(), packed_w_ref.end(), pad_value);
+
+    std::fill(padded_weights.begin(), padded_weights.end(), 0);
+    for (size_t gid = 0; gid < g(); gid++) {
+      for (size_t i = 0; i < n(); i++) {
+        for (size_t j = 0; j < k(); j++) {
+          padded_weights[(gid * n() + i) * packed_k() + j] =
+              weights[(gid * n() + i) * k() + j];
+        }
+      }
+    }
+
+    const uint16_t* bias_data = nullbias() ? nullptr : bias.data();
+
+    xnn_pack_f16_gemm_gio_w(
+        g(), n(), packed_k(), nr(), kr(), sr(), n(),
+        padded_weights.data(),
+        bias_data,
+        /*scale=*/nullptr, packed_w_ref.data(),
+        /*extra_bytes=*/0, /*params=*/nullptr);
+
+    packw(g(), n(), k(), nr(), kr(), sr(), n(), weights.data(), bias_data,
+          /*scale=*/nullptr, packed_w.data(),
+          /*extra_bytes=*/0, /*params=*/nullptr);
+
+    for (size_t i = 0; i < packed_w.size(); i++) {
+      if (packed_w_ref[i] != pad_value) {
+        ASSERT_EQ(packed_w[i], packed_w_ref[i])
+            << "at position " << i << " / " << packed_w.size();
+      }
+    }
+  }
+
   void Test(xnn_qb4_packw_gemm_goi_ukernel_fn packw) const {
     size_t packed_k2 = round_up_po2(k(), kr() * sr() * 2);
     size_t k_num_blocks = packed_k2 / bl();

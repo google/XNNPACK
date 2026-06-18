@@ -80,6 +80,7 @@ void xnn_x32_packw_gemm_gio_ukernel_x32__hvx_u2(
         w += k_stride;
         packed_w += 32;
       }
+      packed_w = (int32_t*) ((uintptr_t) packed_w + extra_bytes);
       w = w - kc * k_stride + 32;  // Advance to next column of 32 int32_t
     }
 
@@ -104,6 +105,7 @@ void xnn_x32_packw_gemm_gio_ukernel_x32__hvx_u2(
         w += k_stride;
         packed_w += 32;
       }
+      packed_w = (int32_t*) ((uintptr_t) packed_w + extra_bytes);
     }
     weights += nc * kc;
   } while (--g != 0);
@@ -180,6 +182,7 @@ void xnn_x32_packw_gemm_gio_ukernel_x64__hvx_u2(
         w += k_stride;
         packed_w += 64;
       }
+      packed_w = (int32_t*) ((uintptr_t) packed_w + extra_bytes);
       w = w - kc * k_stride + 64;  // Advance to next column of 64 int32_t
     }
 
@@ -210,6 +213,7 @@ void xnn_x32_packw_gemm_gio_ukernel_x64__hvx_u2(
         w += k_stride;
         packed_w += 64;
       }
+      packed_w = (int32_t*) ((uintptr_t) packed_w + extra_bytes);
     }
     weights += nc * kc;
   } while (--g != 0);
@@ -295,6 +299,7 @@ void xnn_x32_packw_gemm_gio_ukernel_x96__hvx_u2(
         w += k_stride;
         packed_w += 96;
       }
+      packed_w = (int32_t*) ((uintptr_t) packed_w + extra_bytes);
       w = w - kc * k_stride + 96;  // Advance to next column of 96 int32_t
     }
 
@@ -331,6 +336,7 @@ void xnn_x32_packw_gemm_gio_ukernel_x96__hvx_u2(
         w += k_stride;
         packed_w += 96;
       }
+      packed_w = (int32_t*) ((uintptr_t) packed_w + extra_bytes);
     }
     weights += nc * kc;
   } while (--g != 0);
@@ -425,6 +431,7 @@ void xnn_x32_packw_gemm_gio_ukernel_x128__hvx_u2(
         w += k_stride;
         packed_w += 128;
       }
+      packed_w = (int32_t*) ((uintptr_t) packed_w + extra_bytes);
       w = w - kc * k_stride + 128;  // Advance to next column of 128 int32_t
     }
 
@@ -467,6 +474,7 @@ void xnn_x32_packw_gemm_gio_ukernel_x128__hvx_u2(
         w += k_stride;
         packed_w += 128;
       }
+      packed_w = (int32_t*) ((uintptr_t) packed_w + extra_bytes);
     }
     weights += nc * kc;
   } while (--g != 0);

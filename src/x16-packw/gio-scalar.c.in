@@ -1,4 +1,4 @@
-// Copyright 2024 Google LLC
+// Copyright 2026 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
@@ -11,7 +11,7 @@
 #include "src/xnnpack/packw.h"
 
 
-void xnn_x32_packw_gemm_gio_ukernel_x${NR}__scalar(
+void xnn_x16_packw_gemm_gio_ukernel_x${NR}__scalar(
   size_t g,
   size_t nc,
   size_t kc,
@@ -19,10 +19,10 @@ void xnn_x32_packw_gemm_gio_ukernel_x${NR}__scalar(
   size_t kr,
   size_t sr,
   size_t k_stride,
-  const uint32_t* weights,
-  const uint32_t* bias,
+  const uint16_t* weights,
+  const uint16_t* bias,
   const void* scale,
-  uint32_t* packed_weights,
+  uint16_t* packed_weights,
   size_t extra_bytes,
   const void* params)
 {
@@ -36,17 +36,17 @@ void xnn_x32_packw_gemm_gio_ukernel_x${NR}__scalar(
   assert(weights != NULL);
   assert(packed_weights != NULL);
 
-  const uint32_t* b = bias;
-  uint32_t* packed_w = packed_weights;
+  const uint16_t* b = bias;
+  uint16_t* packed_w = packed_weights;
   do {
     // NC main loop multiple of ${NR}
-    const uint32_t* w = weights;
+    const uint16_t* w = weights;
     size_t n = nc;
 
     for (; n >= ${NR}; n -= ${NR}) {
       if XNN_LIKELY(b != NULL) {
         $for N in range(NR):
-          const uint32_t v${N} = b[${N}];
+          const uint16_t v${N} = b[${N}];
         $for N in range(NR):
           packed_w[${N}] = v${N};
         b += ${NR};
@@ -59,14 +59,14 @@ void xnn_x32_packw_gemm_gio_ukernel_x${NR}__scalar(
       // KC main loop
       for (size_t k = kc; k > 0; --k) {
         $for N in range(NR):
-          const uint32_t v${N} = w[${N}];
+          const uint16_t v${N} = w[${N}];
         $for N in range(NR):
           packed_w[${N}] = v${N};
         w += k_stride;
         packed_w += ${NR};
       }
-      packed_w = (uint32_t*) ((uintptr_t) packed_w + extra_bytes);
-      w = w - kc * k_stride + ${NR};  // Advance to next column of ${NR} uint32_t
+      packed_w = (uint16_t*) ((uintptr_t) packed_w + extra_bytes);
+      w = w - kc * k_stride + ${NR};  // Advance to next column of ${NR} uint16_t
     }
 
     // NC remainder (1..${NR-1})
@@ -93,7 +93,7 @@ void xnn_x32_packw_gemm_gio_ukernel_x${NR}__scalar(
         w += k_stride;
         packed_w += ${NR};
       }
-      packed_w = (uint32_t*) ((uintptr_t) packed_w + extra_bytes);
+      packed_w = (uint16_t*) ((uintptr_t) packed_w + extra_bytes);
     }
     weights += nc * kc;
   } while (--g != 0);

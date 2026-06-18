@@ -12,6 +12,13 @@ tools/xngen src/x32-packw/scalar.c.in -D NR=16 -D KBLOCK=4 -D TYPE=uint16_t -o s
 tools/xngen src/x32-packw/scalar.c.in -D NR=32 -D KBLOCK=4 -D TYPE=uint16_t -o src/x16-packw/gen/x16-packw-x32-gemm-goi-scalar-int-u4.c &
 tools/xngen src/x32-packw/scalar.c.in -D NR=64 -D KBLOCK=4 -D TYPE=uint16_t -o src/x16-packw/gen/x16-packw-x64-gemm-goi-scalar-int-u4.c &
 
+tools/xngen src/x16-packw/gio-scalar.c.in -D NR=2  -o src/x16-packw/gen/x16-packw-x2-gemm-gio-scalar.c &
+tools/xngen src/x16-packw/gio-scalar.c.in -D NR=4  -o src/x16-packw/gen/x16-packw-x4-gemm-gio-scalar.c &
+tools/xngen src/x16-packw/gio-scalar.c.in -D NR=8  -o src/x16-packw/gen/x16-packw-x8-gemm-gio-scalar.c &
+tools/xngen src/x16-packw/gio-scalar.c.in -D NR=16 -o src/x16-packw/gen/x16-packw-x16-gemm-gio-scalar.c &
+tools/xngen src/x16-packw/gio-scalar.c.in -D NR=32 -o src/x16-packw/gen/x16-packw-x32-gemm-gio-scalar.c &
+tools/xngen src/x16-packw/gio-scalar.c.in -D NR=64 -o src/x16-packw/gen/x16-packw-x64-gemm-gio-scalar.c &
+
 ################################### ARM NEON ##################################
 ### NR multiple of 4
 tools/xngen src/x16-packw/neon.c.in -D NR=8  -D PREFETCH=0 -D KBLOCK=4 -o src/x16-packw/gen/x16-packw-x8-gemm-goi-neon-ld4lane-u4.c &

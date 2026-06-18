@@ -168,8 +168,6 @@ INSTANTIATE_TEST_SUITE_P(x8_packw, XnnTest, testing::ValuesIn(xnn_test_params),
                          GetTestName);
 
 // Enable on all platforms when scalar available
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-
 struct XnnTestGIOParam {
   const char* name;
   xnn_x8_packw_gemm_gio_ukernel_fn ukernel;
@@ -323,7 +321,5 @@ TEST_P(XnnTestGIO, n_gt_nr) {
 INSTANTIATE_TEST_SUITE_P(x8_packw_gio, XnnTestGIO,
                          testing::ValuesIn(xnn_test_gio_params),
                          GetTestGIOName);
-
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 }  // namespace

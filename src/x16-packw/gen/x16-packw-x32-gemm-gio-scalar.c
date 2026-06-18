@@ -1,9 +1,9 @@
 // clang-format off
 // Auto-generated file. Do not edit!
-//   Template: src/x32-packw/gio-scalar.c.in
+//   Template: src/x16-packw/gio-scalar.c.in
 //   Generator: tools/xngen
 //
-// Copyright 2024 Google LLC
+// Copyright 2026 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
@@ -16,7 +16,7 @@
 #include "src/xnnpack/packw.h"
 
 
-void xnn_x32_packw_gemm_gio_ukernel_x32__scalar(
+void xnn_x16_packw_gemm_gio_ukernel_x32__scalar(
   size_t g,
   size_t nc,
   size_t kc,
@@ -24,10 +24,10 @@ void xnn_x32_packw_gemm_gio_ukernel_x32__scalar(
   size_t kr,
   size_t sr,
   size_t k_stride,
-  const uint32_t* weights,
-  const uint32_t* bias,
+  const uint16_t* weights,
+  const uint16_t* bias,
   const void* scale,
-  uint32_t* packed_weights,
+  uint16_t* packed_weights,
   size_t extra_bytes,
   const void* params)
 {
@@ -41,47 +41,47 @@ void xnn_x32_packw_gemm_gio_ukernel_x32__scalar(
   assert(weights != NULL);
   assert(packed_weights != NULL);
 
-  const uint32_t* b = bias;
-  uint32_t* packed_w = packed_weights;
+  const uint16_t* b = bias;
+  uint16_t* packed_w = packed_weights;
   do {
     // NC main loop multiple of 32
-    const uint32_t* w = weights;
+    const uint16_t* w = weights;
     size_t n = nc;
 
     for (; n >= 32; n -= 32) {
       if XNN_LIKELY(b != NULL) {
-        const uint32_t v0 = b[0];
-        const uint32_t v1 = b[1];
-        const uint32_t v2 = b[2];
-        const uint32_t v3 = b[3];
-        const uint32_t v4 = b[4];
-        const uint32_t v5 = b[5];
-        const uint32_t v6 = b[6];
-        const uint32_t v7 = b[7];
-        const uint32_t v8 = b[8];
-        const uint32_t v9 = b[9];
-        const uint32_t v10 = b[10];
-        const uint32_t v11 = b[11];
-        const uint32_t v12 = b[12];
-        const uint32_t v13 = b[13];
-        const uint32_t v14 = b[14];
-        const uint32_t v15 = b[15];
-        const uint32_t v16 = b[16];
-        const uint32_t v17 = b[17];
-        const uint32_t v18 = b[18];
-        const uint32_t v19 = b[19];
-        const uint32_t v20 = b[20];
-        const uint32_t v21 = b[21];
-        const uint32_t v22 = b[22];
-        const uint32_t v23 = b[23];
-        const uint32_t v24 = b[24];
-        const uint32_t v25 = b[25];
-        const uint32_t v26 = b[26];
-        const uint32_t v27 = b[27];
-        const uint32_t v28 = b[28];
-        const uint32_t v29 = b[29];
-        const uint32_t v30 = b[30];
-        const uint32_t v31 = b[31];
+        const uint16_t v0 = b[0];
+        const uint16_t v1 = b[1];
+        const uint16_t v2 = b[2];
+        const uint16_t v3 = b[3];
+        const uint16_t v4 = b[4];
+        const uint16_t v5 = b[5];
+        const uint16_t v6 = b[6];
+        const uint16_t v7 = b[7];
+        const uint16_t v8 = b[8];
+        const uint16_t v9 = b[9];
+        const uint16_t v10 = b[10];
+        const uint16_t v11 = b[11];
+        const uint16_t v12 = b[12];
+        const uint16_t v13 = b[13];
+        const uint16_t v14 = b[14];
+        const uint16_t v15 = b[15];
+        const uint16_t v16 = b[16];
+        const uint16_t v17 = b[17];
+        const uint16_t v18 = b[18];
+        const uint16_t v19 = b[19];
+        const uint16_t v20 = b[20];
+        const uint16_t v21 = b[21];
+        const uint16_t v22 = b[22];
+        const uint16_t v23 = b[23];
+        const uint16_t v24 = b[24];
+        const uint16_t v25 = b[25];
+        const uint16_t v26 = b[26];
+        const uint16_t v27 = b[27];
+        const uint16_t v28 = b[28];
+        const uint16_t v29 = b[29];
+        const uint16_t v30 = b[30];
+        const uint16_t v31 = b[31];
         packed_w[0] = v0;
         packed_w[1] = v1;
         packed_w[2] = v2;
@@ -153,38 +153,38 @@ void xnn_x32_packw_gemm_gio_ukernel_x32__scalar(
 
       // KC main loop
       for (size_t k = kc; k > 0; --k) {
-        const uint32_t v0 = w[0];
-        const uint32_t v1 = w[1];
-        const uint32_t v2 = w[2];
-        const uint32_t v3 = w[3];
-        const uint32_t v4 = w[4];
-        const uint32_t v5 = w[5];
-        const uint32_t v6 = w[6];
-        const uint32_t v7 = w[7];
-        const uint32_t v8 = w[8];
-        const uint32_t v9 = w[9];
-        const uint32_t v10 = w[10];
-        const uint32_t v11 = w[11];
-        const uint32_t v12 = w[12];
-        const uint32_t v13 = w[13];
-        const uint32_t v14 = w[14];
-        const uint32_t v15 = w[15];
-        const uint32_t v16 = w[16];
-        const uint32_t v17 = w[17];
-        const uint32_t v18 = w[18];
-        const uint32_t v19 = w[19];
-        const uint32_t v20 = w[20];
-        const uint32_t v21 = w[21];
-        const uint32_t v22 = w[22];
-        const uint32_t v23 = w[23];
-        const uint32_t v24 = w[24];
-        const uint32_t v25 = w[25];
-        const uint32_t v26 = w[26];
-        const uint32_t v27 = w[27];
-        const uint32_t v28 = w[28];
-        const uint32_t v29 = w[29];
-        const uint32_t v30 = w[30];
-        const uint32_t v31 = w[31];
+        const uint16_t v0 = w[0];
+        const uint16_t v1 = w[1];
+        const uint16_t v2 = w[2];
+        const uint16_t v3 = w[3];
+        const uint16_t v4 = w[4];
+        const uint16_t v5 = w[5];
+        const uint16_t v6 = w[6];
+        const uint16_t v7 = w[7];
+        const uint16_t v8 = w[8];
+        const uint16_t v9 = w[9];
+        const uint16_t v10 = w[10];
+        const uint16_t v11 = w[11];
+        const uint16_t v12 = w[12];
+        const uint16_t v13 = w[13];
+        const uint16_t v14 = w[14];
+        const uint16_t v15 = w[15];
+        const uint16_t v16 = w[16];
+        const uint16_t v17 = w[17];
+        const uint16_t v18 = w[18];
+        const uint16_t v19 = w[19];
+        const uint16_t v20 = w[20];
+        const uint16_t v21 = w[21];
+        const uint16_t v22 = w[22];
+        const uint16_t v23 = w[23];
+        const uint16_t v24 = w[24];
+        const uint16_t v25 = w[25];
+        const uint16_t v26 = w[26];
+        const uint16_t v27 = w[27];
+        const uint16_t v28 = w[28];
+        const uint16_t v29 = w[29];
+        const uint16_t v30 = w[30];
+        const uint16_t v31 = w[31];
         packed_w[0] = v0;
         packed_w[1] = v1;
         packed_w[2] = v2;
@@ -220,8 +220,8 @@ void xnn_x32_packw_gemm_gio_ukernel_x32__scalar(
         w += k_stride;
         packed_w += 32;
       }
-      packed_w = (uint32_t*) ((uintptr_t) packed_w + extra_bytes);
-      w = w - kc * k_stride + 32;  // Advance to next column of 32 uint32_t
+      packed_w = (uint16_t*) ((uintptr_t) packed_w + extra_bytes);
+      w = w - kc * k_stride + 32;  // Advance to next column of 32 uint16_t
     }
 
     // NC remainder (1..31)
@@ -278,7 +278,7 @@ void xnn_x32_packw_gemm_gio_ukernel_x32__scalar(
         w += k_stride;
         packed_w += 32;
       }
-      packed_w = (uint32_t*) ((uintptr_t) packed_w + extra_bytes);
+      packed_w = (uint16_t*) ((uintptr_t) packed_w + extra_bytes);
     }
     weights += nc * kc;
   } while (--g != 0);

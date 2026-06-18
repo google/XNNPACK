@@ -671,6 +671,69 @@ static void x32_gio_packw(benchmark::State& state,
       benchmark::Counter::kIsRate);
 }
 
+static void x16_gio_packw(benchmark::State& state,
+                          xnn_x16_packw_gemm_gio_ukernel_fn packw, size_t nr,
+                          size_t kr, size_t sr, uint64_t arch_flags = 0) {
+  if (!benchmark::utils::CheckArchFlags(state, arch_flags)) {
+    return;
+  }
+
+  const size_t batch = state.range(0);
+  const size_t dim_n = state.range(2);
+  const size_t dim_k = state.range(3);
+
+  const size_t rounded_n = benchmark::utils::RoundUp(dim_n, nr);
+  const size_t rounded_k = benchmark::utils::RoundUp(dim_k, kr * sr);
+
+  xnnpack::ReplicableRandomDevice rng;
+  auto u16rng =
+      std::bind(std::uniform_int_distribution<uint16_t>(), std::ref(rng));
+
+  const size_t num_buffers =
+      1 + benchmark::utils::DivideRoundUp<size_t>(
+              benchmark::utils::GetMaxCacheSize(),
+              sizeof(uint16_t) * batch *
+                  (dim_n * dim_k + rounded_n * rounded_k + rounded_n));
+
+  xnnpack::Buffer<uint16_t, XNN_ALLOCATION_ALIGNMENT> weights(num_buffers * batch *
+                                                              dim_n * dim_k);
+  std::generate(weights.begin(), weights.end(), std::ref(u16rng));
+  xnnpack::Buffer<uint16_t, XNN_ALLOCATION_ALIGNMENT> packed_weights(
+      num_buffers * batch * (rounded_n * rounded_k + rounded_n));
+
+  size_t buffer_index = 0;
+  for (auto _ : state) {
+    if (++buffer_index == num_buffers) {
+      buffer_index = 0;
+    }
+
+    packw(batch, dim_n, dim_k, nr, kr, sr, dim_n,
+          weights.data() + buffer_index * batch * dim_n * dim_k,
+          /*bias=*/nullptr,
+          /*scale=*/nullptr,
+          packed_weights.data() + buffer_index * batch *
+                                      (rounded_n * rounded_k + rounded_n),
+          /*extra_bytes=*/0, /*params=*/nullptr);
+  }
+
+  const uint64_t cpu_frequency = benchmark::utils::GetCurrentCpuFrequency();
+  if (cpu_frequency != 0) {
+    state.counters["cpufreq"] = cpu_frequency;
+  }
+
+  const size_t elements_per_iteration = batch * dim_n * dim_k;
+  state.counters["elements"] = benchmark::Counter(
+      static_cast<uint64_t>(state.iterations()) * elements_per_iteration,
+      benchmark::Counter::kIsRate);
+
+  const size_t bytes_per_iteration =
+      (elements_per_iteration + batch * (rounded_n * rounded_k + rounded_n)) *
+      sizeof(uint16_t);
+  state.counters["bytes"] = benchmark::Counter(
+      static_cast<uint64_t>(state.iterations()) * bytes_per_iteration,
+      benchmark::Counter::kIsRate);
+}
+
 static void x8_packw__reference(size_t batch, size_t dim_n, size_t dim_k,
                                 size_t nr, size_t kr, size_t sr,
                                 const int8_t* weights, const uint32_t* bias,

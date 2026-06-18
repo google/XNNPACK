@@ -1,4 +1,4 @@
-// Copyright 2024 Google LLC
+// Copyright 2026 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
@@ -21,6 +21,7 @@
 
 #include "src/x8-packw/x8-packw.inc"
 #undef XNN_UKERNEL
+#undef XNN_GIO_UKERNEL
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
 XNN_BENCHMARK_MAIN();

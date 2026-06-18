@@ -68,13 +68,12 @@ SET(PROD_WASMSIMD_MICROKERNEL_SRCS
   src/f32-igemm/gen/f32-igemm-5x8-minmax-wasmsimd-arm-splat.c
   src/f32-igemm/gen/f32-igemm-5x8-wasmsimd-splat.c
   src/f32-maxpool/gen/f32-maxpool-9p-minmax-wasmsimd-u4.c
-  src/f32-qc8w-gemm/gen/f32-qc8w-gemm-1x8-minmax-wasmsimd-arm-splat.c
-  src/f32-qc8w-gemm/gen/f32-qc8w-gemm-1x8-minmax-wasmsimd-x86-splat.c
-  src/f32-qc8w-gemm/gen/f32-qc8w-gemm-1x8-wasmsimd-splat.c
-  src/f32-qc8w-gemm/gen/f32-qc8w-gemm-4x8-minmax-wasmsimd-x86-splat.c
-  src/f32-qc8w-gemm/gen/f32-qc8w-gemm-4x8-wasmsimd-splat.c
-  src/f32-qc8w-gemm/gen/f32-qc8w-gemm-5x8-minmax-wasmsimd-arm-splat.c
-  src/f32-qc8w-gemm/gen/f32-qc8w-gemm-5x8-wasmsimd-splat.c
+  src/f32-qc8w-gemm/gen/f32-qc8w-gemm-1x8-minmax-wasmsimd-arm-loadsplat.c
+  src/f32-qc8w-gemm/gen/f32-qc8w-gemm-1x8-minmax-wasmsimd-x86-loadsplat.c
+  src/f32-qc8w-gemm/gen/f32-qc8w-gemm-1x8-wasmsimd-loadsplat.c
+  src/f32-qc8w-gemm/gen/f32-qc8w-gemm-4x8-minmax-wasmsimd-arm-loadsplat.c
+  src/f32-qc8w-gemm/gen/f32-qc8w-gemm-4x8-minmax-wasmsimd-x86-loadsplat.c
+  src/f32-qc8w-gemm/gen/f32-qc8w-gemm-4x8-wasmsimd-loadsplat.c
   src/f32-qs8-vcvt/gen/f32-qs8-vcvt-wasmsimd-magic-u32.c
   src/f32-qu8-vcvt/gen/f32-qu8-vcvt-wasmsimd-magic-u32.c
   src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-wasmsimd-rr2-p5-u16-acc2.c
@@ -482,9 +481,9 @@ SET(NON_PROD_WASMSIMD_MICROKERNEL_SRCS
   src/f32-igemm/gen/f32-igemm-6x8s4-wasmsimd.c
   src/f32-ppmm/gen/f32-ppmm-4x8-minmax-wasmsimd-arm-splat.c
   src/f32-ppmm/gen/f32-ppmm-4x8-minmax-wasmsimd-x86-splat.c
-  src/f32-qc8w-gemm/gen/f32-qc8w-gemm-1x8-minmax-wasmsimd-arm-loadsplat.c
-  src/f32-qc8w-gemm/gen/f32-qc8w-gemm-1x8-minmax-wasmsimd-x86-loadsplat.c
-  src/f32-qc8w-gemm/gen/f32-qc8w-gemm-1x8-wasmsimd-loadsplat.c
+  src/f32-qc8w-gemm/gen/f32-qc8w-gemm-1x8-minmax-wasmsimd-arm-splat.c
+  src/f32-qc8w-gemm/gen/f32-qc8w-gemm-1x8-minmax-wasmsimd-x86-splat.c
+  src/f32-qc8w-gemm/gen/f32-qc8w-gemm-1x8-wasmsimd-splat.c
   src/f32-qc8w-gemm/gen/f32-qc8w-gemm-1x8s4-minmax-wasmsimd-arm.c
   src/f32-qc8w-gemm/gen/f32-qc8w-gemm-1x8s4-minmax-wasmsimd-x86.c
   src/f32-qc8w-gemm/gen/f32-qc8w-gemm-1x8s4-wasmsimd.c
@@ -500,17 +499,18 @@ SET(NON_PROD_WASMSIMD_MICROKERNEL_SRCS
   src/f32-qc8w-gemm/gen/f32-qc8w-gemm-4x2c4-minmax-wasmsimd-arm.c
   src/f32-qc8w-gemm/gen/f32-qc8w-gemm-4x2c4-minmax-wasmsimd-x86.c
   src/f32-qc8w-gemm/gen/f32-qc8w-gemm-4x2c4-wasmsimd.c
-  src/f32-qc8w-gemm/gen/f32-qc8w-gemm-4x8-minmax-wasmsimd-arm-loadsplat.c
   src/f32-qc8w-gemm/gen/f32-qc8w-gemm-4x8-minmax-wasmsimd-arm-splat.c
-  src/f32-qc8w-gemm/gen/f32-qc8w-gemm-4x8-minmax-wasmsimd-x86-loadsplat.c
-  src/f32-qc8w-gemm/gen/f32-qc8w-gemm-4x8-wasmsimd-loadsplat.c
+  src/f32-qc8w-gemm/gen/f32-qc8w-gemm-4x8-minmax-wasmsimd-x86-splat.c
+  src/f32-qc8w-gemm/gen/f32-qc8w-gemm-4x8-wasmsimd-splat.c
   src/f32-qc8w-gemm/gen/f32-qc8w-gemm-4x8s4-minmax-wasmsimd-arm.c
   src/f32-qc8w-gemm/gen/f32-qc8w-gemm-4x8s4-minmax-wasmsimd-x86.c
   src/f32-qc8w-gemm/gen/f32-qc8w-gemm-4x8s4-wasmsimd.c
   src/f32-qc8w-gemm/gen/f32-qc8w-gemm-5x8-minmax-wasmsimd-arm-loadsplat.c
+  src/f32-qc8w-gemm/gen/f32-qc8w-gemm-5x8-minmax-wasmsimd-arm-splat.c
   src/f32-qc8w-gemm/gen/f32-qc8w-gemm-5x8-minmax-wasmsimd-x86-loadsplat.c
   src/f32-qc8w-gemm/gen/f32-qc8w-gemm-5x8-minmax-wasmsimd-x86-splat.c
   src/f32-qc8w-gemm/gen/f32-qc8w-gemm-5x8-wasmsimd-loadsplat.c
+  src/f32-qc8w-gemm/gen/f32-qc8w-gemm-5x8-wasmsimd-splat.c
   src/f32-qc8w-gemm/gen/f32-qc8w-gemm-5x8s4-minmax-wasmsimd-arm.c
   src/f32-qc8w-gemm/gen/f32-qc8w-gemm-5x8s4-minmax-wasmsimd-x86.c
   src/f32-qc8w-gemm/gen/f32-qc8w-gemm-5x8s4-wasmsimd.c
@@ -902,6 +902,7 @@ SET(NON_PROD_WASMSIMD_MICROKERNEL_SRCS
   src/x8-lut/gen/x8-lut-wasmsimd-u16.c
   src/x8-lut/gen/x8-lut-wasmsimd-u48.c
   src/x8-lut/gen/x8-lut-wasmsimd-u64.c
+  src/x8-packw/gen/x8-packw-gio-wasmsimd-u2.c
   src/x8-transposec/gen/x8-transposec-16x16-reuse-switch-wasmsimd.c
   src/x16-transposec/gen/x16-transposec-8x8-multi-mov-wasmsimd.c
   src/x16-transposec/gen/x16-transposec-8x8-multi-switch-wasmsimd.c

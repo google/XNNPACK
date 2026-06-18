@@ -1,9 +1,9 @@
 // clang-format off
 // Auto-generated file. Do not edit!
-//   Template: src/x32-packw/gio-scalar.c.in
+//   Template: src/x8-packw/gio-scalar.c.in
 //   Generator: tools/xngen
 //
-// Copyright 2024 Google LLC
+// Copyright 2026 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
@@ -11,12 +11,13 @@
 #include <assert.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <string.h>
 
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/packw.h"
 
 
-void xnn_x32_packw_gemm_gio_ukernel_x4__scalar(
+void xnn_x8_packw_gemm_gio_ukernel_x4__scalar(
   size_t g,
   size_t nc,
   size_t kc,
@@ -24,10 +25,10 @@ void xnn_x32_packw_gemm_gio_ukernel_x4__scalar(
   size_t kr,
   size_t sr,
   size_t k_stride,
-  const uint32_t* weights,
+  const int8_t* weights,
   const uint32_t* bias,
   const void* scale,
-  uint32_t* packed_weights,
+  int8_t* packed_weights,
   size_t extra_bytes,
   const void* params)
 {
@@ -42,46 +43,30 @@ void xnn_x32_packw_gemm_gio_ukernel_x4__scalar(
   assert(packed_weights != NULL);
 
   const uint32_t* b = bias;
-  uint32_t* packed_w = packed_weights;
+  int8_t* packed_w = packed_weights;
   do {
     // NC main loop multiple of 4
-    const uint32_t* w = weights;
+    const int8_t* w = weights;
     size_t n = nc;
 
     for (; n >= 4; n -= 4) {
       if XNN_LIKELY(b != NULL) {
-        const uint32_t v0 = b[0];
-        const uint32_t v1 = b[1];
-        const uint32_t v2 = b[2];
-        const uint32_t v3 = b[3];
-        packed_w[0] = v0;
-        packed_w[1] = v1;
-        packed_w[2] = v2;
-        packed_w[3] = v3;
+        memcpy(packed_w, b, 4 * sizeof(uint32_t));
+        packed_w += 4 * sizeof(uint32_t);
         b += 4;
       } else {
-        packed_w[0] = 0;
-        packed_w[1] = 0;
-        packed_w[2] = 0;
-        packed_w[3] = 0;
+        memset(packed_w, 0, 4 * sizeof(uint32_t));
+        packed_w += 4 * sizeof(uint32_t);
       }
-      packed_w += 4;
 
       // KC main loop
       for (size_t k = kc; k > 0; --k) {
-        const uint32_t v0 = w[0];
-        const uint32_t v1 = w[1];
-        const uint32_t v2 = w[2];
-        const uint32_t v3 = w[3];
-        packed_w[0] = v0;
-        packed_w[1] = v1;
-        packed_w[2] = v2;
-        packed_w[3] = v3;
+        memcpy(packed_w, w, 4 * sizeof(int8_t));
         w += k_stride;
         packed_w += 4;
       }
-      packed_w = (uint32_t*) ((uintptr_t) packed_w + extra_bytes);
-      w = w - kc * k_stride + 4;  // Advance to next column of 4 uint32_t
+      packed_w += extra_bytes;
+      w = w - kc * k_stride + 4;  // Advance to next column of 4 int8_t
     }
 
     // NC remainder (1..3)
@@ -90,27 +75,23 @@ void xnn_x32_packw_gemm_gio_ukernel_x4__scalar(
       assert(n <= 3);
 
       if XNN_LIKELY(b != NULL) {
-        for (size_t i = 0; i < n; ++i) {
-          packed_w[i] = b[i];
-        }
+        memcpy(packed_w, b, n * sizeof(uint32_t));
+        memset(packed_w + n * sizeof(uint32_t), 0, (4 - n) * sizeof(uint32_t));
+        packed_w += 4 * sizeof(uint32_t);
         b += n;
       } else {
-        packed_w[0] = 0;
-        packed_w[1] = 0;
-        packed_w[2] = 0;
-        packed_w[3] = 0;
+        memset(packed_w, 0, 4 * sizeof(uint32_t));
+        packed_w += 4 * sizeof(uint32_t);
       }
-      packed_w += 4;
 
       // KC main loop
       for (size_t k = kc; k > 0; --k) {
-        for (size_t i = 0; i < n; ++i) {
-          packed_w[i] = w[i];
-        }
+        memcpy(packed_w, w, n * sizeof(int8_t));
+        memset(packed_w + n, 0, (4 - n) * sizeof(int8_t));
         w += k_stride;
         packed_w += 4;
       }
-      packed_w = (uint32_t*) ((uintptr_t) packed_w + extra_bytes);
+      packed_w += extra_bytes;
     }
     weights += nc * kc;
   } while (--g != 0);

@@ -125,6 +125,99 @@ void xnnpack_batch_matrix_multiply_f32(benchmark::State& state,
   pthreadpool_destroy(threadpool);
 }
 
+void xnnpack_batch_matrix_multiply_f16(benchmark::State& state,
+                                       const char* net) {
+  const size_t batch_size = state.range(0);
+  const size_t m = state.range(1);
+  const size_t k = state.range(2);
+  const size_t n = state.range(3);
+  const bool transpose_b = state.range(4);
+  const size_t num_threads = state.range(5);
+
+  xnnpack::ReplicableRandomDevice rng;
+  auto f32rng = std::bind(std::uniform_real_distribution<float>(0.0f, 1.0f),
+                          std::ref(rng));
+
+  const size_t input1_elements = batch_size * m * k;
+  const size_t input2_elements = batch_size * k * n;
+  const size_t output_elements = batch_size * m * n;
+
+  xnnpack::Buffer<xnn_float16> input1(input1_elements, xnnpack::XnnExtraBytes);
+  std::generate(input1.begin(), input1.end(), f32rng);
+  xnnpack::Buffer<xnn_float16> input2(input2_elements);
+  std::generate(input2.begin(), input2.end(), f32rng);
+  xnnpack::Buffer<xnn_float16> output(output_elements);
+
+  xnn_status status = xnn_initialize(nullptr /* allocator */);
+  if (status != xnn_status_success) {
+    state.SkipWithError("failed to initialize XNNPACK");
+    return;
+  }
+
+  xnn_operator_t op;
+
+  uint32_t flags = transpose_b ? XNN_FLAG_TRANSPOSE_B : 0;
+  status = xnn_create_batch_matrix_multiply_nc_f16_const_weights(
+      batch_size, k, n, input2.data(), flags, &op);
+  if (status != xnn_status_success) {
+    state.SkipWithError("failed to create FP16 BatchMatrixMultiply operator");
+    return;
+  }
+
+  pthreadpool_t threadpool = pthreadpool_create(num_threads);
+
+  size_t workspace_size = 0;
+  status = xnn_reshape_batch_matrix_multiply_nc_f16(
+      op, /*num_batch_dims=*/1, /*batch_dims_a=*/&batch_size,
+      /*batch_dims_b=*/&batch_size, m, k, n, &workspace_size,
+      threadpool);
+
+  if (status != xnn_status_success) {
+    state.SkipWithError("failed to reshape FP16 BatchMatrixMultiply operator");
+    return;
+  }
+
+  status = xnn_setup_batch_matrix_multiply_nc_f16(
+      op, /*workspace=*/nullptr, input1.data(),
+      /*input_b=*/nullptr, output.data());
+
+  if (status != xnn_status_success) {
+    state.SkipWithError("failed to setup FP16 BatchMatrixMultiply operator");
+    return;
+  }
+
+  int num_iters = FLAGS_benchmark_min_iters;
+  while (state.KeepRunningBatch(num_iters)) {
+    for (int iter = 0; iter < num_iters; iter++) {
+      benchmark::utils::WipePthreadpoolL2Caches(state, threadpool);
+
+      status = xnn_run_operator(op, threadpool);
+      if (status != xnn_status_success) {
+        state.SkipWithError("failed to run FP16 BatchMatrixMultiply operator");
+        return;
+      }
+    }
+    num_iters = 1;
+  }
+
+  status = xnn_delete_operator(op);
+  if (status != xnn_status_success) {
+    state.SkipWithError("failed to delete FP16 BatchMatrixMultiply operator");
+    return;
+  }
+
+  const uint64_t cpu_frequency = benchmark::utils::GetCurrentCpuFrequency();
+  if (cpu_frequency != 0) {
+    state.counters["cpufreq"] = cpu_frequency;
+  }
+
+  state.counters["FLOPS"] = benchmark::Counter(
+      static_cast<uint64_t>(state.iterations()) * batch_size * m * k * n,
+      benchmark::Counter::kIsRate);
+
+  pthreadpool_destroy(threadpool);
+}
+
 void xnnpack_batch_matrix_multiply_qd8_f32_qc8w(benchmark::State& state,
                                                 const char* net) {
   const size_t batch_size = state.range(0);
@@ -222,6 +315,111 @@ void xnnpack_batch_matrix_multiply_qd8_f32_qc8w(benchmark::State& state,
   if (status != xnn_status_success) {
     state.SkipWithError(
         "failed to delete QD8_F32_QC8W BatchMatrixMultiply operator");
+    return;
+  }
+
+  const uint64_t cpu_frequency = benchmark::utils::GetCurrentCpuFrequency();
+  if (cpu_frequency != 0) {
+    state.counters["cpufreq"] = cpu_frequency;
+  }
+
+  state.counters["FLOPS"] = benchmark::Counter(
+      static_cast<uint64_t>(state.iterations()) * batch_size * m * k * n,
+      benchmark::Counter::kIsRate);
+
+  pthreadpool_destroy(threadpool);
+}
+
+void xnnpack_batch_matrix_multiply_f32_qc8w(benchmark::State& state,
+                                            const char* net) {
+  const size_t batch_size = state.range(0);
+  const size_t m = state.range(1);
+  const size_t k = state.range(2);
+  const size_t n = state.range(3);
+  const bool transpose_b = state.range(4);
+  const size_t num_threads = state.range(5);
+
+  xnnpack::ReplicableRandomDevice rng;
+  auto f32rng = std::bind(std::uniform_real_distribution<float>(0.0f, 1.0f),
+                          std::ref(rng));
+
+  const size_t input1_elements = batch_size * m * k;
+  const size_t input2_elements = batch_size * k * n;
+  const size_t output_elements = batch_size * m * n;
+
+  xnnpack::Buffer<float> input1(input1_elements, xnnpack::XnnExtraBytes);
+  std::generate(input1.begin(), input1.end(), std::ref(f32rng));
+  xnnpack::Buffer<int8_t> input2(input2_elements);
+  xnnpack::fill_uniform_random_bits(input2.data(), input2.size(), rng);
+  xnnpack::Buffer<float> output(output_elements);
+
+  // Allocate and fill the quantization parameters.
+  xnnpack::Buffer<float> channelwise_scales(batch_size * n,
+                                            xnnpack::XnnExtraBytes);
+  std::generate(channelwise_scales.begin(), channelwise_scales.end(),
+                std::ref(f32rng));
+
+  xnn_status status = xnn_initialize(nullptr /* allocator */);
+  if (status != xnn_status_success) {
+    state.SkipWithError("failed to initialize XNNPACK");
+    return;
+  }
+
+  xnn_operator_t op;
+
+  uint32_t flags = transpose_b ? XNN_FLAG_TRANSPOSE_B : 0;
+  status = xnn_create_batch_matrix_multiply_nc_f32_qc8w_const_weights(
+      batch_size, k, n, input2.data(), channelwise_scales.data(), flags, &op);
+  if (status != xnn_status_success) {
+    state.SkipWithError(
+        "failed to create F32_QC8W BatchMatrixMultiply operator");
+    return;
+  }
+
+  pthreadpool_t threadpool = pthreadpool_create(num_threads);
+
+  size_t workspace_size = 0;
+  status = xnn_reshape_batch_matrix_multiply_nc_f32_qc8w_const_weights(
+      op, /*num_batch_dims=*/1, /*batch_dims_a=*/&batch_size,
+      /*batch_dims_b=*/&batch_size, m, k, n, &workspace_size, threadpool);
+
+  if (status != xnn_status_success) {
+    state.SkipWithError(
+        "failed to reshape F32_QC8W BatchMatrixMultiply operator");
+    return;
+  }
+
+  xnnpack::Buffer<uint8_t, XNN_ALLOCATION_ALIGNMENT> workspace(
+    workspace_size);
+
+  status = xnn_setup_batch_matrix_multiply_nc_f32_qc8w(
+      op, workspace.data(), input1.data(), /*input_b=*/nullptr, output.data());
+
+  if (status != xnn_status_success) {
+    state.SkipWithError(
+        "failed to setup F32_QC8W BatchMatrixMultiply operator");
+    return;
+  }
+
+  int num_iters = FLAGS_benchmark_min_iters;
+  while (state.KeepRunningBatch(num_iters)) {
+    for (int iter = 0; iter < num_iters; iter++) {
+      benchmark::utils::WipePthreadpoolL2Caches(state, threadpool);
+
+      status = xnn_run_operator(op, threadpool);
+      if (status != xnn_status_success) {
+        state.SkipWithError(
+            "failed to run F32_QC8W BatchMatrixMultiply operator");
+        return;
+      }
+    }
+    num_iters = 1;
+  }
+
+  status = xnn_delete_operator(op);
+  if (status != xnn_status_success) {
+    state.SkipWithError(
+        "failed to delete F32_QC8W BatchMatrixMultiply operator");
     return;
   }
 
