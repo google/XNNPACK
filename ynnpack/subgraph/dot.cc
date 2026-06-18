@@ -250,8 +250,11 @@ auto make_dot_impl(dot_type type, bool consistent_arithmetic, bool transposed_a,
                ? (a_m.extent() == 1 || a_stride_m == a.elem_size * a_tile_k)
                : (a_k1o.extent() == 1 || a_stride_k1 == a.elem_size));
 
-    std::array<size_t, 3> k = {static_cast<size_t>(k1), static_cast<size_t>(k2),
-                               static_cast<size_t>(k3)};
+    std::array<size_t, 3> k = {
+        static_cast<size_t>(k1),
+        static_cast<size_t>(k2),
+        static_cast<size_t>(k3),
+    };
     std::array<size_t, 3> a_k_strides = {
         static_cast<size_t>(a_stride_k1),
         static_cast<size_t>(a_stride_k2),
@@ -498,12 +501,13 @@ uint32_t define_pack_b(ynn_subgraph_t subgraph, const dot_type& type,
     slinky::func::input func_input = {input.buffer};
     slinky::expr tile_k = output.physical_extent(0);
     slinky::expr block_n = output.physical_extent(1);
-    slinky::var ki = dims[0];
-    slinky::var ni = dims[1];
     slinky::var ko = dims[2];
     slinky::var no = dims[3];
-    func_input.bounds = {slinky::point(no * block_n + ni),
-                         slinky::point(ko * tile_k + ki)};
+    func_input.bounds = {
+        // The callback expects to produce whole ki x ni tiles at once.
+        slinky::min_extent(no * block_n, block_n),
+        slinky::min_extent(ko * tile_k, tile_k),
+    };
     for (size_t i = 4; i < dims.size(); ++i) {
       func_input.bounds.push_back(slinky::point(dims[i]));
     }
@@ -960,8 +964,7 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
   }
 
   ynn_node node;
-  // We need both the original input b (for shape inference only) and packed b.
-  node.inputs = {input_a_id, input_b_id, input_c_id, packed_b_id};
+  node.inputs = {input_a_id, input_b_id, input_c_id};
   node.outputs = {*output_id};
   node.op = ynn_node::dot{num_k_dims};
 
@@ -1012,10 +1015,10 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
           d + 1, " (", b_k_dim, ") of ", ynn_node::input_idx{1}}});
   }
 
-  // After shape inference, we don't need input_b any more.
+  // After shape inference, replace input_b with packed_b in the node.
   // TODO(dsharlet): With a better API for `infer_elementwise_shape`, we
   // wouldn't need to put input_b into the inputs in the first place.
-  node.inputs.erase(node.inputs.begin() + 1);
+  node.inputs[1] = packed_b_id;
 
   const bool transpose_a = kernel.flags & dot_flag::transpose_a;
   if (transpose_a) {
@@ -1042,13 +1045,13 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
     const ynn_node::dot& op = std::get<ynn_node::dot>(node.op);
     const size_t num_k_dims = op.num_k_dims;
     ynn_runtime_value& input_a = runtime.value(node.inputs[0]);
+    ynn_runtime_value& packed_b = runtime.value(node.inputs[1]);
     ynn_runtime_value input_c;
-    if (node.inputs[1] != YNN_INVALID_VALUE_ID) {
-      input_c = runtime.value(node.inputs[1]);
+    if (node.inputs[2] != YNN_INVALID_VALUE_ID) {
+      input_c = runtime.value(node.inputs[2]);
     } else {
       input_c.buffer = runtime.null_buffer();
     }
-    ynn_runtime_value& packed_b = runtime.value(node.inputs[2]);
     ynn_runtime_value& output = runtime.value(node.outputs[0]);
 
     if (!transpose_a) {

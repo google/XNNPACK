@@ -252,6 +252,9 @@ ynn_type get_accumulator_type(ynn_reduce_operator op, ynn_type a_type) {
   }
 }
 
+// Makes an identity for a reduction. For most reductions, this is a simple
+// rank-zero scalar. But for min_max reductions, we need a different reduction
+// identity value for the min and the max.
 slinky::raw_buffer_ptr make_reduce_identity(ynn_type type, int rank,
                                             ynn_reduce_operator op) {
   slinky::dim dims[YNN_MAX_TENSOR_RANK];

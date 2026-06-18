@@ -161,6 +161,54 @@ Tensor<T> slice_batches(Tensor<T> tensor, std::vector<size_t> at) {
 }
 
 template <typename A, typename B, typename C>
+void VerifyDotResults(
+    Tensor<A> a, Tensor<B> b, Tensor<C> c, Tensor<C> expected,
+    const std::vector<size_t>& batch_dims,
+    const std::vector<size_t>& a_shape,
+    const std::vector<size_t>& b_shape,
+    size_t num_k_dims,
+    float max_abs_value,
+    uint32_t dot_flags) {
+  // Explicitly broadcast any implicit broadcast dimensions.
+  const size_t target_rank_a = batch_dims.size() + 1 + num_k_dims;
+  if (a.rank() < target_rank_a) {
+    const size_t a_broadcast_dims = target_rank_a - a.rank();
+    a = a.expand_dims(iota(0, a_broadcast_dims));
+  }
+  const size_t target_rank_b = batch_dims.size() + num_k_dims + 1;
+  if (b.rank() < target_rank_b) {
+    const size_t b_broadcast_dims = target_rank_b - b.rank();
+    b = b.expand_dims(iota(0, b_broadcast_dims));
+  }
+  broadcast_extent_1(a);
+  broadcast_extent_1(b);
+
+  for (const auto& i : EnumerateIndices(batch_dims)) {
+    Reference(slice_batches(a, i), slice_batches(b, i),
+              slice_batches(expected, i));
+  }
+  size_t num_k_elements = 1;
+  for (size_t i = 0; i < num_k_dims; ++i) {
+    num_k_elements *= b.extent(batch_dims.size() + i);
+  }
+  for (const auto& i : EnumerateIndices(expected.shape())) {
+    if (is_integral<C>::value) {
+      ASSERT_EQ(c(i), expected(i))
+          << "i=" << index_to_string(i) << " num_k_dims=" << num_k_dims
+          << " a_shape=" << index_to_string(a_shape)
+          << " b_shape=" << index_to_string(b_shape);
+    } else {
+      const auto tolerance =
+          get_dot_tolerance<C>(num_k_elements, max_abs_value, dot_flags);
+      ASSERT_NEAR(c(i), expected(i), tolerance)
+          << "i=" << index_to_string(i) << " num_k_dims=" << num_k_dims
+          << " a_shape=" << index_to_string(a_shape)
+          << " b_shape=" << index_to_string(b_shape);
+    }
+  }
+}
+
+template <typename A, typename B, typename C>
 void TestStaticB(A, B, C) {
   ReplicableRandomDevice rng;
 
@@ -284,33 +332,8 @@ void TestStaticB(A, B, C) {
       runtime.SetupExternalTensor(c.data(), output_id).InvokeRuntime();
       ASSERT_EQ(runtime.Status(), ynn_status_success);
 
-      Tensor<B> broadcasted_b = b;
-      while (broadcasted_b.rank() < a.rank()) {
-        broadcasted_b = broadcasted_b.expand_dims({0});
-      }
-      for (const auto& i : EnumerateIndices(batch_dims)) {
-        Reference(slice_batches(a, i), slice_batches(broadcasted_b, i),
-                  slice_batches(expected, i));
-      }
-      size_t num_k_elements = 1;
-      for (size_t i = 0; i < num_k_dims; ++i) {
-        num_k_elements *= b_shape[i];
-      }
-      for (const auto& i : EnumerateIndices(c_shape)) {
-        if (is_integral<C>::value) {
-          ASSERT_EQ(c(i), expected(i))
-              << "i=" << index_to_string(i) << " num_k_dims=" << num_k_dims
-              << " a_shape=" << index_to_string(a_shape)
-              << " b_shape=" << index_to_string(b_shape);
-        } else {
-          const auto tolerance =
-              get_dot_tolerance<C>(num_k_elements, max_abs_value, dot_flags);
-          ASSERT_NEAR(c(i), expected(i), tolerance)
-              << "i=" << index_to_string(i) << " num_k_dims=" << num_k_dims
-              << " a_shape=" << index_to_string(a_shape)
-              << " b_shape=" << index_to_string(b_shape);
-        }
-      }
+      VerifyDotResults(a, b, c, expected, batch_dims, a_shape, b_shape,
+                       num_k_dims, max_abs_value, dot_flags);
     }
   }
 }
@@ -490,35 +513,8 @@ void TestDynamicB(A, B, C) {
       runtime.SetupExternalTensor(c.data(), output_id).InvokeRuntime();
       ASSERT_EQ(runtime.Status(), ynn_status_success);
 
-      // Put broadcast dimensions back for the reference computation.
-      a = a.expand_dims(iota(0, a_broadcast_dims));
-      b = b.expand_dims(iota(0, b_broadcast_dims));
-      broadcast_extent_1(a);
-      broadcast_extent_1(b);
-
-      for (const auto& i : EnumerateIndices(shapes.batch_dims)) {
-        Reference(slice_batches(a, i), slice_batches(b, i),
-                  slice_batches(expected, i));
-      }
-      size_t num_k_elements = 1;
-      for (size_t i = 0; i < num_k_dims; ++i) {
-        num_k_elements *= shapes.dot_dims[i + 1];
-      }
-      for (const auto& i : EnumerateIndices(shapes.c)) {
-        if (is_integral<C>::value) {
-          ASSERT_EQ(c(i), expected(i))
-              << "i=" << index_to_string(i) << " num_k_dims=" << num_k_dims
-              << " shapes.a=" << index_to_string(shapes.a)
-              << " shapes.b=" << index_to_string(shapes.b);
-        } else {
-          const auto tolerance =
-              get_dot_tolerance<C>(num_k_elements, max_abs_value, dot_flags);
-          ASSERT_NEAR(c(i), expected(i), tolerance)
-              << "i=" << index_to_string(i) << " num_k_dims=" << num_k_dims
-              << " shapes.a=" << index_to_string(shapes.a)
-              << " shapes.b=" << index_to_string(shapes.b);
-        }
-      }
+      VerifyDotResults(a, b, c, expected, shapes.batch_dims, shapes.a, shapes.b,
+                       num_k_dims, max_abs_value, dot_flags);
     }
   }
 }
@@ -650,35 +646,8 @@ void TestStaticShapeDynamicB(A, B, C) {
         b = b.transpose(b_perm).deep_copy();
       }
 
-      // Put broadcast dimensions back for the reference computation.
-      a = a.expand_dims(iota(0, a_broadcast_dims));
-      b = b.expand_dims(iota(0, b_broadcast_dims));
-      broadcast_extent_1(a);
-      broadcast_extent_1(b);
-
-      for (const auto& i : EnumerateIndices(shapes.batch_dims)) {
-        Reference(slice_batches(a, i), slice_batches(b, i),
-                  slice_batches(expected, i));
-      }
-      size_t num_k_elements = 1;
-      for (size_t i = 0; i < num_k_dims; ++i) {
-        num_k_elements *= shapes.dot_dims[i + 1];
-      }
-      for (const auto& i : EnumerateIndices(shapes.c)) {
-        if (is_integral<C>::value) {
-          ASSERT_EQ(c(i), expected(i))
-              << "i=" << index_to_string(i) << " num_k_dims=" << num_k_dims
-              << " shapes.a=" << index_to_string(shapes.a)
-              << " shapes.b=" << index_to_string(shapes.b);
-        } else {
-          const auto tolerance =
-              get_dot_tolerance<C>(num_k_elements, max_abs_value, dot_flags);
-          ASSERT_NEAR(c(i), expected(i), tolerance)
-              << "i=" << index_to_string(i) << " num_k_dims=" << num_k_dims
-              << " shapes.a=" << index_to_string(shapes.a)
-              << " shapes.b=" << index_to_string(shapes.b);
-        }
-      }
+      VerifyDotResults(a, b, c, expected, shapes.batch_dims, shapes.a, shapes.b,
+                       num_k_dims, max_abs_value, dot_flags);
     }
   }
 }
