@@ -15,6 +15,11 @@
 #include <cpuinfo.h>
 #endif
 
+#ifdef YNN_ARCH_HEXAGON
+#include "ynnpack/base/log.h"
+#include <qurt.h>
+#endif
+
 namespace ynn {
 
 #if defined(YNN_ARCH_X86_64) && defined(__linux__) && !defined(CHROMIUM)
@@ -89,6 +94,15 @@ uint64_t get_supported_arch_flags() {
 #endif  // YNN_ENABLE_CPUINFO
 #ifdef YNN_ARCH_HEXAGON
     result |= arch_flag::hvx;
+    qurt_arch_version_t vers = {0};
+    if (qurt_sysenv_get_arch_version(&vers) == QURT_EOK) {
+      const uint32_t v = vers.arch_version & 0xff;
+      if (v >= 0x79) result |= arch_flag::hvx_v79;
+      if (v >= 0x81) result |= arch_flag::hvx_v81;
+    } else {
+      YNN_LOG_WARNING() << "qurt_sysenv_get_arch_version failed; "
+                           "falling back to HVX V75 baseline";
+    }
 #endif  // YNN_ARCH_HEXAGON
 #ifdef YNN_ARCH_WASM
     result |= arch_flag::simd128;

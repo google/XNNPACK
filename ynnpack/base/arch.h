@@ -50,7 +50,9 @@ enum {
   sve = 1 << 9,
 #endif
 #ifdef YNN_ARCH_HEXAGON
-  hvx = 1 << 0,
+  hvx = 1 << 0,      // V75 baseline (toolchain floor).
+  hvx_v79 = 1 << 1,
+  hvx_v81 = 1 << 2,
 #endif  // YNN_ARCH_HEXAGON
 #ifdef YNN_ARCH_WASM
   simd128 = 1 << 0,
