@@ -4,7 +4,6 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <algorithm>
-#include <array>
 #include <cassert>
 #include <cstddef>
 #include <cstdint>
@@ -160,27 +159,28 @@ auto make_gather_impl(int32_t axis, ynn_type index_type) {
             std::min<size_t>(input.rank, static_cast<size_t>(R_loop));
 
         // 4. Run gather.
+        bool error = false;
         slinky::for_each_element(
-            [=, &output_slice, &input_slice](void* output_ptr,
-                                             const void* index_ptr,
-                                             const void* input_dummy_ptr) {
+            [=, &error, &output_slice, &input_slice](
+                void* output_ptr, const void* index_ptr,
+                const void* input_dummy_ptr) {
               slinky::index_t idx = read_index_value(index_ptr, index_type);
-              if (idx < 0) {
-                idx += input_axis.extent();
+
+              if (input_axis.contains(idx)) {
+                const void* input_ptr = slinky::offset_bytes(
+                    input_dummy_ptr, input_axis.flat_offset_bytes(idx));
+
+                output_slice.base = output_ptr;
+                input_slice.base = const_cast<void*>(input_ptr);
+
+                slinky::copy(input_slice, output_slice);
+              } else {
+                error = true;
               }
-              assert(idx >= 0 && idx < input_axis.extent());
-
-              const void* input_ptr = slinky::offset_bytes(
-                  input_dummy_ptr, input_axis.flat_offset_bytes(idx));
-
-              output_slice.base = output_ptr;
-              input_slice.base = const_cast<void*>(input_ptr);
-
-              slinky::copy(input_slice, output_slice);
             },
             output_for_loop, index, input_for_loop);
 
-        return 0;
+        return error;
       };
 }
 
@@ -219,15 +219,20 @@ void define_gather(ynn_subgraph& subgraph, ynn_node& node, int32_t axis,
     }
   }
 
-  if (axis == 0) {
+  if (axis == 0 && type_size_bits(index.type) <= 16) {
     // If we are doing the gather in axis 0, we might be able to use a LUT
     // kernel for this.
-    lut_kernel_fn kernel = get_lut_kernel(index.type, input.type);
-    if (kernel) {
-      node.create = [kernel](const ynn_node& node, ynn_runtime& runtime) {
-        return create_gather_lut(node, runtime, kernel);
-      };
-      return;
+    int expected_size = 1 << type_size_bits(index.type);
+    if (!slinky::is_constant(input.extent(0), expected_size)) {
+      // We can't use a LUT kernel if the index might be out of bounds.
+    } else {
+      lut_kernel_fn kernel = get_lut_kernel(index.type, input.type);
+      if (kernel) {
+        node.create = [kernel](const ynn_node& node, ynn_runtime& runtime) {
+          return create_gather_lut(node, runtime, kernel);
+        };
+        return;
+      }
     }
   }
 
