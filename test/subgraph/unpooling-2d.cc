@@ -124,4 +124,32 @@ void TestImpl() {
 
 TEST(Unpooling2DF32, test) { TestImpl<float>(); }
 
+#ifndef XNNPACK_USE_YNNPACK
+TEST(Unpooling2D, reshape_rejects_index_shape_mismatch) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+
+  SubgraphTester subgraph(3);
+  subgraph.AddInputTensor(4, xnn_datatype_fp32, 0)
+      .AddInputTensor(4, xnn_datatype_int32, 1)
+      .AddOutputTensor(4, xnn_datatype_fp32, 2)
+      .AddUnpooling2D(0, 0, 0, 0, 2, 2, 0, 1, 2);
+  if (subgraph.CreateRuntime() == xnn_status_unsupported_hardware) {
+    GTEST_SKIP();
+  }
+
+  // The index input is consumed with strides taken from the value shape, so an
+  // index tensor smaller than the value tensor reads past the end of the index
+  // buffer. The reshape must reject the mismatch rather than carry it through.
+  const std::vector<size_t> value_shape = {1, 4, 4, 8};
+  const std::vector<size_t> index_shape = {1, 2, 2, 8};
+  Tensor<float> value(value_shape, XnnExtraBytes);
+  Tensor<int32_t> index(index_shape, XnnExtraBytes);
+
+  subgraph.ReshapeExternalTensor(value_shape, value.base(), 0)
+      .ReshapeExternalTensor(index_shape, index.base(), 1)
+      .ReshapeRuntime();
+  EXPECT_EQ(subgraph.Status(), xnn_status_invalid_parameter);
+}
+#endif  // XNNPACK_USE_YNNPACK
+
 }  // namespace xnnpack
