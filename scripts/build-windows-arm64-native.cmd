@@ -1,0 +1,27 @@
+mkdir build\windows
+mkdir build\windows\arm64
+
+rem Native ARM64 host build (e.g. GHA windows-11-arm runner, or a Snapdragon
+rem X dev box). Uses the arm64 native cl.exe rather than the x64 -> arm64
+rem cross used by scripts\build-windows-arm64.cmd. No CMAKE_TOOLCHAIN_FILE
+rem is needed because we are not cross-compiling, which also lets ctest run
+rem the produced binaries directly.
+echo VCVARSALL: %VCVARSALL%
+call "%VCVARSALL%" arm64
+
+rem Set up the CMake arguments. Same minimal feature set as
+rem scripts\build-windows-arm64.cmd
+set CMAKE_ARGS=-DXNNPACK_LIBRARY_TYPE=static -G="Ninja" -DCMAKE_BUILD_TYPE=Release
+set CMAKE_ARGS=%CMAKE_ARGS% -DXNNPACK_ENABLE_ASSEMBLY=OFF -DXNNPACK_ENABLE_ARM_FP16_SCALAR=OFF -DXNNPACK_ENABLE_ARM_BF16=OFF
+
+rem User-specified CMake arguments go last to allow overriding defaults.
+set CMAKE_ARGS=%CMAKE_ARGS% %*
+
+echo CMAKE_ARGS: %CMAKE_ARGS%
+
+rem Configure the build.
+cd build\windows\arm64
+cmake ..\..\.. %CMAKE_ARGS%
+
+rem Run the build.
+cmake --build . --config Release -- -j %NUMBER_OF_PROCESSORS%
