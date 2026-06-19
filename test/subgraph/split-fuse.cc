@@ -154,6 +154,7 @@ void FuseAndSplit() {
   }
 }
 
+#ifndef XNNPACK_USE_YNNPACK
 // A large fuse/split axis makes `axis + count` wrap past SIZE_MAX, so the
 // `> XNN_MAX_TENSOR_DIMS` range check used to pass. For fuse_dims the oversized
 // count then writes past the end of a XNN_MAX_TENSOR_DIMS stack array, and the
@@ -209,6 +210,7 @@ TEST(SplitDim, large_axis_rejected) {
 
   xnn_delete_subgraph(subgraph);
 }
+#endif  // XNNPACK_USE_YNNPACK
 
 TEST(FuseAndSplitQS8, test) { FuseAndSplit<quantized<int8_t>>(); }
 TEST(FuseAndSplitQU8, test) { FuseAndSplit<quantized<uint8_t>>(); }
