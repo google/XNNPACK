@@ -266,18 +266,17 @@ auto make_dot_impl(dot_type type, bool consistent_arithmetic, bool transposed_a,
         static_cast<size_t>(b_stride_k3),
     };
 
-    auto call_kernel =
-        [transposed_a, c_stride_m, kernel = kernel.kernel](
-            index_t m, index_t n, span<const size_t> k, const void* a,
-            size_t a_stride_m, span<const size_t> a_k_strides, const void* b,
-            span<const size_t> b_k_strides, index_t init_c_stride_m,
-            const void* init_c, void* c) {
-          kernel(m, n, k[2], k[1], k[0],
-                 transposed_a ? a_k_strides[0] : a_stride_m,
-                 a_k_strides[2], a_k_strides[1], a, b_k_strides[2],
-                 b_k_strides[1], b_k_strides[0], b, init_c_stride_m, init_c,
-                 c_stride_m, c);
-        };
+    auto call_kernel = [transposed_a, c_stride_m, kernel = kernel.kernel](
+                           index_t m, index_t n, span<const size_t> k,
+                           const void* a, size_t a_stride_m,
+                           span<const size_t> a_k_strides, const void* b,
+                           span<const size_t> b_k_strides,
+                           index_t init_c_stride_m, const void* init_c,
+                           void* c) {
+      kernel(m, n, k[2], k[1], k[0], transposed_a ? a_k_strides[0] : a_stride_m,
+             a_k_strides[2], a_k_strides[1], a, b_k_strides[2], b_k_strides[1],
+             b_k_strides[0], b, init_c_stride_m, init_c, c_stride_m, c);
+    };
 
     const size_t cache_sizes[] = {cache_size_l2};
 
@@ -1075,11 +1074,6 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
     std::vector<slinky::var> reduction_dims;
     std::vector<slinky::expr> all_extents;
 
-    for (int i = 0; i < output.rank(); ++i) {
-      all_dims.push_back(output_dims[i]);
-      all_extents.push_back(output.extent(i));
-    }
-
     int reduction_dim = 0;
     for (size_t d = 0; d < num_k_dims; ++d) {
       slinky::var r_dim = runtime.globals.make_reduction_dim(reduction_dim);
@@ -1102,6 +1096,11 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
       reduction_buffer->dim(reduction_dim).stride = 0;
       reduction_buffer->dim(reduction_dim).fold_factor = slinky::dim::unfolded;
       ++reduction_dim;
+    }
+
+    for (int i = 0; i < output.rank(); ++i) {
+      all_dims.push_back(output_dims[i]);
+      all_extents.push_back(output.extent(i));
     }
 
     // A: We need all of the k dims, i is elementwise.
@@ -1210,30 +1209,33 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
       split_n = {};
     }
 
+    const int rank = output.rank();
     std::vector<int> loop_order;
-    if (output.rank() >= 2) {
-      loop_order = {0, 1};
-      if (pack_b && !packed_b.is_static()) {
-        // Loop over n first so we don't redundantly compute the packing for
-        // each split of m.
-        std::swap(loop_order[0], loop_order[1]);
+    if (rank >= 2 && pack_b && !packed_b.is_static()) {
+      loop_order.resize(num_k_dims + 2);
+      for (size_t i = 0; i < loop_order.size(); ++i) {
+        loop_order[i] = i;
       }
+      // Loop over n first so we don't redundantly compute the packing for
+      // each split of m.
+      std::swap(loop_order[num_k_dims], loop_order[num_k_dims + 1]);
     }
+
+    // Provide splits only for the reduction dims and n/m. The batch dims come
+    // after these in all_dims and are intentionally left out: make_schedule
+    // auto-computes a cache-aware tile for them.
+    std::vector<slinky::expr> splits;
 
     // If output is rank >= 2, we want to split n, m, and k. Otherwise, we only
     // split n and k (e.g. fully-connected layers).
-    std::vector<slinky::expr> splits;
-    splits.push_back(split_n);
-    if (output.rank() >= 2) {
-      splits.push_back(split_m);
-      for (size_t i = 2; i < output.rank(); ++i) {
-        splits.push_back({});
-      }
-    }
     splits.push_back(split_k);
     for (size_t i = 1; i < num_k_dims; ++i) {
       // Do not create loops for the remaining k dims.
       splits.push_back({});
+    }
+    splits.push_back(split_n);
+    if (output.rank() >= 2) {
+      splits.push_back(split_m);
     }
 
     auto sched = runtime.make_schedule(
