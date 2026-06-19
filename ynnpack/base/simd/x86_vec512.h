@@ -1124,7 +1124,7 @@ YNN_ALWAYS_INLINE bf16x32 cast(f32x32 a, bfloat16) {
   const __m512i d = _mm512_packus_epi32(c1, c2);
   const __m512i permutation =
       _mm512_set_epi32(15, 14, 11, 10, 7, 6, 3, 2, 13, 12, 9, 8, 5, 4, 1, 0);
-  return bf16x32{_mm512_permutevar_epi32(permutation, d)};
+  return bf16x32{_mm512_permutexvar_epi32(permutation, d)};
 #endif
 }
 YNN_ALWAYS_INLINE bf16x16 cast(f32x16 a, bfloat16) {

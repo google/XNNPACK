@@ -1,0 +1,54 @@
+# Copyright 2026 Google LLC
+#
+# This source code is licensed under the BSD-style license found in the
+# LICENSE file in the root directory of this source tree.
+
+# ---[ Options.
+SET(YNN_LOG_LEVEL "warning" CACHE STRING "Log level (error, warning, info, debug, verbose)")
+SET_PROPERTY(CACHE YNN_LOG_LEVEL PROPERTY STRINGS error warning info debug verbose)
+
+# ---[ Log library.
+ADD_LIBRARY(ynnpack_log INTERFACE)
+TARGET_COMPILE_DEFINITIONS(ynnpack_log INTERFACE YNN_LOG_LEVEL=YNN_LOG_LEVEL_${YNN_LOG_LEVEL})
+TARGET_LINK_LIBRARIES(ynnpack_log INTERFACE slinky_base)
+
+# ---[ Base library.
+ADD_LIBRARY(ynnpack_base STATIC
+  arch.cc
+  to_string.cc
+  type.cc
+)
+
+TARGET_INCLUDE_DIRECTORIES(ynnpack_base PUBLIC .)
+TARGET_LINK_LIBRARIES(ynnpack_base PUBLIC ynnpack_log slinky_base)
+
+# ---[ SIMD library.
+ADD_LIBRARY(ynnpack_simd INTERFACE)
+TARGET_LINK_LIBRARIES(ynnpack_simd INTERFACE ynnpack_base)
+
+IF(YNN_ENABLE_CPUINFO)
+  # Check if cpuinfo target exists (it should if XNNPACK is set up correctly)
+  IF(TARGET cpuinfo)
+    TARGET_LINK_LIBRARIES(ynnpack_base PUBLIC cpuinfo)
+    TARGET_COMPILE_DEFINITIONS(ynnpack_base PUBLIC YNN_ENABLE_CPUINFO)
+  ENDIF()
+ENDIF()
+
+# Architecture-specific defines.
+IF(YNNPACK_TARGET_PROCESSOR STREQUAL "x86")
+  TARGET_COMPILE_DEFINITIONS(ynnpack_base PUBLIC YNN_ARCH_X86 YNN_ARCH_X86_32)
+ELSEIF(YNNPACK_TARGET_PROCESSOR STREQUAL "x86_64")
+  TARGET_COMPILE_DEFINITIONS(ynnpack_base PUBLIC YNN_ARCH_X86 YNN_ARCH_X86_64)
+ELSEIF(YNNPACK_TARGET_PROCESSOR STREQUAL "arm")
+  TARGET_COMPILE_DEFINITIONS(ynnpack_base PUBLIC YNN_ARCH_ARM YNN_ARCH_ARM32)
+ELSEIF(YNNPACK_TARGET_PROCESSOR STREQUAL "arm64")
+  TARGET_COMPILE_DEFINITIONS(ynnpack_base PUBLIC YNN_ARCH_ARM YNN_ARCH_ARM64)
+ELSEIF(YNNPACK_TARGET_PROCESSOR STREQUAL "hexagon")
+  TARGET_COMPILE_DEFINITIONS(ynnpack_base PUBLIC YNN_ARCH_HEXAGON)
+ELSEIF(YNNPACK_TARGET_PROCESSOR STREQUAL "wasm")
+  TARGET_COMPILE_DEFINITIONS(ynnpack_base PUBLIC YNN_ARCH_WASM)
+ENDIF()
+
+IF(YNNPACK_BUILD_TESTS)
+  ADD_SUBDIRECTORY(test)
+ENDIF()
