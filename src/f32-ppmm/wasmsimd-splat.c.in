@@ -1,0 +1,142 @@
+// Copyright 2020 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert MR % 4 == 0
+$assert NR % 4 == 0
+$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+#include <assert.h>
+
+#include <wasm_simd128.h>
+
+#include "src/xnnpack/ppmm.h"
+
+
+$WASM_F32X4_MIN={"MINMAX": "wasm_f32x4_min", "PMINMAX": "wasm_f32x4_pmin"}[MINMAX]
+$WASM_F32X4_MAX={"MINMAX": "wasm_f32x4_max", "PMINMAX": "wasm_f32x4_pmax"}[MINMAX]
+$ARCH_SUFFIX = "_x86" if MINMAX == "PMINMAX" else "_arm"
+void xnn_f32_ppmm_minmax_ukernel_${MR}x${NR}__wasmsimd${ARCH_SUFFIX}_splat(
+  size_t mr,
+  size_t nc,
+  size_t kc,
+  const float* restrict a,
+  const float* restrict w,
+  float* restrict c,
+  size_t cm_stride,
+  size_t cn_stride,
+  const struct xnn_f32_minmax_params* restrict params)
+{
+  assert(mr != 0);
+  assert(mr <= ${MR});
+  assert(nc != 0);
+  assert(kc != 0);
+  assert(kc % sizeof(float) == 0);
+
+  float* c0 = c;
+  $for M in range(1, MR):
+    float* c${M} = (float*) ((uintptr_t) c${M-1} + cm_stride);
+    $if M % 2 == 0:
+      if XNN_UNPREDICTABLE(mr <= ${M}) {
+        c${M} = c${M-1};
+      }
+    $elif M + 1 == MR:
+      if XNN_UNPREDICTABLE(mr != ${M+1}) {
+        c${M} = c${M-1};
+      }
+    $else:
+      if XNN_UNPREDICTABLE(mr < ${M+1}) {
+        c${M} = c${M-1};
+      }
+
+  const v128_t vmin = wasm_v128_load32_splat(&params->scalar.min);
+  const v128_t vmax = wasm_v128_load32_splat(&params->scalar.max);
+  XNN_FORCE_REALIZATION(vmin);
+  XNN_FORCE_REALIZATION(vmax);
+  do {
+    v128_t vacc0x${ABC[0:4]} = wasm_v128_load(w);
+    $for N in range(4, NR, 4):
+      v128_t vacc0x${ABC[N:N+4]} = wasm_v128_load(w + ${N});
+    $for M in range(1, MR):
+      $for N in range(0, NR, 4):
+        v128_t vacc${M}x${ABC[N:N+4]} = vacc0x${ABC[N:N+4]};
+    w += ${NR};
+
+    size_t k = kc;
+    do {
+      const v128_t va${ABC[0:4]} = wasm_v128_load(a);
+      $for M in range(4, MR, 4):
+        const v128_t va${ABC[M:M+4]} = wasm_v128_load(a + ${M});
+      a += ${MR};
+
+      const v128_t vb${ABC[0:4]} = wasm_v128_load(w);
+      $for N in range(4, NR, 4):
+        const v128_t vb${ABC[N:N+4]} = wasm_v128_load(w + ${N});
+      w += ${NR};
+
+      $for M in range(MR):
+        $MMMM = str(M) * 4
+        const v128_t va${MMMM} = wasm_v32x4_shuffle(va${ABC[M&-4:4+M&-4]}, va${ABC[M&-4:4+M&-4]}, ${M}, ${M}, ${M}, ${M});
+
+      $for N in range(0, NR, 4):
+        $for M in range(MR):
+          $MMMM = str(M) * 4
+          vacc${M}x${ABC[N:N+4]} = wasm_f32x4_add(vacc${M}x${ABC[N:N+4]}, wasm_f32x4_mul(va${MMMM}, vb${ABC[N:N+4]}));
+
+      k -= sizeof(float);
+    } while (k != 0);
+
+    $for N in range(0, NR, 4):
+      $for M in range(MR):
+        vacc${M}x${ABC[N:N+4]} = ${WASM_F32X4_MAX}(vmin, vacc${M}x${ABC[N:N+4]});
+
+    $for N in range(0, NR, 4):
+      $for M in range(MR):
+        vacc${M}x${ABC[N:N+4]} = ${WASM_F32X4_MIN}(vmax, vacc${M}x${ABC[N:N+4]});
+
+    if XNN_LIKELY(nc >= ${NR}) {
+      $for M in reversed(range(MR)):
+        wasm_v128_store(c${M}, vacc${M}x${ABC[0:4]});
+        $for N in range(4, NR, 4):
+          wasm_v128_store(c${M} + ${N}, vacc${M}x${ABC[N:N+4]});
+
+      a = (const float*) ((uintptr_t) a - kc * ${MR});
+
+      $for M in reversed(range(MR)):
+        c${M} = (float*) ((uintptr_t) c${M} + cn_stride);
+
+      nc -= ${NR};
+    } else {
+      $for LOG2N in reversed(range(NR.bit_length())):
+        $if NR != 1 << LOG2N:
+          if (nc & ${1 << LOG2N}) {
+            $if LOG2N >= 2:
+              $for M in reversed(range(MR)):
+                wasm_v128_store(c${M}, vacc${M}x${ABC[0:4]});
+                $for N in range(4, 1 << LOG2N, 4):
+                  wasm_v128_store(c${M} + ${N}, vacc${M}x${ABC[N:N+4]});
+
+              $for M in reversed(range(MR)):
+                $for N in range(0, NR - (1 << LOG2N), 4):
+                  vacc${M}x${ABC[N:N+4]} = vacc${M}x${ABC[N + (1 << LOG2N):N + (1 << LOG2N)+4]};
+
+              $for M in reversed(range(MR)):
+                c${M} += ${1 << LOG2N};
+            $elif LOG2N == 1:
+              $for M in reversed(range(MR)):
+                wasm_v128_store64_lane(c${M}, vacc${M}x${ABC[0:4]}, 0);
+
+              $for M in reversed(range(MR)):
+                vacc${M}x${ABC[0:4]} = wasm_v64x2_shuffle(vacc${M}x${ABC[0:4]}, vacc${M}x${ABC[0:4]}, 1, 1);
+
+              $for M in reversed(range(MR)):
+                c${M} += 2;
+            $elif LOG2N == 0:
+              $for M in reversed(range(MR)):
+                wasm_v128_store32_lane(c${M}, vacc${M}x${ABC[0:4]}, 0);
+          }
+
+      nc = 0;
+    }
+  } while (nc != 0);
+}

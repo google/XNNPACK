@@ -1,0 +1,438 @@
+// Copyright 2023 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert NR >= 4
+$assert NR % 4 == 0
+$assert SR == 4
+$assert KBLOCK >= 4
+$assert KBLOCK % 4 == 0
+$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+
+#include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
+
+#include <immintrin.h>
+
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/packw.h"
+$if PREFETCH:
+  #include "src/xnnpack/prefetch.h"
+
+
+$ISA = "avx" if AVX else "sse2"
+void xnn_x32_packw_gemm_goi_ukernel_x${NR}s4__${ISA}_u${KBLOCK}${"_prfm" if PREFETCH else ""}(
+  size_t g,
+  size_t nc,
+  size_t kc,
+  size_t nr,
+  size_t kr,
+  size_t sr,
+  const uint32_t* weights,
+  const uint32_t* bias,
+  const void* scale,
+  uint32_t* packed_weights,
+  size_t extra_bytes,
+  const void* params)
+{
+  assert(g != 0);
+  assert(nc != 0);
+  assert(kc != 0);
+  assert(nr == ${NR});
+  assert(kr == 1);
+  assert(sr == ${SR});
+  assert(weights != NULL);
+  assert(packed_weights != NULL);
+
+  const float* b = (const float*) bias;
+  float* packed_w = (float*) packed_weights;
+  do {
+    // NC main loop multiple of ${NR}
+    const float* w0 = (const float*) weights;
+    size_t n = nc;
+
+    for (; n >= ${NR}; n -= ${NR}) {
+      if XNN_LIKELY(b != NULL) {
+        const __m128 vb0 = _mm_loadu_ps(b);
+        $for N in range(4,NR,4):
+          const __m128 vb${N} = _mm_loadu_ps(b + ${N});
+        _mm_store_ps(packed_w, vb0);
+        $for N in range(4,NR,4):
+          _mm_store_ps(packed_w + ${N}, vb${N});
+        b += ${NR};
+      } else {
+        const __m128 vzero = _mm_setzero_ps();
+        _mm_store_ps(packed_w, vzero);
+        $for N in range(4, NR, 4):
+          _mm_store_ps(packed_w + ${N}, vzero);
+      }
+      packed_w += ${NR};
+
+      $for N in range(1, NR):
+        const float* w${N} = w${N-1} + kc;
+      $if PREFETCH:
+        $for N in range(0, NR):
+          xnn_prefetch_to_l1((const int8_t*) w${N});
+          xnn_prefetch_to_l1((const int8_t*) w${N} + 64);
+
+      size_t k = kc;
+      $if KBLOCK > 4:
+        // KC main loop multiple of ${KBLOCK}
+        for (; k >= ${KBLOCK}; k -= ${KBLOCK}) {
+          // Read blocks of 4x4
+          // a b c d
+          // e f g h
+          // i j k l
+          // m n o p
+          $for N in range(NR):
+            __m128 v${N}x0123 = _mm_loadu_ps(w${N});
+            $for K in range(4,KBLOCK,4):
+              __m128 v${N}x${ABC[K:K+4]} = _mm_loadu_ps(w${N} + ${K});
+            w${N} += ${KBLOCK};
+
+          // Apply SR4 shuffle
+          $for N in range(0,NR,4):
+            $for L in range(1,4):
+              $for K in range(0,KBLOCK,4):
+                v${N+L}x${ABC[K:K+4]} = _mm_castsi128_ps(_mm_shuffle_epi32(_mm_castps_si128(v${N+L}x${ABC[K:K+4]}), _MM_SHUFFLE(${(L+3)&3}, ${(L+2)&3}, ${(L+1)&3}, ${L})));
+          // Transpose 2x2
+          $for N in range(0,NR,4):
+            $for K in range(0,KBLOCK,4):
+              const __m128 vtmp${N+0}x${ABC[K:K+4]} = _mm_unpacklo_ps(v${N+0}x${ABC[K:K+4]}, v${N+1}x${ABC[K:K+4]});  // a e b f   from row 0, 1
+              const __m128 vtmp${N+1}x${ABC[K:K+4]} = _mm_unpacklo_ps(v${N+2}x${ABC[K:K+4]}, v${N+3}x${ABC[K:K+4]});  // i m j n   from row 2, 3
+              const __m128 vtmp${N+2}x${ABC[K:K+4]} = _mm_unpackhi_ps(v${N+0}x${ABC[K:K+4]}, v${N+1}x${ABC[K:K+4]});  // c g d h   from row 0, 1
+              const __m128 vtmp${N+3}x${ABC[K:K+4]} = _mm_unpackhi_ps(v${N+2}x${ABC[K:K+4]}, v${N+3}x${ABC[K:K+4]});  // k o l p   from row 2, 3
+          $if PREFETCH:
+            $for N in range(0, NR):
+              xnn_prefetch_to_l1((const int8_t*) w${N} + 128);
+          // Transpose 4x4
+          $for N in range(0,NR,4):
+            $for K in range(0,KBLOCK,4):
+              v${N+0}x${ABC[K:K+4]} = _mm_movelh_ps(vtmp${N+0}x${ABC[K:K+4]}, vtmp${N+1}x${ABC[K:K+4]});  // a e i m   from row 0, 1
+              v${N+1}x${ABC[K:K+4]} = _mm_movehl_ps(vtmp${N+1}x${ABC[K:K+4]}, vtmp${N+0}x${ABC[K:K+4]});  // b f j n   from row 0, 1
+              v${N+2}x${ABC[K:K+4]} = _mm_movelh_ps(vtmp${N+2}x${ABC[K:K+4]}, vtmp${N+3}x${ABC[K:K+4]});  // c g k o   from row 2, 3
+              v${N+3}x${ABC[K:K+4]} = _mm_movehl_ps(vtmp${N+3}x${ABC[K:K+4]}, vtmp${N+2}x${ABC[K:K+4]});  // d h l p   from row 2, 3
+
+          _mm_store_ps(packed_w, v0x0123);
+          $for K in range(0,KBLOCK,4):
+            $for L in range(4):
+              $for N in range(0,NR,4):
+                $if (N+(K+L)*NR) > 0:
+                  _mm_store_ps(packed_w + ${N+(K+L)*NR}, v${N+L}x${ABC[K:K+4]});
+          packed_w += ${NR*KBLOCK};
+        }
+
+      // KC multiple of 4
+      for (; k >= 4; k -= 4) {
+        // Read blocks of 4x4
+        // a b c d
+        // e f g h
+        // i j k l
+        // m n o p
+        $for N in range(NR):
+          __m128 v${N}x0123 = _mm_loadu_ps(w${N});
+          w${N} += 4;
+
+        // Apply SR4 shuffle
+        $for N in range(0,NR,4):
+          $for L in range(1,4):
+            v${N+L}x${ABC[0:4]} = _mm_castsi128_ps(_mm_shuffle_epi32(_mm_castps_si128(v${N+L}x${ABC[0:4]}), _MM_SHUFFLE(${(L+3)&3}, ${(L+2)&3}, ${(L+1)&3}, ${L})));
+
+        // Transpose 2x2
+        $for N in range(0,NR,4):
+          const __m128 vtmp${N+0}x${ABC[0:4]} = _mm_unpacklo_ps(v${N+0}x${ABC[0:4]}, v${N+1}x${ABC[0:4]});  // a e b f   from row 0, 1
+          const __m128 vtmp${N+1}x${ABC[0:4]} = _mm_unpacklo_ps(v${N+2}x${ABC[0:4]}, v${N+3}x${ABC[0:4]});  // i m j n   from row 2, 3
+          const __m128 vtmp${N+2}x${ABC[0:4]} = _mm_unpackhi_ps(v${N+0}x${ABC[0:4]}, v${N+1}x${ABC[0:4]});  // c g d h   from row 0, 1
+          const __m128 vtmp${N+3}x${ABC[0:4]} = _mm_unpackhi_ps(v${N+2}x${ABC[0:4]}, v${N+3}x${ABC[0:4]});  // k o l p   from row 2, 3
+        $if PREFETCH:
+          $for N in range(0, NR):
+            xnn_prefetch_to_l1((const int8_t*) w${N} + 128);
+        // Transpose 4x4
+        $for N in range(0,NR,4):
+          v${N+0}x${ABC[0:4]} = _mm_movelh_ps(vtmp${N+0}x${ABC[0:4]}, vtmp${N+1}x${ABC[0:4]});  // a e i m   from row 0, 1
+          v${N+1}x${ABC[0:4]} = _mm_movehl_ps(vtmp${N+1}x${ABC[0:4]}, vtmp${N+0}x${ABC[0:4]});  // b f j n   from row 0, 1
+          v${N+2}x${ABC[0:4]} = _mm_movelh_ps(vtmp${N+2}x${ABC[0:4]}, vtmp${N+3}x${ABC[0:4]});  // c g k o   from row 2, 3
+          v${N+3}x${ABC[0:4]} = _mm_movehl_ps(vtmp${N+3}x${ABC[0:4]}, vtmp${N+2}x${ABC[0:4]});  // d h l p   from row 2, 3
+
+        _mm_store_ps(packed_w, v0x0123);
+        $for L in range(4):
+          $for N in range(0,NR,4):
+            $if N != 0 or L != 0:
+              _mm_store_ps(packed_w + ${N+L*NR}, v${N+L}x${ABC[0:4]});
+        packed_w += ${NR*4};
+      }
+
+      // KC remainder (1..3)
+      if XNN_UNLIKELY(k != 0) {
+        assert(k >= 1);
+        assert(k <= 3);
+        $for N in range(NR):
+          __m128 v${N} = _mm_undefined_ps();
+
+        switch (k) {
+          case 1:
+            // Read blocks of 4x1
+            // a
+            // e
+            // i
+            // m
+            $for N in range(NR):
+              v${N} = _mm_load_ss(w${N});
+              w${N} += 1;
+            break;
+          case 2:
+            // Read blocks of 4x2
+            // a b
+            // e f
+            // i j
+            // m n
+            $for N in range(NR):
+              v${N} = _mm_castpd_ps(_mm_load_sd((const double*) w${N}));
+              w${N} += 2;
+            break;
+          case 3:
+          {
+            // Read blocks of 4x3
+            // a b c
+            // e f g
+            // i j k
+            // m n o
+            $for N in range(NR):
+              const __m128 v${N}lo = _mm_castpd_ps(_mm_load_sd((const double*) w${N}));
+              const __m128 v${N}hi = _mm_load_ss(w${N} + 2);
+              v${N} = _mm_movelh_ps(v${N}lo, v${N}hi);
+              w${N} += 3;
+            break;
+          }
+          default:
+            XNN_UNREACHABLE;
+        }
+
+        // Apply SR4 shuffle
+        $for N in range(0,NR,4):
+          $for L in range(1,4):
+            v${N+L} = _mm_castsi128_ps(_mm_shuffle_epi32(_mm_castps_si128(v${N+L}), _MM_SHUFFLE(${(L+3)&3}, ${(L+2)&3}, ${(L+1)&3}, ${L})));
+        // Transpose 2x2
+        $for N in range(0,NR,4):
+          const __m128 vtmp${N+0} = _mm_unpacklo_ps(v${N+0}, v${N+1});  // a e b f   from row 0, 1
+          const __m128 vtmp${N+1} = _mm_unpacklo_ps(v${N+2}, v${N+3});  // i m j n   from row 2, 3
+          const __m128 vtmp${N+2} = _mm_unpackhi_ps(v${N+0}, v${N+1});  // c g d h   from row 0, 1
+          const __m128 vtmp${N+3} = _mm_unpackhi_ps(v${N+2}, v${N+3});  // k o l p   from row 2, 3
+        // Transpose 4x4
+        $for N in range(0,NR,4):
+          v${N+0} = _mm_movelh_ps(vtmp${N+0}, vtmp${N+1});  // a e i m   from row 0, 1
+          v${N+1} = _mm_movehl_ps(vtmp${N+1}, vtmp${N+0});  // b f j n   from row 0, 1
+          v${N+2} = _mm_movelh_ps(vtmp${N+2}, vtmp${N+3});  // c g k o   from row 2, 3
+          v${N+3} = _mm_movehl_ps(vtmp${N+3}, vtmp${N+2});  // d h l p   from row 2, 3
+        _mm_store_ps(packed_w, v0);
+        $for L in range(4):
+          $for N in range(0,NR,4):
+            $if (N+L) != 0:
+              _mm_store_ps(packed_w + ${N+L*NR}, v${N+L});
+        packed_w += ${NR*4};
+      }
+      packed_w = (float*) ((uintptr_t) packed_w + extra_bytes);
+      w0 = w${NR-1};
+    }
+
+    // NC remainder (1..${NR-1})
+    if XNN_UNLIKELY(n != 0) {
+      assert(n >= 1);
+      assert(n <= ${NR-1});
+      if XNN_LIKELY(b != NULL) {
+        size_t nb = n;
+        do {
+          *packed_w++  = *b++;
+        } while (--nb != 0);
+        packed_w += (${NR} - n);
+      } else {
+        const __m128 vzero = _mm_setzero_ps();
+        _mm_store_ps(packed_w, vzero);
+        $for N in range(4, NR, 4):
+          _mm_store_ps(packed_w + ${N}, vzero);
+        packed_w += ${NR};
+      }
+
+      // NR remainder has less than ${NR} rows so last row is not loaded
+      $for N in range(1, NR-1):
+        const float* w${N} = w${N-1} + kc;
+        $if N % 2 == 0:
+          if XNN_UNPREDICTABLE(n <= ${N}) {
+            w${N} = w${N-1};
+          }
+        $else:
+          if XNN_UNPREDICTABLE(n < ${N+1}) {
+            w${N} = w${N-1};
+          }
+
+      size_t k = kc;
+      $if KBLOCK > 4:
+        // KC main loop multiple of ${KBLOCK}
+        for (; k >= ${KBLOCK}; k -= ${KBLOCK}) {
+          // Read blocks of 4x4
+          // a b c d
+          // e f g h
+          // i j k l
+          // m n o p
+          $for N in range(NR-1):
+            __m128 v${N}x0123 = _mm_loadu_ps(w${N});
+            $for K in range(4,KBLOCK,4):
+              __m128 v${N}x${ABC[K:K+4]} = _mm_loadu_ps(w${N} + ${K});
+            w${N} += ${KBLOCK};
+
+          $for K in range(0,KBLOCK,4):
+            __m128 v${NR-1}x${ABC[K:K+4]}  = _mm_undefined_ps();
+
+          // Apply SR4 shuffle
+          $for N in range(0,NR,4):
+            $for L in range(1,4):
+              $for K in range(0,KBLOCK,4):
+                $if (N+L) != (NR-1):
+                  v${N+L}x${ABC[K:K+4]} = _mm_castsi128_ps(_mm_shuffle_epi32(_mm_castps_si128(v${N+L}x${ABC[K:K+4]}), _MM_SHUFFLE(${(L+3)&3}, ${(L+2)&3}, ${(L+1)&3}, ${L})));
+
+          // Transpose 2x2
+          $for N in range(0,NR,4):
+            $for K in range(0,KBLOCK,4):
+              const __m128 vtmp${N+0}x${ABC[K:K+4]} = _mm_unpacklo_ps(v${N+0}x${ABC[K:K+4]}, v${N+1}x${ABC[K:K+4]});  // a e b f   from row 0, 1
+              const __m128 vtmp${N+1}x${ABC[K:K+4]} = _mm_unpacklo_ps(v${N+2}x${ABC[K:K+4]}, v${min(N+3, NR-2)}x${ABC[K:K+4]});  // i m j n   from row 2, 3
+              const __m128 vtmp${N+2}x${ABC[K:K+4]} = _mm_unpackhi_ps(v${N+0}x${ABC[K:K+4]}, v${N+1}x${ABC[K:K+4]});  // c g d h   from row 0, 1
+              const __m128 vtmp${N+3}x${ABC[K:K+4]} = _mm_unpackhi_ps(v${N+2}x${ABC[K:K+4]}, v${min(N+3, NR-2)}x${ABC[K:K+4]});  // k o l p   from row 2, 3
+          $if PREFETCH:
+            $for N in range(0, NR-1):
+              xnn_prefetch_to_l1((const int8_t*) w${N} + 128);
+          // Transpose 4x4
+          $for N in range(0,NR,4):
+            $for K in range(0,KBLOCK,4):
+              v${N+0}x${ABC[K:K+4]} = _mm_movelh_ps(vtmp${N+0}x${ABC[K:K+4]}, vtmp${N+1}x${ABC[K:K+4]});  // a e i m   from row 0, 1
+              v${N+1}x${ABC[K:K+4]} = _mm_movehl_ps(vtmp${N+1}x${ABC[K:K+4]}, vtmp${N+0}x${ABC[K:K+4]});  // b f j n   from row 0, 1
+              v${N+2}x${ABC[K:K+4]} = _mm_movelh_ps(vtmp${N+2}x${ABC[K:K+4]}, vtmp${N+3}x${ABC[K:K+4]});  // c g k o   from row 2, 3
+              v${N+3}x${ABC[K:K+4]} = _mm_movehl_ps(vtmp${N+3}x${ABC[K:K+4]}, vtmp${N+2}x${ABC[K:K+4]});  // d h l p   from row 2, 3
+
+          _mm_store_ps(packed_w, v0x0123);
+          $for K in range(0,KBLOCK,4):
+            $for L in range(4):
+              $for N in range(0,NR,4):
+                $if (N+(K+L)*NR) > 0:
+                  _mm_store_ps(packed_w + ${N+(K+L)*NR}, v${N+L}x${ABC[K:K+4]});
+          packed_w += ${NR*KBLOCK};
+        }
+
+      // KC multiple of 4
+      for (; k >= 4; k -= 4) {
+        // Read blocks of 4x4
+        // a b c d
+        // e f g h
+        // i j k l
+        // m n o p
+        $for N in range(NR-1):
+          __m128 v${N}x0123 = _mm_loadu_ps(w${N});
+          w${N} += 4;
+        __m128 v${NR-1}x${ABC[0:4]}  = _mm_undefined_ps();
+
+        // Apply SR4 shuffle
+        $for N in range(0,NR,4):
+          $for L in range(1,4):
+            $if (N+L) != (NR-1):
+              v${N+L}x${ABC[0:4]} = _mm_castsi128_ps(_mm_shuffle_epi32(_mm_castps_si128(v${N+L}x${ABC[0:4]}), _MM_SHUFFLE(${(L+3)&3}, ${(L+2)&3}, ${(L+1)&3}, ${L})));
+
+        // Transpose 2x2
+        $for N in range(0,NR,4):
+          const __m128 vtmp${N+0}x${ABC[0:4]} = _mm_unpacklo_ps(v${N+0}x${ABC[0:4]}, v${N+1}x${ABC[0:4]});  // a e b f   from row 0, 1
+          const __m128 vtmp${N+1}x${ABC[0:4]} = _mm_unpacklo_ps(v${N+2}x${ABC[0:4]}, v${min(N+3, NR-2)}x${ABC[0:4]});  // i m j n   from row 2, 3
+          const __m128 vtmp${N+2}x${ABC[0:4]} = _mm_unpackhi_ps(v${N+0}x${ABC[0:4]}, v${N+1}x${ABC[0:4]});  // c g d h   from row 0, 1
+          const __m128 vtmp${N+3}x${ABC[0:4]} = _mm_unpackhi_ps(v${N+2}x${ABC[0:4]}, v${min(N+3, NR-2)}x${ABC[0:4]});  // k o l p   from row 2, 3
+        $if PREFETCH:
+          $for N in range(0, NR-1):
+            xnn_prefetch_to_l1((const int8_t*) w${N} + 128);
+        // Transpose 4x4
+        $for N in range(0,NR,4):
+          v${N+0}x${ABC[0:4]} = _mm_movelh_ps(vtmp${N+0}x${ABC[0:4]}, vtmp${N+1}x${ABC[0:4]});  // a e i m   from row 0, 1
+          v${N+1}x${ABC[0:4]} = _mm_movehl_ps(vtmp${N+1}x${ABC[0:4]}, vtmp${N+0}x${ABC[0:4]});  // b f j n   from row 0, 1
+          v${N+2}x${ABC[0:4]} = _mm_movelh_ps(vtmp${N+2}x${ABC[0:4]}, vtmp${N+3}x${ABC[0:4]});  // c g k o   from row 2, 3
+          v${N+3}x${ABC[0:4]} = _mm_movehl_ps(vtmp${N+3}x${ABC[0:4]}, vtmp${N+2}x${ABC[0:4]});  // d h l p   from row 2, 3
+
+        _mm_store_ps(packed_w, v0x0123);
+        $for K in range(4):
+          $for N in range(0,NR,4):
+            $if N != 0 or K != 0:
+              _mm_store_ps(packed_w + ${N+K*NR}, v${N+K}x${ABC[0:4]});
+        packed_w += ${NR*4};
+      }
+
+      // KC remainder (1..3)
+      if XNN_UNLIKELY(k != 0) {
+        assert(k >= 1);
+        assert(k <= 3);
+        $for N in range(NR):
+          __m128 v${N} = _mm_undefined_ps();
+
+        switch (k) {
+          case 1:
+            // Read blocks of 4x1
+            // a
+            // e
+            // i
+            // m
+            $for N in range(NR-1):
+              v${N} = _mm_load_ss(w${N});
+              w${N} += 1;
+            break;
+          case 2:
+            // Read blocks of 4x2
+            // a b
+            // e f
+            // i j
+            // m n
+            $for N in range(NR-1):
+              v${N} = _mm_castpd_ps(_mm_load_sd((const double*) w${N}));
+              w${N} += 2;
+            break;
+          case 3:
+          {
+            // Read blocks of 4x3
+            // a b c
+            // e f g
+            // i j k
+            // m n o
+            $for N in range(NR-1):
+              const __m128 v${N}lo = _mm_castpd_ps(_mm_load_sd((const double*) w${N}));
+              const __m128 v${N}hi = _mm_load_ss(w${N} + 2);
+              v${N} = _mm_movelh_ps(v${N}lo, v${N}hi);
+              w${N} += 3;
+            break;
+          }
+          default:
+            XNN_UNREACHABLE;
+        }
+
+        // Apply SR4 shuffle
+        $for N in range(0,NR,4):
+          $for L in range(1,4):
+            $if (N+L) != (NR-1):
+              v${N+L} = _mm_castsi128_ps(_mm_shuffle_epi32(_mm_castps_si128(v${N+L}), _MM_SHUFFLE(${(L+3)&3}, ${(L+2)&3}, ${(L+1)&3}, ${L})));
+        // Transpose 2x2
+        $for N in range(0,NR,4):
+          const __m128 vtmp${N+0} = _mm_unpacklo_ps(v${N+0}, v${N+1});  // a e b f   from row 0, 1
+          const __m128 vtmp${N+1} = _mm_unpacklo_ps(v${N+2}, v${min(N+3, NR-2)});  // i m j n   from row 2, 3
+          const __m128 vtmp${N+2} = _mm_unpackhi_ps(v${N+0}, v${N+1});  // c g d h   from row 0, 1
+          const __m128 vtmp${N+3} = _mm_unpackhi_ps(v${N+2}, v${min(N+3, NR-2)});  // k o l p   from row 2, 3
+        // Transpose 4x4
+        $for N in range(0,NR,4):
+          v${N+0} = _mm_movelh_ps(vtmp${N+0}, vtmp${N+1});  // a e i m   from row 0, 1
+          v${N+1} = _mm_movehl_ps(vtmp${N+1}, vtmp${N+0});  // b f j n   from row 0, 1
+          v${N+2} = _mm_movelh_ps(vtmp${N+2}, vtmp${N+3});  // c g k o   from row 2, 3
+          v${N+3} = _mm_movehl_ps(vtmp${N+3}, vtmp${N+2});  // d h l p   from row 2, 3
+        _mm_store_ps(packed_w, v0);
+        $for L in range(4):
+          $for N in range(0,NR,4):
+            $if (N+L) != 0:
+              _mm_store_ps(packed_w + ${N+L*NR}, v${N+L});
+        packed_w += ${NR*4};
+      }
+      packed_w = (float*) ((uintptr_t) packed_w + extra_bytes);
+    }
+    weights += nc * kc;
+  } while (--g != 0);
+}

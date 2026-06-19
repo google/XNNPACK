@@ -1,0 +1,179 @@
+// Copyright 2022 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert BATCH_TILE % 8 == 0
+$assert BATCH_TILE >= 8
+$SIMD_TILE = BATCH_TILE // 8
+$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+#include <arm_neon.h>
+#include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
+
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/raddstoreexpminusmax.h"
+
+
+void xnn_f16_raddstoreexpminusmax_ukernel__neonfp16arith_rr2_p2_u${BATCH_TILE}${"" if ACCUMULATORS == 1 else "_acc%d" % ACCUMULATORS}(
+    size_t batch,
+    const xnn_float16* input,
+    const xnn_float16* max,
+    xnn_float16* output,
+    float* sum,
+    const void* params) XNN_OOB_READS
+{
+  assert(batch != 0);
+  assert(batch % sizeof(uint16_t) == 0);
+  assert(input != NULL);
+  assert(max != NULL);
+  assert(output != NULL);
+  assert(sum != NULL);
+
+  const float16x8_t vlog2e = vreinterpretq_f16_u16(vmovq_n_u16(UINT16_C(0x3DC5)));  // 0x1.714p+0h
+  const float16x8_t vmagic_bias = vreinterpretq_f16_u16(vmovq_n_u16(UINT16_C(0x660F)));  // 0x1.83Cp+10h
+  const float16x8_t vminus_ln2_hi = vreinterpretq_f16_u16(vmovq_n_u16(UINT16_C(0xB98C)));  // -0x1.630p-1h
+  const float16x8_t vminus_ln2_lo = vreinterpretq_f16_u16(vmovq_n_u16(UINT16_C(0x0AF4)));  // 0x1.BD0p-13h
+  const float16x8_t vc2 = vreinterpretq_f16_u16(vmovq_n_u16(UINT16_C(0x37F9)));  // 0x1.FE4p-2h
+  const float16x8_t vc1 = vreinterpretq_f16_u16(vmovq_n_u16(UINT16_C(0x3C0E)));  // 0x1.038p+0h
+  const float16x8_t vdenorm_cutoff = vreinterpretq_f16_u16(vmovq_n_u16(UINT16_C(0xC8DA)));  // -0x1.368p+3h
+
+  XNN_FORCE_REALIZATION(vlog2e);
+  XNN_FORCE_REALIZATION(vmagic_bias);
+  XNN_FORCE_REALIZATION(vminus_ln2_hi);
+  XNN_FORCE_REALIZATION(vminus_ln2_lo);
+  XNN_FORCE_REALIZATION(vc2);
+  XNN_FORCE_REALIZATION(vc1);
+  XNN_FORCE_REALIZATION(vdenorm_cutoff);
+
+  const float16x8_t vi_max = vreinterpretq_f16_u16(vld1q_dup_u16((const uint16_t*)max));
+
+  const uint16_t* i = (const uint16_t*) input;
+  uint16_t* o = (uint16_t*) output;
+  $for K in range(ACCUMULATORS):
+    float32x4_t vacc${K}_0 = vdupq_n_f32(0.0f);
+    float32x4_t vacc${K}_1 = vdupq_n_f32(0.0f);
+  $if BATCH_TILE > 8:
+    for (; batch >= ${BATCH_TILE} * sizeof(uint16_t); batch -= ${BATCH_TILE} * sizeof(uint16_t)) {
+      $for N in range(SIMD_TILE):
+        const float16x8_t vi${ABC[N]} = vreinterpretq_f16_u16(vld1q_u16(i)); i += 8;
+
+      $for N in range(SIMD_TILE):
+        const float16x8_t vx${ABC[N]} = vsubq_f16(vi${ABC[N]}, vi_max);
+
+      $for N in range(SIMD_TILE):
+        float16x8_t vn${ABC[N]} = vfmaq_f16(vmagic_bias, vx${ABC[N]}, vlog2e);
+
+      $for N in range(SIMD_TILE):
+        const float16x8_t vs${ABC[N]} = vreinterpretq_f16_s16(vshlq_n_s16(vreinterpretq_s16_f16(vn${ABC[N]}), 10));
+
+      $for N in range(SIMD_TILE):
+        vn${ABC[N]} = vsubq_f16(vn${ABC[N]}, vmagic_bias);
+
+      $for N in range(SIMD_TILE):
+        float16x8_t vt${ABC[N]} = vfmaq_f16(vx${ABC[N]}, vn${ABC[N]}, vminus_ln2_hi);
+
+      $for N in range(SIMD_TILE):
+        vt${ABC[N]} = vfmaq_f16(vt${ABC[N]}, vn${ABC[N]}, vminus_ln2_lo);
+
+      $for N in range(SIMD_TILE):
+        const float16x8_t vp${ABC[N]} = vfmaq_f16(vc1, vc2, vt${ABC[N]});
+
+      $for N in range(SIMD_TILE):
+        vt${ABC[N]} = vmulq_f16(vt${ABC[N]}, vs${ABC[N]});
+
+      $for N in range(SIMD_TILE):
+        float16x8_t vf${ABC[N]} = vfmaq_f16(vs${ABC[N]}, vp${ABC[N]}, vt${ABC[N]});
+        const uint16x8_t vm${ABC[N]} = vcltq_f16(vx${ABC[N]}, vdenorm_cutoff);
+
+      $for N in range(SIMD_TILE):
+        vf${ABC[N]} = vreinterpretq_f16_u16(vbicq_u16(vreinterpretq_u16_f16(vf${ABC[N]}), vm${ABC[N]}));
+
+      $for N in range(SIMD_TILE):
+        vst1q_u16(o, vreinterpretq_u16_f16(vf${ABC[N]})); o += 8;
+
+      $for N in range(SIMD_TILE):
+        vacc${N % ACCUMULATORS}_0 = vaddq_f32(vacc${N % ACCUMULATORS}_0, vcvt_f32_f16(vget_low_f16(vf${ABC[N]})));
+        vacc${N % ACCUMULATORS}_1 = vaddq_f32(vacc${N % ACCUMULATORS}_1, vcvt_f32_f16(vget_high_f16(vf${ABC[N]})));
+    }
+
+    $if ACCUMULATORS > 1:
+      $ACC_SLICE = 1
+      $while ACC_SLICE < ACCUMULATORS:
+        $for A in range(0, ACCUMULATORS, ACC_SLICE * 2):
+          $if A + ACC_SLICE < ACCUMULATORS:
+            vacc${A}_0 = vaddq_f32(vacc${A}_0, vacc${A + ACC_SLICE}_0);
+            vacc${A}_1 = vaddq_f32(vacc${A}_1, vacc${A + ACC_SLICE}_1);
+        $ACC_SLICE *= 2
+
+  for (; batch >= 8 * sizeof(uint16_t); batch -= 8 * sizeof(uint16_t)) {
+    const float16x8_t vi = vreinterpretq_f16_u16(vld1q_u16(i)); i += 8;
+
+    const float16x8_t vx = vsubq_f16(vi, vi_max);
+
+    float16x8_t vn = vfmaq_f16(vmagic_bias, vx, vlog2e);
+    const float16x8_t vs = vreinterpretq_f16_s16(vshlq_n_s16(vreinterpretq_s16_f16(vn), 10));
+    vn = vsubq_f16(vn, vmagic_bias);
+
+    float16x8_t vt = vfmaq_f16(vx, vn, vminus_ln2_hi);
+    vt = vfmaq_f16(vt, vn, vminus_ln2_lo);
+
+    const float16x8_t vp = vfmaq_f16(vc1, vc2, vt);
+    vt = vmulq_f16(vt, vs);
+
+    float16x8_t vf = vfmaq_f16(vs, vp, vt);
+    const uint16x8_t vm = vcltq_f16(vx, vdenorm_cutoff);
+    vf = vreinterpretq_f16_u16(vbicq_u16(vreinterpretq_u16_f16(vf), vm));
+
+    vst1q_u16(o, vreinterpretq_u16_f16(vf)); o += 8;
+
+    vacc0_0 = vaddq_f32(vacc0_0, vcvt_f32_f16(vget_low_f16(vf)));
+    vacc0_1 = vaddq_f32(vacc0_1, vcvt_f32_f16(vget_high_f16(vf)));
+  }
+  vacc0_0 = vaddq_f32(vacc0_0, vacc0_1);
+  float32x2_t vacc_lo = vadd_f32(vget_low_f32(vacc0_0), vget_high_f32(vacc0_0));
+
+  if (batch != 0) {
+    assert(batch >= 1 * sizeof(uint16_t));
+    assert(batch <= 7 * sizeof(uint16_t));
+    const float16x8_t vi = vreinterpretq_f16_u16(vld1q_u16(i));
+
+    const float16x8_t vx = vsubq_f16(vi, vi_max);
+
+    float16x8_t vn = vfmaq_f16(vmagic_bias, vx, vlog2e);
+    const float16x8_t vs = vreinterpretq_f16_s16(vshlq_n_s16(vreinterpretq_s16_f16(vn), 10));
+    vn = vsubq_f16(vn, vmagic_bias);
+
+    float16x8_t vt = vfmaq_f16(vx, vn, vminus_ln2_hi);
+    vt = vfmaq_f16(vt, vn, vminus_ln2_lo);
+
+    const float16x8_t vp = vfmaq_f16(vc1, vc2, vt);
+    vt = vmulq_f16(vt, vs);
+
+    float16x8_t vf = vfmaq_f16(vs, vp, vt);
+    const uint16x8_t vm = vcltq_f16(vx, vdenorm_cutoff);
+    vf = vreinterpretq_f16_u16(vbicq_u16(vreinterpretq_u16_f16(vf), vm));
+
+    float16x4_t vf_lo = vget_low_f16(vf);
+    if (batch & (4 * sizeof(uint16_t))) {
+      vst1_u16(o, vreinterpret_u16_f16(vf_lo)); o += 4;
+      float32x4_t vf_32 = vcvt_f32_f16(vf_lo);
+      vacc_lo = vadd_f32(vacc_lo, vget_low_f32(vf_32));
+      vacc_lo = vadd_f32(vacc_lo, vget_high_f32(vf_32));
+      vf_lo = vget_high_f16(vf);
+    }
+    if (batch & (2 * sizeof(uint16_t))) {
+      vst1_lane_u32((void*) o, vreinterpret_u32_f16(vf_lo), 0); o += 2;
+      vacc_lo = vadd_f32(vacc_lo, vget_low_f32(vcvt_f32_f16(vf_lo)));
+      vf_lo = vext_f16(vf_lo, vf_lo, 2);
+    }
+    if (batch & (1 * sizeof(uint16_t))) {
+      vst1_lane_u16(o, vreinterpret_u16_f16(vf_lo), 0);
+      vacc_lo = vadd_f32(vacc_lo, vset_lane_f32(0.0f, vget_low_f32(vcvt_f32_f16(vf_lo)), 1));
+    }
+  }
+  vacc_lo = vpadd_f32(vacc_lo, vacc_lo);
+  vst1_lane_f32(sum, vacc_lo, 0);
+}

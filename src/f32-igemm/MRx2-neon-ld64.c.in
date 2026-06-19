@@ -1,0 +1,136 @@
+// Copyright 2019 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert NR == 2
+#include <arm_neon.h>
+#include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
+
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/igemm.h"
+#include "src/xnnpack/microparams.h"
+
+
+void xnn_f32_igemm_minmax_ukernel_${MR}x${NR}__${"aarch64_neonfma" if FMA else "neon"}_lane_ld64(
+    size_t mr,
+    size_t nc,
+    size_t kc,
+    size_t ks,
+    const float** restrict a,
+    const float* restrict w,
+    float* restrict c,
+    size_t cm_stride,
+    size_t cn_stride,
+    size_t a_offset,
+    const float* zero,
+    const struct xnn_f32_minmax_params* restrict params)
+{
+  assert(mr != 0);
+  assert(mr <= ${MR});
+  assert(nc != 0);
+  assert(kc != 0);
+  assert(kc % sizeof(float) == 0);
+  assert(ks != 0);
+  assert(ks % (${MR} * sizeof(void*)) == 0);
+  assert(a_offset % sizeof(float) == 0);
+  assert(a != NULL);
+  assert(w != NULL);
+  assert(c != NULL);
+
+  float* c0 = c;
+  $for M in range(1, MR):
+    float* c${M} = (float*) ((uintptr_t) c${M-1} + cm_stride);
+    $if M % 2 == 0:
+      if XNN_UNPREDICTABLE(mr <= ${M}) {
+        c${M} = c${M-1};
+      }
+    $elif M + 1 == MR:
+      if XNN_UNPREDICTABLE(mr != ${M+1}) {
+        c${M} = c${M-1};
+      }
+    $else:
+      if XNN_UNPREDICTABLE(mr < ${M+1}) {
+        c${M} = c${M-1};
+      }
+
+  do {
+    float32x2_t vacc0x01 = vld1_f32(w); w += 2;
+    $for M in range(1, MR):
+      float32x2_t vacc${M}x01 = vacc0x01;
+
+    size_t p = ks;
+    do {
+      $for M in range(MR):
+        const float* restrict a${M} = a[${M}];
+        assert(a${M} != NULL);
+        if XNN_UNPREDICTABLE(a${M} != zero) {
+          a${M} = (const float*) ((uintptr_t) a${M} + a_offset);
+        }
+      a += ${MR};
+
+      size_t k = kc;
+      for (; k >= 2 * sizeof(float); k -= 2 * sizeof(float)) {
+        $for M in range(MR):
+          const float32x2_t va${M} = vld1_f32(a${M}); a${M} += 2;
+
+        $for L in range(2):
+          const float32x2_t vb01c${L} = vld1_f32(w); w += 2;
+
+          $if FMA:
+            #if XNN_ARCH_ARM64
+              $for M in range(MR):
+                vacc${M}x01 = vfma_lane_f32(vacc${M}x01, vb01c${L}, va${M}, ${L});
+            #else
+              $for M in range(MR):
+                const float32x2_t va${M}c${L} = vdup_lane_f32(va${M}, ${L});
+              $for M in range(MR):
+                vacc${M}x01 = vfma_f32(vacc${M}x01, va${M}c${L}, vb01c${L});
+            #endif
+          $else:
+            $for M in range(MR):
+              vacc${M}x01 = vmla_lane_f32(vacc${M}x01, vb01c${L}, va${M}, ${L});
+      }
+      if XNN_UNLIKELY(k != 0) {
+        $for M in range(MR):
+          const float32x2_t va${M} = vld1_dup_f32(a${M});
+
+        const float32x2_t vb01 = vld1_f32(w); w += 2;
+
+        $for M in range(MR):
+          $if FMA:
+            vacc${M}x01 = vfma_f32(vacc${M}x01, va${M}, vb01);
+          $else:
+            vacc${M}x01 = vmla_f32(vacc${M}x01, va${M}, vb01);
+      }
+      p -= ${MR} * sizeof(void*);
+    } while (p != 0);
+
+    const float32x2_t vmax = vdup_n_f32(params->scalar.max);
+    $for N in range(0, NR, 4):
+      $for M in range(MR):
+        vacc${M}x01 = vmin_f32(vacc${M}x01, vmax);
+
+    const float32x2_t vmin = vdup_n_f32(params->scalar.min);
+    $for N in range(0, NR, 4):
+      $for M in range(MR):
+        vacc${M}x01 = vmax_f32(vacc${M}x01, vmin);
+
+    if XNN_LIKELY(nc >= ${NR}) {
+      $for M in reversed(range(MR)):
+        vst1_f32(c${M}, vacc${M}x01);
+        c${M} = (float*) ((uintptr_t) c${M} + cn_stride);
+
+      a = (const float**restrict) ((uintptr_t) a - ks);
+      nc -= ${NR};
+    } else {
+      assert(nc == 1);
+      $for M in reversed(range(MR)):
+        vst1_lane_f32(c${M}, vacc${M}x01, 0);
+
+      nc = 0;
+    }
+  } while (nc != 0);
+}

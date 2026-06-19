@@ -1,0 +1,2161 @@
+# Copyright 2020 Google LLC
+#
+# This source code is licensed under the BSD-style license found in the
+# LICENSE file in the root directory of this source tree.
+#
+# Description:
+#   XNNPACK - optimized floating-point neural network operators library
+
+load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
+load("@bazel_skylib//lib:selects.bzl", "selects")  # buildifier: disable=out-of-order-load
+load("@rules_python//python:py_binary.bzl", "py_binary")
+load(
+    ":build_defs.bzl",
+    "xnnpack_cc_library",
+    "xnnpack_cxx_library",
+    "xnnpack_if_kleidiai_enabled",
+    "xnnpack_min_size_copts",
+    "xnnpack_select_if",
+    "xnnpack_source_list_file",
+    "xnnpack_transitive_source_list",
+    "xnnpack_visibility",
+)
+load(
+    ":build_params.bzl",
+    "xnnpack_archs",
+    "xnnpack_cc_library_for_arch",
+    "xnnpack_cond_for_arch",
+    "xnnpack_list_sum",
+    "xnnpack_simd_f16_archs",
+    "xnnpack_simd_f32_archs",
+    "xnnpack_simd_s16_archs",
+    "xnnpack_simd_s32_archs",
+    "xnnpack_simd_s8_archs",
+    "xnnpack_simd_u8_archs",
+)
+load(
+    "//gen:microkernels.bzl",
+    "all_srcs_for_arch",
+    "non_prod_asm_srcs_for_arch",
+    "non_prod_c_srcs_for_arch",
+    "prod_asm_srcs_for_arch",
+    "prod_c_srcs_for_arch",
+)
+load(
+    ":build_srcs.bzl",
+    "LOGGING_SRCS",
+    "MICROKERNEL_DEFS",
+    "MICROKERNEL_HDRS",
+    "OPERATOR_SRCS",
+    "SUBGRAPH_SRCS",
+    "TABLE_SRCS",
+)
+
+package(default_visibility = ["//:__subpackages__"])
+
+licenses(["notice"])
+
+exports_files(["LICENSE"] + glob(["**/*.h"]))
+
+exports_files(["preamble.js.lds"])
+
+MICROKERNEL_DEPS = [
+    ":assembly",
+    ":common",
+    ":intrinsics_polyfill",
+    ":math",
+    ":microkernel_hdrs",
+    ":microparams_h",
+    ":microparams_init",
+    ":prefetch",
+    ":sanitizers",
+    ":simd_hdrs",
+    ":tables",
+    ":unaligned",
+    "//src/configs:hardware_config",
+    ":logging",
+]
+
+SIMD_HEADERS = [
+    "src/xnnpack/simd/f32-avx-base.h",
+    "src/xnnpack/simd/f32-sse2-base.h",
+    "src/xnnpack/simd/f32-wasmsimd-base.h",
+] + [
+    "src/xnnpack/simd/f32-" + arch + ".h"
+    for arch in xnnpack_simd_f32_archs()
+] + [
+    "src/xnnpack/simd/f16-" + arch + ".h"
+    for arch in xnnpack_simd_f16_archs()
+] + [
+    "src/xnnpack/simd/s16-" + arch + ".h"
+    for arch in xnnpack_simd_s16_archs()
+] + [
+    "src/xnnpack/simd/s32-" + arch + ".h"
+    for arch in xnnpack_simd_s32_archs()
+] + [
+    "src/xnnpack/simd/s8-" + arch + ".h"
+    for arch in xnnpack_simd_s8_archs()
+] + [
+    "src/xnnpack/simd/u8-" + arch + ".h"
+    for arch in xnnpack_simd_u8_archs()
+]
+
+exports_files(SIMD_HEADERS)
+
+ALL_MICROKERNEL_SRCS = xnnpack_list_sum(
+    [all_srcs_for_arch(arch) for arch in xnnpack_archs()],
+    [],
+)
+
+filegroup(
+    name = "microkernel_source_files",
+    data = ALL_MICROKERNEL_SRCS + ["src/microparams-init.c"],
+    visibility = xnnpack_visibility(),
+)
+
+filegroup(
+    name = "microkernel_header_files",
+    data = MICROKERNEL_HDRS + ["src/xnnpack/microparams.h"],
+    visibility = xnnpack_visibility(),
+)
+
+# Collection of internal microkernel related headers that declares all the microkernel functions.
+xnnpack_cc_library(
+    name = "microkernel_hdrs",
+    hdrs = MICROKERNEL_HDRS,
+    deps = [
+        ":common",
+        ":math",
+        ":microkernel_defs",
+        ":microparams_h",
+        "//src/configs:config_hdrs",
+    ],
+)
+
+xnnpack_cc_library(
+    name = "xnnpack_h",
+    hdrs = [
+        "include/experimental.h",
+        "include/xnnpack.h",
+    ],
+    deps = [
+        ":fingerprint_id",
+        "@pthreadpool",
+    ],
+)
+
+xnnpack_cc_library(
+    name = "intrinsics_polyfill",
+    hdrs = ["src/xnnpack/intrinsics-polyfill.h"],
+    deps = [
+        ":common",
+        ":unaligned",
+    ],
+)
+
+xnnpack_cc_library(
+    name = "microkernel_defs",
+    hdrs = MICROKERNEL_DEFS,
+    deps = [
+        ":common",
+        ":math",
+    ],
+)
+
+xnnpack_cc_library(
+    name = "simd_hdrs",
+    hdrs = SIMD_HEADERS,
+    deps = [
+        ":common",
+        ":intrinsics_polyfill",
+        ":math",
+        ":unaligned",
+    ],
+)
+
+xnnpack_cc_library(
+    name = "common",
+    hdrs = ["src/xnnpack/common.h"],
+)
+
+xnnpack_cc_library(
+    name = "init_once",
+    srcs = ["src/xnnpack/init-once.c"],
+    hdrs = ["src/xnnpack/init-once.h"],
+    deps = [":common"],
+)
+
+xnnpack_cc_library(
+    name = "microparams_h",
+    hdrs = [
+        "src/xnnpack/microparams.h",
+    ],
+    deps = [
+        ":common",
+        ":math",
+        ":xnnpack_h",
+    ],
+)
+
+xnnpack_cc_library(
+    name = "microfnptr_h",
+    hdrs = [
+        "src/xnnpack/microfnptr.h",
+    ],
+    deps = [
+        ":common",
+        ":math",
+        ":microparams_h",
+        ":xnnpack_h",
+    ],
+)
+
+xnnpack_cc_library(
+    name = "params",
+    srcs = ["src/params.c"],
+    hdrs = [
+        "src/xnnpack/params.h",
+    ],
+    deps = [
+        ":common",
+        ":xnnpack_h",
+    ],
+)
+
+xnnpack_cc_library(
+    name = "fp16",
+    hdrs = ["src/xnnpack/fp16.h"],
+)
+
+xnnpack_cc_library(
+    name = "math",
+    hdrs = ["src/xnnpack/math.h"],
+    deps = [
+        ":common",
+        ":fp16",
+    ],
+)
+
+xnnpack_cc_library(
+    name = "prefetch",
+    hdrs = ["src/xnnpack/prefetch.h"],
+    deps = [
+        ":common",
+    ],
+)
+
+xnnpack_cc_library(
+    name = "unaligned",
+    hdrs = ["src/xnnpack/unaligned.h"],
+    deps = [
+        ":common",
+    ],
+)
+
+xnnpack_cc_library(
+    name = "microparams_init",
+    srcs = ["src/microparams-init.c"],
+    hdrs = ["src/xnnpack/microparams-init.h"],
+    deps = [
+        ":common",
+        ":math",
+        ":microparams_h",
+        ":requantization",
+        ":unaligned",
+        ":xnnpack_h",
+    ],
+)
+
+xnnpack_cc_library(
+    name = "node_type",
+    hdrs = [
+        "src/xnnpack/node-type.h",
+        "src/xnnpack/node-type-defs.inc",
+    ],
+    deps = [
+        ":common",
+    ],
+)
+
+xnnpack_cc_library(
+    name = "allocation_type",
+    hdrs = [
+        "src/xnnpack/allocation-type.h",
+        "src/xnnpack/allocation-type-defs.inc",
+    ],
+    deps = [
+        ":common",
+    ],
+)
+
+xnnpack_cc_library(
+    name = "operator_type",
+    hdrs = [
+        "src/xnnpack/operator-type.h",
+        "src/xnnpack/operator-type-defs.inc",
+    ],
+    deps = [
+        ":common",
+    ],
+)
+
+xnnpack_cc_library(
+    name = "microkernel_type",
+    hdrs = [
+        "src/xnnpack/microkernel-type.h",
+        "src/xnnpack/microkernel-type-defs.inc",
+    ],
+    deps = [
+        ":common",
+    ],
+)
+
+xnnpack_cc_library(
+    name = "internal",
+    hdrs = ["src/xnnpack/internal.h"],
+    deps = [
+        ":math",
+        ":subgraph_h",
+        ":xnnpack_h",
+        "//src/configs:config_hdrs",
+        "@pthreadpool",
+    ],
+)
+
+xnnpack_cc_library(
+    name = "allocator",
+    srcs = [
+        "src/allocator.c",
+    ],
+    hdrs = ["src/xnnpack/allocator.h"],
+    deps = [
+        ":common",
+        ":params",
+        ":xnnpack_h",
+    ],
+)
+
+xnnpack_cc_library(
+    name = "aligned_allocator",
+    hdrs = [
+        "src/xnnpack/aligned-allocator.h",
+    ],
+)
+
+# TODO: This should be test_only = True.
+xnnpack_cxx_library(
+    name = "buffer",
+    hdrs = ["src/xnnpack/buffer.h"],
+    deps = [
+        ":common",
+        ":datatype",
+        ":logging",
+        ":math",
+        ":reference_ukernels",
+        ":xnnpack_h",
+    ],
+)
+
+xnnpack_cc_library(
+    name = "isa_checks",
+    hdrs = [
+        "src/xnnpack/isa-checks.h",
+    ],
+    deps = [
+        ":common",
+        "//src/configs:hardware_config",
+    ],
+)
+
+xnnpack_cc_library(
+    name = "memory",
+    srcs = [
+        "src/memory.c",
+    ],
+    hdrs = ["src/xnnpack/memory.h"],
+    # Override using xnnpack_gcc_std_copts, as it defines -std=c99, which then makes MAP_ANONYMOUS
+    # undefined
+    gcc_copts = [],
+    deps = [
+        ":common",
+        ":init_once",
+        ":logging",
+        ":math",
+        ":xnnpack_h",
+    ],
+)
+
+xnnpack_cc_library(
+    name = "quantization",
+    hdrs = ["src/xnnpack/quantization.h"],
+    deps = [
+        ":math",
+        ":microparams_h",
+    ],
+)
+
+xnnpack_cc_library(
+    name = "requantization",
+    hdrs = ["src/xnnpack/requantization.h"],
+    deps = [
+        ":common",
+        ":math",
+        ":microparams_h",
+    ],
+)
+
+xnnpack_cc_library(
+    name = "requantization_stubs",
+    hdrs = ["src/xnnpack/requantization-stubs.h"],
+)
+
+xnnpack_cc_library(
+    name = "tables",
+    srcs = TABLE_SRCS,
+    deps = [
+        ":common",
+    ],
+)
+
+xnnpack_cc_library(
+    name = "assembly",
+    textual_hdrs = ["src/xnnpack/assembly.h"],
+)
+
+# Generate the prod/all microkernel libraries for each architecture.
+[
+    [
+        xnnpack_cc_library_for_arch(
+            name = arch + "_prod_microkernels",
+            srcs = prod_c_srcs_for_arch(arch) + xnnpack_select_if(
+                ":assembly_enabled",
+                prod_asm_srcs_for_arch(arch),
+            ),
+            arch = arch,
+            # Internal build flag.
+            tags = ["nobuilder"],
+            deps = MICROKERNEL_DEPS,
+        ),
+        xnnpack_cc_library_for_arch(
+            name = arch + "_all_microkernels",
+            srcs = non_prod_c_srcs_for_arch(arch) + xnnpack_select_if(
+                ":assembly_enabled",
+                non_prod_asm_srcs_for_arch(arch),
+            ),
+            arch = arch,
+            tags = ["nobuilder"],
+            deps = MICROKERNEL_DEPS + [":" + arch + "_prod_microkernels"],
+        ),
+    ]
+    for arch in xnnpack_archs()
+]
+
+xnnpack_cc_library(
+    name = "log_level_default",
+    defines = select({
+        # No logging in optimized mode
+        ":optimized_build": ["XNN_LOG_LEVEL=0"],
+        # Warning logging in debug mode.  Use `--define=xnn_log_level=debug` for full logging.
+        ":debug_build": ["XNN_LOG_LEVEL=3"],
+        # Error-only logging in default (fastbuild) mode
+        "//conditions:default": ["XNN_LOG_LEVEL=2"],
+    }),
+)
+
+xnnpack_cc_library(
+    name = "logging",
+    srcs = LOGGING_SRCS,
+    hdrs = ["src/xnnpack/log.h"],
+    copts = select({
+        ":debug_build": [],
+        "//conditions:default": xnnpack_min_size_copts(),
+    }) + select({
+        ":xnn_log_to_stdio_explicit_true": ["-DXNN_LOG_TO_STDIO=1"],
+        "//conditions:default": [],
+    }),
+    defines = select({
+        ":xnn_log_level_explicit_none": ["XNN_LOG_LEVEL=0"],
+        ":xnn_log_level_explicit_fatal": ["XNN_LOG_LEVEL=1"],
+        ":xnn_log_level_explicit_error": ["XNN_LOG_LEVEL=2"],
+        ":xnn_log_level_explicit_warning": ["XNN_LOG_LEVEL=3"],
+        ":xnn_log_level_explicit_info": ["XNN_LOG_LEVEL=4"],
+        ":xnn_log_level_explicit_debug": ["XNN_LOG_LEVEL=5"],
+        "//conditions:default": [],
+    }),
+    visibility = xnnpack_visibility(),
+    deps = select({
+        ":xnn_log_level_explicit_none": [],
+        ":xnn_log_level_explicit_fatal": [],
+        ":xnn_log_level_explicit_error": [],
+        ":xnn_log_level_explicit_warning": [],
+        ":xnn_log_level_explicit_info": [],
+        ":xnn_log_level_explicit_debug": [],
+        "//conditions:default": [":log_level_default"],
+    }) + [
+        ":allocation_type",
+        ":common",
+        ":microkernel_type",
+        ":node_type",
+        ":operator_type",
+        ":xnnpack_h",
+    ],
+)
+
+[
+    xnnpack_cc_library(
+        name = lib + "_microkernels",
+        deps = xnnpack_list_sum(
+            [
+                xnnpack_select_if(
+                    xnnpack_cond_for_arch(arch),
+                    [":" + arch + "_" + lib + "_microkernels"],
+                )
+                for arch in xnnpack_archs()
+            ],
+            [],
+        ),
+    )
+    for lib in ("prod", "all")
+]
+
+xnnpack_cc_library(
+    name = "indirection",
+    srcs = ["src/indirection.c"],
+    hdrs = ["src/xnnpack/indirection.h"],
+    deps = [
+        ":common",
+        ":math",
+        ":microparams_h",
+        ":operator_h",
+        ":xnnpack_h",
+    ],
+)
+
+xnnpack_cxx_library(
+    name = "pack_lh",
+    srcs = ["src/pack-lh.cc"],
+    deps = [
+        ":common",
+        ":logging",
+        ":math",
+        ":microfnptr_h",
+        ":microkernel_hdrs",
+        ":microparams_h",
+        ":quantization",
+        "//src/configs:config_hdrs",
+        "//src/configs:hardware_config",
+    ] + xnnpack_if_kleidiai_enabled([
+        "@KleidiAI//kai/ukernels/matmul",
+    ]),
+)
+
+xnnpack_cxx_library(
+    name = "packing",
+    srcs = ["src/reference/packing.cc"],
+    hdrs = ["src/xnnpack/pack.h"],
+    deps = [
+        ":allocator",
+        ":common",
+        ":logging",
+        ":math",
+        ":microfnptr_h",
+        ":microparams_h",
+        ":microparams_init",
+        ":unaligned",
+        ":xnnpack_h",
+        "//src/configs:config_hdrs",
+    ] + xnnpack_if_kleidiai_enabled([
+        "@KleidiAI//kai/ukernels/matmul",
+    ]),
+)
+
+py_binary(
+    name = "generate_build_identifier_py",
+    srcs = ["scripts/generate-build-identifier.py"],
+    main = "scripts/generate-build-identifier.py",
+    tags = ["notap"],  # This should only be built as part of the related genrule.
+    target_compatible_with = select({
+        "//build_config:emscripten": ["@platforms//:incompatible"],
+        "//conditions:default": [],
+    }),
+)
+
+# This target gathers the transitive sources from its deps and adds them to the
+# srcs attribute.
+xnnpack_transitive_source_list(
+    name = "build_identifier_ukernel_srcs",
+    srcs = ["src/reference/packing.cc"],
+    deps = [":prod_microkernels"],
+)
+
+# Windows builds fail on the generate_build_identifier genrule because the
+# command line is too long when expanding the source file paths to feed to the
+# Python generation script. To work around this, we write those files to a
+# single file that we.
+#
+# This is what the below command does. It ONLY exposes the list file as an output.
+#
+# See the next genrule comment for the rest of the explanation.
+xnnpack_source_list_file(
+    name = "build_identifier_ukernel_srcs_list",
+    srcs = [":build_identifier_ukernel_srcs"],
+)
+
+# When the python script gets executed, the files it has access to are limited
+# to what is explicitely requested in the `srcs` attribute. We add the "list"
+# and the source paths to the sources to make them available to the Python
+# script and only expand the list file path to keep the command line short
+# enough to avoid having Windows break down.
+#
+# I have not found a way to transitively pull the source files from the "list"
+# target and make them available from the Python script without adding them to
+# the `srcs` attribute (making them expanded in the "$(SRCS)" variable), thus
+# the repetition.
+genrule(
+    name = "generate_build_identifier",
+    srcs = [
+        ":build_identifier_ukernel_srcs_list",
+        ":build_identifier_ukernel_srcs",
+    ],
+    outs = ["src/build_identifier.c"],
+    cmd = "$(location generate_build_identifier_py) --output $@ --input_file_list $(location :build_identifier_ukernel_srcs_list)",
+    tools = [":generate_build_identifier_py"],
+)
+
+xnnpack_cc_library(
+    name = "build_identifier",
+    srcs = ["src/build_identifier.c"],
+)
+
+xnnpack_cc_library(
+    name = "cache",
+    srcs = ["src/cache.c"],
+    hdrs = ["src/xnnpack/cache.h"],
+    deps = [
+        ":allocator",
+        ":common",
+        ":logging",
+        ":math",
+        ":memory",
+        ":mutex",
+        ":xnnpack_h",
+    ],
+)
+
+# Define a library with just the header to remove circular dependencies:
+# operator-run (compute) <-> operators.
+xnnpack_cc_library(
+    name = "compute_h",
+    hdrs = [
+        "src/xnnpack/compute.h",
+    ],
+    deps = [
+        ":common",
+        ":microfnptr_h",
+        ":microparams_h",
+        ":operator_type",
+        ":xnnpack_h",
+        "//src/configs:config_hdrs",
+        "@pthreadpool",
+    ],
+)
+
+xnnpack_cc_library(
+    name = "microkernel_utils",
+    srcs = ["src/microkernel-utils.c"],
+    hdrs = ["src/xnnpack/microkernel-utils.h"],
+    deps = [
+        ":common",
+        ":logging",
+        ":math",
+        "//src/configs:config_hdrs",
+        "//src/configs:hardware_config",
+    ],
+)
+
+# Define a library with just the header to remove circular dependencies:
+# indirection <-> operators.
+xnnpack_cc_library(
+    name = "operator_h",
+    hdrs = [
+        "src/xnnpack/operator.h",
+    ],
+    deps = [
+        ":common",
+        ":compute_h",
+        ":microfnptr_h",
+        ":microkernel_type",
+        ":microparams_h",
+        ":node_type",
+        ":operator_type",
+        ":xnnpack_h",
+        "//src/configs:config_hdrs",
+        "@pthreadpool",
+    ],
+)
+
+xnnpack_cc_library(
+    name = "operator_utils",
+    srcs = ["src/operator-utils.c"],
+    hdrs = ["src/xnnpack/operator-utils.h"],
+    deps = [
+        ":allocator",
+        ":common",
+        ":logging",
+        ":math",
+        ":microfnptr_h",
+        ":node_type",
+        ":operator_h",
+        ":operator_type",
+        ":params",
+        ":xnnpack_h",
+    ],
+)
+
+xnnpack_cxx_library(
+    name = "reference_ukernels",
+    srcs = [
+        "src/reference/binary-elementwise.cc",
+        "src/reference/unary-elementwise.cc",
+    ],
+    hdrs = [
+        "src/xnnpack/reference-config.h",
+        "src/xnnpack/reference-utils.h",
+    ],
+    deps = [
+        ":common",
+        ":datatype",
+        ":math",
+        ":microfnptr_h",
+        ":microparams_h",
+        ":xnnpack_h",
+        "//src/configs:config_hdrs",
+    ],
+)
+
+xnnpack_cc_library(
+    name = "datatype",
+    srcs = ["src/datatype.c"],
+    hdrs = ["src/xnnpack/datatype.h"],
+    deps = [
+        ":common",
+        ":math",
+        ":xnnpack_h",
+    ],
+)
+
+xnnpack_cc_library(
+    name = "fingerprint_id",
+    srcs = ["src/operators/fingerprint_id.c"],
+    hdrs = [
+        "src/operators/fingerprint_id.h",
+        "src/operators/fingerprint_id.h.inc",
+    ],
+)
+
+xnnpack_cc_library(
+    name = "fingerprint_cache",
+    srcs = ["src/operators/fingerprint_cache.c"],
+    hdrs = ["src/operators/fingerprint_cache.h"],
+    deps = [
+        ":allocator",
+        ":cache",
+        ":fingerprint_id",
+        ":init_once",
+        ":mutex",
+        ":operator_delete",
+        ":xnnpack_h",
+    ],
+)
+
+xnnpack_cc_library(
+    name = "fingerprint_check",
+    srcs = ["src/xnnpack/fingerprint_check.c"],
+    deps = [
+        ":common",
+        ":fingerprint_cache",  # build_cleaner: keep
+        ":fingerprint_id",
+        ":internal",
+        ":logging",
+        ":xnnpack_h",
+    ],
+)
+
+xnnpack_cc_library(
+    name = "operator_delete",
+    srcs = ["src/operator-delete.c"],
+    deps = [
+        ":allocator",
+        ":logging",
+        ":operator_h",
+        ":operator_utils",
+        ":params",
+        ":xnnpack_h",
+    ],
+)
+
+xnnpack_cc_library(
+    name = "operators",
+    srcs = OPERATOR_SRCS,
+    hdrs = [
+        "src/xnnpack/compute.h",
+        "src/xnnpack/operator.h",
+    ],
+    copts = select({
+        ":debug_build": [],
+        "//conditions:default": xnnpack_min_size_copts(),
+    }) + select({
+        ":xnn_enable_hmp_explicit_false": ["-DXNN_MAX_UARCH_TYPES=1"],
+        "//conditions:default": [],
+    }),
+    deps = [
+        ":allocator",
+        ":cache",
+        ":common",
+        ":datatype",
+        ":fingerprint_cache",
+        ":fingerprint_id",
+        ":indirection",
+        ":internal",
+        ":logging",
+        ":math",
+        ":microfnptr_h",
+        ":microkernel_hdrs",
+        ":microkernel_type",
+        ":microkernel_utils",
+        ":microparams_h",
+        ":microparams_init",
+        ":node_type",
+        ":normalization",
+        ":operator_delete",
+        ":operator_type",
+        ":operator_utils",
+        ":pack_lh",
+        ":packing",
+        ":params",
+        ":quantization",
+        ":reference_ukernels",
+        ":subgraph_h",
+        ":xnnpack_h",
+        "//src/configs:config_hdrs",
+        "//src/configs:hardware_config",
+        "//src/configs:microkernel_configs",
+        "@pthreadpool",
+    ],
+)
+
+xnnpack_cc_library(
+    name = "sanitizers",
+    srcs = [
+        "src/sanitizers.c",
+    ],
+)
+
+xnnpack_cc_library(
+    name = "subgraph_h",
+    hdrs = [
+        "src/xnnpack/subgraph.h",
+    ],
+    deps = [
+        ":allocation_type",
+        ":common",
+        ":math",
+        ":node_type",
+        ":xnnpack_h",
+        "//src/configs:config_hdrs",
+        "@pthreadpool",
+    ],
+)
+
+xnnpack_cc_library(
+    name = "subgraph",
+    srcs = SUBGRAPH_SRCS,
+    hdrs = [
+        "src/subgraph/subgraph-utils.h",
+        "src/xnnpack/memory-planner.h",
+        "src/xnnpack/reshape-helpers.h",
+        "src/xnnpack/subgraph.h",
+        "src/xnnpack/subgraph-validation.h",
+    ],
+    deps = [
+        ":allocation_type",
+        ":allocator",
+        ":cache",
+        ":common",
+        ":datatype",
+        ":fp16",
+        ":internal",
+        ":logging",
+        ":math",
+        ":memory",
+        ":microkernel_hdrs",
+        ":microkernel_type",
+        ":mutex",
+        ":node_type",
+        ":operator_type",
+        ":operator_utils",
+        ":operators",
+        ":params",
+        ":requantization",
+        ":subgraph_h",
+        ":xnnpack_h",
+        "//src/configs:config_hdrs",
+        "//src/configs:hardware_config",
+        "//src/subgraph/rewrites:fp16_to_fp32",
+        "@pthreadpool",
+    ],
+)
+
+xnnpack_cc_library(
+    name = "mutex",
+    srcs = [
+        "src/mutex.c",
+    ],
+    hdrs = [
+        "src/xnnpack/mutex.h",
+    ],
+    deps = [
+        ":common",
+        ":logging",
+        ":xnnpack_h",
+    ],
+)
+
+xnnpack_cc_library(
+    name = "normalization",
+    srcs = ["src/normalization.c"],
+    hdrs = [
+        "src/xnnpack/normalization.h",
+    ],
+    deps = [
+        ":common",
+        ":math",
+        ":xnnpack_h",
+    ],
+)
+
+xnnpack_cc_library(
+    name = "XNNPACK",
+    srcs = select({
+        "//ynnpack/xnnpack:use_ynnpack": [],
+        "//conditions:default": ["src/init.c"],
+    }),
+    hdrs = [
+        "include/experimental.h",
+        "include/xnnpack.h",
+    ],
+    copts = select({
+        ":debug_build": [],
+        "//conditions:default": xnnpack_min_size_copts(),
+    }) + select({
+        ":xnn_enable_hmp_explicit_false": ["-DXNN_MAX_UARCH_TYPES=1"],
+        "//conditions:default": [],
+    }),
+    visibility = xnnpack_visibility(),
+    deps = select({
+        "//ynnpack/xnnpack:use_ynnpack": ["//ynnpack/xnnpack"],
+        "//conditions:default": [
+            "//:allocator",
+            "//:build_identifier",  # build_cleaner: keep
+            "//:common",  # build_cleaner: keep
+            "//:fingerprint_check",
+            "//:fingerprint_id",
+            "//:init_once",
+            "//:logging",
+            "//:math",  # build_cleaner: keep
+            "//:microkernel_hdrs",  # build_cleaner: keep
+            "//:microparams_h",  # build_cleaner: keep
+            "//:microparams_init",  # build_cleaner: keep
+            "//:operators",  # build_cleaner: keep
+            "//:params",
+            "//:subgraph",  # build_cleaner: keep
+            "//src/configs:hardware_config",
+            "//src/configs:microkernel_configs",  # build_cleaner: keep
+            "@pthreadpool",
+        ],
+    }) + xnnpack_if_kleidiai_enabled([
+        "@KleidiAI//:common",
+    ]),
+)
+
+############################# Build configurations #############################
+
+# Enables usage of ARM FP16 (FP16 arithmetics) scalar kernels.
+config_setting(
+    name = "xnn_enable_arm_fp16_scalar_explicit_true",
+    define_values = {"xnn_enable_arm_fp16_scalar": "true"},
+)
+
+# Disables usage of ARM FP16 (FP16 arithmetics) scalar kernels.
+config_setting(
+    name = "xnn_enable_arm_fp16_scalar_explicit_false",
+    define_values = {"xnn_enable_arm_fp16_scalar": "false"},
+)
+
+# Enables usage of ARM FP16 (FP16 arithmetics) vector kernels.
+config_setting(
+    name = "xnn_enable_arm_fp16_vector_explicit_true",
+    define_values = {"xnn_enable_arm_fp16_vector": "true"},
+)
+
+# Disables usage of ARM FP16 (FP16 arithmetics) vector kernels.
+config_setting(
+    name = "xnn_enable_arm_fp16_vector_explicit_false",
+    define_values = {"xnn_enable_arm_fp16_vector": "false"},
+)
+
+# Enables usage of ARM BF16 (BF16 arithmetics) kernels.
+config_setting(
+    name = "xnn_enable_arm_bf16_explicit_true",
+    define_values = {"xnn_enable_arm_bf16": "true"},
+)
+
+# Disables usage of ARM BF16 (BF16 arithmetics) kernels.
+config_setting(
+    name = "xnn_enable_arm_bf16_explicit_false",
+    define_values = {"xnn_enable_arm_bf16": "false"},
+)
+
+# Enables usage of ARM DotProd (integer dot product) kernels.
+config_setting(
+    name = "xnn_enable_arm_dotprod_explicit_true",
+    define_values = {"xnn_enable_arm_dotprod": "true"},
+)
+
+# Disables usage of ARM DotProd (integer dot product) kernels.
+config_setting(
+    name = "xnn_enable_arm_dotprod_explicit_false",
+    define_values = {"xnn_enable_arm_dotprod": "false"},
+)
+
+# Enables usage of ARM I8MM (8-bit integer matrix multiply accumulate) kernels.
+config_setting(
+    name = "xnn_enable_arm_i8mm_explicit_true",
+    define_values = {"xnn_enable_arm_i8mm": "true"},
+)
+
+# Disables usage of ARM I8MM (8-bit integer matrix multiply accumulate) kernels.
+config_setting(
+    name = "xnn_enable_arm_i8mm_explicit_false",
+    define_values = {"xnn_enable_arm_i8mm": "false"},
+)
+
+# Enables usage of RNDNU16 kernels.
+config_setting(
+    name = "xnn_enable_rndnu16_explicit_true",
+    define_values = {"xnn_enable_rndnu16": "true"},
+)
+
+# Disables usage of RNDNU16 kernels.
+config_setting(
+    name = "xnn_enable_rndnu16_explicit_false",
+    define_values = {"xnn_enable_rndnu16": "false"},
+)
+
+# Enables usage of ARM SME kernels.
+config_setting(
+    name = "xnn_enable_arm_sme_explicit_true",
+    define_values = {"xnn_enable_arm_sme": "true"},
+)
+
+# Disables usage of ARM SME kernels.
+config_setting(
+    name = "xnn_enable_arm_sme_explicit_false",
+    define_values = {"xnn_enable_arm_sme": "false"},
+)
+
+# Enables usage of ARM SME2 kernels.
+config_setting(
+    name = "xnn_enable_arm_sme2_explicit_true",
+    define_values = {"xnn_enable_arm_sme2": "true"},
+)
+
+# Disables usage of ARM SME2 kernels.
+config_setting(
+    name = "xnn_enable_arm_sme2_explicit_false",
+    define_values = {"xnn_enable_arm_sme2": "false"},
+)
+
+# Enables usage of Intel AVX512F (evex512) kernels.
+config_setting(
+    name = "xnn_enable_avx512f_explicit_true",
+    define_values = {"xnn_enable_avx512f": "true"},
+)
+
+# Disables usage of Intel AVX512F (evex512) kernels.
+config_setting(
+    name = "xnn_enable_avx512f_explicit_false",
+    define_values = {"xnn_enable_avx512f": "false"},
+)
+
+# Enables usage of Intel AVX512SKX (evex512) kernels.
+config_setting(
+    name = "xnn_enable_avx512skx_explicit_true",
+    define_values = {"xnn_enable_avx512skx": "true"},
+)
+
+# Disables usage of Intel AVX512SKX (evex512) kernels.
+config_setting(
+    name = "xnn_enable_avx512skx_explicit_false",
+    define_values = {"xnn_enable_avx512skx": "false"},
+)
+
+# Enables usage of Intel AVX512VBMI (evex512) kernels.
+config_setting(
+    name = "xnn_enable_avx512vbmi_explicit_true",
+    define_values = {"xnn_enable_avx512vbmi": "true"},
+)
+
+# Disables usage of Intel AVX512VBMI (evex512) kernels.
+config_setting(
+    name = "xnn_enable_avx512vbmi_explicit_false",
+    define_values = {"xnn_enable_avx512vbmi": "false"},
+)
+
+# Enables usage of Intel AVX512VNNI (evex512) kernels.
+config_setting(
+    name = "xnn_enable_avx512vnni_explicit_true",
+    define_values = {"xnn_enable_avx512vnni": "true"},
+)
+
+# Disables usage of Intel AVX512VNNI (evex512) kernels.
+config_setting(
+    name = "xnn_enable_avx512vnni_explicit_false",
+    define_values = {"xnn_enable_avx512vnni": "false"},
+)
+
+# Enables usage of Intel AVX512VNNIGFNI (evex512) kernels.
+config_setting(
+    name = "xnn_enable_avx512vnnigfni_explicit_true",
+    define_values = {"xnn_enable_avx512vnnigfni": "true"},
+)
+
+# Disables usage of Intel AVX512VNNIGFNI (evex512) kernels.
+config_setting(
+    name = "xnn_enable_avx512vnnigfni_explicit_false",
+    define_values = {"xnn_enable_avx512vnnigfni": "false"},
+)
+
+# Enables usage of Intel AVX512-AMX (integer matrix multiply) kernels.
+config_setting(
+    name = "xnn_enable_avx512amx_explicit_true",
+    define_values = {"xnn_enable_avx512amx": "true"},
+)
+
+# Disables usage of Intel AVX512-AMX (integer matrix multiply) kernels.
+config_setting(
+    name = "xnn_enable_avx512amx_explicit_false",
+    define_values = {"xnn_enable_avx512amx": "false"},
+)
+
+# Enables usage of Intel AVX512-FP16 (fp16 arithmetic) kernels.
+config_setting(
+    name = "xnn_enable_avx512fp16_explicit_true",
+    define_values = {"xnn_enable_avx512fp16": "true"},
+)
+
+# Disables usage of Intel AVX512-FP16 (fp16 arithmetic) kernels.
+config_setting(
+    name = "xnn_enable_avx512fp16_explicit_false",
+    define_values = {"xnn_enable_avx512fp16": "false"},
+)
+
+# Enables usage of WebAssembly Relaxed SIMD FP16 (fp16 arithmetic) kernels.
+config_setting(
+    name = "xnn_enable_wasmrelaxedsimdfp16_explicit_true",
+    define_values = {"xnn_enable_wasmrelaxedsimdfp16": "true"},
+)
+
+# Disables usage of WebAssembly Relaxed SIMD FP16 (fp16 arithmetic) kernels.
+config_setting(
+    name = "xnn_enable_wasmrelaxedsimdfp16_explicit_false",
+    define_values = {"xnn_enable_wasmrelaxedsimdfp16": "false"},
+)
+
+# Enables usage of Intel AVX512-BF16 (bf16 arithmetic) kernels.
+config_setting(
+    name = "xnn_enable_avx512bf16_explicit_true",
+    define_values = {"xnn_enable_avx512bf16": "true"},
+)
+
+# Disables usage of Intel AVX512-BF16 (bf16 arithmetic) kernels.
+config_setting(
+    name = "xnn_enable_avx512bf16_explicit_false",
+    define_values = {"xnn_enable_avx512bf16": "false"},
+)
+
+# Enables usage of Intel SSE kernels.
+config_setting(
+    name = "xnn_enable_sse_explicit_true",
+    define_values = {"xnn_enable_sse": "true"},
+)
+
+# Disables usage of Intel SSE kernels.
+config_setting(
+    name = "xnn_enable_sse_explicit_false",
+    define_values = {"xnn_enable_sse": "false"},
+)
+
+# Enables usage of Intel SSE2 kernels.
+config_setting(
+    name = "xnn_enable_sse2_explicit_true",
+    define_values = {"xnn_enable_sse2": "true"},
+)
+
+# Disables usage of Intel SSE2 kernels.
+config_setting(
+    name = "xnn_enable_sse2_explicit_false",
+    define_values = {"xnn_enable_sse2": "false"},
+)
+
+# Enables usage of Intel SSSE3 kernels.
+config_setting(
+    name = "xnn_enable_ssse3_explicit_true",
+    define_values = {"xnn_enable_ssse3": "true"},
+)
+
+# Disables usage of Intel SSSE3 kernels.
+config_setting(
+    name = "xnn_enable_ssse3_explicit_false",
+    define_values = {"xnn_enable_ssse3": "false"},
+)
+
+# Enables usage of Intel SSE41 kernels.
+config_setting(
+    name = "xnn_enable_sse41_explicit_true",
+    define_values = {"xnn_enable_sse41": "true"},
+)
+
+# Disables usage of Intel SSE41 kernels.
+config_setting(
+    name = "xnn_enable_sse41_explicit_false",
+    define_values = {"xnn_enable_sse41": "false"},
+)
+
+# Enables usage of Intel AVX kernels.
+config_setting(
+    name = "xnn_enable_avx_explicit_true",
+    define_values = {"xnn_enable_avx": "true"},
+)
+
+# Disables usage of Intel AVX kernels.
+config_setting(
+    name = "xnn_enable_avx_explicit_false",
+    define_values = {"xnn_enable_avx": "false"},
+)
+
+# Enables usage of Intel F16C (f16 convert) kernels.
+config_setting(
+    name = "xnn_enable_f16c_explicit_true",
+    define_values = {"xnn_enable_f16c": "true"},
+)
+
+# Disables usage of Intel F16C (f16 convert) kernels.
+config_setting(
+    name = "xnn_enable_f16c_explicit_false",
+    define_values = {"xnn_enable_f16c": "false"},
+)
+
+# Enables usage of Intel FMA3 (fused multiply accumulate) kernels.
+config_setting(
+    name = "xnn_enable_fma3_explicit_true",
+    define_values = {"xnn_enable_fma3": "true"},
+)
+
+# Disables usage of Intel FMA3 (fused multiply accumulate) kernels.
+config_setting(
+    name = "xnn_enable_fma3_explicit_false",
+    define_values = {"xnn_enable_fma3": "false"},
+)
+
+# Enables usage of Intel AVX2 kernels.
+config_setting(
+    name = "xnn_enable_avx2_explicit_true",
+    define_values = {"xnn_enable_avx2": "true"},
+)
+
+# Disables usage of Intel AVX2 kernels.
+config_setting(
+    name = "xnn_enable_avx2_explicit_false",
+    define_values = {"xnn_enable_avx2": "false"},
+)
+
+# Enables usage of Intel AVX-VNNI (integer dot product) kernels.
+config_setting(
+    name = "xnn_enable_avxvnni_explicit_true",
+    define_values = {"xnn_enable_avxvnni": "true"},
+)
+
+# Disables usage of Intel AVX-VNNI (integer dot product) kernels.
+config_setting(
+    name = "xnn_enable_avxvnni_explicit_false",
+    define_values = {"xnn_enable_avxvnni": "false"},
+)
+
+# Enables usage of Intel AVX-VNNI-INT8 (integer dot product) kernels.
+config_setting(
+    name = "xnn_enable_avxvnniint8_explicit_true",
+    define_values = {"xnn_enable_avxvnniint8": "true"},
+)
+
+# Disables usage of Intel AVX-VNNI-INT8 (integer dot product) kernels.
+config_setting(
+    name = "xnn_enable_avxvnniint8_explicit_false",
+    define_values = {"xnn_enable_avxvnniint8": "false"},
+)
+
+# Enables usage of Intel AVX256SKX (evex256) kernels.
+config_setting(
+    name = "xnn_enable_avx256skx_explicit_true",
+    define_values = {"xnn_enable_avx256skx": "true"},
+)
+
+# Disables usage of Intel AVX256SKX (evex256) kernels.
+config_setting(
+    name = "xnn_enable_avx256skx_explicit_false",
+    define_values = {"xnn_enable_avx256skx": "false"},
+)
+
+# Enables usage of Intel AVX256VNNI (evex256) kernels.
+config_setting(
+    name = "xnn_enable_avx256vnni_explicit_true",
+    define_values = {"xnn_enable_avx256vnni": "true"},
+)
+
+# Disables usage of Intel AVX256VNNI (evex256) kernels.
+config_setting(
+    name = "xnn_enable_avx256vnni_explicit_false",
+    define_values = {"xnn_enable_avx256vnni": "false"},
+)
+
+# Enables usage of Intel AVX256VNNIGFNI (evex256) kernels.
+config_setting(
+    name = "xnn_enable_avx256vnnigfni_explicit_true",
+    define_values = {"xnn_enable_avx256vnnigfni": "true"},
+)
+
+# Disables usage of Intel AVX256VNNIGFNI (evex256) kernels.
+config_setting(
+    name = "xnn_enable_avx256vnnigfni_explicit_false",
+    define_values = {"xnn_enable_avx256vnnigfni": "false"},
+)
+
+# Enables usage of Hexagon HVX kernels.
+config_setting(
+    name = "xnn_enable_hvx_explicit_true",
+    define_values = {"xnn_enable_hvx": "true"},
+)
+
+# Disables usage of Hexagon HVX kernels.
+config_setting(
+    name = "xnn_enable_hvx_explicit_false",
+    define_values = {"xnn_enable_hvx": "false"},
+)
+
+# Enables usage of RISC-V Vector kernels.
+config_setting(
+    name = "xnn_enable_riscv_vector_explicit_true",
+    define_values = {"xnn_enable_riscv_vector": "true"},
+)
+
+# Disables usage of RISC-V Vector kernels.
+config_setting(
+    name = "xnn_enable_riscv_vector_explicit_false",
+    define_values = {"xnn_enable_riscv_vector": "false"},
+)
+
+# Enables usage of RISC-V FP16 (FP16 arithmetics) vector kernels.
+config_setting(
+    name = "xnn_enable_riscv_fp16_vector_explicit_true",
+    define_values = {"xnn_enable_riscv_fp16_vector": "true"},
+)
+
+# Disables usage of RISC-V FP16 (FP16 arithmetics) vector kernels.
+config_setting(
+    name = "xnn_enable_riscv_fp16_vector_explicit_false",
+    define_values = {"xnn_enable_riscv_fp16_vector": "false"},
+)
+
+# Enables usage of cpuinfo library.
+config_setting(
+    name = "xnn_enable_cpuinfo_explicit_true",
+    define_values = {"xnn_enable_cpuinfo": "true"},
+)
+
+# Disables usage of cpuinfo library.
+config_setting(
+    name = "xnn_enable_cpuinfo_explicit_false",
+    define_values = {"xnn_enable_cpuinfo": "false"},
+)
+
+# Enables usage of the KleidiAI library.
+config_setting(
+    name = "xnn_enable_kleidiai_explicit_true",
+    define_values = {"xnn_enable_kleidiai": "true"},
+)
+
+# Disables usage of the KleidiAI library.
+config_setting(
+    name = "xnn_enable_kleidiai_explicit_false",
+    define_values = {"xnn_enable_kleidiai": "false"},
+)
+
+# Enables usage of assembly kernels.
+config_setting(
+    name = "xnn_enable_assembly_explicit_true",
+    define_values = {"xnn_enable_assembly": "true"},
+)
+
+# Disables usage of assembly kernels.
+config_setting(
+    name = "xnn_enable_assembly_explicit_false",
+    define_values = {"xnn_enable_assembly": "false"},
+)
+
+# Enables usage of sparse inference.
+config_setting(
+    name = "xnn_enable_sparse_explicit_true",
+    define_values = {"xnn_enable_sparse": "true"},
+)
+
+# Disables usage of sparse inference.
+config_setting(
+    name = "xnn_enable_sparse_explicit_false",
+    define_values = {"xnn_enable_sparse": "false"},
+)
+
+# Disables usage of HMP-aware optimizations.
+config_setting(
+    name = "xnn_enable_hmp_explicit_false",
+    define_values = {"xnn_enable_hmp": "false"},
+)
+
+# Enables usage of WASM SIMD AVX-256 revectorization kernels.
+config_setting(
+    name = "xnn_enable_wasm_revectorize_explicit_true",
+    define_values = {"xnn_enable_wasm_revectorize": "true"},
+)
+
+# Disables usage of WASM SIMD AVX-256 revectorization kernels.
+config_setting(
+    name = "xnn_enable_wasm_revectorize_explicit_false",
+    define_values = {"xnn_enable_wasm_revectorize": "false"},
+)
+
+# Force logging to stderr/stdout
+config_setting(
+    name = "xnn_log_to_stdio_explicit_true",
+    define_values = {"xnn_log_to_stdio": "true"},
+)
+
+# Fully disable logging
+config_setting(
+    name = "xnn_log_level_explicit_none",
+    define_values = {"xnn_log_level": "none"},
+)
+
+# Log fatal errors only
+config_setting(
+    name = "xnn_log_level_explicit_fatal",
+    define_values = {"xnn_log_level": "fatal"},
+)
+
+# Log fatal and non-fatal errors
+config_setting(
+    name = "xnn_log_level_explicit_error",
+    define_values = {"xnn_log_level": "error"},
+)
+
+# Log warnings and errors
+config_setting(
+    name = "xnn_log_level_explicit_warning",
+    define_values = {"xnn_log_level": "warning"},
+)
+
+# Log information messages, warnings and errors
+config_setting(
+    name = "xnn_log_level_explicit_info",
+    define_values = {"xnn_log_level": "info"},
+)
+
+# Log all messages, including debug messages
+config_setting(
+    name = "xnn_log_level_explicit_debug",
+    define_values = {"xnn_log_level": "debug"},
+)
+
+# Builds with -c dbg
+config_setting(
+    name = "debug_build",
+    values = {
+        "compilation_mode": "dbg",
+    },
+)
+
+# Builds with -c opt
+config_setting(
+    name = "optimized_build",
+    values = {
+        "compilation_mode": "opt",
+    },
+)
+
+######################## Composite build configurations #######################
+
+selects.config_setting_group(
+    name = "arm_fp16_scalar_enabled_by_default",
+    match_any = [
+        "//build_config:aarch32",
+        "//build_config:aarch64",
+    ],
+)
+
+alias(
+    name = "arm_fp16_scalar_enabled",
+    actual = select({
+        ":xnn_enable_arm_fp16_scalar_explicit_true": ":xnn_enable_arm_fp16_scalar_explicit_true",
+        ":xnn_enable_arm_fp16_scalar_explicit_false": ":xnn_enable_arm_fp16_scalar_explicit_true",
+        "//conditions:default": ":arm_fp16_scalar_enabled_by_default",
+    }),
+)
+
+selects.config_setting_group(
+    name = "arm_fp16_vector_enabled_by_default",
+    match_any = [
+        "//build_config:aarch32",
+        "//build_config:aarch64",
+    ],
+)
+
+selects.config_setting_group(
+    name = "arm_neondotfp16_enabled",
+    match_all = [
+        ":arm_fp16_vector_enabled",
+        ":arm_dotprod_enabled",
+    ],
+)
+
+alias(
+    name = "arm_fp16_vector_enabled",
+    actual = select({
+        ":xnn_enable_arm_fp16_vector_explicit_true": ":xnn_enable_arm_fp16_vector_explicit_true",
+        ":xnn_enable_arm_fp16_vector_explicit_false": ":xnn_enable_arm_fp16_vector_explicit_true",
+        "//conditions:default": ":arm_fp16_vector_enabled_by_default",
+    }),
+)
+
+selects.config_setting_group(
+    name = "arm_aarch64_fp16_vector_enabled",
+    match_all = [
+        ":arm_fp16_vector_enabled",
+        "//build_config:aarch64",
+    ],
+)
+
+selects.config_setting_group(
+    name = "avx512bf16_enabled_by_default",
+    match_any = [
+        "//build_config:x86_64",
+    ],
+)
+
+alias(
+    name = "avx512bf16_enabled",
+    actual = select({
+        ":xnn_enable_avx512bf16_explicit_true": ":xnn_enable_avx512bf16_explicit_true",
+        ":xnn_enable_avx512bf16_explicit_false": ":xnn_enable_avx512bf16_explicit_true",
+        "//conditions:default": ":avx512bf16_enabled_by_default",
+    }),
+)
+
+selects.config_setting_group(
+    name = "arm_bf16_enabled_by_default",
+    match_any = [
+        "//build_config:aarch64",
+    ],
+)
+
+alias(
+    name = "arm_bf16_enabled",
+    actual = select({
+        ":xnn_enable_arm_bf16_explicit_true": ":xnn_enable_arm_bf16_explicit_true",
+        ":xnn_enable_arm_bf16_explicit_false": ":xnn_enable_arm_bf16_explicit_true",
+        "//conditions:default": ":arm_bf16_enabled_by_default",
+    }),
+)
+
+selects.config_setting_group(
+    name = "arm_dotprod_enabled_by_default",
+    match_any = [
+        "//build_config:aarch32",
+        "//build_config:aarch64",
+    ],
+)
+
+alias(
+    name = "arm_dotprod_enabled",
+    actual = select({
+        ":xnn_enable_arm_dotprod_explicit_true": ":xnn_enable_arm_dotprod_explicit_true",
+        ":xnn_enable_arm_dotprod_explicit_false": ":xnn_enable_arm_dotprod_explicit_true",
+        "//conditions:default": ":arm_dotprod_enabled_by_default",
+    }),
+)
+
+selects.config_setting_group(
+    name = "arm_aarch64_dotprod_enabled",
+    match_all = [
+        ":arm_dotprod_enabled",
+        "//build_config:aarch64",
+    ],
+)
+
+selects.config_setting_group(
+    name = "arm_i8mm_enabled_by_default",
+    match_any = [
+        "//build_config:aarch64",
+    ],
+)
+
+alias(
+    name = "arm_i8mm_enabled",
+    actual = select({
+        ":xnn_enable_arm_i8mm_explicit_true": ":xnn_enable_arm_i8mm_explicit_true",
+        ":xnn_enable_arm_i8mm_explicit_false": ":xnn_enable_arm_i8mm_explicit_true",
+        "//conditions:default": ":arm_i8mm_enabled_by_default",
+    }),
+)
+
+selects.config_setting_group(
+    name = "arm_sme_enabled_by_default",
+    match_any = [
+        "//build_config:aarch64",
+    ],
+)
+
+alias(
+    name = "arm_sme_enabled",
+    actual = select({
+        ":xnn_enable_arm_sme_explicit_true": ":xnn_enable_arm_sme_explicit_true",
+        ":xnn_enable_arm_sme_explicit_false": ":xnn_enable_arm_sme_explicit_true",
+        "//conditions:default": ":arm_sme_enabled_by_default",
+    }),
+)
+
+selects.config_setting_group(
+    name = "arm_sme2_enabled_by_default",
+    match_any = [
+        "//build_config:aarch64",
+    ],
+)
+
+alias(
+    name = "arm_sme2_enabled",
+    actual = select({
+        ":xnn_enable_arm_sme2_explicit_true": ":xnn_enable_arm_sme2_explicit_true",
+        ":xnn_enable_arm_sme2_explicit_false": ":xnn_enable_arm_sme2_explicit_true",
+        "//conditions:default": ":arm_sme2_enabled_by_default",
+    }),
+)
+
+selects.config_setting_group(
+    name = "avx512f_enabled_by_default",
+    match_any = [
+        "//build_config:x86",
+    ],
+)
+
+alias(
+    name = "avx512f_enabled",
+    actual = select({
+        ":xnn_enable_avx512f_explicit_true": ":xnn_enable_avx512f_explicit_true",
+        ":xnn_enable_avx512f_explicit_false": ":xnn_enable_avx512f_explicit_true",
+        "//conditions:default": ":avx512f_enabled_by_default",
+    }),
+)
+
+selects.config_setting_group(
+    name = "avx512skx_enabled_by_default",
+    match_any = [
+        "//build_config:x86",
+    ],
+)
+
+alias(
+    name = "avx512skx_enabled",
+    actual = select({
+        ":xnn_enable_avx512skx_explicit_true": ":xnn_enable_avx512skx_explicit_true",
+        ":xnn_enable_avx512skx_explicit_false": ":xnn_enable_avx512skx_explicit_true",
+        "//conditions:default": ":avx512skx_enabled_by_default",
+    }),
+)
+
+selects.config_setting_group(
+    name = "avx512vbmi_enabled_by_default",
+    match_any = [
+        "//build_config:x86",
+    ],
+)
+
+alias(
+    name = "avx512vbmi_enabled",
+    actual = select({
+        ":xnn_enable_avx512vbmi_explicit_true": ":xnn_enable_avx512vbmi_explicit_true",
+        ":xnn_enable_avx512vbmi_explicit_false": ":xnn_enable_avx512vbmi_explicit_true",
+        "//conditions:default": ":avx512vbmi_enabled_by_default",
+    }),
+)
+
+selects.config_setting_group(
+    name = "avx512vnni_enabled_by_default",
+    match_any = [
+        "//build_config:x86",
+    ],
+)
+
+alias(
+    name = "avx512vnni_enabled",
+    actual = select({
+        ":xnn_enable_avx512vnni_explicit_true": ":xnn_enable_avx512vnni_explicit_true",
+        ":xnn_enable_avx512vnni_explicit_false": ":xnn_enable_avx512vnni_explicit_true",
+        "//conditions:default": ":avx512vnni_enabled_by_default",
+    }),
+)
+
+selects.config_setting_group(
+    name = "avx512vnnigfni_enabled_by_default",
+    match_any = [
+        "//build_config:x86",
+    ],
+)
+
+alias(
+    name = "avx512vnnigfni_enabled",
+    actual = select({
+        ":xnn_enable_avx512vnnigfni_explicit_true": ":xnn_enable_avx512vnnigfni_explicit_true",
+        ":xnn_enable_avx512vnnigfni_explicit_false": ":xnn_enable_avx512vnnigfni_explicit_true",
+        "//conditions:default": ":avx512vnnigfni_enabled_by_default",
+    }),
+)
+
+selects.config_setting_group(
+    name = "avx512amx_enabled_by_default",
+    match_any = [
+        "//build_config:x86",
+    ],
+)
+
+alias(
+    name = "avx512amx_enabled",
+    actual = select({
+        ":xnn_enable_avx512amx_explicit_true": ":xnn_enable_avx512amx_explicit_true",
+        ":xnn_enable_avx512amx_explicit_false": ":xnn_enable_avx512amx_explicit_true",
+        "//build_config:windows_lexan": ":xnn_enable_avx512amx_explicit_true",
+        "//conditions:default": ":avx512amx_enabled_by_default",
+    }),
+)
+
+selects.config_setting_group(
+    name = "avx512fp16_enabled_by_default",
+    match_any = [
+        "//build_config:x86",
+    ],
+)
+
+alias(
+    name = "avx512fp16_enabled",
+    actual = select({
+        ":xnn_enable_avx512fp16_explicit_true": ":xnn_enable_avx512fp16_explicit_true",
+        ":xnn_enable_avx512fp16_explicit_false": ":xnn_enable_avx512fp16_explicit_true",
+        "//conditions:default": ":avx512fp16_enabled_by_default",
+    }),
+)
+
+selects.config_setting_group(
+    name = "wasmrelaxedsimdfp16_enabled_by_default",
+    match_any = [
+        "//build_config:emscripten_wasmrelaxedsimd",
+    ],
+)
+
+alias(
+    name = "wasmrelaxedsimdfp16_enabled",
+    actual = select({
+        ":xnn_enable_wasmrelaxedsimdfp16_explicit_true": ":xnn_enable_wasmrelaxedsimdfp16_explicit_true",
+        "//conditions:default": ":xnn_enable_wasmrelaxedsimdfp16_explicit_false",
+    }),
+)
+
+selects.config_setting_group(
+    name = "sse_enabled_by_default",
+    match_any = [
+        "//build_config:x86",
+    ],
+)
+
+alias(
+    name = "sse_enabled",
+    actual = select({
+        ":xnn_enable_sse_explicit_true": ":xnn_enable_sse_explicit_true",
+        ":xnn_enable_sse_explicit_false": ":xnn_enable_sse_explicit_true",
+        "//conditions:default": ":sse_enabled_by_default",
+    }),
+)
+
+selects.config_setting_group(
+    name = "sse2_enabled_by_default",
+    match_any = [
+        "//build_config:x86",
+    ],
+)
+
+alias(
+    name = "sse2_enabled",
+    actual = select({
+        ":xnn_enable_sse2_explicit_true": ":xnn_enable_sse2_explicit_true",
+        ":xnn_enable_sse2_explicit_false": ":xnn_enable_sse2_explicit_true",
+        "//conditions:default": ":sse2_enabled_by_default",
+    }),
+)
+
+selects.config_setting_group(
+    name = "ssse3_enabled_by_default",
+    match_any = [
+        "//build_config:x86",
+    ],
+)
+
+alias(
+    name = "ssse3_enabled",
+    actual = select({
+        ":xnn_enable_ssse3_explicit_true": ":xnn_enable_ssse3_explicit_true",
+        ":xnn_enable_ssse3_explicit_false": ":xnn_enable_ssse3_explicit_true",
+        "//conditions:default": ":ssse3_enabled_by_default",
+    }),
+)
+
+selects.config_setting_group(
+    name = "sse41_enabled_by_default",
+    match_any = [
+        "//build_config:x86",
+    ],
+)
+
+alias(
+    name = "sse41_enabled",
+    actual = select({
+        ":xnn_enable_sse41_explicit_true": ":xnn_enable_sse41_explicit_true",
+        ":xnn_enable_sse41_explicit_false": ":xnn_enable_sse41_explicit_true",
+        "//conditions:default": ":sse41_enabled_by_default",
+    }),
+)
+
+selects.config_setting_group(
+    name = "avx_enabled_by_default",
+    match_any = [
+        "//build_config:x86",
+    ],
+)
+
+alias(
+    name = "avx_enabled",
+    actual = select({
+        ":xnn_enable_avx_explicit_true": ":xnn_enable_avx_explicit_true",
+        ":xnn_enable_avx_explicit_false": ":xnn_enable_avx_explicit_true",
+        "//conditions:default": ":avx_enabled_by_default",
+    }),
+)
+
+selects.config_setting_group(
+    name = "f16c_enabled_by_default",
+    match_any = [
+        "//build_config:x86",
+    ],
+)
+
+alias(
+    name = "f16c_enabled",
+    actual = select({
+        ":xnn_enable_f16c_explicit_true": ":xnn_enable_f16c_explicit_true",
+        ":xnn_enable_f16c_explicit_false": ":xnn_enable_f16c_explicit_true",
+        "//conditions:default": ":f16c_enabled_by_default",
+    }),
+)
+
+selects.config_setting_group(
+    name = "fma3_enabled_by_default",
+    match_any = [
+        "//build_config:x86",
+    ],
+)
+
+alias(
+    name = "fma3_enabled",
+    actual = select({
+        ":xnn_enable_fma3_explicit_true": ":xnn_enable_fma3_explicit_true",
+        ":xnn_enable_fma3_explicit_false": ":xnn_enable_fma3_explicit_true",
+        "//conditions:default": ":fma3_enabled_by_default",
+    }),
+)
+
+selects.config_setting_group(
+    name = "avx2_enabled_by_default",
+    match_any = [
+        "//build_config:x86",
+    ],
+)
+
+alias(
+    name = "avx2_enabled",
+    actual = select({
+        ":xnn_enable_avx2_explicit_true": ":xnn_enable_avx2_explicit_true",
+        ":xnn_enable_avx2_explicit_false": ":xnn_enable_avx2_explicit_true",
+        "//conditions:default": ":avx2_enabled_by_default",
+    }),
+)
+
+selects.config_setting_group(
+    name = "avxvnni_enabled_by_default",
+    match_any = [
+        "//build_config:x86",
+    ],
+)
+
+alias(
+    name = "avxvnni_enabled",
+    actual = select({
+        ":xnn_enable_avxvnni_explicit_true": ":xnn_enable_avxvnni_explicit_true",
+        ":xnn_enable_avxvnni_explicit_false": ":xnn_enable_avxvnni_explicit_true",
+        "//conditions:default": ":avxvnni_enabled_by_default",
+    }),
+)
+
+selects.config_setting_group(
+    name = "avxvnniint8_enabled_by_default",
+    match_any = [
+        "//build_config:x86",
+    ],
+)
+
+alias(
+    name = "avxvnniint8_enabled",
+    actual = select({
+        ":xnn_enable_avxvnniint8_explicit_true": ":xnn_enable_avxvnniint8_explicit_true",
+        ":xnn_enable_avxvnniint8_explicit_false": ":xnn_enable_avxvnniint8_explicit_true",
+        "//build_config:ios_x86_64": ":xnn_enable_avxvnniint8_explicit_true",
+        "//build_config:ios": ":xnn_enable_avxvnniint8_explicit_true",
+        "//conditions:default": ":avxvnniint8_enabled_by_default",
+    }),
+)
+
+selects.config_setting_group(
+    name = "avx256skx_enabled_by_default",
+    match_any = [
+        "//build_config:x86",
+    ],
+)
+
+alias(
+    name = "avx256skx_enabled",
+    actual = select({
+        ":xnn_enable_avx256skx_explicit_true": ":xnn_enable_avx256skx_explicit_true",
+        ":xnn_enable_avx256skx_explicit_false": ":xnn_enable_avx256skx_explicit_true",
+        "//conditions:default": ":avx256skx_enabled_by_default",
+    }),
+)
+
+selects.config_setting_group(
+    name = "avx256vnni_enabled_by_default",
+    match_any = [
+        "//build_config:x86",
+    ],
+)
+
+alias(
+    name = "avx256vnni_enabled",
+    actual = select({
+        ":xnn_enable_avx256vnni_explicit_true": ":xnn_enable_avx256vnni_explicit_true",
+        ":xnn_enable_avx256vnni_explicit_false": ":xnn_enable_avx256vnni_explicit_true",
+        "//conditions:default": ":avx256vnni_enabled_by_default",
+    }),
+)
+
+selects.config_setting_group(
+    name = "avx256vnnigfni_enabled_by_default",
+    match_any = [
+        "//build_config:x86",
+    ],
+)
+
+alias(
+    name = "avx256vnnigfni_enabled",
+    actual = select({
+        ":xnn_enable_avx256vnnigfni_explicit_true": ":xnn_enable_avx256vnnigfni_explicit_true",
+        ":xnn_enable_avx256vnnigfni_explicit_false": ":xnn_enable_avx256vnnigfni_explicit_true",
+        "//conditions:default": ":avx256vnnigfni_enabled_by_default",
+    }),
+)
+
+selects.config_setting_group(
+    name = "hvx_enabled_by_default",
+    match_any = [
+        "//build_config:hexagon",
+    ],
+)
+
+alias(
+    name = "hvx_enabled",
+    actual = select({
+        ":xnn_enable_hvx_explicit_true": ":xnn_enable_hvx_explicit_true",
+        ":xnn_enable_hvx_explicit_false": ":xnn_enable_hvx_explicit_true",
+        "//conditions:default": ":hvx_enabled_by_default",
+    }),
+)
+
+selects.config_setting_group(
+    name = "riscv_vector_enabled_by_default",
+    match_any = [
+        "//build_config:riscv",
+    ],
+)
+
+alias(
+    name = "riscv_vector_enabled",
+    actual = select({
+        ":xnn_enable_riscv_vector_explicit_true": ":xnn_enable_riscv_vector_explicit_true",
+        ":xnn_enable_riscv_vector_explicit_false": ":xnn_enable_riscv_vector_explicit_true",
+        "//conditions:default": ":riscv_vector_enabled_by_default",
+    }),
+)
+
+selects.config_setting_group(
+    name = "riscv_fp16_vector_enabled_by_default",
+    match_any = [
+        "//build_config:riscv",
+    ],
+)
+
+# Temporary disable fp16 vectors on Android
+alias(
+    name = "riscv_fp16_vector_enabled",
+    actual = select({
+        ":xnn_enable_riscv_fp16_vector_explicit_true": ":xnn_enable_riscv_fp16_vector_explicit_true",
+        ":xnn_enable_riscv_fp16_vector_explicit_false": ":xnn_enable_riscv_fp16_vector_explicit_true",
+        "//build_config:android": ":xnn_enable_riscv_fp16_vector_explicit_false",
+        "//conditions:default": ":riscv_fp16_vector_enabled_by_default",
+    }),
+)
+
+selects.config_setting_group(
+    name = "cpuinfo_enabled_by_default",
+    match_any = [
+        "//build_config:aarch32",
+        "//build_config:aarch64",
+        "//build_config:x86",
+    ],
+)
+
+alias(
+    name = "cpuinfo_enabled",
+    actual = select({
+        ":xnn_enable_cpuinfo_explicit_true": ":xnn_enable_cpuinfo_explicit_true",
+        ":xnn_enable_cpuinfo_explicit_false": ":xnn_enable_cpuinfo_explicit_true",
+        "//conditions:default": ":cpuinfo_enabled_by_default",
+    }),
+)
+
+selects.config_setting_group(
+    name = "kleidiai_enabled_by_default",
+    match_all = [
+        "//build_config:aarch64",
+        ":arm_i8mm_enabled",
+    ],
+)
+
+alias(
+    name = "kleidiai_enabled",
+    actual = select({
+        ":xnn_enable_kleidiai_explicit_true": ":xnn_enable_kleidiai_explicit_true",
+        ":xnn_enable_kleidiai_explicit_false": ":xnn_enable_kleidiai_explicit_true",
+        # Disable for Windows ARM64 unless explicitly enabled
+        "//build_config:windows_aarch64": ":xnn_enable_kleidiai_explicit_true",
+        "//conditions:default": ":kleidiai_enabled_by_default",
+    }),
+)
+
+selects.config_setting_group(
+    name = "assembly_enabled_by_default",
+    match_any = [
+        "//conditions:default",
+    ],
+)
+
+alias(
+    name = "assembly_enabled",
+    actual = select({
+        ":xnn_enable_assembly_explicit_true": ":xnn_enable_assembly_explicit_true",
+        ":xnn_enable_assembly_explicit_false": ":xnn_enable_assembly_explicit_true",
+        "//conditions:default": ":assembly_enabled_by_default",
+    }),
+)
+
+selects.config_setting_group(
+    name = "rndnu16_enabled_by_default",
+    match_any = [
+        "//conditions:default",
+    ],
+)
+
+alias(
+    name = "rndnu16_enabled",
+    actual = select({
+        ":xnn_enable_rndnu16_explicit_true": ":xnn_enable_rndnu16_explicit_true",
+        ":xnn_enable_rndnu16_explicit_false": ":xnn_enable_rndnu16_explicit_true",
+        "//conditions:default": ":rndnu16_enabled_by_default",
+    }),
+)
+
+selects.config_setting_group(
+    name = "sparse_enabled_by_default",
+    match_any = [
+        "//conditions:default",
+    ],
+)
+
+alias(
+    name = "sparse_enabled",
+    actual = select({
+        ":xnn_enable_sparse_explicit_true": ":xnn_enable_sparse_explicit_true",
+        ":xnn_enable_sparse_explicit_false": ":xnn_enable_sparse_explicit_true",
+        "//conditions:default": ":sparse_enabled_by_default",
+    }),
+)
+
+selects.config_setting_group(
+    name = "wasm_revectorize_enabled_by_default",
+    match_any = [
+        "//build_config:emscripten_wasmsimd",
+        "//build_config:emscripten_wasmrelaxedsimd",
+    ],
+)
+
+alias(
+    name = "wasm_revectorize_enabled",
+    actual = select({
+        ":xnn_enable_wasm_revectorize_explicit_true": ":xnn_enable_wasm_revectorize_explicit_true",
+        ":xnn_enable_wasm_revectorize_explicit_false": ":xnn_enable_wasm_revectorize_explicit_true",
+        "//conditions:default": ":wasm_revectorize_enabled_by_default",
+    }),
+)
+
+bzl_library(
+    name = "build_defs_bzl",
+    srcs = ["build_defs.bzl"],
+    visibility = ["//visibility:private"],
+    deps = ["@rules_cc//cc:core_rules"],
+)
+
+bzl_library(
+    name = "build_params_bzl",
+    srcs = ["build_params.bzl"],
+    visibility = ["//visibility:private"],
+)

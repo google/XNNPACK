@@ -1,0 +1,110 @@
+// Copyright 2020 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert BATCH_TILE % 4 == 0
+$assert BATCH_TILE >= 4
+$SIMD_TILE = BATCH_TILE // 4
+$assert OP in ["ADD", "DIV", "MAX", "MIN", "MUL", "SUB", "SQRDIFF", "PRELU"]
+#include <assert.h>
+
+#include <wasm_simd128.h>
+
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/vbinary.h"
+
+
+$WASM_V32X4_LANESELECT = "wasm_i32x4_relaxed_laneselect" if RELAXED else "wasm_v128_bitselect"
+$WASM_F32X4_OP = {
+$  "ADD": "wasm_f32x4_add",
+$  "DIV": "wasm_f32x4_div",
+$  "MAX": "wasm_f32x4_pmax" if X86 else "wasm_f32x4_max",
+$  "MIN": "wasm_f32x4_pmin" if X86 else "wasm_f32x4_min",
+$  "MUL": "wasm_f32x4_mul",
+$  "SUB": "wasm_f32x4_sub",
+$  "SQRDIFF": "wasm_f32x4_sub",
+$  "PRELU": "wasm_f32x4_mul",
+$}[OP]
+$ARCH_SUFFIX = "" if OP not in ["MIN", "MAX"] else "_x86" if X86 else "_arm"
+$RELAXED_SUFFIX = "relaxed" if RELAXED else ""
+void xnn_f32_v${OP.lower()}_ukernel__wasm${RELAXED_SUFFIX}simd${ARCH_SUFFIX}_u${BATCH_TILE}(
+    size_t batch,
+    const float* input_a,
+    const float* input_b,
+    float* output,
+    const struct xnn_f32_default_params* restrict params) XNN_OOB_READS
+{
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input_a != NULL);
+  assert(input_b != NULL);
+  assert(output != NULL);
+
+  $if BATCH_TILE > 4:
+    for (; batch >= ${BATCH_TILE} * sizeof(float); batch -= ${BATCH_TILE} * sizeof(float)) {
+      $for N in range(SIMD_TILE):
+        const v128_t va${N} = wasm_v128_load(input_a + ${N * 4});
+      input_a += ${BATCH_TILE};
+
+      $for N in range(SIMD_TILE):
+        const v128_t vb${N} = wasm_v128_load(input_b + ${N * 4});
+      input_b += ${BATCH_TILE};
+
+      $for N in range(SIMD_TILE):
+        v128_t vacc${N} = ${WASM_F32X4_OP}(va${N}, vb${N});
+
+      $if OP == "SQRDIFF":
+        $for N in range(SIMD_TILE):
+          vacc${N} = wasm_f32x4_mul(vacc${N}, vacc${N});
+      $elif OP == "PRELU":
+        $for N in range(SIMD_TILE):
+          const v128_t vmask${N} = wasm_i32x4_shr(va${N}, 31);
+
+        $for N in range(SIMD_TILE):
+          vacc${N} = ${WASM_V32X4_LANESELECT}(vacc${N}, va${N}, vmask${N});
+
+      $for N in range(SIMD_TILE):
+        wasm_v128_store(output + ${N * 4}, vacc${N});
+      output += ${BATCH_TILE};
+    }
+  for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
+    const v128_t va = wasm_v128_load(input_a);
+    input_a += 4;
+
+    const v128_t vb = wasm_v128_load(input_b);
+    input_b += 4;
+
+    v128_t vacc = ${WASM_F32X4_OP}(va, vb);
+    $if OP == "SQRDIFF":
+      vacc = wasm_f32x4_mul(vacc, vacc);
+    $elif OP == "PRELU":
+      const v128_t vmask = wasm_i32x4_shr(va, 31);
+
+      vacc = ${WASM_V32X4_LANESELECT}(vacc, va, vmask);
+
+    wasm_v128_store(output, vacc);
+    output += 4;
+  }
+  if XNN_UNLIKELY(batch != 0) {
+    const v128_t va = wasm_v128_load(input_a);
+    const v128_t vb = wasm_v128_load(input_b);
+
+    v128_t vacc = ${WASM_F32X4_OP}(va, vb);
+    $if OP == "SQRDIFF":
+      vacc = wasm_f32x4_mul(vacc, vacc);
+    $elif OP == "PRELU":
+      const v128_t vmask = wasm_i32x4_shr(va, 31);
+
+      vacc = ${WASM_V32X4_LANESELECT}(vacc, va, vmask);
+
+    if (batch & (2 * sizeof(float))) {
+      wasm_v128_store64_lane(output, vacc, 0);
+      vacc = wasm_v64x2_shuffle(vacc, vacc, 1, 1);
+      output += 2;
+    }
+    if (batch & (1 * sizeof(float))) {
+      wasm_v128_store32_lane(output, vacc, 0);
+    }
+  }
+}

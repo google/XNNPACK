@@ -1,0 +1,74 @@
+// Copyright 2020 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert BATCH_TILE % 4 == 0
+$assert BATCH_TILE >= 4
+$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+$assert OP in ["RNDNE", "RNDZ", "RNDU", "RNDD"]
+#include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
+
+#include <smmintrin.h>
+
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/microparams.h"
+#include "src/xnnpack/vunary.h"
+
+
+$_MM_FROUND_TO_FLAG = {
+$  "RNDNE": "_MM_FROUND_TO_NEAREST_INT",
+$  "RNDZ": "_MM_FROUND_TO_ZERO",
+$  "RNDU": "_MM_FROUND_TO_POS_INF",
+$  "RNDD": "_MM_FROUND_TO_NEG_INF",
+$}[OP]
+void xnn_f32_v${OP.lower()}_ukernel__sse41_u${BATCH_TILE}(
+    size_t batch,
+    const float* input,
+    float* output,
+    const struct xnn_f32_default_params* restrict params) XNN_OOB_READS
+{
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
+
+  for (; batch >= ${BATCH_TILE} * sizeof(float); batch -= ${BATCH_TILE} * sizeof(float)) {
+    const __m128 vx${ABC[0:4]} = _mm_loadu_ps(input);
+    $for N in range(4, BATCH_TILE, 4):
+      const __m128 vx${ABC[N:N+4]} = _mm_loadu_ps(input + ${N});
+    input += ${BATCH_TILE};
+
+    $for N in range(0, BATCH_TILE, 4):
+      const __m128 vy${ABC[N:N+4]} = _mm_round_ps(vx${ABC[N:N+4]}, ${_MM_FROUND_TO_FLAG} | _MM_FROUND_NO_EXC);
+
+    _mm_storeu_ps(output, vy${ABC[0:4]});
+    $for N in range(4, BATCH_TILE, 4):
+      _mm_storeu_ps(output + ${N}, vy${ABC[N:N+4]});
+    output += ${BATCH_TILE};
+  }
+  $if BATCH_TILE > 4:
+    for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
+      const __m128 vx = _mm_loadu_ps(input);
+      input += 4;
+
+      const __m128 vy = _mm_round_ps(vx, ${_MM_FROUND_TO_FLAG} | _MM_FROUND_NO_EXC);
+
+      _mm_storeu_ps(output, vy);
+      output += 4;
+    }
+  if XNN_UNLIKELY(batch != 0) {
+    const __m128 vx = _mm_loadu_ps(input);
+    __m128 vy = _mm_round_ps(vx, ${_MM_FROUND_TO_FLAG} | _MM_FROUND_NO_EXC);
+    if (batch & (2 * sizeof(float))) {
+      _mm_storel_pi((__m64*) output, vy);
+      vy = _mm_movehl_ps(vy, vy);
+      output += 2;
+    }
+    if (batch & (1 * sizeof(float))) {
+      _mm_store_ss(output, vy);
+    }
+  }
+}

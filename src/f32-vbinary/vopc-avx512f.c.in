@@ -1,0 +1,131 @@
+// Copyright 2019 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert BATCH_TILE % 16 == 0
+$assert BATCH_TILE >= 16
+$SIMD_TILE = BATCH_TILE // 16
+$assert OP in ["ADD", "DIV", "RDIV", "MAX", "MIN", "MUL", "SUB", "RSUB", "SQRDIFF", "PRELU", "RPRELU"]
+
+#include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
+
+#include <immintrin.h>
+
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/microparams.h"
+#include "src/xnnpack/intrinsics-polyfill.h"
+#include "src/xnnpack/vbinary.h"
+
+
+$_MM512_OP_PS = {
+$  "ADD": lambda x: "_mm512_add_ps(%s, vb)" % x,
+$  "DIV": lambda x: "_mm512_div_ps(%s, vb)" % x,
+$  "RDIV": lambda x: "_mm512_div_ps(vb, %s)" % x,
+$  "MAX": lambda x: "_mm512_max_ps(%s, vb)" % x,
+$  "MIN": lambda x: "_mm512_min_ps(%s, vb)" % x,
+$  "MUL": lambda x: "_mm512_mul_ps(%s, vb)" % x,
+$  "SUB": lambda x: "_mm512_sub_ps(%s, vb)" % x,
+$  "RSUB": lambda x: "_mm512_sub_ps(vb, %s)" % x,
+$  "SQRDIFF": lambda x: "_mm512_sub_ps(%s, vb)" % x,
+$  "PRELU": lambda x: "_mm512_mul_ps(%s, vb)" % x,
+$  "RPRELU": lambda x: "_mm512_mul_ps(%s, vb)" % x,
+$}[OP]
+$_MM512_MASKZ_OP_PS = {
+$  "ADD": lambda m, x: "_mm512_maskz_add_ps(%s, %s, vb)" % (m, x),
+$  "DIV": lambda m, x: "_mm512_maskz_div_ps(%s, %s, vb)" % (m, x),
+$  "RDIV": lambda m, x: "_mm512_maskz_div_ps(%s, vb, %s)" % (m, x),
+$  "MAX": lambda m, x: "_mm512_maskz_max_ps(%s, %s, vb)" % (m, x),
+$  "MIN": lambda m, x: "_mm512_maskz_min_ps(%s, %s, vb)" % (m, x),
+$  "MUL": lambda m, x: "_mm512_maskz_mul_ps(%s, %s, vb)" % (m, x),
+$  "SUB": lambda m, x: "_mm512_maskz_sub_ps(%s, %s, vb)" % (m, x),
+$  "RSUB": lambda m, x: "_mm512_maskz_sub_ps(%s, vb, %s)" % (m, x),
+$  "SQRDIFF": lambda m, x: "_mm512_maskz_sub_ps(%s, %s, vb)" % (m, x),
+$  "PRELU": lambda m, x: "_mm512_maskz_mul_ps(%s, %s, vb)" % (m, x),
+$  "RPRELU": lambda m, x: "_mm512_maskz_mul_ps(%s, %s, vb)" % (m, x),
+$}[OP]
+void xnn_f32_v${OP.lower()}c_ukernel__avx512f_u${BATCH_TILE}(
+    size_t batch,
+    const float* input_a,
+    const float* input_b,
+    float* output,
+    const struct xnn_f32_default_params* restrict params)
+{
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input_a != NULL);
+  assert(input_b != NULL);
+  assert(output != NULL);
+
+  const __m512 vb = _mm512_set1_ps(*input_b);
+  $if OP == "PRELU":
+    const __m512 vzero = _mm512_setzero_ps();
+  $elif OP == "RPRELU":
+    const __m512 vzero = _mm512_setzero_ps();
+    const __mmask16 vsign = _mm512_cmp_ps_mask(vb, vzero, _CMP_LT_OQ);
+
+  for (; batch >= ${BATCH_TILE} * sizeof(float); batch -= ${BATCH_TILE} * sizeof(float)) {
+    $for N in range(SIMD_TILE):
+      __m512 va${N} = _mm512_loadu_ps(input_a + ${N * 16});
+    input_a += ${BATCH_TILE};
+
+    $if OP == "PRELU":
+      $for N in range(SIMD_TILE):
+        const __mmask16 vsign${N} = _mm512_cmp_ps_mask(va${N}, vzero, _CMP_LT_OQ);
+        __m512 vacc${N} = _mm512_mask_mul_ps(va${N}, vsign${N}, va${N}, vb);
+    $elif OP == "RPRELU":
+      $for N in range(SIMD_TILE):
+        __m512 vacc${N} = _mm512_mask_mul_ps(vb, vsign, va${N}, vb);
+    $else:
+      $for N in range(SIMD_TILE):
+        __m512 vacc${N} = ${_MM512_OP_PS("va" + str(N))};
+
+      $if OP == "SQRDIFF":
+        $for N in range(SIMD_TILE):
+          vacc${N} = _mm512_mul_ps(vacc${N}, vacc${N});
+
+    $for N in range(SIMD_TILE):
+      _mm512_storeu_ps(output + ${N * 16}, vacc${N});
+    output += ${BATCH_TILE};
+  }
+  $if BATCH_TILE > 16:
+    for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
+      const __m512 va = _mm512_loadu_ps(input_a);
+      input_a += 16;
+
+      $if OP == "PRELU":
+        const __mmask16 vsign = _mm512_cmp_ps_mask(va, vzero, _CMP_LT_OQ);
+        __m512 vacc = _mm512_mask_mul_ps(va, vsign, va, vb);
+      $elif OP == "RPRELU":
+        __m512 vacc = _mm512_mask_mul_ps(vb, vsign, va, vb);
+      $else:
+        __m512 vacc = ${_MM512_OP_PS("va")};
+        $if OP == "SQRDIFF":
+          vacc = _mm512_mul_ps(vacc, vacc);
+
+      _mm512_storeu_ps(output, vacc);
+      output += 16;
+    }
+  if XNN_UNLIKELY(batch != 0) {
+    assert(batch >= 1 * sizeof(float));
+    assert(batch <= 15 * sizeof(float));
+    // Prepare mask for valid 32-bit elements (depends on batch).
+    batch >>= XNN_LOG2_SIZEOF_FLOAT;
+    const __mmask16 vmask = _cvtu32_mask16((uint32_t) ((UINT32_C(1) << batch) - UINT32_C(1)));
+
+    __m512 va = _mm512_maskz_loadu_ps(vmask, input_a);
+    $if OP == "PRELU":
+      const __mmask16 vsign = _mm512_cmp_ps_mask(va, vzero, _CMP_LT_OQ);
+      __m512 vacc = _mm512_mask_mul_ps(va, vsign, va, vb);
+    $elif OP == "RPRELU":
+      __m512 vacc = _mm512_mask_mul_ps(vb, vsign, va, vb);
+    $else:
+      __m512 vacc = ${_MM512_OP_PS("va")};
+      $if OP == "SQRDIFF":
+        vacc = _mm512_mul_ps(vacc, vacc);
+
+    _mm512_mask_storeu_ps(output, vmask, vacc);
+  }
+}

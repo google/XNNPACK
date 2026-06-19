@@ -1,0 +1,14 @@
+name: Build and update caches
+on:
+  push:
+    branches: [ master ]
+    paths-ignore:
+      - 'docker/**'
+  workflow_dispatch:
+
+jobs:
+  build-and-test:
+    uses: ./.github/workflows/build.yml
+    with:
+      run-tests: false
+      update-caches: true

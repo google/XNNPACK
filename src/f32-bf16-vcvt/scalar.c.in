@@ -1,0 +1,72 @@
+// Copyright 2021 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert BATCH_TILE >= 1
+#include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
+
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/vcvt.h"
+
+
+void xnn_f32_bf16_vcvt_ukernel__scalar_u${BATCH_TILE}(
+    size_t batch,
+    const float* input,
+    xnn_bfloat16* output,
+    const void* params)
+{
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
+
+  const float* i = input;
+  xnn_bfloat16* o = output;
+  $if BATCH_TILE == 1:
+    do {
+      const float vw = *i++;
+
+      xnn_bfloat16 vbf = xnn_bfloat16_from_float(vw);
+
+      *o++ = vbf;
+
+      batch -= sizeof(float);
+    } while (batch != 0);
+  $else:
+    for (; batch >= ${BATCH_TILE} * sizeof(float); batch -= ${BATCH_TILE} * sizeof(float)) {
+      $for N in range(BATCH_TILE):
+        const float vw${N} = i[${N}];
+      i += ${BATCH_TILE};
+
+      $for N in range(BATCH_TILE):
+        xnn_bfloat16 vbf${N} = xnn_bfloat16_from_float(vw${N});
+
+      $for N in range(BATCH_TILE):
+        o[${N}] = vbf${N};
+      o += ${BATCH_TILE};
+    }
+    $if BATCH_TILE == 2:
+      if XNN_UNLIKELY(batch != 0) {
+        const float vw = *i;
+
+        xnn_bfloat16 vbf = xnn_bfloat16_from_float(vw);
+
+        *o = vbf;
+      }
+    $else:
+      if XNN_UNLIKELY(batch != 0) {
+        do {
+          const float vw = *i++;
+
+          xnn_bfloat16 vbf = xnn_bfloat16_from_float(vw);
+
+          *o++ = vbf;
+
+          batch -= sizeof(float);
+        } while (batch != 0);
+      }
+}

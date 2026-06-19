@@ -1,0 +1,179 @@
+// Copyright 2019 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert MR % 4 == 0
+$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+$VMULADD_F32 = "vfma_f32" if FMA else "vmla_f32"
+$VMULADDQ_F32 = "vfmaq_f32" if FMA else "vmlaq_f32"
+#include <arm_neon.h>
+#include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
+
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/microparams.h"
+#include "src/xnnpack/prefetch.h"
+#include "src/xnnpack/spmm.h"
+
+
+void xnn_f32_spmm_minmax_ukernel_${MR}x${NR}__${"neonfma" if FMA else "neon"}${"_u" + str(UNROLL) if UNROLL > 1 else ""}(
+    size_t mc,
+    size_t nc,
+    const float* input,
+    const float* weights,
+    const int32_t* widx_dmap,
+    const uint32_t* nidx_nnzmap,
+    float* output,
+    size_t output_stride,
+    const struct xnn_f32_minmax_params* restrict params)
+{
+  assert(mc != 0);
+  assert(mc % sizeof(float) == 0);
+  assert(nc != 0);
+
+  #if XNN_ARCH_ARM64
+    const float32x4x2_t vminmax = vld2q_dup_f32(&params->scalar.min);
+    const float32x4_t vmin = vminmax.val[0];
+    const float32x4_t vmax = vminmax.val[1];
+  #else
+    const float32x2x2_t vminmax = vld2_dup_f32(&params->scalar.min);
+    const float32x4_t vmin = vcombine_f32(vminmax.val[0], vminmax.val[0]);
+    const float32x4_t vmax = vcombine_f32(vminmax.val[1], vminmax.val[1]);
+  #endif
+
+  size_t output_decrement = output_stride * nc - ${MR} * sizeof(float);
+  while XNN_LIKELY(mc >= ${MR} * sizeof(float)) {
+    const float* w = weights;
+    const int32_t* dmap = widx_dmap;
+    const uint32_t* nnzmap = nidx_nnzmap;
+    size_t n = nc;
+    do {
+      uint32_t nnz = *nnzmap++;
+      $if UNROLL > 1:
+        float32x4_t vacc0123x0 = vld1q_dup_f32(w); w += 1;
+        $for K in range(1, UNROLL):
+          float32x4_t vacc0123x${K} = vmovq_n_f32(0.0f);
+        $for M in range(4, MR, 4):
+          float32x4_t vacc${ABC[M:M+4]}x0 = vacc0123x0;
+          $for K in range(1, UNROLL):
+            float32x4_t vacc${ABC[M:M+4]}x${K} = vmovq_n_f32(0.0f);
+        for (; nnz >= ${UNROLL}; nnz -= ${UNROLL}) {
+          $for K in range(UNROLL):
+            const intptr_t diff${K} = dmap[${K}];
+          dmap += ${UNROLL};
+          $for K in range(UNROLL):
+            const float32x4_t vi0123x${K} = vld1q_f32(input);
+            $for M in range(4, MR, 4):
+              const float32x4_t vi${ABC[M:M+4]}x${K} = vld1q_f32(input + ${M});
+            input = (const float*) ((uintptr_t) input + (uintptr_t) diff${K});
+            $for M in range(0, MR, 16):
+              xnn_prefetch_to_l1(input + ${M+16});
+            const float32x4_t vw${K} = vld1q_dup_f32(w); w += 1;
+            xnn_prefetch_to_l1(w + 32);
+            $for M in range(0, MR, 4):
+              vacc${ABC[M:M+4]}x${K} = ${VMULADDQ_F32}(vacc${ABC[M:M+4]}x${K}, vi${ABC[M:M+4]}x${K}, vw${K});
+        }
+        $for M in range(0, MR, 4):
+          float32x4_t vacc${ABC[M:M+4]} = vacc${ABC[M:M+4]}x0;
+        $for K in range(1, UNROLL):
+          $for M in range(0, MR, 4):
+            vacc${ABC[M:M+4]} = vaddq_f32(vacc${ABC[M:M+4]}, vacc${ABC[M:M+4]}x${K});
+      $else:
+        float32x4_t vacc0123 = vld1q_dup_f32(w); w += 1;
+        $for M in range(4, MR, 4):
+          float32x4_t vacc${ABC[M:M+4]} = vacc0123;
+      if XNN_LIKELY(nnz != 0) {
+        do {
+          const intptr_t diff = *dmap++;
+          const float32x4_t vi0123 = vld1q_f32(input);
+          $for M in range(4, MR, 4):
+            const float32x4_t vi${ABC[M:M+4]} = vld1q_f32(input + ${M});
+          input = (const float*) ((uintptr_t) input + (uintptr_t) diff);
+          $for M in range(0, MR, 16):
+            xnn_prefetch_to_l1(input + ${M+16});
+          const float32x4_t vw = vld1q_dup_f32(w); w += 1;
+          xnn_prefetch_to_l1(w + 32);
+          $for M in range(0, MR, 4):
+            vacc${ABC[M:M+4]} = ${VMULADDQ_F32}(vacc${ABC[M:M+4]}, vi${ABC[M:M+4]}, vw);
+        } while (--nnz != 0);
+      }
+      $for M in range(0, MR, 4):
+        float32x4_t vout${ABC[M:M+4]} = vminq_f32(vacc${ABC[M:M+4]}, vmax);
+      $for M in range(0, MR, 4):
+        vout${ABC[M:M+4]} = vmaxq_f32(vout${ABC[M:M+4]}, vmin);
+      vst1q_f32(output, vout0123);
+      $for M in range(4, MR, 4):
+        vst1q_f32(output + ${M}, vout${ABC[M:M+4]});
+      output = (float*) ((uintptr_t) output + output_stride);
+    } while (--n != 0);
+    output = (float*) ((uintptr_t) output - output_decrement);
+    input += ${MR};
+    mc -= ${MR} * sizeof(float);
+  }
+  if XNN_UNLIKELY(mc != 0) {
+    $for LOG2M in reversed(range((MR - 1).bit_length())):
+      $SUBMR = 1 << LOG2M
+      $if SUBMR * 2 >= MR:
+        output_decrement += ${MR - SUBMR} * sizeof(float);
+      $else:
+        output_decrement += ${SUBMR} * sizeof(float);
+      if (mc & (${SUBMR} * sizeof(float))) {
+        const float* w = weights;
+        const int32_t* dmap = widx_dmap;
+        const uint32_t* nnzmap = nidx_nnzmap;
+        size_t n = nc;
+        do {
+          uint32_t nnz = *nnzmap++;
+          $if SUBMR <= 2:
+            float32x2_t vacc${ABC[0:SUBMR]} = vld1_dup_f32(w); w += 1;
+          $else:
+            float32x4_t vacc0123 = vld1q_dup_f32(w); w += 1;
+          $for M in range(4, SUBMR, 4):
+            float32x4_t vacc${ABC[M:M+4]} = vacc0123;
+          if XNN_LIKELY(nnz != 0) {
+            do {
+              const intptr_t diff = *dmap++;
+              $if SUBMR == 1:
+                const float32x2_t vi0 = vld1_dup_f32(input);
+              $elif SUBMR == 2:
+                const float32x2_t vi01 = vld1_f32(input);
+              $else:
+                const float32x4_t vi0123 = vld1q_f32(input);
+              $for M in range(4, SUBMR, 4):
+                const float32x4_t vi${ABC[M:M+4]} = vld1q_f32(input + ${M});
+              input = (const float*) ((uintptr_t) input + (uintptr_t) diff);
+              $if SUBMR <= 2:
+                const float32x2_t vw = vld1_dup_f32(w); w += 1;
+              $else:
+                const float32x4_t vw = vld1q_dup_f32(w); w += 1;
+              $if SUBMR <= 2:
+                vacc${ABC[0:SUBMR]} = ${VMULADD_F32}(vacc${ABC[0:SUBMR]}, vi${ABC[0:SUBMR]}, vw);
+              $else:
+                $for M in range(0, SUBMR, 4):
+                  vacc${ABC[M:M+4]} = ${VMULADDQ_F32}(vacc${ABC[M:M+4]}, vi${ABC[M:M+4]}, vw);
+            } while (--nnz != 0);
+          }
+          $if SUBMR <= 2:
+            float32x2_t vout${ABC[0:SUBMR]} = vmin_f32(vacc${ABC[0:SUBMR]}, vget_low_f32(vmax));
+            vout${ABC[0:SUBMR]} = vmax_f32(vout${ABC[0:SUBMR]}, vget_low_f32(vmin));
+            $if SUBMR == 1:
+              vst1_lane_f32(output, vout${ABC[0]}, 0);
+            $else:
+              vst1_f32(output, vout${ABC[0:SUBMR]});
+          $else:
+            $for M in range(0, SUBMR, 4):
+              float32x4_t vout${ABC[M:M+4]} = vminq_f32(vacc${ABC[M:M+4]}, vmax);
+            $for M in range(0, SUBMR, 4):
+              vout${ABC[M:M+4]} = vmaxq_f32(vout${ABC[M:M+4]}, vmin);
+            vst1q_f32(output, vout0123);
+            $for M in range(4, SUBMR, 4):
+              vst1q_f32(output + ${M}, vout${ABC[M:M+4]});
+          output = (float*) ((uintptr_t) output + output_stride);
+        } while (--n != 0);
+        output = (float*) ((uintptr_t) output - output_decrement);
+        input += ${SUBMR};
+      }
+  }
+}

@@ -1,0 +1,126 @@
+// Copyright 2024 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert BATCH_TILE % 32 == 0
+$assert BATCH_TILE >= 32
+$SIMD_TILE = BATCH_TILE // 32
+$assert OP in ["ADD", "DIV", "MAX", "MIN", "MUL", "SUB", "SQRDIFF", "PRELU"]
+#include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
+
+#include <immintrin.h>
+
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/microparams.h"
+#include "src/xnnpack/vbinary.h"
+
+
+$_MM512_OP_ph = {
+$  "ADD": "_mm512_add_ph",
+$  "DIV": "_mm512_div_ph",
+$  "MAX": "_mm512_max_ph",
+$  "MIN": "_mm512_min_ph",
+$  "MUL": "_mm512_mul_ph",
+$  "SUB": "_mm512_sub_ph",
+$  "SQRDIFF": "_mm512_sub_ph",
+$  "PRELU": "_mm512_mul_ph",
+$}[OP]
+$_MM512_MASKZ_OP_ph = {
+$  "ADD": "_mm512_maskz_add_ph",
+$  "DIV": "_mm512_maskz_div_ph",
+$  "MAX": "_mm512_maskz_max_ph",
+$  "MIN": "_mm512_maskz_min_ph",
+$  "MUL": "_mm512_maskz_mul_ph",
+$  "SUB": "_mm512_maskz_sub_ph",
+$  "SQRDIFF": "_mm512_maskz_sub_ph",
+$  "PRELU": "_mm512_maskz_mul_ph",
+$}[OP]
+void xnn_f16_v${OP.lower()}_ukernel__avx512fp16_u${BATCH_TILE}(
+    size_t batch,
+    const xnn_float16* restrict input_a,
+    const xnn_float16* restrict input_b,
+    xnn_float16* restrict output,
+    const struct xnn_f16_default_params* restrict params)
+{
+  assert(batch != 0);
+  assert(batch % sizeof(uint16_t) == 0);
+  assert(input_a != NULL);
+  assert(input_b != NULL);
+  assert(output != NULL);
+
+#if defined(__AVX512FP16__)
+  const uint16_t* a = (const uint16_t*) input_a;
+  const uint16_t* b = (const uint16_t*) input_b;
+  uint16_t* o = (uint16_t*) output;
+
+  $if OP == "PRELU":
+    const __m512h vzero = _mm512_setzero_ph();
+
+  $if BATCH_TILE > 32:
+    for (; batch >= ${BATCH_TILE} * sizeof(uint16_t); batch -= ${BATCH_TILE} * sizeof(uint16_t)) {
+      $for N in range(SIMD_TILE):
+        const __m512h va${N} = _mm512_loadu_ph(a + ${N * 32});
+      a += ${BATCH_TILE};
+
+      $if OP == "PRELU":
+        $for N in range(SIMD_TILE):
+          const __mmask32 vsign${N} = _mm512_cmp_ph_mask(va${N}, vzero, _CMP_LT_OQ);
+          __m512h vacc${N} = _mm512_mask_mul_ph(va${N}, vsign${N}, va${N}, _mm512_loadu_ph(b + ${N * 32}));
+        b += ${BATCH_TILE};
+      $else:
+        $for N in range(SIMD_TILE):
+          __m512h vacc${N} = ${_MM512_OP_ph}(va${N}, _mm512_loadu_ph(b + ${N * 32}));
+        b += ${BATCH_TILE};
+
+        $if OP == "SQRDIFF":
+          $for N in range(SIMD_TILE):
+            vacc${N} = _mm512_mul_ph(vacc${N}, vacc${N});
+
+      $for N in range(SIMD_TILE):
+        _mm512_storeu_ph(o + ${N * 32}, vacc${N});
+      o += ${BATCH_TILE};
+    }
+  for (; batch >= 32 * sizeof(uint16_t); batch -= 32 * sizeof(uint16_t)) {
+    const __m512h va = _mm512_loadu_ph(a);
+    a += 32;
+
+    $if OP == "PRELU":
+      const __mmask32 vsign = _mm512_cmp_ph_mask(va, vzero, _CMP_LT_OQ);
+      __m512h vacc = _mm512_mask_mul_ph(va, vsign, va, _mm512_loadu_ph(b));
+      b += 32;
+    $else:
+      __m512h vacc = ${_MM512_OP_ph}(va, _mm512_loadu_ph(b));
+      b += 32;
+
+      $if OP == "SQRDIFF":
+        vacc = _mm512_mul_ph(vacc, vacc);
+
+    _mm512_storeu_ph(o, vacc);
+    o += 32;
+  }
+  if XNN_UNLIKELY(batch != 0) {
+    assert(batch >= 1 * sizeof(uint16_t));
+    assert(batch <= 31 * sizeof(uint16_t));
+    // Prepare mask for valid 16-bit elements (depends on batch).
+    batch >>= XNN_LOG2_SIZEOF_FLOAT16;
+    const __mmask32 vmask = _cvtu32_mask32((uint32_t) ((UINT32_C(1) << batch) - UINT32_C(1)));
+
+    const __m512h va = _mm512_castsi512_ph(_mm512_maskz_loadu_epi16(vmask, a));
+
+    $if OP == "PRELU":
+      const __mmask32 vsign = _mm512_cmp_ph_mask(va, vzero, _CMP_LT_OQ);
+      __m512h vacc = _mm512_mask_mul_ph(va, vsign, va, _mm512_castsi512_ph(_mm512_maskz_loadu_epi16(vmask, b)));
+    $else:
+      __m512h vacc = ${_MM512_MASKZ_OP_ph}(vmask, va, _mm512_castsi512_ph(_mm512_maskz_loadu_epi16(vmask, b)));
+
+      $if OP == "SQRDIFF":
+        vacc = _mm512_maskz_mul_ph(vmask, vacc, vacc);
+
+    _mm512_mask_storeu_epi16(o, vmask, _mm512_castph_si512(vacc));
+  }
+#endif  // defined(__AVX512FP16__)
+}

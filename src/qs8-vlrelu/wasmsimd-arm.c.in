@@ -1,0 +1,116 @@
+// Copyright 2022 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert BATCH_TILE >= 16
+$assert BATCH_TILE % 16 == 0
+$SIMD_TILE = BATCH_TILE // 16
+$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+#include <assert.h>
+
+#include <wasm_simd128.h>
+
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/vcvt.h"
+
+
+$XINT8_T = {"QS8": "int8_t", "QU8": "uint8_t"}[DATATYPE]
+$WASM_X16X8_LOAD8X8 = {"QS8": "wasm_i16x8_load8x8", "QU8": "wasm_u16x8_load8x8"}[DATATYPE]
+$WASM_X16X8_EXTEND_LOW_X8X16 = {"QS8": "wasm_i16x8_extend_low_i8x16", "QU8": "wasm_u16x8_extend_low_u8x16"}[DATATYPE]
+$WASM_X16X8_EXTEND_HIGH_X8X16 = {"QS8": "wasm_i16x8_extend_high_i8x16", "QU8": "wasm_u16x8_extend_high_u8x16"}[DATATYPE]
+$WASM_V16X8_LANESELECT = "wasm_i16x8_relaxed_laneselect" if RELAXED else "wasm_v128_bitselect"
+$WASM_I16X8_Q15MULR = "wasm_i16x8_relaxed_q15mulr" if RELAXED else "wasm_i16x8_q15mulr_sat"
+$WASM_X8X16_NARROW_I16X8 = {"QS8": "wasm_i8x16_narrow_i16x8", "QU8": "wasm_u8x16_narrow_i16x8"}[DATATYPE]
+$ISA = "wasmrelaxedsimd" if RELAXED else "wasmsimd"
+void xnn_${DATATYPE.lower()}_vlrelu_ukernel__${ISA}_arm_u${BATCH_TILE}(
+    size_t batch,
+    const ${XINT8_T}* input,
+    ${XINT8_T}* output,
+    const struct xnn_${DATATYPE.lower()}_lrelu_params* restrict params) XNN_OOB_READS
+{
+  assert(batch != 0);
+  assert(batch % sizeof(${XINT8_T}) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
+
+  const v128_t vinput_zero_point = wasm_v128_load16_splat(&params->scalar.input_zero_point);
+  const v128_t vpositive_multiplier = wasm_i16x8_splat(-params->scalar.positive_multiplier);
+  const v128_t vnegative_multiplier = wasm_i16x8_splat(-params->scalar.negative_multiplier);
+  const v128_t voutput_zero_point = wasm_v128_load16_splat(&params->scalar.output_zero_point);
+  XNN_FORCE_REALIZATION(vinput_zero_point);
+  XNN_FORCE_REALIZATION(vpositive_multiplier);
+  XNN_FORCE_REALIZATION(vnegative_multiplier);
+  XNN_FORCE_REALIZATION(voutput_zero_point);
+  for (; batch >= ${BATCH_TILE} * sizeof(${XINT8_T}); batch -= ${BATCH_TILE} * sizeof(${XINT8_T})) {
+    v128_t vx${ABC[0]} = wasm_v128_load(input);
+    $for N in range(1, SIMD_TILE):
+      v128_t vx${ABC[N]} = wasm_v128_load(input + ${N * 16});
+    input += ${BATCH_TILE};
+
+    $for N in range(SIMD_TILE):
+      v128_t vacc${ABC[2*N]} = wasm_i16x8_sub(vinput_zero_point, ${WASM_X16X8_EXTEND_LOW_X8X16}(vx${ABC[N]}));
+      v128_t vacc${ABC[2*N+1]} = wasm_i16x8_sub(vinput_zero_point, ${WASM_X16X8_EXTEND_HIGH_X8X16}(vx${ABC[N]}));
+      v128_t vmultiplier${ABC[2*N]} = wasm_i16x8_shr(vacc${ABC[2*N]}, 15);
+      v128_t vmultiplier${ABC[2*N+1]} = wasm_i16x8_shr(vacc${ABC[2*N+1]}, 15);
+
+    $for N in range(2*SIMD_TILE):
+      vacc${ABC[N]} = wasm_i16x8_shl(vacc${ABC[N]}, 7);
+      vmultiplier${ABC[N]} = ${WASM_V16X8_LANESELECT}(vpositive_multiplier, vnegative_multiplier, vmultiplier${ABC[N]});
+
+    $for N in range(2*SIMD_TILE):
+      vacc${ABC[N]} = ${WASM_I16X8_Q15MULR}(vacc${ABC[N]}, vmultiplier${ABC[N]});
+
+    $for N in range(2*SIMD_TILE):
+      vacc${ABC[N]} = wasm_i16x8_add_sat(vacc${ABC[N]}, voutput_zero_point);
+
+    $for N in range(SIMD_TILE):
+      const v128_t vy${ABC[N]} = ${WASM_X8X16_NARROW_I16X8}(vacc${ABC[2*N]}, vacc${ABC[2*N+1]});
+
+    wasm_v128_store(output, vy${ABC[0]});
+    $for N in range(1, SIMD_TILE):
+      wasm_v128_store((output + ${N * 16}), vy${ABC[N]});
+    output += ${BATCH_TILE};
+  }
+  for (; batch >= 8 * sizeof(${XINT8_T}); batch -= 8 * sizeof(${XINT8_T})) {
+    const v128_t vx = ${WASM_X16X8_LOAD8X8}(input);
+    v128_t vacc = wasm_i16x8_sub(vinput_zero_point, vx);
+    v128_t vmultiplier = wasm_i16x8_shr(vacc, 15);
+    vacc = wasm_i16x8_shl(vacc, 7);
+    vmultiplier = ${WASM_V16X8_LANESELECT}(vpositive_multiplier, vnegative_multiplier, vmultiplier);
+    vacc = ${WASM_I16X8_Q15MULR}(vacc, vmultiplier);
+    vacc = wasm_i16x8_add_sat(vacc, voutput_zero_point);
+    input += 8;
+
+    const v128_t vy = ${WASM_X8X16_NARROW_I16X8}(vacc, vacc);
+    wasm_v128_store64_lane(output, vy, 0);
+    output += 8;
+  }
+  if XNN_UNLIKELY(batch != 0) {
+    assert(batch >= 1 * sizeof(${XINT8_T}));
+    assert(batch <= 7 * sizeof(${XINT8_T}));
+
+    const v128_t vx = ${WASM_X16X8_LOAD8X8}(input);
+    v128_t vacc = wasm_i16x8_sub(vinput_zero_point, vx);
+    v128_t vmultiplier = wasm_i16x8_shr(vacc, 15);
+    vacc = wasm_i16x8_shl(vacc, 7);
+    vmultiplier = ${WASM_V16X8_LANESELECT}(vpositive_multiplier, vnegative_multiplier, vmultiplier);
+    vacc = ${WASM_I16X8_Q15MULR}(vacc, vmultiplier);
+    vacc = wasm_i16x8_add_sat(vacc, voutput_zero_point);
+
+    v128_t vy = ${WASM_X8X16_NARROW_I16X8}(vacc, vacc);
+    if (batch & (4 * sizeof(${XINT8_T}))) {
+      wasm_v128_store32_lane(output, vy, 0);
+      vy = wasm_u64x2_shr(vy, 32);
+      output += 4;
+    }
+    if (batch & (2 * sizeof(${XINT8_T}))) {
+      wasm_v128_store16_lane(output, vy, 0);
+      vy = wasm_u32x4_shr(vy, 16);
+      output += 2;
+    }
+    if (batch & (1 * sizeof(${XINT8_T}))) {
+      wasm_v128_store8_lane(output, vy, 0);
+    }
+  }
+}

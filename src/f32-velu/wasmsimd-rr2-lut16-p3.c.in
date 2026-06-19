@@ -1,0 +1,215 @@
+// Copyright 2020 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert BATCH_TILE % 4 == 0
+$assert BATCH_TILE >= 4
+$assert ARCH in ["ARM", "X86", "RELAXED"]
+$assert not FMA or ARCH == "RELAXED"
+$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+#include <assert.h>
+
+#include <wasm_simd128.h>
+
+#include "src/xnnpack/vunary.h"
+#include "src/xnnpack/common.h"
+
+
+extern XNN_INTERNAL const uint32_t xnn_table_exp2minus_k_over_16[16];
+
+$WASM_F32X4_MAX={"ARM": "wasm_f32x4_max", "X86": "wasm_f32x4_pmax", "RELAXED": "wasm_f32x4_relaxed_max"}[ARCH]
+$WASM_V32X4_LANESELECT="wasm_i32x4_relaxed_laneselect" if ARCH == "RELAXED" else "wasm_v128_bitselect"
+$ISA = "wasmsimd" if ARCH != "RELAXED" else "wasmrelaxedsimd"
+$ARCH_SUFFIX = "" if ARCH == "RELAXED" and not FMA else "_" + ("fma" if FMA else ARCH.lower())
+void xnn_f32_velu_ukernel__${ISA}${ARCH_SUFFIX}_rr2_lut16_p3_u${BATCH_TILE}(
+    size_t batch,
+    const float* input,
+    float* output,
+    const struct xnn_f32_elu_params* restrict params) XNN_OOB_READS
+{
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
+
+  const v128_t vsat_cutoff = wasm_f32x4_const_splat(-0x1.154246p+4f);
+  const v128_t vmagic_bias = wasm_f32x4_const_splat(0x1.800000p19f);
+  const v128_t vlog2e = wasm_f32x4_const_splat(0x1.715476p+0f);
+  const v128_t vindex_mask = wasm_u32x4_const_splat(UINT32_C(0xF));
+  const v128_t vminus_ln2_hi = wasm_f32x4_const_splat(-0x1.62E400p-1f);
+  const v128_t vminus_ln2_lo = wasm_f32x4_const_splat(-0x1.7F7D1Cp-20f);
+  const v128_t vc3 = wasm_f32x4_const_splat(0x1.55561Cp-3f);
+  const v128_t vc2 = wasm_f32x4_const_splat(0x1.0001ECp-1f);
+  const v128_t vone = wasm_f32x4_const_splat(1.0f);
+
+  XNN_FORCE_REALIZATION(vsat_cutoff);
+  XNN_FORCE_REALIZATION(vmagic_bias);
+  XNN_FORCE_REALIZATION(vlog2e);
+  XNN_FORCE_REALIZATION(vindex_mask);
+  XNN_FORCE_REALIZATION(vminus_ln2_hi);
+  XNN_FORCE_REALIZATION(vminus_ln2_lo);
+  XNN_FORCE_REALIZATION(vc3);
+  XNN_FORCE_REALIZATION(vc2);
+  XNN_FORCE_REALIZATION(vone);
+
+  const v128_t vprescale = wasm_v128_load32_splat(&params->scalar.prescale);
+  const v128_t valpha = wasm_v128_load32_splat(&params->scalar.alpha);
+  const v128_t vbeta = wasm_v128_load32_splat(&params->scalar.beta);
+
+  $if BATCH_TILE > 4:
+    for (; batch >= ${BATCH_TILE} * sizeof(float); batch -= ${BATCH_TILE} * sizeof(float)) {
+      v128_t vx${ABC[0:4]} = wasm_v128_load(input);
+      $for N in range(4, BATCH_TILE, 4):
+        v128_t vx${ABC[N:N+4]} = wasm_v128_load(input + ${N});
+      input += ${BATCH_TILE};
+
+      $for N in range(0, BATCH_TILE, 4):
+        const v128_t vz${ABC[N:N+4]} = ${WASM_F32X4_MAX}(vsat_cutoff, wasm_f32x4_mul(vx${ABC[N:N+4]}, vprescale));
+
+      $for N in range(0, BATCH_TILE, 4):
+        v128_t vn${ABC[N:N+4]} = wasm_f32x4_add(vmagic_bias, wasm_f32x4_mul(vz${ABC[N:N+4]}, vlog2e));
+
+      $for N in range(0, BATCH_TILE, 4):
+        const v128_t vidx${ABC[N:N+4]} = wasm_i32x4_shl(wasm_v128_and(vn${ABC[N:N+4]}, vindex_mask), 2);
+        const v128_t ven${ABC[N:N+4]} = wasm_i32x4_shl(vn${ABC[N:N+4]}, 19);
+
+      $for N in range(0, BATCH_TILE, 4):
+        const uint32_t vidx${ABC[N]} = wasm_u32x4_extract_lane(vidx${ABC[N:N+4]}, 0);
+        v128_t vl${ABC[N:N+4]} = wasm_v128_load32_zero((const void*) ((uintptr_t) xnn_table_exp2minus_k_over_16 + (uint32_t) vidx${ABC[N]}));
+
+      $for L in range(1, 4):
+        $for N in range(0, BATCH_TILE, 4):
+          const uint32_t vidx${ABC[N+L]} = wasm_u32x4_extract_lane(vidx${ABC[N:N+4]}, ${L});
+          vl${ABC[N:N+4]} = wasm_v128_load32_lane((const void*) ((uintptr_t) xnn_table_exp2minus_k_over_16 + (uint32_t) vidx${ABC[N+L]}), vl${ABC[N:N+4]}, ${L});
+
+      $for N in range(0, BATCH_TILE, 4):
+        vn${ABC[N:N+4]} = wasm_f32x4_sub(vn${ABC[N:N+4]}, vmagic_bias);
+        v128_t vs${ABC[N:N+4]} = wasm_i32x4_add(vl${ABC[N:N+4]}, ven${ABC[N:N+4]});
+
+      $for N in range(0, BATCH_TILE, 4):
+        v128_t vt${ABC[N:N+4]} = wasm_f32x4_add(vz${ABC[N:N+4]}, wasm_f32x4_mul(vn${ABC[N:N+4]}, vminus_ln2_hi));
+
+      $for N in range(0, BATCH_TILE, 4):
+        vt${ABC[N:N+4]} = wasm_f32x4_add(wasm_f32x4_mul(vn${ABC[N:N+4]}, vminus_ln2_lo), vt${ABC[N:N+4]});
+
+      $for N in range(0, BATCH_TILE, 4):
+        v128_t vp${ABC[N:N+4]} = wasm_f32x4_add(vc2, wasm_f32x4_mul(vc3, vt${ABC[N:N+4]}));
+
+      $for N in range(0, BATCH_TILE, 4):
+        vp${ABC[N:N+4]} = wasm_f32x4_mul(vp${ABC[N:N+4]}, vt${ABC[N:N+4]});
+
+      $for N in range(0, BATCH_TILE, 4):
+        vt${ABC[N:N+4]} = wasm_f32x4_mul(vt${ABC[N:N+4]}, vs${ABC[N:N+4]});
+        vs${ABC[N:N+4]} = wasm_f32x4_sub(vs${ABC[N:N+4]}, vone);
+
+      $for N in range(0, BATCH_TILE, 4):
+        vp${ABC[N:N+4]} = wasm_f32x4_add(vt${ABC[N:N+4]}, wasm_f32x4_mul(vp${ABC[N:N+4]}, vt${ABC[N:N+4]}));
+
+      $for N in range(0, BATCH_TILE, 4):
+        const v128_t ve${ABC[N:N+4]} = wasm_f32x4_mul(valpha, wasm_f32x4_add(vp${ABC[N:N+4]}, vs${ABC[N:N+4]}));
+
+      $for N in range(0, BATCH_TILE, 4):
+        const v128_t vsignm${ABC[N:N+4]} = wasm_i32x4_shr(vx${ABC[N:N+4]}, 31);
+        vx${ABC[N:N+4]} = wasm_f32x4_mul(vx${ABC[N:N+4]}, vbeta);
+
+      $for N in range(0, BATCH_TILE, 4):
+        const v128_t vy${ABC[N:N+4]} = ${WASM_V32X4_LANESELECT}(ve${ABC[N:N+4]}, vx${ABC[N:N+4]}, vsignm${ABC[N:N+4]});
+
+      wasm_v128_store(output, vy${ABC[0:4]});
+      $for N in range(4, BATCH_TILE, 4):
+        wasm_v128_store(output + ${N}, vy${ABC[N:N+4]});
+      output += ${BATCH_TILE};
+    }
+  for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
+    v128_t vx = wasm_v128_load(input);
+    input += 4;
+
+    const v128_t vz = ${WASM_F32X4_MAX}(vsat_cutoff, wasm_f32x4_mul(vx, vprescale));
+
+    v128_t vn = wasm_f32x4_add(vmagic_bias, wasm_f32x4_mul(vz, vlog2e));
+    const v128_t vidx = wasm_i32x4_shl(wasm_v128_and(vn, vindex_mask), 2);
+    const v128_t ven = wasm_i32x4_shl(vn, 19);
+
+    const uint32_t vidx0 = wasm_u32x4_extract_lane(vidx, 0);
+    v128_t vl = wasm_v128_load32_zero((const void*) ((uintptr_t) xnn_table_exp2minus_k_over_16 + (uint32_t) vidx0));
+
+    const uint32_t vidx1 = wasm_u32x4_extract_lane(vidx, 1);
+    vl = wasm_v128_load32_lane((const void*) ((uintptr_t) xnn_table_exp2minus_k_over_16 + (uint32_t) vidx1), vl, 1);
+
+    const uint32_t vidx2 = wasm_u32x4_extract_lane(vidx, 2);
+    vl = wasm_v128_load32_lane((const void*) ((uintptr_t) xnn_table_exp2minus_k_over_16 + (uint32_t) vidx2), vl, 2);
+
+    const uint32_t vidx3 = wasm_u32x4_extract_lane(vidx, 3);
+    vl = wasm_v128_load32_lane((const void*) ((uintptr_t) xnn_table_exp2minus_k_over_16 + (uint32_t) vidx3), vl, 3);
+
+    v128_t vs = wasm_i32x4_add(vl, ven);
+    vn = wasm_f32x4_sub(vn, vmagic_bias);
+
+    v128_t vt = wasm_f32x4_add(vz, wasm_f32x4_mul(vn, vminus_ln2_hi));
+    vt = wasm_f32x4_add(vt, wasm_f32x4_mul(vn, vminus_ln2_lo));
+
+    v128_t vp = wasm_f32x4_add(vc2, wasm_f32x4_mul(vc3, vt));
+    vp = wasm_f32x4_mul(vp, vt);
+
+    vt = wasm_f32x4_mul(vt, vs);
+    vs = wasm_f32x4_sub(vs, vone);
+    vp = wasm_f32x4_add(vt, wasm_f32x4_mul(vp, vt));
+    const v128_t ve = wasm_f32x4_mul(wasm_f32x4_add(vp, vs), valpha);
+
+    const v128_t vsignm = wasm_i32x4_shr(vx, 31);
+    vx = wasm_f32x4_mul(vx, vbeta);
+    const v128_t vy = ${WASM_V32X4_LANESELECT}(ve, vx, vsignm);
+
+    wasm_v128_store(output, vy);
+    output += 4;
+  }
+  if XNN_UNLIKELY(batch != 0) {
+    v128_t vx = wasm_v128_load(input);
+
+    const v128_t vz = ${WASM_F32X4_MAX}(vsat_cutoff, wasm_f32x4_mul(vx, vprescale));
+
+    v128_t vn = wasm_f32x4_add(vmagic_bias, wasm_f32x4_mul(vz, vlog2e));
+    const v128_t vidx = wasm_i32x4_shl(wasm_v128_and(vn, vindex_mask), 2);
+    const v128_t ven = wasm_i32x4_shl(vn, 19);
+
+    const uint32_t vidx0 = wasm_u32x4_extract_lane(vidx, 0);
+    v128_t vl = wasm_v128_load32_zero((const void*) ((uintptr_t) xnn_table_exp2minus_k_over_16 + (uint32_t) vidx0));
+
+    const uint32_t vidx1 = wasm_u32x4_extract_lane(vidx, 1);
+    vl = wasm_v128_load32_lane((const void*) ((uintptr_t) xnn_table_exp2minus_k_over_16 + (uint32_t) vidx1), vl, 1);
+
+    const uint32_t vidx2 = wasm_u32x4_extract_lane(vidx, 2);
+    vl = wasm_v128_load32_lane((const void*) ((uintptr_t) xnn_table_exp2minus_k_over_16 + (uint32_t) vidx2), vl, 2);
+
+    const uint32_t vidx3 = wasm_u32x4_extract_lane(vidx, 3);
+    vl = wasm_v128_load32_lane((const void*) ((uintptr_t) xnn_table_exp2minus_k_over_16 + (uint32_t) vidx3), vl, 3);
+
+    v128_t vs = wasm_i32x4_add(vl, ven);
+    vn = wasm_f32x4_sub(vn, vmagic_bias);
+
+    v128_t vt = wasm_f32x4_add(vz, wasm_f32x4_mul(vn, vminus_ln2_hi));
+    vt = wasm_f32x4_add(vt, wasm_f32x4_mul(vn, vminus_ln2_lo));
+
+    v128_t vp = wasm_f32x4_add(vc2, wasm_f32x4_mul(vc3, vt));
+    vp = wasm_f32x4_mul(vp, vt);
+
+    vt = wasm_f32x4_mul(vt, vs);
+    vs = wasm_f32x4_sub(vs, vone);
+    vp = wasm_f32x4_add(vt, wasm_f32x4_mul(vp, vt));
+    const v128_t ve = wasm_f32x4_mul(wasm_f32x4_add(vp, vs), valpha);
+
+    const v128_t vsignm = wasm_i32x4_shr(vx, 31);
+    vx = wasm_f32x4_mul(vx, vbeta);
+    v128_t vy = ${WASM_V32X4_LANESELECT}(ve, vx, vsignm);
+
+    if (batch & (2 * sizeof(float))) {
+      wasm_v128_store64_lane(output, vy, 0);
+      vy = wasm_v64x2_shuffle(vy, vy, 1, 1);
+      output += 2;
+    }
+    if (batch & (1 * sizeof(float))) {
+      wasm_v128_store32_lane(output, vy, 0);
+    }
+  }
+}

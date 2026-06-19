@@ -1,0 +1,102 @@
+// Copyright 2023 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert BATCH_TILE >= 1
+$assert OP in ["MAX", "MIN", "MINMAX"]
+$EMIT_MIN = "MIN" in OP
+$EMIT_MAX = "MAX" in OP
+#include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
+
+$if BATCH_TILE > 1:
+  #include "src/xnnpack/common.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/microparams.h"
+#include "src/xnnpack/reduce.h"
+
+
+$ACC_SUFFIX = "" if ACCUMULATORS == 1 else "_acc%d" % ACCUMULATORS
+$MAX = "math_max_s16"
+$MIN = "math_min_s16"
+$ISA = "wasm" if WASM else "scalar"
+$MAX_POS = 1 if OP == "MINMAX" else 0
+void xnn_f16_r${OP.lower()}_ukernel__scalar_u${BATCH_TILE}${ACC_SUFFIX}(
+    size_t batch,
+    const xnn_float16* input,
+    xnn_float16* output,
+    const struct xnn_f16_default_params* restrict params)
+{
+  assert(batch != 0);
+  assert(batch % sizeof(uint16_t) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
+
+  const uint16_t* i = (const uint16_t*) input;
+  uint16_t* o = (uint16_t*) output;
+
+  $if EMIT_MIN:
+    int16_t vmin0 = math_signcomplement_f16(o[0]);
+  $if EMIT_MAX:
+    int16_t vmax0 = math_signcomplement_f16(o[${MAX_POS}]);
+  $for A in range(1, ACCUMULATORS):
+    $if EMIT_MIN:
+      int16_t vmin${A} = vmin0;
+    $if EMIT_MAX:
+      int16_t vmax${A} = vmax0;
+  $if BATCH_TILE == 1:
+    do {
+      int16_t vt = math_signcomplement_f16(*i++);
+      $if EMIT_MIN:
+        vmin0 = ${MIN}(vmin0, vt);
+      $if EMIT_MAX:
+        vmax0 = ${MAX}(vmax0, vt);
+      batch -= sizeof(uint16_t);
+    } while (batch != 0);
+  $else:
+    for (; batch >= ${BATCH_TILE} * sizeof(uint16_t); batch -= ${BATCH_TILE} * sizeof(uint16_t)) {
+      $for N in range(BATCH_TILE):
+        const int16_t vt${N} = math_signcomplement_f16(i[${N}]);
+      i += ${BATCH_TILE};
+
+      $for N in range(BATCH_TILE):
+        $if EMIT_MIN:
+          vmin${N % ACCUMULATORS} = ${MIN}(vmin${N % ACCUMULATORS}, vt${N});
+        $if EMIT_MAX:
+          vmax${N % ACCUMULATORS} = ${MAX}(vmax${N % ACCUMULATORS}, vt${N});
+    }
+    $if ACCUMULATORS > 1:
+      $ACC_SLICE = 1
+      $while ACC_SLICE < ACCUMULATORS:
+        $for A in range(0, ACCUMULATORS, ACC_SLICE * 2):
+          $if A + ACC_SLICE < ACCUMULATORS:
+            $if EMIT_MIN:
+              vmin${A} = ${MIN}(vmin${A}, vmin${A + ACC_SLICE});
+            $if EMIT_MAX:
+              vmax${A} = ${MAX}(vmax${A}, vmax${A + ACC_SLICE});
+        $ACC_SLICE *= 2
+
+    if XNN_UNLIKELY(batch != 0) {
+      $if BATCH_TILE == 2:
+        int16_t vt = math_signcomplement_f16(*i);
+        $if EMIT_MIN:
+          vmin0 = ${MIN}(vmin0, vt);
+        $if EMIT_MAX:
+          vmax0 = ${MAX}(vmax0, vt);
+      $else:
+        do {
+          int16_t vt = math_signcomplement_f16(*i++);
+          $if EMIT_MIN:
+            vmin0 = ${MIN}(vmin0, vt);
+          $if EMIT_MAX:
+            vmax0 = ${MAX}(vmax0, vt);
+          batch -= sizeof(uint16_t);
+        } while (batch != 0);
+    }
+  $if EMIT_MIN:
+    o[0] = (uint16_t) math_signcomplement_f16((uint16_t) vmin0);
+  $if EMIT_MAX:
+    o[${MAX_POS}] = (uint16_t) math_signcomplement_f16((uint16_t) vmax0);
+}

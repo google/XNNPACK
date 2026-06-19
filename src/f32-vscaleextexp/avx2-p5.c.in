@@ -1,0 +1,200 @@
+// Copyright 2019 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert BATCH_TILE % 8 == 0
+$assert BATCH_TILE >= 8
+$SIMD_TILE = BATCH_TILE // 8
+$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+#include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
+
+#include <immintrin.h>
+
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/vscaleextexp.h"
+
+
+void xnn_f32_vscaleextexp_ukernel__avx2_p5_u${BATCH_TILE}(
+    size_t batch,
+    const float* input,
+    float* output,
+    float scale_value,
+    float scale_exp)
+{
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
+
+  static const int32_t mask_table[14] = {-1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0};
+
+  const __m256 vlog2e = _mm256_set1_ps(0x1.715476p+0f);
+  const __m256 vminus_ln2_hi = _mm256_set1_ps(-0x1.62E43p-1f);
+  const __m256 vminus_ln2_lo = _mm256_set1_ps(0x1.05C61p-29f);
+
+  // The smallest batch such that 2**batch is considered non-negligible.
+  // For smaller batch, 2**batch is replaced with zero.
+  const __m256 vmin_exponent = _mm256_set1_ps(-127.0f);
+  const __m256 vmagic_bias = _mm256_set1_ps(0x1.8000FEp23f);
+
+  const __m256 vc0 = _mm256_set1_ps(1.0f);
+  const __m256 vc1 = _mm256_set1_ps(0x1.FFFFF6p-1f);
+  const __m256 vc2 = _mm256_set1_ps(0x1.FFFDC6p-2f);
+  const __m256 vc3 = _mm256_set1_ps(0x1.555A80p-3f);
+  const __m256 vc4 = _mm256_set1_ps(0x1.573A1Ap-5f);
+  const __m256 vc5 = _mm256_set1_ps(0x1.0F9F9Cp-7f);
+
+  const __m256 vscalev = _mm256_set1_ps(scale_value);
+  const __m256 vscalee = _mm256_set1_ps(scale_exp);
+
+  for (; batch >= ${BATCH_TILE} * sizeof(float); batch -= ${BATCH_TILE} * sizeof(float)) {
+    // Load ${BATCH_TILE} (${SIMD_TILE}x8) inputs at a time.
+    const __m256 vx0 = _mm256_loadu_ps(input);
+    $for N in range(1, SIMD_TILE):
+      const __m256 vx${N} = _mm256_loadu_ps(input + ${N * 8});
+    input += ${BATCH_TILE};
+
+    // Compute reduced argument batch := round(input / log(2)).
+    $for N in range(SIMD_TILE):
+      const __m256 vn${N} = _mm256_round_ps(_mm256_mul_ps(vx${N}, vlog2e), _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC);
+
+    // Compute reduced argument t := input - batch * log(2).
+    // Use Cody-Waite range reduction method (note two constants to represent log(2)) to improve accuracy.
+    $for N in range(SIMD_TILE):
+      __m256 vt${N} = _mm256_fmadd_ps(vn${N}, vminus_ln2_hi, vx${N});
+
+    $for N in range(SIMD_TILE):
+      vt${N} = _mm256_fmadd_ps(vn${N}, vminus_ln2_lo, vt${N});
+
+    // Compute degree-5 polynomial approximation for exp(t) on [-log(2)/2, log(2)/2].
+    $for N in range(SIMD_TILE):
+      __m256 vp${N} = _mm256_fmadd_ps(vc5, vt${N}, vc4);
+
+    $for N in range(SIMD_TILE):
+      vp${N} = _mm256_fmadd_ps(vp${N}, vt${N}, vc3);
+
+    $for N in range(SIMD_TILE):
+      vp${N} = _mm256_fmadd_ps(vp${N}, vt${N}, vc2);
+
+    $for N in range(SIMD_TILE):
+      vp${N} = _mm256_fmadd_ps(vp${N}, vt${N}, vc1);
+
+    $for N in range(SIMD_TILE):
+      vp${N} = _mm256_fmadd_ps(vp${N}, vt${N}, vc0);
+
+    // Multiply "extended" floating-point numbers in ("mantissa", "exponent") representation where
+    //  - vnX is "exponent"
+    //  - vpX is "mantissa"
+    //
+    // exp2(ae) * av * exp2(be) * bv =
+    //   = exp2(ae + be) * (av * bv)
+    $for N in range(SIMD_TILE):
+      __m256 vf${N} = _mm256_mul_ps(vp${N}, vscalev);
+
+    $for N in range(SIMD_TILE):
+      __m256 ve${N} = _mm256_add_ps(vn${N}, vscalee);
+
+    // For computational efficiency, replace exp2(e) with 0.0f when e <= -127.0.
+    // This replacement is done in two steps:
+    // 1. Clamp minimum e at -127.0.
+    // 2. Map e to scale factor 0.0 when e == -127.0
+    $for N in range(SIMD_TILE):
+      ve${N} = _mm256_max_ps(ve${N}, vmin_exponent);
+
+    // Convert exponents into scale factors:
+    // - s = exp2(e) when e > -127.0
+    // - s = 0.0 when e <= -127.0
+    $for N in range(SIMD_TILE):
+      const __m256 vs${N} = _mm256_castsi256_ps(_mm256_slli_epi32(_mm256_castps_si256(_mm256_add_ps(ve${N}, vmagic_bias)), 23));
+
+    // Multiply "mantissa" by the scale factor.
+    $for N in range(SIMD_TILE):
+      vf${N} = _mm256_mul_ps(vf${N}, vs${N});
+
+    // Store ${BATCH_TILE} (${SIMD_TILE}x8) outputs at a time.
+    _mm256_storeu_ps(output, vf0);
+    $for N in range(1, SIMD_TILE):
+      _mm256_storeu_ps(output + ${N * 8}, vf${N});
+    output += ${BATCH_TILE};
+  }
+
+  for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
+    // Load 8 inputs at a time.
+    const __m256 vx = _mm256_loadu_ps(input);
+    input += 8;
+
+    // Compute reduced argument batch := round(input / log(2)).
+    const __m256 vn = _mm256_round_ps(_mm256_mul_ps(vx, vlog2e), _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC);
+
+    // Compute reduced argument t := input - batch * log(2).
+    // Use Cody-Waite range reduction method (note two constants to represent log(2)) to improve accuracy.
+    __m256 vt = _mm256_fmadd_ps(vn, vminus_ln2_hi, vx);
+    vt = _mm256_fmadd_ps(vn, vminus_ln2_lo, vt);
+
+    // Compute degree-5 polynomial approximation for exp(t) on [-log(2)/2, log(2)/2].
+    __m256 vp = _mm256_fmadd_ps(vc5, vt, vc4);
+    vp = _mm256_fmadd_ps(vp, vt, vc3);
+    vp = _mm256_fmadd_ps(vp, vt, vc2);
+    vp = _mm256_fmadd_ps(vp, vt, vc1);
+    vp = _mm256_fmadd_ps(vp, vt, vc0);
+
+    // Multiply "extended" floating-point numbers in ("mantissa", "exponent") representation.
+    __m256 vf = _mm256_mul_ps(vp, vscalev);
+    __m256 ve = _mm256_add_ps(vn, vscalee);
+
+    // For computational efficiency, replace exp2(e) with 0.0f when e <= -127.0.
+    ve = _mm256_max_ps(ve, vmin_exponent);
+
+    // Convert exponents into scale factors.
+    const __m256 vs = _mm256_castsi256_ps(_mm256_slli_epi32(_mm256_castps_si256(_mm256_add_ps(ve, vmagic_bias)), 23));
+
+    // Multiply "mantissa" by the scale factor.
+    vf = _mm256_mul_ps(vf, vs);
+
+    // Store 8 results at a time.
+    _mm256_storeu_ps(output, vf);
+    output += 8;
+  }
+  if XNN_UNLIKELY(batch != 0) {
+    assert(batch >= 1 * sizeof(float));
+    assert(batch <= 7 * sizeof(float));
+    const __m256i vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &mask_table[7] - batch));
+
+    // Load up to 7 inputs at a time.
+    const __m256 vx = _mm256_maskload_ps(input, vmask);
+
+    // Compute reduced argument batch := round(input / log(2)).
+    const __m256 vn = _mm256_round_ps(_mm256_mul_ps(vx, vlog2e), _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC);
+
+    // Compute reduced argument t := input - batch * log(2).
+    // Use Cody-Waite range reduction method (note two constants to represent log(2)) to improve accuracy.
+    __m256 vt = _mm256_fmadd_ps(vn, vminus_ln2_hi, vx);
+    vt = _mm256_fmadd_ps(vn, vminus_ln2_lo, vt);
+
+    // Compute degree-5 polynomial approximation for exp(t) on [-log(2)/2, log(2)/2].
+    __m256 vp = _mm256_fmadd_ps(vc5, vt, vc4);
+    vp = _mm256_fmadd_ps(vp, vt, vc3);
+    vp = _mm256_fmadd_ps(vp, vt, vc2);
+    vp = _mm256_fmadd_ps(vp, vt, vc1);
+    vp = _mm256_fmadd_ps(vp, vt, vc0);
+
+    // Multiply "extended" floating-point numbers in ("mantissa", "exponent") representation.
+    __m256 vf = _mm256_mul_ps(vp, vscalev);
+    __m256 ve = _mm256_add_ps(vn, vscalee);
+
+    // For computational efficiency, replace exp2(e) with 0.0f when e <= -127.0.
+    ve = _mm256_max_ps(ve, vmin_exponent);
+
+    // Convert exponents into scale factors.
+    const __m256 vs = _mm256_castsi256_ps(_mm256_slli_epi32(_mm256_castps_si256(_mm256_add_ps(ve, vmagic_bias)), 23));
+
+    // Multiply "mantissa" by the scale factor.
+    vf = _mm256_mul_ps(vf, vs);
+
+    // Store up to 7 inputs at a time.
+    _mm256_maskstore_ps(output, vmask, vf);
+  }
+}

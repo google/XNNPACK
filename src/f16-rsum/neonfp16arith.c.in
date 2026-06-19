@@ -1,0 +1,76 @@
+// Copyright 2023 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert BATCH_TILE % 8 == 0
+$assert BATCH_TILE >= 8
+$SIMD_TILE = BATCH_TILE // 8
+$assert ACCUMULATORS <= SIMD_TILE
+$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+#include <arm_neon.h>
+#include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
+
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/microparams.h"
+#include "src/xnnpack/reduce.h"
+
+
+$ACC_SUFFIX = "" if ACCUMULATORS == 1 else "_acc%d" % ACCUMULATORS
+void xnn_f16_rsum_ukernel__neonfp16arith_u${BATCH_TILE}${ACC_SUFFIX}(
+    size_t batch,
+    const xnn_float16* input,
+    xnn_float16* output,
+    const struct xnn_f16_scale_params* restrict params)
+{
+  assert(batch != 0);
+  assert(batch % sizeof(uint16_t) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
+
+  const uint16_t* i = (const uint16_t*) input;
+  uint16_t* o = (uint16_t*) output;
+  $for A in range(ACCUMULATORS):
+    float16x8_t vacc${A} = vreinterpretq_f16_u16(vmovq_n_u16(0));
+  $if BATCH_TILE > 8:
+    for (; batch >= ${BATCH_TILE} * sizeof(uint16_t); batch -= ${BATCH_TILE} * sizeof(uint16_t)) {
+      $for N in range(SIMD_TILE):
+        const float16x8_t vt${N} = vreinterpretq_f16_u16(vld1q_u16(i)); i += 8;
+
+      $for N in range(SIMD_TILE):
+        vacc${N % ACCUMULATORS} = vaddq_f16(vacc${N % ACCUMULATORS}, vt${N});
+    }
+    $if ACCUMULATORS > 1:
+      $ACC_SLICE = 1
+      $while ACC_SLICE < ACCUMULATORS:
+        $for A in range(0, ACCUMULATORS, ACC_SLICE * 2):
+          $if A + ACC_SLICE < ACCUMULATORS:
+            vacc${A} = vaddq_f16(vacc${A}, vacc${A + ACC_SLICE});
+        $ACC_SLICE *= 2
+  for (; batch >= 8 * sizeof(uint16_t); batch -= 8 * sizeof(uint16_t)) {
+    const float16x8_t vt = vreinterpretq_f16_u16(vld1q_u16(i)); i += 8;
+    vacc0 = vaddq_f16(vacc0, vt);
+  }
+  const float16x4_t vscale = vreinterpret_f16_u16(vdup_n_u16(*(const uint16_t*) &params->scalar.scale));
+  float16x4_t vacc = vadd_f16(vget_low_f16(vacc0), vget_high_f16(vacc0));
+  if XNN_UNLIKELY(batch & (4 * sizeof(uint16_t))) {
+    const float16x4_t vt = vreinterpret_f16_u16(vld1_u16(i)); i += 4;
+    vacc = vadd_f16(vacc, vt);
+  }
+  vacc = vpadd_f16(vacc, vacc);
+  if XNN_UNLIKELY(batch & (2 * sizeof(uint16_t))) {
+    const float16x4_t vt = vreinterpret_f16_u32(vld1_dup_u32((const void*) i)); i += 2;
+    vacc = vadd_f16(vacc, vt);
+  }
+  vacc = vpadd_f16(vacc, vacc);
+  if XNN_UNLIKELY(batch & (1 * sizeof(uint16_t))) {
+    const float16x4_t vt = vreinterpret_f16_u16(vld1_dup_u16(i));
+    vacc = vadd_f16(vacc, vt);
+  }
+  vacc = vmul_f16(vacc, vscale);
+  vacc = vadd_f16(vacc, vreinterpret_f16_u16(vld1_dup_u16(o)));
+  vst1_lane_u16(o, vreinterpret_u16_f16(vacc), 0);
+}

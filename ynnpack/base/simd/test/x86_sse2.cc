@@ -1,0 +1,174 @@
+// Copyright 2025 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+#include <cmath>
+
+#include <gtest/gtest.h>
+#include "ynnpack/base/simd/x86_vec128.h"
+
+// This must be included last
+#include "ynnpack/base/simd/test/generic.h"
+
+namespace ynn {
+namespace simd {
+
+// We assume we can always use sse2.
+class x86_sse2 : public ::testing::Test {};
+
+TEST_BROADCAST(x86_sse2, u8, 16);
+TEST_BROADCAST(x86_sse2, s8, 16);
+TEST_BROADCAST(x86_sse2, s16, 8);
+TEST_BROADCAST(x86_sse2, f16, 8);
+TEST_BROADCAST(x86_sse2, bf16, 8);
+TEST_BROADCAST(x86_sse2, f32, 4);
+TEST_BROADCAST(x86_sse2, s32, 4);
+TEST_BROADCAST(x86_sse2, f64, 2);
+
+TEST_LOAD_STORE(x86_sse2, u8, 16);
+TEST_LOAD_STORE(x86_sse2, s8, 16);
+TEST_LOAD_STORE(x86_sse2, s16, 8);
+TEST_LOAD_STORE(x86_sse2, f16, 8);
+TEST_LOAD_STORE(x86_sse2, bf16, 8);
+TEST_LOAD_STORE(x86_sse2, f32, 4);
+TEST_LOAD_STORE(x86_sse2, s32, 4);
+
+TEST_ALIGNED_LOAD_STORE(x86_sse2, u8, 16);
+TEST_ALIGNED_LOAD_STORE(x86_sse2, s8, 16);
+TEST_ALIGNED_LOAD_STORE(x86_sse2, s16, 8);
+TEST_ALIGNED_LOAD_STORE(x86_sse2, f16, 8);
+TEST_ALIGNED_LOAD_STORE(x86_sse2, bf16, 8);
+TEST_ALIGNED_LOAD_STORE(x86_sse2, f32, 4);
+TEST_ALIGNED_LOAD_STORE(x86_sse2, s32, 4);
+
+TEST_PARTIAL_LOAD_STORE(x86_sse2, u8, 16);
+TEST_PARTIAL_LOAD_STORE(x86_sse2, s8, 16);
+TEST_PARTIAL_LOAD_STORE(x86_sse2, s16, 8);
+TEST_PARTIAL_LOAD_STORE(x86_sse2, f16, 8);
+TEST_PARTIAL_LOAD_STORE(x86_sse2, bf16, 8);
+TEST_PARTIAL_LOAD_STORE(x86_sse2, f32, 4);
+TEST_PARTIAL_LOAD_STORE(x86_sse2, s32, 4);
+
+TEST_ADD(x86_sse2, u8, 16);
+TEST_ADD(x86_sse2, s8, 16);
+TEST_ADD(x86_sse2, s16, 8);
+TEST_ADD(x86_sse2, f32, 4);
+TEST_ADD(x86_sse2, s32, 4);
+TEST_ADD(x86_sse2, f64, 2);
+
+TEST_SUBTRACT(x86_sse2, u8, 16);
+TEST_SUBTRACT(x86_sse2, s8, 16);
+TEST_SUBTRACT(x86_sse2, s16, 8);
+TEST_SUBTRACT(x86_sse2, f32, 4);
+TEST_SUBTRACT(x86_sse2, s32, 4);
+TEST_SUBTRACT(x86_sse2, f64, 2);
+
+TEST_ADD_SAT(x86_sse2, u8, 16);
+TEST_ADD_SAT(x86_sse2, s8, 16);
+TEST_ADD_SAT(x86_sse2, u16, 8);
+TEST_ADD_SAT(x86_sse2, s16, 8);
+
+TEST_SUB_SAT(x86_sse2, u8, 16);
+TEST_SUB_SAT(x86_sse2, s8, 16);
+TEST_SUB_SAT(x86_sse2, u16, 8);
+TEST_SUB_SAT(x86_sse2, s16, 8);
+
+TEST_MULTIPLY(x86_sse2, f32, 4);
+TEST_MULTIPLY(x86_sse2, f64, 2);
+
+TEST_DIVIDE(x86_sse2, f32, 4);
+
+TEST_COPYSIGN(x86_sse2, f64, 2);
+
+TEST_MIN(x86_sse2, u8, 16);
+TEST_MIN(x86_sse2, s16, 8);
+TEST_MIN(x86_sse2, f32, 4);
+
+TEST_MAX(x86_sse2, u8, 16);
+TEST_MAX(x86_sse2, s16, 8);
+TEST_MAX(x86_sse2, f32, 4);
+
+TEST_AND(x86_sse2, u8, 16);
+TEST_AND(x86_sse2, s8, 16);
+TEST_AND(x86_sse2, s16, 8);
+TEST_AND(x86_sse2, s32, 4);
+
+TEST_OR(x86_sse2, u8, 16);
+TEST_OR(x86_sse2, s8, 16);
+TEST_OR(x86_sse2, s16, 8);
+TEST_OR(x86_sse2, s32, 4);
+
+TEST_XOR(x86_sse2, u8, 16);
+TEST_XOR(x86_sse2, s8, 16);
+TEST_XOR(x86_sse2, s16, 8);
+TEST_XOR(x86_sse2, s32, 4);
+
+TEST_NOT(x86_sse2, u8, 16);
+TEST_NOT(x86_sse2, s8, 16);
+TEST_NOT(x86_sse2, s16, 8);
+TEST_NOT(x86_sse2, s32, 4);
+
+TEST_SHIFT_LEFT(x86_sse2, s16, 8);
+TEST_SHIFT_LEFT(x86_sse2, s32, 4);
+
+TEST_SQRT(x86_sse2, f32, 4);
+
+TEST_ABS(x86_sse2, f32, 4);
+
+TEST_FLOOR_LOG2(x86_sse2, f32, 4);
+TEST_FLOOR_LOG2(x86_sse2, f64, 2);
+TEST_EXP2_ROUND(x86_sse2, f32, 4);
+TEST_EXP2_ROUND(x86_sse2, f64, 2);
+TEST_COMPARISONS(x86_sse2, f32, 4);
+TEST_COMPARISONS(x86_sse2, f64, 2);
+TEST_ISNAN(x86_sse2, f32, 4);
+TEST_ISNAN(x86_sse2, f64, 2);
+TEST_ISFINITE(x86_sse2, f32, 4);
+TEST_ISFINITE(x86_sse2, f64, 2);
+
+TEST_HORIZONTAL_MIN(x86_sse2, u8, 16);
+TEST_HORIZONTAL_MIN(x86_sse2, s16, 8);
+TEST_HORIZONTAL_MIN(x86_sse2, f32, 4);
+
+TEST_HORIZONTAL_MAX(x86_sse2, u8, 16);
+TEST_HORIZONTAL_MAX(x86_sse2, s16, 8);
+TEST_HORIZONTAL_MAX(x86_sse2, f32, 4);
+
+TEST_HORIZONTAL_SUM(x86_sse2, f64, 2);
+TEST_HORIZONTAL_SUM(x86_sse2, f32, 4);
+TEST_HORIZONTAL_SUM(x86_sse2, s32, 4);
+
+TEST_CAST(x86_sse2, f32, bf16x8);
+TEST_CAST(x86_sse2, s32, u8x16);
+TEST_CAST(x86_sse2, s32, s8x16);
+TEST_CAST(x86_sse2, f32, s32x4);
+TEST_CAST(x86_sse2, s32, f32x4);
+TEST_CAST(x86_sse2, f64, f32x4);
+TEST_CAST(x86_sse2, f32, f64x4);
+
+TEST_CAST(x86_sse2, s16, s32x8);
+TEST_CAST(x86_sse2, u8, s16x16);
+TEST_CAST(x86_sse2, s8, s16x16);
+TEST_CAST(x86_sse2, u8, f32x16);
+TEST_CAST(x86_sse2, s8, f32x16);
+TEST_CAST(x86_sse2, s16, f32x8);
+
+TEST_UNARY(x86_sse2, exp, f32, 4, std::exp, 2);
+TEST_UNARY(x86_sse2, exp, f64, 2, std::exp, 2);
+TEST_UNARY(x86_sse2, expm1, f32, 4, std::expm1, 2);
+TEST_UNARY(x86_sse2, expm1, f64, 2, std::expm1, 2);
+TEST_UNARY(x86_sse2, log, f32, 4, std::log, 2);
+TEST_UNARY(x86_sse2, log, f64, 2, std::log, 2);
+TEST_UNARY(x86_sse2, log1p, f32, 4, std::log1p, 3);
+TEST_UNARY(x86_sse2, log1p, f64, 2, std::log1p, 3);
+TEST_UNARY(x86_sse2, erf, f32, 4, std::erf, 2);
+TEST_UNARY(x86_sse2, erf, f64, 2, std::erf, 3);
+TEST_UNARY(x86_sse2, tanh, f32, 4, std::tanh, 3);
+TEST_UNARY(x86_sse2, tanh, f64, 2, std::tanh, 4);
+
+TEST_UNARY(x86_sse2, approx_erf, f32, 4, std::erf, 5);
+TEST_UNARY(x86_sse2, approx_tanh, f32, 4, std::tanh, 5);
+
+}  // namespace simd
+}  // namespace ynn

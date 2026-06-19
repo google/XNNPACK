@@ -1,0 +1,125 @@
+// Copyright 2021 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert BATCH_TILE % 8 == 0
+$assert BATCH_TILE >= 8
+$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+#include <arm_neon.h>
+#include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
+
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/microparams.h"
+#include "src/xnnpack/vcvt.h"
+
+
+$XINT8_T = {"QS8": "int8_t", "QU8": "uint8_t"}[DATATYPE]
+$XINT8X8_T = {"QS8": "int8x8_t", "QU8": "uint8x8_t"}[DATATYPE]
+$XINT8X16_T = {"QS8": "int8x16_t", "QU8": "uint8x16_t"}[DATATYPE]
+$VST1Q_X8 = {"QS8": "vst1q_s8", "QU8": "vst1q_u8"}[DATATYPE]
+$VST1_X8 = {"QS8": "vst1_s8", "QU8": "vst1_u8"}[DATATYPE]
+$VST1_LANE_X8 = {"QS8": "vst1_lane_s8", "QU8": "vst1_lane_u8"}[DATATYPE]
+$VQMOVXN_S16 = {"QS8": "vqmovn_s16", "QU8": "vqmovun_s16"}[DATATYPE]
+$VEXT_X8 = {"QS8": "vext_s8", "QU8": "vext_u8"}[DATATYPE]
+$VCOMBINE_X8 = {"QS8": "vcombine_s8", "QU8": "vcombine_u8"}[DATATYPE]
+$VGET_LOW_X8 = {"QS8": "vget_low_s8", "QU8": "vget_low_u8"}[DATATYPE]
+$VREINTERPRET_U16_X8 = {"QS8": "vreinterpret_u16_s8", "QU8": "vreinterpret_u16_u8"}[DATATYPE]
+$VREINTERPRET_U32_X8 = {"QS8": "vreinterpret_u32_s8", "QU8": "vreinterpret_u32_u8"}[DATATYPE]
+void xnn_f32_${DATATYPE.lower()}_vcvt_ukernel__neon_u${BATCH_TILE}(
+    size_t batch,
+    const float* input,
+    ${XINT8_T}* output,
+    const struct xnn_f32_${DATATYPE.lower()}_cvt_params* restrict params) XNN_OOB_READS
+{
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
+
+  const float32x4_t vscale = vdupq_n_f32(params->scalar.scale);
+  const float32x4_t vmagic_bias = vdupq_n_f32(12582912.0f);
+  const int32x4_t vmagic_bias_less_zero_point = vdupq_n_s32(INT32_C(0x4B400000) - (int32_t) params->scalar.output_zero_point);
+  XNN_FORCE_REALIZATION(vmagic_bias);
+  $if BATCH_TILE > 8:
+    for (; batch >= ${BATCH_TILE} * sizeof(float); batch -= ${BATCH_TILE} * sizeof(float)) {
+      $for N in range(0, BATCH_TILE, 4):
+        float32x4_t vx${ABC[N:N+4]} = vld1q_f32(input); input += 4;
+
+      $for N in range(0, BATCH_TILE, 4):
+        vx${ABC[N:N+4]} = vmulq_f32(vx${ABC[N:N+4]}, vscale);
+
+      $for N in range(0, BATCH_TILE, 4):
+        vx${ABC[N:N+4]} = vaddq_f32(vx${ABC[N:N+4]}, vmagic_bias);
+
+      $for N in range(0, BATCH_TILE, 4):
+        const int32x4_t vacc${ABC[N:N+4]} = vqsubq_s32(vreinterpretq_s32_f32(vx${ABC[N:N+4]}), vmagic_bias_less_zero_point);
+
+      $for N in range(0, BATCH_TILE, 8):
+        const int16x8_t vacc${ABC[N:N+8]} = vcombine_s16(vqmovn_s32(vacc${ABC[N:N+4]}), vqmovn_s32(vacc${ABC[N+4:N+8]}));
+
+      $for N in range(0, BATCH_TILE, 16):
+        $if N + 8 < BATCH_TILE:
+          ${XINT8X16_T} vy${ABC[N:N+16]} = ${VCOMBINE_X8}(${VQMOVXN_S16}(vacc${ABC[N:N+8]}), ${VQMOVXN_S16}(vacc${ABC[N+8:N+16]}));
+        $else:
+          ${XINT8X8_T} vy${ABC[N:N+8]} = ${VQMOVXN_S16}(vacc${ABC[N:N+8]});
+
+      $for N in range(0, BATCH_TILE, 16):
+        $if N + 8 < BATCH_TILE:
+          ${VST1Q_X8}(output, vy${ABC[N:N+16]}); output += 16;
+        $else:
+          ${VST1_X8}(output, vy${ABC[N:N+8]}); output += 8;
+    }
+  for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
+    float32x4_t vx_lo = vld1q_f32(input); input += 4;
+    float32x4_t vx_hi = vld1q_f32(input); input += 4;
+
+    vx_lo = vmulq_f32(vx_lo, vscale);
+    vx_hi = vmulq_f32(vx_hi, vscale);
+
+    vx_lo = vaddq_f32(vx_lo, vmagic_bias);
+    vx_hi = vaddq_f32(vx_hi, vmagic_bias);
+
+    const int32x4_t vacc_lo = vqsubq_s32(vreinterpretq_s32_f32(vx_lo), vmagic_bias_less_zero_point);
+    const int32x4_t vacc_hi = vqsubq_s32(vreinterpretq_s32_f32(vx_hi), vmagic_bias_less_zero_point);
+
+    const int16x8_t vacc = vcombine_s16(vqmovn_s32(vacc_lo), vqmovn_s32(vacc_hi));
+
+    ${XINT8X8_T} vy = ${VQMOVXN_S16}(vacc);
+    ${VST1_X8}(output, vy); output += 8;
+  }
+  if XNN_UNLIKELY(batch != 0) {
+    assert(batch >= 1 * sizeof(float));
+    assert(batch <= 7 * sizeof(float));
+    float32x4_t vx_lo = vld1q_f32(input);
+    const float* x_hi = (const float*) ((uintptr_t) input + (batch & (4 * sizeof(float))));
+    float32x4_t vx_hi = vld1q_f32(x_hi);
+
+    vx_lo = vmulq_f32(vx_lo, vscale);
+    vx_hi = vmulq_f32(vx_hi, vscale);
+
+    vx_lo = vaddq_f32(vx_lo, vmagic_bias);
+    vx_hi = vaddq_f32(vx_hi, vmagic_bias);
+
+    const int32x4_t vacc_lo = vqsubq_s32(vreinterpretq_s32_f32(vx_lo), vmagic_bias_less_zero_point);
+    const int32x4_t vacc_hi = vqsubq_s32(vreinterpretq_s32_f32(vx_hi), vmagic_bias_less_zero_point);
+
+    const int16x8_t vacc = vcombine_s16(vqmovn_s32(vacc_lo), vqmovn_s32(vacc_hi));
+
+    ${XINT8X8_T} vy = ${VQMOVXN_S16}(vacc);
+
+    if (batch & (4 * sizeof(float))) {
+      vst1_lane_u32((void*) output, ${VREINTERPRET_U32_X8}(vy), 0); output += 4;
+      vy = ${VEXT_X8}(vy, vy, 4);
+    }
+    if (batch & (2 * sizeof(float))) {
+      vst1_lane_u16((void*) output, ${VREINTERPRET_U16_X8}(vy), 0); output += 2;
+      vy = ${VEXT_X8}(vy, vy, 2);
+    }
+    if (batch & (1 * sizeof(float))) {
+      ${VST1_LANE_X8}(output, vy, 0);
+    }
+  }
+}

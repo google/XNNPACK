@@ -1,0 +1,134 @@
+// Copyright 2019 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert ACTIVATION in ["LINEAR", "MINMAX"]
+$assert ACTIVATION != "LINEAR" or not WASM
+#include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
+
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/igemm.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/microparams.h"
+
+
+$MIN_F32 = "__builtin_wasm_min_f32" if WASM else "math_min_f32"
+$MAX_F32 = "__builtin_wasm_max_f32" if WASM else "math_max_f32"
+$SUFFIX = {"LINEAR": "", "MINMAX": "_minmax"}[ACTIVATION]
+$PARAMS = {"LINEAR": "struct xnn_f32_default_params", "MINMAX": "struct xnn_f32_minmax_params"}[ACTIVATION]
+void xnn_f32_igemm${SUFFIX}_ukernel_${MR}x${NR}__${"wasm" if WASM else "scalar"}(
+    size_t mr,
+    size_t nc,
+    size_t kc,
+    size_t ks,
+    const float** restrict a,
+    const float* restrict w,
+    float* restrict c,
+    size_t cm_stride,
+    size_t cn_stride,
+    size_t a_offset,
+    const float* zero,
+    const ${PARAMS}* restrict params)
+{
+  assert(mr != 0);
+  assert(mr <= ${MR});
+  assert(nc != 0);
+  assert(kc != 0);
+  assert(kc % sizeof(float) == 0);
+  assert(ks != 0);
+  assert(ks % (${MR} * sizeof(void*)) == 0);
+  assert(a_offset % sizeof(float) == 0);
+  assert(a != NULL);
+  assert(w != NULL);
+  assert(c != NULL);
+
+  float* c0 = c;
+  $for M in range(1, MR):
+    float* c${M} = (float*) ((uintptr_t) c${M-1} + cm_stride);
+    $if M % 2 == 0:
+      if XNN_UNPREDICTABLE(mr <= ${M}) {
+        c${M} = c${M-1};
+      }
+    $elif M + 1 == MR:
+      if XNN_UNPREDICTABLE(mr != ${M+1}) {
+        c${M} = c${M-1};
+      }
+    $else:
+      if XNN_UNPREDICTABLE(mr < ${M+1}) {
+        c${M} = c${M-1};
+      }
+
+  $if ACTIVATION == "MINMAX":
+    const float vmin = params->scalar.min;
+    const float vmax = params->scalar.max;
+  do {
+    $for N in range(NR):
+      float vacc0${N} = w[${N}];
+    $for M in range(1, MR):
+      $for N in range(NR):
+        float vacc${M}${N} = vacc0${N};
+    w += ${NR};
+
+    size_t p = ks;
+    do {
+      $for M in range(MR):
+        const float* restrict a${M} = a[${M}];
+        assert(a${M} != NULL);
+        if XNN_UNPREDICTABLE(a${M} != zero) {
+          a${M} = (const float*) ((uintptr_t) a${M} + a_offset);
+        }
+      a += ${MR};
+
+      size_t k = kc;
+      do {
+        $for M in range(MR):
+          const float va${M} = *a${M}++;
+
+        $for N in range(NR):
+          const float vb${N} = w[${N}];
+        w += ${NR};
+
+        $for M in range(MR):
+          $for N in range(NR):
+            vacc${M}${N} = math_muladd_f32(va${M}, vb${N}, vacc${M}${N});
+
+        k -= sizeof(float);
+      } while (k != 0);
+      p -= ${MR} * sizeof(void*);
+    } while (p != 0);
+
+    $if ACTIVATION == "MINMAX":
+      $for M in range(MR):
+        $for N in range(NR):
+          vacc${M}${N} = ${MAX_F32}(vacc${M}${N}, vmin);
+
+      $for M in range(MR):
+        $for N in range(NR):
+          vacc${M}${N} = ${MIN_F32}(vacc${M}${N}, vmax);
+    if XNN_LIKELY(nc >= ${NR}) {
+      $for M in reversed(range(MR)):
+        $for N in range(NR):
+          c${M}[${N}] = vacc${M}${N};
+        c${M} = (float*) ((uintptr_t) c${M} + cn_stride);
+
+      a = (const float**restrict) ((uintptr_t) a - ks);
+      nc -= ${NR};
+    } else {
+      $for LOG2N in reversed(range(NR.bit_length() - 1)):
+        if (nc & ${1 << LOG2N}) {
+          $for M in reversed(range(MR)):
+            $for N in range(1 << LOG2N):
+              c${M}[${N}] = vacc${M}${N};
+            $if LOG2N != 0:
+              $for N in range(NR - (1 << LOG2N) - 1):
+                vacc${M}${N} = vacc${M}${N + (1 << LOG2N)};
+              c${M} += ${1 << LOG2N};
+        }
+
+      nc = 0;
+    }
+  } while (nc != 0);
+}

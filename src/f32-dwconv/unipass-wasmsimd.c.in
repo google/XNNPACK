@@ -1,0 +1,198 @@
+// Copyright 2020 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert CHANNEL_TILE % 4 == 0
+$assert KERNEL_TILE >= 2
+$assert ACCUMULATORS >= 1
+$assert ACTIVATION != "MINMAX" or ARCH in ["ARM", "X86", "RELAXED"]
+$assert not FMA or ARCH == "RELAXED"
+$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+#include <assert.h>
+
+#include <wasm_simd128.h>
+
+#include "src/xnnpack/dwconv.h"
+
+
+$assert ACTIVATION in ["LINEAR", "RELU", "MINMAX"]
+$if ACTIVATION == "MINMAX":
+$  WASM_F32X4_MIN={"ARM": "wasm_f32x4_min", "X86": "wasm_f32x4_pmin", "RELAXED": "wasm_f32x4_relaxed_min"}[ARCH]
+$  WASM_F32X4_MAX={"ARM": "wasm_f32x4_max", "X86": "wasm_f32x4_pmax", "RELAXED": "wasm_f32x4_relaxed_max"}[ARCH]
+$ACTIVATION_SUFFIX = {"LINEAR": ""}.get(ACTIVATION, "_" + ACTIVATION.lower())
+$ISA = "wasmsimd" if not FMA and (ACTIVATION in ["LINEAR", "RELU"] or ARCH != "RELAXED") else "wasmrelaxedsimd"
+$ARCH_SUFFIX = "" if not FMA and (ACTIVATION in ["LINEAR", "RELU"] or ARCH == "RELAXED") else "_" + ("fma" if FMA else ARCH.lower())
+$PARAMS = {"LINEAR": "struct xnn_f32_default_params", "RELU": "struct xnn_f32_relu_params", "MINMAX": "struct xnn_f32_minmax_params"}[ACTIVATION]
+void xnn_f32_dwconv${ACTIVATION_SUFFIX}_ukernel_${KERNEL_TILE}p${CHANNEL_TILE}c__${ISA}${ARCH_SUFFIX}${"" if ACCUMULATORS == 1 else "_acc%d" % ACCUMULATORS}(
+    size_t channels,
+    size_t output_width,
+    const float** input,
+    const float* weights,
+    float* output,
+    intptr_t input_stride,
+    size_t output_increment,
+    size_t input_offset,
+    size_t input_pixel_stride,
+    const float* zero,
+    const ${PARAMS}* restrict params) XNN_OOB_READS
+{
+  assert(channels != 0);
+  assert(output_width != 0);
+
+  $if ACTIVATION == "MINMAX":
+    const v128_t vmin = wasm_v128_load32_splat(&params->scalar.min);
+    const v128_t vmax = wasm_v128_load32_splat(&params->scalar.max);
+    XNN_FORCE_REALIZATION(vmin);
+    XNN_FORCE_REALIZATION(vmax);
+  $elif ACTIVATION == "RELU":
+    const v128_t vzero = wasm_i32x4_const_splat(0);
+  do {
+    $for K in range(KERNEL_TILE):
+      const float* i${K} = input[${K}];
+      assert(i${K} != NULL);
+      if XNN_UNPREDICTABLE(i${K} != zero) {
+        i${K} = (const float*) ((uintptr_t) i${K} + input_offset);
+      }
+    input = (const float**) ((uintptr_t) input + input_stride);
+
+    size_t c = channels;
+    const float* w = weights;
+    for (; c >= ${CHANNEL_TILE}; c -= ${CHANNEL_TILE}) {
+      v128_t vacc${ABC[0:4]}p0 = wasm_v128_load(w);
+      $for C in range(4, CHANNEL_TILE, 4):
+        v128_t vacc${ABC[C:C+4]}p0 = wasm_v128_load(w + ${C});
+
+      $for K in range(KERNEL_TILE):
+
+        const v128_t vi${K}x${ABC[0:4]} = wasm_v128_load(i${K});
+        $for C in range(4, CHANNEL_TILE, 4):
+          const v128_t vi${K}x${ABC[C:C+4]} = wasm_v128_load(i${K} + ${C});
+        i${K} += ${CHANNEL_TILE};
+
+        $for C in range(0, CHANNEL_TILE, 4):
+          const v128_t vk${K}x${ABC[C:C+4]} = wasm_v128_load(w + ${(K + 1) * CHANNEL_TILE + C});
+        $for C in range(0, CHANNEL_TILE, 4):
+          $if 1 <= K < ACCUMULATORS:
+            v128_t vacc${ABC[C:C+4]}p${K} = wasm_f32x4_mul(vi${K}x${ABC[C:C+4]}, vk${K}x${ABC[C:C+4]});
+          $else:
+            $if FMA:
+              vacc${ABC[C:C+4]}p${K % ACCUMULATORS} = wasm_f32x4_relaxed_madd(vi${K}x${ABC[C:C+4]}, vk${K}x${ABC[C:C+4]}, vacc${ABC[C:C+4]}p${K % ACCUMULATORS});
+            $else:
+              vacc${ABC[C:C+4]}p${K % ACCUMULATORS} = wasm_f32x4_add(wasm_f32x4_mul(vi${K}x${ABC[C:C+4]}, vk${K}x${ABC[C:C+4]}), vacc${ABC[C:C+4]}p${K % ACCUMULATORS});
+
+      w += ${(KERNEL_TILE + 1) * CHANNEL_TILE};
+
+      $if ACCUMULATORS > 1:
+        // Add up all accumulators to vacc${ABC[0:CHANNEL_TILE]}p0
+        $ACC_SLICE = 1
+        $while ACC_SLICE < ACCUMULATORS:
+          $for A in range(0, ACCUMULATORS, ACC_SLICE * 2):
+            $if A + ACC_SLICE < ACCUMULATORS:
+              $for C in range(0, CHANNEL_TILE, 4):
+                vacc${ABC[C:C+4]}p${A} = wasm_f32x4_add(vacc${ABC[C:C+4]}p${A}, vacc${ABC[C:C+4]}p${A + ACC_SLICE});
+          $ACC_SLICE *= 2
+
+      $if ACTIVATION == "MINMAX":
+        $for C in range(0, CHANNEL_TILE, 4):
+          v128_t vacc${ABC[C:C+4]} = ${WASM_F32X4_MAX}(vmin, vacc${ABC[C:C+4]}p0);
+
+        $for C in range(0, CHANNEL_TILE, 4):
+          vacc${ABC[C:C+4]} = ${WASM_F32X4_MIN}(vmax, vacc${ABC[C:C+4]});
+      $elif ACTIVATION == "RELU":
+        $for C in range(0, CHANNEL_TILE, 4):
+          const v128_t vacc${ABC[C:C+4]} = wasm_i32x4_max(vacc${ABC[C:C+4]}p0, vzero);
+      $elif ACTIVATION == "LINEAR":
+        $for C in range(0, CHANNEL_TILE, 4):
+          const v128_t vacc${ABC[C:C+4]} = vacc${ABC[C:C+4]}p0;
+
+      wasm_v128_store(output, vacc${ABC[0:4]});
+      $for C in range(4, CHANNEL_TILE, 4):
+        wasm_v128_store(output + ${C}, vacc${ABC[C:C+4]});
+      output += ${CHANNEL_TILE};
+    }
+    $if CHANNEL_TILE > 4:
+      for (; c >= 4; c -= 4) {
+        v128_t vacc0123p0 = wasm_v128_load(w);
+        $for K in range(KERNEL_TILE):
+
+          const v128_t vi${K}x0123 = wasm_v128_load(i${K});
+          i${K} += 4;
+
+          const v128_t vk${K}x0123 = wasm_v128_load(w + ${(K + 1) * CHANNEL_TILE});
+          $if 1 <= K < ACCUMULATORS:
+            v128_t vacc0123p${K} = wasm_f32x4_mul(vi${K}x0123, vk${K}x0123);
+          $else:
+            $if FMA:
+              vacc0123p${K % ACCUMULATORS} = wasm_f32x4_relaxed_madd(vi${K}x0123, vk${K}x0123, vacc0123p${K % ACCUMULATORS});
+            $else:
+              vacc0123p${K % ACCUMULATORS} = wasm_f32x4_add(wasm_f32x4_mul(vi${K}x0123, vk${K}x0123), vacc0123p${K % ACCUMULATORS});
+
+        w += 4;
+
+        $if ACCUMULATORS > 1:
+          // Add up all accumulators to vacc${ABC[0:CHANNEL_TILE]}p0
+          $ACC_SLICE = 1
+          $while ACC_SLICE < ACCUMULATORS:
+            $for A in range(0, ACCUMULATORS, ACC_SLICE * 2):
+              $if A + ACC_SLICE < ACCUMULATORS:
+                vacc0123p${A} = wasm_f32x4_add(vacc0123p${A}, vacc0123p${A + ACC_SLICE});
+            $ACC_SLICE *= 2
+
+        $if ACTIVATION == "MINMAX":
+          v128_t vacc0123 = ${WASM_F32X4_MAX}(vmin, vacc0123p0);
+          vacc0123 = ${WASM_F32X4_MIN}(vmax, vacc0123);
+        $elif ACTIVATION == "RELU":
+          const v128_t vacc0123 = wasm_i32x4_max(vacc0123p0, vzero);
+        $elif ACTIVATION == "LINEAR":
+          const v128_t vacc0123 = vacc0123p0;
+
+        wasm_v128_store(output, vacc0123);
+        output += 4;
+      }
+    if XNN_UNLIKELY(c != 0) {
+      v128_t vacc0123p0 = wasm_v128_load(w);
+      $for K in range(KERNEL_TILE):
+
+        const v128_t vi${K}x0123 = wasm_v128_load(i${K});
+        const v128_t vk${K}x0123 = wasm_v128_load(w + ${(K+1) * CHANNEL_TILE});
+        $if 1 <= K < ACCUMULATORS:
+          v128_t vacc0123p${K} = wasm_f32x4_mul(vi${K}x0123, vk${K}x0123);
+        $else:
+          $if FMA:
+            vacc0123p${K % ACCUMULATORS} = wasm_f32x4_relaxed_madd(vi${K}x0123, vk${K}x0123, vacc0123p${K % ACCUMULATORS});
+          $else:
+            vacc0123p${K % ACCUMULATORS} = wasm_f32x4_add(wasm_f32x4_mul(vi${K}x0123, vk${K}x0123), vacc0123p${K % ACCUMULATORS});
+
+      $if ACCUMULATORS > 1:
+        // Add up all accumulators to vacc${ABC[0:CHANNEL_TILE]}p0
+        $ACC_SLICE = 1
+        $while ACC_SLICE < ACCUMULATORS:
+          $for A in range(0, ACCUMULATORS, ACC_SLICE * 2):
+            $if A + ACC_SLICE < ACCUMULATORS:
+              vacc0123p${A} = wasm_f32x4_add(vacc0123p${A}, vacc0123p${A + ACC_SLICE});
+          $ACC_SLICE *= 2
+
+      $if ACTIVATION == "MINMAX":
+        v128_t vacc0123 = ${WASM_F32X4_MAX}(vmin, vacc0123p0);
+        vacc0123 = ${WASM_F32X4_MIN}(vmax, vacc0123);
+      $elif ACTIVATION == "RELU":
+        v128_t vacc0123 = wasm_i32x4_max(vacc0123p0, vzero);
+      $elif ACTIVATION == "LINEAR":
+        v128_t vacc0123 = vacc0123p0;
+
+      if (c & 2) {
+        wasm_v128_store64_lane(output, vacc0123, 0);
+        vacc0123 = wasm_v64x2_shuffle(vacc0123, vacc0123, 1, 1);
+        output += 2;
+      }
+      if (c & 1) {
+        wasm_v128_store32_lane(output, vacc0123, 0);
+        output += 1;
+      }
+    }
+
+    input_offset += input_pixel_stride;
+    output = (float*) ((uintptr_t) output + output_increment);
+  } while (--output_width != 0);
+}

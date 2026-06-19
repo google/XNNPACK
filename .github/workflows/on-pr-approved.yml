@@ -1,0 +1,9 @@
+name: Test Pull Request
+run-name: ${{ github.event.pull_request.title }}
+on:
+  pull_request_review:
+    types: [submitted]
+jobs:
+  build-and-test:
+    if: github.event.review.state == 'APPROVED'
+    uses: ./.github/workflows/build.yml

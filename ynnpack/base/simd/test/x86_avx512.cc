@@ -1,0 +1,262 @@
+// Copyright 2025 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+#include <cmath>
+
+#include <iomanip>
+#include <gtest/gtest.h>
+#include "ynnpack/base/arch.h"
+#include "ynnpack/base/simd/x86_vec512.h"
+
+// This must be included last
+#include "ynnpack/base/simd/test/generic.h"
+
+namespace ynn {
+namespace simd {
+
+class x86_avx512 : public ::testing::Test {
+  void SetUp() override {
+    if (!is_arch_supported(arch_flag::avx512)) {
+      GTEST_SKIP() << "avx512 not supported on this hardware";
+    }
+  }
+};
+
+TEST_BROADCAST(x86_avx512, u8, 64);
+TEST_BROADCAST(x86_avx512, s8, 64);
+TEST_BROADCAST(x86_avx512, s16, 32);
+TEST_BROADCAST(x86_avx512, f16, 32);
+TEST_BROADCAST(x86_avx512, bf16, 32);
+TEST_BROADCAST(x86_avx512, f32, 16);
+TEST_BROADCAST(x86_avx512, s32, 16);
+TEST_BROADCAST(x86_avx512, f64, 8);
+
+TEST_LOAD_STORE(x86_avx512, u8, 64);
+TEST_LOAD_STORE(x86_avx512, s8, 64);
+TEST_LOAD_STORE(x86_avx512, s16, 32);
+TEST_LOAD_STORE(x86_avx512, f16, 32);
+TEST_LOAD_STORE(x86_avx512, bf16, 32);
+TEST_LOAD_STORE(x86_avx512, f32, 16);
+TEST_LOAD_STORE(x86_avx512, s32, 16);
+TEST_LOAD_STORE(x86_avx512, f64, 8);
+
+TEST_ALIGNED_LOAD_STORE(x86_avx512, u8, 64);
+TEST_ALIGNED_LOAD_STORE(x86_avx512, s8, 64);
+TEST_ALIGNED_LOAD_STORE(x86_avx512, s16, 32);
+TEST_ALIGNED_LOAD_STORE(x86_avx512, f16, 32);
+TEST_ALIGNED_LOAD_STORE(x86_avx512, bf16, 32);
+TEST_ALIGNED_LOAD_STORE(x86_avx512, f32, 16);
+TEST_ALIGNED_LOAD_STORE(x86_avx512, s32, 16);
+TEST_ALIGNED_LOAD_STORE(x86_avx512, f64, 8);
+
+TEST_PARTIAL_LOAD_STORE(x86_avx512, u8, 16);
+TEST_PARTIAL_LOAD_STORE(x86_avx512, s8, 16);
+TEST_PARTIAL_LOAD_STORE(x86_avx512, s16, 8);
+TEST_PARTIAL_LOAD_STORE(x86_avx512, f16, 8);
+TEST_PARTIAL_LOAD_STORE(x86_avx512, bf16, 8);
+TEST_PARTIAL_LOAD_STORE(x86_avx512, f32, 4);
+TEST_PARTIAL_LOAD_STORE(x86_avx512, s32, 4);
+TEST_PARTIAL_LOAD_STORE(x86_avx512, f64, 2);
+
+TEST_PARTIAL_LOAD_STORE(x86_avx512, u8, 32);
+TEST_PARTIAL_LOAD_STORE(x86_avx512, s8, 32);
+TEST_PARTIAL_LOAD_STORE(x86_avx512, s16, 16);
+TEST_PARTIAL_LOAD_STORE(x86_avx512, f16, 16);
+TEST_PARTIAL_LOAD_STORE(x86_avx512, bf16, 16);
+TEST_PARTIAL_LOAD_STORE(x86_avx512, f32, 8);
+TEST_PARTIAL_LOAD_STORE(x86_avx512, s32, 8);
+TEST_PARTIAL_LOAD_STORE(x86_avx512, f64, 4);
+
+TEST_PARTIAL_LOAD_STORE(x86_avx512, u8, 64);
+TEST_PARTIAL_LOAD_STORE(x86_avx512, s8, 64);
+TEST_PARTIAL_LOAD_STORE(x86_avx512, s16, 32);
+TEST_PARTIAL_LOAD_STORE(x86_avx512, f16, 32);
+TEST_PARTIAL_LOAD_STORE(x86_avx512, bf16, 32);
+TEST_PARTIAL_LOAD_STORE(x86_avx512, f32, 16);
+TEST_PARTIAL_LOAD_STORE(x86_avx512, s32, 16);
+TEST_PARTIAL_LOAD_STORE(x86_avx512, f64, 8);
+
+TEST_ADD(x86_avx512, u8, 64);
+TEST_ADD(x86_avx512, s8, 64);
+TEST_ADD(x86_avx512, f32, 16);
+TEST_ADD(x86_avx512, f64, 8);
+TEST_ADD(x86_avx512, s32, 16);
+
+TEST_SUBTRACT(x86_avx512, u8, 64);
+TEST_SUBTRACT(x86_avx512, s8, 64);
+TEST_SUBTRACT(x86_avx512, f32, 16);
+TEST_SUBTRACT(x86_avx512, f64, 8);
+TEST_SUBTRACT(x86_avx512, s32, 16);
+
+TEST_ADD_SAT(x86_avx512, u8, 64);
+TEST_ADD_SAT(x86_avx512, s8, 64);
+TEST_ADD_SAT(x86_avx512, u16, 32);
+TEST_ADD_SAT(x86_avx512, s16, 32);
+
+TEST_SUB_SAT(x86_avx512, u8, 64);
+TEST_SUB_SAT(x86_avx512, s8, 64);
+TEST_SUB_SAT(x86_avx512, u16, 32);
+TEST_SUB_SAT(x86_avx512, s16, 32);
+
+TEST_MULTIPLY(x86_avx512, f32, 16);
+TEST_MULTIPLY(x86_avx512, f64, 8);
+TEST_DIVIDE(x86_avx512, f32, 16);
+TEST_DIVIDE(x86_avx512, f64, 8);
+TEST_MULTIPLY(x86_avx512, s32, 16);
+
+TEST_MIN(x86_avx512, u8, 64);
+TEST_MIN(x86_avx512, s8, 64);
+TEST_MIN(x86_avx512, s16, 32);
+TEST_MIN(x86_avx512, f32, 16);
+TEST_MIN(x86_avx512, f64, 8);
+TEST_MIN(x86_avx512, s32, 16);
+
+TEST_MAX(x86_avx512, u8, 64);
+TEST_MAX(x86_avx512, s8, 64);
+TEST_MAX(x86_avx512, s16, 32);
+TEST_MAX(x86_avx512, f32, 16);
+TEST_MAX(x86_avx512, f64, 8);
+TEST_MAX(x86_avx512, s32, 16);
+
+TEST_AND(x86_avx512, u8, 64);
+TEST_AND(x86_avx512, s8, 64);
+TEST_AND(x86_avx512, s16, 32);
+TEST_AND(x86_avx512, s32, 16);
+
+TEST_OR(x86_avx512, u8, 64);
+TEST_OR(x86_avx512, s8, 64);
+TEST_OR(x86_avx512, s16, 32);
+TEST_OR(x86_avx512, s32, 16);
+
+TEST_XOR(x86_avx512, u8, 64);
+TEST_XOR(x86_avx512, s8, 64);
+TEST_XOR(x86_avx512, s16, 32);
+TEST_XOR(x86_avx512, s32, 16);
+
+TEST_NOT(x86_avx512, u8, 64);
+TEST_NOT(x86_avx512, s8, 64);
+TEST_NOT(x86_avx512, s16, 32);
+TEST_NOT(x86_avx512, s32, 16);
+
+TEST_SHIFT_LEFT(x86_avx512, s16, 32);
+TEST_SHIFT_LEFT(x86_avx512, s32, 16);
+
+TEST_FLOOR_LOG2(x86_avx512, f32, 16);
+TEST_FLOOR_LOG2(x86_avx512, f32, 8);
+TEST_FLOOR_LOG2(x86_avx512, f32, 4);
+TEST_FLOOR_LOG2(x86_avx512, f64, 8);
+TEST_FLOOR_LOG2(x86_avx512, f64, 4);
+TEST_FLOOR_LOG2(x86_avx512, f64, 2);
+TEST_EXP2_ROUND(x86_avx512, f32, 16);
+TEST_EXP2_ROUND(x86_avx512, f64, 8);
+TEST_COMPARISONS(x86_avx512, f32, 16);
+TEST_COMPARISONS(x86_avx512, f64, 8);
+TEST_ISNAN(x86_avx512, f32, 16);
+TEST_ISNAN(x86_avx512, f64, 8);
+TEST_ISFINITE(x86_avx512, f32, 16);
+TEST_ISFINITE(x86_avx512, f64, 8);
+
+TEST_FLOOR(x86_avx512, f32, 16);
+TEST_FLOOR(x86_avx512, f64, 8);
+TEST_CEIL(x86_avx512, f32, 16);
+TEST_CEIL(x86_avx512, f64, 8);
+TEST_ROUND(x86_avx512, f32, 16);
+TEST_ROUND(x86_avx512, f64, 8);
+TEST_SQRT(x86_avx512, f32, 16);
+TEST_SQRT(x86_avx512, f64, 8);
+
+TEST_ABS(x86_avx512, s8, 64);
+TEST_ABS(x86_avx512, s16, 32);
+TEST_ABS(x86_avx512, s32, 16);
+TEST_ABS(x86_avx512, f32, 16);
+TEST_ABS(x86_avx512, f64, 8);
+
+TEST_FMA(x86_avx512, f32, 16);
+TEST_FMA(x86_avx512, f64, 8);
+
+TEST_EXTRACT(x86_avx512, s32x16, 4);
+TEST_EXTRACT(x86_avx512, f32x16, 4);
+TEST_EXTRACT(x86_avx512, s8x64, 16);
+TEST_EXTRACT(x86_avx512, u8x64, 16);
+
+TEST_EXTRACT(x86_avx512, s32x32, 8);
+TEST_EXTRACT(x86_avx512, f32x32, 8);
+TEST_EXTRACT(x86_avx512, bf16x32, 16);
+TEST_EXTRACT(x86_avx512, f16x32, 16);
+TEST_EXTRACT(x86_avx512, s8x64, 32);
+TEST_EXTRACT(x86_avx512, u8x64, 32);
+
+TEST_CONCAT(x86_avx512, bf16x16);
+TEST_CONCAT(x86_avx512, f16x16);
+TEST_CONCAT(x86_avx512, f64x4);
+TEST_CONCAT(x86_avx512, s8x32);
+TEST_CONCAT(x86_avx512, u8x32);
+
+TEST_HORIZONTAL_MIN(x86_avx512, u8, 64);
+TEST_HORIZONTAL_MIN(x86_avx512, s8, 64);
+TEST_HORIZONTAL_MIN(x86_avx512, s16, 32);
+TEST_HORIZONTAL_MIN(x86_avx512, s32, 16);
+TEST_HORIZONTAL_MIN(x86_avx512, f32, 16);
+TEST_HORIZONTAL_MIN(x86_avx512, f64, 8);
+
+TEST_HORIZONTAL_MAX(x86_avx512, u8, 64);
+TEST_HORIZONTAL_MAX(x86_avx512, s8, 64);
+TEST_HORIZONTAL_MAX(x86_avx512, s16, 32);
+TEST_HORIZONTAL_MAX(x86_avx512, s32, 16);
+TEST_HORIZONTAL_MAX(x86_avx512, f32, 16);
+TEST_HORIZONTAL_MAX(x86_avx512, f64, 8);
+
+TEST_CAST(x86_avx512, f32, bf16x16);
+TEST_CAST(x86_avx512, f32, f16x16);
+TEST_CAST(x86_avx512, bf16, f32x32);
+TEST_CAST(x86_avx512, bf16, f32x16);
+TEST_CAST(x86_avx512, f16, f32x16);
+TEST_CAST(x86_avx512, s32, s8x16);
+TEST_CAST(x86_avx512, s32, u8x16);
+TEST_CAST(x86_avx512, s32, s8x32);
+TEST_CAST(x86_avx512, s32, u8x32);
+TEST_CAST(x86_avx512, f32, s32x16);
+TEST_CAST(x86_avx512, s32, f32x16);
+TEST_CAST(x86_avx512, f64, f32x8);
+TEST_CAST(x86_avx512, f64, f32x16);
+TEST_CAST(x86_avx512, f32, f64x8);
+
+TEST_CAST(x86_avx512, s16, s32x32);
+TEST_CAST(x86_avx512, u8, s16x64);
+TEST_CAST(x86_avx512, s8, s16x64);
+TEST_CAST(x86_avx512, u8, f32x64);
+TEST_CAST(x86_avx512, s8, f32x64);
+TEST_CAST(x86_avx512, s16, f32x32);
+
+TEST_UNARY(x86_avx512, exp, f16, 16, std::exp, 2);
+TEST_UNARY(x86_avx512, exp, bf16, 16, std::exp, 2);
+TEST_UNARY(x86_avx512, exp, f32, 16, std::exp, 2);
+TEST_UNARY(x86_avx512, exp, f64, 8, std::exp, 2);
+TEST_UNARY(x86_avx512, expm1, f16, 16, std::expm1, 2);
+TEST_UNARY(x86_avx512, expm1, bf16, 16, std::expm1, 2);
+TEST_UNARY(x86_avx512, expm1, f32, 16, std::expm1, 2);
+TEST_UNARY(x86_avx512, expm1, f64, 8, std::expm1, 2);
+TEST_UNARY(x86_avx512, log, f16, 16, std::log, 1);
+TEST_UNARY(x86_avx512, log, bf16, 16, std::log, 1);
+TEST_UNARY(x86_avx512, log, f32, 16, std::log, 2);
+TEST_UNARY(x86_avx512, log, f64, 8, std::log, 2);
+TEST_UNARY(x86_avx512, log1p, f16, 16, std::log1p, 1);
+TEST_UNARY(x86_avx512, log1p, bf16, 16, std::log1p, 1);
+TEST_UNARY(x86_avx512, log1p, f32, 16, std::log1p, 3);
+TEST_UNARY(x86_avx512, log1p, f64, 8, std::log1p, 3);
+TEST_UNARY(x86_avx512, erf, f16, 16, std::erf, 1);
+TEST_UNARY(x86_avx512, erf, bf16, 16, std::erf, 1);
+TEST_UNARY(x86_avx512, erf, f32, 16, std::erf, 2);
+TEST_UNARY(x86_avx512, erf, f64, 8, std::erf, 3);
+TEST_UNARY(x86_avx512, tanh, f16, 16, std::tanh, 1);
+TEST_UNARY(x86_avx512, tanh, bf16, 16, std::tanh, 1);
+TEST_UNARY(x86_avx512, tanh, f32, 16, std::tanh, 2);
+TEST_UNARY(x86_avx512, tanh, f64, 8, std::tanh, 4);
+
+TEST_UNARY(x86_avx512, approx_erf, f32, 16, std::erf, 5);
+TEST_UNARY(x86_avx512, approx_tanh, f32, 16, std::tanh, 5);
+
+}  // namespace simd
+}  // namespace ynn

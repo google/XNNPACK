@@ -1,0 +1,104 @@
+// Copyright 2023 SiFive, Inc.
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+//
+// Optimized by Autocomp (https://github.com/ucb-bar/autocomp)
+$assert LMUL in [1, 2, 4]
+$TILE_WIDTH = 8
+$N_LOADS = LMUL
+$SEG_PER_LOAD = 8 // LMUL
+$HALF_SEG = SEG_PER_LOAD // 2
+#include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
+
+#include <riscv_vector.h>
+
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/transpose.h"
+
+
+void xnn_x32_transposec_ukernel__${TILE_WIDTH}xv${LMUL}_rvv(
+    const uint32_t* input,
+    uint32_t* output,
+    size_t input_stride,
+    size_t output_stride,
+    size_t block_width,
+    size_t block_height)
+{
+  assert(block_width == 1 || output_stride >= block_height * sizeof(uint32_t));
+  assert(block_height == 1 || input_stride >= block_width * sizeof(uint32_t));
+
+  const size_t input_stride_u32 = input_stride / sizeof(uint32_t);
+  const size_t output_stride_u32 = output_stride / sizeof(uint32_t);
+
+  for (size_t bh = 0; bh < block_height; ) {
+    const size_t vl = __riscv_vsetvl_e32m${LMUL}(block_height - bh);
+
+    const uint32_t* i_row = input + bh * input_stride_u32;
+    uint32_t* o_col = output + bh;
+
+    size_t bw = 0;
+    for (; bw + ${TILE_WIDTH} <= block_width; bw += ${TILE_WIDTH}) {
+      const uint32_t* i_ptr = i_row + bw;
+      uint32_t* o_ptr = o_col + bw * output_stride_u32;
+
+      // Issue loads with the first half of each tuple's stores interleaved to
+      // cover segmented-load latency.
+      $for L in range(N_LOADS):
+        vuint32m${LMUL}x${SEG_PER_LOAD}_t tuple${L} = __riscv_vlsseg${SEG_PER_LOAD}e32_v_u32m${LMUL}x${SEG_PER_LOAD}(i_ptr + ${L * SEG_PER_LOAD}, input_stride, vl);
+        $if L + 1 < N_LOADS:
+          $for S in range(HALF_SEG):
+            __riscv_vse32_v_u32m${LMUL}(o_ptr + ${L * SEG_PER_LOAD + S} * output_stride_u32, __riscv_vget_v_u32m${LMUL}x${SEG_PER_LOAD}_u32m${LMUL}(tuple${L}, ${S}), vl);
+
+      // Drain remaining stores.
+      $for L in range(N_LOADS):
+        $if L + 1 < N_LOADS:
+          $for S in range(HALF_SEG, SEG_PER_LOAD):
+            __riscv_vse32_v_u32m${LMUL}(o_ptr + ${L * SEG_PER_LOAD + S} * output_stride_u32, __riscv_vget_v_u32m${LMUL}x${SEG_PER_LOAD}_u32m${LMUL}(tuple${L}, ${S}), vl);
+        $else:
+          $for S in range(SEG_PER_LOAD):
+            __riscv_vse32_v_u32m${LMUL}(o_ptr + ${L * SEG_PER_LOAD + S} * output_stride_u32, __riscv_vget_v_u32m${LMUL}x${SEG_PER_LOAD}_u32m${LMUL}(tuple${L}, ${S}), vl);
+    }
+
+    // Column tail: 0 < (block_width - bw) < TILE_WIDTH.
+    // Keep LMUL=${LMUL} so the same vl rows are processed, splitting the tail
+    // into legal vlsseg calls where needed (EMUL * NFIELDS <= 8).
+    if (bw < block_width) {
+      const size_t bw_tail = block_width - bw;
+      const uint32_t* i_ptr = i_row + bw;
+      uint32_t* o_ptr = o_col + bw * output_stride_u32;
+      switch (bw_tail) {
+        $for M in reversed(range(2, TILE_WIDTH)):
+          case ${M}: {
+            $for K in range(M // SEG_PER_LOAD):
+              vuint32m${LMUL}x${SEG_PER_LOAD}_t tuple${K} = __riscv_vlsseg${SEG_PER_LOAD}e32_v_u32m${LMUL}x${SEG_PER_LOAD}(i_ptr + ${K * SEG_PER_LOAD}, input_stride, vl);
+            $if M % SEG_PER_LOAD > 1:
+              vuint32m${LMUL}x${M % SEG_PER_LOAD}_t tuple${M // SEG_PER_LOAD} = __riscv_vlsseg${M % SEG_PER_LOAD}e32_v_u32m${LMUL}x${M % SEG_PER_LOAD}(i_ptr + ${(M // SEG_PER_LOAD) * SEG_PER_LOAD}, input_stride, vl);
+            $if M % SEG_PER_LOAD == 1:
+              vuint32m${LMUL}_t tuple${M // SEG_PER_LOAD} = __riscv_vlse32_v_u32m${LMUL}(i_ptr + ${(M // SEG_PER_LOAD) * SEG_PER_LOAD}, input_stride, vl);
+            $for K in range(M // SEG_PER_LOAD):
+              $for S in range(SEG_PER_LOAD):
+                __riscv_vse32_v_u32m${LMUL}(o_ptr + ${K * SEG_PER_LOAD + S} * output_stride_u32, __riscv_vget_v_u32m${LMUL}x${SEG_PER_LOAD}_u32m${LMUL}(tuple${K}, ${S}), vl);
+            $if M % SEG_PER_LOAD > 1:
+              $for S in range(M % SEG_PER_LOAD):
+                __riscv_vse32_v_u32m${LMUL}(o_ptr + ${(M // SEG_PER_LOAD) * SEG_PER_LOAD + S} * output_stride_u32, __riscv_vget_v_u32m${LMUL}x${M % SEG_PER_LOAD}_u32m${LMUL}(tuple${M // SEG_PER_LOAD}, ${S}), vl);
+            $if M % SEG_PER_LOAD == 1:
+              __riscv_vse32_v_u32m${LMUL}(o_ptr + ${(M // SEG_PER_LOAD) * SEG_PER_LOAD} * output_stride_u32, tuple${M // SEG_PER_LOAD}, vl);
+            break;
+          }
+        case 1: {
+          vuint32m${LMUL}_t v = __riscv_vlse32_v_u32m${LMUL}(i_ptr, input_stride, vl);
+          __riscv_vse32_v_u32m${LMUL}(o_ptr, v, vl);
+          break;
+        }
+        default:
+          XNN_UNREACHABLE;
+      }
+    }
+
+    bh += vl;
+  }
+}

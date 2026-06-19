@@ -1,0 +1,18 @@
+Name: cpuinfo
+Short Name: cpuinfo
+URL: https://github.com/pytorch/cpuinfo
+Version: N/A
+Revision: 0fea7f5f88243ee354df0e0082b5f27d13fc9551
+Update Mechanism: Manual
+License: BSD-2-Clause
+License File: src/LICENSE
+Security Critical: Yes
+Shipped: no
+
+Description:
+cpuinfo is a library to detect essential performance optimization
+information about the host CPU.
+
+Updating:
+* Update //DEPS with the latest revision
+* Run `gclient sync` and build for preferred platform

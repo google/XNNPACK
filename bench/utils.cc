@@ -1,0 +1,424 @@
+// Copyright 2019-2025 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+#include "bench/utils.h"
+
+#include <algorithm>
+#include <atomic>
+#include <condition_variable>  // NOLINT(build/c++11)
+#include <cstdint>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <iostream>
+#include <mutex>
+
+#include "include/experimental.h"
+
+#if defined(__APPLE__)
+#include <sys/types.h>
+#include <sys/sysctl.h>
+#endif
+#ifdef __linux__
+#include <sched.h>
+#else
+#include <thread>  // NOLINT(build/c++11)
+#endif
+#if defined(__ANDROID__) || defined(_WIN32) || defined(__CYGWIN__)
+#include <malloc.h>
+#endif
+#if defined(__SSE__) || defined(__x86_64__)
+#include <xmmintrin.h>
+#endif
+
+#if XNN_ENABLE_CPUINFO
+#include <cpuinfo.h>
+#endif  // XNN_ENABLE_CPUINFO
+
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/hardware-config.h"
+#include <benchmark/benchmark.h>
+#include <pthreadpool.h>
+
+#if XNN_PLATFORM_QURT
+#include <qurt.h>
+#include <HAP_power.h>
+#endif
+#if XNN_PLATFORM_WINDOWS
+#include <windows.h>
+#include <shlwapi.h>
+#endif
+
+
+// Common flags for all benchmarks.
+int FLAGS_num_threads = 1;
+int FLAGS_batch_size = 1;
+uint32_t FLAGS_xnn_runtime_flags = 0;
+uint32_t FLAGS_benchmark_min_iters = 1;
+bool FLAGS_wipe_caches = false;
+
+namespace benchmark {
+namespace utils {
+
+std::vector<int64_t> FLAGS_shapes;
+int64_t FLAGS_gemm_block_size = 32;
+
+struct DeferredArgs {
+  benchmark::Benchmark* b;
+  ArgsFn fn;
+};
+static std::vector<DeferredArgs>& GetDeferredArgs() {
+  static std::vector<DeferredArgs> deferred_args;
+  return deferred_args;
+}
+
+void DeferArgs(benchmark::Benchmark* b, ArgsFn fn) {
+  GetDeferredArgs().push_back({b, fn});
+}
+
+void ApplyDeferredArgs() {
+  for (auto& deferred : GetDeferredArgs()) {
+    deferred.fn(deferred.b);
+  }
+}
+
+namespace {
+
+static void* wipe_buffer = nullptr;
+static size_t wipe_buffer_size = 0;
+
+static std::once_flag wipe_buffer_guard;  // NOLINT(build/c++11)
+
+static void InitWipeBuffer() {
+#if XNN_ENABLE_CPUINFO
+  if (cpuinfo_initialize()) {
+    wipe_buffer_size = GetMaxCacheSize();
+  }
+#endif  // XNN_ENABLE_CPUINFO
+  if (wipe_buffer_size == 0) {
+    return;
+  }
+
+#if defined(_WIN32)
+  wipe_buffer = _aligned_malloc(wipe_buffer_size, 128);
+#elif defined(__ANDROID__) || defined(__CYGWIN__)
+  // memalign is obsolete, but it is the only option on Android until API
+  // level 17.
+  wipe_buffer = memalign(128, wipe_buffer_size);
+#else
+  // The posix_memalign function returns 0 on success, and an error number on
+  // failure. We should check the return value.
+  if (posix_memalign((void**)&wipe_buffer, 128, wipe_buffer_size) != 0) {
+    // Allocation failed, set wipe_buffer to nullptr to indicate failure
+    wipe_buffer = nullptr;
+  }
+#endif
+  if (wipe_buffer != nullptr) {
+    memset(wipe_buffer, 0xA5, wipe_buffer_size);
+  }
+}
+
+struct ClearL2CacheContext {
+  std::atomic<int64_t> counter;
+  int64_t num_threads = 0;  // Set to zero if we don't need to wait for all
+                            // threads to finish.
+  std::mutex mutex;         // NOLINT(build/c++11)
+  std::condition_variable cond_var;
+};
+
+// Pthreadpool-compatible function to wipe the cache in each thread.
+void ClearL2CacheWorkerFun(ClearL2CacheContext* context, size_t id) {
+#if XNN_ENABLE_CPUINFO
+  static const size_t wipe_buffer_size = []() {
+    const auto* l2_cache = cpuinfo_get_l2_cache(0);
+    return l2_cache == nullptr ? 0 : l2_cache->size;
+  }();
+  static const char* wipe_buffer = wipe_buffer_size ? [&]() -> char* {
+    char* const buff = (char*)malloc(wipe_buffer_size);
+    memset(buff, 0xA5, wipe_buffer_size);
+    return buff;
+  }()
+      : nullptr;
+  if (wipe_buffer_size) {
+    PrefetchToL1(wipe_buffer, wipe_buffer_size);
+  } else {
+    WipeCache();
+  }
+#else
+  WipeCache();
+#endif  // XNN_ENABLE_CPUINFO
+  // Wait until all threads are done. This ensures that each thread calls this
+  // function exactly once.
+  std::unique_lock<std::mutex> lock(context->mutex);  // NOLINT(build/c++11)
+  if (context->counter.fetch_sub(1) == 1) {
+    context->cond_var.notify_all();
+  } else {
+    while (context->counter.load() > 0) {
+      context->cond_var.wait(lock);
+    }
+  }
+
+  // Last thread waits for all the others to finish.
+  if (context->num_threads) {
+    if (id == 0) {
+      if (context->counter.fetch_sub(1) - 1 != -context->num_threads) {
+        do {
+          context->cond_var.wait(lock);
+        } while (context->counter.load() != -context->num_threads);
+      }
+    } else {
+      if (context->counter.fetch_sub(1) - 1 == -context->num_threads) {
+        context->cond_var.notify_all();
+      }
+    }
+  }
+}
+
+};  // namespace
+
+int ProcessArgs(int& argc, char**& argv) {
+  for (int i = 1; i < argc;) {
+    if (strncmp(argv[i], "--num_threads=", 14) == 0) {
+      FLAGS_num_threads = atoi(argv[i] + 14);  // NOLINT(runtime/deprecated_fn)
+      if (FLAGS_num_threads <= 0) {
+        std::cerr << "Invalid --num_threads: " << FLAGS_num_threads << "\n";
+        return 1;
+      }
+      std::copy(argv + i + 1, argv + argc, argv + i);
+      argc -= 1;
+    } else if (strncmp(argv[i], "--batch_size=", 13) == 0) {
+      FLAGS_batch_size = atoi(argv[i] + 13);  // NOLINT(runtime/deprecated_fn)
+      if (FLAGS_batch_size <= 0) {
+        std::cerr << "Invalid --batch_size: " << FLAGS_batch_size << "\n";
+        return 1;
+      }
+      std::copy(argv + i + 1, argv + argc, argv + i);
+      argc -= 1;
+    } else if (strncmp(argv[i], "--xnn_runtime_flags=", 20) == 0) {
+      const char* v = argv[i] + 20;
+      if (strlen(v) > 2 && strncmp(v, "0x", 2) == 0) {
+        FLAGS_xnn_runtime_flags =
+            strtoul(v + 2, nullptr, 16);  // NOLINT(runtime/deprecated_fn)
+      } else {
+        FLAGS_xnn_runtime_flags =
+            strtoul(v, nullptr, 10);  // NOLINT(runtime/deprecated_fn)
+      }
+      std::copy(argv + i + 1, argv + argc, argv + i);
+      argc -= 1;
+    } else if (strncmp(argv[i], "--benchmark_min_iters=", 22) == 0) {
+      FLAGS_benchmark_min_iters =
+          atoi(argv[i] + 22);  // NOLINT(runtime/deprecated_fn)
+      if (FLAGS_benchmark_min_iters <= 0) {
+        std::cerr << "Invalid --benchmark_min_iters: "
+                  << FLAGS_benchmark_min_iters << "\n";
+        return 1;
+      }
+      std::copy(argv + i + 1, argv + argc, argv + i);
+      argc -= 1;
+    } else if (strncmp(argv[i], "--wipe_caches", 13) == 0) {
+      FLAGS_wipe_caches = true;
+      std::copy(argv + i + 1, argv + argc, argv + i);
+      argc -= 1;
+    } else if (strncmp(argv[i], "--block_size=", 13) == 0) {
+      FLAGS_gemm_block_size =
+          atoll(argv[i] + 13);  // NOLINT(runtime/deprecated_fn)
+      if (FLAGS_gemm_block_size <= 0) {
+        std::cerr << "Invalid --block_size: " << FLAGS_gemm_block_size << "\n";
+        return 1;
+      }
+      std::copy(argv + i + 1, argv + argc, argv + i);
+      argc -= 1;
+    } else {
+      char* endptr;
+      int64_t val = strtoll(argv[i], &endptr, 10);
+      if (endptr != argv[i] && *endptr == '\0') {
+        FLAGS_shapes.push_back(val);
+        std::copy(argv + i + 1, argv + argc, argv + i);
+        argc -= 1;
+      } else {
+        ++i;
+      }
+    }
+  }
+#if !XNN_PLATFORM_QURT
+  // InitGoogle(...);
+#endif
+  return 0;
+}
+
+uint32_t PrefetchToL1(const void* ptr, size_t size) {
+  uint32_t step = 16;
+#if XNN_ENABLE_CPUINFO
+  if (cpuinfo_initialize()) {
+    const struct cpuinfo_cache* cpuinfo_cache_info = cpuinfo_get_l1d_cache(0);
+    if (cpuinfo_cache_info) {
+      step = cpuinfo_cache_info->line_size;
+    }
+  }
+#endif  // XNN_ENABLE_CPUINFO
+
+  const uint8_t* u8_ptr = static_cast<const uint8_t*>(ptr);
+  // Compute and return sum of data to prevent compiler from removing data
+  // reads.
+  uint32_t sum = 0;
+  while (size >= step) {
+    sum += static_cast<uint32_t>(*u8_ptr);
+    u8_ptr += step;
+    size -= step;
+  }
+  return sum;
+}
+
+void WipePthreadpoolL2Caches(benchmark::State& state,
+                             pthreadpool_t threadpool) {
+  static struct ClearL2CacheContext context;
+  state.PauseTiming();
+  const int64_t num_threads = pthreadpool_get_threads_count(threadpool);
+  context.counter = num_threads;
+  pthreadpool_parallelize_1d(
+      threadpool, (pthreadpool_task_1d_t)ClearL2CacheWorkerFun, &context,
+      pthreadpool_get_threads_count(threadpool), 0);
+  state.ResumeTiming();
+}
+
+void WipeSchedulerL2Caches(benchmark::State& state, xnn_scheduler_v2 scheduler,
+                           void* scheduler_context) {
+  static struct ClearL2CacheContext context;
+  state.PauseTiming();
+  const int64_t num_threads = scheduler.num_threads(scheduler_context) + 1;
+  context.num_threads = num_threads;
+  context.counter = num_threads;
+  for (int k = 1; k < num_threads; k++) {
+    scheduler.schedule(scheduler_context, &context, [](void* arg) -> void {
+      ClearL2CacheWorkerFun((struct ClearL2CacheContext*)arg, 1);
+    });
+  }
+  ClearL2CacheWorkerFun(&context, 0);
+  state.ResumeTiming();
+}
+
+uint32_t WipeCache() {
+  std::call_once(wipe_buffer_guard, InitWipeBuffer);  // NOLINT(build/c++11)
+  if (!wipe_buffer) {
+    return 0;
+  }
+  return PrefetchToL1(wipe_buffer, wipe_buffer_size);
+}
+
+void DisableDenormals() {
+#if defined(__SSE__) || defined(__x86_64__)
+  _mm_setcsr(_mm_getcsr() | 0x8040);
+#elif defined(__arm__) && defined(__ARM_FP) && (__ARM_FP != 0)
+  uint32_t fpscr;
+#if defined(__thumb__) && !defined(__thumb2__)
+  __asm__ __volatile__(
+      "VMRS %[fpscr], fpscr\n"
+      "ORRS %[fpscr], %[bitmask]\n"
+      "VMSR fpscr, %[fpscr]\n"
+      : [fpscr] "=l"(fpscr)
+      : [bitmask] "l"(0x1000000)
+      : "cc");
+#else
+  __asm__ __volatile__(
+      "VMRS %[fpscr], fpscr\n"
+      "ORR %[fpscr], #0x1000000\n"
+      "VMSR fpscr, %[fpscr]\n"
+      : [fpscr] "=r"(fpscr));
+#endif
+#elif defined(__aarch64__)
+  uint64_t fpcr;
+  __asm__ __volatile__(
+      "MRS %[fpcr], fpcr\n"
+      "ORR %w[fpcr], %w[fpcr], 0x1000000\n"
+      "ORR %w[fpcr], %w[fpcr], 0x80000\n"
+      "MSR fpcr, %[fpcr]\n"
+      : [fpcr] "=r"(fpcr));
+#endif
+}
+
+// Return clock rate in Hz.
+uint64_t GetCurrentCpuFrequency() {
+#if defined(__linux__)
+  int freq = 0;
+  char cpuinfo_name[512];
+  int cpu = sched_getcpu();
+  snprintf(cpuinfo_name, sizeof(cpuinfo_name),
+           "/sys/devices/system/cpu/cpu%d/cpufreq/scaling_cur_freq", cpu);
+
+  FILE* f = fopen(cpuinfo_name, "r");
+  if (f != nullptr) {
+    if (fscanf(f, "%d", &freq) != 0) {
+      fclose(f);
+      return static_cast<uint64_t>(freq) * 1000;
+    }
+    fclose(f);
+  }
+#elif XNN_PLATFORM_WINDOWS
+  // Read MHz from the registry
+  DWORD data, data_size = sizeof(data);
+  LSTATUS r = SHGetValueA(HKEY_LOCAL_MACHINE,
+                      "HARDWARE\\DESCRIPTION\\System\\CentralProcessor\\0",
+                      "~MHz", nullptr, &data, &data_size);
+  if (r == ERROR_SUCCESS) {
+    return static_cast<uint64_t>(data) * static_cast<uint64_t>(1000 * 1000);
+  }
+#elif XNN_PLATFORM_QURT
+  HAP_power_response_t response = {.type = HAP_power_get_clk_Freq};
+  if (HAP_power_get(NULL, &response) == AEE_SUCCESS) {
+    return static_cast<uint64_t>(response.clkFreqHz);
+  }
+#elif defined(__APPLE__)
+  uint64_t freq = 0;
+  size_t freq_len = sizeof(freq);
+
+  // On x86 return hw.cpufrequency
+  if (sysctlbyname("hw.cpufrequency", &freq, &freq_len, NULL, 0) >= 0) {
+    return freq;
+  }
+  // Retrieve the time base frequency (e.g., 24,000,000 Hz on M1/M2/M3/M4)
+  if (sysctlbyname("hw.tbfrequency", &freq, &freq_len, NULL, 0) >= 0) {
+    struct clockinfo clockrate;
+    size_t clock_len = sizeof(clockrate);
+    // Retrieve kernel clock information, including the 'hz' (system clock rate)
+    if (sysctlbyname("kern.clockrate", &clockrate, &clock_len, NULL, 0) >= 0) {
+      // Typical calculation used in some system monitoring tools
+      return freq * clockrate.hz;
+    }
+  }
+#endif
+  return 0;
+}
+
+size_t GetMaxCacheSize() {
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+  // DynamIQ max: 4 MB
+  size_t max_cache_size = 4 * 1024 * 1024;
+#else
+  // Intel eDRAM max: 128 MB
+  size_t max_cache_size = 128 * 1024 * 1024;
+#endif
+#if XNN_ENABLE_CPUINFO
+  if (cpuinfo_initialize()) {
+    max_cache_size = cpuinfo_get_max_cache_size();
+  }
+#endif  // XNN_ENABLE_CPUINFO
+  return max_cache_size;
+}
+
+bool CheckArchFlags(benchmark::State& state, uint64_t arch_flags) {
+  const xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+  if (hardware_config == nullptr) {
+    state.SkipWithError("no hardware config");
+    return false;
+  } else if ((hardware_config->arch_flags & arch_flags) != arch_flags) {
+    state.SkipWithError("architecture unsupported");
+    return false;
+  }
+
+  return true;
+}
+
+}  // namespace utils
+}  // namespace benchmark

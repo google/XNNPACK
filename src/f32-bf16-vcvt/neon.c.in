@@ -1,0 +1,99 @@
+// Copyright 2026 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert BATCH_TILE % 8 == 0
+$assert BATCH_TILE >= 8
+$SIMD_TILE = BATCH_TILE // 8
+#include <arm_neon.h>
+#include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
+
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/vcvt.h"
+
+
+void xnn_f32_bf16_vcvt_ukernel__neon_u${BATCH_TILE}(
+    size_t batch,
+    const float* input,
+    xnn_bfloat16* output,
+    const void* params) XNN_OOB_READS
+{
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
+
+  const uint32x4_t vexp_mask = vdupq_n_u32(0x7F800000u);
+  const uint32x4_t vbias = vdupq_n_u32(0x7FFFu);
+  const uint32x4_t vone = vdupq_n_u32(1u);
+  const uint32x4_t vabs_mask = vdupq_n_u32(0x7FFFFFFFu);
+  const uint32x4_t vquiet = vdupq_n_u32(0x00400000u);
+
+  uint16_t* o = (uint16_t*) output;
+  for (; batch >= ${BATCH_TILE} * sizeof(float); batch -= ${BATCH_TILE} * sizeof(float)) {
+    $for N in range(2*SIMD_TILE):
+      const float32x4_t vf${N} = vld1q_f32(input); input += 4;
+
+    $for N in range(2*SIMD_TILE):
+      uint32x4_t vi${N} = vreinterpretq_u32_f32(vf${N});
+
+    $for N in range(2*SIMD_TILE):
+      const uint32x4_t vlsb${N} = vandq_u32(vshrq_n_u32(vi${N}, 16), vone);
+
+    $for N in range(2*SIMD_TILE):
+      const uint32x4_t vrounded${N} = vaddq_u32(vaddq_u32(vi${N}, vbias), vlsb${N});
+
+    $for N in range(2*SIMD_TILE):
+      const uint32x4_t vabsi${N} = vandq_u32(vi${N}, vabs_mask);
+
+    $for N in range(2*SIMD_TILE):
+      const uint32x4_t vnanmask${N} = vcgtq_u32(vabsi${N}, vexp_mask);
+
+    $for N in range(2*SIMD_TILE):
+      vi${N} = vbslq_u32(vnanmask${N}, vorrq_u32(vi${N}, vquiet), vrounded${N});
+
+    $for N in range(SIMD_TILE):
+      const uint16x8_t vbf${N} = vcombine_u16(vshrn_n_u32(vi${2*N}, 16), vshrn_n_u32(vi${2*N+1}, 16));
+
+    $for N in range(SIMD_TILE):
+      vst1q_u16(o, vbf${N}); o += 8;
+  }
+  for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
+    const float32x4_t vf = vld1q_f32(input); input += 4;
+
+    uint32x4_t vi = vreinterpretq_u32_f32(vf);
+    const uint32x4_t vlsb = vandq_u32(vshrq_n_u32(vi, 16), vone);
+    const uint32x4_t vrounded = vaddq_u32(vaddq_u32(vi, vbias), vlsb);
+    const uint32x4_t vabsi = vandq_u32(vi, vabs_mask);
+    const uint32x4_t vnanmask = vcgtq_u32(vabsi, vexp_mask);
+    vi = vbslq_u32(vnanmask, vorrq_u32(vi, vquiet), vrounded);
+    const uint16x4_t vbf = vshrn_n_u32(vi, 16);
+
+    vst1_u16(o, vbf); o += 4;
+  }
+  if XNN_UNLIKELY(batch != 0) {
+    assert(batch % sizeof(float) == 0);
+    assert(batch >= 1 * sizeof(float));
+    assert(batch <= 3 * sizeof(float));
+    const float32x4_t vf = vld1q_f32(input);
+
+    uint32x4_t vi = vreinterpretq_u32_f32(vf);
+    const uint32x4_t vlsb = vandq_u32(vshrq_n_u32(vi, 16), vone);
+    const uint32x4_t vrounded = vaddq_u32(vaddq_u32(vi, vbias), vlsb);
+    const uint32x4_t vabsi = vandq_u32(vi, vabs_mask);
+    const uint32x4_t vnanmask = vcgtq_u32(vabsi, vexp_mask);
+    vi = vbslq_u32(vnanmask, vorrq_u32(vi, vquiet), vrounded);
+    uint16x4_t vbf = vshrn_n_u32(vi, 16);
+
+    if (batch & (2 * sizeof(float))) {
+      vst1_lane_u32((void*) o, vreinterpret_u32_u16(vbf), 0); o += 2;
+      vbf = vext_u16(vbf, vbf, 2);
+    }
+    if (batch & (1 * sizeof(float))) {
+      vst1_lane_u16(o, vbf, 0);
+    }
+  }
+}

@@ -1,0 +1,72 @@
+// clang-format off
+// Auto-generated file. Do not edit!
+//   Template: src/f32-spmm/scalar-pipelined.c.in
+//   Generator: tools/xngen
+//
+// Copyright 2019 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+#include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
+
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/microparams.h"
+#include "src/xnnpack/spmm.h"
+
+
+void xnn_f32_spmm_minmax_ukernel_1x1__scalar_pipelined(
+    size_t mc,
+    size_t nc,
+    const float* input,
+    const float* weights,
+    const int32_t* widx_dmap,
+    const uint32_t* nidx_nnzmap,
+    float* output,
+    size_t output_stride,
+    const struct xnn_f32_minmax_params* restrict params)
+{
+  assert(mc != 0);
+  assert(mc % sizeof(float) == 0);
+  assert(nc != 0);
+
+  const float vmin = params->scalar.min;
+  const float vmax = params->scalar.max;
+  size_t output_decrement = output_stride * nc - 1 * sizeof(float);
+  while XNN_LIKELY(mc >= 1 * sizeof(float)) {
+    const float* w = weights;
+    const int32_t* dmap = widx_dmap;
+    const uint32_t* nnzmap = nidx_nnzmap;
+    float vw = *w++;
+    intptr_t diff = *dmap++;
+    float vi0 = input[0];
+    size_t n = nc;
+    do {
+      uint32_t nnz = *nnzmap++;
+      float vacc0 = vw;
+      vw = *w++;
+      if XNN_LIKELY(nnz != 0) {
+        do {
+          vacc0 += vi0 * vw;
+          input = (const float*restrict) ((uintptr_t) input + (uintptr_t) diff);
+
+          diff = *dmap++;
+          vw = *w++;
+          vi0 = input[0];
+        } while (--nnz != 0);
+      }
+      float vout0 = math_min_f32(vacc0, vmax);
+      vout0 = math_max_f32(vout0, vmin);
+      output[0] = vout0;
+      output = (float*restrict) ((uintptr_t) output + output_stride);
+    } while (--n != 0);
+    output = (float*restrict) ((uintptr_t) output - output_decrement);
+    input += 1;
+    mc -= 1 * sizeof(float);
+  }
+  if XNN_UNLIKELY(mc != 0) {
+  }
+}

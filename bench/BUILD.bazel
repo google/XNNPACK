@@ -1,0 +1,560 @@
+# Copyright 2023-2025 Google LLC
+#
+# This source code is licensed under the BSD-style license found in the
+# LICENSE file in the root directory of this source tree.
+
+load(
+    "//:build_defs.bzl",
+    "xnnpack_benchmark",
+    "xnnpack_cc_library",
+    "xnnpack_cxx_library",
+    "xnnpack_if_kleidiai_enabled",
+    "xnnpack_optional_dnnl_copts",
+    "xnnpack_optional_dnnl_deps",
+    "xnnpack_optional_gemmlowp_copts",
+    "xnnpack_optional_gemmlowp_deps",
+    "xnnpack_optional_ruy_copts",
+    "xnnpack_optional_ruy_deps",
+    "xnnpack_select_if",
+    "xnnpack_visibility",
+)
+
+MICROKERNEL_BENCHMARK_DEPS = [
+    ":bench_utils",
+    "//:aligned_allocator",
+    "//:all_microkernels",
+    "//:allocator",
+    "//:buffer",
+    "//:common",
+    "//:datatype",
+    "//:isa_checks",
+    "//:math",
+    "//:microfnptr_h",
+    "//:microkernel_defs",
+    "//:microkernel_hdrs",
+    "//:microparams_init",
+    "//:packing",
+    "//:params",
+    "//:xnnpack_h",
+    "//src/configs:hardware_config",
+    "//test:replicable_random_device",
+]
+
+############################### Helper libraries ###############################
+
+xnnpack_cxx_library(
+    name = "bench_utils",
+    srcs = ["utils.cc"],
+    hdrs = ["utils.h"],
+    copts = select({
+        "//:cpuinfo_enabled": ["-DXNN_ENABLE_CPUINFO=1"],
+        "//conditions:default": ["-DXNN_ENABLE_CPUINFO=0"],
+    }),
+    visibility = xnnpack_visibility(),
+    deps = [
+        "//:allocator",
+        "//:common",
+        "//:memory",
+        "//:params",
+        "//:xnnpack_h",
+        "//src/configs:hardware_config",
+        "@com_google_benchmark//:benchmark",
+        "@pthreadpool",
+    ] + xnnpack_select_if(
+        "//:cpuinfo_enabled",
+        ["@cpuinfo"],
+    ) + xnnpack_select_if(
+        "//build_config:hexagon",
+        [],
+        [],  # ["//base"]
+    ),
+)
+
+xnnpack_cc_library(
+    name = "conv",
+    hdrs = [
+        "conv.h",
+    ],
+    deps = [
+        ":bench_utils",
+        "@com_google_benchmark//:benchmark",
+    ],
+)
+
+xnnpack_cc_library(
+    name = "dwconv",
+    hdrs = [
+        "dwconv.h",
+    ],
+    deps = [
+        ":bench_utils",
+        "@com_google_benchmark//:benchmark",
+    ],
+)
+
+xnnpack_cc_library(
+    name = "spmm",
+    hdrs = [
+        "spmm.h",
+    ],
+    deps = [
+        ":bench_utils",
+        "@com_google_benchmark//:benchmark",
+    ],
+)
+
+xnnpack_cxx_library(
+    name = "gemm_benchmark",
+    testonly = True,
+    srcs = [
+        "gemm-benchmark.cc",
+    ],
+    hdrs = [
+        "gemm.h",
+        "gemm-benchmark.h",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        ":conv",
+        "//:indirection",
+        "//:microparams_h",
+        "//src/configs:config_hdrs",
+        "@com_google_benchmark//:benchmark",
+    ] + xnnpack_if_kleidiai_enabled([
+        "@KleidiAI//kai/ukernels/matmul",
+    ]),
+)
+
+xnnpack_cxx_library(
+    name = "packw_benchmark",
+    testonly = True,
+    hdrs = [
+        "packw-benchmark.h",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        ":bgemm",
+        "@com_google_benchmark//:benchmark",
+    ],
+)
+
+xnnpack_cxx_library(
+    name = "bgemm",
+    testonly = True,
+    hdrs = [
+        "bgemm.h",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        "@com_google_benchmark//:benchmark",
+    ],
+)
+
+xnnpack_cxx_library(
+    name = "packq_benchmark",
+    testonly = True,
+    srcs = [
+        "packq-benchmark.cc",
+    ],
+    hdrs = ["packq-benchmark.h"],
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        ":bgemm",
+        "@com_google_benchmark//:benchmark",
+    ],
+)
+
+######################### Benchmarks for micro-kernels #########################
+
+[xnnpack_benchmark(
+    name = "%s_bench" % kernel,
+    srcs = [
+        "%s.cc" % kernel.replace("_", "-"),
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        ":gemm_benchmark",
+    ],
+) for kernel in [
+    "bf16_gemm",
+    "qd8_f16_qb4w_gemm",
+    "qd8_f32_qb4w_gemm",
+    "qd8_f16_qc8w_gemm",
+    "qd8_f32_qc8w_gemm",
+    "qd8_f16_qc4w_gemm",
+    "qd8_f32_qc4w_gemm",
+    "qd8_f32_qc2w_gemm",
+    "qd8_f16_qc2w_gemm",
+    "qs8_qc2w_gemm_fp32",
+    "qs8_qc4w_gemm_fp32",
+    "qs8_qc8w_gemm_fp32",
+    "qu8_gemm_fp32",
+    "qu8_gemm_rndnu",
+    "f16_f32acc_gemm",
+    "f16_gemm",
+    "f32_qc4w_gemm",
+    "f32_qc8w_gemm",
+]]
+
+[xnnpack_benchmark(
+    name = "%s_bench" % kernel,
+    srcs = [
+        "%s.cc" % kernel.replace("_", "-"),
+    ],
+    copts = xnnpack_optional_ruy_copts() + xnnpack_optional_gemmlowp_copts(),
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        ":gemm_benchmark",
+    ] + xnnpack_optional_ruy_deps() + xnnpack_optional_gemmlowp_deps(),
+) for kernel in [
+    "f16_gemm_minmax",
+    "f32_gemm_minmax",
+    "f32_gemm",
+    "pqs8_qc8w_gemm_minmax",
+    "qs8_gemm",
+    "qu8_gemm",
+]]
+
+xnnpack_benchmark(
+    name = "f32_bgemm_bench",
+    srcs = [
+        "f32-bgemm.cc",
+    ],
+    copts = xnnpack_optional_ruy_copts(),
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        ":bgemm",
+    ] + xnnpack_optional_ruy_deps(),
+)
+
+xnnpack_benchmark(
+    name = "qp8_f32_qc4w_gemm_bench",
+    srcs = [
+        "qp8-f32-qc4w-gemm.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        ":gemm_benchmark",
+    ] + xnnpack_if_kleidiai_enabled([
+        "@KleidiAI//kai/ukernels/matmul",
+    ]),
+)
+
+xnnpack_benchmark(
+    name = "qp8_f32_qc8w_gemm_bench",
+    srcs = [
+        "qp8-f32-qc8w-gemm.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        ":gemm_benchmark",
+    ] + xnnpack_if_kleidiai_enabled([
+        "@KleidiAI//kai/ukernels/matmul",
+    ]),
+)
+
+xnnpack_benchmark(
+    name = "qp8_f32_qb4w_gemm_bench",
+    srcs = ["qp8-f32-qb4w-gemm.cc"],
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        ":gemm_benchmark",
+    ] + xnnpack_if_kleidiai_enabled([
+        "@KleidiAI//kai/ukernels/matmul",
+    ]),
+)
+
+xnnpack_benchmark(
+    name = "pf32_gemm_minmax_bench",
+    srcs = ["pf32-gemm-minmax.cc"],
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        ":gemm_benchmark",
+    ] + xnnpack_if_kleidiai_enabled([
+        "@KleidiAI//kai/ukernels/matmul",
+    ]),
+)
+
+xnnpack_benchmark(
+    name = "pf16_gemm_minmax_bench",
+    srcs = ["pf16-gemm-minmax.cc"],
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        ":gemm_benchmark",
+    ] + xnnpack_if_kleidiai_enabled([
+        "@KleidiAI//kai/ukernels/matmul",
+    ]),
+)
+
+[xnnpack_benchmark(
+    name = "%s_bench" % kernel,
+    srcs = [
+        "%s.cc" % kernel.replace("_", "-"),
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+) for kernel in [
+    "f16_raddstoreexpminusmax",
+    "f32_raddexpminusmax",
+    "f32_raddextexp",
+    "f32_raddstoreexpminusmax",
+    "f32_vscaleexpminusmax",
+    "f32_vscaleextexp",
+    "f16_vcmul",
+    "f32_vcmul",
+    "rdminmax",
+    "rdsum",
+    "rdsum2",
+    "rminmax",
+    "rsum",
+    "rsum2",
+    "x8_lut",
+]]
+
+[xnnpack_benchmark(
+    name = "%s_bench" % kernel,
+    srcs = [
+        "%s.cc" % kernel.replace("_", "-"),
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+) for kernel in [
+    "xx_transposev",
+    "xN_transposec",
+]]
+
+xnnpack_benchmark(
+    name = "qs8_dwconv_bench",
+    srcs = [
+        "qs8-dwconv.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        ":dwconv",
+        "//:indirection",
+        "//:microkernel_utils",
+        "//:microparams_h",
+        "//src/configs:microkernel_configs",
+    ],
+)
+
+xnnpack_benchmark(
+    name = "f16_f32acc_igemm_bench",
+    srcs = [
+        "f16-f32acc-igemm.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        ":conv",
+        "//:indirection",
+    ],
+)
+
+xnnpack_benchmark(
+    name = "f16_igemm_bench",
+    srcs = [
+        "f16-igemm.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        ":conv",
+        ":gemm_benchmark",
+        "//:indirection",
+    ],
+)
+
+xnnpack_benchmark(
+    name = "vunary_bench",
+    srcs = ["vunary.cc"],
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        "//:microparams_h",
+    ],
+)
+
+xnnpack_benchmark(
+    name = "vbinary_bench",
+    srcs = ["vbinary.cc"],
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        "//:microparams_h",
+    ],
+)
+
+xnnpack_benchmark(
+    name = "f32_igemm_bench",
+    srcs = [
+        "f32-igemm.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        ":conv",
+        "//:indirection",
+    ],
+)
+
+xnnpack_benchmark(
+    name = "indirection_bench",
+    srcs = ["indirection.cc"],
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        "//:indirection",
+    ],
+)
+
+xnnpack_benchmark(
+    name = "f32_conv_hwc_bench",
+    srcs = [
+        "dconv.h",
+        "f32-conv-hwc.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
+    name = "f16_conv_hwc2chw_bench",
+    srcs = [
+        "dconv.h",
+        "f16-conv-hwc2chw.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
+    name = "f32_conv_hwc2chw_bench",
+    srcs = [
+        "dconv.h",
+        "f32-conv-hwc2chw.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
+    name = "f16_dwconv_bench",
+    srcs = [
+        "f16-dwconv.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        ":dwconv",
+        "//:indirection",
+        "//:microkernel_utils",
+    ],
+)
+
+xnnpack_benchmark(
+    name = "f32_dwconv_bench",
+    srcs = [
+        "f32-dwconv.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        ":dwconv",
+        "//:indirection",
+        "//:microkernel_utils",
+    ],
+)
+
+xnnpack_benchmark(
+    name = "f32_dwconv2d_chw_bench",
+    srcs = [
+        "f32-dwconv2d-chw.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        ":dwconv",
+        "//:indirection",
+    ],
+)
+
+xnnpack_benchmark(
+    name = "f16_dwconv2d_chw_bench",
+    srcs = [
+        "f16-dwconv2d-chw.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        ":dwconv",
+        "//:indirection",
+    ],
+)
+
+xnnpack_benchmark(
+    name = "spmm_bench",
+    srcs = ["spmm.cc"],
+    deps = MICROKERNEL_BENCHMARK_DEPS + [":spmm"],
+)
+
+xnnpack_benchmark(
+    name = "f32_softmax_bench",
+    srcs = [
+        "f32-softmax.cc",
+    ],
+    copts = xnnpack_optional_dnnl_copts(),
+    deps = MICROKERNEL_BENCHMARK_DEPS + xnnpack_optional_dnnl_deps() + [
+        "//:microparams_h",
+    ],
+)
+
+xnnpack_benchmark(
+    name = "x8_packq_bench",
+    srcs = [
+        "x8-packq.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        ":bgemm",
+        ":packq_benchmark",
+    ],
+)
+
+xnnpack_benchmark(
+    name = "x8_packw_bench",
+    srcs = [
+        "x8-packw.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        ":bgemm",
+        ":packw_benchmark",
+    ],
+)
+
+xnnpack_benchmark(
+    name = "qs8_packw_bench",
+    srcs = [
+        "qs8-packw.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        ":bgemm",
+        ":packw_benchmark",
+    ],
+)
+
+xnnpack_benchmark(
+    name = "qs8_qc4w_packw_bench",
+    srcs = [
+        "qs8-qc4w-packw.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        ":bgemm",
+        ":packw_benchmark",
+    ],
+)
+
+xnnpack_benchmark(
+    name = "qb4_packw_bench",
+    srcs = [
+        "qb4-packw.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        ":bgemm",
+        ":packw_benchmark",
+    ],
+)
+
+xnnpack_benchmark(
+    name = "x16_packw_bench",
+    srcs = [
+        "x16-packw.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        ":bgemm",
+        ":packw_benchmark",
+    ],
+)
+
+xnnpack_benchmark(
+    name = "x16_x32_packw_bench",
+    srcs = [
+        "x16-x32-packw.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        ":bgemm",
+        ":packw_benchmark",
+    ],
+)
+
+xnnpack_benchmark(
+    name = "x32_packw_bench",
+    srcs = [
+        "x32-packw.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        ":bgemm",
+        ":packw_benchmark",
+    ],
+)

@@ -1,0 +1,291 @@
+// Copyright 2022 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+#ifndef XNNPACK_YNNPACK_BASE_ARITHMETIC_H_
+#define XNNPACK_YNNPACK_BASE_ARITHMETIC_H_
+
+#include <cassert>
+#include <cmath>
+#include <cstddef>
+#include <cstdint>
+#include <limits>
+
+#include "ynnpack/base/bfloat16.h"
+#include "ynnpack/base/fp8.h"
+#include "ynnpack/base/half.h"
+#include "ynnpack/base/type.h"
+
+namespace ynn {
+
+// Clamp a float to the range of the given integer or quantized integer type.
+template <typename Int>
+float clamp_float_to_int(float x) {
+  using Unwrapped = typename unwrap_quantized<Int>::type;
+  // It's tricky to do this with std::max/std::min, because the min/max values
+  // might not be exactly representable as floats, and so are ineffective to
+  // avoid converting to an out of bounds integer. To avoid this problem, we've
+  // determined a constant that when added to the min/max float values, results
+  // in the upper bound of the integer range.
+  constexpr int half_mantissa = sizeof(Unwrapped) * 8 > 23 ? 127 : 0;
+  x = std::max<float>(x, type_info<Unwrapped>::min());
+  x = std::min<float>(x, type_info<Unwrapped>::max() - half_mantissa);
+  return x;
+}
+
+// A cast that:
+// - Rounds to nearest integer
+// - Replaces NaN with 0
+// - Saturates to the bounds of the result type
+template <typename To>
+auto cast(float x) {
+  using ToInfo = type_info<To>;
+  using Element = typename ToInfo::element_type;
+  using Unwrapped = typename unwrap_quantized<Element>::type;
+  if constexpr (is_integral<Unwrapped>::value) {
+    x = std::isnan(x) ? 0.0f : x;
+    x = std::nearbyint(x);
+    constexpr int half_mantissa = sizeof(Unwrapped) * 8 > 23 ? 127 : 0;
+    if (x > type_info<Unwrapped>::max() - half_mantissa) {
+      return static_cast<Element>(type_info<Unwrapped>::max());
+    }
+    if (x < type_info<Unwrapped>::min()) {
+      return static_cast<Element>(type_info<Unwrapped>::min());
+    }
+    return static_cast<Element>(
+        static_cast<typename unwrap_quantized<Element>::type>(x));
+  } else {
+    return static_cast<Element>(x);
+  }
+}
+
+template <typename To>
+auto cast(half x) {
+  return cast<To>(static_cast<float>(x));
+}
+
+template <typename To>
+auto cast(bfloat16 x) {
+  return cast<To>(static_cast<float>(x));
+}
+
+template <typename To>
+auto cast(fp8_e5m2 x) {
+  return cast<To>(static_cast<half>(x));
+}
+
+template <typename To>
+auto cast(fp8_e4m3 x) {
+  return cast<To>(static_cast<bfloat16>(x));
+}
+
+// std::saturate_cast is C++26
+template <typename T, typename U>
+constexpr T cast(U x) noexcept {
+  if constexpr (is_integral<T>::value) {
+    if (x > type_info<T>::max()) return type_info<T>::max();
+    if (x < type_info<T>::min()) return type_info<T>::min();
+  }
+  return static_cast<T>(x);
+}
+
+template <typename T>
+float dequantize(T x, float scale, float zero_point) {
+  return (cast<float>(x) - zero_point) * scale;
+}
+inline double dequantize(double x, float scale, float zero_point) {
+  return (x - zero_point) * scale;
+}
+template <typename T>
+auto dequantize(T x, const quantization_params& params) {
+  return dequantize(x, params.scale, params.zero_point);
+}
+
+template <typename T>
+T quantize(float x, float inv_scale, float zero_point) {
+  return cast<T>(x * inv_scale + zero_point);
+}
+inline double quantize(double x, double inv_scale, double zero_point) {
+  return std::nearbyint(x * inv_scale + zero_point);
+}
+template <typename T>
+T quantize(float x, const quantization_params& params) {
+  return quantize<T>(x, 1.0f / params.scale, params.zero_point);
+}
+
+template <typename T>
+void quantize(const float* in, T* out, size_t n, float inv_scale,
+              float zero_point) {
+  for (size_t i = 0; i < n; ++i) {
+    out[i] = quantize<T>(in[i], inv_scale, zero_point);
+  }
+}
+
+template <typename T>
+void quantize(const float* in, T* out, size_t n,
+              const quantization_params& params) {
+  for (size_t i = 0; i < n; ++i) {
+    out[i] = quantize<T>(in[i], params);
+  }
+}
+
+inline float fake_quantize(float x, float inv_scale, float zero_point) {
+  return std::nearbyint(x * inv_scale + zero_point);
+}
+inline double fake_quantize(double x, double inv_scale, double zero_point) {
+  return std::nearbyint(x * inv_scale + zero_point);
+}
+inline float fake_quantize(float x, const quantization_params& params) {
+  return fake_quantize(x, 1.0f / params.scale, params.zero_point);
+}
+inline double fake_quantize(double x, const quantization_params& params) {
+  return fake_quantize(x, 1.0 / params.scale, params.zero_point);
+}
+
+// These help to implement integer arithmetic without signed integer overflow.
+inline int64_t widen(int32_t x) { return static_cast<int64_t>(x); }
+inline int32_t widen(int16_t x) { return static_cast<int32_t>(x); }
+inline int16_t widen(int8_t x) { return static_cast<int16_t>(x); }
+inline int32_t narrow(int64_t x) { return static_cast<int32_t>(x); }
+inline int16_t narrow(int32_t x) { return static_cast<int16_t>(x); }
+inline int8_t narrow(int16_t x) { return static_cast<int8_t>(x); }
+
+// This implements "Euclidean division", which is the way integer division
+// should be: (a / b) * b + r = a, where r is always in [0, |b|). This is
+// unlike "computer division" where, annoyingly, a / b is rounded towards 0,
+// and the remainder may be positive or negative accordingly. This
+// implementation of Euclidean integer division is taken from
+// https://github.com/dsharlet/slinky/blob/5020dae47ecb176bcd917ecd07d37e19615b955b/base/arithmetic.h#L12-L26
+template <typename T>
+T euclidean_div(T a, T b) {
+  if (b == 0) {
+    return 0;
+  }
+  T q = a / b;
+  T r = a - q * b;
+  T bs = b >> (sizeof(T) * 8 - 1);
+  T rs = r >> (sizeof(T) * 8 - 1);
+  return q - (rs & bs) + (rs & ~bs);
+}
+
+inline size_t euclidean_div(size_t a, size_t b) { return b != 0 ? a / b : 0; }
+
+template <typename T>
+T euclidean_mod(T a, T b) {
+  if (b == 0) {
+    return 0;
+  }
+  T r = a % b;
+  return r >= 0 ? r : (b < 0 ? r - b : r + b);
+}
+
+inline size_t euclidean_mod(size_t a, size_t b) { return b != 0 ? a % b : 0; }
+
+template <typename T>
+bool is_power_of_two(T x) {
+  return (x & (x - 1)) == 0;
+}
+
+template <typename T>
+T align_down(T value, T alignment) {
+  assert(is_power_of_two(alignment));
+  return value & ~(alignment - 1);
+}
+
+template <typename T>
+T align_up(T value, T alignment) {
+  return align_down(value + alignment - 1, alignment);
+}
+
+template <typename T>
+T floor_div(T a, T b) {
+  return euclidean_div(a, b);
+}
+
+template <typename T>
+T ceil_div(T a, T b) {
+  assert(b > 0);
+  return euclidean_div(a + b - 1, b);
+}
+
+template <typename T>
+T integer_pow(T a, T b) {
+  if (b < 0) {
+    // 1 / a^b is either 0 or 1 (if a^b is positive), or -1 or 0 (if a^b is
+    // negative).
+    if ((b & 1) == 0) {
+      return euclidean_div<T>(1, narrow(widen(a) * widen(a)));
+    } else {
+      return euclidean_div<T>(1, a);
+    }
+  }
+  T result = 1;
+  for (; b; b >>= 1) {
+    if (b & 1) {
+      result = widen(result) * widen(a);
+    }
+    a = widen(a) * widen(a);
+  }
+  return result;
+}
+
+template <typename T>
+T* offset_bytes(T* ptr, ptrdiff_t offset) {
+  assert(ptr || offset == 0);
+  return reinterpret_cast<T*>(reinterpret_cast<uint8_t*>(ptr) + offset);
+}
+
+template <typename T>
+const T* offset_bytes(const T* ptr, ptrdiff_t offset) {
+  assert(ptr || offset == 0);
+  return reinterpret_cast<const T*>(reinterpret_cast<const uint8_t*>(ptr) +
+                                    offset);
+}
+
+// std::sub_sat is in C++26, we can use that in a few decades maybe.
+inline size_t sub_sat(size_t a, size_t b) { return a > b ? a - b : 0; }
+
+template <typename T>
+T add_sat(T a, T b) {
+  return cast<T>(static_cast<int64_t>(a) + static_cast<int64_t>(b));
+}
+
+template <typename T>
+T sub_sat(T a, T b) {
+  return cast<T>(static_cast<int64_t>(a) - static_cast<int64_t>(b));
+}
+
+template <typename T>
+T floor_log2(T a) {
+  if (a == 0.0) return -std::numeric_limits<T>::infinity();
+  // This is true if a is NaN.
+  if (!(a >= 0.0)) return std::numeric_limits<T>::quiet_NaN();
+  int exp;
+  T significand = std::frexp(a, &exp);
+  if (std::isinf(significand)) return significand;
+  return static_cast<T>(exp - 1);
+}
+
+template <typename T>
+T exp2_round(T a) {
+  return std::ldexp(static_cast<T>(1.0), static_cast<int>(std::nearbyint(a)));
+}
+
+constexpr size_t pow(size_t base, size_t exp) {
+  return (exp == 0) ? 1 : base * pow(base, exp - 1);
+}
+
+using std::isfinite;
+using std::isinf;
+using std::isnan;
+
+#ifndef _MSC_VER
+inline bool isinf(int x) { return false; }
+inline bool isnan(int x) { return false; }
+inline bool isfinite(int x) { return true; }
+#endif  // _MSC_VER
+
+}  // namespace ynn
+
+#endif  // XNNPACK_YNNPACK_BASE_ARITHMETIC_H_

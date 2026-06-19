@@ -1,0 +1,760 @@
+// Copyright 2020 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert ROW_TILE >= 1
+$assert ACCUMULATORS >= 1
+#include <arm_neon.h>
+#include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
+
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/dwconv.h"
+#include "src/xnnpack/intrinsics-polyfill.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/microparams.h"
+
+
+void xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_${ROW_TILE}x8${"_acc%d" % ACCUMULATORS if ACCUMULATORS > 1 else ""}(
+    size_t input_height,
+    size_t input_width,
+    const xnn_float16* input,
+    const xnn_float16* weights,
+    const xnn_float16* zero,
+    xnn_float16* output,
+    uint32_t padding_top,
+    const struct xnn_f16_minmax_params* restrict params) XNN_OOB_READS
+{
+  assert(input_height != 0);
+  assert(input_width != 0);
+  assert(input_width % sizeof(uint16_t) == 0);
+  assert(padding_top == 2);
+
+  #if XNN_ARCH_ARM64
+    const uint16x8x2_t vminmax = vld2q_dup_u16((const uint16_t*) &params->scalar.min);
+    const float16x8_t vmin = vreinterpretq_f16_u16(vminmax.val[0]);
+    const float16x8_t vmax = vreinterpretq_f16_u16(vminmax.val[1]);
+  #else
+    // vld2_dup is to work around aarch32 clang bug with vld1q_dup
+    const uint16x4x2_t vminmax = vld2_dup_u16((const uint16_t*) &params->scalar.min);
+    const float16x8_t vmin = vreinterpretq_f16_u16(vcombine_u16(vminmax.val[0], vminmax.val[0]));
+    const float16x8_t vmax = vreinterpretq_f16_u16(vcombine_u16(vminmax.val[1], vminmax.val[1]));
+  #endif
+
+  // TODO(dsharlet): I don't really understand how this works. This mask is used twice, once for pixels
+  // 9-16, and once for pixels 1-8. Shouldn't these have different masks?
+  static const int16_t mask_table[15] = {-1, -1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0};
+  const uint16x8_t vmask = vld1q_u16((const uint16_t*) &mask_table[7 - (((input_width >> 1) - 1) & 7)]);
+
+  const uint16_t* w = (const uint16_t*) weights;
+  const float16x8_t vw01234567 = vreinterpretq_f16_u16(vld1q_u16(w));
+  const float16x8_t vw89ABCDEF = vreinterpretq_f16_u16(vld1q_u16(w + 8));
+  const float16x8_t vwGHIJKLMN = vreinterpretq_f16_u16(vld1q_u16(w + 16));
+  const float16x4_t vwOP = vreinterpret_f16_u32(vld1_dup_u32((const void*) (w + 24)));
+
+  const size_t input_decrement = round_up_po2(input_width, 8 * sizeof(uint16_t));
+
+  const uint16_t* i0 = (const uint16_t*) zero;
+  const uint16_t* i1 = (const uint16_t*) zero;
+  const uint16_t* i2 = (const uint16_t*) input;
+  $for M in range(3, 4 + ROW_TILE):
+    const uint16_t* i${M} = (const uint16_t*) ((uintptr_t) i${M-1} + input_width);
+
+  uint16_t* o0 = (uint16_t*) output;
+  $for M in range(1, ROW_TILE):
+    uint16_t* o${M} = (uint16_t*) ((uintptr_t) o${M-1} + input_width);
+
+  size_t output_height = input_height;
+  do {
+    $for M in range(2, 3 + ROW_TILE):
+      if XNN_UNPREDICTABLE(output_height < ${M}) {
+        i${M+1} = (const uint16_t*) zero;
+        $if M <= ROW_TILE:
+          o${M-1} = o${M-2};
+      }
+
+    $for M in range(4 + ROW_TILE):
+      float16x8_t vi${M}x01234567 = vreinterpretq_f16_u16(vmovq_n_u16(0));
+
+    $for M in range(4 + ROW_TILE):
+      float16x8_t vi${M}x89ABCDEF = vreinterpretq_f16_u16(vld1q_u16(i${M})); i${M} += 8;
+
+    size_t w = input_width;
+    for (; w > 16 * sizeof(uint16_t); w -= 8 * sizeof(uint16_t)) {
+      $for M in range(ROW_TILE):
+        float16x8_t vo${M}p0 = vdupq_lane_f16(vget_low_f16(vw01234567), 0);
+
+      $for M in range(4 + ROW_TILE):
+        const float16x8_t vi${M}xGHIJKLMN = vreinterpretq_f16_u16(vld1q_u16(i${M})); i${M} += 8;
+
+      // Center column
+      $for M in range(ROW_TILE):
+        $if ACCUMULATORS > 1:
+          float16x8_t vo${M}p1 = vmulq_lane_f16(vi${M}x89ABCDEF, vget_low_f16(vw01234567), 3);
+        $else:
+          #if XNN_ARCH_ARM64
+            vo${M}p0 = vfmaq_laneq_f16(vo${M}p0, vi${M}x89ABCDEF, vw01234567, 3);
+          #else
+            vo${M}p0 = vmlaq_lane_f16(vo${M}p0, vi${M}x89ABCDEF, vget_low_f16(vw01234567), 3);
+          #endif
+      $for M in range(ROW_TILE):
+        $if ACCUMULATORS > 2:
+          float16x8_t vo${M}p2 = vmulq_lane_f16(vi${M+1}x89ABCDEF, vget_low_f16(vw89ABCDEF), 0);
+        $else:
+          #if XNN_ARCH_ARM64
+            vo${M}p0 = vfmaq_laneq_f16(vo${M}p0, vi${M+1}x89ABCDEF, vw89ABCDEF, 0);
+          #else
+            vo${M}p0 = vmlaq_lane_f16(vo${M}p0, vi${M+1}x89ABCDEF, vget_low_f16(vw89ABCDEF), 0);
+          #endif
+      $for M in range(ROW_TILE):
+        $if ACCUMULATORS > 3:
+          float16x8_t vo${M}p3 = vmulq_lane_f16(vi${M+2}x89ABCDEF, vget_high_f16(vw89ABCDEF), 1);
+        $else:
+          #if XNN_ARCH_ARM64
+            vo${M}p${4 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${4 % ACCUMULATORS}, vi${M+2}x89ABCDEF, vw89ABCDEF, 5);
+          #else
+            vo${M}p${4 % ACCUMULATORS} = vmlaq_lane_f16(vo${M}p${4 % ACCUMULATORS}, vi${M+2}x89ABCDEF, vget_high_f16(vw89ABCDEF), 1);
+          #endif
+      $for M in range(ROW_TILE):
+        $if ACCUMULATORS > 4:
+          float16x8_t vo${M}p4 = vmulq_lane_f16(vi${M+3}x89ABCDEF, vget_low_f16(vwGHIJKLMN), 2);
+        $else:
+          #if XNN_ARCH_ARM64
+            vo${M}p${5 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${5 % ACCUMULATORS}, vi${M+3}x89ABCDEF, vwGHIJKLMN, 2);
+          #else
+            vo${M}p${5 % ACCUMULATORS} = vmlaq_lane_f16(vo${M}p${5 % ACCUMULATORS}, vi${M+3}x89ABCDEF, vget_low_f16(vwGHIJKLMN), 2);
+          #endif
+      $for M in range(ROW_TILE):
+        $if ACCUMULATORS > 6:
+          float16x8_t vo${M}p5 = vmulq_lane_f16(vi${M+4}x89ABCDEF, vget_high_f16(vwGHIJKLMN), 3);
+        $else:
+          #if XNN_ARCH_ARM64
+            vo${M}p${6 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${6 % ACCUMULATORS}, vi${M+4}x89ABCDEF, vwGHIJKLMN, 7);
+          #else
+            vo${M}p${6 % ACCUMULATORS} = vmlaq_lane_f16(vo${M}p${6 % ACCUMULATORS}, vi${M+4}x89ABCDEF, vget_high_f16(vwGHIJKLMN), 3);
+          #endif
+      // Left by 1 column
+      $for M in range(4 + ROW_TILE):
+        const float16x8_t vi${M}x789ABCDE = vextq_f16(vi${M}x01234567, vi${M}x89ABCDEF, 7);
+
+      $for M in range(ROW_TILE):
+        #if XNN_ARCH_ARM64
+          vo${M}p${7 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${7 % ACCUMULATORS}, vi${M}x789ABCDE, vw01234567, 2);
+        #else
+          vo${M}p${7 % ACCUMULATORS} = vmlaq_lane_f16(vo${M}p${7 % ACCUMULATORS}, vi${M}x789ABCDE, vget_low_f16(vw01234567), 2);
+        #endif
+      $for M in range(ROW_TILE):
+        #if XNN_ARCH_ARM64
+          vo${M}p${8 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${8 % ACCUMULATORS}, vi${M+1}x789ABCDE, vw01234567, 7);
+        #else
+          vo${M}p${8 % ACCUMULATORS} = vmlaq_lane_f16(vo${M}p${8 % ACCUMULATORS}, vi${M+1}x789ABCDE, vget_high_f16(vw01234567), 3);
+        #endif
+      $for M in range(ROW_TILE):
+        #if XNN_ARCH_ARM64
+          vo${M}p${9 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${9 % ACCUMULATORS}, vi${M+2}x789ABCDE, vw89ABCDEF, 4);
+        #else
+          vo${M}p${9 % ACCUMULATORS} = vmlaq_lane_f16(vo${M}p${9 % ACCUMULATORS}, vi${M+2}x789ABCDE, vget_high_f16(vw89ABCDEF), 0);
+        #endif
+      $for M in range(ROW_TILE):
+        #if XNN_ARCH_ARM64
+          vo${M}p${10 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${10 % ACCUMULATORS}, vi${M+3}x789ABCDE, vwGHIJKLMN, 1);
+        #else
+          vo${M}p${10 % ACCUMULATORS} = vmlaq_lane_f16(vo${M}p${10 % ACCUMULATORS}, vi${M+3}x789ABCDE, vget_low_f16(vwGHIJKLMN), 1);
+        #endif
+      $for M in range(ROW_TILE):
+        #if XNN_ARCH_ARM64
+          vo${M}p${11 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${11 % ACCUMULATORS}, vi${M+4}x789ABCDE, vwGHIJKLMN, 6);
+        #else
+          vo${M}p${11 % ACCUMULATORS} = vmlaq_lane_f16(vo${M}p${11 % ACCUMULATORS}, vi${M+4}x789ABCDE, vget_high_f16(vwGHIJKLMN), 2);
+        #endif
+      // Left by 2 column
+      $for M in range(4 + ROW_TILE):
+        const float16x8_t vi${M}x6789ABCD = vextq_f16(vi${M}x01234567, vi${M}x89ABCDEF, 6);
+        vi${M}x01234567 = vi${M}x89ABCDEF;
+
+      $for M in range(ROW_TILE):
+        #if XNN_ARCH_ARM64
+          vo${M}p${12 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${12 % ACCUMULATORS}, vi${M}x6789ABCD, vw01234567, 1);
+        #else
+          vo${M}p${12 % ACCUMULATORS} = vmlaq_lane_f16(vo${M}p${12 % ACCUMULATORS}, vi${M}x6789ABCD, vget_low_f16(vw01234567), 1);
+        #endif
+      $for M in range(ROW_TILE):
+        #if XNN_ARCH_ARM64
+          vo${M}p${13 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${13 % ACCUMULATORS}, vi${M+1}x6789ABCD, vw01234567, 6);
+        #else
+          vo${M}p${13 % ACCUMULATORS} = vmlaq_lane_f16(vo${M}p${13 % ACCUMULATORS}, vi${M+1}x6789ABCD, vget_high_f16(vw01234567), 2);
+        #endif
+      $for M in range(ROW_TILE):
+        #if XNN_ARCH_ARM64
+          vo${M}p${14 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${14 % ACCUMULATORS}, vi${M+2}x6789ABCD, vw89ABCDEF, 3);
+        #else
+          vo${M}p${14 % ACCUMULATORS} = vmlaq_lane_f16(vo${M}p${14 % ACCUMULATORS}, vi${M+2}x6789ABCD, vget_low_f16(vw89ABCDEF), 3);
+        #endif
+      $for M in range(ROW_TILE):
+        #if XNN_ARCH_ARM64
+          vo${M}p${15 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${15 % ACCUMULATORS}, vi${M+3}x6789ABCD, vwGHIJKLMN, 0);
+        #else
+          vo${M}p${15 % ACCUMULATORS} = vmlaq_lane_f16(vo${M}p${15 % ACCUMULATORS}, vi${M+3}x6789ABCD, vget_low_f16(vwGHIJKLMN), 0);
+        #endif
+      $for M in range(ROW_TILE):
+        #if XNN_ARCH_ARM64
+          vo${M}p${16 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${16 % ACCUMULATORS}, vi${M+4}x6789ABCD, vwGHIJKLMN, 5);
+        #else
+          vo${M}p${16 % ACCUMULATORS} = vmlaq_lane_f16(vo${M}p${16 % ACCUMULATORS}, vi${M+4}x6789ABCD, vget_high_f16(vwGHIJKLMN), 1);
+        #endif
+      // Right by 1 column
+      $for M in range(4 + ROW_TILE):
+        const float16x8_t vi${M}x9ABCDEFG = vextq_f16(vi${M}x89ABCDEF, vi${M}xGHIJKLMN, 1);
+
+      $for M in range(ROW_TILE):
+        #if XNN_ARCH_ARM64
+          vo${M}p${17 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${17 % ACCUMULATORS}, vi${M}x9ABCDEFG, vw01234567, 4);
+        #else
+          vo${M}p${17 % ACCUMULATORS} = vmlaq_lane_f16(vo${M}p${17 % ACCUMULATORS}, vi${M}x9ABCDEFG, vget_high_f16(vw01234567), 0);
+        #endif
+      $for M in range(ROW_TILE):
+        #if XNN_ARCH_ARM64
+          vo${M}p${18 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${18 % ACCUMULATORS}, vi${M+1}x9ABCDEFG, vw89ABCDEF, 1);
+        #else
+          vo${M}p${18 % ACCUMULATORS} = vmlaq_lane_f16(vo${M}p${18 % ACCUMULATORS}, vi${M+1}x9ABCDEFG, vget_low_f16(vw89ABCDEF), 1);
+        #endif
+      $for M in range(ROW_TILE):
+        #if XNN_ARCH_ARM64
+          vo${M}p${19 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${19 % ACCUMULATORS}, vi${M+2}x9ABCDEFG, vw89ABCDEF, 6);
+        #else
+          vo${M}p${19 % ACCUMULATORS} = vmlaq_lane_f16(vo${M}p${19 % ACCUMULATORS}, vi${M+2}x9ABCDEFG, vget_high_f16(vw89ABCDEF), 2);
+        #endif
+      $for M in range(ROW_TILE):
+        #if XNN_ARCH_ARM64
+          vo${M}p${20 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${20 % ACCUMULATORS}, vi${M+3}x9ABCDEFG, vwGHIJKLMN, 3);
+        #else
+          vo${M}p${20 % ACCUMULATORS} = vmlaq_lane_f16(vo${M}p${20 % ACCUMULATORS}, vi${M+3}x9ABCDEFG, vget_low_f16(vwGHIJKLMN), 3);
+        #endif
+      $for M in range(ROW_TILE):
+        #if XNN_ARCH_ARM64
+          vo${M}p${21 % ACCUMULATORS} = vfmaq_lane_f16(vo${M}p${21 % ACCUMULATORS}, vi${M+4}x9ABCDEFG, vwOP, 0);
+        #else
+          vo${M}p${21 % ACCUMULATORS} = vmlaq_lane_f16(vo${M}p${21 % ACCUMULATORS}, vi${M+4}x9ABCDEFG, vwOP, 0);
+        #endif
+      // Right by 2 column
+      $for M in range(4 + ROW_TILE):
+        const float16x8_t vi${M}xABCDEFGH = vextq_f16(vi${M}x89ABCDEF, vi${M}xGHIJKLMN, 2);
+        vi${M}x89ABCDEF = vi${M}xGHIJKLMN;
+
+      $for M in range(ROW_TILE):
+        #if XNN_ARCH_ARM64
+          vo${M}p${22 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${22 % ACCUMULATORS}, vi${M}xABCDEFGH, vw01234567, 5);
+        #else
+          vo${M}p${22 % ACCUMULATORS} = vmlaq_lane_f16(vo${M}p${22 % ACCUMULATORS}, vi${M}xABCDEFGH, vget_high_f16(vw01234567), 1);
+        #endif
+      $for M in range(ROW_TILE):
+        #if XNN_ARCH_ARM64
+          vo${M}p${23 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${23 % ACCUMULATORS}, vi${M+1}xABCDEFGH, vw89ABCDEF, 2);
+        #else
+          vo${M}p${23 % ACCUMULATORS} = vmlaq_lane_f16(vo${M}p${23 % ACCUMULATORS}, vi${M+1}xABCDEFGH, vget_low_f16(vw89ABCDEF), 2);
+        #endif
+      $for M in range(ROW_TILE):
+        #if XNN_ARCH_ARM64
+          vo${M}p${24 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${24 % ACCUMULATORS}, vi${M+2}xABCDEFGH, vw89ABCDEF, 7);
+        #else
+          vo${M}p${24 % ACCUMULATORS} = vmlaq_lane_f16(vo${M}p${24 % ACCUMULATORS}, vi${M+2}xABCDEFGH, vget_high_f16(vw89ABCDEF), 3);
+        #endif
+      $for M in range(ROW_TILE):
+        #if XNN_ARCH_ARM64
+          vo${M}p${25 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${25 % ACCUMULATORS}, vi${M+3}xABCDEFGH, vwGHIJKLMN, 4);
+        #else
+          vo${M}p${25 % ACCUMULATORS} = vmlaq_lane_f16(vo${M}p${25 % ACCUMULATORS}, vi${M+3}xABCDEFGH, vget_high_f16(vwGHIJKLMN), 0);
+        #endif
+      $for M in range(ROW_TILE):
+        #if XNN_ARCH_ARM64
+          vo${M}p${26 % ACCUMULATORS} = vfmaq_lane_f16(vo${M}p${26 % ACCUMULATORS}, vi${M+4}xABCDEFGH, vwOP, 1);
+        #else
+          vo${M}p${26 % ACCUMULATORS} = vmlaq_lane_f16(vo${M}p${26 % ACCUMULATORS}, vi${M+4}xABCDEFGH, vwOP, 1);
+        #endif
+      $if ACCUMULATORS > 1:
+        $ACC_SLICE = 1
+        $while ACC_SLICE < ACCUMULATORS:
+          $for A in range(0, ACCUMULATORS, ACC_SLICE * 2):
+            $if A + ACC_SLICE < ACCUMULATORS:
+              $for M in range(ROW_TILE):
+                vo${M}p${A} = vaddq_f16(vo${M}p${A}, vo${M}p${A + ACC_SLICE});
+          $ACC_SLICE *= 2
+
+      $for M in range(ROW_TILE):
+        float16x8_t vo${M} = vmaxq_f16(vo${M}p0, vmin);
+
+      $for M in range(ROW_TILE):
+        vo${M} = vminq_f16(vo${M}, vmax);
+
+      $for M in reversed(range(ROW_TILE)):
+        vst1q_u16(o${M}, vreinterpretq_u16_f16(vo${M})); o${M} += 8;
+    }
+
+    // Always process the last block of 9..16 pixels.
+    assert(w <= 16 * sizeof(uint16_t));
+    if XNN_LIKELY(w > 8 * sizeof(uint16_t)) {
+      $for M in range(ROW_TILE):
+        float16x8_t vo${M}p0 = vdupq_lane_f16(vget_low_f16(vw01234567), 0);
+
+      $for M in range(4 + ROW_TILE):
+        float16x8_t vi${M}xGHIJKLMN = vreinterpretq_f16_u16(vld1q_u16(i${M})); i${M} += 8;
+
+      $for M in range(4 + ROW_TILE):
+        vi${M}xGHIJKLMN = vreinterpretq_f16_u16(vandq_u16(vmask, vreinterpretq_u16_f16(vi${M}xGHIJKLMN)));
+
+      // Center column
+      $for M in range(ROW_TILE):
+        $if ACCUMULATORS > 1:
+          float16x8_t vo${M}p1 = vmulq_lane_f16(vi${M}x89ABCDEF, vget_low_f16(vw01234567), 3);
+        $else:
+          #if XNN_ARCH_ARM64
+            vo${M}p0 = vfmaq_laneq_f16(vo${M}p0, vi${M}x89ABCDEF, vw01234567, 3);
+          #else
+            vo${M}p0 = vmlaq_lane_f16(vo${M}p0, vi${M}x89ABCDEF, vget_low_f16(vw01234567), 3);
+          #endif
+      $for M in range(ROW_TILE):
+        $if ACCUMULATORS > 2:
+          float16x8_t vo${M}p2 = vmulq_lane_f16(vi${M+1}x89ABCDEF, vget_low_f16(vw89ABCDEF), 0);
+        $else:
+          #if XNN_ARCH_ARM64
+            vo${M}p0 = vfmaq_laneq_f16(vo${M}p0, vi${M+1}x89ABCDEF, vw89ABCDEF, 0);
+          #else
+            vo${M}p0 = vmlaq_lane_f16(vo${M}p0, vi${M+1}x89ABCDEF, vget_low_f16(vw89ABCDEF), 0);
+          #endif
+      $for M in range(ROW_TILE):
+        $if ACCUMULATORS > 3:
+          float16x8_t vo${M}p3 = vmulq_lane_f16(vi${M+2}x89ABCDEF, vget_high_f16(vw89ABCDEF), 1);
+        $else:
+          #if XNN_ARCH_ARM64
+            vo${M}p${4 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${4 % ACCUMULATORS}, vi${M+2}x89ABCDEF, vw89ABCDEF, 5);
+          #else
+            vo${M}p${4 % ACCUMULATORS} = vmlaq_lane_f16(vo${M}p${4 % ACCUMULATORS}, vi${M+2}x89ABCDEF, vget_high_f16(vw89ABCDEF), 1);
+          #endif
+      $for M in range(ROW_TILE):
+        $if ACCUMULATORS > 4:
+          float16x8_t vo${M}p4 = vmulq_lane_f16(vi${M+3}x89ABCDEF, vget_low_f16(vwGHIJKLMN), 2);
+        $else:
+          #if XNN_ARCH_ARM64
+            vo${M}p${5 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${5 % ACCUMULATORS}, vi${M+3}x89ABCDEF, vwGHIJKLMN, 2);
+          #else
+            vo${M}p${5 % ACCUMULATORS} = vmlaq_lane_f16(vo${M}p${5 % ACCUMULATORS}, vi${M+3}x89ABCDEF, vget_low_f16(vwGHIJKLMN), 2);
+          #endif
+      $for M in range(ROW_TILE):
+        $if ACCUMULATORS > 6:
+          float16x8_t vo${M}p5 = vmulq_lane_f16(vi${M+4}x89ABCDEF, vget_high_f16(vwGHIJKLMN), 3);
+        $else:
+          #if XNN_ARCH_ARM64
+            vo${M}p${6 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${6 % ACCUMULATORS}, vi${M+4}x89ABCDEF, vwGHIJKLMN, 7);
+          #else
+            vo${M}p${6 % ACCUMULATORS} = vmlaq_lane_f16(vo${M}p${6 % ACCUMULATORS}, vi${M+4}x89ABCDEF, vget_high_f16(vwGHIJKLMN), 3);
+          #endif
+      // Left by 1 column
+      $for M in range(4 + ROW_TILE):
+        const float16x8_t vi${M}x789ABCDE = vextq_f16(vi${M}x01234567, vi${M}x89ABCDEF, 7);
+
+      $for M in range(ROW_TILE):
+        #if XNN_ARCH_ARM64
+          vo${M}p${7 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${7 % ACCUMULATORS}, vi${M}x789ABCDE, vw01234567, 2);
+        #else
+          vo${M}p${7 % ACCUMULATORS} = vmlaq_lane_f16(vo${M}p${7 % ACCUMULATORS}, vi${M}x789ABCDE, vget_low_f16(vw01234567), 2);
+        #endif
+      $for M in range(ROW_TILE):
+        #if XNN_ARCH_ARM64
+          vo${M}p${8 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${8 % ACCUMULATORS}, vi${M+1}x789ABCDE, vw01234567, 7);
+        #else
+          vo${M}p${8 % ACCUMULATORS} = vmlaq_lane_f16(vo${M}p${8 % ACCUMULATORS}, vi${M+1}x789ABCDE, vget_high_f16(vw01234567), 3);
+        #endif
+      $for M in range(ROW_TILE):
+        #if XNN_ARCH_ARM64
+          vo${M}p${9 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${9 % ACCUMULATORS}, vi${M+2}x789ABCDE, vw89ABCDEF, 4);
+        #else
+          vo${M}p${9 % ACCUMULATORS} = vmlaq_lane_f16(vo${M}p${9 % ACCUMULATORS}, vi${M+2}x789ABCDE, vget_high_f16(vw89ABCDEF), 0);
+        #endif
+      $for M in range(ROW_TILE):
+        #if XNN_ARCH_ARM64
+          vo${M}p${10 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${10 % ACCUMULATORS}, vi${M+3}x789ABCDE, vwGHIJKLMN, 1);
+        #else
+          vo${M}p${10 % ACCUMULATORS} = vmlaq_lane_f16(vo${M}p${10 % ACCUMULATORS}, vi${M+3}x789ABCDE, vget_low_f16(vwGHIJKLMN), 1);
+        #endif
+      $for M in range(ROW_TILE):
+        #if XNN_ARCH_ARM64
+          vo${M}p${11 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${11 % ACCUMULATORS}, vi${M+4}x789ABCDE, vwGHIJKLMN, 6);
+        #else
+          vo${M}p${11 % ACCUMULATORS} = vmlaq_lane_f16(vo${M}p${11 % ACCUMULATORS}, vi${M+4}x789ABCDE, vget_high_f16(vwGHIJKLMN), 2);
+        #endif
+      // Left by 2 column
+      $for M in range(4 + ROW_TILE):
+        const float16x8_t vi${M}x6789ABCD = vextq_f16(vi${M}x01234567, vi${M}x89ABCDEF, 6);
+        vi${M}x01234567 = vi${M}x89ABCDEF;
+
+      $for M in range(ROW_TILE):
+        #if XNN_ARCH_ARM64
+          vo${M}p${12 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${12 % ACCUMULATORS}, vi${M}x6789ABCD, vw01234567, 1);
+        #else
+          vo${M}p${12 % ACCUMULATORS} = vmlaq_lane_f16(vo${M}p${12 % ACCUMULATORS}, vi${M}x6789ABCD, vget_low_f16(vw01234567), 1);
+        #endif
+      $for M in range(ROW_TILE):
+        #if XNN_ARCH_ARM64
+          vo${M}p${13 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${13 % ACCUMULATORS}, vi${M+1}x6789ABCD, vw01234567, 6);
+        #else
+          vo${M}p${13 % ACCUMULATORS} = vmlaq_lane_f16(vo${M}p${13 % ACCUMULATORS}, vi${M+1}x6789ABCD, vget_high_f16(vw01234567), 2);
+        #endif
+      $for M in range(ROW_TILE):
+        #if XNN_ARCH_ARM64
+          vo${M}p${14 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${14 % ACCUMULATORS}, vi${M+2}x6789ABCD, vw89ABCDEF, 3);
+        #else
+          vo${M}p${14 % ACCUMULATORS} = vmlaq_lane_f16(vo${M}p${14 % ACCUMULATORS}, vi${M+2}x6789ABCD, vget_low_f16(vw89ABCDEF), 3);
+        #endif
+      $for M in range(ROW_TILE):
+        #if XNN_ARCH_ARM64
+          vo${M}p${15 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${15 % ACCUMULATORS}, vi${M+3}x6789ABCD, vwGHIJKLMN, 0);
+        #else
+          vo${M}p${15 % ACCUMULATORS} = vmlaq_lane_f16(vo${M}p${15 % ACCUMULATORS}, vi${M+3}x6789ABCD, vget_low_f16(vwGHIJKLMN), 0);
+        #endif
+      $for M in range(ROW_TILE):
+        #if XNN_ARCH_ARM64
+          vo${M}p${16 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${16 % ACCUMULATORS}, vi${M+4}x6789ABCD, vwGHIJKLMN, 5);
+        #else
+          vo${M}p${16 % ACCUMULATORS} = vmlaq_lane_f16(vo${M}p${16 % ACCUMULATORS}, vi${M+4}x6789ABCD, vget_high_f16(vwGHIJKLMN), 1);
+        #endif
+      // Right by 1 column
+      $for M in range(4 + ROW_TILE):
+        const float16x8_t vi${M}x9ABCDEFG = vextq_f16(vi${M}x89ABCDEF, vi${M}xGHIJKLMN, 1);
+
+      $for M in range(ROW_TILE):
+        #if XNN_ARCH_ARM64
+          vo${M}p${17 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${17 % ACCUMULATORS}, vi${M}x9ABCDEFG, vw01234567, 4);
+        #else
+          vo${M}p${17 % ACCUMULATORS} = vmlaq_lane_f16(vo${M}p${17 % ACCUMULATORS}, vi${M}x9ABCDEFG, vget_high_f16(vw01234567), 0);
+        #endif
+      $for M in range(ROW_TILE):
+        #if XNN_ARCH_ARM64
+          vo${M}p${18 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${18 % ACCUMULATORS}, vi${M+1}x9ABCDEFG, vw89ABCDEF, 1);
+        #else
+          vo${M}p${18 % ACCUMULATORS} = vmlaq_lane_f16(vo${M}p${18 % ACCUMULATORS}, vi${M+1}x9ABCDEFG, vget_low_f16(vw89ABCDEF), 1);
+        #endif
+      $for M in range(ROW_TILE):
+        #if XNN_ARCH_ARM64
+          vo${M}p${19 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${19 % ACCUMULATORS}, vi${M+2}x9ABCDEFG, vw89ABCDEF, 6);
+        #else
+          vo${M}p${19 % ACCUMULATORS} = vmlaq_lane_f16(vo${M}p${19 % ACCUMULATORS}, vi${M+2}x9ABCDEFG, vget_high_f16(vw89ABCDEF), 2);
+        #endif
+      $for M in range(ROW_TILE):
+        #if XNN_ARCH_ARM64
+          vo${M}p${20 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${20 % ACCUMULATORS}, vi${M+3}x9ABCDEFG, vwGHIJKLMN, 3);
+        #else
+          vo${M}p${20 % ACCUMULATORS} = vmlaq_lane_f16(vo${M}p${20 % ACCUMULATORS}, vi${M+3}x9ABCDEFG, vget_low_f16(vwGHIJKLMN), 3);
+        #endif
+      $for M in range(ROW_TILE):
+        #if XNN_ARCH_ARM64
+          vo${M}p${21 % ACCUMULATORS} = vfmaq_lane_f16(vo${M}p${21 % ACCUMULATORS}, vi${M+4}x9ABCDEFG, vwOP, 0);
+        #else
+          vo${M}p${21 % ACCUMULATORS} = vmlaq_lane_f16(vo${M}p${21 % ACCUMULATORS}, vi${M+4}x9ABCDEFG, vwOP, 0);
+        #endif
+      // Right by 2 column
+      $for M in range(4 + ROW_TILE):
+        const float16x8_t vi${M}xABCDEFGH = vextq_f16(vi${M}x89ABCDEF, vi${M}xGHIJKLMN, 2);
+        vi${M}x89ABCDEF = vi${M}xGHIJKLMN;
+
+      $for M in range(ROW_TILE):
+        #if XNN_ARCH_ARM64
+          vo${M}p${22 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${22 % ACCUMULATORS}, vi${M}xABCDEFGH, vw01234567, 5);
+        #else
+          vo${M}p${22 % ACCUMULATORS} = vmlaq_lane_f16(vo${M}p${22 % ACCUMULATORS}, vi${M}xABCDEFGH, vget_high_f16(vw01234567), 1);
+        #endif
+      $for M in range(ROW_TILE):
+        #if XNN_ARCH_ARM64
+          vo${M}p${23 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${23 % ACCUMULATORS}, vi${M+1}xABCDEFGH, vw89ABCDEF, 2);
+        #else
+          vo${M}p${23 % ACCUMULATORS} = vmlaq_lane_f16(vo${M}p${23 % ACCUMULATORS}, vi${M+1}xABCDEFGH, vget_low_f16(vw89ABCDEF), 2);
+        #endif
+      $for M in range(ROW_TILE):
+        #if XNN_ARCH_ARM64
+          vo${M}p${24 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${24 % ACCUMULATORS}, vi${M+2}xABCDEFGH, vw89ABCDEF, 7);
+        #else
+          vo${M}p${24 % ACCUMULATORS} = vmlaq_lane_f16(vo${M}p${24 % ACCUMULATORS}, vi${M+2}xABCDEFGH, vget_high_f16(vw89ABCDEF), 3);
+        #endif
+      $for M in range(ROW_TILE):
+        #if XNN_ARCH_ARM64
+          vo${M}p${25 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${25 % ACCUMULATORS}, vi${M+3}xABCDEFGH, vwGHIJKLMN, 4);
+        #else
+          vo${M}p${25 % ACCUMULATORS} = vmlaq_lane_f16(vo${M}p${25 % ACCUMULATORS}, vi${M+3}xABCDEFGH, vget_high_f16(vwGHIJKLMN), 0);
+        #endif
+      $for M in range(ROW_TILE):
+        #if XNN_ARCH_ARM64
+          vo${M}p${26 % ACCUMULATORS} = vfmaq_lane_f16(vo${M}p${26 % ACCUMULATORS}, vi${M+4}xABCDEFGH, vwOP, 1);
+        #else
+          vo${M}p${26 % ACCUMULATORS} = vmlaq_lane_f16(vo${M}p${26 % ACCUMULATORS}, vi${M+4}xABCDEFGH, vwOP, 1);
+        #endif
+      $if ACCUMULATORS > 1:
+        $ACC_SLICE = 1
+        $while ACC_SLICE < ACCUMULATORS:
+          $for A in range(0, ACCUMULATORS, ACC_SLICE * 2):
+            $if A + ACC_SLICE < ACCUMULATORS:
+              $for M in range(ROW_TILE):
+                vo${M}p${A} = vaddq_f16(vo${M}p${A}, vo${M}p${A + ACC_SLICE});
+          $ACC_SLICE *= 2
+
+      $for M in range(ROW_TILE):
+        float16x8_t vo${M} = vmaxq_f16(vo${M}p0, vmin);
+
+      $for M in range(ROW_TILE):
+        vo${M} = vminq_f16(vo${M}, vmax);
+
+      $for M in reversed(range(ROW_TILE)):
+        vst1q_u16(o${M}, vreinterpretq_u16_f16(vo${M})); o${M} += 8;
+
+      w -= 8 * sizeof(uint16_t);
+    }
+
+    assert(w >= 1 * sizeof(uint16_t));
+    assert(w <= 8 * sizeof(uint16_t));
+    {
+      $for M in range(ROW_TILE):
+        float16x8_t vo${M}p0 = vdupq_lane_f16(vget_low_f16(vw01234567), 0);
+
+      $for M in range(4 + ROW_TILE):
+        vi${M}x89ABCDEF = vreinterpretq_f16_u16(vandq_u16(vmask, vreinterpretq_u16_f16(vi${M}x89ABCDEF)));
+
+      // Center column
+      $for M in range(ROW_TILE):
+        $if ACCUMULATORS > 1:
+          float16x8_t vo${M}p1 = vmulq_lane_f16(vi${M}x89ABCDEF, vget_low_f16(vw01234567), 3);
+        $else:
+          #if XNN_ARCH_ARM64
+            vo${M}p0 = vfmaq_laneq_f16(vo${M}p0, vi${M}x89ABCDEF, vw01234567, 3);
+          #else
+            vo${M}p0 = vmlaq_lane_f16(vo${M}p0, vi${M}x89ABCDEF, vget_low_f16(vw01234567), 3);
+          #endif
+      $for M in range(ROW_TILE):
+        $if ACCUMULATORS > 2:
+          float16x8_t vo${M}p2 = vmulq_lane_f16(vi${M+1}x89ABCDEF, vget_low_f16(vw89ABCDEF), 0);
+        $else:
+          #if XNN_ARCH_ARM64
+            vo${M}p0 = vfmaq_laneq_f16(vo${M}p0, vi${M+1}x89ABCDEF, vw89ABCDEF, 0);
+          #else
+            vo${M}p0 = vmlaq_lane_f16(vo${M}p0, vi${M+1}x89ABCDEF, vget_low_f16(vw89ABCDEF), 0);
+          #endif
+      $for M in range(ROW_TILE):
+        $if ACCUMULATORS > 3:
+          float16x8_t vo${M}p3 = vmulq_lane_f16(vi${M+2}x89ABCDEF, vget_high_f16(vw89ABCDEF), 1);
+        $else:
+          #if XNN_ARCH_ARM64
+            vo${M}p${4 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${4 % ACCUMULATORS}, vi${M+2}x89ABCDEF, vw89ABCDEF, 5);
+          #else
+            vo${M}p${4 % ACCUMULATORS} = vmlaq_lane_f16(vo${M}p${4 % ACCUMULATORS}, vi${M+2}x89ABCDEF, vget_high_f16(vw89ABCDEF), 1);
+          #endif
+      $for M in range(ROW_TILE):
+        $if ACCUMULATORS > 4:
+          float16x8_t vo${M}p4 = vmulq_lane_f16(vi${M+3}x89ABCDEF, vget_low_f16(vwGHIJKLMN), 2);
+        $else:
+          #if XNN_ARCH_ARM64
+            vo${M}p${5 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${5 % ACCUMULATORS}, vi${M+3}x89ABCDEF, vwGHIJKLMN, 2);
+          #else
+            vo${M}p${5 % ACCUMULATORS} = vmlaq_lane_f16(vo${M}p${5 % ACCUMULATORS}, vi${M+3}x89ABCDEF, vget_low_f16(vwGHIJKLMN), 2);
+          #endif
+      $for M in range(ROW_TILE):
+        $if ACCUMULATORS > 6:
+          float16x8_t vo${M}p5 = vmulq_lane_f16(vi${M+4}x89ABCDEF, vget_high_f16(vwGHIJKLMN), 3);
+        $else:
+          #if XNN_ARCH_ARM64
+            vo${M}p${6 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${6 % ACCUMULATORS}, vi${M+4}x89ABCDEF, vwGHIJKLMN, 7);
+          #else
+            vo${M}p${6 % ACCUMULATORS} = vmlaq_lane_f16(vo${M}p${6 % ACCUMULATORS}, vi${M+4}x89ABCDEF, vget_high_f16(vwGHIJKLMN), 3);
+          #endif
+      // Left by 1 column
+      $for M in range(4 + ROW_TILE):
+        const float16x8_t vi${M}x789ABCDE = vextq_f16(vi${M}x01234567, vi${M}x89ABCDEF, 7);
+
+      $for M in range(ROW_TILE):
+        #if XNN_ARCH_ARM64
+          vo${M}p${7 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${7 % ACCUMULATORS}, vi${M}x789ABCDE, vw01234567, 2);
+        #else
+          vo${M}p${7 % ACCUMULATORS} = vmlaq_lane_f16(vo${M}p${7 % ACCUMULATORS}, vi${M}x789ABCDE, vget_low_f16(vw01234567), 2);
+        #endif
+      $for M in range(ROW_TILE):
+        #if XNN_ARCH_ARM64
+          vo${M}p${8 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${8 % ACCUMULATORS}, vi${M+1}x789ABCDE, vw01234567, 7);
+        #else
+          vo${M}p${8 % ACCUMULATORS} = vmlaq_lane_f16(vo${M}p${8 % ACCUMULATORS}, vi${M+1}x789ABCDE, vget_high_f16(vw01234567), 3);
+        #endif
+      $for M in range(ROW_TILE):
+        #if XNN_ARCH_ARM64
+          vo${M}p${9 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${9 % ACCUMULATORS}, vi${M+2}x789ABCDE, vw89ABCDEF, 4);
+        #else
+          vo${M}p${9 % ACCUMULATORS} = vmlaq_lane_f16(vo${M}p${9 % ACCUMULATORS}, vi${M+2}x789ABCDE, vget_high_f16(vw89ABCDEF), 0);
+        #endif
+      $for M in range(ROW_TILE):
+        #if XNN_ARCH_ARM64
+          vo${M}p${10 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${10 % ACCUMULATORS}, vi${M+3}x789ABCDE, vwGHIJKLMN, 1);
+        #else
+          vo${M}p${10 % ACCUMULATORS} = vmlaq_lane_f16(vo${M}p${10 % ACCUMULATORS}, vi${M+3}x789ABCDE, vget_low_f16(vwGHIJKLMN), 1);
+        #endif
+      $for M in range(ROW_TILE):
+        #if XNN_ARCH_ARM64
+          vo${M}p${11 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${11 % ACCUMULATORS}, vi${M+4}x789ABCDE, vwGHIJKLMN, 6);
+        #else
+          vo${M}p${11 % ACCUMULATORS} = vmlaq_lane_f16(vo${M}p${11 % ACCUMULATORS}, vi${M+4}x789ABCDE, vget_high_f16(vwGHIJKLMN), 2);
+        #endif
+      // Left by 2 column
+      $for M in range(4 + ROW_TILE):
+        const float16x8_t vi${M}x6789ABCD = vextq_f16(vi${M}x01234567, vi${M}x89ABCDEF, 6);
+
+      $for M in range(ROW_TILE):
+        #if XNN_ARCH_ARM64
+          vo${M}p${12 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${12 % ACCUMULATORS}, vi${M}x6789ABCD, vw01234567, 1);
+        #else
+          vo${M}p${12 % ACCUMULATORS} = vmlaq_lane_f16(vo${M}p${12 % ACCUMULATORS}, vi${M}x6789ABCD, vget_low_f16(vw01234567), 1);
+        #endif
+      $for M in range(ROW_TILE):
+        #if XNN_ARCH_ARM64
+          vo${M}p${13 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${13 % ACCUMULATORS}, vi${M+1}x6789ABCD, vw01234567, 6);
+        #else
+          vo${M}p${13 % ACCUMULATORS} = vmlaq_lane_f16(vo${M}p${13 % ACCUMULATORS}, vi${M+1}x6789ABCD, vget_high_f16(vw01234567), 2);
+        #endif
+      $for M in range(ROW_TILE):
+        #if XNN_ARCH_ARM64
+          vo${M}p${14 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${14 % ACCUMULATORS}, vi${M+2}x6789ABCD, vw89ABCDEF, 3);
+        #else
+          vo${M}p${14 % ACCUMULATORS} = vmlaq_lane_f16(vo${M}p${14 % ACCUMULATORS}, vi${M+2}x6789ABCD, vget_low_f16(vw89ABCDEF), 3);
+        #endif
+      $for M in range(ROW_TILE):
+        #if XNN_ARCH_ARM64
+          vo${M}p${15 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${15 % ACCUMULATORS}, vi${M+3}x6789ABCD, vwGHIJKLMN, 0);
+        #else
+          vo${M}p${15 % ACCUMULATORS} = vmlaq_lane_f16(vo${M}p${15 % ACCUMULATORS}, vi${M+3}x6789ABCD, vget_low_f16(vwGHIJKLMN), 0);
+        #endif
+      $for M in range(ROW_TILE):
+        #if XNN_ARCH_ARM64
+          vo${M}p${16 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${16 % ACCUMULATORS}, vi${M+4}x6789ABCD, vwGHIJKLMN, 5);
+        #else
+          vo${M}p${16 % ACCUMULATORS} = vmlaq_lane_f16(vo${M}p${16 % ACCUMULATORS}, vi${M+4}x6789ABCD, vget_high_f16(vwGHIJKLMN), 1);
+        #endif
+      // Right by 1 column
+      const float16x8_t vzero = vreinterpretq_f16_u16(vmovq_n_u16(0));
+      $for M in range(4 + ROW_TILE):
+        const float16x8_t vi${M}x9ABCDEFG = vextq_f16(vi${M}x89ABCDEF, vzero, 1);
+
+      $for M in range(ROW_TILE):
+        #if XNN_ARCH_ARM64
+          vo${M}p${17 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${17 % ACCUMULATORS}, vi${M}x9ABCDEFG, vw01234567, 4);
+        #else
+          vo${M}p${17 % ACCUMULATORS} = vmlaq_lane_f16(vo${M}p${17 % ACCUMULATORS}, vi${M}x9ABCDEFG, vget_high_f16(vw01234567), 0);
+        #endif
+      $for M in range(ROW_TILE):
+        #if XNN_ARCH_ARM64
+          vo${M}p${18 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${18 % ACCUMULATORS}, vi${M+1}x9ABCDEFG, vw89ABCDEF, 1);
+        #else
+          vo${M}p${18 % ACCUMULATORS} = vmlaq_lane_f16(vo${M}p${18 % ACCUMULATORS}, vi${M+1}x9ABCDEFG, vget_low_f16(vw89ABCDEF), 1);
+        #endif
+      $for M in range(ROW_TILE):
+        #if XNN_ARCH_ARM64
+          vo${M}p${19 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${19 % ACCUMULATORS}, vi${M+2}x9ABCDEFG, vw89ABCDEF, 6);
+        #else
+          vo${M}p${19 % ACCUMULATORS} = vmlaq_lane_f16(vo${M}p${19 % ACCUMULATORS}, vi${M+2}x9ABCDEFG, vget_high_f16(vw89ABCDEF), 2);
+        #endif
+      $for M in range(ROW_TILE):
+        #if XNN_ARCH_ARM64
+          vo${M}p${20 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${20 % ACCUMULATORS}, vi${M+3}x9ABCDEFG, vwGHIJKLMN, 3);
+        #else
+          vo${M}p${20 % ACCUMULATORS} = vmlaq_lane_f16(vo${M}p${20 % ACCUMULATORS}, vi${M+3}x9ABCDEFG, vget_low_f16(vwGHIJKLMN), 3);
+        #endif
+      $for M in range(ROW_TILE):
+        #if XNN_ARCH_ARM64
+          vo${M}p${21 % ACCUMULATORS} = vfmaq_lane_f16(vo${M}p${21 % ACCUMULATORS}, vi${M+4}x9ABCDEFG, vwOP, 0);
+        #else
+          vo${M}p${21 % ACCUMULATORS} = vmlaq_lane_f16(vo${M}p${21 % ACCUMULATORS}, vi${M+4}x9ABCDEFG, vwOP, 0);
+        #endif
+      // Right by 2 column
+      $for M in range(4 + ROW_TILE):
+        const float16x8_t vi${M}xABCDEFGH = vextq_f16(vi${M}x9ABCDEFG, vzero, 1);
+
+      $for M in range(ROW_TILE):
+        #if XNN_ARCH_ARM64
+          vo${M}p${22 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${22 % ACCUMULATORS}, vi${M}xABCDEFGH, vw01234567, 5);
+        #else
+          vo${M}p${22 % ACCUMULATORS} = vmlaq_lane_f16(vo${M}p${22 % ACCUMULATORS}, vi${M}xABCDEFGH, vget_high_f16(vw01234567), 1);
+        #endif
+      $for M in range(ROW_TILE):
+        #if XNN_ARCH_ARM64
+          vo${M}p${23 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${23 % ACCUMULATORS}, vi${M+1}xABCDEFGH, vw89ABCDEF, 2);
+        #else
+          vo${M}p${23 % ACCUMULATORS} = vmlaq_lane_f16(vo${M}p${23 % ACCUMULATORS}, vi${M+1}xABCDEFGH, vget_low_f16(vw89ABCDEF), 2);
+        #endif
+      $for M in range(ROW_TILE):
+        #if XNN_ARCH_ARM64
+          vo${M}p${24 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${24 % ACCUMULATORS}, vi${M+2}xABCDEFGH, vw89ABCDEF, 7);
+        #else
+          vo${M}p${24 % ACCUMULATORS} = vmlaq_lane_f16(vo${M}p${24 % ACCUMULATORS}, vi${M+2}xABCDEFGH, vget_high_f16(vw89ABCDEF), 3);
+        #endif
+      $for M in range(ROW_TILE):
+        #if XNN_ARCH_ARM64
+          vo${M}p${25 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${25 % ACCUMULATORS}, vi${M+3}xABCDEFGH, vwGHIJKLMN, 4);
+        #else
+          vo${M}p${25 % ACCUMULATORS} = vmlaq_lane_f16(vo${M}p${25 % ACCUMULATORS}, vi${M+3}xABCDEFGH, vget_high_f16(vwGHIJKLMN), 0);
+        #endif
+      $for M in range(ROW_TILE):
+        #if XNN_ARCH_ARM64
+          vo${M}p${26 % ACCUMULATORS} = vfmaq_lane_f16(vo${M}p${26 % ACCUMULATORS}, vi${M+4}xABCDEFGH, vwOP, 1);
+        #else
+          vo${M}p${26 % ACCUMULATORS} = vmlaq_lane_f16(vo${M}p${26 % ACCUMULATORS}, vi${M+4}xABCDEFGH, vwOP, 1);
+        #endif
+      $if ACCUMULATORS > 1:
+        $ACC_SLICE = 1
+        $while ACC_SLICE < ACCUMULATORS:
+          $for A in range(0, ACCUMULATORS, ACC_SLICE * 2):
+            $if A + ACC_SLICE < ACCUMULATORS:
+              $for M in range(ROW_TILE):
+                vo${M}p${A} = vaddq_f16(vo${M}p${A}, vo${M}p${A + ACC_SLICE});
+          $ACC_SLICE *= 2
+
+      $for M in range(ROW_TILE):
+        float16x8_t vo${M} = vmaxq_f16(vo${M}p0, vmin);
+
+      $for M in range(ROW_TILE):
+        vo${M} = vminq_f16(vo${M}, vmax);
+
+      if XNN_LIKELY(w == 8 * sizeof(uint16_t)) {
+        $for M in reversed(range(ROW_TILE)):
+          vst1q_u16(o${M}, vreinterpretq_u16_f16(vo${M})); o${M} += 8;
+      } else {
+        $for M in reversed(range(ROW_TILE)):
+          float16x4_t vo${M}_lo = vget_low_f16(vo${M});
+
+        if (w & (4 * sizeof(uint16_t))) {
+         $for M in reversed(range(ROW_TILE)):
+            vst1_u16(o${M}, vreinterpret_u16_f16(vo${M}_lo)); o${M} += 4;
+
+          $for M in reversed(range(ROW_TILE)):
+            vo${M}_lo = vget_high_f16(vo${M});
+        }
+        if (w & (2 * sizeof(uint16_t))) {
+          $for M in reversed(range(ROW_TILE)):
+            vst1_lane_u32((void*) o${M}, vreinterpret_u32_f16(vo${M}_lo), 0); o${M} += 2;
+
+          $for M in range(ROW_TILE):
+            vo${M}_lo = vext_f16(vo${M}_lo, vo${M}_lo, 2);
+        }
+        if (w & (1 * sizeof(uint16_t))) {
+          $for M in reversed(range(ROW_TILE)):
+            vst1_lane_u16(o${M}, vreinterpret_u16_f16(vo${M}_lo), 0); o${M} += 1;
+        }
+      }
+    }
+
+    i0 = (const uint16_t*) ((uintptr_t) i${ROW_TILE} - input_decrement);
+    i1 = (const uint16_t*) ((uintptr_t) i${ROW_TILE+1} - input_decrement);
+    $for M in range(2, 4 + ROW_TILE):
+      i${M} = (const uint16_t*) ((uintptr_t) i${M-1} + input_width);
+
+    $if ROW_TILE > 1:
+      o0 = o${ROW_TILE - 1};
+      $for M in range(1, ROW_TILE):
+        o${M} = (uint16_t*) ((uintptr_t) o${M-1} + input_width);
+
+    $if ROW_TILE > 1:
+      output_height = doz(output_height, ${ROW_TILE});
+  } while (${"--" if ROW_TILE == 1 else ""}output_height != 0);
+}

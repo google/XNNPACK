@@ -1,0 +1,163 @@
+// Copyright 2019 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert NR % 4 == 0
+$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+$VMULADDQ_F32 = "vfmaq_f32" if FMA else "vmlaq_f32"
+$VMULADDQ_LANE_F32 = "vfmaq_lane_f32" if FMA else "vmlaq_lane_f32"
+#include <arm_neon.h>
+#include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
+
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/igemm.h"
+#include "src/xnnpack/microparams.h"
+
+
+$ISA = ("neonfma" if DUP else "aarch64_neonfma") if FMA else "neon"
+void xnn_f32_igemm_minmax_ukernel_${MR}x${NR}__${ISA}_${"dup" if DUP else "lane"}_ld64(
+    size_t mr,
+    size_t nc,
+    size_t kc,
+    size_t ks,
+    const float** restrict a,
+    const float* restrict w,
+    float* restrict c,
+    size_t cm_stride,
+    size_t cn_stride,
+    size_t a_offset,
+    const float* zero,
+    const struct xnn_f32_minmax_params* restrict params)
+{
+  assert(mr != 0);
+  assert(mr <= ${MR});
+  assert(nc != 0);
+  assert(kc != 0);
+  assert(kc % sizeof(float) == 0);
+  assert(ks != 0);
+  assert(ks % (${MR} * sizeof(void*)) == 0);
+  assert(a_offset % sizeof(float) == 0);
+  assert(a != NULL);
+  assert(w != NULL);
+  assert(c != NULL);
+
+  float* c0 = c;
+  $for M in range(1, MR):
+    float* c${M} = (float*) ((uintptr_t) c${M-1} + cm_stride);
+    $if M % 2 == 0:
+      if XNN_UNPREDICTABLE(mr <= ${M}) {
+        c${M} = c${M-1};
+      }
+    $elif M + 1 == MR:
+      if XNN_UNPREDICTABLE(mr != ${M+1}) {
+        c${M} = c${M-1};
+      }
+    $else:
+      if XNN_UNPREDICTABLE(mr < ${M+1}) {
+        c${M} = c${M-1};
+      }
+
+  do {
+    $for N in range(0, NR, 4):
+      float32x4_t vacc0x${N//4} = vld1q_f32(w); w += 4;
+    $for M in range(1, MR):
+      $for N in range(0, NR, 4):
+        float32x4_t vacc${M}x${N//4} = vacc0x${N//4};
+
+    size_t p = ks;
+    do {
+      $for M in range(MR):
+        const float* restrict a${M} = a[${M}];
+        assert(a${M} != NULL);
+        if XNN_UNPREDICTABLE(a${M} != zero) {
+          a${M} = (const float*) ((uintptr_t) a${M} + a_offset);
+        }
+      a += ${MR};
+
+      size_t k = kc;
+      for (; k >= 2 * sizeof(float); k -= 2 * sizeof(float)) {
+        $for M in range(MR):
+          const float32x2_t va${M} = vld1_f32(a${M}); a${M} += 2;
+
+        $for L in range(2):
+          $for N in range(0, NR, 4):
+            const float32x4_t vb${ABC[N:N+4]}c${L} = vld1q_f32(w); w += 4;
+
+          $if DUP:
+            $for M in range(MR):
+              const float32x4_t va${M}c${L} = vdupq_lane_f32(va${M}, ${L});
+            $for N in range(0, NR, 4):
+              $for M in range(MR):
+                vacc${M}x${N//4} = ${VMULADDQ_F32}(vacc${M}x${N//4}, va${M}c${L}, vb${ABC[N:N+4]}c${L});
+          $else:
+             $for N in range(0, NR, 4):
+               $for M in range(MR):
+                 vacc${M}x${N//4} = ${VMULADDQ_LANE_F32}(vacc${M}x${N//4}, vb${ABC[N:N+4]}c${L}, va${M}, ${L});
+
+      }
+      if XNN_UNLIKELY(k != 0) {
+        $for M in range(MR):
+          const float32x4_t va${M} = vld1q_dup_f32(a${M});
+
+        $for N in range(0, NR, 4):
+          const float32x4_t vb${ABC[N:N+4]} = vld1q_f32(w); w += 4;
+
+        $for N in range(0, NR, 4):
+          $for M in range(MR):
+            vacc${M}x${N//4} = ${VMULADDQ_F32}(vacc${M}x${N//4}, va${M}, vb${ABC[N:N+4]});
+      }
+      p -= ${MR} * sizeof(void*);
+    } while (p != 0);
+
+    const float32x4_t vmax = vdupq_n_f32(params->scalar.max);
+    $for N in range(0, NR, 4):
+      $for M in range(MR):
+        vacc${M}x${N//4} = vminq_f32(vacc${M}x${N//4}, vmax);
+
+    const float32x4_t vmin = vdupq_n_f32(params->scalar.min);
+    $for N in range(0, NR, 4):
+      $for M in range(MR):
+        vacc${M}x${N//4} = vmaxq_f32(vacc${M}x${N//4}, vmin);
+
+    if XNN_LIKELY(nc >= ${NR}) {
+      $for M in reversed(range(MR)):
+        vst1q_f32(c${M}, vacc${M}x0);
+        $for N in range(4, NR, 4):
+          vst1q_f32(c${M} + ${N}, vacc${M}x${N//4});
+        c${M} = (float*) ((uintptr_t) c${M} + cn_stride);
+
+      a = (const float**restrict) ((uintptr_t) a - ks);
+      nc -= ${NR};
+    } else {
+      $for LOG2N in reversed(range(NR.bit_length())):
+        $if LOG2N == 1:
+          $for M in reversed(range(MR)):
+            float32x2_t vacc${M} = vget_low_f32(vacc${M}x0);
+        $if 1 << LOG2N != NR:
+          if (nc & ${1 << LOG2N}) {
+            $if LOG2N >= 2:
+              $for N in range(0, 1 << LOG2N, 4):
+                $for M in reversed(range(MR)):
+                  vst1q_f32(c${M}, vacc${M}x${N//4}); c${M} += 4;
+
+              $for M in reversed(range(MR)):
+                $for N in range(0, NR - (1 << LOG2N), 4):
+                  vacc${M}x${N//4} = vacc${M}x${(N + (1 << LOG2N))//4};
+            $elif LOG2N == 1:
+              $for M in reversed(range(MR)):
+                vst1_f32(c${M}, vacc${M}); c${M} += 2;
+
+              $for M in reversed(range(MR)):
+                vacc${M} = vget_high_f32(vacc${M}x0);
+            $elif LOG2N == 0:
+              $for M in reversed(range(MR)):
+                vst1_lane_f32(c${M}, vacc${M}, 0);
+          }
+
+      nc = 0;
+    }
+  } while (nc != 0);
+}

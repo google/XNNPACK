@@ -1,0 +1,106 @@
+# Copyright 2022 Google LLC
+#
+# This source code is licensed under the BSD-style license found in the
+# LICENSE file in the root directory of this source tree.
+
+# ARM NEON
+- name: xnn_bf16_gemm_minmax_ukernel_1x4c8__neonfma_shland
+  init: xnn_init_bf16_minmax_scalar_params
+  pack: xnn_pack_f16_gemm_goi_w
+  k-block: 8
+- name: xnn_bf16_gemm_minmax_ukernel_2x4c8__neonfma_shland
+  init: xnn_init_bf16_minmax_scalar_params
+  pack: xnn_pack_f16_gemm_goi_w
+  k-block: 8
+- name: xnn_bf16_gemm_minmax_ukernel_3x4c8__neonfma_shland
+  init: xnn_init_bf16_minmax_scalar_params
+  pack: xnn_pack_f16_gemm_goi_w
+  k-block: 8
+- name: xnn_bf16_gemm_minmax_ukernel_4x4c8__neonfma_shland
+  init: xnn_init_bf16_minmax_scalar_params
+  pack: xnn_pack_f16_gemm_goi_w
+  k-block: 8
+- name: xnn_bf16_gemm_minmax_ukernel_5x4c8__neonfma_shland
+  init: xnn_init_bf16_minmax_scalar_params
+  pack: xnn_pack_f16_gemm_goi_w
+  k-block: 8
+
+- name: xnn_bf16_gemm_minmax_ukernel_1x4c8__neonfma_zip
+  init: xnn_init_bf16_minmax_scalar_params
+  pack: xnn_pack_f16_gemm_goi_w
+  k-block: 8
+- name: xnn_bf16_gemm_minmax_ukernel_2x4c8__neonfma_zip
+  init: xnn_init_bf16_minmax_scalar_params
+  pack: xnn_pack_f16_gemm_goi_w
+  k-block: 8
+- name: xnn_bf16_gemm_minmax_ukernel_3x4c8__neonfma_zip
+  init: xnn_init_bf16_minmax_scalar_params
+  pack: xnn_pack_f16_gemm_goi_w
+  k-block: 8
+- name: xnn_bf16_gemm_minmax_ukernel_4x4c8__neonfma_zip
+  init: xnn_init_bf16_minmax_scalar_params
+  pack: xnn_pack_f16_gemm_goi_w
+  k-block: 8
+- name: xnn_bf16_gemm_minmax_ukernel_5x4c8__neonfma_zip
+  init: xnn_init_bf16_minmax_scalar_params
+  pack: xnn_pack_f16_gemm_goi_w
+  k-block: 8
+
+- name: xnn_bf16_gemm_minmax_ukernel_1x8c2__neonbf16_bfdot_lane_ld128
+  init: xnn_init_bf16_minmax_scalar_params
+  pack: xnn_pack_f16_gemm_goi_w
+  k-block: 8
+- name: xnn_bf16_gemm_minmax_ukernel_4x8c2__neonbf16_bfdot_lane_ld128
+  init: xnn_init_bf16_minmax_scalar_params
+  pack: xnn_pack_f16_gemm_goi_w
+  k-block: 8
+- name: xnn_bf16_gemm_minmax_ukernel_5x8c2__neonbf16_bfdot_lane_ld128
+  init: xnn_init_bf16_minmax_scalar_params
+  pack: xnn_pack_f16_gemm_goi_w
+  k-block: 8
+- name: xnn_bf16_gemm_minmax_ukernel_6x8c2__neonbf16_bfdot_lane_ld128
+  init: xnn_init_bf16_minmax_scalar_params
+  pack: xnn_pack_f16_gemm_goi_w
+  k-block: 8
+
+- name: xnn_bf16_gemm_minmax_ukernel_1x4c8__neonbf16_bfdot
+  init: xnn_init_bf16_minmax_scalar_params
+  pack: xnn_pack_f16_gemm_goi_w
+  k-block: 8
+- name: xnn_bf16_gemm_minmax_ukernel_2x4c8__neonbf16_bfdot
+  init: xnn_init_bf16_minmax_scalar_params
+  pack: xnn_pack_f16_gemm_goi_w
+  k-block: 8
+- name: xnn_bf16_gemm_minmax_ukernel_3x4c8__neonbf16_bfdot
+  init: xnn_init_bf16_minmax_scalar_params
+  pack: xnn_pack_f16_gemm_goi_w
+  k-block: 8
+- name: xnn_bf16_gemm_minmax_ukernel_4x4c8__neonbf16_bfdot
+  init: xnn_init_bf16_minmax_scalar_params
+  pack: xnn_pack_f16_gemm_goi_w
+  k-block: 8
+- name: xnn_bf16_gemm_minmax_ukernel_5x4c8__neonbf16_bfdot
+  init: xnn_init_bf16_minmax_scalar_params
+  pack: xnn_pack_f16_gemm_goi_w
+  k-block: 8
+
+- name: xnn_bf16_gemm_minmax_ukernel_1x4c8__neonbf16_bfmlal
+  init: xnn_init_bf16_minmax_scalar_params
+  pack: xnn_pack_f16_gemm_goi_w
+  k-block: 8
+- name: xnn_bf16_gemm_minmax_ukernel_2x4c8__neonbf16_bfmlal
+  init: xnn_init_bf16_minmax_scalar_params
+  pack: xnn_pack_f16_gemm_goi_w
+  k-block: 8
+- name: xnn_bf16_gemm_minmax_ukernel_3x4c8__neonbf16_bfmlal
+  init: xnn_init_bf16_minmax_scalar_params
+  pack: xnn_pack_f16_gemm_goi_w
+  k-block: 8
+- name: xnn_bf16_gemm_minmax_ukernel_4x4c8__neonbf16_bfmlal
+  init: xnn_init_bf16_minmax_scalar_params
+  pack: xnn_pack_f16_gemm_goi_w
+  k-block: 8
+- name: xnn_bf16_gemm_minmax_ukernel_5x4c8__neonbf16_bfmlal
+  init: xnn_init_bf16_minmax_scalar_params
+  pack: xnn_pack_f16_gemm_goi_w
+  k-block: 8

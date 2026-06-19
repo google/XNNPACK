@@ -1,0 +1,186 @@
+// Copyright 2021 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert DATATYPE in ["S8", "U8"]
+$assert CHANNEL_TILE % 8 == 0
+$assert CHANNEL_TILE >= 8
+$assert PIXEL_TILE == 1
+$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+#include <assert.h>
+
+#include <wasm_simd128.h>
+
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/ibilinear.h"
+
+
+$XINT8_T = {"S8": "int8_t", "U8": "uint8_t"}[DATATYPE]
+$WASM_X16X8_LOAD_8X8 = {"S8": "wasm_i16x8_load8x8", "U8": "wasm_u16x8_load8x8"}[DATATYPE]
+$WASM_X32X4_SHR = {"S8": "wasm_i32x4_shr", "U8": "wasm_u32x4_shr"}[DATATYPE]
+$WASM_X8X16_NARROW_I16X8 = {"S8": "wasm_i8x16_narrow_i16x8", "U8": "wasm_u8x16_narrow_i16x8"}[DATATYPE]
+void xnn_${DATATYPE.lower()}_ibilinear_ukernel__wasmsimd_mul32_u${CHANNEL_TILE}${"" if PIXEL_TILE == 1 else "x%d" % PIXEL_TILE}(
+    size_t output_pixels,
+    size_t channels,
+    const ${XINT8_T}** restrict input,
+    size_t input_offset,
+    const int16_t* restrict weights,
+    ${XINT8_T}* restrict output,
+    size_t output_increment) XNN_OOB_READS
+{
+  assert(output_pixels != 0);
+  assert(channels != 0);
+
+  do {
+    const ${XINT8_T}* i0 = (const ${XINT8_T}*) ((uintptr_t) input[0] + input_offset);
+    const ${XINT8_T}* i1 = (const ${XINT8_T}*) ((uintptr_t) input[1] + input_offset);
+    const ${XINT8_T}* i2 = (const ${XINT8_T}*) ((uintptr_t) input[2] + input_offset);
+    const ${XINT8_T}* i3 = (const ${XINT8_T}*) ((uintptr_t) input[3] + input_offset);
+    input += 4;
+
+    const v128_t valphah = wasm_i32x4_extend_low_i16x8(wasm_v128_load16_splat(weights));
+    const v128_t valphav = wasm_i32x4_extend_low_i16x8(wasm_v128_load16_splat(weights + 1));
+    weights += 2;
+
+    const v128_t vrounding = wasm_i32x4_const_splat(0x00200000);
+
+    size_t c = channels;
+    $if CHANNEL_TILE > 8:
+      for (; c >= ${CHANNEL_TILE} * sizeof(${XINT8_T}); c -= ${CHANNEL_TILE} * sizeof(${XINT8_T})) {
+        const v128_t vtl${ABC[0:8]} = ${WASM_X16X8_LOAD_8X8}(i0);
+        const v128_t vtr${ABC[0:8]} = ${WASM_X16X8_LOAD_8X8}(i1);
+        const v128_t vbl${ABC[0:8]} = ${WASM_X16X8_LOAD_8X8}(i2);
+        const v128_t vbr${ABC[0:8]} = ${WASM_X16X8_LOAD_8X8}(i3);
+        $for C in range(8, CHANNEL_TILE, 8):
+          const v128_t vtl${ABC[C:C+8]} = ${WASM_X16X8_LOAD_8X8}(i0 + ${C});
+          const v128_t vtr${ABC[C:C+8]} = ${WASM_X16X8_LOAD_8X8}(i1 + ${C});
+          const v128_t vbl${ABC[C:C+8]} = ${WASM_X16X8_LOAD_8X8}(i2 + ${C});
+          const v128_t vbr${ABC[C:C+8]} = ${WASM_X16X8_LOAD_8X8}(i3 + ${C});
+        i0 += ${CHANNEL_TILE};
+        i1 += ${CHANNEL_TILE};
+        i2 += ${CHANNEL_TILE};
+        i3 += ${CHANNEL_TILE};
+
+        $for C in range(0, CHANNEL_TILE, 8):
+          const v128_t vtd${ABC[C:C+8]} = wasm_i16x8_sub(vtr${ABC[C:C+8]}, vtl${ABC[C:C+8]});
+          const v128_t vbd${ABC[C:C+8]} = wasm_i16x8_sub(vbr${ABC[C:C+8]}, vbl${ABC[C:C+8]});
+          const v128_t vdl${ABC[C:C+8]} = wasm_i16x8_sub(vbl${ABC[C:C+8]}, vtl${ABC[C:C+8]});
+          const v128_t vdd${ABC[C:C+8]} = wasm_i16x8_sub(vbd${ABC[C:C+8]}, vtd${ABC[C:C+8]});
+
+        $for C in range(0, CHANNEL_TILE, 8):
+          const v128_t vt${ABC[C:C+4]} = wasm_i32x4_add(wasm_i32x4_shl(wasm_i32x4_extend_low_i16x8(vtl${ABC[C:C+8]}), 11), wasm_i32x4_mul(wasm_i32x4_extend_low_i16x8(vtd${ABC[C:C+8]}), valphah));
+          const v128_t vt${ABC[C+4:C+8]} = wasm_i32x4_add(wasm_i32x4_shl(wasm_i32x4_extend_high_i16x8(vtl${ABC[C:C+8]}), 11), wasm_i32x4_mul(wasm_i32x4_extend_high_i16x8(vtd${ABC[C:C+8]}), valphah));
+          const v128_t vd${ABC[C:C+4]} = wasm_i32x4_add(wasm_i32x4_shl(wasm_i32x4_extend_low_i16x8(vdl${ABC[C:C+8]}), 11), wasm_i32x4_mul(wasm_i32x4_extend_low_i16x8(vdd${ABC[C:C+8]}), valphah));
+          const v128_t vd${ABC[C+4:C+8]} = wasm_i32x4_add(wasm_i32x4_shl(wasm_i32x4_extend_high_i16x8(vdl${ABC[C:C+8]}), 11), wasm_i32x4_mul(wasm_i32x4_extend_high_i16x8(vdd${ABC[C:C+8]}), valphah));
+
+        $for C in range(0, CHANNEL_TILE, 4):
+          v128_t vacc${ABC[C:C+4]} = wasm_i32x4_mul(vd${ABC[C:C+4]}, valphav);
+
+        $for C in range(0, CHANNEL_TILE, 4):
+          vacc${ABC[C:C+4]} = wasm_i32x4_add(wasm_i32x4_shl(vt${ABC[C:C+4]}, 11), vacc${ABC[C:C+4]});
+
+        $for C in range(0, CHANNEL_TILE, 4):
+          vacc${ABC[C:C+4]} = ${WASM_X32X4_SHR}(wasm_i16x8_add(vacc${ABC[C:C+4]}, vrounding), 22);
+
+        $for C in range(0, CHANNEL_TILE, 8):
+          const v128_t vacc${ABC[C:C+8]} = wasm_i16x8_narrow_i32x4(vacc${ABC[C:C+4]}, vacc${ABC[C+4:C+8]});
+
+        $for C in range(0, CHANNEL_TILE, 16):
+          $if C + 8 < CHANNEL_TILE:
+            const v128_t vo${ABC[C:C+16]} = ${WASM_X8X16_NARROW_I16X8}(vacc${ABC[C:C+8]}, vacc${ABC[C+8:C+16]});
+          $else:
+            const v128_t vo${ABC[C:C+8]} = ${WASM_X8X16_NARROW_I16X8}(vacc${ABC[C:C+8]}, vacc${ABC[C:C+8]});
+
+        wasm_v128_store(output, vo${ABC[0:16]});
+        $for C in range(16, CHANNEL_TILE, 16):
+          $if C + 8 < CHANNEL_TILE:
+            wasm_v128_store(output + ${C}, vo${ABC[C:C+16]});
+          $else:
+            wasm_v128_store64_lane(output + ${C}, vo${ABC[C:C+8]}, 0);
+        output += ${CHANNEL_TILE};
+      }
+    for (; c >= 8 * sizeof(${XINT8_T}); c -= 8 * sizeof(${XINT8_T})) {
+      const v128_t vtl01234567 = ${WASM_X16X8_LOAD_8X8}(i0);
+      i0 += 8;
+      const v128_t vtr01234567 = ${WASM_X16X8_LOAD_8X8}(i1);
+      i1 += 8;
+      const v128_t vbl01234567 = ${WASM_X16X8_LOAD_8X8}(i2);
+      i2 += 8;
+      const v128_t vbr01234567 = ${WASM_X16X8_LOAD_8X8}(i3);
+      i3 += 8;
+
+      const v128_t vtd01234567 = wasm_i16x8_sub(vtr01234567, vtl01234567);
+      const v128_t vbd01234567 = wasm_i16x8_sub(vbr01234567, vbl01234567);
+      const v128_t vdl01234567 = wasm_i16x8_sub(vbl01234567, vtl01234567);
+      const v128_t vdd01234567 = wasm_i16x8_sub(vbd01234567, vtd01234567);
+
+      const v128_t vt0123 = wasm_i32x4_add(wasm_i32x4_shl(wasm_i32x4_extend_low_i16x8(vtl01234567), 11), wasm_i32x4_mul(wasm_i32x4_extend_low_i16x8(vtd01234567), valphah));
+      const v128_t vt4567 = wasm_i32x4_add(wasm_i32x4_shl(wasm_i32x4_extend_high_i16x8(vtl01234567), 11), wasm_i32x4_mul(wasm_i32x4_extend_high_i16x8(vtd01234567), valphah));
+      const v128_t vd0123 = wasm_i32x4_add(wasm_i32x4_shl(wasm_i32x4_extend_low_i16x8(vdl01234567), 11), wasm_i32x4_mul(wasm_i32x4_extend_low_i16x8(vdd01234567), valphah));
+      const v128_t vd4567 = wasm_i32x4_add(wasm_i32x4_shl(wasm_i32x4_extend_high_i16x8(vdl01234567), 11), wasm_i32x4_mul(wasm_i32x4_extend_high_i16x8(vdd01234567), valphah));
+
+      v128_t vacc0123 = wasm_i32x4_mul(vd0123, valphav);
+      v128_t vacc4567 = wasm_i32x4_mul(vd4567, valphav);
+
+      vacc0123 = wasm_i32x4_add(wasm_i32x4_shl(vt0123, 11), vacc0123);
+      vacc4567 = wasm_i32x4_add(wasm_i32x4_shl(vt4567, 11), vacc4567);
+
+      vacc0123 = ${WASM_X32X4_SHR}(wasm_i16x8_add(vacc0123, vrounding), 22);
+      vacc4567 = ${WASM_X32X4_SHR}(wasm_i16x8_add(vacc4567, vrounding), 22);
+
+      const v128_t vacc01234567 = wasm_i16x8_narrow_i32x4(vacc0123, vacc4567);
+
+      const v128_t vo01234567 = ${WASM_X8X16_NARROW_I16X8}(vacc01234567, vacc01234567);
+
+      wasm_v128_store64_lane(output, vo01234567, 0);
+      output += 8;
+    }
+    if XNN_UNLIKELY(c != 0) {
+      const v128_t vtl01234567 = ${WASM_X16X8_LOAD_8X8}(i0);
+      const v128_t vtr01234567 = ${WASM_X16X8_LOAD_8X8}(i1);
+      const v128_t vbl01234567 = ${WASM_X16X8_LOAD_8X8}(i2);
+      const v128_t vbr01234567 = ${WASM_X16X8_LOAD_8X8}(i3);
+
+      const v128_t vtd01234567 = wasm_i16x8_sub(vtr01234567, vtl01234567);
+      const v128_t vbd01234567 = wasm_i16x8_sub(vbr01234567, vbl01234567);
+      const v128_t vdl01234567 = wasm_i16x8_sub(vbl01234567, vtl01234567);
+      const v128_t vdd01234567 = wasm_i16x8_sub(vbd01234567, vtd01234567);
+
+      const v128_t vt0123 = wasm_i32x4_add(wasm_i32x4_shl(wasm_i32x4_extend_low_i16x8(vtl01234567), 11), wasm_i32x4_mul(wasm_i32x4_extend_low_i16x8(vtd01234567), valphah));
+      const v128_t vt4567 = wasm_i32x4_add(wasm_i32x4_shl(wasm_i32x4_extend_high_i16x8(vtl01234567), 11), wasm_i32x4_mul(wasm_i32x4_extend_high_i16x8(vtd01234567), valphah));
+      const v128_t vd0123 = wasm_i32x4_add(wasm_i32x4_shl(wasm_i32x4_extend_low_i16x8(vdl01234567), 11), wasm_i32x4_mul(wasm_i32x4_extend_low_i16x8(vdd01234567), valphah));
+      const v128_t vd4567 = wasm_i32x4_add(wasm_i32x4_shl(wasm_i32x4_extend_high_i16x8(vdl01234567), 11), wasm_i32x4_mul(wasm_i32x4_extend_high_i16x8(vdd01234567), valphah));
+
+      v128_t vacc0123 = wasm_i32x4_mul(vd0123, valphav);
+      v128_t vacc4567 = wasm_i32x4_mul(vd4567, valphav);
+
+      vacc0123 = wasm_i32x4_add(wasm_i32x4_shl(vt0123, 11), vacc0123);
+      vacc4567 = wasm_i32x4_add(wasm_i32x4_shl(vt4567, 11), vacc4567);
+
+      vacc0123 = ${WASM_X32X4_SHR}(wasm_i16x8_add(vacc0123, vrounding), 22);
+      vacc4567 = ${WASM_X32X4_SHR}(wasm_i16x8_add(vacc4567, vrounding), 22);
+
+      const v128_t vacc01234567 = wasm_i16x8_narrow_i32x4(vacc0123, vacc4567);
+
+      v128_t vo01234567 = ${WASM_X8X16_NARROW_I16X8}(vacc01234567, vacc01234567);
+
+      if (c & (4 * sizeof(${XINT8_T}))) {
+        wasm_v128_store32_lane(output, vo01234567, 0);
+        vo01234567 = wasm_u64x2_shr(vo01234567, 32);
+        output += 4;
+      }
+      if (c & (2 * sizeof(${XINT8_T}))) {
+        wasm_v128_store16_lane(output, vo01234567, 0);
+        vo01234567 = wasm_u32x4_shr(vo01234567, 16);
+        output += 2;
+      }
+      if (c & (1 * sizeof(${XINT8_T}))) {
+        wasm_v128_store8_lane(output, vo01234567, 0);
+        output += 1;
+      }
+    }
+
+    output = (${XINT8_T}*) ((uintptr_t) output + output_increment);
+  } while (--output_pixels != 0);
+}

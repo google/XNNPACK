@@ -1,0 +1,137 @@
+// Copyright 2021 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert BATCH_TILE >= 1
+$assert IDATATYPE in ["BF16", "F16", "F32"]
+$assert ODATATYPE in ["QS8", "QU8"]
+#include <assert.h>
+
+$if IDATATYPE in ["BF16", "F16"]:
+  #include <float.h>
+#include <stddef.h>
+#include <stdint.h>
+
+$if BATCH_TILE > 1:
+  #include "src/xnnpack/common.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/microparams.h"
+#include "src/xnnpack/vcvt.h"
+
+$INPUT_T = {"BF16": "xnn_bfloat16", "F16": "xnn_float16", "F32": "float"}[IDATATYPE]
+$XINT8_T = {"QS8": "int8_t", "QU8": "uint8_t"}[ODATATYPE]
+$OUTPUT_MIN = {"QS8": -128, "QU8": 0}[ODATATYPE]
+$OUTPUT_MAX = {"QS8": 127, "QU8": 255}[ODATATYPE]
+void xnn_${IDATATYPE.lower()}_${ODATATYPE.lower()}_vcvt_ukernel__${"wasm" if WASM else "scalar"}_imagic_u${BATCH_TILE}(
+    size_t batch,
+    const ${INPUT_T}* input,
+    ${XINT8_T}* output,
+    const struct xnn_${IDATATYPE.lower()}_${ODATATYPE.lower()}_cvt_params* restrict params)
+{
+  assert(batch != 0);
+  assert(batch % sizeof(${INPUT_T}) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
+
+  $if IDATATYPE in ["BF16", "F16"]:
+    const ${INPUT_T}* i = input;
+    // Don't let the scale be 0, which can happen for large scales, and should
+    // not happen because this value is a reciprocal.
+    const float vscale = math_max_f32(FLT_MIN, ${INPUT_T}_to_float(params->scalar.scale));
+  $else:
+    const float* i = input;
+    const float vscale = params->scalar.scale;
+  const float vmagic_bias = 12582912.0f;
+  const float output_min_less_zero_point = (float) ((int32_t) ${OUTPUT_MIN} - (int32_t) params->scalar.output_zero_point);
+  const float output_max_less_zero_point = (float) ((int32_t) ${OUTPUT_MAX} - (int32_t) params->scalar.output_zero_point);
+  const int32_t vmagic_min = (int32_t) float_as_uint32(vmagic_bias + output_min_less_zero_point);
+  const int32_t vmagic_max = (int32_t) float_as_uint32(vmagic_bias + output_max_less_zero_point);
+  const int32_t vmagic_bias_less_zero_point = INT32_C(0x4B400000) - (int32_t) params->scalar.output_zero_point;
+
+  $if BATCH_TILE == 1:
+    do {
+      $if IDATATYPE in ["BF16", "F16"]:
+        float vx = ${INPUT_T}_to_float(*i++);
+      $else:
+        float vx = *i++;
+      vx *= vscale;
+      vx += vmagic_bias;
+
+      int32_t vy = (int32_t) float_as_uint32(vx);
+      vy = math_max_s32(vy, vmagic_min);
+      vy = math_min_s32(vy, vmagic_max);
+      vy -= vmagic_bias_less_zero_point;
+
+      *output++ = (${XINT8_T}) vy;
+
+      batch -= sizeof(${INPUT_T});
+    } while (batch != 0);
+  $else:
+    for (; batch >= ${BATCH_TILE} * sizeof(${INPUT_T}); batch -= ${BATCH_TILE} * sizeof(${INPUT_T})) {
+      $for N in range(BATCH_TILE):
+        $if IDATATYPE in ["BF16", "F16"]:
+          float vx${N} = ${INPUT_T}_to_float(i[${N}]);
+        $else:
+          float vx${N} = i[${N}];
+      i += ${BATCH_TILE};
+
+      $for N in range(BATCH_TILE):
+        vx${N} *= vscale;
+
+      $for N in range(BATCH_TILE):
+        vx${N} += vmagic_bias;
+
+      $for N in range(BATCH_TILE):
+        int32_t vy${N} = (int32_t) float_as_uint32(vx${N});
+
+      $for N in range(BATCH_TILE):
+        vy${N} = math_max_s32(vy${N}, vmagic_min);
+
+      $for N in range(BATCH_TILE):
+        vy${N} = math_min_s32(vy${N}, vmagic_max);
+
+      $for N in range(BATCH_TILE):
+        vy${N} -= vmagic_bias_less_zero_point;
+
+      $for N in range(BATCH_TILE):
+        output[${N}] = (${XINT8_T}) vy${N};
+      output += ${BATCH_TILE};
+    }
+    $if BATCH_TILE == 2:
+      if XNN_UNLIKELY(batch != 0) {
+        $if IDATATYPE in ["BF16", "F16"]:
+          float vx = ${INPUT_T}_to_float(*i);
+        $else:
+          float vx = *i;
+        vx *= vscale;
+        vx += vmagic_bias;
+
+        int32_t vy = (int32_t) float_as_uint32(vx);
+        vy = math_max_s32(vy, vmagic_min);
+        vy = math_min_s32(vy, vmagic_max);
+        vy -= vmagic_bias_less_zero_point;
+
+        *output = (${XINT8_T}) vy;
+      }
+    $else:
+      if XNN_UNLIKELY(batch != 0) {
+        do {
+          $if IDATATYPE in ["BF16", "F16"]:
+            float vx = ${INPUT_T}_to_float(*i++);
+          $else:
+            float vx = *i++;
+          vx *= vscale;
+          vx += vmagic_bias;
+
+          int32_t vy = (int32_t) float_as_uint32(vx);
+          vy = math_max_s32(vy, vmagic_min);
+          vy = math_min_s32(vy, vmagic_max);
+          vy -= vmagic_bias_less_zero_point;
+
+          *output++ = (${XINT8_T}) vy;
+
+          batch -= sizeof(${INPUT_T});
+        } while (batch != 0);
+      }
+}

@@ -1,0 +1,110 @@
+// Copyright 2021 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert DATATYPE in ["QS8", "QU8"]
+$assert BATCH_TILE >= 1
+#include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
+
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/microparams.h"
+#include "src/xnnpack/vbinary.h"
+
+
+$XINT8_T = {"QS8": "int8_t", "QU8": "uint8_t"}[DATATYPE]
+void xnn_${DATATYPE.lower()}_vadd_minmax_ukernel__scalar_u${BATCH_TILE}(
+    size_t batch,
+    const ${XINT8_T}* input_a,
+    const ${XINT8_T}* input_b,
+    ${XINT8_T}* output,
+    const struct xnn_${DATATYPE.lower()}_add_minmax_params* restrict params)
+{
+  assert(batch != 0);
+  assert(batch % sizeof(${XINT8_T}) == 0);
+  assert(input_a != NULL);
+  assert(input_b != NULL);
+  assert(output != NULL);
+
+  const int32_t vbias = params->scalar.bias;
+  const int32_t va_multiplier = params->scalar.a_multiplier;
+  const int32_t vb_multiplier = params->scalar.b_multiplier;
+  const uint32_t vshift = params->scalar.shift;
+  const int32_t voutput_min = params->scalar.output_min;
+  const int32_t voutput_max = params->scalar.output_max;
+  const int32_t voutput_zero_point = params->scalar.output_zero_point;
+
+  $if BATCH_TILE == 1:
+    do {
+      const int32_t va = *input_a++;
+      const int32_t vb = *input_b++;
+      const int32_t vacc = vbias + va * va_multiplier + vb * vb_multiplier;
+
+      int32_t vout = math_asr_s32(vacc, vshift);
+      vout += voutput_zero_point;
+      vout = math_max_s32(vout, voutput_min);
+      vout = math_min_s32(vout, voutput_max);
+      *output++ = (${XINT8_T}) vout;
+
+      batch -= sizeof(${XINT8_T});
+    } while (batch != 0);
+  $else:
+    for (; batch >= ${BATCH_TILE} * sizeof(${XINT8_T}); batch -= ${BATCH_TILE} * sizeof(${XINT8_T})) {
+      $for N in range(BATCH_TILE):
+        const int32_t va${N} = input_a[${N}];
+      input_a += ${BATCH_TILE};
+
+      $for N in range(BATCH_TILE):
+        const int32_t vb${N} = input_b[${N}];
+        int32_t vacc${N} = vbias + va${N} * va_multiplier;
+      input_b += ${BATCH_TILE};
+
+      $for N in range(BATCH_TILE):
+        vacc${N} += vb${N} * vb_multiplier;
+
+      $for N in range(BATCH_TILE):
+        int32_t vout${N} = math_asr_s32(vacc${N}, vshift);
+
+      $for N in range(BATCH_TILE):
+        vout${N} += voutput_zero_point;
+
+      $for N in range(BATCH_TILE):
+        vout${N} = math_max_s32(vout${N}, voutput_min);
+
+      $for N in range(BATCH_TILE):
+        vout${N} = math_min_s32(vout${N}, voutput_max);
+
+      $for N in range(BATCH_TILE):
+        output[${N}] = (${XINT8_T}) vout${N};
+      output += ${BATCH_TILE};
+    }
+    if XNN_UNLIKELY(batch != 0) {
+      $if BATCH_TILE == 2:
+        const int32_t va = *input_a;
+        const int32_t vb = *input_b;
+        const int32_t vacc = vbias + va * va_multiplier + vb * vb_multiplier;
+
+        int32_t vout = math_asr_s32(vacc, vshift);
+        vout += voutput_zero_point;
+        vout = math_max_s32(vout, voutput_min);
+        vout = math_min_s32(vout, voutput_max);
+        *output++ = (${XINT8_T}) vout;
+      $else:
+        do {
+          const int32_t va = *input_a++;
+          const int32_t vb = *input_b++;
+          const int32_t vacc = vbias + va * va_multiplier + vb * vb_multiplier;
+
+          int32_t vout = math_asr_s32(vacc, vshift);
+          vout += voutput_zero_point;
+          vout = math_max_s32(vout, voutput_min);
+          vout = math_min_s32(vout, voutput_max);
+          *output++ = (${XINT8_T}) vout;
+
+          batch -= sizeof(${XINT8_T});
+        } while (batch != 0);
+    }
+}

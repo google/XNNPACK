@@ -1,0 +1,51 @@
+// Copyright 2025 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+#include <gtest/gtest.h>
+#include "ynnpack/base/arch.h"
+#include "ynnpack/base/simd/x86_vec128.h"
+
+// This must be included last
+#include "ynnpack/base/simd/test/generic.h"
+
+namespace ynn {
+namespace simd {
+
+class x86_sse41 : public ::testing::Test {
+  void SetUp() override {
+    if (!is_arch_supported(arch_flag::sse41)) {
+      GTEST_SKIP() << "sse41 not supported on this hardware";
+    }
+  }
+};
+
+TEST_MULTIPLY(x86_sse41, s32, 4);
+
+TEST_MIN(x86_sse41, s8, 16);
+TEST_MIN(x86_sse41, s32, 4);
+
+TEST_MAX(x86_sse41, s8, 16);
+TEST_MAX(x86_sse41, s32, 4);
+
+TEST_FLOOR(x86_sse41, f32, 4);
+TEST_FLOOR(x86_sse41, f64, 2);
+TEST_CEIL(x86_sse41, f32, 4);
+TEST_CEIL(x86_sse41, f64, 2);
+TEST_ROUND(x86_sse41, f32, 4);
+TEST_ROUND(x86_sse41, f64, 2);
+
+TEST_ABS(x86_sse41, s8, 16);
+TEST_ABS(x86_sse41, s16, 8);
+TEST_ABS(x86_sse41, s32, 4);
+
+TEST_HORIZONTAL_MIN(x86_sse41, s32, 4);
+
+TEST_HORIZONTAL_MAX(x86_sse41, s32, 4);
+
+TEST_CAST(x86_sse41, s32, u8x16);
+TEST_CAST(x86_sse41, s32, s8x16);
+
+}  // namespace simd
+}  // namespace ynn

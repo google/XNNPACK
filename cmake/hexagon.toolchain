@@ -1,0 +1,90 @@
+# Copyright 2022 Google LLC
+#
+# This source code is licensed under the BSD-style license found in the
+# LICENSE file in the root directory of this source tree.
+
+SET(CMAKE_SYSTEM_NAME QURT)
+SET(CMAKE_SYSTEM_PROCESSOR Hexagon)
+SET(CMAKE_CROSSCOMPILING TRUE)
+
+# For compatibility with with CMake toolchain from Hexagon SDK
+SET(HEXAGON TRUE)
+SET(HEXAGON_ARCH v68)
+SET(HEXAGON_TOOL_VER v86)
+
+# This is configured for Hexagon SDK 5.3.0.0
+IF(NOT DEFINED ENV{HEXAGON_SDK_ROOT})
+  MESSAGE(FATAL_ERROR "HEXAGON_SDK_ROOT environment variable not defined")
+ENDIF()
+IF(NOT DEFINED ENV{HEXAGON_TOOLS_ROOT})
+  MESSAGE(FATAL_ERROR "HEXAGON_TOOLS_ROOT environment variable not defined")
+ENDIF()
+
+SET(CMAKE_C_COMPILER "$ENV{HEXAGON_TOOLS_ROOT}/bin/hexagon-clang")
+SET(CMAKE_ASM_COMPILER "$ENV{HEXAGON_TOOLS_ROOT}/bin/hexagon-clang")
+SET(CMAKE_CXX_COMPILER "$ENV{HEXAGON_TOOLS_ROOT}/bin/hexagon-clang++")
+SET(HEXAGON_LINK "$ENV{HEXAGON_TOOLS_ROOT}/bin/hexagon-link")
+SET(HEXAGON_SIM "$ENV{HEXAGON_TOOLS_ROOT}/bin/hexagon-sim")
+
+SET(CMAKE_FIND_ROOT_PATH "$ENV{HEXAGON_TOOLS_ROOT}/target/hexagon")
+SET(CMAKE_PREFIX_PATH "$ENV{HEXAGON_TOOLS_ROOT}/target/hexagon")
+SET(CMAKE_INCLUDE_PATH "$ENV{HEXAGON_TOOLS_ROOT}/target/hexagon/include")
+SET(CMAKE_LIBRARY_PATH "$ENV{HEXAGON_TOOLS_ROOT}/target/hexagon/lib/${HEXAGON_ARCH}/G0/pic")
+SET(CMAKE_PROGRAM_PATH "$ENV{HEXAGON_TOOLS_ROOT}/bin")
+
+SET(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
+SET(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
+SET(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
+SET(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE ONLY)
+
+SET(CMAKE_C_STANDARD_INCLUDE_DIRECTORIES
+  "$ENV{HEXAGON_SDK_ROOT}/incs"
+  "$ENV{HEXAGON_SDK_ROOT}/incs/stddef"
+  "$ENV{HEXAGON_SDK_ROOT}/rtos/qurt/compute${HEXAGON_ARCH}/include"
+  "$ENV{HEXAGON_SDK_ROOT}/rtos/qurt/compute${HEXAGON_ARCH}/include/qurt"
+  "$ENV{HEXAGON_SDK_ROOT}/rtos/qurt/compute${HEXAGON_ARCH}/include/posix")
+
+SET(CMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES
+  "$ENV{HEXAGON_SDK_ROOT}/incs"
+  "$ENV{HEXAGON_SDK_ROOT}/incs/stddef"
+  "$ENV{HEXAGON_SDK_ROOT}/rtos/qurt/compute${HEXAGON_ARCH}/include"
+  "$ENV{HEXAGON_SDK_ROOT}/rtos/qurt/compute${HEXAGON_ARCH}/include/qurt"
+  "$ENV{HEXAGON_SDK_ROOT}/rtos/qurt/compute${HEXAGON_ARCH}/include/posix")
+
+SET(HEXAGON_C_LINK_EXECUTABLE_LINK_OPTIONS "-shared -m${HEXAGON_ARCH} -g -nostdlib --section-start .interp=0x23000000 --dynamic-linker= --force-dynamic -E -z muldefs --whole-archive -o <TARGET> --start-group $ENV{HEXAGON_TOOLS_ROOT}/target/hexagon/lib/${HEXAGON_ARCH}/G0/pic/initS.o $ENV{HEXAGON_SDK_ROOT}/rtos/qurt/compute${HEXAGON_ARCH}/lib/pic/crt1.o $ENV{HEXAGON_SDK_ROOT}/rtos/qurt/compute${HEXAGON_ARCH}/lib/pic/debugmon.o $ENV{HEXAGON_SDK_ROOT}/rtos/qurt/compute${HEXAGON_ARCH}/lib/pic/libqurt.a $ENV{HEXAGON_TOOLS_ROOT}/target/hexagon/lib/${HEXAGON_ARCH}/G0/pic/libc.a $ENV{HEXAGON_TOOLS_ROOT}/target/hexagon/lib/${HEXAGON_ARCH}/G0/pic/libqcc.a $ENV{HEXAGON_TOOLS_ROOT}/target/hexagon/lib/${HEXAGON_ARCH}/G0/pic/libhexagon.a $ENV{HEXAGON_SDK_ROOT}/rtos/qurt/compute${HEXAGON_ARCH}/lib/pic/libqurtcfs.a $ENV{HEXAGON_SDK_ROOT}/rtos/qurt/compute${HEXAGON_ARCH}/lib/pic/libtimer.a $ENV{HEXAGON_SDK_ROOT}/rtos/qurt/compute${HEXAGON_ARCH}/lib/pic/libposix.a <OBJECTS> <LINK_LIBRARIES> $ENV{HEXAGON_TOOLS_ROOT}/target/hexagon/lib/${HEXAGON_ARCH}/G0/pic/finiS.o --end-group")
+SET(HEXAGON_CXX_LINK_EXECUTABLE_LINK_OPTIONS "-shared -m${HEXAGON_ARCH} -g -nostdlib --section-start .interp=0x23000000 --dynamic-linker= --force-dynamic -E -z muldefs --whole-archive -o <TARGET> --start-group $ENV{HEXAGON_TOOLS_ROOT}/target/hexagon/lib/${HEXAGON_ARCH}/G0/pic/initS.o $ENV{HEXAGON_SDK_ROOT}/rtos/qurt/compute${HEXAGON_ARCH}/lib/pic/crt1.o  $ENV{HEXAGON_SDK_ROOT}/rtos/qurt/compute${HEXAGON_ARCH}/lib/pic/debugmon.o $ENV{HEXAGON_SDK_ROOT}/rtos/qurt/compute${HEXAGON_ARCH}/lib/pic/libqurt.a $ENV{HEXAGON_TOOLS_ROOT}/target/hexagon/lib/${HEXAGON_ARCH}/G0/pic/libc.a $ENV{HEXAGON_TOOLS_ROOT}/target/hexagon/lib/${HEXAGON_ARCH}/G0/pic/libqcc.a $ENV{HEXAGON_TOOLS_ROOT}/target/hexagon/lib/${HEXAGON_ARCH}/G0/pic/libhexagon.a $ENV{HEXAGON_SDK_ROOT}/rtos/qurt/compute${HEXAGON_ARCH}/lib/pic/libqurtcfs.a $ENV{HEXAGON_SDK_ROOT}/rtos/qurt/compute${HEXAGON_ARCH}/lib/pic/libtimer.a $ENV{HEXAGON_SDK_ROOT}/rtos/qurt/compute${HEXAGON_ARCH}/lib/pic/libposix.a $ENV{HEXAGON_TOOLS_ROOT}/target/hexagon/lib/${HEXAGON_ARCH}/G0/pic/libc++.a $ENV{HEXAGON_TOOLS_ROOT}/target/hexagon/lib/${HEXAGON_ARCH}/G0/pic/libc++abi.a $ENV{HEXAGON_TOOLS_ROOT}/target/hexagon/lib/${HEXAGON_ARCH}/G0/pic/libc_eh.a <OBJECTS> <LINK_LIBRARIES> $ENV{HEXAGON_TOOLS_ROOT}/target/hexagon/lib/${HEXAGON_ARCH}/G0/pic/finiS.o --end-group")
+
+SET(CMAKE_C_LINK_EXECUTABLE "${HEXAGON_LINK} ${HEXAGON_C_LINK_EXECUTABLE_LINK_OPTIONS}")
+SET(CMAKE_CXX_LINK_EXECUTABLE "${HEXAGON_LINK} ${HEXAGON_CXX_LINK_EXECUTABLE_LINK_OPTIONS}")
+
+ADD_COMPILE_OPTIONS(-O2)
+ADD_COMPILE_OPTIONS(-m${HEXAGON_ARCH})
+ADD_COMPILE_OPTIONS(-mhvx)
+ADD_COMPILE_OPTIONS(-mhvx-ieee-fp)
+ADD_COMPILE_OPTIONS(-fPIC)
+
+SET(CMAKE_THREAD_LIBS_INIT "" CACHE STRING "")
+SET(CMAKE_HAVE_THREADS_LIBRARY TRUE)
+SET(CMAKE_USE_WIN32_THREADS_INIT FALSE)
+SET(CMAKE_USE_PTHREADS_INIT TRUE)
+SET(THREADS_PREFER_PTHREAD_FLAG FALSE)
+SET(Threads_FOUND TRUE CACHE BOOL "")
+
+# Setup Hexagon simulator
+SET(HEXAGON_SIM_OSAM_CONTENT "$ENV{HEXAGON_SDK_ROOT}/rtos/qurt/compute${HEXAGON_ARCH}/debugger/lnx64/qurt_model.so")
+SET(HEXAGON_SIM_Q6SS_CONTENT
+"$ENV{HEXAGON_TOOLS_ROOT}/lib/iss/qtimer.so --csr_base=0xFC900000 --irq_p=1 --freq=19200000 --cnttid=1
+$ENV{HEXAGON_TOOLS_ROOT}/lib/iss/l2vic.so 32 0xFC910000")
+
+SET(HEXAGON_SIMRUN_CONTENT
+"#!/bin/sh
+${HEXAGON_SIM} -m${HEXAGON_ARCH} -mhvx -mhvx-ieee-fp mhvx-qfloat --quiet --simulated_returnval --usefs ${CMAKE_CURRENT_BINARY_DIR} --pmu_statsfile ${CMAKE_CURRENT_BINARY_DIR}/pmu_stats.txt --cosim_file ${CMAKE_BINARY_DIR}/q6ss.cfg --l2tcm_base 0xd800 --rtos ${CMAKE_BINARY_DIR}/osam.cfg $ENV{HEXAGON_SDK_ROOT}/rtos/qurt/compute${HEXAGON_ARCH}/sdksim_bin/runelf.pbn -- $ENV{HEXAGON_SDK_ROOT}/libs/run_main_on_hexagon/ship/hexagon_tool${HEXAGON_TOOL_VER}_${HEXAGON_ARCH}/run_main_on_hexagon_sim --  $@")
+
+FILE(WRITE "${CMAKE_BINARY_DIR}/osam.cfg" "${HEXAGON_SIM_OSAM_CONTENT}")
+FILE(WRITE "${CMAKE_BINARY_DIR}/q6ss.cfg" "${HEXAGON_SIM_Q6SS_CONTENT}")
+
+FILE(TOUCH "${CMAKE_BINARY_DIR}/simrun")
+FILE(CHMOD "${CMAKE_BINARY_DIR}/simrun" FILE_PERMISSIONS OWNER_READ OWNER_EXECUTE GROUP_READ WORLD_READ)
+FILE(WRITE "${CMAKE_BINARY_DIR}/simrun" "${HEXAGON_SIMRUN_CONTENT}")
+
+SET(CMAKE_CROSSCOMPILING_EMULATOR "${HEXAGON_SIM}" "-m${HEXAGON_ARCH}" "--quiet" "--simulated_returnval" "--usefs" "${CMAKE_CURRENT_BINARY_DIR}" "--pmu_statsfile" "${CMAKE_CURRENT_BINARY_DIR}/pmu_stats.txt" "--cosim_file" "${CMAKE_BINARY_DIR}/q6ss.cfg" "--l2tcm_base" "0xd800" "--rtos" "${CMAKE_BINARY_DIR}/osam.cfg" "$ENV{HEXAGON_SDK_ROOT}/rtos/qurt/compute${HEXAGON_ARCH}/sdksim_bin/runelf.pbn" "--" "$ENV{HEXAGON_SDK_ROOT}/libs/run_main_on_hexagon/ship/hexagon_tool${HEXAGON_TOOL_VER}_${HEXAGON_ARCH}/run_main_on_hexagon_sim" "--")

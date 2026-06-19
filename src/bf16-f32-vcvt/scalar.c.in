@@ -1,0 +1,63 @@
+// Copyright 2021 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert BATCH_TILE >= 1
+#include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
+
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/vcvt.h"
+
+
+void xnn_bf16_f32_vcvt_ukernel__scalar_u${BATCH_TILE}(
+    size_t batch,
+    const xnn_bfloat16* input,
+    float* output,
+    const void* params)
+{
+  assert(batch != 0);
+  assert(batch % sizeof(xnn_bfloat16) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
+
+  const xnn_bfloat16* i = input;
+  float* o = output;
+  $if BATCH_TILE > 1:
+    for (; batch >= ${BATCH_TILE} * sizeof(xnn_bfloat16); batch -= ${BATCH_TILE} * sizeof(xnn_bfloat16)) {
+      $for N in range(BATCH_TILE):
+        const xnn_bfloat16 vh${N} = i[${N}];
+      i += ${BATCH_TILE};
+
+      $for N in range(BATCH_TILE):
+        o[${N}] = xnn_bfloat16_to_float(vh${N});
+      o += ${BATCH_TILE};
+    }
+  $if BATCH_TILE == 1:
+    do {
+      const xnn_bfloat16 vh = *i++;
+
+      *o++ = xnn_bfloat16_to_float(vh);
+
+      batch -= sizeof(xnn_bfloat16);
+    } while (batch != 0);
+  $elif BATCH_TILE == 2:
+    if XNN_UNLIKELY(batch != 0) {
+      const xnn_bfloat16 vh = *i;
+
+      *o = xnn_bfloat16_to_float(vh);
+    }
+  $else:
+    if XNN_UNLIKELY(batch != 0) {
+      do {
+        const xnn_bfloat16 vh = *i++;
+
+        *o++ = xnn_bfloat16_to_float(vh);
+
+        batch -= sizeof(xnn_bfloat16);
+      } while (batch != 0);
+    }
+}

@@ -1,0 +1,33 @@
+# Copyright (c) Facebook, Inc. and its affiliates.
+# All rights reserved.
+#
+# Copyright 2019-2025 Google LLC
+#
+# This source code is licensed under the BSD-style license found in the
+# LICENSE file in the root directory of this source tree.
+
+IF(XNNPACK_BUILD_LIBRARY)
+  # ---[ Build operator-level microbenchmarks
+  SET(LIBRARY_OPERATOR_BENCHMARKS
+      average-pooling
+      batch-matrix-multiply
+      binary
+      convolution
+      deconvolution
+      fully-connected
+      max-pooling
+      prelu
+      resize-bilinear-nhwc
+      softmax
+      unary)
+  FOREACH(BENCH ${LIBRARY_OPERATOR_BENCHMARKS})
+    ADD_EXECUTABLE(operator-${BENCH}-bench ${BENCH}.cc)
+    TARGET_LINK_LIBRARIES(operator-${BENCH}-bench PRIVATE
+      xnnpack-bench-utils
+      benchmark::benchmark
+      xnnpack-datatype
+      xnnpack-test
+      XNNPACK
+    )
+  ENDFOREACH()
+ENDIF()

@@ -1,0 +1,205 @@
+// Copyright 2022 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert BATCH_TILE % 8 == 0
+$assert BATCH_TILE >= 8
+$SIMD_TILE = BATCH_TILE // 8
+$assert DIV_ALGO in ["DIV", "NR1FMA", "NR1RECPS"]
+$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+#include <arm_neon.h>
+#include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
+
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/microparams.h"
+#include "src/xnnpack/vunary.h"
+
+
+$ISA = "aarch64_neonfp16arith" if DIV_ALGO == "DIV" else "neonfp16arith"
+void xnn_f16_vsigmoid_ukernel__${ISA}_rr2_p2_${DIV_ALGO.lower()}_u${BATCH_TILE}(
+    size_t batch,
+    const xnn_float16* input,
+    xnn_float16* output,
+    const struct xnn_f16_default_params* restrict params) XNN_OOB_READS
+{
+  assert(batch != 0);
+  assert(batch % sizeof(uint16_t) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
+
+  const float16x8_t vmagic_bias = vreinterpretq_f16_u16(vmovq_n_u16(UINT16_C(0x660F)));  // 0x1.83Cp+10h
+  const float16x8_t vminus_log2e = vreinterpretq_f16_u16(vmovq_n_u16(UINT16_C(0xBDC5)));  // -0x1.714p+0h
+  const float16x8_t vln2_hi = vreinterpretq_f16_u16(vmovq_n_u16(UINT16_C(0x398C)));  // 0x1.630p-1h
+  const float16x8_t vln2_lo = vreinterpretq_f16_u16(vmovq_n_u16(UINT16_C(0x8AF4)));  // -0x1.BD0p-13h
+  const float16x8_t vc2 = vreinterpretq_f16_u16(vmovq_n_u16(UINT16_C(0x37F9)));  // 0x1.FE4p-2h
+  const float16x8_t vc1 = vreinterpretq_f16_u16(vmovq_n_u16(UINT16_C(0xBC0E)));  // -0x1.038p+0h
+  const float16x8_t vone = vreinterpretq_f16_u16(vmovq_n_u16(UINT16_C(0x3C00)));  // 1.0h
+  const float16x8_t vdenorm_cutoff = vreinterpretq_f16_u16(vmovq_n_u16(UINT16_C(0xC8DA)));  // -0x1.368p+3h
+
+  XNN_FORCE_REALIZATION(vmagic_bias);
+  XNN_FORCE_REALIZATION(vminus_log2e);
+  XNN_FORCE_REALIZATION(vln2_hi);
+  XNN_FORCE_REALIZATION(vln2_lo);
+  XNN_FORCE_REALIZATION(vc2);
+  XNN_FORCE_REALIZATION(vc1);
+  XNN_FORCE_REALIZATION(vone);
+  XNN_FORCE_REALIZATION(vdenorm_cutoff);
+
+  const uint16_t* i = (const uint16_t*) input;
+  uint16_t* o = (uint16_t*) output;
+  $if BATCH_TILE > 8:
+    for (; batch >= ${BATCH_TILE} * sizeof(uint16_t); batch -= ${BATCH_TILE} * sizeof(uint16_t)) {
+      $for N in range(SIMD_TILE):
+        const float16x8_t vx${ABC[N]} = vreinterpretq_f16_u16(vld1q_u16(i)); i += 8;
+
+      $for N in range(SIMD_TILE):
+        const float16x8_t vz${ABC[N]} = vabsq_f16(vx${ABC[N]});
+
+      $for N in range(SIMD_TILE):
+        float16x8_t vn${ABC[N]} = vfmaq_f16(vmagic_bias, vz${ABC[N]}, vminus_log2e);
+
+      $for N in range(SIMD_TILE):
+        const float16x8_t vs${ABC[N]} = vreinterpretq_f16_s16(vshlq_n_s16(vreinterpretq_s16_f16(vn${ABC[N]}), 10));
+
+      $for N in range(SIMD_TILE):
+        vn${ABC[N]} = vsubq_f16(vn${ABC[N]}, vmagic_bias);
+
+      $for N in range(SIMD_TILE):
+        float16x8_t vt${ABC[N]} = vfmaq_f16(vz${ABC[N]}, vn${ABC[N]}, vln2_hi);
+
+      $for N in range(SIMD_TILE):
+        vt${ABC[N]} = vfmaq_f16(vt${ABC[N]}, vn${ABC[N]}, vln2_lo);
+
+      $for N in range(SIMD_TILE):
+        const float16x8_t vp${ABC[N]} = vfmaq_f16(vc1, vc2, vt${ABC[N]});
+
+      $for N in range(SIMD_TILE):
+        vt${ABC[N]} = vmulq_f16(vt${ABC[N]}, vs${ABC[N]});
+
+      $for N in range(SIMD_TILE):
+        const float16x8_t ve${ABC[N]} = vfmaq_f16(vs${ABC[N]}, vp${ABC[N]}, vt${ABC[N]});
+
+      $for N in range(SIMD_TILE):
+        const float16x8_t vd${ABC[N]} = vaddq_f16(ve${ABC[N]}, vone);
+
+      $if DIV_ALGO == "DIV":
+        $for N in range(SIMD_TILE):
+          float16x8_t vf${ABC[N]} = vdivq_f16(ve${ABC[N]}, vd${ABC[N]});
+      $else:
+        $for N in range(SIMD_TILE):
+          float16x8_t vr${ABC[N]} = vrecpeq_f16(vd${ABC[N]});
+
+        $if DIV_ALGO == "NR1FMA":
+          $for N in range(SIMD_TILE):
+            const float16x8_t vadj${ABC[N]} = vfmsq_f16(vone, vr${N}, vd${N});
+
+          $for N in range(SIMD_TILE):
+            vr${ABC[N]} = vfmaq_f16(vr${ABC[N]}, vr${ABC[N]}, vadj${ABC[N]});
+        $else:
+          $for N in range(SIMD_TILE):
+            const float16x8_t vadj${ABC[N]} = vrecpsq_f16(vr${ABC[N]}, vd${ABC[N]});
+
+          $for N in range(SIMD_TILE):
+            vr${ABC[N]} = vmulq_f16(vr${ABC[N]}, vadj${ABC[N]});
+
+        $for N in range(SIMD_TILE):
+          float16x8_t vf${ABC[N]} = vmulq_f16(ve${ABC[N]}, vr${ABC[N]});
+
+      $for N in range(SIMD_TILE):
+        vf${ABC[N]} = vreinterpretq_f16_u16(vbicq_u16(vreinterpretq_u16_f16(vf${ABC[N]}), vcagtq_f16(vx${ABC[N]}, vdenorm_cutoff)));
+
+      $for N in range(SIMD_TILE):
+        const uint16x8_t vm${ABC[N]} = vcltq_f16(vx${ABC[N]}, vreinterpretq_f16_u16(vmovq_n_u16(0)));
+
+      $for N in range(SIMD_TILE):
+        vf${ABC[N]} = vbslq_f16(vm${ABC[N]}, vf${ABC[N]}, vsubq_f16(vone, vf${ABC[N]}));
+
+      $for N in range(SIMD_TILE):
+        vst1q_u16(o, vreinterpretq_u16_f16(vf${ABC[N]})); o += 8;
+    }
+  for (; batch >= 8 * sizeof(uint16_t); batch -= 8 * sizeof(uint16_t)) {
+    const float16x8_t vx = vreinterpretq_f16_u16(vld1q_u16(i)); i += 8;
+
+    const float16x8_t vz = vabsq_f16(vx);
+
+    float16x8_t vn = vfmaq_f16(vmagic_bias, vz, vminus_log2e);
+    const float16x8_t vs = vreinterpretq_f16_s16(vshlq_n_s16(vreinterpretq_s16_f16(vn), 10));
+    vn = vsubq_f16(vn, vmagic_bias);
+
+    float16x8_t vt = vfmaq_f16(vz, vn, vln2_hi);
+    vt = vfmaq_f16(vt, vn, vln2_lo);
+
+    const float16x8_t vp = vfmaq_f16(vc1, vc2, vt);
+    vt = vmulq_f16(vt, vs);
+    const float16x8_t ve = vfmaq_f16(vs, vp, vt);
+    const float16x8_t vd = vaddq_f16(ve, vone);
+
+    $if DIV_ALGO == "DIV":
+      float16x8_t vf = vdivq_f16(ve, vd);
+    $else:
+      float16x8_t vr = vrecpeq_f16(vd);
+      $if DIV_ALGO == "NR1FMA":
+        const float16x8_t vadj = vfmsq_f16(vone, vr, vd);
+        vr = vfmaq_f16(vr, vr, vadj);
+      $else:
+        const float16x8_t vadj = vrecpsq_f16(vr, vd);
+        vr = vmulq_f16(vr, vadj);
+
+      float16x8_t vf = vmulq_f16(ve, vr);
+    vf = vreinterpretq_f16_u16(vbicq_u16(vreinterpretq_u16_f16(vf), vcagtq_f16(vx, vdenorm_cutoff)));
+    const uint16x8_t vm = vcltq_f16(vx, vreinterpretq_f16_u16(vmovq_n_u16(0)));
+    vf = vbslq_f16(vm, vf, vsubq_f16(vone, vf));
+
+    vst1q_u16(o, vreinterpretq_u16_f16(vf)); o += 8;
+  }
+  if XNN_UNLIKELY(batch != 0) {
+    const float16x8_t vx = vreinterpretq_f16_u16(vld1q_u16(i));
+
+    const float16x8_t vz = vabsq_f16(vx);
+
+    float16x8_t vn = vfmaq_f16(vmagic_bias, vz, vminus_log2e);
+    const float16x8_t vs = vreinterpretq_f16_s16(vshlq_n_s16(vreinterpretq_s16_f16(vn), 10));
+    vn = vsubq_f16(vn, vmagic_bias);
+
+    float16x8_t vt = vfmaq_f16(vz, vn, vln2_hi);
+    vt = vfmaq_f16(vt, vn, vln2_lo);
+
+    const float16x8_t vp = vfmaq_f16(vc1, vc2, vt);
+    vt = vmulq_f16(vt, vs);
+    const float16x8_t ve = vfmaq_f16(vs, vp, vt);
+    const float16x8_t vd = vaddq_f16(ve, vone);
+
+    $if DIV_ALGO == "DIV":
+      float16x8_t vf = vdivq_f16(ve, vd);
+    $else:
+      float16x8_t vr = vrecpeq_f16(vd);
+      $if DIV_ALGO == "NR1FMA":
+        const float16x8_t vadj = vfmsq_f16(vone, vr, vd);
+        vr = vfmaq_f16(vr, vr, vadj);
+      $else:
+        const float16x8_t vadj = vrecpsq_f16(vr, vd);
+        vr = vmulq_f16(vr, vadj);
+
+      float16x8_t vf = vmulq_f16(ve, vr);
+    vf = vreinterpretq_f16_u16(vbicq_u16(vreinterpretq_u16_f16(vf), vcagtq_f16(vx, vdenorm_cutoff)));
+    const uint16x8_t vm = vcltq_f16(vx, vreinterpretq_f16_u16(vmovq_n_u16(0)));
+    vf = vbslq_f16(vm, vf, vsubq_f16(vone, vf));
+
+    float16x4_t vf_lo = vget_low_f16(vf);
+    if (batch & (4 * sizeof(uint16_t))) {
+      vst1_u16(o, vreinterpret_u16_f16(vf_lo)); o += 4;
+      vf_lo = vget_high_f16(vf);
+    }
+    if (batch & (2 * sizeof(uint16_t))) {
+      vst1_lane_u32((void*) o, vreinterpret_u32_f16(vf_lo), 0); o += 2;
+      vf_lo = vext_f16(vf_lo, vf_lo, 2);
+    }
+    if (batch & (1 * sizeof(uint16_t))) {
+      vst1_lane_u16(o, vreinterpret_u16_f16(vf_lo), 0);
+    }
+  }
+}

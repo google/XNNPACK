@@ -1,0 +1,75 @@
+// clang-format off
+// Auto-generated file. Do not edit!
+//   Template: src/f16-vgelu/rvvfp16arith-rational-6-4.c.in
+//   Generator: tools/xngen
+//
+// Copyright 2024 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+#include <assert.h>
+#include <stddef.h>
+
+#include <riscv_vector.h>
+
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/vunary.h"
+
+
+void xnn_f16_vgelu_ukernel__rvvfp16arith_rational_6_4_div_u4v(
+    size_t batch,
+    const xnn_float16* input,
+    xnn_float16* output,
+    const struct xnn_f16_default_params* unused_params)
+{
+  assert(batch != 0);
+  assert(batch % sizeof(xnn_float16) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
+
+  const xnn_float16 vmax_abs_x = 3.5f;
+  const xnn_float16 valpha_1 = 7.9763203859e-01f;
+  const xnn_float16 valpha_3 = 1.5397867560e-01f;
+  const xnn_float16 valpha_5 = 4.5998394489e-03f;
+  const xnn_float16 vbeta_2 = 3.5756936669e-01f;
+  const xnn_float16 vbeta_4 = 4.2862996459e-02f;
+
+  batch >>= XNN_LOG2_SIZEOF_FLOAT16;
+  do {
+    const size_t n = __riscv_vsetvl_e16m4(batch);
+
+    vfloat16m4_t vx_orig = __riscv_vle16_v_f16m4(input, n);
+    input += n;
+
+    // Clamp.
+    vfloat16m4_t vx = __riscv_vfmin(vx_orig, vmax_abs_x, n);
+    vx = __riscv_vfmax(vx, -vmax_abs_x, n);
+
+    vfloat16m4_t vx2 = __riscv_vfmul(vx, vx, n);
+
+    // Numerator p (odd polynomial).
+    vfloat16m4_t vp = __riscv_vfmv_v_f_f16m4(valpha_3, n);
+    vp = __riscv_vfmacc(vp, valpha_5, vx2, n);
+    vp = __riscv_vfmadd(vp, vx2, __riscv_vfmv_v_f_f16m4(valpha_1, n), n);
+    vp = __riscv_vfmul(vp, vx, n);
+
+    // Denominator q (even polynomial).
+    vfloat16m4_t vq = __riscv_vfmv_v_f_f16m4(vbeta_2, n);
+    vq = __riscv_vfmacc(vq, vbeta_4, vx2, n);
+    vq = __riscv_vfmadd(vq, vx2, __riscv_vfmv_v_f_f16m4(1.0f, n), n);
+
+    // erf = p / q.
+    vfloat16m4_t verf = __riscv_vfdiv(vp, vq, n);
+
+    // y = x_orig * 0.5 * (1 + erf).
+    vfloat16m4_t vy = __riscv_vfadd(verf, 1.0f, n);
+    vy = __riscv_vfmul(vy, 0.5f, n);
+    vy = __riscv_vfmul(vy, vx_orig, n);
+
+    __riscv_vse16(output, vy, n);
+    output += n;
+
+    batch -= n;
+  } while (batch != 0);
+}

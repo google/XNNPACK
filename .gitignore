@@ -1,0 +1,38 @@
+# Copyright (c) Facebook, Inc. and its affiliates.
+# All rights reserved.
+#
+# Copyright 2019 Google LLC
+#
+# This source code is licensed under the BSD-style license found in the
+# LICENSE file in the root directory of this source tree.
+
+# Build objects and artifacts
+bazel-bin
+bazel-genfiles
+bazel-out
+bazel-testlogs
+bazel-XNNPACK
+MODULE.bazel.lock
+bin/
+build/
+build-*/
+deps/
+lib/
+libs/
+obj/
+out/
+*.pyc
+*.pyo
+*.log
+
+# System files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+*.swp
+.vscode
+.vs

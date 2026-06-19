@@ -1,0 +1,92 @@
+
+$assert BATCH_TILE % 32 == 0
+$assert BATCH_TILE >= 32
+$SIMD_TILE = BATCH_TILE // 32
+$assert OP in ["ADD", "DIV", "MAX", "MIN", "MUL", "SUB", "SQRDIFF", "PRELU"]
+#include <assert.h>
+
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/simd/f32-hvx.h"
+#include "src/xnnpack/vbinary.h"
+
+$_HEXAGON_OP_HVX = {
+$  "ADD": "xnn_add_f32",
+$  "DIV": "xnn_div_f32",
+$  "MAX": "xnn_max_f32",
+$  "MIN": "xnn_min_f32",
+$  "MUL": "xnn_mul_f32",
+$  "SUB": "xnn_sub_f32",
+$  "SQRDIFF": "xnn_sub_f32",
+$  "PRELU": "xnn_mul_f32",
+$}[OP]
+void xnn_f32_v${OP.lower()}_ukernel__hvx_u${BATCH_TILE}(
+    size_t batch,
+    const float* input_a,
+    const float* input_b,
+    float* output,
+    const struct xnn_f32_default_params* restrict params)
+{
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input_a != NULL);
+  assert(input_b != NULL);
+  assert(output != NULL);
+
+  $if OP == "PRELU":
+    const HVX_Vector vzero = xnn_zero_f32();
+  $if BATCH_TILE > 32:
+    for (; batch >= ${BATCH_TILE} * sizeof(float); batch -= ${BATCH_TILE} * sizeof(float)) {
+      $for N in range(0, BATCH_TILE, 32):
+        HVX_Vector va${N//32} = xnn_loadu_f32(input_a + ${N});
+      $for N in range(0, BATCH_TILE, 32):
+        HVX_Vector vb${N//32} = xnn_loadu_f32(input_b + ${N});
+      input_a += ${BATCH_TILE};
+      input_b += ${BATCH_TILE};
+
+      $for N in range(SIMD_TILE):
+        HVX_Vector vacc${N} = ${_HEXAGON_OP_HVX}(va${N}, vb${N});
+
+      $if OP == "SQRDIFF":
+        $for N in range(SIMD_TILE):
+          vacc${N} = xnn_mul_f32(vacc${N}, vacc${N});
+      $elif OP == "PRELU":
+        $for N in range(SIMD_TILE):
+          const HVX_VectorPred vm${N} = Q6_Q_vcmp_gt_VsfVsf(va${N}, vzero);
+
+        $for N in range(SIMD_TILE):
+          vacc${N} = Q6_V_vmux_QVV(vm${N}, va${N}, vacc${N});
+
+      $for N in range(0, BATCH_TILE, 32):
+        xnn_storeu_f32(output + ${N}, vacc${N//32});
+      output += ${BATCH_TILE};
+    }
+  for (; batch >= 32 * sizeof(float); batch -= 32 * sizeof(float)) {
+    HVX_Vector va = xnn_loadu_f32(input_a);
+    HVX_Vector vb = xnn_loadu_f32(input_b);
+    input_a += 32;
+    input_b += 32;
+
+    HVX_Vector vacc = ${_HEXAGON_OP_HVX}(va, vb);
+    $if OP == "SQRDIFF":
+      vacc = xnn_mul_f32(vacc, vacc);
+    $elif OP == "PRELU":
+      const HVX_VectorPred vm = Q6_Q_vcmp_gt_VsfVsf(va, vzero);
+      vacc = Q6_V_vmux_QVV(vm, va, vacc);
+
+    xnn_storeu_f32(output, vacc);
+    output += 32;
+  }
+  if XNN_UNLIKELY(batch != 0) {
+    HVX_Vector va = xnn_load_tail_f32(input_a, batch >> XNN_LOG2_SIZEOF_FLOAT);
+    HVX_Vector vb = xnn_load_tail_f32(input_b, batch >> XNN_LOG2_SIZEOF_FLOAT);
+
+    HVX_Vector vacc = ${_HEXAGON_OP_HVX}(va, vb);
+    $if OP == "SQRDIFF":
+      vacc = xnn_mul_f32(vacc, vacc);
+    $elif OP == "PRELU":
+      const HVX_VectorPred vm = Q6_Q_vcmp_gt_VsfVsf(va, vzero);
+      vacc = Q6_V_vmux_QVV(vm, va, vacc);
+
+    Q6_V_vstu_variable(output, batch, vacc);
+  }
+}

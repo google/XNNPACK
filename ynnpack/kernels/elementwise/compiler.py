@@ -1,0 +1,1796 @@
+"""Generator for elementwise kernels.
+
+Enables specification of kernels as pure python functions, and generating C++
+implementations using SIMD intrinsics.
+"""
+
+import builtins
+import copy
+import enum
+import functools
+import math
+import types
+
+
+class Type:
+
+  def __init__(self, type_class, size, lanes):
+    self.type_class = type_class
+    self.size = size
+    self.lanes = lanes
+
+  def __hash__(self):
+    return hash((self.type_class, self.size, self.lanes))
+
+  def __eq__(self, other):
+    return (self.type_class, self.size) == (
+        other.type_class,
+        other.size,
+    ) and ((self.lanes == other.lanes) or other.lanes == 0 or self.lanes == 0)
+
+  def is_int(self):
+    return self.type_class == "int"
+
+  def is_uint(self):
+    return self.type_class == "uint"
+
+  def is_float(self):
+    return self.type_class in ("float", "bfloat")
+
+  def __str__(self):
+    if self.lanes == 1:
+      if self.type_class == "int" and self.size == 2:
+        return "int2x4"
+      elif self.type_class == "uint" and self.size == 2:
+        return "uint2x4"
+      elif self.type_class == "int" and self.size == 4:
+        return "int4x2"
+      elif self.type_class == "uint" and self.size == 4:
+        return "uint4x2"
+      else:
+        return self.to_c_decl(False)
+    else:
+      return f"{self.type_class}{self.size}x{self.lanes}_t"
+
+  def __repr__(self):
+    return str(self)
+
+  def scalar(self):
+    return Type(self.type_class, self.size, 1)
+
+  def widen(self):
+    return Type(self.type_class, self.size * 2, self.lanes)
+
+  def narrow(self):
+    return Type(self.type_class, self.size // 2, self.lanes)
+
+  def signed_widen(self):
+    type_class = "int" if self.is_uint() else self.type_class
+    return Type(type_class, self.size * 2, self.lanes)
+
+  def with_lanes(self, lanes):
+    return Type(self.type_class, self.size, lanes)
+
+  def with_size(self, size):
+    return Type(self.type_class, size, self.lanes)
+
+  def to_c_decl(self, const, indirection=0):
+    result = ""
+    if const:
+      result += "const "
+    if self.size == 0:
+      result += "ssize_t" if self.is_int() else "size_t"
+    else:
+      if self.type_class == "float" and self.size == 16:
+        result += "half"
+      elif self.type_class == "float" and self.size == 32:
+        result += "float"
+      elif self.type_class == "float" and self.size == 64:
+        result += "double"
+      elif self.type_class == "bfloat" and self.size == 16:
+        result += "bfloat16"
+      else:
+        result += self.type_class + str(self.size)
+      if self.lanes > 1:
+        result += "x" + str(self.lanes)
+      if self.is_int() or self.is_uint() or self.lanes > 1:
+        result += "_t"
+    while indirection > 0:
+      result += "*"
+      indirection -= 1
+    return result
+
+  def min(self):
+    if self.is_int():
+      return -(2 ** (self.size - 1))
+    elif self.is_uint():
+      return 0
+    elif self.is_float():
+      return -float("inf")
+    else:
+      assert False
+
+  def max(self):
+    if self.is_int():
+      return 2 ** (self.size - 1) - 1
+    elif self.is_uint():
+      return 2**self.size - 1
+    elif self.is_float():
+      return float("inf")
+    else:
+      assert False
+
+
+def Int(size=0, lanes=1):
+  return Type("int", size, lanes)
+
+
+def UInt(size=0, lanes=1):
+  return Type("uint", size, lanes)
+
+
+def Float(size, lanes=1):
+  return Type("float", size, lanes)
+
+
+def BFloat(size, lanes=1):  # pylint: disable=invalid-name
+  return Type("bfloat", size, lanes)
+
+
+fn_ops = []
+
+
+def wrap(y):
+  result = y
+  if isinstance(y, int):
+    if builtins.abs(y) > 2**31 - 1:
+      result = Constant(Int(64), y)
+    else:
+      result = Constant(Int(32), y)
+  elif isinstance(y, float):
+    result = Constant(Float(32), y)
+  return result
+
+
+def promote_types(a, b):
+  """Makes x and y to have compatible types."""
+  if a.ty is None and b.ty is None:
+    return [a, b]
+
+  assert a.ty.lanes == b.ty.lanes or a.ty.lanes == 1 or b.ty.lanes == 1
+
+  if a.ty == b.ty:
+    return [a, b]
+
+  if isinstance(a, Constant) or isinstance(b, Constant):
+    if not isinstance(a, Constant):
+      return [a, cast(a.ty, b)]
+    elif not isinstance(b, Constant):
+      return [cast(b.ty, a), b]
+    else:
+      assert False
+
+  if a.ty.is_float() or b.ty.is_float():
+    max_size = builtins.max(a.ty.size, b.ty.size)
+    max_lanes = builtins.max(a.ty.lanes, b.ty.lanes)
+
+    return [
+        cast(Float(max_size, max_lanes), a),
+        cast(Float(max_size, max_lanes), b),
+    ]
+  else:
+    assert a.ty.type_class == b.ty.type_class
+    promoted_ty = Type(
+        a.ty.type_class,
+        builtins.max(a.ty.size, b.ty.size),
+        builtins.max(a.ty.lanes, b.ty.lanes),
+    )
+    return [
+        cast(promoted_ty, a),
+        cast(promoted_ty, b),
+    ]
+
+
+def get_cmp_type(x):
+  if x.ty.is_float():
+    return Int(x.ty.size, x.ty.lanes)
+  return x.ty
+
+
+class Value:
+
+  def __init__(self, ty):
+    self.ty = ty
+
+  def __add__(self, y):
+    return Op(self.ty, "add", promote_types(self, wrap(y)))
+
+  def __radd__(self, y):
+    return Op(self.ty, "add", promote_types(self, wrap(y)))
+
+  def __sub__(self, y):
+    return Op(self.ty, "sub", promote_types(self, wrap(y)))
+
+  def __rsub__(self, y):
+    return Op(self.ty, "sub", promote_types(wrap(y), self))
+
+  def __mul__(self, y):
+    return Op(self.ty, "mul", promote_types(self, wrap(y)))
+
+  def __rmul__(self, y):
+    return Op(self.ty, "mul", promote_types(self, wrap(y)))
+
+  def __truediv__(self, y):
+    return Op(self.ty, "truediv", promote_types(self, wrap(y)))
+
+  def __rtruediv__(self, y):
+    return Op(self.ty, "truediv", promote_types(wrap(y), self))
+
+  def __floordiv__(self, y):
+    return Op(self.ty, "floordiv", promote_types(self, wrap(y)))
+
+  def __rfloordiv__(self, y):
+    return Op(self.ty, "floordiv", promote_types(wrap(y), self))
+
+  def __mod__(self, y):
+    return Op(self.ty, "mod", promote_types(self, wrap(y)))
+
+  def __rmod__(self, y):
+    return Op(self.ty, "mod", promote_types(wrap(y), self))
+
+  def __pow__(self, y):
+    return Op(self.ty, "pow", promote_types(self, wrap(y)))
+
+  def __rpow__(self, y):
+    return Op(self.ty, "pow", promote_types(wrap(y), self))
+
+  def __rshift__(self, y):
+    return Op(self.ty, "rshift", promote_types(self, wrap(y)))
+
+  def __rrshift__(self, y):
+    return Op(self.ty, "rshift", promote_types(wrap(y), self))
+
+  def __lshift__(self, y):
+    return Op(self.ty, "lshift", promote_types(self, wrap(y)))
+
+  def __rlshift__(self, y):
+    return Op(self.ty, "lshift", promote_types(wrap(y), self))
+
+  def __and__(self, y):
+    return Op(self.ty, "bitwise_and", promote_types(self, wrap(y)))
+
+  def __rand__(self, y):
+    return Op(self.ty, "bitwise_and", promote_types(self, wrap(y)))
+
+  def __or__(self, y):
+    return Op(self.ty, "bitwise_or", promote_types(self, wrap(y)))
+
+  def __ror__(self, y):
+    return Op(self.ty, "bitwise_or", promote_types(self, wrap(y)))
+
+  def __xor__(self, y):
+    return Op(self.ty, "bitwise_xor", promote_types(self, wrap(y)))
+
+  def __rxor__(self, y):
+    return Op(self.ty, "bitwise_xor", promote_types(self, wrap(y)))
+
+  def __invert__(self):
+    return Op(self.ty, "~", [self])
+
+  def __neg__(self):
+    return Constant(self.ty, 0) - self
+
+  def __lt__(self, y):
+    x_pr, y_pr = promote_types(self, wrap(y))
+    return Op(get_cmp_type(x_pr), "less", [x_pr, y_pr])
+
+  def __le__(self, y):
+    x_pr, y_pr = promote_types(self, wrap(y))
+    return Op(get_cmp_type(x_pr), "less_equal", [x_pr, y_pr])
+
+  def __gt__(self, y):
+    x_pr, y_pr = promote_types(self, wrap(y))
+    opp = Op(get_cmp_type(x_pr), "greater", [x_pr, y_pr])
+    return opp
+
+  def __ge__(self, y):
+    x_pr, y_pr = promote_types(self, wrap(y))
+    return Op(get_cmp_type(x_pr), "greater_equal", [x_pr, y_pr])
+
+
+class WildCard(Value):
+
+  def __init__(self):
+    Value.__init__(self, None)
+
+
+class WildConstant(Value):
+
+  def __init__(self, value=None):
+    Value.__init__(self, None)
+    self.value = value
+
+
+class Op(Value):
+
+  def __init__(self, ty, name, args):
+    assert isinstance(args, list)
+    Value.__init__(self, ty)
+    self.name = name
+    self.args = args
+    fn_ops.append(self)
+
+  def __repr__(self):
+    return f"{self.name}<{self.ty}>({', '.join(map(repr, self.args))})"
+
+  def compare(self, other):
+    return self.name == other.name and self.ty == other.ty
+
+  def with_lanes(self, lanes):
+    return Op(
+        self.ty.with_lanes(lanes),
+        self.name,
+        [i.with_lanes(lanes) for i in self.args],
+    )
+
+
+class Var(Value):
+
+  def __init__(self, name, ty):
+    Value.__init__(self, ty)
+    self.name = name
+
+  def __str__(self):
+    return self.name
+
+  def __repr__(self):
+    return f"{self.name}:{self.ty}"
+
+  def __hash__(self):
+    return hash((self.name, self.ty))
+
+  def __eq__(self, other):
+    if isinstance(other, Var):
+      return self.name == other.name and self.ty == other.ty
+    return False
+
+  def compare(self, other):
+    if type(self) != type(other):
+      return False
+
+    return self.name == other.name and self.ty == other.ty
+
+  def with_lanes(self, lanes):
+    return Var(self.name, self.ty.with_lanes(lanes))
+
+
+class Load(Value):
+  """A load node."""
+
+  def __init__(self, ty, index):
+    Value.__init__(self, ty)
+    self.name = "load"
+    self.index = index
+
+  def __repr__(self):
+    return f"load<{self.ty}>({self.index})"
+
+  def with_lanes(self, lanes):
+    return Load(self.ty.with_lanes(lanes), self.index)
+
+  def compare(self, other):
+    if type(self) is not type(other):
+      return False
+
+    return (
+        self.index == other.index
+        and self.ty == other.ty
+    )
+
+
+class Store:
+
+  def __init__(self, value, to):
+    self.value = value
+    self.to = to
+
+
+def intrinsic(func):
+  @functools.wraps(func)
+  def wrapper(*args, **kwargs):
+    args = [wrap(arg) for arg in args]
+    kwargs = {k: wrap(v) for k, v in kwargs.items()}
+    return func(*args, **kwargs)
+
+  return wrapper
+
+
+@intrinsic
+def equal(self, y):
+  x_pr, y_pr = promote_types(self, wrap(y))
+  return Op(get_cmp_type(x_pr), "equal", [x_pr, y_pr])
+
+
+@intrinsic
+def not_equal(self, y):
+  x_pr, y_pr = promote_types(self, wrap(y))
+  return Op(get_cmp_type(x_pr), "not_equal", [x_pr, y_pr])
+
+
+@intrinsic
+def abs(value):
+  return Op(value.ty, "abs", [value])
+
+
+@intrinsic
+def logical_shift_left(x, shift):
+  return Op(x.ty, "logical_shift_left", [x, shift])
+
+
+@intrinsic
+def round(value):
+  return Op(value.ty, "round", [value])
+
+
+@intrinsic
+def ceil(value):
+  return Op(value.ty, "ceil", [value])
+
+
+@intrinsic
+def floor(value):
+  return Op(value.ty, "floor", [value])
+
+
+@intrinsic
+def floor_log2(value):
+  return Op(value.ty, "floor_log2", [value])
+
+
+@intrinsic
+def exp2_round(value):
+  return Op(value.ty, "exp2_round", [value])
+
+
+@intrinsic
+def isnan(value):
+  return Op(get_cmp_type(value), "isnan", [value])
+
+
+@intrinsic
+def isinf(value):
+  return Op(get_cmp_type(value), "isinf", [value])
+
+
+@intrinsic
+def isfinite(value):
+  return Op(get_cmp_type(value), "isfinite", [value])
+
+
+@intrinsic
+def select(cond, x, y):
+  x_pr, y_pr = promote_types(wrap(x), wrap(y))
+  return Op(x_pr.ty, "select", [cond, x_pr, y_pr])
+
+
+@intrinsic
+def sqrt(value):
+  return Op(value.ty, "sqrt", [value])
+
+
+@intrinsic
+def erf(value):
+  return Op(value.ty, "erf", [value])
+
+
+@intrinsic
+def approx_erf(value):
+  return Op(value.ty, "approx_erf", [value])
+
+
+@intrinsic
+def approx_tanh(value):
+  return Op(value.ty, "approx_tanh", [value])
+
+
+@intrinsic
+def exp(value):
+  return Op(value.ty, "exp", [value])
+
+
+@intrinsic
+def expm1(value):
+  return Op(value.ty, "expm1", [value])
+
+
+@intrinsic
+def tanh(value):
+  return Op(value.ty, "tanh", [value])
+
+
+@intrinsic
+def log(value):
+  return Op(value.ty, "log", [value])
+
+
+@intrinsic
+def log1p(value):
+  return Op(value.ty, "log1p", [value])
+
+
+@intrinsic
+def cast(ty, value):
+  """Casts value to a given type."""
+  # This is no-op.
+  if value.ty == ty:
+    return value
+  # We can just change the type of the constant.
+  if isinstance(value, Constant):
+    const = Constant(ty.with_lanes(1), value.value)
+    # This is just so broadcast is inserted.
+    if ty.lanes > 1:
+      const = const.with_lanes(ty.lanes)
+    return const
+  if (
+      value.ty.type_class == ty.type_class
+      and ty.size == value.ty.size
+      and ty.lanes > 1
+      and value.ty.lanes == 1
+  ):
+    # If the types only differ by number of lanes we can insert a broadcast
+    # instead of the full cast.
+    return broadcast(value, ty.lanes)
+  return Op(ty, "cast", [value])
+
+
+@intrinsic
+def saturating_cast(ty, value):
+  return Op(ty, "saturating_cast", [value])
+
+
+@intrinsic
+def reinterpret_cast(ty, value):
+  assert ty.size == value.ty.size and ty.lanes == value.ty.lanes
+  return Op(ty, "reinterpret_cast", [value])
+
+
+def widen(x):
+  return cast(x.ty.widen(), x)
+
+
+def signed_widen(x):
+  return cast(x.ty.signed_widen(), x)
+
+
+# Computes signed_widen(x) - signed_widen(y)
+@intrinsic
+def widening_sub(x, y):
+  assert x.ty == y.ty
+  return Op(x.ty.signed_widen(), "widening_sub", [x, y])
+
+
+# Computes widen(x) * widen(y)
+@intrinsic
+def widening_mul(x, y):
+  assert x.ty == y.ty
+  return Op(x.ty.widen(), "widening_mul", [x, y])
+
+
+# Computes saturating_narrow(widen(x) + widen(y))
+@intrinsic
+def add_sat(x, y):
+  assert x.ty == y.ty
+  return Op(x.ty, "add_sat", [x, y])
+
+
+@intrinsic
+def sub_sat(x, y):
+  assert x.ty == y.ty
+  return Op(x.ty, "sub_sat", [x, y])
+
+
+# Computes x * y + z
+@intrinsic
+def multiply_add(x, y, z):
+  assert x.ty == y.ty
+  assert x.ty == z.ty
+  return Op(x.ty, "multiply_add", [x, y, z])
+
+
+def halving_add(x, y):
+  assert x.ty == y.ty
+  return Op(x.ty, "halving_add", [x, y])
+
+
+def rounding_halving_add(x, y):
+  assert x.ty == y.ty
+  return Op(x.ty, "rounding_halving_add", [x, y])
+
+
+# Computes saturating_narrow((widen(x) + (1 << (shift - 1))) >> shift)
+@intrinsic
+def rounding_narrowing_shift_right(x, shift):
+  return Op(x.ty.narrow(), "rounding_narrowing_shift_right", [x, shift])
+
+
+@intrinsic
+def saturating_narrow(x):
+  return Op(x.ty.narrow(), "saturating_narrow", [x])
+
+
+@intrinsic
+def min(x, y):
+  (x, y) = promote_types(x, y)
+  return Op(wrap(x).ty, "min", [x, y])
+
+
+@intrinsic
+def max(x, y):
+  (x, y) = promote_types(x, y)
+  return Op(x.ty, "max", [x, y])
+
+
+@intrinsic
+def select_bits(mask, x, y):
+  return Op(x.ty, "select_bits", [mask, x, y])
+
+
+def lower_select_bits(mask, x, y):
+  if x.ty.is_float():
+    ity = Int(x.ty.size, x.ty.lanes)
+    iy = reinterpret_cast(ity, y)
+    return reinterpret_cast(
+        x.ty,
+        iy ^ ((reinterpret_cast(ity, x) ^ iy) & reinterpret_cast(ity, mask)),
+    )
+  else:
+    return y ^ ((x ^ y) & mask)
+
+
+def load(x):
+  return Load(x.ty, x)
+
+
+def store(value, to):
+  return Store(value, to)
+
+
+def lower_widening_sub(x, y):
+  return signed_widen(x) - signed_widen(y)
+
+
+def lower_widening_mul(x, y):
+  return widen(x) * widen(y)
+
+
+def lower_multiply_sub(x, y, z):
+  return x * y - z
+
+
+def broadcast(x, lanes):
+  """Broadcasts a scalar to a vector."""
+  assert x.ty.lanes == 1
+  x = wrap(x)
+  # TODO(vksnk): here we push broadcast into the op. Usually, you would want to
+  # the opposite, but this simplifies a lot of things. Probably, would make
+  # sense to reconsider in the future.
+  if isinstance(x, Op):
+    return Op(
+        x.ty.with_lanes(lanes),
+        x.name,
+        [broadcast(arg, lanes) for arg in x.args],
+    )
+  return Op(x.ty.with_lanes(lanes), "broadcast", [x])
+
+
+# Would it be bad if instead of using a map we looked up in a global namespace
+# if there is a function called "lower" + op.name?
+lowering_funcs = {
+    "widening_sub": lower_widening_sub,
+    "widening_mul": lower_widening_mul,
+    "select_bits": lower_select_bits,
+}
+
+
+class Constant(Value):
+  """Represents a constant value."""
+
+  def __init__(self, ty, value):
+    Value.__init__(self, ty)
+    self.value = value
+
+  def __str__(self):
+    return f"{self.value}"
+
+  def __repr__(self):
+    return f"Constant({str(self)})"
+
+  def __getattr__(self, name):
+    # This is just for convenience, so every potential arg has a 'name' field.
+    if name == "name":
+      return str(self.value)
+    return object.__getattribute__(self, name)
+
+  def with_lanes(self, lanes):
+    return broadcast(self, lanes)
+
+
+def i8(value):
+  return Constant(Int(8), value)
+
+
+def i16(value):
+  return Constant(Int(16), value)
+
+
+def i32(value):
+  return Constant(Int(32), value)
+
+
+def i64(value):
+  return Constant(Int(64), value)
+
+
+def f32(value):
+  return Constant(Float(32), value)
+
+
+def f64(value):
+  return Constant(Float(64), value)
+
+
+class BroadcastMode(enum.Enum):
+  """Defines how a broadcast of the buffer should be handled."""
+
+  # The buffer is never broadcasted.
+  NONE = 1
+  # The buffer is always broadcasted.
+  ALWAYS = 2
+  # The two copies of body are created - one with broadcast and one without.
+  # This option is most efficent, but doubles the code size.
+  SPECIALIZE = 3
+  # The broadcast is handled through making a local copy of the broadcasted
+  # value and reading it as if it was a normal buffer. This has almost no
+  # code size penalty, but might be slower than `specialize` option.
+  LOCAL_VAR = 4
+  # Let compiler decide which broadcasting mode to use.
+  AUTO = 5
+
+
+class Scalar:
+
+  def __init__(self, name, ty):
+    self.name = name
+    self.ty = ty
+
+
+class Buffer:
+
+  def __init__(
+      self, name, ty, is_const, broadcast_mode=BroadcastMode.LOCAL_VAR
+  ):
+    self.name = name
+    self.ty = ty
+    self.is_const = is_const
+    self.broadcast_mode = broadcast_mode
+
+
+buffer_args = []
+scalar_args = []
+
+op_name = "unknown"
+code = ""
+
+header = """
+#include <algorithm>
+#include <cassert>
+#include <cstdint>
+#include <cstddef>
+#include <cstring>
+#include <cstdio>
+
+#include "ynnpack/base/simd/vec.h"
+
+#if !defined(__has_attribute)
+#define YNN_COMPILER_HAS_ATTRIBUTE(x) 0
+#else
+#define YNN_COMPILER_HAS_ATTRIBUTE(x) __has_attribute(x)
+#endif
+
+#if defined(__GNUC__)
+#define YNN_ALWAYS_INLINE inline __attribute__((__always_inline__))
+#elif defined(_MSC_VER)
+#define YNN_ALWAYS_INLINE __forceinline
+#else
+#define YNN_ALWAYS_INLINE inline
+#endif
+
+#if YNN_COMPILER_HAS_ATTRIBUTE(unused)
+#define YNN_UNUSED __attribute__((unused))
+#else
+#define YNN_UNUSED
+#endif
+
+#define YNN_INTRINSIC YNN_UNUSED YNN_ALWAYS_INLINE
+
+namespace ynn {
+namespace {
+
+YNN_INTRINSIC std::size_t min(std::size_t a, std::size_t b) {
+  return a < b ? a : b;
+}
+
+template <typename T>
+YNN_INTRINSIC T load(T* ptr) {
+    return ptr[0];
+}
+
+template <typename T>
+YNN_INTRINSIC void store(T* ptr, T val) {
+    ptr[0] = val;
+}
+
+template <typename T>
+YNN_INTRINSIC T add(T a, T b) {
+    return a + b;
+}
+
+template <typename T>
+YNN_INTRINSIC T sub(T a, T b) {
+    return a - b;
+}
+
+template <typename T>
+YNN_INTRINSIC T mul(T a, T b) {
+    return a * b;
+}
+
+template <typename T>
+YNN_INTRINSIC T truediv(T a, T b) {
+    return a / b;
+}
+
+template <typename T>
+YNN_INTRINSIC T select_greater_than(T a, T b, T c, T d) {
+    return a > b ? c : d;
+}
+
+template <typename T>
+YNN_INTRINSIC simd::vec<T, 1> select_greater_than(simd::vec<T, 1> a, simd::vec<T, 1> b, simd::vec<T, 1> c, simd::vec<T, 1> d) {
+    return a.v > b.v ? c : d;
+}
+
+template <typename T, size_t N>
+YNN_INTRINSIC simd::vec<T, N> select_greater_than(simd::vec<T, N> a, simd::vec<T, N> b, simd::vec<T, N> c, simd::vec<T, N> d) {
+    return simd::vec<T, N>(select_greater_than(lo(a), lo(b), lo(c), lo(d)),
+                           select_greater_than(hi(a), hi(b), hi(c), hi(d)));
+}
+
+} // namespace
+} // namespace ynn
+
+"""
+
+
+def params(*ps):
+  """Decorator to add scalar parameters to the function."""
+  def actual_decorator(func):
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+      assert len(ps) > 0
+      scalar_args.extend(ps)
+      # fn_args.append((name, ty, 0))
+      for p in ps:
+        args += (Var(p.name, p.ty),)
+      return func(*args, **kwargs)
+
+    return wrapper
+
+  return actual_decorator
+
+
+def buffer(name, ty, is_const=False, broadcast_mode=BroadcastMode.NONE):
+  def actual_decorator(func):
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+      buffer_args.append(Buffer(name, ty, is_const, broadcast_mode))
+      # fn_args.append((name, ty, 1))
+      args += (Var(name, ty),)
+      return func(*args, **kwargs)
+
+    return wrapper
+
+  return actual_decorator
+
+
+def const_buffer(name, ty, broadcast_mode=BroadcastMode.AUTO):
+  return buffer(name, ty, is_const=True, broadcast_mode=broadcast_mode)
+
+
+def struct(type_name, name, fields):
+  def actual_decorator(func):
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+      # fn_args.append((name, type_name, fields))
+      obj = types.SimpleNamespace()
+      for k, v in fields.items():
+        setattr(obj, k, Var(k, v))
+      args += (obj,)
+      return func(*args, **kwargs)
+
+    return wrapper
+
+  return actual_decorator
+
+
+def operator_name(name):
+  def actual_decorator(func):
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+      global op_name
+      op_name = name
+      return func(*args, **kwargs)
+
+    return wrapper
+
+  return actual_decorator
+
+
+class TailStrategy(enum.Enum):
+  SCALAR = 1
+  VECTOR = 2
+
+
+def match(pattern, expr, matches):
+  """Matches an expression against a pattern."""
+  if isinstance(pattern, Op):
+    if (
+        not isinstance(expr, Op)
+        or (pattern.ty is not None and pattern.ty != expr.ty)
+        or pattern.name != expr.name
+        or len(pattern.args) != len(expr.args)
+    ):
+      return False
+  elif isinstance(pattern, Var):
+    if pattern.ty == expr.ty:
+      matches.append(expr)
+      return True
+    else:
+      return False
+  elif isinstance(pattern, WildCard):
+    matches.append(expr)
+    return True
+  elif isinstance(pattern, WildConstant):
+    if isinstance(expr, Constant) and (
+        pattern.value is None or expr.value == pattern.value
+    ):
+      matches.append(expr)
+      return True
+    return False
+  else:
+    assert False
+  for p_arg, e_arg in zip(pattern.args, expr.args):
+    matched = match(p_arg, e_arg, matches)
+    if not matched:
+      return False
+
+  return True
+
+
+def rewrite(pattern, replacement, expr):
+  """Rewrites an expression based on a pattern and result."""
+  matches = []
+  matched = match(pattern, expr, matches)
+  if matched:
+    return Op(expr.ty, replacement.name, matches)
+  else:
+    return None
+
+
+def find_intrinsics(e):
+  """Looks for a known patterns in an expression."""
+  x = WildCard()
+  y = WildCard()
+  z = WildCard()
+
+  if (r := rewrite(x * y + z, multiply_add(x, y, z), e)) is not None:
+    return r
+  if (
+      r := rewrite((x + y) / WildConstant(2), halving_add(x, y), e)
+  ) is not None:
+    return r
+
+  return r
+
+
+class Target:
+
+  def __init__(self):
+    self.indent_level = 0
+    self.patterns = []
+    self.features = []
+    self.vector_bits = 0
+    self.tail_strategy = TailStrategy.SCALAR
+    self.result = ""
+    self.header = header
+    self.simd_ops = {
+        "abs",
+        "min",
+        "max",
+        "load",
+        "store",
+        "round",
+        "floor",
+        "floor_log2",
+        "exp2_round",
+        "ceil",
+        "sqrt",
+        "reinterpret_cast",
+        "cast",
+        "add_sat",
+        "sub_sat",
+        "saturating_cast",
+        "saturating_rounding_cast",
+        "fma",
+        "multiply_add",
+        "select_greater_than",
+        "isnan",
+        "isinf",
+        "isfinite",
+        "select",
+        "~",
+        "erf",
+        "approx_erf",
+        "approx_tanh",
+        "exp",
+        "expm1",
+        "tanh",
+        "log",
+        "log1p",
+    }
+    self.infix_ops = {
+        "add": "+",
+        "sub": "-",
+        "mul": "*",
+        "truediv": "/",
+        "bitwise_and": "&",
+        "bitwise_or": "|",
+        "bitwise_xor": "^",
+        "logical_shift_left": "<<",
+        "equal": "==",
+        "not_equal": "!=",
+        "less": "<",
+        "less_equal": "<=",
+        "greater": ">",
+        "greater_equal": ">=",
+    }
+
+  def indent(self):
+    return "  " * self.indent_level
+
+  def as_buffer(self, arg, buffers):
+    b = None
+    if isinstance(arg, Var):
+      b = next((buf for buf in buffers if buf.name == arg.name), None)
+    return b
+
+  def is_scalar_arg(self, arg):
+    s = None
+    if isinstance(arg, Var):
+      s = next((s for s in scalar_args if s.name == arg.name), None)
+    return s
+
+  def compute_all_features(self, features, implied_features, all_features):
+    for feature in features:
+      if feature in all_features:
+        continue
+      all_features.append(feature)
+
+      if feature in implied_features:
+        self.compute_all_features(
+            implied_features[feature], implied_features, all_features
+        )
+
+  def needs_simd_wrapper(self, op):
+    if op.name in self.simd_ops or op.name in self.infix_ops:
+      return False
+    return True
+
+  def simd_suffix(self, op):
+    if op.name in self.simd_ops or op.name in self.infix_ops:
+      return ""
+    return ".v"
+
+  def legalize_type(self, ty, is_const=False):
+    if ty.lanes == 1:
+      return ty.to_c_decl(is_const)
+    else:
+      if ty.type_class == "int" and ty.size == 2:
+        return f"simd::s2x{ty.lanes}"
+      elif ty.type_class == "int" and ty.size == 4:
+        return f"simd::s4x{ty.lanes}"
+      return f"simd::vec<{ty.scalar().to_c_decl(is_const)}, {ty.lanes}>"
+
+  def legalize_op(self, op):
+    """Legalizes an operator."""
+    if op.name == "broadcast":
+      return (
+          f"simd::broadcast<{op.ty.lanes},"
+          f" {self.legalize_type(op.ty.scalar())}>"
+      )
+    elif op.name == "reinterpret_cast":
+      return (
+          f"bit_cast<{self.legalize_type(op.ty)},"
+          f" {self.legalize_type(op.args[0].ty)}>"
+      )
+    elif op.name == "saturating_cast":
+      return "simd::cast"
+    elif op.name == "saturating_rounding_cast":
+      return "simd::cast"
+    elif op.name == "min" or op.name == "max":
+      return f"simd::{op.name}"
+    return op.name
+
+  def vectorize(self, expr, lanes, cache):
+    if expr in cache:
+      return cache[expr]
+
+    v = None
+    if (
+        isinstance(expr, Var)
+        or isinstance(expr, Constant)
+        or isinstance(expr, Load)
+    ):
+      v = expr.with_lanes(lanes)
+    else:
+      # TODO(vksnk): this needs a proper fix, for example, ops checking the types
+      # and doing broadcasting when neccessary.
+      if expr.name == "broadcast":
+        return expr
+      v = Op(
+          expr.ty.with_lanes(lanes),
+          expr.name,
+          [self.vectorize(i, lanes, cache) for i in expr.args],
+      )
+
+    cache[expr] = v
+    return v
+
+  def pattern_match(self, expr, cache):
+    """Recursively iterate over the expression and try to find patterns to replace."""
+    if expr in cache:
+      return cache[expr]
+
+    if isinstance(expr, Op):
+      for rule in self.patterns:
+        replacement = rewrite(rule.pattern, rule.result, expr)
+        if replacement is not None:
+          mutated_expr = self.pattern_match(replacement, cache)
+          cache[expr] = mutated_expr
+          return mutated_expr
+
+      if expr.name in lowering_funcs:
+        lowered = lowering_funcs[expr.name](*expr.args)
+        mutated = self.pattern_match(lowered, cache)
+        cache[expr] = mutated
+        return mutated
+
+      args = []
+      for arg in expr.args:
+        args.append(self.pattern_match(arg, cache))
+
+      mutated_expr = Op(expr.ty, expr.name, args)
+      cache[expr] = mutated_expr
+
+      return mutated_expr
+    else:
+      return expr
+
+  def lift_constants(self, expr, constants):
+    if isinstance(expr, Op):
+      if all(isinstance(arg, Constant) for arg in expr.args):
+        result = None
+        # Check if we already lifted this constant.
+        for var, lifted in constants.items():
+          if all(
+              lifted_arg.value == arg.value
+              for lifted_arg, arg in zip(lifted.args, expr.args)
+          ):
+            result = var
+            break
+
+        if result is None:
+          name = "c" + str(len(constants))
+          result = Var(name, expr.ty)
+
+          # Lifting it together with the op.
+          constants[result] = expr
+        return result
+      else:
+        for i, arg in enumerate(expr.args):
+          expr.args[i] = self.lift_constants(arg, constants)
+
+    return expr
+
+  def linearize(self, op, ops, values):
+    if isinstance(op, Var):
+      values[op] = op.name
+      return op
+    if isinstance(op, Constant):
+      values[op] = op
+      return op
+
+    if op in values:
+      return values[op]
+
+    flat_op = op
+    if not isinstance(op, Constant) and not isinstance(op, Load):
+      linearized_args = []
+      for i in op.args:
+        linearized_args += [self.linearize(i, ops, values)]
+      flat_op = Op(op.ty, op.name, linearized_args)
+
+    name = "v" + str(len(ops))
+    result = Var(name, flat_op.ty)
+    values[op] = result
+    ops.append((result, flat_op))
+
+    return result
+
+  def begin_function(self, name, args):
+    self.indent_level += 1
+    self.result += "void " + name.lower() + "(\n"
+    args_str = []
+    args_str.append(f"{self.indent()}size_t m, size_t n")
+    if len(args) >= 3:
+      for b in args[:-1]:
+        args_str.append(
+            f"{self.indent()}size_t stride_{b.name}_m, size_t"
+            f" stride_{b.name}_n, const void* __restrict base_{b.name}"
+        )
+    else:
+      args_str.append(
+          f"{self.indent()}size_t stride_{args[0].name}_m, const void*"
+          f" __restrict base_{args[0].name}"
+      )
+
+    args_str.append(
+        f"{self.indent()}size_t stride_{args[-1].name}_m, void* __restrict"
+        f" base_{args[-1].name}"
+    )
+
+    arity = self.get_arity_string(args)
+    args_str.append(f"{self.indent()}const {arity}_params* params")
+    self.result += ",\n".join(args_str)
+    self.result += ") {\n"
+
+  def end_function(self):
+    self.indent_level -= 1
+    self.result += "}\n"
+
+  def begin_loop(
+      self,
+      var,
+      start,
+      index,
+      max_value,
+      increment,
+      emit_loop,
+      buffers,
+      tile_width,
+      prefix_before,
+      prefix_after,
+  ):
+    # Probably bad to rely on specific var name.
+    outer_loop = index == "i"
+    if emit_loop:
+      if outer_loop:
+        self.result += (
+            f"{self.indent()}for (size_t {index} = {start}; {index} <"
+            f" {max_value}; {index} += {increment}) {{\n"
+        )
+        self.indent_level += 1
+      else:
+        self.result += f"{self.indent()}size_t {index} = {max_value};\n"
+        self.result += f"{self.indent()}while ({index} >= {increment}) {{\n"
+        self.indent_level += 1
+        self.result += f"{self.indent()}{index} -= {increment};\n"
+    else:
+      if not outer_loop:
+        self.result += f"{self.indent()}if ({index} != 0) {{\n"
+        self.indent_level += 1
+
+    if outer_loop:
+      for b in buffers:
+        modifier = ""
+        if b.is_const:
+          modifier = "const "
+        self.result += (
+            f"{self.indent()}{modifier}void* {prefix_after}{b.name} ="
+            f" offset_bytes({prefix_before}{b.name}, stride_{b.name}_{var} *"
+            f" {index});\n"
+        )
+
+        # This should've been handled before here.
+        assert b.broadcast_mode != BroadcastMode.SPECIALIZE
+
+        if not b.is_const or b.broadcast_mode == BroadcastMode.NONE:
+          continue
+
+        if b.broadcast_mode == BroadcastMode.LOCAL_VAR and increment > 1:
+          self.result += (
+              f"{self.indent()}size_t stride_{b.name}_m_broadcasted ="
+              f" stride_{b.name}_m;\n"
+          )
+
+        broadcast_op = self.pattern_match(
+            broadcast(Var(b.name, b.ty.with_lanes(1)), tile_width),
+            {},
+        )
+        self.result += (
+            f"{self.indent()}{self.legalize_type(broadcast_op.ty)}"
+            f" {b.name}_broadcasted[{increment}];\n"
+        )
+
+        if b.broadcast_mode == BroadcastMode.LOCAL_VAR:
+          self.result += f"{self.indent()}if (stride_{b.name}_n == 0) {{\n"
+
+          self.indent_level += 1
+          if increment > 1:
+            self.result += (
+                f"{self.indent()}stride_{b.name}_m_broadcasted ="
+                f" {self.vector_bits // 8};\n"
+            )
+
+        for i in range(increment):
+          self.result += (
+              f"{self.indent()}{b.name}_broadcasted[{i}] ="
+              f" {self.legalize_op(broadcast_op)}((("
+              f" {self.legalize_type(b.ty, True)}*)offset_bytes({prefix_after}{b.name},"
+          )
+          if i > 0:
+            self.result += f" min({i}, m - i - 1) * stride_{b.name}_m"
+          else:
+            self.result += " 0"
+          self.result += "))[0]);\n"
+
+        if b.broadcast_mode == BroadcastMode.LOCAL_VAR:
+          self.result += (
+              f"{self.indent()}{prefix_after}{b.name} ="
+              f" &{b.name}_broadcasted[0];\n"
+          )
+
+          self.indent_level -= 1
+          self.result += f"{self.indent()}}}\n"
+
+        self.result += "\n"
+
+  def advance_pointers(self, buffers, var, step):
+    """Emit code to advance pointers."""
+    for b in buffers:
+      stride = ""
+      if b.broadcast_mode == BroadcastMode.NONE:
+        if b.ty.size < 8:
+          self.result += (
+              f"{self.indent()} {b.name} = offset_bytes({b.name},"
+              f" ({step} * {b.ty.size}) / 8);\n"
+          )
+          continue
+        else:
+          stride = str(b.ty.size // 8)
+      elif b.broadcast_mode == BroadcastMode.ALWAYS:
+        stride = "0"
+      else:
+        stride = f"stride_{b.name}_{var}"
+
+      self.result += (
+          f"{self.indent()} {b.name} = offset_bytes({b.name},"
+          f" {stride} * {step});\n"
+      )
+
+  def end_scope(self):
+    self.indent_level -= 1
+    self.result += f"{self.indent()}}}\n"
+
+  def emit_constants(self, constants):
+    for k, v in constants.items():
+      const_type = self.legalize_type(v.ty)
+      self.result += (
+          f"{self.indent()}const {const_type} {k} ="
+          f" {self.legalize_op(v)}({v.args[0]});\n"
+      )
+
+  def emit_scalar_arguments(self, scalars, tile_width):
+    """Emits scalar arguments."""
+
+    if scalars:
+      self.result += f"{self.indent()}assert(params != nullptr);\n"
+
+    for s in scalars:
+      self.result += (
+          f"{self.indent()}const"
+          f" {self.legalize_type(s.ty.with_lanes(tile_width))} {s.name} ="
+          f" {self.legalize_op(broadcast(Constant(s.ty, 0), tile_width))}(reinterpret_cast<const"
+          f" {op_name}_params*>(params)->{s.name});\n"
+      )
+
+  def emit_op(self, i, j, is_rem_width, buffers, constants, tile_width):
+    """Emits a single operation."""
+    op = i[1]
+    self.result += self.indent()
+    result_type = ""
+    if i[0] is not None:
+      if op.name in self.infix_ops or op.name in {"isnan", "isinf", "isfinite"}:
+        result_type = "auto"
+      else:
+        result_type = self.legalize_type(op.ty.with_lanes(tile_width))
+      self.result += f"{result_type} {i[0]}_{j}"
+
+    is_load = isinstance(op, Load)
+    is_store = isinstance(op, Op) and op.name == "store"
+
+    str_args = []
+
+    args = []
+
+    if is_load:
+      # Just for simplicity handle the broadcast here:
+      # if the type of the broadcasting is always replace the load with
+      # the existing broadcast value.
+      b = self.as_buffer(op.index, buffers)
+      if b is not None and b.broadcast_mode == BroadcastMode.ALWAYS:
+        self.result += f" = {b.name}_broadcasted[{j}];\n"
+        return
+      # hack
+      args = [op.index]
+    else:
+      args = op.args
+    for arg in args:
+      b = self.as_buffer(arg, buffers)
+      if b is not None:
+        if is_load and b.ty.size < 8:
+          t = "const int8_t"
+        else:
+          t = self.legalize_type(b.ty, False)
+          if is_load:
+            t = "const " + t
+        row_offset = "0"
+        stride_n = ""
+        if b.broadcast_mode == BroadcastMode.NONE:
+          # If there is no broadcasting for this b we can just use
+          # sizeof(type) instead of the stride.
+          stride_n = str(b.ty.size // 8)
+        else:
+          stride_n = f"stride_{arg.name}_n"
+        if j > 0:
+          # Only add stride if this is not the first row of the tile.
+          if b.is_const and b.broadcast_mode == BroadcastMode.LOCAL_VAR:
+            row_offset = (
+                f"stride_{arg.name}_m_broadcasted * min({j}, m - i - 1)"
+            )
+          else:
+            row_offset = f"stride_{arg.name}_m * min({j}, m - i - 1)"
+        str_args.append(
+            f"({t}*)offset_bytes({arg.name}, {stride_n} * ({row_offset}))"
+        )
+      else:
+        if isinstance(arg, Constant):
+          str_args.append(f"{arg}")
+        elif isinstance(arg, Var) and (
+            arg in constants or (self.is_scalar_arg(arg) is not None)
+        ):
+          str_args.append(f"{arg}{self.simd_suffix(op)}")
+        else:
+          str_args.append(f"{arg}_{j}{self.simd_suffix(op)}")
+
+    if not is_store:
+      self.result += " = "
+
+    mem_op = ""
+    if is_load:
+      mem_op = "simd::load"
+      b = self.as_buffer(op.index, buffers)
+      if b is not None and b.ty.size < 8:
+        byte_lanes = tile_width * b.ty.size // 8
+        if is_rem_width:
+          str_args.append(f"ceil_div<size_t>(j * {b.ty.size}, 8)")
+          str_args.append(f"simd::undef<{byte_lanes}>()")
+        else:
+          str_args.append(f"simd::vec<int8_t, {byte_lanes}>::N")
+      else:
+        if is_rem_width:
+          str_args.append("j")
+          str_args.append(f"simd::undef<{op.ty.lanes}>()")
+        else:
+          str_args.append(f"{self.legalize_type(op.ty)}::N")
+    elif is_store:
+      mem_op = "simd::store"
+      if is_rem_width:
+        str_args.append("j")
+    elif op.name in self.infix_ops:
+      pass
+    else:
+      if (
+          op.name == "cast"
+          or op.name == "saturating_cast"
+          or op.name == "saturating_rounding_cast"
+      ):
+        str_args.append(f"{self.legalize_type(op.ty.scalar())}{{}}")
+      mem_op = self.legalize_op(op)
+
+    b = None
+    if is_load:
+      b = self.as_buffer(op.index, buffers)
+
+    if is_load and b is not None and b.ty.size < 8:
+      byte_lanes = tile_width * b.ty.size // 8
+      self.result += (
+          f"bit_cast<{result_type}, simd::vec<int8_t,"
+          f" {byte_lanes}>>({mem_op}({', '.join(str_args)}));\n"
+      )
+    elif op.name in self.infix_ops:
+      self.result += f"{str_args[0]} {self.infix_ops[op.name]} {str_args[1]};\n"
+    elif self.needs_simd_wrapper(op):
+      self.result += f"{result_type}({mem_op}({', '.join(str_args)}));\n"
+    else:
+      self.result += f"{mem_op}({', '.join(str_args)});\n"
+
+  def emit_inner_loop_body(
+      self,
+      ops,
+      rows_num,
+      is_rem_width,
+      tile_width,
+      buffers,
+      constants,
+      step,
+  ):
+    """Emits the body of the innermost loop."""
+    for op in ops:
+      for j in range(rows_num):
+        self.emit_op(op, j, is_rem_width, buffers, constants, tile_width)
+
+    if not is_rem_width:
+      self.advance_pointers(buffers, "n", step)
+
+  def emit_body(
+      self,
+      ops,
+      constants,
+      buffers,
+      tile_height,
+      tile_width,
+  ):
+    """Emits the main body of the generated kernel function."""
+    for is_rem_height in [False]:  # , True] if tile_height > 1 else [False]:
+      self.begin_loop(
+          "m",
+          "0" if not is_rem_height else f"m - m % {tile_height}",
+          "i",
+          "m"  # f"m - m % {tile_height}"
+          if not is_rem_height and tile_height > 1
+          else "m",
+          tile_height if not is_rem_height else 1,
+          True,
+          buffers,
+          tile_width,
+          "base_",
+          "",
+      )
+
+      rows_num = tile_height if not is_rem_height else 1
+      for is_rem_width in [False, True] if tile_width > 1 else [False]:
+        emit_loop = (
+            not is_rem_width or self.tail_strategy == TailStrategy.SCALAR
+        )
+        # if not is_rem_width:
+        step = tile_width if not is_rem_width else 1
+        self.begin_loop(
+            "n",
+            "0",
+            "j",
+            "n",
+            step,
+            emit_loop,
+            buffers,
+            tile_width,
+            "",
+            "",
+        )
+
+        self.emit_inner_loop_body(
+            ops,
+            rows_num,
+            is_rem_width,
+            tile_width,
+            buffers,
+            constants,
+            step,
+        )
+
+        self.end_scope()
+
+      self.end_scope()
+
+  def emit_asserts(self, buffers):
+    """Emit asserts to check that strides match broadcasting modes."""
+    for b in buffers:
+      if not b.is_const:
+        continue
+
+      assert_body = ""
+      if b.broadcast_mode == BroadcastMode.ALWAYS:
+        assert_body = f"stride_{b.name}_n == 0"
+      elif b.broadcast_mode == BroadcastMode.NONE:
+        assert_body = f"stride_{b.name}_n == {b.ty.size // 8}"
+      else:
+        assert_body = (
+            f"stride_{b.name}_n == 0 || stride_{b.name}_n == {b.ty.size // 8}"
+        )
+      self.result += f"{self.indent()}assert({assert_body} || n == 1);\n"
+
+  def handle_specialize(
+      self,
+      ops,
+      constants,
+      buffers,
+      tile_height,
+      tile_width,
+  ):
+    """Handles broadcast specializations of the kernel."""
+    for i, b in enumerate(buffers):
+      if b.is_const and b.broadcast_mode == BroadcastMode.SPECIALIZE:
+        # If the buffer has SPECIALIZE type of the broadcast we produce two
+        # branches of the code to handle cases with and without broadcasting.
+        new_buffers = copy.deepcopy(buffers)
+        self.result += f"{self.indent()}if (stride_{b.name}_n == 0) {{\n"
+        self.indent_level += 1
+        new_buffers[i].broadcast_mode = BroadcastMode.ALWAYS
+
+        self.handle_specialize(
+            ops,
+            constants,
+            new_buffers,
+            tile_height,
+            tile_width,
+        )
+
+        self.indent_level -= 1
+        self.result += f"{self.indent()}}} else {{\n"
+        self.indent_level += 1
+        new_buffers[i].broadcast_mode = BroadcastMode.NONE
+
+        self.handle_specialize(
+            ops,
+            constants,
+            new_buffers,
+            tile_height,
+            tile_width,
+        )
+
+        self.indent_level -= 1
+
+        self.result += f"{self.indent()}}}\n"
+        return
+
+    # Just produce body for every other type of broadcasting.
+    self.emit_body(
+        ops,
+        constants,
+        buffers,
+        tile_height,
+        tile_width,
+    )
+
+  def compile(self, name, buffers, func, tile_shapes):
+    """Generates a function for a range of tile sizes."""
+    assert (
+        func.value.ty == func.to.ty
+    ), "Mismatching types of the output value and buffer."
+
+    ast = copy.deepcopy(func.value)
+
+    for tile in tile_shapes:
+      tile_width = tile[1]
+      tile_height = tile[0]
+
+      ast = self.vectorize(ast, tile_width, {})
+      ast = self.pattern_match(ast, {})
+
+      constants = {}
+      ast = self.lift_constants(ast, constants)
+
+      values = {}
+      ops = []
+      self.linearize(ast, ops, values)
+
+      ops.append((
+          None,
+          Op(
+              func.value.ty.with_lanes(tile_width),
+              "store",
+              [func.to, values[ast]],
+          ),
+      ))
+
+      self.begin_function(
+          name,
+          buffers,
+      )
+
+      if len(buffers) > 2:
+        self.emit_asserts(buffers)
+
+      self.emit_scalar_arguments(scalar_args, tile_width)
+      self.emit_constants(constants)
+
+      self.handle_specialize(
+          ops,
+          constants,
+          buffer_args,
+          tile_height,
+          tile_width,
+      )
+
+      self.end_function()
+      self.result += "\n"
+
+      return self.result
+
+  def arch_flags(self):
+    return "|".join(["arch_flag::" + i.lower() for i in self.features])
+
+  def arch_string(self):
+    return "_".join([i.lower() for i in self.features])
+
+  def get_arity_string(self, buffers):
+    if len(buffers) == 4:
+      return "ternary"
+    elif len(buffers) == 3:
+      return "binary"
+    elif len(buffers) == 2:
+      return "unary"
+    else:
+      assert False, "Unsupported number of buffers."
+
+  def compile_function(self, name, fn, tile_shapes, flags):
+    """Compile a function for a set of tile shapes."""
+    self.result = ""
+    buffer_args.clear()
+    scalar_args.clear()
+    global op_name
+    op_name = "unknown"
+    result = fn()
+
+    for b in buffer_args:
+      if b.broadcast_mode == BroadcastMode.AUTO:
+        if len(buffer_args) == 2:
+          b.broadcast_mode = BroadcastMode.NONE
+        else:
+          b.broadcast_mode = BroadcastMode.SPECIALIZE
+
+    func_name = (
+        name
+        + "_"
+        + self.arch_string()
+    )
+
+    src = '#include "ynnpack/kernels/'
+    arity = self.get_arity_string(buffer_args)
+    src += f"{arity}/{arity}.h"
+    src += '"\n'
+    src += "namespace ynn {\n"
+    src += self.compile(func_name, buffer_args, result, tile_shapes)
+    src += "} // namespace ynn\n"
+
+    tps = []
+    for b in buffer_args:
+      tps.append(str(b.ty))
+    types = ", ".join(tps)
+
+    inc = (
+        f"YNN_ELEMENTWISE_KERNEL({self.arch_flags()}, {func_name}, {op_name},"
+        f" {flags}, {types})\n"
+    )
+
+    return src, inc

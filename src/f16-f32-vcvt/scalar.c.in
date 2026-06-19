@@ -1,0 +1,110 @@
+// Copyright 2021 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert BATCH_TILE >= 1
+$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+#include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
+
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/vcvt.h"
+
+
+void xnn_f16_f32_vcvt_ukernel__scalar_u${BATCH_TILE}(
+    size_t batch,
+    const xnn_float16* input,
+    float* output,
+    const void* params)
+{
+  assert(batch != 0);
+  assert(batch % sizeof(uint16_t) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
+
+  const uint32_t vsign_mask = 0x80000000;
+  const uint32_t vexp_offset = 0x70000000;
+  const float vexp_scale = 0x1.0p-112f;
+  const uint32_t vmagic_mask = 0x3F000000;
+  const float vmagic_bias = 0.5f;
+  const uint32_t vdenorm_cutoff = 0x08000000;
+
+  const uint16_t* i = (const uint16_t*) input;
+  uint32_t* o = (uint32_t*) output;
+  $if BATCH_TILE > 1:
+    for (; batch >= ${BATCH_TILE} * sizeof(uint16_t); batch -= ${BATCH_TILE} * sizeof(uint16_t)) {
+      $for N in range(BATCH_TILE):
+        const uint16_t vh${N} = i[${N}];
+      i += ${BATCH_TILE};
+
+      $for N in range(BATCH_TILE):
+        const uint32_t vw${N} = (uint32_t) vh${N} << 16;
+
+      $for N in range(BATCH_TILE):
+        const uint32_t vsign${N} = vw${N} & vsign_mask;
+
+      $for N in range(BATCH_TILE):
+        const uint32_t v2w${N} = vw${N} + vw${N};
+
+      $for N in range(BATCH_TILE):
+        const uint32_t vnorm${N} = float_as_uint32(uint32_as_float((v2w${N} >> 4) + vexp_offset) * vexp_scale);
+
+      $for N in range(BATCH_TILE):
+        const uint32_t vdenorm${N} = float_as_uint32(uint32_as_float((v2w${N} >> 17) | vmagic_mask) - vmagic_bias);
+
+      $for N in range(BATCH_TILE):
+        const uint32_t vf${N} = vsign${N} | (XNN_UNPREDICTABLE(v2w${N} < vdenorm_cutoff) ? vdenorm${N} : vnorm${N});
+
+      $for N in range(BATCH_TILE):
+        o[${N}] = vf${N};
+      o += ${BATCH_TILE};
+    }
+  $if BATCH_TILE == 1:
+    do {
+      const uint16_t vh = *i++;
+
+      const uint32_t vw = (uint32_t) vh << 16;
+      const uint32_t vsign = vw & vsign_mask;
+      const uint32_t v2w = vw + vw;
+      const uint32_t vnorm = float_as_uint32(uint32_as_float((v2w >> 4) + vexp_offset) * vexp_scale);
+      const uint32_t vdenorm = float_as_uint32(uint32_as_float((v2w >> 17) | vmagic_mask) - vmagic_bias);
+      const uint32_t vf = vsign | (XNN_UNPREDICTABLE(v2w < vdenorm_cutoff) ? vdenorm : vnorm);
+
+      *o++ = vf;
+
+      batch -= sizeof(uint16_t);
+    } while (batch != 0);
+  $elif BATCH_TILE == 2:
+    if XNN_UNLIKELY(batch != 0) {
+      const uint16_t vh = *i;
+
+      const uint32_t vw = (uint32_t) vh << 16;
+      const uint32_t vsign = vw & vsign_mask;
+      const uint32_t v2w = vw + vw;
+      const uint32_t vnorm = float_as_uint32(uint32_as_float((v2w >> 4) + vexp_offset) * vexp_scale);
+      const uint32_t vdenorm = float_as_uint32(uint32_as_float((v2w >> 17) | vmagic_mask) - vmagic_bias);
+      const uint32_t vf = vsign | (XNN_UNPREDICTABLE(v2w < vdenorm_cutoff) ? vdenorm : vnorm);
+
+      *o = vf;
+    }
+  $else:
+    if XNN_UNLIKELY(batch != 0) {
+      do {
+        const uint16_t vh = *i++;
+
+        const uint32_t vw = (uint32_t) vh << 16;
+        const uint32_t vsign = vw & vsign_mask;
+        const uint32_t v2w = vw + vw;
+        const uint32_t vnorm = float_as_uint32(uint32_as_float((v2w >> 4) + vexp_offset) * vexp_scale);
+        const uint32_t vdenorm = float_as_uint32(uint32_as_float((v2w >> 17) | vmagic_mask) - vmagic_bias);
+        const uint32_t vf = vsign | (XNN_UNPREDICTABLE(v2w < vdenorm_cutoff) ? vdenorm : vnorm);
+
+        *o++ = vf;
+
+        batch -= sizeof(uint16_t);
+      } while (batch != 0);
+    }
+}

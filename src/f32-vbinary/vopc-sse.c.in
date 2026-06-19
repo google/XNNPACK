@@ -1,0 +1,135 @@
+// Copyright 2019 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert BATCH_TILE % 4 == 0
+$assert BATCH_TILE >= 4
+$SIMD_TILE = BATCH_TILE // 4
+$assert OP in ["ADD", "DIV", "RDIV", "MAX", "MIN", "MUL", "SUB", "RSUB", "SQRDIFF", "PRELU", "RPRELU"]
+#include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
+
+$SSE_HEADER = {1: "xmmintrin.h", 2: "emmintrin.h", 4: "smmintrin.h"}[SSE]
+#include <${SSE_HEADER}>
+
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/microparams.h"
+#include "src/xnnpack/vbinary.h"
+
+
+$_MM_OP_PS = {
+$  "ADD": lambda x: "_mm_add_ps(%s, vb)" % x,
+$  "DIV": lambda x: "_mm_div_ps(%s, vb)" % x,
+$  "RDIV": lambda x: "_mm_div_ps(vb, %s)" % x,
+$  "MAX": lambda x: "_mm_max_ps(%s, vb)" % x,
+$  "MIN": lambda x: "_mm_min_ps(%s, vb)" % x,
+$  "MUL": lambda x: "_mm_mul_ps(%s, vb)" % x,
+$  "SUB": lambda x: "_mm_sub_ps(%s, vb)" % x,
+$  "RSUB": lambda x: "_mm_sub_ps(vb, %s)" % x,
+$  "SQRDIFF": lambda x: "_mm_sub_ps(%s, vb)" % x,
+$  "PRELU": lambda x: "_mm_mul_ps(%s, vb)" % x,
+$  "RPRELU": lambda x: "_mm_mul_ps(%s, vb)" % x,
+$}[OP]
+$ISA = {1: "sse", 2: "sse2", 4: "sse41"}[SSE]
+void xnn_f32_v${OP.lower()}c_ukernel__${ISA}_u${BATCH_TILE}(
+    size_t batch,
+    const float* input_a,
+    const float* input_b,
+    float* output,
+    const struct xnn_f32_default_params* restrict params) XNN_OOB_READS
+{
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input_a != NULL);
+  assert(input_b != NULL);
+  assert(output != NULL);
+
+  const __m128 vb = _mm_load1_ps(input_b);
+
+  $if OP == "RPRELU":
+    $if SSE == 2:
+      const __m128 vmask = _mm_castsi128_ps(_mm_cmpgt_epi32(_mm_setzero_si128(), _mm_castps_si128(vb)));
+  $if BATCH_TILE > 4:
+    for (; batch >= ${BATCH_TILE} * sizeof(float); batch -= ${BATCH_TILE} * sizeof(float)) {
+      $for N in range(SIMD_TILE):
+        const __m128 va${N} = _mm_loadu_ps(input_a + ${N * 4});
+      input_a += ${BATCH_TILE};
+
+      $for N in range(SIMD_TILE):
+        __m128 vacc${N} = ${_MM_OP_PS("va" + str(N))};
+
+      $if OP == "SQRDIFF":
+        $for N in range(SIMD_TILE):
+          vacc${N} = _mm_mul_ps(vacc${N}, vacc${N});
+      $elif OP == "PRELU":
+        $for N in range(SIMD_TILE):
+          $if SSE == 2:
+            const __m128 vmask${N} = _mm_castsi128_ps(_mm_cmpgt_epi32(_mm_setzero_si128(), _mm_castps_si128(va${N})));
+
+        $for N in range(SIMD_TILE):
+          $if SSE == 2:
+            vacc${N} = _mm_or_ps(_mm_and_ps(vacc${N}, vmask${N}), _mm_andnot_ps(vmask${N}, va${N}));
+          $elif SSE == 4:
+            vacc${N} = _mm_blendv_ps(va${N}, vacc${N}, va${N});
+      $elif OP == "RPRELU":
+        $for N in range(SIMD_TILE):
+          $if SSE == 2:
+            vacc${N} = _mm_or_ps(_mm_and_ps(vacc${N}, vmask), _mm_andnot_ps(vmask, vb));
+          $elif SSE == 4:
+            vacc${N} = _mm_blendv_ps(vb, vacc${N}, vb);
+
+      $for N in range(SIMD_TILE):
+        _mm_storeu_ps(output + ${N * 4}, vacc${N});
+      output += ${BATCH_TILE};
+    }
+  for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
+    const __m128 va = _mm_loadu_ps(input_a);
+    input_a += 4;
+
+    __m128 vacc = ${_MM_OP_PS("va")};
+    $if OP == "SQRDIFF":
+      vacc = _mm_mul_ps(vacc, vacc);
+    $elif OP == "PRELU":
+      $if SSE == 2:
+        const __m128 vmask = _mm_castsi128_ps(_mm_cmpgt_epi32(_mm_setzero_si128(), _mm_castps_si128(va)));
+        vacc = _mm_or_ps(_mm_and_ps(vacc, vmask), _mm_andnot_ps(vmask, va));
+      $elif SSE == 4:
+        vacc = _mm_blendv_ps(va, vacc, va);
+    $elif OP == "RPRELU":
+      $if SSE == 2:
+        vacc = _mm_or_ps(_mm_and_ps(vacc, vmask), _mm_andnot_ps(vmask, vb));
+      $elif SSE == 4:
+        vacc = _mm_blendv_ps(vb, vacc, vb);
+
+    _mm_storeu_ps(output, vacc);
+    output += 4;
+  }
+  if XNN_UNLIKELY(batch != 0) {
+    const __m128 va = _mm_loadu_ps(input_a);
+
+    __m128 vacc = ${_MM_OP_PS("va")};
+    $if OP == "SQRDIFF":
+      vacc = _mm_mul_ps(vacc, vacc);
+    $elif OP == "PRELU":
+      $if SSE == 2:
+        const __m128 vmask = _mm_castsi128_ps(_mm_cmpgt_epi32(_mm_setzero_si128(), _mm_castps_si128(va)));
+        vacc = _mm_or_ps(_mm_and_ps(vacc, vmask), _mm_andnot_ps(vmask, va));
+      $elif SSE == 4:
+        vacc = _mm_blendv_ps(va, vacc, va);
+    $elif OP == "RPRELU":
+      $if SSE == 2:
+        vacc = _mm_or_ps(_mm_and_ps(vacc, vmask), _mm_andnot_ps(vmask, vb));
+      $elif SSE == 4:
+        vacc = _mm_blendv_ps(vb, vacc, vb);
+    if (batch & (2 * sizeof(float))) {
+      _mm_storel_pi((__m64*) output, vacc);
+      vacc = _mm_movehl_ps(vacc, vacc);
+      output += 2;
+    }
+    if (batch & (1 * sizeof(float))) {
+      _mm_store_ss(output, vacc);
+    }
+  }
+}

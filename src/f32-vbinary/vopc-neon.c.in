@@ -1,0 +1,110 @@
+// Copyright 2019 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert BATCH_TILE % 4 == 0
+$assert BATCH_TILE >= 4
+$SIMD_TILE = BATCH_TILE // 4
+$assert OP in ["ADD", "DIV", "RDIV", "MAX", "MIN", "MUL", "SUB", "RSUB", "SQRDIFF", "PRELU", "RPRELU"]
+#include <arm_neon.h>
+#include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
+
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/microparams.h"
+#include "src/xnnpack/vbinary.h"
+
+
+$VOPQ_F32 = {
+$  "ADD": lambda x: "vaddq_f32(%s, vb)" % x,
+$  "DIV": lambda x: "vdivq_f32(%s, vb)" % x,
+$  "RDIV": lambda x: "vdivq_f32(vb, %s)" % x,
+$  "MAX": lambda x: "vmaxq_f32(%s, vb)" % x,
+$  "MIN": lambda x: "vminq_f32(%s, vb)" % x,
+$  "MUL": lambda x: "vmulq_f32(%s, vb)" % x,
+$  "SUB": lambda x: "vsubq_f32(%s, vb)" % x,
+$  "RSUB": lambda x: "vsubq_f32(vb, %s)" % x,
+$  "SQRDIFF": lambda x: "vsubq_f32(%s, vb)" % x,
+$  "PRELU": lambda x: "vmulq_f32(%s, vb)" % x,
+$  "RPRELU": lambda x: "vmulq_f32(%s, vb)" % x,
+$}[OP]
+$ISA = "aarch64_neon" if OP in ["DIV", "RDIV"] else "neon"
+void xnn_f32_v${OP.lower()}c_ukernel__${ISA}_u${BATCH_TILE}(
+    size_t batch,
+    const float* input_a,
+    const float* input_b,
+    float* output,
+    const struct xnn_f32_default_params* restrict params) XNN_OOB_READS
+{
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input_a != NULL);
+  assert(input_b != NULL);
+  assert(output != NULL);
+
+  const float32x4_t vb = vld1q_dup_f32(input_b);
+
+  $if OP == "RPRELU":
+    const uint32x4_t vm = vcltq_s32(vreinterpretq_s32_f32(vb), vmovq_n_s32(0));
+  $if BATCH_TILE > 4:
+    for (; batch >= ${BATCH_TILE} * sizeof(float); batch -= ${BATCH_TILE} * sizeof(float)) {
+      $for N in range(SIMD_TILE):
+        const float32x4_t va${N} = vld1q_f32(input_a); input_a += 4;
+
+      $for N in range(SIMD_TILE):
+        float32x4_t vacc${N} = ${VOPQ_F32("va" + str(N))};
+
+      $if OP == "SQRDIFF":
+        $for N in range(SIMD_TILE):
+          vacc${N} = vmulq_f32(vacc${N}, vacc${N});
+      $elif OP == "PRELU":
+        $for N in range(SIMD_TILE):
+          const uint32x4_t vm${N} = vcltq_s32(vreinterpretq_s32_f32(va${N}), vmovq_n_s32(0));
+
+        $for N in range(SIMD_TILE):
+          vacc${N} = vbslq_f32(vm${N}, vacc${N}, va${N});
+      $elif OP == "RPRELU":
+        $for N in range(SIMD_TILE):
+          vacc${N} = vbslq_f32(vm, vacc${N}, vb);
+
+      $for N in range(SIMD_TILE):
+        vst1q_f32(output, vacc${N}); output += 4;
+    }
+  for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
+    const float32x4_t va = vld1q_f32(input_a); input_a += 4;
+
+    float32x4_t vacc = ${VOPQ_F32("va")};
+    $if OP == "SQRDIFF":
+      vacc = vmulq_f32(vacc, vacc);
+    $elif OP == "PRELU":
+      const uint32x4_t vm = vcltq_s32(vreinterpretq_s32_f32(va), vmovq_n_s32(0));
+      vacc = vbslq_f32(vm, vacc, va);
+    $elif OP == "RPRELU":
+      vacc = vbslq_f32(vm, vacc, vb);
+
+    vst1q_f32(output, vacc); output += 4;
+  }
+  if XNN_UNLIKELY(batch != 0) {
+    const float32x4_t va = vld1q_f32(input_a);
+
+    float32x4_t vacc = ${VOPQ_F32("va")};
+    $if OP == "SQRDIFF":
+      vacc = vmulq_f32(vacc, vacc);
+    $elif OP == "PRELU":
+      const uint32x4_t vm = vcltq_s32(vreinterpretq_s32_f32(va), vmovq_n_s32(0));
+      vacc = vbslq_f32(vm, vacc, va);
+    $elif OP == "RPRELU":
+      vacc = vbslq_f32(vm, vacc, vb);
+
+    float32x2_t vacc_lo = vget_low_f32(vacc);
+    if (batch & (2 * sizeof(float))) {
+      vst1_f32(output, vacc_lo); output += 2;
+      vacc_lo = vget_high_f32(vacc);
+    }
+    if (batch & (1 * sizeof(float))) {
+      vst1_lane_f32(output, vacc_lo, 0);
+    }
+  }
+}

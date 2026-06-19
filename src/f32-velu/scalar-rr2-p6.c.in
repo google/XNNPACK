@@ -1,0 +1,256 @@
+// Copyright 2020 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert BATCH_TILE >= 1
+#include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
+
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/microparams.h"
+#include "src/xnnpack/vunary.h"
+
+
+void xnn_f32_velu_ukernel__${"wasm" if WASM else "scalar"}_rr2_p6_u${BATCH_TILE}(
+    size_t batch,
+    const float* input,
+    float* output,
+    const struct xnn_f32_elu_params* restrict params)
+{
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
+
+  const float vsat_cutoff = -0x1.154246p+4f;
+  const float vmagic_bias = 0x1.8000FEp23f;
+  const float vlog2e = 0x1.715476p+0f;
+  const float vminus_ln2_hi = -0x1.62E440p-1f;
+  const float vminus_ln2_lo = 0x1.0105C6p-21f;
+  const float vc6 = 0x1.6b7338p-10f;
+  const float vc5 = 0x1.12278Ep-7f;
+  const float vc4 = 0x1.555716p-5f;
+  const float vc3 = 0x1.5554B0p-3f;
+  const float vc2 = 0x1.FFFFFEp-2f;
+  const float vone = 1.0f;
+
+  const float vprescale = params->scalar.prescale;
+  const float valpha = params->scalar.alpha;
+  const float vbeta = params->scalar.beta;
+
+  $if BATCH_TILE > 1:
+    for (; batch >= ${BATCH_TILE} * sizeof(float); batch -= ${BATCH_TILE} * sizeof(float)) {
+      $for N in range(BATCH_TILE):
+        float vx${N} = input[${N}];
+      input += ${BATCH_TILE};
+
+      $for N in range(BATCH_TILE):
+        $if WASM:
+          const float vz${N} = __builtin_wasm_min_f32(__builtin_wasm_max_f32(vx${N} * vprescale, vsat_cutoff), 0.0f);
+        $else:
+          const float vz${N} = vx${N} * vprescale;
+
+      $for N in range(BATCH_TILE):
+        float vn${N} = vz${N} * vlog2e + vmagic_bias;
+
+      $for N in range(BATCH_TILE):
+        float vs${N} = uint32_as_float(float_as_uint32(vn${N}) << 23);
+        vn${N} -= vmagic_bias;
+
+      $for N in range(BATCH_TILE):
+        float vt${N} = vn${N} * vminus_ln2_hi + vz${N};
+
+      $for N in range(BATCH_TILE):
+        vt${N} = vn${N} * vminus_ln2_lo + vt${N};
+
+      $if not WASM:
+        $for N in range(BATCH_TILE):
+          if XNN_UNPREDICTABLE(vz${N} <= vsat_cutoff) {
+            vs${N} = 0.0f;
+            vt${N} = 0.0f;
+          }
+
+      $for N in range(BATCH_TILE):
+        float vp${N} = vc6 * vt${N} + vc5;
+
+      $for N in range(BATCH_TILE):
+        vp${N} = vp${N} * vt${N} + vc4;
+
+      $for N in range(BATCH_TILE):
+        vp${N} = vp${N} * vt${N} + vc3;
+
+      $for N in range(BATCH_TILE):
+        vp${N} = vp${N} * vt${N} + vc2;
+
+      $for N in range(BATCH_TILE):
+        vp${N} *= vt${N};
+
+      $for N in range(BATCH_TILE):
+        vt${N} *= vs${N};
+        vs${N} -= vone;
+
+      $for N in range(BATCH_TILE):
+        vp${N} = vp${N} * vt${N} + vt${N};
+
+      $for N in range(BATCH_TILE):
+        const float ve${N} = (vp${N} + vs${N}) * valpha;
+        $if WASM:
+          float vy${N} = __builtin_wasm_max_f32(vx${N} * vbeta, 0.0f);
+        $else:
+          float vy${N} = vx${N} * vbeta;
+
+      $if WASM:
+        $for N in range(BATCH_TILE):
+          vy${N} += __builtin_wasm_min_f32(ve${N}, 0.0f);
+      $else:
+        $for N in range(BATCH_TILE):
+          if XNN_UNPREDICTABLE(vx${N} < 0.0f) {
+            vy${N} = ve${N};
+          }
+
+      $for N in range(BATCH_TILE):
+        output[${N}] = vy${N};
+      output += ${BATCH_TILE};
+    }
+  $if BATCH_TILE == 1:
+    do {
+      float vx = *input++;
+
+      $if WASM:
+        const float vz = __builtin_wasm_min_f32(__builtin_wasm_max_f32(vx * vprescale, vsat_cutoff), 0.0f);
+      $else:
+        const float vz = vx * vprescale;
+
+      float vn = vz * vlog2e + vmagic_bias;
+      float vs = uint32_as_float(float_as_uint32(vn) << 23);
+      vn -= vmagic_bias;
+
+      float vt = vn * vminus_ln2_hi + vz;
+      vt = vn * vminus_ln2_lo + vt;
+
+      $if not WASM:
+        if XNN_UNPREDICTABLE(vz <= vsat_cutoff) {
+          vs = 0.0f;
+          vt = 0.0f;
+        }
+
+      float vp = vc6 * vt + vc5;
+      vp = vp * vt + vc4;
+      vp = vp * vt + vc3;
+      vp = vp * vt + vc2;
+      vp *= vt;
+
+      vt *= vs;
+      vs -= vone;
+      vp = vp * vt + vt;
+      const float ve = (vp + vs) * valpha;
+
+      $if WASM:
+        float vy = __builtin_wasm_max_f32(vx * vbeta, 0.0f);
+        vy += __builtin_wasm_min_f32(ve, 0.0f);
+      $else:
+        float vy = vx * vbeta;
+        if XNN_UNPREDICTABLE(vx < 0.0f) {
+          vy = ve;
+        }
+
+      *output++ = vy;
+
+      batch -= sizeof(float);
+    } while (batch != 0);
+  $elif BATCH_TILE == 2:
+    if XNN_UNLIKELY(batch != 0) {
+      float vx = *input;
+
+      $if WASM:
+        const float vz = __builtin_wasm_min_f32(__builtin_wasm_max_f32(vx * vprescale, vsat_cutoff), 0.0f);
+      $else:
+        const float vz = vx * vprescale;
+
+      float vn = vz * vlog2e + vmagic_bias;
+      float vs = uint32_as_float(float_as_uint32(vn) << 23);
+      vn -= vmagic_bias;
+
+      float vt = vn * vminus_ln2_hi + vz;
+      vt = vn * vminus_ln2_lo + vt;
+
+      $if not WASM:
+        if XNN_UNPREDICTABLE(vz <= vsat_cutoff) {
+          vs = 0.0f;
+          vt = 0.0f;
+        }
+
+      float vp = vc6 * vt + vc5;
+      vp = vp * vt + vc4;
+      vp = vp * vt + vc3;
+      vp = vp * vt + vc2;
+      vp *= vt;
+
+      vt *= vs;
+      vs -= vone;
+      vp = vp * vt + vt;
+      const float ve = (vp + vs) * valpha;
+
+      $if WASM:
+        float vy = __builtin_wasm_max_f32(vx * vbeta, 0.0f);
+        vy += __builtin_wasm_min_f32(ve, 0.0f);
+      $else:
+        float vy = vx * vbeta;
+        if XNN_UNPREDICTABLE(vx < 0.0f) {
+          vy = ve;
+        }
+
+      *output = vy;
+    }
+  $else:
+    if XNN_UNLIKELY(batch != 0) {
+      do {
+        float vx = *input++;
+
+        $if WASM:
+          const float vz = __builtin_wasm_min_f32(__builtin_wasm_max_f32(vx * vprescale, vsat_cutoff), 0.0f);
+        $else:
+          const float vz = vx * vprescale;
+
+        float vn = vz * vlog2e + vmagic_bias;
+        float vs = uint32_as_float(float_as_uint32(vn) << 23);
+        vn -= vmagic_bias;
+
+        float vt = vn * vminus_ln2_hi + vz;
+        vt = vn * vminus_ln2_lo + vt;
+
+        $if not WASM:
+          if XNN_UNPREDICTABLE(vz <= vsat_cutoff) {
+            vs = 0.0f;
+            vt = 0.0f;
+          }
+
+        float vp = vc6 * vt + vc5;
+        vp = vp * vt + vc4;
+        vp = vp * vt + vc3;
+        vp = vp * vt + vc2;
+        vp *= vt;
+
+        vt *= vs;
+        vs -= vone;
+        vp = vp * vt + vt;
+        const float ve = (vp + vs) * valpha;
+
+        $if WASM:
+          float vy = __builtin_wasm_max_f32(vx * vbeta, 0.0f);
+          vy += __builtin_wasm_min_f32(ve, 0.0f);
+        $else:
+          float vy = vx * vbeta;
+          if XNN_UNPREDICTABLE(vx < 0.0f) {
+            vy = ve;
+          }
+
+        *output++ = vy;
+
+        batch -= sizeof(float);
+      } while (batch != 0);
+    }
+}

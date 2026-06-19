@@ -1,0 +1,112 @@
+// Copyright 2026 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert LMUL in [1, 2, 4, 8]
+$assert(DATATYPE in ["f32", "f16", "u8", "s8"])
+#include <assert.h>
+#include "src/xnnpack/maxpool.h"
+#include <riscv_vector.h>
+
+$CTYPE = {"f32": "float", "f16": "xnn_float16", "u8": "uint8_t", "s8": "int8_t"}[DATATYPE]
+$VTYPE = {"f32": "vfloat32", "f16": "vfloat16", "u8": "vuint8", "s8": "vint8"}[DATATYPE]
+$VLOAD = {"f32": "__riscv_vle32_v_f32", "f16": "__riscv_vle16_v_f16", "u8": "__riscv_vle8_v_u8", "s8": "__riscv_vle8_v_i8"}[DATATYPE]
+$VSTORE = {"f32": "__riscv_vse32_v_f32", "f16": "__riscv_vse16_v_f16", "u8": "__riscv_vse8_v_u8", "s8": "__riscv_vse8_v_i8"}[DATATYPE]
+$VSETVL = {"f32": "__riscv_vsetvl_e32", "f16": "__riscv_vsetvl_e16", "u8": "__riscv_vsetvl_e8", "s8": "__riscv_vsetvl_e8"}[DATATYPE]
+$VMAX = {"f32": "__riscv_vfmax", "f16": "__riscv_vfmax", "u8": "__riscv_vmaxu", "s8": "__riscv_vmax"}[DATATYPE]
+$VMIN = {"f32": "__riscv_vfmin", "f16": "__riscv_vfmin", "u8": "__riscv_vminu", "s8": "__riscv_vmin"}[DATATYPE]
+$ISA = "fp16arith" if DATATYPE == "f16" else ""
+
+void xnn_${DATATYPE}_maxpool_minmax_ukernel_9p__rvv${ISA}_u${LMUL}v(
+    size_t output_pixels,
+    size_t kernel_elements,
+    size_t channels,
+    const ${CTYPE}** input,
+    size_t input_offset,
+    size_t input_pixel_stride,
+    ${CTYPE}* output,
+    size_t input_increment,
+    size_t output_increment,
+    const struct xnn_${DATATYPE}_minmax_params* restrict params)
+{
+  assert(output_pixels != 0);
+  assert(kernel_elements != 0);
+  assert(channels != 0);
+
+  const ${CTYPE} output_min = params->scalar.min;
+  const ${CTYPE} output_max = params->scalar.max;
+  do {
+    const ${CTYPE}** i = input;
+
+    // First pass: load the inputs, store the max pool in the output.
+    const ${CTYPE}* i0 = *i++;
+    $for K in range(1, 9):
+      const ${CTYPE}* i${K} = ${K} < kernel_elements ? *i++ : i0;
+    $for K in range(9):
+      i${K} = (const ${CTYPE}*) ((uintptr_t) i${K} + input_offset);
+
+    ${CTYPE}* o = output;
+    size_t c = channels;
+    do {
+      size_t vl = ${VSETVL}m${LMUL}(c);
+      $for K in range(9):
+        ${VTYPE}m${LMUL}_t vi${K} = ${VLOAD}m${LMUL}(i${K}, vl); i${K} += vl;
+
+      ${VTYPE}m${LMUL}_t vmax01 = ${VMAX}(vi0, vi1, vl);
+      ${VTYPE}m${LMUL}_t vmax23 = ${VMAX}(vi2, vi3, vl);
+      ${VTYPE}m${LMUL}_t vmax45 = ${VMAX}(vi4, vi5, vl);
+      ${VTYPE}m${LMUL}_t vmax67 = ${VMAX}(vi6, vi7, vl);
+      ${VTYPE}m${LMUL}_t vmax018 = ${VMAX}(vmax01, vi8, vl);
+
+      ${VTYPE}m${LMUL}_t vmax2345 = ${VMAX}(vmax23, vmax45, vl);
+      ${VTYPE}m${LMUL}_t vmax01678 = ${VMAX}(vmax67, vmax018, vl);
+      ${VTYPE}m${LMUL}_t vacc = ${VMAX}(vmax2345, vmax01678, vl);
+
+      vacc = ${VMAX}(vacc, output_min, vl);
+      vacc = ${VMIN}(vacc, output_max, vl);
+      ${VSTORE}m${LMUL}(o, vacc, vl); o += vl;
+
+      c -= vl;
+    } while (c != 0);
+
+    // Passes 1 - n: Max more inputs to the output.
+    for (ptrdiff_t k = (ptrdiff_t) kernel_elements - 9; k > 0; k -= 9) {
+      const ${CTYPE}* i0 = *i++;
+      $for K in range(1, 9):
+        const ${CTYPE}* i${K} = ${K} < k ? *i++ : i0;
+      $for K in range(9):
+        i${K} = (const ${CTYPE}*) ((uintptr_t) i${K} + input_offset);
+
+      o = output;
+      size_t c = channels;
+      do {
+        size_t vl = ${VSETVL}m${LMUL}(c);
+
+        $for K in range(9):
+          ${VTYPE}m${LMUL}_t vi${K} = ${VLOAD}m${LMUL}(i${K}, vl); i${K} += vl;
+
+        ${VTYPE}m${LMUL}_t vprev = ${VLOAD}m${LMUL}(o, vl);
+
+        ${VTYPE}m${LMUL}_t vmax01 = ${VMAX}(vi0, vi1, vl);
+        ${VTYPE}m${LMUL}_t vmax23 = ${VMAX}(vi2, vi3, vl);
+        ${VTYPE}m${LMUL}_t vmax45 = ${VMAX}(vi4, vi5, vl);
+        ${VTYPE}m${LMUL}_t vmax67 = ${VMAX}(vi6, vi7, vl);
+        ${VTYPE}m${LMUL}_t vmax018 = ${VMAX}(vmax01, vi8, vl);
+
+        ${VTYPE}m${LMUL}_t vmax2345 = ${VMAX}(vmax23, vmax45, vl);
+        ${VTYPE}m${LMUL}_t vmax01678 = ${VMAX}(vmax67, vmax018, vl);
+        ${VTYPE}m${LMUL}_t vmax012345678 = ${VMAX}(vmax2345, vmax01678, vl);
+
+        ${VTYPE}m${LMUL}_t vacc = ${VMAX}(vprev, vmax012345678, vl);
+        vacc = ${VMIN}(vacc, output_max, vl);
+        ${VSTORE}m${LMUL}(o, vacc, vl); o += vl;
+
+        c -= vl;
+      } while (c != 0);
+    }
+    input = (const ${CTYPE}**) ((uintptr_t) input + input_increment);
+    input_offset += input_pixel_stride;
+    output = (${CTYPE}*) ((uintptr_t) output + output_increment);
+  } while (--output_pixels != 0);
+}

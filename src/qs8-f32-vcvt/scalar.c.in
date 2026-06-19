@@ -1,0 +1,84 @@
+// Copyright 2021 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert BATCH_TILE >= 1
+#include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
+
+$if BATCH_TILE > 1:
+  #include "src/xnnpack/common.h"
+#include "src/xnnpack/microparams.h"
+#include "src/xnnpack/vcvt.h"
+
+
+$XINT8_T = {"QS8": "int8_t", "QU8": "uint8_t"}[DATATYPE]
+void xnn_${DATATYPE.lower()}_f32_vcvt_ukernel__scalar_u${BATCH_TILE}(
+    size_t batch,
+    const ${XINT8_T}* input,
+    float* output,
+    const struct xnn_${DATATYPE.lower()}_f32_cvt_params* restrict params)
+{
+  assert(batch != 0);
+  assert(batch % sizeof(${XINT8_T}) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
+
+  const int32_t vzero_point = params->scalar.zero_point;
+  const float vscale = params->scalar.scale;
+
+  $if BATCH_TILE > 1:
+    for (; batch >= ${BATCH_TILE} * sizeof(${XINT8_T}); batch -= ${BATCH_TILE} * sizeof(${XINT8_T})) {
+      $for N in range(BATCH_TILE):
+        int32_t vx${N} = (int32_t) input[${N}];
+      input += ${BATCH_TILE};
+
+      $for N in range(BATCH_TILE):
+        vx${N} -= vzero_point;
+
+      $for N in range(BATCH_TILE):
+        float vy${N} = (float) vx${N};
+
+      $for N in range(BATCH_TILE):
+        vy${N} *= vscale;
+
+      $for N in range(BATCH_TILE):
+        output[${N}] = vy${N};
+      output += ${BATCH_TILE};
+    }
+  $if BATCH_TILE == 1:
+    do {
+      int32_t vx = *input++;
+      vx -= vzero_point;
+
+      float vy = (float) vx;
+      vy *= vscale;
+      *output++ = vy;
+
+      batch -= sizeof(${XINT8_T});
+    } while (batch != 0);
+  $elif BATCH_TILE == 2:
+    if XNN_UNLIKELY(batch != 0) {
+      int32_t vx = *input;
+      vx -= vzero_point;
+
+      float vy = (float) vx;
+      vy *= vscale;
+      *output = vy;
+    }
+  $else:
+    if XNN_UNLIKELY(batch != 0) {
+      do {
+        int32_t vx = *input++;
+        vx -= vzero_point;
+
+        float vy = (float) vx;
+        vy *= vscale;
+        *output++ = vy;
+
+        batch -= sizeof(${XINT8_T});
+      } while (batch != 0);
+    }
+}

@@ -1,0 +1,83 @@
+// Copyright 2020 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert BATCH_TILE % 4 == 0
+$assert BATCH_TILE >= 4
+$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+#include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
+
+#include <emmintrin.h>
+
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/microparams.h"
+#include "src/xnnpack/vunary.h"
+
+
+void xnn_f32_vrndz_ukernel__sse2_u${BATCH_TILE}(
+    size_t batch,
+    const float* input,
+    float* output,
+    const struct xnn_f32_default_params* restrict params) XNN_OOB_READS
+{
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
+
+  const __m128i vmagic = _mm_castps_si128(_mm_set1_ps(-0.0f));
+  for (; batch >= ${BATCH_TILE} * sizeof(float); batch -= ${BATCH_TILE} * sizeof(float)) {
+    const __m128 vx${ABC[0:4]} = _mm_loadu_ps(input);
+    $for N in range(4, BATCH_TILE, 4):
+      const __m128 vx${ABC[N:N+4]} = _mm_loadu_ps(input + ${N});
+    input += ${BATCH_TILE};
+
+    $for N in range(0, BATCH_TILE, 4):
+      const __m128i vintx${ABC[N:N+4]} = _mm_cvttps_epi32(vx${ABC[N:N+4]});
+
+    $for N in range(0, BATCH_TILE, 4):
+      const __m128 vrndmask${ABC[N:N+4]} = _mm_castsi128_ps(_mm_or_si128(vmagic, _mm_cmpeq_epi32(vintx${ABC[N:N+4]}, vmagic)));
+
+    $for N in range(0, BATCH_TILE, 4):
+      const __m128 vrndx${ABC[N:N+4]} = _mm_cvtepi32_ps(vintx${ABC[N:N+4]});
+
+    $for N in range(0, BATCH_TILE, 4):
+      const __m128 vy${ABC[N:N+4]} = _mm_or_ps(_mm_and_ps(vx${ABC[N:N+4]}, vrndmask${ABC[N:N+4]}), _mm_andnot_ps(vrndmask${ABC[N:N+4]}, vrndx${ABC[N:N+4]}));
+
+    _mm_storeu_ps(output, vy${ABC[0:4]});
+    $for N in range(4, BATCH_TILE, 4):
+      _mm_storeu_ps(output + ${N}, vy${ABC[N:N+4]});
+    output += ${BATCH_TILE};
+  }
+  $if BATCH_TILE > 4:
+    for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
+      const __m128 vx = _mm_loadu_ps(input);
+      input += 4;
+
+      const __m128i vintx = _mm_cvttps_epi32(vx);
+      const __m128 vrndmask = _mm_castsi128_ps(_mm_or_si128(vmagic, _mm_cmpeq_epi32(vintx, vmagic)));
+      const __m128 vrndx = _mm_cvtepi32_ps(vintx);
+      const __m128 vy = _mm_or_ps(_mm_and_ps(vx, vrndmask), _mm_andnot_ps(vrndmask, vrndx));
+
+      _mm_storeu_ps(output, vy);
+      output += 4;
+    }
+  if XNN_UNLIKELY(batch != 0) {
+    const __m128 vx = _mm_loadu_ps(input);
+    const __m128i vintx = _mm_cvttps_epi32(vx);
+    const __m128 vrndmask = _mm_castsi128_ps(_mm_or_si128(vmagic, _mm_cmpeq_epi32(vintx, vmagic)));
+    const __m128 vrndx = _mm_cvtepi32_ps(vintx);
+    __m128 vy = _mm_or_ps(_mm_and_ps(vx, vrndmask), _mm_andnot_ps(vrndmask, vrndx));
+    if (batch & (2 * sizeof(float))) {
+      _mm_storel_pi((__m64*) output, vy);
+      vy = _mm_movehl_ps(vy, vy);
+      output += 2;
+    }
+    if (batch & (1 * sizeof(float))) {
+      _mm_store_ss(output, vy);
+    }
+  }
+}

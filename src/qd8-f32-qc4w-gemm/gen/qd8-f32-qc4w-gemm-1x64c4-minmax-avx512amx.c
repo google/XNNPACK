@@ -1,0 +1,427 @@
+// clang-format off
+// Auto-generated file. Do not edit!
+//   Template: src/qs8-gemm/c4-avx512amx.c.in
+//   Generator: tools/xngen
+//
+// Copyright 2024 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+#include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
+#if defined(__has_feature)
+  #if __has_feature(memory_sanitizer)
+    #include <sanitizer/msan_interface.h>
+  #endif
+#endif
+
+#include <immintrin.h>
+
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/gemm.h"
+#include "src/xnnpack/intrinsics-polyfill.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/microparams.h"
+
+
+void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x64c4__avx512amx(
+    size_t mr,
+    size_t nc,
+    size_t kc,
+    const int8_t* restrict a,
+    size_t a_stride,
+    const void* restrict w,
+    float* restrict c,
+    size_t cm_stride,
+    size_t cn_stride,
+    const struct xnn_f32_qc4w_minmax_params* restrict params,
+    const struct xnn_qd8_quantization_params* restrict quantization_params)
+{
+  assert(mr != 0);
+  assert(mr <= 1);
+  assert(nc != 0);
+  assert(kc != 0);
+  assert(kc % sizeof(int8_t) == 0);
+  assert(a != NULL);
+  assert(w != NULL);
+  assert(c != NULL);
+
+// AMX is only available for __x86_64__
+#if XNN_ARCH_X86_64
+
+  // Define tile config data structure
+  struct __tile_config {
+    uint8_t palette_id;
+    uint8_t start_row;
+    uint8_t reserved_0[14];
+    uint16_t colsb[8];
+    uint16_t reserved_1[8];
+    uint8_t rows[8];
+    uint8_t reserved_2[8];
+  };
+
+  XNN_ALIGN(64) struct __tile_config tile_data = {0};
+  XNN_ALIGN(64) int32_t res[4][1 * 16];
+  XNN_ALIGN(64) int8_t weight_buffer[16 * 64];
+
+  kc = round_up_po2(kc, 4 * sizeof(int8_t));
+  const size_t kremainder = (kc & 63) ? (kc & 63) : 64;
+
+  tile_data.palette_id = 1;
+  tile_data.rows[0] = mr;              // tmm0 = res[0]
+  tile_data.rows[1] = mr;              // tmm1 = res[1]
+  tile_data.rows[2] = mr;              // tmm2 = res[2]
+  tile_data.rows[3] = mr;              // tmm3 = res[3]
+  tile_data.rows[4] = mr;              // tmm4 = input
+  tile_data.rows[5] = 16;              // tmm5 = weights
+  tile_data.rows[6] = mr;              // tmm6 = input remainder
+  tile_data.rows[7] = kremainder >> 2; // tmm7 = weights remainder
+  tile_data.colsb[0] = 64;          // tmm0 = res[0]
+  tile_data.colsb[1] = 64;          // tmm1 = res[1]
+  tile_data.colsb[2] = 64;          // tmm2 = res[2]
+  tile_data.colsb[3] = 64;          // tmm3 = res[3]
+  tile_data.colsb[4] = 64;          // tmm4 = input
+  tile_data.colsb[5] = 64;          // tmm5 = weights
+  tile_data.colsb[6] = kremainder;  // tmm6 = input remainder
+  tile_data.colsb[7] = 64;          // tmm7 = weights remainder
+  _tile_loadconfig(&tile_data);
+
+  float* c0 = c;
+
+  const __m512 voutput_min = _mm512_set1_ps(params->scalar.min);
+  const __m512 voutput_max = _mm512_set1_ps(params->scalar.max);
+  // XNN_FORCE_REALIZATION(voutput_min);
+  // XNN_FORCE_REALIZATION(voutput_max);
+  const __m512i vmask = _mm512_set1_epi8(0xF0);
+  const __m512i vshl4 = _mm512_set1_epi64(0x01020408);
+  XNN_FORCE_REALIZATION(vmask);
+  XNN_FORCE_REALIZATION(vshl4);
+
+  do {
+    const __m512i vksum0 = _mm512_load_epi32((const int32_t*) w + 0);
+    const __m512i vksum1 = _mm512_load_epi32((const int32_t*) w + 16);
+    const __m512i vksum2 = _mm512_load_epi32((const int32_t*) w + 32);
+    const __m512i vksum3 = _mm512_load_epi32((const int32_t*) w + 48);
+    w = (const int32_t*) w + 64;
+
+    // Zero tile accumulator
+    _tile_zero(0);
+    _tile_zero(1);
+    _tile_zero(2);
+    _tile_zero(3);
+
+    size_t k = kc;
+    while (k >= 64 * sizeof(int8_t)) {
+      _tile_loadd(4, a, a_stride);
+      a += 64;
+      const __m512i vb0x0 = _mm512_load_epi32((const int8_t*) w + 0);
+      const __m512i vb1x0 = _mm512_load_epi32((const int8_t*) w + 256);
+      const __m512i vb2x0 = _mm512_load_epi32((const int8_t*) w + 512);
+      const __m512i vb3x0 = _mm512_load_epi32((const int8_t*) w + 768);
+      const __m512i vb4x0 = _mm512_load_epi32((const int8_t*) w + 1024);
+      const __m512i vb5x0 = _mm512_load_epi32((const int8_t*) w + 1280);
+      const __m512i vb6x0 = _mm512_load_epi32((const int8_t*) w + 1536);
+      const __m512i vb7x0 = _mm512_load_epi32((const int8_t*) w + 1792);
+      const __m512i vl0x0 = _mm512_gf2p8affine_epi64_epi8(vb0x0, vshl4, 0);
+      const __m512i vh0x0 = _mm512_and_si512(vb0x0, vmask);
+      const __m512i vl1x0 = _mm512_gf2p8affine_epi64_epi8(vb1x0, vshl4, 0);
+      const __m512i vh1x0 = _mm512_and_si512(vb1x0, vmask);
+      const __m512i vl2x0 = _mm512_gf2p8affine_epi64_epi8(vb2x0, vshl4, 0);
+      const __m512i vh2x0 = _mm512_and_si512(vb2x0, vmask);
+      const __m512i vl3x0 = _mm512_gf2p8affine_epi64_epi8(vb3x0, vshl4, 0);
+      const __m512i vh3x0 = _mm512_and_si512(vb3x0, vmask);
+      const __m512i vl4x0 = _mm512_gf2p8affine_epi64_epi8(vb4x0, vshl4, 0);
+      const __m512i vh4x0 = _mm512_and_si512(vb4x0, vmask);
+      const __m512i vl5x0 = _mm512_gf2p8affine_epi64_epi8(vb5x0, vshl4, 0);
+      const __m512i vh5x0 = _mm512_and_si512(vb5x0, vmask);
+      const __m512i vl6x0 = _mm512_gf2p8affine_epi64_epi8(vb6x0, vshl4, 0);
+      const __m512i vh6x0 = _mm512_and_si512(vb6x0, vmask);
+      const __m512i vl7x0 = _mm512_gf2p8affine_epi64_epi8(vb7x0, vshl4, 0);
+      const __m512i vh7x0 = _mm512_and_si512(vb7x0, vmask);
+      _mm512_store_epi32(weight_buffer + 0, vl0x0);
+      _mm512_store_epi32(weight_buffer + 64, vh0x0);
+      _mm512_store_epi32(weight_buffer + 128, vl1x0);
+      _mm512_store_epi32(weight_buffer + 192, vh1x0);
+      _mm512_store_epi32(weight_buffer + 256, vl2x0);
+      _mm512_store_epi32(weight_buffer + 320, vh2x0);
+      _mm512_store_epi32(weight_buffer + 384, vl3x0);
+      _mm512_store_epi32(weight_buffer + 448, vh3x0);
+      _mm512_store_epi32(weight_buffer + 512, vl4x0);
+      _mm512_store_epi32(weight_buffer + 576, vh4x0);
+      _mm512_store_epi32(weight_buffer + 640, vl5x0);
+      _mm512_store_epi32(weight_buffer + 704, vh5x0);
+      _mm512_store_epi32(weight_buffer + 768, vl6x0);
+      _mm512_store_epi32(weight_buffer + 832, vh6x0);
+      _mm512_store_epi32(weight_buffer + 896, vl7x0);
+      _mm512_store_epi32(weight_buffer + 960, vh7x0);
+      _tile_loadd(5, weight_buffer, 64);
+      _tile_dpbssd(0, 4, 5);
+      const __m512i vb0x1 = _mm512_load_epi32((const int8_t*) w + 64);
+      const __m512i vb1x1 = _mm512_load_epi32((const int8_t*) w + 320);
+      const __m512i vb2x1 = _mm512_load_epi32((const int8_t*) w + 576);
+      const __m512i vb3x1 = _mm512_load_epi32((const int8_t*) w + 832);
+      const __m512i vb4x1 = _mm512_load_epi32((const int8_t*) w + 1088);
+      const __m512i vb5x1 = _mm512_load_epi32((const int8_t*) w + 1344);
+      const __m512i vb6x1 = _mm512_load_epi32((const int8_t*) w + 1600);
+      const __m512i vb7x1 = _mm512_load_epi32((const int8_t*) w + 1856);
+      const __m512i vl0x1 = _mm512_gf2p8affine_epi64_epi8(vb0x1, vshl4, 0);
+      const __m512i vh0x1 = _mm512_and_si512(vb0x1, vmask);
+      const __m512i vl1x1 = _mm512_gf2p8affine_epi64_epi8(vb1x1, vshl4, 0);
+      const __m512i vh1x1 = _mm512_and_si512(vb1x1, vmask);
+      const __m512i vl2x1 = _mm512_gf2p8affine_epi64_epi8(vb2x1, vshl4, 0);
+      const __m512i vh2x1 = _mm512_and_si512(vb2x1, vmask);
+      const __m512i vl3x1 = _mm512_gf2p8affine_epi64_epi8(vb3x1, vshl4, 0);
+      const __m512i vh3x1 = _mm512_and_si512(vb3x1, vmask);
+      const __m512i vl4x1 = _mm512_gf2p8affine_epi64_epi8(vb4x1, vshl4, 0);
+      const __m512i vh4x1 = _mm512_and_si512(vb4x1, vmask);
+      const __m512i vl5x1 = _mm512_gf2p8affine_epi64_epi8(vb5x1, vshl4, 0);
+      const __m512i vh5x1 = _mm512_and_si512(vb5x1, vmask);
+      const __m512i vl6x1 = _mm512_gf2p8affine_epi64_epi8(vb6x1, vshl4, 0);
+      const __m512i vh6x1 = _mm512_and_si512(vb6x1, vmask);
+      const __m512i vl7x1 = _mm512_gf2p8affine_epi64_epi8(vb7x1, vshl4, 0);
+      const __m512i vh7x1 = _mm512_and_si512(vb7x1, vmask);
+      _mm512_store_epi32(weight_buffer + 0, vl0x1);
+      _mm512_store_epi32(weight_buffer + 64, vh0x1);
+      _mm512_store_epi32(weight_buffer + 128, vl1x1);
+      _mm512_store_epi32(weight_buffer + 192, vh1x1);
+      _mm512_store_epi32(weight_buffer + 256, vl2x1);
+      _mm512_store_epi32(weight_buffer + 320, vh2x1);
+      _mm512_store_epi32(weight_buffer + 384, vl3x1);
+      _mm512_store_epi32(weight_buffer + 448, vh3x1);
+      _mm512_store_epi32(weight_buffer + 512, vl4x1);
+      _mm512_store_epi32(weight_buffer + 576, vh4x1);
+      _mm512_store_epi32(weight_buffer + 640, vl5x1);
+      _mm512_store_epi32(weight_buffer + 704, vh5x1);
+      _mm512_store_epi32(weight_buffer + 768, vl6x1);
+      _mm512_store_epi32(weight_buffer + 832, vh6x1);
+      _mm512_store_epi32(weight_buffer + 896, vl7x1);
+      _mm512_store_epi32(weight_buffer + 960, vh7x1);
+      _tile_loadd(5, weight_buffer, 64);
+      _tile_dpbssd(1, 4, 5);
+      const __m512i vb0x2 = _mm512_load_epi32((const int8_t*) w + 128);
+      const __m512i vb1x2 = _mm512_load_epi32((const int8_t*) w + 384);
+      const __m512i vb2x2 = _mm512_load_epi32((const int8_t*) w + 640);
+      const __m512i vb3x2 = _mm512_load_epi32((const int8_t*) w + 896);
+      const __m512i vb4x2 = _mm512_load_epi32((const int8_t*) w + 1152);
+      const __m512i vb5x2 = _mm512_load_epi32((const int8_t*) w + 1408);
+      const __m512i vb6x2 = _mm512_load_epi32((const int8_t*) w + 1664);
+      const __m512i vb7x2 = _mm512_load_epi32((const int8_t*) w + 1920);
+      const __m512i vl0x2 = _mm512_gf2p8affine_epi64_epi8(vb0x2, vshl4, 0);
+      const __m512i vh0x2 = _mm512_and_si512(vb0x2, vmask);
+      const __m512i vl1x2 = _mm512_gf2p8affine_epi64_epi8(vb1x2, vshl4, 0);
+      const __m512i vh1x2 = _mm512_and_si512(vb1x2, vmask);
+      const __m512i vl2x2 = _mm512_gf2p8affine_epi64_epi8(vb2x2, vshl4, 0);
+      const __m512i vh2x2 = _mm512_and_si512(vb2x2, vmask);
+      const __m512i vl3x2 = _mm512_gf2p8affine_epi64_epi8(vb3x2, vshl4, 0);
+      const __m512i vh3x2 = _mm512_and_si512(vb3x2, vmask);
+      const __m512i vl4x2 = _mm512_gf2p8affine_epi64_epi8(vb4x2, vshl4, 0);
+      const __m512i vh4x2 = _mm512_and_si512(vb4x2, vmask);
+      const __m512i vl5x2 = _mm512_gf2p8affine_epi64_epi8(vb5x2, vshl4, 0);
+      const __m512i vh5x2 = _mm512_and_si512(vb5x2, vmask);
+      const __m512i vl6x2 = _mm512_gf2p8affine_epi64_epi8(vb6x2, vshl4, 0);
+      const __m512i vh6x2 = _mm512_and_si512(vb6x2, vmask);
+      const __m512i vl7x2 = _mm512_gf2p8affine_epi64_epi8(vb7x2, vshl4, 0);
+      const __m512i vh7x2 = _mm512_and_si512(vb7x2, vmask);
+      _mm512_store_epi32(weight_buffer + 0, vl0x2);
+      _mm512_store_epi32(weight_buffer + 64, vh0x2);
+      _mm512_store_epi32(weight_buffer + 128, vl1x2);
+      _mm512_store_epi32(weight_buffer + 192, vh1x2);
+      _mm512_store_epi32(weight_buffer + 256, vl2x2);
+      _mm512_store_epi32(weight_buffer + 320, vh2x2);
+      _mm512_store_epi32(weight_buffer + 384, vl3x2);
+      _mm512_store_epi32(weight_buffer + 448, vh3x2);
+      _mm512_store_epi32(weight_buffer + 512, vl4x2);
+      _mm512_store_epi32(weight_buffer + 576, vh4x2);
+      _mm512_store_epi32(weight_buffer + 640, vl5x2);
+      _mm512_store_epi32(weight_buffer + 704, vh5x2);
+      _mm512_store_epi32(weight_buffer + 768, vl6x2);
+      _mm512_store_epi32(weight_buffer + 832, vh6x2);
+      _mm512_store_epi32(weight_buffer + 896, vl7x2);
+      _mm512_store_epi32(weight_buffer + 960, vh7x2);
+      _tile_loadd(5, weight_buffer, 64);
+      _tile_dpbssd(2, 4, 5);
+      const __m512i vb0x3 = _mm512_load_epi32((const int8_t*) w + 192);
+      const __m512i vb1x3 = _mm512_load_epi32((const int8_t*) w + 448);
+      const __m512i vb2x3 = _mm512_load_epi32((const int8_t*) w + 704);
+      const __m512i vb3x3 = _mm512_load_epi32((const int8_t*) w + 960);
+      const __m512i vb4x3 = _mm512_load_epi32((const int8_t*) w + 1216);
+      const __m512i vb5x3 = _mm512_load_epi32((const int8_t*) w + 1472);
+      const __m512i vb6x3 = _mm512_load_epi32((const int8_t*) w + 1728);
+      const __m512i vb7x3 = _mm512_load_epi32((const int8_t*) w + 1984);
+      const __m512i vl0x3 = _mm512_gf2p8affine_epi64_epi8(vb0x3, vshl4, 0);
+      const __m512i vh0x3 = _mm512_and_si512(vb0x3, vmask);
+      const __m512i vl1x3 = _mm512_gf2p8affine_epi64_epi8(vb1x3, vshl4, 0);
+      const __m512i vh1x3 = _mm512_and_si512(vb1x3, vmask);
+      const __m512i vl2x3 = _mm512_gf2p8affine_epi64_epi8(vb2x3, vshl4, 0);
+      const __m512i vh2x3 = _mm512_and_si512(vb2x3, vmask);
+      const __m512i vl3x3 = _mm512_gf2p8affine_epi64_epi8(vb3x3, vshl4, 0);
+      const __m512i vh3x3 = _mm512_and_si512(vb3x3, vmask);
+      const __m512i vl4x3 = _mm512_gf2p8affine_epi64_epi8(vb4x3, vshl4, 0);
+      const __m512i vh4x3 = _mm512_and_si512(vb4x3, vmask);
+      const __m512i vl5x3 = _mm512_gf2p8affine_epi64_epi8(vb5x3, vshl4, 0);
+      const __m512i vh5x3 = _mm512_and_si512(vb5x3, vmask);
+      const __m512i vl6x3 = _mm512_gf2p8affine_epi64_epi8(vb6x3, vshl4, 0);
+      const __m512i vh6x3 = _mm512_and_si512(vb6x3, vmask);
+      const __m512i vl7x3 = _mm512_gf2p8affine_epi64_epi8(vb7x3, vshl4, 0);
+      const __m512i vh7x3 = _mm512_and_si512(vb7x3, vmask);
+      _mm512_store_epi32(weight_buffer + 0, vl0x3);
+      _mm512_store_epi32(weight_buffer + 64, vh0x3);
+      _mm512_store_epi32(weight_buffer + 128, vl1x3);
+      _mm512_store_epi32(weight_buffer + 192, vh1x3);
+      _mm512_store_epi32(weight_buffer + 256, vl2x3);
+      _mm512_store_epi32(weight_buffer + 320, vh2x3);
+      _mm512_store_epi32(weight_buffer + 384, vl3x3);
+      _mm512_store_epi32(weight_buffer + 448, vh3x3);
+      _mm512_store_epi32(weight_buffer + 512, vl4x3);
+      _mm512_store_epi32(weight_buffer + 576, vh4x3);
+      _mm512_store_epi32(weight_buffer + 640, vl5x3);
+      _mm512_store_epi32(weight_buffer + 704, vh5x3);
+      _mm512_store_epi32(weight_buffer + 768, vl6x3);
+      _mm512_store_epi32(weight_buffer + 832, vh6x3);
+      _mm512_store_epi32(weight_buffer + 896, vl7x3);
+      _mm512_store_epi32(weight_buffer + 960, vh7x3);
+      _tile_loadd(5, weight_buffer, 64);
+      _tile_dpbssd(3, 4, 5);
+
+      w = (const int8_t*) w + 2048;
+      k -= 64 * sizeof(int8_t);
+    }
+
+    if XNN_UNLIKELY(k != 0) {
+      _tile_loadd(6, a, a_stride);
+      a += kremainder;
+      for (size_t k = 0; k < ((kremainder + 7) >> 3); ++k) {
+        const __m512i vb0 = _mm512_load_epi32((const int8_t*) w + 0 + 256 * k);
+        const __m512i vl0 = _mm512_gf2p8affine_epi64_epi8(vb0, vshl4, 0);
+        const __m512i vh0 = _mm512_and_si512(vb0, vmask);
+        _mm512_store_epi32(weight_buffer + 128 * k + 0, vl0);
+        _mm512_store_epi32(weight_buffer + 128 * k + 64, vh0);
+      }
+      _tile_loadd(7, weight_buffer, 64);
+      _tile_dpbssd(0, 6, 7);
+      for (size_t k = 0; k < ((kremainder + 7) >> 3); ++k) {
+        const __m512i vb1 = _mm512_load_epi32((const int8_t*) w + 64 + 256 * k);
+        const __m512i vl1 = _mm512_gf2p8affine_epi64_epi8(vb1, vshl4, 0);
+        const __m512i vh1 = _mm512_and_si512(vb1, vmask);
+        _mm512_store_epi32(weight_buffer + 128 * k + 0, vl1);
+        _mm512_store_epi32(weight_buffer + 128 * k + 64, vh1);
+      }
+      _tile_loadd(7, weight_buffer, 64);
+      _tile_dpbssd(1, 6, 7);
+      for (size_t k = 0; k < ((kremainder + 7) >> 3); ++k) {
+        const __m512i vb2 = _mm512_load_epi32((const int8_t*) w + 128 + 256 * k);
+        const __m512i vl2 = _mm512_gf2p8affine_epi64_epi8(vb2, vshl4, 0);
+        const __m512i vh2 = _mm512_and_si512(vb2, vmask);
+        _mm512_store_epi32(weight_buffer + 128 * k + 0, vl2);
+        _mm512_store_epi32(weight_buffer + 128 * k + 64, vh2);
+      }
+      _tile_loadd(7, weight_buffer, 64);
+      _tile_dpbssd(2, 6, 7);
+      for (size_t k = 0; k < ((kremainder + 7) >> 3); ++k) {
+        const __m512i vb3 = _mm512_load_epi32((const int8_t*) w + 192 + 256 * k);
+        const __m512i vl3 = _mm512_gf2p8affine_epi64_epi8(vb3, vshl4, 0);
+        const __m512i vh3 = _mm512_and_si512(vb3, vmask);
+        _mm512_store_epi32(weight_buffer + 128 * k + 0, vl3);
+        _mm512_store_epi32(weight_buffer + 128 * k + 64, vh3);
+      }
+      _tile_loadd(7, weight_buffer, 64);
+      _tile_dpbssd(3, 6, 7);
+
+      w = (const int8_t*) w + ((kremainder + 7) >> 3) * 256;
+      k -= kremainder * sizeof(int8_t);
+    }
+
+    // TODO: Instead of processing up to 4 tiles (16x64) consider
+    // quantizing 1 tile at a time (16 registers)
+    _tile_stored(0, &res[0][0], 64);
+    _tile_stored(1, &res[1][0], 64);
+    _tile_stored(2, &res[2][0], 64);
+    _tile_stored(3, &res[3][0], 64);
+
+    // TODO: Fix msan for AMX
+    #if defined(__has_feature)
+      #if __has_feature(memory_sanitizer)
+        __msan_unpoison(res, sizeof(res));
+      #endif
+    #endif
+
+    // TODO: Instead of processing up to 4 tiles (16x64) consider
+    // quantizing 1 row at a time.
+    __m512i vacc0x0 = _mm512_mullo_epi32(vksum0, _mm512_set1_epi32((int) quantization_params[0].zero_point));
+    __m512i vacc0x1 = _mm512_mullo_epi32(vksum1, _mm512_set1_epi32((int) quantization_params[0].zero_point));
+    __m512i vacc0x2 = _mm512_mullo_epi32(vksum2, _mm512_set1_epi32((int) quantization_params[0].zero_point));
+    __m512i vacc0x3 = _mm512_mullo_epi32(vksum3, _mm512_set1_epi32((int) quantization_params[0].zero_point));
+    // Add tile to bias
+    vacc0x0 = _mm512_add_epi32(vacc0x0, _mm512_load_epi32(&res[0][0] + 0));
+    vacc0x1 = _mm512_add_epi32(vacc0x1, _mm512_load_epi32(&res[1][0] + 0));
+    vacc0x2 = _mm512_add_epi32(vacc0x2, _mm512_load_epi32(&res[2][0] + 0));
+    vacc0x3 = _mm512_add_epi32(vacc0x3, _mm512_load_epi32(&res[3][0] + 0));
+
+    vacc0x0 = _mm512_srai_epi32(vacc0x0, 4);
+    vacc0x1 = _mm512_srai_epi32(vacc0x1, 4);
+    vacc0x2 = _mm512_srai_epi32(vacc0x2, 4);
+    vacc0x3 = _mm512_srai_epi32(vacc0x3, 4);
+    __m512 vscaled0x0 = _mm512_cvtepi32_ps(vacc0x0);
+    __m512 vscaled0x1 = _mm512_cvtepi32_ps(vacc0x1);
+    __m512 vscaled0x2 = _mm512_cvtepi32_ps(vacc0x2);
+    __m512 vscaled0x3 = _mm512_cvtepi32_ps(vacc0x3);
+
+    vscaled0x0 = _mm512_mul_ps(vscaled0x0, _mm512_set1_ps(quantization_params[0].inv_scale));
+    vscaled0x1 = _mm512_mul_ps(vscaled0x1, _mm512_set1_ps(quantization_params[0].inv_scale));
+    vscaled0x2 = _mm512_mul_ps(vscaled0x2, _mm512_set1_ps(quantization_params[0].inv_scale));
+    vscaled0x3 = _mm512_mul_ps(vscaled0x3, _mm512_set1_ps(quantization_params[0].inv_scale));
+
+    const __m512 vfilter_output_scale0 = _mm512_load_ps((const float*) w + 0);
+    const __m512 vfilter_output_scale1 = _mm512_load_ps((const float*) w + 16);
+    const __m512 vfilter_output_scale2 = _mm512_load_ps((const float*) w + 32);
+    const __m512 vfilter_output_scale3 = _mm512_load_ps((const float*) w + 48);
+    w = (const int32_t*) w + 64;
+    const __m512 vbias0 = _mm512_load_ps((const float*) w + 0);
+    const __m512 vbias1 = _mm512_load_ps((const float*) w + 16);
+    const __m512 vbias2 = _mm512_load_ps((const float*) w + 32);
+    const __m512 vbias3 = _mm512_load_ps((const float*) w + 48);
+    w = (const int32_t*) w + 64;
+
+    vscaled0x0 = _mm512_fmadd_ps(vscaled0x0, vfilter_output_scale0, vbias0);
+    vscaled0x1 = _mm512_fmadd_ps(vscaled0x1, vfilter_output_scale1, vbias1);
+    vscaled0x2 = _mm512_fmadd_ps(vscaled0x2, vfilter_output_scale2, vbias2);
+    vscaled0x3 = _mm512_fmadd_ps(vscaled0x3, vfilter_output_scale3, vbias3);
+
+    vscaled0x0 = _mm512_max_ps(vscaled0x0, voutput_min);
+    vscaled0x1 = _mm512_max_ps(vscaled0x1, voutput_min);
+    vscaled0x2 = _mm512_max_ps(vscaled0x2, voutput_min);
+    vscaled0x3 = _mm512_max_ps(vscaled0x3, voutput_min);
+
+    vscaled0x0 = _mm512_min_ps(vscaled0x0, voutput_max);
+    vscaled0x1 = _mm512_min_ps(vscaled0x1, voutput_max);
+    vscaled0x2 = _mm512_min_ps(vscaled0x2, voutput_max);
+    vscaled0x3 = _mm512_min_ps(vscaled0x3, voutput_max);
+
+    if XNN_LIKELY(nc >= 64) {
+      _mm512_storeu_ps(c0 + 0, vscaled0x0);
+      _mm512_storeu_ps(c0 + 16, vscaled0x1);
+      _mm512_storeu_ps(c0 + 32, vscaled0x2);
+      _mm512_storeu_ps(c0 + 48, vscaled0x3);
+      c0 = (float*) ((uintptr_t) c0 + cn_stride);
+
+      a -= kc;
+      nc -= 64;
+    } else {
+      // Prepare mask for valid 32-bit elements (depends on nc).
+      const __mmask16 vmask0 = _cvtu32_mask16((uint32_t) ((((UINT64_C(1) << nc) - 1) >> 0) & 0xFFFF));
+      const __mmask16 vmask1 = _cvtu32_mask16((uint32_t) ((((UINT64_C(1) << nc) - 1) >> 16) & 0xFFFF));
+      const __mmask16 vmask2 = _cvtu32_mask16((uint32_t) ((((UINT64_C(1) << nc) - 1) >> 32) & 0xFFFF));
+      const __mmask16 vmask3 = _cvtu32_mask16((uint32_t) ((((UINT64_C(1) << nc) - 1) >> 48) & 0xFFFF));
+      _mm512_mask_storeu_ps(c0 + 0, vmask0, vscaled0x0);
+      _mm512_mask_storeu_ps(c0 + 16, vmask1, vscaled0x1);
+      _mm512_mask_storeu_ps(c0 + 32, vmask2, vscaled0x2);
+      _mm512_mask_storeu_ps(c0 + 48, vmask3, vscaled0x3);
+      nc = 0;
+    }
+  } while (nc != 0);
+  // Release tile config
+  _tile_release();
+  #endif  // defined(__x86_64__)
+}

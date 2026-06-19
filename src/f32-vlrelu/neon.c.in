@@ -1,0 +1,69 @@
+// Copyright 2020 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert BATCH_TILE % 4 == 0
+$assert BATCH_TILE >= 4
+$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+#include <arm_neon.h>
+#include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
+
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/microparams.h"
+#include "src/xnnpack/vunary.h"
+
+
+void xnn_f32_vlrelu_ukernel__neon_u${BATCH_TILE}(
+    size_t batch,
+    const float* input,
+    float* output,
+    const struct xnn_f32_lrelu_params* restrict params) XNN_OOB_READS
+{
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
+
+  const float32x4_t vslope = vdupq_n_f32(params->scalar.slope);
+
+  for (; batch >= ${BATCH_TILE} * sizeof(float); batch -= ${BATCH_TILE} * sizeof(float)) {
+    $for N in range(0, BATCH_TILE, 4):
+      const float32x4_t vx${ABC[N:N+4]} = vld1q_f32(input); input += 4;
+
+    $for N in range(0, BATCH_TILE, 4):
+      float32x4_t vacc${ABC[N:N+4]} = vmulq_f32(vx${ABC[N:N+4]}, vslope);
+      const uint32x4_t vmask${ABC[N:N+4]} = vcltq_s32(vreinterpretq_s32_f32(vx${ABC[N:N+4]}), vmovq_n_s32(0));
+
+    $for N in range(0, BATCH_TILE, 4):
+      vacc${ABC[N:N+4]} = vbslq_f32(vmask${ABC[N:N+4]}, vacc${ABC[N:N+4]}, vx${ABC[N:N+4]});
+
+    $for N in range(0, BATCH_TILE, 4):
+      vst1q_f32(output, vacc${ABC[N:N+4]}); output += 4;
+  }
+  $if BATCH_TILE > 4:
+    for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
+      const float32x4_t vx = vld1q_f32(input); input += 4;
+      float32x4_t vacc = vmulq_f32(vx, vslope);
+      const uint32x4_t vmask = vcltq_s32(vreinterpretq_s32_f32(vx), vmovq_n_s32(0));
+      vacc = vbslq_f32(vmask, vacc, vx);
+      vst1q_f32(output, vacc); output += 4;
+    }
+  if XNN_UNLIKELY(batch != 0) {
+    const float32x4_t vx = vld1q_f32(input);
+    float32x4_t vacc = vmulq_f32(vx, vslope);
+    const uint32x4_t vmask = vcltq_s32(vreinterpretq_s32_f32(vx), vmovq_n_s32(0));
+    vacc = vbslq_f32(vmask, vacc, vx);
+
+    float32x2_t vacc_lo = vget_low_f32(vacc);
+    if (batch & (2 * sizeof(float))) {
+      vst1_f32(output, vacc_lo); output += 2;
+      vacc_lo = vget_high_f32(vacc);
+    }
+    if (batch & (1 * sizeof(float))) {
+      vst1_lane_f32(output, vacc_lo, 0);
+    }
+  }
+}

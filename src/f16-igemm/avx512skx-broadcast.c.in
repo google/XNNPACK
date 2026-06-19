@@ -1,0 +1,138 @@
+// Copyright 2026 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert NR % 16 == 0
+$assert ACCTYPE in ["F16", "F32"]
+$ACC_SUFFIX = "_f32acc" if ACCTYPE == "F32" else ""
+#include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
+
+#include <immintrin.h>
+
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/intrinsics-polyfill.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/microparams.h"
+#include "src/xnnpack/igemm.h"
+
+
+void xnn_f16${ACC_SUFFIX}_igemm_minmax_ukernel_${MR}x${NR}__avx512skx_broadcast(
+    size_t mr,
+    size_t nc,
+    size_t kc,
+    size_t ks,
+    const xnn_float16** restrict a,
+    const xnn_float16* restrict w,
+    xnn_float16* restrict c,
+    size_t cm_stride,
+    size_t cn_stride,
+    size_t a_offset,
+    const xnn_float16* zero,
+    const struct xnn_f16_minmax_params* restrict params)
+{
+  assert(mr != 0);
+  assert(mr <= ${MR});
+  assert(nc != 0);
+  assert(kc != 0);
+  assert(kc % sizeof(uint16_t) == 0);
+  assert(ks != 0);
+  assert(ks % (${MR} * sizeof(void*)) == 0);
+  assert(a_offset % sizeof(uint16_t) == 0);
+  assert(a != NULL);
+  assert(w != NULL);
+  assert(c != NULL);
+
+  const __m512 vmin = _mm512_cvtph_ps(_mm256_set1_epi16(*(const uint16_t*) &params->scalar.min));
+  const __m512 vmax = _mm512_cvtph_ps(_mm256_set1_epi16(*(const uint16_t*) &params->scalar.max));
+  XNN_FORCE_REALIZATION(vmin);
+  XNN_FORCE_REALIZATION(vmax);
+
+  uint16_t* c0 = (uint16_t*) c;
+  $for M in range(1, MR):
+    uint16_t* c${M} = (uint16_t*) ((uintptr_t) c${M-1} + cm_stride);
+    $if M % 2 == 0:
+      if XNN_UNPREDICTABLE(mr <= ${M}) {
+        c${M} = c${M-1};
+      }
+    $elif M + 1 == MR:
+      if XNN_UNPREDICTABLE(mr != ${M+1}) {
+        c${M} = c${M-1};
+      }
+    $else:
+      if XNN_UNPREDICTABLE(mr < ${M+1}) {
+        c${M} = c${M-1};
+      }
+
+  do {
+    __m512 vacc0x0 = _mm512_cvtph_ps(_mm256_loadu_si256((const __m256i*) w));
+    $for N in range(16, NR, 16):
+      __m512 vacc0x${N//16} = _mm512_cvtph_ps(_mm256_loadu_si256((const __m256i*) ((const uint16_t*) w + ${N})));
+    $for M in range(1, MR):
+      $for N in range(0, NR, 16):
+        __m512 vacc${M}x${N//16} = vacc0x${N//16};
+    w = (const xnn_float16*) w + ${NR};
+
+    size_t p = ks;
+    do {
+      $for M in range(MR):
+        const uint16_t* restrict a${M} = (const uint16_t*) a[${M}];
+        assert(a${M} != NULL);
+        if XNN_UNPREDICTABLE(a${M} != (const uint16_t*) zero) {
+          a${M} = (const uint16_t*) ((uintptr_t) a${M} + a_offset);
+        }
+      a += ${MR};
+
+      size_t k = kc;
+      do {
+        const __m512 vb0 = _mm512_cvtph_ps(_mm256_loadu_si256((const __m256i*) w));
+        $for N in range(16, NR, 16):
+          const __m512 vb${N//16} = _mm512_cvtph_ps(_mm256_loadu_si256((const __m256i*) ((const uint16_t*) w + ${N})));
+        w = (const xnn_float16*) w + ${NR};
+
+        $for M in range(MR):
+          const __m512 va${M} = _mm512_cvtph_ps(_mm256_set1_epi16((short) *a${M}));
+          a${M} += 1;
+
+        $for M in range(MR):
+          $for N in range(0, NR, 16):
+            $if ACCTYPE == "F32":
+              vacc${M}x${N//16} = _mm512_fmadd_ps(va${M}, vb${N//16}, vacc${M}x${N//16});
+            $else:
+              vacc${M}x${N//16} = _mm512_cvtph_ps(_mm512_cvtps_ph(_mm512_fmadd_ps(va${M}, vb${N//16}, vacc${M}x${N//16}), _MM_FROUND_TO_NEAREST_INT));
+
+        k -= sizeof(uint16_t);
+      } while (k != 0);
+      p -= ${MR} * sizeof(void*);
+    } while (p != 0);
+
+    $for N in range(0, NR, 16):
+      $for M in range(MR):
+        vacc${M}x${N//16} = _mm512_max_ps(vacc${M}x${N//16}, vmin);
+
+    $for N in range(0, NR, 16):
+      $for M in range(MR):
+        vacc${M}x${N//16} = _mm512_min_ps(vacc${M}x${N//16}, vmax);
+
+    if XNN_LIKELY(nc >= ${NR}) {
+      $for M in reversed(range(MR)):
+        _mm256_storeu_si256((__m256i*) c${M}, _mm512_cvtps_ph(vacc${M}x0, _MM_FROUND_TO_NEAREST_INT));
+        $for N in range(16, NR, 16):
+          _mm256_storeu_si256((__m256i*) (c${M} + ${N}), _mm512_cvtps_ph(vacc${M}x${N//16}, _MM_FROUND_TO_NEAREST_INT));
+        c${M} = (uint16_t*) ((uintptr_t) c${M} + cn_stride);
+
+      a = (const xnn_float16**restrict) ((uintptr_t) a - ks);
+      nc -= ${NR};
+    } else {
+      $for N in range(0, NR, 16):
+        const __mmask16 vmask${N//16} = _cvtu32_mask16((uint32_t) (((UINT64_C(1) << nc) - 1) >> ${N}));
+
+      $for M in reversed(range(MR)):
+        $for N in range(0, NR, 16):
+          _mm256_mask_storeu_epi16(c${M} + ${N}, vmask${N//16}, _mm512_cvtps_ph(vacc${M}x${N//16}, _MM_FROUND_TO_NEAREST_INT));
+      nc = 0;
+    }
+  } while (nc != 0);
+}

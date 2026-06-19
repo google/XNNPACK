@@ -1,0 +1,159 @@
+// Copyright 2019 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert CHANNEL_TILE % 16 == 0
+$assert KERNEL_TILE >= 2
+$assert ACCUMULATORS >= 1
+$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+#include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
+
+#include <immintrin.h>
+
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/microparams.h"
+#include "src/xnnpack/dwconv.h"
+#include "src/xnnpack/intrinsics-polyfill.h"
+
+
+void xnn_f32_dwconv_minmax_ukernel_${KERNEL_TILE}p${CHANNEL_TILE}c__avx512f${"" if ACCUMULATORS == 1 else "_acc%d" % ACCUMULATORS}(
+    size_t channels,
+    size_t output_width,
+    const float** input,
+    const float* weights,
+    float* output,
+    intptr_t input_stride,
+    size_t output_increment,
+    size_t input_offset,
+    size_t input_pixel_stride,
+    const float* zero,
+    const struct xnn_f32_minmax_params* restrict params)
+{
+  assert(channels != 0);
+  assert(output_width != 0);
+
+  const __m512 vmin = _mm512_set1_ps(params->scalar.min);
+  const __m512 vmax = _mm512_set1_ps(params->scalar.max);
+  do {
+    $for K in range(KERNEL_TILE):
+      const float* i${K} = input[${K}];
+      assert(i${K} != NULL);
+      if XNN_UNPREDICTABLE(i${K} != zero) {
+        i${K} = (const float*) ((uintptr_t) i${K} + input_offset);
+      }
+    input = (const float**) ((uintptr_t) input + input_stride);
+
+    size_t c = channels;
+    const float* w = weights;
+    for (; c >= ${CHANNEL_TILE}; c -= ${CHANNEL_TILE}) {
+      __m512 vacc${ABC[0:16]}p0 = _mm512_load_ps(w);
+      $for C in range(16, CHANNEL_TILE, 16):
+        __m512 vacc${ABC[C:C+16]}p0 = _mm512_load_ps(w + ${C});
+
+      $for K in range(KERNEL_TILE):
+
+        const __m512 vi${K}x${ABC[0:16]} = _mm512_loadu_ps(i${K});
+        $for C in range(16, CHANNEL_TILE, 16):
+          const __m512 vi${K}x${ABC[C:C+16]} = _mm512_loadu_ps(i${K} + ${C});
+        i${K} += ${CHANNEL_TILE};
+
+        $for C in range(0, CHANNEL_TILE, 16):
+          const __m512 vk${K}x${ABC[C:C+16]} = _mm512_load_ps(w + ${(K + 1) * CHANNEL_TILE + C});
+        $for C in range(0, CHANNEL_TILE, 16):
+          $if 1 <= K < ACCUMULATORS:
+            __m512 vacc${ABC[C:C+16]}p${K} = _mm512_mul_ps(vi${K}x${ABC[C:C+16]}, vk${K}x${ABC[C:C+16]});
+          $else:
+            vacc${ABC[C:C+16]}p${K % ACCUMULATORS} = _mm512_fmadd_ps(vi${K}x${ABC[C:C+16]}, vk${K}x${ABC[C:C+16]}, vacc${ABC[C:C+16]}p${K % ACCUMULATORS});
+
+      w += ${(KERNEL_TILE + 1) * CHANNEL_TILE};
+
+      $if ACCUMULATORS > 1:
+        // Add up all accumulators to vacc${ABC[0:CHANNEL_TILE]}p0
+        $ACC_SLICE = 1
+        $while ACC_SLICE < ACCUMULATORS:
+          $for A in range(0, ACCUMULATORS, ACC_SLICE * 2):
+            $if A + ACC_SLICE < ACCUMULATORS:
+              $for C in range(0, CHANNEL_TILE, 16):
+                vacc${ABC[C:C+16]}p${A} = _mm512_add_ps(vacc${ABC[C:C+16]}p${A}, vacc${ABC[C:C+16]}p${A + ACC_SLICE});
+          $ACC_SLICE *= 2
+
+      $for C in range(0, CHANNEL_TILE, 16):
+        __m512 vacc${ABC[C:C+16]} = _mm512_max_ps(vmin, vacc${ABC[C:C+16]}p0);
+      $for C in range(0, CHANNEL_TILE, 16):
+        vacc${ABC[C:C+16]} = _mm512_min_ps(vmax, vacc${ABC[C:C+16]});
+
+      _mm512_storeu_ps(output, vacc${ABC[0:16]});
+      $for C in range(16, CHANNEL_TILE, 16):
+        _mm512_storeu_ps(output + ${C}, vacc${ABC[C:C+16]});
+      output += ${CHANNEL_TILE};
+    }
+    $if CHANNEL_TILE > 16:
+      for (; c >= 16; c -= 16) {
+        __m512 vacc${ABC[0:16]}p0 = _mm512_load_ps(w);
+        $for K in range(KERNEL_TILE):
+
+          const __m512 vi${K}x${ABC[0:16]} = _mm512_loadu_ps(i${K});
+          i${K} += 16;
+
+          const __m512 vk${K}x${ABC[0:16]} = _mm512_load_ps(w + ${(K + 1) * CHANNEL_TILE});
+          $if 1 <= K < ACCUMULATORS:
+            __m512 vacc${ABC[0:16]}p${K} = _mm512_mul_ps(vi${K}x${ABC[0:16]}, vk${K}x${ABC[0:16]});
+          $else:
+            vacc${ABC[0:16]}p${K % ACCUMULATORS} = _mm512_fmadd_ps(vi${K}x${ABC[0:16]}, vk${K}x${ABC[0:16]}, vacc${ABC[0:16]}p${K % ACCUMULATORS});
+
+        w += 16;
+
+        $if ACCUMULATORS > 1:
+          // Add up all accumulators to vacc${ABC[0:16]}p0
+          $ACC_SLICE = 1
+          $while ACC_SLICE < ACCUMULATORS:
+            $for A in range(0, ACCUMULATORS, ACC_SLICE * 2):
+              $if A + ACC_SLICE < ACCUMULATORS:
+                vacc${ABC[0:16]}p${A} = _mm512_add_ps(vacc${ABC[0:16]}p${A}, vacc${ABC[0:16]}p${A + ACC_SLICE});
+            $ACC_SLICE *= 2
+
+        __m512 vacc${ABC[0:16]} = _mm512_max_ps(vmin, vacc${ABC[0:16]}p0);
+        vacc${ABC[0:16]} = _mm512_min_ps(vmax, vacc${ABC[0:16]});
+
+        _mm512_storeu_ps(output, vacc${ABC[0:16]});
+        output += 16;
+      }
+    if XNN_UNLIKELY(c != 0) {
+      assert(c >= 1);
+      assert(c <= 16);
+      // Prepare mask for valid 32-bit elements (depends on nc).
+      const __mmask16 vmask = _cvtu32_mask16((uint32_t) ((UINT32_C(1) << c) - UINT32_C(1)));
+
+      __m512 vacc${ABC[0:16]}p0 = _mm512_maskz_loadu_ps(vmask, w);
+      $for K in range(KERNEL_TILE):
+
+        const __m512 vi${K}x${ABC[0:16]} = _mm512_maskz_loadu_ps(vmask, i${K});
+        const __m512 vk${K}x${ABC[0:16]} = _mm512_maskz_loadu_ps(vmask, w + ${(K + 1) * CHANNEL_TILE});
+        $if 1 <= K < ACCUMULATORS:
+          __m512 vacc${ABC[0:16]}p${K} = _mm512_mul_ps(vi${K}x${ABC[0:16]}, vk${K}x${ABC[0:16]});
+        $else:
+          vacc${ABC[0:16]}p${K % ACCUMULATORS} = _mm512_fmadd_ps(vi${K}x${ABC[0:16]}, vk${K}x${ABC[0:16]}, vacc${ABC[0:16]}p${K % ACCUMULATORS});
+
+      $if ACCUMULATORS > 1:
+        // Add up all accumulators to vacc${ABC[0:16]}p0
+        $ACC_SLICE = 1
+        $while ACC_SLICE < ACCUMULATORS:
+          $for A in range(0, ACCUMULATORS, ACC_SLICE * 2):
+            $if A + ACC_SLICE < ACCUMULATORS:
+              vacc${ABC[0:16]}p${A} = _mm512_add_ps(vacc${ABC[0:16]}p${A}, vacc${ABC[0:16]}p${A + ACC_SLICE});
+          $ACC_SLICE *= 2
+
+      __m512 vacc${ABC[0:16]} = _mm512_max_ps(vmin, vacc${ABC[0:16]}p0);
+      vacc${ABC[0:16]} = _mm512_min_ps(vmax, vacc${ABC[0:16]});
+
+      _mm512_mask_storeu_ps(output, vmask, vacc${ABC[0:16]});
+      output += c;
+    }
+
+    input_offset += input_pixel_stride;
+    output = (float*) ((uintptr_t) output + output_increment);
+  } while (--output_width != 0);
+}

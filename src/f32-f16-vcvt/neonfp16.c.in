@@ -1,0 +1,64 @@
+// Copyright 2021 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert BATCH_TILE % 8 == 0
+$assert BATCH_TILE >= 8
+$SIMD_TILE = BATCH_TILE // 8
+#include <arm_neon.h>
+#include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
+
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/vcvt.h"
+
+
+void xnn_f32_f16_vcvt_ukernel__neonfp16_u${BATCH_TILE}(
+    size_t batch,
+    const float* input,
+    xnn_float16* output,
+    const void* params) XNN_OOB_READS
+{
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
+
+  uint16_t* o = (uint16_t*) output;
+  for (; batch >= ${BATCH_TILE} * sizeof(float); batch -= ${BATCH_TILE} * sizeof(float)) {
+    $for N in range(2*SIMD_TILE):
+      const float32x4_t vf${N} = vld1q_f32(input); input += 4;
+
+    $for N in range(SIMD_TILE):
+      const uint16x8_t vh${N} = vreinterpretq_u16_f16(vcombine_f16(vcvt_f16_f32(vf${2*N}), vcvt_f16_f32(vf${2*N+1})));
+
+    $for N in range(SIMD_TILE):
+      vst1q_u16(o, vh${N}); o += 8;
+  }
+  for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
+    const float32x4_t vf = vld1q_f32(input); input += 4;
+
+    const uint16x4_t vh = vreinterpret_u16_f16(vcvt_f16_f32(vf));
+
+    vst1_u16(o, vh); o += 4;
+  }
+  if XNN_UNLIKELY(batch != 0) {
+    assert(batch % sizeof(float) == 0);
+    assert(batch >= 1 * sizeof(float));
+    assert(batch <= 3 * sizeof(float));
+    const float32x4_t vf = vld1q_f32(input);
+
+    uint16x4_t vh = vreinterpret_u16_f16(vcvt_f16_f32(vf));
+
+    if (batch & (2 * sizeof(float))) {
+      vst1_lane_u32((void*) o, vreinterpret_u32_u16(vh), 0); o += 2;
+      vh = vext_u16(vh, vh, 2);
+    }
+    if (batch & (1 * sizeof(float))) {
+      vst1_lane_u16(o, vh, 0);
+    }
+  }
+}

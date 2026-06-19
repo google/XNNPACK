@@ -1,0 +1,178 @@
+// Copyright 2021 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert BATCH_TILE % 8 == 0
+$assert BATCH_TILE >= 8
+$SIMD_TILE = BATCH_TILE // 8
+#include <arm_neon.h>
+#include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
+
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/vcvt.h"
+
+
+void xnn_f32_f16_vcvt_ukernel__neon_u${BATCH_TILE}(
+    size_t batch,
+    const float* input,
+    xnn_float16* output,
+    const void* params) XNN_OOB_READS
+{
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
+
+  const uint32x4_t vexp_bias = vdupq_n_u32(UINT32_C(0x07800000));
+  const float32x4_t vscale_to_inf = vdupq_n_f32(0x1.0p+112f);
+  const uint32x4_t vexpw_max = vdupq_n_u32(UINT32_C(0x7F800000));
+  const float32x4_t vscale_to_zero = vdupq_n_f32(0x1.0p-110f);
+  const uint32x4_t vbias_min = vdupq_n_u32(UINT32_C(0x40000000));
+  const uint16x8_t vexph_mask = vdupq_n_u16(UINT16_C(0x7C00));
+  const uint16x8_t vmanth_mask = vdupq_n_u16(UINT16_C(0x0FFF));
+  const uint16x8_t vsignh_mask = vdupq_n_u16(UINT16_C(0x8000));
+  const uint16x8_t vnanh = vdupq_n_u16(UINT16_C(0x7E00));
+
+  // Only realizing a subset of these to match prior behavior.
+  XNN_FORCE_REALIZATION(vexp_bias);
+  XNN_FORCE_REALIZATION(vscale_to_inf);
+  XNN_FORCE_REALIZATION(vexpw_max);
+  XNN_FORCE_REALIZATION(vscale_to_zero);
+
+  uint16_t* o = (uint16_t*) output;
+  for (; batch >= ${BATCH_TILE} * sizeof(float); batch -= ${BATCH_TILE} * sizeof(float)) {
+    $for N in range(2*SIMD_TILE):
+      const float32x4_t vx${N} = vld1q_f32(input); input += 4;
+
+    $for N in range(2*SIMD_TILE):
+      const float32x4_t vabsx${N} = vabsq_f32(vx${N});
+
+    $for N in range(2*SIMD_TILE):
+      uint32x4_t vbias${N} = vaddq_u32(vreinterpretq_u32_f32(vabsx${N}), vexp_bias);
+
+    $for N in range(2*SIMD_TILE):
+      float32x4_t vf${N} = vmulq_f32(vabsx${N}, vscale_to_inf);
+    $for N in range(2*SIMD_TILE):
+      const uint32x4_t vnanmaskw${N} = vcgtq_u32(vreinterpretq_u32_f32(vabsx${N}), vexpw_max);
+
+    $for N in range(2*SIMD_TILE):
+      vbias${N} = vandq_u32(vbias${N}, vexpw_max);
+    $for N in range(2*SIMD_TILE):
+      vf${N} = vmulq_f32(vf${N}, vscale_to_zero);
+
+    $for N in range(SIMD_TILE):
+      const uint16x8_t vnanmaskh${N} = vcombine_u16(vmovn_u32(vnanmaskw${2*N}), vmovn_u32(vnanmaskw${2*N+1}));
+    $for N in range(2*SIMD_TILE):
+      vbias${N} = vmaxq_u32(vbias${N}, vbias_min);
+
+    $for N in range(2*SIMD_TILE):
+      vf${N} = vaddq_f32(vf${N}, vreinterpretq_f32_u32(vbias${N}));
+
+    $for N in range(SIMD_TILE):
+      uint16x8_t vexph${N} = vcombine_u16(vshrn_n_u32(vreinterpretq_u32_f32(vf${2*N}), 13), vshrn_n_u32(vreinterpretq_u32_f32(vf${2*N+1}), 13));
+    $for N in range(SIMD_TILE):
+      uint16x8_t vmanth${N} = vcombine_u16(vmovn_u32(vreinterpretq_u32_f32(vf${2*N})), vmovn_u32(vreinterpretq_u32_f32(vf${2*N+1})));
+    $for N in range(SIMD_TILE):
+      uint16x8_t vsignh${N} = vcombine_u16(vshrn_n_u32(vreinterpretq_u32_f32(vx${2*N}), 16), vshrn_n_u32(vreinterpretq_u32_f32(vx${2*N+1}), 16));
+
+    $for N in range(SIMD_TILE):
+      vexph${N} = vandq_u16(vexph${N}, vexph_mask);
+    $for N in range(SIMD_TILE):
+      vmanth${N} = vandq_u16(vmanth${N}, vmanth_mask);
+    $for N in range(SIMD_TILE):
+      vsignh${N} = vandq_u16(vsignh${N}, vsignh_mask);
+
+    $for N in range(SIMD_TILE):
+      uint16x8_t vh${N} = vaddq_u16(vmanth${N}, vexph${N});
+
+    $for N in range(SIMD_TILE):
+      vh${N} = vbslq_u16(vnanmaskh${N}, vnanh, vh${N});
+
+    $for N in range(SIMD_TILE):
+      vh${N} = vorrq_u16(vh${N}, vsignh${N});
+
+    $for N in range(SIMD_TILE):
+      vst1q_u16(o, vh${N}); o += 8;
+  }
+  for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
+    const float32x4_t vx = vld1q_f32(input); input += 4;
+
+    const float32x4_t vabsx = vabsq_f32(vx);
+
+    uint32x4_t vbias = vaddq_u32(vreinterpretq_u32_f32(vabsx), vexp_bias);
+
+    float32x4_t vf = vmulq_f32(vabsx, vscale_to_inf);
+    const uint32x4_t vnanmaskw = vcgtq_u32(vreinterpretq_u32_f32(vabsx), vexpw_max);
+
+    vbias = vandq_u32(vbias, vexpw_max);
+    vf = vmulq_f32(vf, vscale_to_zero);
+
+    const uint16x4_t vnanmaskh = vmovn_u32(vnanmaskw);
+    vbias = vmaxq_u32(vbias, vbias_min);
+
+    vf = vaddq_f32(vf, vreinterpretq_f32_u32(vbias));
+
+    uint16x4_t vexph = vshrn_n_u32(vreinterpretq_u32_f32(vf), 13);
+    uint16x4_t vmanth = vmovn_u32(vreinterpretq_u32_f32(vf));
+    uint16x4_t vsignh = vshrn_n_u32(vreinterpretq_u32_f32(vx), 16);
+
+    vexph = vand_u16(vexph, vget_low_u16(vexph_mask));
+    vmanth = vand_u16(vmanth, vget_low_u16(vmanth_mask));
+    vsignh = vand_u16(vsignh, vget_low_u16(vsignh_mask));
+
+    uint16x4_t vh = vadd_u16(vmanth, vexph);
+
+    vh = vbsl_u16(vnanmaskh, vget_low_u16(vnanh), vh);
+
+    vh = vorr_u16(vh, vsignh);
+
+    vst1_u16(o, vh); o += 4;
+  }
+  if XNN_UNLIKELY(batch != 0) {
+    assert(batch % sizeof(float) == 0);
+    assert(batch >= 1 * sizeof(float));
+    assert(batch <= 3 * sizeof(float));
+    const float32x4_t vx = vld1q_f32(input);
+
+    const float32x4_t vabsx = vabsq_f32(vx);
+
+    uint32x4_t vbias = vaddq_u32(vreinterpretq_u32_f32(vabsx), vexp_bias);
+
+    float32x4_t vf = vmulq_f32(vabsx, vscale_to_inf);
+    const uint32x4_t vnanmaskw = vcgtq_u32(vreinterpretq_u32_f32(vabsx), vexpw_max);
+
+    vbias = vandq_u32(vbias, vexpw_max);
+    vf = vmulq_f32(vf, vscale_to_zero);
+
+    const uint16x4_t vnanmaskh = vmovn_u32(vnanmaskw);
+    vbias = vmaxq_u32(vbias, vbias_min);
+
+    vf = vaddq_f32(vf, vreinterpretq_f32_u32(vbias));
+
+    uint16x4_t vexph = vshrn_n_u32(vreinterpretq_u32_f32(vf), 13);
+    uint16x4_t vmanth = vmovn_u32(vreinterpretq_u32_f32(vf));
+    uint16x4_t vsignh = vshrn_n_u32(vreinterpretq_u32_f32(vx), 16);
+
+    vexph = vand_u16(vexph, vget_low_u16(vexph_mask));
+    vmanth = vand_u16(vmanth, vget_low_u16(vmanth_mask));
+    vsignh = vand_u16(vsignh, vget_low_u16(vsignh_mask));
+
+    uint16x4_t vh = vadd_u16(vmanth, vexph);
+
+    vh = vbsl_u16(vnanmaskh, vget_low_u16(vnanh), vh);
+
+    vh = vorr_u16(vh, vsignh);
+
+    if (batch & (2 * sizeof(float))) {
+      vst1_lane_u32((void*) o, vreinterpret_u32_u16(vh), 0); o += 2;
+      vh = vext_u16(vh, vh, 2);
+    }
+    if (batch & (1 * sizeof(float))) {
+      vst1_lane_u16(o, vh, 0);
+    }
+  }
+}

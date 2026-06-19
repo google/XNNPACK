@@ -1,0 +1,62 @@
+// Copyright 2026 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$BATCH_TILES = tuple(int(bt) for bt in BATCH_TILES.split(","))
+$SIMD_SIZE = BATCH_TILES[0]
+#include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
+
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/microparams.h"
+#include "src/xnnpack/simd/f16-${ARCH}.h"
+#include "src/xnnpack/vunary.h"
+
+$for BATCH_TILE in BATCH_TILES:
+  $assert BATCH_TILE % SIMD_SIZE == 0
+  $assert BATCH_TILE >= SIMD_SIZE
+  $SIMD_TILE = BATCH_TILE // SIMD_SIZE
+
+  void xnn_f16_vsqrt_ukernel__${ARCH}_sqrt_u${BATCH_TILE}(
+      size_t batch,
+      const xnn_float16* input,
+      xnn_float16* output,
+      const struct xnn_f16_default_params* unused_params)
+  {
+    assert(batch != 0);
+    assert(batch % sizeof(xnn_float16) == 0);
+    assert(input != NULL);
+    assert(output != NULL);
+    assert(xnn_simd_size_f16 == ${SIMD_SIZE});
+
+    $if SIMD_TILE > 1:
+      for (; batch >= ${BATCH_TILE} * sizeof(xnn_float16); batch -= ${BATCH_TILE} * sizeof(xnn_float16)) {
+        $for N in range(SIMD_TILE):
+          xnn_simd_f16_t vx_${N} = xnn_loadu_f16(input + ${N} * xnn_simd_size_f16);
+        input += ${BATCH_TILE};
+
+        $for N in range(SIMD_TILE):
+          xnn_simd_f16_t vy_${N} = xnn_sqrt_f16(vx_${N});
+
+        $for N in range(SIMD_TILE):
+          xnn_storeu_f16(output + ${N} * xnn_simd_size_f16, vy_${N});
+        output += ${BATCH_TILE};
+      }
+    for (; batch >= xnn_simd_bytes_f16; batch -= xnn_simd_bytes_f16) {
+      xnn_simd_f16_t vx = xnn_loadu_f16(input);
+      input += ${SIMD_SIZE};
+
+      xnn_simd_f16_t vy = xnn_sqrt_f16(vx);
+
+      xnn_storeu_f16(output, vy);
+      output += ${SIMD_SIZE};
+    }
+    $if SIMD_SIZE > 1:
+      if XNN_UNLIKELY(batch != 0) {
+        xnn_simd_f16_t vx = xnn_load_tail_f16(input, batch >> XNN_LOG2_SIZEOF_FLOAT16);
+        xnn_simd_f16_t vy = xnn_sqrt_f16(vx);
+        xnn_store_tail_f16(output, vy, batch >> XNN_LOG2_SIZEOF_FLOAT16);
+      }
+  }
