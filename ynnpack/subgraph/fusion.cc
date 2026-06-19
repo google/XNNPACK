@@ -736,7 +736,7 @@ bool remove_static_broadcast_from_elementwise(ynn_subgraph& subgraph,
 
         const ynn_value& input = subgraph.value(id);
         return d < input.extents.size() &&
-               slinky::prove_true(input.extents[d] == broadcast->new_dims[d]);
+               slinky::prove_true(input.extent(d) == broadcast->new_dims[d]);
       };
       return !std::any_of(node.inputs.begin(), node.inputs.end(),
                           implicitly_broadcasts);

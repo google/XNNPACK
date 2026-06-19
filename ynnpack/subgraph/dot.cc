@@ -227,6 +227,7 @@ auto make_dot_impl(dot_type type, bool consistent_arithmetic, bool transposed_a,
     a.slice(0, slinky::in_bounds{c_m.min()});
     if (pack_b) {
       // If b is packed, we must slice b at blocks of n.
+      assert(c_n.min() % block_n == 0);
       b.slice({0, 1, 2});
       b.slice(0, slinky::in_bounds{c_n.min() / block_n});
     } else {
@@ -1202,12 +1203,6 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
     slinky::expr split_n, split_m, split_k;
     std::tie(split_n, split_m, split_k) =
         choose_split_factors(runtime, m, n, k, block_n);
-
-    if (slinky::prove_true(n <= block_n)) {
-      // We know n is smaller than the side of the area we want to compute,
-      // don't split it.
-      split_n = {};
-    }
 
     const int rank = output.rank();
     std::vector<int> loop_order;
