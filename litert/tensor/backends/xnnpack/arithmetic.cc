@@ -1190,6 +1190,10 @@ absl::Status OpMixin<ExpandDimsOperation, XnnpackMixinTag>::ToXnnpack(
         absl::StrFormat("%s: axis must be a constant tensor", op_name));
   }
   auto locked_axis = axis_info.buffer->Lock().As<const int32_t>();
+  if (locked_axis.size() == 0) {
+    return absl::InvalidArgumentError(
+        absl::StrFormat("%s: axis tensor must not be empty", op_name));
+  }
   int real_axis = locked_axis.data()[0];
 
   LRT_TENSOR_ASSIGN_OR_RETURN(const auto& input_info, graph::GetInfo(input));
@@ -1201,6 +1205,12 @@ absl::Status OpMixin<ExpandDimsOperation, XnnpackMixinTag>::ToXnnpack(
 
   if (real_axis < 0) {
     real_axis += input_info.shape.size() + 1;
+  }
+  if (real_axis < 0 ||
+      real_axis > static_cast<int>(input_info.shape.size())) {
+    return absl::InvalidArgumentError(absl::StrFormat(
+        "%s: axis %d is out of range for input of rank %d", op_name,
+        locked_axis.data()[0], static_cast<int>(input_info.shape.size())));
   }
   new_shape.insert(new_shape.begin() + real_axis, 1);
 
