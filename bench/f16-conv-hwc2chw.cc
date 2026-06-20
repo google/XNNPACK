@@ -87,7 +87,8 @@ static void f16_conv_hwc2chw(
   xnnpack::Buffer<xnn_float16> output(output_elements * num_buffers);
 
   xnn_f16_minmax_params params;
-  init_params(&params, 0x7C00 /* inf */, 0xFC00 /* -inf */);
+  init_params(&params, static_cast<xnn_float16>(-INFINITY),
+              static_cast<xnn_float16>(INFINITY));
 
   size_t buffer_index = 0;
   for (auto _ : state) {
