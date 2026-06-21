@@ -2386,6 +2386,10 @@ XNN_NO_SANITIZE_FUNCTION void xnn_pack_qb4_weights_and_biases(
   const size_t extra_bytes_bl = sizeof(uint16_t);
   const size_t extra_bytes_n = sizeof(uint32_t);
   if (flags & XNN_FLAG_TRANSPOSE_WEIGHTS) {
+    // In the transposed (GIO) layout the source kernel is
+    // [input_channels][output_channels] nibbles, so the source row stride is
+    // output_channels; `k_stride` above is the packed-output stride and would
+    // read out of bounds here.
     xnn_pack_qs8_qb4w_gemm_gio_w(
         /*g=*/groups,
         /*nc=*/output_channels,
@@ -2393,7 +2397,7 @@ XNN_NO_SANITIZE_FUNCTION void xnn_pack_qb4_weights_and_biases(
         /*nr=*/nr,
         /*kr=*/kr,
         /*sr=*/sr,
-        /*k_stride=*/k_stride,
+        /*k_stride=*/output_channels,
         /*bl=*/block_size,
         /*kernel=*/(const uint8_t*)weights,
         /*bias=*/nullptr,
