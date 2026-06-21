@@ -528,11 +528,16 @@ ynn_status ynn_define_fuse_dims(ynn_subgraph_t subgraph, size_t num_axes,
 
   ynn_node::fuse_dims op;
   for (size_t i = 0; i < num_axes; ++i) {
-    YNN_RETURN_IF_ERROR(
-        validate_axis("fuse_dims", "input", input.rank(), axes[i]));
     // Since we are reversing the axes, the first dimension to fuse is actually
     // the next dimension.
-    op.axes[axis_to_slinky_dim(input.rank(), axes[i] + 1)] = true;
+    const int dim = axis_to_slinky_dim(input.rank(), axes[i] + 1);
+    // Fusing the last (or an out of bounds) dimension fuses it with an implicit
+    // broadcast dimension, which is a no-op, so ignore it. This also keeps the
+    // shape propagation below from indexing past the end of the extents.
+    if (dim + 1 >= input.rank()) {
+      continue;
+    }
+    op.axes[dim] = true;
   }
 
   // Propagate shape.

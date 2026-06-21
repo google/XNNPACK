@@ -94,4 +94,34 @@ INSTANTIATE_TEST_SUITE_P(
                      testing::Range(2, YNN_MAX_TENSOR_RANK)),
     test_param_to_string<FuseDims::ParamType>);
 
+TEST(FuseDims, last_axis_is_noop) {
+  ReplicableRandomDevice rng;
+
+  // The last dimension has no following dimension to fuse with, so it fuses with
+  // an implicit broadcast dimension. Out of bounds axes are broadcast
+  // dimensions too. Both are a no-op and should be ignored, not rejected.
+  for (const std::vector<int32_t>& axes :
+       {std::vector<int32_t>{2}, std::vector<int32_t>{-1},
+        std::vector<int32_t>{5}}) {
+    const std::vector<size_t> shape = {2, 3, 4};
+    SubgraphBuilder subgraph(2);
+    subgraph.AddInput(ynn_type_fp32, shape, 0)
+        .AddOutput(ynn_type_fp32, shape.size(), 1)
+        .AddFuseDims(axes, 0, 1);
+
+    Runtime runtime(subgraph.GetSubgraph());
+    ASSERT_EQ(runtime.Status(), ynn_status_success);
+
+    Tensor<float> input(shape);
+    fill_random(input.data(), input.size(), rng);
+
+    runtime.ReshapeExternalTensor(shape, input.base(), 0).ReshapeRuntime();
+    ASSERT_EQ(runtime.GetExternalTensorShape(1), shape);
+
+    Tensor<float> output(shape);
+    runtime.SetupExternalTensor(output.base(), 1).InvokeRuntime();
+    ASSERT_THAT(output, testing::ElementsAreArray(input));
+  }
+}
+
 }  // namespace ynn
