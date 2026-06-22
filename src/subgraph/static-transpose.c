@@ -74,7 +74,15 @@ static enum xnn_status reshape_transpose_operator(
   assert(output_id < num_values);
 
   const size_t num_dims = opdata->shape1.num_dims;
-  assert(input->shape.num_dims == num_dims);
+  if (input->shape.num_dims != num_dims) {
+    xnn_log_error(
+      "failed to reshape %s operator with input ID #%" PRIu32
+      ": number of input dimensions (%zu) does not match the number of "
+      "permutation dimensions (%zu)",
+      xnn_node_type_to_string(xnn_node_type_static_transpose), input_id,
+      input->shape.num_dims, num_dims);
+    return xnn_status_invalid_parameter;
+  }
 
   switch (opdata->operator_objects[0]->type) {
     case xnn_operator_type_transpose_nd_x16: {

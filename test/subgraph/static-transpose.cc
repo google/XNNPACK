@@ -85,4 +85,31 @@ INSTANTIATE_TEST_SUITE_P(Transpose, TransposeQU8, rank_params);
 INSTANTIATE_TEST_SUITE_P(Transpose, TransposeF16, rank_params);
 INSTANTIATE_TEST_SUITE_P(Transpose, TransposeF32, rank_params);
 
+#ifndef XNNPACK_USE_YNNPACK
+TEST(Transpose, reshape_rejects_input_rank_mismatch) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+
+  // The permutation fixes the operator rank at define time. An external input
+  // may be reshaped to a different rank at runtime; the reshape must reject the
+  // mismatch instead of transposing with a stale dimension count and reading
+  // past the input buffer.
+  const std::vector<size_t> perm = {2, 0, 1};
+  SubgraphTester subgraph(2);
+  subgraph.AddInputTensor(3, xnn_datatype_fp32, 0)
+      .AddOutputTensor(3, xnn_datatype_fp32, 1)
+      .AddTranspose(perm, 0, 1);
+  if (subgraph.CreateRuntime() == xnn_status_unsupported_hardware) {
+    GTEST_SKIP();
+  }
+
+  std::vector<float> data(6, 0.0f);
+  subgraph.ReshapeExternalTensor(std::vector<size_t>({2, 3}), data.data(), 0)
+      .ReshapeRuntime();
+  EXPECT_EQ(subgraph.Status(), xnn_status_invalid_parameter);
+}
+#else
+// In YNNPACK transpose can add or remove dimensions, so a rank mismatch is not
+// an error.
+#endif  // XNNPACK_USE_YNNPACK
+
 }  // namespace xnnpack
