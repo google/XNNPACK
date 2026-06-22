@@ -85,6 +85,7 @@ INSTANTIATE_TEST_SUITE_P(Transpose, TransposeQU8, rank_params);
 INSTANTIATE_TEST_SUITE_P(Transpose, TransposeF16, rank_params);
 INSTANTIATE_TEST_SUITE_P(Transpose, TransposeF32, rank_params);
 
+#ifndef XNNPACK_USE_YNNPACK
 TEST(Transpose, reshape_rejects_input_rank_mismatch) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
 
@@ -106,5 +107,9 @@ TEST(Transpose, reshape_rejects_input_rank_mismatch) {
       .ReshapeRuntime();
   EXPECT_EQ(subgraph.Status(), xnn_status_invalid_parameter);
 }
+#else
+// In YNNPACK transpose can add or remove dimensions, so a rank mismatch is not
+// an error.
+#endif  // XNNPACK_USE_YNNPACK
 
 }  // namespace xnnpack
