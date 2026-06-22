@@ -489,7 +489,8 @@ bool is_broadcast_noop(const ynn_subgraph& subgraph, const ynn_node& node,
     return true;
   } else if (const auto* g = std::get_if<ynn_node::gather>(&node.op)) {
     const ynn_value& table = subgraph.value(node.inputs[0]);
-    if (table.rank() == 1 && g->axis == 0 && input_id == node.inputs[1]) {
+    if (table.rank() == 1 && g->axes.size() == 1 && g->axes[0] == 0 &&
+        input_id == node.inputs[1]) {
       return true;
     }
   } else if (const auto* t =

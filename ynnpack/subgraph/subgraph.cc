@@ -1093,7 +1093,7 @@ void print(std::ostream& os, const ynn_node::even_split& op) {
 
 void print(std::ostream& os, const ynn_node::copy& op) { os << "copy"; }
 void print(std::ostream& os, const ynn_node::gather& op) {
-  os << "axis=" << op.axis;
+  os << "axes=" << op.axes;
 }
 
 void print(std::ostream& os, const ynn_node::fuse_dim& op) {

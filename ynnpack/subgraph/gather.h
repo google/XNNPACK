@@ -6,13 +6,16 @@
 #ifndef XNNPACK_YNNPACK_SUBGRAPH_GATHER_H_
 #define XNNPACK_YNNPACK_SUBGRAPH_GATHER_H_
 
+#include <cstddef>
 #include <cstdint>
+#include <vector>
 
 #include "ynnpack/subgraph/subgraph.h"
 
 namespace ynn {
 
-void define_gather(ynn_subgraph& subgraph, ynn_node& node, int32_t axis,
+void define_gather(ynn_subgraph& subgraph, ynn_node& node,
+                   std::vector<int32_t> axes, size_t output_rank,
                    uint32_t input_id, uint32_t index_id, uint32_t& output_id);
 
 }  // namespace ynn

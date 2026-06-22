@@ -262,11 +262,21 @@ enum ynn_status ynn_define_binary(ynn_subgraph_t subgraph,
                                   uint32_t* output_id, uint32_t flags);
 
 // Defines a gather operation. This computes:
-// `output[...i, j, ...k] = input[...i, index[...i, j, ...k], ...k]`, where `j`
-// is the `axis` dimension. This operation supports broadcasting of the input,
-// but not the index. Such broadcasting should be performed with a subsequent
-// broadcast operation.
-enum ynn_status ynn_define_gather(ynn_subgraph_t subgraph, int32_t axis,
+//
+//   output[i, j, k, ...] = input[
+//     index[index_of(axes, 0), i, j, k, ...] if 0 in axes else i,
+//     index[index_of(axes, 1), i, j, k, ...] if 1 in axes else j,
+//     index[index_of(axes, 2), i, j, k, ...] if 2 in axes else k,
+//     ...]
+//
+// If `num_axes == 1`, the first dimension of `index` (which would have size 1)
+// may be omitted. In this case, the operation computes:
+//
+//   output[i, j, k, ...] = input[..., index[i, j, k, ...], ...]
+//
+// where the `index` tensor replaces the gathered axis.
+enum ynn_status ynn_define_gather(ynn_subgraph_t subgraph, size_t num_axes,
+                                  const int32_t* axes, size_t output_rank,
                                   uint32_t input_id, uint32_t index_id,
                                   uint32_t* output_id, uint32_t flags);
 

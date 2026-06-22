@@ -345,8 +345,8 @@ bool rewrite_subgraph_for_unary_lut(ynn_subgraph& subgraph,
     gather_index_id = converted_id;
   }
 
-  define_gather(subgraph, *output_node, 0, lut_id, gather_index_id,
-                best_candidate.output_id());
+  define_gather(subgraph, *output_node, /*axes=*/{0}, output_value.rank(),
+                lut_id, gather_index_id, best_candidate.output_id());
   subgraph.topological_sort();
   return true;
 }

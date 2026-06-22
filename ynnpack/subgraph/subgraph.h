@@ -315,12 +315,12 @@ struct ynn_node {
     friend bool operator<(const copy&, const copy&) { return false; }
   };
   struct gather {
-    int32_t axis;
+    std::vector<int32_t> axes;
     friend bool operator==(const gather& a, const gather& b) {
-      return a.axis == b.axis;
+      return a.axes == b.axes;
     }
     friend bool operator<(const gather& a, const gather& b) {
-      return a.axis < b.axis;
+      return a.axes < b.axes;
     }
   };
   struct fuse_dim {
