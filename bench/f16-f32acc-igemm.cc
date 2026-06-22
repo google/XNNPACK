@@ -119,9 +119,8 @@ static void f16_igemm(benchmark::State& state,
 
   // Prepare minmax parameters.
   xnn_f16_minmax_params params;
-  // TODO: min = INFINITY, max = -INFINITY?!
-  init_params(&params, static_cast<xnn_float16>(INFINITY),
-              static_cast<xnn_float16>(-INFINITY));
+  init_params(&params, static_cast<xnn_float16>(-INFINITY),
+              static_cast<xnn_float16>(INFINITY));
 
   size_t buffer_index = 0;
   for (auto _ : state) {
