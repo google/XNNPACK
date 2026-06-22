@@ -52,6 +52,7 @@ enum xnn_status create_pack_lh(uint32_t flags,
     xnn_log_error("failed to allocate %zu bytes for %s operator descriptor",
                   sizeof(struct compute_parameters),
                   xnn_operator_type_to_string(expected_operator_type));
+    xnn_delete_operator(pack_lh_op);
     return xnn_status_out_of_memory;
   }
   pack_lh_op->num_compute_invocations = 1;
