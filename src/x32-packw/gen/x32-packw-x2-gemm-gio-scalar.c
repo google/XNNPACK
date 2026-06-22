@@ -70,6 +70,7 @@ void xnn_x32_packw_gemm_gio_ukernel_x2__scalar(
         w += k_stride;
         packed_w += 2;
       }
+      packed_w = (uint32_t*) ((uintptr_t) packed_w + extra_bytes);
       w = w - kc * k_stride + 2;  // Advance to next column of 2 uint32_t
     }
 
@@ -97,6 +98,7 @@ void xnn_x32_packw_gemm_gio_ukernel_x2__scalar(
         w += k_stride;
         packed_w += 2;
       }
+      packed_w = (uint32_t*) ((uintptr_t) packed_w + extra_bytes);
     }
     weights += nc * kc;
   } while (--g != 0);

@@ -762,7 +762,7 @@ ynn_runtime::ynn_runtime(ynn::ref_count<const ynn_subgraph> subgraph,
 
       value.buffer =
           slinky::buffer_expr::make_constant(value.symbol, value.data);
-    } else if (value.is_external_input()) {
+    } else if (value.is_external()) {
       value.make_buffer(*this);
 
       for (size_t d = 0; d < value.extents.size(); ++d) {
@@ -774,11 +774,13 @@ ynn_runtime::ynn_runtime(ynn::ref_count<const ynn_subgraph> subgraph,
         }
       }
 
-      if (!value.data) {
-        value.data =
-            slinky::raw_buffer::make(i.rank(), ynn::type_size_bytes(i.type));
-      } else {
-        assert(value.data->rank == value.rank());
+      if (value.is_external_input()) {
+        if (!value.data) {
+          value.data =
+              slinky::raw_buffer::make(i.rank(), ynn::type_size_bytes(i.type));
+        } else {
+          assert(value.data->rank == value.rank());
+        }
       }
     }
   }

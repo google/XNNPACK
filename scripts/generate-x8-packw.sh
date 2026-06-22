@@ -159,5 +159,21 @@ tools/xngen src/x8-packw/kr-avxvnni.c.in -D NR=16 -D KR=8 -D DATATYPE=QS4 -D TYP
 tools/xngen src/x8-packw/kr-wasmdot.c.in -D NR=8  -D KR=8 -D TYPE=int8_t -D IZP=0   -o src/qs8-packw/gen/qs8-packw-x8c8-gemm-goi-wasmrelaxedsimd.c &
 tools/xngen src/x8-packw/kr-wasmdot.c.in -D NR=8  -D KR=8 -D TYPE=int8_t -D IZP=128 -o src/qs8-qu8-packw/gen/qs8-qu8-packw-x8c8-gemm-goi-wasmrelaxedsimd.c &
 
+################################### GIO Scalar ###################################
+tools/xngen src/x8-packw/gio-scalar.c.in -D NR=2  -o src/x8-packw/gen/x8-packw-x2-gemm-gio-scalar.c &
+tools/xngen src/x8-packw/gio-scalar.c.in -D NR=4  -o src/x8-packw/gen/x8-packw-x4-gemm-gio-scalar.c &
+tools/xngen src/x8-packw/gio-scalar.c.in -D NR=8  -o src/x8-packw/gen/x8-packw-x8-gemm-gio-scalar.c &
+tools/xngen src/x8-packw/gio-scalar.c.in -D NR=16 -o src/x8-packw/gen/x8-packw-x16-gemm-gio-scalar.c &
+tools/xngen src/x8-packw/gio-scalar.c.in -D NR=32 -o src/x8-packw/gen/x8-packw-x32-gemm-gio-scalar.c &
+tools/xngen src/x8-packw/gio-scalar.c.in -D NR=64 -o src/x8-packw/gen/x8-packw-x64-gemm-gio-scalar.c &
+
+################################## ARM NEON ###################################
+tools/xngen src/x8-packw/gio-simd.c.in -D BATCH_TILES=16,32,48,64 -D PREFETCH=0 -D KBLOCK=2 -D ARCH=neon -o src/x8-packw/gen/x8-packw-gio-neon-u2.c &
+
+################################## Wasm SIMD ##################################
+tools/xngen src/x8-packw/gio-simd.c.in -D BATCH_TILES=16,32,48,64 -D PREFETCH=0 -D KBLOCK=2 -D ARCH=wasmsimd -o src/x8-packw/gen/x8-packw-gio-wasmsimd-u2.c &
+
+################################## Hexagon HVX #################################
+tools/xngen src/x8-packw/gio-simd.c.in -D BATCH_TILES=128,256 -D PREFETCH=0 -D KBLOCK=2 -D ARCH=hvx -o src/x8-packw/gen/x8-packw-gio-hvx-u2.c &
 
 wait

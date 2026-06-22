@@ -9,6 +9,8 @@ import("//build/dotfile_settings.gni")
 # The location of the build configuration file.
 buildconfig = "//build/config/BUILDCONFIG.gn"
 
+expand_directory_allowlist = build_dotfile_settings.expand_directory_allowlist
+
 # The python interpreter to use by default. On Windows, this will look
 # for python3.exe and python3.bat.
 script_executable = "python3"

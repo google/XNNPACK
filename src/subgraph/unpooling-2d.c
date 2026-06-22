@@ -67,8 +67,24 @@ static enum xnn_status reshape_unpooling_operator(
   const size_t old_workspace_size = opdata->workspace_size;
   size_t output_height, output_width;
 
-  (void)index_id;
-  assert(channel_dim == values[index_id].shape.dim[3]);
+  // The compute kernel walks the index input with strides taken from the value
+  // shape (one index per value element), so the index input must carry the same
+  // shape as the value input. This was only an assert, which is compiled out
+  // under NDEBUG and left an out-of-bounds read of the index buffer when a
+  // smaller index tensor was supplied at runtime.
+  const struct xnn_runtime_value* index_value = values + index_id;
+  if (index_value->shape.num_dims != 4 ||
+      index_value->shape.dim[0] != batch_size ||
+      index_value->shape.dim[1] != input_height ||
+      index_value->shape.dim[2] != input_width ||
+      index_value->shape.dim[3] != channel_dim) {
+    xnn_log_error(
+      "failed to reshape %s operator with index ID #%" PRIu32
+      ": index shape must match the value shape [%zu, %zu, %zu, %zu]",
+      xnn_node_type_to_string(xnn_node_type_unpooling_2d), index_id,
+      batch_size, input_height, input_width, channel_dim);
+    return xnn_status_invalid_parameter;
+  }
 
   status = xnn_reshape_unpooling2d_nhwc_x32(
     opdata->operator_objects[0],

@@ -80,6 +80,7 @@ void xnn_x32_packw_gemm_gio_ukernel_x4__neon_u2(
         w += k_stride;
         packed_w += 4;
       }
+      packed_w = (int32_t*) ((uintptr_t) packed_w + extra_bytes);
       w = w - kc * k_stride + 4;  // Advance to next column of 4 int32_t
     }
 
@@ -104,6 +105,7 @@ void xnn_x32_packw_gemm_gio_ukernel_x4__neon_u2(
         w += k_stride;
         packed_w += 4;
       }
+      packed_w = (int32_t*) ((uintptr_t) packed_w + extra_bytes);
     }
     weights += nc * kc;
   } while (--g != 0);
@@ -180,6 +182,7 @@ void xnn_x32_packw_gemm_gio_ukernel_x8__neon_u2(
         w += k_stride;
         packed_w += 8;
       }
+      packed_w = (int32_t*) ((uintptr_t) packed_w + extra_bytes);
       w = w - kc * k_stride + 8;  // Advance to next column of 8 int32_t
     }
 
@@ -210,6 +213,7 @@ void xnn_x32_packw_gemm_gio_ukernel_x8__neon_u2(
         w += k_stride;
         packed_w += 8;
       }
+      packed_w = (int32_t*) ((uintptr_t) packed_w + extra_bytes);
     }
     weights += nc * kc;
   } while (--g != 0);
@@ -295,6 +299,7 @@ void xnn_x32_packw_gemm_gio_ukernel_x12__neon_u2(
         w += k_stride;
         packed_w += 12;
       }
+      packed_w = (int32_t*) ((uintptr_t) packed_w + extra_bytes);
       w = w - kc * k_stride + 12;  // Advance to next column of 12 int32_t
     }
 
@@ -331,6 +336,7 @@ void xnn_x32_packw_gemm_gio_ukernel_x12__neon_u2(
         w += k_stride;
         packed_w += 12;
       }
+      packed_w = (int32_t*) ((uintptr_t) packed_w + extra_bytes);
     }
     weights += nc * kc;
   } while (--g != 0);
@@ -425,6 +431,7 @@ void xnn_x32_packw_gemm_gio_ukernel_x16__neon_u2(
         w += k_stride;
         packed_w += 16;
       }
+      packed_w = (int32_t*) ((uintptr_t) packed_w + extra_bytes);
       w = w - kc * k_stride + 16;  // Advance to next column of 16 int32_t
     }
 
@@ -467,6 +474,7 @@ void xnn_x32_packw_gemm_gio_ukernel_x16__neon_u2(
         w += k_stride;
         packed_w += 16;
       }
+      packed_w = (int32_t*) ((uintptr_t) packed_w + extra_bytes);
     }
     weights += nc * kc;
   } while (--g != 0);

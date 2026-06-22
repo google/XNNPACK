@@ -140,6 +140,7 @@ void xnn_x32_packw_gemm_gio_ukernel_x16__scalar(
         w += k_stride;
         packed_w += 16;
       }
+      packed_w = (uint32_t*) ((uintptr_t) packed_w + extra_bytes);
       w = w - kc * k_stride + 16;  // Advance to next column of 16 uint32_t
     }
 
@@ -181,6 +182,7 @@ void xnn_x32_packw_gemm_gio_ukernel_x16__scalar(
         w += k_stride;
         packed_w += 16;
       }
+      packed_w = (uint32_t*) ((uintptr_t) packed_w + extra_bytes);
     }
     weights += nc * kc;
   } while (--g != 0);

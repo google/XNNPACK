@@ -96,6 +96,7 @@ $for NR in BATCH_TILES:
           w += k_stride;
           packed_w += ${NR};
         }
+        packed_w = (int32_t*) ((uintptr_t) packed_w + extra_bytes);
         w = w - kc * k_stride + ${NR};  // Advance to next column of ${NR} int32_t
       }
 
@@ -129,6 +130,7 @@ $for NR in BATCH_TILES:
           w += k_stride;
           packed_w += ${NR};
         }
+        packed_w = (int32_t*) ((uintptr_t) packed_w + extra_bytes);
       }
       weights += nc * kc;
     } while (--g != 0);

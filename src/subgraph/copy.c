@@ -562,7 +562,8 @@ enum xnn_status xnn_define_static_expand_dims(
 enum xnn_status xnn_define_fuse_dims(
     xnn_subgraph_t subgraph, size_t axis, size_t axes_count,
     uint32_t input_id, uint32_t output_id, uint32_t flags) {
-  if (axis + axes_count > XNN_MAX_TENSOR_DIMS) {
+  if (axis > XNN_MAX_TENSOR_DIMS || axes_count > XNN_MAX_TENSOR_DIMS ||
+      axis + axes_count > XNN_MAX_TENSOR_DIMS) {
     xnn_log_error(
         "failed to define %s operator with %zu-dimensional input shape: at "
         "most %zu dimensions are supported",
@@ -585,7 +586,8 @@ enum xnn_status xnn_define_split_dim(xnn_subgraph_t subgraph,
                                              uint32_t input_id,
                                              uint32_t output_id,
                                              uint32_t flags) {
-  if (axis + num_splits > XNN_MAX_TENSOR_DIMS) {
+  if (axis > XNN_MAX_TENSOR_DIMS || num_splits > XNN_MAX_TENSOR_DIMS ||
+      axis + num_splits > XNN_MAX_TENSOR_DIMS) {
     xnn_log_error(
         "failed to define %s operator with %zu-dimensional output shape: at "
         "most %zu dimensions are supported",

@@ -736,7 +736,7 @@ bool remove_static_broadcast_from_elementwise(ynn_subgraph& subgraph,
 
         const ynn_value& input = subgraph.value(id);
         return d < input.extents.size() &&
-               slinky::prove_true(input.extents[d] == broadcast->new_dims[d]);
+               slinky::prove_true(input.extent(d) == broadcast->new_dims[d]);
       };
       return !std::any_of(node.inputs.begin(), node.inputs.end(),
                           implicitly_broadcasts);
@@ -1154,7 +1154,7 @@ bool rewrite_dequantize_dot(ynn_subgraph& subgraph, ynn_node& node,
   const ynn_node::dot* dot_op = std::get_if<ynn_node::dot>(&dot_node->op);
   if (!dot_op || dot_node->inputs.size() < 2) return false;
 
-  uint32_t input_c_id = dot_node->inputs[1];
+  uint32_t input_c_id = dot_node->inputs[2];
   ynn_node* input_c_producer = analysis.producer_of(input_c_id);
   if (!input_c_producer ||
       !is_ternary_node(*input_c_producer, ternary_op::subtract_multiply)) {
@@ -1190,7 +1190,7 @@ bool rewrite_dequantize_dot(ynn_subgraph& subgraph, ynn_node& node,
       output.type, YNN_INVALID_VALUE_ID, YNN_INVALID_VALUE_ID, 0.0f);
 
   uint32_t input1_id = dot_node->inputs[1];
-  dot_node->inputs[1] = YNN_INVALID_VALUE_ID;
+  dot_node->inputs[2] = YNN_INVALID_VALUE_ID;
   bool result = ynn::define_dequantize_dot(
       subgraph, node, output.type, dot_node->outputs[0], a_offset_id,
       b_offset_id, a_scale_id, b_scale_id, offset_id, node.outputs[0],
@@ -1198,7 +1198,7 @@ bool rewrite_dequantize_dot(ynn_subgraph& subgraph, ynn_node& node,
   if (!result) {
     // There is no kernel for dequantize_dot, so don't do rewrite and restore
     // the old value.
-    dot_node->inputs[1] = input1_id;
+    dot_node->inputs[2] = input1_id;
   }
   return result;
 }

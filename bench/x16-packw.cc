@@ -15,9 +15,14 @@
   BENCHMARK_CAPTURE_BGEMM(x16_packw, ukernel##_, ukernel, nr, kr, sr,         \
                           arch_flags);
 
+#define XNN_GIO_UKERNEL(arch_flags, ukernel, nr, kr, sr, kblock, nr_scale)    \
+  BENCHMARK_CAPTURE_BGEMM(x16_gio_packw, ukernel##_, ukernel, nr, kr, sr,     \
+                          arch_flags);
+
 #include "src/x16-packw/x16-packw.inc"
 
 #undef XNN_UKERNEL
+#undef XNN_GIO_UKERNEL
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
 XNN_BENCHMARK_MAIN();

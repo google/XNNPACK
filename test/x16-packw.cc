@@ -29,12 +29,14 @@ std::string GetTestName(
 
 #define XNN_UKERNEL(arch_flags, ukernel, nr, kr, sr, kblock, nr_scale) \
   {#ukernel, ukernel, arch_flags, nr, kr, sr, kblock, nr_scale},
+#define XNN_GIO_UKERNEL(arch_flags, ukernel, nr, kr, sr, kblock, nr_scale)
 
 const XnnTestParam xnn_test_params[] = {
 #include "src/x16-packw/x16-packw.inc"
 };
 
 #undef XNN_UKERNEL
+#undef XNN_GIO_UKERNEL
 
 TEST_P(XnnTest, k_eq_kblock) {
   TEST_REQUIRES_ARCH_FLAGS(GetParam().arch_flags);
@@ -249,4 +251,70 @@ TEST_P(XnnTest, null_bias) {
 INSTANTIATE_TEST_SUITE_P(x16_packw, XnnTest, testing::ValuesIn(xnn_test_params),
                          GetTestName);
 
+struct XnnTestGIOParam {
+  const char* name;
+  xnn_x16_packw_gemm_gio_ukernel_fn ukernel;
+  uint64_t arch_flags;
+  size_t nr, kr, sr, kblock, nr_scale;
+};
+
+class XnnTestGIO : public testing::TestWithParam<XnnTestGIOParam> {};
+
+std::string GetTestGIOName(
+    const testing::TestParamInfo<XnnTestGIO::ParamType>& info) {
+  return info.param.name;
+}
+
+#define XNN_GIO_UKERNEL(arch_flags, ukernel, nr, kr, sr, kblock, nr_scale) \
+  {#ukernel, ukernel, arch_flags, nr, kr, sr, kblock, nr_scale},
+#define XNN_UKERNEL(arch_flags, ukernel, nr, kr, sr, kblock, nr_scale)
+
+const XnnTestGIOParam xnn_test_gio_params[] = {
+#include "src/x16-packw/x16-packw.inc"
+};
+
+#undef XNN_UKERNEL
+#undef XNN_GIO_UKERNEL
+
+TEST_P(XnnTestGIO, k_eq_kblock) {
+  TEST_REQUIRES_ARCH_FLAGS(GetParam().arch_flags);
+  PackWMicrokernelTester()
+      .n(GetParam().nr * GetParam().nr_scale)
+      .k(GetParam().kblock)
+      .nr(GetParam().nr * GetParam().nr_scale)
+      .kr(GetParam().kr)
+      .sr(GetParam().sr)
+      .Test(GetParam().ukernel);
+}
+
+TEST_P(XnnTestGIO, null_bias) {
+  TEST_REQUIRES_ARCH_FLAGS(GetParam().arch_flags);
+  PackWMicrokernelTester()
+      .nullbias(true)
+      .n(GetParam().nr * GetParam().nr_scale)
+      .k(GetParam().kblock)
+      .nr(GetParam().nr * GetParam().nr_scale)
+      .kr(GetParam().kr)
+      .sr(GetParam().sr)
+      .Test(GetParam().ukernel);
+}
+
+TEST_P(XnnTestGIO, n_lt_nr) {
+  TEST_REQUIRES_ARCH_FLAGS(GetParam().arch_flags);
+  for (size_t n = 1; n < GetParam().nr * GetParam().nr_scale; n++) {
+    PackWMicrokernelTester()
+        .n(n)
+        .k(GetParam().kblock)
+        .nr(GetParam().nr * GetParam().nr_scale)
+        .kr(GetParam().kr)
+        .sr(GetParam().sr)
+        .Test(GetParam().ukernel);
+  }
+}
+
+INSTANTIATE_TEST_SUITE_P(x16_packw_gio, XnnTestGIO,
+                         testing::ValuesIn(xnn_test_gio_params),
+                         GetTestGIOName);
+
 }  // namespace
+

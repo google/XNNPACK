@@ -238,11 +238,6 @@ std::vector<slinky::expr> make_split_factors(
       s = globals.get(s, "s");
       splits[d] = s;
     }
-    if (splits[d].defined() && slinky::prove_true(splits[d] >= extents[d])) {
-      // TODO(b/458542243): We should not need to do this optimization
-      // ourselves.
-      splits[d] = {};
-    }
     if (splits[d].defined()) {
       tile_area_so_far = slinky::simplify(tile_area_so_far * splits[d]);
     } else {

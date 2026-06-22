@@ -2543,6 +2543,14 @@ enum xnn_status xnn_create_convolution2d_nhwc_pf32_f16(
     size_t output_channel_stride, const void* kernel, const void* bias,
     float output_min, float output_max, uint32_t flags,
     xnn_weights_cache_t weights_cache, xnn_operator_t* convolution_op_out) {
+  const struct xnn_gemm_config* gemm_config = xnn_init_pf32_gemm_config();
+  if (gemm_config == NULL) {
+    xnn_log_error(
+        "failed to create %s operator: unsupported hardware configuration",
+        xnn_operator_type_to_string(xnn_operator_type_convolution_nhwc_pf32));
+    return xnn_status_unsupported_hardware;
+  }
+
   // Convert the `f16` kernel and bias to `f32` in temporary buffers.
   const size_t num_kernel_entries = groups * group_input_channels *
                                     group_output_channels * kernel_width *
@@ -2565,14 +2573,6 @@ enum xnn_status xnn_create_convolution2d_nhwc_pf32_f16(
     }
   } else {
     bias_buffer = bias;
-  }
-
-  const struct xnn_gemm_config* gemm_config = xnn_init_pf32_gemm_config();
-  if (gemm_config == NULL) {
-    xnn_log_error(
-        "failed to create %s operator: unsupported hardware configuration",
-        xnn_operator_type_to_string(xnn_operator_type_convolution_nhwc_pf32));
-    return xnn_status_unsupported_hardware;
   }
 
   // Delegate creation to the `pf32` operator.

@@ -311,7 +311,6 @@ NON_PROD_SSE41_MICROKERNEL_SRCS = [
     "src/s8-rminmax/gen/s8-rminmax-sse41-u64-acc2.c",
     "src/s8-rminmax/gen/s8-rminmax-sse41-u64-acc4.c",
     "src/u8-ibilinear/gen/u8-ibilinear-sse41-u8.c",
-    "src/x32-packw/gen/x32-packw-gio-sse41-u2.c",
 ]
 
 ALL_SSE41_MICROKERNEL_SRCS = PROD_SSE41_MICROKERNEL_SRCS + NON_PROD_SSE41_MICROKERNEL_SRCS

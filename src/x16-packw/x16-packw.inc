@@ -12,6 +12,13 @@ XNN_UKERNEL(xnn_arch_none, xnn_x16_packw_gemm_goi_ukernel_x16__scalar_int_u4, 16
 XNN_UKERNEL(xnn_arch_none, xnn_x16_packw_gemm_goi_ukernel_x32__scalar_int_u4, 32, 1, 1, 4, 1)
 XNN_UKERNEL(xnn_arch_none, xnn_x16_packw_gemm_goi_ukernel_x64__scalar_int_u4, 64, 1, 1, 4, 1)
 
+XNN_GIO_UKERNEL(xnn_arch_none, xnn_x16_packw_gemm_gio_ukernel_x2__scalar, 2, 1, 1, 1, 1)
+XNN_GIO_UKERNEL(xnn_arch_none, xnn_x16_packw_gemm_gio_ukernel_x4__scalar, 4, 1, 1, 1, 1)
+XNN_GIO_UKERNEL(xnn_arch_none, xnn_x16_packw_gemm_gio_ukernel_x8__scalar, 8, 1, 1, 1, 1)
+XNN_GIO_UKERNEL(xnn_arch_none, xnn_x16_packw_gemm_gio_ukernel_x16__scalar, 16, 1, 1, 1, 1)
+XNN_GIO_UKERNEL(xnn_arch_none, xnn_x16_packw_gemm_gio_ukernel_x32__scalar, 32, 1, 1, 1, 1)
+XNN_GIO_UKERNEL(xnn_arch_none, xnn_x16_packw_gemm_gio_ukernel_x64__scalar, 64, 1, 1, 1, 1)
+
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
 XNN_UKERNEL(xnn_arch_arm_neon, xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_u4, 8, 1, 1, 4, 1)
 XNN_UKERNEL(xnn_arch_arm_neon, xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_u4_prfm, 8, 1, 1, 4, 1)
