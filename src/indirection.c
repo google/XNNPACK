@@ -496,17 +496,20 @@ void xnn_indirection_init_resize_bilinear2d_hwc_f16(
   const uint32_t input_x_max = (uint32_t) input_width - 1;
   if (tensorflow_legacy || align_corners) {
     for (size_t output_y = output_y_start; output_y < output_y_end; output_y++) {
-      const float input_y = (float) (int32_t) output_y * height_scale;
-      assert(input_y >= 0.0f);
-      assert(input_y < (float) input_height);
+      float input_y = (float) (int32_t) output_y * height_scale;
+      // Clamp the source coordinate as the half-pixel branch does. The legacy
+      // and align-corners formulas rely on input_y staying < input_height, but
+      // height_scale is float32 and for large output_height the rounded product
+      // can reach input_height, putting input_y_top one full row past the input
+      // (out-of-bounds read in the bilinear ukernel).
+      input_y = math_min_f32(math_max_f32(input_y, 0.0f), (float) input_y_max);
 
       const uint32_t input_y_top = (uint32_t) (int32_t) input_y;
       const uint32_t input_y_bottom = math_min_u32(input_y_top + 1, input_y_max);
       const float alpha_y = input_y - (float) input_y_top;
       for (size_t output_x = 0; output_x < output_width; output_x++) {
-        const float input_x = (float) (int32_t) output_x * width_scale;
-        assert(input_x >= 0.0f);
-        assert(input_x < (float) input_width);
+        float input_x = (float) (int32_t) output_x * width_scale;
+        input_x = math_min_f32(math_max_f32(input_x, 0.0f), (float) input_x_max);
 
         const uint32_t input_x_left = (uint32_t) (int32_t) input_x;
         const uint32_t input_x_right = math_min_u32(input_x_left + 1, input_x_max);
@@ -597,17 +600,20 @@ void xnn_indirection_init_resize_bilinear2d_hwc_f32(
 
   if (tensorflow_legacy || align_corners) {
     for (size_t output_y = output_y_start; output_y < output_y_end; output_y++) {
-      const float input_y = (float) (int32_t) output_y * height_scale;
-      assert(input_y >= 0.0f);
-      assert(input_y < (float) input_height);
+      float input_y = (float) (int32_t) output_y * height_scale;
+      // Clamp the source coordinate as the half-pixel branch does. The legacy
+      // and align-corners formulas rely on input_y staying < input_height, but
+      // height_scale is float32 and for large output_height the rounded product
+      // can reach input_height, putting input_y_top one full row past the input
+      // (out-of-bounds read in the bilinear ukernel).
+      input_y = math_min_f32(math_max_f32(input_y, 0.0f), (float) input_y_max);
 
       const uint32_t input_y_top = (uint32_t) (int32_t) input_y;
       const uint32_t input_y_bottom = math_min_u32(input_y_top + 1, input_y_max);
       const float alpha_y = input_y - (float) input_y_top;
       for (size_t output_x = 0; output_x < output_width; output_x++) {
-        const float input_x = (float) (int32_t) output_x * width_scale;
-        assert(input_x >= 0.0f);
-        assert(input_x < (float) input_width);
+        float input_x = (float) (int32_t) output_x * width_scale;
+        input_x = math_min_f32(math_max_f32(input_x, 0.0f), (float) input_x_max);
 
         const uint32_t input_x_left = (uint32_t) (int32_t) input_x;
         const uint32_t input_x_right = math_min_u32(input_x_left + 1, input_x_max);
@@ -698,17 +704,20 @@ void xnn_indirection_init_resize_bilinear2d_hwc_q11(
 
   if (tensorflow_legacy || align_corners) {
     for (size_t output_y = output_y_start; output_y < output_y_end; output_y++) {
-      const float input_y = (float) (int32_t) output_y * height_scale;
-      assert(input_y >= 0.0f);
-      assert(input_y < (float) input_height);
+      float input_y = (float) (int32_t) output_y * height_scale;
+      // Clamp the source coordinate as the half-pixel branch does. The legacy
+      // and align-corners formulas rely on input_y staying < input_height, but
+      // height_scale is float32 and for large output_height the rounded product
+      // can reach input_height, putting input_y_top one full row past the input
+      // (out-of-bounds read in the bilinear ukernel).
+      input_y = math_min_f32(math_max_f32(input_y, 0.0f), (float) input_y_max);
 
       const uint32_t input_y_top = (uint32_t) (int32_t) input_y;
       const uint32_t input_y_bottom = math_min_u32(input_y_top + 1, input_y_max);
       const float alpha_y = input_y - (float) input_y_top;
       for (size_t output_x = 0; output_x < output_width; output_x++) {
-        const float input_x = (float) (int32_t) output_x * width_scale;
-        assert(input_x >= 0.0f);
-        assert(input_x < (float) input_width);
+        float input_x = (float) (int32_t) output_x * width_scale;
+        input_x = math_min_f32(math_max_f32(input_x, 0.0f), (float) input_x_max);
 
         const uint32_t input_x_left = (uint32_t) (int32_t) input_x;
         const uint32_t input_x_right = math_min_u32(input_x_left + 1, input_x_max);
@@ -794,17 +803,20 @@ void xnn_indirection_init_resize_bilinear2d_chw_f16(
   const uint32_t input_x_max = (uint32_t) input_width - 1;
   if (tensorflow_legacy || align_corners) {
     for (size_t output_y = 0; output_y < output_height; output_y++) {
-      const float input_y = (float) (int32_t) output_y * height_scale;
-      assert(input_y >= 0.0f);
-      assert(input_y < (float) input_height);
+      float input_y = (float) (int32_t) output_y * height_scale;
+      // Clamp the source coordinate as the half-pixel branch does. The legacy
+      // and align-corners formulas rely on input_y staying < input_height, but
+      // height_scale is float32 and for large output_height the rounded product
+      // can reach input_height, putting input_y_top one full row past the input
+      // (out-of-bounds read in the bilinear ukernel).
+      input_y = math_min_f32(math_max_f32(input_y, 0.0f), (float) input_y_max);
 
       const uint32_t input_y_top = (uint32_t) (int32_t) input_y;
       const uint32_t input_y_bottom = math_min_u32(input_y_top + 1, input_y_max);
       const float alpha_y = input_y - (float) input_y_top;
       for (size_t output_x = 0; output_x < output_width; output_x++) {
-        const float input_x = (float) (int32_t) output_x * width_scale;
-        assert(input_x >= 0.0f);
-        assert(input_x < (float) input_width);
+        float input_x = (float) (int32_t) output_x * width_scale;
+        input_x = math_min_f32(math_max_f32(input_x, 0.0f), (float) input_x_max);
 
         uint32_t input_x_left = (uint32_t) (int32_t) input_x;
 
@@ -894,17 +906,20 @@ void xnn_indirection_init_resize_bilinear2d_chw_f32(
   const uint32_t input_x_max = (uint32_t) input_width - 1;
   if (tensorflow_legacy || align_corners) {
     for (size_t output_y = 0; output_y < output_height; output_y++) {
-      const float input_y = (float) (int32_t) output_y * height_scale;
-      assert(input_y >= 0.0f);
-      assert(input_y < (float) input_height);
+      float input_y = (float) (int32_t) output_y * height_scale;
+      // Clamp the source coordinate as the half-pixel branch does. The legacy
+      // and align-corners formulas rely on input_y staying < input_height, but
+      // height_scale is float32 and for large output_height the rounded product
+      // can reach input_height, putting input_y_top one full row past the input
+      // (out-of-bounds read in the bilinear ukernel).
+      input_y = math_min_f32(math_max_f32(input_y, 0.0f), (float) input_y_max);
 
       const uint32_t input_y_top = (uint32_t) (int32_t) input_y;
       const uint32_t input_y_bottom = math_min_u32(input_y_top + 1, input_y_max);
       const float alpha_y = input_y - (float) input_y_top;
       for (size_t output_x = 0; output_x < output_width; output_x++) {
-        const float input_x = (float) (int32_t) output_x * width_scale;
-        assert(input_x >= 0.0f);
-        assert(input_x < (float) input_width);
+        float input_x = (float) (int32_t) output_x * width_scale;
+        input_x = math_min_f32(math_max_f32(input_x, 0.0f), (float) input_x_max);
 
         uint32_t input_x_left = (uint32_t) (int32_t) input_x;
 
