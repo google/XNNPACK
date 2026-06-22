@@ -329,8 +329,25 @@ bool rewrite_subgraph_for_unary_lut(ynn_subgraph& subgraph,
   // Replace and invalidate all nodes in `candidate` with the new LUT node.
   ynn_node* output_node = analysis.producers[best_candidate.get_output_id()];
 
-  define_gather(subgraph, *output_node, /*axis=*/0, lut_id,
-                best_candidate.get_input_id(), best_candidate.output_id());
+  uint32_t gather_index_id = best_candidate.get_input_id();
+  const ynn_value& input_val = subgraph.value(gather_index_id);
+  if (input_val.type == ynn_type_int8) {
+    // We need to "bitcast" the input to be unsigned with a copy (it should be
+    // a no-op).
+    uint32_t converted_id = YNN_INVALID_VALUE_ID;
+    subgraph.get_output_value(&converted_id, ynn_type_uint8);
+
+    ynn_status status =
+        ynn_define_copy(&subgraph, gather_index_id, &converted_id, 0);
+    if (status != ynn_status_success) {
+      return false;
+    }
+    gather_index_id = converted_id;
+  }
+
+  define_gather(subgraph, *output_node, 0, lut_id, gather_index_id,
+                best_candidate.output_id());
+  subgraph.topological_sort();
   return true;
 }
 

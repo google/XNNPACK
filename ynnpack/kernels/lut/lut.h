@@ -12,15 +12,17 @@
 
 namespace ynn {
 
-typedef void (*lut_kernel_fn)(size_t n, const void* a, const void* lut,
-                              void* x);
+// Assigns x[i] = lut[a[i]]. Returns false if any of a[i] are out of bounds.
+typedef bool (*lut_kernel_fn)(size_t n, const void* idx, size_t lut_size,
+                              const void* lut, void* out);
 
-#define YNN_LUT_KERNEL(arch, name, type_a, type_x) \
-  void name(size_t n, const void* a, const void* lut, void* x);
+#define YNN_LUT_KERNEL(arch, name, idx_type, elem_size_bits)             \
+  bool name(size_t n, const void* idx, size_t lut_size, const void* lut, \
+            void* out);
 #include "ynnpack/kernels/lut/kernels.inc"
 #undef YNN_LUT_KERNEL
 
-lut_kernel_fn get_lut_kernel(ynn_type type_a, ynn_type type_x);
+lut_kernel_fn get_lut_kernel(ynn_type idx_type, size_t elem_size_bits);
 
 }  // namespace ynn
 

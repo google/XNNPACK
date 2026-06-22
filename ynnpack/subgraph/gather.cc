@@ -47,11 +47,12 @@ auto make_lut_impl(lut_kernel_fn kernel) {
     const slinky::index_t x_n_extent = x_dim.extent();
 
     // Slice the lookup dimension of lut (dim 0).
+    size_t lut_size = lut.dim(0).extent();
     lut.slice(0, 0);
 
     slinky::for_each_element(
         [=](void* x, const void* a, const void* lut_ptr) {
-          kernel(x_n_extent, a, lut_ptr, x);
+          kernel(x_n_extent, a, lut_size, lut_ptr, x);
         },
         x, a, lut);
     return 0;
@@ -72,7 +73,7 @@ ynn_status create_gather_lut(const ynn_node& node, ynn_runtime& runtime,
   slinky::box_expr bounds = make_elementwise_bounds(dims, a.physical_extents());
 
   slinky::box_expr lut_bounds(lut.rank());
-  lut_bounds[0] = slinky::interval_expr(0, 1 << type_size_bytes(a.type));
+  lut_bounds[0] = all_bounds(1 << type_size_bits(a.type));
   for (size_t d = 1; d < lut.rank(); ++d) {
     lut_bounds[d] = elementwise_bounds(dims[d], lut.physical_extents()[d]);
   }
@@ -226,7 +227,8 @@ void define_gather(ynn_subgraph& subgraph, ynn_node& node, int32_t axis,
     if (!slinky::is_constant(input.extent(0), expected_size)) {
       // We can't use a LUT kernel if the index might be out of bounds.
     } else {
-      lut_kernel_fn kernel = get_lut_kernel(index.type, input.type);
+      lut_kernel_fn kernel =
+          get_lut_kernel(index.type, type_size_bits(input.type));
       if (kernel) {
         node.create = [kernel](const ynn_node& node, ynn_runtime& runtime) {
           return create_gather_lut(node, runtime, kernel);

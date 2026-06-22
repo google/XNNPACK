@@ -172,6 +172,8 @@ inline void replace_denormals_and_nans(double* data, size_t size) {
 
 inline void replace_denormals_and_nans(int4x2*, size_t) {}
 inline void replace_denormals_and_nans(int2x4*, size_t) {}
+inline void replace_denormals_and_nans(uint4x2*, size_t) {}
+inline void replace_denormals_and_nans(uint2x4*, size_t) {}
 
 // Fill `[data, data + size)` with uniform random bits, excluding denormals and
 // NaNs for floating point types.
