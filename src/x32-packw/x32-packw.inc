@@ -89,6 +89,7 @@ XNN_UKERNEL(xnn_arch_x86_avx512f, xnn_x32_packw_gemm_goi_ukernel_x32c2__avx512f_
 XNN_UKERNEL(xnn_arch_none, xnn_x32_packw_gemm_goi_ukernel_x2c4__wasmsimd_u4, 2, 4, 1, 4, 1)
 XNN_UKERNEL(xnn_arch_none, xnn_x32_packw_gemm_goi_ukernel_x8__wasmsimd_u4, 8, 1, 1, 4, 1)
 XNN_UKERNEL(xnn_arch_none, xnn_x32_packw_gemm_goi_ukernel_x8s4__wasmsimd_u4, 8, 1, 4, 4, 1)
+XNN_UKERNEL(xnn_arch_none, xnn_x32_packw_gemm_goi_ukernel_x16__wasmsimd_u4, 16, 1, 1, 4, 1)
 
 XNN_GIO_UKERNEL(xnn_arch_none, xnn_x32_packw_gemm_gio_ukernel_x4__wasmsimd_u2, 4, 1, 1, 1, 1)
 XNN_GIO_UKERNEL(xnn_arch_none, xnn_x32_packw_gemm_gio_ukernel_x8__wasmsimd_u2, 8, 1, 1, 1, 1)
