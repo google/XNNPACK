@@ -560,7 +560,7 @@ SET(SUBGRAPH_SRCS
   src/subgraph/max-pooling-2d.c
   src/subgraph/pack-lh.c
   src/subgraph/reshape-helpers.c
-  src/subgraph/rewrites/fp16_to_fp32.cc
+  src/subgraph/rewrites/cvt_to_fp32.cc
   src/subgraph/rope.c
   src/subgraph/softmax.c
   src/subgraph/space-to-depth-2d.c

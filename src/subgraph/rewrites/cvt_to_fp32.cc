@@ -1,4 +1,4 @@
-#include "src/subgraph/rewrites/fp16_to_fp32.h"
+#include "src/subgraph/rewrites/cvt_to_fp32.h"
 
 #include <algorithm>
 #include <cassert>
@@ -18,6 +18,7 @@
 #include "src/xnnpack/fp16.h"
 #include "src/xnnpack/internal.h"
 #include "src/xnnpack/log.h"
+#include "src/xnnpack/math.h"
 #include "src/xnnpack/node-type.h"
 #include "src/xnnpack/operator.h"
 #include "src/xnnpack/subgraph.h"
@@ -43,10 +44,10 @@ bool ReplaceInSet(uint32_t* arr, uint32_t size, uint32_t old_value,
 
 enum class OpAction {
   kNone,             // Don't do anything, skip the node.
-  kRewrite,          // Force outputs to fp32, insert converts from fp16 input
-                     // to fp32
-  kNeedsFP16Inputs,  // The inputs must be converted back to fp16 if they were
-                     // rewritten.
+  kRewrite,          // Force outputs to fp32, insert converts from the source
+                     // 16-bit type to fp32
+  kNeedsXF16Inputs,  // The inputs must be converted back to the source 16-bit
+                     // type if they were rewritten.
   kTransparent,  // If the inputs have been rewritten, the outputs must be also.
   kElide,        // This op should be removed (eg. convert(fp32, fp32)).
 };
@@ -107,7 +108,7 @@ bool IsValid(const Config* config) {
   } break
 
 // Is this op supported when fp16 hardware is missing (allow-list).
-OpAction GetOpAction(const xnn_subgraph_t subgraph, const xnn_node& node) {
+OpAction GetOpActionFp16(const xnn_subgraph_t subgraph, const xnn_node& node) {
   switch (node.type) {
     case xnn_node_type_unary_elementwise:
       switch (node.unary_operator) {
@@ -267,17 +268,115 @@ OpAction GetOpAction(const xnn_subgraph_t subgraph, const xnn_node& node) {
   return OpAction::kRewrite;
 }
 
-// Checks if an op has an fp16 input or output and whether we currently
-// support that.
-bool HasFp16Values(const xnn_subgraph_t subgraph, const xnn_node& node) {
-  auto IsFp16Value = [subgraph](uint32_t id) {
+// Is this op supported when bf16 hardware is missing (allow-list).
+//
+// bf16 has very few native microkernels, so most ops fall back to fp32. The
+// notable exceptions are the bf16 GEMM (bf16 x bf16 -> fp32) and the bf16
+// reductions, which are kept native when their configs are available.
+OpAction GetOpActionBf16(const xnn_subgraph_t subgraph, const xnn_node& node) {
+  switch (node.type) {
+    case xnn_node_type_unary_elementwise:
+      switch (node.unary_operator) {
+        case xnn_unary_convert: {
+          const xnn_value& output = subgraph->values[node.outputs[0]];
+          const xnn_value& input = subgraph->values[node.inputs[0]];
+          if (output.datatype == input.datatype &&
+              (output.datatype == xnn_datatype_bf16 ||
+               output.datatype == xnn_datatype_fp32)) {
+            // Elide converts from T to T. These are no-ops that may be
+            // introduced by the rewrite.
+            return OpAction::kElide;
+          }
+          if (output.datatype == xnn_datatype_bf16 ||
+              input.datatype == xnn_datatype_bf16) {
+            // Leave bf16<->fp32 converts native (these are the converts the
+            // rewrite itself inserts).
+            return OpAction::kNone;
+          }
+        } break;
+        default:
+          break;
+      }
+      break;
+    case xnn_node_type_convert: {
+      const xnn_value& input = subgraph->values[node.inputs[0]];
+      const xnn_value& output = subgraph->values[node.outputs[0]];
+      if (input.datatype == output.datatype &&
+          (input.datatype == xnn_datatype_bf16 ||
+           input.datatype == xnn_datatype_fp32)) {
+        return OpAction::kElide;
+      }
+      if (input.datatype == xnn_datatype_bf16 &&
+          output.datatype == xnn_datatype_qdint8) {
+        if (IsValid(xnn_init_bf16_to_qs8_cvt_config()) &&
+            IsValid(xnn_init_bf16_rminmax_config()) &&
+            IsValid(xnn_init_qs8_rsum_config())) {
+          return OpAction::kTransparent;
+        }
+      } else if (input.datatype == xnn_datatype_bf16 &&
+                 output.datatype == xnn_datatype_qduint8) {
+        if (IsValid(xnn_init_bf16_to_qu8_cvt_config()) &&
+            IsValid(xnn_init_bf16_rminmax_config()) &&
+            IsValid(xnn_init_qu8_rsum_config())) {
+          return OpAction::kTransparent;
+        }
+      } else if (input.datatype == xnn_datatype_fp32 &&
+                 output.datatype == xnn_datatype_bf16) {
+        if (IsValid(xnn_init_f32_to_bf16_cvt_config())) {
+          return OpAction::kTransparent;
+        }
+      } else if (input.datatype == xnn_datatype_bf16 &&
+                 output.datatype == xnn_datatype_fp32) {
+        if (IsValid(xnn_init_bf16_to_f32_cvt_config())) {
+          return OpAction::kTransparent;
+        }
+      }
+      break;
+    }
+    case xnn_node_type_static_reduce_max:
+      if (IsValid(xnn_init_bf16_rmax_config())) {
+        return OpAction::kTransparent;
+      }
+      break;
+    case xnn_node_type_static_reduce_min:
+      if (IsValid(xnn_init_bf16_rmin_config())) {
+        return OpAction::kTransparent;
+      }
+      break;
+    case xnn_node_type_static_reshape:
+    case xnn_node_type_static_transpose:
+    case xnn_node_type_even_split:
+    case xnn_node_type_concatenate:
+    case xnn_node_type_copy:
+    case xnn_node_type_static_slice:
+    case xnn_node_type_depth_to_space_2d:
+    case xnn_node_type_space_to_depth_2d:
+    case xnn_node_type_static_expand_dims:
+    case xnn_node_type_fuse_dims:
+    case xnn_node_type_split_dims:
+    case xnn_node_type_static_broadcast:
+    case xnn_node_type_static_constant_pad:
+    case xnn_node_type_pack_lh:
+      return OpAction::kTransparent;
+    default:
+      break;
+  }
+  return OpAction::kRewrite;
+}
+
+// Checks if an op has an input or output of type `from_dt` (or one that was
+// already overwritten to fp32 by the fallback) and whether we currently support
+// that.
+bool HasValuesOfType(const xnn_subgraph_t subgraph, const xnn_node& node,
+                     xnn_datatype from_dt) {
+  auto IsFromValue = [subgraph, from_dt](uint32_t id) {
     assert(id < subgraph->num_values);
-    return subgraph->values[id].datatype == xnn_datatype_fp16 ||
-           subgraph->values[id].fp16_to_fp32_fallback.was_overwritten;
+    return subgraph->values[id].datatype == from_dt ||
+           subgraph->values[id].to_fp32_fallback.was_overwritten;
   };
-  return std::any_of(node.inputs, node.inputs + node.num_inputs, IsFp16Value) ||
+  return std::any_of(node.inputs, node.inputs + node.num_inputs, IsFromValue) ||
          std::any_of(node.outputs, node.outputs + node.num_outputs,
-                     IsFp16Value);
+                     IsFromValue);
 }
 
 void RemoveFlag(uint32_t& bitfield, uint32_t flag) {
@@ -320,23 +419,27 @@ CloneValueRet CloneValue(xnn_subgraph_t subgraph, xnn_value*& value) {
   return CloneValue(subgraph, const_cast<const xnn_value*&>(value));
 }
 
-}  // namespace
-
-}  // namespace xnnpack
-
-extern "C" enum xnn_status xnn_subgraph_fallback_from_fp16_to_fp32(
-    xnn_subgraph_t subgraph, int optimization_flags) {
+// Rewrites unsupported `from_dt` (fp16 or bf16) operations to fp32.
+//
+// `get_op_action` is the per-datatype allow-list that decides what to do with
+// each node. The rest of the logic (inserting converts, converting static data,
+// eliding no-ops, etc.) is datatype agnostic.
+xnn_status FallbackToFp32(xnn_subgraph_t subgraph, int optimization_flags,
+                          xnn_datatype from_dt,
+                          OpAction (*get_op_action)(const xnn_subgraph_t,
+                                                    const xnn_node&)) {
   xnn_subgraph_analyze_consumers_and_producers(subgraph);
-  // Maps fp16 value ids to the corresponding fp32 value id if a conversion
+  // Maps `from_dt` value ids to the corresponding fp32 value id if a conversion
   // has been inserted.
-  std::vector<uint32_t> fp16_id_to_fp32_id(subgraph->num_values,
+  std::vector<uint32_t> from_id_to_fp32_id(subgraph->num_values,
                                            XNN_INVALID_VALUE_ID);
-  // Maps fp32 value ids to the corresponding fp16 value id if a conversion
+  // Maps fp32 value ids to the corresponding `from_dt` value id if a conversion
   // has been inserted.
-  std::vector<uint32_t> fp32_id_to_fp16_id(subgraph->num_values,
+  std::vector<uint32_t> fp32_id_to_from_id(subgraph->num_values,
                                            XNN_INVALID_VALUE_ID);
 
-  xnn_log_debug("Running fp16 analysis and falling back to fp32.");
+  xnn_log_debug("Running %s analysis and falling back to fp32.",
+                xnn_datatype_to_string(from_dt));
 
   // Count changes that are made to the graph.
   size_t changes = 0;
@@ -351,51 +454,55 @@ extern "C" enum xnn_status xnn_subgraph_fallback_from_fp16_to_fp32(
       continue;
     }
 
-    if (!xnnpack::HasFp16Values(subgraph, CurrentNode())) {
-      xnn_log_debug("node %d doesn't have fp16 values", node_id);
+    if (!HasValuesOfType(subgraph, CurrentNode(), from_dt)) {
+      xnn_log_debug("node %d doesn't have %s values", node_id,
+                    xnn_datatype_to_string(from_dt));
       continue;
     }
 
-    xnnpack::OpAction op_action = xnnpack::GetOpAction(subgraph, CurrentNode());
-    if (op_action == xnnpack::OpAction::kNone) {
+    OpAction op_action = get_op_action(subgraph, CurrentNode());
+    if (op_action == OpAction::kNone) {
       continue;
     }
 
-    if (op_action == xnnpack::OpAction::kNeedsFP16Inputs) {
-      // Check for overwritten inputs that need to be converted back to fp16.
+    if (op_action == OpAction::kNeedsXF16Inputs) {
+      // Check for overwritten inputs that need to be converted back to the
+      // source 16-bit type.
       for (uint32_t i = 0; i < CurrentNode().num_inputs; i++) {
         // The value is copied because adding new values may invalidate
         // references.
         const xnn_value value = subgraph->values[CurrentNode().inputs[i]];
         if (value.datatype == xnn_datatype_fp32 &&
-            value.fp16_to_fp32_fallback.was_overwritten) {
-          if (fp32_id_to_fp16_id[value.id] == XNN_INVALID_VALUE_ID) {
+            value.to_fp32_fallback.was_overwritten) {
+          if (fp32_id_to_from_id[value.id] == XNN_INVALID_VALUE_ID) {
             const xnn_value* value_ptr =
                 subgraph->values + CurrentNode().inputs[i];
-            XNN_ASSIGN_OR_RETURN_CXX(xnn_value & fp16_value,
-                                     xnnpack::CloneValue(subgraph, value_ptr),
+            XNN_ASSIGN_OR_RETURN_CXX(xnn_value & from_value,
+                                     CloneValue(subgraph, value_ptr),
                                      "Failed to clone value.");
-            fp16_value.datatype = xnn_datatype_fp16;
-            fp16_value.size = xnn_tensor_get_size(&fp16_value);
-            fp16_value.allocation_type = xnn_allocation_type_workspace;
-            xnn_log_debug("Adding a convert[fp32, fp16](%d, %d) node.",
-                          value.id, fp16_value.id);
+            from_value.datatype = from_dt;
+            from_value.size = xnn_tensor_get_size(&from_value);
+            from_value.allocation_type = xnn_allocation_type_workspace;
+            xnn_log_debug("Adding a convert[fp32, %s](%d, %d) node.",
+                          xnn_datatype_to_string(from_dt), value.id,
+                          from_value.id);
             xnn_define_unary(subgraph, xnn_unary_convert, /*params=*/nullptr,
-                             value.id, fp16_value.id,
+                             value.id, from_value.id,
                              /*flags=*/0);
-            fp32_id_to_fp16_id[value.id] = fp16_value.id;
+            fp32_id_to_from_id[value.id] = from_value.id;
             ++changes;
           } else {
-            xnn_log_debug("Reusing convert[fp32, fp16](%d, %d) node.", value.id,
-                          fp32_id_to_fp16_id[value.id]);
+            xnn_log_debug("Reusing convert[fp32, %s](%d, %d) node.",
+                          xnn_datatype_to_string(from_dt), value.id,
+                          fp32_id_to_from_id[value.id]);
           }
-          CurrentNode().inputs[i] = fp32_id_to_fp16_id[value.id];
+          CurrentNode().inputs[i] = fp32_id_to_from_id[value.id];
         }
       }
       continue;
     }
 
-    if (op_action == xnnpack::OpAction::kElide) {
+    if (op_action == OpAction::kElide) {
       // If the inputs and outputs cannot be directly mapped, we don't elide.
       // This log an error because that would mean that the elision strategy
       // needs to be specified when marking a node as elidable.
@@ -449,7 +556,7 @@ extern "C" enum xnn_status xnn_subgraph_fallback_from_fp16_to_fp32(
                    candidate_consumer_id < subgraph->num_nodes;
                    ++candidate_consumer_id) {
                 xnn_node& node_k = subgraph->nodes[candidate_consumer_id];
-                consumers_updated_count += xnnpack::ReplaceInSet(
+                consumers_updated_count += ReplaceInSet(
                     node_k.inputs, node_k.num_inputs, output.id, input.id);
               }
               input.num_consumers += output.num_consumers - 1;
@@ -461,8 +568,8 @@ extern "C" enum xnn_status xnn_subgraph_fallback_from_fp16_to_fp32(
               //
               // Update the input producer to write to the output directly.
               xnn_node& producer = subgraph->nodes[input.producer];
-              xnnpack::ReplaceInSet(producer.outputs, producer.num_outputs,
-                                    input.id, output.id);
+              ReplaceInSet(producer.outputs, producer.num_outputs, input.id,
+                           output.id);
               // Update all of the input consumers to reuse the output value.
               uint32_t candidate_consumer_id =
                   std::min(node_id, input.first_consumer);
@@ -471,7 +578,7 @@ extern "C" enum xnn_status xnn_subgraph_fallback_from_fp16_to_fp32(
                    candidate_consumer_id < subgraph->num_nodes;
                    ++candidate_consumer_id) {
                 xnn_node& node_k = subgraph->nodes[candidate_consumer_id];
-                consumers_updated_count += xnnpack::ReplaceInSet(
+                consumers_updated_count += ReplaceInSet(
                     node_k.inputs, node_k.num_inputs, input.id, output.id);
               }
               output.producer = input.producer;
@@ -487,14 +594,14 @@ extern "C" enum xnn_status xnn_subgraph_fallback_from_fp16_to_fp32(
       }
     }
 
-    if (op_action == xnnpack::OpAction::kTransparent) {
-      // If an input has been rewritten from fp16 to fp32, the outputs should
-      // also be rewritten.
+    if (op_action == OpAction::kTransparent) {
+      // If an input has been rewritten from the source 16-bit type to fp32, the
+      // outputs should also be rewritten.
       bool needs_output_rewrite = false;
       for (uint32_t i = 0; i < CurrentNode().num_inputs; i++) {
         xnn_value& value = subgraph->values[CurrentNode().inputs[i]];
         if (value.datatype == xnn_datatype_fp32 &&
-            value.fp16_to_fp32_fallback.was_overwritten) {
+            value.to_fp32_fallback.was_overwritten) {
           needs_output_rewrite = true;
           break;
         }
@@ -509,8 +616,7 @@ extern "C" enum xnn_status xnn_subgraph_fallback_from_fp16_to_fp32(
 
     // Force node outputs to be fp32.
     for (uint32_t i = 0; i < CurrentNode().num_outputs; i++) {
-      if (subgraph->values[CurrentNode().outputs[i]].datatype !=
-          xnn_datatype_fp16) {
+      if (subgraph->values[CurrentNode().outputs[i]].datatype != from_dt) {
         continue;
       }
 
@@ -520,17 +626,17 @@ extern "C" enum xnn_status xnn_subgraph_fallback_from_fp16_to_fp32(
         // the fp32 output and a conversion to the original external tensor.
         struct xnn_value* value = subgraph->values + CurrentNode().outputs[i];
         XNN_ASSIGN_OR_RETURN_CXX(xnn_value & fp32_value,
-                                 xnnpack::CloneValue(subgraph, value),
+                                 CloneValue(subgraph, value),
                                  "Failed to clone value");
         fp32_value.datatype = xnn_datatype_fp32;
         fp32_value.size = xnn_tensor_get_size(&fp32_value);
-        xnnpack::RemoveFlag(
+        RemoveFlag(
             fp32_value.flags,
             XNN_VALUE_FLAG_EXTERNAL_INPUT | XNN_VALUE_FLAG_EXTERNAL_OUTPUT);
-        fp32_value.fp16_to_fp32_fallback.was_overwritten = true;
+        fp32_value.to_fp32_fallback.was_overwritten = true;
 
         if (fp32_value.data != nullptr) {
-          fp32_value.fp16_to_fp32_fallback.original_data = fp32_value.data;
+          fp32_value.to_fp32_fallback.original_data = fp32_value.data;
           fp32_value.data =
               xnn_allocate_zero_memory(fp32_value.size + XNN_EXTRA_BYTES);
           fp32_value.flags |= XNN_VALUE_FLAG_NEEDS_CLEANUP;
@@ -548,26 +654,28 @@ extern "C" enum xnn_status xnn_subgraph_fallback_from_fp16_to_fp32(
         for (int j = 0; j < value->num_consumers - 1 && k < subgraph->num_nodes;
              ++k) {
           xnn_node& node_k = subgraph->nodes[k];
-          j += xnnpack::ReplaceInSet(node_k.inputs, node_k.num_inputs,
-                                     value->id, fp32_value.id);
+          j += ReplaceInSet(node_k.inputs, node_k.num_inputs, value->id,
+                            fp32_value.id);
         }
 
-        xnn_log_debug("Adding a convert[fp32, fp16](%d, %d) node.",
-                      fp32_value.id, value->id);
+        xnn_log_debug("Adding a convert[fp32, %s](%d, %d) node.",
+                      xnn_datatype_to_string(from_dt), fp32_value.id,
+                      value->id);
         xnn_define_unary(subgraph, xnn_unary_convert, /*params=*/nullptr,
                          fp32_value.id, value->id,
                          /*flags=*/0);
       } else {
         xnn_value& value = subgraph->values[CurrentNode().outputs[i]];
-        xnn_log_debug("Overriding value %d from fp16 to fp32.", value.id);
+        xnn_log_debug("Overriding value %d from %s to fp32.", value.id,
+                      xnn_datatype_to_string(from_dt));
         value.datatype = xnn_datatype_fp32;
         value.size = xnn_tensor_get_size(&value);
-        value.fp16_to_fp32_fallback.was_overwritten = true;
+        value.to_fp32_fallback.was_overwritten = true;
       }
       ++changes;
     }
 
-    // Insert conversions to fp32 for fp16 inputs.
+    // Insert conversions to fp32 for `from_dt` inputs.
     for (uint32_t i = 0; i < CurrentNode().num_inputs; i++) {
       const uint32_t input_id = CurrentNode().inputs[i];
       assert(input_id != XNN_INVALID_VALUE_ID);
@@ -575,16 +683,16 @@ extern "C" enum xnn_status xnn_subgraph_fallback_from_fp16_to_fp32(
       // The value is copied because adding new values may invalidate
       // references.
       const xnn_value value = subgraph->values[input_id];
-      if (value.datatype == xnn_datatype_fp16) {
-        if (fp16_id_to_fp32_id[value.id] == XNN_INVALID_VALUE_ID) {
+      if (value.datatype == from_dt) {
+        if (from_id_to_fp32_id[value.id] == XNN_INVALID_VALUE_ID) {
           const xnn_value* value_ptr =
               subgraph->values + CurrentNode().inputs[i];
           XNN_ASSIGN_OR_RETURN_CXX(xnn_value & fp32_value,
-                                   xnnpack::CloneValue(subgraph, value_ptr),
+                                   CloneValue(subgraph, value_ptr),
                                    "Failed to clone value.");
           fp32_value.datatype = xnn_datatype_fp32;
           fp32_value.size = xnn_tensor_get_size(&fp32_value);
-          xnnpack::RemoveFlag(
+          RemoveFlag(
               fp32_value.flags,
               XNN_VALUE_FLAG_EXTERNAL_INPUT | XNN_VALUE_FLAG_EXTERNAL_OUTPUT);
           if (xnn_value_is_static(value.allocation_type)) {
@@ -595,9 +703,9 @@ extern "C" enum xnn_status xnn_subgraph_fallback_from_fp16_to_fp32(
             fp32_value.data =
                 xnn_allocate_zero_memory(fp32_value.size + XNN_EXTRA_BYTES);
             fp32_value.flags |= XNN_VALUE_FLAG_NEEDS_CLEANUP;
-            fp32_value.fp16_to_fp32_fallback.original_data = value.data;
+            fp32_value.to_fp32_fallback.original_data = value.data;
             xnn_run_unary_elementwise_nc(
-                xnn_unary_convert, xnn_datatype_fp16, xnn_datatype_fp32,
+                xnn_unary_convert, from_dt, xnn_datatype_fp32,
                 /*params=*/nullptr, /*input_quantization=*/nullptr,
                 /*output_quantization=*/nullptr, /*flags=*/0,
                 /*batch_size=*/xnn_shape_multiply_all_dims(&value.shape),
@@ -605,31 +713,37 @@ extern "C" enum xnn_status xnn_subgraph_fallback_from_fp16_to_fp32(
                 /*input_stride=*/1, /*output_stride=*/1, /*threadpool=*/nullptr,
                 /*input=*/value.data, /*output=*/fp32_value.data);
           } else {
-            xnn_log_debug("Adding a convert[fp16, fp32](%d, %d) node.",
-                          value.id, fp32_value.id);
+            xnn_log_debug("Adding a convert[%s, fp32](%d, %d) node.",
+                          xnn_datatype_to_string(from_dt), value.id,
+                          fp32_value.id);
             fp32_value.allocation_type = xnn_allocation_type_workspace;
             xnn_define_unary(subgraph, xnn_unary_convert, /*params=*/nullptr,
                              value.id, fp32_value.id,
                              /*flags=*/0);
           }
-          fp16_id_to_fp32_id[value.id] = fp32_value.id;
+          from_id_to_fp32_id[value.id] = fp32_value.id;
         }
-        CurrentNode().inputs[i] = fp16_id_to_fp32_id[value.id];
+        CurrentNode().inputs[i] = from_id_to_fp32_id[value.id];
         ++changes;
       }
     }
 
-    // Handle node parameters that may have been stored as fp16.
+    // Handle node parameters that may have been stored as a 16-bit type.
     switch (CurrentNode().type) {
       case xnn_node_type_static_constant_pad: {
-        uint32_t fp16_val = CurrentNode().params.static_pad.padding_value;
-        float fp32_float = fp16_ieee_to_fp32_value((uint16_t)fp16_val);
+        uint32_t from_val = CurrentNode().params.static_pad.padding_value;
+        float fp32_float =
+            from_dt == xnn_datatype_bf16
+                ? xnn_bfloat16_to_float(
+                      xnn_bfloat16_from_bits((uint16_t)from_val))
+                : fp16_ieee_to_fp32_value((uint16_t)from_val);
         CurrentNode().params.static_pad.padding_value =
             fp32_to_bits(fp32_float);
         xnn_log_debug(
-            "Rewriting static_constant_pad padding_value from FP16 bits to "
+            "Rewriting static_constant_pad padding_value from %s bits to "
             "FP32 bits: %04X -> %08X",
-            fp16_val, CurrentNode().params.static_pad.padding_value);
+            xnn_datatype_to_string(from_dt), from_val,
+            CurrentNode().params.static_pad.padding_value);
       } break;
       default:
         break;
@@ -642,14 +756,30 @@ extern "C" enum xnn_status xnn_subgraph_fallback_from_fp16_to_fp32(
   return xnn_status_success;
 }
 
-enum xnn_status xnn_subgraph_alias_fp16_fp32_fallback_data(
+}  // namespace
+
+}  // namespace xnnpack
+
+extern "C" enum xnn_status xnn_subgraph_fallback_from_fp16_to_fp32(
+    xnn_subgraph_t subgraph, int optimization_flags) {
+  return xnnpack::FallbackToFp32(subgraph, optimization_flags,
+                                 xnn_datatype_fp16, xnnpack::GetOpActionFp16);
+}
+
+extern "C" enum xnn_status xnn_subgraph_fallback_from_bf16_to_fp32(
+    xnn_subgraph_t subgraph, int optimization_flags) {
+  return xnnpack::FallbackToFp32(subgraph, optimization_flags,
+                                 xnn_datatype_bf16, xnnpack::GetOpActionBf16);
+}
+
+enum xnn_status xnn_subgraph_alias_fp32_fallback_data(
     xnn_subgraph_t subgraph, xnn_weights_cache_t cache) {
   if (cache) {
     for (uint32_t i = 0; i < subgraph->num_values; ++i) {
       const xnn_value& value = subgraph->values[i];
-      if (value.fp16_to_fp32_fallback.original_data) {
+      if (value.to_fp32_fallback.original_data) {
         XNN_RETURN_IF_ERROR(xnn_weights_cache_alias_data(
-            cache, value.data, value.fp16_to_fp32_fallback.original_data));
+            cache, value.data, value.to_fp32_fallback.original_data));
       }
     }
   }
