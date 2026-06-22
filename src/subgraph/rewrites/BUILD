@@ -6,9 +6,9 @@ load(
 package(default_visibility = ["//:__subpackages__"])
 
 xnnpack_cxx_library(
-    name = "fp16_to_fp32",
-    srcs = ["fp16_to_fp32.cc"],
-    hdrs = ["fp16_to_fp32.h"],
+    name = "cvt_to_fp32",
+    srcs = ["cvt_to_fp32.cc"],
+    hdrs = ["cvt_to_fp32.h"],
     deps = [
         "//:allocation_type",
         "//:allocator",

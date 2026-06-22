@@ -12,7 +12,7 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include "include/xnnpack.h"
-#include "src/subgraph/rewrites/fp16_to_fp32.h"
+#include "src/subgraph/rewrites/cvt_to_fp32.h"
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/config.h"
 #include "src/xnnpack/hardware-config.h"

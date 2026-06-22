@@ -22,7 +22,7 @@
 
 #include "include/experimental.h"
 #include "include/xnnpack.h"
-#include "src/subgraph/rewrites/fp16_to_fp32.h"
+#include "src/subgraph/rewrites/cvt_to_fp32.h"
 #include "src/xnnpack/allocation-type.h"
 #include "src/xnnpack/allocator.h"
 #include "src/xnnpack/cache.h"
@@ -599,7 +599,7 @@ enum xnn_status xnn_create_runtime_v4(
     goto error;
   }
 
-  XNN_IF_ERROR_GOTO(error, xnn_subgraph_alias_fp16_fp32_fallback_data(
+  XNN_IF_ERROR_GOTO(error, xnn_subgraph_alias_fp32_fallback_data(
                                subgraph, weights_cache));
 
   status = xnn_status_out_of_memory;

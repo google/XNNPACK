@@ -15,7 +15,7 @@
 
 #include "include/experimental.h"
 #include "include/xnnpack.h"
-#include "src/subgraph/rewrites/fp16_to_fp32.h"
+#include "src/subgraph/rewrites/cvt_to_fp32.h"
 #include "src/xnnpack/allocation-type.h"
 #include "src/xnnpack/allocator.h"
 #include "src/xnnpack/common.h"
@@ -4675,6 +4675,11 @@ enum xnn_status xnn_subgraph_optimize(xnn_subgraph_t subgraph,
   if (!force_fp16) {
     XNN_RETURN_IF_ERROR(xnn_subgraph_fallback_from_fp16_to_fp32(subgraph, optimization_flags));
   }
+
+  // bf16 values are independent of the fp16 force flag, so this always runs to
+  // lower any bf16 ops that lack a native kernel to fp32.
+  XNN_RETURN_IF_ERROR(
+      xnn_subgraph_fallback_from_bf16_to_fp32(subgraph, optimization_flags));
 
   return xnn_status_success;
 }
