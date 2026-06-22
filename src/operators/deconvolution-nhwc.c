@@ -269,7 +269,7 @@ static XNN_NO_SANITIZE_FUNCTION enum xnn_status create_deconvolution2d_nhwc(
     xnn_log_error("failed to allocate %zu bytes for %s operator descriptor",
                   sizeof(struct xnn_convolution_operator),
                   xnn_operator_type_to_string(operator_type));
-    return xnn_status_out_of_memory;
+    goto error;
   }
 
   deconvolution_op->weights_cache = weights_cache;
