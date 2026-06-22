@@ -121,4 +121,34 @@ INSTANTIATE_TEST_SUITE_P(
                      testing::Range(1, max_test_rank)),
     test_param_to_string<Broadcast::ParamType>);
 
+// An axis outside [-rank, rank) maps to a slinky dim past the input's
+// dimensions. YNNPACK treats tensors as having infinite implicit broadcast
+// dimensions, so broadcasting such a dimension is a no-op: it is skipped rather
+// than indexing the axes_set bitset out of range, and the input passes through
+// unchanged.
+TEST(BroadcastAxes, out_of_bounds_axis_is_noop) {
+  ReplicableRandomDevice rng;
+  const std::vector<size_t> shape = {2, 3, 4};
+  const std::vector<int32_t> axes = {-100};
+
+  SubgraphBuilder subgraph(2);
+  subgraph.AddInput(ynn_type_fp32, shape.size(), 0)
+      .AddOutput(ynn_type_fp32, shape.size(), 1)
+      .AddBroadcast(axes, 0, 1);
+
+  Runtime runtime(subgraph.GetSubgraph());
+  ASSERT_EQ(runtime.Status(), ynn_status_success);
+
+  Tensor<float> input(shape);
+  fill_random(input.data(), input.size(), rng);
+
+  runtime.ReshapeExternalTensor(shape, input.base(), 0).ReshapeRuntime();
+  ASSERT_EQ(runtime.GetExternalTensorShape(1), shape);
+
+  Tensor<float> output(shape);
+  runtime.SetupExternalTensor(output.base(), 1).InvokeRuntime();
+
+  ASSERT_THAT(output, testing::ElementsAreArray(input));
+}
+
 }  // namespace ynn

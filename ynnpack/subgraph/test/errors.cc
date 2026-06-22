@@ -49,21 +49,4 @@ TEST(Errors, bad_dot_shape) {
   ASSERT_EQ(runtime.ReshapeRuntime().Status(), ynn_status_error);
 }
 
-TEST(Errors, broadcast_axis_out_of_bounds) {
-  const uint32_t in_id = 0;
-  SubgraphBuilder subgraph(1);
-  subgraph.AddInput(ynn_type_fp32, 3, in_id);
-
-  // An axis far outside [-rank, rank) maps to a slinky dim past the input's
-  // dimensions. Such a dimension is an implicit broadcast, so broadcasting it
-  // is a no-op: it must be skipped rather than indexing the axes_set bitset out
-  // of range.
-  const int32_t axes[] = {-100};
-  uint32_t output_id = YNN_INVALID_VALUE_ID;
-  EXPECT_EQ(ynn_define_broadcast(subgraph.GetSubgraph(), /*num_axes=*/1, axes,
-                                 in_id, &output_id, /*flags=*/0),
-            ynn_status_success);
-  EXPECT_EQ(output_id, in_id);
-}
-
 }  // namespace ynn
