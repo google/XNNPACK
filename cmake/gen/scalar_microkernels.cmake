@@ -26,7 +26,7 @@ SET(PROD_SCALAR_MICROKERNEL_SRCS
   src/f16-rminmax/gen/f16-rminmax-scalar-u2-acc2.c
   src/f16-vapproxgelu/gen/f16-f32acc-vapproxgelu-scalar-rational-6-4-div.c
   src/f16-vcos/gen/f16-vcos-scalar-rational-3-2-div.c
-  src/f16-vexp/gen/f16-vexp-scalar-poly-3.c
+  src/f16-vexp/gen/f16-f32acc-vexp-scalar-poly-3.c
   src/f16-vgelu/gen/f16-vgelu-scalar-rational-6-4-div.c
   src/f16-vlog/gen/f16-f32acc-vlog-scalar-rational-1-3-div.c
   src/f16-vsin/gen/f16-vsin-scalar-rational-3-2-div.c
@@ -312,6 +312,7 @@ SET(NON_PROD_SCALAR_MICROKERNEL_SRCS
   src/f16-rminmax/gen/f16-rminmax-scalar-u4-acc2.c
   src/f16-rminmax/gen/f16-rminmax-scalar-u4-acc4.c
   src/f16-vapproxgelu/gen/f16-vapproxgelu-scalar-rational-6-4-div.c
+  src/f16-vexp/gen/f16-vexp-scalar-poly-3.c
   src/f16-vlog/gen/f16-vlog-scalar-rational-1-3-div.c
   src/f16-vtanh/gen/f16-vtanh-scalar-rational-5-4-div.c
   src/f32-bf16-vcvt/gen/f32-bf16-vcvt-scalar-u1.c

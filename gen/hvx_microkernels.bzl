@@ -7,6 +7,7 @@
 
 PROD_HVX_MICROKERNEL_SRCS = [
     "src/f16-vapproxgelu/gen/f16-f32acc-vapproxgelu-hvx-rational-6-4-div.c",
+    "src/f16-vexp/gen/f16-f32acc-vexp-hvx-poly-3.c",
     "src/f16-vlog/gen/f16-f32acc-vlog-hvx-rational-1-3-div.c",
     "src/f16-vtanh/gen/f16-f32acc-vtanh-hvx-rational-5-4-div.c",
     "src/f32-avgpool/gen/f32-avgpool-9p-minmax-hvx-u32.c",
