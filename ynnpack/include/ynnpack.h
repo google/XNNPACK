@@ -182,7 +182,7 @@ enum ynn_status ynn_define_unary(ynn_subgraph_t subgraph,
 // output: y = coefficients[degree]*x^degree + ... + coefficients[0]
 enum ynn_status ynn_define_unary_polynomial(ynn_subgraph_t subgraph,
                                             uint32_t input_id, size_t degree,
-                                            const float* coefficients,
+                                            const double* coefficients,
                                             uint32_t* output_id,
                                             uint32_t flags);
 

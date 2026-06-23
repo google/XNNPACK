@@ -516,7 +516,7 @@ ynn_status ynn_define_unary(ynn_subgraph_t subgraph, ynn_unary_operator op,
 
 ynn_status ynn_define_unary_polynomial(ynn_subgraph_t subgraph,
                                        uint32_t input_id, size_t degree,
-                                       const float* coefficients,
+                                       const double* coefficients,
                                        uint32_t* output_id, uint32_t flags) {
   YNN_RETURN_IF_ERROR(validate_subgraph("unary_polynomial", subgraph));
   YNN_RETURN_IF_ERROR(validate_input_tensor("unary_polynomial", subgraph,
@@ -531,9 +531,9 @@ ynn_status ynn_define_unary_polynomial(ynn_subgraph_t subgraph,
 
   unary_params params;
   params.poly3.c0 = coefficients[0];
-  params.poly3.c1 = 1 <= degree ? coefficients[1] : 0.0f;
-  params.poly3.c2 = 2 <= degree ? coefficients[2] : 0.0f;
-  params.poly3.c3 = 3 <= degree ? coefficients[3] : 0.0f;
+  params.poly3.c1 = 1 <= degree ? coefficients[1] : 0.0;
+  params.poly3.c2 = 2 <= degree ? coefficients[2] : 0.0;
+  params.poly3.c3 = 3 <= degree ? coefficients[3] : 0.0;
 
   return define_unary(subgraph, ynn_unary_poly3, input_id, params, output_id,
                       flags);

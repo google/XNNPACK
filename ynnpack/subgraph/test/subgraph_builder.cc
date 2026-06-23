@@ -103,11 +103,13 @@ SubgraphBuilder& SubgraphBuilder::AddDequantize(
 SubgraphBuilder& SubgraphBuilder::AddPolynomial(
     const std::vector<float>& coefficients, uint32_t input_id,
     uint32_t output_id, uint32_t flags) {
+  std::vector<double> coefficients_double(coefficients.begin(),
+                                          coefficients.end());
   assert(!coefficients.empty());
   assert(status_ == ynn_status_success);
-  status_ = ynn_define_unary_polynomial(subgraph_.get(), input_id,
-                                        coefficients.size() - 1,
-                                        coefficients.data(), &output_id, flags);
+  status_ = ynn_define_unary_polynomial(
+      subgraph_.get(), input_id, coefficients_double.size() - 1,
+      coefficients_double.data(), &output_id, flags);
   return *this;
 }
 

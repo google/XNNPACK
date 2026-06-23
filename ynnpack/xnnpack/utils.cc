@@ -679,9 +679,9 @@ ynn_status implement_gelu(xnn_subgraph_t subgraph, uint32_t input_id,
 ynn_status implement_approxgelu(xnn_subgraph_t subgraph, uint32_t input_id,
                                 uint32_t* output_id) {
   // (x / 2) * (1 + tanh(sqrt(2 / pi) * (x + 0.044715 * x^3)))
-  const float sqrt_2_over_pi = 0.7978845608f;
-  const float coefficients[] = {0.0f, sqrt_2_over_pi, 0.0f,
-                                sqrt_2_over_pi * 0.044715f};
+  const double sqrt_2_over_pi = std::sqrt(2 / M_PI);
+  const double coefficients[] = {0.0, sqrt_2_over_pi, 0.0,
+                                sqrt_2_over_pi * 0.044715};
 
   uint32_t tanh_arg_id = YNN_INVALID_VALUE_ID;
   ynn_status status = ynn_define_unary_polynomial(
