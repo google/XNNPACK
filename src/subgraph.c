@@ -334,6 +334,9 @@ void xnn_subgraph_analyze_consumers_and_producers(xnn_subgraph_t subgraph) {
         continue;
       }
       const uint32_t input_id = node->inputs[i];
+      if (input_id == XNN_INVALID_VALUE_ID) {
+        continue;
+      }
       assert(input_id < subgraph->num_values);
 
       if (subgraph->values[input_id].num_consumers++ == 0) {
@@ -2171,6 +2174,7 @@ void xnn_subgraph_clean_up(xnn_subgraph_t subgraph) {
   uint32_t left = 0;
   uint32_t num_invalid_nodes = 0;
   while (left + num_invalid_nodes < subgraph->num_nodes) {
+    const uint32_t old_left = left;
     num_invalid_nodes = 0;
     for (uint32_t i = left; i < subgraph->num_nodes; i++) {
       struct xnn_node* node = &subgraph->nodes[i];
@@ -2184,7 +2188,12 @@ void xnn_subgraph_clean_up(xnn_subgraph_t subgraph) {
       // Check whether all inputs to this node have been produced.
       bool all_values_avail = true;
       for (uint32_t j = 0; all_values_avail && j < node->num_inputs; j++) {
-        all_values_avail = values_ready[node->inputs[j]];
+        uint32_t input_id = node->inputs[j];
+        if (input_id == XNN_INVALID_VALUE_ID) {
+          continue;
+        }
+        assert(input_id < subgraph->num_values);
+        all_values_avail = values_ready[input_id];
       }
 
       // If so, bubble this node down to the left end of the list of nodes.
@@ -2207,6 +2216,10 @@ void xnn_subgraph_clean_up(xnn_subgraph_t subgraph) {
         }
         left++;
       }
+    }
+    if (left == old_left) {
+      xnn_log_error("Failed to schedule all nodes in subgraph (possible cycle).");
+      break;
     }
   }
 

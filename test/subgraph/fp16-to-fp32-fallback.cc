@@ -1417,4 +1417,42 @@ INSTANTIATE_TEST_SUITE_P(
     [](const testing::TestParamInfo<Fp16ToFp32FallbackBinaryOpTest::ParamType>&
            info) { return info.param.name; });
 
+TEST_F(Fp16ToFp32FallbackTest, HandlesInvalidValueIdGracefully) {
+  xnn_subgraph_t subgraph = nullptr;
+  ASSERT_EQ(xnn_create_subgraph(/*num_values=*/3, /*flags=*/0, &subgraph),
+            xnn_status_success);
+
+  uint32_t input_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(
+      xnn_define_tensor_value(subgraph, xnn_datatype_fp16, 0, nullptr, nullptr,
+                              0, XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id),
+      xnn_status_success);
+
+  uint32_t weights_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(
+      xnn_define_tensor_value(subgraph, xnn_datatype_fp16, 0, nullptr, nullptr,
+                              1, XNN_VALUE_FLAG_EXTERNAL_INPUT, &weights_id),
+      xnn_status_success);
+
+  uint32_t output_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(
+      xnn_define_tensor_value(subgraph, xnn_datatype_fp16, 0, nullptr, nullptr,
+                              2, XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id),
+      xnn_status_success);
+
+  struct xnn_node* node = xnn_subgraph_new_node(subgraph);
+  ASSERT_NE(node, nullptr);
+  node->type = xnn_node_type_fully_connected;
+  node->num_inputs = 3;
+  node->inputs[0] = input_id;
+  node->inputs[1] = weights_id;
+  node->inputs[2] = XNN_INVALID_VALUE_ID;
+  node->num_outputs = 1;
+  node->outputs[0] = output_id;
+
+  ASSERT_THAT(xnn_subgraph_fallback_from_fp16_to_fp32(subgraph, 0),
+              Eq(xnn_status_success));
+  xnn_delete_subgraph(subgraph);
+}
+
 }  // namespace
