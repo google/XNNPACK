@@ -29,12 +29,14 @@ void TestImpl(T, size_t rank) {
   ReplicableRandomDevice rng;
 
   for (size_t axis = 0; axis < rank; ++axis) {
-    for (size_t axes_count = 1; axis + axes_count <= rank; ++axes_count) {
+    // Fusing dimensions beyond the rank is defined to be a no-op, test that.
+    for (size_t axes_count = 1; axis + axes_count <= rank + 2; ++axes_count) {
       // Define subgraph
       std::vector<size_t> template_shape = random_shape(rng, rank, 0, 9);
       SubgraphBuilder subgraph(2);
+      size_t clamped_axes_count = std::min(axes_count, rank - axis);
       subgraph.AddInput(type_of<T>(), template_shape, 0)
-          .AddOutput(type_of<T>(), rank + 1 - axes_count, 1)
+          .AddOutput(type_of<T>(), rank + 1 - clamped_axes_count, 1)
           .AddFuseDim(axis, axes_count, 0, 1);
 
       Runtime runtime(subgraph.GetSubgraph());
@@ -50,11 +52,14 @@ void TestImpl(T, size_t rank) {
         runtime.ReshapeExternalTensor(input_shape, input.base(), 0)
             .ReshapeRuntime();
 
+        size_t fuse_begin = axis;
+        size_t fuse_end = std::min(axis + axes_count, input_shape.size());
+
         std::vector<size_t> output_shape(input_shape);
-        output_shape.erase(output_shape.begin() + axis,
-                           output_shape.begin() + axis + axes_count);
+        output_shape.erase(output_shape.begin() + fuse_begin,
+                           output_shape.begin() + fuse_end);
         size_t fused_size = std::accumulate(
-            input_shape.begin() + axis, input_shape.begin() + axis + axes_count,
+            input_shape.begin() + fuse_begin, input_shape.begin() + fuse_end,
             static_cast<size_t>(1), std::multiplies<>());
         output_shape.insert(output_shape.begin() + axis, fused_size);
         ASSERT_EQ(runtime.GetExternalTensorShape(1), output_shape);
