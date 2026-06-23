@@ -54,6 +54,18 @@ static s32x32 reduce_add(
   return a;
 }
 
+static f32x32 reduce_add(
+    f32x32 a, f32x32 b, identity /*map_fn*/,
+    std::integral_constant<size_t, 1> /*horizontal_factor*/) {
+  return a + b;
+}
+
+static f32x32 reduce_add(
+    f32x32 a, f32x32 b, square /*map_fn*/,
+    std::integral_constant<size_t, 1> /*horizontal_factor*/) {
+  return a + (b * b);
+}
+
 }  // namespace simd
 
 using simd::bf16x64;
@@ -112,5 +124,10 @@ SUM_K1_KERNEL(sum_squared_k1_uint8_int32_hvx, uint8_t, int32_t, 32, 4, square);
 SUM_KN_KERNEL(sum_squared_kn_uint8_int32_hvx, uint8_t, int32_t, 128, square);
 SUM_K1_KERNEL(sum_squared_k1_int8_int32_hvx, int8_t, int32_t, 32, 4, square);
 SUM_KN_KERNEL(sum_squared_kn_int8_int32_hvx, int8_t, int32_t, 128, square);
+
+SUM_FLOAT_K1_KERNEL(sum_k1_fp32_hvx, float, float, 32, 1, identity);
+SUM_FLOAT_KN_KERNEL(sum_kn_fp32_hvx, float, float, 32, identity);
+SUM_FLOAT_K1_KERNEL(sum_squared_k1_fp32_hvx, float, float, 32, 1, square);
+SUM_FLOAT_KN_KERNEL(sum_squared_kn_fp32_hvx, float, float, 32, square);
 
 }  // namespace ynn

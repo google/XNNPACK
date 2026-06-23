@@ -92,6 +92,11 @@ YNN_REDUCE_KERNEL(arch_flag::sse2, sum_squared_k1_bf16_fp32_sse2, reduce_dim::k1
 YNN_REDUCE_KERNEL(arch_flag::sse2, sum_squared_kn_bf16_fp32_sse2, reduce_dim::kn, bfloat16, float)
 #endif  // YNN_ARCH_X86_SSE2
 
+#ifdef YNN_ARCH_HEXAGON
+YNN_REDUCE_KERNEL(arch_flag::hvx, sum_squared_k1_fp32_hvx, reduce_dim::k1, float, float)
+YNN_REDUCE_KERNEL(arch_flag::hvx, sum_squared_kn_fp32_hvx, reduce_dim::kn, float, float)
+#endif  // YNN_ARCH_HEXAGON
+
 // We can assume that SSE2 exists on any x86 CPU we will run on, so we don't
 // need to include these kernels. Reasons to do this:
 // - Saves a little code size to not include kernels we will never need.
