@@ -232,6 +232,7 @@ MICROKERNEL_DEFS = [
     "src/qs8-f32-vcvt/qs8-f32-vcvt.inc",
     "src/qs8-packw/qs8-packw.inc",
     "src/qs8-qc4w-packw/qs8-qc4w-packw.inc",
+    "src/qs8-qc2w-packw/qs8-qc2w-packw.inc",
     "src/qs8-qc8w-dwconv/qs8-qc8w-dwconv-minmax-fp32.inc",
     "src/qs8-rdsum/qs8-rdsum-minmax-fp32.inc",
     "src/qs8-rsum/qs8-rsum.inc",

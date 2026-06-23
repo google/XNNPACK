@@ -956,6 +956,7 @@ xnnpack_unit_test(
     "qb4_packw",
     "qs8_packw",
     "qs8_qc4w_packw",
+    "qs8_qc2w_packw",
     "x16_packw",
     "x16_x32_packw",
     "x32_packw",
