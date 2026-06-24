@@ -246,7 +246,7 @@ static const struct xnn_unary_elementwise_config* get_config(
   return NULL;
 }
 
-static enum xnn_status init_op(
+static XNN_NO_SANITIZE_FUNCTION enum xnn_status init_op(
     xnn_operator_t op,
     enum xnn_unary_operator op_type,
     enum xnn_datatype input_datatype,

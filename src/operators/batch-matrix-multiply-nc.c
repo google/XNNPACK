@@ -208,8 +208,8 @@ static enum xnn_status setup_linear_ukernels(const struct bmm_variant* variant,
   return xnn_status_success;
 }
 
-static enum xnn_status setup_params_f16(const struct bmm_variant* variant,
-                                        struct bmm_context* context) {
+static XNN_NO_SANITIZE_FUNCTION enum xnn_status setup_params_f16(
+    const struct bmm_variant* variant, struct bmm_context* context) {
   if XNN_LIKELY (context->gemm_config->init.f16 != NULL) {
     context->gemm_config->init.f16(&context->params.f16_minmax,
                                    xnn_float16_from_float(-INFINITY),
@@ -219,8 +219,8 @@ static enum xnn_status setup_params_f16(const struct bmm_variant* variant,
   return xnn_status_success;
 }
 
-static enum xnn_status setup_params_f32(const struct bmm_variant* variant,
-                                        struct bmm_context* context) {
+static XNN_NO_SANITIZE_FUNCTION enum xnn_status setup_params_f32(
+    const struct bmm_variant* variant, struct bmm_context* context) {
   if XNN_LIKELY (context->gemm_config->init.f32 != NULL) {
     context->gemm_config->init.f32(&context->params.f32_minmax, -INFINITY,
                                    INFINITY);
@@ -229,8 +229,8 @@ static enum xnn_status setup_params_f32(const struct bmm_variant* variant,
   return xnn_status_success;
 }
 
-static enum xnn_status setup_params_qs8_qc8w(const struct bmm_variant* variant,
-                                             struct bmm_context* context) {
+static XNN_NO_SANITIZE_FUNCTION enum xnn_status setup_params_qs8_qc8w(
+    const struct bmm_variant* variant, struct bmm_context* context) {
   if (context->output_min > context->output_max) {
     xnn_log_error(
         "failed to create %s operator with [%f, %f] output range:"
@@ -825,7 +825,8 @@ enum xnn_status xnn_create_batch_matrix_multiply_nc_qs8_const_weights(
       &qs8_variant, &context);
 }
 
-static enum xnn_status reshape_batch_matrix_multiply_nc(
+static XNN_NO_SANITIZE_FUNCTION enum xnn_status
+reshape_batch_matrix_multiply_nc(
     xnn_operator_t batch_matrix_multiply_op,
     enum xnn_operator_type expected_operator_type, size_t num_batch_dims,
     const size_t* batch_dims_a, const size_t* batch_dims_b, size_t m, size_t k,

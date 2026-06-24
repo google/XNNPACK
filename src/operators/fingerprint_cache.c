@@ -158,7 +158,7 @@ struct fingerprint_context create_fingerprint_context(
   return context;
 }
 
-static void free_fingerprint_cache_provider(
+static XNN_NO_SANITIZE_FUNCTION void free_fingerprint_cache_provider(
     struct xnn_weights_cache_provider* const provider) {
   if (provider) {
     provider->delete_cache(provider->context);

@@ -128,12 +128,11 @@ static uint32_t get_identity_value(xnn_operator_t reduce_op, size_t num_reductio
   return identity_value;
 }
 
-static enum xnn_status reshape_reduce_nd(
+static XNN_NO_SANITIZE_FUNCTION enum xnn_status reshape_reduce_nd(
     xnn_operator_t reduce_op, size_t num_reduction_axes,
     const int64_t* reduction_axes, size_t num_input_dims,
     const size_t* input_shape, size_t* workspace_size,
-    enum xnn_operator_type expected_operator_type,
-    pthreadpool_t threadpool) {
+    enum xnn_operator_type expected_operator_type, pthreadpool_t threadpool) {
   if (reduce_op->type != expected_operator_type) {
     xnn_log_error(
         "failed to reshape operator: operator type mismatch (expected %s, got "
@@ -426,7 +425,7 @@ static enum xnn_status setup_reduce_nd(
   return xnn_status_success;
 }
 
-enum xnn_status xnn_create_reduce_nd(
+XNN_NO_SANITIZE_FUNCTION enum xnn_status xnn_create_reduce_nd(
     const enum xnn_reduce_operator reduce_operator_type,
     const enum xnn_datatype datatype,
     const struct xnn_quantization_params* input_quantization,

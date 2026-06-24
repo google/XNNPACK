@@ -155,7 +155,7 @@ error:
   return status;
 }
 
-enum xnn_status xnn_create_max_pooling2d_nhwc_s8(
+XNN_NO_SANITIZE_FUNCTION enum xnn_status xnn_create_max_pooling2d_nhwc_s8(
     uint32_t input_padding_top,
     uint32_t input_padding_right,
     uint32_t input_padding_bottom,
@@ -194,7 +194,7 @@ enum xnn_status xnn_create_max_pooling2d_nhwc_s8(
     max_pooling_op_out);
 }
 
-enum xnn_status xnn_create_max_pooling2d_nhwc_u8(
+XNN_NO_SANITIZE_FUNCTION enum xnn_status xnn_create_max_pooling2d_nhwc_u8(
     uint32_t input_padding_top,
     uint32_t input_padding_right,
     uint32_t input_padding_bottom,
@@ -233,7 +233,7 @@ enum xnn_status xnn_create_max_pooling2d_nhwc_u8(
     max_pooling_op_out);
 }
 
-enum xnn_status xnn_create_max_pooling2d_nhwc_f32(
+XNN_NO_SANITIZE_FUNCTION enum xnn_status xnn_create_max_pooling2d_nhwc_f32(
     uint32_t input_padding_top,
     uint32_t input_padding_right,
     uint32_t input_padding_bottom,
@@ -291,7 +291,7 @@ enum xnn_status xnn_create_max_pooling2d_nhwc_f32(
     max_pooling_op_out);
 }
 
-enum xnn_status xnn_create_max_pooling2d_nhwc_f16(
+XNN_NO_SANITIZE_FUNCTION enum xnn_status xnn_create_max_pooling2d_nhwc_f16(
     uint32_t input_padding_top,
     uint32_t input_padding_right,
     uint32_t input_padding_bottom,
