@@ -264,6 +264,11 @@ enum ynn_binary_operator {
 // dimensions will have leading broadcast dimensions inserted to match the rank
 // of the other input. Dimensions that exist in both inputs must have the same
 // extent.
+//
+// If the output is not defined, the output type will be:
+// - The type of a, if b can be losslessly converted to the type of a.
+// - The type of b, if a can be losslessly converted to the type of b.
+// - fp32 otherwise.
 enum ynn_status ynn_define_binary(ynn_subgraph_t subgraph,
                                   enum ynn_binary_operator op,
                                   uint32_t input_a_id, uint32_t input_b_id,

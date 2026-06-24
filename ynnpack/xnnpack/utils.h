@@ -63,26 +63,6 @@ ynn_status define_binary_with_broadcasting(
     xnn_subgraph_t subgraph, ynn_binary_operator op, uint32_t input_a_id,
     uint32_t input_b_id, uint32_t* output_id, uint32_t flags = 0);
 
-// Implements (x / 2) * (1 + erf(x * sqrt(2) / 2))
-ynn_status implement_gelu(xnn_subgraph_t subgraph, uint32_t input_id,
-                          uint32_t* output_id);
-
-// Implements (x / 2) * (1 + tanh(sqrt(2 / pi) * (x + 0.044715 * x^3)))
-ynn_status implement_approxgelu(xnn_subgraph_t subgraph, uint32_t input_id,
-                                uint32_t* output_id);
-
-// Implements elu(x) = select(x < 0, alpha * expm1(x), x)
-ynn_status implement_elu(xnn_subgraph_t subgraph, uint32_t input_id,
-                         float alpha, uint32_t* output_id);
-
-// Implement x * clamp(x / 6 + 0.5, 0, 1);
-ynn_status implement_hardswish(xnn_subgraph_t subgraph, uint32_t input_id,
-                               uint32_t* output_id);
-
-// Implement select(x < 0, negative_slope * x, x)
-ynn_status implement_leaky_relu(xnn_subgraph_t subgraph, uint32_t input_id,
-                                uint32_t* output_id, float alpha);
-
 // Implement clamp(x, min, max)
 ynn_status define_clamp(xnn_subgraph_t subgraph, float min, float max,
                         uint32_t input_id, uint32_t* output_id);

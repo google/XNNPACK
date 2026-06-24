@@ -814,6 +814,22 @@ ynn_status ynn_define_dequantize(ynn_subgraph_t subgraph, uint32_t input_id,
   }
 }
 
+namespace {
+
+ynn_type get_binary_output_type(ynn_binary_operator op, const ynn_value& a,
+                                const ynn_value& b) {
+  if (is_convert_lossless(a.type, b.type)) {
+    return b.type;
+  } else if (is_convert_lossless(b.type, a.type)) {
+    return a.type;
+  } else {
+    assert(a.type != ynn_type_fp64 && b.type != ynn_type_fp64);
+    return ynn_type_fp32;
+  }
+}
+
+}  // namespace
+
 ynn_status ynn_define_binary(ynn_subgraph_t subgraph, ynn_binary_operator op,
                              uint32_t input_a_id, uint32_t input_b_id,
                              uint32_t* output_id, uint32_t flags) {
@@ -832,7 +848,8 @@ ynn_status ynn_define_binary(ynn_subgraph_t subgraph, ynn_binary_operator op,
       validate_output_tensor("binary", subgraph, "output_id", output_id));
   const ynn_value& a = subgraph->value(input_a_id);
   const ynn_value& b = subgraph->value(input_b_id);
-  ynn_value& x = subgraph->get_output_value(output_id, a);
+  ynn_value& x =
+      subgraph->get_output_value(output_id, get_binary_output_type(op, a, b));
 
   // Find the kernel.
   const bool is_quantized = a.scale_id != YNN_INVALID_VALUE_ID ||
@@ -849,7 +866,8 @@ ynn_status ynn_define_binary(ynn_subgraph_t subgraph, ynn_binary_operator op,
                     << ", output type " << x.type
                     << "; attempting to convert to fp32.";
 
-    if (!(a.type == ynn_type_fp32 && b.type == ynn_type_fp32)) {
+    if (!(a.type == ynn_type_fp32 && b.type == ynn_type_fp32) ||
+        x.type != ynn_type_fp32) {
       uint32_t a_fp32_id = YNN_INVALID_VALUE_ID;
       if (a.type != ynn_type_fp32) {
         ynn_status status = ynn_define_dequantize(

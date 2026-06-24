@@ -18,6 +18,7 @@
 #include "include/xnnpack.h"
 #include "ynnpack/base/log.h"
 #include "ynnpack/base/type.h"
+#include "ynnpack/composites/composites.h"
 #include "ynnpack/include/ynnpack.h"
 #include "ynnpack/xnnpack/dynamic_quantization.h"
 #include "ynnpack/xnnpack/utils.h"
@@ -175,20 +176,21 @@ xnn_status xnn_define_unary(xnn_subgraph_t subgraph, xnn_unary_operator type,
 
   ynn_status status;
   if (type == xnn_unary_leaky_relu) {
-    status = ynn::implement_leaky_relu(subgraph, input_id, &output_float_id,
-                                       params->leaky_relu.negative_slope);
+    status = ynn::define_leaky_relu(subgraph->ynn, input_id,
+                                    params->leaky_relu.negative_slope,
+                                    output_float_id);
   } else if (type == xnn_unary_clamp) {
     status = ynn::define_clamp(subgraph, params->clamp.min, params->clamp.max,
                                input_id, &output_float_id);
   } else if (type == xnn_unary_elu) {
-    status = ynn::implement_elu(subgraph, input_id, params->elu.alpha,
-                                &output_float_id);
+    status = ynn::define_elu(subgraph->ynn, input_id, params->elu.alpha,
+                             output_float_id);
   } else if (type == xnn_unary_gelu) {
-    status = ynn::implement_gelu(subgraph, input_id, &output_float_id);
+    status = ynn::define_gelu(subgraph->ynn, input_id, output_float_id);
   } else if (type == xnn_unary_hardswish) {
-    status = ynn::implement_hardswish(subgraph, input_id, &output_float_id);
+    status = ynn::define_hardswish(subgraph->ynn, input_id, output_float_id);
   } else if (type == xnn_unary_approxgelu) {
-    status = ynn::implement_approxgelu(subgraph, input_id, &output_float_id);
+    status = ynn::define_approx_gelu(subgraph->ynn, input_id, output_float_id);
   } else {
     ynn_unary_operator ynn_type = ynn::unary_operator_from_xnn(type);
     if (ynn_type != ynn_unary_invalid) {
@@ -1228,75 +1230,9 @@ xnn_status xnn_define_batch_matrix_multiply(xnn_subgraph_t subgraph,
 
 xnn_status xnn_define_softmax(xnn_subgraph_t subgraph, uint32_t input_id,
                               uint32_t output_id, uint32_t flags) {
-  // TODO: This implementation needs helper functions...
-
-  uint32_t max_input_id = YNN_INVALID_VALUE_ID;
-  uint32_t max_identity_id = YNN_INVALID_VALUE_ID;
-  const int32_t last_axis[] = {-1};
   ynn_status status =
-      ynn_define_reduce(subgraph->ynn, ynn_reduce_max, 1, last_axis, input_id,
-                        max_identity_id, &max_input_id,
-                        /*flags=*/YNN_NODE_FLAG_KEEP_DIMS);
-  if (status != ynn_status_success) {
-    return ynn::xnn_status_from_ynn(status);
-  }
-
-  uint32_t input_minus_max_id = YNN_INVALID_VALUE_ID;
-  status = ynn_define_binary(subgraph->ynn, ynn_binary_subtract, input_id,
-                             max_input_id, &input_minus_max_id,
-                             /*flags=*/0);
-  if (status != ynn_status_success) {
-    return ynn::xnn_status_from_ynn(status);
-  }
-
-  uint32_t exp_input_minus_max_id = YNN_INVALID_VALUE_ID;
-  status = ynn_define_unary(subgraph->ynn, ynn_unary_exp, input_minus_max_id,
-                            &exp_input_minus_max_id, /*flags=*/0);
-  if (status != ynn_status_success) {
-    return ynn::xnn_status_from_ynn(status);
-  }
-
-  uint32_t sum_exp_input_minus_max_id = YNN_INVALID_VALUE_ID;
-  uint32_t init_sum_exp_input_minus_max_id = YNN_INVALID_VALUE_ID;
-  status = ynn_define_reduce(
-      subgraph->ynn, ynn_reduce_sum, 1, last_axis, exp_input_minus_max_id,
-      init_sum_exp_input_minus_max_id, &sum_exp_input_minus_max_id,
-      /*flags=*/YNN_NODE_FLAG_KEEP_DIMS);
-  if (status != ynn_status_success) {
-    return ynn::xnn_status_from_ynn(status);
-  }
-
-  uint32_t inv_sum_id = YNN_INVALID_VALUE_ID;
-  status = ynn::define_binary_scalar_a(subgraph, ynn_binary_divide, 1.0f,
-                                       sum_exp_input_minus_max_id, &inv_sum_id);
-  if (status != ynn_status_success) {
-    return ynn::xnn_status_from_ynn(status);
-  }
-
-  if (ynn::type_of_value(subgraph, inv_sum_id) !=
-      ynn::type_of_value(subgraph, input_id)) {
-    uint32_t inv_sum_cast_id = YNN_INVALID_VALUE_ID;
-    status =
-        ynn::define_tensor_value_like(subgraph, input_id, &inv_sum_cast_id);
-    if (status != ynn_status_success) {
-      return ynn::xnn_status_from_ynn(status);
-    }
-
-    status = ynn_define_unary(subgraph->ynn, ynn_unary_convert, inv_sum_id,
-                              &inv_sum_cast_id, /*flags=*/0);
-    if (status != ynn_status_success) {
-      return ynn::xnn_status_from_ynn(status);
-    }
-    inv_sum_id = inv_sum_cast_id;
-  }
-
-  status = ynn_define_binary(subgraph->ynn, ynn_binary_multiply,
-                             exp_input_minus_max_id, inv_sum_id, &output_id,
-                             /*flags=*/0);
-  if (status != ynn_status_success) {
-    return ynn::xnn_status_from_ynn(status);
-  }
-  return xnn_status_success;
+      ynn::define_softmax(subgraph->ynn, input_id, 1.0f, output_id);
+  return ynn::xnn_status_from_ynn(status);
 }
 
 xnn_status xnn_define_static_slice(xnn_subgraph_t subgraph, size_t num_dims,

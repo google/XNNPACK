@@ -639,165 +639,13 @@ ynn_status define_binary_with_broadcasting(
                            /*flags=*/0);
 }
 
-ynn_status implement_gelu(xnn_subgraph_t subgraph, uint32_t input_id,
-                          uint32_t* output_id) {
-  uint32_t x_sqrt2_over_2_id = YNN_INVALID_VALUE_ID;
-  ynn_status status = define_binary_scalar_b(subgraph, ynn_binary_multiply,
-                                             input_id, std::sqrt(2) / 2,
-                                             &x_sqrt2_over_2_id);
-  if (status != ynn_status_success) {
-    return status;
-  }
-
-  uint32_t erf_x_sqrt2_over_2_id = YNN_INVALID_VALUE_ID;
-  status = ynn_define_unary(subgraph->ynn, ynn_unary_erf, x_sqrt2_over_2_id,
-                            &erf_x_sqrt2_over_2_id,
-                            /*flags=*/0);
-  if (status != ynn_status_success) {
-    return status;
-  }
-
-  uint32_t half_erf_id = YNN_INVALID_VALUE_ID;
-  status = define_binary_scalar_b(subgraph, ynn_binary_multiply,
-                                  erf_x_sqrt2_over_2_id, 0.5f, &half_erf_id);
-  if (status != ynn_status_success) {
-    return status;
-  }
-
-  uint32_t half_erf_plus_half_id = YNN_INVALID_VALUE_ID;
-  status = define_binary_scalar_b(subgraph, ynn_binary_add, half_erf_id, 0.5f,
-                                  &half_erf_plus_half_id);
-  if (status != ynn_status_success) {
-    return status;
-  }
-
-  return ynn_define_binary(subgraph->ynn, ynn_binary_multiply, input_id,
-                           half_erf_plus_half_id, output_id,
-                           /*flags=*/0);
-}
-
-ynn_status implement_approxgelu(xnn_subgraph_t subgraph, uint32_t input_id,
-                                uint32_t* output_id) {
-  // (x / 2) * (1 + tanh(sqrt(2 / pi) * (x + 0.044715 * x^3)))
-  const double sqrt_2_over_pi = std::sqrt(2 / M_PI);
-  const double coefficients[] = {0.0, sqrt_2_over_pi, 0.0,
-                                sqrt_2_over_pi * 0.044715};
-
-  uint32_t tanh_arg_id = YNN_INVALID_VALUE_ID;
-  ynn_status status = ynn_define_unary_polynomial(
-      subgraph->ynn, input_id, 3, coefficients, &tanh_arg_id, /*flags=*/0);
-  if (status != ynn_status_success) {
-    return status;
-  }
-
-  uint32_t tanh_id = YNN_INVALID_VALUE_ID;
-  status =
-      ynn_define_unary(subgraph->ynn, ynn_unary_tanh, tanh_arg_id, &tanh_id,
-                       /*flags=*/0);
-  if (status != ynn_status_success) {
-    return status;
-  }
-
-  uint32_t one_plus_tanh_id = YNN_INVALID_VALUE_ID;
-  status = define_binary_scalar_b(subgraph, ynn_binary_add, tanh_id, 1.0f,
-                                  &one_plus_tanh_id);
-  if (status != ynn_status_success) {
-    return status;
-  }
-
-  uint32_t x_times_half_id = YNN_INVALID_VALUE_ID;
-  status = define_binary_scalar_b(subgraph, ynn_binary_multiply, input_id, 0.5f,
-                                  &x_times_half_id);
-  if (status != ynn_status_success) {
-    return status;
-  }
-
-  return ynn_define_binary(subgraph->ynn, ynn_binary_multiply, x_times_half_id,
-                           one_plus_tanh_id, output_id,
-                           /*flags=*/0);
-}
-
-// Implements elu(x) = select(x < 0, alpha * expm1(x), x)
-ynn_status implement_elu(xnn_subgraph_t subgraph, uint32_t input_id,
-                         float alpha, uint32_t* output_id) {
-  // We implement this using min/max instead:
-  //
-  // elu(x) = max(alpha*expm1(min(x, 0)), x)
-  //
-  // We currently don't have select, and this might actually be better than a
-  // select implementation, which would require a binary + ternary op, instead
-  // of two binary ops.
-  uint32_t min_x_0_id = YNN_INVALID_VALUE_ID;
-  ynn_status status = define_binary_scalar_b(subgraph, ynn_binary_min, input_id,
-                                             0.0f, &min_x_0_id);
-  if (status != ynn_status_success) {
-    return status;
-  }
-
-  uint32_t expm1_x_id = YNN_INVALID_VALUE_ID;
-  status =
-      ynn_define_unary(subgraph->ynn, ynn_unary_expm1, min_x_0_id, &expm1_x_id,
-                       /*flags=*/0);
-  if (status != ynn_status_success) {
-    return status;
-  }
-
-  uint32_t alpha_times_expm1_x_id = YNN_INVALID_VALUE_ID;
-  status = define_binary_scalar_b(subgraph, ynn_binary_multiply, expm1_x_id,
-                                  alpha, &alpha_times_expm1_x_id);
-  if (status != ynn_status_success) {
-    return status;
-  }
-
-  return ynn_define_binary(subgraph->ynn, ynn_binary_max,
-                           alpha_times_expm1_x_id, input_id, output_id,
-                           /*flags=*/0);
-}
-
-ynn_status implement_hardswish(xnn_subgraph_t subgraph, uint32_t input_id,
-                               uint32_t* output_id) {
-  uint32_t x_div_6_id = YNN_INVALID_VALUE_ID;
-  ynn_status status = define_binary_scalar_b(
-      subgraph, ynn_binary_multiply, input_id, 1.0f / 6.0f, &x_div_6_id);
-  if (status != ynn_status_success) {
-    return status;
-  }
-
-  uint32_t x_div_6_plus_0_5_id = YNN_INVALID_VALUE_ID;
-  status = define_binary_scalar_b(subgraph, ynn_binary_add, x_div_6_id, 0.5f,
-                                  &x_div_6_plus_0_5_id);
-  if (status != ynn_status_success) {
-    return status;
-  }
-
-  uint32_t max_id = YNN_INVALID_VALUE_ID;
-  status = define_binary_scalar_b(subgraph, ynn_binary_max, x_div_6_plus_0_5_id,
-                                  0.0f, &max_id);
-  if (status != ynn_status_success) {
-    return status;
-  }
-
-  uint32_t relu6_id = YNN_INVALID_VALUE_ID;
-  status =
-      define_binary_scalar_b(subgraph, ynn_binary_min, max_id, 1.0f, &relu6_id);
-  if (status != ynn_status_success) {
-    return status;
-  }
-
-  return ynn_define_binary(subgraph->ynn, ynn_binary_multiply, input_id,
-                           relu6_id, output_id,
-                           /*flags=*/0);
-}
-
-ynn_status implement_leaky_relu(xnn_subgraph_t subgraph, uint32_t input_id,
-                                uint32_t* output_id, float alpha) {
-  return define_binary_scalar_b(subgraph, ynn_binary_leaky_relu, input_id,
-                                alpha, output_id);
-}
-
 ynn_status define_clamp(xnn_subgraph_t subgraph, float min, float max,
                         uint32_t input_id, uint32_t* output_id) {
   ynn_status status;
+
+  uint32_t zp_id = get_zero_point_id(subgraph, input_id);
+  uint32_t scale_id = get_scale_id(subgraph, input_id);
+  ynn_type type = subgraph->ynn->value(input_id).type;
 
   uint32_t min_id = YNN_INVALID_VALUE_ID;
   status = define_scalar_value_like(subgraph, input_id, min, &min_id);
@@ -812,12 +660,19 @@ ynn_status define_clamp(xnn_subgraph_t subgraph, float min, float max,
   }
 
   uint32_t maxed_id = YNN_INVALID_VALUE_ID;
+  if (zp_id != YNN_INVALID_VALUE_ID || scale_id != YNN_INVALID_VALUE_ID) {
+    subgraph->ynn->get_output_value(&maxed_id, type, zp_id, scale_id);
+  }
   status = ynn_define_binary(subgraph->ynn, ynn_binary_max, input_id, min_id,
                              &maxed_id, /*flags=*/0);
   if (status != ynn_status_success) {
     return status;
   }
 
+  if (*output_id == YNN_INVALID_VALUE_ID &&
+      (zp_id != YNN_INVALID_VALUE_ID || scale_id != YNN_INVALID_VALUE_ID)) {
+    subgraph->ynn->get_output_value(output_id, type, zp_id, scale_id);
+  }
   return ynn_define_binary(subgraph->ynn, ynn_binary_min, maxed_id, max_id,
                            output_id, /*flags=*/0);
 }
@@ -829,7 +684,12 @@ ynn_status implement_clamp(xnn_subgraph_t subgraph, float min, float max,
   }
 
   uint32_t clamped_id = YNN_INVALID_VALUE_ID;
-  ynn_status status = define_clamp(subgraph, min, max, output_id, &clamped_id);
+  ynn_status status =
+      define_tensor_value_like(subgraph, output_id, &clamped_id);
+  if (status != ynn_status_success) {
+    return status;
+  }
+  status = define_clamp(subgraph, min, max, output_id, &clamped_id);
   if (status != ynn_status_success) {
     return status;
   }

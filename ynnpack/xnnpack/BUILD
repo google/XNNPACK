@@ -33,6 +33,7 @@ cc_library(
         "//ynnpack",
         "//ynnpack/base",
         "//ynnpack/base:log",
+        "//ynnpack/composites",
         "//ynnpack/kernels/dot",
         "//ynnpack/subgraph",
         "@pthreadpool",
