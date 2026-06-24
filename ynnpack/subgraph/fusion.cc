@@ -270,8 +270,8 @@ bool rewrite_ternary(ynn_subgraph& subgraph, ynn_node& node,
     if (kernel != nullptr) {
       // Yes we do. Rewrite this to a ternary op.
       YNN_LOG_DEBUG() << "Rewriting " << to_string(outer->op) << "("
-                      << to_string(inner) << "(a, b), c) to "
-                      << to_string(r.op) << "(a, b, c)";
+                      << to_string(inner) << "(a, b), c) to " << to_string(r.op)
+                      << "(a, b, c)";
       ynn::define_ternary(subgraph, node, a.id, b.id, c.id, x.id, r.op, kernel);
       return true;
     }
@@ -1318,8 +1318,25 @@ bool fold_unary_input(ynn_subgraph& subgraph, ynn_node& node,
       // We can't handle addition here.
       return false;
     }
+
+    ynn_type input_type = subgraph.value(mul->x_id).type;
+    ynn_type folded_type = subgraph.value(node.inputs[0]).type;
+
+    unary_kernel_fn convert_kernel = nullptr;
+    if (input_type != folded_type) {
+      if (analysis.consumers[node.inputs[0]].size() != 1) {
+        return false;
+      }
+      convert_kernel =
+          get_unary_kernel(ynn_unary_convert, input_type, folded_type);
+      if (!convert_kernel) {
+        return false;
+      }
+    }
+
     YNN_LOG_DEBUG() << "Folding multiply by " << mul->a << " into "
-                    << to_string(unary->op) << ".";
+                    << to_string(unary->op);
+
     if (unary->op == ynn_unary_exp || unary->op == ynn_unary_expm1) {
       unary->params.exp.input_multiplier *= mul->a;
     } else if (unary->op == ynn_unary_approx_erf) {
@@ -1327,7 +1344,15 @@ bool fold_unary_input(ynn_subgraph& subgraph, ynn_node& node,
     } else {
       unary->params.erf.input_multiplier *= mul->a;
     }
-    node.inputs[0] = mul->x_id;
+
+    if (input_type != folded_type) {
+      define_unary(subgraph, *producer, mul->x_id, producer->outputs[0],
+                   ynn_unary_convert, convert_kernel);
+    } else {
+      node.inputs[0] = mul->x_id;
+    }
+
+    analysis.invalidate();
     return true;
   }
   return false;
@@ -1371,6 +1396,16 @@ bool fold_unary_output(ynn_subgraph& subgraph, ynn_node& node,
   // Check if the output is only used by this binary node.
   if (analysis.consumers[producer->outputs[0]].size() != 1) return false;
 
+  ynn_type folded_type = subgraph.value(producer->outputs[0]).type;
+  ynn_type output_type = subgraph.value(node.outputs[0]).type;
+
+  unary_kernel_fn convert_kernel = nullptr;
+  if (folded_type != output_type) {
+    convert_kernel =
+        get_unary_kernel(ynn_unary_convert, folded_type, output_type);
+    if (!convert_kernel) return false;
+  }
+
   YNN_LOG_DEBUG() << "Folding scalar arithmetic onto " << to_string(unary->op);
 
   unary->params.poly3.c0 *= scalar_arithmetic->a;
@@ -1381,8 +1416,15 @@ bool fold_unary_output(ynn_subgraph& subgraph, ynn_node& node,
   }
   unary->params.poly3.c0 += scalar_arithmetic->b;
 
-  producer->outputs[0] = node.outputs[0];
-  node.invalidate();
+  if (folded_type != output_type) {
+    define_unary(subgraph, node, producer->outputs[0], node.outputs[0],
+                 ynn_unary_convert, convert_kernel);
+  } else {
+    producer->outputs[0] = node.outputs[0];
+    node.invalidate();
+  }
+
+  analysis.invalidate();
   return true;
 }
 
@@ -1478,8 +1520,8 @@ bool rewrite_reshape(ynn_subgraph& subgraph, ynn_node& node,
   }
 
   YNN_LOG_DEBUG() << "Rewriting reshape to static_transpose";
-  ynn::define_static_transpose(subgraph, node, std::move(permutation),
-                               input.id, &output.id);
+  ynn::define_static_transpose(subgraph, node, std::move(permutation), input.id,
+                               &output.id);
   return true;
 }
 

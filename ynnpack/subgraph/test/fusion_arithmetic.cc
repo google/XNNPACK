@@ -176,6 +176,47 @@ TEST(fusion, exp_negate) {
   EXPECT_NEAR(unary.params.exp.input_multiplier, -1.0f, 1e-6f);
 }
 
+TEST(fusion, fold_unary_input_mixed_types) {
+  // input (bf16) -> multiply (bf16, fp32 -> fp32) -> intermediate (fp32) -> erf
+  // (fp32 -> fp32) -> output (fp32) Should fold multiply into erf, and replace
+  // multiply with convert (bf16 -> fp32). Result: input (bf16) -> convert (bf16
+  // -> fp32) -> intermediate (fp32) -> erf (fp32 -> fp32) (with folded params)
+  // -> output (fp32).
+  const uint32_t x_id = 0;
+  const uint32_t c_id = 1;
+  const uint32_t y_id = 2;
+
+  SubgraphBuilder builder(3, YNN_FLAG_FAST_MATH);
+  uint32_t xc_id = YNN_INVALID_VALUE_ID;
+  float c = 0.707107f;
+
+  builder.AddInput(ynn_type_bf16, 2, x_id)
+      .AddScalar(c, c_id)
+      .AddOutput(ynn_type_fp32, 2, y_id)
+      .AddTensor(ynn_type_fp32, 2, xc_id);
+
+  builder.AddBinary(ynn_binary_multiply, x_id, c_id, xc_id)
+      .AddUnary(ynn_unary_erf, xc_id, y_id);
+
+  ynn_subgraph& subgraph = *builder.GetSubgraph();
+
+  subgraph.fusion();
+  subgraph.invalidate_dead_values();
+
+  ASSERT_THAT(subgraph, AllOf(HasValidNodeCount(2), HasValidValueCount(3)));
+
+  const ynn_node& erf_node = ProducerOf(y_id, subgraph);
+  EXPECT_THAT(erf_node, IsUnary(ynn_unary_approx_erf));
+  EXPECT_EQ(erf_node.inputs[0], xc_id);
+
+  const ynn_node& convert_node = ProducerOf(xc_id, subgraph);
+  EXPECT_THAT(convert_node, IsUnary(ynn_unary_convert));
+  EXPECT_EQ(convert_node.inputs[0], x_id);
+
+  const auto& unary = std::get<ynn_node::unary_elementwise>(erf_node.op);
+  EXPECT_NEAR(unary.params.approx_erf.input_multiplier, c, 1e-6f);
+}
+
 TEST(fusion, subtract_multiply) {
   // subtract(a, mul(b, c) -> subtract_multiply(a, b, c)
   const uint32_t a_id = 0;
@@ -799,8 +840,6 @@ TEST(fusion, fast_math_erf_folded) {
   EXPECT_NEAR(unary.params.approx_erf.output_multiplier, a, 1e-6f);
   EXPECT_NEAR(unary.params.approx_erf.output_offset, b, 1e-6f);
 }
-
-
 
 TEST(fusion, fast_math_tanh_folded) {
   const uint32_t x_id = 0;
