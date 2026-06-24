@@ -797,7 +797,7 @@ namespace {
     GEMMBenchmark(state,
       xnn_qd8_f16_qc8w_gemm_minmax_ukernel_1x8c4__neondotfp16arith,
       xnn_init_f16_minmax_scalar_params,
-      xnn_pack_qs8_gemm_goi_w,
+      xnn_qs8_packw_gemm_goi_ukernel_x8c4__neondot,
       /*mr=*/1, /*nr=*/8, /*kr=*/4, /*sr=*/1,
       /*arch_flags=*/xnn_arch_arm_neon_dot | xnn_arch_arm_neon_fp16_arith);
   }
@@ -808,7 +808,7 @@ namespace {
     GEMMBenchmark(state,
       xnn_qd8_f16_qc8w_gemm_minmax_ukernel_2x8c4__neondotfp16arith,
       xnn_init_f16_minmax_scalar_params,
-      xnn_pack_qs8_gemm_goi_w,
+      xnn_qs8_packw_gemm_goi_ukernel_x8c4__neondot,
       /*mr=*/2, /*nr=*/8, /*kr=*/4, /*sr=*/1,
       /*arch_flags=*/xnn_arch_arm_neon_dot | xnn_arch_arm_neon_fp16_arith);
   }
@@ -819,7 +819,7 @@ namespace {
     GEMMBenchmark(state,
       xnn_qd8_f16_qc8w_gemm_minmax_ukernel_3x8c4__neondotfp16arith,
       xnn_init_f16_minmax_scalar_params,
-      xnn_pack_qs8_gemm_goi_w,
+      xnn_qs8_packw_gemm_goi_ukernel_x8c4__neondot,
       /*mr=*/3, /*nr=*/8, /*kr=*/4, /*sr=*/1,
       /*arch_flags=*/xnn_arch_arm_neon_dot | xnn_arch_arm_neon_fp16_arith);
   }
@@ -830,7 +830,7 @@ namespace {
     GEMMBenchmark(state,
       xnn_qd8_f16_qc8w_gemm_minmax_ukernel_4x8c4__neondotfp16arith,
       xnn_init_f16_minmax_scalar_params,
-      xnn_pack_qs8_gemm_goi_w,
+      xnn_qs8_packw_gemm_goi_ukernel_x8c4__neondot,
       /*mr=*/4, /*nr=*/8, /*kr=*/4, /*sr=*/1,
       /*arch_flags=*/xnn_arch_arm_neon_dot | xnn_arch_arm_neon_fp16_arith);
   }
@@ -841,7 +841,7 @@ namespace {
     GEMMBenchmark(state,
       xnn_qd8_f16_qc8w_gemm_minmax_ukernel_5x8c4__neondotfp16arith,
       xnn_init_f16_minmax_scalar_params,
-      xnn_pack_qs8_gemm_goi_w,
+      xnn_qs8_packw_gemm_goi_ukernel_x8c4__neondot,
       /*mr=*/5, /*nr=*/8, /*kr=*/4, /*sr=*/1,
       /*arch_flags=*/xnn_arch_arm_neon_dot | xnn_arch_arm_neon_fp16_arith);
   }
@@ -852,7 +852,7 @@ namespace {
     GEMMBenchmark(state,
       xnn_qd8_f16_qc8w_gemm_minmax_ukernel_6x8c4__neondotfp16arith,
       xnn_init_f16_minmax_scalar_params,
-      xnn_pack_qs8_gemm_goi_w,
+      xnn_qs8_packw_gemm_goi_ukernel_x8c4__neondot,
       /*mr=*/6, /*nr=*/8, /*kr=*/4, /*sr=*/1,
       /*arch_flags=*/xnn_arch_arm_neon_dot | xnn_arch_arm_neon_fp16_arith);
   }
@@ -863,7 +863,7 @@ namespace {
     GEMMBenchmark(state,
       xnn_qd8_f16_qc8w_gemm_minmax_ukernel_7x8c4__neondotfp16arith,
       xnn_init_f16_minmax_scalar_params,
-      xnn_pack_qs8_gemm_goi_w,
+      xnn_qs8_packw_gemm_goi_ukernel_x8c4__neondot,
       /*mr=*/7, /*nr=*/8, /*kr=*/4, /*sr=*/1,
       /*arch_flags=*/xnn_arch_arm_neon_dot | xnn_arch_arm_neon_fp16_arith);
   }
@@ -874,7 +874,7 @@ namespace {
     GEMMBenchmark(state,
       xnn_qd8_f16_qc8w_gemm_minmax_ukernel_8x8c4__neondotfp16arith,
       xnn_init_f16_minmax_scalar_params,
-      xnn_pack_qs8_gemm_goi_w,
+      xnn_qs8_packw_gemm_goi_ukernel_x8c4__neondot,
       /*mr=*/8, /*nr=*/8, /*kr=*/4, /*sr=*/1,
       /*arch_flags=*/xnn_arch_arm_neon_dot | xnn_arch_arm_neon_fp16_arith);
   }
@@ -885,7 +885,7 @@ namespace {
     GEMMBenchmark(state,
       xnn_qd8_f16_qc8w_gemm_minmax_ukernel_1x16c4__neondotfp16arith,
       xnn_init_f16_minmax_scalar_params,
-      xnn_pack_qs8_gemm_goi_w,
+      xnn_qs8_packw_gemm_goi_ukernel_x16c4__neondot,
       /*mr=*/1, /*nr=*/16, /*kr=*/4, /*sr=*/1,
       /*arch_flags=*/xnn_arch_arm_neon_dot | xnn_arch_arm_neon_fp16_arith);
   }
@@ -896,7 +896,7 @@ namespace {
     GEMMBenchmark(state,
       xnn_qd8_f16_qc8w_gemm_minmax_ukernel_2x16c4__neondotfp16arith,
       xnn_init_f16_minmax_scalar_params,
-      xnn_pack_qs8_gemm_goi_w,
+      xnn_qs8_packw_gemm_goi_ukernel_x16c4__neondot,
       /*mr=*/2, /*nr=*/16, /*kr=*/4, /*sr=*/1,
       /*arch_flags=*/xnn_arch_arm_neon_dot | xnn_arch_arm_neon_fp16_arith);
   }
@@ -907,7 +907,7 @@ namespace {
     GEMMBenchmark(state,
       xnn_qd8_f16_qc8w_gemm_minmax_ukernel_3x16c4__neondotfp16arith,
       xnn_init_f16_minmax_scalar_params,
-      xnn_pack_qs8_gemm_goi_w,
+      xnn_qs8_packw_gemm_goi_ukernel_x16c4__neondot,
       /*mr=*/3, /*nr=*/16, /*kr=*/4, /*sr=*/1,
       /*arch_flags=*/xnn_arch_arm_neon_dot | xnn_arch_arm_neon_fp16_arith);
   }
@@ -918,7 +918,7 @@ namespace {
     GEMMBenchmark(state,
       xnn_qd8_f16_qc8w_gemm_minmax_ukernel_4x16c4__neondotfp16arith,
       xnn_init_f16_minmax_scalar_params,
-      xnn_pack_qs8_gemm_goi_w,
+      xnn_qs8_packw_gemm_goi_ukernel_x16c4__neondot,
       /*mr=*/4, /*nr=*/16, /*kr=*/4, /*sr=*/1,
       /*arch_flags=*/xnn_arch_arm_neon_dot | xnn_arch_arm_neon_fp16_arith);
   }
@@ -929,7 +929,7 @@ namespace {
     GEMMBenchmark(state,
       xnn_qd8_f16_qc8w_gemm_minmax_ukernel_5x16c4__neondotfp16arith,
       xnn_init_f16_minmax_scalar_params,
-      xnn_pack_qs8_gemm_goi_w,
+      xnn_qs8_packw_gemm_goi_ukernel_x16c4__neondot,
       /*mr=*/5, /*nr=*/16, /*kr=*/4, /*sr=*/1,
       /*arch_flags=*/xnn_arch_arm_neon_dot | xnn_arch_arm_neon_fp16_arith);
   }
@@ -940,7 +940,7 @@ namespace {
     GEMMBenchmark(state,
       xnn_qd8_f16_qc8w_gemm_minmax_ukernel_6x16c4__neondotfp16arith,
       xnn_init_f16_minmax_scalar_params,
-      xnn_pack_qs8_gemm_goi_w,
+      xnn_qs8_packw_gemm_goi_ukernel_x16c4__neondot,
       /*mr=*/6, /*nr=*/16, /*kr=*/4, /*sr=*/1,
       /*arch_flags=*/xnn_arch_arm_neon_dot | xnn_arch_arm_neon_fp16_arith);
   }
@@ -951,7 +951,7 @@ namespace {
     GEMMBenchmark(state,
       xnn_qd8_f16_qc8w_gemm_minmax_ukernel_7x16c4__neondotfp16arith,
       xnn_init_f16_minmax_scalar_params,
-      xnn_pack_qs8_gemm_goi_w,
+      xnn_qs8_packw_gemm_goi_ukernel_x16c4__neondot,
       /*mr=*/7, /*nr=*/16, /*kr=*/4, /*sr=*/1,
       /*arch_flags=*/xnn_arch_arm_neon_dot | xnn_arch_arm_neon_fp16_arith);
   }
@@ -962,7 +962,7 @@ namespace {
     GEMMBenchmark(state,
       xnn_qd8_f16_qc8w_gemm_minmax_ukernel_8x16c4__neondotfp16arith,
       xnn_init_f16_minmax_scalar_params,
-      xnn_pack_qs8_gemm_goi_w,
+      xnn_qs8_packw_gemm_goi_ukernel_x16c4__neondot,
       /*mr=*/8, /*nr=*/16, /*kr=*/4, /*sr=*/1,
       /*arch_flags=*/xnn_arch_arm_neon_dot | xnn_arch_arm_neon_fp16_arith);
   }
@@ -976,7 +976,7 @@ namespace {
     GEMMBenchmark(state,
       xnn_qd8_f16_qc8w_gemm_minmax_ukernel_4x16c4__asm_aarch64_neondotfp16arith_cortex_a55,
       xnn_init_f16_minmax_scalar_params,
-      xnn_pack_qs8_gemm_goi_w,
+      xnn_qs8_packw_gemm_goi_ukernel_x16c4__neondot,
       /*mr=*/4, /*nr=*/16, /*kr=*/4, /*sr=*/1,
       /*arch_flags=*/xnn_arch_arm_neon_dot | xnn_arch_arm_neon_fp16_arith);
   }
@@ -987,7 +987,7 @@ namespace {
     GEMMBenchmark(state,
       xnn_qd8_f16_qc8w_gemm_minmax_ukernel_4x16c4__asm_aarch64_neondotfp16arith_ld128,
       xnn_init_f16_minmax_scalar_params,
-      xnn_pack_qs8_gemm_goi_w,
+      xnn_qs8_packw_gemm_goi_ukernel_x16c4__neondot,
       /*mr=*/4, /*nr=*/16, /*kr=*/4, /*sr=*/1,
       /*arch_flags=*/xnn_arch_arm_neon_dot | xnn_arch_arm_neon_fp16_arith);
   }
@@ -1026,7 +1026,7 @@ namespace {
     GEMMBenchmark(state,
       xnn_qd8_f16_qc8w_gemm_minmax_ukernel_4x8c4__asm_aarch32_neondotfp16arith_cortex_a55,
       xnn_init_f16_minmax_scalar_params,
-      xnn_pack_qs8_gemm_goi_w,
+      xnn_qs8_packw_gemm_goi_ukernel_x8c4__neondot,
       /*mr=*/4, /*nr=*/8, /*kr=*/4, /*sr=*/1,
       /*arch_flags=*/xnn_arch_arm_neon_dot | xnn_arch_arm_neon_fp16_arith);
   }

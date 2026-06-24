@@ -102,8 +102,8 @@ void xnn_${DATATYPE_SPEC}_packw_gemm_goi_ukernel_x${NR}c${KR}__${ISA}${"_madd" i
   assert(sr == 1);
   assert(weights != NULL);
   assert(packed_weights != NULL);
-  assert(params != NULL);
   $if DATATYPE == "QS4":
+    assert(params != NULL);
     assert(kc % 2 == 0);  // This kernel does not support odd KC
     kc >>= 1;  // KR=8 4 bit with 2 planes is 8 bytes.  Measure in bytes
 

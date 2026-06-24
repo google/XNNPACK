@@ -58,3 +58,6 @@ XNN_UKERNEL(xnn_arch_x86_avx256vnni, xnn_qs8_qc4w_packw_gemm_goi_ukernel_x16c8__
 XNN_UKERNEL(xnn_arch_x86_avx256vnni, xnn_qs8_to_qu8_qc4w_packw_gemm_goi_ukernel_x16c8__avx256vnni, 16, 8, 1, 32, 1, 128)
 XNN_UKERNEL(xnn_arch_x86_avx256vnni, xnn_qs8_to_qu8_qc4w_packw_gemm_goi_ukernel_x16c8__avx256vnni_prfm, 16, 8, 1, 32, 1, 128)
 #endif
+
+
+

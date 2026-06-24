@@ -45,6 +45,7 @@ XNN_QS8_GIO_UKERNEL(xnn_arch_none, xnn_qs8_to_qu8_packw_gemm_gio_ukernel_x16c8__
 
 #if XNN_ENABLE_AVX2 && (XNN_ARCH_X86_64 || XNN_ARCH_X86)
 XNN_QS8_UKERNEL(xnn_arch_x86_avx2, xnn_qs8_packw_gemm_goi_ukernel_x8c8__avx2_madd, 8, 8, 1, 8, 1, 0)
+XNN_QS8_UKERNEL(xnn_arch_x86_avx2, xnn_qs8_packw_gemm_goi_ukernel_x16c8__avx2_madd, 16, 8, 1, 8, 1, 0)
 #endif  // XNN_ENABLE_AVX2 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 #if XNN_ENABLE_AVXVNNI && (XNN_ARCH_X86_64 || XNN_ARCH_X86)
@@ -81,3 +82,9 @@ XNN_QS8_UKERNEL(xnn_arch_x86_avx256vnni, xnn_qs8_to_qu8_packw_gemm_goi_ukernel_x
 XNN_QS8_UKERNEL(xnn_arch_none, xnn_qs8_packw_gemm_goi_ukernel_x8c8__wasmrelaxedsimd, 8, 8, 1, 8, 1, 0)
 XNN_QS8_UKERNEL(xnn_arch_none, xnn_qs8_to_qu8_packw_gemm_goi_ukernel_x8c8__wasmrelaxedsimd, 8, 8, 1, 8, 1, 128)
 #endif // XNN_ARCH_WASMRELAXEDSIMD
+
+#if XNN_ENABLE_ARM_DOTPROD && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+XNN_QS8_UKERNEL(xnn_arch_arm_neon_dot, xnn_qs8_packw_gemm_goi_ukernel_x8c4__neondot, 8, 4, 1, 4, 1, 0)
+XNN_QS8_UKERNEL(xnn_arch_arm_neon_dot, xnn_qs8_packw_gemm_goi_ukernel_x16c4__neondot, 16, 4, 1, 4, 1, 0)
+#endif
+

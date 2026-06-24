@@ -53,6 +53,7 @@ SET(PROD_AVX2_MICROKERNEL_SRCS
   src/qs8-f16-vcvt/gen/qs8-f16-vcvt-avx2-u16.c
   src/qs8-f32-vcvt/gen/qs8-f32-vcvt-avx2-u16.c
   src/qs8-packw/gen/qs8-packw-x8c8-gemm-goi-avx2-madd.c
+  src/qs8-packw/gen/qs8-packw-x16c8-gemm-goi-avx2-madd.c
   src/qs8-qc2w-gemm/gen/qs8-qc2w-gemm-1x8c8-minmax-avx2-madd.c
   src/qs8-qc2w-gemm/gen/qs8-qc2w-gemm-5x8c8-minmax-avx2-madd.c
   src/qs8-qc4w-gemm/gen/qs8-qc4w-gemm-1x8c8-minmax-avx2-madd-prfm.c
