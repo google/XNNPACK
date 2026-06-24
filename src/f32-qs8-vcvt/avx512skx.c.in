@@ -3,7 +3,8 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-$assert DATATYPE in ["QS8", "QU8"]
+$assert IDATATYPE in ["BF16", "F16", "F32"]
+$assert ODATATYPE in ["QS8", "QU8"]
 $assert BATCH_TILE % 16 == 0
 $assert BATCH_TILE >= 16
 $SIMD_TILE = BATCH_TILE // 4
@@ -16,23 +17,25 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/intrinsics-polyfill.h"
+$if IDATATYPE in ["BF16", "F16"]:
+  #include "src/xnnpack/math.h"
 #include "src/xnnpack/microparams.h"
 #include "src/xnnpack/vcvt.h"
 
 
-$XINT8_T = {"QS8": "int8_t", "QU8": "uint8_t"}[DATATYPE]
-$_MM512_PACKXS_EPI16 = {"QS8": "_mm512_packs_epi16", "QU8": "_mm512_packus_epi16"}[DATATYPE]
-$_MM256_PACKXS_EPI16 = {"QS8": "_mm256_packs_epi16", "QU8": "_mm256_packus_epi16"}[DATATYPE]
-$_MM_PACKXS_EPI16 = {"QS8": "_mm_packs_epi16", "QU8": "_mm_packus_epi16"}[DATATYPE]
-$OUTPUT_MAX = {"QS8": 127, "QU8": 255}[DATATYPE]
-void xnn_f32_${DATATYPE.lower()}_vcvt_ukernel__avx512skx_u${BATCH_TILE}(
+$INPUT_T = {"BF16": "xnn_bfloat16", "F16": "xnn_float16", "F32": "float"}[IDATATYPE]
+$XINT8_T = {"QS8": "int8_t", "QU8": "uint8_t"}[ODATATYPE]
+$_MM512_PACKXS_EPI16 = {"QS8": "_mm512_packs_epi16", "QU8": "_mm512_packus_epi16"}[ODATATYPE]
+$_MM256_PACKXS_EPI16 = {"QS8": "_mm256_packs_epi16", "QU8": "_mm256_packus_epi16"}[ODATATYPE]
+$_MM_PACKXS_EPI16 = {"QS8": "_mm_packs_epi16", "QU8": "_mm_packus_epi16"}[ODATATYPE]
+void xnn_${IDATATYPE.lower()}_${ODATATYPE.lower()}_vcvt_ukernel__avx512skx_u${BATCH_TILE}(
     size_t batch,
-    const float* input,
+    const ${INPUT_T}* input,
     ${XINT8_T}* output,
-    const struct xnn_f32_${DATATYPE.lower()}_cvt_params* restrict params)
+    const struct xnn_${IDATATYPE.lower()}_${ODATATYPE.lower()}_cvt_params* restrict params)
 {
   assert(batch != 0);
-  assert(batch % sizeof(float) == 0);
+  assert(batch % sizeof(${INPUT_T}) == 0);
   assert(input != NULL);
   assert(output != NULL);
 
@@ -46,7 +49,10 @@ void xnn_f32_${DATATYPE.lower()}_vcvt_ukernel__avx512skx_u${BATCH_TILE}(
   // INT16_MAX is exactly representable as a float, and is plenty large (this clamp is applied after scaling).
   const __m512 voverflow_max = _mm512_set1_ps((float) INT16_MAX);
 
-  const __m512 vscale = _mm512_set1_ps(params->scalar.scale);
+  $if IDATATYPE in ["BF16", "F16"]:
+    const __m512 vscale = _mm512_set1_ps(${INPUT_T}_to_float(params->scalar.scale));
+  $else:
+    const __m512 vscale = _mm512_set1_ps(params->scalar.scale);
   const __m512i voutput_zero_point = _mm512_set1_epi16(params->scalar.output_zero_point);
   $if SIMD_TILE > 8:
     const __m512i vshuffle512_mask = _mm512_load_si512(shuffle512_mask);
@@ -55,10 +61,19 @@ void xnn_f32_${DATATYPE.lower()}_vcvt_ukernel__avx512skx_u${BATCH_TILE}(
   XNN_FORCE_REALIZATION(vscale);
   XNN_FORCE_REALIZATION(voverflow_max);
   XNN_FORCE_REALIZATION(voutput_zero_point);
-  for (; batch >= ${BATCH_TILE} * sizeof(float); batch -= ${BATCH_TILE} * sizeof(float)) {
-    __m512 vx0123 = _mm512_loadu_ps(input);
-    $for N in range(4, SIMD_TILE, 4):
-      __m512 vx${ABC[N:N+4]} = _mm512_loadu_ps(input + ${N * 4});
+  for (; batch >= ${BATCH_TILE} * sizeof(${INPUT_T}); batch -= ${BATCH_TILE} * sizeof(${INPUT_T})) {
+    $if IDATATYPE == "BF16":
+      __m512 vx0123 = _mm512_castsi512_ps(_mm512_slli_epi32(_mm512_cvtepu16_epi32(_mm256_loadu_si256((const __m256i*) input)), 16));
+      $for N in range(4, SIMD_TILE, 4):
+        __m512 vx${ABC[N:N+4]} = _mm512_castsi512_ps(_mm512_slli_epi32(_mm512_cvtepu16_epi32(_mm256_loadu_si256((const __m256i*) (input + ${N * 4}))), 16));
+    $elif IDATATYPE == "F16":
+      __m512 vx0123 = _mm512_cvtph_ps(_mm256_loadu_si256((const __m256i*) input));
+      $for N in range(4, SIMD_TILE, 4):
+        __m512 vx${ABC[N:N+4]} = _mm512_cvtph_ps(_mm256_loadu_si256((const __m256i*) (input + ${N * 4})));
+    $else:
+      __m512 vx0123 = _mm512_loadu_ps(input);
+      $for N in range(4, SIMD_TILE, 4):
+        __m512 vx${ABC[N:N+4]} = _mm512_loadu_ps(input + ${N * 4});
     input += ${BATCH_TILE};
 
     $for N in range(0, SIMD_TILE, 4):
@@ -99,8 +114,13 @@ void xnn_f32_${DATATYPE.lower()}_vcvt_ukernel__avx512skx_u${BATCH_TILE}(
         _mm256_storeu_si256((__m256i*) (output + ${N * 4}), vy${ABC[N:N+8]});
     output += ${BATCH_TILE};
   }
-  for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
-    __m512 vx0123 = _mm512_loadu_ps(input);
+  for (; batch >= 16 * sizeof(${INPUT_T}); batch -= 16 * sizeof(${INPUT_T})) {
+    $if IDATATYPE == "BF16":
+      __m512 vx0123 = _mm512_castsi512_ps(_mm512_slli_epi32(_mm512_cvtepu16_epi32(_mm256_loadu_si256((const __m256i*) input)), 16));
+    $elif IDATATYPE == "F16":
+      __m512 vx0123 = _mm512_cvtph_ps(_mm256_loadu_si256((const __m256i*) input));
+    $else:
+      __m512 vx0123 = _mm512_loadu_ps(input);
     vx0123 = _mm512_mul_ps(vx0123, vscale);
     vx0123 = _mm512_min_ps(vx0123, voverflow_max);
     input += 16;
@@ -116,14 +136,24 @@ void xnn_f32_${DATATYPE.lower()}_vcvt_ukernel__avx512skx_u${BATCH_TILE}(
     output += 16;
   }
   if XNN_UNLIKELY(batch != 0) {
-    assert(batch >= 1 * sizeof(float));
-    assert(batch <= 15 * sizeof(float));
+    assert(batch >= 1 * sizeof(${INPUT_T}));
+    assert(batch <= 15 * sizeof(${INPUT_T}));
 
     // Prepare mask for valid elements (depends on batch).
-    batch >>= XNN_LOG2_SIZEOF_FLOAT;
+    $if IDATATYPE == "BF16":
+      batch >>= XNN_LOG2_SIZEOF_BFLOAT16;
+    $elif IDATATYPE == "F16":
+      batch >>= XNN_LOG2_SIZEOF_FLOAT16;
+    $else:
+      batch >>= XNN_LOG2_SIZEOF_FLOAT;
     const __mmask16 vmask = _cvtu32_mask16((uint32_t) ((UINT32_C(1) << batch) - UINT32_C(1)));
 
-    __m512 vx0123 = _mm512_maskz_loadu_ps(vmask, input);
+    $if IDATATYPE == "BF16":
+      __m512 vx0123 = _mm512_castsi512_ps(_mm512_slli_epi32(_mm512_cvtepu16_epi32(_mm256_maskz_loadu_epi16(vmask, input)), 16));
+    $elif IDATATYPE == "F16":
+      __m512 vx0123 = _mm512_cvtph_ps(_mm256_maskz_loadu_epi16(vmask, input));
+    $else:
+      __m512 vx0123 = _mm512_maskz_loadu_ps(vmask, input);
     vx0123 = _mm512_mul_ps(vx0123, vscale);
     vx0123 = _mm512_min_ps(vx0123, voverflow_max);
 

@@ -53,7 +53,7 @@ void xnn_f16_vexp_ukernel__wasmrelaxedsimd_poly_3_u8(
   XNN_SIMD_CONST_F16_FROM_FLOAT(valpha_1, 0.6933594f);
   XNN_SIMD_CONST_F16_FROM_FLOAT(valpha_2, 0.24255371f);
   XNN_SIMD_CONST_F16_FROM_FLOAT(valpha_3, 0.05517578f);
-
+      
   // Some useful constants.
   XNN_SIMD_CONST_F16_FROM_FLOAT(vlog2e, 1.4423828f);
   XNN_SIMD_CONST_F16_FROM_FLOAT(v16, 16.0f);
@@ -63,7 +63,7 @@ void xnn_f16_vexp_ukernel__wasmrelaxedsimd_poly_3_u8(
   for (; batch >= xnn_simd_bytes_f16; batch -= xnn_simd_bytes_f16) {
     xnn_simd_f16_t vx = xnn_loadu_f16(input);
     input += xnn_simd_size_f16;
-
+    
     // Clamp `vz_prime = x * log2(e)` to the maximum exponents [-127, 128].
     xnn_simd_f16_t vz_prime = xnn_mul_f16(vx, vlog2e);
     vz_prime = xnn_min_f16(xnn_max_f16(vz_prime, vm15), v16);
@@ -71,7 +71,7 @@ void xnn_f16_vexp_ukernel__wasmrelaxedsimd_poly_3_u8(
     // Decompose x * log2e into `z` (integer part) and `r` (remainder).
     const xnn_simd_f16_t vz = xnn_qd_round_f16(vz_prime);
     const xnn_simd_f16_t vr = xnn_sub_f16(vz_prime, vz);
-
+    
     // Compute 2^z.
     const xnn_simd_f16_t v2z = xnn_setexp_f16(vz);
 
@@ -96,7 +96,7 @@ void xnn_f16_vexp_ukernel__wasmrelaxedsimd_poly_3_u8(
     // Decompose x * log2e into `z` (integer part) and `r` (remainder).
     const xnn_simd_f16_t vz = xnn_qd_round_f16(vz_prime);
     const xnn_simd_f16_t vr = xnn_sub_f16(vz_prime, vz);
-
+    
     // Compute 2^z.
     const xnn_simd_f16_t v2z = xnn_setexp_f16(vz);
 
@@ -128,7 +128,7 @@ void xnn_f16_vexp_ukernel__wasmrelaxedsimd_poly_3_u16(
   XNN_SIMD_CONST_F16_FROM_FLOAT(valpha_1, 0.6933594f);
   XNN_SIMD_CONST_F16_FROM_FLOAT(valpha_2, 0.24255371f);
   XNN_SIMD_CONST_F16_FROM_FLOAT(valpha_3, 0.05517578f);
-
+      
   // Some useful constants.
   XNN_SIMD_CONST_F16_FROM_FLOAT(vlog2e, 1.4423828f);
   XNN_SIMD_CONST_F16_FROM_FLOAT(v16, 16.0f);
@@ -139,7 +139,7 @@ void xnn_f16_vexp_ukernel__wasmrelaxedsimd_poly_3_u16(
     xnn_simd_f16_t vx_0 = xnn_loadu_f16(input + 0 * xnn_simd_size_f16);
     xnn_simd_f16_t vx_1 = xnn_loadu_f16(input + 1 * xnn_simd_size_f16);
     input += 16;
-
+    
     // Clamp `vz_prime = x * log2(e)` to the maximum exponents [-127, 128].
     xnn_simd_f16_t vz_prime_0 = xnn_mul_f16(vx_0, vlog2e);
     xnn_simd_f16_t vz_prime_1 = xnn_mul_f16(vx_1, vlog2e);
@@ -151,7 +151,7 @@ void xnn_f16_vexp_ukernel__wasmrelaxedsimd_poly_3_u16(
     const xnn_simd_f16_t vz_1 = xnn_qd_round_f16(vz_prime_1);
     const xnn_simd_f16_t vr_0 = xnn_sub_f16(vz_prime_0, vz_0);
     const xnn_simd_f16_t vr_1 = xnn_sub_f16(vz_prime_1, vz_1);
-
+    
     // Compute 2^z.
     const xnn_simd_f16_t v2z_0 = xnn_setexp_f16(vz_0);
     const xnn_simd_f16_t v2z_1 = xnn_setexp_f16(vz_1);
@@ -175,7 +175,7 @@ void xnn_f16_vexp_ukernel__wasmrelaxedsimd_poly_3_u16(
   for (; batch >= xnn_simd_bytes_f16; batch -= xnn_simd_bytes_f16) {
     xnn_simd_f16_t vx = xnn_loadu_f16(input);
     input += xnn_simd_size_f16;
-
+    
     // Clamp `vz_prime = x * log2(e)` to the maximum exponents [-127, 128].
     xnn_simd_f16_t vz_prime = xnn_mul_f16(vx, vlog2e);
     vz_prime = xnn_min_f16(xnn_max_f16(vz_prime, vm15), v16);
@@ -183,7 +183,7 @@ void xnn_f16_vexp_ukernel__wasmrelaxedsimd_poly_3_u16(
     // Decompose x * log2e into `z` (integer part) and `r` (remainder).
     const xnn_simd_f16_t vz = xnn_qd_round_f16(vz_prime);
     const xnn_simd_f16_t vr = xnn_sub_f16(vz_prime, vz);
-
+    
     // Compute 2^z.
     const xnn_simd_f16_t v2z = xnn_setexp_f16(vz);
 
@@ -208,7 +208,7 @@ void xnn_f16_vexp_ukernel__wasmrelaxedsimd_poly_3_u16(
     // Decompose x * log2e into `z` (integer part) and `r` (remainder).
     const xnn_simd_f16_t vz = xnn_qd_round_f16(vz_prime);
     const xnn_simd_f16_t vr = xnn_sub_f16(vz_prime, vz);
-
+    
     // Compute 2^z.
     const xnn_simd_f16_t v2z = xnn_setexp_f16(vz);
 
@@ -240,7 +240,7 @@ void xnn_f16_vexp_ukernel__wasmrelaxedsimd_poly_3_u32(
   XNN_SIMD_CONST_F16_FROM_FLOAT(valpha_1, 0.6933594f);
   XNN_SIMD_CONST_F16_FROM_FLOAT(valpha_2, 0.24255371f);
   XNN_SIMD_CONST_F16_FROM_FLOAT(valpha_3, 0.05517578f);
-
+      
   // Some useful constants.
   XNN_SIMD_CONST_F16_FROM_FLOAT(vlog2e, 1.4423828f);
   XNN_SIMD_CONST_F16_FROM_FLOAT(v16, 16.0f);
@@ -253,7 +253,7 @@ void xnn_f16_vexp_ukernel__wasmrelaxedsimd_poly_3_u32(
     xnn_simd_f16_t vx_2 = xnn_loadu_f16(input + 2 * xnn_simd_size_f16);
     xnn_simd_f16_t vx_3 = xnn_loadu_f16(input + 3 * xnn_simd_size_f16);
     input += 32;
-
+    
     // Clamp `vz_prime = x * log2(e)` to the maximum exponents [-127, 128].
     xnn_simd_f16_t vz_prime_0 = xnn_mul_f16(vx_0, vlog2e);
     xnn_simd_f16_t vz_prime_1 = xnn_mul_f16(vx_1, vlog2e);
@@ -273,7 +273,7 @@ void xnn_f16_vexp_ukernel__wasmrelaxedsimd_poly_3_u32(
     const xnn_simd_f16_t vr_1 = xnn_sub_f16(vz_prime_1, vz_1);
     const xnn_simd_f16_t vr_2 = xnn_sub_f16(vz_prime_2, vz_2);
     const xnn_simd_f16_t vr_3 = xnn_sub_f16(vz_prime_3, vz_3);
-
+    
     // Compute 2^z.
     const xnn_simd_f16_t v2z_0 = xnn_setexp_f16(vz_0);
     const xnn_simd_f16_t v2z_1 = xnn_setexp_f16(vz_1);
@@ -309,7 +309,7 @@ void xnn_f16_vexp_ukernel__wasmrelaxedsimd_poly_3_u32(
   for (; batch >= xnn_simd_bytes_f16; batch -= xnn_simd_bytes_f16) {
     xnn_simd_f16_t vx = xnn_loadu_f16(input);
     input += xnn_simd_size_f16;
-
+    
     // Clamp `vz_prime = x * log2(e)` to the maximum exponents [-127, 128].
     xnn_simd_f16_t vz_prime = xnn_mul_f16(vx, vlog2e);
     vz_prime = xnn_min_f16(xnn_max_f16(vz_prime, vm15), v16);
@@ -317,7 +317,7 @@ void xnn_f16_vexp_ukernel__wasmrelaxedsimd_poly_3_u32(
     // Decompose x * log2e into `z` (integer part) and `r` (remainder).
     const xnn_simd_f16_t vz = xnn_qd_round_f16(vz_prime);
     const xnn_simd_f16_t vr = xnn_sub_f16(vz_prime, vz);
-
+    
     // Compute 2^z.
     const xnn_simd_f16_t v2z = xnn_setexp_f16(vz);
 
@@ -342,7 +342,7 @@ void xnn_f16_vexp_ukernel__wasmrelaxedsimd_poly_3_u32(
     // Decompose x * log2e into `z` (integer part) and `r` (remainder).
     const xnn_simd_f16_t vz = xnn_qd_round_f16(vz_prime);
     const xnn_simd_f16_t vr = xnn_sub_f16(vz_prime, vz);
-
+    
     // Compute 2^z.
     const xnn_simd_f16_t v2z = xnn_setexp_f16(vz);
 

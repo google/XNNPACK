@@ -9,6 +9,13 @@
 #define XNN_DEFINED_QUANTIZED
 #endif
 
+#if XNN_ENABLE_AVX512SKX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+XNN_UKERNEL(xnn_arch_x86_avx512skx, xnn_bf16_qu8_vcvt_ukernel__avx512skx_u32, 32, false, xnn_bfloat16, XNN_QUANTIZED(uint8_t), struct xnn_bf16_qu8_cvt_params, xnn_init_bf16_qu8_cvt_scalar_params)
+XNN_UKERNEL(xnn_arch_x86_avx512skx, xnn_bf16_qu8_vcvt_ukernel__avx512skx_u64, 64, false, xnn_bfloat16, XNN_QUANTIZED(uint8_t), struct xnn_bf16_qu8_cvt_params, xnn_init_bf16_qu8_cvt_scalar_params)
+XNN_UKERNEL(xnn_arch_x86_avx512skx, xnn_bf16_qu8_vcvt_ukernel__avx512skx_u96, 96, false, xnn_bfloat16, XNN_QUANTIZED(uint8_t), struct xnn_bf16_qu8_cvt_params, xnn_init_bf16_qu8_cvt_scalar_params)
+XNN_UKERNEL(xnn_arch_x86_avx512skx, xnn_bf16_qu8_vcvt_ukernel__avx512skx_u128, 128, false, xnn_bfloat16, XNN_QUANTIZED(uint8_t), struct xnn_bf16_qu8_cvt_params, xnn_init_bf16_qu8_cvt_scalar_params)
+#endif  // XNN_ENABLE_AVX512SKX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+
 XNN_UKERNEL(xnn_arch_none, xnn_bf16_qu8_vcvt_ukernel__scalar_imagic_u1, 1, false, xnn_bfloat16, XNN_QUANTIZED(uint8_t), struct xnn_bf16_qu8_cvt_params, xnn_init_bf16_qu8_cvt_scalar_params)
 XNN_UKERNEL(xnn_arch_none, xnn_bf16_qu8_vcvt_ukernel__scalar_imagic_u2, 2, false, xnn_bfloat16, XNN_QUANTIZED(uint8_t), struct xnn_bf16_qu8_cvt_params, xnn_init_bf16_qu8_cvt_scalar_params)
 XNN_UKERNEL(xnn_arch_none, xnn_bf16_qu8_vcvt_ukernel__scalar_imagic_u3, 3, false, xnn_bfloat16, XNN_QUANTIZED(uint8_t), struct xnn_bf16_qu8_cvt_params, xnn_init_bf16_qu8_cvt_scalar_params)
