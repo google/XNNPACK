@@ -2494,13 +2494,33 @@ static void init_qd8_bf16_qb4w_gemm_config(void) {
   qd8_bf16_qb4w_gemm_config.packed_stride_weights_and_biases = xnn_packed_stride_qb4_weights_and_biases;
   qd8_bf16_qb4w_gemm_config.pack_weights_and_biases = xnn_pack_qb4_weights_and_biases;
 
-  // Scalar-only for now.
+  // Scalar fallback.
   qd8_bf16_qb4w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_DQGEMM_UKERNEL(xnn_qd8_bf16_qb4w_gemm_minmax_ukernel_1x4__scalar);
   qd8_bf16_qb4w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(4)] = XNN_INIT_HMP_DQGEMM_UKERNEL(xnn_qd8_bf16_qb4w_gemm_minmax_ukernel_4x4__scalar);
   qd8_bf16_qb4w_gemm_config.init.bf16_qb4w = xnn_init_bf16_qb4w_minmax_scalar_params;
   qd8_bf16_qb4w_gemm_config.mr = 4;
   qd8_bf16_qb4w_gemm_config.nr = 4;
   qd8_bf16_qb4w_gemm_config.planes = 2;
+
+  // The bf16 output conversion uses `vcvt_bf16_f32`, so the i8mm kernels require
+  // both the i8mm and bf16 arch extensions.
+  #if XNN_ARCH_ARM64
+    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    assert(hardware_config != NULL);
+    (void) hardware_config;  // May be unused.
+    #if XNN_ENABLE_ARM_I8MM && XNN_ENABLE_ARM_BF16
+      if ((hardware_config->arch_flags & xnn_arch_arm_neon_i8mm) &&
+          (hardware_config->arch_flags & xnn_arch_arm_neon_bf16)) {
+        qd8_bf16_qb4w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_DQGEMM_UKERNEL(xnn_qd8_bf16_qb4w_gemm_minmax_ukernel_1x16c8__neoni8mmbf16);
+        qd8_bf16_qb4w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(4)] = XNN_INIT_HMP_DQGEMM_UKERNEL(xnn_qd8_bf16_qb4w_gemm_minmax_ukernel_4x16c8__neoni8mmbf16);
+        qd8_bf16_qb4w_gemm_config.init.bf16_qb4w = xnn_init_bf16_qb4w_minmax_scalar_params;
+        qd8_bf16_qb4w_gemm_config.mr = 4;
+        qd8_bf16_qb4w_gemm_config.nr = 16;
+        qd8_bf16_qb4w_gemm_config.log2_kr = 3;
+        qd8_bf16_qb4w_gemm_config.planes = 2;
+      }
+    #endif  // XNN_ENABLE_ARM_I8MM && XNN_ENABLE_ARM_BF16
+  #endif  // XNN_ARCH_ARM64
 
   assert(qd8_bf16_qb4w_gemm_config.mr <= XNN_MAX_MR);
   assert(qd8_bf16_qb4w_gemm_config.mr <= (XNN_EXTRA_QUANTIZATION_PARAMS + 1));
