@@ -2892,6 +2892,11 @@ static XNN_NO_SANITIZE_FUNCTION enum xnn_status reshape_fully_connected_nc(
         packed_lh_config = xnn_init_f32_qdint8_pack_lh_config();
       }
       break;
+    case xnn_operator_type_fully_connected_nc_qd8_bf16_qb4w:
+      if (inline_lhs_packing) {
+        packed_lh_config = xnn_init_bf16_qdint8_pack_lh_config();
+      }
+      break;
     case xnn_operator_type_fully_connected_nc_qdu8_f32_qb4w:
     case xnn_operator_type_fully_connected_nc_qdu8_f32_qc4w:
     case xnn_operator_type_fully_connected_nc_qdu8_f32_qc8w:
