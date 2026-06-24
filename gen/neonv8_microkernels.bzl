@@ -6,6 +6,10 @@
 #
 
 PROD_NEONV8_MICROKERNEL_SRCS = [
+    "src/bf16-qs8-vcvt/gen/bf16-qs8-vcvt-neonv8-u32.c",
+    "src/bf16-qu8-vcvt/gen/bf16-qu8-vcvt-neonv8-u32.c",
+    "src/f16-qs8-vcvt/gen/f16-qs8-vcvt-neonv8-u32.c",
+    "src/f16-qu8-vcvt/gen/f16-qu8-vcvt-neonv8-u32.c",
     "src/f32-qs8-vcvt/gen/f32-qs8-vcvt-neonv8-u32.c",
     "src/f32-qu8-vcvt/gen/f32-qu8-vcvt-neonv8-u32.c",
     "src/f32-vrnd/gen/f32-vrndd-neonv8-u8.c",
@@ -26,6 +30,18 @@ PROD_NEONV8_MICROKERNEL_SRCS = [
 ]
 
 NON_PROD_NEONV8_MICROKERNEL_SRCS = [
+    "src/bf16-qs8-vcvt/gen/bf16-qs8-vcvt-neonv8-u8.c",
+    "src/bf16-qs8-vcvt/gen/bf16-qs8-vcvt-neonv8-u16.c",
+    "src/bf16-qs8-vcvt/gen/bf16-qs8-vcvt-neonv8-u24.c",
+    "src/bf16-qu8-vcvt/gen/bf16-qu8-vcvt-neonv8-u8.c",
+    "src/bf16-qu8-vcvt/gen/bf16-qu8-vcvt-neonv8-u16.c",
+    "src/bf16-qu8-vcvt/gen/bf16-qu8-vcvt-neonv8-u24.c",
+    "src/f16-qs8-vcvt/gen/f16-qs8-vcvt-neonv8-u8.c",
+    "src/f16-qs8-vcvt/gen/f16-qs8-vcvt-neonv8-u16.c",
+    "src/f16-qs8-vcvt/gen/f16-qs8-vcvt-neonv8-u24.c",
+    "src/f16-qu8-vcvt/gen/f16-qu8-vcvt-neonv8-u8.c",
+    "src/f16-qu8-vcvt/gen/f16-qu8-vcvt-neonv8-u16.c",
+    "src/f16-qu8-vcvt/gen/f16-qu8-vcvt-neonv8-u24.c",
     "src/f32-qs8-vcvt/gen/f32-qs8-vcvt-neonv8-u8.c",
     "src/f32-qs8-vcvt/gen/f32-qs8-vcvt-neonv8-u16.c",
     "src/f32-qs8-vcvt/gen/f32-qs8-vcvt-neonv8-u24.c",
