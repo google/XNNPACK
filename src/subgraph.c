@@ -1933,10 +1933,11 @@ fail:
   return status;
 }
 
-static bool replace_node_with_lut(xnn_subgraph_t subgraph,
-                                  struct xnn_node* node, uint32_t input_id,
-                                  uint32_t unary_input_id,
-                                  xnn_subgraph_t unary_subgraph) {
+static enum xnn_status replace_node_with_lut(xnn_subgraph_t subgraph,
+                                             struct xnn_node* node,
+                                             uint32_t input_id,
+                                             uint32_t unary_input_id,
+                                             xnn_subgraph_t unary_subgraph) {
   XNN_RETURN_IF_ERROR(xnn_subgraph_reserve_values(subgraph, 1));
 
   const uint32_t unary_output_id =
@@ -1954,19 +1955,23 @@ static bool replace_node_with_lut(xnn_subgraph_t subgraph,
   uint8_t* lut = xnn_allocate_memory(256 * sizeof(uint8_t));
   if (lut == NULL) {
     xnn_log_error("failed to allocate LUT");
-    return false;
+    return xnn_status_out_of_memory;
   }
   enum xnn_status status = run_subgraph_to_make_lut(
       unary_subgraph, unary_input_id, unary_output_id, lut);
   if (status != xnn_status_success) {
     // Failed to generate the LUT, abandon this fusion.
     xnn_release_memory(lut);
-    return false;
+    return status;
   }
 
   // We don't have any other way to store a dynamic allocation in a subgraph
   // except in a value.
   struct xnn_value* lut_value = xnn_subgraph_new_internal_value(subgraph);
+  if (lut_value == NULL) {
+    xnn_release_memory(lut);
+    return xnn_status_out_of_memory;
+  }
   lut_value->flags |= XNN_VALUE_FLAG_NEEDS_CLEANUP;
   lut_value->data = lut;
   lut_value->datatype = xnn_datatype_quint8;
@@ -1983,9 +1988,8 @@ static bool replace_node_with_lut(xnn_subgraph_t subgraph,
     }
   }
 
-  xnn_define_unary_elementwise_lut_in_place(node, input_id, node->outputs[0],
-                                            lut_value->id);
-  return true;
+  return xnn_define_unary_elementwise_lut_in_place(
+      node, input_id, node->outputs[0], lut_value->id);
 }
 
 void reshape_for_lut(struct xnn_value* value) {
@@ -2097,7 +2101,7 @@ void xnn_subgraph_fuse_unary_quantized_into_lut(xnn_subgraph_t subgraph) {
       const uint32_t unary_input_id = map_value_id(value_map, input_id, NULL);
       reshape_for_lut(&unary_subgraph.values[unary_input_id]);
       if (replace_node_with_lut(subgraph, node, input_id, unary_input_id,
-                                &unary_subgraph)) {
+                                &unary_subgraph) == xnn_status_success) {
         // We replaced this subgraph with a LUT, clear out the old values and
         // nodes.
         for (uint32_t i = 0; i + 1 < unary_subgraph.num_nodes; i++) {
