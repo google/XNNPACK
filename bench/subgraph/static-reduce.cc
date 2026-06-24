@@ -1,4 +1,4 @@
-// Copyright 2020-2025 Google LLC
+// Copyright 2020-2026 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
@@ -13,6 +13,7 @@
 #include "bench/subgraph/benchmark.h"
 #include "include/xnnpack.h"
 #include "src/xnnpack/datatype.h"
+#include "src/xnnpack/math.h"
 #include "src/xnnpack/operator-utils.h"
 #include <benchmark/benchmark.h>
 
@@ -162,7 +163,8 @@ xnn_subgraph_t StaticReduce(custom_reduce_operator op_type,
 
 }  // namespace models
 
-static void FP32Reduce(benchmark::State& state,
+template <typename T>
+static void ReduceImpl(benchmark::State& state,
                        models::custom_reduce_operator op_type) {
   const size_t d0 = state.range(0);
   const size_t d1 = state.range(1);
@@ -178,8 +180,17 @@ static void FP32Reduce(benchmark::State& state,
   }
 
   xnnpack::RunBenchmark(
-      state,
-      [=]() { return models::StaticReduce<float>(op_type, dims, axes); });
+      state, [=]() { return models::StaticReduce<T>(op_type, dims, axes); });
+}
+
+static void FP32Reduce(benchmark::State& state,
+                       models::custom_reduce_operator op_type) {
+  ReduceImpl<float>(state, op_type);
+}
+
+static void FP16Reduce(benchmark::State& state,
+                       models::custom_reduce_operator op_type) {
+  ReduceImpl<xnn_float16>(state, op_type);
 }
 
 static void ReduceArguments(benchmark::Benchmark* b) {
@@ -219,6 +230,24 @@ static void FP32Mean(benchmark::State& state) {
 static void FP32Max(benchmark::State& state) {
   FP32Reduce(state, models::custom_reduce_max);
 }
+static void FP16Sum(benchmark::State& state) {
+  FP16Reduce(state, models::custom_reduce_sum);
+}
+static void FP16SumSquared(benchmark::State& state) {
+  FP16Reduce(state, models::custom_reduce_sum_squared);
+}
+static void FP16SumSquareDifferences(benchmark::State& state) {
+  FP16Reduce(state, models::custom_reduce_sum_square_differences);
+}
+static void FP16SumAbsoluteDifferences(benchmark::State& state) {
+  FP16Reduce(state, models::custom_reduce_sum_absolute_differences);
+}
+static void FP16Mean(benchmark::State& state) {
+  FP16Reduce(state, models::custom_reduce_mean);
+}
+static void FP16Max(benchmark::State& state) {
+  FP16Reduce(state, models::custom_reduce_max);
+}
 
 BENCHMARK(FP32Sum)
     ->Unit(benchmark::kMicrosecond)
@@ -251,6 +280,42 @@ BENCHMARK(FP32Mean)
     ->Apply(ReduceArguments);
 
 BENCHMARK(FP32Max)
+    ->Unit(benchmark::kMicrosecond)
+    ->MeasureProcessCPUTime()
+    ->UseRealTime()
+    ->Apply(ReduceArguments);
+
+BENCHMARK(FP16Sum)
+    ->Unit(benchmark::kMicrosecond)
+    ->MeasureProcessCPUTime()
+    ->UseRealTime()
+    ->Apply(ReduceArguments);
+
+BENCHMARK(FP16SumSquared)
+    ->Unit(benchmark::kMicrosecond)
+    ->MeasureProcessCPUTime()
+    ->UseRealTime()
+    ->Apply(ReduceArguments);
+
+BENCHMARK(FP16SumSquareDifferences)
+    ->Unit(benchmark::kMicrosecond)
+    ->MeasureProcessCPUTime()
+    ->UseRealTime()
+    ->Apply(ReduceArguments);
+
+BENCHMARK(FP16SumAbsoluteDifferences)
+    ->Unit(benchmark::kMicrosecond)
+    ->MeasureProcessCPUTime()
+    ->UseRealTime()
+    ->Apply(ReduceArguments);
+
+BENCHMARK(FP16Mean)
+    ->Unit(benchmark::kMicrosecond)
+    ->MeasureProcessCPUTime()
+    ->UseRealTime()
+    ->Apply(ReduceArguments);
+
+BENCHMARK(FP16Max)
     ->Unit(benchmark::kMicrosecond)
     ->MeasureProcessCPUTime()
     ->UseRealTime()
