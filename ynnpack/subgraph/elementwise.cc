@@ -552,6 +552,11 @@ ynn_status ynn_define_convert(ynn_subgraph_t subgraph, uint32_t input_id,
   const ynn_value& a = subgraph->value(input_id);
   ynn_value& x = subgraph->get_output_value(output_id, output_type,
                                             zero_point_id, scale_id);
+  if (flags & YNN_NODE_FLAG_NO_EXCESS_PRECISION) {
+    // If the node requests no excess precision, that means that our result
+    // should not be given excess precision.
+    x.flags |= YNN_VALUE_FLAG_NO_EXCESS_PRECISION;
+  }
 
   const uint32_t x_scale_id =
       scale_id != YNN_INVALID_VALUE_ID ? scale_id : x.scale_id;

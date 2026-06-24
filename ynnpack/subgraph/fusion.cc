@@ -1058,7 +1058,8 @@ bool fuse_converts(ynn_subgraph& subgraph, ynn_node& node,
   assert(producer->outputs[0] == node.inputs[0]);
   const ynn_value& intermediate = subgraph.value(node.inputs[0]);
   if (!is_convert_lossless(input.type, intermediate.type) &&
-      (subgraph.flags & YNN_FLAG_NO_EXCESS_PRECISION) != 0) {
+      ((subgraph.flags & YNN_FLAG_NO_EXCESS_PRECISION) != 0 ||
+       (intermediate.flags & YNN_VALUE_FLAG_NO_EXCESS_PRECISION) != 0)) {
     if (intermediate.type == ynn_type_bf16) {
       unary_kernel_fn kernel = ynn::get_unary_kernel(ynn_unary_round_to_bf16,
                                                      input.type, output.type);
@@ -1074,15 +1075,8 @@ bool fuse_converts(ynn_subgraph& subgraph, ynn_node& node,
     // This conversion loses information, and the converts might have been
     // inserted because we don't have a kernel for this type.
     YNN_LOG_DEBUG()
-        << "Not fusing no-op converts because YNN_FLAG_NO_EXCESS_PRECISION "
-           "is set.";
-    return false;
-  }
-
-  if (analysis.consumers[intermediate.id].size() != 1) {
-    // TODO: b/488394862 - We probably should rewrite even in this case, but it
-    // breaks dot bf16 rewrites until we can be explicit that we don't want this
-    // sequence of converts to be treated as a round_to_bf16 op.
+        << "Not fusing no-op converts because YNN_FLAG_NO_EXCESS_PRECISION or "
+           "YNN_VALUE_FLAG_NO_EXCESS_PRECISION is set.";
     return false;
   }
 

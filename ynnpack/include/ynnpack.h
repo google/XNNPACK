@@ -87,6 +87,7 @@ enum ynn_type {
 #define YNN_VALUE_FLAG_EXTERNAL_INPUT (1 << 0)
 #define YNN_VALUE_FLAG_EXTERNAL_OUTPUT (1 << 1)
 #define YNN_VALUE_FLAG_COPY_DATA (1 << 2)
+#define YNN_VALUE_FLAG_NO_EXCESS_PRECISION (1 << 3)
 
 // Define a new tensor in a subgraph.
 //
@@ -113,6 +114,9 @@ enum ynn_type {
 // exists, unless the `YNN_VALUE_FLAG_COPY_DATA` flag is used, indicating that
 // this function will make a copy of the data, releasing the caller of the
 // obligation to maintain it.
+//
+// If the `YNN_VALUE_FLAG_NO_EXCESS_PRECISION` flag is set, this value will not
+// be promoted to a wider type as part of optimization.
 enum ynn_status ynn_define_tensor(ynn_subgraph_t subgraph, enum ynn_type type,
                                   size_t rank, const size_t* dims,
                                   const void* data, uint32_t flags,
@@ -141,6 +145,7 @@ enum ynn_status ynn_define_iota(ynn_subgraph_t subgraph, enum ynn_type type,
 #define YNN_NODE_FLAG_SLICE_DIMS (1 << 0)
 #define YNN_NODE_FLAG_RESHAPE_1D (1 << 0)
 #define YNN_NODE_FLAG_UNIQUE_DIMS (1 << 1)
+#define YNN_NODE_FLAG_NO_EXCESS_PRECISION (1 << 2)
 
 enum ynn_unary_operator {
   ynn_unary_invalid = 0,
@@ -188,6 +193,9 @@ enum ynn_status ynn_define_unary_polynomial(ynn_subgraph_t subgraph,
 
 // A helper for `ynn_define_unary` with `op` = `ynn_unary_convert`, which is
 // capable of defining the output value.
+//
+// If the `YNN_NODE_FLAG_NO_EXCESS_PRECISION` flag is set, the resulting value
+// will have the `YNN_VALUE_FLAG_NO_EXCESS_PRECISION` flag set.
 enum ynn_status ynn_define_convert(ynn_subgraph_t subgraph, uint32_t input_id,
                                    enum ynn_type type, uint32_t zero_point_id,
                                    uint32_t scale_id, uint32_t* output_id,

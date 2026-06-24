@@ -1286,9 +1286,11 @@ ynn_status define_split_f32_to_bf16(ynn_subgraph& subgraph, uint32_t input_id,
                                     uint32_t flags) {
   assert(subgraph.value(input_id).type == ynn_type_fp32);
 
-  ynn_status status = ynn_define_convert(&subgraph, input_id, ynn_type_bf16,
-                                         YNN_INVALID_VALUE_ID,
-                                         YNN_INVALID_VALUE_ID, bf16_id, flags);
+  // Specifying YNN_NODE_FLAG_NO_EXCESS_PRECISION ensures that this value will
+  // not be optimized to be fp32 when it is used to compute the residual below.
+  ynn_status status = ynn_define_convert(
+      &subgraph, input_id, ynn_type_bf16, YNN_INVALID_VALUE_ID,
+      YNN_INVALID_VALUE_ID, bf16_id, flags | YNN_NODE_FLAG_NO_EXCESS_PRECISION);
   if (status != ynn_status_success) return status;
 
   // Explicitly define the residual as type bf16 otherwise type fp32 will be
