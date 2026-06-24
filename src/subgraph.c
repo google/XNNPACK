@@ -334,6 +334,7 @@ void xnn_subgraph_analyze_consumers_and_producers(xnn_subgraph_t subgraph) {
         continue;
       }
       const uint32_t input_id = node->inputs[i];
+      assert(input_id != XNN_INVALID_VALUE_ID);
       assert(input_id < subgraph->num_values);
 
       if (subgraph->values[input_id].num_consumers++ == 0) {
@@ -375,14 +376,18 @@ void xnn_subgraph_analyze_consumers_and_producers(xnn_subgraph_t subgraph) {
 static bool all_values_fp(xnn_subgraph_t subgraph,
                           const struct xnn_node* node) {
   for (uint32_t i = 0; i < node->num_inputs; i++) {
-    if (subgraph->values[node->inputs[i]].datatype != xnn_datatype_fp16 &&
-        subgraph->values[node->inputs[i]].datatype != xnn_datatype_fp32) {
+    const uint32_t input_id = node->inputs[i];
+    assert(input_id != XNN_INVALID_VALUE_ID);
+    if (subgraph->values[input_id].datatype != xnn_datatype_fp16 &&
+        subgraph->values[input_id].datatype != xnn_datatype_fp32) {
       return false;
     }
   }
   for (uint32_t i = 0; i < node->num_outputs; i++) {
-    if (subgraph->values[node->outputs[i]].datatype != xnn_datatype_fp16 &&
-        subgraph->values[node->outputs[i]].datatype != xnn_datatype_fp32) {
+    const uint32_t output_id = node->outputs[i];
+    assert(output_id != XNN_INVALID_VALUE_ID);
+    if (subgraph->values[output_id].datatype != xnn_datatype_fp16 &&
+        subgraph->values[output_id].datatype != xnn_datatype_fp32) {
       return false;
     }
   }
@@ -704,7 +709,9 @@ void xnn_subgraph_rewrite_for_nchw(xnn_subgraph_t subgraph) {
     node->cluster_leader = n;
     if (node->layout_flags & XNN_LAYOUT_FLAG_COMPATIBLE_NCHW2NHWC) {
       for (uint32_t i = 0; i < node->num_inputs; i++) {
-        const struct xnn_value* value = &subgraph->values[node->inputs[i]];
+        const uint32_t input_id = node->inputs[i];
+        assert(input_id != XNN_INVALID_VALUE_ID);
+        const struct xnn_value* value = &subgraph->values[input_id];
         if (value->data != NULL) {
           // Static data, skip this input value. Compatibility of this static
           // input with NCHW layout was validated during the initial NCHW
@@ -758,7 +765,9 @@ void xnn_subgraph_rewrite_for_nchw(xnn_subgraph_t subgraph) {
       }
 
       for (uint32_t i = 0; i < node->num_inputs; i++) {
-        const struct xnn_value* value = &subgraph->values[node->inputs[i]];
+        const uint32_t input_id = node->inputs[i];
+        assert(input_id != XNN_INVALID_VALUE_ID);
+        const struct xnn_value* value = &subgraph->values[input_id];
         if (value->data != NULL) {
           // Static data, skip this input value. Compatibility of this static
           // input with NCHW layout was validated during the initial NCHW
@@ -813,7 +822,9 @@ void xnn_subgraph_rewrite_for_nchw(xnn_subgraph_t subgraph) {
     }
 
     for (uint32_t i = 0; i < node->num_inputs; i++) {
-      struct xnn_value* value = &subgraph->values[node->inputs[i]];
+      const uint32_t input_id = node->inputs[i];
+      assert(input_id != XNN_INVALID_VALUE_ID);
+      struct xnn_value* value = &subgraph->values[input_id];
       if (value->data != NULL) {
         // Static data, skip this input value because it doesn't have a producer
         // Node.
@@ -836,7 +847,9 @@ void xnn_subgraph_rewrite_for_nchw(xnn_subgraph_t subgraph) {
     }
 
     for (uint32_t i = 0; i < node->num_inputs; i++) {
-      const struct xnn_value* value = &subgraph->values[node->inputs[i]];
+      const uint32_t input_id = node->inputs[i];
+      assert(input_id != XNN_INVALID_VALUE_ID);
+      const struct xnn_value* value = &subgraph->values[input_id];
       if (value->data != NULL) {
         // Static data, skip this input value because it doesn't have a producer
         // Node.
@@ -923,7 +936,9 @@ void xnn_subgraph_rewrite_for_nchw(xnn_subgraph_t subgraph) {
     }
 
     for (uint32_t i = 0; i < node->num_inputs; i++) {
-      struct xnn_value* value = &subgraph->values[node->inputs[i]];
+      const uint32_t input_id = node->inputs[i];
+      assert(input_id != XNN_INVALID_VALUE_ID);
+      struct xnn_value* value = &subgraph->values[input_id];
       if (value->data != NULL) {
         // Static data, skip this input value because it doesn't have a producer
         // Node.
@@ -947,12 +962,16 @@ void xnn_subgraph_rewrite_for_nchw(xnn_subgraph_t subgraph) {
 static bool any_values_fp32(xnn_subgraph_t subgraph,
                             const struct xnn_node* node) {
   for (uint32_t i = 0; i < node->num_inputs; i++) {
-    if (subgraph->values[node->inputs[i]].datatype == xnn_datatype_fp32) {
+    const uint32_t input_id = node->inputs[i];
+    assert(input_id != XNN_INVALID_VALUE_ID);
+    if (subgraph->values[input_id].datatype == xnn_datatype_fp32) {
       return true;
     }
   }
   for (uint32_t i = 0; i < node->num_outputs; i++) {
-    if (subgraph->values[node->outputs[i]].datatype == xnn_datatype_fp32) {
+    const uint32_t output_id = node->outputs[i];
+    assert(output_id != XNN_INVALID_VALUE_ID);
+    if (subgraph->values[output_id].datatype == xnn_datatype_fp32) {
       return true;
     }
   }
@@ -962,14 +981,18 @@ static bool any_values_fp32(xnn_subgraph_t subgraph,
 static bool all_values_fp32_or_pfp32(xnn_subgraph_t subgraph,
                                      const struct xnn_node* node) {
   for (uint32_t i = 0; i < node->num_inputs; i++) {
-    if (subgraph->values[node->inputs[i]].datatype != xnn_datatype_fp32 &&
-        subgraph->values[node->inputs[i]].datatype != xnn_datatype_pfp32) {
+    const uint32_t input_id = node->inputs[i];
+    assert(input_id != XNN_INVALID_VALUE_ID);
+    if (subgraph->values[input_id].datatype != xnn_datatype_fp32 &&
+        subgraph->values[input_id].datatype != xnn_datatype_pfp32) {
       return false;
     }
   }
   for (uint32_t i = 0; i < node->num_outputs; i++) {
-    if (subgraph->values[node->outputs[i]].datatype != xnn_datatype_fp32 &&
-        subgraph->values[node->outputs[i]].datatype != xnn_datatype_pfp32) {
+    const uint32_t output_id = node->outputs[i];
+    assert(output_id != XNN_INVALID_VALUE_ID);
+    if (subgraph->values[output_id].datatype != xnn_datatype_fp32 &&
+        subgraph->values[output_id].datatype != xnn_datatype_pfp32) {
       return false;
     }
   }
@@ -1101,9 +1124,11 @@ bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph) {
           if (subgraph->values[node->inputs[1]].datatype == xnn_datatype_fp32) {
             subgraph->values[node->inputs[1]].fp16_rewrite.fp16_compatible = true;
           }
-          if (node->num_inputs > 2 &&
-              subgraph->values[node->inputs[2]].datatype == xnn_datatype_fp32) {
-            subgraph->values[node->inputs[2]].fp16_rewrite.fp16_compatible = true;
+          if (node->num_inputs > 2) {
+            assert(node->inputs[2] != XNN_INVALID_VALUE_ID);
+            if (subgraph->values[node->inputs[2]].datatype == xnn_datatype_fp32) {
+              subgraph->values[node->inputs[2]].fp16_rewrite.fp16_compatible = true;
+            }
           }
         } else if (all_values_fp32_or_pfp32(subgraph, node)) {
           subgraph->values[node->inputs[0]].fp16_rewrite.fp16_compatible = true;
@@ -1137,10 +1162,12 @@ bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph) {
         break;
       default:
         for (uint32_t i = 0; i < node->num_inputs; i++) {
-          switch (subgraph->values[node->inputs[i]].datatype) {
+          const uint32_t input_id = node->inputs[i];
+          assert(input_id != XNN_INVALID_VALUE_ID);
+          switch (subgraph->values[input_id].datatype) {
             case xnn_datatype_fp32:
             case xnn_datatype_pfp32:
-              subgraph->values[node->inputs[i]].fp16_rewrite.fp16_compatible = true;
+              subgraph->values[input_id].fp16_rewrite.fp16_compatible = true;
               break;
             default:
               break;
@@ -1228,7 +1255,9 @@ bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph) {
       if (is_repeated_input(node, i)) {
         continue;
       }
-      const struct xnn_value* value = &subgraph->values[node->inputs[i]];
+      const uint32_t input_id = node->inputs[i];
+      assert(input_id != XNN_INVALID_VALUE_ID);
+      const struct xnn_value* value = &subgraph->values[input_id];
       if (value->fp16_rewrite.fp16_id != XNN_INVALID_VALUE_ID &&
           value->first_consumer == n) {
         assert(value->data == NULL);
@@ -1366,7 +1395,9 @@ bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph) {
     }
 
     for (uint32_t i = 0; i < node->num_inputs; i++) {
-      const uint32_t fp16_id = subgraph->values[node->inputs[i]].fp16_rewrite.fp16_id;
+      const uint32_t input_id = node->inputs[i];
+      assert(input_id != XNN_INVALID_VALUE_ID);
+      const uint32_t fp16_id = subgraph->values[input_id].fp16_rewrite.fp16_id;
       if (fp16_id != XNN_INVALID_VALUE_ID) {
         struct xnn_value* fp16_value = &subgraph->values[fp16_id];
         assert(fp16_value->fp16_rewrite.fp32_id == node->inputs[i]);
@@ -2171,6 +2202,7 @@ void xnn_subgraph_clean_up(xnn_subgraph_t subgraph) {
   uint32_t left = 0;
   uint32_t num_invalid_nodes = 0;
   while (left + num_invalid_nodes < subgraph->num_nodes) {
+    const uint32_t old_left = left;
     num_invalid_nodes = 0;
     for (uint32_t i = left; i < subgraph->num_nodes; i++) {
       struct xnn_node* node = &subgraph->nodes[i];
@@ -2184,7 +2216,10 @@ void xnn_subgraph_clean_up(xnn_subgraph_t subgraph) {
       // Check whether all inputs to this node have been produced.
       bool all_values_avail = true;
       for (uint32_t j = 0; all_values_avail && j < node->num_inputs; j++) {
-        all_values_avail = values_ready[node->inputs[j]];
+        uint32_t input_id = node->inputs[j];
+        assert(input_id != XNN_INVALID_VALUE_ID);
+        assert(input_id < subgraph->num_values);
+        all_values_avail = values_ready[input_id];
       }
 
       // If so, bubble this node down to the left end of the list of nodes.
@@ -2207,6 +2242,10 @@ void xnn_subgraph_clean_up(xnn_subgraph_t subgraph) {
         }
         left++;
       }
+    }
+    if (left == old_left) {
+      xnn_log_error("Failed to schedule all nodes in subgraph (possible cycle).");
+      break;
     }
   }
 

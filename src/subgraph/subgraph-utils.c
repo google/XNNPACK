@@ -336,7 +336,9 @@ void xnn_subgraph_log_dot_impl(xnn_subgraph_t subgraph, FILE* out) {
       continue;
     }
     for (uint32_t k = 0; k < node->num_inputs; k++) {
-      const struct xnn_value* value = &subgraph->values[node->inputs[k]];
+      const uint32_t input_id = node->inputs[k];
+      assert(input_id != XNN_INVALID_VALUE_ID);
+      const struct xnn_value* value = &subgraph->values[input_id];
       if (value->producer != XNN_INVALID_NODE_ID) {
         fprintf(out, "  n%03" PRIu32 " -> n%03" PRIu32 " [label=\"v%03" PRIu32 ": %s[", value->producer,
                 node->id, value->id, xnn_datatype_to_string(value->datatype));
