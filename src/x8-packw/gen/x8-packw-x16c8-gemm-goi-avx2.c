@@ -363,7 +363,9 @@ void xnn_x8_packw_gemm_goi_ukernel_x16c8__avx2(
         b += n;
       } else {
         _mm256_storeu_si256((__m256i*) (out + 0), _mm256_setzero_si256());
-        _mm256_storeu_si256((__m256i*) (out + 32), _mm256_setzero_si256());
+        if (n > 8) {
+          _mm256_storeu_si256((__m256i*) (out + 32), _mm256_setzero_si256());
+        }
       }
       out += 16 * sizeof(uint32_t);
 
