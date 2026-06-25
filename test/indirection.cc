@@ -540,5 +540,59 @@ TEST(INDIRECTION_COMPRESSED, input2x2_kernel2x2_padding2x2_subsampling2) {
       })
       .TestCompressed();
 }
+
+// Under align-corners (or the TensorFlow legacy mode) the resize-bilinear
+// indirection init floors output_coord * scale to a source pixel index. For
+// some accepted large input extents the float product rounds up to exactly
+// input_height/input_width, one past the last valid pixel, so the indirection
+// pointer addresses memory past the end of the input tensor. The init routine
+// only computes pointers, so a null base lets us check the flat pixel index
+// without allocating the (multi-MiB) input.
+TEST(RESIZE_BILINEAR_INDIRECTION, hwc_f32_align_corners_no_oob) {
+  const size_t input_height = 10485768;
+  const size_t input_width = 3;
+  const size_t output_height = 6;
+  const size_t output_width = 3;
+  const size_t input_pixels = input_height * input_width;
+
+  std::vector<const void*> indirection(4 * output_height * output_width,
+                                       nullptr);
+  std::vector<float> packed_weights(2 * output_height * output_width, 0.0f);
+
+  xnn_indirection_init_resize_bilinear2d_hwc_f32(
+      /*output_y_start=*/0, /*output_y_end=*/output_height,
+      /*input_pixel_stride=*/1, input_height, input_width, output_height,
+      output_width, /*input=*/nullptr, indirection.data(),
+      packed_weights.data(), /*align_corners=*/true,
+      /*tensorflow_legacy=*/false);
+
+  for (size_t i = 0; i < indirection.size(); i++) {
+    EXPECT_LT(reinterpret_cast<uintptr_t>(indirection[i]), input_pixels)
+        << "indirection[" << i << "] points past the input buffer";
+  }
+}
+
+TEST(RESIZE_BILINEAR_INDIRECTION, chw_f32_align_corners_no_oob) {
+  const size_t input_height = 10485768;
+  const size_t input_width = 3;
+  const size_t output_height = 6;
+  const size_t output_width = 3;
+  const size_t input_pixels = input_height * input_width;
+
+  std::vector<const void*> indirection(2 * output_height * output_width,
+                                       nullptr);
+  std::vector<float> packed_weights(2 * output_height * output_width, 0.0f);
+
+  xnn_indirection_init_resize_bilinear2d_chw_f32(
+      /*input_pixel_stride=*/1, input_height, input_width, output_height,
+      output_width, /*input=*/nullptr, indirection.data(),
+      packed_weights.data(), /*align_corners=*/true,
+      /*tensorflow_legacy=*/false);
+
+  for (size_t i = 0; i < indirection.size(); i++) {
+    EXPECT_LT(reinterpret_cast<uintptr_t>(indirection[i]), input_pixels)
+        << "indirection[" << i << "] points past the input buffer";
+  }
+}
 }  // namespace
 }  // namespace xnnpack

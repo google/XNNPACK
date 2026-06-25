@@ -496,7 +496,7 @@ void xnn_indirection_init_resize_bilinear2d_hwc_f16(
   const uint32_t input_x_max = (uint32_t) input_width - 1;
   if (tensorflow_legacy || align_corners) {
     for (size_t output_y = output_y_start; output_y < output_y_end; output_y++) {
-      const float input_y = (float) (int32_t) output_y * height_scale;
+      const float input_y = math_min_f32((float) (int32_t) output_y * height_scale, (float) input_y_max);
       assert(input_y >= 0.0f);
       assert(input_y < (float) input_height);
 
@@ -504,7 +504,7 @@ void xnn_indirection_init_resize_bilinear2d_hwc_f16(
       const uint32_t input_y_bottom = math_min_u32(input_y_top + 1, input_y_max);
       const float alpha_y = input_y - (float) input_y_top;
       for (size_t output_x = 0; output_x < output_width; output_x++) {
-        const float input_x = (float) (int32_t) output_x * width_scale;
+        const float input_x = math_min_f32((float) (int32_t) output_x * width_scale, (float) input_x_max);
         assert(input_x >= 0.0f);
         assert(input_x < (float) input_width);
 
@@ -597,7 +597,7 @@ void xnn_indirection_init_resize_bilinear2d_hwc_f32(
 
   if (tensorflow_legacy || align_corners) {
     for (size_t output_y = output_y_start; output_y < output_y_end; output_y++) {
-      const float input_y = (float) (int32_t) output_y * height_scale;
+      const float input_y = math_min_f32((float) (int32_t) output_y * height_scale, (float) input_y_max);
       assert(input_y >= 0.0f);
       assert(input_y < (float) input_height);
 
@@ -605,7 +605,7 @@ void xnn_indirection_init_resize_bilinear2d_hwc_f32(
       const uint32_t input_y_bottom = math_min_u32(input_y_top + 1, input_y_max);
       const float alpha_y = input_y - (float) input_y_top;
       for (size_t output_x = 0; output_x < output_width; output_x++) {
-        const float input_x = (float) (int32_t) output_x * width_scale;
+        const float input_x = math_min_f32((float) (int32_t) output_x * width_scale, (float) input_x_max);
         assert(input_x >= 0.0f);
         assert(input_x < (float) input_width);
 
@@ -698,7 +698,7 @@ void xnn_indirection_init_resize_bilinear2d_hwc_q11(
 
   if (tensorflow_legacy || align_corners) {
     for (size_t output_y = output_y_start; output_y < output_y_end; output_y++) {
-      const float input_y = (float) (int32_t) output_y * height_scale;
+      const float input_y = math_min_f32((float) (int32_t) output_y * height_scale, (float) input_y_max);
       assert(input_y >= 0.0f);
       assert(input_y < (float) input_height);
 
@@ -706,7 +706,7 @@ void xnn_indirection_init_resize_bilinear2d_hwc_q11(
       const uint32_t input_y_bottom = math_min_u32(input_y_top + 1, input_y_max);
       const float alpha_y = input_y - (float) input_y_top;
       for (size_t output_x = 0; output_x < output_width; output_x++) {
-        const float input_x = (float) (int32_t) output_x * width_scale;
+        const float input_x = math_min_f32((float) (int32_t) output_x * width_scale, (float) input_x_max);
         assert(input_x >= 0.0f);
         assert(input_x < (float) input_width);
 
@@ -794,7 +794,7 @@ void xnn_indirection_init_resize_bilinear2d_chw_f16(
   const uint32_t input_x_max = (uint32_t) input_width - 1;
   if (tensorflow_legacy || align_corners) {
     for (size_t output_y = 0; output_y < output_height; output_y++) {
-      const float input_y = (float) (int32_t) output_y * height_scale;
+      const float input_y = math_min_f32((float) (int32_t) output_y * height_scale, (float) input_y_max);
       assert(input_y >= 0.0f);
       assert(input_y < (float) input_height);
 
@@ -802,7 +802,7 @@ void xnn_indirection_init_resize_bilinear2d_chw_f16(
       const uint32_t input_y_bottom = math_min_u32(input_y_top + 1, input_y_max);
       const float alpha_y = input_y - (float) input_y_top;
       for (size_t output_x = 0; output_x < output_width; output_x++) {
-        const float input_x = (float) (int32_t) output_x * width_scale;
+        const float input_x = math_min_f32((float) (int32_t) output_x * width_scale, (float) input_x_max);
         assert(input_x >= 0.0f);
         assert(input_x < (float) input_width);
 
@@ -894,7 +894,7 @@ void xnn_indirection_init_resize_bilinear2d_chw_f32(
   const uint32_t input_x_max = (uint32_t) input_width - 1;
   if (tensorflow_legacy || align_corners) {
     for (size_t output_y = 0; output_y < output_height; output_y++) {
-      const float input_y = (float) (int32_t) output_y * height_scale;
+      const float input_y = math_min_f32((float) (int32_t) output_y * height_scale, (float) input_y_max);
       assert(input_y >= 0.0f);
       assert(input_y < (float) input_height);
 
@@ -902,7 +902,7 @@ void xnn_indirection_init_resize_bilinear2d_chw_f32(
       const uint32_t input_y_bottom = math_min_u32(input_y_top + 1, input_y_max);
       const float alpha_y = input_y - (float) input_y_top;
       for (size_t output_x = 0; output_x < output_width; output_x++) {
-        const float input_x = (float) (int32_t) output_x * width_scale;
+        const float input_x = math_min_f32((float) (int32_t) output_x * width_scale, (float) input_x_max);
         assert(input_x >= 0.0f);
         assert(input_x < (float) input_width);
 
