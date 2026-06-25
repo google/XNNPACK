@@ -9,6 +9,8 @@ cc_library(
     srcs = [
         "elementwise.cc",
         "normalization.cc",
+        "pooling.cc",
+        "reduction.cc",
     ],
     hdrs = [
         "composites.h",
@@ -42,5 +44,28 @@ cc_test(
         ":composites",
         "//ynnpack",
         "//ynnpack/base",
+    ] + ynn_test_deps(),
+)
+
+cc_test(
+    name = "pooling_test",
+    srcs = ["pooling_test.cc"],
+    linkopts = ynn_binary_linkopts(),
+    malloc = ynn_binary_malloc(),
+    deps = [
+        ":composites",
+        "//ynnpack",
+        "//ynnpack/base",
+    ] + ynn_test_deps(),
+)
+
+cc_test(
+    name = "reduction_test",
+    srcs = ["reduction_test.cc"],
+    linkopts = ynn_binary_linkopts(),
+    malloc = ynn_binary_malloc(),
+    deps = [
+        ":composites",
+        "//ynnpack",
     ] + ynn_test_deps(),
 )
