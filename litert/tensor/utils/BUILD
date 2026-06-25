@@ -58,4 +58,28 @@ cc_library(
     hdrs = ["source_location.h"],
 )
 
+cc_library(
+    name = "file_utils",
+    srcs = ["file_utils.cc"],
+    hdrs = ["file_utils.h"],
+    deps = [
+        "@abseil-cpp//absl/random",
+        "@abseil-cpp//absl/status",
+        "@abseil-cpp//absl/status:statusor",
+        "@abseil-cpp//absl/strings",
+        "@abseil-cpp//absl/strings:str_format",
+    ],
+)
+
+cc_test(
+    name = "file_utils_test",
+    srcs = ["file_utils_test.cc"],
+    deps = [
+        ":file_utils",
+        "@abseil-cpp//absl/status",
+        "@abseil-cpp//absl/status:statusor",
+        "@com_google_googletest//:gtest_main",  # gunit
+    ],
+)
+
 # OSS: source_location_cc_library
