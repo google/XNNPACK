@@ -18,6 +18,7 @@
 #include "include/xnnpack.h"
 #include "src/xnnpack/allocation-type.h"
 #include "src/xnnpack/buffer.h"
+#include "src/xnnpack/hardware-config.h"
 #include "src/xnnpack/math.h"
 #include "src/xnnpack/node-type.h"
 #include "src/xnnpack/operator.h"
@@ -1377,5 +1378,237 @@ TEST(SUBGRAPH_FP16_CONVOLUTION, inline_lhs_packing_pf16) {
   }
 }
 #endif
+
+TEST(SUBGRAPH_FP16, static_value_pack_to_fp16) {
+  SubgraphTester tester(3);
+
+  const std::vector<size_t> shape = {2, 3, 4};
+  const size_t element_count = 2 * 3 * 4;
+
+  std::vector<float> static_data(element_count);
+  xnnpack::ReplicableRandomDevice rng;
+  auto f32rng = std::bind(std::uniform_real_distribution<float>(-10.f, 10.f),
+                          std::ref(rng));
+  std::generate(static_data.begin(), static_data.end(), std::ref(f32rng));
+
+  const uint32_t input1_id = 0;
+  const uint32_t input2_id = 1;
+  const uint32_t output_id = 2;
+
+  tester.AddInputTensor<xnn_float16>(shape, input1_id)
+      .AddStaticTensorF32(shape, input2_id, static_data.data(),
+                          XNN_VALUE_FLAG_PACK_TO_FP16)
+      .AddOutputTensor<xnn_float16>(shape, output_id)
+      .AddAddition(input1_id, input2_id, output_id)
+      .Optimize();
+
+  const struct xnn_hardware_config* hardware_config =
+      xnn_init_hardware_config();
+  ASSERT_NE(hardware_config, nullptr);
+  const bool f16_possible = xnn_is_f16_compatible_config(hardware_config);
+
+  const xnn_value* val = tester.Value(input2_id);
+  if (f16_possible) {
+    ASSERT_EQ(val->datatype, xnn_datatype_fp16);
+    ASSERT_NE(val->data, nullptr);
+    ASSERT_NE(val->data, static_data.data());
+
+    const xnn_float16* packed_data =
+        reinterpret_cast<const xnn_float16*>(val->data);
+    for (size_t i = 0; i < element_count; i++) {
+      float unpacked_val = xnn_float16_to_float(packed_data[i]);
+      const float tolerance = std::max(std::abs(static_data[i]) * 1e-3f, 1e-3f);
+      ASSERT_NEAR(unpacked_val, static_data[i], tolerance);
+    }
+  } else {
+    ASSERT_EQ(val->datatype, xnn_datatype_invalid);
+    bool found = false;
+    for (uint32_t i = 0; i < tester.Subgraph()->num_values; i++) {
+      const xnn_value* v = &tester.Subgraph()->values[i];
+      if (v->type != xnn_value_type_invalid &&
+          v->datatype == xnn_datatype_fp32 &&
+          (v->flags & XNN_VALUE_FLAG_PACK_TO_FP16) && v->data != nullptr &&
+          v->data != static_data.data()) {
+        const float* val_data = reinterpret_cast<const float*>(v->data);
+        for (size_t j = 0; j < element_count; j++) {
+          float expected_val =
+              xnn_float16_to_float(xnn_float16_from_float(static_data[j]));
+          ASSERT_FLOAT_EQ(val_data[j], expected_val);
+        }
+        found = true;
+        break;
+      }
+    }
+    ASSERT_TRUE(found) << "Could not find packed and unpacked F32 static value";
+  }
+}
+
+TEST(SUBGRAPH_FP16, fully_connected_f32_weights_and_biases_pack_to_f16) {
+  SubgraphTester tester(4);
+
+  const uint32_t batch = 2;
+  const uint32_t input_channels = 3;
+  const uint32_t output_channels = 4;
+
+  std::vector<float> weights_f32(input_channels * output_channels);
+  std::vector<float> bias_f32(output_channels);
+
+  xnnpack::ReplicableRandomDevice rng;
+  auto f32rng = std::bind(std::uniform_real_distribution<float>(-1.f, 1.f),
+                          std::ref(rng));
+  std::generate(weights_f32.begin(), weights_f32.end(), std::ref(f32rng));
+  std::generate(bias_f32.begin(), bias_f32.end(), std::ref(f32rng));
+
+  const uint32_t input_id = 0;
+  const uint32_t filter_id = 1;
+  const uint32_t bias_id = 2;
+  const uint32_t output_id = 3;
+
+  tester.AddInputTensorF32({batch, input_channels}, input_id)
+      .AddStaticTensorF32({output_channels, input_channels}, filter_id,
+                          weights_f32.data(), XNN_VALUE_FLAG_PACK_TO_FP16)
+      .AddStaticTensorF32({output_channels}, bias_id, bias_f32.data(),
+                          XNN_VALUE_FLAG_PACK_TO_FP16)
+      .AddOutputTensorF32({batch, output_channels}, output_id)
+      .AddFullyConnected(input_id, filter_id, bias_id, output_id, 0)
+      .Optimize();
+
+  const struct xnn_hardware_config* hardware_config =
+      xnn_init_hardware_config();
+  ASSERT_NE(hardware_config, nullptr);
+  const bool f16_possible = xnn_is_f16_compatible_config(hardware_config);
+
+  const xnn_value* filter_val = tester.Value(filter_id);
+  if (f16_possible) {
+    // Verify weights were packed
+    ASSERT_EQ(filter_val->datatype, xnn_datatype_fp16);
+    ASSERT_NE(filter_val->data, nullptr);
+    ASSERT_NE(filter_val->data, weights_f32.data());
+
+    const xnn_float16* packed_weights =
+        reinterpret_cast<const xnn_float16*>(filter_val->data);
+    for (size_t i = 0; i < weights_f32.size(); i++) {
+      float unpacked_val = xnn_float16_to_float(packed_weights[i]);
+      const float tolerance = std::max(std::abs(weights_f32[i]) * 1e-3f, 1e-3f);
+      ASSERT_NEAR(unpacked_val, weights_f32[i], tolerance);
+    }
+
+    // Verify bias was packed
+    const xnn_value* bias_val = tester.Value(bias_id);
+    ASSERT_EQ(bias_val->datatype, xnn_datatype_fp16);
+    ASSERT_NE(bias_val->data, nullptr);
+    ASSERT_NE(bias_val->data, bias_f32.data());
+
+    const xnn_float16* packed_bias =
+        reinterpret_cast<const xnn_float16*>(bias_val->data);
+    for (size_t i = 0; i < bias_f32.size(); i++) {
+      float unpacked_val = xnn_float16_to_float(packed_bias[i]);
+      const float tolerance = std::max(std::abs(bias_f32[i]) * 1e-3f, 1e-3f);
+      ASSERT_NEAR(unpacked_val, bias_f32[i], tolerance);
+    }
+  } else {
+    // Verify fallback to FP32 for weights and bias
+    ASSERT_EQ(filter_val->datatype, xnn_datatype_invalid);
+    const xnn_value* bias_val = tester.Value(bias_id);
+    ASSERT_EQ(bias_val->datatype, xnn_datatype_invalid);
+
+    bool found_weights = false;
+    bool found_bias = false;
+    for (uint32_t i = 0; i < tester.Subgraph()->num_values; i++) {
+      const xnn_value* v = &tester.Subgraph()->values[i];
+      if (v->type != xnn_value_type_invalid &&
+          v->datatype == xnn_datatype_fp32 &&
+          (v->flags & XNN_VALUE_FLAG_PACK_TO_FP16) && v->data != nullptr) {
+        size_t num_elements = 1;
+        for (size_t d = 0; d < v->shape.num_dims; d++) {
+          num_elements *= v->shape.dim[d];
+        }
+
+        if (num_elements == weights_f32.size() &&
+            v->data != weights_f32.data()) {
+          const float* val_data = reinterpret_cast<const float*>(v->data);
+          for (size_t j = 0; j < num_elements; j++) {
+            float expected_val =
+                xnn_float16_to_float(xnn_float16_from_float(weights_f32[j]));
+            ASSERT_FLOAT_EQ(val_data[j], expected_val);
+          }
+          found_weights = true;
+        } else if (num_elements == bias_f32.size() &&
+                   v->data != bias_f32.data()) {
+          const float* val_data = reinterpret_cast<const float*>(v->data);
+          for (size_t j = 0; j < num_elements; j++) {
+            float expected_val =
+                xnn_float16_to_float(xnn_float16_from_float(bias_f32[j]));
+            ASSERT_FLOAT_EQ(val_data[j], expected_val);
+          }
+          found_bias = true;
+        }
+      }
+    }
+    ASSERT_TRUE(found_weights)
+        << "Could not find packed and unpacked F32 weights";
+    ASSERT_TRUE(found_bias) << "Could not find packed and unpacked F32 bias";
+  }
+}
+
+TEST(SUBGRAPH_FP16, non_static_value_with_pack_to_fp16_fails_validation) {
+  SubgraphTester tester(3);
+
+  const std::vector<size_t> shape = {2, 3, 4};
+
+  // Input 1 is FP16.
+  tester.AddInputTensor(shape, xnn_datatype_fp16, 0);
+
+  // Input 2 is FP32, with PACK_TO_FP16 flag, but NOT static.
+  uint32_t input2_id;
+  ASSERT_EQ(xnn_define_tensor_value(tester.Subgraph(), xnn_datatype_fp32,
+                                    shape.size(), shape.data(),
+                                    /*data=*/nullptr, /*external_id=*/1,
+                                    /*flags=*/XNN_VALUE_FLAG_PACK_TO_FP16,
+                                    &input2_id),
+            xnn_status_success);
+  ASSERT_EQ(input2_id, 1);
+
+  // Output is FP16.
+  tester.AddOutputTensor(shape, xnn_datatype_fp16, 2);
+
+  // Define addition. It should fail because input 2 effective datatype is FP32.
+  const xnn_status status = xnn_define_binary(tester.Subgraph(), xnn_binary_add,
+                                              /*params=*/nullptr, 0, 1, 2,
+                                              /*flags=*/0);
+  EXPECT_EQ(status, xnn_status_invalid_parameter);
+}
+
+TEST(SUBGRAPH_FP16, optimize_is_idempotent) {
+  const struct xnn_hardware_config* hardware_config =
+      xnn_init_hardware_config();
+  ASSERT_NE(hardware_config, nullptr);
+  if (!xnn_is_f16_compatible_config(hardware_config)) {
+    GTEST_SKIP();
+  }
+
+  SubgraphTester tester(3);
+
+  const std::vector<size_t> shape = {2, 3, 4};
+  const size_t element_count = 2 * 3 * 4;
+
+  std::vector<float> static_data(element_count);
+  xnnpack::ReplicableRandomDevice rng;
+  auto f32rng = std::bind(std::uniform_real_distribution<float>(-10.f, 10.f),
+                          std::ref(rng));
+  std::generate(static_data.begin(), static_data.end(), std::ref(f32rng));
+
+  tester.AddInputTensor(shape, xnn_datatype_fp16, 0)
+      .AddStaticTensorF32(shape, 1, static_data.data(),
+                          XNN_VALUE_FLAG_PACK_TO_FP16)
+      .AddOutputTensor(shape, xnn_datatype_fp16, 2)
+      .AddAddition(0, 1, 2);
+
+  tester.Optimize();
+  ASSERT_EQ(tester.Status(), xnn_status_success);
+
+  tester.Optimize();
+  ASSERT_EQ(tester.Status(), xnn_status_success);
+}
 
 }  // namespace xnnpack

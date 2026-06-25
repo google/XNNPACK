@@ -4542,6 +4542,61 @@ void xnn_subgraph_rewrite_ssa(xnn_subgraph_t subgraph) {
   xnn_release_memory(values_written);
 }
 
+enum xnn_status xnn_subgraph_pack_static_values_to_fp16(
+    xnn_subgraph_t subgraph) {
+  for (uint32_t n = 0; n < subgraph->num_values; n++) {
+    struct xnn_value* value = &subgraph->values[n];
+    if (xnn_value_is_static(value->allocation_type) &&
+        (value->flags & XNN_VALUE_FLAG_PACK_TO_FP16)) {
+      if (value->datatype == xnn_datatype_fp16) {
+        continue;
+      }
+      if (value->datatype != xnn_datatype_fp32) {
+        xnn_log_error(
+            "failed to pack value #%" PRIu32 " to FP16: unsupported datatype %s"
+             " (expected FP32)", n, xnn_datatype_to_string(value->datatype));
+        return xnn_status_invalid_parameter;
+      }
+
+      const size_t fp16_size = xnn_tensor_get_size(value) / 2 + XNN_EXTRA_BYTES;
+      void* fp16_data = xnn_allocate_zero_memory(fp16_size);
+      if (fp16_data == NULL) {
+        xnn_log_error(
+            "failed to allocate %zu bytes for packed fp16 tensor data",
+            fp16_size);
+        return xnn_status_out_of_memory;
+      }
+
+      const size_t num_elements = xnn_shape_multiply_all_dims(&value->shape);
+      enum xnn_status status = xnn_run_unary_elementwise_nc(
+          xnn_unary_convert, xnn_datatype_fp32, xnn_datatype_fp16,
+          /*params=*/NULL, /*input_quantization=*/NULL,
+          /*output_quantization=*/NULL, 0, num_elements, 1, 1, 1, NULL,
+          value->data, fp16_data);
+
+      if (status != xnn_status_success) {
+        xnn_release_memory(fp16_data);
+        xnn_log_error("failed to convert value #%" PRIu32 " data to FP16", n);
+        return status;
+      }
+
+      if (value->flags & XNN_VALUE_FLAG_NEEDS_CLEANUP) {
+        XNN_PRAGMA_CLANG("clang diagnostic push")
+        XNN_PRAGMA_CLANG("clang diagnostic ignored \"-Wcast-qual\"")
+        xnn_release_memory((void*)value->data);
+        XNN_PRAGMA_CLANG("clang diagnostic pop")
+      }
+
+      value->data = fp16_data;
+      value->datatype = xnn_datatype_fp16;
+      value->flags |= XNN_VALUE_FLAG_NEEDS_CLEANUP;
+
+      xnn_log_debug("packed value #%" PRIu32 " to FP16", n);
+    }
+  }
+  return xnn_status_success;
+}
+
 enum xnn_status xnn_subgraph_optimize(xnn_subgraph_t subgraph,
                                       uint32_t optimization_flags) {
   // If the subgraph has no nodes, then there is nothing for us to do here, but
@@ -4550,6 +4605,8 @@ enum xnn_status xnn_subgraph_optimize(xnn_subgraph_t subgraph,
     xnn_log_info("Trying to optimize subgraph with zero nodes, skipping.");
     return xnn_status_success;
   }
+
+  XNN_RETURN_IF_ERROR(xnn_subgraph_pack_static_values_to_fp16(subgraph));
 
   // Start with a clean and ordered subgraph.
   xnn_subgraph_clean_up(subgraph);

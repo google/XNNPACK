@@ -378,6 +378,7 @@ xnnpack_unit_test(
         "//:params",
         "//:subgraph_h",
         "//:xnnpack_h",
+        "//src/configs:hardware_config",
         "//test:replicable_random_device",
     ],
 )
