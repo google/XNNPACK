@@ -7,6 +7,7 @@ _COMPATIBLE_WITH = []
 cc_library(
     name = "composites",
     srcs = [
+        "dot_quantization.cc",
         "elementwise.cc",
         "normalization.cc",
         "pooling.cc",
@@ -62,6 +63,17 @@ cc_test(
 cc_test(
     name = "reduction_test",
     srcs = ["reduction_test.cc"],
+    linkopts = ynn_binary_linkopts(),
+    malloc = ynn_binary_malloc(),
+    deps = [
+        ":composites",
+        "//ynnpack",
+    ] + ynn_test_deps(),
+)
+
+cc_test(
+    name = "dot_quantization_test",
+    srcs = ["dot_quantization_test.cc"],
     linkopts = ynn_binary_linkopts(),
     malloc = ynn_binary_malloc(),
     deps = [

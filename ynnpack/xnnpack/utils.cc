@@ -5,7 +5,6 @@
 
 #include "ynnpack/xnnpack/utils.h"
 
-#include <algorithm>
 #include <array>
 #include <cassert>
 #include <cmath>
@@ -15,6 +14,7 @@
 
 #include "include/xnnpack.h"
 #include "ynnpack/base/type.h"
+#include "ynnpack/composites/composites.h"
 #include "ynnpack/include/ynnpack.h"
 #include "ynnpack/subgraph/subgraph.h"
 
@@ -79,243 +79,6 @@ ynn_type product_type(ynn_type a, ynn_type b) {
 // be more general (it would handle blockwise quantization), but it's harder for
 // the subgraph optimization to see that sum(b) is a constant and can be
 // constant folded in that case.
-ynn_status subtract_a_times_sum_b(xnn_subgraph_t subgraph, size_t num_k_dims,
-                                  const int32_t* a_k_dims,
-                                  const int32_t* b_k_dims, uint32_t a_id,
-                                  uint32_t b_id, uint32_t* output_id) {
-  if (a_id == YNN_INVALID_VALUE_ID) {
-    return ynn_status_success;
-  }
-
-  // Get the sum of b.
-  uint32_t init_sum_id = YNN_INVALID_VALUE_ID;
-  ynn_status status =
-      ynn::define_scalar_value_like(subgraph, a_id, 0.0f, &init_sum_id);
-  if (status != ynn_status_success) {
-    return status;
-  }
-
-  uint32_t sum_sliced_id = YNN_INVALID_VALUE_ID;
-  status = ynn_define_tensor(
-      subgraph->ynn, accumulator_for_type(ynn::type_of_value(subgraph, b_id)),
-      ynn::rank_of_value(subgraph, b_id) - num_k_dims, /*dims=*/nullptr,
-      /*data=*/nullptr,
-      /*flags=*/0, &sum_sliced_id);
-  if (status != ynn_status_success) {
-    return status;
-  }
-
-  status =
-      ynn_define_reduce(subgraph->ynn, ynn_reduce_sum, num_k_dims, b_k_dims,
-                        b_id, init_sum_id, &sum_sliced_id, /*flags=*/0);
-  if (status != ynn_status_success) {
-    return status;
-  }
-
-  // Put one of the k dims back (to be broadcasted).
-  uint32_t sum_id = YNN_INVALID_VALUE_ID;
-  status = ynn_define_static_expand_dims(subgraph->ynn, 1, &b_k_dims[0],
-                                         sum_sliced_id, &sum_id, /*flags=*/0);
-  if (status != ynn_status_success) {
-    return status;
-  }
-
-  uint32_t zero_times_sum_id = YNN_INVALID_VALUE_ID;
-  status =
-      define_binary_with_broadcasting(subgraph, ynn_binary_multiply, a_id,
-                                      sum_id, &zero_times_sum_id, /*flags=*/0);
-  if (status != ynn_status_success) {
-    return status;
-  }
-
-  if (*output_id != YNN_INVALID_VALUE_ID) {
-    // Add the product of the zero point and the sum to the output.
-    uint32_t sub_id = YNN_INVALID_VALUE_ID;
-    status = define_binary_with_broadcasting(subgraph, ynn_binary_subtract,
-                                             *output_id, zero_times_sum_id,
-                                             &sub_id, /*flags=*/0);
-    if (status != ynn_status_success) {
-      return status;
-    }
-
-    *output_id = sub_id;
-  } else {
-    // The output is 0, just use the (negated) result as the output.
-    status = ynn_define_unary(subgraph->ynn, ynn_unary_negate,
-                              zero_times_sum_id, output_id, /*flags=*/0);
-    if (status != ynn_status_success) {
-      return status;
-    }
-  }
-  return ynn_status_success;
-}
-
-// This function implements the logic for propagating the scale and zero points
-// of quantized dot products.
-//
-// We have the following:
-//
-//   ((a - a_zp)*a_s).(b - b_zp)*b_s
-//
-// First, observe we can reassociate the scales:
-//
-//   (a_s*b_s)*((a - a_zp).(b - b_zp))
-//
-// Distributing:
-//
-//   (a_s*b_s)*(a.b - a_zp.b - b_zp.a + a_zp.b_zp)
-//
-// The terms here are:
-// - a_s*b_s: Elementwise broadcasted multiply
-// - a.b: the actual dot we need to compute.
-// - a_zp.b, b_zp.a: if the zero points are broadcasted scalars, these can be
-//   implemented as a_zp*sum(b) and b_zp*sum(a) instead.
-// - a_zp.b_zp: Elementwise broadcasted multiply
-//
-// In this form, we can see we can get the result we want by:
-// - Initializing the accumulators with the sum of the last 3 terms
-// - Using a_s*b_s as the scale of the result,
-//
-// Note that many of these operations have interesting broadcasting patterns
-// and constant folding opportunities where a naive implementation will be
-// inefficient. This motivates some special case operators:
-// - (a_s*b_s)*x is a basically an outer product multiplied by x. We should
-//   implement this with a 3 way multiply that does the two broadcasts at the
-//   same time.
-// - The sum of the 3 zero point products have a similar pattern, but with
-//   an add instead of a multiply.
-// - The final product of two zero points also has this pattern.
-ynn_status define_xnn_accumulator_for_quantized_dot(
-    xnn_subgraph_t subgraph, size_t num_k_dims, uint32_t a_id, uint32_t b_id,
-    uint32_t* init_output_id, uint32_t* output_id, bool allow_reuse) {
-  const ynn_value& a = subgraph->ynn->value(a_id);
-  const ynn_value& b = subgraph->ynn->value(b_id);
-  ynn_type accumulator_type =
-      accumulator_for_type(product_type(a.type, b.type));
-
-  // `init_output_id` is strictly used for the quantization offsets calculated
-  // below.
-  assert(*init_output_id == YNN_INVALID_VALUE_ID);
-
-  uint32_t a_zero_point_id = get_zero_point_id(subgraph, a_id);
-  uint32_t a_scale_id = get_scale_id(subgraph, a_id);
-  uint32_t b_zero_point_id = get_zero_point_id(subgraph, b_id);
-  uint32_t b_scale_id = get_scale_id(subgraph, b_id);
-
-  // We need a list of the k dims for computing reductions.
-  // We would also need to slice k-dims of zero points and scales of a and b,
-  // but define_xnn_stencil doesn't insert dims corresponding to stencil into
-  // them.
-  assert(a_zero_point_id == YNN_INVALID_VALUE_ID ||
-         (rank_of_value(subgraph, a_zero_point_id) <=
-          (rank_of_value(subgraph, a_id) - num_k_dims + 1)));
-  assert(a_scale_id == YNN_INVALID_VALUE_ID ||
-         (rank_of_value(subgraph, a_scale_id) <=
-          (rank_of_value(subgraph, a_id) - num_k_dims + 1)));
-  int32_t a_k_dims[YNN_MAX_TENSOR_RANK];
-  int32_t b_k_dims[YNN_MAX_TENSOR_RANK];
-  std::iota(a_k_dims, a_k_dims + num_k_dims, -static_cast<int>(num_k_dims));
-  std::iota(b_k_dims, b_k_dims + num_k_dims, -static_cast<int>(num_k_dims) - 1);
-  std::reverse(a_k_dims, a_k_dims + num_k_dims);
-  std::reverse(b_k_dims, b_k_dims + num_k_dims);
-
-  ynn_status status = ynn_status_success;
-
-  if (a_zero_point_id != YNN_INVALID_VALUE_ID &&
-      b_zero_point_id != YNN_INVALID_VALUE_ID) {
-    // We need to add a_zero_point * b_zero_point to the accumulator
-    // initialization. Even if a_zero_point and b_zero_point are scalars
-    // this is conceptually a dot-product of broadcasted vectors, so we
-    // need to additionally multiply by k.
-    ynn_type zp_product_type =
-        product_type(type_of_value(subgraph, a_zero_point_id),
-                     type_of_value(subgraph, b_zero_point_id));
-    uint32_t a_times_b_zero_point_no_k_id = YNN_INVALID_VALUE_ID;
-    status = ynn_define_tensor(subgraph->ynn, zp_product_type, /*rank=*/0,
-                               /*dims=*/nullptr, /*data=*/nullptr, /*flags=*/0,
-                               &a_times_b_zero_point_no_k_id);
-    if (status != ynn_status_success) {
-      return status;
-    }
-
-    status = define_binary_with_broadcasting(subgraph, ynn_binary_multiply,
-                                             a_zero_point_id, b_zero_point_id,
-                                             &a_times_b_zero_point_no_k_id,
-                                             /*flags=*/0);
-    if (status != ynn_status_success) {
-      return status;
-    }
-
-    uint32_t k_id = YNN_INVALID_VALUE_ID;
-    status = ynn_define_get_tensor_shape(
-        subgraph->ynn, num_k_dims, b_k_dims, ynn_type_int32,
-        /*rank=*/0, b_id, &k_id,
-        /*flags=*/YNN_NODE_FLAG_RESHAPE_1D | YNN_NODE_FLAG_UNIQUE_DIMS);
-    if (status != ynn_status_success) {
-      return status;
-    }
-
-    uint32_t a_times_b_zero_point_id = YNN_INVALID_VALUE_ID;
-    status = define_binary_with_broadcasting(subgraph, ynn_binary_multiply,
-                                             a_times_b_zero_point_no_k_id, k_id,
-                                             &a_times_b_zero_point_id,
-                                             /*flags=*/0);
-    if (status != ynn_status_success) {
-      return status;
-    }
-
-    *init_output_id = a_times_b_zero_point_id;
-  }
-
-  // We need to add a_zero_point * sum(b) to the accumulator initialization.
-  // This product is missing dimension 0 from the result of the dot product.
-  status = subtract_a_times_sum_b(subgraph, num_k_dims, a_k_dims, b_k_dims,
-                                  a_zero_point_id, b_id, init_output_id);
-  if (status != ynn_status_success) {
-    return status;
-  }
-
-  // We need to add b_zero_point * sum(a) to the accumulator initialization.
-  // This product is missing dimension 1 from the result of the dot product.
-  status = subtract_a_times_sum_b(subgraph, num_k_dims, b_k_dims, a_k_dims,
-                                  b_zero_point_id, a_id, init_output_id);
-  if (status != ynn_status_success) {
-    return status;
-  }
-
-  // The scale of the accumulator is the product of the scales of the inputs.
-  uint32_t scale_id = YNN_INVALID_VALUE_ID;
-  if (a_scale_id != YNN_INVALID_VALUE_ID &&
-      b_scale_id != YNN_INVALID_VALUE_ID) {
-    status = define_binary_with_broadcasting(subgraph, ynn_binary_multiply,
-                                             a_scale_id, b_scale_id, &scale_id,
-                                             /*flags=*/0);
-    if (status != ynn_status_success) {
-      return status;
-    }
-  } else if (a_scale_id != YNN_INVALID_VALUE_ID) {
-    scale_id = a_scale_id;
-  } else if (b_scale_id != YNN_INVALID_VALUE_ID) {
-    scale_id = b_scale_id;
-  }
-
-  if (allow_reuse) {
-    assert(type_of_value(subgraph, *output_id) == accumulator_type);
-    assert(scale_id == YNN_INVALID_VALUE_ID);
-  } else {
-    *output_id = YNN_INVALID_VALUE_ID;
-    ynn_status status =
-        ynn_define_tensor(subgraph->ynn, accumulator_type, /*rank=*/0,
-                          /*dims=*/nullptr, /*data=*/nullptr,
-                          /*flags=*/0, output_id);
-    if (status != ynn_status_success) {
-      return status;
-    }
-    subgraph->ynn->value(*output_id).scale_id = scale_id;
-  }
-
-  return ynn_status_success;
-}
 
 ynn_status convert_to(xnn_subgraph_t subgraph, uint32_t* value_id,
                       ynn_type type) {
@@ -438,18 +201,34 @@ ynn_status define_xnn_dot_quantized(xnn_subgraph_t subgraph, size_t num_k_dims,
        type_promotes_to_float(type_of_value(subgraph, b_zp_id)));
 
   // We can reuse the `output_id` as the accumulator to the dot if there is no
-  // bias and the output type matches the accumulator type. Otherwise, let
-  // `define_xnn_accumulator_for_quantized_dot` define the accumulator.
+  // bias and the output type matches the accumulator type.
+  ynn_type accumulator_type = accumulator_for_type(product_type(
+      type_of_value(subgraph, a_id), type_of_value(subgraph, b_id)));
   bool allow_reuse = bias_id == YNN_INVALID_VALUE_ID && !defer_init &&
-                     type_of_value(subgraph, output_id) ==
-                         accumulator_for_type(type_of_value(subgraph, a_id));
-  uint32_t accumulator_id = allow_reuse ? output_id : YNN_INVALID_VALUE_ID;
-  uint32_t init_accumulator_id = YNN_INVALID_VALUE_ID;
+                     type_of_value(subgraph, output_id) == accumulator_type;
 
-  ynn_status status = define_xnn_accumulator_for_quantized_dot(
-      subgraph, num_k_dims, a_id, b_id, &init_accumulator_id, &accumulator_id,
-      allow_reuse);
+  uint32_t dot_zp_id = YNN_INVALID_VALUE_ID;
+  uint32_t dot_scale_id = YNN_INVALID_VALUE_ID;
+  ynn_status status = ynn::define_dot_quantization(
+      subgraph->ynn, num_k_dims, a_id, a_zp_id, get_scale_id(subgraph, a_id),
+      b_id, b_zp_id, get_scale_id(subgraph, b_id), dot_zp_id, dot_scale_id);
   if (status != ynn_status_success) return status;
+
+  uint32_t init_accumulator_id = YNN_INVALID_VALUE_ID;
+  if (dot_zp_id != YNN_INVALID_VALUE_ID) {
+    status = ynn_define_unary(subgraph->ynn, ynn_unary_negate, dot_zp_id,
+                              &init_accumulator_id, 0);
+    if (status != ynn_status_success) return status;
+  }
+
+  uint32_t accumulator_id = allow_reuse ? output_id : YNN_INVALID_VALUE_ID;
+  if (!allow_reuse) {
+    status = ynn_define_tensor(subgraph->ynn, accumulator_type, /*rank=*/0,
+                               /*dims=*/nullptr, /*data=*/nullptr,
+                               /*flags=*/0, &accumulator_id);
+    if (status != ynn_status_success) return status;
+    subgraph->ynn->value(accumulator_id).scale_id = dot_scale_id;
+  }
 
   uint32_t dot_init_id =
       defer_init ? YNN_INVALID_VALUE_ID : init_accumulator_id;

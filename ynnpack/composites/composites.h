@@ -65,6 +65,21 @@ ynn_status define_reduce_sum(ynn_subgraph_t subgraph, size_t num_axes,
                              uint32_t output_zero_point_id,
                              uint32_t output_scale_id, uint32_t& output_id);
 
+// This function computes the quantization parameters of the result of a
+// quantized dot operation. It computes the `zero_point` and `scale` values of
+// the following equivalence:
+//
+//   (a.b - zero_point)*scale =
+//       ((a - a_zero_point)*a_scale).(b - b_zerp_point)*b_scale
+//
+// It supports dynamic and static quantization parameters.
+ynn_status define_dot_quantization(ynn_subgraph_t subgraph, size_t num_k_dims,
+                                   uint32_t a_id, uint32_t a_zero_point_id,
+                                   uint32_t a_scale_id, uint32_t b_id,
+                                   uint32_t b_zero_point_id,
+                                   uint32_t b_scale_id, uint32_t& zero_point_id,
+                                   uint32_t& scale_id);
+
 }  // namespace ynn
 
 #endif  // XNNPACK_YNNPACK_COMPOSITES_COMPOSITES_H_

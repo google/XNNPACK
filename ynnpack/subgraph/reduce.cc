@@ -294,46 +294,8 @@ void define_reduce(ynn_subgraph& subgraph, ynn_node& node,
                    std::vector<slinky::expr> split_factors) {
   const ynn_value& a = subgraph.value(input_a_id);
 
-  if (*output_id == YNN_INVALID_VALUE_ID) {
-    // Make the output for this reduction.
-    ynn_type output_type = get_accumulator_type(op, a.type);
-    ynn_value& output = subgraph.new_internal_value(output_type);
-    uint32_t reduce_size_id = YNN_INVALID_VALUE_ID;
-    switch (op) {
-      case ynn_reduce_sum:
-      case ynn_reduce_sum_squared:
-        if (a.zero_point_id != YNN_INVALID_VALUE_ID) {
-          // When computing a sum, the zero point gets multiplied by the number
-          // of elements in the reduction.
-          int32_t axes[YNN_MAX_TENSOR_RANK];
-          int num_axes = 0;
-          for (int i = 0; i < a.rank(); ++i) {
-            if (k_dims[i]) axes[num_axes++] = a.rank() - 1 - i;
-          }
-          ynn_define_get_tensor_shape(
-              &subgraph, num_axes, axes, ynn_type_int32,
-              /*rank=*/0, input_a_id, &reduce_size_id,
-              /*flags=*/YNN_NODE_FLAG_RESHAPE_1D | YNN_NODE_FLAG_UNIQUE_DIMS);
-          ynn_define_binary(&subgraph, ynn_binary_multiply, a.zero_point_id,
-                            reduce_size_id, &output.zero_point_id,
-                            /*flags=*/0);
-        }
-        output.scale_id = a.scale_id;
-        break;
-      case ynn_reduce_max:
-      case ynn_reduce_min:
-      case ynn_reduce_min_max:
-        output.zero_point_id = a.zero_point_id;
-        output.scale_id = a.scale_id;
-        break;
-      default:
-        YNN_UNREACHABLE;
-    }
-
-    *output_id = output.id;
-  }
-
-  ynn_value& output = subgraph.value(*output_id);
+  ynn_type output_type = get_accumulator_type(op, a.type);
+  ynn_value& output = subgraph.get_output_value(output_id, output_type);
 
   auto split_factor = [&](size_t i) {
     return i < split_factors.size() ? split_factors[i] : slinky::expr{};
