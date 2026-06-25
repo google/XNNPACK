@@ -364,6 +364,29 @@ template <typename scalar, size_t N>
 void test_sqrt() {
   using vector = vec<scalar, N>;
 
+  std::pair<scalar, scalar> special_values[] = {
+      {static_cast<scalar>(0.0), 0.0},
+      {static_cast<scalar>(-0.0), 0.0},
+      {type_info<scalar>::infinity(), type_info<scalar>::infinity()},
+      {static_cast<scalar>(-1.0), type_info<scalar>::nan()},
+      {-type_info<scalar>::infinity(), type_info<scalar>::nan()},
+      {-type_info<scalar>::max(), type_info<scalar>::nan()},
+      {type_info<scalar>::nan(), type_info<scalar>::nan()},
+  };
+
+  for (const auto& [input, expected] : special_values) {
+    scalar a[vector::N];
+    std::fill_n(a, vector::N, input);
+
+    scalar result[vector::N];
+    store(result, sqrt(load(a, vector::N)));
+    if (ynn::isnan(expected)) {
+      ASSERT_TRUE(ynn::isnan(result[0])) << input;
+    } else {
+      ASSERT_EQ(result[0], expected) << input;
+    }
+  }
+
   ReplicableRandomDevice rng;
   for (auto _ : FuzzTest(std::chrono::milliseconds(100))) {
     scalar a[vector::N];
