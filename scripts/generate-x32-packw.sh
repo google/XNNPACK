@@ -106,6 +106,7 @@ tools/xngen src/x32-packw/avx512c2.c.in -D NR=32 -D PREFETCH=1 -D KBLOCK=4 -o sr
 ################################## Wasm SIMD ##################################
 ### NR multiple of 4
 tools/xngen src/x32-packw/wasmsimd.c.in -D NR=8 -D KBLOCK=4 -o src/x32-packw/gen/x32-packw-x8-gemm-goi-wasmsimd-u4.c &
+tools/xngen src/x32-packw/wasmsimd.c.in -D NR=16 -D KBLOCK=4 -o src/x32-packw/gen/x32-packw-x16-gemm-goi-wasmsimd-u4.c &
 
 ### SR 4
 tools/xngen src/x32-packw/s4-wasmsimd.c.in -D NR=8 -D KBLOCK=4 -o src/x32-packw/gen/x32-packw-x8s4-gemm-goi-wasmsimd-u4.c &
