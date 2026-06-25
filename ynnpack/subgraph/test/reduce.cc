@@ -34,6 +34,11 @@ using ynn::to_string;  // NOLINT(misc-unused-using-decls)
 
 namespace ynn {
 
+// We only test reduce up to this rank. The reduce implementation has no special
+// cases for more than one or two dimensions, so this should be plenty of
+// coverage.
+constexpr int max_test_rank = 5;
+
 template <typename T>
 std::function<T(T, T)> GetReferenceOp(ynn_reduce_operator op) {
   switch (op) {
@@ -115,7 +120,7 @@ void ReferenceImpl(ynn_reduce_operator op, const std::vector<int32_t>& axes,
 template <typename A, typename C>
 void TestReduce(A, C, ynn_reduce_operator op) {
   ReplicableRandomDevice rng;
-  std::uniform_int_distribution<size_t> rank_dist(1, YNN_MAX_TENSOR_RANK);
+  std::uniform_int_distribution<size_t> rank_dist(1, max_test_rank);
   std::bernoulli_distribution random_bool(0.5);
   std::bernoulli_distribution empty_shape_dist(0.01f);
 
@@ -306,7 +311,7 @@ INSTANTIATE_TEST_SUITE_P(
 template <typename T>
 void TestMinMax(T) {
   ReplicableRandomDevice rng;
-  std::uniform_int_distribution<size_t> rank_dist(1, YNN_MAX_TENSOR_RANK - 1);
+  std::uniform_int_distribution<size_t> rank_dist(1, max_test_rank - 1);
   std::bernoulli_distribution random_bool(0.5);
   std::bernoulli_distribution empty_shape_dist(0.01f);
 
@@ -462,7 +467,7 @@ void MaxAbsDiff(const std::vector<int32_t>& axes, const Tensor<T>& a,
 
 TEST(MaxAbsDiff, Test) {
   ReplicableRandomDevice rng;
-  std::uniform_int_distribution<size_t> rank_dist(1, YNN_MAX_TENSOR_RANK - 1);
+  std::uniform_int_distribution<size_t> rank_dist(1, max_test_rank - 1);
   std::bernoulli_distribution random_bool(0.5);
   std::bernoulli_distribution empty_shape_dist(0.01f);
 
