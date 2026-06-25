@@ -91,10 +91,6 @@ struct ynn_value {
   // The data we have for this value, if any.
   slinky::raw_buffer_ptr data;
 
-  // Tensor IDs for quantization data, if any.
-  uint32_t zero_point_id = YNN_INVALID_VALUE_ID;
-  uint32_t scale_id = YNN_INVALID_VALUE_ID;
-
   // The inferred shape of this value.
   // TODO: We need an absl::InlinedVector for things like this.
   std::vector<slinky::expr> extents;
@@ -664,22 +660,16 @@ struct ynn_subgraph : public ynn::ref_counted<ynn_subgraph> {
   ynn_value& get_output_value(uint32_t* output_id,
                               const ynn_value& template_value);
   ynn_value& get_output_value(uint32_t* output_id, ynn_type type);
-  ynn_value& get_output_value(uint32_t* output_id, ynn_type type,
-                              uint32_t zero_point_id, uint32_t scale_id);
 
   // Get a scalar value of the given type and quantization parameters.
-  uint32_t get_scalar_value_id(ynn_type type, uint32_t zero_point_id,
-                               uint32_t scale_id, float value_f32);
+  uint32_t get_scalar_value_id(ynn_type type, float value_f32);
   // Get a constant value of the given type and quantization parameters.
   uint32_t get_static_value_id(ynn_type type, size_t rank, const size_t* dims,
-                               uint32_t zero_point_id, uint32_t scale_id,
                                float* value_f32);
 
   template <typename T>
   uint32_t get_scalar_value_id(T value) {
-    return get_scalar_value_id(ynn::type_of<T>(),
-                               /*zero_point_id=*/YNN_INVALID_VALUE_ID,
-                               /*scale_id=*/YNN_INVALID_VALUE_ID, value);
+    return get_scalar_value_id(ynn::type_of<T>(), value);
   }
 
   void infer_elementwise_shape(ynn_node& node, int input_idx, int output_idx,

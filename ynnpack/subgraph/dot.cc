@@ -1288,9 +1288,9 @@ ynn_status define_split_f32_to_bf16(ynn_subgraph& subgraph, uint32_t input_id,
 
   // Specifying YNN_NODE_FLAG_NO_EXCESS_PRECISION ensures that this value will
   // not be optimized to be fp32 when it is used to compute the residual below.
-  ynn_status status = ynn_define_convert(
-      &subgraph, input_id, ynn_type_bf16, YNN_INVALID_VALUE_ID,
-      YNN_INVALID_VALUE_ID, bf16_id, flags | YNN_NODE_FLAG_NO_EXCESS_PRECISION);
+  ynn_status status = ynn_define_convert_v2(
+      &subgraph, input_id, ynn_type_bf16, bf16_id,
+      flags | YNN_NODE_FLAG_NO_EXCESS_PRECISION);
   if (status != ynn_status_success) return status;
 
   // Explicitly define the residual as type bf16 otherwise type fp32 will be
@@ -1383,9 +1383,8 @@ ynn_status ynn_define_dot(ynn_subgraph_t subgraph, size_t num_k_dims,
     const ynn_value& input_c = subgraph->value(input_c_id);
     if (input_c.type != c_type) {
       uint32_t input_c_converted_id = YNN_INVALID_VALUE_ID;
-      YNN_RETURN_IF_ERROR(ynn_define_convert(
-          subgraph, input_c_id, c_type, YNN_INVALID_VALUE_ID,
-          YNN_INVALID_VALUE_ID, &input_c_converted_id, flags));
+      YNN_RETURN_IF_ERROR(ynn_define_convert_v2(
+          subgraph, input_c_id, c_type, &input_c_converted_id, flags));
       input_c_id = input_c_converted_id;
     }
   }

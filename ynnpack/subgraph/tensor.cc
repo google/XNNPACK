@@ -96,8 +96,6 @@ ynn_status ynn_define_tensor(ynn_subgraph_t subgraph, enum ynn_type type,
   }
   value->type = type;
   value->flags = flags;
-  value->scale_id = YNN_INVALID_VALUE_ID;
-  value->zero_point_id = YNN_INVALID_VALUE_ID;
 
   *id_out = value->id;
   if (!(data || value->is_external())) {

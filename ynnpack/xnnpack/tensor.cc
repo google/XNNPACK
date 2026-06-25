@@ -90,8 +90,8 @@ xnn_status xnn_define_quantized_tensor_value(
     // below.
     status = value.set_external_shape(num_dims, dims);
   }
-  value.zero_point_id = zero_point_id;
-  value.scale_id = scale_id;
+  subgraph->zero_point_ids[*id_out] = zero_point_id;
+  subgraph->scale_ids[*id_out] = scale_id;
   return ynn::xnn_status_from_ynn(status);
 }
 
@@ -174,8 +174,8 @@ xnn_status xnn_define_channelwise_quantized_tensor_value_v3(
   if (status != ynn_status_success) {
     return ynn::xnn_status_from_ynn(status);
   }
-  subgraph->ynn->value(*id_out).scale_id = scale_id;
-  subgraph->ynn->value(*id_out).zero_point_id = zero_point_id;
+  subgraph->scale_ids[*id_out] = scale_id;
+  subgraph->zero_point_ids[*id_out] = zero_point_id;
   return xnn_status_success;
 }
 
@@ -248,8 +248,8 @@ xnn_status xnn_define_dynamically_quantized_tensor_value(
 
   // Store the number of non-batch dimensions where we can find it again.
   subgraph->num_nonbatch_axes[*id_out] = num_nonbatch_dims;
-  subgraph->ynn->value(*id_out).zero_point_id = zero_point_id;
-  subgraph->ynn->value(*id_out).scale_id = scale_id;
+  subgraph->zero_point_ids[*id_out] = zero_point_id;
+  subgraph->scale_ids[*id_out] = scale_id;
 
   return xnn_status_success;
 }

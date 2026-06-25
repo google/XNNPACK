@@ -331,8 +331,8 @@ void define_reduce(ynn_subgraph& subgraph, ynn_node& node,
       input_b_id = YNN_INVALID_VALUE_ID;
     } else if (b.type != output.type) {
       input_b_id = YNN_INVALID_VALUE_ID;
-      ynn_define_convert(&subgraph, b.id, output.type, output.zero_point_id,
-                         output.scale_id, &input_b_id, /*flags=*/0);
+      ynn_define_convert_v2(&subgraph, b.id, output.type, &input_b_id,
+                            /*flags=*/0);
     }
   }
 

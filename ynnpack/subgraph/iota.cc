@@ -96,8 +96,7 @@ ynn_status ynn_define_iota(ynn_subgraph_t subgraph, ynn_type type, size_t rank,
 
   uint32_t scalar_zero_id = YNN_INVALID_VALUE_ID;
   if (begin_id == YNN_INVALID_VALUE_ID || stride_id == YNN_INVALID_VALUE_ID) {
-    scalar_zero_id = subgraph->get_scalar_value_id(type, YNN_INVALID_VALUE_ID,
-                                                   YNN_INVALID_VALUE_ID, 0.0f);
+    scalar_zero_id = subgraph->get_scalar_value_id(type, 0.0f);
     if (begin_id == YNN_INVALID_VALUE_ID) begin_id = scalar_zero_id;
     if (stride_id == YNN_INVALID_VALUE_ID) stride_id = scalar_zero_id;
   }

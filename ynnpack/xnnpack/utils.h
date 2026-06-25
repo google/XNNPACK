@@ -86,6 +86,9 @@ bool is_value_quantized(xnn_subgraph_t subgraph, uint32_t id);
 uint32_t get_zero_point_id(xnn_subgraph_t subgraph, uint32_t id);
 uint32_t get_scale_id(xnn_subgraph_t subgraph, uint32_t id);
 
+void copy_quantization(xnn_subgraph_t subgraph, uint32_t from_id,
+                       uint32_t to_id);
+
 }  // namespace ynn
 
 #endif  // XNNPACK_YNNPACK_XNNPACK_UTILS_H_

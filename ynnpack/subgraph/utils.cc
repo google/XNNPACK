@@ -62,14 +62,6 @@ slinky::ref_count<ynn_subgraph> clone_subgraph_subset(
   while (head < values_to_traverse.size()) {
     uint32_t curr_id = values_to_traverse[head++];
 
-    const ynn_value& val = subgraph.value(curr_id);
-    if (val.scale_id != YNN_INVALID_VALUE_ID) {
-      add_value_for_traversal(val.scale_id);
-    }
-    if (val.zero_point_id != YNN_INVALID_VALUE_ID) {
-      add_value_for_traversal(val.zero_point_id);
-    }
-
     if (curr_id == input_id) {
       continue;
     }
@@ -147,15 +139,6 @@ slinky::ref_count<ynn_subgraph> clone_subgraph_subset(
   // Clone values in topological order.
   for (uint32_t old_id : relevant_values) {
     clone_or_get_new_value(old_id);
-  }
-
-  // Now fix up quantization links.
-  for (uint32_t old_id : relevant_values) {
-    uint32_t new_id = old_to_new_id[old_id];
-    const ynn_value& old_val = subgraph.value(old_id);
-    ynn_value& new_val = new_subgraph->value(new_id);
-    new_val.scale_id = clone_or_get_new_value(old_val.scale_id);
-    new_val.zero_point_id = clone_or_get_new_value(old_val.zero_point_id);
   }
 
   // Clone nodes in topological order.

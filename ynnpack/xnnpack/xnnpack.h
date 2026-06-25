@@ -22,6 +22,10 @@ struct xnn_subgraph {
   // When implementing `xnn_define_dynamically_quantized_tensor_value`, we don't
   // have anywhere to put this, so store it here.
   std::map<uint32_t, size_t> num_nonbatch_axes;
+
+  // Quantization data for each tensor in the XNNPACK subgraph.
+  std::map<uint32_t, uint32_t> scale_ids;
+  std::map<uint32_t, uint32_t> zero_point_ids;
 };
 
 typedef struct xnn_subgraph* xnn_subgraph_t;

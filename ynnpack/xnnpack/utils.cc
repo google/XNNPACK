@@ -31,9 +31,14 @@ ynn_status define_tensor_value_like(xnn_subgraph_t subgraph, uint32_t type_id,
     return status;
   }
 
-  ynn_value& value = subgraph->ynn->value(*id_out);
-  value.zero_point_id = get_zero_point_id(subgraph, type_id);
-  value.scale_id = get_scale_id(subgraph, type_id);
+  uint32_t zp_id = get_zero_point_id(subgraph, type_id);
+  if (zp_id != YNN_INVALID_VALUE_ID) {
+    subgraph->zero_point_ids[*id_out] = zp_id;
+  }
+  uint32_t scale_id = get_scale_id(subgraph, type_id);
+  if (scale_id != YNN_INVALID_VALUE_ID) {
+    subgraph->scale_ids[*id_out] = scale_id;
+  }
   return ynn_status_success;
 }
 
@@ -47,10 +52,30 @@ ynn_status define_scalar_value_like(xnn_subgraph_t subgraph, uint32_t id,
                                     float value_fp32, uint32_t* id_out) {
   assert(*id_out == YNN_INVALID_VALUE_ID);
   const ynn_value& id_value = subgraph->ynn->value(id);
-  *id_out = subgraph->ynn->get_scalar_value_id(
-      id_value.type, get_zero_point_id(subgraph, id),
-      get_scale_id(subgraph, id), value_fp32);
-  return ynn_status_success;
+  if (is_value_quantized(subgraph, id)) {
+    // Quantized scalar: define as float and then quantize.
+    uint32_t float_scalar_id =
+        subgraph->ynn->get_scalar_value_id(ynn_type_fp32, value_fp32);
+    ynn_status status =
+        ynn_define_quantize(subgraph->ynn, float_scalar_id, id_value.type,
+                            get_zero_point_id(subgraph, id),
+                            get_scale_id(subgraph, id), id_out, /*flags=*/0);
+    if (status != ynn_status_success) return status;
+    // Register the new quantized scalar in the maps
+    subgraph->zero_point_ids[*id_out] = get_zero_point_id(subgraph, id);
+    subgraph->scale_ids[*id_out] = get_scale_id(subgraph, id);
+    return ynn_status_success;
+  } else {
+    // Non-quantized scalar:
+    if (id_value.type == ynn_type_int32) {
+      int32_t val = static_cast<int32_t>(value_fp32);
+      return ynn_define_tensor(subgraph->ynn, ynn_type_int32, 0, nullptr, &val,
+                               YNN_VALUE_FLAG_COPY_DATA, id_out);
+    } else {
+      *id_out = subgraph->ynn->get_scalar_value_id(id_value.type, value_fp32);
+      return ynn_status_success;
+    }
+  }
 }
 
 namespace {
@@ -88,10 +113,11 @@ ynn_status convert_to(xnn_subgraph_t subgraph, uint32_t* value_id,
   }
 
   uint32_t converted_id = YNN_INVALID_VALUE_ID;
-  ynn_status status = ynn_define_convert(
-      subgraph->ynn, *value_id, type, /*zero_point_id=*/YNN_INVALID_VALUE_ID,
-      /*scale_id=*/YNN_INVALID_VALUE_ID, &converted_id, /*lags=*/0);
-  *value_id = converted_id;
+  ynn_status status = ynn_define_convert_v2(
+      subgraph->ynn, *value_id, type, &converted_id, /*flags=*/0);
+  if (status == ynn_status_success) {
+    *value_id = converted_id;
+  }
   return status;
 }
 
@@ -156,12 +182,27 @@ ynn_status define_convert_uint8_to_int8(xnn_subgraph_t subgraph,
     zero_point_id = subgraph->ynn->get_scalar_value_id<int32_t>(-128);
   }
 
+  // Explicit requantization:
+  // 1. Dequantize uint8 to float
+  uint32_t float_id = YNN_INVALID_VALUE_ID;
+  status = ynn_define_dequantize(
+      subgraph->ynn, *input_id, get_zero_point_id(subgraph, *input_id),
+      get_scale_id(subgraph, *input_id), ynn_type_fp32, &float_id, /*flags=*/0);
+  if (status != ynn_status_success) return status;
+
+  // 2. Quantize float to int8
   uint32_t input_int8_id = YNN_INVALID_VALUE_ID;
-  status = ynn_define_convert(subgraph->ynn, *input_id, ynn_type_int8,
-                              zero_point_id, get_scale_id(subgraph, *input_id),
-                              &input_int8_id, /*flags=*/0);
+  status = ynn_define_quantize(subgraph->ynn, float_id, ynn_type_int8,
+                               zero_point_id, get_scale_id(subgraph, *input_id),
+                               &input_int8_id, /*flags=*/0);
+  if (status != ynn_status_success) return status;
+
+  // 3. Register the new int8 tensor in the shim's maps
+  subgraph->zero_point_ids[input_int8_id] = zero_point_id;
+  subgraph->scale_ids[input_int8_id] = get_scale_id(subgraph, *input_id);
+
   *input_id = input_int8_id;
-  return status;
+  return ynn_status_success;
 }
 
 }  // namespace
@@ -227,7 +268,7 @@ ynn_status define_xnn_dot_quantized(xnn_subgraph_t subgraph, size_t num_k_dims,
                                /*dims=*/nullptr, /*data=*/nullptr,
                                /*flags=*/0, &accumulator_id);
     if (status != ynn_status_success) return status;
-    subgraph->ynn->value(accumulator_id).scale_id = dot_scale_id;
+    subgraph->scale_ids[accumulator_id] = dot_scale_id;
   }
 
   uint32_t dot_init_id =
@@ -248,9 +289,11 @@ ynn_status define_xnn_dot_quantized(xnn_subgraph_t subgraph, size_t num_k_dims,
     // accumulator_id.
     if (type_is_integral(type_of_value(subgraph, accumulator_id))) {
       uint32_t float_val_id = YNN_INVALID_VALUE_ID;
-      status = ynn_define_dequantize(subgraph->ynn, accumulator_id,
-                                     YNN_INVALID_VALUE_ID, YNN_INVALID_VALUE_ID,
-                                     ynn_type_fp32, &float_val_id, /*flags=*/0);
+      status =
+          ynn_define_dequantize(subgraph->ynn, accumulator_id,
+                                get_zero_point_id(subgraph, accumulator_id),
+                                get_scale_id(subgraph, accumulator_id),
+                                ynn_type_fp32, &float_val_id, /*flags=*/0);
       if (status != ynn_status_success) return status;
 
       dot_result_as_float_id = float_val_id;
@@ -281,8 +324,21 @@ ynn_status define_xnn_dot_quantized(xnn_subgraph_t subgraph, size_t num_k_dims,
 
     if (bias_id != YNN_INVALID_VALUE_ID) {
       // Ensure bias is also fp32 for the addition.
-      status = convert_to(subgraph, &bias_id, ynn_type_fp32);
-      if (status != ynn_status_success) return status;
+      if (type_is_integral(type_of_value(subgraph, bias_id)) &&
+          (get_scale_id(subgraph, bias_id) != YNN_INVALID_VALUE_ID ||
+           get_zero_point_id(subgraph, bias_id) != YNN_INVALID_VALUE_ID)) {
+        uint32_t dequantized_bias_id = YNN_INVALID_VALUE_ID;
+        status = ynn_define_dequantize(
+            subgraph->ynn, bias_id,
+            get_zero_point_id(subgraph, bias_id),
+            get_scale_id(subgraph, bias_id),
+            ynn_type_fp32, &dequantized_bias_id, /*flags=*/0);
+        if (status != ynn_status_success) return status;
+        bias_id = dequantized_bias_id;
+      } else {
+        status = convert_to(subgraph, &bias_id, ynn_type_fp32);
+        if (status != ynn_status_success) return status;
+      }
 
       // If the output is fp32, we can compute the add directly into the output.
       // Otherwise, compute into an intermediate, and convert after.
@@ -296,20 +352,33 @@ ynn_status define_xnn_dot_quantized(xnn_subgraph_t subgraph, size_t num_k_dims,
       if (status != ynn_status_success) return status;
 
       if (output_unconverted_id != output_id) {
-        status =
-            ynn_define_unary(subgraph->ynn, ynn_unary_convert,
-                             output_unconverted_id, &output_id, /*flags=*/0);
+        status = ynn_define_quantize(subgraph->ynn, output_unconverted_id,
+                                     type_of_value(subgraph, output_id),
+                                     get_zero_point_id(subgraph, output_id),
+                                     get_scale_id(subgraph, output_id),
+                                     &output_id, /*flags=*/0);
         if (status != ynn_status_success) return status;
       }
     } else if (dot_result_as_float_id != output_id) {
-      status =
-          ynn_define_unary(subgraph->ynn, ynn_unary_convert,
-                           dot_result_as_float_id, &output_id, /*flags=*/0);
+      status = ynn_define_quantize(subgraph->ynn, dot_result_as_float_id,
+                                   type_of_value(subgraph, output_id),
+                                   get_zero_point_id(subgraph, output_id),
+                                   get_scale_id(subgraph, output_id),
+                                   &output_id, /*flags=*/0);
       if (status != ynn_status_success) return status;
     }
   } else if (accumulator_id != output_id) {
-    status = ynn_define_unary(subgraph->ynn, ynn_unary_convert, accumulator_id,
-                              &output_id, /*flags=*/0);
+    uint32_t float_val_id = YNN_INVALID_VALUE_ID;
+    status = ynn_define_dequantize(subgraph->ynn, accumulator_id,
+                                   get_zero_point_id(subgraph, accumulator_id),
+                                   get_scale_id(subgraph, accumulator_id),
+                                   ynn_type_fp32, &float_val_id, /*flags=*/0);
+    if (status != ynn_status_success) return status;
+
+    status = ynn_define_quantize(
+        subgraph->ynn, float_val_id, type_of_value(subgraph, output_id),
+        get_zero_point_id(subgraph, output_id),
+        get_scale_id(subgraph, output_id), &output_id, /*flags=*/0);
     if (status != ynn_status_success) return status;
   }
 
@@ -386,6 +455,9 @@ ynn_status implement_xnn_broadcasting(xnn_subgraph_t subgraph,
     if (status != ynn_status_success) {
       return status;
     }
+    if (input_a_broadcasted_id != *input_a_id) {
+      copy_quantization(subgraph, *input_a_id, input_a_broadcasted_id);
+    }
   }
 
   uint32_t input_b_broadcasted_id = *input_b_id;
@@ -397,6 +469,9 @@ ynn_status implement_xnn_broadcasting(xnn_subgraph_t subgraph,
         &input_b_broadcasted_id, /*flags=*/0);
     if (status != ynn_status_success) {
       return status;
+    }
+    if (input_b_broadcasted_id != *input_b_id) {
+      copy_quantization(subgraph, *input_b_id, input_b_broadcasted_id);
     }
   }
 
@@ -422,38 +497,64 @@ ynn_status define_clamp(xnn_subgraph_t subgraph, float min, float max,
                         uint32_t input_id, uint32_t* output_id) {
   ynn_status status;
 
-  uint32_t zp_id = get_zero_point_id(subgraph, input_id);
-  uint32_t scale_id = get_scale_id(subgraph, input_id);
-  ynn_type type = subgraph->ynn->value(input_id).type;
+  const bool is_quantized = is_value_quantized(subgraph, input_id);
+
+  uint32_t input_float_id = input_id;
+  if (is_quantized) {
+    input_float_id = YNN_INVALID_VALUE_ID;
+    status = ynn_define_dequantize(
+        subgraph->ynn, input_id, get_zero_point_id(subgraph, input_id),
+        get_scale_id(subgraph, input_id), ynn_type_fp32, &input_float_id,
+        /*flags=*/0);
+    if (status != ynn_status_success) return status;
+  }
+
+  ynn_type type = subgraph->ynn->value(input_float_id).type;
 
   uint32_t min_id = YNN_INVALID_VALUE_ID;
-  status = define_scalar_value_like(subgraph, input_id, min, &min_id);
-  if (status != ynn_status_success) {
-    return status;
-  }
-
   uint32_t max_id = YNN_INVALID_VALUE_ID;
-  status = define_scalar_value_like(subgraph, input_id, max, &max_id);
-  if (status != ynn_status_success) {
-    return status;
+
+  if (type == ynn_type_int32) {
+    int32_t min_val = static_cast<int32_t>(min);
+    status = ynn_define_tensor(subgraph->ynn, ynn_type_int32, 0, nullptr,
+                               &min_val, YNN_VALUE_FLAG_COPY_DATA, &min_id);
+    if (status != ynn_status_success) return status;
+
+    int32_t max_val = static_cast<int32_t>(max);
+    status = ynn_define_tensor(subgraph->ynn, ynn_type_int32, 0, nullptr,
+                               &max_val, YNN_VALUE_FLAG_COPY_DATA, &max_id);
+    if (status != ynn_status_success) return status;
+  } else {
+    min_id = subgraph->ynn->get_scalar_value_id(ynn_type_fp32, min);
+    max_id = subgraph->ynn->get_scalar_value_id(ynn_type_fp32, max);
   }
 
-  uint32_t maxed_id = YNN_INVALID_VALUE_ID;
-  if (zp_id != YNN_INVALID_VALUE_ID || scale_id != YNN_INVALID_VALUE_ID) {
-    subgraph->ynn->get_output_value(&maxed_id, type, zp_id, scale_id);
+  // Do max/min.
+  uint32_t maxed_float_id = YNN_INVALID_VALUE_ID;
+  status = ynn_define_binary(subgraph->ynn, ynn_binary_max, input_float_id,
+                             min_id, &maxed_float_id, /*flags=*/0);
+  if (status != ynn_status_success) return status;
+
+  uint32_t clamped_float_id = *output_id;
+  if (is_quantized) {
+    clamped_float_id = YNN_INVALID_VALUE_ID;
   }
-  status = ynn_define_binary(subgraph->ynn, ynn_binary_max, input_id, min_id,
-                             &maxed_id, /*flags=*/0);
-  if (status != ynn_status_success) {
-    return status;
+  status = ynn_define_binary(subgraph->ynn, ynn_binary_min, maxed_float_id,
+                             max_id, &clamped_float_id, /*flags=*/0);
+  if (status != ynn_status_success) return status;
+
+  if (is_quantized) {
+    // Quantize back to output.
+    status = ynn_define_quantize(
+        subgraph->ynn, clamped_float_id, type_of_value(subgraph, *output_id),
+        get_zero_point_id(subgraph, *output_id),
+        get_scale_id(subgraph, *output_id), output_id, /*flags=*/0);
+    if (status != ynn_status_success) return status;
+  } else {
+    *output_id = clamped_float_id;
   }
 
-  if (*output_id == YNN_INVALID_VALUE_ID &&
-      (zp_id != YNN_INVALID_VALUE_ID || scale_id != YNN_INVALID_VALUE_ID)) {
-    subgraph->ynn->get_output_value(output_id, type, zp_id, scale_id);
-  }
-  return ynn_define_binary(subgraph->ynn, ynn_binary_min, maxed_id, max_id,
-                           output_id, /*flags=*/0);
+  return ynn_status_success;
 }
 
 ynn_status implement_clamp(xnn_subgraph_t subgraph, float min, float max,
@@ -528,6 +629,7 @@ ynn_status define_xnn_stencil(
     uint32_t pooling_width, uint32_t stride_height, uint32_t stride_width,
     uint32_t dilation_height, uint32_t dilation_width, uint32_t input_id,
     uint32_t* stencil_id, uint32_t flags) {
+  uint32_t original_input_id = input_id;
   bool same_padding = false;
   if (flags & XNN_FLAG_TENSORFLOW_SAME_PADDING) {
     if (compute_same_padding(pooling_width, stride_width, dilation_width,
@@ -549,7 +651,6 @@ ynn_status define_xnn_stencil(
       input_padding_left || same_padding) {
     // The padding should just be the zero point of the input, converted to the
     // same type as the input.
-    const ynn_value& input = subgraph->ynn->value(input_id);
     if (get_zero_point_id(subgraph, input_id) == YNN_INVALID_VALUE_ID) {
       ynn_status status = define_scalar_value_like(subgraph, input_id,
                                                    padding_value, &padding_id);
@@ -559,18 +660,20 @@ ynn_status define_xnn_stencil(
     } else {
       assert(padding_value == 0.0f);
 
-      padding_id = subgraph->ynn->get_scalar_value_id(
-          input.type, get_zero_point_id(subgraph, input_id),
-          get_scale_id(subgraph, input_id), 0.0f);
+      ynn_status status =
+          define_scalar_value_like(subgraph, input_id, 0.0f, &padding_id);
+      if (status != ynn_status_success) {
+        return status;
+      }
 
       // Assume this is a dynamically quantized convolution, and broadcast
       // the non-batch dimensions.
       uint32_t padding_broadcast_id = YNN_INVALID_VALUE_ID;
       const int32_t nonbatch_axes[YNN_MAX_TENSOR_RANK] = {-1, -2, -3, -4,
                                                           -5, -6, -7, -8};
-      ynn_status status = ynn_define_broadcast(
-          subgraph->ynn, /*num_axes=*/input_rank - 1, nonbatch_axes, padding_id,
-          &padding_broadcast_id, /*flags=*/0);
+      status = ynn_define_broadcast(subgraph->ynn, /*num_axes=*/input_rank - 1,
+                                    nonbatch_axes, padding_id,
+                                    &padding_broadcast_id, /*flags=*/0);
 
       if (status != ynn_status_success) {
         return status;
@@ -603,10 +706,14 @@ ynn_status define_xnn_stencil(
   const size_t stencil_strides[] = {stride_height, stride_width};
   const size_t stencil_dilations[] = {dilation_height, dilation_width};
 
-  return ynn_define_stencil_copy(subgraph->ynn, /*num_stencils=*/2,
-                                 stencil_axes, new_axes, stencil_dims,
-                                 stencil_strides, stencil_dilations, input_id,
-                                 padding_id, stencil_id, /*flags=*/0);
+  ynn_status status = ynn_define_stencil_copy(
+      subgraph->ynn, /*num_stencils=*/2, stencil_axes, new_axes, stencil_dims,
+      stencil_strides, stencil_dilations, input_id, padding_id, stencil_id,
+      /*flags=*/0);
+  if (status == ynn_status_success) {
+    copy_quantization(subgraph, original_input_id, *stencil_id);
+  }
+  return status;
 }
 
 ynn_type type_of_value(xnn_subgraph_t subgraph, uint32_t id) {
@@ -618,16 +725,34 @@ size_t rank_of_value(xnn_subgraph_t subgraph, uint32_t id) {
 }
 
 bool is_value_quantized(xnn_subgraph_t subgraph, uint32_t id) {
-  const ynn_value& value = subgraph->ynn->value(id);
-  return value.type == ynn_type_int8 || value.type == ynn_type_uint8;
+  return subgraph->scale_ids.count(id) > 0 ||
+         subgraph->zero_point_ids.count(id) > 0;
 }
 
 uint32_t get_zero_point_id(xnn_subgraph_t subgraph, uint32_t id) {
-  return subgraph->ynn->value(id).zero_point_id;
+  auto it = subgraph->zero_point_ids.find(id);
+  if (it != subgraph->zero_point_ids.end()) {
+    return it->second;
+  }
+  return YNN_INVALID_VALUE_ID;
 }
 
 uint32_t get_scale_id(xnn_subgraph_t subgraph, uint32_t id) {
-  return subgraph->ynn->value(id).scale_id;
+  auto it = subgraph->scale_ids.find(id);
+  if (it != subgraph->scale_ids.end()) {
+    return it->second;
+  }
+  return YNN_INVALID_VALUE_ID;
+}
+
+void copy_quantization(xnn_subgraph_t subgraph, uint32_t from_id,
+                       uint32_t to_id) {
+  if (subgraph->zero_point_ids.count(from_id)) {
+    subgraph->zero_point_ids[to_id] = subgraph->zero_point_ids[from_id];
+  }
+  if (subgraph->scale_ids.count(from_id)) {
+    subgraph->scale_ids[to_id] = subgraph->scale_ids[from_id];
+  }
 }
 
 uint32_t value_flags_from_xnn(uint32_t flags) {

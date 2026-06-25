@@ -303,14 +303,6 @@ bool rewrite_binary_convert(ynn_subgraph& subgraph, ynn_node& node,
       subgraph.value(is_convert[1] ? producers[1]->inputs[0] : node.inputs[1]);
   const ynn_value& output = subgraph.value(node.outputs[0]);
 
-  // Check if either input is quantized.
-  if (a.scale_id != YNN_INVALID_VALUE_ID ||
-      a.zero_point_id != YNN_INVALID_VALUE_ID ||
-      b.scale_id != YNN_INVALID_VALUE_ID ||
-      b.zero_point_id != YNN_INVALID_VALUE_ID) {
-    return false;
-  }
-
   // If it's a square, we must rewrite both or neither to keep it a square.
   if (node.inputs[0] == node.inputs[1] && is_convert[0]) {
     ynn::binary_kernel_fn kernel =
@@ -418,8 +410,7 @@ bool rewrite_negate_multiply(ynn_subgraph& subgraph, ynn_node& node,
     const ynn_value& b = subgraph.value(producer->inputs[0]);
     const ynn_value& c = subgraph.value(producer->inputs[1]);
     const ynn_value& x = subgraph.value(node.outputs[0]);
-    uint32_t a_id = subgraph.get_scalar_value_id(x.type, YNN_INVALID_VALUE_ID,
-                                                 YNN_INVALID_VALUE_ID, 0.0f);
+    uint32_t a_id = subgraph.get_scalar_value_id(x.type, 0.0f);
     const ynn_value& a = subgraph.value(a_id);
 
     const ynn::ternary_kernel_fn kernel = ynn::get_ternary_kernel(
@@ -564,8 +555,6 @@ bool move_broadcast_to_output(ynn_subgraph& subgraph, ynn_node& broadcast,
   ynn_value& broadcast_output = subgraph.value(broadcast.outputs[0]);
   const ynn_value& consumer_output = subgraph.value(consumer->outputs[0]);
   broadcast_output.type = consumer_output.type;
-  broadcast_output.zero_point_id = consumer_output.zero_point_id;
-  broadcast_output.scale_id = consumer_output.scale_id;
   broadcast_output.extents = input.extents;
 
   broadcast.inputs[0] = broadcast.outputs[0];
@@ -1015,12 +1004,6 @@ bool rewrite_reduce_convert(ynn_subgraph& subgraph, ynn_node& node,
   }
 
   const ynn_value& x = subgraph.value(convert->inputs[0]);
-  const ynn_value& converted_x = subgraph.value(convert->outputs[0]);
-  if (x.scale_id != converted_x.scale_id ||
-      x.zero_point_id != converted_x.zero_point_id) {
-    // Don't rewrite quantization changes.
-    return false;
-  }
 
   const ynn_value& output = subgraph.value(node.outputs[0]);
   reduce_kernel kernel = get_reduce_kernel(reduce_op->op, x.type, output.type);
@@ -1181,8 +1164,7 @@ bool rewrite_dequantize_dot(ynn_subgraph& subgraph, ynn_node& node,
                      "c, d) to dequantize_dot";
 
   const ynn_value& output = subgraph.value(node.outputs[0]);
-  uint32_t offset_id = subgraph.get_scalar_value_id(
-      output.type, YNN_INVALID_VALUE_ID, YNN_INVALID_VALUE_ID, 0.0f);
+  uint32_t offset_id = subgraph.get_scalar_value_id(output.type, 0.0f);
 
   uint32_t input1_id = dot_node->inputs[1];
   dot_node->inputs[2] = YNN_INVALID_VALUE_ID;

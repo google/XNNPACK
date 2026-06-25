@@ -261,6 +261,7 @@ xnn_status xnn_define_convolution_2d(
     if (status != ynn_status_success) {
       return ynn::xnn_status_from_ynn(status);
     }
+    ynn::copy_quantization(subgraph, input_id, split_id);
     input_id = split_id;
 
     // [co, kh, kw, ci] -> [g, co/g, kh, kw, ci].
@@ -271,6 +272,7 @@ xnn_status xnn_define_convolution_2d(
     if (status != ynn_status_success) {
       return ynn::xnn_status_from_ynn(status);
     }
+    ynn::copy_quantization(subgraph, filter_id, split_id);
     filter_id = split_id;
 
     uint32_t filter_scale_id = ynn::get_scale_id(subgraph, filter_id);
@@ -289,7 +291,7 @@ xnn_status xnn_define_convolution_2d(
       if (status != ynn_status_success) {
         return ynn::xnn_status_from_ynn(status);
       }
-      subgraph->ynn->value(filter_id).scale_id = split_id;
+      subgraph->scale_ids[filter_id] = split_id;
     }
 
     split_id = YNN_INVALID_VALUE_ID;
@@ -301,6 +303,7 @@ xnn_status xnn_define_convolution_2d(
       if (status != ynn_status_success) {
         return ynn::xnn_status_from_ynn(status);
       }
+      ynn::copy_quantization(subgraph, bias_id, split_id);
       bias_id = split_id;
     }
 
@@ -329,8 +332,8 @@ xnn_status xnn_define_convolution_2d(
         return ynn::xnn_status_from_ynn(status);
       }
 
-      subgraph->ynn->value(input_id).zero_point_id = zero_point_id;
-      subgraph->ynn->value(input_id).scale_id = scale_id;
+      subgraph->zero_point_ids[input_id] = zero_point_id;
+      subgraph->scale_ids[input_id] = scale_id;
     }
 
     // [n, h, w, kh, kw, g, 1, ci/g] -> [n, h, w, g, 1, kh, kw, ci/g]
@@ -341,6 +344,7 @@ xnn_status xnn_define_convolution_2d(
     if (status != ynn_status_success) {
       return ynn::xnn_status_from_ynn(status);
     }
+    ynn::copy_quantization(subgraph, input_id, transposed_input_id);
     input_id = transposed_input_id;
   }
 
@@ -371,6 +375,7 @@ xnn_status xnn_define_convolution_2d(
   if (status != ynn_status_success) {
     return ynn::xnn_status_from_ynn(status);
   }
+  ynn::copy_quantization(subgraph, filter_id, transposed_filter_id);
 
   uint32_t output_unfused_id = groups != 1 ? YNN_INVALID_VALUE_ID : output_id;
 
@@ -444,6 +449,7 @@ xnn_status xnn_define_depthwise_convolution_2d(
   if (status != ynn_status_success) {
     return ynn::xnn_status_from_ynn(status);
   }
+  ynn::copy_quantization(subgraph, filter_id, transposed_filter_id);
 
   uint32_t old_scale_id = ynn::get_scale_id(subgraph, transposed_filter_id);
 
@@ -463,7 +469,7 @@ xnn_status xnn_define_depthwise_convolution_2d(
       return ynn::xnn_status_from_ynn(status);
     }
 
-    subgraph->ynn->value(transposed_filter_id).scale_id = new_scale_id;
+    subgraph->scale_ids[transposed_filter_id] = new_scale_id;
   }
 
   return xnn_define_convolution_2d(
@@ -493,6 +499,7 @@ xnn_status xnn_define_space_to_depth_2d(xnn_subgraph_t subgraph,
   if (status != ynn_status_success) {
     return ynn::xnn_status_from_ynn(status);
   }
+  ynn::copy_quantization(subgraph, input_id, tiled_id);
 
   // Fuse [n, y, x, dy, dx, c] -> [n, y, x, dy_dx_c]
   return ynn::xnn_status_from_ynn(ynn_define_fuse_dim(
@@ -512,6 +519,7 @@ xnn_status xnn_define_depth_to_space_2d(xnn_subgraph_t subgraph,
   if (status != ynn_status_success) {
     return ynn::xnn_status_from_ynn(status);
   }
+  ynn::copy_quantization(subgraph, input_id, transposed_id);
 
   // Transpose [n, y, x, dy, dx, c] -> [n, y, dy, x, dx, c]
   uint32_t tiled_id = YNN_INVALID_VALUE_ID;
@@ -521,6 +529,7 @@ xnn_status xnn_define_depth_to_space_2d(xnn_subgraph_t subgraph,
   if (status != ynn_status_success) {
     return ynn::xnn_status_from_ynn(status);
   }
+  ynn::copy_quantization(subgraph, transposed_id, tiled_id);
 
   // Fuse [n, y, dy, x, dx, c] -> [n, y_dy, x_dx, c]
   const int32_t fuse_axes[] = {1, 3};
@@ -694,13 +703,12 @@ xnn_status xnn_define_fully_connected(xnn_subgraph_t subgraph, float output_min,
     assert(!(flags & XNN_FLAG_TRANSPOSE_WEIGHTS));
     uint32_t unpacked_id = YNN_INVALID_VALUE_ID;
     ynn_status status =
-        ynn_define_convert(subgraph->ynn, filter_id, ynn_type_int8,
-                           ynn::get_zero_point_id(subgraph, filter_id),
-                           ynn::get_scale_id(subgraph, filter_id), &unpacked_id,
-                           /*flags=*/0);
+        ynn_define_convert_v2(subgraph->ynn, filter_id, ynn_type_int8,
+                              &unpacked_id, /*flags=*/0);
     if (status != ynn_status_success) {
       return ynn::xnn_status_from_ynn(status);
     }
+    ynn::copy_quantization(subgraph, filter_id, unpacked_id);
 
     filter_id = unpacked_id;
   }
@@ -716,6 +724,7 @@ xnn_status xnn_define_fully_connected(xnn_subgraph_t subgraph, float output_min,
     if (status != ynn_status_success) {
       return ynn::xnn_status_from_ynn(status);
     }
+    ynn::copy_quantization(subgraph, filter_id, filter_id_transposed);
     filter_id = filter_id_transposed;
   }
 
@@ -806,11 +815,50 @@ xnn_status xnn_define_binary(xnn_subgraph_t subgraph, xnn_binary_operator type,
   if (status != ynn_status_success) {
     return ynn::xnn_status_from_ynn(status);
   }
+
+  uint32_t input1_float_id = input1_id;
+  if (ynn::is_value_quantized(subgraph, input1_id)) {
+    input1_float_id = YNN_INVALID_VALUE_ID;
+    status = ynn_define_dequantize(
+        subgraph->ynn, input1_id, ynn::get_zero_point_id(subgraph, input1_id),
+        ynn::get_scale_id(subgraph, input1_id), ynn_type_fp32, &input1_float_id,
+        /*flags=*/0);
+    if (status != ynn_status_success) return ynn::xnn_status_from_ynn(status);
+  }
+
+  uint32_t input2_float_id = input2_id;
+  if (ynn::is_value_quantized(subgraph, input2_id)) {
+    input2_float_id = YNN_INVALID_VALUE_ID;
+    status = ynn_define_dequantize(
+        subgraph->ynn, input2_id, ynn::get_zero_point_id(subgraph, input2_id),
+        ynn::get_scale_id(subgraph, input2_id), ynn_type_fp32, &input2_float_id,
+        /*flags=*/0);
+    if (status != ynn_status_success) return ynn::xnn_status_from_ynn(status);
+  }
+
+  uint32_t output_float_id = output_id;
+  if (ynn::is_value_quantized(subgraph, output_id)) {
+    output_float_id = YNN_INVALID_VALUE_ID;
+  }
+
   status = ynn_define_binary(subgraph->ynn, ynn::binary_operator_from_xnn(type),
-                             input1_id, input2_id, &output_id, flags);
+                             input1_float_id, input2_float_id, &output_float_id,
+                             flags);
   if (status != ynn_status_success) {
     return ynn::xnn_status_from_ynn(status);
   }
+
+  if (output_id != output_float_id) {
+    status = ynn_define_quantize(
+        subgraph->ynn, output_float_id, ynn::type_of_value(subgraph, output_id),
+        ynn::get_zero_point_id(subgraph, output_id),
+        ynn::get_scale_id(subgraph, output_id), &output_id,
+        /*flags=*/0);
+    if (status != ynn_status_success) {
+      return ynn::xnn_status_from_ynn(status);
+    }
+  }
+
   if (params) {
     return ynn::xnn_status_from_ynn(ynn::implement_clamp(
         subgraph, params->output_min, params->output_max, output_id));
@@ -1180,6 +1228,7 @@ xnn_status xnn_define_batch_matrix_multiply(xnn_subgraph_t subgraph,
     if (status != ynn_status_success) {
       return ynn::xnn_status_from_ynn(status);
     }
+    ynn::copy_quantization(subgraph, input2_id, input2_id_transposed);
     input2_id = input2_id_transposed;
   }
 
