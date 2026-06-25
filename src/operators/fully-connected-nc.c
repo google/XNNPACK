@@ -6,6 +6,9 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+#if !defined(_GNU_SOURCE)
+#define _GNU_SOURCE
+#endif
 #include <assert.h>
 #include <float.h>
 #include <inttypes.h>
@@ -1917,6 +1920,8 @@ enum xnn_status xnn_create_fully_connected_nc_qd8_f16_qb4w_f16_scales(
       input_channels, output_channels, input_stride, output_stride, block_size,
       kernel_zero_point, (const uint16_t*)bf16_scale_buffer, kernel, bias,
       output_min, output_max, flags, weights_cache, fully_connected_op_out);
+  // CWE-226: Zero scale buffer derived from private kernel data before release.
+  explicit_bzero(bf16_scale_buffer, num_blocks * sizeof(xnn_bfloat16));
   xnn_release_memory(bf16_scale_buffer);
   return status;
 }
@@ -2122,6 +2127,8 @@ enum xnn_status xnn_create_fully_connected_nc_qp8_f32_qb4w_f16_scales(
       input_channels, output_channels, input_stride, output_stride, block_size,
       kernel_zero_point, (const uint16_t*)bf16_scale_buffer, kernel, bias,
       output_min, output_max, flags, weights_cache, fully_connected_op_out);
+  // CWE-226: Zero scale buffer derived from private kernel data before release.
+  explicit_bzero(bf16_scale_buffer, num_blocks * sizeof(xnn_bfloat16));
   xnn_release_memory(bf16_scale_buffer);
   return status;
 }
@@ -2171,6 +2178,8 @@ enum xnn_status xnn_create_fully_connected_nc_qd8_f32_qb4w_f16_scales(
       input_channels, output_channels, input_stride, output_stride, block_size,
       kernel_zero_point, (const uint16_t*)bf16_scale_buffer, kernel, bias, output_min, output_max,
       flags, weights_cache, fully_connected_op_out);
+  // CWE-226: Zero scale buffer derived from private kernel data before release.
+  explicit_bzero(bf16_scale_buffer, num_blocks * sizeof(xnn_bfloat16));
   xnn_release_memory(bf16_scale_buffer);
   return status;
 }
@@ -2220,6 +2229,8 @@ enum xnn_status xnn_create_fully_connected_nc_qdu8_f32_qb4w_f16_scales(
       input_channels, output_channels, input_stride, output_stride, block_size,
       kernel_zero_point, (const uint16_t*)bf16_scale_buffer, kernel, bias, output_min, output_max,
       flags, weights_cache, fully_connected_op_out);
+  // CWE-226: Zero scale buffer derived from private kernel data before release.
+  explicit_bzero(bf16_scale_buffer, num_blocks * sizeof(xnn_bfloat16));
   xnn_release_memory(bf16_scale_buffer);
   return status;
 }
@@ -2363,7 +2374,14 @@ enum xnn_status xnn_create_fully_connected_nc_f32_f16(
       .original_bias = bias,
   };
   enum xnn_status status = create_fully_connected_nc_helper(&context);
+  // CWE-226: Zero transient FP32 weight buffers before release.
+  explicit_bzero(fp32_kernel_buffer,
+                 input_channels * output_channels * sizeof(float));
   xnn_release_memory(fp32_kernel_buffer);
+  if (fp32_bias_buffer_to_release != NULL) {
+    explicit_bzero(fp32_bias_buffer_to_release,
+                   output_channels * sizeof(float));
+  }
   xnn_release_memory(fp32_bias_buffer_to_release);
   return status;
 }
@@ -2411,7 +2429,14 @@ enum xnn_status xnn_create_fully_connected_nc_pf32_f16(
       .original_bias = bias,
   };
   enum xnn_status status = create_fully_connected_nc_helper(&context);
+  // CWE-226: Zero transient FP32 weight buffers before release.
+  explicit_bzero(fp32_kernel_buffer,
+                 input_channels * output_channels * sizeof(float));
   xnn_release_memory(fp32_kernel_buffer);
+  if (fp32_bias_buffer_to_release != NULL) {
+    explicit_bzero(fp32_bias_buffer_to_release,
+                   output_channels * sizeof(float));
+  }
   xnn_release_memory(fp32_bias_buffer_to_release);
   return status;
 }

@@ -3,6 +3,9 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+#if !defined(_GNU_SOURCE)
+#define _GNU_SOURCE
+#endif
 #include "src/xnnpack/operator-utils.h"
 
 #include <assert.h>
@@ -194,6 +197,16 @@ enum xnn_status xnn_destroy_operator(xnn_operator_t op)
     xnn_release_memory(op->convolution_op);
   }
   if (op->weights_cache == NULL) {
+    // CWE-226: Zero packed weight buffer before release so model weights do not
+    // remain recoverable from freed heap memory. The buffer size is
+    // group_output_channels * weights_stride, matching the allocation in
+    // xnn_get_pointer_to_write_weights().
+    if (op->packed_weights.pointer != NULL && op->convolution_op != NULL &&
+        op->weights_stride > 0) {
+      explicit_bzero(op->packed_weights.pointer,
+                     op->convolution_op->group_output_channels *
+                         op->weights_stride);
+    }
     xnn_release_simd_memory(op->packed_weights.pointer);
   }
   xnn_release_simd_memory(op->zero_buffer);

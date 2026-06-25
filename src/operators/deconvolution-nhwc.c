@@ -6,6 +6,9 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+#if !defined(_GNU_SOURCE)
+#define _GNU_SOURCE
+#endif
 #include <assert.h>
 #include <float.h>
 #include <inttypes.h>
@@ -1725,7 +1728,13 @@ enum xnn_status xnn_create_deconvolution2d_nhwc_f32_f16(
       flags, weights_cache, deconvolution_op_out);
 
   // Release temporary `f32` buffers.
+  // CWE-226: Zero before release so kernel/bias data does not persist on heap.
+  explicit_bzero(fp32_kernel_buffer, num_kernel_entries * sizeof(float));
   xnn_release_memory(fp32_kernel_buffer);
+  if (fp32_bias_buffer != NULL) {
+    explicit_bzero(fp32_bias_buffer,
+                   groups * group_output_channels * sizeof(float));
+  }
   xnn_release_memory(fp32_bias_buffer);
 
   return status;
