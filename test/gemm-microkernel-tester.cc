@@ -1838,7 +1838,10 @@ void GemmMicrokernelTester::Test(xnn_qd8_bf16_qb4w_gemm_ukernel_fn gemm,
   auto w8rng = std::bind(std::uniform_int_distribution<int32_t>(
                              0, std::numeric_limits<uint8_t>::max()),
                          std::ref(rng));
-  const float max_abs_product = 1.0f * 16.0f * 2.0f;
+  // Output magnitude matches the f16/f32 qb4w paths (same int8 x int4 inputs);
+  // must be 256 (not 16) so the bf16 output-rounding tolerance is sized to the
+  // real output range, otherwise large outputs fail on unlucky seeds.
+  const float max_abs_product = 1.0f * 256.0f * 2.0f;
 
   const size_t planes = 2;  // 4 bit is 2 planes - low nibbles and high nibbles
   const size_t k2 = round_up_po2(k(), 2);  // tester assumes byte aligned rows
