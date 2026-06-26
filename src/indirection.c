@@ -415,7 +415,10 @@ void xnn_indirection_init_maxpool2d(
         while (input_y >= input_height + input_padding_top) {
           input_y = doz(input_y, dilation_height);
         }
-        input_y -= input_padding_top;
+        // When dilation_height > input_height the loop above can step below
+        // input_padding_top, so the subtraction would underflow. Clamp the
+        // result to the last valid input row to stay in bounds.
+        input_y = min(doz(input_y, input_padding_top), input_height - 1);
 
         for (size_t output_x = 0; output_x < output_width; output_x++) {
           size_t safe_input_x = output_x * stride_width;
@@ -432,7 +435,10 @@ void xnn_indirection_init_maxpool2d(
             while (input_x >= input_width + input_padding_left) {
               input_x = doz(input_x, dilation_width);
             }
-            input_x -= input_padding_left;
+            // When dilation_width > input_width the loop above can step below
+            // input_padding_left, so the subtraction would underflow. Clamp the
+            // result to the last valid input column to stay in bounds.
+            input_x = min(doz(input_x, input_padding_left), input_width - 1);
 
             const size_t index = output_y * step_height + output_x * step_width * kernel_height + pooling_x * kernel_height + pooling_y;
             indirection_buffer[index] = (const void*) ((uintptr_t) input + (input_y * input_width + input_x) * input_pixel_stride);
