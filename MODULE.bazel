@@ -77,9 +77,9 @@ http_archive(
 # pthreadpool library, used for parallelization
 http_archive(
     name = "pthreadpool",
-    sha256 = "00a9a1c633f62290a22ea1db42c4401dffe9f05645fb66d6609ae46a05333a2a",
-    strip_prefix = "pthreadpool-9003ee6c137cea3b94161bd5c614fb43be523ee1",
-    urls = ["https://github.com/google/pthreadpool/archive/9003ee6c137cea3b94161bd5c614fb43be523ee1.zip"],
+    sha256 = "5ab4e8f63e3dcf62048360c216532bdf62f00dc204883a52d91230402f0feb6a",
+    strip_prefix = "pthreadpool-02460584c6092e527c8b89f7df4de143d70e801f",
+    urls = ["https://github.com/google/pthreadpool/archive/02460584c6092e527c8b89f7df4de143d70e801f.zip"],
 )
 # LINT.ThenChange(cmake/DownloadPThreadPool.cmake)
 
@@ -87,10 +87,10 @@ http_archive(
 # cpuinfo library, used for detecting processor characteristics
 http_archive(
     name = "cpuinfo",
-    sha256 = "995316f224247d1611ab1b624a66bc5cbd5b5d2e5ce991ed68d983aac950ad8b",
-    strip_prefix = "cpuinfo-bc3c01e230c6974283e4b89421cfb0e232435589",
+    sha256 = "9213f6f81784eb8679f0621ad1c20eac711e063cb9c7712738720609cbdf1c33",
+    strip_prefix = "cpuinfo-ea6b9f1bb6e1001d8b21574d5bc78ddef62e499d",
     urls = [
-        "https://github.com/pytorch/cpuinfo/archive/bc3c01e230c6974283e4b89421cfb0e232435589.zip",
+        "https://github.com/pytorch/cpuinfo/archive/ea6b9f1bb6e1001d8b21574d5bc78ddef62e499d.zip",
     ],
 )
 # LINT.ThenChange(cmake/DownloadCpuinfo.cmake)
@@ -99,10 +99,10 @@ http_archive(
 # KleidiAI library, used for ARM microkernels.
 http_archive(
     name = "KleidiAI",
-    sha256 = "9b8d0df9bab42d1d19acb571337cbaa527027cae0efd361d75dfb9b10fd7dc4e",
-    strip_prefix = "kleidiai-51f7190558e51b7415d9ba24994fb477d7371446",
+    sha256 = "c69cf2eb6e58b77b0bcdae5aadd506192785ce6a2f3f2f8ec0eab27b10909302",
+    strip_prefix = "kleidiai-dc50c2e68d2eb28efe17c835c754f1d6421f30e8",
     urls = [
-        "https://github.com/ARM-software/kleidiai/archive/51f7190558e51b7415d9ba24994fb477d7371446.zip",
+        "https://github.com/ARM-software/kleidiai/archive/dc50c2e68d2eb28efe17c835c754f1d6421f30e8.zip",
     ],
 )
 # LINT.ThenChange(cmake/DownloadKleidiAI.cmake)
