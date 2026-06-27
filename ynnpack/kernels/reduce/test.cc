@@ -258,7 +258,7 @@ TEST_P(UnaryReduce, n) {
 
 #define YNN_REDUCE_KERNEL(arch_flags, name, k_dim, a_type, c_type) \
   INSTANTIATE_TEST_SUITE_P(                                        \
-      name, UnaryReduce,                                           \
+      name##_##a_type##_##c_type, UnaryReduce,                     \
       testing::Values(KernelParam{arch_flags, name, current_op,    \
                                   multi_type_of(a_type(), c_type()), k_dim}));
 

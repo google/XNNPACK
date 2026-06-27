@@ -1244,6 +1244,9 @@ YNN_ALWAYS_INLINE u8x8 sub_sat(u8x8 a, u8x8 b) {
 YNN_ALWAYS_INLINE s16x8 operator>>(s16x8 a, int b) {
   return s16x8{vshlq_s16(a.v, vdupq_n_s16(-b))};
 }
+YNN_ALWAYS_INLINE s8x16 operator>>(s8x16 a, int b) {
+  return s8x16{vshlq_s8(a.v, vdupq_n_s8(-b))};
+}
 YNN_ALWAYS_INLINE s8x16 operator<<(s8x16 a, int b) {
   return s8x16{vshlq_s8(a.v, vdupq_n_s8(b))};
 }

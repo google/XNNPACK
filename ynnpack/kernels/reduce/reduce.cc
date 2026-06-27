@@ -8,7 +8,9 @@
 #include <cassert>
 #include <cstdint>
 
+#include "ynnpack/base/arch.h"
 #include "ynnpack/base/bfloat16.h"
+#include "ynnpack/base/fp8.h"
 #include "ynnpack/base/half.h"
 #include "ynnpack/base/log.h"
 #include "ynnpack/base/simd/scalar.h"
@@ -83,6 +85,10 @@ MIN_K1_KERNEL(min_k1_int8, int8_t);
 MIN_KN_KERNEL(min_kn_int8, int8_t);
 MIN_K1_KERNEL(min_k1_uint8, uint8_t);
 MIN_KN_KERNEL(min_kn_uint8, uint8_t);
+MIN_K1_KERNEL(min_k1_fp8_e5m2, fp8_e5m2);
+MIN_KN_KERNEL(min_kn_fp8_e5m2, fp8_e5m2);
+MIN_K1_KERNEL(min_k1_fp8_e4m3, fp8_e4m3);
+MIN_KN_KERNEL(min_kn_fp8_e4m3, fp8_e4m3);
 
 MAX_K1_KERNEL(max_k1_fp32, float);
 MAX_KN_KERNEL(max_kn_fp32, float);
@@ -96,6 +102,10 @@ MAX_K1_KERNEL(max_k1_int8, int8_t);
 MAX_KN_KERNEL(max_kn_int8, int8_t);
 MAX_K1_KERNEL(max_k1_uint8, uint8_t);
 MAX_KN_KERNEL(max_kn_uint8, uint8_t);
+MAX_K1_KERNEL(max_k1_fp8_e5m2, fp8_e5m2);
+MAX_KN_KERNEL(max_kn_fp8_e5m2, fp8_e5m2);
+MAX_K1_KERNEL(max_k1_fp8_e4m3, fp8_e4m3);
+MAX_KN_KERNEL(max_kn_fp8_e4m3, fp8_e4m3);
 
 MIN_MAX_K1_KERNEL_SCALAR(min_max_k1_fp32, float);
 MIN_MAX_KN_KERNEL_SCALAR(min_max_kn_fp32, float);
@@ -109,6 +119,10 @@ MIN_MAX_K1_KERNEL_SCALAR(min_max_k1_int8, int8_t);
 MIN_MAX_KN_KERNEL_SCALAR(min_max_kn_int8, int8_t);
 MIN_MAX_K1_KERNEL_SCALAR(min_max_k1_uint8, uint8_t);
 MIN_MAX_KN_KERNEL_SCALAR(min_max_kn_uint8, uint8_t);
+MIN_MAX_K1_KERNEL_SCALAR(min_max_k1_fp8_e5m2, fp8_e5m2);
+MIN_MAX_KN_KERNEL_SCALAR(min_max_kn_fp8_e5m2, fp8_e5m2);
+MIN_MAX_K1_KERNEL_SCALAR(min_max_k1_fp8_e4m3, fp8_e4m3);
+MIN_MAX_KN_KERNEL_SCALAR(min_max_kn_fp8_e4m3, fp8_e4m3);
 
 #define YNN_REDUCE_KERNEL(arch, name, k_dim, A, C)          \
   if (type_of<A>() == a_type && type_of<C>() == c_type) {   \

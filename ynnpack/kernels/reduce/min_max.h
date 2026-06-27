@@ -8,6 +8,8 @@
 
 #include <cassert>
 #include <cstddef>
+#include <cstdint>
+#include <limits>
 #include <type_traits>
 
 #include "ynnpack/base/base.h"
@@ -20,53 +22,66 @@ namespace ynn {
 using std::max;
 using std::min;
 
-// This class allows min/max reductions of sign-magnitude floating point types
-// to be computed efficiently using integer arithmetic. It is implicitly
-// convertible to-from Float, and supports computing min/max.
-//
-// The intended usage is:
-//
-//   float16_wrapper<Float, Int, Float::value_type> r(init_value);
-//   for (int i = 0; i < n; ++i) {
-//     r = min(r, floats[i]);
-//   }
-//   Float result = static_cast<Float>(r);
-template <typename Float, typename Int>
-class float16_wrapper {
+template <typename T>
+struct scalar_type_of {
+  using type = T;
+};
+
+template <typename T, size_t N>
+struct scalar_type_of<simd::vec<T, N>> {
+  using type = T;
+};
+
+// Transform a sign-magnitude integer into an integer that is correctly ordered
+// by standard comparison operators. This function is reversible, i.e.
+// sign_complement(sign_complement(x)) = x.
+template <typename T>
+T sign_complement(T a) {
+  using scalar = typename scalar_type_of<T>::type;
+  constexpr int shift = sizeof(scalar) * 8 - 1;
+  const T mask = static_cast<scalar>(~(1 << shift));
+  return (a & mask) ^ (a >> shift);
+}
+
+// This class allows computing the min or max of a sign-magnitude integer.
+// Most floating point types can be bitcasted to this, so we can compute min/max
+// reductions for types that don't have native SIMD instructions.
+template <typename T>
+class sign_magnitude {
+  // We need this hoop jumping to enable implementing a constexpr `from_bits`.
+  struct zero_initializer {};
+  explicit constexpr sign_magnitude(zero_initializer) : value_(0) {}
+
  public:
-  float16_wrapper() = default;
-  float16_wrapper(Float value)  // NOLINT
-      : value_(sign_complement(bit_cast<Int>(value))) {}
-  constexpr float16_wrapper(Int value)  // NOLINT
-      : value_(value) {}
+  sign_magnitude() = default;
+  sign_magnitude(T value)  // NOLINT
+      : value_(sign_complement(value)) {}
 
-  operator Float() const {  // NOLINT
-    return bit_cast<Float>(sign_complement(value_));
+  static constexpr sign_magnitude from_bits(T bits) {
+    sign_magnitude result(zero_initializer{});
+    result.value_ = bits;
+    return result;
   }
 
-  operator Int() const {  // NOLINT
-    return value_;
-  }
+  T to_bits() const { return value_; }
 
-  friend float16_wrapper min(float16_wrapper a, float16_wrapper b) {
-    a.value_ = min(a.value_, b.value_);
+  operator T() const { return sign_complement(value_); }  // NOLINT
+
+  friend sign_magnitude min(sign_magnitude a, T b) {
+    a.value_ = min(a.value_, sign_complement(b));
     return a;
   }
-  friend float16_wrapper max(float16_wrapper a, float16_wrapper b) {
-    a.value_ = max(a.value_, b.value_);
+  friend sign_magnitude max(sign_magnitude a, T b) {
+    a.value_ = max(a.value_, sign_complement(b));
     return a;
   }
 
  private:
-  Int value_;
-
-  static constexpr Int sign_complement(Int a) {
-    return (a & 0x7FFF) ^ (a >> 15);
-  }
+  T value_;
 };
 
-using half_rvar = float16_wrapper<half, int16_t>;
-using bfloat16_rvar = float16_wrapper<bfloat16, int16_t>;
+using xf16_rvar = sign_magnitude<int16_t>;
+using xf8_rvar = sign_magnitude<int8_t>;
 
 // Forward type_info for simd::vec.
 template <typename T, size_t N>
@@ -80,34 +95,33 @@ class type_info<simd::vec<T, N>> {
   }
 };
 
-// Forward type_info for float16_wrapper.
-template <typename Float, typename Int>
-class type_info<float16_wrapper<Float, Int>> {
+// Forward type_info for sign_magnitude.
+template <typename T>
+class type_info<sign_magnitude<T>> {
  public:
   static constexpr auto min_identity() {
-    return type_info<Float>::min_identity();
+    using scalar = typename scalar_type_of<T>::type;
+    return T(std::numeric_limits<scalar>::max());
   }
   static constexpr auto max_identity() {
-    return type_info<Float>::max_identity();
+    using scalar = typename scalar_type_of<T>::type;
+    return T(static_cast<scalar>(-1));
   }
 };
 
-template <typename Float, typename Int, size_t N>
-float16_wrapper<Float, Int> horizontal_min(
-    float16_wrapper<simd::vec<Float, N>, simd::vec<Int, N>> x) {
-  return horizontal_min(static_cast<simd::vec<Int, N>>(x));
+template <typename T, size_t N>
+sign_magnitude<T> horizontal_min(sign_magnitude<simd::vec<T, N>> x) {
+  return sign_magnitude<T>::from_bits(simd::horizontal_min(x.to_bits()));
 }
-template <typename Float, typename Int, size_t N>
-float16_wrapper<Float, Int> horizontal_max(
-    float16_wrapper<simd::vec<Float, N>, simd::vec<Int, N>> x) {
-  return horizontal_max(static_cast<simd::vec<Int, N>>(x));
+template <typename T, size_t N>
+sign_magnitude<T> horizontal_max(sign_magnitude<simd::vec<T, N>> x) {
+  return sign_magnitude<T>::from_bits(simd::horizontal_max(x.to_bits()));
 }
 
-// We want to store float16_wrappers as the underlying float type.
-template <typename Float, typename Int, size_t N, typename NT>
-void store(Float* dst,
-           float16_wrapper<simd::vec<Float, N>, simd::vec<Int, N>> x, NT n) {
-  store(dst, static_cast<simd::vec<Float, N>>(x), n);
+// We want to store sign_magnitudes as the underlying float type.
+template <typename T, size_t N, typename NT>
+void store(T* dst, sign_magnitude<simd::vec<T, N>> x, NT n) {
+  store(dst, static_cast<simd::vec<T, N>>(x), n);
 }
 
 // Below, we define an accumulator for both min and max at the same time.
