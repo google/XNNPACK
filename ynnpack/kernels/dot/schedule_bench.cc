@@ -152,7 +152,12 @@ double run_benchmark(TA, TB, TC, const kernel_info& kernel, size_t m, size_t n,
           size_t a_stride_m, span<const size_t> a_k_strides, const void* b_ptr,
           span<const size_t> b_k_strides, size_t init_c_stride_m,
           const void* init_c, void* c_ptr) {
-        kernel.kernel(m, n, k[2], k[1], k[0], a_stride_m,
+        // For dot_flag::transpose_a kernels, the 6th kernel arg is the
+        // stride of the k1/tile_k dimension of the packed A (see dot.h),
+        // not the m stride. subgraph/dot.cc does the same swap — mirror
+        // it here.
+        kernel.kernel(m, n, k[2], k[1], k[0],
+                      pack_a ? a_k_strides[0] : a_stride_m,
                       a_k_strides[2], a_k_strides[1], a_ptr, b_k_strides[2],
                       b_k_strides[1], b_k_strides[0], b_ptr, init_c_stride_m,
                       init_c, c.stride(0) * sizeof(TC), c_ptr);
@@ -193,7 +198,8 @@ double run_benchmark(TA, TB, TC, const kernel_info& kernel, size_t m, size_t n,
 int main(int argc, char** argv) {
   if (argc < 3) {
     std::cerr << "Usage: " << argv[0]
-              << " <kernel_name> <MxNxK> [<loop1> <loop2> ...]" << std::endl;
+              << " <kernel_name> <MxNxK> [<loop1>|auto:<cache1>[,<cache2>...]]"
+              << std::endl;
     return 1;
   }
 
@@ -204,21 +210,33 @@ int main(int argc, char** argv) {
     return 1;
   }
 
-  std::vector<ynn::dot_loop> loops;
-  for (int i = 3; i < argc; ++i) {
-    ynn::dot_loop loop = ynn::parse_dot_loop(argv[i]);
-    if (loop.dim < 0 || loop.blocks == 0) {
-      std::cerr << "Error parsing loop specifier: " << argv[i] << std::endl;
-      return 1;
-    }
-    loops.push_back(loop);
-  }
-
   // Find the kernel
   auto kernel = ynn::get_kernel(kernel_name);
   if (!kernel.kernel) {
     std::cerr << "Unknown kernel: " << kernel_name << std::endl;
     return 1;
+  }
+
+  std::vector<ynn::dot_loop> loops;
+  std::vector<size_t> auto_cache_sizes;
+  for (int i = 3; i < argc; ++i) {
+    std::string arg = argv[i];
+    if (arg.rfind("auto:", 0) == 0) {
+      std::stringstream ss(arg.substr(5));
+      std::string token;
+      while (std::getline(ss, token, ',')) {
+        if (token.empty()) continue;
+        size_t cs = std::stoul(token);
+        auto_cache_sizes.push_back(cs);
+      }
+      continue;
+    }
+    ynn::dot_loop loop = ynn::parse_dot_loop(arg);
+    if (loop.dim < 0 || loop.blocks == 0) {
+      std::cerr << "Error parsing loop specifier: " << arg << std::endl;
+      return 1;
+    }
+    loops.push_back(loop);
   }
 
   // Kernels require an outer loop for m, make sure we have one.
@@ -239,9 +257,36 @@ int main(int argc, char** argv) {
         break;
     }
   }
-  if (min_block_m > 1) loops.push_back({ynn::dot_loop::m, 1});
 
   double t = ynn::SwitchThreeTypes(kernel.type, [&](auto a, auto b, auto c) {
+    using TA = decltype(a);
+    using TB = decltype(b);
+    std::vector<ynn::dot_loop> auto_storage;
+    if (!auto_cache_sizes.empty()) {
+      auto_storage.resize(auto_cache_sizes.size() * 3);
+      size_t ks[] = {static_cast<size_t>(shape.k), 1, 1};
+      ynn::span<const size_t> cs(auto_cache_sizes);
+      auto auto_loops = ynn::schedule_dot(
+          cs, static_cast<size_t>(shape.m), static_cast<size_t>(shape.n),
+          ynn::span<const size_t>(ks), kernel.block_m, kernel.block_n,
+          kernel.block_k, sizeof(TA), sizeof(TB), auto_storage.data());
+      std::cerr << "[auto schedule] ";
+      for (const auto& l : auto_loops) {
+        char d = l.dim == ynn::dot_loop::m ? 'm'
+               : l.dim == ynn::dot_loop::n ? 'n' : 'k';
+        size_t bs = l.dim == ynn::dot_loop::m ? kernel.block_m
+                  : l.dim == ynn::dot_loop::n ? kernel.block_n
+                                              : kernel.block_k;
+        std::cerr << d << (l.blocks * bs) << " ";
+      }
+      std::cerr << std::endl;
+      for (const auto& l : auto_loops) loops.push_back(l);
+      for (const auto& l : auto_loops) {
+        if (l.dim == ynn::dot_loop::m)
+          min_block_m = std::min(min_block_m, l.blocks);
+      }
+    }
+    if (min_block_m > 1) loops.push_back({ynn::dot_loop::m, 1});
     return ynn::run_benchmark(a, b, c, kernel, shape.m, shape.n, shape.k,
                               loops);
   });

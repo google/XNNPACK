@@ -163,4 +163,116 @@ TEST(run_dot, loop_k) {
                           dot_call_at(m, n, block_k, 0, 0, 3 * block_k)));
 }
 
+// -- Targeted tests for schedule_dot itself --
+
+bool operator==(const dot_loop& a, const dot_loop& b) {
+  return a.dim == b.dim && a.blocks == b.blocks;
+}
+
+std::ostream& operator<<(std::ostream& os, const dot_loop& l) {
+  const char* d = l.dim == dot_loop::m   ? "m"
+                  : l.dim == dot_loop::n ? "n"
+                  : l.dim == dot_loop::k ? "k"
+                                         : "?";
+  return os << d << "x" << l.blocks;
+}
+
+// A cache budget much larger than the working set yields no blocking — the
+// default {m, 1} safety loop is emitted so run_dot always has at least one
+// loop to walk.
+TEST(schedule_dot, no_blocking_when_everything_fits) {
+  dot_loop storage[3];
+  const size_t cache_sizes[] = {8 * 1024 * 1024};  // 8 MiB
+  const size_t ks[] = {64};
+  auto loops = schedule_dot(cache_sizes, /*m=*/16, /*n=*/64, ks,
+                            /*block_m=*/16, /*block_n=*/64, /*block_k=*/1,
+                            /*a_elem_size=*/4, /*b_elem_size=*/4, storage);
+  EXPECT_THAT(loops, ElementsAre(dot_loop{dot_loop::m, 1}));
+}
+
+// Large shape vs a 128 KiB cache: kc_max = 15/16 * 128 KiB /
+// (n * b_elem * block_k) = 120 KiB / (2048 * 4 * 1) = 15 block_k units.
+// The 15/16 factor is the safety headroom applied in schedule.cc.
+TEST(schedule_dot, k_loop_sized_from_current_n) {
+  dot_loop storage[3];
+  const size_t cache_sizes[] = {128 * 1024};
+  const size_t ks[] = {2048};
+  auto loops = schedule_dot(cache_sizes, /*m=*/2048, /*n=*/2048, ks,
+                            /*block_m=*/16, /*block_n=*/64, /*block_k=*/1,
+                            /*a_elem_size=*/4, /*b_elem_size=*/4, storage);
+  EXPECT_THAT(loops, ElementsAre(dot_loop{dot_loop::k, 15},
+                                 dot_loop{dot_loop::m, 1},
+                                 dot_loop{dot_loop::n, 1}));
+}
+
+// Even-split: when k slightly overflows the natural kc, we split into two
+// near-equal iterations rather than one cache-max iter plus a small tail.
+// With a 16 MiB cache, n = 4096, and the 15/16 safety headroom, kc_max =
+// 15 MiB / (4096 * 4) = 960. For k = 1200, niter = 2, blocks = 600.
+TEST(schedule_dot, k_loop_splits_evenly_when_k_slightly_over_kc_max) {
+  dot_loop storage[3];
+  const size_t cache_sizes[] = {16ULL * 1024 * 1024};
+  const size_t ks[] = {1200};
+  auto loops = schedule_dot(cache_sizes, /*m=*/4096, /*n=*/4096, ks,
+                            /*block_m=*/16, /*block_n=*/64, /*block_k=*/1,
+                            /*a_elem_size=*/4, /*b_elem_size=*/4, storage);
+  EXPECT_THAT(loops, ElementsAre(dot_loop{dot_loop::k, 600},
+                                 dot_loop{dot_loop::m, 1},
+                                 dot_loop{dot_loop::n, 1}));
+}
+
+// Even-split at ~1.5x: k = 1536 is ~1.6 * kc_max (960). Old policy would
+// have run one cache-max iter plus a small tail; the new even-split gives
+// two near-equal iters of 768, each comfortably inside cache.
+TEST(schedule_dot, k_loop_splits_evenly_at_1p5x_boundary) {
+  dot_loop storage[3];
+  const size_t cache_sizes[] = {16ULL * 1024 * 1024};
+  const size_t ks[] = {1024 + 1024 / 2};  // k1 = 1536
+  auto loops = schedule_dot(cache_sizes, /*m=*/4096, /*n=*/4096, ks,
+                            /*block_m=*/16, /*block_n=*/64, /*block_k=*/1,
+                            /*a_elem_size=*/4, /*b_elem_size=*/4, storage);
+  EXPECT_THAT(loops, ElementsAre(dot_loop{dot_loop::k, 768},
+                                 dot_loop{dot_loop::m, 1},
+                                 dot_loop{dot_loop::n, 1}));
+}
+
+// Larger overflow: k = 1600 gives niter = 2, blocks = ceil(1600/2) = 800.
+TEST(schedule_dot, k_loop_splits_evenly_into_two_when_below_2x_kc_max) {
+  dot_loop storage[3];
+  const size_t cache_sizes[] = {16ULL * 1024 * 1024};
+  const size_t ks[] = {1600};
+  auto loops = schedule_dot(cache_sizes, /*m=*/4096, /*n=*/4096, ks,
+                            /*block_m=*/16, /*block_n=*/64, /*block_k=*/1,
+                            /*a_elem_size=*/4, /*b_elem_size=*/4, storage);
+  EXPECT_THAT(loops, ElementsAre(dot_loop{dot_loop::k, 800},
+                                 dot_loop{dot_loop::m, 1},
+                                 dot_loop{dot_loop::n, 1}));
+}
+
+// Many iterations: k = 2880 = 3 * kc_max (960 after the 15/16 headroom).
+// The resulting blocks equals kc_max exactly when k is a clean multiple.
+TEST(schedule_dot, k_loop_uses_kc_max_when_k_is_multiple_of_kc_max) {
+  dot_loop storage[3];
+  const size_t cache_sizes[] = {16ULL * 1024 * 1024};
+  const size_t ks[] = {2880};
+  auto loops = schedule_dot(cache_sizes, /*m=*/4096, /*n=*/4096, ks,
+                            /*block_m=*/16, /*block_n=*/64, /*block_k=*/1,
+                            /*a_elem_size=*/4, /*b_elem_size=*/4, storage);
+  EXPECT_THAT(loops, ElementsAre(dot_loop{dot_loop::k, 960},
+                                 dot_loop{dot_loop::m, 1},
+                                 dot_loop{dot_loop::n, 1}));
+}
+
+// Boundary: k = kc_max exactly -> fits in one iteration, no k-loop emitted.
+TEST(schedule_dot, k_loop_skipped_when_k_equals_kc_max) {
+  dot_loop storage[3];
+  const size_t cache_sizes[] = {16ULL * 1024 * 1024};
+  const size_t ks[] = {960};  // kc_max = 960 after the 15/16 headroom
+  auto loops = schedule_dot(cache_sizes, /*m=*/4096, /*n=*/4096, ks,
+                            /*block_m=*/16, /*block_n=*/64, /*block_k=*/1,
+                            /*a_elem_size=*/4, /*b_elem_size=*/4, storage);
+  EXPECT_THAT(loops, ElementsAre(dot_loop{dot_loop::m, 1},
+                                 dot_loop{dot_loop::n, 1}));
+}
+
 }  // namespace ynn
