@@ -88,6 +88,7 @@ enum ynn_type {
 #define YNN_VALUE_FLAG_EXTERNAL_OUTPUT (1 << 1)
 #define YNN_VALUE_FLAG_COPY_DATA (1 << 2)
 #define YNN_VALUE_FLAG_NO_EXCESS_PRECISION (1 << 3)
+#define YNN_VALUE_FLAG_COPY_DATA_FP32 (1 << 4)
 
 // Define a new tensor in a subgraph.
 //

@@ -13,6 +13,7 @@
 #include <memory>
 
 #include "ynnpack/base/algorithm.h"
+#include "ynnpack/base/base.h"
 #include "ynnpack/base/log.h"
 #include "ynnpack/base/type.h"
 #include "ynnpack/include/ynnpack.h"
@@ -178,29 +179,50 @@ ynn_status ynn_define_tensor(ynn_subgraph_t subgraph, enum ynn_type type,
     }
   }
 
-  value->data = slinky::raw_buffer::make(rank);
-  init_buffer(*value->data, ynn::type_size_bytes(type), rank,
-              dims ? physical_dims : nullptr, data);
   if (data) {
-    if (flags & YNN_VALUE_FLAG_COPY_DATA) {
-      // TODO: This makes an extra heap allocation of the raw_buffer structure.
-      // It's small, but this is wasteful.
-      value->data = slinky::raw_buffer::make_copy(*value->data);
+    const bool copy_data = (flags & YNN_VALUE_FLAG_COPY_DATA) != 0;
+    const bool copy_data_fp32 = (flags & YNN_VALUE_FLAG_COPY_DATA_FP32) != 0;
+
+    if (copy_data || copy_data_fp32) {
+      // Initialize a buffer just to get the dims.
+      slinky::buffer<char, YNN_MAX_TENSOR_RANK> dims_buf(rank);
+      init_buffer(dims_buf, ynn::type_size_bytes(type), rank,
+                  dims ? physical_dims : nullptr, nullptr);
+
+      value->data = slinky::raw_buffer::make(
+          rank, ynn::type_size_bytes(type), dims_buf.dims,
+          YNN_ALLOCATION_ALIGNMENT);
+
+      if (copy_data_fp32 && type != ynn_type_fp32) {
+        ynn::convert_n(static_cast<const float*>(data),
+                       value->data->elem_count(), type, value->data->base);
+      } else {
+        std::memcpy(value->data->base, data, value->data->size_bytes());
+      }
+    } else {
+      value->data = slinky::raw_buffer::make(rank);
+      init_buffer(*value->data, ynn::type_size_bytes(type), rank,
+                  dims ? physical_dims : nullptr, data);
     }
-  } else if (is_external_input) {
-    value->symbol = subgraph->globals.symbols.insert_unique(value->name());
-    value->extents.resize(rank);
-    // Replace any constant 0 dimensions with dynamic extents.
-    for (size_t d = 0; d < rank; ++d) {
-      if (!dims || physical_dims[rank - 1 - d] == 0) {
-        slinky::expr extent_d = buffer_max(value->symbol, d) + 1;
-        if (d == 0) {
-          int elem_count = ynn::type_element_count(type);
-          if (elem_count != 1) {
-            extent_d *= elem_count;
+  } else {
+    value->data = slinky::raw_buffer::make(rank);
+    init_buffer(*value->data, ynn::type_size_bytes(type), rank,
+                dims ? physical_dims : nullptr, nullptr);
+    if (is_external_input) {
+      value->symbol = subgraph->globals.symbols.insert_unique(value->name());
+      value->extents.resize(rank);
+      // Replace any constant 0 dimensions with dynamic extents.
+      for (size_t d = 0; d < rank; ++d) {
+        if (!dims || physical_dims[rank - 1 - d] == 0) {
+          slinky::expr extent_d = buffer_max(value->symbol, d) + 1;
+          if (d == 0) {
+            int elem_count = ynn::type_element_count(type);
+            if (elem_count != 1) {
+              extent_d *= elem_count;
+            }
           }
+          value->extents[d] = extent_d;
         }
-        value->extents[d] = extent_d;
       }
     }
   }

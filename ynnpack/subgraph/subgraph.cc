@@ -322,47 +322,9 @@ uint32_t ynn_subgraph::get_scalar_value_id(ynn_type type, float value_f32) {
 uint32_t ynn_subgraph::get_static_value_id(ynn_type type, size_t rank,
                                            const size_t* dims,
                                            float* value_f32) {
-  const size_t size = std::accumulate(dims, dims + rank, static_cast<size_t>(1),
-                                      std::multiplies<size_t>());
-  assert(size > 0);
-
-  float scale = 1.0f;
-  int32_t zero_point = 0;
-
-  std::vector<char> data(size * ynn::type_size_bytes(type));
-  switch (type) {
-    case ynn_type_fp64:
-      std::copy_n(value_f32, size, reinterpret_cast<double*>(data.data()));
-      break;
-    case ynn_type_fp32:
-      std::copy_n(value_f32, size, reinterpret_cast<float*>(data.data()));
-      break;
-    case ynn_type_fp16:
-      std::copy_n(value_f32, size, reinterpret_cast<ynn::half*>(data.data()));
-      break;
-    case ynn_type_bf16:
-      std::copy_n(value_f32, size,
-                  reinterpret_cast<ynn::bfloat16*>(data.data()));
-      break;
-    case ynn_type_int32:
-      ynn::quantize(value_f32, reinterpret_cast<int32_t*>(data.data()), size,
-                    1.0f / scale, zero_point);
-      break;
-    case ynn_type_int8:
-      ynn::quantize(value_f32, reinterpret_cast<int8_t*>(data.data()), size,
-                    1.0f / scale, zero_point);
-      break;
-    case ynn_type_uint8:
-      ynn::quantize(value_f32, reinterpret_cast<uint8_t*>(data.data()), size,
-                    1.0f / scale, zero_point);
-      break;
-    default:
-      YNN_UNREACHABLE;
-  }
-
   uint32_t id = YNN_INVALID_VALUE_ID;
-  ynn_define_tensor(this, type, rank, dims, data.data(),
-                    YNN_VALUE_FLAG_COPY_DATA, &id);
+  ynn_define_tensor(this, type, rank, dims, value_f32,
+                    YNN_VALUE_FLAG_COPY_DATA_FP32, &id);
   return id;
 }
 

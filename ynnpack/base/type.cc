@@ -187,43 +187,43 @@ void convert_to_int(const float* src, size_t n, T* dst) {
 void convert_n(const float* src, size_t n, ynn_type type, void* dst) {
   switch (type) {
     case ynn_type_fp64:
-      std::copy_n(src, n, (double*)dst);
+      std::copy_n(src, n, static_cast<double*>(dst));
       return;
     case ynn_type_fp32:
-      std::copy_n(src, n, (float*)dst);
+      std::copy_n(src, n, static_cast<float*>(dst));
       return;
     case ynn_type_fp16:
-      std::copy_n(src, n, (half*)dst);
+      std::copy_n(src, n, static_cast<half*>(dst));
       return;
     case ynn_type_bf16:
-      std::copy_n(src, n, (bfloat16*)dst);
+      std::copy_n(src, n, static_cast<bfloat16*>(dst));
       return;
     case ynn_type_fp8_e5m2:
-      std::copy_n(src, n, (fp8_e5m2*)dst);
+      std::copy_n(src, n, static_cast<fp8_e5m2*>(dst));
       return;
     case ynn_type_fp8_e4m3:
-      std::copy_n(src, n, (fp8_e4m3*)dst);
+      std::copy_n(src, n, static_cast<fp8_e4m3*>(dst));
       return;
     case ynn_type_int2:
-      convert_to_int<int2x4>(src, n, (int2x4*)dst);
+      convert_to_int(src, n, static_cast<int2x4*>(dst));
       return;
     case ynn_type_uint2:
-      convert_to_int<uint2x4>(src, n, (uint2x4*)dst);
+      convert_to_int(src, n, static_cast<uint2x4*>(dst));
       return;
     case ynn_type_int4:
-      convert_to_int<int4x2>(src, n, (int4x2*)dst);
+      convert_to_int(src, n, static_cast<int4x2*>(dst));
       return;
     case ynn_type_uint4:
-      convert_to_int<uint4x2>(src, n, (uint4x2*)dst);
+      convert_to_int(src, n, static_cast<uint4x2*>(dst));
       return;
     case ynn_type_int8:
-      convert_to_int<int8_t>(src, n, (int8_t*)dst);
+      convert_to_int(src, n, static_cast<int8_t*>(dst));
       return;
     case ynn_type_uint8:
-      convert_to_int<uint8_t>(src, n, (uint8_t*)dst);
+      convert_to_int(src, n, static_cast<uint8_t*>(dst));
       return;
     case ynn_type_int32:
-      convert_to_int<int32_t>(src, n, (int32_t*)dst);
+      convert_to_int(src, n, static_cast<int32_t*>(dst));
       return;
     case ynn_type_invalid:
       break;

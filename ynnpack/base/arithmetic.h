@@ -86,6 +86,7 @@ constexpr T cast(U x) noexcept {
   if constexpr (is_integral<T>::value) {
     if (x > type_info<T>::max()) return type_info<T>::max();
     if (x < type_info<T>::min()) return type_info<T>::min();
+    if (!is_integral<U>::value) return static_cast<T>(std::nearbyint(x));
   }
   return static_cast<T>(x);
 }
