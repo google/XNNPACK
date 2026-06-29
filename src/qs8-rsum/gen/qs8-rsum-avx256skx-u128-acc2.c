@@ -18,6 +18,7 @@
 #include "src/xnnpack/microparams.h"
 #include "src/xnnpack/reduce.h"
 
+XNN_NO_SANITIZE_INTEGER_OVERFLOW
 void xnn_qs8_rsum_ukernel__avx256skx_u128_acc2(
     size_t batch,
     const int8_t* input,

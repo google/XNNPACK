@@ -20,6 +20,7 @@ $assert AVX in [2, 10]
 
 $ACC_SUFFIX = "" if ACCUMULATORS == 1 else "_acc%d" % ACCUMULATORS
 $ISA = "avx2" if AVX == 2 else "avx256skx"
+XNN_NO_SANITIZE_INTEGER_OVERFLOW
 void xnn_qs8_rsum_ukernel__${ISA}_u${CHANNEL_TILE}${ACC_SUFFIX}(
     size_t batch,
     const int8_t* input,
