@@ -316,7 +316,6 @@ const ynn_node* ynn_subgraph::get_producer(uint32_t id) const {
 }
 
 uint32_t ynn_subgraph::get_scalar_value_id(ynn_type type, float value_f32) {
-  // TODO(dsharlet): We should have a cache of scalars and re-use them.
   return get_static_value_id(type, /*rank=*/0, /*dims=*/nullptr, &value_f32);
 }
 

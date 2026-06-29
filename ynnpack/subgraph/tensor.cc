@@ -9,8 +9,10 @@
 #include <cassert>
 #include <cstddef>
 #include <cstdint>
+#include <cstring>
 #include <memory>
 
+#include "ynnpack/base/algorithm.h"
 #include "ynnpack/base/log.h"
 #include "ynnpack/base/type.h"
 #include "ynnpack/include/ynnpack.h"
@@ -67,6 +69,40 @@ void init_buffer(slinky::raw_buffer& buffer, size_t elem_size, size_t num_dims,
   }
 }
 
+namespace {
+
+bool find_static_tensor(ynn_subgraph_t subgraph, ynn_type type, size_t rank,
+                        const size_t* physical_dims, const void* data,
+                        uint32_t* id_out) {
+  for (const ynn_value& value : subgraph->values) {
+    if (!value.is_valid()) continue;
+    if (!value.is_static()) continue;
+    if (value.type != type) continue;
+    if (value.data->rank != rank) continue;
+    if (!ynn::all_n(rank, [&](size_t i) {
+          return value.data->dim(i).extent() == physical_dims[i];
+        })) {
+      continue;
+    }
+    // We don't check very large tensors for duplicates. We assume that callers
+    // will not define duplicates of large tensors, and it may be expensive to
+    // check them.
+    constexpr size_t max_search_size_bytes = 1024 * 1024;
+    const size_t size_bytes = value.data->size_bytes();
+    if (size_bytes > max_search_size_bytes) {
+      continue;
+    }
+    if (std::memcmp(value.data->base, data, size_bytes) != 0) {
+      continue;
+    }
+    *id_out = value.id;
+    return true;
+  }
+  return false;
+}
+
+}  // namespace
+
 extern "C" {
 
 ynn_status ynn_define_tensor(ynn_subgraph_t subgraph, enum ynn_type type,
@@ -81,6 +117,36 @@ ynn_status ynn_define_tensor(ynn_subgraph_t subgraph, enum ynn_type type,
   if (!id_out) {
     YNN_LOG_ERROR() << "id_out must be non-null";
     return ynn_status_invalid_parameter;
+  }
+  const bool is_external_input = (flags & YNN_VALUE_FLAG_EXTERNAL_INPUT) != 0;
+  const bool is_external_output = (flags & YNN_VALUE_FLAG_EXTERNAL_OUTPUT) != 0;
+  if (data) {
+    if (is_external_input || is_external_output) {
+      YNN_LOG_ERROR() << "data must be null for external tensors";
+      return ynn_status_invalid_parameter;
+    }
+    if (rank > 0 && !dims) {
+      YNN_LOG_ERROR()
+          << "dims must be non-null for non-scalar external tensors";
+      return ynn_status_invalid_parameter;
+    }
+  }
+
+  if (!data && !is_external_input) {
+    // We only use dims for static or input tensors.
+    dims = nullptr;
+  }
+
+  size_t physical_dims[YNN_MAX_TENSOR_RANK];
+  if (dims) {
+    YNN_RETURN_IF_ERROR(to_physical_shape(type, rank, dims, physical_dims));
+  }
+
+  if (*id_out == YNN_INVALID_VALUE_ID && data) {
+    assert(rank == 0 || dims);
+    if (find_static_tensor(subgraph, type, rank, physical_dims, data, id_out)) {
+      return ynn_status_success;
+    }
   }
 
   ynn_value* value;
@@ -103,22 +169,12 @@ ynn_status ynn_define_tensor(ynn_subgraph_t subgraph, enum ynn_type type,
     return ynn_status_success;
   }
 
-  size_t physical_dims[YNN_MAX_TENSOR_RANK];
   if (dims) {
-    if (value->is_external_output()) {
-      // We want to infer this later.
-      dims = nullptr;
-    } else {
-      ynn_status status = to_physical_shape(type, rank, dims, physical_dims);
-      if (status != ynn_status_success) {
-        return status;
-      }
-      for (size_t d = 0; d < rank; ++d) {
-        // Any (logical) extent 1 dimensions of static values may be implicitly
-        // broadcasted.
-        const slinky::index_t logical = dims[rank - 1 - d];
-        value->extents.push_back(logical == 1 ? slinky::expr{} : logical);
-      }
+    for (size_t d = 0; d < rank; ++d) {
+      // Any (logical) extent 1 dimensions of static values may be implicitly
+      // broadcasted.
+      const slinky::index_t logical = dims[rank - 1 - d];
+      value->extents.push_back(logical == 1 ? slinky::expr{} : logical);
     }
   }
 
@@ -131,10 +187,7 @@ ynn_status ynn_define_tensor(ynn_subgraph_t subgraph, enum ynn_type type,
       // It's small, but this is wasteful.
       value->data = slinky::raw_buffer::make_copy(*value->data);
     }
-    // Don't allow static values to be interpreted as inputs/outputs.
-    value->flags &=
-        ~(YNN_VALUE_FLAG_EXTERNAL_INPUT | YNN_VALUE_FLAG_EXTERNAL_OUTPUT);
-  } else if (value->is_external_input()) {
+  } else if (is_external_input) {
     value->symbol = subgraph->globals.symbols.insert_unique(value->name());
     value->extents.resize(rank);
     // Replace any constant 0 dimensions with dynamic extents.
