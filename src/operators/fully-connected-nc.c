@@ -259,7 +259,14 @@ static XNN_NO_SANITIZE_FUNCTION enum xnn_status create_fully_connected_nc(
                 extra_weights_bytes)
           : (k_stride << log2_filter_element_size) + bias_element_size +
                 extra_weights_bytes + block_scale_bytes;
-  const size_t packed_weights_size = n_stride * weights_stride;
+  size_t packed_weights_size = 0;
+  if (!xnn_safe_mul(n_stride, weights_stride, &packed_weights_size)) {
+    xnn_log_error(
+        "failed to create %s operator: packed weights size overflows size_t "
+        "(n_stride=%zu, weights_stride=%zu)",
+        xnn_operator_type_to_string(operator_type), n_stride, weights_stride);
+    goto error;
+  }
   fully_connected_op->weights_stride = weights_stride;
   size_t aligned_total_weights_size =
       round_up_po2(packed_weights_size, XNN_ALLOCATION_ALIGNMENT);
