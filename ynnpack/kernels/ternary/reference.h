@@ -138,12 +138,7 @@ void check_results(const OpInfo& op, const Tensor<A>& a, const Tensor<B>& b,
           << ", b(i) = " << b_i << ", c(i) = " << c_i;
     } else {
       double expected = op(a_i, b_i, c_i);
-      if (expected < type_info<X>::min()) {
-        expected = -type_info<double>::infinity();
-      }
-      if (expected > type_info<X>::max()) {
-        expected = type_info<double>::infinity();
-      }
+      expected = static_cast<double>(static_cast<X>(expected));
       if (std::isnan(expected)) {
         // Checking the x is NaN could make sense, but it fails in
         // a variety of cases.

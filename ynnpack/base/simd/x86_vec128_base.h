@@ -1676,6 +1676,14 @@ YNN_ALWAYS_INLINE s32x16 cast(u8x16 a, int32_t) {
 
 #endif  // YNN_ARCH_X86_SSE41
 
+YNN_ALWAYS_INLINE f32x16 cast(s8x16 a, float) {
+  return cast(cast(a, int32_t()), float());
+}
+
+YNN_ALWAYS_INLINE f32x16 cast(u8x16 a, float) {
+  return cast(cast(a, int32_t()), float());
+}
+
 YNN_ALWAYS_INLINE f64x4 cast(f32x4 x, double) {
   return {f64x2{_mm_cvtps_pd(x.v)},
           f64x2{_mm_cvtps_pd(_mm_movehl_ps(x.v, x.v))}};

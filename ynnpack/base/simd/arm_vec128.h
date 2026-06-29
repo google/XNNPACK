@@ -2032,6 +2032,14 @@ YNN_ALWAYS_INLINE s32x16 cast(u8x16 b, int32_t) {
   return cast(cast(b, int16_t{}), int32_t{});
 }
 
+YNN_ALWAYS_INLINE f32x16 cast(s8x16 a, float) {
+  return cast(cast(a, int32_t{}), float{});
+}
+
+YNN_ALWAYS_INLINE f32x16 cast(u8x16 a, float) {
+  return cast(cast(a, int32_t{}), float{});
+}
+
 YNN_ALWAYS_INLINE f32x4 cast(s32x4 x, float) {
   return f32x4{vcvtq_f32_s32(x.v)};
 }

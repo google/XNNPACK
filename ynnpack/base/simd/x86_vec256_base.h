@@ -41,7 +41,7 @@ YNN_ALWAYS_INLINE __m128i hi(__m256i x) {
   return _mm_castps_si128(_mm256_extractf128_ps(_mm256_castsi256_ps(x), 1));
 }
 
-YNN_ALWAYS_INLINE __m128d lo(__m256d x) {return _mm256_castpd256_pd128(x); }
+YNN_ALWAYS_INLINE __m128d lo(__m256d x) { return _mm256_castpd256_pd128(x); }
 YNN_ALWAYS_INLINE __m128d hi(__m256d x) { return _mm256_extractf128_pd(x, 1); }
 
 YNN_ALWAYS_INLINE __m256 concat(__m128 lo, __m128 hi) {
@@ -1288,6 +1288,24 @@ YNN_ALWAYS_INLINE f64x4 floor_log2(f64x4 a) {
 }
 #endif  // YNN_ARCH_X86_AVX2
 
+YNN_ALWAYS_INLINE s8x16 cast(s16x16 a, int8_t) {
+  return s8x16{_mm_packs_epi16(lo(a).v, hi(a).v)};
+}
+
+YNN_ALWAYS_INLINE u8x16 cast(s16x16 a, uint8_t) {
+  return u8x16{_mm_packus_epi16(lo(a).v, hi(a).v)};
+}
+
+YNN_ALWAYS_INLINE s16x8 cast(s32x8 a, int16_t) {
+  return s16x8{_mm_packs_epi32(lo(a).v, hi(a).v)};
+}
+
+YNN_ALWAYS_INLINE s16x8 cast(f32x8 f, int16_t) {
+  const s32x4 i0 = cast(lo(f), int32_t());
+  const s32x4 i1 = cast(hi(f), int32_t());
+  return cast(concat(i0, i1), int16_t());
+}
+
 #ifdef YNN_ARCH_X86_AVX2
 YNN_ALWAYS_INLINE s32x8 cast(f32x8 f, int32_t) {
   const __m256 threshold = _mm256_set1_ps(2147483520.0f);
@@ -1455,6 +1473,14 @@ YNN_ALWAYS_INLINE s32x16 cast(u8x16 a, int32_t) {
   };
 }
 
+YNN_ALWAYS_INLINE f32x16 cast(s8x16 a, float) {
+  return cast(cast(a, int32_t()), float());
+}
+
+YNN_ALWAYS_INLINE f32x16 cast(u8x16 a, float) {
+  return cast(cast(a, int32_t()), float());
+}
+
 YNN_ALWAYS_INLINE bf16x16 cast(f32x16 a, bfloat16) {
   __m256 nan_mask_lo = _mm256_cmp_ps(lo(a).v, lo(a).v, _CMP_UNORD_Q);
   __m256i u_lo = _mm256_castps_si256(lo(a).v);
@@ -1519,6 +1545,38 @@ YNN_ALWAYS_INLINE u8x32 cast(f32x32 f, uint8_t) {
   const __m256i r = _mm256_packus_epi16(i01_16, i23_16);
   return u8x32{_mm256_permutevar8x32_epi32(
       r, _mm256_setr_epi32(0, 4, 1, 5, 2, 6, 3, 7))};
+}
+#endif  // YNN_ARCH_X86_AVX512
+#else   // YNN_ARCH_X86_AVX2
+#ifndef YNN_ARCH_X86_AVX512
+// AVX512 provides better versions of these casts.
+using f32x16 = vec<float, 16>;
+using s32x16 = vec<int32_t, 16>;
+
+YNN_ALWAYS_INLINE s32x16 cast(s8x16 a, int32_t) {
+  return {
+      concat(s32x4{_mm_cvtepi8_epi32(a.v)},
+             s32x4{_mm_cvtepi8_epi32(_mm_srli_si128(a.v, 4))}),
+      concat(s32x4{_mm_cvtepi8_epi32(_mm_srli_si128(a.v, 8))},
+             s32x4{_mm_cvtepi8_epi32(_mm_srli_si128(a.v, 12))}),
+  };
+}
+
+YNN_ALWAYS_INLINE s32x16 cast(u8x16 a, int32_t) {
+  return {
+      concat(s32x4{_mm_cvtepu8_epi32(a.v)},
+             s32x4{_mm_cvtepu8_epi32(_mm_srli_si128(a.v, 4))}),
+      concat(s32x4{_mm_cvtepu8_epi32(_mm_srli_si128(a.v, 8))},
+             s32x4{_mm_cvtepu8_epi32(_mm_srli_si128(a.v, 12))}),
+  };
+}
+
+YNN_ALWAYS_INLINE f32x16 cast(s8x16 a, float) {
+  return cast(cast(a, int32_t()), float());
+}
+
+YNN_ALWAYS_INLINE f32x16 cast(u8x16 a, float) {
+  return cast(cast(a, int32_t()), float());
 }
 #endif  // YNN_ARCH_X86_AVX512
 #endif  // YNN_ARCH_X86_AVX2

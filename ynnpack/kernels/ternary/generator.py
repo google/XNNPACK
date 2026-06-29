@@ -22,56 +22,126 @@ def main(argv: Sequence[str]) -> None:
 
   kernels = {
       "x86_sse2": [
-          (quantize_fp32_to_int8, (16, 1)),
-          (multiply_int32_fp32_fp32, (8, 1)),
-          (multiply_add_fp32_fp32_fp32, (8, 1)),
-          (multiply_add_fp64_fp64_fp64, (4, 1)),
+          # go/keep-sorted start
           (clamp_fp32_fp32_fp32, (8, 1)),
           (clamp_fp64_fp64_fp64, (4, 1)),
+          (dequantize_int8_to_fp32, (16, 1)),
+          (multiply_add_fp32_fp32_fp32, (8, 1)),
+          (multiply_add_fp64_fp64_fp64, (4, 1)),
+          (multiply_int32_fp32_fp32, (8, 1)),
+          (quantize_fp32_to_int8, (16, 1)),
+          # go/keep-sorted end
       ],
       "x86_sse41": [
-          (subtract_multiply_int32_int32_int32, (8, 1)),
+          # go/keep-sorted start
+          (dequantize_uint8_to_fp32, (16, 1)),
           (quantize_fp32_to_uint8, (16, 1)),
+          (subtract_multiply_int32_int32_int32, (8, 1)),
+          # go/keep-sorted end
       ],
       "x86_avx": [
-          (multiply_add_fp32_fp32_fp32, (16, 1)),
-          (multiply_add_fp64_fp64_fp64, (8, 1)),
+          # go/keep-sorted start
           (clamp_fp32_fp32_fp32, (16, 1)),
           (clamp_fp64_fp64_fp64, (8, 1)),
+          (multiply_add_fp32_fp32_fp32, (16, 1)),
+          (multiply_add_fp64_fp64_fp64, (8, 1)),
+          # go/keep-sorted end
       ],
       "x86_avx2": [
+          # go/keep-sorted start
+          (dequantize_int8_to_bf16, (32, 1)),
+          (dequantize_int8_to_fp32, (32, 1)),
+          (dequantize_uint8_to_bf16, (32, 1)),
+          (dequantize_uint8_to_fp32, (32, 1)),
+          (multiply_int32_fp32_fp32, (16, 1)),
+          (quantize_bf16_to_int8, (32, 1)),
+          (quantize_bf16_to_uint8, (32, 1)),
           (quantize_fp32_to_int8, (32, 1)),
           (quantize_fp32_to_uint8, (32, 1)),
-          (multiply_int32_fp32_fp32, (16, 1)),
           (subtract_multiply_int32_int32_int32, (16, 1)),
+          # go/keep-sorted end
       ],
       "x86_avx512": [
-          (multiply_int32_fp32_fp32, (32, 1)),
-          (subtract_multiply_int32_int32_int32, (32, 1)),
-          (multiply_add_fp32_fp32_fp32, (32, 1)),
-          (multiply_add_fp64_fp64_fp64, (16, 1)),
+          # go/keep-sorted start
           (clamp_fp32_fp32_fp32, (32, 1)),
           (clamp_fp64_fp64_fp64, (16, 1)),
+          (dequantize_int8_to_bf16, (64, 1)),
+          (dequantize_int8_to_fp16, (64, 1)),
+          (dequantize_int8_to_fp32, (64, 1)),
+          (dequantize_uint8_to_bf16, (64, 1)),
+          (dequantize_uint8_to_fp16, (64, 1)),
+          (dequantize_uint8_to_fp32, (64, 1)),
+          (multiply_add_fp32_fp32_fp32, (32, 1)),
+          (multiply_add_fp64_fp64_fp64, (16, 1)),
+          (multiply_int32_fp32_fp32, (32, 1)),
+          (quantize_bf16_to_int8, (64, 1)),
+          (quantize_bf16_to_uint8, (64, 1)),
+          (quantize_fp16_to_int8, (64, 1)),
+          (quantize_fp16_to_uint8, (64, 1)),
           (quantize_fp32_to_int8, (64, 1)),
           (quantize_fp32_to_uint8, (64, 1)),
+          (subtract_multiply_int32_int32_int32, (32, 1)),
+          # go/keep-sorted end
+      ],
+      "x86_avx512bf16": [
+          # go/keep-sorted start
+          (dequantize_int8_to_bf16, (64, 1)),
+          (dequantize_uint8_to_bf16, (64, 1)),
+          # go/keep-sorted end
+      ],
+      "x86_f16c": [
+          # go/keep-sorted start
+          (dequantize_int8_to_fp16, (32, 1)),
+          (dequantize_uint8_to_fp16, (32, 1)),
+          (quantize_fp16_to_int8, (32, 1)),
+          (quantize_fp16_to_uint8, (32, 1)),
+          # go/keep-sorted end
       ],
       "arm_neon": [
-          (quantize_fp32_to_int8, (16, 1)),
-          (multiply_int32_fp32_fp32, (64, 1)),
-          (subtract_multiply_int32_int32_int32, (8, 1)),
-          (multiply_add_fp32_fp32_fp32, (32, 1)),
+          # go/keep-sorted start
           (clamp_fp32_fp32_fp32, (32, 1)),
+          (dequantize_int8_to_bf16, (16, 1)),
+          (dequantize_int8_to_fp32, (16, 1)),
+          (dequantize_uint8_to_bf16, (16, 1)),
+          (dequantize_uint8_to_fp32, (16, 1)),
+          (multiply_add_fp32_fp32_fp32, (32, 1)),
+          (multiply_int32_fp32_fp32, (64, 1)),
+          (quantize_bf16_to_int8, (16, 1)),
+          (quantize_bf16_to_uint8, (16, 1)),
+          (quantize_fp32_to_int8, (16, 1)),
+          (subtract_multiply_int32_int32_int32, (8, 1)),
+          # go/keep-sorted end
+      ],
+      "arm_neonbf16": [
+          # go/keep-sorted start
+          (dequantize_int8_to_bf16, (16, 1)),
+          (dequantize_uint8_to_bf16, (16, 1)),
+          # go/keep-sorted end
+      ],
+      "arm_neonfp16": [
+          # go/keep-sorted start
+          (dequantize_int8_to_fp16, (16, 1)),
+          (dequantize_uint8_to_fp16, (16, 1)),
+          (quantize_fp16_to_int8, (16, 1)),
+          (quantize_fp16_to_uint8, (16, 1)),
+          # go/keep-sorted end
       ],
       "arm64_neon": [
-          (multiply_add_fp64_fp64_fp64, (16, 1)),
+          # go/keep-sorted start
           (clamp_fp64_fp64_fp64, (16, 1)),
+          (multiply_add_fp64_fp64_fp64, (16, 1)),
+          # go/keep-sorted end
       ],
       "wasm_simd128": [
-          (quantize_fp32_to_int8, (16, 1)),
-          (multiply_int32_fp32_fp32, (8, 1)),
-          (subtract_multiply_int32_int32_int32, (8, 1)),
-          (multiply_add_fp32_fp32_fp32, (8, 1)),
+          # go/keep-sorted start
           (clamp_fp32_fp32_fp32, (8, 1)),
+          (dequantize_int8_to_fp32, (16, 1)),
+          (dequantize_uint8_to_fp32, (16, 1)),
+          (multiply_add_fp32_fp32_fp32, (8, 1)),
+          (multiply_int32_fp32_fp32, (8, 1)),
+          (quantize_fp32_to_int8, (16, 1)),
+          (subtract_multiply_int32_int32_int32, (8, 1)),
+          # go/keep-sorted end
       ],
   }[target]
 

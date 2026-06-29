@@ -1163,6 +1163,14 @@ YNN_ALWAYS_INLINE f32x16 cast(s32x16 x, float) {
   return f32x16{_mm512_cvtepi32_ps(x.v)};
 }
 
+YNN_ALWAYS_INLINE f32x16 cast(s8x16 a, float) {
+  return cast(cast(a, int32_t()), float());
+}
+
+YNN_ALWAYS_INLINE f32x16 cast(u8x16 a, float) {
+  return cast(cast(a, int32_t()), float());
+}
+
 YNN_ALWAYS_INLINE f64x8 cast(f32x8 a, double) {
   return f64x8{_mm512_cvtps_pd(a.v)};
 }
