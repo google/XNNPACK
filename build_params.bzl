@@ -475,7 +475,7 @@ XNNPACK_PARAMS_FOR_ARCH = {
         msvc_x86_64_copts = ["/arch:SSE2"],
     ),
     "avx": _create_params(
-        cond = "//build_config:x86",
+        cond = "//:avx_enabled",
         copts = _x86_align_stack(32),
         gcc_x86_copts = [
             "-mavx",
@@ -513,7 +513,7 @@ XNNPACK_PARAMS_FOR_ARCH = {
         msvc_x86_64_copts = ["/arch:AVX"],
     ),
     "f16c": _create_params(
-        cond = "//build_config:x86",
+        cond = "//:f16c_enabled",
         copts = _x86_align_stack(32),
         gcc_x86_copts = [
             "-mf16c",
@@ -524,7 +524,7 @@ XNNPACK_PARAMS_FOR_ARCH = {
         msvc_x86_64_copts = ["/arch:AVX"],
     ),
     "fma3": _create_params(
-        cond = "//build_config:x86",
+        cond = "//:fma3_enabled",
         copts = _x86_align_stack(32),
         gcc_x86_copts = [
             "-mf16c",
@@ -535,7 +535,7 @@ XNNPACK_PARAMS_FOR_ARCH = {
         msvc_x86_64_copts = ["/arch:AVX"],
     ),
     "avx2": _create_params(
-        cond = "//build_config:x86",
+        cond = "//:avx2_enabled",
         copts = _x86_align_stack(32),
         gcc_x86_copts = [
             "-mf16c",
