@@ -184,7 +184,7 @@ jobs:
           key: ccache-riscv64-${{ runner.os }}-${{ github.job }}-${{ github.run_id }}-${{ github.run_attempt }}
       - name: Print ccache stats
         run: ccache -s
-  cmake-windows-arm64-native:
+  cmake-windows-arm64:
     runs-on: windows-11-arm
     timeout-minutes: 60
     steps:
