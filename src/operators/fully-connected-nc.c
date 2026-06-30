@@ -673,8 +673,8 @@ static enum xnn_status setup_gemm_ukernels(const struct fc_variant* variant,
   return xnn_status_success;
 }
 
-static enum xnn_status setup_params_f16(const struct fc_variant* variant,
-                                        struct fc_context* context) {
+static XNN_NO_SANITIZE_FUNCTION enum xnn_status setup_params_f16(
+    const struct fc_variant* variant, struct fc_context* context) {
   const xnn_float16 fp16_output_min =
       xnn_float16_from_float(context->output_min);
   const xnn_float16 fp16_output_max =
@@ -687,8 +687,8 @@ static enum xnn_status setup_params_f16(const struct fc_variant* variant,
   return xnn_status_success;
 }
 
-static enum xnn_status setup_params_f16_qc4w(const struct fc_variant* variant,
-                                             struct fc_context* context) {
+static XNN_NO_SANITIZE_FUNCTION enum xnn_status setup_params_f16_qc4w(
+    const struct fc_variant* variant, struct fc_context* context) {
   const xnn_float16 fp16_output_min =
       xnn_float16_from_float(context->output_min);
   const xnn_float16 fp16_output_max =
@@ -702,8 +702,8 @@ static enum xnn_status setup_params_f16_qc4w(const struct fc_variant* variant,
   return xnn_status_success;
 }
 
-static enum xnn_status setup_params_f16_qb4w(const struct fc_variant* variant,
-                                             struct fc_context* context) {
+static XNN_NO_SANITIZE_FUNCTION enum xnn_status setup_params_f16_qb4w(
+    const struct fc_variant* variant, struct fc_context* context) {
   const xnn_float16 fp16_output_min =
       xnn_float16_from_float(context->output_min);
   const xnn_float16 fp16_output_max =
@@ -717,8 +717,8 @@ static enum xnn_status setup_params_f16_qb4w(const struct fc_variant* variant,
   return xnn_status_success;
 }
 
-static enum xnn_status setup_params_f32(const struct fc_variant* variant,
-                                        struct fc_context* context) {
+static XNN_NO_SANITIZE_FUNCTION enum xnn_status setup_params_f32(
+    const struct fc_variant* variant, struct fc_context* context) {
   if XNN_LIKELY (context->gemm_config->init.f32 != NULL) {
     context->gemm_config->init.f32(&context->params.f32, context->output_min,
                                    context->output_max);
@@ -727,8 +727,8 @@ static enum xnn_status setup_params_f32(const struct fc_variant* variant,
   return xnn_status_success;
 }
 
-static enum xnn_status setup_params_f32_qc4w(const struct fc_variant* variant,
-                                             struct fc_context* context) {
+static XNN_NO_SANITIZE_FUNCTION enum xnn_status setup_params_f32_qc4w(
+    const struct fc_variant* variant, struct fc_context* context) {
   if XNN_LIKELY (context->gemm_config->init.f32_qc4w != NULL) {
     context->gemm_config->init.f32_qc4w(
         &context->params.f32_qc4w, context->output_min, context->output_max,
@@ -738,8 +738,8 @@ static enum xnn_status setup_params_f32_qc4w(const struct fc_variant* variant,
   return xnn_status_success;
 }
 
-static enum xnn_status setup_params_f32_qb4w(const struct fc_variant* variant,
-                                             struct fc_context* context) {
+static XNN_NO_SANITIZE_FUNCTION enum xnn_status setup_params_f32_qb4w(
+    const struct fc_variant* variant, struct fc_context* context) {
   if XNN_LIKELY (context->gemm_config->init.f32_qb4w != NULL) {
     context->gemm_config->init.f32_qb4w(
         &context->params.f32_qb4w, context->output_min, context->output_max,
@@ -749,8 +749,8 @@ static enum xnn_status setup_params_f32_qb4w(const struct fc_variant* variant,
   return xnn_status_success;
 }
 
-static enum xnn_status setup_params_qs8_qc8w(const struct fc_variant* variant,
-                                             struct fc_context* context) {
+static XNN_NO_SANITIZE_FUNCTION enum xnn_status setup_params_qs8_qc8w(
+    const struct fc_variant* variant, struct fc_context* context) {
   context->output_min = clamp(context->output_min, INT8_MIN, INT8_MAX);
   context->output_max = clamp(context->output_max, INT8_MIN, INT8_MAX);
   if XNN_LIKELY (context->gemm_config->init.qs8_qc8w != NULL) {
@@ -762,8 +762,8 @@ static enum xnn_status setup_params_qs8_qc8w(const struct fc_variant* variant,
   return xnn_status_success;
 }
 
-static enum xnn_status setup_params_qu8(const struct fc_variant* variant,
-                                        struct fc_context* context) {
+static XNN_NO_SANITIZE_FUNCTION enum xnn_status setup_params_qu8(
+    const struct fc_variant* variant, struct fc_context* context) {
   const float requantization_scale = context->input_scale *
                                      context->kernel_scale_value /
                                      context->output_scale;
@@ -2726,7 +2726,7 @@ enum xnn_status xnn_create_fully_connected_nc_qu8(
   return create_fully_connected_nc_helper(&context);
 }
 
-static enum xnn_status reshape_fully_connected_nc(
+static XNN_NO_SANITIZE_FUNCTION enum xnn_status reshape_fully_connected_nc(
     xnn_operator_t fully_connected_op,
     enum xnn_operator_type expected_operator_type, size_t batch_size,
     bool dynamic_quantization, uint32_t log2_output_element_size,

@@ -90,14 +90,12 @@ enum xnn_status xnn_create_pack_lh_x8(uint32_t flags,
                         pack_lh_op_out);
 }
 
-enum xnn_status reshape_pack_lh(xnn_operator_t pack_lh_op, size_t num_groups,
-                                size_t batch_size, size_t channels,
-                                size_t* output_size_bytes,
-                                enum xnn_operator_type expected_operator_type,
-                                size_t element_size,
-                                const struct xnn_gemm_config* gemm_config,
-                                const struct xnn_pack_lh_config* pack_lh_config,
-                                pthreadpool_t threadpool) {
+XNN_NO_SANITIZE_FUNCTION enum xnn_status reshape_pack_lh(
+    xnn_operator_t pack_lh_op, size_t num_groups, size_t batch_size,
+    size_t channels, size_t* output_size_bytes,
+    enum xnn_operator_type expected_operator_type, size_t element_size,
+    const struct xnn_gemm_config* gemm_config,
+    const struct xnn_pack_lh_config* pack_lh_config, pthreadpool_t threadpool) {
   if (pack_lh_op->type != expected_operator_type) {
     xnn_log_error(
         "failed to reshape operator: operator type mismatch (expected %s, got "

@@ -103,9 +103,9 @@ XNN_NO_SANITIZE_FUNCTION void xnn_compute_transposec_5d(struct transpose_context
   context->const_size_ukernel(x, y, ld_input, ld_output, tile_l, tile_m);
 }
 
-void xnn_compute_transposec_6d(struct transpose_context* restrict context,
-                               size_t i, size_t j, size_t k, size_t l, size_t m,
-                               size_t n, size_t tile_m, size_t tile_n) {
+XNN_NO_SANITIZE_FUNCTION void xnn_compute_transposec_6d(
+    struct transpose_context* restrict context, size_t i, size_t j, size_t k,
+    size_t l, size_t m, size_t n, size_t tile_m, size_t tile_n) {
   const size_t ld_input = context->input_stride[5];
   const size_t ld_output = context->output_stride[4];
   const void* x =
@@ -124,9 +124,9 @@ void xnn_compute_transposec_6d(struct transpose_context* restrict context,
   context->const_size_ukernel(x, y, ld_input, ld_output, tile_m, tile_n);
 }
 
-void xnn_compute_transposev_2d(struct transpose_context* restrict context,
-                               size_t i, size_t j, size_t tile_i,
-                               size_t tile_j) {
+XNN_NO_SANITIZE_FUNCTION void xnn_compute_transposev_2d(
+    struct transpose_context* restrict context, size_t i, size_t j,
+    size_t tile_i, size_t tile_j) {
   const size_t element_size = context->output_stride[1];
   const size_t ld_input = context->input_stride[1];
   const size_t ld_output = context->output_stride[0];
@@ -141,9 +141,9 @@ void xnn_compute_transposev_2d(struct transpose_context* restrict context,
       context->output_stride[1], element_size, tile_i, tile_j);
 }
 
-void xnn_compute_transposev_3d(struct transpose_context* restrict context,
-                               size_t i, size_t j, size_t k, size_t tile_j,
-                               size_t tile_k) {
+XNN_NO_SANITIZE_FUNCTION void xnn_compute_transposev_3d(
+    struct transpose_context* restrict context, size_t i, size_t j, size_t k,
+    size_t tile_j, size_t tile_k) {
   const size_t element_size = context->output_stride[2];
   const size_t ld_input = context->input_stride[2];
   const size_t ld_output = context->output_stride[1];
@@ -160,9 +160,9 @@ void xnn_compute_transposev_3d(struct transpose_context* restrict context,
       context->output_stride[2], element_size, tile_j, tile_k);
 }
 
-void xnn_compute_transposev_4d(struct transpose_context* restrict context,
-                               size_t i, size_t j, size_t k, size_t l,
-                               size_t tile_k, size_t tile_l) {
+XNN_NO_SANITIZE_FUNCTION void xnn_compute_transposev_4d(
+    struct transpose_context* restrict context, size_t i, size_t j, size_t k,
+    size_t l, size_t tile_k, size_t tile_l) {
   const size_t element_size = context->output_stride[3];
   const size_t ld_input = context->input_stride[3];
   const size_t ld_output = context->output_stride[2];
@@ -181,9 +181,9 @@ void xnn_compute_transposev_4d(struct transpose_context* restrict context,
       context->output_stride[3], element_size, tile_k, tile_l);
 }
 
-void xnn_compute_transposev_5d(struct transpose_context* restrict context,
-                               size_t i, size_t j, size_t k, size_t l, size_t m,
-                               size_t tile_l, size_t tile_m) {
+XNN_NO_SANITIZE_FUNCTION void xnn_compute_transposev_5d(
+    struct transpose_context* restrict context, size_t i, size_t j, size_t k,
+    size_t l, size_t m, size_t tile_l, size_t tile_m) {
   const size_t element_size = context->output_stride[4];
   const size_t ld_input = context->input_stride[4];
   const size_t ld_output = context->output_stride[3];
@@ -203,9 +203,9 @@ void xnn_compute_transposev_5d(struct transpose_context* restrict context,
       context->output_stride[4], element_size, tile_l, tile_m);
 }
 
-void xnn_compute_transposev_6d(struct transpose_context* restrict context,
-                               size_t i, size_t j, size_t k, size_t l, size_t m,
-                               size_t n, size_t tile_m, size_t tile_n) {
+XNN_NO_SANITIZE_FUNCTION void xnn_compute_transposev_6d(
+    struct transpose_context* restrict context, size_t i, size_t j, size_t k,
+    size_t l, size_t m, size_t n, size_t tile_m, size_t tile_n) {
   const size_t element_size = context->output_stride[5];
   const size_t ld_input = context->input_stride[5];
   const size_t ld_output = context->output_stride[4];
@@ -543,7 +543,7 @@ void xnn_compute_grouped_qp8gemm(struct gemm_context* restrict context,
                                   mr_block_size);
 }
 
-XNN_INLINE static void compute_hmp_qp8gemm(
+XNN_INLINE static XNN_NO_SANITIZE_FUNCTION void compute_hmp_qp8gemm(
     struct gemm_context* restrict context, uint32_t uarch_index,
     size_t nr_block_start, size_t mr_block_start, size_t nr_block_size,
     size_t mr_block_size) {
@@ -620,8 +620,9 @@ void xnn_compute_qp8gemm(struct gemm_context* restrict context,
                       mr_block_start, nr_block_size, mr_block_size);
 }
 
-void xnn_compute_spmm(struct spmm_context* restrict context, size_t batch_index,
-                      size_t mr_block_start, size_t mr_block_size) {
+XNN_NO_SANITIZE_FUNCTION void xnn_compute_spmm(
+    struct spmm_context* restrict context, size_t batch_index,
+    size_t mr_block_start, size_t mr_block_size) {
   context->ukernel(
       mr_block_size, context->n,
       (const void*)((uintptr_t)context->input +
@@ -811,11 +812,10 @@ void xnn_compute_inline_packed_igemm(
                                       mr_block_size);
 }
 
-void xnn_compute_hmp_inline_packed_igemm(struct igemm_context* restrict context,
-                                         uint32_t uarch_index, size_t thread_id,
-                                         size_t batch_index, size_t group_index,
-                                         size_t mr_block_start,
-                                         size_t mr_block_size) {
+XNN_NO_SANITIZE_FUNCTION void xnn_compute_hmp_inline_packed_igemm(
+    struct igemm_context* restrict context, uint32_t uarch_index,
+    size_t thread_id, size_t batch_index, size_t group_index,
+    size_t mr_block_start, size_t mr_block_size) {
   const size_t mr = context->mr;
   const size_t mr_packed = context->mr_packed;
   const size_t kc = context->kc;
@@ -956,9 +956,9 @@ XNN_NO_SANITIZE_FUNCTION void xnn_compute_dqsubconv2d(struct subconv_context* re
       &context->quantization_params[batch_index]);
 }
 
-void xnn_compute_conv2d_hwc2chw(struct conv2d_context* restrict context,
-                                size_t batch_index, size_t output_y_start,
-                                size_t output_y_slice) {
+XNN_NO_SANITIZE_FUNCTION void xnn_compute_conv2d_hwc2chw(
+    struct conv2d_context* restrict context, size_t batch_index,
+    size_t output_y_start, size_t output_y_slice) {
   context->hwc2chw_ukernel(
       context->input_height, context->input_width, output_y_start,
       output_y_start + output_y_slice,
@@ -1011,8 +1011,9 @@ XNN_NO_SANITIZE_FUNCTION void xnn_compute_dwconv_unipass(struct dwconv_context* 
                    context->zero, &context->params);
 }
 
-void xnn_compute_dwconv2d_chw(struct dwconv2d_context* restrict context,
-                              size_t batch_index, size_t channel) {
+XNN_NO_SANITIZE_FUNCTION void xnn_compute_dwconv2d_chw(
+    struct dwconv2d_context* restrict context, size_t batch_index,
+    size_t channel) {
   context->chw_ukernel(context->input_height, context->input_width,
                        (const void*)((uintptr_t)context->input +
                                      channel * context->input_channel_stride +
@@ -1145,7 +1146,7 @@ XNN_NO_SANITIZE_FUNCTION void xnn_compute_resize_bilinear(
       output, context->output_pixel_stride - context->scaled_channels);
 }
 
-void xnn_compute_resize_bilinear_chw(
+XNN_NO_SANITIZE_FUNCTION void xnn_compute_resize_bilinear_chw(
     struct resize_bilinear_chw_context* restrict context, size_t batch_index,
     size_t channel_start, size_t channel_range) {
   void* output = (void*)((uintptr_t)context->output +
@@ -1161,8 +1162,9 @@ void xnn_compute_resize_bilinear_chw(
                    context->input_channel_stride);
 }
 
-void xnn_compute_pad_5d(struct pad_context* restrict context, size_t i,
-                        size_t j, size_t k, size_t l, size_t m) {
+XNN_NO_SANITIZE_FUNCTION void xnn_compute_pad_5d(
+    struct pad_context* restrict context, size_t i, size_t j, size_t k,
+    size_t l, size_t m) {
   const void* input =
       (const void*)((uintptr_t)context->input + i * context->input_stride[4] +
                     j * context->input_stride[3] +
@@ -1248,8 +1250,9 @@ XNN_NO_SANITIZE_FUNCTION void xnn_compute_slice_4d(struct slice_context* restric
   context->ukernel(context->contiguous_size, input, output, NULL);
 }
 
-void xnn_compute_slice_5d(struct slice_context* restrict context, size_t i,
-                          size_t j, size_t k, size_t l, size_t m) {
+XNN_NO_SANITIZE_FUNCTION void xnn_compute_slice_5d(
+    struct slice_context* restrict context, size_t i, size_t j, size_t k,
+    size_t l, size_t m) {
   const void* input =
       (const void*)((uintptr_t)context->input + i * context->input_stride[4] +
                     j * context->input_stride[3] +
@@ -1344,7 +1347,7 @@ XNN_NO_SANITIZE_FUNCTION void xnn_compute_elementwise_binary_4d(
   }
 }
 
-void xnn_compute_elementwise_binary_5d(
+XNN_NO_SANITIZE_FUNCTION void xnn_compute_elementwise_binary_5d(
     struct elementwise_binary_context* restrict context, size_t i, size_t j,
     size_t k, size_t l, size_t m) {
   const void* a =
@@ -1361,8 +1364,9 @@ void xnn_compute_elementwise_binary_5d(
   context->ukernel(context->elements, a, b, y, &context->params);
 }
 
-void xnn_compute_lut_strided(struct lut_strided_context* restrict context,
-                             size_t batch_offset, size_t batch_range) {
+XNN_NO_SANITIZE_FUNCTION void xnn_compute_lut_strided(
+    struct lut_strided_context* restrict context, size_t batch_offset,
+    size_t batch_range) {
   for (size_t batch_index = batch_offset;
        batch_index < batch_offset + batch_range; batch_index++) {
     const void* x =
@@ -1373,8 +1377,9 @@ void xnn_compute_lut_strided(struct lut_strided_context* restrict context,
   }
 }
 
-void xnn_compute_lut_contiguous(struct lut_contiguous_context* restrict context,
-                                size_t offset, size_t size) {
+XNN_NO_SANITIZE_FUNCTION void xnn_compute_lut_contiguous(
+    struct lut_contiguous_context* restrict context, size_t offset,
+    size_t size) {
   const void* x = (const void*)((uintptr_t)context->x + offset);
   void* y = (void*)((uintptr_t)context->y + offset);
 
@@ -1748,7 +1753,7 @@ void xnn_compute_f32_qdu8_convert(
   }
 }
 
-void xnn_compute_pack_lh(struct pack_lh_context* restrict context,
+XNN_NO_SANITIZE_FUNCTION void xnn_compute_pack_lh(struct pack_lh_context* restrict context,
                          size_t group_idx, size_t m_idx_start, size_t tile) {
   const void* lhs =
       (const void*)((uintptr_t)context->lhs + group_idx * context->gi_stride +
@@ -1763,7 +1768,7 @@ void xnn_compute_pack_lh(struct pack_lh_context* restrict context,
                            context->lhs_stride, lhs_packed);
 }
 
-void xnn_compute_f32_qp8_convert(
+XNN_NO_SANITIZE_FUNCTION void xnn_compute_f32_qp8_convert(
     struct f32_qp8_convert_context* restrict context, size_t group_idx,
     size_t m_idx_start, size_t m_tile) {
   const size_t m_end = m_idx_start + m_tile;
@@ -1785,8 +1790,8 @@ void xnn_compute_f32_qp8_convert(
   }
 }
 
-void xnn_compute_u8_softmax(struct u8_softmax_context* restrict context,
-                            size_t batch_index) {
+XNN_NO_SANITIZE_FUNCTION void xnn_compute_u8_softmax(
+    struct u8_softmax_context* restrict context, size_t batch_index) {
   const uint8_t* x =
       (const uint8_t*)((uintptr_t)context->x + context->x_stride * batch_index);
   uint8_t* y =
@@ -1830,8 +1835,9 @@ XNN_NO_SANITIZE_FUNCTION void xnn_compute_floating_point_softmax(
   context->vmulc_ukernel(n, y, &y_scale, y, &context->minmax_params);
 }
 
-void xnn_compute_vmulcaddc(struct vmulcaddc_context* restrict context,
-                           size_t batch_start, size_t batch_size) {
+XNN_NO_SANITIZE_FUNCTION void xnn_compute_vmulcaddc(
+    struct vmulcaddc_context* restrict context, size_t batch_start,
+    size_t batch_size) {
   const size_t x_stride = context->x_stride;
   const size_t y_stride = context->y_stride;
 
