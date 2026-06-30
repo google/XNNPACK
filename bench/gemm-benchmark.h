@@ -72,6 +72,30 @@ void GEMMBenchmark(benchmark::State& state,
                    size_t sr,
                    uint64_t arch_flags = 0);
 
+inline void GEMMBenchmark(benchmark::State& state,
+                          xnn_qs8_qc8w_gemm_minmax_ukernel_fn gemm,
+                          xnn_init_qs8_qc8w_conv_minmax_params_fn init_params,
+                          xnn_qs8_packw_gemm_goi_ukernel_fn pack, size_t mr, size_t nr, size_t kr,
+                          size_t sr, uint64_t arch_flags = 0) {
+  GEMMBenchmark(state, gemm, init_params, reinterpret_cast<xnn_pack_qs8_gemm_fn>(pack), mr, nr, kr, sr, arch_flags);
+}
+
+inline void GEMMBenchmark(benchmark::State& state,
+                          xnn_qd8_f16_qc8w_gemm_ukernel_fn gemm,
+                          xnn_init_f16_minmax_params_fn init_params,
+                          xnn_qs8_packw_gemm_goi_ukernel_fn pack, size_t mr, size_t nr, size_t kr,
+                          size_t sr, uint64_t arch_flags = 0) {
+  GEMMBenchmark(state, gemm, init_params, reinterpret_cast<xnn_pack_qs8_gemm_fn>(pack), mr, nr, kr, sr, arch_flags);
+}
+
+inline void GEMMBenchmark(benchmark::State& state,
+                          xnn_qd8_f32_qc8w_gemm_ukernel_fn gemm,
+                          xnn_init_f32_minmax_params_fn init_params,
+                          xnn_qs8_packw_gemm_goi_ukernel_fn pack, size_t mr, size_t nr, size_t kr,
+                          size_t sr, uint64_t arch_flags = 0) {
+  GEMMBenchmark(state, gemm, init_params, reinterpret_cast<xnn_pack_qs8_gemm_fn>(pack), mr, nr, kr, sr, arch_flags);
+}
+
 void GEMMBenchmark(benchmark::State& state,
                    xnn_qd8_f16_qb4w_gemm_ukernel_fn gemm,
                    xnn_init_f16_qb4w_minmax_params_fn init_params,

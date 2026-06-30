@@ -1200,7 +1200,7 @@ std::vector<GemmTestParams> CreateTests1(
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_qd8_f32_qc8w_gemm_minmax_ukernel_2x8c4__neondot,
                         xnn_init_f32_minmax_scalar_params,
-                        xnn_pack_qs8_gemm_goi_w);
+                        xnn_qs8_packw_gemm_goi_ukernel_x8c4__neondot);
           },
           xnn_arch_arm_neon_dot)),
       [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
@@ -1219,7 +1219,7 @@ std::vector<GemmTestParams> CreateTests1(
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_qd8_f32_qc8w_gemm_minmax_ukernel_5x8c4__neondot,
                         xnn_init_f32_minmax_scalar_params,
-                        xnn_pack_qs8_gemm_goi_w);
+                        xnn_qs8_packw_gemm_goi_ukernel_x8c4__neondot);
           },
           xnn_arch_arm_neon_dot)),
       [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
@@ -1238,7 +1238,7 @@ std::vector<GemmTestParams> CreateTests1(
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_qd8_f32_qc8w_gemm_minmax_ukernel_4x16c4__neondot,
                         xnn_init_f32_minmax_scalar_params,
-                        xnn_pack_qs8_gemm_goi_w);
+                        xnn_qs8_packw_gemm_goi_ukernel_x16c4__neondot);
           },
           xnn_arch_arm_neon_dot)),
       [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
@@ -1257,7 +1257,7 @@ std::vector<GemmTestParams> CreateTests1(
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_qd8_f32_qc8w_gemm_minmax_ukernel_5x16c4__neondot,
                         xnn_init_f32_minmax_scalar_params,
-                        xnn_pack_qs8_gemm_goi_w);
+                        xnn_qs8_packw_gemm_goi_ukernel_x16c4__neondot);
           },
           xnn_arch_arm_neon_dot)),
       [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
@@ -1276,7 +1276,7 @@ std::vector<GemmTestParams> CreateTests1(
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_qd8_f32_qc8w_gemm_minmax_ukernel_8x16c4__neondot,
                         xnn_init_f32_minmax_scalar_params,
-                        xnn_pack_qs8_gemm_goi_w);
+                        xnn_qs8_packw_gemm_goi_ukernel_x16c4__neondot);
           },
           xnn_arch_arm_neon_dot)),
       [](const testing::TestParamInfo<GemmTest::ParamType>& info) {

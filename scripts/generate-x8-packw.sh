@@ -132,6 +132,7 @@ tools/xngen src/x8-packw/kr-avxvnni.c.in -D NR=16 -D KR=8 -D DATATYPE=X8  -D TYP
 tools/xngen src/x8-packw/kr-avxvnni.c.in -D NR=16 -D KR=8 -D DATATYPE=X8  -D TYPE=int8_t -D IZP=0   -D AVX=10 -D VARIANT=     -D PREFETCH=1 -o src/x8-packw/gen/x8-packw-x16c8-gemm-goi-avx256skx-prfm.c &
 
 tools/xngen src/x8-packw/kr-avxvnni.c.in -D NR=8  -D KR=8 -D DATATYPE=QS8 -D TYPE=int8_t -D IZP=0   -D AVX=2  -D VARIANT=MADD -D PREFETCH=0 -o src/qs8-packw/gen/qs8-packw-x8c8-gemm-goi-avx2-madd.c &
+tools/xngen src/x8-packw/kr-avxvnni.c.in -D NR=16 -D KR=8 -D DATATYPE=QS8 -D TYPE=int8_t -D IZP=0   -D AVX=2  -D VARIANT=MADD -D PREFETCH=0 -o src/qs8-packw/gen/qs8-packw-x16c8-gemm-goi-avx2-madd.c &
 
 # QC4W
 tools/xngen src/x8-packw/kr-avxvnni.c.in -D NR=8  -D KR=8 -D DATATYPE=QS4 -D TYPE=int8_t -D IZP=0   -D AVX=2  -D VARIANT=     -D PREFETCH=0 -o src/qs8-qc4w-packw/gen/qs8-qc4w-packw-x8c8-gemm-goi-avxvnni.c &
@@ -169,6 +170,15 @@ tools/xngen src/x8-packw/gio-scalar.c.in -D NR=64 -o src/x8-packw/gen/x8-packw-x
 
 ################################## ARM NEON ###################################
 tools/xngen src/x8-packw/gio-simd.c.in -D BATCH_TILES=16,32,48,64 -D PREFETCH=0 -D KBLOCK=2 -D ARCH=neon -o src/x8-packw/gen/x8-packw-gio-neon-u2.c &
+
+### NEON C4 micro-kernels
+tools/xngen src/x8-packw/c4-neon.c.in -D NR=8  -D KR=4 -D DATATYPE=QS8 -D TYPE=int8_t -D IZP=0 -o src/qs8-packw/gen/qs8-packw-x8c4-gemm-goi-neondot.c &
+tools/xngen src/x8-packw/c4-neon.c.in -D NR=16 -D KR=4 -D DATATYPE=QS8 -D TYPE=int8_t -D IZP=0 -o src/qs8-packw/gen/qs8-packw-x16c4-gemm-goi-neondot.c &
+
+tools/xngen src/x8-packw/c4-neon.c.in -D NR=8  -D KR=4 -D DATATYPE=X8  -D TYPE=int8_t -D IZP=0 -o src/x8-packw/gen/x8-packw-x8c4-gemm-goi-neon.c &
+tools/xngen src/x8-packw/c4-neon.c.in -D NR=16 -D KR=4 -D DATATYPE=X8  -D TYPE=int8_t -D IZP=0 -o src/x8-packw/gen/x8-packw-x16c4-gemm-goi-neon.c &
+
+
 
 ################################## Wasm SIMD ##################################
 tools/xngen src/x8-packw/gio-simd.c.in -D BATCH_TILES=16,32,48,64 -D PREFETCH=0 -D KBLOCK=2 -D ARCH=wasmsimd -o src/x8-packw/gen/x8-packw-gio-wasmsimd-u2.c &

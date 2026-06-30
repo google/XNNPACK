@@ -1,0 +1,192 @@
+// Copyright 2026 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$BATCH_TILES = tuple(int(bt) for bt in BATCH_TILES.split(","))
+$SIMD_SIZE = {
+$  "scalar": 1,
+$  "neon": 4,
+$  "neonfp16": 4,
+$  "wasmrelaxedsimd": 4,
+$  "f16c": 8,
+$  "avx512f": 16,
+$  "hvx": 32,
+$}[ARCH]
+#include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
+
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/microparams.h"
+
+$SIMD_ARCH = {
+$  "f16c": "avx",
+$  "neonfp16": "neon",
+$}.get(ARCH, ARCH)
+#include "src/xnnpack/simd/f32-${SIMD_ARCH}.h"
+
+$if ARCH == "wasmrelaxedsimd":
+  #undef XNN_SIMD_HAS_NATIVE_FMA
+  #include "src/xnnpack/simd/f16-wasmrelaxedsimd.h"
+$elif ARCH == "scalar":
+  #include "src/xnnpack/simd/f16-scalar.h"
+$elif ARCH not in ("f16c", "avx512f", "neon", "neonfp16", "hvx"):
+  #include "src/xnnpack/simd/f16-scalar.h"
+
+
+// Helper functions for f16 <-> f32 conversion using xnn_simd_f32_t.
+static XNN_INLINE xnn_simd_f32_t xnn_loadu_f16_f32(const xnn_float16* ptr) {
+  return xnn_cvt_f32_f16(xnn_loadu_f16(ptr));
+}
+
+static XNN_INLINE void xnn_store_f32_f16(xnn_float16* ptr, xnn_simd_f32_t v) {
+  xnn_store_tail_f16(ptr, xnn_cvt_f16_f32(v), xnn_simd_size_f32);
+}
+
+static XNN_INLINE xnn_simd_f32_t xnn_load_f16_f32(const xnn_float16* ptr, size_t elements) {
+  return xnn_cvt_f32_f16(xnn_load_tail_f16(ptr, elements));
+}
+
+static XNN_INLINE void xnn_store_f32_f16_tail(xnn_float16* ptr, xnn_simd_f32_t v, size_t elements) {
+  xnn_store_tail_f16(ptr, xnn_cvt_f16_f32(v), elements);
+}
+
+
+static XNN_INLINE xnn_simd_f32_t xnn_setexp_f32(xnn_simd_f32_t vx) {
+  // If `x` is an floating point value in the range [-127, 128], then
+  // `(x + magic) << 23` will generate the floating point value corresponding
+  // to `2^round(x)` (2^-127 and 2^128 will flush to zero and infinity,
+  // respectively).
+  XNN_SIMD_CONST_F32(vmagic, 8388735.0f);  // 2^23 + 127.
+  return xnn_sll_f32(xnn_add_f32(vx, vmagic), 23);
+}
+
+// Quick-and-dirty round to nearest, only works for floats in the range
+// `[2^-22, 2^22)`.
+static XNN_INLINE xnn_simd_f32_t xnn_qd_round_f32(xnn_simd_f32_t vx) {
+  // If `x` is an floating point value in the range `[2^-22, 2^22)`, then
+  // `(x + magic) - magic`` will generate the floating point value corresponding
+  // to `round(x)`.
+  XNN_SIMD_CONST_F32(vmagic, 12582912.0f);  // 2^23 + 2^22.
+  return xnn_sub_f32(xnn_add_f32(vmagic, vx), vmagic);
+}
+
+$for BATCH_TILE in BATCH_TILES:
+  $assert BATCH_TILE % SIMD_SIZE == 0
+  $assert BATCH_TILE >= SIMD_SIZE
+  $SIMD_TILE = BATCH_TILE // SIMD_SIZE
+  void xnn_f16_f32acc_vexp_ukernel__${ARCH}_poly_3_u${BATCH_TILE}(
+      size_t batch,
+      const xnn_float16* input,
+      xnn_float16* output,
+      const struct xnn_f16_default_params* unused_params)
+  {
+    assert(batch != 0);
+    assert(batch % sizeof(xnn_float16) == 0);
+    assert(input != NULL);
+    assert(output != NULL);
+    assert(xnn_simd_size_f32 == ${SIMD_SIZE});
+
+    // The monomial coefficients of the interpolation polynomial (`valpha_0` = 1).
+    XNN_SIMD_CONST_F32(valpha_1, 0.6933594f);
+    XNN_SIMD_CONST_F32(valpha_2, 0.24255371f);
+    XNN_SIMD_CONST_F32(valpha_3, 0.05517578f);
+
+    // Some useful constants.
+    XNN_SIMD_CONST_F32(vlog2e, 1.4423828f);
+    XNN_SIMD_CONST_F32(v16, 16.0f);
+    XNN_SIMD_CONST_F32(vm15, -15.0f);
+    XNN_SIMD_CONST_F32(vone, 1.0f);
+
+    $if SIMD_TILE > 1:
+      for (; batch >= ${BATCH_TILE} * sizeof(xnn_float16); batch -= ${BATCH_TILE} * sizeof(xnn_float16)) {
+        $for N in range(SIMD_TILE):
+          xnn_simd_f32_t vx_${N} = xnn_loadu_f16_f32(input + ${N} * ${SIMD_SIZE});
+        input += ${BATCH_TILE};
+
+        // Clamp `vz_prime = x * log2(e)` to the maximum exponents [-127, 128].
+        $for N in range(0, SIMD_TILE):
+          xnn_simd_f32_t vz_prime_${N} = xnn_mul_f32(vx_${N}, vlog2e);
+        $for N in range(0, SIMD_TILE):
+          vz_prime_${N} = xnn_min_f32(xnn_max_f32(vz_prime_${N}, vm15), v16);
+
+        // Decompose x * log2e into `z` (integer part) and `r` (remainder).
+        $for N in range(0, SIMD_TILE):
+          const xnn_simd_f32_t vz_${N} = xnn_qd_round_f32(vz_prime_${N});
+        $for N in range(0, SIMD_TILE):
+          const xnn_simd_f32_t vr_${N} = xnn_sub_f32(vz_prime_${N}, vz_${N});
+
+        // Compute 2^z.
+        $for N in range(0, SIMD_TILE):
+          const xnn_simd_f32_t v2z_${N} = xnn_setexp_f32(vz_${N});
+
+        // Evaluate the interpolation polynomial for `2^r`.
+        $for N in range(0, SIMD_TILE):
+          xnn_simd_f32_t v2r_${N} = xnn_fmadd_f32(vr_${N}, valpha_3, valpha_2);
+        $for N in range(0, SIMD_TILE):
+          v2r_${N} = xnn_fmadd_f32(vr_${N}, v2r_${N}, valpha_1);
+        $for N in range(0, SIMD_TILE):
+          v2r_${N} = xnn_fmadd_f32(vr_${N}, v2r_${N}, vone);
+
+        // Compute 2^z * 2^r.
+        $for N in range(0, SIMD_TILE):
+          const xnn_simd_f32_t vy_${N} = xnn_mul_f32(v2z_${N}, v2r_${N});
+
+        $for N in range(SIMD_TILE):
+          xnn_store_f32_f16(output + ${N} * ${SIMD_SIZE}, vy_${N});
+        output += ${BATCH_TILE};
+      }
+    for (; batch >= ${SIMD_SIZE} * sizeof(xnn_float16); batch -= ${SIMD_SIZE} * sizeof(xnn_float16)) {
+      xnn_simd_f32_t vx = xnn_loadu_f16_f32(input);
+      input += ${SIMD_SIZE};
+
+      // Clamp `vz_prime = x * log2(e)` to the maximum exponents [-127, 128].
+      xnn_simd_f32_t vz_prime = xnn_mul_f32(vx, vlog2e);
+      vz_prime = xnn_min_f32(xnn_max_f32(vz_prime, vm15), v16);
+
+      // Decompose x * log2e into `z` (integer part) and `r` (remainder).
+      const xnn_simd_f32_t vz = xnn_qd_round_f32(vz_prime);
+      const xnn_simd_f32_t vr = xnn_sub_f32(vz_prime, vz);
+
+      // Compute 2^z.
+      const xnn_simd_f32_t v2z = xnn_setexp_f32(vz);
+
+      // Evaluate the interpolation polynomial for `2^r`.
+      xnn_simd_f32_t v2r = xnn_fmadd_f32(vr, valpha_3, valpha_2);
+      v2r = xnn_fmadd_f32(vr, v2r, valpha_1);
+      v2r = xnn_fmadd_f32(vr, v2r, vone);
+
+      // Compute 2^z * 2^r.
+      const xnn_simd_f32_t vy = xnn_mul_f32(v2z, v2r);
+
+      xnn_store_f32_f16(output, vy);
+      output += ${SIMD_SIZE};
+    }
+    $if SIMD_SIZE > 1:
+      if XNN_UNLIKELY(batch != 0) {
+        xnn_simd_f32_t vx = xnn_load_f16_f32(input, batch >> XNN_LOG2_SIZEOF_FLOAT16);
+
+        // Clamp `vz_prime = x * log2(e)` to the maximum exponents [-127, 128].
+        xnn_simd_f32_t vz_prime = xnn_mul_f32(vx, vlog2e);
+        vz_prime = xnn_min_f32(xnn_max_f32(vz_prime, vm15), v16);
+
+        // Decompose x * log2e into `z` (integer part) and `r` (remainder).
+        const xnn_simd_f32_t vz = xnn_qd_round_f32(vz_prime);
+        const xnn_simd_f32_t vr = xnn_sub_f32(vz_prime, vz);
+
+        // Compute 2^z.
+        const xnn_simd_f32_t v2z = xnn_setexp_f32(vz);
+
+        // Evaluate the interpolation polynomial for `2^r`.
+        xnn_simd_f32_t v2r = xnn_fmadd_f32(vr, valpha_3, valpha_2);
+        v2r = xnn_fmadd_f32(vr, v2r, valpha_1);
+        v2r = xnn_fmadd_f32(vr, v2r, vone);
+
+        // Compute 2^z * 2^r.
+        const xnn_simd_f32_t vy = xnn_mul_f32(v2z, v2r);
+
+        xnn_store_f32_f16_tail(output, vy, batch >> XNN_LOG2_SIZEOF_FLOAT16);
+      }
+  }

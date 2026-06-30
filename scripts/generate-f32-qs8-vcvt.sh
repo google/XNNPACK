@@ -80,15 +80,35 @@ tools/xngen src/f32-qs8-vcvt/avx2.c.in -D BATCH_TILE=48 -D DATATYPE=QU8 -o src/f
 tools/xngen src/f32-qs8-vcvt/avx2.c.in -D BATCH_TILE=64 -D DATATYPE=QU8 -o src/f32-qu8-vcvt/gen/f32-qu8-vcvt-avx2-u64.c &
 
 ################################# x86 512-bit #################################
-tools/xngen src/f32-qs8-vcvt/avx512skx.c.in -D BATCH_TILE=32  -D DATATYPE=QS8 -o src/f32-qs8-vcvt/gen/f32-qs8-vcvt-avx512skx-u32.c &
-tools/xngen src/f32-qs8-vcvt/avx512skx.c.in -D BATCH_TILE=64  -D DATATYPE=QS8 -o src/f32-qs8-vcvt/gen/f32-qs8-vcvt-avx512skx-u64.c &
-tools/xngen src/f32-qs8-vcvt/avx512skx.c.in -D BATCH_TILE=96  -D DATATYPE=QS8 -o src/f32-qs8-vcvt/gen/f32-qs8-vcvt-avx512skx-u96.c &
-tools/xngen src/f32-qs8-vcvt/avx512skx.c.in -D BATCH_TILE=128 -D DATATYPE=QS8 -o src/f32-qs8-vcvt/gen/f32-qs8-vcvt-avx512skx-u128.c &
+tools/xngen src/f32-qs8-vcvt/avx512skx.c.in -D BATCH_TILE=32  -D IDATATYPE=F32 -D ODATATYPE=QS8 -o src/f32-qs8-vcvt/gen/f32-qs8-vcvt-avx512skx-u32.c &
+tools/xngen src/f32-qs8-vcvt/avx512skx.c.in -D BATCH_TILE=64  -D IDATATYPE=F32 -D ODATATYPE=QS8 -o src/f32-qs8-vcvt/gen/f32-qs8-vcvt-avx512skx-u64.c &
+tools/xngen src/f32-qs8-vcvt/avx512skx.c.in -D BATCH_TILE=96  -D IDATATYPE=F32 -D ODATATYPE=QS8 -o src/f32-qs8-vcvt/gen/f32-qs8-vcvt-avx512skx-u96.c &
+tools/xngen src/f32-qs8-vcvt/avx512skx.c.in -D BATCH_TILE=128 -D IDATATYPE=F32 -D ODATATYPE=QS8 -o src/f32-qs8-vcvt/gen/f32-qs8-vcvt-avx512skx-u128.c &
 
-tools/xngen src/f32-qs8-vcvt/avx512skx.c.in -D BATCH_TILE=32  -D DATATYPE=QU8 -o src/f32-qu8-vcvt/gen/f32-qu8-vcvt-avx512skx-u32.c &
-tools/xngen src/f32-qs8-vcvt/avx512skx.c.in -D BATCH_TILE=64  -D DATATYPE=QU8 -o src/f32-qu8-vcvt/gen/f32-qu8-vcvt-avx512skx-u64.c &
-tools/xngen src/f32-qs8-vcvt/avx512skx.c.in -D BATCH_TILE=96  -D DATATYPE=QU8 -o src/f32-qu8-vcvt/gen/f32-qu8-vcvt-avx512skx-u96.c &
-tools/xngen src/f32-qs8-vcvt/avx512skx.c.in -D BATCH_TILE=128 -D DATATYPE=QU8 -o src/f32-qu8-vcvt/gen/f32-qu8-vcvt-avx512skx-u128.c &
+tools/xngen src/f32-qs8-vcvt/avx512skx.c.in -D BATCH_TILE=32  -D IDATATYPE=F32 -D ODATATYPE=QU8 -o src/f32-qu8-vcvt/gen/f32-qu8-vcvt-avx512skx-u32.c &
+tools/xngen src/f32-qs8-vcvt/avx512skx.c.in -D BATCH_TILE=64  -D IDATATYPE=F32 -D ODATATYPE=QU8 -o src/f32-qu8-vcvt/gen/f32-qu8-vcvt-avx512skx-u64.c &
+tools/xngen src/f32-qs8-vcvt/avx512skx.c.in -D BATCH_TILE=96  -D IDATATYPE=F32 -D ODATATYPE=QU8 -o src/f32-qu8-vcvt/gen/f32-qu8-vcvt-avx512skx-u96.c &
+tools/xngen src/f32-qs8-vcvt/avx512skx.c.in -D BATCH_TILE=128 -D IDATATYPE=F32 -D ODATATYPE=QU8 -o src/f32-qu8-vcvt/gen/f32-qu8-vcvt-avx512skx-u128.c &
+
+tools/xngen src/f32-qs8-vcvt/avx512skx.c.in -D BATCH_TILE=32  -D IDATATYPE=F16 -D ODATATYPE=QS8 -o src/f16-qs8-vcvt/gen/f16-qs8-vcvt-avx512skx-u32.c &
+tools/xngen src/f32-qs8-vcvt/avx512skx.c.in -D BATCH_TILE=64  -D IDATATYPE=F16 -D ODATATYPE=QS8 -o src/f16-qs8-vcvt/gen/f16-qs8-vcvt-avx512skx-u64.c &
+tools/xngen src/f32-qs8-vcvt/avx512skx.c.in -D BATCH_TILE=96  -D IDATATYPE=F16 -D ODATATYPE=QS8 -o src/f16-qs8-vcvt/gen/f16-qs8-vcvt-avx512skx-u96.c &
+tools/xngen src/f32-qs8-vcvt/avx512skx.c.in -D BATCH_TILE=128 -D IDATATYPE=F16 -D ODATATYPE=QS8 -o src/f16-qs8-vcvt/gen/f16-qs8-vcvt-avx512skx-u128.c &
+
+tools/xngen src/f32-qs8-vcvt/avx512skx.c.in -D BATCH_TILE=32  -D IDATATYPE=F16 -D ODATATYPE=QU8 -o src/f16-qu8-vcvt/gen/f16-qu8-vcvt-avx512skx-u32.c &
+tools/xngen src/f32-qs8-vcvt/avx512skx.c.in -D BATCH_TILE=64  -D IDATATYPE=F16 -D ODATATYPE=QU8 -o src/f16-qu8-vcvt/gen/f16-qu8-vcvt-avx512skx-u64.c &
+tools/xngen src/f32-qs8-vcvt/avx512skx.c.in -D BATCH_TILE=96  -D IDATATYPE=F16 -D ODATATYPE=QU8 -o src/f16-qu8-vcvt/gen/f16-qu8-vcvt-avx512skx-u96.c &
+tools/xngen src/f32-qs8-vcvt/avx512skx.c.in -D BATCH_TILE=128 -D IDATATYPE=F16 -D ODATATYPE=QU8 -o src/f16-qu8-vcvt/gen/f16-qu8-vcvt-avx512skx-u128.c &
+
+tools/xngen src/f32-qs8-vcvt/avx512skx.c.in -D BATCH_TILE=32  -D IDATATYPE=BF16 -D ODATATYPE=QS8 -o src/bf16-qs8-vcvt/gen/bf16-qs8-vcvt-avx512skx-u32.c &
+tools/xngen src/f32-qs8-vcvt/avx512skx.c.in -D BATCH_TILE=64  -D IDATATYPE=BF16 -D ODATATYPE=QS8 -o src/bf16-qs8-vcvt/gen/bf16-qs8-vcvt-avx512skx-u64.c &
+tools/xngen src/f32-qs8-vcvt/avx512skx.c.in -D BATCH_TILE=96  -D IDATATYPE=BF16 -D ODATATYPE=QS8 -o src/bf16-qs8-vcvt/gen/bf16-qs8-vcvt-avx512skx-u96.c &
+tools/xngen src/f32-qs8-vcvt/avx512skx.c.in -D BATCH_TILE=128 -D IDATATYPE=BF16 -D ODATATYPE=QS8 -o src/bf16-qs8-vcvt/gen/bf16-qs8-vcvt-avx512skx-u128.c &
+
+tools/xngen src/f32-qs8-vcvt/avx512skx.c.in -D BATCH_TILE=32  -D IDATATYPE=BF16 -D ODATATYPE=QU8 -o src/bf16-qu8-vcvt/gen/bf16-qu8-vcvt-avx512skx-u32.c &
+tools/xngen src/f32-qs8-vcvt/avx512skx.c.in -D BATCH_TILE=64  -D IDATATYPE=BF16 -D ODATATYPE=QU8 -o src/bf16-qu8-vcvt/gen/bf16-qu8-vcvt-avx512skx-u64.c &
+tools/xngen src/f32-qs8-vcvt/avx512skx.c.in -D BATCH_TILE=96  -D IDATATYPE=BF16 -D ODATATYPE=QU8 -o src/bf16-qu8-vcvt/gen/bf16-qu8-vcvt-avx512skx-u96.c &
+tools/xngen src/f32-qs8-vcvt/avx512skx.c.in -D BATCH_TILE=128 -D IDATATYPE=BF16 -D ODATATYPE=QU8 -o src/bf16-qu8-vcvt/gen/bf16-qu8-vcvt-avx512skx-u128.c &
 
 ################################## Wasm SIMD ##################################
 tools/xngen src/f32-qs8-vcvt/wasmsimd-cvt.c.in -D BATCH_TILE=8  -D DATATYPE=QS8 -o src/f32-qs8-vcvt/gen/f32-qs8-vcvt-wasmsimd-cvt-u8.c &

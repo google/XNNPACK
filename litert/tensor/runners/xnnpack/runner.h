@@ -50,6 +50,13 @@ class XnnpackRunner {
   // Warning: this must be called before the first call to `Run`.
   void SetNumThreads(size_t num_threads) { num_threads_ = num_threads; }
 
+  // Sets the weights cache.
+  //
+  // Warning: this must be called before the first call to `Run`.
+  void SetWeightsCache(xnn_weights_cache_t weights_cache) {
+    weights_cache_ = weights_cache;
+  }
+
   // Sets the input data for a given tensor.
   absl::Status SetInput(const TensorHandle& tensor,
                         absl::Span<const std::byte> data);
@@ -108,6 +115,7 @@ class XnnpackRunner {
   absl::flat_hash_map<uint32_t, ExternalBuffer> external_buffers_;
   ThreadpoolPtr threadpool_ = nullptr;
   size_t num_threads_ = 1;
+  xnn_weights_cache_t weights_cache_ = nullptr;
 };
 
 }  // namespace litert::tensor

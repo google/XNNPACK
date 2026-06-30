@@ -569,9 +569,12 @@ extern "C" enum xnn_status xnn_subgraph_fallback_from_fp16_to_fp32(
 
     // Insert conversions to fp32 for fp16 inputs.
     for (uint32_t i = 0; i < CurrentNode().num_inputs; i++) {
+      const uint32_t input_id = CurrentNode().inputs[i];
+      assert(input_id != XNN_INVALID_VALUE_ID);
+      assert(input_id < subgraph->num_values);
       // The value is copied because adding new values may invalidate
       // references.
-      const xnn_value value = subgraph->values[CurrentNode().inputs[i]];
+      const xnn_value value = subgraph->values[input_id];
       if (value.datatype == xnn_datatype_fp16) {
         if (fp16_id_to_fp32_id[value.id] == XNN_INVALID_VALUE_ID) {
           const xnn_value* value_ptr =

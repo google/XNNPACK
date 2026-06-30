@@ -27,6 +27,9 @@ XNN_GIO_UKERNEL(xnn_arch_none, xnn_x8_packw_gemm_gio_ukernel_x64__scalar, 64, 1,
 XNN_GIO_UKERNEL(xnn_arch_none, xnn_x8_packw_gemm_gio_ukernel_x8c8__scalar, 8, 8, 1, 8, 1)
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
+XNN_UKERNEL(xnn_arch_arm_neon, xnn_x8_packw_gemm_goi_ukernel_x8c4__neon, 8, 4, 1, 4, 1)
+XNN_UKERNEL(xnn_arch_arm_neon, xnn_x8_packw_gemm_goi_ukernel_x16c4__neon, 16, 4, 1, 4, 1)
+
 XNN_GIO_UKERNEL(xnn_arch_arm_neon, xnn_x8_packw_gemm_gio_ukernel_x16__neon_u2, 16, 1, 1, 1, 1)
 XNN_GIO_UKERNEL(xnn_arch_arm_neon, xnn_x8_packw_gemm_gio_ukernel_x32__neon_u2, 32, 1, 1, 1, 1)
 XNN_GIO_UKERNEL(xnn_arch_arm_neon, xnn_x8_packw_gemm_gio_ukernel_x48__neon_u2, 48, 1, 1, 1, 1)

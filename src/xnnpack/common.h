@@ -339,6 +339,17 @@
 #define XNN_NO_SANITIZE_FUNCTION
 #endif
 
+// Disables UBSan's integer-overflow checks for an annotated function. Only use
+// this where the overflow merely yields a wrong numeric result and poses no
+// safety risk. Expands to nothing on compilers without the attribute.
+#if defined(__clang__) && XNN_COMPILER_HAS_ATTRIBUTE(no_sanitize)
+#define XNN_NO_SANITIZE_INTEGER_OVERFLOW                  \
+  __attribute__((no_sanitize("signed-integer-overflow",      \
+                             "unsigned-integer-overflow")))
+#else
+#define XNN_NO_SANITIZE_INTEGER_OVERFLOW
+#endif
+
 #define XNN_OOB_READS \
   XNN_DISABLE_TSAN XNN_DISABLE_MSAN XNN_DISABLE_HWASAN XNN_DISABLE_ASAN
 

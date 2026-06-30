@@ -394,19 +394,24 @@ ynn_status ynn_define_fuse_dim(ynn_subgraph_t subgraph, int32_t axis,
     return ynn_status_invalid_parameter;
   }
   const ynn_value& input = subgraph->value(input_id);
+  const int rank = input.rank();
   YNN_RETURN_IF_ERROR(validate_axis("fuse_dim", "input", input.rank(), axis));
-  YNN_RETURN_IF_ERROR(
-      validate_axis("fuse_dim", "input", input.rank(), axis + axes_count - 1));
 
   ynn_node::fuse_dim op;
-  // Since the first axis was specified with the dims in reverse order, we
-  // actually want the last dim here.
-  op.axis = axis_to_slinky_dim(input.rank(), axis) + 1 - axes_count;
-  op.axes_count = axes_count;
+  auto clamped_axis_to_slinky_dim = [](int rank, int axis) {
+    axis = axis < 0 ? axis + rank : axis;
+    return std::max(0, std::min(rank - 1 - axis, rank - 1));
+  };
+  // Handle the reversed dimension range by finding the first and last dimension
+  // with clamping, and recompute the axis and axes_count from that.
+  int first = clamped_axis_to_slinky_dim(rank, axis + axes_count - 1);
+  int last = clamped_axis_to_slinky_dim(rank, axis);
+  op.axis = first;
+  op.axes_count = last - first + 1;
 
   // Propagate shape.
   slinky::expr fused_elements = 1;
-  for (size_t d = op.axis; d < op.axis + op.axes_count; ++d) {
+  for (int d = op.axis; d < op.axis + op.axes_count; ++d) {
     if (input.extents[d].defined()) {
       fused_elements *= input.extents[d];
     }
@@ -414,9 +419,9 @@ ynn_status ynn_define_fuse_dim(ynn_subgraph_t subgraph, int32_t axis,
 
   ynn_value& output = subgraph->get_output_value(output_id, input);
   output.extents.clear();
-  output.extents.reserve(input.rank() - op.axes_count + 1);
+  output.extents.reserve(rank - op.axes_count + 1);
 
-  for (size_t d = 0; d < input.rank(); ++d) {
+  for (size_t d = 0; d < rank; ++d) {
     if (op.axis <= d && d < op.axis + op.axes_count) {
       // This is a fused dimension.
       if (fused_elements.defined()) {
@@ -528,11 +533,14 @@ ynn_status ynn_define_fuse_dims(ynn_subgraph_t subgraph, size_t num_axes,
 
   ynn_node::fuse_dims op;
   for (size_t i = 0; i < num_axes; ++i) {
-    YNN_RETURN_IF_ERROR(
-        validate_axis("fuse_dims", "input", input.rank(), axes[i]));
     // Since we are reversing the axes, the first dimension to fuse is actually
     // the next dimension.
-    op.axes[axis_to_slinky_dim(input.rank(), axes[i] + 1)] = true;
+    int axis = axis_to_slinky_dim(input.rank(), axes[i] + 1);
+    if (axis < input.rank()) {
+      op.axes[axis] = true;
+    } else {
+      // Fusing a broadcast dimension is a no-op.
+    }
   }
 
   // Propagate shape.

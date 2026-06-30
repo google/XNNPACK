@@ -269,7 +269,7 @@ static XNN_NO_SANITIZE_FUNCTION enum xnn_status create_deconvolution2d_nhwc(
     xnn_log_error("failed to allocate %zu bytes for %s operator descriptor",
                   sizeof(struct xnn_convolution_operator),
                   xnn_operator_type_to_string(operator_type));
-    return xnn_status_out_of_memory;
+    goto error;
   }
 
   deconvolution_op->weights_cache = weights_cache;
@@ -764,7 +764,7 @@ static enum xnn_status setup_linear_gemm_ukernels(
   return xnn_status_success;
 }
 
-static enum xnn_status setup_params_qs8_qc8w(
+static XNN_NO_SANITIZE_FUNCTION enum xnn_status setup_params_qs8_qc8w(
     const struct deconv2d_variant* variant, struct deconv2d_context* context) {
   if XNN_LIKELY (context->gemm_config->init.qs8_qc8w != NULL) {
     context->gemm_config->init.qs8_qc8w(
@@ -776,8 +776,8 @@ static enum xnn_status setup_params_qs8_qc8w(
   return xnn_status_success;
 }
 
-static enum xnn_status setup_params_qu8(const struct deconv2d_variant* variant,
-                                        struct deconv2d_context* context) {
+static XNN_NO_SANITIZE_FUNCTION enum xnn_status setup_params_qu8(
+    const struct deconv2d_variant* variant, struct deconv2d_context* context) {
   if XNN_LIKELY (context->gemm_config->init.qu8 != NULL) {
     context->gemm_config->init.qu8(
         &context->params_.qu8, context->kernel_zero_point,
@@ -789,8 +789,8 @@ static enum xnn_status setup_params_qu8(const struct deconv2d_variant* variant,
   return xnn_status_success;
 }
 
-static enum xnn_status setup_params_f16(const struct deconv2d_variant* variant,
-                                        struct deconv2d_context* context) {
+static XNN_NO_SANITIZE_FUNCTION enum xnn_status setup_params_f16(
+    const struct deconv2d_variant* variant, struct deconv2d_context* context) {
   if XNN_LIKELY (context->gemm_config->init.f16 != NULL) {
     const xnn_float16 output_min_as_half =
         xnn_float16_from_float(context->output_min);
@@ -804,8 +804,8 @@ static enum xnn_status setup_params_f16(const struct deconv2d_variant* variant,
   return xnn_status_success;
 }
 
-static enum xnn_status setup_params_f32(const struct deconv2d_variant* variant,
-                                        struct deconv2d_context* context) {
+static XNN_NO_SANITIZE_FUNCTION enum xnn_status setup_params_f32(
+    const struct deconv2d_variant* variant, struct deconv2d_context* context) {
   if XNN_LIKELY (context->gemm_config->init.f32 != NULL) {
     context->gemm_config->init.f32(&context->params_.f32, context->output_min,
                                    context->output_max);
@@ -1731,7 +1731,7 @@ enum xnn_status xnn_create_deconvolution2d_nhwc_f32_f16(
   return status;
 }
 
-static enum xnn_status reshape_igemm_path(
+static XNN_NO_SANITIZE_FUNCTION enum xnn_status reshape_igemm_path(
     xnn_operator_t deconvolution_op, size_t batch_size,
     uint32_t log2_input_element_size, uint32_t log2_filter_element_size,
     uint32_t extra_weights_element_size, uint32_t log2_output_element_size,

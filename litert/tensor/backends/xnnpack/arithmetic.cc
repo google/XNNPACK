@@ -1079,7 +1079,11 @@ absl::Status OpMixin<SliceOperation, XnnpackMixinTag>::ToXnnpack(
   std::vector<size_t> sizes(num_dims);
   for (size_t i = 0; i < num_dims; ++i) {
     offsets[i] = static_cast<size_t>(begin_data[i]);
-    sizes[i] = static_cast<size_t>(size_data[i]);
+    if (size_data[i] == -1) {
+      sizes[i] = static_cast<size_t>(-begin_data[i]);
+    } else {
+      sizes[i] = static_cast<size_t>(size_data[i]);
+    }
   }
 
   LRT_TENSOR_RETURN_IF_ERROR(

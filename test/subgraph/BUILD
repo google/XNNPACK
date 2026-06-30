@@ -273,6 +273,10 @@ xnnpack_unit_test(
     name = "static_transpose_test",
     timeout = "moderate",
     srcs = ["static-transpose.cc"],
+    defines = select({
+        "//ynnpack/xnnpack:use_ynnpack": ["XNNPACK_USE_YNNPACK"],
+        "//conditions:default": [],
+    }),
     shard_count = 5,
     deps = SUBGRAPH_TEST_DEPS,
 )
@@ -374,6 +378,7 @@ xnnpack_unit_test(
         "//:params",
         "//:subgraph_h",
         "//:xnnpack_h",
+        "//src/configs:hardware_config",
         "//test:replicable_random_device",
     ],
 )

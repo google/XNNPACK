@@ -45,7 +45,15 @@
 
 #define XNN_LOG_STDERR STD_ERROR_HANDLE
 #define XNN_LOG_STDOUT STD_OUTPUT_HANDLE
-#elif defined(__hexagon__) || defined(__ZEPHYR__)
+#elif defined(__ZEPHYR__)
+// The Zephyr branch writes a trailing '\n' followed by a '\0' (the buffer is
+// passed to printf, which needs a NUL terminator), i.e. two trailing bytes,
+// so reserve two like the _WIN32 path.
+#define XNN_LOG_NEWLINE_LENGTH 2
+
+#define XNN_LOG_STDERR 0
+#define XNN_LOG_STDOUT 0
+#elif defined(__hexagon__)
 #define XNN_LOG_NEWLINE_LENGTH 1
 
 #define XNN_LOG_STDERR 0

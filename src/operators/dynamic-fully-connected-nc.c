@@ -149,7 +149,7 @@ error:
   return status;
 }
 
-enum xnn_status create_dynamic_fully_connected_nc_f16(
+XNN_NO_SANITIZE_FUNCTION enum xnn_status create_dynamic_fully_connected_nc_f16(
     float output_min, float output_max, uint32_t flags,
     const struct xnn_gemm_config* gemm_config,
     enum xnn_operator_type expected_operator_type,
@@ -232,7 +232,7 @@ enum xnn_status xnn_create_dynamic_fully_connected_nc_pf16(
       dynamic_fully_connected_op_out);
 }
 
-enum xnn_status create_dynamic_fully_connected_nc_f32(
+XNN_NO_SANITIZE_FUNCTION enum xnn_status create_dynamic_fully_connected_nc_f32(
     float output_min, float output_max, uint32_t flags,
     const struct xnn_gemm_config* gemm_config,
     const struct xnn_gemm_config* gemm_nr2_config,
@@ -338,7 +338,8 @@ enum xnn_status xnn_create_dynamic_fully_connected_nc_pf32(
       dynamic_fully_connected_op_out);
 }
 
-static enum xnn_status reshape_dynamic_fully_connected_nc(
+static XNN_NO_SANITIZE_FUNCTION enum xnn_status
+reshape_dynamic_fully_connected_nc(
     xnn_operator_t dynamic_fully_connected_op,
     enum xnn_operator_type expected_operator_type, size_t batch_size,
     size_t input_channels, size_t output_channels, size_t input_stride,

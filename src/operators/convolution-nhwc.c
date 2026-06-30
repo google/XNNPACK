@@ -1092,7 +1092,7 @@ static enum xnn_status init_packing_params_fxx_qc8w(
   return xnn_status_success;
 }
 
-static enum xnn_status init_gemm_params_qu8(
+static XNN_NO_SANITIZE_FUNCTION enum xnn_status init_gemm_params_qu8(
     const struct convolution2d_nhwc_variant* variant,
     struct convolution2d_nhwc_context* context) {
   if (context->output_max > UINT8_MAX) {
@@ -1112,7 +1112,7 @@ static enum xnn_status init_gemm_params_qu8(
   return xnn_status_success;
 }
 
-static enum xnn_status init_gemm_params_qs8_qc8w(
+static XNN_NO_SANITIZE_FUNCTION enum xnn_status init_gemm_params_qs8_qc8w(
     const struct convolution2d_nhwc_variant* variant,
     struct convolution2d_nhwc_context* context) {
   if (context->output_max > INT8_MAX) {
@@ -1131,7 +1131,7 @@ static enum xnn_status init_gemm_params_qs8_qc8w(
   return xnn_status_success;
 }
 
-static enum xnn_status init_gemm_params_f16(
+static XNN_NO_SANITIZE_FUNCTION enum xnn_status init_gemm_params_f16(
     const struct convolution2d_nhwc_variant* variant,
     struct convolution2d_nhwc_context* context) {
   if XNN_LIKELY (context->gemm_config->init.f16 != NULL) {
@@ -1144,7 +1144,7 @@ static enum xnn_status init_gemm_params_f16(
   return xnn_status_success;
 }
 
-static enum xnn_status init_gemm_params_f32(
+static XNN_NO_SANITIZE_FUNCTION enum xnn_status init_gemm_params_f32(
     const struct convolution2d_nhwc_variant* variant,
     struct convolution2d_nhwc_context* context) {
   if XNN_LIKELY (context->gemm_config->init.f32 != NULL) {
@@ -1156,7 +1156,7 @@ static enum xnn_status init_gemm_params_f32(
   return xnn_status_success;
 }
 
-static enum xnn_status init_dwconv_params_qu8(
+static XNN_NO_SANITIZE_FUNCTION enum xnn_status init_dwconv_params_qu8(
     const struct convolution2d_nhwc_variant* variant,
     struct convolution2d_nhwc_context* context) {
   const struct xnn_dwconv_config* dwconv_config = xnn_init_qu8_dwconv_config();
@@ -1181,7 +1181,7 @@ static enum xnn_status init_dwconv_params_qu8(
   return xnn_status_success;
 }
 
-static enum xnn_status init_dwconv_params_qs8_qc8w(
+static XNN_NO_SANITIZE_FUNCTION enum xnn_status init_dwconv_params_qs8_qc8w(
     const struct convolution2d_nhwc_variant* variant,
     struct convolution2d_nhwc_context* context) {
   const struct xnn_dwconv_config* dwconv_config =
@@ -1206,7 +1206,7 @@ static enum xnn_status init_dwconv_params_qs8_qc8w(
   return xnn_status_success;
 }
 
-static enum xnn_status init_dwconv_params_f16(
+static XNN_NO_SANITIZE_FUNCTION enum xnn_status init_dwconv_params_f16(
     const struct convolution2d_nhwc_variant* variant,
     struct convolution2d_nhwc_context* context) {
   const struct xnn_dwconv_config* dwconv_config = xnn_init_f16_dwconv_config();
@@ -1229,7 +1229,7 @@ static enum xnn_status init_dwconv_params_f16(
   return xnn_status_success;
 }
 
-static enum xnn_status init_dwconv_params_f32(
+static XNN_NO_SANITIZE_FUNCTION enum xnn_status init_dwconv_params_f32(
     const struct convolution2d_nhwc_variant* variant,
     struct convolution2d_nhwc_context* context) {
   const struct xnn_dwconv_config* dwconv_config = xnn_init_f32_dwconv_config();
@@ -1251,7 +1251,7 @@ static enum xnn_status init_dwconv_params_f32(
   return xnn_status_success;
 }
 
-static enum xnn_status init_vmuladdc_params_f16(
+static XNN_NO_SANITIZE_FUNCTION enum xnn_status init_vmuladdc_params_f16(
     const struct convolution2d_nhwc_variant* variant,
     struct convolution2d_nhwc_context* context) {
   const struct xnn_vmulcaddc_config* vmulcaddc_config =
@@ -1273,7 +1273,7 @@ static enum xnn_status init_vmuladdc_params_f16(
   return xnn_status_success;
 }
 
-static enum xnn_status init_vmuladdc_params_f32(
+static XNN_NO_SANITIZE_FUNCTION enum xnn_status init_vmuladdc_params_f32(
     const struct convolution2d_nhwc_variant* variant,
     struct convolution2d_nhwc_context* context) {
   const struct xnn_vmulcaddc_config* vmulcaddc_config =

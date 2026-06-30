@@ -1244,6 +1244,9 @@ YNN_ALWAYS_INLINE u8x8 sub_sat(u8x8 a, u8x8 b) {
 YNN_ALWAYS_INLINE s16x8 operator>>(s16x8 a, int b) {
   return s16x8{vshlq_s16(a.v, vdupq_n_s16(-b))};
 }
+YNN_ALWAYS_INLINE s8x16 operator>>(s8x16 a, int b) {
+  return s8x16{vshlq_s8(a.v, vdupq_n_s8(-b))};
+}
 YNN_ALWAYS_INLINE s8x16 operator<<(s8x16 a, int b) {
   return s8x16{vshlq_s8(a.v, vdupq_n_s8(b))};
 }
@@ -1787,7 +1790,14 @@ YNN_ALWAYS_INLINE f32x4 sqrt(f32x4 a) {
 
   float32x4_t sqrt_result = vmulq_f32(a.v, rsqrt_estimate);
 
-  return f32x4{sqrt_result};
+  // If a is 0.0, the Newton-Raphson refinement results in NaN because we
+  // multiply 0.0 * inf. We can fix this by selecting a.v if a.v is 0.0.
+  uint32x4_t is_zero = vceqq_f32(a.v, vdupq_n_f32(0.0f));
+  // If a is inf, the above will produce NaN.
+  uint32x4_t is_inf =
+      vceqq_f32(a.v, vdupq_n_f32(std::numeric_limits<float>::infinity()));
+  uint32x4_t is_zero_or_inf = vorrq_u32(is_zero, is_inf);
+  return f32x4{vbslq_f32(is_zero_or_inf, a.v, sqrt_result)};
 #else
   return f32x4{vsqrtq_f32(a.v)};
 #endif
@@ -2020,6 +2030,14 @@ YNN_ALWAYS_INLINE s32x16 cast(s8x16 b, int32_t) {
 
 YNN_ALWAYS_INLINE s32x16 cast(u8x16 b, int32_t) {
   return cast(cast(b, int16_t{}), int32_t{});
+}
+
+YNN_ALWAYS_INLINE f32x16 cast(s8x16 a, float) {
+  return cast(cast(a, int32_t{}), float{});
+}
+
+YNN_ALWAYS_INLINE f32x16 cast(u8x16 a, float) {
+  return cast(cast(a, int32_t{}), float{});
 }
 
 YNN_ALWAYS_INLINE f32x4 cast(s32x4 x, float) {

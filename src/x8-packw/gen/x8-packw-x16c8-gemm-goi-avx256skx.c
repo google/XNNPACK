@@ -61,7 +61,6 @@ void xnn_x8_packw_gemm_goi_ukernel_x16c8__avx256skx(
   assert(sr == 1);
   assert(weights != NULL);
   assert(packed_weights != NULL);
-  assert(params != NULL);
 
   int8_t* out = (int8_t*) packed_weights;
   const uint32_t* b = (const uint32_t*) bias;
@@ -363,7 +362,9 @@ void xnn_x8_packw_gemm_goi_ukernel_x16c8__avx256skx(
         b += n;
       } else {
         _mm256_storeu_si256((__m256i*) (out + 0), _mm256_setzero_si256());
-        _mm256_storeu_si256((__m256i*) (out + 32), _mm256_setzero_si256());
+        if (n > 8) {
+          _mm256_storeu_si256((__m256i*) (out + 32), _mm256_setzero_si256());
+        }
       }
       out += 16 * sizeof(uint32_t);
 

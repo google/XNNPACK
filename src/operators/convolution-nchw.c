@@ -82,7 +82,7 @@ static inline const void* get_bias_for_cache_key(
                                      : context->bias;
 }
 
-static enum xnn_status create_spmm_path(
+static XNN_NO_SANITIZE_FUNCTION enum xnn_status create_spmm_path(
     struct convolution2d_nchw_context* context,
     const uint32_t log2_filter_element_size,
     const xnn_analyze_spmm_w_fn xnn_analyze_spmm,
@@ -198,7 +198,7 @@ error:
   return status;
 }
 
-static enum xnn_status create_conv2d_hwc2chw_path(
+static XNN_NO_SANITIZE_FUNCTION enum xnn_status create_conv2d_hwc2chw_path(
     struct convolution2d_nchw_context* context,
     const size_t output_height_tile,
     const size_t output_channel_tile,
@@ -258,7 +258,7 @@ static enum xnn_status create_conv2d_hwc2chw_path(
   return xnn_status_success;
 }
 
-static enum xnn_status create_dwconv_path(
+static XNN_NO_SANITIZE_FUNCTION enum xnn_status create_dwconv_path(
     const struct convolution2d_nchw_context* context,
     const uint32_t log2_filter_element_size,
     const xnn_pack_chw_dwconv_hwg_w_fn pack_chw_dwconv_hwg_w,
@@ -353,22 +353,20 @@ static float round_float_value_f16(float value) {
   return xnn_float16_to_float(fp16_value);
 }
 
-static void init_spmm_f32(xnn_analyze_spmm_w_fn* xnn_analyze_spmm,
-                          xnn_pack_spmm_w_fn* xnn_pack_spmm,
-                          xnn_operator_t convolution_op, float output_min,
-                          float output_max, int flags,
-                          const struct xnn_spmm_config* spmm_config) {
+static XNN_NO_SANITIZE_FUNCTION void init_spmm_f32(
+    xnn_analyze_spmm_w_fn* xnn_analyze_spmm, xnn_pack_spmm_w_fn* xnn_pack_spmm,
+    xnn_operator_t convolution_op, float output_min, float output_max,
+    int flags, const struct xnn_spmm_config* spmm_config) {
   *xnn_analyze_spmm = (xnn_analyze_spmm_w_fn)xnn_analyze_f32_spmm_w;
   *xnn_pack_spmm = (xnn_pack_spmm_w_fn)xnn_pack_f32_spmm_w;
   spmm_config->init.f32(&convolution_op->params.f32_minmax, output_min,
                         output_max);
 }
 
-static void init_spmm_f16(xnn_analyze_spmm_w_fn* xnn_analyze_spmm,
-                          xnn_pack_spmm_w_fn* xnn_pack_spmm,
-                          xnn_operator_t convolution_op, float output_min,
-                          float output_max, int flags,
-                          const struct xnn_spmm_config* spmm_config) {
+static XNN_NO_SANITIZE_FUNCTION void init_spmm_f16(
+    xnn_analyze_spmm_w_fn* xnn_analyze_spmm, xnn_pack_spmm_w_fn* xnn_pack_spmm,
+    xnn_operator_t convolution_op, float output_min, float output_max,
+    int flags, const struct xnn_spmm_config* spmm_config) {
   if (flags & XNN_FLAG_FP32_STATIC_WEIGHTS) {
     *xnn_analyze_spmm = (xnn_analyze_spmm_w_fn)xnn_analyze_f32_spmm_w;
     *xnn_pack_spmm = (xnn_pack_spmm_w_fn)xnn_pack_f32_to_f16_spmm_w;
@@ -381,7 +379,7 @@ static void init_spmm_f16(xnn_analyze_spmm_w_fn* xnn_analyze_spmm,
                         xnn_float16_from_float(output_max));
 }
 
-static enum xnn_status init_conv_hwc2chw_f32(
+static XNN_NO_SANITIZE_FUNCTION enum xnn_status init_conv_hwc2chw_f32(
     xnn_pack_dconv_oki_w_fn* xnn_pack_dconv_oki_w,
     const struct xnn_conv_hwc2chw_config** conv_hwc2chw_config,
     xnn_operator_t convolution_op, const int flags, const float output_min,
@@ -401,7 +399,7 @@ static enum xnn_status init_conv_hwc2chw_f32(
   return xnn_status_success;
 }
 
-static enum xnn_status init_conv_hwc2chw_f16(
+static XNN_NO_SANITIZE_FUNCTION enum xnn_status init_conv_hwc2chw_f16(
     xnn_pack_dconv_oki_w_fn* xnn_pack_dconv_oki_w,
     const struct xnn_conv_hwc2chw_config** conv_hwc2chw_config,
     xnn_operator_t convolution_op, const int flags, const float output_min,
@@ -428,7 +426,7 @@ static enum xnn_status init_conv_hwc2chw_f16(
   return xnn_status_success;
 }
 
-static void init_dwconv_f32(
+static XNN_NO_SANITIZE_FUNCTION void init_dwconv_f32(
     xnn_pack_chw_dwconv_hwg_w_fn* pack_chw_dwconv_hwg_w,
     xnn_pack_chw_dwconv_ghw_w_fn* pack_chw_dwconv_ghw_w,
     const struct xnn_dwconv2d_chw_parameters* dwconv2d_parameters,
@@ -442,7 +440,7 @@ static void init_dwconv_f32(
                                 output_max);
 }
 
-static void init_dwconv_f16(
+static XNN_NO_SANITIZE_FUNCTION void init_dwconv_f16(
     xnn_pack_chw_dwconv_hwg_w_fn* pack_chw_dwconv_hwg_w,
     xnn_pack_chw_dwconv_ghw_w_fn* pack_chw_dwconv_ghw_w,
     const struct xnn_dwconv2d_chw_parameters* dwconv2d_parameters,

@@ -105,6 +105,16 @@ enum xnn_status xnn_subgraph_check_output_type_dense(
   return xnn_status_success;
 }
 
+static inline enum xnn_datatype xnn_subgraph_effective_datatype(
+    const struct xnn_value* value) {
+  if (value->datatype == xnn_datatype_fp32 &&
+      xnn_value_is_static(value->allocation_type) &&
+      (value->flags & XNN_VALUE_FLAG_PACK_TO_FP16)) {
+    return xnn_datatype_fp16;
+  }
+  return value->datatype;
+}
+
 enum xnn_status xnn_subgraph_check_datatype_matches(
   enum xnn_node_type node_type,
   uint32_t input_id,
@@ -114,7 +124,11 @@ enum xnn_status xnn_subgraph_check_datatype_matches(
 {
   assert(input_value->datatype != xnn_datatype_invalid);
   assert(output_value->datatype != xnn_datatype_invalid);
-  if (input_value->datatype != output_value->datatype) {
+  const enum xnn_datatype input_datatype =
+      xnn_subgraph_effective_datatype(input_value);
+  const enum xnn_datatype output_datatype =
+      xnn_subgraph_effective_datatype(output_value);
+  if (input_datatype != output_datatype) {
     xnn_log_error(
         "failed to define %s operator with input ID #%" PRIu32
         " and output ID #%" PRIu32
@@ -139,9 +153,11 @@ enum xnn_status xnn_subgraph_check_datatype_matches_two_inputs(
   assert(input1_value->datatype != xnn_datatype_invalid);
   assert(input2_value->datatype != xnn_datatype_invalid);
   assert(output_value->datatype != xnn_datatype_invalid);
-  if (input1_value->datatype != input2_value->datatype ||
-      input1_value->datatype != output_value->datatype)
-  {
+  const enum xnn_datatype input1_datatype = xnn_subgraph_effective_datatype(input1_value);
+  const enum xnn_datatype input2_datatype = xnn_subgraph_effective_datatype(input2_value);
+  const enum xnn_datatype output_datatype = xnn_subgraph_effective_datatype(output_value);
+  if (input1_datatype != input2_datatype ||
+      input1_datatype != output_datatype) {
     xnn_log_error("failed to define %s operator with input IDs #%" PRIu32
                   " and #%" PRIu32 " and output ID #%" PRIu32
                   ": mismatching datatypes across the first input (%s), the "

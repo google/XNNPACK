@@ -264,3 +264,18 @@ cc_test(
         "//ynnpack/subgraph",
     ] + ynn_benchmark_deps(),
 )
+
+cc_test(
+    name = "gather_bench",
+    srcs = ["gather_bench.cc"],
+    args = ["--benchmark_min_time=1x"],
+    linkopts = ynn_binary_linkopts(),
+    malloc = ynn_binary_malloc(),
+    deps = [
+        "//ynnpack",
+        "//ynnpack/base",
+        "//ynnpack/base/test:buffer",
+        "//ynnpack/base/test:random",
+        "//ynnpack/base/test:tensor",
+    ] + ynn_benchmark_deps(),
+)

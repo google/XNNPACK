@@ -117,7 +117,7 @@ MATCHER_P(HasInputCount, count, "") {
 MATCHER_P(IsLut, subgraph, "") {
   const auto* g = std::get_if<ynn_node::gather>(&arg.op);
   if (!g) return false;
-  if (g->axis != 0) return false;
+  if (g->axes.size() != 1 || g->axes[0] != 0) return false;
   const ynn_value& table = subgraph.value(arg.inputs[0]);
   return table.rank() == 1;
 }

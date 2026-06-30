@@ -56,13 +56,16 @@ TEST_ADD(hvx, u8, 128);
 TEST_ADD(hvx, s8, 128);
 TEST_ADD(hvx, s16, 64);
 TEST_ADD(hvx, s32, 32);
+TEST_ADD(hvx, f32, 32);
 
 TEST_SUBTRACT(hvx, u8, 128);
 TEST_SUBTRACT(hvx, s8, 128);
 TEST_SUBTRACT(hvx, s16, 64);
 TEST_SUBTRACT(hvx, s32, 32);
+TEST_SUBTRACT(hvx, f32, 32);
 
 TEST_MULTIPLY(hvx, s32, 32);
+TEST_MULTIPLY(hvx, f32, 32);
 
 TEST_MIN(hvx, u8, 128);
 TEST_MIN(hvx, s8, 128);
@@ -77,6 +80,7 @@ TEST_MAX(hvx, f16, 64);
 TEST_MAX(hvx, f32, 32);
 
 TEST_HORIZONTAL_SUM(hvx, s32, 32);
+TEST_HORIZONTAL_SUM(hvx, f32, 32);
 
 TEST_HORIZONTAL_MIN(hvx, u8, 128);
 // TODO(dsharlet): HVX vectors are so big that our test for this overflows...

@@ -185,73 +185,15 @@ slinky::expr lcm_sat(ynn::slinky_globals& globals, slinky::expr a,
                      "lcm_sat");
 }
 
-}  // namespace
-
-// Logically this function has multiple separate blocks:
-// 1) infer symbolic source regions for all buffers to ensure loops are only
-//    fused if they share a common source region origin.
-// 2) computing a list of possible compute_at locations for a given function.
-//    This is a very concrete thing and doesn't require any heuristics.
-// 3) using the set of locations from 2) decide if we want for this function
-//    to be computed at root or at one of the existing loops based on the
-//    available information such as scheduling_info attached to the function
-//    or source regions inferred in 1).
-// 4) if we decide to share the loop location possibly update loop parameters
-//    such as step based on the specific of the given function (this is pretty
-//    much a no-op right now and is solely defined by a "parent" function of
-//    the loop, but we can use it in the future to figure out, for example, a
-//    step size based on the *all* functions which were assigned to the loop).
-// 5) potentially add new loop(s) into the loop nest based on a given
-//    function.
-// 6) based on compute locations computed in 2) - 5), set up the
-//    func-s. This is done in a separate loop once all of the functions from
-//    the pipeline were processed.
-void ynn_runtime::schedule() {
-  // Just a helper function to track information about loop levels.
-  struct loop_level {
-    slinky::loop_id loop_id;
-    slinky::expr extent;
-    slinky::expr step;
-    bool step_is_required = false;
-  };
-
-  struct scheduling_data {
-    // Loop nest should be a pair of function and loop_id. This is in fact a
-    // tree, but for the sake of simplicity we store it as a set of pathes
-    // (loop nests in this case) from the root of the tree (outermost
-    // location) to a leaf node (the innermost loop of a given function). Loop
-    // nests for each of the functions scheduled so far with the indices
-    // pointing to the global loop nest. Loop nests can overlap with each
-    // other if functions are scheduled within the same loop (only prefixes,
-    // i.e. from the root of the loop nest to the most innermost common loop).
-    std::vector<int> loop_nest;
-    // Compute_at locations of a function -- this an index within a
-    // loop nest of a given function, i.e from root (0) to the innermost loop
-    // (loop_nest[f_index].back()).
-    int compute_at = 0;
-    // How many loops from the scheduling_info were matched to the existing
-    // loop nest (this is currently done by comparing extents computed in
-    // forward bounds).
-    int splits_match = 0;
-  };
-
-  // This a list of indices of consumers of a given buffer.
-  std::map<slinky::var, std::vector<int>> consumers;
-  // This is a tree representing a global loop nest of a whole pipeline so
-  // far. For efficiency and convenience, it's stored as an array of nodes
-  // with auxiliary structures using indices to refer to the loop levels.
-  std::vector<loop_level> global_loop_nest;
-
-  std::vector<scheduling_data> func_scheduling_data(funcs.size());
-
-  // This pass infers symbolic source regions for all buffers, traversing the
-  // pipeline in reverse topological order (consumers to producers). It ensures
-  // that loops are only fused if their dimensions share a common source
-  // region origin, which naturally prevents incorrect fusions of unrelated
-  // dimensions that happen to have the same constant size. This is similar
-  // to the backward bounds inference, but much more lightweight because we
-  // only care if given extents are the same in terms of consumer extents.
-
+// This pass infers symbolic source regions for all buffers, traversing the
+// pipeline in reverse topological order (consumers to producers). It ensures
+// that loops are only fused if their dimensions share a common source
+// region origin, which naturally prevents incorrect fusions of unrelated
+// dimensions that happen to have the same constant size. This is similar
+// to the backward bounds inference, but much more lightweight because we
+// only care if given extents are the same in terms of consumer extents.
+std::map<std::pair<slinky::var, int>, int> infer_source_regions(
+    const std::vector<slinky::func>& funcs) {
   std::map<slinky::var, const slinky::func*> buffer_to_producer;
   for (const auto& f : funcs) {
     for (const auto& out : f.outputs()) {
@@ -381,6 +323,79 @@ void ynn_runtime::schedule() {
     }
   }
 
+  return source_regions;
+}
+
+}  // namespace
+
+// Logically this function has multiple separate blocks:
+// 1) infer symbolic source regions for all buffers to ensure loops are only
+//    fused if they share a common source region origin.
+// 2) computing a list of possible compute_at locations for a given function.
+//    This is a very concrete thing and doesn't require any heuristics.
+// 3) using the set of locations from 2) decide if we want for this function
+//    to be computed at root or at one of the existing loops based on the
+//    available information such as scheduling_info attached to the function
+//    or source regions inferred in 1).
+// 4) if we decide to share the loop location possibly update loop parameters
+//    such as step based on the specific of the given function (this is pretty
+//    much a no-op right now and is solely defined by a "parent" function of
+//    the loop, but we can use it in the future to figure out, for example, a
+//    step size based on the *all* functions which were assigned to the loop).
+// 5) potentially add new loop(s) into the loop nest based on a given
+//    function.
+// 6) based on compute locations computed in 2) - 5), set up the
+//    func-s. This is done in a separate loop once all of the functions from
+//    the pipeline were processed.
+void ynn_runtime::schedule() {
+  // Just a helper function to track information about loop levels.
+  struct loop_level {
+    slinky::loop_id loop_id;
+    slinky::expr extent;
+    slinky::expr step;
+    bool step_is_required = false;
+  };
+
+  struct scheduling_data {
+    // Loop nest should be a pair of function and loop_id. This is in fact a
+    // tree, but for the sake of simplicity we store it as a set of pathes
+    // (loop nests in this case) from the root of the tree (outermost
+    // location) to a leaf node (the innermost loop of a given function). Loop
+    // nests for each of the functions scheduled so far with the indices
+    // pointing to the global loop nest. Loop nests can overlap with each
+    // other if functions are scheduled within the same loop (only prefixes,
+    // i.e. from the root of the loop nest to the most innermost common loop).
+    std::vector<int> loop_nest;
+    // Compute_at locations of a function -- this an index within a
+    // loop nest of a given function, i.e from root (0) to the innermost loop
+    // (loop_nest[f_index].back()).
+    int compute_at = 0;
+    // How many loops from the scheduling_info were matched to the existing
+    // loop nest (this is currently done by comparing extents computed in
+    // forward bounds).
+    int splits_match = 0;
+  };
+
+  // This a list of indices of consumers of a given buffer.
+  std::map<slinky::var, std::vector<int>> consumers;
+  // This is a tree representing a global loop nest of a whole pipeline so
+  // far. For efficiency and convenience, it's stored as an array of nodes
+  // with auxiliary structures using indices to refer to the loop levels.
+  std::vector<loop_level> global_loop_nest;
+
+  std::vector<scheduling_data> func_scheduling_data(funcs.size());
+
+  // Maps {buffer_sym, dim_index} to its inferred source region unique
+  // identifier.
+  std::map<std::pair<slinky::var, int>, int> source_regions =
+      infer_source_regions(funcs);
+
+  auto get_source_region = [&](slinky::var buf, int dim) {
+    auto key = std::make_pair(buf, dim);
+    auto it = source_regions.find(key);
+    return it != source_regions.end() ? it->second : -1;
+  };
+
   for (int i = funcs.size() - 1; i >= 0; --i) {
     slinky::func& f = funcs[i];
     scheduling_data& sched_data = func_scheduling_data[i];
@@ -471,7 +486,8 @@ void ynn_runtime::schedule() {
           int consumer_source_region =
               get_source_region(consumer_buf, consumer_dim);
 
-          if (producer_source_region == consumer_source_region) {
+          if (producer_source_region != -1 &&
+              producer_source_region == consumer_source_region) {
             extents_match = true;
           }
         }

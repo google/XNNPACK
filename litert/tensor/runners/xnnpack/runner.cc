@@ -145,7 +145,7 @@ absl::Status XnnpackRunner::Run() {
     }
     xnn_runtime* raw_runtime = nullptr;
     LRT_TENSOR_RETURN_IF_ERROR(
-        xnn_create_runtime_v3(graph_->subgraph(), /*weights_cache=*/nullptr,
+        xnn_create_runtime_v3(graph_->subgraph(), weights_cache_,
                               /*threadpool=*/threadpool_.get(),
                               /*flags=*/0, &raw_runtime));
     runtime_.reset(raw_runtime);

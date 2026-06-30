@@ -87,6 +87,8 @@ enum ynn_type {
 #define YNN_VALUE_FLAG_EXTERNAL_INPUT (1 << 0)
 #define YNN_VALUE_FLAG_EXTERNAL_OUTPUT (1 << 1)
 #define YNN_VALUE_FLAG_COPY_DATA (1 << 2)
+#define YNN_VALUE_FLAG_NO_EXCESS_PRECISION (1 << 3)
+#define YNN_VALUE_FLAG_COPY_DATA_FP32 (1 << 4)
 
 // Define a new tensor in a subgraph.
 //
@@ -113,6 +115,9 @@ enum ynn_type {
 // exists, unless the `YNN_VALUE_FLAG_COPY_DATA` flag is used, indicating that
 // this function will make a copy of the data, releasing the caller of the
 // obligation to maintain it.
+//
+// If the `YNN_VALUE_FLAG_NO_EXCESS_PRECISION` flag is set, this value will not
+// be promoted to a wider type as part of optimization.
 enum ynn_status ynn_define_tensor(ynn_subgraph_t subgraph, enum ynn_type type,
                                   size_t rank, const size_t* dims,
                                   const void* data, uint32_t flags,
@@ -141,6 +146,7 @@ enum ynn_status ynn_define_iota(ynn_subgraph_t subgraph, enum ynn_type type,
 #define YNN_NODE_FLAG_SLICE_DIMS (1 << 0)
 #define YNN_NODE_FLAG_RESHAPE_1D (1 << 0)
 #define YNN_NODE_FLAG_UNIQUE_DIMS (1 << 1)
+#define YNN_NODE_FLAG_NO_EXCESS_PRECISION (1 << 2)
 
 enum ynn_unary_operator {
   ynn_unary_invalid = 0,
@@ -182,12 +188,15 @@ enum ynn_status ynn_define_unary(ynn_subgraph_t subgraph,
 // output: y = coefficients[degree]*x^degree + ... + coefficients[0]
 enum ynn_status ynn_define_unary_polynomial(ynn_subgraph_t subgraph,
                                             uint32_t input_id, size_t degree,
-                                            const float* coefficients,
+                                            const double* coefficients,
                                             uint32_t* output_id,
                                             uint32_t flags);
 
 // A helper for `ynn_define_unary` with `op` = `ynn_unary_convert`, which is
 // capable of defining the output value.
+//
+// If the `YNN_NODE_FLAG_NO_EXCESS_PRECISION` flag is set, the resulting value
+// will have the `YNN_VALUE_FLAG_NO_EXCESS_PRECISION` flag set.
 enum ynn_status ynn_define_convert(ynn_subgraph_t subgraph, uint32_t input_id,
                                    enum ynn_type type, uint32_t zero_point_id,
                                    uint32_t scale_id, uint32_t* output_id,
@@ -256,17 +265,32 @@ enum ynn_binary_operator {
 // dimensions will have leading broadcast dimensions inserted to match the rank
 // of the other input. Dimensions that exist in both inputs must have the same
 // extent.
+//
+// If the output is not defined, the output type will be:
+// - The type of a, if b can be losslessly converted to the type of a.
+// - The type of b, if a can be losslessly converted to the type of b.
+// - fp32 otherwise.
 enum ynn_status ynn_define_binary(ynn_subgraph_t subgraph,
                                   enum ynn_binary_operator op,
                                   uint32_t input_a_id, uint32_t input_b_id,
                                   uint32_t* output_id, uint32_t flags);
 
 // Defines a gather operation. This computes:
-// `output[...i, j, ...k] = input[...i, index[...i, j, ...k], ...k]`, where `j`
-// is the `axis` dimension. This operation supports broadcasting of the input,
-// but not the index. Such broadcasting should be performed with a subsequent
-// broadcast operation.
-enum ynn_status ynn_define_gather(ynn_subgraph_t subgraph, int32_t axis,
+//
+//   output[i, j, k, ...] = input[
+//     index[index_of(axes, 0), i, j, k, ...] if 0 in axes else i,
+//     index[index_of(axes, 1), i, j, k, ...] if 1 in axes else j,
+//     index[index_of(axes, 2), i, j, k, ...] if 2 in axes else k,
+//     ...]
+//
+// If `num_axes == 1`, the first dimension of `index` (which would have size 1)
+// may be omitted. In this case, the operation computes:
+//
+//   output[i, j, k, ...] = input[..., index[i, j, k, ...], ...]
+//
+// where the `index` tensor replaces the gathered axis.
+enum ynn_status ynn_define_gather(ynn_subgraph_t subgraph, size_t num_axes,
+                                  const int32_t* axes, size_t output_rank,
                                   uint32_t input_id, uint32_t index_id,
                                   uint32_t* output_id, uint32_t flags);
 

@@ -246,7 +246,7 @@ static const struct xnn_unary_elementwise_config* get_config(
   return NULL;
 }
 
-static enum xnn_status init_op(
+static XNN_NO_SANITIZE_FUNCTION enum xnn_status init_op(
     xnn_operator_t op,
     enum xnn_unary_operator op_type,
     enum xnn_datatype input_datatype,
@@ -348,6 +348,7 @@ enum xnn_status xnn_create_unary_elementwise_nc(
     xnn_log_error("failed to allocate %zu bytes for %s operator descriptor",
                   sizeof(struct compute_parameters),
                   xnn_unary_operator_to_string(op_type));
+    xnn_delete_operator(op);
     return xnn_status_out_of_memory;
   }
   op->num_compute_invocations = num_compute_invocations;
@@ -637,6 +638,7 @@ static enum xnn_status create_unary_elementwise_nc(
     xnn_log_error("failed to allocate %zu bytes for %s operator descriptor",
                   sizeof(struct compute_parameters),
                   xnn_operator_type_to_string(operator_type));
+    xnn_delete_operator(unary_elementwise_op);
     return xnn_status_out_of_memory;
   }
   unary_elementwise_op->num_compute_invocations = num_compute_invocations;

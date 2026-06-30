@@ -47,8 +47,8 @@ static s32x4 reduce_add(
     std::integral_constant<size_t, 4> /*horizontal_factor*/) {
   __m128i lo = _mm_cvtepi8_epi16(b.v);
   __m128i hi = _mm_cvtepi8_epi16(_mm_srli_si128(b.v, 8));
-  return a += s32x4(_mm_hadd_epi32(_mm_madd_epi16(lo, lo),
-                                   _mm_madd_epi16(hi, hi)));
+  return a +=
+         s32x4(_mm_hadd_epi32(_mm_madd_epi16(lo, lo), _mm_madd_epi16(hi, hi)));
 }
 
 static s32x4 reduce_add(
@@ -56,8 +56,16 @@ static s32x4 reduce_add(
     std::integral_constant<size_t, 4> /*horizontal_factor*/) {
   __m128i lo = _mm_cvtepu8_epi16(b.v);
   __m128i hi = _mm_cvtepu8_epi16(_mm_srli_si128(b.v, 8));
-  return a += s32x4(_mm_hadd_epi32(_mm_madd_epi16(lo, lo),
-                                   _mm_madd_epi16(hi, hi)));
+  return a +=
+         s32x4(_mm_hadd_epi32(_mm_madd_epi16(lo, lo), _mm_madd_epi16(hi, hi)));
+}
+
+YNN_ALWAYS_INLINE s8x16 sign_complement(s8x16 x) {
+  __m128i zero = _mm_setzero_si128();
+  __m128i sign = _mm_cmpgt_epi8(zero, x.v);
+  __m128i mask = _mm_set1_epi8(0x7F);
+  __m128i abs_val = _mm_and_si128(x.v, mask);
+  return s8x16(_mm_xor_si128(abs_val, sign));
 }
 
 }  // namespace simd
@@ -67,12 +75,22 @@ using simd::s32x4;
 using simd::s8x16;
 using simd::u8x16;
 
+using xf8x16_rvar = sign_magnitude<s8x16>;
+
 MIN_MAX_K1_KERNEL(min_max_k1_int8_sse41, s8x16, s8x16, int8_t, 16);
 MIN_MAX_KN_KERNEL(min_max_kn_int8_sse41, s8x16, s8x16, int8_t, 16);
+MIN_MAX_K1_KERNEL(min_max_k1_xf8_sse41, xf8x16_rvar, xf8x16_rvar, int8_t, 16);
+MIN_MAX_KN_KERNEL(min_max_kn_xf8_sse41, xf8x16_rvar, xf8x16_rvar, int8_t, 16);
+
 MIN_MAX_K1_KERNEL(min_k1_int8_sse41, s8x16, dummy_t, int8_t, 16);
 MIN_MAX_KN_KERNEL(min_kn_int8_sse41, s8x16, dummy_t, int8_t, 16);
+MIN_MAX_K1_KERNEL(min_k1_xf8_sse41, xf8x16_rvar, dummy_t, int8_t, 16);
+MIN_MAX_KN_KERNEL(min_kn_xf8_sse41, xf8x16_rvar, dummy_t, int8_t, 16);
+
 MIN_MAX_K1_KERNEL(max_k1_int8_sse41, dummy_t, s8x16, int8_t, 16);
 MIN_MAX_KN_KERNEL(max_kn_int8_sse41, dummy_t, s8x16, int8_t, 16);
+MIN_MAX_K1_KERNEL(max_k1_xf8_sse41, dummy_t, xf8x16_rvar, int8_t, 16);
+MIN_MAX_KN_KERNEL(max_kn_xf8_sse41, dummy_t, xf8x16_rvar, int8_t, 16);
 
 SUM_KN_KERNEL(sum_kn_int8_int32_sse41, int8_t, int32_t, 16, identity);
 SUM_KN_KERNEL(sum_kn_uint8_int32_sse41, uint8_t, int32_t, 16, identity);

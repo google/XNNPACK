@@ -62,7 +62,6 @@ void xnn_qs8_to_qu8_packw_gemm_goi_ukernel_x16c8__avx256vnni(
   assert(sr == 1);
   assert(weights != NULL);
   assert(packed_weights != NULL);
-  assert(params != NULL);
 
   int8_t* out = (int8_t*) packed_weights;
   const int32_t* b = (const int32_t*) bias;
@@ -408,7 +407,9 @@ void xnn_qs8_to_qu8_packw_gemm_goi_ukernel_x16c8__avx256vnni(
         b += n;
       } else {
         _mm256_storeu_si256((__m256i*) (out + 0), _mm256_setzero_si256());
-        _mm256_storeu_si256((__m256i*) (out + 32), _mm256_setzero_si256());
+        if (n > 8) {
+          _mm256_storeu_si256((__m256i*) (out + 32), _mm256_setzero_si256());
+        }
       }
       out += 16 * sizeof(int32_t);
 
@@ -632,11 +633,13 @@ void xnn_qs8_to_qu8_packw_gemm_goi_ukernel_x16c8__avx256vnni(
       vksum0 = _mm256_mullo_epi32(vksum0, vzeropoint);
       vksum8 = _mm256_mullo_epi32(vksum8, vzeropoint);
       __m256i vpack0 =  _mm256_loadu_si256((const __m256i*) (packed_b + 0));
-      __m256i vpack8 =  _mm256_loadu_si256((const __m256i*) (packed_b + 8));
       vpack0 = _mm256_sub_epi32(vpack0, vksum0);
-      vpack8 = _mm256_sub_epi32(vpack8, vksum8);
       _mm256_storeu_si256((__m256i *) (packed_b + 0), vpack0);
-      _mm256_storeu_si256((__m256i *) (packed_b + 8), vpack8);
+      if (n > 8) {
+        __m256i vpack8 =  _mm256_loadu_si256((const __m256i*) (packed_b + 8));
+        vpack8 = _mm256_sub_epi32(vpack8, vksum8);
+        _mm256_storeu_si256((__m256i *) (packed_b + 8), vpack8);
+      }
 
       out = (int8_t*) ((uintptr_t) out + extra_bytes);
     }

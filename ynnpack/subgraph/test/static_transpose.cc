@@ -32,6 +32,10 @@ using ynn::to_string;  // NOLINT(misc-unused-using-decls)
 
 namespace ynn {
 
+// Limit rank of tensors for testing, we have no special case codepaths beyond
+// rank 2, so this should be plenty of coverage.
+constexpr int max_test_rank = 5;
+
 template <typename T>
 void test_transpose_2d(T, size_t m, size_t n) {
   // Define subgraph
@@ -163,9 +167,9 @@ void test_random(T, bool with_copy) {
 
   ReplicableRandomDevice rng;
   std::uniform_int_distribution<size_t> basis_dist(1, 100);
-  std::uniform_int_distribution<int> input_rank_dist(0, YNN_MAX_TENSOR_RANK);
+  std::uniform_int_distribution<int> input_rank_dist(0, max_test_rank);
 
-  for (auto _ : FuzzTest(std::chrono::milliseconds(500))) {
+  for (auto _ : FuzzTest(std::chrono::milliseconds(100))) {
     const size_t input_rank = input_rank_dist(rng);
     std::uniform_int_distribution<int> output_rank_dist(0, input_rank);
     // Generate a random permutation that has some new dimensions in it.

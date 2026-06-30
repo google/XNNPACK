@@ -406,6 +406,25 @@ YNN_ALWAYS_INLINE void store(int8_t* ptr, s8x128 b, size_t n) {
   internal::partial_store(ptr, b.v, n);
 }
 
+YNN_ALWAYS_INLINE f32x32 operator+(f32x32 a, f32x32 b) {
+  return f32x32{Q6_Vsf_vadd_VsfVsf(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE f32x32 operator-(f32x32 a, f32x32 b) {
+  return f32x32{Q6_Vsf_vsub_VsfVsf(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE f32x32 operator*(f32x32 a, f32x32 b) {
+  return f32x32{Q6_Vsf_vmpy_VsfVsf(a.v, b.v)};
+}
+
+YNN_ALWAYS_INLINE HVX_VectorPred isfinite(f32x32 a) {
+  HVX_Vector abs_a = Q6_V_vand_VV(a.v, Q6_V_vsplat_R(0x7FFFFFFF));
+  return Q6_Q_vcmp_gt_VwVw(Q6_V_vsplat_R(0x7F800000), abs_a);
+}
+
+YNN_ALWAYS_INLINE f32x32 select(HVX_VectorPred cond, f32x32 a, f32x32 b) {
+  return f32x32{Q6_V_vmux_QVV(cond, a.v, b.v)};
+}
+
 YNN_ALWAYS_INLINE s32x32 operator+(s32x32 a, s32x32 b) {
   return s32x32{Q6_Vw_vadd_VwVw(a.v, b.v)};
 }
@@ -482,13 +501,26 @@ YNN_ALWAYS_INLINE s8x128 max(s8x128 a, s8x128 b) {
   return s8x128{Q6_Vb_vmax_VbVb(a.v, b.v)};
 }
 
+YNN_ALWAYS_INLINE float horizontal_sum(f32x32 x) {
+  x.v = Q6_Vsf_vadd_VsfVsf(x.v, Q6_V_vror_VR(x.v, 64));
+  x.v = Q6_Vsf_vadd_VsfVsf(x.v, Q6_V_vror_VR(x.v, 32));
+  x.v = Q6_Vsf_vadd_VsfVsf(x.v, Q6_V_vror_VR(x.v, 16));
+  x.v = Q6_Vsf_vadd_VsfVsf(x.v, Q6_V_vror_VR(x.v, 8));
+  x.v = Q6_Vsf_vadd_VsfVsf(x.v, Q6_V_vror_VR(x.v, 4));
+  float result;
+  memcpy(&result, &x.v, sizeof(float));
+  return result;
+}
+
 YNN_ALWAYS_INLINE int32_t horizontal_sum(s32x32 x) {
   x.v = Q6_Vw_vadd_VwVw(x.v, Q6_V_vror_VR(x.v, 64));
   x.v = Q6_Vw_vadd_VwVw(x.v, Q6_V_vror_VR(x.v, 32));
   x.v = Q6_Vw_vadd_VwVw(x.v, Q6_V_vror_VR(x.v, 16));
   x.v = Q6_Vw_vadd_VwVw(x.v, Q6_V_vror_VR(x.v, 8));
   x.v = Q6_Vw_vadd_VwVw(x.v, Q6_V_vror_VR(x.v, 4));
-  return *(int32_t*)&x.v;
+  int32_t result;
+  memcpy(&result, &x.v, sizeof(int32_t));
+  return result;
 }
 
 YNN_ALWAYS_INLINE float horizontal_min(f32x32 x) {
@@ -497,7 +529,9 @@ YNN_ALWAYS_INLINE float horizontal_min(f32x32 x) {
   x.v = Q6_Vsf_vmin_VsfVsf(x.v, Q6_V_vror_VR(x.v, 16));
   x.v = Q6_Vsf_vmin_VsfVsf(x.v, Q6_V_vror_VR(x.v, 8));
   x.v = Q6_Vsf_vmin_VsfVsf(x.v, Q6_V_vror_VR(x.v, 4));
-  return *(float*)&x.v;
+  float result;
+  memcpy(&result, &x.v, sizeof(float));
+  return result;
 }
 YNN_ALWAYS_INLINE half horizontal_min(f16x64 x) {
   x.v = Q6_Vhf_vmin_VhfVhf(x.v, Q6_V_vror_VR(x.v, 64));
@@ -514,7 +548,9 @@ YNN_ALWAYS_INLINE int32_t horizontal_min(s32x32 x) {
   x.v = Q6_Vw_vmin_VwVw(x.v, Q6_V_vror_VR(x.v, 16));
   x.v = Q6_Vw_vmin_VwVw(x.v, Q6_V_vror_VR(x.v, 8));
   x.v = Q6_Vw_vmin_VwVw(x.v, Q6_V_vror_VR(x.v, 4));
-  return *(int32_t*)&x.v;
+  int32_t result;
+  memcpy(&result, &x.v, sizeof(int32_t));
+  return result;
 }
 YNN_ALWAYS_INLINE int16_t horizontal_min(s16x64 x) {
   x.v = Q6_Vh_vmin_VhVh(x.v, Q6_V_vror_VR(x.v, 64));
@@ -551,7 +587,9 @@ YNN_ALWAYS_INLINE float horizontal_max(f32x32 x) {
   x.v = Q6_Vsf_vmax_VsfVsf(x.v, Q6_V_vror_VR(x.v, 16));
   x.v = Q6_Vsf_vmax_VsfVsf(x.v, Q6_V_vror_VR(x.v, 8));
   x.v = Q6_Vsf_vmax_VsfVsf(x.v, Q6_V_vror_VR(x.v, 4));
-  return *(float*)&x.v;
+  float result;
+  memcpy(&result, &x.v, sizeof(float));
+  return result;
 }
 YNN_ALWAYS_INLINE half horizontal_max(f16x64 x) {
   x.v = Q6_Vhf_vmax_VhfVhf(x.v, Q6_V_vror_VR(x.v, 64));
@@ -568,7 +606,9 @@ YNN_ALWAYS_INLINE int32_t horizontal_max(s32x32 x) {
   x.v = Q6_Vw_vmax_VwVw(x.v, Q6_V_vror_VR(x.v, 16));
   x.v = Q6_Vw_vmax_VwVw(x.v, Q6_V_vror_VR(x.v, 8));
   x.v = Q6_Vw_vmax_VwVw(x.v, Q6_V_vror_VR(x.v, 4));
-  return *(int32_t*)&x.v;
+  int32_t result;
+  memcpy(&result, &x.v, sizeof(int32_t));
+  return result;
 }
 YNN_ALWAYS_INLINE int16_t horizontal_max(s16x64 x) {
   x.v = Q6_Vh_vmax_VhVh(x.v, Q6_V_vror_VR(x.v, 64));
