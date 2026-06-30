@@ -12,6 +12,8 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <assert.h>
 #include <stddef.h>
 #include <stdint.h>
+$if IDATATYPE == "F16":
+  #include <float.h>
 
 #include <immintrin.h>
 
@@ -49,8 +51,12 @@ void xnn_${IDATATYPE.lower()}_${ODATATYPE.lower()}_vcvt_ukernel__avx512skx_u${BA
   // INT16_MAX is exactly representable as a float, and is plenty large (this clamp is applied after scaling).
   const __m512 voverflow_max = _mm512_set1_ps((float) INT16_MAX);
 
-  $if IDATATYPE in ["BF16", "F16"]:
-    const __m512 vscale = _mm512_set1_ps(${INPUT_T}_to_float(params->scalar.scale));
+  $if IDATATYPE in ["F16"]:
+    // Don't let the scale be 0, which can happen for large scales, and should
+    // not happen because this value is a reciprocal.
+    const __m512 vscale = _mm512_set1_ps(math_max_f32(FLT_MIN, xnn_float16_to_float(params->scalar.scale)));
+  $elif IDATATYPE in ["BF16"]:
+    const __m512 vscale = _mm512_set1_ps(xnn_bfloat16_to_float(params->scalar.scale));
   $else:
     const __m512 vscale = _mm512_set1_ps(params->scalar.scale);
   const __m512i voutput_zero_point = _mm512_set1_epi16(params->scalar.output_zero_point);

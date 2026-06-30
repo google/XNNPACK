@@ -11,6 +11,7 @@
 #include <assert.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <float.h>
 
 #include <immintrin.h>
 
@@ -40,7 +41,9 @@ void xnn_f16_qs8_vcvt_ukernel__avx512skx_u96(
   // INT16_MAX is exactly representable as a float, and is plenty large (this clamp is applied after scaling).
   const __m512 voverflow_max = _mm512_set1_ps((float) INT16_MAX);
 
-  const __m512 vscale = _mm512_set1_ps(xnn_float16_to_float(params->scalar.scale));
+  // Don't let the scale be 0, which can happen for large scales, and should
+  // not happen because this value is a reciprocal.
+  const __m512 vscale = _mm512_set1_ps(math_max_f32(FLT_MIN, xnn_float16_to_float(params->scalar.scale)));
   const __m512i voutput_zero_point = _mm512_set1_epi16(params->scalar.output_zero_point);
   const __m512i vshuffle512_mask = _mm512_load_si512(shuffle512_mask);
   const __m256i vshuffle256_mask = _mm256_load_si256((const __m256i*) shuffle256_mask);
