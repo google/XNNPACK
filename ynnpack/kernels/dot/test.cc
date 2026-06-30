@@ -164,24 +164,26 @@ void TestConv2D(AT, BT, CT, const KernelInfo& kernel) {
   const size_t tile_m = kernel.tile_m;
   const size_t tile_n = kernel.tile_n;
   const size_t tile_k = kernel.tile_k;
+  // We assume that coverage of unaligned m comes from the basic dot tests, and
+  // we only need to test the k2 and k3 loops here.
+  const size_t w = kernel.block_shape.m;
   const bool pack_a = kernel.flags & dot_flag::transpose_a;
 
   // We always have m = 1, because that would just be a batch dimension here,
   // it does not exercise the dot kernel API.
   // TODO: Try to parameterize the test on this.
   struct Conv2DShape {
-    size_t w, kw, kh, co, ci;
+    size_t kw, kh, co, ci;
   };
 
   const auto cos = simd_sizes_up_to(block_shape.n, B_info::element_count());
   std::vector<Conv2DShape> shapes;
-  for (size_t w = 1; w <= block_shape.m; ++w) {
-    for (size_t kw : {1, 3}) {
-      for (size_t kh : {2}) {
-        for (size_t co : cos) {
-          for (size_t ci = tile_k; ci <= tile_k * 3; ci += tile_k) {
-            shapes.push_back({w, kw, kh, co, ci});
-          }
+  shapes.reserve(2 * 1 * cos.size() * 3);
+  for (size_t kw : {1, 3}) {
+    for (size_t kh : {2}) {
+      for (size_t co : cos) {
+        for (size_t ci = tile_k; ci <= tile_k * 3; ci += tile_k) {
+          shapes.push_back({kw, kh, co, ci});
         }
       }
     }
@@ -190,7 +192,6 @@ void TestConv2D(AT, BT, CT, const KernelInfo& kernel) {
   const float max_abs_value = 10.0f;
 
   for (const Conv2DShape& shape : shapes) {
-    const size_t w = shape.w;
     const size_t kw = shape.kw;
     const size_t kh = shape.kh;
     const size_t co = shape.co;
