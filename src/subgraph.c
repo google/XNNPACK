@@ -4713,7 +4713,9 @@ enum xnn_status xnn_delete_subgraph(xnn_subgraph_t subgraph) {
       // subgraph still has ownership of them.
       for (uint32_t i = 0; i < subgraph->num_values; i++) {
         struct xnn_value* value = &subgraph->values[i];
-        if (value->fp16_rewrite.fp16_compatible && value->data != NULL) {
+        if ((value->fp16_rewrite.fp16_compatible ||
+             (value->flags & XNN_VALUE_FLAG_NEEDS_CLEANUP)) &&
+            value->data != NULL) {
           XNN_PRAGMA_CLANG("clang diagnostic push")
           XNN_PRAGMA_CLANG("clang diagnostic ignored \"-Wcast-qual\"")
           xnn_release_memory((void*)value->data);
