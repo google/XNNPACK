@@ -725,7 +725,8 @@ enum xnn_status xnn_create_runtime_v4(
       continue;
     }
 
-    if (value->flags & XNN_VALUE_FLAG_FP16_COMPATIBLE && xnn_value_is_static(value->allocation_type)) {
+    if (value->flags & (XNN_VALUE_FLAG_FP16_COMPATIBLE | XNN_VALUE_FLAG_NEEDS_CLEANUP) &&
+        xnn_value_is_static(value->allocation_type)) {
       // Value is static and has been converted to FP16 in a new buffer.
       value->flags |= XNN_VALUE_FLAG_NEEDS_CLEANUP;
       // Runtime takes ownership of the data from subgraph.

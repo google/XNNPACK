@@ -195,7 +195,8 @@ enum xnn_status xnn_subgraph_add_internal_values(xnn_subgraph_t subgraph,
   XNN_RETURN_IF_ERROR(xnn_subgraph_reserve_values(subgraph, num_values));
   struct xnn_value* new_values = subgraph->values + subgraph->num_values;
   for (size_t i = 0; i < num_values; i++) {
-    xnn_value_clear(&new_values[i]);
+    assert(new_values + i != NULL);
+    memset(new_values + i, 0, sizeof(struct xnn_value));
     new_values[i].id = subgraph->num_values + i;
   }
   subgraph->num_values += num_values;
@@ -210,6 +211,12 @@ void xnn_node_clear(struct xnn_node* node) {
 
 void xnn_value_clear(struct xnn_value* value) {
   assert(value != NULL);
+  if ((value->flags & XNN_VALUE_FLAG_NEEDS_CLEANUP) && value->data != NULL) {
+    XNN_PRAGMA_CLANG("clang diagnostic push")
+    XNN_PRAGMA_CLANG("clang diagnostic ignored \"-Wcast-qual\"")
+    xnn_release_memory((void*)value->data);
+    XNN_PRAGMA_CLANG("clang diagnostic pop")
+  }
   memset(value, 0, sizeof(struct xnn_value));
 }
 
