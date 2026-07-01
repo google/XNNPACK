@@ -123,7 +123,6 @@ cc_test(
     linkopts = ynn_binary_linkopts(),
     malloc = ynn_binary_malloc(),
     shard_count = 24,
-    tags = ["nowasm"],  # b/525770952
     deps = TEST_DEPS,
 )
 
