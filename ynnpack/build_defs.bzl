@@ -77,6 +77,7 @@ _YNN_IMPLIED_ARCHS = {
     "arm64_neoni8mm": ["arm64_neon"],
     "arm64_neonfp8": ["arm64_neon"],
     "arm64_neonfp8dot4": ["arm64_neonfp8"],
+    "arm64_neonf8mm8": ["arm64_neonfp8"],
     "arm64_sme": ["arm64_neon"],
     "arm64_sme2": ["arm64_neon"],
     "arm64_sve": ["arm64_neon"],
@@ -174,6 +175,11 @@ _YNN_PARAMS_FOR_ARCH = {
         "cond": "//ynnpack:ynn_enable_arm64_neonfp8dot4",
         "arch_copts": ["-march=armv8.2-a+fp8+fp8dot4"],
         "arch_flag": "neonfp8dot4",
+    },
+    "arm64_neonf8mm8": {
+        "cond": "//ynnpack:ynn_enable_arm64_neonf8mm8",
+        "arch_copts": ["-march=armv8.2-a+fp8+f8f32mm"],
+        "arch_flag": "neonf8mm8",
     },
     "arm_neonbf16": {
         "cond": "//ynnpack:ynn_enable_arm_neonbf16",

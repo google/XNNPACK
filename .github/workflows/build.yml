@@ -865,6 +865,7 @@ jobs:
       BAZEL_DEFINES: |
         --define=ynn_enable_arm64_neonfp8=true
         --define=ynn_enable_arm64_neonfp8dot4=true
+        --define=ynn_enable_arm64_neonf8mm8=true
     steps:
       - uses: actions/checkout@v6
 

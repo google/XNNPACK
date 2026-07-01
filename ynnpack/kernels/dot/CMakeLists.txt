@@ -197,6 +197,11 @@ YNN_ADD_DOT_KERNELS(arm_fp8_fp8_fp32
   arm64_neonfp8dot4 arm64_neonfp8dot4_fp8_e4m3_fp8_e4m3_fp32
 )
 
+YNN_ADD_DOT_KERNELS(arm_fp8_fp8_fp32_k2
+  arm64_neonf8mm8 arm64_neonf8mm8_fp8_e5m2_fp8_e5m2_fp32_k2
+  arm64_neonf8mm8 arm64_neonf8mm8_fp8_e4m3_fp8_e4m3_fp32_k2
+)
+
 YNN_ADD_DOT_SRC(arm64_sme arm64_sme.cc)
 YNN_ADD_DOT_SRC(arm64_sme2 arm64_sme2.cc)
 

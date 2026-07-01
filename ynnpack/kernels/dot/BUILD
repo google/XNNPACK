@@ -84,6 +84,10 @@ ynn_generate_srcs(
         "arm64_neonfp8dot4_fp8_e5m2_fp8_e5m2_fp32.inc",
         "arm64_neonfp8dot4_fp8_e4m3_fp8_e4m3_fp32.cc",
         "arm64_neonfp8dot4_fp8_e4m3_fp8_e4m3_fp32.inc",
+        "arm64_neonf8mm8_fp8_e5m2_fp8_e5m2_fp32.cc",
+        "arm64_neonf8mm8_fp8_e5m2_fp8_e5m2_fp32.inc",
+        "arm64_neonf8mm8_fp8_e4m3_fp8_e4m3_fp32.cc",
+        "arm64_neonf8mm8_fp8_e4m3_fp8_e4m3_fp32.inc",
     ],
 )
 
@@ -300,6 +304,8 @@ ynn_cc_library(
         "arm64_neon_bf16_bf16_fp32.inc",
         "arm64_neon_fp32.inc",
         "arm64_neon_fp64.inc",
+        "arm64_neonf8mm8_fp8_e4m3_fp8_e4m3_fp32.inc",
+        "arm64_neonf8mm8_fp8_e5m2_fp8_e5m2_fp32.inc",
         "arm64_neonfp8dot4_fp8_e4m3_fp8_e4m3_fp32.inc",
         "arm64_neonfp8dot4_fp8_e5m2_fp8_e5m2_fp32.inc",
         "arm64_neoni8mm_int8_int8_int32.inc",
@@ -351,6 +357,10 @@ ynn_cc_library(
         "arm64_neonfp8dot4": [
             "arm64_neonfp8dot4_fp8_e4m3_fp8_e4m3_fp32.cc",
             "arm64_neonfp8dot4_fp8_e5m2_fp8_e5m2_fp32.cc",
+        ],
+        "arm64_neonf8mm8": [
+            "arm64_neonf8mm8_fp8_e4m3_fp8_e4m3_fp32.cc",
+            "arm64_neonf8mm8_fp8_e5m2_fp8_e5m2_fp32.cc",
         ],
         "arm64_neoni8mm": ["arm64_neoni8mm_int8_int8_int32.cc"],
         "arm64_sme": [

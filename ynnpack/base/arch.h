@@ -48,9 +48,10 @@ enum {
   neonfp8 = 1 << 6,
   neonfp8dot4 = 1 << 7,
   neoni8mm = 1 << 8,
-  sme = 1 << 9,
-  sme2 = 1 << 10,
-  sve = 1 << 11,
+  neonf8mm8 = 1 << 9,
+  sme = 1 << 10,
+  sme2 = 1 << 11,
+  sve = 1 << 12,
 #endif
 #ifdef YNN_ARCH_HEXAGON
   hvx = 1 << 0,
