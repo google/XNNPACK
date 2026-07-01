@@ -107,6 +107,9 @@ deps = {
   'third_party/google_benchmark/src': {
     'url': Var('chromium_url') + '/external/github.com/google/benchmark.git' + '@' + '8abf1e701fbd88c8170f48fe0558247e2e5f8e7d',
   },
+  'third_party/abseil-cpp': {
+    'url': Var('chromium_url') + '/chromium/src/third_party/abseil-cpp' + '@' + '5c3e051186c88b1e7ee66750eda59096a51abc73',
+  },
   'third_party/kleidiai/src': {
     'url': 'https://gitlab.arm.com/kleidi/kleidiai@v1.25.0',
     'condition': 'checkout_kleidiai'
