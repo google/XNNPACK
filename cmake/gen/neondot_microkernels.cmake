@@ -29,6 +29,8 @@ SET(PROD_NEONDOT_MICROKERNEL_SRCS
   src/qs8-packw/gen/qs8-packw-x16c4-gemm-goi-neondot.c
   src/qs8-qc2w-gemm/gen/qs8-qc2w-gemm-1x8c4-minmax-fp32-neondot.c
   src/qs8-qc2w-gemm/gen/qs8-qc2w-gemm-8x8c4-minmax-fp32-neondot.c
+  src/qs8-qc2w-packw/gen/qd8-qc2w-packw-x8c4-gemm-goi-neondot.c
+  src/qs8-qc2w-packw/gen/qs8-qc2w-packw-x8c4-gemm-goi-neondot.c
   src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-1x8c4-minmax-fp32-neondot.c
   src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-1x16c4-minmax-fp32-neondot.c
   src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-4x8c4-minmax-fp32-neondot.c
@@ -110,6 +112,10 @@ SET(NON_PROD_NEONDOT_MICROKERNEL_SRCS
   src/qs8-qc2w-gemm/gen/qs8-qc2w-gemm-6x8c4-minmax-fp32-neondot.c
   src/qs8-qc2w-gemm/gen/qs8-qc2w-gemm-6x16c4-minmax-fp32-neondot.c
   src/qs8-qc2w-gemm/gen/qs8-qc2w-gemm-8x16c4-minmax-fp32-neondot.c
+  src/qs8-qc2w-packw/gen/qd8-qc2w-packw-x16c4-gemm-goi-neondot.c
+  src/qs8-qc2w-packw/gen/qs8-qc2w-packw-x16c4-gemm-goi-neondot.c
+  src/qs8-qc2w-packw/gen/qs8-to-qu8-qc2w-packw-x8c4-gemm-goi-neondot.c
+  src/qs8-qc2w-packw/gen/qs8-to-qu8-qc2w-packw-x16c4-gemm-goi-neondot.c
   src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-1x8c8-minmax-fp32-neondot-ld64.c
   src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-1x16c8-minmax-fp32-neondot-ld64.c
   src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-6x8c4-minmax-fp32-neondot.c

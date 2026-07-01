@@ -644,6 +644,18 @@ typedef void (*xnn_qs8_qc4w_packw_gemm_goi_ukernel_fn)(
     void* packed_weights, size_t extra_bytes,
     const struct xnn_qs8_qc4w_packing_params* params);
 
+typedef void (*xnn_qd8_qc2w_packw_gemm_goi_ukernel_fn)(
+    size_t g, size_t nc, size_t kc, size_t nr, size_t kr, size_t sr,
+    const uint8_t* k, const int32_t* b, const float* scale,
+    void* packed_weights, size_t extra_bytes,
+    const struct xnn_qd8_qc2w_packing_params* params);
+
+typedef void (*xnn_qs8_qc2w_packw_gemm_goi_ukernel_fn)(
+    size_t g, size_t nc, size_t kc, size_t nr, size_t kr, size_t sr,
+    const uint8_t* k, const int32_t* b, const float* scale,
+    void* packed_weights, size_t extra_bytes,
+    const struct xnn_qs8_qc2w_packing_params* params);
+
 typedef void (*xnn_qb4_packw_gemm_goi_ukernel_fn)(
     size_t g, size_t nc, size_t kc, size_t nr, size_t kr, size_t sr, size_t bl,
     const uint8_t* k, const int32_t* b, const void* scale,
