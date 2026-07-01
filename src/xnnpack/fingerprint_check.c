@@ -30,6 +30,7 @@ static enum xnn_status compute_fingerprint(
     case xnn_fingerprint_id_fully_connected_nc_qd8_f16_qc4w:
     case xnn_fingerprint_id_fully_connected_nc_qdu8_f16_qc4w:
     case xnn_fingerprint_id_fully_connected_nc_qd8_f16_qb4w:
+    case xnn_fingerprint_id_fully_connected_nc_qd8_bf16_qb4w:
     case xnn_fingerprint_id_fully_connected_nc_qd8_f32_qc2w:
     case xnn_fingerprint_id_fully_connected_nc_qdu8_f32_qc2w:
     case xnn_fingerprint_id_fully_connected_nc_qd8_f32_qc4w:
