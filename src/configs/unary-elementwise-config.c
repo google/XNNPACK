@@ -279,8 +279,8 @@ static void init_f16_approxgelu_config(void) {
   const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
   assert(hardware_config != NULL);
   if (hardware_config->arch_flags & xnn_arch_riscv_vector_fp16_arith) {
-    f16_approxgelu_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f16_vapproxgelu_ukernel__rvvfp16arith_rational_6_4_div_u8v);
-    f16_approxgelu_config.element_tile = 8 * hardware_config->vlenb / sizeof(xnn_float16);
+    f16_approxgelu_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f16_vapproxgelu_ukernel__rvvfp16arith_rational_6_4_div_u4v);
+    f16_approxgelu_config.element_tile = 4 * hardware_config->vlenb / sizeof(xnn_float16);
   } else {
     f16_approxgelu_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f16_f32acc_vapproxgelu_ukernel__scalar_rational_6_4_div_u4);
     f16_approxgelu_config.element_tile = 4;
