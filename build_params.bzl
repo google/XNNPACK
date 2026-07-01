@@ -353,8 +353,11 @@ XNNPACK_PARAMS_FOR_ARCH = {
         copts = ["-march=armv8.2-a+fp16"],
     ),
     "neonbf16": _create_params(
-        cond = "//build_config:aarch64",
-        copts = ["-march=armv8.2-a+bf16"],
+        cond = "//:arm_bf16_enabled",
+        copts = select({
+            "//build_config:windows_arm64": [],
+            "//conditions:default": ["-march=armv8.2-a+bf16"],
+        }),
     ),
     "neondotfp16arith": _create_params(
         cond = "//:arm_neondotfp16_enabled",

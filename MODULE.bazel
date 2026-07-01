@@ -87,6 +87,8 @@ http_archive(
 # cpuinfo library, used for detecting processor characteristics
 http_archive(
     name = "cpuinfo",
+    patch_args = ["-p1"],
+    patches = ["//:cpuinfo_windows_arm64_msvc.patch"],
     sha256 = "995316f224247d1611ab1b624a66bc5cbd5b5d2e5ce991ed68d983aac950ad8b",
     strip_prefix = "cpuinfo-bc3c01e230c6974283e4b89421cfb0e232435589",
     urls = [
