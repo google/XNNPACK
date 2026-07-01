@@ -113,3 +113,21 @@ cc_test(
         "@com_google_googletest//:gtest_main",  # gunit
     ],
 )
+
+cc_test(
+    name = "xnnpack_conversion_numerical_test",
+    srcs = ["xnnpack_conversion_numerical_test.cc"],
+    deps = [
+        ":conversion",
+        "//:XNNPACK",
+        "//litert/tensor",
+        "//litert/tensor/backends/testing:numerical_test_suite",
+        "//litert/tensor/runners/xnnpack:runner",
+        "//litert/tensor/utils:macros",
+        "@abseil-cpp//absl/status",
+        "@abseil-cpp//absl/status:statusor",
+        "@abseil-cpp//absl/strings",
+        "@abseil-cpp//absl/types:span",
+        "@com_google_googletest//:gtest_main",  # gunit
+    ],
+)
