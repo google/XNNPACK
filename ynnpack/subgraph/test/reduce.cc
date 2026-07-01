@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <cassert>
 #include <chrono>
+#include <cmath>
 #include <cstddef>
 #include <cstdint>
 #include <functional>
@@ -152,7 +153,11 @@ void TestReduce(A, C, ynn_reduce_operator op) {
     const uint32_t input_a_id = 0;
     uint32_t c_id = 1;
     const uint32_t output_id = 2;
-    std::vector<size_t> input_shape = random_shape(rng, input_rank, 0, 9);
+    constexpr size_t max_size = 1024;
+    const size_t max_dim = static_cast<size_t>(std::ceil(
+        std::pow(static_cast<double>(max_size),
+                 1.0 / static_cast<double>(std::max<size_t>(1, input_rank)))));
+    std::vector<size_t> input_shape = random_shape(rng, input_rank, 0, max_dim);
     input_shape[dim_dist(rng)] = large_shape_dist(rng);
     subgraph.AddInput(type_of<A>(), input_shape, input_a_id)
         .AddOutput(type_of<C>(), output_rank, output_id);
@@ -341,7 +346,11 @@ void TestMinMax(T) {
     const uint32_t a_id = 0;
     uint32_t c_id = 1;
     const uint32_t output_id = 2;
-    std::vector<size_t> input_shape = random_shape(rng, input_rank, 0, 9);
+    constexpr size_t max_size = 1024;
+    const size_t max_dim = static_cast<size_t>(std::ceil(
+        std::pow(static_cast<double>(max_size),
+                 1.0 / static_cast<double>(std::max<size_t>(1, input_rank)))));
+    std::vector<size_t> input_shape = random_shape(rng, input_rank, 0, max_dim);
     input_shape[dim_dist(rng)] = large_shape_dist(rng);
     subgraph.AddInput(type_of<T>(), input_shape, a_id)
         .AddOutput(type_of<T>(), output_rank, output_id);
@@ -500,7 +509,11 @@ TEST(MaxAbsDiff, Test) {
     const uint32_t output_id = 3;
     uint32_t diff_id = YNN_INVALID_VALUE_ID;
     uint32_t abs_diff_id = YNN_INVALID_VALUE_ID;
-    std::vector<size_t> input_shape = random_shape(rng, input_rank, 0, 9);
+    constexpr size_t max_size = 1024;
+    const size_t max_dim = static_cast<size_t>(std::ceil(
+        std::pow(static_cast<double>(max_size),
+                 1.0 / static_cast<double>(std::max<size_t>(1, input_rank)))));
+    std::vector<size_t> input_shape = random_shape(rng, input_rank, 0, max_dim);
     input_shape[dim_dist(rng)] = large_shape_dist(rng);
     subgraph.AddInput(type_of<float>(), input_shape, a_id)
         .AddInput(type_of<float>(), input_rank, b_id)
