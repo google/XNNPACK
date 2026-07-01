@@ -150,6 +150,23 @@ bool find_n(const T* data, size_t size, const Target& x) {
   return false;
 }
 
+// Returns true if `e` indexes dimension `v` pointwise -- either directly (`v`)
+// or through the broadcast-aware bound that `make_broadcast_bounds` emits when
+// it can't prove a dim isn't a broadcast: `select(extent > 1, v, 0)` (index by
+// `v` unless the source extent is 1, in which case read index 0). Slinky
+// normalizes `extent > 1` to `1 < extent` (a `less` node with constant `1` on
+// the left).
+bool indexes_pointwise(const slinky::expr& e, const slinky::var& v) {
+  if (slinky::is_variable(e, v)) return true;
+  const class slinky::select* s = e.as<class slinky::select>();
+  if (s == nullptr || !slinky::is_variable(s->true_value, v) ||
+      !slinky::is_constant(s->false_value, 0)) {
+    return false;
+  }
+  const class slinky::less* lt = s->condition.as<class slinky::less>();
+  return lt != nullptr && slinky::is_constant(lt->a, 1);
+}
+
 // Finds which {`buffer`, `dim`} corresponds to the output dimension variable
 // `v`.
 std::pair<slinky::var, int> find_output_dim(const slinky::func* f,
@@ -291,8 +308,8 @@ std::map<std::pair<slinky::var, int>, int> infer_source_regions(
             }
           }
 
-          if (slinky::is_variable(bound.min, v) &&
-              slinky::is_variable(bound.max, v) &&
+          if (indexes_pointwise(bound.min, v) &&
+              indexes_pointwise(bound.max, v) &&
               !parent_source_regions.empty()) {
             // Check if all parent extents are equivalent.
             bool all_equal = true;
