@@ -55,6 +55,8 @@ class dot_base:
     self.a_type = ""
     self.b_type = ""
     self.c_type = ""
+    self.a_load_type = None
+    self.b_load_type = None
     self.b_chunk_n = 1
     self.min_tiles = 4
     self.flags = []
@@ -65,6 +67,8 @@ class dot_base:
 #include <cstdint>
 #include <cstddef>
 #include <cstring>
+
+#include "ynnpack/base/arithmetic.h"
 
 #if !defined(__has_attribute)
 #define YNN_COMPILER_HAS_ATTRIBUTE(x) 0
@@ -92,23 +96,8 @@ namespace ynn {
 
 namespace {
 
-template <typename T>
-YNN_INTRINSIC T* offset_bytes(T* ptr, std::ptrdiff_t offset) {
-  return reinterpret_cast<T*>(reinterpret_cast<uint8_t*>(ptr) + offset);
-}
-
-template <typename T>
-YNN_INTRINSIC const T* offset_bytes(const T* ptr, std::ptrdiff_t offset) {
-  return reinterpret_cast<const T*>(reinterpret_cast<const uint8_t*>(ptr) +
-                                    offset);
-}
-
 YNN_INTRINSIC std::size_t min(std::size_t a, std::size_t b) {
   return a < b ? a : b;
-}
-
-YNN_INTRINSIC std::size_t sub_sat(std::size_t a, std::size_t b) {
-  return a > b ? a - b : 0;
 }
 
 }  // namespace
@@ -151,7 +140,7 @@ void {func_name}(
 
   def a_ptr(self, i, k1, ty=None):
     """Get pointers to a(i, k1) within the current block."""
-    ty = ty or self.a_type
+    ty = ty or self.a_load_type or self.a_type
     # When we clamp, we need to align down to the nearest tile.
     i = f"min({i}, (M - 1) & ~{self.tile_shape[0] - 1})" if i != 0 else i
     if "dot_flag::transpose_a" in self.flags:
@@ -162,7 +151,7 @@ void {func_name}(
 
   def b_ptr(self, k1, j, ty=None):
     """Get pointers to b(k1, j) within the current block."""
-    ty = ty or self.b_type
+    ty = ty or self.b_load_type or self.b_type
     # Split j into `jo` and `ji`, where `jo` is which B pointer we use, and `ji`
     # is the offset from that B pointer we want.
     jo = (j // self.b_chunk_n) * self.b_chunk_n

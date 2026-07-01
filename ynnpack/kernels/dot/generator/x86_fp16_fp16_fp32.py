@@ -18,17 +18,9 @@ class x86_fp16_fp16_fp32(x86):
   def __init__(self, arch, bits, tile_shape):
     super().__init__(arch, "fp16_fp16_fp32", "float", bits, tile_shape)
     self.a_type = "half"
+    self.a_load_type = "int16_t"
     self.b_type = "half"
-
-  def header(self):
-    return super().header() + """
-
-namespace {
-
-using half = int16_t;
-
-}  // namespace
-"""
+    self.b_load_type = "int16_t"
 
   def load_a_tile(self, i, k):
     a = f"{self._mm(self.bits // 2)}_set1_epi16(*{self.a_ptr(i, k)})"

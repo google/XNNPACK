@@ -18,16 +18,15 @@ class arm_fp8_fp8_fp32(arm_neon):
     super().__init__(arch, dot_type, "float", tile_shape)
     self.fp8_type = fp8_type
     self.a_type = fp8_type
+    self.a_load_type = "uint8_t"
     self.b_type = fp8_type
+    self.b_load_type = "uint8_t"
     self.flags += ["dot_flag::consistent_arithmetic"]
 
   def header(self):
     return super().header() + """
 
 namespace {
-
-using fp8_e5m2 = uint8_t;
-using fp8_e4m3 = uint8_t;
 
 YNN_INTRINSIC uint32_t unaligned_load_uint8x4(const uint8_t* ptr) {
     uint32_t value;

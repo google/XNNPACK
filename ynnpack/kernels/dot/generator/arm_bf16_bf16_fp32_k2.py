@@ -16,7 +16,9 @@ class arm_neon_bf16_bf16_fp32(arm_neon):
   def __init__(self, arch="neon", tile_shape=(1, 4, 2)):
     super().__init__(arch, "bf16_bf16_fp32", "float", tile_shape)
     self.a_type = "bfloat16"
+    self.a_load_type = "__bf16"
     self.b_type = "bfloat16"
+    self.b_load_type = "__bf16"
 
 
 class arm_neonbf16_bf16_bf16_fp32_k2(arm_neon_bf16_bf16_fp32):
@@ -26,11 +28,9 @@ class arm_neonbf16_bf16_bf16_fp32_k2(arm_neon_bf16_bf16_fp32):
   def header(self):
     return super().header() + """
 
-using bfloat16 = __bf16;
-
 namespace {
 
-YNN_INTRINSIC bfloat16x4_t unaligned_load_broadcast_bf16x2(const bfloat16* ptr) {
+YNN_INTRINSIC bfloat16x4_t unaligned_load_broadcast_bf16x2(const __bf16* ptr) {
     float value;
     memcpy(&value, ptr, sizeof(float));
     return vreinterpret_bf16_f32(vdup_n_f32(value));

@@ -33,7 +33,9 @@ using bfloat16x1_t = bfloat16;
 using float8_e5m2x1_t = fp8_e5m2;
 using float8_e4m3x1_t = fp8_e4m3;
 using float32x1_t = float;
+#if !defined(__aarch64__) || !defined(__ARM_NEON)
 using float64x1_t = double;
+#endif
 
 // TODO: b/501068911 - When we have an option to disable fp64 support, we should
 // make this float when fp64 is disabled.

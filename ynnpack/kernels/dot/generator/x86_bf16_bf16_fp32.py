@@ -18,7 +18,9 @@ class x86_bf16_bf16_fp32(x86):
   def __init__(self, arch, bits, tile_shape):
     super().__init__(arch, "bf16_bf16_fp32", "float", bits, tile_shape)
     self.a_type = "bfloat16"
+    self.a_load_type = "std::uint16_t"
     self.b_type = "bfloat16"
+    self.b_load_type = "std::uint16_t"
     # Very interestingly, fma doesn't seem to matter for bf16!
     self.flags += ["dot_flag::consistent_arithmetic"]
 
@@ -27,11 +29,7 @@ class x86_bf16_bf16_fp32(x86):
 
 namespace {{
 
-struct bfloat16 {{
-  std::uint16_t value;
-}};
-
-YNN_INTRINSIC __m{self.bits}i unaligned_load_broadcast_bf16x2(const bfloat16* ptr) {{
+YNN_INTRINSIC __m{self.bits}i unaligned_load_broadcast_bf16x2(const std::uint16_t* ptr) {{
     int32_t value;
     memcpy(&value, ptr, sizeof(int32_t));
     return {self._mm()}_set1_epi32(value);
@@ -116,7 +114,7 @@ class x86_avx512bf16_bf16_bf16_fp32(x86_bf16_bf16_fp32, x86_avx512):
 
 namespace {{
 
-YNN_INTRINSIC __m{self.bits} unaligned_load_broadcast_2xbf16(const bfloat16* ptr) {{
+YNN_INTRINSIC __m{self.bits} unaligned_load_broadcast_2xbf16(const std::uint16_t* ptr) {{
     float value;
     memcpy(&value, ptr, sizeof(float));
     return {self._mm()}_set1_ps(value);

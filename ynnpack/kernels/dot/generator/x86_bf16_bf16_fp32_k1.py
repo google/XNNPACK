@@ -18,17 +18,9 @@ class x86_bf16_bf16_fp32_k1(x86):
   def __init__(self, arch, bits, tile_shape):
     super().__init__(arch, "bf16_bf16_fp32", "float", bits, tile_shape)
     self.a_type = "bfloat16"
+    self.a_load_type = "std::uint16_t"
     self.b_type = "bfloat16"
-
-  def header(self):
-    return super().header() + """
-
-namespace {
-
-using bfloat16 = uint16_t;
-
-}  // namespace
-"""
+    self.b_load_type = "std::uint16_t"
 
   def load_a_tile(self, i, k):
     bits = self.bits

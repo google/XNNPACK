@@ -16,18 +16,10 @@ class arm_neonbf16_bf16_bf16_fp32_k4(arm_neon):
   def __init__(self):
     super().__init__("neonbf16", "bf16_bf16_fp32", "float", (2, 4, 4))
     self.a_type = "bfloat16"
+    self.a_load_type = "bfloat16_t"
     self.b_type = "bfloat16"
+    self.b_load_type = "bfloat16_t"
     self.flags += ["dot_flag::transpose_a"]
-
-  def header(self):
-    return super().header() + """
-
-namespace {
-
-using bfloat16 = bfloat16_t;
-
-}  // namespace
-"""
 
   # This is one of the trickier generators. mmla is a 2x4*4x2 matrix multiply.
   # We handle it in 2x4 tiles, with 2 accumulator registers per tile.
