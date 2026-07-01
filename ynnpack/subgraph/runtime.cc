@@ -460,6 +460,20 @@ void ynn_runtime::schedule() {
           // If the split is 1, it doesn't matter if we fuse or not.
           continue;
         }
+        // Likewise skip extent-1 loops on the consumer (nest) side. They are
+        // no-op single-iteration loops; if we don't skip them, a consumer's
+        // extent-1 loop (e.g. a degenerate batch dim added to the nest by a
+        // root producer) would be compared against this producer's first real
+        // split, misaligning the two nests and breaking fusion. We compute the
+        // producer inside such loops (harmless), so advance past them.
+        while (
+            compute_at < loop_nest.size() &&
+            prove_true(global_loop_nest[loop_nest[compute_at]].extent == 1)) {
+          compute_at++;
+        }
+        if (compute_at >= loop_nest.size()) {
+          break;
+        }
         int loop_nest_id = loop_nest[compute_at];
         loop_level& global_loop = global_loop_nest[loop_nest_id];
         if (!globals.is_pure_dim(split.var)) {
