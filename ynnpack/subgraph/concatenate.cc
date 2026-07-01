@@ -89,13 +89,31 @@ ynn_status ynn_define_concatenate(ynn_subgraph_t subgraph, int32_t axis,
     }
     auto func =
         slinky::func::make_concat(inputs, {output.buffer, dims}, axis, bounds);
+
+    // By giving it loop_splits over the output dims, the producers can share a
+    // loop with the concatenate, bounding their transient allocations.
+    auto sched = runtime.make_schedule(dims, output.physical_extents(),
+                                       output.buffer->elem_size());
+    // Never tile across the concatenation axis: the inputs occupy disjoint
+    // ranges along it, so a loop there is not a valid fusion dimension. Keep
+    // only the loop splits for the (shared) non-axis dims.
+    if (sched) {
+      auto& splits = sched->loop_splits;
+      splits.erase(std::remove_if(splits.begin(), splits.end(),
+                                  [&](const ynn::scheduling_split& s) {
+                                    return s.var == dims[axis];
+                                  }),
+                   splits.end());
+    }
+    func.user_data() = sched.get();
+    runtime.scheduling_info_storage.push_back(std::move(sched));
+
     runtime.funcs.push_back(std::move(func));
     return ynn_status_success;
   };
   subgraph->add_node(std::move(node));
   return ynn_status_success;
 }
-
 }  // extern "C"
 
 }  // namespace ynn
