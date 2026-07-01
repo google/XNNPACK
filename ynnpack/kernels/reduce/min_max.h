@@ -43,6 +43,11 @@ T sign_complement(T a) {
   return (a & mask) ^ (a >> shift);
 }
 
+template <typename T>
+YNN_ALWAYS_INLINE simd::vec<T, 1> sign_complement(simd::vec<T, 1> a) {
+  return simd::vec<T, 1>{sign_complement(a.v)};
+}
+
 // This class allows computing the min or max of a sign-magnitude integer.
 // Most floating point types can be bitcasted to this, so we can compute min/max
 // reductions for types that don't have native SIMD instructions.
@@ -80,8 +85,8 @@ class sign_magnitude {
   T value_;
 };
 
-using xf16_rvar = sign_magnitude<int16_t>;
-using xf8_rvar = sign_magnitude<int8_t>;
+using xf16 = sign_magnitude<int16_t>;
+using xf8 = sign_magnitude<int8_t>;
 
 // Forward type_info for simd::vec.
 template <typename T, size_t N>

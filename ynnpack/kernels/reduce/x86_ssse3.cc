@@ -39,8 +39,6 @@ using simd::s8x16;
 using simd::u8x16;
 
 SUM_K1_KERNEL(sum_k1_int8_int32_ssse3, int8_t, int32_t, 4, 4, identity);
-SUM_KN_KERNEL(sum_kn_int8_int32_ssse3, int8_t, int32_t, 16, identity);
 SUM_K1_KERNEL(sum_k1_uint8_int32_ssse3, uint8_t, int32_t, 4, 4, identity);
-SUM_KN_KERNEL(sum_kn_uint8_int32_ssse3, uint8_t, int32_t, 16, identity);
 
 }  // namespace ynn

@@ -96,9 +96,7 @@ YNN_REDUCE_KERNEL(arch_flag::sse2, sum_kn_int32_sse2, reduce_dim::kn, int32_t, i
 #endif  // YNN_ARCH_X86_SSE2
 #ifdef YNN_ARCH_X86_SSSE3
 YNN_REDUCE_KERNEL(arch_flag::ssse3, sum_k1_uint8_int32_ssse3, reduce_dim::k1, uint8_t, int32_t)
-YNN_REDUCE_KERNEL(arch_flag::ssse3, sum_kn_uint8_int32_ssse3, reduce_dim::kn, uint8_t, int32_t)
 YNN_REDUCE_KERNEL(arch_flag::ssse3, sum_k1_int8_int32_ssse3, reduce_dim::k1, int8_t, int32_t)
-YNN_REDUCE_KERNEL(arch_flag::ssse3, sum_kn_int8_int32_ssse3, reduce_dim::kn, int8_t, int32_t)
 #endif  // YNN_ARCH_X86_SSSE3
 
 #ifdef YNN_ARCH_HEXAGON
