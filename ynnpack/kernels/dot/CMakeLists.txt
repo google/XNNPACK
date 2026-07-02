@@ -211,6 +211,9 @@ YNN_ADD_DOT_KERNELS(wasm_int8_int8_int32
   wasm_simd128 wasm_simd128_int8_int8_int32
 )
 
+# --- Hexagon kernels ---
+YNN_ADD_DOT_SRC(hexagon_hvx hexagon_hvx.cc)
+
 
 
 IF(YNNPACK_TARGET_PROCESSOR STREQUAL "arm64")

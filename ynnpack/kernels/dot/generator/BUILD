@@ -94,3 +94,24 @@ py_library(
     "x86_uint8_int8_int32",
     "x86_uint8_int8_int32_k16",
 ]]
+
+py_library(
+    name = "hexagon",
+    srcs = ["hexagon.py"],
+    deps = [":dot_base"],
+)
+
+[py_binary(
+    name = name,
+    srcs = [name + ".py"],
+    tags = [
+        "manual",
+        "notap",
+    ],
+    deps = [
+        ":dot_base",
+        ":hexagon",
+    ],
+) for name in [
+    "hexagon_fp32",
+]]

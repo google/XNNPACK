@@ -265,6 +265,16 @@ ynn_generate_srcs(
     ],
 )
 
+ynn_generate_srcs(
+    name = "hexagon_fp32",
+    compatible_with = _COMPATIBLE_WITH,
+    generator = "//ynnpack/kernels/dot/generator:hexagon_fp32",
+    output_srcs = [
+        "hexagon_hvx_fp32_32x1.cc",
+        "hexagon_hvx_fp32_32x1.inc",
+    ],
+)
+
 cc_library(
     name = "schedule",
     srcs = ["schedule.cc"],
@@ -309,6 +319,7 @@ ynn_cc_library(
         "arm_neonbf16_bf16_bf16_fp32_k4.inc",
         "arm_neondot_int8_int8_int32.inc",
         "dot.h",
+        "hexagon_hvx_fp32_32x1.inc",
         "kernels.inc",
         "wasm_simd128_fp32.inc",
         "wasm_simd128_fp64.inc",
@@ -422,12 +433,14 @@ ynn_cc_library(
             "wasm_simd128_fp64.cc",
             "wasm_simd128_int8_int8_int32.cc",
         ],
+        "hexagon_hvx": ["hexagon_hvx_fp32_32x1.cc"],
     },
     visibility = ["//ynnpack:__subpackages__"],
     deps = [
         "//ynnpack:ynnpack_h",
         "//ynnpack/base",
         "//ynnpack/base:log",
+        "//ynnpack/base/simd",
     ] + select({
         "//ynnpack:arm64": [":arm64_sme_stubs"],
         "//conditions:default": [],
@@ -451,6 +464,11 @@ cc_test(
     srcs = ["test.cc"],
     linkopts = ynn_binary_linkopts(),
     malloc = ynn_binary_malloc(),
+    shard_count = select({
+        "//ynnpack:hexagon": 50,
+        "//ynnpack:arm": 10,
+        "//conditions:default": 1,
+    }),
     deps = [
         ":dot",
         ":pack",
