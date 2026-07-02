@@ -102,6 +102,7 @@ SET(MICROKERNEL_UNIT_TESTS
     f32-conv-hwc
     f32-conv-hwc2chw
     f32-ibilinear
+    f32-ibilinear-rvv
     f32-ibilinear-chw
     f32-raddexpminusmax
     f32-raddextexp
