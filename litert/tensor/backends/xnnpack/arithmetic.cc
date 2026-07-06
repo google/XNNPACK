@@ -59,6 +59,78 @@ absl::StatusOr<uint32_t> DynamicallyQuantizeInput(
   return qd_id;
 }
 
+absl::StatusOr<uint32_t> DefineZeroTensor(
+    XnnpackBuildContext& ctx, const graph::TensorInformation& input_info,
+    size_t num_dims, const size_t* dims, absl::string_view op_name) {
+  xnn_datatype datatype = GetXnnpackType(input_info);
+  if (datatype == xnn_datatype_invalid) {
+    return absl::UnimplementedError(
+        absl::StrFormat("%s: unsupported input type %d", op_name,
+                        static_cast<int>(input_info.type)));
+  }
+
+  size_t num_elements = 1;
+  for (size_t i = 0; i < num_dims; ++i) {
+    num_elements *= dims[i];
+  }
+
+  uint32_t zero_id = XNN_INVALID_VALUE_ID;
+  const void* data_ptr = nullptr;
+
+  if (input_info.quantization) {
+    if (auto maybe_pcq =
+            input_info.quantization->As<PerChannelAffineQuantization>();
+        maybe_pcq.ok()) {
+      const auto& pcq = maybe_pcq.value();
+      if (pcq.scales.size() == 1) {
+        int32_t zero_point = pcq.zero_points.empty() ? 0 : pcq.zero_points[0];
+        float scale = pcq.scales[0];
+
+        if (datatype == xnn_datatype_qint8) {
+          std::vector<int8_t> zeros(num_elements,
+                                    static_cast<int8_t>(zero_point));
+          data_ptr = ctx.KeepAlive(std::move(zeros));
+        } else {
+          return absl::UnimplementedError(
+              absl::StrFormat("%s: unsupported quantized type %d", op_name,
+                              static_cast<int>(datatype)));
+        }
+
+        LRT_TENSOR_RETURN_IF_ERROR(xnn_define_quantized_tensor_value(
+            ctx.subgraph(), datatype, zero_point, scale, num_dims, dims,
+            data_ptr,
+            /*external_id=*/XNN_INVALID_VALUE_ID, /*flags=*/0, &zero_id))
+            << "Could not define quantized zero tensor.";
+      } else {
+        return absl::UnimplementedError(absl::StrFormat(
+            "%s: per-channel quantized zero tensor not supported", op_name));
+      }
+    } else {
+      return absl::UnimplementedError(
+          absl::StrFormat("%s: unsupported quantization type", op_name));
+    }
+  } else {
+    if (datatype == xnn_datatype_fp32) {
+      std::vector<float> zeros(num_elements, 0.0f);
+      data_ptr = ctx.KeepAlive(std::move(zeros));
+    } else if (datatype == xnn_datatype_int32) {
+      std::vector<int32_t> zeros(num_elements, 0);
+      data_ptr = ctx.KeepAlive(std::move(zeros));
+    } else {
+      return absl::UnimplementedError(
+          absl::StrFormat("%s: unsupported type %d for zero tensor", op_name,
+                          static_cast<int>(datatype)));
+    }
+
+    LRT_TENSOR_RETURN_IF_ERROR(xnn_define_tensor_value(
+        ctx.subgraph(), datatype, num_dims, dims, data_ptr,
+        /*external_id=*/XNN_INVALID_VALUE_ID, /*flags=*/0, &zero_id))
+        << "Could not define zero tensor.";
+  }
+
+  return zero_id;
+}
+
 template <Type... Types>
 absl::Status ValidateTensorType(const graph::Tensor& tensor,
                                 absl::string_view op_name) {
@@ -1316,7 +1388,7 @@ absl::Status OpMixin<TileOperation, XnnpackMixinTag>::ToXnnpack(
                         input_info.shape.size(), num_dims));
   }
 
-  std::vector<size_t> new_shape(num_dims);
+  std::vector<size_t> zero_shape(num_dims);
   for (size_t i = 0; i < num_dims; ++i) {
     int mult = multiples_data[i];
     int dim = input_info.shape[i];
@@ -1326,13 +1398,21 @@ absl::Status OpMixin<TileOperation, XnnpackMixinTag>::ToXnnpack(
           "Dimension %d has size %d but multiples[%d]=%d",
           op_name, i, dim, i, mult));
     }
-    new_shape[i] = static_cast<size_t>(dim * mult);
+    zero_shape[i] = static_cast<size_t>(mult);
   }
 
-  LRT_TENSOR_RETURN_IF_ERROR(xnn_define_static_broadcast(
-      ctx.subgraph(), num_dims, new_shape.data(), input_id, output_id,
+  LRT_TENSOR_ASSIGN_OR_RETURN(
+      uint32_t zero_id, DefineZeroTensor(ctx, input_info, zero_shape.size(),
+                                         zero_shape.data(), op_name));
+
+  LRT_TENSOR_ASSIGN_OR_RETURN(auto params,
+                              BuildBinaryParams(kActNone, op_name));
+
+  LRT_TENSOR_RETURN_IF_ERROR(xnn_define_binary(
+      ctx.subgraph(), xnn_binary_add, &params, input_id, zero_id, output_id,
       /*flags=*/0))
       << op_name;
+
   return absl::OkStatus();
 }
 
@@ -1511,17 +1591,24 @@ OpMixin<ResizeNearestNeighborOperation, XnnpackMixinTag>::ToXnnpack(
       static_cast<size_t>(scale_h), static_cast<size_t>(input_w),
       static_cast<size_t>(scale_w), static_cast<size_t>(channels)};
 
+  xnn_datatype datatype = GetXnnpackType(input_info);
+  if (datatype == xnn_datatype_invalid) {
+    return absl::UnimplementedError(
+        absl::StrFormat("%s: unsupported input type %d", op_name,
+                        static_cast<int>(input_info.type)));
+  }
+
   uint32_t reshape_id = XNN_INVALID_VALUE_ID;
   LRT_TENSOR_RETURN_IF_ERROR(xnn_define_tensor_value(
-      ctx.subgraph(), xnn_datatype_fp32, reshape_dims.size(),
-      reshape_dims.data(), /*data=*/nullptr, XNN_INVALID_VALUE_ID,
+      ctx.subgraph(), datatype, reshape_dims.size(), reshape_dims.data(),
+      /*data=*/nullptr, XNN_INVALID_VALUE_ID,
       /*flags=*/0, &reshape_id))
       << op_name;
 
   uint32_t broadcast_id = XNN_INVALID_VALUE_ID;
   LRT_TENSOR_RETURN_IF_ERROR(xnn_define_tensor_value(
-      ctx.subgraph(), xnn_datatype_fp32, broadcast_dims.size(),
-      broadcast_dims.data(), /*data=*/nullptr, XNN_INVALID_VALUE_ID,
+      ctx.subgraph(), datatype, broadcast_dims.size(), broadcast_dims.data(),
+      /*data=*/nullptr, XNN_INVALID_VALUE_ID,
       /*flags=*/0, &broadcast_id))
       << op_name;
 
@@ -1530,9 +1617,20 @@ OpMixin<ResizeNearestNeighborOperation, XnnpackMixinTag>::ToXnnpack(
       reshape_id, /*flags=*/0))
       << op_name;
 
-  LRT_TENSOR_RETURN_IF_ERROR(xnn_define_static_broadcast(
-      ctx.subgraph(), broadcast_dims.size(), broadcast_dims.data(), reshape_id,
-      broadcast_id, /*flags=*/0))
+  const std::array<size_t, 6> zero_dims = {
+      1, 1, static_cast<size_t>(scale_h), 1, static_cast<size_t>(scale_w), 1};
+
+  LRT_TENSOR_ASSIGN_OR_RETURN(
+      uint32_t zero_id, DefineZeroTensor(ctx, input_info, zero_dims.size(),
+                                         zero_dims.data(), op_name));
+
+  LRT_TENSOR_ASSIGN_OR_RETURN(auto params,
+                              BuildBinaryParams(kActNone, op_name));
+
+  LRT_TENSOR_RETURN_IF_ERROR(xnn_define_binary(ctx.subgraph(), xnn_binary_add,
+                                               &params, reshape_id, zero_id,
+                                               broadcast_id,
+                                               /*flags=*/0))
       << op_name;
 
   const std::array<size_t, 4> output_dims = {

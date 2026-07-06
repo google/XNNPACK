@@ -20,6 +20,7 @@ limitations under the License.
 #include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
+#include "litert/tensor/internal/graph.h"
 #include "litert/tensor/utils/macros.h"
 
 namespace litert::tensor {
@@ -42,6 +43,51 @@ inline absl::Status XnnStatusToAbsl(enum xnn_status status,
   }
   return absl::UnknownError(
       absl::StrCat("xnn_status=", static_cast<int>(status), ";", label));
+}
+
+inline xnn_datatype GetXnnpackType(const graph::TensorInformation& info) {
+  switch (info.type) {
+    case Type::kUnknown:
+    case Type::kBOOL:
+    case Type::kI2:
+    case Type::kI4:
+      if (info.quantization) {
+        if (info.quantization->As<graph::PerChannelAffineQuantization>().ok()) {
+          return xnn_datatype_qcint4;
+        } else if (info.quantization->As<graph::BlockwiseQuantization>().ok()) {
+          return xnn_datatype_qbint4;
+        }
+      }
+      break;
+    case Type::kI8:
+      if (info.quantization) {
+        if (auto it =
+                info.quantization->As<graph::PerChannelAffineQuantization>();
+            it.ok()) {
+          return it->scales.size() > 1 ? xnn_datatype_qcint8
+                                       : xnn_datatype_qint8;
+        }
+      }
+      break;
+    case Type::kI16:
+    case Type::kI64:
+    case Type::kU4:
+    case Type::kU8:
+    case Type::kU16:
+    case Type::kU32:
+    case Type::kU64:
+    case Type::kFP16:
+      return xnn_datatype_fp16;
+    case Type::kI32:
+      return xnn_datatype_int32;
+    case Type::kFP32:
+      return xnn_datatype_fp32;
+    case Type::kFP64:
+      break;
+    case Type::kBF16:
+      return xnn_datatype_bf16;
+  }
+  return xnn_datatype_invalid;
 }
 
 }  // namespace litert::tensor
