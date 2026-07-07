@@ -2573,6 +2573,22 @@ static void init_qd8_bf16_qb4w_gemm_config(void) {
         qd8_bf16_qb4w_gemm_config.planes = 2;
       #endif  // XNN_ENABLE_ARM_DOTPROD
     }
+  #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
+    // The avx2 kernels convert fp32->bf16 with integer round-to-nearest-even ops,
+    // so they only require avx2 (no AVX512_BF16). Prefer avx2, else scalar.
+    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    assert(hardware_config != NULL);
+    (void) hardware_config;  // May be unused.
+    #if XNN_ENABLE_AVX2
+      if (hardware_config->arch_flags & xnn_arch_x86_avx2) {
+        qd8_bf16_qb4w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_DQGEMM_UKERNEL(xnn_qd8_bf16_qb4w_gemm_minmax_ukernel_1x8c8__avx2);
+        qd8_bf16_qb4w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(3)] = XNN_INIT_HMP_DQGEMM_UKERNEL(xnn_qd8_bf16_qb4w_gemm_minmax_ukernel_3x8c8__avx2);
+        qd8_bf16_qb4w_gemm_config.mr = 3;
+        qd8_bf16_qb4w_gemm_config.nr = 8;
+        qd8_bf16_qb4w_gemm_config.log2_kr = 3;
+        qd8_bf16_qb4w_gemm_config.planes = 2;
+      }
+    #endif  // XNN_ENABLE_AVX2
   #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
   assert(qd8_bf16_qb4w_gemm_config.mr <= XNN_MAX_MR);
