@@ -39,58 +39,86 @@ parser.set_defaults(defines=list())
 
 def split_ukernel_name(name):
   match = re.fullmatch(
-      r"xnn_(f16|f32|s8|u8)_ibilinear_ukernel__(.+)_u(\d+)", name
+      r"xnn_(f16|f32|s8|u8)_ibilinear_ukernel__(.+)_u(\d+)(v)?", name
   )
   assert match is not None
   channel_tile = int(match.group(3))
+  vector_tile = bool(match.group(4))
   pixel_tile = 1
 
   arch, isa, assembly = xnncommon.parse_target_name(target_name=match.group(2))
-  return channel_tile, pixel_tile, arch, isa
+  return channel_tile, vector_tile, pixel_tile, arch, isa
 
 
 IBILINEAR_TEST_TEMPLATE = """\
-TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}) {
+TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}${CHANNEL_SUFFIX}) {
   $if ISA_CHECK:
     ${ISA_CHECK};
   IBilinearMicrokernelTester()
     .pixels(${PIXEL_TILE})
-    .channels(${CHANNEL_TILE})
+    .channels(${CHANNEL_SCALED_TILE})
     .Test(${TEST_FUNC});
 }
 
-$if CHANNEL_TILE > 1:
-  TEST(${TEST_NAME}, channels_div_${CHANNEL_TILE}) {
+$if CHANNEL_TILE > 1 or CHANNEL_SCALED_TILE != CHANNEL_TILE:
+  TEST(${TEST_NAME}, channels_div_${CHANNEL_TILE}${CHANNEL_SUFFIX}) {
     $if ISA_CHECK:
       ${ISA_CHECK};
-    for (size_t channels = ${CHANNEL_TILE*2}; channels < ${CHANNEL_TILE*10}; channels += ${CHANNEL_TILE}) {
-      IBilinearMicrokernelTester()
-        .pixels(${PIXEL_TILE})
-        .channels(channels)
-        .Test(${TEST_FUNC});
-    }
+    $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
+      for (size_t channels = ${CHANNEL_TILE*2}; channels < ${CHANNEL_TILE*10}; channels += ${CHANNEL_TILE}) {
+        IBilinearMicrokernelTester()
+          .pixels(${PIXEL_TILE})
+          .channels(channels)
+          .Test(${TEST_FUNC});
+      }
+    $else:
+      const size_t channel_tile = ${CHANNEL_SCALED_TILE};
+      for (size_t channels = channel_tile * 2; channels < channel_tile * 10; channels += channel_tile) {
+        IBilinearMicrokernelTester()
+          .pixels(${PIXEL_TILE})
+          .channels(channels)
+          .Test(${TEST_FUNC});
+      }
   }
 
-  TEST(${TEST_NAME}, channels_lt_${CHANNEL_TILE}) {
+  TEST(${TEST_NAME}, channels_lt_${CHANNEL_TILE}${CHANNEL_SUFFIX}) {
     $if ISA_CHECK:
       ${ISA_CHECK};
-    for (size_t channels = 1; channels < ${CHANNEL_TILE}; channels++) {
-      IBilinearMicrokernelTester()
-        .pixels(${PIXEL_TILE})
-        .channels(channels)
-        .Test(${TEST_FUNC});
-    }
+    $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
+      for (size_t channels = 1; channels < ${CHANNEL_TILE}; channels++) {
+        IBilinearMicrokernelTester()
+          .pixels(${PIXEL_TILE})
+          .channels(channels)
+          .Test(${TEST_FUNC});
+      }
+    $else:
+      const size_t channel_tile = ${CHANNEL_SCALED_TILE};
+      for (size_t channels = 1; channels < channel_tile; channels++) {
+        IBilinearMicrokernelTester()
+          .pixels(${PIXEL_TILE})
+          .channels(channels)
+          .Test(${TEST_FUNC});
+      }
   }
 
-TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}) {
+TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}${CHANNEL_SUFFIX}) {
   $if ISA_CHECK:
     ${ISA_CHECK};
-  for (size_t channels = ${CHANNEL_TILE+1}; channels < ${10 if CHANNEL_TILE == 1 else CHANNEL_TILE*2}; channels++) {
-    IBilinearMicrokernelTester()
-      .pixels(${PIXEL_TILE})
-      .channels(channels)
-      .Test(${TEST_FUNC});
-  }
+  $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
+    for (size_t channels = ${CHANNEL_TILE+1}; channels < ${10 if CHANNEL_TILE == 1 else CHANNEL_TILE*2}; channels++) {
+      IBilinearMicrokernelTester()
+        .pixels(${PIXEL_TILE})
+        .channels(channels)
+        .Test(${TEST_FUNC});
+    }
+  $else:
+    const size_t channel_tile = ${CHANNEL_SCALED_TILE};
+    for (size_t channels = channel_tile+1; channels < channel_tile * 2; channels++) {
+      IBilinearMicrokernelTester()
+        .pixels(${PIXEL_TILE})
+        .channels(channels)
+        .Test(${TEST_FUNC});
+    }
 }
 
 $if PIXEL_TILE > 1:
@@ -123,53 +151,90 @@ $if PIXEL_TILE > 1:
 TEST(${TEST_NAME}, pixels_gt_${PIXEL_TILE}) {
   $if ISA_CHECK:
     ${ISA_CHECK};
-  for (size_t pixels = ${PIXEL_TILE+1}; pixels < ${max(PIXEL_TILE*2, 3)}; pixels++) {
-    for (size_t channels = 1; channels <= ${CHANNEL_TILE * 5}; channels += ${max(1, CHANNEL_TILE - 1)}) {
-      IBilinearMicrokernelTester()
-        .pixels(pixels)
-        .channels(channels)
-        .Test(${TEST_FUNC});
+  $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
+    for (size_t pixels = ${PIXEL_TILE+1}; pixels < ${max(PIXEL_TILE*2, 3)}; pixels++) {
+      for (size_t channels = 1; channels <= ${CHANNEL_TILE * 5}; channels += ${max(1, CHANNEL_TILE - 1)}) {
+        IBilinearMicrokernelTester()
+          .pixels(pixels)
+          .channels(channels)
+          .Test(${TEST_FUNC});
+      }
     }
-  }
+  $else:
+    const size_t channel_tile = ${CHANNEL_SCALED_TILE};
+    for (size_t pixels = ${PIXEL_TILE+1}; pixels < ${max(PIXEL_TILE*2, 3)}; pixels++) {
+      for (size_t channels = 1; channels <= channel_tile * 5; channels += channel_tile - 1) {
+        IBilinearMicrokernelTester()
+          .pixels(pixels)
+          .channels(channels)
+          .Test(${TEST_FUNC});
+      }
+    }
 }
 
 TEST(${TEST_NAME}, input_offset) {
   $if ISA_CHECK:
     ${ISA_CHECK};
-  for (size_t pixels = 1; pixels < ${PIXEL_TILE * 5}; pixels += ${max(1, PIXEL_TILE - 1)}) {
-    for (size_t channels = 1; channels <= ${CHANNEL_TILE * 5}; channels += ${max(1, CHANNEL_TILE - 1)}) {
-      IBilinearMicrokernelTester()
-        .pixels(pixels)
-        .channels(channels)
-        .input_offset(${next_prime(CHANNEL_TILE * 5 + 1)})
-        .Test(${TEST_FUNC});
+  $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
+    for (size_t pixels = 1; pixels < ${PIXEL_TILE * 5}; pixels += ${max(1, PIXEL_TILE - 1)}) {
+      for (size_t channels = 1; channels <= ${CHANNEL_TILE * 5}; channels += ${max(1, CHANNEL_TILE - 1)}) {
+        IBilinearMicrokernelTester()
+          .pixels(pixels)
+          .channels(channels)
+          .input_offset(${next_prime(CHANNEL_TILE * 5 + 1)})
+          .Test(${TEST_FUNC});
+      }
     }
-  }
+  $else:
+    const size_t channel_tile = ${CHANNEL_SCALED_TILE};
+    for (size_t pixels = 1; pixels < ${PIXEL_TILE * 5}; pixels += ${max(1, PIXEL_TILE - 1)}) {
+      for (size_t channels = 1; channels <= channel_tile * 5; channels += channel_tile - 1) {
+        IBilinearMicrokernelTester()
+          .pixels(pixels)
+          .channels(channels)
+          .input_offset(channel_tile * 5 + 1)
+          .Test(${TEST_FUNC});
+      }
+    }
 }
 
 TEST(${TEST_NAME}, output_stride) {
   $if ISA_CHECK:
     ${ISA_CHECK};
-  for (size_t pixels = 1; pixels < ${PIXEL_TILE * 5}; pixels += ${max(1, PIXEL_TILE - 1)}) {
-    for (size_t channels = 1; channels <= ${CHANNEL_TILE * 5}; channels += ${max(1, CHANNEL_TILE - 1)}) {
-      IBilinearMicrokernelTester()
-        .pixels(pixels)
-        .channels(channels)
-        .output_stride(${next_prime(CHANNEL_TILE * 5 + 1)})
-        .Test(${TEST_FUNC});
+  $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
+    for (size_t pixels = 1; pixels < ${PIXEL_TILE * 5}; pixels += ${max(1, PIXEL_TILE - 1)}) {
+      for (size_t channels = 1; channels <= ${CHANNEL_TILE * 5}; channels += ${max(1, CHANNEL_TILE - 1)}) {
+        IBilinearMicrokernelTester()
+          .pixels(pixels)
+          .channels(channels)
+          .output_stride(${next_prime(CHANNEL_TILE * 5 + 1)})
+          .Test(${TEST_FUNC});
+      }
     }
-  }
+  $else:
+    const size_t channel_tile = ${CHANNEL_SCALED_TILE};
+    for (size_t pixels = 1; pixels < ${PIXEL_TILE * 5}; pixels += ${max(1, PIXEL_TILE - 1)}) {
+      for (size_t channels = 1; channels <= channel_tile * 5; channels += channel_tile - 1) {
+        IBilinearMicrokernelTester()
+          .pixels(pixels)
+          .channels(channels)
+          .output_stride(channel_tile * 5 + 1)
+          .Test(${TEST_FUNC});
+      }
+    }
 }
 """
 
 
-def generate_test_cases(ukernel, channel_tile, pixel_tile, isa):
+def generate_test_cases(ukernel, channel_tile, vector_tile, pixel_tile, isa):
   """Generates all tests cases for a BILINEAR micro-kernel.
 
   Args:
     ukernel: C name of the micro-kernel function.
     channel_tile: Number of channels processed per one iteration of the inner
       loop of the micro-kernel.
+    vector_tile: Indicates if channels are specified in vectors rather than
+      elements.
     pixel_tile: Number of pixels processed per one iteration of the outer loop
       of the micro-kernel.
     isa: instruction set required to run the micro-kernel. Generated unit test
@@ -181,6 +246,15 @@ def generate_test_cases(ukernel, channel_tile, pixel_tile, isa):
   _, test_name = ukernel.split("_", 1)
   _, datatype, ukernel_type, _ = ukernel.split("_", 3)
   test_args = [ukernel]
+  channel_scaled_tile = channel_tile
+  if vector_tile:
+    ctype = {"f16": "uint16_t", "f32": "float"}[datatype]
+    channel_scaled_tile = {
+        "rvv": (
+            "(%s * xnn_init_hardware_config()->vlenb / sizeof(%s))"
+            % (str(channel_tile), ctype)
+        )
+    }[isa]
   return xngen.preprocess(
       IBILINEAR_TEST_TEMPLATE,
       {
@@ -189,6 +263,8 @@ def generate_test_cases(ukernel, channel_tile, pixel_tile, isa):
           "UKERNEL_TYPE": ukernel_type.upper(),
           "DATATYPE": datatype,
           "CHANNEL_TILE": channel_tile,
+          "CHANNEL_SCALED_TILE": channel_scaled_tile,
+          "CHANNEL_SUFFIX": "v" if vector_tile else "",
           "PIXEL_TILE": pixel_tile,
           "ISA_CHECK": xnncommon.generate_isa_check_macro(isa),
           "next_prime": next_prime,
@@ -225,9 +301,11 @@ def main(args):
 
     for ukernel_spec in spec_yaml:
       name = ukernel_spec["name"]
-      channel_tile, pixel_tile, arch, isa = split_ukernel_name(name)
+      channel_tile, vector_tile, pixel_tile, arch, isa = split_ukernel_name(name)
 
-      test_case = generate_test_cases(name, channel_tile, pixel_tile, isa)
+      test_case = generate_test_cases(
+          name, channel_tile, vector_tile, pixel_tile, isa
+      )
       tests += "\n\n" + xnncommon.postprocess_test_case(test_case, arch, isa)
 
     xnncommon.overwrite_if_changed(options.output, tests)
