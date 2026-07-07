@@ -1012,3 +1012,258 @@ TEST(F32_IBILINEAR__SCALAR_U4, output_stride) {
     }
   }
 #endif  // XNN_ARCH_WASMRELAXEDSIMD
+
+
+#if XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+  TEST(F32_IBILINEAR__RVV_U1V, channels_eq_1v) {
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
+    IBilinearMicrokernelTester()
+      .pixels(1)
+      .channels((1 * xnn_init_hardware_config()->vlenb / sizeof(float)))
+      .Test(xnn_f32_ibilinear_ukernel__rvv_u1v);
+  }
+
+  TEST(F32_IBILINEAR__RVV_U1V, channels_div_1v) {
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
+    const size_t channel_tile = (1 * xnn_init_hardware_config()->vlenb / sizeof(float));
+    for (size_t channels = channel_tile * 2; channels < channel_tile * 10; channels += channel_tile) {
+      IBilinearMicrokernelTester()
+        .pixels(1)
+        .channels(channels)
+        .Test(xnn_f32_ibilinear_ukernel__rvv_u1v);
+    }
+  }
+
+  TEST(F32_IBILINEAR__RVV_U1V, channels_lt_1v) {
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
+    const size_t channel_tile = (1 * xnn_init_hardware_config()->vlenb / sizeof(float));
+    for (size_t channels = 1; channels < channel_tile; channels++) {
+      IBilinearMicrokernelTester()
+        .pixels(1)
+        .channels(channels)
+        .Test(xnn_f32_ibilinear_ukernel__rvv_u1v);
+    }
+  }
+
+  TEST(F32_IBILINEAR__RVV_U1V, channels_gt_1v) {
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
+    const size_t channel_tile = (1 * xnn_init_hardware_config()->vlenb / sizeof(float));
+    for (size_t channels = channel_tile+1; channels < channel_tile * 2; channels++) {
+      IBilinearMicrokernelTester()
+        .pixels(1)
+        .channels(channels)
+        .Test(xnn_f32_ibilinear_ukernel__rvv_u1v);
+    }
+  }
+
+  TEST(F32_IBILINEAR__RVV_U1V, pixels_gt_1) {
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
+    const size_t channel_tile = (1 * xnn_init_hardware_config()->vlenb / sizeof(float));
+    for (size_t pixels = 2; pixels < 3; pixels++) {
+      for (size_t channels = 1; channels <= channel_tile * 5; channels += channel_tile - 1) {
+        IBilinearMicrokernelTester()
+          .pixels(pixels)
+          .channels(channels)
+          .Test(xnn_f32_ibilinear_ukernel__rvv_u1v);
+      }
+    }
+  }
+
+  TEST(F32_IBILINEAR__RVV_U1V, input_offset) {
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
+    const size_t channel_tile = (1 * xnn_init_hardware_config()->vlenb / sizeof(float));
+    for (size_t pixels = 1; pixels < 5; pixels += 1) {
+      for (size_t channels = 1; channels <= channel_tile * 5; channels += channel_tile - 1) {
+        IBilinearMicrokernelTester()
+          .pixels(pixels)
+          .channels(channels)
+          .input_offset(channel_tile * 5 + 1)
+          .Test(xnn_f32_ibilinear_ukernel__rvv_u1v);
+      }
+    }
+  }
+
+  TEST(F32_IBILINEAR__RVV_U1V, output_stride) {
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
+    const size_t channel_tile = (1 * xnn_init_hardware_config()->vlenb / sizeof(float));
+    for (size_t pixels = 1; pixels < 5; pixels += 1) {
+      for (size_t channels = 1; channels <= channel_tile * 5; channels += channel_tile - 1) {
+        IBilinearMicrokernelTester()
+          .pixels(pixels)
+          .channels(channels)
+          .output_stride(channel_tile * 5 + 1)
+          .Test(xnn_f32_ibilinear_ukernel__rvv_u1v);
+      }
+    }
+  }
+#endif  // XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+
+
+#if XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+  TEST(F32_IBILINEAR__RVV_U2V, channels_eq_2v) {
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
+    IBilinearMicrokernelTester()
+      .pixels(1)
+      .channels((2 * xnn_init_hardware_config()->vlenb / sizeof(float)))
+      .Test(xnn_f32_ibilinear_ukernel__rvv_u2v);
+  }
+
+  TEST(F32_IBILINEAR__RVV_U2V, channels_div_2v) {
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
+    const size_t channel_tile = (2 * xnn_init_hardware_config()->vlenb / sizeof(float));
+    for (size_t channels = channel_tile * 2; channels < channel_tile * 10; channels += channel_tile) {
+      IBilinearMicrokernelTester()
+        .pixels(1)
+        .channels(channels)
+        .Test(xnn_f32_ibilinear_ukernel__rvv_u2v);
+    }
+  }
+
+  TEST(F32_IBILINEAR__RVV_U2V, channels_lt_2v) {
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
+    const size_t channel_tile = (2 * xnn_init_hardware_config()->vlenb / sizeof(float));
+    for (size_t channels = 1; channels < channel_tile; channels++) {
+      IBilinearMicrokernelTester()
+        .pixels(1)
+        .channels(channels)
+        .Test(xnn_f32_ibilinear_ukernel__rvv_u2v);
+    }
+  }
+
+  TEST(F32_IBILINEAR__RVV_U2V, channels_gt_2v) {
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
+    const size_t channel_tile = (2 * xnn_init_hardware_config()->vlenb / sizeof(float));
+    for (size_t channels = channel_tile+1; channels < channel_tile * 2; channels++) {
+      IBilinearMicrokernelTester()
+        .pixels(1)
+        .channels(channels)
+        .Test(xnn_f32_ibilinear_ukernel__rvv_u2v);
+    }
+  }
+
+  TEST(F32_IBILINEAR__RVV_U2V, pixels_gt_1) {
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
+    const size_t channel_tile = (2 * xnn_init_hardware_config()->vlenb / sizeof(float));
+    for (size_t pixels = 2; pixels < 3; pixels++) {
+      for (size_t channels = 1; channels <= channel_tile * 5; channels += channel_tile - 1) {
+        IBilinearMicrokernelTester()
+          .pixels(pixels)
+          .channels(channels)
+          .Test(xnn_f32_ibilinear_ukernel__rvv_u2v);
+      }
+    }
+  }
+
+  TEST(F32_IBILINEAR__RVV_U2V, input_offset) {
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
+    const size_t channel_tile = (2 * xnn_init_hardware_config()->vlenb / sizeof(float));
+    for (size_t pixels = 1; pixels < 5; pixels += 1) {
+      for (size_t channels = 1; channels <= channel_tile * 5; channels += channel_tile - 1) {
+        IBilinearMicrokernelTester()
+          .pixels(pixels)
+          .channels(channels)
+          .input_offset(channel_tile * 5 + 1)
+          .Test(xnn_f32_ibilinear_ukernel__rvv_u2v);
+      }
+    }
+  }
+
+  TEST(F32_IBILINEAR__RVV_U2V, output_stride) {
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
+    const size_t channel_tile = (2 * xnn_init_hardware_config()->vlenb / sizeof(float));
+    for (size_t pixels = 1; pixels < 5; pixels += 1) {
+      for (size_t channels = 1; channels <= channel_tile * 5; channels += channel_tile - 1) {
+        IBilinearMicrokernelTester()
+          .pixels(pixels)
+          .channels(channels)
+          .output_stride(channel_tile * 5 + 1)
+          .Test(xnn_f32_ibilinear_ukernel__rvv_u2v);
+      }
+    }
+  }
+#endif  // XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+
+
+#if XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+  TEST(F32_IBILINEAR__RVV_U4V, channels_eq_4v) {
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
+    IBilinearMicrokernelTester()
+      .pixels(1)
+      .channels((4 * xnn_init_hardware_config()->vlenb / sizeof(float)))
+      .Test(xnn_f32_ibilinear_ukernel__rvv_u4v);
+  }
+
+  TEST(F32_IBILINEAR__RVV_U4V, channels_div_4v) {
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
+    const size_t channel_tile = (4 * xnn_init_hardware_config()->vlenb / sizeof(float));
+    for (size_t channels = channel_tile * 2; channels < channel_tile * 10; channels += channel_tile) {
+      IBilinearMicrokernelTester()
+        .pixels(1)
+        .channels(channels)
+        .Test(xnn_f32_ibilinear_ukernel__rvv_u4v);
+    }
+  }
+
+  TEST(F32_IBILINEAR__RVV_U4V, channels_lt_4v) {
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
+    const size_t channel_tile = (4 * xnn_init_hardware_config()->vlenb / sizeof(float));
+    for (size_t channels = 1; channels < channel_tile; channels++) {
+      IBilinearMicrokernelTester()
+        .pixels(1)
+        .channels(channels)
+        .Test(xnn_f32_ibilinear_ukernel__rvv_u4v);
+    }
+  }
+
+  TEST(F32_IBILINEAR__RVV_U4V, channels_gt_4v) {
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
+    const size_t channel_tile = (4 * xnn_init_hardware_config()->vlenb / sizeof(float));
+    for (size_t channels = channel_tile+1; channels < channel_tile * 2; channels++) {
+      IBilinearMicrokernelTester()
+        .pixels(1)
+        .channels(channels)
+        .Test(xnn_f32_ibilinear_ukernel__rvv_u4v);
+    }
+  }
+
+  TEST(F32_IBILINEAR__RVV_U4V, pixels_gt_1) {
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
+    const size_t channel_tile = (4 * xnn_init_hardware_config()->vlenb / sizeof(float));
+    for (size_t pixels = 2; pixels < 3; pixels++) {
+      for (size_t channels = 1; channels <= channel_tile * 5; channels += channel_tile - 1) {
+        IBilinearMicrokernelTester()
+          .pixels(pixels)
+          .channels(channels)
+          .Test(xnn_f32_ibilinear_ukernel__rvv_u4v);
+      }
+    }
+  }
+
+  TEST(F32_IBILINEAR__RVV_U4V, input_offset) {
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
+    const size_t channel_tile = (4 * xnn_init_hardware_config()->vlenb / sizeof(float));
+    for (size_t pixels = 1; pixels < 5; pixels += 1) {
+      for (size_t channels = 1; channels <= channel_tile * 5; channels += channel_tile - 1) {
+        IBilinearMicrokernelTester()
+          .pixels(pixels)
+          .channels(channels)
+          .input_offset(channel_tile * 5 + 1)
+          .Test(xnn_f32_ibilinear_ukernel__rvv_u4v);
+      }
+    }
+  }
+
+  TEST(F32_IBILINEAR__RVV_U4V, output_stride) {
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
+    const size_t channel_tile = (4 * xnn_init_hardware_config()->vlenb / sizeof(float));
+    for (size_t pixels = 1; pixels < 5; pixels += 1) {
+      for (size_t channels = 1; channels <= channel_tile * 5; channels += channel_tile - 1) {
+        IBilinearMicrokernelTester()
+          .pixels(pixels)
+          .channels(channels)
+          .output_stride(channel_tile * 5 + 1)
+          .Test(xnn_f32_ibilinear_ukernel__rvv_u4v);
+      }
+    }
+  }
+#endif  // XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
