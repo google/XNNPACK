@@ -171,6 +171,15 @@ SET(NON_PROD_RVV_MICROKERNEL_SRCS
   src/f32-ibilinear/gen/f32-ibilinear-rvv-u4v.c
   src/f32-igemm/gen/f32-igemm-1x4v-rvv.c
   src/f32-igemm/gen/f32-igemm-7x4v-rvv.c
+  src/f32-ppmm/gen/f32-ppmm-1x1v-minmax-rvv.c
+  src/f32-ppmm/gen/f32-ppmm-1x2v-minmax-rvv.c
+  src/f32-ppmm/gen/f32-ppmm-1x4v-minmax-rvv.c
+  src/f32-ppmm/gen/f32-ppmm-2x1v-minmax-rvv.c
+  src/f32-ppmm/gen/f32-ppmm-2x2v-minmax-rvv.c
+  src/f32-ppmm/gen/f32-ppmm-2x4v-minmax-rvv.c
+  src/f32-ppmm/gen/f32-ppmm-4x1v-minmax-rvv.c
+  src/f32-ppmm/gen/f32-ppmm-4x2v-minmax-rvv.c
+  src/f32-ppmm/gen/f32-ppmm-4x4v-minmax-rvv.c
   src/f32-qs8-vcvt/gen/f32-qs8-vcvt-rvv-u1v.c
   src/f32-qs8-vcvt/gen/f32-qs8-vcvt-rvv-u4v.c
   src/f32-qs8-vcvt/gen/f32-qs8-vcvt-rvv-u8v.c
