@@ -8,6 +8,8 @@
 
 #include <cassert>
 #include <cstddef>
+#include <limits>
+#include <memory>
 
 #include <gtest/gtest.h>
 #include "include/xnnpack.h"
@@ -15,6 +17,48 @@
 #include "test/operators/max-pooling-operator-tester.h"
 
 constexpr int max_pool_size = 25;
+
+TEST(MAX_POOLING_NHWC_F32, indirection_buffer_size_overflow_32bit) {
+  if (sizeof(void*) != 4) {
+    GTEST_SKIP() << "requires 32-bit pointers";
+  }
+
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
+
+  xnn_operator_t max_pooling_op = nullptr;
+  ASSERT_EQ(xnn_status_success,
+            xnn_create_max_pooling2d_nhwc_f32(
+                /*input_padding_top=*/0, /*input_padding_right=*/0,
+                /*input_padding_bottom=*/0, /*input_padding_left=*/0,
+                /*pooling_height=*/2, /*pooling_width=*/1,
+                /*stride_height=*/1, /*stride_width=*/1,
+                /*dilation_height=*/1, /*dilation_width=*/1,
+                -std::numeric_limits<float>::infinity(),
+                std::numeric_limits<float>::infinity(), /*flags=*/0,
+                &max_pooling_op));
+  ASSERT_NE(max_pooling_op, nullptr);
+
+  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)>
+      auto_max_pooling_op(max_pooling_op, xnn_delete_operator);
+
+  size_t output_height = 0;
+  size_t output_width = 0;
+  const enum xnn_status status = xnn_reshape_max_pooling2d_nhwc_f32(
+      max_pooling_op,
+      /*batch_size=*/1,
+      /*input_height=*/1,
+      /*input_width=*/size_t{1} << 29,
+      /*channels=*/1,
+      /*input_pixel_stride=*/1,
+      /*output_pixel_stride=*/1,
+      &output_height,
+      &output_width,
+      /*threadpool=*/nullptr);
+
+  EXPECT_EQ(xnn_status_out_of_memory, status)
+      << "output_height=" << output_height
+      << ", output_width=" << output_width;
+}
 
 TEST(MAX_POOLING_NHWC_S8, unit_batch_small_1xM_pool) {
   const struct xnn_maxpool_config* maxpool_config =
