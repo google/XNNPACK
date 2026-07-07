@@ -21,7 +21,7 @@ cc_library(
     compatible_with = _COMPATIBLE_WITH,
     visibility = ["//visibility:public"],
     deps = [
-        "//ynnpack:ynnpack_h",
+        "//ynnpack",
         "//ynnpack/base",
     ],
 )
