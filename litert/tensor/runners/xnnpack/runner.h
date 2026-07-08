@@ -19,6 +19,7 @@ limitations under the License.
 #include <cstddef>
 #include <cstdint>
 #include <memory>
+#include <type_traits>
 #include <vector>
 
 #include "include/xnnpack.h"
@@ -60,17 +61,46 @@ class XnnpackRunner {
   // Sets the input data for a given tensor.
   absl::Status SetInput(const TensorHandle& tensor,
                         absl::Span<const std::byte> data);
+
+  // Sets the input data for a given tensor.
+  template <class ContiguousSequence,
+            class S = std::remove_reference_t<ContiguousSequence>,
+            class T = typename S::value_type,
+            class SFINAE = decltype(std::declval<S>().data())>
+  absl::Status SetInput(const TensorHandle& tensor, ContiguousSequence&& seq) {
+    return SetInput(tensor, absl::Span<const std::byte>(
+                                reinterpret_cast<const std::byte*>(seq.data()),
+                                seq.size() * sizeof(T)));
+  }
+
   // Sets the output buffer for a given tensor.
   absl::Status SetOutput(const TensorHandle& tensor,
                          absl::Span<std::byte> data);
+
   // Updates the shape for an external input tensor.
   absl::Status ReshapeInput(const TensorHandle& tensor,
                             absl::Span<const int32_t> shape);
+
   // Writes a slice of bytes into an external input tensor's host buffer.
   absl::Status WriteInput(const TensorHandle& tensor, size_t offset_bytes,
                           absl::Span<const std::byte> data);
+
+  // Sets the input data for a given tensor.
+  template <class ContiguousSequence,
+            class S = std::remove_reference_t<ContiguousSequence>,
+            class T = typename S::value_type,
+            class SFINAE = decltype(std::declval<S>().data())>
+  absl::Status WriteInput(const TensorHandle& tensor, size_t offset_bytes,
+                          ContiguousSequence&& seq) {
+    return WriteInput(tensor, offset_bytes,
+                      absl::Span<const std::byte>(
+                          reinterpret_cast<const std::byte*>(seq.data()),
+                          seq.size() * sizeof(T)));
+  }
+
   // Runs the XNNPACK graph.
   absl::Status Run();
+
   // Reads the output data for a given tensor.
   absl::StatusOr<LockedBufferSpan<const std::byte>> ReadOutput(
       const TensorHandle& tensor) const;
