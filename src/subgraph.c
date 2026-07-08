@@ -2737,7 +2737,8 @@ static enum xnn_status optimize_common_subgraphs_broadcast(
 
     // Create a static right-hand side value filled with zeros.
     void* data = xnn_allocate_zero_memory(
-        num_elements * xnn_datatype_size_bytes(input_value->datatype));
+        num_elements * xnn_datatype_size_bytes(input_value->datatype) +
+        XNN_EXTRA_BYTES);
     uint32_t new_value_id;
     XNN_RETURN_IF_ERROR(
         xnn_datatype_is_quantized(input_value->datatype)
