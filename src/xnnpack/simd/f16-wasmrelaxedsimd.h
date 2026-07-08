@@ -22,8 +22,6 @@ typedef v128_t xnn_simd_f16_t;
 #define xnn_simd_bytes_f16 (xnn_simd_size_f16 * sizeof(uint16_t))
 
 #define XNN_SIMD_HAS_NATIVE_FMA 1
-#define XNN_SIMD_HAVE_RCP_F16 1
-#define XNN_SIMD_NUM_RCP_ITER_F16 0
 
 #define XNN_SIMD_CONST_F16(var, val) \
   const xnn_simd_f16_t var = wasm_i16x8_splat(val);
@@ -79,6 +77,8 @@ static XNN_INLINE xnn_simd_f16_t xnn_div_f16(xnn_simd_f16_t a,
 
 #define XNN_SIMD_HAVE_RCP_F16 1
 #define XNN_SIMD_NUM_RCP_ITER_F16 0
+#define XNN_SIMD_HAVE_RSQRT_F16 0
+#define XNN_SIMD_NUM_RSQRT_ITER_F16 0
 static XNN_INLINE xnn_simd_f16_t xnn_rcp_f16(xnn_simd_f16_t a) {
   return wasm_f16x8_div(wasm_i16x8_const_splat(0x3C00), a);
 }
