@@ -164,14 +164,15 @@ template <typename T>
 void test_random(T, bool with_copy) {
   using T_info = type_info<T>;
   constexpr size_t elem_count = T_info::element_count();
+  const int min_rank = elem_count > 1 ? 1 : 0;
 
   ReplicableRandomDevice rng;
   std::uniform_int_distribution<size_t> basis_dist(1, 100);
-  std::uniform_int_distribution<int> input_rank_dist(0, max_test_rank);
+  std::uniform_int_distribution<int> input_rank_dist(min_rank, max_test_rank);
 
   for (auto _ : FuzzTest(std::chrono::milliseconds(100))) {
     const size_t input_rank = input_rank_dist(rng);
-    std::uniform_int_distribution<int> output_rank_dist(0, input_rank);
+    std::uniform_int_distribution<int> output_rank_dist(min_rank, input_rank);
     // Generate a random permutation that has some new dimensions in it.
     // This avoids generating permutations that use the same input dimension
     // more than once. This seems like something that maybe should work, but it
@@ -180,9 +181,14 @@ void test_random(T, bool with_copy) {
     std::iota(perm.begin(), perm.end(), 0);
     std::shuffle(perm.begin(), perm.end(), rng);
     perm.resize(output_rank_dist(rng));
-    while (elem_count > 1 && !perm.empty() && perm.back() >= input_rank) {
-      // Don't make a new trailing dimension if the type is not byte aligned.
+    while (elem_count > 1 && !perm.empty() &&
+           perm.back() != static_cast<int32_t>(input_rank - 1)) {
+      // Don't change or make a new trailing dimension if the type is not byte
+      // aligned.
       perm.pop_back();
+    }
+    if (static_cast<int>(perm.size()) < min_rank) {
+      perm.push_back(input_rank - 1);
     }
 
     // Define subgraph

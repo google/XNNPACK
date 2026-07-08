@@ -14,6 +14,7 @@
 #include <vector>
 
 #include "ynnpack/base/algorithm.h"
+#include "ynnpack/base/arithmetic.h"
 #include "ynnpack/base/log.h"
 #include "ynnpack/base/type.h"
 #include "ynnpack/include/ynnpack.h"
@@ -42,61 +43,58 @@ auto make_transpose_impl(int elem_count, std::vector<int32_t> permutation) {
     sliced_input.elem_size = input.elem_size;
     sliced_input.raw_buffer::base = input.base;
 
-    // We need to find the dimension 0 of the input, and know where it is after
-    // optimizing the copy.
-    int input_dim0 = -1;
-    int fuse_transpose[YNN_MAX_TENSOR_RANK];
-    int fuse_batch[YNN_MAX_TENSOR_RANK];
     for (size_t d = 0; d < permutation.size(); ++d) {
       sliced_input.dims[d] = input.dim(permutation[d]);
-      fuse_batch[d] = input_dim0 == -1 ? d : YNN_MAX_TENSOR_RANK;
-      if (permutation[d] == 0) {
-        input_dim0 = d;
-      }
-      // Don't include input_dim0 in the set for fusion.
-      fuse_transpose[d] = input_dim0 == -1 ? 0 : d;
     }
 
-    // Fuse dimensions after the input dimension 0 first.
-    slinky::fuse_contiguous_dims(fuse_batch, sliced_output, sliced_input);
-    // Fuse dimensions that can be handled by a single loop, and update the
-    // input dimension 0 accordingly. Due to the construction of `fusion_sets`
-    // above, we're only going to fuse dimensions before `input_dim0`, so that
-    // dimension moves by the number of dimensions fused.
-    input_dim0 -= slinky::fuse_contiguous_dims(fuse_transpose, sliced_output,
-                                               sliced_input);
+    // Sort and fuse dimensions
+    slinky::optimize_dims(sliced_output, sliced_input);
 
-    if (input_dim0 == 0 ||
-        (elem_count == 1 && (input_dim0 <= 0 || sliced_output.rank < 2))) {
-      // This transpose collapsed to a simple copy (one of the transposed
-      // extents was 1?)
-      slinky::copy(sliced_input, sliced_output);
-      return 0;
+    // Fold copies of contiguous dimensions into the elem_size.
+    slinky::index_t elem_size = sliced_output.elem_size;
+    int sliced_elem_count = elem_count;
+    while (sliced_output.rank > 0 && (elem_count == 1 || permutation[0] == 0) &&
+           is_contiguous(sliced_output.dim(0), elem_size) &&
+           is_contiguous(sliced_input.dim(0), elem_size)) {
+      elem_size *= sliced_output.dim(0).extent();
+      sliced_input.slice(0, slinky::in_bounds{sliced_output.dim(0).min()});
+      sliced_output.slice(0);
+      sliced_elem_count = 1;
     }
 
     const transpose_fn kernel =
-        get_tiled_transpose(output.elem_size * 8 / elem_count);
+        get_tiled_transpose(elem_size * 8 / sliced_elem_count);
     assert(kernel);
 
-    const slinky::index_t m = sliced_output.dim(input_dim0).extent();
-    const slinky::index_t n = sliced_output.dim(0).extent() * elem_count;
-    const slinky::index_t n_bytes_a = m * output.elem_size;
-    assert(is_contiguous(sliced_input.dim(input_dim0), output.elem_size));
+    // Find the contiguous dimension in the input, which is the dimension we
+    // need to handle with the kernel.
+    int input_dim0 = sliced_input.rank;
+    for (int d = 1; d < sliced_input.rank; ++d) {
+      if (is_contiguous(sliced_input.dim(d), elem_size)) {
+        input_dim0 = d;
+        break;
+      }
+    }
+
+    const slinky::dim& output_m = sliced_output.dim(input_dim0);
+    const slinky::dim& output_n = sliced_output.dim(0);
+    const slinky::index_t m = output_m.extent();
+    const slinky::index_t n = output_n.extent() * sliced_elem_count;
+    const slinky::index_t n_bytes_a =
+        ceil_div<slinky::index_t>(m * elem_size, sliced_elem_count);
     const slinky::index_t input_stride = sliced_input.dim(0).stride();
-    assert(is_contiguous(sliced_output.dim(0), output.elem_size));
-    const slinky::index_t output_stride =
-        sliced_output.dim(input_dim0).stride();
+    const slinky::index_t output_stride = output_m.stride();
 
     // Remove the transposed dimensions. These loops are inside the kernel.
     // We need to slice the input at the min of the output so we get the
     // correct pointers. `for_each_element` handles this for us for the
     // other dimensions. The order here is important because slicing dim0
     // would change the meaning of the input_dim0 index.
-    sliced_input.slice(
-        input_dim0,
-        slinky::in_bounds{sliced_output.dim(input_dim0).min() / elem_count});
-    sliced_input.slice(
-        0, slinky::in_bounds{sliced_output.dim(0).min() * elem_count});
+    assert(output_m.min() % sliced_elem_count == 0);
+    sliced_input.slice(input_dim0,
+                       slinky::in_bounds{output_m.min() / sliced_elem_count});
+    sliced_input.slice(0,
+                       slinky::in_bounds{output_n.min() * sliced_elem_count});
     sliced_output.slice({0, static_cast<size_t>(input_dim0)});
 
     slinky::for_each_element(
@@ -127,7 +125,7 @@ void define_static_transpose(ynn_subgraph& subgraph, ynn_node& node,
     slinky::expr input_extent = permutation[d] < input.rank()
                                     ? input.extents[permutation[d]]
                                     : slinky::expr{};
-    if (input_extent.defined()) {
+    if (input_extent.defined() && !slinky::is_one(input_extent)) {
       first_non_trivial_dim = std::min(first_non_trivial_dim, d);
     }
     output_extents[d] = input_extent;
@@ -170,7 +168,7 @@ void define_static_transpose(ynn_subgraph& subgraph, ynn_node& node,
     const int output_id = node.outputs[0];
     const ynn_runtime_value& input = runtime.value(input_id);
     ynn_runtime_value& output = runtime.value(output_id);
-    const size_t elem_count = type_element_count(output.type);
+    const int elem_count = type_element_count(output.type);
 
     output.make_buffer(runtime, input.buffer->elem_size());
 
@@ -184,11 +182,18 @@ void define_static_transpose(ynn_subgraph& subgraph, ynn_node& node,
       }
     }
 
-    if (elem_count != 1 &&
-        any_n(rank, [&](int d) { return d > 0 && op.permutation[d] == 0; })) {
-      // We're loading the packed dimensions with an index from a non-packed
-      // dimension, adjust for the number of elements.
-      bounds[0] /= (int)elem_count;
+    if (elem_count != 1) {
+      if (any_n(rank, [&](int d) { return d > 0 && op.permutation[d] == 0; })) {
+        // We're loading the packed dimensions with an index from a non-packed
+        // dimension, adjust for the number of elements.
+        bounds[0] /= elem_count;
+      }
+      if (rank > 0 && op.permutation[0] > 0 &&
+          op.permutation[0] < input.rank()) {
+        // We're loading a non-packed dimension with an index from the packed
+        // dimension, adjust for the number of elements.
+        bounds[op.permutation[0]] *= elem_count;
+      }
     }
 
     slinky::func f;
