@@ -16,6 +16,7 @@ xnnpack_cxx_library(
         "//:fp16",
         "//:internal",
         "//:logging",
+        "//:math",
         "//:node_type",
         "//:operator_h",
         "//:subgraph_h",
