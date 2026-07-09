@@ -84,6 +84,20 @@ cc_test(
     ] + ynn_test_deps(),
 )
 
+cc_test(
+    name = "tensor",
+    srcs = ["tensor.cc"],
+    linkopts = ynn_binary_linkopts(),
+    malloc = ynn_binary_malloc(),
+    deps = [
+        ":matchers",
+        ":subgraph_builder",
+        "//ynnpack:ynnpack_h",
+        "//ynnpack/base",
+        "//ynnpack/subgraph",
+    ] + ynn_test_deps(),
+)
+
 TEST_DEPS = [
     ":matchers",
     ":subgraph_builder",
