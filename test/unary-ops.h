@@ -453,7 +453,6 @@ struct SquareRoot : public UnaryOpInfo {
       case xnn_datatype_fp16:
         return {1.0e-4f, 10.0f};
       case xnn_datatype_fp32:
-      case xnn_datatype_bf16:
         // The reciprocal square root estimate instructions (e.g. `vrsqrteq_f32`
         // for Arm or `_m*_rsqrt_ps` for Intel) seem to fail for values larger
         // than the inverse of the minimum normalized number when denormals are
@@ -461,6 +460,8 @@ struct SquareRoot : public UnaryOpInfo {
         // numbers.
         return {std::numeric_limits<float>::epsilon(),
                 std::numeric_limits<float>::max() / 4};
+      case xnn_datatype_bf16:
+        return {std::numeric_limits<float>::epsilon(), 1.0e30f};
       default:
         return Interval::Positive(datatype);
     }

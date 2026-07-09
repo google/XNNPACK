@@ -406,8 +406,8 @@ xnnpack_source_set("subgraph") {
   # From build_srcs.bzl
   sources = SUBGRAPH_SRCS
   sources += [
-    "src/subgraph/rewrites/fp16_to_fp32.cc",
-    "src/subgraph/rewrites/fp16_to_fp32.h",
+    "src/subgraph/rewrites/cvt_to_fp32.cc",
+    "src/subgraph/rewrites/cvt_to_fp32.h",
   ]
 }
 
