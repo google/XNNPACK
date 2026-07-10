@@ -3,9 +3,10 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+#include <gtest/gtest.h>
+
 #include <cstddef>
 
-#include <gtest/gtest.h>
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/isa-checks.h"
 #include "src/xnnpack/unpool.h"
@@ -34,7 +35,7 @@ TEST(X32_UNPOOL__NEON, c_lt_4) {
 TEST(X32_UNPOOL__NEON, c_gt_4) {
   TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_neon);
   for (size_t c = 5; c < 8; c++) {
-    UnpoolMicrokernelTester().p(10).c(4).Test(xnn_x32_unpool_ukernel__neon);
+    UnpoolMicrokernelTester().p(10).c(c).Test(xnn_x32_unpool_ukernel__neon);
   }
 }
 
@@ -86,7 +87,7 @@ TEST(X32_UNPOOL__SSE2, c_lt_4) {
 
 TEST(X32_UNPOOL__SSE2, c_gt_4) {
   for (size_t c = 5; c < 8; c++) {
-    UnpoolMicrokernelTester().p(10).c(4).Test(xnn_x32_unpool_ukernel__sse2);
+    UnpoolMicrokernelTester().p(10).c(c).Test(xnn_x32_unpool_ukernel__sse2);
   }
 }
 
@@ -135,7 +136,7 @@ TEST(X32_UNPOOL__WASMSIMD, c_lt_4) {
 
 TEST(X32_UNPOOL__WASMSIMD, c_gt_4) {
   for (size_t c = 5; c < 8; c++) {
-    UnpoolMicrokernelTester().p(10).c(4).Test(xnn_x32_unpool_ukernel__wasmsimd);
+    UnpoolMicrokernelTester().p(10).c(c).Test(xnn_x32_unpool_ukernel__wasmsimd);
   }
 }
 
@@ -189,7 +190,7 @@ TEST(X32_UNPOOL__RISCV, c_lt_4) {
 TEST(X32_UNPOOL__RISCV, c_gt_4) {
   TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
   for (size_t c = 5; c < 8; c++) {
-    UnpoolMicrokernelTester().p(10).c(4).Test(xnn_x32_unpool_ukernel__rvv);
+    UnpoolMicrokernelTester().p(10).c(c).Test(xnn_x32_unpool_ukernel__rvv);
   }
 }
 
