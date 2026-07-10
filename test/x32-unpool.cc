@@ -166,6 +166,62 @@ TEST(X32_UNPOOL__WASMSIMD, y_stride) {
 }
 #endif  // XNN_ARCH_WASMSIMD
 
+#if XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+TEST(X32_UNPOOL__RISCV, c_eq_4) {
+  TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
+  UnpoolMicrokernelTester().p(10).c(4).Test(xnn_x32_unpool_ukernel__rvv);
+}
+
+TEST(X32_UNPOOL__RISCV, c_div_4) {
+  TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
+  for (size_t c = 8; c < 32; c += 4) {
+    UnpoolMicrokernelTester().p(10).c(c).Test(xnn_x32_unpool_ukernel__rvv);
+  }
+}
+
+TEST(X32_UNPOOL__RISCV, c_lt_4) {
+  TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
+  for (size_t c = 1; c < 4; c++) {
+    UnpoolMicrokernelTester().p(10).c(c).Test(xnn_x32_unpool_ukernel__rvv);
+  }
+}
+
+TEST(X32_UNPOOL__RISCV, c_gt_4) {
+  TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
+  for (size_t c = 5; c < 8; c++) {
+    UnpoolMicrokernelTester().p(10).c(4).Test(xnn_x32_unpool_ukernel__rvv);
+  }
+}
+
+TEST(X32_UNPOOL__RISCV, varying_p) {
+  TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
+  for (size_t p = 1; p < 20; p += 3) {
+    for (size_t c = 1; c < 32; c += 5) {
+      UnpoolMicrokernelTester().p(p).c(c).Test(xnn_x32_unpool_ukernel__rvv);
+    }
+  }
+}
+
+TEST(X32_UNPOOL__RISCV, varying_f) {
+  TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
+  for (size_t c = 1; c < 32; c += 5) {
+    UnpoolMicrokernelTester()
+        .p(10)
+        .c(c)
+        .f(0xDEADBEAF)
+        .Test(xnn_x32_unpool_ukernel__rvv);
+  }
+}
+
+TEST(X32_UNPOOL__RISCV, y_stride) {
+  TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
+  for (size_t c = 1; c < 32; c += 5) {
+    UnpoolMicrokernelTester().p(10).c(c).y_stride(c * 2 + 7).Test(
+        xnn_x32_unpool_ukernel__rvv);
+  }
+}
+#endif  // XNN_ARCH_RISCV
+
 TEST(X32_UNPOOL__SCALAR, c_eq_1) {
   UnpoolMicrokernelTester().p(10).c(1).Test(xnn_x32_unpool_ukernel__scalar);
 }
