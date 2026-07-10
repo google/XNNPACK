@@ -192,6 +192,16 @@ ynn_generate_srcs(
 )
 
 ynn_generate_srcs(
+    name = "x86_fp32_k8",
+    compatible_with = _COMPATIBLE_WITH,
+    generator = "//ynnpack/kernels/dot/generator:x86_fp32_k8",
+    output_srcs = [
+        "x86_avx2_fma3_fp32_k8.cc",
+        "x86_avx2_fma3_fp32_k8.inc",
+    ],
+)
+
+ynn_generate_srcs(
     name = "x86_fp64",
     compatible_with = _COMPATIBLE_WITH,
     generator = "//ynnpack/kernels/dot/generator:x86_fp64",
@@ -383,6 +393,7 @@ ynn_cc_library(
         "x86_avx2_fma3_bf16_bf16_fp32.inc",
         "x86_avx2_fma3_bf16_bf16_fp32_k1.inc",
         "x86_avx2_fma3_fp32_k2.inc",
+        "x86_avx2_fma3_fp32_k8.inc",
         "x86_avx2_fp32_k2.inc",
         "x86_avx2_int8_int8_int32.inc",
         "x86_avx2_int8_int8_int32_k1.inc",
@@ -470,6 +481,7 @@ ynn_cc_library(
             "x86_avx2_fma3_bf16_bf16_fp32.cc",
             "x86_avx2_fma3_bf16_bf16_fp32_k1.cc",
             "x86_avx2_fma3_fp32_k2.cc",
+            "x86_avx2_fma3_fp32_k8.cc",
         ],
         "x86_avx512": [
             "x86_avx512_bf16_bf16_fp32.cc",
