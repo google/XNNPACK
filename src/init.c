@@ -82,3 +82,11 @@ enum xnn_status xnn_initialize(const struct xnn_allocator* allocator) {
 enum xnn_status xnn_deinitialize(void) {
   return xnn_status_success;
 }
+
+bool xnn_is_f16_native_supported(void) {
+  const struct xnn_hardware_config* hardware_config =
+      xnn_init_hardware_config();
+  return hardware_config != NULL &&
+         xnn_is_f16_supported_natively(hardware_config);
+}
+

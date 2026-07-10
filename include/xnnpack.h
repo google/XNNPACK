@@ -212,6 +212,10 @@ enum xnn_status xnn_initialize(const struct xnn_allocator* allocator);
 /// @retval xnn_status_success - deinitialization call succeeded.
 enum xnn_status xnn_deinitialize(void);
 
+/// Check whether native FP16 execution is supported by the hardware.
+bool xnn_is_f16_native_supported(void);
+
+
 /// Get the microkernel implementation build identifier's data.
 ///
 /// That identifier will be unique for the current set of microkernels implementations.
