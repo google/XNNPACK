@@ -240,6 +240,28 @@ cc_test(
 )
 
 cc_test(
+    name = "attention_bench",
+    srcs = [
+        "attention_bench.cc",
+        "attention_graph.cc",
+        "attention_graph.h",
+    ],
+    args = ["--benchmark_min_time=1x"],
+    linkopts = ynn_binary_linkopts(),
+    malloc = ynn_binary_malloc(),
+    tags = [
+        "manual",
+        "notap",
+    ],
+    deps = [
+        ":scheduler",
+        "//ynnpack",
+        "//ynnpack/base",
+        "//ynnpack/composites",
+    ] + ynn_benchmark_deps(),
+)
+
+cc_test(
     name = "dot_bench",
     srcs = ["dot_bench.cc"],
     args = ["--benchmark_min_time=1x"],
