@@ -166,15 +166,21 @@ static enum xnn_status reshape_fully_connected_operator(
     return xnn_status_invalid_parameter;
   }
 
-  const size_t num_input_elements = xnn_shape_multiply_all_dims(&values[input_id].shape);
-  if (num_input_elements % input_channels != 0) {
+  const struct xnn_shape* input_shape = &values[input_id].shape;
+  if (input_shape->num_dims == 0 ||
+      input_shape->dim[input_shape->num_dims - 1] != input_channels) {
     xnn_log_error("failed to reshape %s operator with input ID #%" PRIu32
-                  ": number of input elements %zu is not divisible by "
+                  ": innermost input dimension %zu does not match the number of "
                   "input channels %zu",
                   xnn_node_type_to_string(xnn_node_type_fully_connected_sparse),
-                  input_id, num_input_elements, input_channels);
+                  input_id,
+                  input_shape->num_dims == 0
+                      ? 0
+                      : input_shape->dim[input_shape->num_dims - 1],
+                  input_channels);
     return xnn_status_invalid_parameter;
   }
+  const size_t num_input_elements = xnn_shape_multiply_all_dims(input_shape);
   const size_t batch_size = num_input_elements / input_channels;
   const size_t old_workspace_size = opdata->workspace_size;
   enum xnn_status status = xnn_status_invalid_state;

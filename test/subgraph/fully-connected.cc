@@ -1090,4 +1090,50 @@ TEST(FullyConnectedF32, zero_dim_input_rejected) {
   xnn_delete_subgraph(subgraph);
 }
 
+// Regression test: fully-connected reshape must reject an input whose innermost
+// dimension does not match the filter input channels. The batch size is derived
+// as num_input_elements / input_channels, so a mismatched innermost dimension
+// decouples it from the input batch dimensions. The dynamically-quantized
+// parameter buffer is sized from the input batch dimensions, so the larger
+// batch size over-indexes it at invoke time, reading out of bounds.
+TEST(FullyConnectedQD8F32QC8W, reshape_rejects_input_channel_mismatch) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
+  const size_t output_channels = 4;
+  const size_t input_channels = 2;
+  SubgraphTester subgraph(3);
+  const uint32_t input_id = 0, filter_id = 1, output_id = 2;
+  subgraph.AddInputTensor(2, xnn_datatype_fp32, input_id);
+  uint32_t fc_input_id = input_id;
+  subgraph.AddInternalDynamicallyQuantizedTensor(
+      2, xnn_datatype_qdint8, /*num_nonbatch_dims=*/1, &fc_input_id);
+  subgraph.AddConvert(input_id, fc_input_id);
+
+  Tensor<int8_t> filter({output_channels, input_channels}, XnnExtraBytes);
+  filter.fill(0);
+  Tensor<float> filter_scale({output_channels});
+  filter_scale.fill(1.0f);
+  subgraph.AddStaticChannelwiseQuantizedTensor(
+      {output_channels, input_channels}, /*channel_dim=*/0,
+      xnn_datatype_qcint8, filter_scale.base(), filter_id, /*flags=*/0,
+      filter.base());
+
+  subgraph.AddOutputTensor(2, xnn_datatype_fp32, output_id)
+      .AddFullyConnected(-std::numeric_limits<float>::infinity(),
+                         std::numeric_limits<float>::infinity(), fc_input_id,
+                         filter_id, XNN_INVALID_VALUE_ID, output_id);
+  const xnn_status create_status = subgraph.CreateRuntime();
+  if (create_status == xnn_status_unsupported_hardware) {
+    GTEST_SKIP();
+  }
+  ASSERT_EQ(xnn_status_success, create_status);
+
+  // Innermost input dimension (8) is a multiple of input_channels (2) but does
+  // not equal it, so the old divisibility check passed this shape through.
+  Tensor<float> input({1, 8}, XnnExtraBytes);
+  input.fill(0.0f);
+  subgraph.ReshapeExternalTensor({1, 8}, input.base(), input_id)
+      .ReshapeRuntime();
+  ASSERT_NE(xnn_status_success, subgraph.Status());
+}
+
 }  // namespace xnnpack

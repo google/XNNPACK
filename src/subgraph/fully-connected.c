@@ -985,12 +985,14 @@ static enum xnn_status reshape_fully_connected_operator(
     return xnn_status_invalid_parameter;
   }
 
-  if (num_input_elements % input_channels != 0) {
+  const size_t input_inner_dim =
+      input_value->shape.dim[input_value->shape.num_dims - 1];
+  if (input_inner_dim != input_channels) {
     xnn_log_error("failed to reshape %s operator with input ID #%" PRIu32
-                  ": number of input elements %zu is not divisible by "
+                  ": innermost input dimension %zu does not match the number of "
                   "input channels %zu",
                   xnn_node_type_to_string(xnn_node_type_fully_connected),
-                  input_id, num_input_elements, input_channels);
+                  input_id, input_inner_dim, input_channels);
     return xnn_status_invalid_parameter;
   }
   const size_t batch_size = num_input_elements / input_channels;
