@@ -100,27 +100,30 @@ void interleave_impl(size_t factor, size_t m, size_t n, size_t stride_a,
 using simd::u8x4;
 using simd::u8x8;
 
+void interleave2_x2(size_t factor, size_t m, size_t n, size_t stride_a,
+                         const void* a, void* x) {
+  assert(factor == 2);
+  interleave<std::array<u8x4, 2>>(m, n, stride_a, a, x,
+                                   std::integral_constant<size_t, 2>{});
+}
 void interleave2_x4(size_t factor, size_t m, size_t n, size_t stride_a,
                          const void* a, void* x) {
   assert(factor == 2);
   interleave<std::array<u8x4, 2>>(m, n, stride_a, a, x,
                                    std::integral_constant<size_t, 4>{});
 }
-
 void interleave2_x8(size_t factor, size_t m, size_t n, size_t stride_a,
                          const void* a, void* x) {
   assert(factor == 2);
   interleave<std::array<u8x4, 2>>(m, n, stride_a, a, x,
                                    std::integral_constant<size_t, 8>{});
 }
-
 void interleave2_x16(size_t factor, size_t m, size_t n, size_t stride_a,
                           const void* a, void* x) {
   assert(factor == 2);
   interleave<std::array<u8x4, 2>>(m, n, stride_a, a, x,
                                    std::integral_constant<size_t, 16>{});
 }
-
 void interleave2_x32(size_t factor, size_t m, size_t n, size_t stride_a,
                           const void* a, void* x) {
   assert(factor == 2);
@@ -128,6 +131,12 @@ void interleave2_x32(size_t factor, size_t m, size_t n, size_t stride_a,
                                    std::integral_constant<size_t, 32>{});
 }
 
+void interleave4_x2(size_t factor, size_t m, size_t n, size_t stride_a,
+                         const void* a, void* x) {
+  assert(factor == 4);
+  interleave<std::array<u8x4, 4>>(m, n, stride_a, a, x,
+                                   std::integral_constant<size_t, 2>{});
+}
 void interleave4_x4(size_t factor, size_t m, size_t n, size_t stride_a,
                          const void* a, void* x) {
   assert(factor == 4);
@@ -139,6 +148,19 @@ void interleave4_x8(size_t factor, size_t m, size_t n, size_t stride_a,
   assert(factor == 4);
   interleave<std::array<u8x4, 4>>(m, n, stride_a, a, x,
                                    std::integral_constant<size_t, 8>{});
+}
+
+void interleave8_x2(size_t factor, size_t m, size_t n, size_t stride_a,
+                         const void* a, void* x) {
+  assert(factor == 8);
+  interleave<std::array<u8x4, 8>>(m, n, stride_a, a, x,
+                                   std::integral_constant<size_t, 2>{});
+}
+void interleave8_x4(size_t factor, size_t m, size_t n, size_t stride_a,
+                         const void* a, void* x) {
+  assert(factor == 8);
+  interleave<std::array<u8x4, 8>>(m, n, stride_a, a, x,
+                                   std::integral_constant<size_t, 4>{});
 }
 
 void interleave_x2(size_t factor, size_t m, size_t n, size_t stride_a,
