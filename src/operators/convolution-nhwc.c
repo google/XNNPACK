@@ -563,7 +563,14 @@ struct convolution2d_nhwc_variant {
 static enum xnn_status select_microkernel_type(
     const struct convolution2d_nhwc_variant* variant,
     struct convolution2d_nhwc_context* context) {
-  const size_t kernel_size = context->kernel_height * context->kernel_width;
+  if ((size_t) context->kernel_height > SIZE_MAX / (size_t) context->kernel_width) {
+    xnn_log_error(
+        "failed to create %s operator: kernel size (%" PRIu32 "x%" PRIu32 ") overflows size_t",
+        xnn_operator_type_to_string(context->operator_type),
+        context->kernel_width, context->kernel_height);
+    return xnn_status_unsupported_parameter;
+  }
+  const size_t kernel_size = (size_t) context->kernel_height * (size_t) context->kernel_width;
   const bool unit_subsampling = (context->subsampling_width | context->subsampling_height) == 1;
   const bool any_padding = (context->input_padding_left | context->input_padding_top |
                             context->input_padding_right | context->input_padding_bottom) != 0;
@@ -737,7 +744,7 @@ static enum xnn_status create_convolution2d_nhwc(
 
   convolution_op->weights_cache = context->weights_cache;
 
-  const size_t kernel_size = context->kernel_height * context->kernel_width;
+  const size_t kernel_size = (size_t) context->kernel_height * (size_t) context->kernel_width;
 
   size_t zero_size = 0;
   switch (context->microkernel_type) {
@@ -1168,7 +1175,7 @@ static XNN_NO_SANITIZE_FUNCTION enum xnn_status init_dwconv_params_qu8(
   }
 
   context->dwconv_ukernel =
-      find_dwconv_ukernel(context->kernel_height * context->kernel_width,
+      find_dwconv_ukernel((size_t) context->kernel_height * (size_t) context->kernel_width,
                           dwconv_config, XNN_MAX_QU8_DWCONV_UKERNELS);
   if XNN_LIKELY (context->dwconv_ukernel != NULL) {
     context->dwconv_ukernel->init.qu8(
@@ -1194,7 +1201,7 @@ static XNN_NO_SANITIZE_FUNCTION enum xnn_status init_dwconv_params_qs8_qc8w(
   }
 
   context->dwconv_ukernel =
-      find_dwconv_ukernel(context->kernel_height * context->kernel_width,
+      find_dwconv_ukernel((size_t) context->kernel_height * (size_t) context->kernel_width,
                           dwconv_config, XNN_MAX_QC8_DWCONV_UKERNELS);
   if XNN_LIKELY (context->dwconv_ukernel != NULL) {
     context->dwconv_ukernel->init.qs8_qc8w(
@@ -1217,7 +1224,7 @@ static XNN_NO_SANITIZE_FUNCTION enum xnn_status init_dwconv_params_f16(
     return xnn_status_unsupported_hardware;
   }
   context->dwconv_ukernel =
-      find_dwconv_ukernel(context->kernel_height * context->kernel_width,
+      find_dwconv_ukernel((size_t) context->kernel_height * (size_t) context->kernel_width,
                           dwconv_config, XNN_MAX_F16_DWCONV_UKERNELS);
   if XNN_LIKELY (context->dwconv_ukernel != NULL) {
     context->dwconv_ukernel->init.f16(&context->dwconv_params.f16,
@@ -1240,7 +1247,7 @@ static XNN_NO_SANITIZE_FUNCTION enum xnn_status init_dwconv_params_f32(
     return xnn_status_unsupported_hardware;
   }
   context->dwconv_ukernel =
-      find_dwconv_ukernel(context->kernel_height * context->kernel_width,
+      find_dwconv_ukernel((size_t) context->kernel_height * (size_t) context->kernel_width,
                           dwconv_config, XNN_MAX_F32_DWCONV_UKERNELS);
   if XNN_LIKELY (context->dwconv_ukernel != NULL) {
     context->dwconv_ukernel->init.f32(&context->dwconv_params.f32,
@@ -2648,7 +2655,7 @@ static enum xnn_status reshape_igemm(
   const size_t groups = convolution_op->convolution_op->groups;
   const size_t kernel_height = convolution_op->convolution_op->kernel_height;
   const size_t kernel_width = convolution_op->convolution_op->kernel_width;
-  const size_t kernel_size = kernel_height * kernel_width;
+  const size_t kernel_size = (size_t) kernel_height * (size_t) kernel_width;
   const size_t output_height = convolution_op->convolution_op->output_height;
   const size_t output_width = convolution_op->convolution_op->output_width;
   const size_t output_size = output_height * output_width;
@@ -2947,7 +2954,7 @@ static enum xnn_status reshape_dwconv(
   const size_t input_width = convolution_op->convolution_op->input_width;
   const size_t kernel_height = convolution_op->convolution_op->kernel_height;
   const size_t kernel_width = convolution_op->convolution_op->kernel_width;
-  const size_t kernel_size = kernel_height * kernel_width;
+  const size_t kernel_size = (size_t) kernel_height * (size_t) kernel_width;
   const size_t output_height = convolution_op->convolution_op->output_height;
   const size_t output_width = convolution_op->convolution_op->output_width;
   const size_t step_width =
@@ -3221,13 +3228,13 @@ static enum xnn_status reshape_convolution2d_nhwc(
         compute_output_dimension_with_tf_same_padding(
             input_width, convolution_op->convolution_op->stride_width);
 
-    const uint32_t effective_kernel_height =
-        (convolution_op->convolution_op->kernel_height - 1) *
-            convolution_op->convolution_op->dilation_height +
+    const size_t effective_kernel_height =
+        (size_t) (convolution_op->convolution_op->kernel_height - 1) *
+            (size_t) convolution_op->convolution_op->dilation_height +
         1;
-    const uint32_t effective_kernel_width =
-        (convolution_op->convolution_op->kernel_width - 1) *
-            convolution_op->convolution_op->dilation_width +
+    const size_t effective_kernel_width =
+        (size_t) (convolution_op->convolution_op->kernel_width - 1) *
+            (size_t) convolution_op->convolution_op->dilation_width +
         1;
     const size_t total_padding_height =
         doz((convolution_op->convolution_op->output_height - 1) *
@@ -3256,11 +3263,11 @@ static enum xnn_status reshape_convolution2d_nhwc(
     const size_t padded_input_width = convolution_op->convolution_op->padding_left +
         input_width + convolution_op->convolution_op->padding_right;
     const size_t effective_kernel_height =
-        (convolution_op->convolution_op->kernel_height - 1) *
-            convolution_op->convolution_op->dilation_height + 1;
+        (size_t) (convolution_op->convolution_op->kernel_height - 1) *
+            (size_t) convolution_op->convolution_op->dilation_height + 1;
     const size_t effective_kernel_width =
-        (convolution_op->convolution_op->kernel_width - 1) *
-            convolution_op->convolution_op->dilation_width + 1;
+        (size_t) (convolution_op->convolution_op->kernel_width - 1) *
+            (size_t) convolution_op->convolution_op->dilation_width + 1;
     if (padded_input_height < effective_kernel_height ||
         padded_input_width < effective_kernel_width) {
       xnn_log_error(
