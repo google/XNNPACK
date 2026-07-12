@@ -398,6 +398,7 @@ unary_kernel_fn get_float_unary_reference_kernel(ynn_unary_operator op,
     case ynn_unary_round_to_bf16:
       return unary_impl<T, T, round_to_bf16_op>;
     case ynn_unary_convert:
+    case ynn_unary_requantize_to_uint8:
     case ynn_unary_invalid:
       break;
   }

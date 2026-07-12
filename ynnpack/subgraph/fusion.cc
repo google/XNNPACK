@@ -2019,6 +2019,55 @@ bool rewrite_fast_math(ynn_subgraph& subgraph, ynn_node& node,
   return false;
 }
 
+// Rewrite requantize_to_uint8(quantize_int8(x, scale, zp)) to
+// quantize_uint8(x, scale, zp + 128)
+bool rewrite_requantize_quantize(ynn_subgraph& subgraph, ynn_node& node,
+                                 subgraph_analysis& analysis) {
+  if (!is_unary_node(node, ynn_unary_requantize_to_uint8)) {
+    return false;
+  }
+
+  ynn_node* producer = analysis.producer_of(node.inputs[0]);
+  if (!producer || !is_ternary_node(*producer, ternary_op::quantize_int8)) {
+    return false;
+  }
+
+  uint32_t input_id = producer->inputs[0];
+  uint32_t scale_id = producer->inputs[1];
+  uint32_t zp_id = producer->inputs[2];
+
+  const ynn_value& zp_val = subgraph.value(zp_id);
+  if (!zp_val.is_static_scalar()) {
+    return false;
+  }
+  std::optional<ynn::real> zp_scalar = zp_val.as_scalar();
+  if (!zp_scalar) {
+    return false;
+  }
+  int32_t new_zp_val = static_cast<int32_t>(*zp_scalar) + 128;
+  uint32_t new_zp_id = subgraph.get_scalar_value_id(
+      ynn_type_int32, static_cast<float>(new_zp_val));
+
+  uint32_t output_id = node.outputs[0];
+
+  const ynn_value& input = subgraph.value(input_id);
+  const ynn_value& output = subgraph.value(output_id);
+
+  const ynn::ternary_kernel_fn kernel =
+      ynn::get_ternary_kernel(ternary_op::quantize_uint8, input.type,
+                              ynn_type_fp32, ynn_type_int32, output.type);
+  if (!kernel) {
+    return false;
+  }
+
+  // Redefine node as quantize_uint8
+  ynn::define_ternary(subgraph, node, input_id, scale_id, new_zp_id, output_id,
+                      ternary_op::quantize_uint8, kernel);
+
+  analysis.invalidate();
+  return true;
+}
+
 }  // namespace
 
 }  // namespace ynn
@@ -2059,7 +2108,9 @@ ynn_status ynn_subgraph::fusion() {
                 ynn::rewrite_reduce_sum_of_squared(*this, node, analysis) ||
                 ynn::rewrite_reduce_convert(*this, node, analysis) ||
                 ynn::rewrite_reduce_static_transpose(*this, node, analysis) ||
-                ynn::rewrite_fast_math(*this, node, analysis) || false;
+                ynn::rewrite_fast_math(*this, node, analysis) ||
+                ynn::rewrite_requantize_quantize(*this, node, analysis) ||
+                false;
 
       if (!analysis.is_valid) {
         break;

@@ -236,6 +236,24 @@ MATCHER(IsDequantizeDot, "") {
   return std::holds_alternative<ynn_node::dequantize_dot>(arg.op);
 }
 
+// Checks that the given node is a dynamic quantization with the given output
+// zero point.
+//
+// Example:
+//   EXPECT_THAT(ProducerOf(zp_id, subgraph), IsDynamicQuantization(0));
+MATCHER_P(IsDynamicQuantization, output_zero_point, "") {
+  const auto* dq = std::get_if<ynn_node::dynamic_quantization>(&arg.op);
+  if (!dq) {
+    *result_listener << "is not a dynamic quantization node";
+    return false;
+  }
+  if (dq->output_zero_point != output_zero_point) {
+    *result_listener << "has output zero point " << dq->output_zero_point;
+    return false;
+  }
+  return true;
+}
+
 // Checks that the given node is a dot.
 //
 // Example:
@@ -273,6 +291,18 @@ MATCHER_P(IsStaticTransposeWithPerm, perm_matcher, "") {
   return transpose &&
          testing::ExplainMatchResult(perm_matcher, transpose->permutation,
                                      result_listener);
+}
+
+// Checks that the given value has the given type.
+//
+// Example:
+//   EXPECT_THAT(subgraph.value(x_id), HasType(ynn_type_fp32));
+MATCHER_P(HasType, type, "") {
+  if (arg.type != type) {
+    *result_listener << "has type " << arg.type;
+    return false;
+  }
+  return true;
 }
 
 // Checks that the given value ID is valid in the given subgraph.

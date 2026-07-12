@@ -6,11 +6,13 @@
 #include <cmath>
 #include <cstdint>
 #include <utility>
+#include <variant>
 #include <vector>
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include "ynnpack/include/ynnpack.h"
+#include "ynnpack/kernels/dequantize_dot/dequantize_dot.h"
 #include "ynnpack/kernels/ternary/ternary.h"
 #include "ynnpack/subgraph/dot.h"
 #include "ynnpack/subgraph/elementwise.h"
@@ -21,6 +23,7 @@
 namespace ynn {
 
 using ::testing::AllOf;
+using ::testing::ElementsAre;
 
 TEST(fusion, multiply_add) {
   // rewrite add(multiply(a, b), c) -> multiply_add(a, b, c)
@@ -996,21 +999,64 @@ TEST(fusion, dynamic_quantize_to_uint8_with_pad) {
     subgraph.invalidate_dead_values();
 
     if (expect_rewrite) {
-      EXPECT_EQ(subgraph.value(quantized_id).type, ynn_type_uint8);
-      EXPECT_EQ(subgraph.value(padded_quantized_id).type, ynn_type_uint8);
+      EXPECT_THAT(subgraph.value(quantized_id), HasType(ynn_type_int8));
+      EXPECT_THAT(subgraph.value(padded_quantized_id), HasType(ynn_type_int8));
 
-      const ynn_node* dq_node = subgraph.get_producer(zp_id);
-      ASSERT_NE(dq_node, nullptr);
-      const auto* dq_op =
-          std::get_if<ynn_node::dynamic_quantization>(&dq_node->op);
-      ASSERT_NE(dq_op, nullptr);
-      EXPECT_EQ(dq_op->output_zero_point, 128);
+      EXPECT_THAT(ProducerOf(zp_id, subgraph), IsDynamicQuantization(0));
+
+      const ynn_node& dot_node = ProducerOf(output_id, subgraph);
+      uint32_t dot_in_id = dot_node.inputs[0];
+      EXPECT_THAT(subgraph.value(dot_in_id), HasType(ynn_type_uint8));
     } else {
-      EXPECT_EQ(subgraph.value(quantized_id).type, ynn_type_int8);
-      EXPECT_EQ(subgraph.value(padded_quantized_id).type, ynn_type_int8);
+      EXPECT_THAT(subgraph.value(quantized_id), HasType(ynn_type_int8));
+      EXPECT_THAT(subgraph.value(padded_quantized_id), HasType(ynn_type_int8));
     }
   }
   EXPECT_GT(rewrite_count, 0);
+}
+
+TEST(fusion, requantize_quantize) {
+  // requantize_to_uint8(quantize_int8(input, scale, zero_point)) ->
+  // quantize_uint8(input, scale, zero_point + 128)
+  // Leaves the old quantize node in place because it has another consumer.
+  const uint32_t input_id = 0;
+  const uint32_t scale_id = 1;
+  const uint32_t zp_id = 2;
+  const uint32_t output_id = 3;
+  const uint32_t output2_id = 4;
+
+  SubgraphBuilder builder(5);
+  uint32_t q_id = YNN_INVALID_VALUE_ID;
+  builder.AddInput(ynn_type_fp32, 2, input_id)
+      .AddInput(ynn_type_fp32, 2, scale_id)
+      .AddScalar<int32_t>(0, zp_id)
+      .AddOutput(ynn_type_uint8, 2, output_id)
+      .AddOutput(ynn_type_int8, 2, output2_id)
+      .AddTensor(ynn_type_int8, 2, q_id);
+
+  builder.AddQuantize(input_id, ynn_type_int8, zp_id, scale_id, q_id)
+      .AddUnary(ynn_unary_requantize_to_uint8, q_id, output_id)
+      .AddCopy(q_id, output2_id);
+
+  ynn_subgraph& subgraph = *builder.GetSubgraph();
+
+  subgraph.fusion();
+  subgraph.invalidate_dead_values();
+
+  // Valid nodes: quantize_int8, copy, quantize_uint8
+  ASSERT_THAT(subgraph, AllOf(HasValidNodeCount(3), HasValidValueCount(7)));
+  EXPECT_THAT(ProducerOf(output_id, subgraph),
+              AllOf(IsTernary(ternary_op::quantize_uint8),
+                    InputsInclude(input_id, scale_id)));
+
+  uint32_t new_zp_id = ProducerOf(output_id, subgraph).inputs[2];
+  EXPECT_THAT(ValuesIn<int32_t>(subgraph.value(new_zp_id)), ElementsAre(128));
+
+  // Check that old quantize is still there and has correct type
+  EXPECT_THAT(subgraph.value(q_id), HasType(ynn_type_int8));
+  EXPECT_THAT(ProducerOf(q_id, subgraph),
+              AllOf(IsTernary(ternary_op::quantize_int8),
+                    InputsInclude(input_id, scale_id)));
 }
 
 }  // namespace ynn

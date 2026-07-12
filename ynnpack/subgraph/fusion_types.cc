@@ -11,7 +11,9 @@ subgraph_analysis::subgraph_analysis(ynn_subgraph& subgraph) : is_valid(true) {
     for (uint32_t input : node.inputs) {
       consumers[input].push_back(&node);
     }
-    assert(producers.find(node.outputs[0]) == producers.end());
-    producers[node.outputs[0]] = &node;
+    for (uint32_t output : node.outputs) {
+      assert(producers.find(output) == producers.end());
+      producers[output] = &node;
+    }
   }
 }

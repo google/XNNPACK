@@ -79,133 +79,138 @@ bool prefer_uint8_dot(ynn_type b_type) {
 
 namespace {
 
-bool is_static_zero(const ynn_value& value) {
-  if (!value.is_static()) {
-    return false;
-  }
-  const char* bytes = static_cast<const char*>(value.data->base);
-  size_t size = value.data->size_bytes();
-  return std::all_of(bytes, bytes + size, [](char c) { return c == 0; });
+bool try_dynamic_quantization_rewrite(ynn_subgraph& subgraph,
+                                      uint32_t input_a_id) {
+  ynn_node* producer_a = subgraph.get_producer(input_a_id);
+  if (!producer_a) return false;
+
+  const ynn_node::ternary_elementwise* ternary =
+      std::get_if<ynn_node::ternary_elementwise>(&producer_a->op);
+  if (!ternary || ternary->op != ternary_op::quantize_int8) return false;
+
+  uint32_t zp_id = producer_a->inputs[2];
+  ynn_node* producer_zp = subgraph.get_producer(zp_id);
+  if (!producer_zp) return false;
+
+  auto* dq_op = std::get_if<ynn_node::dynamic_quantization>(&producer_zp->op);
+  if (!dq_op) return false;
+
+  uint32_t input_id = producer_a->inputs[0];
+  const ynn_value& input = subgraph.value(input_id);
+  const ynn::ternary_kernel_fn kernel =
+      ynn::get_ternary_kernel(ternary_op::quantize_uint8, input.type,
+                              ynn_type_fp32, ynn_type_int32, ynn_type_uint8);
+  if (!kernel) return false;
+
+  // This is a dynamic quantization. We can change it to produce uint8
+  // instead of int8.
+  uint32_t scale_id = producer_a->inputs[1];
+  dq_op->output_zero_point = 128;
+  subgraph.value(input_a_id).type = ynn_type_uint8;
+  ynn::define_ternary(subgraph, *producer_a, input_id, scale_id, zp_id,
+                      input_a_id, ternary_op::quantize_uint8, kernel);
+  return true;
 }
 
-bool is_copy_node(const ynn_node& node, const ynn_subgraph& subgraph) {
-  if (std::holds_alternative<ynn_node::copy>(node.op) ||
-      std::holds_alternative<ynn_node::static_transpose>(node.op) ||
-      std::holds_alternative<ynn_node::static_reshape>(node.op)) {
+bool try_requantize_rewrite(ynn_subgraph& subgraph, uint32_t& input_a_id,
+                            uint32_t input_b_id, uint32_t& input_c_id,
+                            size_t num_k_dims) {
+  uint32_t uint8_a_id = YNN_INVALID_VALUE_ID;
+  ynn_status status = ynn_define_unary(&subgraph, ynn_unary_requantize_to_uint8,
+                                       input_a_id, &uint8_a_id, 0);
+  if (status != ynn_status_success) {
+    YNN_LOG_ERROR() << "Failed to define requantize_to_uint8 for input A";
+    return false;
+  }
+  input_a_id = uint8_a_id;
+
+  const ynn_value& b_val = subgraph.value(input_b_id);
+  int32_t reduce_axes[YNN_MAX_TENSOR_RANK];
+  for (size_t i = 0; i < num_k_dims; ++i) {
+    reduce_axes[i] = b_val.rank() - 1 - num_k_dims + i;
+  }
+
+  uint32_t sum_b_id = YNN_INVALID_VALUE_ID;
+  status = ynn_define_reduce(&subgraph, ynn_reduce_sum, num_k_dims, reduce_axes,
+                             input_b_id, YNN_INVALID_VALUE_ID, &sum_b_id, 0);
+  if (status != ynn_status_success) {
+    YNN_LOG_ERROR() << "Failed to define reduce sum for B in uint8 rewrite";
+    return false;
+  }
+
+  // 3. Expand sum_b to add a 1 dimension for M: sum_b_expanded =
+  // expand_dims(sum_b, axis)
+  uint32_t sum_b_expanded_id = YNN_INVALID_VALUE_ID;
+  int32_t expand_axis = b_val.rank() - num_k_dims - 1;
+  status = ynn_define_static_expand_dims(&subgraph, 1, &expand_axis, sum_b_id,
+                                         &sum_b_expanded_id, 0);
+  if (status != ynn_status_success) {
+    YNN_LOG_ERROR() << "Failed to expand dims of sum_b in uint8 rewrite";
+    return false;
+  }
+
+  // 4. Multiply sum_b_expanded by 128 (or -128) and adjust input_c_id.
+  if (input_c_id == YNN_INVALID_VALUE_ID) {
+    uint32_t c_neg128_id = subgraph.get_scalar_value_id<int32_t>(-128);
+    uint32_t new_c_id = YNN_INVALID_VALUE_ID;
+    status = ynn_define_binary(&subgraph, ynn_binary_multiply,
+                               sum_b_expanded_id, c_neg128_id, &new_c_id, 0);
+    if (status != ynn_status_success) {
+      YNN_LOG_ERROR() << "Failed to multiply sum_b by -128";
+      return false;
+    }
+    input_c_id = new_c_id;
+  } else {
+    uint32_t c128_id = subgraph.get_scalar_value_id<int32_t>(128);
+    uint32_t sum_b_times_128_id = YNN_INVALID_VALUE_ID;
+    status =
+        ynn_define_binary(&subgraph, ynn_binary_multiply, sum_b_expanded_id,
+                          c128_id, &sum_b_times_128_id, 0);
+    if (status != ynn_status_success) {
+      YNN_LOG_ERROR() << "Failed to multiply sum_b by 128";
+      return false;
+    }
+
+    uint32_t new_c_id = YNN_INVALID_VALUE_ID;
+    status = ynn_define_binary(&subgraph, ynn_binary_subtract, input_c_id,
+                               sum_b_times_128_id, &new_c_id, 0);
+    if (status != ynn_status_success) {
+      YNN_LOG_ERROR() << "Failed to subtract sum_b_times_128 from input_c";
+      return false;
+    }
+    input_c_id = new_c_id;
+  }
+  return true;
+}
+
+// Some hardware (mostly x86) prefer `a` of a dot to be uint8, while `b` is a
+// signed type, because pmaddubsw and dpbusd instructions multiply a signed and
+// an unsigned int8. This function checks if the current machine is such
+// hardware, and if so, attempts to rewrite the input to be uint8 instead of
+// int8.
+bool maybe_rewrite_input_a_to_uint8(ynn_subgraph& subgraph,
+                                    uint32_t& input_a_id, uint32_t input_b_id,
+                                    uint32_t& input_c_id, size_t num_k_dims) {
+  const ynn_value& a = subgraph.value(input_a_id);
+  if (a.type != ynn_type_int8) return false;
+
+  ynn_type b_type = subgraph.value(input_b_id).type;
+  if (!prefer_uint8_dot(b_type)) {
+    // This hardware does not prefer uint8.
+    return false;
+  }
+
+  YNN_LOG_DEBUG() << "Rewriting input A (" << input_a_id
+                  << ") to uint8 for dot";
+
+  if (try_dynamic_quantization_rewrite(subgraph, input_a_id)) {
+    // `a` was produced by dynamic quantization, and we rewrote it to quantize
+    // to uint8.
     return true;
   }
-  if (std::holds_alternative<ynn_node::static_pad>(node.op) ||
-      std::holds_alternative<ynn_node::stencil_copy>(node.op)) {
-    uint32_t padding_id =
-        node.inputs.size() > 1 ? node.inputs[1] : YNN_INVALID_VALUE_ID;
-    return padding_id == YNN_INVALID_VALUE_ID ||
-           is_static_zero(subgraph.value(padding_id));
-  }
-  return false;
-}
 
-size_t count_consumers(const ynn_subgraph& subgraph, uint32_t val_id) {
-  size_t count = 0;
-  for (const ynn_node& node : subgraph.nodes) {
-    if (!node.is_valid()) continue;
-    for (uint32_t input : node.inputs) {
-      if (input == val_id) {
-        count++;
-      }
-    }
-  }
-  return count;
-}
-
-bool maybe_rewrite_input_a_to_uint8(ynn_subgraph& subgraph, uint32_t input_a_id,
-                                    ynn_type b_type) {
-  if (!prefer_uint8_dot(b_type)) {
-    return false;
-  }
-
-  std::vector<uint32_t> tensors_to_update;
-  uint32_t curr_id = input_a_id;
-  ynn_node* quantize_node = nullptr;
-
-  while (curr_id != YNN_INVALID_VALUE_ID) {
-    const ynn_value& val = subgraph.value(curr_id);
-    if (val.type != ynn_type_int8 || val.is_external_output()) {
-      return false;
-    }
-    if (count_consumers(subgraph, curr_id) > 1) {
-      return false;
-    }
-
-    tensors_to_update.push_back(curr_id);
-
-    ynn_node* producer = subgraph.get_producer(curr_id);
-    if (!producer) {
-      return false;
-    }
-
-    if (const auto* quantize_op =
-            std::get_if<ynn_node::ternary_elementwise>(&producer->op)) {
-      if (quantize_op->op == ternary_op::quantize_int8) {
-        quantize_node = producer;
-        break;
-      }
-    }
-
-    if (!is_copy_node(*producer, subgraph)) {
-      return false;
-    }
-
-    curr_id = producer->inputs[0];
-  }
-
-  if (!quantize_node) {
-    return false;
-  }
-
-  uint32_t quantize_input_id = quantize_node->inputs[0];
-  const ynn_value& quantize_input = subgraph.value(quantize_input_id);
-  ternary_kernel_fn kernel =
-      get_ternary_kernel(ternary_op::quantize_uint8, quantize_input.type,
-                         ynn_type_fp32, ynn_type_int32, ynn_type_uint8);
-  if (!kernel) {
-    return false;
-  }
-
-  uint32_t zp_id = quantize_node->inputs[2];
-  const ynn_value& zp_val = subgraph.value(zp_id);
-  if (zp_val.is_static_scalar()) {
-    std::optional<ynn::real> zp_real = zp_val.as_scalar();
-    if (!zp_real) {
-      return false;
-    }
-    int32_t old_zp = static_cast<int32_t>(*zp_real);
-    int32_t new_zp = old_zp + 128;
-    zp_id = subgraph.get_scalar_value_id(new_zp);
-  } else {
-    ynn_node* dq_node = subgraph.get_producer(zp_id);
-    if (!dq_node) {
-      return false;
-    }
-    auto* dq_op = std::get_if<ynn_node::dynamic_quantization>(&dq_node->op);
-    if (!dq_op) {
-      return false;
-    }
-    dq_op->output_zero_point = 128;
-  }
-
-  YNN_LOG_DEBUG() << "Rewriting dynamic quantization of tensor " << input_a_id
-                  << " to uint8 in define_dot";
-
-  uint32_t quantize_out_id = quantize_node->outputs[0];
-  define_ternary(subgraph, *quantize_node, quantize_node->inputs[0],
-                 quantize_node->inputs[1], zp_id, quantize_out_id,
-                 ternary_op::quantize_uint8, kernel);
-
-  for (uint32_t id : tensors_to_update) {
-    subgraph.value(id).type = ynn_type_uint8;
-  }
-
-  return true;
+  return try_requantize_rewrite(subgraph, input_a_id, input_b_id, input_c_id,
+                                num_k_dims);
 }
 
 // TODO(dsharlet): This should probably be a parameter we learn based on cpuinfo
@@ -1457,11 +1462,12 @@ ynn_status ynn_define_dot(ynn_subgraph_t subgraph, size_t num_k_dims,
     return ynn_status_invalid_parameter;
   }
 
-  const ynn_value& b = subgraph->value(input_b_id);
   // TODO: b/531861696 - This and other dot graph rewrites should be done in a
   // separate graph optimization pass.
-  maybe_rewrite_input_a_to_uint8(*subgraph, input_a_id, b.type);
+  maybe_rewrite_input_a_to_uint8(*subgraph, input_a_id, input_b_id, input_c_id,
+                                 num_k_dims);
   const ynn_value& a = subgraph->value(input_a_id);
+  const ynn_value& b = subgraph->value(input_b_id);
   const ynn_type c_type = deduce_output_type(a.type, b.type);
 
   if (input_c_id != YNN_INVALID_VALUE_ID) {

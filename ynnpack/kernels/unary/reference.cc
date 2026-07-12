@@ -23,6 +23,8 @@ std::unique_ptr<unary_op_info> get_unary_op_info(ynn_unary_operator op,
       return std::make_unique<ceil>(params);
     case ynn_unary_convert:
       return std::make_unique<convert>(params);
+    case ynn_unary_requantize_to_uint8:
+      return std::make_unique<requantize_to_uint8>(params);
     case ynn_unary_exp:
       return std::make_unique<exp>(params);
     case ynn_unary_expm1:

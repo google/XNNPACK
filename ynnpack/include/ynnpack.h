@@ -176,6 +176,9 @@ enum ynn_unary_operator {
   ynn_unary_round_to_bf16 = 23,
   ynn_unary_approx_erf = 24,
   ynn_unary_approx_tanh = 25,
+
+  // Internal use only
+  ynn_unary_requantize_to_uint8,
 };
 
 // Defines a unary operation of a single input to a single output.

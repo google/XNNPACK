@@ -20,6 +20,8 @@ const char* to_string(enum ynn_unary_operator op) {
       return "ceil";
     case ynn_unary_convert:
       return "convert";
+    case ynn_unary_requantize_to_uint8:
+      return "requantize_to_uint8";
     case ynn_unary_exp:
       return "exp";
     case ynn_unary_expm1:

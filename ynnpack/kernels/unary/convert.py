@@ -58,3 +58,10 @@ def convert_int2_to_int8(a, x):
 @operator_name("convert")
 def convert_int4_to_int8(a, x):
   return store(cast(Int(8), load(a)), x)
+
+
+@const_buffer("a", Int(8))
+@buffer("x", UInt(8))
+@operator_name("requantize_to_uint8")
+def requantize_to_uint8(a, x):
+  return store(reinterpret_cast(UInt(8), load(a)) ^ 0x80, x)

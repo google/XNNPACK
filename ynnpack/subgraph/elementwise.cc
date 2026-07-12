@@ -442,7 +442,9 @@ ynn_status define_unary(ynn_subgraph_t subgraph, ynn_unary_operator op,
                         uint32_t input_a_id, unary_params params,
                         uint32_t* output_id, uint32_t flags) {
   const ynn_value& a = subgraph->value(input_a_id);
-  ynn_value& x = subgraph->get_output_value(output_id, a);
+  ynn_type output_type =
+      op == ynn_unary_requantize_to_uint8 ? ynn_type_uint8 : a.type;
+  ynn_value& x = subgraph->get_output_value(output_id, output_type);
 
   // Find the kernel.
   unary_kernel_fn kernel = get_unary_kernel(op, a.type, x.type);
