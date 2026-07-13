@@ -3041,9 +3041,9 @@ static void init_qp8_f16_qc8w_gemm_config(void) {
     qp8_f16_qc8w_gemm_config.nr = nr;
     qp8_f16_qc8w_gemm_config.log2_kr = 2;
     qp8_f16_qc8w_gemm_config.mr_packed = mr;
+    assert(qp8_f16_qc8w_gemm_config.mr <= XNN_MAX_MR);
 #endif  // XNN_ENABLE_ARM_SME2
   }
-  assert(qp8_f16_qc8w_gemm_config.mr <= XNN_MAX_MR);
 #endif  // XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI
 }
 
