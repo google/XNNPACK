@@ -73,6 +73,7 @@ cc_library(
     hdrs = ["datatypes.h"],
     deps = [
         "//litert/tensor/internal:fp16",
+        "@abseil-cpp//absl/status",
     ],
 )
 
@@ -81,6 +82,7 @@ cc_test(
     srcs = ["datatypes_test.cc"],
     deps = [
         ":datatypes",
+        "//litert/tensor/utils:matchers",
         "@com_google_googletest//:gtest_main",  # gunit
     ],
 )
