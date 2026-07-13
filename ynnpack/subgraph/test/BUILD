@@ -330,3 +330,18 @@ cc_test(
         "//ynnpack/base/test:tensor",
     ] + ynn_benchmark_deps(),
 )
+
+cc_test(
+    name = "concatenated_mixed_dot_bench",
+    srcs = ["concatenated_mixed_dot_bench.cc"],
+    args = ["--benchmark_min_time=1x"],
+    linkopts = ynn_binary_linkopts(),
+    malloc = ynn_binary_malloc(),
+    deps = [
+        ":scheduler",
+        ":subgraph_builder",
+        "//ynnpack",
+        "//ynnpack/base",
+        "//ynnpack/base/test:tensor",
+    ] + ynn_benchmark_deps(),
+)
