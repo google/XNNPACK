@@ -616,6 +616,54 @@ TEST(fusion, dequantize_quantize) {
   }
 }
 
+TEST(fusion, convert_dequantize) {
+  // rewrite convert(dequantize(x, T1), T2) -> dequantize(x, T2)
+  const uint32_t a_id = 0;
+  const uint32_t x_id = 1;
+  SubgraphBuilder builder(2);
+  uint32_t b_id = YNN_INVALID_VALUE_ID;
+  uint32_t zero_point_id = builder.DefineScalar(5);
+  uint32_t scale_id = builder.DefineScalar(0.5f);
+  builder.AddInput(ynn_type_int8, 2, a_id)
+      .AddOutput(ynn_type_bf16, 2, x_id)
+      .AddTensor(ynn_type_fp32, 2, b_id);
+  builder.AddDequantize(a_id, zero_point_id, scale_id, ynn_type_fp32, b_id)
+      .AddConvert(b_id, ynn_type_fp32, x_id);
+
+  ynn_subgraph& subgraph = *builder.GetSubgraph();
+
+  subgraph.fusion();
+  subgraph.invalidate_dead_values();
+
+  ASSERT_THAT(subgraph, AllOf(HasValidNodeCount(1), HasValidValueCount(4)));
+  EXPECT_THAT(ProducerOf(x_id, subgraph),
+              AllOf(IsDequantize(), InputsAre(a_id, zero_point_id, scale_id)));
+}
+
+TEST(fusion, quantize_convert) {
+  // rewrite quantize(convert(x, T1), T2) -> quantize(x, T2)
+  const uint32_t a_id = 0;
+  const uint32_t x_id = 1;
+  SubgraphBuilder builder(2);
+  uint32_t b_id = YNN_INVALID_VALUE_ID;
+  uint32_t zero_point_id = builder.DefineScalar(5);
+  uint32_t scale_id = builder.DefineScalar(0.5f);
+  builder.AddInput(ynn_type_bf16, 2, a_id)
+      .AddOutput(ynn_type_int8, 2, x_id)
+      .AddTensor(ynn_type_fp32, 2, b_id);
+  builder.AddConvert(a_id, ynn_type_fp32, b_id)
+      .AddQuantize(b_id, ynn_type_int8, zero_point_id, scale_id, x_id);
+
+  ynn_subgraph& subgraph = *builder.GetSubgraph();
+
+  subgraph.fusion();
+  subgraph.invalidate_dead_values();
+
+  ASSERT_THAT(subgraph, AllOf(HasValidNodeCount(1), HasValidValueCount(4)));
+  EXPECT_THAT(ProducerOf(x_id, subgraph),
+              AllOf(IsQuantize(), InputsAre(a_id, scale_id, zero_point_id)));
+}
+
 TEST(fusion, bf16_elementwise) {
   for (bool no_excess_precision : {false, true}) {
     // We don't have bf16 binary elementwise ops, we will insert converts to
