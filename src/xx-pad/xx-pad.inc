@@ -8,6 +8,10 @@
 XNN_PAD_UKERNEL(xnn_arch_arm_neon, xnn_xx_pad_ukernel_p16__neon_u16, 16)
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
+#if XNN_ENABLE_AVX512SKX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+XNN_PAD_UKERNEL(xnn_arch_x86_avx512skx, xnn_xx_pad_ukernel_p64__avx512skx_u128, 128)
+#endif  // XNN_ENABLE_AVX512SKX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+
 #if XNN_ENABLE_SSE2 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 XNN_PAD_UKERNEL(xnn_arch_x86_sse2, xnn_xx_pad_ukernel_p16__sse2_u16, 16)
 #endif  // XNN_ENABLE_SSE2 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)

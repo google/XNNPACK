@@ -306,6 +306,7 @@ xnnpack_benchmark(
     ],
     deps = MICROKERNEL_BENCHMARK_DEPS,
 ) for kernel in [
+    "xx_pad",
     "xx_transposev",
     "xN_transposec",
 ]]

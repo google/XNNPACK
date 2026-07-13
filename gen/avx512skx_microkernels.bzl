@@ -65,6 +65,7 @@ PROD_AVX512SKX_MICROKERNEL_SRCS = [
     "src/s8-vclamp/s8-vclamp-avx512skx-u256.c",
     "src/u8-vclamp/u8-vclamp-avx512skx-u256.c",
     "src/x8-lut/gen/x8-lut-avx512skx-vpshufb-u64.c",
+    "src/xx-pad/xx-pad-p64-avx512skx-u128.c",
 ]
 
 NON_PROD_AVX512SKX_MICROKERNEL_SRCS = [

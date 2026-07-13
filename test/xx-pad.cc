@@ -378,7 +378,7 @@ TEST_P(PadTest, multitile_with_input_stride) {
           .input_channels(channels)
           .pre_padding(channels)
           .post_padding(channels)
-          .input_stride(51)
+          .input_stride(tile_size * 3 + 3)
           .Test(GetParam().ukernel);
     }
   }
@@ -394,7 +394,7 @@ TEST_P(PadTest, multitile_with_output_stride) {
           .input_channels(2 * channels)
           .pre_padding(channels)
           .post_padding(channels)
-          .output_stride(193)
+          .output_stride(tile_size * 12 + 1)
           .Test(GetParam().ukernel);
     }
   }
