@@ -47,7 +47,6 @@ cc_library(
 
 define_build_option(
     name = "ynn_enable_tsl_profiler",
-    default_all = [],
 )
 
 _TSL_PROFILER_DEPS = [
