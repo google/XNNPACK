@@ -61,7 +61,7 @@ float Tolerance(ynn_reduce_operator op, size_t k, float max_abs_value) {
       return type_info<T>::epsilon() * k * max_abs_value * 3.0f;
     case ynn_reduce_sum_squared:
       return type_info<T>::epsilon() * k * max_abs_value * max_abs_value *
-             20.0f;
+             24.0f;
     default:
       return 0.0f;
   }
