@@ -38,9 +38,7 @@ void xnn_qp8_f16_qc8w_gemm_minmax_ukernel_1x64c4__neonsme2(
       xnn_float16_to_float(f16_minmax_params->scalar.min),
       xnn_float16_to_float(f16_minmax_params->scalar.max));
 #else
-  assert(
-      "Calling KleidiAI microkernel wrapper, but XNNPACK was compiled without "
-      "`XNN_ENABLE_KLEIDIAI`." &&
-      0);
+  assert("Calling KleidiAI microkernel wrapper, but XNNPACK was compiled without "
+         "`XNN_ENABLE_KLEIDIAI`." &&  0);
 #endif  // XNN_ENABLE_KLEIDIAI
 }
