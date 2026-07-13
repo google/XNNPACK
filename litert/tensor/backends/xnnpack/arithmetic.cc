@@ -1231,9 +1231,9 @@ absl::Status OpMixin<ReshapeOperation, XnnpackMixinTag>::ToXnnpack(
   LRT_TENSOR_ASSIGN_OR_RETURN(const ReshapeOperation& op_data,
                               op.As<ReshapeOperation>());
 
-  if (op.inputs.size() != 1) {
+  if (op.inputs.size() != 1 && op.inputs.size() != 2) {
     return absl::InvalidArgumentError(
-        absl::StrFormat("%s expects 1 input", op_name));
+        absl::StrFormat("%s expects 1 or 2 inputs", op_name));
   }
 
   const graph::Tensor& input = op.inputs[0];
