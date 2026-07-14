@@ -101,10 +101,10 @@ http_archive(
 # KleidiAI library, used for ARM microkernels.
 http_archive(
     name = "KleidiAI",
-    sha256 = "c69cf2eb6e58b77b0bcdae5aadd506192785ce6a2f3f2f8ec0eab27b10909302",
-    strip_prefix = "kleidiai-dc50c2e68d2eb28efe17c835c754f1d6421f30e8",
+    sha256 = "b147799b94c51f5e57492930bfd9e5294fb7ffe44fee1dbcd3f8048adeedd5e3",
+    strip_prefix = "kleidiai-b87ef9c94f45f11c81a6b1fdaed1b2b45ea58c0c",
     urls = [
-        "https://gitlab.arm.com/kleidi/kleidiai/-/archive/dc50c2e68d2eb28efe17c835c754f1d6421f30e8/kleidiai-dc50c2e68d2eb28efe17c835c754f1d6421f30e8.zip",
+        "https://gitlab.arm.com/kleidi/kleidiai/-/archive/b87ef9c94f45f11c81a6b1fdaed1b2b45ea58c0c/kleidiai-b87ef9c94f45f11c81a6b1fdaed1b2b45ea58c0c.zip",
     ],
 )
 # LINT.ThenChange(cmake/DownloadKleidiAI.cmake)
@@ -121,9 +121,9 @@ http_archive(
 
 http_archive(
     name = "slinky",
-    sha256 = "fedb183479e9de84e3d80092042d0d3384b95285a14f1aaf37c34107b8700c4c",
-    strip_prefix = "slinky-8480fc77d7f9aa3c046c8478ba760870a29c5f16",
+    sha256 = "eee999088e6105043663abf22a00268b22013151166109fafb15635da81f2de6",
+    strip_prefix = "slinky-8eda4a050105a7148d3d6cb77960077790d69b01",
     urls = [
-        "https://github.com/dsharlet/slinky/archive/8480fc77d7f9aa3c046c8478ba760870a29c5f16.zip",
+        "https://github.com/dsharlet/slinky/archive/8eda4a050105a7148d3d6cb77960077790d69b01.zip",
     ],
 )
