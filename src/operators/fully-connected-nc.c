@@ -1364,7 +1364,7 @@ static const struct fc_variant qs8_qc2w_variant = {
     .fingerprint_constraints = {force_coherent_kernel_scale_values_f32,
                                 force_coherent_bias_values_i32},
     .extra_weights_bytes = sizeof(float),
-    .kernel_scale_element_size = 0,
+    .kernel_scale_element_size = sizeof(float),
 };
 
 static const struct fc_variant qs8_qc4w_variant = {
@@ -1383,7 +1383,7 @@ static const struct fc_variant qs8_qc4w_variant = {
     .fingerprint_constraints = {force_coherent_kernel_scale_values_f32,
                                 force_coherent_bias_values_i32},
     .extra_weights_bytes = sizeof(float),
-    .kernel_scale_element_size = 0,
+    .kernel_scale_element_size = sizeof(float),
 };
 
 static const struct fc_variant qs8_qc8w_variant = {
@@ -1402,7 +1402,7 @@ static const struct fc_variant qs8_qc8w_variant = {
     .fingerprint_constraints = {force_coherent_kernel_scale_values_f32,
                                 force_coherent_bias_values_i32},
     .extra_weights_bytes = sizeof(float),
-    .kernel_scale_element_size = 0,
+    .kernel_scale_element_size = sizeof(float),
 };
 
 static const struct fc_variant qu8_variant = {
