@@ -411,10 +411,6 @@ bool should_constant_fold(const ynn_subgraph& subgraph, const ynn_node& node) {
     // fold and the heuristic below allowed it, it's possible we would produce
     // two copies of the same value.
     return false;
-  } else if (std::holds_alternative<ynn_node::pack_b>(node.op)) {
-    // The heuristic below doesn't fold this sometimes due to alignment padding,
-    // but we usually do want to constant fold this.
-    return true;
   }
 
   size_t size_of_inputs = static_size_of_inputs(subgraph, node);
