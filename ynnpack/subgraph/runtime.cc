@@ -194,13 +194,6 @@ slinky::expr lcm_sat(ynn::slinky_globals& globals, slinky::expr a,
 // only care if given extents are the same in terms of consumer extents.
 std::map<std::pair<slinky::var, int>, int> infer_source_regions(
     const std::vector<slinky::func>& funcs) {
-  std::map<slinky::var, const slinky::func*> buffer_to_producer;
-  for (const auto& f : funcs) {
-    for (const auto& out : f.outputs()) {
-      buffer_to_producer[out.sym()] = &f;
-    }
-  }
-
   // Maps {buffer_sym, dim_index} to its inferred source region unique
   // identifier.
   std::map<std::pair<slinky::var, int>, int> source_regions;
@@ -230,36 +223,27 @@ std::map<std::pair<slinky::var, int>, int> infer_source_regions(
       }
     }
 
-    for (const auto& in : f.inputs()) {
+    const auto* sched = static_cast<const ynn::scheduling_info*>(f.user_data());
+
+    for (size_t in_idx = 0; in_idx < f.inputs().size(); ++in_idx) {
+      const auto& in = f.inputs()[in_idx];
+      const std::vector<slinky::interval_expr>* scheduler_bounds = nullptr;
+      if (sched && in_idx < sched->input_scheduler_bounds.size()) {
+        scheduler_bounds = &sched->input_scheduler_bounds[in_idx];
+      }
+
       for (int d = 0; d < in.bounds.size(); ++d) {
         slinky::interval_expr bound = in.bounds[d];
 
-        // If the producer provided a custom scheduler_bound, we use it instead
-        // of the forward bounds. This allows tricks like fusing pack_b's
-        // blocks_n (extent N/16) with dot's n (extent N) by forcing a virtual
-        // 1-to-1 mapping.
-        if (buffer_to_producer.count(in.sym()) > 0) {
-          const slinky::func* f_prod = buffer_to_producer[in.sym()];
-          slinky::var v_prod;
-          for (const auto& out : f_prod->outputs()) {
-            if (out.sym() == in.sym() && d < out.dims.size()) {
-              v_prod = out.dims[d];
-              break;
-            }
-          }
-
-          if (v_prod.defined()) {
-            if (f_prod->user_data()) {
-              const auto* sched =
-                  static_cast<const ynn::scheduling_info*>(f_prod->user_data());
-              for (const auto& split : sched->loop_splits) {
-                if (split.var == v_prod && split.scheduler_bound.has_value()) {
-                  bound = *split.scheduler_bound;
-                  break;
-                }
-              }
-            }
-          }
+        // If this function provided a custom scheduler bound for this input
+        // dimension, we use it instead of the real bounds. This allows tricks
+        // like fusing pack_b's blocks_n (extent N/16) with dot's n (extent N)
+        // by declaring a virtual 1-to-1 mapping. The bounds are attached to
+        // the consumer that understands the layout of the input, so they work
+        // regardless of which function produced the input.
+        if (scheduler_bounds && d < scheduler_bounds->size() &&
+            (*scheduler_bounds)[d].min.defined()) {
+          bound = (*scheduler_bounds)[d];
         }
 
         // Find which output variables this input dimension depends on.

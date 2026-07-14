@@ -134,9 +134,6 @@ struct scheduling_split {
   // unless the step matches or the other loop doesn't have required step yet.
   // In the latter case this step will override the existing step of that loop.
   bool step_is_required = false;
-  // If defined, this bound expression is used to infer source regions
-  // during scheduling, instead of evaluating the consumer's input bounds.
-  std::optional<slinky::interval_expr> scheduler_bound;
 };
 
 // A scheduling information for a buffer -- it's expected to be attached to the
@@ -162,6 +159,17 @@ struct scheduling_info {
   // A set of loop splits for a given function.
   std::vector<scheduling_split> loop_splits;
   std::vector<scheduled_buffer> scheduled_buffers;
+
+  // Scheduler-only bounds for the inputs of this function, used by the
+  // scheduler's source region inference in place of the function's real input
+  // bounds. The outer vector parallels the function's inputs, the inner vector
+  // is indexed by the input's dimension; missing or undefined entries mean
+  // "use the real bounds". This lets a consumer that understands a non-trivial
+  // layout (e.g. dot reading blocks_n of a packed buffer, or pack_b reading
+  // blocks of its source) declare an input dimension as a virtual 1-to-1
+  // mapping with one of its loop variables, so producers of that input can be
+  // fused with loops derived from it.
+  std::vector<std::vector<slinky::interval_expr>> input_scheduler_bounds;
 
   bool force_root = false;
 };

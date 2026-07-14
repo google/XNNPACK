@@ -713,9 +713,11 @@ uint32_t define_pack_b(ynn_subgraph_t subgraph, const dot_type& type,
     // We enforce this by requiring their step to be equal to their extent.
     sched->loop_splits[0].step_is_required = true;
     sched->loop_splits[2].step_is_required = true;
-    // n-loop we provide a scheduler bound matching n-extent loop var (d0).
-    sched->loop_splits[3].scheduler_bound = {runtime.globals.make_dim(0),
-                                             runtime.globals.make_dim(0)};
+    // The real bounds of the input's n dimension are blocks of size block_n
+    // indexed by `no`, which breaks the scheduler's source region inference.
+    // Declare a virtual 1-to-1 mapping with `no` instead, so producers of the
+    // input can be fused with loops derived from it.
+    sched->input_scheduler_bounds = {{slinky::point(no)}};
 
     func.user_data() = sched.get();
     runtime.scheduling_info_storage.push_back(std::move(sched));
@@ -1419,6 +1421,16 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
           break;
         }
       }
+    }
+
+    // The real bounds of the packed input's blocks_n dimension are block
+    // indices (j / block_n), which breaks the scheduler's source region
+    // inference. Declare a virtual 1-to-1 mapping with `j` instead, so the
+    // pack (and anything feeding it) can be fused with loops derived from j.
+    if (pack_b) {
+      sched->input_scheduler_bounds.resize(2);
+      sched->input_scheduler_bounds[1].resize(4);
+      sched->input_scheduler_bounds[1][3] = slinky::point(j);
     }
 
     // Schedule the output buffer to be stored at the same level as it's
