@@ -348,6 +348,7 @@ cc_test(
     args = ["--benchmark_min_time=1x"],
     linkopts = ynn_binary_linkopts(),
     malloc = ynn_binary_malloc(),
+    tags = ["noemulator"],
     deps = [
         ":scheduler",
         ":subgraph_builder",

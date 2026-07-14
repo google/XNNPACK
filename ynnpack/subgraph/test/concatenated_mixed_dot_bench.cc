@@ -23,7 +23,11 @@ namespace ynn {
 namespace {
 
 template <typename T>
-void BM_ConcatenatedMixedDot(benchmark::State& state, bool concat_a) {
+void BM_MixedDot(benchmark::State& state) {
+  const int thread_count = state.range(0);
+  const bool concat_a = state.range(1);
+  const bool static_shape = state.range(2);
+
   constexpr size_t M = 8;
   constexpr size_t K0 = 256;
   constexpr size_t K1 = 256;
@@ -47,13 +51,18 @@ void BM_ConcatenatedMixedDot(benchmark::State& state, bool concat_a) {
   const uint32_t Y_id = 0;
 
   if (concat_a) {
-    subgraph.AddInput(type_of<T>(), {M, K0}, X0_id)
-        .AddInput(type_of<T>(), {M, K1}, X1_id)
-        .AddTensor(type_of<T>(), {M, K}, X_concat_id);
+    TensorShape x0_shape = static_shape ? TensorShape({M, K0}) : TensorShape(2);
+    TensorShape x1_shape = static_shape ? TensorShape({M, K1}) : TensorShape(2);
+    TensorShape x_concat_shape = {M, K};
+    subgraph.AddInput(type_of<T>(), x0_shape, X0_id)
+        .AddInput(type_of<T>(), x1_shape, X1_id)
+        .AddTensor(type_of<T>(), 2, X_concat_id);
 
     subgraph.AddConcatenate(1, {X0_id, X1_id}, X_concat_id);
   } else {
-    subgraph.AddInput(type_of<T>(), {M, K}, X_concat_id);
+    TensorShape x_concat_shape =
+        static_shape ? TensorShape({M, K}) : TensorShape(2);
+    subgraph.AddInput(type_of<T>(), x_concat_shape, X_concat_id);
   }
   subgraph.AddOutput(type_of<T>(), 2, Y_id);
 
@@ -72,7 +81,6 @@ void BM_ConcatenatedMixedDot(benchmark::State& state, bool concat_a) {
   subgraph.AddDot(1, X_concat_id, W_dequant_id, YNN_INVALID_VALUE_ID, Y_id);
 
   // Run the subgraph
-  int thread_count = state.range(0);
   TestScheduler scheduler(thread_count);
   Runtime runtime(subgraph.GetSubgraph(), &scheduler);
   if (runtime.Status() != ynn_status_success) {
@@ -127,39 +135,26 @@ void BM_ConcatenatedMixedDot(benchmark::State& state, bool concat_a) {
       benchmark::Counter(state.iterations() * ops, benchmark::Counter::kIsRate);
 }
 
-template <typename T>
-void BM_MixedDot(benchmark::State& state) {
-  BM_ConcatenatedMixedDot<T>(state, /*concat_a=*/false);
+void params(benchmark::Benchmark* state) {
+  state->ArgNames({"thread_count", "concat_a", "static_shape"});
+  for (int thread_count : {1, 2, 4, 8}) {
+    for (bool concat_a : {true, false}) {
+      for (bool static_shape : {true, false}) {
+        state->Args({thread_count, concat_a, static_shape});
+      }
+    }
+  }
 }
 
-BENCHMARK_TEMPLATE(BM_MixedDot, float)->Arg(1)->Arg(4)->Arg(8)->UseRealTime();
-BENCHMARK_TEMPLATE(BM_MixedDot, half)->Arg(1)->Arg(4)->Arg(8)->UseRealTime();
-BENCHMARK_TEMPLATE(BM_MixedDot, bfloat16)
-    ->Arg(1)
-    ->Arg(4)
-    ->Arg(8)
-    ->UseRealTime();
-
-template <typename T>
-void BM_ConcatenatedMixedDot(benchmark::State& state) {
-  BM_ConcatenatedMixedDot<T>(state, /*concat_a=*/true);
+void BM_MixedDotF32(benchmark::State& state) { BM_MixedDot<float>(state); }
+void BM_MixedDotF16(benchmark::State& state) { BM_MixedDot<half>(state); }
+void BM_MixedDotBF16(benchmark::State& state) {
+  BM_MixedDot<bfloat16>(state);
 }
 
-BENCHMARK_TEMPLATE(BM_ConcatenatedMixedDot, float)
-    ->Arg(1)
-    ->Arg(4)
-    ->Arg(8)
-    ->UseRealTime();
-BENCHMARK_TEMPLATE(BM_ConcatenatedMixedDot, half)
-    ->Arg(1)
-    ->Arg(4)
-    ->Arg(8)
-    ->UseRealTime();
-BENCHMARK_TEMPLATE(BM_ConcatenatedMixedDot, bfloat16)
-    ->Arg(1)
-    ->Arg(4)
-    ->Arg(8)
-    ->UseRealTime();
+BENCHMARK(BM_MixedDotF32)->Apply(params);
+BENCHMARK(BM_MixedDotF16)->Apply(params);
+BENCHMARK(BM_MixedDotBF16)->Apply(params);
 
 }  // namespace
 }  // namespace ynn
