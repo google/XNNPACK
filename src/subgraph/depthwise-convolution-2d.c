@@ -604,7 +604,7 @@ static inline bool validate_datatypes_with_bias(
       {
         return true;
       } else if (input_datatype == xnn_datatype_fp16 &&
-          bias_datatype == xnn_datatype_fp32 &&
+          (bias_datatype == xnn_datatype_fp16 || bias_datatype == xnn_datatype_fp32) &&
           output_datatype == xnn_datatype_fp16) {
         // Flag: XNN_FLAG_FP32_STATIC_WEIGHTS
         return true;
