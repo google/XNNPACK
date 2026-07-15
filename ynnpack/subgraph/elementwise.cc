@@ -453,9 +453,9 @@ ynn_status define_unary(ynn_subgraph_t subgraph, ynn_unary_operator op,
         get_unary_kernel(op, ynn_type_fp32, ynn_type_fp32);
     if (float_kernel) {
       uint32_t a_float_id = YNN_INVALID_VALUE_ID;
-      ynn_status status = ynn_define_convert_v2(subgraph, input_a_id,
-                                                ynn_type_fp32, &a_float_id,
-                                                /*flags=*/0);
+      ynn_status status =
+          ynn_define_convert(subgraph, input_a_id, ynn_type_fp32, &a_float_id,
+                             /*flags=*/0);
       if (status != ynn_status_success) {
         return status;
       }
@@ -467,8 +467,8 @@ ynn_status define_unary(ynn_subgraph_t subgraph, ynn_unary_operator op,
         return status;
       }
 
-      return ynn_define_convert_v2(subgraph, x_float_id, x.type, output_id,
-                                   /*flags=*/0);
+      return ynn_define_convert(subgraph, x_float_id, x.type, output_id,
+                                /*flags=*/0);
     }
 
     YNN_LOG_ERROR() << "Unsupported unary operator " << op << " for input type "
@@ -507,8 +507,7 @@ ynn_status ynn_define_unary(ynn_subgraph_t subgraph, ynn_unary_operator op,
     }
 
     const ynn_value& x = subgraph->value(*output_id);
-    return ynn_define_convert_v2(subgraph, input_a_id, x.type,
-                                 output_id, flags);
+    return ynn_define_convert(subgraph, input_a_id, x.type, output_id, flags);
   }
 
   return define_unary(subgraph, op, input_a_id, get_unary_params(op), output_id,
@@ -541,8 +540,7 @@ ynn_status ynn_define_unary_polynomial(ynn_subgraph_t subgraph,
 }
 
 ynn_status ynn_define_convert(ynn_subgraph_t subgraph, uint32_t input_id,
-                              ynn_type output_type, uint32_t zero_point_id,
-                              uint32_t scale_id, uint32_t* output_id,
+                              ynn_type output_type, uint32_t* output_id,
                               uint32_t flags) {
   YNN_RETURN_IF_ERROR(validate_subgraph("unary", subgraph));
   YNN_RETURN_IF_ERROR(
@@ -556,25 +554,6 @@ ynn_status ynn_define_convert(ynn_subgraph_t subgraph, uint32_t input_id,
     x.flags |= YNN_VALUE_FLAG_NO_EXCESS_PRECISION;
   }
 
-  const bool a_is_quantized =
-      type_is_integral(a.type) && (scale_id != YNN_INVALID_VALUE_ID ||
-                                   zero_point_id != YNN_INVALID_VALUE_ID);
-  const bool x_is_quantized =
-      type_is_integral(x.type) && (scale_id != YNN_INVALID_VALUE_ID ||
-                                   zero_point_id != YNN_INVALID_VALUE_ID);
-
-  if (type_is_integral(x.type) && x_is_quantized &&
-      type_is_floating_point(a.type)) {
-    return ynn_define_quantize(subgraph, input_id, x.type, zero_point_id,
-                               scale_id, output_id, flags);
-  }
-
-  if (type_is_integral(a.type) && a_is_quantized &&
-      type_is_floating_point(x.type)) {
-    return ynn_define_dequantize(subgraph, input_id, zero_point_id, scale_id,
-                                 output_type, output_id, flags);
-  }
-
   // We can use a convert kernel if there are no quantization parameters.
   unary_kernel_fn kernel = get_unary_kernel(ynn_unary_convert, a.type, x.type);
   if (!kernel) {
@@ -585,15 +564,15 @@ ynn_status ynn_define_convert(ynn_subgraph_t subgraph, uint32_t input_id,
     }
 
     uint32_t intermediate_id = YNN_INVALID_VALUE_ID;
-    ynn_status status = ynn_define_convert_v2(subgraph, input_id, ynn_type_fp32,
-                                              &intermediate_id,
-                                              /*flags=*/0);
+    ynn_status status =
+        ynn_define_convert(subgraph, input_id, ynn_type_fp32, &intermediate_id,
+                           /*flags=*/0);
     if (status != ynn_status_success) {
       return status;
     }
 
-    return ynn_define_convert_v2(subgraph, intermediate_id, x.type, output_id,
-                                 /*flags=*/0);
+    return ynn_define_convert(subgraph, intermediate_id, x.type, output_id,
+                              /*flags=*/0);
   }
 
   // Make the node.
@@ -612,9 +591,7 @@ ynn_status ynn_define_convert(ynn_subgraph_t subgraph, uint32_t input_id,
 ynn_status ynn_define_convert_v2(ynn_subgraph_t subgraph, uint32_t input_id,
                                  ynn_type output_type, uint32_t* output_id,
                                  uint32_t flags) {
-  return ynn_define_convert(subgraph, input_id, output_type,
-                            YNN_INVALID_VALUE_ID, YNN_INVALID_VALUE_ID,
-                            output_id, flags);
+  return ynn_define_convert(subgraph, input_id, output_type, output_id, flags);
 }
 
 ynn_status ynn_define_quantize(ynn_subgraph_t subgraph, uint32_t input_id,
@@ -640,8 +617,8 @@ ynn_status ynn_define_quantize(ynn_subgraph_t subgraph, uint32_t input_id,
   uint32_t x_zero_point_id = zero_point_id;
   if (x_scale_id == YNN_INVALID_VALUE_ID &&
       x_zero_point_id == YNN_INVALID_VALUE_ID) {
-    return ynn_define_convert_v2(subgraph, input_id, output_type, output_id,
-                                 flags);
+    return ynn_define_convert(subgraph, input_id, output_type, output_id,
+                              flags);
   }
 
   if (x_scale_id == YNN_INVALID_VALUE_ID) {
@@ -665,8 +642,8 @@ ynn_status ynn_define_quantize(ynn_subgraph_t subgraph, uint32_t input_id,
                                 ynn_type_int32, x.type);
     assert(kernel);
     uint32_t input_float_id = YNN_INVALID_VALUE_ID;
-    ynn_status status = ynn_define_convert_v2(subgraph, input_id, ynn_type_fp32,
-                                              &input_float_id, /*flags=*/0);
+    ynn_status status = ynn_define_convert(subgraph, input_id, ynn_type_fp32,
+                                           &input_float_id, /*flags=*/0);
     if (status != ynn_status_success) {
       return status;
     }
@@ -710,8 +687,8 @@ ynn_status ynn_define_dequantize(ynn_subgraph_t subgraph, uint32_t input_id,
   uint32_t a_zero_point_id = zero_point_id;
   if (a_scale_id == YNN_INVALID_VALUE_ID &&
       a_zero_point_id == YNN_INVALID_VALUE_ID) {
-    return ynn_define_convert_v2(subgraph, input_id, output_type, output_id,
-                                 flags);
+    return ynn_define_convert(subgraph, input_id, output_type, output_id,
+                              flags);
   }
 
   if (a_scale_id == YNN_INVALID_VALUE_ID) {
@@ -745,8 +722,8 @@ ynn_status ynn_define_dequantize(ynn_subgraph_t subgraph, uint32_t input_id,
       define_binary(*subgraph, node, input_id, a_scale_id, output_float_id,
                     ynn_binary_multiply, kernel);
       subgraph->add_node(std::move(node));
-      return ynn_define_convert_v2(subgraph, output_float_id, x.type, output_id,
-                                   flags);
+      return ynn_define_convert(subgraph, output_float_id, x.type, output_id,
+                                flags);
     }
 
     // We didn't handle it with a multiply, try to do it with a dequantize
@@ -785,8 +762,8 @@ ynn_status ynn_define_dequantize(ynn_subgraph_t subgraph, uint32_t input_id,
                    output_float_id, ternary_op::dequantize, kernel);
     subgraph->add_node(std::move(node));
 
-    return ynn_define_convert_v2(subgraph, output_float_id, x.type, output_id,
-                                 flags);
+    return ynn_define_convert(subgraph, output_float_id, x.type, output_id,
+                              flags);
   } else {
     YNN_LOG_ERROR() << "No ternary kernel found for dequantize operator with "
                        "input type "
@@ -844,7 +821,7 @@ ynn_status ynn_define_binary(ynn_subgraph_t subgraph, ynn_binary_operator op,
         x.type != ynn_type_fp32) {
       uint32_t a_fp32_id = YNN_INVALID_VALUE_ID;
       if (a.type != ynn_type_fp32) {
-        ynn_status status = ynn_define_convert_v2(
+        ynn_status status = ynn_define_convert(
             subgraph, input_a_id, ynn_type_fp32, &a_fp32_id, /*flags=*/0);
         if (status != ynn_status_success) return status;
       } else {
@@ -852,7 +829,7 @@ ynn_status ynn_define_binary(ynn_subgraph_t subgraph, ynn_binary_operator op,
       }
       uint32_t b_fp32_id = YNN_INVALID_VALUE_ID;
       if (b.type != ynn_type_fp32) {
-        ynn_status status = ynn_define_convert_v2(
+        ynn_status status = ynn_define_convert(
             subgraph, input_b_id, ynn_type_fp32, &b_fp32_id, /*flags=*/0);
         if (status != ynn_status_success) return status;
       } else {
@@ -868,8 +845,8 @@ ynn_status ynn_define_binary(ynn_subgraph_t subgraph, ynn_binary_operator op,
                                               b_fp32_id, &x_fp32_id, flags);
         if (status != ynn_status_success) return status;
 
-        return ynn_define_convert_v2(subgraph, x_fp32_id, x.type, output_id,
-                                     /*flags=*/0);
+        return ynn_define_convert(subgraph, x_fp32_id, x.type, output_id,
+                                  /*flags=*/0);
       }
     }
 

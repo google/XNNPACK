@@ -47,7 +47,7 @@ SubgraphBuilder& SubgraphBuilder::AddConvert(uint32_t input_id, ynn_type type,
                                              uint32_t flags) {
   assert(status_ == ynn_status_success);
   status_ =
-      ynn_define_convert_v2(subgraph_.get(), input_id, type, &output_id, flags);
+      ynn_define_convert(subgraph_.get(), input_id, type, &output_id, flags);
   return *this;
 }
 

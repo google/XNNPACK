@@ -113,8 +113,8 @@ ynn_status convert_to(xnn_subgraph_t subgraph, uint32_t* value_id,
   }
 
   uint32_t converted_id = YNN_INVALID_VALUE_ID;
-  ynn_status status = ynn_define_convert_v2(
-      subgraph->ynn, *value_id, type, &converted_id, /*flags=*/0);
+  ynn_status status = ynn_define_convert(subgraph->ynn, *value_id, type,
+                                         &converted_id, /*flags=*/0);
   if (status == ynn_status_success) {
     *value_id = converted_id;
   }

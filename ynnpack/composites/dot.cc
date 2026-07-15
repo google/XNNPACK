@@ -26,13 +26,13 @@ ynn_status define_convert_f32_to_bf16_sum(ynn_subgraph_t subgraph,
 
   for (size_t i = 0; i < num_values; ++i) {
     if (output_ids[i] == YNN_INVALID_VALUE_ID) {
-      YNN_RETURN_IF_ERROR(ynn_define_convert_v2(subgraph, current_residual_fp32,
-                                                ynn_type_bf16, &output_ids[i],
-                                                node_flags));
+      YNN_RETURN_IF_ERROR(ynn_define_convert(subgraph, current_residual_fp32,
+                                             ynn_type_bf16, &output_ids[i],
+                                             node_flags));
     } else {
-      YNN_RETURN_IF_ERROR(ynn_define_convert_v2(subgraph, current_residual_fp32,
-                                                ynn_type_bf16, &output_ids[i],
-                                                node_flags));
+      YNN_RETURN_IF_ERROR(ynn_define_convert(subgraph, current_residual_fp32,
+                                             ynn_type_bf16, &output_ids[i],
+                                             node_flags));
     }
 
     if (i == num_values - 1) {

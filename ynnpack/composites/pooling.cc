@@ -22,7 +22,7 @@ ynn_status define_constant_of_type(ynn_subgraph_t subgraph, float value,
     id = fp32_id;
     return ynn_status_success;
   }
-  return ynn_define_convert_v2(subgraph, fp32_id, type, &id, 0);
+  return ynn_define_convert(subgraph, fp32_id, type, &id, 0);
 }
 
 }  // namespace
@@ -53,8 +53,8 @@ ynn_status define_average_pool_2d(ynn_subgraph_t subgraph, uint32_t input_id,
     uint32_t ones_id = ones_fp32_id;
     if (type != ynn_type_fp32) {
       ones_id = YNN_INVALID_VALUE_ID;
-      YNN_RETURN_IF_ERROR(ynn_define_convert_v2(subgraph, ones_fp32_id, type,
-                                                &ones_id, 0));
+      YNN_RETURN_IF_ERROR(
+          ynn_define_convert(subgraph, ones_fp32_id, type, &ones_id, 0));
     }
 
     uint32_t ones_broadcasted_id = YNN_INVALID_VALUE_ID;
@@ -110,7 +110,7 @@ ynn_status define_average_pool_2d(ynn_subgraph_t subgraph, uint32_t input_id,
 
   if (div_output_id != output_id) {
     YNN_RETURN_IF_ERROR(
-        ynn_define_convert_v2(subgraph, div_output_id, type, &output_id, 0));
+        ynn_define_convert(subgraph, div_output_id, type, &output_id, 0));
   }
 
   return ynn_status_success;

@@ -345,8 +345,8 @@ void define_reduce(ynn_subgraph& subgraph, ynn_node& node,
       input_b_id = YNN_INVALID_VALUE_ID;
     } else if (b.type != output.type) {
       input_b_id = YNN_INVALID_VALUE_ID;
-      ynn_define_convert_v2(&subgraph, b.id, output.type, &input_b_id,
-                            /*flags=*/0);
+      ynn_define_convert(&subgraph, b.id, output.type, &input_b_id,
+                         /*flags=*/0);
     }
   }
 
@@ -493,7 +493,7 @@ ynn_status ynn_define_reduce(ynn_subgraph_t subgraph, ynn_reduce_operator op,
       ynn_type promoted_type = get_promoted_type(a_ptr->type);
       if (promoted_type != a_ptr->type) {
         uint32_t promoted_input_id = YNN_INVALID_VALUE_ID;
-        YNN_RETURN_IF_ERROR(ynn_define_convert_v2(
+        YNN_RETURN_IF_ERROR(ynn_define_convert(
             subgraph, input_a_id, promoted_type, &promoted_input_id, flags));
         input_a_id = promoted_input_id;
       }

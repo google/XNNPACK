@@ -201,8 +201,7 @@ enum ynn_status ynn_define_unary_polynomial(ynn_subgraph_t subgraph,
 // If the `YNN_NODE_FLAG_NO_EXCESS_PRECISION` flag is set, the resulting value
 // will have the `YNN_VALUE_FLAG_NO_EXCESS_PRECISION` flag set.
 enum ynn_status ynn_define_convert(ynn_subgraph_t subgraph, uint32_t input_id,
-                                   enum ynn_type type, uint32_t zero_point_id,
-                                   uint32_t scale_id, uint32_t* output_id,
+                                   enum ynn_type type, uint32_t* output_id,
                                    uint32_t flags);
 
 // A helper for `ynn_define_unary` with `op` = `ynn_unary_convert`, which is

@@ -1486,8 +1486,8 @@ ynn_status ynn_define_dot(ynn_subgraph_t subgraph, size_t num_k_dims,
     const ynn_value& input_c = subgraph->value(input_c_id);
     if (input_c.type != c_type) {
       uint32_t input_c_converted_id = YNN_INVALID_VALUE_ID;
-      YNN_RETURN_IF_ERROR(ynn_define_convert_v2(subgraph, input_c_id, c_type,
-                                                &input_c_converted_id, flags));
+      YNN_RETURN_IF_ERROR(ynn_define_convert(subgraph, input_c_id, c_type,
+                                             &input_c_converted_id, flags));
       input_c_id = input_c_converted_id;
     }
   }
