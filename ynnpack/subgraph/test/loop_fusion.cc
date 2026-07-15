@@ -167,5 +167,50 @@ TEST_F(LoopFusionTest, ProducerOfTransposedPackedInputFusesWithDot) {
   EXPECT_LT(max_allocation_size_, b.size_bytes());
 }
 
+// Two dots accumulated into one output: dot(A, B1, c=dot(A, B0)), like the
+// dots of the dot_sum composite. The second dot fuses into the loops of the
+// first one; both require specific tile steps for the shared loops, and the
+// scheduler reconciles them with a least common multiple (lcm_sat).
+TEST_F(LoopFusionTest, TwoDotsShareLoops) {
+  const uint32_t a_id = 0;
+  const uint32_t b0_id = 1;
+  const uint32_t b1_id = 2;
+  const uint32_t out_id = 3;
+  uint32_t dot0_id = YNN_INVALID_VALUE_ID;
+  SubgraphBuilder subgraph(4);
+  subgraph.AddInput(type_of<float>(), TensorShape(2), a_id)
+      .AddInput(type_of<float>(), TensorShape(2), b0_id)
+      .AddInput(type_of<float>(), TensorShape(2), b1_id)
+      .AddOutput(type_of<float>(), TensorShape(2), out_id)
+      .AddTensor(type_of<float>(), TensorShape(2), dot0_id)
+      .AddDot(1, a_id, b0_id, YNN_INVALID_VALUE_ID, dot0_id)
+      .AddDot(1, a_id, b1_id, dot0_id, out_id);
+
+  MakeRuntime(subgraph.GetSubgraph());
+
+  const size_t M = 128, K = 256, N = 1024;
+  Tensor<float> a({M, K});
+  Tensor<float> b0({K, N});
+  Tensor<float> b1({K, N});
+  Tensor<float> out({M, N});
+  a.fill(1.0f);
+  b0.fill(1.0f);
+  b1.fill(2.0f);
+  ReshapeExternalTensor(a_id, {M, K}, a.data());
+  ReshapeExternalTensor(b0_id, {K, N}, b0.data());
+  ReshapeExternalTensor(b1_id, {K, N}, b1.data());
+  SetupExternalTensor(out_id, out.data());
+  RunPipeline();
+  // Both dot intermediates should be computed per-block inside the shared
+  // loop nest rather than materialized in full.
+  EXPECT_LT(max_allocation_size_, M * N * sizeof(float));
+  // The reconciled loop steps must still produce correct results.
+  for (size_t i = 0; i < M; ++i) {
+    for (size_t j = 0; j < N; ++j) {
+      ASSERT_EQ(out({i, j}), 3.0f * K) << i << " " << j;
+    }
+  }
+}
+
 }  // namespace
 }  // namespace ynn
