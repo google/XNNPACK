@@ -354,10 +354,12 @@ void ynn_runtime::schedule() {
     // loop nest of a given function, i.e from root (0) to the innermost loop
     // (loop_nest[f_index].back()).
     int compute_at = 0;
-    // How many loops from the scheduling_info were matched to the existing
-    // loop nest (this is currently done by comparing extents computed in
-    // forward bounds).
-    int splits_match = 0;
+    // For each split of the function's scheduling_info (in the reversed,
+    // outermost-first order used during matching), whether it was matched to
+    // an existing loop of the nest. Matched splits become loops of the
+    // function this function was fused into; unmatched splits become the
+    // function's own loops.
+    std::vector<bool> split_matched;
   };
 
   // This a list of indices of consumers of a given buffer.
@@ -419,9 +421,6 @@ void ynn_runtime::schedule() {
     }
 
     int compute_at = -1;
-    // The total number of elements shared between the producer and consumer
-    // at the proposed compute_at level.
-    sched_data.splits_match = 0;
     ynn::scheduling_info* sched =
         static_cast<ynn::scheduling_info*>(f.user_data());
 
@@ -434,52 +433,91 @@ void ynn_runtime::schedule() {
       // Reverse to simplify indexing below.
       std::reverse(loop_splits.begin(), loop_splits.end());
 
-      compute_at = 0;
+      std::vector<bool>& split_matched = sched_data.split_matched;
+      split_matched.assign(loop_splits.size(), false);
+
+      // Splits with a provable extent of 1 don't need a loop of their own and
+      // must not become levels of the global loop nest: a degenerate level
+      // would block the functions scheduled later from matching the loops
+      // behind it. Treat them as trivially matched, so they are neither
+      // considered for matching nor appended to the nest.
       for (int split_i = 0; split_i < loop_splits.size(); ++split_i) {
-        if (compute_at >= loop_nest.size()) {
-          break;
+        if (prove_true(loop_splits[split_i].extent == 1)) {
+          split_matched[split_i] = true;
         }
-        const ynn::scheduling_split& split = loop_splits[split_i];
-        if (prove_true(split.extent == 1)) {
-          // If the split is 1, it doesn't matter if we fuse or not.
-          continue;
-        }
-        int loop_nest_id = loop_nest[compute_at];
-        loop_level& global_loop = global_loop_nest[loop_nest_id];
-        if (!globals.is_pure_dim(split.var)) {
-          // We don't want to fuse a reduction dimension because it is likely
-          // being broadcasted here.
-          break;
-        }
+      }
+
+      // Walk the loop nest from the outermost loop inwards. For each loop,
+      // find a split of this function which covers the same source region.
+      // The splits don't have to be matched in their declared order: loops
+      // over pure dims carry no state across iterations, so they can be
+      // freely reordered, and splits which were not matched simply remain the
+      // function's own inner loops. Non-pure (reduction) splits do carry
+      // state across iterations (they accumulate into the same output), so
+      // they act as a fence: nothing is matched at or beyond the first one.
+      // We must stop at the first loop of the nest we can't cover: computing
+      // the function inside a loop which doesn't slice its output would
+      // recompute the function on every iteration of that loop.
+      compute_at = 0;
+      while (compute_at < loop_nest.size()) {
+        loop_level& global_loop = global_loop_nest[loop_nest[compute_at]];
         // Map the consumer's loop variable back to its output dimension
         // index.
         auto [consumer_buf, consumer_dim] =
             find_output_dim(global_loop.loop_id.func, global_loop.loop_id.var);
+        const int consumer_source_region =
+            consumer_dim != -1 && consumer_buf.defined()
+                ? get_source_region(consumer_buf, consumer_dim)
+                : -1;
 
-        // Map the producer's loop variable back to its output dimension index.
-        auto [producer_buf, producer_dim] = find_output_dim(&f, split.var);
+        int matched_split = -1;
+        if (consumer_source_region != -1) {
+          // Whether the search has passed over an unmatched (and non-trivial)
+          // split, i.e. matching a later split would reorder the function's
+          // loops.
+          bool out_of_order = false;
+          for (int split_i = 0; split_i < loop_splits.size(); ++split_i) {
+            if (split_matched[split_i]) continue;
+            const ynn::scheduling_split& split = loop_splits[split_i];
+            if (!globals.is_pure_dim(split.var)) {
+              // We don't want to fuse a reduction dimension because it is
+              // likely being broadcasted here, and we don't reorder other
+              // splits across it either.
+              break;
+            }
+            if (split.step_is_required && out_of_order) {
+              // A required step means the function deliberately chose the
+              // blocking of this loop, and the loop order is likely a part of
+              // the same deliberate choice. Matching it out of order would
+              // impose that blocking on a nest built for a different order
+              // (e.g. pull a dot under the loops of its elementwise consumer,
+              // overriding the consumer's steps with the dot's tiles), so we
+              // only allow such splits to be matched in their declared order.
+              continue;
+            }
+            // Map the producer's loop variable back to its output dimension
+            // index.
+            auto [producer_buf, producer_dim] = find_output_dim(&f, split.var);
 
-        // Instead of comparing forward extents (which causes false positives
-        // for unrelated constant extents), we check if both loops share the
-        // exact same inferred source region identifier.
-        bool extents_match = false;
-        if (producer_dim != -1 && consumer_dim != -1 &&
-            producer_buf.defined() && consumer_buf.defined()) {
-          int producer_source_region =
-              get_source_region(producer_buf, producer_dim);
-          int consumer_source_region =
-              get_source_region(consumer_buf, consumer_dim);
-
-          if (producer_source_region != -1 &&
-              producer_source_region == consumer_source_region) {
-            extents_match = true;
+            // Instead of comparing forward extents (which causes false
+            // positives for unrelated constant extents), we check if both
+            // loops share the exact same inferred source region identifier.
+            if (producer_dim != -1 && producer_buf.defined() &&
+                get_source_region(producer_buf, producer_dim) ==
+                    consumer_source_region) {
+              matched_split = split_i;
+              break;
+            }
+            out_of_order = true;
           }
         }
 
-        if (!extents_match) {
+        if (matched_split == -1) {
           break;
         }
+        split_matched[matched_split] = true;
 
+        const ynn::scheduling_split& split = loop_splits[matched_split];
         if (split.step_is_required) {
           if (global_loop.step_is_required &&
               !prove_true(split.step == global_loop.step)) {
@@ -503,7 +541,6 @@ void ynn_runtime::schedule() {
           global_loop.step_is_required = true;
         }
         compute_at++;
-        sched_data.splits_match = split_i + 1;
       }
       // Remove the inner part of the loop nest which we were not able to
       // match.
@@ -512,7 +549,7 @@ void ynn_runtime::schedule() {
 
     if (sched && sched->force_root) {
       compute_at = 0;
-      sched_data.splits_match = 0;
+      sched_data.split_matched.assign(sched->loop_splits.size(), false);
       loop_nest.clear();
     }
 
@@ -525,9 +562,10 @@ void ynn_runtime::schedule() {
     if (sched && !sched->loop_splits.empty()) {
       const std::vector<ynn::scheduling_split>& loop_splits =
           sched->loop_splits;
-      // Update the global loop nest by adding loops of this function.
-      int splits_match = sched_data.splits_match;
-      for (int j = splits_match; j < loop_splits.size(); j++) {
+      // Update the global loop nest by adding the unmatched loops of this
+      // function, preserving their relative order.
+      for (int j = 0; j < loop_splits.size(); j++) {
+        if (sched_data.split_matched[j]) continue;
         const ynn::scheduling_split& dim = loop_splits[j];
         global_loop_nest.push_back(
             {{&f, dim.var}, dim.extent, dim.step, dim.step_is_required});
@@ -578,16 +616,24 @@ void ynn_runtime::schedule() {
     if (sched && !sched->loop_splits.empty()) {
       std::vector<ynn::scheduling_split>& loop_splits = sched->loop_splits;
       const std::vector<int>& loop_nest = sched_data.loop_nest;
+      const std::vector<bool>& split_matched = sched_data.split_matched;
       // Reverse it back.
       std::reverse(loop_splits.begin(), loop_splits.end());
 
-      const int splits_match = sched_data.splits_match;
+      // The loops of this function are its unmatched splits (matched splits
+      // are loops of the function this one was fused into). The j-th
+      // unmatched split from the innermost corresponds to the j-th innermost
+      // entry of the loop nest, which tracks the (possibly updated by other
+      // fused functions) step of the loop.
       std::vector<slinky::func::loop_info> loops;
-      loops.reserve(loop_splits.size() - splits_match);
-      for (int j = 0; j < loop_splits.size() - splits_match; ++j) {
-        const ynn::scheduling_split& dim = loop_splits[j];
+      for (int i = 0; i < loop_splits.size(); ++i) {
+        // loop_splits was reversed back to its original order, but
+        // split_matched is indexed in the reversed order used for matching.
+        if (split_matched[loop_splits.size() - 1 - i]) continue;
+        const ynn::scheduling_split& dim = loop_splits[i];
         slinky::expr step =
-            global_loop_nest[loop_nest[loop_nest.size() - j - 1]].step;
+            global_loop_nest[loop_nest[loop_nest.size() - loops.size() - 1]]
+                .step;
         loops.push_back({dim.var, step, dim.workers});
       }
 

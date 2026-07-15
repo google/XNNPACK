@@ -105,6 +105,35 @@ TEST_F(LoopFusionTest, PackFusesWithDot) {
   EXPECT_LT(max_allocation_size_, b.size_bytes());
 }
 
+// The pipeline is dot(A, pack(exp(B))). exp's natural loop order does not
+// match the dot's loop nest positionally (its n dimension is innermost, while
+// the dot's nest iterates n outermost), so fusing it requires the scheduler
+// to match loop splits by source region rather than by position.
+TEST_F(LoopFusionTest, ProducerOfPackedInputFusesWithDot) {
+  const uint32_t a_id = 0;
+  const uint32_t b_id = 1;
+  const uint32_t out_id = 2;
+  uint32_t exp_id = YNN_INVALID_VALUE_ID;
+  SubgraphBuilder subgraph(3);
+  subgraph.AddInput(type_of<float>(), TensorShape(2), a_id)
+      .AddInput(type_of<float>(), TensorShape(2), b_id)
+      .AddOutput(type_of<float>(), TensorShape(2), out_id)
+      .AddTensor(type_of<float>(), TensorShape(2), exp_id)
+      .AddUnary(ynn_unary_exp, b_id, exp_id)
+      .AddDot(1, a_id, exp_id, YNN_INVALID_VALUE_ID, out_id);
+
+  MakeRuntime(subgraph.GetSubgraph());
+
+  Tensor<float> a({16, 512});
+  Tensor<float> b({512, 1024});
+  Tensor<float> out({16, 1024});
+  ReshapeExternalTensor(a_id, {16, 512}, a.data());
+  ReshapeExternalTensor(b_id, {512, 1024}, b.data());
+  SetupExternalTensor(out_id, out.data());
+  RunPipeline();
+  EXPECT_LT(max_allocation_size_, b.size_bytes());
+}
+
 // The pipeline is dot(A, transpose(exp(Bt))). The transpose is folded into the
 // packing (always_alias_transpose), so the func chain is exp -> transpose
 // (aliased copy) -> pack_b -> dot. In this layout exp's loop order matches the
