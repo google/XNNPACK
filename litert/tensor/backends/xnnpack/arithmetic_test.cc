@@ -87,6 +87,13 @@ TEST(ArithmeticXnnpackTest, GatherUnimplemented) {
   EXPECT_EQ(status.code(), absl::StatusCode::kUnimplemented);
 }
 
+TEST(ArithmeticXnnpackTest, ReshapeAcceptsShapeTensorInput) {
+  XnnTensor input({.name = "input", .type = Type::kFP32, .shape = {2, 3}});
+  XnnTensor output = Reshape(input, {3, 2});
+
+  EXPECT_THAT(BuildXnnpackGraph({output}), IsOk());
+}
+
 TEST(ArithmeticXnnpackTest, SpaceToDepthWorks) {
   XnnTensor input(
       {.name = "input", .type = Type::kFP32, .shape = {1, 4, 4, 1}});
