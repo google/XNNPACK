@@ -71,8 +71,8 @@ void BenchAttention(benchmark::State& state, size_t b, size_t query_len = 0,
 
   ynn_status status;
   if (decode1) {
-    status =
-        define_attention_decode1(subgraph.get(), q_id, k_id, v_id, scale, o_id);
+    status = define_attention_decode1(subgraph.get(), q_id, k_id, v_id, scale,
+                                      o_id, transpose_io);
   } else {
     status = define_attention(subgraph.get(), q_id, k_id, v_id, scale, o_id,
                               transpose_io);
@@ -159,6 +159,11 @@ void AttentionDecode(benchmark::State& state) {
 // layout, no transpose/pack) and makes Q the `B` operand instead (a free
 // size-1-axis swap), avoiding the O(s * h) K-transpose/pack that
 // AttentionDecode pays on every decode step. See define_attention_decode1.
+void AttentionDecode1Transposed(benchmark::State& state) {
+  BenchAttention(state, /*b=*/1, /*query_len=*/1,
+                 /*transpose_io=*/true, /*decode1=*/true);
+}
+
 void AttentionDecode1(benchmark::State& state) {
   BenchAttention(state, /*b=*/1, /*query_len=*/1,
                  /*transpose_io=*/false, /*decode1=*/true);
@@ -196,6 +201,9 @@ BENCHMARK(AttentionDecode)
     ->Apply(AttentionArguments)
     ->Unit(benchmark::TimeUnit::kMillisecond);
 
+BENCHMARK(AttentionDecode1Transposed)
+    ->Apply(AttentionArguments)
+    ->Unit(benchmark::TimeUnit::kMillisecond);
 BENCHMARK(AttentionDecode1)
     ->Apply(AttentionArguments)
     ->Unit(benchmark::TimeUnit::kMillisecond);

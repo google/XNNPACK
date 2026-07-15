@@ -47,7 +47,8 @@ ynn_status define_attention(ynn_subgraph_t subgraph, uint32_t query_id,
 // pipeline expects.
 ynn_status define_attention_decode1(ynn_subgraph_t subgraph, uint32_t query_id,
                                     uint32_t key_id, uint32_t value_id,
-                                    float scale, uint32_t& output_id);
+                                    float scale, uint32_t& output_id,
+                                    bool transpose_io = false);
 
 }  // namespace ynn
 

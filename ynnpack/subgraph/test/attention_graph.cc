@@ -65,7 +65,20 @@ ynn_status define_attention(ynn_subgraph_t subgraph, uint32_t query_id,
 
 ynn_status define_attention_decode1(ynn_subgraph_t subgraph, uint32_t query_id,
                                     uint32_t key_id, uint32_t value_id,
-                                    float scale, uint32_t& output_id) {
+                                    float scale, uint32_t& output_id,
+                                    bool transpose_io) {
+  const int32_t io_perm[] = {0, 2, 1, 3};
+  uint32_t q_id = query_id, k_id = key_id, v_id = value_id;
+  if (transpose_io) {
+    q_id = k_id = v_id = YNN_INVALID_VALUE_ID;
+    YNN_RETURN_IF_ERROR(
+        ynn_define_static_transpose(subgraph, 4, io_perm, query_id, &q_id, 0));
+    YNN_RETURN_IF_ERROR(
+        ynn_define_static_transpose(subgraph, 4, io_perm, key_id, &k_id, 0));
+    YNN_RETURN_IF_ERROR(
+        ynn_define_static_transpose(subgraph, 4, io_perm, value_id, &v_id, 0));
+  }
+
   // S = K @ Q^T (see the header comment for why this avoids packing K). Q's
   // last two axes ({..., t=1, h} -> {..., h, t=1}) need swapping so its `h`
   // axis lands in the dot's contracted (second-to-last) position; since t is
@@ -73,10 +86,10 @@ ynn_status define_attention_decode1(ynn_subgraph_t subgraph, uint32_t query_id,
   const int32_t q_t_perm[] = {0, 1, 3, 2};
   uint32_t q_t_id = YNN_INVALID_VALUE_ID;
   YNN_RETURN_IF_ERROR(
-      ynn_define_static_transpose(subgraph, 4, q_t_perm, query_id, &q_t_id, 0));
+      ynn_define_static_transpose(subgraph, 4, q_t_perm, q_id, &q_t_id, 0));
 
   uint32_t scores_ts_id = YNN_INVALID_VALUE_ID;
-  YNN_RETURN_IF_ERROR(ynn_define_dot(subgraph, /*num_k_dims=*/1, key_id, q_t_id,
+  YNN_RETURN_IF_ERROR(ynn_define_dot(subgraph, /*num_k_dims=*/1, k_id, q_t_id,
                                      YNN_INVALID_VALUE_ID, &scores_ts_id, 0));
 
   // scores_ts is [b, n, s, t]; swap back to [b, n, t, s] (again cheap or free,
@@ -91,8 +104,16 @@ ynn_status define_attention_decode1(ynn_subgraph_t subgraph, uint32_t query_id,
   YNN_RETURN_IF_ERROR(define_softmax(subgraph, scores_id, scale, probs_id));
 
   // O = P @ V.
-  return ynn_define_dot(subgraph, /*num_k_dims=*/1, probs_id, value_id,
-                        YNN_INVALID_VALUE_ID, &output_id, 0);
+  uint32_t o_id = YNN_INVALID_VALUE_ID;
+  YNN_RETURN_IF_ERROR(ynn_define_dot(subgraph, /*num_k_dims=*/1, probs_id, v_id,
+                                     YNN_INVALID_VALUE_ID,
+                                     transpose_io ? &o_id : &output_id, 0));
+
+  if (transpose_io) {
+    YNN_RETURN_IF_ERROR(
+        ynn_define_static_transpose(subgraph, 4, io_perm, o_id, &output_id, 0));
+  }
+  return ynn_status_success;
 }
 
 }  // namespace ynn
