@@ -37,18 +37,15 @@ void BM_MixedDot(benchmark::State& state) {
   // Inputs
   const float scale = 0.5f;
   const int32_t zero_point = 2;
-  const int8_t quant_w_val = static_cast<int8_t>(1.0f / scale + zero_point);
-
-  Tensor<int8_t> in_w_quant({K, N});
-  std::fill(in_w_quant.begin(), in_w_quant.end(), quant_w_val);
 
   // Build Subgraph
-  SubgraphBuilder subgraph(concat_a ? 3 : 2, 0);
+  SubgraphBuilder subgraph(concat_a ? 4 : 3, 0);
 
-  uint32_t X_concat_id = concat_a ? YNN_INVALID_VALUE_ID : 1;
-  const uint32_t X0_id = 1;
-  const uint32_t X1_id = 2;
-  const uint32_t Y_id = 0;
+  const uint32_t W_quant_id = 0;
+  const uint32_t Y_id = 1;
+  uint32_t X_concat_id = concat_a ? YNN_INVALID_VALUE_ID : 2;
+  const uint32_t X0_id = 2;
+  const uint32_t X1_id = 3;
 
   if (concat_a) {
     TensorShape x0_shape = static_shape ? TensorShape({M, K0}) : TensorShape(2);
@@ -66,9 +63,9 @@ void BM_MixedDot(benchmark::State& state) {
   }
   subgraph.AddOutput(type_of<T>(), 2, Y_id);
 
-  uint32_t W_quant_id = YNN_INVALID_VALUE_ID;
-  subgraph.AddTensor(ynn_type_int8, {K, N}, W_quant_id, in_w_quant.data(),
-                     YNN_VALUE_FLAG_COPY_DATA);
+  TensorShape w_quant_shape =
+      static_shape ? TensorShape({K, N}) : TensorShape(2);
+  subgraph.AddInput(ynn_type_int8, w_quant_shape, W_quant_id);
 
   uint32_t W_dequant_id = YNN_INVALID_VALUE_ID;
   subgraph.AddTensor(type_of<T>(), 2, W_dequant_id);
@@ -103,6 +100,12 @@ void BM_MixedDot(benchmark::State& state) {
     std::fill(in_x.begin(), in_x.end(), static_cast<T>(1.0f));
     runtime.ReshapeExternalTensor({M, K}, in_x.data(), X_concat_id);
   }
+
+  const int8_t quant_w_val = static_cast<int8_t>(1.0f / scale + zero_point);
+
+  Tensor<int8_t> in_w_quant({K, N});
+  std::fill(in_w_quant.begin(), in_w_quant.end(), quant_w_val);
+  runtime.ReshapeExternalTensor({K, N}, in_w_quant.data(), W_quant_id);
 
   runtime.ReshapeRuntime();
   if (runtime.Status() != ynn_status_success) {
