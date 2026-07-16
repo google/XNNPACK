@@ -53,11 +53,18 @@ static XNN_INLINE xnn_simd_f16_t xnn_mul_f16(xnn_simd_f16_t a,
 #endif  // XNN_HAVE_FLOAT16
 }
 
-// Plain scalar f16 expressions do not explicitly use fused operations.
+// If we're computing the fused ops in `float`, act as if we're going to
+// round like native FMA.
 #if XNN_HAVE_FLOAT16
-#define XNN_SIMD_HAS_NATIVE_FMA 0
+#if ((XNN_ARCH_X86 || XNN_ARCH_X86_64) && defined(__FMA__)) || \
+    (XNN_ARCH_ARM64 && __ARM_FEATURE_FMA && defined(__ARM_FEATURE_FP16_FML))
+#define XNN_SIMD_HAS_NATIVE_FMA 1
 #else
-// Computing f16 fused ops via float rounds once at the final f16 conversion.
+#define XNN_SIMD_HAS_NATIVE_FMA 0
+#endif  // ((XNN_ARCH_X86 || XNN_ARCH_X86_64) && defined(__FMA__)) ||
+        // (XNN_ARCH_ARM64 && __ARM_FEATURE_FMA &&
+        // defined(__ARM_FEATURE_FP16_FML))
+#else
 #define XNN_SIMD_HAS_NATIVE_FMA 1
 #endif  // XNN_HAVE_FLOAT16
 
