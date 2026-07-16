@@ -1429,6 +1429,10 @@ std::vector<Tensor<Mixins...>> Unpack(
   std::vector<Tensor<Mixins...>> outputs;
   outputs.reserve(num);
   const graph::TensorInformation& input_info = GetInfo(input.GetRaw()).value();
+  if (axis < 0 || axis >= static_cast<int>(input_info.shape.size())) {
+    return {Tensor<Mixins...>(graph::ErrorTensor(absl::InvalidArgumentError(
+        "The Unpack axis is out of range.")))};
+  }
   std::vector<int> output_shape = input_info.shape;
   output_shape.erase(output_shape.begin() + axis);
   for (int i = 0; i < num; ++i) {
@@ -1469,6 +1473,11 @@ std::vector<Tensor<Mixins...>> Split(
 
   if (axis_val < 0) {
     axis_val += input_info.shape.size();
+  }
+
+  if (axis_val < 0 || static_cast<size_t>(axis_val) >= input_info.shape.size()) {
+    return {Tensor<Mixins...>(graph::ErrorTensor(absl::InvalidArgumentError(
+        "The Split axis is out of range.")))};
   }
 
   if (input_info.shape[axis_val] % num_splits != 0) {
@@ -1646,6 +1655,10 @@ Tensor<Mixins...> Tile(Tensor<Mixins...> input, Tensor<Mixins...> multiples,
         multiples_info.buffer->Lock().As<const int32_t>();
     const auto& input_shape = input_info.shape;
     output_info.shape.resize(input_shape.size());
+    if (multiples_data.size() != input_shape.size()) {
+      return Tensor<Mixins...>(graph::ErrorTensor(absl::InvalidArgumentError(
+          "Tile multiples length must equal input rank.")));
+    }
     for (size_t i = 0; i < multiples_data.size(); ++i) {
       output_info.shape[i] = input_shape[i] * multiples_data.data()[i];
     }
