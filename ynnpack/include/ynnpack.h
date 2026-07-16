@@ -144,6 +144,7 @@ enum ynn_status ynn_define_iota(ynn_subgraph_t subgraph, enum ynn_type type,
 
 #define YNN_NODE_FLAG_KEEP_DIMS (1 << 0)
 #define YNN_NODE_FLAG_SLICE_DIMS (1 << 0)
+#define YNN_NODE_FLAG_KEEP_SHAPE (1 << 0)
 #define YNN_NODE_FLAG_RESHAPE_1D (1 << 0)
 #define YNN_NODE_FLAG_UNIQUE_DIMS (1 << 1)
 #define YNN_NODE_FLAG_NO_EXCESS_PRECISION (1 << 2)
@@ -389,6 +390,9 @@ enum ynn_status ynn_define_static_slice(
 
 // Extracts the range of indices `[0, end)` in `axes` dimensions, where `end` is
 // the extent of the same axis in the template value.
+//
+// If the YNN_NODE_FLAG_KEEP_SHAPE flag is set, this replaces the sliced values
+// with zeros; the shape of the output is unchanged by this operation.
 enum ynn_status ynn_define_slice_like(ynn_subgraph_t subgraph, size_t num_axes,
                                       const int32_t* axes, uint32_t input_id,
                                       uint32_t template_id, uint32_t* output_id,

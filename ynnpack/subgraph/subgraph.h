@@ -444,11 +444,12 @@ struct ynn_node {
   };
   struct slice_like {
     ynn::axes_set axes;
+    bool keep_shape = false;
     friend bool operator==(const slice_like& a, const slice_like& b) {
-      return a.axes == b.axes;
+      return a.axes == b.axes && a.keep_shape == b.keep_shape;
     }
     friend bool operator<(const slice_like& a, const slice_like& b) {
-      return a.axes < b.axes;
+      return std::tie(a.axes, a.keep_shape) < std::tie(b.axes, b.keep_shape);
     }
   };
   struct static_transpose {

@@ -7,10 +7,8 @@
 #include <cassert>
 #include <cstddef>
 #include <cstdint>
-#include <numeric>
 #include <random>
 #include <tuple>
-#include <utility>
 #include <vector>
 
 #include <gmock/gmock.h>
@@ -27,7 +25,7 @@
 namespace ynn {
 
 template <typename T>
-void TestSliceLike(T, size_t rank) {
+void TestSliceLike(T, size_t rank, bool keep_shape) {
   ReplicableRandomDevice rng;
   std::bernoulli_distribution slice_dist(0.5);
 
@@ -47,7 +45,8 @@ void TestSliceLike(T, size_t rank) {
       subgraph.AddInput(type_of<T>(), static_input_shape, 0)
           .AddInput(type_of<half>(), template_rank, 1)
           .AddOutput(type_of<T>(), rank, 2)
-          .AddSliceLike(axes, 0, 1, 2);
+          .AddSliceLike(axes, 0, 1, 2,
+                        keep_shape ? YNN_NODE_FLAG_KEEP_SHAPE : 0);
 
       Runtime runtime(subgraph.GetSubgraph());
       ASSERT_EQ(runtime.Status(), ynn_status_success);
@@ -57,13 +56,13 @@ void TestSliceLike(T, size_t rank) {
         std::vector<size_t> template_shape =
             random_shape(rng, template_rank, 1, 10);
 
-        std::vector<size_t> output_shape = input_shape;
+        std::vector<size_t> slice_shape = input_shape;
         for (int32_t axis : axes) {
           if (axis < template_rank) {
-            output_shape[axis] =
+            slice_shape[axis] =
                 std::min(template_shape[axis], input_shape[axis]);
           } else {
-            output_shape[axis] = 1;
+            slice_shape[axis] = 1;
           }
         }
 
@@ -74,15 +73,17 @@ void TestSliceLike(T, size_t rank) {
         runtime.ReshapeExternalTensor(input_shape, input.base(), 0)
             .ReshapeExternalTensor(template_shape, nullptr, 1)
             .ReshapeRuntime();
-        ASSERT_EQ(runtime.GetExternalTensorShape(2), output_shape);
+        Tensor<T> output(keep_shape ? input_shape : slice_shape);
+        ASSERT_EQ(runtime.GetExternalTensorShape(2), output.shape());
 
         // Run subgraph
-        Tensor<T> output(output_shape);
         runtime.SetupExternalTensor(output.base(), 2).InvokeRuntime();
 
-        // Implement the slice so we can check the result.
+        // Implement the slice so we can check the result. When we are keeping
+        // the shape, we only expect the sliced output to be equal.
         std::vector<size_t> begins(input_rank, 0);
-        Tensor<T> expected = input.crop(begins, output_shape).deep_copy();
+        Tensor<T> expected = input.crop(begins, slice_shape).deep_copy();
+        output = output.crop(begins, slice_shape).deep_copy();
 
         // Verify results.
         ASSERT_THAT(output, testing::ElementsAreArray(expected));
@@ -93,10 +94,19 @@ void TestSliceLike(T, size_t rank) {
 
 class SliceLike : public ::testing::TestWithParam<std::tuple<ynn_type, int>> {};
 
-TEST_P(SliceLike, test) {
+TEST_P(SliceLike, slice) {
   ynn_type type = std::get<0>(GetParam());
   int rank = std::get<1>(GetParam());
-  SwitchRealType(type, [&](auto type) { TestSliceLike(type, rank); });
+  SwitchRealType(type, [&](auto type) {
+    TestSliceLike(type, rank, /*keep_shape=*/false);
+  });
+}
+
+TEST_P(SliceLike, keep_shape) {
+  ynn_type type = std::get<0>(GetParam());
+  int rank = std::get<1>(GetParam());
+  SwitchRealType(
+      type, [&](auto type) { TestSliceLike(type, rank, /*keep_shape=*/true); });
 }
 
 INSTANTIATE_TEST_SUITE_P(

@@ -3,6 +3,7 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+#include <algorithm>
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
@@ -38,6 +39,7 @@ void BenchAttention(benchmark::State& state, size_t b, size_t query_len = 0,
   const size_t h = state.range(2);
   const size_t n = state.range(3);
   const int num_threads = static_cast<int>(state.range(4));
+  const int s_active = std::min<int>(s, static_cast<int>(state.range(5)));
   const float scale = 1.0f / std::sqrt(static_cast<float>(h));
 
   TestScheduler scheduler(num_threads);
@@ -46,7 +48,7 @@ void BenchAttention(benchmark::State& state, size_t b, size_t query_len = 0,
                         &threadpool_raw);
   threadpool_ptr threadpool(threadpool_raw, &ynn_delete_threadpool);
 
-  subgraph_ptr subgraph = create_subgraph(4, 0);
+  subgraph_ptr subgraph = create_subgraph(s_active != s ? 5 : 4, 0);
   if (!subgraph) {
     state.SkipWithError("failed to create subgraph");
     return;
@@ -55,7 +57,9 @@ void BenchAttention(benchmark::State& state, size_t b, size_t query_len = 0,
   // Define the external tensors.
   const size_t qo_dims[] = {b, transpose_io ? t : n, transpose_io ? n : t, h};
   const size_t kv_dims[] = {b, transpose_io ? s : n, transpose_io ? n : s, h};
-  uint32_t q_id = 0, k_id = 1, v_id = 2, o_id = 3;
+  const size_t kv_active_dims[] = {b, transpose_io ? s_active : n,
+                                   transpose_io ? n : s_active, h};
+  uint32_t q_id = 0, k_id = 1, v_id = 2, o_id = 3, dummy_kv_id = 4;
   ynn_define_tensor(subgraph.get(), ynn_type_fp32, 4,
                     dynamic ? nullptr : qo_dims, nullptr,
                     YNN_VALUE_FLAG_EXTERNAL_INPUT, &q_id);
@@ -69,13 +73,38 @@ void BenchAttention(benchmark::State& state, size_t b, size_t query_len = 0,
                     dynamic ? nullptr : qo_dims, nullptr,
                     YNN_VALUE_FLAG_EXTERNAL_OUTPUT, &o_id);
 
+  uint32_t actual_k_id = k_id;
+  uint32_t actual_v_id = v_id;
+
+  if (s_active != s) {
+    ynn_define_tensor(subgraph.get(), ynn_type_fp32, 4,
+                      dynamic ? nullptr : kv_active_dims, nullptr,
+                      YNN_VALUE_FLAG_EXTERNAL_INPUT, &dummy_kv_id);
+
+    int32_t seq_axis = transpose_io ? 1 : 2;
+    uint32_t sliced_k_id = YNN_INVALID_VALUE_ID;
+    uint32_t sliced_v_id = YNN_INVALID_VALUE_ID;
+
+    if (ynn_define_slice_like(subgraph.get(), /*num_axes=*/1, &seq_axis, k_id,
+                              dummy_kv_id, &sliced_k_id,
+                              /*flags=*/0) != ynn_status_success ||
+        ynn_define_slice_like(subgraph.get(), /*num_axes=*/1, &seq_axis, v_id,
+                              dummy_kv_id, &sliced_v_id,
+                              /*flags=*/0) != ynn_status_success) {
+      state.SkipWithError("failed to define slice_like for KV cache");
+      return;
+    }
+    actual_k_id = sliced_k_id;
+    actual_v_id = sliced_v_id;
+  }
+
   ynn_status status;
   if (decode1) {
-    status = define_attention_decode1(subgraph.get(), q_id, k_id, v_id, scale,
-                                      o_id, transpose_io);
+    status = define_attention_decode1(subgraph.get(), q_id, actual_k_id,
+                                      actual_v_id, scale, o_id, transpose_io);
   } else {
-    status = define_attention(subgraph.get(), q_id, k_id, v_id, scale, o_id,
-                              transpose_io);
+    status = define_attention(subgraph.get(), q_id, actual_k_id, actual_v_id,
+                              scale, o_id, transpose_io);
   }
 
   if (status != ynn_status_success) {
@@ -106,6 +135,9 @@ void BenchAttention(benchmark::State& state, size_t b, size_t query_len = 0,
           ynn_status_success ||
       ynn_set_external_value_shape(runtime.get(), v_id, 4, kv_dims) !=
           ynn_status_success ||
+      (s_active != s &&
+       ynn_set_external_value_shape(runtime.get(), dummy_kv_id, 4,
+                                    kv_active_dims) != ynn_status_success) ||
       ynn_set_external_value_data(runtime.get(), q_id, q.data()) !=
           ynn_status_success ||
       ynn_set_external_value_data(runtime.get(), k_id, k.data()) !=
@@ -130,7 +162,7 @@ void BenchAttention(benchmark::State& state, size_t b, size_t query_len = 0,
     }
   }
 
-  const size_t flops = 2ull * b * n * t * s * h * 2;  // QK^T and P@V
+  const size_t flops = 2ull * b * n * t * s_active * h * 2;  // QK^T and P@V
   state.counters["FLOP"] =
       benchmark::Counter(static_cast<double>(state.iterations() * flops),
                          benchmark::Counter::kIsRate);
@@ -170,7 +202,7 @@ void AttentionDecode1(benchmark::State& state) {
 }
 
 void AttentionArguments(benchmark::Benchmark* b) {
-  b->ArgNames({"dynamic", "seq", "head", "heads", "threads"});
+  b->ArgNames({"dynamic", "seq", "head", "heads", "threads", "seq_active"});
   b->UseRealTime();
   b->MeasureProcessCPUTime();
   std::vector<std::vector<int>> shapes = {{256, 64, 8},
@@ -181,7 +213,10 @@ void AttentionArguments(benchmark::Benchmark* b) {
   for (bool dynamic : {false, true}) {
     for (const auto& shape : shapes) {
       for (int threads : {1, 2, 4}) {
-        b->Args({dynamic, shape[0], shape[1], shape[2], threads});
+        for (float s_fraction : {0.01f, 0.5f, 0.99f, 1.0f}) {
+          const int s_active = std::ceil(s_fraction * shape[0]);
+          b->Args({dynamic, shape[0], shape[1], shape[2], threads, s_active});
+        }
       }
     }
   }
