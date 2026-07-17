@@ -179,6 +179,13 @@ BENCHMARK_IBILINEAR_CHW(sse_p4, xnn_arch_x86_sse);
 BENCHMARK_IBILINEAR_CHW(sse_p8, xnn_arch_x86_sse);
 #endif
 
+#if XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
+BENCHMARK_IBILINEAR_CHW(rvv_1x1v, xnn_arch_riscv_vector);
+BENCHMARK_IBILINEAR_CHW(rvv_2x1v, xnn_arch_riscv_vector);
+BENCHMARK_IBILINEAR_CHW(rvv_1x2v, xnn_arch_riscv_vector);
+BENCHMARK_IBILINEAR_CHW(rvv_2x2v, xnn_arch_riscv_vector);
+#endif
+
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
 XNN_BENCHMARK_MAIN();
 #endif
