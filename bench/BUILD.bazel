@@ -559,3 +559,11 @@ xnnpack_benchmark(
         ":packw_benchmark",
     ],
 )
+
+xnnpack_benchmark(
+    name = "x32_unpool_bench",
+    srcs = [
+        "x32-unpool.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS
+)
