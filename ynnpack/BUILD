@@ -169,12 +169,10 @@ define_build_option(
 
 define_build_option(
     name = "ynn_enable_arm64_neonfp8",
-    default_all = [":ynn_enable_arm64_neon"],
 )
 
 define_build_option(
     name = "ynn_enable_arm64_neonfp8dot4",
-    default_all = [":ynn_enable_arm64_neonfp8"],
 )
 
 define_build_option(
