@@ -1329,6 +1329,7 @@ bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph) {
         value->data = value->fp16_rewrite.fp16_temp_data;
         value->fp16_rewrite.fp16_temp_data = NULL;
         value->datatype = xnn_datatype_fp16;
+        value->flags |= XNN_VALUE_FLAG_NEEDS_CLEANUP;
         xnn_log_debug("FP16 rewrite: converted static FP32 tensor #%" PRIu32
                       " to FP16 in new buffer",
                       n);
