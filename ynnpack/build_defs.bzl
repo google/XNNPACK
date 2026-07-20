@@ -39,7 +39,7 @@ def define_build_option(name, default_all = [], default_any = []):
         name = name,
         actual = select({
             explicit_true: ":" + explicit_true,
-            explicit_false: ":" + explicit_true,
+            explicit_false: ":" + explicit_false,
             "//conditions:default": ":" + default,
         }),
     )
