@@ -1775,7 +1775,10 @@ static XNN_NO_SANITIZE_FUNCTION enum xnn_status reshape_igemm_path(
   }
 
   if (input_height != deconvolution_op->convolution_op->last_input_height ||
-      input_width != deconvolution_op->convolution_op->last_input_width) {
+      input_width != deconvolution_op->convolution_op->last_input_width ||
+      output_height != deconvolution_op->convolution_op->last_output_height ||
+      output_width != deconvolution_op->convolution_op->last_output_width ||
+      mr != deconvolution_op->convolution_op->last_mr) {
     const void** indirection_buffer = (const void**)xnn_reallocate_memory(
         deconvolution_op->convolution_op->indirection_buffer,
         indirection_buffer_size);
@@ -1801,6 +1804,9 @@ static XNN_NO_SANITIZE_FUNCTION enum xnn_status reshape_igemm_path(
         deconvolution_op->convolution_op->input;
     deconvolution_op->convolution_op->last_input_height = input_height;
     deconvolution_op->convolution_op->last_input_width = input_width;
+    deconvolution_op->convolution_op->last_output_height = output_height;
+    deconvolution_op->convolution_op->last_output_width = output_width;
+    deconvolution_op->convolution_op->last_mr = mr;
 
     xnn_indirection_init_deconv2d(
         mr, deconvolution_op->convolution_op->indirection_buffer,
