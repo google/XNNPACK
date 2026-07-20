@@ -20,6 +20,8 @@
 #include "src/xnnpack/simd/f16-scalar.h"
 #include "test/replicable_random_device.h"
 
+#define XNN_SIMD_TEST_USES_EXPLICIT_FMA 0
+
 namespace xnnpack {
 
 class F16SimdSCALARTest : public ::testing::Test {
@@ -101,17 +103,20 @@ TEST_F(F16SimdSCALARTest, Fmadd) {
   std::vector<float> output_f32 = ToFloat32(output_);
   std::vector<float> inputs_f32 = ToFloat32(inputs_);
   for (size_t k = 0; k < xnn_simd_size_f16; k++) {
-#if XNN_SIMD_HAS_NATIVE_FMA
-    // If an arch claims to support FMA, it better also round things correctly.
+#if XNN_SIMD_TEST_USES_EXPLICIT_FMA && XNN_SIMD_HAS_NATIVE_FMA
     ASSERT_EQ(output_f32[k],
               TruncToF16(inputs_f32[k] * inputs_f32[k + xnn_simd_size_f16] +
                          inputs_f32[k + 2 * xnn_simd_size_f16]));
-#else
+#elif XNN_SIMD_TEST_USES_EXPLICIT_FMA || XNN_HAVE_FLOAT16
     ASSERT_EQ(output_f32[k],
               TruncToF16(TruncToF16(inputs_f32[k] *
                                     inputs_f32[k + xnn_simd_size_f16]) +
                          inputs_f32[k + 2 * xnn_simd_size_f16]));
-#endif  // XNN_SIMD_HAS_NATIVE_FMA
+#else
+    ASSERT_EQ(output_f32[k],
+              TruncToF16(inputs_f32[k] * inputs_f32[k + xnn_simd_size_f16] +
+                         inputs_f32[k + 2 * xnn_simd_size_f16]));
+#endif  // XNN_SIMD_TEST_USES_EXPLICIT_FMA && XNN_SIMD_HAS_NATIVE_FMA
   }
 }
 
@@ -125,17 +130,20 @@ TEST_F(F16SimdSCALARTest, Fmsub) {
   std::vector<float> output_f32 = ToFloat32(output_);
   std::vector<float> inputs_f32 = ToFloat32(inputs_);
   for (size_t k = 0; k < xnn_simd_size_f16; k++) {
-#if XNN_SIMD_HAS_NATIVE_FMA
-    // If an arch claims to support FMA, it better also round things correctly.
+#if XNN_SIMD_TEST_USES_EXPLICIT_FMA && XNN_SIMD_HAS_NATIVE_FMA
     ASSERT_EQ(output_f32[k],
               TruncToF16(inputs_f32[k] * inputs_f32[k + xnn_simd_size_f16] -
                          inputs_f32[k + 2 * xnn_simd_size_f16]));
-#else
+#elif XNN_SIMD_TEST_USES_EXPLICIT_FMA || XNN_HAVE_FLOAT16
     ASSERT_EQ(output_f32[k],
               TruncToF16(TruncToF16(inputs_f32[k] *
                                     inputs_f32[k + xnn_simd_size_f16]) -
                          inputs_f32[k + 2 * xnn_simd_size_f16]));
-#endif  // XNN_SIMD_HAS_NATIVE_FMA
+#else
+    ASSERT_EQ(output_f32[k],
+              TruncToF16(inputs_f32[k] * inputs_f32[k + xnn_simd_size_f16] -
+                         inputs_f32[k + 2 * xnn_simd_size_f16]));
+#endif  // XNN_SIMD_TEST_USES_EXPLICIT_FMA && XNN_SIMD_HAS_NATIVE_FMA
   }
 }
 
@@ -149,17 +157,20 @@ TEST_F(F16SimdSCALARTest, Fnmadd) {
   std::vector<float> output_f32 = ToFloat32(output_);
   std::vector<float> inputs_f32 = ToFloat32(inputs_);
   for (size_t k = 0; k < xnn_simd_size_f16; k++) {
-#if XNN_SIMD_HAS_NATIVE_FMA
-    // If an arch claims to support FMA, it better also round things correctly.
+#if XNN_SIMD_TEST_USES_EXPLICIT_FMA && XNN_SIMD_HAS_NATIVE_FMA
     ASSERT_EQ(output_f32[k],
               TruncToF16(-inputs_f32[k] * inputs_f32[k + xnn_simd_size_f16] +
                          inputs_f32[k + 2 * xnn_simd_size_f16]));
-#else
+#elif XNN_SIMD_TEST_USES_EXPLICIT_FMA || XNN_HAVE_FLOAT16
     ASSERT_EQ(output_f32[k],
               TruncToF16(TruncToF16(-inputs_f32[k] *
                                     inputs_f32[k + xnn_simd_size_f16]) +
                          inputs_f32[k + 2 * xnn_simd_size_f16]));
-#endif  // XNN_SIMD_HAS_NATIVE_FMA
+#else
+    ASSERT_EQ(output_f32[k],
+              TruncToF16(-inputs_f32[k] * inputs_f32[k + xnn_simd_size_f16] +
+                         inputs_f32[k + 2 * xnn_simd_size_f16]));
+#endif  // XNN_SIMD_TEST_USES_EXPLICIT_FMA && XNN_SIMD_HAS_NATIVE_FMA
   }
 }
 
