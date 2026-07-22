@@ -1,4 +1,4 @@
-// Copyright 2020-2025 Google LLC
+// Copyright 2020-2026 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
@@ -93,6 +93,13 @@ static void FP32Binary(benchmark::State& state) {
                                  state.range(4));
   });
 }
+static void FP16Binary(benchmark::State& state) {
+  xnnpack::RunBenchmark(state, [&state]() {
+    return models::Binary<xnn_float16>(state.range(0), FLAGS_batch_size,
+                                       state.range(1), state.range(2),
+                                       state.range(3), state.range(4));
+  });
+}
 
 static void RegisterBenchmarks() {
   // Use a static variable inside the function to ensure this block runs only
@@ -109,19 +116,26 @@ static void RegisterBenchmarks() {
 
     for (auto op : real_ops) {
       std::string op_name = xnn_binary_operator_to_string(op);
-      auto b =
-          benchmark::RegisterBenchmark("FP32Binary/" + op_name, FP32Binary);
-      b->Unit(benchmark::kMicrosecond)->MeasureProcessCPUTime()->UseRealTime();
-      b->ArgNames({"Op", "M", "N", "BroadcastA", "BroadcastB"});
-
       const std::pair<int, int> shapes[] = {{1, 256}, {1, 4096}, {256, 4096}};
 
       const std::pair<bool, bool> broadcasts[] = {
           {false, false}, {true, false}, {false, true}};
 
+      auto b =
+          benchmark::RegisterBenchmark("FP32Binary/" + op_name, FP32Binary);
+      auto b_fp16 =
+          benchmark::RegisterBenchmark("FP16Binary/" + op_name, FP16Binary);
+      b->Unit(benchmark::kMicrosecond)->MeasureProcessCPUTime()->UseRealTime();
+      b_fp16->Unit(benchmark::kMicrosecond)
+          ->MeasureProcessCPUTime()
+          ->UseRealTime();
+      b->ArgNames({"Op", "M", "N", "BroadcastA", "BroadcastB"});
+      b_fp16->ArgNames({"Op", "M", "N", "BroadcastA", "BroadcastB"});
+
       for (auto shape : shapes) {
         for (auto bc : broadcasts) {
           b->Args({op, shape.first, shape.second, bc.first, bc.second});
+          b_fp16->Args({op, shape.first, shape.second, bc.first, bc.second});
         }
       }
     }

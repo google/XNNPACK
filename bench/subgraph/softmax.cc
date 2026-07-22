@@ -1,4 +1,4 @@
-// Copyright 2025 Google LLC
+// Copyright 2026 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
@@ -13,13 +13,17 @@
 
 #include "bench/subgraph/benchmark.h"
 #include "include/xnnpack.h"
+#include "src/xnnpack/datatype.h"
+#include "src/xnnpack/math.h"
 #include <benchmark/benchmark.h>
 
 namespace models {
 
-xnn_subgraph_t FP32Softmax(size_t m, size_t n, size_t k, uint32_t norm_mask,
+template <typename T>
+xnn_subgraph_t SoftmaxImpl(size_t m, size_t n, size_t k, uint32_t norm_mask,
                            bool use_softmax) {
   xnn_status status;
+  const xnn_datatype datatype = xnn_datatype_of<T>();
   auto subgraph = xnnpack::CreateUniqueSubgraph(/*num_external_values=*/2, 0);
   if (!subgraph) {
     std::cerr << "failed to create subgrpah" << std::endl;
@@ -39,7 +43,7 @@ xnn_subgraph_t FP32Softmax(size_t m, size_t n, size_t k, uint32_t norm_mask,
 
   uint32_t v0 = 0;
   status = xnn_define_tensor_value(
-      subgraph.get(), xnn_datatype_fp32, dims.size(), dims.data(),
+      subgraph.get(), datatype, dims.size(), dims.data(),
       /*data=*/nullptr, v0, XNN_VALUE_FLAG_EXTERNAL_INPUT, &v0);
   if (status != xnn_status_success) {
     std::cerr << "failed to create tensor v0" << std::endl;
@@ -48,7 +52,7 @@ xnn_subgraph_t FP32Softmax(size_t m, size_t n, size_t k, uint32_t norm_mask,
 
   uint32_t v1 = 1;
   status = xnn_define_tensor_value(
-      subgraph.get(), xnn_datatype_fp32, dims.size(), dims.data(),
+      subgraph.get(), datatype, dims.size(), dims.data(),
       /*data=*/nullptr, v1, XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &v1);
   if (status != xnn_status_success) {
     std::cerr << "failed to create tensor v1" << std::endl;
@@ -85,7 +89,7 @@ xnn_subgraph_t FP32Softmax(size_t m, size_t n, size_t k, uint32_t norm_mask,
     const bool needs_transpose = !std::is_sorted(perm.begin(), perm.end());
     if (needs_transpose) {
       status = xnn_define_tensor_value(
-          subgraph.get(), xnn_datatype_fp32, dims.size(), dims.data(),
+          subgraph.get(), datatype, dims.size(), dims.data(),
           /*data=*/nullptr, XNN_INVALID_VALUE_ID, /*flags=*/0, &transposed_v0);
       if (status != xnn_status_success) {
         std::cerr << "failed to create tensor transposed_v0" << std::endl;
@@ -101,7 +105,7 @@ xnn_subgraph_t FP32Softmax(size_t m, size_t n, size_t k, uint32_t norm_mask,
       }
 
       status = xnn_define_tensor_value(
-          subgraph.get(), xnn_datatype_fp32, reduction_dims.size(),
+          subgraph.get(), datatype, reduction_dims.size(),
           reduction_dims.data(),
           /*data=*/nullptr, XNN_INVALID_VALUE_ID, /*flags=*/0, &transposed_v1);
       if (status != xnn_status_success) {
@@ -114,8 +118,8 @@ xnn_subgraph_t FP32Softmax(size_t m, size_t n, size_t k, uint32_t norm_mask,
     uint32_t transposed_reshaped_v0 = transposed_v0;
     uint32_t transposed_reshaped_v1 = transposed_v1;
     if (reshaped_dims.size() < dims.size()) {
-      status = xnn_define_tensor_value(subgraph.get(), xnn_datatype_fp32,
-                                       dims.size(), dims.data(),
+      status = xnn_define_tensor_value(subgraph.get(), datatype, dims.size(),
+                                       dims.data(),
                                        /*data=*/nullptr, XNN_INVALID_VALUE_ID,
                                        /*flags=*/0, &transposed_reshaped_v0);
       if (status != xnn_status_success) {
@@ -133,8 +137,8 @@ xnn_subgraph_t FP32Softmax(size_t m, size_t n, size_t k, uint32_t norm_mask,
         return nullptr;
       }
 
-      status = xnn_define_tensor_value(subgraph.get(), xnn_datatype_fp32,
-                                       dims.size(), dims.data(),
+      status = xnn_define_tensor_value(subgraph.get(), datatype, dims.size(),
+                                       dims.data(),
                                        /*data=*/nullptr, XNN_INVALID_VALUE_ID,
                                        /*flags=*/0, &transposed_reshaped_v1);
       if (status != xnn_status_success) {
@@ -178,10 +182,9 @@ xnn_subgraph_t FP32Softmax(size_t m, size_t n, size_t k, uint32_t norm_mask,
 
   } else {
     uint32_t max_v0 = XNN_INVALID_VALUE_ID;
-    status =
-        xnn_define_tensor_value(subgraph.get(), xnn_datatype_fp32,
-                                reduction_dims.size(), reduction_dims.data(),
-                                /*data=*/nullptr, max_v0, /*flags=*/0, &max_v0);
+    status = xnn_define_tensor_value(
+        subgraph.get(), datatype, reduction_dims.size(), reduction_dims.data(),
+        /*data=*/nullptr, max_v0, /*flags=*/0, &max_v0);
     if (status != xnn_status_success) {
       std::cerr << "failed to create tensor max_v0" << std::endl;
       return nullptr;
@@ -197,7 +200,7 @@ xnn_subgraph_t FP32Softmax(size_t m, size_t n, size_t k, uint32_t norm_mask,
 
     uint32_t v0_minus_max = XNN_INVALID_VALUE_ID;
     status = xnn_define_tensor_value(
-        subgraph.get(), xnn_datatype_fp32, dims.size(), dims.data(),
+        subgraph.get(), datatype, dims.size(), dims.data(),
         /*data=*/nullptr, v0_minus_max, /*flags=*/0, &v0_minus_max);
     if (status != xnn_status_success) {
       std::cerr << "failed to create tensor v0_minus_max" << std::endl;
@@ -213,7 +216,7 @@ xnn_subgraph_t FP32Softmax(size_t m, size_t n, size_t k, uint32_t norm_mask,
 
     uint32_t exp_v0_minus_max = XNN_INVALID_VALUE_ID;
     status = xnn_define_tensor_value(
-        subgraph.get(), xnn_datatype_fp32, dims.size(), dims.data(),
+        subgraph.get(), datatype, dims.size(), dims.data(),
         /*data=*/nullptr, exp_v0_minus_max, /*flags=*/0, &exp_v0_minus_max);
     if (status != xnn_status_success) {
       std::cerr << "failed to create tensor exp_v0_minus_max" << std::endl;
@@ -228,11 +231,10 @@ xnn_subgraph_t FP32Softmax(size_t m, size_t n, size_t k, uint32_t norm_mask,
     }
 
     uint32_t sum_exp_v0_minus_max = XNN_INVALID_VALUE_ID;
-    status =
-        xnn_define_tensor_value(subgraph.get(), xnn_datatype_fp32,
-                                reduction_dims.size(), reduction_dims.data(),
-                                /*data=*/nullptr, sum_exp_v0_minus_max,
-                                /*flags=*/0, &sum_exp_v0_minus_max);
+    status = xnn_define_tensor_value(
+        subgraph.get(), datatype, reduction_dims.size(), reduction_dims.data(),
+        /*data=*/nullptr, sum_exp_v0_minus_max,
+        /*flags=*/0, &sum_exp_v0_minus_max);
     if (status != xnn_status_success) {
       std::cerr << "failed to create tensor sum_exp_v0_minus_max" << std::endl;
       return nullptr;
@@ -249,18 +251,17 @@ xnn_subgraph_t FP32Softmax(size_t m, size_t n, size_t k, uint32_t norm_mask,
 
     uint32_t inv_sum = XNN_INVALID_VALUE_ID;
     status = xnn_define_tensor_value(
-        subgraph.get(), xnn_datatype_fp32, reduction_dims.size(),
-        reduction_dims.data(),
+        subgraph.get(), datatype, reduction_dims.size(), reduction_dims.data(),
         /*data=*/nullptr, inv_sum, /*flags=*/0, &inv_sum);
     if (status != xnn_status_success) {
       std::cerr << "failed to create tensor inv_sum" << std::endl;
       return nullptr;
     }
 
-    static const float one_value = 1.0f;
+    static const T one_value = (T)1.0f;
     uint32_t one = XNN_INVALID_VALUE_ID;
     status =
-        xnn_define_tensor_value(subgraph.get(), xnn_datatype_fp32, 0, nullptr,
+        xnn_define_tensor_value(subgraph.get(), datatype, 0, nullptr,
                                 /*data=*/&one_value, one, /*flags=*/0, &one);
     if (status != xnn_status_success) {
       std::cerr << "failed to create tensor one" << std::endl;
@@ -284,13 +285,28 @@ xnn_subgraph_t FP32Softmax(size_t m, size_t n, size_t k, uint32_t norm_mask,
 
   return subgraph.release();
 }
+xnn_subgraph_t FP32Softmax(size_t m, size_t n, size_t k, uint32_t norm_mask,
+                           bool use_softmax) {
+  return SoftmaxImpl<float>(m, n, k, norm_mask, use_softmax);
+}
+
+xnn_subgraph_t FP16Softmax(size_t m, size_t n, size_t k, uint32_t norm_mask,
+                           bool use_softmax) {
+  return SoftmaxImpl<xnn_float16>(m, n, k, norm_mask, use_softmax);
+}
 
 }  // namespace models
 
 static void FP32SoftmaxDecomp(benchmark::State& state) {
   xnnpack::RunBenchmark(state, [&state]() {
     return models::FP32Softmax(state.range(0), state.range(1), state.range(2),
-                       state.range(3), /*use_softmax=*/false);
+                               state.range(3), /*use_softmax=*/false);
+  });
+}
+static void FP16SoftmaxDecomp(benchmark::State& state) {
+  xnnpack::RunBenchmark(state, [&state]() {
+    return models::FP16Softmax(state.range(0), state.range(1), state.range(2),
+                               state.range(3), /*use_softmax=*/false);
   });
 }
 
@@ -298,6 +314,12 @@ static void FP32SoftmaxFused(benchmark::State& state) {
   xnnpack::RunBenchmark(state, [&state]() {
     return models::FP32Softmax(state.range(0), state.range(1), state.range(2),
                        state.range(3), /*use_softmax=*/true);
+  });
+}
+static void FP16SoftmaxFused(benchmark::State& state) {
+  xnnpack::RunBenchmark(state, [&state]() {
+    return models::FP16Softmax(state.range(0), state.range(1), state.range(2),
+                               state.range(3), /*use_softmax=*/true);
   });
 }
 
@@ -313,8 +335,18 @@ BENCHMARK(FP32SoftmaxDecomp)
     ->MeasureProcessCPUTime()
     ->UseRealTime()
     ->Apply(SoftmaxArguments);
+BENCHMARK(FP16SoftmaxDecomp)
+    ->Unit(benchmark::kMicrosecond)
+    ->MeasureProcessCPUTime()
+    ->UseRealTime()
+    ->Apply(SoftmaxArguments);
 
 BENCHMARK(FP32SoftmaxFused)
+    ->Unit(benchmark::kMicrosecond)
+    ->MeasureProcessCPUTime()
+    ->UseRealTime()
+    ->Apply(SoftmaxArguments);
+BENCHMARK(FP16SoftmaxFused)
     ->Unit(benchmark::kMicrosecond)
     ->MeasureProcessCPUTime()
     ->UseRealTime()

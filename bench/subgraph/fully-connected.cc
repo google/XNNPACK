@@ -273,10 +273,42 @@ static void QD8F32QC2WFullyConnected(benchmark::State& state) {
   });
 }
 
+static void QD8F16QC8WFullyConnected(benchmark::State& state) {
+  xnnpack::RunBenchmark(state, [&state]() {
+    return models::FullyConnected<xnn_float16, qcint8>(
+        FLAGS_batch_size,
+        /*m=*/state.range(0), /*k=*/state.range(1),
+        /*n=*/state.range(2),
+        /*dynamically_quantize_lhs=*/true);
+  });
+}
+
+static void QD8F16QC4WFullyConnected(benchmark::State& state) {
+  xnnpack::RunBenchmark(state, [&state]() {
+    return models::FullyConnected<xnn_float16, qcint4>(
+        FLAGS_batch_size,
+        /*m=*/state.range(0), /*k=*/state.range(1),
+        /*n=*/state.range(2),
+        /*dynamically_quantize_lhs=*/true);
+  });
+}
+
+static void QD8F16QC2WFullyConnected(benchmark::State& state) {
+  xnnpack::RunBenchmark(state, [&state]() {
+    return models::FullyConnected<xnn_float16, qcint2>(
+        FLAGS_batch_size,
+        /*m=*/state.range(0), /*k=*/state.range(1),
+        /*n=*/state.range(2),
+        /*dynamically_quantize_lhs=*/true);
+  });
+}
+
 static void QS8QC4WFullyConnected(benchmark::State& state) {
   xnnpack::RunBenchmark(state, [&state]() {
     return models::FullyConnected<xnnpack::quantized<int8_t>, qcint4>(
-        FLAGS_batch_size, state.range(0), state.range(1), state.range(2),
+        FLAGS_batch_size,
+        /*m=*/state.range(0), /*k=*/state.range(1),
+        /*n=*/state.range(2),
         /*dynamically_quantize_lhs=*/false);
   });
 }
@@ -284,7 +316,9 @@ static void QS8QC4WFullyConnected(benchmark::State& state) {
 static void QS8QC2WFullyConnected(benchmark::State& state) {
   xnnpack::RunBenchmark(state, [&state]() {
     return models::FullyConnected<xnnpack::quantized<int8_t>, qcint2>(
-        FLAGS_batch_size, state.range(0), state.range(1), state.range(2),
+        FLAGS_batch_size,
+        /*m=*/state.range(0), /*k=*/state.range(1),
+        /*n=*/state.range(2),
         /*dynamically_quantize_lhs=*/false);
   });
 }
@@ -321,6 +355,24 @@ BENCHMARK(QD8F32QC2WFullyConnected)
     ->UseRealTime()
     ->Apply(FullyConnectedArgs);
 
+BENCHMARK(QD8F16QC8WFullyConnected)
+    ->Unit(benchmark::kMicrosecond)
+    ->MeasureProcessCPUTime()
+    ->UseRealTime()
+    ->Apply(FullyConnectedArgs);
+
+BENCHMARK(QD8F16QC4WFullyConnected)
+    ->Unit(benchmark::kMicrosecond)
+    ->MeasureProcessCPUTime()
+    ->UseRealTime()
+    ->Apply(FullyConnectedArgs);
+
+BENCHMARK(QD8F16QC2WFullyConnected)
+    ->Unit(benchmark::kMicrosecond)
+    ->MeasureProcessCPUTime()
+    ->UseRealTime()
+    ->Apply(FullyConnectedArgs);
+
 BENCHMARK(QS8QC4WFullyConnected)
     ->Unit(benchmark::kMicrosecond)
     ->MeasureProcessCPUTime()
@@ -336,9 +388,8 @@ BENCHMARK(QS8QC2WFullyConnected)
 static void FullyConnectedArgs(benchmark::Benchmark* b) {
   b->ArgNames({"M", "K", "N"});
 
-  static const std::array<int64_t, 17> kDims = {
-      1,   2,   4,    8,    16,   32,   64,    128,
-      256, 512, 1024, 2048, 4096, 8192, 16384, 65536};
+  static const std::array<int64_t, 17> kDims = {1,    4,    16,    64,   256,
+                                                1024, 4096, 16384, 65536};
   const int64_t kMinK = 8;
   const int64_t kMaxSmall = 16;
   const int64_t kMinHuge = 1024;

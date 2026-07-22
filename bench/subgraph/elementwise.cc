@@ -1,4 +1,4 @@
-// Copyright 2020 Google LLC
+// Copyright 2026 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
@@ -10,13 +10,17 @@
 
 #include "bench/subgraph/benchmark.h"
 #include "include/xnnpack.h"
+#include "src/xnnpack/datatype.h"
+#include "src/xnnpack/math.h"
 #include <benchmark/benchmark.h>
 
 namespace models {
 
-xnn_subgraph_t FP32Elementwise(size_t batch_size, size_t num_elements,
+template <typename T>
+xnn_subgraph_t ElementwiseImpl(size_t batch_size, size_t num_elements,
                                size_t depth) {
   xnn_status status;
+  const xnn_datatype datatype = xnn_datatype_of<T>();
   auto subgraph = xnnpack::CreateUniqueSubgraph(/*num_external_values=*/3, 0);
   if (!subgraph) {
     std::cerr << "failed to create subgrpah" << std::endl;
@@ -27,7 +31,7 @@ xnn_subgraph_t FP32Elementwise(size_t batch_size, size_t num_elements,
 
   uint32_t v0 = XNN_INVALID_VALUE_ID;
   status = xnn_define_tensor_value(
-      subgraph.get(), xnn_datatype_fp32, dims.size(), dims.data(),
+      subgraph.get(), datatype, dims.size(), dims.data(),
       /*data=*/nullptr, 0, XNN_VALUE_FLAG_EXTERNAL_INPUT, &v0);
   if (status != xnn_status_success) {
     std::cerr << "failed to create tensor v0" << std::endl;
@@ -36,7 +40,7 @@ xnn_subgraph_t FP32Elementwise(size_t batch_size, size_t num_elements,
 
   uint32_t v1 = XNN_INVALID_VALUE_ID;
   status = xnn_define_tensor_value(
-      subgraph.get(), xnn_datatype_fp32, dims.size(), dims.data(),
+      subgraph.get(), datatype, dims.size(), dims.data(),
       /*data=*/nullptr, 1, XNN_VALUE_FLAG_EXTERNAL_INPUT, &v1);
   if (status != xnn_status_success) {
     std::cerr << "failed to create tensor v1" << std::endl;
@@ -45,7 +49,7 @@ xnn_subgraph_t FP32Elementwise(size_t batch_size, size_t num_elements,
 
   uint32_t output = XNN_INVALID_VALUE_ID;
   status = xnn_define_tensor_value(
-      subgraph.get(), xnn_datatype_fp32, dims.size(), dims.data(),
+      subgraph.get(), datatype, dims.size(), dims.data(),
       /*data=*/nullptr, 2, /*flags=*/XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output);
   if (status != xnn_status_success) {
     std::cerr << "failed to create tensor output" << std::endl;
@@ -59,7 +63,7 @@ xnn_subgraph_t FP32Elementwise(size_t batch_size, size_t num_elements,
   for (int i = 0; i < depth; ++i) {
     uint32_t new_add = XNN_INVALID_VALUE_ID;
     status = xnn_define_tensor_value(
-        subgraph.get(), xnn_datatype_fp32, dims.size(), dims.data(),
+        subgraph.get(), datatype, dims.size(), dims.data(),
         /*data=*/nullptr, XNN_INVALID_VALUE_ID, /*flags=*/0, &new_add);
     if (status != xnn_status_success) {
       std::cerr << "failed to create tensor add" << std::endl;
@@ -77,7 +81,7 @@ xnn_subgraph_t FP32Elementwise(size_t batch_size, size_t num_elements,
 
     mul = XNN_INVALID_VALUE_ID;
     status = xnn_define_tensor_value(
-        subgraph.get(), xnn_datatype_fp32, dims.size(), dims.data(),
+        subgraph.get(), datatype, dims.size(), dims.data(),
         /*data=*/nullptr, XNN_INVALID_VALUE_ID, /*flags=*/0, &mul);
     if (status != xnn_status_success) {
       std::cerr << "failed to create tensor mul" << std::endl;
@@ -103,18 +107,43 @@ xnn_subgraph_t FP32Elementwise(size_t batch_size, size_t num_elements,
 
   return subgraph.release();
 }
+xnn_subgraph_t FP32Elementwise(size_t batch_size, size_t num_elements,
+                               size_t depth) {
+  return ElementwiseImpl<float>(batch_size, num_elements, depth);
+}
+
+xnn_subgraph_t FP16Elementwise(size_t batch_size, size_t num_elements,
+                               size_t depth) {
+  return ElementwiseImpl<xnn_float16>(batch_size, num_elements, depth);
+}
 
 }  // namespace models
 
 static void FP32Elementwise(benchmark::State& state) {
   xnnpack::RunBenchmark(state, [&state]() {
     return models::FP32Elementwise(/*batch_size=*/state.range(0),
-                           /*num_elements=*/state.range(1),
-                           /*depth=*/state.range(2));
+                                   /*num_elements=*/state.range(1),
+                                   /*depth=*/state.range(2));
+  });
+}
+static void FP16Elementwise(benchmark::State& state) {
+  xnnpack::RunBenchmark(state, [&state]() {
+    return models::FP16Elementwise(/*batch_size=*/state.range(0),
+                                   /*num_elements=*/state.range(1),
+                                   /*depth=*/state.range(2));
   });
 }
 
 BENCHMARK(FP32Elementwise)
+    ->Unit(benchmark::kMicrosecond)
+    ->MeasureProcessCPUTime()
+    ->UseRealTime()
+    ->ArgNames({"B", "N", "D"})
+    ->Args({1024, 1024, 6})
+    ->Args({1024, 1024, 10})
+    ->Args({1024, 1024, 18})
+    ->Args({1024, 1024, 34});
+BENCHMARK(FP16Elementwise)
     ->Unit(benchmark::kMicrosecond)
     ->MeasureProcessCPUTime()
     ->UseRealTime()
