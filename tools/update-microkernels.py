@@ -80,6 +80,8 @@ _ISA_LIST = frozenset({
     'wasmsdot',
     'wasmusdot',
     'wasmsimd',
+    'lsx',
+    'lasx',
 })
 
 _ISA_MAP = {
