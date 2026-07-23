@@ -81,7 +81,7 @@ uint64_t get_supported_arch_flags() {
     if (cpuinfo_has_arm_neon_bf16()) result |= arch_flag::neonbf16;
     if (cpuinfo_has_arm_i8mm()) result |= arch_flag::neoni8mm;
     if (cpuinfo_has_arm_fp8()) result |= arch_flag::neonfp8;
-    if (cpuinfo_has_arm_f8dot()) result |= arch_flag::neonfp8dot4;
+    if (cpuinfo_has_arm_neon_f8dot4()) result |= arch_flag::neonfp8dot4;
 #if !YNN_COMPILER_HAS_FEATURE(memory_sanitizer)
     // msan (understandably) does not support SVE/SME (b/494230133).
     if (cpuinfo_has_arm_sme()) result |= arch_flag::sme;
