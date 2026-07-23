@@ -1129,6 +1129,7 @@ xnnpack_unit_test(
         "//:microkernel_utils",
         "//:operator_utils",
         "//src/configs:config_types",
+        "//src/configs:microkernel_configs",
     ],
 )
 
