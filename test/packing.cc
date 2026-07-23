@@ -13,6 +13,9 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include "src/xnnpack/buffer.h"
+#include "src/xnnpack/config.h"
+#include "src/xnnpack/gemm.h"
+#include "src/xnnpack/isa-checks.h"
 #include "src/xnnpack/math.h"
 #include "src/xnnpack/microparams.h"
 #include "src/xnnpack/microparams-init.h"
@@ -23,6 +26,90 @@ namespace {
 using testing::ElementsAreArray;
 using testing::Matcher;
 using testing::_;
+
+#if XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI
+TEST(PACK_KAI_F16_6X32_WEIGHTS_AND_BIASES,
+     transposed_grouped_weights_use_k_stride) {
+  TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_neon_fp16_arith);
+
+  const struct xnn_gemm_config* gemm_config =
+      xnn_init_pf16_gemm_config();
+  if (gemm_config == nullptr ||
+      gemm_config->pack_weights_and_biases !=
+          xnn_pack_kai_f16_6x32_weights_and_biases) {
+    GTEST_SKIP() << "KleidiAI Adv SIMD PF16 GEMM is not selected";
+  }
+  ASSERT_EQ(gemm_config->nr, 32);
+  ASSERT_EQ(UINT32_C(1) << gemm_config->log2_kr, 1);
+
+  constexpr size_t k = 3;
+  constexpr size_t n = 35;
+  constexpr size_t n_tile_start = 32;
+  constexpr size_t n_tile = n - n_tile_start;
+  constexpr size_t groups = 2;
+
+  std::vector<xnn_float16> lhs(k);
+  std::vector<xnn_float16> weights(groups * k * n);
+  std::vector<xnn_float16> bias(groups * n_tile);
+  for (size_t k_index = 0; k_index < k; k_index++) {
+    lhs[k_index] = xnn_float16_from_float(float(k_index + 1));
+  }
+  for (size_t group = 0; group < groups; group++) {
+    for (size_t k_index = 0; k_index < k; k_index++) {
+      for (size_t n_index = 0; n_index < n; n_index++) {
+        weights[(group * k + k_index) * n + n_index] =
+            xnn_float16_from_float(
+                float(100 * group + 10 * k_index + n_index));
+      }
+    }
+    for (size_t n_index = 0; n_index < n_tile; n_index++) {
+      bias[group * n_tile + n_index] =
+          xnn_float16_from_float(float(10 * group + n_index));
+    }
+  }
+
+  const size_t packed_stride =
+      xnn_packed_stride_kai_f16_6x32_weights_and_biases(
+          gemm_config, k, /*block_size=*/0, /*k_stride=*/n,
+          /*extra_bytes=*/0);
+  const size_t packed_group_stride =
+      round_up(n_tile, size_t{32}) * packed_stride;
+  xnnpack::Buffer<uint8_t, XNN_ALLOCATION_ALIGNMENT> packed_weights(
+      groups * packed_group_stride);
+  xnn_pack_kai_f16_6x32_weights_and_biases(
+      XNN_FLAG_TRANSPOSE_WEIGHTS, gemm_config, k, n_tile, groups,
+      /*block_size=*/0, /*k_stride=*/n, bias.data(),
+      weights.data() + n_tile_start, /*init_extra_data0_fn=*/nullptr,
+      /*extra_data0=*/nullptr, /*extra_data0_element_size=*/0,
+      /*init_extra_data1_fn=*/nullptr, /*extra_data1=*/nullptr,
+      /*extra_data1_element_size=*/0, packed_weights.data(), /*params=*/nullptr);
+
+  struct xnn_f16_minmax_params params;
+  xnn_init_f16_minmax_scalar_params(
+      &params, xnn_float16_from_float(-INFINITY),
+      xnn_float16_from_float(INFINITY));
+
+  for (size_t group = 0; group < groups; group++) {
+    std::vector<xnn_float16> output(n_tile);
+    xnn_pf16_gemm_minmax_ukernel_6x32__kai_aarch64_neonfp16arith(
+        /*m=*/1, n_tile, k * sizeof(xnn_float16), lhs.data(),
+        packed_weights.data() + group * packed_group_stride, output.data(),
+        /*dst_stride_row=*/n_tile * sizeof(xnn_float16),
+        /*dst_stride_col=*/sizeof(xnn_float16), &params);
+
+    for (size_t n_index = 0; n_index < n_tile; n_index++) {
+      xnn_float16 expected = bias[group * n_tile + n_index];
+      for (size_t k_index = 0; k_index < k; k_index++) {
+        expected = xnn_float16(
+            expected +
+            lhs[k_index] * weights[(group * k + k_index) * n +
+                                   n_tile_start + n_index]);
+      }
+      EXPECT_EQ(output[n_index], expected);
+    }
+  }
+}
+#endif  // XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI
 
 // QS8-QC2W GEMM packing tests.
 

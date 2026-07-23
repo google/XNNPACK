@@ -18,6 +18,7 @@
 #include "include/xnnpack.h"
 #include "src/xnnpack/allocation-type.h"
 #include "src/xnnpack/buffer.h"
+#include "src/xnnpack/config.h"
 #include "src/xnnpack/hardware-config.h"
 #include "src/xnnpack/math.h"
 #include "src/xnnpack/node-type.h"
@@ -1250,6 +1251,49 @@ TEST(SUBGRAPH_FP16_DUPLICATE_INPUTS, converted_only_once) {
 }
 
 #if XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI
+TEST(SUBGRAPH_FP16_CONVOLUTION, no_inline_lhs_without_igemm) {
+  const struct xnn_gemm_config* pf16_config =
+      xnn_init_pf16_gemm_config();
+  // This test executes only on Arm64 KleidiAI builds where PF16 GEMM is
+  // available without an IGEMM weight packer, such as Adv SIMD builds with
+  // SME and SME2 disabled. Other build and hardware combinations skip it.
+  if (pf16_config == nullptr || pf16_config->pack_igemm_goki != nullptr) {
+    GTEST_SKIP() << "PF16 without an IGEMM packer is not selected";
+  }
+
+  constexpr uint32_t input_id = 0;
+  constexpr uint32_t filter_id = 1;
+  constexpr uint32_t bias_id = 2;
+  constexpr uint32_t output_id = 3;
+  const uint32_t runtime_flags =
+      xnn_test_runtime_flags() & ~XNN_FLAG_NO_INLINED_LHS_PACKING;
+
+  SubgraphTester tester(/*external_value_ids=*/4);
+  tester.AddInputTensorF32({1, 8, 8, 32}, input_id)
+      .AddStaticTensorF32({64, 3, 3, 32}, TensorType::kDense, filter_id)
+      .AddStaticTensorF32({64}, TensorType::kDense, bias_id)
+      .AddOutputTensorF32({1, 8, 8, 64}, output_id)
+      .AddConvolution2D(
+          ConvolutionParams{
+              Padding{1, 1, 1, 1}, Kernel{3, 3}, Subsampling{1, 1},
+              Dilation{1, 1}, /*groups=*/1, /*group_input_channels=*/32,
+              /*group_output_channels=*/64, /*output_min=*/-INFINITY,
+              /*output_max=*/INFINITY},
+          input_id, filter_id, bias_id, output_id, /*flags=*/0)
+      .RewriteForFp16()
+      .Optimize(runtime_flags);
+
+  bool found_convolution = false;
+  for (uint32_t i = 0; i < tester.NumNodes(); i++) {
+    const xnn_node* node = tester.Node(i);
+    if (node->type == xnn_node_type_convolution_2d) {
+      found_convolution = true;
+      EXPECT_EQ(node->flags & XNN_FLAG_INLINE_LHS_PACKING, 0);
+    }
+  }
+  EXPECT_TRUE(found_convolution);
+}
+
 // This test targets the failure where pf16 packed-LHS iGEMM kernels were
 // accidentally invoked through the non-packed iGEMM call path. The packed-LHS
 // kernels have a different function signature, so the runtime ended up passing
@@ -1257,12 +1301,11 @@ TEST(SUBGRAPH_FP16_DUPLICATE_INPUTS, converted_only_once) {
 // causing a crash. In this test we build a Conv2D that forces the pf16 iGEMM path with
 // inline LHS packing enabled
 TEST(SUBGRAPH_FP16_CONVOLUTION, inline_lhs_packing_pf16) {
-
-    const auto* hw = xnn_init_hardware_config();
-    if (!hw || (hw->arch_flags & xnn_arch_arm_sme2) == 0
-            || (hw->arch_flags & xnn_arch_arm_sme ) == 0) {
-      GTEST_SKIP() << "PF16/SME(2) path not available on this target";
-    }
+  const struct xnn_gemm_config* pf16_config =
+      xnn_init_pf16_gemm_config();
+  if (pf16_config == nullptr || pf16_config->pack_igemm_goki == nullptr) {
+    GTEST_SKIP() << "PF16 IGEMM path not available on this target";
+  }
 
   // Construct an NHWC Conv that triggers iGEMM path
   // Shapes: N=1, H=W=8 => output_size=64; Cin=32, Cout=64.
