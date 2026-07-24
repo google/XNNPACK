@@ -291,14 +291,19 @@ enum xnn_status xnn_release_weights_memory(struct xnn_weights_buffer* buffer) {
 }
 
 enum xnn_status xnn_reserve_weights_memory(struct xnn_weights_buffer* buffer, size_t min_available_size) {
-  if (buffer->size + min_available_size <= buffer->capacity) {
+  size_t required_size;
+  if (!xnn_safe_add(buffer->size, min_available_size, &required_size)) {
+    xnn_log_error("failed to reserve weights memory: size overflow");
+    return xnn_status_out_of_memory;
+  }
+  if (required_size <= buffer->capacity) {
     xnn_log_debug("reserving weights memory of size %zu without growing buffer", min_available_size);
     return xnn_status_success;
   }
 
   size_t new_capacity = 0;
   void* new_start =
-    resize_buffer(buffer->start, buffer->size, buffer->capacity, buffer->size + min_available_size, &new_capacity);
+    resize_buffer(buffer->start, buffer->size, buffer->capacity, required_size, &new_capacity);
   if (new_start == NULL) {
     xnn_log_error("failed to reserve weights memory");
     return xnn_status_out_of_memory;

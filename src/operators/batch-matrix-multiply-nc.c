@@ -439,7 +439,14 @@ XNN_NO_SANITIZE_FUNCTION enum xnn_status create_batch_matrix_multiply_nc_const_w
     const uint32_t nr =
         batch_matrix_multiply_op->ukernel.gemm_ukernels->gemm.nr;
     const size_t n_stride = round_up(n, nr);
-    const size_t packed_size = batch_size_b * n_stride * weights_stride;
+    size_t packed_size;
+    if (!xnn_safe_mul(batch_size_b, n_stride, &packed_size) ||
+        !xnn_safe_mul(packed_size, weights_stride, &packed_size)) {
+      xnn_log_error(
+          "failed to calculate packed weights size for %s operator: overflow",
+          xnn_operator_type_to_string_v2(batch_matrix_multiply_op));
+      return xnn_status_out_of_memory;
+    }
     const size_t aligned_size =
         round_up_po2(packed_size, XNN_ALLOCATION_ALIGNMENT);
 
