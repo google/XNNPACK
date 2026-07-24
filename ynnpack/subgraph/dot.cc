@@ -213,14 +213,28 @@ bool maybe_rewrite_input_a_to_uint8(ynn_subgraph& subgraph,
                                 num_k_dims);
 }
 
-// TODO(dsharlet): This should probably be a parameter we learn based on cpuinfo
-// or other source of CPU metadata. This was determined experimentally.
-constexpr index_t cache_size_l2 = 128 * 1024;
+// Set default cache sizes to be conservative.
+constexpr index_t default_cache_size_l1 = 16 * 1024;
+constexpr index_t default_cache_size_l2 = 256 * 1024;
+constexpr index_t default_cache_size_l3 = 4 * 1024 * 1024;
+constexpr index_t default_num_shared_l3_cores = 4;
 
 // When we want arithmetic to be consistent, we need to make all tiling
 // decisions independently of any hardware dependent parameters (cache sizes,
 // kernel tile sizes, etc.).
 constexpr index_t consistent_block_n = 64;
+
+const cpu_info& get_cpu_info() {
+  static const cpu_info info = []() {
+    cpu_info info;
+    info.cache_sizes[0] = default_cache_size_l1;
+    info.cache_sizes[1] = default_cache_size_l2;
+    info.cache_sizes[2] = default_cache_size_l3;
+    info.num_shared_l3_cores = default_num_shared_l3_cores;
+    return info;
+  }();
+  return info;
+}
 
 // The wrapper for the kernel we use when we actually want to run a dot kernel
 // on some buffers.
@@ -446,13 +460,12 @@ auto make_dot_impl(dot_type type, bool consistent_arithmetic, bool transposed_a,
              b_k_strides[0], b, init_c_stride_m, init_c, c_stride_m, c);
     };
 
-    const size_t cache_sizes[] = {cache_size_l2};
-
+    const cpu_info& cpu_info = get_cpu_info();
     // We need up to 3 loops per cache level.
-    dot_loop loops_storage[std::size(cache_sizes) * 3];
+    dot_loop loops_storage[cpu_info::kNumCacheLevels * 3];
 
     if (k1) {
-      auto loops = schedule_dot(cache_sizes, c_m.extent(), c_n.extent(), k,
+      auto loops = schedule_dot(cpu_info, c_m.extent(), c_n.extent(), k,
                                 block_m, block_n, block_k, a.elem_size,
                                 b.elem_size, loops_storage);
 
@@ -469,7 +482,7 @@ auto make_dot_impl(dot_type type, bool consistent_arithmetic, bool transposed_a,
       std::array<size_t, 3> k_tail = {static_cast<size_t>(k1_tail),
                                       static_cast<size_t>(k2),
                                       static_cast<size_t>(k3)};
-      auto loops = schedule_dot(cache_sizes, c_m.extent(), c_n.extent(), k_tail,
+      auto loops = schedule_dot(cpu_info, c_m.extent(), c_n.extent(), k_tail,
                                 block_m, block_n, block_k, a.elem_size,
                                 b.elem_size, loops_storage);
       // Dot kernels can't handle k1 not aligned to tile_k. We handle that
@@ -616,8 +629,10 @@ uint32_t define_pack_b(ynn_subgraph_t subgraph, const dot_type& type,
   slinky::expr k2 = num_k_dims >= 2 ? b.extent(2) : 1;
   slinky::expr k3 = num_k_dims >= 3 ? b.extent(3) : 1;
 
+  // Use half of the L2 cache for the packed B buffer.
+  const index_t cache_capacity = default_cache_size_l2 / 2;
   const index_t elem_size_bits = type_size_bytes(b.type) * 8 / element_count;
-  const index_t cache_elements = cache_size_l2 * 8 / elem_size_bits;
+  const index_t cache_elements = cache_capacity * 8 / elem_size_bits;
 
   // When choosing block_n, we have the following concerns:
   // - We want to make the block bigger than the kernel's `block_n`
