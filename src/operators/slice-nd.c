@@ -16,6 +16,7 @@
 #include "src/xnnpack/config-types.h"
 #include "src/xnnpack/config.h"
 #include "src/xnnpack/log.h"
+#include "src/xnnpack/math.h"
 #include "src/xnnpack/normalization.h"
 #include "src/xnnpack/operator-type.h"
 #include "src/xnnpack/operator-utils.h"
@@ -172,7 +173,9 @@ static enum xnn_status reshape_slice_nd(
           input_shape[i]);
       return xnn_status_unsupported_parameter;
     }
-    if (offsets[i] + sizes[i] > input_shape[i]) {
+    size_t offset_plus_size;
+    if (!xnn_safe_add(offsets[i], sizes[i], &offset_plus_size) ||
+        offset_plus_size > input_shape[i]) {
       xnn_log_error(
           "failed to reshape %s operator with %zu offsets[%zu] and %zu "
           "sizes[%zu]: offset + size <= %zu",
