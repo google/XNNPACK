@@ -336,10 +336,9 @@ cc_test(
     linkopts = ynn_binary_linkopts(),
     malloc = ynn_binary_malloc(),
     deps = [
-        ":subgraph_builder",
+        ":scheduler",
         "//ynnpack",
         "//ynnpack/base",
-        "//ynnpack/base/test:tensor",
     ] + ynn_benchmark_deps(),
 )
 
