@@ -39,6 +39,9 @@ def define_build_option(name, default_all = [], default_any = []):
         name = name,
         actual = select({
             explicit_true: ":" + explicit_true,
+            # This alias is used as a positive condition in downstream select()
+            # calls. When the option is explicitly false, route the alias to the
+            # explicit-true config_setting so the public condition does not match.
             explicit_false: ":" + explicit_true,
             "//conditions:default": ":" + default,
         }),
