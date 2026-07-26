@@ -40,7 +40,8 @@ class x86_uint8_int2_int32(x86):
     bits = self.bits
     broadcast_128 = self.broadcast_128()
     return super().begin_func(func_name) + f"""
-const __m{bits}i mask = {mm}_set1_epi8(0x03);
+const __m{bits}i mask_k02 = {mm}_set1_epi8(0x33);
+const __m{bits}i mask_k13 = {mm}_set1_epi8(0xCC);
 const __m{bits}i sign_lut = {broadcast_128}(_mm_setr_epi8(0, 1, -2, -1, 0, 1, -2, -1, 0, 1, -2, -1, 0, 1, -2, -1));
 const __m{bits}i shuf_a0 = {broadcast_128}(_mm_setr_epi8(0, 4, 8, 12, 0, 4, 8, 12, 0, 4, 8, 12, 0, 4, 8, 12));
 const __m{bits}i shuf_a1 = {broadcast_128}(_mm_setr_epi8(1, 5, 9, 13, 1, 5, 9, 13, 1, 5, 9, 13, 1, 5, 9, 13));
@@ -52,13 +53,17 @@ const __m{bits}i shuf_a3 = {broadcast_128}(_mm_setr_epi8(3, 7, 11, 15, 3, 7, 11,
     bits = self.bits
     mm = self._mm()
     # Unpack 2-bit data to 8-bit, leaving every 4th value of K in 4 registers.
+    # The sign_lut effectively computes x % 4, but shuffle_epi8 has a special
+    # case for when the upper bits are set. so we need to mask off the bits that
+    # would pollute the upper bit of each 8-bit lane before applying sign_lut.
     return f"""
-__m{bits}i b_{k}_{j} = {mm}_load_si{bits}({self.b_ptr(k, j, f"__m{bits}i")});
+__m{bits}i b_{k+0}_{j} = {mm}_load_si{bits}({self.b_ptr(k, j, f"__m{bits}i")});
+__m{bits}i b_{k+1}_{j} = {mm}_and_si{bits}(b_{k+0}_{j}, mask_k13);
+b_{k+0}_{j} = {mm}_and_si{bits}(b_{k+0}_{j}, mask_k02);
 
-__m{bits}i b_{k+1}_{j} = {mm}_and_si{bits}({mm}_srli_epi32(b_{k}_{j}, 2), mask);
-__m{bits}i b_{k+2}_{j} = {mm}_and_si{bits}({mm}_srli_epi32(b_{k}_{j}, 4), mask);
-__m{bits}i b_{k+3}_{j} = {mm}_and_si{bits}({mm}_srli_epi32(b_{k}_{j}, 6), mask);
-b_{k+0}_{j} = {mm}_and_si{bits}(b_{k}_{j}, mask);
+__m{bits}i b_{k+3}_{j} = {mm}_srli_epi32(b_{k+1}_{j}, 6);
+__m{bits}i b_{k+2}_{j} = {mm}_srli_epi32(b_{k+0}_{j}, 4);
+b_{k+1}_{j} = {mm}_srli_epi32(b_{k+1}_{j}, 2);
 
 b_{k+0}_{j} = {mm}_shuffle_epi8(sign_lut, b_{k+0}_{j});
 b_{k+1}_{j} = {mm}_shuffle_epi8(sign_lut, b_{k+1}_{j});
@@ -72,12 +77,12 @@ b_{k+3}_{j} = {mm}_shuffle_epi8(sign_lut, b_{k+3}_{j});
     mm = self._mm()
     a_ptr = self.a_ptr(i, k)
     a_128 = f"_mm_loadu_si128(reinterpret_cast<const __m128i*>({a_ptr}))"
-    a = f"{self.broadcast_128()}({a_128})"
     return f"""
-__m{self.bits}i a_{i}_{k+0} = {mm}_shuffle_epi8({a}, shuf_a0);
-__m{self.bits}i a_{i}_{k+1} = {mm}_shuffle_epi8({a}, shuf_a1);
-__m{self.bits}i a_{i}_{k+2} = {mm}_shuffle_epi8({a}, shuf_a2);
-__m{self.bits}i a_{i}_{k+3} = {mm}_shuffle_epi8({a}, shuf_a3);
+__m{self.bits}i a_{i}_{k+0} = {self.broadcast_128()}({a_128});
+__m{self.bits}i a_{i}_{k+3} = {mm}_shuffle_epi8(a_{i}_{k+0}, shuf_a3);
+__m{self.bits}i a_{i}_{k+2} = {mm}_shuffle_epi8(a_{i}_{k+0}, shuf_a2);
+__m{self.bits}i a_{i}_{k+1} = {mm}_shuffle_epi8(a_{i}_{k+0}, shuf_a1);
+a_{i}_{k+0} = {mm}_shuffle_epi8(a_{i}_{k+0}, shuf_a0);
 """
 
   def product(self, i, j, k):
@@ -95,9 +100,6 @@ __m{self.bits}i a_{i}_{k+3} = {mm}_shuffle_epi8({a}, shuf_a3);
       # The first tile initializes the local accumulator of int16 values.
       result = f"""
 __m{self.bits}i {c_ij}_block = {mm}_maddubs_epi16({a_ik0}, {b_k0j});
-{c_ij}_block = {mm}_add_epi16({c_ij}_block, {mm}_maddubs_epi16({a_ik1}, {b_k1j}));
-{c_ij}_block = {mm}_add_epi16({c_ij}_block, {mm}_maddubs_epi16({a_ik2}, {b_k2j}));
-{c_ij}_block = {mm}_add_epi16({c_ij}_block, {mm}_maddubs_epi16({a_ik3}, {b_k3j}));
 """
     else:
       # Subsequent tiles add to the local accumulator. We can add 64 values of k
@@ -105,6 +107,8 @@ __m{self.bits}i {c_ij}_block = {mm}_maddubs_epi16({a_ik0}, {b_k0j});
       assert k <= 64
       result = f"""
 {c_ij}_block = {mm}_add_epi16({c_ij}_block, {mm}_maddubs_epi16({a_ik0}, {b_k0j}));
+"""
+    result += f"""
 {c_ij}_block = {mm}_add_epi16({c_ij}_block, {mm}_maddubs_epi16({a_ik1}, {b_k1j}));
 {c_ij}_block = {mm}_add_epi16({c_ij}_block, {mm}_maddubs_epi16({a_ik2}, {b_k2j}));
 {c_ij}_block = {mm}_add_epi16({c_ij}_block, {mm}_maddubs_epi16({a_ik3}, {b_k3j}));
