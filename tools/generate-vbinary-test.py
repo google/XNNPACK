@@ -11,6 +11,10 @@ import os
 import re
 import sys
 import yaml
+try:
+  from immutabledict import immutabledict
+except ImportError:
+  immutabledict = dict
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import xngen
@@ -44,7 +48,7 @@ parser.add_argument(
 )
 parser.set_defaults(defines=list())
 
-OP_TYPES = {
+OP_TYPES = immutabledict({
     "vadd": "Add",
     "vaddc": "Add",
     "vcopysign": "CopySign",
@@ -71,7 +75,7 @@ OP_TYPES = {
     "vprelu": "Prelu",
     "vpreluc": "Prelu",
     "vrpreluc": "RPrelu",
-}
+})
 
 BINOP_TEST_TEMPLATE = """
 #define XNN_UKERNEL(arch_flags, ukernel, batch_tile, vector_tile, datatype, params_type, init_params)
