@@ -15,6 +15,7 @@
 #include "src/xnnpack/init-once.h"
 #include "src/xnnpack/log.h"
 #include "src/xnnpack/microfnptr.h"
+#include "src/xnnpack/microkernel-name-registry.h"
 #include "src/xnnpack/microparams-init.h"
 #include "src/xnnpack/packq.h"
 #include "src/xnnpack/vcvt.h"
@@ -153,9 +154,10 @@ XNN_INIT_ONCE_GUARD(u8_clamp);
 XNN_INIT_ONCE_GUARD(xx_copy);
 
 // Macros to log the microkernel names if and when they are registered.
-#define XNN_INIT_UNARY_UKERNEL(ukernel) \
-  (xnn_vunary_ukernel_fn) ukernel;      \
-  xnn_log_info("Using unary microkernel '%s'.", #ukernel);
+#define XNN_INIT_UNARY_UKERNEL(ukernel)                    \
+  (xnn_vunary_ukernel_fn) ukernel;                         \
+  xnn_log_info("Using unary microkernel '%s'.", #ukernel); \
+  XNN_REGISTER_UKERNEL_NAME(ukernel);
 
 static void init_bf16_to_f32_cvt_config(void) {
   #if XNN_ARCH_ARM
