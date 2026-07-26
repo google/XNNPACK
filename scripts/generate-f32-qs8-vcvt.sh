@@ -21,15 +21,36 @@ tools/xngen src/f32-qs8-vcvt/neon.c.in -D BATCH_TILE=16 -D DATATYPE=QU8 -o src/f
 tools/xngen src/f32-qs8-vcvt/neon.c.in -D BATCH_TILE=24 -D DATATYPE=QU8 -o src/f32-qu8-vcvt/gen/f32-qu8-vcvt-neon-u24.c &
 tools/xngen src/f32-qs8-vcvt/neon.c.in -D BATCH_TILE=32 -D DATATYPE=QU8 -o src/f32-qu8-vcvt/gen/f32-qu8-vcvt-neon-u32.c &
 
-tools/xngen src/f32-qs8-vcvt/neonv8.c.in -D BATCH_TILE=8  -D DATATYPE=QS8 -o src/f32-qs8-vcvt/gen/f32-qs8-vcvt-neonv8-u8.c &
-tools/xngen src/f32-qs8-vcvt/neonv8.c.in -D BATCH_TILE=16 -D DATATYPE=QS8 -o src/f32-qs8-vcvt/gen/f32-qs8-vcvt-neonv8-u16.c &
-tools/xngen src/f32-qs8-vcvt/neonv8.c.in -D BATCH_TILE=24 -D DATATYPE=QS8 -o src/f32-qs8-vcvt/gen/f32-qs8-vcvt-neonv8-u24.c &
-tools/xngen src/f32-qs8-vcvt/neonv8.c.in -D BATCH_TILE=32 -D DATATYPE=QS8 -o src/f32-qs8-vcvt/gen/f32-qs8-vcvt-neonv8-u32.c &
+tools/xngen src/f32-qs8-vcvt/neonv8.c.in -D BATCH_TILE=8  -D IDATATYPE=F32 -D ODATATYPE=QS8 -o src/f32-qs8-vcvt/gen/f32-qs8-vcvt-neonv8-u8.c &
+tools/xngen src/f32-qs8-vcvt/neonv8.c.in -D BATCH_TILE=16 -D IDATATYPE=F32 -D ODATATYPE=QS8 -o src/f32-qs8-vcvt/gen/f32-qs8-vcvt-neonv8-u16.c &
+tools/xngen src/f32-qs8-vcvt/neonv8.c.in -D BATCH_TILE=24 -D IDATATYPE=F32 -D ODATATYPE=QS8 -o src/f32-qs8-vcvt/gen/f32-qs8-vcvt-neonv8-u24.c &
+tools/xngen src/f32-qs8-vcvt/neonv8.c.in -D BATCH_TILE=32 -D IDATATYPE=F32 -D ODATATYPE=QS8 -o src/f32-qs8-vcvt/gen/f32-qs8-vcvt-neonv8-u32.c &
 
-tools/xngen src/f32-qs8-vcvt/neonv8.c.in -D BATCH_TILE=8  -D DATATYPE=QU8 -o src/f32-qu8-vcvt/gen/f32-qu8-vcvt-neonv8-u8.c &
-tools/xngen src/f32-qs8-vcvt/neonv8.c.in -D BATCH_TILE=16 -D DATATYPE=QU8 -o src/f32-qu8-vcvt/gen/f32-qu8-vcvt-neonv8-u16.c &
-tools/xngen src/f32-qs8-vcvt/neonv8.c.in -D BATCH_TILE=24 -D DATATYPE=QU8 -o src/f32-qu8-vcvt/gen/f32-qu8-vcvt-neonv8-u24.c &
-tools/xngen src/f32-qs8-vcvt/neonv8.c.in -D BATCH_TILE=32 -D DATATYPE=QU8 -o src/f32-qu8-vcvt/gen/f32-qu8-vcvt-neonv8-u32.c &
+tools/xngen src/f32-qs8-vcvt/neonv8.c.in -D BATCH_TILE=8  -D IDATATYPE=F32 -D ODATATYPE=QU8 -o src/f32-qu8-vcvt/gen/f32-qu8-vcvt-neonv8-u8.c &
+tools/xngen src/f32-qs8-vcvt/neonv8.c.in -D BATCH_TILE=16 -D IDATATYPE=F32 -D ODATATYPE=QU8 -o src/f32-qu8-vcvt/gen/f32-qu8-vcvt-neonv8-u16.c &
+tools/xngen src/f32-qs8-vcvt/neonv8.c.in -D BATCH_TILE=24 -D IDATATYPE=F32 -D ODATATYPE=QU8 -o src/f32-qu8-vcvt/gen/f32-qu8-vcvt-neonv8-u24.c &
+tools/xngen src/f32-qs8-vcvt/neonv8.c.in -D BATCH_TILE=32 -D IDATATYPE=F32 -D ODATATYPE=QU8 -o src/f32-qu8-vcvt/gen/f32-qu8-vcvt-neonv8-u32.c &
+
+tools/xngen src/f32-qs8-vcvt/neonv8.c.in -D BATCH_TILE=8  -D IDATATYPE=F16 -D ODATATYPE=QS8 -o src/f16-qs8-vcvt/gen/f16-qs8-vcvt-neonv8-u8.c &
+tools/xngen src/f32-qs8-vcvt/neonv8.c.in -D BATCH_TILE=16 -D IDATATYPE=F16 -D ODATATYPE=QS8 -o src/f16-qs8-vcvt/gen/f16-qs8-vcvt-neonv8-u16.c &
+tools/xngen src/f32-qs8-vcvt/neonv8.c.in -D BATCH_TILE=24 -D IDATATYPE=F16 -D ODATATYPE=QS8 -o src/f16-qs8-vcvt/gen/f16-qs8-vcvt-neonv8-u24.c &
+tools/xngen src/f32-qs8-vcvt/neonv8.c.in -D BATCH_TILE=32 -D IDATATYPE=F16 -D ODATATYPE=QS8 -o src/f16-qs8-vcvt/gen/f16-qs8-vcvt-neonv8-u32.c &
+
+tools/xngen src/f32-qs8-vcvt/neonv8.c.in -D BATCH_TILE=8  -D IDATATYPE=F16 -D ODATATYPE=QU8 -o src/f16-qu8-vcvt/gen/f16-qu8-vcvt-neonv8-u8.c &
+tools/xngen src/f32-qs8-vcvt/neonv8.c.in -D BATCH_TILE=16 -D IDATATYPE=F16 -D ODATATYPE=QU8 -o src/f16-qu8-vcvt/gen/f16-qu8-vcvt-neonv8-u16.c &
+tools/xngen src/f32-qs8-vcvt/neonv8.c.in -D BATCH_TILE=24 -D IDATATYPE=F16 -D ODATATYPE=QU8 -o src/f16-qu8-vcvt/gen/f16-qu8-vcvt-neonv8-u24.c &
+tools/xngen src/f32-qs8-vcvt/neonv8.c.in -D BATCH_TILE=32 -D IDATATYPE=F16 -D ODATATYPE=QU8 -o src/f16-qu8-vcvt/gen/f16-qu8-vcvt-neonv8-u32.c &
+
+tools/xngen src/f32-qs8-vcvt/neonv8.c.in -D BATCH_TILE=8  -D IDATATYPE=BF16 -D ODATATYPE=QS8 -o src/bf16-qs8-vcvt/gen/bf16-qs8-vcvt-neonv8-u8.c &
+tools/xngen src/f32-qs8-vcvt/neonv8.c.in -D BATCH_TILE=16 -D IDATATYPE=BF16 -D ODATATYPE=QS8 -o src/bf16-qs8-vcvt/gen/bf16-qs8-vcvt-neonv8-u16.c &
+tools/xngen src/f32-qs8-vcvt/neonv8.c.in -D BATCH_TILE=24 -D IDATATYPE=BF16 -D ODATATYPE=QS8 -o src/bf16-qs8-vcvt/gen/bf16-qs8-vcvt-neonv8-u24.c &
+tools/xngen src/f32-qs8-vcvt/neonv8.c.in -D BATCH_TILE=32 -D IDATATYPE=BF16 -D ODATATYPE=QS8 -o src/bf16-qs8-vcvt/gen/bf16-qs8-vcvt-neonv8-u32.c &
+
+tools/xngen src/f32-qs8-vcvt/neonv8.c.in -D BATCH_TILE=8  -D IDATATYPE=BF16 -D ODATATYPE=QU8 -o src/bf16-qu8-vcvt/gen/bf16-qu8-vcvt-neonv8-u8.c &
+tools/xngen src/f32-qs8-vcvt/neonv8.c.in -D BATCH_TILE=16 -D IDATATYPE=BF16 -D ODATATYPE=QU8 -o src/bf16-qu8-vcvt/gen/bf16-qu8-vcvt-neonv8-u16.c &
+tools/xngen src/f32-qs8-vcvt/neonv8.c.in -D BATCH_TILE=24 -D IDATATYPE=BF16 -D ODATATYPE=QU8 -o src/bf16-qu8-vcvt/gen/bf16-qu8-vcvt-neonv8-u24.c &
+tools/xngen src/f32-qs8-vcvt/neonv8.c.in -D BATCH_TILE=32 -D IDATATYPE=BF16 -D ODATATYPE=QU8 -o src/bf16-qu8-vcvt/gen/bf16-qu8-vcvt-neonv8-u32.c &
+
 
 ################################# RISCV-V Vector #################################
 tools/xngen src/f32-qs8-vcvt/rvv.c.in -D LMUL=1 -D DATATYPE=QS8 -o src/f32-qs8-vcvt/gen/f32-qs8-vcvt-rvv-u1v.c &

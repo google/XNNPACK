@@ -3,6 +3,8 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+$assert IDATATYPE in ["BF16", "F16", "F32"]
+$assert ODATATYPE in ["QS8", "QU8"]
 $assert BATCH_TILE % 8 == 0
 $assert BATCH_TILE >= 8
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
@@ -13,39 +15,56 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/intrinsics-polyfill.h"
+$if IDATATYPE in ["BF16", "F16"]:
+  #include "src/xnnpack/math.h"
 #include "src/xnnpack/microparams.h"
 #include "src/xnnpack/vcvt.h"
 
 
-$XINT8_T = {"QS8": "int8_t", "QU8": "uint8_t"}[DATATYPE]
-$XINT8X8_T = {"QS8": "int8x8_t", "QU8": "uint8x8_t"}[DATATYPE]
-$XINT8X16_T = {"QS8": "int8x16_t", "QU8": "uint8x16_t"}[DATATYPE]
-$VST1Q_X8 = {"QS8": "vst1q_s8", "QU8": "vst1q_u8"}[DATATYPE]
-$VST1_X8 = {"QS8": "vst1_s8", "QU8": "vst1_u8"}[DATATYPE]
-$VST1_LANE_X8 = {"QS8": "vst1_lane_s8", "QU8": "vst1_lane_u8"}[DATATYPE]
-$VQMOVXN_S16 = {"QS8": "vqmovn_s16", "QU8": "vqmovun_s16"}[DATATYPE]
-$VEXT_X8 = {"QS8": "vext_s8", "QU8": "vext_u8"}[DATATYPE]
-$VCOMBINE_X8 = {"QS8": "vcombine_s8", "QU8": "vcombine_u8"}[DATATYPE]
-$VGET_LOW_X8 = {"QS8": "vget_low_s8", "QU8": "vget_low_u8"}[DATATYPE]
-$VREINTERPRET_U16_X8 = {"QS8": "vreinterpret_u16_s8", "QU8": "vreinterpret_u16_u8"}[DATATYPE]
-$VREINTERPRET_U32_X8 = {"QS8": "vreinterpret_u32_s8", "QU8": "vreinterpret_u32_u8"}[DATATYPE]
-void xnn_f32_${DATATYPE.lower()}_vcvt_ukernel__neonv8_u${BATCH_TILE}(
+$INPUT_T = {"BF16": "xnn_bfloat16", "F16": "xnn_float16", "F32": "float"}[IDATATYPE]
+$XINT8_T = {"QS8": "int8_t", "QU8": "uint8_t"}[ODATATYPE]
+$XINT8X8_T = {"QS8": "int8x8_t", "QU8": "uint8x8_t"}[ODATATYPE]
+$XINT8X16_T = {"QS8": "int8x16_t", "QU8": "uint8x16_t"}[ODATATYPE]
+$VST1Q_X8 = {"QS8": "vst1q_s8", "QU8": "vst1q_u8"}[ODATATYPE]
+$VST1_X8 = {"QS8": "vst1_s8", "QU8": "vst1_u8"}[ODATATYPE]
+$VST1_LANE_X8 = {"QS8": "vst1_lane_s8", "QU8": "vst1_lane_u8"}[ODATATYPE]
+$VQMOVXN_S16 = {"QS8": "vqmovn_s16", "QU8": "vqmovun_s16"}[ODATATYPE]
+$VEXT_X8 = {"QS8": "vext_s8", "QU8": "vext_u8"}[ODATATYPE]
+$VCOMBINE_X8 = {"QS8": "vcombine_s8", "QU8": "vcombine_u8"}[ODATATYPE]
+$VGET_LOW_X8 = {"QS8": "vget_low_s8", "QU8": "vget_low_u8"}[ODATATYPE]
+$VREINTERPRET_U16_X8 = {"QS8": "vreinterpret_u16_s8", "QU8": "vreinterpret_u16_u8"}[ODATATYPE]
+$VREINTERPRET_U32_X8 = {"QS8": "vreinterpret_u32_s8", "QU8": "vreinterpret_u32_u8"}[ODATATYPE]
+void xnn_${IDATATYPE.lower()}_${ODATATYPE.lower()}_vcvt_ukernel__neonv8_u${BATCH_TILE}(
     size_t batch,
-    const float* input,
+    const ${INPUT_T}* input,
     ${XINT8_T}* output,
-    const struct xnn_f32_${DATATYPE.lower()}_cvt_params* restrict params) XNN_OOB_READS
+    const struct xnn_${IDATATYPE.lower()}_${ODATATYPE.lower()}_cvt_params* restrict params) XNN_OOB_READS
 {
   assert(batch != 0);
-  assert(batch % sizeof(float) == 0);
+  assert(batch % sizeof(${INPUT_T}) == 0);
   assert(input != NULL);
   assert(output != NULL);
 
-  const float32x4_t vscale = vdupq_n_f32(params->scalar.scale);
+  $if IDATATYPE in ["BF16", "F16"]:
+    const float32x4_t vscale = vdupq_n_f32(${INPUT_T}_to_float(params->scalar.scale));
+  $else:
+    const float32x4_t vscale = vdupq_n_f32(params->scalar.scale);
   const int16x8_t voutput_zero_point = vdupq_n_s16(params->scalar.output_zero_point);
   $if BATCH_TILE > 8:
-    for (; batch >= ${BATCH_TILE} * sizeof(float); batch -= ${BATCH_TILE} * sizeof(float)) {
-      $for N in range(0, BATCH_TILE, 4):
-        float32x4_t vx${ABC[N:N+4]} = vld1q_f32(input); input += 4;
+    for (; batch >= ${BATCH_TILE} * sizeof(${INPUT_T}); batch -= ${BATCH_TILE} * sizeof(${INPUT_T})) {
+      $if IDATATYPE == "BF16":
+        $for N in range(0, BATCH_TILE, 8):
+          const uint16x8_t vbf${ABC[N:N+8]} = vld1q_u16((const uint16_t*) input); input += 8;
+          float32x4_t vx${ABC[N:N+4]} = vreinterpretq_f32_u32(vshll_n_u16(vget_low_u16(vbf${ABC[N:N+8]}), 16));
+          float32x4_t vx${ABC[N+4:N+8]} = vreinterpretq_f32_u32(vshll_n_u16(vget_high_u16(vbf${ABC[N:N+8]}), 16));
+      $elif IDATATYPE == "F16":
+        $for N in range(0, BATCH_TILE, 8):
+          const float16x8_t vfp${ABC[N:N+8]} = vreinterpretq_f16_u16(vld1q_u16((const uint16_t*) input)); input += 8;
+          float32x4_t vx${ABC[N:N+4]} = vcvt_f32_f16(vget_low_f16(vfp${ABC[N:N+8]}));
+          float32x4_t vx${ABC[N+4:N+8]} = vcvt_f32_f16(vget_high_f16(vfp${ABC[N:N+8]}));
+      $else:
+        $for N in range(0, BATCH_TILE, 4):
+          float32x4_t vx${ABC[N:N+4]} = vld1q_f32(input); input += 4;
 
       $for N in range(0, BATCH_TILE, 4):
         vx${ABC[N:N+4]} = vmulq_f32(vx${ABC[N:N+4]}, vscale);
@@ -71,9 +90,18 @@ void xnn_f32_${DATATYPE.lower()}_vcvt_ukernel__neonv8_u${BATCH_TILE}(
         $else:
           ${VST1_X8}(output, vy${ABC[N:N+8]}); output += 8;
     }
-  for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
-    float32x4_t vx_lo = vld1q_f32(input); input += 4;
-    float32x4_t vx_hi = vld1q_f32(input); input += 4;
+  for (; batch >= 8 * sizeof(${INPUT_T}); batch -= 8 * sizeof(${INPUT_T})) {
+    $if IDATATYPE == "BF16":
+      const uint16x8_t vbf = vld1q_u16((const uint16_t*) input); input += 8;
+      float32x4_t vx_lo = vreinterpretq_f32_u32(vshll_n_u16(vget_low_u16(vbf), 16));
+      float32x4_t vx_hi = vreinterpretq_f32_u32(vshll_n_u16(vget_high_u16(vbf), 16));
+    $elif IDATATYPE == "F16":
+      const float16x8_t vfp = vreinterpretq_f16_u16(vld1q_u16((const uint16_t*) input)); input += 8;
+      float32x4_t vx_lo = vcvt_f32_f16(vget_low_f16(vfp));
+      float32x4_t vx_hi = vcvt_f32_f16(vget_high_f16(vfp));
+    $else:
+      float32x4_t vx_lo = vld1q_f32(input); input += 4;
+      float32x4_t vx_hi = vld1q_f32(input); input += 4;
 
     vx_lo = vmulq_f32(vx_lo, vscale);
     vx_hi = vmulq_f32(vx_hi, vscale);
@@ -88,11 +116,20 @@ void xnn_f32_${DATATYPE.lower()}_vcvt_ukernel__neonv8_u${BATCH_TILE}(
     ${VST1_X8}(output, vy); output += 8;
   }
   if XNN_UNLIKELY(batch != 0) {
-    assert(batch >= 1 * sizeof(float));
-    assert(batch <= 7 * sizeof(float));
-    float32x4_t vx_lo = vld1q_f32(input);
-    const float* x_hi = (const float*) ((uintptr_t) input + (batch & (4 * sizeof(float))));
-    float32x4_t vx_hi = vld1q_f32(x_hi);
+    assert(batch >= 1 * sizeof(${INPUT_T}));
+    assert(batch <= 7 * sizeof(${INPUT_T}));
+    $if IDATATYPE == "BF16":
+      const uint16x8_t vbf = vld1q_u16((const uint16_t*) input);
+      float32x4_t vx_lo = vreinterpretq_f32_u32(vshll_n_u16(vget_low_u16(vbf), 16));
+      float32x4_t vx_hi = vreinterpretq_f32_u32(vshll_n_u16(vget_high_u16(vbf), 16));
+    $elif IDATATYPE == "F16":
+      const float16x8_t vfp = vreinterpretq_f16_u16(vld1q_u16((const uint16_t*) input));
+      float32x4_t vx_lo = vcvt_f32_f16(vget_low_f16(vfp));
+      float32x4_t vx_hi = vcvt_f32_f16(vget_high_f16(vfp));
+    $else:
+      float32x4_t vx_lo = vld1q_f32(input);
+      const float* x_hi = (const float*) ((uintptr_t) input + (batch & (4 * sizeof(float))));
+      float32x4_t vx_hi = vld1q_f32(x_hi);
 
     vx_lo = vmulq_f32(vx_lo, vscale);
     vx_hi = vmulq_f32(vx_hi, vscale);
@@ -105,15 +142,15 @@ void xnn_f32_${DATATYPE.lower()}_vcvt_ukernel__neonv8_u${BATCH_TILE}(
 
     ${XINT8X8_T} vy = ${VQMOVXN_S16}(vacc);
 
-    if (batch & (4 * sizeof(float))) {
+    if (batch & (4 * sizeof(${INPUT_T}))) {
       vst1_lane_u32((void*) output, ${VREINTERPRET_U32_X8}(vy), 0); output += 4;
       vy = ${VEXT_X8}(vy, vy, 4);
     }
-    if (batch & (2 * sizeof(float))) {
+    if (batch & (2 * sizeof(${INPUT_T}))) {
       vst1_lane_u16((void*) output, ${VREINTERPRET_U16_X8}(vy), 0); output += 2;
       vy = ${VEXT_X8}(vy, vy, 2);
     }
-    if (batch & (1 * sizeof(float))) {
+    if (batch & (1 * sizeof(${INPUT_T}))) {
       ${VST1_LANE_X8}(output, vy, 0);
     }
   }
