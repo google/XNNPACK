@@ -39,7 +39,8 @@ class XnnpackGraph {
                absl::flat_hash_map<graph::Tensor, size_t> tensor_index,
                absl::flat_hash_set<graph::Tensor> external_outputs,
                std::vector<std::vector<float>> dequantized_buffers = {},
-               std::vector<std::vector<fp16_t>> fp16_buffers = {});
+               std::vector<std::vector<fp16_t>> fp16_buffers = {},
+               std::vector<std::unique_ptr<BufferHolder>> custom_buffers = {});
   ~XnnpackGraph();
 
   // Returns the XNNPACK subgraph.
@@ -66,6 +67,7 @@ class XnnpackGraph {
   absl::flat_hash_set<graph::Tensor> external_outputs_;
   std::vector<std::vector<float>> dequantized_buffers_;
   std::vector<std::vector<fp16_t>> fp16_buffers_;
+  std::vector<std::unique_ptr<BufferHolder>> custom_buffers_;
 };
 
 // Builds an XNNPACK graph from the given outputs.

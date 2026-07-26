@@ -19,6 +19,7 @@ limitations under the License.
 #include <cstddef>
 #include <cstdint>
 #include <memory>
+#include <utility>
 #include <vector>
 
 #include "include/xnnpack.h"
@@ -36,6 +37,21 @@ limitations under the License.
 struct xnn_subgraph;
 
 namespace litert::tensor {
+
+class BufferHolder {
+ public:
+  virtual ~BufferHolder() = default;
+};
+
+template <typename T>
+class TypedBufferHolder : public BufferHolder {
+ public:
+  explicit TypedBufferHolder(std::vector<T>&& vec) : vec_(std::move(vec)) {}
+  const T* data() const { return vec_.data(); }
+
+ private:
+  std::vector<T> vec_;
+};
 
 // Tag to identify the XNNPACK mixin.
 struct XnnpackMixinTag {};
@@ -65,6 +81,14 @@ class XnnpackBuildContext {
   // Returns the XNNPACK subgraph.
   ::xnn_subgraph* subgraph();
 
+  template <typename T>
+  const T* KeepAlive(std::vector<T>&& buffer) {
+    auto holder = std::make_unique<TypedBufferHolder<T>>(std::move(buffer));
+    const T* ptr = holder->data();
+    custom_buffers_.push_back(std::move(holder));
+    return ptr;
+  }
+
  private:
   xnn_subgraph* subgraph_ = nullptr;
   std::vector<graph::Tensor> outputs_;
@@ -74,6 +98,7 @@ class XnnpackBuildContext {
   absl::flat_hash_map<graph::Tensor, uint32_t> external_ids_;
   std::vector<std::vector<float>> dequantized_buffers_;
   std::vector<std::vector<fp16_t>> fp16_buffers_;
+  std::vector<std::unique_ptr<BufferHolder>> custom_buffers_;
 
   friend absl::StatusOr<std::unique_ptr<XnnpackGraph>> BuildXnnpackGraph(
       std::vector<TensorHandle> outputs);

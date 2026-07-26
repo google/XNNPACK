@@ -91,6 +91,7 @@ cc_library(
     hdrs = ["utils.h"],
     deps = [
         "//:XNNPACK",
+        "//litert/tensor/internal:graph",
         "//litert/tensor/utils:macros",
         "@abseil-cpp//absl/status",
         "@abseil-cpp//absl/strings",
