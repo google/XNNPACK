@@ -28,6 +28,7 @@
 #include "ynnpack/kernels/dot/schedule.h"
 #include "ynnpack/kernels/ternary/ternary.h"
 #include "ynnpack/subgraph/copy.h"
+#include "ynnpack/subgraph/dot.h"
 #include "ynnpack/subgraph/elementwise.h"
 #include "ynnpack/subgraph/runtime.h"
 #include "ynnpack/subgraph/slinky.h"
@@ -785,6 +786,8 @@ auto make_transpose_a_impl(int m_dim) {
 
 }  // namespace
 
+choose_split_factors_fn choose_split_factors_hook = nullptr;
+
 // Packing means transposing
 // a(k, m, ...) => a([0, tile_k), m, k/tile_k, ...)
 void define_transpose_a(ynn_subgraph& subgraph, ynn_node& node, index_t tile_k,
@@ -865,6 +868,9 @@ uint32_t define_transpose_a(ynn_subgraph& subgraph, index_t tile_k,
 std::tuple<slinky::expr, slinky::expr, slinky::expr> choose_split_factors(
     ynn_runtime& runtime, slinky::expr m, slinky::expr n, slinky::expr k,
     slinky::expr block_n) {
+  if (choose_split_factors_hook) {
+    return choose_split_factors_hook(runtime, m, n, k, block_n);
+  }
   // We can only return a scalar from a slinky expression, so we pack the
   // splits into one integer.
   auto impl = [](const slinky::call* op, slinky::eval_context& ctx) {
@@ -1386,7 +1392,12 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
 
     const int rank = output.rank();
     std::vector<int> loop_order;
-    if (rank >= 2 && pack_b && !packed_b.is_static()) {
+    if (slinky::prove_true(split_k < k)) {
+      if (rank >= 2) loop_order.push_back(num_k_dims + 1);
+      loop_order.push_back(num_k_dims);
+      for (size_t i = 0; i < num_k_dims; ++i) loop_order.push_back(i);
+      for (size_t i = 2; i < rank; ++i) loop_order.push_back(num_k_dims + i);
+    } else if (rank >= 2 && pack_b && !packed_b.is_static()) {
       loop_order.resize(num_k_dims + 2);
       for (size_t i = 0; i < loop_order.size(); ++i) {
         loop_order[i] = i;
