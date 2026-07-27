@@ -29,11 +29,33 @@ class arm_neondot_int8_int4_int32(arm_int8_int4_int32):
   def __init__(self):
     super().__init__("neondot", (1, 4, 8))
 
+  # We can permute B, or we can permute A. If we are loading a lot of tiles of
+  # A, it's better to permute B, or vice versa.
+  def shuffle_a(self):
+    block_m, _, _ = self.block_shape
+    return block_m < 8
+
+  def begin_func(self, func_name):
+    result = super().begin_func(func_name)
+    if self.shuffle_a():
+      result += "  const int8_t a_table[] = {0, 2, 4, 6, 1, 3, 5, 7};\n"
+    return result
+
   def load_a_tile(self, i, k):
-    return f"int8x8_t a_{i}_{k} = vld1_s8({self.a_ptr(i, k)});\n"
+    result = f"int8x8_t a_{i}_{k} = vld1_s8({self.a_ptr(i, k)});\n"
+    if self.shuffle_a():
+      result += f"a_{i}_{k} = vtbl1_s8(a_{i}_{k}, vld1_s8(a_table));\n"
+    return result
 
   def load_b_tile(self, k, j):
-    return f"""
+    if self.shuffle_a():
+      return f"""
+int8x16_t b_{k}_{j} = vld1q_s8({self.b_ptr(k, j, "int8_t")});
+int8x16_t b_{k+1}_{j} = vshrq_n_s8(b_{k}_{j}, 4);
+b_{k+0}_{j} = vshrq_n_s8(vshlq_n_s8(b_{k}_{j}, 4), 4);
+"""
+    else:
+      return f"""
 int8x16_t b_{k}_{j}_eo = vld1q_s8({self.b_ptr(k, j, "int8_t")});
 int8x16_t b_{k}_{j}_o = vshrq_n_s8(b_{k}_{j}_eo, 4);
 int8x16_t b_{k}_{j}_e = vshrq_n_s8(vshlq_n_s8(b_{k}_{j}_eo, 4), 4);
@@ -46,7 +68,13 @@ int8x16_t b_{k+4}_{j} = vreinterpretq_s8_s32(unzipped_{k}_{j}.val[1]);
   def product(self, i, j, k):
     c_ij = f"c_{i}_{j}"
     a = f"a_{i}_{k}"
-    return f"""
+    if self.shuffle_a():
+      return f"""
+{c_ij} = vdotq_lane_s32({c_ij}, b_{k+0}_{j}, {a}, 0);
+{c_ij} = vdotq_lane_s32({c_ij}, b_{k+1}_{j}, {a}, 1);
+"""
+    else:
+      return f"""
 {c_ij} = vdotq_lane_s32({c_ij}, b_{k+0}_{j}, {a}, 0);
 {c_ij} = vdotq_lane_s32({c_ij}, b_{k+4}_{j}, {a}, 1);
 """
@@ -107,6 +135,8 @@ generate_dot_kernels(
     arm_neondot_int8_int4_int32(),
     [
         (1, 32, 8),
+        (2, 32, 8),
+        (3, 32, 8),
         (1, 16, 8),
         (2, 16, 8),
         (3, 16, 8),
@@ -114,7 +144,6 @@ generate_dot_kernels(
         (5, 16, 8),
         (1, 8, 8),
         (8, 8, 8),
-        (10, 8, 8),
         (8, 4, 8),
     ],
 )
