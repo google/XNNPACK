@@ -41,6 +41,7 @@ PROD_AVX512FP16_MICROKERNEL_SRCS = [
 ]
 
 NON_PROD_AVX512FP16_MICROKERNEL_SRCS = [
+    "src/f16-dwconv/gen/f16-dwconv-9p32c-minmax-avx512fp16.c",
     "src/f16-gemm/gen/f16-gemm-1x64-minmax-avx512fp16-broadcast.c",
     "src/f16-gemm/gen/f16-gemm-4x32-minmax-avx512fp16-broadcast.c",
     "src/f16-gemm/gen/f16-gemm-4x64-minmax-avx512fp16-broadcast.c",

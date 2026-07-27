@@ -109,6 +109,15 @@ static void init_f16_dwconv_config(void) {
         f16_dwconv_config[3].init.f16 = xnn_init_f16_minmax_scalar_params;
         f16_dwconv_config[3].channel_tile = 8;
         f16_dwconv_config[3].primary_tile = 25;
+
+        #if XNN_ENABLE_AVX512FP16
+          if (hardware_config->arch_flags & xnn_arch_x86_avx512fp16) {
+            f16_dwconv_config[2].minmax = XNN_INIT_DWCONV_UKERNEL(xnn_f16_dwconv_minmax_ukernel_9p32c__avx512fp16);
+            f16_dwconv_config[2].init.f16 = xnn_init_f16_minmax_scalar_params;
+            f16_dwconv_config[2].channel_tile = 32;
+            f16_dwconv_config[2].primary_tile = 9;
+          }
+        #endif  // XNN_ENABLE_AVX512FP16
       } else
     #endif
     ;  // no f16 support
