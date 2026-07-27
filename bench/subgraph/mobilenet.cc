@@ -8,7 +8,6 @@
 
 #include "bench/subgraph/benchmark.h"
 #include "bench/subgraph/models.h"
-#include "include/xnnpack.h"
 #include <benchmark/benchmark.h>
 
 static void FP32MobileNetV1(benchmark::State& state) {
@@ -28,23 +27,19 @@ static void FP32MobileNetV3Small(benchmark::State& state) {
 }
 
 static void FP16MobileNetV1(benchmark::State& state) {
-  xnnpack::RunBenchmark(state, models::FP32MobileNetV1,
-                        XNN_FLAG_FORCE_FP16_INFERENCE);
+  xnnpack::RunBenchmark(state, models::FP16MobileNetV1);
 }
 
 static void FP16MobileNetV2(benchmark::State& state) {
-  xnnpack::RunBenchmark(state, models::FP32MobileNetV2,
-                        XNN_FLAG_FORCE_FP16_INFERENCE);
+  xnnpack::RunBenchmark(state, models::FP16MobileNetV2);
 }
 
 static void FP16MobileNetV3Large(benchmark::State& state) {
-  xnnpack::RunBenchmark(state, models::FP32MobileNetV3Large,
-                        XNN_FLAG_FORCE_FP16_INFERENCE);
+  xnnpack::RunBenchmark(state, models::FP16MobileNetV3Large);
 }
 
 static void FP16MobileNetV3Small(benchmark::State& state) {
-  xnnpack::RunBenchmark(state, models::FP32MobileNetV3Small,
-                        XNN_FLAG_FORCE_FP16_INFERENCE);
+  xnnpack::RunBenchmark(state, models::FP16MobileNetV3Small);
 }
 
 static void QS8MobileNetV2(benchmark::State& state) {

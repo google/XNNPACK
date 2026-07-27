@@ -41,11 +41,10 @@
 /// Assume tensors of rank > 2 will be squashed to 2 dimensions.
 #define XNN_FLAG_SQUASH_GROUPS 0x00000100
 #define XNN_VALUE_FLAG_ONE_CONSUMER 0x00000200
-#define XNN_VALUE_FLAG_FP16_COMPATIBLE 0x00000400
-#define XNN_VALUE_FLAG_LAYOUT_NCHW 0x00000800
-#define XNN_VALUE_FLAG_SHAPE_IS_STATIC 0x00001000
-#define XNN_VALUE_FLAG_IS_ZERO 0x00002000
-#define XNN_VALUE_FLAG_IS_ONE 0x00004000
+#define XNN_VALUE_FLAG_LAYOUT_NCHW 0x00000400
+#define XNN_VALUE_FLAG_SHAPE_IS_STATIC 0x00000800
+#define XNN_VALUE_FLAG_IS_ZERO 0x00001000
+#define XNN_VALUE_FLAG_IS_ONE 0x00002000
 
 /// Create explicit `pack-lh` nodes, instead of pack the data on the fly
 /// in a temporary buffer in the consuming op. Inline packing reduces memory
@@ -660,8 +659,6 @@ enum xnn_status xnn_subgraph_rewrite_dequant_bmm(xnn_subgraph_t subgraph);
 enum xnn_status xnn_subgraph_optimize(xnn_subgraph_t subgraph, uint32_t flags);
 
 void xnn_subgraph_rewrite_for_nchw(xnn_subgraph_t subgraph);
-// Rewrites subgraph for FP16, returns true if success, false if rewrite failed.
-bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph);
 
 void xnn_subgraph_clean_up(xnn_subgraph_t subgraph);
 

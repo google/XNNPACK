@@ -1112,26 +1112,23 @@ TEST_F(Fp16ToFp32FineGrainedOpSupportTest, NoRewriteAfterFp16Rewrite) {
   std::unique_ptr<XnnpackGraph> graph;
   {
     XnnTensor input({.type = Type::kFP32, .shape = {3, 4}});
-    XnnTensor output = Abs(input);
+    XnnTensor input_fp16 = Cast(input, Type::kFP16);
+    XnnTensor output_fp16 = Abs(input_fp16);
+    XnnTensor output = Cast(output_fp16, Type::kFP32);
     LRT_TENSOR_ASSERT_OK_AND_ASSIGN(graph, BuildXnnpackGraph({output}));
   }
 
   std::unique_ptr<XnnpackGraph> expected_graph;
   {
     XnnTensor input({.type = Type::kFP32, .shape = {3, 4}});
-    XnnTensor output = Abs(input);
+    XnnTensor input_fp16 = Cast(input, Type::kFP16);
+    XnnTensor output_fp16 = Abs(input_fp16);
+    XnnTensor output = Cast(output_fp16, Type::kFP32);
     LRT_TENSOR_ASSERT_OK_AND_ASSIGN(expected_graph,
                                     BuildXnnpackGraph({output}));
   }
 
-  // We expect the graph to be in the FP16 state after rewrite.
-  // So we run rewrite on expected_graph too.
-  ASSERT_TRUE(xnn_subgraph_rewrite_for_fp16(expected_graph->subgraph()));
-
   xnn_subgraph_t subgraph = graph->subgraph();
-
-  // Rewrite to FP16.
-  ASSERT_TRUE(xnn_subgraph_rewrite_for_fp16(subgraph));
 
   // Run fallback. It should be a no-op because native FP16 is supported.
   ASSERT_THAT(xnn_subgraph_fallback_from_fp16_to_fp32(subgraph,

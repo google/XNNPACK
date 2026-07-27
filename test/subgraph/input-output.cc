@@ -23,19 +23,8 @@
 
 namespace xnnpack {
 
-class InputOutput : public testing::TestWithParam<bool> {};
-
-INSTANTIATE_TEST_SUITE_P(
-    InputOutput, InputOutput, testing::Bool(),
-    [](const testing::TestParamInfo<InputOutput::ParamType>& info) {
-      const bool rewrite_for_fp16 = info.param;
-      return rewrite_for_fp16 ? "fp16_rewrite" : "fp32";
-    });
-
-TEST_P(InputOutput, ConditionalReadWrite) {
-  const bool rewrite_for_fp16 = GetParam();
-  if (rewrite_for_fp16 &&
-      !xnn_is_f16_compatible_config(xnn_init_hardware_config())) {
+TEST(InputOutput, ConditionalReadWrite) {
+  if (!xnn_is_f16_compatible_config(xnn_init_hardware_config())) {
     GTEST_SKIP() << "No FP16 support detected.";
   }
 
@@ -77,8 +66,7 @@ TEST_P(InputOutput, ConditionalReadWrite) {
   ASSERT_EQ(xnn_status_success,
             subgraph.CreateRuntime(
                 /*threadpool=*/nullptr,
-                /*flags=*/xnn_test_runtime_flags() |
-                    (rewrite_for_fp16 ? XNN_FLAG_FORCE_FP16_INFERENCE : 0)));
+                /*flags=*/xnn_test_runtime_flags()));
 
   Tensor<float> input(dims, xnnpack::XnnExtraBytes);
   std::iota(input.begin(), input.end(), 0.0f);
@@ -117,10 +105,8 @@ TEST_P(InputOutput, ConditionalReadWrite) {
   ASSERT_THAT(add, testing::ElementsAre(2.0f, 3.0f, 4.0f, 5.0f, 6.0f));
 }
 
-TEST_P(InputOutput, SlidingWindow) {
-  const bool rewrite_for_fp16 = GetParam();
-  if (rewrite_for_fp16 &&
-      !xnn_is_f16_compatible_config(xnn_init_hardware_config())) {
+TEST(InputOutput, SlidingWindow) {
+  if (!xnn_is_f16_compatible_config(xnn_init_hardware_config())) {
     GTEST_SKIP() << "No FP16 support detected.";
   }
 
@@ -154,8 +140,7 @@ TEST_P(InputOutput, SlidingWindow) {
   ASSERT_EQ(xnn_status_success,
             subgraph.CreateRuntime(
                 /*threadpool=*/nullptr,
-                /*flags=*/xnn_test_runtime_flags() |
-                    (rewrite_for_fp16 ? XNN_FLAG_FORCE_FP16_INFERENCE : 0)));
+                /*flags=*/xnn_test_runtime_flags()));
 
   // If we are using an input-output tensor as the persistent tensor, we need
   // to provide the storage for it.
@@ -185,10 +170,8 @@ TEST_P(InputOutput, SlidingWindow) {
   }
 }
 
-TEST_P(InputOutput, MultipleWrites) {
-  const bool rewrite_for_fp16 = GetParam();
-  if (rewrite_for_fp16 &&
-      !xnn_is_f16_compatible_config(xnn_init_hardware_config())) {
+TEST(InputOutput, MultipleWrites) {
+  if (!xnn_is_f16_compatible_config(xnn_init_hardware_config())) {
     GTEST_SKIP() << "No FP16 support detected.";
   }
 
@@ -228,8 +211,7 @@ TEST_P(InputOutput, MultipleWrites) {
   ASSERT_EQ(xnn_status_success,
             subgraph.CreateRuntime(
                 /*threadpool=*/nullptr,
-                /*flags=*/xnn_test_runtime_flags() |
-                    (rewrite_for_fp16 ? XNN_FLAG_FORCE_FP16_INFERENCE : 0)));
+                /*flags=*/xnn_test_runtime_flags()));
 
   // If we are using an input-output tensor as the persistent tensor, we need
   // to provide the storage for it.

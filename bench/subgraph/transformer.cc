@@ -21,6 +21,9 @@ namespace models {
 xnn_subgraph_t QD8TransformerBlock(size_t batch_size, size_t sequence_length,
                                    size_t embedding_dim, size_t num_heads,
                                    size_t head_dim, size_t hidden_dim);
+xnn_subgraph_t FP16TransformerBlock(size_t batch_size, size_t sequence_length,
+                                    size_t embedding_dim, size_t num_heads,
+                                    size_t head_dim, size_t hidden_dim);
 xnn_subgraph_t FP32TransformerBlock(size_t batch_size, size_t sequence_length,
                                     size_t embedding_dim, size_t num_heads,
                                     size_t head_dim, size_t hidden_dim);
@@ -49,12 +52,11 @@ static void FP16TransformerBlock(benchmark::State& state) {
   xnnpack::RunBenchmark(
       state,
       [&state]() {
-        return models::FP32TransformerBlock(
+        return models::FP16TransformerBlock(
             FLAGS_batch_size, /*sequence_length=*/state.range(0),
             /*embedding_dim=*/state.range(1), /*num_heads=*/state.range(2),
             /*head_dim=*/state.range(3), /*hidden_dim=*/state.range(4));
-      },
-      XNN_FLAG_FORCE_FP16_INFERENCE);
+      });
 }
 
 static void TransformerBlockArguments(benchmark::Benchmark* b) {
