@@ -77,6 +77,18 @@ class dot_base:
 #endif
 
 #if defined(__GNUC__)
+#define YNN_FORCE_REALIZATION(x) __asm volatile("" ::"m"(x));
+#if defined(__AVX__) || defined(__AVX2__) || defined(__AVX512F__)
+#define YNN_OPTIMIZATION_BARRIER(x) __asm volatile("" : "+v"(x));
+#else
+#define YNN_OPTIMIZATION_BARRIER(x) __asm volatile("" : "+x"(x));
+#endif
+#else
+#define YNN_FORCE_REALIZATION(x)
+#define YNN_OPTIMIZATION_BARRIER(x)
+#endif
+
+#if defined(__GNUC__)
 #define YNN_ALWAYS_INLINE inline __attribute__((__always_inline__))
 #elif defined(_MSC_VER)
 #define YNN_ALWAYS_INLINE __forceinline
