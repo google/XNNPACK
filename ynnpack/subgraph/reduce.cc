@@ -280,6 +280,11 @@ slinky::raw_buffer_ptr make_reduce_identity(ynn_type type, int rank,
   float value_f32[2];
   size_t n = 1;
   if (op == ynn_reduce_min_max) {
+    // `rank` is the rank of the reduction output, which is computed internally
+    // rather than supplied by the caller; these guard the `dims[max_tensor_rank]`
+    // buffer indexed by `rank - 1` below.
+    assert(rank >= 1);
+    assert(rank <= max_tensor_rank);
     value.rank = rank;
     for (int i = 0; i < rank - 1; ++i) {
       value.mutable_dim(i) = slinky::dim::broadcast();
