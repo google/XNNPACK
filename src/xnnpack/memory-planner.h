@@ -51,6 +51,7 @@ struct xnn_value_allocation_tracker {
 };
 
 // Initialize the memory allocation tracker for xnn_values.
+//
 // Returns xnn_status_out_of_memory if the internal usage array cannot be
 // allocated. On failure the tracker must not be used and does not need to be
 // released.
@@ -88,6 +89,7 @@ XNN_INTERNAL void xnn_mark_tensor_as_reuse(
 
 // Plan the exact the memory allocation for intermediate tensors according to
 // the xnn_value allocation tracker.
+//
 // Returns xnn_status_out_of_memory if an internal scratch buffer cannot be
 // allocated.
 XNN_INTERNAL enum xnn_status xnn_plan_value_allocation_tracker(
