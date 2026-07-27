@@ -65,13 +65,7 @@ http_archive(
 )
 
 # LINT.ThenChange(cmake/DownloadGoogleBenchmark.cmake)
-# FXdiv library, used for repeated integer division by the same factor
-http_archive(
-    name = "FXdiv",
-    sha256 = "ab7dfb08829bee33dca38405d647868fb214ac685e379ec7ef2bebcd234cd44d",
-    strip_prefix = "FXdiv-b408327ac2a15ec3e43352421954f5b1967701d1",
-    urls = ["https://github.com/Maratyszcza/FXdiv/archive/b408327ac2a15ec3e43352421954f5b1967701d1.zip"],
-)
+
 
 # LINT.IfChange(pthreadpool)
 # pthreadpool library, used for parallelization
