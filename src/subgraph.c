@@ -3998,7 +3998,25 @@ enum xnn_status xnn_subgraph_optimize_packed_lhs(xnn_subgraph_t subgraph,
             // We may inline the `qdint8` packing regardless of whether we have
             // a specialized `qpint8` kernel or not.
             assumed_datatype = xnn_datatype_qdint8;
-            if (output_datatype == xnn_datatype_fp32) {
+            if (output_datatype == xnn_datatype_fp16) {
+              // The QP8/F16 packer consumes the convert's original FP16 input.
+              if (input_value->producer != XNN_INVALID_NODE_ID) {
+                const struct xnn_node* producer =
+                    &subgraph->nodes[input_value->producer];
+                const bool converts_from_fp16 =
+                    producer->type == xnn_node_type_convert &&
+                    subgraph->values[producer->inputs[0]].datatype ==
+                        xnn_datatype_fp16;
+                const bool has_qc8w_weights =
+                    kernel_datatype == xnn_datatype_qcint8 &&
+                    (node->flags & XNN_FLAG_TRANSPOSE_WEIGHTS) == 0;
+                if (converts_from_fp16 && has_qc8w_weights &&
+                    (gemm_config = xnn_init_qp8_f16_qc8w_gemm_config()) !=
+                        NULL) {
+                  assumed_datatype = xnn_datatype_qpint8;
+                }
+              }
+            } else if (output_datatype == xnn_datatype_fp32) {
               switch (kernel_datatype) {
                 case xnn_datatype_qbint4:
                   // The qp8_f32_qb4w kernels only support unsigned 4-bit
