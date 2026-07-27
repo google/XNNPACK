@@ -22,7 +22,7 @@
 #include "src/xnnpack/unaligned.h"
 
 
-void xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_5x8c8__avx256skx_madd(
+void xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_5x8c8__avx2_madd(
     size_t mr,
     size_t nc,
     size_t kc,
@@ -250,11 +250,16 @@ void xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_5x8c8__avx256skx_madd(
     vacc3x01234567 = _mm256_add_epi32(vacc3x01234567, voutput_zero_point);
     vacc4x01234567 = _mm256_add_epi32(vacc4x01234567, voutput_zero_point);
 
-    __m128i voutb0x01234567 = _mm256_cvtsepi32_epi8(vacc0x01234567);
-    __m128i voutb1x01234567 = _mm256_cvtsepi32_epi8(vacc1x01234567);
-    __m128i voutb2x01234567 = _mm256_cvtsepi32_epi8(vacc2x01234567);
-    __m128i voutb3x01234567 = _mm256_cvtsepi32_epi8(vacc3x01234567);
-    __m128i voutb4x01234567 = _mm256_cvtsepi32_epi8(vacc4x01234567);
+    vacc0x01234567 = _mm256_packs_epi32(vacc0x01234567, _mm256_castsi128_si256(_mm256_extracti128_si256(vacc0x01234567, 1)));
+    __m128i voutb0x01234567 = _mm256_castsi256_si128(_mm256_packs_epi16(vacc0x01234567, vacc0x01234567));
+    vacc1x01234567 = _mm256_packs_epi32(vacc1x01234567, _mm256_castsi128_si256(_mm256_extracti128_si256(vacc1x01234567, 1)));
+    __m128i voutb1x01234567 = _mm256_castsi256_si128(_mm256_packs_epi16(vacc1x01234567, vacc1x01234567));
+    vacc2x01234567 = _mm256_packs_epi32(vacc2x01234567, _mm256_castsi128_si256(_mm256_extracti128_si256(vacc2x01234567, 1)));
+    __m128i voutb2x01234567 = _mm256_castsi256_si128(_mm256_packs_epi16(vacc2x01234567, vacc2x01234567));
+    vacc3x01234567 = _mm256_packs_epi32(vacc3x01234567, _mm256_castsi128_si256(_mm256_extracti128_si256(vacc3x01234567, 1)));
+    __m128i voutb3x01234567 = _mm256_castsi256_si128(_mm256_packs_epi16(vacc3x01234567, vacc3x01234567));
+    vacc4x01234567 = _mm256_packs_epi32(vacc4x01234567, _mm256_castsi128_si256(_mm256_extracti128_si256(vacc4x01234567, 1)));
+    __m128i voutb4x01234567 = _mm256_castsi256_si128(_mm256_packs_epi16(vacc4x01234567, vacc4x01234567));
 
     voutb0x01234567 = _mm_max_epi8(voutb0x01234567, voutput_min);
     voutb1x01234567 = _mm_max_epi8(voutb1x01234567, voutput_min);
@@ -281,13 +286,47 @@ void xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_5x8c8__avx256skx_madd(
 
       nc -= 8;
     } else {
-      // Prepare mask for valid 8-bit elements (depends on nc).
-      const __mmask16 vmask = _cvtu32_mask16((UINT32_C(1) << nc) - UINT32_C(1));
-      _mm_mask_storeu_epi8(c0, vmask, voutb0x01234567);
-      _mm_mask_storeu_epi8(c1, vmask, voutb1x01234567);
-      _mm_mask_storeu_epi8(c2, vmask, voutb2x01234567);
-      _mm_mask_storeu_epi8(c3, vmask, voutb3x01234567);
-      _mm_mask_storeu_epi8(c4, vmask, voutb4x01234567);
+      if (nc & 4) {
+        _mm_storeu_si32(c0, voutb0x01234567);
+        c0 += 4;
+        _mm_storeu_si32(c1, voutb1x01234567);
+        c1 += 4;
+        _mm_storeu_si32(c2, voutb2x01234567);
+        c2 += 4;
+        _mm_storeu_si32(c3, voutb3x01234567);
+        c3 += 4;
+        _mm_storeu_si32(c4, voutb4x01234567);
+        c4 += 4;
+        voutb0x01234567 = _mm_srli_epi64(voutb0x01234567, 32);
+        voutb1x01234567 = _mm_srli_epi64(voutb1x01234567, 32);
+        voutb2x01234567 = _mm_srli_epi64(voutb2x01234567, 32);
+        voutb3x01234567 = _mm_srli_epi64(voutb3x01234567, 32);
+        voutb4x01234567 = _mm_srli_epi64(voutb4x01234567, 32);
+      }
+      if (nc & 2) {
+        unaligned_store_u16(c0, (uint16_t) _mm_extract_epi16(voutb0x01234567, 0));
+        c0 += 2;
+        unaligned_store_u16(c1, (uint16_t) _mm_extract_epi16(voutb1x01234567, 0));
+        c1 += 2;
+        unaligned_store_u16(c2, (uint16_t) _mm_extract_epi16(voutb2x01234567, 0));
+        c2 += 2;
+        unaligned_store_u16(c3, (uint16_t) _mm_extract_epi16(voutb3x01234567, 0));
+        c3 += 2;
+        unaligned_store_u16(c4, (uint16_t) _mm_extract_epi16(voutb4x01234567, 0));
+        c4 += 2;
+        voutb0x01234567 = _mm_srli_epi32(voutb0x01234567, 16);
+        voutb1x01234567 = _mm_srli_epi32(voutb1x01234567, 16);
+        voutb2x01234567 = _mm_srli_epi32(voutb2x01234567, 16);
+        voutb3x01234567 = _mm_srli_epi32(voutb3x01234567, 16);
+        voutb4x01234567 = _mm_srli_epi32(voutb4x01234567, 16);
+      }
+      if (nc & 1) {
+        *c0 = (int8_t) _mm_extract_epi8(voutb0x01234567, 0);
+        *c1 = (int8_t) _mm_extract_epi8(voutb1x01234567, 0);
+        *c2 = (int8_t) _mm_extract_epi8(voutb2x01234567, 0);
+        *c3 = (int8_t) _mm_extract_epi8(voutb3x01234567, 0);
+        *c4 = (int8_t) _mm_extract_epi8(voutb4x01234567, 0);
+      }
       nc = 0;
     }
   } while (nc != 0);
