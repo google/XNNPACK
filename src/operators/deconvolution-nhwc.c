@@ -1722,6 +1722,9 @@ enum xnn_status xnn_create_deconvolution2d_nhwc_f32_f16(
                                     kernel_height;
   float* fp32_kernel_buffer =
       (float*)xnn_allocate_memory(num_kernel_entries * sizeof(float));
+  if (fp32_kernel_buffer == NULL) {
+    return xnn_status_out_of_memory;
+  }
   float* fp32_bias_buffer = NULL;
   const xnn_float16* f16_kernel = (const xnn_float16*)kernel;
   const xnn_float16* f16_bias = (const xnn_float16*)bias;
@@ -1731,6 +1734,10 @@ enum xnn_status xnn_create_deconvolution2d_nhwc_f32_f16(
   if (bias && !(flags & XNN_FLAG_FP32_STATIC_BIASES)) {
     fp32_bias_buffer = (float*)xnn_allocate_memory(
         groups * group_output_channels * sizeof(float));
+    if (fp32_bias_buffer == NULL) {
+      xnn_release_memory(fp32_kernel_buffer);
+      return xnn_status_out_of_memory;
+    }
     for (size_t i = 0; i < groups * group_output_channels; ++i) {
       fp32_bias_buffer[i] = xnn_float16_to_float(f16_bias[i]);
     }
