@@ -10,6 +10,7 @@
 
 #include "include/xnnpack.h"
 #include "src/xnnpack/allocator.h"
+#include "src/xnnpack/log.h"
 #include "src/xnnpack/memory-planner.h"
 #include "src/xnnpack/subgraph.h"
 
@@ -142,15 +143,21 @@ static size_t find_value_alloc_offset(struct memory_block* live_mem_blocks,
   return alloc_offset;
 }
 
-void xnn_init_value_allocation_tracker(
+enum xnn_status xnn_init_value_allocation_tracker(
   struct xnn_value_allocation_tracker* tracker,
   const struct xnn_runtime* runtime)
 {
   tracker->mem_arena_size = 0;
   tracker->usage = xnn_allocate_zero_memory(sizeof(struct xnn_usage_record) * (runtime->num_values + runtime->num_ops));
+  if (tracker->usage == NULL) {
+    xnn_log_error("failed to allocate %zu bytes for memory planning usage tracker",
+                  sizeof(struct xnn_usage_record) * (runtime->num_values + runtime->num_ops));
+    return xnn_status_out_of_memory;
+  }
   populate_value_lifecycle(runtime, tracker->usage);
   tracker->min_value_id = XNN_INVALID_VALUE_ID;
   tracker->max_value_id = XNN_INVALID_VALUE_ID;
+  return xnn_status_success;
 }
 
 void xnn_mark_tensor_as_reuse(struct xnn_value_allocation_tracker* tracker,
@@ -199,14 +206,19 @@ void xnn_add_operator_workspace_allocation_tracker(
   tracker->usage[operator_workspace_value_id].opdata_id = opdata_id;
 }
 
-void xnn_plan_value_allocation_tracker(struct xnn_value_allocation_tracker* tracker) {
+enum xnn_status xnn_plan_value_allocation_tracker(struct xnn_value_allocation_tracker* tracker) {
   if (tracker->min_value_id == XNN_INVALID_VALUE_ID) {
     assert(tracker->max_value_id == XNN_INVALID_VALUE_ID);
-    return;
+    return xnn_status_success;
   }
 
   const uint32_t num_values = tracker->max_value_id - tracker->min_value_id + 1;
   struct xnn_usage_record** sorted_usage = xnn_allocate_zero_memory(sizeof(struct xnn_usage_record*) * num_values);
+  if (sorted_usage == NULL) {
+    xnn_log_error("failed to allocate %zu bytes for memory planning sorted usage array",
+                  sizeof(struct xnn_usage_record*) * num_values);
+    return xnn_status_out_of_memory;
+  }
   size_t num_values_to_alloc = 0;
   for (size_t i = tracker->min_value_id; i <= tracker->max_value_id; ++i) {
     struct xnn_usage_record* info = tracker->usage + i;
@@ -219,6 +231,12 @@ void xnn_plan_value_allocation_tracker(struct xnn_value_allocation_tracker* trac
   // Start the allocation planning process.
   struct memory_block* current_live_mem_blocks = xnn_allocate_zero_memory(
       sizeof(struct memory_block) * num_values_to_alloc);
+  if (current_live_mem_blocks == NULL && num_values_to_alloc != 0) {
+    xnn_log_error("failed to allocate %zu bytes for memory planning live blocks array",
+                  sizeof(struct memory_block) * num_values_to_alloc);
+    xnn_release_memory(sorted_usage);
+    return xnn_status_out_of_memory;
+  }
   size_t mem_arena_size = 0;
   for (size_t i = 0; i < num_values_to_alloc; ++i) {
     size_t num_live_mem_blocks = 0;
@@ -252,4 +270,5 @@ void xnn_plan_value_allocation_tracker(struct xnn_value_allocation_tracker* trac
   tracker->mem_arena_size = mem_arena_size;
   xnn_release_memory(sorted_usage);
   xnn_release_memory(current_live_mem_blocks);
+  return xnn_status_success;
 }

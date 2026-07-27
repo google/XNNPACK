@@ -824,7 +824,10 @@ enum xnn_status xnn_plan_memory(
     xnn_runtime_t runtime) {
   enum xnn_status status = xnn_status_invalid_state;
   struct xnn_value_allocation_tracker mem_alloc_tracker;
-  xnn_init_value_allocation_tracker(&mem_alloc_tracker, runtime);
+  status = xnn_init_value_allocation_tracker(&mem_alloc_tracker, runtime);
+  if (status != xnn_status_success) {
+    return status;
+  }
 
   for (uint32_t i = 0; i < runtime->num_values; i++) {
     const struct xnn_runtime_value* value = &runtime->values[i];
@@ -851,7 +854,10 @@ enum xnn_status xnn_plan_memory(
   }
 
   optimize_tensor_allocation_for_in_place_operations(&mem_alloc_tracker, runtime);
-  xnn_plan_value_allocation_tracker(&mem_alloc_tracker);
+  status = xnn_plan_value_allocation_tracker(&mem_alloc_tracker);
+  if (status != xnn_status_success) {
+    goto error;
+  }
 
   status = initialize_workspace_values(runtime, &mem_alloc_tracker);
   if (status != xnn_status_success) {
