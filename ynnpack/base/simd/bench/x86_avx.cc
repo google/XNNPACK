@@ -28,6 +28,12 @@ BENCH_UNARY(avx, erf, f32, 8);
 BENCH_UNARY(avx, erf, f64, 4);
 BENCH_UNARY(avx, tanh, f32, 8);
 BENCH_UNARY(avx, tanh, f64, 4);
+BENCH_UNARY(avx, sin, f32, 8);
+BENCH_UNARY(avx, sin, f64, 4);
+BENCH_UNARY(avx, cos, f32, 8);
+BENCH_UNARY(avx, cos, f64, 4);
+BENCH_UNARY(avx, tan, f32, 8);
+BENCH_UNARY(avx, tan, f64, 4);
 
 BENCH_UNARY(avx, approx_erf, f32, 8);
 BENCH_UNARY(avx, approx_tanh, f32, 8);

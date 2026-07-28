@@ -78,7 +78,10 @@ void BM_MixedDot(benchmark::State& state) {
   subgraph.AddDot(1, X_concat_id, W_dequant_id, YNN_INVALID_VALUE_ID, Y_id);
 
   // Run the subgraph
-  TestScheduler scheduler(thread_count);
+  // Run the subgraph. `thread_count` is the total number of threads that should
+  // run the work; the runtime's invoking thread participates as a worker, so
+  // the scheduler only needs `thread_count - 1` background threads.
+  TestScheduler scheduler(thread_count - 1);
   Runtime runtime(subgraph.GetSubgraph(), &scheduler);
   if (runtime.Status() != ynn_status_success) {
     state.SkipWithError("Failed to create runtime");

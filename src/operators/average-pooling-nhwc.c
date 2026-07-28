@@ -522,7 +522,16 @@ static XNN_NO_SANITIZE_FUNCTION enum xnn_status reshape_average_pooling2d(
     assert(indirection_init_pavgpool2d != NULL);
 
     if (input_size_changed) {
-      const size_t pixelwise_buffer_size = (output_height * output_width) << log2_weight_element_size;
+      size_t num_output_pixels = 0;
+      size_t pixelwise_buffer_size = 0;
+      if (!xnn_safe_mul(output_height, output_width, &num_output_pixels) ||
+          !xnn_safe_mul(num_output_pixels, (size_t)1u << log2_weight_element_size,
+                        &pixelwise_buffer_size)) {
+        xnn_log_error(
+            "failed to reshape %s operator: pixelwise buffer size overflows size_t",
+            xnn_operator_type_to_string_v2(average_pooling_op));
+        return xnn_status_out_of_memory;
+      }
       void* pixelwise_buffer = xnn_reallocate_memory(average_pooling_op->convolution_op->pixelwise_buffer, pixelwise_buffer_size);
       if (pixelwise_buffer == NULL) {
         xnn_log_error(

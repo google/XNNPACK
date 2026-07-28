@@ -125,7 +125,7 @@ bool try_requantize_rewrite(ynn_subgraph& subgraph, uint32_t& input_a_id,
   input_a_id = uint8_a_id;
 
   const ynn_value& b_val = subgraph.value(input_b_id);
-  int32_t reduce_axes[YNN_MAX_TENSOR_RANK];
+  int32_t reduce_axes[max_tensor_rank];
   for (size_t i = 0; i < num_k_dims; ++i) {
     reduce_axes[i] = b_val.rank() - 1 - num_k_dims + i;
   }
@@ -691,7 +691,20 @@ uint32_t define_pack_b(ynn_subgraph_t subgraph, const dot_type& type,
                                    {std::move(func_input)},
                                    {{output.buffer, dims}}, std::move(attrs));
 
-    auto sched = std::make_unique<scheduling_info>();
+    // Pin ki, ni and ko to their full extents (the packing kernel produces
+    // whole ki x ni tiles and all of ko at once), and let make_schedule pick
+    // splits and workers for the blocks_n and batch dimensions, so the
+    // packing is parallelized even when it is not fused into a dot's loop
+    // nest (e.g. when it is constant folded). When it is fused, the splits
+    // don't require their steps, so they adopt the loops of the dot as
+    // before.
+    std::vector<slinky::expr> given_splits = {output.physical_extent(0),
+                                              output.physical_extent(1)};
+    auto sched =
+        runtime.make_schedule(dims, output.physical_extents(),
+                              output.buffer->elem_size(), given_splits);
+    sched->loop_splits[0].step_is_required = true;
+    sched->loop_splits[1].step_is_required = true;
 
     // TODO(vksnk): This is a temporary workaround to avoid recomputing packed
     // buffer. The proper fix would probably involve adding a loop splits for
@@ -699,20 +712,7 @@ uint32_t define_pack_b(ynn_subgraph_t subgraph, const dot_type& type,
     if (num_k_dims > 1) {
       sched->force_root = true;
     }
-    // Use "identity" splits where step == extent which will always fuse into
-    // parent loop as long as extents match.
-    // TODO(vksnk): Ideally we should select better steps, so the packing is
-    // parallelized even if it's not fused.
-    for (int i = 0; i < output.extents.size(); i++) {
-      sched->loop_splits.push_back({dims[i], output.physical_extent(i),
-                                    slinky::loop::serial,
-                                    output.physical_extent(i),
-                                    /*step_is_required=*/false});
-    }
-    // ki (dim 0) and ko (dim 2) must not be split.
-    // We enforce this by requiring their step to be equal to their extent.
-    sched->loop_splits[0].step_is_required = true;
-    sched->loop_splits[2].step_is_required = true;
+
     // The real bounds of the input's n dimension are blocks of size block_n
     // indexed by `no`, which breaks the scheduler's source region inference.
     // Declare a virtual 1-to-1 mapping with `no` instead, so producers of the
@@ -734,9 +734,8 @@ uint32_t define_pack_b(ynn_subgraph_t subgraph, const dot_type& type,
 // TODO(b/454146513): We should try to combine both pack_b and transpose_a into
 // a `split_transpose` op that can handle padding, split, and transpose.
 auto make_transpose_a_impl(int m_dim) {
-  constexpr size_t max_rank = YNN_MAX_TENSOR_RANK + ynn_internal_extra_dims;
-  return [m_dim](slinky::buffer<const void, max_rank> input,
-                 slinky::buffer<void, max_rank> output) -> index_t {
+  return [m_dim](slinky::buffer<const void, max_tensor_rank> input,
+                 slinky::buffer<void, max_tensor_rank> output) -> index_t {
     const slinky::dim& input_k = input.dim(0);
     const slinky::dim& input_m = input.dim(m_dim);
     const slinky::dim& output_ki = output.dim(0);

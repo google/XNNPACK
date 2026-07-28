@@ -62,6 +62,8 @@ TEST_UNARY(arm_neon, log, f64, 2, std::log, 2);
 TEST_UNARY(arm_neon, log1p, f64, 2, std::log1p, 3);
 TEST_UNARY(arm_neon, erf, f64, 2, std::erf, 3);
 TEST_UNARY(arm_neon, tanh, f64, 2, std::tanh, 4);
+TEST_UNARY_RANGE(arm_neon, sin, f64, 2, std::sin, 2, -1e12, 1e12);
+TEST_UNARY_RANGE(arm_neon, cos, f64, 2, std::cos, 2, -1e12, 1e12);
 
 }  // namespace simd
 }  // namespace ynn

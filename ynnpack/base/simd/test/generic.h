@@ -986,7 +986,9 @@ void test_sub_sat() {
   TEST_F(test_class, sub_sat_##type##x##N) { test_sub_sat<type, N>(); }
 
 template <typename scalar, size_t N, typename F, typename Ref>
-void test_unary(F f, Ref ref, float epsilons) {
+void test_unary(F f, Ref ref, float epsilons,
+                double min_val = -std::numeric_limits<double>::infinity(),
+                double max_val = std::numeric_limits<double>::infinity()) {
   using vector = vec<scalar, N>;
   using scalar_info = type_info<scalar>;
 
@@ -1003,6 +1005,7 @@ void test_unary(F f, Ref ref, float epsilons) {
   };
 
   for (scalar input : special_values) {
+    if (!std::isnan(input) && (input < min_val || input > max_val)) continue;
     scalar expected = ref(input);
     scalar a[vector::N];
     std::fill_n(a, vector::N, input);
@@ -1019,7 +1022,7 @@ void test_unary(F f, Ref ref, float epsilons) {
   ReplicableRandomDevice rng;
   for (auto _ : FuzzTest(std::chrono::milliseconds(100))) {
     scalar a[vector::N];
-    fill_random(a, vector::N, rng);
+    fill_random(a, vector::N, rng, min_val, max_val);
 
     scalar result[vector::N];
     store(result, f(load(a, vector::N)));
@@ -1033,7 +1036,8 @@ void test_unary(F f, Ref ref, float epsilons) {
         ASSERT_LE(result[i], scalar_info::smallest_normal()) << a[i];
       } else {
         const scalar abs_error =
-            std::abs(k) * epsilons * scalar_info::epsilon();
+            static_cast<scalar>(static_cast<double>(scalar_info::epsilon()) *
+                                static_cast<double>(std::abs(k) * epsilons));
         ASSERT_NEAR(result[i], k, abs_error) << a[i];
       }
     }
@@ -1049,6 +1053,14 @@ void test_unary(F f, Ref ref, float epsilons) {
         [](vec<type, N> x) { return op(x); },                                  \
         [](type x) { return static_cast<type>(ref(static_cast<double>(x))); }, \
         epsilons);                                                             \
+  }
+
+#define TEST_UNARY_RANGE(test_class, op, type, N, ref, epsilons, min, max)     \
+  TEST_F(test_class, op##_##type##x##N) {                                      \
+    test_unary<type, N>(                                                       \
+        [](vec<type, N> x) { return op(x); },                                  \
+        [](type x) { return static_cast<type>(ref(static_cast<double>(x))); }, \
+        epsilons, min, max);                                                   \
   }
 
 }  // namespace simd

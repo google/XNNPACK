@@ -1790,6 +1790,15 @@ static uint32_t is_pure_unary_elementwise(xnn_subgraph_t subgraph,
                                           uint32_t num_unary_values) {
   switch (node->type) {
     case xnn_node_type_unary_elementwise:
+      // A pure unary elementwise function takes exactly one tensor input and
+      // must have a valid operator. A node already fused into a LUT by this
+      // same pass (see `xnn_define_unary_elementwise_lut_in_place`) has 2
+      // inputs (the tensor and the LUT table) and
+      // `unary_operator == xnn_unary_invalid`; it isn't safe to treat that as
+      // a plain unary function and fuse it into another LUT.
+      if (node->num_inputs != 1 || node->unary_operator == xnn_unary_invalid) {
+        return XNN_INVALID_VALUE_ID;
+      }
       assert(node->num_inputs >= 1);
       return node->inputs[0];
     case xnn_node_type_binary_elementwise: {
@@ -4251,6 +4260,15 @@ static bool is_qs8_to_f32_dequant(const struct xnn_subgraph* subgraph,
 }
 
 static bool rewrite_dequant_bmm_at(xnn_subgraph_t subgraph, uint32_t node_id) {
+  // Only batch-matrix-multiply nodes are rewritten here. Check the node type
+  // *before* reserving any space: reserving may reallocate the subgraph's node
+  // and value arrays, and some callers optimize a fixed-capacity scratch
+  // subgraph whose `nodes`/`values` storage is not heap-allocated and must not
+  // be reallocated (see `xnn_subgraph_fuse_unary_quantized_into_lut`).
+  if (subgraph->nodes[node_id].type != xnn_node_type_batch_matrix_multiply) {
+    return false;
+  }
+
   // Reserve space upfront (we'll add 1 value + 1 node) so the later
   // `xnn_subgraph_new_internal_value` / `xnn_subgraph_new_node` calls do not
   // each trigger an additional reallocation or invalidate pointers.
@@ -4260,10 +4278,6 @@ static bool rewrite_dequant_bmm_at(xnn_subgraph_t subgraph, uint32_t node_id) {
   }
 
   struct xnn_node* node = &subgraph->nodes[node_id];
-  if (node->type != xnn_node_type_batch_matrix_multiply) {
-    return false;
-  }
-
   const uint32_t input_a_id = node->inputs[0];
   const uint32_t input_b_id = node->inputs[1];
   const uint32_t output_id = node->outputs[0];

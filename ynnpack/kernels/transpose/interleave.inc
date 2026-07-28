@@ -11,6 +11,7 @@ YNN_INTERLEAVE_KERNEL(arch_flag::avx512, interleave4_x16_avx512, 4, 16)
 YNN_INTERLEAVE_KERNEL(arch_flag::avx512, interleave4_x32_avx512, 4, 32)
 YNN_INTERLEAVE_KERNEL(arch_flag::avx512, interleave8_x2_avx512, 8, 2)
 YNN_INTERLEAVE_KERNEL(arch_flag::avx512, interleave8_x4_avx512, 8, 4)
+YNN_INTERLEAVE_KERNEL(arch_flag::avx512, interleave16_x2_avx512, 16, 2)
 #endif  // YNN_ARCH_X86_AVX512
 #ifdef YNN_ARCH_X86_AVX2
 YNN_INTERLEAVE_KERNEL(arch_flag::avx2, interleave2_x2_avx2, 2, 2)
@@ -25,6 +26,7 @@ YNN_INTERLEAVE_KERNEL(arch_flag::avx2, interleave4_x16_avx2, 4, 16)
 YNN_INTERLEAVE_KERNEL(arch_flag::avx2, interleave4_x32_avx2, 4, 32)
 YNN_INTERLEAVE_KERNEL(arch_flag::avx2, interleave8_x2_avx2, 8, 2)
 YNN_INTERLEAVE_KERNEL(arch_flag::avx2, interleave8_x4_avx2, 8, 4)
+YNN_INTERLEAVE_KERNEL(arch_flag::avx2, interleave16_x2_avx2, 16, 2)
 #endif  // YNN_ARCH_X86_AVX2
 #ifdef YNN_ARCH_X86_SSE2
 YNN_INTERLEAVE_KERNEL(arch_flag::sse2, interleave2_x2_sse2, 2, 2)
@@ -39,6 +41,7 @@ YNN_INTERLEAVE_KERNEL(arch_flag::sse2, interleave4_x16_sse2, 4, 16)
 YNN_INTERLEAVE_KERNEL(arch_flag::sse2, interleave4_x32_sse2, 4, 32)
 YNN_INTERLEAVE_KERNEL(arch_flag::sse2, interleave8_x2_sse2, 8, 2)
 YNN_INTERLEAVE_KERNEL(arch_flag::sse2, interleave8_x4_sse2, 8, 4)
+YNN_INTERLEAVE_KERNEL(arch_flag::sse2, interleave16_x2_sse2, 16, 2)
 #endif  // YNN_ARCH_X86_SSE2
 
 #ifdef YNN_ARCH_ARM64_SVE
@@ -64,6 +67,7 @@ YNN_INTERLEAVE_KERNEL(arch_flag::neon, interleave4_x16_neon, 4, 16)
 YNN_INTERLEAVE_KERNEL(arch_flag::neon, interleave4_x32_neon, 4, 32)
 YNN_INTERLEAVE_KERNEL(arch_flag::neon, interleave8_x2_neon, 8, 2)
 YNN_INTERLEAVE_KERNEL(arch_flag::neon, interleave8_x4_neon, 8, 4)
+YNN_INTERLEAVE_KERNEL(arch_flag::neon, interleave16_x2_neon, 16, 2)
 #endif  // YNN_ARCH_ARM_NEON
 
 #ifdef YNN_ARCH_HEXAGON_HVX
@@ -93,6 +97,7 @@ YNN_INTERLEAVE_KERNEL(arch_flag::none, interleave4_x4, 4, 4)
 YNN_INTERLEAVE_KERNEL(arch_flag::none, interleave4_x8, 4, 8)
 YNN_INTERLEAVE_KERNEL(arch_flag::none, interleave8_x2, 8, 2)
 YNN_INTERLEAVE_KERNEL(arch_flag::none, interleave8_x4, 8, 4)
+YNN_INTERLEAVE_KERNEL(arch_flag::none, interleave16_x2, 16, 2)
 
 YNN_INTERLEAVE_KERNEL(arch_flag::none, interleave_x2, 0, 2)
 YNN_INTERLEAVE_KERNEL(arch_flag::none, interleave_x4, 0, 4)

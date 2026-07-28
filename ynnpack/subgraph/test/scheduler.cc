@@ -14,6 +14,9 @@ namespace ynn {
 // invoke pthread_create
 //   synchronously, and we must match the pre-allocated PTHREAD_POOL_SIZE linked
 //   during build.
+//
+// `thread_count` here is the number of *background* worker threads. The thread
+// that invokes the runtime also participates as a worker.
 #if defined(__EMSCRIPTEN__) && !defined(__EMSCRIPTEN_PTHREADS__)
 TestScheduler::TestScheduler(int) : impl_(0) {}
 #elif defined(__EMSCRIPTEN__) && defined(__EMSCRIPTEN_PTHREADS__)
@@ -31,8 +34,9 @@ int TestScheduler::num_threads_impl(void* self) {
 
 void TestScheduler::schedule_impl(void* self, void* context,
                                   void (*task)(void* context)) {
-  reinterpret_cast<TestScheduler*>(self)->impl_.enqueue(
-      [task, context]() { (*task)(context); });
+  TestScheduler* scheduler = reinterpret_cast<TestScheduler*>(self);
+  ++scheduler->task_count_;
+  scheduler->impl_.enqueue([task, context]() { (*task)(context); });
 }
 
 const ynn_scheduler* TestScheduler::scheduler() {

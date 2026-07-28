@@ -77,6 +77,18 @@ class dot_base:
 #endif
 
 #if defined(__GNUC__)
+#define YNN_FORCE_REALIZATION(x) __asm volatile("" ::"m"(x));
+#if defined(__AVX__) || defined(__AVX2__) || defined(__AVX512F__)
+#define YNN_OPTIMIZATION_BARRIER(x) __asm volatile("" : "+v"(x));
+#else
+#define YNN_OPTIMIZATION_BARRIER(x) __asm volatile("" : "+x"(x));
+#endif
+#else
+#define YNN_FORCE_REALIZATION(x)
+#define YNN_OPTIMIZATION_BARRIER(x)
+#endif
+
+#if defined(__GNUC__)
 #define YNN_ALWAYS_INLINE inline __attribute__((__always_inline__))
 #elif defined(_MSC_VER)
 #define YNN_ALWAYS_INLINE __forceinline
@@ -270,28 +282,28 @@ void {func_name}(
     """
     return ""
 
-  def generate_block(self, nk):
+  def generate_block(self):
     """Generate the loads and products to implement a `block_shape` of the dot product."""
     result = ""
     for i in range(0, self.block_shape[0], self.tile_shape[0]):
-      for k in range(0, nk, self.tile_shape[2]):
-        result += self.load_a_tile_k_tail(i, k, nk)
+      for k in range(0, self.block_shape[2], self.tile_shape[2]):
+        result += self.load_a_tile_k_tail(i, k, self.block_shape[2])
     result += "\n"
 
     # TODO: This is a hack, find a better way to decide this loop ordering.
     if "neon" in self.arch:
       for j in range(0, self.block_shape[1], self.tile_shape[1]):
-        for k in range(0, nk, self.tile_shape[2]):
+        for k in range(0, self.block_shape[2], self.tile_shape[2]):
           result += self.load_b_tile(k, j)
         for i in range(0, self.block_shape[0], self.tile_shape[0]):
-          for k in range(0, nk, self.tile_shape[2]):
+          for k in range(0, self.block_shape[2], self.tile_shape[2]):
             result += self.product(i, j, k)
     else:
-      for k in range(0, nk, self.tile_shape[2]):
+      for k in range(0, self.block_shape[2], self.tile_shape[2]):
         for j in range(0, self.block_shape[1], self.tile_shape[1]):
           result += self.load_b_tile(k, j)
 
-      for k in range(0, nk, self.tile_shape[2]):
+      for k in range(0, self.block_shape[2], self.tile_shape[2]):
         for i in range(0, self.block_shape[0], self.tile_shape[0]):
           for j in range(0, self.block_shape[1], self.tile_shape[1]):
             result += self.product(i, j, k)
@@ -387,8 +399,15 @@ void {func_name}(
     result += """const void* A_k1 = A_k2;
 std::ptrdiff_t k1 = K1;
 """
-    block_body = self.generate_block(self.block_shape[2])
-    tile_body = self.generate_block(self.tile_shape[2])
+    block_body = self.generate_block()
+    block_shape = self.block_shape
+    self.block_shape = (
+        self.block_shape[0],
+        self.block_shape[1],
+        self.tile_shape[2],
+    )
+    tile_body = self.generate_block()
+    self.block_shape = block_shape
 
     a_step = (
         "A_stride_m"

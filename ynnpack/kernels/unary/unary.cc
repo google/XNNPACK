@@ -150,14 +150,14 @@ struct square_op {
   }
 };
 
-struct square_root_op {
-  explicit square_root_op(const unary_params& = {}) {}
+struct sqrt_op {
+  explicit sqrt_op(const unary_params& = {}) {}
   float operator()(float x) const { return std::sqrt(x); }
   double operator()(double x) const { return std::sqrt(x); }
 };
 
-struct cube_root_op {
-  explicit cube_root_op(const unary_params& = {}) {}
+struct cbrt_op {
+  explicit cbrt_op(const unary_params& = {}) {}
   float operator()(float x) const { return std::cbrt(x); }
   double operator()(double x) const { return std::cbrt(x); }
 };
@@ -175,8 +175,8 @@ struct tanh_op {
   }
 };
 
-struct reciprocal_square_root_op {
-  explicit reciprocal_square_root_op(const unary_params& = {}) {}
+struct rsqrt_op {
+  explicit rsqrt_op(const unary_params& = {}) {}
   float operator()(float x) const { return 1.0f / std::sqrt(x); }
   double operator()(double x) const { return 1.0 / std::sqrt(x); }
 };
@@ -265,10 +265,10 @@ struct sign_op {
   int32_t operator()(int32_t x) const { return x < 0 ? -1 : x > 0 ? 1 : 0; }
 };
 
-struct sine_op {
-  sine_params params;
+struct sin_op {
+  sin_params params;
 
-  explicit sine_op(const unary_params& params) : params(params.sine) {}
+  explicit sin_op(const unary_params& params) : params(params.sin) {}
   float operator()(float x) const {
     return std::sin(x) * static_cast<float>(params.output_multiplier) +
            static_cast<float>(params.output_offset);
@@ -278,10 +278,10 @@ struct sine_op {
   }
 };
 
-struct cosine_op {
-  cosine_params params;
+struct cos_op {
+  cos_params params;
 
-  explicit cosine_op(const unary_params& params) : params(params.cosine) {}
+  explicit cos_op(const unary_params& params) : params(params.cos) {}
   float operator()(float x) const {
     return std::cos(x) * static_cast<float>(params.output_multiplier) +
            static_cast<float>(params.output_offset);
@@ -289,6 +289,12 @@ struct cosine_op {
   double operator()(double x) const {
     return std::cos(x) * params.output_multiplier + params.output_offset;
   }
+};
+
+struct tan_op {
+  explicit tan_op(const unary_params&) {}
+  float operator()(float x) const { return std::tan(x); }
+  double operator()(double x) const { return std::tan(x); }
 };
 
 struct sigmoid_op {
@@ -375,20 +381,22 @@ unary_kernel_fn get_float_unary_reference_kernel(ynn_unary_operator op,
       return unary_impl<T, T, negate_op>;
     case ynn_unary_square:
       return unary_impl<T, T, square_op>;
-    case ynn_unary_square_root:
-      return unary_impl<T, T, square_root_op>;
-    case ynn_unary_reciprocal_square_root:
-      return unary_impl<T, T, reciprocal_square_root_op>;
+    case ynn_unary_sqrt:
+      return unary_impl<T, T, sqrt_op>;
+    case ynn_unary_rsqrt:
+      return unary_impl<T, T, rsqrt_op>;
     case ynn_unary_tanh:
       return unary_impl<T, T, tanh_op>;
-    case ynn_unary_cube_root:
-      return unary_impl<T, T, cube_root_op>;
+    case ynn_unary_cbrt:
+      return unary_impl<T, T, cbrt_op>;
     case ynn_unary_sign:
       return unary_impl<T, T, sign_op>;
-    case ynn_unary_sine:
-      return unary_impl<T, T, sine_op>;
-    case ynn_unary_cosine:
-      return unary_impl<T, T, cosine_op>;
+    case ynn_unary_sin:
+      return unary_impl<T, T, sin_op>;
+    case ynn_unary_cos:
+      return unary_impl<T, T, cos_op>;
+    case ynn_unary_tan:
+      return unary_impl<T, T, tan_op>;
     case ynn_unary_sigmoid:
       return unary_impl<T, T, sigmoid_op>;
     case ynn_unary_hardswish:
@@ -529,12 +537,12 @@ unary_params get_unary_params(ynn_unary_operator op) {
     case ynn_unary_tanh:
       return unary_params{
           .tanh = tanh_params{.output_offset = 0.0, .output_multiplier = 1.0}};
-    case ynn_unary_sine:
+    case ynn_unary_sin:
       return unary_params{
-          .sine = sine_params{.output_offset = 0.0, .output_multiplier = 1.0}};
-    case ynn_unary_cosine:
-      return unary_params{.cosine = cosine_params{.output_offset = 0.0,
-                                                  .output_multiplier = 1.0}};
+          .sin = sin_params{.output_offset = 0.0, .output_multiplier = 1.0}};
+    case ynn_unary_cos:
+      return unary_params{
+          .cos = cos_params{.output_offset = 0.0, .output_multiplier = 1.0}};
     case ynn_unary_poly3:
       return unary_params{.poly3 = poly3_params{/*c0=*/0.0, /*c1=*/0.0,
                                                 /*c2=*/0.0, /*c3=*/0.0}};

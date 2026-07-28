@@ -44,6 +44,12 @@
 #define YNN_UNUSED
 #endif
 
+#if YNN_COMPILER_HAS_ATTRIBUTE(weak)
+#define YNN_WEAK __attribute__((weak))
+#else
+#define YNN_WEAK
+#endif
+
 #if defined(__GNUC__)
 #if defined(__clang__) || (__GNUC__ > 4 || __GNUC__ == 4 && __GNUC_MINOR__ >= 5)
 #define YNN_UNREACHABLE      \

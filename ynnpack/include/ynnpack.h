@@ -144,6 +144,7 @@ enum ynn_status ynn_define_iota(ynn_subgraph_t subgraph, enum ynn_type type,
 
 #define YNN_NODE_FLAG_KEEP_DIMS (1 << 0)
 #define YNN_NODE_FLAG_SLICE_DIMS (1 << 0)
+#define YNN_NODE_FLAG_KEEP_SHAPE (1 << 0)
 #define YNN_NODE_FLAG_RESHAPE_1D (1 << 0)
 #define YNN_NODE_FLAG_UNIQUE_DIMS (1 << 1)
 #define YNN_NODE_FLAG_NO_EXCESS_PRECISION (1 << 2)
@@ -154,8 +155,8 @@ enum ynn_unary_operator {
   ynn_unary_abs = 1,
   ynn_unary_ceil = 2,
   ynn_unary_convert = 3,
-  ynn_unary_cosine = 4,
-  ynn_unary_cube_root = 5,
+  ynn_unary_cos = 4,
+  ynn_unary_cbrt = 5,
   ynn_unary_erf = 6,
   ynn_unary_exp = 7,
   ynn_unary_expm1 = 8,
@@ -164,21 +165,30 @@ enum ynn_unary_operator {
   ynn_unary_log = 11,
   ynn_unary_log1p = 12,
   ynn_unary_negate = 13,
-  ynn_unary_reciprocal_square_root = 14,
+  ynn_unary_rsqrt = 14,
   ynn_unary_round = 15,
   ynn_unary_sigmoid = 16,
   ynn_unary_sign = 17,
-  ynn_unary_sine = 18,
+  ynn_unary_sin = 18,
   ynn_unary_square = 19,
-  ynn_unary_square_root = 20,
+  ynn_unary_sqrt = 20,
   ynn_unary_tanh = 21,
   ynn_unary_poly3 = 22,
   ynn_unary_round_to_bf16 = 23,
   ynn_unary_approx_erf = 24,
   ynn_unary_approx_tanh = 25,
+  ynn_unary_tan = 26,
 
   // Internal use only
   ynn_unary_requantize_to_uint8,
+
+  // For backwards compatibility
+  ynn_unary_cosine = ynn_unary_cos,
+  ynn_unary_sine = ynn_unary_sin,
+  ynn_unary_tangent = ynn_unary_tan,
+  ynn_unary_square_root = ynn_unary_sqrt,
+  ynn_unary_reciprocal_square_root = ynn_unary_rsqrt,
+  ynn_unary_cube_root = ynn_unary_cbrt,
 };
 
 // Defines a unary operation of a single input to a single output.
@@ -389,6 +399,9 @@ enum ynn_status ynn_define_static_slice(
 
 // Extracts the range of indices `[0, end)` in `axes` dimensions, where `end` is
 // the extent of the same axis in the template value.
+//
+// If the YNN_NODE_FLAG_KEEP_SHAPE flag is set, this replaces the sliced values
+// with zeros; the shape of the output is unchanged by this operation.
 enum ynn_status ynn_define_slice_like(ynn_subgraph_t subgraph, size_t num_axes,
                                       const int32_t* axes, uint32_t input_id,
                                       uint32_t template_id, uint32_t* output_id,

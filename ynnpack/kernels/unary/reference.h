@@ -214,8 +214,8 @@ struct square : public unary_op_info {
   }
 };
 
-struct square_root : public unary_op_info {
-  explicit square_root(const unary_params& = {}) {}
+struct sqrt : public unary_op_info {
+  explicit sqrt(const unary_params& = {}) {}
   float operator()(float x) const override { return std::sqrt(x); }
   double operator()(double x) const override { return std::sqrt(x); }
 
@@ -275,8 +275,8 @@ struct tanh : public unary_op_info {
   }
 };
 
-struct reciprocal_square_root : public unary_op_info {
-  explicit reciprocal_square_root(const unary_params& = {}) {}
+struct rsqrt : public unary_op_info {
+  explicit rsqrt(const unary_params& = {}) {}
   float operator()(float x) const override {
     return static_cast<float>(1.0 / std::sqrt(static_cast<double>(x)));
   }
@@ -442,8 +442,8 @@ struct approx_tanh : public unary_op_info {
   }
 };
 
-struct cube_root : public unary_op_info {
-  explicit cube_root(const unary_params& = {}) {}
+struct cbrt : public unary_op_info {
+  explicit cbrt(const unary_params& = {}) {}
   float operator()(float x) const override { return std::cbrt(x); }
   double operator()(double x) const override { return std::cbrt(x); }
 
@@ -474,16 +474,16 @@ struct sign : public unary_op_info {
 struct trig : public unary_op_info {
   explicit trig(const unary_params& = {}) {}
   tolerance_spec tolerance(ynn_type /*type*/) const override {
-    return tolerance_spec{/*relative=*/5.0f, /*absolute=*/3.0f};
+    return tolerance_spec{/*relative=*/5.0f};
   }
 
   interval domain(ynn_type type) const override { return {-100.0f, 100.0f}; }
 };
 
-struct sine : public trig {
-  sine_params params;
+struct sin : public trig {
+  sin_params params;
 
-  explicit sine(const unary_params& params = {}) : params(params.sine) {}
+  explicit sin(const unary_params& params = {}) : params(params.sin) {}
   float operator()(float x) const override {
     return std::sin(x) * static_cast<float>(params.output_multiplier) +
            static_cast<float>(params.output_offset);
@@ -493,10 +493,10 @@ struct sine : public trig {
   }
 };
 
-struct cosine : public trig {
-  cosine_params params;
+struct cos : public trig {
+  cos_params params;
 
-  explicit cosine(const unary_params& params = {}) : params(params.cosine) {}
+  explicit cos(const unary_params& params = {}) : params(params.cos) {}
   float operator()(float x) const override {
     return std::cos(x) * static_cast<float>(params.output_multiplier) +
            static_cast<float>(params.output_offset);
@@ -504,6 +504,12 @@ struct cosine : public trig {
   double operator()(double x) const override {
     return std::cos(x) * params.output_multiplier + params.output_offset;
   }
+};
+
+struct tan : public trig {
+  explicit tan(const unary_params&) {}
+  float operator()(float x) const override { return std::tan(x); }
+  double operator()(double x) const override { return std::tan(x); }
 };
 
 struct hardswish : public unary_op_info {

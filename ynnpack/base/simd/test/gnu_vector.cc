@@ -218,6 +218,10 @@ TEST_UNARY(gnu_vector, erf, f32, 4, std::erf, 2);
 TEST_UNARY(gnu_vector, erf, f64, 2, std::erf, 3);
 TEST_UNARY(gnu_vector, tanh, f32, 4, std::tanh, 3);
 TEST_UNARY(gnu_vector, tanh, f64, 2, std::tanh, 4);
+TEST_UNARY_RANGE(gnu_vector, sin, f32, 4, std::sin, 3, -1e4, 1e4);
+TEST_UNARY_RANGE(gnu_vector, sin, f64, 2, std::sin, 2, -1e7, 1e7);
+TEST_UNARY_RANGE(gnu_vector, cos, f32, 4, std::cos, 3, -1e4, 1e4);
+TEST_UNARY_RANGE(gnu_vector, cos, f64, 2, std::cos, 2, -1e7, 1e7);
 
 TEST_UNARY(gnu_vector, approx_erf, f32, 4, std::erf, 5);
 TEST_UNARY(gnu_vector, approx_tanh, f32, 4, std::tanh, 5);

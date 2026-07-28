@@ -16,6 +16,23 @@
 #include "ynnpack/xnnpack/utils.h"
 #include "ynnpack/xnnpack/xnnpack.h"
 
+namespace {
+
+uint32_t value_flags_from_xnn(uint32_t flags, bool is_static) {
+  uint32_t ynn = 0;
+  if (!is_static) {
+    if (flags & XNN_VALUE_FLAG_EXTERNAL_INPUT) {
+      ynn |= YNN_VALUE_FLAG_EXTERNAL_INPUT;
+    }
+    if (flags & XNN_VALUE_FLAG_EXTERNAL_OUTPUT) {
+      ynn |= YNN_VALUE_FLAG_EXTERNAL_OUTPUT;
+    }
+  }
+  return ynn;
+}
+
+}  // namespace
+
 extern "C" {
 
 xnn_status xnn_define_tensor_value(xnn_subgraph_t subgraph,
@@ -30,7 +47,7 @@ xnn_status xnn_define_tensor_value(xnn_subgraph_t subgraph,
   const size_t* xnn_dims = data ? dims : nullptr;
   ynn_status status = ynn_define_tensor(
       subgraph->ynn, ynn::type_from_xnn(datatype), num_dims, xnn_dims, data,
-      ynn::value_flags_from_xnn(flags), id_out);
+      value_flags_from_xnn(flags, data != nullptr), id_out);
   if (status != ynn_status_success) {
     return ynn::xnn_status_from_ynn(status);
   }
@@ -77,7 +94,7 @@ xnn_status xnn_define_quantized_tensor_value(
   const size_t* xnn_dims = data ? dims : nullptr;
   ynn_status status = ynn_define_tensor(
       subgraph->ynn, ynn::type_from_xnn(datatype), num_dims, xnn_dims, data,
-      ynn::value_flags_from_xnn(flags), id_out);
+      value_flags_from_xnn(flags, data != nullptr), id_out);
   if (status != ynn_status_success) {
     return ynn::xnn_status_from_ynn(status);
   }
@@ -168,9 +185,9 @@ xnn_status xnn_define_channelwise_quantized_tensor_value_v3(
 
   *id_out =
       external_id == XNN_INVALID_VALUE_ID ? YNN_INVALID_VALUE_ID : external_id;
-  status =
-      ynn_define_tensor(subgraph->ynn, ynn::type_from_xnn(datatype), num_dims,
-                        dims, data, ynn::value_flags_from_xnn(flags), id_out);
+  status = ynn_define_tensor(
+      subgraph->ynn, ynn::type_from_xnn(datatype), num_dims, dims, data,
+      value_flags_from_xnn(flags, data != nullptr), id_out);
   if (status != ynn_status_success) {
     return ynn::xnn_status_from_ynn(status);
   }

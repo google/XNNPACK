@@ -777,8 +777,10 @@ class PackWMicrokernelTester {
       // check bias
       uint32_t* bias_start = (uint32_t*)packed_data;
       uint32_t* bias_ref_start = (uint32_t*)packed_ref_data;
-      for (size_t ni = 0; ni < n_remainder; ni++) {
-        EXPECT_EQ(bias_start[ni], bias_ref_start[ni])
+      for (size_t ni = 0; ni < nr(); ni++) {
+        const uint32_t expected_bias =
+            ni < n_remainder ? bias_ref_start[ni] : 0;
+        EXPECT_EQ(bias_start[ni], expected_bias)
             << "n_block_start " << n_block_start << " ni " << ni;
       }
       packed_ref_data += nr() * sizeof(uint32_t);

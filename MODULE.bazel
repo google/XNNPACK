@@ -89,10 +89,10 @@ http_archive(
     name = "cpuinfo",
     patch_args = ["-p1"],
     patches = ["//:cpuinfo_windows_arm64_msvc.patch"],
-    sha256 = "9213f6f81784eb8679f0621ad1c20eac711e063cb9c7712738720609cbdf1c33",
-    strip_prefix = "cpuinfo-ea6b9f1bb6e1001d8b21574d5bc78ddef62e499d",
+    sha256 = "dcb29a31da2c90c17d922d0db24edeec106742599cbeddc9046060d911ac47a0",
+    strip_prefix = "cpuinfo-6882af581bbbdd073c946eae4fd21bc037ff39cf",
     urls = [
-        "https://github.com/pytorch/cpuinfo/archive/ea6b9f1bb6e1001d8b21574d5bc78ddef62e499d.zip",
+        "https://github.com/pytorch/cpuinfo/archive/6882af581bbbdd073c946eae4fd21bc037ff39cf.zip",
     ],
 )
 # LINT.ThenChange(cmake/DownloadCpuinfo.cmake)

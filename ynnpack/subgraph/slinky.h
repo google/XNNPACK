@@ -127,7 +127,6 @@ std::vector<slinky::expr> make_split_factors(
 struct scheduling_split {
   slinky::var var;
   slinky::expr step;
-  slinky::expr workers = slinky::loop::parallel;
   slinky::expr extent;
   // If this is true the corresponding loop is required to have this specific
   // step, i.e. it can not get scheduled in the loop of the other function
@@ -254,8 +253,7 @@ bool fuse_and_slice_leading_dim(int i, slinky::dim* x_dims,
   // First check whether fusing dimensions is possible.
   const slinky::dim& x_dim_0 = x.dims[0];
   bool can_fuse_all =
-      !x_dim_0.empty() &&
-      slinky::can_fuse(x_dims[i], x_dim_0) &&
+      !x_dim_0.empty() && slinky::can_fuse(x_dims[i], x_dim_0) &&
       all_of_pairs(
           [x_dims, i, &x_dim_0](const slinky::dim* in_dims,
                                 const slinky::raw_buffer& in_buf) {
@@ -332,6 +330,51 @@ bool fuse_and_slice_leading_dims(slinky::dim* x_dims, slinky::raw_buffer& x,
     // nice "fast path" for 1D buffers.
     while (x.rank > 0) {
       if (!internal::fuse_and_slice_leading_dim(i, x_dims, x, inputs...)) {
+        break;
+      }
+    }
+  }
+
+  return true;
+}
+
+// This overload of fuse_and_slice_leading_dims allows sub-byte types.
+template <int NumInnerDims>
+bool fuse_and_slice_leading_dims(slinky::dim* x_dims, int x_elem_count,
+                                 slinky::raw_buffer& x, slinky::dim* a_dims,
+                                 int a_elem_count, slinky::raw_buffer& a) {
+  assert(is_contiguous(x.dim(0), x.elem_size));
+
+  x_dims[0] = slice_dim0(x);
+  if (x_dims[0].empty()) {
+    return false;
+  }
+
+  slinky::index_t x_min_0 = x_dims[0].min() * x_elem_count;
+  assert(x_min_0 % a_elem_count == 0);
+  // We might need to avoid this division by a_elem_count when it is 1.
+  a_dims[0] = slice_dim0(a, slinky::in_bounds{x_min_0 / a_elem_count});
+
+  if (x_elem_count == 1 && a_elem_count == 1) {
+    while (x.rank > 0) {
+      if (!internal::fuse_and_slice_leading_dim(0, x_dims, x, a_dims, a)) {
+        break;
+      }
+    }
+  } else {
+    // We might be able to fuse in this case too.
+  }
+
+  for (int i = 1; i < NumInnerDims; ++i) {
+    x_dims[i] = slice_dim0(x);
+    if (x_dims[i].empty()) {
+      return false;
+    }
+
+    a_dims[i] = slice_dim0(a, slinky::in_bounds{x_dims[i].min()});
+
+    while (x.rank > 0) {
+      if (!internal::fuse_and_slice_leading_dim(i, x_dims, x, a_dims, a)) {
         break;
       }
     }

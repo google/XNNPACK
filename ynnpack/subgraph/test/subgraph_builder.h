@@ -154,7 +154,7 @@ class SubgraphBuilder {
 
   SubgraphBuilder& AddSliceLike(const std::vector<int32_t>& axes,
                                 uint32_t input_id, uint32_t template_id,
-                                uint32_t output_id);
+                                uint32_t output_id, uint32_t flags = 0);
 
   SubgraphBuilder& AddBroadcastLike(const std::vector<int32_t>& axes,
                                     uint32_t input_id, uint32_t template_id,

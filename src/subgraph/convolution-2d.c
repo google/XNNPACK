@@ -682,6 +682,24 @@ enum xnn_status reshape_convolution_operator(struct xnn_operator_data* opdata,
   const size_t input_height = input_value->shape.dim[1];
   const size_t input_width = input_value->shape.dim[2];
 
+  // The indirection buffer strides across input pixels by the operator's
+  // create-time input_pixel_stride, so an NHWC input carrying fewer channels
+  // than that makes the microkernel read past the end of the input buffer.
+  const xnn_operator_t convolution_op = opdata->operator_objects[0];
+  if (convolution_op->type != xnn_operator_type_convolution_nchw_f16 &&
+      convolution_op->type != xnn_operator_type_convolution_nchw_f32) {
+    const size_t input_channels =
+        input_value->shape.dim[input_value->shape.num_dims - 1];
+    if (input_channels != convolution_op->input_pixel_stride) {
+      xnn_log_error("failed to reshape %s operator with input ID #%" PRIu32
+                    ": mismatch at channel dimension (%zu != %zu)",
+                    xnn_node_type_to_string(xnn_node_type_convolution_2d),
+                    input_id, input_channels,
+                    convolution_op->input_pixel_stride);
+      return xnn_status_invalid_parameter;
+    }
+  }
+
   size_t output_height, output_width;
   enum xnn_status status = xnn_status_invalid_state;
   const size_t old_workspace_size = opdata->workspace_size;

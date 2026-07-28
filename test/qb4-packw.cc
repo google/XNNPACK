@@ -66,6 +66,20 @@ TEST_P(XnnTestQB4, bias) {
     .Test(GetParam().ukernel);
 }
 
+TEST_P(XnnTestQB4, bias_tail_padding) {
+  TEST_REQUIRES_ARCH_FLAGS(GetParam().arch_flags);
+  PackWMicrokernelTester()
+    .nullbias(false)
+    .n(GetParam().nr - 1)
+    .k(GetParam().kblock)
+    .nr(GetParam().nr * GetParam().nr_scale)
+    .kr(GetParam().kr)
+    .sr(GetParam().sr)
+    .bl(GetParam().bl)
+    .izp(GetParam().izp)
+    .Test(GetParam().ukernel);
+}
+
 TEST_P(XnnTestQB4, kb_gt_bl_no_bias) {
   TEST_REQUIRES_ARCH_FLAGS(GetParam().arch_flags);
   for(int kb_scale = 2; kb_scale < 7; kb_scale++){

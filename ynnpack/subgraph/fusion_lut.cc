@@ -87,19 +87,19 @@ std::set<uint32_t> get_variable_inputs(const ynn_subgraph& subgraph,
 bool should_lut_single_node(const ynn_node& node) {
   if (auto unary = std::get_if<ynn_node::unary_elementwise>(&node.op)) {
     switch (unary->op) {
-      case ynn_unary_cosine:
-      case ynn_unary_cube_root:
+      case ynn_unary_cos:
+      case ynn_unary_cbrt:
       case ynn_unary_erf:
       case ynn_unary_exp:
       case ynn_unary_expm1:
       case ynn_unary_hardswish:
       case ynn_unary_log:
       case ynn_unary_log1p:
-      case ynn_unary_reciprocal_square_root:
+      case ynn_unary_rsqrt:
       case ynn_unary_sigmoid:
-      case ynn_unary_sine:
+      case ynn_unary_sin:
       case ynn_unary_square:
-      case ynn_unary_square_root:
+      case ynn_unary_sqrt:
       case ynn_unary_tanh:
         return true;
       default:

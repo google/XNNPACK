@@ -25,9 +25,9 @@ typedef struct sme_state {
 
 extern "C" {
 
-sme_state_t __arm_sme_state() { YNN_UNREACHABLE; }
-void __arm_tpidr2_restore(void* blk) { YNN_UNREACHABLE; }
-void __arm_tpidr2_save(void) { YNN_UNREACHABLE; }
-void __arm_za_disable(void) { YNN_UNREACHABLE; }
+YNN_WEAK sme_state_t __arm_sme_state() { YNN_UNREACHABLE; }
+YNN_WEAK void __arm_tpidr2_restore(void* blk) { YNN_UNREACHABLE; }
+YNN_WEAK void __arm_tpidr2_save(void) { YNN_UNREACHABLE; }
+YNN_WEAK void __arm_za_disable(void) { YNN_UNREACHABLE; }
 
 }  // extern "C"

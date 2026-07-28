@@ -100,6 +100,130 @@ TEST(MemoryPlanner, MemoryBlocksCoalescing) {
   xnn_release_value_allocation_tracker(&tracker);
 }
 
+TEST(MemoryPlanner, ReusesLeadingGap) {
+  EXPECT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  struct xnn_runtime runtime;
+  runtime.num_ops = 0;
+  runtime.num_values = 3;
+  struct xnn_value_allocation_tracker tracker;
+  xnn_init_value_allocation_tracker(&tracker, &runtime);
+
+  tracker.usage[0].first_node = 0;
+  tracker.usage[0].last_node = 1;
+  xnn_add_value_allocation_tracker(&tracker, 0, 100);
+
+  tracker.usage[1].first_node = 1;
+  tracker.usage[1].last_node = 2;
+  xnn_add_value_allocation_tracker(&tracker, 1, 80);
+
+  tracker.usage[2].first_node = 2;
+  tracker.usage[2].last_node = 3;
+  xnn_add_value_allocation_tracker(&tracker, 2, 60);
+
+  for (size_t i = 0; i < runtime.num_values; i++) {
+    tracker.usage[i].reuse_value_id = XNN_INVALID_VALUE_ID;
+  }
+  xnn_plan_value_allocation_tracker(&tracker);
+
+  EXPECT_EQ(0, tracker.usage[0].alloc_offset);
+  EXPECT_EQ(100, tracker.usage[1].alloc_offset);
+  EXPECT_EQ(0, tracker.usage[2].alloc_offset);
+  EXPECT_EQ(180, tracker.mem_arena_size);
+
+  xnn_release_value_allocation_tracker(&tracker);
+}
+
+TEST(MemoryPlanner, PrefersSmallerInternalGapOverLeadingGap) {
+  EXPECT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  struct xnn_runtime runtime;
+  runtime.num_ops = 0;
+  runtime.num_values = 5;
+  struct xnn_value_allocation_tracker tracker;
+  xnn_init_value_allocation_tracker(&tracker, &runtime);
+
+  tracker.usage[0].first_node = 0;
+  tracker.usage[0].last_node = 0;
+  xnn_add_value_allocation_tracker(&tracker, 0, 100);
+
+  tracker.usage[1].first_node = 0;
+  tracker.usage[1].last_node = 2;
+  xnn_add_value_allocation_tracker(&tracker, 1, 90);
+
+  tracker.usage[2].first_node = 0;
+  tracker.usage[2].last_node = 0;
+  xnn_add_value_allocation_tracker(&tracker, 2, 80);
+
+  tracker.usage[3].first_node = 0;
+  tracker.usage[3].last_node = 2;
+  xnn_add_value_allocation_tracker(&tracker, 3, 70);
+
+  tracker.usage[4].first_node = 2;
+  tracker.usage[4].last_node = 3;
+  xnn_add_value_allocation_tracker(&tracker, 4, 60);
+
+  for (size_t i = 0; i < runtime.num_values; i++) {
+    tracker.usage[i].reuse_value_id = XNN_INVALID_VALUE_ID;
+  }
+  xnn_plan_value_allocation_tracker(&tracker);
+
+  EXPECT_EQ(0, tracker.usage[0].alloc_offset);
+  EXPECT_EQ(100, tracker.usage[1].alloc_offset);
+  EXPECT_EQ(190, tracker.usage[2].alloc_offset);
+  EXPECT_EQ(270, tracker.usage[3].alloc_offset);
+  EXPECT_EQ(190, tracker.usage[4].alloc_offset);
+  EXPECT_EQ(340, tracker.mem_arena_size);
+
+  xnn_release_value_allocation_tracker(&tracker);
+}
+
+TEST(MemoryPlanner, PrefersLeadingGapOnEqualFit) {
+  EXPECT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  struct xnn_runtime runtime;
+  runtime.num_ops = 0;
+  runtime.num_values = 6;
+  struct xnn_value_allocation_tracker tracker;
+  xnn_init_value_allocation_tracker(&tracker, &runtime);
+
+  tracker.usage[0].first_node = 0;
+  tracker.usage[0].last_node = 0;
+  xnn_add_value_allocation_tracker(&tracker, 0, 110);
+
+  tracker.usage[1].first_node = 0;
+  tracker.usage[1].last_node = 2;
+  xnn_add_value_allocation_tracker(&tracker, 1, 100);
+
+  tracker.usage[2].first_node = 0;
+  tracker.usage[2].last_node = 0;
+  xnn_add_value_allocation_tracker(&tracker, 2, 60);
+
+  tracker.usage[3].first_node = 0;
+  tracker.usage[3].last_node = 0;
+  xnn_add_value_allocation_tracker(&tracker, 3, 50);
+
+  tracker.usage[4].first_node = 0;
+  tracker.usage[4].last_node = 2;
+  xnn_add_value_allocation_tracker(&tracker, 4, 45);
+
+  tracker.usage[5].first_node = 2;
+  tracker.usage[5].last_node = 3;
+  xnn_add_value_allocation_tracker(&tracker, 5, 40);
+
+  for (size_t i = 0; i < runtime.num_values; i++) {
+    tracker.usage[i].reuse_value_id = XNN_INVALID_VALUE_ID;
+  }
+  xnn_plan_value_allocation_tracker(&tracker);
+
+  EXPECT_EQ(0, tracker.usage[0].alloc_offset);
+  EXPECT_EQ(110, tracker.usage[1].alloc_offset);
+  EXPECT_EQ(210, tracker.usage[2].alloc_offset);
+  EXPECT_EQ(270, tracker.usage[3].alloc_offset);
+  EXPECT_EQ(320, tracker.usage[4].alloc_offset);
+  EXPECT_EQ(0, tracker.usage[5].alloc_offset);
+  EXPECT_EQ(365, tracker.mem_arena_size);
+
+  xnn_release_value_allocation_tracker(&tracker);
+}
+
 TEST(MemoryPlanner, GeneralPlanning) {
   EXPECT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   struct xnn_runtime runtime;

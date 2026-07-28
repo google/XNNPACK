@@ -207,6 +207,8 @@ TEST_UNARY(arm_neon, tanh, f32, 4, std::tanh, 2);
 #else
 // TODO: b/515053903 - 32-bit ARM does something weird here.
 #endif
+TEST_UNARY_RANGE(arm_neon, sin, f32, 4, std::sin, 3, -1e4, 1e4);
+TEST_UNARY_RANGE(arm_neon, cos, f32, 4, std::cos, 3, -1e4, 1e4);
 
 TEST_UNARY(arm_neon, approx_erf, f32, 4, std::erf, 5);
 TEST_UNARY(arm_neon, approx_tanh, f32, 4, std::tanh, 5);

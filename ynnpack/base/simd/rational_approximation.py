@@ -136,7 +136,6 @@ def plot_error(f, x, approx, title="Relative Error", epsilon=None):
   plt.grid(True)
   plt.show()
 
-
 # %%
 # expm1, >=12 bits of precision
 # We approximate expm1(x) / x
@@ -155,6 +154,7 @@ print_polynomial("q", q)
 x_test = np.linspace(x_min, x_max, 5000)
 approx = x_test * poly_eval(p, x_test) / poly_eval(q, x_test)
 plot_error(np.expm1, x_test, approx, epsilon=2**-12)
+
 # %%
 # fp32 expm1
 # We approximate (expm1(x) - x) / x^2 to model the higher order terms
@@ -171,7 +171,8 @@ print_polynomial("p", p)
 # expm1(x) ~= x + x^2 * (P(x)/Q(x))
 x_test = np.linspace(x_min, x_max, 5000)
 approx = x_test**2 * poly_eval(p, x_test) + x_test
-plot_error(np.expm1, x_test, approx, epsilon=2**-24)
+plot_error(np.expm1, x_test, approx, epsilon=2**-23)
+
 # %%
 # fp64 expm1
 # We approximate (expm1(x) - x) / x^2 to model the higher order terms
@@ -190,6 +191,7 @@ print_polynomial("q", q)
 x_test = np.linspace(x_min, x_max, 5000)
 approx = x_test**2 * poly_eval(p, x_test) / poly_eval(q, x_test) + x_test
 plot_error(np.expm1, x_test, approx, epsilon=2**-53)
+
 # %%
 import math
 
@@ -209,6 +211,7 @@ print_polynomial("Q", q)
 x_test = np.linspace(x_min, x_max, 5000).astype(np.float16)
 approx = x_test**2 * poly_eval(p, x_test) / poly_eval(q, x_test) + x_test
 plot_error(np.log1p, x_test, approx, epsilon=2**-12)
+
 # %%
 import math
 
@@ -226,7 +229,8 @@ print_polynomial("Q", q)
 # Evaluate final error
 x_test = np.linspace(x_min, x_max, 5000)
 approx = x_test**2 * poly_eval(p, x_test) / poly_eval(q, x_test) + x_test
-plot_error(np.log1p, x_test, approx, epsilon=2**-24)
+plot_error(np.log1p, x_test, approx, epsilon=2**-23)
+
 # %%
 import math
 
@@ -245,6 +249,7 @@ print_polynomial("Q", q)
 x_test = np.linspace(x_min, x_max, 5000)
 approx = x_test**2 * poly_eval(p, x_test) / poly_eval(q, x_test) + x_test
 plot_error(np.log1p, x_test, approx, epsilon=2**-53)
+
 # %%
 import scipy.special
 
@@ -273,6 +278,7 @@ plot_error(
     title="Relative Error for erf(x) (Odd Approximation)",
     epsilon=2**-12,
 )
+
 # %%
 import scipy.special
 
@@ -302,8 +308,9 @@ plot_error(
     x_test,
     approx,
     title="Relative Error for erf(x) (Odd Approximation)",
-    epsilon=2**-24,
+    epsilon=2**-23,
 )
+
 # %%
 # Manual Exploration: 3-Piece erf Approximation
 x_min, x_limit = 1e-7, 3.8
@@ -337,13 +344,14 @@ plot_error(
     x_test,
     approx,
     title=f"Refined 3-Piece erf (P={p_deg}, Q={q_deg}, R={r_deg})",
-    epsilon=2**-24,
+    epsilon=2**-23,
 )
 
 print("Final Optimized 3-Piece Coefficients:")
 print_polynomial("P", p)
 print_polynomial("Q", q)
 print_polynomial("R", r)
+
 # %%
 import scipy.special
 
@@ -382,6 +390,7 @@ print_polynomial("P", p)
 print_polynomial("Q", q)
 print_polynomial("R", r)
 print_polynomial("S", s)
+
 # %%
 import numpy as np
 
@@ -413,6 +422,7 @@ plot_error(
     title="Odd tanh(x) Relative Error (fp32)",
     epsilon=2**-12,
 )
+
 # %%
 # tanh(x) fp32 approximation
 f = lambda x: np.tanh(np.sqrt(x)) / np.sqrt(x)
@@ -439,5 +449,159 @@ plot_error(
     x_test,
     approx,
     title="Odd tanh(x) Relative Error (fp32)",
-    epsilon=2**-24,
+    epsilon=2**-23,
+)
+
+# %%
+import mpmath
+
+# Split x into n constants, each with n bits of precision that when added together, approximate x.
+def split(x, n, bits, dtype):
+  # Ensure x is an mpmath mpf object for high-precision arithmetic
+  mpmath.mp.dps = 100
+  x_mp = mpmath.mpf(x)
+
+  result = np.zeros(n, dtype=dtype)
+  for i in range(n):
+    if x_mp == 0:
+      break
+    # Get exponent of the remaining value
+    # mpmath.frexp returns (mantissa, exponent) where 0.5 <= abs(mantissa) < 1.0
+    m, e = mpmath.frexp(x_mp)
+
+    if bits > 0:
+      # Round mantissa to the target number of bits manually
+      scale = mpmath.mpf(2.0) ** bits
+      # mpmath standard rounding
+      m = mpmath.floor(m * scale + 0.5) / scale
+
+    # Reconstruct the value for this component
+    val = m * (mpmath.mpf(2.0) ** e)
+
+    # Convert to target numpy dtype
+    val_converted = dtype(float(val))
+    result[i] = val_converted
+
+    # Subtract the actual stored value to track the remaining residue
+    x_mp -= mpmath.mpf(float(val_converted))
+
+  return result
+
+
+# %%
+# We want to approximate sin(x * pi/2) for x in [-1, 1]
+# sin(z) is odd, so sin(x * pi/2) = x * P(x^2) / Q(x^2)
+# Let t = x^2, where t is in [0, 1].
+# We approximate g(t) = sin(sqrt(t) * pi/2) / sqrt(t)
+
+
+def g(t):
+  sq = np.sqrt(t)
+  with np.errstate(divide="ignore", invalid="ignore"):
+    return np.where(sq == 0, 1.0, np.sin(sq) / sq)
+
+
+p_degree, q_degree = 4, 0
+t_min, t_max = 1e-20, (np.pi / 2) ** 2
+
+p, q = rational_approximation(
+    g, t_min, t_max, p_degree, q_degree, dtype=np.float64
+)
+
+# In this case, we get a better result by computing the polynomial in fp64, and
+# rounding the result.
+p = p.astype(np.float32)
+q = q.astype(np.float32)
+
+print_polynomial("P", p)
+print_polynomial("Q", q)
+
+# Figure out range reduction constants using mpmath for high precision.
+import mpmath
+
+half_pi = mpmath.pi / -2
+fma_constants = split(half_pi, 3, 0, np.float32)
+constants = split(half_pi, 5, 11, np.float32)
+
+print(f"""
+  constexpr float half_pi[] = {{
+#ifdef YNN_HAVE_FMA
+      {fma_constants[0]:.8e}f,
+      {fma_constants[1]:.8e}f,
+      {fma_constants[2]:.8e}f,
+#else
+      {constants[0]:.8e}f,
+      {constants[1]:.8e}f,
+      {constants[2]:.8e}f,
+      {constants[3]:.8e}f,
+      {constants[4]:.8e}f,
+#endif
+  }};
+""")
+
+# Evaluate final error on original domain [-pi, pi]
+x_test = np.linspace(-np.pi / 2, np.pi / 2, 5000)
+t_test = x_test**2
+approx = x_test * (poly_eval(p, t_test) / poly_eval(q, t_test))
+
+plot_error(
+    np.sin,
+    x_test,
+    approx,
+    title="Relative Error for sin(x * pi/2)",
+    epsilon=2**-23,
+)
+
+
+# %%
+def g(t):
+  sq = np.sqrt(t)
+  with np.errstate(divide="ignore", invalid="ignore"):
+    return np.where(sq == 0, 1.0, np.sin(sq) / sq)
+
+
+p_degree, q_degree = 8, 0
+t_min, t_max = 1e-4, (np.pi / 2) ** 2
+
+p, q = rational_approximation(
+    g, t_min, t_max, p_degree, q_degree, dtype=np.float64
+)
+
+print_polynomial("P", p)
+print_polynomial("Q", q)
+
+# Figure out range reduction constants using mpmath for high precision.
+import mpmath
+
+half_pi = mpmath.pi / -2
+fma_constants = split(half_pi, 3, 0, np.float64)
+constants = split(half_pi, 5, 27, np.float64)
+
+print(f"""
+  constexpr double half_pi[] = {{
+#ifdef YNN_HAVE_FMA
+      {fma_constants[0]:.16e},
+      {fma_constants[1]:.16e},
+      {fma_constants[2]:.16e},
+#else
+      {constants[0]:.16e},
+      {constants[1]:.16e},
+      {constants[2]:.16e},
+      {constants[3]:.16e},
+      {constants[4]:.16e},
+#endif
+  }};
+""")
+
+# Evaluate final error on original domain [-pi, pi]
+x_test = np.linspace(-np.pi / 2, np.pi / 2, 5000)
+t_test = x_test**2
+approx = x_test * (poly_eval(p, t_test) / poly_eval(q, t_test))
+
+plot_error(
+    np.sin,
+    x_test,
+    approx,
+    title="Relative Error for sin(x * pi/2)",
+    epsilon=2**-53,
 )

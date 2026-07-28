@@ -30,7 +30,7 @@ FUNCTION(YNN_GENERATE_UNARY_KERNEL NAME ARCH)
               "${CMAKE_CURRENT_SOURCE_DIR}/exp.py"
               "${CMAKE_CURRENT_SOURCE_DIR}/log.py"
               "${CMAKE_CURRENT_SOURCE_DIR}/sigmoid.py"
-              "${CMAKE_CURRENT_SOURCE_DIR}/sine_cosine.py"
+              "${CMAKE_CURRENT_SOURCE_DIR}/trig.py"
               "${CMAKE_CURRENT_SOURCE_DIR}/tanh.py"
               "${CMAKE_SOURCE_DIR}/ynnpack/kernels/elementwise/generator.py"
       WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
@@ -62,6 +62,7 @@ YNN_GENERATE_UNARY_KERNEL(x86_avx512bf16 x86_avx512bf16)
 
 # ARM
 YNN_GENERATE_UNARY_KERNEL(arm64_neon arm64_neon)
+YNN_GENERATE_UNARY_KERNEL(arm_neonfma arm_neonfma)
 YNN_GENERATE_UNARY_KERNEL(arm_neon arm_neon)
 YNN_GENERATE_UNARY_KERNEL(arm_neonbf16 arm_neonbf16)
 YNN_GENERATE_UNARY_KERNEL(arm_neonfp16 arm_neonfp16)

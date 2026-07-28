@@ -190,6 +190,15 @@ static XNN_INLINE xnn_simd_f16_t xnn_xor_f16(xnn_simd_f16_t a,
   return xnn_float16_from_bits(xnn_float16_to_bits(a) ^ xnn_float16_to_bits(b));
 }
 
+static XNN_INLINE xnn_simd_f16_t xnn_not_f16(xnn_simd_f16_t a) {
+  return xnn_float16_from_bits(~xnn_float16_to_bits(a));
+}
+
+static XNN_INLINE xnn_simd_f16_t xnn_andnot_f16(xnn_simd_f16_t a,
+                                                xnn_simd_f16_t b) {
+  return xnn_and_f16(xnn_not_f16(a), b);
+}
+
 static XNN_INLINE xnn_simd_f16_t xnn_sll_f16(xnn_simd_f16_t a, uint8_t bits) {
   return xnn_float16_from_bits(xnn_float16_to_bits(a) << bits);
 }

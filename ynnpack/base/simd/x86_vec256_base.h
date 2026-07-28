@@ -16,6 +16,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <limits>
+#include <tuple>
 #include <type_traits>
 
 #include "ynnpack/base/base.h"
@@ -725,6 +726,9 @@ YNN_ALWAYS_INLINE f16x16 operator-(f16x16 a) {
 #endif
 
 #ifdef YNN_ARCH_X86_AVX2
+YNN_ALWAYS_INLINE s64x4 operator+(s64x4 a, s64x4 b) {
+  return s64x4{_mm256_add_epi64(a.v, b.v)};
+}
 YNN_ALWAYS_INLINE s32x8 operator+(s32x8 a, s32x8 b) {
   return s32x8{_mm256_add_epi32(a.v, b.v)};
 }
@@ -985,6 +989,9 @@ YNN_ALWAYS_INLINE s16x16 operator<<(s16x16 a, int b) {
 YNN_ALWAYS_INLINE s32x8 operator<<(s32x8 a, int b) {
   return s32x8{_mm256_slli_epi32(a.v, b)};
 }
+YNN_ALWAYS_INLINE s64x4 operator<<(s64x4 a, int b) {
+  return s64x4{_mm256_slli_epi64(a.v, b)};
+}
 #endif  // YNN_ARCH_X86_AVX2
 
 YNN_ALWAYS_INLINE s32x8 operator==(f32x8 a, f32x8 b) {
@@ -1026,6 +1033,14 @@ YNN_ALWAYS_INLINE s64x4 operator>=(f64x4 a, f64x4 b) {
 }
 
 #ifdef YNN_ARCH_X86_AVX2
+YNN_ALWAYS_INLINE s64x4 operator==(s64x4 a, s64x4 b) {
+  return s64x4{_mm256_cmpeq_epi64(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE s64x4 operator>(s64x4 a, s64x4 b) {
+  return s64x4{_mm256_cmpgt_epi64(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE s64x4 operator<(s64x4 a, s64x4 b) { return b > a; }
+
 YNN_ALWAYS_INLINE s32x8 operator==(s32x8 a, s32x8 b) {
   return s32x8{_mm256_cmpeq_epi32(a.v, b.v)};
 }

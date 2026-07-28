@@ -41,7 +41,10 @@ void bench_pi(benchmark::State& state) {
 
   // pi = sum_{i=0}^{n-1} (a / ((i + b) * (i + c)))
 
-  TestScheduler scheduler(thread_count);
+  // `thread_count` is the total number of threads that should run the work. The
+  // runtime's invoking thread participates as a worker, so the scheduler only
+  // needs `thread_count - 1` background threads.
+  TestScheduler scheduler(thread_count - 1);
   ynn_threadpool_t threadpool_raw = nullptr;
   ynn_create_threadpool(scheduler.scheduler(), &scheduler, 0, &threadpool_raw);
   threadpool_ptr threadpool(threadpool_raw, &ynn_delete_threadpool);

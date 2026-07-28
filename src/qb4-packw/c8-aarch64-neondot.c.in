@@ -10,6 +10,7 @@ $assert KR > 1
 #include <assert.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <string.h>
 
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/microparams.h"
@@ -170,10 +171,16 @@ void xnn_qb4_packw_gemm_goi_ukernel_x${NR}c${KR}__aarch64_neondot(
 
 
       if XNN_LIKELY(b != NULL){
-        $for N in range(0, NR, 4):
-          const int32x4_t b${N//4} = vld1q_s32(&b[${N}]);
-          vst1q_s32((int32_t*)out + ${N}, b${N//4});
-        b += ${NR};
+        if (n >= ${NR}) {
+          $for N in range(0, NR, 4):
+            const int32x4_t b${N//4} = vld1q_s32(&b[${N}]);
+            vst1q_s32((int32_t*)out + ${N}, b${N//4});
+          b += ${NR};
+        } else {
+          memcpy(out, b, n * sizeof(int32_t));
+          memset((int32_t*) out + n, 0, (${NR} - n) * sizeof(int32_t));
+          b += n;
+        }
       } else {
         $for N in range(0, NR, 4):
           vst1q_s32((int32_t*)out + ${N}, vdupq_n_s32(0));

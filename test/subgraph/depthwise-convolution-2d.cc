@@ -350,4 +350,45 @@ TEST(DepthwiseConvolution2DF16F32, test) {
 }
 TEST(DepthwiseConvolution2DF32, test) { TestImpl<float, float, float>(); }
 
+TEST(DepthwiseConvolution2D, reshape_rejects_input_channel_mismatch) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+
+  DepthwiseConvolutionParams params;
+  params.padding = {0, 0, 0, 0};
+  params.kernel = {3, 3};
+  params.subsampling = {1, 1};
+  params.dilation = {1, 1};
+  params.depth_multiplier = 1;
+  params.input_channels = 4;
+
+  const uint32_t input_id = 0;
+  const uint32_t filter_id = 1;
+  const uint32_t bias_id = 2;
+  const uint32_t output_id = 3;
+
+  Tensor<float> filter(std::vector<size_t>{1, 3, 3, 4});
+  filter.fill(0.0f);
+  Tensor<float> bias(std::vector<size_t>{4});
+  bias.fill(0.0f);
+
+  SubgraphTester subgraph(4);
+  subgraph.AddInputTensor(4, xnn_datatype_fp32, input_id)
+      .AddStaticTensor(filter.extents(), filter_id, filter.base())
+      .AddStaticTensor(bias.extents(), bias_id, bias.base())
+      .AddOutputTensor(4, xnn_datatype_fp32, output_id)
+      .AddDepthwiseConvolution2D(params, input_id, filter_id, bias_id,
+                                 output_id);
+  if (subgraph.CreateRuntime() == xnn_status_unsupported_hardware) {
+    GTEST_SKIP();
+  }
+
+  // The operator was created for input_channels == 4. A single-channel runtime
+  // input must be rejected before the indirection buffer strides past the end
+  // of the smaller input.
+  std::vector<float> input(1 * 8 * 8 * 1);
+  subgraph.ReshapeExternalTensor({1, 8, 8, 1}, input.data(), input_id)
+      .ReshapeRuntime();
+  EXPECT_EQ(subgraph.Status(), xnn_status_invalid_parameter);
+}
+
 }  // namespace xnnpack

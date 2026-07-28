@@ -195,8 +195,28 @@ XNN_NO_SANITIZE_FUNCTION enum xnn_status xnn_reshape_resize_bilinear2d_nhwc(
   const size_t output_width = resize_op->convolution_op->output_width;
   const bool enable_transient_indirection = !!(resize_op->flags & XNN_FLAG_TRANSIENT_INDIRECTION_BUFFER);
   const size_t input_pixel_stride_in_bytes = input_pixel_stride << log2_data_element_size;
-  const size_t indirection_buffer_size = sizeof(void*) * (output_height * output_width * 4);
-  const size_t packed_weights_size = (output_height * output_width * 2) << log2_weight_element_size;
+  size_t num_output_pixels = 0;
+  if (!xnn_safe_mul(output_height, output_width, &num_output_pixels)) {
+    xnn_log_error(
+        "failed to reshape %s operator: output pixel count overflows size_t",
+        xnn_operator_type_to_string_v2(resize_op));
+    return xnn_status_out_of_memory;
+  }
+  size_t indirection_buffer_size = 0;
+  if (!xnn_safe_mul(num_output_pixels, 4 * sizeof(void*), &indirection_buffer_size)) {
+    xnn_log_error(
+        "failed to reshape %s operator: indirection buffer size overflows size_t",
+        xnn_operator_type_to_string_v2(resize_op));
+    return xnn_status_out_of_memory;
+  }
+  const size_t packed_weights_element_size = 2u << log2_weight_element_size;
+  size_t packed_weights_size = 0;
+  if (!xnn_safe_mul(num_output_pixels, packed_weights_element_size, &packed_weights_size)) {
+    xnn_log_error(
+        "failed to reshape %s operator: packed weights size overflows size_t",
+        xnn_operator_type_to_string_v2(resize_op));
+    return xnn_status_out_of_memory;
+  }
 
   const size_t num_threads = pthreadpool_get_threads_count(threadpool);
 

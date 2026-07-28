@@ -11,6 +11,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
+#include <tuple>
 #include <type_traits>
 
 #include "ynnpack/base/base.h"
@@ -161,19 +162,14 @@ YNN_ALWAYS_INLINE vec<T, N> divide(vec<T, N> a, decltype(one)) {
 
 // Round floating point values assuming the integer value can fit in the
 // mantissa of the result.
-template <size_t N>
-vec<half, N> round_small(vec<half, N> a) {
-  const auto magic = broadcast<N>(static_cast<half>(1.5f * (1 << 10)));
-  return (magic + a) - magic;
-}
-template <size_t N>
-vec<float, N> round_small(vec<float, N> a) {
-  const auto magic = broadcast<N>(1.5f * (1 << 23));
-  return (magic + a) - magic;
-}
-template <size_t N>
-vec<double, N> round_small(vec<double, N> a) {
-  const auto magic = broadcast<N>(1.5 * (1ull << 52));
+constexpr int mantissa_bits(half) { return 10; }
+constexpr int mantissa_bits(float) { return 23; }
+constexpr int mantissa_bits(double) { return 52; }
+
+template <typename T, size_t N>
+vec<T, N> round_small(vec<T, N> a) {
+  const auto magic =
+      broadcast<N>(static_cast<T>(1.5f * (1ull << mantissa_bits(T{}))));
   return (magic + a) - magic;
 }
 
@@ -803,6 +799,149 @@ static vec<float, N> approx_tanh(vec<float, N> x) {
 template <size_t N>
 static vec<half, N> approx_tanh(vec<half, N> x) {
   return tanh(x, precision12{});
+}
+
+namespace internal {
+
+// Returns the range reduced `x` in [-pi/2, pi/2] such that sin(x) computes
+// {sin(x), cos(x)}
+//
+// The constants `half_pi` split -pi/2 into a sum of increasingly precise parts:
+// half_pi[0] ~= -pi/2
+// half_pi[1] ~= -pi/2 - pi_2[0]
+// half_pi[2] ~= -pi/2 - (pi_2[0] + pi_2[1])
+// and so on.
+template <typename Int, typename T, size_t N, size_t M>
+YNN_ALWAYS_INLINE std::array<vec<T, N>, 2> range_reduce(vec<T, N> x,
+                                                        const T (&half_pi)[M]) {
+  constexpr T pi = 3.1415926535897932384;
+  constexpr T two_over_pi = 2.0 / pi;
+
+  // Find the integer k such that x = k*pi/2 + x' and x' is in [-pi/4, pi/4].
+  auto k = x * broadcast<N>(two_over_pi);
+
+  // See `round_small` for an explanation of this. We aren't using that helper
+  // because we want to get the intermediate integer value for use below.
+  const auto magic =
+      broadcast<N>(static_cast<T>(1.5f * (1ull << mantissa_bits(T{}))));
+  k += magic;
+  auto k_sin = bit_cast<vec<Int, N>>(k);
+  k -= magic;
+
+  // Use the high precision value of half_pi to compute x in [-pi/4, pi/4]
+  for (T i : half_pi) {
+    x = multiply_add(k, broadcast<N>(i), x);
+  }
+
+  auto zero = broadcast<N>(static_cast<Int>(0));
+  auto one = broadcast<N>(static_cast<Int>(1));
+  auto two = broadcast<N>(static_cast<Int>(2));
+
+  auto mirror_x = broadcast<N>(static_cast<T>(pi / 2)) - abs(x);
+
+  auto x_sin = select((k_sin & one) == zero, x, mirror_x);
+  x_sin = select((k_sin & two) == zero, x_sin, -x_sin);
+
+  // cos(x) = sin(x + pi/2), we can implement this by adding one quadrant to k
+  // if we want cos(x).
+  auto k_cos = k_sin + one;
+  auto x_cos = select((k_cos & one) == zero, x, mirror_x);
+  x_cos = select((k_cos & two) == zero, x_cos, -x_cos);
+  return {{x_sin, x_cos}};
+}
+
+// sin(x) ~= x*P(x^2)
+template <typename T, size_t N, typename P>
+YNN_ALWAYS_INLINE vec<T, N> sin_impl(vec<T, N> x, const P& p) {
+  auto x2 = x * x;
+  return eval_polynomial(p, x2) * x;
+}
+
+// TODO: b/515053903 - If we know we are going to compute sin and cos both, we
+// can do better than this, I think the trick would be to have both a sin and
+// cos polynomial for the region around where these functions are zero, and
+// select the appropriate one for x.
+template <size_t N>
+YNN_ALWAYS_INLINE static std::array<vec<float, N>, 2> sincos(vec<float, N> x) {
+  constexpr float half_pi[] = {
+#ifdef YNN_HAVE_FMA
+      -1.57079637e+00f,
+      4.37113883e-08f,
+      1.71512451e-15f,
+#else
+      -1.57031250e+00f,
+      -4.83751297e-04f,
+      -7.54953362e-08f,
+      -2.56328292e-12f,
+      -6.12574227e-17f,
+#endif
+  };
+  auto x_sin_cos = range_reduce<int32_t>(x, half_pi);
+
+  std::array<float, 5> P = {
+      2.6052248359e-06f,
+      -1.9809075457e-04f,
+      8.3330506459e-03f,
+      -1.6666658223e-01f,
+      1.0000000000e+00f,
+  };
+  return {{
+      internal::sin_impl(x_sin_cos[0], P),
+      internal::sin_impl(x_sin_cos[1], P),
+  }};
+}
+
+template <size_t N>
+YNN_ALWAYS_INLINE static std::array<vec<double, N>, 2> sincos(
+    vec<double, N> x) {
+  constexpr double half_pi[] = {
+#ifdef YNN_HAVE_FMA
+      -1.5707963267948966e+00,
+      -6.1232339957367660e-17,
+      1.4973849048591698e-33,
+#else
+      -1.5707963258028030e+00,
+      -9.9209357395935172e-10,
+      -5.7211887096635749e-18,
+      -1.6446256892965207e-26,
+      -4.3359050802648101e-35,
+#endif
+  };
+  auto x_sin_cos = range_reduce<int64_t>(x, half_pi);
+
+  std::array<double, 9> P = {
+      2.765834900803161893e-15,
+      -7.650022465844408508e-13,
+      1.605934858160708274e-10,
+      -2.505211878738542593e-08,
+      2.755731940097233417e-06,
+      -1.984126984283516356e-04,
+      8.333333333339692714e-03,
+      -1.666666666666674068e-01,
+      1.000000000000000000e+00,
+  };
+  return {{
+      internal::sin_impl(x_sin_cos[0], P),
+      internal::sin_impl(x_sin_cos[1], P),
+  }};
+}
+
+}  // namespace internal
+
+template <typename T, size_t N>
+static vec<T, N> sin(vec<T, N> x) {
+  return internal::sincos(x)[0];
+}
+
+template <typename T, size_t N>
+static vec<T, N> cos(vec<T, N> x) {
+  return internal::sincos(x)[1];
+}
+
+template <typename T, size_t N>
+static vec<T, N> tan(vec<T, N> x) {
+  auto sincos = internal::sincos(x);
+  return sincos[0] / sincos[1];
 }
 
 }  // namespace simd

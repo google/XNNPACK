@@ -139,9 +139,15 @@ void xnn_qb4_packw_gemm_goi_ukernel_x${NR}c${KR}__scalar(
       }
 
       if XNN_LIKELY(b != NULL){
-        $for N in range(NR):
-          ((uint32_t*) out)[${N}] = b[${N}];
-        b += ${NR};
+        if (n >= ${NR}) {
+          $for N in range(NR):
+            ((uint32_t*) out)[${N}] = b[${N}];
+          b += ${NR};
+        } else {
+          memcpy(out, b, n * sizeof(uint32_t));
+          memset((uint32_t*) out + n, 0, (${NR} - n) * sizeof(uint32_t));
+          b += n;
+        }
       } else {
         $for N in range(NR):
           ((uint32_t*) out)[${N}] = 0;

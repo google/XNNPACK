@@ -130,6 +130,12 @@ static XNN_INLINE xnn_simd_f16_t xnn_xor_f16(xnn_simd_f16_t a,
       _mm512_xor_si512(_mm512_castph_si512(a), _mm512_castph_si512(b)));
 }
 
+static XNN_INLINE xnn_simd_f16_t xnn_andnot_f16(xnn_simd_f16_t a,
+                                                xnn_simd_f16_t b) {
+  return _mm512_castsi512_ph(
+      _mm512_andnot_si512(_mm512_castph_si512(a), _mm512_castph_si512(b)));
+}
+
 static XNN_INLINE xnn_simd_f16_t xnn_sll_f16(xnn_simd_f16_t a, uint8_t bits) {
   return _mm512_castsi512_ph(_mm512_slli_epi16(_mm512_castph_si512(a), bits));
 }

@@ -222,10 +222,19 @@ static XNN_NO_SANITIZE_FUNCTION enum xnn_status create_conv2d_hwc2chw_path(
 
   if(convolution_op->packed_weights.offset == XNN_CACHE_NOT_FOUND) {
     const size_t packed_group_output_channels = round_up(context->group_output_channels, output_channel_tile);
-    const size_t packed_weights_size = (context->groups * packed_group_output_channels *
-                                         (context->group_input_channels * context->kernel_height
-                                          * context->kernel_width + 1 /* bias */))
-                                       << log2_filter_element_size;
+
+    // Calculate total packed weights size:
+    //   groups * packed_group_output_channels * (group_input_channels * kernel_height * kernel_width + 1)
+    //   << log2_filter_element_size
+    size_t packed_weights_size;
+    if (!xnn_safe_mul(context->group_input_channels, context->kernel_height, &packed_weights_size) ||
+        !xnn_safe_mul(packed_weights_size, context->kernel_width, &packed_weights_size) ||
+        !xnn_safe_add(packed_weights_size, 1, &packed_weights_size) ||
+        !xnn_safe_mul(packed_weights_size, context->groups, &packed_weights_size) ||
+        !xnn_safe_mul(packed_weights_size, packed_group_output_channels, &packed_weights_size) ||
+        !xnn_safe_mul(packed_weights_size, (size_t)1 << log2_filter_element_size, &packed_weights_size)) {
+      return xnn_status_out_of_memory;
+    }
     const size_t aligned_total_weights_size = round_up_po2(packed_weights_size, XNN_ALLOCATION_ALIGNMENT);
     void* weights_ptr = xnn_get_pointer_to_write_weights(convolution_op, aligned_total_weights_size);
     if (weights_ptr == NULL) {
@@ -283,8 +292,14 @@ static XNN_NO_SANITIZE_FUNCTION enum xnn_status create_dwconv_path(
       XNN_CACHE_NOT_FOUND;
 
   if(convolution_op->packed_weights.offset == XNN_CACHE_NOT_FOUND) {
-    const size_t packed_weights_size =
-        ((size_t) context->groups * ((size_t) context->kernel_height * context->kernel_width + 1 /* bias */)) << log2_filter_element_size;
+    // Calculate total packed weights size: groups * (kernel_height * kernel_width + 1) << log2_filter_element_size
+    size_t packed_weights_size;
+    if (!xnn_safe_mul(context->kernel_height, context->kernel_width, &packed_weights_size) ||
+        !xnn_safe_add(packed_weights_size, 1, &packed_weights_size) ||
+        !xnn_safe_mul(packed_weights_size, context->groups, &packed_weights_size) ||
+        !xnn_safe_mul(packed_weights_size, (size_t)1 << log2_filter_element_size, &packed_weights_size)) {
+      return xnn_status_out_of_memory;
+    }
     const size_t aligned_total_weights_size = round_up_po2(packed_weights_size, XNN_ALLOCATION_ALIGNMENT);
     void* weights_ptr = xnn_get_pointer_to_write_weights(
         convolution_op, aligned_total_weights_size);

@@ -184,6 +184,16 @@ YNN_ADD_DOT_KERNELS(arm_int8_int8_int32
   arm_neondot arm_neondot_int8_int8_int32
 )
 
+YNN_ADD_DOT_KERNELS(arm_int8_int2_int32
+  arm_neondot arm_neondot_int8_int2_int32
+  arm64_neoni8mm arm64_neoni8mm_int8_int2_int32
+)
+
+YNN_ADD_DOT_KERNELS(arm_int8_int4_int32
+  arm_neondot arm_neondot_int8_int4_int32
+  arm64_neoni8mm arm64_neoni8mm_int8_int4_int32
+)
+
 YNN_ADD_DOT_KERNELS(arm_bf16_bf16_fp32_k2
   arm_neonbf16 arm_neonbf16_bf16_bf16_fp32_k2
 )

@@ -120,15 +120,15 @@ std::vector<unary_params> get_params_for_op(ynn_unary_operator op) {
           unary_params{.tanh = tanh_params{0.0f, 1.0f}},
           unary_params{.tanh = tanh_params{2.0f, 1.1f}},
       };
-    case ynn_unary_sine:
+    case ynn_unary_sin:
       return {
-          unary_params{.sine = sine_params{0.0f, 1.0f}},
-          unary_params{.sine = sine_params{2.0f, 0.5f}},
+          unary_params{.sin = sin_params{0.0f, 1.0f}},
+          unary_params{.sin = sin_params{2.0f, 0.5f}},
       };
-    case ynn_unary_cosine:
+    case ynn_unary_cos:
       return {
-          unary_params{.cosine = cosine_params{0.0f, 1.0f}},
-          unary_params{.cosine = cosine_params{2.0f, 0.5f}},
+          unary_params{.cos = cos_params{0.0f, 1.0f}},
+          unary_params{.cos = cos_params{2.0f, 0.5f}},
       };
     case ynn_unary_poly3:
       return {
@@ -258,9 +258,9 @@ const ynn_unary_operator all_real_ops[] = {
     ynn_unary_round,
     ynn_unary_negate,
     ynn_unary_square,
-    ynn_unary_square_root,
-    ynn_unary_cube_root,
-    ynn_unary_reciprocal_square_root,
+    ynn_unary_sqrt,
+    ynn_unary_cbrt,
+    ynn_unary_rsqrt,
     ynn_unary_log,
     ynn_unary_log1p,
     ynn_unary_exp,
@@ -270,8 +270,9 @@ const ynn_unary_operator all_real_ops[] = {
     ynn_unary_approx_tanh,
     ynn_unary_tanh,
     ynn_unary_sign,
-    ynn_unary_sine,
-    ynn_unary_cosine,
+    ynn_unary_sin,
+    ynn_unary_cos,
+    ynn_unary_tan,
     ynn_unary_sigmoid,
     ynn_unary_hardswish,
     ynn_unary_round_to_bf16,

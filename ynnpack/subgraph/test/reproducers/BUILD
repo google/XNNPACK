@@ -20,3 +20,18 @@ cc_test(
         "//ynnpack/subgraph/test:subgraph_builder",
     ] + ynn_test_deps(),
 )
+
+cc_test(
+    name = "sum_to_dot_rank",
+    srcs = ["sum_to_dot_rank.cc"],
+    linkopts = ynn_binary_linkopts(),
+    malloc = ynn_binary_malloc(),
+    deps = [
+        "//ynnpack",
+        "//ynnpack/base",
+        "//ynnpack/base/test:buffer",
+        "//ynnpack/base/test:tensor",
+        "//ynnpack/subgraph/test:scheduler",
+        "//ynnpack/subgraph/test:subgraph_builder",
+    ] + ynn_test_deps(),
+)

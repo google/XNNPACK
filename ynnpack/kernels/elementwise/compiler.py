@@ -519,6 +519,21 @@ def log1p(value):
 
 
 @intrinsic
+def sin(value):
+  return Op(value.ty, "sin", [value])
+
+
+@intrinsic
+def cos(value):
+  return Op(value.ty, "cos", [value])
+
+
+@intrinsic
+def tan(value):
+  return Op(value.ty, "tan", [value])
+
+
+@intrinsic
 def cast(ty, value):
   """Casts value to a given type."""
   # This is no-op.
@@ -1047,6 +1062,9 @@ class Target:
         "tanh",
         "log",
         "log1p",
+        "sin",
+        "cos",
+        "tan",
     }
     self.infix_ops = {
         "add": "+",

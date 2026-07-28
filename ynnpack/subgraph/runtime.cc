@@ -97,39 +97,15 @@ std::unique_ptr<ynn::scheduling_info> ynn_runtime::make_schedule(
     return {};
   }
 
-  int max_threads = threadpool() ? threadpool()->thread_count() : 1;
-  // Enough tasks to have good load balancing.
-  slinky::index_t target_task_count = max_threads > 1 ? max_threads * 2 : 1;
-
-  std::vector<slinky::expr> workers(rank);
-  slinky::expr threads_so_far = 1;
-
   auto get_loop_dim = [&](int index_d) {
     return index_d < loop_order.size() ? loop_order[index_d] : index_d;
   };
-
-  for (int index_d = rank - 1; index_d >= 0; --index_d) {
-    int d = get_loop_dim(index_d);
-    if (max_threads == 1 || globals.is_reduction_dim(dims[d])) {
-      workers[d] = slinky::loop::serial;
-    } else if (extents[d].defined() && splits[d].defined()) {
-      slinky::expr w =
-          slinky::ceil_div(slinky::expr(target_task_count), threads_so_far);
-      w = globals.get(w, "w");
-
-      workers[d] = slinky::simplify(slinky::select::make(
-          w > 1, slinky::loop::parallel, slinky::loop::serial));
-
-      threads_so_far =
-          slinky::simplify(threads_so_far * ceil_div(extents[d], splits[d]));
-    }
-  }
 
   std::vector<ynn::scheduling_split> loop_splits;
   for (int index_d = 0; index_d < rank; ++index_d) {
     int d = get_loop_dim(index_d);
     if (extents[d].defined() && splits[d].defined()) {
-      loop_splits.push_back({dims[d], splits[d], workers[d], extents[d]});
+      loop_splits.push_back({dims[d], splits[d], extents[d]});
     }
   }
 
@@ -139,6 +115,43 @@ std::unique_ptr<ynn::scheduling_info> ynn_runtime::make_schedule(
 }
 
 namespace {
+
+// Just a helper structure to track information about loop levels.
+struct loop_level {
+  slinky::loop_id loop_id;
+  slinky::expr extent;
+  slinky::expr step;
+  bool step_is_required = false;
+  // The index of the parent loop in the global loop nest, or -1 for the
+  // outermost loops. Loops are appended after their parent, so the parent
+  // index is always less than the index of the loop itself.
+  int parent = -1;
+  // The number of workers the loop should use, computed by compute_workers()
+  // once the whole nest is built.
+  slinky::expr workers = slinky::loop::serial;
+};
+
+struct scheduling_data {
+  // Loop nest should be a pair of function and loop_id. This is in fact a
+  // tree, but for the sake of simplicity we store it as a set of pathes
+  // (loop nests in this case) from the root of the tree (outermost
+  // location) to a leaf node (the innermost loop of a given function). Loop
+  // nests for each of the functions scheduled so far with the indices
+  // pointing to the global loop nest. Loop nests can overlap with each
+  // other if functions are scheduled within the same loop (only prefixes,
+  // i.e. from the root of the loop nest to the most innermost common loop).
+  std::vector<int> loop_nest;
+  // Compute_at locations of a function -- this an index within a
+  // loop nest of a given function, i.e from root (0) to the innermost loop
+  // (loop_nest[f_index].back()).
+  int compute_at = 0;
+  // For each split of the function's scheduling_info (in the reversed,
+  // outermost-first order used during matching), whether it was matched to
+  // an existing loop of the nest. Matched splits become loops of the
+  // function this function was fused into; unmatched splits become the
+  // function's own loops.
+  std::vector<bool> split_matched;
+};
 
 template <typename T, typename Target>
 bool find_n(const T* data, size_t size, const Target& x) {
@@ -310,6 +323,40 @@ std::map<std::pair<slinky::var, int>, int> infer_source_regions(
   return source_regions;
 }
 
+// Decide how many workers each loop of the global nest should use. This must
+// run after the whole nest is built (and all the steps are final): after
+// fusion, a function's loops can end up inside loops of other functions, so
+// the number of tasks produced outside each loop is only known once the nest
+// is complete.
+void compute_workers(ynn::slinky_globals& globals, int max_threads,
+                     std::vector<loop_level>& global_loop_nest) {
+  // Enough tasks to have good load balancing.
+  const slinky::index_t target_task_count =
+      max_threads > 1 ? max_threads * 2 : 1;
+
+  // The number of tasks the loops from the root down to (and including) each
+  // loop can produce. Serial loops (reductions) run their iterations within
+  // one task, so they don't contribute to this count.
+  std::vector<slinky::expr> tasks(global_loop_nest.size());
+  for (size_t i = 0; i < global_loop_nest.size(); ++i) {
+    loop_level& l = global_loop_nest[i];
+    assert(l.parent < static_cast<int>(i));
+    slinky::expr tasks_above = l.parent >= 0 ? tasks[l.parent] : 1;
+    if (max_threads == 1 || globals.is_reduction_dim(l.loop_id.var)) {
+      l.workers = slinky::loop::serial;
+      tasks[i] = tasks_above;
+    } else {
+      slinky::expr w =
+          slinky::ceil_div(slinky::expr(target_task_count), tasks_above);
+      w = globals.get(w, "w");
+      l.workers = slinky::simplify(slinky::select::make(
+          w > 1, slinky::loop::parallel, slinky::loop::serial));
+      tasks[i] =
+          slinky::simplify(tasks_above * slinky::ceil_div(l.extent, l.step));
+    }
+  }
+}
+
 }  // namespace
 
 // Logically this function has multiple separate blocks:
@@ -332,36 +379,6 @@ std::map<std::pair<slinky::var, int>, int> infer_source_regions(
 //    func-s. This is done in a separate loop once all of the functions from
 //    the pipeline were processed.
 void ynn_runtime::schedule() {
-  // Just a helper function to track information about loop levels.
-  struct loop_level {
-    slinky::loop_id loop_id;
-    slinky::expr extent;
-    slinky::expr step;
-    bool step_is_required = false;
-  };
-
-  struct scheduling_data {
-    // Loop nest should be a pair of function and loop_id. This is in fact a
-    // tree, but for the sake of simplicity we store it as a set of pathes
-    // (loop nests in this case) from the root of the tree (outermost
-    // location) to a leaf node (the innermost loop of a given function). Loop
-    // nests for each of the functions scheduled so far with the indices
-    // pointing to the global loop nest. Loop nests can overlap with each
-    // other if functions are scheduled within the same loop (only prefixes,
-    // i.e. from the root of the loop nest to the most innermost common loop).
-    std::vector<int> loop_nest;
-    // Compute_at locations of a function -- this an index within a
-    // loop nest of a given function, i.e from root (0) to the innermost loop
-    // (loop_nest[f_index].back()).
-    int compute_at = 0;
-    // For each split of the function's scheduling_info (in the reversed,
-    // outermost-first order used during matching), whether it was matched to
-    // an existing loop of the nest. Matched splits become loops of the
-    // function this function was fused into; unmatched splits become the
-    // function's own loops.
-    std::vector<bool> split_matched;
-  };
-
   // This a list of indices of consumers of a given buffer.
   std::map<slinky::var, std::vector<int>> consumers;
   // This is a tree representing a global loop nest of a whole pipeline so
@@ -567,8 +584,12 @@ void ynn_runtime::schedule() {
       for (int j = 0; j < loop_splits.size(); j++) {
         if (sched_data.split_matched[j]) continue;
         const ynn::scheduling_split& dim = loop_splits[j];
-        global_loop_nest.push_back(
-            {{&f, dim.var}, dim.extent, dim.step, dim.step_is_required});
+        const int parent = loop_nest.empty() ? -1 : loop_nest.back();
+        global_loop_nest.push_back({{&f, dim.var},
+                                    dim.extent,
+                                    dim.step,
+                                    dim.step_is_required,
+                                    parent});
         loop_nest.push_back(global_loop_nest.size() - 1);
       }
     }
@@ -578,6 +599,16 @@ void ynn_runtime::schedule() {
       consumers[input.buffer->sym()].push_back(i);
     }
   }
+
+  // `thread_count()` reports the number of background worker threads. The
+  // thread that invokes the runtime also participates as a worker (it runs
+  // tasks while waiting in `thread_pool::wait_for`), so the effective
+  // parallelism is one more than the reported count. Without this `+ 1`, a
+  // pool with a single background thread (two threads of execution in total)
+  // would be scheduled serially, and every other size would be sized one
+  // worker short.
+  const int max_threads = threadpool() ? threadpool()->thread_count() + 1 : 1;
+  compute_workers(globals, max_threads, global_loop_nest);
 
   // Use previously computed information to actually schedule the functions.
   for (int i = funcs.size() - 1; i >= 0; --i) {
@@ -624,17 +655,16 @@ void ynn_runtime::schedule() {
       // are loops of the function this one was fused into). The j-th
       // unmatched split from the innermost corresponds to the j-th innermost
       // entry of the loop nest, which tracks the (possibly updated by other
-      // fused functions) step of the loop.
+      // fused functions) step of the loop and the globally computed workers.
       std::vector<slinky::func::loop_info> loops;
       for (int i = 0; i < loop_splits.size(); ++i) {
         // loop_splits was reversed back to its original order, but
         // split_matched is indexed in the reversed order used for matching.
         if (split_matched[loop_splits.size() - 1 - i]) continue;
         const ynn::scheduling_split& dim = loop_splits[i];
-        slinky::expr step =
-            global_loop_nest[loop_nest[loop_nest.size() - loops.size() - 1]]
-                .step;
-        loops.push_back({dim.var, step, dim.workers});
+        const loop_level& level =
+            global_loop_nest[loop_nest[loop_nest.size() - loops.size() - 1]];
+        loops.push_back({dim.var, level.step, level.workers});
       }
 
       f.loops(std::move(loops));
@@ -695,7 +725,7 @@ auto make_reshape_impl(ynn_runtime* runtime) {
       }
     }
     if (errors) {
-      return ynn_status_error;
+      return ynn_status_invalid_parameter;
     }
 
     for (auto& i : runtime->values) {
@@ -918,8 +948,9 @@ ynn_status ynn_runtime::build() {
 
 ynn_status ynn_runtime::reshape() {
   setup();
-  return slinky::evaluate(reshape_impl, eval_context) ? ynn_status_error
-                                                      : ynn_status_success;
+  slinky::index_t result = slinky::evaluate(reshape_impl, eval_context);
+  static_assert(ynn_status_success == 0, "");
+  return static_cast<ynn_status>(result);
 }
 
 ynn_status ynn_runtime::setup() {

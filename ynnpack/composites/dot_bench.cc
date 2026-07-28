@@ -334,7 +334,10 @@ int main(int argc, char** argv) {
     shapes.push_back({256, 256, 256});
   }
 
-  ynn::TestScheduler scheduler(thread_count);
+  // `thread_count` (from --thread_count) is the total number of threads that
+  // should run the work. The runtime's invoking thread participates as a
+  // worker, so the scheduler only needs `thread_count - 1` background threads.
+  ynn::TestScheduler scheduler(thread_count - 1);
   ynn::threadpool_ptr threadpool =
       ynn::create_threadpool(scheduler.scheduler(), &scheduler);
 

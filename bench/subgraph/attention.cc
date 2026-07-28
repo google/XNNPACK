@@ -745,11 +745,17 @@ static void QD8Attention(benchmark::State& state) {
 
 static void AttentionArguments(benchmark::Benchmark* b) {
   b->ArgNames({"T", "H", "N", "S"});
+  b->Args({256, 64, 8, 256});
+  b->Args({512, 64, 8, 512});
+  b->Args({1024, 64, 8, 1024});
   b->Args({64, 64, 32, 64});
   b->Args({256, 64, 32, 256});
   b->Args({1024, 64, 32, 1024});
   b->Args({4096, 64, 32, 4096});
   // Decoding: a single query token attending over a large KV.
+  b->Args({1, 64, 8, 256});
+  b->Args({1, 64, 8, 512});
+  b->Args({1, 64, 8, 1024});
   b->Args({1, 64, 32, 1024});
   b->Args({1, 64, 32, 4096});
 }

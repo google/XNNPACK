@@ -43,22 +43,22 @@ std::unique_ptr<unary_op_info> get_unary_op_info(ynn_unary_operator op,
       return std::make_unique<log1p>(params);
     case ynn_unary_negate:
       return std::make_unique<negate>(params);
-    case ynn_unary_reciprocal_square_root:
-      return std::make_unique<reciprocal_square_root>(params);
+    case ynn_unary_rsqrt:
+      return std::make_unique<rsqrt>(params);
     case ynn_unary_square:
       return std::make_unique<square>(params);
-    case ynn_unary_square_root:
-      return std::make_unique<square_root>(params);
+    case ynn_unary_sqrt:
+      return std::make_unique<sqrt>(params);
     case ynn_unary_tanh:
       return std::make_unique<tanh>(params);
-    case ynn_unary_cube_root:
-      return std::make_unique<cube_root>(params);
+    case ynn_unary_cbrt:
+      return std::make_unique<cbrt>(params);
     case ynn_unary_sign:
       return std::make_unique<sign>(params);
-    case ynn_unary_sine:
-      return std::make_unique<sine>(params);
-    case ynn_unary_cosine:
-      return std::make_unique<cosine>(params);
+    case ynn_unary_sin:
+      return std::make_unique<sin>(params);
+    case ynn_unary_cos:
+      return std::make_unique<cos>(params);
     case ynn_unary_sigmoid:
       return std::make_unique<sigmoid>(params);
     case ynn_unary_hardswish:
@@ -67,6 +67,8 @@ std::unique_ptr<unary_op_info> get_unary_op_info(ynn_unary_operator op,
       return std::make_unique<poly3>(params);
     case ynn_unary_round_to_bf16:
       return std::make_unique<round_to_bf16>(params);
+    case ynn_unary_tan:
+      return std::make_unique<tan>(params);
     case ynn_unary_invalid:
       return nullptr;
   }

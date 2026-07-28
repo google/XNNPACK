@@ -43,6 +43,8 @@ TEST_UNARY(arm_neonfma, erf, bf16, 8, std::erf, 1);
 TEST_UNARY(arm_neonfma, erf, f32, 4, std::erf, 2);
 TEST_UNARY(arm_neonfma, tanh, bf16, 8, std::tanh, 1);
 TEST_UNARY(arm_neonfma, tanh, f32, 4, std::tanh, 2);
+TEST_UNARY_RANGE(arm_neonfma, sin, f32, 4, std::sin, 2, -1e6, 1e6);
+TEST_UNARY_RANGE(arm_neonfma, cos, f32, 4, std::cos, 2, -1e6, 1e6);
 
 TEST_UNARY(arm_neonfma, approx_erf, f32, 4, std::erf, 5);
 TEST_UNARY(arm_neonfma, approx_tanh, f32, 4, std::tanh, 5);

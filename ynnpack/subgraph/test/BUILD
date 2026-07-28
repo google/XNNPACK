@@ -283,6 +283,7 @@ cc_test(
         ":scheduler",
         "//ynnpack",
         "//ynnpack/base",
+        "//ynnpack/base/test:util",
         "@com_google_benchmark//:benchmark",
     ],
 )
@@ -335,10 +336,9 @@ cc_test(
     linkopts = ynn_binary_linkopts(),
     malloc = ynn_binary_malloc(),
     deps = [
-        ":subgraph_builder",
+        ":scheduler",
         "//ynnpack",
         "//ynnpack/base",
-        "//ynnpack/base/test:tensor",
     ] + ynn_benchmark_deps(),
 )
 
@@ -355,5 +355,21 @@ cc_test(
         "//ynnpack",
         "//ynnpack/base",
         "//ynnpack/base/test:tensor",
+    ] + ynn_benchmark_deps(),
+)
+
+cc_test(
+    name = "reduce_bench",
+    srcs = ["reduce_bench.cc"],
+    args = ["--benchmark_min_time=1x"],
+    linkopts = ynn_binary_linkopts(),
+    malloc = ynn_binary_malloc(),
+    deps = [
+        ":scheduler",
+        ":subgraph_builder",
+        "//ynnpack",
+        "//ynnpack/base",
+        "//ynnpack/base/test:tensor",
+        "//ynnpack/base/test:util",
     ] + ynn_benchmark_deps(),
 )

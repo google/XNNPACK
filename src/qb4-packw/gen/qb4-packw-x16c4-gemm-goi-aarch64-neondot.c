@@ -12,6 +12,7 @@
 #include <assert.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <string.h>
 
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/microparams.h"
@@ -364,15 +365,21 @@ void xnn_qb4_packw_gemm_goi_ukernel_x16c4__aarch64_neondot(
 
 
       if XNN_LIKELY(b != NULL){
-        const int32x4_t b0 = vld1q_s32(&b[0]);
-        vst1q_s32((int32_t*)out + 0, b0);
-        const int32x4_t b1 = vld1q_s32(&b[4]);
-        vst1q_s32((int32_t*)out + 4, b1);
-        const int32x4_t b2 = vld1q_s32(&b[8]);
-        vst1q_s32((int32_t*)out + 8, b2);
-        const int32x4_t b3 = vld1q_s32(&b[12]);
-        vst1q_s32((int32_t*)out + 12, b3);
-        b += 16;
+        if (n >= 16) {
+          const int32x4_t b0 = vld1q_s32(&b[0]);
+          vst1q_s32((int32_t*)out + 0, b0);
+          const int32x4_t b1 = vld1q_s32(&b[4]);
+          vst1q_s32((int32_t*)out + 4, b1);
+          const int32x4_t b2 = vld1q_s32(&b[8]);
+          vst1q_s32((int32_t*)out + 8, b2);
+          const int32x4_t b3 = vld1q_s32(&b[12]);
+          vst1q_s32((int32_t*)out + 12, b3);
+          b += 16;
+        } else {
+          memcpy(out, b, n * sizeof(int32_t));
+          memset((int32_t*) out + n, 0, (16 - n) * sizeof(int32_t));
+          b += n;
+        }
       } else {
         vst1q_s32((int32_t*)out + 0, vdupq_n_s32(0));
         vst1q_s32((int32_t*)out + 4, vdupq_n_s32(0));

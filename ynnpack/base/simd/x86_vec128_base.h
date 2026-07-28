@@ -839,6 +839,9 @@ YNN_ALWAYS_INLINE f64x2 operator+(f64x2 a, f64x2 b) {
 YNN_ALWAYS_INLINE f32x4 operator+(f32x4 a, f32x4 b) {
   return f32x4{_mm_add_ps(a.v, b.v)};
 }
+YNN_ALWAYS_INLINE s64x2 operator+(s64x2 a, s64x2 b) {
+  return s64x2{_mm_add_epi64(a.v, b.v)};
+}
 YNN_ALWAYS_INLINE s32x4 operator+(s32x4 a, s32x4 b) {
   return s32x4{_mm_add_epi32(a.v, b.v)};
 }
@@ -1041,6 +1044,9 @@ YNN_ALWAYS_INLINE s64x2 operator|(s64x2 a, s64x2 b) {
 }
 YNN_ALWAYS_INLINE s64x2 operator^(s64x2 a, s64x2 b) {
   return s64x2{_mm_xor_si128(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE s64x2 operator<<(s64x2 a, int b) {
+  return s64x2{_mm_slli_epi64(a.v, b)};
 }
 YNN_ALWAYS_INLINE s64x2 operator~(s64x2 a) {
   return s64x2{_mm_xor_si128(a.v, _mm_set1_epi32(-1))};
@@ -1310,6 +1316,12 @@ YNN_ALWAYS_INLINE s64x2 operator>(f64x2 a, f64x2 b) {
 YNN_ALWAYS_INLINE s64x2 operator>=(f64x2 a, f64x2 b) {
   return s64x2{_mm_castpd_si128(_mm_cmpge_pd(a.v, b.v))};
 }
+
+#ifdef YNN_ARCH_X86_SSE41
+YNN_ALWAYS_INLINE s64x2 operator==(s64x2 a, s64x2 b) {
+  return s64x2{_mm_cmpeq_epi64(a.v, b.v)};
+}
+#endif
 
 YNN_ALWAYS_INLINE s32x4 operator==(s32x4 a, s32x4 b) {
   return s32x4{_mm_cmpeq_epi32(a.v, b.v)};

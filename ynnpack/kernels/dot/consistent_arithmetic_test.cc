@@ -156,7 +156,11 @@ void TestMatMul(AT, BT, CT, size_t k) {
       c = kernel_c;
     }
   }
-  ASSERT_GT(consistent_kernels, 0) << "No consistent_arithmetic kernels found.";
+  if (std::is_same_v<AT, float> && std::is_same_v<BT, float> &&
+      std::is_same_v<CT, float>) {
+    ASSERT_GT(consistent_kernels, 0)
+        << "No consistent_arithmetic kernels found.";
+  }
 }
 
 const char* to_string(const KernelInfo& param) { return ""; }

@@ -41,6 +41,10 @@ TEST_UNARY(x86_avx2_fma3, erf, f64, 4, std::erf, 3);
 TEST_UNARY(x86_avx2_fma3, tanh, bf16, 16, std::tanh, 1);
 TEST_UNARY(x86_avx2_fma3, tanh, f32, 8, std::tanh, 2);
 TEST_UNARY(x86_avx2_fma3, tanh, f64, 4, std::tanh, 4);
+TEST_UNARY_RANGE(x86_avx2_fma3, sin, f32, 8, std::sin, 2, -1e6, 1e6);
+TEST_UNARY_RANGE(x86_avx2_fma3, sin, f64, 4, std::sin, 2, -1e12, 1e12);
+TEST_UNARY_RANGE(x86_avx2_fma3, cos, f32, 8, std::cos, 2, -1e6, 1e6);
+TEST_UNARY_RANGE(x86_avx2_fma3, cos, f64, 4, std::cos, 2, -1e12, 1e12);
 
 TEST_UNARY(x86_avx2_fma3, approx_erf, f32, 8, std::erf, 5);
 TEST_UNARY(x86_avx2_fma3, approx_tanh, f32, 8, std::tanh, 5);

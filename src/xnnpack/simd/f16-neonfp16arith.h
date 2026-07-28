@@ -158,6 +158,15 @@ static XNN_INLINE xnn_simd_f16_t xnn_xor_f16(xnn_simd_f16_t a,
       veorq_s16(vreinterpretq_s16_f16(a), vreinterpretq_s16_f16(b)));
 }
 
+static XNN_INLINE xnn_simd_f16_t xnn_not_f16(xnn_simd_f16_t a) {
+  return vreinterpretq_f16_u16(vmvnq_u16(vreinterpretq_u16_f16(a)));
+}
+
+static XNN_INLINE xnn_simd_f16_t xnn_andnot_f16(xnn_simd_f16_t a,
+                                                xnn_simd_f16_t b) {
+  return xnn_and_f16(xnn_not_f16(a), b);
+}
+
 static XNN_INLINE xnn_simd_f16_t xnn_cmpeq_f16(xnn_simd_f16_t a,
                                                xnn_simd_f16_t b) {
   return vreinterpretq_f16_u16(vceqq_f16(a, b));

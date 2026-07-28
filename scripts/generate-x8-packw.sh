@@ -59,6 +59,7 @@ tools/xngen src/x8-packw/kr-gio-scalar.c.in -D NR=16 -D KR=8 -D DATATYPE=QS8 -D 
 tools/xngen src/x8-packw/kr-scalar.c.in -D NR=4  -D KR=8 -D DATATYPE=QS4 -D IZP=0   -o src/qs8-qc4w-packw/gen/qs8-qc4w-packw-x4c8-gemm-goi-scalar.c &
 tools/xngen src/x8-packw/kr-scalar.c.in -D NR=8  -D KR=8 -D DATATYPE=QS4 -D IZP=0   -o src/qs8-qc4w-packw/gen/qs8-qc4w-packw-x8c8-gemm-goi-scalar.c &
 tools/xngen src/x8-packw/kr-scalar.c.in -D NR=16 -D KR=8 -D DATATYPE=QS4 -D IZP=0   -o src/qs8-qc4w-packw/gen/qs8-qc4w-packw-x16c8-gemm-goi-scalar.c &
+tools/xngen src/x8-packw/kr-scalar.c.in -D NR=32 -D KR=8 -D DATATYPE=QS4 -D IZP=0   -o src/qs8-qc4w-packw/gen/qs8-qc4w-packw-x32c8-gemm-goi-scalar.c &
 
 tools/xngen src/x8-packw/kr-scalar.c.in -D NR=4  -D KR=8 -D DATATYPE=QS4 -D IZP=128 -o src/qs8-qc4w-packw/gen/qs8-to-qu8-qc4w-packw-x4c8-gemm-goi-scalar.c &
 tools/xngen src/x8-packw/kr-scalar.c.in -D NR=8  -D KR=8 -D DATATYPE=QS4 -D IZP=128 -o src/qs8-qc4w-packw/gen/qs8-to-qu8-qc4w-packw-x8c8-gemm-goi-scalar.c &

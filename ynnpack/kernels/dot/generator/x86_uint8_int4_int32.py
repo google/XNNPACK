@@ -71,10 +71,27 @@ b_{k}_{j+n} = {mm}_shuffle_epi8(sign_lut, b_{k}_{j+n});
     b_kjn = f"b_{k}_{j+n}"
     c_ij0 = f"c_{i}_{j+0}"
     c_ijn = f"c_{i}_{j+n}"
-    return f"""
-{c_ij0} = {mm}_add_epi32({c_ij0}, {mm}_madd_epi16({mm}_maddubs_epi16({a_ik}, {b_kj0}), {mm}_set1_epi16(1)));
-{c_ijn} = {mm}_add_epi32({c_ijn}, {mm}_madd_epi16({mm}_maddubs_epi16({a_ik}, {b_kjn}), {mm}_set1_epi16(1)));
+    if k == 0:
+      # The first tile initializes the local accumulator of int16 values.
+      result = f"""
+__m{self.bits}i {c_ij0}_block = {mm}_maddubs_epi16({a_ik}, {b_kj0});
+__m{self.bits}i {c_ijn}_block = {mm}_maddubs_epi16({a_ik}, {b_kjn});
 """
+    else:
+      # Subsequent tiles add to the local accumulator. We can add 16 values of k
+      # without overflow (32768 / (8*256) = 16). The accumulators are split in 2
+      assert k <= 32
+      result = f"""
+{c_ij0}_block = {mm}_add_epi16({c_ij0}_block, {mm}_maddubs_epi16({a_ik}, {b_kj0}));
+{c_ijn}_block = {mm}_add_epi16({c_ijn}_block, {mm}_maddubs_epi16({a_ik}, {b_kjn}));
+"""
+    if k + self.tile_shape[2] == self.block_shape[2]:
+      # On the last tile, widen to int32, and add to the global accumulator.
+      result += f"""
+{c_ij0} = {mm}_sub_epi32({c_ij0}, {mm}_madd_epi16({c_ij0}_block, {mm}_set1_epi16(-1)));
+{c_ijn} = {mm}_sub_epi32({c_ijn}, {mm}_madd_epi16({c_ijn}_block, {mm}_set1_epi16(-1)));
+"""
+    return result
 
   def init_c_tile(self, i, j):
     mm = self._mm()
@@ -155,28 +172,26 @@ c_{i}_{j+8} = {mm}_dpbusd_epi32(c_{i}_{j+8}, a_{i}_{k}, b_{k}_{j+8});
 generate_dot_kernels(
     x86_avx2_uint8_int4_int32(),
     [
-        (1, 16, 8),
-        (2, 16, 8),
-        (3, 16, 8),
-        (1, 8, 8),
-        (3, 8, 8),
-        (4, 8, 8),
-        (8, 8, 8),
+        (1, 16, 32),
+        (2, 16, 32),
+        (3, 16, 32),
+        (1, 8, 32),
+        (3, 8, 32),
+        (4, 8, 32),
     ],
 )
 
 generate_dot_kernels(
     x86_avx512_uint8_int4_int32(),
     [
-        (1, 32, 8),
-        (2, 32, 8),
-        (3, 32, 8),
-        (4, 32, 8),
-        (5, 32, 8),
-        (1, 16, 8),
-        (5, 16, 8),
-        (8, 16, 8),
-        (12, 16, 8),
+        (1, 32, 32),
+        (2, 32, 32),
+        (3, 32, 32),
+        (4, 32, 32),
+        (5, 32, 32),
+        (1, 16, 32),
+        (5, 16, 32),
+        (8, 16, 32),
     ],
 )
 

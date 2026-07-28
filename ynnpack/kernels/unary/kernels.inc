@@ -37,6 +37,9 @@
 #ifdef YNN_ARCH_ARM_NEONFP16
 #include "ynnpack/kernels/unary/arm_neonfp16.inc"
 #endif  // YNN_ARCH_ARM_NEONFP16
+#ifdef YNN_ARCH_ARM_NEONFMA
+#include "ynnpack/kernels/unary/arm_neonfma.inc"
+#endif  // YNN_ARCH_ARM_NEONFMA
 #ifdef YNN_ARCH_ARM64_NEON
 #include "ynnpack/kernels/unary/arm64_neon.inc"
 #endif  // YNN_ARCH_ARM64_NEON

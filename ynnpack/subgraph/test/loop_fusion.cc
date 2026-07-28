@@ -212,5 +212,33 @@ TEST_F(LoopFusionTest, TwoDotsShareLoops) {
   }
 }
 
+// When B is static, the packing is constant folded during
+// ynn_optimize_subgraph: it has no dot loop nest to fuse into, so it runs
+// with its own loops, which should still be parallelized.
+TEST_F(LoopFusionTest, ConstantFoldedPackIsParallel) {
+  const size_t K = 512, N = 4096;
+  Tensor<float> b({K, N});
+  b.fill(1.0f);
+
+  const uint32_t a_id = 0;
+  const uint32_t b_id = 1;
+  const uint32_t out_id = 2;
+  SubgraphBuilder subgraph(3);
+  subgraph.AddInput(type_of<float>(), TensorShape(2), a_id)
+      .AddTensor(b, b_id)
+      .AddOutput(type_of<float>(), TensorShape(2), out_id)
+      .AddDot(1, a_id, b_id, YNN_INVALID_VALUE_ID, out_id);
+
+  // Constant folding runs the packing during MakeRuntime (in
+  // ynn_optimize_subgraph); nothing else is invoked, so any tasks the
+  // scheduler saw are the packing's parallel loops.
+  MakeRuntime(subgraph.GetSubgraph());
+// NOTE(vksnk): We skip WASM_SIMD128, because the default config doesn't enable
+// threads so all of the loops become serial.
+#if !defined(YNN_ARCH_WASM_SIMD128)
+  EXPECT_GT(scheduler_.task_count(), 0);
+#endif  // !YNN_ARCH_WASM_SIMD128
+}
+
 }  // namespace
 }  // namespace ynn

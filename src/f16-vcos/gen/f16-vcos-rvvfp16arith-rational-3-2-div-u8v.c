@@ -19,6 +19,7 @@
 #include "src/xnnpack/microparams.h"
 #include "src/xnnpack/vunary.h"
 
+#if XNN_ENABLE_RISCV_FP16_VECTOR && (XNN_ARCH_RISCV)
 static XNN_INLINE vfloat16m8_t xnn_round_f16(vfloat16m8_t a, size_t vl) {
   // preserve NaN
   vbool2_t nan_bv = __riscv_vmfeq(a, a, vl);
@@ -100,3 +101,4 @@ void xnn_f16_vcos_ukernel__rvvfp16arith_rational_3_2_div_u8v(
 
   } while (batch > 0);
 }
+#endif  // XNN_ENABLE_RISCV_FP16_VECTOR && (XNN_ARCH_RISCV)

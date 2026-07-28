@@ -338,7 +338,7 @@ static void FullyConnectedArgs(benchmark::Benchmark* b) {
 
   static const std::array<int64_t, 17> kDims = {
       1,   2,   4,    8,    16,   32,   64,    128,
-      256, 512, 1024, 2048, 4096, 8192, 16384, 65536};
+      256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536};
   const int64_t kMinK = 8;
   const int64_t kMaxSmall = 16;
   const int64_t kMinHuge = 1024;

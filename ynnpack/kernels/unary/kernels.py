@@ -67,29 +67,29 @@ def square_fp64(a, x):
 
 @const_buffer("a", Float(32))
 @buffer("x", Float(32))
-@operator_name("square_root")
-def square_root_fp32(a, x):
+@operator_name("sqrt")
+def sqrt_fp32(a, x):
   return store(sqrt(load(a)), x)
 
 
 @const_buffer("a", Float(64))
 @buffer("x", Float(64))
-@operator_name("square_root")
-def square_root_fp64(a, x):
+@operator_name("sqrt")
+def sqrt_fp64(a, x):
   return store(sqrt(load(a)), x)
 
 
 @const_buffer("a", Float(32))
 @buffer("x", Float(32))
-@operator_name("reciprocal_square_root")
-def reciprocal_square_root_fp32(a, x):
+@operator_name("rsqrt")
+def rsqrt_fp32(a, x):
   return store(1.0 / sqrt(load(a)), x)
 
 
 @const_buffer("a", Float(64))
 @buffer("x", Float(64))
-@operator_name("reciprocal_square_root")
-def reciprocal_square_root_fp64(a, x):
+@operator_name("rsqrt")
+def rsqrt_fp64(a, x):
   return store(1.0 / sqrt(load(a)), x)
 
 

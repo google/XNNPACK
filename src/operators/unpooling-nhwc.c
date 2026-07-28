@@ -215,9 +215,22 @@ enum xnn_status xnn_reshape_unpooling2d_nhwc_x32(
 
   const size_t pooling_height = unpooling_op->convolution_op->kernel_height;
   const size_t pooling_width = unpooling_op->convolution_op->kernel_width;
-  const size_t pooling_size = pooling_height * pooling_width;
+  size_t pooling_size = 0;
+  if (!xnn_safe_mul(pooling_height, pooling_width, &pooling_size)) {
+    xnn_log_error("failed to reshape %s operator: kernel size overflows size_t",
+      xnn_operator_type_to_string(xnn_operator_type_unpooling_nhwc_x32));
+    return xnn_status_out_of_memory;
+  }
 
-  const size_t indirection_buffer_size = sizeof(void*) * (batch_size * input_height * input_width * pooling_size);
+  size_t indirection_buffer_size = 0;
+  if (!xnn_safe_mul(batch_size, input_height, &indirection_buffer_size) ||
+      !xnn_safe_mul(indirection_buffer_size, input_width, &indirection_buffer_size) ||
+      !xnn_safe_mul(indirection_buffer_size, pooling_size, &indirection_buffer_size) ||
+      !xnn_safe_mul(indirection_buffer_size, sizeof(void*), &indirection_buffer_size)) {
+    xnn_log_error("failed to reshape %s operator: indirection buffer size overflows size_t",
+      xnn_operator_type_to_string(xnn_operator_type_unpooling_nhwc_x32));
+    return xnn_status_out_of_memory;
+  }
   const void** indirection_buffer = (const void**) xnn_reallocate_memory(unpooling_op->convolution_op->indirection_buffer, indirection_buffer_size);
   if (indirection_buffer == NULL) {
     xnn_log_error(

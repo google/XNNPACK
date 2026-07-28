@@ -87,7 +87,7 @@ TEST(fusion, divide_sqrt) {
       .AddInput(ynn_type_fp32, 2, y_id)
       .AddOutput(ynn_type_fp32, 2, out_id)
       .AddTensor(ynn_type_fp32, 2, sqrt_y_id);
-  builder.AddUnary(ynn_unary_square_root, y_id, sqrt_y_id)
+  builder.AddUnary(ynn_unary_sqrt, y_id, sqrt_y_id)
       .AddBinary(ynn_binary_divide, x_id, sqrt_y_id, out_id);
 
   ynn_subgraph& subgraph = *builder.GetSubgraph();
@@ -99,9 +99,8 @@ TEST(fusion, divide_sqrt) {
   EXPECT_THAT(
       ProducerOf(out_id, subgraph),
       AllOf(IsBinary(ynn_binary_multiply), InputsInclude(x_id, sqrt_y_id)));
-  EXPECT_THAT(
-      ProducerOf(sqrt_y_id, subgraph),
-      AllOf(IsUnary(ynn_unary_reciprocal_square_root), InputsAre(y_id)));
+  EXPECT_THAT(ProducerOf(sqrt_y_id, subgraph),
+              AllOf(IsUnary(ynn_unary_rsqrt), InputsAre(y_id)));
 }
 
 TEST(fusion, negate_multiply) {

@@ -20,6 +20,9 @@ BENCH_UNARY(sse2_fma, log, f32, 4);
 BENCH_UNARY(sse2_fma, log1p, f32, 4);
 BENCH_UNARY(sse2_fma, erf, f32, 4);
 BENCH_UNARY(sse2_fma, tanh, f32, 4);
+BENCH_UNARY(sse2_fma, sin, f32, 4);
+BENCH_UNARY(sse2_fma, cos, f32, 4);
+BENCH_UNARY(sse2_fma, tan, f32, 4);
 
 BENCH_UNARY(sse2_fma, approx_erf, f32, 4);
 BENCH_UNARY(sse2_fma, approx_tanh, f32, 4);

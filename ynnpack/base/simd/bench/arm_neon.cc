@@ -34,6 +34,9 @@ BENCH_UNARY(neon, log1p, f32, 4);
 BENCH_UNARY(neon, erf, bf16, 8);
 BENCH_UNARY(neon, erf, f32, 4);
 BENCH_UNARY(neon, tanh, f32, 4);
+BENCH_UNARY(neon, sin, f32, 4);
+BENCH_UNARY(neon, cos, f32, 4);
+BENCH_UNARY(neon, tan, f32, 4);
 
 BENCH_UNARY(neon, approx_erf, f32, 4);
 BENCH_UNARY(neon, approx_tanh, f32, 4);

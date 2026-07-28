@@ -25,6 +25,8 @@ TEST_UNARY(x86_sse2_fma, log, f32, 4, std::log, 2);
 TEST_UNARY(x86_sse2_fma, log1p, f32, 4, std::log1p, 3);
 TEST_UNARY(x86_sse2_fma, erf, f32, 4, std::erf, 2);
 TEST_UNARY(x86_sse2_fma, tanh, f32, 4, std::tanh, 2);
+TEST_UNARY_RANGE(x86_sse2_fma, sin, f32, 4, std::sin, 2, -1e6, 1e6);
+TEST_UNARY_RANGE(x86_sse2_fma, cos, f32, 4, std::cos, 2, -1e6, 1e6);
 
 TEST_UNARY(x86_sse2_fma, approx_erf, f32, 4, std::erf, 5);
 TEST_UNARY(x86_sse2_fma, approx_tanh, f32, 4, std::tanh, 5);

@@ -192,8 +192,28 @@ XNN_NO_SANITIZE_FUNCTION enum xnn_status xnn_reshape_resize_bilinear2d_nchw(
   const size_t output_height = resize_op->convolution_op->output_height;
   const size_t output_width = resize_op->convolution_op->output_width;
   if (output_height * output_width != resize_op->convolution_op->last_output_height * resize_op->convolution_op->last_output_width) {
-    const size_t indirection_buffer_size = sizeof(void*) * (output_height * output_width * 4);
-    const size_t packed_weights_size = (output_height * output_width * 2) << log2_weight_element_size;
+    size_t num_output_pixels = 0;
+    if (!xnn_safe_mul(output_height, output_width, &num_output_pixels)) {
+      xnn_log_error(
+          "failed to reshape %s operator: output pixel count overflows size_t",
+          xnn_operator_type_to_string(xnn_operator_type_resize_bilinear_nchw));
+      return xnn_status_out_of_memory;
+    }
+    size_t indirection_buffer_size = 0;
+    if (!xnn_safe_mul(num_output_pixels, 4 * sizeof(void*), &indirection_buffer_size)) {
+      xnn_log_error(
+          "failed to reshape %s operator: indirection buffer size overflows size_t",
+          xnn_operator_type_to_string(xnn_operator_type_resize_bilinear_nchw));
+      return xnn_status_out_of_memory;
+    }
+    const size_t packed_weights_element_size = 2u << log2_weight_element_size;
+    size_t packed_weights_size = 0;
+    if (!xnn_safe_mul(num_output_pixels, packed_weights_element_size, &packed_weights_size)) {
+      xnn_log_error(
+          "failed to reshape %s operator: packed weights size overflows size_t",
+          xnn_operator_type_to_string(xnn_operator_type_resize_bilinear_nchw));
+      return xnn_status_out_of_memory;
+    }
 
     const void** indirection_buffer = (const void**) xnn_reallocate_memory(resize_op->convolution_op->indirection_buffer, indirection_buffer_size);
     if (indirection_buffer == NULL) {

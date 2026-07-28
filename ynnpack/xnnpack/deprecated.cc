@@ -297,16 +297,15 @@ xnn_status xnn_define_square(xnn_subgraph_t subgraph, uint32_t input_id,
                           output_id, flags);
 }
 
-xnn_status xnn_define_square_root(xnn_subgraph_t subgraph, uint32_t input_id,
-                                  uint32_t output_id, uint32_t flags) {
+xnn_status xnn_define_sqrt(xnn_subgraph_t subgraph, uint32_t input_id,
+                           uint32_t output_id, uint32_t flags) {
   return xnn_define_unary(subgraph, xnn_unary_square_root, nullptr, input_id,
                           output_id, flags);
 }
 
-xnn_status xnn_define_reciprocal_square_root(xnn_subgraph_t subgraph,
-                                             uint32_t input_id,
-                                             uint32_t output_id,
-                                             uint32_t flags) {
+xnn_status xnn_define_rsqrt(xnn_subgraph_t subgraph,
+                                      uint32_t input_id, uint32_t output_id,
+                                      uint32_t flags) {
   return xnn_define_unary(subgraph, xnn_unary_reciprocal_square_root, nullptr,
                           input_id, output_id, flags);
 }

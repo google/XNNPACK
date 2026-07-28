@@ -283,7 +283,10 @@ static XNN_NO_SANITIZE_FUNCTION enum xnn_status create_deconvolution2d_nhwc(
 
   const size_t n_stride = round_up(group_output_channels, nr);
   const size_t k_stride = round_up_po2(group_input_channels, kr * sr);
-  const size_t kernel_size = (size_t) kernel_height * kernel_width;
+  size_t kernel_size;
+  if (!xnn_safe_mul(kernel_height, kernel_width, &kernel_size)) {
+    return xnn_status_out_of_memory;
+  }
   enum xnn_microkernel_type ukernel_type = xnn_microkernel_type_igemm;
   size_t packed_group_weights_size =
       ((kernel_size * k_stride << log2_filter_element_size) +
@@ -366,7 +369,10 @@ static XNN_NO_SANITIZE_FUNCTION enum xnn_status create_deconvolution2d_nhwc(
             divide_round_up(kernel_height - offset_y, stride_height);
         const size_t subkernel_width =
             divide_round_up(kernel_width - offset_x, stride_width);
-        const size_t subkernel_size = subkernel_height * subkernel_width;
+        size_t subkernel_size;
+        if (!xnn_safe_mul(subkernel_height, subkernel_width, &subkernel_size)) {
+          return xnn_status_invalid_parameter;
+        }
 
         subconvolution_params->indirection_x_stride =
             sizeof(void*) * subkernel_size;
@@ -394,7 +400,11 @@ static XNN_NO_SANITIZE_FUNCTION enum xnn_status create_deconvolution2d_nhwc(
                 divide_round_up(kernel_height - sh, stride_height);
             const size_t subkernel_width =
                 divide_round_up(kernel_width - sw, stride_width);
-            const size_t subkernel_size = subkernel_height * subkernel_width;
+            size_t subkernel_size;
+            if (!xnn_safe_mul(subkernel_height, subkernel_width,
+                               &subkernel_size)) {
+              return xnn_status_invalid_parameter;
+            }
             group_weights =
                 (void*)((uintptr_t)group_weights +
                         gemm_config->nr * ((subkernel_size * k_stride
@@ -429,7 +439,11 @@ static XNN_NO_SANITIZE_FUNCTION enum xnn_status create_deconvolution2d_nhwc(
                 divide_round_up(kernel_height - sh, stride_height);
             const size_t subkernel_width =
                 divide_round_up(kernel_width - sw, stride_width);
-            const size_t subkernel_size = subkernel_height * subkernel_width;
+            size_t subkernel_size;
+            if (!xnn_safe_mul(subkernel_height, subkernel_width,
+                               &subkernel_size)) {
+              return xnn_status_invalid_parameter;
+            }
             group_weights =
                 (void*)((uintptr_t)group_weights +
                         gemm_config->nr * ((subkernel_size * k_stride
@@ -1247,11 +1261,19 @@ static enum xnn_status generate_fingerprint_parameters(struct deconv2d_context* 
   }
 
   {  // Generate kernel data.
-    const size_t kernel_bytes =
-        context->groups * context->group_output_channels *
-        context->kernel_height * context->kernel_width *
-        context->group_input_channels *
-        (1 << context->gemm_config->log2_filter_element_size);
+    size_t kernel_bytes;
+    if (!xnn_safe_mul(context->groups, context->group_output_channels, &kernel_bytes) ||
+        !xnn_safe_mul(kernel_bytes, context->kernel_height, &kernel_bytes) ||
+        !xnn_safe_mul(kernel_bytes, context->kernel_width, &kernel_bytes) ||
+        !xnn_safe_mul(kernel_bytes, context->group_input_channels, &kernel_bytes) ||
+        !xnn_safe_mul(kernel_bytes,
+                       (size_t) 1 << context->gemm_config->log2_filter_element_size,
+                       &kernel_bytes)) {
+      xnn_log_error(
+          "failed to create %s operator: kernel size overflows size_t",
+          xnn_operator_type_to_string(context->operator_type));
+      return xnn_status_invalid_parameter;
+    }
     const size_t bias_bytes = context->groups * context->group_output_channels *
                               context->gemm_config->bias_element_size;
 
@@ -1700,6 +1722,9 @@ enum xnn_status xnn_create_deconvolution2d_nhwc_f32_f16(
                                     kernel_height;
   float* fp32_kernel_buffer =
       (float*)xnn_allocate_memory(num_kernel_entries * sizeof(float));
+  if (fp32_kernel_buffer == NULL) {
+    return xnn_status_out_of_memory;
+  }
   float* fp32_bias_buffer = NULL;
   const xnn_float16* f16_kernel = (const xnn_float16*)kernel;
   const xnn_float16* f16_bias = (const xnn_float16*)bias;
@@ -1709,6 +1734,10 @@ enum xnn_status xnn_create_deconvolution2d_nhwc_f32_f16(
   if (bias && !(flags & XNN_FLAG_FP32_STATIC_BIASES)) {
     fp32_bias_buffer = (float*)xnn_allocate_memory(
         groups * group_output_channels * sizeof(float));
+    if (fp32_bias_buffer == NULL) {
+      xnn_release_memory(fp32_kernel_buffer);
+      return xnn_status_out_of_memory;
+    }
     for (size_t i = 0; i < groups * group_output_channels; ++i) {
       fp32_bias_buffer[i] = xnn_float16_to_float(f16_bias[i]);
     }
@@ -1745,7 +1774,10 @@ static XNN_NO_SANITIZE_FUNCTION enum xnn_status reshape_igemm_path(
   const size_t output_width = deconvolution_op->convolution_op->output_width;
   const size_t kernel_height = deconvolution_op->convolution_op->kernel_height;
   const size_t kernel_width = deconvolution_op->convolution_op->kernel_width;
-  const size_t kernel_size = kernel_height * kernel_width;
+  size_t kernel_size;
+  if (!xnn_safe_mul(kernel_height, kernel_width, &kernel_size)) {
+    return xnn_status_invalid_parameter;
+  }
 
   const size_t groups = deconvolution_op->convolution_op->groups;
   const size_t output_size = output_height * output_width;
@@ -2002,7 +2034,10 @@ static enum xnn_status reshape_subconv2d_path(
   const size_t output_width = deconvolution_op->convolution_op->output_width;
   const size_t kernel_height = deconvolution_op->convolution_op->kernel_height;
   const size_t kernel_width = deconvolution_op->convolution_op->kernel_width;
-  const size_t kernel_size = kernel_height * kernel_width;
+  size_t kernel_size;
+  if (!xnn_safe_mul(kernel_height, kernel_width, &kernel_size)) {
+    return xnn_status_invalid_parameter;
+  }
   const size_t stride_height = deconvolution_op->convolution_op->stride_height;
   const size_t stride_width = deconvolution_op->convolution_op->stride_width;
   const size_t output_height_positions =

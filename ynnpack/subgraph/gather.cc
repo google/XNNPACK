@@ -81,15 +81,15 @@ auto make_gather_impl(std::vector<int32_t> gathered_axes, size_t output_rank,
                       ynn_type index_type) {
   return
       [gathered_axes = std::move(gathered_axes), output_rank, index_type](
-          slinky::buffer<const void, YNN_MAX_TENSOR_RANK> input,
-          slinky::buffer<const void, YNN_MAX_TENSOR_RANK> index,
-          slinky::buffer<void, YNN_MAX_TENSOR_RANK> output) -> slinky::index_t {
+          slinky::buffer<const void, max_tensor_rank> input,
+          slinky::buffer<const void, max_tensor_rank> index,
+          slinky::buffer<void, max_tensor_rank> output) -> slinky::index_t {
         slinky::dim axis_index_dim = index.dim(output_rank);
         index.slice(output_rank);
 
         // We're going to address the gathered dimensions separately from the
         // loop over the output.
-        slinky::dim gathered_input_dims[YNN_MAX_TENSOR_RANK];
+        slinky::dim gathered_input_dims[max_tensor_rank];
         size_t num_gathered_dims = gathered_axes.size();
         for (size_t i = 0; i < num_gathered_dims; ++i) {
           gathered_input_dims[i] = input.dim(gathered_axes[i]);
@@ -98,8 +98,8 @@ auto make_gather_impl(std::vector<int32_t> gathered_axes, size_t output_rank,
 
         // We need two sets of buffers: one for defining an outer loop, and one
         // to define how we can slinky::copy inside that outer loop.
-        slinky::buffer<void, YNN_MAX_TENSOR_RANK> output_slice = output;
-        slinky::buffer<const void, YNN_MAX_TENSOR_RANK> input_slice = input;
+        slinky::buffer<void, max_tensor_rank> output_slice = output;
+        slinky::buffer<const void, max_tensor_rank> input_slice = input;
 
         for (int i = output.rank - 1; i >= 0; --i) {
           if (index.dim(i).is_broadcast()) {

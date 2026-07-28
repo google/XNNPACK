@@ -18,8 +18,6 @@ namespace ynn {
 
 xnn_status xnn_status_from_ynn(ynn_status status);
 
-uint32_t value_flags_from_xnn(uint32_t flags);
-
 ynn_unary_operator unary_operator_from_xnn(xnn_unary_operator op);
 ynn_binary_operator binary_operator_from_xnn(xnn_binary_operator op);
 ynn_reduce_operator reduce_operator_from_xnn(xnn_reduce_operator op);

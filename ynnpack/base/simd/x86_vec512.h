@@ -85,6 +85,18 @@ struct vec<float, 16> {
 };
 
 template <>
+struct vec<int64_t, 8> {
+  using value_type = int64_t;
+  static constexpr std::integral_constant<size_t, 8> N = {};
+
+  vec() = default;
+  explicit vec(__m512i v) : v(v) {}
+  vec(int64_t x) : v(_mm512_set1_epi64(x)) {}  // NOLINT
+
+  __m512i v;
+};
+
+template <>
 struct vec<uint32_t, 16> {
   using value_type = uint32_t;
   static constexpr std::integral_constant<size_t, 16> N = {};
@@ -182,6 +194,7 @@ struct vec<int8_t, 64> {
 
 using f64x8 = vec<double, 8>;
 using f32x16 = vec<float, 16>;
+using s64x8 = vec<int64_t, 8>;
 using u32x16 = vec<uint32_t, 16>;
 using s32x16 = vec<int32_t, 16>;
 using bf16x32 = vec<bfloat16, 32>;
@@ -196,6 +209,8 @@ YNN_ALWAYS_INLINE f64x4 lo(f64x8 x) { return f64x4{internal::lo(x.v)}; }
 YNN_ALWAYS_INLINE f64x4 hi(f64x8 x) { return f64x4{internal::hi(x.v)}; }
 YNN_ALWAYS_INLINE f32x8 lo(f32x16 x) { return f32x8{internal::lo(x.v)}; }
 YNN_ALWAYS_INLINE f32x8 hi(f32x16 x) { return f32x8{internal::hi(x.v)}; }
+YNN_ALWAYS_INLINE s64x4 lo(s64x8 x) { return s64x4{internal::lo(x.v)}; }
+YNN_ALWAYS_INLINE s64x4 hi(s64x8 x) { return s64x4{internal::hi(x.v)}; }
 YNN_ALWAYS_INLINE u32x8 lo(u32x16 x) { return u32x8{internal::lo(x.v)}; }
 YNN_ALWAYS_INLINE u32x8 hi(u32x16 x) { return u32x8{internal::hi(x.v)}; }
 YNN_ALWAYS_INLINE s32x8 lo(s32x16 x) { return s32x8{internal::lo(x.v)}; }
@@ -218,6 +233,9 @@ YNN_ALWAYS_INLINE f64x8 concat(f64x4 lo, f64x4 hi) {
 }
 YNN_ALWAYS_INLINE f32x16 concat(f32x8 lo, f32x8 hi) {
   return f32x16{internal::concat(lo.v, hi.v)};
+}
+YNN_ALWAYS_INLINE s64x8 concat(s64x4 lo, s64x4 hi) {
+  return s64x8{internal::concat(lo.v, hi.v)};
 }
 YNN_ALWAYS_INLINE u32x16 concat(u32x8 lo, u32x8 hi) {
   return u32x16{internal::concat(lo.v, hi.v)};
@@ -491,6 +509,9 @@ YNN_ALWAYS_INLINE f64x8 operator+(f64x8 a, f64x8 b) {
 YNN_ALWAYS_INLINE f32x16 operator+(f32x16 a, f32x16 b) {
   return f32x16{_mm512_add_ps(a.v, b.v)};
 }
+YNN_ALWAYS_INLINE s64x8 operator+(s64x8 a, s64x8 b) {
+  return s64x8{_mm512_add_epi64(a.v, b.v)};
+}
 YNN_ALWAYS_INLINE s32x16 operator+(s32x16 a, s32x16 b) {
   return s32x16{_mm512_add_epi32(a.v, b.v)};
 }
@@ -650,6 +671,22 @@ YNN_ALWAYS_INLINE s8x64 operator^(s8x64 a, s8x64 b) {
 }
 YNN_ALWAYS_INLINE s8x64 operator~(s8x64 a) {
   return s8x64{_mm512_xor_si512(a.v, _mm512_set1_epi32(-1))};
+}
+
+YNN_ALWAYS_INLINE s64x8 operator&(s64x8 a, s64x8 b) {
+  return s64x8{_mm512_and_si512(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE s64x8 operator|(s64x8 a, s64x8 b) {
+  return s64x8{_mm512_or_si512(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE s64x8 operator^(s64x8 a, s64x8 b) {
+  return s64x8{_mm512_xor_si512(a.v, b.v)};
+}
+YNN_ALWAYS_INLINE s64x8 operator<<(s64x8 a, int b) {
+  return s64x8{_mm512_slli_epi64(a.v, b)};
+}
+YNN_ALWAYS_INLINE s64x8 operator~(s64x8 a) {
+  return s64x8{_mm512_xor_si512(a.v, _mm512_set1_epi64(-1))};
 }
 
 YNN_ALWAYS_INLINE f64x8 fma(f64x8 a, f64x8 b, f64x8 acc) {
@@ -912,6 +949,25 @@ YNN_ALWAYS_INLINE __mmask8 isinf(f64x8 a) {
 }
 YNN_ALWAYS_INLINE __mmask8 isfinite(f64x8 a) {
   return ~_mm512_fpclass_pd_mask(a.v, 0x99);
+}
+
+YNN_ALWAYS_INLINE __mmask8 operator==(s64x8 a, s64x8 b) {
+  return _mm512_cmpeq_epi64_mask(a.v, b.v);
+}
+YNN_ALWAYS_INLINE __mmask8 operator!=(s64x8 a, s64x8 b) {
+  return _mm512_cmpneq_epi64_mask(a.v, b.v);
+}
+YNN_ALWAYS_INLINE __mmask8 operator<(s64x8 a, s64x8 b) {
+  return _mm512_cmplt_epi64_mask(a.v, b.v);
+}
+YNN_ALWAYS_INLINE __mmask8 operator<=(s64x8 a, s64x8 b) {
+  return _mm512_cmple_epi64_mask(a.v, b.v);
+}
+YNN_ALWAYS_INLINE __mmask8 operator>(s64x8 a, s64x8 b) {
+  return _mm512_cmpgt_epi64_mask(a.v, b.v);
+}
+YNN_ALWAYS_INLINE __mmask8 operator>=(s64x8 a, s64x8 b) {
+  return _mm512_cmpge_epi64_mask(a.v, b.v);
 }
 
 YNN_ALWAYS_INLINE __mmask16 operator==(s32x16 a, s32x16 b) {

@@ -302,7 +302,8 @@ void xnnpack_dynamic_fully_connected_f32(benchmark::State& state,
     }
   }
 
-  std::vector<std::unique_ptr<xnnpack::Buffer<char>>> workspaces;
+  std::vector<std::unique_ptr<xnnpack::Buffer<char, XNN_ALLOCATION_ALIGNMENT>>>
+      workspaces;
 
   for (size_t i = 0; i < ops.size(); i++) {
     size_t workspace_size = 0;
@@ -317,7 +318,9 @@ void xnnpack_dynamic_fully_connected_f32(benchmark::State& state,
       return;
     }
 
-    auto workspace = std::make_unique<xnnpack::Buffer<char>>(workspace_size);
+    auto workspace =
+        std::make_unique<xnnpack::Buffer<char, XNN_ALLOCATION_ALIGNMENT>>(
+            workspace_size);
     char* workspace_ptr = workspace->data();
 
     workspaces.push_back(std::move(workspace));

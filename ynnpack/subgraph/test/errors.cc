@@ -27,7 +27,7 @@ TEST(Errors, bad_binary_shape) {
   runtime.ReshapeExternalTensor({10, 20}, nullptr, a_id)
       .ReshapeExternalTensor({5, 20}, nullptr, b_id);
 
-  ASSERT_EQ(runtime.ReshapeRuntime().Status(), ynn_status_error);
+  ASSERT_EQ(runtime.ReshapeRuntime().Status(), ynn_status_invalid_parameter);
 }
 
 TEST(Errors, bad_dot_shape) {
@@ -46,7 +46,7 @@ TEST(Errors, bad_dot_shape) {
   runtime.ReshapeExternalTensor({5, 10, 20, 30}, nullptr, a_id)
       .ReshapeExternalTensor({1, 2, 3, 4}, nullptr, b_id);
 
-  ASSERT_EQ(runtime.ReshapeRuntime().Status(), ynn_status_error);
+  ASSERT_EQ(runtime.ReshapeRuntime().Status(), ynn_status_invalid_parameter);
 }
 
 }  // namespace ynn

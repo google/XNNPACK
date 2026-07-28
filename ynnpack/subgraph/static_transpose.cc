@@ -37,8 +37,8 @@ auto make_transpose_impl(int elem_count, std::vector<int32_t> permutation) {
              const slinky::raw_buffer& output) -> slinky::index_t {
     // Make a shallow copy of the input buffers. We need to be able to slice
     // dimensions from these buffers, and reorder the input dimensions.
-    slinky::buffer<void, YNN_MAX_TENSOR_RANK> sliced_output = output;
-    slinky::buffer<const void, YNN_MAX_TENSOR_RANK> sliced_input;
+    slinky::buffer<void, max_tensor_rank> sliced_output = output;
+    slinky::buffer<const void, max_tensor_rank> sliced_input;
     sliced_input.rank = permutation.size();
     sliced_input.elem_size = input.elem_size;
     sliced_input.raw_buffer::base = input.base;

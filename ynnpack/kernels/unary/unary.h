@@ -88,8 +88,8 @@ struct affine_output_params {
 
 using tanh_params = affine_output_params;
 using approx_tanh_params = tanh_params;
-using sine_params = affine_output_params;
-using cosine_params = affine_output_params;
+using sin_params = affine_output_params;
+using cos_params = affine_output_params;
 
 struct poly3_params {
   real c0, c1, c2, c3;
@@ -115,8 +115,8 @@ union unary_params {
   approx_erf_params approx_erf;
   approx_tanh_params approx_tanh;
   tanh_params tanh;
-  sine_params sine;
-  cosine_params cosine;
+  sin_params sin;
+  cos_params cos;
   poly3_params poly3;
 };
 

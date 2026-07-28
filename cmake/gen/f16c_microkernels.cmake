@@ -38,6 +38,7 @@ SET(PROD_F16C_MICROKERNEL_SRCS
   src/f16-vbinary/gen/f16-vsub-f16c-u16.c
   src/f16-vbinary/gen/f16-vsubc-f16c-u16.c
   src/f16-vclamp/gen/f16-vclamp-f16c-u16.c
+  src/f16-vcos/gen/f16-f32acc-vcos-f16c-poly-3.c
   src/f16-vexp/gen/f16-f32acc-vexp-f16c-poly-3.c
   src/f16-vhswish/gen/f16-vhswish-f16c-u16.c
   src/f16-vlog/gen/f16-f32acc-vlog-f16c-rational-1-3-div.c
@@ -47,6 +48,7 @@ SET(PROD_F16C_MICROKERNEL_SRCS
   src/f16-vrnd/gen/f16-vrndu-f16c-u16.c
   src/f16-vrnd/gen/f16-vrndz-f16c-u16.c
   src/f16-vrsqrt/gen/f16-vrsqrt-f16c-rsqrt-u32.c
+  src/f16-vsin/gen/f16-f32acc-vsin-f16c-poly-3.c
   src/f16-vsqrt/gen/f16-vsqrt-f16c-rsqrt-u32.c
   src/f16-vtanh/gen/f16-f32acc-vtanh-f16c-rational-5-4-div.c
   src/f16-vunary/gen/f16-vsqr-f16c-u16.c

@@ -147,9 +147,9 @@ SubgraphBuilder& SubgraphBuilder::AddBroadcast(const std::vector<size_t>& shape,
 SubgraphBuilder& SubgraphBuilder::AddStaticBroadcast(
     const std::vector<size_t>& shape, uint32_t input_id, uint32_t output_id) {
   assert(status_ == ynn_status_success);
-  status_ = ynn_define_static_broadcast(
-      subgraph_.get(), shape.size(), shape.data(), input_id, &output_id,
-      /*flags=*/0);
+  status_ = ynn_define_static_broadcast(subgraph_.get(), shape.size(),
+                                        shape.data(), input_id, &output_id,
+                                        /*flags=*/0);
   return *this;
 }
 
@@ -282,13 +282,13 @@ SubgraphBuilder& SubgraphBuilder::AddBroadcast(const std::vector<int32_t>& axes,
 }
 
 SubgraphBuilder& SubgraphBuilder::AddSliceLike(const std::vector<int32_t>& axes,
-                                              uint32_t input_id,
-                                              uint32_t template_id,
-                                              uint32_t output_id) {
+                                               uint32_t input_id,
+                                               uint32_t template_id,
+                                               uint32_t output_id,
+                                               uint32_t flags) {
   assert(status_ == ynn_status_success);
-  status_ =
-      ynn_define_slice_like(subgraph_.get(), axes.size(), axes.data(), input_id,
-                            template_id, &output_id, /*flags=*/0);
+  status_ = ynn_define_slice_like(subgraph_.get(), axes.size(), axes.data(),
+                                  input_id, template_id, &output_id, flags);
   return *this;
 }
 

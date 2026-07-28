@@ -1267,6 +1267,9 @@ YNN_ALWAYS_INLINE s64x2 operator|(s64x2 a, s64x2 b) {
 YNN_ALWAYS_INLINE s64x2 operator^(s64x2 a, s64x2 b) {
   return s64x2{veorq_s64(a.v, b.v)};
 }
+YNN_ALWAYS_INLINE s64x2 operator<<(s64x2 a, int b) {
+  return s64x2{vshlq_s64(a.v, vdupq_n_s64(b))};
+}
 YNN_ALWAYS_INLINE s64x2 operator~(s64x2 a) {
   return s64x2{vreinterpretq_s64_s8(vmvnq_s8(vreinterpretq_s8_s64(a.v)))};
 }
@@ -1440,6 +1443,23 @@ YNN_ALWAYS_INLINE s32x4 isfinite(f32x4 a) {
 }
 
 #ifdef YNN_ARCH_ARM64
+YNN_ALWAYS_INLINE s64x2 operator==(s64x2 a, s64x2 b) {
+  return s64x2{vreinterpretq_s64_u64(vceqq_s64(a.v, b.v))};
+}
+YNN_ALWAYS_INLINE s64x2 operator!=(s64x2 a, s64x2 b) { return ~(a == b); }
+YNN_ALWAYS_INLINE s64x2 operator<(s64x2 a, s64x2 b) {
+  return s64x2{vreinterpretq_s64_u64(vcltq_s64(a.v, b.v))};
+}
+YNN_ALWAYS_INLINE s64x2 operator<=(s64x2 a, s64x2 b) {
+  return s64x2{vreinterpretq_s64_u64(vcleq_s64(a.v, b.v))};
+}
+YNN_ALWAYS_INLINE s64x2 operator>(s64x2 a, s64x2 b) {
+  return s64x2{vreinterpretq_s64_u64(vcgtq_s64(a.v, b.v))};
+}
+YNN_ALWAYS_INLINE s64x2 operator>=(s64x2 a, s64x2 b) {
+  return s64x2{vreinterpretq_s64_u64(vcgeq_s64(a.v, b.v))};
+}
+
 YNN_ALWAYS_INLINE s64x2 operator==(f64x2 a, f64x2 b) {
   return s64x2{vreinterpretq_s64_u64(vceqq_f64(a.v, b.v))};
 }

@@ -327,23 +327,29 @@ void xnn_qb4_packw_gemm_goi_ukernel_x16c4__scalar(
       }
 
       if XNN_LIKELY(b != NULL){
-        ((uint32_t*) out)[0] = b[0];
-        ((uint32_t*) out)[1] = b[1];
-        ((uint32_t*) out)[2] = b[2];
-        ((uint32_t*) out)[3] = b[3];
-        ((uint32_t*) out)[4] = b[4];
-        ((uint32_t*) out)[5] = b[5];
-        ((uint32_t*) out)[6] = b[6];
-        ((uint32_t*) out)[7] = b[7];
-        ((uint32_t*) out)[8] = b[8];
-        ((uint32_t*) out)[9] = b[9];
-        ((uint32_t*) out)[10] = b[10];
-        ((uint32_t*) out)[11] = b[11];
-        ((uint32_t*) out)[12] = b[12];
-        ((uint32_t*) out)[13] = b[13];
-        ((uint32_t*) out)[14] = b[14];
-        ((uint32_t*) out)[15] = b[15];
-        b += 16;
+        if (n >= 16) {
+          ((uint32_t*) out)[0] = b[0];
+          ((uint32_t*) out)[1] = b[1];
+          ((uint32_t*) out)[2] = b[2];
+          ((uint32_t*) out)[3] = b[3];
+          ((uint32_t*) out)[4] = b[4];
+          ((uint32_t*) out)[5] = b[5];
+          ((uint32_t*) out)[6] = b[6];
+          ((uint32_t*) out)[7] = b[7];
+          ((uint32_t*) out)[8] = b[8];
+          ((uint32_t*) out)[9] = b[9];
+          ((uint32_t*) out)[10] = b[10];
+          ((uint32_t*) out)[11] = b[11];
+          ((uint32_t*) out)[12] = b[12];
+          ((uint32_t*) out)[13] = b[13];
+          ((uint32_t*) out)[14] = b[14];
+          ((uint32_t*) out)[15] = b[15];
+          b += 16;
+        } else {
+          memcpy(out, b, n * sizeof(uint32_t));
+          memset((uint32_t*) out + n, 0, (16 - n) * sizeof(uint32_t));
+          b += n;
+        }
       } else {
         ((uint32_t*) out)[0] = 0;
         ((uint32_t*) out)[1] = 0;

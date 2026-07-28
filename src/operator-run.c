@@ -1434,8 +1434,8 @@ XNN_NO_SANITIZE_FUNCTION void xnn_compute_contiguous_reduce(struct reduce_contex
       (output_stride[0] * output_idx0 + output_stride[1] * output_idx1 +
        output_stride[2] * output_idx2) *
       context->accumulation_element_size;
-  int input_shape1 = context->input_shape[1];
-  int input_shape3 = context->input_shape[3];
+  size_t input_shape1 = context->input_shape[1];
+  size_t input_shape3 = context->input_shape[3];
 
   void* output_ptr = NULL;
   if (context->workspace) {
@@ -1514,8 +1514,8 @@ XNN_NO_SANITIZE_FUNCTION void xnn_compute_discontiguous_reduce(struct reduce_con
       (output_stride[0] * output_idx0 + output_stride[1] * output_idx1 +
        output_stride[2] * output_idx2) *
       context->accumulation_element_size;
-  int input_shape0 = context->input_shape[0];
-  int input_shape2 = context->input_shape[2];
+  size_t input_shape0 = context->input_shape[0];
+  size_t input_shape2 = context->input_shape[2];
 
   void* output_ptr = NULL;
   if (context->workspace) {

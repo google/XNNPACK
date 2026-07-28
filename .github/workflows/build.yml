@@ -719,6 +719,8 @@ jobs:
     env:
       CC: clang-18
       CXX: clang++-18
+      BAZEL_DEFINES: |
+        --define=ynn_enable_arm64_neonfp8=false
     steps:
       - uses: actions/checkout@v6
       - name: Restore Bazel Cache
@@ -740,6 +742,7 @@ jobs:
               --disk_cache=/home/xnnpack/.cache/bazel/disk_cache \
               --repository_cache=/home/xnnpack/.cache/bazel/repo_cache \
               --test_output=errors \
+              ${BAZEL_DEFINES} \
               -- \
               //test/... \
               //bench/... \
@@ -755,6 +758,7 @@ jobs:
               --test_output=errors \
               --local_test_jobs=HOST_CPUS \
               --test_tag_filters=-not_run:arm \
+              ${BAZEL_DEFINES} \
               -- \
               //test/... \
               //bench/... \
@@ -788,6 +792,7 @@ jobs:
         --define=ynn_enable_arm64_sme=false
         --define=ynn_enable_arm_neonbf16=false
         --define=ynn_enable_arm64_sve=false
+        --define=ynn_enable_arm64_neonfp8=false
     steps:
       - uses: actions/checkout@v6
       - name: Restore Bazel Cache

@@ -298,6 +298,15 @@ inline int32_t mul_no_overflow(int32_t a, int32_t b) {
   return static_cast<int64_t>(a) * static_cast<int64_t>(b);
 }
 
+inline int64_t add_no_overflow(int64_t a, int64_t b) {
+  return static_cast<int64_t>(static_cast<uint64_t>(a) +
+                              static_cast<uint64_t>(b));
+}
+inline int64_t sub_no_overflow(int64_t a, int64_t b) {
+  return static_cast<int64_t>(static_cast<uint64_t>(a) -
+                              static_cast<uint64_t>(b));
+}
+
 // Overloads of the above to allow template code to work with floats too.
 inline float add_no_overflow(float a, float b) {
   return a + b;

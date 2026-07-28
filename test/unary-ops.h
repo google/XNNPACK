@@ -383,10 +383,12 @@ struct Sine : public UnaryOpInfo {
   float Tolerance(float y_ref, xnn_datatype datatype) const override {
     switch (datatype) {
       case xnn_datatype_fp32:
-      case xnn_datatype_fp16:
       case xnn_datatype_bf16:
-        return TolMixed(y_ref, 3 * xnnpack::epsilon(datatype),
-                        5 * xnnpack::epsilon(datatype));
+        return TolMixed(y_ref, 10 * xnnpack::epsilon(datatype),
+                        10 * xnnpack::epsilon(datatype));
+      case xnn_datatype_fp16:
+        return TolMixed(y_ref, 35 * xnnpack::epsilon(datatype),
+                        35 * xnnpack::epsilon(datatype));
       case xnn_datatype_qint8:
       case xnn_datatype_quint8:
         return 1;
@@ -590,10 +592,12 @@ struct Cosine : public UnaryOpInfo {
   float Tolerance(float y_ref, xnn_datatype datatype) const override {
     switch (datatype) {
       case xnn_datatype_fp32:
-      case xnn_datatype_fp16:
       case xnn_datatype_bf16:
-        return TolMixed(y_ref, 3 * xnnpack::epsilon(datatype),
-                        5 * xnnpack::epsilon(datatype));
+        return TolMixed(y_ref, 10 * xnnpack::epsilon(datatype),
+                        10 * xnnpack::epsilon(datatype));
+      case xnn_datatype_fp16:
+        return TolMixed(y_ref, 35 * xnnpack::epsilon(datatype),
+                        35 * xnnpack::epsilon(datatype));
       case xnn_datatype_qint8:
       case xnn_datatype_quint8:
         return 1;

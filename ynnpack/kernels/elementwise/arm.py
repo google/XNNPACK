@@ -34,12 +34,12 @@ class ARM(Target):
     implied_features = {
         "NEONBF16": ["NEON"],
         "NEONFP16": ["NEON"],
-        "FMA": ["NEON"],
+        "NEONFMA": ["NEON"],
     }
     all_features = []
     self.compute_all_features(features, implied_features, all_features)
 
-    known_features = ["NEON", "NEONBF16", "NEONFP16", "FMA"]
+    known_features = ["NEON", "NEONBF16", "NEONFP16", "NEONFMA"]
     for feature in all_features:
       if feature not in known_features:
         raise ValueError(f"Unknown feature: {feature}")
@@ -55,7 +55,7 @@ class ARM(Target):
       self.update_for_fp16()
     if "NEONBF16" in all_features:
       self.update_for_bf16()
-    if "FMA" in all_features:
+    if "NEONFMA" in all_features:
       self.update_for_fma()
 
   def arch_flags(self):

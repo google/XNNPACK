@@ -11,8 +11,10 @@
 
 SET(PROD_AVX512F_MICROKERNEL_SRCS
   src/f16-vapproxgelu/gen/f16-f32acc-vapproxgelu-avx512f-rational-6-4-div.c
+  src/f16-vcos/gen/f16-f32acc-vcos-avx512f-poly-3.c
   src/f16-vexp/gen/f16-f32acc-vexp-avx512f-poly-3.c
   src/f16-vlog/gen/f16-f32acc-vlog-avx512f-rational-1-3-div.c
+  src/f16-vsin/gen/f16-f32acc-vsin-avx512f-poly-3.c
   src/f16-vtanh/gen/f16-f32acc-vtanh-avx512f-rational-5-4-div.c
   src/f32-avgpool/gen/f32-avgpool-9p-minmax-avx512f-u16.c
   src/f32-dwconv/gen/f32-dwconv-3p16c-minmax-avx512f.c

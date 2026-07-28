@@ -70,9 +70,9 @@ ynn_type get_promoted_type(ynn_type type) {
 // kernel on some buffers.
 auto make_unary_reduce_impl(const ynn_node::reduce& op, reduce_kernel kernel) {
   return [op, kernel](
-             slinky::buffer<const void, YNN_MAX_TENSOR_RANK> a,
-             slinky::buffer<const void, YNN_MAX_TENSOR_RANK> init_c,
-             slinky::buffer<void, YNN_MAX_TENSOR_RANK> c,
+             slinky::buffer<const void, max_tensor_rank> a,
+             slinky::buffer<const void, max_tensor_rank> init_c,
+             slinky::buffer<void, max_tensor_rank> c,
              const slinky::raw_buffer& reduction_bounds) -> slinky::index_t {
     bool init_output = true;
     if (op.keep_dims) {
@@ -226,7 +226,7 @@ auto make_unary_reduce_impl(const ynn_node::reduce& op, reduce_kernel kernel) {
 
     // The k1 kernel always works.
     reduce_kernel_fn kernel_fn = kernel.k1;
-    if (k1 == 1 && k2 != 1 && (n == 1 || a_stride_n == a.elem_size)) {
+    if (k1 == 1 && (n == 1 || a_stride_n == a.elem_size)) {
       // There is no reduction in the k1 dimension, and the n dimension is
       // contiguous in a, the kn kernel will be much faster.
       kernel_fn = kernel.kn;
@@ -271,7 +271,7 @@ ynn_type get_accumulator_type(ynn_reduce_operator op, ynn_type a_type) {
 // identity value for the min and the max.
 slinky::raw_buffer_ptr make_reduce_identity(ynn_type type, int rank,
                                             ynn_reduce_operator op) {
-  slinky::dim dims[YNN_MAX_TENSOR_RANK];
+  slinky::dim dims[max_tensor_rank];
   slinky::raw_buffer value;
   value.rank = 0;
   value.elem_size = ynn::type_size_bytes(type);

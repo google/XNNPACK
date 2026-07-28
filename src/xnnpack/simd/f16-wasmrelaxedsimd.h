@@ -94,7 +94,7 @@ static XNN_INLINE xnn_simd_f16_t xnn_min_f16(xnn_simd_f16_t a,
 }
 
 static XNN_INLINE xnn_simd_f16_t xnn_abs_f16(xnn_simd_f16_t a) {
-  return wasm_f16x8_abs(a);
+  return wasm_v128_and(a, wasm_i16x8_splat(0x7FFF));
 }
 
 static XNN_INLINE xnn_simd_f16_t xnn_sqrt_f16(xnn_simd_f16_t a) {
@@ -102,7 +102,7 @@ static XNN_INLINE xnn_simd_f16_t xnn_sqrt_f16(xnn_simd_f16_t a) {
 }
 
 static XNN_INLINE xnn_simd_f16_t xnn_neg_f16(xnn_simd_f16_t a) {
-  return wasm_f16x8_neg(a);
+  return wasm_v128_xor(a, wasm_i16x8_splat((int16_t)0x8000));
 }
 
 static XNN_INLINE xnn_simd_f16_t xnn_round_f16(xnn_simd_f16_t a) {
@@ -123,6 +123,15 @@ static XNN_INLINE xnn_simd_f16_t xnn_or_f16(xnn_simd_f16_t a,
 static XNN_INLINE xnn_simd_f16_t xnn_xor_f16(xnn_simd_f16_t a,
                                              xnn_simd_f16_t b) {
   return wasm_v128_xor(a, b);
+}
+
+static XNN_INLINE xnn_simd_f16_t xnn_not_f16(xnn_simd_f16_t a) {
+  return wasm_v128_not(a);
+}
+
+static XNN_INLINE xnn_simd_f16_t xnn_andnot_f16(xnn_simd_f16_t a,
+                                                xnn_simd_f16_t b) {
+  return wasm_v128_bitselect(wasm_i16x8_const_splat(0), b, a);
 }
 
 static XNN_INLINE xnn_simd_f16_t xnn_sll_f16(xnn_simd_f16_t a, uint8_t bits) {
@@ -234,29 +243,29 @@ static XNN_INLINE void xnn_store_tail_f16(xnn_float16* output, xnn_simd_f16_t v,
 }
 
 // Conversion operations.
-// TODO: Remove __builtin_convertvector once the wasm header is fixed.
-typedef __fp16 xnn_f16x4 __attribute__((__vector_size__(8), __aligned__(8)));
-
-static XNN_INLINE v128_t xnn_wasm_f32x4_promote_low_f16x8(v128_t __a) {
-  return (v128_t) __builtin_convertvector(
-      (xnn_f16x4){((__f16x8)__a)[0], ((__f16x8)__a)[1], ((__f16x8)__a)[2],
-                  ((__f16x8)__a)[3]},
-      __f32x4);
-}
-
-static XNN_INLINE v128_t xnn_wasm_f16x8_demote_f32x4_zero(v128_t __a) {
-  return (v128_t) __builtin_convertvector(
-      __builtin_shufflevector((__f32x4)__a, (__f32x4){0.0f, 0.0f, 0.0f, 0.0f},
-                              0, 1, 2, 3, 4, 5, 6, 7),
-      __f16x8);
-}
-
 static XNN_INLINE v128_t xnn_cvt_f32_f16(v128_t h) {
-  return xnn_wasm_f32x4_promote_low_f16x8(h);
+  const uint16_t h0 = wasm_u16x8_extract_lane(h, 0);
+  const uint16_t h1 = wasm_u16x8_extract_lane(h, 1);
+  const uint16_t h2 = wasm_u16x8_extract_lane(h, 2);
+  const uint16_t h3 = wasm_u16x8_extract_lane(h, 3);
+  return wasm_f32x4_make(
+      xnn_float16_to_float(xnn_float16_from_bits(h0)),
+      xnn_float16_to_float(xnn_float16_from_bits(h1)),
+      xnn_float16_to_float(xnn_float16_from_bits(h2)),
+      xnn_float16_to_float(xnn_float16_from_bits(h3)));
 }
 
 static XNN_INLINE v128_t xnn_cvt_f16_f32(v128_t f) {
-  return xnn_wasm_f16x8_demote_f32x4_zero(f);
+  const float f0 = wasm_f32x4_extract_lane(f, 0);
+  const float f1 = wasm_f32x4_extract_lane(f, 1);
+  const float f2 = wasm_f32x4_extract_lane(f, 2);
+  const float f3 = wasm_f32x4_extract_lane(f, 3);
+  return wasm_i16x8_make(
+      (int16_t) xnn_float16_to_bits(xnn_float16_from_float(f0)),
+      (int16_t) xnn_float16_to_bits(xnn_float16_from_float(f1)),
+      (int16_t) xnn_float16_to_bits(xnn_float16_from_float(f2)),
+      (int16_t) xnn_float16_to_bits(xnn_float16_from_float(f3)),
+      0, 0, 0, 0);
 }
 
 #endif  // XNNPACK_SRC_XNNPACK_SIMD_F16_WASMRELAXEDSIMD_H_

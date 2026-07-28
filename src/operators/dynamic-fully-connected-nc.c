@@ -463,7 +463,12 @@ reshape_dynamic_fully_connected_nc(
       dynamic_fully_connected_op->dynamic_context.gemm;
 
   // TODO(zhin): fast path to query workspace size when workspace_size != NULL?
-  *workspace_size = n_stride * weights_stride;
+  if (!xnn_safe_mul(n_stride, weights_stride, workspace_size)) {
+    xnn_log_error(
+        "failed to reshape %s operator: workspace size overflows size_t",
+        xnn_operator_type_to_string_v2(dynamic_fully_connected_op));
+    return xnn_status_out_of_memory;
+  }
 
   if (dynamic_fully_connected_op->flags & XNN_FLAG_TRANSPOSE_WEIGHTS) {
     assert(ukernel->packw_gemm_gio || gemm_config->pack_weights_and_biases);

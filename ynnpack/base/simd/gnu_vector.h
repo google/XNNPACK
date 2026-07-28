@@ -689,6 +689,6 @@ YNN_ALWAYS_INLINE T horizontal_max(vec<T, N> x) {
 // 5. Include target independent math functions (must be outside namespace
 // ynn::simd)
 #define YNN_HAVE_FMA
-#include "ynnpack/base/simd/target_independent.inc"
+#include "ynnpack/base/simd/target_independent.inc"  // IWYU pragma: export
 
 #endif  // XNNPACK_YNNPACK_BASE_SIMD_GNU_VECTOR_H_

@@ -20,8 +20,8 @@ py_binary(
         "kernels.py",
         "log.py",
         "sigmoid.py",
-        "sine_cosine.py",
         "tanh.py",
+        "trig.py",
     ],
     tags = [
         "manual",
@@ -42,6 +42,7 @@ ARCHS = [
     "x86_avx512",
     "x86_avx512bf16",
     "arm64_neon",
+    "arm_neonfma",
     "arm_neon",
     "arm_neonbf16",
     "arm_neonfp16",

@@ -86,5 +86,4 @@ XNN_UKERNEL(xnn_arch_hvx, xnn_f16_f32acc_vapproxgelu_ukernel__hvx_rational_6_4_n
 XNN_UKERNEL(xnn_arch_riscv_vector_fp16_arith, xnn_f16_vapproxgelu_ukernel__rvvfp16arith_rational_6_4_div_u1v, 1, true, xnn_float16, struct xnn_f16_default_params, NULL)
 XNN_UKERNEL(xnn_arch_riscv_vector_fp16_arith, xnn_f16_vapproxgelu_ukernel__rvvfp16arith_rational_6_4_div_u2v, 2, true, xnn_float16, struct xnn_f16_default_params, NULL)
 XNN_UKERNEL(xnn_arch_riscv_vector_fp16_arith, xnn_f16_vapproxgelu_ukernel__rvvfp16arith_rational_6_4_div_u4v, 4, true, xnn_float16, struct xnn_f16_default_params, NULL)
-XNN_UKERNEL(xnn_arch_riscv_vector_fp16_arith, xnn_f16_vapproxgelu_ukernel__rvvfp16arith_rational_6_4_div_u8v, 8, true, xnn_float16, struct xnn_f16_default_params, NULL)
 #endif  // XNN_ARCH_RISCV && XNN_ENABLE_RISCV_FP16_VECTOR
