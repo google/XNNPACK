@@ -2700,9 +2700,9 @@ TEST(FULLY_CONNECTED_NC_QD8_F16_QC2W, unit_batch_without_bias) {
 
 TEST(FULLY_CONNECTED_NC_QD8_F16_QC2W, small_batch) {
   FullyConnectedOperatorTester()
-      .batch_size(4)
-      .input_channels(2)
-      .output_channels(16)
+      .batch_size(12)
+      .input_channels(22)
+      .output_channels(19)
       .TestQD8F16QC2W();
 }
 

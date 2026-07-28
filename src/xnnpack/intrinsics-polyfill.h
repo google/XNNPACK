@@ -237,6 +237,19 @@ static XNN_INTRINSIC __m256i _mm256_dpbusd_epi32_madd_kzp2(__m256i i32,
   return _mm256_dpbusd_offset_epi32_madd(i32, u8, u2, 2);
 }
 
+// AVXVNNI replacement for qd8_qc2w that uses vpmaddubsw with swapped operands.
+// u2 is uint2 weights in lower 2 bits (1st arg, unsigned).
+// i8 is int8 activations (2nd arg, signed).
+static XNN_INTRINSIC __m256i _mm256_dpbusd_epi32_madd_qd8_qc2w(
+    __m256i i32, const __m256i u2, const __m256i i8) {
+  const __m256i vminus_one = _mm256_set1_epi16(-1);
+  const __m256i i12 = _mm256_maddubs_epi16(
+      u2, i8);  // u2 (unsigned weight) * i8 (signed activation)
+  const __m256i v = _mm256_madd_epi16(
+      i12, vminus_one);             // convert 16 bits to 32 bits and negate
+  return _mm256_sub_epi32(i32, v);  // sub negate = add
+}
+
 #endif  // __AVX2__
 
 #if defined(__SSSE3__) || defined(_M_X64) || \
@@ -268,6 +281,20 @@ static XNN_INTRINSIC __m128i _mm_dpbusd_epi32_madd_kzp2(__m128i i32,
   const __m128i i10 = _mm_maddubs_epi16(u8, i2);     // u8 * i2 = i10
   const __m128i v = _mm_madd_epi16(i10, vminus_one);  // convert 16 bits to 32 bits
   return _mm_sub_epi32(i32, v);
+}
+
+// SSE VNNI replacement for qd8_qc2w that uses pmaddubsw with swapped operands.
+// u2 is uint2 weights in lower 2 bits (1st arg, unsigned).
+// i8 is int8 activations (2nd arg, signed).
+static XNN_INTRINSIC __m128i _mm_dpbusd_epi32_madd_qd8_qc2w(__m128i i32,
+                                                            const __m128i u2,
+                                                            const __m128i i8) {
+  const __m128i vminus_one = _mm_set1_epi16(-1);
+  const __m128i i12 = _mm_maddubs_epi16(
+      u2, i8);  // u2 (unsigned weight) * i8 (signed activation)
+  const __m128i v =
+      _mm_madd_epi16(i12, vminus_one);  // convert 16 bits to 32 bits and negate
+  return _mm_sub_epi32(i32, v);         // sub negate = add
 }
 
 #endif  // defined(__SSSE3__) || defined _M_X64 || (defined _M_IX86_FP &&

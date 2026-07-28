@@ -129,7 +129,7 @@ TEST(PACK_QD8_F32_QC2W_GEMM_GOI_W, kr_eq_4) {
     // 1 kernel zero point
     0x00, 0x00, 0x00, 0x00,
     // weights
-    0x4E, 0x4E, 0x4E, 0x4E,
+    0xE4, 0xE4, 0xE4, 0xE4,
   };
   int* i2_ptr = (int*)expected.data();
   float* f2_ptr = (float*)expected.data();
@@ -167,7 +167,7 @@ TEST(PACK_QD8_F32_QC2W_GEMM_GOI_W, kernel_zero_point_zero) {
     // 1 kernel zero point
     0x00, 0x00, 0x00, 0x00,
     // weights
-    0x4E, 0x4E, 0x4E, 0x4E,
+    0xE4, 0xE4, 0xE4, 0xE4,
   };
   int* i2_ptr = (int*)expected.data();
   float* f2_ptr = (float*)expected.data();
@@ -205,7 +205,7 @@ TEST(PACK_QD8_F32_QC2W_GEMM_GIO_W, kernel_zero_point_zero) {
     // 1 kernel zero point
     0x00, 0x00, 0x00, 0x00,
     // weights
-    0x4E, 0x4E, 0x4E, 0x4E,
+    0xE4, 0xE4, 0xE4, 0xE4,
   };
   int* i2_ptr = (int*)expected.data();
   float* f2_ptr = (float*)expected.data();
@@ -245,7 +245,7 @@ TEST(PACK_QD8_F32_QC2W_GEMM_GIO_W, kr_eq_4) {
     // 1 kernel zero point
     0x00, 0x00, 0x00, 0x00,
     // weights
-    0x4E, 0x4E, 0x4E, 0x4E,
+    0xE4, 0xE4, 0xE4, 0xE4,
   };
   int* i2_ptr = (int*)expected.data();
   float* f2_ptr = (float*)expected.data();
