@@ -721,6 +721,7 @@ jobs:
       CXX: clang++-18
       BAZEL_DEFINES: |
         --define=ynn_enable_arm64_neonfp8=false
+        --define=ynn_enable_arm64_sme=false
     steps:
       - uses: actions/checkout@v6
       - name: Restore Bazel Cache
@@ -863,6 +864,7 @@ jobs:
       BAZEL_DEFINES: |
         --define=ynn_enable_arm64_neonfp8=true
         --define=ynn_enable_arm64_neonfp8dot4=true
+        --linkopt=-rtlib=compiler-rt
     steps:
       - uses: actions/checkout@v6
 
