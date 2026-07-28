@@ -556,6 +556,13 @@ absl::Status OpMixin<CastOperation, XnnpackMixinTag>::ToXnnpack(
   return AddUnaryNode(xnn_unary_convert, io, ctx, op_name);
 }
 
+absl::Status OpMixin<DequantizeOperation, XnnpackMixinTag>::ToXnnpack(
+    const graph::Operation& op, XnnpackBuildContext& ctx) const {
+  const absl::string_view op_name = op.GetName();
+  LRT_TENSOR_ASSIGN_OR_RETURN(auto io, PrepareUnaryIO(op, ctx, op_name));
+  return AddUnaryNode(xnn_unary_convert, io, ctx, op_name);
+}
+
 absl::Status OpMixin<SinOperation, XnnpackMixinTag>::ToXnnpack(
     const graph::Operation& op, XnnpackBuildContext& ctx) const {
   const absl::string_view op_name = op.GetName();
