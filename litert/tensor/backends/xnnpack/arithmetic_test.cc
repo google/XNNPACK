@@ -15,9 +15,11 @@ limitations under the License.
 
 #include "litert/tensor/backends/xnnpack/arithmetic.h"
 
+#include <array>
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
+#include <memory>
 #include <ostream>
 #include <string>
 #include <vector>
@@ -26,7 +28,6 @@ limitations under the License.
 #include <gtest/gtest.h>
 #include "include/xnnpack.h"
 #include "absl/status/status.h"
-#include "absl/types/span.h"
 #include "litert/tensor/arithmetic.h"
 #include "litert/tensor/backends/xnnpack/conversion.h"
 #include "litert/tensor/buffer.h"
@@ -38,7 +39,18 @@ limitations under the License.
 namespace litert::tensor {
 namespace {
 
+using ::testing::ElementsAreArray;
+using ::testing::FloatEq;
+using ::testing::FloatNear;
+using ::testing::Pointwise;
+using ::testing::Values;
+
 using XnnTensor = Tensor<XnnpackMixinTag>;
+
+template <class T, class... Ts>
+constexpr std::array<T, sizeof...(Ts)> to_array(Ts&&... vals) {
+  return {static_cast<T>(vals)...};
+}
 
 // Check XNNPACK specific flag behavior during lowering.
 TEST(ArithmeticXnnpackTest, AddBuildsExternalFlags) {
@@ -100,27 +112,18 @@ TEST(ArithmeticXnnpackTest, SpaceToDepthWorks) {
   XnnTensor output = SpaceToDepth(input, 2);
 
   LRT_TENSOR_ASSERT_OK_AND_ASSIGN(auto runner, XnnpackRunner::Create({output}));
-  std::vector<float> input_data = {1.0f,  2.0f,  3.0f,  4.0f,  5.0f,  6.0f,
-                                   7.0f,  8.0f,  9.0f,  10.0f, 11.0f, 12.0f,
-                                   13.0f, 14.0f, 15.0f, 16.0f};
-  std::vector<float> expected_output = {
-      1.0f, 2.0f,  5.0f,  6.0f,  3.0f,  4.0f,  7.0f,  8.0f,
-      9.0f, 10.0f, 13.0f, 14.0f, 11.0f, 12.0f, 15.0f, 16.0f};
-
-  absl::Span<const std::byte> input_bytes(
-      reinterpret_cast<const std::byte*>(input_data.data()),
-      input_data.size() * sizeof(float));
-
-  ASSERT_THAT(runner.SetInput(input, input_bytes), IsOk());
+  ASSERT_THAT(runner.SetInputAsCopy(
+                  input, to_array<float>(1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f,
+                                         7.0f, 8.0f, 9.0f, 10.0f, 11.0f, 12.0f,
+                                         13.0f, 14.0f, 15.0f, 16.0f)),
+              IsOk());
   ASSERT_THAT(runner.Run(), IsOk());
 
-  LRT_TENSOR_ASSERT_OK_AND_ASSIGN(auto output_bytes, runner.ReadOutput(output));
-  auto output_data =
-      absl::MakeSpan(reinterpret_cast<const float*>(output_bytes.data()),
-                     output_bytes.size() / sizeof(float));
-
-  EXPECT_THAT(output_data, ::testing::Pointwise(::testing::FloatNear(1e-6),
-                                                expected_output));
+  EXPECT_THAT(runner.ReadOutputAs<float>(output),
+              IsOkAndHolds(Pointwise(
+                  FloatNear(1e-6),
+                  {1.0f, 2.0f, 5.0f, 6.0f, 3.0f, 4.0f, 7.0f, 8.0f, 9.0f, 10.0f,
+                   13.0f, 14.0f, 11.0f, 12.0f, 15.0f, 16.0f})));
 }
 
 TEST(ArithmeticXnnpackTest, DepthToSpaceWorks) {
@@ -129,27 +132,18 @@ TEST(ArithmeticXnnpackTest, DepthToSpaceWorks) {
   XnnTensor output = DepthToSpace(input, 2);
 
   LRT_TENSOR_ASSERT_OK_AND_ASSIGN(auto runner, XnnpackRunner::Create({output}));
-  std::vector<float> input_data = {1.0f,  2.0f,  5.0f,  6.0f,  3.0f,  4.0f,
-                                   7.0f,  8.0f,  9.0f,  10.0f, 13.0f, 14.0f,
-                                   11.0f, 12.0f, 15.0f, 16.0f};
-  std::vector<float> expected_output = {
-      1.0f, 2.0f,  3.0f,  4.0f,  5.0f,  6.0f,  7.0f,  8.0f,
-      9.0f, 10.0f, 11.0f, 12.0f, 13.0f, 14.0f, 15.0f, 16.0f};
-
-  absl::Span<const std::byte> input_bytes(
-      reinterpret_cast<const std::byte*>(input_data.data()),
-      input_data.size() * sizeof(float));
-
-  ASSERT_THAT(runner.SetInput(input, input_bytes), IsOk());
+  ASSERT_THAT(runner.SetInputAsCopy(
+                  input, to_array<float>(1.0f, 2.0f, 5.0f, 6.0f, 3.0f, 4.0f,
+                                         7.0f, 8.0f, 9.0f, 10.0f, 13.0f, 14.0f,
+                                         11.0f, 12.0f, 15.0f, 16.0f)),
+              IsOk());
   ASSERT_THAT(runner.Run(), IsOk());
 
-  LRT_TENSOR_ASSERT_OK_AND_ASSIGN(auto output_bytes, runner.ReadOutput(output));
-  auto output_data =
-      absl::MakeSpan(reinterpret_cast<const float*>(output_bytes.data()),
-                     output_bytes.size() / sizeof(float));
-
-  EXPECT_THAT(output_data, ::testing::Pointwise(::testing::FloatNear(1e-6),
-                                                expected_output));
+  EXPECT_THAT(runner.ReadOutputAs<float>(output),
+              IsOkAndHolds(Pointwise(
+                  FloatNear(1e-6),
+                  {1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f, 7.0f, 8.0f, 9.0f, 10.0f,
+                   11.0f, 12.0f, 13.0f, 14.0f, 15.0f, 16.0f})));
 }
 
 TEST(ArithmeticXnnpackTest, SplitWorks) {
@@ -176,28 +170,13 @@ TEST(ArithmeticXnnpackTest, SplitWorks) {
                                           21, 22, 23, 24, 37, 38, 39, 40,
                                           41, 42, 43, 44, 45, 46, 47, 48};
 
-  absl::Span<const std::byte> input_bytes(
-      reinterpret_cast<const std::byte*>(input_data.data()),
-      input_data.size() * sizeof(float));
-
-  ASSERT_THAT(runner.SetInput(input, input_bytes), IsOk());
+  ASSERT_THAT(runner.SetInput(input, input_data), IsOk());
   ASSERT_THAT(runner.Run(), IsOk());
 
-  LRT_TENSOR_ASSERT_OK_AND_ASSIGN(auto output_bytes_0,
-                                  runner.ReadOutput(outputs[0]));
-  auto output_data_0 =
-      absl::MakeSpan(reinterpret_cast<const float*>(output_bytes_0.data()),
-                     output_bytes_0.size() / sizeof(float));
-  EXPECT_THAT(output_data_0, ::testing::Pointwise(::testing::FloatNear(1e-6),
-                                                  expected_output_0));
-
-  LRT_TENSOR_ASSERT_OK_AND_ASSIGN(auto output_bytes_1,
-                                  runner.ReadOutput(outputs[1]));
-  auto output_data_1 =
-      absl::MakeSpan(reinterpret_cast<const float*>(output_bytes_1.data()),
-                     output_bytes_1.size() / sizeof(float));
-  EXPECT_THAT(output_data_1, ::testing::Pointwise(::testing::FloatNear(1e-6),
-                                                  expected_output_1));
+  EXPECT_THAT(runner.ReadOutputAs<float>(outputs[0]),
+              IsOkAndHolds(Pointwise(FloatNear(1e-6), expected_output_0)));
+  EXPECT_THAT(runner.ReadOutputAs<float>(outputs[1]),
+              IsOkAndHolds(Pointwise(FloatNear(1e-6), expected_output_1)));
 }
 
 struct UnaryOpTestParams {
@@ -206,31 +185,22 @@ struct UnaryOpTestParams {
   std::vector<float> expected_output;
 };
 
+[[maybe_unused]]
 std::ostream& operator<<(std::ostream& os, const UnaryOpTestParams& params) {
   return os << "Op: " << params.op_name;
 }
 
-class UnaryOpNumericalTest
-    : public ::testing::TestWithParam<UnaryOpTestParams> {
+class UnaryOpNumericalTest : public testing::TestWithParam<UnaryOpTestParams> {
  protected:
   void RunTest(const XnnTensor& input, const XnnTensor& output,
                const std::vector<float>& input_data,
                const std::vector<float>& expected_output) {
     LRT_TENSOR_ASSERT_OK_AND_ASSIGN(auto runner,
                                     XnnpackRunner::Create({output}));
-    absl::Span<const std::byte> input_bytes(
-        reinterpret_cast<const std::byte*>(input_data.data()),
-        input_data.size() * sizeof(float));
-    ASSERT_THAT(runner.SetInput(input, input_bytes), IsOk());
+    ASSERT_THAT(runner.SetInput(input, input_data), IsOk());
     ASSERT_THAT(runner.Run(), IsOk());
-    LRT_TENSOR_ASSERT_OK_AND_ASSIGN(auto output_bytes,
-                                    runner.ReadOutput(output));
-    auto output_data =
-        absl::MakeSpan(reinterpret_cast<const float*>(output_bytes.data()),
-                       output_bytes.size() / sizeof(float));
-
-    EXPECT_THAT(output_data, ::testing::Pointwise(::testing::FloatNear(1e-6),
-                                                  expected_output));
+    EXPECT_THAT(runner.ReadOutputAs<float>(output),
+                IsOkAndHolds(Pointwise(FloatNear(1e-6), expected_output)));
   }
 };
 
@@ -282,31 +252,31 @@ TEST_P(UnaryOpNumericalTest, UnaryOps) {
 }
 
 INSTANTIATE_TEST_SUITE_P(AbsOpTest, UnaryOpNumericalTest,
-                         ::testing::Values(UnaryOpTestParams{
+                         Values(UnaryOpTestParams{
                              .op_name = "Abs",
                              .input_data = {-1.0f, -2.0f, 3.0f, 4.0f},
                              .expected_output = {1.0f, 2.0f, 3.0f, 4.0f}}));
 
 INSTANTIATE_TEST_SUITE_P(ReluOpTest, UnaryOpNumericalTest,
-                         ::testing::Values(UnaryOpTestParams{
+                         Values(UnaryOpTestParams{
                              .op_name = "Relu",
                              .input_data = {-1.0f, -2.0f, 3.0f, 4.0f},
                              .expected_output = {0.0f, 0.0f, 3.0f, 4.0f}}));
 
 INSTANTIATE_TEST_SUITE_P(Relu6OpTest, UnaryOpNumericalTest,
-                         ::testing::Values(UnaryOpTestParams{
+                         Values(UnaryOpTestParams{
                              .op_name = "Relu6",
                              .input_data = {-1.0f, -2.0f, 7.0f, 4.0f},
                              .expected_output = {0.0f, 0.0f, 6.0f, 4.0f}}));
 
 INSTANTIATE_TEST_SUITE_P(LeakyReluOpTest, UnaryOpNumericalTest,
-                         ::testing::Values(UnaryOpTestParams{
+                         Values(UnaryOpTestParams{
                              .op_name = "LeakyRelu",
                              .input_data = {-1.0f, -2.0f, 7.0f, 4.0f},
                              .expected_output = {-0.2f, -0.4f, 7.0f, 4.0f}}));
 
 INSTANTIATE_TEST_SUITE_P(EluOpTest, UnaryOpNumericalTest,
-                         ::testing::Values(UnaryOpTestParams{
+                         Values(UnaryOpTestParams{
                              .op_name = "Elu",
                              .input_data = {-1.0f, -2.0f, 7.0f, 4.0f},
                              .expected_output = {std::expm1(-1.0f),
@@ -314,85 +284,85 @@ INSTANTIATE_TEST_SUITE_P(EluOpTest, UnaryOpNumericalTest,
                                                  4.0f}}));
 
 INSTANTIATE_TEST_SUITE_P(GeluOpTest, UnaryOpNumericalTest,
-                         ::testing::Values(UnaryOpTestParams{
+                         Values(UnaryOpTestParams{
                              .op_name = "Gelu",
                              .input_data = {-1.0f, -2.0f, 7.0f, 4.0f},
                              .expected_output = {-0.158655f, -0.0455003f, 7.0f,
                                                  3.99987316f}}));
 
 INSTANTIATE_TEST_SUITE_P(HardSwishOpTest, UnaryOpNumericalTest,
-                         ::testing::Values(UnaryOpTestParams{
+                         Values(UnaryOpTestParams{
                              .op_name = "HardSwish",
                              .input_data = {-4.0f, -2.0f, 1.0f, 4.0f},
                              .expected_output = {0.0f, -0.33333334f, 0.6666667f,
                                                  4.0f}}));
 
 INSTANTIATE_TEST_SUITE_P(CeilOpTest, UnaryOpNumericalTest,
-                         ::testing::Values(UnaryOpTestParams{
+                         Values(UnaryOpTestParams{
                              .op_name = "Ceil",
                              .input_data = {-1.5f, -2.1f, 3.4f, 4.9f},
                              .expected_output = {-1.0f, -2.0f, 4.0f, 5.0f}}));
 
 INSTANTIATE_TEST_SUITE_P(ExpOpTest, UnaryOpNumericalTest,
-                         ::testing::Values(UnaryOpTestParams{
+                         Values(UnaryOpTestParams{
                              .op_name = "Exp",
                              .input_data = {0.0f, 1.0f, -1.0f, 0.5f},
                              .expected_output = {1.0f, 2.7182817f, 0.36787945f,
                                                  1.6487213f}}));
 
 INSTANTIATE_TEST_SUITE_P(LogOpTest, UnaryOpNumericalTest,
-                         ::testing::Values(UnaryOpTestParams{
+                         Values(UnaryOpTestParams{
                              .op_name = "Log",
                              .input_data = {1.0f, 2.0f, 0.5f, 0.1f},
                              .expected_output = {0.0f, 0.6931472f, -0.6931472f,
                                                  -2.3025851f}}));
 
 INSTANTIATE_TEST_SUITE_P(FloorOpTest, UnaryOpNumericalTest,
-                         ::testing::Values(UnaryOpTestParams{
+                         Values(UnaryOpTestParams{
                              .op_name = "Floor",
                              .input_data = {-1.5f, -2.1f, 3.4f, 4.9f},
                              .expected_output = {-2.0f, -3.0f, 3.0f, 4.0f}}));
 
 INSTANTIATE_TEST_SUITE_P(NegOpTest, UnaryOpNumericalTest,
-                         ::testing::Values(UnaryOpTestParams{
+                         Values(UnaryOpTestParams{
                              .op_name = "Neg",
                              .input_data = {-1.0f, -2.0f, 3.0f, 4.0f},
                              .expected_output = {1.0f, 2.0f, -3.0f, -4.0f}}));
 
 INSTANTIATE_TEST_SUITE_P(RoundOpTest, UnaryOpNumericalTest,
-                         ::testing::Values(UnaryOpTestParams{
+                         Values(UnaryOpTestParams{
                              .op_name = "Round",
                              .input_data = {-1.5f, -2.1f, 3.4f, 4.9f},
                              .expected_output = {-2.0f, -2.0f, 3.0f, 5.0f}}));
 
 INSTANTIATE_TEST_SUITE_P(RsqrtOpTest, UnaryOpNumericalTest,
-                         ::testing::Values(UnaryOpTestParams{
+                         Values(UnaryOpTestParams{
                              .op_name = "Rsqrt",
                              .input_data = {1.0f, 4.0f, 0.25f, 0.01f},
                              .expected_output = {1.0f, 0.5f, 2.0f, 10.0f}}));
 
 INSTANTIATE_TEST_SUITE_P(SinOpTest, UnaryOpNumericalTest,
-                         ::testing::Values(UnaryOpTestParams{
+                         Values(UnaryOpTestParams{
                              .op_name = "Sin",
                              .input_data = {0.0f, 1.5707964f, 3.1415927f,
                                             4.712389f},
                              .expected_output = {0.0f, 1.0f, 0.0f, -1.0f}}));
 
 INSTANTIATE_TEST_SUITE_P(CosOpTest, UnaryOpNumericalTest,
-                         ::testing::Values(UnaryOpTestParams{
+                         Values(UnaryOpTestParams{
                              .op_name = "Cos",
                              .input_data = {0.0f, 1.5707964f, 3.1415927f,
                                             4.712389f},
                              .expected_output = {1.0f, 0.0f, -1.0f, 0.0f}}));
 
 INSTANTIATE_TEST_SUITE_P(SqrtOpTest, UnaryOpNumericalTest,
-                         ::testing::Values(UnaryOpTestParams{
+                         Values(UnaryOpTestParams{
                              .op_name = "Sqrt",
                              .input_data = {1.0f, 4.0f, 0.25f, 0.01f},
                              .expected_output = {1.0f, 2.0f, 0.5f, 0.1f}}));
 
 INSTANTIATE_TEST_SUITE_P(SquareOpTest, UnaryOpNumericalTest,
-                         ::testing::Values(UnaryOpTestParams{
+                         Values(UnaryOpTestParams{
                              .op_name = "Square",
                              .input_data = {-1.0f, -2.0f, 3.0f, 4.0f},
                              .expected_output = {1.0f, 4.0f, 9.0f, 16.0f}}));
@@ -405,23 +375,14 @@ TEST(ArithmeticXnnpackTest, AveragePool2DNumericalTest) {
                     /*stride_h=*/1, /*stride_w=*/1, kPaddingValid);
 
   LRT_TENSOR_ASSERT_OK_AND_ASSIGN(auto runner, XnnpackRunner::Create({output}));
-  std::vector<float> input_data = {1.0f, 2.0f, 3.0f, 4.0f};
-  std::vector<float> expected_output = {2.5f};
 
-  absl::Span<const std::byte> input_bytes(
-      reinterpret_cast<const std::byte*>(input_data.data()),
-      input_data.size() * sizeof(float));
-
-  ASSERT_THAT(runner.SetInput(input, input_bytes), IsOk());
+  ASSERT_THAT(
+      runner.SetInputAsCopy(input, to_array<float>(1.0f, 2.0f, 3.0f, 4.0f)),
+      IsOk());
   ASSERT_THAT(runner.Run(), IsOk());
 
-  LRT_TENSOR_ASSERT_OK_AND_ASSIGN(auto output_bytes, runner.ReadOutput(output));
-  auto output_data =
-      absl::MakeSpan(reinterpret_cast<const float*>(output_bytes.data()),
-                     output_bytes.size() / sizeof(float));
-
-  EXPECT_THAT(output_data, ::testing::Pointwise(::testing::FloatNear(1e-6),
-                                                expected_output));
+  EXPECT_THAT(runner.ReadOutputAs<float>(output),
+              IsOkAndHolds(Pointwise(FloatNear(1e-6), {2.5f})));
 }
 
 TEST(ArithmeticXnnpackTest, ExpandDimsNumericalTest) {
@@ -430,23 +391,15 @@ TEST(ArithmeticXnnpackTest, ExpandDimsNumericalTest) {
   XnnTensor output = ExpandDims(input, 1);
 
   LRT_TENSOR_ASSERT_OK_AND_ASSIGN(auto runner, XnnpackRunner::Create({output}));
-  std::vector<float> input_data = {1.0f, 2.0f, 3.0f, 4.0f};
-  std::vector<float> expected_output = {1.0f, 2.0f, 3.0f, 4.0f};
 
-  absl::Span<const std::byte> input_bytes(
-      reinterpret_cast<const std::byte*>(input_data.data()),
-      input_data.size() * sizeof(float));
-
-  ASSERT_THAT(runner.SetInput(input, input_bytes), IsOk());
+  ASSERT_THAT(
+      runner.SetInputAsCopy(input, to_array<float>(1.0f, 2.0f, 3.0f, 4.0f)),
+      IsOk());
   ASSERT_THAT(runner.Run(), IsOk());
 
-  LRT_TENSOR_ASSERT_OK_AND_ASSIGN(auto output_bytes, runner.ReadOutput(output));
-  auto output_data =
-      absl::MakeSpan(reinterpret_cast<const float*>(output_bytes.data()),
-                     output_bytes.size() / sizeof(float));
-
-  EXPECT_THAT(output_data, ::testing::Pointwise(::testing::FloatNear(1e-6),
-                                                expected_output));
+  EXPECT_THAT(
+      runner.ReadOutputAs<float>(output),
+      IsOkAndHolds(Pointwise(FloatNear(1e-6), {1.0f, 2.0f, 3.0f, 4.0f})));
 }
 
 TEST(ArithmeticXnnpackTest, SqueezeWorks) {
@@ -454,23 +407,15 @@ TEST(ArithmeticXnnpackTest, SqueezeWorks) {
   XnnTensor output = Squeeze(input);
 
   LRT_TENSOR_ASSERT_OK_AND_ASSIGN(auto runner, XnnpackRunner::Create({output}));
-  std::vector<float> input_data = {1.0f, 2.0f, 3.0f, 4.0f};
-  std::vector<float> expected_output = {1.0f, 2.0f, 3.0f, 4.0f};
 
-  absl::Span<const std::byte> input_bytes(
-      reinterpret_cast<const std::byte*>(input_data.data()),
-      input_data.size() * sizeof(float));
-
-  ASSERT_THAT(runner.SetInput(input, input_bytes), IsOk());
+  ASSERT_THAT(
+      runner.SetInputAsCopy(input, to_array<float>(1.0f, 2.0f, 3.0f, 4.0f)),
+      IsOk());
   ASSERT_THAT(runner.Run(), IsOk());
 
-  LRT_TENSOR_ASSERT_OK_AND_ASSIGN(auto output_bytes, runner.ReadOutput(output));
-  auto output_data =
-      absl::MakeSpan(reinterpret_cast<const float*>(output_bytes.data()),
-                     output_bytes.size() / sizeof(float));
-
-  EXPECT_THAT(output_data, ::testing::Pointwise(::testing::FloatNear(1e-6),
-                                                expected_output));
+  EXPECT_THAT(
+      runner.ReadOutputAs<float>(output),
+      IsOkAndHolds(Pointwise(FloatNear(1e-6), {1.0f, 2.0f, 3.0f, 4.0f})));
 }
 
 TEST(ArithmeticXnnpackTest, SqueezeWithDimsWorks) {
@@ -478,23 +423,15 @@ TEST(ArithmeticXnnpackTest, SqueezeWithDimsWorks) {
   XnnTensor output = Squeeze(input, {0, 2});
 
   LRT_TENSOR_ASSERT_OK_AND_ASSIGN(auto runner, XnnpackRunner::Create({output}));
-  std::vector<float> input_data = {1.0f, 2.0f, 3.0f, 4.0f};
-  std::vector<float> expected_output = {1.0f, 2.0f, 3.0f, 4.0f};
 
-  absl::Span<const std::byte> input_bytes(
-      reinterpret_cast<const std::byte*>(input_data.data()),
-      input_data.size() * sizeof(float));
-
-  ASSERT_THAT(runner.SetInput(input, input_bytes), IsOk());
+  ASSERT_THAT(
+      runner.SetInputAsCopy(input, to_array<float>(1.0f, 2.0f, 3.0f, 4.0f)),
+      IsOk());
   ASSERT_THAT(runner.Run(), IsOk());
 
-  LRT_TENSOR_ASSERT_OK_AND_ASSIGN(auto output_bytes, runner.ReadOutput(output));
-  auto output_data =
-      absl::MakeSpan(reinterpret_cast<const float*>(output_bytes.data()),
-                     output_bytes.size() / sizeof(float));
-
-  EXPECT_THAT(output_data, ::testing::Pointwise(::testing::FloatNear(1e-6),
-                                                expected_output));
+  EXPECT_THAT(
+      runner.ReadOutputAs<float>(output),
+      IsOkAndHolds(Pointwise(FloatNear(1e-6), {1.0f, 2.0f, 3.0f, 4.0f})));
 }
 
 TEST(ArithmeticXnnpackTest, MaxPool2DNumericalTest) {
@@ -504,23 +441,14 @@ TEST(ArithmeticXnnpackTest, MaxPool2DNumericalTest) {
                                /*stride_h=*/1, /*stride_w=*/1, kPaddingValid);
 
   LRT_TENSOR_ASSERT_OK_AND_ASSIGN(auto runner, XnnpackRunner::Create({output}));
-  std::vector<float> input_data = {1.0f, 2.0f, 3.0f, 4.0f};
-  std::vector<float> expected_output = {4.0f};
 
-  absl::Span<const std::byte> input_bytes(
-      reinterpret_cast<const std::byte*>(input_data.data()),
-      input_data.size() * sizeof(float));
-
-  ASSERT_THAT(runner.SetInput(input, input_bytes), IsOk());
+  ASSERT_THAT(
+      runner.SetInputAsCopy(input, to_array<float>(1.0f, 2.0f, 3.0f, 4.0f)),
+      IsOk());
   ASSERT_THAT(runner.Run(), IsOk());
 
-  LRT_TENSOR_ASSERT_OK_AND_ASSIGN(auto output_bytes, runner.ReadOutput(output));
-  auto output_data =
-      absl::MakeSpan(reinterpret_cast<const float*>(output_bytes.data()),
-                     output_bytes.size() / sizeof(float));
-
-  EXPECT_THAT(output_data, ::testing::Pointwise(::testing::FloatNear(1e-6),
-                                                expected_output));
+  EXPECT_THAT(runner.ReadOutputAs<float>(output),
+              IsOkAndHolds(Pointwise(FloatNear(1e-6), {4.0f})));
 }
 
 TEST(ArithmeticXnnpackTest, PReluNumericalTest) {
@@ -529,43 +457,29 @@ TEST(ArithmeticXnnpackTest, PReluNumericalTest) {
   XnnTensor output = PRelu(input, alpha);
 
   LRT_TENSOR_ASSERT_OK_AND_ASSIGN(auto runner, XnnpackRunner::Create({output}));
-  std::vector<float> input_data = {-1.0f, 2.0f, -3.0f, 4.0f};
-  std::vector<float> alpha_data = {0.1f, 0.2f};
-  std::vector<float> expected_output = {-0.1f, 2.0f, -0.3f, 4.0f};
 
-  absl::Span<const std::byte> input_bytes(
-      reinterpret_cast<const std::byte*>(input_data.data()),
-      input_data.size() * sizeof(float));
-  absl::Span<const std::byte> alpha_bytes(
-      reinterpret_cast<const std::byte*>(alpha_data.data()),
-      alpha_data.size() * sizeof(float));
-
-  ASSERT_THAT(runner.SetInput(input, input_bytes), IsOk());
-  ASSERT_THAT(runner.SetInput(alpha, alpha_bytes), IsOk());
+  ASSERT_THAT(
+      runner.SetInputAsCopy(input, to_array<float>(-1.0f, 2.0f, -3.0f, 4.0f)),
+      IsOk());
+  ASSERT_THAT(runner.SetInputAsCopy(alpha, to_array<float>(0.1f, 0.2f)),
+              IsOk());
   ASSERT_THAT(runner.Run(), IsOk());
 
-  LRT_TENSOR_ASSERT_OK_AND_ASSIGN(auto output_bytes, runner.ReadOutput(output));
-  auto output_data =
-      absl::MakeSpan(reinterpret_cast<const float*>(output_bytes.data()),
-                     output_bytes.size() / sizeof(float));
-
-  EXPECT_THAT(output_data, ::testing::Pointwise(::testing::FloatNear(1e-6),
-                                                expected_output));
+  EXPECT_THAT(
+      runner.ReadOutputAs<float>(output),
+      IsOkAndHolds(Pointwise(FloatNear(1e-6), {-0.1f, 2.0f, -0.3f, 4.0f})));
 }
 
 TEST(ArithmeticXnnpackTest, TransposeConvOp) {
-  std::vector<float> filter_data = {1.0f, 2.0f, 3.0f, 4.0f};
-  XnnTensor filter({.name = "filter",
-                    .type = Type::kFP32,
-                    .shape = {1, 2, 2, 1},
-                    .buffer = OwningCpuBuffer::Copy<Type::kFP32>(filter_data)});
+  XnnTensor filter(
+      {.name = "filter",
+       .type = Type::kFP32,
+       .shape = {1, 2, 2, 1},
+       .buffer = OwningCpuBuffer::Copy<Type::kFP32>({1, 2, 3, 4})});
   XnnTensor input(
       {.name = "input", .type = Type::kFP32, .shape = {1, 2, 2, 1}});
-  std::vector<float> bias_data = {0.0f};
-  XnnTensor bias({.name = "bias",
-                  .type = Type::kFP32,
-                  .shape = {1},
-                  .buffer = OwningCpuBuffer::Copy<Type::kFP32>(bias_data)});
+  XnnTensor bias(
+      {.name = "bias", .type = Type::kFP32, .shape = {1}, .buffer = 0});
 
   std::vector<int> output_shape_vec = {1, 3, 3, 1};
   XnnTensor output =
@@ -573,39 +487,27 @@ TEST(ArithmeticXnnpackTest, TransposeConvOp) {
 
   LRT_TENSOR_ASSERT_OK_AND_ASSIGN(auto runner, XnnpackRunner::Create({output}));
 
-  std::vector<float> input_data = {1.0f, 2.0f, 3.0f, 4.0f};
-  absl::Span<const std::byte> input_bytes(
-      reinterpret_cast<const std::byte*>(input_data.data()),
-      input_data.size() * sizeof(float));
-  ASSERT_THAT(runner.SetInput(input, input_bytes), IsOk());
+  ASSERT_THAT(runner.SetInputAsCopy(input, to_array<float>(1, 2, 3, 4)),
+              IsOk());
 
   ASSERT_THAT(runner.Run(), IsOk());
 
-  LRT_TENSOR_ASSERT_OK_AND_ASSIGN(auto output_bytes, runner.ReadOutput(output));
-  auto output_data =
-      absl::MakeSpan(reinterpret_cast<const float*>(output_bytes.data()),
-                     output_bytes.size() / sizeof(float));
-
-  std::vector<float> expected = {1.0f,  4.0f, 4.0f,  6.0f, 20.0f,
-                                 16.0f, 9.0f, 24.0f, 16.0f};
-
-  EXPECT_THAT(output_data,
-              ::testing::Pointwise(::testing::FloatNear(1e-6), expected));
+  EXPECT_THAT(
+      runner.ReadOutputAs<float>(output),
+      IsOkAndHolds(Pointwise(FloatNear(1e-6), {1.0f, 4.0f, 4.0f, 6.0f, 20.0f,
+                                               16.0f, 9.0f, 24.0f, 16.0f})));
 }
 
 TEST(ArithmeticXnnpackTest, TransposeConv2DOp) {
-  std::vector<float> filter_data = {1.0f, 2.0f, 3.0f, 4.0f};
-  XnnTensor filter({.name = "filter",
-                    .type = Type::kFP32,
-                    .shape = {1, 2, 2, 1},
-                    .buffer = OwningCpuBuffer::Copy<Type::kFP32>(filter_data)});
+  XnnTensor filter(
+      {.name = "filter",
+       .type = Type::kFP32,
+       .shape = {1, 2, 2, 1},
+       .buffer = OwningCpuBuffer::Copy<Type::kFP32>({1, 2, 3, 4})});
   XnnTensor input(
       {.name = "input", .type = Type::kFP32, .shape = {1, 2, 2, 1}});
-  std::vector<float> bias_data = {0.0f};
-  XnnTensor bias({.name = "bias",
-                  .type = Type::kFP32,
-                  .shape = {1},
-                  .buffer = OwningCpuBuffer::Copy<Type::kFP32>(bias_data)});
+  XnnTensor bias(
+      {.name = "bias", .type = Type::kFP32, .shape = {1}, .buffer = 0});
 
   std::vector<int> output_shape_vec = {1, 3, 3, 1};
   XnnTensor output = TransposeConv2D(filter, input, bias, output_shape_vec,
@@ -613,61 +515,40 @@ TEST(ArithmeticXnnpackTest, TransposeConv2DOp) {
 
   LRT_TENSOR_ASSERT_OK_AND_ASSIGN(auto runner, XnnpackRunner::Create({output}));
 
-  std::vector<float> input_data = {1.0f, 2.0f, 3.0f, 4.0f};
-  absl::Span<const std::byte> input_bytes(
-      reinterpret_cast<const std::byte*>(input_data.data()),
-      input_data.size() * sizeof(float));
-  ASSERT_THAT(runner.SetInput(input, input_bytes), IsOk());
+  ASSERT_THAT(runner.SetInputAsCopy(input, to_array<float>(1, 2, 3, 4)),
+              IsOk());
 
   ASSERT_THAT(runner.Run(), IsOk());
 
-  LRT_TENSOR_ASSERT_OK_AND_ASSIGN(auto output_bytes, runner.ReadOutput(output));
-  auto output_data =
-      absl::MakeSpan(reinterpret_cast<const float*>(output_bytes.data()),
-                     output_bytes.size() / sizeof(float));
-
-  std::vector<float> expected = {1.0f,  4.0f, 4.0f,  6.0f, 20.0f,
-                                 16.0f, 9.0f, 24.0f, 16.0f};
-
-  EXPECT_THAT(output_data,
-              ::testing::Pointwise(::testing::FloatNear(1e-6), expected));
+  EXPECT_THAT(
+      runner.ReadOutputAs<float>(output),
+      IsOkAndHolds(Pointwise(FloatNear(1e-6), {1.0f, 4.0f, 4.0f, 6.0f, 20.0f,
+                                               16.0f, 9.0f, 24.0f, 16.0f})));
 }
 
 TEST(ArithmeticXnnpackTest, Conv2DOp) {
   XnnTensor input(
       {.name = "input", .type = Type::kFP32, .shape = {1, 2, 2, 1}});
-  std::vector<float> filter_data = {1.0f, 2.0f, 3.0f, 4.0f};
-  XnnTensor filter({.name = "filter",
-                    .type = Type::kFP32,
-                    .shape = {1, 2, 2, 1},
-                    .buffer = OwningCpuBuffer::Copy<Type::kFP32>(filter_data)});
-  std::vector<float> bias_data = {1.0f};
-  XnnTensor bias({.name = "bias",
-                  .type = Type::kFP32,
-                  .shape = {1},
-                  .buffer = OwningCpuBuffer::Copy<Type::kFP32>(bias_data)});
+  XnnTensor filter(
+      {.name = "filter",
+       .type = Type::kFP32,
+       .shape = {1, 2, 2, 1},
+       .buffer = OwningCpuBuffer::Copy<Type::kFP32>({1, 2, 3, 4})});
+  XnnTensor bias(
+      {.name = "bias", .type = Type::kFP32, .shape = {1}, .buffer = 1});
 
   XnnTensor output = Conv2D(input, filter, bias, /*stride_h=*/1, /*stride_w=*/1,
                             kPaddingValid);
 
   LRT_TENSOR_ASSERT_OK_AND_ASSIGN(auto runner, XnnpackRunner::Create({output}));
 
-  std::vector<float> input_data = {1.0f, 2.0f, 3.0f, 4.0f};
-  absl::Span<const std::byte> input_bytes(
-      reinterpret_cast<const std::byte*>(input_data.data()),
-      input_data.size() * sizeof(float));
-  ASSERT_THAT(runner.SetInput(input, input_bytes), IsOk());
-
+  ASSERT_THAT(runner.SetInputAsCopy(input, to_array<float>(1, 2, 3, 4)),
+              IsOk());
   ASSERT_THAT(runner.Run(), IsOk());
 
-  LRT_TENSOR_ASSERT_OK_AND_ASSIGN(auto output_bytes, runner.ReadOutput(output));
-  auto output_data =
-      absl::MakeSpan(reinterpret_cast<const float*>(output_bytes.data()),
-                     output_bytes.size() / sizeof(float));
-
-  // input * filter + bias
-  // 1*1 + 2*2 + 3*3 + 4*4 + 1 = 1 + 4 + 9 + 16 + 1 = 31
-  EXPECT_THAT(output_data, ::testing::ElementsAreArray({31.0f}));
+  // input * filter + bias.
+  EXPECT_THAT(runner.ReadOutputAs<float>(output),
+              IsOkAndHolds(ElementsAreArray({31.0f})));
 }
 
 TEST(ArithmeticXnnpackTest, SliceWorks) {
@@ -675,24 +556,15 @@ TEST(ArithmeticXnnpackTest, SliceWorks) {
   XnnTensor output = Slice(input, {0, 0, 0}, {3, 2, 2});
 
   LRT_TENSOR_ASSERT_OK_AND_ASSIGN(auto runner, XnnpackRunner::Create({output}));
-  std::vector<float> input_data = {
+  const std::vector<float> input_data = {
       1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f, 7.0f, 8.0f, 1.0f, 2.0f, 3.0f, 4.0f,
       5.0f, 6.0f, 7.0f, 8.0f, 1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f, 7.0f, 8.0f};
-  std::vector<float> expected_output = {1.0f, 2.0f, 5.0f, 6.0f, 1.0f, 2.0f,
-                                        5.0f, 6.0f, 1.0f, 2.0f, 5.0f, 6.0f};
-  ASSERT_THAT(
-      runner.SetInput(input,
-                      absl::Span<const std::byte>(
-                          reinterpret_cast<const std::byte*>(input_data.data()),
-                          input_data.size() * sizeof(float))),
-      IsOk());
+  const std::array expected_output = to_array<float>(
+      1.0f, 2.0f, 5.0f, 6.0f, 1.0f, 2.0f, 5.0f, 6.0f, 1.0f, 2.0f, 5.0f, 6.0f);
+  ASSERT_THAT(runner.SetInput(input, input_data), IsOk());
   ASSERT_THAT(runner.Run(), IsOk());
-  LRT_TENSOR_ASSERT_OK_AND_ASSIGN(auto output_bytes, runner.ReadOutput(output));
-  auto output_data =
-      absl::MakeSpan(reinterpret_cast<const float*>(output_bytes.data()),
-                     output_bytes.size() / sizeof(float));
-  EXPECT_THAT(output_data,
-              ::testing::Pointwise(::testing::FloatEq(), expected_output));
+  EXPECT_THAT(runner.ReadOutputAs<float>(output),
+              IsOkAndHolds(Pointwise(FloatEq(), expected_output)));
 }
 
 TEST(ArithmeticXnnpackTest, CastI32ToF32Works) {
@@ -700,22 +572,11 @@ TEST(ArithmeticXnnpackTest, CastI32ToF32Works) {
   XnnTensor output = Cast(input, Type::kFP32);
 
   LRT_TENSOR_ASSERT_OK_AND_ASSIGN(auto runner, XnnpackRunner::Create({output}));
-  std::vector<int32_t> input_data = {0, 1, 2};
-  std::vector<float> expected_output = {0.0f, 1.0f, 2.0f};
 
-  ASSERT_THAT(
-      runner.SetInput(input,
-                      absl::Span<const std::byte>(
-                          reinterpret_cast<const std::byte*>(input_data.data()),
-                          input_data.size() * sizeof(int32_t))),
-      IsOk());
+  ASSERT_THAT(runner.SetInputAsCopy(input, to_array<int32_t>(0, 1, 2)), IsOk());
   ASSERT_THAT(runner.Run(), IsOk());
-  LRT_TENSOR_ASSERT_OK_AND_ASSIGN(auto output_bytes, runner.ReadOutput(output));
-  auto output_data =
-      absl::MakeSpan(reinterpret_cast<const float*>(output_bytes.data()),
-                     output_bytes.size() / sizeof(float));
-  EXPECT_THAT(output_data,
-              ::testing::Pointwise(::testing::FloatEq(), expected_output));
+  EXPECT_THAT(runner.ReadOutputAs<float>(output),
+              IsOkAndHolds(Pointwise(FloatEq(), {0.0f, 1.0f, 2.0f})));
 }
 
 }  // namespace

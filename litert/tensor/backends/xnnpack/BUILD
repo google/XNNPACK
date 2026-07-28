@@ -55,7 +55,6 @@ cc_test(
         "//litert/tensor/runners/xnnpack:runner",
         "//litert/tensor/utils:matchers",
         "@abseil-cpp//absl/status",
-        "@abseil-cpp//absl/types:span",
         "@com_google_googletest//:gtest_main",  # gunit
     ],
 )
