@@ -20,6 +20,7 @@ limitations under the License.
 #include <cstdint>
 #include <memory>
 #include <type_traits>
+#include <utility>
 #include <vector>
 
 #include "include/xnnpack.h"
@@ -29,7 +30,9 @@ limitations under the License.
 #include "absl/types/span.h"
 #include "litert/tensor/backends/xnnpack/conversion.h"
 #include "litert/tensor/buffer.h"
+#include "litert/tensor/datatypes.h"
 #include "litert/tensor/tensor.h"
+#include "litert/tensor/utils/macros.h"
 #include <pthreadpool.h>
 
 struct xnn_runtime;
@@ -60,17 +63,52 @@ class XnnpackRunner {
 
   // Sets the input data for a given tensor.
   absl::Status SetInput(const TensorHandle& tensor,
-                        absl::Span<const std::byte> data);
+                        absl::Span<const std::byte> data,
+                        bool copy_data = false);
+
+  absl::Status SetInput(const TensorHandle& tensor, absl::Span<std::byte> data,
+                        bool copy_data = false) {
+    return SetInput(tensor, absl::Span<const std::byte>(data), copy_data);
+  }
 
   // Sets the input data for a given tensor.
   template <class ContiguousSequence,
             class S = std::remove_reference_t<ContiguousSequence>,
             class T = typename S::value_type,
             class SFINAE = decltype(std::declval<S>().data())>
-  absl::Status SetInput(const TensorHandle& tensor, ContiguousSequence&& seq) {
+  absl::Status SetInput(const TensorHandle& tensor,
+                        const ContiguousSequence& seq) {
+    if (tensor.GetType() != ApiType<T>::value) {
+      return absl::InvalidArgumentError(
+          "The sequence type doesn't match the input tensor type.");
+    }
     return SetInput(tensor, absl::Span<const std::byte>(
                                 reinterpret_cast<const std::byte*>(seq.data()),
                                 seq.size() * sizeof(T)));
+  }
+
+  template <class ContiguousSequence,
+            class S = std::remove_reference_t<ContiguousSequence>,
+            class T = typename S::value_type,
+            class SFINAE = decltype(std::declval<S>().data())>
+  absl::Status SetInput(const TensorHandle& tensor,
+                        const ContiguousSequence&& seq) = delete;
+
+  template <class ContiguousSequence,
+            class S = std::remove_reference_t<ContiguousSequence>,
+            class T = typename S::value_type,
+            class SFINAE = decltype(std::declval<S>().data())>
+  absl::Status SetInputAsCopy(const TensorHandle& tensor,
+                              ContiguousSequence&& seq) {
+    if (tensor.GetType() != ApiType<T>::value) {
+      return absl::InvalidArgumentError(
+          "The sequence type doesn't match the input tensor type.");
+    }
+    return SetInput(tensor,
+                    absl::Span<const std::byte>(
+                        reinterpret_cast<const std::byte*>(seq.data()),
+                        seq.size() * sizeof(T)),
+                    /*copy_data=*/true);
   }
 
   // Sets the output buffer for a given tensor.
@@ -104,6 +142,18 @@ class XnnpackRunner {
   // Reads the output data for a given tensor.
   absl::StatusOr<LockedBufferSpan<const std::byte>> ReadOutput(
       const TensorHandle& tensor) const;
+
+  template <class T>
+  absl::StatusOr<LockedBufferSpan<const T>> ReadOutputAs(
+      const TensorHandle& tensor) {
+    if (tensor.GetType() != ApiType<T>::value) {
+      return absl::InvalidArgumentError(
+          "The read type doesn't match the output tensor type.");
+    }
+    LRT_TENSOR_ASSIGN_OR_RETURN(LockedBufferSpan<const std::byte> out,
+                                ReadOutput(tensor));
+    return std::move(out).As<const T>();
+  }
 
  private:
   explicit XnnpackRunner(std::unique_ptr<XnnpackGraph> graph);

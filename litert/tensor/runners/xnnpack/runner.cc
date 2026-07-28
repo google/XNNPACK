@@ -76,7 +76,8 @@ XnnpackRunner::XnnpackRunner(std::unique_ptr<XnnpackGraph> graph)
 
 // Sets the input data for a given tensor.
 absl::Status XnnpackRunner::SetInput(const TensorHandle& tensor,
-                                     absl::Span<const std::byte> data) {
+                                     absl::Span<const std::byte> data,
+                                     const bool copy_data) {
   LRT_TENSOR_ASSIGN_OR_RETURN(size_t index, graph_->Lookup(tensor));
   XnnpackValue& value = graph_->mutable_values()[index];
   // Check if the tensor is marked as an external input.
@@ -88,7 +89,11 @@ absl::Status XnnpackRunner::SetInput(const TensorHandle& tensor,
         absl::StrCat("Mismatched input size: expected ", ByteSize(value.info),
                      ", got ", data.size()));
   }
-  external_buffers_[value.id].SetExternalView(data);
+  if (!copy_data) {
+    external_buffers_[value.id].SetExternalView(data);
+  } else {
+    external_buffers_[value.id].SetOwnedBuffer(data);
+  }
   return absl::OkStatus();
 }
 
