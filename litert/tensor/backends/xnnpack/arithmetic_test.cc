@@ -579,5 +579,24 @@ TEST(ArithmeticXnnpackTest, CastI32ToF32Works) {
               IsOkAndHolds(Pointwise(FloatEq(), {0.0f, 1.0f, 2.0f})));
 }
 
+TEST(ArithmeticXnnpackTest, DequantizeQuantizedTensorWorks) {
+  std::vector<float> scales = {0.5f};
+  std::vector<int64_t> zero_points = {2};
+  auto quant = std::make_shared<PerChannelAffineQuantization>(
+      scales, zero_points, /*quantized_dimension=*/0);
+
+  XnnTensor input({.name = "input",
+                   .type = Type::kI8,
+                   .shape = {4},
+                   .buffer = OwningCpuBuffer::Copy<Type::kI8>({0, 2, 4, 6}),
+                   .quantization = quant});
+  XnnTensor output = Dequantize(input);
+
+  LRT_TENSOR_ASSERT_OK_AND_ASSIGN(auto runner, XnnpackRunner::Create({output}));
+  ASSERT_THAT(runner.Run(), IsOk());
+  EXPECT_THAT(runner.ReadOutputAs<float>(output),
+              IsOkAndHolds(Pointwise(FloatEq(), {-1, 0, 1, 2})));
+}
+
 }  // namespace
 }  // namespace litert::tensor

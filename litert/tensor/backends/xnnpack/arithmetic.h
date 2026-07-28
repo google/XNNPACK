@@ -248,6 +248,13 @@ class OpMixin<CastOperation, XnnpackMixinTag> : public XnnpackOperation {
 };
 
 template <>
+class OpMixin<DequantizeOperation, XnnpackMixinTag> : public XnnpackOperation {
+ public:
+  absl::Status ToXnnpack(const graph::Operation& op,
+                         XnnpackBuildContext& ctx) const override;
+};
+
+template <>
 class OpMixin<ReluOperation, XnnpackMixinTag> : public XnnpackOperation {
  public:
   absl::Status ToXnnpack(const graph::Operation& op,
