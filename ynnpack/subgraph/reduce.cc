@@ -293,7 +293,9 @@ slinky::raw_buffer_ptr make_reduce_identity(ynn_type type, int rank,
   }
 
   assert(type_size_bytes(type) <= sizeof(double));
-  alignas(double) char storage[2 * sizeof(double)] = {0, };
+  alignas(double) char storage[2 * sizeof(double)] = {
+      0,
+  };
   value.base = storage;
   convert_n(value_f32, n, type, value.base);
   return slinky::raw_buffer::make_copy(value);
@@ -483,6 +485,10 @@ ynn_status ynn_define_reduce(ynn_subgraph_t subgraph, ynn_reduce_operator op,
       validate_output_tensor("reduce", subgraph, "output_id", output_id));
 
   const ynn_value* a_ptr = &subgraph->value(input_a_id);
+  // The type the input is stored as. Sub-byte inputs may be promoted below,
+  // but the (fused) convert still reads the stored input, so byte-density
+  // derived floors must be computed from this type, not the promoted one.
+  const ynn_type stored_type = a_ptr->type;
   ynn_type target_accumulator_type = get_accumulator_type(op, a_ptr->type);
   reduce_kernel kernel =
       get_reduce_kernel(op, a_ptr->type, target_accumulator_type);
@@ -523,8 +529,67 @@ ynn_status ynn_define_reduce(ynn_subgraph_t subgraph, ynn_reduce_operator op,
   }
 
   if (op != ynn_reduce_min_max) {
+    // make_split_factors hands out the tile area innermost-first, so an early
+    // large dimension can consume all of it and leave later dimensions with a
+    // split of 1. Guard against that with two reservation floors (alignments),
+    // both counted in the *stored* type: a sub-byte input is promoted, but
+    // the promoting convert fuses into the reduction loops and reads the
+    // packed stored input, so byte-derived floors must use its density, not
+    // the promoted one.
+
+    // A tile is read as contiguous rows: dimension 0's split, extended by the
+    // kept dimensions above it while their extents are covered whole. Short
+    // rows are dominated by per-row kernel startup, which is especially
+    // expensive for the sub-byte unpack.
+    constexpr slinky::index_t row_target_bytes = 1024;
+    // Each tile must reduce at least this many elements, as the *product* of
+    // its reduction-dimension chunks, so writing out the partial accumulators
+    // is amortized: with a chunk of 1 the "partial reduction" is just an
+    // expensive copy of the input. This floor is also what lets a reduction
+    // dimension small enough to fit in the tile reach its full extent, so no
+    // partial reduction is created at all.
+    constexpr slinky::index_t min_reduction_elems = 256;
+
+    const size_t stored_size =
+        std::max<size_t>(1, type_size_bytes(stored_type));
+    const slinky::index_t row_elems = std::max<size_t>(
+        1, row_target_bytes * type_element_count(stored_type) / stored_size);
+    // Alignments passed to make_split_factors must not exceed the extents, so
+    // every floor below is clamped by the extent of its dimension.
+    std::vector<slinky::expr> alignments(a.rank());
+    if (a.rank() > 0) {
+      alignments[0] = slinky::simplify(slinky::min(row_elems, a.extents[0]));
+      if (!k_dims[0]) {
+        // Dimension 0 reserves the whole row target; each kept dimension of the
+        // contiguous prefix above it only reserves the factor still missing.
+        slinky::expr prefix = alignments[0];
+        for (int i = 1; i < a.rank() && !k_dims[i]; ++i) {
+          alignments[i] = slinky::simplify(slinky::min(
+              slinky::max(1, slinky::ceil_div(slinky::expr(row_elems), prefix)),
+              a.extents[i]));
+          prefix = slinky::simplify(prefix * alignments[i]);
+        }
+      }
+    }
+    // Visiting dimensions inner to outer, k_chunk_so_far accumulates the
+    // chunk product already guaranteed by the inner reduction dimensions
+    // (including dimension 0's row reservation when it is a reduction
+    // dimension), so each outer reduction dimension only reserves the factor
+    // still missing from the target.
+    slinky::expr k_chunk_so_far = 1;
+    for (int i = 0; i < a.rank(); ++i) {
+      if (!k_dims[i]) continue;
+      if (i > 0) {
+        alignments[i] = slinky::simplify(slinky::min(
+            slinky::max(1, slinky::ceil_div(slinky::expr(min_reduction_elems),
+                                            k_chunk_so_far)),
+            a.extents[i]));
+      }
+      k_chunk_so_far = slinky::simplify(k_chunk_so_far * alignments[i]);
+    }
     std::vector<slinky::expr> split_factors = make_split_factors(
-        subgraph->globals, a.extents, type_size_bytes(a.type));
+        subgraph->globals, a.extents, type_size_bytes(a.type),
+        /*given_splits=*/{}, /*loop_order=*/{}, alignments);
 
     // We should only do a partial reduction if we can prove that a dimension is
     // split. If needed, we could add a flag that would indicate we should

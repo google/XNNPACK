@@ -117,11 +117,22 @@ slinky::box_expr make_broadcast_bounds(
     std::vector<slinky::var> dims, const std::vector<slinky::expr>& src_extents,
     const std::vector<slinky::expr>& dst_extents, bool no_broadcast = false);
 
+// Computes a split factor for each dimension by distributing a cache-sized
+// tile area between the dimensions, visited in `loop_order` (dimensions
+// earlier in the order get the first claim on the area). `alignments` is a
+// positional vector (undefined entries mean no alignment): a dimension with an
+// alignment gets a split that is a multiple of it, and at least one
+// alignment-sized block is reserved for it before the remaining area is
+// distributed between the other dimensions. Alignments must not exceed the
+// corresponding extents (callers should clamp them), otherwise the computed
+// split exceeds the extent and the reservation wastes area the dimension
+// can't use.
 std::vector<slinky::expr> make_split_factors(
     ynn::slinky_globals& globals, ynn::span<const slinky::expr> extents,
     const slinky::expr& element_cost,
     ynn::span<const slinky::expr> given_splits = {},
-    ynn::span<const int> loop_order = {});
+    ynn::span<const int> loop_order = {},
+    ynn::span<const slinky::expr> alignments = {});
 
 // A loop split for a given function.
 struct scheduling_split {

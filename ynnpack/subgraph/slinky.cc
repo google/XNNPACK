@@ -210,8 +210,8 @@ slinky::box_expr make_broadcast_bounds(
 std::vector<slinky::expr> make_split_factors(
     ynn::slinky_globals& globals, ynn::span<const slinky::expr> extents,
     const slinky::expr& element_cost,
-    ynn::span<const slinky::expr> given_splits,
-    ynn::span<const int> loop_order) {
+    ynn::span<const slinky::expr> given_splits, ynn::span<const int> loop_order,
+    ynn::span<const slinky::expr> alignments) {
   const int rank = extents.size();
 
   // Area is selected such that tiles fit better into cache, this is a
@@ -226,22 +226,49 @@ std::vector<slinky::expr> make_split_factors(
     return index_d < loop_order.size() ? loop_order[index_d] : index_d;
   };
 
+  auto alignment_of = [&](int d) {
+    if (d < alignments.size() && alignments[d].defined()) {
+      return alignments[d];
+    }
+    return slinky::expr(1);
+  };
+
+  // Reserve one alignment-sized block for every dimension whose split we are
+  // going to compute by pre-multiplying the alignments into the used area, so
+  // dimensions earlier in the loop order can't consume the area later
+  // dimensions need for their minimal split.
+  for (int d = 0; d < rank; ++d) {
+    if (!extents[d].defined() || d < given_splits.size()) continue;
+    tile_area_so_far = slinky::simplify(tile_area_so_far * alignment_of(d));
+  }
+
   for (int index_d = 0; index_d < rank; ++index_d) {
     int d = get_loop_dim(index_d);
     assert(d < extents.size());
     if (!extents[d].defined()) continue;
     if (d < given_splits.size()) {
       splits[d] = given_splits[d];
+      if (splits[d].defined()) {
+        tile_area_so_far = slinky::simplify(tile_area_so_far * splits[d]);
+      } else {
+        tile_area_so_far = slinky::simplify(tile_area_so_far * extents[d]);
+      }
     } else {
-      slinky::expr s = slinky::simplify(slinky::max(
-          1, slinky::min(tile_area / tile_area_so_far, extents[d])));
+      const slinky::expr align = alignment_of(d);
+      // tile_area_so_far includes this dimension's own reservation, so the
+      // quotient is the number of whole alignment-sized blocks of the area
+      // available to this dimension.
+      slinky::expr blocks = tile_area / tile_area_so_far;
+      // Use as many whole blocks as possible, but never less than one.
+      slinky::expr s = slinky::simplify(
+          slinky::max(align, slinky::min(align * blocks, extents[d])));
       s = globals.get(s, "s");
       splits[d] = s;
-    }
-    if (splits[d].defined()) {
-      tile_area_so_far = slinky::simplify(tile_area_so_far * splits[d]);
-    } else {
-      tile_area_so_far = slinky::simplify(tile_area_so_far * extents[d]);
+      // The reservation is already a factor of tile_area_so_far, so multiply
+      // by the number of blocks the split uses rather than by the split
+      // itself.
+      tile_area_so_far = slinky::simplify(tile_area_so_far *
+                                          slinky::ceil_div(splits[d], align));
     }
   }
   return splits;
