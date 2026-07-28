@@ -23,74 +23,57 @@ class arm_int8_int2_int32(arm_neon):
   def b_tile_size_bytes(self):
     return f"{self.tile_shape[1] * self.tile_shape[2] // 4}"
 
-  def begin_func(self, func_name):
-    result = super().begin_func(func_name)
-    result += """
-  const int8x16_t shift_vec = {6, 4, 2, 0, 6, 4, 2, 0, 6, 4, 2, 0, 6, 4, 2, 0};
-"""
-    return result
-
 
 class arm_neondot_int8_int2_int32(arm_int8_int2_int32):
 
   def __init__(self):
-    super().__init__("neondot", (1, 4, 8))
+    super().__init__("neondot", (1, 4, 16))
 
   def header(self):
     return super().header() + """
 namespace {
 
-#if YNN_ARCH_ARM64
-YNN_INTRINSIC int8x16_t broadcast_even_x4(int8x8_t x) {
-  const uint8x16_t mask_even = {0, 0, 0, 0, 2, 2, 2, 2, 4, 4, 4, 4, 6, 6, 6, 6};
-  int8x16_t x2 = vcombine_s8(x, x);
-  return vqtbl1q_s8(x2, mask_even);
+#ifdef YNN_ARCH_ARM32
+YNN_INTRINSIC int8x16_t vqtbl1q_s8(int8x16_t a, uint8x16_t b) {
+  int8x8x2_t a64 = {vget_low_s8(a), vget_high_s8(a)};
+  int8x8_t result0 = vtbl2_s8(a64, vreinterpret_s8_u8(vget_low_u8(b)));
+  int8x8_t result1 = vtbl2_s8(a64, vreinterpret_s8_u8(vget_high_u8(b)));
+  return vcombine_s8(result0, result1);
 }
+#endif  // YNN_ARCH_ARM32
 
-YNN_INTRINSIC int8x16_t broadcast_odd_x4(int8x8_t x) {
-  const uint8x16_t mask_odd  = {1, 1, 1, 1, 3, 3, 3, 3, 5, 5, 5, 5, 7, 7, 7, 7};
-  int8x16_t x2 = vcombine_s8(x, x);
-  return vqtbl1q_s8(x2, mask_odd);
 }
-#elif YNN_ARCH_ARM32
-YNN_INTRINSIC int8x16_t broadcast_even_x4(int8x8_t x) {
-  int8x8x2_t unzipped = vuzp_s8(x, x);
-  int8x8x2_t zipped1 = vzip_s8(unzipped.val[0], unzipped.val[0]);
-  int8x8x2_t zipped2 = vzip_s8(zipped1.val[0], zipped1.val[0]);
-  return vcombine_s8(zipped2.val[0], zipped2.val[1]);
-}
-
-YNN_INTRINSIC int8x16_t broadcast_odd_x4(int8x8_t x) {
-  int8x8x2_t unzipped = vuzp_s8(x, x);
-  int8x8x2_t zipped1 = vzip_s8(unzipped.val[1], unzipped.val[1]);
-  int8x8x2_t zipped2 = vzip_s8(zipped1.val[0], zipped1.val[0]);
-  return vcombine_s8(zipped2.val[0], zipped2.val[1]);
-}
-#endif
-
-}  // namespace
 """
 
+  def begin_func(self, func_name):
+    result = super().begin_func(func_name)
+    result += """
+  const uint8_t shuf_a_data[] = {0, 4, 8, 12, 1, 5, 9, 13, 2, 6, 10, 14, 3, 7, 11, 15};
+  const uint8x16_t shuf_a = vld1q_u8(shuf_a_data);
+"""
+    return result
+
   def load_a_tile(self, i, k):
-    return f"int8x8_t a_{i}_{k} = vld1_s8({self.a_ptr(i, k)});\n"
+    return f"""
+int8x16_t a_raw_{i}_{k} = vld1q_s8({self.a_ptr(i, k, "int8_t")});
+int8x16_t a_{i}_{k} = vqtbl1q_s8(a_raw_{i}_{k}, shuf_a);
+"""
 
   def load_b_tile(self, k, j):
-    # The b values come in groups of 8 at a time. We:
-    # 1. Load 4 of these groups.
-    # 2. Replicate each byte 4x.
-    # 3. Move each 2-bit weight to the lower 2 bits by shifting.
     return f"""
-int8x8_t b_{k}_{j}_x1 = vld1_s8({self.b_ptr(k, j, "int8_t")});
-int8x16_t b_{k}_{j}_even = broadcast_even_x4(b_{k}_{j}_x1);
-int8x16_t b_{k}_{j}_odd  = broadcast_odd_x4(b_{k}_{j}_x1);
-int8x16_t b_{k+0}_{j} = vshrq_n_s8(vshlq_s8(b_{k}_{j}_even, shift_vec), 6);
-int8x16_t b_{k+4}_{j} = vshrq_n_s8(vshlq_s8(b_{k}_{j}_odd, shift_vec), 6);
+int8x16_t b_{k}_{j} = vld1q_s8({self.b_ptr(k, j, "int8_t")});
+int8x16_t b_{k+3}_{j} = vshrq_n_s8(b_{k}_{j}, 6);
+int8x16_t b_{k+2}_{j} = vshrq_n_s8(vshlq_n_s8(b_{k}_{j}, 2), 6);
+int8x16_t b_{k+1}_{j} = vshrq_n_s8(vshlq_n_s8(b_{k}_{j}, 4), 6);
+b_{k}_{j} = vshrq_n_s8(vshlq_n_s8(b_{k}_{j}, 6), 6);
 """
 
   def product(self, i, j, k):
     return f"""
-c_{i}_{j} = vdotq_lane_s32(c_{i}_{j}, b_{k+0}_{j}, a_{i}_{k}, 0);
-c_{i}_{j} = vdotq_lane_s32(c_{i}_{j}, b_{k+4}_{j}, a_{i}_{k}, 1);
+c_{i}_{j} = vdotq_lane_s32(c_{i}_{j}, b_{k}_{j}, vget_low_s8(a_{i}_{k}), 0);
+c_{i}_{j} = vdotq_lane_s32(c_{i}_{j}, b_{k+1}_{j}, vget_low_s8(a_{i}_{k}), 1);
+c_{i}_{j} = vdotq_lane_s32(c_{i}_{j}, b_{k+2}_{j}, vget_high_s8(a_{i}_{k}), 0);
+c_{i}_{j} = vdotq_lane_s32(c_{i}_{j}, b_{k+3}_{j}, vget_high_s8(a_{i}_{k}), 1);
 """
 
 
@@ -105,6 +88,7 @@ class arm64_neoni8mm_int8_int2_int32(arm_int8_int2_int32):
     result += """
   const uint8x16_t mask_lo = {0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3};
   const uint8x16_t mask_hi = {4, 4, 4, 4, 5, 5, 5, 5, 6, 6, 6, 6, 7, 7, 7, 7};
+  const int8x16_t shift_vec = {6, 4, 2, 0, 6, 4, 2, 0, 6, 4, 2, 0, 6, 4, 2, 0};
 """
     return result
 
@@ -161,15 +145,15 @@ c_{i+0}_{j} = vcombine_s32(vget_low_s32({c0}), vget_low_s32({c2}));
 generate_dot_kernels(
     arm_neondot_int8_int2_int32(),
     [
-        (1, 32, 8),
-        (1, 16, 8),
-        (2, 16, 8),
-        (1, 8, 8),
-        (2, 8, 8),
-        (3, 8, 8),
-        (4, 8, 8),
-        (8, 8, 8),
-        (8, 4, 8),
+        (1, 32, 16),
+        (1, 16, 16),
+        (2, 16, 16),
+        (1, 8, 16),
+        (2, 8, 16),
+        (3, 8, 16),
+        (4, 8, 16),
+        (8, 8, 16),
+        (8, 4, 16),
     ],
 )
 
