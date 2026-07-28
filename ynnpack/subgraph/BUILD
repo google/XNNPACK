@@ -79,6 +79,7 @@ cc_library(
         "gather.cc",
         "gather.h",
         "get_tensor_shape.cc",
+        "grouped_dot.cc",
         "iota.cc",
         "iota.h",
         "reduce.cc",
@@ -101,6 +102,7 @@ cc_library(
     hdrs = [
         "dot.h",  # Only public for tests...
         "elementwise.h",  # Only public for tests...
+        "grouped_dot.h",
         "runtime.h",
         "slinky.h",
         "static_transpose.h",  # Only public for tests...
