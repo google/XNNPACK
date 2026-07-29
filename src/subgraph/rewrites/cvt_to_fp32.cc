@@ -275,6 +275,23 @@ OpAction GetOpActionFp16(const xnn_subgraph_t subgraph, const xnn_node& node) {
 // reductions, which are kept native when their configs are available.
 OpAction GetOpActionBf16(const xnn_subgraph_t subgraph, const xnn_node& node) {
   switch (node.type) {
+    case xnn_node_type_fully_connected: {
+      // Fully-connected with a blockwise int4 filter and a bf16 output has a
+      // native fused-bf16 GEMM. Only keep it native when the unsigned
+      // qdu8_bf16_qb4w path is available: on that hardware the f32 activations
+      // are dynamically quantized to qduint8 (by convert_gemm_to_qduint8) and
+      // packed via the f32->qduint8 inline-LHS path. Elsewhere, fall through to
+      // the fp32 GEMM + f32->bf16 convert lowering (which always works).
+      const xnn_value& filter = subgraph->values[node.inputs[1]];
+      if (filter.datatype == xnn_datatype_qbint4) {
+        const struct xnn_gemm_config* gemm_config =
+            xnn_init_qdu8_bf16_qb4w_gemm_config();
+        if (gemm_config && gemm_config->minmax.dqgemm[0].function[0]) {
+          return OpAction::kTransparent;
+        }
+      }
+      break;
+    }
     case xnn_node_type_unary_elementwise:
       switch (node.unary_operator) {
         case xnn_unary_convert: {

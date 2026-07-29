@@ -2342,6 +2342,11 @@ static bool convert_gemm_to_qduint8(
           XNN_UNREACHABLE;
       }
     }
+  } else if (input_datatype == xnn_datatype_bf16) {
+    if (consumer_weights_type == xnn_datatype_qbint4) {
+      original_config = xnn_init_qd8_bf16_qb4w_gemm_config();
+      unsigned_config = xnn_init_qdu8_bf16_qb4w_gemm_config();
+    }
   }
   // If the `qduint8` config is better than the `qdint8` config, use it
   // instead.

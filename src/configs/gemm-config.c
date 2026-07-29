@@ -51,6 +51,7 @@ static struct xnn_gemm_config qd8_f16_qc4w_gemm_config = {0};
 static struct xnn_gemm_config qd8_f16_qc8w_gemm_config = {0};
 static struct xnn_gemm_config qd8_f16_qc8w_igemm_config = {0};
 static struct xnn_gemm_config qd8_bf16_qb4w_gemm_config = {0};
+static struct xnn_gemm_config qdu8_bf16_qb4w_gemm_config = {0};
 static struct xnn_gemm_config qd8_f32_qb4w_gemm_config = {0};
 static struct xnn_gemm_config qd8_f32_qc4w_gemm_config = {0};
 static struct xnn_gemm_config qd8_f32_qc2w_gemm_config = {0};
@@ -84,6 +85,7 @@ XNN_INIT_ONCE_GUARD(qd8_f16_qc2w_gemm);
 XNN_INIT_ONCE_GUARD(qdu8_f16_qc2w_gemm);
 XNN_INIT_ONCE_GUARD(qd8_f16_qb4w_gemm);
 XNN_INIT_ONCE_GUARD(qd8_bf16_qb4w_gemm);
+XNN_INIT_ONCE_GUARD(qdu8_bf16_qb4w_gemm);
 XNN_INIT_ONCE_GUARD(qd8_f16_qc4w_gemm);
 XNN_INIT_ONCE_GUARD(qd8_f16_qc8w_gemm);
 XNN_INIT_ONCE_GUARD(qd8_f16_qc8w_igemm);
@@ -2601,6 +2603,39 @@ static void init_qd8_bf16_qb4w_gemm_config(void) {
 
   assert(qd8_bf16_qb4w_gemm_config.mr <= XNN_MAX_MR);
   assert(qd8_bf16_qb4w_gemm_config.mr <= (XNN_EXTRA_QUANTIZATION_PARAMS + 1));
+}
+
+static void init_qdu8_bf16_qb4w_gemm_config(void) {
+  // Common parameters.
+  qdu8_bf16_qb4w_gemm_config.log2_input_element_size = XNN_LOG2_SIZEOF_INT8_T;
+  qdu8_bf16_qb4w_gemm_config.log2_filter_element_size = XNN_LOG2_SIZEOF_UINT8_T;
+  qdu8_bf16_qb4w_gemm_config.log2_filter_element_bit_size = XNN_LOG2_BIT_SIZEOF_INT4;
+  qdu8_bf16_qb4w_gemm_config.bias_element_size = sizeof(float);
+  qdu8_bf16_qb4w_gemm_config.packed_stride_weights_and_biases = xnn_packed_stride_qb4_weights_and_biases;
+  qdu8_bf16_qb4w_gemm_config.pack_weights_and_biases = xnn_pack_qb4_weights_and_biases;
+
+  // Arch-specific parameters. The avx512vnni kernels compute on unsigned
+  // activations (vpdpbusd, no sign-flip) and convert fp32->bf16 with
+  // vcvtneps2bf16, so they require both avx512vnni and avx512bf16.
+  #if XNN_ARCH_X86 || XNN_ARCH_X86_64
+    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    assert(hardware_config != NULL);
+    (void) hardware_config;  // May be unused.
+    #if XNN_ENABLE_AVX512BF16 && XNN_ENABLE_AVX512VNNI
+      if ((hardware_config->arch_flags & xnn_arch_x86_avx512vnni) &&
+          (hardware_config->arch_flags & xnn_arch_x86_avx512bf16)) {
+        qdu8_bf16_qb4w_gemm_config.arch = xnn_arch_x86_avx512vnni;
+        qdu8_bf16_qb4w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_DQGEMM_UKERNEL(xnn_qd8_bf16_qb4w_gemm_minmax_ukernel_1x16c8__avx512vnni);
+        qdu8_bf16_qb4w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(8)] = XNN_INIT_HMP_DQGEMM_UKERNEL(xnn_qd8_bf16_qb4w_gemm_minmax_ukernel_8x16c8__avx512vnni);
+        qdu8_bf16_qb4w_gemm_config.init.bf16_qb4w = xnn_init_bf16_qb4w_minmax_scalar_params;
+        qdu8_bf16_qb4w_gemm_config.mr = 8;
+        qdu8_bf16_qb4w_gemm_config.nr = 16;
+        qdu8_bf16_qb4w_gemm_config.log2_kr = 3;
+        qdu8_bf16_qb4w_gemm_config.planes = 2;
+      }
+    #endif  // XNN_ENABLE_AVX512BF16 && XNN_ENABLE_AVX512VNNI
+    assert(qdu8_bf16_qb4w_gemm_config.mr <= XNN_MAX_MR);
+  #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 }
 
 static void init_qd8_f32_qc2w_gemm_config(void) {
@@ -6543,6 +6578,14 @@ const struct xnn_gemm_config* xnn_init_qd8_bf16_qb4w_gemm_config() {
   }
   XNN_INIT_ONCE(qd8_bf16_qb4w_gemm);
   return &qd8_bf16_qb4w_gemm_config;
+}
+
+const struct xnn_gemm_config* xnn_init_qdu8_bf16_qb4w_gemm_config() {
+  if (xnn_init_hardware_config() == NULL) {
+    return NULL;
+  }
+  XNN_INIT_ONCE(qdu8_bf16_qb4w_gemm);
+  return qdu8_bf16_qb4w_gemm_config.arch ? &qdu8_bf16_qb4w_gemm_config : NULL;
 }
 
 const struct xnn_gemm_config* xnn_init_qd8_f32_qc4w_gemm_config() {
