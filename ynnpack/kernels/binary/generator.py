@@ -42,6 +42,7 @@ def main(argv: Sequence[str]) -> None:
           (min_fp64, (4, 1)),
           (squared_difference_fp32, (8, 1)),
           (squared_difference_fp64, (4, 1)),
+          (exp_subtract_fp32, (16, 1)),
       ],
       "x86_avx": [
           (add_fp32, (16, 1)),
@@ -60,6 +61,7 @@ def main(argv: Sequence[str]) -> None:
           (min_fp64, (8, 1)),
           (squared_difference_fp32, (16, 1)),
           (squared_difference_fp64, (8, 1)),
+          (exp_subtract_fp32, (16, 1)),
       ],
       "x86_avx2": [
           (multiply_int32_fp32, (16, 1)),
@@ -69,6 +71,7 @@ def main(argv: Sequence[str]) -> None:
           (multiply_bf16_fp32, (64, 1)),
           (divide_bf16_fp32_bf16, (32, 1)),
           (multiply_bf16_fp32_bf16, (32, 1)),
+          (exp_subtract_fp32, (16, 1)),
       ],
       "x86_avx512": [
           (add_fp32, (32, 1)),
@@ -92,6 +95,7 @@ def main(argv: Sequence[str]) -> None:
           (min_fp64, (16, 1)),
           (squared_difference_fp32, (32, 1)),
           (squared_difference_fp64, (16, 1)),
+          (exp_subtract_fp32, (32, 1)),
       ],
       "x86_avx512bf16": [
           (subtract_fp32_bf16_bf16, (64, 1)),
@@ -113,6 +117,7 @@ def main(argv: Sequence[str]) -> None:
           (max_fp32, (8, 1)),
           (min_fp32, (8, 1)),
           (squared_difference_fp32, (32, 1)),
+          (exp_subtract_fp32, (16, 1)),
       ],
       "arm64_neon": [
           (add_fp64, (4, 1)),
@@ -138,6 +143,7 @@ def main(argv: Sequence[str]) -> None:
           (max_fp32, (8, 1)),
           (min_fp32, (8, 1)),
           (squared_difference_fp32, (8, 1)),
+          (exp_subtract_fp32, (8, 1)),
       ],
   }[target]
 

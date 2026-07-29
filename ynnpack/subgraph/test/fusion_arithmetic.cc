@@ -179,6 +179,30 @@ TEST(fusion, exp_negate) {
   EXPECT_NEAR(unary.params.exp.input_multiplier, -1.0f, 1e-6f);
 }
 
+TEST(fusion, exp_subtract) {
+  // exp(subtract(a, b)) -> exp_subtract(a, b)
+  const uint32_t a_id = 0;
+  const uint32_t b_id = 1;
+  const uint32_t x_id = 2;
+  SubgraphBuilder builder(3);
+  uint32_t ab_id = YNN_INVALID_VALUE_ID;
+  builder.AddInput(ynn_type_fp32, 2, a_id)
+      .AddInput(ynn_type_fp32, 2, b_id)
+      .AddOutput(ynn_type_fp32, 2, x_id)
+      .AddTensor(ynn_type_fp32, 2, ab_id);
+  builder.AddBinary(ynn_binary_subtract, a_id, b_id, ab_id)
+      .AddUnary(ynn_unary_exp, ab_id, x_id);
+
+  ynn_subgraph& subgraph = *builder.GetSubgraph();
+
+  subgraph.fusion();
+  subgraph.invalidate_dead_values();
+
+  ASSERT_THAT(subgraph, AllOf(HasValidNodeCount(1), HasValidValueCount(3)));
+  const ynn_node& node = ProducerOf(x_id, subgraph);
+  EXPECT_THAT(node, IsBinary(ynn_binary_exp_subtract));
+}
+
 TEST(fusion, fold_unary_input_mixed_types) {
   // input (bf16) -> multiply (bf16, fp32 -> fp32) -> intermediate (fp32) -> erf
   // (fp32 -> fp32) -> output (fp32) Should fold multiply into erf, and replace
@@ -1104,6 +1128,58 @@ TEST(fusion, requantize_quantize) {
   EXPECT_THAT(ProducerOf(q_id, subgraph),
               AllOf(IsTernary(ternary_op::quantize_int8),
                     InputsInclude(input_id, scale_id)));
+}
+
+TEST(fusion, multiply_reciprocal) {
+  // rewrite multiply(x, divide(1, y)) -> divide(x, y)
+  const uint32_t x_id = 0;
+  const uint32_t y_id = 1;
+  const uint32_t out_id = 2;
+  SubgraphBuilder builder(3);
+  uint32_t one_id = builder.DefineScalar<float>(1.0f);
+  uint32_t reciprocal_y_id = YNN_INVALID_VALUE_ID;
+  builder.AddInput(ynn_type_fp32, 2, x_id)
+      .AddInput(ynn_type_fp32, 2, y_id)
+      .AddOutput(ynn_type_fp32, 2, out_id)
+      .AddTensor(ynn_type_fp32, 2, reciprocal_y_id);
+
+  builder.AddBinary(ynn_binary_divide, one_id, y_id, reciprocal_y_id)
+      .AddBinary(ynn_binary_multiply, x_id, reciprocal_y_id, out_id);
+
+  ynn_subgraph& subgraph = *builder.GetSubgraph();
+
+  subgraph.fusion();
+  subgraph.invalidate_dead_values();
+
+  ASSERT_THAT(subgraph, AllOf(HasValidNodeCount(1), HasValidValueCount(3)));
+  EXPECT_THAT(ProducerOf(out_id, subgraph),
+              AllOf(IsBinary(ynn_binary_divide), InputsAre(x_id, y_id)));
+}
+
+TEST(fusion, multiply_reciprocal_commutative) {
+  // rewrite multiply(divide(1, y), x) -> divide(x, y)
+  const uint32_t x_id = 0;
+  const uint32_t y_id = 1;
+  const uint32_t out_id = 2;
+  SubgraphBuilder builder(3);
+  uint32_t one_id = builder.DefineScalar<float>(1.0f);
+  uint32_t reciprocal_y_id = YNN_INVALID_VALUE_ID;
+  builder.AddInput(ynn_type_fp32, 2, x_id)
+      .AddInput(ynn_type_fp32, 2, y_id)
+      .AddOutput(ynn_type_fp32, 2, out_id)
+      .AddTensor(ynn_type_fp32, 2, reciprocal_y_id);
+
+  builder.AddBinary(ynn_binary_divide, one_id, y_id, reciprocal_y_id)
+      .AddBinary(ynn_binary_multiply, reciprocal_y_id, x_id, out_id);
+
+  ynn_subgraph& subgraph = *builder.GetSubgraph();
+
+  subgraph.fusion();
+  subgraph.invalidate_dead_values();
+
+  ASSERT_THAT(subgraph, AllOf(HasValidNodeCount(1), HasValidValueCount(3)));
+  EXPECT_THAT(ProducerOf(out_id, subgraph),
+              AllOf(IsBinary(ynn_binary_divide), InputsAre(x_id, y_id)));
 }
 
 }  // namespace ynn

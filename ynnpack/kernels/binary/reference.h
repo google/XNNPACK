@@ -134,6 +134,13 @@ struct leaky_relu : public binary_op_info {
   }
 };
 
+struct exp_subtract : public binary_op_info {
+  float operator()(float a, float b) const override { return std::exp(a - b); }
+  double operator()(double a, double b) const override {
+    return std::exp(a - b);
+  }
+};
+
 const binary_op_info* get_binary_op_info(ynn_binary_operator op);
 
 // Check that `op(a, b)` == x, within tolerances described by `op`.
@@ -162,6 +169,9 @@ void check_results(const OpInfo& op, const Tensor<A>& a, const Tensor<B>& b,
       if (isnan(expected)) {
         // Checking the x is NaN could make sense, but it fails in
         // a variety of cases.
+      } else if (!isinf(expected) && isinf(expected * 2) && isinf(x(i))) {
+        // The expected value is close to infinity, allow our output to be
+        // infinity.
       } else {
         ASSERT_NEAR(expected, x(i), tol.absolute_error<X>(expected))
             << "i = " << index_to_string(i) << ", a(i) = " << a(i)

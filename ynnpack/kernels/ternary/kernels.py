@@ -1,7 +1,17 @@
 """Definition of ternary kernels."""
 
 # pylint: disable=undefined-variable
+# pylint: disable=g-unsafe-pickle-load
 from ynnpack.kernels.elementwise.compiler import *  # pylint: disable=wildcard-import
+
+
+@const_buffer("a", Float(32))
+@const_buffer("b", Float(32))
+@const_buffer("c", Float(32))
+@buffer("x", Float(32))
+@operator_name("multiply")
+def multiply_fp32_fp32_fp32(a, b, c, x):
+  return store(load(a) * load(b) * load(c), x)
 
 
 @const_buffer("a", Int(32))

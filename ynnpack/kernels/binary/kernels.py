@@ -1,6 +1,7 @@
 """Definition of binary kernels."""
 
 # pylint: disable=undefined-variable
+# pylint: disable=g-unsafe-pickle-load
 from ynnpack.kernels.elementwise.compiler import *  # pylint: disable=wildcard-import
 
 
@@ -50,6 +51,14 @@ def subtract_bf16_fp32(a, b, x):
 @operator_name("subtract")
 def subtract_fp32_bf16_bf16(a, b, x):
   return store(cast(BFloat(16), load(a) - cast(Float(32), load(b))), x)
+
+
+@const_buffer("a", Float(32))
+@const_buffer("b", Float(32))
+@buffer("x", Float(32))
+@operator_name("exp_subtract")
+def exp_subtract_fp32(a, b, x):
+  return store(exp(load(a) - load(b)), x)
 
 
 @const_buffer("a", Float(32))

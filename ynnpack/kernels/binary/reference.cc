@@ -20,6 +20,7 @@ const binary_op_info* get_binary_op_info(ynn_binary_operator op) {
   static squared_difference squared_difference;
   static subtract sub;
   static leaky_relu leaky_relu;
+  static exp_subtract exp_subtract;
 
   switch (op) {
     case ynn_binary_add:
@@ -42,6 +43,8 @@ const binary_op_info* get_binary_op_info(ynn_binary_operator op) {
       return &sub;
     case ynn_binary_leaky_relu:
       return &leaky_relu;
+    case ynn_binary_exp_subtract:
+      return &exp_subtract;
     case ynn_binary_invalid:
       return nullptr;
   }

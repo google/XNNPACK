@@ -95,6 +95,8 @@ const char* to_string(enum ynn_binary_operator op) {
       return "pow";
     case ynn_binary_leaky_relu:
       return "leaky_relu";
+    case ynn_binary_exp_subtract:
+      return "exp_subtract";
     case ynn_binary_invalid:
       return "invalid";
   }

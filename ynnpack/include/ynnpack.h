@@ -272,6 +272,9 @@ enum ynn_binary_operator {
   ynn_binary_pow = 8,
   ynn_binary_squared_difference = 9,
   ynn_binary_subtract = 10,
+
+  // Internal use only
+  ynn_binary_exp_subtract,
 };
 
 // Defines a binary operation of two inputs to a single output. The two inputs
