@@ -2955,10 +2955,11 @@ static XNN_NO_SANITIZE_FUNCTION enum xnn_status reshape_fully_connected_nc(
       }
       break;
     case xnn_operator_type_fully_connected_nc_qdu8_bf16_qb4w:
-      // The bf16 output qb4w GEMM is fed by f32 activations dynamically
-      // quantized to qduint8 (mirrors the qdu8_f32_qb4w source path).
+      // The bf16-output qb4w GEMM is fed by bf16 activations dynamically
+      // quantized to qduint8, so the LHS packing must read a bf16 (2-byte)
+      // source, not f32.
       if (inline_lhs_packing) {
-        packed_lh_config = xnn_init_f32_qduint8_pack_lh_config();
+        packed_lh_config = xnn_init_bf16_qduint8_pack_lh_config();
       }
       break;
     case xnn_operator_type_fully_connected_nc_qp8_f32_qb4w:
