@@ -40,6 +40,9 @@
 #include "kai/ukernels/matmul/pack/kai_rhs_pack_nxk_qsi8cxp_qsi8cx_neon.h"
 #include "kai/ukernels/matmul/pack/kai_rhs_pack_nxk_x16p2vlx2b_x16_x16_sme.h"
 #include "src/xnnpack/allocator.h"
+#if XNN_ENABLE_ARM_SME2 && XNN_ENABLE_KLEIDIAI
+#include "kai/ukernels/matmul/pack/kai_rhs_pack_nxk_qsu2cxp4vlx4_qsu2cx_neon.h"
+#endif  // XNN_ENABLE_ARM_SME2 && XNN_ENABLE_KLEIDIAI
 #endif  // XNN_ENABLE_KLEIDIAI
 
 class unaligned_int32_t {
@@ -2616,6 +2619,87 @@ void xnn_pack_kai_qs4_weights_and_biases(
         /*extra_bytes=*/0, &kai_params);
   }
 }
+
+#if XNN_ENABLE_ARM_SME2 && XNN_ENABLE_KLEIDIAI
+size_t xnn_packed_stride_kai_qs2_weights_and_biases_sme2(
+    const struct xnn_gemm_config* gemm_config, size_t k,
+    size_t unused_block_size, size_t unused_k_stride, size_t extra_bytes) {
+  (void)unused_block_size;
+  (void)unused_k_stride;
+  (void)extra_bytes;
+  const size_t nr = gemm_config->nr;
+  return kai_get_rhs_packed_stride_rhs_pack_nxk_qsu2cxp4vlx4_qsu2cx_neon(
+             k, nr, UINT32_C(1) << gemm_config->log2_kr,
+             UINT32_C(1) << gemm_config->log2_sr) /
+         nr;
+}
+
+void xnn_pack_kai_qs2_weights_and_biases_sme2(
+    uint32_t flags, const struct xnn_gemm_config* gemm_config,
+    size_t input_channels, size_t output_channels, size_t groups,
+    size_t unused_block_size, size_t k_stride, const void* accumulator_init,
+    const void* weights, xnn_init_scale_params_fn init_extra_data0_fn,
+    const void* extra_data0, size_t extra_data0_element_size,
+    xnn_init_scale_params_fn init_extra_data1_fn, const void* extra_data1,
+    size_t extra_data1_element_size, void* packed_weights_ptr,
+    const void* params) {
+  (void)unused_block_size;
+  (void)accumulator_init;
+  (void)init_extra_data0_fn;
+  (void)init_extra_data1_fn;
+  (void)params;
+
+  if ((flags & XNN_FLAG_TRANSPOSE_WEIGHTS) != 0) {
+    xnn_log_error("KleidiAI QP8/F32/QC2W SME2 packing requires NxK weights");
+    return;
+  }
+  if (input_channels % 32 != 0) {
+    xnn_log_error(
+        "KleidiAI QP8/F32/QC2W SME2 packing requires K to be a multiple "
+        "of 32, got %zu",
+        input_channels);
+    return;
+  }
+  if (extra_data1 == nullptr) {
+    xnn_log_error("KleidiAI QP8/F32/QC2W SME2 packing requires scales");
+    return;
+  }
+
+  const size_t nr = gemm_config->nr;
+  const size_t kr = UINT32_C(1) << gemm_config->log2_kr;
+  const size_t sr = UINT32_C(1) << gemm_config->log2_sr;
+  const size_t packed_group_size =
+      kai_get_rhs_packed_size_rhs_pack_nxk_qsu2cxp4vlx4_qsu2cx_neon(
+          output_channels, input_channels, nr, kr, sr);
+  const size_t rhs_group_stride =
+      output_channels * ((k_stride + 3) / 4);
+  const int32_t xnn_qc2w_signed_lut[4] = {0, 1, -2, -1};
+  struct kai_rhs_pack_nxk_qsu2cxp4vlx4_qsu2cx_neon_params kai_params;
+  kai_params.lhs_zero_point = 1;
+  kai_params.rhs_zero_point = 2;
+
+  for (size_t group = 0; group < groups; group++) {
+    const uint8_t* group_rhs =
+        static_cast<const uint8_t*>(weights) + group * rhs_group_stride;
+    const float* group_bias =
+        extra_data0 == nullptr
+            ? nullptr
+            : reinterpret_cast<const float*>(
+                  static_cast<const uint8_t*>(extra_data0) +
+                  group * output_channels * extra_data0_element_size);
+    const float* group_scale = reinterpret_cast<const float*>(
+        static_cast<const uint8_t*>(extra_data1) +
+        group * output_channels * extra_data1_element_size);
+    kai_run_rhs_pack_nxk_qsu2cxp4vlx4_qsu2cx_neon(
+        /*num_groups=*/1, output_channels, input_channels, nr, kr, sr,
+        group_rhs, group_bias, group_scale,
+        static_cast<uint8_t*>(packed_weights_ptr) +
+            group * packed_group_size,
+        /*extra_bytes=*/0, &kai_params, xnn_qc2w_signed_lut);
+  }
+}
+
+#endif  // XNN_ENABLE_ARM_SME2 && XNN_ENABLE_KLEIDIAI
 
 size_t xnn_packed_stride_kai_qs8_qc8w_weights_and_biases_sme(
     const struct xnn_gemm_config* gemm_config, size_t k,
