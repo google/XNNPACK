@@ -640,6 +640,16 @@ std::vector<GemmTestParams> CreateTests(
         .loop_k(k_block, k_block * 12, k_block, LoopStepType::Linear)
         .loop_bl(32, k_block * 32, 32));
 
+  $if INPUT_DATATYPE in ['qs8', 'qd8']:
+    gemm_tests.push_back(GemmTestParams(
+        "k_overflow",
+        tester.clone()
+            .m(mr).n(nr).k(k_block * std::max<size_t>(1, 8192 / k_block))
+            $if WEIGHTS_DATATYPE in ['qb4w', 'qc4w', 'qc2w']:
+              .b_zero_point(8)
+            $if WEIGHTS_DATATYPE in ['qb4w']:
+              .bl(32)
+        , test_func, arch_flags));
   return gemm_tests;
 }
 """

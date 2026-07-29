@@ -69,17 +69,22 @@ TEST_P(GemmTest, Test) {
             if (params.loop_bzp_.is_set) {
               tester.b_zero_point(bzp);
             }
-            for (size_t bl = params.loop_bl_.from;
-                 bl <= std::max<size_t>(tester.k() / 2, params.loop_bl_.from);
-                 bl = params.loop_bl_.next(bl)) {
-              if (params.loop_bl_.is_set) {
+            if (params.loop_bl_.is_set) {
+              for (size_t bl = params.loop_bl_.from;
+                   bl <= std::max<size_t>(tester.k() / 2, params.loop_bl_.from);
+                   bl = params.loop_bl_.next(bl)) {
                 // Require block size to divide (padded) column size.
                 if (round_up_po2(k, params.loop_bl_.step) % bl != 0) {
                   continue;
                 }
                 tester.bl(bl);
+                params.test_func(tester);
+                num_tests_invocations++;
+                if (HasFatalFailure()) {
+                  return;
+                }
               }
-
+            } else {
               // Call the test function.
               params.test_func(tester);
               num_tests_invocations++;
@@ -288,7 +293,7 @@ void GemmMicrokernelTester::Test(xnn_qd8_f16_qc8w_igemm_ukernel_fn igemm,
         quantization_params.data());
 
   const float tolerance =
-      compute_sum_tolerance(max_abs_product, ks() * k(),
+      compute_sum_tolerance(max_abs_product * k(), ks() * k(), 0.0f,
                             xnnpack::NumericLimits<xnn_float16>::epsilon()) *
       dynamic_quantization_ops;
   for (size_t i = 0; i < m(); i++) {
@@ -1358,7 +1363,7 @@ void GemmMicrokernelTester::Test(xnn_qd8_f16_qc8w_gemm_ukernel_fn gemm,
        quantization_params.data());
 
   const float tolerance =
-      compute_sum_tolerance(max_abs_product, ks() * k(),
+      compute_sum_tolerance(max_abs_product * k(), ks() * k(), 0.0f,
                             xnnpack::NumericLimits<xnn_float16>::epsilon()) *
       dynamic_quantization_ops;
   for (size_t i = 0; i < m(); i++) {
@@ -1652,7 +1657,7 @@ void GemmMicrokernelTester::Test(xnn_qd8_f16_qc4w_gemm_ukernel_fn gemm,
        quantization_params.data());
 
   const float tolerance =
-      compute_sum_tolerance(max_abs_product, ks() * k(),
+      compute_sum_tolerance(max_abs_product * k(), ks() * k(), 0.0f,
                             xnnpack::NumericLimits<xnn_float16>::epsilon()) *
       dynamic_quantization_ops;
   for (size_t i = 0; i < m(); i++) {
@@ -1811,7 +1816,7 @@ void GemmMicrokernelTester::Test(xnn_qd8_f16_qb4w_gemm_ukernel_fn gemm,
        quantization_params.data());
 
   const float tolerance =
-      compute_sum_tolerance(max_abs_product, ks() * k(),
+      compute_sum_tolerance(max_abs_product * k(), ks() * k(), 0.0f,
                             xnnpack::NumericLimits<xnn_float16>::epsilon()) *
       dynamic_quantization_ops;
   for (size_t i = 0; i < m(); i++) {
@@ -2350,7 +2355,7 @@ void GemmMicrokernelTester::Test(
        row_sum.data(), quantization_params.data());
 
   const float tolerance =
-      compute_sum_tolerance(max_abs_product, ks() * k(),
+      compute_sum_tolerance(max_abs_product * k(), ks() * k(), 0.0f,
                             xnnpack::NumericLimits<xnn_float16>::epsilon()) *
       dynamic_quantization_ops;
   for (size_t i = 0; i < m(); i++) {

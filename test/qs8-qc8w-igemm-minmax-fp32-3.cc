@@ -291,6 +291,11 @@ std::vector<GemmTestParams> CreateTests1(
           .cm_stride(xnnpack::NextPrime(nr + 1))
       , test_func, arch_flags));
 
+  gemm_tests.push_back(GemmTestParams(
+      "k_overflow",
+      tester.clone()
+          .m(mr).n(nr).k(k_block * std::max<size_t>(1, 8192 / k_block))
+      , test_func, arch_flags));
   return gemm_tests;
 }
 
@@ -731,6 +736,11 @@ std::vector<GemmTestParams> CreateTests2(
             .cm_stride(xnnpack::NextPrime(nr + 1))
         , test_func, arch_flags));
 
+    gemm_tests.push_back(GemmTestParams(
+        "k_overflow",
+        tester.clone()
+            .m(mr).n(nr).k(k_block * std::max<size_t>(1, 8192 / k_block))
+        , test_func, arch_flags));
     return gemm_tests;
   }
 #endif  // XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV

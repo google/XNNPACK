@@ -118,6 +118,13 @@ std::vector<GemmTestParams> CreateTests1(
       .loop_k(k_block, k_block * 12, k_block, LoopStepType::Linear)
       .loop_bl(32, k_block * 32, 32));
 
+  gemm_tests.push_back(GemmTestParams(
+      "k_overflow",
+      tester.clone()
+          .m(mr).n(nr).k(k_block * std::max<size_t>(1, 8192 / k_block))
+          .b_zero_point(8)
+          .bl(32)
+      , test_func, arch_flags));
   return gemm_tests;
 }
 
