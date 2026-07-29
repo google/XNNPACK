@@ -202,9 +202,9 @@ ynn_status ynn_define_tensor(ynn_subgraph_t subgraph, enum ynn_type type,
   slinky::raw_buffer_ptr data_buffer;
   if (data) {
     const bool copy_data = (flags & YNN_VALUE_FLAG_COPY_DATA) != 0;
-    const bool copy_data_fp32 = (flags & YNN_VALUE_FLAG_COPY_DATA_FP32) != 0;
+    const bool data_is_fp32 = (flags & YNN_VALUE_FLAG_DATA_IS_FP32) != 0;
 
-    if (copy_data || copy_data_fp32) {
+    if (copy_data) {
       // Initialize a buffer just to get the dims.
       slinky::buffer<char, YNN_MAX_TENSOR_RANK> dims_buf(rank);
       init_buffer(dims_buf, ynn::type_size_bytes(type), rank,
@@ -214,7 +214,7 @@ ynn_status ynn_define_tensor(ynn_subgraph_t subgraph, enum ynn_type type,
           rank, ynn::type_size_bytes(type), dims_buf.dims,
           YNN_ALLOCATION_ALIGNMENT);
 
-      if (copy_data_fp32 && type != ynn_type_fp32) {
+      if (data_is_fp32 && type != ynn_type_fp32) {
         ynn::convert_n(static_cast<const float*>(data),
                        data_buffer->elem_count(), type, data_buffer->base);
       } else {

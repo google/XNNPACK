@@ -166,4 +166,198 @@ TEST(fold_constants, iota_square_folding) {
   }
 }
 
+TEST(fold_constants, caching_shared_pointer) {
+  constexpr float constant_values[] = {0.0f, 1.0f, 2.0f, 3.0f};
+
+  slinky::raw_buffer_ptr data1;
+  {
+    const uint32_t input_id = 0;
+    const uint32_t output_id = 1;
+    uint32_t constant_id = 2;
+    uint32_t temp_id = YNN_INVALID_VALUE_ID;
+
+    SubgraphBuilder builder(3);
+    builder.AddInput(type_of<float>(), 1, input_id)
+        .AddOutput(type_of<float>(), 1, output_id)
+        .AddTensor(type_of<float>(), {4}, constant_id, &constant_values)
+        .AddTensor(type_of<float>(), 1, temp_id);
+
+    const uint32_t one_id = builder.DefineScalar(1.0f);
+    builder.AddBinary(ynn_binary_add, constant_id, one_id, temp_id)
+        .AddBinary(ynn_binary_add, input_id, temp_id, output_id);
+
+    ynn_subgraph_t subgraph = builder.GetSubgraph();
+    subgraph->fold_constants(nullptr);
+
+    const ynn_value& constant = subgraph->value(temp_id);
+    ASSERT_TRUE(constant.is_static());
+    data1 = constant.data;
+  }
+
+  slinky::raw_buffer_ptr data2;
+  {
+    const uint32_t input_id = 0;
+    const uint32_t output_id = 1;
+    uint32_t constant_id = 2;
+    uint32_t temp_id = YNN_INVALID_VALUE_ID;
+
+    SubgraphBuilder builder(3);
+    builder.AddInput(type_of<float>(), 1, input_id)
+        .AddOutput(type_of<float>(), 1, output_id)
+        .AddTensor(type_of<float>(), {4}, constant_id, &constant_values)
+        .AddTensor(type_of<float>(), 1, temp_id);
+
+    const uint32_t one_id = builder.DefineScalar(1.0f);
+    builder.AddBinary(ynn_binary_add, constant_id, one_id, temp_id)
+        .AddBinary(ynn_binary_add, input_id, temp_id, output_id);
+
+    ynn_subgraph_t subgraph = builder.GetSubgraph();
+    subgraph->fold_constants(nullptr);
+
+    const ynn_value& constant = subgraph->value(temp_id);
+    ASSERT_TRUE(constant.is_static());
+    data2 = constant.data;
+  }
+
+  EXPECT_EQ(data1.get(), data2.get());
+}
+
+TEST(fold_constants, caching_copied_value) {
+  constexpr float constant_values1[] = {0.0f, 1.0f, 2.0f, 3.0f};
+  constexpr float constant_values2[] = {0.0f, 1.0f, 2.0f, 3.0f};
+
+  slinky::raw_buffer_ptr data1;
+  {
+    const uint32_t input_id = 0;
+    const uint32_t output_id = 1;
+    uint32_t constant_id = 2;
+    uint32_t temp_id = YNN_INVALID_VALUE_ID;
+
+    SubgraphBuilder builder(3);
+    builder.AddInput(type_of<float>(), 1, input_id)
+        .AddOutput(type_of<float>(), 1, output_id)
+        .AddTensor(type_of<float>(), {4}, constant_id, &constant_values1,
+                   YNN_VALUE_FLAG_COPY_DATA)
+        .AddTensor(type_of<float>(), 1, temp_id);
+
+    const uint32_t one_id = builder.DefineScalar(1.0f);
+    builder.AddBinary(ynn_binary_add, constant_id, one_id, temp_id)
+        .AddBinary(ynn_binary_add, input_id, temp_id, output_id);
+
+    ynn_subgraph_t subgraph = builder.GetSubgraph();
+    subgraph->fold_constants(nullptr);
+
+    const ynn_value& constant = subgraph->value(temp_id);
+    ASSERT_TRUE(constant.is_static());
+    data1 = constant.data;
+  }
+
+  slinky::raw_buffer_ptr data2;
+  {
+    const uint32_t input_id = 0;
+    const uint32_t output_id = 1;
+    uint32_t constant_id = 2;
+    uint32_t temp_id = YNN_INVALID_VALUE_ID;
+
+    SubgraphBuilder builder(3);
+    builder.AddInput(type_of<float>(), 1, input_id)
+        .AddOutput(type_of<float>(), 1, output_id)
+        .AddTensor(type_of<float>(), {4}, constant_id, &constant_values2,
+                   YNN_VALUE_FLAG_COPY_DATA)
+        .AddTensor(type_of<float>(), 1, temp_id);
+
+    const uint32_t one_id = builder.DefineScalar(1.0f);
+    builder.AddBinary(ynn_binary_add, constant_id, one_id, temp_id)
+        .AddBinary(ynn_binary_add, input_id, temp_id, output_id);
+
+    ynn_subgraph_t subgraph = builder.GetSubgraph();
+    subgraph->fold_constants(nullptr);
+
+    const ynn_value& constant = subgraph->value(temp_id);
+    ASSERT_TRUE(constant.is_static());
+    data2 = constant.data;
+  }
+
+  EXPECT_EQ(data1.get(), data2.get());
+}
+
+TEST(fold_constants, mix_cached_uncached) {
+  // Run 1: Evaluate and cache temp1 and temp2.
+  {
+    const uint32_t input_id = 0;
+    const uint32_t output_id = 1;
+    uint32_t const1_id = 2;
+    uint32_t const2_id = 3;
+    uint32_t temp1_id = YNN_INVALID_VALUE_ID;
+    uint32_t temp2_id = YNN_INVALID_VALUE_ID;
+
+    float const1_val = 1.0f;
+    float const2_val = 10.0f;
+
+    SubgraphBuilder builder(4);
+    builder.AddInput(type_of<float>(), 1, input_id)
+        .AddOutput(type_of<float>(), 1, output_id)
+        .AddTensor(type_of<float>(), {}, const1_id, &const1_val)
+        .AddTensor(type_of<float>(), {}, const2_id, &const2_val)
+        .AddTensor(type_of<float>(), 1, temp1_id)
+        .AddTensor(type_of<float>(), 1, temp2_id);
+
+    uint32_t one = builder.DefineScalar(1.0f);
+    uint32_t two = builder.DefineScalar(2.0f);
+
+    uint32_t temp3_id = YNN_INVALID_VALUE_ID;
+    builder.AddTensor(type_of<float>(), 1, temp3_id);
+    builder.AddBinary(ynn_binary_add, const1_id, one, temp1_id)
+        .AddBinary(ynn_binary_add, const2_id, two, temp2_id)
+        .AddBinary(ynn_binary_add, input_id, temp1_id, temp3_id)
+        .AddBinary(ynn_binary_add, temp3_id, temp2_id, output_id);
+
+    ynn_subgraph_t subgraph = builder.GetSubgraph();
+    subgraph->fold_constants(nullptr);
+
+    EXPECT_TRUE(subgraph->value(temp1_id).is_static());
+    EXPECT_TRUE(subgraph->value(temp2_id).is_static());
+  }
+
+  // Run 2: const1 is same (temp1 cached), const2 is different (temp2 uncached).
+  {
+    const uint32_t input_id = 0;
+    const uint32_t output_id = 1;
+    uint32_t const1_id = 2;
+    uint32_t const2_id = 3;
+    uint32_t temp1_id = YNN_INVALID_VALUE_ID;
+    uint32_t temp2_id = YNN_INVALID_VALUE_ID;
+
+    float const1_val = 1.0f;   // same
+    float const2_val = 20.0f;  // changed
+
+    SubgraphBuilder builder(4);
+    builder.AddInput(type_of<float>(), 1, input_id)
+        .AddOutput(type_of<float>(), 1, output_id)
+        .AddTensor(type_of<float>(), {}, const1_id, &const1_val)
+        .AddTensor(type_of<float>(), {}, const2_id, &const2_val)
+        .AddTensor(type_of<float>(), 1, temp1_id)
+        .AddTensor(type_of<float>(), 1, temp2_id);
+
+    uint32_t one = builder.DefineScalar(1.0f);
+    uint32_t two = builder.DefineScalar(2.0f);
+
+    uint32_t temp3_id = YNN_INVALID_VALUE_ID;
+    builder.AddTensor(type_of<float>(), 1, temp3_id);
+    builder.AddBinary(ynn_binary_add, const1_id, one, temp1_id)
+        .AddBinary(ynn_binary_add, const2_id, two, temp2_id)
+        .AddBinary(ynn_binary_add, input_id, temp1_id, temp3_id)
+        .AddBinary(ynn_binary_add, temp3_id, temp2_id, output_id);
+
+    ynn_subgraph_t subgraph = builder.GetSubgraph();
+    // This should not crash!
+    subgraph->fold_constants(nullptr);
+
+    EXPECT_TRUE(subgraph->value(temp1_id).is_static());
+    EXPECT_TRUE(subgraph->value(temp2_id).is_static());
+    EXPECT_THAT(ValuesIn<float>(subgraph->value(temp1_id)), ElementsAre(2.0f));
+    EXPECT_THAT(ValuesIn<float>(subgraph->value(temp2_id)), ElementsAre(22.0f));
+  }
+}
+
 }  // namespace ynn

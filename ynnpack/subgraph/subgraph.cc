@@ -6,6 +6,7 @@
 #include "ynnpack/subgraph/subgraph.h"
 
 #include <algorithm>
+#include <array>
 #include <cassert>
 #include <cmath>
 #include <cstddef>
@@ -13,14 +14,18 @@
 #include <cstring>
 #include <functional>
 #include <iomanip>
+#include <iterator>
 #include <map>
 #include <memory>
+#include <mutex>
 #include <numeric>
 #include <optional>
 #include <ostream>
 #include <set>
 #include <sstream>
 #include <string>
+#include <string_view>
+#include <tuple>
 #include <utility>
 #include <variant>
 #include <vector>
@@ -371,6 +376,15 @@ void ynn_subgraph::infer_elementwise_shape(ynn_node& node, int input_idx,
 
 namespace {
 
+template <typename C, typename T>
+std::optional<size_t> index_of(const C& container, const T& value) {
+  auto it = std::find(container.begin(), container.end(), value);
+  if (it == container.end()) {
+    return std::nullopt;
+  }
+  return static_cast<size_t>(std::distance(container.begin(), it));
+}
+
 size_t static_size_of_value(const ynn_value& value) {
   size_t size = ynn::type_size_bytes(value.type);
   for (const auto& extent : value.extents) {
@@ -437,6 +451,181 @@ bool should_constant_fold(const ynn_subgraph& subgraph, const ynn_node& node) {
                     << size_of_inputs << " bytes).";
     return false;
   }
+}
+
+// When caching folded constants, we need a cache key. To avoid the need to have
+// arbitrary producer graphs as cache keys, we only cache values that have a
+// single chain of producers, where each producer consumes either constants or
+// at most one other produced value. The following 3 structs define the 3 kinds
+// of inputs a producer may have.
+struct input_pointer {
+  ynn_type ynn_type_val = ynn_type_invalid;
+  std::array<slinky::index_t, ynn::max_tensor_rank> extents;
+  const void* pointer = nullptr;
+
+  bool operator==(const input_pointer& other) const {
+    return std::tie(ynn_type_val, extents, pointer) ==
+           std::tie(other.ynn_type_val, other.extents, other.pointer);
+  }
+  bool operator<(const input_pointer& other) const {
+    return std::tie(ynn_type_val, extents, pointer) <
+           std::tie(other.ynn_type_val, other.extents, other.pointer);
+  }
+};
+
+struct input_value {
+  ynn_type ynn_type_val = ynn_type_invalid;
+  std::array<slinky::index_t, ynn::max_tensor_rank> extents;
+  size_t value_hash = 0;
+
+  bool operator==(const input_value& other) const {
+    return std::tie(ynn_type_val, extents, value_hash) ==
+           std::tie(other.ynn_type_val, other.extents, other.value_hash);
+  }
+  bool operator<(const input_value& other) const {
+    return std::tie(ynn_type_val, extents, value_hash) <
+           std::tie(other.ynn_type_val, other.extents, other.value_hash);
+  }
+};
+
+struct input_producer {
+  // Which output of the producer produces this value.
+  size_t output_index = 0;
+
+  bool operator==(const input_producer& other) const {
+    return output_index == other.output_index;
+  }
+  bool operator<(const input_producer& other) const {
+    return output_index < other.output_index;
+  }
+};
+
+struct op_key {
+  decltype(ynn_node::op) op;
+  using input_key = std::variant<input_pointer, input_value, input_producer>;
+  std::vector<input_key> inputs;
+
+  bool operator==(const op_key& other) const {
+    return op == other.op && inputs == other.inputs;
+  }
+  bool operator<(const op_key& other) const {
+    return std::tie(op, inputs) < std::tie(other.op, other.inputs);
+  }
+};
+
+struct cache_key {
+  std::vector<op_key> producers;
+  size_t output_index;
+
+  bool operator==(const cache_key& other) const {
+    return output_index == other.output_index && producers == other.producers;
+  }
+  bool operator<(const cache_key& other) const {
+    return std::tie(output_index, producers) <
+           std::tie(other.output_index, other.producers);
+  }
+};
+
+bool build_chain(const ynn_subgraph& subgraph, uint32_t v_id,
+                 std::vector<op_key>& chain, size_t& output_index) {
+  const ynn_node* producer = subgraph.get_producer(v_id);
+  if (!producer) return false;
+
+  std::optional<size_t> idx = index_of(producer->outputs, v_id);
+  if (!idx) return false;
+  output_index = *idx;
+
+  op_key op_key;
+  op_key.op = producer->op;
+
+  uint32_t chain_input_id = YNN_INVALID_VALUE_ID;
+  int chain_inputs_count = 0;
+
+  for (uint32_t input_id : producer->inputs) {
+    if (input_id == YNN_INVALID_VALUE_ID) {
+      op_key.inputs.push_back(input_pointer{});
+      continue;
+    }
+
+    const ynn_node* producer = subgraph.get_producer(input_id);
+    if (!producer) {
+      const ynn_value& input = subgraph.value(input_id);
+      ynn_type type = input.type;
+      assert(input.data);
+      std::array<slinky::index_t, ynn::max_tensor_rank> extents;
+      extents.fill(1);
+      for (size_t d = 0; d < input.data->rank; ++d) {
+        extents[d] = input.data->dim(d).extent();
+      }
+
+      if (input.flags & YNN_VALUE_FLAG_COPY_DATA) {
+        // We made a copy of this value, so the pointer is not an identifier.
+        std::string_view view(static_cast<const char*>(input.data->base),
+                              input.data->size_bytes());
+        size_t value_hash = std::hash<std::string_view>{}(view);
+        op_key.inputs.push_back(input_value{type, extents, value_hash});
+      } else {
+        const void* pointer = input.data->base;
+        op_key.inputs.push_back(input_pointer{type, extents, pointer});
+      }
+    } else {
+      std::optional<size_t> output_index =
+          index_of(producer->outputs, input_id);
+      if (!output_index) return false;
+
+      op_key.inputs.push_back(input_producer{*output_index});
+
+      chain_input_id = input_id;
+      chain_inputs_count++;
+    }
+  }
+
+  if (chain_inputs_count > 1) {
+    // We only support caching values with one non-static input.
+    return false;
+  }
+
+  chain.push_back(op_key);
+
+  size_t dummy_output_index;
+  return chain_inputs_count == 0 ||
+         build_chain(subgraph, chain_input_id, chain, dummy_output_index);
+}
+
+bool build_cache_key(const ynn_subgraph& subgraph, uint32_t v_id,
+                     cache_key& key) {
+  key.producers.clear();
+  if (!build_chain(subgraph, v_id, key.producers, key.output_index)) {
+    return false;
+  }
+  std::reverse(key.producers.begin(), key.producers.end());
+  return true;
+}
+
+std::mutex constant_cache_mutex;  // NOLINT
+std::map<cache_key, std::weak_ptr<slinky::raw_buffer>> constant_cache;
+
+// constant_cache_mutex must be held when calling this function.
+slinky::raw_buffer_ptr lookup_constant(const cache_key& key) {
+  auto it = constant_cache.find(key);
+  if (it != constant_cache.end()) {
+    if (slinky::raw_buffer_ptr ptr = it->second.lock()) {
+      return ptr;
+    } else {
+      // The value was released by all subgraphs, we don't have it in the cache
+      // any more.
+      constant_cache.erase(it);
+    }
+  }
+  return nullptr;
+}
+
+// constant_cache_mutex must be held when calling this function.
+void insert_constant(const cache_key& key, slinky::raw_buffer_ptr& ptr) {
+  // This must tolerate writing multiple buffers to the same cache key, because
+  // graphs sometimes define multiple copies of the same computation, so within
+  // one subgraph, multiple constants map to the same cache key.
+  constant_cache[key] = ptr;
 }
 
 }  // namespace
@@ -552,10 +741,6 @@ ynn_status ynn_subgraph::fold_constants(slinky::thread_pool* threadpool) {
     }
   }
 
-  if (to_fold.empty()) {
-    return ynn_status_success;
-  }
-
   // Find which constant values are actually needed by the remaining active
   // nodes of the main subgraph.
   std::set<uint32_t> needed_constants;
@@ -568,10 +753,46 @@ ynn_status ynn_subgraph::fold_constants(slinky::thread_pool* threadpool) {
     }
   }
 
+  if (needed_constants.empty()) {
+    return ynn_status_success;
+  }
+
+  // Cache lookup.
+  std::map<uint32_t, cache_key> keys;
+  std::map<uint32_t, slinky::raw_buffer_ptr> cached_values;
+
+  // From here, we need to serialize constant folding, to avoid racily folding
+  // the same constant twice.
+  std::lock_guard<std::mutex> lock(constant_cache_mutex);  // NOLINT
+  for (uint32_t i : needed_constants) {
+    cache_key key;
+    // Build key using constants subgraph because it has folded nodes intact.
+    if (build_cache_key(*constants, i, key)) {
+      keys[i] = key;
+      slinky::raw_buffer_ptr cached_ptr = lookup_constant(key);
+      if (cached_ptr) {
+        YNN_LOG_DEBUG() << "Constant cache hit for value " << i;
+        cached_values[i] = cached_ptr;
+      }
+    }
+  }
+
+  // Put cached values in constants subgraph.
+  for (auto& [i, cached_ptr] : cached_values) {
+    constants->values[i].data = cached_ptr;
+    // Invalidate producer in constants
+    ynn_node* producer = constants->get_producer(i);
+    if (producer) {
+      producer->invalidate();
+    }
+  }
+
   // Mark these values as external outputs in `constants` so we can reshape and
   // learn the shape of the constants.
   for (uint32_t i : needed_constants) {
-    constants->values[i].flags |= YNN_VALUE_FLAG_EXTERNAL_OUTPUT;
+    if (!cached_values.count(i)) {
+      constants->values[i].flags |= YNN_VALUE_FLAG_EXTERNAL_OUTPUT;
+    }
   }
 
   constants->invalidate_dead_values();
@@ -595,6 +816,7 @@ ynn_status ynn_subgraph::fold_constants(slinky::thread_pool* threadpool) {
   // Use the results of reshape to allocate static buffers for the constants.
   for (uint32_t i : needed_constants) {
     ynn_runtime_value& folded = runtime.value(i);
+    assert(folded.data);
     assert(values[i].extents.size() == folded.data->rank);
     for (size_t d = 0; d < folded.data->rank; ++d) {
       slinky::index_t extent = folded.data->dim(d).extent();
@@ -603,12 +825,16 @@ ynn_status ynn_subgraph::fold_constants(slinky::thread_pool* threadpool) {
       }
       values[i].extents[d] = extent;
     }
-    // Make a new value to put the constant in.
-    values[i].data =
-        slinky::raw_buffer::make(folded.data->rank, folded.data->elem_size,
-                                 folded.data->dims, YNN_ALLOCATION_ALIGNMENT);
-    // Use the new value as the output of the constant folding runtime.
-    folded.data = values[i].data;
+    if (cached_values.count(i)) {
+      values[i].data = folded.data;
+    } else {
+      // Make a new value to put the constant in.
+      values[i].data =
+          slinky::raw_buffer::make(folded.data->rank, folded.data->elem_size,
+                                   folded.data->dims, YNN_ALLOCATION_ALIGNMENT);
+      // Use the new value as the output of the constant folding runtime.
+      folded.data = values[i].data;
+    }
   }
 
   status = runtime.setup();
@@ -616,7 +842,21 @@ ynn_status ynn_subgraph::fold_constants(slinky::thread_pool* threadpool) {
     return status;
   }
 
-  return runtime.invoke();
+  status = runtime.invoke();
+  if (status != ynn_status_success) {
+    return status;
+  }
+
+  // Insert newly folded constants into cache.
+  for (uint32_t i : needed_constants) {
+    if (cached_values.count(i)) continue;
+    auto it = keys.find(i);
+    if (it != keys.end()) {
+      insert_constant(it->second, values[i].data);
+    }
+  }
+
+  return ynn_status_success;
 }
 
 void ynn_subgraph::invalidate_dead_values() {
@@ -664,26 +904,6 @@ void ynn_subgraph::invalidate_dead_values() {
 }
 
 namespace {
-
-bool values_are_equal(const ynn_subgraph& subgraph, uint32_t a_id,
-                      uint32_t b_id) {
-  if (a_id == b_id) return true;
-  if (a_id == YNN_INVALID_VALUE_ID || b_id == YNN_INVALID_VALUE_ID)
-    return false;
-
-  const ynn_value& a = subgraph.value(a_id);
-  const ynn_value& b = subgraph.value(b_id);
-
-  if (a.type != b.type) return false;
-
-  if (a.is_static_scalar() && b.is_static_scalar()) {
-    assert(a.data);
-    assert(b.data);
-    if (a.data->size_bytes() != b.data->size_bytes()) return false;
-    return std::memcmp(a.data->base, b.data->base, a.data->size_bytes()) == 0;
-  }
-  return false;
-}
 
 bool outputs_are_compatible(const ynn_subgraph& subgraph,
                             const std::vector<uint32_t>& a_outputs,
@@ -958,7 +1178,6 @@ void print(std::ostream& os, const ynn_node::opaque& op) {
 void print(std::ostream& os, const ynn_node::unary_elementwise& op) {
   os << "op=" << op.op;
 }
-
 
 void print(std::ostream& os, const ynn_node::binary_elementwise& op) {
   os << "op=" << op.op;

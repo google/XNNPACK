@@ -1001,6 +1001,10 @@ ynn_status ynn_update_runtime_with_threadpool(ynn_runtime_t runtime,
 }
 
 ynn_status ynn_runtime::invoke() {
+  if (!pipeline.body.defined()) {
+    // This pipeline is a no-op.
+    return ynn_status_success;
+  }
   return pipeline.evaluate(eval_context) ? ynn_status_error
                                          : ynn_status_success;
 }
