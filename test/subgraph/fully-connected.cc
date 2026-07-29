@@ -610,6 +610,11 @@ TEST(FullyConnectedQD8F32QB4W_F16, static_b) {
 }
 // bf16 output only supports bf16-typed blockwise scales (there is no
 // qd8_bf16_qb4w_f16_scales create variant), so no _F16 counterpart here.
+// On AVX512 (vnni+bf16) hardware, the fp32->qdint8 convert feeding this
+// bf16-output qb4w fully-connected is upgraded to qduint8 by
+// convert_gemm_to_qduint8, so the runtime selects the unsigned
+// qdu8_bf16_qb4w AVX512-VNNI kernel. This exercises that path end-to-end
+// and catches the signed/unsigned activation bug.
 TEST(FullyConnectedQD8BF16QB4W_BF16, static_b) {
   TestStaticB<float, qcint4, float, xnn_bfloat16, xnn_bfloat16>(
       /*convert_to=*/xnn_datatype_qdint8, /*block_size=*/32);

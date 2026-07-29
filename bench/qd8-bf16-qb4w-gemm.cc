@@ -428,6 +428,185 @@ namespace {
 #endif  // XNN_ENABLE_ARM_DOTPROD && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 
 
+#if XNN_ENABLE_AVX512VNNI && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+  static void qd8_bf16_qb4w_gemm_minmax_ukernel_1x16c8__avx512vnni(benchmark::State& state) {
+    GEMMBenchmark(state,
+      xnn_qd8_bf16_qb4w_gemm_minmax_ukernel_1x16c8__avx512vnni,
+      xnn_init_bf16_qb4w_minmax_scalar_params,
+      xnn_pack_qs8_qb4w_gemm_goi_w,
+      /*mr=*/1, /*nr=*/16, /*kr=*/8, /*sr=*/1,
+      /*arch_flags=*/xnn_arch_x86_avx512vnni);
+  }
+
+  BENCHMARK_GEMM(qd8_bf16_qb4w_gemm_minmax_ukernel_1x16c8__avx512vnni)
+
+  static void qd8_bf16_qb4w_gemm_minmax_ukernel_5x16c8__avx512vnni(benchmark::State& state) {
+    GEMMBenchmark(state,
+      xnn_qd8_bf16_qb4w_gemm_minmax_ukernel_5x16c8__avx512vnni,
+      xnn_init_bf16_qb4w_minmax_scalar_params,
+      xnn_pack_qs8_qb4w_gemm_goi_w,
+      /*mr=*/5, /*nr=*/16, /*kr=*/8, /*sr=*/1,
+      /*arch_flags=*/xnn_arch_x86_avx512vnni);
+  }
+
+  BENCHMARK_GEMM(qd8_bf16_qb4w_gemm_minmax_ukernel_5x16c8__avx512vnni)
+
+  static void qd8_bf16_qb4w_gemm_minmax_ukernel_7x16c8__avx512vnni(benchmark::State& state) {
+    GEMMBenchmark(state,
+      xnn_qd8_bf16_qb4w_gemm_minmax_ukernel_7x16c8__avx512vnni,
+      xnn_init_bf16_qb4w_minmax_scalar_params,
+      xnn_pack_qs8_qb4w_gemm_goi_w,
+      /*mr=*/7, /*nr=*/16, /*kr=*/8, /*sr=*/1,
+      /*arch_flags=*/xnn_arch_x86_avx512vnni);
+  }
+
+  BENCHMARK_GEMM(qd8_bf16_qb4w_gemm_minmax_ukernel_7x16c8__avx512vnni)
+
+  static void qd8_bf16_qb4w_gemm_minmax_ukernel_8x16c8__avx512vnni(benchmark::State& state) {
+    GEMMBenchmark(state,
+      xnn_qd8_bf16_qb4w_gemm_minmax_ukernel_8x16c8__avx512vnni,
+      xnn_init_bf16_qb4w_minmax_scalar_params,
+      xnn_pack_qs8_qb4w_gemm_goi_w,
+      /*mr=*/8, /*nr=*/16, /*kr=*/8, /*sr=*/1,
+      /*arch_flags=*/xnn_arch_x86_avx512vnni);
+  }
+
+  BENCHMARK_GEMM(qd8_bf16_qb4w_gemm_minmax_ukernel_8x16c8__avx512vnni)
+
+  static void qd8_bf16_qb4w_gemm_minmax_ukernel_9x16c8__avx512vnni(benchmark::State& state) {
+    GEMMBenchmark(state,
+      xnn_qd8_bf16_qb4w_gemm_minmax_ukernel_9x16c8__avx512vnni,
+      xnn_init_bf16_qb4w_minmax_scalar_params,
+      xnn_pack_qs8_qb4w_gemm_goi_w,
+      /*mr=*/9, /*nr=*/16, /*kr=*/8, /*sr=*/1,
+      /*arch_flags=*/xnn_arch_x86_avx512vnni);
+  }
+
+  BENCHMARK_GEMM(qd8_bf16_qb4w_gemm_minmax_ukernel_9x16c8__avx512vnni)
+
+  static void qd8_bf16_qb4w_gemm_minmax_ukernel_10x16c8__avx512vnni(benchmark::State& state) {
+    GEMMBenchmark(state,
+      xnn_qd8_bf16_qb4w_gemm_minmax_ukernel_10x16c8__avx512vnni,
+      xnn_init_bf16_qb4w_minmax_scalar_params,
+      xnn_pack_qs8_qb4w_gemm_goi_w,
+      /*mr=*/10, /*nr=*/16, /*kr=*/8, /*sr=*/1,
+      /*arch_flags=*/xnn_arch_x86_avx512vnni);
+  }
+
+  BENCHMARK_GEMM(qd8_bf16_qb4w_gemm_minmax_ukernel_10x16c8__avx512vnni)
+
+  static void qd8_bf16_qb4w_gemm_minmax_ukernel_12x16c8__avx512vnni(benchmark::State& state) {
+    GEMMBenchmark(state,
+      xnn_qd8_bf16_qb4w_gemm_minmax_ukernel_12x16c8__avx512vnni,
+      xnn_init_bf16_qb4w_minmax_scalar_params,
+      xnn_pack_qs8_qb4w_gemm_goi_w,
+      /*mr=*/12, /*nr=*/16, /*kr=*/8, /*sr=*/1,
+      /*arch_flags=*/xnn_arch_x86_avx512vnni);
+  }
+
+  BENCHMARK_GEMM(qd8_bf16_qb4w_gemm_minmax_ukernel_12x16c8__avx512vnni)
+
+  static void qd8_bf16_qb4w_gemm_minmax_ukernel_14x16c8__avx512vnni(benchmark::State& state) {
+    GEMMBenchmark(state,
+      xnn_qd8_bf16_qb4w_gemm_minmax_ukernel_14x16c8__avx512vnni,
+      xnn_init_bf16_qb4w_minmax_scalar_params,
+      xnn_pack_qs8_qb4w_gemm_goi_w,
+      /*mr=*/14, /*nr=*/16, /*kr=*/8, /*sr=*/1,
+      /*arch_flags=*/xnn_arch_x86_avx512vnni);
+  }
+
+  BENCHMARK_GEMM(qd8_bf16_qb4w_gemm_minmax_ukernel_14x16c8__avx512vnni)
+
+  static void qd8_bf16_qb4w_gemm_minmax_ukernel_1x16c8__avx512vnni_prfm(benchmark::State& state) {
+    GEMMBenchmark(state,
+      xnn_qd8_bf16_qb4w_gemm_minmax_ukernel_1x16c8__avx512vnni_prfm,
+      xnn_init_bf16_qb4w_minmax_scalar_params,
+      xnn_pack_qs8_qb4w_gemm_goi_w,
+      /*mr=*/1, /*nr=*/16, /*kr=*/8, /*sr=*/1,
+      /*arch_flags=*/xnn_arch_x86_avx512vnni);
+  }
+
+  BENCHMARK_GEMM(qd8_bf16_qb4w_gemm_minmax_ukernel_1x16c8__avx512vnni_prfm)
+
+  static void qd8_bf16_qb4w_gemm_minmax_ukernel_5x16c8__avx512vnni_prfm(benchmark::State& state) {
+    GEMMBenchmark(state,
+      xnn_qd8_bf16_qb4w_gemm_minmax_ukernel_5x16c8__avx512vnni_prfm,
+      xnn_init_bf16_qb4w_minmax_scalar_params,
+      xnn_pack_qs8_qb4w_gemm_goi_w,
+      /*mr=*/5, /*nr=*/16, /*kr=*/8, /*sr=*/1,
+      /*arch_flags=*/xnn_arch_x86_avx512vnni);
+  }
+
+  BENCHMARK_GEMM(qd8_bf16_qb4w_gemm_minmax_ukernel_5x16c8__avx512vnni_prfm)
+
+  static void qd8_bf16_qb4w_gemm_minmax_ukernel_7x16c8__avx512vnni_prfm(benchmark::State& state) {
+    GEMMBenchmark(state,
+      xnn_qd8_bf16_qb4w_gemm_minmax_ukernel_7x16c8__avx512vnni_prfm,
+      xnn_init_bf16_qb4w_minmax_scalar_params,
+      xnn_pack_qs8_qb4w_gemm_goi_w,
+      /*mr=*/7, /*nr=*/16, /*kr=*/8, /*sr=*/1,
+      /*arch_flags=*/xnn_arch_x86_avx512vnni);
+  }
+
+  BENCHMARK_GEMM(qd8_bf16_qb4w_gemm_minmax_ukernel_7x16c8__avx512vnni_prfm)
+
+  static void qd8_bf16_qb4w_gemm_minmax_ukernel_8x16c8__avx512vnni_prfm(benchmark::State& state) {
+    GEMMBenchmark(state,
+      xnn_qd8_bf16_qb4w_gemm_minmax_ukernel_8x16c8__avx512vnni_prfm,
+      xnn_init_bf16_qb4w_minmax_scalar_params,
+      xnn_pack_qs8_qb4w_gemm_goi_w,
+      /*mr=*/8, /*nr=*/16, /*kr=*/8, /*sr=*/1,
+      /*arch_flags=*/xnn_arch_x86_avx512vnni);
+  }
+
+  BENCHMARK_GEMM(qd8_bf16_qb4w_gemm_minmax_ukernel_8x16c8__avx512vnni_prfm)
+
+  static void qd8_bf16_qb4w_gemm_minmax_ukernel_9x16c8__avx512vnni_prfm(benchmark::State& state) {
+    GEMMBenchmark(state,
+      xnn_qd8_bf16_qb4w_gemm_minmax_ukernel_9x16c8__avx512vnni_prfm,
+      xnn_init_bf16_qb4w_minmax_scalar_params,
+      xnn_pack_qs8_qb4w_gemm_goi_w,
+      /*mr=*/9, /*nr=*/16, /*kr=*/8, /*sr=*/1,
+      /*arch_flags=*/xnn_arch_x86_avx512vnni);
+  }
+
+  BENCHMARK_GEMM(qd8_bf16_qb4w_gemm_minmax_ukernel_9x16c8__avx512vnni_prfm)
+
+  static void qd8_bf16_qb4w_gemm_minmax_ukernel_10x16c8__avx512vnni_prfm(benchmark::State& state) {
+    GEMMBenchmark(state,
+      xnn_qd8_bf16_qb4w_gemm_minmax_ukernel_10x16c8__avx512vnni_prfm,
+      xnn_init_bf16_qb4w_minmax_scalar_params,
+      xnn_pack_qs8_qb4w_gemm_goi_w,
+      /*mr=*/10, /*nr=*/16, /*kr=*/8, /*sr=*/1,
+      /*arch_flags=*/xnn_arch_x86_avx512vnni);
+  }
+
+  BENCHMARK_GEMM(qd8_bf16_qb4w_gemm_minmax_ukernel_10x16c8__avx512vnni_prfm)
+
+  static void qd8_bf16_qb4w_gemm_minmax_ukernel_12x16c8__avx512vnni_prfm(benchmark::State& state) {
+    GEMMBenchmark(state,
+      xnn_qd8_bf16_qb4w_gemm_minmax_ukernel_12x16c8__avx512vnni_prfm,
+      xnn_init_bf16_qb4w_minmax_scalar_params,
+      xnn_pack_qs8_qb4w_gemm_goi_w,
+      /*mr=*/12, /*nr=*/16, /*kr=*/8, /*sr=*/1,
+      /*arch_flags=*/xnn_arch_x86_avx512vnni);
+  }
+
+  BENCHMARK_GEMM(qd8_bf16_qb4w_gemm_minmax_ukernel_12x16c8__avx512vnni_prfm)
+
+  static void qd8_bf16_qb4w_gemm_minmax_ukernel_14x16c8__avx512vnni_prfm(benchmark::State& state) {
+    GEMMBenchmark(state,
+      xnn_qd8_bf16_qb4w_gemm_minmax_ukernel_14x16c8__avx512vnni_prfm,
+      xnn_init_bf16_qb4w_minmax_scalar_params,
+      xnn_pack_qs8_qb4w_gemm_goi_w,
+      /*mr=*/14, /*nr=*/16, /*kr=*/8, /*sr=*/1,
+      /*arch_flags=*/xnn_arch_x86_avx512vnni);
+  }
+
+  BENCHMARK_GEMM(qd8_bf16_qb4w_gemm_minmax_ukernel_14x16c8__avx512vnni_prfm)
+#endif  // XNN_ENABLE_AVX512VNNI && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+
+
 #if XNN_ENABLE_AVX2 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
   static void qd8_bf16_qb4w_gemm_minmax_ukernel_1x8c8__avx2(benchmark::State& state) {
     GEMMBenchmark(state,

@@ -63,6 +63,7 @@ static enum xnn_operator_type get_operator_type(
     XNNPACK_FINGERPRINT_TO_OP_TYPE(qdu8, f16, qc4w);
     XNNPACK_FINGERPRINT_TO_OP_TYPE(qd8, f16, qb4w);
     XNNPACK_FINGERPRINT_TO_OP_TYPE(qd8, bf16, qb4w);
+    XNNPACK_FINGERPRINT_TO_OP_TYPE(qdu8, bf16, qb4w);
     XNNPACK_FINGERPRINT_TO_OP_TYPE(qd8, f32, qc4w);
     XNNPACK_FINGERPRINT_TO_OP_TYPE(qdu8, f32, qc4w);
     XNNPACK_FINGERPRINT_TO_OP_TYPE(qp8, f32, qc4w);
@@ -1452,6 +1453,11 @@ static enum xnn_status setup_variant_and_gemm_config(
       context->gemm_config = xnn_init_qd8_bf16_qb4w_gemm_config();
       context->fingerprint_id = xnn_fingerprint_id_fully_connected_nc_qd8_bf16_qb4w;
       break;
+    case xnn_operator_type_fully_connected_nc_qdu8_bf16_qb4w:
+      *variant = &qd8_bf16_qb4w_variant;
+      context->gemm_config = xnn_init_qdu8_bf16_qb4w_gemm_config();
+      context->fingerprint_id = xnn_fingerprint_id_fully_connected_nc_qdu8_bf16_qb4w;
+      break;
     case xnn_operator_type_fully_connected_nc_qd8_f32_qc2w:
       *variant = &qx8_f32_qc2w_variant;
       context->gemm_config = xnn_init_qd8_f32_qc2w_gemm_config();
@@ -2010,6 +2016,33 @@ enum xnn_status xnn_create_fully_connected_nc_qd8_bf16_qb4w(
       .flags = flags,
       .weights_cache = weights_cache,
       .operator_type = xnn_operator_type_fully_connected_nc_qd8_bf16_qb4w,
+      .fully_connected_op_out = fully_connected_op_out,
+      .should_fingerprint = true,
+  };
+  return create_fully_connected_nc_helper(&context);
+}
+
+enum xnn_status xnn_create_fully_connected_nc_qdu8_bf16_qb4w(
+    size_t input_channels, size_t output_channels, size_t input_stride,
+    size_t output_stride, size_t block_size, uint8_t kernel_zero_point,
+    const uint16_t* kernel_scale, const void* kernel, const float* bias,
+    float output_min, float output_max, uint32_t flags,
+    xnn_weights_cache_t weights_cache, xnn_operator_t* fully_connected_op_out) {
+  struct fc_context context = {
+      .input_channels = input_channels,
+      .output_channels = output_channels,
+      .input_stride = input_stride,
+      .output_stride = output_stride,
+      .block_size = block_size,
+      .kernel_zero_point = kernel_zero_point,
+      .kernel_scale.bf16 = kernel_scale,
+      .kernel = kernel,
+      .bias = bias,
+      .output_min = output_min,
+      .output_max = output_max,
+      .flags = flags,
+      .weights_cache = weights_cache,
+      .operator_type = xnn_operator_type_fully_connected_nc_qdu8_bf16_qb4w,
       .fully_connected_op_out = fully_connected_op_out,
       .should_fingerprint = true,
   };
@@ -3005,6 +3038,13 @@ static XNN_NO_SANITIZE_FUNCTION enum xnn_status reshape_fully_connected_nc(
         packed_lh_config = xnn_init_f32_qduint8_pack_lh_config();
       }
       break;
+    case xnn_operator_type_fully_connected_nc_qdu8_bf16_qb4w:
+      // The bf16 output qb4w GEMM is fed by f32 activations dynamically
+      // quantized to qduint8 (mirrors the qdu8_f32_qb4w source path).
+      if (inline_lhs_packing) {
+        packed_lh_config = xnn_init_f32_qduint8_pack_lh_config();
+      }
+      break;
     case xnn_operator_type_fully_connected_nc_qp8_f32_qb4w:
     case xnn_operator_type_fully_connected_nc_qp8_f32_qc4w:
     case xnn_operator_type_fully_connected_nc_qp8_f32_qc8w:
@@ -3400,6 +3440,19 @@ enum xnn_status xnn_reshape_fully_connected_nc_qd8_bf16_qb4w(
     size_t* workspace_size, pthreadpool_t threadpool) {
   return reshape_fully_connected_nc(
       fully_connected_op, xnn_operator_type_fully_connected_nc_qd8_bf16_qb4w,
+      batch_size,
+      /*dynamic_quantization=*/true,
+      /*log2_output_element_size=*/XNN_LOG2_SIZEOF_BFLOAT16,
+      &fully_connected_op->params.bf16_qb4w_minmax,
+      sizeof(fully_connected_op->params.bf16_qb4w_minmax), workspace_size,
+      threadpool);
+}
+
+enum xnn_status xnn_reshape_fully_connected_nc_qdu8_bf16_qb4w(
+    xnn_operator_t fully_connected_op, size_t batch_size,
+    size_t* workspace_size, pthreadpool_t threadpool) {
+  return reshape_fully_connected_nc(
+      fully_connected_op, xnn_operator_type_fully_connected_nc_qdu8_bf16_qb4w,
       batch_size,
       /*dynamic_quantization=*/true,
       /*log2_output_element_size=*/XNN_LOG2_SIZEOF_BFLOAT16,
@@ -3822,6 +3875,15 @@ enum xnn_status xnn_setup_fully_connected_nc_qd8_bf16_qb4w(
     const struct xnn_quantization_params* quantization_params) {
   return setup_fully_connected_nc(
       fully_connected_op, xnn_operator_type_fully_connected_nc_qd8_bf16_qb4w,
+      input, output, workspace, /*row_sum=*/NULL, quantization_params);
+}
+
+enum xnn_status xnn_setup_fully_connected_nc_qdu8_bf16_qb4w(
+    xnn_operator_t fully_connected_op, const int8_t* input, void* output,
+    void* workspace,
+    const struct xnn_quantization_params* quantization_params) {
+  return setup_fully_connected_nc(
+      fully_connected_op, xnn_operator_type_fully_connected_nc_qdu8_bf16_qb4w,
       input, output, workspace, /*row_sum=*/NULL, quantization_params);
 }
 
