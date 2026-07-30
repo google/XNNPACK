@@ -194,6 +194,11 @@ DatatypeGenerator<quint8> MakeDatatypeGenerator(qcuint4) {
 
 const size_t no_blockwise = std::numeric_limits<size_t>::max();
 
+enum class StaticBTestConfig {
+  kDefault,
+  kQp8Qc2w,
+};
+
 std::string runtime_flags_to_string(uint32_t runtime_flags) {
   std::string result;
   if (runtime_flags & XNN_FLAG_NO_INLINED_LHS_PACKING) {
@@ -206,7 +211,8 @@ template <typename Input, typename Filter, typename Bias,
           typename Output = Input, typename Scale = float>
 void TestStaticB(xnn_datatype convert_to = xnn_datatype_invalid,
                  size_t block_size = no_blockwise,
-                 bool require_qp8_qc2w = false) {
+                 StaticBTestConfig test_config = StaticBTestConfig::kDefault) {
+  const bool require_qp8_qc2w = test_config == StaticBTestConfig::kQp8Qc2w;
   const bool channelwise_quantization =
       xnn_datatype_is_channelwise_quantized(datatype_of<Filter>());
   const bool is_qd8_qc2w = (std::is_same<Filter, qcint2>::value &&
@@ -296,10 +302,7 @@ void TestStaticB(xnn_datatype convert_to = xnn_datatype_invalid,
                                 divide_round_up(input_channels, block_size)});
     // Needed for qd8_qc2w only.
     std::vector<float> channelwise_zero_point(output_channels);
-    if (require_qp8_qc2w) {
-      std::fill(channelwise_zero_point.begin(), channelwise_zero_point.end(),
-                0.0f);
-    } else {
+    if (!require_qp8_qc2w) {
       std::generate(channelwise_zero_point.begin(),
                     channelwise_zero_point.end(),
                     [&]() { return zero_point_dist(rng); });
@@ -685,7 +688,7 @@ TEST(FullyConnectedQD8F32QC2W, static_b) {
 TEST(FullyConnectedQP8F32QC2W, static_b) {
   TestStaticB<float, qcint2, float>(/*convert_to=*/xnn_datatype_qdint8,
                                     /*block_size=*/no_blockwise,
-                                    /*require_qp8_qc2w=*/true);
+                                    /*test_config=*/StaticBTestConfig::kQp8Qc2w);
 }
 TEST(FullyConnectedQD8F32QC8W, static_b) {
   TestStaticB<float, qcint8, float>(/*convert_to=*/xnn_datatype_qdint8);

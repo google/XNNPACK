@@ -271,7 +271,7 @@ xnnpack_unit_test(
     }),
     deps = SUBGRAPH_TEST_DEPS + [
         "//:operator_h",
-        "//src/configs:config_hdrs",
+        "//src/configs:config_h",
     ],
 )
 
