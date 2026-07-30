@@ -799,6 +799,25 @@ static void f32_igemm_6x8s4__sse(benchmark::State& state) {
             xnn_init_f32_minmax_scalar_params,
             /*mr=*/6, /*nr=*/8, /*kr=*/1, /*sr=*/4);
 }
+
+BENCHMARK_CONV(f32_igemm_1x8__sse_load1)
+BENCHMARK_CONV(f32_igemm_3x8__sse_load1)
+BENCHMARK_CONV(f32_igemm_4x8__sse_load1)
+BENCHMARK_CONV(f32_igemm_5x8__sse_load1)
+BENCHMARK_CONV(f32_igemm_6x8__sse_load1)
+BENCHMARK_CONV(f32_igemm_1x8__sse_dup)
+BENCHMARK_CONV(f32_igemm_3x8__sse_dup)
+BENCHMARK_CONV(f32_igemm_4x8__sse_dup)
+BENCHMARK_CONV(f32_igemm_5x8__sse_dup)
+BENCHMARK_CONV(f32_igemm_6x8__sse_dup)
+BENCHMARK_CONV(f32_igemm_1x8s4__sse)
+BENCHMARK_CONV(f32_igemm_3x8s4__sse)
+BENCHMARK_CONV(f32_igemm_4x8s4__sse)
+BENCHMARK_CONV(f32_igemm_5x8s4__sse)
+BENCHMARK_CONV(f32_igemm_6x8s4__sse)
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+#if XNN_ENABLE_AVX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 static void f32_igemm_1x8__avx_broadcast(benchmark::State& state) {
   f32_igemm(state, xnn_f32_igemm_minmax_ukernel_1x8__avx_broadcast,
             xnn_init_f32_minmax_scalar_params,
@@ -825,6 +844,14 @@ static void f32_igemm_7x8__avx_broadcast(benchmark::State& state) {
             /*mr=*/7, /*nr=*/8, /*kr=*/1, /*sr=*/1, xnn_arch_x86_avx);
 }
 
+BENCHMARK_CONV(f32_igemm_1x8__avx_broadcast)
+BENCHMARK_CONV(f32_igemm_4x8__avx_broadcast)
+BENCHMARK_CONV(f32_igemm_5x8__avx_broadcast)
+BENCHMARK_CONV(f32_igemm_6x8__avx_broadcast)
+BENCHMARK_CONV(f32_igemm_7x8__avx_broadcast)
+#endif  // XNN_ENABLE_AVX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+
+#if XNN_ENABLE_FMA3 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 static void f32_igemm_1x8__fma3_broadcast(benchmark::State& state) {
   f32_igemm(state, xnn_f32_igemm_minmax_ukernel_1x8__fma3_broadcast,
             xnn_init_f32_minmax_scalar_params,
@@ -907,26 +934,6 @@ static void f32_igemm_6x16__fma3_broadcast_prfm(benchmark::State& state) {
             xnn_arch_x86_fma3);
 }
 
-BENCHMARK_CONV(f32_igemm_1x8__sse_load1)
-BENCHMARK_CONV(f32_igemm_3x8__sse_load1)
-BENCHMARK_CONV(f32_igemm_4x8__sse_load1)
-BENCHMARK_CONV(f32_igemm_5x8__sse_load1)
-BENCHMARK_CONV(f32_igemm_6x8__sse_load1)
-BENCHMARK_CONV(f32_igemm_1x8__sse_dup)
-BENCHMARK_CONV(f32_igemm_3x8__sse_dup)
-BENCHMARK_CONV(f32_igemm_4x8__sse_dup)
-BENCHMARK_CONV(f32_igemm_5x8__sse_dup)
-BENCHMARK_CONV(f32_igemm_6x8__sse_dup)
-BENCHMARK_CONV(f32_igemm_1x8s4__sse)
-BENCHMARK_CONV(f32_igemm_3x8s4__sse)
-BENCHMARK_CONV(f32_igemm_4x8s4__sse)
-BENCHMARK_CONV(f32_igemm_5x8s4__sse)
-BENCHMARK_CONV(f32_igemm_6x8s4__sse)
-BENCHMARK_CONV(f32_igemm_1x8__avx_broadcast)
-BENCHMARK_CONV(f32_igemm_4x8__avx_broadcast)
-BENCHMARK_CONV(f32_igemm_5x8__avx_broadcast)
-BENCHMARK_CONV(f32_igemm_6x8__avx_broadcast)
-BENCHMARK_CONV(f32_igemm_7x8__avx_broadcast)
 BENCHMARK_CONV(f32_igemm_1x8__fma3_broadcast)
 BENCHMARK_CONV(f32_igemm_4x8__fma3_broadcast)
 BENCHMARK_CONV(f32_igemm_5x8__fma3_broadcast)
@@ -940,7 +947,7 @@ BENCHMARK_CONV(f32_igemm_5x16__fma3_broadcast)
 BENCHMARK_CONV(f32_igemm_6x16__fma3_broadcast)
 BENCHMARK_CONV(f32_igemm_5x16__fma3_broadcast_prfm)
 BENCHMARK_CONV(f32_igemm_6x16__fma3_broadcast_prfm)
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif  // XNN_ENABLE_FMA3 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 static void f32_igemm_3x8__wasmsimd_arm_loadsplat(benchmark::State& state) {

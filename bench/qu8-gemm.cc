@@ -553,7 +553,7 @@ static void qu8_gemm_1x16c8__avx512skx(benchmark::State& state) {
 BENCHMARK_GEMM(qu8_gemm_1x16c8__avx512skx)
 #endif  // XNN_ENABLE_AVX512SKX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ENABLE_AVX2 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 static void qu8_gemm_1x8c8__avx2(benchmark::State& state) {
   GEMMBenchmark(state, xnn_qu8_gemm_minmax_fp32_ukernel_1x8c8__avx2,
                 xnn_init_qu8_conv_minmax_fp32_scalar_params, 1, 8, 8, 1,
@@ -570,6 +570,12 @@ static void qu8_gemm_3x8c8__avx2(benchmark::State& state) {
                 xnn_arch_x86_avx2);
 }
 
+BENCHMARK_GEMM(qu8_gemm_1x8c8__avx2)
+BENCHMARK_GEMM(qu8_gemm_2x8c8__avx2)
+BENCHMARK_GEMM(qu8_gemm_3x8c8__avx2)
+#endif  // XNN_ENABLE_AVX2 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+
+#if XNN_ENABLE_AVX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 static void qu8_gemm_1x4c2__avx_ld64(benchmark::State& state) {
   GEMMBenchmark(state, xnn_qu8_gemm_minmax_fp32_ukernel_1x4c8__avx_ld64,
                 xnn_init_qu8_conv_minmax_fp32_scalar_params, 1, 4, 2, 1,
@@ -640,6 +646,24 @@ static void qu8_gemm_3x4c8__avx_ld128(benchmark::State& state) {
                 xnn_init_qu8_conv_minmax_fp32_scalar_params, 3, 4, 8, 1,
                 xnn_arch_x86_avx);
 }
+
+BENCHMARK_GEMM(qu8_gemm_1x4c2__avx_ld64)
+BENCHMARK_GEMM(qu8_gemm_2x4c2__avx_ld64)
+BENCHMARK_GEMM(qu8_gemm_3x4c2__avx_ld64)
+BENCHMARK_GEMM(qu8_gemm_4x4c2__avx_ld64)
+BENCHMARK_GEMM(qu8_gemm_1x4c2__avx_ld128)
+BENCHMARK_GEMM(qu8_gemm_2x4c2__avx_ld128)
+BENCHMARK_GEMM(qu8_gemm_3x4c2__avx_ld128)
+BENCHMARK_GEMM(qu8_gemm_4x4c2__avx_ld128)
+BENCHMARK_GEMM(qu8_gemm_1x4c8__avx_ld64)
+BENCHMARK_GEMM(qu8_gemm_2x4c8__avx_ld64)
+BENCHMARK_GEMM(qu8_gemm_3x4c8__avx_ld64)
+BENCHMARK_GEMM(qu8_gemm_1x4c8__avx_ld128)
+BENCHMARK_GEMM(qu8_gemm_2x4c8__avx_ld128)
+BENCHMARK_GEMM(qu8_gemm_3x4c8__avx_ld128)
+#endif  // XNN_ENABLE_AVX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+
+#if XNN_ENABLE_SSE41 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 static void qu8_gemm_1x4c2__sse41_ld64(benchmark::State& state) {
   GEMMBenchmark(state, xnn_qu8_gemm_minmax_fp32_ukernel_1x4c8__sse41_ld64,
                 xnn_init_qu8_conv_minmax_fp32_scalar_params, 1, 4, 2, 1,
@@ -710,6 +734,24 @@ static void qu8_gemm_3x4c8__sse41_ld128(benchmark::State& state) {
                 xnn_init_qu8_conv_minmax_fp32_scalar_params, 3, 4, 8, 1,
                 xnn_arch_x86_sse4_1);
 }
+
+BENCHMARK_GEMM(qu8_gemm_1x4c2__sse41_ld64)
+BENCHMARK_GEMM(qu8_gemm_2x4c2__sse41_ld64)
+BENCHMARK_GEMM(qu8_gemm_3x4c2__sse41_ld64)
+BENCHMARK_GEMM(qu8_gemm_4x4c2__sse41_ld64)
+BENCHMARK_GEMM(qu8_gemm_1x4c2__sse41_ld128)
+BENCHMARK_GEMM(qu8_gemm_2x4c2__sse41_ld128)
+BENCHMARK_GEMM(qu8_gemm_3x4c2__sse41_ld128)
+BENCHMARK_GEMM(qu8_gemm_4x4c2__sse41_ld128)
+BENCHMARK_GEMM(qu8_gemm_1x4c8__sse41_ld64)
+BENCHMARK_GEMM(qu8_gemm_2x4c8__sse41_ld64)
+BENCHMARK_GEMM(qu8_gemm_3x4c8__sse41_ld64)
+BENCHMARK_GEMM(qu8_gemm_1x4c8__sse41_ld128)
+BENCHMARK_GEMM(qu8_gemm_2x4c8__sse41_ld128)
+BENCHMARK_GEMM(qu8_gemm_3x4c8__sse41_ld128)
+#endif  // XNN_ENABLE_SSE41 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
 static void qu8_gemm_1x4c2__sse2_ld64(benchmark::State& state) {
   GEMMBenchmark(state, xnn_qu8_gemm_minmax_fp32_ukernel_1x4c8__sse2_ld64,
                 xnn_init_qu8_conv_minmax_fp32_scalar_params,
@@ -780,40 +822,6 @@ static void qu8_gemm_3x4c8__sse2_ld128(benchmark::State& state) {
                 xnn_init_qu8_conv_minmax_fp32_scalar_params,
                 /*mr=*/3, /*nr=*/4, /*kr=*/8, /*sr=*/1);
 }
-
-BENCHMARK_GEMM(qu8_gemm_1x8c8__avx2)
-BENCHMARK_GEMM(qu8_gemm_2x8c8__avx2)
-BENCHMARK_GEMM(qu8_gemm_3x8c8__avx2)
-
-BENCHMARK_GEMM(qu8_gemm_1x4c2__avx_ld64)
-BENCHMARK_GEMM(qu8_gemm_2x4c2__avx_ld64)
-BENCHMARK_GEMM(qu8_gemm_3x4c2__avx_ld64)
-BENCHMARK_GEMM(qu8_gemm_4x4c2__avx_ld64)
-BENCHMARK_GEMM(qu8_gemm_1x4c2__avx_ld128)
-BENCHMARK_GEMM(qu8_gemm_2x4c2__avx_ld128)
-BENCHMARK_GEMM(qu8_gemm_3x4c2__avx_ld128)
-BENCHMARK_GEMM(qu8_gemm_4x4c2__avx_ld128)
-BENCHMARK_GEMM(qu8_gemm_1x4c8__avx_ld64)
-BENCHMARK_GEMM(qu8_gemm_2x4c8__avx_ld64)
-BENCHMARK_GEMM(qu8_gemm_3x4c8__avx_ld64)
-BENCHMARK_GEMM(qu8_gemm_1x4c8__avx_ld128)
-BENCHMARK_GEMM(qu8_gemm_2x4c8__avx_ld128)
-BENCHMARK_GEMM(qu8_gemm_3x4c8__avx_ld128)
-
-BENCHMARK_GEMM(qu8_gemm_1x4c2__sse41_ld64)
-BENCHMARK_GEMM(qu8_gemm_2x4c2__sse41_ld64)
-BENCHMARK_GEMM(qu8_gemm_3x4c2__sse41_ld64)
-BENCHMARK_GEMM(qu8_gemm_4x4c2__sse41_ld64)
-BENCHMARK_GEMM(qu8_gemm_1x4c2__sse41_ld128)
-BENCHMARK_GEMM(qu8_gemm_2x4c2__sse41_ld128)
-BENCHMARK_GEMM(qu8_gemm_3x4c2__sse41_ld128)
-BENCHMARK_GEMM(qu8_gemm_4x4c2__sse41_ld128)
-BENCHMARK_GEMM(qu8_gemm_1x4c8__sse41_ld64)
-BENCHMARK_GEMM(qu8_gemm_2x4c8__sse41_ld64)
-BENCHMARK_GEMM(qu8_gemm_3x4c8__sse41_ld64)
-BENCHMARK_GEMM(qu8_gemm_1x4c8__sse41_ld128)
-BENCHMARK_GEMM(qu8_gemm_2x4c8__sse41_ld128)
-BENCHMARK_GEMM(qu8_gemm_3x4c8__sse41_ld128)
 
 BENCHMARK_GEMM(qu8_gemm_1x4c2__sse2_ld64)
 BENCHMARK_GEMM(qu8_gemm_2x4c2__sse2_ld64)
