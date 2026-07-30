@@ -273,6 +273,12 @@ auto make_dot_impl(dot_type type, bool consistent_arithmetic, bool transposed_a,
     const slinky::dim& b_k2 = num_k_dims >= 2 ? b.dim(4) : dummy_dim;
     const slinky::dim& b_k3 = num_k_dims >= 3 ? b.dim(5) : dummy_dim;
 
+    if (c_n.empty()) {
+      // Most things below transparently handle empty dimensions, but n has some
+      // alignment requirements.
+      return 0;
+    }
+
     const int b_type_element_count = type_element_count(type.b);
     const index_t tile_k = b_k1i.extent() * b_type_element_count;
     // If a is transposed, then the k dimension has been reshaped to have
@@ -561,7 +567,7 @@ auto make_pack_impl(int elem_count) {
     (void)output_ki;
 
     input.slice(0, output_no.min() * block_n / elem_count);
-    input.slice(0, slinky::in_bounds{output_ko.min() * tile_k});
+    input.slice(0, output_ko.min() * tile_k);
     output.slice({0, 1, 2, 3});
 
     // Depending on the strides of the input, we might use either an interleave
