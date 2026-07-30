@@ -2213,6 +2213,10 @@ void xnn_subgraph_clean_up(xnn_subgraph_t subgraph) {
   uint32_t* nodes_map =
       xnn_allocate_memory(sizeof(uint32_t) * subgraph->num_nodes +
                           sizeof(bool) * subgraph->num_values);
+  if (nodes_map == NULL) {
+    xnn_log_error("failed to allocate nodes_map scratch buffer");
+    return;
+  }
   bool* values_ready = (bool*)&nodes_map[subgraph->num_nodes];
   for (uint32_t i = 0; i < subgraph->num_values; i++) {
     struct xnn_value* value = &subgraph->values[i];
@@ -4490,6 +4494,10 @@ static void replace_in_set(uint32_t* set, uint32_t size, uint32_t old_value,
 void xnn_subgraph_rewrite_ssa(xnn_subgraph_t subgraph) {
   bool* values_written =
       (bool*)xnn_allocate_memory(sizeof(bool) * subgraph->num_values);
+  if (values_written == NULL) {
+    xnn_log_error("failed to allocate values_written scratch buffer");
+    return;
+  }
   for (uint32_t i = 0; i < subgraph->num_values; i++) {
     values_written[i] = false;
   }
