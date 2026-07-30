@@ -121,7 +121,7 @@ BENCHMARK_CAPTURE(x8_lut, avx512skx_vpshufb_u256,
     ->UseRealTime();
 #endif  // XNN_ENABLE_AVX512SKX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ENABLE_AVX2 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 BENCHMARK_CAPTURE(x8_lut, avx2_u32, xnn_x8_lut_ukernel__avx2_u32,
                   xnn_arch_x86_avx2)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<uint8_t, uint8_t>)
@@ -138,7 +138,9 @@ BENCHMARK_CAPTURE(x8_lut, avx2_u128, xnn_x8_lut_ukernel__avx2_u128,
                   xnn_arch_x86_avx2)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<uint8_t, uint8_t>)
     ->UseRealTime();
+#endif  // XNN_ENABLE_AVX2 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
+#if XNN_ENABLE_AVX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 BENCHMARK_CAPTURE(x8_lut, avx_u16, xnn_x8_lut_ukernel__avx_u16,
                   xnn_arch_x86_avx)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<uint8_t, uint8_t>)
@@ -155,7 +157,9 @@ BENCHMARK_CAPTURE(x8_lut, avx_u64, xnn_x8_lut_ukernel__avx_u64,
                   xnn_arch_x86_avx)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<uint8_t, uint8_t>)
     ->UseRealTime();
+#endif  // XNN_ENABLE_AVX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
+#if XNN_ENABLE_SSSE3 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 BENCHMARK_CAPTURE(x8_lut, ssse3_u16, xnn_x8_lut_ukernel__ssse3_u16,
                   xnn_arch_x86_ssse3)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<uint8_t, uint8_t>)
@@ -164,7 +168,7 @@ BENCHMARK_CAPTURE(x8_lut, ssse3_u32, xnn_x8_lut_ukernel__ssse3_u32,
                   xnn_arch_x86_ssse3)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<uint8_t, uint8_t>)
     ->UseRealTime();
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif  // XNN_ENABLE_SSSE3 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 #if XNN_ARCH_WASMRELAXEDSIMD
 BENCHMARK_CAPTURE(x8_lut, wasmpshufb_u16, xnn_x8_lut_ukernel__wasmpshufb_u16)

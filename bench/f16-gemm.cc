@@ -268,7 +268,7 @@ BENCHMARK_GEMM(f16_gemm_6x16__neonfp16arith_ld64)
 BENCHMARK_GEMM(f16_gemm_8x16__neonfp16arith_ld64)
 #endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ENABLE_AVX2 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 static void f16_gemm_1x8__avx2_broadcast(benchmark::State& state) {
   f16_gemm(state, xnn_f16_gemm_minmax_ukernel_1x8__avx2_broadcast,
            xnn_init_f16_minmax_scalar_params,
@@ -328,7 +328,7 @@ BENCHMARK_GEMM(f16_gemm_1x16__avx2_broadcast)
 BENCHMARK_GEMM(f16_gemm_3x16__avx2_broadcast)
 BENCHMARK_GEMM(f16_gemm_4x16__avx2_broadcast)
 BENCHMARK_GEMM(f16_gemm_5x16__avx2_broadcast)
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif  // XNN_ENABLE_AVX2 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 #if XNN_ARCH_WASMRELAXEDSIMD
 static void f16_gemm_1x8__wasmrelaxedsimd_splat(benchmark::State& state) {

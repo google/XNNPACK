@@ -704,13 +704,21 @@ class Fp16ToFp32FineGrainedOpSupportTest : public testing::Test {
  public:
   void SetUp() override {
 #if XNN_ARCH_ARM64
+#if !XNN_ENABLE_ARM_FP16_VECTOR
+    GTEST_SKIP();
+#else
     mock_config_.arch_flags |= xnn_arch_arm_neon_fp16_arith;
+#endif
 #elif XNN_ARCH_X86_64
+#if !XNN_ENABLE_F16C || !XNN_ENABLE_AVX2
+    GTEST_SKIP();
+#else
     mock_config_.arch_flags |= xnn_arch_x86_sse2;
     mock_config_.arch_flags |= xnn_arch_x86_avx;
     mock_config_.arch_flags |= xnn_arch_x86_f16c;
     mock_config_.arch_flags |= xnn_arch_x86_fma3;
     mock_config_.arch_flags |= xnn_arch_x86_avx2;
+#endif
 #else
     GTEST_SKIP();
 #endif

@@ -159,7 +159,7 @@ static void f16_igemm(benchmark::State& state,
       benchmark::Counter::kIsRate);
 }
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ENABLE_AVX2 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 static void f16_f32acc_igemm_1x8__avx2_broadcast(benchmark::State& state) {
   f16_igemm(state, xnn_f16_f32acc_igemm_minmax_ukernel_1x8__avx2_broadcast, 1,
             8, 1, 1, xnn_init_f16_minmax_scalar_params,
@@ -215,6 +215,7 @@ BENCHMARK_CONV(f16_f32acc_igemm_1x16__avx2_broadcast)
 BENCHMARK_CONV(f16_f32acc_igemm_3x16__avx2_broadcast)
 BENCHMARK_CONV(f16_f32acc_igemm_4x16__avx2_broadcast)
 BENCHMARK_CONV(f16_f32acc_igemm_5x16__avx2_broadcast)
+#endif  // XNN_ENABLE_AVX2 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 #if XNN_ENABLE_AVX512SKX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 static void f16_f32acc_igemm_1x16__avx512skx_broadcast(benchmark::State& state) {
@@ -291,7 +292,6 @@ BENCHMARK_CONV(f16_f32acc_igemm_6x32__avx512skx_broadcast)
 BENCHMARK_CONV(f16_f32acc_igemm_7x32__avx512skx_broadcast)
 BENCHMARK_CONV(f16_f32acc_igemm_8x32__avx512skx_broadcast)
 #endif  // XNN_ENABLE_AVX512SKX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
 XNN_BENCHMARK_MAIN();
