@@ -18,8 +18,8 @@ void xnn_qp8_f32_qb4w_gemm_minmax_ukernel_8x4c16s2__neoni8mm_mstep2(
     const void* rhs_packed, float* dst, size_t dst_stride_row,
     size_t dst_stride_col,
     const void* params) {
-  const struct xnn_f32_qb4w_minmax_params* minmax_params = params;
 #if XNN_ENABLE_KLEIDIAI
+  const struct xnn_f32_qb4w_minmax_params* minmax_params = params;
   kai_run_matmul_clamp_f32_qai8dxp4x8_qsi4c32p4x8_8x4x32_neon_i8mm(
       m, n, k, minmax_params->scalar.blocksize, lhs_packed, rhs_packed, dst, dst_stride_row, dst_stride_col,
       minmax_params->scalar.min, minmax_params->scalar.max);
