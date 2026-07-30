@@ -399,6 +399,18 @@ void ynn_runtime::schedule() {
     return it != source_regions.end() ? it->second : -1;
   };
 
+  // Slinky doesn't allocate the pipeline's output buffers, and as a result it
+  // also never crops them to the region a loop iteration needs. Fusing the
+  // producer of an external output into a loop of one of its consumers would
+  // therefore run the producer (and everything it depends on) over the
+  // whole output on *every* iteration of that loop.
+  std::set<slinky::var> external_output_syms;
+  for (const ynn_runtime_value& value : values) {
+    if (value.is_valid() && value.is_external_output()) {
+      external_output_syms.insert(value.symbol);
+    }
+  }
+
   for (int i = funcs.size() - 1; i >= 0; --i) {
     slinky::func& f = funcs[i];
     scheduling_data& sched_data = func_scheduling_data[i];
@@ -564,9 +576,21 @@ void ynn_runtime::schedule() {
       loop_nest.erase(loop_nest.begin() + compute_at, loop_nest.end());
     }
 
-    if (sched && sched->force_root) {
+    // A function producing an external output cannot be fused into a loop of
+    // its consumers without recomputing all of it on every iteration, see
+    // `external_output_syms` above.
+    const bool produces_external_output =
+        !loop_nest.empty() &&
+        std::any_of(f.outputs().begin(), f.outputs().end(),
+                    [&](const slinky::func::output& o) {
+                      return external_output_syms.count(o.buffer->sym()) > 0;
+                    });
+
+    if ((sched && sched->force_root) || produces_external_output) {
       compute_at = 0;
-      sched_data.split_matched.assign(sched->loop_splits.size(), false);
+      if (sched) {
+        sched_data.split_matched.assign(sched->loop_splits.size(), false);
+      }
       loop_nest.clear();
     }
 
