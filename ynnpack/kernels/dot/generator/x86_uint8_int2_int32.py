@@ -40,14 +40,16 @@ class x86_uint8_int2_int32(x86):
     bits = self.bits
     broadcast_128 = self.broadcast_128()
     return super().begin_func(func_name) + f"""
-__m{bits}i mask_k02 = {mm}_set1_epi8(0x33);
+const __m{bits}i mask = {mm}_set1_epi8(0x0F);
 const __m{bits}i sign_lut = {broadcast_128}(_mm_setr_epi8(0, 1, -2, -1, 0, 1, -2, -1, 0, 1, -2, -1, 0, 1, -2, -1));
+const __m{bits}i sign_lut_x4 = {broadcast_128}(_mm_setr_epi8(0, 0, 0, 0, 1, 1, 1, 1, -2, -2, -2, -2, -1, -1, -1, -1));
 const __m{bits}i shuf_a0 = {broadcast_128}(_mm_setr_epi8(0, 4, 8, 12, 0, 4, 8, 12, 0, 4, 8, 12, 0, 4, 8, 12));
 const __m{bits}i shuf_a1 = {broadcast_128}(_mm_setr_epi8(1, 5, 9, 13, 1, 5, 9, 13, 1, 5, 9, 13, 1, 5, 9, 13));
 const __m{bits}i shuf_a2 = {broadcast_128}(_mm_setr_epi8(2, 6, 10, 14, 2, 6, 10, 14, 2, 6, 10, 14, 2, 6, 10, 14));
 const __m{bits}i shuf_a3 = {broadcast_128}(_mm_setr_epi8(3, 7, 11, 15, 3, 7, 11, 15, 3, 7, 11, 15, 3, 7, 11, 15));
-YNN_OPTIMIZATION_BARRIER(mask_k02);
+YNN_FORCE_REALIZATION(mask);
 YNN_FORCE_REALIZATION(sign_lut);
+YNN_FORCE_REALIZATION(sign_lut_x4);
 YNN_FORCE_REALIZATION(shuf_a0);
 YNN_FORCE_REALIZATION(shuf_a1);
 YNN_FORCE_REALIZATION(shuf_a2);
@@ -58,22 +60,20 @@ YNN_FORCE_REALIZATION(shuf_a3);
     bits = self.bits
     mm = self._mm()
     # Unpack 2-bit data to 8-bit, leaving every 4th value of K in 4 registers.
-    # The sign_lut effectively computes x % 4, but shuffle_epi8 has a special
-    # case for when the upper bits are set. so we need to mask off the bits that
-    # would pollute the upper bit of each 8-bit lane before applying sign_lut.
+    # sign_lut computes sign_lut[x % 4], so it ignores the upper bits (except
+    # the most significant bit). sign_lut_x4 computes sign_lut[(x / 4) % 4], it
+    # ignores the lower 2 bits. Because of this, we only need to shift once, and
+    # mask twice (instead of shift 3 times, mask 4 times)
     return f"""
 __m{bits}i b_{k+0}_{j} = {mm}_load_si{bits}({self.b_ptr(k, j, f"__m{bits}i")});
-__m{bits}i b_{k+1}_{j} = {mm}_andnot_si{bits}(mask_k02, b_{k+0}_{j});
-b_{k+0}_{j} = {mm}_and_si{bits}(mask_k02, b_{k+0}_{j});
-
-__m{bits}i b_{k+3}_{j} = {mm}_srli_epi32(b_{k+1}_{j}, 6);
 __m{bits}i b_{k+2}_{j} = {mm}_srli_epi32(b_{k+0}_{j}, 4);
-b_{k+1}_{j} = {mm}_srli_epi32(b_{k+1}_{j}, 2);
+b_{k+2}_{j} = {mm}_and_si{bits}(mask, b_{k+2}_{j});
+b_{k+0}_{j} = {mm}_and_si{bits}(mask, b_{k+0}_{j});
 
+__m{bits}i b_{k+1}_{j} = {mm}_shuffle_epi8(sign_lut_x4, b_{k+0}_{j});
+__m{bits}i b_{k+3}_{j} = {mm}_shuffle_epi8(sign_lut_x4, b_{k+2}_{j});
 b_{k+0}_{j} = {mm}_shuffle_epi8(sign_lut, b_{k+0}_{j});
-b_{k+1}_{j} = {mm}_shuffle_epi8(sign_lut, b_{k+1}_{j});
 b_{k+2}_{j} = {mm}_shuffle_epi8(sign_lut, b_{k+2}_{j});
-b_{k+3}_{j} = {mm}_shuffle_epi8(sign_lut, b_{k+3}_{j});
 """
 
   def load_a_tile(self, i, k):
@@ -157,7 +157,10 @@ c_{i}_{j} = {mm}_dpbusd_epi32(c_{i}_{j}, a_{i}_{k+3}, b_{k+3}_{j});
 generate_dot_kernels(
     x86_avx2_uint8_int2_int32(),
     [
-        (1, 32, 32),
+        # Register pressure is high here. For m = 1, it's better to reduce
+        # block_k unrolling, despite widening earlier. For m > 1, the widening
+        # optimization is more helpful.
+        (1, 32, 16),
         (2, 32, 32),
         (3, 32, 32),
         (4, 32, 32),
