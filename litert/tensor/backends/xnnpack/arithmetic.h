@@ -62,6 +62,12 @@ class XnnpackBuildContext {
   absl::StatusOr<std::unique_ptr<XnnpackGraph>> Finalize();
   // Defines a tensor in the XNNPACK subgraph.
   absl::StatusOr<uint32_t> DefineValue(const graph::Tensor& tensor);
+  // Defines a constant tensor in the XNNPACK subgraph.
+  // The data will be copied and its lifetime will be managed by the
+  // graph/runner.
+  absl::StatusOr<uint32_t> DefineConstant(const void* data, size_t bytes,
+                                          ::xnn_datatype datatype,
+                                          std::vector<size_t> shape);
   // Returns the XNNPACK subgraph.
   ::xnn_subgraph* subgraph();
 
@@ -74,6 +80,7 @@ class XnnpackBuildContext {
   absl::flat_hash_map<graph::Tensor, uint32_t> external_ids_;
   std::vector<std::vector<float>> dequantized_buffers_;
   std::vector<std::vector<fp16_t>> fp16_buffers_;
+  std::vector<std::vector<char>> constant_buffers_;
 
   friend absl::StatusOr<std::unique_ptr<XnnpackGraph>> BuildXnnpackGraph(
       std::vector<TensorHandle> outputs);

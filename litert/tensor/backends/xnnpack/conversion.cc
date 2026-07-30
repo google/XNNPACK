@@ -225,13 +225,15 @@ XnnpackGraph::XnnpackGraph(
     absl::flat_hash_map<graph::Tensor, size_t> tensor_index,
     absl::flat_hash_set<graph::Tensor> external_outputs,
     std::vector<std::vector<float>> dequantized_buffers,
-    std::vector<std::vector<fp16_t>> fp16_buffers)
+    std::vector<std::vector<fp16_t>> fp16_buffers,
+    std::vector<std::vector<char>> constant_buffers)
     : subgraph_(subgraph),
       values_(std::move(values)),
       tensor_index_(std::move(tensor_index)),
       external_outputs_(std::move(external_outputs)),
       dequantized_buffers_(std::move(dequantized_buffers)),
-      fp16_buffers_(std::move(fp16_buffers)) {}
+      fp16_buffers_(std::move(fp16_buffers)),
+      constant_buffers_(std::move(constant_buffers)) {}
 
 XnnpackGraph::~XnnpackGraph() {
   if (subgraph_ != nullptr) {
@@ -285,7 +287,7 @@ absl::StatusOr<std::unique_ptr<XnnpackGraph>> XnnpackBuildContext::Finalize() {
   return std::make_unique<XnnpackGraph>(
       subgraph, std::move(values_), std::move(tensor_index_),
       std::move(external_outputs_), std::move(dequantized_buffers_),
-      std::move(fp16_buffers_));
+      std::move(fp16_buffers_), std::move(constant_buffers_));
 }
 
 absl::StatusOr<std::unique_ptr<XnnpackGraph>> BuildXnnpackGraph(
@@ -434,6 +436,22 @@ absl::StatusOr<uint32_t> XnnpackBuildContext::DefineValue(
   tensor_index_.emplace(tensor, values_.size());
   values_.emplace_back(std::move(value));
   return values_.back().id;
+}
+
+absl::StatusOr<uint32_t> XnnpackBuildContext::DefineConstant(
+    const void* data, size_t bytes, ::xnn_datatype datatype,
+    std::vector<size_t> shape) {
+  constant_buffers_.emplace_back(reinterpret_cast<const char*>(data),
+                                 reinterpret_cast<const char*>(data) + bytes);
+  const void* copied_data_ptr = constant_buffers_.back().data();
+
+  uint32_t id = XNN_INVALID_VALUE_ID;
+  LRT_TENSOR_RETURN_IF_ERROR(xnn_define_tensor_value(
+      subgraph_, datatype, shape.size(), shape.empty() ? nullptr : shape.data(),
+      copied_data_ptr, XNN_INVALID_VALUE_ID,
+      /*flags=*/0, &id))
+      << "Could not define a new constant tensor value.";
+  return id;
 }
 
 ::xnn_subgraph* XnnpackBuildContext::subgraph() { return subgraph_; }
