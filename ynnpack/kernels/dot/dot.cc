@@ -8,7 +8,6 @@
 #include <cassert>
 #include <cstddef>
 #include <cstdint>
-#include <limits>
 #include <optional>
 #include <type_traits>
 
@@ -16,6 +15,7 @@
 #include "ynnpack/base/arithmetic.h"
 #include "ynnpack/base/base.h"
 #include "ynnpack/base/bfloat16.h"
+#include "ynnpack/base/fp8.h"
 #include "ynnpack/base/half.h"
 #include "ynnpack/base/log.h"
 #include "ynnpack/base/type.h"
@@ -400,9 +400,6 @@ dot_kernel get_dot_kernel(const dot_shape& shape,
       YNN_LOG_DEBUG() << "Using dot kernel " << optimizer.kernel_used
                       << " for dot " << shape.m << "x" << shape.n << "x"
                       << shape.k1;
-    } else {
-      YNN_LOG_WARNING() << "No dot kernel found for dot " << shape.m << "x"
-                        << shape.n << "x" << shape.k1;
     }
   }
   return optimizer.result;
