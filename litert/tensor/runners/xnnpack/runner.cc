@@ -141,9 +141,7 @@ absl::Status XnnpackRunner::WriteInput(const TensorHandle& tensor,
   return absl::OkStatus();
 }
 
-// Runs the XNNPACK graph.
-absl::Status XnnpackRunner::Run() {
-  // Create the XNNPACK runtime if it doesn't exist.
+absl::Status XnnpackRunner::PrepareRuntime() {
   if (runtime_ == nullptr) {
     if (num_threads_ > 1) {
       threadpool_.reset(pthreadpool_create(num_threads_));
@@ -155,6 +153,12 @@ absl::Status XnnpackRunner::Run() {
                               /*flags=*/0, &raw_runtime));
     runtime_.reset(raw_runtime);
   }
+  return absl::OkStatus();
+}
+
+// Runs the XNNPACK graph.
+absl::Status XnnpackRunner::Run() {
+  LRT_TENSOR_RETURN_IF_ERROR(PrepareRuntime());
 
   // Reshape external inputs to match the current host-side tensor shapes.
   for (XnnpackValue& value : graph_->mutable_values()) {

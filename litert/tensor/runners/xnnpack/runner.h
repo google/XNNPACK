@@ -61,6 +61,10 @@ class XnnpackRunner {
     weights_cache_ = weights_cache;
   }
 
+  // Prepares the XNNPACK runtime (compiles the graph into operators and packs
+  // weights).
+  absl::Status PrepareRuntime();
+
   // Sets the input data for a given tensor.
   absl::Status SetInput(const TensorHandle& tensor,
                         absl::Span<const std::byte> data,
