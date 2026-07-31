@@ -260,6 +260,8 @@ struct ynn_node {
           return a.params.tanh == b.params.tanh;
         case ynn_unary_poly3:
           return a.params.poly3 == b.params.poly3;
+        case ynn_unary_rsqrt:
+          return a.params.rsqrt == b.params.rsqrt;
         default:
           break;
       }
@@ -281,6 +283,8 @@ struct ynn_node {
           return a.params.tanh < b.params.tanh;
         case ynn_unary_poly3:
           return a.params.poly3 < b.params.poly3;
+        case ynn_unary_rsqrt:
+          return a.params.rsqrt < b.params.rsqrt;
         default:
           break;
       }

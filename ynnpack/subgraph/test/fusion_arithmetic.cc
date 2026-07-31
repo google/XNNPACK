@@ -1182,4 +1182,40 @@ TEST(fusion, multiply_reciprocal_commutative) {
               AllOf(IsBinary(ynn_binary_divide), InputsAre(x_id, y_id)));
 }
 
+TEST(fusion, rsqrt_input_fusion) {
+  // rsqrt(mul(add(x, B), A)) -> rsqrt(x, multiplier = A, offset = B * A)
+  // (assuming initial multiplier = 1, offset = 0)
+  const uint32_t x_id = 0;
+  const uint32_t b_id = 1;
+  const uint32_t a_id = 2;
+  const uint32_t out_id = 3;
+  SubgraphBuilder builder(4);
+  uint32_t y_id = YNN_INVALID_VALUE_ID;
+  uint32_t z_id = YNN_INVALID_VALUE_ID;
+  float b = 3.0f;
+  float a = 2.0f;
+  builder.AddInput(ynn_type_fp32, 2, x_id)
+      .AddScalar(b, b_id)
+      .AddScalar(a, a_id)
+      .AddOutput(ynn_type_fp32, 2, out_id)
+      .AddTensor(ynn_type_fp32, 2, y_id)
+      .AddTensor(ynn_type_fp32, 2, z_id);
+
+  builder.AddBinary(ynn_binary_add, x_id, b_id, y_id)
+      .AddBinary(ynn_binary_multiply, y_id, a_id, z_id)
+      .AddUnary(ynn_unary_rsqrt, z_id, out_id);
+
+  ynn_subgraph& subgraph = *builder.GetSubgraph();
+
+  subgraph.fusion();
+  subgraph.invalidate_dead_values();
+
+  ASSERT_THAT(subgraph, AllOf(HasValidNodeCount(1)));
+  const ynn_node& node = ProducerOf(out_id, subgraph);
+  EXPECT_THAT(node, IsUnary(ynn_unary_rsqrt));
+  const auto& unary = std::get<ynn_node::unary_elementwise>(node.op);
+  EXPECT_NEAR(unary.params.rsqrt.input_multiplier, 2.0f, 1e-6f);
+  EXPECT_NEAR(unary.params.rsqrt.input_offset, 6.0f, 1e-6f);
+}
+
 }  // namespace ynn

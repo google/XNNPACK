@@ -176,9 +176,16 @@ struct tanh_op {
 };
 
 struct rsqrt_op {
-  explicit rsqrt_op(const unary_params& = {}) {}
-  float operator()(float x) const { return 1.0f / std::sqrt(x); }
-  double operator()(double x) const { return 1.0 / std::sqrt(x); }
+  rsqrt_params params;
+
+  explicit rsqrt_op(const unary_params& params) : params(params.rsqrt) {}
+  float operator()(float x) const {
+    return 1.0f / std::sqrt(x * static_cast<float>(params.input_multiplier) +
+                            static_cast<float>(params.input_offset));
+  }
+  double operator()(double x) const {
+    return 1.0 / std::sqrt(x * params.input_multiplier + params.input_offset);
+  }
 };
 
 struct log_op {
@@ -546,6 +553,9 @@ unary_params get_unary_params(ynn_unary_operator op) {
     case ynn_unary_poly3:
       return unary_params{.poly3 = poly3_params{/*c0=*/0.0, /*c1=*/0.0,
                                                 /*c2=*/0.0, /*c3=*/0.0}};
+    case ynn_unary_rsqrt:
+      return unary_params{.rsqrt = rsqrt_params{.input_offset = 0.0,
+                                                .input_multiplier = 1.0}};
     default:
       return unary_params{};
   }

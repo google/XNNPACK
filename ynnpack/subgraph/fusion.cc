@@ -31,7 +31,6 @@
 #include "ynnpack/subgraph/fusion_lut.h"
 #include "ynnpack/subgraph/fusion_types.h"
 #include "ynnpack/subgraph/reduce.h"
-#include "ynnpack/subgraph/static_slice.h"
 #include "ynnpack/subgraph/static_transpose.h"
 #include "ynnpack/subgraph/stencil_copy.h"
 #include "ynnpack/subgraph/subgraph.h"
@@ -1441,7 +1440,7 @@ bool rewrite_ternary_convert(ynn_subgraph& subgraph, ynn_node& node,
   return false;
 }
 
-// Rewrite f(x * C) to fold the arithmetic into the params.
+// Rewrite f(x * A + B) to fold the arithmetic into the params.
 bool fold_unary_input(ynn_subgraph& subgraph, ynn_node& node,
                       subgraph_analysis& analysis) {
   ynn_node::unary_elementwise* unary =
@@ -1456,6 +1455,7 @@ bool fold_unary_input(ynn_subgraph& subgraph, ynn_node& node,
     case ynn_unary_log1p:
     case ynn_unary_erf:
     case ynn_unary_approx_erf:
+    case ynn_unary_rsqrt:
       break;
     default:
       return false;
@@ -1467,8 +1467,13 @@ bool fold_unary_input(ynn_subgraph& subgraph, ynn_node& node,
   }
   if (auto mul = is_scalar_arithmetic(subgraph, *producer)) {
     if (mul->b != 0.0f) {
-      // We can't handle addition here.
-      return false;
+      switch (unary->op) {
+        case ynn_unary_rsqrt:
+          break;
+        default:
+          // We can't handle addition here.
+          return false;
+      }
     }
 
     ynn_type input_type = subgraph.value(mul->x_id).type;
@@ -1493,6 +1498,10 @@ bool fold_unary_input(ynn_subgraph& subgraph, ynn_node& node,
       unary->params.exp.input_multiplier *= mul->a;
     } else if (unary->op == ynn_unary_approx_erf) {
       unary->params.approx_erf.input_multiplier *= mul->a;
+    } else if (unary->op == ynn_unary_rsqrt) {
+      unary->params.rsqrt.input_offset +=
+          mul->b * unary->params.rsqrt.input_multiplier;
+      unary->params.rsqrt.input_multiplier *= mul->a;
     } else {
       unary->params.erf.input_multiplier *= mul->a;
     }
