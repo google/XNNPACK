@@ -231,11 +231,10 @@ class VUnaryMicrokernelTester {
             (UKernelParamsType*)&uparams);
     for (size_t i = 0; i < outputs.size(); i++) {
       if (std::isfinite(static_cast<float>(expected[i]))) {
-        ASSERT_NEAR(
-            static_cast<float>(expected[i]), static_cast<float>(outputs[i]),
-            tolerance_ulp *
-                std::max(1.0f, std::abs(static_cast<float>(expected[i]))) *
-                std::numeric_limits<float>::epsilon())
+        ASSERT_NEAR(static_cast<float>(expected[i]),
+                    static_cast<float>(outputs[i]),
+                    tolerance_ulp * std::abs(static_cast<float>(expected[i])) *
+                        std::numeric_limits<float>::epsilon())
             << "for input " << static_cast<float>(inputs[i]);
       } else {
         EXPECT_EQ(std::fpclassify(static_cast<float>(expected[i])),
