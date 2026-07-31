@@ -34,6 +34,7 @@ SET(PROD_SSE2_MICROKERNEL_SRCS
   src/f32-vcopysign/gen/f32-vcopysign-sse2.c
   src/f32-vcopysign/gen/f32-vcopysignc-sse2.c
   src/f32-vcopysign/gen/f32-vrcopysignc-sse2.c
+  src/f32-vcos/gen/f32-vcos-sse2-poly-4.c
   src/f32-vcos/gen/f32-vcos-sse2-rational-5-4-div.c
   src/f32-velu/gen/f32-velu-sse2-rr2-lut16-p3-u12.c
   src/f32-vexp/gen/f32-vexp-sse2-rational-3-2-div.c
@@ -48,6 +49,7 @@ SET(PROD_SSE2_MICROKERNEL_SRCS
   src/f32-vrsqrt/gen/f32-vrsqrt-sse2-sqrt.c
   src/f32-vsigmoid/gen/f32-vsigmoid-sse2-rr2-lut64-p2-div-u8.c
   src/f32-vsigmoid/gen/f32-vsigmoid-sse2-rr2-p5-div-u8.c
+  src/f32-vsin/gen/f32-vsin-sse2-poly-4.c
   src/f32-vsin/gen/f32-vsin-sse2-rational-5-4-div.c
   src/f32-vsqrt/gen/f32-vsqrt-sse2-rsqrt.c
   src/f32-vsqrt/gen/f32-vsqrt-sse2-sqrt.c

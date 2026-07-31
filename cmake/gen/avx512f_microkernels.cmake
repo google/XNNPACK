@@ -64,6 +64,7 @@ SET(PROD_AVX512F_MICROKERNEL_SRCS
   src/f32-vcopysign/gen/f32-vcopysign-avx512f.c
   src/f32-vcopysign/gen/f32-vcopysignc-avx512f.c
   src/f32-vcopysign/gen/f32-vrcopysignc-avx512f.c
+  src/f32-vcos/gen/f32-vcos-avx512f-poly-4.c
   src/f32-vcos/gen/f32-vcos-avx512f-rational-5-4-div.c
   src/f32-velu/gen/f32-velu-avx512f-rr1-p6-u64.c
   src/f32-vexp/gen/f32-vexp-avx512f-rational-3-2-div.c
@@ -78,6 +79,7 @@ SET(PROD_AVX512F_MICROKERNEL_SRCS
   src/f32-vrsqrt/gen/f32-vrsqrt-avx512f-rsqrt.c
   src/f32-vrsqrt/gen/f32-vrsqrt-avx512f-sqrt.c
   src/f32-vsigmoid/gen/f32-vsigmoid-avx512f-rr2-lut32-p2-perm2-scalef-div-u64.c
+  src/f32-vsin/gen/f32-vsin-avx512f-poly-4.c
   src/f32-vsin/gen/f32-vsin-avx512f-rational-5-4-div.c
   src/f32-vsqrt/gen/f32-vsqrt-avx512f-rsqrt.c
   src/f32-vtanh/gen/f32-vtanh-avx512f-rational-9-8-div.c

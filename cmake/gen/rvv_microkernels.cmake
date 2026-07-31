@@ -69,6 +69,7 @@ SET(PROD_RVV_MICROKERNEL_SRCS
   src/f32-vcopysign/gen/f32-vcopysign-rvv-u8v.c
   src/f32-vcopysign/gen/f32-vcopysignc-rvv-u8v.c
   src/f32-vcopysign/gen/f32-vrcopysignc-rvv-u8v.c
+  src/f32-vcos/gen/f32-vcos-rvv-poly-4-u4v.c
   src/f32-vcos/gen/f32-vcos-rvv-rational-5-4-div-u8v.c
   src/f32-velu/gen/f32-velu-rvv-rr2-p6-u4v.c
   src/f32-vexp/gen/f32-vexp-rvv-rational-3-2-div-u8v.c
@@ -83,6 +84,7 @@ SET(PROD_RVV_MICROKERNEL_SRCS
   src/f32-vrnd/gen/f32-vrndz-rvv-u4v.c
   src/f32-vrsqrt/gen/f32-vrsqrt-rvv-rsqrt-u4v.c
   src/f32-vsigmoid/gen/f32-vsigmoid-rvv-rr2-p5-div-u8v.c
+  src/f32-vsin/gen/f32-vsin-rvv-poly-4-u4v.c
   src/f32-vsin/gen/f32-vsin-rvv-rational-5-4-div-u8v.c
   src/f32-vsqrt/gen/f32-vsqrt-rvv-sqrt-u8v.c
   src/f32-vtanh/gen/f32-vtanh-rvv-rational-9-8-div-u8v.c
@@ -247,6 +249,9 @@ SET(NON_PROD_RVV_MICROKERNEL_SRCS
   src/f32-vcopysign/gen/f32-vcopysign-rvv-u4v.c
   src/f32-vcopysign/gen/f32-vcopysignc-rvv-u4v.c
   src/f32-vcopysign/gen/f32-vrcopysignc-rvv-u4v.c
+  src/f32-vcos/gen/f32-vcos-rvv-poly-4-u1v.c
+  src/f32-vcos/gen/f32-vcos-rvv-poly-4-u2v.c
+  src/f32-vcos/gen/f32-vcos-rvv-poly-4-u8v.c
   src/f32-vcos/gen/f32-vcos-rvv-rational-5-4-div-u1v.c
   src/f32-vcos/gen/f32-vcos-rvv-rational-5-4-div-u2v.c
   src/f32-vcos/gen/f32-vcos-rvv-rational-5-4-div-u4v.c
@@ -290,6 +295,9 @@ SET(NON_PROD_RVV_MICROKERNEL_SRCS
   src/f32-vsigmoid/gen/f32-vsigmoid-rvv-rr2-p5-div-u1v.c
   src/f32-vsigmoid/gen/f32-vsigmoid-rvv-rr2-p5-div-u2v.c
   src/f32-vsigmoid/gen/f32-vsigmoid-rvv-rr2-p5-div-u4v.c
+  src/f32-vsin/gen/f32-vsin-rvv-poly-4-u1v.c
+  src/f32-vsin/gen/f32-vsin-rvv-poly-4-u2v.c
+  src/f32-vsin/gen/f32-vsin-rvv-poly-4-u8v.c
   src/f32-vsin/gen/f32-vsin-rvv-rational-5-4-div-u1v.c
   src/f32-vsin/gen/f32-vsin-rvv-rational-5-4-div-u2v.c
   src/f32-vsin/gen/f32-vsin-rvv-rational-5-4-div-u4v.c

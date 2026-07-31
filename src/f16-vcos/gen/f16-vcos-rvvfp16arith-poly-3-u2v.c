@@ -52,8 +52,8 @@ void xnn_f16_vcos_ukernel__rvvfp16arith_poly_3_u2v(
     vfloat16m2_t vk = __riscv_vfadd(vy, vmagic, vl);
     vfloat16m2_t vk_float = __riscv_vfsub(vk, vmagic, vl);
 
-    vx = __riscv_vfadd(__riscv_vfmul(vk_float, vhalf_pi_0, vl), vx, vl);
-    vx = __riscv_vfadd(__riscv_vfmul(vk_float, vhalf_pi_1, vl), vx, vl);
+    vx = __riscv_vfmacc_vf_f16m2(vx, vhalf_pi_0, vk_float, vl);
+    vx = __riscv_vfmacc_vf_f16m2(vx, vhalf_pi_1, vk_float, vl);
 
     vfloat16m2_t vk_quad = __riscv_vfadd(vk, 1.0f16, vl);
     vuint16m2_t vu_quad = __riscv_vreinterpret_u16m2(vk_quad);

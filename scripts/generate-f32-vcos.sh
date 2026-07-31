@@ -4,6 +4,19 @@
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
 
+################################# Polynomial ###################################
+tools/xngen src/f32-vsin/poly-4.c.in -D FUN=COS -D ARCH=scalar          -D BATCH_TILES=1,2,4,8      -o src/f32-vcos/gen/f32-vcos-scalar-poly-4.c &
+tools/xngen src/f32-vsin/poly-4.c.in -D FUN=COS -D ARCH=wasmrelaxedsimd -D BATCH_TILES=4,8,16        -o src/f32-vcos/gen/f32-vcos-wasmrelaxedsimd-poly-4.c &
+tools/xngen src/f32-vsin/poly-4.c.in -D FUN=COS -D ARCH=neon            -D BATCH_TILES=4,8,16        -o src/f32-vcos/gen/f32-vcos-neon-poly-4.c &
+tools/xngen src/f32-vsin/poly-4.c.in -D FUN=COS -D ARCH=sse2            -D BATCH_TILES=4,8,12,16    -o src/f32-vcos/gen/f32-vcos-sse2-poly-4.c &
+tools/xngen src/f32-vsin/poly-4.c.in -D FUN=COS -D ARCH=sse2fma         -D BATCH_TILES=4,8,12,16    -o src/f32-vcos/gen/f32-vcos-sse2fma-poly-4.c &
+tools/xngen src/f32-vsin/poly-4.c.in -D FUN=COS -D ARCH=fma3            -D BATCH_TILES=8,16,24,32   -o src/f32-vcos/gen/f32-vcos-fma3-poly-4.c &
+tools/xngen src/f32-vsin/poly-4.c.in -D FUN=COS -D ARCH=avx512f         -D BATCH_TILES=16,32,48,64  -o src/f32-vcos/gen/f32-vcos-avx512f-poly-4.c &
+tools/xngen src/f32-vsin/rvv-poly-4.c.in -D FUN=COS -D LMUL=1 -o src/f32-vcos/gen/f32-vcos-rvv-poly-4-u1v.c &
+tools/xngen src/f32-vsin/rvv-poly-4.c.in -D FUN=COS -D LMUL=2 -o src/f32-vcos/gen/f32-vcos-rvv-poly-4-u2v.c &
+tools/xngen src/f32-vsin/rvv-poly-4.c.in -D FUN=COS -D LMUL=4 -o src/f32-vcos/gen/f32-vcos-rvv-poly-4-u4v.c &
+tools/xngen src/f32-vsin/rvv-poly-4.c.in -D FUN=COS -D LMUL=8 -o src/f32-vcos/gen/f32-vcos-rvv-poly-4-u8v.c &
+
 ##################################### SIMD #####################################
 tools/xngen src/f32-vsin/rational-5-4.c.in -D FUN=COS -D ARCH=scalar   -D BATCH_TILES=1,2,4,8      -D DIV=DIV -o src/f32-vcos/gen/f32-vcos-scalar-rational-5-4-div.c &
 tools/xngen src/f32-vsin/rational-5-4.c.in -D FUN=COS -D ARCH=sse2     -D BATCH_TILES=4,8,12,16    -D DIV=DIV -o src/f32-vcos/gen/f32-vcos-sse2-rational-5-4-div.c &

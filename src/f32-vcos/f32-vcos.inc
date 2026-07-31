@@ -1,10 +1,53 @@
 // clang-format off
-// Copyright 2025 Google LLC
+// Copyright 2026 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+// Polynomial
+XNN_UKERNEL(xnn_arch_none, xnn_f32_vcos_ukernel__scalar_poly_4_u1, 1, false, float, struct xnn_f32_default_params, NULL)
+XNN_UKERNEL(xnn_arch_none, xnn_f32_vcos_ukernel__scalar_poly_4_u2, 2, false, float, struct xnn_f32_default_params, NULL)
+XNN_UKERNEL(xnn_arch_none, xnn_f32_vcos_ukernel__scalar_poly_4_u4, 4, false, float, struct xnn_f32_default_params, NULL)
+XNN_UKERNEL(xnn_arch_none, xnn_f32_vcos_ukernel__scalar_poly_4_u8, 8, false, float, struct xnn_f32_default_params, NULL)
 
+#if XNN_ARCH_WASMRELAXEDSIMD
+XNN_UKERNEL(xnn_arch_none, xnn_f32_vcos_ukernel__wasmrelaxedsimd_poly_4_u4, 4, false, float, struct xnn_f32_default_params, NULL)
+XNN_UKERNEL(xnn_arch_none, xnn_f32_vcos_ukernel__wasmrelaxedsimd_poly_4_u8, 8, false, float, struct xnn_f32_default_params, NULL)
+XNN_UKERNEL(xnn_arch_none, xnn_f32_vcos_ukernel__wasmrelaxedsimd_poly_4_u16, 16, false, float, struct xnn_f32_default_params, NULL)
+#endif  // XNN_ARCH_WASMRELAXEDSIMD
+
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+XNN_UKERNEL(xnn_arch_arm_neon, xnn_f32_vcos_ukernel__neon_poly_4_u4, 4, false, float, struct xnn_f32_default_params, NULL)
+XNN_UKERNEL(xnn_arch_arm_neon, xnn_f32_vcos_ukernel__neon_poly_4_u8, 8, false, float, struct xnn_f32_default_params, NULL)
+XNN_UKERNEL(xnn_arch_arm_neon, xnn_f32_vcos_ukernel__neon_poly_4_u16, 16, false, float, struct xnn_f32_default_params, NULL)
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+
+#if XNN_ENABLE_SSE2 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+XNN_UKERNEL(xnn_arch_x86_sse2, xnn_f32_vcos_ukernel__sse2_poly_4_u4, 4, false, float, struct xnn_f32_default_params, NULL)
+XNN_UKERNEL(xnn_arch_x86_sse2, xnn_f32_vcos_ukernel__sse2_poly_4_u8, 8, false, float, struct xnn_f32_default_params, NULL)
+XNN_UKERNEL(xnn_arch_x86_sse2, xnn_f32_vcos_ukernel__sse2_poly_4_u12, 12, false, float, struct xnn_f32_default_params, NULL)
+XNN_UKERNEL(xnn_arch_x86_sse2, xnn_f32_vcos_ukernel__sse2_poly_4_u16, 16, false, float, struct xnn_f32_default_params, NULL)
+XNN_UKERNEL(xnn_arch_x86_sse2, xnn_f32_vcos_ukernel__sse2fma_poly_4_u4, 4, false, float, struct xnn_f32_default_params, NULL)
+XNN_UKERNEL(xnn_arch_x86_sse2, xnn_f32_vcos_ukernel__sse2fma_poly_4_u8, 8, false, float, struct xnn_f32_default_params, NULL)
+XNN_UKERNEL(xnn_arch_x86_sse2, xnn_f32_vcos_ukernel__sse2fma_poly_4_u12, 12, false, float, struct xnn_f32_default_params, NULL)
+XNN_UKERNEL(xnn_arch_x86_sse2, xnn_f32_vcos_ukernel__sse2fma_poly_4_u16, 16, false, float, struct xnn_f32_default_params, NULL)
+#endif  // XNN_ENABLE_SSE2 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+
+#if XNN_ENABLE_FMA3 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+XNN_UKERNEL(xnn_arch_x86_fma3, xnn_f32_vcos_ukernel__fma3_poly_4_u8, 8, false, float, struct xnn_f32_default_params, NULL)
+XNN_UKERNEL(xnn_arch_x86_fma3, xnn_f32_vcos_ukernel__fma3_poly_4_u16, 16, false, float, struct xnn_f32_default_params, NULL)
+XNN_UKERNEL(xnn_arch_x86_fma3, xnn_f32_vcos_ukernel__fma3_poly_4_u24, 24, false, float, struct xnn_f32_default_params, NULL)
+XNN_UKERNEL(xnn_arch_x86_fma3, xnn_f32_vcos_ukernel__fma3_poly_4_u32, 32, false, float, struct xnn_f32_default_params, NULL)
+#endif  // XNN_ENABLE_FMA3 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+
+#if XNN_ENABLE_AVX512F && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+XNN_UKERNEL(xnn_arch_x86_avx512f, xnn_f32_vcos_ukernel__avx512f_poly_4_u16, 16, false, float, struct xnn_f32_default_params, NULL)
+XNN_UKERNEL(xnn_arch_x86_avx512f, xnn_f32_vcos_ukernel__avx512f_poly_4_u32, 32, false, float, struct xnn_f32_default_params, NULL)
+XNN_UKERNEL(xnn_arch_x86_avx512f, xnn_f32_vcos_ukernel__avx512f_poly_4_u48, 48, false, float, struct xnn_f32_default_params, NULL)
+XNN_UKERNEL(xnn_arch_x86_avx512f, xnn_f32_vcos_ukernel__avx512f_poly_4_u64, 64, false, float, struct xnn_f32_default_params, NULL)
+#endif  // XNN_ENABLE_AVX512F && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+
+// Rational
 XNN_UKERNEL(xnn_arch_none, xnn_f32_vcos_ukernel__scalar_rational_5_4_div_u1, 1, false, float, struct xnn_f32_default_params, NULL)
 XNN_UKERNEL(xnn_arch_none, xnn_f32_vcos_ukernel__scalar_rational_5_4_div_u2, 2, false, float, struct xnn_f32_default_params, NULL)
 XNN_UKERNEL(xnn_arch_none, xnn_f32_vcos_ukernel__scalar_rational_5_4_div_u4, 4, false, float, struct xnn_f32_default_params, NULL)
@@ -43,6 +86,7 @@ XNN_UKERNEL(xnn_arch_x86_avx512f, xnn_f32_vcos_ukernel__avx512f_rational_5_4_nr_
 XNN_UKERNEL(xnn_arch_x86_avx512f, xnn_f32_vcos_ukernel__avx512f_rational_5_4_nr_u48, 48, false, float, struct xnn_f32_default_params, NULL)
 XNN_UKERNEL(xnn_arch_x86_avx512f, xnn_f32_vcos_ukernel__avx512f_rational_5_4_nr_u64, 64, false, float, struct xnn_f32_default_params, NULL)
 #endif  // XNN_ENABLE_AVX512F && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 XNN_UKERNEL(xnn_arch_none, xnn_f32_vcos_ukernel__wasmsimd_rational_5_4_div_u4, 4, false, float, struct xnn_f32_default_params, NULL)
 XNN_UKERNEL(xnn_arch_none, xnn_f32_vcos_ukernel__wasmsimd_rational_5_4_div_u8, 8, false, float, struct xnn_f32_default_params, NULL)
@@ -69,6 +113,10 @@ XNN_UKERNEL(xnn_arch_arm_neon, xnn_f32_vcos_ukernel__neon_rational_5_4_nr_u16, 1
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 #if XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
+XNN_UKERNEL(xnn_arch_riscv_vector, xnn_f32_vcos_ukernel__rvv_poly_4_u1v, 1, true, float, struct xnn_f32_default_params, NULL)
+XNN_UKERNEL(xnn_arch_riscv_vector, xnn_f32_vcos_ukernel__rvv_poly_4_u2v, 2, true, float, struct xnn_f32_default_params, NULL)
+XNN_UKERNEL(xnn_arch_riscv_vector, xnn_f32_vcos_ukernel__rvv_poly_4_u4v, 4, true, float, struct xnn_f32_default_params, NULL)
+XNN_UKERNEL(xnn_arch_riscv_vector, xnn_f32_vcos_ukernel__rvv_poly_4_u8v, 8, true, float, struct xnn_f32_default_params, NULL)
 XNN_UKERNEL(xnn_arch_riscv_vector, xnn_f32_vcos_ukernel__rvv_rational_5_4_div_u1v, 1, true, float, struct xnn_f32_default_params, NULL)
 XNN_UKERNEL(xnn_arch_riscv_vector, xnn_f32_vcos_ukernel__rvv_rational_5_4_div_u2v, 2, true, float, struct xnn_f32_default_params, NULL)
 XNN_UKERNEL(xnn_arch_riscv_vector, xnn_f32_vcos_ukernel__rvv_rational_5_4_div_u4v, 4, true, float, struct xnn_f32_default_params, NULL)

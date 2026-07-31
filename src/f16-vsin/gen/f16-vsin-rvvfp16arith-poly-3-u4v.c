@@ -51,8 +51,8 @@ void xnn_f16_vsin_ukernel__rvvfp16arith_poly_3_u4v(
     vfloat16m4_t vk = __riscv_vfadd(vy, vmagic, vl);
     vfloat16m4_t vk_float = __riscv_vfsub(vk, vmagic, vl);
 
-    vx = __riscv_vfadd(__riscv_vfmul(vk_float, vpi_0, vl), vx, vl);
-    vx = __riscv_vfadd(__riscv_vfmul(vk_float, vpi_1, vl), vx, vl);
+    vx = __riscv_vfmacc_vf_f16m4(vx, vpi_0, vk_float, vl);
+    vx = __riscv_vfmacc_vf_f16m4(vx, vpi_1, vk_float, vl);
 
     vuint16m4_t vu_k = __riscv_vreinterpret_u16m4(vk);
     vuint16m4_t vsign_flip = __riscv_vsll(vu_k, 15u, vl);
