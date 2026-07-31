@@ -618,6 +618,13 @@ static enum xnn_status compute_scale_params_qs8_qc8w(
     // This buffer is released in the `cleanup` function.
     context->kernel_scale_for_cleanup = xnn_allocate_simd_memory(
       output_channels * sizeof(float));
+    if (context->kernel_scale_for_cleanup == NULL) {
+      xnn_log_error(
+          "failed to allocate %zu bytes for %s operator packed weights",
+          output_channels * sizeof(float),
+          xnn_operator_type_to_string(context->operator_type));
+      return xnn_status_out_of_memory;
+    }
     context->kernel_scale = context->kernel_scale_for_cleanup;
     float* const kernel_scale = context->kernel_scale_for_cleanup;
     for (size_t output_channel = 0; output_channel < output_channels; ++output_channel) {
