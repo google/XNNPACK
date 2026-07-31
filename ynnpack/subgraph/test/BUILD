@@ -373,3 +373,31 @@ cc_test(
         "//ynnpack/base/test:util",
     ] + ynn_benchmark_deps(),
 )
+
+cc_test(
+    name = "grouped_dot",
+    srcs = ["grouped_dot.cc"],
+    linkopts = ynn_binary_linkopts(),
+    malloc = ynn_binary_malloc(),
+    deps = TEST_DEPS + [
+        "//ynnpack/kernels/dot",
+        "//ynnpack/kernels/dot:pack",
+        "//ynnpack/subgraph",
+    ],
+)
+
+cc_test(
+    name = "grouped_dot_bench",
+    srcs = ["grouped_dot_bench.cc"],
+    args = ["--benchmark_min_time=1x"],
+    linkopts = ynn_binary_linkopts(),
+    malloc = ynn_binary_malloc(),
+    deps = [
+        ":scheduler",
+        "//ynnpack",
+        "//ynnpack/base",
+        "//ynnpack/kernels/dot",
+        "//ynnpack/kernels/dot:pack",
+        "//ynnpack/subgraph",
+    ] + ynn_benchmark_deps(),
+)
