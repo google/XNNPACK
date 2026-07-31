@@ -79,6 +79,7 @@ cc_library(
         "gather.cc",
         "gather.h",
         "get_tensor_shape.cc",
+        "get_tensor_shape.h",
         "iota.cc",
         "iota.h",
         "reduce.cc",

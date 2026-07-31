@@ -30,7 +30,7 @@
 #include <variant>
 #include <vector>
 
-#include "ynnpack/base/arithmetic.h"
+#include "ynnpack/base/algorithm.h"
 #include "ynnpack/base/base.h"
 #include "ynnpack/base/bfloat16.h"
 #include "ynnpack/base/fp8.h"
@@ -40,10 +40,12 @@
 #include "ynnpack/base/type.h"
 #include "ynnpack/include/ynnpack.h"
 #include "ynnpack/kernels/ternary/ternary.h"
+#include "ynnpack/subgraph/get_tensor_shape.h"
 #include "ynnpack/subgraph/runtime.h"
 #include "ynnpack/subgraph/tensor.h"
 #include "slinky/base/ref_count.h"
 #include "slinky/base/thread_pool.h"
+#include "slinky/builder/simplify.h"
 #include "slinky/runtime/buffer.h"
 #include "slinky/runtime/evaluate.h"
 #include "slinky/runtime/expr.h"
@@ -628,6 +630,45 @@ void insert_constant(const cache_key& key, slinky::raw_buffer_ptr& ptr) {
   constant_cache[key] = ptr;
 }
 
+// `get_tensor_shape` needs a special case for constant folding, because we can
+// constant fold tensors with a constant extent, even if the data is not
+// constant.
+ynn_status fold_constant_get_tensor_shape(ynn_subgraph& subgraph) {
+  for (ynn_node& node : subgraph.nodes) {
+    if (!node.is_valid()) continue;
+    const auto* op = std::get_if<ynn_node::get_tensor_shape>(&node.op);
+    if (!op) continue;
+
+    assert(node.inputs.size() == 1);
+    const ynn_value& input = subgraph.value(node.inputs[0]);
+
+    if (ynn::any_n(input.rank(), [&](size_t i) {
+          return !slinky::as_constant(input.extent(i));
+        })) {
+      continue;
+    }
+
+    uint32_t output_id = node.outputs[0];
+    ynn_value& output = subgraph.value(output_id);
+
+    assert(output.rank() <= ynn::max_tensor_rank);
+    std::array<slinky::dim, ynn::max_tensor_rank> dims;
+    for (size_t d = 0; d < output.rank(); ++d) {
+      dims[d].set_min_extent(0, *slinky::as_constant(output.extent(d)));
+    }
+
+    output.data = slinky::raw_buffer::make(
+        output.rank(), ynn::type_size_bytes(output.type), dims.data(),
+        YNN_ALLOCATION_ALIGNMENT);
+
+    ynn::implement_get_tensor_shape(input.extents, op->axes, op->reshape_1d,
+                                    output.type, *output.data);
+
+    node.invalidate();
+  }
+  return ynn_status_success;
+}
+
 }  // namespace
 
 // Find parts of the graph that can be executed independently of any inputs.
@@ -1044,6 +1085,11 @@ void ynn_subgraph::topological_sort() {
 
 ynn_status ynn_subgraph::optimize(slinky::thread_pool* threadpool) {
   ynn_status status;
+
+  status = fold_constant_get_tensor_shape(*this);
+  if (status != ynn_status_success) {
+    return status;
+  }
 
   status = fusion();
   if (status != ynn_status_success) {

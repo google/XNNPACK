@@ -3,6 +3,8 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+#include "ynnpack/subgraph/get_tensor_shape.h"
+
 #include <algorithm>
 #include <cassert>
 #include <cstddef>
@@ -14,6 +16,7 @@
 
 #include "ynnpack/base/base.h"
 #include "ynnpack/base/log.h"
+#include "ynnpack/base/span.h"
 #include "ynnpack/include/ynnpack.h"
 #include "ynnpack/subgraph/runtime.h"
 #include "ynnpack/subgraph/slinky.h"
@@ -24,34 +27,74 @@
 #include "slinky/runtime/evaluate.h"
 #include "slinky/runtime/expr.h"
 #include "slinky/runtime/stmt.h"
-
 namespace ynn {
-
 namespace {
 
 template <typename T>
-auto make_get_tensor_shape_impl(std::vector<slinky::expr> extents) {
-  return [=](const slinky::call_stmt* call,
-             slinky::eval_context& ctx) -> slinky::index_t {
-    assert(call->outputs.size() == 1);
-    slinky::buffer<T, 1> shape = *ctx.lookup_buffer(call->outputs[0]);
-
-    if (shape.rank == 0) {
-      assert(extents.size() == 1);
-      shape.at() = evaluate(extents[0], ctx);
-    } else if (shape.rank == 1) {
-      for (slinky::index_t i = shape.dim(0).begin(); i != shape.dim(0).end();
-           ++i) {
-        shape.at(i) = evaluate(extents[i], ctx);
-      }
-    } else {
-      YNN_UNREACHABLE;
+void implement_get_tensor_shape_typed(ynn::span<const slinky::expr> extents,
+                                      const slinky::buffer<T>& output,
+                                      slinky::eval_context* ctx) {
+  if (output.rank == 0) {
+    assert(extents.size() == 1);
+    slinky::index_t val =
+        ctx ? slinky::evaluate(extents[0], *ctx) : slinky::evaluate(extents[0]);
+    output.at() = static_cast<T>(val);
+  } else if (output.rank == 1) {
+    for (slinky::index_t i = output.dim(0).begin(); i != output.dim(0).end();
+         ++i) {
+      slinky::index_t val = ctx ? slinky::evaluate(extents[i], *ctx)
+                                : slinky::evaluate(extents[i]);
+      output.at(i) = static_cast<T>(val);
     }
-    return 0;
-  };
+  } else {
+    YNN_UNREACHABLE;
+  }
+}
+
+void implement_get_tensor_shape(ynn::span<const slinky::expr> extents,
+                                ynn_type type, const slinky::raw_buffer& output,
+                                slinky::eval_context* ctx) {
+  if (type == ynn_type_int32) {
+    implement_get_tensor_shape_typed<int32_t>(extents, output.cast<int32_t>(),
+                                              ctx);
+  } else if (type == ynn_type_fp32) {
+    implement_get_tensor_shape_typed<float>(extents, output.cast<float>(), ctx);
+  } else {
+    YNN_UNREACHABLE;
+  }
+}
+
+std::vector<slinky::expr> get_tensor_shape_extents(
+    ynn::span<const slinky::expr> extents, ynn::span<const int32_t> axes,
+    bool reshape_1d) {
+  std::vector<slinky::expr> selected;
+  selected.reserve(axes.size());
+  for (int32_t i : axes) {
+    slinky::expr ext =
+        (i < extents.size() && extents[i].defined()) ? extents[i] : 1;
+    selected.push_back(ext);
+  }
+
+  if (reshape_1d) {
+    slinky::expr extent = slinky::index_t(1);
+    for (const slinky::expr& ext : selected) {
+      extent *= ext;
+    }
+    return {slinky::simplify(extent)};
+  } else {
+    return selected;
+  }
 }
 
 }  // namespace
+
+void implement_get_tensor_shape(ynn::span<const slinky::expr> extents,
+                                ynn::span<const int32_t> axes, bool reshape_1d,
+                                ynn_type type, const slinky::raw_buffer& output,
+                                slinky::eval_context* ctx) {
+  implement_get_tensor_shape(
+      get_tensor_shape_extents(extents, axes, reshape_1d), type, output, ctx);
+}
 
 extern "C" {
 
@@ -112,31 +155,18 @@ ynn_status ynn_define_get_tensor_shape(ynn_subgraph_t subgraph, size_t num_axes,
 
     std::vector<slinky::var> dims = runtime.globals.make_dims(output.rank());
 
-    std::vector<slinky::expr> extents;
-    if (op.reshape_1d) {
-      extents = {slinky::index_t(1)};
-      for (int32_t i : op.axes) {
-        extents[0] *= input.extent(i);
-      }
-      extents[0] = slinky::simplify(extents[0]);
-    } else {
-      extents.reserve(op.axes.size());
-      for (int32_t i : op.axes) {
-        extents.push_back(input.extent(i));
-      }
-    }
+    std::vector<slinky::expr> extents =
+        get_tensor_shape_extents(input.extents, op.axes, op.reshape_1d);
 
-    slinky::call_stmt::callable impl;
-    switch (output.type) {
-      case ynn_type_int32:
-        impl = make_get_tensor_shape_impl<int32_t>(extents);
-        break;
-      case ynn_type_fp32:
-        impl = make_get_tensor_shape_impl<float>(extents);
-        break;
-      default:
-        YNN_UNREACHABLE;
-    }
+    slinky::call_stmt::callable impl =
+        [extents = std::move(extents), type = output.type](
+            const slinky::call_stmt* call,
+            slinky::eval_context& ctx) -> slinky::index_t {
+      assert(call->outputs.size() == 1);
+      const slinky::raw_buffer& shape = *ctx.lookup_buffer(call->outputs[0]);
+      implement_get_tensor_shape(extents, type, shape, &ctx);
+      return 0;
+    };
 
     slinky::call_stmt::attributes attrs;
     attrs.name = "get_tensor_shape";
