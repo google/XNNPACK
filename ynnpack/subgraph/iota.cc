@@ -5,7 +5,9 @@
 
 #include "ynnpack/kernels/iota/iota.h"
 
+#include <algorithm>
 #include <cassert>
+#include <cmath>
 #include <cstddef>
 #include <cstdint>
 #include <functional>
@@ -13,6 +15,7 @@
 #include <utility>
 #include <vector>
 
+#include "ynnpack/base/arithmetic.h"
 #include "ynnpack/base/base.h"
 #include "ynnpack/base/log.h"
 #include "ynnpack/include/ynnpack.h"
@@ -58,29 +61,105 @@ void iota_impl(iota_kernel_fn kernel, T begin, const T* stride,
 
 template <typename T>
 auto make_iota_impl(iota_kernel_fn kernel, const iota_params& params) {
-  return
-      [=](slinky::buffer<const T, 0> begin, slinky::buffer<const T, 1> stride,
-          slinky::buffer<T, max_tensor_rank> output) -> slinky::index_t {
-        // Copy the params to the type of the iota.
-        T scale = params.scale;
-        T offset = params.offset;
-        assert(scale == params.scale);
-        assert(offset == params.offset);
+  return [=](slinky::buffer<const T, 0> begin,
+             slinky::buffer<const T, 1> stride,
+             slinky::buffer<T, max_tensor_rank> output) -> slinky::index_t {
+    // Copy the params to the type of the iota.
+    T scale = params.scale;
+    T offset = params.offset;
+    assert(scale == params.scale);
+    assert(offset == params.offset);
 
-        assert(is_contiguous(stride.dim(0), sizeof(T)));
-        assert(!stride.dim(0).is_folded());
-        assert(output.rank <= max_tensor_rank);
-        // Rather than try to handle broadcasting in iota_impl above, just
-        // copy the strides here. We initialize it to 0, so we avoid possible
-        // ubsan complaints when output.rank = 0.
-        T stride_broadcast[max_tensor_rank] = {0, };
-        for (int i = 0; i < output.rank; ++i) {
-          stride_broadcast[i] = stride(i) * scale;
-        }
-        iota_impl<T>(kernel, begin() * scale + offset,
-                     stride_broadcast, output);
-        return 0;
-      };
+    assert(is_contiguous(stride.dim(0), sizeof(T)));
+    assert(!stride.dim(0).is_folded());
+    assert(output.rank <= max_tensor_rank);
+    // Rather than try to handle broadcasting in iota_impl above, just
+    // copy the strides here. We initialize it to 0, so we avoid possible
+    // ubsan complaints when output.rank = 0.
+    T stride_broadcast[max_tensor_rank] = {
+        0,
+    };
+    for (int i = 0; i < output.rank; ++i) {
+      stride_broadcast[i] = stride(i) * scale;
+    }
+    iota_impl<T>(kernel, begin() * scale + offset, stride_broadcast, output);
+    return 0;
+  };
+}
+
+template <typename T>
+void iota_less_zero_impl(T begin, const T* stride, T scale, T offset,
+                         slinky::raw_buffer output) {
+  if (output.rank <= 1) {
+    const slinky::dim& dim_0 = output.dim(0);
+    assert(is_contiguous(dim_0, sizeof(T)));
+    assert(!dim_0.is_folded());
+    begin = begin + dim_0.min() * stride[0];
+    T stride_0 = stride[0];
+    T* out = static_cast<T*>(output.base);
+    slinky::index_t n = dim_0.extent();
+
+    // If stride > 0, we start out true, and become false.
+    T value_0 = scale + offset;  // 1 * scale + offset
+    T value_n = offset;  // 0 * scale + offset
+
+    // We want x + 1 such that begin + x*stride < 0 => x < -begin/stride
+    T x;
+    if (stride_0 == static_cast<T>(0)) {
+      x = begin < 0 ? n : 0;
+    } else if (stride_0 > static_cast<T>(0)) {
+      x = ceil_div(-begin, stride_0);
+    } else {
+      x = floor_div(begin, -stride_0) + 1;
+      std::swap(value_0, value_n);
+    }
+
+    if (x < 0) {
+      std::fill_n(out, n, value_n);
+    } else if (x >= n) {
+      std::fill_n(out, n, value_0);
+    } else {
+      T* middle = out + static_cast<slinky::index_t>(x);
+      T* end = out + n;
+      std::fill(out, middle, value_0);
+      std::fill(middle, end, value_n);
+    }
+  } else {
+    const T stride_d = *stride++;
+    const int d = output.rank - 1;
+    const slinky::dim& dim_d = output.dim(d);
+    for (slinky::index_t i = dim_d.min(); i <= dim_d.max(); ++i) {
+      slinky::raw_buffer output_i = output;
+      output_i.slice(d, i);
+      iota_less_zero_impl(static_cast<T>(begin + i * stride_d), stride, scale,
+                          offset, output_i);
+    }
+  }
+}
+
+template <typename T>
+auto make_iota_less_zero_impl(const iota_params& params) {
+  return [=](slinky::buffer<const T, 0> begin,
+             slinky::buffer<const T, 1> stride,
+             slinky::buffer<T, max_tensor_rank> output) -> slinky::index_t {
+    T scale = params.scale;
+    T offset = params.offset;
+    assert(scale == params.scale);
+    assert(offset == params.offset);
+
+    assert(is_contiguous(stride.dim(0), sizeof(T)));
+    assert(!stride.dim(0).is_folded());
+    assert(output.rank <= max_tensor_rank);
+
+    T stride_broadcast[max_tensor_rank] = {
+        0,
+    };
+    for (int i = 0; i < output.rank; ++i) {
+      stride_broadcast[i] = stride(i);
+    }
+    iota_less_zero_impl<T>(begin(), stride_broadcast, scale, offset, output);
+    return 0;
+  };
 }
 
 }  // namespace
@@ -131,7 +210,9 @@ ynn_status ynn_define_iota(ynn_subgraph_t subgraph, ynn_type type, size_t rank,
   ynn_node node;
   node.inputs = {begin_id, stride_id};
   node.outputs = {*output_id};
-  node.op = ynn_node::iota{};
+  ynn_node::iota op;
+  op.less_zero = (flags & YNN_NODE_FLAG_LESS_ZERO) != 0;
+  node.op = op;
   node.create = [](const ynn_node& node, ynn_runtime& runtime) {
     const ynn_node::iota& op = std::get<ynn_node::iota>(node.op);
     const ynn_runtime_value& begin = runtime.value(node.inputs[0]);
@@ -139,12 +220,6 @@ ynn_status ynn_define_iota(ynn_subgraph_t subgraph, ynn_type type, size_t rank,
     ynn_runtime_value& output = runtime.value(node.outputs[0]);
 
     output.make_buffer(runtime);
-
-    iota_kernel_fn kernel = get_iota_kernel(output.type);
-    if (!kernel) {
-      YNN_LOG_ERROR() << "Unsupported type for iota: " << output.type;
-      return ynn_status_unsupported_parameter;
-    }
 
     std::vector<slinky::var> dims = runtime.globals.make_dims(output.rank());
 
@@ -155,18 +230,40 @@ ynn_status ynn_define_iota(ynn_subgraph_t subgraph, ynn_type type, size_t rank,
     auto sched = runtime.make_schedule(dims, output.physical_extents(),
                                        output.buffer->elem_size());
 
-    if (output.type == ynn_type_int32) {
-      runtime.funcs.push_back(slinky::func::make(
-          make_iota_impl<int32_t>(kernel, op.params),
-          {{begin.buffer, {}}, {stride.buffer, std::move(stride_bounds)}},
-          {{output.buffer, std::move(dims)}}, std::move(attrs)));
-    } else if (output.type == ynn_type_fp32) {
-      runtime.funcs.push_back(slinky::func::make(
-          make_iota_impl<float>(kernel, op.params),
-          {{begin.buffer, {}}, {stride.buffer, std::move(stride_bounds)}},
-          {{output.buffer, std::move(dims)}}, std::move(attrs)));
+    if (op.less_zero) {
+      if (output.type == ynn_type_int32) {
+        runtime.funcs.push_back(slinky::func::make(
+            make_iota_less_zero_impl<int32_t>(op.params),
+            {{begin.buffer, {}}, {stride.buffer, std::move(stride_bounds)}},
+            {{output.buffer, std::move(dims)}}, std::move(attrs)));
+      } else if (output.type == ynn_type_fp32) {
+        runtime.funcs.push_back(slinky::func::make(
+            make_iota_less_zero_impl<float>(op.params),
+            {{begin.buffer, {}}, {stride.buffer, std::move(stride_bounds)}},
+            {{output.buffer, std::move(dims)}}, std::move(attrs)));
+      } else {
+        YNN_UNREACHABLE;
+      }
     } else {
-      YNN_UNREACHABLE;
+      iota_kernel_fn kernel = get_iota_kernel(output.type);
+      if (!kernel) {
+        YNN_LOG_ERROR() << "Unsupported type for iota: " << output.type;
+        return ynn_status_unsupported_parameter;
+      }
+
+      if (output.type == ynn_type_int32) {
+        runtime.funcs.push_back(slinky::func::make(
+            make_iota_impl<int32_t>(kernel, op.params),
+            {{begin.buffer, {}}, {stride.buffer, std::move(stride_bounds)}},
+            {{output.buffer, std::move(dims)}}, std::move(attrs)));
+      } else if (output.type == ynn_type_fp32) {
+        runtime.funcs.push_back(slinky::func::make(
+            make_iota_impl<float>(kernel, op.params),
+            {{begin.buffer, {}}, {stride.buffer, std::move(stride_bounds)}},
+            {{output.buffer, std::move(dims)}}, std::move(attrs)));
+      } else {
+        YNN_UNREACHABLE;
+      }
     }
 
     runtime.funcs.back().user_data() = sched.get();

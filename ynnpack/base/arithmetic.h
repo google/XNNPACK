@@ -206,9 +206,15 @@ T floor_div(T a, T b) {
 
 template <typename T>
 T ceil_div(T a, T b) {
-  assert(b > 0);
-  return euclidean_div(a + b - 1, b);
+  return euclidean_div(a + std::abs(b - 1), b);
 }
+
+inline size_t ceil_div(size_t a, size_t b) { return (a + b - 1) / b; }
+
+inline float floor_div(float a, float b) { return std::floor(a / b); }
+inline double floor_div(double a, double b) { return std::floor(a / b); }
+inline float ceil_div(float a, float b) { return std::ceil(a / b); }
+inline double ceil_div(double a, double b) { return std::ceil(a / b); }
 
 template <typename T>
 T integer_pow(T a, T b) {

@@ -1511,7 +1511,7 @@ class Target:
       if b is not None and b.ty.size < 8:
         byte_lanes = tile_width * b.ty.size // 8
         if is_rem_width:
-          str_args.append(f"ceil_div<size_t>(j * {b.ty.size}, 8)")
+          str_args.append(f"ceil_div(j * {b.ty.size}, 8)")
           str_args.append(f"simd::undef<{byte_lanes}>()")
         else:
           str_args.append(f"simd::vec<int8_t, {byte_lanes}>::N")

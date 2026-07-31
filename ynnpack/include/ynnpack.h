@@ -136,6 +136,9 @@ enum ynn_status ynn_define_tensor(ynn_subgraph_t subgraph, enum ynn_type type,
 // `stride_id` is a 1D tensor with extent `rank`, where element i indicates the
 // step between output elements in dimension i.
 //
+// If `YNN_NODE_FLAG_LESS_ZERO` is set, the result will be 1 if the result is
+// less than 0, or 0 otherwise.
+//
 // The ID of the new tensor will be stored in `output_id`. If `*output_id` is
 // not `YNN_INVALID_VALUE_ID`, it must be a valid ID of a tensor previously
 // defined by `ynn_define_tensor`.
@@ -150,6 +153,7 @@ enum ynn_status ynn_define_iota(ynn_subgraph_t subgraph, enum ynn_type type,
 #define YNN_NODE_FLAG_RESHAPE_1D (1 << 0)
 #define YNN_NODE_FLAG_UNIQUE_DIMS (1 << 1)
 #define YNN_NODE_FLAG_NO_EXCESS_PRECISION (1 << 2)
+#define YNN_NODE_FLAG_LESS_ZERO (1 << 3)
 
 enum ynn_unary_operator {
   ynn_unary_invalid = 0,

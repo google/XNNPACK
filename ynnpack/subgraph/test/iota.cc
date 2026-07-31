@@ -3,14 +3,11 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include <algorithm>
 #include <cassert>
 #include <chrono>
 #include <cstddef>
 #include <cstdint>
-#include <numeric>
 #include <random>
-#include <tuple>
 #include <vector>
 
 #include <gmock/gmock.h>
@@ -18,7 +15,6 @@
 #include "ynnpack/base/test/fuzz_test.h"
 #include "ynnpack/base/test/random.h"
 #include "ynnpack/base/test/tensor.h"
-#include "ynnpack/base/test/util.h"
 #include "ynnpack/base/type.h"
 #include "ynnpack/include/ynnpack.h"
 #include "ynnpack/subgraph/test/subgraph_builder.h"
@@ -28,7 +24,8 @@ namespace ynn {
 using testing::ElementsAre;
 
 template <typename T>
-void RunIota(T begin, const std::vector<T>& stride, Tensor<T>& output) {
+void RunIota(T begin, const std::vector<T>& stride, Tensor<T>& output,
+             uint32_t flags = 0) {
   const size_t rank = output.rank();
 
   // Define subgraph
@@ -41,8 +38,8 @@ void RunIota(T begin, const std::vector<T>& stride, Tensor<T>& output) {
       .AddInput(type_of<T>(), 1, stride_id)
       .AddOutput(type_of<T>(), rank, output_id);
 
-  subgraph.AddIota(type_of<T>(), output.shape(), begin_id, stride_id,
-                   output_id);
+  subgraph.AddIota(type_of<T>(), output.shape(), begin_id, stride_id, output_id,
+                   flags);
 
   Runtime runtime(subgraph.GetSubgraph());
   ASSERT_EQ(runtime.Status(), ynn_status_success);
@@ -186,9 +183,75 @@ TYPED_TEST_P(iota, random) {
   }
 }
 
+TYPED_TEST_P(iota, less_zero_stride_zero) {
+  Tensor<TypeParam> output({5});
+  RunIota<TypeParam>(-1, {0}, output, YNN_NODE_FLAG_LESS_ZERO);
+  ASSERT_THAT(output, ElementsAre(1, 1, 1, 1, 1));
+}
+
+TYPED_TEST_P(iota, less_zero_stride_zero_pos) {
+  Tensor<TypeParam> output({5});
+  RunIota<TypeParam>(1, {0}, output, YNN_NODE_FLAG_LESS_ZERO);
+  ASSERT_THAT(output, ElementsAre(0, 0, 0, 0, 0));
+}
+
+TYPED_TEST_P(iota, less_zero_stride_pos) {
+  Tensor<TypeParam> output({5});
+  RunIota<TypeParam>(-3, {2}, output, YNN_NODE_FLAG_LESS_ZERO);
+  ASSERT_THAT(output, ElementsAre(1, 1, 0, 0, 0));
+}
+
+TYPED_TEST_P(iota, less_zero_stride_neg) {
+  Tensor<TypeParam> output({5});
+  RunIota<TypeParam>(3, {-2}, output, YNN_NODE_FLAG_LESS_ZERO);
+  ASSERT_THAT(output, ElementsAre(0, 0, 1, 1, 1));
+}
+
+TYPED_TEST_P(iota, less_zero_stride_neg_exact) {
+  Tensor<TypeParam> output({5});
+  RunIota<TypeParam>(4, {-2}, output, YNN_NODE_FLAG_LESS_ZERO);
+  ASSERT_THAT(output, ElementsAre(0, 0, 0, 1, 1));
+}
+
+TYPED_TEST_P(iota, less_zero_rank2) {
+  Tensor<TypeParam> output({3, 3});
+  RunIota<TypeParam>(-3, {2, 1}, output, YNN_NODE_FLAG_LESS_ZERO);
+  ASSERT_THAT(output, ElementsAre(1, 1, 1, 1, 0, 0, 0, 0, 0));
+}
+
+TYPED_TEST_P(iota, less_zero_random) {
+  using T = TypeParam;
+  ReplicableRandomDevice rng;
+  std::uniform_int_distribution<size_t> rank_dist(0, 4);
+  std::uniform_int_distribution<size_t> dim_dist(1, 9);
+
+  for (auto _ : FuzzTest(std::chrono::milliseconds(250))) {
+    size_t rank = rank_dist(rng);
+    std::vector<size_t> shape = random_shape(rng, rank);
+
+    T begin = random_value<T>(rng);
+    std::vector<T> stride(rank);
+    fill_random(stride.data(), stride.size(), rng, -10, 10);
+
+    Tensor<T> output(shape);
+    RunIota(begin, stride, output, YNN_NODE_FLAG_LESS_ZERO);
+
+    for (auto i : EnumerateIndices(shape)) {
+      T expected = begin;
+      for (int d = 0; d < rank; ++d) {
+        expected = expected + i[d] * stride[d];
+      }
+      ASSERT_EQ(output(i), expected < 0 ? 1 : 0);
+    }
+  }
+}
+
 REGISTER_TYPED_TEST_SUITE_P(iota, rank0, rank1_stride1, rank1_stride3,
                             rank2_stride1_0, rank2_flat, rank2_fill_zero,
-                            rank2_fill_one, random);
+                            rank2_fill_one, random, less_zero_stride_zero,
+                            less_zero_stride_zero_pos, less_zero_stride_pos,
+                            less_zero_stride_neg, less_zero_stride_neg_exact,
+                            less_zero_rank2, less_zero_random);
 
 using types = testing::Types<int32_t, float>;
 

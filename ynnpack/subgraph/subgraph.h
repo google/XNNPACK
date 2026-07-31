@@ -505,11 +505,12 @@ struct ynn_node {
   };
   struct iota {
     ynn::iota_params params;
+    bool less_zero = false;
     friend bool operator==(const iota& a, const iota& b) {
-      return a.params == b.params;
+      return a.params == b.params && a.less_zero == b.less_zero;
     }
     friend bool operator<(const iota& a, const iota& b) {
-      return a.params < b.params;
+      return std::tie(a.params, a.less_zero) < std::tie(b.params, b.less_zero);
     }
   };
   struct pack_b {
