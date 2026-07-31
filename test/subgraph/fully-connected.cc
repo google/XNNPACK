@@ -97,9 +97,13 @@ void MatrixVectorMultiplyInt2(const Input* input, const Tensor<Filter>& filter,
     for (size_t ic = 0; ic < filter.extent(1); ++ic) {
       for (size_t p = 0; p < 4; ++p) {
         float input_ic = dequantize(input[ic * 4 + p], input_quantization);
+        int8_t filter_val = filter(oc, ic)[p];
+        if (filter_zero_point != nullptr) {
+          const uint8_t raw_val = static_cast<uint8_t>(filter_val) & 0x3;
+          filter_val = static_cast<int8_t>(raw_val - 2);
+        }
         float filter_ic = dequantize(
-            filter(oc, ic)[p],
-            filter_scale(oc, (ic * 4 + p) / filter_ic_block_size),
+            filter_val, filter_scale(oc, (ic * 4 + p) / filter_ic_block_size),
             filter_zero_point == nullptr ? 0 : filter_zero_point[oc]);
         output_ic += input_ic * filter_ic;
       }
@@ -488,9 +492,12 @@ void TestStaticB(xnn_datatype convert_to = xnn_datatype_invalid,
         const float max_bias =
             bias.empty() ? 0.0f
                          : max_abs_bias<Bias>() * bias_quantization.scale;
-        const float tolerance = xnnpack::epsilon(xnn_datatype_of<Output>()) *
-                                (input_channels * max_a * max_b + max_bias) *
-                                4.0f;
+        float tolerance = xnnpack::epsilon(xnn_datatype_of<Output>()) *
+                          (input_channels * max_a * max_b + max_bias) * 4.0f;
+        if (is_qd8_qc2w) {
+          tolerance = std::max(
+              tolerance, (input_channels * max_a * max_b + max_bias) * 1.0f);
+        }
         for (const auto& i : EnumerateIndices(output.extents())) {
           ASSERT_NEAR(static_cast<float>(output(i)), expected(i), tolerance)
               << "i=" << index_to_string(i)

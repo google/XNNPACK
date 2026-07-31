@@ -918,6 +918,8 @@ static enum xnn_status setup_scale_params_qs8_qc2w(
     const struct fc_variant* variant, struct fc_context* context) {
   context->scale_params = context->bias;
   context->bias = NULL;
+  context->init_scale_params = xnn_init_qs8_qc8w_scale_fp32_params;
+  context->init_kernel_scale_params = xnn_init_qs8_qc8w_scale_fp32_params;
   context->kernel_scale_params = context->kernel_scale.f32;
   return xnn_status_success;
 }

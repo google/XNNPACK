@@ -842,7 +842,7 @@ void xnn_pack_qd8_qc2w_gemm_goi_w(
             const size_t k_offset =
                 (nr_block_start + nr_block_offset) * kc + kc_idx;
 
-            int8_t kv_0 = 0, kv_1 = 0, kv_2 = 0, kv_3 = 0;
+            int8_t kv_0 = 2, kv_1 = 2, kv_2 = 2, kv_3 = 2;
 
             if (kc_idx < kc) {
               kv_0 = (k[k_offset >> 2] >> ((k_offset & 3) * 2)) & 0x3;
@@ -860,13 +860,13 @@ void xnn_pack_qd8_qc2w_gemm_goi_w(
               kv_3 = (k[offset >> 2] >> ((offset & 3) * 2)) & 0x3;
             }
             const int8_t kv = (kv_0 | (kv_1 << 2) | (kv_2 << 4) | (kv_3 << 6));
-            kv_0 = sign_extend_int2(kv_0);
-            kv_1 = sign_extend_int2(kv_1);
-            kv_2 = sign_extend_int2(kv_2);
-            kv_3 = sign_extend_int2(kv_3);
+            kv_0 = kv_0 - 2;
+            kv_1 = kv_1 - 2;
+            kv_2 = kv_2 - 2;
+            kv_3 = kv_3 - 2;
 
             ksum += kv_0 + kv_1 + kv_2 + kv_3;
-            static_cast<int8_t*>(packed_weights)[kr_block_offset] = kv ^ 0xAA;
+            static_cast<int8_t*>(packed_weights)[kr_block_offset] = kv;
           }
 
           packed_b[nr_block_offset] = packed_b[nr_block_offset] - ksum * izp;
@@ -942,7 +942,7 @@ void xnn_pack_qd8_qc2w_gemm_gio_w(
                  (skr - 1));
             const size_t oc = nr_block_start + nr_block_offset;
 
-            int8_t kv_0 = 0, kv_1 = 0, kv_2 = 0, kv_3 = 0;
+            int8_t kv_0 = 2, kv_1 = 2, kv_2 = 2, kv_3 = 2;
 
             if (kc_idx < kc) {
               const size_t k_element_offset = kc_idx * k_stride + oc;
@@ -965,13 +965,13 @@ void xnn_pack_qd8_qc2w_gemm_gio_w(
               kv_3 = (k[k_element_offset >> 2] >> crumb_shift) & 0x3;
             }
             const int8_t kv = (kv_0 | (kv_1 << 2) | (kv_2 << 4) | (kv_3 << 6));
-            kv_0 = sign_extend_int2(kv_0);
-            kv_1 = sign_extend_int2(kv_1);
-            kv_2 = sign_extend_int2(kv_2);
-            kv_3 = sign_extend_int2(kv_3);
+            kv_0 = kv_0 - 2;
+            kv_1 = kv_1 - 2;
+            kv_2 = kv_2 - 2;
+            kv_3 = kv_3 - 2;
 
             ksum += kv_0 + kv_1 + kv_2 + kv_3;
-            static_cast<int8_t*>(packed_weights)[kr_block_offset] = kv ^ 0xAA;
+            static_cast<int8_t*>(packed_weights)[kr_block_offset] = kv;
           }
 
           packed_b[nr_block_offset] = packed_b[nr_block_offset] - ksum * izp;
@@ -3291,14 +3291,15 @@ void xnn_pack_qd8_qc2w_weights_and_biases(
         reinterpret_cast<const float*>(extra_data1),
         reinterpret_cast<void*>(
             reinterpret_cast<uintptr_t>(packed_weights_ptr) +
-                nr * (packed_stride - 2 * sizeof(float))));
+            nr * (packed_stride - 2 * sizeof(float))));
   }
 
   // Pack the bias.
-  if (extra_data0 != nullptr) {
+  const float* bias_ptr = reinterpret_cast<const float*>(
+      extra_data0 != nullptr ? extra_data0 : accumulator_init);
+  if (bias_ptr != nullptr) {
     xnn_init_qs8_qc8w_scale_fp32_params(
-        output_channels, nr, nr * packed_stride,
-        reinterpret_cast<const float*>(extra_data0),
+        output_channels, nr, nr * packed_stride, bias_ptr,
         reinterpret_cast<void*>(
             reinterpret_cast<uintptr_t>(packed_weights_ptr) +
             nr * (packed_stride - sizeof(float))));

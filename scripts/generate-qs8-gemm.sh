@@ -1807,6 +1807,14 @@ tools/xngen src/qs8-gemm/MRx4c8-ssevnni.c.in -D MR=4  -D DATATYPE=QC2_F32 -D SSE
 tools/xngen src/qs8-gemm/MRx4c8-ssevnni.c.in -D MR=5  -D DATATYPE=QC2_F32 -D SSE=3 -D AVX=0 -D VARIANT=MADD -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f32-qc2w-gemm/gen/qd8-f32-qc2w-gemm-5x4c8-minmax-ssse3-madd.c &
 tools/xngen src/qs8-gemm/MRx4c8-ssevnni.c.in -D MR=6  -D DATATYPE=QC2_F32 -D SSE=3 -D AVX=0 -D VARIANT=MADD -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f32-qc2w-gemm/gen/qd8-f32-qc2w-gemm-6x4c8-minmax-ssse3-madd.c &
 
+tools/xngen src/qs8-gemm/MRx8c8-ssevnni.c.in -D MR=1  -D DATATYPE=QC2_F32 -D SSE=3 -D AVX=0 -D VARIANT=MADD -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f32-qc2w-gemm/gen/qd8-f32-qc2w-gemm-1x8c8-minmax-ssse3-madd.c &
+tools/xngen src/qs8-gemm/MRx8c8-ssevnni.c.in -D MR=2  -D DATATYPE=QC2_F32 -D SSE=3 -D AVX=0 -D VARIANT=MADD -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f32-qc2w-gemm/gen/qd8-f32-qc2w-gemm-2x8c8-minmax-ssse3-madd.c &
+tools/xngen src/qs8-gemm/MRx8c8-ssevnni.c.in -D MR=3  -D DATATYPE=QC2_F32 -D SSE=3 -D AVX=0 -D VARIANT=MADD -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f32-qc2w-gemm/gen/qd8-f32-qc2w-gemm-3x8c8-minmax-ssse3-madd.c &
+tools/xngen src/qs8-gemm/MRx8c8-ssevnni.c.in -D MR=4  -D DATATYPE=QC2_F32 -D SSE=3 -D AVX=0 -D VARIANT=MADD -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f32-qc2w-gemm/gen/qd8-f32-qc2w-gemm-4x8c8-minmax-ssse3-madd.c &
+tools/xngen src/qs8-gemm/MRx8c8-ssevnni.c.in -D MR=5  -D DATATYPE=QC2_F32 -D SSE=3 -D AVX=0 -D VARIANT=MADD -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f32-qc2w-gemm/gen/qd8-f32-qc2w-gemm-5x8c8-minmax-ssse3-madd.c &
+tools/xngen src/qs8-gemm/MRx8c8-ssevnni.c.in -D MR=6  -D DATATYPE=QC2_F32 -D SSE=3 -D AVX=0 -D VARIANT=MADD -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION= -o src/qd8-f32-qc2w-gemm/gen/qd8-f32-qc2w-gemm-6x8c8-minmax-ssse3-madd.c &
+
+
 ################################## x86 AVX256 VNNI EVEX #################################
 ### C8 micro-kernels
 
