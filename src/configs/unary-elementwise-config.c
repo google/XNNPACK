@@ -2638,7 +2638,7 @@ static void init_f32_sigmoid_config_impl(struct xnn_unary_elementwise_config* co
         if (!consistent_arithmetic) {
           config->ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f32_vsigmoid_ukernel__sse2_rr2_lut64_p2_div_u8);
         } else {
-          config->ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f32_vsigmoid_ukernel__sse41_rr2_p5_div_u8);
+          config->ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f32_vsigmoid_ukernel__sse2_rr2_p5_div_u8);
         }
         config->element_tile = 8;
       } else

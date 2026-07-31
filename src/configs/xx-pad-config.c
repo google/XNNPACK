@@ -39,8 +39,11 @@ static void init_xx_pad_config(void) {
     #if XNN_ENABLE_SSE2
       if (hardware_config->arch_flags & xnn_arch_x86_sse2) {
         xx_pad_config.ukernel = (xnn_pad_ukernel_fn) xnn_xx_pad_ukernel_p16__sse2_u16;
-      }
+      } else
     #endif
+    {
+      xx_pad_config.ukernel = (xnn_pad_ukernel_fn) xnn_xx_pad_ukernel_p4__scalar_u16;
+    }
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     xx_pad_config.ukernel = (xnn_pad_ukernel_fn) xnn_xx_pad_ukernel_p16__wasmsimd_u16;
   #else

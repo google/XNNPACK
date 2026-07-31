@@ -34,8 +34,11 @@ static void init_xx_fill_config(void) {
     #if XNN_ENABLE_SSE2
       if (hardware_config->arch_flags & xnn_arch_x86_sse2) {
         xx_fill_config.ukernel = (xnn_fill_ukernel_fn) xnn_xx_fill_ukernel__sse2_u64;
-      }
+      } else
     #endif
+    {
+      xx_fill_config.ukernel = (xnn_fill_ukernel_fn) xnn_xx_fill_ukernel__scalar_u16;
+    }
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     xx_fill_config.ukernel = (xnn_fill_ukernel_fn) xnn_xx_fill_ukernel__wasmsimd_u64;
   #elif XNN_ARCH_RISCV
