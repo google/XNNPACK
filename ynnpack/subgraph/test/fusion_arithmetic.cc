@@ -1218,4 +1218,210 @@ TEST(fusion, rsqrt_input_fusion) {
   EXPECT_NEAR(unary.params.rsqrt.input_offset, 6.0f, 1e-6f);
 }
 
+TEST(fusion, rsqrt_transpose_fusion) {
+  // rsqrt(transpose(mul(x, A))) -> rsqrt(transpose(x), multiplier = A)
+  const uint32_t x_id = 0;
+  const uint32_t a_id = 1;
+  const uint32_t out_id = 2;
+  SubgraphBuilder builder(3);
+  uint32_t y_id = YNN_INVALID_VALUE_ID;
+  uint32_t z_id = YNN_INVALID_VALUE_ID;
+  float a = 2.0f;
+  builder.AddInput(ynn_type_fp32, 2, x_id)
+      .AddScalar(a, a_id)
+      .AddOutput(ynn_type_fp32, 2, out_id)
+      .AddTensor(ynn_type_fp32, 2, y_id)
+      .AddTensor(ynn_type_fp32, 2, z_id);
+
+  builder.AddBinary(ynn_binary_multiply, x_id, a_id, y_id)
+      .AddTranspose({1, 0}, y_id, z_id)
+      .AddUnary(ynn_unary_rsqrt, z_id, out_id);
+
+  ynn_subgraph& subgraph = *builder.GetSubgraph();
+
+  subgraph.fusion();
+  subgraph.invalidate_dead_values();
+
+  ASSERT_THAT(subgraph, AllOf(HasValidNodeCount(2)));
+  const ynn_node& transpose_node = ProducerOf(z_id, subgraph);
+  EXPECT_THAT(transpose_node,
+              IsStaticTransposeWithPerm(testing::ElementsAre(1, 0)));
+  EXPECT_EQ(transpose_node.inputs[0], x_id);
+
+  const ynn_node& rsqrt_node = ProducerOf(out_id, subgraph);
+  EXPECT_THAT(rsqrt_node, IsUnary(ynn_unary_rsqrt));
+  const auto& unary = std::get<ynn_node::unary_elementwise>(rsqrt_node.op);
+  EXPECT_NEAR(unary.params.rsqrt.input_multiplier, 2.0f, 1e-6f);
+}
+
+TEST(fusion, rsqrt_transpose_input_fusion) {
+  // rsqrt(add(mul(transpose(x), A), B)) -> rsqrt(transpose(x), multiplier = A,
+  // offset = B)
+  const uint32_t x_id = 0;
+  const uint32_t a_id = 1;
+  const uint32_t b_id = 2;
+  const uint32_t out_id = 3;
+  SubgraphBuilder builder(4);
+  uint32_t y_id = YNN_INVALID_VALUE_ID;
+  uint32_t z_id = YNN_INVALID_VALUE_ID;
+  uint32_t w_id = YNN_INVALID_VALUE_ID;
+  float a = 2.0f;
+  float b = 3.0f;
+  builder.AddInput(ynn_type_fp32, 2, x_id)
+      .AddScalar(a, a_id)
+      .AddScalar(b, b_id)
+      .AddOutput(ynn_type_fp32, 2, out_id)
+      .AddTensor(ynn_type_fp32, 2, y_id)
+      .AddTensor(ynn_type_fp32, 2, z_id)
+      .AddTensor(ynn_type_fp32, 2, w_id);
+
+  builder.AddTranspose({1, 0}, x_id, y_id)
+      .AddBinary(ynn_binary_multiply, y_id, a_id, z_id)
+      .AddBinary(ynn_binary_add, z_id, b_id, w_id)
+      .AddUnary(ynn_unary_rsqrt, w_id, out_id);
+
+  ynn_subgraph& subgraph = *builder.GetSubgraph();
+
+  subgraph.fusion();
+  subgraph.invalidate_dead_values();
+
+  ASSERT_THAT(subgraph, AllOf(HasValidNodeCount(2)));
+  const ynn_node& transpose_node = ProducerOf(y_id, subgraph);
+  EXPECT_THAT(transpose_node,
+              IsStaticTransposeWithPerm(testing::ElementsAre(1, 0)));
+  EXPECT_EQ(transpose_node.inputs[0], x_id);
+
+  const ynn_node& rsqrt_node = ProducerOf(out_id, subgraph);
+  EXPECT_THAT(rsqrt_node, IsUnary(ynn_unary_rsqrt));
+  EXPECT_EQ(rsqrt_node.inputs[0], y_id);
+  const auto& unary = std::get<ynn_node::unary_elementwise>(rsqrt_node.op);
+  EXPECT_NEAR(unary.params.rsqrt.input_multiplier, 2.0f, 1e-6f);
+  EXPECT_NEAR(unary.params.rsqrt.input_offset, 3.0f, 1e-6f);
+}
+
+TEST(fusion, rsqrt_input_transpose_fusion) {
+  // rsqrt(add(transpose(mul(x, A)), B)) -> rsqrt(transpose(x), multiplier = A,
+  // offset = B)
+  const uint32_t x_id = 0;
+  const uint32_t a_id = 1;
+  const uint32_t b_id = 2;
+  const uint32_t out_id = 3;
+  SubgraphBuilder builder(4);
+  uint32_t y_id = YNN_INVALID_VALUE_ID;
+  uint32_t z_id = YNN_INVALID_VALUE_ID;
+  uint32_t w_id = YNN_INVALID_VALUE_ID;
+  float a = 2.0f;
+  float b = 3.0f;
+  builder.AddInput(ynn_type_fp32, 2, x_id)
+      .AddScalar(a, a_id)
+      .AddScalar(b, b_id)
+      .AddOutput(ynn_type_fp32, 2, out_id)
+      .AddTensor(ynn_type_fp32, 2, y_id)
+      .AddTensor(ynn_type_fp32, 2, z_id)
+      .AddTensor(ynn_type_fp32, 2, w_id);
+
+  builder.AddBinary(ynn_binary_multiply, x_id, a_id, y_id)
+      .AddTranspose({1, 0}, y_id, z_id)
+      .AddBinary(ynn_binary_add, z_id, b_id, w_id)
+      .AddUnary(ynn_unary_rsqrt, w_id, out_id);
+
+  ynn_subgraph& subgraph = *builder.GetSubgraph();
+
+  subgraph.fusion();
+  subgraph.invalidate_dead_values();
+
+  ASSERT_THAT(subgraph, AllOf(HasValidNodeCount(2)));
+  const ynn_node& transpose_node = ProducerOf(z_id, subgraph);
+  EXPECT_THAT(transpose_node,
+              IsStaticTransposeWithPerm(testing::ElementsAre(1, 0)));
+  EXPECT_EQ(transpose_node.inputs[0], x_id);
+
+  const ynn_node& rsqrt_node = ProducerOf(out_id, subgraph);
+  EXPECT_THAT(rsqrt_node, IsUnary(ynn_unary_rsqrt));
+  EXPECT_EQ(rsqrt_node.inputs[0], z_id);
+  const auto& unary = std::get<ynn_node::unary_elementwise>(rsqrt_node.op);
+  EXPECT_NEAR(unary.params.rsqrt.input_multiplier, 2.0f, 1e-6f);
+  EXPECT_NEAR(unary.params.rsqrt.input_offset, 3.0f, 1e-6f);
+}
+
+TEST(fusion, rsqrt_multiply_add_fusion) {
+  // rsqrt(add(mul(x, A), B)) -> rsqrt(x, multiplier = A, offset = B)
+  const uint32_t x_id = 0;
+  const uint32_t a_id = 1;
+  const uint32_t b_id = 2;
+  const uint32_t out_id = 3;
+  SubgraphBuilder builder(4);
+  uint32_t y_id = YNN_INVALID_VALUE_ID;
+  uint32_t z_id = YNN_INVALID_VALUE_ID;
+  float a = 2.0f;
+  float b = 3.0f;
+  builder.AddInput(ynn_type_fp32, 2, x_id)
+      .AddScalar(a, a_id)
+      .AddScalar(b, b_id)
+      .AddOutput(ynn_type_fp32, 2, out_id)
+      .AddTensor(ynn_type_fp32, 2, y_id)
+      .AddTensor(ynn_type_fp32, 2, z_id);
+
+  builder.AddBinary(ynn_binary_multiply, x_id, a_id, y_id)
+      .AddBinary(ynn_binary_add, y_id, b_id, z_id)
+      .AddUnary(ynn_unary_rsqrt, z_id, out_id);
+
+  ynn_subgraph& subgraph = *builder.GetSubgraph();
+
+  subgraph.fusion();
+  subgraph.invalidate_dead_values();
+
+  ASSERT_THAT(subgraph, AllOf(HasValidNodeCount(1)));
+  const ynn_node& rsqrt_node = ProducerOf(out_id, subgraph);
+  EXPECT_THAT(rsqrt_node, IsUnary(ynn_unary_rsqrt));
+  EXPECT_EQ(rsqrt_node.inputs[0], x_id);
+  const auto& unary = std::get<ynn_node::unary_elementwise>(rsqrt_node.op);
+  EXPECT_NEAR(unary.params.rsqrt.input_multiplier, 2.0f, 1e-6f);
+  EXPECT_NEAR(unary.params.rsqrt.input_offset, 3.0f, 1e-6f);
+}
+
+TEST(fusion, rsqrt_transpose_ternary_multiply_fusion) {
+  // rsqrt(mul(mul(transpose(x), A), B)) -> rsqrt(transpose(x), multiplier = A *
+  // B)
+  const uint32_t x_id = 0;
+  const uint32_t a_id = 1;
+  const uint32_t b_id = 2;
+  const uint32_t out_id = 3;
+  SubgraphBuilder builder(4);
+  uint32_t y_id = YNN_INVALID_VALUE_ID;
+  uint32_t z_id = YNN_INVALID_VALUE_ID;
+  uint32_t w_id = YNN_INVALID_VALUE_ID;
+  float a = 2.0f;
+  float b = 3.0f;
+  builder.AddInput(ynn_type_fp32, 2, x_id)
+      .AddScalar(a, a_id)
+      .AddScalar(b, b_id)
+      .AddOutput(ynn_type_fp32, 2, out_id)
+      .AddTensor(ynn_type_fp32, 2, y_id)
+      .AddTensor(ynn_type_fp32, 2, z_id)
+      .AddTensor(ynn_type_fp32, 2, w_id);
+
+  builder.AddTranspose({1, 0}, x_id, y_id)
+      .AddBinary(ynn_binary_multiply, y_id, a_id, z_id)
+      .AddBinary(ynn_binary_multiply, z_id, b_id, w_id)
+      .AddUnary(ynn_unary_rsqrt, w_id, out_id);
+
+  ynn_subgraph& subgraph = *builder.GetSubgraph();
+
+  subgraph.fusion();
+  subgraph.invalidate_dead_values();
+
+  ASSERT_THAT(subgraph, AllOf(HasValidNodeCount(2)));
+  const ynn_node& transpose_node = ProducerOf(y_id, subgraph);
+  EXPECT_THAT(transpose_node,
+              IsStaticTransposeWithPerm(testing::ElementsAre(1, 0)));
+  EXPECT_EQ(transpose_node.inputs[0], x_id);
+
+  const ynn_node& rsqrt_node = ProducerOf(out_id, subgraph);
+  EXPECT_THAT(rsqrt_node, IsUnary(ynn_unary_rsqrt));
+  EXPECT_EQ(rsqrt_node.inputs[0], y_id);
+  const auto& unary = std::get<ynn_node::unary_elementwise>(rsqrt_node.op);
+  EXPECT_NEAR(unary.params.rsqrt.input_multiplier, 6.0f, 1e-6f);
+}
+
 }  // namespace ynn
