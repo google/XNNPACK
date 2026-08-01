@@ -5,9 +5,11 @@
 
 #include "ynnpack/subgraph/reduce.h"
 
+#include <algorithm>
 #include <cassert>
 #include <cstddef>
 #include <cstdint>
+#include <cstring>
 #include <functional>
 #include <limits>
 #include <memory>
@@ -79,7 +81,7 @@ auto make_unary_reduce_impl(const ynn_node::reduce& op, reduce_kernel kernel) {
       int r_dim = 0;
       for (int i = 0; i < a.rank && r_dim < reduction_bounds.rank; ++i) {
         if (op.k_dims[i]) {
-          const slinky::dim& r_dim_i = reduction_bounds.dim(r_dim++);
+          const slinky::dim& r_dim_i = reduction_bounds.dims[r_dim++];
           if (c.dim(i).stride() == 0) {
             assert(c.dim(i).is_point());
             if (r_dim_i.min() != 0) {
@@ -123,7 +125,11 @@ auto make_unary_reduce_impl(const ynn_node::reduce& op, reduce_kernel kernel) {
         // TODO: Do we need to slice init_c first? Or maybe just fall through to
         // slinky::copy and make it optimize this case?
       } else {
-        slinky::copy(init_c, c);
+        if (init_c.rank == 0 && c.rank == 0) {
+          std::memcpy(c.base(), init_c.base(), c.elem_size);
+        } else {
+          slinky::copy(init_c, c);
+        }
       }
     }
 
@@ -235,15 +241,18 @@ auto make_unary_reduce_impl(const ynn_node::reduce& op, reduce_kernel kernel) {
       k2 = 1;
     }
 
-    slinky::for_each_element(
-        [&](void* c0, const void* a) {
-          void* c1 = offset_bytes(c0, c_stride_m);
-          for (size_t i = 0; i < k2; ++i) {
-            kernel_fn(n, k1, a_stride_n, a, c0, c1);
-            a = offset_bytes(a, a_stride_k2);
-          }
-        },
-        c, a);
+    auto body = [&](void* c0, const void* a) {
+      void* c1 = offset_bytes(c0, c_stride_m);
+      for (size_t i = 0; i < k2; ++i) {
+        kernel_fn(n, k1, a_stride_n, a, c0, c1);
+        a = offset_bytes(a, a_stride_k2);
+      }
+    };
+    if (a.rank == 0 && c.rank == 0) {
+      body(c.base(), a.base());
+    } else {
+      slinky::for_each_element(body, c, a);
+    }
 
     return 0;
   };

@@ -336,19 +336,7 @@ xnn_status xnn_setup_runtime_v2(xnn_runtime_t runtime,
 
 xnn_status xnn_invoke_runtime(xnn_runtime_t runtime) {
   xnn_status result;
-  if (runtime->pthreadpool) {
-    pthreadpool_to_slinky_thread_pool(
-        runtime->pthreadpool, [&](slinky::thread_pool& thread_pool) {
-          assert(!runtime->ynn->eval_config.thread_pool);
-          runtime->ynn->eval_config.thread_pool = &thread_pool;
-          result = ynn::xnn_status_from_ynn(ynn_invoke_runtime(runtime->ynn));
-          runtime->ynn->eval_config.thread_pool = nullptr;
-        });
-  } else {
-    run_with_xnn_fpu_state([&result, runtime]() {
-      result = ynn::xnn_status_from_ynn(ynn_invoke_runtime(runtime->ynn));
-    });
-  }
+  result = ynn::xnn_status_from_ynn(ynn_invoke_runtime(runtime->ynn));
   return result;
 }
 

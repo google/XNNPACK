@@ -141,7 +141,7 @@ static void FP32RMSNorm(benchmark::State& state) {
 static void RMSNormArguments(benchmark::Benchmark* b) {
   b->ArgNames({"M", "N", "K", "NormMask"});
   for (int norm_mask = 1; norm_mask < 8; norm_mask++) {
-    b->Args({128, 256, 512, norm_mask});
+    b->Args({1, 1, 640, norm_mask});
   }
 }
 

@@ -44,7 +44,7 @@ xnn_status xnn_define_tensor_value(xnn_subgraph_t subgraph,
       external_id == XNN_INVALID_VALUE_ID ? YNN_INVALID_VALUE_ID : external_id;
   // YNNPACK interprets non-null dims for non-constant values to be static
   // shapes, so we can't pass them here unless the shape really is static.
-  const size_t* xnn_dims = data ? dims : nullptr;
+  const size_t* xnn_dims = dims;  // data ? dims : nullptr;
   ynn_status status = ynn_define_tensor(
       subgraph->ynn, ynn::type_from_xnn(datatype), num_dims, xnn_dims, data,
       value_flags_from_xnn(flags, data != nullptr), id_out);
