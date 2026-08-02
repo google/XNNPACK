@@ -2459,6 +2459,195 @@ TEST(FULLY_CONNECTED_NC_QD8_F16_QC4W,
       .TestQD8F16QC4W();
 }
 
+TEST(FULLY_CONNECTED_NC_QP8_F32_QC2W, unit_batch) {
+  FullyConnectedOperatorTester()
+      .batch_size(1)
+      .input_channels(32)
+      .output_channels(19)
+      .TestQP8F32QC2W();
+}
+
+TEST(FULLY_CONNECTED_NC_QP8_F32_QC2W, unit_batch_with_qmin) {
+  FullyConnectedOperatorTester()
+      .batch_size(1)
+      .input_channels(64)
+      .output_channels(19)
+      .qmin(128)
+      .TestQP8F32QC2W();
+}
+
+TEST(FULLY_CONNECTED_NC_QP8_F32_QC2W, unit_batch_with_qmax) {
+  FullyConnectedOperatorTester()
+      .batch_size(1)
+      .input_channels(64)
+      .output_channels(19)
+      .qmax(128)
+      .TestQP8F32QC2W();
+}
+
+TEST(FULLY_CONNECTED_NC_QP8_F32_QC2W, unit_batch_with_input_stride) {
+  FullyConnectedOperatorTester()
+      .batch_size(1)
+      .input_channels(32)
+      .input_stride(40)
+      .output_channels(19)
+      .TestQP8F32QC2W();
+}
+
+TEST(FULLY_CONNECTED_NC_QP8_F32_QC2W, unit_batch_with_output_stride) {
+  FullyConnectedOperatorTester()
+      .batch_size(1)
+      .input_channels(32)
+      .output_channels(19)
+      .output_stride(29)
+      .TestQP8F32QC2W();
+}
+
+TEST(FULLY_CONNECTED_NC_QP8_F32_QC2W, unit_batch_without_bias) {
+  FullyConnectedOperatorTester()
+      .has_bias(false)
+      .batch_size(1)
+      .input_channels(32)
+      .output_channels(19)
+      .TestQP8F32QC2W();
+}
+
+TEST(FULLY_CONNECTED_NC_QP8_F32_QC2W, small_batch) {
+  FullyConnectedOperatorTester()
+      .batch_size(12)
+      .input_channels(64)
+      .output_channels(19)
+      .TestQP8F32QC2W();
+}
+
+TEST(FULLY_CONNECTED_NC_QP8_F32_QC2W, weights_cache_unit_batch) {
+  FullyConnectedOperatorTester()
+      .batch_size(1)
+      .input_channels(32)
+      .output_channels(19)
+      .use_weights_cache(true)
+      .TestQP8F32QC2W();
+}
+
+TEST(FULLY_CONNECTED_NC_QP8_F32_QC2W, transpose_weights_unsupported) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+
+  constexpr size_t input_channels = 32;
+  constexpr size_t output_channels = 16;
+  uint8_t kernel[output_channels * input_channels / 4] = {};
+  float kernel_scale[output_channels];
+  float kernel_zero_point[output_channels] = {};
+  for (size_t i = 0; i < output_channels; i++) {
+    kernel_scale[i] = 1.0f;
+  }
+
+  xnn_operator_t fully_connected_op = nullptr;
+  EXPECT_EQ(
+      xnn_status_unsupported_parameter,
+      xnn_create_fully_connected_nc_qp8_f32_qc2w(
+          input_channels, output_channels, input_channels, output_channels,
+          kernel_zero_point, kernel_scale, kernel, /*bias=*/nullptr,
+          /*output_min=*/-1.0f, /*output_max=*/1.0f,
+          XNN_FLAG_TRANSPOSE_WEIGHTS, /*weights_cache=*/nullptr,
+          &fully_connected_op));
+  EXPECT_EQ(nullptr, fully_connected_op);
+}
+
+TEST(FULLY_CONNECTED_NC_QP8_F32_QC2W,
+     input_channels_must_be_multiple_of_32) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+
+  constexpr size_t output_channels = 16;
+  constexpr size_t max_input_channels = 33;
+  uint8_t kernel[output_channels * ((max_input_channels + 3) / 4)] = {};
+  float kernel_scale[output_channels];
+  float kernel_zero_point[output_channels] = {};
+  for (size_t i = 0; i < output_channels; i++) {
+    kernel_scale[i] = 1.0f;
+  }
+
+  for (const size_t input_channels : {31, 33}) {
+    xnn_operator_t fully_connected_op = nullptr;
+    EXPECT_EQ(
+        xnn_status_unsupported_parameter,
+        xnn_create_fully_connected_nc_qp8_f32_qc2w(
+            input_channels, output_channels, input_channels, output_channels,
+            kernel_zero_point, kernel_scale, kernel, /*bias=*/nullptr,
+            /*output_min=*/-1.0f, /*output_max=*/1.0f, /*flags=*/0,
+            /*weights_cache=*/nullptr, &fully_connected_op));
+    EXPECT_EQ(nullptr, fully_connected_op);
+  }
+}
+
+TEST(FULLY_CONNECTED_NC_QP8_F32_QC2W, static_kernel_required) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+
+  constexpr size_t input_channels = 32;
+  constexpr size_t output_channels = 16;
+  float kernel_scale[output_channels];
+  float kernel_zero_point[output_channels] = {};
+  for (size_t i = 0; i < output_channels; i++) {
+    kernel_scale[i] = 1.0f;
+  }
+
+  xnn_operator_t fully_connected_op = nullptr;
+  EXPECT_EQ(
+      xnn_status_invalid_parameter,
+      xnn_create_fully_connected_nc_qp8_f32_qc2w(
+          input_channels, output_channels, input_channels, output_channels,
+          kernel_zero_point, kernel_scale, /*kernel=*/nullptr, /*bias=*/nullptr,
+          /*output_min=*/-1.0f, /*output_max=*/1.0f, /*flags=*/0,
+          /*weights_cache=*/nullptr, &fully_connected_op));
+  EXPECT_EQ(nullptr, fully_connected_op);
+}
+
+TEST(FULLY_CONNECTED_NC_QP8_F32_QC2W, kernel_scale_required) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+
+  constexpr size_t input_channels = 32;
+  constexpr size_t output_channels = 16;
+  uint8_t kernel[output_channels * input_channels / 4] = {};
+  float kernel_zero_point[output_channels] = {};
+
+  xnn_operator_t fully_connected_op = nullptr;
+  EXPECT_EQ(
+      xnn_status_invalid_parameter,
+      xnn_create_fully_connected_nc_qp8_f32_qc2w(
+          input_channels, output_channels, input_channels, output_channels,
+          kernel_zero_point, /*kernel_scale=*/nullptr, kernel, /*bias=*/nullptr,
+          /*output_min=*/-1.0f, /*output_max=*/1.0f, /*flags=*/0,
+          /*weights_cache=*/nullptr, &fully_connected_op));
+  EXPECT_EQ(nullptr, fully_connected_op);
+}
+
+TEST(FULLY_CONNECTED_NC_QP8_F32_QC2W,
+     nonzero_kernel_zero_point_unsupported) {
+  if (xnn_init_qp8_f32_qc2w_gemm_config() == nullptr) {
+    GTEST_SKIP() << "QP8 F32 QC2W is not available";
+  }
+  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+
+  constexpr size_t input_channels = 32;
+  constexpr size_t output_channels = 16;
+  uint8_t kernel[output_channels * input_channels / 4] = {};
+  float kernel_scale[output_channels];
+  float kernel_zero_point[output_channels] = {};
+  for (size_t i = 0; i < output_channels; i++) {
+    kernel_scale[i] = 1.0f;
+  }
+  kernel_zero_point[output_channels / 2] = 1.0f;
+
+  xnn_operator_t fully_connected_op = nullptr;
+  EXPECT_EQ(
+      xnn_status_unsupported_parameter,
+      xnn_create_fully_connected_nc_qp8_f32_qc2w(
+          input_channels, output_channels, input_channels, output_channels,
+          kernel_zero_point, kernel_scale, kernel, /*bias=*/nullptr,
+          /*output_min=*/-1.0f, /*output_max=*/1.0f, /*flags=*/0,
+          /*weights_cache=*/nullptr, &fully_connected_op));
+  EXPECT_EQ(nullptr, fully_connected_op);
+}
+
 TEST(FULLY_CONNECTED_NC_QP8_F32_QC4W, unit_batch) {
   FullyConnectedOperatorTester()
       .batch_size(1)

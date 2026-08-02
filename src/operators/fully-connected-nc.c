@@ -65,6 +65,7 @@ static enum xnn_operator_type get_operator_type(
     XNNPACK_FINGERPRINT_TO_OP_TYPE(qd8, bf16, qb4w);
     XNNPACK_FINGERPRINT_TO_OP_TYPE(qd8, f32, qc4w);
     XNNPACK_FINGERPRINT_TO_OP_TYPE(qdu8, f32, qc4w);
+    XNNPACK_FINGERPRINT_TO_OP_TYPE(qp8, f32, qc2w);
     XNNPACK_FINGERPRINT_TO_OP_TYPE(qp8, f32, qc4w);
     XNNPACK_FINGERPRINT_TO_OP_TYPE(qp8, f32, qc8w);
     XNNPACK_FINGERPRINT_TO_OP_TYPE(qp8, f32, qb4w);
@@ -592,6 +593,26 @@ static enum xnn_status check_kernel_zero_point_is_8_qu8(
   return xnn_status_success;
 }
 
+static enum xnn_status check_kernel_zero_points_are_zero(
+    const struct fc_variant* variant, struct fc_context* context) {
+  if (context->kernel_zero_points == NULL) {
+    return xnn_status_success;
+  }
+  const float* kernel_zero_points =
+      (const float*)context->kernel_zero_points;
+  for (size_t channel = 0; channel < context->output_channels; channel++) {
+    if (kernel_zero_points[channel] != 0.0f) {
+      xnn_log_error(
+          "failed to create %s operator with %.7g kernel zero point in "
+          "channel %zu: the SME2 QC2W kernel requires zero",
+          xnn_operator_type_to_string(context->operator_type),
+          kernel_zero_points[channel], channel);
+      return xnn_status_unsupported_parameter;
+    }
+  }
+  return xnn_status_success;
+}
+
 static enum xnn_status check_block_size(const struct fc_variant* variant,
                                         struct fc_context* context) {
   if (context->block_size < XNN_MIN_BLOCKSIZE ||
@@ -1015,6 +1036,20 @@ static enum xnn_status force_coherent_kernel_scale_values_f32(const struct fc_va
   return xnn_status_success;
 }
 
+static enum xnn_status force_zero_kernel_zero_points_f32(
+    const struct fc_variant* variant, struct fc_context* context) {
+  if (context->kernel_zero_points == NULL) {
+    return xnn_status_success;
+  }
+  // Fingerprint data is owned by this context and is safe to modify.
+  float* kernel_zero_points =
+      (float*)(uintptr_t)context->kernel_zero_points;
+  for (size_t i = 0; i < context->output_channels; ++i) {
+    kernel_zero_points[i] = 0.0f;
+  }
+  return xnn_status_success;
+}
+
 static enum xnn_status force_coherent_bias_values_i32(
     const struct fc_variant* variant, struct fc_context* context) {
   // We cast the `const` away because we know that the data was created for the
@@ -1138,6 +1173,21 @@ static const struct fc_variant qp8_f32_qc4w_variant = {
     .setup_packing_functions = setup_packing_functions_from_gemm_config,
     .setup_scale_params = setup_scale_params_qs8_qc8w,
     .fingerprint_constraints = {},
+    .extra_weights_bytes = sizeof(float) * 2,
+    .kernel_scale_element_size = sizeof(float),
+};
+
+static const struct fc_variant qp8_f32_qc2w_variant = {
+    .check_output_bounds = check_output_bounds_f32,
+    .check_kernel_zero_point = check_kernel_zero_points_are_zero,
+    .check_block_size = UNUSED,
+    .check_flags = UNUSED,
+    .setup_gemm_ukernels = setup_gemm_ukernels,
+    .setup_params = setup_params_f32,
+    .setup_packing_params = setup_packing_params_qd8_qc2w_izp1,
+    .setup_packing_functions = setup_packing_functions_from_gemm_config,
+    .setup_scale_params = setup_scale_params_qs8_qc8w,
+    .fingerprint_constraints = {force_zero_kernel_zero_points_f32},
     .extra_weights_bytes = sizeof(float) * 2,
     .kernel_scale_element_size = sizeof(float),
 };
@@ -1471,6 +1521,12 @@ static enum xnn_status setup_variant_and_gemm_config(
       *variant = &qx8_f32_qc4w_variant;
       context->gemm_config = xnn_init_qdu8_f32_qc4w_gemm_config();
       context->fingerprint_id = xnn_fingerprint_id_fully_connected_nc_qdu8_f32_qc4w;
+      break;
+    case xnn_operator_type_fully_connected_nc_qp8_f32_qc2w:
+      *variant = &qp8_f32_qc2w_variant;
+      context->gemm_config = xnn_init_qp8_f32_qc2w_gemm_config();
+      context->fingerprint_id =
+          xnn_fingerprint_id_fully_connected_nc_qp8_f32_qc2w;
       break;
     case xnn_operator_type_fully_connected_nc_qp8_f32_qc4w:
       *variant = &qp8_f32_qc4w_variant;
@@ -2116,6 +2172,52 @@ enum xnn_status xnn_create_fully_connected_nc_qp8_f32_qc4w(
       .flags = flags,
       .weights_cache = weights_cache,
       .operator_type = xnn_operator_type_fully_connected_nc_qp8_f32_qc4w,
+      .fully_connected_op_out = fully_connected_op_out,
+      .should_fingerprint = true,
+  };
+  return create_fully_connected_nc_helper(&context);
+}
+
+enum xnn_status xnn_create_fully_connected_nc_qp8_f32_qc2w(
+    size_t input_channels, size_t output_channels, size_t input_stride,
+    size_t output_stride, const float* kernel_zero_point,
+    const float* kernel_scale, const void* kernel, const float* bias,
+    float output_min, float output_max, uint32_t flags,
+    xnn_weights_cache_t weights_cache,
+    xnn_operator_t* fully_connected_op_out) {
+  if ((flags & XNN_FLAG_TRANSPOSE_WEIGHTS) != 0) {
+    xnn_log_error(
+        "failed to create QP8/F32/QC2W operator: the SME2 kernel requires "
+        "NxK weights");
+    return xnn_status_unsupported_parameter;
+  }
+  if (input_channels % 32 != 0) {
+    xnn_log_error(
+        "failed to create QP8/F32/QC2W operator with %zu input channels: "
+        "the SME2 kernel requires a multiple of 32",
+        input_channels);
+    return xnn_status_unsupported_parameter;
+  }
+  if (kernel == NULL || kernel_scale == NULL) {
+    xnn_log_error(
+        "failed to create QP8/F32/QC2W operator: static weights and "
+        "per-channel scales are required");
+    return xnn_status_invalid_parameter;
+  }
+  struct fc_context context = {
+      .input_channels = input_channels,
+      .output_channels = output_channels,
+      .input_stride = input_stride,
+      .output_stride = output_stride,
+      .kernel_zero_points = kernel_zero_point,
+      .kernel_scale.f32 = kernel_scale,
+      .kernel = kernel,
+      .bias = bias,
+      .output_min = output_min,
+      .output_max = output_max,
+      .flags = flags,
+      .weights_cache = weights_cache,
+      .operator_type = xnn_operator_type_fully_connected_nc_qp8_f32_qc2w,
       .fully_connected_op_out = fully_connected_op_out,
       .should_fingerprint = true,
   };
@@ -2922,6 +3024,7 @@ static XNN_NO_SANITIZE_FUNCTION enum xnn_status reshape_fully_connected_nc(
       }
       break;
     case xnn_operator_type_fully_connected_nc_qp8_f32_qb4w:
+    case xnn_operator_type_fully_connected_nc_qp8_f32_qc2w:
     case xnn_operator_type_fully_connected_nc_qp8_f32_qc4w:
     case xnn_operator_type_fully_connected_nc_qp8_f32_qc8w:
       packed_lh_config = xnn_init_qp8_pack_lh_config();
@@ -3467,6 +3570,19 @@ enum xnn_status xnn_reshape_fully_connected_nc_qp8_f32_qc4w(
       threadpool);
 }
 
+enum xnn_status xnn_reshape_fully_connected_nc_qp8_f32_qc2w(
+    xnn_operator_t fully_connected_op, size_t batch_size,
+    size_t* workspace_size, pthreadpool_t threadpool) {
+  return reshape_fully_connected_nc(
+      fully_connected_op, xnn_operator_type_fully_connected_nc_qp8_f32_qc2w,
+      batch_size,
+      /*dynamic_quantization=*/false,
+      /*log2_output_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
+      &fully_connected_op->params.f32_minmax,
+      sizeof(fully_connected_op->params.f32_minmax), workspace_size,
+      threadpool);
+}
+
 enum xnn_status xnn_reshape_fully_connected_nc_qp8_f32_qc8w(
     xnn_operator_t fully_connected_op, size_t batch_size,
     size_t* workspace_size, pthreadpool_t threadpool) {
@@ -3819,6 +3935,15 @@ enum xnn_status xnn_setup_fully_connected_nc_qp8_f32_qc4w(
   return setup_fully_connected_nc(
       fully_connected_op, xnn_operator_type_fully_connected_nc_qp8_f32_qc4w,
       input, output, workspace, /*row_sum=*/NULL, /*quantization_params=*/NULL);
+}
+
+enum xnn_status xnn_setup_fully_connected_nc_qp8_f32_qc2w(
+    xnn_operator_t fully_connected_op, const int8_t* input, float* output,
+    void* workspace) {
+  return setup_fully_connected_nc(
+      fully_connected_op, xnn_operator_type_fully_connected_nc_qp8_f32_qc2w,
+      input, output, workspace, /*row_sum=*/NULL,
+      /*quantization_params=*/NULL);
 }
 
 enum xnn_status xnn_setup_fully_connected_nc_qp8_f32_qc8w(

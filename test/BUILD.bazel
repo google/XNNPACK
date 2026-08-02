@@ -752,6 +752,17 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "qp8_f32_qc2w_gemm_minmax_test",
+    timeout = "moderate",
+    srcs = [
+        "qp8-f32-qc2w-gemm-minmax.cc",
+    ],
+    deps = MICROKERNEL_TEST_DEPS + [
+        ":gemm_microkernel_tester",
+    ],
+)
+
+xnnpack_unit_test(
     name = "qp8_f32_qc4w_gemm_minmax_test",
     timeout = "moderate",
     srcs = [

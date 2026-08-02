@@ -13,6 +13,9 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include "src/xnnpack/buffer.h"
+#include "src/xnnpack/config-types.h"
+#include "src/xnnpack/gemm.h"
+#include "src/xnnpack/hardware-config.h"
 #include "src/xnnpack/math.h"
 #include "src/xnnpack/microparams.h"
 #include "src/xnnpack/microparams-init.h"
@@ -23,6 +26,14 @@ namespace {
 using testing::ElementsAreArray;
 using testing::Matcher;
 using testing::_;
+
+static void set_packed_i2(std::vector<uint8_t>& data, size_t byte_offset,
+                          size_t index, uint8_t value) {
+  const size_t shift = (index & 3) * 2;
+  uint8_t& byte = data[byte_offset + (index >> 2)];
+  byte = static_cast<uint8_t>((byte & ~(UINT8_C(0x3) << shift)) |
+                              ((value & UINT8_C(0x3)) << shift));
+}
 
 // QS8-QC2W GEMM packing tests.
 
@@ -321,6 +332,150 @@ TEST(PACK_QD8_F32_QC4W_GEMM_GIO_W, kr_eq_4) {
   };
   EXPECT_THAT(packed_weights, ElementsAreArray(expected));
 }
+
+#if XNN_ENABLE_ARM_SME2 && XNN_ENABLE_KLEIDIAI
+TEST(PACK_KAI_QS2_WEIGHTS_AND_BIASES_SME2, groups_and_optional_bias) {
+  const struct xnn_hardware_config* hardware_config =
+      xnn_init_hardware_config();
+  if (hardware_config == nullptr ||
+      (hardware_config->arch_flags & xnn_arch_arm_sme2) == 0) {
+    GTEST_SKIP() << "SME2 is not available at runtime";
+  }
+
+  constexpr size_t groups = 2;
+  constexpr size_t output_channels = 3;
+  constexpr size_t input_channels = 64;
+  constexpr size_t weights_row_stride = input_channels / 4;
+  constexpr size_t weights_group_stride =
+      output_channels * weights_row_stride;
+
+  std::vector<uint8_t> weights(groups * weights_group_stride);
+  for (size_t group = 0; group < groups; group++) {
+    for (size_t output_channel = 0; output_channel < output_channels;
+         output_channel++) {
+      for (size_t input_channel = 0; input_channel < input_channels;
+           input_channel++) {
+        const size_t byte_offset =
+            group * weights_group_stride +
+            output_channel * weights_row_stride;
+        // Exercise every signed two-bit code. The QP8 path interprets these
+        // bit patterns as {0, 1, -2, -1}.
+        set_packed_i2(weights, byte_offset, input_channel,
+                      static_cast<uint8_t>(group + output_channel +
+                                           input_channel));
+      }
+    }
+  }
+
+  std::vector<float> bias(groups * output_channels);
+  std::iota(bias.begin(), bias.end(), -3.0f);
+  std::vector<float> scale(groups * output_channels);
+  std::iota(scale.begin(), scale.end(), 0.5f);
+
+  struct xnn_gemm_config gemm_config = {};
+  gemm_config.nr =
+      xnn_qp8_f32_qc2w_gemm_minmax_ukernel_16x64c4__neonsme2_get_nr();
+  gemm_config.log2_kr = 2;
+  gemm_config.log2_sr = 0;
+
+  const size_t packed_stride =
+      xnn_packed_stride_kai_qs2_weights_and_biases_sme2(
+          &gemm_config, input_channels, /*unused_block_size=*/0,
+          /*unused_k_stride=*/input_channels, /*extra_bytes=*/0);
+  const size_t packed_group_size =
+      round_up(output_channels, gemm_config.nr) * packed_stride;
+  std::vector<uint8_t> grouped_packed_weights(
+      groups * packed_group_size, UINT8_C(0xA5));
+  std::vector<uint8_t> expected_packed_weights(
+      groups * packed_group_size, UINT8_C(0xA5));
+
+  xnn_pack_kai_qs2_weights_and_biases_sme2(
+      /*flags=*/0, &gemm_config, input_channels, output_channels, groups,
+      /*unused_block_size=*/0, /*k_stride=*/input_channels,
+      /*accumulator_init=*/bias.data(), weights.data(),
+      /*init_extra_data0_fn=*/nullptr, /*extra_data0=*/bias.data(),
+      /*extra_data0_element_size=*/sizeof(float),
+      /*init_extra_data1_fn=*/nullptr, /*extra_data1=*/scale.data(),
+      /*extra_data1_element_size=*/sizeof(float),
+      grouped_packed_weights.data(), /*params=*/nullptr);
+
+  for (size_t group = 0; group < groups; group++) {
+    xnn_pack_kai_qs2_weights_and_biases_sme2(
+        /*flags=*/0, &gemm_config, input_channels, output_channels,
+        /*groups=*/1, /*unused_block_size=*/0,
+        /*k_stride=*/input_channels,
+        /*accumulator_init=*/bias.data() + group * output_channels,
+        weights.data() + group * weights_group_stride,
+        /*init_extra_data0_fn=*/nullptr,
+        /*extra_data0=*/bias.data() + group * output_channels,
+        /*extra_data0_element_size=*/sizeof(float),
+        /*init_extra_data1_fn=*/nullptr,
+        /*extra_data1=*/scale.data() + group * output_channels,
+        /*extra_data1_element_size=*/sizeof(float),
+        expected_packed_weights.data() + group * packed_group_size,
+        /*params=*/nullptr);
+  }
+  EXPECT_THAT(grouped_packed_weights,
+              ElementsAreArray(expected_packed_weights));
+
+  constexpr int32_t signed_i2_lut[4] = {0, 1, -2, -1};
+  const size_t packed_weights_bytes =
+      gemm_config.nr * (input_channels / 4);
+  for (size_t group = 0; group < groups; group++) {
+    const uint8_t* packed_group =
+        grouped_packed_weights.data() + group * packed_group_size;
+    const int32_t* packed_sums = reinterpret_cast<const int32_t*>(
+        packed_group + packed_weights_bytes);
+    const float* packed_scales = reinterpret_cast<const float*>(
+        packed_sums + gemm_config.nr);
+    const float* packed_biases = packed_scales + gemm_config.nr;
+    for (size_t output_channel = 0; output_channel < output_channels;
+         output_channel++) {
+      int32_t expected_sum = 0;
+      for (size_t input_channel = 0; input_channel < input_channels;
+           input_channel++) {
+        const size_t code =
+            (group + output_channel + input_channel) & 3;
+        expected_sum += signed_i2_lut[code];
+      }
+      EXPECT_EQ(packed_sums[output_channel], expected_sum);
+      EXPECT_FLOAT_EQ(packed_scales[output_channel],
+                      scale[group * output_channels + output_channel]);
+      EXPECT_FLOAT_EQ(packed_biases[output_channel],
+                      bias[group * output_channels + output_channel]);
+    }
+  }
+
+  // A missing fully-connected bias is represented as a null pointer. KleidiAI
+  // must pack it identically to an explicit all-zero bias.
+  std::vector<float> zero_bias(groups * output_channels, 0.0f);
+  std::fill(grouped_packed_weights.begin(), grouped_packed_weights.end(),
+            UINT8_C(0xA5));
+  std::fill(expected_packed_weights.begin(), expected_packed_weights.end(),
+            UINT8_C(0xA5));
+  xnn_pack_kai_qs2_weights_and_biases_sme2(
+      /*flags=*/0, &gemm_config, input_channels, output_channels, groups,
+      /*unused_block_size=*/0, /*k_stride=*/input_channels,
+      /*accumulator_init=*/nullptr, weights.data(),
+      /*init_extra_data0_fn=*/nullptr, /*extra_data0=*/nullptr,
+      /*extra_data0_element_size=*/0,
+      /*init_extra_data1_fn=*/nullptr, /*extra_data1=*/scale.data(),
+      /*extra_data1_element_size=*/sizeof(float),
+      grouped_packed_weights.data(), /*params=*/nullptr);
+  xnn_pack_kai_qs2_weights_and_biases_sme2(
+      /*flags=*/0, &gemm_config, input_channels, output_channels, groups,
+      /*unused_block_size=*/0, /*k_stride=*/input_channels,
+      /*accumulator_init=*/zero_bias.data(), weights.data(),
+      /*init_extra_data0_fn=*/nullptr, /*extra_data0=*/zero_bias.data(),
+      /*extra_data0_element_size=*/sizeof(float),
+      /*init_extra_data1_fn=*/nullptr, /*extra_data1=*/scale.data(),
+      /*extra_data1_element_size=*/sizeof(float),
+      expected_packed_weights.data(), /*params=*/nullptr);
+  EXPECT_THAT(grouped_packed_weights,
+              ElementsAreArray(expected_packed_weights));
+}
+
+#endif  // XNN_ENABLE_ARM_SME2 && XNN_ENABLE_KLEIDIAI
 
 TEST(PACK_QD8_F32_QC4W_GEMM_GOI_W, kr_eq_4_nr_eq_2) {
   size_t g = 1;
