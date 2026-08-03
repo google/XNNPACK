@@ -839,6 +839,13 @@ ynn_runtime::ynn_runtime(ynn::ref_count<const ynn_subgraph> subgraph,
     };
   }
 #endif
+#ifdef YNN_ENABLE_RUNTIME_TRACE
+  eval_config.trace_begin = [this](const char* name) -> slinky::index_t {
+    std::lock_guard<std::mutex> lock(trace_mutex);  // NOLINT(build/c++11)
+    trace_events.push_back(name);
+    return 0;
+  };
+#endif
   eval_context.config = &eval_config;
 
   values.reserve(subgraph->values.size());
@@ -949,6 +956,9 @@ ynn_status ynn_runtime::build() {
   }
 
   slinky::build_options options;
+#ifdef YNN_ENABLE_RUNTIME_TRACE
+  options.trace = true;
+#endif
 #ifdef YNN_ENABLE_PERFETTO
   options.trace = options.trace || get_trace_filename() != nullptr;
 #endif

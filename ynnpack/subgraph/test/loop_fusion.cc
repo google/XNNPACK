@@ -188,7 +188,7 @@ TEST_F(LoopFusionTest, TwoDotsShareLoops) {
 
   MakeRuntime(subgraph.GetSubgraph());
 
-  const size_t M = 128, K = 256, N = 1024;
+  const size_t M = 256, K = 256, N = 2048;
   Tensor<float> a({M, K});
   Tensor<float> b0({K, N});
   Tensor<float> b1({K, N});

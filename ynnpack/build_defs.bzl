@@ -172,7 +172,10 @@ _YNN_PARAMS_FOR_ARCH = {
     },
     "arm64_neonfp8dot4": {
         "cond": "//ynnpack:ynn_enable_arm64_neonfp8dot4",
-        "arch_copts": ["-march=armv8.2-a+fp8+fp8dot4"],
+        "arch_copts": select({
+            "//ynnpack:arm64": ["-march=armv8.2-a+fp8+fp8dot4"],
+            "//conditions:default": [],
+        }),
         "arch_flag": "neonfp8dot4",
     },
     "arm_neonbf16": {
@@ -190,7 +193,10 @@ _YNN_PARAMS_FOR_ARCH = {
     },
     "arm64_neoni8mm": {
         "cond": "//ynnpack:ynn_enable_arm64_neoni8mm",
-        "arch_copts": ["-march=armv8.2-a+i8mm"],
+        "arch_copts": select({
+            "//ynnpack:arm64": ["-march=armv8.2-a+i8mm"],
+            "//conditions:default": [],
+        }),
         "arch_flag": "neoni8mm",
     },
     "arm64": {
@@ -203,17 +209,26 @@ _YNN_PARAMS_FOR_ARCH = {
     },
     "arm64_sme": {
         "cond": "//ynnpack:ynn_enable_arm64_sme",
-        "arch_copts": ["-march=armv8.2-a+sme"],
+        "arch_copts": select({
+            "//ynnpack:arm64": ["-march=armv8.2-a+sme"],
+            "//conditions:default": [],
+        }),
         "arch_flag": "sme",
     },
     "arm64_sme2": {
         "cond": "//ynnpack:ynn_enable_arm64_sme2",
-        "arch_copts": ["-march=armv8.2-a+sme2"],
+        "arch_copts": select({
+            "//ynnpack:arm64": ["-march=armv8.2-a+sme2"],
+            "//conditions:default": [],
+        }),
         "arch_flag": "sme2",
     },
     "arm64_sve": {
         "cond": "//ynnpack:ynn_enable_arm64_sve",
-        "arch_copts": ["-march=armv8.2-a+sve"],
+        "arch_copts": select({
+            "//ynnpack:arm64": ["-march=armv8.2-a+sve"],
+            "//conditions:default": [],
+        }),
         "arch_flag": "sve",
     },
     "x86_sse2": {
@@ -305,12 +320,18 @@ _YNN_PARAMS_FOR_ARCH = {
     },
     "hexagon_hvx": {
         "cond": "//ynnpack:ynn_enable_hvx",
-        "arch_copts": ["-mhvx"],
+        "arch_copts": select({
+            "//ynnpack:hexagon": ["-mhvx"],
+            "//conditions:default": [],
+        }),
         "arch_flag": "hvx",
     },
     "wasm_simd128": {
         "cond": "//ynnpack:ynn_enable_wasm_simd128",
-        "arch_copts": ["-msimd128"],
+        "arch_copts": select({
+            "//ynnpack:wasm": ["-msimd128"],
+            "//conditions:default": [],
+        }),
         "arch_flag": "wasm_simd128",
     },
 }
