@@ -55,7 +55,14 @@ auto make_transpose_impl(int elem_count, std::vector<int32_t> permutation) {
     int sliced_elem_count = elem_count;
     while (sliced_output.rank > 0 && (elem_count == 1 || permutation[0] == 0) &&
            is_contiguous(sliced_output.dim(0), elem_size) &&
-           is_contiguous(sliced_input.dim(0), elem_size)) {
+           is_contiguous(sliced_input.dim(0), elem_size) &&
+           // Only fold dims if their extent spans the physical stride to the
+           // next dim.
+           (sliced_output.rank == 1 ||
+            (sliced_output.dim(0).extent() * elem_size ==
+                 sliced_output.dim(1).stride() &&
+             sliced_input.dim(0).extent() * elem_size ==
+                 sliced_input.dim(1).stride()))) {
       elem_size *= sliced_output.dim(0).extent();
       sliced_input.slice(0, slinky::in_bounds{sliced_output.dim(0).min()});
       sliced_output.slice(0);
