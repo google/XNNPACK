@@ -2694,7 +2694,10 @@ static enum xnn_status reshape_igemm(
   }
   const size_t output_height = convolution_op->convolution_op->output_height;
   const size_t output_width = convolution_op->convolution_op->output_width;
-  const size_t output_size = output_height * output_width;
+  size_t output_size;
+  if (!xnn_safe_mul(output_height, output_width, &output_size)) {
+    return xnn_status_out_of_memory;
+  }
 
   const uint32_t nr = convolution_op->ukernel.igemm->nr;
   struct xnn_hmp_igemm_ukernel* igemm_cases =
