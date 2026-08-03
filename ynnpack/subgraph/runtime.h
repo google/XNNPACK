@@ -9,6 +9,7 @@
 #include <cassert>
 #include <cstdint>
 #include <memory>
+#include <mutex>
 #include <utility>
 #include <vector>
 
@@ -58,6 +59,11 @@ struct ynn_runtime {
   // The evaluateable slinky pipeline, and the context to run it.
   slinky::pipeline pipeline;
   slinky::eval_context eval_context;
+
+#ifdef YNN_ENABLE_RUNTIME_TRACE
+  std::mutex trace_mutex;  // NOLINT(build/c++11)
+  std::vector<std::string> trace_events;
+#endif
 
   const ynn_runtime_value& value(uint32_t id) const {
     assert(id < values.size());

@@ -64,4 +64,48 @@ void dot_uint8_int8_int32_32x32x64_16x16x4_amxint8(
       B_stride_k2, B_stride_k1, B, C_in_stride_m, C_in, C_out_stride_m, C_out);
 }
 
+void dot_int8_int8_int32_32x48x64_16x16x4_amxint8(
+    size_t M, size_t N, size_t K3, size_t K2, size_t K1, size_t A_stride_m,
+    size_t A_stride_k3, size_t A_stride_k2, const void* A, size_t B_stride_k3,
+    size_t B_stride_k2, size_t B_stride_k1, const void* B, size_t C_in_stride_m,
+    const void* C_in, size_t C_out_stride_m, void* C_out) {
+  x86_amx_dot_2x3<int8_t, int32_t, dpbssd>(
+      M, N, K3, K2, K1 & ~3, A_stride_m, A_stride_k3, A_stride_k2, A,
+      B_stride_k3, B_stride_k2, B_stride_k1, B, C_in_stride_m, C_in,
+      C_out_stride_m, C_out);
+}
+
+void dot_uint8_int8_int32_32x48x64_16x16x4_amxint8(
+    size_t M, size_t N, size_t K3, size_t K2, size_t K1, size_t A_stride_m,
+    size_t A_stride_k3, size_t A_stride_k2, const void* A, size_t B_stride_k3,
+    size_t B_stride_k2, size_t B_stride_k1, const void* B, size_t C_in_stride_m,
+    const void* C_in, size_t C_out_stride_m, void* C_out) {
+  x86_amx_dot_2x3<int8_t, int32_t, dpbusd>(
+      M, N, K3, K2, K1 & ~3, A_stride_m, A_stride_k3, A_stride_k2, A,
+      B_stride_k3, B_stride_k2, B_stride_k1, B, C_in_stride_m, C_in,
+      C_out_stride_m, C_out);
+}
+
+void dot_int8_int8_int32_48x32x64_16x16x4_amxint8(
+    size_t M, size_t N, size_t K3, size_t K2, size_t K1, size_t A_stride_m,
+    size_t A_stride_k3, size_t A_stride_k2, const void* A, size_t B_stride_k3,
+    size_t B_stride_k2, size_t B_stride_k1, const void* B, size_t C_in_stride_m,
+    const void* C_in, size_t C_out_stride_m, void* C_out) {
+  x86_amx_dot_3x2<int8_t, int32_t, dpbssd>(
+      M, N, K3, K2, K1 & ~3, A_stride_m, A_stride_k3, A_stride_k2, A,
+      B_stride_k3, B_stride_k2, B_stride_k1, B, C_in_stride_m, C_in,
+      C_out_stride_m, C_out);
+}
+
+void dot_uint8_int8_int32_48x32x64_16x16x4_amxint8(
+    size_t M, size_t N, size_t K3, size_t K2, size_t K1, size_t A_stride_m,
+    size_t A_stride_k3, size_t A_stride_k2, const void* A, size_t B_stride_k3,
+    size_t B_stride_k2, size_t B_stride_k1, const void* B, size_t C_in_stride_m,
+    const void* C_in, size_t C_out_stride_m, void* C_out) {
+  x86_amx_dot_3x2<int8_t, int32_t, dpbusd>(
+      M, N, K3, K2, K1 & ~3, A_stride_m, A_stride_k3, A_stride_k2, A,
+      B_stride_k3, B_stride_k2, B_stride_k1, B, C_in_stride_m, C_in,
+      C_out_stride_m, C_out);
+}
+
 }  // namespace ynn

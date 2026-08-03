@@ -49,6 +49,11 @@ define_build_option(
     name = "ynn_enable_tsl_profiler",
 )
 
+define_build_option(
+    name = "ynn_enable_runtime_trace",
+    default_all = ["//ynnpack:hexagon-clang"],
+)
+
 _TSL_PROFILER_DEPS = [
     # The capability to add tsl profiler traces is disabled by default. To enable and use it:add:
     #
@@ -111,6 +116,9 @@ cc_library(
     ],
     compatible_with = _COMPATIBLE_WITH,
     defines = select({
+        ":ynn_enable_runtime_trace": ["YNN_ENABLE_RUNTIME_TRACE"],
+        "//conditions:default": [],
+    }) + select({
         ":ynn_enable_tsl_profiler": ["YNN_ENABLE_TSL_PROFILER"],
         "//conditions:default": [],
     }),

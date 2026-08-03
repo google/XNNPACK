@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <array>
 #include <cassert>
+#include <cmath>
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
@@ -28,6 +29,7 @@
 #include "ynnpack/kernels/dot/schedule.h"
 #include "ynnpack/kernels/ternary/ternary.h"
 #include "ynnpack/subgraph/copy.h"
+#include "ynnpack/subgraph/dot.h"
 #include "ynnpack/subgraph/elementwise.h"
 #include "ynnpack/subgraph/runtime.h"
 #include "ynnpack/subgraph/slinky.h"
@@ -213,14 +215,28 @@ bool maybe_rewrite_input_a_to_uint8(ynn_subgraph& subgraph,
                                 num_k_dims);
 }
 
-// TODO(dsharlet): This should probably be a parameter we learn based on cpuinfo
-// or other source of CPU metadata. This was determined experimentally.
-constexpr index_t cache_size_l2 = 128 * 1024;
+// Set default cache sizes to be conservative.
+constexpr index_t default_cache_size_l1 = 16 * 1024;
+constexpr index_t default_cache_size_l2 = 256 * 1024;
+constexpr index_t default_cache_size_l3 = 4 * 1024 * 1024;
+constexpr index_t default_num_shared_l3_cores = 4;
 
 // When we want arithmetic to be consistent, we need to make all tiling
 // decisions independently of any hardware dependent parameters (cache sizes,
 // kernel tile sizes, etc.).
 constexpr index_t consistent_block_n = 64;
+
+const cpu_info& get_cpu_info() {
+  static const cpu_info info = []() {
+    cpu_info info;
+    info.cache_sizes[0] = default_cache_size_l1;
+    info.cache_sizes[1] = default_cache_size_l2;
+    info.cache_sizes[2] = default_cache_size_l3;
+    info.num_shared_l3_cores = default_num_shared_l3_cores;
+    return info;
+  }();
+  return info;
+}
 
 // The wrapper for the kernel we use when we actually want to run a dot kernel
 // on some buffers.
@@ -452,13 +468,12 @@ auto make_dot_impl(dot_type type, bool consistent_arithmetic, bool transposed_a,
              b_k_strides[0], b, init_c_stride_m, init_c, c_stride_m, c);
     };
 
-    const size_t cache_sizes[] = {cache_size_l2};
-
+    const cpu_info& cpu_info = get_cpu_info();
     // We need up to 3 loops per cache level.
-    dot_loop loops_storage[std::size(cache_sizes) * 3];
+    dot_loop loops_storage[cpu_info::kNumCacheLevels * 3];
 
     if (k1) {
-      auto loops = schedule_dot(cache_sizes, c_m.extent(), c_n.extent(), k,
+      auto loops = schedule_dot(cpu_info, c_m.extent(), c_n.extent(), k,
                                 block_m, block_n, block_k, a.elem_size,
                                 b.elem_size, loops_storage);
 
@@ -475,7 +490,7 @@ auto make_dot_impl(dot_type type, bool consistent_arithmetic, bool transposed_a,
       std::array<size_t, 3> k_tail = {static_cast<size_t>(k1_tail),
                                       static_cast<size_t>(k2),
                                       static_cast<size_t>(k3)};
-      auto loops = schedule_dot(cache_sizes, c_m.extent(), c_n.extent(), k_tail,
+      auto loops = schedule_dot(cpu_info, c_m.extent(), c_n.extent(), k_tail,
                                 block_m, block_n, block_k, a.elem_size,
                                 b.elem_size, loops_storage);
       // Dot kernels can't handle k1 not aligned to tile_k. We handle that
@@ -622,8 +637,9 @@ uint32_t define_pack_b(ynn_subgraph_t subgraph, const dot_type& type,
   slinky::expr k2 = num_k_dims >= 2 ? b.extent(2) : 1;
   slinky::expr k3 = num_k_dims >= 3 ? b.extent(3) : 1;
 
+  const size_t available_cache = default_cache_size_l2 / 2;
   const index_t elem_size_bits = type_size_bytes(b.type) * 8 / element_count;
-  const index_t cache_elements = cache_size_l2 * 8 / elem_size_bits;
+  const index_t cache_elements = available_cache * 8 / elem_size_bits;
 
   // When choosing block_n, we have the following concerns:
   // - We want to make the block bigger than the kernel's `block_n`
@@ -785,6 +801,8 @@ auto make_transpose_a_impl(int m_dim) {
 
 }  // namespace
 
+choose_split_factors_fn choose_split_factors_hook = nullptr;
+
 // Packing means transposing
 // a(k, m, ...) => a([0, tile_k), m, k/tile_k, ...)
 void define_transpose_a(ynn_subgraph& subgraph, ynn_node& node, index_t tile_k,
@@ -862,75 +880,223 @@ uint32_t define_transpose_a(ynn_subgraph& subgraph, index_t tile_k,
   return output.id;
 }
 
+// We pack three log2(split) exponents into a single scalar index_t.
+// Each exponent requires at most 5 bits (0..30 for 32-bit index_t, 0..62 for
+// 64-bit index_t). We use 10 bits per split factor to provide plenty of room
+// while easily fitting in a 32-bit signed integer without overflow.
+constexpr int kLog2SplitBits = 10;
+constexpr index_t kMaxLog2Split = (index_t(1) << kLog2SplitBits) - 1;
+constexpr index_t kMaxSplit = 2097151;
+
+index_t ceil_log2(index_t x) {
+  if (x <= 1) return 0;
+  index_t log2_x = 0;
+  index_t val = x - 1;
+  while (val > 0) {
+    val >>= 1;
+    ++log2_x;
+  }
+  return log2_x;
+}
+
+std::tuple<index_t, index_t, index_t> choose_split_factors(
+    index_t m, index_t n, index_t k, index_t block_n, int a_elem_size,
+    int b_elem_size, int c_elem_size) {
+  assert(m >= 0);
+  assert(n >= 0);
+  assert(k >= 0);
+  assert(a_elem_size > 0);
+  assert(b_elem_size > 0);
+  assert(c_elem_size > 0);
+  assert(block_n > 0);
+  static_assert(default_num_shared_l3_cores > 0);
+
+  index_t total_macs = m * n * k;
+  index_t min_macs_per_task =
+      1024 * 1024 * std::max<index_t>(8 / a_elem_size, 1);
+
+  // 1. Check if we can avoid splitting. We do this only for x86 since ARM CPUs
+  // are slower and benefit more from splitting.
+#ifndef YNN_ARCH_ARM
+  bool heavily_skewed = (m >= 512 && m >= 16 * n) || (n >= 512 && n >= 16 * m);
+  if (!heavily_skewed) {
+    if (total_macs <= min_macs_per_task) {
+      return {n, m, k};
+    }
+    index_t footprint_bytes =
+        m * k * a_elem_size + k * n * b_elem_size + m * n * c_elem_size;
+    if (footprint_bytes <= default_cache_size_l2) {
+      return {n, m, k};
+    }
+  }
+#endif
+
+  // 2. Check if we need to split k.
+  index_t split_n = std::min<index_t>(n, block_n);
+  index_t split_m = std::min<index_t>(m, 16);
+  const index_t effective_l3_cache_size =
+      default_cache_size_l3 / default_num_shared_l3_cores;
+  index_t slice_footprint = split_m * a_elem_size + split_n * b_elem_size +
+                            split_m * split_n * c_elem_size;
+  index_t split_k = k;
+  const index_t min_k_threshold = 8192 / a_elem_size;
+  index_t k_threshold =
+      align_up<index_t>(effective_l3_cache_size / slice_footprint, 64);
+  k_threshold = std::max<index_t>(k_threshold, min_k_threshold);
+  if (k >= k_threshold * 2) {
+    split_k = index_t(1) << ceil_log2(k_threshold);
+  }
+
+  // 3. Split m and n.
+  //
+  // Considerations for task size:
+  // - Footprint: Enforces a spatial limit. We target a specific footprint
+  //   to maximize data reuse and saturate CPU caches.
+  // - Cost: The total number of input elements read from matrices A and B.
+  //   Enforces a temporal limit, ensuring a single thread doesn't process
+  //   too much data and cause thread starvation.
+#ifdef YNN_ARCH_ARM
+  // ARM CPUs are slower and benefit more from concurrency. We use lower
+  // thresholds to encourage smaller tiles and more parallelism.
+  const index_t min_footprint = 16 * a_elem_size * 1024;
+  index_t max_footprint = 256 * 1024;
+  index_t target_cost = 32768;
+#else
+  const index_t min_footprint = 32 * a_elem_size * 1024;
+  index_t max_footprint = 512 * 1024;
+  // BF16 will typically run on AMX and can handle more flops.
+  index_t target_cost = a_elem_size == 2 ? 163840 : 65536;
+#endif
+
+  // Default aspect ratio for symmetric matrices.
+  index_t aspect_ratio = 4;
+  // For M-heavy or N-heavy shapes, we adjust the `aspect_ratio` to prioritize
+  // growing the larger dimension. We also boost `max_footprint` and
+  // `target_cost` to coalesce tiny slivers into fewer, larger blocks.
+  if (m >= 4 * n) {
+    aspect_ratio = 16;  // Prioritize growing m.
+    max_footprint *= 2;
+    target_cost *= 2;
+  } else if (n >= 4 * m) {
+    aspect_ratio = 1;  // Prioritize growing n.
+    max_footprint *= 2;
+    target_cost *= 2;
+  }
+
+  const index_t total_min_macs =
+      min_macs_per_task * default_num_shared_l3_cores;
+  const index_t num_tasks_per_core =
+      std::min<index_t>(4, ceil_div(total_macs, total_min_macs));
+  const index_t num_tasks = num_tasks_per_core * default_num_shared_l3_cores;
+  const index_t target_concurrency = std::max<index_t>(1, num_tasks);
+  const index_t area_threshold =
+      std::min<index_t>(m, 64) * std::min<index_t>(n, 64);
+
+  while (true) {
+    index_t footprint = split_m * split_k * a_elem_size +
+                        split_k * split_n * b_elem_size +
+                        split_m * split_n * c_elem_size;
+    index_t cost = (split_m + split_n) * split_k;
+
+    if (footprint >= effective_l3_cache_size) {
+      break;
+    }
+
+    // Balance parallelism and task size once minimum viable tile size is
+    // reached. If concurrency is saturated (grid_concurrency <=
+    // target_concurrency), we enforce the target cost ceiling to prevent
+    // threads from processing too much data. We also stop if the spatial
+    // footprint exceeds the maximum limit.
+    if (split_m * split_n >= area_threshold && footprint >= min_footprint) {
+      const index_t grid_concurrency =
+          ((m + split_m - 1) / split_m) * ((n + split_n - 1) / split_n);
+      const bool enforce_cost_ceiling =
+          (grid_concurrency <= target_concurrency);
+      if ((enforce_cost_ceiling && cost >= target_cost) ||
+          footprint >= max_footprint) {
+        break;
+      }
+    }
+
+    // We want to make the tile bigger, figure out which dimension to grow.
+    if ((aspect_ratio * split_n <= split_m || split_m >= m) && split_n < n) {
+      split_n *= 2;
+    } else if ((split_m <= aspect_ratio * split_n || split_n >= n) &&
+               split_m < m) {
+      split_m *= 2;
+    } else {
+      break;
+    }
+  }
+
+  assert(split_k == k || split_k % 64 == 0);
+  assert(split_n == n || split_n % block_n == 0);
+  split_m = std::min<index_t>(std::min<index_t>(split_m, m), kMaxSplit);
+  split_n = std::min<index_t>(std::min<index_t>(split_n, n), kMaxSplit);
+  split_k = std::min<index_t>(std::min<index_t>(split_k, k), kMaxSplit);
+  // Ensure that split factors are powers of two (or the original dimension)
+  // since some callers of this function will pack the splits into log2
+  // exponents.
+  assert(split_m == m || (split_m & (split_m - 1)) == 0);
+  assert(split_k == k || (split_k & (split_k - 1)) == 0);
+  assert(split_n == n ||
+         ((split_n / block_n) & ((split_n / block_n) - 1)) == 0);
+  return {split_n, split_m, split_k};
+}
+
 std::tuple<slinky::expr, slinky::expr, slinky::expr> choose_split_factors(
     ynn_runtime& runtime, slinky::expr m, slinky::expr n, slinky::expr k,
-    slinky::expr block_n) {
-  // We can only return a scalar from a slinky expression, so we pack the
-  // splits into one integer.
+    slinky::expr block_n, ynn_type input_a_type, ynn_type input_b_type,
+    ynn_type output_c_type) {
   auto impl = [](const slinky::call* op, slinky::eval_context& ctx) {
     index_t m = evaluate(op->args[0], ctx);
     index_t n = evaluate(op->args[1], ctx);
     index_t k = evaluate(op->args[2], ctx);
     index_t block_n = evaluate(op->args[3], ctx);
-    assert(block_n > 0);
-
-    // If k gets big, we're going to tile k anyways. It could be faster to
-    // parallelize more finely, but it will waste CPU cycles due to more memory
-    // traffic out of the cache.
-    k = std::min<index_t>(k, 1024);
-
-    // Considerations for task size:
-    // - We want tasks to be square-ish, to maximize the number of times we can
-    // use data we load from either side.
-    // - Tasks shouldn't be too small, to avoid parallelism overhead.
-    // - Tasks shouldn't be too large, so we get enough parallelism.
-    const index_t min_area =
-        std::min<index_t>(m, 64) * std::min<index_t>(n, 64);
-    const index_t max_area = 256 * 256;
-    // The maximum cost of a tile, according to the cost function (m + n) * k.
-    const index_t max_cost = 1024 * 64;
-
-    // A parameter indicating the target split_m/split_n ratio.
-    // TODO(b/438841352): Figure out why we want tall skinny tiles, at least on
-    // AMD Rome.
-    const index_t aspect_ratio = 4;
-
-    index_t split_n = std::min<index_t>(n, block_n);
-    index_t split_m = std::min<index_t>(m, 16);
-    while (true) {
-      if (split_n * split_m >= min_area) {
-        // We've reached the minimum tile size, should we stop?
-        if ((split_m + split_n) * k >= max_cost ||
-            split_m * split_n >= max_area) {
-          // We've reached the maximum task size, we should stop.
-          break;
-        }
-      }
-      // We want to make the tile bigger, figure out which dimension to grow.
-      if ((aspect_ratio * split_n <= split_m || split_m >= m) && split_n < n) {
-        split_n *= 2;
-      } else if ((split_m <= aspect_ratio * split_n || split_n >= n) &&
-                 split_m < m) {
-        split_m *= 2;
-      } else {
-        break;
-      }
-    }
-
-    split_m = std::min<index_t>(split_m, 32768);
-    split_n = std::min<index_t>(split_n, 65536);
-    return split_m * 65536 + split_n;
+    index_t a_elem_size = evaluate(op->args[4], ctx);
+    index_t b_elem_size = evaluate(op->args[5], ctx);
+    index_t c_elem_size = evaluate(op->args[6], ctx);
+    auto constant_splits = choose_split_factors(m, n, k, block_n, a_elem_size,
+                                                b_elem_size, c_elem_size);
+    // We can only return a scalar from a slinky expression, so we pack the
+    // three log2(split) exponents into one integer.
+    // For split_n, block_n can be a non-power-of-two (e.g., 48), but split_n is
+    // guaranteed to be a multiple of block_n (block_n * 2^j). We store log2_n
+    // as the exponent j of the ratio split_n / block_n.
+    index_t log2_n = ceil_log2(
+        std::max<index_t>(1, ceil_div(std::get<0>(constant_splits), block_n)));
+    index_t log2_m = ceil_log2(std::get<1>(constant_splits));
+    index_t log2_k = ceil_log2(std::get<2>(constant_splits));
+    log2_n = std::min<index_t>(log2_n, kMaxLog2Split);
+    log2_m = std::min<index_t>(log2_m, kMaxLog2Split);
+    log2_k = std::min<index_t>(log2_k, kMaxLog2Split);
+    return (log2_n << (2 * kLog2SplitBits)) | (log2_m << kLog2SplitBits) |
+           log2_k;
   };
-  slinky::expr splits = slinky::call::make(impl, {m, n, k, block_n});
+  index_t a_elem_size = type_size_bytes(input_a_type);
+  index_t b_elem_size = type_size_bytes(input_b_type);
+  index_t c_elem_size = type_size_bytes(output_c_type);
+  slinky::expr splits = slinky::call::make(
+      impl, {m, n, k, block_n, a_elem_size, b_elem_size, c_elem_size});
 
-  // Extract the splits from the single index_t result.
+  // Extract the log2 split exponents from the single index_t result and convert
+  // them back to power-of-two split factors.
   splits = runtime.globals.get(splits, "dot_splits");
-  slinky::expr split_m = splits / 65536;
-  slinky::expr split_n = splits % 65536;
-  // Align `split_k` to be a multiple of possible values of `tile_k`. We cannot
-  // use the value of `tile_k` directly since this varies by CPU, so we use 64
-  // as a heuristic.
-  slinky::expr split_k = slinky::select(k >= 64, slinky::align_up(k, 64), k);
+  slinky::expr log2_n = splits / (index_t(1) << (2 * kLog2SplitBits));
+  slinky::expr log2_m = (splits / (index_t(1) << kLog2SplitBits)) %
+                        (index_t(1) << kLog2SplitBits);
+  slinky::expr log2_k = splits % (index_t(1) << kLog2SplitBits);
+
+  auto exp2_impl = [](const slinky::call* op, slinky::eval_context& ctx) {
+    return index_t(1) << evaluate(op->args[0], ctx);
+  };
+  slinky::expr split_m = slinky::call::make(exp2_impl, {log2_m});
+  // Since log2_n stores exponent j where split_n = block_n * 2^j, we multiply
+  // the power-of-two multiplier (2^j) by block_n to reconstruct split_n. This
+  // guarantees split_n is an exact multiple of block_n even for
+  // non-power-of-two block_n values.
+  slinky::expr split_n = block_n * slinky::call::make(exp2_impl, {log2_n});
+  slinky::expr split_k = slinky::call::make(exp2_impl, {log2_k});
   split_m = runtime.globals.get(split_m, "split_m");
   split_n = runtime.globals.get(split_n, "split_n");
   split_k = runtime.globals.get(split_k, "split_k");
@@ -1379,14 +1545,37 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
     for (size_t d = 1; d < num_k_dims; ++d) {
       k *= packed_b.extent(3 + d);
     }
+    k = slinky::simplify(k);
+
+    const int a_elem_size = type_size_bytes(input_a.type);
+    const int b_elem_size = type_size_bytes(packed_b.type);
+    const int c_elem_size = type_size_bytes(output.type);
 
     slinky::expr split_n, split_m, split_k;
-    std::tie(split_n, split_m, split_k) =
-        choose_split_factors(runtime, m, n, k, block_n);
+    if (choose_split_factors_hook) {
+      std::tie(split_n, split_m, split_k) =
+          choose_split_factors_hook(runtime, m, n, k, block_n);
+    } else if (as_constant(m) && as_constant(n) && as_constant(k) &&
+               as_constant(block_n)) {
+      auto constant_splits = choose_split_factors(
+          *as_constant(m), *as_constant(n), *as_constant(k),
+          *as_constant(block_n), a_elem_size, b_elem_size, c_elem_size);
+      split_n = std::get<0>(constant_splits);
+      split_m = std::get<1>(constant_splits);
+      split_k = std::get<2>(constant_splits);
+    } else {
+      std::tie(split_n, split_m, split_k) = choose_split_factors(
+          runtime, m, n, k, block_n, input_a.type, packed_b.type, output.type);
+    }
 
     const int rank = output.rank();
     std::vector<int> loop_order;
-    if (rank >= 2 && pack_b && !packed_b.is_static()) {
+    if (slinky::prove_true(split_k < k)) {
+      if (rank >= 2) loop_order.push_back(num_k_dims + 1);
+      loop_order.push_back(num_k_dims);
+      for (size_t i = 0; i < num_k_dims; ++i) loop_order.push_back(i);
+      for (size_t i = 2; i < rank; ++i) loop_order.push_back(num_k_dims + i);
+    } else if (rank >= 2 && pack_b && !packed_b.is_static()) {
       loop_order.resize(num_k_dims + 2);
       for (size_t i = 0; i < loop_order.size(); ++i) {
         loop_order[i] = i;
