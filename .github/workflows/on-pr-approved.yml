@@ -3,6 +3,10 @@ run-name: ${{ github.event.pull_request.title }}
 on:
   pull_request_review:
     types: [submitted]
+permissions:
+  contents: read   # checkout in the called workflow
+  actions: write   # cache restore + save in the called workflow (actions/cache@v5)
+
 jobs:
   build-and-test:
     if: github.event.review.state == 'APPROVED'

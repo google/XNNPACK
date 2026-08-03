@@ -6,6 +6,10 @@ on:
       - 'docker/**'
   workflow_dispatch:
 
+permissions:
+  contents: read   # checkout in the called workflow
+  actions: write   # cache restore + save in the called workflow (actions/cache@v5)
+
 jobs:
   build-and-test:
     uses: ./.github/workflows/build.yml
