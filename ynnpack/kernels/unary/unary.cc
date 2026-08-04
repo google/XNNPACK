@@ -513,6 +513,13 @@ unary_kernel_fn get_unary_kernel(ynn_unary_operator op, ynn_type a_type,
 }
 
 unary_params get_unary_params(ynn_unary_operator op) {
+  // To better preserve signedness of zeros, we should make zero offsets -0.0.
+  // In floating point arithmetic:
+  //
+  //   0.0 + 0.0 = 0.0
+  //   0.0 + -0.0 = 0.0
+  //   -0.0 + -0.0 = -0.0
+  constexpr double zero = -0.0;
   switch (op) {
     case ynn_unary_exp:
     case ynn_unary_expm1:
@@ -530,31 +537,31 @@ unary_params get_unary_params(ynn_unary_operator op) {
                               .input_multiplier = 1.0,
                           }};
     case ynn_unary_erf:
-      return unary_params{.erf = erf_params{.output_offset = 0.0,
+      return unary_params{.erf = erf_params{.output_offset = zero,
                                             .output_multiplier = 1.0,
                                             .input_multiplier = 1.0}};
     case ynn_unary_approx_erf:
       return unary_params{.approx_erf =
-                              approx_erf_params{.output_offset = 0.0,
+                              approx_erf_params{.output_offset = zero,
                                                 .output_multiplier = 1.0,
                                                 .input_multiplier = 1.0}};
     case ynn_unary_approx_tanh:
       return unary_params{.approx_tanh = approx_tanh_params{
-                              .output_offset = 0.0, .output_multiplier = 1.0}};
+                              .output_offset = zero, .output_multiplier = 1.0}};
     case ynn_unary_tanh:
       return unary_params{
-          .tanh = tanh_params{.output_offset = 0.0, .output_multiplier = 1.0}};
+          .tanh = tanh_params{.output_offset = zero, .output_multiplier = 1.0}};
     case ynn_unary_sin:
       return unary_params{
-          .sin = sin_params{.output_offset = 0.0, .output_multiplier = 1.0}};
+          .sin = sin_params{.output_offset = zero, .output_multiplier = 1.0}};
     case ynn_unary_cos:
       return unary_params{
-          .cos = cos_params{.output_offset = 0.0, .output_multiplier = 1.0}};
+          .cos = cos_params{.output_offset = zero, .output_multiplier = 1.0}};
     case ynn_unary_poly3:
-      return unary_params{.poly3 = poly3_params{/*c0=*/0.0, /*c1=*/0.0,
-                                                /*c2=*/0.0, /*c3=*/0.0}};
+      return unary_params{.poly3 = poly3_params{/*c0=*/zero, /*c1=*/zero,
+                                                /*c2=*/zero, /*c3=*/zero}};
     case ynn_unary_rsqrt:
-      return unary_params{.rsqrt = rsqrt_params{.input_offset = 0.0,
+      return unary_params{.rsqrt = rsqrt_params{.input_offset = zero,
                                                 .input_multiplier = 1.0}};
     default:
       return unary_params{};
