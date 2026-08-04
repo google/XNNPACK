@@ -1801,6 +1801,13 @@ static struct fingerprint_buffers generate_fingerprint_data(
       kernel_scale_size * sizeof(float) +
       XNN_ALLOCATION_ALIGNMENT * 3;
   uint8_t* buffer = xnn_allocate_simd_memory(bytes);
+  if (!buffer) {
+    xnn_log_error(
+        "Could not allocate %zu bytes when generating convolution 2D NHWC "
+        "fingerprint data",
+        bytes);
+    return (struct fingerprint_buffers){0};
+  }
   fill_fingerprint_buffer(buffer, bytes);
   struct fingerprint_buffers data = {
     .data = buffer,
@@ -1916,6 +1923,10 @@ enum xnn_status xnn_fingerprint_convolution2d_nhwc(
     return f_context.status;
   }
   struct fingerprint_buffers data = generate_fingerprint_data(variant, &context);
+  if (!data.data) {
+    finalize_fingerprint_context(&f_context);
+    return xnn_status_out_of_memory;
+  }
   context.kernel = data.kernel;
   context.bias = data.bias;
   context.kernel_scale = data.kernel_scale;
