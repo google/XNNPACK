@@ -2837,11 +2837,13 @@ enum xnn_status xnn_create_fully_connected_nc_qu8(
   return create_fully_connected_nc_helper(&context);
 }
 
-static XNN_NO_SANITIZE_FUNCTION enum xnn_status reshape_fully_connected_nc(
+static XNN_NO_SANITIZE_FUNCTION enum xnn_status
+reshape_fully_connected_nc_with_pack_lh_config(
     xnn_operator_t fully_connected_op,
     enum xnn_operator_type expected_operator_type, size_t batch_size,
     bool dynamic_quantization, uint32_t log2_output_element_size,
     const void* params, size_t params_size, size_t* workspace_size,
+    const struct xnn_pack_lh_config* packed_lh_config,
     pthreadpool_t threadpool) {
   uint32_t log2_input_element_size = fully_connected_op->gemm_config->log2_input_element_size;
   const bool filter_is_nibble =
@@ -2898,7 +2900,6 @@ static XNN_NO_SANITIZE_FUNCTION enum xnn_status reshape_fully_connected_nc(
     input_channels = round_up_po2(input_channels, planes);
   }
 
-  const struct xnn_pack_lh_config* packed_lh_config = NULL;
   bool inline_lhs_packing =
       fully_connected_op->flags & XNN_FLAG_INLINE_LHS_PACKING;
   switch (fully_connected_op->type) {
@@ -2955,11 +2956,8 @@ static XNN_NO_SANITIZE_FUNCTION enum xnn_status reshape_fully_connected_nc(
       }
       break;
     case xnn_operator_type_fully_connected_nc_qdu8_bf16_qb4w:
-      // The bf16-output qb4w GEMM is fed by bf16 activations dynamically
-      // quantized to qduint8, so the LHS packing must read a bf16 (2-byte)
-      // source, not f32.
-      if (inline_lhs_packing) {
-        packed_lh_config = xnn_init_bf16_qduint8_pack_lh_config();
+      if (inline_lhs_packing && packed_lh_config == NULL) {
+        packed_lh_config = xnn_init_f32_qduint8_pack_lh_config();
       }
       break;
     case xnn_operator_type_fully_connected_nc_qp8_f32_qb4w:
@@ -3193,6 +3191,18 @@ static XNN_NO_SANITIZE_FUNCTION enum xnn_status reshape_fully_connected_nc(
   return xnn_status_success;
 }
 
+static XNN_NO_SANITIZE_FUNCTION enum xnn_status reshape_fully_connected_nc(
+    xnn_operator_t fully_connected_op,
+    enum xnn_operator_type expected_operator_type, size_t batch_size,
+    bool dynamic_quantization, uint32_t log2_output_element_size,
+    const void* params, size_t params_size, size_t* workspace_size,
+    pthreadpool_t threadpool) {
+  return reshape_fully_connected_nc_with_pack_lh_config(
+      fully_connected_op, expected_operator_type, batch_size,
+      dynamic_quantization, log2_output_element_size, params, params_size,
+      workspace_size, /*packed_lh_config=*/NULL, threadpool);
+}
+
 enum xnn_status xnn_reshape_fully_connected_nc_f16(
     xnn_operator_t fully_connected_op, size_t batch_size,
     pthreadpool_t threadpool) {
@@ -3365,16 +3375,39 @@ enum xnn_status xnn_reshape_fully_connected_nc_qd8_bf16_qb4w(
       threadpool);
 }
 
-enum xnn_status xnn_reshape_fully_connected_nc_qdu8_bf16_qb4w(
+enum xnn_status
+xnn_reshape_fully_connected_nc_qdu8_bf16_qb4w_with_input_datatype(
     xnn_operator_t fully_connected_op, size_t batch_size,
-    size_t* workspace_size, pthreadpool_t threadpool) {
-  return reshape_fully_connected_nc(
+    enum xnn_datatype input_datatype, size_t* workspace_size,
+    pthreadpool_t threadpool) {
+  const struct xnn_pack_lh_config* packed_lh_config = NULL;
+  if (fully_connected_op->flags & XNN_FLAG_INLINE_LHS_PACKING) {
+    switch (input_datatype) {
+      case xnn_datatype_bf16:
+        packed_lh_config = xnn_init_bf16_qduint8_pack_lh_config();
+        break;
+      case xnn_datatype_fp32:
+        packed_lh_config = xnn_init_f32_qduint8_pack_lh_config();
+        break;
+      default:
+        XNN_UNREACHABLE;
+    }
+  }
+  return reshape_fully_connected_nc_with_pack_lh_config(
       fully_connected_op, xnn_operator_type_fully_connected_nc_qdu8_bf16_qb4w,
       batch_size,
       /*dynamic_quantization=*/true,
       /*log2_output_element_size=*/XNN_LOG2_SIZEOF_BFLOAT16,
       &fully_connected_op->params.bf16_qb4w_minmax,
       sizeof(fully_connected_op->params.bf16_qb4w_minmax), workspace_size,
+      packed_lh_config, threadpool);
+}
+
+enum xnn_status xnn_reshape_fully_connected_nc_qdu8_bf16_qb4w(
+    xnn_operator_t fully_connected_op, size_t batch_size,
+    size_t* workspace_size, pthreadpool_t threadpool) {
+  return xnn_reshape_fully_connected_nc_qdu8_bf16_qb4w_with_input_datatype(
+      fully_connected_op, batch_size, xnn_datatype_fp32, workspace_size,
       threadpool);
 }
 

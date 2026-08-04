@@ -1134,8 +1134,10 @@ static enum xnn_status reshape_fully_connected_operator(
           fully_connected_op, batch_size, &opdata->workspace_size, threadpool);
       break;
     case xnn_operator_type_fully_connected_nc_qdu8_bf16_qb4w:
-      status = xnn_reshape_fully_connected_nc_qdu8_bf16_qb4w(
-          fully_connected_op, batch_size, &opdata->workspace_size, threadpool);
+      status =
+          xnn_reshape_fully_connected_nc_qdu8_bf16_qb4w_with_input_datatype(
+              fully_connected_op, batch_size, input_value->datatype,
+              &opdata->workspace_size, threadpool);
       break;
     case xnn_operator_type_fully_connected_nc_qd8_f32_qb4w:
       status = xnn_reshape_fully_connected_nc_qd8_f32_qb4w(
