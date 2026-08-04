@@ -203,12 +203,20 @@ _YNN_PARAMS_FOR_ARCH = {
     },
     "arm64_sme": {
         "cond": "//ynnpack:ynn_enable_arm64_sme",
-        "arch_copts": ["-march=armv8.2-a+sme"],
+        "arch_copts": select({
+            # Apple's Clang generates code that crashes with -msve (and works without it), while
+            # other compilers can't compile this code without it.
+            "//ynnpack:apple_clang": ["-march=armv8.2-a+sme"],
+            "//conditions:default": ["-march=armv8.2-a+sve+sme"],
+        }),
         "arch_flag": "sme",
     },
     "arm64_sme2": {
         "cond": "//ynnpack:ynn_enable_arm64_sme2",
-        "arch_copts": ["-march=armv8.2-a+sme2"],
+        "arch_copts": select({
+            "//ynnpack:apple_clang": ["-march=armv8.2-a+sme2"],
+            "//conditions:default": ["-march=armv8.2-a+sve+sme2"],
+        }),
         "arch_flag": "sme2",
     },
     "arm64_sve": {
