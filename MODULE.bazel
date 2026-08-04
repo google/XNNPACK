@@ -121,9 +121,9 @@ http_archive(
 
 http_archive(
     name = "slinky",
-    sha256 = "0bc38e01bdab4743104e94a6fe9e20f79a1792fe1297a4af7a23bfb679d85486",
-    strip_prefix = "slinky-c025c1f0e35c1828363f74affcd7852f57cfdf1b",
+    sha256 = "f9e718f65bcf2710450e00b0ed383a1025bc9a8bf3abfda85e49587f9f34929d",
+    strip_prefix = "slinky-36852ece52b3101a5c56b741c20866988428ae21",
     urls = [
-        "https://github.com/dsharlet/slinky/archive/c025c1f0e35c1828363f74affcd7852f57cfdf1b.zip",
+        "https://github.com/dsharlet/slinky/archive/36852ece52b3101a5c56b741c20866988428ae21.zip",
     ],
 )
