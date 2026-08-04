@@ -853,13 +853,6 @@ ynn_runtime::ynn_runtime(ynn::ref_count<const ynn_subgraph> subgraph,
       value.symbol = globals.symbols.insert_unique(value.name());
     }
     if (value.is_static()) {
-      for (size_t d = 0; d < value.extents.size(); ++d) {
-        if (!value.extents[d].defined() ||
-            slinky::is_constant(value.extents[d], 1)) {
-          value.data->mutable_dim(d) = slinky::dim::broadcast();
-        }
-      }
-
       value.buffer =
           slinky::buffer_expr::make_constant(value.symbol, value.data);
     } else if (value.is_external()) {
@@ -932,13 +925,14 @@ ynn_status ynn_runtime::build() {
     if (value.is_external_output()) {
       assert(value.buffer);
       outputs.push_back(value.buffer);
-    }
 
-    if (value.data) {
-      for (size_t d = 0; d < value.extents.size(); ++d) {
-        if (!value.extents[d].defined() ||
-            slinky::is_constant(value.extents[d], 1)) {
-          value.data->mutable_dim(d) = slinky::dim::broadcast();
+      // This should be assert(value.data), but let's do that in a follow-up.
+      if (value.data) {
+        for (size_t d = 0; d < value.extents.size(); ++d) {
+          if (!value.extents[d].defined() ||
+              slinky::is_constant(value.extents[d], 1)) {
+            value.data->mutable_dim(d) = slinky::dim::broadcast();
+          }
         }
       }
     }
