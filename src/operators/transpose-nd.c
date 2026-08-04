@@ -1416,7 +1416,16 @@ static enum xnn_status reshape_space_to_depth_nhwc(
   }
 
   const uint32_t block_size = space_to_depth_op->depth_to_space.block_size;
-  const size_t output_channels = input_channels * block_size * block_size;
+  size_t output_channels = 0;
+  if (!xnn_safe_mul(input_channels, block_size, &output_channels) ||
+      !xnn_safe_mul(output_channels, block_size, &output_channels)) {
+    xnn_log_error(
+        "failed to reshape %s operator with %zu input channels and %u "
+        "block size: output channels overflows size_t",
+        xnn_operator_type_to_string(expected_operator_type), input_channels,
+        block_size);
+    return xnn_status_invalid_parameter;
+  }
 
   if (input_width % block_size != 0) {
     xnn_log_error(
