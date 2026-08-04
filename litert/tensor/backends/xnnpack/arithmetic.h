@@ -62,6 +62,12 @@ class XnnpackBuildContext {
   absl::StatusOr<std::unique_ptr<XnnpackGraph>> Finalize();
   // Defines a tensor in the XNNPACK subgraph.
   absl::StatusOr<uint32_t> DefineValue(const graph::Tensor& tensor);
+  // Aliases `source` to `target`. Any call to `DefineValue(source)` will return
+  // the XNNPACK ID of `target`.
+  absl::Status AliasValue(const graph::Tensor& source,
+                          const graph::Tensor& target);
+  // Removes a tensor from the context.
+  void RemoveTensor(const graph::Tensor& tensor);
   // Defines a constant tensor in the XNNPACK subgraph.
   // The data will be copied and its lifetime will be managed by the
   // graph/runner.
@@ -70,6 +76,10 @@ class XnnpackBuildContext {
                                           std::vector<size_t> shape);
   // Returns the XNNPACK subgraph.
   ::xnn_subgraph* subgraph();
+  // Keeps a buffer alive for the duration of the graph's lifetime.
+  void KeepAlive(std::shared_ptr<Buffer> buffer) {
+    keep_alive_buffers_.push_back(std::move(buffer));
+  }
 
  private:
   xnn_subgraph* subgraph_ = nullptr;
@@ -81,6 +91,7 @@ class XnnpackBuildContext {
   std::vector<std::vector<float>> dequantized_buffers_;
   std::vector<std::vector<fp16_t>> fp16_buffers_;
   std::vector<std::vector<char>> constant_buffers_;
+  std::vector<std::shared_ptr<Buffer>> keep_alive_buffers_;
 
   friend absl::StatusOr<std::unique_ptr<XnnpackGraph>> BuildXnnpackGraph(
       std::vector<TensorHandle> outputs);

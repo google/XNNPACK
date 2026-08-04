@@ -1858,3 +1858,18 @@ absl::Status OpMixin<RopeOperation, XnnpackMixinTag>::ToXnnpack(
   return absl::OkStatus();
 }
 }  // namespace litert::tensor::graph
+
+namespace litert::tensor {
+
+absl::Status XnnpackBuildContext::AliasValue(const graph::Tensor& source,
+                                             const graph::Tensor& target) {
+  LRT_TENSOR_RETURN_IF_ERROR(DefineValue(target).status());
+  tensor_index_[source] = tensor_index_[target];
+  return absl::OkStatus();
+}
+
+void XnnpackBuildContext::RemoveTensor(const graph::Tensor& tensor) {
+  tensor_index_.erase(tensor);
+}
+
+}  // namespace litert::tensor

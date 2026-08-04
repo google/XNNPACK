@@ -22,8 +22,11 @@ limitations under the License.
 
 #include "absl/container/flat_hash_map.h"
 #include "absl/container/flat_hash_set.h"
+#include "absl/status/status.h"
 #include "absl/status/statusor.h"
+#include "absl/types/span.h"
 #include "litert/tensor/backends/xnnpack/arithmetic.h"  // IWYU pragma: export
+#include "litert/tensor/buffer.h"
 #include "litert/tensor/datatypes.h"
 #include "litert/tensor/internal/graph.h"
 #include "litert/tensor/tensor.h"
@@ -40,7 +43,8 @@ class XnnpackGraph {
                absl::flat_hash_set<graph::Tensor> external_outputs,
                std::vector<std::vector<float>> dequantized_buffers = {},
                std::vector<std::vector<fp16_t>> fp16_buffers = {},
-               std::vector<std::vector<char>> constant_buffers = {});
+               std::vector<std::vector<char>> constant_buffers = {},
+               std::vector<std::shared_ptr<Buffer>> keep_alive_buffers = {});
   ~XnnpackGraph();
 
   // Returns the XNNPACK subgraph.
@@ -68,11 +72,26 @@ class XnnpackGraph {
   std::vector<std::vector<float>> dequantized_buffers_;
   std::vector<std::vector<fp16_t>> fp16_buffers_;
   std::vector<std::vector<char>> constant_buffers_;
+  std::vector<std::shared_ptr<Buffer>> keep_alive_buffers_;
 };
 
 // Builds an XNNPACK graph from the given outputs.
 absl::StatusOr<std::unique_ptr<XnnpackGraph>> BuildXnnpackGraph(
     std::vector<TensorHandle> outputs);
+
+// Lowers the implementation graph of an operation to XNNPACK.
+//
+// It maps the operation's inputs and outputs to the corresponding inlined
+// tensors. `inlined_inputs` must be positionally aligned with `op.inputs`.
+// If an input is not used or is a constant created in-place
+// (not mapped to `op.inputs`), an invalid `graph::Tensor` (default constructed)
+// should be used as a placeholder in `inlined_inputs` to maintain alignment.
+//
+// It then traverses the inlined graph between the inlined inputs and outputs
+// and lowers all operations.
+absl::Status InlineImplementationGraphFor(
+    const graph::Operation& op, absl::Span<const graph::Tensor> inlined_inputs,
+    absl::Span<const graph::Tensor> inlined_outputs, XnnpackBuildContext& ctx);
 
 }  // namespace litert::tensor
 

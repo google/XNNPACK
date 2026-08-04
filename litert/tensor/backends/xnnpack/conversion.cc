@@ -15,6 +15,7 @@ limitations under the License.
 
 #include "litert/tensor/backends/xnnpack/conversion.h"
 
+#include <algorithm>
 #include <cstddef>
 #include <cstdint>
 #include <cstdlib>
@@ -22,6 +23,7 @@ limitations under the License.
 #include <limits>
 #include <memory>
 #include <utility>
+#include <variant>
 #include <vector>
 
 #include "include/xnnpack.h"
@@ -36,6 +38,7 @@ limitations under the License.
 #include "absl/types/span.h"
 #include "litert/tensor/backends/xnnpack/arithmetic.h"
 #include "litert/tensor/backends/xnnpack/utils.h"
+#include "litert/tensor/buffer.h"
 #include "litert/tensor/datatypes.h"
 #include "litert/tensor/internal/graph.h"
 #include "litert/tensor/internal/graph_traversal.h"
@@ -218,6 +221,69 @@ absl::StatusOr<std::vector<float>> DequantizeInt8ConstantTensor(
   return values;
 }
 
+// Performs a topological sort of the operations required to produce
+// `output`, traversing backwards from `output to its producers.
+// This function assumes the graph is acyclic and does not verify this property.
+// This function performs a depth-first search (DFS) starting from
+// `output`. It stops traversing back when it hits a tensor in
+// `inlined_inputs`.
+// To support multiple outputs, this function can be called repeatedly for each
+// output tensor. By sharing `visited_tensors`, `visited_ops`, and `ordered_ops`
+// across calls, it ensures that each operation is visited and ordered exactly
+// once.
+absl::Status TopologicalSort(
+    graph::Tensor output,
+    const absl::flat_hash_set<graph::Tensor>& inlined_inputs,
+    absl::flat_hash_set<graph::Tensor>& visited_tensors,
+    absl::flat_hash_set<const graph::Operation*>& visited_ops,
+    std::vector<const graph::Operation*>& ordered_ops) {
+  using StackEntry = std::variant<graph::Tensor, const graph::Operation*>;
+  std::vector<StackEntry> stack;
+  stack.push_back(output);
+
+  while (!stack.empty()) {
+    StackEntry entry = std::move(stack.back());
+    stack.pop_back();
+
+    if (std::holds_alternative<const graph::Operation*>(entry)) {
+      ordered_ops.push_back(std::get<const graph::Operation*>(entry));
+      continue;
+    }
+
+    graph::Tensor tensor = std::get<graph::Tensor>(entry);
+
+    if (inlined_inputs.contains(tensor)) {
+      continue;
+    }
+    if (!visited_tensors.insert(tensor).second) {
+      // Already in visited_tensors.
+      continue;
+    }
+
+    LRT_TENSOR_ASSIGN_OR_RETURN(std::shared_ptr<graph::Operation> producer,
+                                graph::GetProducer(tensor));
+    if (producer == nullptr) {
+      continue;
+    }
+
+    if (!visited_ops.insert(producer.get()).second) {
+      // Already in visited_ops.
+      continue;
+    }
+
+    stack.push_back(producer.get());
+
+    // Push inputs in reverse order onto the stack so they are popped and
+    // processed in their natural left-to-right order.
+    for (auto it = producer->inputs.rbegin(); it != producer->inputs.rend();
+         ++it) {
+      stack.push_back(*it);
+    }
+  }
+
+  return absl::OkStatus();
+}
+
 }  // namespace
 
 XnnpackGraph::XnnpackGraph(
@@ -226,14 +292,16 @@ XnnpackGraph::XnnpackGraph(
     absl::flat_hash_set<graph::Tensor> external_outputs,
     std::vector<std::vector<float>> dequantized_buffers,
     std::vector<std::vector<fp16_t>> fp16_buffers,
-    std::vector<std::vector<char>> constant_buffers)
+    std::vector<std::vector<char>> constant_buffers,
+    std::vector<std::shared_ptr<Buffer>> keep_alive_buffers)
     : subgraph_(subgraph),
       values_(std::move(values)),
       tensor_index_(std::move(tensor_index)),
       external_outputs_(std::move(external_outputs)),
       dequantized_buffers_(std::move(dequantized_buffers)),
       fp16_buffers_(std::move(fp16_buffers)),
-      constant_buffers_(std::move(constant_buffers)) {}
+      constant_buffers_(std::move(constant_buffers)),
+      keep_alive_buffers_(std::move(keep_alive_buffers)) {}
 
 XnnpackGraph::~XnnpackGraph() {
   if (subgraph_ != nullptr) {
@@ -287,7 +355,8 @@ absl::StatusOr<std::unique_ptr<XnnpackGraph>> XnnpackBuildContext::Finalize() {
   return std::make_unique<XnnpackGraph>(
       subgraph, std::move(values_), std::move(tensor_index_),
       std::move(external_outputs_), std::move(dequantized_buffers_),
-      std::move(fp16_buffers_), std::move(constant_buffers_));
+      std::move(fp16_buffers_), std::move(constant_buffers_),
+      std::move(keep_alive_buffers_));
 }
 
 absl::StatusOr<std::unique_ptr<XnnpackGraph>> BuildXnnpackGraph(
@@ -356,6 +425,7 @@ absl::StatusOr<uint32_t> XnnpackBuildContext::DefineValue(
 
   if (info.buffer && !is_external) {
     value.data = info.buffer->Lock();
+    KeepAlive(info.buffer);
   }
 
   std::vector<size_t> dims(info.shape.begin(), info.shape.end());
@@ -455,5 +525,72 @@ absl::StatusOr<uint32_t> XnnpackBuildContext::DefineConstant(
 }
 
 ::xnn_subgraph* XnnpackBuildContext::subgraph() { return subgraph_; }
+
+absl::Status InlineImplementationGraphFor(
+    const graph::Operation& op, absl::Span<const graph::Tensor> inlined_inputs,
+    absl::Span<const graph::Tensor> inlined_outputs, XnnpackBuildContext& ctx) {
+  // Alias outputs
+  LRT_TENSOR_ASSIGN_OR_RETURN(std::vector<graph::Tensor> op_outputs,
+                              graph::GetOutputs(op));
+  if (op_outputs.size() != inlined_outputs.size()) {
+    return absl::InvalidArgumentError("Output size mismatch");
+  }
+  for (size_t i = 0; i < op_outputs.size(); ++i) {
+    LRT_TENSOR_RETURN_IF_ERROR(
+        ctx.AliasValue(inlined_outputs[i], op_outputs[i]));
+  }
+
+  // Alias inputs
+  for (size_t i = 0; i < std::min(inlined_inputs.size(), op.inputs.size());
+       ++i) {
+    if (graph::GetStatus(inlined_inputs[i]).ok() &&
+        graph::GetStatus(op.inputs[i]).ok()) {
+      LRT_TENSOR_RETURN_IF_ERROR(
+          ctx.AliasValue(inlined_inputs[i], op.inputs[i]));
+    }
+  }
+
+  // Only add valid inputs to the boundary set. If an input is invalid (e.g.,
+  // a missing optional input), we want TopologicalSort to fail if it attempts
+  // to traverse it (by trying to get its producer), rather than stopping at it
+  // as if it were a valid boundary. Outputs don't need this check here because
+  // they are the starting points of the sort and will trigger a failure
+  // immediately if invalid.
+  absl::flat_hash_set<graph::Tensor> inlined_inputs_set;
+  for (const auto& t : inlined_inputs) {
+    if (graph::GetStatus(t).ok()) {
+      inlined_inputs_set.insert(t);
+    }
+  }
+  absl::flat_hash_set<graph::Tensor> visited_tensors;
+  absl::flat_hash_set<const graph::Operation*> visited_ops;
+  std::vector<const graph::Operation*> ordered_ops;
+
+  for (const auto& out : inlined_outputs) {
+    LRT_TENSOR_RETURN_IF_ERROR(TopologicalSort(
+        out, inlined_inputs_set, visited_tensors, visited_ops, ordered_ops));
+  }
+
+  // Lower ops
+  for (const auto* inline_op : ordered_ops) {
+    auto xnn_op = inline_op->GetExtension<XnnpackOperation>();
+    if (xnn_op == nullptr) {
+      return absl::InvalidArgumentError(
+          absl::StrCat("Operation ", inline_op->GetName(),
+                       " does not implement XnnpackOperation."));
+    }
+    LRT_TENSOR_RETURN_IF_ERROR(xnn_op->ToXnnpack(*inline_op, ctx));
+  }
+
+  // Remove aliases
+  for (const auto& t : inlined_outputs) {
+    ctx.RemoveTensor(t);
+  }
+  for (const auto& t : inlined_inputs) {
+    ctx.RemoveTensor(t);
+  }
+
+  return absl::OkStatus();
+}
 
 }  // namespace litert::tensor
