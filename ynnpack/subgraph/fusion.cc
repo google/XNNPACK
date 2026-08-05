@@ -566,6 +566,10 @@ bool rewrite_negate_multiply(ynn_subgraph& subgraph, ynn_node& node,
 // Rewrite exp(subtract(a, b)) to exp_subtract(a, b)
 bool rewrite_exp_subtract(ynn_subgraph& subgraph, ynn_node& node,
                           subgraph_analysis& analysis) {
+  if ((subgraph.flags & YNN_FLAG_CONSISTENT_ARITHMETIC) != 0) {
+    // We don't try to maintain fma consistency for binary ops.
+    return false;
+  }
   const ynn_node::unary_elementwise* unary =
       std::get_if<ynn_node::unary_elementwise>(&node.op);
   if (!unary || unary->op != ynn_unary_exp ||

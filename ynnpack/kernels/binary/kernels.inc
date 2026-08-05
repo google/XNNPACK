@@ -6,6 +6,12 @@
 #ifdef YNN_ARCH_X86_AVX512
 #include "ynnpack/kernels/binary/x86_avx512.inc"
 #endif  // YNN_ARCH_X86_AVX512
+#ifdef YNN_ARCH_X86_AVX2_FMA3
+#include "ynnpack/kernels/binary/x86_avx2_fma3.inc"
+#endif  // YNN_ARCH_X86_AVX2_FMA3
+#ifdef YNN_ARCH_X86_FMA3
+#include "ynnpack/kernels/binary/x86_fma3.inc"
+#endif  // YNN_ARCH_X86_FMA3
 #ifdef YNN_ARCH_X86_AVX2
 #include "ynnpack/kernels/binary/x86_avx2.inc"
 #endif  // YNN_ARCH_X86_AVX2
@@ -22,6 +28,9 @@
 #ifdef YNN_ARCH_ARM64_NEON
 #include "ynnpack/kernels/binary/arm64_neon.inc"
 #endif  // YNN_ARCH_ARM64_NEON
+#ifdef YNN_ARCH_ARM_NEONFMA
+#include "ynnpack/kernels/binary/arm_neonfma.inc"
+#endif  // YNN_ARCH_ARM_NEONFMA
 #ifdef YNN_ARCH_ARM_NEON
 #include "ynnpack/kernels/binary/arm_neon.inc"
 #endif  // YNN_ARCH_ARM_NEON
