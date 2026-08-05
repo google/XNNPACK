@@ -952,11 +952,19 @@ static enum xnn_status setup_scale_params_qs8(const struct fc_variant* variant,
 
 static enum xnn_status setup_scale_params_qx8_qcyw(const struct fc_variant* variant,
                                               struct fc_context* context) {
-  context->requantization_scale.f32 = xnn_allocate_simd_memory(context->output_channels * sizeof(float));
+  size_t requantization_scale_bytes = 0;
+  if (!xnn_safe_mul(context->output_channels, sizeof(float), &requantization_scale_bytes)) {
+    xnn_log_error(
+        "failed to create %s operator: requantization scale size overflows "
+        "size_t (output_channels=%zu)",
+        xnn_operator_type_to_string(context->operator_type), context->output_channels);
+    return xnn_status_unsupported_parameter;
+  }
+  context->requantization_scale.f32 = xnn_allocate_simd_memory(requantization_scale_bytes);
   context->requantization_scale_to_release = context->requantization_scale.f32;
   if (context->requantization_scale.f32 == NULL) {
     xnn_log_error("failed to allocate %zu bytes for %s operator packed weights",
-                  context->output_channels * sizeof(float),
+                  requantization_scale_bytes,
                   xnn_operator_type_to_string(context->operator_type));
     return xnn_status_out_of_memory;
   }
