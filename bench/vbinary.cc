@@ -217,6 +217,7 @@ static void vbinary(benchmark::State& state, uint64_t arch_flags,
 #include "src/qs8-vmulc/qs8-vmulc-minmax-rndnu.inc"
 #include "src/qs8-vprelu/qs8-vprelu.inc"
 #include "src/qs8-vpreluc/qs8-vpreluc.inc"
+#include "src/qs8-vrpreluc/qs8-vrpreluc.inc"
 #include "src/qu8-vadd/qu8-vadd-minmax.inc"
 #include "src/qu8-vaddc/qu8-vaddc-minmax.inc"
 #include "src/qu8-vmul/qu8-vmul-minmax-fp32.inc"
@@ -225,6 +226,7 @@ static void vbinary(benchmark::State& state, uint64_t arch_flags,
 #include "src/qu8-vmulc/qu8-vmulc-minmax-rndnu.inc"
 #include "src/qu8-vprelu/qu8-vprelu.inc"
 #include "src/qu8-vpreluc/qu8-vpreluc.inc"
+#include "src/qu8-vrpreluc/qu8-vrpreluc.inc"
 
 #undef XNN_UKERNEL
 
