@@ -225,6 +225,7 @@ class Runtime {
   std::vector<size_t> GetExternalTensorShape(uint32_t id);
 
   ynn_status Status() const { return status_; }
+  ynn_runtime_t get() const { return runtime_.get(); }
 
   template <typename T>
   ynn_status Query(ynn_runtime_property property, T* result) {
