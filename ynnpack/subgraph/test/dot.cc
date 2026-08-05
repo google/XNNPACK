@@ -3,6 +3,8 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+#include "ynnpack/subgraph/dot.h"
+
 #include <algorithm>
 #include <cassert>
 #include <chrono>
@@ -10,8 +12,10 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
+#include <memory>
 #include <numeric>
 #include <random>
+#include <tuple>
 #include <utility>
 #include <vector>
 
@@ -26,8 +30,12 @@
 #include "ynnpack/base/test/util.h"
 #include "ynnpack/base/type.h"
 #include "ynnpack/include/ynnpack.h"
+#include "ynnpack/subgraph/runtime.h"
+#include "ynnpack/subgraph/slinky.h"
 #include "ynnpack/subgraph/test/scheduler.h"
 #include "ynnpack/subgraph/test/subgraph_builder.h"
+#include "slinky/runtime/expr.h"
+#include "slinky/runtime/stmt.h"
 
 namespace ynn {
 
@@ -658,4 +666,71 @@ INSTANTIATE_TEST_SUITE_P(
       return to_string(info.param);
     });
 
+namespace {
+
+#ifdef YNN_ENABLE_RUNTIME_TRACE
+
+bool RunDotWithSplitK(int split_k_val) {
+  choose_split_factors_hook = [split_k_val](ynn_runtime& runtime,
+                                            slinky::expr m, slinky::expr n,
+                                            slinky::expr k,
+                                            slinky::expr block_n) {
+    slinky::expr split_n = runtime.globals.get(n, "split_n");
+    slinky::expr split_m = runtime.globals.get(m, "split_m");
+    slinky::expr split_k = runtime.globals.get(split_k_val, "split_k");
+    return std::make_tuple(split_n, split_m, split_k);
+  };
+  struct HookGuard {
+    ~HookGuard() { choose_split_factors_hook = nullptr; }
+  } guard;
+
+  const uint32_t a_id = 0;
+  const uint32_t b_id = 1;
+  const uint32_t out_id = 2;
+  SubgraphBuilder builder(3);
+  builder.AddInput(type_of<float>(), TensorShape({300, 100}), a_id)
+      .AddInput(type_of<float>(), TensorShape({100, 400}), b_id)
+      .AddOutput(type_of<float>(), TensorShape({300, 400}), out_id)
+      .AddDot(1, a_id, b_id, YNN_INVALID_VALUE_ID, out_id);
+
+  TestScheduler scheduler(3);
+  Runtime runtime(builder.GetSubgraph(), &scheduler);
+
+  Tensor<float> a({300, 100});
+  Tensor<float> b({100, 400});
+  Tensor<float> out({300, 400});
+  runtime.ReshapeExternalTensor(a.extents(), a.data(), a_id)
+      .ReshapeExternalTensor(b.extents(), b.data(), b_id)
+      .ReshapeExternalTensor(out.extents(), out.data(), out_id)
+      .ReshapeRuntime()
+      .InvokeRuntime();
+  EXPECT_EQ(runtime.Status(), ynn_status_success);
+
+  ynn_runtime_t runtime_ptr = runtime.get();
+  EXPECT_FALSE(runtime_ptr->trace_events.empty());
+  EXPECT_EQ(runtime_ptr->trace_events.front(), "pipeline");
+  bool found_pack = false;
+  bool found_dot = false;
+  bool found_loop = false;
+  for (const std::string& event : runtime_ptr->trace_events) {
+    if (event.find("pack_b") != std::string::npos) found_pack = true;
+    if (event.find("dot") != std::string::npos) found_dot = true;
+    if (event.find("loop") != std::string::npos) found_loop = true;
+  }
+  EXPECT_TRUE(found_pack);
+  EXPECT_TRUE(found_dot);
+  return found_loop;
+}
+
+TEST(DotLoopOrderTest, SplitKLessThanK) {
+  EXPECT_TRUE(RunDotWithSplitK(/*split_k_val=*/25));
+}
+
+TEST(DotLoopOrderTest, SplitKNotLessThanK) {
+  EXPECT_FALSE(RunDotWithSplitK(/*split_k_val=*/100));
+}
+
+#endif  // YNN_ENABLE_RUNTIME_TRACE
+
+}  // namespace
 }  // namespace ynn

@@ -61,6 +61,12 @@ TARGET_LINK_LIBRARIES(ynnpack_subgraph PUBLIC
   slinky_runtime
 )
 
+# Handle optional Runtime Trace.
+SET(YNN_ENABLE_RUNTIME_TRACE OFF CACHE BOOL "Enable Runtime Trace for YNNPACK")
+IF(YNN_ENABLE_RUNTIME_TRACE)
+  TARGET_COMPILE_DEFINITIONS(ynnpack_subgraph PUBLIC YNN_ENABLE_RUNTIME_TRACE)
+ENDIF()
+
 # Handle optional Perfetto.
 SET(YNN_ENABLE_PERFETTO OFF CACHE BOOL "Enable Perfetto tracing for YNNPACK")
 IF(YNN_ENABLE_PERFETTO)
