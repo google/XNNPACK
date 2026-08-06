@@ -184,7 +184,7 @@ enum xnn_status xnn_destroy_operator(xnn_operator_t op)
   if (op->convolution_op) {
     xnn_release_memory(op->convolution_op->indirection_buffer);
     if (op->convolution_op->zero_buffers) {
-      for (size_t i = 1; i < op->batch_size; ++i) {
+      for (size_t i = 1; i < op->convolution_op->valid_batch_size; ++i) {
         xnn_release_simd_memory(op->convolution_op->zero_buffers[i]);
       }
       xnn_release_memory(op->convolution_op->zero_buffers);

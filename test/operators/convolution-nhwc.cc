@@ -6,10 +6,14 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+#include <cstddef>
 #include <utility>
 #include <vector>
 
 #include <gtest/gtest.h>
+#include "include/xnnpack.h"
+#include "src/xnnpack/allocator.h"
+#include "src/xnnpack/params.h"
 #include "test/operators/convolution-operator-tester.h"
 
 namespace {
@@ -1095,6 +1099,89 @@ CREATE_CONVOLUTION_SETUP_TESTS(CONVOLUTION_NHWC_PQS8_QS8_QC8W,
 CREATE_CONVOLUTION_TESTS(CONVOLUTION_NHWC_QD8_F16_QC8W, TestNHWCxQD8F16QC8W)
 
 CREATE_CONVOLUTION_TESTS(CONVOLUTION_NHWC_QD8_F32_QC8W, TestNHWCxQD8F32QC8W)
+
+// Counts the aligned allocations that are still live, so that a zero buffer
+// the operator forgets to release is observable.
+size_t live_aligned_allocations = 0;
+
+void* CountingAlignedAllocate(void* context, size_t alignment, size_t size) {
+  void* pointer =
+      xnn_default_allocator.aligned_allocate(context, alignment, size);
+  if (pointer != nullptr) {
+    live_aligned_allocations++;
+  }
+  return pointer;
+}
+
+void CountingAlignedDeallocate(void* context, void* pointer) {
+  if (pointer != nullptr) {
+    live_aligned_allocations--;
+  }
+  xnn_default_allocator.aligned_deallocate(context, pointer);
+}
+
+// The dynamically quantized reshape grows convolution_op->zero_buffers and
+// bumps valid_batch_size before it delegates to the shared reshape, which can
+// still reject the shape and leave xnn_operator::batch_size behind. Deleting
+// the operator has to release every zero buffer that valid_batch_size covers.
+TEST(CONVOLUTION_NHWC_QD8_F32_QC8W,
+     zero_buffers_released_after_failed_reshape) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+
+  const size_t input_channels = 8;
+  const size_t output_channels = 8;
+  const size_t kernel_height = 3;
+  const size_t kernel_width = 3;
+  std::vector<int8_t> kernel(
+      output_channels * kernel_height * kernel_width * input_channels, 0);
+  std::vector<float> bias(output_channels, 0.0f);
+  std::vector<float> kernel_scale(output_channels, 1.0f);
+
+  const struct xnn_allocator saved_allocator = xnn_params.allocator;
+  xnn_params.allocator.aligned_allocate = CountingAlignedAllocate;
+  xnn_params.allocator.aligned_deallocate = CountingAlignedDeallocate;
+  live_aligned_allocations = 0;
+
+  xnn_operator_t convolution_op = nullptr;
+  enum xnn_status status = xnn_create_convolution2d_nhwc_qd8_f32_qc8w(
+      /*input_padding_top=*/1, /*input_padding_right=*/1,
+      /*input_padding_bottom=*/1, /*input_padding_left=*/1, kernel_height,
+      kernel_width, /*subsampling_height=*/1, /*subsampling_width=*/1,
+      /*dilation_height=*/1, /*dilation_width=*/1, /*groups=*/1, input_channels,
+      output_channels,
+      /*input_channel_stride=*/input_channels,
+      /*output_channel_stride=*/output_channels, kernel_scale.data(),
+      kernel.data(), bias.data(), /*output_min=*/-1.0e+30f,
+      /*output_max=*/1.0e+30f, /*flags=*/0, /*weights_cache=*/nullptr,
+      &convolution_op);
+
+  if (status == xnn_status_success) {
+    size_t workspace_size = 0;
+    size_t output_height = 0;
+    size_t output_width = 0;
+    ASSERT_EQ(xnn_status_success,
+              xnn_reshape_convolution2d_nhwc_qd8_f32_qc8w(
+                  convolution_op, /*batch_size=*/1, /*input_height=*/4,
+                  /*input_width=*/4, &workspace_size, &output_height,
+                  &output_width, /*threadpool=*/nullptr));
+
+    // Rejected for the zero input height, but only after the zero buffers for
+    // the eight batches have been allocated.
+    ASSERT_EQ(xnn_status_invalid_parameter,
+              xnn_reshape_convolution2d_nhwc_qd8_f32_qc8w(
+                  convolution_op, /*batch_size=*/8, /*input_height=*/0,
+                  /*input_width=*/4, &workspace_size, &output_height,
+                  &output_width, /*threadpool=*/nullptr));
+
+    ASSERT_EQ(xnn_status_success, xnn_delete_operator(convolution_op));
+  }
+
+  const size_t leaked = live_aligned_allocations;
+  xnn_params.allocator = saved_allocator;
+
+  ASSERT_EQ(xnn_status_success, status);
+  EXPECT_EQ(leaked, 0);
+}
 
 CREATE_CONVOLUTION_TESTS(CONVOLUTION_NHWC_QS8, TestNHWCxQS8)
 CREATE_CONVOLUTION_SETUP_TESTS(CONVOLUTION_NHWC_QS8, TestSetupNHWCxQS8)
