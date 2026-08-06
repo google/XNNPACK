@@ -1,7 +1,7 @@
 // clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f32-vsqrt/simd-rsqrt.c.in
-//   Generator: tools/xngen
+//   Generator: tools/xngen.py
 //
 // Copyright 2025 Google LLC
 //
@@ -62,6 +62,8 @@ void xnn_f32_vsqrt_ukernel__neon_rsqrt_u4(
   // Constants for the Newton-Raphson iteration.
   const xnn_simd_f32_t kOne = xnn_set1_f32(1.0f);
   const xnn_simd_f32_t kHalf = xnn_set1_f32(0.5f);
+  // +inf represented as exact IEEE 754 bit pattern, safe under -ffast-math.
+  XNN_SIMD_CONST_F32_FROM_INT32(vinf, INT32_C(0x7F800000));
 
 
   for (; batch >= xnn_simd_bytes_f32; batch -= xnn_simd_bytes_f32) {
@@ -89,7 +91,13 @@ void xnn_f32_vsqrt_ukernel__neon_rsqrt_u4(
 
     // Extract the square root by multiplying the original value with the
     // inverse square root.
-    const xnn_simd_f32_t vy = xnn_mul_f32(vx, vt7);
+    xnn_simd_f32_t vy = xnn_mul_f32(vx, vt7);
+
+    // Blend +inf back for +inf inputs: rsqrt(+inf)=0, so inf*0=NaN without this.
+    const xnn_simd_f32_t vposinf_mask = xnn_cmpeq_f32(vx, vinf);
+    vy = xnn_or_f32(
+        xnn_and_f32(vposinf_mask, vinf),
+        xnn_and_f32(xnn_not_f32(vposinf_mask), vy));
 
     xnn_storeu_f32(output, vy);
     output += xnn_simd_size_f32;
@@ -121,11 +129,18 @@ void xnn_f32_vsqrt_ukernel__neon_rsqrt_u4(
 
     // Extract the square root by multiplying the original value with the
     // inverse square root.
-    const xnn_simd_f32_t vy = xnn_mul_f32(vx, vt7);
+    xnn_simd_f32_t vy = xnn_mul_f32(vx, vt7);
+
+    // Blend +inf back for +inf inputs: rsqrt(+inf)=0, so inf*0=NaN without this.
+    const xnn_simd_f32_t vposinf_mask = xnn_cmpeq_f32(vx, vinf);
+    vy = xnn_or_f32(
+        xnn_and_f32(vposinf_mask, vinf),
+        xnn_and_f32(xnn_not_f32(vposinf_mask), vy));
 
     xnn_store_tail_f32(output, vy, batch >> XNN_LOG2_SIZEOF_FLOAT);
   }
 }
+
 
 void xnn_f32_vsqrt_ukernel__neon_rsqrt_u8(
     size_t batch, const float* input, float* output,
@@ -138,6 +153,8 @@ void xnn_f32_vsqrt_ukernel__neon_rsqrt_u8(
   // Constants for the Newton-Raphson iteration.
   const xnn_simd_f32_t kOne = xnn_set1_f32(1.0f);
   const xnn_simd_f32_t kHalf = xnn_set1_f32(0.5f);
+  // +inf represented as exact IEEE 754 bit pattern, safe under -ffast-math.
+  XNN_SIMD_CONST_F32_FROM_INT32(vinf, INT32_C(0x7F800000));
 
   for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
     const xnn_simd_f32_t vx0 = xnn_loadu_f32(input);
@@ -174,8 +191,17 @@ void xnn_f32_vsqrt_ukernel__neon_rsqrt_u8(
 
     // Extract the square root by multiplying the original value with the
     // inverse square root.
-    const xnn_simd_f32_t vy0 = xnn_mul_f32(vx0, vt7_0);
-    const xnn_simd_f32_t vy1 = xnn_mul_f32(vx1, vt7_1);
+    xnn_simd_f32_t vy0 = xnn_mul_f32(vx0, vt7_0);
+    xnn_simd_f32_t vy1 = xnn_mul_f32(vx1, vt7_1);
+    // Blend +inf back for +inf inputs: rsqrt(+inf)=0, so inf*0=NaN without this.
+    const xnn_simd_f32_t vposinf_mask_0 = xnn_cmpeq_f32(vx0, vinf);
+    const xnn_simd_f32_t vposinf_mask_1 = xnn_cmpeq_f32(vx1, vinf);
+    vy0 = xnn_or_f32(
+        xnn_and_f32(vposinf_mask_0, vinf),
+        xnn_and_f32(xnn_not_f32(vposinf_mask_0), vy0));
+    vy1 = xnn_or_f32(
+        xnn_and_f32(vposinf_mask_1, vinf),
+        xnn_and_f32(xnn_not_f32(vposinf_mask_1), vy1));
 
     // Store the results.
     xnn_storeu_f32(output, vy0);
@@ -208,7 +234,13 @@ void xnn_f32_vsqrt_ukernel__neon_rsqrt_u8(
 
     // Extract the square root by multiplying the original value with the
     // inverse square root.
-    const xnn_simd_f32_t vy = xnn_mul_f32(vx, vt7);
+    xnn_simd_f32_t vy = xnn_mul_f32(vx, vt7);
+
+    // Blend +inf back for +inf inputs: rsqrt(+inf)=0, so inf*0=NaN without this.
+    const xnn_simd_f32_t vposinf_mask = xnn_cmpeq_f32(vx, vinf);
+    vy = xnn_or_f32(
+        xnn_and_f32(vposinf_mask, vinf),
+        xnn_and_f32(xnn_not_f32(vposinf_mask), vy));
 
     xnn_storeu_f32(output, vy);
     output += xnn_simd_size_f32;
@@ -240,11 +272,18 @@ void xnn_f32_vsqrt_ukernel__neon_rsqrt_u8(
 
     // Extract the square root by multiplying the original value with the
     // inverse square root.
-    const xnn_simd_f32_t vy = xnn_mul_f32(vx, vt7);
+    xnn_simd_f32_t vy = xnn_mul_f32(vx, vt7);
+
+    // Blend +inf back for +inf inputs: rsqrt(+inf)=0, so inf*0=NaN without this.
+    const xnn_simd_f32_t vposinf_mask = xnn_cmpeq_f32(vx, vinf);
+    vy = xnn_or_f32(
+        xnn_and_f32(vposinf_mask, vinf),
+        xnn_and_f32(xnn_not_f32(vposinf_mask), vy));
 
     xnn_store_tail_f32(output, vy, batch >> XNN_LOG2_SIZEOF_FLOAT);
   }
 }
+
 
 void xnn_f32_vsqrt_ukernel__neon_rsqrt_u16(
     size_t batch, const float* input, float* output,
@@ -257,6 +296,8 @@ void xnn_f32_vsqrt_ukernel__neon_rsqrt_u16(
   // Constants for the Newton-Raphson iteration.
   const xnn_simd_f32_t kOne = xnn_set1_f32(1.0f);
   const xnn_simd_f32_t kHalf = xnn_set1_f32(0.5f);
+  // +inf represented as exact IEEE 754 bit pattern, safe under -ffast-math.
+  XNN_SIMD_CONST_F32_FROM_INT32(vinf, INT32_C(0x7F800000));
 
   for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
     const xnn_simd_f32_t vx0 = xnn_loadu_f32(input);
@@ -313,10 +354,27 @@ void xnn_f32_vsqrt_ukernel__neon_rsqrt_u16(
 
     // Extract the square root by multiplying the original value with the
     // inverse square root.
-    const xnn_simd_f32_t vy0 = xnn_mul_f32(vx0, vt7_0);
-    const xnn_simd_f32_t vy1 = xnn_mul_f32(vx1, vt7_1);
-    const xnn_simd_f32_t vy2 = xnn_mul_f32(vx2, vt7_2);
-    const xnn_simd_f32_t vy3 = xnn_mul_f32(vx3, vt7_3);
+    xnn_simd_f32_t vy0 = xnn_mul_f32(vx0, vt7_0);
+    xnn_simd_f32_t vy1 = xnn_mul_f32(vx1, vt7_1);
+    xnn_simd_f32_t vy2 = xnn_mul_f32(vx2, vt7_2);
+    xnn_simd_f32_t vy3 = xnn_mul_f32(vx3, vt7_3);
+    // Blend +inf back for +inf inputs: rsqrt(+inf)=0, so inf*0=NaN without this.
+    const xnn_simd_f32_t vposinf_mask_0 = xnn_cmpeq_f32(vx0, vinf);
+    const xnn_simd_f32_t vposinf_mask_1 = xnn_cmpeq_f32(vx1, vinf);
+    const xnn_simd_f32_t vposinf_mask_2 = xnn_cmpeq_f32(vx2, vinf);
+    const xnn_simd_f32_t vposinf_mask_3 = xnn_cmpeq_f32(vx3, vinf);
+    vy0 = xnn_or_f32(
+        xnn_and_f32(vposinf_mask_0, vinf),
+        xnn_and_f32(xnn_not_f32(vposinf_mask_0), vy0));
+    vy1 = xnn_or_f32(
+        xnn_and_f32(vposinf_mask_1, vinf),
+        xnn_and_f32(xnn_not_f32(vposinf_mask_1), vy1));
+    vy2 = xnn_or_f32(
+        xnn_and_f32(vposinf_mask_2, vinf),
+        xnn_and_f32(xnn_not_f32(vposinf_mask_2), vy2));
+    vy3 = xnn_or_f32(
+        xnn_and_f32(vposinf_mask_3, vinf),
+        xnn_and_f32(xnn_not_f32(vposinf_mask_3), vy3));
 
     // Store the results.
     xnn_storeu_f32(output, vy0);
@@ -351,7 +409,13 @@ void xnn_f32_vsqrt_ukernel__neon_rsqrt_u16(
 
     // Extract the square root by multiplying the original value with the
     // inverse square root.
-    const xnn_simd_f32_t vy = xnn_mul_f32(vx, vt7);
+    xnn_simd_f32_t vy = xnn_mul_f32(vx, vt7);
+
+    // Blend +inf back for +inf inputs: rsqrt(+inf)=0, so inf*0=NaN without this.
+    const xnn_simd_f32_t vposinf_mask = xnn_cmpeq_f32(vx, vinf);
+    vy = xnn_or_f32(
+        xnn_and_f32(vposinf_mask, vinf),
+        xnn_and_f32(xnn_not_f32(vposinf_mask), vy));
 
     xnn_storeu_f32(output, vy);
     output += xnn_simd_size_f32;
@@ -383,8 +447,15 @@ void xnn_f32_vsqrt_ukernel__neon_rsqrt_u16(
 
     // Extract the square root by multiplying the original value with the
     // inverse square root.
-    const xnn_simd_f32_t vy = xnn_mul_f32(vx, vt7);
+    xnn_simd_f32_t vy = xnn_mul_f32(vx, vt7);
+
+    // Blend +inf back for +inf inputs: rsqrt(+inf)=0, so inf*0=NaN without this.
+    const xnn_simd_f32_t vposinf_mask = xnn_cmpeq_f32(vx, vinf);
+    vy = xnn_or_f32(
+        xnn_and_f32(vposinf_mask, vinf),
+        xnn_and_f32(xnn_not_f32(vposinf_mask), vy));
 
     xnn_store_tail_f32(output, vy, batch >> XNN_LOG2_SIZEOF_FLOAT);
   }
 }
+
