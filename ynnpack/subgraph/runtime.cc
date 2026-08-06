@@ -789,6 +789,10 @@ bool ynn_traceme_enabled() {
 }
 #endif
 
+// Slinky will automatically place allocates on the stack if the allocation is
+// smaller than this threshold.
+constexpr size_t auto_stack_threshold = 64 * 1024;
+
 }  // namespace
 
 extern "C" {
@@ -812,6 +816,7 @@ ynn_runtime::ynn_runtime(ynn::ref_count<const ynn_subgraph> subgraph,
     YNN_LOG_ERROR() << c->attrs.name << " failed";
   };
   eval_config.base_alignment = YNN_ALLOCATION_ALIGNMENT;
+  eval_config.auto_stack_threshold = auto_stack_threshold;
 
 #ifdef YNN_ENABLE_PERFETTO
   if (ynn::perfetto_session::global()) {
