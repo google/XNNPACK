@@ -246,12 +246,15 @@ std::vector<slinky::expr> make_split_factors(
     int d = get_loop_dim(index_d);
     assert(d < extents.size());
     if (!extents[d].defined()) continue;
+    // Find an constant upper bound of the extent to make splits simpler and
+    // potentially avoid unnecessary loops.
+    slinky::expr extent = slinky::constant_upper_bound(extents[d]);
     if (d < given_splits.size()) {
       splits[d] = given_splits[d];
       if (splits[d].defined()) {
         tile_area_so_far = slinky::simplify(tile_area_so_far * splits[d]);
       } else {
-        tile_area_so_far = slinky::simplify(tile_area_so_far * extents[d]);
+        tile_area_so_far = slinky::simplify(tile_area_so_far * extent);
       }
     } else {
       const slinky::expr align = alignment_of(d);
@@ -261,7 +264,7 @@ std::vector<slinky::expr> make_split_factors(
       slinky::expr blocks = tile_area / tile_area_so_far;
       // Use as many whole blocks as possible, but never less than one.
       slinky::expr s = slinky::simplify(
-          slinky::max(align, slinky::min(align * blocks, extents[d])));
+          slinky::max(align, slinky::min(align * blocks, extent)));
       s = globals.get(s, "s");
       splits[d] = s;
       // The reservation is already a factor of tile_area_so_far, so multiply
