@@ -10,6 +10,7 @@
 
 
 SET(PROD_AVX512FP16_MICROKERNEL_SRCS
+  src/f16-dwconv/gen/f16-dwconv-9p32c-minmax-avx512fp16.c
   src/f16-gemm/gen/f16-gemm-1x32-minmax-avx512fp16-broadcast.c
   src/f16-gemm/gen/f16-gemm-8x32-minmax-avx512fp16-broadcast.c
   src/f16-igemm/gen/f16-igemm-1x32-minmax-avx512fp16-broadcast.c
@@ -44,6 +45,7 @@ SET(PROD_AVX512FP16_MICROKERNEL_SRCS
   src/f16-vtanh/gen/f16-vtanh-avx512fp16-rational-5-4-div.c)
 
 SET(NON_PROD_AVX512FP16_MICROKERNEL_SRCS
+  src/f16-dwconv/gen/f16-dwconv-9p32c-minmax-avx512fp16-acc2.c
   src/f16-gemm/gen/f16-gemm-1x64-minmax-avx512fp16-broadcast.c
   src/f16-gemm/gen/f16-gemm-4x32-minmax-avx512fp16-broadcast.c
   src/f16-gemm/gen/f16-gemm-4x64-minmax-avx512fp16-broadcast.c
