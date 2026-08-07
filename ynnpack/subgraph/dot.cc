@@ -615,39 +615,33 @@ uint32_t define_pack_b(ynn_subgraph_t subgraph, const dot_type& type,
   packed_b.type = b.type;
   uint32_t packed_b_id = packed_b.id;
 
-  const int element_count = type_element_count(b.type);
-
   slinky::expr n = b.extent(0);
   slinky::expr k1 = b.extent(1);
   slinky::expr k2 = num_k_dims >= 2 ? b.extent(2) : 1;
   slinky::expr k3 = num_k_dims >= 3 ? b.extent(3) : 1;
 
-  const int elem_size_bits = type_size_bytes(b.type) * 8 / element_count;
-  const int cache_elements = cache_size_l2 * 8 / elem_size_bits;
 
   // When choosing block_n, we have the following concerns:
   // - We want to make the block bigger than the kernel's `block_n`
   // - If we want consistent arithmetic: it should be independent of the kernel.
   const int align_block_n =
-      consistent_arithmetic ? consistent_block_n : kernel.block_n;
+      consistent_arithmetic ? consistent_block_n : kernel.max_block_n;
 
-  // - We want to maximize block_n if the block will fit in cache
-  slinky::expr cache_blocks_n = slinky::floor_div<slinky::expr>(
-      cache_elements, align_block_n * k1 * k2 * k3);
-
+  slinky::expr block_n;
   if (type_size_bytes(b.type) <= 1) {
     // We don't want the stride of the loads from B to be too big.
     // TODO: b/543245536 - We should probably do this for all types, not just
     // int8 or smaller. However, this uncovers an issue of uneven split factors
     // in some cases, so as a workaround, we only do this for 8-bit or smaller
     // types.
-    const int max_stride = 4096 / elem_size_bits;
-    const int max_blocks_n =
-        std::max(1, max_stride / (kernel.tile_k * align_block_n));
-
-    cache_blocks_n = min(cache_blocks_n, max_blocks_n);
+    block_n = align_block_n;
+  } else {
+    // - We want to maximize block_n if the block will fit in cache
+    const int cache_elements = cache_size_l2 * 8 / type_size_bits(b.type);
+    slinky::expr cache_blocks_n = slinky::floor_div<slinky::expr>(
+        cache_elements, align_block_n * k1 * k2 * k3);
+    block_n = align_block_n * max(1, cache_blocks_n);
   }
-  slinky::expr block_n = align_block_n * max(1, cache_blocks_n);
 
   // - We don't want the block to be bigger than n (the number of columns of B).
   // - We want it to be aligned to a multiple of the kernel's `tile_n`.
@@ -660,7 +654,7 @@ uint32_t define_pack_b(ynn_subgraph_t subgraph, const dot_type& type,
   slinky::expr tiles_k = slinky::ceil_div<slinky::expr>(k1, kernel.tile_k);
   slinky::expr blocks_n = slinky::ceil_div(n, block_n);
 
-  assert(kernel.tile_k % element_count == 0);
+  assert(kernel.tile_k % type_element_count(b.type) == 0);
   packed_b.extents = {kernel.tile_k, block_n, tiles_k, blocks_n};
   for (slinky::expr& i : packed_b.extents) {
     i = slinky::simplify(i);
@@ -897,8 +891,10 @@ std::tuple<slinky::expr, slinky::expr, slinky::expr> choose_split_factors(
     // use data we load from either side.
     // - Tasks shouldn't be too small, to avoid parallelism overhead.
     // - Tasks shouldn't be too large, so we get enough parallelism.
-    const index_t min_area =
+    const index_t min_area_2d =
         std::min<index_t>(m, 64) * std::min<index_t>(n, 64);
+    const index_t min_area_1d = 256;
+    const index_t min_area = std::max<index_t>(min_area_2d, min_area_1d);
     const index_t max_area = 256 * 256;
     // The maximum cost of a tile, according to the cost function (m + n) * k.
     const index_t max_cost = 1024 * 64;
