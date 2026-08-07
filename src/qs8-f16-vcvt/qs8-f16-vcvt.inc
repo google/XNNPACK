@@ -25,6 +25,12 @@ XNN_UKERNEL(xnn_arch_x86_avx2, xnn_qs8_f16_vcvt_ukernel__avx2_u32, 32, false, XN
 XNN_UKERNEL(xnn_arch_x86_avx2, xnn_qs8_f16_vcvt_ukernel__avx2_u64, 64, false, XNN_QUANTIZED(int8_t), xnn_float16, struct xnn_qs8_f16_cvt_params, xnn_init_qs8_f16_cvt_scalar_params)
 #endif  // XNN_ENABLE_AVX2 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
+#if XNN_ARCH_RISCV && XNN_ENABLE_RISCV_FP16_VECTOR
+XNN_UKERNEL(xnn_arch_riscv_vector_fp16_arith, xnn_qs8_f16_vcvt_ukernel__rvvfp16arith_u1v, 1, true, XNN_QUANTIZED(int8_t), xnn_float16, struct xnn_qs8_f16_cvt_params, xnn_init_qs8_f16_cvt_scalar_params)
+XNN_UKERNEL(xnn_arch_riscv_vector_fp16_arith, xnn_qs8_f16_vcvt_ukernel__rvvfp16arith_u2v, 2, true, XNN_QUANTIZED(int8_t), xnn_float16, struct xnn_qs8_f16_cvt_params, xnn_init_qs8_f16_cvt_scalar_params)
+XNN_UKERNEL(xnn_arch_riscv_vector_fp16_arith, xnn_qs8_f16_vcvt_ukernel__rvvfp16arith_u4v, 4, true, XNN_QUANTIZED(int8_t), xnn_float16, struct xnn_qs8_f16_cvt_params, xnn_init_qs8_f16_cvt_scalar_params)
+#endif  // XNN_ARCH_RISCV && XNN_ENABLE_RISCV_FP16_VECTOR
+
 #ifdef XNN_DEFINED_QUANTIZED
 #undef XNN_DEFINED_QUANTIZED
 #undef XNN_QUANTIZED
