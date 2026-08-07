@@ -606,6 +606,8 @@ auto make_pack_impl(int elem_count) {
 // b(n, k, ...) => b(k%tile_k, n%nr, k/tile_k, n/tile_n, ...)
 // where tile_n is a multiple of the kernel's tile_n, but not greater than the
 // kernel's block_n.
+}  // namespace
+
 uint32_t define_pack_b(ynn_subgraph_t subgraph, const dot_type& type,
                        const dot_kernel& kernel, size_t num_k_dims,
                        bool consistent_arithmetic, uint32_t input_b_id) {
@@ -747,6 +749,8 @@ uint32_t define_pack_b(ynn_subgraph_t subgraph, const dot_type& type,
   subgraph->add_node(std::move(node));
   return packed_b_id;
 }
+
+namespace {
 
 // Make a kernel wrapper for packing the input of a dot kernel, i.e.
 // interleaving `tile_k` rows at a time.
