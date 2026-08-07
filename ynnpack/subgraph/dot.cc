@@ -875,75 +875,98 @@ uint32_t define_transpose_a(ynn_subgraph& subgraph, index_t tile_k,
   return output.id;
 }
 
-std::tuple<slinky::expr, slinky::expr, slinky::expr> choose_split_factors(
-    ynn_runtime& runtime, slinky::expr m, slinky::expr n, slinky::expr k,
-    slinky::expr block_n) {
-  // We can only return a scalar from a slinky expression, so we pack the
-  // splits into one integer.
-  auto impl = [](const slinky::call* op, slinky::eval_context& ctx) {
-    index_t m = evaluate(op->args[0], ctx);
-    index_t n = evaluate(op->args[1], ctx);
-    index_t k = evaluate(op->args[2], ctx);
-    index_t block_n = evaluate(op->args[3], ctx);
-    assert(block_n > 0);
+index_t compute_dot_splits(index_t m, index_t n, index_t k, index_t block_n) {
+  assert(block_n > 0);
 
-    // If k gets big, we're going to tile k anyways. It could be faster to
-    // parallelize more finely, but it will waste CPU cycles due to more memory
-    // traffic out of the cache.
-    k = std::min<index_t>(k, 1024);
+  // If k gets big, we're going to tile k anyways. It could be faster to
+  // parallelize more finely, but it will waste CPU cycles due to more memory
+  // traffic out of the cache.
+  k = std::min<index_t>(k, 1024);
 
-    // Considerations for task size:
-    // - We want tasks to be square-ish, to maximize the number of times we can
-    // use data we load from either side.
-    // - Tasks shouldn't be too small, to avoid parallelism overhead.
-    // - Tasks shouldn't be too large, so we get enough parallelism.
-    const index_t min_area =
-        std::min<index_t>(m, 64) * std::min<index_t>(n, 64);
-    const index_t max_area = 256 * 256;
-    // The maximum cost of a tile, according to the cost function (m + n) * k.
-    const index_t max_cost = 1024 * 64;
+  // Considerations for task size:
+  // - We want tasks to be square-ish, to maximize the number of times we can
+  // use data we load from either side.
+  // - Tasks shouldn't be too small, to avoid parallelism overhead.
+  // - Tasks shouldn't be too large, so we get enough parallelism.
+  const index_t min_area = std::min<index_t>(m, 64) * std::min<index_t>(n, 64);
+  const index_t max_area = 256 * 256;
+  // The maximum cost of a tile, according to the cost function (m + n) * k.
+  const index_t max_cost = 1024 * 64;
 
-    // A parameter indicating the target split_m/split_n ratio.
-    // TODO(b/438841352): Figure out why we want tall skinny tiles, at least on
-    // AMD Rome.
-    const index_t aspect_ratio = 4;
+  // A parameter indicating the target split_m/split_n ratio.
+  // TODO(b/438841352): Figure out why we want tall skinny tiles, at least on
+  // AMD Rome.
+  const index_t aspect_ratio = 4;
 
-    index_t split_n = std::min<index_t>(n, block_n);
-    index_t split_m = std::min<index_t>(m, 16);
-    while (true) {
-      if (split_n * split_m >= min_area) {
-        // We've reached the minimum tile size, should we stop?
-        if ((split_m + split_n) * k >= max_cost ||
-            split_m * split_n >= max_area) {
-          // We've reached the maximum task size, we should stop.
-          break;
-        }
-      }
-      // We want to make the tile bigger, figure out which dimension to grow.
-      if ((aspect_ratio * split_n <= split_m || split_m >= m) && split_n < n) {
-        split_n *= 2;
-      } else if ((split_m <= aspect_ratio * split_n || split_n >= n) &&
-                 split_m < m) {
-        split_m *= 2;
-      } else {
+  index_t split_n = std::min<index_t>(n, block_n);
+  index_t split_m = std::min<index_t>(m, 16);
+  while (true) {
+    if (split_n * split_m >= min_area) {
+      // We've reached the minimum tile size, should we stop?
+      if ((split_m + split_n) * k >= max_cost ||
+          split_m * split_n >= max_area) {
+        // We've reached the maximum task size, we should stop.
         break;
       }
     }
+    // We want to make the tile bigger, figure out which dimension to grow.
+    if ((aspect_ratio * split_n <= split_m || split_m >= m) && split_n < n) {
+      split_n *= 2;
+    } else if ((split_m <= aspect_ratio * split_n || split_n >= n) &&
+               split_m < m) {
+      split_m *= 2;
+    } else {
+      break;
+    }
+  }
 
-    split_m = std::min<index_t>(split_m, 32768);
-    split_n = std::min<index_t>(split_n, 65536);
-    return split_m * 65536 + split_n;
+  split_m = std::min<index_t>(split_m, 32768);
+  split_n = std::min<index_t>(split_n, 65536);
+  return split_m * 65536 + split_n;
+}
+
+slinky::expr compute_k_split(slinky::expr k) {
+  // Align `split_k` to be a multiple of possible values of `tile_k`. We cannot
+  // use the value of `tile_k` directly since this varies by CPU, so we use 64
+  // as a heuristic.
+  return slinky::select(k >= 64, slinky::align_up(k, 64), k);
+}
+
+template <typename T>
+std::tuple<slinky::expr, slinky::expr, slinky::expr> get_splits(
+    T packed_mn, slinky::expr k) {
+  T split_n = packed_mn % 65536;
+  T split_m = packed_mn / 65536;
+  slinky::expr split_k = compute_k_split(k);
+  return {slinky::expr(split_n), slinky::expr(split_m), split_k};
+}
+
+std::tuple<slinky::expr, slinky::expr, slinky::expr> choose_split_factors(
+    ynn_runtime& runtime, slinky::expr m, slinky::expr n, slinky::expr k,
+    slinky::expr block_n) {
+  // When every extent is known at build time, fold the heuristic to constant
+  // splits.
+  std::optional<index_t> mc = slinky::as_constant(slinky::simplify(m));
+  std::optional<index_t> nc = slinky::as_constant(slinky::simplify(n));
+  std::optional<index_t> kc = slinky::as_constant(slinky::simplify(k));
+  std::optional<index_t> bc = slinky::as_constant(slinky::simplify(block_n));
+
+  if (mc && nc && kc && bc) {
+    const index_t packed = compute_dot_splits(*mc, *nc, *kc, *bc);
+    return get_splits(packed, k);
+  }
+
+  auto impl = [](const slinky::call* op, slinky::eval_context& ctx) {
+    return compute_dot_splits(
+        evaluate(op->args[0], ctx), evaluate(op->args[1], ctx),
+        evaluate(op->args[2], ctx), evaluate(op->args[3], ctx));
   };
   slinky::expr splits = slinky::call::make(impl, {m, n, k, block_n});
 
   // Extract the splits from the single index_t result.
   splits = runtime.globals.get(splits, "dot_splits");
-  slinky::expr split_m = splits / 65536;
-  slinky::expr split_n = splits % 65536;
-  // Align `split_k` to be a multiple of possible values of `tile_k`. We cannot
-  // use the value of `tile_k` directly since this varies by CPU, so we use 64
-  // as a heuristic.
-  slinky::expr split_k = slinky::select(k >= 64, slinky::align_up(k, 64), k);
+  slinky::expr split_m, split_n, split_k;
+  std::tie(split_n, split_m, split_k) = get_splits(splits, k);
   split_m = runtime.globals.get(split_m, "split_m");
   split_n = runtime.globals.get(split_n, "split_n");
   split_k = runtime.globals.get(split_k, "split_k");
