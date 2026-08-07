@@ -203,7 +203,8 @@ std::string runtime_flags_to_string(uint32_t runtime_flags) {
 template <typename Input, typename Filter, typename Bias,
           typename Output = Input, typename Scale = float>
 void TestStaticB(xnn_datatype convert_to = xnn_datatype_invalid,
-                 size_t block_size = no_blockwise) {
+                 size_t block_size = no_blockwise,
+                 bool force_inline_lhs_packing = false) {
   const bool channelwise_quantization =
       xnn_datatype_is_channelwise_quantized(datatype_of<Filter>());
   const bool is_qd8_qc2w = (std::is_same<Filter, qcint2>::value &&
@@ -257,7 +258,9 @@ void TestStaticB(xnn_datatype convert_to = xnn_datatype_invalid,
     }
 
     uint32_t runtime_flags = xnn_test_runtime_flags();
-    if (flag_dist(rng)) {
+    if (force_inline_lhs_packing) {
+      runtime_flags &= ~XNN_FLAG_NO_INLINED_LHS_PACKING;
+    } else if (flag_dist(rng)) {
       runtime_flags |= XNN_FLAG_NO_INLINED_LHS_PACKING;
     }
 
@@ -610,6 +613,12 @@ TEST(FullyConnectedQD8F32QB4W_F16, static_b) {
 TEST(FullyConnectedQD8BF16QB4W_BF16, static_b) {
   TestStaticB<float, qcint4, float, xnn_bfloat16, xnn_bfloat16>(
       /*convert_to=*/xnn_datatype_qdint8, /*block_size=*/32);
+}
+
+TEST(FullyConnectedQD8BF16QB4W_BF16Input, static_b) {
+  TestStaticB<xnn_bfloat16, qcint4, float, xnn_bfloat16, xnn_bfloat16>(
+      /*convert_to=*/xnn_datatype_qdint8, /*block_size=*/32,
+      /*force_inline_lhs_packing=*/true);
 }
 #endif  // XNNPACK_USE_YNNPACK
 
