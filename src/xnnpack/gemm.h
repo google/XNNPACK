@@ -351,6 +351,10 @@ DECLARE_PF16_GEMM_MINMAX_UKERNEL_FUNCTION(
 DECLARE_PF16_GEMM_MINMAX_UKERNEL_FUNCTION(
     xnn_pf16_gemm_minmax_ukernel_32x32c2__neonsme2)
 DECLARE_PF16_GEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_pf16_gemm_minmax_ukernel_6x32__kai_aarch64_neonfp16arith)
+DECLARE_PF16_GEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_pf16_gemm_minmax_ukernel_6x32__kai_aarch64_neonfp16arith_cortex_a55)
+DECLARE_PF16_GEMM_MINMAX_UKERNEL_FUNCTION(
     xnn_pf16_gemm_minmax_ukernel_1x32c2__neonsme)
 DECLARE_PF16_GEMM_MINMAX_UKERNEL_FUNCTION(
     xnn_pf16_gemm_minmax_ukernel_32x32c2__neonsme)

@@ -13,7 +13,8 @@ SET(PROD_NEONFP16ARITH_AARCH64_MICROKERNEL_SRCS
   src/f16-vbinary/gen/f16-vdiv-aarch64-neonfp16arith-u8.c
   src/f16-vbinary/gen/f16-vdivc-aarch64-neonfp16arith-u8.c
   src/f16-vbinary/gen/f16-vrdivc-aarch64-neonfp16arith-u8.c
-  src/f16-vsqrt/gen/f16-vsqrt-aarch64-neonfp16arith-sqrt-u8.c)
+  src/f16-vsqrt/gen/f16-vsqrt-aarch64-neonfp16arith-sqrt-u8.c
+  src/pf16-gemm/pf16-gemm-6x32-minmax-aarch64-neonfp16arith.c)
 
 SET(NON_PROD_NEONFP16ARITH_AARCH64_MICROKERNEL_SRCS
   src/f16-vbinary/gen/f16-vdiv-aarch64-neonfp16arith-u16.c

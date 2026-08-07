@@ -5,6 +5,7 @@
 
 #include <assert.h>
 #include <stddef.h>
+#include <string.h>
 
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/config-types.h"
@@ -30,6 +31,32 @@ XNN_INIT_ONCE_GUARD(x32_pack_lh);
 XNN_INIT_ONCE_GUARD(x32_igemm_pack_lh);
 XNN_INIT_ONCE_GUARD(x8_igemm_pack_lh);
 XNN_INIT_ONCE_GUARD(x16_igemm_pack_lh);
+
+#if XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI
+static void x16_pack_lh_direct(
+    size_t m, size_t k, size_t unused_mr, size_t unused_kr, size_t unused_sr,
+    size_t unused_m_idx_start, const void* lhs, size_t lhs_stride,
+    void* lhs_packed) {
+  (void)unused_mr;
+  (void)unused_kr;
+  (void)unused_sr;
+  (void)unused_m_idx_start;
+  const size_t row_size = k * sizeof(xnn_float16);
+  for (size_t row = 0; row < m; row++) {
+    memcpy((void*)((uintptr_t)lhs_packed + row * row_size),
+           (const void*)((uintptr_t)lhs + row * lhs_stride), row_size);
+  }
+}
+
+static size_t x16_pack_lh_direct_size(
+    size_t m, size_t k, size_t unused_mr, size_t unused_kr,
+    size_t unused_sr) {
+  (void)unused_mr;
+  (void)unused_kr;
+  (void)unused_sr;
+  return m * k * sizeof(xnn_float16);
+}
+#endif  // XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI
 
 static void init_qp8_pack_lh_config(void) {
 #if XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI
@@ -139,6 +166,9 @@ static void init_x16_pack_lh_config(void) {
   assert(hardware_config != NULL);
   (void)hardware_config;
 #if XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI
+  x16_pack_lh_config.pack_lh_fn = x16_pack_lh_direct;
+  x16_pack_lh_config.size_fn = x16_pack_lh_direct_size;
+  x16_pack_lh_config.offset_fn = x16_pack_lh_direct_size;
 #if XNN_ENABLE_ARM_SME
   if ((hardware_config->arch_flags & xnn_arch_arm_sme)) {
     x16_pack_lh_config.pack_lh_fn =
