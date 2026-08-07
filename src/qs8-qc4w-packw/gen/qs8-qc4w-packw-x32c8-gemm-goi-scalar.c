@@ -29,6 +29,7 @@ void xnn_qs8_qc4w_packw_gemm_goi_ukernel_x32c8__scalar(
   size_t nr,
   size_t kr,
   size_t sr,
+  size_t n_stride,
   const uint8_t* weights,
   const int32_t* bias,
   const float* scale,
@@ -74,37 +75,37 @@ void xnn_qs8_qc4w_packw_gemm_goi_ukernel_x32c8__scalar(
       }
       out += 32 * sizeof(int32_t);
 
-      const uint8_t* w1 = w0 + mock_kc;
-      const uint8_t* w2 = w1 + mock_kc;
-      const uint8_t* w3 = w2 + mock_kc;
-      const uint8_t* w4 = w3 + mock_kc;
-      const uint8_t* w5 = w4 + mock_kc;
-      const uint8_t* w6 = w5 + mock_kc;
-      const uint8_t* w7 = w6 + mock_kc;
-      const uint8_t* w8 = w7 + mock_kc;
-      const uint8_t* w9 = w8 + mock_kc;
-      const uint8_t* w10 = w9 + mock_kc;
-      const uint8_t* w11 = w10 + mock_kc;
-      const uint8_t* w12 = w11 + mock_kc;
-      const uint8_t* w13 = w12 + mock_kc;
-      const uint8_t* w14 = w13 + mock_kc;
-      const uint8_t* w15 = w14 + mock_kc;
-      const uint8_t* w16 = w15 + mock_kc;
-      const uint8_t* w17 = w16 + mock_kc;
-      const uint8_t* w18 = w17 + mock_kc;
-      const uint8_t* w19 = w18 + mock_kc;
-      const uint8_t* w20 = w19 + mock_kc;
-      const uint8_t* w21 = w20 + mock_kc;
-      const uint8_t* w22 = w21 + mock_kc;
-      const uint8_t* w23 = w22 + mock_kc;
-      const uint8_t* w24 = w23 + mock_kc;
-      const uint8_t* w25 = w24 + mock_kc;
-      const uint8_t* w26 = w25 + mock_kc;
-      const uint8_t* w27 = w26 + mock_kc;
-      const uint8_t* w28 = w27 + mock_kc;
-      const uint8_t* w29 = w28 + mock_kc;
-      const uint8_t* w30 = w29 + mock_kc;
-      const uint8_t* w31 = w30 + mock_kc;
+      const uint8_t* w1 = w0 + (n_stride >> 1);
+      const uint8_t* w2 = w1 + (n_stride >> 1);
+      const uint8_t* w3 = w2 + (n_stride >> 1);
+      const uint8_t* w4 = w3 + (n_stride >> 1);
+      const uint8_t* w5 = w4 + (n_stride >> 1);
+      const uint8_t* w6 = w5 + (n_stride >> 1);
+      const uint8_t* w7 = w6 + (n_stride >> 1);
+      const uint8_t* w8 = w7 + (n_stride >> 1);
+      const uint8_t* w9 = w8 + (n_stride >> 1);
+      const uint8_t* w10 = w9 + (n_stride >> 1);
+      const uint8_t* w11 = w10 + (n_stride >> 1);
+      const uint8_t* w12 = w11 + (n_stride >> 1);
+      const uint8_t* w13 = w12 + (n_stride >> 1);
+      const uint8_t* w14 = w13 + (n_stride >> 1);
+      const uint8_t* w15 = w14 + (n_stride >> 1);
+      const uint8_t* w16 = w15 + (n_stride >> 1);
+      const uint8_t* w17 = w16 + (n_stride >> 1);
+      const uint8_t* w18 = w17 + (n_stride >> 1);
+      const uint8_t* w19 = w18 + (n_stride >> 1);
+      const uint8_t* w20 = w19 + (n_stride >> 1);
+      const uint8_t* w21 = w20 + (n_stride >> 1);
+      const uint8_t* w22 = w21 + (n_stride >> 1);
+      const uint8_t* w23 = w22 + (n_stride >> 1);
+      const uint8_t* w24 = w23 + (n_stride >> 1);
+      const uint8_t* w25 = w24 + (n_stride >> 1);
+      const uint8_t* w26 = w25 + (n_stride >> 1);
+      const uint8_t* w27 = w26 + (n_stride >> 1);
+      const uint8_t* w28 = w27 + (n_stride >> 1);
+      const uint8_t* w29 = w28 + (n_stride >> 1);
+      const uint8_t* w30 = w29 + (n_stride >> 1);
+      const uint8_t* w31 = w30 + (n_stride >> 1);
 
       int32_t ksum0 = 0;
       int32_t ksum1 = 0;
@@ -1515,123 +1516,123 @@ void xnn_qs8_qc4w_packw_gemm_goi_ukernel_x32c8__scalar(
       out += 32 * sizeof(int32_t);
 
       // Clamp weight pointers
-      const uint8_t* w1 = w0 + mock_kc;
+      const uint8_t* w1 = w0 + (n_stride >> 1);
       if XNN_UNPREDICTABLE(n < 2) {
         w1 = w0;
       }
-      const uint8_t* w2 = w1 + mock_kc;
+      const uint8_t* w2 = w1 + (n_stride >> 1);
       if XNN_UNPREDICTABLE(n <= 2) {
         w2 = w1;
       }
-      const uint8_t* w3 = w2 + mock_kc;
+      const uint8_t* w3 = w2 + (n_stride >> 1);
       if XNN_UNPREDICTABLE(n < 4) {
         w3 = w2;
       }
-      const uint8_t* w4 = w3 + mock_kc;
+      const uint8_t* w4 = w3 + (n_stride >> 1);
       if XNN_UNPREDICTABLE(n <= 4) {
         w4 = w3;
       }
-      const uint8_t* w5 = w4 + mock_kc;
+      const uint8_t* w5 = w4 + (n_stride >> 1);
       if XNN_UNPREDICTABLE(n < 6) {
         w5 = w4;
       }
-      const uint8_t* w6 = w5 + mock_kc;
+      const uint8_t* w6 = w5 + (n_stride >> 1);
       if XNN_UNPREDICTABLE(n <= 6) {
         w6 = w5;
       }
-      const uint8_t* w7 = w6 + mock_kc;
+      const uint8_t* w7 = w6 + (n_stride >> 1);
       if XNN_UNPREDICTABLE(n < 8) {
         w7 = w6;
       }
-      const uint8_t* w8 = w7 + mock_kc;
+      const uint8_t* w8 = w7 + (n_stride >> 1);
       if XNN_UNPREDICTABLE(n <= 8) {
         w8 = w7;
       }
-      const uint8_t* w9 = w8 + mock_kc;
+      const uint8_t* w9 = w8 + (n_stride >> 1);
       if XNN_UNPREDICTABLE(n < 10) {
         w9 = w8;
       }
-      const uint8_t* w10 = w9 + mock_kc;
+      const uint8_t* w10 = w9 + (n_stride >> 1);
       if XNN_UNPREDICTABLE(n <= 10) {
         w10 = w9;
       }
-      const uint8_t* w11 = w10 + mock_kc;
+      const uint8_t* w11 = w10 + (n_stride >> 1);
       if XNN_UNPREDICTABLE(n < 12) {
         w11 = w10;
       }
-      const uint8_t* w12 = w11 + mock_kc;
+      const uint8_t* w12 = w11 + (n_stride >> 1);
       if XNN_UNPREDICTABLE(n <= 12) {
         w12 = w11;
       }
-      const uint8_t* w13 = w12 + mock_kc;
+      const uint8_t* w13 = w12 + (n_stride >> 1);
       if XNN_UNPREDICTABLE(n < 14) {
         w13 = w12;
       }
-      const uint8_t* w14 = w13 + mock_kc;
+      const uint8_t* w14 = w13 + (n_stride >> 1);
       if XNN_UNPREDICTABLE(n <= 14) {
         w14 = w13;
       }
-      const uint8_t* w15 = w14 + mock_kc;
+      const uint8_t* w15 = w14 + (n_stride >> 1);
       if XNN_UNPREDICTABLE(n < 16) {
         w15 = w14;
       }
-      const uint8_t* w16 = w15 + mock_kc;
+      const uint8_t* w16 = w15 + (n_stride >> 1);
       if XNN_UNPREDICTABLE(n <= 16) {
         w16 = w15;
       }
-      const uint8_t* w17 = w16 + mock_kc;
+      const uint8_t* w17 = w16 + (n_stride >> 1);
       if XNN_UNPREDICTABLE(n < 18) {
         w17 = w16;
       }
-      const uint8_t* w18 = w17 + mock_kc;
+      const uint8_t* w18 = w17 + (n_stride >> 1);
       if XNN_UNPREDICTABLE(n <= 18) {
         w18 = w17;
       }
-      const uint8_t* w19 = w18 + mock_kc;
+      const uint8_t* w19 = w18 + (n_stride >> 1);
       if XNN_UNPREDICTABLE(n < 20) {
         w19 = w18;
       }
-      const uint8_t* w20 = w19 + mock_kc;
+      const uint8_t* w20 = w19 + (n_stride >> 1);
       if XNN_UNPREDICTABLE(n <= 20) {
         w20 = w19;
       }
-      const uint8_t* w21 = w20 + mock_kc;
+      const uint8_t* w21 = w20 + (n_stride >> 1);
       if XNN_UNPREDICTABLE(n < 22) {
         w21 = w20;
       }
-      const uint8_t* w22 = w21 + mock_kc;
+      const uint8_t* w22 = w21 + (n_stride >> 1);
       if XNN_UNPREDICTABLE(n <= 22) {
         w22 = w21;
       }
-      const uint8_t* w23 = w22 + mock_kc;
+      const uint8_t* w23 = w22 + (n_stride >> 1);
       if XNN_UNPREDICTABLE(n < 24) {
         w23 = w22;
       }
-      const uint8_t* w24 = w23 + mock_kc;
+      const uint8_t* w24 = w23 + (n_stride >> 1);
       if XNN_UNPREDICTABLE(n <= 24) {
         w24 = w23;
       }
-      const uint8_t* w25 = w24 + mock_kc;
+      const uint8_t* w25 = w24 + (n_stride >> 1);
       if XNN_UNPREDICTABLE(n < 26) {
         w25 = w24;
       }
-      const uint8_t* w26 = w25 + mock_kc;
+      const uint8_t* w26 = w25 + (n_stride >> 1);
       if XNN_UNPREDICTABLE(n <= 26) {
         w26 = w25;
       }
-      const uint8_t* w27 = w26 + mock_kc;
+      const uint8_t* w27 = w26 + (n_stride >> 1);
       if XNN_UNPREDICTABLE(n < 28) {
         w27 = w26;
       }
-      const uint8_t* w28 = w27 + mock_kc;
+      const uint8_t* w28 = w27 + (n_stride >> 1);
       if XNN_UNPREDICTABLE(n <= 28) {
         w28 = w27;
       }
-      const uint8_t* w29 = w28 + mock_kc;
+      const uint8_t* w29 = w28 + (n_stride >> 1);
       if XNN_UNPREDICTABLE(n < 30) {
         w29 = w28;
       }
-      const uint8_t* w30 = w29 + mock_kc;
+      const uint8_t* w30 = w29 + (n_stride >> 1);
       if XNN_UNPREDICTABLE(n <= 30) {
         w30 = w29;
       }

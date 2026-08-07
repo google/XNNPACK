@@ -25,6 +25,7 @@ void xnn_x32_packw_gemm_goi_ukernel_x16__wasmsimd_u4(
   size_t nr,
   size_t kr,
   size_t sr,
+  size_t n_stride,
   const uint32_t* weights,
   const uint32_t* bias,
   const void* scale,
@@ -67,21 +68,21 @@ void xnn_x32_packw_gemm_goi_ukernel_x16__wasmsimd_u4(
       }
       packed_weights += 16;
 
-      const uint32_t* w1 = w0 + kc;
-      const uint32_t* w2 = w1 + kc;
-      const uint32_t* w3 = w2 + kc;
-      const uint32_t* w4 = w3 + kc;
-      const uint32_t* w5 = w4 + kc;
-      const uint32_t* w6 = w5 + kc;
-      const uint32_t* w7 = w6 + kc;
-      const uint32_t* w8 = w7 + kc;
-      const uint32_t* w9 = w8 + kc;
-      const uint32_t* wA = w9 + kc;
-      const uint32_t* wB = wA + kc;
-      const uint32_t* wC = wB + kc;
-      const uint32_t* wD = wC + kc;
-      const uint32_t* wE = wD + kc;
-      const uint32_t* wF = wE + kc;
+      const uint32_t* w1 = w0 + n_stride;
+      const uint32_t* w2 = w1 + n_stride;
+      const uint32_t* w3 = w2 + n_stride;
+      const uint32_t* w4 = w3 + n_stride;
+      const uint32_t* w5 = w4 + n_stride;
+      const uint32_t* w6 = w5 + n_stride;
+      const uint32_t* w7 = w6 + n_stride;
+      const uint32_t* w8 = w7 + n_stride;
+      const uint32_t* w9 = w8 + n_stride;
+      const uint32_t* wA = w9 + n_stride;
+      const uint32_t* wB = wA + n_stride;
+      const uint32_t* wC = wB + n_stride;
+      const uint32_t* wD = wC + n_stride;
+      const uint32_t* wE = wD + n_stride;
+      const uint32_t* wF = wE + n_stride;
 
       // KC main loop multiple of 16x4
       size_t k = kc;
@@ -424,59 +425,59 @@ void xnn_x32_packw_gemm_goi_ukernel_x16__wasmsimd_u4(
         packed_weights += 16;
       }
 
-      const uint32_t* w1 = w0 + kc;
+      const uint32_t* w1 = w0 + n_stride;
       if XNN_UNPREDICTABLE(n < 2) {
         w1 = w0;
       }
-      const uint32_t* w2 = w1 + kc;
+      const uint32_t* w2 = w1 + n_stride;
       if XNN_UNPREDICTABLE(n <= 2) {
         w2 = w1;
       }
-      const uint32_t* w3 = w2 + kc;
+      const uint32_t* w3 = w2 + n_stride;
       if XNN_UNPREDICTABLE(n < 4) {
         w3 = w2;
       }
-      const uint32_t* w4 = w3 + kc;
+      const uint32_t* w4 = w3 + n_stride;
       if XNN_UNPREDICTABLE(n <= 4) {
         w4 = w3;
       }
-      const uint32_t* w5 = w4 + kc;
+      const uint32_t* w5 = w4 + n_stride;
       if XNN_UNPREDICTABLE(n < 6) {
         w5 = w4;
       }
-      const uint32_t* w6 = w5 + kc;
+      const uint32_t* w6 = w5 + n_stride;
       if XNN_UNPREDICTABLE(n <= 6) {
         w6 = w5;
       }
-      const uint32_t* w7 = w6 + kc;
+      const uint32_t* w7 = w6 + n_stride;
       if XNN_UNPREDICTABLE(n < 8) {
         w7 = w6;
       }
-      const uint32_t* w8 = w7 + kc;
+      const uint32_t* w8 = w7 + n_stride;
       if XNN_UNPREDICTABLE(n <= 8) {
         w8 = w7;
       }
-      const uint32_t* w9 = w8 + kc;
+      const uint32_t* w9 = w8 + n_stride;
       if XNN_UNPREDICTABLE(n < 10) {
         w9 = w8;
       }
-      const uint32_t* wA = w9 + kc;
+      const uint32_t* wA = w9 + n_stride;
       if XNN_UNPREDICTABLE(n <= 10) {
         wA = w9;
       }
-      const uint32_t* wB = wA + kc;
+      const uint32_t* wB = wA + n_stride;
       if XNN_UNPREDICTABLE(n < 12) {
         wB = wA;
       }
-      const uint32_t* wC = wB + kc;
+      const uint32_t* wC = wB + n_stride;
       if XNN_UNPREDICTABLE(n <= 12) {
         wC = wB;
       }
-      const uint32_t* wD = wC + kc;
+      const uint32_t* wD = wC + n_stride;
       if XNN_UNPREDICTABLE(n < 14) {
         wD = wC;
       }
-      const uint32_t* wE = wD + kc;
+      const uint32_t* wE = wD + n_stride;
       if XNN_UNPREDICTABLE(n <= 14) {
         wE = wD;
       }

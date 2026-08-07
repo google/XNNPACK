@@ -40,6 +40,7 @@ void xnn_${DATATYPE_SPEC}_packw_gemm_goi_ukernel_x${NR}c${KR}__scalar(
   size_t nr,
   size_t kr,
   size_t sr,
+  size_t n_stride,
   const ${WTYPE}* weights,
   const ${BTYPE}* bias,
   const ${SCALETYPE}* scale,
@@ -82,7 +83,7 @@ void xnn_${DATATYPE_SPEC}_packw_gemm_goi_ukernel_x${NR}c${KR}__scalar(
         out += ${NR} * sizeof(int32_t);
 
         $for N in range(1, NR):
-          const ${OUTTYPE}* w${N} = w${N-1} + kc;
+          const ${OUTTYPE}* w${N} = w${N-1} + n_stride;
         $for N in range(NR):
           uint32_t ksum${N} = 0;
 
@@ -144,7 +145,7 @@ void xnn_${DATATYPE_SPEC}_packw_gemm_goi_ukernel_x${NR}c${KR}__scalar(
         $if NR > 2:
           // NR remainder has less than ${NR} rows so last row is not loaded
         $for N in range(1, NR-1):
-          const ${OUTTYPE}* w${N} = w${N-1} + kc;
+          const ${OUTTYPE}* w${N} = w${N-1} + n_stride;
           $if N % 2 == 0:
             if XNN_UNPREDICTABLE(n <= ${N}) {
               w${N} = w${N-1};
@@ -153,7 +154,6 @@ void xnn_${DATATYPE_SPEC}_packw_gemm_goi_ukernel_x${NR}c${KR}__scalar(
             if XNN_UNPREDICTABLE(n < ${N+1}) {
               w${N} = w${N-1};
             }
-
         $for N in range(NR-1):
           uint32_t ksum${N} = 0;
 
@@ -226,7 +226,7 @@ void xnn_${DATATYPE_SPEC}_packw_gemm_goi_ukernel_x${NR}c${KR}__scalar(
         out += ${NR} * sizeof(int32_t);
 
         $for N in range(1, NR):
-          const uint8_t* w${N} = w${N-1} + mock_kc;
+          const uint8_t* w${N} = w${N-1} + (n_stride >> 1);
 
         $for N in range(NR):
           int32_t ksum${N} = 0;
@@ -322,7 +322,7 @@ void xnn_${DATATYPE_SPEC}_packw_gemm_goi_ukernel_x${NR}c${KR}__scalar(
 
         // Clamp weight pointers
         $for N in range(1, NR-1):
-          const uint8_t* w${N} = w${N-1} + mock_kc;
+          const uint8_t* w${N} = w${N-1} + (n_stride >> 1);
           $if N % 2 == 0:
             if XNN_UNPREDICTABLE(n <= ${N}) {
               w${N} = w${N-1};

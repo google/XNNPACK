@@ -81,9 +81,9 @@ static void GEMMBenchmark(benchmark::State& state,
   xnnpack::Buffer<uint8_t, XNN_ALLOCATION_ALIGNMENT> w(w_elements *
                                                        num_buffers);
   const xnn_qu8_packing_params packing_params = {127, 127};
-  xnn_pack_qu8_gemm_goi_w(/*groups=*/1, nc, kc, nr, kr, sr, k.data(), b.data(),
-                          /*scale=*/nullptr, w.data(), /*extra_bytes=*/0,
-                          &packing_params);
+  xnn_pack_qu8_gemm_goi_w(/*groups=*/1, nc, kc, nr, kr, sr, /*n_stride=*/kc,
+                          k.data(), b.data(), /*scale=*/nullptr, w.data(),
+                          /*extra_bytes=*/0, &packing_params);
   xnnpack::Buffer<uint8_t> c(c_elements * num_buffers);
 
   union xnn_qu8_conv_minmax_params quantization_params;

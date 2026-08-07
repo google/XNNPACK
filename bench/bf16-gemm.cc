@@ -63,7 +63,7 @@ static void bf16_gemm(benchmark::State& state,
 
   xnnpack::Buffer<xnn_bfloat16, XNN_ALLOCATION_ALIGNMENT> w(w_elements *
                                                             num_buffers);
-  xnn_pack_f16_gemm_goi_w(/*groups=*/1, nc, kc, nr, kr, sr,
+  xnn_pack_f16_gemm_goi_w(/*groups=*/1, nc, kc, nr, kr, sr, /*n_stride=*/kc,
                           reinterpret_cast<const uint16_t*>(k.data()),
                           reinterpret_cast<const uint16_t*>(b.data()),
                           /*scale=*/nullptr,
