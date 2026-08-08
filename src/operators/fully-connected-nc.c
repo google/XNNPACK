@@ -1946,13 +1946,27 @@ enum xnn_status xnn_create_fully_connected_nc_qd8_f16_qb4w_f16_scales(
     float output_min, float output_max, uint32_t flags,
     xnn_weights_cache_t weights_cache, xnn_operator_t* fully_connected_op_out) {
   enum xnn_status status = xnn_status_success;
-  const size_t num_blocks =
-      (input_channels + block_size - 1) / block_size * output_channels;
-  xnn_bfloat16* bf16_scale_buffer =
-      (xnn_bfloat16*)xnn_allocate_memory(num_blocks * sizeof(xnn_bfloat16));
-  if (bf16_scale_buffer == NULL) {
-    return xnn_status_out_of_memory;
+  if (block_size == 0) {
+    xnn_log_error("failed to create %s operator: block size must be non-zero",
+                  xnn_operator_type_to_string(
+                      xnn_operator_type_fully_connected_nc_qd8_f16_qb4w));
+    return xnn_status_invalid_parameter;
   }
+  const size_t blocks_per_output = divide_round_up(input_channels, block_size);
+  size_t num_blocks = 0;
+  size_t scale_buffer_size = 0;
+  if (!xnn_safe_mul(blocks_per_output, output_channels, &num_blocks) ||
+      !xnn_safe_mul(num_blocks, sizeof(xnn_bfloat16), &scale_buffer_size)) {
+    xnn_log_error(
+        "failed to create %s operator with %zu input channels, %zu output "
+        "channels, and block size %zu: scale buffer size overflows size_t",
+        xnn_operator_type_to_string(
+            xnn_operator_type_fully_connected_nc_qd8_f16_qb4w),
+        input_channels, output_channels, block_size);
+    return xnn_status_invalid_parameter;
+  }
+  xnn_bfloat16* bf16_scale_buffer =
+      (xnn_bfloat16*)xnn_allocate_memory(scale_buffer_size);
   for (size_t i = 0; i < num_blocks; ++i) {
     bf16_scale_buffer[i] = xnn_bfloat16_from_float(
         xnn_float16_to_float(((const xnn_float16*)kernel_scale)[i]));
@@ -2180,10 +2194,27 @@ enum xnn_status xnn_create_fully_connected_nc_qp8_f32_qb4w_f16_scales(
     float output_min, float output_max, uint32_t flags,
     xnn_weights_cache_t weights_cache, xnn_operator_t* fully_connected_op_out) {
   enum xnn_status status = xnn_status_success;
-  const size_t num_blocks =
-      (input_channels + block_size - 1) / block_size * output_channels;
+  if (block_size == 0) {
+    xnn_log_error("failed to create %s operator: block size must be non-zero",
+                  xnn_operator_type_to_string(
+                      xnn_operator_type_fully_connected_nc_qp8_f32_qb4w));
+    return xnn_status_invalid_parameter;
+  }
+  const size_t blocks_per_output = divide_round_up(input_channels, block_size);
+  size_t num_blocks = 0;
+  size_t scale_buffer_size = 0;
+  if (!xnn_safe_mul(blocks_per_output, output_channels, &num_blocks) ||
+      !xnn_safe_mul(num_blocks, sizeof(xnn_bfloat16), &scale_buffer_size)) {
+    xnn_log_error(
+        "failed to create %s operator with %zu input channels, %zu output "
+        "channels, and block size %zu: scale buffer size overflows size_t",
+        xnn_operator_type_to_string(
+            xnn_operator_type_fully_connected_nc_qp8_f32_qb4w),
+        input_channels, output_channels, block_size);
+    return xnn_status_invalid_parameter;
+  }
   xnn_bfloat16* bf16_scale_buffer =
-      (xnn_bfloat16*)xnn_allocate_memory(num_blocks * sizeof(xnn_bfloat16));
+      (xnn_bfloat16*)xnn_allocate_memory(scale_buffer_size);
   for (size_t i = 0; i < num_blocks; ++i) {
     bf16_scale_buffer[i] = xnn_bfloat16_from_float(
         xnn_float16_to_float(((const xnn_float16*)kernel_scale)[i]));
@@ -2230,10 +2261,27 @@ enum xnn_status xnn_create_fully_connected_nc_qd8_f32_qb4w_f16_scales(
     const xnn_float16* kernel_scale, const void* kernel, const float* bias,
     float output_min, float output_max, uint32_t flags,
     xnn_weights_cache_t weights_cache, xnn_operator_t* fully_connected_op_out) {
-  const size_t num_blocks =
-      (input_channels + block_size - 1) / block_size * output_channels;
+  if (block_size == 0) {
+    xnn_log_error("failed to create %s operator: block size must be non-zero",
+                  xnn_operator_type_to_string(
+                      xnn_operator_type_fully_connected_nc_qd8_f32_qb4w));
+    return xnn_status_invalid_parameter;
+  }
+  const size_t blocks_per_output = divide_round_up(input_channels, block_size);
+  size_t num_blocks = 0;
+  size_t scale_buffer_size = 0;
+  if (!xnn_safe_mul(blocks_per_output, output_channels, &num_blocks) ||
+      !xnn_safe_mul(num_blocks, sizeof(xnn_bfloat16), &scale_buffer_size)) {
+    xnn_log_error(
+        "failed to create %s operator with %zu input channels, %zu output "
+        "channels, and block size %zu: scale buffer size overflows size_t",
+        xnn_operator_type_to_string(
+            xnn_operator_type_fully_connected_nc_qd8_f32_qb4w),
+        input_channels, output_channels, block_size);
+    return xnn_status_invalid_parameter;
+  }
   xnn_bfloat16* bf16_scale_buffer =
-      (xnn_bfloat16*)xnn_allocate_memory(num_blocks * sizeof(xnn_bfloat16));
+      (xnn_bfloat16*)xnn_allocate_memory(scale_buffer_size);
   for (size_t i = 0; i < num_blocks; ++i) {
     bf16_scale_buffer[i] =
         xnn_bfloat16_from_float(xnn_float16_to_float(kernel_scale[i]));
@@ -2279,10 +2327,30 @@ enum xnn_status xnn_create_fully_connected_nc_qdu8_f32_qb4w_f16_scales(
     const xnn_float16* kernel_scale, const void* kernel, const float* bias,
     float output_min, float output_max, uint32_t flags,
     xnn_weights_cache_t weights_cache, xnn_operator_t* fully_connected_op_out) {
-  const size_t num_blocks =
-      (input_channels + block_size - 1) / block_size * output_channels;
+  if (block_size == 0) {
+    xnn_log_error("failed to create %s operator: block size must be non-zero",
+                  xnn_operator_type_to_string(
+                      xnn_operator_type_fully_connected_nc_qdu8_f32_qb4w));
+    return xnn_status_invalid_parameter;
+  }
+  const size_t blocks_per_output = divide_round_up(input_channels, block_size);
+  size_t num_blocks = 0;
+  size_t scale_buffer_size = 0;
+  if (!xnn_safe_mul(blocks_per_output, output_channels, &num_blocks) ||
+      !xnn_safe_mul(num_blocks, sizeof(xnn_bfloat16), &scale_buffer_size)) {
+    xnn_log_error(
+        "failed to create %s operator with %zu input channels, %zu output "
+        "channels, and block size %zu: scale buffer size overflows size_t",
+        xnn_operator_type_to_string(
+            xnn_operator_type_fully_connected_nc_qdu8_f32_qb4w),
+        input_channels, output_channels, block_size);
+    return xnn_status_invalid_parameter;
+  }
   xnn_bfloat16* bf16_scale_buffer =
-      (xnn_bfloat16*)xnn_allocate_memory(num_blocks * sizeof(xnn_bfloat16));
+      (xnn_bfloat16*)xnn_allocate_memory(scale_buffer_size);
+  if (bf16_scale_buffer == NULL) {
+    return xnn_status_out_of_memory;
+  }
   for (size_t i = 0; i < num_blocks; ++i) {
     bf16_scale_buffer[i] =
         xnn_bfloat16_from_float(xnn_float16_to_float(kernel_scale[i]));
