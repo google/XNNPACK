@@ -69,6 +69,7 @@ YNN_INTRINSIC bfloat16x4_t unaligned_load_broadcast_bf16x2(const __bf16* ptr) {
 generate_dot_kernels(
     arm_neonbf16_bf16_bf16_fp32_k2(),
     [
+        (1, 64, 4),
         (1, 32, 4),
         (2, 32, 4),
         (1, 16, 4),
