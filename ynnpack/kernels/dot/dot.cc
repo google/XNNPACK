@@ -283,9 +283,6 @@ float estimate_dot_cost(size_t m, size_t n, size_t k, size_t block_m,
 
 namespace {
 
-// If we don't know the shape of a dot, just assume it's big.
-constexpr size_t unknown_dot_extent = 2048;
-
 // An additional penalty scale term on the cost of a dot kernel based on the
 // architecture.
 float dot_arch_cost_factor(uint64_t arch) {
@@ -372,21 +369,20 @@ YNN_UNUSED null_logger& operator<<(null_logger& os, std::optional<size_t> v) {
 }
 
 template <typename A, typename B, typename C>
-dot_kernel get_dot_kernel(const dot_shape& shape,
-                          const dot_packed_shape* packed_shape,
+dot_kernel get_dot_kernel(const dot_shape& shape, dot_packed_shape packed_shape,
                           uint32_t required_flags,
                           std::optional<bool> transpose_a,
                           uint64_t arch_flags) {
-  if (!packed_shape) {
+  if (packed_shape.tile_k == 0 && packed_shape.block_n == 0) {
     YNN_LOG_DEBUG() << "Selecting kernel for dot " << shape.m << "x" << shape.n
                     << "x" << shape.k1;
   }
   optimizer<A, B, C> optimizer{
-      shape.m.value_or(unknown_dot_extent),
-      shape.n.value_or(unknown_dot_extent),
-      shape.k1.value_or(unknown_dot_extent),
-      packed_shape ? packed_shape->tile_k : 0,
-      packed_shape ? packed_shape->block_n : 0,
+      shape.m,
+      shape.n,
+      shape.k1,
+      packed_shape.tile_k,
+      packed_shape.block_n,
       required_flags,
       transpose_a,
       arch_flags,
@@ -402,7 +398,7 @@ dot_kernel get_dot_kernel(const dot_shape& shape,
   }
 #include "ynnpack/kernels/dot/kernels.inc"
 #undef YNN_DOT_KERNEL
-  if (!packed_shape) {
+  if (packed_shape.tile_k == 0 && packed_shape.block_n == 0) {
     if (optimizer.result.kernel) {
       YNN_LOG_DEBUG() << "Using dot kernel " << optimizer.kernel_used
                       << " for dot " << shape.m << "x" << shape.n << "x"
@@ -415,7 +411,7 @@ dot_kernel get_dot_kernel(const dot_shape& shape,
 }  // namespace
 
 dot_kernel get_dot_kernel(const dot_type& type, const dot_shape& shape,
-                          const dot_packed_shape* packed_shape,
+                          dot_packed_shape packed_shape,
                           uint32_t required_flags,
                           std::optional<bool> transpose_a,
                           uint64_t arch_flags) {

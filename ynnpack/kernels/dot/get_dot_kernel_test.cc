@@ -29,7 +29,7 @@ std::map<dot_kernel_fn, std::string> kernels = {
 
 const std::string& get_dot_kernel_name(
     const dot_type& type, const dot_shape& shape, uint64_t arch_flags,
-    const dot_packed_shape* packed_shape = nullptr) {
+    const dot_packed_shape& packed_shape = {}) {
   return kernels[get_dot_kernel(type, shape, packed_shape,
                                 /*consistent_arithmetic=*/false,
                                 /*transpose_a=*/std::nullopt, arch_flags)
@@ -162,7 +162,7 @@ TEST(get_dot_kernel, small_n_tile_k_1) {
 
   auto fp32_x8 = [=](uint64_t arch_flags) {
     return get_dot_kernel_name(fp32, {large_shape, 8, large_shape}, arch_flags,
-                               &no_tile_k);
+                               no_tile_k);
   };
   ASSERT_EQ(fp32_x8(arch_flags_sse2), "dot_fp32_4x8x1_1x4x1_sse2");
   ASSERT_EQ(fp32_x8(arch_flags_avx2), "dot_fp32_8x8x1_1x8x1_avx");
@@ -177,7 +177,7 @@ TEST(get_dot_kernel, large_tile_k_1) {
 
   auto fp32_large = [=](uint64_t arch_flags) {
     return get_dot_kernel_name(fp32, {large_shape, large_shape, large_shape},
-                               arch_flags, &no_tile_k);
+                               arch_flags, no_tile_k);
   };
   ASSERT_EQ(fp32_large(arch_flags_sse2), "dot_fp32_3x16x1_1x4x1_sse2");
   ASSERT_EQ(fp32_large(arch_flags_avx2), "dot_fp32_4x16x1_1x8x1_avx");

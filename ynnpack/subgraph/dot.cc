@@ -342,7 +342,7 @@ auto make_dot_impl(dot_type type, bool consistent_arithmetic, bool symmetric_b,
       // values), then we don't care if the kernel is transposed or not.
       require_transpose_a = std::nullopt;
     }
-    dot_kernel kernel = get_dot_kernel(type, shape, &packed_shape, kernel_flags,
+    dot_kernel kernel = get_dot_kernel(type, shape, packed_shape, kernel_flags,
                                        require_transpose_a);
     assert(kernel.kernel);
     assert(tile_k == kernel.tile_k);
@@ -959,10 +959,14 @@ std::tuple<slinky::expr, slinky::expr, slinky::expr> choose_split_factors(
 
 void learn_shape_from_b(dot_shape& shape, size_t num_k_dims,
                         const ynn_value& b) {
-  shape.n = as_constant(b.extent(0));
-  shape.k1 = as_constant(b.extent(1));
-  shape.k2 = num_k_dims >= 2 ? as_constant(b.extent(2)) : 1;
-  shape.k3 = num_k_dims >= 3 ? as_constant(b.extent(3)) : 1;
+  shape.n = as_constant(b.extent(0)).value_or(unknown_dot_extent);
+  shape.k1 = as_constant(b.extent(1)).value_or(unknown_dot_extent);
+  shape.k2 = num_k_dims >= 2
+                 ? as_constant(b.extent(2)).value_or(unknown_dot_extent)
+                 : 1;
+  shape.k3 = num_k_dims >= 3
+                 ? as_constant(b.extent(3)).value_or(unknown_dot_extent)
+                 : 1;
 }
 
 ynn_status always_alias_transpose(ynn_subgraph& subgraph, uint32_t& id) {
@@ -1124,7 +1128,7 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
   dot_shape shape;
   learn_shape_from_b(shape, num_k_dims, b);
   static constexpr dot_packed_shape no_tile_k = {0, 1};
-  const dot_packed_shape* packed_shape = nullptr;
+  static constexpr dot_packed_shape packed_shape = {};
   const bool symmetric_b = (flags & YNN_NODE_FLAG_SYMMETRIC_B) != 0;
   const bool consistent_arithmetic =
       (!type_is_integral(a.type) || !type_is_integral(b.type)) &&
@@ -1147,7 +1151,7 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
   } else {
     unpacked_kernel = kernel;
     if (kernel.tile_k != 1) {
-      unpacked_kernel = get_dot_kernel(type, shape, &no_tile_k,
+      unpacked_kernel = get_dot_kernel(type, shape, no_tile_k,
                                        kernel_flags | dot_flag::unaligned_b);
     }
   }
