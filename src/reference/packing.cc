@@ -2675,6 +2675,7 @@ void xnn_pack_kai_qs8_qc8w_weights_and_biases_sme(
       xnn_log_error(
           "failed to allocate %zu bytes for KleidiAI SME bias substitute buffer",
           output_channels * sizeof(int32_t));
+      assert(false);
       return;
     }
     free_accumulator_init = true;
@@ -2838,6 +2839,7 @@ void xnn_pack_kai_f16_weights_and_biases(
       xnn_log_error(
           "failed to allocate %zu bytes for KleidiAI SME bias substitute buffer",
           output_channels * sizeof(float));
+      assert(false);
       return;
     }
     free_accumulator_init = true;
@@ -2924,6 +2926,7 @@ void xnn_pack_kai_f32_weights_and_biases(
       xnn_log_error(
           "failed to allocate %zu bytes for KleidiAI SME bias substitute buffer",
           output_channels * sizeof(float));
+      assert(false);
       return;
     }
     free_accumulator_init = true;
