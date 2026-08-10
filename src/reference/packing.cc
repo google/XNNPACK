@@ -2690,6 +2690,7 @@ void xnn_pack_kai_qs8_qc8w_weights_and_biases_sme(
       if (free_accumulator_init) {
         free((void*)accumulator_init);
       }
+      assert(false);
       return;
     }
     transpose_weights_x8((const int8_t*)weights, tmp_data, output_channels,
@@ -3067,6 +3068,7 @@ void xnn_pack_kai_f16_conv_goki_w_sme(size_t g, size_t nc, size_t ks,
     if (tmp_bias != NULL) {
       xnn_release_memory(tmp_bias);
     }
+    assert(false);
     return;
   }
   const size_t rhs_row_stride = nc * sizeof(uint16_t);
@@ -3130,6 +3132,7 @@ void xnn_pack_kai_qs8_conv_goki_w_sme(
     if (tmp_bias != NULL) {
       xnn_release_memory(tmp_bias);
     }
+    assert(false);
     return;
   }
   const size_t rhs_row_stride = nc * sizeof(int8_t);
@@ -3193,6 +3196,7 @@ void xnn_pack_kai_pf32_conv_goki_w_sme(
         "failed to allocate %zu bytes for KleidiAI SME weight transpose buffer",
         nc * ks * kc * sizeof(float));
     free(tmp_bias);
+    assert(false);
     return;
   }
   const size_t rhs_row_stride = nc * sizeof(float);
