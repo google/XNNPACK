@@ -442,6 +442,7 @@ jobs:
             ccache-linux-arm-master-
       - name: Install system dependencies
         run: |
+          sudo apt-get update
           sudo apt-get install -y ccache qemu-user qemu-user-static g++-arm-linux-gnueabihf
       - name: Install Depot Tools
         uses: newkdev/setup-depot-tools@v1.0.1
@@ -513,6 +514,7 @@ jobs:
             ccache-linux-master-
       - name: Install ccache
         run: |
+          sudo apt-get update
           sudo apt-get install -y ccache
       - name: Install Depot Tools
         uses: newkdev/setup-depot-tools@v1.0.1
