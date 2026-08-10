@@ -16,6 +16,7 @@
 #include "ynnpack/base/algorithm.h"
 #include "ynnpack/base/arithmetic.h"
 #include "ynnpack/base/log.h"
+#include "ynnpack/base/span.h"
 #include "ynnpack/base/type.h"
 #include "ynnpack/include/ynnpack.h"
 #include "ynnpack/kernels/transpose/transpose.h"
@@ -114,6 +115,15 @@ auto make_transpose_impl(int elem_count, std::vector<int32_t> permutation) {
   };
 }
 
+size_t first_non_trivial_dim(ynn::span<const slinky::expr> extents) {
+  for (size_t i = 0; i < extents.size(); ++i) {
+    if (extents[i].defined() && !slinky::is_one(extents[i])) {
+      return i;
+    }
+  }
+  return extents.size();
+}
+
 }  // namespace
 
 void define_static_transpose(ynn_subgraph& subgraph, ynn_node& node,
@@ -125,16 +135,12 @@ void define_static_transpose(ynn_subgraph& subgraph, ynn_node& node,
   // Propagate shape.
   const int elem_count = type_element_count(input.type);
   std::vector<slinky::expr> output_extents(permutation.size());
-  size_t first_non_trivial_dim = permutation.size();
   bool identity = permutation.size() == input.rank();
   for (size_t d = 0; d < output_extents.size(); ++d) {
     identity = identity && (permutation[d] == static_cast<int32_t>(d));
     slinky::expr input_extent = permutation[d] < input.rank()
                                     ? input.extents[permutation[d]]
                                     : slinky::expr{};
-    if (input_extent.defined() && !slinky::is_one(input_extent)) {
-      first_non_trivial_dim = std::min(first_non_trivial_dim, d);
-    }
     output_extents[d] = input_extent;
   }
   if (elem_count != 1 && !output_extents.empty() &&
@@ -160,9 +166,13 @@ void define_static_transpose(ynn_subgraph& subgraph, ynn_node& node,
 
   // We can alias if we aren't rearranging the stride 1 dimension from the
   // input.
-  alias = alias || permutation.empty() ||
-          first_non_trivial_dim >= permutation.size() ||
-          permutation[first_non_trivial_dim] == 0;
+  size_t first_non_trivial_output_dim = first_non_trivial_dim(output.extents);
+  size_t first_non_trivial_input_dim = first_non_trivial_dim(input.extents);
+  alias =
+      alias || permutation.empty() ||
+      first_non_trivial_output_dim >= permutation.size() ||
+      first_non_trivial_input_dim >= input.rank() ||
+      permutation[first_non_trivial_output_dim] == first_non_trivial_input_dim;
 
   node.inputs = {input_id};
   node.outputs = {output.id};
