@@ -324,6 +324,36 @@ TYPED_TEST(GatherTest, MultiAxis) {
       /*expected_output_data=*/{1, 6, 8, 2});
 }
 
+TYPED_TEST(GatherTest, MultiAxisLastCoord) {
+  using T = typename TestFixture::InputType;
+  using IndexType = typename TestFixture::IndexType;
+
+  if constexpr (type_info<IndexType>::element_count() != 1) {
+    GTEST_SKIP()
+        << "MultiAxisLastCoord gather not supported for sub-byte types "
+           "(requires LUT path)";
+  }
+
+  // 2D input, gather both axes (aligned).
+  // Coord dim is last in index_shape.
+  // input_shape = {3, 3}
+  // axes = {0, 1}
+  TestGather<T, IndexType>(
+      /*axes=*/{0, 1},
+      /*input_shape=*/{3, 3},
+      /*input_data=*/{1, 2, 3, 4, 5, 6, 7, 8, 9},
+      /*index_shape=*/{4, 2},
+      /*index_data=*/
+      {
+          0, 0,  // coordinates for lookup 0 (axis 0, axis 1)
+          1, 2,  // coordinates for lookup 1
+          2, 1,  // coordinates for lookup 2
+          0, 1   // coordinates for lookup 3
+      },
+      /*expected_output_shape=*/{4},
+      /*expected_output_data=*/{1, 6, 8, 2});
+}
+
 TYPED_TEST(GatherTest, NumAxes1NotOmitted) {
   using T = typename TestFixture::InputType;
   using IndexType = typename TestFixture::IndexType;
@@ -341,5 +371,116 @@ TYPED_TEST(GatherTest, NumAxes1NotOmitted) {
       /*expected_output_shape=*/{4}, /*expected_output_data=*/{3, 1, 2, 3});
 }
 
+TYPED_TEST(GatherTest, UnsqueezedIndex) {
+  using T = typename TestFixture::InputType;
+  using IndexType = typename TestFixture::IndexType;
+
+  if constexpr (type_info<IndexType>::element_count() != 1) {
+    GTEST_SKIP() << "UnsqueezedIndex gather not supported for sub-byte types "
+                    "(requires LUT path)";
+  }
+
+  // 2D input, 1D index, axis = 0.
+  // input_shape = {3, 5}
+  // index_shape = {2}
+  // output_shape = {2, 5}
+  TestGather<T, IndexType>(
+      /*axis=*/0,
+      /*input_shape=*/{3, 5},
+      /*input_data=*/
+      {1,  2,  3,  4,  5,
+       6,  7,  8,  9,  10,
+       11, 12, 13, 14, 15},
+      /*index_shape=*/{2},
+      /*index_data=*/{2, 0},
+      /*expected_output_shape=*/{2, 5},
+      /*expected_output_data=*/
+      {11, 12, 13, 14, 15,
+       1,  2,  3,  4,  5});
+}
+
+TYPED_TEST(GatherTest, SlinkyCollapseSize1DimWithReshape) {
+  using T = typename TestFixture::InputType;
+  using IndexType = typename TestFixture::IndexType;
+
+  if constexpr (type_info<IndexType>::element_count() != 1) {
+    GTEST_SKIP() << "Not supported for sub-byte types";
+  }
+
+  // Subgraph: Input(3, 5) -> Reshape(1, 3, 5) -> Gather(axis=1) ->
+  // Output(1, 2, 5)
+  // Slinky should collapse the size-1 dimension of the intermediate tensor.
+  SubgraphBuilder subgraph(3);
+  uint32_t input_id = 0;
+  uint32_t index_id = 1;
+  uint32_t output_id = 2;
+  uint32_t intermediate_id = YNN_INVALID_VALUE_ID;
+
+  subgraph.AddInput(type_of<T>(), {3, 5}, input_id)
+      .AddInput(type_of<IndexType>(), {2}, index_id)
+      .AddOutput(type_of<T>(), {1, 2, 5}, output_id);
+
+  subgraph.AddTensor(type_of<T>(), {1, 3, 5}, intermediate_id);
+
+  subgraph.AddReshape({1, 3, 5}, input_id, intermediate_id);
+  subgraph.AddGather({1}, 3, intermediate_id, index_id, output_id);
+
+  Runtime runtime(subgraph.GetSubgraph());
+  ASSERT_EQ(runtime.Status(), ynn_status_success);
+
+  std::vector<T> input_data = {1, 2,  3,  4,  5,  6,  7, 8,
+                               9, 10, 11, 12, 13, 14, 15};
+  runtime.ReshapeExternalTensor({3, 5}, input_data.data(), input_id);
+
+  Buffer<IndexType> index_buffer(2);
+  index_buffer[0] = 2;
+  index_buffer[1] = 0;
+  runtime.ReshapeExternalTensor({2}, index_buffer.data(), index_id);
+
+  runtime.ReshapeRuntime();
+  ASSERT_EQ(runtime.Status(), ynn_status_success);
+
+  std::vector<T> expected_output_data = {11, 12, 13, 14, 15, 1, 2, 3, 4, 5};
+  std::vector<T> output_data(expected_output_data.size());
+  runtime.SetupExternalTensor(output_data.data(), output_id).InvokeRuntime();
+
+  EXPECT_EQ(runtime.Status(), ynn_status_success);
+  EXPECT_THAT(output_data, testing::ElementsAreArray(expected_output_data));
+}
+
+TYPED_TEST(GatherTest, NonContiguousAxes) {
+  using T = typename TestFixture::InputType;
+  using IndexType = typename TestFixture::IndexType;
+
+  if constexpr (type_info<IndexType>::element_count() != 1) {
+    GTEST_SKIP()
+        << "NonContiguousAxes gather not supported for sub-byte types "
+           "(requires LUT path)";
+  }
+
+  // 4D input, gather axes 0 and 2.
+  // input_shape = {2, 3, 4, 2}
+  // axes = {0, 2}
+  // index_shape = {2, 3}
+  // output_shape = {3, 3, 2}
+  std::vector<T> input_data(48);
+  for (int i = 0; i < 48; ++i) {
+    input_data[i] = (T)(i + 1);
+  }
+
+  TestGather<T, IndexType>(
+      /*axes=*/{0, 2},
+      /*input_shape=*/{2, 3, 4, 2},
+      input_data,
+      /*index_shape=*/{2, 3},
+      /*index_data=*/{0, 1, 0, 1, 3, 0},
+      /*expected_output_shape=*/{3, 3, 2},
+      /*expected_output_data=*/
+      {3,  4,  11, 12, 19, 20,
+       31, 32, 39, 40, 47, 48,
+       1,  2,  9,  10, 17, 18});
+}
+
 }  // namespace
 }  // namespace ynn
+
