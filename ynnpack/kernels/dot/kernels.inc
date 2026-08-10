@@ -174,30 +174,30 @@ YNN_DOT_KERNEL(arch_flag::sme, dot_int8_int8_int32_sme,
 #endif
 
 
-YNN_DOT_KERNEL(arch_flag::none, dot_fp32_1x128x1_1x1x1,
-               1, 128, 1, 1, 1, 1,
+YNN_DOT_KERNEL(arch_flag::none, dot_fp32_1xNx1_1x1x1,
+               1, 32, 1, 1, 1, 1,
                YNN_DOT_KERNEL_CONSISTENT_ARITHMETIC,
                float, float, float)
-YNN_DOT_KERNEL(arch_flag::none, dot_fp64_1x128x1_1x1x1,
-               1, 128, 1, 1, 1, 1,
+YNN_DOT_KERNEL(arch_flag::none, dot_fp64_1xNx1_1x1x1,
+               1, 32, 1, 1, 1, 1,
                YNN_DOT_KERNEL_CONSISTENT_ARITHMETIC,
                double, double, double)
-YNN_DOT_KERNEL(arch_flag::none, dot_fp16_fp16_fp32_1x128x1_1x1x1,
-               1, 128, 1, 1, 1, 1,
+YNN_DOT_KERNEL(arch_flag::none, dot_fp16_fp16_fp32_1xNx1_1x1x1,
+               1, 32, 1, 1, 1, 1,
                dot_flag::consistent_arithmetic, half, half, float)
-YNN_DOT_KERNEL(arch_flag::none, dot_bf16_bf16_fp32_1x128x1_1x1x1,
-               1, 128, 1, 1, 1, 1,
+YNN_DOT_KERNEL(arch_flag::none, dot_bf16_bf16_fp32_1xNx1_1x1x1,
+               1, 32, 1, 1, 1, 1,
                YNN_DOT_KERNEL_CONSISTENT_ARITHMETIC,
                bfloat16, bfloat16, float)
-YNN_DOT_KERNEL(arch_flag::none, dot_int8_int8_int32_1x128x1_1x1x1,
-               1, 128, 1, 1, 1, 1,
+YNN_DOT_KERNEL(arch_flag::none, dot_int8_int8_int32_1xNx1_1x1x1,
+               1, 32, 1, 1, 1, 1,
                dot_flag::consistent_arithmetic, int8_t, int8_t, int32_t)
-YNN_DOT_KERNEL(arch_flag::none, dot_uint8_int8_int32_1x128x1_1x1x1,
-               1, 128, 1, 1, 1, 1,
+YNN_DOT_KERNEL(arch_flag::none, dot_uint8_int8_int32_1xNx1_1x1x1,
+               1, 32, 1, 1, 1, 1,
                dot_flag::consistent_arithmetic, uint8_t, int8_t, int32_t)
-YNN_DOT_KERNEL(arch_flag::none, dot_int8_int4_int32_1x128x2_1x1x2,
-               1, 128, 2, 1, 1, 2,
+YNN_DOT_KERNEL(arch_flag::none, dot_int8_int4_int32_1xNx2_1x1x2,
+               1, 32, 2, 1, 1, 2,
                dot_flag::consistent_arithmetic, int8_t, int4x2, int32_t)
-YNN_DOT_KERNEL(arch_flag::none, dot_int8_int2_int32_1x128x4_1x1x4,
-               1, 128, 4, 1, 1, 4,
+YNN_DOT_KERNEL(arch_flag::none, dot_int8_int2_int32_1xNx4_1x1x4,
+               1, 32, 4, 1, 1, 4,
                dot_flag::consistent_arithmetic, int8_t, int2x4, int32_t)

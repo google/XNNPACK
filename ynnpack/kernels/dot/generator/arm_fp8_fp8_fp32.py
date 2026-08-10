@@ -94,6 +94,7 @@ class arm64_neonfp8dot4_fp8_e4m3_fp8_e4m3_fp32(arm_fp8_fp8_fp32):
 
 # Generate kernels
 shapes = [
+    (1, 64, 8),
     (1, 32, 8),
     (2, 32, 8),
     (3, 32, 8),

@@ -103,6 +103,10 @@ struct dot_kernel {
   int tile_k = 0;
   uint32_t flags = 0;
   float cost = std::numeric_limits<float>::infinity();
+
+  // If not specifically known, this is the maximum `block_n` value that could
+  // be returned by another compatible call to `get_dot_kernel`.
+  int max_block_n = 0;
 };
 
 // If we don't know the shape of a dot, just assume it's big.
