@@ -579,6 +579,15 @@ struct ynn_node {
     }
   };
 
+  struct grouped_dot {
+    friend bool operator==(const grouped_dot& a, const grouped_dot& b) {
+      return true;
+    }
+    friend bool operator<(const grouped_dot& a, const grouped_dot& b) {
+      return false;
+    }
+  };
+
   // Value IDs for node inputs and outputs.
   // TODO: We need an absl::InlinedVector for things like this.
   std::vector<uint32_t> inputs;
@@ -589,7 +598,7 @@ struct ynn_node {
                slice_like, static_transpose, stencil_copy, unary_elementwise,
                binary_elementwise, ternary_elementwise, dot, iota, pack_b,
                transpose_a, get_tensor_shape, reduce, dequantize_dot,
-               dynamic_quantization>
+               dynamic_quantization, grouped_dot>
       op;
 
   const char* name() const;

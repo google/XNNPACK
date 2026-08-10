@@ -611,12 +611,13 @@ auto make_pack_impl(int elem_count) {
 // kernel's block_n.
 }  // namespace
 
-uint32_t define_pack_b(ynn_subgraph_t subgraph, const dot_type& type,
+uint32_t define_pack_b(ynn_subgraph& subgraph, const dot_type& type,
                        const dot_kernel& kernel, size_t num_k_dims,
                        bool consistent_arithmetic, uint32_t input_b_id) {
-  const ynn_value& b = subgraph->value(input_b_id);
+  const ynn_value& b = subgraph.value(input_b_id);
 
-  ynn_value& packed_b = subgraph->new_internal_value();
+
+  ynn_value& packed_b = subgraph.new_internal_value();
   packed_b.type = b.type;
   uint32_t packed_b_id = packed_b.id;
 
@@ -654,7 +655,7 @@ uint32_t define_pack_b(ynn_subgraph_t subgraph, const dot_type& type,
   // Make a global variable for the alignment, which is a messy expression,
   // but keep the max outside it, so slinky can learn bounds from it
   // (hacky...).
-  block_n = max(kernel.tile_n, subgraph->globals.get(block_n, "block_n"));
+  block_n = max(kernel.tile_n, subgraph.globals.get(block_n, "block_n"));
   slinky::expr tiles_k = slinky::ceil_div<slinky::expr>(k1, kernel.tile_k);
   slinky::expr blocks_n = slinky::ceil_div(n, block_n);
 
@@ -742,7 +743,7 @@ uint32_t define_pack_b(ynn_subgraph_t subgraph, const dot_type& type,
     runtime.funcs.push_back(std::move(func));
     return ynn_status_success;
   };
-  subgraph->add_node(std::move(node));
+  subgraph.add_node(std::move(node));
   return packed_b_id;
 }
 
@@ -1162,7 +1163,7 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
     define_static_expand_dims(subgraph, node, input_b_id, &packed_b_id, 0b1001);
     subgraph.add_node(std::move(node));
   } else {
-    packed_b_id = define_pack_b(&subgraph, type, kernel, num_k_dims,
+    packed_b_id = define_pack_b(subgraph, type, kernel, num_k_dims,
                                 consistent_arithmetic, input_b_id);
   }
 

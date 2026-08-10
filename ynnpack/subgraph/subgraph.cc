@@ -342,10 +342,13 @@ uint32_t ynn_subgraph::get_static_value_id(ynn_type type, size_t rank,
 void ynn_subgraph::infer_elementwise_shape(ynn_node& node, int input_idx,
                                            int output_idx, int input_dim,
                                            int output_dim) {
+  assert(input_idx >= 0 && static_cast<size_t>(input_idx) < node.inputs.size());
   const int input_id = node.inputs[input_idx];
   if (input_id == YNN_INVALID_VALUE_ID) {
     return;
   }
+  assert(output_idx >= 0 &&
+         static_cast<size_t>(output_idx) < node.outputs.size());
   const int output_id = node.outputs[output_idx];
   const ynn_value& input = value(input_id);
   if (input_dim >= input.extents.size()) {
@@ -1164,6 +1167,7 @@ const char* name_of(const ynn_node::dynamic_quantization&) {
 const char* name_of(const ynn_node::get_tensor_shape&) {
   return "get_tensor_shape";
 }
+const char* name_of(const ynn_node::grouped_dot&) { return "grouped_dot"; }
 
 using ynn::operator<<;  // NOLINT(misc-unused-using-decls)
 
@@ -1336,6 +1340,8 @@ void print(std::ostream& os, const ynn_node::dequantize_dot& op) {}
 void print(std::ostream& os, const ynn_node::dynamic_quantization& op) {
   os << "output_zero_point=" << op.output_zero_point;
 }
+
+void print(std::ostream& os, const ynn_node::grouped_dot& op) {}
 
 void print(std::ostream& os, const ynn_node::get_tensor_shape& op) {
   os << "axes=" << op.axes;
