@@ -36,6 +36,10 @@ enum {
 
   // This kernel supports an unaligned B
   unaligned_b = 1 << 2,
+
+  // This kernel assumes that the values in B do not include the most negative
+  // value, i.e. -b does not overflow.
+  symmetric_b = 1 << 3,
 };
 
 }  // namespace dot_flag

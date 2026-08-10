@@ -165,6 +165,72 @@ __m{bits}i b_{k}_{j+8} = {mm}_cvtepi8_epi16({mm2}_load_si{bits//2}({b8_ptr}));
 """
 
 
+class x86_avx2_int8_int8_int32_symmetric_b(x86_avx):
+
+  def __init__(self, arch="avx2", vector_bits=256):
+    super().__init__(
+        arch,
+        "int8_int8_int32_symmetric_b",
+        "int32_t",
+        vector_bits,
+        tile_shape=(1, 8, 4),
+    )
+    self.a_type = "int8_t"
+    self.b_type = "int8_t"
+    self.flags += ["dot_flag::consistent_arithmetic", "dot_flag::symmetric_b"]
+
+  def header(self):
+    return super().header() + """
+
+namespace {
+
+YNN_INTRINSIC int32_t unaligned_load_int8x4(const int8_t* ptr) {
+    int32_t value;
+    memcpy(&value, ptr, sizeof(int32_t));
+    return value;
+}
+
+}  // namespace
+"""
+
+  def b_alignment_bytes(self):
+    return self.tile_shape[1] * self.tile_shape[2]
+
+  # If we know B is symmetric, we can use pmaddubsw, by transferring the sign
+  # of A to B (which is safe because -b will not overflow), and then taking the
+  # absolute value of A to create an unsigned value in [0, 128].
+
+  def load_a_tile(self, i, k):
+    bits = self.bits
+    mm = self._mm()
+    a = f"unaligned_load_int8x4({self.a_ptr(i, k)})"
+    a_ik = f"a_{i}_{k}"
+    return f"""
+__m{bits}i {a_ik} = {mm}_set1_epi32({a});
+__m{bits}i {a_ik}_abs = {mm}_abs_epi8({a_ik});
+"""
+
+  def load_b_tile(self, k, j):
+    bits = self.bits
+    mm = self._mm()
+    b_ptr = self.b_ptr(k, j + 0, f"__m{bits}i")
+    return f"""
+__m{bits}i b_{k}_{j} = {mm}_load_si{bits}({b_ptr});
+// We assume that b is in the range [-127, 127].
+assert({mm}_testz_si{bits}({mm}_cmpeq_epi8(b_{k}_{j}, {mm}_set1_epi8(-128)), {mm}_set1_epi8(-1)));
+"""
+
+  def product(self, i, j, k):
+    bits = self.bits
+    mm = self._mm()
+    c_ij = f"c_{i}_{j}"
+    ab_ijk = f"ab_{i}_{j}_{k}"
+    return f"""
+__m{bits}i {ab_ijk} = {mm}_maddubs_epi16(a_{i}_{k}_abs, {mm}_sign_epi8(b_{k}_{j}, a_{i}_{k}));
+{c_ij} = {mm}_add_epi32({c_ij}, {mm}_madd_epi16({ab_ijk}, {mm}_set1_epi16(1)));
+"""
+
+
 generate_dot_kernels(
     x86_avx2_int8_int8_int32(),
     [
@@ -175,6 +241,18 @@ generate_dot_kernels(
         (3, 8, 4),
         (4, 8, 4),
         (6, 8, 4),
+    ],
+)
+
+generate_dot_kernels(
+    x86_avx2_int8_int8_int32_symmetric_b(),
+    [
+        (1, 32, 4),
+        (2, 32, 4),
+        (1, 16, 4),
+        (2, 16, 4),
+        (3, 16, 4),
+        (4, 16, 4),
     ],
 )
 

@@ -321,7 +321,14 @@ struct optimizer {
       // transposed (or is).
       return;
     }
-    if ((required_flags & flags) != required_flags) {
+    if ((flags & dot_flag::symmetric_b) &&
+        !(required_flags & dot_flag::symmetric_b)) {
+      // This kernel requires symmetric_b, but the caller did not specify the
+      // data is symmetric_b.
+      return;
+    }
+    uint32_t strictly_required_flags = required_flags & ~dot_flag::symmetric_b;
+    if ((strictly_required_flags & flags) != strictly_required_flags) {
       return;
     }
     if (!is_arch_supported(arch, supported_arch_flags)) {

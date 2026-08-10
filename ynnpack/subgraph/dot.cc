@@ -224,11 +224,14 @@ constexpr index_t consistent_block_n = 64;
 
 // The wrapper for the kernel we use when we actually want to run a dot kernel
 // on some buffers.
-auto make_dot_impl(dot_type type, bool consistent_arithmetic, bool transposed_a,
-                   bool pack_b, size_t num_k_dims) {
+auto make_dot_impl(dot_type type, bool consistent_arithmetic, bool symmetric_b,
+                   bool transposed_a, bool pack_b, size_t num_k_dims) {
   uint32_t kernel_flags = 0;
   if (consistent_arithmetic) {
     kernel_flags |= dot_flag::consistent_arithmetic;
+  }
+  if (symmetric_b) {
+    kernel_flags |= dot_flag::symmetric_b;
   }
   if (!pack_b) {
     kernel_flags |= dot_flag::unaligned_b;
@@ -1118,11 +1121,15 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
   learn_shape_from_b(shape, num_k_dims, b);
   static constexpr dot_packed_shape no_tile_k = {0, 1};
   const dot_packed_shape* packed_shape = nullptr;
+  const bool symmetric_b = (flags & YNN_NODE_FLAG_SYMMETRIC_B) != 0;
   const bool consistent_arithmetic =
       (!type_is_integral(a.type) || !type_is_integral(b.type)) &&
       (subgraph.flags & YNN_FLAG_CONSISTENT_ARITHMETIC) != 0;
   uint32_t kernel_flags =
       consistent_arithmetic ? dot_flag::consistent_arithmetic : 0;
+  if (symmetric_b) {
+    kernel_flags |= dot_flag::symmetric_b;
+  }
   dot_kernel kernel = get_dot_kernel(type, shape, packed_shape, kernel_flags);
   dot_kernel unpacked_kernel;
   if (b_transposed) {
@@ -1232,9 +1239,9 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
                                    ? consistent_block_n
                                    : std::max(YNN_CACHE_LINE_SIZE / b_elem_size,
                                               unpacked_kernel.block_n);
-  node.create = [consistent_arithmetic, pack_b, transpose_a, block_n_unpacked,
-                 tile_k = kernel.tile_k](const ynn_node& node,
-                                         ynn_runtime& runtime) {
+  node.create = [consistent_arithmetic, symmetric_b, pack_b, transpose_a,
+                 block_n_unpacked, tile_k = kernel.tile_k](
+                    const ynn_node& node, ynn_runtime& runtime) {
     const ynn_node::dot& op = std::get<ynn_node::dot>(node.op);
     const size_t num_k_dims = op.num_k_dims;
     ynn_runtime_value& input_a = runtime.value(node.inputs[0]);
@@ -1373,15 +1380,15 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
       attrs.allow_in_place = (1 << 2);
     }
     dot_type dot_type = {input_a.type, packed_b.type, output.type};
-    auto func =
-        slinky::func::make(make_dot_impl(dot_type, consistent_arithmetic,
-                                         transpose_a, pack_b, num_k_dims),
-                           {{input_a.buffer, std::move(a_bounds)},
-                            {packed_b.buffer, std::move(b_bounds)},
-                            {input_c.buffer, std::move(c_bounds)}},
-                           {{output.buffer, output_dims},
-                            {reduction_buffer, std::move(reduction_dims)}},
-                           std::move(attrs));
+    auto func = slinky::func::make(
+        make_dot_impl(dot_type, consistent_arithmetic, symmetric_b, transpose_a,
+                      pack_b, num_k_dims),
+        {{input_a.buffer, std::move(a_bounds)},
+         {packed_b.buffer, std::move(b_bounds)},
+         {input_c.buffer, std::move(c_bounds)}},
+        {{output.buffer, output_dims},
+         {reduction_buffer, std::move(reduction_dims)}},
+        std::move(attrs));
 
     slinky::expr block_n = pack_b ? packed_b.extent(1) : block_n_unpacked;
     slinky::expr n = output.extent(0);

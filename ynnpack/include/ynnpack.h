@@ -154,6 +154,7 @@ enum ynn_status ynn_define_iota(ynn_subgraph_t subgraph, enum ynn_type type,
 #define YNN_NODE_FLAG_UNIQUE_DIMS (1 << 1)
 #define YNN_NODE_FLAG_NO_EXCESS_PRECISION (1 << 2)
 #define YNN_NODE_FLAG_LESS_ZERO (1 << 3)
+#define YNN_NODE_FLAG_SYMMETRIC_B (1 << 4)
 
 enum ynn_unary_operator {
   ynn_unary_invalid = 0,
@@ -488,6 +489,9 @@ enum ynn_status ynn_define_stencil_copy(
 // - product: 1
 // - min: (max value of type of `input_a_id`)
 // - max: (min value of type of `input_a_id`)
+//
+// If the `YNN_NODE_FLAG_SYMMETRIC_B` flag is set, this operation will assume
+// that `input_b_id` can be negated without overflow.
 enum ynn_status ynn_define_dot(ynn_subgraph_t subgraph, size_t num_k_dims,
                                uint32_t input_a_id, uint32_t input_b_id,
                                uint32_t input_c_id, uint32_t* output_id,
