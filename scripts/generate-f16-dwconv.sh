@@ -78,5 +78,7 @@ tools/xngen src/f16-dwconv/unipass-rvvfp16arith.c.in -D CHANNEL_TILE=m8 -D KERNE
 ################################### x86 AVX512FP16 ###########################
 tools/xngen src/f16-dwconv/unipass-avx512fp16.c.in -D CHANNEL_TILE=32 -D KERNEL_TILE=9 -D ACCUMULATORS=1 -o src/f16-dwconv/gen/f16-dwconv-9p32c-minmax-avx512fp16.c &
 tools/xngen src/f16-dwconv/unipass-avx512fp16.c.in -D CHANNEL_TILE=32 -D KERNEL_TILE=9 -D ACCUMULATORS=2 -o src/f16-dwconv/gen/f16-dwconv-9p32c-minmax-avx512fp16-acc2.c &
+tools/xngen src/f16-dwconv/unipass-avx512fp16.c.in -D CHANNEL_TILE=32 -D KERNEL_TILE=25 -D ACCUMULATORS=1 -o src/f16-dwconv/gen/f16-dwconv-25p32c-minmax-avx512fp16.c &
+tools/xngen src/f16-dwconv/unipass-avx512fp16.c.in -D CHANNEL_TILE=32 -D KERNEL_TILE=25 -D ACCUMULATORS=2 -o src/f16-dwconv/gen/f16-dwconv-25p32c-minmax-avx512fp16-acc2.c &
 
 wait
