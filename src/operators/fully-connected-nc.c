@@ -2184,6 +2184,9 @@ enum xnn_status xnn_create_fully_connected_nc_qp8_f32_qb4w_f16_scales(
       (input_channels + block_size - 1) / block_size * output_channels;
   xnn_bfloat16* bf16_scale_buffer =
       (xnn_bfloat16*)xnn_allocate_memory(num_blocks * sizeof(xnn_bfloat16));
+  if (bf16_scale_buffer == NULL) {
+    return xnn_status_out_of_memory;
+  }
   for (size_t i = 0; i < num_blocks; ++i) {
     bf16_scale_buffer[i] = xnn_bfloat16_from_float(
         xnn_float16_to_float(((const xnn_float16*)kernel_scale)[i]));
@@ -2234,6 +2237,9 @@ enum xnn_status xnn_create_fully_connected_nc_qd8_f32_qb4w_f16_scales(
       (input_channels + block_size - 1) / block_size * output_channels;
   xnn_bfloat16* bf16_scale_buffer =
       (xnn_bfloat16*)xnn_allocate_memory(num_blocks * sizeof(xnn_bfloat16));
+  if (bf16_scale_buffer == NULL) {
+    return xnn_status_out_of_memory;
+  }
   for (size_t i = 0; i < num_blocks; ++i) {
     bf16_scale_buffer[i] =
         xnn_bfloat16_from_float(xnn_float16_to_float(kernel_scale[i]));
@@ -2283,6 +2289,9 @@ enum xnn_status xnn_create_fully_connected_nc_qdu8_f32_qb4w_f16_scales(
       (input_channels + block_size - 1) / block_size * output_channels;
   xnn_bfloat16* bf16_scale_buffer =
       (xnn_bfloat16*)xnn_allocate_memory(num_blocks * sizeof(xnn_bfloat16));
+  if (bf16_scale_buffer == NULL) {
+    return xnn_status_out_of_memory;
+  }
   for (size_t i = 0; i < num_blocks; ++i) {
     bf16_scale_buffer[i] =
         xnn_bfloat16_from_float(xnn_float16_to_float(kernel_scale[i]));
