@@ -169,10 +169,7 @@ define_build_option(
 
 define_build_option(
     name = "ynn_enable_arm64_neonfp8",
-    default_all = [
-        ":ynn_enable_arm64_neon",
-        ":not_apple",
-    ],
+    default_all = [],  # Waiting for better compiler support.
 )
 
 define_build_option(
