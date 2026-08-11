@@ -140,6 +140,9 @@ tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester  --ukernel qu8-
 tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester --broadcast_b --ukernel qu8-vpreluc  --output test/qu8-vpreluc.cc &
 tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester --broadcast_b --ukernel qu8-vrpreluc  --output test/qu8-vrpreluc.cc &
 ### Tests for VUnary micro-kernels
+tools/generate-vunary-test.py --ukernel bf16-vrsqrt --output test/bf16-vrsqrt.cc &
+tools/generate-vunary-test.py --ukernel bf16-vsigmoid --output test/bf16-vsigmoid.cc &
+tools/generate-vunary-test.py --ukernel bf16-vsqr --output test/bf16-vsqr.cc &
 tools/generate-vunary-test.py --ukernel f16-vabs --output test/f16-vabs.cc &
 tools/generate-vunary-test.py --ukernel f16-vapproxgelu --output test/f16-vapproxgelu.cc &
 tools/generate-vunary-test.py --ukernel f16-vclamp --output test/f16-vclamp.cc &

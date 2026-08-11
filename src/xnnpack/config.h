@@ -85,6 +85,12 @@ xnn_init_qu8_vprelu_config();
 XNN_INTERNAL const struct xnn_unary_elementwise_config*
 xnn_init_bf16_to_f32_cvt_config();
 XNN_INTERNAL const struct xnn_unary_elementwise_config*
+xnn_init_bf16_rsqrt_config();
+XNN_INTERNAL const struct xnn_unary_elementwise_config*
+xnn_init_bf16_sigmoid_config();
+XNN_INTERNAL const struct xnn_unary_elementwise_config*
+xnn_init_bf16_sqr_config();
+XNN_INTERNAL const struct xnn_unary_elementwise_config*
 xnn_init_f16_abs_config();
 XNN_INTERNAL const struct xnn_unary_elementwise_config*
 xnn_init_f16_approxgelu_config();

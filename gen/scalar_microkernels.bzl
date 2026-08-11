@@ -12,6 +12,7 @@ PROD_SCALAR_MICROKERNEL_SRCS = [
     "src/bf16-rminmax/gen/bf16-rmax-scalar-u2-acc2.c",
     "src/bf16-rminmax/gen/bf16-rmin-scalar-u2-acc2.c",
     "src/bf16-rminmax/gen/bf16-rminmax-scalar-u2-acc2.c",
+    "src/bf16-vunary/gen/bf16-vunary-scalar.c",
     "src/f16-f32-vcvt/gen/f16-f32-vcvt-scalar-u4.c",
     "src/f16-qs8-vcvt/gen/f16-qs8-vcvt-scalar-imagic-u4.c",
     "src/f16-qu8-vcvt/gen/f16-qu8-vcvt-scalar-imagic-u4.c",

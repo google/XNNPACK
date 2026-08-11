@@ -382,6 +382,9 @@ IF(XNNPACK_TARGET_PROCESSOR MATCHES "^riscv")
 ENDIF()
 
 SET(MICROKERNEL_VUNARY_TESTS
+    bf16-vrsqrt
+    bf16-vsigmoid
+    bf16-vsqr
     f16-vabs
     f16-vapproxgelu
     f16-vclamp

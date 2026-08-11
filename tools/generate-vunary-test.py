@@ -136,6 +136,27 @@ SPECIAL_VALUES_BY_OP_TYPE_F16 = types.MappingProxyType({
     ),
 })
 
+SPECIAL_VALUES_BY_OP_TYPE_BF16 = types.MappingProxyType({
+    "ReciprocalSquareRoot": SpecialValues(
+        num_elements=6,
+        inputs="{0.0f, -0.0f, -1.0f, INFINITY, -INFINITY, NAN}",
+        expected_outputs="{INFINITY, -INFINITY, NAN, 0.0f, NAN, NAN}",
+        tolerance_ulp=1,
+    ),
+    "Sigmoid": SpecialValues(
+        num_elements=5,
+        inputs="{0x1.FEp127f, -0x1.FEp127f, INFINITY, -INFINITY, NAN}",
+        expected_outputs="{1.0f, 0.0f, 1.0f, 0.0f, NAN}",
+        tolerance_ulp=1,
+    ),
+    "Square": SpecialValues(
+        num_elements=5,
+        inputs="{0.0f, -0.0f, INFINITY, -INFINITY, NAN}",
+        expected_outputs="{0.0f, 0.0f, INFINITY, INFINITY, NAN}",
+        tolerance_ulp=1,
+    ),
+})
+
 TEST_TEMPLATE = """\
 #define XNN_UKERNEL(arch_flags, ukernel, batch_tile, vector_tile, datatype, params_type, init_params)
   TEST(ukernel, batch_eq) { TestBatchEq<TestInfo, datatype, datatype>(arch_flags, batch_tile, ukernel, init_params); }
@@ -218,6 +239,14 @@ $if DATATYPE == "f16" and OP_TYPE in SPECIAL_VALUES_BY_OP_TYPE_F16:
       /*outputs=*/${SPECIAL_VALUES_BY_OP_TYPE_F16[OP_TYPE].expected_outputs},
       /*tolerance_ulp=*/${SPECIAL_VALUES_BY_OP_TYPE_F16[OP_TYPE].tolerance_ulp});
   }
+$if DATATYPE == "bf16" and OP_TYPE in SPECIAL_VALUES_BY_OP_TYPE_BF16:
+  TEST(ukernel, special_values) {
+    TEST_REQUIRES_ARCH_FLAGS(arch_flags);
+    VUnaryMicrokernelTester().Test<TestInfo, datatype, datatype>(ukernel, init_params,
+      /*inputs=*/${SPECIAL_VALUES_BY_OP_TYPE_BF16[OP_TYPE].inputs},
+      /*outputs=*/${SPECIAL_VALUES_BY_OP_TYPE_BF16[OP_TYPE].expected_outputs},
+      /*tolerance_ulp=*/${SPECIAL_VALUES_BY_OP_TYPE_BF16[OP_TYPE].tolerance_ulp});
+  }
 """
 
 
@@ -287,6 +316,7 @@ using TestInfo = {op_type};
               "OP_NAME": op,
               "SPECIAL_VALUES_BY_OP_TYPE_F32": SPECIAL_VALUES_BY_OP_TYPE_F32,
               "SPECIAL_VALUES_BY_OP_TYPE_F16": SPECIAL_VALUES_BY_OP_TYPE_F16,
+              "SPECIAL_VALUES_BY_OP_TYPE_BF16": SPECIAL_VALUES_BY_OP_TYPE_BF16,
           },
       )
   )
