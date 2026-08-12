@@ -244,7 +244,7 @@ xnnpack_unit_test(
         "fully-connected-nc.cc",
         "fully-connected-operator-tester.h",
     ],
-    deps = OPERATOR_TEST_DEPS,
+    deps = OPERATOR_TEST_DEPS + ["//:operator_h"],
 )
 
 xnnpack_unit_test(

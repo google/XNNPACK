@@ -3476,10 +3476,14 @@ void GemmMicrokernelTester::Test_PQS8QC4W(
     for (size_t n_index = 0; n_index < n(); n_index++) {
       for (size_t k_index = 0; k_index < k2; k_index++) {
         const size_t nb_index = (n_index * k2 + k_index) / 2;
-        const int32_t bv = static_cast<int32_t>(
-                               (k_index % 2 == 0) ? (b[nb_index] & UINT8_C(0xF))
-                                                  : (b[nb_index] >> 4)) -
-                           b_zero_point();
+        int32_t bv = static_cast<int32_t>(
+            (k_index % 2 == 0) ? (b[nb_index] & UINT8_C(0xF))
+                               : (b[nb_index] >> 4));
+        if (b_zero_point() == 0) {
+          bv = (bv ^ 8) - 8;
+        } else {
+          bv -= b_zero_point();
+        }
         acc[m_index * n() + n_index] +=
             (static_cast<int32_t>(a[m_index * k2 + k_index]) -
              static_cast<int32_t>(a_zero_point() - 0x80)) *
