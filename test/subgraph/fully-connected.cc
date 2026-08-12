@@ -18,8 +18,10 @@
 #include <gtest/gtest.h>
 #include "include/xnnpack.h"
 #include "src/xnnpack/buffer.h"
+#include "src/xnnpack/config.h"
 #include "src/xnnpack/datatype.h"
 #include "src/xnnpack/math.h"
+#include "src/xnnpack/operator.h"
 #include "src/xnnpack/subgraph.h"
 #include "test/replicable_random_device.h"
 #include "test/subgraph/quantization-helpers.h"
@@ -192,6 +194,13 @@ DatatypeGenerator<quint8> MakeDatatypeGenerator(qcuint4) {
 
 const size_t no_blockwise = std::numeric_limits<size_t>::max();
 
+enum class StaticBTestConfig {
+  kDefault,
+  kForceInlineLhsPacking,
+  kQp8Qc2w,
+  kQp8Qc2wUnitBatch,
+};
+
 std::string runtime_flags_to_string(uint32_t runtime_flags) {
   std::string result;
   if (runtime_flags & XNN_FLAG_NO_INLINED_LHS_PACKING) {
@@ -204,7 +213,15 @@ template <typename Input, typename Filter, typename Bias,
           typename Output = Input, typename Scale = float>
 void TestStaticB(xnn_datatype convert_to = xnn_datatype_invalid,
                  size_t block_size = no_blockwise,
-                 bool force_inline_lhs_packing = false) {
+                 StaticBTestConfig test_config = StaticBTestConfig::kDefault) {
+  const bool require_qp8_qc2w =
+      test_config == StaticBTestConfig::kQp8Qc2w ||
+      test_config == StaticBTestConfig::kQp8Qc2wUnitBatch;
+  const bool force_unit_batch =
+      test_config == StaticBTestConfig::kQp8Qc2wUnitBatch;
+  const bool force_inline_lhs_packing =
+      require_qp8_qc2w ||
+      test_config == StaticBTestConfig::kForceInlineLhsPacking;
   const bool channelwise_quantization =
       xnn_datatype_is_channelwise_quantized(datatype_of<Filter>());
   const bool is_qd8_qc2w = (std::is_same<Filter, qcint2>::value &&
@@ -218,6 +235,9 @@ void TestStaticB(xnn_datatype convert_to = xnn_datatype_invalid,
   std::bernoulli_distribution flag_dist(0.5);
 
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  if (require_qp8_qc2w && xnn_init_qp8_f32_qc2w_gemm_config() == nullptr) {
+    GTEST_SKIP() << "QP8 F32 QC2W is not available";
+  }
 
   auto input_gen = MakeDatatypeGenerator(Input());
   auto output_gen = MakeDatatypeGenerator(Output());
@@ -229,10 +249,15 @@ void TestStaticB(xnn_datatype convert_to = xnn_datatype_invalid,
 
   for (auto _ : FuzzTest(std::chrono::milliseconds(500))) {
     size_t rank = rank_dist(rng);
-    size_t input_channels = channels_dist(rng);
-    size_t output_channels = channels_dist(rng);
+    size_t input_channels =
+        force_unit_batch ? 64 : static_cast<size_t>(channels_dist(rng));
+    size_t output_channels =
+        force_unit_batch ? 64 : static_cast<size_t>(channels_dist(rng));
 
-    if (block_size != no_blockwise) {
+    if (require_qp8_qc2w) {
+      // The SME2 QP8/QC2W kernels require K to be a multiple of 32.
+      input_channels = round_up(input_channels, 32);
+    } else if (block_size != no_blockwise) {
       // Align the input channels to the block size.
       input_channels = round_up(input_channels, block_size);
     } else {
@@ -288,8 +313,11 @@ void TestStaticB(xnn_datatype convert_to = xnn_datatype_invalid,
                                 divide_round_up(input_channels, block_size)});
     // Needed for qd8_qc2w only.
     std::vector<float> channelwise_zero_point(output_channels);
-    std::generate(channelwise_zero_point.begin(), channelwise_zero_point.end(),
-                  [&]() { return zero_point_dist(rng); });
+    if (!require_qp8_qc2w) {
+      std::generate(channelwise_zero_point.begin(),
+                    channelwise_zero_point.end(),
+                    [&]() { return zero_point_dist(rng); });
+    }
 
     if (filter_scale.size() > 1) {
       // Generate random per-channel scales, in the range of the original scale.
@@ -309,7 +337,8 @@ void TestStaticB(xnn_datatype convert_to = xnn_datatype_invalid,
 
     // (Maybe) make a random bias.
     Tensor<Bias> bias;
-    if (!std::is_same<Bias, invalid_type>::value && flag_dist(rng)) {
+    if (!std::is_same<Bias, invalid_type>::value &&
+        (force_unit_batch || flag_dist(rng))) {
       std::vector<size_t> bias_shape = {output_channels};
       DatatypeGenerator<Bias> bias_gen = MakeDatatypeGenerator(
           Bias(), -max_abs_bias<Bias>(), max_abs_bias<Bias>());
@@ -416,7 +445,10 @@ void TestStaticB(xnn_datatype convert_to = xnn_datatype_invalid,
     // (except for the input/output channels, which are determined by the filter
     // shape).
     for (int reshape = 0; reshape < 2; ++reshape) {
-      std::vector<size_t> input_shape = random_shape(rng, rank, 1, 4);
+      std::vector<size_t> input_shape =
+          force_unit_batch && reshape == 0
+              ? std::vector<size_t>(rank, 1)
+              : random_shape(rng, rank, 1, 4);
       std::vector<size_t> output_shape = input_shape;
       input_shape.back() = input_channels;
       output_shape.back() = output_channels;
@@ -513,6 +545,105 @@ TEST(FullyConnectedQU8, static_b) { TestStaticB<quint8, quint8, qint32>(); }
 
 TEST(FullyConnectedQS8QC8W, static_b) { TestStaticB<qint8, qcint8, qcint32>(); }
 TEST(FullyConnectedQS8QC4W, static_b) { TestStaticB<qint8, qcint4, qcint32>(); }
+static void TestQD8F32QC2WPackingSelection(
+    size_t input_channels, uint32_t fully_connected_flags,
+    bool nonzero_channelwise_zero_point, bool expect_qp8) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
+  if (xnn_init_qp8_f32_qc2w_gemm_config() == nullptr) {
+    GTEST_SKIP() << "QP8 F32 QC2W is not available";
+  }
+
+  constexpr size_t m = 4;
+  constexpr size_t output_channels = 64;
+  const bool transpose_weights =
+      (fully_connected_flags & XNN_FLAG_TRANSPOSE_WEIGHTS) != 0;
+  const std::vector<size_t> filter_shape =
+      transpose_weights
+          ? std::vector<size_t>{input_channels, output_channels}
+          : std::vector<size_t>{output_channels, input_channels};
+  const size_t channel_dim = transpose_weights ? 1 : 0;
+
+  std::vector<uint8_t> filter(
+      divide_round_up(input_channels * output_channels, 4));
+  std::vector<float> filter_scale(output_channels, 1.0f);
+  std::vector<float> filter_zero_point(output_channels, 0.0f);
+  if (nonzero_channelwise_zero_point) {
+    filter_zero_point[output_channels / 2] = -1.0f;
+  }
+
+  SubgraphTester subgraph(3);
+  constexpr uint32_t input_id = 0;
+  constexpr uint32_t filter_id = 1;
+  constexpr uint32_t output_id = 2;
+  uint32_t dynamically_quantized_input_id = XNN_INVALID_VALUE_ID;
+  subgraph
+      .AddInputTensor({m, input_channels}, xnn_datatype_fp32, input_id)
+      .AddInternalDynamicallyQuantizedTensor(
+          {m, input_channels}, xnn_datatype_qdint8,
+          /*num_nonbatch_dims=*/1, &dynamically_quantized_input_id)
+      .AddConvert(input_id, dynamically_quantized_input_id);
+
+  uint32_t defined_filter_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(
+      xnn_status_success,
+      xnn_define_channelwise_quantized_tensor_value_v3(
+          subgraph.Subgraph(), xnn_datatype_qcint2,
+          /*zero_point=*/0, filter_scale.data(), filter_shape.size(),
+          channel_dim, filter_shape.data(), filter.data(), filter_id,
+          /*flags=*/0, &defined_filter_id, filter_zero_point.data()));
+  ASSERT_EQ(defined_filter_id, filter_id);
+
+  subgraph
+      .AddOutputTensor({m, output_channels}, xnn_datatype_fp32, output_id)
+      .AddFullyConnected(dynamically_quantized_input_id, filter_id,
+                         /*bias_id=*/XNN_INVALID_VALUE_ID, output_id,
+                         fully_connected_flags)
+      .Optimize(/*flags=*/0);
+
+  ASSERT_EQ(subgraph.NumNodes(), 1);
+  const struct xnn_node* fully_connected_node = subgraph.Node(0);
+  ASSERT_EQ(fully_connected_node->type, xnn_node_type_fully_connected);
+  EXPECT_NE(fully_connected_node->flags & XNN_FLAG_INLINE_LHS_PACKING, 0);
+  if (expect_qp8) {
+    EXPECT_EQ(fully_connected_node->packed_input_datatype,
+              xnn_datatype_qpint8);
+  } else {
+    EXPECT_NE(fully_connected_node->packed_input_datatype,
+              xnn_datatype_qpint8);
+    EXPECT_TRUE(fully_connected_node->packed_input_datatype ==
+                    xnn_datatype_qdint8 ||
+                fully_connected_node->packed_input_datatype ==
+                    xnn_datatype_qduint8);
+  }
+}
+
+TEST(FullyConnectedQP8F32QC2W, packs_lhs_for_sme2) {
+  TestQD8F32QC2WPackingSelection(
+      /*input_channels=*/64, /*fully_connected_flags=*/0,
+      /*nonzero_channelwise_zero_point=*/false, /*expect_qp8=*/true);
+}
+
+TEST(FullyConnectedQP8F32QC2W,
+     transposed_weights_use_dynamic_quantized_fallback) {
+  TestQD8F32QC2WPackingSelection(
+      /*input_channels=*/64, XNN_FLAG_TRANSPOSE_WEIGHTS,
+      /*nonzero_channelwise_zero_point=*/false, /*expect_qp8=*/false);
+}
+
+TEST(FullyConnectedQP8F32QC2W,
+     unaligned_input_channels_use_dynamic_quantized_fallback) {
+  TestQD8F32QC2WPackingSelection(
+      /*input_channels=*/36, /*fully_connected_flags=*/0,
+      /*nonzero_channelwise_zero_point=*/false, /*expect_qp8=*/false);
+}
+
+TEST(FullyConnectedQP8F32QC2W,
+     nonzero_channelwise_zero_point_uses_dynamic_quantized_fallback) {
+  TestQD8F32QC2WPackingSelection(
+      /*input_channels=*/64, /*fully_connected_flags=*/0,
+      /*nonzero_channelwise_zero_point=*/true, /*expect_qp8=*/false);
+}
+
 TEST(FullyConnectedQS8QC2W, static_b) { TestStaticB<qint8, qcint2, qcint32>(); }
 
 TEST(FullyConnectedF16F32F16, static_b) {
@@ -569,6 +700,18 @@ TEST(FullyConnectedQD8F32QC4W, static_b) {
 TEST(FullyConnectedQD8F32QC2W, static_b) {
   TestStaticB<float, qcint2, float>(/*convert_to=*/xnn_datatype_qdint8);
 }
+TEST(FullyConnectedQP8F32QC2W, static_b) {
+  TestStaticB<float, qcint2, float>(/*convert_to=*/xnn_datatype_qdint8,
+                                    /*block_size=*/no_blockwise,
+                                    /*test_config=*/StaticBTestConfig::kQp8Qc2w);
+}
+
+TEST(FullyConnectedQP8F32QC2W, batch_size_1_inline_lhs_packing) {
+  TestStaticB<float, qcint2, float>(/*convert_to=*/xnn_datatype_qdint8,
+                                    /*block_size=*/no_blockwise,
+                                    /*test_config=*/
+                                        StaticBTestConfig::kQp8Qc2wUnitBatch);
+}
 TEST(FullyConnectedQD8F32QC8W, static_b) {
   TestStaticB<float, qcint8, float>(/*convert_to=*/xnn_datatype_qdint8);
 }
@@ -621,7 +764,7 @@ TEST(FullyConnectedQD8BF16QB4W_BF16, static_b) {
 TEST(FullyConnectedQD8BF16QB4W_BF16Input, static_b) {
   TestStaticB<xnn_bfloat16, qcint4, float, xnn_bfloat16, xnn_bfloat16>(
       /*convert_to=*/xnn_datatype_qdint8, /*block_size=*/32,
-      /*force_inline_lhs_packing=*/true);
+      /*test_config=*/StaticBTestConfig::kForceInlineLhsPacking);
 }
 
 template <typename Input, typename Filter, typename Bias,
