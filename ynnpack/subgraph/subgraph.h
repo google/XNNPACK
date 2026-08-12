@@ -320,11 +320,12 @@ struct ynn_node {
   };
   struct gather {
     std::vector<int32_t> axes;
+    int32_t s_coord_dim = -1;
     friend bool operator==(const gather& a, const gather& b) {
-      return a.axes == b.axes;
+      return a.axes == b.axes && a.s_coord_dim == b.s_coord_dim;
     }
     friend bool operator<(const gather& a, const gather& b) {
-      return a.axes < b.axes;
+      return std::tie(a.axes, a.s_coord_dim) < std::tie(b.axes, b.s_coord_dim);
     }
   };
   struct fuse_dim {
