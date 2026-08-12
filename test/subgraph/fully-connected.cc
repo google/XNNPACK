@@ -623,6 +623,12 @@ TEST(FullyConnectedQP8F32QC2W, packs_lhs_for_sme2) {
       /*nonzero_channelwise_zero_point=*/false, /*expect_qp8=*/true);
 }
 
+TEST(FullyConnectedQP8F32QC2W, minimum_aligned_input_channels_use_sme2) {
+  TestQD8F32QC2WPackingSelection(
+      /*input_channels=*/32, /*fully_connected_flags=*/0,
+      /*nonzero_channelwise_zero_point=*/false, /*expect_qp8=*/true);
+}
+
 TEST(FullyConnectedQP8F32QC2W,
      transposed_weights_use_dynamic_quantized_fallback) {
   TestQD8F32QC2WPackingSelection(
