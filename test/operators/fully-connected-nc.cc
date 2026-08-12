@@ -10,6 +10,7 @@
 
 #include <gtest/gtest.h>
 #include "src/xnnpack/common.h"
+#include "src/xnnpack/isa-checks.h"
 #include "test/operators/fully-connected-operator-tester.h"
 
 TEST(FULLY_CONNECTED_NC_QS8, unit_batch) {
@@ -2528,6 +2529,19 @@ TEST(FULLY_CONNECTED_NC_QP8_F32_QC2W, weights_cache_unit_batch) {
       .use_weights_cache(true)
       .TestQP8F32QC2W();
 }
+
+#if XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI && XNN_ENABLE_ARM_SME2
+TEST(FULLY_CONNECTED_NC_QP8_F32_QC2W, config_registers_all_batch_kernels) {
+  TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_sme2);
+  const struct xnn_gemm_config* gemm_config =
+      xnn_init_qp8_f32_qc2w_gemm_config();
+  ASSERT_NE(nullptr, gemm_config);
+  ASSERT_GT(gemm_config->mr, 1);
+  EXPECT_NE(nullptr, gemm_config->minmax.qp8gemm[0].function[0]);
+  EXPECT_NE(nullptr,
+            gemm_config->minmax.qp8gemm[gemm_config->mr - 1].function[0]);
+}
+#endif  // XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI && XNN_ENABLE_ARM_SME2
 
 TEST(FULLY_CONNECTED_NC_QP8_F32_QC2W, transpose_weights_unsupported) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
