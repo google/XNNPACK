@@ -2181,7 +2181,8 @@ class FullyConnectedOperatorTester {
     ASSERT_EQ(input_channels() % 32, 0);
     ASSERT_FALSE(transpose_weights());
 
-    const uint32_t mr_packed = gemm_config->mr_packed;
+    const uint32_t mr_packed =
+        batch_size() > 1 ? gemm_config->mr_packed : 1;
     const uint32_t kr = UINT32_C(1) << gemm_config->log2_kr;
     const uint32_t sr = UINT32_C(1) << gemm_config->log2_sr;
 

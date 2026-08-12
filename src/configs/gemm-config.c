@@ -2938,6 +2938,9 @@ static void init_qp8_f32_qc2w_gemm_config(void) {
     const size_t nr =
         xnn_qp8_f32_qc2w_gemm_minmax_ukernel_16x64c4__neonsme2_get_nr();
     qp8_f32_qc2w_gemm_config.arch = xnn_arch_arm_sme2;
+    qp8_f32_qc2w_gemm_config.minmax.qp8gemm[XNN_MR_TO_INDEX(1)] =
+        XNN_INIT_HMP_QP8GEMM_UKERNEL(
+            xnn_qp8_f32_qc2w_gemm_minmax_ukernel_1x64c4__neonsme2);
     qp8_f32_qc2w_gemm_config.minmax.qp8gemm[XNN_MR_TO_INDEX(mr)] =
         XNN_INIT_HMP_QP8GEMM_UKERNEL(
             xnn_qp8_f32_qc2w_gemm_minmax_ukernel_16x64c4__neonsme2);
