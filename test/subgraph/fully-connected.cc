@@ -18,8 +18,10 @@
 #include <gtest/gtest.h>
 #include "include/xnnpack.h"
 #include "src/xnnpack/buffer.h"
+#include "src/xnnpack/config.h"
 #include "src/xnnpack/datatype.h"
 #include "src/xnnpack/math.h"
+#include "src/xnnpack/operator.h"
 #include "src/xnnpack/subgraph.h"
 #include "test/replicable_random_device.h"
 #include "test/subgraph/quantization-helpers.h"
@@ -510,6 +512,66 @@ TEST(FullyConnectedQU8, static_b) { TestStaticB<quint8, quint8, qint32>(); }
 
 TEST(FullyConnectedQS8QC8W, static_b) { TestStaticB<qint8, qcint8, qcint32>(); }
 TEST(FullyConnectedQS8QC4W, static_b) { TestStaticB<qint8, qcint4, qcint32>(); }
+
+TEST(FullyConnectedQS8QC4W, packs_lhs_for_sme2) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
+  if (xnn_init_pqs8_qc4w_gemm_config() == nullptr) {
+    GTEST_SKIP() << "PQS8 QC4W is not available";
+  }
+
+  constexpr size_t m = 4;
+  constexpr size_t k = 64;
+  constexpr size_t n = 32;
+  std::vector<uint8_t> filter(n * k / 2);
+  std::vector<float> filter_scale(n, 1.0f);
+
+  SubgraphTester subgraph(3);
+  subgraph
+      .AddInputTensor({m, k}, xnn_datatype_qint8, {0, 1.0f}, /*external_id=*/0)
+      .AddStaticChannelwiseQuantizedTensor(
+          {n, k}, /*channel_dim=*/0, xnn_datatype_qcint4,
+          filter_scale.data(), /*external_id=*/1, /*flags=*/0, filter.data())
+      .AddOutputTensor({m, n}, xnn_datatype_qint8, {0, 1.0f},
+                       /*external_id=*/2)
+      .AddFullyConnected(/*input_id=*/0, /*filter_id=*/1,
+                         /*bias_id=*/XNN_INVALID_VALUE_ID, /*output_id=*/2)
+      .Optimize(/*flags=*/0);
+
+  ASSERT_EQ(subgraph.NumNodes(), 1);
+  EXPECT_NE(subgraph.Node(0)->flags & XNN_FLAG_INLINE_LHS_PACKING, 0);
+  EXPECT_EQ(subgraph.Node(0)->packed_input_datatype, xnn_datatype_pqint8);
+}
+
+TEST(FullyConnectedQS8QC4W, transposed_weights_use_unpacked_lhs) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
+  if (xnn_init_pqs8_qc4w_gemm_config() == nullptr) {
+    GTEST_SKIP() << "PQS8 QC4W is not available";
+  }
+
+  constexpr size_t m = 4;
+  constexpr size_t k = 64;
+  constexpr size_t n = 32;
+  std::vector<uint8_t> filter(n * k / 2);
+  std::vector<float> filter_scale(n, 1.0f);
+
+  SubgraphTester subgraph(3);
+  subgraph
+      .AddInputTensor({m, k}, xnn_datatype_qint8, {0, 1.0f}, /*external_id=*/0)
+      .AddStaticChannelwiseQuantizedTensor(
+          {k, n}, /*channel_dim=*/1, xnn_datatype_qcint4,
+          filter_scale.data(), /*external_id=*/1, /*flags=*/0, filter.data())
+      .AddOutputTensor({m, n}, xnn_datatype_qint8, {0, 1.0f},
+                       /*external_id=*/2)
+      .AddFullyConnected(/*input_id=*/0, /*filter_id=*/1,
+                         /*bias_id=*/XNN_INVALID_VALUE_ID, /*output_id=*/2,
+                         XNN_FLAG_TRANSPOSE_WEIGHTS)
+      .Optimize(/*flags=*/0);
+
+  ASSERT_EQ(subgraph.NumNodes(), 1);
+  EXPECT_EQ(subgraph.Node(0)->flags & XNN_FLAG_INLINE_LHS_PACKING, 0);
+  EXPECT_EQ(subgraph.Node(0)->packed_input_datatype, xnn_datatype_invalid);
+}
+
 TEST(FullyConnectedQS8QC2W, static_b) { TestStaticB<qint8, qcint2, qcint32>(); }
 
 TEST(FullyConnectedF16F32F16, static_b) {

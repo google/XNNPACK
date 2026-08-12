@@ -850,7 +850,9 @@ def generate_test_cases(
         "rvvfp16arith": " * xnn_init_hardware_config()->vlenb / sizeof(%s)" % nr_type
     }[isa]
   test_fun_name = "".join(ukernel.split("_")[1:4]).upper()
-  if test_fun_name in {"QP8F32QC8W"}:
+  if input_datatype == "pqs8" and weights_datatype == "qc4w":
+    test_fun_name = "Test_PQS8QC4W"
+  elif test_fun_name in {"QP8F32QC8W"}:
     test_fun_name = "_".join(["Test", test_fun_name])
   elif input_datatype in {"pf32", "pf16", "pqs8"}:
     test_fun_name = "_".join(["Test", input_datatype.upper()])
