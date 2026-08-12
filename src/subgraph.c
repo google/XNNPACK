@@ -3994,7 +3994,9 @@ enum xnn_status xnn_subgraph_optimize_packed_lhs(xnn_subgraph_t subgraph,
             if (input_datatype == output_datatype) {
               switch (kernel_datatype) {
                 case xnn_datatype_qcint4:
-                  if (node->type == xnn_node_type_fully_connected &&
+                  if ((kernel_value->quantization.zero_point == 0 ||
+                       kernel_value->quantization.zero_point == 8) &&
+                      node->type == xnn_node_type_fully_connected &&
                       (optimization_flags &
                        XNN_FLAG_NO_INLINED_LHS_PACKING) == 0 &&
                       (node->flags & XNN_FLAG_TRANSPOSE_WEIGHTS) == 0 &&
