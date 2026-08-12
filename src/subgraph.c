@@ -4012,6 +4012,36 @@ enum xnn_status xnn_subgraph_optimize_packed_lhs(xnn_subgraph_t subgraph,
                     assumed_datatype = xnn_datatype_qpint8;
                   }
                   break;
+                case xnn_datatype_qcint2: {
+                  bool zero_points_are_zero = true;
+                  const float* zero_points =
+                      kernel_value->quantization.channelwise_zero_point;
+                  if (zero_points == NULL) {
+                    zero_points_are_zero =
+                        kernel_value->quantization.zero_point == 0;
+                  } else {
+                    const size_t channels = kernel_value->shape.dim[
+                        kernel_value->quantization.channel_dimension];
+                    for (size_t channel = 0; channel < channels; channel++) {
+                      if (zero_points[channel] != 0.0f) {
+                        zero_points_are_zero = false;
+                        break;
+                      }
+                    }
+                  }
+                  const size_t input_channels = kernel_value->shape.dim[
+                      kernel_value->shape.num_dims - 1];
+                  if (node->type == xnn_node_type_fully_connected &&
+                      (optimization_flags &
+                       XNN_FLAG_NO_INLINED_LHS_PACKING) == 0 &&
+                      (node->flags & XNN_FLAG_TRANSPOSE_WEIGHTS) == 0 &&
+                      input_channels % 32 == 0 && zero_points_are_zero &&
+                      (gemm_config =
+                           xnn_init_qp8_f32_qc2w_gemm_config())) {
+                    assumed_datatype = xnn_datatype_qpint8;
+                  }
+                  break;
+                }
                 case xnn_datatype_qcint4:
                   if ((gemm_config = xnn_init_qp8_f32_qc4w_gemm_config())) {
                     assumed_datatype = xnn_datatype_qpint8;
