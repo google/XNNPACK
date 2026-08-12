@@ -4005,10 +4005,24 @@ enum xnn_status xnn_subgraph_optimize_packed_lhs(xnn_subgraph_t subgraph,
             }
             break;
           case xnn_datatype_qint8:
-            if (input_datatype == output_datatype &&
-                kernel_datatype == xnn_datatype_qcint8) {
-              if ((gemm_config = xnn_init_pqs8_qc8w_gemm_config())) {
-                assumed_datatype = xnn_datatype_pqint8;
+            if (input_datatype == output_datatype) {
+              switch (kernel_datatype) {
+                case xnn_datatype_qcint4:
+                  if (node->type == xnn_node_type_fully_connected &&
+                      (optimization_flags &
+                       XNN_FLAG_NO_INLINED_LHS_PACKING) == 0 &&
+                      (node->flags & XNN_FLAG_TRANSPOSE_WEIGHTS) == 0 &&
+                      (gemm_config = xnn_init_pqs8_qc4w_gemm_config())) {
+                    assumed_datatype = xnn_datatype_pqint8;
+                  }
+                  break;
+                case xnn_datatype_qcint8:
+                  if ((gemm_config = xnn_init_pqs8_qc8w_gemm_config())) {
+                    assumed_datatype = xnn_datatype_pqint8;
+                  }
+                  break;
+                default:
+                  break;
               }
             }
             break;

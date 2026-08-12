@@ -3543,6 +3543,145 @@ void GemmMicrokernelTester::Test_PQS8(
   }
 }
 
+void GemmMicrokernelTester::Test_PQS8QC4W(
+    xnn_pqs8_qc8w_gemm_minmax_ukernel_fn gemm,
+    xnn_init_qs8_qc8w_conv_minmax_params_fn init_minmax_params,
+    xnn_pack_weights_and_biases_fn pack,
+    xnn_packed_stride_weights_and_biases_fn packed_stride,
+    xnn_qs8_requantize_fn requantize) const {
+  ASSERT_LE(m(), mr());
+
+  xnnpack::ReplicableRandomDevice rng;
+  auto i32rng = std::bind(std::uniform_int_distribution<int32_t>(-10000, 10000),
+                          std::ref(rng));
+
+  const size_t k2 = round_up_po2(k(), 2);
+
+  xnnpack::Buffer<int8_t> a(m() * k2, xnnpack::XnnExtraBytes);
+  xnnpack::Buffer<uint8_t> b(n() * k2 / 2);
+  xnnpack::Buffer<int32_t> bias(n());
+  xnnpack::Buffer<int8_t> c((m() - 1) * cm_stride() + n());
+  xnnpack::Buffer<int32_t> acc(m() * n());
+  xnnpack::Buffer<int8_t> c_ref(m() * n());
+
+  // Create a fake `gemm_config` for the packing functions.
+  struct xnn_gemm_config gemm_config;
+  gemm_config.mr = static_cast<uint8_t>(mr());
+  gemm_config.mr_packed = static_cast<uint8_t>(mr_packed());
+  gemm_config.nr = static_cast<uint8_t>(nr());
+  gemm_config.log2_kr = static_cast<uint8_t>(31 - math_clz_nonzero_u32(kr()));
+  gemm_config.log2_sr = static_cast<uint8_t>(31 - math_clz_nonzero_u32(sr()));
+
+  const size_t packed_w_stride =
+      packed_stride(&gemm_config, k2, /*unused_block_size=*/0,
+                    /*k_stride=*/k2, /*extra_bytes=*/0);
+  const size_t packed_w_size = packed_w_stride * round_up(n(), nr());
+  xnnpack::Buffer<uint8_t, XNN_ALLOCATION_ALIGNMENT> packed_w(packed_w_size);
+
+  const struct xnn_pack_lh_config* pack_lh_config =
+      xnn_init_x8_pack_lh_config();
+  ASSERT_NE(pack_lh_config, nullptr);
+
+  xnnpack::fill_uniform_random_bits(a.data(), a.size(), rng);
+  xnnpack::fill_uniform_random_bits(b.data(), b.size(), rng);
+  std::generate(bias.begin(), bias.end(), std::ref(i32rng));
+
+  const size_t input_packed_size =
+      pack_lh_config->size_fn(m(), k2, mr_packed(), kr(), sr());
+  xnnpack::Buffer<int8_t> input_packed(input_packed_size);
+  pack_lh_config->pack_lh_fn(m(), k2, mr_packed(), kr(), sr(),
+                             /*m_idx_start=*/0, a.data(),
+                             /*lhs_stride=*/k2 * sizeof(int8_t),
+                             input_packed.data());
+
+  std::fill(acc.begin(), acc.end(), 0);
+  for (size_t m_index = 0; m_index < m(); m_index++) {
+    for (size_t n_index = 0; n_index < n(); n_index++) {
+      for (size_t k_index = 0; k_index < k2; k_index++) {
+        const size_t nb_index = (n_index * k2 + k_index) / 2;
+        const int32_t bv = static_cast<int32_t>(
+                               (k_index % 2 == 0) ? (b[nb_index] & UINT8_C(0xF))
+                                                  : (b[nb_index] >> 4)) -
+                           b_zero_point();
+        acc[m_index * n() + n_index] +=
+            (static_cast<int32_t>(a[m_index * k2 + k_index]) -
+             static_cast<int32_t>(a_zero_point() - 0x80)) *
+            bv;
+      }
+      acc[m_index * n() + n_index] += bias[n_index];
+    }
+  }
+
+  int32_t accumulated_min = acc[0];
+  int32_t accumulated_max = acc[0];
+  for (size_t i = 0; i < acc.size(); i++) {
+    accumulated_min = std::min(accumulated_min, acc[i]);
+    accumulated_max = std::max(accumulated_max, acc[i]);
+  }
+  const uint32_t accumulated_range =
+      static_cast<uint32_t>(accumulated_max - accumulated_min);
+  const float c_scale = accumulated_range >= 256
+                            ? static_cast<double>(accumulated_range) / 255.0
+                            : 256.0 / 255;
+  const float requantization_scale = 1.0f / c_scale;
+  const xnnpack::Buffer<float> requantization_scale_buffer(
+      n(), requantization_scale);
+
+  struct xnn_qs8_qc4w_packing_params params;
+  params.input_zero_point = static_cast<int8_t>(a_zero_point() - 0x80);
+  params.kernel_zero_point = b_zero_point();
+  pack(/*flags=*/0, &gemm_config, k2, n(),
+       /*groups=*/1, /*unused_block_size=*/0,
+       /*k_stride=*/k2,
+       /*accumulator_init=*/bias.data(),
+       /*weights=*/b.data(),
+       /*int_extra_data0_fn=*/nullptr,
+       /*extra_data0=*/requantization_scale_buffer.data(),
+       /*extra_data0_size=*/sizeof(float),
+       /*init_extra_data1_fn=*/nullptr,
+       /*extra_data1=*/nullptr,
+       /*extra_data1_size=*/0,
+       /*packed_weights_ptr=*/packed_w.data(), &params);
+
+  const int8_t c_zero_point = -1;
+  union xnn_qs8_qc8w_conv_minmax_params minmax_params;
+  init_minmax_params(&minmax_params, c_zero_point,
+                     static_cast<int8_t>(qmin() - 0x80),
+                     static_cast<int8_t>(qmax() - 0x80));
+
+  gemm(m(), n(), k2, input_packed.data(), packed_w.data(), c.data(),
+       cm_stride() * sizeof(int8_t), sizeof(int8_t), &minmax_params);
+
+  for (size_t m_index = 0; m_index < m(); m_index++) {
+    for (size_t n_index = 0; n_index < n(); n_index++) {
+      c_ref[m_index * n() + n_index] = requantize(
+          acc[m_index * n() + n_index], requantization_scale, c_zero_point,
+          static_cast<int8_t>(qmin() - 0x80),
+          static_cast<int8_t>(qmax() - 0x80));
+    }
+  }
+
+  for (size_t i = 0; i < m(); i++) {
+    for (size_t j = 0; j < n(); j++) {
+      const size_t idx = i * cm_stride() + j;
+      ASSERT_LE(static_cast<int32_t>(c[idx]),
+                static_cast<int32_t>(qmax()) - 0x80);
+      ASSERT_GE(static_cast<int32_t>(c[idx]),
+                static_cast<int32_t>(qmin()) - 0x80);
+      ASSERT_EQ(static_cast<int32_t>(c[idx]),
+                static_cast<int32_t>(c_ref[i * n() + j]))
+          << "at " << i << ", " << j
+          << ": reference = " << static_cast<int32_t>(c_ref[i * n() + j])
+          << " (accumulator = " << acc[i * n() + j]
+          << "), optimized = " << static_cast<int32_t>(c[idx])
+          << ", Mr x Nr x Kr = " << mr() << " x " << nr() << " x " << kr()
+          << ", M x N x K = " << m() << " x " << n() << " x " << k2
+          << ", requantization scale = " << requantization_scale
+          << ", output zero point = " << static_cast<int32_t>(c_zero_point);
+    }
+  }
+}
+
 void GemmMicrokernelTester::Test_PQS8(
     xnn_packed_lhs_igemm_ukernel_fn packed_igemm,
     xnn_init_qs8_qc8w_conv_minmax_params_fn init_minmax_params,

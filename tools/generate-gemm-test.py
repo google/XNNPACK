@@ -856,6 +856,8 @@ def generate_test_cases(
   test_fun_name = "".join(ukernel.split("_")[1:4]).upper()
   if input_datatype == "qp8" and weights_datatype == "qc2w":
     test_fun_name = "Test_QP8F32QC2W"
+  elif input_datatype == "pqs8" and weights_datatype == "qc4w":
+    test_fun_name = "Test_PQS8QC4W"
   elif test_fun_name in {"QP8F32QC8W"}:
     test_fun_name = "_".join(["Test", test_fun_name])
   elif input_datatype in {"pf32", "pf16", "pqs8"}:
