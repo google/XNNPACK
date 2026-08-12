@@ -4029,13 +4029,14 @@ enum xnn_status xnn_subgraph_optimize_packed_lhs(xnn_subgraph_t subgraph,
                       }
                     }
                   }
-                  const size_t input_channels = kernel_value->shape.dim[
-                      kernel_value->shape.num_dims - 1];
+                  const size_t input_channels = input_value->shape.dim[
+                      input_value->shape.num_dims - 1];
                   if (node->type == xnn_node_type_fully_connected &&
                       (optimization_flags &
                        XNN_FLAG_NO_INLINED_LHS_PACKING) == 0 &&
                       (node->flags & XNN_FLAG_TRANSPOSE_WEIGHTS) == 0 &&
-                      input_channels % 32 == 0 && zero_points_are_zero &&
+                      input_channels != 0 && input_channels % 32 == 0 &&
+                      zero_points_are_zero &&
                       (gemm_config =
                            xnn_init_qp8_f32_qc2w_gemm_config())) {
                     assumed_datatype = xnn_datatype_qpint8;
