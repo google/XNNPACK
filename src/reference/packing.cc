@@ -2747,6 +2747,14 @@ void xnn_pack_kai_qs8_qc4w_weights_and_biases_sme2(
   const struct xnn_qs8_qc4w_packing_params* xnn_params =
       reinterpret_cast<const struct xnn_qs8_qc4w_packing_params*>(params);
 
+  if (xnn_params->kernel_zero_point != 0 &&
+      xnn_params->kernel_zero_point != 8) {
+    xnn_log_error(
+        "KleidiAI QS8 QC4W SME2 RHS packing requires a kernel zero point of "
+        "0 (signed weights) or 8 (unsigned weights)");
+    return;
+  }
+
   if (extra_data0 == NULL) {
     xnn_log_error("KleidiAI QS8 QC4W SME2 RHS packing requires scale data");
     return;
@@ -2774,7 +2782,6 @@ void xnn_pack_kai_qs8_qc4w_weights_and_biases_sme2(
     api =
         kai_matmul_pack_rhs_nxk_qsi4cxp8vsx4sf32bi32_qsi4cx_f32_i32_sme();
   } else {
-    assert(xnn_params->kernel_zero_point == 8);
     api =
         kai_matmul_pack_rhs_nxk_qsi4cxp8vsx4sf32bi32_qsu4cx_f32_i32_sme();
   }
@@ -2787,7 +2794,8 @@ void xnn_pack_kai_qs8_qc4w_weights_and_biases_sme2(
       api.get_rhs_packed_size(&config, &packed_shape, &packed_stride);
   const size_t rhs_stride_row = (k_stride + 1) / 2;
   const size_t rhs_group_stride = output_channels * rhs_stride_row;
-  const int32_t lhs_zero_point = xnn_params->input_zero_point;
+  // KleidiAI adds k_sum_scale * sum(weights) to each packed bias.
+  const int32_t k_sum_scale = -(int32_t)xnn_params->input_zero_point;
   const float scale_multiplier = 1.0f;
 
   for (size_t group = 0; group < groups; group++) {
@@ -2808,7 +2816,7 @@ void xnn_pack_kai_qs8_qc4w_weights_and_biases_sme2(
         (uint8_t*)packed_weights_ptr + group * packed_group_size;
     args.operand.rhs_packed.stride = packed_stride;
     args.operand.bias_n.ptr = group_accumulator_init;
-    args.operand.k_sum_scale_global.ptr = &lhs_zero_point;
+    args.operand.k_sum_scale_global.ptr = &k_sum_scale;
     args.operand.scale_n.ptr = group_extra_data0;
     args.operand.scale_global.ptr = &scale_multiplier;
     api.run(&config, &args);

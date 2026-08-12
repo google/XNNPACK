@@ -259,6 +259,12 @@ std::vector<GemmTestParams> CreateTests1(
           .cm_stride(xnnpack::NextPrime(nr + 1))
           .b_zero_point(8)
       , test_func, arch_flags));
+  gemm_tests.push_back(GemmTestParams(
+      "signed_weights",
+      tester.clone()
+          .m(mr).n(nr).k(k_block)
+          .b_zero_point(0)
+      , test_func, arch_flags));
 
   return gemm_tests;
 }
@@ -316,7 +322,6 @@ std::vector<GemmTestParams> CreateTests1(
       [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
         return info.param.test_name;
       });
-
 
 
   INSTANTIATE_TEST_SUITE_P(

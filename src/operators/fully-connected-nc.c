@@ -3075,6 +3075,17 @@ enum xnn_status xnn_create_fully_connected_nc_pqs8_qc4w(
     const int32_t* bias, int8_t output_zero_point, float output_scale,
     int8_t output_min, int8_t output_max, uint32_t flags,
     xnn_weights_cache_t weights_cache, xnn_operator_t* fully_connected_op_out) {
+  if (kernel_zero_point != 0 && kernel_zero_point != 8) {
+    xnn_log_error(
+        "failed to create %s operator with %" PRIu8
+        " kernel zero point: kernel zero point must equal 0 (signed weights) "
+        "or 8 (unsigned weights)",
+        xnn_operator_type_to_string(
+            xnn_operator_type_fully_connected_nc_pqs8_qc4w),
+        kernel_zero_point);
+    return xnn_status_invalid_parameter;
+  }
+
   if ((flags & XNN_FLAG_TRANSPOSE_WEIGHTS) != 0) {
     xnn_log_error(
         "failed to create %s operator with XNN_FLAG_TRANSPOSE_WEIGHTS: "

@@ -604,6 +604,13 @@ std::vector<GemmTestParams> CreateTests(
               $if WEIGHTS_DATATYPE in ['qb4w']:
                 .bl(32)
           , test_func, arch_flags));
+      $if INPUT_DATATYPE == "pqs8" and WEIGHTS_DATATYPE == "qc4w":
+        gemm_tests.push_back(GemmTestParams(
+            "signed_weights",
+            tester.clone()
+                .m(mr).n(nr).k(k_block)
+                .b_zero_point(0)
+            , test_func, arch_flags));
       $if INPUT_DATATYPE == "qu8":
         gemm_tests.push_back(GemmTestParams(
             "no_a_zero_point",
