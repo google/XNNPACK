@@ -2,7 +2,6 @@
 // All rights reserved.
 //
 // Copyright 2019 Google LLC
-// Copyright 2026 Arm Limited and/or its affiliates <open-source-office@arm.com>
 //
 // Copyright 2026 Arm Limited and/or its affiliates <open-source-office@arm.com>
 //
