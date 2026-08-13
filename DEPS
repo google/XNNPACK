@@ -111,7 +111,7 @@ deps = {
     'url': Var('chromium_url') + '/chromium/src/third_party/abseil-cpp' + '@' + '5c3e051186c88b1e7ee66750eda59096a51abc73',
   },
   'third_party/kleidiai/src': {
-    'url': 'https://gitlab.arm.com/kleidi/kleidiai@74b1a12d3620c89dae4766de640e064952000f4d',
+    'url': 'https://gitlab.arm.com/kleidi/kleidiai@v1.30.0',
     'condition': 'checkout_kleidiai'
   },
   'third_party/libc++/src':
