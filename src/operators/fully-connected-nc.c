@@ -1636,6 +1636,13 @@ static enum xnn_status generate_fingerprint_data(const struct fc_variant* varian
   const size_t bytes = weights_bytes + bias_bytes + kernel_scale_bytes +
                        kernel_zero_points_bytes + 4 * XNN_ALLOCATION_ALIGNMENT;
   uint8_t* buffer = xnn_allocate_simd_memory(bytes);
+  if (!buffer) {
+    xnn_log_error(
+        "Could not allocate %zu bytes when generating fully connected "
+        "fingerprint data",
+        bytes);
+    return xnn_status_out_of_memory;
+  }
   fill_fingerprint_buffer(buffer, bytes);
   context->fingerprint_data_to_release = buffer;
   context->input_channels = input_channels;
