@@ -1036,8 +1036,13 @@ static enum xnn_status init_requantization_scale_qs8(
   size_t num_output_channels = 0;
   size_t scale_params_size = 0;
   if (!xnn_safe_mul(context->groups, context->group_output_channels,
-                    &num_output_channels) ||
-      !xnn_safe_mul(num_output_channels, sizeof(float), &scale_params_size)) {
+                    &num_output_channels)) {
+    xnn_log_error(
+        "failed to create %s operator: requantization scale size overflows size_t",
+        xnn_operator_type_to_string(context->operator_type));
+    return xnn_status_invalid_parameter;
+  }
+  if (!xnn_safe_mul(num_output_channels, sizeof(float), &scale_params_size)) {
     xnn_log_error(
         "failed to create %s operator: requantization scale size overflows size_t",
         xnn_operator_type_to_string(context->operator_type));
@@ -1066,8 +1071,13 @@ static enum xnn_status init_requantization_scale_qx8_qc8w(
   size_t num_output_channels = 0;
   size_t scale_params_size = 0;
   if (!xnn_safe_mul(context->groups, context->group_output_channels,
-                    &num_output_channels) ||
-      !xnn_safe_mul(num_output_channels, sizeof(float), &scale_params_size)) {
+                    &num_output_channels)) {
+    xnn_log_error(
+        "failed to create %s operator: requantization scale size overflows size_t",
+        xnn_operator_type_to_string(context->operator_type));
+    return xnn_status_invalid_parameter;
+  }
+  if (!xnn_safe_mul(num_output_channels, sizeof(float), &scale_params_size)) {
     xnn_log_error(
         "failed to create %s operator: requantization scale size overflows size_t",
         xnn_operator_type_to_string(context->operator_type));
