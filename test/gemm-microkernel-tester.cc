@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright 2026 Arm Limited and/or its affiliates <open-source-office@arm.com>
+// Copyright 2026 Arm Limited and/or its affiliates <open-source-office@arm.com>
 //
 #include "test/gemm-microkernel-tester.h"
 
