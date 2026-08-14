@@ -6,6 +6,7 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+#include <limits>
 #include <utility>
 #include <vector>
 
@@ -1987,5 +1988,51 @@ TEST(DEPTHWISE_CONVOLUTION_NHWC_F16,
       .groups(24)
       .group_output_channels(3)
       .TestNHWCxF16();
+}
+
+TEST(CONVOLUTION_NHWC_QS8, reject_scale_buffer_size_overflow) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
+  const int8_t kernel[1] = {0};
+  const int32_t bias[1] = {0};
+  xnn_operator_t convolution_op = nullptr;
+  ASSERT_EQ(
+      xnn_status_success,
+      xnn_create_convolution2d_nhwc_qs8(
+          0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1.0f, 1.0f,
+          kernel, bias, 0, 1.0f, -128, 127, 0, nullptr, &convolution_op));
+  xnn_delete_operator(convolution_op);
+
+  const size_t overflowing_group_output_channels =
+      std::numeric_limits<size_t>::max() / sizeof(float) + 1;
+  convolution_op = nullptr;
+  EXPECT_EQ(
+      xnn_status_invalid_parameter,
+      xnn_create_convolution2d_nhwc_qs8(
+          0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1,
+          overflowing_group_output_channels, 1, 1, 0, 1.0f, 1.0f, kernel,
+          bias, 0, 1.0f, -128, 127, 0, nullptr, &convolution_op));
+}
+
+TEST(CONVOLUTION_NHWC_PQS8_QS8_QS8, reject_scale_buffer_size_overflow) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
+  const int8_t kernel[1] = {0};
+  const int32_t bias[1] = {0};
+  xnn_operator_t convolution_op = nullptr;
+  ASSERT_EQ(xnn_status_success,
+            xnn_create_convolution2d_nhwc_pqs8_qs8_qs8(
+                0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1.0f,
+                1.0f, kernel, bias, 0, 1.0f, -128, 127, 0, nullptr,
+                &convolution_op));
+  xnn_delete_operator(convolution_op);
+
+  const size_t overflowing_group_output_channels =
+      std::numeric_limits<size_t>::max() / sizeof(float) + 1;
+  convolution_op = nullptr;
+  EXPECT_EQ(xnn_status_invalid_parameter,
+            xnn_create_convolution2d_nhwc_pqs8_qs8_qs8(
+                0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1,
+                overflowing_group_output_channels, 1, 1, 0, 1.0f, 1.0f,
+                kernel, bias, 0, 1.0f, -128, 127, 0, nullptr,
+                &convolution_op));
 }
 }  // namespace

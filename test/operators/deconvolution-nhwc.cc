@@ -4,6 +4,7 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <cstddef>
+#include <limits>
 #include <vector>
 
 #include <gtest/gtest.h>
@@ -3385,3 +3386,29 @@ CREATE_DECONVOLUTION_SETUP_TESTS(DECONVOLUTION_NHWC_F16, TestSetupF16)
 CREATE_DECONVOLUTION_TESTS(DECONVOLUTION_NHWC_F32, xnn_init_f32_igemm_config(),
                            TestF32)
 CREATE_DECONVOLUTION_SETUP_TESTS(DECONVOLUTION_NHWC_F32, TestSetupF32)
+
+TEST(DECONVOLUTION_NHWC_QS8_QC8W, reject_scale_buffer_size_overflow) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
+  const int8_t kernel[1] = {0};
+  const int32_t bias[1] = {0};
+  const float kernel_scale[1] = {1.0f};
+  xnn_operator_t deconvolution_op = nullptr;
+  ASSERT_EQ(
+      xnn_status_success,
+      xnn_create_deconvolution2d_nhwc_qs8_qc8w(
+          0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1.0f,
+          kernel_scale, kernel, bias, 0, 1.0f, -128, 127, 0, nullptr,
+          &deconvolution_op));
+  xnn_delete_operator(deconvolution_op);
+
+  const size_t overflowing_group_output_channels =
+      std::numeric_limits<size_t>::max() / sizeof(float) + 1;
+  deconvolution_op = nullptr;
+  EXPECT_EQ(
+      xnn_status_invalid_parameter,
+      xnn_create_deconvolution2d_nhwc_qs8_qc8w(
+          0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1,
+          overflowing_group_output_channels, 1, 1, 0, 1.0f, kernel_scale,
+          kernel, bias, 0, 1.0f, -128, 127, 0, nullptr,
+          &deconvolution_op));
+}
