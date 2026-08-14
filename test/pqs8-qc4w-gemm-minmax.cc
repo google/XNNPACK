@@ -2,10 +2,7 @@
 // Copyright (c) Facebook, Inc. and its affiliates.
 // All rights reserved.
 //
-// SPDX-FileCopyrightText: Copyright 2026 Arm Limited and/or its affiliates <open-source-office@arm.com>
-//
-// This source code is licensed under the BSD-style license found in the
-// LICENSE file in the root directory of this source tree.
+// Copyright 2026 Arm Limited and/or its affiliates <open-source-office@arm.com>
 //
 // Auto-generated file. Do not edit!
 //   Specification: test/pqs8-qc4w-gemm-minmax.yaml
