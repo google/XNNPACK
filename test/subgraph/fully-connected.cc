@@ -555,10 +555,14 @@ static void TestQD8F32QC2WPackingSelection(
   constexpr size_t output_channels = 64;
   const bool transpose_weights =
       (fully_connected_flags & XNN_FLAG_TRANSPOSE_WEIGHTS) != 0;
+  // QC2W stores four weights per byte. Use the packed K extent here so this
+  // test catches attempts to derive the logical input channels from the
+  // filter storage shape.
+  const size_t packed_input_channels = divide_round_up(input_channels, 4);
   const std::vector<size_t> filter_shape =
       transpose_weights
-          ? std::vector<size_t>{input_channels, output_channels}
-          : std::vector<size_t>{output_channels, input_channels};
+          ? std::vector<size_t>{packed_input_channels, output_channels}
+          : std::vector<size_t>{output_channels, packed_input_channels};
   const size_t channel_dim = transpose_weights ? 1 : 0;
 
   std::vector<uint8_t> filter(
