@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: Copyright 2026 Arm Limited and/or its affiliates <open-source-office@arm.com>
+# Copyright 2026 Arm Limited and/or its affiliates <open-source-office@arm.com>
 #
 # This file is used to manage the dependencies of the XNNPACK repo
 # for use with the GN build system. It is losely based on what they do for V8:
