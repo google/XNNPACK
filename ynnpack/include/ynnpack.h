@@ -497,6 +497,30 @@ enum ynn_status ynn_define_dot(ynn_subgraph_t subgraph, size_t num_k_dims,
                                uint32_t input_c_id, uint32_t* output_id,
                                uint32_t flags);
 
+// Performs grouped matrix multiplication (grouped GEMM) across `E` experts.
+// For each expert `e` in `[0, E)` and token index `i` in
+// `[0, expert_counts[e])`:
+//
+//   output(expert_offsets[e] + i, j) =
+//     sum_k(input_a(expert_offsets[e] + i, k) * input_b(e, k, j))
+//
+// `input_a_id` is a 2D tensor of shape [num_tokens, d_in] containing
+// dispatched tokens grouped by expert.
+// `input_b_id` is a 3D tensor of shape [num_experts, d_in, d_out] containing
+// the weight matrices for each expert.
+// `expert_counts_id` is a 1D tensor of shape [num_experts] (int32) containing
+// the number of tokens routed to each expert.
+// `expert_offsets_id` is a 1D tensor of shape [num_experts + 1] (int32)
+// containing the starting token offset in `input_a` and `output` for each
+// expert.
+//
+// If `output_id` is `YNN_INVALID_VALUE_ID`, the output will have shape
+// [num_tokens, d_out] and type `ynn_type_fp32`.
+enum ynn_status ynn_define_grouped_dot(
+    ynn_subgraph_t subgraph, uint32_t input_a_id, uint32_t input_b_id,
+    uint32_t expert_counts_id, uint32_t expert_offsets_id, uint32_t* output_id,
+    uint32_t flags);
+
 enum ynn_reduce_operator {
   ynn_reduce_invalid = 0,
 
