@@ -1,4 +1,3 @@
-# Copyright 2026 Arm Limited and/or its affiliates <open-source-office@arm.com>
 #
 # Microkernel filenames lists for neonsme2.
 #
