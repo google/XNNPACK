@@ -3411,4 +3411,14 @@ TEST(DECONVOLUTION_NHWC_QS8_QC8W, reject_scale_buffer_size_overflow) {
           overflowing_group_output_channels, 1, 1, 0, 1.0f, kernel_scale,
           kernel, bias, 0, 1.0f, -128, 127, 0, nullptr,
           &deconvolution_op));
+
+  const size_t overflowing_output_channels =
+      std::numeric_limits<size_t>::max() / 2 + 1;
+  deconvolution_op = nullptr;
+  EXPECT_EQ(
+      xnn_status_invalid_parameter,
+      xnn_create_deconvolution2d_nhwc_qs8_qc8w(
+          0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 2, 1,
+          overflowing_output_channels, 2, 2, 0, 1.0f, kernel_scale, kernel,
+          bias, 0, 1.0f, -128, 127, 0, nullptr, &deconvolution_op));
 }

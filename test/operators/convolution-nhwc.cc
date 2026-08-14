@@ -2011,6 +2011,16 @@ TEST(CONVOLUTION_NHWC_QS8, reject_scale_buffer_size_overflow) {
           0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1,
           overflowing_group_output_channels, 1, 1, 0, 1.0f, 1.0f, kernel,
           bias, 0, 1.0f, -128, 127, 0, nullptr, &convolution_op));
+
+  const size_t overflowing_output_channels =
+      std::numeric_limits<size_t>::max() / 2 + 1;
+  convolution_op = nullptr;
+  EXPECT_EQ(
+      xnn_status_invalid_parameter,
+      xnn_create_convolution2d_nhwc_qs8(
+          0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 2, 1,
+          overflowing_output_channels, 2, 2, 0, 1.0f, 1.0f, kernel, bias,
+          0, 1.0f, -128, 127, 0, nullptr, &convolution_op));
 }
 
 TEST(CONVOLUTION_NHWC_PQS8_QS8_QS8, reject_scale_buffer_size_overflow) {
@@ -2034,5 +2044,14 @@ TEST(CONVOLUTION_NHWC_PQS8_QS8_QS8, reject_scale_buffer_size_overflow) {
                 overflowing_group_output_channels, 1, 1, 0, 1.0f, 1.0f,
                 kernel, bias, 0, 1.0f, -128, 127, 0, nullptr,
                 &convolution_op));
+
+  const size_t overflowing_output_channels =
+      std::numeric_limits<size_t>::max() / 2 + 1;
+  convolution_op = nullptr;
+  EXPECT_EQ(xnn_status_invalid_parameter,
+            xnn_create_convolution2d_nhwc_pqs8_qs8_qs8(
+                0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 2, 1,
+                overflowing_output_channels, 2, 2, 0, 1.0f, 1.0f, kernel,
+                bias, 0, 1.0f, -128, 127, 0, nullptr, &convolution_op));
 }
 }  // namespace

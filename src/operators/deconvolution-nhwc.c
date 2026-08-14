@@ -601,8 +601,8 @@ static enum xnn_status check_input_scale(const struct deconv2d_variant* variant,
 // The array is assigned to `context->scale_params`.
 static enum xnn_status compute_scale_params_qs8_qc8w(
     const struct deconv2d_variant* variant, struct deconv2d_context* context) {
-  size_t output_channels;
-  size_t output_channels_bytes;
+  size_t output_channels = 0;
+  size_t output_channels_bytes = 0;
   if (!xnn_safe_mul(context->groups, context->group_output_channels,
                     &output_channels) ||
       !xnn_safe_mul(output_channels, sizeof(float), &output_channels_bytes)) {

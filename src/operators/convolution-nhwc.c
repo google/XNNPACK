@@ -1025,8 +1025,8 @@ static enum xnn_status init_requantization_scale_qs8(
   if (status != xnn_status_success) {
     return status;
   }
-  size_t num_output_channels;
-  size_t scale_params_size;
+  size_t num_output_channels = 0;
+  size_t scale_params_size = 0;
   if (!xnn_safe_mul(context->groups, context->group_output_channels,
                     &num_output_channels) ||
       !xnn_safe_mul(num_output_channels, sizeof(float), &scale_params_size)) {
@@ -2253,8 +2253,8 @@ enum xnn_status xnn_create_convolution2d_nhwc_pqs8_qs8_qs8(
     int8_t output_zero_point, float output_scale, int8_t output_min,
     int8_t output_max, uint32_t flags, xnn_weights_cache_t weights_cache,
     xnn_operator_t* convolution_op_out) {
-  size_t num_output_channels;
-  size_t broadcast_kernel_scale_size;
+  size_t num_output_channels = 0;
+  size_t broadcast_kernel_scale_size = 0;
   if (!xnn_safe_mul(groups, group_output_channels, &num_output_channels) ||
       !xnn_safe_mul(num_output_channels, sizeof(float),
                     &broadcast_kernel_scale_size)) {
