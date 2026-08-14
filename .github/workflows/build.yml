@@ -462,8 +462,10 @@ jobs:
           EOF
       - name: Sync to commit and run hooks
         run: gclient sync --reset --force --upstream --revision $GITHUB_SHA
-      - name: Install sysroot
-        run: ./build/linux/sysroot_scripts/install-sysroot.py --arch=armhf
+      - name: Install sysroots
+        run: |
+          ./build/linux/sysroot_scripts/install-sysroot.py --arch=armhf
+          ./build/linux/sysroot_scripts/install-sysroot.py --arch=arm64
         working-directory: ${{ github.workspace }}/xnnpack
       - name: Check GN formatting
         run: |
@@ -472,10 +474,12 @@ jobs:
       - name: Generate build files
         run: |
           gn gen --check --args="is_debug=false clang_use_chrome_plugins=false dcheck_always_on=true cc_wrapper=\"ccache\" symbol_level=0 target_cpu=\"arm\" use_siso=true" out/arm.dchecks
+          gn gen --check --args="is_debug=false clang_use_chrome_plugins=false dcheck_always_on=true cc_wrapper=\"ccache\" symbol_level=0 target_cpu=\"arm64\" use_siso=true" out/arm64.dchecks
         working-directory: ${{ github.workspace }}/xnnpack
       - name: Build all targets (Release + debug checks)
         run: |
           autoninja -C out/arm.dchecks
+          autoninja -C out/arm64.dchecks
         working-directory: ${{ github.workspace }}/xnnpack
       - name: Save ccache
         if: ${{ inputs.update-caches }}
@@ -486,7 +490,11 @@ jobs:
           key: ccache-linux-arm-${{ github.ref_name }}-${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
       - name: Print ccache stats
         run: ccache -s
-      - name: Run tests
+      - name: Run tests (AArch64)
+        run: |
+          python3 scripts/run-gn-tests.py out/arm64.dchecks --sysroot=/usr/aarch64-linux-gnu --architecture=arm64 --shards=32
+        working-directory: ${{ github.workspace }}/xnnpack
+      - name: Run tests (AArch32)
         run: |
           python3 scripts/run-gn-tests.py out/arm.dchecks --sysroot=/usr/arm-linux-gnueabihf --architecture=arm --shards=32
         working-directory: ${{ github.workspace }}/xnnpack
