@@ -442,6 +442,7 @@ jobs:
             ccache-linux-arm-master-
       - name: Install system dependencies
         run: |
+          sudo apt-get update
           sudo apt-get install -y ccache qemu-user qemu-user-static g++-arm-linux-gnueabihf
       - name: Install Depot Tools
         uses: newkdev/setup-depot-tools@v1.0.1
@@ -513,6 +514,7 @@ jobs:
             ccache-linux-master-
       - name: Install ccache
         run: |
+          sudo apt-get update
           sudo apt-get install -y ccache
       - name: Install Depot Tools
         uses: newkdev/setup-depot-tools@v1.0.1
@@ -861,6 +863,7 @@ jobs:
       CXX: clang++-20
       QEMU_ARGS: -cpu max
       BAZEL_DEFINES: |
+        --define=ynn_enable_arm64_neonfp8=true
     steps:
       - uses: actions/checkout@v6
 

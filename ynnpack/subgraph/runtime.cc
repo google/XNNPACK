@@ -323,36 +323,131 @@ std::map<std::pair<slinky::var, int>, int> infer_source_regions(
   return source_regions;
 }
 
+// If `e` is a global let variable, return the let's value (an existing,
+// shared expression -- nothing is constructed); otherwise return `e`
+// unchanged. One level is enough for the analyses below: loop steps are let
+// variables whose immediate values expose the min/max caps the constant
+// bounds need (variables remaining inside them are simply unknowns to the
+// bounds evaluator), and loop extents are stored in raw form. This
+// deliberately avoids substituting lets into expressions: full expansion
+// can grow combinatorially when let values nest.
+slinky::expr resolve_let_var(const ynn::slinky_globals& globals,
+                             const slinky::expr& e) {
+  if (auto v = slinky::as_variable(e)) {
+    for (const auto& let : globals.lets) {
+      if (let.first == *v) return let.second;
+    }
+  }
+  return e;
+}
+
 // Decide how many workers each loop of the global nest should use. This must
 // run after the whole nest is built (and all the steps are final): after
 // fusion, a function's loops can end up inside loops of other functions, so
 // the number of tasks produced outside each loop is only known once the nest
 // is complete.
+//
+// `funcs_in_level[i]` is the number of functions whose body executes inside
+// loop level `i`. A loop whose ancestors provably always produce enough tasks
+// can never run more than one worker, so its
+// `select(w > 1, parallel, serial)` is folded to `serial`. If such a loop
+// also contains a single function and its step is not required (no alignment
+// constraint), the loop is pure overhead: one kernel call per tile with
+// nothing to interleave or parallelize. Setting its step to the full extent
+// makes it a provable single iteration, which slinky then folds away,
+// leaving one kernel call over the whole range.
 void compute_workers(ynn::slinky_globals& globals, int max_threads,
-                     std::vector<loop_level>& global_loop_nest) {
+                     std::vector<loop_level>& global_loop_nest,
+                     const std::vector<int>& funcs_in_level) {
   // Enough tasks to have good load balancing.
   const slinky::index_t target_task_count =
       max_threads > 1 ? max_threads * 2 : 1;
 
+  // A guaranteed lower bound of the number of iterations of loop level `l`:
+  // ceil_div(lower bound of extent, upper bound of step), or 1 when either
+  // bound is unknown (a scheduled loop runs at least one iteration).
+  auto min_iterations = [&](const loop_level& l) -> slinky::index_t {
+    std::optional<slinky::index_t> extent_lb =
+        slinky::evaluate_constant_lower_bound(l.extent);
+    std::optional<slinky::index_t> step_ub =
+        slinky::evaluate_constant_upper_bound(resolve_let_var(globals, l.step));
+    if (extent_lb && step_ub && *step_ub > 0) {
+      return std::max<slinky::index_t>(slinky::ceil_div(*extent_lb, *step_ub),
+                                       1);
+    }
+    return 1;
+  };
+
   // The number of tasks the loops from the root down to (and including) each
   // loop can produce. Serial loops (reductions) run their iterations within
-  // one task, so they don't contribute to this count.
+  // one task, so they don't contribute to this count. `tasks_lb` is a
+  // guaranteed constant lower bound of the same quantity.
   std::vector<slinky::expr> tasks(global_loop_nest.size());
+  std::vector<slinky::index_t> tasks_lb(global_loop_nest.size());
   for (size_t i = 0; i < global_loop_nest.size(); ++i) {
     loop_level& l = global_loop_nest[i];
     assert(l.parent < static_cast<int>(i));
     slinky::expr tasks_above = l.parent >= 0 ? tasks[l.parent] : 1;
-    if (max_threads == 1 || globals.is_reduction_dim(l.loop_id.var)) {
+    const slinky::index_t tasks_above_lb =
+        l.parent >= 0 ? tasks_lb[l.parent] : 1;
+    // A loop whose step provably covers its extent runs exactly one
+    // iteration, so it is identical for any number of functions inside it
+    // (required steps are excluded). The proof needs the global lets resolved
+    // -- split factors are frequently `min(...)` expressions that the
+    // simplifier already reduced to the extent itself, but hidden behind a let
+    // variable slinky can't see through when it builds the loop. Replacing the
+    // step with the extent expression lets slinky prove the single iteration
+    // and fold the loop away entirely.
+    const bool elide_allowed =
+        !l.step_is_required && globals.is_pure_dim(l.loop_id.var);
+    // Serial reduction ("k") dims additionally qualify for the
+    // single-iteration elision below (but not for the widening elisions):
+    // with provably one iteration there is no accumulation blocking to
+    // preserve.
+    const bool single_iteration_elide_allowed =
+        elide_allowed ||
+        (!l.step_is_required && globals.is_reduction_dim(l.loop_id.var));
+    const slinky::expr simplified_extent = single_iteration_elide_allowed
+                                               ? slinky::simplify(l.extent)
+                                               : slinky::expr();
+    if (single_iteration_elide_allowed &&
+        slinky::prove_true(simplified_extent <=
+                           resolve_let_var(globals, l.step))) {
+      l.step = slinky::max(simplified_extent, 1);
       l.workers = slinky::loop::serial;
       tasks[i] = tasks_above;
+      tasks_lb[i] = tasks_above_lb;
+    } else if (max_threads == 1 || globals.is_reduction_dim(l.loop_id.var)) {
+      l.workers = slinky::loop::serial;
+      // Reduction loops are left alone even when they contain a single
+      // function: their step controls accumulation blocking, not just task
+      // granularity.
+      if (elide_allowed && i < funcs_in_level.size() &&
+          funcs_in_level[i] <= 1) {
+        l.step = slinky::max(l.extent, 1);
+      }
+      tasks[i] = tasks_above;
+      tasks_lb[i] = tasks_above_lb;
     } else {
-      slinky::expr w =
-          slinky::ceil_div(slinky::expr(target_task_count), tasks_above);
-      w = globals.get(w, "w");
-      l.workers = slinky::simplify(slinky::select::make(
-          w > 1, slinky::loop::parallel, slinky::loop::serial));
+      // The loop is provably serial iff the loops above it always produce
+      // enough tasks: w = ceil_div(target, tasks_above) <= 1 iff
+      // tasks_above >= target.
+      if (tasks_above_lb >= target_task_count) {
+        l.workers = slinky::loop::serial;
+        if (elide_allowed && i < funcs_in_level.size() &&
+            funcs_in_level[i] <= 1) {
+          l.step = slinky::max(l.extent, 1);
+        }
+      } else {
+        slinky::expr w = globals.get(
+            slinky::ceil_div(slinky::expr(target_task_count), tasks_above),
+            "w");
+        l.workers = slinky::simplify(slinky::select::make(
+            w > 1, slinky::loop::parallel, slinky::loop::serial));
+      }
       tasks[i] =
           slinky::simplify(tasks_above * slinky::ceil_div(l.extent, l.step));
+      tasks_lb[i] = tasks_above_lb * min_iterations(l);
     }
   }
 }
@@ -632,7 +727,17 @@ void ynn_runtime::schedule() {
   // would be scheduled serially, and every other size would be sized one
   // worker short.
   const int max_threads = threadpool() ? threadpool()->thread_count() + 1 : 1;
-  compute_workers(globals, max_threads, global_loop_nest);
+  // A function executes inside every loop of its (final) loop nest, so the
+  // number of functions inside a loop level is the number of loop nests it
+  // appears in. A count of 1 means the level only contains the function that
+  // created it.
+  std::vector<int> funcs_in_level(global_loop_nest.size(), 0);
+  for (const scheduling_data& sched_data : func_scheduling_data) {
+    for (int level : sched_data.loop_nest) {
+      funcs_in_level[level]++;
+    }
+  }
+  compute_workers(globals, max_threads, global_loop_nest, funcs_in_level);
 
   // Use previously computed information to actually schedule the functions.
   for (int i = funcs.size() - 1; i >= 0; --i) {

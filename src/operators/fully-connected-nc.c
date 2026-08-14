@@ -1636,6 +1636,13 @@ static enum xnn_status generate_fingerprint_data(const struct fc_variant* varian
   const size_t bytes = weights_bytes + bias_bytes + kernel_scale_bytes +
                        kernel_zero_points_bytes + 4 * XNN_ALLOCATION_ALIGNMENT;
   uint8_t* buffer = xnn_allocate_simd_memory(bytes);
+  if (!buffer) {
+    xnn_log_error(
+        "Could not allocate %zu bytes when generating fully connected "
+        "fingerprint data",
+        bytes);
+    return xnn_status_out_of_memory;
+  }
   fill_fingerprint_buffer(buffer, bytes);
   context->fingerprint_data_to_release = buffer;
   context->input_channels = input_channels;
@@ -1967,6 +1974,9 @@ enum xnn_status xnn_create_fully_connected_nc_qd8_f16_qb4w_f16_scales(
   }
   xnn_bfloat16* bf16_scale_buffer =
       (xnn_bfloat16*)xnn_allocate_memory(scale_buffer_size);
+  if (bf16_scale_buffer == NULL) {
+    return xnn_status_out_of_memory;
+  }
   for (size_t i = 0; i < num_blocks; ++i) {
     bf16_scale_buffer[i] = xnn_bfloat16_from_float(
         xnn_float16_to_float(((const xnn_float16*)kernel_scale)[i]));
@@ -2215,6 +2225,9 @@ enum xnn_status xnn_create_fully_connected_nc_qp8_f32_qb4w_f16_scales(
   }
   xnn_bfloat16* bf16_scale_buffer =
       (xnn_bfloat16*)xnn_allocate_memory(scale_buffer_size);
+  if (bf16_scale_buffer == NULL) {
+    return xnn_status_out_of_memory;
+  }
   for (size_t i = 0; i < num_blocks; ++i) {
     bf16_scale_buffer[i] = xnn_bfloat16_from_float(
         xnn_float16_to_float(((const xnn_float16*)kernel_scale)[i]));
@@ -2282,6 +2295,9 @@ enum xnn_status xnn_create_fully_connected_nc_qd8_f32_qb4w_f16_scales(
   }
   xnn_bfloat16* bf16_scale_buffer =
       (xnn_bfloat16*)xnn_allocate_memory(scale_buffer_size);
+  if (bf16_scale_buffer == NULL) {
+    return xnn_status_out_of_memory;
+  }
   for (size_t i = 0; i < num_blocks; ++i) {
     bf16_scale_buffer[i] =
         xnn_bfloat16_from_float(xnn_float16_to_float(kernel_scale[i]));

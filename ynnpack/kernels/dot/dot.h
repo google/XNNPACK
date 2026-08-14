@@ -36,6 +36,10 @@ enum {
 
   // This kernel supports an unaligned B
   unaligned_b = 1 << 2,
+
+  // This kernel assumes that the values in B do not include the most negative
+  // value, i.e. -b does not overflow.
+  symmetric_b = 1 << 3,
 };
 
 }  // namespace dot_flag
@@ -99,14 +103,21 @@ struct dot_kernel {
   int tile_k = 0;
   uint32_t flags = 0;
   float cost = std::numeric_limits<float>::infinity();
+
+  // If not specifically known, this is the maximum `block_n` value that could
+  // be returned by another compatible call to `get_dot_kernel`.
+  int max_block_n = 0;
 };
 
+// If we don't know the shape of a dot, just assume it's big.
+inline constexpr size_t unknown_dot_extent = 2048;
+
 struct dot_shape {
-  std::optional<size_t> m;
-  std::optional<size_t> n;
-  std::optional<size_t> k1;
-  std::optional<size_t> k2;
-  std::optional<size_t> k3;
+  size_t m = unknown_dot_extent;
+  size_t n = unknown_dot_extent;
+  size_t k1 = unknown_dot_extent;
+  size_t k2 = unknown_dot_extent;
+  size_t k3 = unknown_dot_extent;
 };
 
 // Compute an estimate of the cost of a dot operation. This number has no
@@ -127,7 +138,7 @@ struct dot_packed_shape {
 // not `nullopt`, the chosen kernel will have the flag `dot_flag::transpose_a`
 // if *transpose_a is true.
 dot_kernel get_dot_kernel(const dot_type& type, const dot_shape& shape = {},
-                          const dot_packed_shape* dot_packed_shape = nullptr,
+                          dot_packed_shape dot_packed_shape = {},
                           uint32_t required_flags = 0,
                           std::optional<bool> transpose_a = std::nullopt,
                           uint64_t arch_flags = get_supported_arch_flags());

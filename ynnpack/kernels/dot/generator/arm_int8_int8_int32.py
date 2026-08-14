@@ -166,6 +166,7 @@ generate_dot_kernels(
 generate_dot_kernels(
     arm_neondot_int8_int8_int32(),
     [
+        (1, 64, 8),
         (1, 32, 8),
         (2, 32, 8),
         (3, 32, 8),

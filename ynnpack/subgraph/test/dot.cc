@@ -266,7 +266,11 @@ void TestStaticB(A, B, C) {
       subgraph.AddInput(type_of<C>(), output_rank, c_id);
     }
 
-    subgraph.AddDot(num_k_dims, a_id, b_id, c_id, output_id);
+    uint32_t dot_flags = 0;
+    if (random_bool(rng)) {
+      dot_flags |= YNN_NODE_FLAG_SYMMETRIC_B;
+    }
+    subgraph.AddDot(num_k_dims, a_id, b_id, c_id, output_id, dot_flags);
 
     Runtime runtime(subgraph.GetSubgraph(),
                     random_bool(rng) ? &scheduler : nullptr);
@@ -436,7 +440,11 @@ void TestDynamicB(A, B, C) {
       subgraph.AddInput(type_of<C>(), output_rank, c_id);
     }
 
-    subgraph.AddDot(num_k_dims, a_id, b_tr_id, c_id, output_id);
+    uint32_t dot_flags = 0;
+    if (random_bool(rng)) {
+      dot_flags |= YNN_NODE_FLAG_SYMMETRIC_B;
+    }
+    subgraph.AddDot(num_k_dims, a_id, b_tr_id, c_id, output_id, dot_flags);
 
     Runtime runtime(subgraph.GetSubgraph(),
                     random_bool(rng) ? &scheduler : nullptr);
@@ -582,7 +590,11 @@ void TestStaticShapeDynamicB(A, B, C) {
       subgraph.AddTranspose(b_perm, b_id, b_tr_id);
     }
 
-    subgraph.AddDot(num_k_dims, a_id, b_tr_id, c_id, output_id);
+    uint32_t dot_flags = 0;
+    if (random_bool(rng)) {
+      dot_flags |= YNN_NODE_FLAG_SYMMETRIC_B;
+    }
+    subgraph.AddDot(num_k_dims, a_id, b_tr_id, c_id, output_id, dot_flags);
 
     Runtime runtime(subgraph.GetSubgraph(),
                     random_bool(rng) ? &scheduler : nullptr);
