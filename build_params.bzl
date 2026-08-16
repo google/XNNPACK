@@ -80,6 +80,8 @@ def xnnpack_cc_library_for_arch(arch, name, deps = None, **kwargs):
         else:
             kwargs[key] = val
 
+    kwargs["copts"] = kwargs.get("copts", []) + ["-Wno-unused-variable"]
+
     xnnpack_cc_library(
         name = name,
         target_compatible_with = xnnpack_select_if(
