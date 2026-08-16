@@ -365,6 +365,92 @@ class PackWMicrokernelTester {
     }
   }
 
+  void Test(xnn_qd8_qc2w_packw_gemm_goi_ukernel_fn packw) const {
+    xnnpack::ReplicableRandomDevice rng;
+    auto i32rng = std::bind(
+        std::uniform_int_distribution<int32_t>(-10000, 10000), std::ref(rng));
+    auto f32rng = std::bind(
+        std::uniform_real_distribution<float>(-10.0f, 10.0f), std::ref(rng));
+
+    const size_t k4 = round_up_po2(k(), 4);  // Round up to byte aligned rows
+
+    xnnpack::Buffer<uint8_t> weights(n() * k4 / 4);
+    xnnpack::Buffer<int32_t> bias(n());
+    xnnpack::Buffer<float> kzp_buffer(n());
+    const size_t total_bytes = packed_n() * packed_k() + packed_n() * sizeof(uint32_t) + packed_n() * sizeof(float);
+    xnnpack::Buffer<int8_t, XNN_ALLOCATION_ALIGNMENT> packed_w(total_bytes);
+    xnnpack::Buffer<int8_t, XNN_ALLOCATION_ALIGNMENT> packed_w_ref(total_bytes);
+
+    xnnpack::fill_uniform_random_bits(weights.data(), weights.size(), rng);
+    std::generate(bias.begin(), bias.end(), std::ref(i32rng));
+    std::generate(kzp_buffer.begin(), kzp_buffer.end(), std::ref(f32rng));
+    std::fill(packed_w.begin(), packed_w.end(), INT8_C(0));
+    std::fill(packed_w_ref.begin(), packed_w_ref.end(), INT8_C(0x7B));
+
+    const int32_t* bias_data = nullbias() ? nullptr : bias.data();
+    const float* kzp_data = kzp_buffer.data();
+    const xnn_qd8_qc2w_packing_params packing_params = {
+        static_cast<int8_t>(izp()), kzp_data};
+
+    xnn_pack_qd8_qc2w_gemm_goi_w(
+        /*g=*/1, n(), k4, nr(), kr(), sr(), weights.data(), bias_data,
+        /*scale=*/nullptr, reinterpret_cast<void*>(packed_w_ref.data()),
+        /*extra_bytes=*/0, &packing_params);
+
+    packw(/*g=*/1, n(), k4, nr(), kr(), sr(), weights.data(), bias_data,
+          /*scale=*/nullptr, packed_w.data(), /*extra_bytes=*/0,
+          &packing_params);
+
+    const size_t total_written = packed_n() * sizeof(int32_t) + packed_n() * sizeof(float) + packed_n() * (k4 / 4);
+    for (size_t i = 0; i < total_written; i++) {
+      if (packed_w_ref[i] != INT8_C(0x7B)) {
+        EXPECT_EQ((int32_t)packed_w[i], (int32_t)packed_w_ref[i])
+            << "at byte " << i;
+      }
+    }
+  }
+
+  void Test(xnn_qs8_qc2w_packw_gemm_goi_ukernel_fn packw) const {
+    xnnpack::ReplicableRandomDevice rng;
+    auto i32rng = std::bind(
+        std::uniform_int_distribution<int32_t>(-10000, 10000), std::ref(rng));
+
+    const size_t k4 = round_up_po2(k(), 4);  // Round up to byte aligned rows
+
+    xnnpack::Buffer<uint8_t> weights(n() * k4 / 4);
+    xnnpack::Buffer<int32_t> bias(n());
+    const size_t total_bytes = packed_n() * packed_k() + packed_n() * sizeof(uint32_t);
+    xnnpack::Buffer<int8_t, XNN_ALLOCATION_ALIGNMENT> packed_w(total_bytes);
+    xnnpack::Buffer<int8_t, XNN_ALLOCATION_ALIGNMENT> packed_w_ref(total_bytes);
+
+    xnnpack::fill_uniform_random_bits(weights.data(), weights.size(), rng);
+    std::generate(bias.begin(), bias.end(), std::ref(i32rng));
+    std::fill(packed_w.begin(), packed_w.end(), INT8_C(0));
+    std::fill(packed_w_ref.begin(), packed_w_ref.end(), INT8_C(0x7B));
+
+    const int32_t* bias_data = nullbias() ? nullptr : bias.data();
+    const xnn_qs8_qc2w_packing_params packing_params = {
+        static_cast<int8_t>(izp()), 0.0f};
+
+    auto reference_fn = unsigned_weight() ? xnn_pack_qs8_to_qu8_qc2w_gemm_goi_w : xnn_pack_qs8_qc2w_gemm_goi_w;
+    reference_fn(
+        /*g=*/1, n(), k4, nr(), kr(), sr(), weights.data(), bias_data,
+        /*scale=*/nullptr, reinterpret_cast<void*>(packed_w_ref.data()),
+        /*extra_bytes=*/0, &packing_params);
+
+    packw(/*g=*/1, n(), k4, nr(), kr(), sr(), weights.data(), bias_data,
+          /*scale=*/nullptr, packed_w.data(), /*extra_bytes=*/0,
+          &packing_params);
+
+    const size_t total_written = packed_n() * sizeof(int32_t) + packed_n() * (k4 / 4);
+    for (size_t i = 0; i < total_written; i++) {
+      if (packed_w_ref[i] != INT8_C(0x7B)) {
+        EXPECT_EQ((int32_t)packed_w[i], (int32_t)packed_w_ref[i])
+            << "at byte " << i;
+      }
+    }
+  }
+
   void Test(xnn_x16_packw_gemm_goi_ukernel_fn packw) const {
     xnnpack::Buffer<xnn_float16> weights(g() * n() * k());
     xnnpack::Buffer<xnn_float16> padded_weights(g() * n() * packed_k());
