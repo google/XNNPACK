@@ -109,10 +109,10 @@ void xnn_qs8_qc2w_gemm_minmax_fp32_ukernel_2x8c8__avx256skx_madd(
       vacc1x4567 = _mm256_dpbusd_epi32_madd_kzp2(vacc1x4567, va1x0, vb89ABCDEFx0123);
       vacc1x0x0123 = _mm256_dpbusd_epi32_madd_kzp2(vacc1x0x0123, va0x1, vb01234567x4567);
       vacc1x0x4567 = _mm256_dpbusd_epi32_madd_kzp2(vacc1x0x4567, va0x1, vb89ABCDEFx4567);
-      vacc0x0123 = _mm256_dpbusd_epi32_madd_kzp2(vacc0x0123, va0x2, vb01234567x89AB);
-      vacc0x4567 = _mm256_dpbusd_epi32_madd_kzp2(vacc0x4567, va0x2, vb89ABCDEFx89AB);
       vacc1x1x0123 = _mm256_dpbusd_epi32_madd_kzp2(vacc1x1x0123, va1x1, vb01234567x4567);
       vacc1x1x4567 = _mm256_dpbusd_epi32_madd_kzp2(vacc1x1x4567, va1x1, vb89ABCDEFx4567);
+      vacc0x0123 = _mm256_dpbusd_epi32_madd_kzp2(vacc0x0123, va0x2, vb01234567x89AB);
+      vacc0x4567 = _mm256_dpbusd_epi32_madd_kzp2(vacc0x4567, va0x2, vb89ABCDEFx89AB);
       vacc1x0123 = _mm256_dpbusd_epi32_madd_kzp2(vacc1x0123, va1x2, vb01234567x89AB);
       vacc1x4567 = _mm256_dpbusd_epi32_madd_kzp2(vacc1x4567, va1x2, vb89ABCDEFx89AB);
       vacc1x0x0123 = _mm256_dpbusd_epi32_madd_kzp2(vacc1x0x0123, va0x3, vb01234567xCDEF);
@@ -191,6 +191,8 @@ void xnn_qs8_qc2w_gemm_minmax_fp32_ukernel_2x8c8__avx256skx_madd(
       w = (const int8_t*) w + 64;
       k -= 8 * sizeof(int8_t);
     }
+    // Make sure there were no leftovers.
+    assert(k == 0);
     vacc0x0123 = _mm256_add_epi32(vacc0x0123, vacc1x0x0123);
     vacc0x4567 = _mm256_add_epi32(vacc0x4567, vacc1x0x4567);
     vacc1x0123 = _mm256_add_epi32(vacc1x0123, vacc1x1x0123);
