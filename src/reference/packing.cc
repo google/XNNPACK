@@ -68,6 +68,18 @@ void copy_bias(const Src* b, size_t b_offset, size_t n, Dst* packed_b) {
   }
 }
 
+template <typename Dst>
+void copy_bias_unaligned(const float* b, size_t b_offset, size_t n,
+                         Dst* packed_b) {
+  if (b) {
+    for (size_t i = 0; i < n; ++i) {
+      packed_b[i] = unaligned_indexed_load_f32(b, b_offset + i);
+    }
+  } else {
+    std::fill_n(packed_b, n, static_cast<Dst>(0));
+  }
+}
+
 template <typename Src, typename Dst>
 void copy_bias(const Src* b, size_t b_offset, size_t n, Dst* packed_b,
                Src zero_point) {
@@ -4566,11 +4578,10 @@ void xnn_pack_f32_dwconv_hwg_w(size_t primary_tile, size_t h, size_t w,
   assert(k != nullptr);
   assert(packed_weights != nullptr);
   size_t kernel_size = h * w;
-
   for (size_t cr_block_start = 0; cr_block_start < c;
        cr_block_start += channel_tile) {
     const size_t cr_block_size = min(c - cr_block_start, channel_tile);
-    copy_bias(b, cr_block_start, cr_block_size, packed_weights);
+    copy_bias_unaligned(b, cr_block_start, cr_block_size, packed_weights);
     packed_weights += channel_tile;
 
     // Stores the x and y index that should be processed next.
@@ -4579,8 +4590,8 @@ void xnn_pack_f32_dwconv_hwg_w(size_t primary_tile, size_t h, size_t w,
     for (size_t i = 0; i < kernel_size; i++) {
       for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size;
            cr_block_offset++) {
-        const float kv =
-            k[(y * w + x) * c + (cr_block_start + cr_block_offset)];
+        const float kv = unaligned_indexed_load_f32(
+            k, (y * w + x) * c + (cr_block_start + cr_block_offset));
         *packed_weights++ = kv;
       }
       packed_weights += channel_tile - cr_block_size;
