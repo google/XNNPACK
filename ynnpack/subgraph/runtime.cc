@@ -48,6 +48,7 @@
 #include "slinky/runtime/depends_on.h"
 #include "slinky/runtime/evaluate.h"
 #include "slinky/runtime/expr.h"
+#include "slinky/runtime/print.h"
 #include "slinky/runtime/stmt.h"
 
 void ynn_runtime_value::make_buffer(ynn_runtime& runtime,
@@ -452,6 +453,149 @@ void compute_workers(ynn::slinky_globals& globals, int max_threads,
   }
 }
 
+// Prints the decisions made by the scheduler for debugging
+void dump_schedule(slinky::node_context& symbols,
+                   const std::vector<slinky::func>& funcs,
+                   const std::vector<scheduling_data>& func_scheduling_data,
+                   const std::vector<loop_level>& global_loop_nest) {
+  auto func_name = [&](const slinky::func* f) -> std::string {
+    if (!f || f->outputs().empty()) return "?";
+    return symbols.name(f->outputs()[0].sym());
+  };
+
+  // A short signature of a function: its index in `funcs`, its output buffer,
+  // operation and input buffers, e.g. "#3 v6 = dot(in0, v7)".
+  auto func_signature = [&](int i) -> std::string {
+    // Keep only the operation name, e.g. "dot num_k_dims=1" -> "dot". Copy
+    // functions (aliased transposes, reshapes and the like) have no name.
+    std::string op = funcs[i].attrs().name;
+    op = op.substr(0, op.find(' '));
+    if (op.empty()) op = "copy";
+    std::stringstream ss;
+    ss << "#" << i << " " << func_name(&funcs[i]) << " = " << op << "(";
+    for (size_t j = 0; j < funcs[i].inputs().size(); ++j) {
+      ss << (j ? ", " : "") << symbols.name(funcs[i].inputs()[j].sym());
+    }
+    ss << ")";
+    return ss.str();
+  };
+
+  // The index of the function which created a loop, so loops can be ordered
+  // by it below.
+  std::map<const slinky::func*, int> func_index;
+  for (size_t i = 0; i < funcs.size(); ++i) {
+    func_index[&funcs[i]] = i;
+  }
+
+  std::vector<std::vector<int>> children(global_loop_nest.size());
+  std::vector<int> roots;
+  for (size_t i = 0; i < global_loop_nest.size(); ++i) {
+    if (global_loop_nest[i].parent == -1) {
+      roots.push_back(i);
+    } else {
+      children[global_loop_nest[i].parent].push_back(i);
+    }
+  }
+
+  // Order sibling loops by the index of the function which created them. The
+  // functions are in graph order (producers before consumers), while the
+  // loops are created in the scheduling order (consumers first), so this
+  // makes the dump follow the execution order of the pipeline.
+  auto owner_index = [&](int loop) {
+    auto it = func_index.find(global_loop_nest[loop].loop_id.func);
+    return it != func_index.end() ? it->second : -1;
+  };
+  auto by_owner = [&](int a, int b) {
+    return std::make_pair(owner_index(a), a) <
+           std::make_pair(owner_index(b), b);
+  };
+  for (std::vector<int>& c : children) {
+    std::sort(c.begin(), c.end(), by_owner);
+  }
+  std::sort(roots.begin(), roots.end(), by_owner);
+
+  // Group the functions by the loop their calls execute in: the innermost
+  // loop of their nest, which includes the loops of the function itself
+  // (-1 is the root). This mirrors the structure of the resulting IR. The
+  // compute_at location (which determines where the outputs are allocated)
+  // is part of the detailed list below. Functions with no explicit
+  // compute_at location (slinky decides) are marked with "(auto)".
+  std::map<int, std::vector<int>> funcs_at;
+  for (size_t i = 0; i < funcs.size(); ++i) {
+    const scheduling_data& sched_data = func_scheduling_data[i];
+    int at = sched_data.loop_nest.empty() ? -1 : sched_data.loop_nest.back();
+    funcs_at[at].push_back(i);
+  }
+
+  std::stringstream ss;
+  ss << "=== ynn schedule ===\n";
+  ss << "loop nest:\n";
+  // The contents of a loop are the functions called directly in it and its
+  // child loops, interleaved in the order of the function indices (functions
+  // are in graph order, so this approximates the execution order of the
+  // pipeline).
+  auto print_body = [&](auto&& self, int loop,
+                        const std::string& indent) -> void {
+    auto func_it = funcs_at[loop].begin();
+    auto child_it = loop >= 0 ? children[loop].begin() : roots.begin();
+    auto func_end = funcs_at[loop].end();
+    auto child_end = loop >= 0 ? children[loop].end() : roots.end();
+    while (func_it != func_end || child_it != child_end) {
+      if (child_it == child_end ||
+          (func_it != func_end && *func_it < owner_index(*child_it))) {
+        ss << indent << func_signature(*func_it)
+           << (func_scheduling_data[*func_it].compute_at < 0 ? " (auto)" : "")
+           << "\n";
+        ++func_it;
+      } else {
+        const int i = *child_it;
+        const loop_level& l = global_loop_nest[i];
+        ss << indent << "[" << i << "] " << func_name(l.loop_id.func) << ":"
+           << symbols.name(l.loop_id.var) << " extent=" << l.extent
+           << " step=" << l.step << " workers=" << l.workers
+           << (l.step_is_required ? " (step required)" : "") << "\n";
+        self(self, i, indent + "  ");
+        ++child_it;
+      }
+    }
+  };
+  print_body(print_body, -1, "  ");
+  ss << "funcs (in scheduling order):\n";
+  for (int i = funcs.size() - 1; i >= 0; --i) {
+    const slinky::func& f = funcs[i];
+    const scheduling_data& sched_data = func_scheduling_data[i];
+    const auto* sched = static_cast<const ynn::scheduling_info*>(f.user_data());
+    ss << "  " << func_signature(i) << ": compute_at=" << sched_data.compute_at
+       << " nest=[";
+    for (size_t j = 0; j < sched_data.loop_nest.size(); ++j) {
+      ss << (j ? " " : "") << sched_data.loop_nest[j];
+    }
+    ss << "]";
+    if (sched && sched->force_root) {
+      ss << " force_root";
+    }
+    if (sched && !sched->loop_splits.empty()) {
+      // The splits are stored in their original (innermost first) order, but
+      // split_matched is indexed in the reversed order used for matching.
+      const size_t num_splits = sched->loop_splits.size();
+      ss << " splits:";
+      for (size_t j = 0; j < num_splits; ++j) {
+        const ynn::scheduling_split& split = sched->loop_splits[j];
+        ss << " (" << symbols.name(split.var) << " extent=" << split.extent
+           << " step=" << split.step;
+        if (split.step_is_required) ss << " required";
+        if (!sched_data.split_matched.empty() &&
+            sched_data.split_matched[num_splits - 1 - j]) {
+          ss << " matched";
+        }
+        ss << ")";
+      }
+    }
+    ss << "\n";
+  }
+  fprintf(stderr, "%s", ss.str().c_str());
+}
+
 }  // namespace
 
 // Logically this function has multiple separate blocks:
@@ -798,6 +942,11 @@ void ynn_runtime::schedule() {
 
       f.loops(std::move(loops));
     }
+  }
+
+  if (getenv("YNN_DUMP_SCHEDULE")) {
+    dump_schedule(globals.symbols, funcs, func_scheduling_data,
+                  global_loop_nest);
   }
 }
 
