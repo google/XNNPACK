@@ -326,6 +326,27 @@ ynn_node* ynn_subgraph::get_producer(uint32_t id) {
   return nullptr;
 }
 
+size_t ynn_subgraph::count_consumers(uint32_t id) const {
+  if (id == YNN_INVALID_VALUE_ID) return 0;
+
+  size_t count = 0;
+  for (const ynn_node& node : nodes) {
+    if (!node.is_valid()) continue;
+    for (uint32_t i : node.inputs) {
+      if (i == id) {
+        ++count;
+      }
+    }
+  }
+
+  if (value(id).is_external_output()) {
+    // Treat external outputs as having a consumer.
+    ++count;
+  }
+
+  return count;
+}
+
 uint32_t ynn_subgraph::get_scalar_value_id(ynn_type type, float value_f32) {
   return get_static_value_id(type, /*rank=*/0, /*dims=*/nullptr, &value_f32);
 }
