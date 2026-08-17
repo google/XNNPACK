@@ -1684,6 +1684,13 @@ static void init_qu8_vprelu_config(void) {
       qu8_vprelu_config.init = (xnn_init_binary_params_fn) xnn_init_qu8_vprelu_scalar_params;
       qu8_vprelu_config.element_tile = 8;
     }
+  #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
+    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    qu8_vprelu_config.op_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_qu8_vprelu_ukernel__rvv_u8v);
+    qu8_vprelu_config.opc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_qu8_vpreluc_ukernel__rvv_u8v);
+    qu8_vprelu_config.ropc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_qu8_vrpreluc_ukernel__rvv_u8v);
+    qu8_vprelu_config.init = (xnn_init_binary_params_fn) xnn_init_qu8_vprelu_scalar_params;
+    qu8_vprelu_config.element_tile = 2 * hardware_config->vlenb / sizeof(int8_t);
   #else
     qu8_vprelu_config.op_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_qu8_vprelu_ukernel__scalar_u8);
     qu8_vprelu_config.opc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_qu8_vpreluc_ukernel__scalar_u8);
