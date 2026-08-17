@@ -1801,6 +1801,13 @@ static struct fingerprint_buffers generate_fingerprint_data(
       kernel_scale_size * sizeof(float) +
       XNN_ALLOCATION_ALIGNMENT * 3;
   uint8_t* buffer = xnn_allocate_simd_memory(bytes);
+  if (!buffer) {
+    xnn_log_error(
+        "Could not allocate %zu bytes when generating convolution 2D NHWC "
+        "fingerprint data",
+        bytes);
+    return (struct fingerprint_buffers){0};
+  }
   fill_fingerprint_buffer(buffer, bytes);
   struct fingerprint_buffers data = {
     .data = buffer,
@@ -1916,6 +1923,10 @@ enum xnn_status xnn_fingerprint_convolution2d_nhwc(
     return f_context.status;
   }
   struct fingerprint_buffers data = generate_fingerprint_data(variant, &context);
+  if (!data.data) {
+    finalize_fingerprint_context(&f_context);
+    return xnn_status_out_of_memory;
+  }
   context.kernel = data.kernel;
   context.bias = data.bias;
   context.kernel_scale = data.kernel_scale;
@@ -3394,9 +3405,16 @@ enum xnn_status reshape_convolution2d_nhwc_qx8_f16_qc8w(
             convolution_op->convolution_op->zero_buffers[i]);
       }
     }
-    convolution_op->convolution_op->zero_buffers =
-        xnn_reallocate_memory(convolution_op->convolution_op->zero_buffers,
-                              batch_size * sizeof(void*));
+    void** new_zero_buffers = xnn_reallocate_memory(
+        convolution_op->convolution_op->zero_buffers,
+        batch_size * sizeof(void*));
+    if (new_zero_buffers == NULL) {
+      xnn_log_error(
+          "failed to reallocate %zu bytes for zero_buffers",
+          batch_size * sizeof(void*));
+      return xnn_status_out_of_memory;
+    }
+    convolution_op->convolution_op->zero_buffers = new_zero_buffers;
     convolution_op->convolution_op->zero_buffers[0] =
         convolution_op->zero_buffer;
     for (size_t i = 1; i < batch_size; ++i) {
@@ -3456,9 +3474,16 @@ enum xnn_status reshape_convolution2d_nhwc_qx8_f32_qc8w(
             convolution_op->convolution_op->zero_buffers[i]);
       }
     }
-    convolution_op->convolution_op->zero_buffers =
-        xnn_reallocate_memory(convolution_op->convolution_op->zero_buffers,
-                              batch_size * sizeof(void*));
+    void** new_zero_buffers = xnn_reallocate_memory(
+        convolution_op->convolution_op->zero_buffers,
+        batch_size * sizeof(void*));
+    if (new_zero_buffers == NULL) {
+      xnn_log_error(
+          "failed to reallocate %zu bytes for zero_buffers",
+          batch_size * sizeof(void*));
+      return xnn_status_out_of_memory;
+    }
+    convolution_op->convolution_op->zero_buffers = new_zero_buffers;
     convolution_op->convolution_op->zero_buffers[0] =
         convolution_op->zero_buffer;
     for (size_t i = 1; i < batch_size; ++i) {

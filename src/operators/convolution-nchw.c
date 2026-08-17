@@ -957,6 +957,13 @@ static struct fingerprint_buffers generate_fingerprint_data(
   const size_t bias_size = params->group_output_channels * params->groups;
   const size_t bytes = (kernel_size + bias_size) * element_size + XNN_ALLOCATION_ALIGNMENT * 1;
   uint8_t* buffer = xnn_allocate_simd_memory(bytes);
+  if (!buffer) {
+    xnn_log_error(
+        "Could not allocate %zu bytes when generating convolution 2D NCHW "
+        "fingerprint data",
+        bytes);
+    return (struct fingerprint_buffers){0};
+  }
   fill_fingerprint_buffer(buffer, bytes);
   return (struct fingerprint_buffers){
       .data = buffer,
@@ -1016,6 +1023,10 @@ enum xnn_status xnn_fingerprint_convolution2d_nchw(
     return context.status;
   }
   const struct fingerprint_buffers data = generate_fingerprint_data(variant, &params);
+  if (!data.data) {
+    finalize_fingerprint_context(&context);
+    return xnn_status_out_of_memory;
+  }
 
   params.kernel = data.kernel;
   params.bias = data.bias;

@@ -115,15 +115,6 @@ auto make_transpose_impl(int elem_count, std::vector<int32_t> permutation) {
   };
 }
 
-size_t first_non_trivial_dim(ynn::span<const slinky::expr> extents) {
-  for (size_t i = 0; i < extents.size(); ++i) {
-    if (extents[i].defined() && !slinky::is_one(extents[i])) {
-      return i;
-    }
-  }
-  return extents.size();
-}
-
 }  // namespace
 
 void define_static_transpose(ynn_subgraph& subgraph, ynn_node& node,

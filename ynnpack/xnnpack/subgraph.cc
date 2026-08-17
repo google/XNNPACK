@@ -16,6 +16,7 @@
 #include <vector>
 
 #include "include/xnnpack.h"
+#include "ynnpack/base/arch.h"
 #include "ynnpack/base/log.h"
 #include "ynnpack/base/type.h"
 #include "ynnpack/composites/composites.h"
@@ -31,6 +32,16 @@ xnn_status xnn_initialize(const xnn_allocator* allocator) {
 }
 
 xnn_status xnn_deinitialize(void) { return xnn_status_success; }
+
+bool xnn_is_f16_native_supported(void) {
+#if defined(YNN_ARCH_ARM)
+  return ynn::is_arch_supported(ynn::arch_flag::neonfp16arith);
+#elif defined(YNN_ARCH_X86)
+  return ynn::is_arch_supported(ynn::arch_flag::avx512fp16);
+#else
+  return false;
+#endif
+}
 
 const void* xnn_experimental_get_build_identifier_data() {
   static uint64_t data = 0;

@@ -234,6 +234,15 @@ YNN_ALWAYS_INLINE bool is_contiguous(const slinky::dim& dim,
   return dim.extent() == 1 || dim.stride() == element_size;
 }
 
+inline size_t first_non_trivial_dim(ynn::span<const slinky::expr> extents) {
+  for (size_t i = 0; i < extents.size(); ++i) {
+    if (extents[i].defined() && !slinky::is_one(extents[i])) {
+      return i;
+    }
+  }
+  return extents.size();
+}
+
 YNN_ALWAYS_INLINE bool is_broadcast(const slinky::dim& dim) {
   return dim.extent() == 1 || dim.stride() == 0;
 }

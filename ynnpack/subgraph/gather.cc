@@ -220,7 +220,9 @@ void define_gather(ynn_subgraph& subgraph, ynn_node& node,
     if (kernel) {
       slinky::call_stmt::attributes attrs;
       attrs.name = "lut";
-      attrs.allow_in_place = compute_allow_in_place(node, *runtime.subgraph);
+      if (allow_in_place(node.inputs[1], node.outputs[0], *runtime.subgraph)) {
+        attrs.allow_in_place = (1 << 1);
+      }
       func = slinky::func::make(make_lut_impl(kernel),
                                 {{input.buffer, std::move(input_bounds)},
                                  {index.buffer, std::move(index_bounds)}},
@@ -228,7 +230,7 @@ void define_gather(ynn_subgraph& subgraph, ynn_node& node,
     } else {
       slinky::call_stmt::attributes attrs;
       attrs.name = "gather";
-      attrs.allow_in_place = compute_allow_in_place(node, *runtime.subgraph);
+      attrs.allow_in_place = 0;
       func = slinky::func::make(make_gather_impl(axes, output_rank, index.type),
                                 {{input.buffer, std::move(input_bounds)},
                                  {index.buffer, std::move(index_bounds)}},

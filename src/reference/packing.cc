@@ -2553,6 +2553,13 @@ void xnn_pack_kai_qs4_weights_and_biases_sme(
   bool free_accumulator_init = false;
   if (extra_data0 == nullptr) {
     extra_data0 = calloc(output_channels, sizeof(float));
+    if (extra_data0 == nullptr) {
+      xnn_log_error(
+          "failed to allocate %zu bytes for KleidiAI QS4 bias substitute buffer",
+          output_channels * sizeof(float));
+      assert(false);
+      return;
+    }
     free_accumulator_init = true;
   }
   kai_run_rhs_pack_nxk_qsi4cxps1s0_qsu4cxs1s0_neon(

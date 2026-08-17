@@ -2524,9 +2524,16 @@ enum xnn_status reshape_deconvolution2d_nhwc_qx8_f32_qc8w(
       }
     }
 
-    deconvolution_op->convolution_op->zero_buffers =
-        xnn_reallocate_memory(deconvolution_op->convolution_op->zero_buffers,
-                              batch_size * sizeof(void*));
+    void** new_zero_buffers = xnn_reallocate_memory(
+        deconvolution_op->convolution_op->zero_buffers,
+        batch_size * sizeof(void*));
+    if (new_zero_buffers == NULL) {
+      xnn_log_error(
+          "failed to reallocate %zu bytes for zero_buffers",
+          batch_size * sizeof(void*));
+      return xnn_status_out_of_memory;
+    }
+    deconvolution_op->convolution_op->zero_buffers = new_zero_buffers;
     deconvolution_op->convolution_op->zero_buffers[0] =
         deconvolution_op->zero_buffer;
     for (size_t i = 1; i < batch_size; ++i) {
