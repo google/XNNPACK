@@ -210,12 +210,48 @@ xnn_status xnn_define_blockwise_quantized_tensor_value_v2(
     const void* scale, size_t num_dims, size_t channel_dim, size_t block_size,
     const size_t* dims, const void* data, uint32_t external_id, uint32_t flags,
     xnn_datatype scale_type, uint32_t* id_out) {
-  // TODO: This is similar to xnn_define_channelwise_quantized_tensor_value_v2,
-  // but with an extra `ynn_define_static_broadcast` and then
-  // `ynn_define_static_reshape` of the scales.
-  YNN_LOG_ERROR()
-      << "Unsupported xnn_define_blockwise_quantized_tensor_value_v2";
-  return xnn_status_deprecated;
+  if (num_dims < 2 || block_size == 0) {
+    return xnn_status_invalid_parameter;
+  }
+
+  const size_t k_dim = dims[1];
+  if (k_dim % block_size != 0) {
+    return xnn_status_invalid_parameter;
+  }
+  const size_t num_blocks = k_dim / block_size;
+  const size_t scale_dims[2] = {dims[0], num_blocks};
+
+  uint32_t scale_id = YNN_INVALID_VALUE_ID;
+  ynn_status status = ynn_define_tensor(
+      subgraph->ynn, ynn::type_from_xnn(scale_type), 2, scale_dims, scale,
+      /*flags=*/0, &scale_id);
+  if (status != ynn_status_success) {
+    return ynn::xnn_status_from_ynn(status);
+  }
+
+  uint32_t zero_point_id = YNN_INVALID_VALUE_ID;
+  if (zero_point != 0) {
+    status = ynn_define_tensor(subgraph->ynn, ynn_type_int32, 0, nullptr,
+                               &zero_point, YNN_VALUE_FLAG_COPY_DATA,
+                               &zero_point_id);
+    if (status != ynn_status_success) {
+      return ynn::xnn_status_from_ynn(status);
+    }
+  }
+
+  *id_out =
+      external_id == XNN_INVALID_VALUE_ID ? YNN_INVALID_VALUE_ID : external_id;
+  status = ynn_define_tensor(
+      subgraph->ynn, ynn::type_from_xnn(datatype), num_dims, dims, data,
+      value_flags_from_xnn(flags, data != nullptr), id_out);
+  if (status != ynn_status_success) {
+    return ynn::xnn_status_from_ynn(status);
+  }
+
+  subgraph->scale_ids[*id_out] = scale_id;
+  subgraph->zero_point_ids[*id_out] = zero_point_id;
+  subgraph->block_sizes[*id_out] = block_size;
+  return xnn_status_success;
 }
 
 xnn_status xnn_define_blockwise_quantized_tensor_value(

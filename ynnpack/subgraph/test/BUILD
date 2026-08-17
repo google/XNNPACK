@@ -188,6 +188,14 @@ cc_test(
     deps = TEST_DEPS + ["//ynnpack/subgraph"],
 )
 
+cc_test(
+    name = "dynamically_quantized_dot",
+    srcs = ["dynamically_quantized_dot.cc"],
+    linkopts = ynn_binary_linkopts(),
+    malloc = ynn_binary_malloc(),
+    deps = TEST_DEPS + ["//ynnpack/subgraph"],
+)
+
 [cc_test(
     name = name,
     srcs = [name + ".cc"],

@@ -79,9 +79,32 @@ bool prefer_uint8_dot(ynn_type b_type) {
 
 namespace {
 
+bool is_layout_transform(const ynn_node& node) {
+  return std::holds_alternative<ynn_node::copy>(node.op) ||
+         std::holds_alternative<ynn_node::split_dim>(node.op) ||
+         std::holds_alternative<ynn_node::fuse_dim>(node.op) ||
+         std::holds_alternative<ynn_node::fuse_dims>(node.op) ||
+         std::holds_alternative<ynn_node::split_dims>(node.op) ||
+         std::holds_alternative<ynn_node::static_reshape>(node.op) ||
+         std::holds_alternative<ynn_node::static_broadcast>(node.op) ||
+         std::holds_alternative<ynn_node::static_slice>(node.op) ||
+         std::holds_alternative<ynn_node::static_transpose>(node.op);
+}
+
 bool try_dynamic_quantization_rewrite(ynn_subgraph& subgraph,
                                       uint32_t input_a_id) {
+  std::vector<uint32_t> path = {input_a_id};
+  // This rewrite assumes that there are no other users of these values. We
+  // can't check for that here, because we are in the middle of constructing the
+  // graph. Even if there are no other users now, there might be users later.
+  // We should be doing this kind of rewrite as part of `ynn_optimize_subgraph`,
+  // to fix this problem.
   ynn_node* producer_a = subgraph.get_producer(input_a_id);
+  while (producer_a && is_layout_transform(*producer_a)) {
+    input_a_id = producer_a->inputs[0];
+    path.push_back(input_a_id);
+    producer_a = subgraph.get_producer(input_a_id);
+  }
   if (!producer_a) return false;
 
   const ynn_node::ternary_elementwise* ternary =
@@ -106,7 +129,9 @@ bool try_dynamic_quantization_rewrite(ynn_subgraph& subgraph,
   // instead of int8.
   uint32_t scale_id = producer_a->inputs[1];
   dq_op->output_zero_point = 128;
-  subgraph.value(input_a_id).type = ynn_type_uint8;
+  for (uint32_t id : path) {
+    subgraph.value(id).type = ynn_type_uint8;
+  }
   ynn::define_ternary(subgraph, *producer_a, input_id, scale_id, zp_id,
                       input_a_id, ternary_op::quantize_uint8, kernel);
   return true;
@@ -615,7 +640,6 @@ uint32_t define_pack_b(ynn_subgraph& subgraph, const dot_type& type,
                        const dot_kernel& kernel, size_t num_k_dims,
                        bool consistent_arithmetic, uint32_t input_b_id) {
   const ynn_value& b = subgraph.value(input_b_id);
-
 
   ynn_value& packed_b = subgraph.new_internal_value();
   packed_b.type = b.type;
