@@ -40,6 +40,9 @@ enum {
   // This kernel assumes that the values in B do not include the most negative
   // value, i.e. -b does not overflow.
   symmetric_b = 1 << 3,
+
+  // This kernel supports or benefits from packing matrix A.
+  pack_a = 1 << 4,
 };
 
 }  // namespace dot_flag
