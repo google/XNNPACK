@@ -1,4 +1,5 @@
 // Copyright 2022 Google LLC
+// Copyright 2026 Arm Limited and/or its affiliates <open-source-office@arm.com>
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
@@ -267,6 +268,7 @@ XNN_INTERNAL const struct xnn_avgpool_config* xnn_init_f32_pavgpool_config();
 
 XNN_INTERNAL const struct xnn_dwconv_config* xnn_init_f16_dwconv_config();
 XNN_INTERNAL const struct xnn_dwconv_config* xnn_init_f32_dwconv_config();
+XNN_INTERNAL const struct xnn_dwconv_config* xnn_init_kai_f32_dwconv_config();
 XNN_INTERNAL const struct xnn_dwconv_config* xnn_init_qs8_qc8w_dwconv_config();
 XNN_INTERNAL const struct xnn_dwconv_config* xnn_init_qs8_dwconv_config();
 XNN_INTERNAL const struct xnn_dwconv_config* xnn_init_qu8_dwconv_config();

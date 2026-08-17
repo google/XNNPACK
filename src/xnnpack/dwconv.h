@@ -2,6 +2,7 @@
 // All rights reserved.
 //
 // Copyright 2019 Google LLC
+// Copyright 2026 Arm Limited and/or its affiliates <open-source-office@arm.com>
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
@@ -36,6 +37,18 @@ extern "C" {
 #include "src/qu8-dwconv/qu8-dwconv-minmax-fp32.inc"
 #include "src/qu8-dwconv/qu8-dwconv-minmax-rndnu.inc"
 #undef XNN_UKERNEL
+
+#if XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI && XNN_ENABLE_ARM_SME2
+XNN_INTERNAL size_t
+xnn_f32_dwconv_minmax_ukernel_9pvc__neonsme2_get_channel_tile(void);
+XNN_INTERNAL size_t
+xnn_f32_dwconv_minmax_ukernel_9pvc__neonsme2_get_output_height_tile(void);
+XNN_INTERNAL void xnn_f32_dwconv_minmax_ukernel_9pvc__neonsme2(
+    size_t channels, size_t output_width, const float** input,
+    const float* weights, float* output, intptr_t input_stride,
+    size_t output_increment, size_t input_offset, size_t input_pixel_stride,
+    const float* zero, const struct xnn_f32_minmax_params* params);
+#endif  // XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI && XNN_ENABLE_ARM_SME2
 
 #define DECLARE_F32_DWCONV2D_CHW_MINMAX_UKERNEL_FUNCTION(fn_name)  \
   XNN_INTERNAL void fn_name(                                       \
