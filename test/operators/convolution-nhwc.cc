@@ -1120,6 +1120,21 @@ void CountingAlignedDeallocate(void* context, void* pointer) {
   xnn_default_allocator.aligned_deallocate(context, pointer);
 }
 
+// Installs the counting hooks and restores the previous allocator when it
+// goes out of scope, so a failed assertion cannot leave them installed.
+class CountingAllocatorGuard {
+ public:
+  CountingAllocatorGuard() : saved_allocator_(xnn_params.allocator) {
+    xnn_params.allocator.aligned_allocate = CountingAlignedAllocate;
+    xnn_params.allocator.aligned_deallocate = CountingAlignedDeallocate;
+    live_aligned_allocations = 0;
+  }
+  ~CountingAllocatorGuard() { xnn_params.allocator = saved_allocator_; }
+
+ private:
+  const struct xnn_allocator saved_allocator_;
+};
+
 // The dynamically quantized reshape grows convolution_op->zero_buffers and
 // bumps valid_batch_size before it delegates to the shared reshape, which can
 // still reject the shape and leave xnn_operator::batch_size behind. Deleting
@@ -1137,10 +1152,7 @@ TEST(CONVOLUTION_NHWC_QD8_F32_QC8W,
   std::vector<float> bias(output_channels, 0.0f);
   std::vector<float> kernel_scale(output_channels, 1.0f);
 
-  const struct xnn_allocator saved_allocator = xnn_params.allocator;
-  xnn_params.allocator.aligned_allocate = CountingAlignedAllocate;
-  xnn_params.allocator.aligned_deallocate = CountingAlignedDeallocate;
-  live_aligned_allocations = 0;
+  const CountingAllocatorGuard allocator_guard;
 
   xnn_operator_t convolution_op = nullptr;
   enum xnn_status status = xnn_create_convolution2d_nhwc_qd8_f32_qc8w(
@@ -1176,11 +1188,8 @@ TEST(CONVOLUTION_NHWC_QD8_F32_QC8W,
     ASSERT_EQ(xnn_status_success, xnn_delete_operator(convolution_op));
   }
 
-  const size_t leaked = live_aligned_allocations;
-  xnn_params.allocator = saved_allocator;
-
   ASSERT_EQ(xnn_status_success, status);
-  EXPECT_EQ(leaked, 0);
+  EXPECT_EQ(live_aligned_allocations, 0);
 }
 
 CREATE_CONVOLUTION_TESTS(CONVOLUTION_NHWC_QS8, TestNHWCxQS8)
