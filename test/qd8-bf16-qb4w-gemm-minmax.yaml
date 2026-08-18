@@ -209,80 +209,112 @@
 - name: xnn_qd8_bf16_qb4w_gemm_minmax_ukernel_1x16c8__avx512vnni
   init: xnn_init_bf16_qb4w_minmax_scalar_params
   pack: xnn_pack_qs8_qb4w_gemm_goi_w
+  cpp-check: XNN_ENABLE_AVX512BF16
+  arch-flags: xnn_arch_x86_avx512vnni | xnn_arch_x86_avx512bf16
   k-block: 32
   unsigned-inputs: True
 - name: xnn_qd8_bf16_qb4w_gemm_minmax_ukernel_5x16c8__avx512vnni
   init: xnn_init_bf16_qb4w_minmax_scalar_params
   pack: xnn_pack_qs8_qb4w_gemm_goi_w
+  cpp-check: XNN_ENABLE_AVX512BF16
+  arch-flags: xnn_arch_x86_avx512vnni | xnn_arch_x86_avx512bf16
   k-block: 32
   unsigned-inputs: True
 - name: xnn_qd8_bf16_qb4w_gemm_minmax_ukernel_7x16c8__avx512vnni
   init: xnn_init_bf16_qb4w_minmax_scalar_params
   pack: xnn_pack_qs8_qb4w_gemm_goi_w
+  cpp-check: XNN_ENABLE_AVX512BF16
+  arch-flags: xnn_arch_x86_avx512vnni | xnn_arch_x86_avx512bf16
   k-block: 32
   unsigned-inputs: True
 - name: xnn_qd8_bf16_qb4w_gemm_minmax_ukernel_8x16c8__avx512vnni
   init: xnn_init_bf16_qb4w_minmax_scalar_params
   pack: xnn_pack_qs8_qb4w_gemm_goi_w
+  cpp-check: XNN_ENABLE_AVX512BF16
+  arch-flags: xnn_arch_x86_avx512vnni | xnn_arch_x86_avx512bf16
   k-block: 32
   unsigned-inputs: True
 - name: xnn_qd8_bf16_qb4w_gemm_minmax_ukernel_9x16c8__avx512vnni
   init: xnn_init_bf16_qb4w_minmax_scalar_params
   pack: xnn_pack_qs8_qb4w_gemm_goi_w
+  cpp-check: XNN_ENABLE_AVX512BF16
+  arch-flags: xnn_arch_x86_avx512vnni | xnn_arch_x86_avx512bf16
   k-block: 32
   unsigned-inputs: True
 - name: xnn_qd8_bf16_qb4w_gemm_minmax_ukernel_10x16c8__avx512vnni
   init: xnn_init_bf16_qb4w_minmax_scalar_params
   pack: xnn_pack_qs8_qb4w_gemm_goi_w
+  cpp-check: XNN_ENABLE_AVX512BF16
+  arch-flags: xnn_arch_x86_avx512vnni | xnn_arch_x86_avx512bf16
   k-block: 32
   unsigned-inputs: True
 - name: xnn_qd8_bf16_qb4w_gemm_minmax_ukernel_12x16c8__avx512vnni
   init: xnn_init_bf16_qb4w_minmax_scalar_params
   pack: xnn_pack_qs8_qb4w_gemm_goi_w
+  cpp-check: XNN_ENABLE_AVX512BF16
+  arch-flags: xnn_arch_x86_avx512vnni | xnn_arch_x86_avx512bf16
   k-block: 32
   unsigned-inputs: True
 - name: xnn_qd8_bf16_qb4w_gemm_minmax_ukernel_14x16c8__avx512vnni
   init: xnn_init_bf16_qb4w_minmax_scalar_params
   pack: xnn_pack_qs8_qb4w_gemm_goi_w
+  cpp-check: XNN_ENABLE_AVX512BF16
+  arch-flags: xnn_arch_x86_avx512vnni | xnn_arch_x86_avx512bf16
   k-block: 32
   unsigned-inputs: True
 - name: xnn_qd8_bf16_qb4w_gemm_minmax_ukernel_1x16c8__avx512vnni_prfm
   init: xnn_init_bf16_qb4w_minmax_scalar_params
   pack: xnn_pack_qs8_qb4w_gemm_goi_w
+  cpp-check: XNN_ENABLE_AVX512BF16
+  arch-flags: xnn_arch_x86_avx512vnni | xnn_arch_x86_avx512bf16
   k-block: 32
   unsigned-inputs: True
 - name: xnn_qd8_bf16_qb4w_gemm_minmax_ukernel_5x16c8__avx512vnni_prfm
   init: xnn_init_bf16_qb4w_minmax_scalar_params
   pack: xnn_pack_qs8_qb4w_gemm_goi_w
+  cpp-check: XNN_ENABLE_AVX512BF16
+  arch-flags: xnn_arch_x86_avx512vnni | xnn_arch_x86_avx512bf16
   k-block: 32
   unsigned-inputs: True
 - name: xnn_qd8_bf16_qb4w_gemm_minmax_ukernel_7x16c8__avx512vnni_prfm
   init: xnn_init_bf16_qb4w_minmax_scalar_params
   pack: xnn_pack_qs8_qb4w_gemm_goi_w
+  cpp-check: XNN_ENABLE_AVX512BF16
+  arch-flags: xnn_arch_x86_avx512vnni | xnn_arch_x86_avx512bf16
   k-block: 32
   unsigned-inputs: True
 - name: xnn_qd8_bf16_qb4w_gemm_minmax_ukernel_8x16c8__avx512vnni_prfm
   init: xnn_init_bf16_qb4w_minmax_scalar_params
   pack: xnn_pack_qs8_qb4w_gemm_goi_w
+  cpp-check: XNN_ENABLE_AVX512BF16
+  arch-flags: xnn_arch_x86_avx512vnni | xnn_arch_x86_avx512bf16
   k-block: 32
   unsigned-inputs: True
 - name: xnn_qd8_bf16_qb4w_gemm_minmax_ukernel_9x16c8__avx512vnni_prfm
   init: xnn_init_bf16_qb4w_minmax_scalar_params
   pack: xnn_pack_qs8_qb4w_gemm_goi_w
+  cpp-check: XNN_ENABLE_AVX512BF16
+  arch-flags: xnn_arch_x86_avx512vnni | xnn_arch_x86_avx512bf16
   k-block: 32
   unsigned-inputs: True
 - name: xnn_qd8_bf16_qb4w_gemm_minmax_ukernel_10x16c8__avx512vnni_prfm
   init: xnn_init_bf16_qb4w_minmax_scalar_params
   pack: xnn_pack_qs8_qb4w_gemm_goi_w
+  cpp-check: XNN_ENABLE_AVX512BF16
+  arch-flags: xnn_arch_x86_avx512vnni | xnn_arch_x86_avx512bf16
   k-block: 32
   unsigned-inputs: True
 - name: xnn_qd8_bf16_qb4w_gemm_minmax_ukernel_12x16c8__avx512vnni_prfm
   init: xnn_init_bf16_qb4w_minmax_scalar_params
   pack: xnn_pack_qs8_qb4w_gemm_goi_w
+  cpp-check: XNN_ENABLE_AVX512BF16
+  arch-flags: xnn_arch_x86_avx512vnni | xnn_arch_x86_avx512bf16
   k-block: 32
   unsigned-inputs: True
 - name: xnn_qd8_bf16_qb4w_gemm_minmax_ukernel_14x16c8__avx512vnni_prfm
   init: xnn_init_bf16_qb4w_minmax_scalar_params
   pack: xnn_pack_qs8_qb4w_gemm_goi_w
+  cpp-check: XNN_ENABLE_AVX512BF16
+  arch-flags: xnn_arch_x86_avx512vnni | xnn_arch_x86_avx512bf16
   k-block: 32
   unsigned-inputs: True
