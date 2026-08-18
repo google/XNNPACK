@@ -1238,32 +1238,12 @@ enum xnn_status xnn_create_convolution2d_nchw_f32_f16(
   const void* kernel_for_cache_key = kernel;
   size_t num_kernel_entries;
   size_t kernel_bytes;
-  if (!xnn_safe_mul(groups, group_input_channels, &num_kernel_entries)) {
-    xnn_log_error(
-        "failed to create %s operator: kernel size overflows size_t",
-        xnn_operator_type_to_string(xnn_operator_type_convolution_nchw_f32));
-    return xnn_status_invalid_parameter;
-  }
-  if (!xnn_safe_mul(num_kernel_entries, group_output_channels,
-                    &num_kernel_entries)) {
-    xnn_log_error(
-        "failed to create %s operator: kernel size overflows size_t",
-        xnn_operator_type_to_string(xnn_operator_type_convolution_nchw_f32));
-    return xnn_status_invalid_parameter;
-  }
-  if (!xnn_safe_mul(num_kernel_entries, kernel_width, &num_kernel_entries)) {
-    xnn_log_error(
-        "failed to create %s operator: kernel size overflows size_t",
-        xnn_operator_type_to_string(xnn_operator_type_convolution_nchw_f32));
-    return xnn_status_invalid_parameter;
-  }
-  if (!xnn_safe_mul(num_kernel_entries, kernel_height, &num_kernel_entries)) {
-    xnn_log_error(
-        "failed to create %s operator: kernel size overflows size_t",
-        xnn_operator_type_to_string(xnn_operator_type_convolution_nchw_f32));
-    return xnn_status_invalid_parameter;
-  }
-  if (!xnn_safe_mul(num_kernel_entries, sizeof(float), &kernel_bytes)) {
+  if (!xnn_safe_mul(groups, group_input_channels, &num_kernel_entries) ||
+      !xnn_safe_mul(num_kernel_entries, group_output_channels,
+                    &num_kernel_entries) ||
+      !xnn_safe_mul(num_kernel_entries, kernel_width, &num_kernel_entries) ||
+      !xnn_safe_mul(num_kernel_entries, kernel_height, &num_kernel_entries) ||
+      !xnn_safe_mul(num_kernel_entries, sizeof(float), &kernel_bytes)) {
     xnn_log_error(
         "failed to create %s operator: kernel size overflows size_t",
         xnn_operator_type_to_string(xnn_operator_type_convolution_nchw_f32));
@@ -1282,14 +1262,8 @@ enum xnn_status xnn_create_convolution2d_nchw_f32_f16(
   if (bias && !(flags & XNN_FLAG_FP32_STATIC_BIASES)) {
     size_t bias_size;
     size_t bias_bytes;
-    if (!xnn_safe_mul(groups, group_output_channels, &bias_size)) {
-      xnn_log_error(
-          "failed to create %s operator: bias size overflows size_t",
-          xnn_operator_type_to_string(xnn_operator_type_convolution_nchw_f32));
-      xnn_release_memory(fp32_kernel_buffer);
-      return xnn_status_invalid_parameter;
-    }
-    if (!xnn_safe_mul(bias_size, sizeof(float), &bias_bytes)) {
+    if (!xnn_safe_mul(groups, group_output_channels, &bias_size) ||
+        !xnn_safe_mul(bias_size, sizeof(float), &bias_bytes)) {
       xnn_log_error(
           "failed to create %s operator: bias size overflows size_t",
           xnn_operator_type_to_string(xnn_operator_type_convolution_nchw_f32));
