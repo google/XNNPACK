@@ -579,6 +579,7 @@ TEST(FullyConnectedQD8F16QB4UW_F16, static_b) {
   TestStaticB<xnn_float16, qcuint4, float, xnn_float16, xnn_float16>(
       /*convert_to=*/xnn_datatype_qdint8, /*block_size=*/32);
 }
+#endif  // XNNPACK_USE_YNNPACK
 TEST(FullyConnectedQD8F16QB4W_BF16, static_b) {
   TestStaticB<xnn_float16, qcint4, float, xnn_float16, xnn_bfloat16>(
       /*convert_to=*/xnn_datatype_qdint8, /*block_size=*/32);
@@ -589,6 +590,7 @@ TEST(FullyConnectedQD8F16QB4W_F16, static_b) {
       /*convert_to=*/xnn_datatype_qdint8, /*block_size=*/32);
 }
 
+#ifndef XNNPACK_USE_YNNPACK
 TEST(FullyConnectedQD8F32QB4UW_BF16, static_b) {
   TestStaticB<float, qcuint4, float, float, xnn_bfloat16>(
       /*convert_to=*/xnn_datatype_qdint8, /*block_size=*/32);
@@ -597,6 +599,7 @@ TEST(FullyConnectedQD8F32QB4UW_F16, static_b) {
   TestStaticB<float, qcuint4, float, float, xnn_float16>(
       /*convert_to=*/xnn_datatype_qdint8, /*block_size=*/32);
 }
+#endif  // XNNPACK_USE_YNNPACK
 TEST(FullyConnectedQD8F32QB4W_BF16, static_b) {
   TestStaticB<float, qcint4, float, float, xnn_bfloat16>(
       /*convert_to=*/xnn_datatype_qdint8, /*block_size=*/32);
@@ -611,7 +614,6 @@ TEST(FullyConnectedQD8BF16QB4W_BF16, static_b) {
   TestStaticB<float, qcint4, float, xnn_bfloat16, xnn_bfloat16>(
       /*convert_to=*/xnn_datatype_qdint8, /*block_size=*/32);
 }
-#endif  // XNNPACK_USE_YNNPACK
 
 template <typename Input, typename Filter, typename Bias,
           typename Output = Input>
