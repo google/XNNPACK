@@ -3,11 +3,188 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+#include <array>
 #include <cstddef>
+#include <cstdint>
+#include <limits>
 
 #include <gtest/gtest.h>
 #include "include/xnnpack.h"
+#include "src/xnnpack/internal.h"
 #include "test/operators/convolution-operator-tester.h"
+
+/**************************** Input validation ****************************/
+
+TEST(CONVOLUTION_NCHW, conversion_buffer_size_overflow) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+
+  constexpr size_t group_input_channels =
+      std::numeric_limits<size_t>::max() / sizeof(float) + 17;
+  constexpr size_t group_output_channels = 1;
+  const std::array<uint16_t, 17> kernel{};
+  xnn_operator_t convolution_op = nullptr;
+
+  EXPECT_EQ(
+      xnn_status_invalid_parameter,
+      xnn_create_convolution2d_nchw_f32_f16(
+          0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, group_input_channels,
+          group_output_channels, group_input_channels, group_output_channels,
+          kernel.data(), nullptr, -std::numeric_limits<float>::infinity(),
+          std::numeric_limits<float>::infinity(), 0, nullptr,
+          &convolution_op));
+  EXPECT_EQ(nullptr, convolution_op);
+}
+
+TEST(CONVOLUTION_NCHW, kernel_element_count_overflow_at_groups) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+
+  constexpr uint32_t groups = std::numeric_limits<uint32_t>::max();
+  constexpr size_t group_input_channels =
+      std::numeric_limits<size_t>::max() / groups + 1;
+  const std::array<uint16_t, 1> kernel{{0x3c00}};
+  xnn_operator_t convolution_op = nullptr;
+
+  EXPECT_EQ(
+      xnn_status_invalid_parameter,
+      xnn_create_convolution2d_nchw_f32_f16(
+          0, 0, 0, 0, 1, 1, 1, 1, 1, 1, groups, group_input_channels, 1,
+          group_input_channels, 1, kernel.data(), nullptr,
+          -std::numeric_limits<float>::infinity(),
+          std::numeric_limits<float>::infinity(), 0, nullptr,
+          &convolution_op));
+  EXPECT_EQ(nullptr, convolution_op);
+}
+
+TEST(CONVOLUTION_NCHW, kernel_element_count_overflow_at_channels) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+
+  constexpr size_t group_input_channels =
+      std::numeric_limits<size_t>::max() / 2 + 1;
+  const std::array<uint16_t, 1> kernel{};
+  xnn_operator_t convolution_op = nullptr;
+
+  EXPECT_EQ(
+      xnn_status_invalid_parameter,
+      xnn_create_convolution2d_nchw_f32_f16(
+          0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, group_input_channels, 2,
+          group_input_channels, 2, kernel.data(), nullptr,
+          -std::numeric_limits<float>::infinity(),
+          std::numeric_limits<float>::infinity(), 0, nullptr,
+          &convolution_op));
+  EXPECT_EQ(nullptr, convolution_op);
+}
+
+TEST(CONVOLUTION_NCHW, kernel_element_count_overflow_at_width) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+
+  constexpr size_t group_input_channels =
+      std::numeric_limits<size_t>::max() / 2 + 1;
+  const std::array<uint16_t, 1> kernel{};
+  xnn_operator_t convolution_op = nullptr;
+
+  EXPECT_EQ(
+      xnn_status_invalid_parameter,
+      xnn_create_convolution2d_nchw_f32_f16(
+          0, 0, 0, 0, 1, 2, 1, 1, 1, 1, 1, group_input_channels, 1,
+          group_input_channels, 1, kernel.data(), nullptr,
+          -std::numeric_limits<float>::infinity(),
+          std::numeric_limits<float>::infinity(), 0, nullptr,
+          &convolution_op));
+  EXPECT_EQ(nullptr, convolution_op);
+}
+
+TEST(CONVOLUTION_NCHW, kernel_element_count_overflow_at_height) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+
+  constexpr size_t group_input_channels =
+      std::numeric_limits<size_t>::max() / 2 + 1;
+  const std::array<uint16_t, 1> kernel{};
+  xnn_operator_t convolution_op = nullptr;
+
+  EXPECT_EQ(
+      xnn_status_invalid_parameter,
+      xnn_create_convolution2d_nchw_f32_f16(
+          0, 0, 0, 0, 2, 1, 1, 1, 1, 1, 1, group_input_channels, 1,
+          group_input_channels, 1, kernel.data(), nullptr,
+          -std::numeric_limits<float>::infinity(),
+          std::numeric_limits<float>::infinity(), 0, nullptr,
+          &convolution_op));
+  EXPECT_EQ(nullptr, convolution_op);
+}
+
+TEST(CONVOLUTION_NCHW, bias_element_count_overflow) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+
+  constexpr uint32_t groups = std::numeric_limits<uint32_t>::max();
+  constexpr size_t group_output_channels =
+      std::numeric_limits<size_t>::max() / groups + 1;
+  const std::array<uint16_t, 1> kernel{};
+  const std::array<uint16_t, 1> bias{};
+  xnn_operator_t convolution_op = nullptr;
+
+  EXPECT_EQ(
+      xnn_status_invalid_parameter,
+      xnn_create_convolution2d_nchw_f32_f16(
+          0, 0, 0, 0, 1, 0, 1, 1, 1, 1, groups, 0,
+          group_output_channels, 0, group_output_channels, kernel.data(),
+          bias.data(), -std::numeric_limits<float>::infinity(),
+          std::numeric_limits<float>::infinity(), 0, nullptr,
+          &convolution_op));
+  EXPECT_EQ(nullptr, convolution_op);
+}
+
+TEST(CONVOLUTION_NCHW, bias_conversion) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+
+  const std::array<uint16_t, 1> kernel{{0x3c00}};
+  const std::array<uint16_t, 1> bias{{0x3c00}};
+  const std::array<float, 1> input{{2.0f}};
+  std::array<float, 1> output{{0.0f}};
+  xnn_operator_t convolution_op = nullptr;
+
+  EXPECT_EQ(
+      xnn_status_success,
+      xnn_create_convolution2d_nchw_f32_f16(
+          0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, kernel.data(),
+          bias.data(), -std::numeric_limits<float>::infinity(),
+          std::numeric_limits<float>::infinity(), 0, nullptr,
+          &convolution_op));
+  ASSERT_NE(nullptr, convolution_op);
+  size_t output_height = 0;
+  size_t output_width = 0;
+  ASSERT_EQ(xnn_status_success,
+            xnn_reshape_convolution2d_nchw_f32(
+                convolution_op, 1, 1, 1, &output_height, &output_width,
+                nullptr));
+  ASSERT_EQ(xnn_status_success,
+            xnn_setup_convolution2d_nchw_f32(convolution_op, input.data(),
+                                              output.data()));
+  ASSERT_EQ(xnn_status_success,
+            xnn_run_operator(convolution_op, nullptr /* threadpool */));
+  EXPECT_FLOAT_EQ(3.0f, output[0]);
+  xnn_delete_operator(convolution_op);
+}
+
+TEST(CONVOLUTION_NCHW, bias_conversion_size_overflow) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+
+  constexpr size_t group_input_channels = 1;
+  constexpr size_t group_output_channels =
+      std::numeric_limits<size_t>::max() / sizeof(float) + 17;
+  const std::array<uint16_t, 1> kernel{};
+  const std::array<uint16_t, 17> bias{};
+  xnn_operator_t convolution_op = nullptr;
+
+  EXPECT_EQ(
+      xnn_status_invalid_parameter,
+      xnn_create_convolution2d_nchw_f32_f16(
+          0, 0, 0, 0, 1, 0, 1, 1, 1, 1, 1, group_input_channels,
+          group_output_channels, group_input_channels, group_output_channels,
+          kernel.data(), bias.data(), -std::numeric_limits<float>::infinity(),
+          std::numeric_limits<float>::infinity(), 0, nullptr,
+          &convolution_op));
+  EXPECT_EQ(nullptr, convolution_op);
+}
 
 /**************************** SPMM path ****************************/
 
