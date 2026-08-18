@@ -44,7 +44,6 @@ import("gen/neonfp16_microkernels.bzl")
 import("gen/neonfp16arith_aarch64_microkernels.bzl")
 import("gen/neonfp16arith_microkernels.bzl")
 import("gen/neoni8mm_microkernels.bzl")
-import("gen/neoni8mmbf16_microkernels.bzl")
 import("gen/neonsme2_microkernels.bzl")
 import("gen/neonsme_microkernels.bzl")
 import("gen/neonv8_microkernels.bzl")
@@ -110,17 +109,17 @@ declare_args() {
   # Experimental: import external kernels from KleidiAI
   xnnpack_enable_arm_kleidiai = false
 
-  # Enables Arm Scalable Matrix Extension (SME)
-  xnnpack_enable_arm_sme = target_cpu == "arm64"
+  # Seperate out some of the architecture features that KleidiAI brings,
+  # so that we can test/bring up each individually. Implicitly enables
+  # the i8mm kernels to start with.
+  # Experimental: use Arm Scalable Matrix Extension (SME)
+  xnnpack_enable_arm_sme = false
 
-  # Enables Arm Scalable Matrix Extension (SME2)
-  xnnpack_enable_arm_sme2 = target_cpu == "arm64"
+  # Experimental: use Arm Scalable Matrix Extension (SME 2)
+  xnnpack_enable_arm_sme2 = false
 
-  # Enable Arm's Neon Dot Product extension
-  xnnpack_enable_arm_dotprod = target_cpu == "arm64" || target_cpu == "arm"
-
-  # Enables Armv8.6-A 8-bit integer matrix multiply accumulate (I8MM) extension
-  xnnpack_enable_arm_i8mm = target_cpu == "arm64"
+  # Experimental: use Arm's Neon Dot Product extension
+  xnnpack_enable_arm_dotprod = false
 }
 
 assert(target_cpu == "arm64" || target_cpu == "x64" || target_cpu == "x86" ||
@@ -129,17 +128,12 @@ assert(target_cpu == "arm64" || target_cpu == "x64" || target_cpu == "x86" ||
 
 assert(!xnnpack_enable_arm_kleidiai || target_cpu == "arm64",
        "xnnpack_enable_arm_kleidiai requires target_cpu='arm64'")
-assert(!xnnpack_enable_arm_sme || target_cpu == "arm64",
-       "xnnpack_enable_arm_sme requires target_cpu='arm64'")
-assert(!xnnpack_enable_arm_sme2 || xnnpack_enable_arm_sme,
-       "xnnpack_enable_arm_sme2 requires xnnpack_enable_arm_sme")
-assert(
-    !xnnpack_enable_arm_dotprod || target_cpu == "arm64" || target_cpu == "arm",
-    "xnnpack_enable_arm_dotprod requires target_cpu='arm64' or target_cpu='arm'")
-assert(!xnnpack_enable_arm_i8mm || target_cpu == "arm64",
-       "xnnpack_enable_arm_i8mm requires target_cpu='arm64'")
-assert(!xnnpack_enable_arm_i8mm || xnnpack_enable_arm_dotprod,
-       "xnnpack_enable_arm_i8mm requires xnnpack_enable_arm_dotprod")
+assert(!xnnpack_enable_arm_sme || xnnpack_enable_arm_kleidiai,
+       "xnnpack_enable_arm_sme requires xnnpack_enable_arm_kleidiai")
+assert(!xnnpack_enable_arm_sme2 || xnnpack_enable_arm_kleidiai,
+       "xnnpack_enable_arm_sme2 requires xnnpack_enable_arm_kleidiai")
+assert(!xnnpack_enable_arm_dotprod || xnnpack_enable_arm_kleidiai,
+       "xnnpack_enable_arm_dotprod requires xnnpack_enable_arm_kleidiai")
 
 # Various #defines and cflags that should stay internal to XNNPACK.
 config("xnnpack_private_config") {
@@ -182,14 +176,10 @@ config("xnnpack_private_config") {
     # Define the core Armv8
     defines += [
       "XNN_ENABLE_ARM_BF16=1",
+      "XNN_ENABLE_ARM_I8MM=1",
       "XNN_ENABLE_ASSEMBLY=1",
       "XNN_ENABLE_ARM_FP16_VECTOR=1",
     ]
-    if (xnnpack_enable_arm_i8mm) {
-      defines += [ "XNN_ENABLE_ARM_I8MM=1" ]
-    } else {
-      defines += [ "XNN_ENABLE_ARM_I8MM=0" ]
-    }
     if (xnnpack_enable_arm_kleidiai) {
       defines += [ "XNN_ENABLE_KLEIDIAI=1" ]
     } else {
@@ -558,32 +548,6 @@ if (current_cpu == "arm64") {
       "-target-feature",
       "-Xclang",
       "+fullfp16",
-    ]
-  }
-
-  xnnpack_source_set("neon_i8mmbf16_microkernels") {
-    deps = [
-      ":microkernel_defs",
-      ":microkernel_headers",
-    ]
-    if (xnnpack_enable_arm_kleidiai) {
-      deps += [ "//third_party/kleidiai" ]
-    }
-    sources = ALL_NEONI8MMBF16_MICROKERNEL_SRCS
-
-    cflags = [
-      "-Xclang",
-      "-target-feature",
-      "-Xclang",
-      "+i8mm",
-      "-Xclang",
-      "-target-feature",
-      "-Xclang",
-      "+fullfp16",
-      "-Xclang",
-      "-target-feature",
-      "-Xclang",
-      "+bf16",
     ]
   }
 
@@ -1046,13 +1010,8 @@ template("xnnpack_library") {
         ":neon_asm_microkernels",
         ":neon_bf16_microkernels",
         ":neon_fullfp16_microkernels",
+        ":neon_i8mm_microkernels",
       ]
-      if (xnnpack_enable_arm_i8mm) {
-        deps += [
-          ":neon_i8mm_microkernels",
-          ":neon_i8mmbf16_microkernels",
-        ]
-      }
       if (xnnpack_enable_arm_dotprod) {
         deps += [
           ":neon_dotprod_microkernels",
