@@ -142,13 +142,14 @@ TEST(CONVOLUTION_NCHW, bias_conversion) {
   std::array<float, 1> output{{0.0f}};
   xnn_operator_t convolution_op = nullptr;
 
-  EXPECT_EQ(
-      xnn_status_success,
-      xnn_create_convolution2d_nchw_f32_f16(
-          0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, kernel.data(),
-          bias.data(), -std::numeric_limits<float>::infinity(),
-          std::numeric_limits<float>::infinity(), 0, nullptr,
-          &convolution_op));
+  const xnn_status status = xnn_create_convolution2d_nchw_f32_f16(
+      0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, kernel.data(),
+      bias.data(), -std::numeric_limits<float>::infinity(),
+      std::numeric_limits<float>::infinity(), 0, nullptr, &convolution_op);
+  if (status == xnn_status_unsupported_hardware) {
+    GTEST_SKIP();
+  }
+  EXPECT_EQ(xnn_status_success, status);
   ASSERT_NE(nullptr, convolution_op);
   size_t output_height = 0;
   size_t output_width = 0;
