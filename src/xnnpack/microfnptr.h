@@ -1,5 +1,7 @@
 // Copyright 2022 Google LLC
 //
+// Copyright 2026 Arm Limited and/or its affiliates <open-source-office@arm.com>
+//
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
@@ -182,6 +184,11 @@ typedef void (*xnn_qu8_gemm_minmax_ukernel_fn)(
     const union xnn_qu8_conv_minmax_params* params);
 
 // GEMM: GEneral Matrix Multiplication with packed and quantized LHS operand.
+
+typedef void (*xnn_qp8_f32_qc2w_gemm_minmax_ukernel_fn)(
+    size_t m, size_t n, size_t k, const void* lhs_packed,
+    const void* rhs_packed, float* dst, size_t dst_stride_row,
+    size_t dst_stride_col, struct xnn_f32_minmax_params* minmax_params);
 
 typedef void (*xnn_qp8_f32_qc4w_gemm_minmax_ukernel_fn)(
     size_t m, size_t n, size_t k, const void* lhs_packed,

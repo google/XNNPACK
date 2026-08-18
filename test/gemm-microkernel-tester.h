@@ -3,6 +3,8 @@
 //
 // Copyright 2019 Google LLC
 //
+// Copyright 2026 Arm Limited and/or its affiliates <open-source-office@arm.com>
+//
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
@@ -349,6 +351,12 @@ class GemmMicrokernelTester {
             xnn_init_f32_qc4w_minmax_params_fn init_minmax_params,
             xnn_pack_weights_and_biases_fn pack,
             xnn_packed_stride_weights_and_biases_fn packed_stride);
+
+  void Test_QP8F32QC2W(
+      xnn_qp8_f32_qc2w_gemm_minmax_ukernel_fn gemm,
+      xnn_init_f32_minmax_params_fn init_minmax_params,
+      xnn_pack_weights_and_biases_fn pack,
+      xnn_packed_stride_weights_and_biases_fn packed_stride);
 
   void Test_QP8F32QC8W(xnn_qp8_f32_qc8w_gemm_minmax_ukernel_fn gemm,
                        xnn_init_f32_minmax_params_fn init_minmax_params,

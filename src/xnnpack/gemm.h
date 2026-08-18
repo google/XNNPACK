@@ -3,6 +3,8 @@
 //
 // Copyright 2019 Google LLC
 //
+// Copyright 2026 Arm Limited and/or its affiliates <open-source-office@arm.com>
+//
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
@@ -4036,6 +4038,22 @@ DECLARE_QD8_F32_QB4W_GEMM_MINMAX_UKERNEL_FUNCTION(
     xnn_qd8_f32_qb4w_gemm_minmax_ukernel_3x4c8__sse41_ld64)
 DECLARE_QD8_F32_QB4W_GEMM_MINMAX_UKERNEL_FUNCTION(
     xnn_qd8_f32_qb4w_gemm_minmax_ukernel_4x4c8__sse41_ld64)
+
+size_t xnn_qp8_f32_qc2w_gemm_minmax_ukernel_1x64c4__neonsme2_get_mr(void);
+size_t xnn_qp8_f32_qc2w_gemm_minmax_ukernel_1x64c4__neonsme2_get_nr(void);
+size_t xnn_qp8_f32_qc2w_gemm_minmax_ukernel_16x64c4__neonsme2_get_mr(void);
+size_t xnn_qp8_f32_qc2w_gemm_minmax_ukernel_16x64c4__neonsme2_get_nr(void);
+
+#define DECLARE_QP8_F32_QC2W_GEMM_MINMAX_UKERNEL_FUNCTION(fn_name) \
+  XNN_INTERNAL void fn_name(                                       \
+      size_t m, size_t n, size_t k, const void* lhs_packed,        \
+      const void* rhs_packed, float* dst, size_t dst_stride_row,   \
+      size_t dst_stride_col, struct xnn_f32_minmax_params* minmax_params);
+
+DECLARE_QP8_F32_QC2W_GEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_qp8_f32_qc2w_gemm_minmax_ukernel_1x64c4__neonsme2)
+DECLARE_QP8_F32_QC2W_GEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_qp8_f32_qc2w_gemm_minmax_ukernel_16x64c4__neonsme2)
 
 size_t xnn_qp8_f32_qc4w_gemm_minmax_ukernel_1x64c4__neonsme2_get_mr();
 size_t xnn_qp8_f32_qc4w_gemm_minmax_ukernel_1x64c4__neonsme2_get_nr();

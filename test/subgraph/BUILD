@@ -1,5 +1,7 @@
 # Copyright 2023 Google LLC
 #
+# Copyright 2026 Arm Limited and/or its affiliates <open-source-office@arm.com>
+#
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
 
@@ -269,7 +271,10 @@ xnnpack_unit_test(
         "//ynnpack/xnnpack:use_ynnpack": ["XNNPACK_USE_YNNPACK"],
         "//conditions:default": [],
     }),
-    deps = SUBGRAPH_TEST_DEPS,
+    deps = SUBGRAPH_TEST_DEPS + [
+        "//:operator_h",
+        "//src/configs:config_h",
+    ],
 )
 
 xnnpack_unit_test(
