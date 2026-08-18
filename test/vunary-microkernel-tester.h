@@ -244,6 +244,11 @@ class VUnaryMicrokernelTester {
             << ", FP_NAN=" << FP_NAN << ", FP_NORMAL=" << FP_NORMAL
             << ", FP_SUBNORMAL=" << FP_SUBNORMAL << ", FP_ZERO=" << FP_ZERO
             << ")";
+        if (std::isinf(static_cast<float>(expected[i]))) {
+          EXPECT_EQ(std::signbit(static_cast<float>(expected[i])),
+                    std::signbit(static_cast<float>(outputs[i])))
+              << "for input " << static_cast<float>(inputs[i]);
+        }
       }
     }
   }

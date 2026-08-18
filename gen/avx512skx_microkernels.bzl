@@ -9,6 +9,7 @@ PROD_AVX512SKX_MICROKERNEL_SRCS = [
     "src/bf16-f32-vcvt/gen/bf16-f32-vcvt-avx512skx-u16.c",
     "src/bf16-qs8-vcvt/gen/bf16-qs8-vcvt-avx512skx-u128.c",
     "src/bf16-qu8-vcvt/gen/bf16-qu8-vcvt-avx512skx-u128.c",
+    "src/bf16-vunary/gen/bf16-vunary-avx512skx.c",
     "src/f16-f32-vcvt/gen/f16-f32-vcvt-avx512skx-u16.c",
     "src/f16-f32acc-gemm/gen/f16-f32acc-gemm-1x32-minmax-avx512skx-broadcast.c",
     "src/f16-f32acc-gemm/gen/f16-f32acc-gemm-4x32-minmax-avx512skx-broadcast.c",
