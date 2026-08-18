@@ -1157,9 +1157,9 @@ static enum xnn_status reshape_depth_to_space_nhwc(
     return xnn_status_invalid_parameter;
   }
 
-  size_t output_stride_0, output_stride_1, temp;
-  if (!xnn_safe_mul((size_t)block_size, input_width, &temp) ||
-      !xnn_safe_mul(temp, block_output_pixel_stride, &output_stride_0)) {
+  size_t output_stride_0, output_stride_1;
+  if (!xnn_safe_mul((size_t)block_size, input_width, &output_stride_0) ||
+      !xnn_safe_mul(output_stride_0, block_output_pixel_stride, &output_stride_0)) {
     xnn_log_error("failed to reshape %s operator: overflow in output_stride[0]",
         xnn_operator_type_to_string(expected_operator_type));
     return xnn_status_invalid_parameter;
