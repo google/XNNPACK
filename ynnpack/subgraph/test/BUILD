@@ -142,6 +142,21 @@ cc_test(
 )
 
 cc_test(
+    name = "dot_scheduling",
+    srcs = ["dot_scheduling.cc"],
+    linkopts = ynn_binary_linkopts(),
+    malloc = ynn_binary_malloc(),
+    tags = [
+        "noemulator",
+        "nowasm",  # b/525770952
+    ],
+    deps = TEST_DEPS + [
+        "//ynnpack/subgraph",
+        "@slinky//slinky/runtime",
+    ],
+)
+
+cc_test(
     name = "fusion",
     srcs = [
         "fusion_copy.cc",
