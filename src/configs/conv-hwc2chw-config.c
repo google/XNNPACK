@@ -14,6 +14,7 @@
 #include "src/xnnpack/init-once.h"
 #include "src/xnnpack/log.h"
 #include "src/xnnpack/microfnptr.h"
+#include "src/xnnpack/microkernel-name-registry.h"
 #include "src/xnnpack/microparams-init.h"
 
 static struct xnn_conv_hwc2chw_config f16_conv_hwc2chw_3x3c3s2_config = {0};
@@ -23,9 +24,10 @@ XNN_INIT_ONCE_GUARD(f16_conv_hwc2chw_3x3c3s2);
 XNN_INIT_ONCE_GUARD(f32_conv_hwc2chw_3x3c3s2);
 
 // Macros to log the microkernel names if and when they are registered.
-#define XNN_INIT_CONV_UKERNEL(ukernel) \
-  (xnn_conv_hwc2chw_ukernel_fn) ukernel;    \
-  xnn_log_info("Using conv_hwc2chw microkernel '%s'.", #ukernel);
+#define XNN_INIT_CONV_UKERNEL(ukernel)                            \
+  (xnn_conv_hwc2chw_ukernel_fn) ukernel;                          \
+  xnn_log_info("Using conv_hwc2chw microkernel '%s'.", #ukernel); \
+  XNN_REGISTER_UKERNEL_NAME(ukernel);
 
 static void init_f16_conv_hwc2chw_3x3c3s2_config(void) {
   #if XNN_ENABLE_ARM_FP16_SCALAR && XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM

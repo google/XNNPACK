@@ -13,6 +13,7 @@
 #include "src/xnnpack/init-once.h"
 #include "src/xnnpack/log.h"
 #include "src/xnnpack/microfnptr.h"
+#include "src/xnnpack/microkernel-name-registry.h"
 #include "src/xnnpack/transpose.h"
 #include "src/xnnpack/vunary.h"
 
@@ -21,17 +22,20 @@ static struct xnn_transpose_config transpose_config = {0};
 XNN_INIT_ONCE_GUARD(transpose);
 
 // Macros to log the microkernel names if and when they are registered.
-#define XNN_INIT_COPY_UKERNEL(ukernel) \
-  (xnn_vunary_ukernel_fn) ukernel;     \
-  xnn_log_info("Using copy microkernel '%s'.", #ukernel);
+#define XNN_INIT_COPY_UKERNEL(ukernel)                    \
+  (xnn_vunary_ukernel_fn) ukernel;                        \
+  xnn_log_info("Using copy microkernel '%s'.", #ukernel); \
+  XNN_REGISTER_UKERNEL_NAME(ukernel);
 
-#define XNN_INIT_TRANSPOSEC_UKERNEL(ukernel) \
-  (xnn_transposec_ukernel_fn) ukernel;       \
-  xnn_log_info("Using transposec microkernel '%s'.", #ukernel);
+#define XNN_INIT_TRANSPOSEC_UKERNEL(ukernel)                    \
+  (xnn_transposec_ukernel_fn) ukernel;                          \
+  xnn_log_info("Using transposec microkernel '%s'.", #ukernel); \
+  XNN_REGISTER_UKERNEL_NAME(ukernel);
 
-#define XNN_INIT_TRANSPOSEV_UKERNEL(ukernel) \
-  (xnn_transposev_ukernel_fn) ukernel;       \
-  xnn_log_info("Using transposev microkernel '%s'.", #ukernel);
+#define XNN_INIT_TRANSPOSEV_UKERNEL(ukernel)                    \
+  (xnn_transposev_ukernel_fn) ukernel;                          \
+  xnn_log_info("Using transposev microkernel '%s'.", #ukernel); \
+  XNN_REGISTER_UKERNEL_NAME(ukernel);
 
 static void init_transpose_config(void) {
   #if XNN_ARCH_ARM
