@@ -289,44 +289,37 @@
 #if defined(__clang__)
 // Clang ignores sanitizer attributes on functions that get inlined. Also:
 // - GCC does not allow this attribute to be specified after a function
+// - It takes precedence over always_inline, so we can specify both.
 #define XNN_NO_INLINE_SANITIZER __attribute__((__noinline__))
 #else
 #define XNN_NO_INLINE_SANITIZER
 #endif
 
 #if XNN_COMPILER_HAS_FEATURE(thread_sanitizer)
-#define XNN_HAS_TSAN 1
 #define XNN_DISABLE_TSAN \
   __attribute__((__no_sanitize__("thread"))) XNN_NO_INLINE_SANITIZER
 #else
-#define XNN_HAS_TSAN 0
 #define XNN_DISABLE_TSAN
 #endif
 
 #if XNN_COMPILER_HAS_FEATURE(memory_sanitizer)
-#define XNN_HAS_MSAN 1
 #define XNN_DISABLE_MSAN \
   __attribute__((__no_sanitize__("memory"))) XNN_NO_INLINE_SANITIZER
 #else
-#define XNN_HAS_MSAN 0
 #define XNN_DISABLE_MSAN
 #endif
 
 #if XNN_COMPILER_HAS_FEATURE(hwaddress_sanitizer)
-#define XNN_HAS_HWASAN 1
 #define XNN_DISABLE_HWASAN \
   __attribute__((__no_sanitize__("hwaddress"))) XNN_NO_INLINE_SANITIZER
 #else
-#define XNN_HAS_HWASAN 0
 #define XNN_DISABLE_HWASAN
 #endif
 
 #if XNN_COMPILER_HAS_FEATURE(address_sanitizer)
-#define XNN_HAS_ASAN 1
 #define XNN_DISABLE_ASAN \
   __attribute__((__no_sanitize__("address"))) XNN_NO_INLINE_SANITIZER
 #else
-#define XNN_HAS_ASAN 0
 #define XNN_DISABLE_ASAN
 #endif
 
@@ -357,9 +350,6 @@
 #define XNN_NO_SANITIZE_INTEGER_OVERFLOW
 #endif
 
-#define XNN_HAS_OOB_READS_SANITIZER \
-  (XNN_HAS_TSAN || XNN_HAS_MSAN || XNN_HAS_HWASAN || XNN_HAS_ASAN)
-
 #define XNN_OOB_READS \
   XNN_DISABLE_TSAN XNN_DISABLE_MSAN XNN_DISABLE_HWASAN XNN_DISABLE_ASAN
 
@@ -379,9 +369,7 @@
 #define XNN_INTRINSIC inline
 #endif
 
-#if XNN_HAS_OOB_READS_SANITIZER
-#define XNN_INLINE inline
-#elif defined(__GNUC__)
+#if defined(__GNUC__)
 #define XNN_INLINE inline __attribute__((__always_inline__))
 #elif defined(_MSC_VER)
 #define XNN_INLINE __forceinline
