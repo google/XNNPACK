@@ -143,7 +143,8 @@ class SubgraphBuilder {
                                 const std::vector<uint32_t>& output_ids);
 
   SubgraphBuilder& AddTranspose(const std::vector<int32_t>& perm,
-                                uint32_t input_id, uint32_t output_id);
+                                uint32_t input_id, uint32_t output_id,
+                                uint32_t flags = 0);
 
   SubgraphBuilder& AddSlice(const std::vector<int32_t>& axes,
                             const std::vector<int64_t>& begins,

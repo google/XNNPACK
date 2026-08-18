@@ -251,11 +251,12 @@ SubgraphBuilder& SubgraphBuilder::AddEvenSplit(
 
 SubgraphBuilder& SubgraphBuilder::AddTranspose(const std::vector<int32_t>& perm,
                                                uint32_t input_id,
-                                               uint32_t output_id) {
+                                               uint32_t output_id,
+                                               uint32_t flags) {
   assert(status_ == ynn_status_success);
   status_ = ynn_define_static_transpose(subgraph_.get(), perm.size(),
                                         perm.data(), input_id, &output_id,
-                                        /*flags=*/0);
+                                        flags);
   return *this;
 }
 
