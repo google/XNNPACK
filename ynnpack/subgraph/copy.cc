@@ -34,8 +34,8 @@ namespace {
 std::vector<slinky::expr> to_exprs(const std::vector<size_t>& dims) {
   std::vector<slinky::expr> output_extents(dims.size());
   for (size_t d = 0; d < dims.size(); ++d) {
-    if (dims[d] == 1) {
-      // Treat static extent 1 as a broadcast.
+    if (dims[d] == 1 || dims[d] == 0) {
+      // Treat static extent 1 as a broadcast, and 0 as a deduced dimension.
       output_extents[d] = {};
     } else {
       output_extents[d] = static_cast<slinky::index_t>(dims[d]);
@@ -48,6 +48,7 @@ std::vector<slinky::expr> to_exprs(const std::vector<size_t>& dims) {
 void deduce_reshape_extent(ynn_node& node, int input_idx,
                            ynn_subgraph& subgraph,
                            const std::vector<slinky::expr>& input_extents,
+                           const size_t* target_dims, size_t target_rank,
                            std::vector<slinky::expr>& output_extents) {
   slinky::expr num_elements = 1;
   for (const slinky::expr& extent : input_extents) {
@@ -58,13 +59,15 @@ void deduce_reshape_extent(ynn_node& node, int input_idx,
 
   int deduce_dim = -1;
   slinky::expr current_elements = 1;
-  for (size_t d = 0; d < output_extents.size(); ++d) {
-    slinky::expr extent_d = output_extents[d].defined() ? output_extents[d] : 1;
-    if (is_constant(extent_d, 0)) {
+  for (size_t d = 0; d < target_rank; ++d) {
+    size_t logical_dim = target_dims[d];
+    if (logical_dim == 0) {
       assert(deduce_dim == -1);
       deduce_dim = d;
+    } else if (logical_dim == 1) {
+      current_elements *= 1;
     } else {
-      current_elements *= extent_d;
+      current_elements *= static_cast<slinky::index_t>(logical_dim);
     }
   }
 
@@ -345,7 +348,8 @@ ynn_status ynn_define_static_reshape(ynn_subgraph_t subgraph, size_t rank,
 
   // Propagate shape.
   output.extents = to_exprs(op.new_dims);
-  deduce_reshape_extent(node, 0, *subgraph, input.extents, output.extents);
+  deduce_reshape_extent(node, 0, *subgraph, input.extents, op.new_dims.data(),
+                        op.new_dims.size(), output.extents);
 
   node.op = std::move(op);
   node.create = [](const ynn_node& node, ynn_runtime& runtime) {
@@ -491,7 +495,7 @@ ynn_status ynn_define_split_dim(ynn_subgraph_t subgraph, int32_t axis,
   // Split dims is essentially a standard reshape of 1 dimension into N.
   std::vector<slinky::expr> split_extents = to_exprs(op.new_dims);
   deduce_reshape_extent(node, 0, *subgraph, {input.extents[op.axis]},
-                        split_extents);
+                        op.new_dims.data(), op.new_dims.size(), split_extents);
 
   // And the rest of the dimensions are treated as batch dimensions.
   output.extents.clear();
