@@ -25,6 +25,7 @@
 #include "ynnpack/subgraph/slinky.h"
 #include "ynnpack/subgraph/subgraph.h"
 #include "slinky/builder/pipeline.h"
+#include "slinky/builder/simplify.h"
 #include "slinky/runtime/buffer.h"
 #include "slinky/runtime/expr.h"
 #include "slinky/runtime/stmt.h"
@@ -206,7 +207,7 @@ void define_static_transpose(ynn_subgraph& subgraph, ynn_node& node,
     }
 
     slinky::func f;
-    auto sched = std::make_unique<scheduling_info>();
+    std::unique_ptr<scheduling_info> sched;
     if (op.alias) {
       f = slinky::func::make_copy({input.buffer, std::move(bounds)},
                                   {output.buffer, output_dims});
@@ -217,6 +218,70 @@ void define_static_transpose(ynn_subgraph& subgraph, ynn_node& node,
       f = slinky::func::make(make_transpose_impl(elem_count, op.permutation),
                              {{input.buffer, std::move(bounds)}},
                              {{output.buffer, output_dims}}, attrs);
+      // Tile the transpose so it can be parallelized and stays cache
+      // friendly. A tile is read as contiguous rows of the input and written
+      // as contiguous rows of the output, so both sides get reservation
+      // floors (alignments) targeting rows of ~1KB: without its floor,
+      // either side can be starved of tile area by the other, degrading the
+      // tile to strided scalar-ish access on that side. Each side reserves
+      // along its dimensions in memory order: the innermost dimension
+      // reserves the whole row target, and when its extent is smaller than
+      // that, the following dimensions extend the contiguous run and reserve
+      // the factor still missing (e.g. transposing 262144x256x4 int8 to
+      // 256x4x262144: input rows of 4 elements are extended to 4x256).
+      constexpr slinky::index_t row_target_bytes = 1024;
+      const size_t size_bytes =
+          std::max<size_t>(1, type_size_bytes(output.type));
+      std::vector<slinky::expr> extents = output.physical_extents();
+      std::vector<slinky::expr> alignments(rank);
+
+      auto reserve = [&](int d, const slinky::expr& floor) {
+        slinky::expr a =
+            slinky::simplify(slinky::min(slinky::max(1, floor), extents[d]));
+        if (alignments[d].defined()) {
+          alignments[d] = slinky::simplify(slinky::max(alignments[d], a));
+        } else {
+          alignments[d] = a;
+        }
+        return a;
+      };
+
+      // Output rows. Dimension 0 of the output buffer is counted in physical
+      // (packed) units of size_bytes each, so the row target is too.
+      const slinky::index_t out_row =
+          std::max<slinky::index_t>(1, row_target_bytes / size_bytes);
+      slinky::expr out_run = 1;
+      for (int d = 0; d < rank && extents[d].defined(); ++d) {
+        slinky::expr a =
+            reserve(d, slinky::ceil_div(slinky::expr(out_row), out_run));
+        out_run = slinky::simplify(out_run * a);
+      }
+
+      // Input rows, reserved on the output dimension each input dimension
+      // maps to. These are counted in logical elements.
+      const slinky::index_t in_row = std::max<slinky::index_t>(
+          1, row_target_bytes * type_element_count(output.type) / size_bytes);
+      slinky::expr in_run = 1;
+      for (int k = 0; k < input.rank(); ++k) {
+        int d = 0;
+        while (d < rank && op.permutation[d] != k) d++;
+        if (d >= rank || !extents[d].defined()) continue;
+        slinky::expr a =
+            reserve(d, slinky::ceil_div(slinky::expr(in_row), in_run));
+        if (d == 0) {
+          // Output dimension 0 is in physical units; the input run it
+          // contributes is elem_count logical elements per unit.
+          a = a * type_element_count(output.type);
+        }
+        in_run = slinky::simplify(in_run * a);
+      }
+      std::vector<slinky::expr> splits = make_split_factors(
+          runtime.globals, extents, type_size_bytes(output.type),
+          /*given_splits=*/{}, /*loop_order=*/{}, alignments);
+      sched = runtime.make_schedule(output_dims, extents, splits);
+    }
+    if (!sched) {
+      sched = std::make_unique<scheduling_info>();
     }
 
     f.user_data() = sched.get();
