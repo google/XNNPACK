@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # Copyright 2019 Google LLC
 #
+# Copyright 2026 Arm Limited and/or its affiliates <open-source-office@arm.com>
+#
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
 
@@ -602,6 +604,13 @@ std::vector<GemmTestParams> CreateTests(
               $if WEIGHTS_DATATYPE in ['qb4w']:
                 .bl(32)
           , test_func, arch_flags));
+      $if INPUT_DATATYPE == "pqs8" and WEIGHTS_DATATYPE == "qc4w":
+        gemm_tests.push_back(GemmTestParams(
+            "signed_weights",
+            tester.clone()
+                .m(mr).n(nr).k(k_block)
+                .b_zero_point(0)
+            , test_func, arch_flags));
       $if INPUT_DATATYPE == "qu8":
         gemm_tests.push_back(GemmTestParams(
             "no_a_zero_point",
@@ -850,7 +859,9 @@ def generate_test_cases(
         "rvvfp16arith": " * xnn_init_hardware_config()->vlenb / sizeof(%s)" % nr_type
     }[isa]
   test_fun_name = "".join(ukernel.split("_")[1:4]).upper()
-  if test_fun_name in {"QP8F32QC8W"}:
+  if input_datatype == "pqs8" and weights_datatype == "qc4w":
+    test_fun_name = "Test_PQS8QC4W"
+  elif test_fun_name in {"QP8F32QC8W"}:
     test_fun_name = "_".join(["Test", test_fun_name])
   elif input_datatype in {"pf32", "pf16", "pqs8"}:
     test_fun_name = "_".join(["Test", input_datatype.upper()])

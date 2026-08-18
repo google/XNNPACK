@@ -1,5 +1,7 @@
 // Copyright 2025 Google LLC
 //
+// Copyright 2026 Arm Limited and/or its affiliates <open-source-office@arm.com>
+//
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
@@ -51,6 +53,7 @@ XNN_FINGERPRINT_ID(fully_connected_nc, qs8, qs8, qs8)
 XNN_FINGERPRINT_ID(fully_connected_nc, qs8, qs8, qc2w)
 XNN_FINGERPRINT_ID(fully_connected_nc, qs8, qs8, qc4w)
 XNN_FINGERPRINT_ID(fully_connected_nc, qs8, qs8, qc8w)
+XNN_FINGERPRINT_ID(fully_connected_nc, pqs8, pqs8, qc4w)
 XNN_FINGERPRINT_ID(fully_connected_nc, pqs8, pqs8, qc8w)
 XNN_FINGERPRINT_ID(fully_connected_nc, qu8, qu8, qu8)
 XNN_FINGERPRINT_ID(convolution2d_nchw, f16, f16, f16, conv2d_hwc2chw)

@@ -1,5 +1,7 @@
 // Copyright 2024 Google LLC
 //
+// Copyright 2026 Arm Limited and/or its affiliates <open-source-office@arm.com>
+//
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
@@ -165,6 +167,8 @@ XNN_ENUM_ITEM(xnn_operator_type_fully_connected_nc_qs8_qc4w,
               "Fully Connected (NC, QS8, QC4W)")
 XNN_ENUM_ITEM(xnn_operator_type_fully_connected_nc_qs8_qc8w,
               "Fully Connected (NC, QS8, QC8W)")
+XNN_ENUM_ITEM(xnn_operator_type_fully_connected_nc_pqs8_qc4w,
+              "Fully Connected (NC, PQS8, QC4W)")
 XNN_ENUM_ITEM(xnn_operator_type_fully_connected_nc_pqs8_qc8w,
               "Fully Connected (NC, PQS8, QC8W)")
 XNN_ENUM_ITEM(xnn_operator_type_fully_connected_nc_qu8,

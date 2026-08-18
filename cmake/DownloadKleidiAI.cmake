@@ -3,6 +3,8 @@
 #
 # Copyright 2019 Google LLC
 #
+# Copyright 2026 Arm Limited and/or its affiliates <open-source-office@arm.com>
+#
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
 
@@ -18,8 +20,8 @@ ENDIF()
 # LINT.IfChange
 INCLUDE(ExternalProject)
 ExternalProject_Add(kleidiai
-  URL https://gitlab.arm.com/kleidi/kleidiai/-/archive/13cd35993d8439143aff1e756a862d366acded0d/kleidiai-13cd35993d8439143aff1e756a862d366acded0d.zip
-  URL_HASH SHA256=b30044217e8e6f131aea4906e87a9908e78828822576d280af7ce68eda4578fd
+  URL https://gitlab.arm.com/kleidi/kleidiai/-/archive/74b1a12d3620c89dae4766de640e064952000f4d/kleidiai-74b1a12d3620c89dae4766de640e064952000f4d.zip
+  URL_HASH SHA256=99749705dcf89a769387057637da2684cf335ed05f7e0e83af26d64aa90316b2
   SOURCE_DIR "${CMAKE_BINARY_DIR}/kleidiai-source"
   BINARY_DIR "${CMAKE_BINARY_DIR}/kleidiai"
   CONFIGURE_COMMAND ""

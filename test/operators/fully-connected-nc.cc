@@ -3,9 +3,12 @@
 //
 // Copyright 2019 Google LLC
 //
+// Copyright 2026 Arm Limited and/or its affiliates <open-source-office@arm.com>
+//
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+#include <algorithm>
 #include <cstdint>
 
 #include <gtest/gtest.h>
@@ -473,6 +476,93 @@ TEST(FULLY_CONNECTED_NC_QS8_QC4W, weights_cache_unit_batch) {
       .use_weights_cache(true)
       .kernel_zero_point(8)
       .TestQS8QC4W();
+}
+
+TEST(FULLY_CONNECTED_NC_PQS8_QC4W, unsigned_weights_with_bias) {
+  FullyConnectedOperatorTester()
+      .batch_size(17)
+      .input_channels(32)
+      .output_channels(29)
+      .kernel_zero_point(8)
+      .TestPQS8QC4W();
+}
+
+TEST(FULLY_CONNECTED_NC_PQS8_QC4W, unsigned_weights_without_bias) {
+  FullyConnectedOperatorTester()
+      .has_bias(false)
+      .batch_size(17)
+      .input_channels(32)
+      .output_channels(29)
+      .kernel_zero_point(8)
+      .TestPQS8QC4W();
+}
+
+TEST(FULLY_CONNECTED_NC_PQS8_QC4W, signed_weights_with_bias) {
+  FullyConnectedOperatorTester()
+      .batch_size(17)
+      .input_channels(32)
+      .output_channels(29)
+      .kernel_zero_point(0)
+      .TestPQS8QC4W();
+}
+
+TEST(FULLY_CONNECTED_NC_PQS8_QC4W, signed_weights_without_bias) {
+  FullyConnectedOperatorTester()
+      .has_bias(false)
+      .batch_size(17)
+      .input_channels(32)
+      .output_channels(29)
+      .kernel_zero_point(0)
+      .TestPQS8QC4W();
+}
+
+TEST(FULLY_CONNECTED_NC_PQS8_QC4W, invalid_kernel_zero_point) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+
+  constexpr size_t input_channels = 32;
+  constexpr size_t output_channels = 16;
+  uint8_t kernel[output_channels * ((input_channels + 1) / 2)] = {};
+  float kernel_scale[output_channels];
+  int32_t bias[output_channels] = {};
+  std::fill_n(kernel_scale, output_channels, 1.0f);
+
+  for (const uint8_t kernel_zero_point : {1, 7, 9, 255}) {
+    xnn_operator_t fully_connected_op = nullptr;
+    EXPECT_EQ(
+        xnn_status_invalid_parameter,
+        xnn_create_fully_connected_nc_pqs8_qc4w(
+            input_channels, output_channels, input_channels, output_channels,
+            /*input_zero_point=*/0, /*input_scale=*/1.0f, kernel_zero_point,
+            kernel_scale, kernel, bias, /*output_zero_point=*/0,
+            /*output_scale=*/1.0f, /*output_min=*/-128, /*output_max=*/127,
+            /*flags=*/0, /*weights_cache=*/nullptr, &fully_connected_op));
+    EXPECT_EQ(nullptr, fully_connected_op);
+  }
+}
+
+TEST(FULLY_CONNECTED_NC_PQS8_QC4W, transpose_weights_unsupported) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+
+  constexpr size_t input_channels = 32;
+  constexpr size_t output_channels = 16;
+  uint8_t kernel[input_channels * ((output_channels + 1) / 2)] = {};
+  float kernel_scale[output_channels] = {};
+  int32_t bias[output_channels] = {};
+  for (size_t i = 0; i < output_channels; i++) {
+    kernel_scale[i] = 1.0f;
+  }
+
+  xnn_operator_t fully_connected_op = nullptr;
+  EXPECT_EQ(
+      xnn_status_unsupported_parameter,
+      xnn_create_fully_connected_nc_pqs8_qc4w(
+          input_channels, output_channels, input_channels, output_channels,
+          /*input_zero_point=*/0, /*input_scale=*/1.0f,
+          /*kernel_zero_point=*/8, kernel_scale, kernel, bias,
+          /*output_zero_point=*/0, /*output_scale=*/1.0f,
+          /*output_min=*/-128, /*output_max=*/127, XNN_FLAG_TRANSPOSE_WEIGHTS,
+          /*weights_cache=*/nullptr, &fully_connected_op));
+  EXPECT_EQ(nullptr, fully_connected_op);
 }
 
 TEST(FULLY_CONNECTED_NC_QS8_QC8W, unit_batch) {

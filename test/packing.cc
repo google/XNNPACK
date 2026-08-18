@@ -1,10 +1,13 @@
 // Copyright 2022 Google LLC
 //
+// Copyright 2026 Arm Limited and/or its affiliates <open-source-office@arm.com>
+//
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
 // clang-format off
 
+#include <algorithm>
 #include <cstddef>
 #include <cstdint>
 #include <numeric>
@@ -13,6 +16,9 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include "src/xnnpack/buffer.h"
+#include "src/xnnpack/config-types.h"
+#include "src/xnnpack/gemm.h"
+#include "src/xnnpack/isa-checks.h"
 #include "src/xnnpack/math.h"
 #include "src/xnnpack/microparams.h"
 #include "src/xnnpack/microparams-init.h"
@@ -23,6 +29,16 @@ namespace {
 using testing::ElementsAreArray;
 using testing::Matcher;
 using testing::_;
+
+static void set_packed_i4(std::vector<uint8_t>& data, size_t byte_offset,
+                          size_t index, uint8_t value) {
+  uint8_t& byte = data[byte_offset + (index >> 1)];
+  if ((index & 1) == 0) {
+    byte = (byte & 0xF0) | (value & 0x0F);
+  } else {
+    byte = (byte & 0x0F) | ((value & 0x0F) << 4);
+  }
+}
 
 // QS8-QC2W GEMM packing tests.
 
@@ -321,6 +337,156 @@ TEST(PACK_QD8_F32_QC4W_GEMM_GIO_W, kr_eq_4) {
   };
   EXPECT_THAT(packed_weights, ElementsAreArray(expected));
 }
+
+#if XNN_ENABLE_ARM_SME2 && XNN_ENABLE_KLEIDIAI
+TEST(PACK_KAI_QS8_QC4W_WEIGHTS_AND_BIASES_SME2, groups_gt_1_goi_w) {
+  TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_sme2);
+  const size_t groups = 2;
+  const size_t output_channels = 3;
+  const size_t input_channels = 5;
+  const size_t input_channel_stride = input_channels;
+  const size_t weights_row_stride = (input_channel_stride + 1) / 2;
+  const size_t weights_group_stride = output_channels * weights_row_stride;
+
+  std::vector<uint8_t> weights(groups * weights_group_stride, 0x88);
+  for (size_t group = 0; group < groups; group++) {
+    for (size_t output_channel = 0; output_channel < output_channels;
+         output_channel++) {
+      for (size_t input_channel = 0; input_channel < input_channels;
+           input_channel++) {
+        const size_t byte_offset =
+            group * weights_group_stride + output_channel * weights_row_stride;
+        const uint8_t value =
+            static_cast<uint8_t>(group * 7 + output_channel * 3 +
+                                 input_channel);
+        set_packed_i4(weights, byte_offset, input_channel, value);
+      }
+    }
+  }
+
+  std::vector<int32_t> bias(groups * output_channels);
+  std::iota(bias.begin(), bias.end(), 10);
+  std::vector<int32_t> zero_bias(groups * output_channels);
+  std::vector<float> scale(groups * output_channels);
+  std::iota(scale.begin(), scale.end(), 1.0f);
+
+  struct xnn_gemm_config gemm_config = {};
+  gemm_config.nr =
+      xnn_pqs8_qc4w_gemm_minmax_fp32_ukernel_32x32c4__neonsme2_get_nr();
+  gemm_config.log2_kr = 2;
+  gemm_config.log2_sr = 0;
+
+  const size_t packed_stride =
+      xnn_packed_stride_kai_qs8_qc4w_weights_and_biases_sme2(
+          &gemm_config, input_channels, /*unused_block_size=*/0,
+          input_channel_stride, /*extra_bytes=*/0);
+  const size_t packed_group_size =
+      round_up(output_channels, gemm_config.nr) * packed_stride;
+  const size_t packed_size = groups * packed_group_size;
+  std::vector<uint8_t> grouped_packed_weights(packed_size, 0xA5);
+  std::vector<uint8_t> expected_packed_weights(packed_size, 0xA5);
+  auto params = xnn_qs8_qc4w_packing_params{1, 0x8};
+
+  xnn_pack_kai_qs8_qc4w_weights_and_biases_sme2(
+      /*flags=*/0, &gemm_config, input_channels, output_channels, groups,
+      /*unused_block_size=*/0, input_channel_stride, bias.data(),
+      weights.data(), /*init_extra_data0_fn=*/nullptr, scale.data(),
+      sizeof(float), /*init_extra_data1_fn=*/nullptr, /*extra_data1=*/nullptr,
+      /*extra_data1_element_size=*/0, grouped_packed_weights.data(), &params);
+
+  for (size_t group = 0; group < groups; group++) {
+    xnn_pack_kai_qs8_qc4w_weights_and_biases_sme2(
+        /*flags=*/0, &gemm_config, input_channels, output_channels,
+        /*groups=*/1, /*unused_block_size=*/0, input_channel_stride,
+        bias.data() + group * output_channels,
+        weights.data() + group * weights_group_stride,
+        /*init_extra_data0_fn=*/nullptr,
+        scale.data() + group * output_channels, sizeof(float),
+        /*init_extra_data1_fn=*/nullptr, /*extra_data1=*/nullptr,
+        /*extra_data1_element_size=*/0,
+        expected_packed_weights.data() + group * packed_group_size, &params);
+  }
+  EXPECT_THAT(grouped_packed_weights,
+              ElementsAreArray(expected_packed_weights));
+
+  std::fill(grouped_packed_weights.begin(), grouped_packed_weights.end(), 0xA5);
+  std::fill(expected_packed_weights.begin(), expected_packed_weights.end(),
+            0xA5);
+  xnn_pack_kai_qs8_qc4w_weights_and_biases_sme2(
+      /*flags=*/0, &gemm_config, input_channels, output_channels, groups,
+      /*unused_block_size=*/0, input_channel_stride,
+      /*accumulator_init=*/zero_bias.data(), weights.data(),
+      /*init_extra_data0_fn=*/nullptr, scale.data(), sizeof(float),
+      /*init_extra_data1_fn=*/nullptr, /*extra_data1=*/nullptr,
+      /*extra_data1_element_size=*/0, grouped_packed_weights.data(), &params);
+
+  for (size_t group = 0; group < groups; group++) {
+    xnn_pack_kai_qs8_qc4w_weights_and_biases_sme2(
+        /*flags=*/0, &gemm_config, input_channels, output_channels,
+        /*groups=*/1, /*unused_block_size=*/0, input_channel_stride,
+        /*accumulator_init=*/zero_bias.data() + group * output_channels,
+        weights.data() + group * weights_group_stride,
+        /*init_extra_data0_fn=*/nullptr,
+        scale.data() + group * output_channels, sizeof(float),
+        /*init_extra_data1_fn=*/nullptr, /*extra_data1=*/nullptr,
+        /*extra_data1_element_size=*/0,
+        expected_packed_weights.data() + group * packed_group_size, &params);
+  }
+  EXPECT_THAT(grouped_packed_weights,
+              ElementsAreArray(expected_packed_weights));
+
+  params.kernel_zero_point = 0;
+  std::fill(grouped_packed_weights.begin(), grouped_packed_weights.end(), 0xA5);
+  std::fill(expected_packed_weights.begin(), expected_packed_weights.end(),
+            0xA5);
+  xnn_pack_kai_qs8_qc4w_weights_and_biases_sme2(
+      /*flags=*/0, &gemm_config, input_channels, output_channels, groups,
+      /*unused_block_size=*/0, input_channel_stride, bias.data(),
+      weights.data(), /*init_extra_data0_fn=*/nullptr, scale.data(),
+      sizeof(float), /*init_extra_data1_fn=*/nullptr, /*extra_data1=*/nullptr,
+      /*extra_data1_element_size=*/0, grouped_packed_weights.data(), &params);
+
+  for (size_t group = 0; group < groups; group++) {
+    xnn_pack_kai_qs8_qc4w_weights_and_biases_sme2(
+        /*flags=*/0, &gemm_config, input_channels, output_channels,
+        /*groups=*/1, /*unused_block_size=*/0, input_channel_stride,
+        bias.data() + group * output_channels,
+        weights.data() + group * weights_group_stride,
+        /*init_extra_data0_fn=*/nullptr,
+        scale.data() + group * output_channels, sizeof(float),
+        /*init_extra_data1_fn=*/nullptr, /*extra_data1=*/nullptr,
+        /*extra_data1_element_size=*/0,
+        expected_packed_weights.data() + group * packed_group_size, &params);
+  }
+  EXPECT_THAT(grouped_packed_weights,
+              ElementsAreArray(expected_packed_weights));
+}
+
+TEST(PACK_KAI_QS8_QC4W_WEIGHTS_AND_BIASES_SME2,
+     rejects_invalid_kernel_zero_point) {
+  struct xnn_gemm_config gemm_config = {};
+  gemm_config.nr = 1;
+  gemm_config.log2_kr = 0;
+  gemm_config.log2_sr = 0;
+
+  const int32_t bias = 0;
+  const uint8_t weights = 0;
+  const float scale = 1.0f;
+  std::vector<uint8_t> packed_weights(64, 0xA5);
+  const auto params = xnn_qs8_qc4w_packing_params{
+      /*input_zero_point=*/0, /*kernel_zero_point=*/7};
+
+  xnn_pack_kai_qs8_qc4w_weights_and_biases_sme2(
+      /*flags=*/0, &gemm_config, /*input_channels=*/1,
+      /*output_channels=*/1, /*groups=*/1, /*unused_block_size=*/0,
+      /*k_stride=*/1, &bias, &weights, /*init_extra_data0_fn=*/nullptr, &scale,
+      sizeof(float), /*init_extra_data1_fn=*/nullptr, /*extra_data1=*/nullptr,
+      /*extra_data1_element_size=*/0, packed_weights.data(), &params);
+
+  EXPECT_TRUE(std::all_of(packed_weights.cbegin(), packed_weights.cend(),
+                          [](uint8_t value) { return value == 0xA5; }));
+}
+#endif  // XNN_ENABLE_ARM_SME2 && XNN_ENABLE_KLEIDIAI
 
 TEST(PACK_QD8_F32_QC4W_GEMM_GOI_W, kr_eq_4_nr_eq_2) {
   size_t g = 1;

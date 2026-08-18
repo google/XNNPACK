@@ -1,5 +1,7 @@
 // Copyright 2022 Google LLC
 //
+// Copyright 2026 Arm Limited and/or its affiliates <open-source-office@arm.com>
+//
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
@@ -388,6 +390,7 @@ XNN_INTERNAL const struct xnn_gemm_config* xnn_init_f32_qc8w_gemm_config();
 XNN_INTERNAL const struct xnn_gemm_config* xnn_init_f32_qc4w_gemm_config();
 XNN_INTERNAL const struct xnn_gemm_config* xnn_init_pf16_gemm_config();
 XNN_INTERNAL const struct xnn_gemm_config* xnn_init_pf32_gemm_config();
+XNN_INTERNAL const struct xnn_gemm_config* xnn_init_pqs8_qc4w_gemm_config();
 XNN_INTERNAL const struct xnn_gemm_config* xnn_init_pqs8_qc8w_gemm_config();
 XNN_INTERNAL const struct xnn_gemm_config* xnn_init_qd8_f16_qc2w_gemm_config();
 XNN_INTERNAL const struct xnn_gemm_config* xnn_init_qdu8_f16_qc2w_gemm_config();

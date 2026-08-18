@@ -1,5 +1,7 @@
 // Copyright 2023 Google LLC
 //
+// Copyright 2026 Arm Limited and/or its affiliates <open-source-office@arm.com>
+//
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
@@ -43,6 +45,7 @@ static struct xnn_gemm_config f32_qc4w_gemm_config = {0};
 static struct xnn_gemm_config f32_qc8w_gemm_config = {0};
 static struct xnn_gemm_config pf16_gemm_config = {0};
 static struct xnn_gemm_config pf32_gemm_config = {0};
+static struct xnn_gemm_config pqs8_qc4w_gemm_config = {0};
 static struct xnn_gemm_config pqs8_qc8w_gemm_config = {0};
 static struct xnn_gemm_config qd8_f16_qc2w_gemm_config = {0};
 static struct xnn_gemm_config qdu8_f16_qc2w_gemm_config = {0};
@@ -79,6 +82,7 @@ XNN_INIT_ONCE_GUARD(f32_qc4w_gemm);
 XNN_INIT_ONCE_GUARD(f32_qc8w_gemm);
 XNN_INIT_ONCE_GUARD(pf16_gemm);
 XNN_INIT_ONCE_GUARD(pf32_gemm);
+XNN_INIT_ONCE_GUARD(pqs8_qc4w_gemm);
 XNN_INIT_ONCE_GUARD(pqs8_qc8w_gemm);
 XNN_INIT_ONCE_GUARD(qd8_f16_qc2w_gemm);
 XNN_INIT_ONCE_GUARD(qdu8_f16_qc2w_gemm);
@@ -606,6 +610,47 @@ static void init_pqs8_qc8w_gemm_config(void) {
     /* No action */
   }
   assert(pqs8_qc8w_gemm_config.mr <= XNN_MAX_MR);
+#endif  // XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI
+}
+
+static void init_pqs8_qc4w_gemm_config(void) {
+  pqs8_qc4w_gemm_config.log2_input_element_size = XNN_LOG2_SIZEOF_INT8_T;
+  pqs8_qc4w_gemm_config.log2_filter_element_size = XNN_LOG2_SIZEOF_INT8_T;
+  pqs8_qc4w_gemm_config.log2_filter_element_bit_size = XNN_LOG2_BIT_SIZEOF_INT4;
+  pqs8_qc4w_gemm_config.bias_element_size = sizeof(int32_t);
+
+#if XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI
+  const struct xnn_hardware_config* hardware_config =
+      xnn_init_hardware_config();
+  assert(hardware_config != NULL);
+  (void)hardware_config;
+  if (XNN_ENABLE_ARM_SME2 && (hardware_config->arch_flags & xnn_arch_arm_sme2)) {
+#if XNN_ENABLE_ARM_SME2
+    const size_t mr =
+        xnn_pqs8_qc4w_gemm_minmax_fp32_ukernel_32x32c4__neonsme2_get_mr();
+    const size_t nr =
+        xnn_pqs8_qc4w_gemm_minmax_fp32_ukernel_32x32c4__neonsme2_get_nr();
+    pqs8_qc4w_gemm_config.arch = xnn_arch_arm_sme2;
+    pqs8_qc4w_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(mr)] =
+        XNN_INIT_HMP_GEMM_UKERNEL(
+            xnn_pqs8_qc4w_gemm_minmax_fp32_ukernel_32x32c4__neonsme2);
+    pqs8_qc4w_gemm_config.init.qs8_qc8w =
+        xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params;
+    pqs8_qc4w_gemm_config.pack_weights_and_biases =
+        xnn_pack_kai_qs8_qc4w_weights_and_biases_sme2;
+    pqs8_qc4w_gemm_config.packed_stride_weights_and_biases =
+        xnn_packed_stride_kai_qs8_qc4w_weights_and_biases_sme2;
+    pqs8_qc4w_gemm_config.mr = mr;
+    pqs8_qc4w_gemm_config.mr_packed = mr;
+    pqs8_qc4w_gemm_config.nr = nr;
+    pqs8_qc4w_gemm_config.log2_kr = 2;
+    pqs8_qc4w_gemm_config.log2_sr = 0;
+    pqs8_qc4w_gemm_config.planes = 1;
+#endif  // XNN_ENABLE_ARM_SME2
+  } else {
+    /* No action. */
+  }
+  assert(pqs8_qc4w_gemm_config.mr <= XNN_MAX_MR);
 #endif  // XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI
 }
 
@@ -6419,6 +6464,14 @@ const struct xnn_gemm_config* xnn_init_pqs8_qc8w_gemm_config() {
   }
   XNN_INIT_ONCE(pqs8_qc8w_gemm);
   return pqs8_qc8w_gemm_config.mr ? &pqs8_qc8w_gemm_config : NULL;
+}
+
+const struct xnn_gemm_config* xnn_init_pqs8_qc4w_gemm_config() {
+  if (xnn_init_hardware_config() == NULL) {
+    return NULL;
+  }
+  XNN_INIT_ONCE(pqs8_qc4w_gemm);
+  return pqs8_qc4w_gemm_config.mr ? &pqs8_qc4w_gemm_config : NULL;
 }
 
 const struct xnn_gemm_config* xnn_init_f32_gemm_config(uint32_t flags) {

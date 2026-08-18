@@ -3,6 +3,8 @@
 //
 // Copyright 2019 Google LLC
 //
+// Copyright 2026 Arm Limited and/or its affiliates <open-source-office@arm.com>
+//
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
@@ -398,6 +400,10 @@ size_t xnn_pqs8_qc8w_gemm_minmax_ukernel_32x32c4__neonsme2_get_mr();
 size_t xnn_pqs8_qc8w_gemm_minmax_ukernel_32x32c4__neonsme2_get_nr();
 size_t xnn_pqs8_qc8w_gemm_minmax_ukernel_32x32c4__neonsme_get_mr();
 size_t xnn_pqs8_qc8w_gemm_minmax_ukernel_32x32c4__neonsme_get_nr();
+size_t xnn_pqs8_qc4w_gemm_minmax_fp32_ukernel_1x64c4__neonsme2_get_mr(void);
+size_t xnn_pqs8_qc4w_gemm_minmax_fp32_ukernel_1x64c4__neonsme2_get_nr(void);
+size_t xnn_pqs8_qc4w_gemm_minmax_fp32_ukernel_32x32c4__neonsme2_get_mr(void);
+size_t xnn_pqs8_qc4w_gemm_minmax_fp32_ukernel_32x32c4__neonsme2_get_nr(void);
 
 #define DECLARE_PQS8_QC8W_GEMM_MINMAX_UKERNEL_FUNCTION(fn_name)            \
                                                                            \
@@ -415,6 +421,10 @@ DECLARE_PQS8_QC8W_GEMM_MINMAX_UKERNEL_FUNCTION(
     xnn_pqs8_qc8w_gemm_minmax_ukernel_1x32c4__neonsme2)
 DECLARE_PQS8_QC8W_GEMM_MINMAX_UKERNEL_FUNCTION(
     xnn_pqs8_qc8w_gemm_minmax_ukernel_32x32c4__neonsme)
+DECLARE_PQS8_QC8W_GEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_pqs8_qc4w_gemm_minmax_fp32_ukernel_1x64c4__neonsme2)
+DECLARE_PQS8_QC8W_GEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_pqs8_qc4w_gemm_minmax_fp32_ukernel_32x32c4__neonsme2)
 
 size_t xnn_pqs8_qc8w_igemm_minmax_fp32_ukernel_32x32c4__neonsme2_get_mr();
 size_t xnn_pqs8_qc8w_igemm_minmax_fp32_ukernel_32x32c4__neonsme2_get_nr();
