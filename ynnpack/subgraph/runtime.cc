@@ -15,6 +15,7 @@
 #include <limits>
 #include <map>
 #include <memory>
+#include <mutex>
 #include <optional>
 #include <set>
 #include <sstream>
@@ -883,6 +884,59 @@ auto make_reshape_impl(ynn_runtime* runtime) {
 const char* get_trace_filename() { return getenv("YNN_TRACE"); }
 #endif
 
+// Reuse allocations across pipeline evaluations.
+class allocation_pool {
+ public:
+  // Small allocations are cheap to make and reusing them buys nothing (the
+  // cost being avoided is munmap/page faults, which only large allocations
+  // pay); pass them through to malloc.
+  static constexpr size_t min_pooled_size = 1 << 20;
+
+  void* allocate(size_t size) {
+    if (size < min_pooled_size) return malloc(size);
+    {
+      std::lock_guard<std::mutex> lock(mutex_);  // NOLINT(build/c++11)
+      auto it = free_list_.lower_bound(size);
+      // Don't let a small request squat on a much bigger block.
+      if (it != free_list_.end() && it->first <= size * 2) {
+        void* allocation = it->second;
+        live_[allocation] = it->first;
+        free_list_.erase(it);
+        return allocation;
+      }
+    }
+    void* allocation = malloc(size);
+    if (allocation) {
+      std::lock_guard<std::mutex> lock(mutex_);  // NOLINT(build/c++11)
+      live_[allocation] = size;
+    }
+    return allocation;
+  }
+
+  void release(void* allocation) {
+    if (!allocation) return;
+    std::lock_guard<std::mutex> lock(mutex_);  // NOLINT(build/c++11)
+    auto it = live_.find(allocation);
+    if (it == live_.end()) {
+      // Not pooled (it was smaller than min_pooled_size).
+      free(allocation);
+      return;
+    }
+    free_list_.emplace(it->second, allocation);
+    live_.erase(it);
+  }
+
+  static allocation_pool& global() {
+    static allocation_pool* pool = new allocation_pool();
+    return *pool;
+  }
+
+ private:
+  std::mutex mutex_;  // NOLINT(build/c++11)
+  std::multimap<size_t, void*> free_list_;
+  std::map<void*, size_t> live_;
+};
+
 #ifdef YNN_ENABLE_TSL_PROFILER
 bool ynn_traceme_enabled() {
   // We can't use `TraceMe::Active` here, because it returns false when called,
@@ -905,12 +959,22 @@ extern "C" {
 ynn_runtime::ynn_runtime(ynn::ref_count<const ynn_subgraph> subgraph,
                          slinky::thread_pool* threadpool, uint32_t flags)
     : subgraph(subgraph), flags(flags), globals(subgraph->globals) {
-  // Implement our required alignment for heap allocations.
-  eval_config.allocate = [](slinky::var sym, slinky::raw_buffer* buffer) {
-    return buffer->allocate(YNN_ALLOCATION_ALIGNMENT);
+  // Allocate through the buffer pool.
+  eval_config.allocate = [](slinky::var sym,
+                            slinky::raw_buffer* buffer) -> void* {
+    std::optional<std::size_t> size = buffer->init_strides();
+    if (!size) return nullptr;
+    void* allocation =
+        allocation_pool::global().allocate(*size + YNN_ALLOCATION_ALIGNMENT);
+    buffer->base = reinterpret_cast<void*>(
+        (reinterpret_cast<uintptr_t>(allocation) + YNN_ALLOCATION_ALIGNMENT -
+         1) &
+        ~static_cast<uintptr_t>(YNN_ALLOCATION_ALIGNMENT - 1));
+    return allocation;
   };
   eval_config.free = [](slinky::var sym, slinky::raw_buffer* buffer,
-                        void* ptr) { std::free(ptr); };
+                        void* ptr) { allocation_pool::global().release(ptr); };
+
   eval_config.thread_pool = threadpool;
   // Slinky's default check failure handler calls std::abort(), don't let that
   // happen here.
