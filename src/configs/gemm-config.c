@@ -1,4 +1,5 @@
 // Copyright 2023 Google LLC
+// Copyright 2026 Arm Limited and/or its affiliates <open-source-office@arm.com>
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
@@ -495,8 +496,8 @@ static void init_pf32_gemm_config(void) {
       pf32_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(mr)] =XNN_INIT_HMP_GEMM_UKERNEL(xnn_pf32_gemm_minmax_ukernel_32x32__neonsme2);
       pf32_gemm_config.minmax.igemm[XNN_MR_TO_INDEX(mr)] = XNN_INIT_HMP_PACKED_IGEMM_UKERNEL(xnn_pf32_igemm_minmax_ukernel_32x32__neonsme2);
       pf32_gemm_config.init.f32 = xnn_init_f32_minmax_scalar_params;
-      pf32_gemm_config.pack_weights_and_biases = xnn_pack_kai_f32_weights_and_biases;
-      pf32_gemm_config.packed_stride_weights_and_biases = xnn_packed_stride_kai_f32_weights_and_biases;
+      pf32_gemm_config.pack_weights_and_biases = xnn_pack_kai_f32_weights_and_biases_sme2;
+      pf32_gemm_config.packed_stride_weights_and_biases = xnn_packed_stride_kai_f32_weights_and_biases_sme2;
       pf32_gemm_config.pack_igemm_goki = (xnn_pack_conv_goki_w_fn) xnn_pack_kai_pf32_conv_goki_w_sme;
       pf32_gemm_config.pack_igemm_kgo = (xnn_pack_conv_kgo_w_fn) xnn_pack_f32_conv_kgo_w;
       pf32_gemm_config.mr = mr;
@@ -514,8 +515,8 @@ static void init_pf32_gemm_config(void) {
     pf32_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(mr)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_pf32_gemm_minmax_ukernel_32x32__neonsme);
     pf32_gemm_config.minmax.igemm[XNN_MR_TO_INDEX(mr)] = XNN_INIT_HMP_PACKED_IGEMM_UKERNEL(xnn_pf32_igemm_minmax_ukernel_32x32__neonsme);
     pf32_gemm_config.init.f32 = xnn_init_f32_minmax_scalar_params;
-    pf32_gemm_config.pack_weights_and_biases = xnn_pack_kai_f32_weights_and_biases;
-    pf32_gemm_config.packed_stride_weights_and_biases = xnn_packed_stride_kai_f32_weights_and_biases;
+    pf32_gemm_config.pack_weights_and_biases = xnn_pack_kai_f32_weights_and_biases_sme;
+    pf32_gemm_config.packed_stride_weights_and_biases = xnn_packed_stride_kai_f32_weights_and_biases_sme;
     pf32_gemm_config.pack_igemm_goki = (xnn_pack_conv_goki_w_fn) xnn_pack_kai_pf32_conv_goki_w_sme;
     pf32_gemm_config.pack_igemm_kgo = (xnn_pack_conv_kgo_w_fn) xnn_pack_f32_conv_kgo_w;
     pf32_gemm_config.mr = mr;

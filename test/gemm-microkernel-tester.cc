@@ -2932,6 +2932,7 @@ void GemmMicrokernelTester::Test_QP8F32QC8W(
 void GemmMicrokernelTester::Test_PF32(
     xnn_pf32_gemm_minmax_ukernel_fn gemm,
     xnn_init_f32_minmax_params_fn init_minmax_params,
+    xnn_x32_pack_lh_ukernel_fn pack_lh_fn, xnn_pack_lh_size_fn pack_lh_size_fn,
     xnn_pack_weights_and_biases_fn pack,
     xnn_packed_stride_weights_and_biases_fn packed_stride) {
   ASSERT_LE(m(), mr());
@@ -2961,22 +2962,16 @@ void GemmMicrokernelTester::Test_PF32(
   const size_t packed_w_size = packed_w_stride * round_up(n(), nr());
   xnnpack::Buffer<float, XNN_ALLOCATION_ALIGNMENT> packed_w(packed_w_size);
 
-  // Get the LHS packing config.
-  const struct xnn_pack_lh_config* pack_lh_config =
-      xnn_init_x32_pack_lh_config();
-  ASSERT_NE(pack_lh_config, nullptr);
-
   // Loop over the iterations.
   std::generate(input_f32.begin(), input_f32.end(), std::ref(f32rng));
 
   // Pack the left-hand operand.
   const size_t input_packed_size =
-      pack_lh_config->size_fn(m(), k(), mr_packed(), kr(), sr());
+      pack_lh_size_fn(m(), k(), mr_packed(), kr(), sr());
   xnnpack::Buffer<int8_t> input_packed(input_packed_size);
-  pack_lh_config->pack_lh_fn(m(), k(), mr_packed(), kr(), sr(),
-                             /*m_idx_start=*/0, input_f32.data(),
-                             /*lhs_stride=*/k() * sizeof(float),
-                             input_packed.data());
+  pack_lh_fn(m(), k(), mr_packed(), kr(), sr(), /*m_idx_start=*/0,
+             input_f32.data(), /*lhs_stride=*/k() * sizeof(float),
+             input_packed.data());
 
   std::generate(weights.begin(), weights.end(), std::ref(f32rng));
   std::generate(bias.begin(), bias.end(), std::ref(f32rng));
