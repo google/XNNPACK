@@ -2043,7 +2043,7 @@ TEST(CONVOLUTION_NHWC_QS8, reject_scale_buffer_size_overflow) {
   if (status == xnn_status_unsupported_hardware) {
     GTEST_SKIP();
   }
-  ASSERT_EQ(xnn_status_success, status);
+  ASSERT_EQ(status, xnn_status_success);
   xnn_delete_operator(convolution_op);
 
   const size_t overflowing_group_output_channels =
@@ -2079,7 +2079,7 @@ TEST(CONVOLUTION_NHWC_QS8_QC8W, reject_scale_buffer_size_overflow) {
   if (status == xnn_status_unsupported_hardware) {
     GTEST_SKIP();
   }
-  ASSERT_EQ(xnn_status_success, status);
+  ASSERT_EQ(status, xnn_status_success);
   xnn_delete_operator(convolution_op);
 
   const size_t overflowing_output_channels =
@@ -2104,7 +2104,7 @@ TEST(CONVOLUTION_NHWC_PQS8_QS8_QS8, reject_scale_buffer_size_overflow) {
   if (status == xnn_status_unsupported_hardware) {
     GTEST_SKIP();
   }
-  ASSERT_EQ(xnn_status_success, status);
+  ASSERT_EQ(status, xnn_status_success);
   xnn_delete_operator(convolution_op);
 
   const size_t overflowing_group_output_channels =

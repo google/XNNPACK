@@ -3401,7 +3401,7 @@ TEST(DECONVOLUTION_NHWC_QS8_QC8W, reject_scale_buffer_size_overflow) {
   if (status == xnn_status_unsupported_hardware) {
     GTEST_SKIP();
   }
-  ASSERT_EQ(xnn_status_success, status);
+  ASSERT_EQ(status, xnn_status_success);
   xnn_delete_operator(deconvolution_op);
 
   const size_t overflowing_group_output_channels =
