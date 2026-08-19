@@ -727,6 +727,7 @@ def generate_test_cases(
     is_pipelined,
     cpp_check,
     isa,
+    arch_flags,
 ):
   """Generates all tests cases for a GEMM micro-kernel.
 
@@ -760,6 +761,7 @@ def generate_test_cases(
       micro-kernel.
     isa: instruction set required to run the micro-kernel. Generated unit test
       will skip execution if the host processor doesn't support this ISA.
+    arch_flags: CPU feature flags required to run the micro-kernel.
 
   Returns:
     Code for the test case.
@@ -875,7 +877,7 @@ def generate_test_cases(
       "NR_SCALE": nr_scale,
       "ADJKBLOCK": 2 * k_block if is_pipelined else k_block,
       "IS_PIPELINED": is_pipelined,
-      "ARCH_FLAGS": xnncommon.get_arch_flags(isa),
+      "ARCH_FLAGS": arch_flags,
       "next_prime": next_prime,
       "CPP_CHECK": cpp_check,
       "OUTPUT_DATATYPE": output_datatype,
@@ -904,7 +906,7 @@ def generate_test_cases(
           "SR": sr,
           "MR_PACKED": mr_packed,
           "NR_SCALE": nr_scale,
-          "ARCH_FLAGS": xnncommon.get_arch_flags(isa),
+          "ARCH_FLAGS": arch_flags,
           "CPP_CHECK": cpp_check,
           "PACKED_LHS": input_datatype in {"qp8", "pf32", "pf16", "pqs8"},
       },
@@ -1048,6 +1050,9 @@ namespace {{
           isa,
           assembly,
       ) = split_ukernel_name(name)
+      arch_flags = ukernel_spec.get(
+          "arch-flags", xnncommon.get_arch_flags(isa)
+      )
 
       if k_block < kr * sr:
         print(f"Error: k_block ({k_block}) must be >= kr * sr ({kr} * {sr}) for kernel {name} in {options.spec}")
@@ -1073,6 +1078,7 @@ namespace {{
           pipelined,
           cpp_check,
           isa,
+          arch_flags,
       )
 
       # Store or reuse the `CreateTests` function?

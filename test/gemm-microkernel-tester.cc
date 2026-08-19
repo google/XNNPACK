@@ -1970,6 +1970,17 @@ void GemmMicrokernelTester::Test(xnn_qd8_bf16_qb4w_gemm_ukernel_fn gemm,
     }
   }
 
+  if (unsigned_inputs()) {
+    // Some architectures require that the input be unsigned.
+    // Adjust the zero point and flip the sign of the input to mimic adding
+    // 128 to the input with correct overflow behaviour.
+    for (int i = 0; i < quantization_params.size(); ++i) {
+      quantization_params[i].zero_point += 128;
+    }
+    for (int i = 0; i < a.size(); ++i) {
+      a[i] ^= 0x80;
+    }
+  }
   gemm(m(), n(), k2, a.data(), a_stride() * sizeof(int8_t),
        static_cast<const void*>(packed_w.data()), c.data(),
        cm_stride() * sizeof(xnn_bfloat16), nr() * sizeof(xnn_bfloat16), &params,
