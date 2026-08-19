@@ -7,6 +7,15 @@
 
 // Arguments are:
 // XNN_UKERNEL(arch, name, c_block, pipelined, cr, kr, datatype, weights_type,params_type, init_fn)
+XNN_UKERNEL(xnn_arch_none, xnn_f16_dwconv_minmax_ukernel_3p1c__scalar_acc2, 1, false, 1, 3, xnn_float16, xnn_float16, struct xnn_f16_minmax_params, xnn_init_f16_minmax_scalar_params)
+XNN_UKERNEL(xnn_arch_none, xnn_f16_dwconv_minmax_ukernel_4p1c__scalar_acc2, 1, false, 1, 4, xnn_float16, xnn_float16, struct xnn_f16_minmax_params, xnn_init_f16_minmax_scalar_params)
+XNN_UKERNEL(xnn_arch_none, xnn_f16_dwconv_minmax_ukernel_9p1c__scalar_acc2, 1, false, 1, 9, xnn_float16, xnn_float16, struct xnn_f16_minmax_params, xnn_init_f16_minmax_scalar_params)
+XNN_UKERNEL(xnn_arch_none, xnn_f16_dwconv_minmax_ukernel_25p2c__scalar_acc2, 2, false, 2, 25, xnn_float16, xnn_float16, struct xnn_f16_minmax_params, xnn_init_f16_minmax_scalar_params)
+XNN_UKERNEL(xnn_arch_none, xnn_f16_f32acc_dwconv_minmax_ukernel_3p1c__scalar_acc2, 1, false, 1, 3, xnn_float16, xnn_float16, struct xnn_f16_minmax_params, xnn_init_f16_minmax_scalar_params)
+XNN_UKERNEL(xnn_arch_none, xnn_f16_f32acc_dwconv_minmax_ukernel_4p1c__scalar_acc2, 1, false, 1, 4, xnn_float16, xnn_float16, struct xnn_f16_minmax_params, xnn_init_f16_minmax_scalar_params)
+XNN_UKERNEL(xnn_arch_none, xnn_f16_f32acc_dwconv_minmax_ukernel_9p1c__scalar_acc2, 1, false, 1, 9, xnn_float16, xnn_float16, struct xnn_f16_minmax_params, xnn_init_f16_minmax_scalar_params)
+XNN_UKERNEL(xnn_arch_none, xnn_f16_f32acc_dwconv_minmax_ukernel_25p2c__scalar_acc2, 2, false, 2, 25, xnn_float16, xnn_float16, struct xnn_f16_minmax_params, xnn_init_f16_minmax_scalar_params)
+
 #if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 XNN_UKERNEL(xnn_arch_arm_neon_fp16_arith, xnn_f16_dwconv_minmax_ukernel_3p8c__neonfp16arith, 8, false, 8, 3, xnn_float16, xnn_float16, struct xnn_f16_minmax_params, xnn_init_f16_minmax_scalar_params)
 XNN_UKERNEL(xnn_arch_arm_neon_fp16_arith, xnn_f16_dwconv_minmax_ukernel_3p8c__neonfp16arith_acc2, 8, false, 8, 3, xnn_float16, xnn_float16, struct xnn_f16_minmax_params, xnn_init_f16_minmax_scalar_params)
@@ -62,6 +71,8 @@ XNN_UKERNEL(xnn_arch_x86_fma3, xnn_f16_dwconv_minmax_ukernel_25p32c__fma3_acc2, 
 #endif  // XNN_ENABLE_FMA3 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 #if XNN_ENABLE_AVX512FP16 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+XNN_UKERNEL(xnn_arch_x86_avx512fp16, xnn_f16_dwconv_minmax_ukernel_3p32c__avx512fp16, 32, false, 32, 3, xnn_float16, xnn_float16, struct xnn_f16_minmax_params, xnn_init_f16_minmax_scalar_params)
+XNN_UKERNEL(xnn_arch_x86_avx512fp16, xnn_f16_dwconv_minmax_ukernel_4p32c__avx512fp16, 32, false, 32, 4, xnn_float16, xnn_float16, struct xnn_f16_minmax_params, xnn_init_f16_minmax_scalar_params)
 XNN_UKERNEL(xnn_arch_x86_avx512fp16, xnn_f16_dwconv_minmax_ukernel_9p32c__avx512fp16, 32, false, 32, 9, xnn_float16, xnn_float16, struct xnn_f16_minmax_params, xnn_init_f16_minmax_scalar_params)
 XNN_UKERNEL(xnn_arch_x86_avx512fp16, xnn_f16_dwconv_minmax_ukernel_9p32c__avx512fp16_acc2, 32, false, 32, 9, xnn_float16, xnn_float16, struct xnn_f16_minmax_params, xnn_init_f16_minmax_scalar_params)
 XNN_UKERNEL(xnn_arch_x86_avx512fp16, xnn_f16_dwconv_minmax_ukernel_25p32c__avx512fp16, 32, false, 32, 25, xnn_float16, xnn_float16, struct xnn_f16_minmax_params, xnn_init_f16_minmax_scalar_params)
