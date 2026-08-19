@@ -40,7 +40,7 @@ static XNN_INLINE __m128i xnn_load_tail_safe_f16(const uint16_t* i, size_t c) {
   assert(c > 0);
   assert(c < 8);
 
-  XNN_ALIGN(16) uint16_t padded[8];
+  XNN_ALIGN(16) uint16_t padded[8] = {0};
   uint16_t* dst = padded;
   switch (c) {
   case 7: *dst++ = *i++; XNN_FALLTHROUGH
