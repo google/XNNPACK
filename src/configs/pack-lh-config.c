@@ -1,4 +1,5 @@
 // Copyright 2024 Google LLC
+// Copyright 2026 Arm Limited and/or its affiliates <open-source-office@arm.com>
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
@@ -74,7 +75,8 @@ static void init_x32_pack_lh_config(void) {
   }
 #endif  // XNN_ENABLE_ARM_SME2
 #if XNN_ENABLE_ARM_SME
-  if ((hardware_config->arch_flags & xnn_arch_arm_sme)) {
+  if ((hardware_config->arch_flags & xnn_arch_arm_sme) &&
+      x32_pack_lh_config.pack_lh_fn == NULL) {
     x32_pack_lh_config.pack_lh_fn =
         (xnn_pack_lh_ukernel_fn)xnn_x32_pack_lh_ukernel__neonsme;
     x32_pack_lh_config.size_fn =
@@ -112,7 +114,8 @@ static void init_x32_igemm_pack_lh_config(void) {
     }
 #endif  // XNN_ENABLE_ARM_SME2
 #if XNN_ENABLE_ARM_SME
-    if ((hardware_config->arch_flags & xnn_arch_arm_sme)) {
+    if ((hardware_config->arch_flags & xnn_arch_arm_sme) &&
+        x32_igemm_pack_lh_config.pack_lh_for_igemm_fn == NULL) {
         x32_igemm_pack_lh_config.pack_lh_for_igemm_fn  = (xnn_pack_lh_igemm_ukernel_fn) xnn_x32_pack_lh_ukernel__igemm_neonsme;
         x32_igemm_pack_lh_config.size_for_igemm_fn  = (xnn_pack_lh_igemm_size_fn) xnn_x32_pack_lh_size__igemm_neonsme;
         x32_igemm_pack_lh_config.offset_for_igemm_fn  = (xnn_pack_lh_igemm_offset_fn) xnn_x32_pack_lh_offset__igemm_neonsme;
