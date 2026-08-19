@@ -3472,6 +3472,12 @@ enum xnn_status reshape_convolution2d_nhwc_qx8_f16_qc8w(
     for (size_t i = 1; i < batch_size; ++i) {
       convolution_op->convolution_op->zero_buffers[i] =
           xnn_allocate_simd_memory(convolution_op->convolution_op->zero_size);
+      if (convolution_op->convolution_op->zero_buffers[i] == NULL) {
+        xnn_log_error(
+            "failed to allocate %zu bytes for zero buffer for batch %zu",
+            convolution_op->convolution_op->zero_size, i);
+        return xnn_status_out_of_memory;
+      }
     }
     convolution_op->convolution_op->valid_batch_size = batch_size;
   }
@@ -3541,6 +3547,12 @@ enum xnn_status reshape_convolution2d_nhwc_qx8_f32_qc8w(
     for (size_t i = 1; i < batch_size; ++i) {
       convolution_op->convolution_op->zero_buffers[i] =
           xnn_allocate_simd_memory(convolution_op->convolution_op->zero_size);
+      if (convolution_op->convolution_op->zero_buffers[i] == NULL) {
+        xnn_log_error(
+            "failed to allocate %zu bytes for zero buffer for batch %zu",
+            convolution_op->convolution_op->zero_size, i);
+        return xnn_status_out_of_memory;
+      }
     }
     convolution_op->convolution_op->valid_batch_size = batch_size;
   }
