@@ -222,7 +222,7 @@ xnn_load_tail_safe_f16(const xnn_float16 *input, size_t num_elements) {
   assert(num_elements > 0);
   assert(num_elements < xnn_simd_size_f16);
 
-  XNN_ALIGN(16) xnn_float16 padded[8];
+  XNN_ALIGN(16) xnn_float16 padded[8] = {0};
   xnn_float16 *dst = padded;
   switch (num_elements) {
     case 7:

@@ -6,10 +6,15 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+#include <array>
 #include <cstdint>
+#include <limits>
 
 #include <gtest/gtest.h>
+#include "include/xnnpack.h"
 #include "src/xnnpack/common.h"
+#include "src/xnnpack/internal.h"
+#include "src/xnnpack/math.h"
 #include "test/operators/fully-connected-operator-tester.h"
 
 TEST(FULLY_CONNECTED_NC_QS8, unit_batch) {
@@ -2634,6 +2639,63 @@ TEST(FULLY_CONNECTED_NC_QD8_F16_QB4W, bl) {
           .TestQD8F16QB4W();
     }
   }
+}
+
+TEST(FULLY_CONNECTED_NC_QB4W_F16_SCALES, scale_buffer_size_overflow) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+
+  constexpr size_t input_channels = 32;
+  constexpr size_t block_size = 32;
+  constexpr size_t num_scale_elements = 33;
+  // The byte-size multiplication wraps to a 64-byte allocation, while the
+  // conversion loop still attempts to process output_channels scale values.
+  constexpr size_t output_channels =
+      std::numeric_limits<size_t>::max() / sizeof(xnn_bfloat16) +
+      num_scale_elements;
+  const std::array<uint16_t, num_scale_elements> f16_scales{};
+  const std::array<xnn_float16, num_scale_elements> typed_f16_scales{};
+  const uint8_t kernel = 0;
+  xnn_operator_t fully_connected_op = nullptr;
+
+  EXPECT_EQ(
+      xnn_status_invalid_parameter,
+      xnn_create_fully_connected_nc_qd8_f16_qb4w_f16_scales(
+          input_channels, output_channels, input_channels, output_channels,
+          block_size, /*kernel_zero_point=*/8, f16_scales.data(), &kernel,
+          /*bias=*/nullptr, -std::numeric_limits<float>::infinity(),
+          std::numeric_limits<float>::infinity(), /*flags=*/0,
+          /*weights_cache=*/nullptr, &fully_connected_op));
+  EXPECT_EQ(nullptr, fully_connected_op);
+
+  EXPECT_EQ(
+      xnn_status_invalid_parameter,
+      xnn_create_fully_connected_nc_qp8_f32_qb4w_f16_scales(
+          input_channels, output_channels, input_channels, output_channels,
+          block_size, /*kernel_zero_point=*/8, f16_scales.data(), &kernel,
+          /*bias=*/nullptr, -std::numeric_limits<float>::infinity(),
+          std::numeric_limits<float>::infinity(), /*flags=*/0,
+          /*weights_cache=*/nullptr, &fully_connected_op));
+  EXPECT_EQ(nullptr, fully_connected_op);
+
+  EXPECT_EQ(
+      xnn_status_invalid_parameter,
+      xnn_create_fully_connected_nc_qd8_f32_qb4w_f16_scales(
+          input_channels, output_channels, input_channels, output_channels,
+          block_size, /*kernel_zero_point=*/8, typed_f16_scales.data(), &kernel,
+          /*bias=*/nullptr, -std::numeric_limits<float>::infinity(),
+          std::numeric_limits<float>::infinity(), /*flags=*/0,
+          /*weights_cache=*/nullptr, &fully_connected_op));
+  EXPECT_EQ(nullptr, fully_connected_op);
+
+  EXPECT_EQ(
+      xnn_status_invalid_parameter,
+      xnn_create_fully_connected_nc_qdu8_f32_qb4w_f16_scales(
+          input_channels, output_channels, input_channels, output_channels,
+          block_size, /*kernel_zero_point=*/8, typed_f16_scales.data(), &kernel,
+          /*bias=*/nullptr, -std::numeric_limits<float>::infinity(),
+          std::numeric_limits<float>::infinity(), /*flags=*/0,
+          /*weights_cache=*/nullptr, &fully_connected_op));
+  EXPECT_EQ(nullptr, fully_connected_op);
 }
 
 TEST(FULLY_CONNECTED_NC_QD8_F16_QC2W, unit_batch) {

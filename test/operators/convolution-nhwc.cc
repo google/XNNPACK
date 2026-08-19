@@ -6,6 +6,9 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+#include <array>
+#include <cstdint>
+#include <limits>
 #include <utility>
 #include <vector>
 
@@ -1107,6 +1110,46 @@ CREATE_CONVOLUTION_SETUP_TESTS(CONVOLUTION_NHWC_F32, TestSetupNHWCxF32)
 
 CREATE_CONVOLUTION_TESTS(CONVOLUTION_NHWC_F16, TestNHWCxF16)
 CREATE_CONVOLUTION_SETUP_TESTS(CONVOLUTION_NHWC_F16, TestSetupNHWCxF16)
+
+TEST(CONVOLUTION_NHWC, conversion_buffer_size_overflow) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+
+  constexpr size_t group_input_channels =
+      std::numeric_limits<size_t>::max() / sizeof(float) + 17;
+  constexpr size_t group_output_channels = 1;
+  const std::array<uint16_t, 17> kernel{};
+  xnn_operator_t convolution_op = nullptr;
+
+  EXPECT_EQ(
+      xnn_status_invalid_parameter,
+      xnn_create_convolution2d_nhwc_f32_f16(
+          0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, group_input_channels,
+          group_output_channels, group_input_channels, group_output_channels,
+          kernel.data(), nullptr, -std::numeric_limits<float>::infinity(),
+          std::numeric_limits<float>::infinity(), 0, nullptr, &convolution_op));
+  EXPECT_EQ(nullptr, convolution_op);
+}
+
+TEST(CONVOLUTION_NHWC, fp32_static_bias_size_overflow) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+
+  constexpr size_t group_input_channels = 1;
+  constexpr size_t group_output_channels =
+      std::numeric_limits<size_t>::max() / sizeof(uint16_t) + 9;
+  const std::array<uint16_t, 1> kernel{};
+  const std::array<float, 17> bias{};
+  xnn_operator_t convolution_op = nullptr;
+
+  EXPECT_EQ(
+      xnn_status_invalid_parameter,
+      xnn_create_convolution2d_nhwc_f16(
+          0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, group_input_channels,
+          group_output_channels, group_input_channels, group_output_channels,
+          kernel.data(), bias.data(), -std::numeric_limits<float>::infinity(),
+          std::numeric_limits<float>::infinity(), XNN_FLAG_FP32_STATIC_BIASES,
+          nullptr, &convolution_op));
+  EXPECT_EQ(nullptr, convolution_op);
+}
 
 TEST(CONVOLUTION_NHWC_F32, unioutput_1x1) {
   ConvolutionOperatorTester()

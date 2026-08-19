@@ -271,12 +271,28 @@ OpAction GetOpActionFp16(const xnn_subgraph_t subgraph, const xnn_node& node) {
 // Is this op supported when bf16 hardware is missing (allow-list).
 //
 // bf16 has very few native microkernels, so most ops fall back to fp32. The
-// notable exceptions are the bf16 GEMM (bf16 x bf16 -> fp32) and the bf16
-// reductions, which are kept native when their configs are available.
+// notable exceptions are the bf16 GEMM (bf16 x bf16 -> fp32), reductions, and
+// selected unary operators, which are kept native when their configs are
+// available.
 OpAction GetOpActionBf16(const xnn_subgraph_t subgraph, const xnn_node& node) {
   switch (node.type) {
     case xnn_node_type_unary_elementwise:
       switch (node.unary_operator) {
+        case xnn_unary_reciprocal_square_root:
+          if (IsValid(xnn_init_bf16_rsqrt_config())) {
+            return OpAction::kTransparent;
+          }
+          break;
+        case xnn_unary_sigmoid:
+          if (IsValid(xnn_init_bf16_sigmoid_config())) {
+            return OpAction::kTransparent;
+          }
+          break;
+        case xnn_unary_square:
+          if (IsValid(xnn_init_bf16_sqr_config())) {
+            return OpAction::kTransparent;
+          }
+          break;
         case xnn_unary_convert: {
           const xnn_value& output = subgraph->values[node.outputs[0]];
           const xnn_value& input = subgraph->values[node.inputs[0]];

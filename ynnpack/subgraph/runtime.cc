@@ -1053,6 +1053,9 @@ ynn_status ynn_runtime::build() {
   }
 
   slinky::build_options options;
+  if ((flags & YNN_FLAG_ENABLE_SLINKY_TRACE) != 0) {
+    options.trace = true;
+  }
 #ifdef YNN_ENABLE_PERFETTO
   options.trace = options.trace || get_trace_filename() != nullptr;
 #endif

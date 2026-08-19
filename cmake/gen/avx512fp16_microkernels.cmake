@@ -10,6 +10,8 @@
 
 
 SET(PROD_AVX512FP16_MICROKERNEL_SRCS
+  src/f16-dwconv/gen/f16-dwconv-3p32c-minmax-avx512fp16.c
+  src/f16-dwconv/gen/f16-dwconv-4p32c-minmax-avx512fp16.c
   src/f16-dwconv/gen/f16-dwconv-9p32c-minmax-avx512fp16.c
   src/f16-dwconv/gen/f16-dwconv-25p32c-minmax-avx512fp16-acc2.c
   src/f16-gemm/gen/f16-gemm-1x32-minmax-avx512fp16-broadcast.c

@@ -417,12 +417,17 @@ enum ynn_status ynn_define_slice_like(ynn_subgraph_t subgraph, size_t num_axes,
                                       uint32_t template_id, uint32_t* output_id,
                                       uint32_t flags);
 
-// Copy the input to the output, using a permutation to select the dimensions of
-// the input. Dimensions can be removed (by not including the dimension in the
-// permutation) or added (by using a dimension that is larger than the rank of
-// the input).
+// Copy the input to the output, using a permutation `axes` to select the
+// dimensions of the input. Dimensions can be removed (by not including the
+// dimension in the permutation) or added (by using a dimension that is larger
+// than the rank of the input).
+//
+// If `YNN_NODE_FLAG_KEEP_DIMS` is set, `num_axes` specifies the number of
+// dimensions in `axes` to reorder. The specified dimensions are reordered among
+// their positions in the input tensor, and all other dimensions are left in
+// place. The output tensor has the same rank as the input tensor.
 enum ynn_status ynn_define_static_transpose(
-    ynn_subgraph_t subgraph, size_t rank, const int32_t* permutation,
+    ynn_subgraph_t subgraph, size_t num_axes, const int32_t* axes,
     uint32_t input_id, uint32_t* output_id, uint32_t flags);
 
 // Copies from `input_id` (when not in the padded area) or `padding_id` (when in

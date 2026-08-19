@@ -26,6 +26,7 @@ struct xnn_subgraph {
   // Quantization data for each tensor in the XNNPACK subgraph.
   std::map<uint32_t, uint32_t> scale_ids;
   std::map<uint32_t, uint32_t> zero_point_ids;
+  std::map<uint32_t, size_t> block_sizes;
 };
 
 typedef struct xnn_subgraph* xnn_subgraph_t;
