@@ -618,13 +618,11 @@ TEST(FullyConnectedQD8BF16QB4W_BF16, static_b) {
       /*convert_to=*/xnn_datatype_qdint8, /*block_size=*/32);
 }
 
-#ifndef XNNPACK_USE_YNNPACK
 TEST(FullyConnectedQD8BF16QB4W_BF16Input, static_b) {
   TestStaticB<xnn_bfloat16, qcint4, float, xnn_bfloat16, xnn_bfloat16>(
       /*convert_to=*/xnn_datatype_qdint8, /*block_size=*/32,
       /*force_inline_lhs_packing=*/true);
 }
-#endif  // XNNPACK_USE_YNNPACK
 
 template <typename Input, typename Filter, typename Bias,
           typename Output = Input>
