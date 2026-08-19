@@ -10,7 +10,7 @@
 
 #include <assert.h>
 
-#include <arm_neon.h>
+#include <wasm_simd128.h>
 
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/intrinsics-polyfill.h"
