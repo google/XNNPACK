@@ -120,7 +120,18 @@ static const struct xnn_unary_elementwise_config* get_config(
     return NULL;
   }
   enum xnn_datatype datatype = output_datatype;
-  if (datatype == xnn_datatype_qint8) {
+  if (datatype == xnn_datatype_bf16) {
+    switch (op_type) {
+      case xnn_unary_reciprocal_square_root:
+        return xnn_init_bf16_rsqrt_config();
+      case xnn_unary_sigmoid:
+        return xnn_init_bf16_sigmoid_config();
+      case xnn_unary_square:
+        return xnn_init_bf16_sqr_config();
+      default:
+        return NULL;
+    }
+  } else if (datatype == xnn_datatype_qint8) {
     switch (op_type) {
       case xnn_unary_clamp:
         if (input_quantization->scale != output_quantization->scale ||

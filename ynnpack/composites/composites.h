@@ -97,6 +97,22 @@ ynn_status define_dot_sum(ynn_subgraph_t subgraph, size_t num_k_dims,
                           uint32_t input_c_id, uint32_t& output_id,
                           uint32_t flags, int max_sum_index = -1);
 
+// Computes a blockwise quantized dot product of `a_id` and `b_id`.
+// `a_id` has shape [..., M, K] (or [K] if rank 1).
+// `b_id` has shape [..., K, N].
+// `b_scale_id` is the scale tensor for `b_id` (either [..., N, num_blocks] or
+// [..., num_blocks, 1, N]). `b_zero_point_id` is the zero point tensor for
+// `b_id` (or YNN_INVALID_VALUE_ID). `a_zero_point_id` and `a_scale_id` are
+// quantization parameters for `a_id` (or YNN_INVALID_VALUE_ID). `bias_id` is
+// an optional bias tensor of shape [N] (or YNN_INVALID_VALUE_ID). `output_id`
+// receives the result tensor.
+ynn_status define_blockwise_dot(ynn_subgraph_t subgraph, uint32_t a_id,
+                                uint32_t a_zero_point_id, uint32_t a_scale_id,
+                                uint32_t b_id, uint32_t b_zero_point_id,
+                                uint32_t b_scale_id, size_t block_size,
+                                uint32_t bias_id, ynn_type output_type,
+                                uint32_t& output_id, uint32_t flags = 0);
+
 }  // namespace ynn
 
 #endif  // XNNPACK_YNNPACK_COMPOSITES_COMPOSITES_H_

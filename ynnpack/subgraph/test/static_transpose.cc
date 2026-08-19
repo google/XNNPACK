@@ -169,26 +169,46 @@ void test_random(T, bool with_copy) {
   ReplicableRandomDevice rng;
   std::uniform_int_distribution<size_t> basis_dist(1, 100);
   std::uniform_int_distribution<int> input_rank_dist(min_rank, max_test_rank);
+  std::bernoulli_distribution bool_dist(0.5);
 
   for (auto _ : FuzzTest(std::chrono::milliseconds(100))) {
     const size_t input_rank = input_rank_dist(rng);
-    std::uniform_int_distribution<int> output_rank_dist(min_rank, input_rank);
+    const bool keep_dims = bool_dist(rng);
+    const uint32_t flags = keep_dims ? YNN_NODE_FLAG_KEEP_DIMS : 0;
+
     // Generate a random permutation that has some new dimensions in it.
     // This avoids generating permutations that use the same input dimension
     // more than once. This seems like something that maybe should work, but it
     // doesn't currently.
-    std::vector<int32_t> perm(input_rank * 2 + 1);
-    std::iota(perm.begin(), perm.end(), 0);
-    std::shuffle(perm.begin(), perm.end(), rng);
-    perm.resize(output_rank_dist(rng));
-    while (elem_count > 1 && !perm.empty() &&
-           perm.back() != static_cast<int32_t>(input_rank - 1)) {
-      // Don't change or make a new trailing dimension if the type is not byte
-      // aligned.
-      perm.pop_back();
-    }
-    if (static_cast<int>(perm.size()) < min_rank) {
-      perm.push_back(input_rank - 1);
+    std::vector<int32_t> axes, perm;
+    if (keep_dims) {
+      axes.resize(input_rank);
+      std::iota(axes.begin(), axes.end(), 0);
+      // Leave the last dimension in place if the type is not byte aligned.
+      int shuffle_rank = elem_count > 1 ? input_rank - 1 : input_rank;
+      std::shuffle(axes.begin(), axes.begin() + shuffle_rank, rng);
+      perm = axes;
+      // When keep_dims is true, we have a total permutation, and we can delete
+      // the dimensions that aren't moving.
+      for (int i = static_cast<int>(input_rank) - 1; i >= 0; --i) {
+        if (axes[i] == i) axes.erase(axes.begin() + i);
+      }
+    } else {
+      std::uniform_int_distribution<int> num_axes_dist(min_rank, input_rank);
+      axes.resize(input_rank * 2 + 1);
+      std::iota(axes.begin(), axes.end(), 0);
+      std::shuffle(axes.begin(), axes.end(), rng);
+      axes.resize(num_axes_dist(rng));
+      while (elem_count > 1 && !axes.empty() &&
+             axes.back() != static_cast<int32_t>(input_rank - 1)) {
+        // Don't change or make a new trailing dimension if the type is not byte
+        // aligned.
+        axes.pop_back();
+      }
+      if (static_cast<int>(axes.size()) < min_rank) {
+        axes.push_back(input_rank - 1);
+      }
+      perm = axes;
     }
 
     // Define subgraph
@@ -204,9 +224,10 @@ void test_random(T, bool with_copy) {
       // an external output.
       uint32_t transpose_id = YNN_INVALID_VALUE_ID;
       subgraph.AddTensor(type_of<T>(), perm.size(), transpose_id);
-      subgraph.AddTranspose(perm, 0, transpose_id).AddCopy(transpose_id, 1);
+      subgraph.AddTranspose(axes, 0, transpose_id, flags)
+          .AddCopy(transpose_id, 1);
     } else {
-      subgraph.AddTranspose(perm, 0, 1);
+      subgraph.AddTranspose(axes, 0, 1, flags);
     }
 
     Runtime runtime(subgraph.GetSubgraph());

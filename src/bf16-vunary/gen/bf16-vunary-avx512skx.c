@@ -1,0 +1,233 @@
+// clang-format off
+// Auto-generated file. Do not edit!
+//   Template: src/bf16-vunary/avx512skx.c.in
+//   Generator: tools/xngen
+//
+// Copyright 2026 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+#include <assert.h>
+#include <immintrin.h>
+#include <stddef.h>
+#include <stdint.h>
+
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/intrinsics-polyfill.h"
+#include "src/xnnpack/microparams.h"
+#include "src/xnnpack/vunary.h"
+
+
+static inline __m512 load_bf16_as_f32(const uint16_t* input) {
+  return _mm512_castsi512_ps(_mm512_slli_epi32(
+      _mm512_cvtepu16_epi32(_mm256_loadu_si256((const __m256i*) input)), 16));
+}
+
+static inline __m512 maskz_load_bf16_as_f32(
+    __mmask16 mask, const uint16_t* input) {
+  return _mm512_castsi512_ps(_mm512_slli_epi32(
+      _mm512_cvtepu16_epi32(_mm256_maskz_loadu_epi16(mask, input)), 16));
+}
+
+static inline __m256i convert_f32_to_bf16(__m512 value) {
+  const __m512i vbias = _mm512_set1_epi32(0x7FFF);
+  const __m512i vone = _mm512_set1_epi32(1);
+  const __m512i vabs_mask = _mm512_set1_epi32(0x7FFFFFFF);
+  const __m512i vexp_mask = _mm512_set1_epi32(0x7F800000);
+  const __m512i vquiet = _mm512_set1_epi32(0x00400000);
+
+  __m512i vi = _mm512_castps_si512(value);
+  const __m512i vlsb =
+      _mm512_and_si512(_mm512_srli_epi32(vi, 16), vone);
+  const __m512i vrounded =
+      _mm512_add_epi32(_mm512_add_epi32(vi, vbias), vlsb);
+  const __mmask16 vnanmask = _mm512_cmpgt_epu32_mask(
+      _mm512_and_si512(vi, vabs_mask), vexp_mask);
+  vi = _mm512_mask_or_epi32(vrounded, vnanmask, vi, vquiet);
+  return _mm512_cvtepi32_epi16(_mm512_srli_epi32(vi, 16));
+}
+
+static inline __m512 sigmoid_f32(__m512 vx) {
+  const __m512i vsign_mask = _mm512_set1_epi32((int) UINT32_C(0x80000000));
+  const __m512 vlog2e = _mm512_set1_ps(0x1.715476p0f);
+  const __m512 vminus_ln2 = _mm512_set1_ps(-0x1.62E430p-1f);
+  const __m512 vc5 = _mm512_set1_ps(0x1.0F9F9Cp-7f);
+  const __m512 vc4 = _mm512_set1_ps(0x1.573A1Ap-5f);
+  const __m512 vc3 = _mm512_set1_ps(0x1.555A80p-3f);
+  const __m512 vc2 = _mm512_set1_ps(0x1.FFFDC6p-2f);
+  const __m512 vc1 = _mm512_set1_ps(0x1.FFFFF6p-1f);
+  const __m512 vone = _mm512_set1_ps(1.0f);
+  const __m512 vnegative_cutoff = _mm512_set1_ps(-0x1.5D589Ep+6f);
+
+  __m512 vz = _mm512_castsi512_ps(
+      _mm512_or_epi32(_mm512_castps_si512(vx), vsign_mask));
+  const __mmask16 vsaturation_mask =
+      _mm512_cmp_ps_mask(vz, vnegative_cutoff, _CMP_LT_OQ);
+  vz = _mm512_mask_mov_ps(vz, vsaturation_mask, vnegative_cutoff);
+  const __m512 vn =
+      _mm512_roundscale_ps(_mm512_mul_ps(vz, vlog2e), 0);
+  const __m512 vt = _mm512_fmadd_ps(vn, vminus_ln2, vz);
+  __m512 vp = _mm512_fmadd_ps(vc5, vt, vc4);
+  vp = _mm512_fmadd_ps(vp, vt, vc3);
+  vp = _mm512_fmadd_ps(vp, vt, vc2);
+  vp = _mm512_fmadd_ps(vp, vt, vc1);
+  vp = _mm512_fmadd_ps(vp, vt, vone);
+  const __m512 ve = _mm512_scalef_ps(vp, vn);
+  const __m512 vd = _mm512_add_ps(ve, vone);
+  __m512 vr = _mm512_rcp14_ps(vd);
+  vr = _mm512_fmadd_ps(_mm512_fnmadd_ps(vr, vd, vone), vr, vr);
+  __m512 vf = _mm512_mul_ps(ve, vr);
+  vf = _mm512_mask_mov_ps(vf, vsaturation_mask, _mm512_setzero_ps());
+  return _mm512_mask_sub_ps(
+      vf, _mm512_testn_epi32_mask(_mm512_castps_si512(vx), vsign_mask),
+      vone, vf);
+}
+
+void xnn_bf16_vsqr_ukernel__avx512skx_u32(
+    size_t batch,
+    const xnn_bfloat16* input,
+    xnn_bfloat16* output,
+    const struct xnn_bf16_default_params* restrict params)
+{
+  assert(batch != 0);
+  assert(batch % sizeof(xnn_bfloat16) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
+
+  const uint16_t* i = (const uint16_t*) input;
+  uint16_t* o = (uint16_t*) output;
+  for (; batch >= 32 * sizeof(xnn_bfloat16);
+       batch -= 32 * sizeof(xnn_bfloat16)) {
+    const __m512 vx0 = load_bf16_as_f32(i + 0);
+    const __m512 vx1 = load_bf16_as_f32(i + 16);
+    i += 32;
+
+    const __m512 vy0 = _mm512_mul_ps(vx0, vx0);
+    const __m512 vy1 = _mm512_mul_ps(vx1, vx1);
+
+    _mm256_storeu_si256((__m256i*) (o + 0),
+                        convert_f32_to_bf16(vy0));
+    _mm256_storeu_si256((__m256i*) (o + 16),
+                        convert_f32_to_bf16(vy1));
+    o += 32;
+  }
+
+  for (; batch >= 16 * sizeof(xnn_bfloat16);
+       batch -= 16 * sizeof(xnn_bfloat16)) {
+    const __m512 vx = load_bf16_as_f32(i);
+    i += 16;
+    const __m512 vy = _mm512_mul_ps(vx, vx);
+    _mm256_storeu_si256((__m256i*) o, convert_f32_to_bf16(vy));
+    o += 16;
+  }
+
+  if XNN_UNLIKELY(batch != 0) {
+    const size_t elements = batch / sizeof(xnn_bfloat16);
+    assert(elements != 0 && elements < 16);
+    const __mmask16 vmask =
+        _cvtu32_mask16((uint32_t) ((UINT32_C(1) << elements) - 1));
+    const __m512 vx = maskz_load_bf16_as_f32(vmask, i);
+    const __m512 vy = _mm512_mul_ps(vx, vx);
+    _mm256_mask_storeu_epi16(o, vmask, convert_f32_to_bf16(vy));
+  }
+}
+void xnn_bf16_vrsqrt_ukernel__avx512skx_u32(
+    size_t batch,
+    const xnn_bfloat16* input,
+    xnn_bfloat16* output,
+    const struct xnn_bf16_default_params* restrict params)
+{
+  assert(batch != 0);
+  assert(batch % sizeof(xnn_bfloat16) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
+
+  const uint16_t* i = (const uint16_t*) input;
+  uint16_t* o = (uint16_t*) output;
+  // Full-precision sqrt/div keeps error well below one BF16 ULP; an
+  // rsqrt14 estimate would need refinement and explicit special handling.
+  const __m512 vone = _mm512_set1_ps(1.0f);
+  for (; batch >= 32 * sizeof(xnn_bfloat16);
+       batch -= 32 * sizeof(xnn_bfloat16)) {
+    const __m512 vx0 = load_bf16_as_f32(i + 0);
+    const __m512 vx1 = load_bf16_as_f32(i + 16);
+    i += 32;
+
+    const __m512 vy0 = _mm512_div_ps(vone, _mm512_sqrt_ps(vx0));
+    const __m512 vy1 = _mm512_div_ps(vone, _mm512_sqrt_ps(vx1));
+
+    _mm256_storeu_si256((__m256i*) (o + 0),
+                        convert_f32_to_bf16(vy0));
+    _mm256_storeu_si256((__m256i*) (o + 16),
+                        convert_f32_to_bf16(vy1));
+    o += 32;
+  }
+
+  for (; batch >= 16 * sizeof(xnn_bfloat16);
+       batch -= 16 * sizeof(xnn_bfloat16)) {
+    const __m512 vx = load_bf16_as_f32(i);
+    i += 16;
+    const __m512 vy = _mm512_div_ps(vone, _mm512_sqrt_ps(vx));
+    _mm256_storeu_si256((__m256i*) o, convert_f32_to_bf16(vy));
+    o += 16;
+  }
+
+  if XNN_UNLIKELY(batch != 0) {
+    const size_t elements = batch / sizeof(xnn_bfloat16);
+    assert(elements != 0 && elements < 16);
+    const __mmask16 vmask =
+        _cvtu32_mask16((uint32_t) ((UINT32_C(1) << elements) - 1));
+    const __m512 vx = maskz_load_bf16_as_f32(vmask, i);
+    const __m512 vy = _mm512_div_ps(vone, _mm512_sqrt_ps(vx));
+    _mm256_mask_storeu_epi16(o, vmask, convert_f32_to_bf16(vy));
+  }
+}
+void xnn_bf16_vsigmoid_ukernel__avx512skx_u32(
+    size_t batch,
+    const xnn_bfloat16* input,
+    xnn_bfloat16* output,
+    const struct xnn_bf16_default_params* restrict params)
+{
+  assert(batch != 0);
+  assert(batch % sizeof(xnn_bfloat16) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
+
+  const uint16_t* i = (const uint16_t*) input;
+  uint16_t* o = (uint16_t*) output;
+  for (; batch >= 32 * sizeof(xnn_bfloat16);
+       batch -= 32 * sizeof(xnn_bfloat16)) {
+    const __m512 vx0 = load_bf16_as_f32(i + 0);
+    const __m512 vx1 = load_bf16_as_f32(i + 16);
+    i += 32;
+
+    const __m512 vy0 = sigmoid_f32(vx0);
+    const __m512 vy1 = sigmoid_f32(vx1);
+
+    _mm256_storeu_si256((__m256i*) (o + 0),
+                        convert_f32_to_bf16(vy0));
+    _mm256_storeu_si256((__m256i*) (o + 16),
+                        convert_f32_to_bf16(vy1));
+    o += 32;
+  }
+
+  for (; batch >= 16 * sizeof(xnn_bfloat16);
+       batch -= 16 * sizeof(xnn_bfloat16)) {
+    const __m512 vx = load_bf16_as_f32(i);
+    i += 16;
+    const __m512 vy = sigmoid_f32(vx);
+    _mm256_storeu_si256((__m256i*) o, convert_f32_to_bf16(vy));
+    o += 16;
+  }
+
+  if XNN_UNLIKELY(batch != 0) {
+    const size_t elements = batch / sizeof(xnn_bfloat16);
+    assert(elements != 0 && elements < 16);
+    const __mmask16 vmask =
+        _cvtu32_mask16((uint32_t) ((UINT32_C(1) << elements) - 1));
+    const __m512 vx = maskz_load_bf16_as_f32(vmask, i);
+    const __m512 vy = sigmoid_f32(vx);
+    _mm256_mask_storeu_epi16(o, vmask, convert_f32_to_bf16(vy));
+  }
+}

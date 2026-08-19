@@ -9,6 +9,7 @@
 #include <cstdint>
 #include <functional>
 #include <memory>
+#include <numeric>
 #include <optional>
 #include <utility>
 #include <vector>
@@ -113,15 +114,6 @@ auto make_transpose_impl(int elem_count, std::vector<int32_t> permutation) {
 
     return 0;
   };
-}
-
-size_t first_non_trivial_dim(ynn::span<const slinky::expr> extents) {
-  for (size_t i = 0; i < extents.size(); ++i) {
-    if (extents[i].defined() && !slinky::is_one(extents[i])) {
-      return i;
-    }
-  }
-  return extents.size();
 }
 
 }  // namespace
@@ -272,8 +264,8 @@ std::optional<axes_set> get_static_expand_dims_axes(
 
 extern "C" {
 
-ynn_status ynn_define_static_transpose(ynn_subgraph_t subgraph, size_t rank,
-                                       const int32_t* permutation,
+ynn_status ynn_define_static_transpose(ynn_subgraph_t subgraph, size_t num_axes,
+                                       const int32_t* axes,
                                        uint32_t input_id, uint32_t* output_id,
                                        uint32_t flags) {
   // Validate arguments.
@@ -282,28 +274,50 @@ ynn_status ynn_define_static_transpose(ynn_subgraph_t subgraph, size_t rank,
                                             "input_id", input_id));
   YNN_RETURN_IF_ERROR(validate_output_tensor("static_transpose", subgraph,
                                              "output_id", output_id));
-  if (permutation == nullptr && rank > 0) {
+  if (axes == nullptr && num_axes > 0) {
     YNN_LOG_ERROR() << "For node `static_transpose`, permutation must be "
                        "non-null for rank > 0";
     return ynn_status_invalid_parameter;
   }
-  YNN_RETURN_IF_ERROR(validate_rank("static_transpose", "output", rank));
-
-  // Rewrite the permutation to be slinky dimensions.
   const ynn_value& input = subgraph->value(input_id);
-  std::vector<int32_t> op_permutation(rank);
-  for (size_t i = 0; i < rank; ++i) {
-    op_permutation[i] = axis_to_slinky_dim(input.rank(), permutation[i]);
-    if (op_permutation[i] < 0 || op_permutation[i] >= input.rank()) {
-      // This means we insert a new dimension of extent 1.
-      op_permutation[i] = input.rank();
+
+  std::vector<int32_t> internal_axes;
+  internal_axes.reserve(num_axes);
+  for (size_t i = 0; i < num_axes; ++i) {
+    int32_t axis = axis_to_slinky_dim(input.rank(), axes[i]);
+    if (axis < 0 || axis >= input.rank()) {
+      if (flags & YNN_NODE_FLAG_KEEP_DIMS) {
+        YNN_LOG_ERROR() << "For node `static_transpose`, axis "
+                        << axes[i] << " is beyond the rank "
+                        << input.rank() << " of the input";
+        return ynn_status_invalid_parameter;
+      } else {
+        // This means we insert a new dimension of extent 1.
+        axis = input.rank();
+      }
     }
+    internal_axes.push_back(axis);
   }
-  std::reverse(op_permutation.begin(), op_permutation.end());
+
+  std::vector<int32_t> op_permutation;
+  if (flags & YNN_NODE_FLAG_KEEP_DIMS) {
+    std::vector<int32_t> positions = internal_axes;
+    std::sort(positions.begin(), positions.end(), std::greater<int32_t>());
+
+    op_permutation.resize(input.rank());
+    std::iota(op_permutation.begin(), op_permutation.end(), 0);
+    for (size_t k = 0; k < num_axes; ++k) {
+      op_permutation[positions[k]] = internal_axes[k];
+    }
+  } else {
+    YNN_RETURN_IF_ERROR(validate_rank("static_transpose", "output", num_axes));
+    op_permutation = std::move(internal_axes);
+    std::reverse(op_permutation.begin(), op_permutation.end());
+  }
 
   ynn_node node;
   define_static_transpose(*subgraph, node, std::move(op_permutation), input_id,
-                          output_id, flags);
+                          output_id, /*alias=*/false);
   subgraph->add_node(std::move(node));
   return ynn_status_success;
 }

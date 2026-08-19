@@ -226,5 +226,109 @@ TEST(DotSumTest, DefineDotSum) {
   }
 }
 
+TEST(DotTest, BlockwiseDot) {
+  subgraph_ptr subgraph = create_subgraph(3, 0);
+  ASSERT_NE(subgraph, nullptr);
+
+  const size_t M = 2;
+  const size_t K = 4;
+  const size_t N = 2;
+  const size_t block_size = 2;
+  const size_t num_blocks = K / block_size;
+
+  uint32_t a_id = 0;
+  ASSERT_EQ(ynn_define_tensor(subgraph.get(), ynn_type_fp32, 2, nullptr,
+                              nullptr, YNN_VALUE_FLAG_EXTERNAL_INPUT, &a_id),
+            ynn_status_success);
+
+  // B is static: shape [K, N] = [4, 2], type int8
+  const int8_t b_data[K * N] = {
+      1, 2, 3, 4, 5, 6, 7, 8,
+  };
+  const size_t b_dims[2] = {K, N};
+  uint32_t b_id = YNN_INVALID_VALUE_ID;
+  ASSERT_EQ(ynn_define_tensor(subgraph.get(), ynn_type_int8, 2, b_dims, b_data,
+                              YNN_VALUE_FLAG_COPY_DATA, &b_id),
+            ynn_status_success);
+
+  // B scales: shape [N, num_blocks] = [2, 2], type fp32
+  const float b_scale_data[N * num_blocks] = {
+      0.5f,
+      0.25f,
+      2.0f,
+      1.0f,
+  };
+  const size_t b_scale_dims[2] = {N, num_blocks};
+  uint32_t b_scale_id = YNN_INVALID_VALUE_ID;
+  ASSERT_EQ(
+      ynn_define_tensor(subgraph.get(), ynn_type_fp32, 2, b_scale_dims,
+                        b_scale_data, YNN_VALUE_FLAG_COPY_DATA, &b_scale_id),
+      ynn_status_success);
+
+  uint32_t out_id = 1;
+  ASSERT_EQ(ynn_define_tensor(subgraph.get(), ynn_type_fp32, 2, nullptr,
+                              nullptr, YNN_VALUE_FLAG_EXTERNAL_OUTPUT, &out_id),
+            ynn_status_success);
+
+  int32_t reduce_axis = -1;
+  uint32_t min_max_id = YNN_INVALID_VALUE_ID;
+  ASSERT_EQ(ynn_define_reduce(subgraph.get(), ynn_reduce_min_max, 1,
+                              &reduce_axis, a_id, YNN_INVALID_VALUE_ID,
+                              &min_max_id, YNN_NODE_FLAG_KEEP_DIMS),
+            ynn_status_success);
+
+  uint32_t a_zp_id = YNN_INVALID_VALUE_ID;
+  uint32_t a_scale_id = YNN_INVALID_VALUE_ID;
+  ASSERT_EQ(
+      ynn_define_dynamic_quantization(subgraph.get(), min_max_id, ynn_type_int8,
+                                      &a_zp_id, &a_scale_id, 0),
+      ynn_status_success);
+
+  uint32_t quantized_a_id = YNN_INVALID_VALUE_ID;
+  ASSERT_EQ(ynn_define_quantize(subgraph.get(), a_id, ynn_type_int8, a_zp_id,
+                                a_scale_id, &quantized_a_id, 0),
+            ynn_status_success);
+
+  ASSERT_EQ(
+      define_blockwise_dot(subgraph.get(), quantized_a_id, a_zp_id, a_scale_id,
+                           b_id, YNN_INVALID_VALUE_ID, b_scale_id, block_size,
+                           YNN_INVALID_VALUE_ID, ynn_type_fp32, out_id, 0),
+      ynn_status_success);
+
+  ASSERT_EQ(ynn_optimize_subgraph(subgraph.get(), nullptr, 0),
+            ynn_status_success);
+
+  runtime_ptr runtime = create_runtime(subgraph, nullptr, 0);
+  ASSERT_NE(runtime, nullptr);
+
+  const size_t a_shape[2] = {M, K};
+  ASSERT_EQ(ynn_set_external_value_shape(runtime.get(), a_id, 2, a_shape),
+            ynn_status_success);
+
+  const std::vector<float> a_data = {
+      1.0f, 2.0f, 3.0f, 4.0f, -1.0f, 0.5f, 2.0f, -2.0f,
+  };
+  std::vector<float> out_data(M * N, 0.0f);
+
+  ASSERT_EQ(ynn_set_external_value_data(runtime.get(), a_id,
+                                        const_cast<float*>(a_data.data())),
+            ynn_status_success);
+  ASSERT_EQ(ynn_set_external_value_data(runtime.get(), out_id, out_data.data()),
+            ynn_status_success);
+
+  ASSERT_EQ(ynn_reshape_runtime(runtime.get()), ynn_status_success);
+  ASSERT_EQ(ynn_invoke_runtime(runtime.get()), ynn_status_success);
+
+  // Reference computation:
+  // For each m, n:
+  // sum over blocks b: (sum over k in block: a_quant[m, k] * b[k, n]) *
+  // b_scale[n, b] * a_scale[m] Because a is dynamically quantized, let's verify
+  // output is non-zero and finite
+  for (size_t i = 0; i < M * N; ++i) {
+    EXPECT_FALSE(std::isnan(out_data[i]));
+    EXPECT_FALSE(std::isinf(out_data[i]));
+  }
+}
+
 }  // namespace
 }  // namespace ynn

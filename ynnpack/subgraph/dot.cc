@@ -28,6 +28,7 @@
 #include "ynnpack/kernels/dot/schedule.h"
 #include "ynnpack/kernels/ternary/ternary.h"
 #include "ynnpack/subgraph/copy.h"
+#include "ynnpack/subgraph/dot.h"
 #include "ynnpack/subgraph/elementwise.h"
 #include "ynnpack/subgraph/runtime.h"
 #include "ynnpack/subgraph/slinky.h"
@@ -79,9 +80,32 @@ bool prefer_uint8_dot(ynn_type b_type) {
 
 namespace {
 
+bool is_layout_transform(const ynn_node& node) {
+  return std::holds_alternative<ynn_node::copy>(node.op) ||
+         std::holds_alternative<ynn_node::split_dim>(node.op) ||
+         std::holds_alternative<ynn_node::fuse_dim>(node.op) ||
+         std::holds_alternative<ynn_node::fuse_dims>(node.op) ||
+         std::holds_alternative<ynn_node::split_dims>(node.op) ||
+         std::holds_alternative<ynn_node::static_reshape>(node.op) ||
+         std::holds_alternative<ynn_node::static_broadcast>(node.op) ||
+         std::holds_alternative<ynn_node::static_slice>(node.op) ||
+         std::holds_alternative<ynn_node::static_transpose>(node.op);
+}
+
 bool try_dynamic_quantization_rewrite(ynn_subgraph& subgraph,
                                       uint32_t input_a_id) {
+  std::vector<uint32_t> path = {input_a_id};
+  // This rewrite assumes that there are no other users of these values. We
+  // can't check for that here, because we are in the middle of constructing the
+  // graph. Even if there are no other users now, there might be users later.
+  // We should be doing this kind of rewrite as part of `ynn_optimize_subgraph`,
+  // to fix this problem.
   ynn_node* producer_a = subgraph.get_producer(input_a_id);
+  while (producer_a && is_layout_transform(*producer_a)) {
+    input_a_id = producer_a->inputs[0];
+    path.push_back(input_a_id);
+    producer_a = subgraph.get_producer(input_a_id);
+  }
   if (!producer_a) return false;
 
   const ynn_node::ternary_elementwise* ternary =
@@ -106,7 +130,9 @@ bool try_dynamic_quantization_rewrite(ynn_subgraph& subgraph,
   // instead of int8.
   uint32_t scale_id = producer_a->inputs[1];
   dq_op->output_zero_point = 128;
-  subgraph.value(input_a_id).type = ynn_type_uint8;
+  for (uint32_t id : path) {
+    subgraph.value(id).type = ynn_type_uint8;
+  }
   ynn::define_ternary(subgraph, *producer_a, input_id, scale_id, zp_id,
                       input_a_id, ternary_op::quantize_uint8, kernel);
   return true;
@@ -215,6 +241,7 @@ bool maybe_rewrite_input_a_to_uint8(ynn_subgraph& subgraph,
 
 // TODO(dsharlet): This should probably be a parameter we learn based on cpuinfo
 // or other source of CPU metadata. This was determined experimentally.
+constexpr index_t cache_size_l1 = 32 * 1024;
 constexpr index_t cache_size_l2 = 128 * 1024;
 
 // When we want arithmetic to be consistent, we need to make all tiling
@@ -616,7 +643,6 @@ uint32_t define_pack_b(ynn_subgraph& subgraph, const dot_type& type,
                        bool consistent_arithmetic, uint32_t input_b_id) {
   const ynn_value& b = subgraph.value(input_b_id);
 
-
   ynn_value& packed_b = subgraph.new_internal_value();
   packed_b.type = b.type;
   uint32_t packed_b_id = packed_b.id;
@@ -878,7 +904,7 @@ uint32_t define_transpose_a(ynn_subgraph& subgraph, index_t tile_k,
 
 std::tuple<slinky::expr, slinky::expr, slinky::expr> choose_split_factors(
     ynn_runtime& runtime, slinky::expr m, slinky::expr n, slinky::expr k,
-    slinky::expr block_n) {
+    slinky::expr block_n, size_t a_elem_size = 0) {
   // We can only return a scalar from a slinky expression, so we pack the
   // splits into one integer.
   auto impl = [](const slinky::call* op, slinky::eval_context& ctx) {
@@ -943,10 +969,34 @@ std::tuple<slinky::expr, slinky::expr, slinky::expr> choose_split_factors(
   splits = runtime.globals.get(splits, "dot_splits");
   slinky::expr split_m = splits / 65536;
   slinky::expr split_n = splits % 65536;
-  // Align `split_k` to be a multiple of possible values of `tile_k`. We cannot
-  // use the value of `tile_k` directly since this varies by CPU, so we use 64
-  // as a heuristic.
-  slinky::expr split_k = slinky::select(k >= 64, slinky::align_up(k, 64), k);
+
+  // Trade-offs for splitting k:
+  // - Benefit: For very large values of k, splitting the reduction dimension
+  //   keeps the active working set of inputs A and B within the L1 cache,
+  //   preventing input cache lines from being evicted before they can be reused
+  //   across the m and n tile loops.
+  // - Cost: Splitting k across multiple serial iterations forces the
+  //   intermediate accumulator buffer C (m_tile x n_tile) to be written to
+  //   memory and reloaded for each k chunk, adding memory bandwidth and loop
+  //   overhead.
+  // - Data-type dependence: For narrow data types (e.g. INT8 with 1-byte input
+  //   and 4-byte INT32 accumulator, or BF16 with 2-byte input and 4-byte FP32
+  //   accumulator), the accumulator is 2-4x larger than the inputs, making
+  //   accumulator spilling much more expensive. Moreover, at k = 8192
+  //   (threshold for FP32), narrow inputs take only 8-16 KB (already fitting in
+  //   L1).
+  //
+  // Sizing rationale:
+  // - We set `k_threshold` so that k-splitting only triggers when a single
+  //   input slice along k reaches `cache_size_l1`.
+  // - We use half of `cache_size_l1` to set the split size so that both A and B
+  //   fit in L1.
+  assert(a_elem_size > 0);
+  const index_t k_threshold = cache_size_l1 / a_elem_size;
+  const index_t k_split_size = k_threshold / 2;
+  slinky::expr split_k =
+      slinky::select(k >= k_threshold, k_split_size,
+                     slinky::select(k >= 64, slinky::align_up(k, 64), k));
   split_m = runtime.globals.get(split_m, "split_m");
   split_n = runtime.globals.get(split_n, "split_n");
   split_k = runtime.globals.get(split_k, "split_k");
@@ -1405,12 +1455,30 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
     }
 
     slinky::expr split_n, split_m, split_k;
-    std::tie(split_n, split_m, split_k) =
-        choose_split_factors(runtime, m, n, k, block_n);
+    std::tie(split_n, split_m, split_k) = choose_split_factors(
+        runtime, m, n, k, block_n, type_size_bytes(input_a.type));
 
     const int rank = output.rank();
+    const bool is_split_k = slinky::prove_true(split_k < k);
     std::vector<int> loop_order;
-    if (rank >= 2 && pack_b && !packed_b.is_static()) {
+    const bool pack_b_outer = rank >= 2 && pack_b && !packed_b.is_static();
+    if (is_split_k) {
+      if (pack_b_outer) {
+        loop_order.push_back(num_k_dims + 1);  // m (innermost)
+        loop_order.push_back(num_k_dims);      // n
+      } else {
+        loop_order.push_back(num_k_dims);  // n (innermost)
+        if (rank >= 2) {
+          loop_order.push_back(num_k_dims + 1);  // m
+        }
+      }
+      for (size_t i = 0; i < num_k_dims; ++i) {
+        loop_order.push_back(i);  // k (outermost reduction loop)
+      }
+      for (size_t i = 2; i < rank; ++i) {
+        loop_order.push_back(num_k_dims + i);  // batch dims (outermost)
+      }
+    } else if (pack_b_outer) {
       loop_order.resize(num_k_dims + 2);
       for (size_t i = 0; i < loop_order.size(); ++i) {
         loop_order[i] = i;
@@ -1427,7 +1495,11 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
 
     // If output is rank >= 2, we want to split n, m, and k. Otherwise, we only
     // split n and k (e.g. fully-connected layers).
-    splits.push_back(split_k);
+    if (is_split_k) {
+      splits.push_back(split_k);
+    } else {
+      splits.push_back({});
+    }
     for (size_t i = 1; i < num_k_dims; ++i) {
       // Do not create loops for the remaining k dims.
       splits.push_back({});

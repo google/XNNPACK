@@ -83,6 +83,7 @@ size_t rank_of_value(xnn_subgraph_t subgraph, uint32_t id);
 bool is_value_quantized(xnn_subgraph_t subgraph, uint32_t id);
 uint32_t get_zero_point_id(xnn_subgraph_t subgraph, uint32_t id);
 uint32_t get_scale_id(xnn_subgraph_t subgraph, uint32_t id);
+size_t get_block_size(xnn_subgraph_t subgraph, uint32_t id);
 
 void copy_quantization(xnn_subgraph_t subgraph, uint32_t from_id,
                        uint32_t to_id);

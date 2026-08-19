@@ -114,9 +114,11 @@ void define_static_slice(ynn_subgraph& subgraph, ynn_node& node,
 
     output.make_buffer(runtime, input.buffer->elem_size());
 
-    if (!slinky::prove_true(output.extent(0) == 1)) {
-      // Don't create output buffers where dimension 0 is not dense.
-      output.buffer->dim(0).stride = output.buffer->elem_size();
+    const size_t first_non_trivial = first_non_trivial_dim(output.extents);
+    if (first_non_trivial < output.buffer->rank()) {
+      // Don't create output buffers where the first non-trivial dimension is
+      // not dense.
+      output.buffer->dim(first_non_trivial).stride = output.buffer->elem_size();
     }
 
     const int rank = input.rank();

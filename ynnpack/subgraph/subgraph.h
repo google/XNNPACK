@@ -665,6 +665,9 @@ struct ynn_subgraph : public ynn::ref_counted<ynn_subgraph> {
   const ynn_node* get_producer(uint32_t id) const;
   ynn_node* get_producer(uint32_t id);
 
+  // Returns the number of nodes that consume `id`.
+  size_t count_consumers(uint32_t id) const;
+
   // If `output_id` is `YNN_INVALID_VALUE_ID`, makes a new value like
   // `template_value`, and updates `output_id` with the new value ID.
   // Otherwise, returns the existing value.

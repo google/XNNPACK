@@ -3,7 +3,9 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+#include <array>
 #include <cstddef>
+#include <cstdint>
 #include <limits>
 #include <vector>
 
@@ -3421,4 +3423,24 @@ TEST(DECONVOLUTION_NHWC_QS8_QC8W, reject_scale_buffer_size_overflow) {
           0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 2, 1,
           overflowing_output_channels, 2, 2, 0, 1.0f, kernel_scale, kernel,
           bias, 0, 1.0f, -128, 127, 0, nullptr, &deconvolution_op));
+}
+
+TEST(DECONVOLUTION_NHWC, conversion_buffer_size_overflow) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+
+  constexpr size_t group_input_channels =
+      std::numeric_limits<size_t>::max() / sizeof(float) + 17;
+  constexpr size_t group_output_channels = 1;
+  const std::array<uint16_t, 17> kernel{};
+  xnn_operator_t deconvolution_op = nullptr;
+
+  EXPECT_EQ(
+      xnn_status_invalid_parameter,
+      xnn_create_deconvolution2d_nhwc_f32_f16(
+          0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, group_input_channels,
+          group_output_channels, group_input_channels, group_output_channels,
+          kernel.data(), nullptr, -std::numeric_limits<float>::infinity(),
+          std::numeric_limits<float>::infinity(), 0, nullptr,
+          &deconvolution_op));
+  EXPECT_EQ(nullptr, deconvolution_op);
 }
