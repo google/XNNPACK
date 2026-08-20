@@ -2031,4 +2031,99 @@ TEST(DEPTHWISE_CONVOLUTION_NHWC_F16,
       .group_output_channels(3)
       .TestNHWCxF16();
 }
+
+TEST(CONVOLUTION_NHWC_QS8, reject_scale_buffer_size_overflow) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
+  const int8_t kernel[1] = {0};
+  const int32_t bias[1] = {0};
+  xnn_operator_t convolution_op = nullptr;
+  const xnn_status status = xnn_create_convolution2d_nhwc_qs8(
+      0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1.0f, 1.0f, kernel,
+      bias, 0, 1.0f, -128, 127, 0, nullptr, &convolution_op);
+  if (status == xnn_status_unsupported_hardware) {
+    GTEST_SKIP();
+  }
+  ASSERT_EQ(status, xnn_status_success);
+  xnn_delete_operator(convolution_op);
+
+  const size_t overflowing_group_output_channels =
+      std::numeric_limits<size_t>::max() / sizeof(float) + 1;
+  convolution_op = nullptr;
+  EXPECT_EQ(
+      xnn_status_invalid_parameter,
+      xnn_create_convolution2d_nhwc_qs8(
+          0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1,
+          overflowing_group_output_channels, 1, 1, 0, 1.0f, 1.0f, kernel,
+          bias, 0, 1.0f, -128, 127, 0, nullptr, &convolution_op));
+
+  const size_t overflowing_output_channels =
+      std::numeric_limits<size_t>::max() / 2 + 1;
+  convolution_op = nullptr;
+  EXPECT_EQ(
+      xnn_status_invalid_parameter,
+      xnn_create_convolution2d_nhwc_qs8(
+          0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 2, 1,
+          overflowing_output_channels, 2, 2, 0, 1.0f, 1.0f, kernel, bias,
+          0, 1.0f, -128, 127, 0, nullptr, &convolution_op));
+}
+
+TEST(CONVOLUTION_NHWC_QS8_QC8W, reject_scale_buffer_size_overflow) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
+  const int8_t kernel[4] = {0};
+  const int32_t bias[4] = {0};
+  const float kernel_scale[4] = {1.0f, 1.0f, 1.0f, 1.0f};
+  xnn_operator_t convolution_op = nullptr;
+  const xnn_status status = xnn_create_convolution2d_nhwc_qs8_qc8w(
+      0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 4, 4, 4, 0, 1.0f, kernel_scale,
+      kernel, bias, 0, 1.0f, -128, 127, 0, nullptr, &convolution_op);
+  if (status == xnn_status_unsupported_hardware) {
+    GTEST_SKIP();
+  }
+  ASSERT_EQ(status, xnn_status_success);
+  xnn_delete_operator(convolution_op);
+
+  const size_t overflowing_output_channels =
+      std::numeric_limits<size_t>::max() / 2 + 1;
+  convolution_op = nullptr;
+  EXPECT_EQ(
+      xnn_status_invalid_parameter,
+      xnn_create_convolution2d_nhwc_qs8_qc8w(
+          0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 2, 1,
+          overflowing_output_channels, 2, 2, 0, 1.0f, kernel_scale, kernel,
+          bias, 0, 1.0f, -128, 127, 0, nullptr, &convolution_op));
+}
+
+TEST(CONVOLUTION_NHWC_PQS8_QS8_QS8, reject_scale_buffer_size_overflow) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
+  const int8_t kernel[1] = {0};
+  const int32_t bias[1] = {0};
+  xnn_operator_t convolution_op = nullptr;
+  const xnn_status status = xnn_create_convolution2d_nhwc_pqs8_qs8_qs8(
+      0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1.0f, 1.0f, kernel,
+      bias, 0, 1.0f, -128, 127, 0, nullptr, &convolution_op);
+  if (status == xnn_status_unsupported_hardware) {
+    GTEST_SKIP();
+  }
+  ASSERT_EQ(status, xnn_status_success);
+  xnn_delete_operator(convolution_op);
+
+  const size_t overflowing_group_output_channels =
+      std::numeric_limits<size_t>::max() / sizeof(float) + 1;
+  convolution_op = nullptr;
+  EXPECT_EQ(xnn_status_invalid_parameter,
+            xnn_create_convolution2d_nhwc_pqs8_qs8_qs8(
+                0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1,
+                overflowing_group_output_channels, 1, 1, 0, 1.0f, 1.0f,
+                kernel, bias, 0, 1.0f, -128, 127, 0, nullptr,
+                &convolution_op));
+
+  const size_t overflowing_output_channels =
+      std::numeric_limits<size_t>::max() / 2 + 1;
+  convolution_op = nullptr;
+  EXPECT_EQ(xnn_status_invalid_parameter,
+            xnn_create_convolution2d_nhwc_pqs8_qs8_qs8(
+                0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 2, 1,
+                overflowing_output_channels, 2, 2, 0, 1.0f, 1.0f, kernel,
+                bias, 0, 1.0f, -128, 127, 0, nullptr, &convolution_op));
+}
 }  // namespace

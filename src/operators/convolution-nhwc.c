@@ -909,9 +909,17 @@ static enum xnn_status check_kernel_scale_qx8(
 static enum xnn_status check_kernel_scale_qc8w(
     const struct convolution2d_nhwc_variant* variant,
     struct convolution2d_nhwc_context* context) {
+  size_t num_output_channels = 0;
+  if (!xnn_safe_mul(context->groups, context->group_output_channels,
+                    &num_output_channels)) {
+    xnn_log_error(
+        "failed to create %s operator: kernel scale size overflows size_t",
+        xnn_operator_type_to_string(context->operator_type));
+    return xnn_status_invalid_parameter;
+  }
   const float* kernel_scale = context->kernel_scale;
   for (size_t output_channel = 0;
-       output_channel < context->groups * context->group_output_channels;
+       output_channel < num_output_channels;
        output_channel++) {
     if (kernel_scale[output_channel] <= 0.0f ||
         !isnormal(kernel_scale[output_channel])) {
@@ -1025,18 +1033,31 @@ static enum xnn_status init_requantization_scale_qs8(
   if (status != xnn_status_success) {
     return status;
   }
-  float* scale_params = xnn_allocate_simd_memory(
-      context->groups * context->group_output_channels * sizeof(float));
+  size_t num_output_channels = 0;
+  size_t scale_params_size = 0;
+  if (!xnn_safe_mul(context->groups, context->group_output_channels,
+                    &num_output_channels)) {
+    xnn_log_error(
+        "failed to create %s operator: requantization scale size overflows size_t",
+        xnn_operator_type_to_string(context->operator_type));
+    return xnn_status_invalid_parameter;
+  }
+  if (!xnn_safe_mul(num_output_channels, sizeof(float), &scale_params_size)) {
+    xnn_log_error(
+        "failed to create %s operator: requantization scale size overflows size_t",
+        xnn_operator_type_to_string(context->operator_type));
+    return xnn_status_invalid_parameter;
+  }
+  float* scale_params = xnn_allocate_simd_memory(scale_params_size);
   if (scale_params == NULL) {
     xnn_log_error(
         "failed to allocate %zu bytes for %s operator packed weights",
-        context->groups * context->group_output_channels * sizeof(float),
+        scale_params_size,
         xnn_operator_type_to_string(context->operator_type));
     return xnn_status_out_of_memory;
   }
   for (size_t output_channel = 0;
-       output_channel < context->groups * context->group_output_channels;
-       output_channel++) {
+       output_channel < num_output_channels; output_channel++) {
     scale_params[output_channel] = context->requantization_scale_value;
   }
   context->requantization_scale = scale_params;
@@ -1047,18 +1068,32 @@ static enum xnn_status init_requantization_scale_qs8(
 static enum xnn_status init_requantization_scale_qx8_qc8w(
     const struct convolution2d_nhwc_variant* variant,
     struct convolution2d_nhwc_context* context) {
-  float* requantization_scale = xnn_allocate_simd_memory(
-      context->groups * context->group_output_channels * sizeof(float));
+  size_t num_output_channels = 0;
+  size_t scale_params_size = 0;
+  if (!xnn_safe_mul(context->groups, context->group_output_channels,
+                    &num_output_channels)) {
+    xnn_log_error(
+        "failed to create %s operator: requantization scale size overflows size_t",
+        xnn_operator_type_to_string(context->operator_type));
+    return xnn_status_invalid_parameter;
+  }
+  if (!xnn_safe_mul(num_output_channels, sizeof(float), &scale_params_size)) {
+    xnn_log_error(
+        "failed to create %s operator: requantization scale size overflows size_t",
+        xnn_operator_type_to_string(context->operator_type));
+    return xnn_status_invalid_parameter;
+  }
+  float* requantization_scale = xnn_allocate_simd_memory(scale_params_size);
   if (requantization_scale == NULL) {
     xnn_log_error(
         "failed to allocate %zu bytes for %s operator packed weights",
-        context->groups * context->group_output_channels * sizeof(float),
+        scale_params_size,
         xnn_operator_type_to_string(context->operator_type));
     return xnn_status_out_of_memory;
   }
   const float* kernel_scale = context->kernel_scale;
   for (size_t output_channel = 0;
-       output_channel < context->groups * context->group_output_channels;
+       output_channel < num_output_channels;
        output_channel++) {
     requantization_scale[output_channel] = context->input_scale *
                                            kernel_scale[output_channel] /
@@ -2245,17 +2280,27 @@ enum xnn_status xnn_create_convolution2d_nhwc_pqs8_qs8_qs8(
     int8_t output_zero_point, float output_scale, int8_t output_min,
     int8_t output_max, uint32_t flags, xnn_weights_cache_t weights_cache,
     xnn_operator_t* convolution_op_out) {
+  size_t num_output_channels = 0;
+  size_t broadcast_kernel_scale_size = 0;
+  if (!xnn_safe_mul(groups, group_output_channels, &num_output_channels) ||
+      !xnn_safe_mul(num_output_channels, sizeof(float),
+                    &broadcast_kernel_scale_size)) {
+    xnn_log_error(
+        "failed to create %s operator: broadcast kernel scale size overflows size_t",
+        xnn_operator_type_to_string(xnn_operator_type_convolution_nhwc_qc8));
+    return xnn_status_invalid_parameter;
+  }
   float* broadcast_kernel_scale =
-      xnn_allocate_simd_memory(groups * group_output_channels * sizeof(float));
+      xnn_allocate_simd_memory(broadcast_kernel_scale_size);
   if (broadcast_kernel_scale == NULL) {
     xnn_log_error(
         "failed to allocate %zu bytes for %s operator packed weights",
-        groups * group_output_channels * sizeof(float),
+        broadcast_kernel_scale_size,
         xnn_operator_type_to_string(xnn_operator_type_convolution_nhwc_qc8));
     return xnn_status_out_of_memory;
   }
   for (size_t output_channel = 0;
-       output_channel < groups * group_output_channels; output_channel++) {
+       output_channel < num_output_channels; output_channel++) {
     broadcast_kernel_scale[output_channel] = kernel_scale;
   }
   struct convolution2d_nhwc_context context = {
