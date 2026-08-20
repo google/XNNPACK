@@ -56,6 +56,7 @@ cc_library(
         "//litert/tensor/utils:macros",
         "//litert/tensor/utils:source_location",
         "@abseil-cpp//absl/status",
+        "@abseil-cpp//absl/strings",
         "@abseil-cpp//absl/types:span",
     ],
 )
