@@ -33,6 +33,13 @@
 XNN_UKERNEL(xnn_arch_x86_avx2, xnn_qu8_vprelu_ukernel__avx2_u16, 16, false, uint8_t, union xnn_qs8_vprelu_scalar_params, xnn_init_qu8_vprelu_scalar_params)
 #endif  // XNN_ENABLE_AVX2 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
+#if XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
+XNN_UKERNEL(xnn_arch_riscv_vector, xnn_qu8_vprelu_ukernel__rvv_u1v, 1, false, uint8_t, union xnn_qs8_vprelu_scalar_params, xnn_init_qu8_vprelu_scalar_params)
+XNN_UKERNEL(xnn_arch_riscv_vector, xnn_qu8_vprelu_ukernel__rvv_u2v, 2, false, uint8_t, union xnn_qs8_vprelu_scalar_params, xnn_init_qu8_vprelu_scalar_params)
+XNN_UKERNEL(xnn_arch_riscv_vector, xnn_qu8_vprelu_ukernel__rvv_u4v, 4, false, uint8_t, union xnn_qs8_vprelu_scalar_params, xnn_init_qu8_vprelu_scalar_params)
+XNN_UKERNEL(xnn_arch_riscv_vector, xnn_qu8_vprelu_ukernel__rvv_u8v, 8, false, uint8_t, union xnn_qs8_vprelu_scalar_params, xnn_init_qu8_vprelu_scalar_params)
+#endif  // XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
+
 XNN_UKERNEL(xnn_arch_none, xnn_qu8_vprelu_ukernel__scalar_u1, 1, false, uint8_t, union xnn_qs8_vprelu_scalar_params, xnn_init_qu8_vprelu_scalar_params)
 XNN_UKERNEL(xnn_arch_none, xnn_qu8_vprelu_ukernel__scalar_u2, 2, false, uint8_t, union xnn_qs8_vprelu_scalar_params, xnn_init_qu8_vprelu_scalar_params)
 XNN_UKERNEL(xnn_arch_none, xnn_qu8_vprelu_ukernel__scalar_u4, 4, false, uint8_t, union xnn_qs8_vprelu_scalar_params, xnn_init_qu8_vprelu_scalar_params)
