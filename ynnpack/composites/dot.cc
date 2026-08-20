@@ -188,16 +188,6 @@ ynn_status define_blockwise_dot(ynn_subgraph_t subgraph, uint32_t a_id,
   YNN_RETURN_IF_ERROR(
       ynn_define_split_dim(subgraph, -2, 2, split_dims, b_id, &b_inner_id, 0));
 
-  // Align A's zero point (if present).
-  uint32_t a_zp_inner_id = a_zero_point_id;
-  if (a_zero_point_id != YNN_INVALID_VALUE_ID) {
-    int32_t expand_a_zp_axis[1] = {-3};
-    uint32_t expanded_a_zp_id = YNN_INVALID_VALUE_ID;
-    YNN_RETURN_IF_ERROR(ynn_define_static_expand_dims(
-        subgraph, 1, expand_a_zp_axis, a_zero_point_id, &expanded_a_zp_id, 0));
-    a_zp_inner_id = expanded_a_zp_id;
-  }
-
   // Align B's scale.
   uint32_t b_scale_aligned_id = YNN_INVALID_VALUE_ID;
   YNN_RETURN_IF_ERROR(define_blockwise_scale(
@@ -210,19 +200,21 @@ ynn_status define_blockwise_dot(ynn_subgraph_t subgraph, uint32_t a_id,
         subgraph, b_zero_point_id, b_zp_aligned_id, /*expand_m_dim=*/true));
   }
 
-  // Compute dot quantization zero-point for inner dot.
-  uint32_t inner_dot_zp_id = YNN_INVALID_VALUE_ID;
-  uint32_t inner_dot_scale_id = YNN_INVALID_VALUE_ID;
-  YNN_RETURN_IF_ERROR(define_dot_quantization(
-      subgraph, /*num_k_dims=*/1, a_inner_id, a_zp_inner_id,
-      /*a_scale_id=*/YNN_INVALID_VALUE_ID, b_inner_id, b_zp_aligned_id,
-      /*b_scale_id=*/YNN_INVALID_VALUE_ID, inner_dot_zp_id,
-      inner_dot_scale_id));
-
+  // B's zero point contribution per block is -b_zp * sum_k(a), which varies at
+  // runtime and is initialized in each block's accumulator.
   uint32_t accum_init_id = YNN_INVALID_VALUE_ID;
-  if (inner_dot_zp_id != YNN_INVALID_VALUE_ID) {
+  if (b_zero_point_id != YNN_INVALID_VALUE_ID) {
+    int32_t a_k_axis = -1;
+    uint32_t sum_a_id = YNN_INVALID_VALUE_ID;
+    YNN_RETURN_IF_ERROR(ynn_define_reduce(
+        subgraph, ynn_reduce_sum, 1, &a_k_axis, a_inner_id,
+        YNN_INVALID_VALUE_ID, &sum_a_id, YNN_NODE_FLAG_KEEP_DIMS));
+    uint32_t b_zp_term_id = YNN_INVALID_VALUE_ID;
+    YNN_RETURN_IF_ERROR(ynn_define_binary(subgraph, ynn_binary_multiply,
+                                          b_zp_aligned_id, sum_a_id,
+                                          &b_zp_term_id, 0));
     YNN_RETURN_IF_ERROR(ynn_define_unary(subgraph, ynn_unary_negate,
-                                         inner_dot_zp_id, &accum_init_id, 0));
+                                         b_zp_term_id, &accum_init_id, 0));
   }
 
   // Run inner dot: produces [..., num_blocks, M, N].
@@ -243,6 +235,48 @@ ynn_status define_blockwise_dot(ynn_subgraph_t subgraph, uint32_t a_id,
   YNN_RETURN_IF_ERROR(ynn_define_reduce(subgraph, ynn_reduce_sum, 1,
                                         &reduce_axis, scaled_blocks_id,
                                         YNN_INVALID_VALUE_ID, &reduced_id, 0));
+
+  // A's zero point contribution is
+  // sum_b scale[n,b] * (zp[m] * colsum_(b - b_zp)[n]), which factors into
+  // zp[m] * C[n] with C = sum_b scale[n,b] * colsum_(b - b_zp)[n] computed
+  // entirely from static tensors (so it constant-folds), and can be subtracted
+  // once from the final result instead of initializing every block's
+  // accumulator with it.
+  if (a_zero_point_id != YNN_INVALID_VALUE_ID) {
+    uint32_t b_eff_id = b_inner_id;
+    if (b_zero_point_id != YNN_INVALID_VALUE_ID) {
+      b_eff_id = YNN_INVALID_VALUE_ID;
+      YNN_RETURN_IF_ERROR(ynn_define_binary(subgraph, ynn_binary_subtract,
+                                            b_inner_id, b_zp_aligned_id,
+                                            &b_eff_id, 0));
+    }
+
+    int32_t colsum_axis = -2;
+    uint32_t colsum_id = YNN_INVALID_VALUE_ID;
+    YNN_RETURN_IF_ERROR(ynn_define_reduce(
+        subgraph, ynn_reduce_sum, 1, &colsum_axis, b_eff_id,
+        YNN_INVALID_VALUE_ID, &colsum_id, YNN_NODE_FLAG_KEEP_DIMS));
+
+    uint32_t scaled_colsum_id = YNN_INVALID_VALUE_ID;
+    YNN_RETURN_IF_ERROR(ynn_define_binary(subgraph, ynn_binary_multiply,
+                                          colsum_id, b_scale_aligned_id,
+                                          &scaled_colsum_id, 0));
+    uint32_t c_id = YNN_INVALID_VALUE_ID;
+    YNN_RETURN_IF_ERROR(ynn_define_reduce(subgraph, ynn_reduce_sum, 1,
+                                          &reduce_axis, scaled_colsum_id,
+                                          YNN_INVALID_VALUE_ID, &c_id, 0));
+
+    // reduced -= a_zp * C, applied once to the final result.
+    uint32_t zp_correction_id = YNN_INVALID_VALUE_ID;
+    YNN_RETURN_IF_ERROR(ynn_define_binary(subgraph, ynn_binary_multiply,
+                                          a_zero_point_id, c_id,
+                                          &zp_correction_id, 0));
+    uint32_t corrected_id = YNN_INVALID_VALUE_ID;
+    YNN_RETURN_IF_ERROR(ynn_define_binary(subgraph, ynn_binary_subtract,
+                                          reduced_id, zp_correction_id,
+                                          &corrected_id, 0));
+    reduced_id = corrected_id;
+  }
 
   // Multiply by a_scale if present.
   if (a_scale_id != YNN_INVALID_VALUE_ID) {
