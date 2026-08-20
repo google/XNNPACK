@@ -285,9 +285,17 @@ float dot_arch_cost_factor(uint64_t arch) {
   if (arch == arch_flag::none) {
     // We should only use the default dot kernel if there is no other choice.
     return 100.0f;
-  } else {
-    return 1.0f;
   }
+#ifdef YNN_ARCH_X86
+  if (arch & arch_flag::avx512vnni || arch & arch_flag::amxint8) {
+    // The VNNI kernels have a smaller unrolling in K than the AVX512 kernels,
+    // which tricks `estimate_dot_cost` into thinking the regular AVX512 kernels
+    // are better. We then also need to adjust AMX, to avoid tricking it into
+    // thinking VNNI is faster than AMX.
+    return 0.5f;
+  }
+#endif
+  return 1.0f;
 }
 
 template <typename A, typename B, typename C>
