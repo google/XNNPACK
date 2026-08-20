@@ -339,9 +339,9 @@ std::vector<slinky::expr> compute_reduce_alignments(
       // contiguous prefix above it only reserves the factor still missing.
       slinky::expr prefix = alignments[0];
       for (int i = 1; i < rank && !k_dims[i]; ++i) {
-        alignments[i] = slinky::simplify(slinky::min(
-            slinky::max(1, slinky::ceil_div(slinky::expr(row_elems), prefix)),
-            extents[i]));
+        alignments[i] = slinky::simplify(slinky::max(
+            1, slinky::min(slinky::ceil_div(slinky::expr(row_elems), prefix),
+                           extents[i])));
         prefix = slinky::simplify(prefix * alignments[i]);
       }
     }
@@ -355,10 +355,10 @@ std::vector<slinky::expr> compute_reduce_alignments(
   for (int i = 0; i < rank; ++i) {
     if (!k_dims[i]) continue;
     if (i > 0) {
-      alignments[i] = slinky::simplify(slinky::min(
-          slinky::max(1, slinky::ceil_div(slinky::expr(min_reduction_elems),
-                                          k_chunk_so_far)),
-          extents[i]));
+      alignments[i] = slinky::simplify(slinky::max(
+          1, slinky::min(slinky::ceil_div(slinky::expr(min_reduction_elems),
+                                          k_chunk_so_far),
+                         extents[i])));
     }
     k_chunk_so_far = slinky::simplify(k_chunk_so_far * alignments[i]);
   }
