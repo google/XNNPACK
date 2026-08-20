@@ -332,7 +332,8 @@ std::vector<slinky::expr> compute_reduce_alignments(
   const int rank = extents.size();
   std::vector<slinky::expr> alignments(rank);
   if (rank > 0) {
-    alignments[0] = slinky::simplify(slinky::min(row_elems, extents[0]));
+    alignments[0] =
+        slinky::simplify(slinky::max(1, slinky::min(row_elems, extents[0])));
     if (!k_dims[0]) {
       // Dimension 0 reserves the whole row target; each kept dimension of the
       // contiguous prefix above it only reserves the factor still missing.
