@@ -77,6 +77,40 @@ void DefineGraph(xnn_subgraph_t* subgraph, std::array<size_t, 4> dims) {
                              intermediate_id, output_id, /*flags=*/0));
 }
 
+void DefineBinaryGraph(xnn_subgraph_t* subgraph,
+                       std::array<size_t, 2> dims) {
+  ASSERT_EQ(xnn_status_success,
+            xnn_create_subgraph(/*external_value_ids=*/3, /*flags=*/0,
+                                subgraph));
+  uint32_t input1_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_tensor_value(
+                *subgraph, xnn_datatype_fp32, dims.size(), dims.data(),
+                nullptr, /*external_id=*/0, XNN_VALUE_FLAG_EXTERNAL_INPUT,
+                &input1_id));
+  ASSERT_EQ(input1_id, 0);
+
+  uint32_t input2_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_tensor_value(
+                *subgraph, xnn_datatype_fp32, dims.size(), dims.data(),
+                nullptr, /*external_id=*/1, XNN_VALUE_FLAG_EXTERNAL_INPUT,
+                &input2_id));
+  ASSERT_EQ(input2_id, 1);
+
+  uint32_t output_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_tensor_value(
+                *subgraph, xnn_datatype_fp32, dims.size(), dims.data(),
+                nullptr, /*external_id=*/2, XNN_VALUE_FLAG_EXTERNAL_OUTPUT,
+                &output_id));
+  ASSERT_EQ(output_id, 2);
+
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_binary(*subgraph, xnn_binary_add, /*params=*/nullptr,
+                              input1_id, input2_id, output_id, /*flags=*/0));
+}
+
 void DefineGraphWithStaticData(xnn_subgraph_t* subgraph,
                                std::array<size_t, 4> dims,
                                const xnnpack::Buffer<float>* static_value) {
@@ -399,6 +433,122 @@ TEST(WORKSPACE, workspace_grow) {
 
   xnn_invoke_runtime(runtime1);
   xnn_invoke_runtime(runtime2);
+}
+
+TEST(WORKSPACE, workspace_growth_repairs_runtimes_after_sibling_setup_failure) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+  xnn_workspace_t workspace = nullptr;
+  ASSERT_EQ(xnn_status_success, xnn_create_workspace(&workspace));
+  std::unique_ptr<xnn_workspace, decltype(&xnn_release_workspace)>
+      auto_workspace(workspace, xnn_release_workspace);
+
+  // Runtime A has an internal tensor backed by the shared workspace.
+  const std::array<size_t, 4> a_dims = {1, 1, 1, 16};
+  xnn_subgraph_t subgraph_a = nullptr;
+  DefineGraph(&subgraph_a, a_dims);
+  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)>
+      auto_subgraph_a(subgraph_a, xnn_delete_subgraph);
+  xnn_runtime_t runtime_a = nullptr;
+  ASSERT_EQ(xnn_status_success,
+            xnn_create_runtime_v4(
+                subgraph_a, /*weights_cache=*/nullptr, workspace,
+                /*threadpool=*/nullptr,
+                xnn_test_runtime_flags() | XNN_FLAG_NO_OPERATOR_FUSION,
+                &runtime_a));
+  std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime_a(
+      runtime_a, xnn_delete_runtime);
+  xnnpack::Buffer<float> a_input(16, 1.0f, xnnpack::XnnExtraBytes);
+  xnnpack::Buffer<float> a_output(16, 0.0f);
+  const std::array<xnn_external_value, 2> a_external_values = {
+      xnn_external_value{0, a_input.data()},
+      xnn_external_value{2, a_output.data()},
+  };
+  ASSERT_EQ(xnn_status_success,
+            xnn_setup_runtime(runtime_a, a_external_values.size(),
+                              a_external_values.data()));
+  ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime_a));
+  void* old_workspace_data = workspace->data;
+  ASSERT_NE(old_workspace_data, nullptr);
+
+  // Runtime B is inserted after A. Make its binary operator invalid with an
+  // incompatible reshape, so re-setup after a later relocation will fail.
+  const std::array<size_t, 2> b_dims = {2, 2};
+  xnn_subgraph_t subgraph_b = nullptr;
+  DefineBinaryGraph(&subgraph_b, b_dims);
+  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)>
+      auto_subgraph_b(subgraph_b, xnn_delete_subgraph);
+  xnn_runtime_t runtime_b = nullptr;
+  ASSERT_EQ(xnn_status_success,
+            xnn_create_runtime_v4(
+                subgraph_b, /*weights_cache=*/nullptr, workspace,
+                /*threadpool=*/nullptr,
+                xnn_test_runtime_flags() | XNN_FLAG_NO_OPERATOR_FUSION,
+                &runtime_b));
+  std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime_b(
+      runtime_b, xnn_delete_runtime);
+  xnnpack::Buffer<float> b_input1(4, 1.0f, xnnpack::XnnExtraBytes);
+  xnnpack::Buffer<float> b_input2(4, 2.0f, xnnpack::XnnExtraBytes);
+  xnnpack::Buffer<float> b_output(4, 0.0f);
+  const std::array<xnn_external_value, 3> b_external_values = {
+      xnn_external_value{0, b_input1.data()},
+      xnn_external_value{1, b_input2.data()},
+      xnn_external_value{2, b_output.data()},
+  };
+  ASSERT_EQ(xnn_status_success,
+            xnn_setup_runtime(runtime_b, b_external_values.size(),
+                              b_external_values.data()));
+  const std::array<size_t, 2> incompatible_b_dims = {2, 3};
+  ASSERT_EQ(xnn_status_success,
+            xnn_reshape_external_value(runtime_b, /*external_id=*/0,
+                                       incompatible_b_dims.size(),
+                                       incompatible_b_dims.data()));
+  ASSERT_EQ(xnn_status_invalid_parameter, xnn_reshape_runtime(runtime_b));
+
+  // Runtime C is inserted after B and grows the shared workspace. User order
+  // is C -> B -> A, so B's failed setup must not stop A's repair.
+  const std::array<size_t, 4> c_dims = {1, 1, 1, 256};
+  xnn_subgraph_t subgraph_c = nullptr;
+  DefineGraph(&subgraph_c, c_dims);
+  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)>
+      auto_subgraph_c(subgraph_c, xnn_delete_subgraph);
+  xnn_runtime_t runtime_c = nullptr;
+  ASSERT_EQ(xnn_status_success,
+            xnn_create_runtime_v4(
+                subgraph_c, /*weights_cache=*/nullptr, workspace,
+                /*threadpool=*/nullptr,
+                xnn_test_runtime_flags() | XNN_FLAG_NO_OPERATOR_FUSION,
+                &runtime_c));
+  std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime_c(
+      runtime_c, xnn_delete_runtime);
+  xnnpack::Buffer<float> c_input(256, 1.0f, xnnpack::XnnExtraBytes);
+  xnnpack::Buffer<float> c_output(256, 0.0f);
+  const std::array<xnn_external_value, 2> c_external_values = {
+      xnn_external_value{0, c_input.data()},
+      xnn_external_value{2, c_output.data()},
+  };
+  ASSERT_EQ(std::vector<xnn_runtime_t>({runtime_c, runtime_b, runtime_a}),
+            workspace_user_to_list(workspace));
+  ASSERT_EQ(xnn_status_invalid_state,
+            xnn_setup_runtime(runtime_c, c_external_values.size(),
+                              c_external_values.data()));
+  ASSERT_NE(workspace->data, old_workspace_data);
+
+  // A's value and operator contexts must now point into the new allocation.
+  ASSERT_TRUE(ValueInWorkspace(&runtime_a->values[1], workspace));
+  ASSERT_EQ(runtime_a->values[1].data,
+            runtime_a->opdata[0]
+                .operator_objects[0]
+                ->context.univector_contiguous.y);
+  ASSERT_EQ(runtime_a->values[1].data,
+            runtime_a->opdata[1]
+                .operator_objects[0]
+                ->context.univector_contiguous.x);
+
+  std::fill(a_output.begin(), a_output.end(), 0.0f);
+  ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime_a));
+  for (float output : a_output) {
+    EXPECT_NEAR(output, 2.0f / 3.0f, 1.0e-6f);
+  }
 }
 
 TEST(WORKSPACE, workspace_runtime_delete_head_runtime_first) {
