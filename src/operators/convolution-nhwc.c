@@ -2245,17 +2245,27 @@ enum xnn_status xnn_create_convolution2d_nhwc_pqs8_qs8_qs8(
     int8_t output_zero_point, float output_scale, int8_t output_min,
     int8_t output_max, uint32_t flags, xnn_weights_cache_t weights_cache,
     xnn_operator_t* convolution_op_out) {
+  size_t bias_size;
+  size_t bias_bytes;
+  if (!xnn_safe_mul(groups, group_output_channels, &bias_size) ||
+      !xnn_safe_mul(bias_size, sizeof(float), &bias_bytes)) {
+    xnn_log_error(
+        "failed to create %s operator: bias size overflows size_t",
+        xnn_operator_type_to_string(
+            xnn_operator_type_convolution_nhwc_pqs8_qs8_qs8));
+    return xnn_status_invalid_parameter;
+  }
   float* broadcast_kernel_scale =
-      xnn_allocate_simd_memory(groups * group_output_channels * sizeof(float));
+      xnn_allocate_simd_memory(bias_bytes);
   if (broadcast_kernel_scale == NULL) {
     xnn_log_error(
         "failed to allocate %zu bytes for %s operator packed weights",
-        groups * group_output_channels * sizeof(float),
+        bias_bytes,
         xnn_operator_type_to_string(xnn_operator_type_convolution_nhwc_qc8));
     return xnn_status_out_of_memory;
   }
   for (size_t output_channel = 0;
-       output_channel < groups * group_output_channels; output_channel++) {
+       output_channel < bias_size; output_channel++) {
     broadcast_kernel_scale[output_channel] = kernel_scale;
   }
   struct convolution2d_nhwc_context context = {
