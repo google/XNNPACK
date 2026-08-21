@@ -1136,31 +1136,63 @@ static enum xnn_status reshape_depth_to_space_nhwc(
     return xnn_status_success;
   }
 
-  const size_t block_output_pixel_stride = block_size * output_channels;
+  size_t block_output_pixel_stride;
+  if (!xnn_safe_mul((size_t)block_size, output_channels, &block_output_pixel_stride)) {
+    xnn_log_error("failed to reshape %s operator: overflow in block_output_pixel_stride",
+        xnn_operator_type_to_string(expected_operator_type));
+    return xnn_status_invalid_parameter;
+  }
 
-  const size_t input_shape[5] = {batch_size * input_height, input_width, block_size, block_size, output_channels};
+  size_t batch_height;
+  if (!xnn_safe_mul(batch_size, input_height, &batch_height)) {
+    xnn_log_error("failed to reshape %s operator: overflow in batch_size * input_height",
+        xnn_operator_type_to_string(expected_operator_type));
+    return xnn_status_invalid_parameter;
+  }
+
+  size_t input_row_stride;
+  if (!xnn_safe_mul(input_width, input_channels, &input_row_stride)) {
+    xnn_log_error("failed to reshape %s operator: overflow in input_width * input_channels",
+        xnn_operator_type_to_string(expected_operator_type));
+    return xnn_status_invalid_parameter;
+  }
+
+  size_t output_stride_0, output_stride_1;
+  if (!xnn_safe_mul((size_t)block_size, input_width, &output_stride_0) ||
+      !xnn_safe_mul(output_stride_0, block_output_pixel_stride, &output_stride_0)) {
+    xnn_log_error("failed to reshape %s operator: overflow in output_stride[0]",
+        xnn_operator_type_to_string(expected_operator_type));
+    return xnn_status_invalid_parameter;
+  }
+  if (!xnn_safe_mul(input_width, block_output_pixel_stride, &output_stride_1)) {
+    xnn_log_error("failed to reshape %s operator: overflow in output_stride[1]",
+        xnn_operator_type_to_string(expected_operator_type));
+    return xnn_status_invalid_parameter;
+  }
+
+  const size_t input_shape[5] = {batch_height, input_width, block_size, block_size, output_channels};
   const size_t perm[5] = {0, 2, 1, 3, 4};
   const size_t input_stride[5] = {
-    input_width * input_channels,
+    input_row_stride,
     input_channels,
-    block_size * output_channels,
+    block_output_pixel_stride,
     output_channels,
     1
   };
 
   if (output_height_out != NULL) {
-    *output_height_out = input_height * block_size;
+    *output_height_out = input_height * (size_t)block_size;
   }
   if (output_width_out != NULL) {
-    *output_width_out = input_width * block_size;
+    *output_width_out = input_width * (size_t)block_size;
   }
   if (output_channels_out != NULL) {
     *output_channels_out = output_channels;
   }
 
   const size_t output_stride[5] = {
-    block_size * input_width * block_output_pixel_stride,
-    input_width * block_output_pixel_stride,
+    output_stride_0,
+    output_stride_1,
     block_output_pixel_stride,
     output_channels,
     1
