@@ -791,6 +791,233 @@ TEST(FullyConnectedF32, dynamic_b) {
   TestDynamicB<float, float, float, float>();
 }
 
+TEST(FullyConnectedQP8F16QC8W, optimize_packed_lhs_inline) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
+
+  xnn_subgraph_t subgraph = nullptr;
+  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(2, 0, &subgraph));
+
+  const size_t input_dims[] = {2, 4};
+  uint32_t input_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_tensor_value(
+                subgraph, xnn_datatype_fp16, 2, input_dims, nullptr,
+                /*external_id=*/0, XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id));
+
+  uint32_t qd_input_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_dynamically_quantized_tensor_value(
+                subgraph, xnn_datatype_qdint8, 2, /*num_nonbatch_dims=*/1,
+                input_dims, XNN_INVALID_VALUE_ID, /*flags=*/0, &qd_input_id));
+
+  const size_t kernel_dims[] = {3, 4};
+  const float kernel_scale[] = {0.5f, 0.75f, 1.0f};
+  const int8_t kernel[12] = {};
+  uint32_t kernel_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_channelwise_quantized_tensor_value(
+                subgraph, xnn_datatype_qcint8, kernel_scale, 2,
+                /*channel_dim=*/0, kernel_dims, kernel, XNN_INVALID_VALUE_ID,
+                /*flags=*/0, &kernel_id));
+
+  const size_t bias_dims[] = {3};
+  const float bias[3] = {};
+  uint32_t bias_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_tensor_value(subgraph, xnn_datatype_fp32, 1, bias_dims,
+                                    bias, XNN_INVALID_VALUE_ID, /*flags=*/0,
+                                    &bias_id));
+
+  const size_t output_dims[] = {2, 3};
+  uint32_t output_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_tensor_value(
+                subgraph, xnn_datatype_fp16, 2, output_dims, nullptr,
+                /*external_id=*/1, XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
+
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_unary(subgraph, xnn_unary_convert, /*params=*/nullptr,
+                             input_id, qd_input_id, /*flags=*/0));
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_fully_connected(subgraph, -1e30f, 1e30f, qd_input_id,
+                                       kernel_id, bias_id, output_id,
+                                       /*flags=*/0));
+
+  ASSERT_EQ(xnn_status_success, xnn_subgraph_optimize(subgraph, /*flags=*/0));
+
+  const xnn_node* fc_node = nullptr;
+  for (size_t i = 0; i < subgraph->num_nodes; i++) {
+    if (subgraph->nodes[i].type == xnn_node_type_fully_connected) {
+      fc_node = &subgraph->nodes[i];
+      break;
+    }
+  }
+  ASSERT_NE(fc_node, nullptr);
+  if (fc_node->packed_input_datatype != xnn_datatype_qpint8) {
+    xnn_delete_subgraph(subgraph);
+    GTEST_SKIP() << "packed-LHS QP8 F16 QC8W rewrite is unavailable";
+  }
+  EXPECT_NE(fc_node->inputs[0], qd_input_id);
+  EXPECT_EQ(fc_node->packed_input_datatype, xnn_datatype_qpint8);
+  EXPECT_EQ(subgraph->values[fc_node->inputs[0]].datatype, xnn_datatype_fp16);
+
+  xnn_delete_subgraph(subgraph);
+}
+
+TEST(FullyConnectedQP8F16QC8W, optimize_packed_lhs_rejects_fp32_source) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
+
+  xnn_subgraph_t subgraph = nullptr;
+  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(2, 0, &subgraph));
+
+  const size_t input_dims[] = {2, 4};
+  uint32_t input_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_tensor_value(
+                subgraph, xnn_datatype_fp32, 2, input_dims, nullptr,
+                /*external_id=*/0, XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id));
+
+  uint32_t qd_input_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_dynamically_quantized_tensor_value(
+                subgraph, xnn_datatype_qdint8, 2, /*num_nonbatch_dims=*/1,
+                input_dims, XNN_INVALID_VALUE_ID, /*flags=*/0, &qd_input_id));
+
+  const size_t kernel_dims[] = {3, 4};
+  const float kernel_scale[] = {0.5f, 0.75f, 1.0f};
+  const int8_t kernel[12] = {};
+  uint32_t kernel_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_channelwise_quantized_tensor_value(
+                subgraph, xnn_datatype_qcint8, kernel_scale, 2,
+                /*channel_dim=*/0, kernel_dims, kernel, XNN_INVALID_VALUE_ID,
+                /*flags=*/0, &kernel_id));
+
+  const size_t bias_dims[] = {3};
+  const float bias[3] = {};
+  uint32_t bias_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_tensor_value(subgraph, xnn_datatype_fp32, 1, bias_dims,
+                                    bias, XNN_INVALID_VALUE_ID, /*flags=*/0,
+                                    &bias_id));
+
+  const size_t output_dims[] = {2, 3};
+  uint32_t output_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_tensor_value(
+                subgraph, xnn_datatype_fp16, 2, output_dims, nullptr,
+                /*external_id=*/1, XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
+
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_unary(subgraph, xnn_unary_convert, /*params=*/nullptr,
+                             input_id, qd_input_id, /*flags=*/0));
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_fully_connected(subgraph, -1e30f, 1e30f, qd_input_id,
+                                       kernel_id, bias_id, output_id,
+                                       /*flags=*/0));
+
+  const xnn_status status = xnn_subgraph_optimize(subgraph, /*flags=*/0);
+  if (status == xnn_status_unsupported_hardware) {
+    xnn_delete_subgraph(subgraph);
+    GTEST_SKIP() << "packed-LHS QP8 F16 QC8W path is unavailable";
+  }
+  ASSERT_EQ(xnn_status_success, status);
+
+  const xnn_node* fc_node = nullptr;
+  for (size_t i = 0; i < subgraph->num_nodes; i++) {
+    if (subgraph->nodes[i].type == xnn_node_type_fully_connected) {
+      fc_node = &subgraph->nodes[i];
+      break;
+    }
+  }
+  ASSERT_NE(fc_node, nullptr);
+  EXPECT_NE(fc_node->packed_input_datatype, xnn_datatype_qpint8);
+
+  xnn_delete_subgraph(subgraph);
+}
+
+TEST(FullyConnectedQP8F16QC8W, optimize_packed_lhs_no_inline) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
+
+  xnn_subgraph_t subgraph = nullptr;
+  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(2, 0, &subgraph));
+
+  const size_t input_dims[] = {2, 4};
+  uint32_t input_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_tensor_value(
+                subgraph, xnn_datatype_fp16, 2, input_dims, nullptr,
+                /*external_id=*/0, XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id));
+
+  uint32_t qd_input_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_dynamically_quantized_tensor_value(
+                subgraph, xnn_datatype_qdint8, 2, /*num_nonbatch_dims=*/1,
+                input_dims, XNN_INVALID_VALUE_ID, /*flags=*/0, &qd_input_id));
+
+  const size_t kernel_dims[] = {3, 4};
+  const float kernel_scale[] = {0.5f, 0.75f, 1.0f};
+  const int8_t kernel[12] = {};
+  uint32_t kernel_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_channelwise_quantized_tensor_value(
+                subgraph, xnn_datatype_qcint8, kernel_scale, 2,
+                /*channel_dim=*/0, kernel_dims, kernel, XNN_INVALID_VALUE_ID,
+                /*flags=*/0, &kernel_id));
+
+  const size_t bias_dims[] = {3};
+  const float bias[3] = {};
+  uint32_t bias_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_tensor_value(subgraph, xnn_datatype_fp32, 1, bias_dims,
+                                    bias, XNN_INVALID_VALUE_ID, /*flags=*/0,
+                                    &bias_id));
+
+  const size_t output_dims[] = {2, 3};
+  uint32_t output_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_tensor_value(
+                subgraph, xnn_datatype_fp16, 2, output_dims, nullptr,
+                /*external_id=*/1, XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
+
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_unary(subgraph, xnn_unary_convert, /*params=*/nullptr,
+                             input_id, qd_input_id, /*flags=*/0));
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_fully_connected(subgraph, -1e30f, 1e30f, qd_input_id,
+                                       kernel_id, bias_id, output_id,
+                                       /*flags=*/0));
+
+  const xnn_status status =
+      xnn_subgraph_optimize(subgraph, XNN_FLAG_NO_INLINED_LHS_PACKING);
+  if (status == xnn_status_unsupported_hardware) {
+    xnn_delete_subgraph(subgraph);
+    GTEST_SKIP() << "packed-LHS QP8 F16 QC8W path is unavailable";
+  }
+  ASSERT_EQ(xnn_status_success, status);
+
+  const xnn_node* fc_node = nullptr;
+  for (size_t i = 0; i < subgraph->num_nodes; i++) {
+    if (subgraph->nodes[i].type == xnn_node_type_fully_connected) {
+      fc_node = &subgraph->nodes[i];
+      break;
+    }
+  }
+  ASSERT_NE(fc_node, nullptr);
+  if (fc_node->inputs[0] == qd_input_id) {
+    xnn_delete_subgraph(subgraph);
+    GTEST_SKIP() << "packed-LHS QP8 F16 QC8W rewrite is unavailable";
+  }
+  if (subgraph->values[fc_node->inputs[0]].datatype != xnn_datatype_qpint8) {
+    xnn_delete_subgraph(subgraph);
+    GTEST_SKIP() << "packed-LHS QP8 F16 QC8W rewrite is unavailable";
+  }
+  EXPECT_EQ(subgraph->values[fc_node->inputs[0]].datatype, xnn_datatype_qpint8);
+  EXPECT_NE(subgraph->values[fc_node->inputs[0]].gemm_config, nullptr);
+
+  xnn_delete_subgraph(subgraph);
+}
+
 #ifndef XNNPACK_USE_YNNPACK
 TEST(FullyConnectedQS8, filter_zero_point_must_be_zero) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));

@@ -157,6 +157,8 @@ XNN_ENUM_ITEM(xnn_operator_type_fully_connected_nc_qp8_f32_qc4w,
               "Fully Connected (NC, QP8, F32, QC4W)")
 XNN_ENUM_ITEM(xnn_operator_type_fully_connected_nc_qp8_f32_qc8w,
               "Fully Connected (NC, QP8, F32, QC8W)")
+XNN_ENUM_ITEM(xnn_operator_type_fully_connected_nc_qp8_f16_qc8w,
+              "Fully Connected (NC, QP8, F16, QC8W)")
 XNN_ENUM_ITEM(xnn_operator_type_fully_connected_nc_qp8_f32_qb4w,
               "Fully Connected (NC, QP8, F32, QB4W)")
 XNN_ENUM_ITEM(xnn_operator_type_fully_connected_nc_qs8,
