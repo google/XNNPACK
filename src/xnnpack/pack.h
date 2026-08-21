@@ -2,6 +2,7 @@
 // All rights reserved.
 //
 // Copyright 2019 Google LLC
+// Copyright 2026 Arm Limited and/or its affiliates <open-source-office@arm.com>
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
@@ -812,6 +813,11 @@ XNN_INTERNAL void xnn_pack_f32_dwconv_ghw_w(
     const float* kernel, const float* bias, const void* scale,
     float* packed_weights, size_t per_tile_extra_bytes, const void* params);
 
+XNN_INTERNAL void xnn_pack_kai_f32_dwconv_ghw_w(
+    size_t primary_tile, size_t h, size_t w, size_t c, size_t channel_tile,
+    const float* kernel, const float* bias, const void* scale,
+    float* packed_weights, size_t per_tile_extra_bytes, const void* params);
+
 XNN_INTERNAL void xnn_pack_f16_dwconv_ghw_w(
     size_t primary_tile, size_t h, size_t w, size_t c, size_t channel_tile,
     const uint16_t* kernel, const uint16_t* bias, const void* scale,
@@ -842,6 +848,11 @@ typedef void (*xnn_pack_dwconv_hwg_w_fn)(
 
 // Weights layout is (h)eight, (w)idth, channels/(g)roups.
 XNN_INTERNAL void xnn_pack_f32_dwconv_hwg_w(
+    size_t primary_tile, size_t h, size_t w, size_t c, size_t channel_tile,
+    const float* kernel, const float* bias, const void* scale,
+    float* packed_weights, size_t per_tile_extra_bytes, const void* params);
+
+XNN_INTERNAL void xnn_pack_kai_f32_dwconv_hwg_w(
     size_t primary_tile, size_t h, size_t w, size_t c, size_t channel_tile,
     const float* kernel, const float* bias, const void* scale,
     float* packed_weights, size_t per_tile_extra_bytes, const void* params);

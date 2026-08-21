@@ -2,6 +2,7 @@
 // All rights reserved.
 //
 // Copyright 2019 Google LLC
+// Copyright 2026 Arm Limited and/or its affiliates <open-source-office@arm.com>
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
@@ -27,6 +28,10 @@
 #include "src/xnnpack/packq.h"
 #include "src/xnnpack/quantization.h"
 #include <pthreadpool.h>
+
+#if XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI && XNN_ENABLE_ARM_SME2
+#include "kai/ukernels/dwconv/dwconv_f32_f32_f32p/kai_dwconv_clamp_f32_f32_f32p1vlx1b_3x3_s1_4xc_sme2_mla.h"
+#endif  // XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI && XNN_ENABLE_ARM_SME2
 
 #if XNN_MAX_UARCH_TYPES > 1
 #include "src/xnnpack/config-types.h"
@@ -1011,6 +1016,43 @@ XNN_NO_SANITIZE_FUNCTION void xnn_compute_dwconv_unipass(struct dwconv_context* 
                    weights, output, context->indirect_input_width_stride,
                    output_increment, input_offset, /*input_pixel_stride=*/0,
                    context->zero, &context->params);
+}
+
+void xnn_compute_kai_f32_dwconv(struct kai_f32_dwconv_context* restrict context,
+                                size_t batch_index, size_t output_y,
+                                size_t output_y_tile) {
+#if XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI && XNN_ENABLE_ARM_SME2
+  const size_t input_y_start = output_y < context->input_padding_top ? 0
+                                   : output_y - context->input_padding_top;
+  const size_t input_y = min(input_y_start, context->input_height);
+  const size_t pad_top = output_y < context->input_padding_top
+                             ? context->input_padding_top - output_y : 0;
+  const size_t valid_input_rows =
+      input_y < context->input_height ? context->input_height - input_y : 0;
+  const size_t valid_output_rows =
+      min(output_y_tile, context->output_height - output_y);
+
+  const void* input = (const void*)((uintptr_t)context->input +
+                                    batch_index * context->input_batch_stride +
+                                    input_y * context->input_height_stride);
+  void* output = (void*)((uintptr_t)context->output +
+                         batch_index * context->output_batch_stride +
+                         output_y * context->output_height_stride);
+
+  kai_run_dwconv_clamp_f32_f32_f32p1vlx1b_3x3_s1_4xc_sme2_mla(
+      input, context->packed_weights, output, context->input_height_stride,
+      context->input_pixel_stride, context->output_height_stride,
+      context->output_pixel_stride, valid_input_rows, valid_output_rows,
+      context->input_padding_left, pad_top, /*pad_value=*/0.0f,
+      context->params.scalar.min, context->params.scalar.max);
+#else
+  (void)context;
+  (void)batch_index;
+  (void)output_y;
+  (void)output_y_tile;
+  assert("Calling KleidiAI F32 DWConv without KleidiAI SME2 support." && 0);
+  XNN_UNREACHABLE;
+#endif  // XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI && XNN_ENABLE_ARM_SME2
 }
 
 XNN_NO_SANITIZE_FUNCTION void xnn_compute_dwconv2d_chw(

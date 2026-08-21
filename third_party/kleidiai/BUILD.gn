@@ -10,7 +10,34 @@ config("kleidiai_config") {
   include_dirs = [ "src/" ]
 }
 
-# src/kai/dwconv components do not seem to be used
+source_set("dwconv") {
+  include_dirs = [ "src/" ]
+  public_deps = [ ":common" ]
+
+  sources = [
+    "src/kai/ukernels/dwconv/dwconv_f32_f32_f32p/kai_dwconv_clamp_f32_f32_f32p1vlx1b_3x3_s1_4xc_sme2_mla.c",
+    "src/kai/ukernels/dwconv/dwconv_f32_f32_f32p/kai_dwconv_clamp_f32_f32_f32p1vlx1b_3x3_s1_4xc_sme2_mla.h",
+    "src/kai/ukernels/dwconv/dwconv_f32_f32_f32p/kai_dwconv_clamp_f32_f32_f32p1vlx1b_3x3_s1_4xc_sme2_mla_asm.S",
+    "src/kai/ukernels/dwconv/pack/kai_rhs_dwconv_pack_x32p1vlx1b_x32_x32_sme.c",
+    "src/kai/ukernels/dwconv/pack/kai_rhs_dwconv_pack_x32p1vlx1b_x32_x32_sme.h",
+  ]
+  cflags = [
+    "-Xclang",
+    "-target-feature",
+    "-Xclang",
+    "+sme2",
+    "-Xclang",
+    "-target-feature",
+    "-Xclang",
+    "+sve2",
+    "-Xclang",
+    "-target-feature",
+    "-Xclang",
+    "+sme",
+    "-fno-tree-vectorize",
+  ]
+  asmflags = [ "-march=armv8-a+sme2" ]
+}
 
 source_set("matmul") {
   include_dirs = [ "src/" ]
@@ -481,6 +508,7 @@ source_set("kleidiai") {
   public_configs = [ ":kleidiai_config" ]
   public_deps = [
     ":common",
+    ":dwconv",
     ":matmul",
   ]
 }

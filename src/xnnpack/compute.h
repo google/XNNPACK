@@ -1,4 +1,5 @@
 // Copyright 2019 Google LLC
+// Copyright 2026 Arm Limited and/or its affiliates <open-source-office@arm.com>
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
@@ -744,6 +745,23 @@ struct dwconv_context {
   xnn_dwconv_ukernel_fn ukernel;
 };
 
+struct kai_f32_dwconv_context {
+  const void* input;
+  const void* packed_weights;
+  void* output;
+  size_t input_height;
+  size_t output_height;
+  size_t input_batch_stride;
+  size_t input_height_stride;
+  size_t input_pixel_stride;
+  size_t output_batch_stride;
+  size_t output_height_stride;
+  size_t output_pixel_stride;
+  size_t input_padding_top;
+  size_t input_padding_left;
+  struct xnn_f32_minmax_params params;
+};
+
 XNN_PRIVATE void xnn_compute_dwconv_indirection(
     struct dwconv_indirection_init_context* context, size_t output_y_start,
     size_t output_y_tile);
@@ -751,6 +769,9 @@ XNN_PRIVATE void xnn_compute_dwconv_unipass(struct dwconv_context* context,
                                             size_t batch_index, size_t output_y,
                                             size_t output_c_start,
                                             size_t output_c_tile);
+XNN_PRIVATE void xnn_compute_kai_f32_dwconv(
+    struct kai_f32_dwconv_context* context, size_t batch_index, size_t output_y,
+    size_t output_y_tile);
 
 struct dwconv2d_context {
   size_t input_height;

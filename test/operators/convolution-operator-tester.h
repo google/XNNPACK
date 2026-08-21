@@ -2159,7 +2159,9 @@ class ConvolutionOperatorTester {
     }
   }
 
-  void TestNHWCxF32() const {
+  void TestNHWCxF32(
+      xnn_dwconv_ukernel_fn expected_ukernel = nullptr,
+      size_t expected_workspace_size = SIZE_MAX) const {
     ASSERT_EQ(weights_type(), WeightsType::Default);
 
     xnnpack::ReplicableRandomDevice rng;
@@ -2372,6 +2374,9 @@ class ConvolutionOperatorTester {
       }
       ASSERT_EQ(xnn_status_success, status);
       ASSERT_NE(nullptr, convolution_op);
+      if (expected_ukernel != nullptr) {
+        ASSERT_EQ(expected_ukernel, convolution_op->ukernel.dwconv.ukernel);
+      }
       if (use_weights_cache()) {
         ASSERT_EQ(xnn_status_success,
                   xnn_finalize_weights_cache(
@@ -2390,9 +2395,14 @@ class ConvolutionOperatorTester {
                     &workspace_size,
                     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
                     auto_threadpool.get()));
+      if (expected_workspace_size != SIZE_MAX) {
+        ASSERT_EQ(expected_workspace_size, workspace_size);
+      }
       xnnpack::Buffer<char, XNN_ALLOCATION_ALIGNMENT> workspace(workspace_size);
       std::iota(workspace.begin(), workspace.end(), 0);
-      if (transient_indirection_buffer()) {
+      const bool uses_transient_indirection =
+          (convolution_op->flags & XNN_FLAG_TRANSIENT_INDIRECTION_BUFFER) != 0;
+      if (uses_transient_indirection) {
         ASSERT_NE(workspace_size, 0);
         ASSERT_NE(workspace_size, SIZE_MAX);
         ASSERT_EQ(xnn_status_success, xnn_setup_convolution2d_nhwc_f32(
@@ -2443,7 +2453,10 @@ class ConvolutionOperatorTester {
         xnnpack::Buffer<char, XNN_ALLOCATION_ALIGNMENT> workspace(
             workspace_size);
         std::iota(workspace.begin(), workspace.end(), 0);
-        if (transient_indirection_buffer()) {
+        const bool uses_transient_indirection =
+            (convolution_op2->flags & XNN_FLAG_TRANSIENT_INDIRECTION_BUFFER) !=
+            0;
+        if (uses_transient_indirection) {
           ASSERT_NE(workspace_size, 0);
           ASSERT_NE(workspace_size, SIZE_MAX);
           ASSERT_EQ(xnn_status_success, xnn_setup_convolution2d_nhwc_f32(
