@@ -182,6 +182,7 @@ struct scheduling_info {
   std::vector<std::vector<slinky::interval_expr>> input_scheduler_bounds;
 
   bool force_root = false;
+  bool allow_redundant_compute = false;
 };
 
 namespace internal {

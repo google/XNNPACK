@@ -24,6 +24,10 @@ void define_transpose_a(ynn_subgraph& subgraph, ynn_node& node,
 // int8 x `b_type`.
 bool prefer_uint8_dot(ynn_type b_type);
 
+uint32_t define_pack_a(ynn_subgraph& subgraph, const dot_type& type,
+                       const dot_kernel& kernel, size_t num_k_dims,
+                       bool consistent_arithmetic, uint32_t input_a_id);
+
 uint32_t define_pack_b(ynn_subgraph& subgraph, const dot_type& type,
                        const dot_kernel& kernel, size_t num_k_dims,
                        bool consistent_arithmetic, uint32_t input_b_id);
