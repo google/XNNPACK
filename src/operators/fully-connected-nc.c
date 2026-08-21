@@ -2513,8 +2513,17 @@ enum xnn_status xnn_create_fully_connected_nc_f32_f16(
     size_t output_stride, const void* kernel, const void* bias,
     float output_min, float output_max, uint32_t flags,
     xnn_weights_cache_t weights_cache, xnn_operator_t* fully_connected_op_out) {
-  float* fp32_kernel_buffer = (float*)xnn_allocate_memory(
-      input_channels * output_channels * sizeof(float));
+  size_t fp32_kernel_size = 0;
+  if (!xnn_safe_mul(input_channels, output_channels, &fp32_kernel_size) ||
+      !xnn_safe_mul(fp32_kernel_size, sizeof(float), &fp32_kernel_size)) {
+    xnn_log_error(
+        "failed to create %s operator with %zu input channels and %zu output "
+        "channels: kernel buffer size overflows size_t",
+        xnn_operator_type_to_string(xnn_operator_type_fully_connected_nc_f32),
+        input_channels, output_channels);
+    return xnn_status_invalid_parameter;
+  }
+  float* fp32_kernel_buffer = (float*)xnn_allocate_memory(fp32_kernel_size);
   if (fp32_kernel_buffer == NULL) {
     return xnn_status_out_of_memory;
   }
@@ -2568,8 +2577,17 @@ enum xnn_status xnn_create_fully_connected_nc_pf32_f16(
     size_t output_stride, const void* kernel, const void* bias,
     float output_min, float output_max, uint32_t flags,
     xnn_weights_cache_t weights_cache, xnn_operator_t* fully_connected_op_out) {
-  float* fp32_kernel_buffer = (float*)xnn_allocate_memory(
-      input_channels * output_channels * sizeof(float));
+  size_t fp32_kernel_size = 0;
+  if (!xnn_safe_mul(input_channels, output_channels, &fp32_kernel_size) ||
+      !xnn_safe_mul(fp32_kernel_size, sizeof(float), &fp32_kernel_size)) {
+    xnn_log_error(
+        "failed to create %s operator with %zu input channels and %zu output "
+        "channels: kernel buffer size overflows size_t",
+        xnn_operator_type_to_string(xnn_operator_type_fully_connected_nc_pf32),
+        input_channels, output_channels);
+    return xnn_status_invalid_parameter;
+  }
+  float* fp32_kernel_buffer = (float*)xnn_allocate_memory(fp32_kernel_size);
   if (fp32_kernel_buffer == NULL) {
     return xnn_status_out_of_memory;
   }
