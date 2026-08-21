@@ -826,16 +826,24 @@ enum xnn_status reshape_depth_to_space_nchw2nhwc(
   }
 
   const uint32_t block_size = depth_to_space_op->depth_to_space.block_size;
-  if (input_channels % (block_size * block_size) != 0) {
+  size_t block_size_sq = 0;
+  if (!xnn_safe_mul((size_t)block_size, (size_t)block_size, &block_size_sq)) {
     xnn_log_error(
-        "failed to reshape %s operator with %zu input_channels and %zu "
-        "block_sizex: input channels must be divisible by block_size * "
+        "failed to reshape %s operator with %u block size: "
+        "block_size * block_size overflows size_t",
+        xnn_operator_type_to_string(operator_type), block_size);
+    return xnn_status_invalid_parameter;
+  }
+  if (input_channels % block_size_sq != 0) {
+    xnn_log_error(
+        "failed to reshape %s operator with %zu input channels and %u "
+        "block_size: input channels must be divisible by block_size * "
         "block_size",
-        xnn_operator_type_to_string(operator_type), input_width, input_height);
+        xnn_operator_type_to_string(operator_type), input_channels, block_size);
     return xnn_status_invalid_parameter;
   }
 
-  const size_t output_channels = input_channels / block_size / block_size;
+  const size_t output_channels = input_channels / block_size_sq;
 
   if (batch_size == 0) {
     depth_to_space_op->state = xnn_run_state_skip;
@@ -1119,9 +1127,17 @@ static enum xnn_status reshape_depth_to_space_nhwc(
   }
 
   const uint32_t block_size = depth_to_space_op->depth_to_space.block_size;
-  if (input_channels % (block_size * block_size) != 0) {
+  size_t block_size_sq = 0;
+  if (!xnn_safe_mul((size_t)block_size, (size_t)block_size, &block_size_sq)) {
     xnn_log_error(
-        "failed to reshape %s operator with %zu input_channels and %u "
+        "failed to reshape %s operator with %u block size: "
+        "block_size * block_size overflows size_t",
+        xnn_operator_type_to_string(expected_operator_type), block_size);
+    return xnn_status_invalid_parameter;
+  }
+  if (input_channels % block_size_sq != 0) {
+    xnn_log_error(
+        "failed to reshape %s operator with %zu input channels and %u "
         "block_size: input channels must be divisible by block_size * "
         "block_size",
         xnn_operator_type_to_string(expected_operator_type), input_channels,
@@ -1129,7 +1145,7 @@ static enum xnn_status reshape_depth_to_space_nhwc(
     return xnn_status_invalid_parameter;
   }
 
-  const size_t output_channels = input_channels / block_size / block_size;
+  const size_t output_channels = input_channels / block_size_sq;
 
   if (batch_size == 0) {
     depth_to_space_op->state = xnn_run_state_skip;
