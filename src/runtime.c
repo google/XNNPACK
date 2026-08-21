@@ -786,6 +786,11 @@ enum xnn_status xnn_create_threadpool_v2(struct xnn_scheduler_v2 scheduler,
                                          uint32_t flags,
                                          xnn_threadpool_t* threadpool_out) {
   *threadpool_out = xnn_allocate_memory(sizeof(struct xnn_threadpool));
+  if (*threadpool_out == NULL) {
+    xnn_log_error("failed to allocate %zu bytes for threadpool descriptor",
+                  sizeof(struct xnn_threadpool));
+    return xnn_status_out_of_memory;
+  }
   (*threadpool_out)->scheduler = scheduler;
   (*threadpool_out)->scheduler_context = scheduler_context;
   return xnn_status_success;
