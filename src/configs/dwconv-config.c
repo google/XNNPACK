@@ -33,28 +33,6 @@ XNN_INIT_ONCE_GUARD(qu8_dwconv);
   (xnn_dwconv_ukernel_fn) ukernel;       \
   xnn_log_info("Using dwconv microkernel '%s'.", #ukernel);
 
-static void init_f16_dwconv_scalar_config(void) {
-  f16_dwconv_config[0].minmax = XNN_INIT_DWCONV_UKERNEL(xnn_f16_f32acc_dwconv_minmax_ukernel_3p1c__scalar_acc2);
-  f16_dwconv_config[0].init.f16 = xnn_init_f16_minmax_scalar_params;
-  f16_dwconv_config[0].channel_tile = 1;
-  f16_dwconv_config[0].primary_tile = 3;
-
-  f16_dwconv_config[1].minmax = XNN_INIT_DWCONV_UKERNEL(xnn_f16_f32acc_dwconv_minmax_ukernel_4p1c__scalar_acc2);
-  f16_dwconv_config[1].init.f16 = xnn_init_f16_minmax_scalar_params;
-  f16_dwconv_config[1].channel_tile = 1;
-  f16_dwconv_config[1].primary_tile = 4;
-
-  f16_dwconv_config[2].minmax = XNN_INIT_DWCONV_UKERNEL(xnn_f16_f32acc_dwconv_minmax_ukernel_9p1c__scalar_acc2);
-  f16_dwconv_config[2].init.f16 = xnn_init_f16_minmax_scalar_params;
-  f16_dwconv_config[2].channel_tile = 1;
-  f16_dwconv_config[2].primary_tile = 9;
-
-  f16_dwconv_config[3].minmax = XNN_INIT_DWCONV_UKERNEL(xnn_f16_f32acc_dwconv_minmax_ukernel_25p2c__scalar_acc2);
-  f16_dwconv_config[3].init.f16 = xnn_init_f16_minmax_scalar_params;
-  f16_dwconv_config[3].channel_tile = 2;
-  f16_dwconv_config[3].primary_tile = 25;
-}
-
 static void init_f16_dwconv_config(void) {
   #if XNN_ENABLE_ARM_FP16_SCALAR && XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
@@ -80,8 +58,6 @@ static void init_f16_dwconv_config(void) {
       f16_dwconv_config[3].init.f16 = xnn_init_f16_minmax_scalar_params;
       f16_dwconv_config[3].channel_tile = 8;
       f16_dwconv_config[3].primary_tile = 25;
-    } else {
-      init_f16_dwconv_scalar_config();
     }
   #elif XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
@@ -107,8 +83,6 @@ static void init_f16_dwconv_config(void) {
       f16_dwconv_config[3].init.f16 = xnn_init_f16_minmax_scalar_params;
       f16_dwconv_config[3].channel_tile = 8;
       f16_dwconv_config[3].primary_tile = 25;
-    } else {
-      init_f16_dwconv_scalar_config();
     }
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
@@ -162,7 +136,25 @@ static void init_f16_dwconv_config(void) {
         return;
       }
     #endif  // XNN_ENABLE_FMA3
-    init_f16_dwconv_scalar_config();
+    f16_dwconv_config[0].minmax = XNN_INIT_DWCONV_UKERNEL(xnn_f16_f32acc_dwconv_minmax_ukernel_3p1c__scalar_acc2);
+    f16_dwconv_config[0].init.f16 = xnn_init_f16_minmax_scalar_params;
+    f16_dwconv_config[0].channel_tile = 1;
+    f16_dwconv_config[0].primary_tile = 3;
+
+    f16_dwconv_config[1].minmax = XNN_INIT_DWCONV_UKERNEL(xnn_f16_f32acc_dwconv_minmax_ukernel_4p1c__scalar_acc2);
+    f16_dwconv_config[1].init.f16 = xnn_init_f16_minmax_scalar_params;
+    f16_dwconv_config[1].channel_tile = 1;
+    f16_dwconv_config[1].primary_tile = 4;
+
+    f16_dwconv_config[2].minmax = XNN_INIT_DWCONV_UKERNEL(xnn_f16_f32acc_dwconv_minmax_ukernel_9p1c__scalar_acc2);
+    f16_dwconv_config[2].init.f16 = xnn_init_f16_minmax_scalar_params;
+    f16_dwconv_config[2].channel_tile = 1;
+    f16_dwconv_config[2].primary_tile = 9;
+
+    f16_dwconv_config[3].minmax = XNN_INIT_DWCONV_UKERNEL(xnn_f16_f32acc_dwconv_minmax_ukernel_25p2c__scalar_acc2);
+    f16_dwconv_config[3].init.f16 = xnn_init_f16_minmax_scalar_params;
+    f16_dwconv_config[3].channel_tile = 2;
+    f16_dwconv_config[3].primary_tile = 25;
   #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR && XNN_ENABLE_RISCV_FP16_VECTOR
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
@@ -187,11 +179,7 @@ static void init_f16_dwconv_config(void) {
       f16_dwconv_config[3].init.f16 = xnn_init_f16_minmax_scalar_params;
       f16_dwconv_config[3].channel_tile = 8 * hardware_config->vlenb / sizeof(xnn_float16);
       f16_dwconv_config[3].primary_tile = 25;
-    } else {
-      init_f16_dwconv_scalar_config();
     }
-  #else
-    init_f16_dwconv_scalar_config();
   #endif
 }
 
@@ -990,7 +978,7 @@ static void init_qu8_dwconv_config(void) {
 
 const struct xnn_dwconv_config* xnn_init_f16_dwconv_config() {
   const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-  if (hardware_config == NULL) {
+  if (hardware_config == NULL || !xnn_is_f16_compatible_config(hardware_config)) {
     return NULL;
   }
   XNN_INIT_ONCE(f16_dwconv);
