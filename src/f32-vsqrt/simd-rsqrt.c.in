@@ -7,9 +7,10 @@ $BATCH_TILES = tuple(int(bt) for bt in BATCH_TILES.split(","))
 $SIMD_SIZE = BATCH_TILES[0]
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <assert.h>
+#include <math.h>
 #include <stddef.h>
 #include <stdint.h>
-    
+
 // Arch-specific SIMD wrapper.
 #include "src/xnnpack/simd/f32-${ARCH}.h"
 
@@ -64,6 +65,7 @@ $for BATCH_TILE in BATCH_TILES:
     // Constants for the Newton-Raphson iteration.
     const xnn_simd_f32_t kOne = xnn_set1_f32(1.0f);
     const xnn_simd_f32_t kHalf = xnn_set1_f32(0.5f);
+    const xnn_simd_f32_t kInf = xnn_set1_f32(INFINITY);
 
     $if BATCH_TILE > SIMD_SIZE:
       for (; batch >= ${BATCH_TILE} * sizeof(float); batch -= ${BATCH_TILE} * sizeof(float)) {
@@ -74,7 +76,7 @@ $for BATCH_TILE in BATCH_TILES:
 
         // Create a mask of the +/-0 inputs, which will be flushed to zero later.
         $for N in range(SIMD_TILE):
-          const xnn_simd_f32_t vinf_mask_${ABC[N]} = xnn_cmpneq_f32(vx${ABC[N]}, xnn_zero_f32());
+          const xnn_simd_f32_t vzero_mask_${ABC[N]} = xnn_cmpneq_f32(vx${ABC[N]}, xnn_zero_f32());
 
         // Generate the initial 12-bit approximation.
         $for N in range(SIMD_TILE):
@@ -98,12 +100,18 @@ $for BATCH_TILE in BATCH_TILES:
 
         // Mask out the inputs that were zero.
         $for N in range(SIMD_TILE):
-          const xnn_simd_f32_t vt7_${ABC[N]} = xnn_and_f32(vinf_mask_${ABC[N]}, vt0_${ABC[N]});
+          const xnn_simd_f32_t vt7_${ABC[N]} = xnn_and_f32(vzero_mask_${ABC[N]}, vt0_${ABC[N]});
 
         // Extract the square root by multiplying the original value with the
         // inverse square root.
         $for N in range(SIMD_TILE):
-          const xnn_simd_f32_t vy${ABC[N]} = xnn_mul_f32(vx${ABC[N]}, vt7_${ABC[N]});
+          xnn_simd_f32_t vy${ABC[N]} = xnn_mul_f32(vx${ABC[N]}, vt7_${ABC[N]});
+
+        // Set output to infinity where the input is infinity (and not NaN)
+        $for N in range(SIMD_TILE):
+          const xnn_simd_f32_t vinf_mask_${ABC[N]} = xnn_cmpeq_f32(kInf, vx${ABC[N]});
+        $for N in range(SIMD_TILE):
+          vy${ABC[N]} = xnn_or_f32(xnn_andnot_f32(vinf_mask_${ABC[N]}, vy${ABC[N]}), xnn_and_f32(vinf_mask_${ABC[N]}, kInf));
 
         // Store the results.
         xnn_storeu_f32(output, vy${ABC[0]});
@@ -117,7 +125,7 @@ $for BATCH_TILE in BATCH_TILES:
       input += xnn_simd_size_f32;
 
       // Create a mask of the +/-0 inputs, which will be flushed to zero later.
-      const xnn_simd_f32_t vinf_mask = xnn_cmpneq_f32(vx, xnn_zero_f32());
+      const xnn_simd_f32_t vzero_mask = xnn_cmpneq_f32(vx, xnn_zero_f32());
 
       // Generate the initial 12-bit approximation.
       xnn_simd_f32_t vt0 = xnn_rsqrt_f32(vx);
@@ -133,11 +141,15 @@ $for BATCH_TILE in BATCH_TILES:
       }
 
       // Mask out the inputs that were zero.
-      const xnn_simd_f32_t vt7 = xnn_and_f32(vinf_mask, vt0);
+      const xnn_simd_f32_t vt7 = xnn_and_f32(vzero_mask, vt0);
 
       // Extract the square root by multiplying the original value with the
       // inverse square root.
-      const xnn_simd_f32_t vy = xnn_mul_f32(vx, vt7);
+      xnn_simd_f32_t vy = xnn_mul_f32(vx, vt7);
+
+      // Set output to infinity where the input is infinity (and not NaN)
+      const xnn_simd_f32_t vinf_mask = xnn_cmpeq_f32(kInf, vx);
+      vy = xnn_or_f32(xnn_andnot_f32(vinf_mask, vy), xnn_and_f32(vinf_mask, kInf));
 
       xnn_storeu_f32(output, vy);
       output += xnn_simd_size_f32;
@@ -149,7 +161,7 @@ $for BATCH_TILE in BATCH_TILES:
       const xnn_simd_f32_t vx = xnn_load_tail_f32(input, batch >> XNN_LOG2_SIZEOF_FLOAT);
 
       // Create a mask of the +/-0 inputs, which will be flushed to zero later.
-      const xnn_simd_f32_t vinf_mask = xnn_cmpneq_f32(vx, xnn_zero_f32());
+      const xnn_simd_f32_t vzero_mask = xnn_cmpneq_f32(vx, xnn_zero_f32());
 
       // Generate the initial 12-bit approximation.
       xnn_simd_f32_t vt0 = xnn_rsqrt_f32(vx);
@@ -165,11 +177,15 @@ $for BATCH_TILE in BATCH_TILES:
       }
 
       // Mask out the inputs that were zero.
-      const xnn_simd_f32_t vt7 = xnn_and_f32(vinf_mask, vt0);
+      const xnn_simd_f32_t vt7 = xnn_and_f32(vzero_mask, vt0);
 
       // Extract the square root by multiplying the original value with the
       // inverse square root.
-      const xnn_simd_f32_t vy = xnn_mul_f32(vx, vt7);
+      xnn_simd_f32_t vy = xnn_mul_f32(vx, vt7);
+
+      // Set output to infinity where the input is infinity (and not NaN)
+      const xnn_simd_f32_t vinf_mask = xnn_cmpeq_f32(kInf, vx);
+      vy = xnn_or_f32(xnn_andnot_f32(vinf_mask, vy), xnn_and_f32(vinf_mask, kInf));
 
       xnn_store_tail_f32(output, vy, batch >> XNN_LOG2_SIZEOF_FLOAT);
     }
