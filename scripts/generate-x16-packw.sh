@@ -46,4 +46,14 @@ tools/xngen src/x16-packw/avx.c.in -D NR=16 -D PREFETCH=1 -D KBLOCK=16 -o src/x1
 tools/xngen src/x16-packw/avx.c.in -D NR=32 -D PREFETCH=0 -D KBLOCK=16 -o src/x16-packw/gen/x16-packw-x32-gemm-goi-avx2-u16.c &
 tools/xngen src/x16-packw/avx.c.in -D NR=32 -D PREFETCH=1 -D KBLOCK=16 -o src/x16-packw/gen/x16-packw-x32-gemm-goi-avx2-u16-prfm.c &
 
+################################# X86 AVX512SKX ################################
+tools/xngen src/x16-packw/avx512skx.c.in -D NR=8  -D PREFETCH=0 -D KBLOCK=16 -o src/x16-packw/gen/x16-packw-x8-gemm-goi-avx512skx-u16.c &
+tools/xngen src/x16-packw/avx512skx.c.in -D NR=8  -D PREFETCH=1 -D KBLOCK=16 -o src/x16-packw/gen/x16-packw-x8-gemm-goi-avx512skx-u16-prfm.c &
+tools/xngen src/x16-packw/avx512skx.c.in -D NR=16 -D PREFETCH=0 -D KBLOCK=16 -o src/x16-packw/gen/x16-packw-x16-gemm-goi-avx512skx-u16.c &
+tools/xngen src/x16-packw/avx512skx.c.in -D NR=16 -D PREFETCH=1 -D KBLOCK=16 -o src/x16-packw/gen/x16-packw-x16-gemm-goi-avx512skx-u16-prfm.c &
+tools/xngen src/x16-packw/avx512skx.c.in -D NR=32 -D PREFETCH=0 -D KBLOCK=16 -o src/x16-packw/gen/x16-packw-x32-gemm-goi-avx512skx-u16.c &
+tools/xngen src/x16-packw/avx512skx.c.in -D NR=32 -D PREFETCH=1 -D KBLOCK=16 -o src/x16-packw/gen/x16-packw-x32-gemm-goi-avx512skx-u16-prfm.c &
+tools/xngen src/x16-packw/avx512skx.c.in -D NR=64 -D PREFETCH=0 -D KBLOCK=16 -o src/x16-packw/gen/x16-packw-x64-gemm-goi-avx512skx-u16.c &
+tools/xngen src/x16-packw/avx512skx.c.in -D NR=64 -D PREFETCH=1 -D KBLOCK=16 -o src/x16-packw/gen/x16-packw-x64-gemm-goi-avx512skx-u16-prfm.c &
+
 wait
