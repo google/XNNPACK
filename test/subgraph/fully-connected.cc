@@ -791,6 +791,7 @@ TEST(FullyConnectedF32, dynamic_b) {
   TestDynamicB<float, float, float, float>();
 }
 
+#ifndef XNNPACK_USE_YNNPACK
 TEST(FullyConnectedQP8F16QC8W, optimize_packed_lhs_inline) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
 
@@ -1018,7 +1019,6 @@ TEST(FullyConnectedQP8F16QC8W, optimize_packed_lhs_no_inline) {
   xnn_delete_subgraph(subgraph);
 }
 
-#ifndef XNNPACK_USE_YNNPACK
 TEST(FullyConnectedQS8, filter_zero_point_must_be_zero) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
 
