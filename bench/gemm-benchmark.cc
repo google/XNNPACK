@@ -72,9 +72,8 @@ void GEMMBenchmark(benchmark::State& state, xnn_qs8_gemm_minmax_ukernel_fn gemm,
   xnnpack::Buffer<char, XNN_ALLOCATION_ALIGNMENT> w(w_size * num_buffers);
 
   const xnn_qs8_packing_params packing_params = {127};
-  pack(/*g=*/1, nc, kc, nr, kr, sr, k.data(), b.data(), /*scale=*/nullptr,
-       w.data(),
-       /*extra_bytes=*/0, &packing_params);
+  pack(/*g=*/1, nc, kc, nr, kr, sr, /*n_stride=*/kc, k.data(), b.data(),
+       /*scale=*/nullptr, w.data(), /*extra_bytes=*/0, &packing_params);
   xnnpack::Buffer<int8_t> c(c_elements * num_buffers);
 
   union xnn_qs8_conv_minmax_params quantization_params;
@@ -158,8 +157,8 @@ void GEMMBenchmark(benchmark::State& state,
   xnnpack::Buffer<char, XNN_ALLOCATION_ALIGNMENT> w(w_size * num_buffers);
 
   const xnn_qs8_packing_params packing_params = {int8_t(127 - 0x80)};
-  pack(/*g=*/1, nc, kc, nr, kr, sr, k.data(), b.data(), /*scale=*/nullptr,
-       w.data(), nr * sizeof(float), &packing_params);
+  pack(/*g=*/1, nc, kc, nr, kr, sr, /*n_stride=*/kc, k.data(), b.data(),
+       /*scale=*/nullptr, w.data(), nr * sizeof(float), &packing_params);
 
   xnnpack::Buffer<int8_t> c(c_elements * num_buffers);
 
@@ -248,8 +247,9 @@ void GEMMBenchmark(benchmark::State& state,
 
   const xnn_qs8_qc2w_packing_params packing_params = {
       static_cast<int8_t>(127 - 0x80), 0.0f};
-  pack(/*g=*/1, nc, kc, nr, kr, sr, k.data(), b.data(), /*scale=*/nullptr,
-       w.data(), nr * sizeof(float), &packing_params);
+  pack(/*g=*/1, nc, kc, nr, kr, sr, /*n_stride=*/(kc + 3) / 4, k.data(),
+       b.data(), /*scale=*/nullptr, w.data(), nr * sizeof(float),
+       &packing_params);
 
   xnnpack::Buffer<int8_t> c(c_elements * num_buffers);
 
@@ -332,8 +332,9 @@ void GEMMBenchmark(benchmark::State& state,
   xnnpack::Buffer<char, XNN_ALLOCATION_ALIGNMENT> w(w_size * num_buffers);
 
   const xnn_qs8_qc4w_packing_params packing_params = {int8_t(127 - 0x80)};
-  pack(/*g=*/1, nc, kc, nr, kr, sr, k.data(), b.data(), /*scale=*/nullptr,
-       w.data(), nr * sizeof(float), &packing_params);
+  pack(/*g=*/1, nc, kc, nr, kr, sr, /*n_stride=*/(kc + 1) / 2, k.data(),
+       b.data(), /*scale=*/nullptr, w.data(), nr * sizeof(float),
+       &packing_params);
 
   xnnpack::Buffer<int8_t> c(c_elements * num_buffers);
 
@@ -415,8 +416,8 @@ void GEMMBenchmark(benchmark::State& state,
   xnnpack::Buffer<char, XNN_ALLOCATION_ALIGNMENT> w(w_elements * num_buffers);
 
   const xnn_qs8_packing_params packing_params = {/*input_zero_point=*/1};
-  pack(1, nc, kc, nr, kr, sr, k.data(), /*bias=*/nullptr, /*scale=*/nullptr,
-       w.data(), sizeof(float) * 2 * nr, &packing_params);
+  pack(1, nc, kc, nr, kr, sr, /*n_stride=*/kc, k.data(), /*bias=*/nullptr,
+       /*scale=*/nullptr, w.data(), sizeof(float) * 2 * nr, &packing_params);
   xnnpack::Buffer<xnn_float16> c(c_elements * num_buffers);
 
   // Prepare parameters.
@@ -492,8 +493,8 @@ void GEMMBenchmark(benchmark::State& state,
   xnnpack::Buffer<char, XNN_ALLOCATION_ALIGNMENT> w(w_elements * num_buffers);
 
   const xnn_qs8_packing_params packing_params = {/*input_zero_point=*/1};
-  pack(1, nc, kc, nr, kr, sr, k.data(), /*bias=*/nullptr, /*scale=*/nullptr,
-       w.data(), sizeof(float) * 2 * nr, &packing_params);
+  pack(1, nc, kc, nr, kr, sr, /*n_stride=*/kc, k.data(), /*bias=*/nullptr,
+       /*scale=*/nullptr, w.data(), sizeof(float) * 2 * nr, &packing_params);
   xnnpack::Buffer<float> c(c_elements * num_buffers);
 
   // Prepare parameters.
@@ -586,7 +587,7 @@ void GEMMBenchmark(benchmark::State& state,
 
   const xnn_qs8_qc4w_packing_params packing_params = {/*input_zero_point=*/1,
                                                       /*kernel_zero_point=*/8};
-  pack(1, nc, k2, nr, kr, sr, bl, k.data(), /*bias=*/nullptr,
+  pack(1, nc, k2, nr, kr, sr, bl, /*n_stride=*/kc, k.data(), /*bias=*/nullptr,
        /*scale=*/kernel_scale2d.data(), w.data(), sizeof(float) * nr,
        sizeof(float) * nr, &packing_params);
   xnnpack::Buffer<xnn_float16> c(c_elements * num_buffers);
@@ -681,7 +682,7 @@ void GEMMBenchmark(benchmark::State& state,
 
   const xnn_qs8_qc4w_packing_params packing_params = {/*input_zero_point=*/1,
                                                       /*kernel_zero_point=*/8};
-  pack(1, nc, k2, nr, kr, sr, bl, k.data(), /*bias=*/nullptr,
+  pack(1, nc, k2, nr, kr, sr, bl, /*n_stride=*/kc, k.data(), /*bias=*/nullptr,
        /*scale=*/kernel_scale2d.data(), w.data(), sizeof(float) * nr,
        sizeof(float) * nr, &packing_params);
   xnnpack::Buffer<xnn_bfloat16> c(c_elements * num_buffers);
@@ -755,8 +756,9 @@ void GEMMBenchmark(benchmark::State& state,
 
   const xnn_qs8_qc4w_packing_params packing_params = {/*input_zero_point=*/1,
                                                       /*kernel_zero_point=*/8};
-  pack(1, nc, kc, nr, kr, sr, k.data(), /*bias=*/nullptr, /*scale=*/nullptr,
-       w.data(), sizeof(float) * 2 * nr, &packing_params);
+  pack(1, nc, kc, nr, kr, sr, /*n_stride=*/(kc + 1) / 2, k.data(),
+       /*bias=*/nullptr, /*scale=*/nullptr, w.data(), sizeof(float) * 2 * nr,
+       &packing_params);
   xnnpack::Buffer<xnn_float16> c(c_elements * num_buffers);
 
   // Prepare parameters.
@@ -848,7 +850,7 @@ void GEMMBenchmark(benchmark::State& state,
 
   const xnn_qs8_qc4w_packing_params packing_params = {/*input_zero_point=*/1,
                                                       /*kernel_zero_point=*/8};
-  pack(1, nc, k2, nr, kr, sr, bl, k.data(), /*bias=*/nullptr,
+  pack(1, nc, k2, nr, kr, sr, bl, /*n_stride=*/kc, k.data(), /*bias=*/nullptr,
        /*scale=*/kernel_scale2d.data(), w.data(), sizeof(float) * nr,
        sizeof(float) * nr, &packing_params);
   xnnpack::Buffer<float> c(c_elements * num_buffers);
@@ -933,8 +935,9 @@ void GEMMBenchmark(benchmark::State& state,
 
   const xnn_qd8_qc2w_packing_params packing_params = {
       /*input_zero_point=*/1, /*kernel_zero_point=*/kernel_zero_point.data()};
-  pack(1, nc, kc, nr, kr, sr, k.data(), /*bias=*/nullptr, /*scale=*/nullptr,
-       w.data(), sizeof(float) * 2 * nr, &packing_params);
+  pack(1, nc, kc, nr, kr, sr, /*n_stride=*/(kc + 3) / 4, k.data(),
+       /*bias=*/nullptr, /*scale=*/nullptr, w.data(), sizeof(float) * 2 * nr,
+       &packing_params);
   xnnpack::Buffer<float> c(c_elements * num_buffers);
 
   // Prepare parameters.
@@ -1019,8 +1022,9 @@ void GEMMBenchmark(benchmark::State& state,
 
   const xnn_qd8_qc2w_packing_params packing_params = {
       /*input_zero_point=*/1, /*kernel_zero_point=*/kernel_zero_point.data()};
-  pack(1, nc, kc, nr, kr, sr, k.data(), /*bias=*/nullptr, /*scale=*/nullptr,
-       w.data(), sizeof(float) * 2 * nr, &packing_params);
+  pack(1, nc, kc, nr, kr, sr, /*n_stride=*/(kc + 3) / 4, k.data(),
+       /*bias=*/nullptr, /*scale=*/nullptr, w.data(), sizeof(float) * 2 * nr,
+       &packing_params);
   xnnpack::Buffer<xnn_float16> c(c_elements * num_buffers);
 
   // Prepare parameters.
@@ -1099,8 +1103,9 @@ void GEMMBenchmark(benchmark::State& state,
 
   const xnn_qs8_qc4w_packing_params packing_params = {/*input_zero_point=*/1,
                                                       /*kernel_zero_point=*/8};
-  pack(1, nc, kc, nr, kr, sr, k.data(), /*bias=*/nullptr, /*scale=*/nullptr,
-       w.data(), sizeof(float) * 2 * nr, &packing_params);
+  pack(1, nc, kc, nr, kr, sr, /*n_stride=*/(kc + 1) / 2, k.data(),
+       /*bias=*/nullptr, /*scale=*/nullptr, w.data(), sizeof(float) * 2 * nr,
+       &packing_params);
   xnnpack::Buffer<float> c(c_elements * num_buffers);
 
   // Prepare parameters.
@@ -1843,8 +1848,8 @@ void GEMMBenchmark(benchmark::State& state, xnn_qu8_gemm_minmax_ukernel_fn gemm,
   xnnpack::Buffer<uint8_t, XNN_ALLOCATION_ALIGNMENT> w(w_elements *
                                                        num_buffers);
   const xnn_qu8_packing_params packing_params = {127, 127};
-  pack(/*groups=*/1, nc, kc, nr, kr, sr, k.data(), b.data(), /*scale=*/nullptr,
-       w.data(),
+  pack(/*groups=*/1, nc, kc, nr, kr, sr, /*n_stride=*/kc, k.data(), b.data(),
+       /*scale=*/nullptr, w.data(),
        /*extra_bytes=*/0, &packing_params);
   xnnpack::Buffer<uint8_t> c(c_elements * num_buffers);
 
@@ -1921,8 +1926,8 @@ void GEMMBenchmark(benchmark::State& state, xnn_f32_gemm_minmax_ukernel_fn gemm,
                                      sizeof(float) * (w_elements + c_elements));
 
   xnnpack::Buffer<float, XNN_ALLOCATION_ALIGNMENT> w(w_elements * num_buffers);
-  pack(/*groups=*/1, nc, kc, nr, kr, sr, k.data(), b.data(), /*scale=*/nullptr,
-       w.data(), /*extra_bytes=*/0, /*params=*/nullptr);
+  pack(/*groups=*/1, nc, kc, nr, kr, sr, /*n_stride=*/kc, k.data(), b.data(),
+       /*scale=*/nullptr, w.data(), /*extra_bytes=*/0, /*params=*/nullptr);
   xnnpack::Buffer<float> c(c_elements * num_buffers);
 
   xnn_f32_minmax_params params;
@@ -2059,7 +2064,7 @@ void GEMMBenchmark(benchmark::State& state, xnn_f16_gemm_minmax_ukernel_fn gemm,
 
   xnnpack::Buffer<xnn_float16, XNN_ALLOCATION_ALIGNMENT> w(w_elements *
                                                            num_buffers);
-  pack(/*groups=*/1, nc, kc, nr, kr, sr,
+  pack(/*groups=*/1, nc, kc, nr, kr, sr, /*n_stride=*/kc,
        reinterpret_cast<const uint16_t*>(k.data()),
        reinterpret_cast<const uint16_t*>(b.data()), /*scale=*/nullptr,
        reinterpret_cast<uint16_t*>(w.data()),

@@ -46,6 +46,7 @@ void xnn_${DATATYPE_SPEC}_packw_gemm_goi_ukernel_x${NR}c4__${ISA}(
   size_t nr,
   size_t kr,
   size_t sr,
+  size_t n_stride,
   const ${TYPE}* weights,
   const ${BTYPE}* bias,
   const ${SCALETYPE}* scale,
@@ -102,7 +103,7 @@ void xnn_${DATATYPE_SPEC}_packw_gemm_goi_ukernel_x${NR}c4__${ISA}(
       out = (${WTYPE}*) ((uintptr_t) out + ${NR} * sizeof(${BTYPE}));
 
       $for N in range(1, NR):
-        const ${TYPE}* w${N} = w${N-1} + mock_kc;
+        const ${TYPE}* w${N} = w${N-1} + n_stride;
 
       $if DATATYPE in ["QS8", "QS4"]:
         $for N in range(NR):
@@ -243,7 +244,7 @@ void xnn_${DATATYPE_SPEC}_packw_gemm_goi_ukernel_x${NR}c4__${ISA}(
     if XNN_UNLIKELY(n != 0) {
       assert(n >= 1 && n <= ${NR-1});
       $for N in range(1, NR):
-        const ${TYPE}* w${N} = w${N-1} + mock_kc;
+        const ${TYPE}* w${N} = w${N-1} + n_stride;
         $if N % 2 == 0:
           if XNN_UNPREDICTABLE(n <= ${N}) {
             w${N} = w${N-1};

@@ -284,7 +284,7 @@ TEST_P(XnnTestGIO, k_eq_kblock) {
       .nr(GetParam().nr * GetParam().nr_scale)
       .kr(GetParam().kr)
       .sr(GetParam().sr)
-      .Test(GetParam().ukernel);
+      .TestGIO(GetParam().ukernel);
 }
 
 TEST_P(XnnTestGIO, null_bias) {
@@ -296,7 +296,7 @@ TEST_P(XnnTestGIO, null_bias) {
       .nr(GetParam().nr * GetParam().nr_scale)
       .kr(GetParam().kr)
       .sr(GetParam().sr)
-      .Test(GetParam().ukernel);
+      .TestGIO(GetParam().ukernel);
 }
 
 TEST_P(XnnTestGIO, n_lt_nr) {
@@ -308,7 +308,7 @@ TEST_P(XnnTestGIO, n_lt_nr) {
         .nr(GetParam().nr * GetParam().nr_scale)
         .kr(GetParam().kr)
         .sr(GetParam().sr)
-        .Test(GetParam().ukernel);
+        .TestGIO(GetParam().ukernel);
   }
 }
 

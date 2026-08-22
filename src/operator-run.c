@@ -347,7 +347,7 @@ XNN_NO_SANITIZE_FUNCTION void xnn_compute_batched_packw_gemm_goi(
   } else {
     context->packw_gemm_goi(
         /*groups=*/1, n_block_size, context->kc, context->nr, context->kr,
-        context->sr, kernel, bias, /*scale=*/NULL, packed_weights,
+        context->sr, /*n_stride=*/context->kc, kernel, bias, /*scale=*/NULL, packed_weights,
         /*extra_bytes=*/context->nr * context->scale_b_size,
         /*params=*/context->params);
 

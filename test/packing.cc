@@ -47,7 +47,7 @@ TEST(PACK_QS8_F32_QC2W_GEMM_GOI_W, kr_eq_4) {
       (sizeof(float) + round_up_po2(kc, kr * sr) / 4));
   auto a = xnn_qs8_qc2w_packing_params{ 1, kernel_zero_point };
   xnn_pack_qs8_qc2w_gemm_goi_w(/*groups=*/g, /*output_channels=*/nc,
-    /*input_channels=*/kc, nr, kr, sr, k.data(), b.data(),
+    /*input_channels=*/kc, nr, kr, sr, /*n_stride=*/kc, k.data(), b.data(),
     /*scale=*/nullptr, packed_weights.data(), /*extra_bytes=*/0, /*params=*/&a);
 
   const std::vector<uint8_t> expected = {
@@ -120,7 +120,7 @@ TEST(PACK_QD8_F32_QC2W_GEMM_GOI_W, kr_eq_4) {
       (sizeof(float) * 2 + round_up_po2(kc, kr * sr) / 4));
   auto a = xnn_qd8_qc2w_packing_params{ 1, kernel_zero_point.data() };
   xnn_pack_qd8_qc2w_gemm_goi_w(/*groups=*/g, /*output_channels=*/nc,
-    /*input_channels=*/kc, nr, kr, sr, k.data(), b.data(),
+    /*input_channels=*/kc, nr, kr, sr, /*n_stride=*/kc, k.data(), b.data(),
     /*scale=*/nullptr, packed_weights.data(), /*extra_bytes=*/0, /*params=*/&a);
 
   const std::vector<uint8_t> expected = {
@@ -158,7 +158,7 @@ TEST(PACK_QD8_F32_QC2W_GEMM_GOI_W, kernel_zero_point_zero) {
       (sizeof(float) * 2 + round_up_po2(kc, kr * sr) / 4));
   auto a = xnn_qd8_qc2w_packing_params{ 1, nullptr };
   xnn_pack_qd8_qc2w_gemm_goi_w(/*groups=*/g, /*output_channels=*/nc,
-    /*input_channels=*/kc, nr, kr, sr, k.data(), b.data(),
+    /*input_channels=*/kc, nr, kr, sr, /*n_stride=*/kc, k.data(), b.data(),
     /*scale=*/nullptr, packed_weights.data(), /*extra_bytes=*/0, /*params=*/&a);
 
   const std::vector<uint8_t> expected = {
@@ -270,7 +270,7 @@ TEST(PACK_QD8_F32_QC4W_GEMM_GOI_W, kr_eq_4) {
   k[0] = 0x98; k[1] = 0xBA; k[2] = 0xDC; k[3] = 0xFE; k[4] = 0x10; k[5] = 0x32; k[6] = 0x54; k[7] = 0x76;
   xnnpack::Buffer<uint8_t> packed_weights(g * round_up(nc, nr) * (sizeof(float) + round_up_po2(kc, kr * sr) / 2));
   auto a = xnn_qs8_qc4w_packing_params{ 0, 0x8 };
-  xnn_pack_qs8_qc4w_gemm_goi_w(g, nc, kc, nr, kr, sr,
+  xnn_pack_qs8_qc4w_gemm_goi_w(g, nc, kc, nr, kr, sr, /*n_stride=*/kc,
     k.data(), b.data(), /*scale=*/nullptr, packed_weights.data(), /*extra_bytes=*/0, /*params=*/&a);
 
   const std::vector<Matcher<uint8_t>> expected = {
@@ -337,7 +337,7 @@ TEST(PACK_QD8_F32_QC4W_GEMM_GOI_W, kr_eq_4_nr_eq_2) {
   k[4] = 0x10; k[5] = 0x32; k[6] = 0x54; k[7] = 0x76;
   xnnpack::Buffer<uint8_t> packed_weights(g * round_up(nc, nr) * (sizeof(float) + round_up_po2(kc, kr * sr) / 2));
   auto a = xnn_qs8_qc4w_packing_params{ 0, 0x8 };
-  xnn_pack_qs8_qc4w_gemm_goi_w(g, nc, kc, nr, kr, sr,
+  xnn_pack_qs8_qc4w_gemm_goi_w(g, nc, kc, nr, kr, sr, /*n_stride=*/kc,
     k.data(), b.data(), /*scale=*/nullptr, packed_weights.data(), /*extra_bytes=*/0, /*params=*/&a);
 
   const std::vector<Matcher<uint8_t>> expected = {
@@ -365,7 +365,7 @@ TEST(PACK_QD8_F32_QC4UW_GEMM_GOI_W, kr_eq_4_nr_eq_2) {
   k[4] = 0x10; k[5] = 0x32; k[6] = 0x54; k[7] = 0x76;
   xnnpack::Buffer<uint8_t> packed_weights(g * round_up(nc, nr) * (sizeof(float) + round_up_po2(kc, kr * sr) / 2));
   auto a = xnn_qs8_qc4w_packing_params{ 0, 0x8 };
-  xnn_pack_qs8_qc4uw_gemm_goi_w(g, nc, kc, nr, kr, sr,
+  xnn_pack_qs8_qc4uw_gemm_goi_w(g, nc, kc, nr, kr, sr, /*n_stride=*/kc,
     k.data(), b.data(), /*scale=*/nullptr, packed_weights.data(), /*extra_bytes=*/0, /*params=*/&a);
 
   const std::vector<Matcher<uint8_t>> expected = {
@@ -431,7 +431,7 @@ TEST(PACK_QD8_F32_QB4W_GEMM_GOI_W, bl_eq_kc) {
   std::vector<xnn_bfloat16> scale(nc * k_num_blocks, 853.6010);
   auto a = xnn_qs8_qc4w_packing_params{ -1, 0x8 };
 
-  xnn_pack_qs8_qb4w_gemm_goi_w(g, nc, kc, nr, kr, sr, bl,
+  xnn_pack_qs8_qb4w_gemm_goi_w(g, nc, kc, nr, kr, sr, bl, /*n_stride=*/kc,
     k.data(), /*bias=*/nullptr, /*scale=*/scale.data(), packed_weights.data(), extra_bytes_bl, extra_bytes_n, /*params=*/&a);
 
   size_t k_stride = round_up_po2(kc, kr * sr * 2 /* planes */);
@@ -503,7 +503,7 @@ TEST(PACK_QD8_F32_QB4W_GEMM_GOI_W, nc_gt_1) {
   std::vector<xnn_bfloat16> scale(nc * k_num_blocks, 853.6010);
 
   auto a = xnn_qs8_qc4w_packing_params{ -1, 0x8 };
-  xnn_pack_qs8_qb4w_gemm_goi_w(g, nc, kc, nr, kr, sr, bl,
+  xnn_pack_qs8_qb4w_gemm_goi_w(g, nc, kc, nr, kr, sr, bl, /*n_stride=*/kc,
     k.data(), nullptr, /*scale=*/scale.data(), packed_weights.data(), extra_bytes_bl, extra_bytes_n, /*params=*/&a);
 
     size_t k_stride = round_up_po2(kc, kr * sr * 2 /* planes */);
@@ -576,7 +576,7 @@ TEST(PACK_QD8_F32_QB4W_GEMM_GOI_W, bl_lt_kc) {
 
 
   auto a = xnn_qs8_qc4w_packing_params{ -1, 0x8 };
-  xnn_pack_qs8_qb4w_gemm_goi_w(g, nc, kc, nr, kr, sr, bl,
+  xnn_pack_qs8_qb4w_gemm_goi_w(g, nc, kc, nr, kr, sr, bl, /*n_stride=*/kc,
     k.data(), /*bias=*/nullptr, /*scale=*/scale.data(), packed_weights.data(), extra_bytes_bl, extra_bytes_n, /*params=*/&a);
 
     size_t k_stride = round_up_po2(kc, kr * sr * 2 /* planes */);
@@ -3382,6 +3382,174 @@ TEST(PACK_F16_DWCONV_OKI_W, primary_tile_eq_kernel_size) {
     // then weight
     5,
   };
+  EXPECT_THAT(packed_weights, ElementsAreArray(expected));
+}
+
+// ----------------------------------------------------------------------------
+// Strided (n_stride > kc) tests for GOI layout packing
+// ----------------------------------------------------------------------------
+
+TEST(PACK_F32_GEMM_GOI_W, n_stride) {
+  const size_t g = 1;
+  const size_t nc = 2;
+  const size_t kc = 4;
+  const size_t nr = 2;
+  const size_t kr = 2;
+  const size_t sr = 1;
+  const size_t n_stride = 6;  // 4 elements + 2 padding elements per row
+
+  std::vector<float> b = {10.0f, 20.0f};
+  std::vector<float> k = {
+    1.0f, 2.0f, 3.0f, 4.0f, -99.0f, -99.0f,  // Row 0 + padding
+    5.0f, 6.0f, 7.0f, 8.0f, -99.0f, -99.0f,  // Row 1 + padding
+  };
+  xnnpack::Buffer<float> packed_w(nc + nc * kc);
+
+  xnn_pack_f32_gemm_goi_w(g, nc, kc, nr, kr, sr, /*n_stride=*/n_stride,
+                          k.data(), b.data(), /*scale=*/nullptr,
+                          packed_w.data(), /*extra_bytes=*/0, /*params=*/nullptr);
+
+  const std::vector<float> expected = {
+    // 2 biases
+    10.0f, 20.0f,
+    // Block 0 (k=0..1): w0[0..1], w1[0..1]
+    1.0f, 2.0f, 5.0f, 6.0f,
+    // Block 1 (k=2..3): w0[2..3], w1[2..3]
+    3.0f, 4.0f, 7.0f, 8.0f,
+  };
+  EXPECT_THAT(packed_w, ElementsAreArray(expected));
+}
+
+TEST(PACK_F16_GEMM_GOI_W, n_stride) {
+  const size_t g = 1;
+  const size_t nc = 2;
+  const size_t kc = 4;
+  const size_t nr = 2;
+  const size_t kr = 2;
+  const size_t sr = 1;
+  const size_t n_stride = 6;  // 4 elements + 2 padding elements per row
+
+  std::vector<uint16_t> b = {10, 20};
+  std::vector<uint16_t> k = {
+    1, 2, 3, 4, 0xDEAD, 0xDEAD,  // Row 0 + padding
+    5, 6, 7, 8, 0xDEAD, 0xDEAD,  // Row 1 + padding
+  };
+  xnnpack::Buffer<uint16_t> packed_w(nc + nc * kc);
+
+  xnn_pack_f16_gemm_goi_w(g, nc, kc, nr, kr, sr, /*n_stride=*/n_stride,
+                          k.data(), b.data(), /*scale=*/nullptr,
+                          packed_w.data(), /*extra_bytes=*/0, /*params=*/nullptr);
+
+  const std::vector<uint16_t> expected = {
+    // 2 biases
+    10, 20,
+    // Block 0 (k=0..1)
+    1, 2, 5, 6,
+    // Block 1 (k=2..3)
+    3, 4, 7, 8,
+  };
+  EXPECT_THAT(packed_w, ElementsAreArray(expected));
+}
+
+TEST(PACK_QS8_GEMM_GOI_W, n_stride) {
+  const size_t g = 1;
+  const size_t nc = 2;
+  const size_t kc = 4;
+  const size_t nr = 2;
+  const size_t kr = 2;
+  const size_t sr = 1;
+  const size_t n_stride = 6;  // 4 elements + 2 padding elements per row
+
+  std::vector<int32_t> b = {10, 20};
+  std::vector<int8_t> k = {
+    1, 2, 3, 4, 127, 127,  // Row 0 + padding
+    5, 6, 7, 8, 127, 127,  // Row 1 + padding
+  };
+  xnnpack::Buffer<int8_t> packed_w(nc * sizeof(int32_t) + nc * kc);
+  const struct xnn_qs8_packing_params params = {0};
+
+  xnn_pack_qs8_gemm_goi_w(g, nc, kc, nr, kr, sr, /*n_stride=*/n_stride,
+                          k.data(), b.data(), /*scale=*/nullptr,
+                          packed_w.data(), /*extra_bytes=*/0, &params);
+
+  int32_t* packed_b = (int32_t*)packed_w.data();
+  EXPECT_EQ(packed_b[0], 10);
+  EXPECT_EQ(packed_b[1], 20);
+
+  const int8_t* packed_k = packed_w.data() + nc * sizeof(int32_t);
+  const std::vector<int8_t> expected_weights = {
+    1, 2, 5, 6,
+    3, 4, 7, 8,
+  };
+  for (size_t i = 0; i < expected_weights.size(); i++) {
+    EXPECT_EQ(packed_k[i], expected_weights[i]);
+  }
+}
+
+TEST(PACK_QD8_F32_QC4W_GEMM_GOI_W, n_stride) {
+  const size_t g = 1;
+  const size_t nc = 2;
+  const size_t kc = 8;
+  const size_t nr = 2;
+  const size_t kr = 4;
+  const size_t sr = 1;
+  const size_t n_stride = 12;  // 8 nibbles (4 bytes) + 4 padding nibbles (2 bytes) per row
+
+  std::vector<int32_t> b = {0, 1};
+  std::vector<uint8_t> k = {
+    0x98, 0xBA, 0xDC, 0xFE, 0xFF, 0xFF,  // Row 0 + padding
+    0x10, 0x32, 0x54, 0x76, 0xFF, 0xFF,  // Row 1 + padding
+  };
+  xnnpack::Buffer<uint8_t> packed_weights(
+      g * round_up(nc, nr) * (sizeof(float) + round_up_po2(kc, kr * sr) / 2));
+  auto a = xnn_qs8_qc4w_packing_params{0, 0x8};
+
+  xnn_pack_qs8_qc4w_gemm_goi_w(g, nc, kc, nr, kr, sr, /*n_stride=*/n_stride,
+                               k.data(), b.data(), /*scale=*/nullptr,
+                               packed_weights.data(), /*extra_bytes=*/0, /*params=*/&a);
+
+  const std::vector<Matcher<uint8_t>> expected = {
+    // 2 bias.
+    0x00, 0x00, 0x00, 0x00,
+    0x10, 0x00, 0x00, 0x00,
+    0x40, 0x51, 0x62, 0x73,
+    0xC8, 0xD9, 0xEA, 0xFB,
+  };
+  EXPECT_THAT(packed_weights, ElementsAreArray(expected));
+}
+
+TEST(PACK_QS8_F32_QC2W_GEMM_GOI_W, n_stride) {
+  const size_t g = 1;
+  const size_t nc = 1;
+  const size_t kc = 16;
+  const size_t nr = 1;
+  const size_t kr = 4;
+  const size_t sr = 1;
+  const size_t n_stride = 32;  // 16 crumbs (4 bytes) + 16 padding crumbs (4 bytes)
+
+  std::vector<int32_t> b = {0};
+  float kernel_zero_point = 0;
+  std::vector<uint8_t> k = {
+    0x00, 0x55, 0xAA, 0xFF, 0xEE, 0xEE, 0xEE, 0xEE,  // Row 0 + padding
+  };
+  xnnpack::Buffer<uint8_t> packed_weights(
+      g * round_up(nc, nr) *
+      (sizeof(float) + round_up_po2(kc, kr * sr) / 4));
+  auto a = xnn_qs8_qc2w_packing_params{1, kernel_zero_point};
+
+  xnn_pack_qs8_qc2w_gemm_goi_w(/*groups=*/g, /*output_channels=*/nc,
+                               /*input_channels=*/kc, nr, kr, sr, /*n_stride=*/n_stride,
+                               k.data(), b.data(), /*scale=*/nullptr,
+                               packed_weights.data(), /*extra_bytes=*/0, /*params=*/&a);
+
+  const std::vector<uint8_t> expected = {
+    // 1 bias.
+    0x00, 0x00, 0x00, 0x00,
+    // weights
+    0xE4, 0xE4, 0xE4, 0xE4,
+  };
+  int* i2_ptr = (int*)expected.data();
+  i2_ptr[0] = 8;
   EXPECT_THAT(packed_weights, ElementsAreArray(expected));
 }
 

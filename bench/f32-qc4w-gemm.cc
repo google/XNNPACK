@@ -59,9 +59,10 @@ static void GEMMBenchmark(
                                      sizeof(float) * c_elements + w_size);
 
   xnnpack::Buffer<uint8_t, XNN_ALLOCATION_ALIGNMENT> w(w_size * num_buffers);
-  xnn_pack_f32_qc4w_gemm_goi_w(/*groups=*/1, nc, kc, nr, kr, sr, k.data(),
-                               b.data(), /*scale=*/nullptr, w.data(),
-                               nr * sizeof(float), /*params=*/nullptr);
+  xnn_pack_f32_qc4w_gemm_goi_w(/*groups=*/1, nc, kc, nr, kr, sr,
+                               /*n_stride=*/(kc + 1) / 2, k.data(), b.data(),
+                               /*scale=*/nullptr, w.data(), nr * sizeof(float),
+                               /*params=*/nullptr);
   xnnpack::Buffer<float> c(c_elements * num_buffers);
 
   xnn_f32_qc4w_minmax_params params;
