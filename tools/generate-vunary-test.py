@@ -69,9 +69,9 @@ PARAMS_TYPES = ["Clamp", "ELU", "LeakyReLU"]
 
 SPECIAL_VALUES_BY_OP_TYPE_F32 = types.MappingProxyType({
     "SquareRoot": SpecialValues(
-        num_elements=4,
-        inputs="{0.0f, -0.0f, 1.0f, -1.0f}",
-        expected_outputs="{0.0f, -0.0f, 1.0f, NAN}",
+        num_elements=7,
+        inputs="{0.0f, -0.0f, 1.0f, -1.0f, INFINITY, -INFINITY, NAN}",
+        expected_outputs="{0.0f, -0.0f, 1.0f, NAN, INFINITY, NAN, NAN}",
         tolerance_ulp=1,
     ),
     "ReciprocalSquareRoot": SpecialValues(
@@ -132,6 +132,12 @@ SPECIAL_VALUES_BY_OP_TYPE_F16 = types.MappingProxyType({
         num_elements=4,
         inputs="{1.0f, -1.0f, 0.0f, -0.0f}",
         expected_outputs="{0.0f, NAN, -INFINITY, -INFINITY}",
+        tolerance_ulp=1,
+    ),
+    "SquareRoot": SpecialValues(
+        num_elements=7,
+        inputs="{0.0f, -0.0f, 1.0f, -1.0f, INFINITY, -INFINITY, NAN}",
+        expected_outputs="{0.0f, -0.0f, 1.0f, NAN, INFINITY, NAN, NAN}",
         tolerance_ulp=1,
     ),
 })
