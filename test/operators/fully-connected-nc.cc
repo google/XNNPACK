@@ -523,7 +523,7 @@ TEST(FULLY_CONNECTED_NC_PQS8_QC4W, signed_weights_without_bias) {
 }
 
 TEST(FULLY_CONNECTED_NC_PQS8_QC4W, invalid_kernel_zero_point) {
-  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+  ASSERT_EQ(xnn_initialize(/*allocator=*/nullptr), xnn_status_success);
 
   constexpr size_t input_channels = 32;
   constexpr size_t output_channels = 16;
@@ -535,19 +535,19 @@ TEST(FULLY_CONNECTED_NC_PQS8_QC4W, invalid_kernel_zero_point) {
   for (const uint8_t kernel_zero_point : {1, 7, 9, 255}) {
     xnn_operator_t fully_connected_op = nullptr;
     EXPECT_EQ(
-        xnn_status_invalid_parameter,
         xnn_create_fully_connected_nc_pqs8_qc4w(
             input_channels, output_channels, input_channels, output_channels,
             /*input_zero_point=*/0, /*input_scale=*/1.0f, kernel_zero_point,
             kernel_scale, kernel, bias, /*output_zero_point=*/0,
             /*output_scale=*/1.0f, /*output_min=*/-128, /*output_max=*/127,
-            /*flags=*/0, /*weights_cache=*/nullptr, &fully_connected_op));
-    EXPECT_EQ(nullptr, fully_connected_op);
+            /*flags=*/0, /*weights_cache=*/nullptr, &fully_connected_op),
+        xnn_status_invalid_parameter);
+    EXPECT_EQ(fully_connected_op, nullptr);
   }
 }
 
 TEST(FULLY_CONNECTED_NC_PQS8_QC4W, transpose_weights_unsupported) {
-  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+  ASSERT_EQ(xnn_initialize(/*allocator=*/nullptr), xnn_status_success);
 
   constexpr size_t input_channels = 32;
   constexpr size_t output_channels = 16;
@@ -560,15 +560,15 @@ TEST(FULLY_CONNECTED_NC_PQS8_QC4W, transpose_weights_unsupported) {
 
   xnn_operator_t fully_connected_op = nullptr;
   EXPECT_EQ(
-      xnn_status_unsupported_parameter,
       xnn_create_fully_connected_nc_pqs8_qc4w(
           input_channels, output_channels, input_channels, output_channels,
           /*input_zero_point=*/0, /*input_scale=*/1.0f,
           /*kernel_zero_point=*/8, kernel_scale, kernel, bias,
           /*output_zero_point=*/0, /*output_scale=*/1.0f,
           /*output_min=*/-128, /*output_max=*/127, XNN_FLAG_TRANSPOSE_WEIGHTS,
-          /*weights_cache=*/nullptr, &fully_connected_op));
-  EXPECT_EQ(nullptr, fully_connected_op);
+          /*weights_cache=*/nullptr, &fully_connected_op),
+      xnn_status_unsupported_parameter);
+  EXPECT_EQ(fully_connected_op, nullptr);
 }
 
 TEST(FULLY_CONNECTED_NC_QS8_QC8W, unit_batch) {
