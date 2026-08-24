@@ -44,6 +44,7 @@ struct xnn_ukernel_dwconv {
   xnn_dwconv_ukernel_fn ukernel;
   uint32_t channel_tile;
   uint8_t primary_tile;
+  enum xnn_dwconv_implementation implementation;
 };
 
 // Direct 2D Depthwise Convolution

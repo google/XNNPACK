@@ -2159,9 +2159,7 @@ class ConvolutionOperatorTester {
     }
   }
 
-  void TestNHWCxF32(
-      xnn_dwconv_ukernel_fn expected_ukernel = nullptr,
-      size_t expected_workspace_size = SIZE_MAX) const {
+  void TestNHWCxF32(size_t expected_workspace_size = SIZE_MAX) const {
     ASSERT_EQ(weights_type(), WeightsType::Default);
 
     xnnpack::ReplicableRandomDevice rng;
@@ -2374,9 +2372,6 @@ class ConvolutionOperatorTester {
       }
       ASSERT_EQ(xnn_status_success, status);
       ASSERT_NE(nullptr, convolution_op);
-      if (expected_ukernel != nullptr) {
-        ASSERT_EQ(expected_ukernel, convolution_op->ukernel.dwconv.ukernel);
-      }
       if (use_weights_cache()) {
         ASSERT_EQ(xnn_status_success,
                   xnn_finalize_weights_cache(

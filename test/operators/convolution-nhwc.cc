@@ -13,7 +13,6 @@
 #include <vector>
 
 #include <gtest/gtest.h>
-#include "src/xnnpack/dwconv.h"
 #include "test/operators/convolution-operator-tester.h"
 
 namespace {
@@ -1166,9 +1165,7 @@ TEST(CONVOLUTION_NHWC_F32, depthwise_3x3_kleidiai) {
       .input_channel_stride(27)
       .output_channel_stride(27)
       .transient_indirection_buffer(true)
-      .TestNHWCxF32(
-          (xnn_dwconv_ukernel_fn)xnn_f32_dwconv_minmax_ukernel_9pvc__neonsme2,
-          /*expected_workspace_size=*/0);
+      .TestNHWCxF32(/*expected_workspace_size=*/0);
 }
 #endif  // XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI && XNN_ENABLE_ARM_SME2
 

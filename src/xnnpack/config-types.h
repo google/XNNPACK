@@ -1,4 +1,5 @@
 // Copyright 2022 Google LLC
+// Copyright 2026 Arm Limited and/or its affiliates <open-source-office@arm.com>
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
@@ -121,6 +122,11 @@ struct xnn_pack_lh_config {
   bool gemv_noop;
 };
 
+enum xnn_dwconv_implementation {
+  xnn_dwconv_implementation_indirect,
+  xnn_dwconv_implementation_kai_planar,
+};
+
 struct xnn_dwconv_config {
   xnn_dwconv_ukernel_fn minmax;
   xnn_dwconv_ukernel_fn linear;
@@ -135,6 +141,7 @@ struct xnn_dwconv_config {
   uint32_t channel_tile;
   // Number of elements in the tile.
   uint8_t primary_tile;
+  enum xnn_dwconv_implementation implementation;
 };
 
 // Bilinear interpolation (2D).

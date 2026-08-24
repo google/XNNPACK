@@ -25,9 +25,9 @@
 #include "src/xnnpack/compute.h"
 #include "src/xnnpack/config-types.h"
 #include "src/xnnpack/config.h"
-#include "src/xnnpack/dwconv.h"
 #include "src/xnnpack/hardware-config.h"
 #include "src/xnnpack/indirection.h"
+#include "src/xnnpack/kai-dwconv.h"
 #include "src/xnnpack/log.h"
 #include "src/xnnpack/math.h"
 #include "src/xnnpack/microfnptr.h"
@@ -259,12 +259,10 @@ static XNN_NO_SANITIZE_FUNCTION enum xnn_status create_dwconv_path(
   assert(primary_tile >= kernel_height * kernel_width);
   xnn_log_debug("using dwconv unipass of primary_tile %u", primary_tile);
 
-#if XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI && XNN_ENABLE_ARM_SME2
-  if (dwconv_ukernel->minmax == (xnn_dwconv_ukernel_fn)xnn_f32_dwconv_minmax_ukernel_9pvc__neonsme2) {
+  if (dwconv_ukernel->implementation == xnn_dwconv_implementation_kai_planar) {
     pack_dwconv_hwg_w = (xnn_pack_dwconv_hwg_w_fn)xnn_pack_kai_f32_dwconv_hwg_w;
     pack_dwconv_ghw_w = (xnn_pack_dwconv_ghw_w_fn)xnn_pack_kai_f32_dwconv_ghw_w;
   }
-#endif  // XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI && XNN_ENABLE_ARM_SME2
 
   // All 1s or 0s to negate the binary representation of the cache key.
   const uint32_t use_depthwise_convolution = flags & XNN_FLAG_DEPTHWISE_CONVOLUTION ? UINT32_MAX : 0;
@@ -359,6 +357,7 @@ static XNN_NO_SANITIZE_FUNCTION enum xnn_status create_dwconv_path(
   convolution_op->ukernel.dwconv = (struct xnn_ukernel_dwconv){
       .channel_tile = dwconv_ukernel->channel_tile,
       .primary_tile = primary_tile,
+      .implementation = dwconv_ukernel->implementation,
   };
 
   convolution_op->ukernel.dwconv.ukernel = ukernel;
@@ -878,8 +877,7 @@ static enum xnn_status create_convolution2d_nhwc(
 #if XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI && XNN_ENABLE_ARM_SME2
   // The planar KAI path does not use an indirection buffer or workspace.
   if (convolution_op->ukernel.type == xnn_microkernel_type_dwconv &&
-      convolution_op->ukernel.dwconv.ukernel ==
-          (xnn_dwconv_ukernel_fn)xnn_f32_dwconv_minmax_ukernel_9pvc__neonsme2) {
+      convolution_op->ukernel.dwconv.implementation == xnn_dwconv_implementation_kai_planar) {
     convolution_op->flags &= ~XNN_FLAG_TRANSIENT_INDIRECTION_BUFFER;
   }
 #endif  // XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI && XNN_ENABLE_ARM_SME2
@@ -1286,23 +1284,21 @@ static XNN_NO_SANITIZE_FUNCTION enum xnn_status init_dwconv_params_f32(
                     &kernel_size)) {
     return xnn_status_unsupported_parameter;
   }
-  context->dwconv_ukernel =
-      find_dwconv_ukernel(kernel_size, dwconv_config, XNN_MAX_F32_DWCONV_UKERNELS);
-#if XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI && XNN_ENABLE_ARM_SME2
+  const struct xnn_dwconv_config* kai_dwconv_config = xnn_init_kai_f32_dwconv_config();
   // KAI derives the channel count and tensor widths from these dense strides.
-  if (context->kernel_height == 3 && context->kernel_width == 3 &&
+  if (kai_dwconv_config != NULL && context->kernel_height == 3 &&
+      context->kernel_width == 3 &&
       context->subsampling_height == 1 && context->subsampling_width == 1 &&
       context->dilation_height == 1 && context->dilation_width == 1 &&
       context->group_input_channels == 1 &&
       context->group_output_channels == 1 &&
       context->input_channel_stride == context->groups &&
       context->output_channel_stride == context->groups) {
-    const struct xnn_dwconv_config* kai_dwconv_config = xnn_init_kai_f32_dwconv_config();
-    if (kai_dwconv_config != NULL) {
-      context->dwconv_ukernel = kai_dwconv_config;
-    }
+    context->dwconv_ukernel = kai_dwconv_config;
+  } else {
+    context->dwconv_ukernel = find_dwconv_ukernel(
+        kernel_size, dwconv_config, XNN_MAX_F32_DWCONV_UKERNELS);
   }
-#endif  // XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI && XNN_ENABLE_ARM_SME2
   if XNN_LIKELY (context->dwconv_ukernel != NULL) {
     context->dwconv_ukernel->init.f32(&context->dwconv_params.f32,
                                       context->output_min, context->output_max);
@@ -1620,13 +1616,10 @@ static enum xnn_status compute_fingerprint_id(
   switch (context->microkernel_type) {
     case xnn_microkernel_type_dwconv:
       flags |= xnn_fingerprint_id_helper_dwconv;
-#if XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI && XNN_ENABLE_ARM_SME2
-      if (context->dwconv_ukernel->minmax ==
-          (xnn_dwconv_ukernel_fn)
-              xnn_f32_dwconv_minmax_ukernel_9pvc__neonsme2) {
+
+      if (context->dwconv_ukernel->implementation == xnn_dwconv_implementation_kai_planar) {
         flags |= xnn_fingerprint_id_helper_kai_dwconv_1vlx1b;
       }
-#endif  // XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI && XNN_ENABLE_ARM_SME2
       break;
     case xnn_microkernel_type_vmulcaddc:
       flags |= xnn_fingerprint_id_helper_vmulcaddc;
@@ -3132,8 +3125,7 @@ static enum xnn_status reshape_dwconv(
   size_t total_workspace_size = 0;
 
 #if XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI && XNN_ENABLE_ARM_SME2
-  if (dwconv_ukernel.ukernel ==
-      (xnn_dwconv_ukernel_fn)xnn_f32_dwconv_minmax_ukernel_9pvc__neonsme2) {
+  if (dwconv_ukernel.implementation == xnn_dwconv_implementation_kai_planar) {
     size_t input_batch_stride;
     size_t input_height_stride;
     size_t input_pixel_stride;
@@ -3154,8 +3146,7 @@ static enum xnn_status reshape_dwconv(
       return xnn_status_unsupported_parameter;
     }
 
-    convolution_op->dynamic_context.dwconv->kai_f32_dwconv =
-        (struct kai_f32_dwconv_context){
+    convolution_op->dynamic_context.dwconv->kai_f32_dwconv = (struct kai_f32_dwconv_context){
             .input = convolution_op->convolution_op->input,
             .packed_weights = packed_weights(convolution_op),
             .output = convolution_op->convolution_op->output,
@@ -3176,14 +3167,11 @@ static enum xnn_status reshape_dwconv(
         sizeof(convolution_op->dynamic_context.dwconv->kai_f32_dwconv.params));
 
     convolution_op->compute[0].type = xnn_parallelization_type_2d_tile_1d;
-    convolution_op->compute[0].context_offset =
-        offsetof(struct dwconv_op_context, kai_f32_dwconv);
-    convolution_op->compute[0].task_2d_tile_1d =
-        (pthreadpool_task_2d_tile_1d_t)xnn_compute_kai_f32_dwconv;
+    convolution_op->compute[0].context_offset = offsetof(struct dwconv_op_context, kai_f32_dwconv);
+    convolution_op->compute[0].task_2d_tile_1d = (pthreadpool_task_2d_tile_1d_t)xnn_compute_kai_f32_dwconv;
     convolution_op->compute[0].range[0] = convolution_op->batch_size;
     convolution_op->compute[0].range[1] = output_height;
-    convolution_op->compute[0].tile[0] =
-        xnn_f32_dwconv_minmax_ukernel_9pvc__neonsme2_get_output_height_tile();
+    convolution_op->compute[0].tile[0] = xnn_f32_dwconv_minmax_ukernel_9pvc__neonsme2_get_output_height_tile();
     convolution_op->state = xnn_run_state_needs_setup;
     *workspace_size = 0;
     return xnn_status_success;
@@ -3850,8 +3838,7 @@ static enum xnn_status setup_dwconv(xnn_operator_t convolution_op,
                                     void* workspace,
                                     uint32_t log2_input_element_size) {
 #if XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI && XNN_ENABLE_ARM_SME2
-  if (convolution_op->ukernel.dwconv.ukernel ==
-      (xnn_dwconv_ukernel_fn)xnn_f32_dwconv_minmax_ukernel_9pvc__neonsme2) {
+  if (convolution_op->ukernel.dwconv.implementation == xnn_dwconv_implementation_kai_planar) {
     convolution_op->dynamic_context.dwconv->kai_f32_dwconv.input =
         convolution_op->convolution_op->input;
     convolution_op->dynamic_context.dwconv->kai_f32_dwconv.output =
