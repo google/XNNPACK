@@ -18,6 +18,7 @@
 #include <limits>
 #include <memory>
 #include <numeric>
+#include <optional>
 #include <random>
 #include <vector>
 
@@ -2159,7 +2160,10 @@ class ConvolutionOperatorTester {
     }
   }
 
-  void TestNHWCxF32(size_t expected_workspace_size = SIZE_MAX) const {
+  void TestNHWCxF32(
+      size_t expected_workspace_size = SIZE_MAX,
+      std::optional<enum xnn_dwconv_implementation>
+          expected_dwconv_implementation = std::nullopt) const {
     ASSERT_EQ(weights_type(), WeightsType::Default);
 
     xnnpack::ReplicableRandomDevice rng;
@@ -2372,6 +2376,11 @@ class ConvolutionOperatorTester {
       }
       ASSERT_EQ(xnn_status_success, status);
       ASSERT_NE(nullptr, convolution_op);
+      if (expected_dwconv_implementation.has_value()) {
+        ASSERT_EQ(xnn_microkernel_type_dwconv, convolution_op->ukernel.type);
+        ASSERT_EQ(*expected_dwconv_implementation,
+                  convolution_op->ukernel.dwconv.implementation);
+      }
       if (use_weights_cache()) {
         ASSERT_EQ(xnn_status_success,
                   xnn_finalize_weights_cache(
@@ -2395,9 +2404,7 @@ class ConvolutionOperatorTester {
       }
       xnnpack::Buffer<char, XNN_ALLOCATION_ALIGNMENT> workspace(workspace_size);
       std::iota(workspace.begin(), workspace.end(), 0);
-      const bool uses_transient_indirection =
-          (convolution_op->flags & XNN_FLAG_TRANSIENT_INDIRECTION_BUFFER) != 0;
-      if (uses_transient_indirection) {
+      if (transient_indirection_buffer()) {
         ASSERT_NE(workspace_size, 0);
         ASSERT_NE(workspace_size, SIZE_MAX);
         ASSERT_EQ(xnn_status_success, xnn_setup_convolution2d_nhwc_f32(
@@ -2436,6 +2443,12 @@ class ConvolutionOperatorTester {
                 flags, auto_weights_cache.get(), &convolution_op2));
 
         ASSERT_NE(nullptr, convolution_op2);
+        if (expected_dwconv_implementation.has_value()) {
+          ASSERT_EQ(xnn_microkernel_type_dwconv,
+                    convolution_op2->ukernel.type);
+          ASSERT_EQ(*expected_dwconv_implementation,
+                    convolution_op2->ukernel.dwconv.implementation);
+        }
 
         xnnpack::Buffer<float> output2(output.size());
         size_t workspace_size = SIZE_MAX;
@@ -2448,10 +2461,7 @@ class ConvolutionOperatorTester {
         xnnpack::Buffer<char, XNN_ALLOCATION_ALIGNMENT> workspace(
             workspace_size);
         std::iota(workspace.begin(), workspace.end(), 0);
-        const bool uses_transient_indirection =
-            (convolution_op2->flags & XNN_FLAG_TRANSIENT_INDIRECTION_BUFFER) !=
-            0;
-        if (uses_transient_indirection) {
+        if (transient_indirection_buffer()) {
           ASSERT_NE(workspace_size, 0);
           ASSERT_NE(workspace_size, SIZE_MAX);
           ASSERT_EQ(xnn_status_success, xnn_setup_convolution2d_nhwc_f32(

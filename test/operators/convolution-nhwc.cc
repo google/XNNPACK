@@ -1164,8 +1164,10 @@ TEST(CONVOLUTION_NHWC_F32, depthwise_3x3_kleidiai) {
       .groups(27)
       .input_channel_stride(27)
       .output_channel_stride(27)
-      .transient_indirection_buffer(true)
-      .TestNHWCxF32(/*expected_workspace_size=*/0);
+      .TestNHWCxF32(
+          /*expected_workspace_size=*/0,
+          /*expected_dwconv_implementation=*/
+          xnn_dwconv_implementation_kai_planar);
 }
 #endif  // XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI && XNN_ENABLE_ARM_SME2
 
