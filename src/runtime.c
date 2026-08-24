@@ -677,6 +677,11 @@ enum xnn_status xnn_create_runtime_v4(
   if (runtime->profiling) {
     for (size_t i = 0; i < subgraph->num_nodes; i++) {
       runtime->opdata[i].end_ts = xnn_allocate_zero_memory(sizeof(xnn_timestamp) * XNN_MAX_OPERATOR_OBJECTS);
+      if (runtime->opdata[i].end_ts == NULL) {
+        xnn_log_error("failed to allocate %zu bytes for profiling timestamps",
+          sizeof(xnn_timestamp) * XNN_MAX_OPERATOR_OBJECTS);
+        goto error;
+      }
     }
   }
 
@@ -781,6 +786,11 @@ enum xnn_status xnn_create_threadpool_v2(struct xnn_scheduler_v2 scheduler,
                                          uint32_t flags,
                                          xnn_threadpool_t* threadpool_out) {
   *threadpool_out = xnn_allocate_memory(sizeof(struct xnn_threadpool));
+  if (*threadpool_out == NULL) {
+    xnn_log_error("failed to allocate %zu bytes for threadpool descriptor",
+                  sizeof(struct xnn_threadpool));
+    return xnn_status_out_of_memory;
+  }
   (*threadpool_out)->scheduler = scheduler;
   (*threadpool_out)->scheduler_context = scheduler_context;
   return xnn_status_success;

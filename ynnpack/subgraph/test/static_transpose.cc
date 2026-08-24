@@ -110,44 +110,6 @@ void test_slice(T, const std::vector<size_t>& input_shape, int dim) {
   EXPECT_THAT(output, testing::ElementsAreArray(expected));
 }
 
-// Returns {x[i] for i in perm}
-template <typename T>
-std::vector<T> permute(const std::vector<int>& perm, const std::vector<T>& x,
-                       T default_value) {
-  std::vector<T> result(perm.size());
-  for (size_t i = 0; i < perm.size(); ++i) {
-    if (perm[i] >= 0 && static_cast<size_t>(perm[i]) < x.size()) {
-      result[i] = x[perm[i]];
-    } else {
-      result[i] = default_value;
-    }
-  }
-  return result;
-}
-
-// Returns sum(a[i] * b[i])
-size_t dot(const std::vector<size_t>& a, const std::vector<size_t>& b) {
-  size_t result = 0;
-  for (size_t i = 0; i < a.size(); ++i) {
-    result += a[i] * b[i];
-  }
-  return result;
-}
-
-// Computes the dense (no padding) strides for a shape, where the last dimension
-// has stride 1.
-std::vector<size_t> compute_strides(const std::vector<size_t>& shape) {
-  if (shape.empty()) {
-    return {};
-  }
-  std::vector<size_t> strides(shape.size());
-  strides.back() = 1;
-  for (size_t i = shape.size() - 1; i > 0; --i) {
-    strides[i - 1] = strides[i] * shape[i];
-  }
-  return strides;
-}
-
 // Align both the input and output trailing dimensions of a transpose to be a
 // multiple of `align`.
 void align_shape(std::vector<size_t>& shape, const std::vector<int32_t>& perm,
@@ -167,7 +129,6 @@ void test_random(T, bool with_copy) {
   const int min_rank = elem_count > 1 ? 1 : 0;
 
   ReplicableRandomDevice rng;
-  std::uniform_int_distribution<size_t> basis_dist(1, 100);
   std::uniform_int_distribution<int> input_rank_dist(min_rank, max_test_rank);
   std::bernoulli_distribution bool_dist(0.5);
 
@@ -180,35 +141,17 @@ void test_random(T, bool with_copy) {
     // This avoids generating permutations that use the same input dimension
     // more than once. This seems like something that maybe should work, but it
     // doesn't currently.
-    std::vector<int32_t> axes, perm;
+    std::vector<int32_t> axes(input_rank);
+    std::iota(axes.begin(), axes.end(), 0);
+    std::shuffle(axes.begin(), axes.end(), rng);
+    std::vector<int32_t> perm = axes;
+
     if (keep_dims) {
-      axes.resize(input_rank);
-      std::iota(axes.begin(), axes.end(), 0);
-      // Leave the last dimension in place if the type is not byte aligned.
-      int shuffle_rank = elem_count > 1 ? input_rank - 1 : input_rank;
-      std::shuffle(axes.begin(), axes.begin() + shuffle_rank, rng);
-      perm = axes;
       // When keep_dims is true, we have a total permutation, and we can delete
       // the dimensions that aren't moving.
       for (int i = static_cast<int>(input_rank) - 1; i >= 0; --i) {
         if (axes[i] == i) axes.erase(axes.begin() + i);
       }
-    } else {
-      std::uniform_int_distribution<int> num_axes_dist(min_rank, input_rank);
-      axes.resize(input_rank * 2 + 1);
-      std::iota(axes.begin(), axes.end(), 0);
-      std::shuffle(axes.begin(), axes.end(), rng);
-      axes.resize(num_axes_dist(rng));
-      while (elem_count > 1 && !axes.empty() &&
-             axes.back() != static_cast<int32_t>(input_rank - 1)) {
-        // Don't change or make a new trailing dimension if the type is not byte
-        // aligned.
-        axes.pop_back();
-      }
-      if (static_cast<int>(axes.size()) < min_rank) {
-        axes.push_back(input_rank - 1);
-      }
-      perm = axes;
     }
 
     // Define subgraph
@@ -233,63 +176,27 @@ void test_random(T, bool with_copy) {
     Runtime runtime(subgraph.GetSubgraph());
     ASSERT_EQ(runtime.Status(), ynn_status_success);
 
-    // We need an algorithm for generating data in a tensor that we can
-    // transpose. The data we generate is the dot product of the coordinate and
-    // this basis. To generate the expected transposed data, we can just
-    // transpose the coordinate and compute the dot product with this basis.
-    std::vector<size_t> basis(input_rank);
-    if (!basis.empty()) {
-      basis[0] = 1;
-    }
-    for (size_t i = 1; i < input_rank; ++i) {
-      basis[i] = basis[i - 1] * basis_dist(rng);
-    }
-
     for (int reshape = 0; reshape < 2; ++reshape) {
       std::vector<size_t> input_shape = random_shape(rng, input_template_shape);
       align_shape(input_shape, perm, elem_count);
 
-      size_t flat_size_in =
-          std::accumulate(input_shape.begin(), input_shape.end(),
-                          static_cast<size_t>(1), std::multiplies<size_t>());
+      Tensor<T> input(input_shape);
+      fill_random(input.data(), input.size(), rng);
 
-      Buffer<T> input(flat_size_in);
-      std::vector<size_t> input_strides = compute_strides(input_shape);
-      for (const auto& i : EnumerateIndices(input_shape)) {
-        size_t flat_index = dot(i, input_strides);
-        input[flat_index] = dot(i, basis);
-      }
+      // Make a deep copy so the expected result is contiguous.
+      Tensor<T> expected = input.transpose(perm).deep_copy();
 
       // Check reshaped shape is correct
-      std::vector<size_t> output_shape =
-          permute(perm, input_shape, static_cast<size_t>(1));
       runtime.ReshapeExternalTensor(input_shape, input.data(), 0)
           .ReshapeRuntime();
-      ASSERT_EQ(runtime.GetExternalTensorShape(1), output_shape);
+      ASSERT_EQ(runtime.GetExternalTensorShape(1), expected.extents());
 
       // Run subgraph
-      size_t flat_size_out =
-          std::accumulate(output_shape.begin(), output_shape.end(),
-                          static_cast<size_t>(1), std::multiplies<size_t>());
-      Buffer<T> output(flat_size_out);
+      Tensor<T> output(expected.extents());
       runtime.SetupExternalTensor(output.data(), 1).InvokeRuntime();
 
       // Verify results.
-      std::vector<size_t> output_strides = compute_strides(output_shape);
-      for (const auto& i_out : EnumerateIndices(output_shape)) {
-        std::vector<size_t> i_in(input_rank, 0);
-        for (int d = static_cast<int>(perm.size()) - 1; d >= 0; --d) {
-          if (perm[d] >= 0 && static_cast<size_t>(perm[d]) < input_rank) {
-            i_in[perm[d]] = i_out[d];
-          }
-        }
-        // Store the value in an instance of T, to get any truncation/rounding
-        // that would have happened.
-        T expected;
-        T_info::set(&expected, 0, dot(i_in, basis));
-        size_t flat_index = dot(i_out, output_strides);
-        ASSERT_EQ(output[flat_index], T_info::get(&expected, 0));
-      }
+      ASSERT_THAT(output, testing::ElementsAreArray(expected));
     }
   }
 }
