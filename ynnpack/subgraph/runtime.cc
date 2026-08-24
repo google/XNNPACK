@@ -637,6 +637,10 @@ void ynn_runtime::schedule() {
         }
 
         if (matched_split == -1) {
+          if (sched && sched->allow_redundant_compute) {
+            compute_at++;
+            continue;
+          }
           break;
         }
         split_matched[matched_split] = true;

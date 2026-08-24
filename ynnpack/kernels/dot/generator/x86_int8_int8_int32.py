@@ -197,7 +197,8 @@ template <typename T>
 YNN_INTRINSIC __m256i zero_invalid(T x, int n) {
   int8_t lanes[sizeof(T)];
   memcpy(lanes, &x, sizeof(T));
-  for (int i = n; i < sizeof(T); ++i) {
+  const int start = n < 0 ? 0 : (n > sizeof(T) ? sizeof(T) : n);
+  for (int i = start; i < sizeof(T); ++i) {
     lanes[i] = 0;
   }
   memcpy(&x, lanes, sizeof(T));
@@ -231,7 +232,7 @@ __m{bits}i {a_ik}_abs = {mm}_abs_epi8({a_ik});
     return f"""
 __m{bits}i b_{k}_{j} = {mm}_load_si{bits}({b_ptr});
 // We assume that b is in the range [-127, 127].
-assert({mm}_testz_si{bits}({mm}_cmpeq_epi8(zero_invalid(b_{k}_{j}, N), {mm}_set1_epi8(-128)), {mm}_set1_epi8(-1)));
+assert({mm}_testz_si{bits}({mm}_cmpeq_epi8(zero_invalid(b_{k}_{j}, N - {j}), {mm}_set1_epi8(-128)), {mm}_set1_epi8(-1)));
 """
 
   def product(self, i, j, k):

@@ -28,7 +28,7 @@ bool contains(const std::string& str, const std::string& substr) {
 }
 
 template <typename AT, typename BT>
-void VerifyDotLoopOrder(const std::vector<size_t>& a_shape,
+void VerifyDotLoopOrder(uint32_t flags, const std::vector<size_t>& a_shape,
                         const std::vector<size_t>& b_shape,
                         bool expect_split_k) {
   const uint32_t a_id = 0;
@@ -41,6 +41,7 @@ void VerifyDotLoopOrder(const std::vector<size_t>& a_shape,
                  out_id)
       .AddDot(1, a_id, b_id, YNN_INVALID_VALUE_ID, out_id);
 
+  builder.GetSubgraph()->flags = flags;
   TestScheduler scheduler(3);
   Runtime runtime(builder.GetSubgraph(), &scheduler,
                   YNN_FLAG_ENABLE_SLINKY_TRACE);
@@ -69,8 +70,14 @@ void VerifyDotLoopOrder(const std::vector<size_t>& a_shape,
   bool found_pack = false;
   bool found_dot = false;
   std::string first_loop;
+  std::string pack_b_loop;
+  std::string pack_a_loop;
   for (const std::string& event : trace_events) {
-    if (contains(event, "pack_b")) found_pack = true;
+    if (contains(event, "pack_b") && pack_b_loop.empty()) {
+      found_pack = true;
+      pack_b_loop = event;
+    }
+    if (contains(event, "pack_a") && pack_a_loop.empty()) pack_a_loop = event;
     if (contains(event, "dot")) found_dot = true;
     if (first_loop.empty() &&
         (contains(event, "loop k") || contains(event, "loop d")) &&
@@ -85,22 +92,35 @@ void VerifyDotLoopOrder(const std::vector<size_t>& a_shape,
   } else {
     EXPECT_THAT(first_loop, testing::Not(testing::HasSubstr("loop k")));
   }
+  if (!pack_a_loop.empty()) {
+    auto pack_a_index = std::distance(
+        trace_events.begin(),
+        std::find(trace_events.begin(), trace_events.end(), pack_a_loop));
+    auto first_loop_index = std::distance(
+        trace_events.begin(),
+        std::find(trace_events.begin(), trace_events.end(), first_loop));
+    EXPECT_GT(pack_a_index, first_loop_index);
+  }
 }
 
 TEST(DotSchedulingTest, NoSplitK) {
-  VerifyDotLoopOrder<float, float>({300, 100}, {100, 400}, false);
+  VerifyDotLoopOrder<float, float>(0, {300, 100}, {100, 400}, false);
 }
 
 TEST(DotSchedulingTest, SplitKTrue) {
-  VerifyDotLoopOrder<float, float>({300, 8192}, {8192, 400}, true);
+  VerifyDotLoopOrder<float, float>(0, {300, 8192}, {8192, 400}, true);
 }
 
 TEST(DotSchedulingTest, NarrowTypeNoSplitK) {
-  VerifyDotLoopOrder<bfloat16, bfloat16>({300, 8192}, {8192, 400}, false);
+  VerifyDotLoopOrder<bfloat16, bfloat16>(0, {300, 8192}, {8192, 400}, true);
 }
 
 TEST(DotSchedulingTest, NarrowTypeLargeSplitK) {
-  VerifyDotLoopOrder<bfloat16, bfloat16>({300, 16384}, {16384, 400}, true);
+  VerifyDotLoopOrder<bfloat16, bfloat16>(0, {300, 16384}, {16384, 400}, true);
+}
+
+TEST(DotSchedulingTest, PackBothDynamic) {
+  VerifyDotLoopOrder<bfloat16, bfloat16>(0, {195, 1536}, {1536, 640}, true);
 }
 
 }  // namespace
