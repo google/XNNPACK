@@ -186,7 +186,9 @@ std::pair<slinky::var, int> find_output_dim(const slinky::func* f,
 // If the LCM overflows, it clamps at the max index_t value.
 slinky::expr lcm_sat(ynn::slinky_globals& globals, slinky::expr a,
                      slinky::expr b) {
-  if (slinky::prove_true(a == b)) return a;
+  if (slinky::prove_true(a == b, globals.fact_bounds, globals.fact_alignment)) {
+    return a;
+  }
   auto impl = [](const slinky::call* op,
                  slinky::eval_context& ctx) -> slinky::index_t {
     slinky::index_t a_val = slinky::evaluate(op->args[0], ctx);
@@ -411,8 +413,9 @@ void compute_workers(ynn::slinky_globals& globals, int max_threads,
                                                ? slinky::simplify(l.extent)
                                                : slinky::expr();
     if (single_iteration_elide_allowed &&
-        slinky::prove_true(simplified_extent <=
-                           resolve_let_var(globals, l.step))) {
+        slinky::prove_true(
+            simplified_extent <= resolve_let_var(globals, l.step),
+            globals.fact_bounds, globals.fact_alignment)) {
       l.step = slinky::max(simplified_extent, 1);
       l.workers = slinky::loop::serial;
       tasks[i] = tasks_above;
@@ -566,7 +569,8 @@ void ynn_runtime::schedule() {
       // behind it. Treat them as trivially matched, so they are neither
       // considered for matching nor appended to the nest.
       for (int split_i = 0; split_i < loop_splits.size(); ++split_i) {
-        if (prove_true(loop_splits[split_i].extent == 1)) {
+        if (prove_true(loop_splits[split_i].extent == 1, globals.fact_bounds,
+                       globals.fact_alignment)) {
           split_matched[split_i] = true;
         }
       }
@@ -644,7 +648,8 @@ void ynn_runtime::schedule() {
         const ynn::scheduling_split& split = loop_splits[matched_split];
         if (split.step_is_required) {
           if (global_loop.step_is_required &&
-              !prove_true(split.step == global_loop.step)) {
+              !prove_true(split.step == global_loop.step, globals.fact_bounds,
+                          globals.fact_alignment)) {
             // Two producers require different tiles for this shared loop (e.g.
             // the two attention matmuls pick different query tiles). Use their
             // least common multiple so the loop is an integer number of *both*
@@ -1193,14 +1198,21 @@ int32_t get_max_concurrency(const ynn_runtime& runtime) {
   // return `max_int32`. Otherwise, we return 1.
   class visitor : public slinky::recursive_node_visitor {
    public:
+    explicit visitor(const ynn_runtime& runtime) : runtime_(runtime) {}
+
     int32_t result = 1;
     void visit(const slinky::loop* op) override {
-      if (!slinky::prove_true(op->max_workers == 1)) {
+      if (!slinky::prove_true(op->max_workers == 1,
+                              runtime_.globals.fact_bounds,
+                              runtime_.globals.fact_alignment)) {
         result = std::numeric_limits<int32_t>::max();
       }
       slinky::recursive_node_visitor::visit(op);
     }
-  } v;
+
+   private:
+    const ynn_runtime& runtime_;
+  } v(runtime);
   if (runtime.pipeline.body.defined()) {
     runtime.pipeline.body.accept(&v);
   }

@@ -152,6 +152,7 @@ cc_test(
     ],
     deps = TEST_DEPS + [
         "//ynnpack/subgraph",
+        "@slinky//slinky/builder",
         "@slinky//slinky/runtime",
     ],
 )

@@ -1044,6 +1044,22 @@ std::tuple<slinky::expr, slinky::expr, slinky::expr> choose_split_factors(
   split_n = runtime.globals.get(split_n, "split_n");
   split_m = runtime.globals.get(split_m, "split_m");
   split_k = runtime.globals.get(split_k, "split_k");
+
+  // The choose_split_factors is an opaque call behind global variables, but its
+  // result has provable structure: each split is min(extent, mult * step)
+  // with a multiplier in [1, max_multiplier]. Register those intervals for
+  // the globals so scheduler proofs and simplifications can reason about the
+  // steps without evaluating the call.
+  runtime.globals.learn_bounds(
+      split_m,
+      {slinky::min(m, step_m), slinky::min(m, max_multiplier_m * step_m)});
+  runtime.globals.learn_bounds(
+      split_n,
+      {slinky::min(n, block_n), slinky::min(n, max_multiplier_n * block_n)});
+  runtime.globals.learn_bounds(
+      split_k,
+      {slinky::min(k, step_k), slinky::min(k, max_multiplier_k * step_k)});
+
   return {split_n, split_m, split_k};
 }
 
