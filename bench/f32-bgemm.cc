@@ -70,7 +70,7 @@ static void f32_gemm(benchmark::State& state,
               +std::numeric_limits<float>::infinity());
 
   for (auto _ : state) {
-    packw(batch, dim_n, dim_k, nr, kr, sr,
+    packw(batch, dim_n, dim_k, nr, kr, sr, /*n_stride=*/dim_k,
           reinterpret_cast<const uint32_t*>(b.data()), /*bias=*/nullptr,
           /*scale=*/nullptr, reinterpret_cast<uint32_t*>(w.data()),
           /*extra_bytes=*/0, nullptr);
@@ -138,7 +138,7 @@ static void f32_ppmm1p(benchmark::State& state,
               +std::numeric_limits<float>::infinity());
 
   for (auto _ : state) {
-    packw(batch, dim_n, dim_k, nr, kr, sr,
+    packw(batch, dim_n, dim_k, nr, kr, sr, /*n_stride=*/dim_k,
           reinterpret_cast<const uint32_t*>(b.data()), /*bias=*/nullptr,
           /*scale=*/nullptr, reinterpret_cast<uint32_t*>(w.data()),
           /*extra_bytes=*/0, nullptr);
@@ -212,7 +212,7 @@ static void f32_ppmm2p(benchmark::State& state,
               +std::numeric_limits<float>::infinity());
 
   for (auto _ : state) {
-    packw(batch, dim_n, dim_k, nr, kr, sr,
+    packw(batch, dim_n, dim_k, nr, kr, sr, /*n_stride=*/dim_k,
           reinterpret_cast<const uint32_t*>(b.data()), /*bias=*/nullptr,
           /*scale=*/nullptr, reinterpret_cast<uint32_t*>(w.data()),
           /*extra_bytes=*/0, /*params=*/nullptr);

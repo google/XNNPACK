@@ -28,6 +28,7 @@ void xnn_qs8_qc4uw_packw_gemm_goi_ukernel_x8c8__sse2(
   size_t nr,
   size_t kr,
   size_t sr,
+  size_t n_stride,
   const uint8_t* weights,
   const int32_t* bias,
   const float* scale,
@@ -77,13 +78,13 @@ void xnn_qs8_qc4uw_packw_gemm_goi_ukernel_x8c8__sse2(
       }
       out += 8 * sizeof(int32_t);
 
-      const uint8_t* w1 = w0 + mock_kc;
-      const uint8_t* w2 = w1 + mock_kc;
-      const uint8_t* w3 = w2 + mock_kc;
-      const uint8_t* w4 = w3 + mock_kc;
-      const uint8_t* w5 = w4 + mock_kc;
-      const uint8_t* w6 = w5 + mock_kc;
-      const uint8_t* w7 = w6 + mock_kc;
+      const uint8_t* w1 = w0 + (n_stride >> 1);
+      const uint8_t* w2 = w1 + (n_stride >> 1);
+      const uint8_t* w3 = w2 + (n_stride >> 1);
+      const uint8_t* w4 = w3 + (n_stride >> 1);
+      const uint8_t* w5 = w4 + (n_stride >> 1);
+      const uint8_t* w6 = w5 + (n_stride >> 1);
+      const uint8_t* w7 = w6 + (n_stride >> 1);
 
       __m128i vacc0 = _mm_setzero_si128();
       __m128i vacc1 = _mm_setzero_si128();
@@ -768,27 +769,27 @@ void xnn_qs8_qc4uw_packw_gemm_goi_ukernel_x8c8__sse2(
       out += 8 * sizeof(int32_t);
 
       // Clamp weight pointers
-      const uint8_t* w1 = w0 + mock_kc;
+      const uint8_t* w1 = w0 + (n_stride >> 1);
       if XNN_UNPREDICTABLE(n < 2) {
         w1 = w0;
       }
-      const uint8_t* w2 = w1 + mock_kc;
+      const uint8_t* w2 = w1 + (n_stride >> 1);
       if XNN_UNPREDICTABLE(n <= 2) {
         w2 = w1;
       }
-      const uint8_t* w3 = w2 + mock_kc;
+      const uint8_t* w3 = w2 + (n_stride >> 1);
       if XNN_UNPREDICTABLE(n < 4) {
         w3 = w2;
       }
-      const uint8_t* w4 = w3 + mock_kc;
+      const uint8_t* w4 = w3 + (n_stride >> 1);
       if XNN_UNPREDICTABLE(n <= 4) {
         w4 = w3;
       }
-      const uint8_t* w5 = w4 + mock_kc;
+      const uint8_t* w5 = w4 + (n_stride >> 1);
       if XNN_UNPREDICTABLE(n < 6) {
         w5 = w4;
       }
-      const uint8_t* w6 = w5 + mock_kc;
+      const uint8_t* w6 = w5 + (n_stride >> 1);
       if XNN_UNPREDICTABLE(n <= 6) {
         w6 = w5;
       }

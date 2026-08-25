@@ -48,6 +48,7 @@ void xnn_qb4_packw_gemm_goi_ukernel_x16c8__aarch64_neondot(
   size_t kr,
   size_t sr,
   size_t bl,
+  size_t n_stride,
   const uint8_t* weights,
   const int32_t* bias,
   const void* scale,
@@ -69,7 +70,7 @@ void xnn_qb4_packw_gemm_goi_ukernel_x16c8__aarch64_neondot(
   assert(params != NULL);
   assert(kc % bl == 0);
   size_t num_blocks = kc / bl;
-  size_t weight_stride = (kc >> 1);
+  size_t weight_stride = (n_stride >> 1);
   const int8x16_t vmask = vmovq_n_s8(INT8_C(0xF0));
   const int8x16_t vones = vmovq_n_s8(UINT8_C(0x01));
 

@@ -128,14 +128,15 @@ class PackWMicrokernelTester {
     // Compute reference results.
     auto* pack_function =
         izp() == 128 ? xnn_pack_qs8_to_qu8_gemm_goi_w : xnn_pack_qs8_gemm_goi_w;
-    pack_function(/*g=*/1, n(), k(), nr(), kr(), sr(),
+    pack_function(/*g=*/1, n(), k(), nr(), kr(), sr(), /*n_stride=*/k(),
                   reinterpret_cast<const int8_t*>(weights.data()), bias_data,
                   /*scale=*/nullptr,
                   reinterpret_cast<void*>(packed_w_ref.data()),
                   /*extra_bytes=*/0, &packing_params);
 
     // Call optimized micro-kernel.
-    packw(/*g=*/1, n(), k(), nr(), kr(), sr(), weights.data(), bias_data,
+    packw(/*g=*/1, n(), k(), nr(), kr(), sr(), /*n_stride=*/k(), weights.data(),
+          bias_data,
           /*scale=*/nullptr, packed_w.data(), /*extra_bytes=*/0,
           &packing_params);
 
@@ -166,7 +167,7 @@ class PackWMicrokernelTester {
     }
   }
 
-  void Test(xnn_qs8_packw_gemm_gio_ukernel_fn packw) const {
+  void TestGIO(xnn_qs8_packw_gemm_gio_ukernel_fn packw) const {
     xnnpack::Buffer<int8_t> weights(n() * k());
     xnnpack::Buffer<int32_t> bias(n());
     xnnpack::Buffer<int8_t, XNN_ALLOCATION_ALIGNMENT> packed_w(
@@ -247,7 +248,8 @@ class PackWMicrokernelTester {
         /*extra_bytes=*/0, &packing_params);
 
     // Call optimized micro-kernel.
-    packw(/*g=*/1, n(), k(), nr(), kr(), sr(), weights.data(), bias_data,
+    packw(/*g=*/1, n(), k(), nr(), kr(), sr(), /*n_stride=*/k(), weights.data(),
+          bias_data,
           /*scale=*/nullptr, packed_w.data(), /*extra_bytes=*/0,
           &packing_params);
 
@@ -262,7 +264,7 @@ class PackWMicrokernelTester {
     }
   }
 
-  void Test(xnn_x8_packw_gemm_gio_ukernel_fn packw) const {
+  void TestGIO(xnn_x8_packw_gemm_gio_ukernel_fn packw) const {
     xnnpack::Buffer<int8_t> weights(n() * k());
     xnnpack::Buffer<uint32_t> bias(n());
     xnnpack::Buffer<int8_t, XNN_ALLOCATION_ALIGNMENT> packed_w(
@@ -310,10 +312,11 @@ class PackWMicrokernelTester {
 
     xnnpack::Buffer<uint8_t> weights(n() * k2 / 2);
     xnnpack::Buffer<int32_t> bias(n());
+    const size_t packed_k_bytes = round_up_po2(packed_k() / 2, 16);
     xnnpack::Buffer<int8_t, XNN_ALLOCATION_ALIGNMENT> packed_w(
-        packed_n() * packed_k() + packed_n() * sizeof(uint32_t));
+        g() * (packed_n() * packed_k_bytes + packed_n() * sizeof(uint32_t)));
     xnnpack::Buffer<int8_t, XNN_ALLOCATION_ALIGNMENT> packed_w_ref(
-        packed_n() * packed_k() + packed_n() * sizeof(uint32_t));
+        g() * (packed_n() * packed_k_bytes + packed_n() * sizeof(uint32_t)));
 
     xnnpack::fill_uniform_random_bits(weights.data(), weights.size(), rng);
     std::generate(bias.begin(), bias.end(), std::ref(i32rng));
@@ -329,12 +332,14 @@ class PackWMicrokernelTester {
         (izp() == 128 ? xnn_pack_qs8_to_qu8_qc4uw_gemm_goi_w : xnn_pack_qs8_qc4uw_gemm_goi_w) :
         (izp() == 128 ? xnn_pack_qs8_to_qu8_qc4w_gemm_goi_w : xnn_pack_qs8_qc4w_gemm_goi_w);
     reference_fn(
-        /*g=*/1, n(), k2, nr(), kr(), sr(), weights.data(), bias_data,
+        /*g=*/1, n(), k2, nr(), kr(), sr(), /*n_stride=*/k2, weights.data(),
+        bias_data,
         /*scale=*/nullptr, reinterpret_cast<void*>(packed_w_ref.data()),
         /*extra_bytes=*/0, &packing_params);
 
     // Call optimized micro-kernel.
-    packw(/*g=*/1, n(), k2, nr(), kr(), sr(), weights.data(), bias_data,
+    packw(/*g=*/1, n(), k2, nr(), kr(), sr(), /*n_stride=*/k2,
+          weights.data(), bias_data,
           /*scale=*/nullptr, packed_w.data(), /*extra_bytes=*/0,
           &packing_params);
 
@@ -348,9 +353,13 @@ class PackWMicrokernelTester {
     // Verify weights results.
     // NOTE remainder KC is different so k2 is used instead of packed_k() for
     // loop
-    for (size_t ki = 0; ki < k2; ki++) {
+    for (size_t ki = 0; ki < k2 / 2; ki++) {
       for (size_t ni = 0; ni < (n()); ni++) {
-        const size_t i = packed_n() * sizeof(int32_t) + ki * packed_n() + ni;
+        const size_t nb = ni / nr();
+        const size_t ni_in_block = ni % nr();
+        const size_t block_bytes = nr() * sizeof(int32_t) + nr() * (k2 / 2);
+        const size_t i =
+            nb * block_bytes + nr() * sizeof(int32_t) + ki * nr() + ni_in_block;
         if (packed_w_ref[i] != INT8_C(0x7B)) {  // Allow pad to differ
           EXPECT_EQ((int32_t)packed_w[i], (int32_t)packed_w_ref[i])
               << "kr " << kr() << " of kc " << k2 << " packed_k " << packed_k()
@@ -395,14 +404,14 @@ class PackWMicrokernelTester {
 
     // Compute reference results.
     xnn_pack_f16_gemm_goi_w(
-        g(), n(), packed_k(), nr(), kr(), sr(),
+        g(), n(), packed_k(), nr(), kr(), sr(), /*n_stride=*/packed_k(),
         reinterpret_cast<const uint16_t*>(padded_weights.data()),
         reinterpret_cast<const uint16_t*>(bias_data),
         /*scale=*/nullptr, reinterpret_cast<uint16_t*>(packed_w_ref.data()),
         /*extra_bytes=*/0, /*params=*/nullptr);
 
     // Call optimized micro-kernel.
-    packw(g(), n(), k(), nr(), kr(), sr(),
+    packw(g(), n(), k(), nr(), kr(), sr(), /*n_stride=*/k(),
           reinterpret_cast<const uint16_t*>(weights.data()),
           reinterpret_cast<const uint16_t*>(bias_data), /*scale=*/nullptr,
           reinterpret_cast<uint16_t*>(packed_w.data()),
@@ -419,7 +428,7 @@ class PackWMicrokernelTester {
     }
   }
 
-  void Test(xnn_x16_x32_packw_gemm_gio_ukernel_fn packw) const {
+  void TestGIO(xnn_x16_x32_packw_gemm_gio_ukernel_fn packw) const {
     xnnpack::Buffer<xnn_bfloat16> weights(g() * n() * k());
     xnnpack::Buffer<float> bias(g() * n());
     xnnpack::Buffer<xnn_bfloat16, XNN_ALLOCATION_ALIGNMENT> packed_w(
@@ -478,12 +487,12 @@ class PackWMicrokernelTester {
 
     // Compute reference results.
     xnn_pack_bf16_f32_gemm_goi_w(g(), n(), k(), nr(), kr(), sr(),
-                                 weights.data(), bias_data,
+                                 /*n_stride=*/k(), weights.data(), bias_data,
                                  /*scale=*/nullptr, packed_w_ref.data(),
                                  /*extra_bytes=*/0, /*params=*/nullptr);
 
     // Call optimized micro-kernel.
-    packw(g(), n(), k(), nr(), kr(), sr(),
+    packw(g(), n(), k(), nr(), kr(), sr(), /*n_stride=*/k(),
           reinterpret_cast<const uint16_t*>(weights.data()),
           reinterpret_cast<const uint32_t*>(bias_data), /*scale=*/nullptr,
           reinterpret_cast<uint16_t*>(packed_w.data()),
@@ -530,14 +539,15 @@ class PackWMicrokernelTester {
 
     // Compute reference results.
     xnn_pack_f32_gemm_goi_w(
-        g(), n(), packed_k(), nr(), kr(), sr(),
+        g(), n(), packed_k(), nr(), kr(), sr(), /*n_stride=*/packed_k(),
         reinterpret_cast<const float*>(padded_weights.data()),
         reinterpret_cast<const float*>(bias_data),
         /*scale=*/nullptr, reinterpret_cast<float*>(packed_w_ref.data()),
         /*extra_bytes=*/0, /*params=*/nullptr);
 
     // Call optimized micro-kernel.
-    packw(g(), n(), k(), nr(), kr(), sr(), weights.data(), bias_data,
+    packw(g(), n(), k(), nr(), kr(), sr(), /*n_stride=*/k(), weights.data(),
+          bias_data,
           /*scale=*/nullptr, packed_w.data(),
           /*extra_bytes=*/0, /*params=*/nullptr);
 
@@ -552,7 +562,7 @@ class PackWMicrokernelTester {
     }
   }
 
-  void Test(xnn_x32_packw_gemm_gio_ukernel_fn packw) const {
+  void TestGIO(xnn_x32_packw_gemm_gio_ukernel_fn packw) const {
     xnnpack::Buffer<uint32_t> weights(g() * n() * k());
     xnnpack::Buffer<uint32_t> padded_weights(g() * n() * packed_k());
     xnnpack::Buffer<uint32_t> bias(g() * n());
@@ -614,7 +624,7 @@ class PackWMicrokernelTester {
     }
   }
 
-  void Test(xnn_x16_packw_gemm_gio_ukernel_fn packw) const {
+  void TestGIO(xnn_x16_packw_gemm_gio_ukernel_fn packw) const {
     xnnpack::Buffer<uint16_t> weights(g() * n() * k());
     xnnpack::Buffer<uint16_t> padded_weights(g() * n() * packed_k());
     xnnpack::Buffer<uint16_t> bias(g() * n());
@@ -689,7 +699,8 @@ class PackWMicrokernelTester {
 
     // Compute reference results.
     xnn_pack_qs8_qb4w_gemm_goi_w(
-        /*g=*/1, n(), k(), nr(), kr(), sr(), bl(), weights.data(), nullptr,
+        /*g=*/1, n(), k(), nr(), kr(), sr(), bl(), /*n_stride=*/k(),
+        weights.data(), nullptr,
         /*scale=*/scale_data, packed_w_ref.data(), sizeof(uint16_t) * nr(),
         /*extra_bytes=*/sizeof(float) * nr(), &packing_params);
 
@@ -715,7 +726,8 @@ class PackWMicrokernelTester {
     }
 
     // Call optimized micro-kernel.
-    packw(/*g=*/1, n(), k(), nr(), kr(), sr(), bl(), weights.data(), bias_data,
+    packw(/*g=*/1, n(), k(), nr(), kr(), sr(), bl(), /*n_stride=*/k(),
+          weights.data(), bias_data,
           /*scale=*/scale_data, packed_w.data(), sizeof(uint16_t) * nr(),
           /*extra_bytes=*/sizeof(float) * nr(), &packing_params);
 

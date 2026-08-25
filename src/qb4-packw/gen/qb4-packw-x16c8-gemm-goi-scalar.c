@@ -89,6 +89,7 @@ void xnn_qb4_packw_gemm_goi_ukernel_x16c8__scalar(
   size_t kr,
   size_t sr,
   size_t bl,
+  size_t n_stride,
   const uint8_t* weights,
   const int32_t* bias,
   const void* scale,
@@ -110,7 +111,7 @@ void xnn_qb4_packw_gemm_goi_ukernel_x16c8__scalar(
   assert(params != NULL);
   assert(kc % bl == 0);
   size_t num_blocks = kc / bl;
-  size_t weight_stride = (kc >> 1);
+  size_t weight_stride = (n_stride >> 1);
 
   int8_t* out = (int8_t*) packed_weights;
   const int32_t* b = (const int32_t*) bias;

@@ -284,9 +284,8 @@ class FullyConnectedOperatorTester {
             int32_t ksum = 0;
 
             for (size_t ki = 0; ki < input_channels(); ++ki) {
-              const size_t k_element_offset = ni * input_channels() + ki;
-              const size_t byte_index = k_element_offset / 4;
-              const int crumb_shift = (k_element_offset % 4) * 2;
+              const size_t byte_index = ni * kernel_stride + ki / 4;
+              const int crumb_shift = (ki % 4) * 2;
               int8_t kernel_value = (kernel[byte_index] >> crumb_shift) & 0x3;
               kernel_value = sign_extend_int2(kernel_value);
               ksum += kernel_value;
@@ -1016,9 +1015,8 @@ class FullyConnectedOperatorTester {
             int32_t ksum = 0;
 
             for (size_t ki = 0; ki < input_channels(); ++ki) {
-              const size_t k_element_offset = ni * input_channels() + ki;
-              const size_t byte_index = k_element_offset / 4;
-              const int crumb_shift = (k_element_offset % 4) * 2;
+              const size_t byte_index = ni * kernel_stride + ki / 4;
+              const int crumb_shift = (ki % 4) * 2;
               int8_t kernel_value = (kernel[byte_index] >> crumb_shift) & 0x3;
               kernel_value = sign_extend_int2(kernel_value);
               ksum += kernel_value;
@@ -1273,9 +1271,8 @@ class FullyConnectedOperatorTester {
             int32_t ksum = 0;
 
             for (size_t ki = 0; ki < input_channels(); ++ki) {
-              const size_t k_element_offset = ni * input_channels() + ki;
-              const size_t byte_index = k_element_offset / 4;
-              const int crumb_shift = (k_element_offset % 4) * 2;
+              const size_t byte_index = ni * kernel_stride + ki / 4;
+              const int crumb_shift = (ki % 4) * 2;
               int8_t kernel_value = (kernel[byte_index] >> crumb_shift) & 0x3;
               kernel_value = sign_extend_int2(kernel_value);
               ksum += kernel_value;
@@ -1552,9 +1549,8 @@ class FullyConnectedOperatorTester {
             int32_t ksum = 0;
 
             for (size_t ki = 0; ki < input_channels(); ++ki) {
-              const size_t k_element_offset = ni * input_channels() + ki;
-              const size_t byte_index = k_element_offset / 4;
-              const int crumb_shift = (k_element_offset % 4) * 2;
+              const size_t byte_index = ni * kernel_stride + ki / 4;
+              const int crumb_shift = (ki % 4) * 2;
               int8_t kernel_value = (kernel[byte_index] >> crumb_shift) & 0x3;
               kernel_value = sign_extend_int2(kernel_value);
               ksum += kernel_value;
@@ -2012,7 +2008,7 @@ class FullyConnectedOperatorTester {
             int32_t c_ref_acc = 0;
             for (size_t ki = 0; ki < block_size(); ki++) {
               const size_t k_index = bi * block_size() + ki;
-              const size_t nb_index = (ni * k2 + k_index) / 2;
+              const size_t nb_index = ni * kernel_stride + k_index / 2;
               const int32_t kernel_value =
                   int32_t((k_index % 2 == 0) ? (kernel[nb_index] & UINT8_C(0xF))
                                              : (kernel[nb_index] >> 4)) -
@@ -3509,9 +3505,8 @@ class FullyConnectedOperatorTester {
       for (size_t i = 0; i < batch_size(); ++i) {
         for (size_t oc = 0; oc < output_channels(); oc++) {
           for (size_t ki = 0; ki < input_channels(); ++ki) {
-            const size_t k_element_offset = oc * input_channels() + ki;
-            const size_t byte_index = k_element_offset / 4;
-            const int crumb_shift = (k_element_offset % 4) * 2;
+            const size_t byte_index = oc * kernel_stride + ki / 4;
+            const int crumb_shift = (ki % 4) * 2;
             int8_t kernel_value = (kernel[byte_index] >> crumb_shift) & 0x3;
             kernel_value = sign_extend_int2(kernel_value);
             accumulators[i * output_channels() + oc] +=

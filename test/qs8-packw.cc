@@ -239,7 +239,7 @@ TEST_P(XnnTestQS8GIO, null_bias) {
       .kr(GetParam().kr)
       .sr(GetParam().sr)
       .izp(GetParam().izp)
-      .Test(GetParam().ukernel);
+      .TestGIO(GetParam().ukernel);
 }
 
 TEST_P(XnnTestQS8GIO, k_eq_kblock) {
@@ -251,7 +251,7 @@ TEST_P(XnnTestQS8GIO, k_eq_kblock) {
       .kr(GetParam().kr)
       .sr(GetParam().sr)
       .izp(GetParam().izp)
-      .Test(GetParam().ukernel);
+      .TestGIO(GetParam().ukernel);
 }
 
 TEST_P(XnnTestQS8GIO, k_div_kblock) {
@@ -265,7 +265,7 @@ TEST_P(XnnTestQS8GIO, k_div_kblock) {
         .kr(GetParam().kr)
         .sr(GetParam().sr)
         .izp(GetParam().izp)
-        .Test(GetParam().ukernel);
+        .TestGIO(GetParam().ukernel);
   }
 }
 
@@ -282,7 +282,7 @@ TEST_P(XnnTestQS8GIO, k_lt_kblock) {
         .kr(GetParam().kr)
         .sr(GetParam().sr)
         .izp(GetParam().izp)
-        .Test(GetParam().ukernel);
+        .TestGIO(GetParam().ukernel);
   }
 }
 
@@ -297,7 +297,7 @@ TEST_P(XnnTestQS8GIO, k_gt_kblock) {
         .kr(GetParam().kr)
         .sr(GetParam().sr)
         .izp(GetParam().izp)
-        .Test(GetParam().ukernel);
+        .TestGIO(GetParam().ukernel);
   }
 }
 
@@ -313,7 +313,7 @@ TEST_P(XnnTestQS8GIO, n_eq_1) {
       .kr(GetParam().kr)
       .sr(GetParam().sr)
       .izp(GetParam().izp)
-      .Test(GetParam().ukernel);
+      .TestGIO(GetParam().ukernel);
 }
 
 TEST_P(XnnTestQS8GIO, n_div_nr_null_bias) {
@@ -327,7 +327,7 @@ TEST_P(XnnTestQS8GIO, n_div_nr_null_bias) {
         .kr(GetParam().kr)
         .sr(GetParam().sr)
         .izp(GetParam().izp)
-        .Test(GetParam().ukernel);
+        .TestGIO(GetParam().ukernel);
   }
 }
 
@@ -341,7 +341,7 @@ TEST_P(XnnTestQS8GIO, n_div_nr) {
         .kr(GetParam().kr)
         .sr(GetParam().sr)
         .izp(GetParam().izp)
-        .Test(GetParam().ukernel);
+        .TestGIO(GetParam().ukernel);
   }
 }
 
@@ -358,7 +358,7 @@ TEST_P(XnnTestQS8GIO, n_lt_nr) {
         .kr(GetParam().kr)
         .sr(GetParam().sr)
         .izp(GetParam().izp)
-        .Test(GetParam().ukernel);
+        .TestGIO(GetParam().ukernel);
   }
 }
 
@@ -374,7 +374,7 @@ TEST_P(XnnTestQS8GIO, n_gt_nr) {
         .kr(GetParam().kr)
         .sr(GetParam().sr)
         .izp(GetParam().izp)
-        .Test(GetParam().ukernel);
+        .TestGIO(GetParam().ukernel);
   }
 }
 
