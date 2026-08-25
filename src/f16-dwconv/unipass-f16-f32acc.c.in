@@ -3,8 +3,11 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-$assert ARCH == "scalar"
-$SIMD_SIZE = 1
+$assert ARCH in ("scalar", "wasmrelaxedsimd")
+$SIMD_SIZE = {
+$  "scalar": 1,
+$  "wasmrelaxedsimd": 4,
+$}[ARCH]
 $assert CHANNEL_TILE % SIMD_SIZE == 0
 $assert KERNEL_TILE >= 2
 $assert ACCUMULATORS >= 1
@@ -17,6 +20,8 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include "src/xnnpack/dwconv.h"
 #include "src/xnnpack/microparams.h"
 #include "src/xnnpack/simd/f32-${ARCH}.h"
+$if ARCH == "wasmrelaxedsimd":
+  #undef XNN_SIMD_HAS_NATIVE_FMA
 #include "src/xnnpack/simd/f16-${ARCH}.h"
 
 
