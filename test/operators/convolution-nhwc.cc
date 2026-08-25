@@ -12,7 +12,6 @@
 
 #include <gtest/gtest.h>
 #include "include/xnnpack.h"
-#include "src/xnnpack/allocator.h"
 #include "src/xnnpack/params.h"
 #include "test/operators/convolution-operator-tester.h"
 
@@ -1100,39 +1099,47 @@ CREATE_CONVOLUTION_TESTS(CONVOLUTION_NHWC_QD8_F16_QC8W, TestNHWCxQD8F16QC8W)
 
 CREATE_CONVOLUTION_TESTS(CONVOLUTION_NHWC_QD8_F32_QC8W, TestNHWCxQD8F32QC8W)
 
-// Counts the aligned allocations that are still live, so that a zero buffer
-// the operator forgets to release is observable.
-size_t live_aligned_allocations = 0;
-
-void* CountingAlignedAllocate(void* context, size_t alignment, size_t size) {
-  void* pointer =
-      xnn_default_allocator.aligned_allocate(context, alignment, size);
-  if (pointer != nullptr) {
-    live_aligned_allocations++;
-  }
-  return pointer;
-}
-
-void CountingAlignedDeallocate(void* context, void* pointer) {
-  if (pointer != nullptr) {
-    live_aligned_allocations--;
-  }
-  xnn_default_allocator.aligned_deallocate(context, pointer);
-}
-
-// Installs the counting hooks and restores the previous allocator when it
-// goes out of scope, so a failed assertion cannot leave them installed.
+// Installs counting hooks that track how many aligned allocations are still
+// live, so that a zero buffer the operator forgets to release is observable,
+// and restores the previous allocator when it goes out of scope, so a failed
+// assertion cannot leave the hooks installed.
 class CountingAllocatorGuard {
  public:
   CountingAllocatorGuard() : saved_allocator_(xnn_params.allocator) {
-    xnn_params.allocator.aligned_allocate = CountingAlignedAllocate;
-    xnn_params.allocator.aligned_deallocate = CountingAlignedDeallocate;
-    live_aligned_allocations = 0;
+    xnn_params.allocator.context = this;
+    xnn_params.allocator.aligned_allocate = AlignedAllocate;
+    xnn_params.allocator.aligned_deallocate = AlignedDeallocate;
   }
   ~CountingAllocatorGuard() { xnn_params.allocator = saved_allocator_; }
 
+  // Non-copyable/non-movable because xnn_params.allocator.context holds
+  // `this`.
+  CountingAllocatorGuard(const CountingAllocatorGuard&) = delete;
+  CountingAllocatorGuard& operator=(const CountingAllocatorGuard&) = delete;
+
+  size_t live_aligned_allocations() const { return live_aligned_allocations_; }
+
  private:
+  static void* AlignedAllocate(void* context, size_t alignment, size_t size) {
+    auto* self = static_cast<CountingAllocatorGuard*>(context);
+    void* pointer = self->saved_allocator_.aligned_allocate(
+        self->saved_allocator_.context, alignment, size);
+    if (pointer != nullptr) {
+      self->live_aligned_allocations_++;
+    }
+    return pointer;
+  }
+  static void AlignedDeallocate(void* context, void* pointer) {
+    auto* self = static_cast<CountingAllocatorGuard*>(context);
+    if (pointer != nullptr) {
+      self->live_aligned_allocations_--;
+    }
+    self->saved_allocator_.aligned_deallocate(self->saved_allocator_.context,
+                                              pointer);
+  }
+
   const struct xnn_allocator saved_allocator_;
+  size_t live_aligned_allocations_ = 0;
 };
 
 // The dynamically quantized reshape grows convolution_op->zero_buffers and
@@ -1189,7 +1196,7 @@ TEST(CONVOLUTION_NHWC_QD8_F32_QC8W,
   }
 
   ASSERT_EQ(xnn_status_success, status);
-  EXPECT_EQ(live_aligned_allocations, 0);
+  EXPECT_EQ(allocator_guard.live_aligned_allocations(), 0);
 }
 
 CREATE_CONVOLUTION_TESTS(CONVOLUTION_NHWC_QS8, TestNHWCxQS8)
