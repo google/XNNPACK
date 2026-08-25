@@ -9,6 +9,7 @@
 # pylint: disable=invalid-name
 
 from ynnpack.kernels.dot.generator.dot_base import generate_dot_kernels
+from ynnpack.kernels.dot.generator.x86 import x86
 from ynnpack.kernels.dot.generator.x86 import x86_avx
 from ynnpack.kernels.dot.generator.x86 import x86_avx512
 
@@ -168,15 +169,15 @@ __m{bits}i b_{k}_{j+8} = {mm}_cvtepi8_epi16({mm2}_load_si{bits//2}({b8_ptr}));
 """
 
 
-class x86_avx2_int8_int8_int32_symmetric_b(x86_avx):
+class x86_int8_int8_int32_symmetric_b(x86):
 
-  def __init__(self, arch="avx2", vector_bits=256):
+  def __init__(self, arch, vector_bits, tile_shape):
     super().__init__(
         arch,
         "int8_int8_int32_symmetric_b",
         "int32_t",
         vector_bits,
-        tile_shape=(1, 8, 4),
+        tile_shape,
     )
     self.a_type = "int8_t"
     self.b_type = "int8_t"
@@ -194,7 +195,7 @@ YNN_INTRINSIC int32_t unaligned_load_int8x4(const int8_t* ptr) {
 }
 
 template <typename T>
-YNN_INTRINSIC __m256i zero_invalid(T x, std::size_t n) {
+YNN_INTRINSIC T zero_invalid(T x, std::size_t n) {
   int8_t lanes[sizeof(T)];
   memcpy(lanes, &x, sizeof(T));
   for (std::size_t i = n; i < sizeof(T); ++i) {
@@ -232,7 +233,7 @@ __m{bits}i {a_ik}_abs = {mm}_abs_epi8({a_ik});
     return f"""
 __m{bits}i b_{k}_{j} = {mm}_load_si{bits}({b_ptr});
 // We assume that b is in the range [-127, 127].
-assert({mm}_testz_si{bits}({mm}_cmpeq_epi8(zero_invalid(b_{k}_{j}, sub_sat(N, {j}) * {tile_k}), {mm}_set1_epi8(-128)), {mm}_set1_epi8(-1)));
+assert(all({mm}_cmpneq_epi8(zero_invalid(b_{k}_{j}, sub_sat(N, {j}) * {tile_k}), {mm}_set1_epi8(-128))));
 """
 
   def product(self, i, j, k):
@@ -243,6 +244,63 @@ assert({mm}_testz_si{bits}({mm}_cmpeq_epi8(zero_invalid(b_{k}_{j}, sub_sat(N, {j
     return f"""
 __m{bits}i {ab_ijk} = {mm}_maddubs_epi16(a_{i}_{k}_abs, {mm}_sign_epi8(b_{k}_{j}, a_{i}_{k}));
 {c_ij} = {mm}_add_epi32({c_ij}, {mm}_madd_epi16({ab_ijk}, {mm}_set1_epi16(1)));
+"""
+
+
+class x86_avx2_int8_int8_int32_symmetric_b(
+    x86_int8_int8_int32_symmetric_b, x86_avx
+):
+
+  def __init__(self, arch="avx2", vector_bits=256):
+    super().__init__(arch, vector_bits, tile_shape=(1, 8, 4))
+
+  def header(self):
+    return super().header() + """
+
+namespace {
+
+YNN_INTRINSIC __m256i _mm256_cmpneq_epi8(__m256i a, __m256i b) {
+  return _mm256_xor_si256(_mm256_cmpeq_epi8(a, b), _mm256_set1_epi8(-1));
+}
+
+YNN_INTRINSIC bool all(__m256i x) {
+  return !_mm256_testz_si256(x, x);
+}
+
+}  // namespace
+"""
+
+
+class x86_avx512_int8_int8_int32_symmetric_b(
+    x86_int8_int8_int32_symmetric_b, x86_avx512
+):
+
+  def __init__(self, arch="avx512", vector_bits=512):
+    super().__init__(arch, vector_bits, tile_shape=(1, 16, 4))
+
+  def header(self):
+    return super().header() + """
+
+namespace {
+
+// This is not a complete _mm512_sign_epi8 implementation, because it doesn't
+// properly handle 0. We don't need that in this case, because we are going to
+// multiply the two arguments.
+YNN_INTRINSIC __m512i _mm512_sign_epi8(__m512i a, __m512i b) {
+  __m512i zero = _mm512_setzero_si512();
+  __mmask64 blt0 = _mm512_movepi8_mask(b);
+  return _mm512_mask_sub_epi8(a, blt0, zero, a);
+}
+
+YNN_INTRINSIC __m512i _mm512_cmpneq_epi8(__m512i a, __m512i b) {
+  return _mm512_movm_epi8(_mm512_cmpneq_epi8_mask(a, b));
+}
+
+YNN_INTRINSIC bool all(__m512i x) {
+  return _mm512_movepi8_mask(x) == ~uint64_t(0);
+}
+
+}  // namespace
 """
 
 
@@ -284,5 +342,15 @@ generate_dot_kernels(
         (1, 16, 4),
         (8, 16, 4),
         (12, 16, 4),
+    ],
+)
+
+generate_dot_kernels(
+    x86_avx512_int8_int8_int32_symmetric_b(),
+    [
+        # This is only faster than the non-symmetric kernel in this case, due to
+        # the overhead of emulating _mm512_sign_epi8
+        (1, 64, 4),
+        (1, 32, 4),
     ],
 )
