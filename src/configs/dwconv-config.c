@@ -1001,7 +1001,6 @@ static void init_kai_f32_dwconv_config(void) {
     kai_f32_dwconv_config.init.f32 = xnn_init_f32_minmax_scalar_params;
     kai_f32_dwconv_config.channel_tile = xnn_f32_dwconv_minmax_ukernel_9pvc__neonsme2_get_channel_tile();
     kai_f32_dwconv_config.primary_tile = 9;
-    kai_f32_dwconv_config.implementation = xnn_dwconv_implementation_kai_planar;
   }
 #endif  // XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI && XNN_ENABLE_ARM_SME2
 }
@@ -1029,8 +1028,15 @@ const struct xnn_dwconv_config* xnn_init_kai_f32_dwconv_config() {
   if (hardware_config == NULL) {
     return NULL;
   }
+#if XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI && XNN_ENABLE_ARM_SME2
+  if (!(hardware_config->arch_flags & xnn_arch_arm_sme2)) {
+    return NULL;
+  }
   XNN_INIT_ONCE(kai_f32_dwconv);
-  return kai_f32_dwconv_config.implementation == xnn_dwconv_implementation_kai_planar ? &kai_f32_dwconv_config : NULL;
+  return &kai_f32_dwconv_config;
+#else
+  return NULL;
+#endif  // XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI && XNN_ENABLE_ARM_SME2
 }
 
 const struct xnn_dwconv_config* xnn_init_qs8_qc8w_dwconv_config() {

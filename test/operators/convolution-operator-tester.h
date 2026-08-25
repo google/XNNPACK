@@ -2160,10 +2160,9 @@ class ConvolutionOperatorTester {
     }
   }
 
-  void TestNHWCxF32(
-      size_t expected_workspace_size = SIZE_MAX,
-      std::optional<enum xnn_dwconv_implementation>
-          expected_dwconv_implementation = std::nullopt) const {
+  void TestNHWCxF32(size_t expected_workspace_size = SIZE_MAX,
+                    std::optional<enum xnn_microkernel_type>
+                        expected_microkernel_type = std::nullopt) const {
     ASSERT_EQ(weights_type(), WeightsType::Default);
 
     xnnpack::ReplicableRandomDevice rng;
@@ -2376,10 +2375,8 @@ class ConvolutionOperatorTester {
       }
       ASSERT_EQ(xnn_status_success, status);
       ASSERT_NE(nullptr, convolution_op);
-      if (expected_dwconv_implementation.has_value()) {
-        ASSERT_EQ(xnn_microkernel_type_dwconv, convolution_op->ukernel.type);
-        ASSERT_EQ(*expected_dwconv_implementation,
-                  convolution_op->ukernel.dwconv.implementation);
+      if (expected_microkernel_type.has_value()) {
+        ASSERT_EQ(*expected_microkernel_type, convolution_op->ukernel.type);
       }
       if (use_weights_cache()) {
         ASSERT_EQ(xnn_status_success,
@@ -2443,11 +2440,8 @@ class ConvolutionOperatorTester {
                 flags, auto_weights_cache.get(), &convolution_op2));
 
         ASSERT_NE(nullptr, convolution_op2);
-        if (expected_dwconv_implementation.has_value()) {
-          ASSERT_EQ(xnn_microkernel_type_dwconv,
-                    convolution_op2->ukernel.type);
-          ASSERT_EQ(*expected_dwconv_implementation,
-                    convolution_op2->ukernel.dwconv.implementation);
+        if (expected_microkernel_type.has_value()) {
+          ASSERT_EQ(*expected_microkernel_type, convolution_op2->ukernel.type);
         }
 
         xnnpack::Buffer<float> output2(output.size());

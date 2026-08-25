@@ -44,7 +44,6 @@ struct xnn_ukernel_dwconv {
   xnn_dwconv_ukernel_fn ukernel;
   uint32_t channel_tile;
   uint8_t primary_tile;
-  enum xnn_dwconv_implementation implementation;
 };
 
 // Direct 2D Depthwise Convolution
@@ -140,8 +139,11 @@ enum xnn_run_state {
 
 struct dwconv_op_context {
   struct dwconv_context dwconv;
-  struct kai_f32_dwconv_context kai_f32_dwconv;
   struct dwconv_indirection_init_context dwconv_indirection_init;
+};
+
+struct kai_dwconv_op_context {
+  struct kai_f32_dwconv_context dwconv;
 };
 
 struct gemm_op_context {
@@ -379,6 +381,7 @@ struct xnn_operator {
   } context;
   union {
     struct dwconv_op_context* dwconv;
+    struct kai_dwconv_op_context* kai_dwconv;
     struct gemm_op_context* gemm;
     struct igemm_op_context* igemm;
     struct reduce_context* reduce;
