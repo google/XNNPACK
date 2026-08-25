@@ -830,12 +830,14 @@ auto make_transpose_a_impl(int m_dim) {
 void define_transpose_a(ynn_subgraph& subgraph, ynn_node& node, index_t tile_k,
                         int m_dim, uint32_t input_a_id, uint32_t output_id) {
   const ynn_value& a = subgraph.value(input_a_id);
-  assert(m_dim < a.rank());
   ynn_value& output = subgraph.get_output_value(&output_id, a.type);
   output.type = a.type;
 
   slinky::expr k = a.extent(0);
   output.extents = a.extents;
+  while (output.extents.size() < 2) {
+    output.extents.push_back(slinky::expr{});
+  }
   output.extents[0] =
       slinky::simplify(slinky::ceil_div<slinky::expr>(k, tile_k));
   output.extents.insert(output.extents.begin(), tile_k);
@@ -1336,9 +1338,6 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
 
   const bool transpose_a = kernel.flags & dot_flag::transpose_a;
   if (transpose_a) {
-    // We should not try to transpose A if it is rank 1.
-    assert(a.rank() >= 2);
-
     // The kernel we want to use has a transposed a.
     // By definition, `m_dim` is the first dimension after the k dims.
     const int m_dim = num_k_dims;
@@ -1480,6 +1479,10 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
         c_bounds.push_back(
             elementwise_bounds(output_dims[i], input_c.physical_extent(i)));
       }
+    }
+
+    while (a_bounds.size() < input_a.rank()) {
+      a_bounds.push_back(slinky::point(0));
     }
 
     assert(a_bounds.size() == input_a.rank());
