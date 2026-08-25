@@ -15,6 +15,13 @@ tools/xngen src/f16-dwconv/unipass-f16-f32acc.c.in -D ARCH=scalar -D CHANNEL_TIL
 tools/xngen src/f16-dwconv/unipass-f16-f32acc.c.in -D ARCH=scalar -D CHANNEL_TILE=1 -D KERNEL_TILE=9  -D ACCUMULATORS=2 -o src/f16-dwconv/gen/f16-f32acc-dwconv-9p1c-minmax-scalar-acc2.c &
 tools/xngen src/f16-dwconv/unipass-f16-f32acc.c.in -D ARCH=scalar -D CHANNEL_TILE=2 -D KERNEL_TILE=25 -D ACCUMULATORS=2 -o src/f16-dwconv/gen/f16-f32acc-dwconv-25p2c-minmax-scalar-acc2.c &
 
+############################## WASM Relaxed SIMD ############################
+tools/xngen src/f16-dwconv/unipass.c.in -D ARCH=wasmrelaxedsimd -D CHANNEL_TILE=8 -D KERNEL_TILE=9  -D ACCUMULATORS=1 -o src/f16-dwconv/gen/f16-dwconv-9p8c-minmax-wasmrelaxedsimd.c &
+tools/xngen src/f16-dwconv/unipass.c.in -D ARCH=wasmrelaxedsimd -D CHANNEL_TILE=8 -D KERNEL_TILE=25 -D ACCUMULATORS=2 -o src/f16-dwconv/gen/f16-dwconv-25p8c-minmax-wasmrelaxedsimd-acc2.c &
+
+tools/xngen src/f16-dwconv/unipass-f16-f32acc.c.in -D ARCH=wasmrelaxedsimd -D CHANNEL_TILE=8 -D KERNEL_TILE=9  -D ACCUMULATORS=1 -o src/f16-dwconv/gen/f16-f32acc-dwconv-9p8c-minmax-wasmrelaxedsimd.c &
+tools/xngen src/f16-dwconv/unipass-f16-f32acc.c.in -D ARCH=wasmrelaxedsimd -D CHANNEL_TILE=8 -D KERNEL_TILE=25 -D ACCUMULATORS=2 -o src/f16-dwconv/gen/f16-f32acc-dwconv-25p8c-minmax-wasmrelaxedsimd-acc2.c &
+
 ################################### ARM NEON ##################################
 tools/xngen src/f16-dwconv/unipass-neonfp16arith.c.in -D CHANNEL_TILE=8  -D KERNEL_TILE=3 -D ACCUMULATORS=1 -o src/f16-dwconv/gen/f16-dwconv-3p8c-minmax-neonfp16arith.c &
 tools/xngen src/f16-dwconv/unipass-neonfp16arith.c.in -D CHANNEL_TILE=8  -D KERNEL_TILE=3 -D ACCUMULATORS=2 -o src/f16-dwconv/gen/f16-dwconv-3p8c-minmax-neonfp16arith-acc2.c &

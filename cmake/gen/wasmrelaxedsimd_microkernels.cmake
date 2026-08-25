@@ -10,6 +10,10 @@
 
 
 SET(PROD_WASMRELAXEDSIMD_MICROKERNEL_SRCS
+  src/f16-dwconv/gen/f16-dwconv-9p8c-minmax-wasmrelaxedsimd.c
+  src/f16-dwconv/gen/f16-dwconv-25p8c-minmax-wasmrelaxedsimd-acc2.c
+  src/f16-dwconv/gen/f16-f32acc-dwconv-9p8c-minmax-wasmrelaxedsimd.c
+  src/f16-dwconv/gen/f16-f32acc-dwconv-25p8c-minmax-wasmrelaxedsimd-acc2.c
   src/f16-f32-vcvt/gen/f16-f32-vcvt-wasmrelaxedsimd-int16-u16.c
   src/f16-vapproxgelu/gen/f16-f32acc-vapproxgelu-wasmrelaxedsimd-rational-6-4-div.c
   src/f16-vapproxgelu/gen/f16-vapproxgelu-wasmrelaxedsimd-rational-6-4-div.c
