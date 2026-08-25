@@ -194,10 +194,10 @@ YNN_INTRINSIC int32_t unaligned_load_int8x4(const int8_t* ptr) {
 }
 
 template <typename T>
-YNN_INTRINSIC __m256i zero_invalid(T x, int n) {
+YNN_INTRINSIC __m256i zero_invalid(T x, std::size_t n) {
   int8_t lanes[sizeof(T)];
   memcpy(lanes, &x, sizeof(T));
-  for (int i = n; i < sizeof(T); ++i) {
+  for (std::size_t i = n; i < sizeof(T); ++i) {
     lanes[i] = 0;
   }
   memcpy(&x, lanes, sizeof(T));
@@ -228,10 +228,11 @@ __m{bits}i {a_ik}_abs = {mm}_abs_epi8({a_ik});
     bits = self.bits
     mm = self._mm()
     b_ptr = self.b_ptr(k, j + 0, f"__m{bits}i")
+    tile_k = self.tile_shape[2]
     return f"""
 __m{bits}i b_{k}_{j} = {mm}_load_si{bits}({b_ptr});
 // We assume that b is in the range [-127, 127].
-assert({mm}_testz_si{bits}({mm}_cmpeq_epi8(zero_invalid(b_{k}_{j}, N), {mm}_set1_epi8(-128)), {mm}_set1_epi8(-1)));
+assert({mm}_testz_si{bits}({mm}_cmpeq_epi8(zero_invalid(b_{k}_{j}, sub_sat(N, {j}) * {tile_k}), {mm}_set1_epi8(-128)), {mm}_set1_epi8(-1)));
 """
 
   def product(self, i, j, k):
