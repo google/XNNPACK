@@ -343,6 +343,23 @@ slinky::expr resolve_let_var(const ynn::slinky_globals& globals,
   return e;
 }
 
+// The condition under which `l` runs exactly one full-extent iteration, i.e.
+// whoever created it made no real splitting decision for this dimension:
+// make_split_factors() hands out a cache-sized tile area and returns the whole
+// extent for any dimension that fits in what is left of it. This is the
+// weakest claim a function can make on a loop step, and such a loop can be
+// folded away entirely.
+//
+// The step is resolved one let level deep and the extent simplified before
+// comparing: split factors are usually `min(...)` expressions the simplifier
+// already reduced to the extent itself, but hidden behind a let variable the
+// prover can't see through.
+slinky::expr is_single_iteration(const ynn::slinky_globals& globals,
+                              const loop_level& l) {
+  if (!l.extent.defined() || !l.step.defined()) return slinky::expr();
+  return slinky::simplify(l.extent) <= resolve_let_var(globals, l.step);
+}
+
 // Decide how many workers each loop of the global nest should use. This must
 // run after the whole nest is built (and all the steps are final): after
 // fusion, a function's loops can end up inside loops of other functions, so
@@ -392,14 +409,10 @@ void compute_workers(ynn::slinky_globals& globals, int max_threads,
     slinky::expr tasks_above = l.parent >= 0 ? tasks[l.parent] : 1;
     const slinky::index_t tasks_above_lb =
         l.parent >= 0 ? tasks_lb[l.parent] : 1;
-    // A loop whose step provably covers its extent runs exactly one
-    // iteration, so it is identical for any number of functions inside it
-    // (required steps are excluded). The proof needs the global lets resolved
-    // -- split factors are frequently `min(...)` expressions that the
-    // simplifier already reduced to the extent itself, but hidden behind a let
-    // variable slinky can't see through when it builds the loop. Replacing the
-    // step with the extent expression lets slinky prove the single iteration
-    // and fold the loop away entirely.
+    // A loop that provably runs exactly one iteration is identical for any
+    // number of functions inside it (required steps are excluded). Replacing
+    // its step with the extent expression lets slinky prove the single
+    // iteration and fold the loop away entirely.
     const bool elide_allowed =
         !l.step_is_required && globals.is_pure_dim(l.loop_id.var);
     // Serial reduction ("k") dims additionally qualify for the
@@ -409,14 +422,12 @@ void compute_workers(ynn::slinky_globals& globals, int max_threads,
     const bool single_iteration_elide_allowed =
         elide_allowed ||
         (!l.step_is_required && globals.is_reduction_dim(l.loop_id.var));
-    const slinky::expr simplified_extent = single_iteration_elide_allowed
-                                               ? slinky::simplify(l.extent)
-                                               : slinky::expr();
-    if (single_iteration_elide_allowed &&
-        slinky::prove_true(
-            simplified_extent <= resolve_let_var(globals, l.step),
-            globals.fact_bounds, globals.fact_alignment)) {
-      l.step = slinky::max(simplified_extent, 1);
+    const slinky::expr once = single_iteration_elide_allowed
+                                  ? is_single_iteration(globals, l)
+                                  : slinky::expr();
+    if (once.defined() &&
+        slinky::prove_true(once, globals.fact_bounds, globals.fact_alignment)) {
+      l.step = slinky::max(slinky::simplify(l.extent), 1);
       l.workers = slinky::loop::serial;
       tasks[i] = tasks_above;
       tasks_lb[i] = tasks_above_lb;
@@ -455,6 +466,104 @@ void compute_workers(ynn::slinky_globals& globals, int max_threads,
   }
 }
 
+using source_region_map = std::map<std::pair<slinky::var, int>, int>;
+
+int get_source_region(const source_region_map& source_regions, slinky::var buf,
+                      int dim) {
+  auto it = source_regions.find(std::make_pair(buf, dim));
+  return it != source_regions.end() ? it->second : -1;
+}
+
+// Sharing a loop between the function that created it and a function being
+// fused into it is two decisions, made in order by the two functions below:
+// may this function's split cover the loop at all (find_matching_split), and
+// what step does the shared loop end up with (reconcile_step).
+
+// Find the split of `f` that covers `consumer_source_region`, or -1 if none
+// does. `split_matched` marks the splits already used by outer loops.
+//
+// The splits don't have to be matched in their declared order: loops over pure
+// dims carry no state across iterations, so they can be freely reordered, and
+// splits which are not matched simply remain the function's own inner loops.
+// Non-pure (reduction) splits do carry state across iterations (they
+// accumulate into the same output), so they act as a fence: nothing is matched
+// at or beyond the first one.
+int find_matching_split(ynn::slinky_globals& globals, const slinky::func& f,
+                        const std::vector<ynn::scheduling_split>& loop_splits,
+                        const std::vector<bool>& split_matched,
+                        int consumer_source_region,
+                        const source_region_map& source_regions) {
+  if (consumer_source_region == -1) return -1;
+
+  // Whether the search has passed over an unmatched (and non-trivial) split,
+  // i.e. matching a later split would reorder the function's loops.
+  bool out_of_order = false;
+
+  for (int split_i = 0; split_i < loop_splits.size(); ++split_i) {
+    if (split_matched[split_i]) continue;
+    const ynn::scheduling_split& split = loop_splits[split_i];
+    if (!globals.is_pure_dim(split.var)) {
+      // We don't want to fuse a reduction dimension because it is likely being
+      // broadcasted here, and we don't reorder other splits across it either.
+      break;
+    }
+    if (split.step_is_required && out_of_order) {
+      // A required step means the function deliberately chose the blocking of
+      // this loop, and the loop order is likely a part of the same deliberate
+      // choice. Matching it out of order would impose that blocking on a nest
+      // built for a different order (e.g. pull a dot under the loops of its
+      // elementwise consumer, overriding the consumer's steps with the dot's
+      // tiles), so we only allow such splits to be matched in their declared
+      // order.
+      continue;
+    }
+    // Map the producer's loop variable back to its output dimension index.
+    auto [producer_buf, producer_dim] = find_output_dim(&f, split.var);
+
+    // Instead of comparing forward extents (which causes false positives for
+    // unrelated constant extents), we check if both loops share the exact same
+    // inferred source region identifier.
+    if (producer_dim != -1 && producer_buf.defined() &&
+        get_source_region(source_regions, producer_buf, producer_dim) ==
+            consumer_source_region) {
+      return split_i;
+    }
+    out_of_order = true;
+  }
+  return -1;
+}
+
+// Decide the step of a loop now shared by its owner and `split`. Each side
+// makes a claim on the step, and the stronger claim wins:
+//
+//   required + required : reconcile with the lcm, so the loop is an integer
+//                         number of *both* tiles (two producers can require
+//                         different tiles for a shared loop, e.g. the two
+//                         attention matmuls pick different query tiles).
+//   required + anything : the required step, which is a kernel's blocking.
+//   otherwise           : keep the loop's step.
+void reconcile_step(ynn::slinky_globals& globals, loop_level& loop,
+                    const ynn::scheduling_split& split) {
+  if (!split.step_is_required) return;
+
+  if (loop.step_is_required &&
+      !prove_true(split.step == loop.step, globals.fact_bounds,
+                  globals.fact_alignment)) {
+    // If the LCM overflows, it clamps at max index_t (assuming no splitting).
+    loop.step = lcm_sat(globals, loop.step, split.step);
+  } else {
+    if (std::optional<slinky::var> v = slinky::as_variable(loop.step)) {
+      // This is a special variable which defines partial reduction bounds, so
+      // we need to override to match the loop step.
+      if (globals.symbols.name(*v).rfind("pr_split", 0) == 0) {
+        globals.update_let(*v, split.step);
+      }
+    }
+    loop.step = split.step;
+  }
+  loop.step_is_required = true;
+}
+
 }  // namespace
 
 // Logically this function has multiple separate blocks:
@@ -488,14 +597,7 @@ void ynn_runtime::schedule() {
 
   // Maps {buffer_sym, dim_index} to its inferred source region unique
   // identifier.
-  std::map<std::pair<slinky::var, int>, int> source_regions =
-      infer_source_regions(funcs);
-
-  auto get_source_region = [&](slinky::var buf, int dim) {
-    auto key = std::make_pair(buf, dim);
-    auto it = source_regions.find(key);
-    return it != source_regions.end() ? it->second : -1;
-  };
+  source_region_map source_regions = infer_source_regions(funcs);
 
   // Slinky doesn't allocate the pipeline's output buffers, and as a result it
   // also never crops them to the region a loop iteration needs. Fusing the
@@ -575,17 +677,12 @@ void ynn_runtime::schedule() {
         }
       }
 
-      // Walk the loop nest from the outermost loop inwards. For each loop,
-      // find a split of this function which covers the same source region.
-      // The splits don't have to be matched in their declared order: loops
-      // over pure dims carry no state across iterations, so they can be
-      // freely reordered, and splits which were not matched simply remain the
-      // function's own inner loops. Non-pure (reduction) splits do carry
-      // state across iterations (they accumulate into the same output), so
-      // they act as a fence: nothing is matched at or beyond the first one.
-      // We must stop at the first loop of the nest we can't cover: computing
-      // the function inside a loop which doesn't slice its output would
-      // recompute the function on every iteration of that loop.
+      // Walk the loop nest from the outermost loop inwards, sharing each loop
+      // with a split of this function that covers the same source region (see
+      // find_matching_split and reconcile_step). We must stop at the first
+      // loop of the nest we can't cover: computing the function inside a loop
+      // which doesn't slice its output would recompute the function on every
+      // iteration of that loop.
       compute_at = 0;
       while (compute_at < loop_nest.size()) {
         loop_level& global_loop = global_loop_nest[loop_nest[compute_at]];
@@ -595,80 +692,17 @@ void ynn_runtime::schedule() {
             find_output_dim(global_loop.loop_id.func, global_loop.loop_id.var);
         const int consumer_source_region =
             consumer_dim != -1 && consumer_buf.defined()
-                ? get_source_region(consumer_buf, consumer_dim)
+                ? get_source_region(source_regions, consumer_buf, consumer_dim)
                 : -1;
 
-        int matched_split = -1;
-        if (consumer_source_region != -1) {
-          // Whether the search has passed over an unmatched (and non-trivial)
-          // split, i.e. matching a later split would reorder the function's
-          // loops.
-          bool out_of_order = false;
-          for (int split_i = 0; split_i < loop_splits.size(); ++split_i) {
-            if (split_matched[split_i]) continue;
-            const ynn::scheduling_split& split = loop_splits[split_i];
-            if (!globals.is_pure_dim(split.var)) {
-              // We don't want to fuse a reduction dimension because it is
-              // likely being broadcasted here, and we don't reorder other
-              // splits across it either.
-              break;
-            }
-            if (split.step_is_required && out_of_order) {
-              // A required step means the function deliberately chose the
-              // blocking of this loop, and the loop order is likely a part of
-              // the same deliberate choice. Matching it out of order would
-              // impose that blocking on a nest built for a different order
-              // (e.g. pull a dot under the loops of its elementwise consumer,
-              // overriding the consumer's steps with the dot's tiles), so we
-              // only allow such splits to be matched in their declared order.
-              continue;
-            }
-            // Map the producer's loop variable back to its output dimension
-            // index.
-            auto [producer_buf, producer_dim] = find_output_dim(&f, split.var);
-
-            // Instead of comparing forward extents (which causes false
-            // positives for unrelated constant extents), we check if both
-            // loops share the exact same inferred source region identifier.
-            if (producer_dim != -1 && producer_buf.defined() &&
-                get_source_region(producer_buf, producer_dim) ==
-                    consumer_source_region) {
-              matched_split = split_i;
-              break;
-            }
-            out_of_order = true;
-          }
-        }
-
+        const int matched_split =
+            find_matching_split(globals, f, loop_splits, split_matched,
+                                consumer_source_region, source_regions);
         if (matched_split == -1) {
           break;
         }
         split_matched[matched_split] = true;
-
-        const ynn::scheduling_split& split = loop_splits[matched_split];
-        if (split.step_is_required) {
-          if (global_loop.step_is_required &&
-              !prove_true(split.step == global_loop.step, globals.fact_bounds,
-                          globals.fact_alignment)) {
-            // Two producers require different tiles for this shared loop (e.g.
-            // the two attention matmuls pick different query tiles). Use their
-            // least common multiple so the loop is an integer number of *both*
-            // tiles, keeping it a multiple of each kernel's m/n block. If the
-            // LCM overflows, it clamps at max index_t (assuming no splitting).
-            global_loop.step = lcm_sat(globals, global_loop.step, split.step);
-          } else {
-            if (std::optional<slinky::var> v =
-                    slinky::as_variable(global_loop.step)) {
-              // This is a special variable which defines partial reduction
-              // bounds, so we need to override to match the loop step.
-              if (globals.symbols.name(*v).rfind("pr_split", 0) == 0) {
-                globals.update_let(*v, split.step);
-              }
-            }
-            global_loop.step = split.step;
-          }
-          global_loop.step_is_required = true;
-        }
+        reconcile_step(globals, global_loop, loop_splits[matched_split]);
         compute_at++;
       }
       // Remove the inner part of the loop nest which we were not able to
