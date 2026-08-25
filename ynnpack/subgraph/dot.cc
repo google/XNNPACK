@@ -1244,7 +1244,10 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
   if (symmetric_b) {
     kernel_flags |= dot_flag::symmetric_b;
   }
-  dot_kernel kernel = get_dot_kernel(type, shape, packed_shape, kernel_flags);
+  const std::optional<bool> require_transpose_a =
+      a.rank() > num_k_dims ? std::nullopt : std::make_optional(false);
+  dot_kernel kernel = get_dot_kernel(type, shape, packed_shape, kernel_flags,
+                                     require_transpose_a);
   dot_kernel unpacked_kernel;
   if (b_transposed) {
     // If b is transposed, we might as well use the packing to do it.
@@ -1258,7 +1261,8 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
     unpacked_kernel = kernel;
     if (kernel.tile_k != 1) {
       unpacked_kernel = get_dot_kernel(type, shape, no_tile_k,
-                                       kernel_flags | dot_flag::unaligned_b);
+                                       kernel_flags | dot_flag::unaligned_b,
+                                       require_transpose_a);
     }
   }
 

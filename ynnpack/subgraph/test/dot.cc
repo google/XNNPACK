@@ -670,4 +670,36 @@ INSTANTIATE_TEST_SUITE_P(
       return to_string(info.param);
     });
 
+TEST(DotTest, Rank1A) {
+  SubgraphBuilder subgraph(4);
+  const uint32_t a_id = 0;
+  const uint32_t b_id = 1;
+  const uint32_t output_id = 3;
+  subgraph.AddInput(type_of<float>(), {4}, a_id)
+      .AddInput(type_of<float>(), {4, 3}, b_id)
+      .AddOutput(type_of<float>(), {3}, output_id);
+  subgraph.AddDot(/*num_k_dims=*/1, a_id, b_id, YNN_INVALID_VALUE_ID,
+                  output_id);
+
+  Runtime runtime(subgraph.GetSubgraph(), nullptr);
+  ASSERT_EQ(runtime.Status(), ynn_status_success);
+
+  Tensor<float> a({4});
+  a.fill(1.0f);
+  Tensor<float> b({4, 3});
+  b.fill(2.0f);
+  Tensor<float> c({3});
+  c.fill(0.0f);
+
+  runtime.SetupExternalTensor(a.data(), a_id)
+      .SetupExternalTensor(b.data(), b_id)
+      .SetupExternalTensor(c.data(), output_id)
+      .ReshapeRuntime()
+      .InvokeRuntime();
+  ASSERT_EQ(runtime.Status(), ynn_status_success);
+  for (size_t i = 0; i < 3; ++i) {
+    EXPECT_FLOAT_EQ(c(i), 8.0f);
+  }
+}
+
 }  // namespace ynn
