@@ -29,10 +29,6 @@
 #include "src/xnnpack/quantization.h"
 #include <pthreadpool.h>
 
-#if XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI && XNN_ENABLE_ARM_SME2
-#include "kai/ukernels/dwconv/dwconv_f32_f32_f32p/kai_dwconv_clamp_f32_f32_f32p1vlx1b_3x3_s1_4xc_sme2_mla.h"
-#endif  // XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI && XNN_ENABLE_ARM_SME2
-
 #if XNN_MAX_UARCH_TYPES > 1
 #include "src/xnnpack/config-types.h"
 #include "src/xnnpack/microparams-init.h"
@@ -1019,7 +1015,6 @@ XNN_NO_SANITIZE_FUNCTION void xnn_compute_dwconv_unipass(struct dwconv_context* 
 void xnn_compute_kai_f32_dwconv(struct kai_f32_dwconv_context* restrict context,
                                 size_t batch_index, size_t output_y,
                                 size_t output_y_tile) {
-#if XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI && XNN_ENABLE_ARM_SME2
   const size_t input_y_start = output_y < context->input_padding_top ? 0
                                    : output_y - context->input_padding_top;
   const size_t input_y = min(input_y_start, context->input_height);
@@ -1037,20 +1032,12 @@ void xnn_compute_kai_f32_dwconv(struct kai_f32_dwconv_context* restrict context,
                          batch_index * context->output_batch_stride +
                          output_y * context->output_height_stride);
 
-  kai_run_dwconv_clamp_f32_f32_f32p1vlx1b_3x3_s1_4xc_sme2_mla(
+  context->ukernel(
       input, context->packed_weights, output, context->input_height_stride,
       context->input_pixel_stride, context->output_height_stride,
       context->output_pixel_stride, valid_input_rows, valid_output_rows,
       context->input_padding_left, pad_top, /*pad_value=*/0.0f,
       context->params.scalar.min, context->params.scalar.max);
-#else
-  (void)context;
-  (void)batch_index;
-  (void)output_y;
-  (void)output_y_tile;
-  assert("Calling KleidiAI F32 DWConv without KleidiAI SME2 support." && 0);
-  XNN_UNREACHABLE;
-#endif  // XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI && XNN_ENABLE_ARM_SME2
 }
 
 XNN_NO_SANITIZE_FUNCTION void xnn_compute_dwconv2d_chw(

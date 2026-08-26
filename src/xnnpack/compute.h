@@ -746,6 +746,7 @@ struct dwconv_context {
 };
 
 struct kai_f32_dwconv_context {
+  xnn_kai_f32_dwconv_minmax_ukernel_fn ukernel;
   const void* input;
   const void* packed_weights;
   void* output;

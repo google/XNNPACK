@@ -367,6 +367,14 @@ typedef void (*xnn_f32_dwconv_minmax_ukernel_fn)(
     size_t output_increment, size_t input_offset, size_t input_pixel_stride,
     const float* zero, const struct xnn_f32_minmax_params* params);
 
+typedef void (*xnn_kai_f32_dwconv_minmax_ukernel_fn)(
+    const void* input, const void* packed_weights, void* output,
+    size_t input_height_stride, size_t input_pixel_stride,
+    size_t output_height_stride, size_t output_pixel_stride,
+    size_t valid_input_rows, size_t valid_output_rows,
+    size_t input_padding_left, size_t input_padding_top, float padding_value,
+    float output_min, float output_max);
+
 typedef void (*xnn_qs8_dwconv_minmax_ukernel_fn)(
     size_t channels, size_t output_width, const int8_t** input,
     const void* weights, int8_t* output, intptr_t input_stride,

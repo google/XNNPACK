@@ -46,6 +46,11 @@ struct xnn_ukernel_dwconv {
   uint8_t primary_tile;
 };
 
+struct xnn_ukernel_kai_dwconv {
+  xnn_kai_f32_dwconv_minmax_ukernel_fn ukernel;
+  uint8_t output_height_tile;
+};
+
 // Direct 2D Depthwise Convolution
 struct xnn_ukernel_dwconv2d {
   union {
@@ -109,6 +114,7 @@ struct xnn_ukernel {
   union {
     struct xnn_ukernel_conv2d conv2d;
     struct xnn_ukernel_dwconv dwconv;
+    struct xnn_ukernel_kai_dwconv kai_dwconv;
     struct xnn_ukernel_dwconv2d dwconv2d;
     struct xnn_ukernel_spmm spmm;
     struct xnn_ukernel_vmulcaddc vmulcaddc;
