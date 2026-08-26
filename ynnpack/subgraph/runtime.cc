@@ -129,6 +129,11 @@ struct loop_level {
   // The number of workers the loop should use, computed by compute_workers()
   // once the whole nest is built.
   slinky::expr workers = slinky::loop::serial;
+  // A finer step for this loop, proposed by a function fused into it. Set by
+  // reconcile_step(); compute_workers() decides whether to use it, because
+  // that depends on the rest of the loop nest, which isn't built yet when
+  // functions are matched.
+  slinky::expr proposed_step;
 };
 
 struct scheduling_data {
@@ -347,15 +352,16 @@ slinky::expr resolve_let_var(const ynn::slinky_globals& globals,
 // whoever created it made no real splitting decision for this dimension:
 // make_split_factors() hands out a cache-sized tile area and returns the whole
 // extent for any dimension that fits in what is left of it. This is the
-// weakest claim a function can make on a loop step, and such a loop can be
-// folded away entirely.
+// weakest claim a function can make on a loop step. Such a loop can be folded
+// away entirely, it can take a finer step from a function fused into it, and
+// it cannot be the loop that parallelizes the nest.
 //
 // The step is resolved one let level deep and the extent simplified before
 // comparing: split factors are usually `min(...)` expressions the simplifier
 // already reduced to the extent itself, but hidden behind a let variable the
 // prover can't see through.
 slinky::expr is_single_iteration(const ynn::slinky_globals& globals,
-                              const loop_level& l) {
+                                 const loop_level& l) {
   if (!l.extent.defined() || !l.step.defined()) return slinky::expr();
   return slinky::simplify(l.extent) <= resolve_let_var(globals, l.step);
 }
@@ -397,6 +403,23 @@ void compute_workers(ynn::slinky_globals& globals, int max_threads,
     return 1;
   };
 
+  // For each loop, whether any of its descendants can be parallelized: a pure
+  // or partial-reduction ("r") loop that is not provably a single iteration.
+  // Serial reduction ("k") loops never count, they run inside one task by
+  // construction. Loops are appended after their parent, so a single backward
+  // pass propagates each loop's answer up to its parent.
+  std::vector<bool> parallel_in_subtree(global_loop_nest.size(), false);
+  for (int i = global_loop_nest.size() - 1; i >= 0; --i) {
+    const loop_level& l = global_loop_nest[i];
+    const slinky::expr once = is_single_iteration(globals, l);
+    const bool is_parallel =
+        !globals.is_reduction_dim(l.loop_id.var) && once.defined() &&
+        !slinky::prove_true(once, globals.fact_bounds, globals.fact_alignment);
+    if (l.parent >= 0 && (is_parallel || parallel_in_subtree[i])) {
+      parallel_in_subtree[l.parent] = true;
+    }
+  }
+
   // The number of tasks the loops from the root down to (and including) each
   // loop can produce. Serial loops (reductions) run their iterations within
   // one task, so they don't contribute to this count. `tasks_lb` is a
@@ -409,6 +432,23 @@ void compute_workers(ynn::slinky_globals& globals, int max_threads,
     slinky::expr tasks_above = l.parent >= 0 ? tasks[l.parent] : 1;
     const slinky::index_t tasks_above_lb =
         l.parent >= 0 ? tasks_lb[l.parent] : 1;
+    // Take the finer step a fused function proposed for this loop, if this
+    // loop is where the nest has to get its parallelism. It isn't if the
+    // ancestors already produce enough tasks, or if the subtree below has a
+    // level that can be parallelized instead - splitting here would then cost
+    // parallelism rather than add it, because the extra outer tasks push the
+    // inner levels past the task target and turn them serial. The inner
+    // levels are also the better place to split: finer tasks over contiguous
+    // memory.
+    if (l.proposed_step.defined() && max_threads > 1 &&
+        !parallel_in_subtree[i] && tasks_above_lb < target_task_count) {
+      // Behind a global so per-task closures reference a variable evaluated
+      // once per invoke, not the whole select tree.
+      l.step =
+          globals.get(slinky::simplify(l.proposed_step, globals.fact_bounds,
+                                       globals.fact_alignment),
+                      "s");
+    }
     // A loop that provably runs exactly one iteration is identical for any
     // number of functions inside it (required steps are excluded). Replacing
     // its step with the extent expression lets slinky prove the single
@@ -499,6 +539,34 @@ int find_matching_split(ynn::slinky_globals& globals, const slinky::func& f,
   // i.e. matching a later split would reorder the function's loops.
   bool out_of_order = false;
 
+  // Whether matching `split_i` here preserves this function's required
+  // blocking order, i.e. no required split before it is still unmatched.
+  auto keeps_required_order = [&](int split_i) {
+    for (int prev = 0; prev < split_i; ++prev) {
+      if (!split_matched[prev] && loop_splits[prev].step_is_required) {
+        return false;
+      }
+    }
+    return true;
+  };
+  // Whether the product of this function's reduction extents is provably below
+  // a threshold. The value works for the benchmarks we have; it may well need
+  // tuning, or replacing by something derived from the shapes.
+  constexpr slinky::index_t small_reduction_threshold = 256;
+  auto has_small_reduction = [&]() {
+    slinky::index_t k_product = 1;
+    for (const auto& out : f.outputs()) {
+      for (int d = 0; d < static_cast<int>(out.dims.size()); ++d) {
+        if (globals.is_pure_dim(out.dims[d])) continue;
+        auto c = slinky::as_constant(
+            slinky::simplify(out.buffer->dim(d).bounds.extent()));
+        if (!c) return false;
+        k_product *= *c;
+      }
+    }
+    return k_product <= small_reduction_threshold;
+  };
+
   for (int split_i = 0; split_i < loop_splits.size(); ++split_i) {
     if (split_matched[split_i]) continue;
     const ynn::scheduling_split& split = loop_splits[split_i];
@@ -507,14 +575,13 @@ int find_matching_split(ynn::slinky_globals& globals, const slinky::func& f,
       // broadcasted here, and we don't reorder other splits across it either.
       break;
     }
-    if (split.step_is_required && out_of_order) {
-      // A required step means the function deliberately chose the blocking of
-      // this loop, and the loop order is likely a part of the same deliberate
-      // choice. Matching it out of order would impose that blocking on a nest
-      // built for a different order (e.g. pull a dot under the loops of its
-      // elementwise consumer, overriding the consumer's steps with the dot's
-      // tiles), so we only allow such splits to be matched in their declared
-      // order.
+    if (split.step_is_required && out_of_order &&
+        !(keeps_required_order(split_i) || has_small_reduction())) {
+      // Matching a required split out of order is fine for any step, but it
+      // must not reorder the function's required loops relative to each
+      // other: that blocking was chosen deliberately, and inverting it makes
+      // the function re-read its inputs. The exception is a function whose
+      // reduction is small enough that re-reading costs nothing.
       continue;
     }
     // Map the producer's loop variable back to its output dimension index.
@@ -541,27 +608,78 @@ int find_matching_split(ynn::slinky_globals& globals, const slinky::func& f,
 //                         different tiles for a shared loop, e.g. the two
 //                         attention matmuls pick different query tiles).
 //   required + anything : the required step, which is a kernel's blocking.
-//   otherwise           : keep the loop's step.
+//   chosen   + no claim : propose the chosen step, see below.
+//   otherwise           : keep the loop's step. When both sides computed a
+//                         real split, each is only meaningful within its own
+//                         cache-budget allocation, so combining them (e.g. by
+//                         taking the min) degenerates to tiny steps.
+//
+// "No claim" means the loop runs a single full-extent iteration, see
+// is_single_iteration(). `loop_splits` are all of the matching function's
+// splits, used to size its iteration space.
 void reconcile_step(ynn::slinky_globals& globals, loop_level& loop,
-                    const ynn::scheduling_split& split) {
-  if (!split.step_is_required) return;
-
-  if (loop.step_is_required &&
-      !prove_true(split.step == loop.step, globals.fact_bounds,
-                  globals.fact_alignment)) {
-    // If the LCM overflows, it clamps at max index_t (assuming no splitting).
-    loop.step = lcm_sat(globals, loop.step, split.step);
-  } else {
-    if (std::optional<slinky::var> v = slinky::as_variable(loop.step)) {
-      // This is a special variable which defines partial reduction bounds, so
-      // we need to override to match the loop step.
-      if (globals.symbols.name(*v).rfind("pr_split", 0) == 0) {
-        globals.update_let(*v, split.step);
+                    const ynn::scheduling_split& split,
+                    const std::vector<ynn::scheduling_split>& loop_splits) {
+  if (split.step_is_required) {
+    if (loop.step_is_required &&
+        !prove_true(split.step == loop.step, globals.fact_bounds,
+                    globals.fact_alignment)) {
+      // If the LCM overflows, it clamps at max index_t (assuming no
+      // splitting).
+      loop.step = lcm_sat(globals, loop.step, split.step);
+    } else {
+      if (std::optional<slinky::var> v = slinky::as_variable(loop.step)) {
+        // This is a special variable which defines partial reduction bounds,
+        // so we need to override to match the loop step.
+        if (globals.symbols.name(*v).rfind("pr_split", 0) == 0) {
+          globals.update_let(*v, split.step);
+        }
       }
+      loop.step = split.step;
     }
-    loop.step = split.step;
+    loop.step_is_required = true;
+    // A required step is a kernel's blocking, so it outranks any step an
+    // earlier function proposed for this loop.
+    loop.proposed_step = slinky::expr();
+    return;
   }
-  loop.step_is_required = true;
+  if (loop.step_is_required || !loop.step.defined() || !split.step.defined()) {
+    return;
+  }
+  // Only a pure dim's step is free to change. A partial reduction's "r" loop
+  // is steppable, but its step is coupled to the reduction buffer's
+  // fold_factor (the kernel's accumulation chunk), so a different step would
+  // desync the accumulation and corrupt results.
+  if (!globals.is_pure_dim(split.var) ||
+      !globals.is_pure_dim(loop.loop_id.var)) {
+    return;
+  }
+  // This function computed a real split for a loop its owner left as a single
+  // task. Propose the split, so that a producer fused into the loop keeps its
+  // parallelism instead of running serially - without this, a norm's reduce
+  // stages serialize the whole chain they fuse into.
+  //
+  // Several functions can match the same loop, and the last proposal wins. A
+  // function whose split is already the loop's step is asking for nothing, so
+  // drop it rather than let it displace an earlier real proposal.
+  if (prove_true(split.step == loop.step, globals.fact_bounds,
+                 globals.fact_alignment)) {
+    return;
+  }
+  // The function's splits span its whole iteration space, so their extent
+  // product is the work that would be divided up. Below this threshold the
+  // extra task dispatches cost more than the split saves; the value was found
+  // experimentally.
+  constexpr slinky::index_t min_work_per_split = 128 * 1024;
+  slinky::expr work = 1;
+  for (const ynn::scheduling_split& ls : loop_splits) {
+    work = work * ls.extent;
+  }
+  // Both conditions can depend on the runtime shape, so they go into the
+  // proposal as a select, which folds away for static shapes.
+  loop.proposed_step = slinky::select(
+      is_single_iteration(globals, loop) && min_work_per_split <= work,
+      split.step, loop.step);
 }
 
 }  // namespace
@@ -702,7 +820,8 @@ void ynn_runtime::schedule() {
           break;
         }
         split_matched[matched_split] = true;
-        reconcile_step(globals, global_loop, loop_splits[matched_split]);
+        reconcile_step(globals, global_loop, loop_splits[matched_split],
+                       loop_splits);
         compute_at++;
       }
       // Remove the inner part of the loop nest which we were not able to
