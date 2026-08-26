@@ -40,11 +40,9 @@
 #include "kai/ukernels/matmul/pack/kai_rhs_pack_nxk_qsi4cxp_qs4cxs1s0.h"
 #include "kai/ukernels/matmul/pack/kai_rhs_pack_nxk_qsi4cxps1s0_qsu4cxs1s0_neon.h"
 #include "kai/ukernels/matmul/pack/kai_rhs_pack_nxk_qsi8cxp_qsi8cx_neon.h"
+#include "kai/ukernels/matmul/pack/kai_rhs_pack_nxk_qsu2cxp4vlx4_qsu2cx_neon.h"
 #include "kai/ukernels/matmul/pack/kai_rhs_pack_nxk_x16p2vlx2b_x16_x16_sme.h"
 #include "src/xnnpack/allocator.h"
-#if XNN_ENABLE_ARM_SME2 && XNN_ENABLE_KLEIDIAI
-#include "kai/ukernels/matmul/pack/kai_rhs_pack_nxk_qsu2cxp4vlx4_qsu2cx_neon.h"
-#endif  // XNN_ENABLE_ARM_SME2 && XNN_ENABLE_KLEIDIAI
 #endif  // XNN_ENABLE_KLEIDIAI
 
 class unaligned_int32_t {

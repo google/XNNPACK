@@ -2933,7 +2933,8 @@ static void init_qp8_f32_qc2w_gemm_config(void) {
   const struct xnn_hardware_config* hardware_config =
       xnn_init_hardware_config();
   assert(hardware_config != NULL);
-  if (hardware_config->arch_flags & xnn_arch_arm_sme2) {
+  if (XNN_ENABLE_ARM_SME2 &&
+      (hardware_config->arch_flags & xnn_arch_arm_sme2)) {
 #if XNN_ENABLE_ARM_SME2
     const size_t mr =
         xnn_qp8_f32_qc2w_gemm_minmax_ukernel_16x64c4__neonsme2_get_mr();
@@ -2957,9 +2958,9 @@ static void init_qp8_f32_qc2w_gemm_config(void) {
     qp8_f32_qc2w_gemm_config.nr = nr;
     qp8_f32_qc2w_gemm_config.log2_kr = 2;
     qp8_f32_qc2w_gemm_config.log2_sr = 0;
+    assert(qp8_f32_qc2w_gemm_config.mr <= XNN_MAX_MR);
 #endif  // XNN_ENABLE_ARM_SME2
   }
-  assert(qp8_f32_qc2w_gemm_config.mr <= XNN_MAX_MR);
 #endif  // XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI
 }
 
