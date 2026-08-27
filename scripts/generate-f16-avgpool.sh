@@ -7,6 +7,9 @@
 ##################################### SIMD #####################################
 tools/xngen src/f32-avgpool/avgpool.c.in -D ARCH=neonfp16arith -D DATATYPE=f16 -D SIMD_SIZE=8 -o src/f16-avgpool/gen/f16-avgpool-9p-minmax-neonfp16arith.c &
 
+############################### Portable C/WASM ###############################
+tools/xngen src/f16-avgpool/avgpool-f16-f32acc.c.in -D ARCH=scalar -o src/f16-avgpool/gen/f16-f32acc-avgpool-9p-minmax-scalar-u1.c &
+
 ##################################### f16c #####################################
 tools/xngen src/f16-avgpool/f16c.c.in -D SIMD_SIZE=8 -o src/f16-avgpool/gen/f16-avgpool-9p-minmax-f16c.c &
 
