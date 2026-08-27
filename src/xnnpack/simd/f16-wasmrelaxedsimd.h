@@ -222,6 +222,11 @@ xnn_load_tail_f16(const xnn_float16* input, size_t num_elements) {
   return wasm_v128_load(padded);
 }
 
+static XNN_INLINE xnn_simd_f16_t
+xnn_load_tail_safe_f16(const xnn_float16* input, size_t num_elements) {
+  return xnn_load_tail_f16(input, num_elements);
+}
+
 static XNN_INLINE void xnn_store_tail_f16(xnn_float16* output, xnn_simd_f16_t v,
                                           size_t num_elements) {
   assert(num_elements > 0);
