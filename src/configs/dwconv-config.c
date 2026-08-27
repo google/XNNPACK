@@ -20,18 +20,14 @@
 
 static struct xnn_dwconv_config f16_dwconv_config[XNN_MAX_F16_DWCONV_UKERNELS] = {0};
 static struct xnn_dwconv_config f32_dwconv_config[XNN_MAX_F32_DWCONV_UKERNELS] = {0};
-#if XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI && XNN_ENABLE_ARM_SME2
 static struct xnn_kai_dwconv_config kai_f32_dwconv_config = {0};
-#endif  // XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI && XNN_ENABLE_ARM_SME2
 static struct xnn_dwconv_config qs8_qc8w_dwconv_config[XNN_MAX_QC8_DWCONV_UKERNELS] = {0};
 static struct xnn_dwconv_config qs8_dwconv_config[XNN_MAX_QS8_DWCONV_UKERNELS] = {0};
 static struct xnn_dwconv_config qu8_dwconv_config[XNN_MAX_QU8_DWCONV_UKERNELS] = {0};
 
 XNN_INIT_ONCE_GUARD(f16_dwconv);
 XNN_INIT_ONCE_GUARD(f32_dwconv);
-#if XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI && XNN_ENABLE_ARM_SME2
 XNN_INIT_ONCE_GUARD(kai_f32_dwconv);
-#endif  // XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI && XNN_ENABLE_ARM_SME2
 XNN_INIT_ONCE_GUARD(qs8_qc8w_dwconv);
 XNN_INIT_ONCE_GUARD(qs8_dwconv);
 XNN_INIT_ONCE_GUARD(qu8_dwconv);
@@ -1025,7 +1021,6 @@ static void init_qu8_dwconv_config(void) {
   #endif
 }
 
-
 static void init_kai_f32_dwconv_config(void) {
 #if XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI && XNN_ENABLE_ARM_SME2
   const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
@@ -1041,7 +1036,6 @@ static void init_kai_f32_dwconv_config(void) {
   }
 #endif  // XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI && XNN_ENABLE_ARM_SME2
 }
-
 
 const struct xnn_dwconv_config* xnn_init_f16_dwconv_config() {
   const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
@@ -1071,15 +1065,8 @@ const struct xnn_kai_dwconv_config* xnn_init_kai_f32_dwconv_config() {
   if (hardware_config == NULL) {
     return NULL;
   }
-#if XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI && XNN_ENABLE_ARM_SME2
-  if (!(hardware_config->arch_flags & xnn_arch_arm_sme2)) {
-    return NULL;
-  }
   XNN_INIT_ONCE(kai_f32_dwconv);
-  return &kai_f32_dwconv_config;
-#else
-  return NULL;
-#endif  // XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI && XNN_ENABLE_ARM_SME2
+  return kai_f32_dwconv_config.init != NULL ? &kai_f32_dwconv_config : NULL;
 }
 
 const struct xnn_dwconv_config* xnn_init_qs8_qc8w_dwconv_config() {
