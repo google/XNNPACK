@@ -4,6 +4,7 @@
 // LICENSE file in the root directory of this source tree.
 
 $assert(SIMD_SIZE > 0)
+$UKERNEL_ARCH = "wasmrelaxedsimdfp16" if DATATYPE == "f16" and ARCH == "wasmrelaxedsimd" else ARCH
 #include <assert.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -14,7 +15,7 @@ $assert(SIMD_SIZE > 0)
 #include "src/xnnpack/simd/${DATATYPE}-${ARCH}.h"
 
 $CTYPE = {"f32": "float", "f16": "xnn_float16"}[DATATYPE]
-void xnn_${DATATYPE}_avgpool_minmax_ukernel_9p__${ARCH}_u${SIMD_SIZE}(
+void xnn_${DATATYPE}_avgpool_minmax_ukernel_9p__${UKERNEL_ARCH}_u${SIMD_SIZE}(
     size_t output_pixels,
     size_t kernel_elements,
     size_t channels,
