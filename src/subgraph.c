@@ -3350,6 +3350,13 @@ static void propagate_constants(xnn_subgraph_t subgraph, uint32_t node_id) {
           break;
 
         case xnn_binary_modulus:
+          // fmod(0, b) == 0, but fmod(1, b) is not 1 in general (e.g. fmod(1,1)==0),
+          // so modulus preserves only zeros, unlike prelu below.
+          if (a_is_zero) {
+            output_value->flags |= XNN_VALUE_FLAG_IS_ZERO;
+          }
+          break;
+
         case xnn_binary_prelu:
           if (a_is_zero) {
             output_value->flags |= XNN_VALUE_FLAG_IS_ZERO;
