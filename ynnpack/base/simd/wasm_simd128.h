@@ -808,6 +808,14 @@ YNN_ALWAYS_INLINE float horizontal_min(f32x4 a) {
   return wasm_f32x4_extract_lane(min, 0);
 }
 
+YNN_ALWAYS_INLINE bool any(s8x16 x) { return wasm_v128_any_true(x.v); }
+YNN_ALWAYS_INLINE bool any(s16x8 x) { return wasm_v128_any_true(x.v); }
+YNN_ALWAYS_INLINE bool any(s32x4 x) { return wasm_v128_any_true(x.v); }
+
+YNN_ALWAYS_INLINE bool all(s8x16 x) { return !any(~x); }
+YNN_ALWAYS_INLINE bool all(s16x8 x) { return !any(~x); }
+YNN_ALWAYS_INLINE bool all(s32x4 x) { return !any(~x); }
+
 namespace internal {
 
 // These are helpers for implementing interleave/transpose.

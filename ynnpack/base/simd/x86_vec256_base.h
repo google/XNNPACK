@@ -293,6 +293,10 @@ YNN_ALWAYS_INLINE s32x8 load_aligned(const int32_t* ptr, decltype(s32x8::N),
                                      s32x8 = {}) {
   return s32x8{_mm256_load_si256(reinterpret_cast<const __m256i*>(ptr))};
 }
+YNN_ALWAYS_INLINE s64x4 load_aligned(const int64_t* ptr, decltype(s64x4::N),
+                                     s64x4 = {}) {
+  return s64x4{_mm256_load_si256(reinterpret_cast<const __m256i*>(ptr))};
+}
 YNN_ALWAYS_INLINE bf16x16 load_aligned(const bfloat16* ptr,
                                        decltype(bf16x16::N), bf16x16 = {}) {
   return bf16x16{_mm256_load_si256(reinterpret_cast<const __m256i*>(ptr))};
@@ -330,6 +334,10 @@ YNN_ALWAYS_INLINE void store_aligned(int32_t* ptr, s32x8 b,
                                      decltype(s32x8::N) = {}) {
   _mm256_store_si256(reinterpret_cast<__m256i*>(ptr), b.v);
 }
+YNN_ALWAYS_INLINE void store_aligned(int64_t* ptr, s64x4 b,
+                                     decltype(s64x4::N) = {}) {
+  _mm256_store_si256(reinterpret_cast<__m256i*>(ptr), b.v);
+}
 YNN_ALWAYS_INLINE void store_aligned(bfloat16* ptr, bf16x16 b,
                                      decltype(bf16x16::N) = {}) {
   _mm256_store_si256(reinterpret_cast<__m256i*>(ptr), b.v);
@@ -361,6 +369,10 @@ YNN_ALWAYS_INLINE f64x4 load(const double* ptr, decltype(f64x4::N),
 }
 YNN_ALWAYS_INLINE f32x8 load(const float* ptr, decltype(f32x8::N), f32x8 = {}) {
   return f32x8{_mm256_loadu_ps(ptr)};
+}
+YNN_ALWAYS_INLINE s64x4 load(const int64_t* ptr, decltype(s64x4::N),
+                             s64x4 = {}) {
+  return s64x4{_mm256_loadu_si256(reinterpret_cast<const __m256i*>(ptr))};
 }
 YNN_ALWAYS_INLINE s32x8 load(const int32_t* ptr, decltype(s32x8::N),
                              s32x8 = {}) {
@@ -396,6 +408,9 @@ YNN_ALWAYS_INLINE void store(double* ptr, f64x4 b, decltype(f64x4::N) = {}) {
 }
 YNN_ALWAYS_INLINE void store(float* ptr, f32x8 b, decltype(f32x8::N) = {}) {
   _mm256_storeu_ps(ptr, b.v);
+}
+YNN_ALWAYS_INLINE void store(int64_t* ptr, s64x4 b, decltype(s64x4::N) = {}) {
+  _mm256_storeu_si256(reinterpret_cast<__m256i*>(ptr), b.v);
 }
 YNN_ALWAYS_INLINE void store(uint32_t* ptr, u32x8 b, decltype(u32x8::N) = {}) {
   _mm256_storeu_si256(reinterpret_cast<__m256i*>(ptr), b.v);
@@ -1176,6 +1191,24 @@ YNN_ALWAYS_INLINE s32x8 select(s32x8 cond, s32x8 a, s32x8 b) {
   return s32x8{_mm256_castps_si256(_mm256_blendv_ps(mb, ma, mc))};
 }
 #endif  // YNN_ARCH_X86_AVX2
+
+YNN_ALWAYS_INLINE bool any(s8x32 x) { return !_mm256_testz_si256(x.v, x.v); }
+YNN_ALWAYS_INLINE bool any(s16x16 x) { return !_mm256_testz_si256(x.v, x.v); }
+YNN_ALWAYS_INLINE bool any(s32x8 x) { return !_mm256_testz_si256(x.v, x.v); }
+YNN_ALWAYS_INLINE bool any(s64x4 x) { return !_mm256_testz_si256(x.v, x.v); }
+
+YNN_ALWAYS_INLINE bool all(s8x32 x) {
+  return _mm256_testc_si256(x.v, _mm256_set1_epi32(-1));
+}
+YNN_ALWAYS_INLINE bool all(s16x16 x) {
+  return _mm256_testc_si256(x.v, _mm256_set1_epi32(-1));
+}
+YNN_ALWAYS_INLINE bool all(s32x8 x) {
+  return _mm256_testc_si256(x.v, _mm256_set1_epi32(-1));
+}
+YNN_ALWAYS_INLINE bool all(s64x4 x) {
+  return _mm256_testc_si256(x.v, _mm256_set1_epi32(-1));
+}
 
 #ifdef YNN_ARCH_X86_FMA3
 YNN_ALWAYS_INLINE f64x4 fma(f64x4 a, f64x4 b, f64x4 acc) {
