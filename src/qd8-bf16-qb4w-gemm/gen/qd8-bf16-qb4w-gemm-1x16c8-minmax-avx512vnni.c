@@ -138,7 +138,7 @@ void xnn_qd8_bf16_qb4w_gemm_minmax_ukernel_1x16c8__avx512vnni(
 
     if XNN_LIKELY(nc >= 16) {
       // Round fp32 to bf16 (round-to-nearest-even, quiet NaNs) and store 16-bit outputs.
-      _mm256_storeu_si256((__m256i*) c0, (__m256i) _mm512_cvtneps_pbh(vscaled0x0123456789ABCDEF));
+      _mm256_storeu_si256((__m256i*) c0, _mm512_cvtneps_pbh(vscaled0x0123456789ABCDEF));
 
       a0 = (const int8_t*) ((uintptr_t) a0 - kc);
 
@@ -148,7 +148,7 @@ void xnn_qd8_bf16_qb4w_gemm_minmax_ukernel_1x16c8__avx512vnni(
     } else {
       // Prepare mask for valid 16-bit elements (depends on nc).
       const __mmask16 vmask = _cvtu32_mask16((UINT32_C(1) << nc) - 1);
-      _mm256_mask_storeu_epi16(c0, vmask, (__m256i) _mm512_cvtneps_pbh(vscaled0x0123456789ABCDEF));
+      _mm256_mask_storeu_epi16(c0, vmask, _mm512_cvtneps_pbh(vscaled0x0123456789ABCDEF));
       nc = 0;
     }
   } while (nc != 0);
