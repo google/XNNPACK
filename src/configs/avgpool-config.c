@@ -66,6 +66,11 @@ static void init_f16_avgpool_config(void) {
       f16_avgpool_config.primary_tile = 9;
       f16_avgpool_config.channel_tile = 2 * hardware_config->vlenb / sizeof(xnn_float16);
     }
+  #elif XNN_ARCH_WASMRELAXEDSIMD
+    f16_avgpool_config.ukernel = XNN_INIT_AVGPOOL_UKERNEL(xnn_f16_f32acc_avgpool_minmax_ukernel_9p__wasmrelaxedsimd_u4);
+    f16_avgpool_config.init.f16 = xnn_init_f16_scaleminmax_scalar_params;
+    f16_avgpool_config.primary_tile = 9;
+    f16_avgpool_config.channel_tile = 4;
   #endif
 }
 

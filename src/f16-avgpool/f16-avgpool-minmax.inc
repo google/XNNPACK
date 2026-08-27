@@ -9,6 +9,10 @@
 // XNN_UKERNEL(arch, ukernel, channel_tile, primary_tile, datatype, params_type, init_params)
 XNN_UKERNEL(xnn_arch_none, xnn_f16_f32acc_avgpool_minmax_ukernel_9p__scalar_u1, 1, 9, xnn_float16, struct xnn_f16_scaleminmax_params, xnn_init_f16_scaleminmax_scalar_params)
 
+#if XNN_ARCH_WASMRELAXEDSIMD
+XNN_UKERNEL(xnn_arch_none, xnn_f16_f32acc_avgpool_minmax_ukernel_9p__wasmrelaxedsimd_u4, 4, 9, xnn_float16, struct xnn_f16_scaleminmax_params, xnn_init_f16_scaleminmax_scalar_params)
+#endif  // XNN_ARCH_WASMRELAXEDSIMD
+
 #if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 XNN_UKERNEL(xnn_arch_arm_neon_fp16_arith, xnn_f16_avgpool_minmax_ukernel_9p__neonfp16arith_u8, 8, 9, xnn_float16, struct xnn_f16_scaleminmax_params, xnn_init_f16_scaleminmax_scalar_params)
 #endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
