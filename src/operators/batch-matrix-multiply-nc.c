@@ -312,8 +312,15 @@ static enum xnn_status setup_packing_params_qs8(
 
     context->packing_params_.qs8 = (struct xnn_qs8_packing_params){
         .input_zero_point = context->input_zero_point};
-    const size_t scale_params_size =
-        sizeof(float) * context->batch_size_b * context->n;
+    size_t scale_params_count;
+    size_t scale_params_size;
+    if (!xnn_safe_mul(context->batch_size_b, context->n, &scale_params_count) ||
+        !xnn_safe_mul(scale_params_count, sizeof(float), &scale_params_size)) {
+      xnn_log_error(
+          "failed to create %s operator: scale params size overflows size_t",
+          xnn_operator_type_to_string(context->operator_type));
+      return xnn_status_invalid_parameter;
+    }
     float* scale_params = xnn_allocate_zero_memory(scale_params_size);
     context->scales_params_to_cleanup = scale_params;
     if (scale_params == NULL) {
@@ -322,7 +329,7 @@ static enum xnn_status setup_packing_params_qs8(
                     xnn_operator_type_to_string(context->operator_type));
       return xnn_status_out_of_memory;
     }
-    for (size_t i = 0; i < context->batch_size_b * context->n; ++i) {
+    for (size_t i = 0; i < scale_params_count; ++i) {
       scale_params[i] = context->requantization_scale;
     }
     context->packing_params = &context->packing_params_;

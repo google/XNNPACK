@@ -320,6 +320,8 @@ struct ternary_rewrite {
   int a = 0;
   int b = 1;
   int c = 2;
+  // Which operands can be commuted with any other operand in the set.
+  int commutative_set = 0;
   // If this rewrite requires the inner binary op to appear as operand 0 or 1 of
   // the outer binary op, this optional should be set to that index.
   std::optional<int> inner_operand = std::nullopt;
@@ -328,16 +330,20 @@ struct ternary_rewrite {
 ternary_rewrite get_ternary_rewrite(ynn_binary_operator outer,
                                     ynn_binary_operator inner) {
   if (outer == ynn_binary_add && inner == ynn_binary_multiply) {
-    return {ternary_op::multiply_add, /*a=*/0, /*b=*/1, /*c=*/2};
+    return {ternary_op::multiply_add, /*a=*/0, /*b=*/1, /*c=*/2,
+            /*commutative_set=*/0b011};
   } else if (outer == ynn_binary_multiply && inner == ynn_binary_multiply) {
-    // TODO: b/504634617 - Our ternary multiply with mixed types assumes this
-    // order. We should generalize this to allow searching for kernels with
-    // operands in any order (or canonicalize based on type).
-    return {ternary_op::multiply, /*a=*/2, /*b=*/0, /*c=*/1};
+    return {ternary_op::multiply, /*a=*/0, /*b=*/1, /*c=*/2,
+            /*commutative_set=*/0b111};
   } else if (outer == ynn_binary_min && inner == ynn_binary_max) {
-    return {ternary_op::clamp, /*a=*/0, /*b=*/1, /*c=*/2};
+    return {ternary_op::clamp, /*a=*/0, /*b=*/1, /*c=*/2,
+            /*commutative_set=*/0b011};
   } else if (outer == ynn_binary_subtract && inner == ynn_binary_multiply) {
-    return {ternary_op::subtract_multiply, /*a=*/2, /*b=*/0, /*c=*/1,
+    return {ternary_op::subtract_multiply,
+            /*a=*/2,
+            /*b=*/0,
+            /*c=*/1,
+            /*commutative_set=*/0b110,
             /*inner_operand=*/1};
   } else {
     return {};
@@ -381,21 +387,38 @@ bool rewrite_ternary(ynn_subgraph& subgraph, ynn_node& node,
         node.inputs[1 - i],
     };
 
+    const uint32_t input_ids[] = {
+        ops[r.a],
+        ops[r.b],
+        ops[r.c],
+    };
+
     // This sequence of binary ops matches. Do we have a kernel for this case?
-    const ynn_value& a = subgraph.value(ops[r.a]);
-    const ynn_value& b = subgraph.value(ops[r.b]);
-    const ynn_value& c = subgraph.value(ops[r.c]);
-    const ynn_value& x = subgraph.value(node.outputs[0]);
-    const ynn::ternary_kernel_fn kernel =
-        ynn::get_ternary_kernel(r.op, a.type, b.type, c.type, x.type);
-    if (kernel != nullptr) {
-      // Yes we do. Rewrite this to a ternary op.
-      YNN_LOG_DEBUG() << "Rewriting " << to_string(outer->op) << "("
-                      << to_string(inner) << "(a, b), c) to " << to_string(r.op)
-                      << "(a, b, c)";
-      ynn::define_ternary(subgraph, node, a.id, b.id, c.id, x.id, r.op, kernel);
-      return true;
-    }
+    int perm[3] = {0, 1, 2};
+    do {
+      if (any_n(3, [&](int i) {
+            return perm[i] != i && (r.commutative_set & (1 << i)) == 0;
+          })) {
+        // We commuted an operand we aren't allowed to commute.
+        continue;
+      }
+
+      const ynn_value& a = subgraph.value(input_ids[perm[0]]);
+      const ynn_value& b = subgraph.value(input_ids[perm[1]]);
+      const ynn_value& c = subgraph.value(input_ids[perm[2]]);
+      const ynn_value& x = subgraph.value(node.outputs[0]);
+      const ynn::ternary_kernel_fn kernel =
+          ynn::get_ternary_kernel(r.op, a.type, b.type, c.type, x.type);
+      if (kernel != nullptr) {
+        // Yes we do. Rewrite this to a ternary op.
+        YNN_LOG_DEBUG() << "Rewriting " << to_string(outer->op) << "("
+                        << to_string(inner) << "(a, b), c) to "
+                        << to_string(r.op) << "(a, b, c)";
+        ynn::define_ternary(subgraph, node, a.id, b.id, c.id, x.id, r.op,
+                            kernel);
+        return true;
+      }
+    } while (std::next_permutation(perm, perm + 3));
   }
   return false;
 }

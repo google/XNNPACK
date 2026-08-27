@@ -70,6 +70,7 @@ SET(PROD_AVX512SKX_MICROKERNEL_SRCS
   src/s8-vclamp/s8-vclamp-avx512skx-u256.c
   src/u8-vclamp/u8-vclamp-avx512skx-u256.c
   src/x8-lut/gen/x8-lut-avx512skx-vpshufb-u64.c
+  src/x16-packw/gen/x16-packw-x32-gemm-goi-avx512skx-u16-prfm.c
   src/xx-pad/xx-pad-p64-avx512skx-u128.c)
 
 SET(NON_PROD_AVX512SKX_MICROKERNEL_SRCS
@@ -294,6 +295,9 @@ SET(NON_PROD_AVX512SKX_MICROKERNEL_SRCS
   src/qu8-vaddc/gen/qu8-vaddc-minmax-avx512skx-mul32-ld128-u32.c
   src/x8-lut/gen/x8-lut-avx512skx-vpshufb-u128.c
   src/x8-lut/gen/x8-lut-avx512skx-vpshufb-u192.c
-  src/x8-lut/gen/x8-lut-avx512skx-vpshufb-u256.c)
+  src/x8-lut/gen/x8-lut-avx512skx-vpshufb-u256.c
+  src/x16-packw/gen/x16-packw-x32-gemm-goi-avx512skx-u16.c
+  src/x16-packw/gen/x16-packw-x64-gemm-goi-avx512skx-u16-prfm.c
+  src/x16-packw/gen/x16-packw-x64-gemm-goi-avx512skx-u16.c)
 
 SET(ALL_AVX512SKX_MICROKERNEL_SRCS ${PROD_AVX512SKX_MICROKERNEL_SRCS} ${NON_PROD_AVX512SKX_MICROKERNEL_SRCS})

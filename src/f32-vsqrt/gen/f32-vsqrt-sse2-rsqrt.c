@@ -9,9 +9,10 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <assert.h>
+#include <math.h>
 #include <stddef.h>
 #include <stdint.h>
-    
+
 // Arch-specific SIMD wrapper.
 #include "src/xnnpack/simd/f32-sse2.h"
 
@@ -62,6 +63,7 @@ void xnn_f32_vsqrt_ukernel__sse2_rsqrt_u4(
   // Constants for the Newton-Raphson iteration.
   const xnn_simd_f32_t kOne = xnn_set1_f32(1.0f);
   const xnn_simd_f32_t kHalf = xnn_set1_f32(0.5f);
+  const xnn_simd_f32_t kInf = xnn_set1_f32(INFINITY);
 
 
   for (; batch >= xnn_simd_bytes_f32; batch -= xnn_simd_bytes_f32) {
@@ -69,7 +71,7 @@ void xnn_f32_vsqrt_ukernel__sse2_rsqrt_u4(
     input += xnn_simd_size_f32;
 
     // Create a mask of the +/-0 inputs, which will be flushed to zero later.
-    const xnn_simd_f32_t vinf_mask = xnn_cmpneq_f32(vx, xnn_zero_f32());
+    const xnn_simd_f32_t vzero_mask = xnn_cmpneq_f32(vx, xnn_zero_f32());
 
     // Generate the initial 12-bit approximation.
     xnn_simd_f32_t vt0 = xnn_rsqrt_f32(vx);
@@ -85,11 +87,15 @@ void xnn_f32_vsqrt_ukernel__sse2_rsqrt_u4(
     }
 
     // Mask out the inputs that were zero.
-    const xnn_simd_f32_t vt7 = xnn_and_f32(vinf_mask, vt0);
+    const xnn_simd_f32_t vt7 = xnn_and_f32(vzero_mask, vt0);
 
     // Extract the square root by multiplying the original value with the
     // inverse square root.
-    const xnn_simd_f32_t vy = xnn_mul_f32(vx, vt7);
+    xnn_simd_f32_t vy = xnn_mul_f32(vx, vt7);
+
+    // Set output to infinity where the input is infinity (and not NaN)
+    const xnn_simd_f32_t vinf_mask = xnn_cmpeq_f32(kInf, vx);
+    vy = xnn_or_f32(xnn_andnot_f32(vinf_mask, vy), xnn_and_f32(vinf_mask, kInf));
 
     xnn_storeu_f32(output, vy);
     output += xnn_simd_size_f32;
@@ -101,7 +107,7 @@ void xnn_f32_vsqrt_ukernel__sse2_rsqrt_u4(
     const xnn_simd_f32_t vx = xnn_load_tail_f32(input, batch >> XNN_LOG2_SIZEOF_FLOAT);
 
     // Create a mask of the +/-0 inputs, which will be flushed to zero later.
-    const xnn_simd_f32_t vinf_mask = xnn_cmpneq_f32(vx, xnn_zero_f32());
+    const xnn_simd_f32_t vzero_mask = xnn_cmpneq_f32(vx, xnn_zero_f32());
 
     // Generate the initial 12-bit approximation.
     xnn_simd_f32_t vt0 = xnn_rsqrt_f32(vx);
@@ -117,11 +123,15 @@ void xnn_f32_vsqrt_ukernel__sse2_rsqrt_u4(
     }
 
     // Mask out the inputs that were zero.
-    const xnn_simd_f32_t vt7 = xnn_and_f32(vinf_mask, vt0);
+    const xnn_simd_f32_t vt7 = xnn_and_f32(vzero_mask, vt0);
 
     // Extract the square root by multiplying the original value with the
     // inverse square root.
-    const xnn_simd_f32_t vy = xnn_mul_f32(vx, vt7);
+    xnn_simd_f32_t vy = xnn_mul_f32(vx, vt7);
+
+    // Set output to infinity where the input is infinity (and not NaN)
+    const xnn_simd_f32_t vinf_mask = xnn_cmpeq_f32(kInf, vx);
+    vy = xnn_or_f32(xnn_andnot_f32(vinf_mask, vy), xnn_and_f32(vinf_mask, kInf));
 
     xnn_store_tail_f32(output, vy, batch >> XNN_LOG2_SIZEOF_FLOAT);
   }
@@ -138,6 +148,7 @@ void xnn_f32_vsqrt_ukernel__sse2_rsqrt_u8(
   // Constants for the Newton-Raphson iteration.
   const xnn_simd_f32_t kOne = xnn_set1_f32(1.0f);
   const xnn_simd_f32_t kHalf = xnn_set1_f32(0.5f);
+  const xnn_simd_f32_t kInf = xnn_set1_f32(INFINITY);
 
   for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
     const xnn_simd_f32_t vx0 = xnn_loadu_f32(input);
@@ -145,8 +156,8 @@ void xnn_f32_vsqrt_ukernel__sse2_rsqrt_u8(
     input += 8;
 
     // Create a mask of the +/-0 inputs, which will be flushed to zero later.
-    const xnn_simd_f32_t vinf_mask_0 = xnn_cmpneq_f32(vx0, xnn_zero_f32());
-    const xnn_simd_f32_t vinf_mask_1 = xnn_cmpneq_f32(vx1, xnn_zero_f32());
+    const xnn_simd_f32_t vzero_mask_0 = xnn_cmpneq_f32(vx0, xnn_zero_f32());
+    const xnn_simd_f32_t vzero_mask_1 = xnn_cmpneq_f32(vx1, xnn_zero_f32());
 
     // Generate the initial 12-bit approximation.
     xnn_simd_f32_t vt0_0 = xnn_rsqrt_f32(vx0);
@@ -169,13 +180,19 @@ void xnn_f32_vsqrt_ukernel__sse2_rsqrt_u8(
     }
 
     // Mask out the inputs that were zero.
-    const xnn_simd_f32_t vt7_0 = xnn_and_f32(vinf_mask_0, vt0_0);
-    const xnn_simd_f32_t vt7_1 = xnn_and_f32(vinf_mask_1, vt0_1);
+    const xnn_simd_f32_t vt7_0 = xnn_and_f32(vzero_mask_0, vt0_0);
+    const xnn_simd_f32_t vt7_1 = xnn_and_f32(vzero_mask_1, vt0_1);
 
     // Extract the square root by multiplying the original value with the
     // inverse square root.
-    const xnn_simd_f32_t vy0 = xnn_mul_f32(vx0, vt7_0);
-    const xnn_simd_f32_t vy1 = xnn_mul_f32(vx1, vt7_1);
+    xnn_simd_f32_t vy0 = xnn_mul_f32(vx0, vt7_0);
+    xnn_simd_f32_t vy1 = xnn_mul_f32(vx1, vt7_1);
+
+    // Set output to infinity where the input is infinity (and not NaN)
+    const xnn_simd_f32_t vinf_mask_0 = xnn_cmpeq_f32(kInf, vx0);
+    const xnn_simd_f32_t vinf_mask_1 = xnn_cmpeq_f32(kInf, vx1);
+    vy0 = xnn_or_f32(xnn_andnot_f32(vinf_mask_0, vy0), xnn_and_f32(vinf_mask_0, kInf));
+    vy1 = xnn_or_f32(xnn_andnot_f32(vinf_mask_1, vy1), xnn_and_f32(vinf_mask_1, kInf));
 
     // Store the results.
     xnn_storeu_f32(output, vy0);
@@ -188,7 +205,7 @@ void xnn_f32_vsqrt_ukernel__sse2_rsqrt_u8(
     input += xnn_simd_size_f32;
 
     // Create a mask of the +/-0 inputs, which will be flushed to zero later.
-    const xnn_simd_f32_t vinf_mask = xnn_cmpneq_f32(vx, xnn_zero_f32());
+    const xnn_simd_f32_t vzero_mask = xnn_cmpneq_f32(vx, xnn_zero_f32());
 
     // Generate the initial 12-bit approximation.
     xnn_simd_f32_t vt0 = xnn_rsqrt_f32(vx);
@@ -204,11 +221,15 @@ void xnn_f32_vsqrt_ukernel__sse2_rsqrt_u8(
     }
 
     // Mask out the inputs that were zero.
-    const xnn_simd_f32_t vt7 = xnn_and_f32(vinf_mask, vt0);
+    const xnn_simd_f32_t vt7 = xnn_and_f32(vzero_mask, vt0);
 
     // Extract the square root by multiplying the original value with the
     // inverse square root.
-    const xnn_simd_f32_t vy = xnn_mul_f32(vx, vt7);
+    xnn_simd_f32_t vy = xnn_mul_f32(vx, vt7);
+
+    // Set output to infinity where the input is infinity (and not NaN)
+    const xnn_simd_f32_t vinf_mask = xnn_cmpeq_f32(kInf, vx);
+    vy = xnn_or_f32(xnn_andnot_f32(vinf_mask, vy), xnn_and_f32(vinf_mask, kInf));
 
     xnn_storeu_f32(output, vy);
     output += xnn_simd_size_f32;
@@ -220,7 +241,7 @@ void xnn_f32_vsqrt_ukernel__sse2_rsqrt_u8(
     const xnn_simd_f32_t vx = xnn_load_tail_f32(input, batch >> XNN_LOG2_SIZEOF_FLOAT);
 
     // Create a mask of the +/-0 inputs, which will be flushed to zero later.
-    const xnn_simd_f32_t vinf_mask = xnn_cmpneq_f32(vx, xnn_zero_f32());
+    const xnn_simd_f32_t vzero_mask = xnn_cmpneq_f32(vx, xnn_zero_f32());
 
     // Generate the initial 12-bit approximation.
     xnn_simd_f32_t vt0 = xnn_rsqrt_f32(vx);
@@ -236,11 +257,15 @@ void xnn_f32_vsqrt_ukernel__sse2_rsqrt_u8(
     }
 
     // Mask out the inputs that were zero.
-    const xnn_simd_f32_t vt7 = xnn_and_f32(vinf_mask, vt0);
+    const xnn_simd_f32_t vt7 = xnn_and_f32(vzero_mask, vt0);
 
     // Extract the square root by multiplying the original value with the
     // inverse square root.
-    const xnn_simd_f32_t vy = xnn_mul_f32(vx, vt7);
+    xnn_simd_f32_t vy = xnn_mul_f32(vx, vt7);
+
+    // Set output to infinity where the input is infinity (and not NaN)
+    const xnn_simd_f32_t vinf_mask = xnn_cmpeq_f32(kInf, vx);
+    vy = xnn_or_f32(xnn_andnot_f32(vinf_mask, vy), xnn_and_f32(vinf_mask, kInf));
 
     xnn_store_tail_f32(output, vy, batch >> XNN_LOG2_SIZEOF_FLOAT);
   }
@@ -257,6 +282,7 @@ void xnn_f32_vsqrt_ukernel__sse2_rsqrt_u16(
   // Constants for the Newton-Raphson iteration.
   const xnn_simd_f32_t kOne = xnn_set1_f32(1.0f);
   const xnn_simd_f32_t kHalf = xnn_set1_f32(0.5f);
+  const xnn_simd_f32_t kInf = xnn_set1_f32(INFINITY);
 
   for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
     const xnn_simd_f32_t vx0 = xnn_loadu_f32(input);
@@ -266,10 +292,10 @@ void xnn_f32_vsqrt_ukernel__sse2_rsqrt_u16(
     input += 16;
 
     // Create a mask of the +/-0 inputs, which will be flushed to zero later.
-    const xnn_simd_f32_t vinf_mask_0 = xnn_cmpneq_f32(vx0, xnn_zero_f32());
-    const xnn_simd_f32_t vinf_mask_1 = xnn_cmpneq_f32(vx1, xnn_zero_f32());
-    const xnn_simd_f32_t vinf_mask_2 = xnn_cmpneq_f32(vx2, xnn_zero_f32());
-    const xnn_simd_f32_t vinf_mask_3 = xnn_cmpneq_f32(vx3, xnn_zero_f32());
+    const xnn_simd_f32_t vzero_mask_0 = xnn_cmpneq_f32(vx0, xnn_zero_f32());
+    const xnn_simd_f32_t vzero_mask_1 = xnn_cmpneq_f32(vx1, xnn_zero_f32());
+    const xnn_simd_f32_t vzero_mask_2 = xnn_cmpneq_f32(vx2, xnn_zero_f32());
+    const xnn_simd_f32_t vzero_mask_3 = xnn_cmpneq_f32(vx3, xnn_zero_f32());
 
     // Generate the initial 12-bit approximation.
     xnn_simd_f32_t vt0_0 = xnn_rsqrt_f32(vx0);
@@ -306,17 +332,27 @@ void xnn_f32_vsqrt_ukernel__sse2_rsqrt_u16(
     }
 
     // Mask out the inputs that were zero.
-    const xnn_simd_f32_t vt7_0 = xnn_and_f32(vinf_mask_0, vt0_0);
-    const xnn_simd_f32_t vt7_1 = xnn_and_f32(vinf_mask_1, vt0_1);
-    const xnn_simd_f32_t vt7_2 = xnn_and_f32(vinf_mask_2, vt0_2);
-    const xnn_simd_f32_t vt7_3 = xnn_and_f32(vinf_mask_3, vt0_3);
+    const xnn_simd_f32_t vt7_0 = xnn_and_f32(vzero_mask_0, vt0_0);
+    const xnn_simd_f32_t vt7_1 = xnn_and_f32(vzero_mask_1, vt0_1);
+    const xnn_simd_f32_t vt7_2 = xnn_and_f32(vzero_mask_2, vt0_2);
+    const xnn_simd_f32_t vt7_3 = xnn_and_f32(vzero_mask_3, vt0_3);
 
     // Extract the square root by multiplying the original value with the
     // inverse square root.
-    const xnn_simd_f32_t vy0 = xnn_mul_f32(vx0, vt7_0);
-    const xnn_simd_f32_t vy1 = xnn_mul_f32(vx1, vt7_1);
-    const xnn_simd_f32_t vy2 = xnn_mul_f32(vx2, vt7_2);
-    const xnn_simd_f32_t vy3 = xnn_mul_f32(vx3, vt7_3);
+    xnn_simd_f32_t vy0 = xnn_mul_f32(vx0, vt7_0);
+    xnn_simd_f32_t vy1 = xnn_mul_f32(vx1, vt7_1);
+    xnn_simd_f32_t vy2 = xnn_mul_f32(vx2, vt7_2);
+    xnn_simd_f32_t vy3 = xnn_mul_f32(vx3, vt7_3);
+
+    // Set output to infinity where the input is infinity (and not NaN)
+    const xnn_simd_f32_t vinf_mask_0 = xnn_cmpeq_f32(kInf, vx0);
+    const xnn_simd_f32_t vinf_mask_1 = xnn_cmpeq_f32(kInf, vx1);
+    const xnn_simd_f32_t vinf_mask_2 = xnn_cmpeq_f32(kInf, vx2);
+    const xnn_simd_f32_t vinf_mask_3 = xnn_cmpeq_f32(kInf, vx3);
+    vy0 = xnn_or_f32(xnn_andnot_f32(vinf_mask_0, vy0), xnn_and_f32(vinf_mask_0, kInf));
+    vy1 = xnn_or_f32(xnn_andnot_f32(vinf_mask_1, vy1), xnn_and_f32(vinf_mask_1, kInf));
+    vy2 = xnn_or_f32(xnn_andnot_f32(vinf_mask_2, vy2), xnn_and_f32(vinf_mask_2, kInf));
+    vy3 = xnn_or_f32(xnn_andnot_f32(vinf_mask_3, vy3), xnn_and_f32(vinf_mask_3, kInf));
 
     // Store the results.
     xnn_storeu_f32(output, vy0);
@@ -331,7 +367,7 @@ void xnn_f32_vsqrt_ukernel__sse2_rsqrt_u16(
     input += xnn_simd_size_f32;
 
     // Create a mask of the +/-0 inputs, which will be flushed to zero later.
-    const xnn_simd_f32_t vinf_mask = xnn_cmpneq_f32(vx, xnn_zero_f32());
+    const xnn_simd_f32_t vzero_mask = xnn_cmpneq_f32(vx, xnn_zero_f32());
 
     // Generate the initial 12-bit approximation.
     xnn_simd_f32_t vt0 = xnn_rsqrt_f32(vx);
@@ -347,11 +383,15 @@ void xnn_f32_vsqrt_ukernel__sse2_rsqrt_u16(
     }
 
     // Mask out the inputs that were zero.
-    const xnn_simd_f32_t vt7 = xnn_and_f32(vinf_mask, vt0);
+    const xnn_simd_f32_t vt7 = xnn_and_f32(vzero_mask, vt0);
 
     // Extract the square root by multiplying the original value with the
     // inverse square root.
-    const xnn_simd_f32_t vy = xnn_mul_f32(vx, vt7);
+    xnn_simd_f32_t vy = xnn_mul_f32(vx, vt7);
+
+    // Set output to infinity where the input is infinity (and not NaN)
+    const xnn_simd_f32_t vinf_mask = xnn_cmpeq_f32(kInf, vx);
+    vy = xnn_or_f32(xnn_andnot_f32(vinf_mask, vy), xnn_and_f32(vinf_mask, kInf));
 
     xnn_storeu_f32(output, vy);
     output += xnn_simd_size_f32;
@@ -363,7 +403,7 @@ void xnn_f32_vsqrt_ukernel__sse2_rsqrt_u16(
     const xnn_simd_f32_t vx = xnn_load_tail_f32(input, batch >> XNN_LOG2_SIZEOF_FLOAT);
 
     // Create a mask of the +/-0 inputs, which will be flushed to zero later.
-    const xnn_simd_f32_t vinf_mask = xnn_cmpneq_f32(vx, xnn_zero_f32());
+    const xnn_simd_f32_t vzero_mask = xnn_cmpneq_f32(vx, xnn_zero_f32());
 
     // Generate the initial 12-bit approximation.
     xnn_simd_f32_t vt0 = xnn_rsqrt_f32(vx);
@@ -379,11 +419,15 @@ void xnn_f32_vsqrt_ukernel__sse2_rsqrt_u16(
     }
 
     // Mask out the inputs that were zero.
-    const xnn_simd_f32_t vt7 = xnn_and_f32(vinf_mask, vt0);
+    const xnn_simd_f32_t vt7 = xnn_and_f32(vzero_mask, vt0);
 
     // Extract the square root by multiplying the original value with the
     // inverse square root.
-    const xnn_simd_f32_t vy = xnn_mul_f32(vx, vt7);
+    xnn_simd_f32_t vy = xnn_mul_f32(vx, vt7);
+
+    // Set output to infinity where the input is infinity (and not NaN)
+    const xnn_simd_f32_t vinf_mask = xnn_cmpeq_f32(kInf, vx);
+    vy = xnn_or_f32(xnn_andnot_f32(vinf_mask, vy), xnn_and_f32(vinf_mask, kInf));
 
     xnn_store_tail_f32(output, vy, batch >> XNN_LOG2_SIZEOF_FLOAT);
   }

@@ -66,7 +66,8 @@ struct multiply_add {
 };
 
 struct subtract_multiply {
-  float operator()(int32_t a, int32_t b, int32_t c) const {
+  float operator()(float a, float b, int32_t c) const { return a - b * c; }
+  int32_t operator()(int32_t a, int32_t b, int32_t c) const {
     return narrow(widen(a) - widen(b) * widen(c));
   }
 

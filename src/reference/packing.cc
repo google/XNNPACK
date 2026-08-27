@@ -2672,6 +2672,13 @@ void xnn_pack_kai_qs8_qc8w_weights_and_biases_sme(
   bool free_accumulator_init = false;
   if (accumulator_init == NULL) {
     accumulator_init = calloc(output_channels, sizeof(int32_t));
+    if (accumulator_init == NULL) {
+      xnn_log_error(
+          "failed to allocate %zu bytes for KleidiAI SME bias substitute buffer",
+          output_channels * sizeof(int32_t));
+      assert(false);
+      return;
+    }
     free_accumulator_init = true;
   }
   const struct xnn_qs8_packing_params* xnn_params =
@@ -2829,6 +2836,13 @@ void xnn_pack_kai_f16_weights_and_biases(
   bool free_accumulator_init = false;
   if (accumulator_init == NULL) {
     accumulator_init = calloc(output_channels, sizeof(float));
+    if (accumulator_init == NULL) {
+      xnn_log_error(
+          "failed to allocate %zu bytes for KleidiAI SME bias substitute buffer",
+          output_channels * sizeof(float));
+      assert(false);
+      return;
+    }
     free_accumulator_init = true;
   }
 
@@ -2909,6 +2923,13 @@ void xnn_pack_kai_f32_weights_and_biases(
   bool free_accumulator_init = false;
   if (accumulator_init == NULL) {
     accumulator_init = calloc(output_channels, sizeof(float));
+    if (accumulator_init == NULL) {
+      xnn_log_error(
+          "failed to allocate %zu bytes for KleidiAI SME bias substitute buffer",
+          output_channels * sizeof(float));
+      assert(false);
+      return;
+    }
     free_accumulator_init = true;
   }
 

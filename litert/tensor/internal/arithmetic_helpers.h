@@ -22,6 +22,8 @@ limitations under the License.
 #include <vector>
 
 #include "absl/status/status.h"
+#include "absl/strings/str_cat.h"
+#include "absl/strings/str_join.h"
 #include "absl/types/span.h"
 #include "litert/tensor/datatypes.h"
 #include "litert/tensor/internal/graph.h"

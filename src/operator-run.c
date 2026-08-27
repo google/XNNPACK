@@ -528,7 +528,8 @@ XNN_NO_SANITIZE_FUNCTION void xnn_compute_hmp_grouped_qp8gemm(struct gemm_contex
       context->qp8_ukernel.function[uarch_index](
           mr_step, nr_block_size, k_scaled, (const void*)(a + a_offset),
           packed_w, (void*)(c + mr_block_start * cm_stride), cm_stride,
-          /*dst_stride_col=*/sizeof(float), context->fused_params);
+          // QP8 kernels can produce f16 or f32 outputs, so use the configured output element size.
+          /*dst_stride_col=*/1 << context->log2_csize, context->fused_params);
     }
     mr_block_size -= mr_step;
     mr_block_start += mr_step;
@@ -598,7 +599,8 @@ XNN_INLINE static XNN_NO_SANITIZE_FUNCTION void compute_hmp_qp8gemm(
           mr_step, nr_block_size, k_scaled,
           (const void*)((uintptr_t)a + a_offset), packed_w,
           (void*)((uintptr_t)c + mr_block_start * cm_stride), cm_stride,
-          /*dst_stride_col=*/sizeof(float), context->fused_params);
+          // QP8 kernels can produce f16 or f32 outputs, so use the configured output element size.
+          /*dst_stride_col=*/1 << context->log2_csize, context->fused_params);
     }
 
     mr_block_size -= mr_step;

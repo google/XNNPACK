@@ -16,6 +16,16 @@ XNN_UKERNEL(xnn_arch_none, xnn_f16_f32acc_dwconv_minmax_ukernel_4p1c__scalar_acc
 XNN_UKERNEL(xnn_arch_none, xnn_f16_f32acc_dwconv_minmax_ukernel_9p1c__scalar_acc2, 1, false, 1, 9, xnn_float16, xnn_float16, struct xnn_f16_minmax_params, xnn_init_f16_minmax_scalar_params)
 XNN_UKERNEL(xnn_arch_none, xnn_f16_f32acc_dwconv_minmax_ukernel_25p2c__scalar_acc2, 2, false, 2, 25, xnn_float16, xnn_float16, struct xnn_f16_minmax_params, xnn_init_f16_minmax_scalar_params)
 
+#if XNN_ARCH_WASMRELAXEDSIMDFP16
+XNN_UKERNEL(xnn_arch_none, xnn_f16_dwconv_minmax_ukernel_9p8c__wasmrelaxedsimd, 8, false, 8, 9, xnn_float16, xnn_float16, struct xnn_f16_minmax_params, xnn_init_f16_minmax_scalar_params)
+XNN_UKERNEL(xnn_arch_none, xnn_f16_dwconv_minmax_ukernel_25p8c__wasmrelaxedsimd_acc2, 8, false, 8, 25, xnn_float16, xnn_float16, struct xnn_f16_minmax_params, xnn_init_f16_minmax_scalar_params)
+#endif  // XNN_ARCH_WASMRELAXEDSIMDFP16
+
+#if XNN_ARCH_WASMRELAXEDSIMD
+XNN_UKERNEL(xnn_arch_none, xnn_f16_f32acc_dwconv_minmax_ukernel_9p8c__wasmrelaxedsimd, 8, false, 8, 9, xnn_float16, xnn_float16, struct xnn_f16_minmax_params, xnn_init_f16_minmax_scalar_params)
+XNN_UKERNEL(xnn_arch_none, xnn_f16_f32acc_dwconv_minmax_ukernel_25p8c__wasmrelaxedsimd_acc2, 8, false, 8, 25, xnn_float16, xnn_float16, struct xnn_f16_minmax_params, xnn_init_f16_minmax_scalar_params)
+#endif  // XNN_ARCH_WASMRELAXEDSIMD
+
 #if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 XNN_UKERNEL(xnn_arch_arm_neon_fp16_arith, xnn_f16_dwconv_minmax_ukernel_3p8c__neonfp16arith, 8, false, 8, 3, xnn_float16, xnn_float16, struct xnn_f16_minmax_params, xnn_init_f16_minmax_scalar_params)
 XNN_UKERNEL(xnn_arch_arm_neon_fp16_arith, xnn_f16_dwconv_minmax_ukernel_3p8c__neonfp16arith_acc2, 8, false, 8, 3, xnn_float16, xnn_float16, struct xnn_f16_minmax_params, xnn_init_f16_minmax_scalar_params)

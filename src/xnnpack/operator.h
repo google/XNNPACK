@@ -402,6 +402,12 @@ XNN_INTERNAL enum xnn_status xnn_run_operator_with_index(
     xnn_operator_t op, size_t opdata_index, size_t operator_object_index,
     pthreadpool_t threadpool);
 
+XNN_INTERNAL enum xnn_status
+xnn_reshape_fully_connected_nc_qdu8_bf16_qb4w_with_input_datatype(
+    xnn_operator_t fully_connected_op, size_t batch_size,
+    enum xnn_datatype input_datatype, size_t* workspace_size,
+    pthreadpool_t threadpool);
+
 XNN_INTERNAL enum xnn_operator_type xnn_reduce_operator_to_operator_type(
     enum xnn_reduce_operator type);
 

@@ -49,8 +49,13 @@ auto make_transpose_impl(int elem_count, std::vector<int32_t> permutation) {
       sliced_input.dims[d] = input.dim(permutation[d]);
     }
 
-    // Sort and fuse dimensions
-    slinky::optimize_dims(sliced_output, sliced_input);
+    if (elem_count != 1) {
+      // TODO: b/532524411 - We should be able to optimize dims when we have
+      // non-byte types too.
+    } else {
+      // Sort and fuse dimensions
+      slinky::optimize_dims(sliced_output, sliced_input);
+    }
 
     // Fold copies of contiguous dimensions into the elem_size.
     slinky::index_t elem_size = sliced_output.elem_size;
@@ -77,11 +82,14 @@ auto make_transpose_impl(int elem_count, std::vector<int32_t> permutation) {
 
     // Find the contiguous dimension in the input, which is the dimension we
     // need to handle with the kernel.
-    int input_dim0 = sliced_input.rank;
-    for (int d = 1; d < sliced_input.rank; ++d) {
+    size_t input_dim0 = sliced_input.rank;
+    for (size_t d = 1; d < permutation.size(); ++d) {
       if (is_contiguous(sliced_input.dim(d), elem_size)) {
-        input_dim0 = d;
-        break;
+        if (d < permutation.size() &&
+            (input_dim0 >= permutation.size() ||
+             permutation[d] < permutation[input_dim0])) {
+          input_dim0 = d;
+        }
       }
     }
 
@@ -104,7 +112,7 @@ auto make_transpose_impl(int elem_count, std::vector<int32_t> permutation) {
                        slinky::in_bounds{output_m.min() / sliced_elem_count});
     sliced_input.slice(0,
                        slinky::in_bounds{output_n.min() * sliced_elem_count});
-    sliced_output.slice({0, static_cast<size_t>(input_dim0)});
+    sliced_output.slice({0, input_dim0});
 
     slinky::for_each_element(
         [=, &kernel](void* out, const void* in) {

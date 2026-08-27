@@ -601,15 +601,24 @@ static enum xnn_status check_input_scale(const struct deconv2d_variant* variant,
 // The array is assigned to `context->scale_params`.
 static enum xnn_status compute_scale_params_qs8_qc8w(
     const struct deconv2d_variant* variant, struct deconv2d_context* context) {
-  const size_t output_channels = context->groups * context->group_output_channels;
+  size_t output_channels = 0;
+  size_t output_channels_bytes = 0;
+  if (!xnn_safe_mul(context->groups, context->group_output_channels,
+                    &output_channels) ||
+      !xnn_safe_mul(output_channels, sizeof(float), &output_channels_bytes)) {
+    xnn_log_error(
+        "failed to create %s operator: scale parameter size overflows size_t",
+        xnn_operator_type_to_string(context->operator_type));
+    return xnn_status_invalid_parameter;
+  }
   // This buffer is released in the `cleanup` function.
-  context->scale_params_for_cleanup = xnn_allocate_simd_memory(
-      output_channels * sizeof(float));
+  context->scale_params_for_cleanup =
+      xnn_allocate_simd_memory(output_channels_bytes);
   float* const scale_params = context->scale_params_for_cleanup;
   if (scale_params == NULL) {
     xnn_log_error(
         "failed to allocate %zu bytes for %s operator packed weights",
-        output_channels * sizeof(float),
+        output_channels_bytes,
         xnn_operator_type_to_string(context->operator_type));
     return xnn_status_out_of_memory;
   }
@@ -617,11 +626,11 @@ static enum xnn_status compute_scale_params_qs8_qc8w(
   if (!context->kernel_scale) {
     // This buffer is released in the `cleanup` function.
     context->kernel_scale_for_cleanup = xnn_allocate_simd_memory(
-      output_channels * sizeof(float));
+      output_channels_bytes);
     if (context->kernel_scale_for_cleanup == NULL) {
       xnn_log_error(
           "failed to allocate %zu bytes for %s operator packed weights",
-          output_channels * sizeof(float),
+          output_channels_bytes,
           xnn_operator_type_to_string(context->operator_type));
       return xnn_status_out_of_memory;
     }
@@ -632,8 +641,7 @@ static enum xnn_status compute_scale_params_qs8_qc8w(
     }
   }
 
-  for (size_t output_channel = 0;
-       output_channel < context->groups * context->group_output_channels;
+  for (size_t output_channel = 0; output_channel < output_channels;
        output_channel++) {
     scale_params[output_channel] = context->input_scale *
                                    context->kernel_scale[output_channel] /
@@ -2557,6 +2565,12 @@ enum xnn_status reshape_deconvolution2d_nhwc_qx8_f32_qc8w(
     for (size_t i = 1; i < batch_size; ++i) {
       deconvolution_op->convolution_op->zero_buffers[i] =
           xnn_allocate_simd_memory(deconvolution_op->convolution_op->zero_size);
+      if (deconvolution_op->convolution_op->zero_buffers[i] == NULL) {
+        xnn_log_error(
+            "failed to allocate %zu bytes for zero buffer for batch %zu",
+            deconvolution_op->convolution_op->zero_size, i);
+        return xnn_status_out_of_memory;
+      }
     }
     deconvolution_op->convolution_op->valid_batch_size = batch_size;
   }

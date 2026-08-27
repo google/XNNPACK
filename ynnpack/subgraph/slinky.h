@@ -21,6 +21,7 @@
 #include "ynnpack/base/base.h"
 #include "ynnpack/base/span.h"
 #include "slinky/builder/pipeline.h"
+#include "slinky/builder/simplify.h"
 #include "slinky/runtime/buffer.h"
 #include "slinky/runtime/expr.h"
 #include "slinky/runtime/stmt.h"
@@ -59,6 +60,18 @@ class slinky_globals {
 
   slinky::buffer_expr_ptr make_buffer_expr(const std::string& name, int rank,
                                            slinky::expr elem_size);
+
+  // Record provable facts about a global variable whose defining expression
+  // is opaque to the simplifier (e.g. the result of a runtime split-factor
+  // call). The facts can be passed to prove_true/simplify wherever the
+  // scheduler reasons about expressions referencing these variables. Bounds
+  // may be symbolic. No-op if `e` is not a variable.
+  void learn_bounds(const slinky::expr& e, slinky::interval_expr bounds);
+  void learn_alignment(const slinky::expr& e, slinky::alignment_type a);
+
+  // Facts registered by learn_bounds/learn_alignment, keyed by variable.
+  slinky::bounds_map fact_bounds;
+  slinky::alignment_map fact_alignment;
 
   // Symbols we've named in Slinky.
   slinky::node_context symbols;
