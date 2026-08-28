@@ -428,7 +428,17 @@ absl::StatusOr<uint32_t> XnnpackBuildContext::DefineValue(
     KeepAlive(info.buffer);
   }
 
-  std::vector<size_t> dims(info.shape.begin(), info.shape.end());
+  std::vector<size_t> dims;
+  dims.reserve(info.shape.size());
+  for (int32_t d : info.shape) {
+    if (d < 0) {
+      return absl::InvalidArgumentError(absl::StrFormat(
+          "%s: tensor has negative dimension %d; dynamic shapes are not "
+          "supported in the XNNPACK backend",
+          info.name, d));
+    }
+    dims.push_back(static_cast<size_t>(d));
+  }
   const void* data_ptr = value.data.data();
 
   uint32_t external_id = XNN_INVALID_VALUE_ID;
