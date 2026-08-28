@@ -1557,7 +1557,7 @@ selects.config_setting_group(
 selects.config_setting_group(
     name = "avx512bf16_enabled_by_default",
     match_any = [
-        "//build_config:x86_64",
+        "//build_config:x86",
     ],
 )
 
