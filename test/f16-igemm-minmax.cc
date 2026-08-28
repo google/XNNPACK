@@ -1514,7 +1514,7 @@ std::vector<GemmTestParams> CreateTests1(
 #endif  // XNN_ENABLE_RISCV_FP16_VECTOR && XNN_ARCH_RISCV
 
 
-#if XNN_ARCH_WASMRELAXEDSIMD
+#if XNN_ARCH_WASMRELAXEDSIMDFP16
   INSTANTIATE_TEST_SUITE_P(
       F16_IGEMM_MINMAX_1X8__WASMRELAXEDSIMD_SPLAT, GemmTest,
       testing::ValuesIn(CreateTests1(
@@ -1666,7 +1666,7 @@ std::vector<GemmTestParams> CreateTests1(
       [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
         return info.param.test_name;
       });
-#endif  // XNN_ARCH_WASMRELAXEDSIMD
+#endif  // XNN_ARCH_WASMRELAXEDSIMDFP16
 
 
 }  // namespace

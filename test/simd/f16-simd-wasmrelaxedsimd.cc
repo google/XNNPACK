@@ -11,7 +11,7 @@
 // This header needs to go first for the arch test macros.
 #include "src/xnnpack/common.h"
 
-#if XNN_ARCH_WASMRELAXEDSIMD
+#if XNN_ARCH_WASMRELAXEDSIMDFP16
 
 #include <algorithm>
 #include <cmath>
@@ -595,4 +595,4 @@ TEST_F(F16SimdWASMRELAXEDSIMDTest, StoreTail) {
 
 }  // namespace xnnpack
 
-#endif  // XNN_ARCH_WASMRELAXEDSIMD
+#endif  // XNN_ARCH_WASMRELAXEDSIMDFP16

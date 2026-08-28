@@ -76,6 +76,9 @@ _ISA_TO_MACRO_MAP = {
     "avx512fp16": "XNN_ENABLE_AVX512FP16",
     "avx512bf16": "XNN_ENABLE_AVX512BF16",
     "hvx": "XNN_ENABLE_HVX",
+    "wasmrelaxedsimdfp16": "XNN_ENABLE_WASMRELAXEDSIMDFP16",
+    "wasmrelaxedsimd": "XNN_ENABLE_WASMRELAXEDSIMD",
+    "wasmsimd": "XNN_ENABLE_WASMSIMD",
 }
 
 _ISA_TO_ARCH_MAP = {
@@ -122,6 +125,7 @@ _ISA_TO_ARCH_MAP = {
     "wasm": ["wasm", "wasmsimd", "wasmrelaxedsimd"],
     "wasmsimd": ["wasmsimd", "wasmrelaxedsimd"],
     "wasmrelaxedsimd": ["wasmrelaxedsimd"],
+    "wasmrelaxedsimdfp16": ["wasmrelaxedsimd"],
     "wasmpshufb": ["wasmrelaxedsimd"],
     "wasmsdot": ["wasmrelaxedsimd"],
     "wasmusdot": ["wasmrelaxedsimd"],
