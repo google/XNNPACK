@@ -106,14 +106,14 @@ class FullyConnectedOperatorTester {
     }
   }
 
-  inline FullyConnectedOperatorTester& block_size(size_t block_size) {
+  FullyConnectedOperatorTester& block_size(size_t block_size) {
     assert(block_size >= 1);
     assert(block_size <= input_channels_);
     this->block_size_ = block_size;
     return *this;
   }
 
-  inline size_t block_size() const { return this->block_size_; }
+  size_t block_size() const { return this->block_size_; }
 
   FullyConnectedOperatorTester& input_zero_point(size_t input_zero_point) {
     this->input_zero_point_ = input_zero_point;
@@ -198,14 +198,12 @@ class FullyConnectedOperatorTester {
 
     const size_t k4 =
         round_up_po2(input_channels(), 4);  // tester assumes byte aligned rows
+    const size_t in_stride = std::max(input_stride(), k4);
 
-    xnnpack::Buffer<int8_t> input((batch_size() - 1) * input_stride() + k4,
+    xnnpack::Buffer<int8_t> input((batch_size() - 1) * in_stride + k4,
                                   xnnpack::XnnExtraBytes);
-    const size_t kernel_stride = transpose_weights()
-                                     ? (output_channels() + 3) / 4
-                                     : (input_channels() + 3) / 4;
-    xnnpack::Buffer<uint8_t> kernel(
-        (transpose_weights() ? k4 : output_channels()) * kernel_stride);
+    xnnpack::Buffer<uint8_t> kernel((input_channels() * output_channels() + 3) /
+                                    4);
     xnnpack::Buffer<float> bias(output_channels());
     xnnpack::Buffer<xnn_float16> output((batch_size() - 1) * output_stride() +
                                         output_channels());
@@ -218,7 +216,7 @@ class FullyConnectedOperatorTester {
                                    XNN_EXTRA_QUANTIZATION_PARAMS);
 
     for (size_t iteration = 0; iteration < kIterations; iteration++) {
-      std::generate(input.begin(), input.end(), [&]() { return w8dist(rng); });
+      std::fill(input.begin(), input.end(), 0);
       std::generate(kernel.begin(), kernel.end(),
                     [&]() { return (int8_t)normal_dist(rng); });
       std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
@@ -227,11 +225,14 @@ class FullyConnectedOperatorTester {
       std::generate(kernel_zero_point.begin(), kernel_zero_point.end(),
                     [&]() { return f32idist(rng); });
       for (size_t i = 0; i < batch_size(); ++i) {
+        for (size_t j = 0; j < input_channels(); ++j) {
+          input[i * in_stride + j] = w8dist(rng);
+        }
         quantization_params[i].zero_point = w8dist(rng);
         quantization_params[i].inv_scale = f32idist(rng);
         int32_t row_sum_value = 0;
-        for (size_t j = 0; j < k4; ++j) {
-          row_sum_value += input[i * input_stride() + j];
+        for (size_t j = 0; j < input_channels(); ++j) {
+          row_sum_value += input[i * in_stride + j];
         }
         row_sum[i] = static_cast<float>(row_sum_value);
       }
@@ -245,6 +246,8 @@ class FullyConnectedOperatorTester {
         row_sum[i] = row_sum[batch_size() - 1];
       }
 
+      const size_t k4 = round_up_po2(input_channels(), 4);
+
       // Compute reference results, without renormalization.
       std::fill(output_ref.begin(), output_ref.end(), 0.0f);
 
@@ -252,61 +255,58 @@ class FullyConnectedOperatorTester {
         for (size_t mi = 0; mi < batch_size(); ++mi) {
           for (size_t ni = 0; ni < output_channels(); ++ni) {
             int32_t ksum = 0;
-
+            int32_t acc = 0;
             for (size_t ki = 0; ki < input_channels(); ++ki) {
-              const size_t crumb_index = ki * kernel_stride + (ni / 4);
-              const int crumb_shift = (ni % 4) * 2;
-              int8_t kernel_value = (kernel[crumb_index] >> crumb_shift) & 0x3;
-              kernel_value = sign_extend_int2(kernel_value);
+              const size_t k_element_offset = ki * output_channels() + ni;
+              int8_t kernel_value = (kernel[k_element_offset / 4] >>
+                                     ((k_element_offset % 4) * 2)) &
+                                    0x3;
+              kernel_value = static_cast<int8_t>(kernel_value - 2);
               ksum += kernel_value;
-              output_ref[mi * output_channels() + ni] +=
-                  static_cast<int32_t>(input[mi * input_stride() + ki]) *
-                  static_cast<int32_t>(kernel_value);
+              acc += static_cast<int32_t>(input[mi * in_stride + ki]) *
+                     static_cast<int32_t>(kernel_value);
             }
-
-            output_ref[mi * output_channels() + ni] -=
-                (quantization_params[mi].zero_point * ksum);
-            output_ref[mi * output_channels() + ni] -=
-                (row_sum[mi] * kernel_zero_point[ni]);
-            output_ref[mi * output_channels() + ni] +=
-                static_cast<float>(k4) * quantization_params[mi].zero_point *
-                kernel_zero_point[ni];
-            output_ref[mi * output_channels() + ni] *=
-                quantization_params[mi].inv_scale * kernel_scale[ni];
+            float val = static_cast<float>(acc);
+            val -= static_cast<float>(quantization_params[mi].zero_point) *
+                   static_cast<float>(ksum);
+            val -= row_sum[mi] * kernel_zero_point[ni];
+            val += static_cast<float>(k4) *
+                   static_cast<float>(quantization_params[mi].zero_point) *
+                   kernel_zero_point[ni];
+            val *= quantization_params[mi].inv_scale * kernel_scale[ni];
             if (has_bias()) {
-              output_ref[mi * output_channels() + ni] += bias[ni];
+              val += bias[ni];
             }
+            output_ref[mi * output_channels() + ni] = val;
           }
         }
       } else {
         for (size_t mi = 0; mi < batch_size(); ++mi) {
           for (size_t ni = 0; ni < output_channels(); ++ni) {
             int32_t ksum = 0;
-
+            int32_t acc = 0;
             for (size_t ki = 0; ki < input_channels(); ++ki) {
               const size_t k_element_offset = ni * input_channels() + ki;
-              const size_t byte_index = k_element_offset / 4;
-              const int crumb_shift = (k_element_offset % 4) * 2;
-              int8_t kernel_value = (kernel[byte_index] >> crumb_shift) & 0x3;
-              kernel_value = sign_extend_int2(kernel_value);
+              int8_t kernel_value = (kernel[k_element_offset / 4] >>
+                                     ((k_element_offset % 4) * 2)) &
+                                    0x3;
+              kernel_value = static_cast<int8_t>(kernel_value - 2);
               ksum += kernel_value;
-              output_ref[mi * output_channels() + ni] +=
-                  static_cast<int32_t>(input[mi * input_stride() + ki]) *
-                  static_cast<int32_t>(kernel_value);
+              acc += static_cast<int32_t>(input[mi * in_stride + ki]) *
+                     static_cast<int32_t>(kernel_value);
             }
-
-            output_ref[mi * output_channels() + ni] -=
-                (quantization_params[mi].zero_point * ksum);
-            output_ref[mi * output_channels() + ni] -=
-                (row_sum[mi] * kernel_zero_point[ni]);
-            output_ref[mi * output_channels() + ni] +=
-                static_cast<float>(k4) * quantization_params[mi].zero_point *
-                kernel_zero_point[ni];
-            output_ref[mi * output_channels() + ni] *=
-                quantization_params[mi].inv_scale * kernel_scale[ni];
+            float val = static_cast<float>(acc);
+            val -= static_cast<float>(quantization_params[mi].zero_point) *
+                   static_cast<float>(ksum);
+            val -= row_sum[mi] * kernel_zero_point[ni];
+            val += static_cast<float>(k4) *
+                   static_cast<float>(quantization_params[mi].zero_point) *
+                   kernel_zero_point[ni];
+            val *= quantization_params[mi].inv_scale * kernel_scale[ni];
             if (has_bias()) {
-              output_ref[mi * output_channels() + ni] += bias[ni];
+              val += bias[ni];
             }
+            output_ref[mi * output_channels() + ni] = val;
           }
         }
       }
@@ -356,7 +356,7 @@ class FullyConnectedOperatorTester {
       }
 
       const xnn_status status = xnn_create_fully_connected_nc_qd8_f16_qc2w(
-          input_channels(), output_channels(), input_stride(), output_stride(),
+          input_channels(), output_channels(), in_stride, output_stride(),
           kernel_zero_point.data(), kernel_scale.data(), kernel.data(),
           has_bias() ? bias.data() : nullptr, output_min, output_max,
           transpose_weights() ? XNN_FLAG_TRANSPOSE_WEIGHTS : 0,
@@ -930,14 +930,12 @@ class FullyConnectedOperatorTester {
 
     // tester assumes byte aligned rows
     const size_t k4 = round_up(input_channels(), 4);
+    const size_t in_stride = std::max(input_stride(), k4);
 
-    xnnpack::Buffer<int8_t> input(
-        (batch_size() - 1) * input_stride() + k4,
-        xnnpack::XnnExtraBytes);
-    const size_t kernel_stride = transpose_weights()
-        ? (output_channels() + 3) / 4 : (input_channels() + 3) / 4;
-    xnnpack::Buffer<uint8_t> kernel(
-        (transpose_weights() ? k4 : output_channels()) * kernel_stride);
+    xnnpack::Buffer<int8_t> input((batch_size() - 1) * in_stride + k4,
+                                  xnnpack::XnnExtraBytes);
+    xnnpack::Buffer<uint8_t> kernel((input_channels() * output_channels() + 3) /
+                                    4);
     xnnpack::Buffer<float> bias(output_channels());
     xnnpack::Buffer<float> output((batch_size() - 1) * output_stride() +
                                   output_channels());
@@ -949,8 +947,8 @@ class FullyConnectedOperatorTester {
     xnnpack::Buffer<float> row_sum(
         batch_size() + XNN_EXTRA_QUANTIZATION_PARAMS);
 
-    {
-      std::generate(input.begin(), input.end(), [&]() { return w8dist(rng); });
+    for (size_t iteration = 0; iteration < kIterations; iteration++) {
+      std::fill(input.begin(), input.end(), 0);
       std::generate(kernel.begin(), kernel.end(),
                     [&]() { return w8dist(rng); });
       std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
@@ -959,11 +957,14 @@ class FullyConnectedOperatorTester {
       std::generate(kernel_zero_point.begin(), kernel_zero_point.end(),
                     [&]() { return f32idist(rng); });
       for (size_t i = 0; i < batch_size(); ++i) {
+        for (size_t j = 0; j < input_channels(); ++j) {
+          input[i * in_stride + j] = w8dist(rng);
+        }
         quantization_params[i].zero_point = w8dist(rng);
         quantization_params[i].inv_scale = f32idist(rng);
         int32_t row_sum_value = 0;
-        for (size_t j = 0; j < k4; ++j) {
-          row_sum_value += input[i * input_stride() + j];
+        for (size_t j = 0; j < input_channels(); ++j) {
+          row_sum_value += input[i * in_stride + j];
         }
         row_sum[i] = static_cast<float>(row_sum_value);
       }
@@ -977,6 +978,8 @@ class FullyConnectedOperatorTester {
         row_sum[i] = row_sum[batch_size() - 1];
       }
 
+      const size_t k4 = round_up_po2(input_channels(), 4);
+
       // Compute reference results, without renormalization.
       std::fill(output_ref.begin(), output_ref.end(), 0.0f);
 
@@ -984,61 +987,58 @@ class FullyConnectedOperatorTester {
         for (size_t mi = 0; mi < batch_size(); ++mi) {
           for (size_t ni = 0; ni < output_channels(); ++ni) {
             int32_t ksum = 0;
-
+            int32_t acc = 0;
             for (size_t ki = 0; ki < input_channels(); ++ki) {
-              const size_t crumb_index = ki * kernel_stride + (ni / 4);
-              const int crumb_shift = (ni % 4) * 2;
-              int8_t kernel_value = (kernel[crumb_index] >> crumb_shift) & 0x3;
-              kernel_value = sign_extend_int2(kernel_value);
+              const size_t k_element_offset = ki * output_channels() + ni;
+              int8_t kernel_value = (kernel[k_element_offset / 4] >>
+                                     ((k_element_offset % 4) * 2)) &
+                                    0x3;
+              kernel_value = static_cast<int8_t>(kernel_value - 2);
               ksum += kernel_value;
-              output_ref[mi * output_channels() + ni] +=
-                  static_cast<int32_t>(input[mi * input_stride() + ki]) *
-                  static_cast<int32_t>(kernel_value);
+              acc += static_cast<int32_t>(input[mi * in_stride + ki]) *
+                     static_cast<int32_t>(kernel_value);
             }
-
-            output_ref[mi * output_channels() + ni] -=
-                (quantization_params[mi].zero_point * ksum);
-            output_ref[mi * output_channels() + ni] -=
-                (row_sum[mi] * kernel_zero_point[ni]);
-            output_ref[mi * output_channels() + ni] +=
-                static_cast<float>(k4) * quantization_params[mi].zero_point *
-                kernel_zero_point[ni];
-            output_ref[mi * output_channels() + ni] *=
-                quantization_params[mi].inv_scale * kernel_scale[ni];
+            float val = static_cast<float>(acc);
+            val -= static_cast<float>(quantization_params[mi].zero_point) *
+                   static_cast<float>(ksum);
+            val -= row_sum[mi] * kernel_zero_point[ni];
+            val += static_cast<float>(k4) *
+                   static_cast<float>(quantization_params[mi].zero_point) *
+                   kernel_zero_point[ni];
+            val *= quantization_params[mi].inv_scale * kernel_scale[ni];
             if (has_bias()) {
-              output_ref[mi * output_channels() + ni] += bias[ni];
+              val += bias[ni];
             }
+            output_ref[mi * output_channels() + ni] = val;
           }
         }
       } else {
         for (size_t mi = 0; mi < batch_size(); ++mi) {
           for (size_t ni = 0; ni < output_channels(); ++ni) {
             int32_t ksum = 0;
-
+            int32_t acc = 0;
             for (size_t ki = 0; ki < input_channels(); ++ki) {
               const size_t k_element_offset = ni * input_channels() + ki;
-              const size_t byte_index = k_element_offset / 4;
-              const int crumb_shift = (k_element_offset % 4) * 2;
-              int8_t kernel_value = (kernel[byte_index] >> crumb_shift) & 0x3;
-              kernel_value = sign_extend_int2(kernel_value);
+              int8_t kernel_value = (kernel[k_element_offset / 4] >>
+                                     ((k_element_offset % 4) * 2)) &
+                                    0x3;
+              kernel_value = static_cast<int8_t>(kernel_value - 2);
               ksum += kernel_value;
-              output_ref[mi * output_channels() + ni] +=
-                  static_cast<int32_t>(input[mi * input_stride() + ki]) *
-                  static_cast<int32_t>(kernel_value);
+              acc += static_cast<int32_t>(input[mi * in_stride + ki]) *
+                     static_cast<int32_t>(kernel_value);
             }
-
-            output_ref[mi * output_channels() + ni] -=
-                (quantization_params[mi].zero_point * ksum);
-            output_ref[mi * output_channels() + ni] -=
-                (row_sum[mi] * kernel_zero_point[ni]);
-            output_ref[mi * output_channels() + ni] +=
-                static_cast<float>(k4) * quantization_params[mi].zero_point *
-                kernel_zero_point[ni];
-            output_ref[mi * output_channels() + ni] *=
-                quantization_params[mi].inv_scale * kernel_scale[ni];
+            float val = static_cast<float>(acc);
+            val -= static_cast<float>(quantization_params[mi].zero_point) *
+                   static_cast<float>(ksum);
+            val -= row_sum[mi] * kernel_zero_point[ni];
+            val += static_cast<float>(k4) *
+                   static_cast<float>(quantization_params[mi].zero_point) *
+                   kernel_zero_point[ni];
+            val *= quantization_params[mi].inv_scale * kernel_scale[ni];
             if (has_bias()) {
-              output_ref[mi * output_channels() + ni] += bias[ni];
+              val += bias[ni];
             }
+            output_ref[mi * output_channels() + ni] = val;
           }
         }
       }
@@ -1081,7 +1081,7 @@ class FullyConnectedOperatorTester {
       }
 
       const xnn_status status = xnn_create_fully_connected_nc_qd8_f32_qc2w(
-          input_channels(), output_channels(), input_stride(), output_stride(),
+          input_channels(), output_channels(), in_stride, output_stride(),
           kernel_zero_point.data(), kernel_scale.data(), kernel.data(),
           has_bias() ? bias.data() : nullptr, output_min, output_max,
           transpose_weights() ? XNN_FLAG_TRANSPOSE_WEIGHTS : 0,
@@ -1191,10 +1191,8 @@ class FullyConnectedOperatorTester {
 
     xnnpack::Buffer<int8_t> input((batch_size() - 1) * input_stride() + k4,
                                   xnnpack::XnnExtraBytes);
-    const size_t kernel_stride = transpose_weights()
-        ? (output_channels() + 3) / 4 : (input_channels() + 3) / 4;
-    xnnpack::Buffer<uint8_t> kernel(
-        (transpose_weights() ? k4 : output_channels()) * kernel_stride);
+    xnnpack::Buffer<uint8_t> kernel((input_channels() * output_channels() + 3) /
+                                    4);
     xnnpack::Buffer<float> bias(output_channels());
     xnnpack::Buffer<xnn_float16> output((batch_size() - 1) * output_stride() +
                                         output_channels());
@@ -1207,7 +1205,7 @@ class FullyConnectedOperatorTester {
                                    XNN_EXTRA_QUANTIZATION_PARAMS);
 
     for (size_t iteration = 0; iteration < kIterations; iteration++) {
-      std::generate(input.begin(), input.end(), [&]() { return w8dist(rng); });
+      std::fill(input.begin(), input.end(), 0);
       std::generate(kernel.begin(), kernel.end(),
                     [&]() { return (int8_t)normal_dist(rng); });
       std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
@@ -1216,10 +1214,13 @@ class FullyConnectedOperatorTester {
       std::generate(kernel_zero_point.begin(), kernel_zero_point.end(),
                     [&]() { return f32idist(rng); });
       for (size_t i = 0; i < batch_size(); ++i) {
+        for (size_t j = 0; j < input_channels(); ++j) {
+          input[i * input_stride() + j] = w8dist(rng);
+        }
         quantization_params[i].zero_point = w8dist(rng);
         quantization_params[i].inv_scale = f32idist(rng);
         int32_t row_sum_value = 0;
-        for (size_t j = 0; j < k4; ++j) {
+        for (size_t j = 0; j < input_channels(); ++j) {
           row_sum_value += input[i * input_stride() + j];
         }
         row_sum[i] = static_cast<float>(row_sum_value);
@@ -1234,6 +1235,8 @@ class FullyConnectedOperatorTester {
         row_sum[i] = row_sum[batch_size() - 1];
       }
 
+      const size_t k4 = round_up_po2(input_channels(), 4);
+
       // Compute reference results, without renormalization.
       std::fill(output_ref.begin(), output_ref.end(), 0.0f);
 
@@ -1241,61 +1244,58 @@ class FullyConnectedOperatorTester {
         for (size_t mi = 0; mi < batch_size(); ++mi) {
           for (size_t ni = 0; ni < output_channels(); ++ni) {
             int32_t ksum = 0;
-
+            int32_t acc = 0;
             for (size_t ki = 0; ki < input_channels(); ++ki) {
-              const size_t crumb_index = ki * kernel_stride + (ni / 4);
-              const int crumb_shift = (ni % 4) * 2;
-              int8_t kernel_value = (kernel[crumb_index] >> crumb_shift) & 0x3;
-              kernel_value = sign_extend_int2(kernel_value);
+              const size_t k_element_offset = ki * output_channels() + ni;
+              int8_t kernel_value = (kernel[k_element_offset / 4] >>
+                                     ((k_element_offset % 4) * 2)) &
+                                    0x3;
+              kernel_value = static_cast<int8_t>(kernel_value - 2);
               ksum += kernel_value;
-              output_ref[mi * output_channels() + ni] +=
-                  static_cast<int32_t>(input[mi * input_stride() + ki]) *
-                  static_cast<int32_t>(kernel_value);
+              acc += static_cast<int32_t>(input[mi * input_stride() + ki]) *
+                     static_cast<int32_t>(kernel_value);
             }
-
-            output_ref[mi * output_channels() + ni] -=
-                (quantization_params[mi].zero_point * ksum);
-            output_ref[mi * output_channels() + ni] -=
-                (row_sum[mi] * kernel_zero_point[ni]);
-            output_ref[mi * output_channels() + ni] +=
-                static_cast<float>(k4) * quantization_params[mi].zero_point *
-                kernel_zero_point[ni];
-            output_ref[mi * output_channels() + ni] *=
-                quantization_params[mi].inv_scale * kernel_scale[ni];
+            float val = static_cast<float>(acc);
+            val -= static_cast<float>(quantization_params[mi].zero_point) *
+                   static_cast<float>(ksum);
+            val -= row_sum[mi] * kernel_zero_point[ni];
+            val += static_cast<float>(k4) *
+                   static_cast<float>(quantization_params[mi].zero_point) *
+                   kernel_zero_point[ni];
+            val *= quantization_params[mi].inv_scale * kernel_scale[ni];
             if (has_bias()) {
-              output_ref[mi * output_channels() + ni] += bias[ni];
+              val += bias[ni];
             }
+            output_ref[mi * output_channels() + ni] = val;
           }
         }
       } else {
         for (size_t mi = 0; mi < batch_size(); ++mi) {
           for (size_t ni = 0; ni < output_channels(); ++ni) {
             int32_t ksum = 0;
-
+            int32_t acc = 0;
             for (size_t ki = 0; ki < input_channels(); ++ki) {
               const size_t k_element_offset = ni * input_channels() + ki;
-              const size_t byte_index = k_element_offset / 4;
-              const int crumb_shift = (k_element_offset % 4) * 2;
-              int8_t kernel_value = (kernel[byte_index] >> crumb_shift) & 0x3;
-              kernel_value = sign_extend_int2(kernel_value);
+              int8_t kernel_value = (kernel[k_element_offset / 4] >>
+                                     ((k_element_offset % 4) * 2)) &
+                                    0x3;
+              kernel_value = static_cast<int8_t>(kernel_value - 2);
               ksum += kernel_value;
-              output_ref[mi * output_channels() + ni] +=
-                  static_cast<int32_t>(input[mi * input_stride() + ki]) *
-                  static_cast<int32_t>(kernel_value);
+              acc += static_cast<int32_t>(input[mi * input_stride() + ki]) *
+                     static_cast<int32_t>(kernel_value);
             }
-
-            output_ref[mi * output_channels() + ni] -=
-                (quantization_params[mi].zero_point * ksum);
-            output_ref[mi * output_channels() + ni] -=
-                (row_sum[mi] * kernel_zero_point[ni]);
-            output_ref[mi * output_channels() + ni] +=
-                static_cast<float>(k4) * quantization_params[mi].zero_point *
-                kernel_zero_point[ni];
-            output_ref[mi * output_channels() + ni] *=
-                quantization_params[mi].inv_scale * kernel_scale[ni];
+            float val = static_cast<float>(acc);
+            val -= static_cast<float>(quantization_params[mi].zero_point) *
+                   static_cast<float>(ksum);
+            val -= row_sum[mi] * kernel_zero_point[ni];
+            val += static_cast<float>(k4) *
+                   static_cast<float>(quantization_params[mi].zero_point) *
+                   kernel_zero_point[ni];
+            val *= quantization_params[mi].inv_scale * kernel_scale[ni];
             if (has_bias()) {
-              output_ref[mi * output_channels() + ni] += bias[ni];
+              val += bias[ni];
             }
+            output_ref[mi * output_channels() + ni] = val;
           }
         }
       }
@@ -1332,7 +1332,7 @@ class FullyConnectedOperatorTester {
       }
       for (size_t i = 0; i < quantization_params.size(); ++i) {
         quantization_params[i].zero_point += 128;
-        row_sum[i] += 128 * k4;
+        row_sum[i] += 128 * input_channels();
       }
 
       // Create, setup, run, and destroy Fully Connected operator.
@@ -1470,10 +1470,8 @@ class FullyConnectedOperatorTester {
     xnnpack::Buffer<int8_t> input(
         (batch_size() - 1) * input_stride() + k4,
         xnnpack::XnnExtraBytes);
-    const size_t kernel_stride = transpose_weights()
-        ? (output_channels() + 3) / 4 : (input_channels() + 3) / 4;
-    xnnpack::Buffer<uint8_t> kernel(
-        (transpose_weights() ? k4 : output_channels()) * kernel_stride);
+    xnnpack::Buffer<uint8_t> kernel((input_channels() * output_channels() + 3) /
+                                    4);
     xnnpack::Buffer<float> bias(output_channels());
     xnnpack::Buffer<float> output((batch_size() - 1) * output_stride() +
                                   output_channels());
@@ -1485,8 +1483,8 @@ class FullyConnectedOperatorTester {
     xnnpack::Buffer<float> row_sum(
         batch_size() + XNN_EXTRA_QUANTIZATION_PARAMS);
 
-    {
-      std::generate(input.begin(), input.end(), [&]() { return w8dist(rng); });
+    for (size_t iteration = 0; iteration < kIterations; iteration++) {
+      std::fill(input.begin(), input.end(), 0);
       std::generate(kernel.begin(), kernel.end(),
                     [&]() { return w8dist(rng); });
       std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
@@ -1495,10 +1493,13 @@ class FullyConnectedOperatorTester {
       std::generate(kernel_zero_point.begin(), kernel_zero_point.end(),
                     [&]() { return f32idist(rng); });
       for (size_t i = 0; i < batch_size(); ++i) {
+        for (size_t j = 0; j < input_channels(); ++j) {
+          input[i * input_stride() + j] = w8dist(rng);
+        }
         quantization_params[i].zero_point = w8dist(rng);
         quantization_params[i].inv_scale = f32idist(rng);
         int32_t row_sum_value = 0;
-        for (size_t j = 0; j < k4; ++j) {
+        for (size_t j = 0; j < input_channels(); ++j) {
           row_sum_value += input[i * input_stride() + j];
         }
         row_sum[i] = static_cast<float>(row_sum_value);
@@ -1513,6 +1514,8 @@ class FullyConnectedOperatorTester {
         row_sum[i] = row_sum[batch_size() - 1];
       }
 
+      const size_t k4 = round_up_po2(input_channels(), 4);
+
       // Compute reference results, without renormalization.
       std::fill(output_ref.begin(), output_ref.end(), 0.0f);
 
@@ -1520,61 +1523,58 @@ class FullyConnectedOperatorTester {
         for (size_t mi = 0; mi < batch_size(); ++mi) {
           for (size_t ni = 0; ni < output_channels(); ++ni) {
             int32_t ksum = 0;
-
+            int32_t acc = 0;
             for (size_t ki = 0; ki < input_channels(); ++ki) {
-              const size_t crumb_index = ki * kernel_stride + (ni / 4);
-              const int crumb_shift = (ni % 4) * 2;
-              int8_t kernel_value = (kernel[crumb_index] >> crumb_shift) & 0x3;
-              kernel_value = sign_extend_int2(kernel_value);
+              const size_t k_element_offset = ki * output_channels() + ni;
+              int8_t kernel_value = (kernel[k_element_offset / 4] >>
+                                     ((k_element_offset % 4) * 2)) &
+                                    0x3;
+              kernel_value = static_cast<int8_t>(kernel_value - 2);
               ksum += kernel_value;
-              output_ref[mi * output_channels() + ni] +=
-                  static_cast<int32_t>(input[mi * input_stride() + ki]) *
-                  static_cast<int32_t>(kernel_value);
+              acc += static_cast<int32_t>(input[mi * input_stride() + ki]) *
+                     static_cast<int32_t>(kernel_value);
             }
-
-            output_ref[mi * output_channels() + ni] -=
-                (quantization_params[mi].zero_point * ksum);
-            output_ref[mi * output_channels() + ni] -=
-                (row_sum[mi] * kernel_zero_point[ni]);
-            output_ref[mi * output_channels() + ni] +=
-                static_cast<float>(k4) * quantization_params[mi].zero_point *
-                kernel_zero_point[ni];
-            output_ref[mi * output_channels() + ni] *=
-                quantization_params[mi].inv_scale * kernel_scale[ni];
+            float val = static_cast<float>(acc);
+            val -= static_cast<float>(quantization_params[mi].zero_point) *
+                   static_cast<float>(ksum);
+            val -= row_sum[mi] * kernel_zero_point[ni];
+            val += static_cast<float>(k4) *
+                   static_cast<float>(quantization_params[mi].zero_point) *
+                   kernel_zero_point[ni];
+            val *= quantization_params[mi].inv_scale * kernel_scale[ni];
             if (has_bias()) {
-              output_ref[mi * output_channels() + ni] += bias[ni];
+              val += bias[ni];
             }
+            output_ref[mi * output_channels() + ni] = val;
           }
         }
       } else {
         for (size_t mi = 0; mi < batch_size(); ++mi) {
           for (size_t ni = 0; ni < output_channels(); ++ni) {
             int32_t ksum = 0;
-
+            int32_t acc = 0;
             for (size_t ki = 0; ki < input_channels(); ++ki) {
               const size_t k_element_offset = ni * input_channels() + ki;
-              const size_t byte_index = k_element_offset / 4;
-              const int crumb_shift = (k_element_offset % 4) * 2;
-              int8_t kernel_value = (kernel[byte_index] >> crumb_shift) & 0x3;
-              kernel_value = sign_extend_int2(kernel_value);
+              int8_t kernel_value = (kernel[k_element_offset / 4] >>
+                                     ((k_element_offset % 4) * 2)) &
+                                    0x3;
+              kernel_value = static_cast<int8_t>(kernel_value - 2);
               ksum += kernel_value;
-              output_ref[mi * output_channels() + ni] +=
-                  static_cast<int32_t>(input[mi * input_stride() + ki]) *
-                  static_cast<int32_t>(kernel_value);
+              acc += static_cast<int32_t>(input[mi * input_stride() + ki]) *
+                     static_cast<int32_t>(kernel_value);
             }
-
-            output_ref[mi * output_channels() + ni] -=
-                (quantization_params[mi].zero_point * ksum);
-            output_ref[mi * output_channels() + ni] -=
-                (row_sum[mi] * kernel_zero_point[ni]);
-            output_ref[mi * output_channels() + ni] +=
-                static_cast<float>(k4) * quantization_params[mi].zero_point *
-                kernel_zero_point[ni];
-            output_ref[mi * output_channels() + ni] *=
-                quantization_params[mi].inv_scale * kernel_scale[ni];
+            float val = static_cast<float>(acc);
+            val -= static_cast<float>(quantization_params[mi].zero_point) *
+                   static_cast<float>(ksum);
+            val -= row_sum[mi] * kernel_zero_point[ni];
+            val += static_cast<float>(k4) *
+                   static_cast<float>(quantization_params[mi].zero_point) *
+                   kernel_zero_point[ni];
+            val *= quantization_params[mi].inv_scale * kernel_scale[ni];
             if (has_bias()) {
-              output_ref[mi * output_channels() + ni] += bias[ni];
+              val += bias[ni];
             }
+            output_ref[mi * output_channels() + ni] = val;
           }
         }
       }
@@ -1605,7 +1605,7 @@ class FullyConnectedOperatorTester {
       }
       for (size_t i = 0; i < quantization_params.size(); ++i) {
         quantization_params[i].zero_point += 128;
-        row_sum[i] += 128 * k4;
+        row_sum[i] += 128 * input_channels();
       }
 
       ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));

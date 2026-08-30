@@ -160,6 +160,36 @@ TEST(polyfill, _mm_dpbusd_epi32_madd_kzp2) {
 #endif
 }
 
+TEST(polyfill, _mm_dpbusd_epi32_madd_qd8_qc2w) {
+#if defined(__SSSE3__)
+  TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_ssse3);
+
+  for (int32_t i8_val = -128; i8_val < 128; ++i8_val) {
+    for (uint32_t u2_val = 0; u2_val < 4; ++u2_val) {
+      __m128i vacc = _mm_set1_epi32(100);
+      __m128i vi8 = _mm_set1_epi8(static_cast<int8_t>(i8_val));
+      __m128i vu2 = _mm_set1_epi8(static_cast<uint8_t>(u2_val));
+
+      __m128i vres = _mm_dpbusd_epi32_madd_qd8_qc2w(vacc, vu2, vi8);
+
+      int32_t res[4];
+      _mm_storeu_si128(reinterpret_cast<__m128i*>(res), vres);
+
+      // Reference formula: result = acc + 4 * (u2 * i8)
+      int32_t expected = 100 + 4 * (static_cast<int32_t>(u2_val) *
+                                    static_cast<int32_t>(i8_val));
+
+      for (int i = 0; i < 4; ++i) {
+        ASSERT_EQ(res[i], expected)
+            << "i8=" << i8_val << ", u2=" << u2_val << ", index=" << i;
+      }
+    }
+  }
+#else
+  GTEST_SKIP();
+#endif
+}
+
 }  // namespace xnnpack
 
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64

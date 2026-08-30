@@ -192,34 +192,34 @@ void xnn_qs8_qc2w_gemm_minmax_fp32_ukernel_8x8c8__avxvnni(
       vacc7x4567 = _mm256_dpbusd_avx_epi32(vacc7x4567, va7x0, vb89ABCDEFx0123);
       vacc0x0123 = _mm256_dpbusd_avx_epi32(vacc0x0123, va0x1, vb01234567x4567);
       vacc0x4567 = _mm256_dpbusd_avx_epi32(vacc0x4567, va0x1, vb89ABCDEFx4567);
-      vacc0x0123 = _mm256_dpbusd_avx_epi32(vacc0x0123, va0x2, vb01234567x89AB);
-      vacc0x4567 = _mm256_dpbusd_avx_epi32(vacc0x4567, va0x2, vb89ABCDEFx89AB);
       vacc1x0123 = _mm256_dpbusd_avx_epi32(vacc1x0123, va1x1, vb01234567x4567);
       vacc1x4567 = _mm256_dpbusd_avx_epi32(vacc1x4567, va1x1, vb89ABCDEFx4567);
-      vacc1x0123 = _mm256_dpbusd_avx_epi32(vacc1x0123, va1x2, vb01234567x89AB);
-      vacc1x4567 = _mm256_dpbusd_avx_epi32(vacc1x4567, va1x2, vb89ABCDEFx89AB);
       vacc2x0123 = _mm256_dpbusd_avx_epi32(vacc2x0123, va2x1, vb01234567x4567);
       vacc2x4567 = _mm256_dpbusd_avx_epi32(vacc2x4567, va2x1, vb89ABCDEFx4567);
-      vacc2x0123 = _mm256_dpbusd_avx_epi32(vacc2x0123, va2x2, vb01234567x89AB);
-      vacc2x4567 = _mm256_dpbusd_avx_epi32(vacc2x4567, va2x2, vb89ABCDEFx89AB);
       vacc3x0123 = _mm256_dpbusd_avx_epi32(vacc3x0123, va3x1, vb01234567x4567);
       vacc3x4567 = _mm256_dpbusd_avx_epi32(vacc3x4567, va3x1, vb89ABCDEFx4567);
-      vacc3x0123 = _mm256_dpbusd_avx_epi32(vacc3x0123, va3x2, vb01234567x89AB);
-      vacc3x4567 = _mm256_dpbusd_avx_epi32(vacc3x4567, va3x2, vb89ABCDEFx89AB);
       vacc4x0123 = _mm256_dpbusd_avx_epi32(vacc4x0123, va4x1, vb01234567x4567);
       vacc4x4567 = _mm256_dpbusd_avx_epi32(vacc4x4567, va4x1, vb89ABCDEFx4567);
-      vacc4x0123 = _mm256_dpbusd_avx_epi32(vacc4x0123, va4x2, vb01234567x89AB);
-      vacc4x4567 = _mm256_dpbusd_avx_epi32(vacc4x4567, va4x2, vb89ABCDEFx89AB);
       vacc5x0123 = _mm256_dpbusd_avx_epi32(vacc5x0123, va5x1, vb01234567x4567);
       vacc5x4567 = _mm256_dpbusd_avx_epi32(vacc5x4567, va5x1, vb89ABCDEFx4567);
-      vacc5x0123 = _mm256_dpbusd_avx_epi32(vacc5x0123, va5x2, vb01234567x89AB);
-      vacc5x4567 = _mm256_dpbusd_avx_epi32(vacc5x4567, va5x2, vb89ABCDEFx89AB);
       vacc6x0123 = _mm256_dpbusd_avx_epi32(vacc6x0123, va6x1, vb01234567x4567);
       vacc6x4567 = _mm256_dpbusd_avx_epi32(vacc6x4567, va6x1, vb89ABCDEFx4567);
-      vacc6x0123 = _mm256_dpbusd_avx_epi32(vacc6x0123, va6x2, vb01234567x89AB);
-      vacc6x4567 = _mm256_dpbusd_avx_epi32(vacc6x4567, va6x2, vb89ABCDEFx89AB);
       vacc7x0123 = _mm256_dpbusd_avx_epi32(vacc7x0123, va7x1, vb01234567x4567);
       vacc7x4567 = _mm256_dpbusd_avx_epi32(vacc7x4567, va7x1, vb89ABCDEFx4567);
+      vacc0x0123 = _mm256_dpbusd_avx_epi32(vacc0x0123, va0x2, vb01234567x89AB);
+      vacc0x4567 = _mm256_dpbusd_avx_epi32(vacc0x4567, va0x2, vb89ABCDEFx89AB);
+      vacc1x0123 = _mm256_dpbusd_avx_epi32(vacc1x0123, va1x2, vb01234567x89AB);
+      vacc1x4567 = _mm256_dpbusd_avx_epi32(vacc1x4567, va1x2, vb89ABCDEFx89AB);
+      vacc2x0123 = _mm256_dpbusd_avx_epi32(vacc2x0123, va2x2, vb01234567x89AB);
+      vacc2x4567 = _mm256_dpbusd_avx_epi32(vacc2x4567, va2x2, vb89ABCDEFx89AB);
+      vacc3x0123 = _mm256_dpbusd_avx_epi32(vacc3x0123, va3x2, vb01234567x89AB);
+      vacc3x4567 = _mm256_dpbusd_avx_epi32(vacc3x4567, va3x2, vb89ABCDEFx89AB);
+      vacc4x0123 = _mm256_dpbusd_avx_epi32(vacc4x0123, va4x2, vb01234567x89AB);
+      vacc4x4567 = _mm256_dpbusd_avx_epi32(vacc4x4567, va4x2, vb89ABCDEFx89AB);
+      vacc5x0123 = _mm256_dpbusd_avx_epi32(vacc5x0123, va5x2, vb01234567x89AB);
+      vacc5x4567 = _mm256_dpbusd_avx_epi32(vacc5x4567, va5x2, vb89ABCDEFx89AB);
+      vacc6x0123 = _mm256_dpbusd_avx_epi32(vacc6x0123, va6x2, vb01234567x89AB);
+      vacc6x4567 = _mm256_dpbusd_avx_epi32(vacc6x4567, va6x2, vb89ABCDEFx89AB);
       vacc7x0123 = _mm256_dpbusd_avx_epi32(vacc7x0123, va7x2, vb01234567x89AB);
       vacc7x4567 = _mm256_dpbusd_avx_epi32(vacc7x4567, va7x2, vb89ABCDEFx89AB);
       vacc0x0123 = _mm256_dpbusd_avx_epi32(vacc0x0123, va0x3, vb01234567xCDEF);
@@ -396,6 +396,8 @@ void xnn_qs8_qc2w_gemm_minmax_fp32_ukernel_8x8c8__avxvnni(
       w = (const int8_t*) w + 64;
       k -= 8 * sizeof(int8_t);
     }
+    // Make sure there were no leftovers.
+    assert(k == 0);
 
     // Add adjacent pairs
     const __m256i vsum0x02134657 = _mm256_hadd_epi32(vacc0x0123, vacc0x4567);
