@@ -44,6 +44,14 @@ TEST_HORIZONTAL_MIN(x86_sse41, s32, 4);
 
 TEST_HORIZONTAL_MAX(x86_sse41, s32, 4);
 
+TEST_ANY(x86_sse41, s8, 16);
+TEST_ANY(x86_sse41, s16, 8);
+TEST_ANY(x86_sse41, s32, 4);
+
+TEST_ALL(x86_sse41, s8, 16);
+TEST_ALL(x86_sse41, s16, 8);
+TEST_ALL(x86_sse41, s32, 4);
+
 TEST_CAST(x86_sse41, s32, u8x16);
 TEST_CAST(x86_sse41, s32, s8x16);
 

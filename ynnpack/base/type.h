@@ -47,11 +47,11 @@ bool type_is_integral(ynn_type t);
 // Returns true if the type is a floating point type.
 bool type_is_floating_point(ynn_type t);
 
-// Returns the size of an element of the type.
-size_t type_size_bytes(ynn_type t);
+// Returns the size of `n` elements of the type.
+size_t type_size_bytes(ynn_type t, size_t n = 1);
 
-// Returns the size of an element of the type in bits.
-size_t type_size_bits(ynn_type t);
+// Returns the size of `n` elements of the type in bits.
+size_t type_size_bits(ynn_type t, size_t n = 1);
 
 // Returns the number of bits in the mantissa of the type, including the implied
 // leading one for float types.

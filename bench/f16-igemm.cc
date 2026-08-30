@@ -27,7 +27,7 @@ namespace {
 
 
 
-#if XNN_ARCH_WASMRELAXEDSIMD
+#if XNN_ARCH_WASMRELAXEDSIMDFP16
   static void f16_igemm_minmax_ukernel_1x8__wasmrelaxedsimd_splat(benchmark::State& state) {
     IGEMMBenchmark(state,
       xnn_f16_igemm_minmax_ukernel_1x8__wasmrelaxedsimd_splat,
@@ -115,7 +115,7 @@ namespace {
   }
 
   BENCHMARK_CONV(f16_igemm_minmax_ukernel_8x16__wasmrelaxedsimd_splat)
-#endif  // XNN_ARCH_WASMRELAXEDSIMD
+#endif  // XNN_ARCH_WASMRELAXEDSIMDFP16
 
 
 #if XNN_ENABLE_AVX512FP16 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)

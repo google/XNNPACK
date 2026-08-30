@@ -1596,11 +1596,6 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
       sched->input_scheduler_bounds[1][3] = slinky::point(j);
     }
 
-    // Schedule the output buffer to be stored at the same level as it's
-    // computed at.
-    ynn::scheduled_buffer sched_output_buffer = {output.buffer, 0};
-    sched->scheduled_buffers.push_back(std::move(sched_output_buffer));
-
     func.user_data() = sched.get();
     runtime.scheduling_info_storage.push_back(std::move(sched));
 

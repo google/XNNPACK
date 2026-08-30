@@ -368,6 +368,10 @@ YNN_ALWAYS_INLINE f64x2 load_aligned(const double* ptr, decltype(f64x2::N),
                                      f64x2 = {}) {
   return f64x2{vld1q_f64(ptr)};
 }
+YNN_ALWAYS_INLINE s64x2 load_aligned(const int64_t* ptr, decltype(s64x2::N),
+                                     s64x2 = {}) {
+  return s64x2{vld1q_s64(ptr)};
+}
 #endif
 YNN_ALWAYS_INLINE s32x4 load_aligned(const int32_t* ptr, decltype(s32x4::N),
                                      s32x4 = {}) {
@@ -427,6 +431,10 @@ YNN_ALWAYS_INLINE void store_aligned(float* ptr, f32x2 b,
 YNN_ALWAYS_INLINE void store_aligned(double* ptr, f64x2 b,
                                      decltype(f64x2::N) = {}) {
   vst1q_f64(ptr, b.v);
+}
+YNN_ALWAYS_INLINE void store_aligned(int64_t* ptr, s64x2 b,
+                                     decltype(s64x2::N) = {}) {
+  vst1q_s64(ptr, b.v);
 }
 #endif
 YNN_ALWAYS_INLINE void store_aligned(uint32_t* ptr, u32x4 b,
@@ -494,6 +502,10 @@ YNN_ALWAYS_INLINE f64x2 load(const double* ptr, decltype(f64x2::N),
                              f64x2 = {}) {
   return f64x2{vld1q_f64(ptr)};
 }
+YNN_ALWAYS_INLINE s64x2 load(const int64_t* ptr, decltype(s64x2::N),
+                             s64x2 = {}) {
+  return s64x2{vld1q_s64(ptr)};
+}
 #endif
 YNN_ALWAYS_INLINE u32x4 load(const uint32_t* ptr, decltype(u32x4::N),
                              u32x4 = {}) {
@@ -555,6 +567,9 @@ YNN_ALWAYS_INLINE void store(float* ptr, f32x2 b, decltype(f32x2::N) = {}) {
 #ifdef YNN_ARCH_ARM64
 YNN_ALWAYS_INLINE void store(double* ptr, f64x2 b, decltype(f64x2::N) = {}) {
   vst1q_f64(ptr, b.v);
+}
+YNN_ALWAYS_INLINE void store(int64_t* ptr, s64x2 b, decltype(s64x2::N) = {}) {
+  vst1q_s64(ptr, b.v);
 }
 #endif
 YNN_ALWAYS_INLINE void store(uint32_t* ptr, u32x4 b, decltype(u32x4::N) = {}) {
@@ -1920,6 +1935,45 @@ YNN_ALWAYS_INLINE double horizontal_max(f64x2 a) {
 YNN_ALWAYS_INLINE double horizontal_sum(f64x2 a) {
   return vgetq_lane_f64(a.v, 0) + vgetq_lane_f64(a.v, 1);
 }
+#endif
+
+#ifdef YNN_ARCH_ARM64
+YNN_ALWAYS_INLINE bool any(s8x16 x) {
+  return vmaxvq_u8(vreinterpretq_u8_s8(x.v)) != 0;
+}
+YNN_ALWAYS_INLINE bool any(s16x8 x) {
+  return vmaxvq_u16(vreinterpretq_u16_s16(x.v)) != 0;
+}
+YNN_ALWAYS_INLINE bool any(s32x4 x) {
+  return vmaxvq_u32(vreinterpretq_u32_s32(x.v)) != 0;
+}
+YNN_ALWAYS_INLINE bool any(s64x2 x) {
+  return (vgetq_lane_u64(vreinterpretq_u64_s64(x.v), 0) |
+          vgetq_lane_u64(vreinterpretq_u64_s64(x.v), 1)) != 0;
+}
+#else
+YNN_ALWAYS_INLINE bool any(s8x16 x) {
+  uint32x2_t lohi = vorr_u32(vget_low_u32(vreinterpretq_u32_s8(x.v)),
+                             vget_high_u32(vreinterpretq_u32_s8(x.v)));
+  return (vget_lane_u32(lohi, 0) | vget_lane_u32(lohi, 1)) != 0;
+}
+YNN_ALWAYS_INLINE bool any(s16x8 x) {
+  uint32x2_t lohi = vorr_u32(vget_low_u32(vreinterpretq_u32_s16(x.v)),
+                             vget_high_u32(vreinterpretq_u32_s16(x.v)));
+  return (vget_lane_u32(lohi, 0) | vget_lane_u32(lohi, 1)) != 0;
+}
+YNN_ALWAYS_INLINE bool any(s32x4 x) {
+  uint32x2_t lohi = vorr_u32(vget_low_u32(vreinterpretq_u32_s32(x.v)),
+                             vget_high_u32(vreinterpretq_u32_s32(x.v)));
+  return (vget_lane_u32(lohi, 0) | vget_lane_u32(lohi, 1)) != 0;
+}
+#endif
+
+YNN_ALWAYS_INLINE bool all(s8x16 x) { return !any(~x); }
+YNN_ALWAYS_INLINE bool all(s16x8 x) { return !any(~x); }
+YNN_ALWAYS_INLINE bool all(s32x4 x) { return !any(~x); }
+#ifdef YNN_ARCH_ARM64
+YNN_ALWAYS_INLINE bool all(s64x2 x) { return !any(~x); }
 #endif
 
 YNN_ALWAYS_INLINE std::tuple<u8x16, u8x16> interleave(

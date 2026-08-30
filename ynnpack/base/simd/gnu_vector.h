@@ -683,6 +683,22 @@ YNN_ALWAYS_INLINE T horizontal_max(vec<T, N> x) {
   return horizontal_max(max(lo(x), hi(x)));
 }
 
+template <typename T, size_t N>
+YNN_ALWAYS_INLINE bool any(vec<T, N> x) {
+  for (size_t i = 0; i < N; ++i) {
+    if (x.v_[i] != 0) return true;
+  }
+  return false;
+}
+
+template <typename T, size_t N>
+YNN_ALWAYS_INLINE bool all(vec<T, N> x) {
+  for (size_t i = 0; i < N; ++i) {
+    if (x.v_[i] == 0) return false;
+  }
+  return true;
+}
+
 }  // namespace simd
 }  // namespace ynn
 

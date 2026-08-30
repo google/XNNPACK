@@ -128,9 +128,7 @@ void bench(benchmark::State& state, ynn_threadpool_t threadpool, int dim0,
   auto input = allocate<T>(size);
   auto output = allocate<T>(size);
   // Materialize the input pages so the benchmark doesn't read the zero page.
-  memset(input.get(), 1,
-         (size * type_size_bytes(type_of<T>())) /
-             type_element_count(type_of<T>()));
+  memset(input.get(), 1, type_size_bytes(type_of<T>(), size));
 
   ynn_set_external_value_data(runtime.get(), input_id, input.get());
   ynn_set_external_value_data(runtime.get(), output_id, output.get());
@@ -145,8 +143,7 @@ void bench(benchmark::State& state, ynn_threadpool_t threadpool, int dim0,
     ynn_invoke_runtime(runtime.get());
   }
 
-  const size_t total_bytes = 2 * (size * type_size_bytes(type_of<T>())) /
-                             type_element_count(type_of<T>());
+  const size_t total_bytes = 2 * type_size_bytes(type_of<T>(), size);
   state.counters["Bytes"] = benchmark::Counter(state.iterations() * total_bytes,
                                                benchmark::Counter::kIsRate);
 }

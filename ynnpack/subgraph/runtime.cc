@@ -914,21 +914,7 @@ void ynn_runtime::schedule() {
             global_loop_nest[loop_nest[compute_at - 1]].loop_id;
         f.compute_at(lid);
       }
-      if (!sched || sched->scheduled_buffers.empty()) {
-        f.store_outputs_innermost();
-      } else {
-        for (auto& b : sched->scheduled_buffers) {
-          if (b.store_at_min_depth == 0) {
-            b.buffer->store_at({&funcs[i], slinky::var()});
-          } else if (b.store_at_min_depth < loop_nest.size()) {
-            const slinky::loop_id& lid =
-                global_loop_nest[loop_nest[b.store_at_min_depth - 1]].loop_id;
-            b.buffer->store_at(lid);
-          } else {
-            b.buffer->store_root();
-          }
-        }
-      }
+      f.store_outputs_innermost();
     }
 
     if (sched && !sched->loop_splits.empty()) {

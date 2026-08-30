@@ -17,6 +17,7 @@ SET(PROD_SCALAR_MICROKERNEL_SRCS
   src/bf16-rminmax/gen/bf16-rmin-scalar-u2-acc2.c
   src/bf16-rminmax/gen/bf16-rminmax-scalar-u2-acc2.c
   src/bf16-vunary/gen/bf16-vunary-scalar.c
+  src/f16-avgpool/gen/f16-f32acc-avgpool-9p-minmax-scalar-u1.c
   src/f16-dwconv/gen/f16-f32acc-dwconv-3p1c-minmax-scalar-acc2.c
   src/f16-dwconv/gen/f16-f32acc-dwconv-4p1c-minmax-scalar-acc2.c
   src/f16-dwconv/gen/f16-f32acc-dwconv-9p1c-minmax-scalar-acc2.c

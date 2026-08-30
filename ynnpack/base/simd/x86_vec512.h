@@ -274,6 +274,10 @@ YNN_ALWAYS_INLINE s32x16 load_aligned(const int32_t* ptr, decltype(s32x16::N),
                                       s32x16 = {}) {
   return s32x16{_mm512_load_si512(reinterpret_cast<const __m512i*>(ptr))};
 }
+YNN_ALWAYS_INLINE s64x8 load_aligned(const int64_t* ptr, decltype(s64x8::N),
+                                     s64x8 = {}) {
+  return s64x8{_mm512_load_si512(reinterpret_cast<const __m512i*>(ptr))};
+}
 YNN_ALWAYS_INLINE bf16x32 load_aligned(const bfloat16* ptr,
                                        decltype(bf16x32::N), bf16x32 = {}) {
   return bf16x32{_mm512_load_si512(reinterpret_cast<const __m512i*>(ptr))};
@@ -311,6 +315,10 @@ YNN_ALWAYS_INLINE void store_aligned(int32_t* ptr, s32x16 b,
                                      decltype(s32x16::N) = {}) {
   _mm512_store_si512(reinterpret_cast<__m512i*>(ptr), b.v);
 }
+YNN_ALWAYS_INLINE void store_aligned(int64_t* ptr, s64x8 b,
+                                     decltype(s64x8::N) = {}) {
+  _mm512_store_si512(reinterpret_cast<__m512i*>(ptr), b.v);
+}
 YNN_ALWAYS_INLINE void store_aligned(bfloat16* ptr, bf16x32 b,
                                      decltype(bf16x32::N) = {}) {
   _mm512_store_si512(reinterpret_cast<__m512i*>(ptr), b.v);
@@ -344,6 +352,10 @@ YNN_ALWAYS_INLINE f32x16 load(const float* ptr, decltype(f32x16::N),
                               f32x16 = {}) {
   return f32x16{_mm512_loadu_ps(ptr)};
 }
+YNN_ALWAYS_INLINE s64x8 load(const int64_t* ptr, decltype(s64x8::N),
+                             s64x8 = {}) {
+  return s64x8{_mm512_loadu_si512(reinterpret_cast<const __m512i*>(ptr))};
+}
 YNN_ALWAYS_INLINE s32x16 load(const int32_t* ptr, decltype(s32x16::N),
                               s32x16 = {}) {
   return s32x16{_mm512_loadu_si512(reinterpret_cast<const __m512i*>(ptr))};
@@ -374,6 +386,9 @@ YNN_ALWAYS_INLINE void store(double* ptr, f64x8 b, decltype(f64x8::N) = {}) {
 }
 YNN_ALWAYS_INLINE void store(float* ptr, f32x16 b, decltype(f32x16::N) = {}) {
   _mm512_storeu_ps(ptr, b.v);
+}
+YNN_ALWAYS_INLINE void store(int64_t* ptr, s64x8 b, decltype(s64x8::N) = {}) {
+  _mm512_storeu_si512(reinterpret_cast<__m512i*>(ptr), b.v);
 }
 YNN_ALWAYS_INLINE void store(uint32_t* ptr, u32x16 b,
                              decltype(u32x16::N) = {}) {
@@ -1345,6 +1360,25 @@ YNN_ALWAYS_INLINE s8x64 cast(s4x64 from, int8_t) {
 
   return s8x64{_mm512_shuffle_epi8(lut, indices)};
 }
+
+YNN_ALWAYS_INLINE bool any(s8x64 x) {
+  return _mm512_test_epi32_mask(x.v, x.v) != 0;
+}
+YNN_ALWAYS_INLINE bool any(s16x32 x) {
+  return _mm512_test_epi32_mask(x.v, x.v) != 0;
+}
+YNN_ALWAYS_INLINE bool any(s32x16 x) {
+  return _mm512_test_epi32_mask(x.v, x.v) != 0;
+}
+YNN_ALWAYS_INLINE bool any(s64x8 x) {
+  return _mm512_test_epi64_mask(x.v, x.v) != 0;
+}
+
+YNN_ALWAYS_INLINE bool all(s8x64 x) { return !any(~x); }
+YNN_ALWAYS_INLINE bool all(s16x32 x) { return !any(~x); }
+YNN_ALWAYS_INLINE bool all(s32x16 x) { return !any(~x); }
+YNN_ALWAYS_INLINE bool all(s64x8 x) { return !any(~x); }
+
 }  // namespace simd
 
 }  // namespace ynn

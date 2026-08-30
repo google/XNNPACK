@@ -127,6 +127,21 @@ _XNNPACK_SIMD_ARCH_COPT_MAPPING = {
             "-mavx512fp16",
         ],
     ),
+    "avx512bf16": xnnpack_select_if(
+        "//:avx512bf16_enabled",
+        [
+            "-mf16c",
+            "-mfma",
+            "-mavx512f",
+            "-mavx512cd",
+            "-mavx512bw",
+            "-mavx512dq",
+            "-mavx512vl",
+            "-mavx512vnni",
+            "-mgfni",
+            "-mavx512bf16",
+        ],
+    ),
     "fma3": xnnpack_select_if("//build_config:x86", ["-mfma"]),
     "neon": select({
         "//build_config:aarch32": [
@@ -736,6 +751,7 @@ XNNPACK_PARAMS_FOR_ARCH = {
     ),
     "avx512bf16": _create_params(
         cond = "//:avx512bf16_enabled",
+        copts = _x86_align_stack(64),
         gcc_x86_copts = [
             "-mf16c",
             "-mfma",

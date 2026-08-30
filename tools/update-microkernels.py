@@ -76,6 +76,7 @@ _ISA_LIST = frozenset({
     'ssse3',
     'wasmblendvps',
     'wasmrelaxedsimd',
+    'wasmrelaxedsimdfp16',
     'wasmpshufb',
     'wasmsdot',
     'wasmusdot',
@@ -292,6 +293,13 @@ def main(args):
             arch = component
           if component in _ISA_LIST:
             isa = _ISA_MAP.get(component, component)
+            if (
+                isa == 'wasmrelaxedsimd'
+                and basename.startswith('f16-')
+                and not basename.startswith('f16-f32acc-')
+                and not basename.startswith('f16-f32-vcvt-')
+            ):
+              isa = 'wasmrelaxedsimdfp16'
             key = isa if arch is None else f'{isa}_{arch}'
             c_microkernels_per_isa[key].append(filepath)
             break
