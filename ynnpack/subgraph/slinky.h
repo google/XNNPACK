@@ -159,21 +159,6 @@ struct scheduling_split {
   bool step_is_required = false;
 };
 
-// A scheduling information for a buffer -- it's expected to be attached to the
-// scheduling_info of the function.
-struct scheduled_buffer {
-  // This potentially could be numeric_limit::max or something, but it's
-  // convenient to do some math with it, so pick something smaller to avoid
-  // overflows.
-  static constexpr slinky::index_t root = 1000;
-  slinky::buffer_expr_ptr buffer;
-  // The location to store buffer at with respect to its producer compute_at
-  // location:
-  // * if it's 0 then it will be stored at the same loop level it's computed at.
-  // * if it's root it's an outermost location.
-  slinky::index_t store_at_min_depth = 0;
-};
-
 struct scheduling_info {
   // This value is large enough to always be outside of any reasonable number
   // of loops.
@@ -181,7 +166,6 @@ struct scheduling_info {
 
   // A set of loop splits for a given function.
   std::vector<scheduling_split> loop_splits;
-  std::vector<scheduled_buffer> scheduled_buffers;
 
   // Scheduler-only bounds for the inputs of this function, used by the
   // scheduler's source region inference in place of the function's real input

@@ -191,9 +191,6 @@ ynn_status ynn_define_dynamic_quantization(ynn_subgraph_t subgraph,
     auto sched =
         runtime.make_schedule(dims, scale.extents, scale.buffer->elem_size());
 
-    ynn::scheduled_buffer sched_output_buffer = {zero_point.buffer, 0};
-    sched->scheduled_buffers.push_back(std::move(sched_output_buffer));
-
     func.user_data() = sched.get();
     runtime.scheduling_info_storage.push_back(std::move(sched));
 
