@@ -18,6 +18,7 @@
 #include <limits>
 #include <memory>
 #include <numeric>
+#include <optional>
 #include <random>
 #include <vector>
 
@@ -2159,7 +2160,9 @@ class ConvolutionOperatorTester {
     }
   }
 
-  void TestNHWCxF32() const {
+  void TestNHWCxF32(size_t expected_workspace_size = SIZE_MAX,
+                    std::optional<enum xnn_microkernel_type>
+                        expected_microkernel_type = std::nullopt) const {
     ASSERT_EQ(weights_type(), WeightsType::Default);
 
     xnnpack::ReplicableRandomDevice rng;
@@ -2372,6 +2375,9 @@ class ConvolutionOperatorTester {
       }
       ASSERT_EQ(xnn_status_success, status);
       ASSERT_NE(nullptr, convolution_op);
+      if (expected_microkernel_type.has_value()) {
+        ASSERT_EQ(*expected_microkernel_type, convolution_op->ukernel.type);
+      }
       if (use_weights_cache()) {
         ASSERT_EQ(xnn_status_success,
                   xnn_finalize_weights_cache(
@@ -2390,6 +2396,9 @@ class ConvolutionOperatorTester {
                     &workspace_size,
                     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
                     auto_threadpool.get()));
+      if (expected_workspace_size != SIZE_MAX) {
+        ASSERT_EQ(expected_workspace_size, workspace_size);
+      }
       xnnpack::Buffer<char, XNN_ALLOCATION_ALIGNMENT> workspace(workspace_size);
       std::iota(workspace.begin(), workspace.end(), 0);
       if (transient_indirection_buffer()) {
@@ -2431,6 +2440,9 @@ class ConvolutionOperatorTester {
                 flags, auto_weights_cache.get(), &convolution_op2));
 
         ASSERT_NE(nullptr, convolution_op2);
+        if (expected_microkernel_type.has_value()) {
+          ASSERT_EQ(*expected_microkernel_type, convolution_op2->ukernel.type);
+        }
 
         xnnpack::Buffer<float> output2(output.size());
         size_t workspace_size = SIZE_MAX;
