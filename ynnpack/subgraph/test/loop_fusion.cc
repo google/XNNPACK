@@ -42,9 +42,12 @@ class LoopFusionTest : public testing::Test {
               ynn_status_success);
     runtime_.reset(runtime);
 
-    runtime_->eval_config.allocate = [this](slinky::var sym,
-                                            slinky::raw_buffer* buffer) {
-      void* ptr = buffer->allocate(YNN_ALLOCATION_ALIGNMENT);
+    auto allocate = runtime_->eval_config.allocate;
+    runtime_->eval_config.allocate = [this, allocate](
+                                         slinky::eval_context& ctx,
+                                         slinky::var sym,
+                                         slinky::raw_buffer* buffer) {
+      void* ptr = allocate(ctx, sym, buffer);
       if (ptr) {
         max_allocation_size_ =
             std::max(max_allocation_size_, buffer->size_bytes());

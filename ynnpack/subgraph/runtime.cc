@@ -1057,12 +1057,6 @@ extern "C" {
 ynn_runtime::ynn_runtime(ynn::ref_count<const ynn_subgraph> subgraph,
                          slinky::thread_pool* threadpool, uint32_t flags)
     : subgraph(subgraph), flags(flags), globals(subgraph->globals) {
-  // Implement our required alignment for heap allocations.
-  eval_config.allocate = [](slinky::var sym, slinky::raw_buffer* buffer) {
-    return buffer->allocate(YNN_ALLOCATION_ALIGNMENT);
-  };
-  eval_config.free = [](slinky::var sym, slinky::raw_buffer* buffer,
-                        void* ptr) { std::free(ptr); };
   eval_config.thread_pool = threadpool;
   // Slinky's default check failure handler calls std::abort(), don't let that
   // happen here.
