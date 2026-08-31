@@ -228,7 +228,20 @@ YNN_ALWAYS_INLINE bool same_bounds(const slinky::dim& a, const slinky::dim& b,
 //   2. Its stride is equal to its element size.
 YNN_ALWAYS_INLINE bool is_contiguous(const slinky::dim& dim,
                                      const int element_size) {
-  return dim.extent() == 1 || dim.stride() == element_size;
+  return dim.min() == dim.max() || dim.stride() == element_size;
+}
+
+YNN_ALWAYS_INLINE bool is_contiguous(const slinky::raw_buffer& buf, size_t dim,
+                                     const int element_size) {
+  if (dim >= buf.rank) return true;
+  const slinky::dim& d = buf.dims[dim];
+  return is_contiguous(d, element_size);
+}
+
+YNN_ALWAYS_INLINE bool is_broadcast(const slinky::raw_buffer& buf, size_t dim) {
+  if (dim >= buf.rank) return true;
+  const slinky::dim& d = buf.dims[dim];
+  return d.min() == d.max() || d.stride() == 0;
 }
 
 inline size_t first_non_trivial_dim(ynn::span<const slinky::expr> extents) {
@@ -238,10 +251,6 @@ inline size_t first_non_trivial_dim(ynn::span<const slinky::expr> extents) {
     }
   }
   return extents.size();
-}
-
-YNN_ALWAYS_INLINE bool is_broadcast(const slinky::dim& dim) {
-  return dim.extent() == 1 || dim.stride() == 0;
 }
 
 // Remove dimension 0 from the buffer and return a reference to it. This
@@ -323,7 +332,7 @@ bool fuse_and_slice_leading_dims(slinky::dim* x_dims, slinky::raw_buffer& x,
     // If the output innermost (n) dimension has extent 1, we need to make the n
     // dimension of all inputs a broadcast. This case is not expected to happen.
     // For now, we add an assert to catch this case if it does.
-    assert(i != 0 || is_contiguous(x.dim(0), x.elem_size));
+    assert(i != 0 || is_contiguous(x, 0, x.elem_size));
 
     x_dims[i] = slice_dim0(x);
     if (x_dims[i].empty()) {
