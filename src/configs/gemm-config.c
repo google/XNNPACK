@@ -631,6 +631,9 @@ static void init_pqs8_qc4w_gemm_config(void) {
         xnn_pqs8_qc4w_gemm_minmax_fp32_ukernel_32x32c4__neonsme2_get_mr();
     const size_t nr =
         xnn_pqs8_qc4w_gemm_minmax_fp32_ukernel_32x32c4__neonsme2_get_nr();
+    if (mr > XNN_MAX_MR) {
+      return;
+    }
     pqs8_qc4w_gemm_config.arch = xnn_arch_arm_sme2;
     pqs8_qc4w_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(mr)] =
         XNN_INIT_HMP_GEMM_UKERNEL(
@@ -651,7 +654,6 @@ static void init_pqs8_qc4w_gemm_config(void) {
   } else {
     /* No action. */
   }
-  assert(pqs8_qc4w_gemm_config.mr <= XNN_MAX_MR);
 #endif  // XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI
 }
 
