@@ -15,6 +15,8 @@
 
 #include <gtest/gtest.h>
 #include "include/xnnpack.h"
+#include "src/xnnpack/config.h"
+#include "src/xnnpack/kai-dwconv.h"
 #include "src/xnnpack/params.h"
 #include "test/operators/convolution-operator-tester.h"
 
@@ -401,6 +403,7 @@ static const ConvolutionTestCase kConvolutionTests[] = {
           .padding(1, 1)
           .kernel_size(3, 3)
           .groups(27)
+          .input_channel_stride(28)
           .transient_indirection_buffer(true)}},
     {"depthwise_3x3_without_bias",
      {ConvolutionOperatorTester()
@@ -1253,6 +1256,37 @@ TEST(CONVOLUTION_NHWC, fp32_static_bias_size_overflow) {
           nullptr, &convolution_op));
   EXPECT_EQ(nullptr, convolution_op);
 }
+#if XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI && XNN_ENABLE_ARM_SME2
+TEST(CONVOLUTION_NHWC_F32, depthwise_3x3_kleidiai) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
+  if (xnn_init_kai_f32_dwconv_config() == nullptr) {
+    GTEST_SKIP() << "KleidiAI F32 DWConv requires SME2";
+  }
+  const size_t channel_tile =
+      xnn_f32_dwconv_minmax_ukernel_9pvc__neonsme2_get_channel_tile();
+  const size_t groups = channel_tile + 1;
+  ConvolutionOperatorTester()
+      .input_size(15, 14)
+      .padding(1, 1)
+      .kernel_size(3, 3)
+      .groups(groups)
+      .input_channel_stride(groups)
+      .output_channel_stride(groups)
+      .TestNHWCxF32(
+          /*expected_workspace_size=*/0,
+          /*expected_microkernel_type=*/xnn_microkernel_type_kai_dwconv);
+  ConvolutionOperatorTester()
+      .input_size(15, 14)
+      .padding(1, 1)
+      .kernel_size(3, 3)
+      .groups(groups)
+      .input_channel_stride(groups + 1)
+      .output_channel_stride(groups)
+      .TestNHWCxF32(
+          /*expected_workspace_size=*/SIZE_MAX,
+          /*expected_microkernel_type=*/xnn_microkernel_type_dwconv);
+}
+#endif  // XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI && XNN_ENABLE_ARM_SME2
 
 TEST(CONVOLUTION_NHWC_F32, unioutput_1x1) {
   ConvolutionOperatorTester()
