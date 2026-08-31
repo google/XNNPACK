@@ -1,4 +1,5 @@
 // Copyright 2022 Google LLC
+// Copyright 2026 Arm Limited and/or its affiliates <open-source-office@arm.com>
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
@@ -135,6 +136,14 @@ struct xnn_dwconv_config {
   uint32_t channel_tile;
   // Number of elements in the tile.
   uint8_t primary_tile;
+};
+
+struct xnn_kai_dwconv_config {
+  xnn_kai_f32_dwconv_minmax_ukernel_fn ukernel;
+  xnn_init_f32_minmax_params_fn init;
+  uint32_t channel_tile;
+  uint8_t primary_tile;
+  uint8_t output_height_tile;
 };
 
 // Bilinear interpolation (2D).
