@@ -1139,3 +1139,13 @@ xnnpack_unit_test(
         "//src/configs:microkernel_configs",
     ],
 )
+
+xnnpack_unit_test(
+    name = "logging_test",
+    srcs = ["logging-test.cc"],
+    deps = [
+        "//:logging",
+        "//:xnnpack_h",
+        "//ynnpack/base:log",
+    ],
+)

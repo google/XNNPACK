@@ -214,6 +214,45 @@ enum xnn_status xnn_initialize(const struct xnn_allocator* allocator);
 /// @retval xnn_status_success - deinitialization call succeeded.
 enum xnn_status xnn_deinitialize(void);
 
+/// Log levels for XNNPACK.
+enum xnn_log_level {
+  xnn_log_level_none = 0,
+  xnn_log_level_fatal = 1,
+  xnn_log_level_error = 2,
+  xnn_log_level_warning = 3,
+  xnn_log_level_info = 4,
+  xnn_log_level_debug = 5,
+};
+
+/// Type of the logging callback function.
+///
+/// @param level - the severity level of the log message.
+/// @param file - the source file where the log was emitted (may be NULL).
+/// @param line - the source line number where the log was emitted (0 if unknown).
+/// @param message - the formatted log message string.
+/// @param user_data - the user_data pointer passed to xnn_set_log_callback.
+typedef void (*xnn_log_callback_fn)(
+    enum xnn_log_level level,
+    const char* file,
+    int line,
+    const char* message,
+    void* user_data);
+
+/// Set the logging callback for XNNPACK.
+///
+/// When a non-NULL callback is set, all XNNPACK (and YNNPACK) logging is routed
+/// to this callback instead of writing directly to stdout/stderr.
+///
+/// @param callback - the function to receive log messages, or NULL to reset to default.
+/// @param user_data - opaque pointer passed back to the callback.
+void xnn_set_log_callback(xnn_log_callback_fn callback, void* user_data);
+
+/// Get the current logging callback function.
+xnn_log_callback_fn xnn_get_log_callback(void);
+
+/// Get the current logging callback user_data pointer.
+void* xnn_get_log_callback_user_data(void);
+
 /// Check whether native FP16 execution is supported by the hardware.
 bool xnn_is_f16_native_supported(void);
 
