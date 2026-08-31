@@ -295,8 +295,16 @@ std::map<std::pair<slinky::var, int>, int> infer_source_regions(
             }
           }
 
-          if (slinky::is_variable(bound.min, v) &&
-              slinky::is_variable(bound.max, v) &&
+          // This pattern covers tiled/blocked spatial accesses
+          // e.g. when `pack_b` divides the output spatial dimension `N` by
+          // `block_n`. This allows pack_b to be fused with the dot product
+          // or other operations that have a similar pattern.
+          auto find_v_in_div = [](slinky::expr e, slinky::var v) -> bool {
+            const slinky::div* d = e.as<slinky::div>();
+            if (d && slinky::is_variable(d->a, v)) return true;
+            return slinky::is_variable(e, v);
+          };
+          if (find_v_in_div(bound.min, v) && find_v_in_div(bound.max, v) &&
               !parent_source_regions.empty()) {
             // Check if all parent extents are equivalent.
             bool all_equal = true;
