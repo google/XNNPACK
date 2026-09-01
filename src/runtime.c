@@ -241,6 +241,7 @@ static enum xnn_status initialize_workspace_values(
     xnn_runtime_t runtime,
     struct xnn_value_allocation_tracker* mem_alloc_tracker)
 {
+  enum xnn_status status = xnn_status_success;
   assert(runtime->workspace != NULL);
   size_t mem_arena_size = mem_alloc_tracker->mem_arena_size;
   if (mem_arena_size == 0) {
@@ -362,17 +363,23 @@ static enum xnn_status initialize_workspace_values(
             continue;
           }
           assert(opdata->setup != NULL);
-          const enum xnn_status status = opdata->setup(opdata, rt->values, rt->num_values, rt->threadpool);
-          if (status != xnn_status_success) {
+          const enum xnn_status setup_status =
+              opdata->setup(opdata, rt->values, rt->num_values, rt->threadpool);
+          if (setup_status != xnn_status_success) {
             xnn_log_error("failed to setup runtime: error in operator #%zu", i);
-            return status;
+            // A workspace relocation invalidates pointers in every runtime
+            // sharing it. Preserve the first setup error, but continue repairing
+            // the remaining runtimes before returning it.
+            if (status == xnn_status_success) {
+              status = setup_status;
+            }
           }
         }
       }
     }
   }
 
-  return xnn_status_success;
+  return status;
 }
 
 // Output can reuse input memory if both are allocated in the workspace.
