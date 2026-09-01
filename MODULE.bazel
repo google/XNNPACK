@@ -49,9 +49,9 @@ http_archive = use_repo_rule("@bazel_tools//tools/build_defs/repo:http.bzl", "ht
 bazel_dep(name = "googletest", version = "1.17.0.bcr.2", repo_name = "com_google_googletest")
 archive_override(
     module_name = "googletest",
-    sha256 = "a4cb11930215b071168811982dfbebc82a2bb0f90db0e8713245931eb742ea46",
-    strip_prefix = "googletest-d72f9c8aea6817cdf1ca0ac10887f328de7f3da2",
-    urls = ["https://github.com/google/googletest/archive/d72f9c8aea6817cdf1ca0ac10887f328de7f3da2.zip"],
+    sha256 = "1582e898ab4307d91fcb84c51897b751a5b5e36a94226895e33c31c3deb5f3d6",
+    strip_prefix = "googletest-c06edf0146209ada7e6ebc15a847be609669e16e",
+    urls = ["https://github.com/google/googletest/archive/c06edf0146209ada7e6ebc15a847be609669e16e.zip"],
 )
 # LINT.ThenChange(cmake/DownloadGoogleTest.cmake)
 
@@ -101,10 +101,10 @@ http_archive(
 # KleidiAI library, used for ARM microkernels.
 http_archive(
     name = "KleidiAI",
-    sha256 = "b30044217e8e6f131aea4906e87a9908e78828822576d280af7ce68eda4578fd",
-    strip_prefix = "kleidiai-13cd35993d8439143aff1e756a862d366acded0d",
+    sha256 = "652ee046ebf99bee5ed78aaf8961ea1df6ac09b6ebbd3a33106d9ce255efba69",
+    strip_prefix = "kleidiai-4bc7bd457930de119f8b826ecfdebfbd9c08cf8c",
     urls = [
-        "https://gitlab.arm.com/kleidi/kleidiai/-/archive/13cd35993d8439143aff1e756a862d366acded0d/kleidiai-13cd35993d8439143aff1e756a862d366acded0d.zip",
+        "https://gitlab.arm.com/kleidi/kleidiai/-/archive/4bc7bd457930de119f8b826ecfdebfbd9c08cf8c/kleidiai-4bc7bd457930de119f8b826ecfdebfbd9c08cf8c.zip",
     ],
 )
 # LINT.ThenChange(cmake/DownloadKleidiAI.cmake)
@@ -121,9 +121,9 @@ http_archive(
 
 http_archive(
     name = "slinky",
-    sha256 = "643646b62a7d47292ab68528355cccf49a1fff2b3a924b4ee820c6c5e06fdba4",
-    strip_prefix = "slinky-2278103db25dbf5f80377954e8cd517c7995cb26",
+    sha256 = "e4f013588ec39441a23ba3454a39586402565d9f58848cb0a0ae0a2f1d66bb2f",
+    strip_prefix = "slinky-bd655154e8b4302d77325afcb4c6a7603aabcc7d",
     urls = [
-        "https://github.com/dsharlet/slinky/archive/2278103db25dbf5f80377954e8cd517c7995cb26.zip",
+        "https://github.com/dsharlet/slinky/archive/bd655154e8b4302d77325afcb4c6a7603aabcc7d.zip",
     ],
 )
