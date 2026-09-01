@@ -5,6 +5,11 @@
 # LICENSE file in the root directory of this source tree.
 
 ################################## ARM NEON ###################################
+tools/xngen src/bf16-qs8-vcvt/neonv8.c.in -D BATCH_TILE=8  -o src/bf16-qs8-vcvt/gen/bf16-qs8-vcvt-neonv8-u8.c &
+tools/xngen src/bf16-qs8-vcvt/neonv8.c.in -D BATCH_TILE=16 -o src/bf16-qs8-vcvt/gen/bf16-qs8-vcvt-neonv8-u16.c &
+tools/xngen src/bf16-qs8-vcvt/neonv8.c.in -D BATCH_TILE=24 -o src/bf16-qs8-vcvt/gen/bf16-qs8-vcvt-neonv8-u24.c &
+tools/xngen src/bf16-qs8-vcvt/neonv8.c.in -D BATCH_TILE=32 -o src/bf16-qs8-vcvt/gen/bf16-qs8-vcvt-neonv8-u32.c &
+
 tools/xngen src/f16-qs8-vcvt/neonfp16arith.c.in -D BATCH_TILE=8  -D DATATYPE=QS8 -o src/f16-qs8-vcvt/gen/f16-qs8-vcvt-neonfp16arith-u8.c &
 tools/xngen src/f16-qs8-vcvt/neonfp16arith.c.in -D BATCH_TILE=16 -D DATATYPE=QS8 -o src/f16-qs8-vcvt/gen/f16-qs8-vcvt-neonfp16arith-u16.c &
 tools/xngen src/f16-qs8-vcvt/neonfp16arith.c.in -D BATCH_TILE=24 -D DATATYPE=QS8 -o src/f16-qs8-vcvt/gen/f16-qs8-vcvt-neonfp16arith-u24.c &

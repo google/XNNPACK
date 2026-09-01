@@ -1295,7 +1295,23 @@ static void init_f16_tanh_config(void) {
 }
 
 static void init_bf16_to_qs8_cvt_config(void) {
-  #if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  #if XNN_ARCH_ARM
+    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    assert(hardware_config != NULL);
+    if (hardware_config->arch_flags & xnn_arch_arm_neon_v8) {
+      bf16_to_qs8_cvt_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_bf16_qs8_vcvt_ukernel__neonv8_u32);
+      bf16_to_qs8_cvt_config.element_tile = 32;
+      bf16_to_qs8_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_bf16_qs8_cvt_scalar_params;
+    } else {
+      bf16_to_qs8_cvt_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_bf16_qs8_vcvt_ukernel__scalar_imagic_u4);
+      bf16_to_qs8_cvt_config.element_tile = 4;
+      bf16_to_qs8_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_bf16_qs8_cvt_scalar_params;
+    }
+  #elif XNN_ARCH_ARM64
+    bf16_to_qs8_cvt_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_bf16_qs8_vcvt_ukernel__neonv8_u32);
+    bf16_to_qs8_cvt_config.element_tile = 32;
+    bf16_to_qs8_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_bf16_qs8_cvt_scalar_params;
+  #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     (void) hardware_config;  // May be unused.
