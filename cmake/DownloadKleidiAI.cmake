@@ -18,8 +18,8 @@ ENDIF()
 # LINT.IfChange
 INCLUDE(ExternalProject)
 ExternalProject_Add(kleidiai
-  URL https://gitlab.arm.com/kleidi/kleidiai/-/archive/13cd35993d8439143aff1e756a862d366acded0d/kleidiai-13cd35993d8439143aff1e756a862d366acded0d.zip
-  URL_HASH SHA256=b30044217e8e6f131aea4906e87a9908e78828822576d280af7ce68eda4578fd
+  URL https://gitlab.arm.com/kleidi/kleidiai/-/archive/4bc7bd457930de119f8b826ecfdebfbd9c08cf8c/kleidiai-4bc7bd457930de119f8b826ecfdebfbd9c08cf8c.zip
+  URL_HASH SHA256=652ee046ebf99bee5ed78aaf8961ea1df6ac09b6ebbd3a33106d9ce255efba69
   SOURCE_DIR "${CMAKE_BINARY_DIR}/kleidiai-source"
   BINARY_DIR "${CMAKE_BINARY_DIR}/kleidiai"
   CONFIGURE_COMMAND ""
