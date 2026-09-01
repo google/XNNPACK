@@ -22,12 +22,6 @@ source_set("matmul") {
   # will get things started. List of files generated with:
   # ls src/kai/ukernels/matmul/*/*.{c,h,S} | sed s/^/\"/g | sed s/$/\"/g | sed '$!s/$/,/'
   sources = [
-    "src/kai/ukernels/matmul/kai_matmul.h",
-    "src/kai/ukernels/matmul/kai_matmul_pack_lhs.h",
-    "src/kai/ukernels/matmul/kai_matmul_pack_lhs_types.h",
-    "src/kai/ukernels/matmul/kai_matmul_pack_rhs.h",
-    "src/kai/ukernels/matmul/kai_matmul_pack_rhs_types.h",
-    "src/kai/ukernels/matmul/kai_matmul_types.h",
     "src/kai/ukernels/matmul/imatmul_clamp_f16_f16p_f16p/kai_imatmul_clamp_f16_f16p2vlx2_f16p2vlx2_2vlx2vl_sme2_mopa.c",
     "src/kai/ukernels/matmul/imatmul_clamp_f16_f16p_f16p/kai_imatmul_clamp_f16_f16p2vlx2_f16p2vlx2_2vlx2vl_sme2_mopa.h",
     "src/kai/ukernels/matmul/imatmul_clamp_f16_f16p_f16p/kai_imatmul_clamp_f16_f16p2vlx2_f16p2vlx2_2vlx2vl_sme2_mopa_asm.S",
@@ -53,6 +47,12 @@ source_set("matmul") {
     "src/kai/ukernels/matmul/imatmul_clamp_qai8_qai8p_qsi8cxp/kai_imatmul_clamp_qai8_qai8p2vlx4_qsi8cxpsb2vlx4_2vlx2vl_sme2_mopa.h",
     "src/kai/ukernels/matmul/imatmul_clamp_qai8_qai8p_qsi8cxp/kai_imatmul_clamp_qai8_qai8p2vlx4_qsi8cxpsb2vlx4_2vlx2vl_sme2_mopa_asm.S",
     "src/kai/ukernels/matmul/imatmul_clamp_qai8_qai8p_qsi8cxp/kai_imatmul_clamp_qai8_qai8p_qsi8cxp_interface.h",
+    "src/kai/ukernels/matmul/kai_matmul.h",
+    "src/kai/ukernels/matmul/kai_matmul_pack_lhs.h",
+    "src/kai/ukernels/matmul/kai_matmul_pack_lhs_types.h",
+    "src/kai/ukernels/matmul/kai_matmul_pack_rhs.h",
+    "src/kai/ukernels/matmul/kai_matmul_pack_rhs_types.h",
+    "src/kai/ukernels/matmul/kai_matmul_types.h",
     "src/kai/ukernels/matmul/matmul_clamp_bf16_qai8dxp_qsi4c32p/kai_matmul_clamp_bf16_qai8dxp1x8_qsi4c32p4x8_1x4_neon_dotprod.c",
     "src/kai/ukernels/matmul/matmul_clamp_bf16_qai8dxp_qsi4c32p/kai_matmul_clamp_bf16_qai8dxp1x8_qsi4c32p4x8_1x4_neon_dotprod.h",
     "src/kai/ukernels/matmul/matmul_clamp_bf16_qai8dxp_qsi4c32p/kai_matmul_clamp_bf16_qai8dxp1x8_qsi4c32p4x8_1x4_neon_dotprod_asm.S",
