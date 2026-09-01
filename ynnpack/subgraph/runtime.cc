@@ -1070,7 +1070,9 @@ ynn_runtime::ynn_runtime(ynn::ref_count<const ynn_subgraph> subgraph,
     YNN_LOG_ERROR() << "Check failed";
   };
   eval_config.call_failed = [](const slinky::call_stmt* c) {
-    YNN_LOG_ERROR() << c->attrs.name << " failed";
+    // This output can be restored after we update slinky past
+    // https://github.com/dsharlet/slinky/pull/874
+    // YNN_LOG_ERROR() << c->attrs->name << " failed";
   };
   eval_config.base_alignment = YNN_ALLOCATION_ALIGNMENT;
   eval_config.auto_stack_threshold = auto_stack_threshold;
