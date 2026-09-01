@@ -930,11 +930,13 @@ constexpr index_t max_multiplier_k = radix_k - 1;
 constexpr index_t step_m = 16;
 constexpr index_t step_k = 1024;
 
-std::tuple<index_t, index_t, index_t> choose_split_factors(index_t m, index_t n,
-                                                           index_t k,
-                                                           index_t block_n,
-                                                           size_t a_elem_size) {
+std::tuple<index_t, index_t, index_t> choose_split_factors(
+    index_t m, index_t n, index_t k, index_t block_n, size_t a_elem_size,
+    size_t b_elem_size, size_t c_elem_size) {
   assert(block_n > 0);
+  assert(a_elem_size > 0);
+  assert(b_elem_size > 0);
+  assert(c_elem_size > 0);
 
   // If k gets big, we're going to tile k anyways. It could be faster to
   // parallelize more finely, but it will waste CPU cycles due to more memory
@@ -990,23 +992,37 @@ std::tuple<index_t, index_t, index_t> choose_split_factors(index_t m, index_t n,
   //   intermediate accumulator buffer C (m_tile x n_tile) to be written to
   //   memory and reloaded for each k chunk, adding memory bandwidth and loop
   //   overhead.
+  // - Small m: For small enough C, it is possible to bypass the read/write
+  //   accumulator penalty if the A and C working sets fit in L1. This occurs
+  //   for small m. In these cases, we set split_k to be smaller such that both
+  //   A and C stay anchored in L1.
   // - Data-type dependence: For narrow data types (e.g. INT8 with 1-byte input
   //   and 4-byte INT32 accumulator, or BF16 with 2-byte input and 4-byte FP32
   //   accumulator), the accumulator is 2-4x larger than the inputs, making
-  //   accumulator spilling much more expensive. Moreover, at k = 8192
-  //   (threshold for FP32), narrow inputs take only 8-16 KB (already fitting in
-  //   L1).
-  //
-  // Sizing rationale:
-  // - We set `k_threshold` so that k-splitting only triggers when a single
-  //   input slice along k reaches `cache_size_l1`.
-  // - We use half of `cache_size_l1` to set the split size so that both A and B
-  //   fit in L1.
-  assert(a_elem_size > 0);
-  const index_t k_threshold = cache_size_l1 / a_elem_size;
-  const index_t k_split_size = k_threshold / 2;
-  index_t split_k = k >= k_threshold ? k_split_size : k;
-  split_k = align_up<index_t>(split_k, step_k);
+  //   accumulator spilling much more expensive.
+#ifdef YNN_ARCH_ARM
+  // Empirically, ARM processors benefit from more aggressive k-splitting than
+  // x86 even though they have larger L1 and L2 caches than x86. This may be due
+  // to narrower vector widths, lower memory bandwidth, or other factors.
+  const index_t split_k_scale = a_elem_size >= 4 ? 16 : 32;
+  const index_t large_m_scale =
+      4 * std::max<index_t>(1, c_elem_size / a_elem_size);
+#else
+  const index_t split_k_scale = a_elem_size >= 4 ? 2 : 32;
+  // `large_m_scale` is a function of the ratio between input width and output
+  // width. This ratio determines the magnitude of the accumulator penalty. The
+  // higher the ratio, the higher the threshold needed before splitting k.
+  const index_t large_m_scale =
+      (a_elem_size == 2 ? 4 : (a_elem_size >= 4 ? 1 : 2)) *
+      std::max<index_t>(1, c_elem_size / a_elem_size);
+#endif
+  const index_t optimal_split_k = cache_size_l1 / (split_k_scale * a_elem_size);
+
+  // If m is large, it only makes sense to split for very large k.
+  const index_t k_multiplier = (m > 64) ? large_m_scale : 2;
+  const index_t k_threshold = optimal_split_k * k_multiplier;
+  const index_t split_k_cand = (k >= k_threshold) ? optimal_split_k : k;
+  index_t split_k = align_up<index_t>(split_k_cand, step_k);
 
   // Ensure the split factors do not exceed the maximum representable numbers
   // in the 32-bit packing scheme (11 bits for n, 11 bits for m, 9 bits for k).
@@ -1018,15 +1034,16 @@ std::tuple<index_t, index_t, index_t> choose_split_factors(index_t m, index_t n,
 
 std::tuple<slinky::expr, slinky::expr, slinky::expr> choose_split_factors(
     ynn_runtime& runtime, slinky::expr m, slinky::expr n, slinky::expr k,
-    slinky::expr block_n, size_t a_elem_size) {
+    slinky::expr block_n, size_t a_elem_size, size_t b_elem_size,
+    size_t c_elem_size) {
   auto impl = [=](const slinky::call* op,
                   slinky::eval_context& ctx) -> index_t {
     index_t m = evaluate(op->args[0], ctx);
     index_t n = evaluate(op->args[1], ctx);
     index_t k = evaluate(op->args[2], ctx);
     index_t block_n = evaluate(op->args[3], ctx);
-    auto [split_n, split_m, split_k] =
-        choose_split_factors(m, n, k, block_n, a_elem_size);
+    auto [split_n, split_m, split_k] = choose_split_factors(
+        m, n, k, block_n, a_elem_size, b_elem_size, c_elem_size);
     index_t mult_n = std::max<index_t>(1, split_n / block_n);
     index_t mult_m = std::max<index_t>(1, split_m / step_m);
     index_t mult_k = std::max<index_t>(1, split_k / step_k);
@@ -1518,7 +1535,8 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
     }
 
     auto [split_n, split_m, split_k] = choose_split_factors(
-        runtime, m, n, k, block_n, type_size_bytes(input_a.type));
+        runtime, m, n, k, block_n, type_size_bytes(input_a.type),
+        type_size_bytes(packed_b.type), type_size_bytes(output.type));
 
     const int rank = output.rank();
     const bool is_split_k = slinky::prove_true(split_k < k);
