@@ -388,7 +388,8 @@ static void init_pf16_gemm_config(void) {
   const struct xnn_hardware_config* hardware_config =
   xnn_init_hardware_config();
   assert(hardware_config != NULL);
-if ((hardware_config->arch_flags & xnn_arch_arm_sme2)) {
+if (XNN_ENABLE_ARM_SME2 &&
+    (hardware_config->arch_flags & xnn_arch_arm_sme2)) {
 #if XNN_ENABLE_ARM_SME2
     const size_t mr = xnn_pf16_gemm_minmax_ukernel_32x32c2__neonsme2_get_mr();
     size_t nr = xnn_pf16_gemm_minmax_ukernel_32x32c2__neonsme2_get_nr();
@@ -410,7 +411,8 @@ if ((hardware_config->arch_flags & xnn_arch_arm_sme2)) {
     pf16_gemm_config.nr = nr < nstep_min ? nstep_min : nr;
     pf16_gemm_config.log2_kr = 1;
 #endif // XNN_ENABLE_ARM_SME2
-  } else if ((hardware_config->arch_flags & xnn_arch_arm_sme)) {
+  } else if (XNN_ENABLE_ARM_SME &&
+             (hardware_config->arch_flags & xnn_arch_arm_sme)) {
 #if XNN_ENABLE_ARM_SME
     const size_t mr = xnn_pf16_gemm_minmax_ukernel_32x32c2__neonsme_get_mr();
     size_t nr = xnn_pf16_gemm_minmax_ukernel_32x32c2__neonsme_get_nr();
@@ -434,7 +436,33 @@ if ((hardware_config->arch_flags & xnn_arch_arm_sme2)) {
     pf16_gemm_config.nr = nr < nstep_min ? nstep_min : nr;
     pf16_gemm_config.log2_kr = 1;
 #endif // XNN_ENABLE_ARM_SME
-  }else {
+  } else if (XNN_ENABLE_ARM_FP16_VECTOR &&
+             (hardware_config->arch_flags & xnn_arch_arm_neon_fp16_arith)) {
+#if XNN_ENABLE_ARM_FP16_VECTOR
+    const size_t mr = 6;
+    const size_t nr = 32;
+    pf16_gemm_config.arch = xnn_arch_arm_neon_fp16_arith;
+    pf16_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(mr)] =
+        XNN_INIT_HMP_GEMM_UKERNEL(
+            xnn_pf16_gemm_minmax_ukernel_6x32__kai_aarch64_neonfp16arith);
+    for (size_t i = 0; i < XNN_MAX_UARCH_TYPES; i++) {
+      if (hardware_config->uarch[i] == xnn_uarch_cortex_a55) {
+        pf16_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(mr)].function[i] =
+            XNN_INIT_GEMM_UKERNEL(
+                xnn_pf16_gemm_minmax_ukernel_6x32__kai_aarch64_neonfp16arith_cortex_a55);
+      }
+    }
+    pf16_gemm_config.init.f16 = xnn_init_f16_minmax_scalar_params;
+    pf16_gemm_config.pack_weights_and_biases =
+        xnn_pack_kai_f16_6x32_weights_and_biases;
+    pf16_gemm_config.packed_stride_weights_and_biases =
+        xnn_packed_stride_kai_f16_6x32_weights_and_biases;
+    pf16_gemm_config.mr = mr;
+    pf16_gemm_config.mr_packed = mr;
+    pf16_gemm_config.nr = nr;
+    pf16_gemm_config.log2_kr = 0;
+#endif  // XNN_ENABLE_ARM_FP16_VECTOR
+  } else {
     /* no action */
   }
   assert(pf16_gemm_config.mr <= XNN_MAX_MR);

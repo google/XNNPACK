@@ -4157,6 +4157,8 @@ enum xnn_status xnn_subgraph_optimize_packed_lhs(xnn_subgraph_t subgraph,
         const enum xnn_datatype input_datatype = input_value->datatype;
         const enum xnn_datatype kernel_datatype = kernel_value->datatype;
         const enum xnn_datatype output_datatype = output_value->datatype;
+        const struct xnn_gemm_config* pf16_gemm_config =
+            xnn_init_pf16_gemm_config();
 
         // Check if we can do anything special with this operation.
         if (input_datatype == xnn_datatype_qint8 &&
@@ -4195,7 +4197,8 @@ enum xnn_status xnn_subgraph_optimize_packed_lhs(xnn_subgraph_t subgraph,
             (kernel_datatype == xnn_datatype_fp16 ||
             kernel_datatype == xnn_datatype_fp32) &&
             output_datatype == xnn_datatype_fp16 &&
-            xnn_init_pf16_gemm_config() != NULL &&
+            pf16_gemm_config != NULL &&
+            pf16_gemm_config->pack_igemm_goki != NULL &&
             !(optimization_flags & XNN_FLAG_NO_INLINED_LHS_PACKING)) {
           // Note that there is currently no option to not use inlining for this
           // iGEMM kernel.

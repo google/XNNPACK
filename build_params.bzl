@@ -366,6 +366,9 @@ XNNPACK_PARAMS_FOR_ARCH = {
     "neonfp16arith_aarch64": _create_params(
         cond = "//:arm_aarch64_fp16_vector_enabled",
         copts = ["-march=armv8.2-a+fp16"],
+        extra_deps = xnnpack_if_kleidiai_enabled([
+            "@KleidiAI//kai/ukernels/matmul:matmul",
+        ]),
     ),
     "neonbf16": _create_params(
         cond = "//:arm_bf16_enabled",

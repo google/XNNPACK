@@ -527,6 +527,9 @@ if (current_cpu == "arm64") {
       ":microkernel_defs",
       ":microkernel_headers",
     ]
+    if (xnnpack_enable_arm_kleidiai) {
+      deps += [ "//third_party/kleidiai" ]
+    }
     sources = ALL_NEONFP16_MICROKERNEL_SRCS
     sources += ALL_NEONFP16ARITH_AARCH64_MICROKERNEL_SRCS
     sources += ALL_NEONFP16ARITH_MICROKERNEL_SRCS

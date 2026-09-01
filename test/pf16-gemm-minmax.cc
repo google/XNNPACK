@@ -242,6 +242,33 @@ std::vector<GemmTestParams> CreateTests1(
 }  // namespace
 
 
+#if XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM64
+  #if XNN_ENABLE_KLEIDIAI
+  INSTANTIATE_TEST_SUITE_P(
+      PF16_GEMM_MINMAX_6X32__KAI_AARCH64_NEONFP16ARITH, GemmTest,
+      testing::ValuesIn(CreateTests1(
+          /*k_block=*/1,
+          /*adj_k_block=*/1,
+          /*mr=*/6, /*nr=*/32, /*kr=*/1, /*sr=*/1,
+          /*mr_packed=*/6,
+          /*is_igemm=*/false,
+          /*unsigned_inputs=*/false,
+          /*planes=*/1,
+          [](GemmMicrokernelTester& tester) {
+            tester.Test_PF16(xnn_pf16_gemm_minmax_ukernel_6x32__kai_aarch64_neonfp16arith,
+                        xnn_init_f16_minmax_scalar_params,
+                        xnn_pack_kai_f16_6x32_weights_and_biases,
+                        xnn_packed_stride_kai_f16_6x32_weights_and_biases);
+          },
+          xnn_arch_arm_neon_fp16_arith)),
+      [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
+        return info.param.test_name;
+      });
+
+  #endif  // XNN_ENABLE_KLEIDIAI
+#endif  // XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM64
+
+
 #if XNN_ENABLE_ARM_SME2 && XNN_ARCH_ARM64
   #if XNN_ENABLE_KLEIDIAI
   INSTANTIATE_TEST_SUITE_P(
@@ -284,6 +311,8 @@ std::vector<GemmTestParams> CreateTests1(
           [](GemmMicrokernelTester& tester) {
             tester.Test_PF16(xnn_pf16_gemm_minmax_ukernel_1x32c2__neonsme2,
                         xnn_init_f16_minmax_scalar_params,
+                        (xnn_pack_lh_ukernel_fn) xnn_x16_pack_lh_ukernel__neonsme2,
+                        xnn_x16_pack_lh_size__neonsme2,
                         xnn_pack_kai_f16_weights_and_biases,
                         xnn_packed_stride_kai_f16_weights_and_biases);
           },
@@ -333,6 +362,8 @@ std::vector<GemmTestParams> CreateTests1(
           [](GemmMicrokernelTester& tester) {
             tester.Test_PF16(xnn_pf16_gemm_minmax_ukernel_32x32c2__neonsme2,
                         xnn_init_f16_minmax_scalar_params,
+                        (xnn_pack_lh_ukernel_fn) xnn_x16_pack_lh_ukernel__neonsme2,
+                        xnn_x16_pack_lh_size__neonsme2,
                         xnn_pack_kai_f16_weights_and_biases,
                         xnn_packed_stride_kai_f16_weights_and_biases);
           },
@@ -387,6 +418,8 @@ std::vector<GemmTestParams> CreateTests1(
           [](GemmMicrokernelTester& tester) {
             tester.Test_PF16(xnn_pf16_gemm_minmax_ukernel_1x32c2__neonsme,
                         xnn_init_f16_minmax_scalar_params,
+                        (xnn_pack_lh_ukernel_fn) xnn_x16_pack_lh_ukernel__neonsme,
+                        xnn_x16_pack_lh_size__neonsme,
                         xnn_pack_kai_f16_weights_and_biases,
                         xnn_packed_stride_kai_f16_weights_and_biases);
           },
@@ -436,6 +469,8 @@ std::vector<GemmTestParams> CreateTests1(
           [](GemmMicrokernelTester& tester) {
             tester.Test_PF16(xnn_pf16_gemm_minmax_ukernel_32x32c2__neonsme,
                         xnn_init_f16_minmax_scalar_params,
+                        (xnn_pack_lh_ukernel_fn) xnn_x16_pack_lh_ukernel__neonsme,
+                        xnn_x16_pack_lh_size__neonsme,
                         xnn_pack_kai_f16_weights_and_biases,
                         xnn_packed_stride_kai_f16_weights_and_biases);
           },
