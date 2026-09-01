@@ -323,7 +323,7 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x16c8__
         $if DATATYPE == "QB4_BF16":
           $for M in range(MR):
             // Round fp32 to bf16 (round-to-nearest-even, quiet NaNs) and store 16-bit outputs.
-            _mm256_storeu_si256((__m256i*) c${M}, (__m256i) _mm512_cvtneps_pbh(vscaled${M}x0123456789ABCDEF));
+            _mm256_storeu_si256((__m256i*) c${M}, _mm512_cvtneps_pbh(vscaled${M}x0123456789ABCDEF));
         $else:
           $for M in range(MR):
             _mm512_storeu_ps(c${M}, vscaled${M}x0123456789ABCDEF);
@@ -340,7 +340,7 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x16c8__
           // Prepare mask for valid 16-bit elements (depends on nc).
           const __mmask16 vmask = _cvtu32_mask16((UINT32_C(1) << nc) - 1);
           $for M in range(MR):
-            _mm256_mask_storeu_epi16(c${M}, vmask, (__m256i) _mm512_cvtneps_pbh(vscaled${M}x0123456789ABCDEF));
+            _mm256_mask_storeu_epi16(c${M}, vmask, _mm512_cvtneps_pbh(vscaled${M}x0123456789ABCDEF));
         $else:
           // Prepare mask for valid 32-bit elements (depends on nc).
           const __mmask16 vmask = _cvtu32_mask16((UINT32_C(1) << nc) - 1);

@@ -21,6 +21,7 @@
 #include "ynnpack/base/base.h"
 #include "ynnpack/base/span.h"
 #include "slinky/builder/pipeline.h"
+#include "slinky/builder/simplify.h"
 #include "slinky/runtime/buffer.h"
 #include "slinky/runtime/expr.h"
 #include "slinky/runtime/stmt.h"
@@ -59,6 +60,18 @@ class slinky_globals {
 
   slinky::buffer_expr_ptr make_buffer_expr(const std::string& name, int rank,
                                            slinky::expr elem_size);
+
+  // Record provable facts about a global variable whose defining expression
+  // is opaque to the simplifier (e.g. the result of a runtime split-factor
+  // call). The facts can be passed to prove_true/simplify wherever the
+  // scheduler reasons about expressions referencing these variables. Bounds
+  // may be symbolic. No-op if `e` is not a variable.
+  void learn_bounds(const slinky::expr& e, slinky::interval_expr bounds);
+  void learn_alignment(const slinky::expr& e, slinky::alignment_type a);
+
+  // Facts registered by learn_bounds/learn_alignment, keyed by variable.
+  slinky::bounds_map fact_bounds;
+  slinky::alignment_map fact_alignment;
 
   // Symbols we've named in Slinky.
   slinky::node_context symbols;
@@ -146,21 +159,6 @@ struct scheduling_split {
   bool step_is_required = false;
 };
 
-// A scheduling information for a buffer -- it's expected to be attached to the
-// scheduling_info of the function.
-struct scheduled_buffer {
-  // This potentially could be numeric_limit::max or something, but it's
-  // convenient to do some math with it, so pick something smaller to avoid
-  // overflows.
-  static constexpr slinky::index_t root = 1000;
-  slinky::buffer_expr_ptr buffer;
-  // The location to store buffer at with respect to its producer compute_at
-  // location:
-  // * if it's 0 then it will be stored at the same loop level it's computed at.
-  // * if it's root it's an outermost location.
-  slinky::index_t store_at_min_depth = 0;
-};
-
 struct scheduling_info {
   // This value is large enough to always be outside of any reasonable number
   // of loops.
@@ -168,7 +166,6 @@ struct scheduling_info {
 
   // A set of loop splits for a given function.
   std::vector<scheduling_split> loop_splits;
-  std::vector<scheduled_buffer> scheduled_buffers;
 
   // Scheduler-only bounds for the inputs of this function, used by the
   // scheduler's source region inference in place of the function's real input
@@ -231,7 +228,20 @@ YNN_ALWAYS_INLINE bool same_bounds(const slinky::dim& a, const slinky::dim& b,
 //   2. Its stride is equal to its element size.
 YNN_ALWAYS_INLINE bool is_contiguous(const slinky::dim& dim,
                                      const int element_size) {
-  return dim.extent() == 1 || dim.stride() == element_size;
+  return dim.min() == dim.max() || dim.stride() == element_size;
+}
+
+YNN_ALWAYS_INLINE bool is_contiguous(const slinky::raw_buffer& buf, size_t dim,
+                                     const int element_size) {
+  if (dim >= buf.rank) return true;
+  const slinky::dim& d = buf.dims[dim];
+  return is_contiguous(d, element_size);
+}
+
+YNN_ALWAYS_INLINE bool is_broadcast(const slinky::raw_buffer& buf, size_t dim) {
+  if (dim >= buf.rank) return true;
+  const slinky::dim& d = buf.dims[dim];
+  return d.min() == d.max() || d.stride() == 0;
 }
 
 inline size_t first_non_trivial_dim(ynn::span<const slinky::expr> extents) {
@@ -241,10 +251,6 @@ inline size_t first_non_trivial_dim(ynn::span<const slinky::expr> extents) {
     }
   }
   return extents.size();
-}
-
-YNN_ALWAYS_INLINE bool is_broadcast(const slinky::dim& dim) {
-  return dim.extent() == 1 || dim.stride() == 0;
 }
 
 // Remove dimension 0 from the buffer and return a reference to it. This
@@ -326,7 +332,7 @@ bool fuse_and_slice_leading_dims(slinky::dim* x_dims, slinky::raw_buffer& x,
     // If the output innermost (n) dimension has extent 1, we need to make the n
     // dimension of all inputs a broadcast. This case is not expected to happen.
     // For now, we add an assert to catch this case if it does.
-    assert(i != 0 || is_contiguous(x.dim(0), x.elem_size));
+    assert(i != 0 || is_contiguous(x, 0, x.elem_size));
 
     x_dims[i] = slice_dim0(x);
     if (x_dims[i].empty()) {

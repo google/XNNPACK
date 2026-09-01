@@ -43,6 +43,7 @@ void xnn_f16_vsqrt_ukernel__f16c_rsqrt_u16(
 
   const uint16_t* i = (const uint16_t*) input;
   uint16_t* o = (uint16_t*) output;
+  const __m256 vzero = _mm256_setzero_ps();
   const __m256 vinf = _mm256_set1_ps(INFINITY);
   for (; batch >= 16 * sizeof(uint16_t); batch -= 16 * sizeof(uint16_t)) {
     __m256 vacc0 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i));
@@ -50,13 +51,17 @@ void xnn_f16_vsqrt_ukernel__f16c_rsqrt_u16(
     i += 16;
 
     const __m256 vt0_0 = _mm256_rsqrt_ps(vacc0);
+    const __m256 vinf_mask_0 = _mm256_cmp_ps(vacc0, vinf, _CMP_EQ_OQ);
+    const __m256 vzero_mask_0 = _mm256_cmp_ps(vacc0, vzero, _CMP_NEQ_OQ);
     const __m256 vt0_1 = _mm256_rsqrt_ps(vacc1);
-    const __m256 vt1_0 = _mm256_cmp_ps(vt0_0, vinf, _CMP_LT_OQ);
-    const __m256 vt1_1 = _mm256_cmp_ps(vt0_1, vinf, _CMP_LT_OQ);
-    const __m256 vt2_0 = _mm256_and_ps(vt0_0, vt1_0);
-    const __m256 vt2_1 = _mm256_and_ps(vt0_1, vt1_1);
-    vacc0 = _mm256_mul_ps(vacc0, vt2_0);
-    vacc1 = _mm256_mul_ps(vacc1, vt2_1);
+    const __m256 vinf_mask_1 = _mm256_cmp_ps(vacc1, vinf, _CMP_EQ_OQ);
+    const __m256 vzero_mask_1 = _mm256_cmp_ps(vacc1, vzero, _CMP_NEQ_OQ);
+    const __m256 vt1_0 = _mm256_and_ps(vt0_0, vzero_mask_0);
+    const __m256 vt1_1 = _mm256_and_ps(vt0_1, vzero_mask_1);
+    vacc0 = _mm256_mul_ps(vacc0, vt1_0);
+    vacc1 = _mm256_mul_ps(vacc1, vt1_1);
+    vacc0 = _mm256_blendv_ps(vacc0, vinf, vinf_mask_0);
+    vacc1 = _mm256_blendv_ps(vacc1, vinf, vinf_mask_1);
 
     _mm_storeu_si128((__m128i*) o, _mm256_cvtps_ph(vacc0, _MM_FROUND_TO_NEAREST_INT));
     _mm_storeu_si128((__m128i*) (o + 8), _mm256_cvtps_ph(vacc1, _MM_FROUND_TO_NEAREST_INT));
@@ -66,18 +71,22 @@ void xnn_f16_vsqrt_ukernel__f16c_rsqrt_u16(
     __m256 vacc = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i));
     i += 8;
     const __m256 vt0 = _mm256_rsqrt_ps(vacc);
-    const __m256 vt1 = _mm256_cmp_ps(vt0, vinf, _CMP_LT_OQ);
-    const __m256 vt2 = _mm256_and_ps(vt0, vt1);
-    vacc = _mm256_mul_ps(vacc, vt2);
+    const __m256 vinf_mask = _mm256_cmp_ps(vacc, vinf, _CMP_EQ_OQ);
+    const __m256 vzero_mask = _mm256_cmp_ps(vacc, vzero, _CMP_NEQ_OQ);
+    const __m256 vt1 = _mm256_and_ps(vt0, vzero_mask);
+    vacc = _mm256_mul_ps(vacc, vt1);
+    vacc = _mm256_blendv_ps(vacc, vinf, vinf_mask);
     _mm_storeu_si128((__m128i*) o, _mm256_cvtps_ph(vacc, _MM_FROUND_TO_NEAREST_INT));
     o += 8;
   }
   if XNN_UNLIKELY(batch != 0) {
     __m256 vacc = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i));
     const __m256 vt0 = _mm256_rsqrt_ps(vacc);
-    const __m256 vt1 = _mm256_cmp_ps(vt0, vinf, _CMP_LT_OQ);
-    const __m256 vt2 = _mm256_and_ps(vt0, vt1);
-    vacc = _mm256_mul_ps(vacc, vt2);
+    const __m256 vinf_mask = _mm256_cmp_ps(vacc, vinf, _CMP_EQ_OQ);
+    const __m256 vzero_mask = _mm256_cmp_ps(vacc, vzero, _CMP_NEQ_OQ);
+    const __m256 vt1 = _mm256_and_ps(vt0, vzero_mask);
+    vacc = _mm256_mul_ps(vacc, vt1);
+    vacc = _mm256_blendv_ps(vacc, vinf, vinf_mask);
     __m128i vh = _mm256_cvtps_ph(vacc, _MM_FROUND_TO_NEAREST_INT);
     if (batch & (4 * sizeof(uint16_t))) {
       _mm_storel_epi64((__m128i*) o, vh);

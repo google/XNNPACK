@@ -11,7 +11,7 @@
 // This header needs to go first for the arch test macros.
 #include "src/xnnpack/common.h"
 
-#if XNN_ARCH_WASMRELAXEDSIMD
+#if XNN_ARCH_WASMRELAXEDSIMDFP16
 
 #include <algorithm>
 #include <cmath>
@@ -24,6 +24,8 @@
 #include "src/xnnpack/simd/f16-wasmrelaxedsimd.h"
 #include "test/replicable_random_device.h"
 
+// By default --copt='-ffp-contract=off' is set, so no implicit FMA. However, 
+// we should identify architectures that support explicit FMA.
 #define XNN_SIMD_TEST_USES_EXPLICIT_FMA 1
 
 namespace xnnpack {
@@ -593,4 +595,4 @@ TEST_F(F16SimdWASMRELAXEDSIMDTest, StoreTail) {
 
 }  // namespace xnnpack
 
-#endif  // XNN_ARCH_WASMRELAXEDSIMD
+#endif  // XNN_ARCH_WASMRELAXEDSIMDFP16

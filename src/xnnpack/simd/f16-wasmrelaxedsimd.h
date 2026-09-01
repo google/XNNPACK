@@ -21,7 +21,11 @@ typedef v128_t xnn_simd_f16_t;
 #define xnn_simd_log2_size_f16 3
 #define xnn_simd_bytes_f16 (xnn_simd_size_f16 * sizeof(uint16_t))
 
+#if XNN_ENABLE_WASMRELAXEDSIMDFP16
 #define XNN_SIMD_HAS_NATIVE_FMA 1
+#else
+#define XNN_SIMD_HAS_NATIVE_FMA 0
+#endif
 
 #define XNN_SIMD_CONST_F16(var, val) \
   const xnn_simd_f16_t var = wasm_i16x8_splat(val);
@@ -37,6 +41,7 @@ static XNN_INLINE xnn_simd_f16_t xnn_zero_f16() {
   return wasm_i16x8_const_splat(0);
 }
 
+#if XNN_ENABLE_WASMRELAXEDSIMDFP16
 static XNN_INLINE xnn_simd_f16_t xnn_add_f16(xnn_simd_f16_t a,
                                              xnn_simd_f16_t b) {
   return wasm_f16x8_add(a, b);
@@ -108,6 +113,7 @@ static XNN_INLINE xnn_simd_f16_t xnn_neg_f16(xnn_simd_f16_t a) {
 static XNN_INLINE xnn_simd_f16_t xnn_round_f16(xnn_simd_f16_t a) {
   return wasm_f16x8_nearest(a);
 }
+#endif  // XNN_ENABLE_WASMRELAXEDSIMDFP16
 
 // Logical operations.
 static XNN_INLINE xnn_simd_f16_t xnn_and_f16(xnn_simd_f16_t a,
@@ -220,6 +226,11 @@ xnn_load_tail_f16(const xnn_float16* input, size_t num_elements) {
       break;
   }
   return wasm_v128_load(padded);
+}
+
+static XNN_INLINE xnn_simd_f16_t
+xnn_load_tail_safe_f16(const xnn_float16* input, size_t num_elements) {
+  return xnn_load_tail_f16(input, num_elements);
 }
 
 static XNN_INLINE void xnn_store_tail_f16(xnn_float16* output, xnn_simd_f16_t v,

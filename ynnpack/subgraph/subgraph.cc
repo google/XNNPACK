@@ -409,15 +409,15 @@ std::optional<size_t> index_of(const C& container, const T& value) {
 }
 
 size_t static_size_of_value(const ynn_value& value) {
-  size_t size = ynn::type_size_bytes(value.type);
+  size_t n = 1;
   for (const auto& extent : value.extents) {
     if (auto extent_c = as_constant(extent)) {
-      size *= *extent_c;
+      n *= *extent_c;
     } else {
       return 0;
     }
   }
-  return size;
+  return ynn::type_size_bytes(value.type, n);
 }
 
 size_t static_size_of_inputs(const ynn_subgraph& subgraph,

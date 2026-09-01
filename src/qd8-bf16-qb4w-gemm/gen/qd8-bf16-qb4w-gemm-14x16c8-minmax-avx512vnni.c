@@ -524,33 +524,33 @@ void xnn_qd8_bf16_qb4w_gemm_minmax_ukernel_14x16c8__avx512vnni(
 
     if XNN_LIKELY(nc >= 16) {
       // Round fp32 to bf16 (round-to-nearest-even, quiet NaNs) and store 16-bit outputs.
-      _mm256_storeu_si256((__m256i*) c0, (__m256i) _mm512_cvtneps_pbh(vscaled0x0123456789ABCDEF));
+      _mm256_storeu_si256((__m256i*) c0, _mm512_cvtneps_pbh(vscaled0x0123456789ABCDEF));
       // Round fp32 to bf16 (round-to-nearest-even, quiet NaNs) and store 16-bit outputs.
-      _mm256_storeu_si256((__m256i*) c1, (__m256i) _mm512_cvtneps_pbh(vscaled1x0123456789ABCDEF));
+      _mm256_storeu_si256((__m256i*) c1, _mm512_cvtneps_pbh(vscaled1x0123456789ABCDEF));
       // Round fp32 to bf16 (round-to-nearest-even, quiet NaNs) and store 16-bit outputs.
-      _mm256_storeu_si256((__m256i*) c2, (__m256i) _mm512_cvtneps_pbh(vscaled2x0123456789ABCDEF));
+      _mm256_storeu_si256((__m256i*) c2, _mm512_cvtneps_pbh(vscaled2x0123456789ABCDEF));
       // Round fp32 to bf16 (round-to-nearest-even, quiet NaNs) and store 16-bit outputs.
-      _mm256_storeu_si256((__m256i*) c3, (__m256i) _mm512_cvtneps_pbh(vscaled3x0123456789ABCDEF));
+      _mm256_storeu_si256((__m256i*) c3, _mm512_cvtneps_pbh(vscaled3x0123456789ABCDEF));
       // Round fp32 to bf16 (round-to-nearest-even, quiet NaNs) and store 16-bit outputs.
-      _mm256_storeu_si256((__m256i*) c4, (__m256i) _mm512_cvtneps_pbh(vscaled4x0123456789ABCDEF));
+      _mm256_storeu_si256((__m256i*) c4, _mm512_cvtneps_pbh(vscaled4x0123456789ABCDEF));
       // Round fp32 to bf16 (round-to-nearest-even, quiet NaNs) and store 16-bit outputs.
-      _mm256_storeu_si256((__m256i*) c5, (__m256i) _mm512_cvtneps_pbh(vscaled5x0123456789ABCDEF));
+      _mm256_storeu_si256((__m256i*) c5, _mm512_cvtneps_pbh(vscaled5x0123456789ABCDEF));
       // Round fp32 to bf16 (round-to-nearest-even, quiet NaNs) and store 16-bit outputs.
-      _mm256_storeu_si256((__m256i*) c6, (__m256i) _mm512_cvtneps_pbh(vscaled6x0123456789ABCDEF));
+      _mm256_storeu_si256((__m256i*) c6, _mm512_cvtneps_pbh(vscaled6x0123456789ABCDEF));
       // Round fp32 to bf16 (round-to-nearest-even, quiet NaNs) and store 16-bit outputs.
-      _mm256_storeu_si256((__m256i*) c7, (__m256i) _mm512_cvtneps_pbh(vscaled7x0123456789ABCDEF));
+      _mm256_storeu_si256((__m256i*) c7, _mm512_cvtneps_pbh(vscaled7x0123456789ABCDEF));
       // Round fp32 to bf16 (round-to-nearest-even, quiet NaNs) and store 16-bit outputs.
-      _mm256_storeu_si256((__m256i*) c8, (__m256i) _mm512_cvtneps_pbh(vscaled8x0123456789ABCDEF));
+      _mm256_storeu_si256((__m256i*) c8, _mm512_cvtneps_pbh(vscaled8x0123456789ABCDEF));
       // Round fp32 to bf16 (round-to-nearest-even, quiet NaNs) and store 16-bit outputs.
-      _mm256_storeu_si256((__m256i*) c9, (__m256i) _mm512_cvtneps_pbh(vscaled9x0123456789ABCDEF));
+      _mm256_storeu_si256((__m256i*) c9, _mm512_cvtneps_pbh(vscaled9x0123456789ABCDEF));
       // Round fp32 to bf16 (round-to-nearest-even, quiet NaNs) and store 16-bit outputs.
-      _mm256_storeu_si256((__m256i*) c10, (__m256i) _mm512_cvtneps_pbh(vscaled10x0123456789ABCDEF));
+      _mm256_storeu_si256((__m256i*) c10, _mm512_cvtneps_pbh(vscaled10x0123456789ABCDEF));
       // Round fp32 to bf16 (round-to-nearest-even, quiet NaNs) and store 16-bit outputs.
-      _mm256_storeu_si256((__m256i*) c11, (__m256i) _mm512_cvtneps_pbh(vscaled11x0123456789ABCDEF));
+      _mm256_storeu_si256((__m256i*) c11, _mm512_cvtneps_pbh(vscaled11x0123456789ABCDEF));
       // Round fp32 to bf16 (round-to-nearest-even, quiet NaNs) and store 16-bit outputs.
-      _mm256_storeu_si256((__m256i*) c12, (__m256i) _mm512_cvtneps_pbh(vscaled12x0123456789ABCDEF));
+      _mm256_storeu_si256((__m256i*) c12, _mm512_cvtneps_pbh(vscaled12x0123456789ABCDEF));
       // Round fp32 to bf16 (round-to-nearest-even, quiet NaNs) and store 16-bit outputs.
-      _mm256_storeu_si256((__m256i*) c13, (__m256i) _mm512_cvtneps_pbh(vscaled13x0123456789ABCDEF));
+      _mm256_storeu_si256((__m256i*) c13, _mm512_cvtneps_pbh(vscaled13x0123456789ABCDEF));
 
       a0 = (const int8_t*) ((uintptr_t) a0 - kc);
       a1 = (const int8_t*) ((uintptr_t) a1 - kc);
@@ -586,20 +586,20 @@ void xnn_qd8_bf16_qb4w_gemm_minmax_ukernel_14x16c8__avx512vnni(
     } else {
       // Prepare mask for valid 16-bit elements (depends on nc).
       const __mmask16 vmask = _cvtu32_mask16((UINT32_C(1) << nc) - 1);
-      _mm256_mask_storeu_epi16(c0, vmask, (__m256i) _mm512_cvtneps_pbh(vscaled0x0123456789ABCDEF));
-      _mm256_mask_storeu_epi16(c1, vmask, (__m256i) _mm512_cvtneps_pbh(vscaled1x0123456789ABCDEF));
-      _mm256_mask_storeu_epi16(c2, vmask, (__m256i) _mm512_cvtneps_pbh(vscaled2x0123456789ABCDEF));
-      _mm256_mask_storeu_epi16(c3, vmask, (__m256i) _mm512_cvtneps_pbh(vscaled3x0123456789ABCDEF));
-      _mm256_mask_storeu_epi16(c4, vmask, (__m256i) _mm512_cvtneps_pbh(vscaled4x0123456789ABCDEF));
-      _mm256_mask_storeu_epi16(c5, vmask, (__m256i) _mm512_cvtneps_pbh(vscaled5x0123456789ABCDEF));
-      _mm256_mask_storeu_epi16(c6, vmask, (__m256i) _mm512_cvtneps_pbh(vscaled6x0123456789ABCDEF));
-      _mm256_mask_storeu_epi16(c7, vmask, (__m256i) _mm512_cvtneps_pbh(vscaled7x0123456789ABCDEF));
-      _mm256_mask_storeu_epi16(c8, vmask, (__m256i) _mm512_cvtneps_pbh(vscaled8x0123456789ABCDEF));
-      _mm256_mask_storeu_epi16(c9, vmask, (__m256i) _mm512_cvtneps_pbh(vscaled9x0123456789ABCDEF));
-      _mm256_mask_storeu_epi16(c10, vmask, (__m256i) _mm512_cvtneps_pbh(vscaled10x0123456789ABCDEF));
-      _mm256_mask_storeu_epi16(c11, vmask, (__m256i) _mm512_cvtneps_pbh(vscaled11x0123456789ABCDEF));
-      _mm256_mask_storeu_epi16(c12, vmask, (__m256i) _mm512_cvtneps_pbh(vscaled12x0123456789ABCDEF));
-      _mm256_mask_storeu_epi16(c13, vmask, (__m256i) _mm512_cvtneps_pbh(vscaled13x0123456789ABCDEF));
+      _mm256_mask_storeu_epi16(c0, vmask, _mm512_cvtneps_pbh(vscaled0x0123456789ABCDEF));
+      _mm256_mask_storeu_epi16(c1, vmask, _mm512_cvtneps_pbh(vscaled1x0123456789ABCDEF));
+      _mm256_mask_storeu_epi16(c2, vmask, _mm512_cvtneps_pbh(vscaled2x0123456789ABCDEF));
+      _mm256_mask_storeu_epi16(c3, vmask, _mm512_cvtneps_pbh(vscaled3x0123456789ABCDEF));
+      _mm256_mask_storeu_epi16(c4, vmask, _mm512_cvtneps_pbh(vscaled4x0123456789ABCDEF));
+      _mm256_mask_storeu_epi16(c5, vmask, _mm512_cvtneps_pbh(vscaled5x0123456789ABCDEF));
+      _mm256_mask_storeu_epi16(c6, vmask, _mm512_cvtneps_pbh(vscaled6x0123456789ABCDEF));
+      _mm256_mask_storeu_epi16(c7, vmask, _mm512_cvtneps_pbh(vscaled7x0123456789ABCDEF));
+      _mm256_mask_storeu_epi16(c8, vmask, _mm512_cvtneps_pbh(vscaled8x0123456789ABCDEF));
+      _mm256_mask_storeu_epi16(c9, vmask, _mm512_cvtneps_pbh(vscaled9x0123456789ABCDEF));
+      _mm256_mask_storeu_epi16(c10, vmask, _mm512_cvtneps_pbh(vscaled10x0123456789ABCDEF));
+      _mm256_mask_storeu_epi16(c11, vmask, _mm512_cvtneps_pbh(vscaled11x0123456789ABCDEF));
+      _mm256_mask_storeu_epi16(c12, vmask, _mm512_cvtneps_pbh(vscaled12x0123456789ABCDEF));
+      _mm256_mask_storeu_epi16(c13, vmask, _mm512_cvtneps_pbh(vscaled13x0123456789ABCDEF));
       nc = 0;
     }
   } while (nc != 0);

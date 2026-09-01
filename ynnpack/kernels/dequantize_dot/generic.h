@@ -6,7 +6,6 @@
 #ifndef XNNPACK_YNNPACK_KERNELS_DEQUANTIZE_DOT_GENERIC_H_
 #define XNNPACK_YNNPACK_KERNELS_DEQUANTIZE_DOT_GENERIC_H_
 
-#include <algorithm>
 #include <cassert>
 #include <cstddef>
 #include <cstdint>
@@ -24,7 +23,7 @@ template <size_t N, typename T>
 struct broadcast_to_load {
   broadcast_to_load(const T*& ptr, size_t stride) {
     if (stride == 0) {
-      std::fill_n(data, N, *ptr);
+      simd::store(data, simd::broadcast<N>(*ptr));
       ptr = data;
     } else {
       assert(stride == sizeof(T));
@@ -44,7 +43,8 @@ static void dequantize_dot(size_t m, size_t n, size_t stride_dot_m,
                            const float* a_scale, size_t stride_b_scale_n,
                            const float* b_scale, size_t stride_output_m,
                            Output* output, const dequantize_dot_params*) {
-  while (m > 0) {
+  assert(m > 0);
+  while (true) {
     const int32_t* dot_m = dot;
     const int32_t* b_offset_m = b_offset;
     const float* offset_m = offset;
@@ -109,6 +109,7 @@ static void dequantize_dot(size_t m, size_t n, size_t stride_dot_m,
     }
 
     --m;
+    if (m == 0) break;
     dot = offset_bytes(dot, stride_dot_m);
     a_offset = offset_bytes(a_offset, stride_a_offset_m);
     a_scale = offset_bytes(a_scale, stride_a_scale_m);

@@ -42,6 +42,20 @@ slinky::expr slinky_globals::get(slinky::expr value, const char* prefix) {
   }
 }
 
+void slinky_globals::learn_bounds(const slinky::expr& e,
+                                  slinky::interval_expr bounds) {
+  if (auto v = slinky::as_variable(e)) {
+    fact_bounds[*v] = std::move(bounds);
+  }
+}
+
+void slinky_globals::learn_alignment(const slinky::expr& e,
+                                     slinky::alignment_type a) {
+  if (auto v = slinky::as_variable(e)) {
+    fact_alignment[*v] = a;
+  }
+}
+
 slinky::expr slinky_globals::make_split_var(slinky::expr value,
                                             const char* prefix) {
   value = slinky::simplify(value);

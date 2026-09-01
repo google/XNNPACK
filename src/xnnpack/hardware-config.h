@@ -167,7 +167,9 @@ XNN_INTERNAL void xnn_reset_hardware_config(void);
 
 static inline bool xnn_is_bf16_compatible_config(
     const struct xnn_hardware_config* hardware_config) {
-#if XNN_ARCH_X86_64
+#if (XNN_ARCH_ARM || XNN_ARCH_ARM64) && XNN_ENABLE_ARM_BF16
+  return hardware_config->arch_flags & xnn_arch_arm_neon_bf16;
+#elif (XNN_ARCH_X86 || XNN_ARCH_X86_64) && XNN_ENABLE_AVX512BF16
   return (hardware_config->arch_flags & xnn_arch_x86_avx512bf16);
 #else
   return false;

@@ -312,11 +312,7 @@ static void init_f16_gemm_config(void) {
         f16_gemm_config.minmax.igemm[XNN_MR_TO_INDEX(8)] = XNN_INIT_HMP_IGEMM_UKERNEL(xnn_f16_igemm_minmax_ukernel_8x32__avx512fp16_broadcast);
         f16_gemm_config.init.f16 = xnn_init_f16_minmax_scalar_params;
         f16_gemm_config.pack_gemm_gio = (xnn_packw_gemm_gio_ukernel_fn) xnn_x16_packw_gemm_gio_ukernel_x32__scalar;
-        #if XNN_ENABLE_AVX2
-          f16_gemm_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_x16_packw_gemm_goi_ukernel_x32__avx2_u16_prfm;
-        #else
-          f16_gemm_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_x16_packw_gemm_goi_ukernel_x32__scalar_int_u4;
-        #endif
+        f16_gemm_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_x16_packw_gemm_goi_ukernel_x32__avx512skx_u16_prfm;
         f16_gemm_config.mr = 8;
         f16_gemm_config.nr = 32;
       } else
@@ -329,11 +325,7 @@ static void init_f16_gemm_config(void) {
         f16_gemm_config.minmax.igemm[XNN_MR_TO_INDEX(4)] = XNN_INIT_HMP_IGEMM_UKERNEL(xnn_f16_f32acc_igemm_minmax_ukernel_4x32__avx512skx_broadcast);
         f16_gemm_config.init.f16 = xnn_init_f16_minmax_scalar_params;
         f16_gemm_config.pack_gemm_gio = (xnn_packw_gemm_gio_ukernel_fn) xnn_x16_packw_gemm_gio_ukernel_x32__scalar;
-        #if XNN_ENABLE_AVX2
-          f16_gemm_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_x16_packw_gemm_goi_ukernel_x32__avx2_u16_prfm;
-        #else
-          f16_gemm_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_x16_packw_gemm_goi_ukernel_x32__scalar_int_u4;
-        #endif
+        f16_gemm_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_x16_packw_gemm_goi_ukernel_x32__avx512skx_u16_prfm;
         f16_gemm_config.mr = 4;
         f16_gemm_config.nr = 32;
       } else

@@ -20,6 +20,8 @@
 #include "src/xnnpack/simd/f16-scalar.h"
 #include "test/replicable_random_device.h"
 
+// By default --copt='-ffp-contract=off' is set, so no implicit FMA. However, 
+// we should identify architectures that support explicit FMA.
 #define XNN_SIMD_TEST_USES_EXPLICIT_FMA 0
 
 namespace xnnpack {

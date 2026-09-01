@@ -289,7 +289,6 @@
 #if defined(__clang__)
 // Clang ignores sanitizer attributes on functions that get inlined. Also:
 // - GCC does not allow this attribute to be specified after a function
-// - It takes precedence over always_inline, so we can specify both.
 #define XNN_NO_INLINE_SANITIZER __attribute__((__noinline__))
 #else
 #define XNN_NO_INLINE_SANITIZER
@@ -303,8 +302,7 @@
 #endif
 
 #if XNN_COMPILER_HAS_FEATURE(memory_sanitizer)
-#define XNN_DISABLE_MSAN \
-  __attribute__((__no_sanitize__("memory"))) XNN_NO_INLINE_SANITIZER
+#define XNN_DISABLE_MSAN __attribute__((__no_sanitize__("memory")))
 #else
 #define XNN_DISABLE_MSAN
 #endif
@@ -324,8 +322,7 @@
 #endif
 
 #if XNN_COMPILER_HAS_FEATURE(undefined_behavior_sanitizer)
-#define XNN_DISABLE_UBSAN \
-  __attribute__((__no_sanitize__("undefined"))) XNN_NO_INLINE_SANITIZER
+#define XNN_DISABLE_UBSAN __attribute__((__no_sanitize__("undefined")))
 #else
 #define XNN_DISABLE_UBSAN
 #endif
@@ -369,7 +366,17 @@
 #define XNN_INTRINSIC inline
 #endif
 
+#if XNN_COMPILER_HAS_FEATURE(address_sanitizer) || \
+    XNN_COMPILER_HAS_FEATURE(hwaddress_sanitizer) || \
+    XNN_COMPILER_HAS_FEATURE(thread_sanitizer)
 #if defined(__GNUC__)
+#define XNN_INLINE inline __attribute__((__noinline__))
+#elif defined(_MSC_VER)
+#define XNN_INLINE __declspec(noinline) inline
+#else
+#define XNN_INLINE inline
+#endif
+#elif defined(__GNUC__)
 #define XNN_INLINE inline __attribute__((__always_inline__))
 #elif defined(_MSC_VER)
 #define XNN_INLINE __forceinline
