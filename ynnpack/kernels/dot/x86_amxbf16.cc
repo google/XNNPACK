@@ -39,4 +39,18 @@ void dot_bf16_bf16_fp32_32x32x32_16x16x2_amxbf16(
       C_out_stride_m, C_out);
 }
 
+// 32x48 AMX BF16 kernel based on the Tiling_B scheme from:
+// Shintaro Endo, Hayato Ohshima, and Takeshi Nanri.
+// "Optimization of a GEMM Implementation using Intel AMX" (HPCAsia 2026).
+void dot_bf16_bf16_fp32_32x48x32_16x16x2_amxbf16(
+    size_t M, size_t N, size_t K3, size_t K2, size_t K1, size_t A_stride_m,
+    size_t A_stride_k3, size_t A_stride_k2, const void* A, size_t B_stride_k3,
+    size_t B_stride_k2, size_t B_stride_k1, const void* B, size_t C_in_stride_m,
+    const void* C_in, size_t C_out_stride_m, void* C_out) {
+  x86_amx_dot_2x3<bfloat16, float, dpbf16ps>(
+      M, N, K3, K2, K1 & ~1, A_stride_m, A_stride_k3, A_stride_k2, A,
+      B_stride_k3, B_stride_k2, B_stride_k1, B, C_in_stride_m, C_in,
+      C_out_stride_m, C_out);
+}
+
 }  // namespace ynn
