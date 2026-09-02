@@ -113,7 +113,7 @@ CC=clang-19 CXX=clang++-19 bazel test -c fastbuild --local_test_jobs=HOST_CPUS /
 | Linux    | x64 | Clang 19.1.7 | `fastbuild` |   ✅  |     ❌    | |
 | Linux    | x64 | Clang 19.1.7 |       `opt` |   ✅  |     ❌    | |
 | Linux    | x64 | Clang 18     | `fastbuild` |   ✅  |     ✅    | |
-| Linux    | x64 | GCC 9        | `fastbuild` |       |     ✅    | With [appropriate defines](.github/workflows/build.yml). |
+| Linux    | x64 | GCC 10       | `fastbuild` |       |     ✅    | With [appropriate defines](.github/workflows/build.yml). |
 | Linux    | AArch64 | Clang 18 | `fastbuild` |       |     ✅    | |
 | Linux    | AArch64 | Clang 20 | `fastbuild` |       |     ✅    | |
 | Linux    | AArch64 | GCC 13   | `fastbuild` |       |     ✅    | |
