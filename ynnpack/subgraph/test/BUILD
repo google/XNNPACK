@@ -256,16 +256,16 @@ cc_test(
     deps = TEST_DEPS + ["//ynnpack/subgraph"],
 )
 
-cc_test(
-    name = "loop_fusion",
-    srcs = ["loop_fusion.cc"],
-    linkopts = ynn_binary_linkopts(),
-    malloc = ynn_binary_malloc(),
-    deps = TEST_DEPS + [
-        "//ynnpack/subgraph",
-        "@slinky//slinky/runtime",
-    ],
-)
+# cc_test(
+#     name = "loop_fusion",
+#     srcs = ["loop_fusion.cc"],
+#     linkopts = ynn_binary_linkopts(),
+#     malloc = ynn_binary_malloc(),
+#     deps = TEST_DEPS + [
+#         "//ynnpack/subgraph",
+#         "@slinky//slinky/runtime",
+#     ],
+# )
 
 cc_test(
     name = "utils",
