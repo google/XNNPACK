@@ -295,16 +295,8 @@ std::map<std::pair<slinky::var, int>, int> infer_source_regions(
             }
           }
 
-          // This pattern covers tiled/blocked spatial accesses
-          // e.g. when `pack_b` divides the output spatial dimension `N` by
-          // `block_n`. This allows pack_b to be fused with the dot product
-          // or other operations that have a similar pattern.
-          auto find_v_in_div = [](slinky::expr e, slinky::var v) -> bool {
-            const slinky::div* d = e.as<slinky::div>();
-            if (d && slinky::is_variable(d->a, v)) return true;
-            return slinky::is_variable(e, v);
-          };
-          if (find_v_in_div(bound.min, v) && find_v_in_div(bound.max, v) &&
+          if (slinky::is_variable(bound.min, v) &&
+              slinky::is_variable(bound.max, v) &&
               !parent_source_regions.empty()) {
             // Check if all parent extents are equivalent.
             bool all_equal = true;
@@ -1070,7 +1062,9 @@ ynn_runtime::ynn_runtime(ynn::ref_count<const ynn_subgraph> subgraph,
     YNN_LOG_ERROR() << "Check failed";
   };
   eval_config.call_failed = [](const slinky::call_stmt* c) {
-    YNN_LOG_ERROR() << c->attrs.name << " failed";
+    // This output can be restored after we update slinky past
+    // https://github.com/dsharlet/slinky/pull/874
+    // YNN_LOG_ERROR() << c->attrs->name << " failed";
   };
   eval_config.base_alignment = YNN_ALLOCATION_ALIGNMENT;
   eval_config.auto_stack_threshold = auto_stack_threshold;

@@ -8,6 +8,9 @@ YNN_DOT_KERNEL(arch_flag::amxbf16, dot_bf16_bf16_fp32_16x64x32_16x16x2_amxbf16,
 YNN_DOT_KERNEL(arch_flag::amxbf16, dot_bf16_bf16_fp32_32x32x32_16x16x2_amxbf16,
                32, 32, 32, 16, 16, 2,
                /*flags=*/0, bfloat16, bfloat16, float)
+YNN_DOT_KERNEL(arch_flag::amxbf16, dot_bf16_bf16_fp32_32x48x32_16x16x2_amxbf16,
+               32, 48, 32, 16, 16, 2,
+               /*flags=*/0, bfloat16, bfloat16, float)
 #endif  // YNN_ARCH_X86_AMXBF16
 #ifdef YNN_ARCH_X86_AMXFP16
 YNN_DOT_KERNEL(arch_flag::amxfp16, dot_fp16_fp16_fp32_16x64x32_16x16x2_amxfp16,

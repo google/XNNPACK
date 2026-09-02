@@ -51,14 +51,14 @@ void xnn_f32_vexp_ukernel__rvv_rational_3_2_div_u8v(
 
   batch >>= XNN_LOG2_SIZEOF_FLOAT;
 
-  // The monomial coefficients of the numerator polynomial (`valpha_0` = 1.0).
-  const float valpha_1 = 4.1594290733e-01f;
-  const float valpha_2 = 7.2068706155e-02f;
-  const float valpha_3 = 5.5380910635e-03f;
+  // The monomial coefficients of the numerator polynomial (`valpha_0` = 0.0).
+  const float valpha_1 = 6.9314718246e-01f;
+  const float valpha_2 = 4.8078041524e-02f;
+  const float valpha_3 = 5.5375634693e-03f;
 
-  // The monomial coefficients of the denominator polynomial (`vbeta_01 = 1.0).
-  const float vbeta_1 = -2.7720427513e-01f;
-  const float vbeta_2 = 2.3986088112e-02f;
+  // The monomial coefficients of the denominator polynomial (`vbeta_0` = 1.0).
+  const float vbeta_1 = -2.7721086144e-01f;
+  const float vbeta_2 = 2.3987604305e-02f;
 
   // Some useful constants.
   const float vlog2e = 1.44269504089f;
@@ -81,17 +81,17 @@ void xnn_f32_vexp_ukernel__rvv_rational_3_2_div_u8v(
     // Compute 2^z.
     vfloat32m8_t v2z = xnn_setexp_f32(vz, vl);
 
-    // Evaluate the numerator polynomial p(f).
+    // Evaluate the numerator polynomial p(r).
     vfloat32m8_t vp = __riscv_vfadd(__riscv_vfmul(vr, valpha_3, vl), valpha_2, vl);
     vp = __riscv_vfadd(__riscv_vfmul(vr, vp, vl), valpha_1, vl);
-    vp = __riscv_vfadd(__riscv_vfmul(vr, vp, vl), vone, vl);
+    vp = __riscv_vfmul(vr, vp, vl);
 
     // Evaluate the denominator polynomial q(r).
     vfloat32m8_t vq = __riscv_vfadd(__riscv_vfmul(vr, vbeta_2, vl), vbeta_1, vl);
     vq = __riscv_vfadd(__riscv_vfmul(vr, vq, vl), vone, vl);
 
-    // Divide the numerator by the denominator, obtaining 2^r.
-    const vfloat32m8_t v2r = __riscv_vfdiv(vp, vq, vl);
+    // Divide the numerator by the denominator, obtaining 2^r - 1, and add 1 to obtain 2^r.
+    const vfloat32m8_t v2r = __riscv_vfadd(__riscv_vfdiv(vp, vq, vl), vone, vl);
 
     // Compute 2^z * 2^r.
     const vfloat32m8_t vy = __riscv_vfmul(v2z, v2r, vl);

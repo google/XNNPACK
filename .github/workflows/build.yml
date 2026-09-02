@@ -707,14 +707,14 @@ jobs:
             /home/xnnpack/.cache/bazel/repo_cache
           key: bazel-clang18-opt-${{ runner.os }}-${{ github.job }}-${{ hashFiles('WORKSPACE', 'WORKSPACE.bazel', 'MODULE.bazel') }}-${{ github.run_id }}-${{ github.run_attempt }}
 
-  bazel-linux-x86_64-gcc-9:
+  bazel-linux-x86_64-gcc-10:
     runs-on: 'ubuntu-24.04-8core'
     timeout-minutes: 60
     container:
       image: ghcr.io/google/xnnpack/standard:latest
     env:
-      CC: gcc-9
-      CXX: g++-9
+      CC: gcc-10
+      CXX: g++-10
       BAZEL_DEFINES: |
         --define=xnn_enable_avxvnni=false
         --define=xnn_enable_avx256vnni=false
@@ -736,10 +736,10 @@ jobs:
           path: |
             /home/xnnpack/.cache/bazel/disk_cache
             /home/xnnpack/.cache/bazel/repo_cache
-          key: bazel-gcc9-opt-${{ runner.os }}-${{ github.job }}-${{ hashFiles('WORKSPACE', 'WORKSPACE.bazel', 'MODULE.bazel') }}-${{ github.run_id }}-${{ github.run_attempt }}
+          key: bazel-gcc10-opt-${{ runner.os }}-${{ github.job }}-${{ hashFiles('WORKSPACE', 'WORKSPACE.bazel', 'MODULE.bazel') }}-${{ github.run_id }}-${{ github.run_attempt }}
           restore-keys: |
-            bazel-gcc9-opt-${{ runner.os }}-${{ github.job }}-${{ hashFiles('WORKSPACE', 'WORKSPACE.bazel', 'MODULE.bazel') }}-
-            bazel-gcc9-opt-${{ runner.os }}-${{ github.job }}-
+            bazel-gcc10-opt-${{ runner.os }}-${{ github.job }}-${{ hashFiles('WORKSPACE', 'WORKSPACE.bazel', 'MODULE.bazel') }}-
+            bazel-gcc10-opt-${{ runner.os }}-${{ github.job }}-
 
       - name: Build tests
         if: ${{ !inputs.run-tests }}
@@ -783,7 +783,7 @@ jobs:
           path: |
             /home/xnnpack/.cache/bazel/disk_cache
             /home/xnnpack/.cache/bazel/repo_cache
-          key: bazel-gcc9-opt-${{ runner.os }}-${{ github.job }}-${{ hashFiles('WORKSPACE', 'WORKSPACE.bazel', 'MODULE.bazel') }}-${{ github.run_id }}-${{ github.run_attempt }}
+          key: bazel-gcc10-opt-${{ runner.os }}-${{ github.job }}-${{ hashFiles('WORKSPACE', 'WORKSPACE.bazel', 'MODULE.bazel') }}-${{ github.run_id }}-${{ github.run_attempt }}
 
   bazel-linux-aarch64-clang18:
     runs-on: 'arm-ubuntu-arm-22.04-8core'
