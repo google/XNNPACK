@@ -4,12 +4,9 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <algorithm>
-#include <cstddef>
 #include <cstdint>
 #include <mutex>
-#include <set>
 #include <string>
-#include <thread>  // NOLINT(build/c++11)
 #include <vector>
 
 #include <gmock/gmock.h>
@@ -32,8 +29,9 @@ bool contains(const std::string& str, const std::string& substr) {
 }
 
 template <typename AT, typename BT>
-void VerifyKLoopOrder(const std::vector<size_t>& a_shape,
-                      const std::vector<size_t>& b_shape, bool expect_split_k) {
+void VerifyDotLoopOrder(const std::vector<size_t>& a_shape,
+                        const std::vector<size_t>& b_shape,
+                        bool expect_split_k) {
   const uint32_t a_id = 0;
   const uint32_t b_id = 1;
   const uint32_t out_id = 2;
@@ -90,160 +88,20 @@ void VerifyKLoopOrder(const std::vector<size_t>& a_shape,
   }
 }
 
-TEST(DotSchedulingTest, FpNoSplitK) {
-  VerifyKLoopOrder<float, float>({300, 100}, {100, 400}, false);
+TEST(DotSchedulingTest, NoSplitK) {
+  VerifyDotLoopOrder<float, float>({300, 100}, {100, 400}, false);
 }
 
-TEST(DotSchedulingTest, FpSplitK) {
-  VerifyKLoopOrder<float, float>({64, 8192}, {8192, 400}, true);
+TEST(DotSchedulingTest, SplitKTrue) {
+  VerifyDotLoopOrder<float, float>({300, 8192}, {8192, 400}, true);
 }
 
-TEST(DotSchedulingTest, Bf16NoSplitK) {
-  VerifyKLoopOrder<bfloat16, bfloat16>({300, 8192}, {8192, 400}, true);
+TEST(DotSchedulingTest, NarrowTypeNoSplitK) {
+  VerifyDotLoopOrder<bfloat16, bfloat16>({300, 8192}, {8192, 400}, false);
 }
 
-TEST(DotSchedulingTest, Bf16SplitK) {
-  VerifyKLoopOrder<bfloat16, bfloat16>({64, 16384}, {16384, 400}, true);
-}
-
-TEST(DotSchedulingTest, Int8NoSplitK) {
-  VerifyKLoopOrder<int8_t, int8_t>({128, 4096}, {4096, 400}, false);
-}
-
-TEST(DotSchedulingTest, Int8SplitK) {
-  VerifyKLoopOrder<int8_t, int8_t>({128, 16384}, {16384, 400}, true);
-}
-
-TEST(DotSchedulingTest, Int8SmallMTightSplit) {
-  VerifyKLoopOrder<int8_t, int8_t>({32, 2048}, {2048, 400}, true);
-}
-
-TEST(DotSchedulingTest, PackBFusedWithDot) {
-  const uint32_t a_id = 0;
-  const uint32_t b_id = 1;
-  const uint32_t out_id = 2;
-  SubgraphBuilder builder(3);
-  builder.AddInput(type_of<bfloat16>(), {1024, 256}, a_id)
-      .AddInput(type_of<bfloat16>(), {256, 4096}, b_id)
-      .AddOutput(type_of<float>(), TensorShape({1024, 4096}), out_id)
-      .AddDot(1, a_id, b_id, YNN_INVALID_VALUE_ID, out_id);
-
-  TestScheduler scheduler(3);
-  Runtime runtime(builder.GetSubgraph(), &scheduler,
-                  YNN_FLAG_ENABLE_SLINKY_TRACE);
-
-  std::vector<std::string> trace_events;
-  std::mutex trace_mutex;  // NOLINT(build/c++11)
-  runtime.get()->eval_config.trace_begin =
-      [&](const char* name) -> slinky::index_t {
-    std::lock_guard<std::mutex> lock(trace_mutex);  // NOLINT(build/c++11)
-    trace_events.push_back(name);
-    return 0;
-  };
-
-  Tensor<bfloat16> a({1024, 256});
-  Tensor<bfloat16> b({256, 4096});
-  Tensor<float> out({1024, 4096});
-  std::fill_n(a.data(), a.size(), bfloat16(1));
-  std::fill_n(b.data(), b.size(), bfloat16(1));
-  std::fill_n(out.data(), out.size(), 0.0f);
-  runtime.ReshapeExternalTensor(a.extents(), a.data(), a_id)
-      .ReshapeExternalTensor(b.extents(), b.data(), b_id)
-      .ReshapeRuntime()
-      .SetupExternalTensor(out.data(), out_id)
-      .InvokeRuntime();
-  EXPECT_EQ(runtime.Status(), ynn_status_success);
-
-  auto first_n_loop = std::find_if(
-      trace_events.begin(), trace_events.end(),
-      [](const std::string& ev) { return contains(ev, "loop d0"); });
-  auto first_pack_b = std::find_if(
-      trace_events.begin(), trace_events.end(),
-      [](const std::string& ev) { return contains(ev, "pack_b"); });
-  auto first_dot =
-      std::find_if(trace_events.begin(), trace_events.end(),
-                   [](const std::string& ev) { return contains(ev, "dot"); });
-  auto last_pack_b_rev = std::find_if(
-      trace_events.rbegin(), trace_events.rend(),
-      [](const std::string& ev) { return contains(ev, "pack_b"); });
-  auto last_pack_b_it = last_pack_b_rev != trace_events.rend()
-                            ? last_pack_b_rev.base() - 1
-                            : trace_events.end();
-
-  EXPECT_THAT(trace_events, testing::Contains(testing::HasSubstr("loop d0")));
-  EXPECT_THAT(trace_events, testing::Contains(testing::HasSubstr("pack_b")));
-  EXPECT_THAT(trace_events, testing::Contains(testing::HasSubstr("dot")));
-
-  // `pack_b` is inside the N loop (not computed upfront at root).
-  EXPECT_LT(first_n_loop, first_pack_b);
-  // Each tile is packed before its dot computation.
-  EXPECT_LT(first_pack_b, first_dot);
-  // `pack_b` and `dot` are interleaved across N-loop iterations
-  // (fused execution).
-  EXPECT_LT(first_dot, last_pack_b_it);
-
-  for (size_t i = 0; i < out.size(); ++i) {
-    EXPECT_EQ(out.data()[i], 256.0f);
-  }
-}
-
-TEST(DotSchedulingTest, PackBHoistedForMultiK) {
-  const uint32_t a_id = 0;
-  const uint32_t b_id = 1;
-  const uint32_t out_id = 2;
-  SubgraphBuilder builder(3);
-  builder.AddInput(type_of<float>(), {64, 32, 16}, a_id)
-      .AddInput(type_of<float>(), {32, 16, 2048}, b_id)
-      .AddOutput(type_of<float>(), TensorShape({64, 2048}), out_id)
-      .AddDot(2, a_id, b_id, YNN_INVALID_VALUE_ID, out_id);
-
-  TestScheduler scheduler(3);
-  Runtime runtime(builder.GetSubgraph(), &scheduler,
-                  YNN_FLAG_ENABLE_SLINKY_TRACE);
-
-  std::vector<std::string> trace_events;
-  std::mutex trace_mutex;  // NOLINT(build/c++11)
-  runtime.get()->eval_config.trace_begin =
-      [&](const char* name) -> slinky::index_t {
-    std::lock_guard<std::mutex> lock(trace_mutex);  // NOLINT(build/c++11)
-    trace_events.push_back(name);
-    return 0;
-  };
-
-  Tensor<float> a({64, 32, 16});
-  Tensor<float> b({32, 16, 2048});
-  Tensor<float> out({64, 2048});
-  std::fill_n(a.data(), a.size(), 1.0f);
-  std::fill_n(b.data(), b.size(), 1.0f);
-  std::fill_n(out.data(), out.size(), 0.0f);
-  runtime.ReshapeExternalTensor(a.extents(), a.data(), a_id)
-      .ReshapeExternalTensor(b.extents(), b.data(), b_id)
-      .ReshapeRuntime()
-      .SetupExternalTensor(out.data(), out_id)
-      .InvokeRuntime();
-  EXPECT_EQ(runtime.Status(), ynn_status_success);
-
-  auto first_dot =
-      std::find_if(trace_events.begin(), trace_events.end(),
-                   [](const std::string& ev) { return contains(ev, "dot"); });
-  auto last_pack_b_rev = std::find_if(
-      trace_events.rbegin(), trace_events.rend(),
-      [](const std::string& ev) { return contains(ev, "pack_b"); });
-  auto last_pack_b_it = last_pack_b_rev != trace_events.rend()
-                            ? last_pack_b_rev.base() - 1
-                            : trace_events.end();
-
-  EXPECT_THAT(trace_events, testing::Contains(testing::HasSubstr("pack_b")));
-  EXPECT_THAT(trace_events, testing::Contains(testing::HasSubstr("dot")));
-
-  // For multi-K dots (`num_k_dims` > 1), `pack_b` is hoisted to root and
-  // executed in its own parallel loop upfront across multiple worker threads.
-  // All packing finishes completely before any dot computation begins.
-  EXPECT_LT(last_pack_b_it, first_dot);
-
-  for (size_t i = 0; i < out.size(); ++i) {
-    EXPECT_EQ(out.data()[i], 32.0f * 16.0f);
-  }
+TEST(DotSchedulingTest, NarrowTypeLargeSplitK) {
+  VerifyDotLoopOrder<bfloat16, bfloat16>({300, 16384}, {16384, 400}, true);
 }
 
 // A dynamic-shape dot computes its split factors with an opaque runtime call

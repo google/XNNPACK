@@ -281,7 +281,8 @@ namespace {
 
 // An additional penalty scale term on the cost of a dot kernel based on the
 // architecture.
-float dot_arch_cost_factor(uint64_t arch) {
+float dot_arch_cost_factor(uint64_t arch, size_t n, size_t block_m,
+                           size_t block_n, size_t tile_m, size_t tile_n) {
   if (arch == arch_flag::none) {
     // We should only use the default dot kernel if there is no other choice.
     return 100.0f;
@@ -293,6 +294,19 @@ float dot_arch_cost_factor(uint64_t arch) {
     // are better. We then also need to adjust AMX, to avoid tricking it into
     // thinking VNNI is faster than AMX.
     return 0.5f;
+  }
+  if (arch & arch_flag::amxbf16) {
+    // The AMX 32x48 kernel (2x3 configuration) currently only works better than
+    // 32x32 kernels for small shapes. This may be due to memory bandwidth
+    // limitations, as there are only 2 tiles for A/B and must be frequently
+    // updated.
+    if (block_m == 32 && block_n == 48 && tile_m == 16 && tile_n == 16) {
+      if (n > 48) {
+        return 100.0f;
+      } else {
+        return 0.5f;
+      }
+    }
   }
 #endif
   return 1.0f;
@@ -355,7 +369,7 @@ struct optimizer {
     const float dot_cost_k =
         estimate_dot_cost(m, n, k, block_m, block_n, block_k, tile_m, tile_n,
                           tile_k, b_elem_count) *
-        dot_arch_cost_factor(arch);
+        dot_arch_cost_factor(arch, n, block_m, block_n, tile_m, tile_n);
     if (!required_tile_k && !required_block_n) {
       char selected = dot_cost_k < result.cost ? '*' : ' ';
       YNN_LOG_DEBUG() << " " << selected << name << " cost=" << dot_cost_k;
