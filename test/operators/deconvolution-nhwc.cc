@@ -3460,7 +3460,7 @@ TEST(DECONVOLUTION_NHWC_F32, reshape_grows_output_via_adjustment) {
   if (xnn_init_f32_igemm_config() == nullptr) {
     GTEST_SKIP();
   }
-  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+  ASSERT_EQ(xnn_initialize(/*allocator=*/nullptr), xnn_status_success);
 
   constexpr uint32_t kernel = 1;
   constexpr uint32_t stride = 2;
@@ -3489,8 +3489,7 @@ TEST(DECONVOLUTION_NHWC_F32, reshape_grows_output_via_adjustment) {
 
   const auto create_op = [&]() -> xnn_operator_t {
     xnn_operator_t op = nullptr;
-    EXPECT_EQ(xnn_status_success,
-              xnn_create_deconvolution2d_nhwc_f32(
+    EXPECT_EQ(xnn_create_deconvolution2d_nhwc_f32(
                   /*output_padding_top=*/0, /*output_padding_right=*/0,
                   /*output_padding_bottom=*/0, /*output_padding_left=*/0,
                   kernel, kernel, stride, stride, /*dilation_height=*/1,
@@ -3501,7 +3500,8 @@ TEST(DECONVOLUTION_NHWC_F32, reshape_grows_output_via_adjustment) {
                   kernel_data.data(), bias.data(),
                   -std::numeric_limits<float>::infinity(),
                   std::numeric_limits<float>::infinity(), /*flags=*/0,
-                  /*weights_cache=*/nullptr, &op));
+                  /*weights_cache=*/nullptr, &op),
+              xnn_status_success);
     return op;
   };
 
@@ -3510,21 +3510,21 @@ TEST(DECONVOLUTION_NHWC_F32, reshape_grows_output_via_adjustment) {
       create_op(), xnn_delete_operator);
   ASSERT_NE(reference_op, nullptr);
   size_t reference_height = 0, reference_width = 0;
-  ASSERT_EQ(xnn_status_success,
-            xnn_reshape_deconvolution2d_nhwc_f32(
+  ASSERT_EQ(xnn_reshape_deconvolution2d_nhwc_f32(
                 reference_op.get(), batch_size, input_height, input_width,
                 /*adjustment_height=*/1, /*adjustment_width=*/1,
-                &reference_height, &reference_width, /*threadpool=*/nullptr));
+                &reference_height, &reference_width, /*threadpool=*/nullptr),
+            xnn_status_success);
   ASSERT_EQ(reference_height, 8);
   ASSERT_EQ(reference_width, 8);
   xnnpack::Buffer<float> reference_output(batch_size * reference_height *
                                           reference_width * groups *
                                           group_output_channels);
-  ASSERT_EQ(xnn_status_success,
-            xnn_setup_deconvolution2d_nhwc_f32(
-                reference_op.get(), input.data(), reference_output.data()));
-  ASSERT_EQ(xnn_status_success,
-            xnn_run_operator(reference_op.get(), /*threadpool=*/nullptr));
+  ASSERT_EQ(xnn_setup_deconvolution2d_nhwc_f32(reference_op.get(), input.data(),
+                                               reference_output.data()),
+            xnn_status_success);
+  ASSERT_EQ(xnn_run_operator(reference_op.get(), /*threadpool=*/nullptr),
+            xnn_status_success);
 
   // Same operator, reshaped to the smaller adjustment=0 (7x7) output first,
   // then grown to 8x8 with the input unchanged.
@@ -3532,28 +3532,28 @@ TEST(DECONVOLUTION_NHWC_F32, reshape_grows_output_via_adjustment) {
       create_op(), xnn_delete_operator);
   ASSERT_NE(op, nullptr);
   size_t small_height = 0, small_width = 0;
-  ASSERT_EQ(xnn_status_success,
-            xnn_reshape_deconvolution2d_nhwc_f32(
+  ASSERT_EQ(xnn_reshape_deconvolution2d_nhwc_f32(
                 op.get(), batch_size, input_height, input_width,
                 /*adjustment_height=*/0, /*adjustment_width=*/0, &small_height,
-                &small_width, /*threadpool=*/nullptr));
+                &small_width, /*threadpool=*/nullptr),
+            xnn_status_success);
   ASSERT_EQ(small_height, 7);
   ASSERT_EQ(small_width, 7);
   size_t output_height = 0, output_width = 0;
-  ASSERT_EQ(xnn_status_success,
-            xnn_reshape_deconvolution2d_nhwc_f32(
+  ASSERT_EQ(xnn_reshape_deconvolution2d_nhwc_f32(
                 op.get(), batch_size, input_height, input_width,
                 /*adjustment_height=*/1, /*adjustment_width=*/1, &output_height,
-                &output_width, /*threadpool=*/nullptr));
+                &output_width, /*threadpool=*/nullptr),
+            xnn_status_success);
   ASSERT_EQ(output_height, 8);
   ASSERT_EQ(output_width, 8);
   xnnpack::Buffer<float> output(batch_size * output_height * output_width *
                                 groups * group_output_channels);
-  ASSERT_EQ(xnn_status_success,
-            xnn_setup_deconvolution2d_nhwc_f32(op.get(), input.data(),
-                                               output.data()));
-  ASSERT_EQ(xnn_status_success,
-            xnn_run_operator(op.get(), /*threadpool=*/nullptr));
+  ASSERT_EQ(
+      xnn_setup_deconvolution2d_nhwc_f32(op.get(), input.data(), output.data()),
+      xnn_status_success);
+  ASSERT_EQ(xnn_run_operator(op.get(), /*threadpool=*/nullptr),
+            xnn_status_success);
 
   for (size_t i = 0; i < output.size(); i++) {
     ASSERT_EQ(output[i], reference_output[i]) << "at index " << i;
