@@ -16,6 +16,7 @@
 #include "src/xnnpack/config-types.h"
 #include "src/xnnpack/config.h"
 #include "src/xnnpack/log.h"
+#include "src/xnnpack/math.h"
 #include "src/xnnpack/normalization.h"
 #include "src/xnnpack/operator-type.h"
 #include "src/xnnpack/operator-utils.h"
@@ -213,8 +214,18 @@ static enum xnn_status reshape_slice_nd(
   for (size_t i = 1; i < XNN_MAX_TENSOR_DIMS; i++) {
     slice_op->context.slice.input_stride[i - 1] = input_stride << log2_element_size;
     slice_op->context.slice.output_stride[i - 1] = output_stride << log2_element_size;
-    input_stride *= normalized_input_shape[XNN_MAX_TENSOR_DIMS - 1 - i];
-    output_stride *= normalized_output_shape[XNN_MAX_TENSOR_DIMS - 1 - i];
+    if (!xnn_safe_mul(input_stride, normalized_input_shape[XNN_MAX_TENSOR_DIMS - 1 - i], &input_stride)) {
+      xnn_log_error(
+        "failed to reshape %s operator: input stride overflow at dimension %zu",
+        xnn_operator_type_to_string_v2(slice_op), i);
+      return xnn_status_invalid_parameter;
+    }
+    if (!xnn_safe_mul(output_stride, normalized_output_shape[XNN_MAX_TENSOR_DIMS - 1 - i], &output_stride)) {
+      xnn_log_error(
+        "failed to reshape %s operator: output stride overflow at dimension %zu",
+        xnn_operator_type_to_string_v2(slice_op), i);
+      return xnn_status_invalid_parameter;
+    }
   }
   slice_op->context.slice.contiguous_size = normalized_output_shape[XNN_MAX_TENSOR_DIMS - 1] << log2_element_size;
 
