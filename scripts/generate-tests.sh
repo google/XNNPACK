@@ -1,6 +1,8 @@
 #!/bin/sh
 # Copyright 2019 Google LLC
 #
+# Copyright 2026 Arm Limited and/or its affiliates <open-source-office@arm.com>
+#
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
 
@@ -41,6 +43,7 @@ tools/generate-gemm-test.py --spec test/qd8-f32-qb4w-gemm-minmax.yaml --output-t
 tools/generate-gemm-test.py --spec test/qd8-f32-qc2w-gemm-minmax.yaml --output-test test/qd8-f32-qc2w-gemm-minmax.cc --output-bench bench/qd8-f32-qc2w-gemm.cc &
 tools/generate-gemm-test.py --spec test/qd8-f16-qc2w-gemm-minmax.yaml --output-test test/qd8-f16-qc2w-gemm-minmax.cc --output-bench bench/qd8-f16-qc2w-gemm.cc &
 
+tools/generate-gemm-test.py --spec test/qp8-f32-qc2w-gemm-minmax.yaml --output-test test/qp8-f32-qc2w-gemm-minmax.cc &
 tools/generate-gemm-test.py --spec test/qp8-f32-qc4w-gemm-minmax.yaml --output-test test/qp8-f32-qc4w-gemm-minmax.cc --output-bench bench/qp8-f32-qc4w-gemm.cc &
 tools/generate-gemm-test.py --spec test/qp8-f32-qc8w-gemm-minmax.yaml --output-test test/qp8-f32-qc8w-gemm-minmax.cc --output-bench bench/qp8-f32-qc8w-gemm.cc &
 tools/generate-gemm-test.py --spec test/qp8-f32-qb4w-gemm-minmax.yaml --output-test test/qp8-f32-qb4w-gemm-minmax.cc --output-bench bench/qp8-f32-qb4w-gemm.cc &

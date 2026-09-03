@@ -1,5 +1,7 @@
 // Copyright 2025 Google LLC
 //
+// Copyright 2026 Arm Limited and/or its affiliates <open-source-office@arm.com>
+//
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
@@ -36,6 +38,7 @@ static enum xnn_status compute_fingerprint(
     case xnn_fingerprint_id_fully_connected_nc_qdu8_f32_qc2w:
     case xnn_fingerprint_id_fully_connected_nc_qd8_f32_qc4w:
     case xnn_fingerprint_id_fully_connected_nc_qdu8_f32_qc4w:
+    case xnn_fingerprint_id_fully_connected_nc_qp8_f32_qc2w:
     case xnn_fingerprint_id_fully_connected_nc_qp8_f32_qc4w:
     case xnn_fingerprint_id_fully_connected_nc_qp8_f32_qc8w:
     case xnn_fingerprint_id_fully_connected_nc_qp8_f16_qc8w:
