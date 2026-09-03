@@ -250,6 +250,13 @@ XNN_NO_SANITIZE_FUNCTION void xnn_compute_batched_packw_gemm_gio(
                                      batch_index * context->n_scale_stride);
   }
 
+  // Zero the per-tile region first so the bias-placeholder slot is
+  // well-defined when no explicit bias is provided (the const-weights path
+  // memsets the whole packed buffer up front; the dynamic path uses the
+  // user's workspace, which is not pre-cleared).
+  memset(packed_weights, 0, round_up(n_block_size, context->nr) * context->w_stride);
+
+
   if (context->pack_weights_and_biases) {
     // Mirror the layout used by `create_batch_matrix_multiply_nc_const_weights`:
     // pass `scale_b` as `extra_data1` (the per-channel scale slot, written
@@ -257,17 +264,11 @@ XNN_NO_SANITIZE_FUNCTION void xnn_compute_batched_packw_gemm_gio(
     // float-bias placeholder). Some packing helpers — notably the KleidiAI
     // wrapper — read `extra_data0` as the bias and `extra_data1` as the scale,
     // so getting these in the right slots is required for correctness.
-    //
-    // Zero the per-tile region first so the bias-placeholder slot is
-    // well-defined when no explicit bias is provided (the const-weights path
-    // memsets the whole packed buffer up front; the dynamic path uses the
-    // user's workspace, which is not pre-cleared).
     const size_t scale_size = (scale_b != NULL) ? sizeof(float) : 0;
     const size_t bias_pad_size =
         context->scale_b_size > scale_size
             ? context->scale_b_size - scale_size
             : 0;
-    memset(packed_weights, 0, context->nr * context->w_stride);
 
     context->pack_weights_and_biases(
         /*flags=*/XNN_FLAG_TRANSPOSE_WEIGHTS, context->gemm_config, context->kc,
@@ -326,14 +327,15 @@ XNN_NO_SANITIZE_FUNCTION void xnn_compute_batched_packw_gemm_goi(
                                      n_block_start * context->gc_scale_stride +
                                      batch_index * context->n_scale_stride);
   }
+  // See the matching comment in `xnn_compute_batched_packw_gemm_gio`.
+  memset(packed_weights, 0, round_up(n_block_size, context->nr) * context->w_stride);
+
   if (context->pack_weights_and_biases) {
-    // See the matching comment in `xnn_compute_batched_packw_gemm_gio`.
     const size_t scale_size = (scale_b != NULL) ? sizeof(float) : 0;
     const size_t bias_pad_size =
         context->scale_b_size > scale_size
             ? context->scale_b_size - scale_size
             : 0;
-    memset(packed_weights, 0, context->nr * context->w_stride);
 
     context->pack_weights_and_biases(
         /*flags=*/0, context->gemm_config, context->kc, n_block_size,

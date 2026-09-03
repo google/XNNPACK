@@ -14,8 +14,8 @@ ENDIF()
 
 INCLUDE(ExternalProject)
 ExternalProject_Add(slinky
-  URL https://github.com/dsharlet/slinky/archive/ed97d801653a6680d4b558614f323f2a01d33413.zip
-  URL_HASH SHA256=1cea5f5ee913da8a7cb703653c14c9b0453ce61216512560abc4414b5504f4fc
+  URL https://github.com/dsharlet/slinky/archive/8d77e68e391fd3a87d7cfb36dbe5efd6f9af73ca.zip
+  URL_HASH SHA256=099510dcf18ade121331a94a536d1a4d50a97fd202934d419bd02faf2faecf38
   SOURCE_DIR "${CMAKE_BINARY_DIR}/slinky-source"
   BINARY_DIR "${CMAKE_BINARY_DIR}/slinky"
   CONFIGURE_COMMAND ""
