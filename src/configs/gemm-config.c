@@ -2534,6 +2534,7 @@ static void init_qd8_f16_qb4w_gemm_config(void) {
 
 static void init_qd8_bf16_qb4w_gemm_config(void) {
   // Common parameters.
+  qd8_bf16_qb4w_gemm_config.arch = 0;
   qd8_bf16_qb4w_gemm_config.log2_input_element_size = XNN_LOG2_SIZEOF_INT8_T;
   qd8_bf16_qb4w_gemm_config.log2_filter_element_size = XNN_LOG2_SIZEOF_UINT8_T;
   qd8_bf16_qb4w_gemm_config.log2_filter_element_bit_size = XNN_LOG2_BIT_SIZEOF_INT4;
@@ -2547,6 +2548,8 @@ static void init_qd8_bf16_qb4w_gemm_config(void) {
   qd8_bf16_qb4w_gemm_config.init.bf16_qb4w = xnn_init_bf16_qb4w_minmax_scalar_params;
   qd8_bf16_qb4w_gemm_config.mr = 4;
   qd8_bf16_qb4w_gemm_config.nr = 4;
+  qd8_bf16_qb4w_gemm_config.log2_kr = 0;
+  qd8_bf16_qb4w_gemm_config.log2_sr = 0;
   qd8_bf16_qb4w_gemm_config.planes = 2;
 
   // The i8mm kernels convert fp32->bf16 with `vcvt_bf16_f32`, so they require both
@@ -2560,6 +2563,7 @@ static void init_qd8_bf16_qb4w_gemm_config(void) {
         (hardware_config->arch_flags & xnn_arch_arm_neon_i8mm) &&
         (hardware_config->arch_flags & xnn_arch_arm_neon_bf16)) {
       #if XNN_ARCH_ARM64 && XNN_ENABLE_ARM_I8MM && XNN_ENABLE_ARM_BF16
+        qd8_bf16_qb4w_gemm_config.arch = xnn_arch_arm_neon_i8mm;
         qd8_bf16_qb4w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_DQGEMM_UKERNEL(xnn_qd8_bf16_qb4w_gemm_minmax_ukernel_1x16c8__neoni8mmbf16);
         qd8_bf16_qb4w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(4)] = XNN_INIT_HMP_DQGEMM_UKERNEL(xnn_qd8_bf16_qb4w_gemm_minmax_ukernel_4x16c8__neoni8mmbf16);
         qd8_bf16_qb4w_gemm_config.mr = 4;
@@ -2570,6 +2574,7 @@ static void init_qd8_bf16_qb4w_gemm_config(void) {
     } else if (XNN_ENABLE_ARM_DOTPROD &&
                (hardware_config->arch_flags & xnn_arch_arm_neon_dot)) {
       #if XNN_ENABLE_ARM_DOTPROD
+        qd8_bf16_qb4w_gemm_config.arch = xnn_arch_arm_neon_dot;
         qd8_bf16_qb4w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_DQGEMM_UKERNEL(xnn_qd8_bf16_qb4w_gemm_minmax_ukernel_1x16c4__neondot);
         qd8_bf16_qb4w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(4)] = XNN_INIT_HMP_DQGEMM_UKERNEL(xnn_qd8_bf16_qb4w_gemm_minmax_ukernel_4x16c4__neondot);
         qd8_bf16_qb4w_gemm_config.mr = 4;
