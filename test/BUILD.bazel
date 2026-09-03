@@ -1113,6 +1113,7 @@ xnnpack_unit_test(
     deps = MICROKERNEL_TEST_DEPS + [
         "//:microkernel_utils",
         "//:operator_utils",
+        "//src/configs:config_types",
     ],
 )
 
