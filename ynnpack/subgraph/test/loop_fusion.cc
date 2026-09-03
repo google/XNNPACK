@@ -42,12 +42,13 @@ class LoopFusionTest : public testing::Test {
               ynn_status_success);
     runtime_.reset(runtime);
 
-    runtime_->eval_config.allocate = [this](slinky::var sym,
-                                            slinky::raw_buffer* buffer) {
-      void* ptr = buffer->allocate(YNN_ALLOCATION_ALIGNMENT);
+    // Disable block reuse so every allocation reaches this hook.
+    runtime_->eval_config.use_memory_pool = false;
+    runtime_->eval_config.allocate = [this](std::size_t size,
+                                            std::size_t alignment) {
+      void* ptr = slinky::allocate_bytes(size, alignment);
       if (ptr) {
-        max_allocation_size_ =
-            std::max(max_allocation_size_, buffer->size_bytes());
+        max_allocation_size_ = std::max(max_allocation_size_, size);
       }
       return ptr;
     };
