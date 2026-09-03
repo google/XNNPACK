@@ -478,12 +478,14 @@ absl::StatusOr<uint32_t> XnnpackBuildContext::DefineValue(
             value.flags, &value.id))
             << "Could not define a new tensor value after dequantization.";
       } else {
-        if (pcq.quantized_dimension >= dims.size() ||
+        if (pcq.quantized_dimension < 0 ||
+            static_cast<size_t>(pcq.quantized_dimension) >= dims.size() ||
             pcq.scales.size() < dims[pcq.quantized_dimension]) {
           return absl::InvalidArgumentError(absl::StrCat(
               info.name, ": per-channel scale count (", pcq.scales.size(),
               ") is smaller than the channel dimension size (",
-              pcq.quantized_dimension < dims.size()
+              pcq.quantized_dimension >= 0 &&
+                      static_cast<size_t>(pcq.quantized_dimension) < dims.size()
                   ? dims[pcq.quantized_dimension]
                   : static_cast<size_t>(0),
               ")"));
