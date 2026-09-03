@@ -174,11 +174,12 @@ static enum xnn_status reshape_concatenate_operator(
   struct xnn_runtime_value* output_value = values + output_id;
 
   output_value->shape.num_dims = input0_value->shape.num_dims;
-  if (axis >= output_value->shape.num_dims) {
+  if (axis < 0 || axis >= output_value->shape.num_dims) {
     xnn_log_error(
-        "failed to reshape reshape operator operator with the output ID "
-        "#%" PRIu32 ": axis (%d) exceeds the number of dimensions (%zu)",
-        output_id, axis, input0_value->shape.num_dims);
+        "failed to reshape %s operator with the output ID #%" PRIu32
+        ": axis (%d) is out of range for a tensor with %zu dimensions",
+        xnn_node_type_to_string(xnn_node_type_concatenate), output_id, axis,
+        output_value->shape.num_dims);
     return xnn_status_invalid_parameter;
   }
 
