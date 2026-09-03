@@ -951,6 +951,7 @@ bool rewrite_transpose_stencil_copy(ynn_subgraph& subgraph, ynn_node& node,
   if (transpose_a == nullptr) {
     return false;
   }
+  const int tile_m = transpose_a->tile_m;
   const int tile_k = transpose_a->tile_k;
   const int m_dim = transpose_a->m_dim;
 
@@ -1007,11 +1008,11 @@ bool rewrite_transpose_stencil_copy(ynn_subgraph& subgraph, ynn_node& node,
   YNN_LOG_DEBUG() << "Rewriting transpose_a(stencil_copy(x)) to "
                      "stencil_copy(transpose_a(x))";
 
-  // transpose_a inserts a new dimension 0, update our stencil dimensions to
-  // account for this.
+  // transpose_a inserts new dimensions at 0 and 1, update our stencil
+  // dimensions to account for this.
   for (ynn_node::stencil_copy::stencil& stencil : stencil_copy.stencils) {
-    stencil.axis++;
-    stencil.new_axis++;
+    stencil.axis += 2;
+    stencil.new_axis += 2;
   }
 
   uint32_t stencil_input_id = stencil_node->inputs[0];
@@ -1022,7 +1023,7 @@ bool rewrite_transpose_stencil_copy(ynn_subgraph& subgraph, ynn_node& node,
 
   // Replace stencil_copy(x) with transpose_a'(x), reusing the stencil_node's x
   // input and y output.
-  ynn::define_transpose_a(subgraph, *stencil_node, tile_k, new_m_dim,
+  ynn::define_transpose_a(subgraph, *stencil_node, tile_m, tile_k, new_m_dim,
                           stencil_input_id, stencil_output_id);
 
   uint32_t output_id = node.outputs[0];
