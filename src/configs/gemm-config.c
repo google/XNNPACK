@@ -350,6 +350,16 @@ static void init_f16_gemm_config(void) {
       f16_gemm_config.mr = 4;
       f16_gemm_config.nr = 16;
     }
+  #elif XNN_ARCH_WASMRELAXEDSIMDFP16
+    f16_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_f16_gemm_minmax_ukernel_1x16__wasmrelaxedsimd_splat);
+    f16_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(6)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_f16_gemm_minmax_ukernel_6x16__wasmrelaxedsimd_splat);
+    f16_gemm_config.minmax.igemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_IGEMM_UKERNEL(xnn_f16_igemm_minmax_ukernel_1x16__wasmrelaxedsimd_splat);
+    f16_gemm_config.minmax.igemm[XNN_MR_TO_INDEX(6)] = XNN_INIT_HMP_IGEMM_UKERNEL(xnn_f16_igemm_minmax_ukernel_6x16__wasmrelaxedsimd_splat);
+    f16_gemm_config.init.f16 = xnn_init_f16_minmax_scalar_params;
+    f16_gemm_config.pack_gemm_gio = (xnn_packw_gemm_gio_ukernel_fn) xnn_x16_packw_gemm_gio_ukernel_x16__scalar;
+    f16_gemm_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_x16_packw_gemm_goi_ukernel_x16__scalar_int_u4;
+    f16_gemm_config.mr = 6;
+    f16_gemm_config.nr = 16;
   #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR && XNN_ENABLE_RISCV_FP16_VECTOR
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
@@ -6540,9 +6550,14 @@ static void init_qu8_gemm_config(void) {
 
 const struct xnn_gemm_config* xnn_init_f16_gemm_config() {
   const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-  if (hardware_config == NULL || !xnn_is_f16_compatible_config(hardware_config)) {
+  if (hardware_config == NULL) {
     return NULL;
   }
+  #if !XNN_ARCH_WASMRELAXEDSIMDFP16
+  if (!xnn_is_f16_compatible_config(hardware_config)) {
+    return NULL;
+  }
+  #endif  // !XNN_ARCH_WASMRELAXEDSIMDFP16
   XNN_INIT_ONCE(f16_gemm);
   return f16_gemm_config.mr ? &f16_gemm_config : NULL;
 }

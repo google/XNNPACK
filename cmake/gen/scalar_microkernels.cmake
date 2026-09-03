@@ -254,6 +254,7 @@ SET(PROD_SCALAR_MICROKERNEL_SRCS
   src/x8-transposec/gen/x8-transposec-2x4-scalar-int.c
   src/x16-packw/gen/x16-packw-x8-gemm-gio-scalar.c
   src/x16-packw/gen/x16-packw-x16-gemm-gio-scalar.c
+  src/x16-packw/gen/x16-packw-x16-gemm-goi-scalar-int-u4.c
   src/x16-packw/gen/x16-packw-x32-gemm-gio-scalar.c
   src/x16-transposec/gen/x16-transposec-2x4-scalar-int.c
   src/x16-x32-packw/gen/x16-x32-packw-x32c2-gemm-gio-scalar.c
@@ -907,7 +908,6 @@ SET(NON_PROD_SCALAR_MICROKERNEL_SRCS
   src/x16-packw/gen/x16-packw-x2-gemm-gio-scalar.c
   src/x16-packw/gen/x16-packw-x4-gemm-gio-scalar.c
   src/x16-packw/gen/x16-packw-x8-gemm-goi-scalar-int-u4.c
-  src/x16-packw/gen/x16-packw-x16-gemm-goi-scalar-int-u4.c
   src/x16-packw/gen/x16-packw-x32-gemm-goi-scalar-int-u4.c
   src/x16-packw/gen/x16-packw-x64-gemm-gio-scalar.c
   src/x16-packw/gen/x16-packw-x64-gemm-goi-scalar-int-u4.c
