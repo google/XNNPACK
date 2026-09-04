@@ -46,9 +46,6 @@
 #include "kai/ukernels/matmul/kai_matmul_pack_rhs.h"
 #include "kai/ukernels/matmul/kai_matmul_pack_rhs_types.h"
 #include "src/xnnpack/allocator.h"
-#if XNN_ENABLE_ARM_SME2
-#include "kai/ukernels/matmul/kai_matmul_pack_rhs.h"
-#endif  // XNN_ENABLE_ARM_SME2
 #endif  // XNN_ENABLE_KLEIDIAI
 
 class unaligned_int32_t {

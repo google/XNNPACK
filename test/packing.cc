@@ -50,8 +50,6 @@ static void set_packed_i4(std::vector<uint8_t>& data, size_t byte_offset,
 
 // QS8-QC2W GEMM packing tests.
 
-// QS8-QC2W GEMM packing tests.
-
 TEST(PACK_QS8_F32_QC2W_GEMM_GOI_W, kr_eq_4) {
   size_t g = 1;
   size_t nc = 1;
