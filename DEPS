@@ -1,3 +1,9 @@
+# Copyright 2026 Google LLC
+# Copyright 2026 Arm Limited and/or its affiliates <open-source-office@arm.com>
+#
+# This source code is licensed under the BSD-style license found in the
+# LICENSE file in the root directory of this source tree.
+
 # This file is used to manage the dependencies of the XNNPACK repo
 # for use with the GN build system. It is losely based on what they do for V8:
 # https://chromium.googlesource.com/v8/v8.git/+/refs/heads/main/DEPS

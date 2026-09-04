@@ -1,3 +1,9 @@
+// Copyright 2026 Google LLC
+// Copyright 2026 Arm Limited and/or its affiliates <open-source-office@arm.com>
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
 #include "test/gemm-microkernel-tester.h"
 
 #include <gtest/gtest.h>
@@ -712,6 +718,117 @@ void GemmMicrokernelTester::Test(xnn_qu8_igemm_minmax_ukernel_fn igemm,
 }
 
 static int8_t sign_extend_int2(int8_t value) { return (value ^ 0x2) - 2; }
+
+void GemmMicrokernelTester::Test_QP8F32QC2W(
+    xnn_qp8_f32_qc2w_gemm_minmax_ukernel_fn gemm,
+    xnn_init_f32_minmax_params_fn init_minmax_params,
+    xnn_pack_weights_and_biases_fn pack,
+    xnn_packed_stride_weights_and_biases_fn packed_stride) {
+  ASSERT_LE(m(), mr());
+
+  xnnpack::ReplicableRandomDevice rng;
+  auto f32rng = std::bind(std::uniform_real_distribution<float>(-1.f, 1.f),
+                          std::ref(rng));
+  auto scalerng = std::bind(std::uniform_real_distribution<float>(0.5f, 2.f),
+                            std::ref(rng));
+  auto w8rng = std::bind(std::uniform_int_distribution<int32_t>(
+                             0, std::numeric_limits<uint8_t>::max()),
+                         std::ref(rng));
+  const float max_abs_product = 1.0f * 2.0f * 2.0f;
+
+  // The KleidiAI QSU2 packing and GEMM kernels require K to be a multiple of
+  // 32. Round generated test dimensions up so generic K-tail cases exercise
+  // the supported domain without calling the kernel with an invalid shape.
+  const size_t k32 = round_up_po2(k(), 32);
+
+  xnnpack::Buffer<float> input_f32(m() * k32);
+  xnnpack::Buffer<uint8_t> b(n() * k32 / 4);
+  xnnpack::Buffer<float> bias(n());
+  xnnpack::Buffer<float> kernel_scale(n());
+  xnnpack::Buffer<float> c((m() - 1) * cm_stride() + n());
+  xnnpack::Buffer<float> c_ref(m() * n(), 0.0f);
+
+  // Create a fake `gemm_config` for the packing functions.
+  struct xnn_gemm_config gemm_config = {};
+  gemm_config.mr = static_cast<uint8_t>(mr());
+  gemm_config.mr_packed = static_cast<uint8_t>(mr_packed());
+  gemm_config.nr = static_cast<uint8_t>(nr());
+  gemm_config.log2_kr =
+      static_cast<uint8_t>(31 - math_clz_nonzero_u32(kr()));
+  gemm_config.log2_sr =
+      static_cast<uint8_t>(31 - math_clz_nonzero_u32(sr()));
+  gemm_config.planes = 4;
+
+  const size_t packed_w_stride =
+      packed_stride(&gemm_config, k32, /*unused_block_size=*/0,
+                    /*k_stride=*/k32, /*extra_bytes=*/0);
+  const size_t packed_w_size = packed_w_stride * round_up(n(), nr());
+  xnnpack::Buffer<uint8_t, XNN_ALLOCATION_ALIGNMENT> packed_w(packed_w_size);
+
+  std::generate(input_f32.begin(), input_f32.end(), std::ref(f32rng));
+
+  // Quantize and pack the left-hand operand.
+  const size_t input_packed_size =
+      xnn_x8_packq_f32qp8_packed_size(m(), k32, mr_packed(), kr(), sr());
+  xnnpack::Buffer<int8_t> input_qp8(input_packed_size);
+  xnn_x8_packq_f32qp8_ukernel__scalar_u1(
+      m(), k32, mr_packed(), kr(), sr(), /*m_idx_start=*/0,
+      input_f32.data(), /*lhs_stride=*/k32 * sizeof(float), input_qp8.data());
+
+  std::generate(b.begin(), b.end(), std::ref(w8rng));
+  std::generate(bias.begin(), bias.end(), std::ref(f32rng));
+  std::generate(kernel_scale.begin(), kernel_scale.end(), std::ref(scalerng));
+
+  // Pack NxK signed two-bit weights. Each crumb is interpreted as two's
+  // complement: 0, 1, -2, -1.
+  pack(/*flags=*/0, &gemm_config, k32, n(), /*groups=*/1,
+       /*unused_block_size=*/0, /*k_stride=*/k32,
+       /*accumulator_init=*/bias.data(), /*weights=*/b.data(),
+       /*init_extra_data0_fn=*/nullptr, /*extra_data0=*/nullptr,
+       /*extra_data0_size=*/0,
+       /*init_extra_data1_fn=*/nullptr, /*extra_data1=*/kernel_scale.data(),
+       /*extra_data1_size=*/sizeof(float),
+       /*packed_weights_ptr=*/packed_w.data(), /*params=*/nullptr);
+
+  for (size_t m_index = 0; m_index < m(); m_index++) {
+    for (size_t n_index = 0; n_index < n(); n_index++) {
+      for (size_t k_index = 0; k_index < k32; k_index++) {
+        const size_t byte_index = (n_index * k32 + k_index) / 4;
+        const int8_t bv = sign_extend_int2(
+            static_cast<int8_t>((b[byte_index] >> (2 * (k_index & 3))) & 3));
+        c_ref[m_index * n() + n_index] +=
+            xnn_x8_packq_f32qp8_get_dequantized(
+                m_index, k_index, input_qp8.data(), k32, mr_packed(), kr(),
+                sr()) *
+            static_cast<float>(bv);
+      }
+      c_ref[m_index * n() + n_index] *= kernel_scale[n_index];
+      c_ref[m_index * n() + n_index] += bias[n_index];
+    }
+  }
+
+  struct xnn_f32_minmax_params minmax_params;
+  init_minmax_params(&minmax_params, min(), max());
+  for (float& value : c_ref) {
+    value = std::max(std::min(value, max()), min());
+  }
+
+  gemm(m(), n(), k32, input_qp8.data(), packed_w.data(), c.data(),
+       cm_stride() * sizeof(float), sizeof(float), &minmax_params);
+
+  const float tolerance = compute_sum_tolerance(
+      max_abs_product, k32, xnnpack::NumericLimits<float>::epsilon());
+  for (size_t i = 0; i < m(); i++) {
+    for (size_t j = 0; j < n(); j++) {
+      ASSERT_NEAR(c[i * cm_stride() + j], c_ref[i * n() + j], tolerance)
+          << "at " << i << ", " << j << ": reference = "
+          << c_ref[i * n() + j] << ", optimized = "
+          << c[i * cm_stride() + j] << ", Mr x Nr x Kr = " << mr() << " x "
+          << nr() << " x " << kr() << ", M x N x K = " << m() << " x "
+          << n() << " x " << k32 << ", cm_stride = " << cm_stride();
+    }
+  }
+}
 
 void GemmMicrokernelTester::Test(
     xnn_qs8_qc2w_gemm_minmax_ukernel_fn gemm,

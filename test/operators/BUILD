@@ -1,5 +1,7 @@
 # Copyright 2023 Google LLC
 #
+# Copyright 2026 Arm Limited and/or its affiliates <open-source-office@arm.com>
+#
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
 
@@ -244,7 +246,9 @@ xnnpack_unit_test(
         "fully-connected-nc.cc",
         "fully-connected-operator-tester.h",
     ],
-    deps = OPERATOR_TEST_DEPS,
+    deps = OPERATOR_TEST_DEPS + [
+        "//:isa_checks",
+    ],
 )
 
 xnnpack_unit_test(

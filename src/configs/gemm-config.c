@@ -1,6 +1,8 @@
 // Copyright 2023 Google LLC
 // Copyright 2026 Arm Limited and/or its affiliates <open-source-office@arm.com>
 //
+// Copyright 2026 Arm Limited and/or its affiliates <open-source-office@arm.com>
+//
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
@@ -58,6 +60,7 @@ static struct xnn_gemm_config qd8_f32_qc4w_gemm_config = {0};
 static struct xnn_gemm_config qd8_f32_qc2w_gemm_config = {0};
 static struct xnn_gemm_config qdu8_f32_qc2w_gemm_config = {0};
 static struct xnn_gemm_config qd8_f32_qc8w_gemm_config = {0};
+static struct xnn_gemm_config qp8_f32_qc2w_gemm_config = {0};
 static struct xnn_gemm_config qp8_f32_qc4w_gemm_config = {0};
 static struct xnn_gemm_config qp8_f32_qc8w_gemm_config = {0};
 static struct xnn_gemm_config qp8_f16_qc8w_gemm_config = {0};
@@ -96,6 +99,7 @@ XNN_INIT_ONCE_GUARD(qd8_f32_qc4w_gemm);
 XNN_INIT_ONCE_GUARD(qd8_f32_qc2w_gemm);
 XNN_INIT_ONCE_GUARD(qdu8_f32_qc2w_gemm);
 XNN_INIT_ONCE_GUARD(qd8_f32_qc8w_gemm);
+XNN_INIT_ONCE_GUARD(qp8_f32_qc2w_gemm);
 XNN_INIT_ONCE_GUARD(qp8_f32_qc4w_gemm);
 XNN_INIT_ONCE_GUARD(qp8_f32_qc8w_gemm);
 XNN_INIT_ONCE_GUARD(qp8_f16_qc8w_gemm);
@@ -2914,6 +2918,51 @@ static void init_qd8_f32_qc4w_gemm_config(void) {
   #endif
   assert(qd8_f32_qc4w_gemm_config.mr <= XNN_MAX_MR);
   assert(qd8_f32_qc4w_gemm_config.mr <= (XNN_EXTRA_QUANTIZATION_PARAMS + 1));
+}
+
+static void init_qp8_f32_qc2w_gemm_config(void) {
+  qp8_f32_qc2w_gemm_config.log2_input_element_size =
+      XNN_LOG2_SIZEOF_INT8_T;
+  qp8_f32_qc2w_gemm_config.log2_filter_element_size =
+      XNN_LOG2_SIZEOF_UINT8_T;
+  qp8_f32_qc2w_gemm_config.log2_filter_element_bit_size =
+      XNN_LOG2_BIT_SIZEOF_INT2;
+  qp8_f32_qc2w_gemm_config.bias_element_size = sizeof(float);
+  qp8_f32_qc2w_gemm_config.planes = 4;
+
+#if XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI
+  const struct xnn_hardware_config* hardware_config =
+      xnn_init_hardware_config();
+  assert(hardware_config != NULL);
+  if (XNN_ENABLE_ARM_SME2 &&
+      (hardware_config->arch_flags & xnn_arch_arm_sme2)) {
+#if XNN_ENABLE_ARM_SME2
+    const size_t mr =
+        xnn_qp8_f32_qc2w_gemm_minmax_ukernel_16x64c4__neonsme2_get_mr();
+    const size_t nr =
+        xnn_qp8_f32_qc2w_gemm_minmax_ukernel_16x64c4__neonsme2_get_nr();
+    qp8_f32_qc2w_gemm_config.arch = xnn_arch_arm_sme2;
+    qp8_f32_qc2w_gemm_config.minmax.qp8gemm[XNN_MR_TO_INDEX(1)] =
+        XNN_INIT_HMP_QP8GEMM_UKERNEL(
+            xnn_qp8_f32_qc2w_gemm_minmax_ukernel_1x64c4__neonsme2);
+    qp8_f32_qc2w_gemm_config.minmax.qp8gemm[XNN_MR_TO_INDEX(mr)] =
+        XNN_INIT_HMP_QP8GEMM_UKERNEL(
+            xnn_qp8_f32_qc2w_gemm_minmax_ukernel_16x64c4__neonsme2);
+    qp8_f32_qc2w_gemm_config.init.f32 =
+        xnn_init_f32_minmax_scalar_params;
+    qp8_f32_qc2w_gemm_config.pack_weights_and_biases =
+        xnn_pack_kai_qs2_weights_and_biases_sme2;
+    qp8_f32_qc2w_gemm_config.packed_stride_weights_and_biases =
+        xnn_packed_stride_kai_qs2_weights_and_biases_sme2;
+    qp8_f32_qc2w_gemm_config.mr = mr;
+    qp8_f32_qc2w_gemm_config.mr_packed = mr;
+    qp8_f32_qc2w_gemm_config.nr = nr;
+    qp8_f32_qc2w_gemm_config.log2_kr = 2;
+    qp8_f32_qc2w_gemm_config.log2_sr = 0;
+    assert(qp8_f32_qc2w_gemm_config.mr <= XNN_MAX_MR);
+#endif  // XNN_ENABLE_ARM_SME2
+  }
+#endif  // XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI
 }
 
 static void init_qp8_f32_qc4w_gemm_config(void) {
@@ -6709,6 +6758,17 @@ const struct xnn_gemm_config* xnn_init_qp8_f32_qc4w_gemm_config() {
   // Only return the config pointer if it actually provides a kernel.
   if (qp8_f32_qc4w_gemm_config.minmax.qp8gemm[0].function[0] != NULL) {
     return &qp8_f32_qc4w_gemm_config;
+  }
+  return NULL;
+}
+
+const struct xnn_gemm_config* xnn_init_qp8_f32_qc2w_gemm_config() {
+  if (xnn_init_hardware_config() == NULL) {
+    return NULL;
+  }
+  XNN_INIT_ONCE(qp8_f32_qc2w_gemm);
+  if (qp8_f32_qc2w_gemm_config.minmax.qp8gemm[0].function[0] != NULL) {
+    return &qp8_f32_qc2w_gemm_config;
   }
   return NULL;
 }
