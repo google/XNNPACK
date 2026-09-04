@@ -430,6 +430,8 @@ XNNPACK_PARAMS_FOR_ARCH = {
         cond = "//:arm_sme2_enabled",
         copts = ["-march=armv8.2-a+sve+sve2"],
         extra_deps = xnnpack_if_kleidiai_enabled([
+            "@KleidiAI//:common",
+            "@KleidiAI//kai/ukernels/dwconv:dwconv",
             "@KleidiAI//kai/ukernels/matmul:matmul",
         ]),
     ),

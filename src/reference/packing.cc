@@ -4663,6 +4663,47 @@ void xnn_pack_f32_dwconv_ghw_w(size_t primary_tile, size_t h, size_t w,
   }
 }
 
+// KAI consumes filter points in row-major order, unlike XNNPACK's indirect
+// DWConv microkernels, whose packed filter-point order is column-major.
+void xnn_pack_kai_f32_dwconv_ghw_w(size_t primary_tile, size_t h, size_t w,
+                                   size_t c, size_t channel_tile,
+                                   const float* k, const float* b,
+                                   const void* scale, float* packed_weights,
+                                   size_t per_tile_extra_bytes,
+                                   const void* params) {
+  assert(k != nullptr);
+  assert(packed_weights != nullptr);
+  assert(primary_tile == 9);
+  assert(h == 3);
+  assert(w == 3);
+  assert(per_tile_extra_bytes == 0);
+  const size_t kernel_size = h * w;
+
+  for (size_t cr_block_start = 0; cr_block_start < c;
+       cr_block_start += channel_tile) {
+    const size_t cr_block_size = min(c - cr_block_start, channel_tile);
+    for (size_t cr_block_offset = 0; cr_block_offset < channel_tile;
+         cr_block_offset++) {
+      packed_weights[cr_block_offset] =
+          cr_block_offset < cr_block_size && b != nullptr
+              ? b[cr_block_start + cr_block_offset]
+              : 0.0f;
+    }
+    packed_weights += channel_tile;
+
+    for (size_t i = 0; i < kernel_size; i++) {
+      for (size_t cr_block_offset = 0; cr_block_offset < channel_tile;
+           cr_block_offset++) {
+        packed_weights[cr_block_offset] =
+            cr_block_offset < cr_block_size
+                ? k[(cr_block_start + cr_block_offset) * kernel_size + i]
+                : 0.0f;
+      }
+      packed_weights += channel_tile;
+    }
+  }
+}
+
 void xnn_pack_f16_dwconv_ghw_w(size_t primary_tile, size_t h, size_t w,
                                size_t c, size_t channel_tile, const uint16_t* k,
                                const uint16_t* b, const void* scale,
@@ -4884,6 +4925,45 @@ void xnn_pack_f32_dwconv_hwg_w(size_t primary_tile, size_t h, size_t w,
     std::fill_n(packed_weights, (primary_tile - kernel_size) * channel_tile,
                 0.0f);
     packed_weights += (primary_tile - kernel_size) * cr_block_size;
+  }
+}
+
+void xnn_pack_kai_f32_dwconv_hwg_w(size_t primary_tile, size_t h, size_t w,
+                                   size_t c, size_t channel_tile,
+                                   const float* k, const float* b,
+                                   const void* scale, float* packed_weights,
+                                   size_t per_tile_extra_bytes,
+                                   const void* params) {
+  assert(k != nullptr);
+  assert(packed_weights != nullptr);
+  assert(primary_tile == 9);
+  assert(h == 3);
+  assert(w == 3);
+  assert(per_tile_extra_bytes == 0);
+  const size_t kernel_size = h * w;
+
+  for (size_t cr_block_start = 0; cr_block_start < c;
+       cr_block_start += channel_tile) {
+    const size_t cr_block_size = min(c - cr_block_start, channel_tile);
+    for (size_t cr_block_offset = 0; cr_block_offset < channel_tile;
+         cr_block_offset++) {
+      packed_weights[cr_block_offset] =
+          cr_block_offset < cr_block_size && b != nullptr
+              ? b[cr_block_start + cr_block_offset]
+              : 0.0f;
+    }
+    packed_weights += channel_tile;
+
+    for (size_t i = 0; i < kernel_size; i++) {
+      for (size_t cr_block_offset = 0; cr_block_offset < channel_tile;
+           cr_block_offset++) {
+        packed_weights[cr_block_offset] =
+            cr_block_offset < cr_block_size
+                ? k[i * c + cr_block_start + cr_block_offset]
+                : 0.0f;
+      }
+      packed_weights += channel_tile;
+    }
   }
 }
 
