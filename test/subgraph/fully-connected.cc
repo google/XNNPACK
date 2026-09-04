@@ -20,15 +20,18 @@
 #include <gtest/gtest.h>
 #include "include/xnnpack.h"
 #include "src/xnnpack/buffer.h"
-#include "src/xnnpack/config.h"
 #include "src/xnnpack/datatype.h"
 #include "src/xnnpack/math.h"
-#include "src/xnnpack/operator.h"
 #include "src/xnnpack/subgraph.h"
 #include "test/replicable_random_device.h"
 #include "test/subgraph/quantization-helpers.h"
 #include "test/subgraph/runtime-flags.h"
 #include "test/subgraph/subgraph-tester.h"
+
+#ifndef XNNPACK_USE_YNNPACK
+#include "src/xnnpack/config.h"
+#include "src/xnnpack/operator.h"
+#endif  // XNNPACK_USE_YNNPACK
 
 namespace xnnpack {
 
@@ -237,9 +240,11 @@ void TestStaticB(xnn_datatype convert_to = xnn_datatype_invalid,
   std::bernoulli_distribution flag_dist(0.5);
 
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+#ifndef XNNPACK_USE_YNNPACK
   if (require_qp8_qc2w && xnn_init_qp8_f32_qc2w_gemm_config() == nullptr) {
     GTEST_SKIP() << "QP8 F32 QC2W is not available";
   }
+#endif
 
   auto input_gen = MakeDatatypeGenerator(Input());
   auto output_gen = MakeDatatypeGenerator(Output());
@@ -547,6 +552,8 @@ TEST(FullyConnectedQU8, static_b) { TestStaticB<quint8, quint8, qint32>(); }
 
 TEST(FullyConnectedQS8QC8W, static_b) { TestStaticB<qint8, qcint8, qcint32>(); }
 TEST(FullyConnectedQS8QC4W, static_b) { TestStaticB<qint8, qcint4, qcint32>(); }
+
+#ifndef XNNPACK_USE_YNNPACK
 static void TestQD8F32QC2WPackingSelection(
     size_t input_channels, uint32_t fully_connected_flags,
     bool nonzero_channelwise_zero_point, bool expect_qp8) {
@@ -752,6 +759,7 @@ TEST(FullyConnectedQS8QC4W, transposed_weights_use_unpacked_lhs) {
   EXPECT_EQ(subgraph.Node(0)->flags & XNN_FLAG_INLINE_LHS_PACKING, 0);
   EXPECT_EQ(subgraph.Node(0)->packed_input_datatype, xnn_datatype_invalid);
 }
+#endif  // XNNPACK_USE_YNNPACK
 
 TEST(FullyConnectedQS8QC2W, static_b) { TestStaticB<qint8, qcint2, qcint32>(); }
 

@@ -271,10 +271,13 @@ xnnpack_unit_test(
         "//ynnpack/xnnpack:use_ynnpack": ["XNNPACK_USE_YNNPACK"],
         "//conditions:default": [],
     }),
-    deps = SUBGRAPH_TEST_DEPS + [
-        "//:operator_h",
-        "//src/configs:config_h",
-    ],
+    deps = SUBGRAPH_TEST_DEPS + select({
+        "//ynnpack/xnnpack:use_ynnpack": [],
+        "//conditions:default": [
+            "//:operator_h",
+            "//src/configs:config_h",
+        ],
+    }),
 )
 
 xnnpack_unit_test(
