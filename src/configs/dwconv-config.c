@@ -14,6 +14,7 @@
 #include "src/xnnpack/init-once.h"
 #include "src/xnnpack/log.h"
 #include "src/xnnpack/microfnptr.h"
+#include "src/xnnpack/microkernel-name-registry.h"
 #include "src/xnnpack/microparams-init.h"
 
 static struct xnn_dwconv_config f16_dwconv_config[XNN_MAX_F16_DWCONV_UKERNELS] = {0};
@@ -29,9 +30,10 @@ XNN_INIT_ONCE_GUARD(qs8_dwconv);
 XNN_INIT_ONCE_GUARD(qu8_dwconv);
 
 // Macros to log the microkernel names if and when they are registered.
-#define XNN_INIT_DWCONV_UKERNEL(ukernel) \
-  (xnn_dwconv_ukernel_fn) ukernel;       \
-  xnn_log_info("Using dwconv microkernel '%s'.", #ukernel);
+#define XNN_INIT_DWCONV_UKERNEL(ukernel)                    \
+  (xnn_dwconv_ukernel_fn) ukernel;                          \
+  xnn_log_info("Using dwconv microkernel '%s'.", #ukernel); \
+  XNN_REGISTER_UKERNEL_NAME(ukernel);
 
 static void init_f16_dwconv_config(void) {
   #if XNN_ENABLE_ARM_FP16_SCALAR && XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM

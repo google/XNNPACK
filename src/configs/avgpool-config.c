@@ -14,6 +14,7 @@
 #include "src/xnnpack/init-once.h"
 #include "src/xnnpack/log.h"
 #include "src/xnnpack/microfnptr.h"
+#include "src/xnnpack/microkernel-name-registry.h"
 #include "src/xnnpack/microparams-init.h"
 
 static struct xnn_avgpool_config f16_avgpool_config = {0};
@@ -23,9 +24,10 @@ XNN_INIT_ONCE_GUARD(f16_avgpool);
 XNN_INIT_ONCE_GUARD(f32_avgpool);
 
 // Macros to log the microkernel names if and when they are registered.
-#define XNN_INIT_AVGPOOL_UKERNEL(ukernel) \
-  (xnn_avgpool_ukernel_fn) ukernel;      \
-  xnn_log_info("Using avgpool microkernel '%s'.", #ukernel);
+#define XNN_INIT_AVGPOOL_UKERNEL(ukernel)                    \
+  (xnn_avgpool_ukernel_fn) ukernel;                          \
+  xnn_log_info("Using avgpool microkernel '%s'.", #ukernel); \
+  XNN_REGISTER_UKERNEL_NAME(ukernel);
 
 static void init_f16_avgpool_config(void) {
   f16_avgpool_config.ukernel = XNN_INIT_AVGPOOL_UKERNEL(xnn_f16_f32acc_avgpool_minmax_ukernel_9p__scalar_u1);
