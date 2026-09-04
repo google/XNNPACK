@@ -1,4 +1,5 @@
 // Copyright 2025 Google LLC
+// Copyright 2026 Arm Limited and/or its affiliates <open-source-office@arm.com>
 //
 // Copyright 2026 Arm Limited and/or its affiliates <open-source-office@arm.com>
 //
@@ -88,6 +89,7 @@ static enum xnn_status compute_fingerprint(
     case xnn_fingerprint_id_convolution2d_nhwc_pf16_pf16_pf16:
     case xnn_fingerprint_id_convolution2d_nhwc_f32_f32_f32_vmulcaddc:
     case xnn_fingerprint_id_convolution2d_nhwc_f32_f32_f32_dwconv:
+    case xnn_fingerprint_id_convolution2d_nhwc_f32_f32_f32_dwconv_kai_dwconv_1vlx1b:
     case xnn_fingerprint_id_convolution2d_nhwc_f32_f32_f32:
     case xnn_fingerprint_id_convolution2d_nhwc_qd8_f16_qc8w_vmulcaddc:
     case xnn_fingerprint_id_convolution2d_nhwc_qd8_f16_qc8w_dwconv:
