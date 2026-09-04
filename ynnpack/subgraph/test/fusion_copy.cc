@@ -143,7 +143,7 @@ TEST(fusion, transpose_stencil_copy) {
 
   EXPECT_THAT(ProducerOf(z_id, subgraph),
               AllOf(IsStencilCopy(std::vector<ynn_node::stencil_copy::stencil>{
-                        {/*axis=*/2, /*new_axis=*/3, /*extent=*/3,
+                        {/*axis=*/3, /*new_axis=*/4, /*extent=*/3,
                          /*stride=*/1, /*dilation=*/1}}),
                     InputsAre(y_id, YNN_INVALID_VALUE_ID)));
 
@@ -155,7 +155,8 @@ TEST(fusion, transpose_stencil_copy) {
   // m_dim was 1 (size 10).
   // new_axis (2) > m_dim (1), so m_dim is not decremented.
   EXPECT_THAT(ProducerOf(y_id, subgraph),
-              AllOf(IsTransposeA(/*tile_k=*/4, /*m_dim=*/1), InputsAre(x_id)));
+              AllOf(IsTransposeA(/*tile_m=*/1, /*tile_k=*/4, /*m_dim=*/1),
+                    InputsAre(x_id)));
 }
 
 TEST(fusion, transpose_stencil_copy_grouped) {
