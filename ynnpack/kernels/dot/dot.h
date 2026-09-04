@@ -99,7 +99,6 @@ struct dot_kernel {
   int block_m = 0;
   int block_n = 0;
   int block_k = 0;
-  int tile_m = 0;
   int tile_n = 0;
   int tile_k = 0;
   uint32_t flags = 0;
