@@ -614,13 +614,18 @@ struct ynn_node {
     // A condition that must evaluate to true.
     slinky::expr condition;
 
+    using message_part =
+        std::variant<const char*, slinky::expr, input_idx, output_idx>;
+
     // The error message to emit if the condition is not true. The message is
     // formed by concatenating all of the parts of the message, evaluating the
     // expressions if needed.
-    std::vector<std::variant<const char*, slinky::expr, input_idx, output_idx>>
-        message;
+    std::vector<message_part> message;
   };
   std::vector<check> checks;
+
+  void add_check(slinky::expr condition,
+                 std::vector<check::message_part> message);
 };
 
 struct ynn_subgraph : public ynn::ref_counted<ynn_subgraph> {

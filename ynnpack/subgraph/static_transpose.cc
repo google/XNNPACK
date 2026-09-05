@@ -148,12 +148,11 @@ void define_static_transpose(ynn_subgraph& subgraph, ynn_node& node,
     // And convert back to a physical shape after converting to a logical
     // shape above. This could fail if the user transposes a dimension with an
     // extent that is not aligned to `elem_count`.
-    node.checks.push_back(ynn_node::check{
+    node.add_check(
         output_extents[0] % elem_count == 0,
         {"For node 'static_transpose', dimension 0 extent (", output_extents[0],
          ") of ", ynn_node::output_idx{0},
-         " is not aligned to an instance of type ", to_string(input.type)},
-    });
+         " is not aligned to an instance of type ", to_string(input.type)});
   }
 
   if (identity && *output_id == YNN_INVALID_VALUE_ID) {

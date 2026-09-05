@@ -383,12 +383,11 @@ void ynn_subgraph::infer_elementwise_shape(ynn_node& node, int input_idx,
   slinky::expr& output_i = output.extents[output_dim];
   if (output_i.defined()) {
     // If we already have an extent here, it must match the new extent.
-    node.checks.push_back(ynn_node::check{
+    node.add_check(
         output_i == input_i,
         {"dimension ", output_dim, " (", output_i, ") of ",
          ynn_node::output_idx{output_idx}, " does not match dimension ",
-         input_dim, " (", input_i, ") of ", ynn_node::input_idx{input_idx}},
-    });
+         input_dim, " (", input_i, ") of ", ynn_node::input_idx{input_idx}});
   }
   if (!output_i.defined() || !as_constant(output_i)) {
     // We don't have an extent, or it wasn't constant. Maybe the new extent is
@@ -1391,6 +1390,14 @@ std::string ynn_node::to_string() const {
   ss << name() << " ";
   std::visit([&](const auto& op) { print(ss, op); }, op);
   return ss.str();
+}
+
+void ynn_node::add_check(slinky::expr condition,
+                         std::vector<check::message_part> message) {
+  condition = slinky::simplify(condition);
+  if (!slinky::is_true(condition)) {
+    checks.push_back({std::move(condition), std::move(message)});
+  }
 }
 
 void ynn_subgraph::dump(std::ostream& os) const {

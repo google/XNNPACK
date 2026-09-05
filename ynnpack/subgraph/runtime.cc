@@ -1006,14 +1006,9 @@ auto make_reshape_impl(ynn_runtime* runtime) {
       if (i.is_external_output()) {
         assert(i.data);
         assert(i.data->rank == i.rank());
-        std::vector<slinky::expr> phys_extents = i.physical_extents();
         for (size_t d = 0; d < i.rank(); ++d) {
-          slinky::expr extent_d = i.physical_extent(d);
-          if (extent_d.defined()) {
-            i.data->mutable_dim(d).set_min_extent(0, evaluate(extent_d, ctx));
-          } else {
-            i.data->mutable_dim(d).set_min_extent(0, 1);
-          }
+          slinky::index_t extent_d = evaluate(i.physical_extent(d), ctx);
+          i.data->dims[d].set_min_extent(0, extent_d);
         }
         ynn::init_buffer_strides(*i.data);
       }

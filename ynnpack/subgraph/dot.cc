@@ -1324,11 +1324,11 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
   for (int d = 0; d < num_k_dims; ++d) {
     slinky::expr a_k_dim = a.extent(d);
     slinky::expr b_k_dim = b.extent(d + 1);
-    node.checks.push_back(
-        {a_k_dim == b_k_dim,
-         {"reduction dimension ", d, " (", a_k_dim, ") of ",
-          ynn_node::input_idx{0}, ") does not match reduction dimension ",
-          d + 1, " (", b_k_dim, ") of ", ynn_node::input_idx{1}}});
+    node.add_check(
+        a_k_dim == b_k_dim,
+        {"reduction dimension ", d, " (", a_k_dim, ") of ",
+         ynn_node::input_idx{0}, ") does not match reduction dimension ", d + 1,
+         " (", b_k_dim, ") of ", ynn_node::input_idx{1}});
   }
 
   // After shape inference, replace input_b with packed_b in the node.

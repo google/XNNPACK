@@ -52,12 +52,10 @@ ynn_status ynn_define_even_split(ynn_subgraph_t subgraph, int32_t axis,
   assert(output_extents[axis].defined());
   const int split_factor = num_outputs;
 
-  node.checks.push_back({
-      output_extents[axis] % split_factor == 0,
-      {"For node 'even_split', invalid split by ", split_factor,
-       " in dimension ", axis, " (", output_extents[axis], ") of ",
-       ynn_node::input_idx{0}},
-  });
+  node.add_check(output_extents[axis] % split_factor == 0,
+                 {"For node 'even_split', invalid split by ", split_factor,
+                  " in dimension ", axis, " (", output_extents[axis], ") of ",
+                  ynn_node::input_idx{0}});
 
   output_extents[axis] = simplify(output_extents[axis] / split_factor);
 
