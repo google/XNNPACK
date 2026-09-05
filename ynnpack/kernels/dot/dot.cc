@@ -281,12 +281,22 @@ namespace {
 
 // An additional penalty scale term on the cost of a dot kernel based on the
 // architecture.
-float dot_arch_cost_factor(uint64_t arch, size_t n, size_t block_m,
+float dot_arch_cost_factor(uint64_t arch, size_t m, size_t n, size_t block_m,
                            size_t block_n, size_t tile_m, size_t tile_n) {
   if (arch == arch_flag::none) {
     // We should only use the default dot kernel if there is no other choice.
     return 100.0f;
   }
+#ifdef YNN_ARCH_ARM
+  if (arch & (arch_flag::sme | arch_flag::sme2)) {
+    // At m == 1, NEON is faster than SME due to SME startup overhead and
+    // vector-matrix multiplication not benefiting from outer-product
+    // accumulation.
+    if (m == 1) {
+      return 2.0f;
+    }
+  }
+#endif
 #ifdef YNN_ARCH_X86
   if (arch & arch_flag::avx512vnni || arch & arch_flag::amxint8) {
     // The VNNI kernels have a smaller unrolling in K than the AVX512 kernels,
@@ -369,7 +379,7 @@ struct optimizer {
     const float dot_cost_k =
         estimate_dot_cost(m, n, k, block_m, block_n, block_k, tile_m, tile_n,
                           tile_k, b_elem_count) *
-        dot_arch_cost_factor(arch, n, block_m, block_n, tile_m, tile_n);
+        dot_arch_cost_factor(arch, m, n, block_m, block_n, tile_m, tile_n);
     if (!required_tile_k && !required_block_n) {
       char selected = dot_cost_k < result.cost ? '*' : ' ';
       YNN_LOG_DEBUG() << " " << selected << name << " cost=" << dot_cost_k;
