@@ -2,6 +2,7 @@
 // All rights reserved.
 //
 // Copyright 2019 Google LLC
+// Copyright 2026 Arm Limited and/or its affiliates <open-source-office@arm.com>
 //
 // Copyright 2026 Arm Limited and/or its affiliates <open-source-office@arm.com>
 //
@@ -452,33 +453,7 @@ XNN_INTERNAL void xnn_pack_kai_qs2_weights_and_biases_sme2(
     void* packed_weights_ptr,                      //
     const void* params);
 
-XNN_INTERNAL void xnn_pack_kai_qs8_qc4w_weights_and_biases_sme2(
-    uint32_t flags,                                //
-    const struct xnn_gemm_config* gemm_config,     //
-    size_t input_channels,                         //
-    size_t output_channels,                        //
-    size_t groups,                                 //
-    size_t unused_block_size,                      //
-    size_t k_stride,                               //
-    const void* accumulator_init,                  //
-    const void* weights,                           //
-    xnn_init_scale_params_fn init_extra_data0_fn,  //
-    const void* extra_data0,                       //
-    size_t extra_data0_element_size,               //
-    xnn_init_scale_params_fn init_extra_data1_fn,  //
-    const void* extra_data1,                       //
-    size_t extra_data1_element_size,               //
-    void* packed_weights_ptr,                      //
-    const void* params);
-
 XNN_INTERNAL size_t xnn_packed_stride_kai_qs2_weights_and_biases_sme2(
-    const struct xnn_gemm_config* gemm_config,  //
-    size_t k,                                   //
-    size_t unused_block_size,                   //
-    size_t k_stride,                            //
-    size_t extra_bytes);
-
-XNN_INTERNAL size_t xnn_packed_stride_kai_qs8_qc4w_weights_and_biases_sme2(
     const struct xnn_gemm_config* gemm_config,  //
     size_t k,                                   //
     size_t unused_block_size,                   //

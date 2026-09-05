@@ -248,7 +248,6 @@ xnnpack_unit_test(
     ],
     deps = OPERATOR_TEST_DEPS + [
         "//:isa_checks",
-        "//:operator_h",
     ],
 )
 
