@@ -21,6 +21,18 @@
 extern "C" {
 #endif
 
+// XNN_ARCH_HEXAGON is also defined by src/xnnpack/common.h, but that is an
+// internal header and is not installed. Define it here as well, deriving it from the same compiler builtin
+// so both expansions are identical. If common.h is included first this block is
+// skipped. Keep the two in sync.
+#ifndef XNN_ARCH_HEXAGON
+#if defined(__hexagon__)
+#define XNN_ARCH_HEXAGON 1
+#else
+#define XNN_ARCH_HEXAGON 0
+#endif
+#endif  // XNN_ARCH_HEXAGON
+
 /// The number of bytes XNNPACK may read beyond array bounds.
 /// The caller must allocate at least this many extra bytes after the tensor data passed to XNNPACK.
 ///
