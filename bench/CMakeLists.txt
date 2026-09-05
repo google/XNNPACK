@@ -60,6 +60,7 @@ SET(MICROKERNEL_BENCHMARKS
     f32-dwconv2d-chw
     f32-gemm
     f32-gemm-minmax
+    f32-ibilinear-chw
     f32-igemm
     f32-qc4w-gemm
     f32-qc8w-gemm
