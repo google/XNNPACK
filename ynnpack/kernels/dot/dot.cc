@@ -388,9 +388,8 @@ struct optimizer {
       return;
     }
     result = {
-        kernel,  block_m,    block_n,
-        block_k, tile_n,     tile_k,
-        flags,   dot_cost_k, result.max_block_n,
+        kernel, block_m, block_n, block_k,    tile_m,
+        tile_n, tile_k,  flags,   dot_cost_k, result.max_block_n,
     };
     kernel_used = name;
   }
