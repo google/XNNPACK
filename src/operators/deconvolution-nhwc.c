@@ -2367,6 +2367,17 @@ static enum xnn_status reshape_deconvolution2d_nhwc(
           deconvolution_op->convolution_op->dilation_width,
           deconvolution_op->convolution_op->stride_width);
 
+  if (deconvolution_op->convolution_op->output_height == 0 ||
+      deconvolution_op->convolution_op->output_width == 0) {
+    xnn_log_error(
+        "failed to reshape %s operator: computed output dimensions %zux%zu, "
+        "dimensions must be non-zero",
+        xnn_operator_type_to_string_v2(deconvolution_op),
+        deconvolution_op->convolution_op->output_height,
+        deconvolution_op->convolution_op->output_width);
+    return xnn_status_invalid_parameter;
+  }
+
   if (output_height_out != NULL) {
     *output_height_out = deconvolution_op->convolution_op->output_height;
   }
