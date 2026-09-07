@@ -409,8 +409,8 @@ std::optional<size_t> index_of(const C& container, const T& value) {
 
 size_t static_size_of_value(const ynn_value& value) {
   size_t n = 1;
-  for (const auto& extent : value.extents) {
-    if (auto extent_c = as_constant(extent)) {
+  for (size_t i = 0; i < value.extents.size(); ++i) {
+    if (auto extent_c = as_constant(value.extent(i))) {
       n *= *extent_c;
     } else {
       return 0;
