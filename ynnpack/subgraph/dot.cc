@@ -1135,6 +1135,25 @@ bool is_constant(const ynn_subgraph& subgraph, uint32_t id, int depth = 5) {
   return false;
 }
 
+bool is_constant_or_gather_of_constant(const ynn_subgraph& subgraph,
+                                       uint32_t id, int depth = 3) {
+  if (is_constant(subgraph, id, depth)) {
+    return true;
+  }
+  const ynn_node* producer = subgraph.get_producer(id);
+  if (!producer) return false;
+  if (const auto* gather = std::get_if<ynn_node::gather>(&producer->op)) {
+    if (std::any_of(gather->axes.begin(), gather->axes.end(),
+                    [](int32_t axis) { return axis < 2; })) {
+      // The gathered dimensions are transposed by the pack, we can't
+      // reassociate the ops.
+      return false;
+    }
+    return is_constant(subgraph, producer->inputs[0], depth);
+  }
+  return false;
+}
+
 bool should_pack_b(const ynn_subgraph& subgraph, size_t num_k_dims,
                    const ynn_value& a, const ynn_value& b,
                    const dot_kernel& kernel,
@@ -1149,7 +1168,7 @@ bool should_pack_b(const ynn_subgraph& subgraph, size_t num_k_dims,
     // should pack.
     return true;
   }
-  if (is_constant(subgraph, b.id)) {
+  if (is_constant_or_gather_of_constant(subgraph, b.id)) {
     // TODO(dsharlet): If B is huge and static, it might cost a lot of memory to
     // pre-pack B, and it might not be so bad to just not pack it (or pack it on
     // the fly as if B were dynamic).

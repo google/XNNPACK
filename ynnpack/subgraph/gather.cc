@@ -158,6 +158,7 @@ void define_gather(ynn_subgraph& subgraph, ynn_node& node,
   node.outputs = {output_id};
 
   // Infer output shape.
+  output.extents.clear();
   output.extents.resize(output_rank);
   for (size_t d = 0; d < output_rank; ++d) {
     subgraph.infer_elementwise_shape(node, /*input_idx=*/1,
