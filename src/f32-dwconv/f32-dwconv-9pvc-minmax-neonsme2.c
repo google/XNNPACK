@@ -10,7 +10,16 @@
 
 #if XNN_ENABLE_KLEIDIAI
 #include "kai/kai_common.h"
-#include "kai/ukernels/dwconv/dwconv_f32_f32_f32p/kai_dwconv_clamp_f32_f32_f32p1vlx1b_3x3_s1_4xc_sme2_mla.h"
+#include "kai/ukernels/dwconv/dwconv_f32_f32_f32p/kai_dwconv_clamp_f32_f32_f32p_interface.h"
+
+// KleidiAI's public interface does not declare concrete kernel symbols.
+extern size_t
+kai_get_m_step_dwconv_clamp_f32_f32_f32p1vlx1b_3x3_s1_4xc_sme2_mla(void);
+extern void kai_run_dwconv_clamp_f32_f32_f32p1vlx1b_3x3_s1_4xc_sme2_mla(
+    const void* src, const void* rhs_packed, void* dst, size_t in_stride_row,
+    size_t in_stride_col, size_t dst_stride_row, size_t dst_stride_col,
+    size_t valid_input_rows, size_t valid_dst_rows, size_t pad_left,
+    size_t pad_top, float pad_value, float clamp_min, float clamp_max);
 
 void xnn_kai_f32_dwconv_minmax_ukernel_9pvc__neonsme2(
     const void* input, const void* packed_weights, void* output,
