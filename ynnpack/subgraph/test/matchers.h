@@ -165,6 +165,13 @@ MATCHER_P(IsUnary, op_type, "") {
 //
 // Example:
 //   EXPECT_THAT(ProducerOf(y_id, subgraph), IsTransposeA(16, 2));
+MATCHER_P3(IsTransposeA, tile_m, tile_k, m_dim, "") {
+  const ynn_node::transpose_a* transpose =
+      std::get_if<ynn_node::transpose_a>(&arg.op);
+  return transpose && transpose->tile_m == tile_m &&
+         transpose->tile_k == tile_k && transpose->m_dim == m_dim;
+}
+
 MATCHER_P2(IsTransposeA, tile_k, m_dim, "") {
   const ynn_node::transpose_a* transpose =
       std::get_if<ynn_node::transpose_a>(&arg.op);

@@ -522,13 +522,15 @@ struct ynn_node {
     friend bool operator<(const pack_b&, const pack_b&) { return false; }
   };
   struct transpose_a {
+    size_t tile_m = 1;
     size_t tile_k;
     int32_t m_dim;
     friend bool operator==(const transpose_a& a, const transpose_a& b) {
-      return a.tile_k == b.tile_k && a.m_dim == b.m_dim;
+      return a.tile_m == b.tile_m && a.tile_k == b.tile_k && a.m_dim == b.m_dim;
     }
     friend bool operator<(const transpose_a& a, const transpose_a& b) {
-      return std::tie(a.tile_k, a.m_dim) < std::tie(b.tile_k, b.m_dim);
+      return std::tie(a.tile_m, a.tile_k, a.m_dim) <
+             std::tie(b.tile_m, b.tile_k, b.m_dim);
     }
   };
   struct get_tensor_shape {
