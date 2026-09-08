@@ -43,3 +43,11 @@ XNN_UKERNEL(xnn_arch_none, xnn_f16_rmax_ukernel__scalar_u2_acc2, 2, false, xnn_f
 XNN_UKERNEL(xnn_arch_none, xnn_f16_rmax_ukernel__scalar_u3_acc3, 3, false, xnn_float16, xnn_float16, struct xnn_f16_default_params, ((struct xnn_init_f16_default_params_fn) NULL))
 XNN_UKERNEL(xnn_arch_none, xnn_f16_rmax_ukernel__scalar_u4_acc2, 4, false, xnn_float16, xnn_float16, struct xnn_f16_default_params, ((struct xnn_init_f16_default_params_fn) NULL))
 XNN_UKERNEL(xnn_arch_none, xnn_f16_rmax_ukernel__scalar_u4_acc4, 4, false, xnn_float16, xnn_float16, struct xnn_f16_default_params, ((struct xnn_init_f16_default_params_fn) NULL))
+
+#if XNN_ARCH_WASMRELAXEDSIMDFP16
+XNN_UKERNEL(xnn_arch_none, xnn_f16_rmax_ukernel__wasmrelaxedsimdfp16_u8, 8, false, xnn_float16, xnn_float16, struct xnn_f16_default_params, ((struct xnn_init_f16_default_params_fn) NULL))
+XNN_UKERNEL(xnn_arch_none, xnn_f16_rmax_ukernel__wasmrelaxedsimdfp16_u16_acc2, 16, false, xnn_float16, xnn_float16, struct xnn_f16_default_params, ((struct xnn_init_f16_default_params_fn) NULL))
+XNN_UKERNEL(xnn_arch_none, xnn_f16_rmax_ukernel__wasmrelaxedsimdfp16_u24_acc3, 24, false, xnn_float16, xnn_float16, struct xnn_f16_default_params, ((struct xnn_init_f16_default_params_fn) NULL))
+XNN_UKERNEL(xnn_arch_none, xnn_f16_rmax_ukernel__wasmrelaxedsimdfp16_u32_acc2, 32, false, xnn_float16, xnn_float16, struct xnn_f16_default_params, ((struct xnn_init_f16_default_params_fn) NULL))
+XNN_UKERNEL(xnn_arch_none, xnn_f16_rmax_ukernel__wasmrelaxedsimdfp16_u32_acc4, 32, false, xnn_float16, xnn_float16, struct xnn_f16_default_params, ((struct xnn_init_f16_default_params_fn) NULL))
+#endif  // XNN_ARCH_WASMRELAXEDSIMDFP16
