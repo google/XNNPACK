@@ -69,8 +69,8 @@ struct InlineQd8Bf16Qb4wFullyConnected {
     const Type tensor_input_type =
         (input_datatype == xnn_datatype_fp32) ? Type::kFP32 : Type::kBF16;
     XnnTensor input({.type = tensor_input_type, .shape = {3, 32}});
-    // 2x32 int4 weights (64 nibbles). {-8, -8} packs to 0x88, matching the
-    // previous zero_point=8 zero weights.
+    // 2x32 int4 weights (64 nibbles, 32 bytes). {-8, -8} packs to 0x88,
+    // which decodes to all-zero weights with zero_point=8.
     std::vector<litert::tensor::int4_t> weights_data(
         32, litert::tensor::int4_t{-8, -8});
     auto quantization = std::make_shared<litert::tensor::BlockwiseQuantization>(
