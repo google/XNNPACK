@@ -331,7 +331,7 @@ struct optimizer {
   int required_tile_k;
   int required_block_n;
   uint32_t required_flags;
-  std::optional<bool> transpose_a;
+  uint32_t disallowed_flags;
   uint64_t supported_arch_flags;
 
   // Outputs
@@ -341,19 +341,10 @@ struct optimizer {
   void operator()(uint64_t arch, int block_m, int block_n, int block_k,
                   int tile_m, int tile_n, int tile_k, uint32_t flags,
                   dot_kernel_fn kernel, const char* name) {
-    if (transpose_a && *transpose_a != ((flags & dot_flag::transpose_a) != 0)) {
-      // The caller wants a transposed (or not), and this kernel is not
-      // transposed (or is).
+    if ((required_flags & flags) != required_flags) {
       return;
     }
-    if ((flags & dot_flag::symmetric_b) &&
-        !(required_flags & dot_flag::symmetric_b)) {
-      // This kernel requires symmetric_b, but the caller did not specify the
-      // data is symmetric_b.
-      return;
-    }
-    uint32_t strictly_required_flags = required_flags & ~dot_flag::symmetric_b;
-    if ((strictly_required_flags & flags) != strictly_required_flags) {
+    if (disallowed_flags & flags) {
       return;
     }
     if (!is_arch_supported(arch, supported_arch_flags)) {
@@ -412,14 +403,36 @@ dot_kernel get_dot_kernel(const dot_shape& shape, dot_packed_shape packed_shape,
     YNN_LOG_DEBUG() << "Selecting kernel for dot " << shape.m << "x" << shape.n
                     << "x" << shape.k1;
   }
+
+  uint32_t strictly_required_flags = required_flags;
+  uint32_t disallowed_flags = 0;
+  if (required_flags & dot_flag::symmetric_b) {
+    // We don't require the kernel to be symmetric_b, a non-symmetric_b kernel
+    // might still be faster.
+    strictly_required_flags &= ~dot_flag::symmetric_b;
+  } else {
+    // Don't use a symmetric_b kernel if the caller did not indicate that the
+    // data is symmetric_b.
+    disallowed_flags |= dot_flag::symmetric_b;
+  }
+
+  if (transpose_a.has_value()) {
+    // We need the kernel to match the requested transpose_a.
+    if (*transpose_a) {
+      strictly_required_flags |= dot_flag::transpose_a;
+    } else {
+      disallowed_flags |= dot_flag::transpose_a;
+    }
+  }
+
   optimizer<A, B, C> optimizer{
       shape.m,
       shape.n,
       shape.k1,
       packed_shape.tile_k,
       packed_shape.block_n,
-      required_flags,
-      transpose_a,
+      strictly_required_flags,
+      disallowed_flags,
       arch_flags,
   };
 
