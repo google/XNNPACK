@@ -1135,6 +1135,25 @@ bool is_constant(const ynn_subgraph& subgraph, uint32_t id, int depth = 5) {
   return false;
 }
 
+bool is_constant_or_gather_of_constant(const ynn_subgraph& subgraph,
+                                       uint32_t id, int depth = 3) {
+  if (is_constant(subgraph, id, depth)) {
+    return true;
+  }
+  const ynn_node* producer = subgraph.get_producer(id);
+  if (!producer) return false;
+  if (const auto* gather = std::get_if<ynn_node::gather>(&producer->op)) {
+    if (std::any_of(gather->axes.begin(), gather->axes.end(),
+                    [](int32_t axis) { return axis < 2; })) {
+      // The gathered dimensions are transposed by the pack, we can't
+      // reassociate the ops.
+      return false;
+    }
+    return is_constant(subgraph, producer->inputs[0], depth);
+  }
+  return false;
+}
+
 bool should_pack_b(const ynn_subgraph& subgraph, size_t num_k_dims,
                    const ynn_value& a, const ynn_value& b,
                    const dot_kernel& kernel,
@@ -1149,7 +1168,7 @@ bool should_pack_b(const ynn_subgraph& subgraph, size_t num_k_dims,
     // should pack.
     return true;
   }
-  if (is_constant(subgraph, b.id)) {
+  if (is_constant_or_gather_of_constant(subgraph, b.id)) {
     // TODO(dsharlet): If B is huge and static, it might cost a lot of memory to
     // pre-pack B, and it might not be so bad to just not pack it (or pack it on
     // the fly as if B were dynamic).
@@ -1324,11 +1343,11 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
   for (int d = 0; d < num_k_dims; ++d) {
     slinky::expr a_k_dim = a.extent(d);
     slinky::expr b_k_dim = b.extent(d + 1);
-    node.checks.push_back(
-        {a_k_dim == b_k_dim,
-         {"reduction dimension ", d, " (", a_k_dim, ") of ",
-          ynn_node::input_idx{0}, ") does not match reduction dimension ",
-          d + 1, " (", b_k_dim, ") of ", ynn_node::input_idx{1}}});
+    node.add_check(
+        a_k_dim == b_k_dim,
+        {"reduction dimension ", d, " (", a_k_dim, ") of ",
+         ynn_node::input_idx{0}, ") does not match reduction dimension ", d + 1,
+         " (", b_k_dim, ") of ", ynn_node::input_idx{1}});
   }
 
   // After shape inference, replace input_b with packed_b in the node.

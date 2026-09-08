@@ -54,11 +54,10 @@ ynn_status ynn_define_concatenate(ynn_subgraph_t subgraph, int32_t axis,
     extent_axis += input_i.extent(axis);
     for (int d = 0; d < input0.rank(); ++d) {
       if (d == axis) continue;
-      node.checks.push_back(
-          {input_i.extent(d) == input0.extent(d),
-           {"mismatch in non-concatenated dimension ", d, " of ",
-            ynn_node::input_idx{0}, " (", input0.extent(d), ") and ",
-            ynn_node::input_idx{i}, " (", input_i.extent(d), ")"}});
+      node.add_check(input_i.extent(d) == input0.extent(d),
+                     {"mismatch in non-concatenated dimension ", d, " of ",
+                      ynn_node::input_idx{0}, " (", input0.extent(d), ") and ",
+                      ynn_node::input_idx{i}, " (", input_i.extent(d), ")"});
     }
   }
   extent_axis = slinky::simplify(extent_axis);

@@ -281,12 +281,22 @@ namespace {
 
 // An additional penalty scale term on the cost of a dot kernel based on the
 // architecture.
-float dot_arch_cost_factor(uint64_t arch, size_t n, size_t block_m,
+float dot_arch_cost_factor(uint64_t arch, size_t m, size_t n, size_t block_m,
                            size_t block_n, size_t tile_m, size_t tile_n) {
   if (arch == arch_flag::none) {
     // We should only use the default dot kernel if there is no other choice.
     return 100.0f;
   }
+#ifdef YNN_ARCH_ARM
+  if (arch & (arch_flag::sme | arch_flag::sme2)) {
+    // At m == 1, NEON is faster than SME due to SME startup overhead and
+    // vector-matrix multiplication not benefiting from outer-product
+    // accumulation.
+    if (m == 1) {
+      return 2.0f;
+    }
+  }
+#endif
 #ifdef YNN_ARCH_X86
   if (arch & arch_flag::avx512vnni || arch & arch_flag::amxint8) {
     // The VNNI kernels have a smaller unrolling in K than the AVX512 kernels,
@@ -321,7 +331,7 @@ struct optimizer {
   int required_tile_k;
   int required_block_n;
   uint32_t required_flags;
-  std::optional<bool> transpose_a;
+  uint32_t disallowed_flags;
   uint64_t supported_arch_flags;
 
   // Outputs
@@ -331,19 +341,10 @@ struct optimizer {
   void operator()(uint64_t arch, int block_m, int block_n, int block_k,
                   int tile_m, int tile_n, int tile_k, uint32_t flags,
                   dot_kernel_fn kernel, const char* name) {
-    if (transpose_a && *transpose_a != ((flags & dot_flag::transpose_a) != 0)) {
-      // The caller wants a transposed (or not), and this kernel is not
-      // transposed (or is).
+    if ((required_flags & flags) != required_flags) {
       return;
     }
-    if ((flags & dot_flag::symmetric_b) &&
-        !(required_flags & dot_flag::symmetric_b)) {
-      // This kernel requires symmetric_b, but the caller did not specify the
-      // data is symmetric_b.
-      return;
-    }
-    uint32_t strictly_required_flags = required_flags & ~dot_flag::symmetric_b;
-    if ((strictly_required_flags & flags) != strictly_required_flags) {
+    if (disallowed_flags & flags) {
       return;
     }
     if (!is_arch_supported(arch, supported_arch_flags)) {
@@ -369,7 +370,7 @@ struct optimizer {
     const float dot_cost_k =
         estimate_dot_cost(m, n, k, block_m, block_n, block_k, tile_m, tile_n,
                           tile_k, b_elem_count) *
-        dot_arch_cost_factor(arch, n, block_m, block_n, tile_m, tile_n);
+        dot_arch_cost_factor(arch, m, n, block_m, block_n, tile_m, tile_n);
     if (!required_tile_k && !required_block_n) {
       char selected = dot_cost_k < result.cost ? '*' : ' ';
       YNN_LOG_DEBUG() << " " << selected << name << " cost=" << dot_cost_k;
@@ -402,14 +403,36 @@ dot_kernel get_dot_kernel(const dot_shape& shape, dot_packed_shape packed_shape,
     YNN_LOG_DEBUG() << "Selecting kernel for dot " << shape.m << "x" << shape.n
                     << "x" << shape.k1;
   }
+
+  uint32_t strictly_required_flags = required_flags;
+  uint32_t disallowed_flags = 0;
+  if (required_flags & dot_flag::symmetric_b) {
+    // We don't require the kernel to be symmetric_b, a non-symmetric_b kernel
+    // might still be faster.
+    strictly_required_flags &= ~dot_flag::symmetric_b;
+  } else {
+    // Don't use a symmetric_b kernel if the caller did not indicate that the
+    // data is symmetric_b.
+    disallowed_flags |= dot_flag::symmetric_b;
+  }
+
+  if (transpose_a.has_value()) {
+    // We need the kernel to match the requested transpose_a.
+    if (*transpose_a) {
+      strictly_required_flags |= dot_flag::transpose_a;
+    } else {
+      disallowed_flags |= dot_flag::transpose_a;
+    }
+  }
+
   optimizer<A, B, C> optimizer{
       shape.m,
       shape.n,
       shape.k1,
       packed_shape.tile_k,
       packed_shape.block_n,
-      required_flags,
-      transpose_a,
+      strictly_required_flags,
+      disallowed_flags,
       arch_flags,
   };
 

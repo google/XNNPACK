@@ -582,4 +582,64 @@ TEST(fusion, move_broadcast_to_output_topological_order) {
   EXPECT_THAT(subgraph.nodes[2], IsStaticBroadcast());
 }
 
+TEST(fusion, pack_b_gather) {
+  const uint32_t a_id = 0;
+  const uint32_t index_id = 1;
+  const uint32_t out_id = 2;
+  SubgraphBuilder builder(3);
+
+  // a: [4, 1, 16] (tokens: batch=4, M=1, K=16)
+  // static weights: [8, 16, 32] (E=8, K=16, N=32)
+  // index: [4, 1, 1] (indices of experts for the 4 rows)
+  // gathered weights: [4, 16, 32]
+  // dot: a @ gathered -> out [4, 1, 32]
+  std::vector<float> weight_data(8 * 16 * 32, 1.0f);
+  uint32_t w_id = YNN_INVALID_VALUE_ID;
+  uint32_t gathered_w_id = YNN_INVALID_VALUE_ID;
+
+  builder.AddInput(ynn_type_fp32, {4, 1, 16}, a_id)
+      .AddInput(ynn_type_int32, {4, 1, 1}, index_id)
+      .AddTensor(ynn_type_fp32, {8, 16, 32}, w_id, weight_data.data())
+      .AddTensor(ynn_type_fp32, {4, 16, 32}, gathered_w_id)
+      .AddOutput(ynn_type_fp32, {4, 1, 32}, out_id);
+
+  builder.AddGather({0}, 3, w_id, index_id, gathered_w_id)
+      .AddDot(1, a_id, gathered_w_id, YNN_INVALID_VALUE_ID, out_id);
+
+  ynn_subgraph& subgraph = *builder.GetSubgraph();
+
+  subgraph.fusion();
+  subgraph.invalidate_dead_values();
+
+  // After fusion, the dot's input_b (packed_b) should be produced by a gather
+  // node, and the pack_b node should have input w_id (the static weights).
+  const ynn_node& dot_node = ProducerOf(out_id, subgraph);
+  EXPECT_THAT(dot_node, IsDot());
+  uint32_t packed_gathered_id = dot_node.inputs[1];
+  const ynn_node& gather_node = ProducerOf(packed_gathered_id, subgraph);
+  EXPECT_THAT(gather_node, IsGather());
+  uint32_t packed_w_id = gather_node.inputs[0];
+  const ynn_node& pack_b_node = ProducerOf(packed_w_id, subgraph);
+  EXPECT_THAT(pack_b_node, IsPackB());
+  EXPECT_EQ(pack_b_node.inputs[0], w_id);
+
+  Runtime runtime(builder.GetSubgraph());
+  std::vector<float> a_data(4 * 1 * 16, 2.0f);
+  std::vector<int32_t> index_data = {0, 1, 2, 3};
+  std::vector<float> out_data(4 * 1 * 32, 0.0f);
+
+  runtime.ReshapeExternalTensor(TensorShape({4, 1, 16}), a_data.data(), a_id)
+      .ReshapeExternalTensor(TensorShape({4, 1, 1}), index_data.data(),
+                             index_id);
+  runtime.ReshapeRuntime();
+  ASSERT_EQ(runtime.Status(), ynn_status_success);
+
+  runtime.SetupExternalTensor(out_data.data(), out_id).InvokeRuntime();
+  ASSERT_EQ(runtime.Status(), ynn_status_success);
+
+  for (float v : out_data) {
+    EXPECT_FLOAT_EQ(v, 32.0f);
+  }
+}
+
 }  // namespace ynn

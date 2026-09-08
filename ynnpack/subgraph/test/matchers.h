@@ -260,6 +260,14 @@ MATCHER_P(IsDynamicQuantization, output_zero_point, "") {
 //   EXPECT_THAT(ProducerOf(y_id, subgraph), IsDot());
 MATCHER(IsDot, "") { return std::holds_alternative<ynn_node::dot>(arg.op); }
 
+MATCHER(IsGather, "") {
+  return std::holds_alternative<ynn_node::gather>(arg.op);
+}
+
+MATCHER(IsPackB, "") {
+  return std::holds_alternative<ynn_node::pack_b>(arg.op);
+}
+
 // Checks that the given node is an iota.
 //
 // Example:

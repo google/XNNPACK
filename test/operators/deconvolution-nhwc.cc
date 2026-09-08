@@ -7,9 +7,12 @@
 #include <cstddef>
 #include <cstdint>
 #include <limits>
+#include <memory>
 #include <vector>
 
 #include <gtest/gtest.h>
+#include "include/xnnpack.h"
+#include "src/xnnpack/buffer.h"
 #include "src/xnnpack/config-types.h"
 #include "src/xnnpack/config.h"
 #include "test/operators/deconvolution-operator-tester.h"
@@ -3444,4 +3447,115 @@ TEST(DECONVOLUTION_NHWC, conversion_buffer_size_overflow) {
           std::numeric_limits<float>::infinity(), 0, nullptr,
           &deconvolution_op));
   EXPECT_EQ(nullptr, deconvolution_op);
+}
+
+// Reshaping an operator to a larger output through a bigger `adjustment`, while
+// the input dimensions stay the same, has to resize and refill the IGEMM
+// indirection buffer: its element count follows the output, not the input. A
+// second reshape with an unchanged 4x4 input but adjustment 0 -> 1 grows the
+// output from 7x7 to 8x8, so the buffer that was sized for 49 output pixels is
+// read for 64, past its end. kernel 1x1 with stride 2 selects the IGEMM (not
+// subconv) path and lets the adjustment move the output on its own.
+TEST(DECONVOLUTION_NHWC_F32, reshape_grows_output_via_adjustment) {
+  if (xnn_init_f32_igemm_config() == nullptr) {
+    GTEST_SKIP();
+  }
+  ASSERT_EQ(xnn_initialize(/*allocator=*/nullptr), xnn_status_success);
+
+  constexpr uint32_t kernel = 1;
+  constexpr uint32_t stride = 2;
+  constexpr size_t groups = 1;
+  constexpr size_t group_input_channels = 4;
+  constexpr size_t group_output_channels = 4;
+  constexpr size_t batch_size = 1;
+  constexpr size_t input_height = 4;
+  constexpr size_t input_width = 4;
+
+  std::vector<float> kernel_data(groups * group_output_channels * kernel *
+                                 kernel * group_input_channels);
+  for (size_t i = 0; i < kernel_data.size(); i++) {
+    kernel_data[i] = static_cast<float>(static_cast<int>(i % 7) - 3) * 0.25f;
+  }
+  std::vector<float> bias(groups * group_output_channels);
+  for (size_t i = 0; i < bias.size(); i++) {
+    bias[i] = static_cast<float>(i) * 0.5f - 1.0f;
+  }
+  xnnpack::Buffer<float> input(
+      batch_size * input_height * input_width * groups * group_input_channels,
+      xnnpack::XnnExtraBytes);
+  for (size_t i = 0; i < input.size(); i++) {
+    input[i] = static_cast<float>(static_cast<int>(i % 11) - 5) * 0.125f;
+  }
+
+  const auto create_op = [&]() -> xnn_operator_t {
+    xnn_operator_t op = nullptr;
+    EXPECT_EQ(xnn_create_deconvolution2d_nhwc_f32(
+                  /*output_padding_top=*/0, /*output_padding_right=*/0,
+                  /*output_padding_bottom=*/0, /*output_padding_left=*/0,
+                  kernel, kernel, stride, stride, /*dilation_height=*/1,
+                  /*dilation_width=*/1, groups, group_input_channels,
+                  group_output_channels,
+                  /*input_pixel_stride=*/groups * group_input_channels,
+                  /*output_pixel_stride=*/groups * group_output_channels,
+                  kernel_data.data(), bias.data(),
+                  -std::numeric_limits<float>::infinity(),
+                  std::numeric_limits<float>::infinity(), /*flags=*/0,
+                  /*weights_cache=*/nullptr, &op),
+              xnn_status_success);
+    return op;
+  };
+
+  // Reference: reshaped straight to the adjustment=1 (8x8) output.
+  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> reference_op(
+      create_op(), xnn_delete_operator);
+  ASSERT_NE(reference_op, nullptr);
+  size_t reference_height = 0, reference_width = 0;
+  ASSERT_EQ(xnn_reshape_deconvolution2d_nhwc_f32(
+                reference_op.get(), batch_size, input_height, input_width,
+                /*adjustment_height=*/1, /*adjustment_width=*/1,
+                &reference_height, &reference_width, /*threadpool=*/nullptr),
+            xnn_status_success);
+  ASSERT_EQ(reference_height, 8);
+  ASSERT_EQ(reference_width, 8);
+  xnnpack::Buffer<float> reference_output(batch_size * reference_height *
+                                          reference_width * groups *
+                                          group_output_channels);
+  ASSERT_EQ(xnn_setup_deconvolution2d_nhwc_f32(reference_op.get(), input.data(),
+                                               reference_output.data()),
+            xnn_status_success);
+  ASSERT_EQ(xnn_run_operator(reference_op.get(), /*threadpool=*/nullptr),
+            xnn_status_success);
+
+  // Same operator, reshaped to the smaller adjustment=0 (7x7) output first,
+  // then grown to 8x8 with the input unchanged.
+  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> op(
+      create_op(), xnn_delete_operator);
+  ASSERT_NE(op, nullptr);
+  size_t small_height = 0, small_width = 0;
+  ASSERT_EQ(xnn_reshape_deconvolution2d_nhwc_f32(
+                op.get(), batch_size, input_height, input_width,
+                /*adjustment_height=*/0, /*adjustment_width=*/0, &small_height,
+                &small_width, /*threadpool=*/nullptr),
+            xnn_status_success);
+  ASSERT_EQ(small_height, 7);
+  ASSERT_EQ(small_width, 7);
+  size_t output_height = 0, output_width = 0;
+  ASSERT_EQ(xnn_reshape_deconvolution2d_nhwc_f32(
+                op.get(), batch_size, input_height, input_width,
+                /*adjustment_height=*/1, /*adjustment_width=*/1, &output_height,
+                &output_width, /*threadpool=*/nullptr),
+            xnn_status_success);
+  ASSERT_EQ(output_height, 8);
+  ASSERT_EQ(output_width, 8);
+  xnnpack::Buffer<float> output(batch_size * output_height * output_width *
+                                groups * group_output_channels);
+  ASSERT_EQ(
+      xnn_setup_deconvolution2d_nhwc_f32(op.get(), input.data(), output.data()),
+      xnn_status_success);
+  ASSERT_EQ(xnn_run_operator(op.get(), /*threadpool=*/nullptr),
+            xnn_status_success);
+
+  for (size_t i = 0; i < output.size(); i++) {
+    ASSERT_EQ(output[i], reference_output[i]) << "at index " << i;
+  }
 }
