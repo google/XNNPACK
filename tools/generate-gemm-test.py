@@ -643,6 +643,19 @@ std::vector<GemmTestParams> CreateTests(
                 .m(mr).n(nr).k(128)
                 .b_zero_point(0)
             , test_func, arch_flags));
+      $if INPUT_DATATYPE == "qp8" and WEIGHTS_DATATYPE == "qc2w":
+        gemm_tests.push_back(GemmTestParams(
+            "k_large_64",
+            tester.clone()
+                .m(mr).n(nr).k(64)
+                .b_zero_point(8)
+            , test_func, arch_flags));
+        gemm_tests.push_back(GemmTestParams(
+            "k_large_128",
+            tester.clone()
+                .m(mr).n(nr).k(128)
+                .b_zero_point(8)
+            , test_func, arch_flags));
       $if INPUT_DATATYPE == "qu8":
         gemm_tests.push_back(GemmTestParams(
             "no_a_zero_point",
