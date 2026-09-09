@@ -40,14 +40,14 @@ void xnn_f16_vapproxgelu_ukernel__wasmrelaxedsimd_rational_6_4_div_u8(
 #endif  // XNN_SIMD_HAS_NATIVE_FMA
 
   // The monomial coefficients of the numerator polynomial (odd).
-  XNN_SIMD_CONST_F16_FROM_FLOAT(valpha_1, 7.9763704538e-01f);
-  XNN_SIMD_CONST_F16_FROM_FLOAT(valpha_3, 1.4811584353e-01f);
-  XNN_SIMD_CONST_F16_FROM_FLOAT(valpha_5, 4.3507730588e-03f);
+  XNN_SIMD_CONST_F16_FROM_FLOAT(valpha_1, 7.9785156250e-01f);
+  XNN_SIMD_CONST_F16_FROM_FLOAT(valpha_3, 1.1065673828e-01f);
+  XNN_SIMD_CONST_F16_FROM_FLOAT(valpha_5, 3.5572052002e-03f);
 
   // The monomial coefficients of the denominator polynomial (even).
-  // XNN_SIMD_CONST_F16_FROM_FLOAT(vbeta_0, 1.0e+00f);
-  XNN_SIMD_CONST_F16_FROM_FLOAT(vbeta_2, 3.5130375624e-01f);
-  XNN_SIMD_CONST_F16_FROM_FLOAT(vbeta_4, 4.0821321309e-02f);
+  // XNN_SIMD_CONST_F16_FROM_FLOAT(vbeta_0, 1.0000000000e+00f);
+  XNN_SIMD_CONST_F16_FROM_FLOAT(vbeta_2, 3.0517578125e-01f);
+  XNN_SIMD_CONST_F16_FROM_FLOAT(vbeta_4, 3.1005859375e-02f);
 
   XNN_SIMD_CONST_F16_FROM_FLOAT(vone, 1.0f);
   XNN_SIMD_CONST_F16_FROM_FLOAT(vhalf, 0.5f);
@@ -125,14 +125,14 @@ void xnn_f16_vapproxgelu_ukernel__wasmrelaxedsimd_rational_6_4_div_u16(
 #endif  // XNN_SIMD_HAS_NATIVE_FMA
 
   // The monomial coefficients of the numerator polynomial (odd).
-  XNN_SIMD_CONST_F16_FROM_FLOAT(valpha_1, 7.9763704538e-01f);
-  XNN_SIMD_CONST_F16_FROM_FLOAT(valpha_3, 1.4811584353e-01f);
-  XNN_SIMD_CONST_F16_FROM_FLOAT(valpha_5, 4.3507730588e-03f);
+  XNN_SIMD_CONST_F16_FROM_FLOAT(valpha_1, 7.9785156250e-01f);
+  XNN_SIMD_CONST_F16_FROM_FLOAT(valpha_3, 1.1065673828e-01f);
+  XNN_SIMD_CONST_F16_FROM_FLOAT(valpha_5, 3.5572052002e-03f);
 
   // The monomial coefficients of the denominator polynomial (even).
-  // XNN_SIMD_CONST_F16_FROM_FLOAT(vbeta_0, 1.0e+00f);
-  XNN_SIMD_CONST_F16_FROM_FLOAT(vbeta_2, 3.5130375624e-01f);
-  XNN_SIMD_CONST_F16_FROM_FLOAT(vbeta_4, 4.0821321309e-02f);
+  // XNN_SIMD_CONST_F16_FROM_FLOAT(vbeta_0, 1.0000000000e+00f);
+  XNN_SIMD_CONST_F16_FROM_FLOAT(vbeta_2, 3.0517578125e-01f);
+  XNN_SIMD_CONST_F16_FROM_FLOAT(vbeta_4, 3.1005859375e-02f);
 
   XNN_SIMD_CONST_F16_FROM_FLOAT(vone, 1.0f);
   XNN_SIMD_CONST_F16_FROM_FLOAT(vhalf, 0.5f);
@@ -254,14 +254,14 @@ void xnn_f16_vapproxgelu_ukernel__wasmrelaxedsimd_rational_6_4_div_u32(
 #endif  // XNN_SIMD_HAS_NATIVE_FMA
 
   // The monomial coefficients of the numerator polynomial (odd).
-  XNN_SIMD_CONST_F16_FROM_FLOAT(valpha_1, 7.9763704538e-01f);
-  XNN_SIMD_CONST_F16_FROM_FLOAT(valpha_3, 1.4811584353e-01f);
-  XNN_SIMD_CONST_F16_FROM_FLOAT(valpha_5, 4.3507730588e-03f);
+  XNN_SIMD_CONST_F16_FROM_FLOAT(valpha_1, 7.9785156250e-01f);
+  XNN_SIMD_CONST_F16_FROM_FLOAT(valpha_3, 1.1065673828e-01f);
+  XNN_SIMD_CONST_F16_FROM_FLOAT(valpha_5, 3.5572052002e-03f);
 
   // The monomial coefficients of the denominator polynomial (even).
-  // XNN_SIMD_CONST_F16_FROM_FLOAT(vbeta_0, 1.0e+00f);
-  XNN_SIMD_CONST_F16_FROM_FLOAT(vbeta_2, 3.5130375624e-01f);
-  XNN_SIMD_CONST_F16_FROM_FLOAT(vbeta_4, 4.0821321309e-02f);
+  // XNN_SIMD_CONST_F16_FROM_FLOAT(vbeta_0, 1.0000000000e+00f);
+  XNN_SIMD_CONST_F16_FROM_FLOAT(vbeta_2, 3.0517578125e-01f);
+  XNN_SIMD_CONST_F16_FROM_FLOAT(vbeta_4, 3.1005859375e-02f);
 
   XNN_SIMD_CONST_F16_FROM_FLOAT(vone, 1.0f);
   XNN_SIMD_CONST_F16_FROM_FLOAT(vhalf, 0.5f);
