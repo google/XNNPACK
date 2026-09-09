@@ -205,7 +205,7 @@ void usage(const char* name) {
   std::cout << R"(
 Options:
   --thread_count=N
-  --type=t1,t2,...     (int8, int8xint4, int8xint2, bf16, fp16, fp32)
+  --type=t1,t2,...     (int8, int8_int4, int8_int2, bf16, fp16, fp32)
   --transpose_b=b1,... (0, 1, false, true)
   --static_b=b1,...    (0, 1, false, true)
   --shape=m,n,k
