@@ -100,6 +100,7 @@ SET(MICROKERNEL_BENCHMARKS
     spmm
     x16-packw
     x32-packw
+    x32-unpool
     x8-lut
     x8-packq
     x8-packw

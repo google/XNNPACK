@@ -49,6 +49,8 @@ static void init_x32_unpool_config(void) {
     }
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     x32_unpool_config.unpool = XNN_INIT_UNPOOL_UKERNEL(xnn_x32_unpool_ukernel__wasmsimd);
+  #elif XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+    x32_unpool_config.unpool = XNN_INIT_UNPOOL_UKERNEL(xnn_x32_unpool_ukernel__rvv);
   #else
     x32_unpool_config.unpool = XNN_INIT_UNPOOL_UKERNEL(xnn_x32_unpool_ukernel__scalar);
   #endif
