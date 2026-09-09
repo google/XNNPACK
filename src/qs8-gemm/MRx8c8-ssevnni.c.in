@@ -1,0 +1,490 @@
+// Copyright 2024 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert REQUANTIZATION == "FP32" or not REQUANTIZATION
+$assert DATATYPE in ["QC8", "QD8_F32", "QC4_F32", "QC2_F32", "QS8_QC4", "QS8_QC2"]
+$assert SSE in [3, 4]
+#include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
+
+$SSE_HEADER = {3: "tmmintrin.h", 4: "smmintrin.h"}[SSE]
+#include <${SSE_HEADER}>
+
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/gemm.h"
+#include "src/xnnpack/intrinsics-polyfill.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/microparams.h"
+$if PREFETCH:
+  #include "src/xnnpack/prefetch.h"
+#include "src/xnnpack/unaligned.h"
+
+$def _MM_SET1_EPI8(VALUE):
+$  return f"_mm_set1_epi8({VALUE})"
+
+$NR = 8
+$DATATYPE_SPEC = {"QC8": "qs8_qc8w", "QS8_QC4": "qs8_qc4w", "QS8_QC2": "qs8_qc2w", "QD8_F32": "qd8_f32_qc8w", "QC4_F32": "qd8_f32_qc4w", "QC2_F32": "qd8_f32_qc2w"}[DATATYPE]
+$REQUANTIZATION_SPEC = "_" + REQUANTIZATION.lower() if REQUANTIZATION else ""
+$PARAMS_STRUCT = REQUANTIZATION.lower() + "_scalar" if REQUANTIZATION else "scalar"
+$PARAMS_TYPE = {"QC8": "union xnn_qs8_qc8w_conv_minmax_params", "QS8_QC4": "union xnn_qs8_qc8w_conv_minmax_params", "QS8_QC2": "union xnn_qs8_qc8w_conv_minmax_params", "QD8_F32": "struct xnn_f32_minmax_params", "QC4_F32": "struct xnn_f32_qc4w_minmax_params", "QC2_F32": "struct xnn_f32_minmax_params"}[DATATYPE]
+$OUT_T = {"QC8": "int8_t", "QS8_QC4": "int8_t", "QS8_QC2": "int8_t", "QD8_F32": "float", "QC4_F32": "float", "QC2_F32": "float"}[DATATYPE]
+$if DATATYPE in ["QC2_F32"]:
+  $_MM_DPBUSD_EPI32 = "_mm_dpbusd_epi32_madd_qd8_qc2w"
+$elif DATATYPE in ["QS8_QC2"]:
+  $_MM_DPBUSD_EPI32 = "_mm_dpbusd_epi32_madd_kzp2"
+$else:
+  $_MM_DPBUSD_EPI32 = "_mm_dpbusd_epi32_madd"
+$ISA = "avx" if AVX else {3: "ssse3", 4: "sse41"}[SSE]
+void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x8c8__${ISA}_madd${"_prfm" if PREFETCH else ""}(
+    size_t mr,
+    size_t nc,
+    size_t kc,
+    const int8_t* restrict a,
+    size_t a_stride,
+    const void* restrict w,
+    ${OUT_T}* restrict c,
+    size_t cm_stride,
+    size_t cn_stride,
+    $if DATATYPE in ["QD8_F32", "QC4_F32", "QC2_F32"]:
+      const ${PARAMS_TYPE}* restrict params,
+      $if DATATYPE in ["QC2_F32"]:
+        const float* row_sum,
+      const struct xnn_qd8_quantization_params* restrict quantization_params) XNN_OOB_READS
+    $else:
+      const ${PARAMS_TYPE}* restrict params) XNN_OOB_READS
+{
+  assert(mr != 0);
+  assert(mr <= ${MR});
+  assert(nc != 0);
+  assert(kc != 0);
+  assert(kc % sizeof(int8_t) == 0);
+  assert(a != NULL);
+  assert(w != NULL);
+  assert(c != NULL);
+
+  $if DATATYPE in ["QC2_F32"]:
+    const size_t original_kc = kc;
+  kc = round_up_po2(kc, 8 * sizeof(int8_t));
+  const int8_t* a0 = a;
+  ${OUT_T}* c0 = c;
+  $for M in range(1, MR):
+    const int8_t* a${M} = (const int8_t*) ((uintptr_t) a${M-1} + a_stride);
+    ${OUT_T}* c${M} = (${OUT_T}*) ((uintptr_t) c${M-1} + cm_stride);
+    $if M % 2 == 0:
+      if XNN_UNPREDICTABLE(mr <= ${M}) {
+        a${M} = a${M-1};
+        c${M} = c${M-1};
+      }
+    $elif M + 1 == MR:
+      if XNN_UNPREDICTABLE(mr != ${M+1}) {
+        a${M} = a${M-1};
+        c${M} = c${M-1};
+      }
+    $else:
+      if XNN_UNPREDICTABLE(mr < ${M+1}) {
+        a${M} = a${M-1};
+        c${M} = c${M-1};
+      }
+
+  $if DATATYPE in ["QD8_F32", "QC4_F32", "QC2_F32"]:
+    $for M in range(MR):
+      const __m128i vinput_zero_point${M} = _mm_set1_epi32((int) quantization_params[${M}].zero_point);
+    const __m128 voutput_min = _mm_set1_ps(params->scalar.min);
+    const __m128 voutput_max = _mm_set1_ps(params->scalar.max);
+  $else:
+    const __m128i vsign_mask = ${_MM_SET1_EPI8("0x80")};
+    XNN_FORCE_REALIZATION(vsign_mask);
+    const __m128 voutput_max_less_zero_point = _mm_set1_ps((int32_t) params->${PARAMS_STRUCT}.output_max - (int32_t) params->${PARAMS_STRUCT}.output_zero_point);
+    const __m128i voutput_zero_point = _mm_set1_epi32(params->${PARAMS_STRUCT}.output_zero_point);
+    const __m128i voutput_min = _mm_set1_epi16(params->${PARAMS_STRUCT}.output_min);
+  $if DATATYPE in ["QS8_QC2", "QC2_F32"]:
+    const __m128i vmask = _mm_set1_epi8(0x03);
+  $elif DATATYPE in ["QC4_F32", "QS8_QC4"]:
+    const __m128i vmask = _mm_set1_epi8(0x0F);
+    XNN_FORCE_REALIZATION(vmask);
+  do {
+    $if DATATYPE in ["QD8_F32", "QC4_F32", "QC2_F32"]:
+      const __m128i vksum0123 = _mm_load_si128((const __m128i*) w);
+      const __m128i vksum4567 = _mm_load_si128((const __m128i*) ((const int32_t*) w + 4));
+      $if SSE == 4:
+        $for M in range(MR):
+          const __m128i vsum${M}x0123 = _mm_mullo_epi32(vksum0123, vinput_zero_point${M});
+          const __m128i vsum${M}x4567 = _mm_mullo_epi32(vksum4567, vinput_zero_point${M});
+      $else:
+        const __m128i vksum13 = _mm_shuffle_epi32(vksum0123, 0xF5);
+        const __m128i vksum57 = _mm_shuffle_epi32(vksum4567, 0xF5);
+        $for M in range(MR):
+          const __m128i vsum${M}x02 = _mm_mul_epu32(vksum0123, vinput_zero_point${M});
+          const __m128i vsum${M}x13 = _mm_mul_epu32(vksum13, vinput_zero_point${M});
+          const __m128i vsum${M}x46 = _mm_mul_epu32(vksum4567, vinput_zero_point${M});
+          const __m128i vsum${M}x57 = _mm_mul_epu32(vksum57, vinput_zero_point${M});
+          const __m128i vsum${M}x01 = _mm_unpacklo_epi32(vsum${M}x02, vsum${M}x13);
+          const __m128i vsum${M}x23 = _mm_unpackhi_epi32(vsum${M}x02, vsum${M}x13);
+          const __m128i vsum${M}x45 = _mm_unpacklo_epi32(vsum${M}x46, vsum${M}x57);
+          const __m128i vsum${M}x67 = _mm_unpackhi_epi32(vsum${M}x46, vsum${M}x57);
+          const __m128i vsum${M}x0123 = _mm_unpacklo_epi64(vsum${M}x01, vsum${M}x23);
+          const __m128i vsum${M}x4567 = _mm_unpacklo_epi64(vsum${M}x45, vsum${M}x67);
+      $for M in range(MR):
+        __m128i vacc${M}x01 = _mm_setzero_si128();
+        __m128i vacc${M}x23 = _mm_setzero_si128();
+        __m128i vacc${M}x45 = _mm_setzero_si128();
+        __m128i vacc${M}x67 = _mm_setzero_si128();
+    $else:
+      const __m128i vksum0123 = _mm_load_si128((const __m128i*) w);
+      const __m128i vksum4567 = _mm_load_si128((const __m128i*) ((const int32_t*) w + 4));
+      __m128i vacc0x01 = _mm_unpacklo_epi32(vksum0123, _mm_setzero_si128());
+      __m128i vacc0x23 = _mm_unpackhi_epi32(vksum0123, _mm_setzero_si128());
+      __m128i vacc0x45 = _mm_unpacklo_epi32(vksum4567, _mm_setzero_si128());
+      __m128i vacc0x67 = _mm_unpackhi_epi32(vksum4567, _mm_setzero_si128());
+      $for M in range(1, MR):
+        __m128i vacc${M}x01 = vacc0x01;
+        __m128i vacc${M}x23 = vacc0x23;
+        __m128i vacc${M}x45 = vacc0x45;
+        __m128i vacc${M}x67 = vacc0x67;
+    $if MR < 3:
+      $for M in range(MR):
+        __m128i vacc1x${M}x01 = _mm_setzero_si128();
+        __m128i vacc1x${M}x23 = _mm_setzero_si128();
+        __m128i vacc1x${M}x45 = _mm_setzero_si128();
+        __m128i vacc1x${M}x67 = _mm_setzero_si128();
+    w = (const int32_t*) w + 8;
+    $if DATATYPE in ["QC2_F32"]:
+      // TODO: move kernel zero point after weights
+      const void* kzp = w;
+      w = (const float*)w + 8;
+
+    size_t k = kc;
+    while (k >= 32 * sizeof(int8_t)) {
+      $for M in range(MR):
+        $if DATATYPE in ["QD8_F32", "QC4_F32", "QC2_F32"]:
+          const __m128i va${M}x0 = _mm_set1_epi64x((int64_t) unaligned_load_u64(a${M}));
+          const __m128i va${M}x1 = _mm_set1_epi64x((int64_t) unaligned_load_u64(a${M} + 8));
+          const __m128i va${M}x2 = _mm_set1_epi64x((int64_t) unaligned_load_u64(a${M} + 16));
+          const __m128i va${M}x3 = _mm_set1_epi64x((int64_t) unaligned_load_u64(a${M} + 24));
+        $else:
+          const __m128i va${M}x0 = _mm_xor_si128(_mm_set1_epi64x((int64_t) unaligned_load_u64(a${M})), vsign_mask);
+          const __m128i va${M}x1 = _mm_xor_si128(_mm_set1_epi64x((int64_t) unaligned_load_u64(a${M} + 8)), vsign_mask);
+          const __m128i va${M}x2 = _mm_xor_si128(_mm_set1_epi64x((int64_t) unaligned_load_u64(a${M} + 16)), vsign_mask);
+          const __m128i va${M}x3 = _mm_xor_si128(_mm_set1_epi64x((int64_t) unaligned_load_u64(a${M} + 24)), vsign_mask);
+        a${M} += 32;
+
+      $if DATATYPE in ["QS8_QC2", "QC2_F32"]:
+        const __m128i vbb01_lo = _mm_load_si128((const __m128i*) w);
+        const __m128i vbb23_lo = _mm_load_si128((const __m128i*) ((const int8_t*) w + 16));
+        const __m128i vbb45_lo = _mm_load_si128((const __m128i*) ((const int8_t*) w + 32));
+        const __m128i vbb67_lo = _mm_load_si128((const __m128i*) ((const int8_t*) w + 48));
+
+        __m128i vb01_p0 = _mm_and_si128(vbb01_lo, vmask);
+        __m128i vb23_p0 = _mm_and_si128(vbb23_lo, vmask);
+        __m128i vb45_p0 = _mm_and_si128(vbb45_lo, vmask);
+        __m128i vb67_p0 = _mm_and_si128(vbb67_lo, vmask);
+
+        __m128i vbs01_p1 = _mm_srli_epi32(vbb01_lo, 2);
+        __m128i vbs23_p1 = _mm_srli_epi32(vbb23_lo, 2);
+        __m128i vbs45_p1 = _mm_srli_epi32(vbb45_lo, 2);
+        __m128i vbs67_p1 = _mm_srli_epi32(vbb67_lo, 2);
+        __m128i vb01_p1 = _mm_and_si128(vbs01_p1, vmask);
+        __m128i vb23_p1 = _mm_and_si128(vbs23_p1, vmask);
+        __m128i vb45_p1 = _mm_and_si128(vbs45_p1, vmask);
+        __m128i vb67_p1 = _mm_and_si128(vbs67_p1, vmask);
+
+        __m128i vbs01_p2 = _mm_srli_epi32(vbb01_lo, 4);
+        __m128i vbs23_p2 = _mm_srli_epi32(vbb23_lo, 4);
+        __m128i vbs45_p2 = _mm_srli_epi32(vbb45_lo, 4);
+        __m128i vbs67_p2 = _mm_srli_epi32(vbb67_lo, 4);
+        __m128i vb01_p2 = _mm_and_si128(vbs01_p2, vmask);
+        __m128i vb23_p2 = _mm_and_si128(vbs23_p2, vmask);
+        __m128i vb45_p2 = _mm_and_si128(vbs45_p2, vmask);
+        __m128i vb67_p2 = _mm_and_si128(vbs67_p2, vmask);
+
+        __m128i vbs01_p3 = _mm_srli_epi32(vbb01_lo, 6);
+        __m128i vbs23_p3 = _mm_srli_epi32(vbb23_lo, 6);
+        __m128i vbs45_p3 = _mm_srli_epi32(vbb45_lo, 6);
+        __m128i vbs67_p3 = _mm_srli_epi32(vbb67_lo, 6);
+        __m128i vb01_p3 = _mm_and_si128(vbs01_p3, vmask);
+        __m128i vb23_p3 = _mm_and_si128(vbs23_p3, vmask);
+        __m128i vb45_p3 = _mm_and_si128(vbs45_p3, vmask);
+        __m128i vb67_p3 = _mm_and_si128(vbs67_p3, vmask);
+
+      $for M in range(MR):
+        vacc${M}x01 = ${_MM_DPBUSD_EPI32}(vacc${M}x01, vb01_p0, va${M}x0);
+        vacc${M}x23 = ${_MM_DPBUSD_EPI32}(vacc${M}x23, vb23_p0, va${M}x0);
+        vacc${M}x45 = ${_MM_DPBUSD_EPI32}(vacc${M}x45, vb45_p0, va${M}x0);
+        vacc${M}x67 = ${_MM_DPBUSD_EPI32}(vacc${M}x67, vb67_p0, va${M}x0);
+        $if MR < 3:
+          vacc1x${M}x01 = ${_MM_DPBUSD_EPI32}(vacc1x${M}x01, vb01_p1, va${M}x1);
+          vacc1x${M}x23 = ${_MM_DPBUSD_EPI32}(vacc1x${M}x23, vb23_p1, va${M}x1);
+          vacc1x${M}x45 = ${_MM_DPBUSD_EPI32}(vacc1x${M}x45, vb45_p1, va${M}x1);
+          vacc1x${M}x67 = ${_MM_DPBUSD_EPI32}(vacc1x${M}x67, vb67_p1, va${M}x1);
+        $else:
+          vacc${M}x01 = ${_MM_DPBUSD_EPI32}(vacc${M}x01, vb01_p1, va${M}x1);
+          vacc${M}x23 = ${_MM_DPBUSD_EPI32}(vacc${M}x23, vb23_p1, va${M}x1);
+          vacc${M}x45 = ${_MM_DPBUSD_EPI32}(vacc${M}x45, vb45_p1, va${M}x1);
+          vacc${M}x67 = ${_MM_DPBUSD_EPI32}(vacc${M}x67, vb67_p1, va${M}x1);
+        vacc${M}x01 = ${_MM_DPBUSD_EPI32}(vacc${M}x01, vb01_p2, va${M}x2);
+        vacc${M}x23 = ${_MM_DPBUSD_EPI32}(vacc${M}x23, vb23_p2, va${M}x2);
+        vacc${M}x45 = ${_MM_DPBUSD_EPI32}(vacc${M}x45, vb45_p2, va${M}x2);
+        vacc${M}x67 = ${_MM_DPBUSD_EPI32}(vacc${M}x67, vb67_p2, va${M}x2);
+        $if MR < 3:
+          vacc1x${M}x01 = ${_MM_DPBUSD_EPI32}(vacc1x${M}x01, vb01_p3, va${M}x3);
+          vacc1x${M}x23 = ${_MM_DPBUSD_EPI32}(vacc1x${M}x23, vb23_p3, va${M}x3);
+          vacc1x${M}x45 = ${_MM_DPBUSD_EPI32}(vacc1x${M}x45, vb45_p3, va${M}x3);
+          vacc1x${M}x67 = ${_MM_DPBUSD_EPI32}(vacc1x${M}x67, vb67_p3, va${M}x3);
+        $else:
+          vacc${M}x01 = ${_MM_DPBUSD_EPI32}(vacc${M}x01, vb01_p3, va${M}x3);
+          vacc${M}x23 = ${_MM_DPBUSD_EPI32}(vacc${M}x23, vb23_p3, va${M}x3);
+          vacc${M}x45 = ${_MM_DPBUSD_EPI32}(vacc${M}x45, vb45_p3, va${M}x3);
+          vacc${M}x67 = ${_MM_DPBUSD_EPI32}(vacc${M}x67, vb67_p3, va${M}x3);
+
+      w = (const int8_t*) w + 64;
+      k -= 32 * sizeof(int8_t);
+    }
+    while (k >= 16 * sizeof(int8_t)) {
+      $for M in range(MR):
+        $if DATATYPE in ["QD8_F32", "QC4_F32", "QC2_F32"]:
+          const __m128i va${M}x01234567 = _mm_set1_epi64x((int64_t) unaligned_load_u64(a${M}));
+          const __m128i va${M}x89ABCDEF = _mm_set1_epi64x((int64_t) unaligned_load_u64(a${M} + 8));
+        $else:
+          const __m128i va${M}x01234567 = _mm_xor_si128(_mm_set1_epi64x((int64_t) unaligned_load_u64(a${M})), vsign_mask);
+          const __m128i va${M}x89ABCDEF = _mm_xor_si128(_mm_set1_epi64x((int64_t) unaligned_load_u64(a${M} + 8)), vsign_mask);
+        a${M} += 16;
+
+      $if DATATYPE in ["QS8_QC2", "QC2_F32"]:
+        const __m128i vbb01_lo = _mm_load_si128((const __m128i*) w);
+        const __m128i vbb23_lo = _mm_load_si128((const __m128i*) ((const int8_t*) w + 16));
+        const __m128i vbb45_lo = _mm_load_si128((const __m128i*) ((const int8_t*) w + 32));
+        const __m128i vbb67_lo = _mm_load_si128((const __m128i*) ((const int8_t*) w + 48));
+
+        __m128i vb01_p0 = _mm_and_si128(vbb01_lo, vmask);
+        __m128i vb23_p0 = _mm_and_si128(vbb23_lo, vmask);
+        __m128i vb45_p0 = _mm_and_si128(vbb45_lo, vmask);
+        __m128i vb67_p0 = _mm_and_si128(vbb67_lo, vmask);
+
+        __m128i vbs01_p1 = _mm_srli_epi32(vbb01_lo, 2);
+        __m128i vbs23_p1 = _mm_srli_epi32(vbb23_lo, 2);
+        __m128i vbs45_p1 = _mm_srli_epi32(vbb45_lo, 2);
+        __m128i vbs67_p1 = _mm_srli_epi32(vbb67_lo, 2);
+        __m128i vb01_p1 = _mm_and_si128(vbs01_p1, vmask);
+        __m128i vb23_p1 = _mm_and_si128(vbs23_p1, vmask);
+        __m128i vb45_p1 = _mm_and_si128(vbs45_p1, vmask);
+        __m128i vb67_p1 = _mm_and_si128(vbs67_p1, vmask);
+
+      $for M in range(MR):
+        vacc${M}x01 = ${_MM_DPBUSD_EPI32}(vacc${M}x01, vb01_p0, va${M}x01234567);
+        vacc${M}x23 = ${_MM_DPBUSD_EPI32}(vacc${M}x23, vb23_p0, va${M}x01234567);
+        vacc${M}x45 = ${_MM_DPBUSD_EPI32}(vacc${M}x45, vb45_p0, va${M}x01234567);
+        vacc${M}x67 = ${_MM_DPBUSD_EPI32}(vacc${M}x67, vb67_p0, va${M}x01234567);
+        $if MR < 3:
+          vacc1x${M}x01 = ${_MM_DPBUSD_EPI32}(vacc1x${M}x01, vb01_p1, va${M}x89ABCDEF);
+          vacc1x${M}x23 = ${_MM_DPBUSD_EPI32}(vacc1x${M}x23, vb23_p1, va${M}x89ABCDEF);
+          vacc1x${M}x45 = ${_MM_DPBUSD_EPI32}(vacc1x${M}x45, vb45_p1, va${M}x89ABCDEF);
+          vacc1x${M}x67 = ${_MM_DPBUSD_EPI32}(vacc1x${M}x67, vb67_p1, va${M}x89ABCDEF);
+        $else:
+          vacc${M}x01 = ${_MM_DPBUSD_EPI32}(vacc${M}x01, vb01_p1, va${M}x89ABCDEF);
+          vacc${M}x23 = ${_MM_DPBUSD_EPI32}(vacc${M}x23, vb23_p1, va${M}x89ABCDEF);
+          vacc${M}x45 = ${_MM_DPBUSD_EPI32}(vacc${M}x45, vb45_p1, va${M}x89ABCDEF);
+          vacc${M}x67 = ${_MM_DPBUSD_EPI32}(vacc${M}x67, vb67_p1, va${M}x89ABCDEF);
+
+      w = (const int8_t*) w + 64;
+      k -= 16 * sizeof(int8_t);
+      $if DATATYPE in ["QS8_QC2", "QC2_F32"]:
+        if (k != 0) {
+          $for M in range(MR):
+            $if DATATYPE in ["QD8_F32", "QC4_F32", "QC2_F32"]:
+              const __m128i va${M}x3 = _mm_set1_epi64x((int64_t) unaligned_load_u64(a${M}));
+            $else:
+              const __m128i va${M}x3 = _mm_xor_si128(_mm_set1_epi64x((int64_t) unaligned_load_u64(a${M})), vsign_mask);
+            a${M} += 8;
+
+          __m128i vbs01_p2 = _mm_srli_epi32(vbb01_lo, 4);
+          __m128i vbs23_p2 = _mm_srli_epi32(vbb23_lo, 4);
+          __m128i vbs45_p2 = _mm_srli_epi32(vbb45_lo, 4);
+          __m128i vbs67_p2 = _mm_srli_epi32(vbb67_lo, 4);
+          __m128i vb01_p2 = _mm_and_si128(vbs01_p2, vmask);
+          __m128i vb23_p2 = _mm_and_si128(vbs23_p2, vmask);
+          __m128i vb45_p2 = _mm_and_si128(vbs45_p2, vmask);
+          __m128i vb67_p2 = _mm_and_si128(vbs67_p2, vmask);
+
+          $for M in range(MR):
+            vacc${M}x01 = ${_MM_DPBUSD_EPI32}(vacc${M}x01, vb01_p2, va${M}x3);
+            vacc${M}x23 = ${_MM_DPBUSD_EPI32}(vacc${M}x23, vb23_p2, va${M}x3);
+            vacc${M}x45 = ${_MM_DPBUSD_EPI32}(vacc${M}x45, vb45_p2, va${M}x3);
+            vacc${M}x67 = ${_MM_DPBUSD_EPI32}(vacc${M}x67, vb67_p2, va${M}x3);
+          k -= 8 * sizeof(int8_t);
+        }
+    }
+
+    if (k != 0) {
+      $for M in range(MR):
+        $if DATATYPE in ["QD8_F32", "QC4_F32", "QC2_F32"]:
+          const __m128i va${M}x01234567 = _mm_set1_epi64x((int64_t) unaligned_load_u64(a${M}));
+        $else:
+          const __m128i va${M}x01234567 = _mm_xor_si128(_mm_set1_epi64x((int64_t) unaligned_load_u64(a${M})), vsign_mask);
+        a${M} += 8;
+
+      $if DATATYPE in ["QS8_QC2", "QC2_F32"]:
+        const __m128i vbb01_lo = _mm_load_si128((const __m128i*) w);
+        const __m128i vbb23_lo = _mm_load_si128((const __m128i*) ((const int8_t*) w + 16));
+        const __m128i vbb45_lo = _mm_load_si128((const __m128i*) ((const int8_t*) w + 32));
+        const __m128i vbb67_lo = _mm_load_si128((const __m128i*) ((const int8_t*) w + 48));
+
+        __m128i vb01_p0 = _mm_and_si128(vbb01_lo, vmask);
+        __m128i vb23_p0 = _mm_and_si128(vbb23_lo, vmask);
+        __m128i vb45_p0 = _mm_and_si128(vbb45_lo, vmask);
+        __m128i vb67_p0 = _mm_and_si128(vbb67_lo, vmask);
+
+      $for M in range(MR):
+        vacc${M}x01 = ${_MM_DPBUSD_EPI32}(vacc${M}x01, vb01_p0, va${M}x01234567);
+        vacc${M}x23 = ${_MM_DPBUSD_EPI32}(vacc${M}x23, vb23_p0, va${M}x01234567);
+        vacc${M}x45 = ${_MM_DPBUSD_EPI32}(vacc${M}x45, vb45_p0, va${M}x01234567);
+        vacc${M}x67 = ${_MM_DPBUSD_EPI32}(vacc${M}x67, vb67_p0, va${M}x01234567);
+
+      w = (const int8_t*) w + 64;
+      k -= 8 * sizeof(int8_t);
+    }
+    $if DATATYPE in ["QC2_F32"]:
+      assert(k == 0);
+    $if MR < 3:
+      $for M in range(MR):
+        vacc${M}x01 = _mm_add_epi32(vacc${M}x01, vacc1x${M}x01);
+        vacc${M}x23 = _mm_add_epi32(vacc${M}x23, vacc1x${M}x23);
+        vacc${M}x45 = _mm_add_epi32(vacc${M}x45, vacc1x${M}x45);
+        vacc${M}x67 = _mm_add_epi32(vacc${M}x67, vacc1x${M}x67);
+
+    // Add adjacent pairs
+    $for M in range(MR):
+      __m128i vacc${M}x0123 = _mm_hadd_epi32(vacc${M}x01, vacc${M}x23);
+      __m128i vacc${M}x4567 = _mm_hadd_epi32(vacc${M}x45, vacc${M}x67);
+      $if DATATYPE in ["QC2_F32"]:
+        vacc${M}x0123 = _mm_add_epi32(vacc${M}x0123, vsum${M}x0123);
+        vacc${M}x4567 = _mm_add_epi32(vacc${M}x4567, vsum${M}x4567);
+
+    $for M in range(MR):
+      __m128 vout${M}x0123 = _mm_cvtepi32_ps(vacc${M}x0123);
+      __m128 vout${M}x4567 = _mm_cvtepi32_ps(vacc${M}x4567);
+
+    $if DATATYPE in ["QD8_F32", "QC4_F32", "QC2_F32"]:
+      $if DATATYPE in ["QC2_F32"]:
+        const __m128 rh_zero_points_0123 = _mm_load_ps((const float*) kzp);
+        const __m128 rh_zero_points_4567 = _mm_load_ps((const float*) kzp + 4);
+        kzp = (const float*)kzp + 8;
+        const __m128 biased_rh_zero_points_0123 = _mm_add_ps(rh_zero_points_0123, _mm_set1_ps(2.0f));
+        const __m128 biased_rh_zero_points_4567 = _mm_add_ps(rh_zero_points_4567, _mm_set1_ps(2.0f));
+        // Subtract out the scaled left-hand row sums.
+        $for M in range(MR):
+          const __m128 lh_row_sum_${M} = _mm_set1_ps(row_sum[${M}]);
+          vout${M}x0123 = _mm_sub_ps(vout${M}x0123, _mm_mul_ps(biased_rh_zero_points_0123, lh_row_sum_${M}));
+          vout${M}x4567 = _mm_sub_ps(vout${M}x4567, _mm_mul_ps(biased_rh_zero_points_4567, lh_row_sum_${M}));
+        // Add the product of left/right-hand zero points and `kc`.
+        $for M in range(MR):
+          const __m128 vscaled_lh_zero_point_${M} = _mm_set1_ps((float)original_kc * quantization_params[${M}].zero_point);
+        $for M in range(MR):
+          vout${M}x0123 = _mm_add_ps(_mm_mul_ps(rh_zero_points_0123, vscaled_lh_zero_point_${M}), vout${M}x0123);
+          vout${M}x4567 = _mm_add_ps(_mm_mul_ps(rh_zero_points_4567, vscaled_lh_zero_point_${M}), vout${M}x4567);
+      $for M in range(MR):
+        vout${M}x0123 = _mm_mul_ps(vout${M}x0123, _mm_set1_ps(quantization_params[${M}].inv_scale));
+        vout${M}x4567 = _mm_mul_ps(vout${M}x4567, _mm_set1_ps(quantization_params[${M}].inv_scale));
+
+      const __m128 vfilter_output_scale0123 = _mm_load_ps((const float*) w);
+      const __m128 vfilter_output_scale4567 = _mm_load_ps((const float*) w + 4);
+      const __m128 vbias0123 = _mm_load_ps((const float*) w + 8);
+      const __m128 vbias4567 = _mm_load_ps((const float*) w + 12);
+      w = (const float*) w + 16;
+
+      $for M in range(MR):
+        vout${M}x0123 = _mm_add_ps(_mm_mul_ps(vout${M}x0123, vfilter_output_scale0123), vbias0123);
+        vout${M}x4567 = _mm_add_ps(_mm_mul_ps(vout${M}x4567, vfilter_output_scale4567), vbias4567);
+
+      $for M in range(MR):
+        vout${M}x0123 = _mm_max_ps(vout${M}x0123, voutput_min);
+        vout${M}x4567 = _mm_max_ps(vout${M}x4567, voutput_min);
+
+      $for M in range(MR):
+        vout${M}x0123 = _mm_min_ps(vout${M}x0123, voutput_max);
+        vout${M}x4567 = _mm_min_ps(vout${M}x4567, voutput_max);
+
+      if XNN_LIKELY(nc >= 8) {
+        $for M in range(MR):
+          _mm_storeu_ps(c${M}, vout${M}x0123);
+          _mm_storeu_ps(c${M} + 4, vout${M}x4567);
+          a${M} = (const int8_t*) ((uintptr_t) a${M} - kc);
+          c${M} = (float*) ((uintptr_t) c${M} + cn_stride);
+        nc -= 8;
+      } else {
+        if (nc & 4) {
+          $for M in range(MR):
+            _mm_storeu_ps(c${M}, vout${M}x0123);
+            c${M} += 4;
+            vout${M}x0123 = vout${M}x4567;
+        }
+        if (nc & 2) {
+          $for M in range(MR):
+            _mm_storel_pi((__m64*) c${M}, vout${M}x0123);
+            c${M} += 2;
+            vout${M}x0123 = _mm_movehl_ps(vout${M}x0123, vout${M}x0123);
+        }
+        if (nc & 1) {
+          $for M in range(MR):
+            _mm_store_ss(c${M}, vout${M}x0123);
+        }
+        nc = 0;
+      }
+    $else:
+      const __m128 vscale0123 = _mm_load_ps((const float*) w);
+      const __m128 vscale4567 = _mm_load_ps((const float*) w + 4);
+      w = (const float*) w + 8;
+      $for M in range(MR):
+        vout${M}x0123 = _mm_mul_ps(vout${M}x0123, vscale0123);
+        vout${M}x4567 = _mm_mul_ps(vout${M}x4567, vscale4567);
+
+      $for M in range(MR):
+        vout${M}x0123 = _mm_min_ps(vout${M}x0123, voutput_max_less_zero_point);
+        vout${M}x4567 = _mm_min_ps(vout${M}x4567, voutput_max_less_zero_point);
+
+      $for M in range(MR):
+        vacc${M}x0123 = _mm_cvtps_epi32(vout${M}x0123);
+        vacc${M}x4567 = _mm_cvtps_epi32(vout${M}x4567);
+
+      $for M in range(MR):
+        vacc${M}x0123 = _mm_add_epi32(vacc${M}x0123, voutput_zero_point);
+        vacc${M}x4567 = _mm_add_epi32(vacc${M}x4567, voutput_zero_point);
+
+      $for M in range(MR):
+        vacc${M}x0123 = _mm_packs_epi32(vacc${M}x0123, vacc${M}x4567);
+      $for M in range(MR):
+        vacc${M}x0123 = _mm_max_epi16(vacc${M}x0123, voutput_min);
+      $for M in range(MR):
+        __m128i voutb${M}x0123 = _mm_packs_epi16(vacc${M}x0123, vacc${M}x0123);
+
+      if (nc >= 8) {
+        $for M in range(MR):
+          _mm_storel_epi64((__m128i*) c${M}, voutb${M}x0123);
+          c${M} = (${OUT_T}*) ((uintptr_t) c${M} + cn_stride);
+          a${M} = (const int8_t*) ((uintptr_t) a${M} - kc);
+
+        nc -= 8;
+      } else {
+        if (nc & 4) {
+          $for M in range(MR):
+            _mm_storeu_si32(c${M}, voutb${M}x0123);
+            c${M} += 4;
+            voutb${M}x0123 = _mm_srli_si128(voutb${M}x0123, 4);
+        }
+        if (nc & 2) {
+          $for M in range(MR):
+            unaligned_store_u16(c${M}, (uint16_t) _mm_extract_epi16(voutb${M}x0123, 0));
+            c${M} += 2;
+          $for M in range(MR):
+            voutb${M}x0123 = _mm_srli_epi32(voutb${M}x0123, 16);
+        }
+        if (nc & 1) {
+          $for M in range(MR):
+            *c${M} = (${OUT_T}) _mm_extract_epi16(voutb${M}x0123, 0);
+        }
+        nc = 0;
+      }
+  } while (nc != 0);
+}
