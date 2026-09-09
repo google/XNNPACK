@@ -47,5 +47,6 @@ cc_library(
         "x86_vec512.h",
         "wasm_simd128.h",
     ],
+    visibility = ["//visibility:public"],
     deps = ["//ynnpack/base"],
 )
