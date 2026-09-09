@@ -39,10 +39,7 @@ $for BATCH_TILE in BATCH_TILES:
     XNN_SIMD_CONST_F16_FROM_FLOAT(vpi, 3.140625f);  // M_PI
     XNN_SIMD_CONST_F16_FROM_FLOAT(v2pi_inv, 0.15917969f); // 0.5 / M_PI
     $if FUN == "COS":
-      // The following two values sum to Pi/2 with ~22 bits of accuracy. We use
-      // them to accurately subtract inputs from Pi/2.
-      XNN_SIMD_CONST_F16_FROM_FLOAT(vpi_half_hi, 1.5703125f);     // M_PI / 2 (first 11 bits of mantissa)
-      XNN_SIMD_CONST_F16_FROM_FLOAT(vpi_half_lo, 4.837513e-4f);   // M_PI / 2 (remaining bits)
+      XNN_SIMD_CONST_F16_FROM_FLOAT(vpi_half, 1.5703125f);  // M_PI / 2
 
     // The following two values sum to 2*Pi with ~33 bits of accuracy. We use
     // them to accurately subtract integer multiples of 2*Pi from large inputs.
@@ -79,7 +76,7 @@ $for BATCH_TILE in BATCH_TILES:
           vx_${N} = xnn_fnmadd_f16(vx_div_2pi_${N}, v2pi_lo, vx_${N});
         $if FUN == "COS":
           $for N in range(SIMD_TILE):
-            vx_${N} = xnn_add_f16(xnn_sub_f16(vpi_half_hi, vx_${N}), vpi_half_lo);
+            vx_${N} = xnn_sub_f16(vpi_half, vx_${N});
         $for N in range(SIMD_TILE):
           vx_${N} = xnn_min_f16(vx_${N}, xnn_sub_f16(vpi, vx_${N}));
         $for N in range(SIMD_TILE):
@@ -129,7 +126,7 @@ $for BATCH_TILE in BATCH_TILES:
       vx = xnn_fnmadd_f16(vx_div_2pi, v2pi_hi, vx);
       vx = xnn_fnmadd_f16(vx_div_2pi, v2pi_lo, vx);
       $if FUN == "COS":
-        vx = xnn_add_f16(xnn_sub_f16(vpi_half_hi, vx), vpi_half_lo);
+        vx = xnn_sub_f16(vpi_half, vx);
       vx = xnn_min_f16(vx, xnn_sub_f16(vpi, vx));
       vx = xnn_max_f16(vx, xnn_sub_f16(xnn_neg_f16(vpi), vx));
       vx = xnn_min_f16(vx, xnn_sub_f16(vpi, vx));
@@ -167,7 +164,7 @@ $for BATCH_TILE in BATCH_TILES:
         vx = xnn_fnmadd_f16(vx_div_2pi, v2pi_hi, vx);
         vx = xnn_fnmadd_f16(vx_div_2pi, v2pi_lo, vx);
         $if FUN == "COS":
-          vx = xnn_add_f16(xnn_sub_f16(vpi_half_hi, vx), vpi_half_lo);
+          vx = xnn_sub_f16(vpi_half, vx);
         vx = xnn_min_f16(vx, xnn_sub_f16(vpi, vx));
         vx = xnn_max_f16(vx, xnn_sub_f16(xnn_neg_f16(vpi), vx));
         vx = xnn_min_f16(vx, xnn_sub_f16(vpi, vx));
