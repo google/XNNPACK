@@ -2721,7 +2721,7 @@ void xnn_pack_kai_qs2_weights_and_biases_sme2(
 // TODO(b/558830577): Disable this workaround (set KLEIDI_PACKBUG to 0) when
 // fixed.
 #ifndef KLEIDI_PACKBUG
-#define KLEIDI_PACKBUG 1
+#define KLEIDI_PACKBUG 0
 #endif
 
 #if XNN_ARCH_ARM64 && KLEIDI_PACKBUG
