@@ -335,7 +335,14 @@ static void init_f16_gemm_config(void) {
         f16_gemm_config.nr = 32;
       } else
     #endif
-    if (hardware_config->arch_flags & xnn_arch_x86_avx2) {
+    if ((hardware_config->arch_flags & xnn_arch_x86_avx2)
+    #if XNN_ENABLE_AVX512SKX
+      && !(hardware_config->arch_flags & xnn_arch_x86_avx512skx)
+    #endif
+    #if XNN_ENABLE_AVX512FP16
+      && !(hardware_config->arch_flags & xnn_arch_x86_avx512fp16)
+    #endif
+    ) {
       f16_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_f16_f32acc_gemm_minmax_ukernel_1x16__avx2_broadcast);
       f16_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(4)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_f16_f32acc_gemm_minmax_ukernel_4x16__avx2_broadcast);
       f16_gemm_config.minmax.igemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_IGEMM_UKERNEL(xnn_f16_f32acc_igemm_minmax_ukernel_1x16__avx2_broadcast);
