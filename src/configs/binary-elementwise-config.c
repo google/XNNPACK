@@ -13,6 +13,7 @@
 #include "src/xnnpack/init-once.h"
 #include "src/xnnpack/log.h"
 #include "src/xnnpack/microfnptr.h"
+#include "src/xnnpack/microkernel-name-registry.h"
 #include "src/xnnpack/microparams-init.h"
 #include "src/xnnpack/vbinary.h"
 
@@ -68,9 +69,10 @@ XNN_INIT_ONCE_GUARD(qu8_vmul);
 XNN_INIT_ONCE_GUARD(qu8_vprelu);
 
 // Macros to log the microkernel names if and when they are registered.
-#define XNN_INIT_BINARY_UKERNEL(ukernel) \
-  (xnn_vbinary_ukernel_fn) ukernel;      \
-  xnn_log_info("Using binary microkernel '%s'.", #ukernel);
+#define XNN_INIT_BINARY_UKERNEL(ukernel)                    \
+  (xnn_vbinary_ukernel_fn) ukernel;                         \
+  xnn_log_info("Using binary microkernel '%s'.", #ukernel); \
+  XNN_REGISTER_UKERNEL_NAME(ukernel);
 
 static void init_f16_vadd_config(void) {
   #if XNN_ENABLE_ARM_FP16_SCALAR && XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM

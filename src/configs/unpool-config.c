@@ -13,6 +13,7 @@
 #include "src/xnnpack/init-once.h"
 #include "src/xnnpack/log.h"
 #include "src/xnnpack/microfnptr.h"
+#include "src/xnnpack/microkernel-name-registry.h"
 #include "src/xnnpack/unpool.h"
 
 static struct xnn_unpool_config x32_unpool_config = {0};
@@ -20,9 +21,10 @@ static struct xnn_unpool_config x32_unpool_config = {0};
 XNN_INIT_ONCE_GUARD(x32_unpool);
 
 // Macros to log the microkernel names if and when they are registered.
-#define XNN_INIT_UNPOOL_UKERNEL(ukernel) \
-  (xnn_unpool_ukernel_fn) ukernel;       \
-  xnn_log_info("Using unpool microkernel '%s'.", #ukernel);
+#define XNN_INIT_UNPOOL_UKERNEL(ukernel)                    \
+  (xnn_unpool_ukernel_fn) ukernel;                          \
+  xnn_log_info("Using unpool microkernel '%s'.", #ukernel); \
+  XNN_REGISTER_UKERNEL_NAME(ukernel);
 
 static void init_x32_unpool_config(void) {
   #if XNN_ARCH_ARM

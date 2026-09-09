@@ -15,6 +15,7 @@
 #include "src/xnnpack/init-once.h"
 #include "src/xnnpack/log.h"
 #include "src/xnnpack/microfnptr.h"
+#include "src/xnnpack/microkernel-name-registry.h"
 
 static struct xnn_ibilinear_config f16_ibilinear_config = {0};
 static struct xnn_ibilinear_config f32_ibilinear_config = {0};
@@ -27,9 +28,10 @@ XNN_INIT_ONCE_GUARD(s8_ibilinear);
 XNN_INIT_ONCE_GUARD(u8_ibilinear);
 
 // Macros to log the microkernel names if and when they are registered.
-#define XNN_INIT_IBILINEAR_UKERNEL(ukernel) \
-  (xnn_ibilinear_ukernel_fn) ukernel;       \
-  xnn_log_info("Using ibilinear microkernel '%s'.", #ukernel);
+#define XNN_INIT_IBILINEAR_UKERNEL(ukernel)                    \
+  (xnn_ibilinear_ukernel_fn) ukernel;                          \
+  xnn_log_info("Using ibilinear microkernel '%s'.", #ukernel); \
+  XNN_REGISTER_UKERNEL_NAME(ukernel);
 
 static void init_f16_ibilinear_config(void) {
   #if XNN_ENABLE_ARM_FP16_SCALAR && XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM
