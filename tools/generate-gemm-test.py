@@ -611,6 +611,24 @@ std::vector<GemmTestParams> CreateTests(
                 .m(mr).n(nr).k(k_block)
                 .b_zero_point(0)
             , test_func, arch_flags));
+        gemm_tests.push_back(GemmTestParams(
+            "k_large_32",
+            tester.clone()
+                .m(mr).n(nr).k(32)
+                .b_zero_point(8)
+            , test_func, arch_flags));
+        gemm_tests.push_back(GemmTestParams(
+            "k_large_128",
+            tester.clone()
+                .m(mr).n(nr).k(128)
+                .b_zero_point(8)
+            , test_func, arch_flags));
+        gemm_tests.push_back(GemmTestParams(
+            "k_large_signed",
+            tester.clone()
+                .m(mr).n(nr).k(128)
+                .b_zero_point(0)
+            , test_func, arch_flags));
       $if INPUT_DATATYPE == "qu8":
         gemm_tests.push_back(GemmTestParams(
             "no_a_zero_point",

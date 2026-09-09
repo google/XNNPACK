@@ -18,7 +18,6 @@
 #include "kai/ukernels/matmul/pack/kai_lhs_pack_x8p2vlx4_x8_sme.h"
 #endif  // XNN_ENABLE_KLEIDIAI
 
-
 // This function just wraps KleidiAI's `kai_run_lhs_pack_x8p2vlx4_x8_sme`, but
 // with a name that is recognized by our tooling.
 void xnn_x8_pack_lh_ukernel__neonsme2(size_t m, size_t k, size_t mr_packed,
@@ -28,7 +27,10 @@ void xnn_x8_pack_lh_ukernel__neonsme2(size_t m, size_t k, size_t mr_packed,
                                       void* XNN_RESTRICT lhs_packed) {
 #if XNN_ENABLE_KLEIDIAI
   if (mr_packed == 1) {
-    memcpy(lhs_packed, lhs, sizeof(int8_t) * k);
+    for (size_t i = 0; i < m; ++i) {
+      memcpy((int8_t*)lhs_packed + i * k, (const int8_t*)lhs + i * lhs_stride,
+             sizeof(int8_t) * k);
+    }
   } else {
     kai_run_lhs_pack_x8p2vlx4_x8_sme(m, k, mr_packed, kr, sr, m_idx_start, lhs,
                                      lhs_stride, lhs_packed);
