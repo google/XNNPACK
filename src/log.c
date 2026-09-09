@@ -146,8 +146,56 @@ cleanup:
 static const char xnnpack_module[] = "XNNPACK";
 #endif  // XNN_LOG_TO_STDIO && XNN_LOG_LEVEL > XNN_LOG_NONE
 
+static xnn_log_callback_fn g_log_callback = NULL;
+static void* g_log_callback_user_data = NULL;
+
+void xnn_set_log_callback(xnn_log_callback_fn callback, void* user_data) {
+  g_log_callback = callback;
+  g_log_callback_user_data = user_data;
+}
+
+xnn_log_callback_fn xnn_get_log_callback(void) {
+  return g_log_callback;
+}
+
+void* xnn_get_log_callback_user_data(void) {
+  return g_log_callback_user_data;
+}
+
+static bool xnn_format_and_dispatch_callback(enum xnn_log_level level, const char* format, va_list args) {
+  if (g_log_callback == NULL) {
+    return false;
+  }
+  char stack_buffer[XNN_LOG_STACK_BUFFER_SIZE];
+  char* heap_buffer = NULL;
+  char* out_buffer = &stack_buffer[0];
+  va_list args_copy;
+  va_copy(args_copy, args);
+  const int format_chars =
+      vsnprintf(stack_buffer, sizeof(stack_buffer), format, args);
+  if (format_chars >= 0) {
+    const size_t format_length = (size_t)format_chars;
+    if (format_length >= sizeof(stack_buffer)) {
+      heap_buffer = (char*) malloc((format_length + 1) * sizeof(char));
+      if (heap_buffer != NULL) {
+        vsnprintf(heap_buffer, format_length + 1, format, args_copy);
+        out_buffer = heap_buffer;
+      }
+    }
+    if (out_buffer != NULL) {
+      g_log_callback(level, NULL, 0, out_buffer, g_log_callback_user_data);
+    }
+    free(heap_buffer);
+  }
+  va_end(args_copy);
+  return true;
+}
+
 #if XNN_LOG_LEVEL >= XNN_LOG_DEBUG
 void xnn_vlog_debug(const char* format, va_list args) {
+  if (xnn_format_and_dispatch_callback(xnn_log_level_debug, format, args)) {
+    return;
+  }
 #if XNN_LOG_TO_STDIO
   static const char debug_prefix[] = "Debug (XNNPACK): ";
   xnn_vlog(XNN_LOG_STDOUT, debug_prefix, 17, format, args);
@@ -163,6 +211,9 @@ void xnn_vlog_debug(const char* format, va_list args) {
 
 #if XNN_LOG_LEVEL >= XNN_LOG_INFO
 void xnn_vlog_info(const char* format, va_list args) {
+  if (xnn_format_and_dispatch_callback(xnn_log_level_info, format, args)) {
+    return;
+  }
 #if XNN_LOG_TO_STDIO
   static const char info_prefix[] = "Note (XNNPACK): ";
   xnn_vlog(XNN_LOG_STDERR, info_prefix, 16, format, args);
@@ -178,6 +229,9 @@ void xnn_vlog_info(const char* format, va_list args) {
 
 #if XNN_LOG_LEVEL >= XNN_LOG_WARNING
 void xnn_vlog_warning(const char* format, va_list args) {
+  if (xnn_format_and_dispatch_callback(xnn_log_level_warning, format, args)) {
+    return;
+  }
 #if XNN_LOG_TO_STDIO
   static const char warning_prefix[] = "Warning in XNNPACK: ";
   xnn_vlog(XNN_LOG_STDERR, warning_prefix, 20, format, args);
@@ -193,6 +247,9 @@ void xnn_vlog_warning(const char* format, va_list args) {
 
 #if XNN_LOG_LEVEL >= XNN_LOG_ERROR
 void xnn_vlog_error(const char* format, va_list args) {
+  if (xnn_format_and_dispatch_callback(xnn_log_level_error, format, args)) {
+    return;
+  }
 #if XNN_LOG_TO_STDIO
   static const char error_prefix[] = "Error in XNNPACK: ";
   xnn_vlog(XNN_LOG_STDERR, error_prefix, 18, format, args);
@@ -208,6 +265,9 @@ void xnn_vlog_error(const char* format, va_list args) {
 
 #if XNN_LOG_LEVEL >= XNN_LOG_FATAL
 void xnn_vlog_fatal(const char* format, va_list args) {
+  if (xnn_format_and_dispatch_callback(xnn_log_level_fatal, format, args)) {
+    return;
+  }
 #if XNN_LOG_TO_STDIO
   static const char fatal_prefix[] = "Fatal error in XNNPACK: ";
   xnn_vlog(XNN_LOG_STDERR, fatal_prefix, 24, format, args);
