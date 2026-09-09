@@ -1646,6 +1646,7 @@ if (!build_with_chromium) {
     "bench/x8-packq.cc",
     "bench/x8-packw.cc",
     "bench/xN-transposec.cc",
+    "bench/xx-fill.cc",
     "bench/xx-pad.cc",
     "bench/xx-transposev.cc",
   ]
