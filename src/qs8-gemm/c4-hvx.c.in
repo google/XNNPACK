@@ -154,8 +154,11 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c
         $if DATATYPE in ["QC4_F16", "QC4_F32", "QS8_QC4"]:
           $for N in range(0, NR, 32):
             const HVX_Vector vb${N//32}x01234567 = *((HVX_Vector *) w); w = (const int8_t*) w + 128;
+          $for N in range(0, NR, 32):
             const HVX_Vector vbs${N//32}x0123 = Q6_Vw_vasl_VwR(vb${N//32}x01234567, 4);
+          $for N in range(0, NR, 32):
             const HVX_Vector vb${N//32}x4567 = Q6_V_vand_VV(vb${N//32}x01234567, vmask);
+          $for N in range(0, NR, 32):
             const HVX_Vector vb${N//32}x0123 = Q6_V_vand_VV(vbs${N//32}x0123, vmask);
         $else:
           $for N in range(0, NR, 32):
@@ -179,8 +182,11 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c
         $if DATATYPE in ["QC4_F16", "QC4_F32", "QS8_QC4"]:
           $for N in range(0, NR, 32):
             const HVX_Vector vb${N//32}x01234567 = *((HVX_Vector *) w); w = (const int8_t*) w + 128;
+          $for N in range(0, NR, 32):
             const HVX_Vector vbs${N//32}x0123 = Q6_Vw_vasl_VwR(vb${N//32}x01234567, 4);
+          $for N in range(0, NR, 32):
             const HVX_Vector vb${N//32}x4567 = Q6_V_vand_VV(vb${N//32}x01234567, vmask);
+          $for N in range(0, NR, 32):
             const HVX_Vector vb${N//32}x0123 = Q6_V_vand_VV(vbs${N//32}x0123, vmask);
         $else:
           $for N in range(0, NR, 32):
@@ -201,10 +207,12 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c
         const HVX_Vector va${M}x0123 = Q6_V_vsplat_R(unaligned_load_s32(a${M})); a${M} += 4;
 
       $if DATATYPE in ["QC4_F16", "QC4_F32", "QS8_QC4"]:
-        $for N in range(0, NR, 32):
-          const HVX_Vector vb${N//32}x01234567 = *((HVX_Vector *) w); w = (const int8_t*) w + 128;
-          const HVX_Vector vbs${N//32}x0123 = Q6_Vw_vasl_VwR(vb${N//32}x01234567, 4);
-          const HVX_Vector vb${N//32}x0123 = Q6_V_vand_VV(vbs${N//32}x0123, vmask);
+          $for N in range(0, NR, 32):
+            const HVX_Vector vb${N//32}x01234567 = *((HVX_Vector *) w); w = (const int8_t*) w + 128;
+          $for N in range(0, NR, 32):
+            const HVX_Vector vbs${N//32}x0123 = Q6_Vw_vasl_VwR(vb${N//32}x01234567, 4);
+          $for N in range(0, NR, 32):
+            const HVX_Vector vb${N//32}x0123 = Q6_V_vand_VV(vbs${N//32}x0123, vmask);
       $else:
         $for N in range(0, NR, 32):
           const HVX_Vector vb${N//32}x0123 = *((HVX_Vector *) w); w = (const int8_t*) w + 128;
