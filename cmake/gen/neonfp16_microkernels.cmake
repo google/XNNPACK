@@ -10,6 +10,13 @@
 
 
 SET(PROD_NEONFP16_MICROKERNEL_SRCS
+  src/f16-dwconv/gen/f16-f32acc-dwconv-3p8c-minmax-neonfp16.c
+  src/f16-dwconv/gen/f16-f32acc-dwconv-3p16c-minmax-neonfp16.c
+  src/f16-dwconv/gen/f16-f32acc-dwconv-4p8c-minmax-neonfp16.c
+  src/f16-dwconv/gen/f16-f32acc-dwconv-4p16c-minmax-neonfp16.c
+  src/f16-dwconv/gen/f16-f32acc-dwconv-9p8c-minmax-neonfp16.c
+  src/f16-dwconv/gen/f16-f32acc-dwconv-9p16c-minmax-neonfp16.c
+  src/f16-dwconv/gen/f16-f32acc-dwconv-25p8c-minmax-neonfp16-acc2.c
   src/f16-f32-vcvt/gen/f16-f32-vcvt-neonfp16-u16.c
   src/f16-vapproxgelu/gen/f16-f32acc-vapproxgelu-neonfp16-rational-6-4-div.c
   src/f16-vcos/gen/f16-f32acc-vcos-neonfp16-poly-3.c
@@ -20,6 +27,15 @@ SET(PROD_NEONFP16_MICROKERNEL_SRCS
   src/f32-f16-vcvt/gen/f32-f16-vcvt-neonfp16-u16.c)
 
 SET(NON_PROD_NEONFP16_MICROKERNEL_SRCS
+  src/f16-dwconv/gen/f16-f32acc-dwconv-3p8c-minmax-neonfp16-acc2.c
+  src/f16-dwconv/gen/f16-f32acc-dwconv-3p16c-minmax-neonfp16-acc2.c
+  src/f16-dwconv/gen/f16-f32acc-dwconv-4p8c-minmax-neonfp16-acc2.c
+  src/f16-dwconv/gen/f16-f32acc-dwconv-4p16c-minmax-neonfp16-acc2.c
+  src/f16-dwconv/gen/f16-f32acc-dwconv-9p8c-minmax-neonfp16-acc2.c
+  src/f16-dwconv/gen/f16-f32acc-dwconv-9p16c-minmax-neonfp16-acc2.c
+  src/f16-dwconv/gen/f16-f32acc-dwconv-25p8c-minmax-neonfp16.c
+  src/f16-dwconv/gen/f16-f32acc-dwconv-25p16c-minmax-neonfp16-acc2.c
+  src/f16-dwconv/gen/f16-f32acc-dwconv-25p16c-minmax-neonfp16.c
   src/f16-f32-vcvt/gen/f16-f32-vcvt-neonfp16-u8.c
   src/f16-vapproxgelu/gen/f16-f32acc-vapproxgelu-neonfp16-rational-6-4-nr.c
   src/f16-vlog/gen/f16-f32acc-vlog-neonfp16-rational-1-3-nr.c
