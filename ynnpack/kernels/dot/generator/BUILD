@@ -90,6 +90,7 @@ py_library(
     "x86_fp32_k2",
     "x86_fp32_k4",
     "x86_fp32_k8",
+    "x86_fp32_k16",
     "x86_fp64",
     "x86_int8_int8_int32",
     "x86_int8_int8_int32_k1",
