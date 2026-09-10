@@ -291,9 +291,11 @@ float dot_arch_cost_factor(uint64_t arch, size_t m, size_t n, size_t block_m,
   if (arch & (arch_flag::sme | arch_flag::sme2)) {
     // At m == 1, NEON is faster than SME due to SME startup overhead and
     // vector-matrix multiplication not benefiting from outer-product
-    // accumulation.
+    // accumulation. A penalty factor >= 3.0 (here 10.0) ensures NEON is
+    // selected even for sub-byte weights (int4, int2) where NEON's narrow
+    // tile_n inflates its estimated cost relative to SME.
     if (m == 1) {
-      return 2.0f;
+      return 10.0f;
     }
   }
 #endif
