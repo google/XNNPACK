@@ -330,6 +330,40 @@ TEST(FULLY_CONNECTED_NC_QS8_QC2W, weights_cache_unit_batch) {
       .TestQS8QC2W();
 }
 
+TEST(FULLY_CONNECTED_NC_PQS8_QC2W, unit_batch) {
+  FullyConnectedOperatorTester()
+      .batch_size(1)
+      .input_channels(32)
+      .output_channels(65)
+      .TestPQS8QC2W();
+}
+
+TEST(FULLY_CONNECTED_NC_PQS8_QC2W, small_batch) {
+  FullyConnectedOperatorTester()
+      .batch_size(31)
+      .input_channels(64)
+      .output_channels(65)
+      .TestPQS8QC2W();
+}
+
+TEST(FULLY_CONNECTED_NC_PQS8_QC2W, small_batch_without_bias) {
+  FullyConnectedOperatorTester()
+      .has_bias(false)
+      .batch_size(32)
+      .input_channels(64)
+      .output_channels(65)
+      .TestPQS8QC2W();
+}
+
+TEST(FULLY_CONNECTED_NC_PQS8_QC2W, weights_cache_unit_batch) {
+  FullyConnectedOperatorTester()
+      .batch_size(1)
+      .input_channels(32)
+      .output_channels(65)
+      .use_weights_cache(true)
+      .TestPQS8QC2W();
+}
+
 TEST(FULLY_CONNECTED_NC_QS8_QC4W, unit_batch) {
   FullyConnectedOperatorTester()
       .batch_size(17)
