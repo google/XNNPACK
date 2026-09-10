@@ -1423,8 +1423,6 @@ TEST(FullyConnectedQD8F32QC8W, reshape_rejects_input_channel_mismatch) {
   ASSERT_NE(xnn_status_success, subgraph.Status());
 }
 
-// Regression test: fully-connected with tensor rank exceeding XNN_MAX_TENSOR_DIMS
-// must be rejected as unsupported parameter (fixes #11036).
 TEST(FullyConnectedF32, rank_exceeding_max_dims_rejected) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
 
