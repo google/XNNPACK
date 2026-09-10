@@ -70,6 +70,7 @@ SET(NON_PROD_AVX512FP16_MICROKERNEL_SRCS
   src/f16-igemm/gen/f16-igemm-7x32-minmax-avx512fp16-broadcast.c
   src/f16-igemm/gen/f16-igemm-7x64-minmax-avx512fp16-broadcast.c
   src/f16-igemm/gen/f16-igemm-8x64-minmax-avx512fp16-broadcast.c
+  src/f16-raddstoreexpminusmax/gen/f16-raddstoreexpminusmax-avx512fp16-rr2-p2-u32.c
   src/f16-rminmax/gen/f16-rmax-avx512fp16-u32.c
   src/f16-rminmax/gen/f16-rmax-avx512fp16-u64-acc2.c
   src/f16-rminmax/gen/f16-rmax-avx512fp16-u96-acc3.c
