@@ -1529,7 +1529,7 @@ std::vector<GemmTestParams> CreateTests1(
 #endif  // XNN_ENABLE_AVX512SKX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 
-#if XNN_ARCH_WASMRELAXEDSIMDFP16
+#if XNN_ENABLE_WASMRELAXEDSIMD && XNN_ARCH_WASMRELAXEDSIMD
   INSTANTIATE_TEST_SUITE_P(
       F16_GEMM_MINMAX_1X8__WASMRELAXEDSIMD_SPLAT, GemmTest,
       testing::ValuesIn(CreateTests1(
@@ -1681,7 +1681,47 @@ std::vector<GemmTestParams> CreateTests1(
       [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
         return info.param.test_name;
       });
-#endif  // XNN_ARCH_WASMRELAXEDSIMDFP16
+#endif  // XNN_ENABLE_WASMRELAXEDSIMD && XNN_ARCH_WASMRELAXEDSIMD
+
+
+INSTANTIATE_TEST_SUITE_P(
+    F16_GEMM_MINMAX_1X8__SCALAR, GemmTest,
+    testing::ValuesIn(CreateTests1(
+        /*k_block=*/1,
+        /*adj_k_block=*/1,
+        /*mr=*/1, /*nr=*/8, /*kr=*/1, /*sr=*/1,
+        /*is_igemm=*/false,
+        /*unsigned_inputs=*/false,
+        /*planes=*/1,
+        [](GemmMicrokernelTester& tester) {
+          tester.Test(xnn_f16_gemm_minmax_ukernel_1x8__scalar,
+                      xnn_init_f16_minmax_scalar_params,
+                      xnn_x16_packw_gemm_goi_ukernel_x8__scalar_int_u4);
+        },
+        0)),
+    [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
+      return info.param.test_name;
+    });
+
+
+INSTANTIATE_TEST_SUITE_P(
+    F16_GEMM_MINMAX_4X8__SCALAR, GemmTest,
+    testing::ValuesIn(CreateTests1(
+        /*k_block=*/1,
+        /*adj_k_block=*/1,
+        /*mr=*/4, /*nr=*/8, /*kr=*/1, /*sr=*/1,
+        /*is_igemm=*/false,
+        /*unsigned_inputs=*/false,
+        /*planes=*/1,
+        [](GemmMicrokernelTester& tester) {
+          tester.Test(xnn_f16_gemm_minmax_ukernel_4x8__scalar,
+                      xnn_init_f16_minmax_scalar_params,
+                      xnn_x16_packw_gemm_goi_ukernel_x8__scalar_int_u4);
+        },
+        0)),
+    [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
+      return info.param.test_name;
+    });
 
 
 #if XNN_ENABLE_RISCV_FP16_VECTOR && XNN_ARCH_RISCV
