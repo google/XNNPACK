@@ -94,14 +94,14 @@ tools/xngen src/f16-igemm/MRxNRv-rvv.c.in -D MR=7 -D NR=m4 -o src/f16-igemm/gen/
 
 ################################# WASM FP16 #################################
 ### WASM FP16X8 micro-kernels
-tools/xngen src/f16-igemm/wasmrelaxedsimd-splat.c.in -D MR=1 -D NR=8 -o src/f16-igemm/gen/f16-igemm-1x8-minmax-wasmrelaxedsimd-splat.c &
-tools/xngen src/f16-igemm/wasmrelaxedsimd-splat.c.in -D MR=4 -D NR=8 -o src/f16-igemm/gen/f16-igemm-4x8-minmax-wasmrelaxedsimd-splat.c &
-tools/xngen src/f16-igemm/wasmrelaxedsimd-splat.c.in -D MR=6 -D NR=8 -o src/f16-igemm/gen/f16-igemm-6x8-minmax-wasmrelaxedsimd-splat.c &
-tools/xngen src/f16-igemm/wasmrelaxedsimd-splat.c.in -D MR=8 -D NR=8 -o src/f16-igemm/gen/f16-igemm-8x8-minmax-wasmrelaxedsimd-splat.c &
+tools/xngen src/f16-igemm/wasmrelaxedsimdfp16-splat.c.in -D MR=1 -D NR=8 -o src/f16-igemm/gen/f16-igemm-1x8-minmax-wasmrelaxedsimdfp16-splat.c &
+tools/xngen src/f16-igemm/wasmrelaxedsimdfp16-splat.c.in -D MR=4 -D NR=8 -o src/f16-igemm/gen/f16-igemm-4x8-minmax-wasmrelaxedsimdfp16-splat.c &
+tools/xngen src/f16-igemm/wasmrelaxedsimdfp16-splat.c.in -D MR=6 -D NR=8 -o src/f16-igemm/gen/f16-igemm-6x8-minmax-wasmrelaxedsimdfp16-splat.c &
+tools/xngen src/f16-igemm/wasmrelaxedsimdfp16-splat.c.in -D MR=8 -D NR=8 -o src/f16-igemm/gen/f16-igemm-8x8-minmax-wasmrelaxedsimdfp16-splat.c &
 
-tools/xngen src/f16-igemm/wasmrelaxedsimd-splat.c.in -D MR=1 -D NR=16 -o src/f16-igemm/gen/f16-igemm-1x16-minmax-wasmrelaxedsimd-splat.c &
-tools/xngen src/f16-igemm/wasmrelaxedsimd-splat.c.in -D MR=4 -D NR=16 -o src/f16-igemm/gen/f16-igemm-4x16-minmax-wasmrelaxedsimd-splat.c &
-tools/xngen src/f16-igemm/wasmrelaxedsimd-splat.c.in -D MR=6 -D NR=16 -o src/f16-igemm/gen/f16-igemm-6x16-minmax-wasmrelaxedsimd-splat.c &
-tools/xngen src/f16-igemm/wasmrelaxedsimd-splat.c.in -D MR=8 -D NR=16 -o src/f16-igemm/gen/f16-igemm-8x16-minmax-wasmrelaxedsimd-splat.c &
+tools/xngen src/f16-igemm/wasmrelaxedsimdfp16-splat.c.in -D MR=1 -D NR=16 -o src/f16-igemm/gen/f16-igemm-1x16-minmax-wasmrelaxedsimdfp16-splat.c &
+tools/xngen src/f16-igemm/wasmrelaxedsimdfp16-splat.c.in -D MR=4 -D NR=16 -o src/f16-igemm/gen/f16-igemm-4x16-minmax-wasmrelaxedsimdfp16-splat.c &
+tools/xngen src/f16-igemm/wasmrelaxedsimdfp16-splat.c.in -D MR=6 -D NR=16 -o src/f16-igemm/gen/f16-igemm-6x16-minmax-wasmrelaxedsimdfp16-splat.c &
+tools/xngen src/f16-igemm/wasmrelaxedsimdfp16-splat.c.in -D MR=8 -D NR=16 -o src/f16-igemm/gen/f16-igemm-8x16-minmax-wasmrelaxedsimdfp16-splat.c &
 
 wait
