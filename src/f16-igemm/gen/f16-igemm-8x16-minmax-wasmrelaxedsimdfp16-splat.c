@@ -1,6 +1,6 @@
 // clang-format off
 // Auto-generated file. Do not edit!
-//   Template: src/f16-igemm/wasmrelaxedsimd-splat.c.in
+//   Template: src/f16-igemm/wasmrelaxedsimdfp16-splat.c.in
 //   Generator: tools/xngen
 //
 // Copyright 2025 Google LLC
@@ -14,7 +14,7 @@
 
 #include "src/xnnpack/igemm.h"
 
-void xnn_f16_igemm_minmax_ukernel_8x16__wasmrelaxedsimd_splat(
+void xnn_f16_igemm_minmax_ukernel_8x16__wasmrelaxedsimdfp16_splat(
     size_t mr,
     size_t nc,
     size_t kc,

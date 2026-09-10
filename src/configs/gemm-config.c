@@ -351,10 +351,10 @@ static void init_f16_gemm_config(void) {
       f16_gemm_config.nr = 16;
     }
   #elif XNN_ARCH_WASMRELAXEDSIMDFP16
-    f16_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_f16_gemm_minmax_ukernel_1x16__wasmrelaxedsimd_splat);
-    f16_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(6)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_f16_gemm_minmax_ukernel_6x16__wasmrelaxedsimd_splat);
-    f16_gemm_config.minmax.igemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_IGEMM_UKERNEL(xnn_f16_igemm_minmax_ukernel_1x16__wasmrelaxedsimd_splat);
-    f16_gemm_config.minmax.igemm[XNN_MR_TO_INDEX(6)] = XNN_INIT_HMP_IGEMM_UKERNEL(xnn_f16_igemm_minmax_ukernel_6x16__wasmrelaxedsimd_splat);
+    f16_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_f16_gemm_minmax_ukernel_1x16__wasmrelaxedsimdfp16_splat);
+    f16_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(6)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_f16_gemm_minmax_ukernel_6x16__wasmrelaxedsimdfp16_splat);
+    f16_gemm_config.minmax.igemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_IGEMM_UKERNEL(xnn_f16_igemm_minmax_ukernel_1x16__wasmrelaxedsimdfp16_splat);
+    f16_gemm_config.minmax.igemm[XNN_MR_TO_INDEX(6)] = XNN_INIT_HMP_IGEMM_UKERNEL(xnn_f16_igemm_minmax_ukernel_6x16__wasmrelaxedsimdfp16_splat);
     f16_gemm_config.init.f16 = xnn_init_f16_minmax_scalar_params;
     f16_gemm_config.pack_gemm_gio = (xnn_packw_gemm_gio_ukernel_fn) xnn_x16_packw_gemm_gio_ukernel_x16__scalar;
     f16_gemm_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_x16_packw_gemm_goi_ukernel_x16__scalar_int_u4;
