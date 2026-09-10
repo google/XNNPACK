@@ -31,6 +31,7 @@ tools/generate-gemm-test.py --spec test/pf32-qc4w-gemm-minmax.yaml --output-test
 tools/generate-gemm-test.py --spec test/pf16-gemm-minmax.yaml     --output-test test/pf16-gemm-minmax.cc --output-bench bench/pf16-gemm-minmax.cc &
 
 tools/generate-gemm-test.py --spec test/pqs8-qc8w-gemm-minmax.yaml     --output-test test/pqs8-qc8w-gemm-minmax.cc --output-bench bench/pqs8-qc8w-gemm-minmax.cc &
+tools/generate-gemm-test.py --spec test/pqs8-qc2w-gemm-minmax.yaml     --output-test test/pqs8-qc2w-gemm-minmax.cc &
 tools/generate-gemm-test.py --spec test/pqs8-qc4w-gemm-minmax.yaml     --output-test test/pqs8-qc4w-gemm-minmax.cc &
 
 tools/generate-gemm-test.py --spec test/qu8-gemm-minmax-rndnu.yaml --output-test test/qu8-gemm-minmax-rndnu16.cc
