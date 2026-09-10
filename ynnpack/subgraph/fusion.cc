@@ -213,6 +213,7 @@ bool replace_uses(subgraph_analysis& analysis, ynn_subgraph& subgraph,
         if (i == from_id) i = to_id;
       }
     }
+    analysis.invalidate();
     return true;
   }
 }
@@ -2487,7 +2488,7 @@ ynn_status ynn_subgraph::fusion() {
     for (ynn_node& node : nodes) {
       if (!node.is_valid()) continue;
 
-      changed = changed || ynn::fold_unary_input(*this, node, analysis) ||
+      changed = ynn::fold_unary_input(*this, node, analysis) ||
                 ynn::fold_unary_output(*this, node, analysis) ||
                 ynn::fold_iota_output(*this, node, analysis) ||
                 ynn::rewrite_binary(*this, node, analysis) ||
@@ -2520,7 +2521,7 @@ ynn_status ynn_subgraph::fusion() {
                 ynn::rewrite_pack_b_gather(*this, node, analysis) ||
                 ynn::rewrite_fast_math(*this, node, analysis) ||
                 ynn::rewrite_requantize_quantize(*this, node, analysis) ||
-                false;
+                changed;
 
       if (!analysis.is_valid) {
         break;
@@ -2541,8 +2542,9 @@ ynn_status ynn_subgraph::fusion() {
     for (ynn_node& node : nodes) {
       if (!node.is_valid()) continue;
 
-      changed = changed || ynn::fuse_converts(*this, node, analysis) ||
-                ynn::fuse_quantize(*this, node, analysis);
+      changed = ynn::fuse_converts(*this, node, analysis) ||
+                ynn::fuse_quantize(*this, node, analysis) ||
+                changed;
 
       if (!analysis.is_valid) {
         break;
