@@ -8,6 +8,7 @@
 
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/config.h"
+#include "src/xnnpack/hardware-config.h"
 #include "src/xnnpack/init-once.h"
 #include "src/xnnpack/microfnptr.h"
 #include "src/xnnpack/pad.h"
@@ -46,6 +47,14 @@ static void init_xx_pad_config(void) {
     }
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     xx_pad_config.ukernel = (xnn_pad_ukernel_fn) xnn_xx_pad_ukernel_p16__wasmsimd_u16;
+  #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR 
+    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    assert(hardware_config != NULL);
+    if (hardware_config->arch_flags & xnn_arch_riscv_vector) {
+      xx_pad_config.ukernel = (xnn_pad_ukernel_fn) xnn_xx_pad_ukernel__rvv_u4v;
+    } else {
+      xx_pad_config.ukernel = (xnn_pad_ukernel_fn) xnn_xx_pad_ukernel_p4__scalar_u16;
+    }
   #else
     xx_pad_config.ukernel = (xnn_pad_ukernel_fn) xnn_xx_pad_ukernel_p4__scalar_u16;
   #endif

@@ -390,6 +390,7 @@ NON_PROD_RVV_MICROKERNEL_SRCS = [
     "src/x32-transposec/gen/x32-transposec-8xv1-rvv.c",
     "src/x32-transposec/gen/x32-transposec-8xv2-rvv.c",
     "src/x32-transposec/gen/x32-transposec-8xv4-rvv.c",
+    "src/xx-pad/xx-pad-rvv-u4v.c",
 ]
 
 ALL_RVV_MICROKERNEL_SRCS = PROD_RVV_MICROKERNEL_SRCS + NON_PROD_RVV_MICROKERNEL_SRCS
