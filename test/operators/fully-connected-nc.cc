@@ -338,6 +338,14 @@ TEST(FULLY_CONNECTED_NC_PQS8_QC2W, unit_batch) {
       .TestPQS8QC2W();
 }
 
+TEST(FULLY_CONNECTED_NC_PQS8_QC2W, unit_batch_with_non_unit_scales) {
+  FullyConnectedOperatorTester()
+      .batch_size(1)
+      .input_channels(32)
+      .output_channels(65)
+      .TestPQS8QC2W(/*input_scale=*/0.5f, /*output_scale=*/2.0f);
+}
+
 TEST(FULLY_CONNECTED_NC_PQS8_QC2W, small_batch) {
   FullyConnectedOperatorTester()
       .batch_size(31)
