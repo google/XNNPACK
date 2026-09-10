@@ -417,8 +417,6 @@ TEST(Convolution2D, reshape_rejects_input_channel_mismatch) {
   EXPECT_EQ(subgraph.Status(), xnn_status_invalid_parameter);
 }
 
-// Regression test: convolution-2d must reject filter tensors whose shape
-// mismatches kernel parameters (fixes #11118).
 TEST(Convolution2D, define_rejects_filter_shape_mismatch) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
 
