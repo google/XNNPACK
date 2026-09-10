@@ -697,7 +697,15 @@ std::vector<GemmTestParams> CreateTests(
   const size_t mr_value = mr;
   const size_t nr_value = nr;
   if (mr_value == 0 || nr_value == 0) {
-    return {};
+    // Keep the parameterized suite instantiated when this binary runs on a
+    // host without the required architecture. GemmTest checks arch_flags and
+    // skips the case before invoking the microkernel.
+    return {GemmTestParams(
+        "unsupported_hardware",
+        GemmMicrokernelTester()
+            .mr(1).nr(1).kr(kr).sr(sr).mr_packed(1)
+            .unsigned_inputs(unsigned_inputs).planes(planes).b_zero_point(0),
+        test_func, arch_flags)};
   }
   const GemmMicrokernelTester tester = GemmMicrokernelTester()
       .mr(mr_value).nr(nr_value).kr(kr).sr(sr).mr_packed(mr_packed)
