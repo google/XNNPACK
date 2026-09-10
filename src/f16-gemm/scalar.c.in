@@ -1,0 +1,121 @@
+// Copyright 2026 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert ACTIVATION in ["LINEAR", "MINMAX"]
+#include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
+
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/gemm.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/microparams.h"
+
+
+$SUFFIX = {"LINEAR": "", "MINMAX": "_minmax"}[ACTIVATION]
+$PARAMS = {"LINEAR": "struct xnn_f16_default_params", "MINMAX": "struct xnn_f16_minmax_params"}[ACTIVATION]
+void xnn_f16_gemm${SUFFIX}_ukernel_${MR}x${NR}__scalar(
+    size_t mr,
+    size_t nc,
+    size_t kc,
+    const xnn_float16* restrict a,
+    size_t a_stride,
+    const xnn_float16* restrict w,
+    xnn_float16* restrict c,
+    size_t cm_stride,
+    size_t cn_stride,
+    const ${PARAMS}* restrict params)
+{
+  assert(mr != 0);
+  assert(mr <= ${MR});
+  assert(nc != 0);
+  assert(kc != 0);
+  assert(kc % sizeof(xnn_float16) == 0);
+  assert(a != NULL);
+  assert(w != NULL);
+  assert(c != NULL);
+
+  const xnn_float16* a0 = a;
+  xnn_float16* c0 = c;
+  $for M in range(1, MR):
+    const xnn_float16* a${M} = (const xnn_float16*) ((uintptr_t) a${M-1} + a_stride);
+    xnn_float16* c${M} = (xnn_float16*) ((uintptr_t) c${M-1} + cm_stride);
+    $if M % 2 == 0:
+      if XNN_UNPREDICTABLE(mr <= ${M}) {
+        a${M} = a${M-1};
+        c${M} = c${M-1};
+      }
+    $elif M + 1 == MR:
+      if XNN_UNPREDICTABLE(mr != ${M+1}) {
+        a${M} = a${M-1};
+        c${M} = c${M-1};
+      }
+    $else:
+      if XNN_UNPREDICTABLE(mr < ${M+1}) {
+        a${M} = a${M-1};
+        c${M} = c${M-1};
+      }
+
+  $if ACTIVATION == "MINMAX":
+    const float vmin = xnn_float16_to_float(params->scalar.min);
+    const float vmax = xnn_float16_to_float(params->scalar.max);
+  do {
+    $for N in range(NR):
+      float vacc0${N} = xnn_float16_to_float(w[${N}]);
+    $for M in range(1, MR):
+      $for N in range(NR):
+        float vacc${M}${N} = vacc0${N};
+    w += ${NR};
+
+    size_t k = kc;
+    do {
+      $for M in range(MR):
+        const float va${M} = xnn_float16_to_float(*a${M}++);
+
+      $for N in range(NR):
+        const float vb${N} = xnn_float16_to_float(w[${N}]);
+      w += ${NR};
+
+      $for M in range(MR):
+        $for N in range(NR):
+          vacc${M}${N} = math_muladd_f32(va${M}, vb${N}, vacc${M}${N});
+
+      k -= sizeof(xnn_float16);
+    } while (k != 0);
+
+    $if ACTIVATION == "MINMAX":
+      $for M in range(MR):
+        $for N in range(NR):
+          vacc${M}${N} = math_max_f32(vacc${M}${N}, vmin);
+
+      $for M in range(MR):
+        $for N in range(NR):
+          vacc${M}${N} = math_min_f32(vacc${M}${N}, vmax);
+    if XNN_LIKELY(nc >= ${NR}) {
+      $for M in reversed(range(MR)):
+        $for N in range(NR):
+          c${M}[${N}] = xnn_float16_from_float(vacc${M}${N});
+        c${M} = (xnn_float16*) ((uintptr_t) c${M} + cn_stride);
+
+      $for M in reversed(range(MR)):
+        a${M} = (const xnn_float16*) ((uintptr_t) a${M} - kc);
+
+      nc -= ${NR};
+    } else {
+      $for LOG2N in reversed(range(NR.bit_length() - 1)):
+        if (nc & ${1 << LOG2N}) {
+          $for M in reversed(range(MR)):
+            $for N in range(1 << LOG2N):
+              c${M}[${N}] = xnn_float16_from_float(vacc${M}${N});
+            $if LOG2N != 0:
+              $for N in range(NR - (1 << LOG2N) - 1):
+                vacc${M}${N} = vacc${M}${N + (1 << LOG2N)};
+              c${M} += ${1 << LOG2N};
+        }
+
+      nc = 0;
+    }
+  } while (nc != 0);
+}
