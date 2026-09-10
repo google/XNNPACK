@@ -88,6 +88,7 @@ static enum xnn_operator_type get_operator_type(
     XNNPACK_FINGERPRINT_TO_OP_TYPE(qs8, qc2w);
     XNNPACK_FINGERPRINT_TO_OP_TYPE(qs8, qc4w);
     XNNPACK_FINGERPRINT_TO_OP_TYPE(qs8, qc8w);
+    XNNPACK_FINGERPRINT_TO_OP_TYPE(pqs8, qc2w);
     XNNPACK_FINGERPRINT_TO_OP_TYPE(pqs8, qc4w);
     XNNPACK_FINGERPRINT_TO_OP_TYPE(pqs8, qc8w);
     XNNPACK_FINGERPRINT_TO_OP_TYPE(qu8);
@@ -321,7 +322,8 @@ static XNN_NO_SANITIZE_FUNCTION enum xnn_status create_fully_connected_nc(
       const void* pack_extra_data0 = scale_params;
       size_t pack_extra_data0_element_size =
           init_scale_params != NULL ? sizeof(float) : 0;
-      if (operator_type == xnn_operator_type_fully_connected_nc_pqs8_qc4w) {
+      if (operator_type == xnn_operator_type_fully_connected_nc_pqs8_qc2w ||
+          operator_type == xnn_operator_type_fully_connected_nc_pqs8_qc4w) {
         if (bias == NULL) {
           accumulator_init_to_release =
               xnn_allocate_zero_memory(output_channels * sizeof(int32_t));
@@ -1709,6 +1711,12 @@ static enum xnn_status setup_variant_and_gemm_config(
       context->gemm_config = xnn_init_pqs8_qc8w_gemm_config();
       context->fingerprint_id = xnn_fingerprint_id_fully_connected_nc_pqs8_pqs8_qc8w;
       break;
+    case xnn_operator_type_fully_connected_nc_pqs8_qc2w:
+      *variant = &qs8_qc2w_variant;
+      context->gemm_config = xnn_init_pqs8_qc2w_gemm_config();
+      context->fingerprint_id =
+          xnn_fingerprint_id_fully_connected_nc_pqs8_pqs8_qc2w;
+      break;
     case xnn_operator_type_fully_connected_nc_pqs8_qc4w:
       *variant = &qs8_qc4w_variant;
       context->gemm_config = xnn_init_pqs8_qc4w_gemm_config();
@@ -3068,6 +3076,87 @@ enum xnn_status xnn_create_fully_connected_nc_qs8_qc8w(
   return create_fully_connected_nc_helper(&context);
 }
 
+enum xnn_status xnn_create_fully_connected_nc_pqs8_qc2w(
+    size_t input_channels, size_t output_channels, size_t input_stride,
+    size_t output_stride, int8_t input_zero_point, float input_scale,
+    const float* kernel_scale, const void* kernel, const int32_t* bias,
+    int8_t output_zero_point, float output_scale, int8_t output_min,
+    int8_t output_max, uint32_t flags, xnn_weights_cache_t weights_cache,
+    xnn_operator_t* fully_connected_op_out) {
+  if (input_channels == 0 || output_channels == 0 || kernel == NULL) {
+    xnn_log_error(
+        "failed to create %s operator: input channels, output channels, and "
+        "kernel must be non-zero",
+        xnn_operator_type_to_string(
+            xnn_operator_type_fully_connected_nc_pqs8_qc2w));
+    return xnn_status_invalid_parameter;
+  }
+  if ((flags & XNN_FLAG_TRANSPOSE_WEIGHTS) != 0) {
+    xnn_log_error(
+        "failed to create %s operator with XNN_FLAG_TRANSPOSE_WEIGHTS: "
+        "KleidiAI QS8 QC2W SME2 RHS packing requires NxK weights",
+        xnn_operator_type_to_string(
+            xnn_operator_type_fully_connected_nc_pqs8_qc2w));
+    return xnn_status_unsupported_parameter;
+  }
+  if (input_channels % 32 != 0) {
+    xnn_log_error(
+        "failed to create %s operator with %zu input channels: KleidiAI "
+        "QS8 QC2W SME2 kernels require a multiple of 32",
+        xnn_operator_type_to_string(
+            xnn_operator_type_fully_connected_nc_pqs8_qc2w),
+        input_channels);
+    return xnn_status_unsupported_parameter;
+  }
+
+  size_t kernel_size = 0;
+  if (!xnn_safe_mul(input_channels / 4, output_channels, &kernel_size)) {
+    xnn_log_error(
+        "failed to create %s operator with %zu input channels and %zu output "
+        "channels: kernel buffer size overflows size_t",
+        xnn_operator_type_to_string(
+            xnn_operator_type_fully_connected_nc_pqs8_qc2w),
+        input_channels, output_channels);
+    return xnn_status_invalid_parameter;
+  }
+  uint8_t* converted_kernel =
+      (uint8_t*)xnn_allocate_memory(kernel_size);
+  if (converted_kernel == NULL) {
+    return xnn_status_out_of_memory;
+  }
+  const uint8_t* xnn_kernel = (const uint8_t*)kernel;
+  for (size_t i = 0; i < kernel_size; i++) {
+    // XNNPACK QC2 encodes {0, 1, -2, -1}; the KAI QSU2 packer expects
+    // {-2, -1, 0, 1}. Toggle bit 1 in every packed 2-bit lane.
+    converted_kernel[i] = xnn_kernel[i] ^ UINT8_C(0xAA);
+  }
+
+  struct fc_context context = {
+      .input_channels = input_channels,
+      .output_channels = output_channels,
+      .input_stride = input_stride,
+      .output_stride = output_stride,
+      .input_zero_point = input_zero_point,
+      .input_scale = input_scale,
+      .kernel_scale.f32 = kernel_scale,
+      .kernel = converted_kernel,
+      .bias = bias,
+      .output_zero_point = output_zero_point,
+      .output_scale = output_scale,
+      .output_min = output_min,
+      .output_max = output_max,
+      .flags = flags,
+      .weights_cache = weights_cache,
+      .operator_type = xnn_operator_type_fully_connected_nc_pqs8_qc2w,
+      .fully_connected_op_out = fully_connected_op_out,
+      .should_fingerprint = true,
+      .original_kernel = kernel,
+  };
+  const enum xnn_status status = create_fully_connected_nc_helper(&context);
+  xnn_release_memory(converted_kernel);
+  return status;
+}
+
 enum xnn_status xnn_create_fully_connected_nc_pqs8_qc4w(
     size_t input_channels, size_t output_channels, size_t input_stride,
     size_t output_stride, int8_t input_zero_point, float input_scale,
@@ -3320,6 +3409,7 @@ reshape_fully_connected_nc_with_pack_lh_config(
       packed_lh_config = xnn_init_x32_pack_lh_config();
       break;
     case xnn_operator_type_fully_connected_nc_pqs8_qc8w:
+    case xnn_operator_type_fully_connected_nc_pqs8_qc2w:
     case xnn_operator_type_fully_connected_nc_pqs8_qc4w:
       packed_lh_config = xnn_init_x8_pack_lh_config();
       break;
@@ -4019,6 +4109,19 @@ enum xnn_status xnn_reshape_fully_connected_nc_pqs8_qc8w(
       threadpool);
 }
 
+enum xnn_status xnn_reshape_fully_connected_nc_pqs8_qc2w(
+    xnn_operator_t fully_connected_op, size_t batch_size,
+    size_t* workspace_size, pthreadpool_t threadpool) {
+  return reshape_fully_connected_nc(
+      fully_connected_op, xnn_operator_type_fully_connected_nc_pqs8_qc2w,
+      batch_size,
+      /*dynamic_quantization=*/false,
+      /*log2_output_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
+      &fully_connected_op->params.qs8_qc8w_conv_minmax,
+      sizeof(fully_connected_op->params.qs8_qc8w_conv_minmax), workspace_size,
+      threadpool);
+}
+
 enum xnn_status xnn_reshape_fully_connected_nc_pqs8_qc4w(
     xnn_operator_t fully_connected_op, size_t batch_size,
     size_t* workspace_size, pthreadpool_t threadpool) {
@@ -4394,6 +4497,15 @@ enum xnn_status xnn_setup_fully_connected_nc_pqs8_qc8w(
   return setup_fully_connected_nc(
       fully_connected_op, xnn_operator_type_fully_connected_nc_pqs8_qc8w, input,
       output, workspace, /*row_sum=*/NULL,
+      /*quantization_params=*/NULL);
+}
+
+enum xnn_status xnn_setup_fully_connected_nc_pqs8_qc2w(
+    xnn_operator_t fully_connected_op, const int8_t* input, int8_t* output,
+    void* workspace) {
+  return setup_fully_connected_nc(
+      fully_connected_op, xnn_operator_type_fully_connected_nc_pqs8_qc2w,
+      input, output, workspace, /*row_sum=*/NULL,
       /*quantization_params=*/NULL);
 }
 

@@ -4007,6 +4007,20 @@ enum xnn_status xnn_subgraph_optimize_packed_lhs(xnn_subgraph_t subgraph,
           case xnn_datatype_qint8:
             if (input_datatype == output_datatype) {
               switch (kernel_datatype) {
+                case xnn_datatype_qcint2: {
+                  const size_t input_channels = input_value->shape.dim[
+                      input_value->shape.num_dims - 1];
+                  if (kernel_value->quantization.zero_point == 0 &&
+                      node->type == xnn_node_type_fully_connected &&
+                      (optimization_flags &
+                       XNN_FLAG_NO_INLINED_LHS_PACKING) == 0 &&
+                      (node->flags & XNN_FLAG_TRANSPOSE_WEIGHTS) == 0 &&
+                      input_channels != 0 && input_channels % 32 == 0 &&
+                      (gemm_config = xnn_init_pqs8_qc2w_gemm_config())) {
+                    assumed_datatype = xnn_datatype_pqint8;
+                  }
+                  break;
+                }
                 case xnn_datatype_qcint4:
                   if ((kernel_value->quantization.zero_point == 0 ||
                        kernel_value->quantization.zero_point == 8) &&
