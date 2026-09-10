@@ -66,9 +66,12 @@ struct InlineQd8Bf16Qb4wFullyConnected {
   void Build(enum xnn_datatype input_datatype,
              enum xnn_datatype output_datatype = xnn_datatype_bf16,
              enum xnn_datatype scale_datatype = xnn_datatype_bf16) {
-    const Type tensor_input_type =
-        (input_datatype == xnn_datatype_fp32) ? Type::kFP32 : Type::kBF16;
-    XnnTensor input({.type = tensor_input_type, .shape = {3, 32}});
+    // The Tensor backend only emits a valid qd8_qb4w graph for FP32 inputs
+    // (it inserts a dynamic-quantize convert to qdint8). A BF16 input would
+    // reach xnn_define_fully_connected as BF16, which is rejected with
+    // xnn_status_invalid_parameter. Always build with FP32, then patch the
+    // input datatype to the requested type below.
+    XnnTensor input({.type = Type::kFP32, .shape = {3, 32}});
     // 2x32 int4 weights (64 nibbles, 32 bytes). {-8, -8} packs to 0x88,
     // which decodes to all-zero weights with zero_point=8.
     std::vector<litert::tensor::int4_t> weights_data(
@@ -107,25 +110,33 @@ struct InlineQd8Bf16Qb4wFullyConnected {
       filter.quantization.scale_type = scale_datatype;
     }
 
-    // FullyConnected infers the output type from the input type; override when
+    // FullyConnected infers the output type from the FP32 input; override when
     // the test needs a different output datatype.
-    if (output_datatype != input_datatype) {
+    if (output_datatype != xnn_datatype_fp32) {
       xnn_value& out = subgraph->values[output_id];
       out.datatype = output_datatype;
       out.size = xnn_tensor_get_size(&out);
     }
 
     // Match the graph state produced by packed-LHS fusion while retaining the
-    // original input datatype used by the inline packer. For FP32 inputs the
-    // Tensor API backend already inserted a convert to qdint8; rewire the FC
-    // to consume the original input like fusion does.
+    // original input datatype used by the inline packer. The Tensor API
+    // backend inserted a convert to qdint8; rewire the FC to consume the
+    // original input like fusion does.
+    bool rewired = false;
     for (size_t i = 0; i < subgraph->num_nodes; ++i) {
       struct xnn_node& node = subgraph->nodes[i];
       if (&node != fully_connected && node.num_outputs > 0 &&
           node.outputs[0] == fully_connected->inputs[0]) {
         fully_connected->inputs[0] = node.inputs[0];
+        rewired = true;
         break;
       }
+    }
+    ASSERT_TRUE(rewired);
+    if (input_datatype != xnn_datatype_fp32) {
+      xnn_value& in = subgraph->values[fully_connected->inputs[0]];
+      in.datatype = input_datatype;
+      in.size = xnn_tensor_get_size(&in);
     }
     fully_connected->flags |= XNN_FLAG_INLINE_LHS_PACKING;
     fully_connected->packed_input_datatype = xnn_datatype_qdint8;
