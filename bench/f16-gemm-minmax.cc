@@ -26,7 +26,7 @@ namespace {
 
 
 
-#if XNN_ARCH_WASMRELAXEDSIMDFP16
+#if XNN_ENABLE_WASMRELAXEDSIMD && XNN_ARCH_WASMRELAXEDSIMD
   static void f16_gemm_minmax_ukernel_1x8__wasmrelaxedsimd_splat(benchmark::State& state) {
     GEMMBenchmark(state,
       xnn_f16_gemm_minmax_ukernel_1x8__wasmrelaxedsimd_splat,
@@ -114,7 +114,7 @@ namespace {
   }
 
   BENCHMARK_GEMM(f16_gemm_minmax_ukernel_8x16__wasmrelaxedsimd_splat)
-#endif  // XNN_ARCH_WASMRELAXEDSIMDFP16
+#endif  // XNN_ENABLE_WASMRELAXEDSIMD && XNN_ARCH_WASMRELAXEDSIMD
 
 
 #if XNN_ENABLE_AVX512FP16 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
@@ -692,6 +692,28 @@ namespace {
   BENCHMARK_GEMM(f16_gemm_minmax_ukernel_8x16__neonfp16arith_ld64)
 #endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 
+
+static void f16_gemm_minmax_ukernel_1x8__scalar(benchmark::State& state) {
+  GEMMBenchmark(state,
+    xnn_f16_gemm_minmax_ukernel_1x8__scalar,
+    xnn_init_f16_minmax_scalar_params,
+    xnn_x16_packw_gemm_goi_ukernel_x8__scalar_int_u4,
+    /*mr=*/1, /*nr=*/8, /*kr=*/1, /*sr=*/1,
+    /*arch_flags=*/0);
+}
+
+BENCHMARK_GEMM(f16_gemm_minmax_ukernel_1x8__scalar)
+
+static void f16_gemm_minmax_ukernel_4x8__scalar(benchmark::State& state) {
+  GEMMBenchmark(state,
+    xnn_f16_gemm_minmax_ukernel_4x8__scalar,
+    xnn_init_f16_minmax_scalar_params,
+    xnn_x16_packw_gemm_goi_ukernel_x8__scalar_int_u4,
+    /*mr=*/4, /*nr=*/8, /*kr=*/1, /*sr=*/1,
+    /*arch_flags=*/0);
+}
+
+BENCHMARK_GEMM(f16_gemm_minmax_ukernel_4x8__scalar)
 
 #if XNN_ENABLE_RISCV_FP16_VECTOR && XNN_ARCH_RISCV
   static void f16_gemm_minmax_ukernel_1x4v__rvvfp16arith(benchmark::State& state) {

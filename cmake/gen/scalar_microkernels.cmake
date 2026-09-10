@@ -23,6 +23,10 @@ SET(PROD_SCALAR_MICROKERNEL_SRCS
   src/f16-dwconv/gen/f16-f32acc-dwconv-9p1c-minmax-scalar-acc2.c
   src/f16-dwconv/gen/f16-f32acc-dwconv-25p2c-minmax-scalar-acc2.c
   src/f16-f32-vcvt/gen/f16-f32-vcvt-scalar-u4.c
+  src/f16-gemm/gen/f16-gemm-1x8-minmax-scalar.c
+  src/f16-gemm/gen/f16-gemm-4x8-minmax-scalar.c
+  src/f16-igemm/gen/f16-igemm-1x8-minmax-scalar.c
+  src/f16-igemm/gen/f16-igemm-4x8-minmax-scalar.c
   src/f16-qs8-vcvt/gen/f16-qs8-vcvt-scalar-imagic-u4.c
   src/f16-qu8-vcvt/gen/f16-qu8-vcvt-scalar-imagic-u4.c
   src/f16-rdminmax/gen/f16-rdmax-2p2x-scalar-u2.c
@@ -253,6 +257,7 @@ SET(PROD_SCALAR_MICROKERNEL_SRCS
   src/x8-packw/gen/x8-packw-x32-gemm-goi-scalar-u2.c
   src/x8-transposec/gen/x8-transposec-2x4-scalar-int.c
   src/x16-packw/gen/x16-packw-x8-gemm-gio-scalar.c
+  src/x16-packw/gen/x16-packw-x8-gemm-goi-scalar-int-u4.c
   src/x16-packw/gen/x16-packw-x16-gemm-gio-scalar.c
   src/x16-packw/gen/x16-packw-x16-gemm-goi-scalar-int-u4.c
   src/x16-packw/gen/x16-packw-x32-gemm-gio-scalar.c
@@ -907,7 +912,6 @@ SET(NON_PROD_SCALAR_MICROKERNEL_SRCS
   src/x8-transposec/gen/x8-transposec-4x4-scalar-int.c
   src/x16-packw/gen/x16-packw-x2-gemm-gio-scalar.c
   src/x16-packw/gen/x16-packw-x4-gemm-gio-scalar.c
-  src/x16-packw/gen/x16-packw-x8-gemm-goi-scalar-int-u4.c
   src/x16-packw/gen/x16-packw-x32-gemm-goi-scalar-int-u4.c
   src/x16-packw/gen/x16-packw-x64-gemm-gio-scalar.c
   src/x16-packw/gen/x16-packw-x64-gemm-goi-scalar-int-u4.c

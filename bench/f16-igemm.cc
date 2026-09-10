@@ -27,7 +27,7 @@ namespace {
 
 
 
-#if XNN_ARCH_WASMRELAXEDSIMDFP16
+#if XNN_ENABLE_WASMRELAXEDSIMD && XNN_ARCH_WASMRELAXEDSIMD
   static void f16_igemm_minmax_ukernel_1x8__wasmrelaxedsimd_splat(benchmark::State& state) {
     IGEMMBenchmark(state,
       xnn_f16_igemm_minmax_ukernel_1x8__wasmrelaxedsimd_splat,
@@ -115,7 +115,7 @@ namespace {
   }
 
   BENCHMARK_CONV(f16_igemm_minmax_ukernel_8x16__wasmrelaxedsimd_splat)
-#endif  // XNN_ARCH_WASMRELAXEDSIMDFP16
+#endif  // XNN_ENABLE_WASMRELAXEDSIMD && XNN_ARCH_WASMRELAXEDSIMD
 
 
 #if XNN_ENABLE_AVX512FP16 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
@@ -685,6 +685,28 @@ namespace {
   BENCHMARK_CONV(f16_igemm_minmax_ukernel_7x4v__rvvfp16arith)
 #endif  // XNN_ENABLE_RISCV_FP16_VECTOR && XNN_ARCH_RISCV
 
+
+static void f16_igemm_minmax_ukernel_1x8__scalar(benchmark::State& state) {
+  IGEMMBenchmark(state,
+    xnn_f16_igemm_minmax_ukernel_1x8__scalar,
+    xnn_init_f16_minmax_scalar_params,
+    xnn_pack_f16_conv_goki_w,
+    /*mr=*/1, /*nr=*/8, /*kr=*/1, /*sr=*/1,
+    /*arch_flags=*/0);
+}
+
+BENCHMARK_CONV(f16_igemm_minmax_ukernel_1x8__scalar)
+
+static void f16_igemm_minmax_ukernel_4x8__scalar(benchmark::State& state) {
+  IGEMMBenchmark(state,
+    xnn_f16_igemm_minmax_ukernel_4x8__scalar,
+    xnn_init_f16_minmax_scalar_params,
+    xnn_pack_f16_conv_goki_w,
+    /*mr=*/4, /*nr=*/8, /*kr=*/1, /*sr=*/1,
+    /*arch_flags=*/0);
+}
+
+BENCHMARK_CONV(f16_igemm_minmax_ukernel_4x8__scalar)
 
 }  // namespace
 

@@ -375,6 +375,18 @@ static void init_f16_gemm_config(void) {
       f16_gemm_config.mr = 7;
       f16_gemm_config.nr = 4 * hardware_config->vlenb / sizeof(xnn_float16);
     }
+  #else
+    // No SIMD-accelerated F16 GEMM available for this target; fall back to a
+    // portable scalar implementation so F16 GEMM is never entirely unsupported.
+    f16_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_f16_gemm_minmax_ukernel_1x8__scalar);
+    f16_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(4)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_f16_gemm_minmax_ukernel_4x8__scalar);
+    f16_gemm_config.minmax.igemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_IGEMM_UKERNEL(xnn_f16_igemm_minmax_ukernel_1x8__scalar);
+    f16_gemm_config.minmax.igemm[XNN_MR_TO_INDEX(4)] = XNN_INIT_HMP_IGEMM_UKERNEL(xnn_f16_igemm_minmax_ukernel_4x8__scalar);
+    f16_gemm_config.init.f16 = xnn_init_f16_minmax_scalar_params;
+    f16_gemm_config.pack_gemm_gio = (xnn_packw_gemm_gio_ukernel_fn) xnn_x16_packw_gemm_gio_ukernel_x8__scalar;
+    f16_gemm_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_x16_packw_gemm_goi_ukernel_x8__scalar_int_u4;
+    f16_gemm_config.mr = 4;
+    f16_gemm_config.nr = 8;
   #endif
   assert(f16_gemm_config.mr <= XNN_MAX_MR);
 }
@@ -6553,11 +6565,9 @@ const struct xnn_gemm_config* xnn_init_f16_gemm_config() {
   if (hardware_config == NULL) {
     return NULL;
   }
-  #if !XNN_ARCH_WASMRELAXEDSIMDFP16
-  if (!xnn_is_f16_compatible_config(hardware_config)) {
-    return NULL;
-  }
-  #endif  // !XNN_ARCH_WASMRELAXEDSIMDFP16
+  // No compatibility pre-check: init_f16_gemm_config() always falls back to a
+  // scalar kernel when no SIMD-accelerated one is available, so `mr` is
+  // always non-zero and the check below is sufficient on its own.
   XNN_INIT_ONCE(f16_gemm);
   return f16_gemm_config.mr ? &f16_gemm_config : NULL;
 }
