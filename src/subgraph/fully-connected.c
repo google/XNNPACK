@@ -327,6 +327,14 @@ static enum xnn_status create_fully_connected_operator(
   assert(output_id < num_values);
   const struct xnn_runtime_value* output_value = &values[output_id];
 
+  if (filter_value->shape.num_dims < 2 || filter_value->shape.num_dims > XNN_MAX_TENSOR_DIMS) {
+    xnn_log_error("failed to create %s operator with filter ID #%" PRIu32
+                  ": number of dimensions (%zu) must be between 2 and %zu",
+                  xnn_node_type_to_string(xnn_node_type_fully_connected),
+                  filter_id, filter_value->shape.num_dims, (size_t)XNN_MAX_TENSOR_DIMS);
+    return xnn_status_unsupported_parameter;
+  }
+
   size_t output_channels, input_channels;
   if (node->flags & XNN_FLAG_TRANSPOSE_WEIGHTS) {
     input_channels = filter_value->shape.dim[0];
@@ -995,13 +1003,13 @@ enum xnn_status resize_fully_connected_output_tensor(
   const uint32_t input_id = opdata->inputs[0];
   const struct xnn_runtime_value* input = &values[input_id];
 
-  if (input->shape.num_dims == 0) {
+  if (input->shape.num_dims == 0 || input->shape.num_dims > XNN_MAX_TENSOR_DIMS) {
     xnn_log_error(
         "failed to reshape %s operator with input ID #%" PRIu32
-        ": unsupported number of dimensions %zu, must be at least 1",
+        ": unsupported number of dimensions %zu, must be between 1 and %zu",
         xnn_node_type_to_string(xnn_node_type_fully_connected),
-        input_id, input->shape.num_dims);
-    return xnn_status_invalid_parameter;
+        input_id, input->shape.num_dims, (size_t)XNN_MAX_TENSOR_DIMS);
+    return xnn_status_unsupported_parameter;
   }
 
   output->shape.num_dims = input->shape.num_dims;
@@ -1032,13 +1040,13 @@ static enum xnn_status reshape_fully_connected_operator(
   assert(input_id < num_values);
   struct xnn_runtime_value* input_value = &values[input_id];
 
-  if (input_value->shape.num_dims == 0) {
+  if (input_value->shape.num_dims == 0 || input_value->shape.num_dims > XNN_MAX_TENSOR_DIMS) {
     xnn_log_error(
         "failed to reshape %s operator with input ID #%" PRIu32
-        ": unsupported number of dimensions %zu, must be at least 1",
+        ": unsupported number of dimensions %zu, must be between 1 and %zu",
         xnn_node_type_to_string(xnn_node_type_fully_connected),
-        input_id, input_value->shape.num_dims);
-    return xnn_status_invalid_parameter;
+        input_id, input_value->shape.num_dims, (size_t)XNN_MAX_TENSOR_DIMS);
+    return xnn_status_unsupported_parameter;
   }
 
   const uint32_t output_id = opdata->outputs[0];
@@ -1049,12 +1057,12 @@ static enum xnn_status reshape_fully_connected_operator(
   assert(filter_id < num_values);
   struct xnn_runtime_value* filter_value = &values[filter_id];
 
-  if (filter_value->shape.num_dims < 2) {
+  if (filter_value->shape.num_dims < 2 || filter_value->shape.num_dims > XNN_MAX_TENSOR_DIMS) {
     xnn_log_error("failed to reshape %s operator with filter ID #%" PRIu32
-                  ": number of dimensions (%zu) must be at least 2",
+                  ": number of dimensions (%zu) must be between 2 and %zu",
                   xnn_node_type_to_string(xnn_node_type_fully_connected),
-                  filter_id, filter_value->shape.num_dims);
-    return xnn_status_invalid_parameter;
+                  filter_id, filter_value->shape.num_dims, (size_t)XNN_MAX_TENSOR_DIMS);
+    return xnn_status_unsupported_parameter;
   }
 
   if (output_value->flags & XNN_VALUE_FLAG_LAYOUT_NCHW) {
@@ -1937,6 +1945,15 @@ enum xnn_status xnn_define_fully_connected(xnn_subgraph_t subgraph,
     return status;
   }
 
+  if (input_value->shape.num_dims > XNN_MAX_TENSOR_DIMS) {
+    xnn_log_error(
+        "failed to define %s operator with input ID #%" PRIu32
+        ": unsupported number of dimensions %zu, must not exceed %zu",
+        xnn_node_type_to_string(xnn_node_type_fully_connected),
+        input_id, input_value->shape.num_dims, (size_t)XNN_MAX_TENSOR_DIMS);
+    return xnn_status_unsupported_parameter;
+  }
+
   switch (input_value->datatype) {
     case xnn_datatype_bf16:
     case xnn_datatype_fp16:
@@ -1980,6 +1997,15 @@ enum xnn_status xnn_define_fully_connected(xnn_subgraph_t subgraph,
                   xnn_node_type_to_string(xnn_node_type_fully_connected),
                   filter_id, kernel_value->type);
     return xnn_status_invalid_parameter;
+  }
+
+  if (kernel_value->shape.num_dims > XNN_MAX_TENSOR_DIMS) {
+    xnn_log_error(
+        "failed to define %s operator with filter ID #%" PRIu32
+        ": unsupported number of dimensions %zu, must not exceed %zu",
+        xnn_node_type_to_string(xnn_node_type_fully_connected),
+        filter_id, kernel_value->shape.num_dims, (size_t)XNN_MAX_TENSOR_DIMS);
+    return xnn_status_unsupported_parameter;
   }
 
   // Non-static kernel is supported, but only for some data types
@@ -2120,6 +2146,15 @@ enum xnn_status xnn_define_fully_connected(xnn_subgraph_t subgraph,
       return xnn_status_invalid_parameter;
     }
 
+    if (bias_value->shape.num_dims > XNN_MAX_TENSOR_DIMS) {
+      xnn_log_error(
+          "failed to define %s operator with bias ID #%" PRIu32
+          ": unsupported number of dimensions %zu, must not exceed %zu",
+          xnn_node_type_to_string(xnn_node_type_fully_connected),
+          bias_id, bias_value->shape.num_dims, (size_t)XNN_MAX_TENSOR_DIMS);
+      return xnn_status_unsupported_parameter;
+    }
+
     // Non-static bias is supported, but only for some data types
     switch (bias_value->datatype) {
       case xnn_datatype_fp16:
@@ -2170,6 +2205,15 @@ enum xnn_status xnn_define_fully_connected(xnn_subgraph_t subgraph,
                                                 output_id, output_value);
   if (status != xnn_status_success) {
     return status;
+  }
+
+  if (output_value->shape.num_dims > XNN_MAX_TENSOR_DIMS) {
+    xnn_log_error(
+        "failed to define %s operator with output ID #%" PRIu32
+        ": unsupported number of dimensions %zu, must not exceed %zu",
+        xnn_node_type_to_string(xnn_node_type_fully_connected),
+        output_id, output_value->shape.num_dims, (size_t)XNN_MAX_TENSOR_DIMS);
+    return xnn_status_unsupported_parameter;
   }
 
   switch (output_value->datatype) {
