@@ -129,11 +129,11 @@ YNN_DOT_KERNEL(arch_flag::sme, dot_int8_int8_int32_sme,
                dot_flag::transpose_a | dot_flag::consistent_arithmetic,
                int8_t, int8_t, int32_t)
 YNN_DOT_KERNEL(arch_flag::sme, dot_int8_int4_int32_sme,
-               sme_vl(int32_t{}), 4 * sme_vl(int32_t{}), 4, 1, sme_vl(int32_t{}), 4,
+               sme_vl(int32_t{}), 4 * sme_vl(int32_t{}), 8, 1, sme_vl(int32_t{}), 8,
                dot_flag::transpose_a | dot_flag::consistent_arithmetic,
                int8_t, int4x2, int32_t)
 YNN_DOT_KERNEL(arch_flag::sme, dot_int8_int2_int32_sme,
-               sme_vl(int32_t{}), 4 * sme_vl(int32_t{}), 4, 1, sme_vl(int32_t{}), 4,
+               sme_vl(int32_t{}), 4 * sme_vl(int32_t{}), 16, 1, sme_vl(int32_t{}), 16,
                dot_flag::transpose_a | dot_flag::consistent_arithmetic,
                int8_t, int2x4, int32_t)
 #endif  // YNN_ARCH_ARM64_SME

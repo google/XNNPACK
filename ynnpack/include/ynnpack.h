@@ -46,6 +46,10 @@ enum ynn_status {
   ynn_status_deprecated = 4,
 };
 
+// -----------------------------------------------------------------------------
+// Section 1. Subgraph Construction
+// -----------------------------------------------------------------------------
+
 typedef struct ynn_subgraph* ynn_subgraph_t;
 
 // This type is an alias for `slinky::thread_pool`. A `slinky::thread_pool`
@@ -64,6 +68,10 @@ void ynn_delete_subgraph(ynn_subgraph_t subgraph);
 // Apply subgraph rewrites and other optimizations to the subgraph.
 ynn_status ynn_optimize_subgraph(ynn_subgraph_t subgraph,
                                  ynn_threadpool_t threadpool, uint32_t flags);
+
+// -----------------------------------------------------------------------------
+// Section 2. Values and Tensors
+// -----------------------------------------------------------------------------
 
 // Describes a type for a value.
 enum ynn_type {
@@ -98,7 +106,8 @@ enum ynn_type {
 // is an optional parameter. If `dims` is NULL, or `dims[d]` is 0, the shape is
 // dynamic in dimension `d`, and must be set with `ynn_set_external_value_shape`
 // prior to calling `ynn_invoke_runtime`. If `dims` is non-NULL or `dims[d]` is
-// not 0, the shape is static in dimension `d`, and cannot be changed.
+// not 0, the shape is static in dimension `d`, and cannot be changed. If
+// `dims[d]` is 1, dimension `d` is a broadcast dimension.
 //
 // If the value is an external output ('YNN_VALUE_FLAG_EXTERNAL_OUTPUT'), the
 // shape will be retrievable via `ynn_get_external_value_shape` after calling
@@ -155,6 +164,19 @@ enum ynn_status ynn_define_iota(ynn_subgraph_t subgraph, enum ynn_type type,
 #define YNN_NODE_FLAG_NO_EXCESS_PRECISION (1 << 2)
 #define YNN_NODE_FLAG_LESS_ZERO (1 << 3)
 #define YNN_NODE_FLAG_SYMMETRIC_B (1 << 4)
+
+// -----------------------------------------------------------------------------
+// Section 3. Elementwise operations
+// -----------------------------------------------------------------------------
+//
+// The following group of functions define elementwise operations. All
+// elementwise operations support the same broadcasting conventions:
+// - The rank of the result is equal to the maximum of the rank of all of the
+// inputs.
+// - If an input has a lower rank than the output rank, the input has leading
+// broadcast dimensions inserted to match the output rank.
+// - In a particular dimension, the extent of all of the inputs in that
+// dimension must match, unless the input dimension is a broadcast dimension.
 
 enum ynn_unary_operator {
   ynn_unary_invalid = 0,
@@ -282,11 +304,7 @@ enum ynn_binary_operator {
   ynn_binary_exp_subtract,
 };
 
-// Defines a binary operation of two inputs to a single output. The two inputs
-// are permitted to have a differing number of dimensions. The input with fewer
-// dimensions will have leading broadcast dimensions inserted to match the rank
-// of the other input. Dimensions that exist in both inputs must have the same
-// extent.
+// Defines a binary operation of two inputs to a single output.
 //
 // If the output is not defined, the output type will be:
 // - The type of a, if b can be losslessly converted to the type of a.
@@ -296,6 +314,65 @@ enum ynn_status ynn_define_binary(ynn_subgraph_t subgraph,
                                   enum ynn_binary_operator op,
                                   uint32_t input_a_id, uint32_t input_b_id,
                                   uint32_t* output_id, uint32_t flags);
+
+// -----------------------------------------------------------------------------
+// Section 4. Copies and layout transformations
+// -----------------------------------------------------------------------------
+//
+// All of these operations copy from one of the inputs with no other processing.
+//
+// Many of these operations allow specifying axes by index. In addition to a
+// simple dimension index, these parameters support the following values:
+// - Negative `axis` indicates that the dimension is `rank + axis`, i.e. `-1`
+// refers to the last dimension.
+// - A dimension that refers to a dimension that is out of bounds refers to a
+// broadcast dimension. **Because of this, many of these operations do nothing
+// (and not errors) when an axis parameter is out of bounds.**
+//
+// There are often multiple ways to express a given operation. Some of these
+// expressions have advantages and disadvantages.
+//
+// **Broadcasting**
+//
+// Prefer implementing broadcasting in order of preference using the following
+// approaches:
+//
+// 1. Broadcasting should be performed by relying on broadcast dimensions.
+// Dimensions that are newly created by YNNPACK operations or are defined to
+// have extent 1 by `ynn_define_tensor` are broadcast dimensions. Broadcasts
+// implemented this way avoid realizing the broadcast into memory, and there is
+// no operation in the graph to process at initialization time.
+//
+// 2. If a dimension is expected to be extent 1, but is not a broadcast
+// dimension, use `ynn_define_broadcast` to mark the dimension as a broadcast
+// dimension.
+//
+// 3. `ynn_define_broadcast_like` or `ynn_define_static_broadcast` define a
+// broadcasted value with a specific shape. **If YNNPACK cannot fold these
+// operations into their consumers, they will realize a broadcasted tensor into
+// memory.**
+//
+// **Adding and removing dimensions**
+//
+// `ynn_define_static_transpose` is a very general operation and can be used to
+// add or remove dimensions in addition to performing transposes. To remove a
+// dimension, omit it from the `axes` list. To add a new broadcast dimension,
+// include a dimension index that doesn't exist in the `input`. When adding or
+// removing dimensions, `num_axes` specifies the rank of the output tensor.
+//
+// `ynn_define_static_expand_dims` adds new broadcast dimensions at `new_axes`.
+//
+// `ynn_define_static_slice` with `flags` `YNN_NODE_FLAG_SLICE_DIMS` will remove
+// a dimension after performing a slice of the `input`.
+//
+// Other less preferred approaches:
+// - `ynn_define_split_dim` with a `1` in `splits` at the appropriate position
+// will make a new dimension.
+// - `ynn_define_fuse_dim` or `ynn_define_fuse_dims` of dimensions with extent 1
+// will drop those dimensions.
+// - `ynn_define_static_reshape` can add or remove extent 1 dimensions, but
+// requires fully specifying the entire shape, which may not be possible if some
+// dimensions are dynamic.
 
 // Defines a gather operation. This computes:
 //
@@ -311,6 +388,8 @@ enum ynn_status ynn_define_binary(ynn_subgraph_t subgraph,
 //   output[i, j, k, ...] = input[..., index[i, j, k, ...], ...]
 //
 // where the `index` tensor replaces the gathered axis.
+//
+// `output_rank` specifies the rank of the output tensor.
 enum ynn_status ynn_define_gather(ynn_subgraph_t subgraph, size_t num_axes,
                                   const int32_t* axes, size_t output_rank,
                                   uint32_t input_id, uint32_t index_id,
@@ -320,6 +399,15 @@ enum ynn_status ynn_define_gather(ynn_subgraph_t subgraph, size_t num_axes,
 // extent 1 dimensions. If `new_dims[d]` is zero, dimension `d` is passed
 // through unchanged. If the rank of `input_id` is less than `rank`,
 // leading broadcasting dimensions are inserted.
+//
+// This operation might explicitly generate a new tensor with the given shape in
+// memory. This is rarely necessary in YNNPACK. Better alternatives include:
+// - No op may be needed at all. If the dimension is a broadcast dimension, most
+// operations can implicitly broadcast as needed.
+// - If the dimension is extent 1, but not a broadcast dimension,
+// `ynn_define_broadcast` will make the dimension a broadcast dimension, but the
+// dimension will still have extent 1, and the operation is usually not realized
+// into memory.
 enum ynn_status ynn_define_static_broadcast(ynn_subgraph_t subgraph,
                                             size_t rank, const size_t* new_dims,
                                             uint32_t input_id,
@@ -342,7 +430,7 @@ enum ynn_status ynn_define_broadcast(ynn_subgraph_t subgraph, size_t num_axes,
                                      const int32_t* axes, uint32_t input_id,
                                      uint32_t* output_id, uint32_t flags);
 
-// Inserts new dimensions of extent 1 at the positions identified by `new_axes`.
+// Inserts new broadcast dimensions at the positions identified by `new_axes`.
 enum ynn_status ynn_define_static_expand_dims(
     ynn_subgraph_t subgraph, size_t num_new_axes, const int32_t* new_axes,
     uint32_t input_id, uint32_t* output_id, uint32_t flags);
@@ -350,7 +438,8 @@ enum ynn_status ynn_define_static_expand_dims(
 // Reinterprets the memory of `input_id` to have the shape `new_dims`. The new
 // shape must have the same number of elements in it as the shape of `input_id`.
 // `new_dims` may have exactly one zero in it, indicating that dimension should
-// be computed such that the input and output have the same total size.
+// be computed such that the input and output have the same total size. Extent 1
+// dimensions will be broadcast dimensions.
 enum ynn_status ynn_define_static_reshape(ynn_subgraph_t subgraph, size_t rank,
                                           const size_t* new_dims,
                                           uint32_t input_id,
@@ -377,23 +466,25 @@ enum ynn_status ynn_define_fuse_dims(ynn_subgraph_t subgraph, size_t num_axes,
                                      const int32_t* axes, uint32_t input_id,
                                      uint32_t* output_id, uint32_t flags);
 
-// Concatenates `input_ids` along the `axis` dimension.
+// Concatenates `input_ids` along the `axis` dimension. `input_ids` must have
+// dimensions with the same extents in all dimensions except `axis`.
 enum ynn_status ynn_define_concatenate(ynn_subgraph_t subgraph, int32_t axis,
                                        size_t num_inputs,
                                        const uint32_t* input_ids,
                                        uint32_t* output_id, uint32_t flags);
 
-// Stacks `input_ids` into an output with a new `axis` dimension.
+// Stacks `input_ids` into an output with a new `axis` dimension. `input_ids`
+// must have dimensions with the same extents in all dimensions.
 enum ynn_status ynn_define_stack(ynn_subgraph_t subgraph, int32_t axis,
                                  size_t num_inputs, const uint32_t* input_ids,
                                  uint32_t* output_id, uint32_t flags);
 
 // Copies `input_id` to `output_id`.
-// TODO: I don't think we need this.
 enum ynn_status ynn_define_copy(ynn_subgraph_t subgraph, uint32_t input_id,
                                 uint32_t* output_id, uint32_t flags);
 
 // Splits `input_id` into `output_ids` evenly in the `axis` dimension.
+// `num_outputs` must divide the extent of dimension `axis` of `input_id`.
 enum ynn_status ynn_define_even_split(ynn_subgraph_t subgraph, int32_t axis,
                                       uint32_t input_id, size_t num_outputs,
                                       uint32_t* output_ids, uint32_t flags);
@@ -401,7 +492,8 @@ enum ynn_status ynn_define_even_split(ynn_subgraph_t subgraph, int32_t axis,
 // Extracts the range of indices `[begin, end)` with stride `strides` in the
 // `axes` dimensions. If the `YNN_NODE_FLAG_SLICE_DIMS` flag is set, this
 // operation slices `axes` at `begins`, and then removes those axes from the
-// result.
+// result. Sliced dimensions that result in extent 1 become broadcast
+// dimensions.
 enum ynn_status ynn_define_static_slice(
     ynn_subgraph_t subgraph, size_t num_axes, const int32_t* axes,
     const int64_t* begins, const int64_t* ends, const int64_t* strides,
@@ -420,7 +512,7 @@ enum ynn_status ynn_define_slice_like(ynn_subgraph_t subgraph, size_t num_axes,
 // Copy the input to the output, using a permutation `axes` to select the
 // dimensions of the input. Dimensions can be removed (by not including the
 // dimension in the permutation) or added (by using a dimension that is larger
-// than the rank of the input).
+// than the rank of the input). Newly added dimensions are broadcast dimensions.
 //
 // If `YNN_NODE_FLAG_KEEP_DIMS` is set, `num_axes` specifies the number of
 // dimensions in `axes` to reorder. The specified dimensions are reordered among
@@ -476,6 +568,10 @@ enum ynn_status ynn_define_stencil_copy(
     uint32_t input_id, uint32_t padding_id, uint32_t* output_id,
     uint32_t flags);
 
+// -----------------------------------------------------------------------------
+// Section 5. Reductions
+// -----------------------------------------------------------------------------
+
 // Performs the operation:
 //
 //   output(batch_dims..., i, j) = c(batch_dims..., i, j)
@@ -484,16 +580,17 @@ enum ynn_status ynn_define_stencil_copy(
 //
 // If num_k_dims = 1, this is a matrix multiply.
 //
+// The batch dimensions are elementwise dimensions. Inputs `a`, `b`, and `c` are
+// permitted to have differing numbers of batch dimensions or broadcast
+// dimensions; leading broadcast dimensions are inserted to match the rank of
+// the output.
+//
 // If `output_id` is `YNN_INVALID_VALUE_ID`, the output type will be:
 // - ynn_type_int32 if both `input_a_id` and `input_b_id` are integer values,
 // - ynn_type_fp32 otherwise.
 //
-// If `input_b_id` is `YNN_INVALID_VALUE_ID`, `b` is defined to be the
-// "identity" value for the reduction operator:
-// - sum: 0
-// - product: 1
-// - min: (max value of type of `input_a_id`)
-// - max: (min value of type of `input_a_id`)
+// `input_c_id` is optional (`YNN_INVALID_VALUE_ID`). If provided, it acts as an
+// additive accumulator or bias: output = dot(a, b) + c.
 //
 // If the `YNN_NODE_FLAG_SYMMETRIC_B` flag is set, this operation will assume
 // that `input_b_id` can be negated without overflow.
@@ -518,7 +615,7 @@ enum ynn_reduce_operator {
 //   output(...) = op(output(...), a(...))
 //
 // `YNN_NODE_FLAG_KEEP_DIMS` indicates that a reduction should keep the reduced
-// dimensions in the result (with extent 1).
+// dimensions in the result as broadcast dimensions (with extent 1).
 //
 // If `output_id` is `YNN_INVALID_VALUE_ID` and `op` is `ynn_reduce_sum` or the
 // output type will be:
@@ -542,14 +639,18 @@ enum ynn_status ynn_define_reduce(ynn_subgraph_t subgraph,
 
 // Get `axes` dimensions of the shape of `value_id` and store it in `output_id`.
 // If the `YNN_NODE_FLAG_RESHAPE_1D` flag is set, the result will be the product
-// of the selected axes. If the `YNN_NODE_FLAG_UNIQUE_DIMS` flag is set, axes
-// are deduplicated.
+// of the selected axes. If the `YNN_NODE_FLAG_UNIQUE_DIMS` flag is set, `axes`
+// are deduplicated. Broadcast dimensions are reported as having extent 1.
 enum ynn_status ynn_define_get_tensor_shape(ynn_subgraph_t subgraph,
                                             size_t num_axes,
                                             const int32_t* axes, ynn_type type,
                                             size_t rank, uint32_t value_id,
                                             uint32_t* output_id,
                                             uint32_t flags);
+
+// -----------------------------------------------------------------------------
+// Section 6. Runtime
+// -----------------------------------------------------------------------------
 
 typedef struct ynn_runtime* ynn_runtime_t;
 

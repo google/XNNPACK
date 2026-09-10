@@ -210,8 +210,8 @@ def xnnpack_std_c_defines():
     return ["_DARWIN_C_SOURCE=1", "_POSIX_C_SOURCE=199309L"]
 
 def xnnpack_test_deps_for_library():
-    """Depencies needed for a library to use gunit."""
-    return ["@com_google_googletest//:gtest_main"]
+    """Dependencies needed for a library to use gunit."""
+    return ["@com_google_googletest//:gtest"]
 
 def xnnpack_optional_ruy_copts():
     """Compiler flags to optionally enable Ruy benchmarks."""

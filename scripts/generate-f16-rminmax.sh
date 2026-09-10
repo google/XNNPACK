@@ -71,6 +71,13 @@ tools/xngen src/f16-rminmax/rvv.c.in -D LMUL=8 -D OP=MIN -o src/f16-rminmax/gen/
 tools/xngen src/f16-rminmax/rvv.c.in -D LMUL=4 -D OP=MINMAX -o src/f16-rminmax/gen/f16-rminmax-rvvfp16arith-u4v.c &
 tools/xngen src/f16-rminmax/rvv.c.in -D LMUL=8 -D OP=MINMAX -o src/f16-rminmax/gen/f16-rminmax-rvvfp16arith-u8v.c &
 
+############################# Wasm Relaxed SIMD FP16 ############################
+tools/xngen src/f16-rminmax/wasmrelaxedsimdfp16.c.in -D BATCH_TILE=8  -D ACCUMULATORS=1 -o src/f16-rminmax/gen/f16-rmax-wasmrelaxedsimdfp16-u8.c &
+tools/xngen src/f16-rminmax/wasmrelaxedsimdfp16.c.in -D BATCH_TILE=16 -D ACCUMULATORS=2 -o src/f16-rminmax/gen/f16-rmax-wasmrelaxedsimdfp16-u16-acc2.c &
+tools/xngen src/f16-rminmax/wasmrelaxedsimdfp16.c.in -D BATCH_TILE=24 -D ACCUMULATORS=3 -o src/f16-rminmax/gen/f16-rmax-wasmrelaxedsimdfp16-u24-acc3.c &
+tools/xngen src/f16-rminmax/wasmrelaxedsimdfp16.c.in -D BATCH_TILE=32 -D ACCUMULATORS=2 -o src/f16-rminmax/gen/f16-rmax-wasmrelaxedsimdfp16-u32-acc2.c &
+tools/xngen src/f16-rminmax/wasmrelaxedsimdfp16.c.in -D BATCH_TILE=32 -D ACCUMULATORS=4 -o src/f16-rminmax/gen/f16-rmax-wasmrelaxedsimdfp16-u32-acc4.c &
+
 #################################### Scalar ###################################
 ### Generic C micro-kernels
 tools/xngen src/f16-rminmax/scalar.c.in -D BATCH_TILE=1 -D DATATYPE=F16 -D ACCUMULATORS=1 -D OP=MINMAX -D WASM=0 -o src/f16-rminmax/gen/f16-rminmax-scalar-u1.c &
