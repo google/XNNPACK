@@ -3,6 +3,16 @@
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
 
+# Scalar
+- name: xnn_f16_raddstoreexpminusmax_ukernel__scalar_rr2_p2_u1
+
+# Portable FP16 arithmetic
+- name: xnn_f16_raddstoreexpminusmax_ukernel__avx512fp16_rr2_p2_u32
+
+# Portable FP32 accumulation
+- name: xnn_f16_f32acc_raddstoreexpminusmax_ukernel__f16c_rr2_p5_u8
+- name: xnn_f16_f32acc_raddstoreexpminusmax_ukernel__avx512f_rr2_p5_u16
+
 # ARM NEON+FP16ARITH
 - name: xnn_f16_raddstoreexpminusmax_ukernel__neonfp16arith_rr2_p2_u16
 - name: xnn_f16_raddstoreexpminusmax_ukernel__neonfp16arith_rr2_p2_u16_acc2
@@ -30,3 +40,9 @@
 - name: xnn_f16_raddstoreexpminusmax_ukernel__rvvfp16arith_rr2_p2_u1v
 - name: xnn_f16_raddstoreexpminusmax_ukernel__rvvfp16arith_rr2_p2_u2v
 - name: xnn_f16_raddstoreexpminusmax_ukernel__rvvfp16arith_rr2_p2_u4v
+
+# WebAssembly Relaxed SIMD FP16
+- name: xnn_f16_raddstoreexpminusmax_ukernel__wasmrelaxedsimdfp16_rr2_p2_u8
+
+# WebAssembly Relaxed SIMD with FP32 accumulation
+- name: xnn_f16_f32acc_raddstoreexpminusmax_ukernel__wasmrelaxedsimd_rr2_p5_u4
