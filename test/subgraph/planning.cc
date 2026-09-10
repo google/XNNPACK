@@ -15,6 +15,7 @@
 #include "litert/tensor/arithmetic.h"
 #include "litert/tensor/backends/xnnpack/arithmetic.h"
 #include "litert/tensor/backends/xnnpack/conversion.h"
+#include "litert/tensor/backends/xnnpack/graph.h"
 #include "litert/tensor/datatypes.h"
 #include "litert/tensor/tensor.h"
 #include "litert/tensor/utils/matchers.h"
@@ -51,7 +52,7 @@ TEST(PlanningTest, ReshapingToBroadcastWorks) {
   }
 
   xnn_runtime_t runtime;
-  xnn_create_runtime_v4(graph->subgraph(), /*weights_cache=*/nullptr,
+  xnn_create_runtime_v4(graph->GetSubgraph(), /*weights_cache=*/nullptr,
                         /*workspace=*/nullptr, /*threadpool=*/nullptr,
                         /*flags=*/0, &runtime);
 
