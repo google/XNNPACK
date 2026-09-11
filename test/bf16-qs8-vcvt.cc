@@ -34,6 +34,14 @@
   TEST(ukernel, output_zero_point) {                                         \
     TestOutputZeroPoint<Convert, datatype_in, datatype_out>(                 \
         arch_flags, batch_tile, ukernel, init_params);                       \
+  }                                                                          \
+  TEST(ukernel, output_saturation) {                                         \
+    TestOutputSaturation<Convert, datatype_in, datatype_out>(                \
+        arch_flags, batch_tile, ukernel, init_params);                       \
+  }                                                                          \
+  TEST(ukernel, output_overflow) {                                           \
+    TestOutputOverflow<Convert, datatype_in, datatype_out>(                  \
+        arch_flags, batch_tile, ukernel, init_params);                       \
   }
 #include "src/bf16-qs8-vcvt/bf16-qs8-vcvt.inc"
 #undef XNN_UKERNEL
