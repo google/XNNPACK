@@ -24,6 +24,7 @@ cc_library(
     deps = [
         "//:XNNPACK",
         "//litert/tensor",
+        "//litert/tensor:buffer",
         "//litert/tensor/backends/common_nnpack:graph",
         "//litert/tensor/backends/xnnpack:conversion",
         "//litert/tensor/backends/xnnpack:graph",
@@ -33,6 +34,7 @@ cc_library(
         "@abseil-cpp//absl/container:flat_hash_map",
         "@abseil-cpp//absl/status",
         "@abseil-cpp//absl/status:statusor",
+        "@abseil-cpp//absl/strings:str_format",
         "@abseil-cpp//absl/types:span",
         "@pthreadpool",
     ],
