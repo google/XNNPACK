@@ -1295,14 +1295,21 @@ enum xnn_status xnn_define_convolution_2d(
     return status;
   }
 
-  if (filter_value->shape.dim[0] != group_output_channels * groups) {
+  if (filter_value->shape.num_dims != 4 ||
+      filter_value->shape.dim[0] != group_output_channels * groups ||
+      filter_value->shape.dim[1] != kernel_height ||
+      filter_value->shape.dim[2] != kernel_width ||
+      filter_value->shape.dim[3] != group_input_channels) {
     xnn_log_error(
-        "failed to define %s operator with filter output channels %zu, groups "
-        "#%" PRIu32
-        " and group_output_channels %zu:mismatching shapes, filter output "
-        "channels must be equal to groups * group_output_channels.",
-        xnn_node_type_to_string(xnn_node_type_convolution_2d),
-        filter_value->shape.dim[0], groups, group_output_channels);
+        "failed to define %s operator with filter ID #%" PRIu32
+        ": filter shape must be [groups * group_output_channels=%zu, "
+        "kernel_height=%" PRIu32 ", kernel_width=%" PRIu32
+        ", group_input_channels=%zu], but got shape [%zu, %zu, %zu, %zu]",
+        xnn_node_type_to_string(xnn_node_type_convolution_2d), filter_id,
+        group_output_channels * groups, kernel_height, kernel_width,
+        group_input_channels, filter_value->shape.dim[0],
+        filter_value->shape.dim[1], filter_value->shape.dim[2],
+        filter_value->shape.dim[3]);
     return xnn_status_invalid_parameter;
   }
 
