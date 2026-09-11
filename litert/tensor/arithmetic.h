@@ -655,6 +655,10 @@ Tensor<Mixins...> ExpandDims(Tensor<Mixins...> input, Tensor<Mixins...> axis,
   if (axis_info.buffer) {
     LockedBufferSpan<const int32_t> axis_lock =
         axis_info.buffer->Lock().template As<const int32_t>();
+    if (axis_lock.size() < 1) {
+      return Tensor<Mixins...>(graph::ErrorTensor(absl::InvalidArgumentError(
+          "ExpandDims axis buffer must contain at least one element.")));
+    }
     int real_axis = axis_lock.data()[0];
     if (real_axis < 0) {
       real_axis += input_info.shape.size() + 1;
@@ -1551,6 +1555,10 @@ std::vector<Tensor<Mixins...>> Split(
   if (axis_info.buffer) {
     LockedBufferSpan<const int32_t> axis_lock =
         axis_info.buffer->Lock().As<const int32_t>();
+    if (axis_lock.size() < 1) {
+      return {Tensor<Mixins...>(graph::ErrorTensor(absl::InvalidArgumentError(
+          "Split axis buffer must contain at least one element.")))};
+    }
     axis_val = axis_lock.data()[0];
   } else {
     // TODO(b/269489748): Support dynamic axis for shape inference.
@@ -2299,6 +2307,10 @@ Tensor<Mixins...> OneHot(Tensor<Mixins...> indices, Tensor<Mixins...> depth,
   if (depth_info.buffer) {
     LockedBufferSpan<const int32_t> depth_lock =
         depth_info.buffer->Lock().template As<const int32_t>();
+    if (depth_lock.size() < 1) {
+      return Tensor<Mixins...>(graph::ErrorTensor(absl::InvalidArgumentError(
+          "OneHot depth buffer must contain at least one element.")));
+    }
     depth_val = depth_lock.data()[0];
   }
   if (resolved_axis < 0 ||
@@ -2543,6 +2555,14 @@ std::vector<Tensor<Mixins...>> NonMaxSuppressionV5(
           graph::GetInfo(max_output_size.GetRaw())->buffer.get()) {
     LockedBufferSpan<const int32_t> max_output_size_lock =
         max_output_size_buffer->Lock().template As<const int32_t>();
+    if (max_output_size_lock.size() < 1) {
+      auto error = absl::InvalidArgumentError(
+          "NonMaxSuppression max_output_size buffer must contain at least one "
+          "element.");
+      return {Tensor<Mixins...>(graph::ErrorTensor(error)),
+              Tensor<Mixins...>(graph::ErrorTensor(error)),
+              Tensor<Mixins...>(graph::ErrorTensor(error))};
+    }
     const int max_output_size_val = *max_output_size_lock.data();
     indices_info.shape = {max_output_size_val};
     scores_info.shape = {max_output_size_val};
