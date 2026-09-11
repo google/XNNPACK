@@ -86,6 +86,7 @@ PROD_AVX512F_MICROKERNEL_SRCS = [
 ]
 
 NON_PROD_AVX512F_MICROKERNEL_SRCS = [
+    "src/f16-raddstoreexpminusmax/gen/f16-f32acc-raddstoreexpminusmax-avx512f-rr2-p5-u16.c",
     "src/f16-vapproxgelu/gen/f16-f32acc-vapproxgelu-avx512f-rational-6-4-nr.c",
     "src/f16-vlog/gen/f16-f32acc-vlog-avx512f-rational-1-3-nr.c",
     "src/f16-vtanh/gen/f16-f32acc-vtanh-avx512f-rational-5-4-nr.c",

@@ -279,4 +279,13 @@ static XNN_INLINE v128_t xnn_cvt_f16_f32(v128_t f) {
       0, 0, 0, 0);
 }
 
+static XNN_INLINE float xnn_reduce_add_f16(xnn_simd_f16_t a) {
+  v128_t vacc = xnn_cvt_f32_f16(a);
+  vacc = wasm_f32x4_add(
+      vacc, xnn_cvt_f32_f16(wasm_v64x2_shuffle(a, a, 1, 1)));
+  vacc = wasm_f32x4_add(vacc, wasm_v64x2_shuffle(vacc, vacc, 1, 1));
+  return wasm_f32x4_extract_lane(vacc, 0) +
+         wasm_f32x4_extract_lane(vacc, 1);
+}
+
 #endif  // XNNPACK_SRC_XNNPACK_SIMD_F16_WASMRELAXEDSIMD_H_
