@@ -1119,15 +1119,10 @@ template("xnnpack_library") {
   }
 }
 
-xnnpack_source_set("litert_tensor_api") {
+xnnpack_source_set("litert_tensor_api_core") {
   sources = [
     "litert/tensor/arithmetic.h",
     "litert/tensor/arithmetic_graph.h",
-    "litert/tensor/backends/xnnpack/arithmetic.cc",
-    "litert/tensor/backends/xnnpack/arithmetic.h",
-    "litert/tensor/backends/xnnpack/conversion.cc",
-    "litert/tensor/backends/xnnpack/conversion.h",
-    "litert/tensor/backends/xnnpack/utils.h",
     "litert/tensor/buffer.cc",
     "litert/tensor/buffer.h",
     "litert/tensor/datatypes.h",
@@ -1145,8 +1140,6 @@ xnnpack_source_set("litert_tensor_api") {
     "litert/tensor/internal/shape.cc",
     "litert/tensor/internal/shape.h",
     "litert/tensor/internal/utils.h",
-    "litert/tensor/runners/xnnpack/runner.cc",
-    "litert/tensor/runners/xnnpack/runner.h",
     "litert/tensor/tensor.cc",
     "litert/tensor/tensor.h",
     "litert/tensor/utils/macros.h",
@@ -1154,6 +1147,74 @@ xnnpack_source_set("litert_tensor_api") {
     "litert/tensor/utils/source_location.h",
   ]
   public_deps = [
+    ":xnnpack_headers",
+    "//third_party/abseil-cpp/absl/algorithm:container",
+    "//third_party/abseil-cpp/absl/base",
+    "//third_party/abseil-cpp/absl/base:no_destructor",
+    "//third_party/abseil-cpp/absl/container:flat_hash_map",
+    "//third_party/abseil-cpp/absl/container:flat_hash_set",
+    "//third_party/abseil-cpp/absl/container:inlined_vector",
+    "//third_party/abseil-cpp/absl/hash",
+    "//third_party/abseil-cpp/absl/log:absl_check",
+    "//third_party/abseil-cpp/absl/log:absl_log",
+    "//third_party/abseil-cpp/absl/random",
+    "//third_party/abseil-cpp/absl/status",
+    "//third_party/abseil-cpp/absl/status:statusor",
+    "//third_party/abseil-cpp/absl/strings",
+    "//third_party/abseil-cpp/absl/strings:str_format",
+    "//third_party/abseil-cpp/absl/strings:string_view",
+    "//third_party/abseil-cpp/absl/types:optional",
+    "//third_party/abseil-cpp/absl/types:span",
+  ]
+}
+
+xnnpack_source_set("litert_tensor_api_common_nnpack") {
+  sources = [
+    "litert/tensor/backends/common_nnpack/conversion.cc",
+    "litert/tensor/backends/common_nnpack/conversion.h",
+    "litert/tensor/backends/common_nnpack/graph.cc",
+    "litert/tensor/backends/common_nnpack/graph.h",
+    "litert/tensor/backends/common_nnpack/utils.cc",
+    "litert/tensor/backends/common_nnpack/utils.h",
+    "litert/tensor/runners/common_nnpack/runner.h",
+  ]
+  public_deps = [
+    ":litert_tensor_api_core",
+    ":xnnpack_headers",
+    "//third_party/abseil-cpp/absl/algorithm:container",
+    "//third_party/abseil-cpp/absl/base",
+    "//third_party/abseil-cpp/absl/base:no_destructor",
+    "//third_party/abseil-cpp/absl/container:flat_hash_map",
+    "//third_party/abseil-cpp/absl/container:flat_hash_set",
+    "//third_party/abseil-cpp/absl/container:inlined_vector",
+    "//third_party/abseil-cpp/absl/hash",
+    "//third_party/abseil-cpp/absl/log:absl_check",
+    "//third_party/abseil-cpp/absl/log:absl_log",
+    "//third_party/abseil-cpp/absl/random",
+    "//third_party/abseil-cpp/absl/status",
+    "//third_party/abseil-cpp/absl/status:statusor",
+    "//third_party/abseil-cpp/absl/strings",
+    "//third_party/abseil-cpp/absl/strings:str_format",
+    "//third_party/abseil-cpp/absl/strings:string_view",
+    "//third_party/abseil-cpp/absl/types:optional",
+    "//third_party/abseil-cpp/absl/types:span",
+  ]
+}
+
+xnnpack_source_set("litert_tensor_api") {
+  sources = [
+    "litert/tensor/backends/xnnpack/arithmetic.cc",
+    "litert/tensor/backends/xnnpack/arithmetic.h",
+    "litert/tensor/backends/xnnpack/conversion.cc",
+    "litert/tensor/backends/xnnpack/conversion.h",
+    "litert/tensor/backends/xnnpack/graph.h",
+    "litert/tensor/backends/xnnpack/utils.h",
+    "litert/tensor/runners/xnnpack/runner.cc",
+    "litert/tensor/runners/xnnpack/runner.h",
+  ]
+  public_deps = [
+    ":litert_tensor_api_common_nnpack",
+    ":litert_tensor_api_core",
     ":xnnpack_headers",
     "//third_party/abseil-cpp/absl/algorithm:container",
     "//third_party/abseil-cpp/absl/base",

@@ -3,6 +3,9 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+#include <cmath>
+#include <cstddef>
+#include <cstdint>
 #include <functional>
 #include <memory>
 #include <ostream>
@@ -23,6 +26,7 @@
 #include "litert/tensor/arithmetic.h"
 #include "litert/tensor/backends/xnnpack/arithmetic.h"
 #include "litert/tensor/backends/xnnpack/conversion.h"
+#include "litert/tensor/backends/xnnpack/graph.h"
 #include "litert/tensor/buffer.h"
 #include "litert/tensor/datatypes.h"
 #include "litert/tensor/tensor.h"
@@ -42,7 +46,7 @@ void PrintTo(const enum xnn_unary_operator type, std::ostream* os) {
 
 namespace litert::tensor {
 void PrintTo(const XnnpackGraph& graph, std::ostream* os) {
-  PrintTo(graph.subgraph(), os);
+  PrintTo(graph.GetSubgraph(), os);
 }
 }  // namespace litert::tensor
 
@@ -150,7 +154,7 @@ TEST_F(Fp16ToFp32FallbackTest, SingleOpRewrite) {
     LRT_TENSOR_ASSERT_OK_AND_ASSIGN(expected_graph,
                                     BuildXnnpackGraph({output}));
   }
-  xnn_subgraph_t subgraph = graph->subgraph();
+  xnn_subgraph_t subgraph = graph->GetSubgraph();
 
   ASSERT_THAT(xnn_subgraph_fallback_from_fp16_to_fp32(subgraph,
                                                       /*optimization_flags=*/0),
@@ -192,7 +196,7 @@ TEST_F(Fp16ToFp32FallbackTest, OpChainRewrite) {
     LRT_TENSOR_ASSERT_OK_AND_ASSIGN(expected_graph, BuildXnnpackGraph({a}));
   }
 
-  ASSERT_THAT(xnn_subgraph_fallback_from_fp16_to_fp32(graph->subgraph(),
+  ASSERT_THAT(xnn_subgraph_fallback_from_fp16_to_fp32(graph->GetSubgraph(),
                                                       /*optimization_flags=*/0),
               Eq(xnn_status_success));
 
@@ -219,7 +223,7 @@ TEST_F(Fp16ToFp32FallbackTest, ReshapeAllowsFp16Inputs) {
     LRT_TENSOR_ASSERT_OK_AND_ASSIGN(expected_graph, BuildXnnpackGraph({a}));
   }
 
-  ASSERT_THAT(xnn_subgraph_fallback_from_fp16_to_fp32(graph->subgraph(),
+  ASSERT_THAT(xnn_subgraph_fallback_from_fp16_to_fp32(graph->GetSubgraph(),
                                                       /*optimization_flags=*/0),
               Eq(xnn_status_success));
 
@@ -247,7 +251,7 @@ TEST_F(Fp16ToFp32FallbackTest, ReshapeHandlesRewrittenInputs) {
     LRT_TENSOR_ASSERT_OK_AND_ASSIGN(expected_graph, BuildXnnpackGraph({a}));
   }
 
-  ASSERT_THAT(xnn_subgraph_fallback_from_fp16_to_fp32(graph->subgraph(),
+  ASSERT_THAT(xnn_subgraph_fallback_from_fp16_to_fp32(graph->GetSubgraph(),
                                                       /*optimization_flags=*/0),
               Eq(xnn_status_success));
 
@@ -271,7 +275,7 @@ TEST_F(Fp16ToFp32FallbackTest, DontInsertConvertFp32Fp32) {
     LRT_TENSOR_ASSERT_OK_AND_ASSIGN(expected_graph, BuildXnnpackGraph({a}));
   }
 
-  ASSERT_THAT(xnn_subgraph_fallback_from_fp16_to_fp32(graph->subgraph(),
+  ASSERT_THAT(xnn_subgraph_fallback_from_fp16_to_fp32(graph->GetSubgraph(),
                                                       /*optimization_flags=*/0),
               Eq(xnn_status_success));
 
@@ -296,7 +300,7 @@ TEST_F(Fp16ToFp32FallbackTest, Fp16ToFp16HandleExternalInput) {
     LRT_TENSOR_ASSERT_OK_AND_ASSIGN(expected_graph, BuildXnnpackGraph({a}));
   }
 
-  ASSERT_THAT(xnn_subgraph_fallback_from_fp16_to_fp32(graph->subgraph(),
+  ASSERT_THAT(xnn_subgraph_fallback_from_fp16_to_fp32(graph->GetSubgraph(),
                                                       /*optimization_flags=*/0),
               Eq(xnn_status_success));
 
@@ -321,7 +325,7 @@ TEST_F(Fp16ToFp32FallbackTest, Fp16ToFp16HandleExternalOutput) {
     LRT_TENSOR_ASSERT_OK_AND_ASSIGN(expected_graph, BuildXnnpackGraph({a}));
   }
 
-  ASSERT_THAT(xnn_subgraph_fallback_from_fp16_to_fp32(graph->subgraph(),
+  ASSERT_THAT(xnn_subgraph_fallback_from_fp16_to_fp32(graph->GetSubgraph(),
                                                       /*optimization_flags=*/0),
               Eq(xnn_status_success));
 
@@ -344,7 +348,7 @@ TEST_F(Fp16ToFp32FallbackTest,
     LRT_TENSOR_ASSERT_OK_AND_ASSIGN(expected_graph, BuildXnnpackGraph({a}));
   }
 
-  ASSERT_THAT(xnn_subgraph_fallback_from_fp16_to_fp32(graph->subgraph(),
+  ASSERT_THAT(xnn_subgraph_fallback_from_fp16_to_fp32(graph->GetSubgraph(),
                                                       /*optimization_flags=*/0),
               Eq(xnn_status_success));
 
@@ -369,7 +373,7 @@ TEST_F(Fp16ToFp32FallbackTest, HandleExternalOutputThatIsReused) {
     LRT_TENSOR_ASSERT_OK_AND_ASSIGN(expected_graph, BuildXnnpackGraph({a, b}));
   }
 
-  ASSERT_THAT(xnn_subgraph_fallback_from_fp16_to_fp32(graph->subgraph(),
+  ASSERT_THAT(xnn_subgraph_fallback_from_fp16_to_fp32(graph->GetSubgraph(),
                                                       /*optimization_flags=*/0),
               Eq(xnn_status_success));
 
@@ -396,7 +400,7 @@ TEST_F(Fp16ToFp32FallbackTest, TransposeAllowsFp16Inputs) {
     LRT_TENSOR_ASSERT_OK_AND_ASSIGN(expected_graph, BuildXnnpackGraph({a}));
   }
 
-  ASSERT_THAT(xnn_subgraph_fallback_from_fp16_to_fp32(graph->subgraph(),
+  ASSERT_THAT(xnn_subgraph_fallback_from_fp16_to_fp32(graph->GetSubgraph(),
                                                       /*optimization_flags=*/0),
               Eq(xnn_status_success));
 
@@ -424,7 +428,7 @@ TEST_F(Fp16ToFp32FallbackTest, TransposeHandlesRewrittenInputs) {
     LRT_TENSOR_ASSERT_OK_AND_ASSIGN(expected_graph, BuildXnnpackGraph({a}));
   }
 
-  ASSERT_THAT(xnn_subgraph_fallback_from_fp16_to_fp32(graph->subgraph(),
+  ASSERT_THAT(xnn_subgraph_fallback_from_fp16_to_fp32(graph->GetSubgraph(),
                                                       /*optimization_flags=*/0),
               Eq(xnn_status_success));
 
@@ -454,7 +458,7 @@ TEST_F(Fp16ToFp32FallbackTest, ReuseConvertedFp32ValueForMultipleConsumers) {
     LRT_TENSOR_ASSERT_OK_AND_ASSIGN(expected_graph, BuildXnnpackGraph({d}));
   }
 
-  ASSERT_THAT(xnn_subgraph_fallback_from_fp16_to_fp32(graph->subgraph(),
+  ASSERT_THAT(xnn_subgraph_fallback_from_fp16_to_fp32(graph->GetSubgraph(),
                                                       /*optimization_flags=*/0),
               Eq(xnn_status_success));
 
@@ -496,7 +500,7 @@ TEST_F(Fp16ToFp32FallbackTest, SplitAllowsFp16Inputs) {
                                     BuildXnnpackGraph({out0, out1}));
   }
 
-  ASSERT_THAT(xnn_subgraph_fallback_from_fp16_to_fp32(graph->subgraph(),
+  ASSERT_THAT(xnn_subgraph_fallback_from_fp16_to_fp32(graph->GetSubgraph(),
                                                       /*optimization_flags=*/0),
               Eq(xnn_status_success));
 
@@ -536,7 +540,7 @@ TEST_F(Fp16ToFp32FallbackTest, SplitHandlesRewrittenInputs) {
                                     BuildXnnpackGraph({out0, out1}));
   }
 
-  ASSERT_THAT(xnn_subgraph_fallback_from_fp16_to_fp32(graph->subgraph(),
+  ASSERT_THAT(xnn_subgraph_fallback_from_fp16_to_fp32(graph->GetSubgraph(),
                                                       /*optimization_flags=*/0),
               Eq(xnn_status_success));
 
@@ -577,7 +581,7 @@ TEST_F(Fp16ToFp32FallbackTest, FullyConnectedWithBias) {
                                     BuildXnnpackGraph({output}));
   }
 
-  ASSERT_THAT(xnn_subgraph_fallback_from_fp16_to_fp32(graph->subgraph(),
+  ASSERT_THAT(xnn_subgraph_fallback_from_fp16_to_fp32(graph->GetSubgraph(),
                                                       /*optimization_flags=*/0),
               Eq(xnn_status_success));
 
@@ -605,7 +609,7 @@ TEST_F(Fp16ToFp32FallbackTest, BatchMatMul) {
                                     BuildXnnpackGraph({output}));
   }
 
-  ASSERT_THAT(xnn_subgraph_fallback_from_fp16_to_fp32(graph->subgraph(),
+  ASSERT_THAT(xnn_subgraph_fallback_from_fp16_to_fp32(graph->GetSubgraph(),
                                                       /*optimization_flags=*/0),
               Eq(xnn_status_success));
 
@@ -650,7 +654,7 @@ TEST_F(Fp16ToFp32FallbackTest, TransposeConv2D) {
                                     BuildXnnpackGraph({output}));
   }
 
-  ASSERT_THAT(xnn_subgraph_fallback_from_fp16_to_fp32(graph->subgraph(),
+  ASSERT_THAT(xnn_subgraph_fallback_from_fp16_to_fp32(graph->GetSubgraph(),
                                                       /*optimization_flags=*/0),
               Eq(xnn_status_success));
 
@@ -693,7 +697,7 @@ TEST_F(Fp16ToFp32FallbackTest, Conv2D) {
                                     BuildXnnpackGraph({output}));
   }
 
-  ASSERT_THAT(xnn_subgraph_fallback_from_fp16_to_fp32(graph->subgraph(),
+  ASSERT_THAT(xnn_subgraph_fallback_from_fp16_to_fp32(graph->GetSubgraph(),
                                                       /*optimization_flags=*/0),
               Eq(xnn_status_success));
 
@@ -748,7 +752,7 @@ TEST_F(Fp16ToFp32FineGrainedOpSupportTest, AbsAndElu) {
         return std::vector<litert::tensor::TensorHandle>({output});
       }()));
 
-  ASSERT_THAT(xnn_subgraph_fallback_from_fp16_to_fp32(graph->subgraph(),
+  ASSERT_THAT(xnn_subgraph_fallback_from_fp16_to_fp32(graph->GetSubgraph(),
                                                       /*optimization_flags=*/0),
               Eq(xnn_status_success));
 
@@ -775,7 +779,7 @@ TEST_F(Fp16ToFp32FineGrainedOpSupportTest,
         return std::vector<litert::tensor::TensorHandle>({output});
       }()));
 
-  ASSERT_THAT(xnn_subgraph_fallback_from_fp16_to_fp32(graph->subgraph(),
+  ASSERT_THAT(xnn_subgraph_fallback_from_fp16_to_fp32(graph->GetSubgraph(),
                                                       /*optimization_flags=*/0),
               Eq(xnn_status_success));
 
@@ -809,7 +813,7 @@ TEST_F(Fp16ToFp32FineGrainedOpSupportTest, NegLogisticAdd) {
         return std::vector<litert::tensor::TensorHandle>({output});
       }()));
 
-  ASSERT_THAT(xnn_subgraph_fallback_from_fp16_to_fp32(graph->subgraph(),
+  ASSERT_THAT(xnn_subgraph_fallback_from_fp16_to_fp32(graph->GetSubgraph(),
                                                       /*optimization_flags=*/0),
               Eq(xnn_status_success));
 
@@ -834,7 +838,7 @@ TEST_F(Fp16ToFp32FineGrainedOpSupportTest, SoftmaxTest) {
         return BuildXnnpackGraph({output});
       }());
 
-  ASSERT_THAT(xnn_subgraph_fallback_from_fp16_to_fp32(graph->subgraph(),
+  ASSERT_THAT(xnn_subgraph_fallback_from_fp16_to_fp32(graph->GetSubgraph(),
                                                       /*optimization_flags=*/0),
               Eq(xnn_status_success));
 
@@ -868,7 +872,7 @@ TEST_F(Fp16ToFp32FineGrainedOpSupportTest, FullyConnected) {
         return std::vector<litert::tensor::TensorHandle>({output});
       }()));
 
-  ASSERT_THAT(xnn_subgraph_fallback_from_fp16_to_fp32(graph->subgraph(),
+  ASSERT_THAT(xnn_subgraph_fallback_from_fp16_to_fp32(graph->GetSubgraph(),
                                                       /*optimization_flags=*/0),
               Eq(xnn_status_success));
 
@@ -896,7 +900,7 @@ TEST_F(Fp16ToFp32FineGrainedOpSupportTest, BatchMatMul) {
         return std::vector<litert::tensor::TensorHandle>({output});
       }()));
 
-  ASSERT_THAT(xnn_subgraph_fallback_from_fp16_to_fp32(graph->subgraph(),
+  ASSERT_THAT(xnn_subgraph_fallback_from_fp16_to_fp32(graph->GetSubgraph(),
                                                       /*optimization_flags=*/0),
               Eq(xnn_status_success));
 
@@ -942,7 +946,7 @@ TEST_F(Fp16ToFp32FineGrainedOpSupportTest, TransposeConv2D) {
         return std::vector<litert::tensor::TensorHandle>({output});
       }()));
 
-  ASSERT_THAT(xnn_subgraph_fallback_from_fp16_to_fp32(graph->subgraph(),
+  ASSERT_THAT(xnn_subgraph_fallback_from_fp16_to_fp32(graph->GetSubgraph(),
                                                       /*optimization_flags=*/0),
               Eq(xnn_status_success));
 
@@ -999,7 +1003,7 @@ TEST_F(Fp16ToFp32FineGrainedOpSupportTest, Conv2D) {
         }
       }()));
 
-  ASSERT_THAT(xnn_subgraph_fallback_from_fp16_to_fp32(graph->subgraph(),
+  ASSERT_THAT(xnn_subgraph_fallback_from_fp16_to_fp32(graph->GetSubgraph(),
                                                       /*optimization_flags=*/0),
               Eq(xnn_status_success));
 
@@ -1041,7 +1045,7 @@ TEST_P(Fp16ToFp32FallbackUnaryOpTest, Rewrite) {
         }
       }());
 
-  ASSERT_THAT(xnn_subgraph_fallback_from_fp16_to_fp32(graph->subgraph(),
+  ASSERT_THAT(xnn_subgraph_fallback_from_fp16_to_fp32(graph->GetSubgraph(),
                                                       /*optimization_flags=*/0),
               Eq(xnn_status_success));
 
@@ -1107,7 +1111,7 @@ TEST_P(Fp16ToFp32FallbackBinaryOpTest, Rewrite) {
                                     BuildXnnpackGraph({output}));
   }
 
-  ASSERT_THAT(xnn_subgraph_fallback_from_fp16_to_fp32(graph->subgraph(),
+  ASSERT_THAT(xnn_subgraph_fallback_from_fp16_to_fp32(graph->GetSubgraph(),
                                                       /*optimization_flags=*/0),
               Eq(xnn_status_success));
 
@@ -1134,9 +1138,9 @@ TEST_F(Fp16ToFp32FineGrainedOpSupportTest, NoRewriteAfterFp16Rewrite) {
 
   // We expect the graph to be in the FP16 state after rewrite.
   // So we run rewrite on expected_graph too.
-  ASSERT_TRUE(xnn_subgraph_rewrite_for_fp16(expected_graph->subgraph()));
+  ASSERT_TRUE(xnn_subgraph_rewrite_for_fp16(expected_graph->GetSubgraph()));
 
-  xnn_subgraph_t subgraph = graph->subgraph();
+  xnn_subgraph_t subgraph = graph->GetSubgraph();
 
   // Rewrite to FP16.
   ASSERT_TRUE(xnn_subgraph_rewrite_for_fp16(subgraph));

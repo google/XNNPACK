@@ -168,6 +168,7 @@ xnnpack_unit_test(
         "//litert/tensor:datatypes",
         "//litert/tensor/backends/xnnpack:arithmetic",
         "//litert/tensor/backends/xnnpack:conversion",
+        "//litert/tensor/backends/xnnpack:graph",
         "//litert/tensor/utils:matchers_no_g3",
         "//src/configs:config_h",
         "//src/configs:hardware_config",
@@ -182,7 +183,6 @@ xnnpack_unit_test(
     tags = ["no_ynnpack"],
     deps = [
         "//:XNNPACK",
-        "//:common",
         "//:node_type",
         "//:operator_utils",
         "//:subgraph",
@@ -192,8 +192,8 @@ xnnpack_unit_test(
         "//litert/tensor:datatypes",
         "//litert/tensor/backends/xnnpack:arithmetic",
         "//litert/tensor/backends/xnnpack:conversion",
+        "//litert/tensor/backends/xnnpack:graph",
         "//litert/tensor/utils:matchers_no_g3",
-        "//src/configs:config_h",
         "//src/configs:hardware_config",
         "//src/subgraph/rewrites:cvt_to_fp32",
         "//test/subgraph/rewrites:subgraph_matcher",
@@ -437,6 +437,7 @@ xnnpack_unit_test(
         "//litert/tensor:datatypes",
         "//litert/tensor/backends/xnnpack:arithmetic",
         "//litert/tensor/backends/xnnpack:conversion",
+        "//litert/tensor/backends/xnnpack:graph",
         "//litert/tensor/utils:matchers_no_g3",
     ],
 )

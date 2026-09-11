@@ -185,6 +185,17 @@ TEST(get_dot_kernel, large_tile_k_1) {
   ASSERT_EQ(fp32_large(arch_flags_avx512), "dot_fp32_5x64x1_1x16x1_avx512");
 }
 
+TEST(dot_kernel_state, destructor) {
+  static bool destroyed = false;
+  destroyed = false;
+  {
+    dot_kernel_state state;
+    state.destroy = [](dot_kernel_state*) { destroyed = true; };
+    EXPECT_FALSE(destroyed);
+  }
+  EXPECT_TRUE(destroyed);
+}
+
 #endif  // YNN_ARCH_X86
 
 #ifdef YNN_ARCH_ARM64

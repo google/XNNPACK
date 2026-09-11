@@ -398,6 +398,8 @@ auto make_dot_impl(dot_type type, bool consistent_arithmetic, bool symmetric_b,
     assert(!b_k2.is_folded());
     assert(!b_k3.is_folded());
 
+    dot_kernel_state kernel_state = {};
+
     bool init_output = true;
     for (int i = 0; i < reduction_bounds.rank; ++i) {
       if (reduction_bounds.dim(i).min() != 0) {
@@ -483,11 +485,11 @@ auto make_dot_impl(dot_type type, bool consistent_arithmetic, bool symmetric_b,
                            const void* a, size_t a_stride_m,
                            span<const size_t> a_k_strides, const void* b,
                            span<const size_t> b_k_strides,
-                           index_t init_c_stride_m, const void* init_c,
-                           void* c) {
+                           index_t init_c_stride_m, const void* init_c, void* c,
+                           dot_kernel_state* state = nullptr) {
       kernel(m, n, k[2], k[1], k[0], transposed_a ? a_k_strides[0] : a_stride_m,
              a_k_strides[2], a_k_strides[1], a, b_k_strides[2], b_k_strides[1],
-             b_k_strides[0], b, init_c_stride_m, init_c, c_stride_m, c);
+             b_k_strides[0], b, init_c_stride_m, init_c, c_stride_m, c, state);
     };
 
     const size_t cache_sizes[] = {cache_size_l2};
@@ -501,11 +503,12 @@ auto make_dot_impl(dot_type type, bool consistent_arithmetic, bool symmetric_b,
                                 b.elem_size, loops_storage);
 
       slinky::for_each_element(
-          [=](void* c, const void* a, const void* b, const void* init_c) {
+          [=, &kernel_state](void* c, const void* a, const void* b,
+                             const void* init_c) {
             run_dot(loops, c_m.extent(), c_n.extent(), k, block_m, block_n,
                     block_k, a_stride_m, a_k_strides, a, b_k_strides,
                     b_stride_n, b, init_c_stride_m, init_c, c_stride_m,
-                    c_stride_n, c, call_kernel);
+                    c_stride_n, c, call_kernel, &kernel_state);
           },
           c, a, b, init_c);
     }
@@ -537,7 +540,7 @@ auto make_dot_impl(dot_type type, bool consistent_arithmetic, bool symmetric_b,
           [&](index_t m, index_t n, span<const size_t> k, const void* a,
               size_t a_stride_m, span<const size_t> a_k_strides, const void* b,
               span<const size_t> b_k_strides, index_t init_c_stride_m,
-              const void* init_c, void* c) {
+              const void* init_c, void* c, dot_kernel_state* state = nullptr) {
             assert(m <= block_m);
             assert(n <= block_n);
             assert(k[0] < tile_k);
@@ -555,14 +558,15 @@ auto make_dot_impl(dot_type type, bool consistent_arithmetic, bool symmetric_b,
                     /*b_stride_k3=*/0,
                     /*b_stride_k2=*/0, b_k_strides[0],
                     offset_bytes(b, K3 * b_k_strides[2] + K2 * b_k_strides[1]),
-                    init_c_stride_m, init_c, c_stride_m, c);
+                    init_c_stride_m, init_c, c_stride_m, c, state);
                 init_c_stride_m = c_stride_m;
                 init_c = c;
               }
             }
           };
       slinky::for_each_element(
-          [=](void* c, const void* a, const void* b, const void* init_c) {
+          [=, &kernel_state](void* c, const void* a, const void* b,
+                             const void* init_c) {
             index_t tail_init_c_stride_m = init_c_stride_m;
             if (k1 != 0) {
               init_c = c;
@@ -573,7 +577,7 @@ auto make_dot_impl(dot_type type, bool consistent_arithmetic, bool symmetric_b,
             run_dot(loops, c_m.extent(), c_n.extent(), k_tail, block_m, block_n,
                     block_k, a_stride_m, a_k_strides_tail, a, b_k_strides,
                     b_stride_n, b, tail_init_c_stride_m, init_c, c_stride_m,
-                    c_stride_n, c, call_kernel_tail);
+                    c_stride_n, c, call_kernel_tail, &kernel_state);
           },
           c, a, b, init_c);
     }

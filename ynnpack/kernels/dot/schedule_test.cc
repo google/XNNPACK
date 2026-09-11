@@ -88,8 +88,10 @@ auto make_record_calls(std::vector<dot_call>& calls) {
   return [&](size_t m, size_t n, span<const size_t> k, const void* a,
              size_t a_stride_m, span<const size_t> a_k_strides, const void* b,
              span<const size_t> b_k_strides, size_t init_c_stride_m,
-             const void* init_c,
-             const void* c) { calls.push_back({m, n, k[0], a, b, init_c, c}); };
+             const void* init_c, const void* c,
+             dot_kernel_state* state = nullptr) {
+    calls.push_back({m, n, k[0], a, b, init_c, c});
+  };
 }
 
 TEST(run_dot, loop_m) {
