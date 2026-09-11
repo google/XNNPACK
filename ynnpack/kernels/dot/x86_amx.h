@@ -16,6 +16,7 @@
 
 #include "ynnpack/base/arithmetic.h"
 #include "ynnpack/base/base.h"
+#include "ynnpack/kernels/dot/dot.h"
 
 #if defined(__GNUC__) && !defined(__clang__)
 // Workaround for GCC bug https://gcc.gnu.org/bugzilla/show_bug.cgi?id=122446
@@ -38,10 +39,6 @@
 
 namespace ynn {
 
-namespace internal {
-
-constexpr size_t tile_row_bytes = 64;
-
 struct tile_config {
   std::uint8_t palette_id;
   std::uint8_t start_row;
@@ -56,37 +53,38 @@ static_assert(sizeof(tile_config) == 64, "");
 static_assert(offsetof(tile_config, colsb) == 16, "");
 static_assert(offsetof(tile_config, rows) == 48, "");
 
-// Manages the state of the AMX tile configuration. Keeps track of the current
-// configuration to avoid redundant loads.
-struct AmxConfigState {
-  alignas(64) tile_config current_config = {0};
-
-  bool is_configured() const { return current_config.palette_id != 0; }
-
-  void load(const tile_config& config) {
-    _tile_loadconfig(&config);
-    current_config = config;
+// The functions below manage the state of the AMX tile configuration in a
+// `dot_kernel_state`. Keeps track of the current configuration to avoid
+// redundant loads.
+inline void destroy_amx_state(dot_kernel_state* /*state*/) { _tile_release(); }
+inline bool is_configured(const dot_kernel_state& state) {
+  return state.as<tile_config>()->palette_id != 0;
+}
+inline void load(dot_kernel_state& state, const tile_config& config) {
+  _tile_loadconfig(&config);
+  *state.as<tile_config>() = config;
+}
+// Marks the AMX tile state as needing to be released when `state` is
+// destroyed. Kernels should call this once, just before returning.
+inline void set_amx_destructor(dot_kernel_state& state) {
+  assert(state.destroy == nullptr || state.destroy == destroy_amx_state);
+  state.destroy = destroy_amx_state;
+}
+inline void load_if_needed(dot_kernel_state& state,
+                           const tile_config& desired) {
+  if (std::memcmp(state.as<tile_config>(), &desired, sizeof(tile_config)) !=
+      0) {
+    load(state, desired);
   }
+}
 
-  void load_if_needed(const tile_config& desired) {
-    if (std::memcmp(&current_config, &desired, sizeof(tile_config)) != 0) {
-      load(desired);
-    }
-  }
+namespace internal {
 
-  void release() {
-    if (is_configured()) {
-      _tile_release();
-      std::memset(&current_config, 0, sizeof(tile_config));
-    }
-  }
-
-  ~AmxConfigState() { release(); }
-};
+constexpr size_t tile_row_bytes = 64;
 
 template <typename TA, typename TB, typename TC>
 static void load_tile_config_1x4(size_t m, size_t n, size_t ktail,
-                                 AmxConfigState& amx_state) {
+                                 dot_kernel_state& state) {
   alignas(64) tile_config config = {0};
   config.palette_id = 1;
 
@@ -112,7 +110,7 @@ static void load_tile_config_1x4(size_t m, size_t n, size_t ktail,
   config.rows[7] = ktail * sizeof(TB) / 4;
   config.colsb[7] = n * sizeof(TC);
 
-  amx_state.load_if_needed(config);
+  load_if_needed(state, config);
 }
 
 }  // namespace internal
@@ -122,11 +120,11 @@ YNN_ALWAYS_INLINE static void x86_amx_dot_1x4(
     size_t M, size_t N, size_t K3, size_t K2, size_t K1, size_t A_stride_m,
     size_t A_stride_k3, size_t A_stride_k2, const void* A, size_t B_stride_k3,
     size_t B_stride_k2, size_t B_stride_k1, const void* B, size_t C_in_stride_m,
-    const void* C_in, size_t C_out_stride_m, void* C_out) {
+    const void* C_in, size_t C_out_stride_m, void* C_out,
+    dot_kernel_state& state) {
   // AMX is structured as 16x16x4 byte tiles. Each row is 64 bytes. This will
   // represent 64 / sizeof(T) elements.
   constexpr size_t k_block = internal::tile_row_bytes / sizeof(TAB);
-  internal::AmxConfigState amx_state;
 
   assert(M > 0);
   assert(N > 0);
@@ -148,7 +146,7 @@ YNN_ALWAYS_INLINE static void x86_amx_dot_1x4(
   const size_t k_tail = (K1 & (k_block - 1)) ? (K1 & (k_block - 1)) : k_block;
 
   // Prepare the config for the main loop (4 tiles).
-  internal::load_tile_config_1x4<TAB, TAB, TC>(M, 16, k_tail, amx_state);
+  internal::load_tile_config_1x4<TAB, TAB, TC>(M, 16, k_tail, state);
   while (N >= 64) {
     if (C_in) {
       _tile_loadd(0, offset_bytes(C_in, 0 * internal::tile_row_bytes),
@@ -236,7 +234,7 @@ YNN_ALWAYS_INLINE static void x86_amx_dot_1x4(
   while (N > 0) {
     // We might need to handle a less-than-tile here.
     internal::load_tile_config_1x4<TAB, TAB, TC>(M, std::min<size_t>(N, 16),
-                                                 k_tail, amx_state);
+                                                 k_tail, state);
     if (C_in) {
       _tile_loadd(0, C_in, C_in_stride_m);
     } else {
@@ -282,6 +280,7 @@ YNN_ALWAYS_INLINE static void x86_amx_dot_1x4(
     B = offset_bytes(B, internal::tile_row_bytes);
     N = sub_sat(N, 16);
   }
+  set_amx_destructor(state);
 }
 
 namespace internal {
@@ -300,7 +299,7 @@ namespace internal {
 //   align_k: alignment of the K dimension in the B matrix.
 template <typename TAB, typename TC>
 static void load_config_2x2(size_t m, size_t n, size_t k_len, size_t align_k,
-                            AmxConfigState& amx_state) {
+                            dot_kernel_state& state) {
   const size_t m0 = std::min<size_t>(m, 16);
   const size_t m1 = sub_sat(m, 16);
 
@@ -359,7 +358,7 @@ static void load_config_2x2(size_t m, size_t n, size_t k_len, size_t align_k,
     config.colsb[7] = n1 * sizeof(TC);
   }
 
-  amx_state.load_if_needed(config);
+  load_if_needed(state, config);
 }
 
 // Calculates the dot product of A and B over the K dimension.
@@ -471,10 +470,10 @@ YNN_ALWAYS_INLINE static void n_loops_2x2_impl(
     size_t B_stride_k3, size_t B_stride_k2, size_t B_stride_k1,
     size_t B_stride_k1_block, const void* B, size_t C_in_stride_m,
     const void* C_in, size_t C_out_stride_m, void* C_out,
-    AmxConfigState& amx_state) {
+    dot_kernel_state& state) {
   if (n_loops > 0) {
     const size_t c_step2 = C_in ? 2 * tile_row_bytes : 0;
-    load_config_2x2<TAB, TC>(M, 32, k_len, align_k, amx_state);
+    load_config_2x2<TAB, TC>(M, 32, k_len, align_k, state);
 
     for (size_t i = 0; i < n_loops; ++i) {
       k_loops_2x2_impl<TileOp, HasM1, /*HasN1=*/true>(
@@ -489,7 +488,7 @@ YNN_ALWAYS_INLINE static void n_loops_2x2_impl(
   }
 
   if (n_tail > 0) {
-    load_config_2x2<TAB, TC>(M, n_tail, k_len, align_k, amx_state);
+    load_config_2x2<TAB, TC>(M, n_tail, k_len, align_k, state);
     if (n_tail > 16) {
       k_loops_2x2_impl<TileOp, HasM1, /*HasN1=*/true>(
           K3, K2, k_iters, A_stride_m, A_stride_k3, A_stride_k2, A_stride_k1, A,
@@ -515,7 +514,7 @@ YNN_ALWAYS_INLINE static void x86_amx_dot_2x2_impl(
     size_t A_stride_k3, size_t A_stride_k2, const void* A, size_t B_stride_k3,
     size_t B_stride_k2, size_t B_stride_k1, const void* B, size_t C_in_stride_m,
     const void* C_in, size_t C_out_stride_m, void* C_out,
-    AmxConfigState& amx_state) {
+    dot_kernel_state& state) {
   constexpr size_t k_block = tile_row_bytes / sizeof(TAB);
   constexpr size_t align_k = 4 / sizeof(TAB);
 
@@ -543,7 +542,7 @@ YNN_ALWAYS_INLINE static void x86_amx_dot_2x2_impl(
         M, n_loops, n_tail, K3, K2, k1_iters, k_block, align_k, A_stride_m,
         A_stride_k3, A_stride_k2, tile_row_bytes, A, B_stride_k3, B_stride_k2,
         B_stride_k1, B_stride_k1_block, B, C_in_stride_m, C_in, C_out_stride_m,
-        C_out, amx_state);
+        C_out, state);
 
     // For the tail, we want to read C_out instead of C_in.
     C_in = C_out;
@@ -560,7 +559,7 @@ YNN_ALWAYS_INLINE static void x86_amx_dot_2x2_impl(
         M, n_loops, n_tail, K3, K2, /*k_iters=*/1, k_tail, align_k, A_stride_m,
         A_stride_k3, A_stride_k2, /*A_stride_k1=*/0, A, B_stride_k3,
         B_stride_k2, B_stride_k1, /*B_stride_k1_block=*/0, B, C_in_stride_m,
-        C_in, C_out_stride_m, C_out, amx_state);
+        C_in, C_out_stride_m, C_out, state);
   }
 }
 }  // namespace internal
@@ -570,19 +569,20 @@ YNN_ALWAYS_INLINE static void x86_amx_dot_2x2(
     size_t M, size_t N, size_t K3, size_t K2, size_t K1, size_t A_stride_m,
     size_t A_stride_k3, size_t A_stride_k2, const void* A, size_t B_stride_k3,
     size_t B_stride_k2, size_t B_stride_k1, const void* B, size_t C_in_stride_m,
-    const void* C_in, size_t C_out_stride_m, void* C_out) {
-  internal::AmxConfigState amx_state;
+    const void* C_in, size_t C_out_stride_m, void* C_out,
+    dot_kernel_state& state) {
   if (M > 16) {
     internal::x86_amx_dot_2x2_impl<TAB, TC, TileOp, /*HasM1=*/true>(
         M, N, K3, K2, K1, A_stride_m, A_stride_k3, A_stride_k2, A, B_stride_k3,
         B_stride_k2, B_stride_k1, B, C_in_stride_m, C_in, C_out_stride_m, C_out,
-        amx_state);
+        state);
   } else {
     internal::x86_amx_dot_2x2_impl<TAB, TC, TileOp, /*HasM1=*/false>(
         M, N, K3, K2, K1, A_stride_m, A_stride_k3, A_stride_k2, A, B_stride_k3,
         B_stride_k2, B_stride_k1, B, C_in_stride_m, C_in, C_out_stride_m, C_out,
-        amx_state);
+        state);
   }
+  set_amx_destructor(state);
 }
 
 namespace internal {
@@ -606,7 +606,7 @@ namespace internal {
 //   align_k: alignment of the K dimension in the B matrix.
 template <typename TAB, typename TC>
 static void load_config_2x3(size_t m, size_t k_len, size_t align_k,
-                            AmxConfigState& amx_state) {
+                            dot_kernel_state& state) {
   const size_t m0 = std::min<size_t>(m, 16);
   const size_t m1 = sub_sat(m, 16);
 
@@ -633,7 +633,7 @@ static void load_config_2x3(size_t m, size_t k_len, size_t align_k,
   config.rows[7] = k_len / align_k;
   config.colsb[7] = 16 * sizeof(TC);
 
-  amx_state.load_if_needed(config);
+  load_if_needed(state, config);
 }
 
 template <template <int, int, int> class TileOp, bool HasM1>
@@ -750,11 +750,11 @@ YNN_ALWAYS_INLINE static void n_loops_2x3_impl(
     size_t B_stride_k3, size_t B_stride_k2, size_t B_stride_k1,
     size_t B_stride_k1_block, const void* B, size_t C_in_stride_m,
     const void* C_in, size_t C_out_stride_m, void* C_out,
-    AmxConfigState& amx_state) {
+    dot_kernel_state& state) {
   if (n_loops > 0) {
     const size_t c_step3 = C_in ? 3 * tile_row_bytes : 0;
     const size_t b_step_n = 3 * tile_row_bytes;
-    load_config_2x3<TAB, TC>(M, k_len, align_k, amx_state);
+    load_config_2x3<TAB, TC>(M, k_len, align_k, state);
     for (size_t i = 0; i < n_loops; ++i) {
       k_loops_2x3_impl<TileOp, HasM1>(
           K3, K2, k_iters, A_stride_m, A_stride_k3, A_stride_k2, A_stride_k1, A,
@@ -773,7 +773,7 @@ YNN_ALWAYS_INLINE static void n_loops_2x3_impl(
         M, n_tail / 32, n_tail % 32, K3, K2, k_iters, k_len, align_k,
         A_stride_m, A_stride_k3, A_stride_k2, A_stride_k1, A, B_stride_k3,
         B_stride_k2, B_stride_k1, B_stride_k1_block, B, C_in_stride_m, C_in,
-        C_out_stride_m, C_out, amx_state);
+        C_out_stride_m, C_out, state);
   }
 }
 
@@ -784,7 +784,7 @@ YNN_ALWAYS_INLINE static void x86_amx_dot_2x3_impl(
     size_t A_stride_k3, size_t A_stride_k2, const void* A, size_t B_stride_k3,
     size_t B_stride_k2, size_t B_stride_k1, const void* B, size_t C_in_stride_m,
     const void* C_in, size_t C_out_stride_m, void* C_out,
-    AmxConfigState& amx_state) {
+    dot_kernel_state& state) {
   constexpr size_t k_block = tile_row_bytes / sizeof(TAB);
   constexpr size_t align_k = 4 / sizeof(TAB);
 
@@ -810,7 +810,7 @@ YNN_ALWAYS_INLINE static void x86_amx_dot_2x3_impl(
         M, n_loops, n_tail, K3, K2, k1_iters, k_block, align_k, A_stride_m,
         A_stride_k3, A_stride_k2, tile_row_bytes, A, B_stride_k3, B_stride_k2,
         B_stride_k1, B_stride_k1_block, B, C_in_stride_m, C_in, C_out_stride_m,
-        C_out, amx_state);
+        C_out, state);
 
     C_in = C_out;
     C_in_stride_m = C_out_stride_m;
@@ -824,7 +824,7 @@ YNN_ALWAYS_INLINE static void x86_amx_dot_2x3_impl(
         M, n_loops, n_tail, K3, K2, /*k_iters=*/1, k_tail, align_k, A_stride_m,
         A_stride_k3, A_stride_k2, /*A_stride_k1=*/0, A, B_stride_k3,
         B_stride_k2, B_stride_k1, /*B_stride_k1_block=*/0, B, C_in_stride_m,
-        C_in, C_out_stride_m, C_out, amx_state);
+        C_in, C_out_stride_m, C_out, state);
   }
 }
 
@@ -836,32 +836,32 @@ YNN_ALWAYS_INLINE static void x86_amx_dot_2x3(
     size_t M, size_t N, size_t K3, size_t K2, size_t K1, size_t A_stride_m,
     size_t A_stride_k3, size_t A_stride_k2, const void* A, size_t B_stride_k3,
     size_t B_stride_k2, size_t B_stride_k1, const void* B, size_t C_in_stride_m,
-    const void* C_in, size_t C_out_stride_m, void* C_out) {
+    const void* C_in, size_t C_out_stride_m, void* C_out,
+    dot_kernel_state& state) {
   assert(M <= 32);
-  // Ideally the state should be initialized higher up the stack in run_dot().
-  internal::AmxConfigState amx_state;
   if (M == 32) {
     internal::x86_amx_dot_2x3_impl<TAB, TC, TileOp, /*HasM1=*/true>(
         32, N, K3, K2, K1, A_stride_m, A_stride_k3, A_stride_k2, A, B_stride_k3,
         B_stride_k2, B_stride_k1, B, C_in_stride_m, C_in, C_out_stride_m, C_out,
-        amx_state);
+        state);
   } else if (M > 16) {
     internal::x86_amx_dot_2x3_impl<TAB, TC, TileOp, /*HasM1=*/false>(
         16, N, K3, K2, K1, A_stride_m, A_stride_k3, A_stride_k2, A, B_stride_k3,
         B_stride_k2, B_stride_k1, B, C_in_stride_m, C_in, C_out_stride_m, C_out,
-        amx_state);
+        state);
     internal::x86_amx_dot_2x3_impl<TAB, TC, TileOp, /*HasM1=*/false>(
         M - 16, N, K3, K2, K1, A_stride_m, A_stride_k3, A_stride_k2,
         offset_bytes(A, 16 * A_stride_m), B_stride_k3, B_stride_k2, B_stride_k1,
         B, C_in_stride_m,
         C_in ? offset_bytes(C_in, 16 * C_in_stride_m) : nullptr, C_out_stride_m,
-        offset_bytes(C_out, 16 * C_out_stride_m), amx_state);
+        offset_bytes(C_out, 16 * C_out_stride_m), state);
   } else {
     internal::x86_amx_dot_2x3_impl<TAB, TC, TileOp, /*HasM1=*/false>(
         M, N, K3, K2, K1, A_stride_m, A_stride_k3, A_stride_k2, A, B_stride_k3,
         B_stride_k2, B_stride_k1, B, C_in_stride_m, C_in, C_out_stride_m, C_out,
-        amx_state);
+        state);
   }
+  set_amx_destructor(state);
 }
 
 }  // namespace ynn

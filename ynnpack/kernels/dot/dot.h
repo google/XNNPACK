@@ -44,6 +44,45 @@ enum {
 
 }  // namespace dot_flag
 
+// Generic stack storage for kernel-specific execution state (e.g. AMX
+// configuration). Kernels should set the `destroy` function if they allocate
+// resources that need to be freed when the state is destroyed.
+struct dot_kernel_state {
+  using destroy_fn = void (*)(dot_kernel_state*);
+  destroy_fn destroy = nullptr;
+
+  static constexpr size_t kStorageAlignment = 64;
+  static constexpr size_t kStorageSize = 64;
+
+  alignas(kStorageAlignment) std::byte storage[kStorageSize] = {};
+
+  dot_kernel_state() = default;
+  ~dot_kernel_state() {
+    if (destroy) {
+      destroy(this);
+    }
+  }
+
+  dot_kernel_state(const dot_kernel_state&) = delete;
+  dot_kernel_state(dot_kernel_state&&) = delete;
+  dot_kernel_state& operator=(const dot_kernel_state&) = delete;
+  dot_kernel_state& operator=(dot_kernel_state&&) = delete;
+
+  template <typename T>
+  T* as() {
+    static_assert(sizeof(T) <= kStorageSize);
+    static_assert(kStorageAlignment >= alignof(T));
+    return reinterpret_cast<T*>(storage);
+  }
+
+  template <typename T>
+  const T* as() const {
+    static_assert(sizeof(T) <= kStorageSize);
+    static_assert(kStorageAlignment >= alignof(T));
+    return reinterpret_cast<const T*>(storage);
+  }
+};
+
 // Dot kernels compute the following:
 //
 //    C_out(i, j) = 0
@@ -57,7 +96,8 @@ typedef void (*dot_kernel_fn)(size_t m, size_t n, size_t k3, size_t k2,
                               size_t b_stride_k3, size_t b_stride_k2,
                               size_t b_stride_k1, const void* b,
                               size_t c_in_stride_m, const void* c_in,
-                              size_t c_out_stride_m, void* c_out);
+                              size_t c_out_stride_m, void* c_out,
+                              dot_kernel_state* state);
 
 #define YNN_DOT_KERNEL(arch, name, block_m, block_n, block_k, tile_m, tile_n, \
                        tile_k, transpose_a, type_a, type_b, type_c)           \
@@ -65,7 +105,8 @@ typedef void (*dot_kernel_fn)(size_t m, size_t n, size_t k3, size_t k2,
             size_t a_stride_m, size_t a_stride_k3, size_t a_stride_k2,        \
             const void* a, size_t b_stride_k3, size_t b_stride_k2,            \
             size_t b_stride_k1, const void* b, size_t c_in_stride_m,          \
-            const void* c_in, size_t c_out_stride_m, void* c_out);
+            const void* c_in, size_t c_out_stride_m, void* c_out,             \
+            dot_kernel_state* state = nullptr);
 #include "ynnpack/kernels/dot/kernels.inc"
 #undef YNN_DOT_KERNEL
 

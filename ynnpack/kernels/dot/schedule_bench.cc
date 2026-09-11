@@ -151,11 +151,11 @@ double run_benchmark(TA, TB, TC, const kernel_info& kernel, size_t m, size_t n,
       [&](size_t m, size_t n, span<const size_t> k, const void* a_ptr,
           size_t a_stride_m, span<const size_t> a_k_strides, const void* b_ptr,
           span<const size_t> b_k_strides, size_t init_c_stride_m,
-          const void* init_c, void* c_ptr) {
-        kernel.kernel(m, n, k[2], k[1], k[0], a_stride_m,
-                      a_k_strides[2], a_k_strides[1], a_ptr, b_k_strides[2],
-                      b_k_strides[1], b_k_strides[0], b_ptr, init_c_stride_m,
-                      init_c, c.stride(0) * sizeof(TC), c_ptr);
+          const void* init_c, void* c_ptr, dot_kernel_state* state = nullptr) {
+        kernel.kernel(m, n, k[2], k[1], k[0], a_stride_m, a_k_strides[2],
+                      a_k_strides[1], a_ptr, b_k_strides[2], b_k_strides[1],
+                      b_k_strides[0], b_ptr, init_c_stride_m, init_c,
+                      c.stride(0) * sizeof(TC), c_ptr, state);
       };
 
   const size_t a_stride_m = pack_a ? kernel.tile_k * sizeof(TA) / a_elem_count
@@ -172,10 +172,11 @@ double run_benchmark(TA, TB, TC, const kernel_info& kernel, size_t m, size_t n,
   const size_t b_k_strides[] = {b_stride_k, 0, 0};
 
   double t = benchmark([&]() {
+    dot_kernel_state kernel_state = {};
     run_dot(loops, m, n, ks, kernel.block_m, kernel.block_n, kernel.block_k,
             a_stride_m, a_k_strides, a.base(), b_k_strides, b_stride_n,
             b.base(), 0, nullptr, c_stride_m, c_stride_n, c.base(),
-            kernel_wrapper);
+            kernel_wrapper, &kernel_state);
   });
   // Check that the kernel didn't compute the wrong thing. We assume the kernel
   // is correct, but we have some logic here that needs validation too. We
