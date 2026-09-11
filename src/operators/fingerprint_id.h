@@ -1,4 +1,5 @@
 // Copyright 2025 Google LLC
+// Copyright 2026 Arm Limited and/or its affiliates <open-source-office@arm.com>
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
@@ -162,6 +163,8 @@ enum xnn_fingerprint_id_helper {
   xnn_fingerprint_id_helper_conv2d_hwc2chw = (1 << 2),
   xnn_fingerprint_id_helper_dwconv = (1 << 3),
   xnn_fingerprint_id_helper_vmulcaddc = (1 << 4),
+  // KAI DWConv weights packed in one SME vector-length channel block.
+  xnn_fingerprint_id_helper_kai_dwconv_1vlx1b = (1 << 5),
   // The C preprocessor is obnoxious. For variadic arguments, there's no way to
   // differentiate between an empty argument list and one argument. This value
   // allows us to avoid bending around this issue when generating the
