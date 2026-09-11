@@ -417,4 +417,58 @@ TEST(Convolution2D, reshape_rejects_input_channel_mismatch) {
   EXPECT_EQ(subgraph.Status(), xnn_status_invalid_parameter);
 }
 
+TEST(Convolution2D, define_rejects_filter_shape_mismatch) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+
+  ConvolutionParams params;
+  params.padding = {0, 0, 0, 0};
+  params.kernel = {5, 5};
+  params.subsampling = {1, 1};
+  params.dilation = {1, 1};
+  params.groups = 1;
+  params.group_input_channels = 3;
+  params.group_output_channels = 32;
+
+  const uint32_t input_id = 0;
+  const uint32_t filter_id = 1;
+  const uint32_t output_id = 2;
+
+  // Filter has kernel 3x3 but conv specifies 5x5
+  Tensor<float> filter(std::vector<size_t>{32, 3, 3, 3});
+  filter.fill(0.0f);
+
+  xnn_subgraph_t subgraph = nullptr;
+  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(3, 0, &subgraph));
+
+  const size_t input_dims[4] = {1, 8, 8, 3};
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_tensor_value(subgraph, xnn_datatype_fp32, 4, input_dims,
+                                    nullptr, input_id,
+                                    XNN_VALUE_FLAG_EXTERNAL_INPUT, nullptr));
+
+  const size_t filter_dims[4] = {32, 3, 3, 3};
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_tensor_value(subgraph, xnn_datatype_fp32, 4, filter_dims,
+                                    filter.base(), filter_id, 0, nullptr));
+
+  const size_t output_dims[4] = {1, 4, 4, 32};
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_tensor_value(subgraph, xnn_datatype_fp32, 4, output_dims,
+                                    nullptr, output_id,
+                                    XNN_VALUE_FLAG_EXTERNAL_OUTPUT, nullptr));
+
+  const xnn_status status = xnn_define_convolution_2d(
+      subgraph, params.padding.top, params.padding.right,
+      params.padding.bottom, params.padding.left, params.kernel.height,
+      params.kernel.width, params.subsampling.height, params.subsampling.width,
+      params.dilation.height, params.dilation.width, params.groups,
+      params.group_input_channels, params.group_output_channels,
+      params.output_min, params.output_max, input_id, filter_id,
+      XNN_INVALID_VALUE_ID, output_id, 0);
+
+  EXPECT_EQ(status, xnn_status_invalid_parameter);
+
+  xnn_delete_subgraph(subgraph);
+}
+
 }  // namespace xnnpack
