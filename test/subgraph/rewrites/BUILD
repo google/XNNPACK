@@ -37,7 +37,9 @@ xnnpack_unit_test(
         "//litert/tensor",
         "//litert/tensor:arithmetic",
         "//litert/tensor:datatypes",
+        "//litert/tensor/backends/xnnpack:arithmetic",
         "//litert/tensor/backends/xnnpack:conversion",
+        "//litert/tensor/backends/xnnpack:graph",
         "//litert/tensor/utils:matchers_no_g3",
     ],
 )

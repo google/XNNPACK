@@ -51,9 +51,9 @@ http_archive = use_repo_rule("@bazel_tools//tools/build_defs/repo:http.bzl", "ht
 bazel_dep(name = "googletest", version = "1.17.0.bcr.2", repo_name = "com_google_googletest")
 archive_override(
     module_name = "googletest",
-    sha256 = "a4cb11930215b071168811982dfbebc82a2bb0f90db0e8713245931eb742ea46",
-    strip_prefix = "googletest-d72f9c8aea6817cdf1ca0ac10887f328de7f3da2",
-    urls = ["https://github.com/google/googletest/archive/d72f9c8aea6817cdf1ca0ac10887f328de7f3da2.zip"],
+    sha256 = "08716e2ce2672299dd47b35d75dab97440e693c34c17f59fea9e149611251fbd",
+    strip_prefix = "googletest-dd0a37b8432bf8a0c3e33938ae9807d413db0cbd",
+    urls = ["https://github.com/google/googletest/archive/dd0a37b8432bf8a0c3e33938ae9807d413db0cbd.zip"],
 )
 # LINT.ThenChange(cmake/DownloadGoogleTest.cmake)
 
@@ -79,9 +79,9 @@ http_archive(
 # pthreadpool library, used for parallelization
 http_archive(
     name = "pthreadpool",
-    sha256 = "5ab4e8f63e3dcf62048360c216532bdf62f00dc204883a52d91230402f0feb6a",
-    strip_prefix = "pthreadpool-02460584c6092e527c8b89f7df4de143d70e801f",
-    urls = ["https://github.com/google/pthreadpool/archive/02460584c6092e527c8b89f7df4de143d70e801f.zip"],
+    sha256 = "9b9fb1179b71021c0c048504eab636424c58e9c8374404754ece6d7cd90f26d4",
+    strip_prefix = "pthreadpool-15a6644ba1c45f1acc16ac1e883efc3e56c6bed2",
+    urls = ["https://github.com/google/pthreadpool/archive/15a6644ba1c45f1acc16ac1e883efc3e56c6bed2.zip"],
 )
 # LINT.ThenChange(cmake/DownloadPThreadPool.cmake)
 
@@ -103,10 +103,10 @@ http_archive(
 # KleidiAI library, used for ARM microkernels.
 http_archive(
     name = "KleidiAI",
-    sha256 = "99749705dcf89a769387057637da2684cf335ed05f7e0e83af26d64aa90316b2",
-    strip_prefix = "kleidiai-74b1a12d3620c89dae4766de640e064952000f4d",
+    sha256 = "652ee046ebf99bee5ed78aaf8961ea1df6ac09b6ebbd3a33106d9ce255efba69",
+    strip_prefix = "kleidiai-4bc7bd457930de119f8b826ecfdebfbd9c08cf8c",
     urls = [
-        "https://gitlab.arm.com/kleidi/kleidiai/-/archive/74b1a12d3620c89dae4766de640e064952000f4d/kleidiai-74b1a12d3620c89dae4766de640e064952000f4d.zip",
+        "https://gitlab.arm.com/kleidi/kleidiai/-/archive/4bc7bd457930de119f8b826ecfdebfbd9c08cf8c/kleidiai-4bc7bd457930de119f8b826ecfdebfbd9c08cf8c.zip",
     ],
 )
 # LINT.ThenChange(cmake/DownloadKleidiAI.cmake)
@@ -123,9 +123,9 @@ http_archive(
 
 http_archive(
     name = "slinky",
-    sha256 = "099510dcf18ade121331a94a536d1a4d50a97fd202934d419bd02faf2faecf38",
-    strip_prefix = "slinky-8d77e68e391fd3a87d7cfb36dbe5efd6f9af73ca",
+    sha256 = "6ba811c39fd400149d58a42a1a5ad33e7fe2554c9a45990788779e0657039405",
+    strip_prefix = "slinky-2c9e129fc82215530af851cfd8d3094de0519241",
     urls = [
-        "https://github.com/dsharlet/slinky/archive/8d77e68e391fd3a87d7cfb36dbe5efd6f9af73ca.zip",
+        "https://github.com/dsharlet/slinky/archive/2c9e129fc82215530af851cfd8d3094de0519241.zip",
     ],
 )

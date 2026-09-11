@@ -153,10 +153,13 @@ void TestMatMul(
   Tensor<BT> packed_b = unpacked_b ? b : pack_b(b, tile_k, tile_n);
   Tensor<AT> packed_a = pack_a ? transpose_a(a, tile_m, tile_k) : a;
 
+  dot_kernel_state kernel_state = {};
+
   kernel.kernel(m, n, 1, 1, k, packed_a.stride_bytes(0) / (pack_a ? tile_k : 1),
                 0, 0, packed_a.base(), 0, 0, packed_b.stride_bytes(0) / tile_k,
                 packed_b.base(), c.stride_bytes(0),
-                init_zero ? nullptr : c.base(), c.stride_bytes(0), c.base());
+                init_zero ? nullptr : c.base(), c.stride_bytes(0), c.base(),
+                &kernel_state);
 
   // Verify results.
   Reference(a, b, expected);
@@ -252,12 +255,14 @@ void TestConv2D(AT, BT, CT, const KernelInfo& kernel) {
     // tile_n. The kernel might also require b to be packed (tile_k > 1).
     Tensor<BT> packed_b = pack_b(b, tile_k, tile_n);
 
+    dot_kernel_state kernel_state = {};
+
     kernel.kernel(
         w, co, kh, kw, ci, packed_a.stride_bytes(0) / (pack_a ? tile_k : 1),
         packed_a.stride_bytes(1), packed_a.stride_bytes(2), packed_a.base(),
         packed_b.stride_bytes(0), packed_b.stride_bytes(1),
         packed_b.stride_bytes(2) / tile_k, packed_b.base(), c.stride_bytes(0),
-        c.base(), c.stride_bytes(0), c.base());
+        c.base(), c.stride_bytes(0), c.base(), &kernel_state);
 
     // Verify results.
     a = make_stencil_dim(a, 1, kw).transpose({2, 0, 1, 3});

@@ -12,8 +12,6 @@
 #include <gtest/gtest.h>
 #include "include/xnnpack.h"
 #include "src/subgraph/rewrites/cvt_to_fp32.h"
-#include "src/xnnpack/common.h"
-#include "src/xnnpack/config.h"
 #include "src/xnnpack/hardware-config.h"
 #include "src/xnnpack/node-type.h"
 #include "src/xnnpack/operator-utils.h"
@@ -22,6 +20,7 @@
 #include "litert/tensor/arithmetic.h"
 #include "litert/tensor/backends/xnnpack/arithmetic.h"
 #include "litert/tensor/backends/xnnpack/conversion.h"
+#include "litert/tensor/backends/xnnpack/graph.h"
 #include "litert/tensor/buffer.h"
 #include "litert/tensor/datatypes.h"
 #include "litert/tensor/tensor.h"
@@ -41,7 +40,7 @@ void PrintTo(const enum xnn_unary_operator type, std::ostream* os) {
 
 namespace litert::tensor {
 void PrintTo(const XnnpackGraph& graph, std::ostream* os) {
-  PrintTo(graph.subgraph(), os);
+  PrintTo(graph.GetSubgraph(), os);
 }
 }  // namespace litert::tensor
 
@@ -85,7 +84,7 @@ struct InlineQd8Bf16Qb4wFullyConnected {
                        .quantization = std::move(quantization)});
     XnnTensor output = FullyConnected(input, weights);
     LRT_TENSOR_ASSERT_OK_AND_ASSIGN(graph, BuildXnnpackGraph({output}));
-    subgraph = graph->subgraph();
+    subgraph = graph->GetSubgraph();
 
     struct xnn_node* fully_connected = nullptr;
     for (size_t i = 0; i < subgraph->num_nodes; ++i) {
@@ -197,7 +196,7 @@ TEST_F(Bf16ToFp32FallbackTest, OpChainRewrite) {
     LRT_TENSOR_ASSERT_OK_AND_ASSIGN(expected_graph, BuildXnnpackGraph({a}));
   }
 
-  ASSERT_THAT(xnn_subgraph_fallback_from_bf16_to_fp32(graph->subgraph(),
+  ASSERT_THAT(xnn_subgraph_fallback_from_bf16_to_fp32(graph->GetSubgraph(),
                                                       /*optimization_flags=*/0),
               Eq(xnn_status_success));
 
@@ -223,8 +222,8 @@ TEST_F(Bf16ToFp32FallbackTest, NativeUnaryOpsStayBf16) {
     LRT_TENSOR_ASSERT_OK_AND_ASSIGN(expected_graph, BuildXnnpackGraph({a}));
   }
 
-  ASSERT_THAT(xnn_subgraph_fallback_from_bf16_to_fp32(
-                  graph->subgraph(), /*optimization_flags=*/0),
+  ASSERT_THAT(xnn_subgraph_fallback_from_bf16_to_fp32(graph->GetSubgraph(),
+                                                      /*optimization_flags=*/0),
               Eq(xnn_status_success));
 
   EXPECT_THAT(graph, IsIsomorphicTo(expected_graph));
@@ -250,7 +249,7 @@ TEST_F(Bf16ToFp32FallbackTest, ReshapeAllowsBf16Inputs) {
     LRT_TENSOR_ASSERT_OK_AND_ASSIGN(expected_graph, BuildXnnpackGraph({a}));
   }
 
-  ASSERT_THAT(xnn_subgraph_fallback_from_bf16_to_fp32(graph->subgraph(),
+  ASSERT_THAT(xnn_subgraph_fallback_from_bf16_to_fp32(graph->GetSubgraph(),
                                                       /*optimization_flags=*/0),
               Eq(xnn_status_success));
 
@@ -278,7 +277,7 @@ TEST_F(Bf16ToFp32FallbackTest, ReshapeHandlesRewrittenInputs) {
     LRT_TENSOR_ASSERT_OK_AND_ASSIGN(expected_graph, BuildXnnpackGraph({a}));
   }
 
-  ASSERT_THAT(xnn_subgraph_fallback_from_bf16_to_fp32(graph->subgraph(),
+  ASSERT_THAT(xnn_subgraph_fallback_from_bf16_to_fp32(graph->GetSubgraph(),
                                                       /*optimization_flags=*/0),
               Eq(xnn_status_success));
 
@@ -302,7 +301,7 @@ TEST_F(Bf16ToFp32FallbackTest, DontInsertConvertFp32Fp32) {
     LRT_TENSOR_ASSERT_OK_AND_ASSIGN(expected_graph, BuildXnnpackGraph({a}));
   }
 
-  ASSERT_THAT(xnn_subgraph_fallback_from_bf16_to_fp32(graph->subgraph(),
+  ASSERT_THAT(xnn_subgraph_fallback_from_bf16_to_fp32(graph->GetSubgraph(),
                                                       /*optimization_flags=*/0),
               Eq(xnn_status_success));
 
@@ -332,7 +331,7 @@ TEST_F(Bf16ToFp32FallbackTest, ReuseConvertedFp32ValueForMultipleConsumers) {
     LRT_TENSOR_ASSERT_OK_AND_ASSIGN(expected_graph, BuildXnnpackGraph({d}));
   }
 
-  ASSERT_THAT(xnn_subgraph_fallback_from_bf16_to_fp32(graph->subgraph(),
+  ASSERT_THAT(xnn_subgraph_fallback_from_bf16_to_fp32(graph->GetSubgraph(),
                                                       /*optimization_flags=*/0),
               Eq(xnn_status_success));
 
@@ -360,7 +359,7 @@ TEST_F(Bf16ToFp32FallbackTest, BinaryRewrite) {
                                     BuildXnnpackGraph({output}));
   }
 
-  ASSERT_THAT(xnn_subgraph_fallback_from_bf16_to_fp32(graph->subgraph(),
+  ASSERT_THAT(xnn_subgraph_fallback_from_bf16_to_fp32(graph->GetSubgraph(),
                                                       /*optimization_flags=*/0),
               Eq(xnn_status_success));
 
