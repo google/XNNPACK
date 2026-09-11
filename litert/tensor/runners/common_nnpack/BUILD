@@ -42,12 +42,19 @@ cc_test(
     srcs = ["runner_test.cc"],
     deps = [
         ":runner",
+        "//litert/tensor",
         "//litert/tensor:buffer",
         "//litert/tensor:datatypes",
+        "//litert/tensor/backends/common_nnpack:graph",
         "//litert/tensor/internal:graph",
+        "//litert/tensor/utils:macros",
         "//litert/tensor/utils:matchers",
+        "@abseil-cpp//absl/container:flat_hash_map",
+        "@abseil-cpp//absl/log:absl_check",
         "@abseil-cpp//absl/status",
         "@abseil-cpp//absl/status:status_matchers",
+        "@abseil-cpp//absl/status:statusor",
+        "@abseil-cpp//absl/types:span",
         "@com_google_googletest//:gtest_main",  # gunit
     ],
 )
