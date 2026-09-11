@@ -1667,6 +1667,7 @@ if (!build_with_chromium) {
     "bench/f32-vscaleextexp.cc",
     "bench/pf16-gemm-minmax.cc",
     "bench/pf32-gemm-minmax.cc",
+    "bench/pqs8-qc4w-gemm-minmax.cc",
     "bench/pqs8-qc8w-gemm-minmax.cc",
     "bench/qb4-packw.cc",
     "bench/qd8-bf16-qb4w-gemm.cc",
