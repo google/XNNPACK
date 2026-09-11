@@ -14,10 +14,10 @@ module(
 )
 
 # Bazel rule definitions
-bazel_dep(name = "rules_cc", version = "0.2.17")
+bazel_dep(name = "rules_cc", version = "0.2.22")
 bazel_dep(name = "rules_license", version = "1.0.0")
 bazel_dep(name = "rules_python", version = "1.7.0")
-bazel_dep(name = "rules_shell", version = "0.6.1")
+bazel_dep(name = "rules_shell", version = "0.8.0")
 
 pip = use_extension("@rules_python//python/extensions:pip.bzl", "pip")
 pip.parse(
@@ -51,9 +51,9 @@ http_archive = use_repo_rule("@bazel_tools//tools/build_defs/repo:http.bzl", "ht
 bazel_dep(name = "googletest", version = "1.17.0.bcr.2", repo_name = "com_google_googletest")
 archive_override(
     module_name = "googletest",
-    sha256 = "08716e2ce2672299dd47b35d75dab97440e693c34c17f59fea9e149611251fbd",
-    strip_prefix = "googletest-dd0a37b8432bf8a0c3e33938ae9807d413db0cbd",
-    urls = ["https://github.com/google/googletest/archive/dd0a37b8432bf8a0c3e33938ae9807d413db0cbd.zip"],
+    sha256 = "6e8db0498a4fdcaa0b03bc4d554d7af8d0a84f49e8d8ba3e5509a6419fa066a5",
+    strip_prefix = "googletest-8eff9e336692fc95961e096564f1044c600b881d",
+    urls = ["https://github.com/google/googletest/archive/8eff9e336692fc95961e096564f1044c600b881d.zip"],
 )
 # LINT.ThenChange(cmake/DownloadGoogleTest.cmake)
 
@@ -103,10 +103,10 @@ http_archive(
 # KleidiAI library, used for ARM microkernels.
 http_archive(
     name = "KleidiAI",
-    sha256 = "652ee046ebf99bee5ed78aaf8961ea1df6ac09b6ebbd3a33106d9ce255efba69",
-    strip_prefix = "kleidiai-4bc7bd457930de119f8b826ecfdebfbd9c08cf8c",
+    sha256 = "3117a65dcef36c9bcb0ff22e63be88da01471ad1ea6bdb2a46c3ec967c09a049",
+    strip_prefix = "kleidiai-c1c9e8767b9a345f447e5608253a7597de84aef1",
     urls = [
-        "https://gitlab.arm.com/kleidi/kleidiai/-/archive/4bc7bd457930de119f8b826ecfdebfbd9c08cf8c/kleidiai-4bc7bd457930de119f8b826ecfdebfbd9c08cf8c.zip",
+        "https://gitlab.arm.com/kleidi/kleidiai/-/archive/c1c9e8767b9a345f447e5608253a7597de84aef1/kleidiai-c1c9e8767b9a345f447e5608253a7597de84aef1.zip",
     ],
 )
 # LINT.ThenChange(cmake/DownloadKleidiAI.cmake)
@@ -123,9 +123,9 @@ http_archive(
 
 http_archive(
     name = "slinky",
-    sha256 = "6ba811c39fd400149d58a42a1a5ad33e7fe2554c9a45990788779e0657039405",
-    strip_prefix = "slinky-2c9e129fc82215530af851cfd8d3094de0519241",
+    sha256 = "4be73fcb8c852813fac02007ca0f35871dd6b44e1fe84727a63bc48a8f3b6a13",
+    strip_prefix = "slinky-039d835892a455d6b5ceb5f78e27df608dbc2368",
     urls = [
-        "https://github.com/dsharlet/slinky/archive/2c9e129fc82215530af851cfd8d3094de0519241.zip",
+        "https://github.com/dsharlet/slinky/archive/039d835892a455d6b5ceb5f78e27df608dbc2368.zip",
     ],
 )
