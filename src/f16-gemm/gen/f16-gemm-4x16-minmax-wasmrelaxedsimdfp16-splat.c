@@ -1,6 +1,6 @@
 // clang-format off
 // Auto-generated file. Do not edit!
-//   Template: src/f16-gemm/wasmrelaxedsimd-splat.c.in
+//   Template: src/f16-gemm/wasmrelaxedsimdfp16-splat.c.in
 //   Generator: tools/xngen
 //
 // Copyright 2025 Google LLC
@@ -14,7 +14,7 @@
 
 #include "src/xnnpack/gemm.h"
 
-void xnn_f16_gemm_minmax_ukernel_4x8__wasmrelaxedsimd_splat(
+void xnn_f16_gemm_minmax_ukernel_4x16__wasmrelaxedsimdfp16_splat(
     size_t mr,
     size_t nc,
     size_t kc,
@@ -62,10 +62,14 @@ void xnn_f16_gemm_minmax_ukernel_4x8__wasmrelaxedsimd_splat(
 
   do {
     v128_t vacc0x0 = wasm_v128_load(w);
+    v128_t vacc0x1 = wasm_v128_load((const uint16_t*) w + 8);
     v128_t vacc1x0 = vacc0x0;
+    v128_t vacc1x1 = vacc0x1;
     v128_t vacc2x0 = vacc0x0;
+    v128_t vacc2x1 = vacc0x1;
     v128_t vacc3x0 = vacc0x0;
-    w = (const xnn_float16*) w + 8;
+    v128_t vacc3x1 = vacc0x1;
+    w = (const xnn_float16*) w + 16;
 
     size_t k = kc;
     do {
@@ -79,12 +83,17 @@ void xnn_f16_gemm_minmax_ukernel_4x8__wasmrelaxedsimd_splat(
       a3 += 1;
 
       const v128_t vb0 = wasm_v128_load(w);
-      w = (const xnn_float16*) w + 8;
+      const v128_t vb1 = wasm_v128_load((const uint16_t*) w + 8);
+      w = (const xnn_float16*) w + 16;
 
       vacc0x0 = wasm_f16x8_relaxed_madd(va0, vb0, vacc0x0);
       vacc1x0 = wasm_f16x8_relaxed_madd(va1, vb0, vacc1x0);
       vacc2x0 = wasm_f16x8_relaxed_madd(va2, vb0, vacc2x0);
       vacc3x0 = wasm_f16x8_relaxed_madd(va3, vb0, vacc3x0);
+      vacc0x1 = wasm_f16x8_relaxed_madd(va0, vb1, vacc0x1);
+      vacc1x1 = wasm_f16x8_relaxed_madd(va1, vb1, vacc1x1);
+      vacc2x1 = wasm_f16x8_relaxed_madd(va2, vb1, vacc2x1);
+      vacc3x1 = wasm_f16x8_relaxed_madd(va3, vb1, vacc3x1);
 
       k -= sizeof(uint16_t);
     } while (k != 0);
@@ -93,20 +102,32 @@ void xnn_f16_gemm_minmax_ukernel_4x8__wasmrelaxedsimd_splat(
     vacc1x0 = wasm_f16x8_pmax(vacc1x0, vmin);
     vacc2x0 = wasm_f16x8_pmax(vacc2x0, vmin);
     vacc3x0 = wasm_f16x8_pmax(vacc3x0, vmin);
+    vacc0x1 = wasm_f16x8_pmax(vacc0x1, vmin);
+    vacc1x1 = wasm_f16x8_pmax(vacc1x1, vmin);
+    vacc2x1 = wasm_f16x8_pmax(vacc2x1, vmin);
+    vacc3x1 = wasm_f16x8_pmax(vacc3x1, vmin);
 
     vacc0x0 = wasm_f16x8_pmin(vacc0x0, vmax);
     vacc1x0 = wasm_f16x8_pmin(vacc1x0, vmax);
     vacc2x0 = wasm_f16x8_pmin(vacc2x0, vmax);
     vacc3x0 = wasm_f16x8_pmin(vacc3x0, vmax);
+    vacc0x1 = wasm_f16x8_pmin(vacc0x1, vmax);
+    vacc1x1 = wasm_f16x8_pmin(vacc1x1, vmax);
+    vacc2x1 = wasm_f16x8_pmin(vacc2x1, vmax);
+    vacc3x1 = wasm_f16x8_pmin(vacc3x1, vmax);
 
-    if XNN_LIKELY(nc >= 8) {
+    if XNN_LIKELY(nc >= 16) {
       wasm_v128_store(c0, vacc0x0);
+      wasm_v128_store(c0 + 8, vacc0x1);
       c0 = (uint16_t*) ((uintptr_t) c0 + cn_stride);
       wasm_v128_store(c1, vacc1x0);
+      wasm_v128_store(c1 + 8, vacc1x1);
       c1 = (uint16_t*) ((uintptr_t) c1 + cn_stride);
       wasm_v128_store(c2, vacc2x0);
+      wasm_v128_store(c2 + 8, vacc2x1);
       c2 = (uint16_t*) ((uintptr_t) c2 + cn_stride);
       wasm_v128_store(c3, vacc3x0);
+      wasm_v128_store(c3 + 8, vacc3x1);
       c3 = (uint16_t*) ((uintptr_t) c3 + cn_stride);
 
       a0 = (const uint16_t*) ((uintptr_t) a0 - kc);
@@ -114,12 +135,28 @@ void xnn_f16_gemm_minmax_ukernel_4x8__wasmrelaxedsimd_splat(
       a2 = (const uint16_t*) ((uintptr_t) a2 - kc);
       a3 = (const uint16_t*) ((uintptr_t) a3 - kc);
 
-      nc -= 8;
+      nc -= 16;
     } else {
       v128_t vh0x0 = vacc0x0;
       v128_t vh1x0 = vacc1x0;
       v128_t vh2x0 = vacc2x0;
       v128_t vh3x0 = vacc3x0;
+      if (nc & 8) {
+        wasm_v128_store(c0, vh0x0);
+        wasm_v128_store(c1, vh1x0);
+        wasm_v128_store(c2, vh2x0);
+        wasm_v128_store(c3, vh3x0);
+
+        vh0x0 = vacc0x1;
+        vh1x0 = vacc1x1;
+        vh2x0 = vacc2x1;
+        vh3x0 = vacc3x1;
+
+        c0 += 8;
+        c1 += 8;
+        c2 += 8;
+        c3 += 8;
+      }
       if (nc & 4) {
         wasm_v128_store64_lane(c0, vh0x0, 0);
         wasm_v128_store64_lane(c1, vh1x0, 0);

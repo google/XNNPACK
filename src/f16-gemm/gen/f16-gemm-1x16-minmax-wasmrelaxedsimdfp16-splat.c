@@ -1,6 +1,6 @@
 // clang-format off
 // Auto-generated file. Do not edit!
-//   Template: src/f16-igemm/wasmrelaxedsimd-splat.c.in
+//   Template: src/f16-gemm/wasmrelaxedsimdfp16-splat.c.in
 //   Generator: tools/xngen
 //
 // Copyright 2025 Google LLC
@@ -12,20 +12,18 @@
 
 #include <wasm_simd128.h>
 
-#include "src/xnnpack/igemm.h"
+#include "src/xnnpack/gemm.h"
 
-void xnn_f16_igemm_minmax_ukernel_1x16__wasmrelaxedsimd_splat(
+void xnn_f16_gemm_minmax_ukernel_1x16__wasmrelaxedsimdfp16_splat(
     size_t mr,
     size_t nc,
     size_t kc,
-    size_t ks,
-    const xnn_float16** restrict a,
+    const xnn_float16* restrict a,
+    size_t a_stride,
     const xnn_float16* restrict w,
     xnn_float16* restrict c,
     size_t cm_stride,
     size_t cn_stride,
-    size_t a_offset,
-    const xnn_float16* zero,
     const struct xnn_f16_minmax_params* restrict params)
 {
   assert(mr != 0);
@@ -33,13 +31,11 @@ void xnn_f16_igemm_minmax_ukernel_1x16__wasmrelaxedsimd_splat(
   assert(nc != 0);
   assert(kc != 0);
   assert(kc % sizeof(uint16_t) == 0);
-  assert(ks != 0);
-  assert(ks % (1 * sizeof(void*)) == 0);
-  assert(a_offset % sizeof(uint16_t) == 0);
   assert(a != NULL);
   assert(w != NULL);
   assert(c != NULL);
 
+  const uint16_t* a0 = (const uint16_t*) a;
   uint16_t* c0 = (uint16_t*) c;
 
   const v128_t vmin = wasm_v128_load16_splat(&params->scalar.min);;
@@ -51,31 +47,20 @@ void xnn_f16_igemm_minmax_ukernel_1x16__wasmrelaxedsimd_splat(
     v128_t vacc0x1 = wasm_v128_load((const uint16_t*) w + 8);
     w = (const xnn_float16*) w + 16;
 
-    size_t p = ks;
+    size_t k = kc;
     do {
-      const uint16_t* restrict a0 = (const uint16_t*) a[0];
-      assert(a0 != NULL);
-      if XNN_UNPREDICTABLE(a0 != (const uint16_t*) zero) {
-        a0 = (const uint16_t*) ((uintptr_t) a0 + a_offset);
-      }
-      a += 1;
+      const v128_t va0 = wasm_i16x8_splat(*a0);
+      a0 += 1;
 
-      size_t k = kc;
-      do {
-        const v128_t va0 = wasm_i16x8_splat(*a0);
-        a0 += 1;
+      const v128_t vb0 = wasm_v128_load(w);
+      const v128_t vb1 = wasm_v128_load((const uint16_t*) w + 8);
+      w = (const xnn_float16*) w + 16;
 
-        const v128_t vb0 = wasm_v128_load(w);
-        const v128_t vb1 = wasm_v128_load((const uint16_t*) w + 8);
-        w = (const xnn_float16*) w + 16;
+      vacc0x0 = wasm_f16x8_relaxed_madd(va0, vb0, vacc0x0);
+      vacc0x1 = wasm_f16x8_relaxed_madd(va0, vb1, vacc0x1);
 
-        vacc0x0 = wasm_f16x8_relaxed_madd(va0, vb0, vacc0x0);
-        vacc0x1 = wasm_f16x8_relaxed_madd(va0, vb1, vacc0x1);
-
-        k -= sizeof(uint16_t);
-      } while (k != 0);
-      p -= 1 * sizeof(void*);
-    } while (p != 0);
+      k -= sizeof(uint16_t);
+    } while (k != 0);
 
     vacc0x0 = wasm_f16x8_pmax(vacc0x0, vmin);
     vacc0x1 = wasm_f16x8_pmax(vacc0x1, vmin);
@@ -88,7 +73,7 @@ void xnn_f16_igemm_minmax_ukernel_1x16__wasmrelaxedsimd_splat(
       wasm_v128_store(c0 + 8, vacc0x1);
       c0 = (uint16_t*) ((uintptr_t) c0 + cn_stride);
 
-      a = (const xnn_float16**restrict) ((uintptr_t) a - ks);
+      a0 = (const uint16_t*) ((uintptr_t) a0 - kc);
 
       nc -= 16;
     } else {
