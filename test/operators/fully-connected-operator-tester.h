@@ -3658,7 +3658,26 @@ class FullyConnectedOperatorTester {
   }
 
   void TestQS8QC2W() const {
+    TestQS8QC2WImpl(/*packed_lhs=*/false, /*input_scale=*/1.0f,
+                    /*output_scale=*/1.0f);
+  }
+
+  void TestPQS8QC2W() const {
+    TestQS8QC2WImpl(/*packed_lhs=*/true, /*input_scale=*/1.0f,
+                    /*output_scale=*/1.0f);
+  }
+
+  void TestPQS8QC2W(float input_scale, float output_scale) const {
+    TestQS8QC2WImpl(/*packed_lhs=*/true, input_scale, output_scale);
+  }
+
+  void TestQS8QC2WImpl(bool packed_lhs, float input_scale,
+                       float output_scale) const {
     ASSERT_EQ(weights_type(), WeightsType::Default);
+    ASSERT_GT(input_scale, 0.0f);
+    ASSERT_TRUE(std::isnormal(input_scale));
+    ASSERT_GT(output_scale, 0.0f);
+    ASSERT_TRUE(std::isnormal(output_scale));
 
     xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32idist(0.1f, 1.0f);
@@ -3681,7 +3700,7 @@ class FullyConnectedOperatorTester {
                                    output_channels());
     xnnpack::Buffer<int32_t> accumulators(batch_size() * output_channels());
     xnnpack::Buffer<double> output_ref(batch_size() * output_channels());
-    xnnpack::Buffer<float> requantization_scales(output_channels());
+    xnnpack::Buffer<float> kernel_scales(output_channels());
 
     for (size_t iteration = 0; iteration < kIterations; ++iteration) {
       std::generate(input.begin(), input.end(), [&]() { return i8dist(rng); });
@@ -3745,7 +3764,7 @@ class FullyConnectedOperatorTester {
         }
         requantization_scale =
             std::min(requantization_scale, 0.99999988079f /*0x1.FFFFFEp-1f*/);
-        requantization_scales[oc] = requantization_scale;
+        kernel_scales[oc] = requantization_scale;
       }
 
       // Renormalize reference results.
@@ -3755,7 +3774,9 @@ class FullyConnectedOperatorTester {
               static_cast<double>(static_cast<int32_t>(
                   output_zero_point() - 0x80)) +
               static_cast<double>(accumulators[i * output_channels() + oc]) *
-                  static_cast<double>(requantization_scales[oc]);
+                  static_cast<double>(input_scale) *
+                  static_cast<double>(kernel_scales[oc]) /
+                  static_cast<double>(output_scale);
         }
       }
       std::transform(output_ref.cbegin(), output_ref.cend(), output_ref.begin(),
@@ -3783,14 +3804,18 @@ class FullyConnectedOperatorTester {
         }
       }
 
-      const xnn_status status = xnn_create_fully_connected_nc_qs8_qc2w(
+      const auto create_fully_connected =
+          packed_lhs ? xnn_create_fully_connected_nc_pqs8_qc2w
+                     : xnn_create_fully_connected_nc_qs8_qc2w;
+      const xnn_status status = create_fully_connected(
           input_channels(), output_channels(), input_stride(), output_stride(),
-          static_cast<int8_t>(input_zero_point() - 0x80), /*input_scale=*/1.0f,
-          requantization_scales.data(),
+          static_cast<int8_t>(input_zero_point() - 0x80), input_scale,
+          kernel_scales.data(),
           kernel.data(), has_bias() ? bias.data() : nullptr,
           static_cast<int8_t>(output_zero_point() - 0x80),
-          /*output_scale=*/1.0f, static_cast<int8_t>(qmin() - 0x80),
-          static_cast<int8_t>(qmax() - 0x80), 0,
+          output_scale, static_cast<int8_t>(qmin() - 0x80),
+          static_cast<int8_t>(qmax() - 0x80),
+          packed_lhs ? XNN_FLAG_INLINE_LHS_PACKING : 0,
           auto_weights_cache.get(), &fully_connected_op);
       if (status == xnn_status_unsupported_hardware) {
         GTEST_SKIP();
@@ -3808,13 +3833,31 @@ class FullyConnectedOperatorTester {
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)>
           auto_fully_connected_op(fully_connected_op, xnn_delete_operator);
 
-      ASSERT_EQ(xnn_status_success, xnn_reshape_fully_connected_nc_qs8_qc2w(
-                                        fully_connected_op, batch_size(),
-                                        /*threadpool=*/nullptr));
+      size_t workspace_size = 0;
+      if (packed_lhs) {
+        ASSERT_EQ(xnn_status_success,
+                  xnn_reshape_fully_connected_nc_pqs8_qc2w(
+                      fully_connected_op, batch_size(), &workspace_size,
+                      /*threadpool=*/nullptr));
+      } else {
+        ASSERT_EQ(xnn_status_success,
+                  xnn_reshape_fully_connected_nc_qs8_qc2w(
+                      fully_connected_op, batch_size(),
+                      /*threadpool=*/nullptr));
+      }
+      xnnpack::Buffer<uint8_t, XNN_ALLOCATION_ALIGNMENT> workspace(
+          workspace_size);
 
-      ASSERT_EQ(xnn_status_success,
-                xnn_setup_fully_connected_nc_qs8_qc2w(
-                    fully_connected_op, input.data(), output.data()));
+      if (packed_lhs) {
+        ASSERT_EQ(xnn_status_success,
+                  xnn_setup_fully_connected_nc_pqs8_qc2w(
+                      fully_connected_op, input.data(), output.data(),
+                      workspace.data()));
+      } else {
+        ASSERT_EQ(xnn_status_success,
+                  xnn_setup_fully_connected_nc_qs8_qc2w(
+                      fully_connected_op, input.data(), output.data()));
+      }
 
       ASSERT_EQ(xnn_status_success,
                 xnn_run_operator(fully_connected_op, /*threadpool=*/nullptr));
@@ -3829,15 +3872,16 @@ class FullyConnectedOperatorTester {
             internal_weights_cache->cache.weights.size;
 
         ASSERT_EQ(xnn_status_success,
-                  xnn_create_fully_connected_nc_qs8_qc2w(
+                  create_fully_connected(
                       input_channels(), output_channels(), input_stride(),
                       output_stride(),
                       static_cast<int8_t>(input_zero_point() - 0x80),
-                      /*input_scale=*/1.0f, requantization_scales.data(),
+                      input_scale, kernel_scales.data(),
                       kernel.data(), has_bias() ? bias.data() : nullptr,
                       static_cast<int8_t>(output_zero_point() - 0x80),
-                      /*output_scale=*/1.0f, static_cast<int8_t>(qmin() - 0x80),
-                      static_cast<int8_t>(qmax() - 0x80), 0,
+                      output_scale, static_cast<int8_t>(qmin() - 0x80),
+                      static_cast<int8_t>(qmax() - 0x80),
+                      packed_lhs ? XNN_FLAG_INLINE_LHS_PACKING : 0,
                       auto_weights_cache.get(), &fully_connected_op2));
         ASSERT_NE(nullptr, fully_connected_op2);
 
@@ -3846,13 +3890,28 @@ class FullyConnectedOperatorTester {
             auto_fully_connected_op(fully_connected_op2, xnn_delete_operator);
         xnnpack::Buffer<int8_t> output2(output.size(), INT8_C(0xA5));
 
-        ASSERT_EQ(xnn_status_success, xnn_reshape_fully_connected_nc_qs8_qc2w(
-                                          fully_connected_op2, batch_size(),
-                                          /*threadpool=*/nullptr));
-
-        ASSERT_EQ(xnn_status_success,
-                  xnn_setup_fully_connected_nc_qs8_qc2w(
-                      fully_connected_op2, input.data(), output2.data()));
+        if (packed_lhs) {
+          ASSERT_EQ(xnn_status_success,
+                    xnn_reshape_fully_connected_nc_pqs8_qc2w(
+                        fully_connected_op2, batch_size(), &workspace_size,
+                        /*threadpool=*/nullptr));
+          if (workspace_size > workspace.size()) {
+            workspace = xnnpack::Buffer<uint8_t, XNN_ALLOCATION_ALIGNMENT>(
+                workspace_size);
+          }
+          ASSERT_EQ(xnn_status_success,
+                    xnn_setup_fully_connected_nc_pqs8_qc2w(
+                        fully_connected_op2, input.data(), output2.data(),
+                        workspace.data()));
+        } else {
+          ASSERT_EQ(xnn_status_success,
+                    xnn_reshape_fully_connected_nc_qs8_qc2w(
+                        fully_connected_op2, batch_size(),
+                        /*threadpool=*/nullptr));
+          ASSERT_EQ(xnn_status_success,
+                    xnn_setup_fully_connected_nc_qs8_qc2w(
+                        fully_connected_op2, input.data(), output2.data()));
+        }
 
         ASSERT_EQ(xnn_status_success, xnn_run_operator(fully_connected_op2,
                                                        /*threadpool=*/nullptr));

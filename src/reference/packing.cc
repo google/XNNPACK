@@ -2953,6 +2953,105 @@ static void xnn_kai_run_rhs_pack_nxk_qsi4cxp8vsx4sf32bi32_qsx4cx_f32_i32_sme(
   }
 }
 #endif  // XNN_ARCH_ARM64 && KLEIDI_PACKBUG
+
+size_t xnn_packed_stride_kai_qs8_qc2w_weights_and_biases_sme2(
+    const struct xnn_gemm_config* gemm_config, size_t k,
+    size_t unused_block_size, size_t unused_k_stride, size_t extra_bytes) {
+  (void)unused_block_size;
+  (void)unused_k_stride;
+  (void)extra_bytes;
+  struct kai_matmul_pack_rhs_uker_config config = {};
+  config.format.nr = gemm_config->nr;
+  config.format.kr = UINT32_C(1) << gemm_config->log2_kr;
+  config.format.sr = UINT32_C(1) << gemm_config->log2_sr;
+  const struct kai_matmul_pack_rhs_uker_api api =
+      kai_matmul_pack_rhs_nxk_qsu2cxp16vsx4sf32bi32_qsu2cx_f32_i32_sme();
+  struct kai_matmul_pack_rhs_uker_rhs_packed_dim_args shape = {};
+  shape.k = k;
+  const size_t n_step = api.get_step(&config).n;
+  return api.get_rhs_packed_stride(&config, &shape).n / n_step;
+}
+
+void xnn_pack_kai_qs8_qc2w_weights_and_biases_sme2(
+    uint32_t flags, const struct xnn_gemm_config* gemm_config,
+    size_t input_channels, size_t output_channels, size_t groups,
+    size_t unused_block_size, size_t k_stride, const void* accumulator_init,
+    const void* weights, xnn_init_scale_params_fn init_extra_data0_fn,
+    const void* extra_data0, size_t extra_data0_element_size,
+    xnn_init_scale_params_fn init_extra_data1_fn, const void* extra_data1,
+    size_t extra_data1_element_size, void* packed_weights_ptr,
+    const void* params) {
+  (void)unused_block_size;
+  (void)init_extra_data0_fn;
+  (void)init_extra_data1_fn;
+  (void)extra_data1;
+  (void)extra_data1_element_size;
+  const struct xnn_qs8_qc2w_packing_params* xnn_params =
+      reinterpret_cast<const struct xnn_qs8_qc2w_packing_params*>(params);
+
+  if ((flags & XNN_FLAG_TRANSPOSE_WEIGHTS) != 0) {
+    xnn_log_error(
+        "KleidiAI QS8 QC2W SME2 RHS packing requires NxK weights");
+    return;
+  }
+  if (input_channels % 32 != 0) {
+    xnn_log_error(
+        "KleidiAI QS8 QC2W SME2 packing requires K to be a multiple "
+        "of 32, got %zu",
+        input_channels);
+    return;
+  }
+  if (accumulator_init == nullptr) {
+    xnn_log_error("KleidiAI QS8 QC2W SME2 packing requires bias data");
+    return;
+  }
+  if (extra_data0 == nullptr || extra_data0_element_size != sizeof(float)) {
+    xnn_log_error(
+        "KleidiAI QS8 QC2W SME2 packing requires FP32 scale data");
+    return;
+  }
+
+  const size_t rhs_stride_row = (k_stride + 3) / 4;
+  const size_t rhs_group_stride = output_channels * rhs_stride_row;
+  struct kai_matmul_pack_rhs_uker_config config = {};
+  config.format.nr = gemm_config->nr;
+  config.format.kr = UINT32_C(1) << gemm_config->log2_kr;
+  config.format.sr = UINT32_C(1) << gemm_config->log2_sr;
+  const struct kai_matmul_pack_rhs_uker_api api =
+      kai_matmul_pack_rhs_nxk_qsu2cxp16vsx4sf32bi32_qsu2cx_f32_i32_sme();
+  struct kai_matmul_pack_rhs_uker_rhs_packed_dim_args packed_shape = {};
+  packed_shape.n = output_channels;
+  packed_shape.k = input_channels;
+  const struct kai_matmul_pack_rhs_uker_rhs_packed_stride_args packed_stride =
+      api.get_rhs_packed_stride(&config, &packed_shape);
+  const size_t packed_group_size =
+      api.get_rhs_packed_size(&config, &packed_shape, &packed_stride);
+  const int32_t k_sum_scale = -(int32_t)xnn_params->input_zero_point;
+  const float scale_multiplier = 1.0f;
+
+  const uint8_t* rhs = static_cast<const uint8_t*>(weights);
+  for (size_t group = 0; group < groups; group++) {
+    const uint8_t* group_rhs = rhs + group * rhs_group_stride;
+    struct kai_matmul_pack_rhs_uker_args args = {};
+    args.shape.n = output_channels;
+    args.shape.k = input_channels;
+    args.operand.rhs.ptr = group_rhs;
+    args.operand.rhs.stride.n = rhs_stride_row;
+    args.operand.rhs_packed.ptr =
+        static_cast<uint8_t*>(packed_weights_ptr) + group * packed_group_size;
+    args.operand.rhs_packed.stride = packed_stride;
+    args.operand.bias_n.ptr =
+        static_cast<const int32_t*>(accumulator_init) +
+        group * output_channels;
+    args.operand.k_sum_scale_global.ptr = &k_sum_scale;
+    args.operand.scale_n.ptr =
+        static_cast<const uint8_t*>(extra_data0) +
+        group * output_channels * extra_data0_element_size;
+    args.operand.scale_global.ptr = &scale_multiplier;
+    api.run(&config, &args);
+  }
+}
+
 size_t xnn_packed_stride_kai_qs8_qc4w_weights_and_biases_sme2(
     const struct xnn_gemm_config* gemm_config, size_t k,
     size_t unused_block_size, size_t unused_k_stride, size_t extra_bytes) {

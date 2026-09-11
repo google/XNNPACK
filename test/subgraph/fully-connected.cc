@@ -663,6 +663,83 @@ TEST(FullyConnectedQP8F32QC2W,
       /*nonzero_channelwise_zero_point=*/true, /*expect_qp8=*/false);
 }
 
+static void TestQS8QC2WPackingSelection(size_t input_channels,
+                                        uint32_t fully_connected_flags,
+                                        uint32_t optimization_flags,
+                                        bool expect_pqs8) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
+  if (xnn_init_pqs8_qc2w_gemm_config() == nullptr) {
+    GTEST_SKIP() << "PQS8 QC2W is not available";
+  }
+
+  constexpr size_t m = 4;
+  constexpr size_t n = 65;
+  std::vector<uint8_t> filter((n * input_channels + 3) / 4);
+  std::vector<float> filter_scale(n, 1.0f);
+  const bool transpose_weights =
+      (fully_connected_flags & XNN_FLAG_TRANSPOSE_WEIGHTS) != 0;
+  const std::vector<size_t> filter_shape =
+      transpose_weights ? std::vector<size_t>{input_channels, n}
+                        : std::vector<size_t>{n, input_channels};
+  const size_t channel_dim = transpose_weights ? 1 : 0;
+
+  SubgraphTester subgraph(3);
+  subgraph
+      .AddInputTensor({m, input_channels}, xnn_datatype_qint8, {0, 1.0f},
+                      /*external_id=*/0)
+      .AddStaticChannelwiseQuantizedTensor(
+          filter_shape, channel_dim, xnn_datatype_qcint2,
+          filter_scale.data(), /*external_id=*/1, /*flags=*/0, filter.data())
+      .AddOutputTensor({m, n}, xnn_datatype_qint8, {0, 1.0f},
+                       /*external_id=*/2)
+      .AddFullyConnected(/*input_id=*/0, /*filter_id=*/1,
+                         /*bias_id=*/XNN_INVALID_VALUE_ID, /*output_id=*/2,
+                         fully_connected_flags)
+      .Optimize(optimization_flags);
+
+  ASSERT_EQ(subgraph.NumNodes(), 1);
+  if (expect_pqs8) {
+    EXPECT_NE(subgraph.Node(0)->flags & XNN_FLAG_INLINE_LHS_PACKING, 0);
+    EXPECT_EQ(subgraph.Node(0)->packed_input_datatype, xnn_datatype_pqint8);
+  } else {
+    EXPECT_EQ(subgraph.Node(0)->flags & XNN_FLAG_INLINE_LHS_PACKING, 0);
+    EXPECT_EQ(subgraph.Node(0)->packed_input_datatype,
+              xnn_datatype_invalid);
+  }
+}
+
+TEST(FullyConnectedQS8QC2W, packs_lhs_for_sme2) {
+  TestQS8QC2WPackingSelection(
+      /*input_channels=*/64, /*fully_connected_flags=*/0,
+      /*optimization_flags=*/0, /*expect_pqs8=*/true);
+}
+
+TEST(FullyConnectedQS8QC2W, minimum_aligned_input_channels_use_sme2) {
+  TestQS8QC2WPackingSelection(
+      /*input_channels=*/32, /*fully_connected_flags=*/0,
+      /*optimization_flags=*/0, /*expect_pqs8=*/true);
+}
+
+TEST(FullyConnectedQS8QC2W, unaligned_input_channels_use_unpacked_lhs) {
+  TestQS8QC2WPackingSelection(
+      /*input_channels=*/36, /*fully_connected_flags=*/0,
+      /*optimization_flags=*/0, /*expect_pqs8=*/false);
+}
+
+TEST(FullyConnectedQS8QC2W, transposed_weights_use_unpacked_lhs) {
+  TestQS8QC2WPackingSelection(
+      /*input_channels=*/64,
+      /*fully_connected_flags=*/XNN_FLAG_TRANSPOSE_WEIGHTS,
+      /*optimization_flags=*/0, /*expect_pqs8=*/false);
+}
+
+TEST(FullyConnectedQS8QC2W, disabled_inline_packing_uses_unpacked_lhs) {
+  TestQS8QC2WPackingSelection(
+      /*input_channels=*/64, /*fully_connected_flags=*/0,
+      /*optimization_flags=*/XNN_FLAG_NO_INLINED_LHS_PACKING,
+      /*expect_pqs8=*/false);
+}
+
 TEST(FullyConnectedQS8QC4W, packs_lhs_for_sme2) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
   if (xnn_init_pqs8_qc4w_gemm_config() == nullptr) {
