@@ -240,7 +240,17 @@ static XNN_NO_SANITIZE_FUNCTION enum xnn_status reshape_reduce_nd(
   size_t num_reduction_elements;
   if (normalized_reduction_axes[num_reduction_axes - 1] == num_input_dims - 1) {
     if (workspace_size != NULL) {
-      const size_t num_output_elements = normalized_input_shape[0] * normalized_input_shape[2] * normalized_input_shape[4];
+      // Fix: guard against size_t overflow when multiplying tensor dimensions
+      // together to compute the workspace size (CWE-190 -> CWE-131 -> CWE-787).
+      size_t num_output_elements;
+      if (!xnn_safe_mul(normalized_input_shape[0], normalized_input_shape[2], &num_output_elements) ||
+          !xnn_safe_mul(num_output_elements, normalized_input_shape[4], &num_output_elements) ||
+          num_output_elements > (SIZE_MAX >> log2_accumulator_element_size) - XNN_EXTRA_BYTES) {
+        xnn_log_error(
+            "failed to reshape %s operator: workspace size computation overflowed",
+            xnn_operator_type_to_string_v2(reduce_op));
+        return xnn_status_unsupported_parameter;
+      }
       *workspace_size = (num_output_elements << log2_accumulator_element_size) + XNN_EXTRA_BYTES;
     }
     num_reduction_elements = normalized_input_shape[1] * normalized_input_shape[3] * normalized_input_shape[5];
@@ -282,7 +292,16 @@ static XNN_NO_SANITIZE_FUNCTION enum xnn_status reshape_reduce_nd(
     // Reduction along the non-innermost dimension
     const size_t channel_like_dim = normalized_input_shape[XNN_MAX_TENSOR_DIMS - 1];
     if (workspace_size != NULL) {
-      const size_t num_output_elements = normalized_input_shape[1] * normalized_input_shape[3] * normalized_input_shape[5];
+      // Fix: guard against size_t overflow (mirror of the branch above).
+      size_t num_output_elements;
+      if (!xnn_safe_mul(normalized_input_shape[1], normalized_input_shape[3], &num_output_elements) ||
+          !xnn_safe_mul(num_output_elements, normalized_input_shape[5], &num_output_elements) ||
+          num_output_elements > (SIZE_MAX >> log2_accumulator_element_size) - XNN_EXTRA_BYTES) {
+        xnn_log_error(
+            "failed to reshape %s operator: workspace size computation overflowed",
+            xnn_operator_type_to_string_v2(reduce_op));
+        return xnn_status_unsupported_parameter;
+      }
       *workspace_size = (num_output_elements << log2_accumulator_element_size) + XNN_EXTRA_BYTES;
     }
     num_reduction_elements = normalized_input_shape[0] * normalized_input_shape[2] * normalized_input_shape[4];
@@ -297,6 +316,13 @@ static XNN_NO_SANITIZE_FUNCTION enum xnn_status reshape_reduce_nd(
       reduce_op->reduce_config->update(&reduce_op->params.reduce, scale);
     }
     if (reduce_op->channels != channel_like_dim) {
+      // Fix: guard against size_t overflow in the zero-padding buffer size.
+      if (channel_like_dim > (SIZE_MAX >> log2_data_element_size) - XNN_EXTRA_BYTES) {
+        xnn_log_error(
+            "failed to reshape %s operator: zero buffer size computation overflowed",
+            xnn_operator_type_to_string_v2(reduce_op));
+        return xnn_status_unsupported_parameter;
+      }
       const size_t zero_size = (channel_like_dim << log2_data_element_size) + XNN_EXTRA_BYTES;
       // Note: zero buffer must be SIMD-aligned, so we can't use xnn_reallocate_memory
       xnn_release_simd_memory(reduce_op->zero_buffer);
