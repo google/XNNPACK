@@ -82,6 +82,9 @@ import("build_srcs.bzl")
 # The values (and what they're currently set to) can be viewed with
 # `gn args --list out/Default`
 declare_args() {
+  # Enables assembly-based microkernels
+  xnnpack_enable_assembly = !is_win
+
   # Enables SSE4.1 support for x86 processors
   xnnpack_enable_sse41 =
       target_cpu == "x64" || target_cpu == "x86" || build_with_chromium
@@ -166,9 +169,6 @@ config("xnnpack_private_config") {
   ]
 
   defines = [
-    # Always enable XNNPACK's assembly kernels
-    "XNN_ENABLE_ASSEMBLY=1",
-
     # TODO: decide if we want to always enable this, or parameterize it
     "XNN_ENABLE_SPARSE=0",
 
@@ -176,13 +176,18 @@ config("xnnpack_private_config") {
     "XNN_ENABLE_CPUINFO=1",
   ]
 
+  if (xnnpack_enable_assembly) {
+    defines += [ "XNN_ENABLE_ASSEMBLY=1" ]
+  } else {
+    defines += [ "XNN_ENABLE_ASSEMBLY=0" ]
+  }
+
   # Define support for all features on every platform possible,
   # unless there's a good reason to switch them off.
   if (current_cpu == "arm64") {
     # Define the core Armv8
     defines += [
       "XNN_ENABLE_ARM_BF16=1",
-      "XNN_ENABLE_ASSEMBLY=1",
       "XNN_ENABLE_ARM_FP16_VECTOR=1",
     ]
     if (xnnpack_enable_arm_i8mm) {
@@ -217,7 +222,6 @@ config("xnnpack_private_config") {
       "XNN_ENABLE_ARM_DOTPROD=1",
       "XNN_ENABLE_ARM_FP16_SCALAR=1",
       "XNN_ENABLE_ARM_FP16_VECTOR=1",
-      "XNN_ENABLE_ASSEMBLY=1",
     ]
   } else if (current_cpu == "x64" || current_cpu == "x86") {
     # x64 support baseline, which is SSSE3 and below to match Chromium.
@@ -1043,10 +1047,12 @@ template("xnnpack_library") {
       sources += ALL_NEONV8_MICROKERNEL_SRCS
       deps += [
         ":neon_aarch64_microkernels",
-        ":neon_asm_microkernels",
         ":neon_bf16_microkernels",
         ":neon_fullfp16_microkernels",
       ]
+      if (xnnpack_enable_assembly) {
+        deps += [ ":neon_asm_microkernels" ]
+      }
       if (xnnpack_enable_arm_i8mm) {
         deps += [
           ":neon_i8mm_microkernels",
@@ -1067,7 +1073,6 @@ template("xnnpack_library") {
       }
     } else if (current_cpu == "arm") {
       deps += [
-        ":aarch32_asm_microkernels",
         ":armsimd32_microkernels",
         ":fp16arith_microkernels",
         ":neon_bf16_microkernels",
@@ -1079,6 +1084,9 @@ template("xnnpack_library") {
         ":neonfp16arith_microkernels",
         ":neonv8_microkernels",
       ]
+      if (xnnpack_enable_assembly) {
+        deps += [ ":aarch32_asm_microkernels" ]
+      }
     } else if (current_cpu == "x64" || current_cpu == "x86") {
       if (xnnpack_enable_avx) {
         deps += [ ":avx_microkernels" ]
@@ -1095,7 +1103,7 @@ template("xnnpack_library") {
       if (xnnpack_enable_avx512) {
         deps += [ ":avx512_microkernels" ]
       }
-      if (!is_win) {
+      if (xnnpack_enable_assembly && current_cpu == "x64") {
         sources += AMD64_ASM_MICROKERNEL_SRCS
       }
       sources += ALL_SSE_MICROKERNEL_SRCS
