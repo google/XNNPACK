@@ -3474,6 +3474,13 @@ void xnn_pack_kai_f32_weights_and_biases_sme2(
   bool free_accumulator_init = false;
   if (accumulator_init == NULL) {
     accumulator_init = calloc(output_channels, sizeof(float));
+    if (accumulator_init == NULL) {
+      xnn_log_error(
+          "failed to allocate %zu bytes for KleidiAI SME2 bias substitute buffer",
+          output_channels * sizeof(float));
+      assert(false);
+      return;
+    }
     free_accumulator_init = true;
   }
 

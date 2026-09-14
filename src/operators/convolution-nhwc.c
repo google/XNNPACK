@@ -278,7 +278,7 @@ static XNN_NO_SANITIZE_FUNCTION enum xnn_status create_dwconv_packed_weights(
   const bool weights_already_cached =
       convolution_op->packed_weights.offset != XNN_CACHE_NOT_FOUND;
 
-  const size_t c_stride = round_up_po2(groups, channel_tile);
+  const size_t c_stride = round_up(groups, channel_tile);
   size_t packed_weights_size = 0;
   packed_weights_size = ((primary_tile << log2_filter_element_size) +
                          bias_element_size + extra_weights_bytes) *
@@ -1384,7 +1384,8 @@ static XNN_NO_SANITIZE_FUNCTION enum xnn_status init_dwconv_params_f32(
   const struct xnn_kai_dwconv_config* kai_dwconv_config =
       xnn_init_kai_f32_dwconv_config();
   // KAI derives the channel count and tensor widths from these dense strides.
-  if (kai_dwconv_config != NULL && context->kernel_height == 3 &&
+  if (context->operator_type == xnn_operator_type_convolution_nhwc_f32 &&
+      kai_dwconv_config != NULL && context->kernel_height == 3 &&
       context->kernel_width == 3 &&
       context->subsampling_height == 1 && context->subsampling_width == 1 &&
       context->dilation_height == 1 && context->dilation_width == 1 &&
