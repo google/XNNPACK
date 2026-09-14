@@ -18,12 +18,12 @@ package(default_visibility = ["//litert/tensor:__subpackages__"])
 
 cc_library(
     name = "runner",
+    srcs = ["runner.cc"],
     hdrs = ["runner.h"],
     deps = [
         "//litert/tensor",
         "//litert/tensor:buffer",
         "//litert/tensor:datatypes",
-        "//litert/tensor/backends/common_nnpack:conversion",
         "//litert/tensor/backends/common_nnpack:graph",
         "//litert/tensor/backends/common_nnpack:utils",
         "//litert/tensor/internal:graph",
@@ -32,6 +32,7 @@ cc_library(
         "@abseil-cpp//absl/status",
         "@abseil-cpp//absl/status:statusor",
         "@abseil-cpp//absl/strings:str_format",
+        "@abseil-cpp//absl/strings:string_view",
         "@abseil-cpp//absl/types:span",
     ],
 )
@@ -41,9 +42,18 @@ cc_test(
     srcs = ["runner_test.cc"],
     deps = [
         ":runner",
+        "//litert/tensor",
+        "//litert/tensor:buffer",
         "//litert/tensor:datatypes",
+        "//litert/tensor/backends/common_nnpack:graph",
         "//litert/tensor/internal:graph",
+        "//litert/tensor/utils:macros",
         "//litert/tensor/utils:matchers",
+        "@abseil-cpp//absl/container:flat_hash_map",
+        "@abseil-cpp//absl/log:absl_check",
+        "@abseil-cpp//absl/status",
+        "@abseil-cpp//absl/status:status_matchers",
+        "@abseil-cpp//absl/status:statusor",
         "@abseil-cpp//absl/types:span",
         "@com_google_googletest//:gtest_main",  # gunit
     ],
@@ -59,6 +69,7 @@ cc_library(
         "//litert/tensor:datatypes",
         "//litert/tensor/utils:matchers",
         "@abseil-cpp//absl/status",
+        "@abseil-cpp//absl/status:status_matchers",
         "@abseil-cpp//absl/types:span",
         "@com_google_googletest//:gtest",  # lib test only
     ],

@@ -19,16 +19,18 @@ limitations under the License.
 #include <cstddef>
 #include <cstdint>
 #include <memory>
+#include <utility>
 #include <vector>
 
 #include "include/xnnpack.h"
 #include "absl/container/flat_hash_map.h"
 #include "absl/status/status.h"
+#include "absl/strings/str_format.h"
 #include "absl/types/span.h"
 #include "litert/tensor/backends/common_nnpack/graph.h"
 #include "litert/tensor/backends/xnnpack/graph.h"
 #include "litert/tensor/backends/xnnpack/utils.h"
-#include "litert/tensor/runners/common_nnpack/runner.h"
+#include "litert/tensor/buffer.h"
 #include "litert/tensor/utils/macros.h"
 
 namespace litert::tensor {
@@ -71,19 +73,29 @@ absl::Status XnnpackRunner::GetExternalValueShape(uint32_t id,
 
 absl::Status XnnpackRunner::SetupExternalValues(
     absl::Span<NnpackValue> values,
-    absl::flat_hash_map<uint32_t, ExternalBuffer>& external_buffers) {
+    const absl::flat_hash_map<uint32_t, std::shared_ptr<Buffer>>&
+        external_buffers,
+    std::vector<LockedBufferSpan<const std::byte>>& locks) {
   std::vector<xnn_external_value> externals;
   externals.reserve(values.size());
+  locks.reserve(values.size());
   for (NnpackValue& value : values) {
     if (value.flags == 0) {
       continue;
     }
-    auto buffer = external_buffers[value.id].data();
-    if (buffer.data() == nullptr) {
+    auto it = external_buffers.find(value.id);
+    if (it == external_buffers.end() || it->second == nullptr) {
       return absl::FailedPreconditionError(
-          "External value missing host buffer");
+          absl::StrFormat("External value %u missing host buffer", value.id));
     }
-    externals.push_back({.id = value.id, .data = buffer.data()});
+    LockedBufferSpan<const std::byte> lock = it->second->Lock();
+    if (lock.data() == nullptr) {
+      return absl::FailedPreconditionError(
+          absl::StrFormat("External value %u could not be locked", value.id));
+    }
+    externals.push_back(
+        {.id = value.id, .data = const_cast<std::byte*>(lock.data())});
+    locks.push_back(std::move(lock));
   }
   return XnnStatusToAbsl(
       xnn_setup_runtime_v2(runtime_.get(), externals.size(), externals.data()),
