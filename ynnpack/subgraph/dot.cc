@@ -18,6 +18,7 @@
 #include <variant>
 #include <vector>
 
+#include "ynnpack/base/arch.h"
 #include "ynnpack/base/arithmetic.h"
 #include "ynnpack/base/base.h"
 #include "ynnpack/base/log.h"
@@ -263,152 +264,45 @@ auto make_dot_impl(dot_type type, bool consistent_arithmetic, bool symmetric_b,
   if (!pack_b) {
     kernel_flags |= dot_flag::unaligned_b;
   }
+  uint64_t arch_flags = get_supported_arch_flags();
 
-  return [type, kernel_flags, transposed_a, pack_b, num_k_dims](
+  return [type, kernel_flags, transposed_a, pack_b, num_k_dims, arch_flags](
              slinky::raw_buffer a, slinky::raw_buffer b,
              slinky::raw_buffer init_c, slinky::raw_buffer c,
              const slinky::raw_buffer& reduction_bounds) -> index_t {
-    // If the dot has fewer than 3 reduction dimensions, we use this dummy
-    // dimension instead.
-    const slinky::dim& dummy_dim = slinky::dim::broadcast();
-
-    const slinky::dim& r_k1 = reduction_bounds.dim(0);
-    const slinky::dim& r_k2 =
-        num_k_dims >= 2 ? reduction_bounds.dim(1) : dummy_dim;
-    const slinky::dim& r_k3 =
-        num_k_dims >= 3 ? reduction_bounds.dim(2) : dummy_dim;
-
-    index_t k1_min = r_k1.min();
-    index_t k1_extent = r_k1.extent();
-    index_t k2_min = num_k_dims >= 2 ? r_k2.min() : 0;
-    index_t k2_extent = num_k_dims >= 2 ? r_k2.extent() : 1;
-    index_t k3_min = num_k_dims >= 3 ? r_k3.min() : 0;
-    index_t k3_extent = num_k_dims >= 3 ? r_k3.extent() : 1;
-
-    // Learn what we need to know about m, n, k1, k2, k3 before slicing them.
-    const int a_k1_dim = transposed_a ? 2 : 0;
-    const slinky::dim& init_c_m = init_c.dim(1);
-    const slinky::dim& init_c_n = init_c.dim(0);
-    const slinky::dim& c_m = c.dim(1);
     const slinky::dim& c_n = c.dim(0);
-    const slinky::dim& a_k1i = transposed_a ? a.dim(0) : dummy_dim;
-    const slinky::dim& a_mi = transposed_a ? a.dim(1) : dummy_dim;
-    const slinky::dim& a_k1o = a.dim(a_k1_dim);
-    const slinky::dim& a_k2 = num_k_dims >= 2 ? a.dim(a_k1_dim + 1) : dummy_dim;
-    const slinky::dim& a_k3 = num_k_dims >= 3 ? a.dim(a_k1_dim + 2) : dummy_dim;
-    const slinky::dim& a_m = a.dim(a_k1_dim + num_k_dims);
-    const slinky::dim& b_k1i = b.dim(0);
-    const slinky::dim& b_ni = b.dim(1);
-    const slinky::dim& b_k1o = b.dim(2);
-    const slinky::dim& b_no = b.dim(3);
-    const slinky::dim& b_k2 = num_k_dims >= 2 ? b.dim(4) : dummy_dim;
-    const slinky::dim& b_k3 = num_k_dims >= 3 ? b.dim(5) : dummy_dim;
-
     if (c_n.empty()) {
       // Most things below transparently handle empty dimensions, but n has some
       // alignment requirements.
       return 0;
     }
 
-    const int b_type_element_count = type_element_count(type.b);
-    const index_t tile_k = b_k1i.extent() * b_type_element_count;
-    // If a is transposed, then the k dimension has been reshaped to have
-    // `tile_k` values in each element.
-    const index_t a_tile_k = a_k1i.extent();
-    const index_t a_stride_m = transposed_a ? a_mi.stride() : a_m.stride();
-    const index_t a_stride_k3 = a_k3.stride();
-    const index_t a_stride_k2 = a_k2.stride();
-    const index_t a_stride_k1 = a_k1o.stride() / a_tile_k;
-    const index_t k1 = k1_extent & ~(tile_k - 1);
-    const index_t k1_tail = k1_extent & (tile_k - 1);
-    const index_t k2 = k2_extent;
-    const index_t k3 = k3_extent;
-    const index_t block_n = pack_b ? b_ni.extent() : c_n.extent();
-    const index_t b_stride_k3 = b_k3.stride();
-    const index_t b_stride_k2 = b_k2.stride();
-    // TODO: The kernels should probably expect this stride to be multiplied
-    // already.
-    assert(b_k1o.extent() == 1 || b_k1o.stride() % tile_k == 0);
-    const index_t b_stride_k1 = b_k1o.stride() / tile_k;
-    // This next line covers up a very tricky issue: we want to be able to
-    // address b by n, but when b is packed, it has been transposed such that
-    // b at n = 0 and b at n = block_n are separated by an entire packed column,
-    // but if b is not packed, they are separated by n elements. If b is packed,
-    // this stride is a lie: it is only valid to increment b pointers by
-    // `block_n` values at a time.
-    assert(pack_b ? b_no.extent() == 1 || b_no.stride() % b_ni.extent() == 0
-                  : b_ni.extent() == 1 || b_ni.stride() == b.elem_size);
-    const index_t b_stride_n =
-        pack_b ? b_no.stride() / b_ni.extent() : b_ni.stride();
+    // If the dot has fewer than 3 reduction dimensions, we use this dummy
+    // dimension instead.
+    const slinky::dim& dummy_dim = slinky::dim::broadcast();
+
+    const slinky::dim& r_k1 = reduction_bounds.dim(0);
+    const slinky::dim& r_k2 = reduction_bounds.dim(1);
+    const slinky::dim& r_k3 = reduction_bounds.dim(2);
+
+    const slinky::dim& c_m = c.dim(1);
+    const index_t m = c_m.extent();
+    const index_t n = c_n.extent();
+    const index_t c_min_m = c_m.min();
+    const index_t c_min_n = c_n.min();
     const index_t c_stride_m = c_m.stride();
     const index_t c_stride_n = c_n.stride();
-    index_t init_c_stride_m = init_c_m.stride();
-
-    a.base = offset_bytes(a.base,
-                          (k3_min - a_k3.min()) * a_stride_k3 +
-                              (k2_min - a_k2.min()) * a_stride_k2 +
-                              (k1_min - a_k1o.min() * a_tile_k) * a_stride_k1);
-    b.base =
-        offset_bytes(b.base, (k3_min - b_k3.min()) * b_stride_k3 +
-                                 (k2_min - b_k2.min()) * b_stride_k2 +
-                                 (k1_min - b_k1o.min() * tile_k) * b_stride_k1);
-
-    // Find a kernel that is compatible with the packed data we have, and
-    // matches whether A is transposed or not.
-    dot_shape shape;
-    shape.m = c_m.extent();
-    shape.n = c_n.extent();
-    shape.k1 = k1;
-    shape.k2 = k2;
-    shape.k3 = k3;
-    dot_packed_shape packed_shape;
-    packed_shape.block_n = block_n;
-    packed_shape.tile_k = tile_k;
-    std::optional<bool> require_transpose_a = std::make_optional(transposed_a);
-    if (a_stride_m == a_stride_k1 * a_tile_k) {
-      // If the stride of m and k1 are the same (i.e. A is a vector of tile_k
-      // values), then we don't care if the kernel is transposed or not.
-      require_transpose_a = std::nullopt;
-    }
-    dot_kernel kernel = get_dot_kernel(type, shape, packed_shape, kernel_flags,
-                                       require_transpose_a);
-    assert(kernel.kernel);
-    assert(tile_k == kernel.tile_k);
-    const index_t block_m = kernel.block_m;
-    const index_t block_k = kernel.block_k;
-
-    assert(a_k1i.min() == 0);
-    assert(a_tile_k == 1 || a_k1i.stride() == a.elem_size);
-    assert(b_k1i.min() == 0);
-    assert(b_k1i.extent() == 1 || b_k1i.stride() == b.elem_size);
-    assert(b_ni.min() == 0);
-    assert(b_ni.extent() == 1 || b_ni.stride() == b.elem_size * b_k1i.extent());
-    assert(!init_c_m.is_folded());
-    assert(!init_c_n.is_folded());
     assert(!c_m.is_folded());
     assert(!c_n.is_folded());
-    assert(!a_m.is_folded(c_m.min(), c_m.max()));
-    assert(!a_k1i.is_folded());
-    assert(!a_mi.is_folded());
-    assert(!a_k1o.is_folded());
-    assert(!a_k2.is_folded());
-    assert(!a_k3.is_folded());
-    assert(!b_k1o.is_folded());
-    assert(!b_no.is_folded());
-    assert(!b_k2.is_folded());
-    assert(!b_k3.is_folded());
 
-    dot_kernel_state kernel_state = {};
+    const slinky::dim& init_c_m = init_c.dim(1);
+    const slinky::dim& init_c_n = init_c.dim(0);
+    assert(!init_c_m.is_folded());
+    assert(!init_c_n.is_folded());
+    index_t init_c_stride_m = init_c_m.stride();
 
-    bool init_output = true;
-    for (int i = 0; i < reduction_bounds.rank; ++i) {
-      if (reduction_bounds.dim(i).min() != 0) {
-        init_output = false;
-        break;
-      }
-    }
-    if (init_output) {
-      if (init_c.base && init_c.base != c.base && c_n.extent() > 1) {
+    if (r_k1.min() == 0 && r_k2.min() == 0 && r_k3.min() == 0) {
+      if (init_c.base && init_c.base != c.base && n > 1) {
         if (init_c_n.stride() == 0) {
           // The initializer is broadcasted in the n dimension, which the kernel
           // cannot handle. We need to copy it to the output, and update the
@@ -425,6 +319,96 @@ auto make_dot_impl(dot_type type, bool consistent_arithmetic, bool symmetric_b,
       init_c = c;
     }
 
+    init_c.slice(0, slinky::in_bounds{c_min_n});
+    init_c.slice(0, slinky::in_bounds{c_min_m});
+    c.slice({0, 1});
+
+    const slinky::dim& b_k1i = b.dim(0);
+    const index_t tile_k = b_k1i.extent() * type_element_count(type.b);
+    assert(is_power_of_two(tile_k));
+    const slinky::dim& b_ni = b.dim(1);
+    const index_t block_n = pack_b ? b_ni.extent() : n;
+    const slinky::dim& b_k1o = b.dim(2);
+    assert(b_k1o.extent() == 1 || b_k1o.stride() % tile_k == 0);
+    const slinky::dim& b_no = b.dim(3);
+    assert(pack_b ? b_no.extent() == 1 || b_no.stride() % block_n == 0
+                  : b_ni.extent() == 1 || b_ni.stride() == b.elem_size);
+    const index_t b_stride_n = pack_b ? b_no.stride() / block_n : b_ni.stride();
+    const slinky::dim& b_k2 = num_k_dims >= 2 ? b.dim(4) : dummy_dim;
+    const slinky::dim& b_k3 = num_k_dims >= 3 ? b.dim(5) : dummy_dim;
+
+    assert(b_k1i.min() == 0);
+    assert(b_k1i.extent() == 1 || b_k1i.stride() == b.elem_size);
+    assert(b_ni.min() == 0);
+    assert(b_ni.extent() == 1 || b_ni.stride() == b.elem_size * b_k1i.extent());
+    assert(b_k1o.stride() % tile_k == 0);
+    assert(!b_k1o.is_folded());
+    assert(!b_no.is_folded());
+    assert(!b_k2.is_folded());
+    assert(!b_k3.is_folded());
+
+    std::array<size_t, 3> b_k_strides = {
+        static_cast<size_t>(b_k1o.stride() / tile_k),
+        static_cast<size_t>(b_k2.stride()),
+        static_cast<size_t>(b_k3.stride()),
+    };
+
+    b.base = offset_bytes(
+        b.base, (r_k3.min() - b_k3.min()) * b_k_strides[2] +
+                    (r_k2.min() - b_k2.min()) * b_k_strides[1] +
+                    (r_k1.min() - b_k1o.min() * tile_k) * b_k_strides[0]);
+
+    if (pack_b) {
+      // If b is packed, we must slice b at blocks of n.
+      assert(c_min_n % block_n == 0);
+      b.slice({0, 1, 2});
+      b.slice(0, slinky::in_bounds{c_min_n / block_n});
+    } else {
+      // If b is not packed, we need to just slice it at n.
+      b.slice(0);
+      b.slice(0, slinky::in_bounds{c_min_n});
+      b.slice({0, 1});
+    }
+    for (size_t i = 1; i < num_k_dims; ++i) {
+      b.slice(0);
+    }
+
+    const int a_k1_dim = transposed_a ? 2 : 0;
+    const slinky::dim& a_k1i = transposed_a ? a.dim(0) : dummy_dim;
+    const index_t a_tile_k = a_k1i.extent();
+    const slinky::dim& a_mi = transposed_a ? a.dim(1) : dummy_dim;
+    const slinky::dim& a_m = a.dim(a_k1_dim + num_k_dims);
+    const index_t a_stride_m = transposed_a ? a_mi.stride() : a_m.stride();
+    const slinky::dim& a_k1o = a.dim(a_k1_dim);
+    const slinky::dim& a_k2 = num_k_dims >= 2 ? a.dim(a_k1_dim + 1) : dummy_dim;
+    const slinky::dim& a_k3 = num_k_dims >= 3 ? a.dim(a_k1_dim + 2) : dummy_dim;
+
+    assert(a_k1i.min() == 0);
+    assert(a_tile_k == 1 || a_k1i.stride() == a.elem_size);
+    assert(!a_m.is_folded(c_min_m, c_min_m + m - 1));
+    assert(!a_k1i.is_folded());
+    assert(!a_mi.is_folded());
+    assert(!a_k1o.is_folded());
+    assert(!a_k2.is_folded());
+    assert(!a_k3.is_folded());
+
+    std::array<size_t, 3> a_k_strides = {
+        static_cast<size_t>(a_k1o.stride() / a_tile_k),
+        static_cast<size_t>(a_k2.stride()),
+        static_cast<size_t>(a_k3.stride()),
+    };
+
+    a.base = offset_bytes(
+        a.base, (r_k3.min() - a_k3.min()) * a_k_strides[2] +
+                    (r_k2.min() - a_k2.min()) * a_k_strides[1] +
+                    (r_k1.min() - a_k1o.min() * a_tile_k) * a_k_strides[0]);
+
+    // The kernels assume that the column dimension of a is stride 1 element.
+    assert(transposed_a
+               ? (a_m.extent() == 1 || a_stride_m == a.elem_size * a_tile_k)
+               : (a_k1o.extent() == 1 ||
+                  a_k_strides[0] == static_cast<size_t>(a.elem_size)));
+
     // `for_each_element` below handles the batch dimensions, we handle the loop
     // over m, and the kernel handles the rest (n, k1, k2, k3). We need to slice
     // off these dimensions so we can handle them.
@@ -433,52 +417,47 @@ auto make_dot_impl(dot_type type, bool consistent_arithmetic, bool symmetric_b,
     }
     if (transposed_a) {
       const index_t tile_m = a_mi.extent();
-      assert(c_m.min() % tile_m == 0);
-      a.slice(0, slinky::in_bounds{c_m.min() / tile_m});
+      assert(c_min_m % tile_m == 0);
+      a.slice(0, slinky::in_bounds{c_min_m / tile_m});
     } else {
-      a.slice(0, slinky::in_bounds{c_m.min()});
+      a.slice(0, slinky::in_bounds{c_min_m});
     }
-    if (pack_b) {
-      // If b is packed, we must slice b at blocks of n.
-      assert(c_n.min() % block_n == 0);
-      b.slice({0, 1, 2});
-      b.slice(0, slinky::in_bounds{c_n.min() / block_n});
-    } else {
-      // If b is not packed, we need to just slice it at n.
-      b.slice(0);
-      b.slice(0, slinky::in_bounds{c_n.min()});
-      b.slice({0, 1});
-    }
-    for (size_t i = 1; i < num_k_dims; ++i) {
-      b.slice(0);
-    }
-    init_c.slice(0, slinky::in_bounds{c_n.min()});
-    init_c.slice(0, slinky::in_bounds{c_m.min()});
-    c.slice({0, 1});
-    // TODO: At this point, we can probably fuse dimensions of c, a, b in the
-    // hopes of making i bigger, which should improve performance in cases where
-    // block_m does not divide c_m.extent()
 
-    // The kernels assume that the column dimension of a is stride 1 element.
-    assert(transposed_a
-               ? (a_m.extent() == 1 || a_stride_m == a.elem_size * a_tile_k)
-               : (a_k1o.extent() == 1 || a_stride_k1 == a.elem_size));
+    const index_t k1_extent = r_k1.extent();
+    const index_t k1 = k1_extent & ~(tile_k - 1);
+    const index_t k1_tail = k1_extent & (tile_k - 1);
+    const index_t k2 = r_k2.extent();
+    const index_t k3 = r_k3.extent();
 
     std::array<size_t, 3> k = {
         static_cast<size_t>(k1),
         static_cast<size_t>(k2),
         static_cast<size_t>(k3),
     };
-    std::array<size_t, 3> a_k_strides = {
-        static_cast<size_t>(a_stride_k1),
-        static_cast<size_t>(a_stride_k2),
-        static_cast<size_t>(a_stride_k3),
-    };
-    std::array<size_t, 3> b_k_strides = {
-        static_cast<size_t>(b_stride_k1),
-        static_cast<size_t>(b_stride_k2),
-        static_cast<size_t>(b_stride_k3),
-    };
+
+    // Find a kernel that is compatible with the packed data we have, and
+    // matches whether A is transposed or not.
+    std::optional<bool> require_transpose_a = std::make_optional(transposed_a);
+    if (a_stride_m == a_k_strides[0] * a_tile_k) {
+      // If the stride of m and k1 are the same (i.e. A is a vector of tile_k
+      // values), then we don't care if the kernel is transposed or not.
+      require_transpose_a = std::nullopt;
+    }
+    dot_shape shape;
+    shape.m = m;
+    shape.n = n;
+    shape.k1 = k1;
+    shape.k2 = k2;
+    shape.k3 = k3;
+    dot_packed_shape packed_shape;
+    packed_shape.block_n = block_n;
+    packed_shape.tile_k = tile_k;
+    dot_kernel kernel = get_dot_kernel(type, shape, packed_shape, kernel_flags,
+                                       require_transpose_a, arch_flags);
+    assert(kernel.kernel);
+    assert(tile_k == kernel.tile_k);
+    const index_t block_m = kernel.block_m;
+    const index_t block_k = kernel.block_k;
 
     auto call_kernel = [transposed_a, c_stride_m, kernel = kernel.kernel](
                            index_t m, index_t n, span<const size_t> k,
@@ -492,33 +471,36 @@ auto make_dot_impl(dot_type type, bool consistent_arithmetic, bool symmetric_b,
              b_k_strides[0], b, init_c_stride_m, init_c, c_stride_m, c, state);
     };
 
+    dot_kernel_state kernel_state = {};
+
     const size_t cache_sizes[] = {cache_size_l2};
 
     // We need up to 3 loops per cache level.
     dot_loop loops_storage[std::size(cache_sizes) * 3];
 
     if (k1) {
-      auto loops = schedule_dot(cache_sizes, c_m.extent(), c_n.extent(), k,
-                                block_m, block_n, block_k, a.elem_size,
-                                b.elem_size, loops_storage);
+      auto loops = schedule_dot(cache_sizes, m, n, k, block_m, block_n, block_k,
+                                a.elem_size, b.elem_size, loops_storage);
 
       slinky::for_each_element(
           [=, &kernel_state](void* c, const void* a, const void* b,
                              const void* init_c) {
-            run_dot(loops, c_m.extent(), c_n.extent(), k, block_m, block_n,
-                    block_k, a_stride_m, a_k_strides, a, b_k_strides,
-                    b_stride_n, b, init_c_stride_m, init_c, c_stride_m,
-                    c_stride_n, c, call_kernel, &kernel_state);
+            run_dot(loops, m, n, k, block_m, block_n, block_k, a_stride_m,
+                    a_k_strides, a, b_k_strides, b_stride_n, b, init_c_stride_m,
+                    init_c, c_stride_m, c_stride_n, c, call_kernel,
+                    &kernel_state);
           },
           c, a, b, init_c);
     }
     if (k1_tail) {
-      std::array<size_t, 3> k_tail = {static_cast<size_t>(k1_tail),
-                                      static_cast<size_t>(k2),
-                                      static_cast<size_t>(k3)};
-      auto loops = schedule_dot(cache_sizes, c_m.extent(), c_n.extent(), k_tail,
-                                block_m, block_n, block_k, a.elem_size,
-                                b.elem_size, loops_storage);
+      std::array<size_t, 3> k_tail = {
+          static_cast<size_t>(k1_tail),
+          static_cast<size_t>(k2),
+          static_cast<size_t>(k3),
+      };
+      auto loops =
+          schedule_dot(cache_sizes, m, n, k_tail, block_m, block_n, block_k,
+                       a.elem_size, b.elem_size, loops_storage);
       // Dot kernels can't handle k1 not aligned to tile_k. We handle that
       // here by making a padded copy of the unaligned elements and calling the
       // kernel again.
@@ -532,10 +514,6 @@ auto make_dot_impl(dot_type type, bool consistent_arithmetic, bool symmetric_b,
       const index_t a_padded_stride_m = a.elem_size * tile_k;
       void* a_padded = YNN_ALLOCA(uint8_t, block_m* a_padded_stride_m);
       memset(a_padded, 0, a_padded_stride_m * block_m);
-      const size_t a_k_strides_tail_v[] = {static_cast<size_t>(a_stride_k1),
-                                           static_cast<size_t>(a_stride_k2),
-                                           static_cast<size_t>(a_stride_k3)};
-      span<const size_t> a_k_strides_tail = a_k_strides_tail_v;
       auto call_kernel_tail =
           [&](index_t m, index_t n, span<const size_t> k, const void* a,
               size_t a_stride_m, span<const size_t> a_k_strides, const void* b,
@@ -572,12 +550,12 @@ auto make_dot_impl(dot_type type, bool consistent_arithmetic, bool symmetric_b,
               init_c = c;
               tail_init_c_stride_m = c_stride_m;
             }
-            a = offset_bytes(a, a_stride_k1 * k1);
-            b = offset_bytes(b, b_stride_k1 * k1);
-            run_dot(loops, c_m.extent(), c_n.extent(), k_tail, block_m, block_n,
-                    block_k, a_stride_m, a_k_strides_tail, a, b_k_strides,
-                    b_stride_n, b, tail_init_c_stride_m, init_c, c_stride_m,
-                    c_stride_n, c, call_kernel_tail, &kernel_state);
+            a = offset_bytes(a, a_k_strides[0] * k1);
+            b = offset_bytes(b, b_k_strides[0] * k1);
+            run_dot(loops, m, n, k_tail, block_m, block_n, block_k, a_stride_m,
+                    a_k_strides, a, b_k_strides, b_stride_n, b,
+                    tail_init_c_stride_m, init_c, c_stride_m, c_stride_n, c,
+                    call_kernel_tail, &kernel_state);
           },
           c, a, b, init_c);
     }
