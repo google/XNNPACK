@@ -27,6 +27,8 @@ PROD_SCALAR_MICROKERNEL_SRCS = [
     "src/f16-rminmax/gen/f16-rmin-scalar-u2-acc2.c",
     "src/f16-rminmax/gen/f16-rminmax-scalar-u2-acc2.c",
     "src/f16-vapproxgelu/gen/f16-f32acc-vapproxgelu-scalar-rational-6-4-div.c",
+    "src/f16-vbinary/gen/f16-vmul-scalar-u1.c",
+    "src/f16-vbinary/gen/f16-vmulc-scalar-u1.c",
     "src/f16-vcos/gen/f16-f32acc-vcos-scalar-poly-3.c",
     "src/f16-vexp/gen/f16-f32acc-vexp-scalar-poly-3.c",
     "src/f16-vgelu/gen/f16-vgelu-scalar-rational-6-4-div.c",
