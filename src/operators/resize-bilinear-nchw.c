@@ -97,7 +97,7 @@ enum xnn_status xnn_create_resize_bilinear2d_nchw(
     xnn_log_error("failed to allocate %zu bytes for %s operator descriptor",
                   sizeof(struct xnn_convolution_operator),
                   xnn_operator_type_to_string(xnn_operator_type_resize_bilinear_nchw));
-    return xnn_status_out_of_memory;
+    goto error;
   }
 
   resize_op->convolution_op->output_height = output_height;
