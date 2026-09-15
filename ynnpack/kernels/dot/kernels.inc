@@ -57,13 +57,6 @@ YNN_DOT_KERNEL(arch_flag::amxint8, dot_uint8_int8_int32_32x32x64_16x16x4_amxint8
 #include "ynnpack/kernels/dot/x86_avx512_uint8_int2_int32.inc"
 #include "ynnpack/kernels/dot/x86_avx512_uint8_int4_int32.inc"
 #endif  // YNN_ARCH_X86_AVX512
-#ifdef YNN_ARCH_X86_AVX2
-#include "ynnpack/kernels/dot/x86_avx2_int8_int8_int32_symmetric_b.inc"
-#include "ynnpack/kernels/dot/x86_avx2_int8_int8_int32.inc"
-#include "ynnpack/kernels/dot/x86_avx2_int8_int8_int32_k1.inc"
-#include "ynnpack/kernels/dot/x86_avx2_uint8_int2_int32.inc"
-#include "ynnpack/kernels/dot/x86_avx2_uint8_int4_int32.inc"
-#endif  // YNN_ARCH_X86_AVX2
 #ifdef YNN_ARCH_X86_FMA3
 #include "ynnpack/kernels/dot/x86_fma3_fp32.inc"
 #include "ynnpack/kernels/dot/x86_fma3_fp64.inc"
@@ -74,6 +67,14 @@ YNN_DOT_KERNEL(arch_flag::amxint8, dot_uint8_int8_int32_32x32x64_16x16x4_amxint8
 #include "ynnpack/kernels/dot/x86_avx2_fma3_fp32_k8.inc"
 #include "ynnpack/kernels/dot/x86_avx2_fma3_fp32_k2.inc"
 #endif  // YNN_ARCH_X86_AVX2_FMA3
+#ifdef YNN_ARCH_X86_AVX2
+#include "ynnpack/kernels/dot/x86_avx2_int8_int8_int32_symmetric_b.inc"
+#include "ynnpack/kernels/dot/x86_avx2_int8_int8_int32.inc"
+#include "ynnpack/kernels/dot/x86_avx2_int8_int8_int32_k1.inc"
+#include "ynnpack/kernels/dot/x86_avx2_uint8_int2_int32.inc"
+#include "ynnpack/kernels/dot/x86_avx2_uint8_int4_int32.inc"
+#include "ynnpack/kernels/dot/x86_avx2_fp32_k2.inc"
+#endif  // YNN_ARCH_X86_AVX2
 #ifdef YNN_ARCH_X86_AVX
 #include "ynnpack/kernels/dot/x86_avx_fp32.inc"
 #include "ynnpack/kernels/dot/x86_avx_fp64.inc"
@@ -84,9 +85,6 @@ YNN_DOT_KERNEL(arch_flag::amxint8, dot_uint8_int8_int32_32x32x64_16x16x4_amxint8
 #ifdef YNN_ARCH_X86_F16C
 #include "ynnpack/kernels/dot/x86_f16c_fp16_fp16_fp32.inc"
 #endif  // YNN_ARCH_X86_F16C
-#ifdef YNN_ARCH_X86_AVX2
-#include "ynnpack/kernels/dot/x86_avx2_fp32_k2.inc"
-#endif  // YNN_ARCH_X86_AVX2
 #ifdef YNN_ARCH_X86_SSE2
 #include "ynnpack/kernels/dot/x86_sse2_fp32.inc"
 #endif  // YNN_ARCH_X86_SSE2

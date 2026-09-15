@@ -11,6 +11,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <limits>
+#include <type_traits>
 
 #include "ynnpack/base/bfloat16.h"
 #include "ynnpack/base/fp8.h"
@@ -160,25 +161,33 @@ inline int8_t narrow(int16_t x) { return static_cast<int8_t>(x); }
 // https://github.com/dsharlet/slinky/blob/5020dae47ecb176bcd917ecd07d37e19615b955b/base/arithmetic.h#L12-L26
 template <typename T>
 T euclidean_div(T a, T b) {
-  if (b == 0) {
-    return 0;
+  if constexpr (std::is_unsigned_v<T>) {
+    return b != 0 ? a / b : 0;
+  } else {
+    if (b == 0) {
+      return 0;
+    }
+    T q = a / b;
+    T r = a - q * b;
+    T bs = b >> (sizeof(T) * 8 - 1);
+    T rs = r >> (sizeof(T) * 8 - 1);
+    return q - (rs & bs) + (rs & ~bs);
   }
-  T q = a / b;
-  T r = a - q * b;
-  T bs = b >> (sizeof(T) * 8 - 1);
-  T rs = r >> (sizeof(T) * 8 - 1);
-  return q - (rs & bs) + (rs & ~bs);
 }
 
 inline size_t euclidean_div(size_t a, size_t b) { return b != 0 ? a / b : 0; }
 
 template <typename T>
 T euclidean_mod(T a, T b) {
-  if (b == 0) {
-    return 0;
+  if constexpr (std::is_unsigned_v<T>) {
+    return b != 0 ? a % b : 0;
+  } else {
+    if (b == 0) {
+      return 0;
+    }
+    T r = a % b;
+    return r >= 0 ? r : (b < 0 ? r - b : r + b);
   }
-  T r = a % b;
-  return r >= 0 ? r : (b < 0 ? r - b : r + b);
 }
 
 inline size_t euclidean_mod(size_t a, size_t b) { return b != 0 ? a % b : 0; }
@@ -205,8 +214,12 @@ T floor_div(T a, T b) {
 }
 
 template <typename T>
-T ceil_div(T a, T b) {
-  return euclidean_div(a + std::abs(b - 1), b);
+constexpr T ceil_div(T a, T b) {
+  if constexpr (std::is_unsigned_v<T>) {
+    return (a + b - 1) / b;
+  } else {
+    return euclidean_div(a + (b > 0 ? b - 1 : b + 1), b);
+  }
 }
 
 inline size_t ceil_div(size_t a, size_t b) { return (a + b - 1) / b; }

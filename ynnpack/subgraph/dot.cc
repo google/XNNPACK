@@ -1383,10 +1383,10 @@ ynn_status define_dot(ynn_subgraph& subgraph, size_t num_k_dims,
   // If we're using an unpacked kernel, we'll be reading columns of B, make sure
   // that we read at least a cache line at a time.
   const int b_elem_size = type_size_bytes(b.type);
-  const int block_n_unpacked = consistent_arithmetic
-                                   ? consistent_block_n
-                                   : std::max(YNN_CACHE_LINE_SIZE / b_elem_size,
-                                              unpacked_kernel.block_n);
+  const int block_n_unpacked =
+      consistent_arithmetic ? consistent_block_n
+                            : std::max<int>(YNN_CACHE_LINE_SIZE / b_elem_size,
+                                            unpacked_kernel.block_n);
   node.create = [consistent_arithmetic, symmetric_b, pack_b, transpose_a,
                  block_n_unpacked, tile_k = kernel.tile_k,
                  tile_m = kernel.tile_m](
