@@ -2,6 +2,7 @@
 // All rights reserved.
 //
 // Copyright 2019 Google LLC
+// Copyright 2026 Arm Limited and/or its affiliates <open-source-office@arm.com>
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
@@ -43,6 +44,11 @@ struct xnn_ukernel_dwconv {
   xnn_dwconv_ukernel_fn ukernel;
   uint32_t channel_tile;
   uint8_t primary_tile;
+};
+
+struct xnn_ukernel_kai_dwconv {
+  xnn_kai_f32_dwconv_minmax_ukernel_fn ukernel;
+  uint8_t output_height_tile;
 };
 
 // Direct 2D Depthwise Convolution
@@ -108,6 +114,7 @@ struct xnn_ukernel {
   union {
     struct xnn_ukernel_conv2d conv2d;
     struct xnn_ukernel_dwconv dwconv;
+    struct xnn_ukernel_kai_dwconv kai_dwconv;
     struct xnn_ukernel_dwconv2d dwconv2d;
     struct xnn_ukernel_spmm spmm;
     struct xnn_ukernel_vmulcaddc vmulcaddc;
@@ -139,6 +146,10 @@ enum xnn_run_state {
 struct dwconv_op_context {
   struct dwconv_context dwconv;
   struct dwconv_indirection_init_context dwconv_indirection_init;
+};
+
+struct kai_dwconv_op_context {
+  struct kai_f32_dwconv_context dwconv;
 };
 
 struct gemm_op_context {
@@ -376,6 +387,7 @@ struct xnn_operator {
   } context;
   union {
     struct dwconv_op_context* dwconv;
+    struct kai_dwconv_op_context* kai_dwconv;
     struct gemm_op_context* gemm;
     struct igemm_op_context* igemm;
     struct reduce_context* reduce;
