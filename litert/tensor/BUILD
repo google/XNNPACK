@@ -31,12 +31,12 @@ cc_library(
         ":datatypes",
         "//litert/tensor/internal:graph",
         "//litert/tensor/utils:macros",
-        "//litert/tensor/utils:source_location",
         "@abseil-cpp//absl/log:absl_check",
         "@abseil-cpp//absl/log:absl_log",
         "@abseil-cpp//absl/status",
         "@abseil-cpp//absl/status:statusor",
         "@abseil-cpp//absl/strings:string_view",
+        "@abseil-cpp//absl/types:source_location",
     ],
 )
 
@@ -109,13 +109,13 @@ cc_library(
         "//litert/tensor/internal:arithmetic_helpers",
         "//litert/tensor/internal:graph",
         "//litert/tensor/utils:macros",
-        "//litert/tensor/utils:source_location",
         "@abseil-cpp//absl/algorithm:container",
         "@abseil-cpp//absl/log:absl_check",
         "@abseil-cpp//absl/status",
         "@abseil-cpp//absl/status:statusor",
         "@abseil-cpp//absl/strings",
         "@abseil-cpp//absl/types:optional",
+        "@abseil-cpp//absl/types:source_location",
         "@abseil-cpp//absl/types:span",
     ],
 )

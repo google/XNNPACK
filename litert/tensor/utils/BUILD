@@ -8,10 +8,10 @@ cc_library(
     hdrs = ["macros.h"],
     # copybara:uncomment includes = ["../utils"],
     deps = [
-        ":source_location",
         "@abseil-cpp//absl/log:absl_log",
         "@abseil-cpp//absl/status",
         "@abseil-cpp//absl/status:statusor",
+        "@abseil-cpp//absl/types:source_location",
     ],
 )
 
@@ -52,10 +52,3 @@ cc_library(
         "@com_google_googletest//:gtest",  # no g3
     ],
 )
-
-cc_library(
-    name = "source_location",
-    hdrs = ["source_location.h"],
-)
-
-# OSS: source_location_cc_library
