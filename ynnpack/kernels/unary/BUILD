@@ -23,6 +23,7 @@ py_binary(
         "tanh.py",
         "trig.py",
     ],
+    legacy_create_init = False,
     tags = [
         "manual",
         "notap",
