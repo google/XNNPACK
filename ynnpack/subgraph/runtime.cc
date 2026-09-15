@@ -1271,7 +1271,7 @@ ynn_status ynn_runtime::invoke() {
     // This pipeline is a no-op.
     return ynn_status_success;
   }
-  slinky::index_t result = pipeline.evaluate(eval_context);
+  slinky::index_t result = pipeline.evaluate(eval_context, /*is_set_up=*/true);
   // Heap blocks are reused within an evaluation, but not kept between invokes.
   eval_context.free_pool();
   return result ? ynn_status_error : ynn_status_success;
