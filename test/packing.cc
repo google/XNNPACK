@@ -8,6 +8,7 @@
 // clang-format off
 
 #include <algorithm>
+#include <array>
 #include <cstddef>
 #include <cstdint>
 #include <numeric>
@@ -2752,6 +2753,58 @@ TEST(PACK_F32_DWCONV_GHW_W, primary_tile_gt_kernel_size_channels_gt_cr) {
     0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
   };
   EXPECT_THAT(packed_weights, ElementsAreArray(expected));
+}
+
+TEST(PACK_KAI_F32_DWCONV_GHW_W, non_power_of_two_channel_tile) {
+  constexpr size_t primary_tile = 9;
+  constexpr size_t h = 3;
+  constexpr size_t w = 3;
+  constexpr size_t channel_tile = 12;
+  constexpr size_t guard_elements = 16;
+  constexpr float guard_value = -1.0f;
+
+  for (const size_t channels : std::array<size_t, 6>{11, 12, 13, 23, 24, 25}) {
+    std::vector<float> bias(channels);
+    std::iota(bias.begin(), bias.end(), 0.0f);
+    std::vector<float> kernel(channels * h * w);
+    std::iota(kernel.begin(), kernel.end(), 100.0f);
+    const size_t packed_elements =
+        (primary_tile + 1) * round_up(channels, channel_tile);
+    std::vector<float> packed_weights(
+        packed_elements + guard_elements, guard_value);
+
+    xnn_pack_kai_f32_dwconv_ghw_w(
+        primary_tile, h, w, channels, channel_tile, kernel.data(), bias.data(),
+        /*scale=*/nullptr, packed_weights.data(), /*per_tile_extra_bytes=*/0,
+        /*params=*/nullptr);
+
+    for (size_t channel_block = 0; channel_block < channels;
+         channel_block += channel_tile) {
+      const size_t block_offset =
+          (primary_tile + 1) * channel_block;
+      for (size_t channel_offset = 0; channel_offset < channel_tile;
+           channel_offset++) {
+        const size_t channel = channel_block + channel_offset;
+        const bool valid_channel = channel < channels;
+        EXPECT_EQ(packed_weights[block_offset + channel_offset],
+                  valid_channel ? bias[channel] : 0.0f)
+            << "channels = " << channels << ", channel = " << channel;
+        for (size_t kernel_index = 0; kernel_index < h * w;
+             kernel_index++) {
+          EXPECT_EQ(
+              packed_weights[block_offset + channel_tile * (kernel_index + 1) +
+                             channel_offset],
+              valid_channel ? kernel[channel * h * w + kernel_index] : 0.0f)
+              << "channels = " << channels << ", channel = " << channel
+              << ", kernel index = " << kernel_index;
+        }
+      }
+    }
+    for (size_t i = packed_elements; i < packed_weights.size(); i++) {
+      EXPECT_EQ(packed_weights[i], guard_value)
+          << "channels = " << channels << ", guard index = " << i;
+    }
+  }
 }
 
 TEST(PACK_F32_DWCONV_HWG_W, primary_tile_eq_kernel_size) {
