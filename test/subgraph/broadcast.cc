@@ -105,6 +105,90 @@ void TestImpl(size_t rank) {
   }
 }
 
+// Runs `input -> static_broadcast -> consumer -> output` with the default
+// runtime flags, so the static_broadcast is either elided into the consumer or
+// rewritten into a broadcasting add of zero, and checks the output shape and
+// values. The consumer is `add(., other)` when `other_shape` is given and
+// `abs(.)` otherwise.
+static void CheckStaticBroadcast(const std::vector<size_t>& input_shape,
+                                 const std::vector<size_t>& broadcast_shape,
+                                 const std::vector<size_t>& other_shape,
+                                 const std::vector<size_t>& expected_shape,
+                                 const std::vector<float>& expected_values) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  const uint32_t input_id = 0;
+  const uint32_t output_id = 1;
+  const uint32_t other_id = 2;
+  const bool binary = !other_shape.empty();
+  SubgraphTester subgraph(binary ? 3 : 2);
+  subgraph.AddInputTensor(input_shape, xnn_datatype_fp32, input_id)
+      .AddOutputTensor(expected_shape, xnn_datatype_fp32, output_id);
+  if (binary) {
+    subgraph.AddInputTensor(other_shape, xnn_datatype_fp32, other_id);
+  }
+  uint32_t broadcast_id = XNN_INVALID_VALUE_ID;
+  subgraph.AddInternalDynamicTensor(expected_shape, xnn_datatype_fp32,
+                                    &broadcast_id, /*flags=*/0);
+  subgraph.AddBroadcast(broadcast_shape, input_id, broadcast_id);
+  if (binary) {
+    subgraph.AddBinary(xnn_binary_add, /*params=*/nullptr, broadcast_id,
+                       other_id, output_id);
+  } else {
+    subgraph.AddUnary(xnn_unary_abs, /*params=*/nullptr, broadcast_id,
+                      output_id);
+  }
+  ASSERT_EQ(subgraph.CreateRuntime(), xnn_status_success);
+
+  // input = -1, -2, -3, ...; other = 10, 11, 12, ...
+  Tensor<float> input(input_shape, xnnpack::XnnExtraBytes);
+  float next_input = 0.0f;
+  input.generate([&]() { return next_input -= 1.0f; });
+  Tensor<float> other(binary ? other_shape : std::vector<size_t>{1},
+                      xnnpack::XnnExtraBytes);
+  std::iota(other.begin(), other.end(), 10.0f);
+  subgraph.ReshapeExternalTensor(input_shape, input.base(), input_id);
+  if (binary) {
+    subgraph.ReshapeExternalTensor(other_shape, other.base(), other_id);
+  }
+  subgraph.ReshapeRuntime();
+  ASSERT_EQ(subgraph.Status(), xnn_status_success);
+  ASSERT_EQ(subgraph.GetExternalTensorShape(output_id), expected_shape);
+
+  Tensor<float> output(expected_shape);
+  subgraph.SetupExternalTensor(output.base(), output_id)
+      .SetupRuntime()
+      .InvokeRuntime();
+  ASSERT_EQ(subgraph.Status(), xnn_status_success);
+  ASSERT_THAT(output, testing::ElementsAreArray(expected_values));
+}
+
+TEST(StaticBroadcastRewrite, ElidedIntoBinaryOnlyIfShapeUnchanged) {
+  // add(broadcast(s[1] -> [4, 5]), other[1, 5]): the add broadcasts only to
+  // [1, 5] on its own, so the broadcast may not be elided into it.
+  CheckStaticBroadcast(/*input_shape=*/{1}, /*broadcast_shape=*/{4, 5},
+                       /*other_shape=*/{1, 5}, /*expected_shape=*/{4, 5},
+                       {9, 10, 11, 12, 13, 9, 10, 11, 12, 13, 9, 10, 11, 12,
+                        13, 9, 10, 11, 12, 13});
+  // add(broadcast(s[1] -> [4, 5]), other[4, 5]): the add broadcasts to [4, 5]
+  // on its own, so the broadcast can be elided.
+  CheckStaticBroadcast(/*input_shape=*/{1}, /*broadcast_shape=*/{4, 5},
+                       /*other_shape=*/{4, 5}, /*expected_shape=*/{4, 5},
+                       {9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22,
+                        23, 24, 25, 26, 27, 28});
+}
+
+TEST(StaticBroadcastRewrite, MaterializesRankIncreasingBroadcast) {
+  // abs(broadcast(x[4] -> [4, 4])): the new leading dimension coincides with
+  // the input's only dimension, which must not be mistaken for a kept one.
+  CheckStaticBroadcast(/*input_shape=*/{4}, /*broadcast_shape=*/{4, 4},
+                       /*other_shape=*/{}, /*expected_shape=*/{4, 4},
+                       {1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4});
+  // The same, with the passed-through dimension given as 0.
+  CheckStaticBroadcast(/*input_shape=*/{3}, /*broadcast_shape=*/{4, 0},
+                       /*other_shape=*/{}, /*expected_shape=*/{4, 3},
+                       {1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3});
+}
+
 template <typename T>
 class Broadcast : public ::testing::TestWithParam<int> {};
 
