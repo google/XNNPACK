@@ -137,18 +137,18 @@ struct dot_kernel {
   // values from `K` rows of B are adjacent in memory.
   // - Kernels often assume that the memory of B is aligned such that the each
   // tile beings on a memory address aligned to the size of the tile.
-  int block_m = 0;
-  int block_n = 0;
-  int block_k = 0;
-  int tile_m = 0;
-  int tile_n = 0;
-  int tile_k = 0;
-  uint32_t flags = 0;
+  int block_m : 8;
+  int block_n : 8;
+  int block_k : 8;
+  int tile_m : 8;
+  int tile_n : 8;
+  int tile_k : 8;
+  uint32_t flags;
   float cost = std::numeric_limits<float>::infinity();
 
   // If not specifically known, this is the maximum `block_n` value that could
   // be returned by another compatible call to `get_dot_kernel`.
-  int max_block_n = 0;
+  int max_block_n;
 };
 
 // If we don't know the shape of a dot, just assume it's big.
@@ -165,9 +165,10 @@ struct dot_shape {
 // Compute an estimate of the cost of a dot operation. This number has no
 // absolute meaning, it is only comparable to other return values of this
 // function.
-float estimate_dot_cost(size_t m, size_t n, size_t k, size_t block_m,
-                        size_t block_n, size_t block_k, size_t tile_m,
-                        size_t tile_n, size_t tile_k, int b_elem_count = 1);
+float estimate_dot_cost(size_t m, size_t n, size_t k, uint32_t block_m,
+                        uint32_t block_n, uint32_t block_k, uint32_t tile_m,
+                        uint32_t tile_n, uint32_t tile_k,
+                        uint32_t b_elem_count = 1);
 
 struct dot_packed_shape {
   int block_n = 0;

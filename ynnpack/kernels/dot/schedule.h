@@ -43,17 +43,19 @@ void block_dot_m(ptrdiff_t m, size_t n, span<const size_t> ks,
                  span<const size_t> a_k_strides, const void* a,
                  span<const size_t> b_k_strides, const void* b,
                  size_t init_c_stride_m, const void* init_c, size_t c_stride_m,
-                 size_t c_stride_n, void* c, DotFn f,
+                 size_t c_stride_n, void* c, const DotFn& f,
                  dot_kernel_state* state = nullptr) {
-  do {
-    f(std::min(m, block_m), n, ks, a, a_stride_m, a_k_strides, b, b_k_strides,
+  // m is often small (one block), we can optimize this case a bit.
+  while (m > block_m) {
+    f(block_m, n, ks, a, a_stride_m, a_k_strides, b, b_k_strides,
       init_c_stride_m, init_c, c, state);
-
-    m -= block_m;
     if (init_c) init_c = offset_bytes(init_c, init_c_stride_m * block_m);
     c = offset_bytes(c, c_stride_m * block_m);
     a = offset_bytes(a, a_stride_m * block_m);
-  } while (m > 0);
+    m -= block_m;
+  }
+  f(m, n, ks, a, a_stride_m, a_k_strides, b, b_k_strides,
+    init_c_stride_m, init_c, c, state);
 }
 
 // Block a dot's n dimension, calling f at each block.
@@ -63,7 +65,7 @@ void block_dot_n(size_t m, ptrdiff_t n, span<const size_t> ks,
                  span<const size_t> a_k_strides, const void* a,
                  size_t b_stride_n, span<const size_t> b_k_strides,
                  const void* b, size_t init_c_stride_m, const void* init_c,
-                 size_t c_stride_m, size_t c_stride_n, void* c, DotFn f,
+                 size_t c_stride_m, size_t c_stride_n, void* c, const DotFn& f,
                  dot_kernel_state* state = nullptr) {
   do {
     f(m, std::min(n, block_n), ks, a, a_stride_m, a_k_strides, b, b_k_strides,
@@ -82,7 +84,7 @@ void block_dot_k(size_t m, size_t n, span<const size_t> ks, ptrdiff_t block_k,
                  size_t a_stride_m, span<const size_t> a_k_strides,
                  const void* a, span<const size_t> b_k_strides, const void* b,
                  size_t init_c_stride_m, const void* init_c, size_t c_stride_m,
-                 size_t c_stride_n, void* c, DotFn f,
+                 size_t c_stride_n, void* c, const DotFn& f,
                  dot_kernel_state* state = nullptr) {
   ptrdiff_t k = ks[0];
   size_t k_block[3];
@@ -118,7 +120,7 @@ void run_dot(span<dot_loop> loops, size_t m, size_t n, span<const size_t> ks,
              span<const size_t> a_k_strides, const void* a,
              span<const size_t> b_k_strides, size_t b_stride_n, const void* b,
              size_t init_c_stride_m, const void* init_c, size_t c_stride_m,
-             size_t c_stride_n, void* c, DotFn f,
+             size_t c_stride_n, void* c, const DotFn& f,
              dot_kernel_state* state = nullptr) {
   assert(!loops.empty());
   const dot_loop loop = loops.front();
@@ -144,7 +146,7 @@ void run_dot(span<dot_loop> loops, size_t m, size_t n, span<const size_t> ks,
   } else {
     // Recursively call `run_dot` with the subsequent loops.
     auto recursive_f =
-        [=](size_t m, size_t n, span<const size_t> ks, const void* a,
+        [&](size_t m, size_t n, span<const size_t> ks, const void* a,
             size_t a_stride_m, span<const size_t> a_k_strides, const void* b,
             span<const size_t> b_k_strides, size_t init_c_stride_m,
             const void* init_c, void* c, dot_kernel_state* state = nullptr) {

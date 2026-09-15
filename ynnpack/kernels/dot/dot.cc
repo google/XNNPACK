@@ -263,9 +263,12 @@ void dot_int8_int2_int32_1xNx4_1x1x4(size_t m, size_t n, size_t k3, size_t k2,
             static_cast<int32_t*>(c_out));
 }
 
-float estimate_dot_cost(size_t m, size_t n, size_t k, size_t block_m,
-                        size_t block_n, size_t block_k, size_t tile_m,
-                        size_t tile_n, size_t tile_k, int b_elem_count) {
+namespace {
+
+float estimate_dot_cost_impl(uint32_t m, uint32_t n, uint32_t k,
+                             uint32_t block_m, uint32_t block_n,
+                             uint32_t block_k, uint32_t tile_m, uint32_t tile_n,
+                             uint32_t tile_k, uint32_t b_elem_count) {
   const float blocks_m = ceil_div(m, block_m);
   const float blocks_n = ceil_div(n, block_n);
   const float blocks_k = ceil_div(k, block_k);
@@ -278,15 +281,15 @@ float estimate_dot_cost(size_t m, size_t n, size_t k, size_t block_m,
   // are ~2x as expensive as loads from a.
   // TODO(dsharlet): This has been tested on Intel Skylake and AMD Rome, but not
   // ARM.
-  const size_t loads_a = block_m * block_k / (tile_m * tile_k);
-  const size_t loads_b = block_n * block_k / (tile_n * tile_k);
+  const uint32_t loads_a = block_m * block_k / (tile_m * tile_k);
+  const uint32_t loads_b = block_n * block_k / (tile_n * tile_k);
 
   // The cost model doesn't understand that padding has a cost beyond just the
   // extra computation, so it will think that two kernels that both need the
   // same number of tiles will cost the same. However, in practice, the smaller
   // tile would be better, so here, we add a small penalty proportional to the
   // tile size.
-  const size_t tile_cost = tile_m * tile_n * tile_k;
+  const uint32_t tile_cost = tile_m * tile_n * tile_k;
 
   // We assume that loads from b are more expensive as b_elem_count grows.
   const float block_cost =
@@ -295,12 +298,11 @@ float estimate_dot_cost(size_t m, size_t n, size_t k, size_t block_m,
   return blocks_m * blocks_n * blocks_k * block_cost;
 }
 
-namespace {
-
 // An additional penalty scale term on the cost of a dot kernel based on the
 // architecture.
-float dot_arch_cost_factor(uint64_t arch, size_t m, size_t n, size_t block_m,
-                           size_t block_n, size_t tile_m, size_t tile_n) {
+float dot_arch_cost_factor(uint64_t arch, uint32_t m, uint32_t n,
+                           uint32_t block_m, uint32_t block_n, uint32_t tile_m,
+                           uint32_t tile_n) {
   if (arch == arch_flag::none) {
     // We should only use the default dot kernel if there is no other choice.
     return 100.0f;
@@ -345,22 +347,31 @@ float dot_arch_cost_factor(uint64_t arch, size_t m, size_t n, size_t block_m,
 template <typename A, typename B, typename C>
 struct optimizer {
   // Inputs
-  size_t m;
-  size_t n;
-  size_t k;
-  int required_tile_k;
-  int required_block_n;
+  uint32_t m;
+  uint32_t n;
+  uint32_t k;
+  uint32_t required_tile_k;
+  uint32_t required_block_n;
   uint32_t required_flags;
   uint32_t disallowed_flags;
   uint64_t supported_arch_flags;
 
   // Outputs
   dot_kernel result;
+#if YNN_LOG_LEVEL >= YNN_LOG_LEVEL_DEBUG
   const char* kernel_used = nullptr;
+#endif
 
-  void operator()(uint64_t arch, int block_m, int block_n, int block_k,
-                  int tile_m, int tile_n, int tile_k, uint32_t flags,
-                  dot_kernel_fn kernel, const char* name) {
+  void operator()(uint64_t arch, uint32_t block_m, uint32_t block_n,
+                  uint32_t block_k, uint32_t tile_m, uint32_t tile_n,
+                  uint32_t tile_k, uint32_t flags, dot_kernel_fn kernel,
+                  const char* name) {
+    // These checks are ordered to minimize the cost of these checks:
+    // - Checks that are more likely to fail should be first.
+    // - Checks that are cheap should be first.
+    if (required_tile_k && tile_k != required_tile_k) {
+      return;
+    }
     if ((required_flags & flags) != required_flags) {
       return;
     }
@@ -370,39 +381,48 @@ struct optimizer {
     if (!is_arch_supported(arch, supported_arch_flags)) {
       return;
     }
+    if (required_block_n && (flags & dot_flag::unaligned_b) == 0 &&
+        (required_block_n % tile_n != 0)) {
+      return;
+    }
     assert(block_m > 0);
     assert(block_n > 0);
     assert(block_k > 0);
     assert(tile_n > 0);
     assert(tile_k > 0);
-    if ((required_tile_k && tile_k != required_tile_k) ||
-        ((flags & dot_flag::unaligned_b) == 0 &&
-         (required_block_n % tile_n != 0))) {
-      // We wanted a kernel compatible with `packed_shape`, but this kernel is
-      // not.
-      return;
-    }
 
     // We might use this kernel, update max_block_n accordingly.
-    result.max_block_n = std::max(result.max_block_n, block_n);
+    result.max_block_n = std::max<int>(result.max_block_n, block_n);
 
     constexpr int b_elem_count = type_info<B>::element_count();
     const float dot_cost_k =
-        estimate_dot_cost(m, n, k, block_m, block_n, block_k, tile_m, tile_n,
-                          tile_k, b_elem_count) *
+        estimate_dot_cost_impl(m, n, k, block_m, block_n, block_k, tile_m,
+                               tile_n, tile_k, b_elem_count) *
         dot_arch_cost_factor(arch, m, n, block_m, block_n, tile_m, tile_n);
+#if YNN_LOG_LEVEL >= YNN_LOG_LEVEL_DEBUG
     if (!required_tile_k && !required_block_n) {
       char selected = dot_cost_k < result.cost ? '*' : ' ';
       YNN_LOG_DEBUG() << " " << selected << name << " cost=" << dot_cost_k;
     }
+#endif
     if (dot_cost_k >= result.cost) {
       return;
     }
     result = {
-        kernel, block_m, block_n, block_k,    tile_m,
-        tile_n, tile_k,  flags,   dot_cost_k, result.max_block_n,
+        kernel,
+        static_cast<int>(block_m),
+        static_cast<int>(block_n),
+        static_cast<int>(block_k),
+        static_cast<int>(tile_m),
+        static_cast<int>(tile_n),
+        static_cast<int>(tile_k),
+        flags,
+        dot_cost_k,
+        static_cast<int>(result.max_block_n),
     };
+#if YNN_LOG_LEVEL >= YNN_LOG_LEVEL_DEBUG
     kernel_used = name;
+#endif
   }
 };
 
@@ -445,11 +465,14 @@ dot_kernel get_dot_kernel(const dot_shape& shape, dot_packed_shape packed_shape,
   }
 
   optimizer<A, B, C> optimizer{
-      shape.m,
-      shape.n,
-      shape.k1,
-      packed_shape.tile_k,
-      packed_shape.block_n,
+      // These casts might saturate a size_t value, which should be OK, because
+      // if m, n, k are that large, any tail cases will be negligible. Cast to
+      // uint16 so we have some headroom for arithmetic.
+      cast<uint16_t>(shape.m),
+      cast<uint16_t>(shape.n),
+      cast<uint16_t>(shape.k1),
+      static_cast<uint32_t>(packed_shape.tile_k),
+      static_cast<uint32_t>(packed_shape.block_n),
       strictly_required_flags,
       disallowed_flags,
       arch_flags,
@@ -465,6 +488,7 @@ dot_kernel get_dot_kernel(const dot_shape& shape, dot_packed_shape packed_shape,
   }
 #include "ynnpack/kernels/dot/kernels.inc"
 #undef YNN_DOT_KERNEL
+#if YNN_LOG_LEVEL >= YNN_LOG_LEVEL_DEBUG
   if (packed_shape.tile_k == 0 && packed_shape.block_n == 0) {
     if (optimizer.result.kernel) {
       YNN_LOG_DEBUG() << "Using dot kernel " << optimizer.kernel_used
@@ -472,7 +496,25 @@ dot_kernel get_dot_kernel(const dot_shape& shape, dot_packed_shape packed_shape,
                       << shape.k1;
     }
   }
+#endif
   return optimizer.result;
+}
+
+// Moving this to a separate (non-inlined) function cleans up the stack a bit.
+YNN_NO_INLINE dot_kernel get_unsupported_dot_kernel(const dot_type& type) {
+  YNN_LOG_ERROR() << "Unsupported dot type " << type.a << "_" << type.b << "_"
+                  << type.c;
+  return {};
+}
+
+constexpr uint32_t dot_type_id(ynn_type a, ynn_type b, ynn_type c) {
+  return (static_cast<uint32_t>(a) << 16) | (static_cast<uint32_t>(b) << 8) |
+         static_cast<uint32_t>(c);
+}
+
+template <typename A, typename B, typename C>
+constexpr uint32_t dot_type_id() {
+  return dot_type_id(type_of<A>(), type_of<B>(), type_of<C>());
 }
 
 }  // namespace
@@ -482,59 +524,36 @@ dot_kernel get_dot_kernel(const dot_type& type, const dot_shape& shape,
                           uint32_t required_flags,
                           std::optional<bool> transpose_a,
                           uint64_t arch_flags) {
-  if (type.a == ynn_type_fp64 && type.b == ynn_type_fp64 &&
-      type.c == ynn_type_fp64) {
-    return get_dot_kernel<double, double, double>(
-        shape, packed_shape, required_flags, transpose_a, arch_flags);
-  } else if (type.a == ynn_type_fp32 && type.b == ynn_type_fp32 &&
-             type.c == ynn_type_fp32) {
-    return get_dot_kernel<float, float, float>(
-        shape, packed_shape, required_flags, transpose_a, arch_flags);
-  } else if (type.a == ynn_type_fp16 && type.b == ynn_type_fp16 &&
-             type.c == ynn_type_fp32) {
-    return get_dot_kernel<half, half, float>(
-        shape, packed_shape, required_flags, transpose_a, arch_flags);
-  } else if (type.a == ynn_type_bf16 && type.b == ynn_type_bf16 &&
-             type.c == ynn_type_fp32) {
-    return get_dot_kernel<bfloat16, bfloat16, float>(
-        shape, packed_shape, required_flags, transpose_a, arch_flags);
-  } else if (type.a == ynn_type_int8 && type.b == ynn_type_int8 &&
-             type.c == ynn_type_int32) {
-    return get_dot_kernel<int8_t, int8_t, int32_t>(
-        shape, packed_shape, required_flags, transpose_a, arch_flags);
-  } else if (type.a == ynn_type_int8 && type.b == ynn_type_int2 &&
-             type.c == ynn_type_int32) {
-    return get_dot_kernel<int8_t, int2x4, int32_t>(
-        shape, packed_shape, required_flags, transpose_a, arch_flags);
-  } else if (type.a == ynn_type_uint8 && type.b == ynn_type_int2 &&
-             type.c == ynn_type_int32) {
-    return get_dot_kernel<uint8_t, int2x4, int32_t>(
-        shape, packed_shape, required_flags, transpose_a, arch_flags);
-  } else if (type.a == ynn_type_int8 && type.b == ynn_type_int4 &&
-             type.c == ynn_type_int32) {
-    return get_dot_kernel<int8_t, int4x2, int32_t>(
-        shape, packed_shape, required_flags, transpose_a, arch_flags);
-  } else if (type.a == ynn_type_uint8 && type.b == ynn_type_int4 &&
-             type.c == ynn_type_int32) {
-    return get_dot_kernel<uint8_t, int4x2, int32_t>(
-        shape, packed_shape, required_flags, transpose_a, arch_flags);
-  } else if (type.a == ynn_type_uint8 && type.b == ynn_type_int8 &&
-             type.c == ynn_type_int32) {
-    return get_dot_kernel<uint8_t, int8_t, int32_t>(
-        shape, packed_shape, required_flags, transpose_a, arch_flags);
-  } else if (type.a == ynn_type_fp8_e5m2 && type.b == ynn_type_fp8_e5m2 &&
-             type.c == ynn_type_fp32) {
-    return get_dot_kernel<fp8_e5m2, fp8_e5m2, float>(
-        shape, packed_shape, required_flags, transpose_a, arch_flags);
-  } else if (type.a == ynn_type_fp8_e4m3 && type.b == ynn_type_fp8_e4m3 &&
-             type.c == ynn_type_fp32) {
-    return get_dot_kernel<fp8_e4m3, fp8_e4m3, float>(
-        shape, packed_shape, required_flags, transpose_a, arch_flags);
-  } else {
-    YNN_LOG_ERROR() << "Unsupported dot type " << type.a << "_" << type.b << "_"
-                    << type.c;
-    return {};
+#define GET_DOT_KERNEL_CASE(a, b, c)                                    \
+  case dot_type_id<a, b, c>():                                          \
+    return get_dot_kernel<a, b, c>(shape, packed_shape, required_flags, \
+                                   transpose_a, arch_flags);
+  switch (dot_type_id(type.a, type.b, type.c)) {
+    GET_DOT_KERNEL_CASE(double, double, double);
+    GET_DOT_KERNEL_CASE(float, float, float);
+    GET_DOT_KERNEL_CASE(half, half, float);
+    GET_DOT_KERNEL_CASE(bfloat16, bfloat16, float);
+    GET_DOT_KERNEL_CASE(int8_t, int8_t, int32_t);
+    GET_DOT_KERNEL_CASE(uint8_t, int8_t, int32_t);
+    GET_DOT_KERNEL_CASE(int8_t, int2x4, int32_t);
+    GET_DOT_KERNEL_CASE(uint8_t, int2x4, int32_t);
+    GET_DOT_KERNEL_CASE(int8_t, int4x2, int32_t);
+    GET_DOT_KERNEL_CASE(uint8_t, int4x2, int32_t);
+    GET_DOT_KERNEL_CASE(fp8_e5m2, fp8_e5m2, float);
+    GET_DOT_KERNEL_CASE(fp8_e4m3, fp8_e4m3, float);
+    default:
+      return get_unsupported_dot_kernel(type);
   }
+}
+
+float estimate_dot_cost(size_t m, size_t n, size_t k, uint32_t block_m,
+                        uint32_t block_n, uint32_t block_k, uint32_t tile_m,
+                        uint32_t tile_n, uint32_t tile_k,
+                        uint32_t b_elem_count) {
+  // Cast to uint16_t, because we need a bit of headroom to do arithmetic.
+  return estimate_dot_cost_impl(cast<uint16_t>(m), cast<uint16_t>(n),
+                                cast<uint16_t>(k), block_m, block_n, block_k,
+                                tile_m, tile_n, tile_k, b_elem_count);
 }
 
 }  // namespace ynn
