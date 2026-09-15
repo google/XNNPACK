@@ -221,6 +221,14 @@ static XNN_NO_SANITIZE_FUNCTION enum xnn_status create_vmulcaddc_path(
       convolution_op->packed_weights.offset = xnn_look_up_or_insert_weights_cache(
           convolution_op->weights_cache, &cache_key, weights_ptr,
           aligned_total_weights_size);
+      if (convolution_op->packed_weights.offset == XNN_CACHE_NOT_FOUND) {
+        xnn_log_error(
+            "failed to create %s operator: packed weights were not inserted "
+            "into the weights cache",
+            xnn_operator_type_to_string_v2(convolution_op));
+        status = xnn_status_invalid_parameter;
+        goto error;
+      }
     }
   }
 
@@ -336,6 +344,14 @@ static XNN_NO_SANITIZE_FUNCTION enum xnn_status create_dwconv_path(
       convolution_op->packed_weights.offset = xnn_look_up_or_insert_weights_cache(
           convolution_op->weights_cache, &cache_key, weights_ptr,
           aligned_total_weights_size);
+      if (convolution_op->packed_weights.offset == XNN_CACHE_NOT_FOUND) {
+        xnn_log_error(
+            "failed to create %s operator: packed weights were not inserted "
+            "into the weights cache",
+            xnn_operator_type_to_string_v2(convolution_op));
+        status = xnn_status_invalid_parameter;
+        goto error;
+      }
     }
   }
 
@@ -522,6 +538,14 @@ static XNN_NO_SANITIZE_FUNCTION enum xnn_status create_igemm(
       convolution_op->packed_weights.offset = xnn_look_up_or_insert_weights_cache(
           convolution_op->weights_cache, &cache_key, weights_ptr,
           aligned_total_weights_size);
+      if (convolution_op->packed_weights.offset == XNN_CACHE_NOT_FOUND) {
+        xnn_log_error(
+            "failed to create %s operator: packed weights were not inserted "
+            "into the weights cache",
+            xnn_operator_type_to_string_v2(convolution_op));
+        status = xnn_status_invalid_parameter;
+        goto error;
+      }
     }
   }
 
