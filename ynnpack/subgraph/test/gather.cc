@@ -75,18 +75,6 @@ void TestGather(std::vector<int32_t> axes, std::vector<size_t> input_shape,
 }
 
 template <typename T, typename IndexType>
-void TestGather(int32_t axis, std::vector<size_t> input_shape,
-                std::vector<T> input_data, std::vector<size_t> index_shape,
-                std::vector<int32_t> index_data,
-                std::vector<size_t> expected_output_shape,
-                std::vector<T> expected_output_data,
-                bool expect_success = true) {
-  TestGather<T, IndexType>(std::vector<int32_t>{axis}, input_shape, input_data,
-                           index_shape, index_data, expected_output_shape,
-                           expected_output_data, expect_success);
-}
-
-template <typename T, typename IndexType>
 constexpr bool is_supported_sub_byte() {
   if constexpr (type_info<IndexType>::element_count() == 1) {
     return true;
@@ -127,7 +115,7 @@ TYPED_TEST(GatherTest, Index0D) {
 
   // 4. 1D input, 0D index
   TestGather<T, IndexType>(
-      /*axis=*/0,
+      /*axes=*/{0},
       /*input_shape=*/{3}, /*input_data=*/{1, 2, 3},
       /*index_shape=*/{}, /*index_data=*/{1},
       /*expected_output_shape=*/{}, /*expected_output_data=*/{2});
@@ -143,7 +131,7 @@ TYPED_TEST(GatherTest, Index1D) {
 
   // 1D input, 1D index (aligned)
   TestGather<T, IndexType>(
-      /*axis=*/0,
+      /*axes=*/{0},
       /*input_shape=*/{3}, /*input_data=*/{1, 2, 3},
       /*index_shape=*/{4}, /*index_data=*/{1, 2, 0, 1},
       /*expected_output_shape=*/{4}, /*expected_output_data=*/{2, 3, 1, 2});
@@ -159,7 +147,7 @@ TYPED_TEST(GatherTest, Index2D) {
 
   // 1D input, 2D index (aligned)
   TestGather<T, IndexType>(
-      /*axis=*/0,
+      /*axes=*/{0},
       /*input_shape=*/{3}, /*input_data=*/{1, 2, 3},
       /*index_shape=*/{2, 4}, /*index_data=*/{1, 2, 0, 2, 0, 1, 1, 2},
       /*expected_output_shape=*/{2, 4},
@@ -177,7 +165,7 @@ TYPED_TEST(GatherTest, Input2DIndex2D) {
 
   // 2D input, 2D index, axis = 0 (aligned)
   TestGather<T, IndexType>(
-      /*axis=*/0,
+      /*axes=*/{0},
       /*input_shape=*/{3, 1, 4},
       /*input_data=*/{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12},
       /*index_shape=*/{2, 3, 4},
@@ -200,7 +188,7 @@ TYPED_TEST(GatherTest, IndexBroadcasting) {
 
   // Index broadcasting (aligned)
   TestGather<T, IndexType>(
-      /*axis=*/0,
+      /*axes=*/{0},
       /*input_shape=*/{3, 2, 4},
       /*input_data=*/
       {1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12,
@@ -222,7 +210,7 @@ TYPED_TEST(GatherTest, InputBroadcasting) {
 
   // Input broadcasting (aligned)
   TestGather<T, IndexType>(
-      /*axis=*/0,
+      /*axes=*/{0},
       /*input_shape=*/{3, 1, 4},
       /*input_data=*/{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12},
       /*index_shape=*/{2, 3, 4},
@@ -245,7 +233,7 @@ TYPED_TEST(GatherTest, OutOfBounds) {
   // 1D input, 1D index (aligned). Fast path (scalar gather) if axis is 0.
   // input_shape = {3}, valid indexes are 0, 1, 2.
   TestGather<T, IndexType>(
-      /*axis=*/0,
+      /*axes=*/{0},
       /*input_shape=*/{3}, /*input_data=*/{1, 2, 3},
       /*index_shape=*/{4}, /*index_data=*/{1, 3, 0, 1},  // 3 is out of bounds
       /*expected_output_shape=*/{4}, /*expected_output_data=*/{},
@@ -253,7 +241,7 @@ TYPED_TEST(GatherTest, OutOfBounds) {
 
   if constexpr (std::is_signed_v<IndexType>) {
     TestGather<T, IndexType>(
-        /*axis=*/0,
+        /*axes=*/{0},
         /*input_shape=*/{3}, /*input_data=*/{1, 2, 3},
         /*index_shape=*/{4},
         /*index_data=*/{-1, 1, 0, 1},  // -1 is out of bounds
@@ -274,7 +262,7 @@ TYPED_TEST(GatherTest, OutOfBounds2D) {
   // 2D input, 2D index, axis = 0 (aligned).
   // input_shape = {3, 1, 4}, valid indexes for axis 0 are 0, 1, 2.
   TestGather<T, IndexType>(
-      /*axis=*/0,
+      /*axes=*/{0},
       /*input_shape=*/{3, 1, 4},
       /*input_data=*/{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12},
       /*index_shape=*/{2, 2, 4},
@@ -286,7 +274,7 @@ TYPED_TEST(GatherTest, OutOfBounds2D) {
   // 2D input, 2D index, axis = 1 (aligned).
   // input_shape = {3, 3, 4}, valid indexes for axis 1 are 0, 1, 2.
   TestGather<T, IndexType>(
-      /*axis=*/1,
+      /*axes=*/{1},
       /*input_shape=*/{3, 3, 4},
       /*input_data=*/
       {1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12, 13, 14, 15, 16, 17, 18,
