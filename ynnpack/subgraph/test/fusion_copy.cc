@@ -349,6 +349,88 @@ TEST(fusion, keep_static_broadcast_multiple_consumers) {
       AllOf(IsBinary(ynn_binary_add), InputsInclude(broadcast_x_id, y_id)));
 }
 
+TEST(fusion, move_static_broadcast_to_output_transpose) {
+  // rewrite transpose(static_broadcast(x)) -> static_broadcast(transpose(x))
+  // where the transpose permutes the broadcasted dimension.
+  const uint32_t x_id = 0;
+  const uint32_t out_id = 1;
+  SubgraphBuilder builder(2);
+  uint32_t broadcast_x_id = YNN_INVALID_VALUE_ID;
+
+  builder.AddInput(ynn_type_fp32, {1, 10}, x_id)
+      .AddOutput(ynn_type_fp32, {10, 5}, out_id)
+      .AddTensor(ynn_type_fp32, {5, 10}, broadcast_x_id);
+
+  builder.AddStaticBroadcast({5, 0}, x_id, broadcast_x_id)
+      .AddTranspose({1, 0}, broadcast_x_id, out_id);
+
+  ynn_subgraph& subgraph = *builder.GetSubgraph();
+
+  subgraph.fusion();
+  subgraph.invalidate_dead_values();
+
+  EXPECT_THAT(ProducerOf(out_id, subgraph), IsStaticBroadcast());
+  uint32_t transpose_out_id = ProducerOf(out_id, subgraph).inputs[0];
+  EXPECT_THAT(ProducerOf(transpose_out_id, subgraph),
+              AllOf(IsStaticTranspose(), InputsAre(x_id)));
+}
+
+TEST(fusion, do_not_move_broadcast_like_to_output_transpose) {
+  // transpose(broadcast_like(x, y)) should not be rewritten to
+  // broadcast_like(transpose(x), y) when the transpose permutes the broadcasted
+  // dimension, because y is not transposed.
+  const uint32_t x_id = 0;
+  const uint32_t y_id = 1;
+  const uint32_t out_id = 2;
+  SubgraphBuilder builder(3);
+  uint32_t broadcast_x_id = YNN_INVALID_VALUE_ID;
+
+  builder.AddInput(ynn_type_fp32, {1, 10}, x_id)
+      .AddInput(ynn_type_fp32, {5, 10}, y_id)
+      .AddOutput(ynn_type_fp32, {10, 5}, out_id)
+      .AddTensor(ynn_type_fp32, {5, 10}, broadcast_x_id);
+
+  builder.AddBroadcastLike({0}, x_id, y_id, broadcast_x_id)
+      .AddTranspose({1, 0}, broadcast_x_id, out_id);
+
+  ynn_subgraph& subgraph = *builder.GetSubgraph();
+
+  subgraph.fusion();
+  subgraph.invalidate_dead_values();
+
+  EXPECT_THAT(ProducerOf(out_id, subgraph), IsStaticTranspose());
+  EXPECT_THAT(ProducerOf(broadcast_x_id, subgraph), IsBroadcastLike());
+}
+
+TEST(fusion, move_broadcast_like_to_output_transpose) {
+  // transpose(broadcast_like(x, y)) should be rewritten to
+  // broadcast_like(transpose(x), y) when the transpose does not permute the
+  // broadcasted dimension.
+  const uint32_t x_id = 0;
+  const uint32_t y_id = 1;
+  const uint32_t out_id = 2;
+  SubgraphBuilder builder(3);
+  uint32_t broadcast_x_id = YNN_INVALID_VALUE_ID;
+
+  builder.AddInput(ynn_type_fp32, {1, 2, 3}, x_id)
+      .AddInput(ynn_type_fp32, {5, 2, 3}, y_id)
+      .AddOutput(ynn_type_fp32, {5, 3, 2}, out_id)
+      .AddTensor(ynn_type_fp32, {5, 2, 3}, broadcast_x_id);
+
+  builder.AddBroadcastLike({0}, x_id, y_id, broadcast_x_id)
+      .AddTranspose({0, 2, 1}, broadcast_x_id, out_id);
+
+  ynn_subgraph& subgraph = *builder.GetSubgraph();
+
+  subgraph.fusion();
+  subgraph.invalidate_dead_values();
+
+  EXPECT_THAT(ProducerOf(out_id, subgraph), IsBroadcastLike());
+  uint32_t transpose_out_id = ProducerOf(out_id, subgraph).inputs[0];
+  EXPECT_THAT(ProducerOf(transpose_out_id, subgraph),
+              AllOf(IsStaticTranspose(), InputsAre(x_id)));
+}
+
 TEST(fusion, reshape_to_expand_dims) {
   const uint32_t x_id = 0;
   const uint32_t out_id = 1;
