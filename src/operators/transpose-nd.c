@@ -762,7 +762,8 @@ enum xnn_status create_depth_to_space_nchw2nhwc(
   if (!transpose_config) {
     xnn_log_error(
       "failed to create transpose config: unsupported hardware configuration");
-    return xnn_status_unsupported_hardware;
+    status = xnn_status_unsupported_hardware;
+    goto error;
   }
 
   depth_to_space_op->depth_to_space.block_size = block_size;
@@ -1038,7 +1039,8 @@ static enum xnn_status create_depth_to_space_nhwc(
   if (!transpose_config) {
     xnn_log_error(
       "failed to create transpose config: unsupported hardware configuration");
-    return xnn_status_unsupported_hardware;
+    status = xnn_status_unsupported_hardware;
+    goto error;
   }
 
   depth_to_space_op->depth_to_space.block_size = block_size;
@@ -1374,7 +1376,8 @@ static enum xnn_status create_space_to_depth_nhwc(
   if (!transpose_config) {
     xnn_log_error(
       "failed to create transpose config: unsupported hardware configuration");
-    return xnn_status_unsupported_hardware;
+    status = xnn_status_unsupported_hardware;
+    goto error;
   }
 
   space_to_depth_op->depth_to_space.block_size = block_size;

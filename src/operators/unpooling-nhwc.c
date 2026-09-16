@@ -86,7 +86,8 @@ enum xnn_status xnn_create_unpooling2d_nhwc_x32(
     xnn_log_error(
       "failed to create %s operator: unsupported hardware configuration",
       xnn_operator_type_to_string(xnn_operator_type_unpooling_nhwc_x32));
-    return xnn_status_unsupported_hardware;
+    status = xnn_status_unsupported_hardware;
+    goto error;
   }
 
   unpooling_op->convolution_op->padding_top = input_padding_top;
