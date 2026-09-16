@@ -568,6 +568,38 @@ TEST(ArithmeticXnnpackTest, SliceWorks) {
               IsOkAndHolds(Pointwise(FloatEq(), expected_output)));
 }
 
+TEST(ArithmeticXnnpackTest, MeanRejectsShortAxisBuffer) {
+  XnnTensor input({.name = "input", .type = Type::kFP32, .shape = {2, 3}});
+  XnnTensor axes({.name = "axes", .type = Type::kI32, .shape = {2},
+                  .buffer = std::vector<int32_t>{0}});
+
+  XnnTensor output = Mean(input, axes, false);
+
+  ASSERT_FALSE(output.GetStatus().ok());
+  EXPECT_EQ(output.GetStatus().code(), absl::StatusCode::kInvalidArgument);
+  EXPECT_THAT(output.GetStatus().message(),
+              ::testing::HasSubstr("axes buffer is smaller than the specified shape"));
+}
+
+TEST(ArithmeticXnnpackTest, SliceRejectsShortSizeBuffer) {
+  XnnTensor input({.name = "input", .type = Type::kFP32, .shape = {3, 2, 4}});
+  XnnTensor begin({.name = "begin",
+                   .type = Type::kI32,
+                   .shape = {3},
+                   .buffer = std::vector<int32_t>{0, 0, 0}});
+  XnnTensor size({.name = "size",
+                  .type = Type::kI32,
+                  .shape = {3},
+                  .buffer = std::vector<int32_t>{2, 2}});
+
+  XnnTensor output = Slice(input, begin, size);
+
+  ASSERT_FALSE(output.GetStatus().ok());
+  EXPECT_EQ(output.GetStatus().code(), absl::StatusCode::kInvalidArgument);
+  EXPECT_THAT(output.GetStatus().message(),
+              ::testing::HasSubstr("size buffer is smaller than the specified shape"));
+}
+
 TEST(ArithmeticXnnpackTest, CastI32ToF32Works) {
   XnnTensor input({.name = "input", .type = Type::kI32, .shape = {3}});
   XnnTensor output = Cast(input, Type::kFP32);
