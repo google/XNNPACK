@@ -1423,4 +1423,37 @@ TEST(FullyConnectedQD8F32QC8W, reshape_rejects_input_channel_mismatch) {
   ASSERT_NE(xnn_status_success, subgraph.Status());
 }
 
+TEST(FullyConnectedF32, rank_exceeding_max_dims_rejected) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
+
+  xnn_subgraph_t subgraph = nullptr;
+  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(3, 0, &subgraph));
+
+  const uint32_t input_id = 0;
+  subgraph->values[input_id].type = xnn_value_type_dense_tensor;
+  subgraph->values[input_id].datatype = xnn_datatype_fp32;
+  subgraph->values[input_id].shape.num_dims = XNN_MAX_TENSOR_DIMS + 1;
+
+  float filter = 1.0f;
+  size_t filter_dims[] = {1, 1};
+  uint32_t filter_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_tensor_value(subgraph, xnn_datatype_fp32, 2,
+                                    filter_dims, &filter, XNN_INVALID_VALUE_ID,
+                                    0, &filter_id));
+
+  uint32_t output_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_tensor_value(subgraph, xnn_datatype_fp32, 0, nullptr,
+                                    nullptr, 1, XNN_VALUE_FLAG_EXTERNAL_OUTPUT,
+                                    &output_id));
+
+  ASSERT_EQ(xnn_status_unsupported_parameter,
+            xnn_define_fully_connected(subgraph, -1e30f, 1e30f, input_id,
+                                       filter_id, XNN_INVALID_VALUE_ID,
+                                       output_id, 0));
+
+  xnn_delete_subgraph(subgraph);
+}
+
 }  // namespace xnnpack
