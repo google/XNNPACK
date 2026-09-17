@@ -599,6 +599,28 @@ enum ynn_status ynn_define_dot(ynn_subgraph_t subgraph, size_t num_k_dims,
                                uint32_t input_c_id, uint32_t* output_id,
                                uint32_t flags);
 
+// Performs the same operation as `ynn_define_dot`, scaled by `scale`:
+//
+//   output(batch_dims..., i, j) =
+//     scale(batch_dims..., i) * (dot(a, b) + c)(batch_dims..., i, j)
+//
+// Where `scale` is zero, the dot product is skipped and the output is zero
+// (non-finite values of `dot(a, b) + c` are not propagated). Non-zero rows are
+// computed in contiguous runs, so grouping active rows together avoids
+// re-streaming `b`.
+//
+// `scale` must be broadcastable to the output shape with extent 1 in dimension
+// `j`. An element of `scale` is zero if all of its bits are zero (`-0.0` is not
+// zero). The output type is that of `ynn_binary_multiply` of the dot product
+// and `scale`.
+//
+// `input_c_id` and `input_scale_id` are optional (`YNN_INVALID_VALUE_ID`).
+enum ynn_status ynn_define_scaled_dot(ynn_subgraph_t subgraph,
+                                      size_t num_k_dims, uint32_t input_a_id,
+                                      uint32_t input_b_id, uint32_t input_c_id,
+                                      uint32_t input_scale_id,
+                                      uint32_t* output_id, uint32_t flags);
+
 enum ynn_reduce_operator {
   ynn_reduce_invalid = 0,
 

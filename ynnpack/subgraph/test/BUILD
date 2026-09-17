@@ -383,6 +383,22 @@ cc_test(
 )
 
 cc_test(
+    name = "scaled_dot_bench",
+    srcs = ["scaled_dot_bench.cc"],
+    args = ["--benchmark_min_time=1x"],
+    linkopts = ynn_binary_linkopts(),
+    malloc = ynn_binary_malloc(),
+    tags = ["noemulator"],
+    deps = [
+        ":scheduler",
+        ":subgraph_builder",
+        "//ynnpack",
+        "//ynnpack/base",
+        "//ynnpack/base/test:tensor",
+    ] + ynn_benchmark_deps(),
+)
+
+cc_test(
     name = "reduce_bench",
     srcs = ["reduce_bench.cc"],
     args = ["--benchmark_min_time=1x"],
