@@ -123,11 +123,15 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x8c8__$
       const __m256i vshr6 = _mm256_set1_epi64x(0x4080808080808080);
     $else:
       const __m256i vmask = _mm256_set1_epi8(0x03);
-      $if DATATYPE in ["QS8_QC2", "QC2_F32", "QC2_F16"] and VARIANT != "MADD":
+      $if DATATYPE in ["QS8_QC2", "QC2_F32", "QC2_F16"]:
         const __m256i vtwo = _mm256_set1_epi8(2);  // Subtract 2 (kernel zero point) from unsigned 2 bit to sign extend
+        $if VARIANT == "MADD":
+          const __m256i vminus_one = _mm256_set1_epi16(-1);
   $elif DATATYPE in ["QC4_F16", "QC4_F32", "QS8_QC4"]:
     $if VARIANT == "MADD":
       const __m256i vmask = _mm256_set1_epi8(0x0F);
+      const __m256i veight = _mm256_set1_epi8(8);  // Subtract 8 (kernel zero point) from unsigned 4 bit to sign extend
+      const __m256i vminus_one = _mm256_set1_epi16(-1);
     $else:
       const __m256i vmask = ${_MM256_SET1_EPI8("0xF0")};
     // XNN_FORCE_REALIZATION(vmask);
@@ -155,6 +159,14 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x8c8__$
       $for M in range(MR):
         __m256i vacc1x${M}x0123 = _mm256_setzero_si256();
         __m256i vacc1x${M}x4567 = _mm256_setzero_si256();
+    $if DATATYPE in ["QS8_QC2", "QC2_F32", "QC2_F16", "QS8_QC4", "QC4_F32", "QC4_F16"] and VARIANT == "MADD":
+      $for M in range(MR):
+        __m256i vacc16_${M}x0123 = _mm256_setzero_si256();
+        __m256i vacc16_${M}x4567 = _mm256_setzero_si256();
+      $if MR < 3:
+        $for M in range(MR):
+          __m256i vacc16_1x${M}x0123 = _mm256_setzero_si256();
+          __m256i vacc16_1x${M}x4567 = _mm256_setzero_si256();
     w = (const int32_t*) w + 8;
     $if DATATYPE in ["QC2_F32", "QC2_F16"]:
       // TODO: move kernel zero point after weights
@@ -204,7 +216,7 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x8c8__$
             __m256i vbs89ABCDEFxCDEF = _mm256_srli_epi32(vbb89ABCDEFx0123456789ABCDEF, 6);
             __m256i vb01234567xCDEF = _mm256_and_si256(vbs01234567xCDEF, vmask);
             __m256i vb89ABCDEFxCDEF = _mm256_and_si256(vbs89ABCDEFxCDEF, vmask);
-            $if DATATYPE in ["QS8_QC2", "QC2_F32", "QC2_F16"] and VARIANT != "MADD":
+            $if DATATYPE in ["QS8_QC2", "QC2_F32", "QC2_F16"]:
               vb01234567x0123 = _mm256_sub_epi8(vb01234567x0123, vtwo);
               vb89ABCDEFx0123 = _mm256_sub_epi8(vb89ABCDEFx0123, vtwo);
               vb01234567x4567 = _mm256_sub_epi8(vb01234567x4567, vtwo);
@@ -227,26 +239,50 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x8c8__$
             xnn_prefetch_to_l1((const int8_t*) w + 896);
 
         $for M in range(MR):
-          vacc${M}x0123 = ${_MM256_DPBUSD_EPI32}(vacc${M}x0123, va${M}x0, vb01234567x0123);
-          vacc${M}x4567 = ${_MM256_DPBUSD_EPI32}(vacc${M}x4567, va${M}x0, vb89ABCDEFx0123);
+          $if DATATYPE in ["QS8_QC2", "QC2_F32", "QC2_F16"] and VARIANT == "MADD":
+            vacc16_${M}x0123 = _mm256_add_epi16(vacc16_${M}x0123, _mm256_maddubs_epi16(va${M}x0, vb01234567x0123));
+            vacc16_${M}x4567 = _mm256_add_epi16(vacc16_${M}x4567, _mm256_maddubs_epi16(va${M}x0, vb89ABCDEFx0123));
+          $else:
+            vacc${M}x0123 = ${_MM256_DPBUSD_EPI32}(vacc${M}x0123, va${M}x0, vb01234567x0123);
+            vacc${M}x4567 = ${_MM256_DPBUSD_EPI32}(vacc${M}x4567, va${M}x0, vb89ABCDEFx0123);
         $if PREFETCH:
           xnn_prefetch_to_l1((const int8_t*) w + 960);
         $for M in range(MR):
           $if MR < 3:
-            vacc1x${M}x0123 = ${_MM256_DPBUSD_EPI32}(vacc1x${M}x0123, va${M}x1, vb01234567x4567);
-            vacc1x${M}x4567 = ${_MM256_DPBUSD_EPI32}(vacc1x${M}x4567, va${M}x1, vb89ABCDEFx4567);
+            $if DATATYPE in ["QS8_QC2", "QC2_F32", "QC2_F16"] and VARIANT == "MADD":
+              vacc16_1x${M}x0123 = _mm256_add_epi16(vacc16_1x${M}x0123, _mm256_maddubs_epi16(va${M}x1, vb01234567x4567));
+              vacc16_1x${M}x4567 = _mm256_add_epi16(vacc16_1x${M}x4567, _mm256_maddubs_epi16(va${M}x1, vb89ABCDEFx4567));
+            $else:
+              vacc1x${M}x0123 = ${_MM256_DPBUSD_EPI32}(vacc1x${M}x0123, va${M}x1, vb01234567x4567);
+              vacc1x${M}x4567 = ${_MM256_DPBUSD_EPI32}(vacc1x${M}x4567, va${M}x1, vb89ABCDEFx4567);
           $else:
-            vacc${M}x0123 = ${_MM256_DPBUSD_EPI32}(vacc${M}x0123, va${M}x1, vb01234567x4567);
-            vacc${M}x4567 = ${_MM256_DPBUSD_EPI32}(vacc${M}x4567, va${M}x1, vb89ABCDEFx4567);
-          vacc${M}x0123 = ${_MM256_DPBUSD_EPI32}(vacc${M}x0123, va${M}x2, vb01234567x89AB);
-          vacc${M}x4567 = ${_MM256_DPBUSD_EPI32}(vacc${M}x4567, va${M}x2, vb89ABCDEFx89AB);
+            $if DATATYPE in ["QS8_QC2", "QC2_F32", "QC2_F16"] and VARIANT == "MADD":
+              vacc16_${M}x0123 = _mm256_add_epi16(vacc16_${M}x0123, _mm256_maddubs_epi16(va${M}x1, vb01234567x4567));
+              vacc16_${M}x4567 = _mm256_add_epi16(vacc16_${M}x4567, _mm256_maddubs_epi16(va${M}x1, vb89ABCDEFx4567));
+            $else:
+              vacc${M}x0123 = ${_MM256_DPBUSD_EPI32}(vacc${M}x0123, va${M}x1, vb01234567x4567);
+              vacc${M}x4567 = ${_MM256_DPBUSD_EPI32}(vacc${M}x4567, va${M}x1, vb89ABCDEFx4567);
+          $if DATATYPE in ["QS8_QC2", "QC2_F32", "QC2_F16"] and VARIANT == "MADD":
+            vacc16_${M}x0123 = _mm256_add_epi16(vacc16_${M}x0123, _mm256_maddubs_epi16(va${M}x2, vb01234567x89AB));
+            vacc16_${M}x4567 = _mm256_add_epi16(vacc16_${M}x4567, _mm256_maddubs_epi16(va${M}x2, vb89ABCDEFx89AB));
+          $else:
+            vacc${M}x0123 = ${_MM256_DPBUSD_EPI32}(vacc${M}x0123, va${M}x2, vb01234567x89AB);
+            vacc${M}x4567 = ${_MM256_DPBUSD_EPI32}(vacc${M}x4567, va${M}x2, vb89ABCDEFx89AB);
         $for M in range(MR):
           $if MR < 3:
-            vacc1x${M}x0123 = ${_MM256_DPBUSD_EPI32}(vacc1x${M}x0123, va${M}x3, vb01234567xCDEF);
-            vacc1x${M}x4567 = ${_MM256_DPBUSD_EPI32}(vacc1x${M}x4567, va${M}x3, vb89ABCDEFxCDEF);
+            $if DATATYPE in ["QS8_QC2", "QC2_F32", "QC2_F16"] and VARIANT == "MADD":
+              vacc16_1x${M}x0123 = _mm256_add_epi16(vacc16_1x${M}x0123, _mm256_maddubs_epi16(va${M}x3, vb01234567xCDEF));
+              vacc16_1x${M}x4567 = _mm256_add_epi16(vacc16_1x${M}x4567, _mm256_maddubs_epi16(va${M}x3, vb89ABCDEFxCDEF));
+            $else:
+              vacc1x${M}x0123 = ${_MM256_DPBUSD_EPI32}(vacc1x${M}x0123, va${M}x3, vb01234567xCDEF);
+              vacc1x${M}x4567 = ${_MM256_DPBUSD_EPI32}(vacc1x${M}x4567, va${M}x3, vb89ABCDEFxCDEF);
           $else:
-            vacc${M}x0123 = ${_MM256_DPBUSD_EPI32}(vacc${M}x0123, va${M}x3, vb01234567xCDEF);
-            vacc${M}x4567 = ${_MM256_DPBUSD_EPI32}(vacc${M}x4567, va${M}x3, vb89ABCDEFxCDEF);
+            $if DATATYPE in ["QS8_QC2", "QC2_F32", "QC2_F16"] and VARIANT == "MADD":
+              vacc16_${M}x0123 = _mm256_add_epi16(vacc16_${M}x0123, _mm256_maddubs_epi16(va${M}x3, vb01234567xCDEF));
+              vacc16_${M}x4567 = _mm256_add_epi16(vacc16_${M}x4567, _mm256_maddubs_epi16(va${M}x3, vb89ABCDEFxCDEF));
+            $else:
+              vacc${M}x0123 = ${_MM256_DPBUSD_EPI32}(vacc${M}x0123, va${M}x3, vb01234567xCDEF);
+              vacc${M}x4567 = ${_MM256_DPBUSD_EPI32}(vacc${M}x4567, va${M}x3, vb89ABCDEFxCDEF);
         $if DATATYPE in ["QS8_QC2", "QC2_F32", "QC2_F16"]:
           w = (const int8_t*) w + 64;
         $elif DATATYPE in ["QC4_F16", "QC4_F32", "QS8_QC4"]:
@@ -254,6 +290,34 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x8c8__$
         $else:
           w = (const int8_t*) w + 256;
         k -= 32 * sizeof(int8_t);
+        $if DATATYPE in ["QS8_QC2", "QC2_F32", "QC2_F16"] and VARIANT == "MADD":
+          if (XNN_UNLIKELY((kc - k) % (512 * sizeof(int8_t)) == 0)) {
+            $for M in range(MR):
+              vacc${M}x0123 = _mm256_sub_epi32(vacc${M}x0123, _mm256_madd_epi16(vacc16_${M}x0123, vminus_one));
+              vacc${M}x4567 = _mm256_sub_epi32(vacc${M}x4567, _mm256_madd_epi16(vacc16_${M}x4567, vminus_one));
+              vacc16_${M}x0123 = _mm256_setzero_si256();
+              vacc16_${M}x4567 = _mm256_setzero_si256();
+            $if MR < 3:
+              $for M in range(MR):
+                vacc1x${M}x0123 = _mm256_sub_epi32(vacc1x${M}x0123, _mm256_madd_epi16(vacc16_1x${M}x0123, vminus_one));
+                vacc1x${M}x4567 = _mm256_sub_epi32(vacc1x${M}x4567, _mm256_madd_epi16(vacc16_1x${M}x4567, vminus_one));
+                vacc16_1x${M}x0123 = _mm256_setzero_si256();
+                vacc16_1x${M}x4567 = _mm256_setzero_si256();
+          }
+        $elif DATATYPE in ["QS8_QC4", "QC4_F32", "QC4_F16"] and VARIANT == "MADD":
+          if (XNN_UNLIKELY((kc - k) % (128 * sizeof(int8_t)) == 0)) {
+            $for M in range(MR):
+              vacc${M}x0123 = _mm256_sub_epi32(vacc${M}x0123, _mm256_madd_epi16(vacc16_${M}x0123, vminus_one));
+              vacc${M}x4567 = _mm256_sub_epi32(vacc${M}x4567, _mm256_madd_epi16(vacc16_${M}x4567, vminus_one));
+              vacc16_${M}x0123 = _mm256_setzero_si256();
+              vacc16_${M}x4567 = _mm256_setzero_si256();
+            $if MR < 3:
+              $for M in range(MR):
+                vacc1x${M}x0123 = _mm256_sub_epi32(vacc1x${M}x0123, _mm256_madd_epi16(vacc16_1x${M}x0123, vminus_one));
+                vacc1x${M}x4567 = _mm256_sub_epi32(vacc1x${M}x4567, _mm256_madd_epi16(vacc16_1x${M}x4567, vminus_one));
+                vacc16_1x${M}x0123 = _mm256_setzero_si256();
+                vacc16_1x${M}x4567 = _mm256_setzero_si256();
+          }
       }
     while (k >= 16 * sizeof(int8_t)) {
       $for M in range(MR):
@@ -281,7 +345,7 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x8c8__$
           __m256i vb89ABCDEFx0123 = _mm256_and_si256(vbb89ABCDEFx01234567, vmask);
           __m256i vb01234567x4567 = _mm256_and_si256(vbs01234567x4567, vmask);
           __m256i vb89ABCDEFx4567 = _mm256_and_si256(vbs89ABCDEFx4567, vmask);
-          $if DATATYPE in ["QS8_QC2", "QC2_F32", "QC2_F16"] and VARIANT != "MADD":
+          $if DATATYPE in ["QS8_QC2", "QC2_F32", "QC2_F16"]:
             vb01234567x0123 = _mm256_sub_epi8(vb01234567x0123, vtwo);
             vb89ABCDEFx0123 = _mm256_sub_epi8(vb89ABCDEFx0123, vtwo);
             vb01234567x4567 = _mm256_sub_epi8(vb01234567x4567, vtwo);
@@ -297,10 +361,14 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x8c8__$
         $elif VARIANT == "MADD":
           const __m256i vbs01234567x4567 = _mm256_srli_epi32(vbb01234567x01234567, 4);
           const __m256i vbs89ABCDEFx4567 = _mm256_srli_epi32(vbb89ABCDEFx01234567, 4);
-          const __m256i vb01234567x0123 = _mm256_and_si256(vbb01234567x01234567, vmask);
-          const __m256i vb89ABCDEFx0123 = _mm256_and_si256(vbb89ABCDEFx01234567, vmask);
-          const __m256i vb01234567x4567 = _mm256_and_si256(vbs01234567x4567, vmask);
-          const __m256i vb89ABCDEFx4567 = _mm256_and_si256(vbs89ABCDEFx4567, vmask);
+          __m256i vb01234567x0123 = _mm256_and_si256(vbb01234567x01234567, vmask);
+          __m256i vb89ABCDEFx0123 = _mm256_and_si256(vbb89ABCDEFx01234567, vmask);
+          __m256i vb01234567x4567 = _mm256_and_si256(vbs01234567x4567, vmask);
+          __m256i vb89ABCDEFx4567 = _mm256_and_si256(vbs89ABCDEFx4567, vmask);
+          vb01234567x0123 = _mm256_sub_epi8(vb01234567x0123, veight);
+          vb89ABCDEFx0123 = _mm256_sub_epi8(vb89ABCDEFx0123, veight);
+          vb01234567x4567 = _mm256_sub_epi8(vb01234567x4567, veight);
+          vb89ABCDEFx4567 = _mm256_sub_epi8(vb89ABCDEFx4567, veight);
         $else:
           const __m256i vbs01234567x0123 = _mm256_slli_epi32(vbb01234567x01234567, 4);
           const __m256i vbs89ABCDEFx0123 = _mm256_slli_epi32(vbb89ABCDEFx01234567, 4);
@@ -317,17 +385,29 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x8c8__$
           xnn_prefetch_to_l1((const int8_t*) w + 896);
 
       $for M in range(MR):
-        vacc${M}x0123 = ${_MM256_DPBUSD_EPI32}(vacc${M}x0123, va${M}x01234567, vb01234567x0123);
-        vacc${M}x4567 = ${_MM256_DPBUSD_EPI32}(vacc${M}x4567, va${M}x01234567, vb89ABCDEFx0123);
+        $if DATATYPE in ["QS8_QC2", "QC2_F32", "QC2_F16", "QS8_QC4", "QC4_F32", "QC4_F16"] and VARIANT == "MADD":
+          vacc16_${M}x0123 = _mm256_add_epi16(vacc16_${M}x0123, _mm256_maddubs_epi16(va${M}x01234567, vb01234567x0123));
+          vacc16_${M}x4567 = _mm256_add_epi16(vacc16_${M}x4567, _mm256_maddubs_epi16(va${M}x01234567, vb89ABCDEFx0123));
+        $else:
+          vacc${M}x0123 = ${_MM256_DPBUSD_EPI32}(vacc${M}x0123, va${M}x01234567, vb01234567x0123);
+          vacc${M}x4567 = ${_MM256_DPBUSD_EPI32}(vacc${M}x4567, va${M}x01234567, vb89ABCDEFx0123);
       $if PREFETCH:
         xnn_prefetch_to_l1((const int8_t*) w + 960);
       $for M in range(MR):
         $if MR < 3:
-          vacc1x${M}x0123 = ${_MM256_DPBUSD_EPI32}(vacc1x${M}x0123, va${M}x89ABCDEF, vb01234567x4567);
-          vacc1x${M}x4567 = ${_MM256_DPBUSD_EPI32}(vacc1x${M}x4567, va${M}x89ABCDEF, vb89ABCDEFx4567);
+          $if DATATYPE in ["QS8_QC2", "QC2_F32", "QC2_F16", "QS8_QC4", "QC4_F32", "QC4_F16"] and VARIANT == "MADD":
+            vacc16_1x${M}x0123 = _mm256_add_epi16(vacc16_1x${M}x0123, _mm256_maddubs_epi16(va${M}x89ABCDEF, vb01234567x4567));
+            vacc16_1x${M}x4567 = _mm256_add_epi16(vacc16_1x${M}x4567, _mm256_maddubs_epi16(va${M}x89ABCDEF, vb89ABCDEFx4567));
+          $else:
+            vacc1x${M}x0123 = ${_MM256_DPBUSD_EPI32}(vacc1x${M}x0123, va${M}x89ABCDEF, vb01234567x4567);
+            vacc1x${M}x4567 = ${_MM256_DPBUSD_EPI32}(vacc1x${M}x4567, va${M}x89ABCDEF, vb89ABCDEFx4567);
         $else:
-          vacc${M}x0123 = ${_MM256_DPBUSD_EPI32}(vacc${M}x0123, va${M}x89ABCDEF, vb01234567x4567);
-          vacc${M}x4567 = ${_MM256_DPBUSD_EPI32}(vacc${M}x4567, va${M}x89ABCDEF, vb89ABCDEFx4567);
+          $if DATATYPE in ["QS8_QC2", "QC2_F32", "QC2_F16", "QS8_QC4", "QC4_F32", "QC4_F16"] and VARIANT == "MADD":
+            vacc16_${M}x0123 = _mm256_add_epi16(vacc16_${M}x0123, _mm256_maddubs_epi16(va${M}x89ABCDEF, vb01234567x4567));
+            vacc16_${M}x4567 = _mm256_add_epi16(vacc16_${M}x4567, _mm256_maddubs_epi16(va${M}x89ABCDEF, vb89ABCDEFx4567));
+          $else:
+            vacc${M}x0123 = ${_MM256_DPBUSD_EPI32}(vacc${M}x0123, va${M}x89ABCDEF, vb01234567x4567);
+            vacc${M}x4567 = ${_MM256_DPBUSD_EPI32}(vacc${M}x4567, va${M}x89ABCDEF, vb89ABCDEFx4567);
 
       $if DATATYPE in ["QC4_F16", "QC4_F32", "QS8_QC4", "QS8_QC2", "QC2_F32", "QC2_F16"]:
         w = (const int8_t*) w + 64;
@@ -354,12 +434,15 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x8c8__$
               __m256i vbs89ABCDEFx89AB = _mm256_srli_epi32(vbb89ABCDEFx01234567, 4);
               __m256i vb01234567x89AB = _mm256_and_si256(vbs01234567x89AB, vmask);
               __m256i vb89ABCDEFx89AB = _mm256_and_si256(vbs89ABCDEFx89AB, vmask);
-              $if DATATYPE in ["QS8_QC2", "QC2_F32", "QC2_F16"] and VARIANT != "MADD":
-                vb01234567x89AB = _mm256_sub_epi8(vb01234567x89AB, vtwo);
-                vb89ABCDEFx89AB = _mm256_sub_epi8(vb89ABCDEFx89AB, vtwo);
+              vb01234567x89AB = _mm256_sub_epi8(vb01234567x89AB, vtwo);
+              vb89ABCDEFx89AB = _mm256_sub_epi8(vb89ABCDEFx89AB, vtwo);
           $for M in range(MR):
-            vacc${M}x0123 = ${_MM256_DPBUSD_EPI32}(vacc${M}x0123, va${M}x3, vb01234567x89AB);
-            vacc${M}x4567 = ${_MM256_DPBUSD_EPI32}(vacc${M}x4567, va${M}x3, vb89ABCDEFx89AB);
+            $if DATATYPE in ["QS8_QC2", "QC2_F32", "QC2_F16"] and VARIANT == "MADD":
+              vacc16_${M}x0123 = _mm256_add_epi16(vacc16_${M}x0123, _mm256_maddubs_epi16(va${M}x3, vb01234567x89AB));
+              vacc16_${M}x4567 = _mm256_add_epi16(vacc16_${M}x4567, _mm256_maddubs_epi16(va${M}x3, vb89ABCDEFx89AB));
+            $else:
+              vacc${M}x0123 = ${_MM256_DPBUSD_EPI32}(vacc${M}x0123, va${M}x3, vb01234567x89AB);
+              vacc${M}x4567 = ${_MM256_DPBUSD_EPI32}(vacc${M}x4567, va${M}x3, vb89ABCDEFx89AB);
           k -= 8 * sizeof(int8_t);
         }
     }
@@ -383,9 +466,8 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x8c8__$
           $if DATATYPE in ["QS8_QC2", "QC2_F32", "QC2_F16"]:
             __m256i vb01234567x0123 = _mm256_and_si256(vbb01234567x01234567, vmask);
             __m256i vb89ABCDEFx0123 = _mm256_and_si256(vbb89ABCDEFx01234567, vmask);
-            $if DATATYPE in ["QS8_QC2", "QC2_F32", "QC2_F16"] and VARIANT != "MADD":
-              vb01234567x0123 = _mm256_sub_epi8(vb01234567x0123, vtwo);
-              vb89ABCDEFx0123 = _mm256_sub_epi8(vb89ABCDEFx0123, vtwo);
+            vb01234567x0123 = _mm256_sub_epi8(vb01234567x0123, vtwo);
+            vb89ABCDEFx0123 = _mm256_sub_epi8(vb89ABCDEFx0123, vtwo);
       $elif DATATYPE in ["QC4_F16", "QC4_F32", "QS8_QC4"]:
         const __m256i vbb01234567x01234567 = _mm256_load_si256(w);
         const __m256i vbb89ABCDEFx01234567 = _mm256_load_si256((const __m256i*) ((const int8_t*) w + 32));
@@ -393,8 +475,10 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x8c8__$
           const __m256i vb01234567x0123 = _mm256_gf2p8affine_epi64_epi8(vbb01234567x01234567, vshl4, 0);
           const __m256i vb89ABCDEFx0123 = _mm256_gf2p8affine_epi64_epi8(vbb89ABCDEFx01234567, vshl4, 0);
         $elif VARIANT == "MADD":
-          const __m256i vb01234567x0123 = _mm256_and_si256(vbb01234567x01234567, vmask);
-          const __m256i vb89ABCDEFx0123 = _mm256_and_si256(vbb89ABCDEFx01234567, vmask);
+          __m256i vb01234567x0123 = _mm256_and_si256(vbb01234567x01234567, vmask);
+          __m256i vb89ABCDEFx0123 = _mm256_and_si256(vbb89ABCDEFx01234567, vmask);
+          vb01234567x0123 = _mm256_sub_epi8(vb01234567x0123, veight);
+          vb89ABCDEFx0123 = _mm256_sub_epi8(vb89ABCDEFx0123, veight);
         $else:
           const __m256i vb01234567x0123 = _mm256_slli_epi32(vbb01234567x01234567, 4);
           const __m256i vb89ABCDEFx0123 = _mm256_slli_epi32(vbb89ABCDEFx01234567, 4);
@@ -403,14 +487,26 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x8c8__$
         const __m256i vb89ABCDEFx0123 = _mm256_load_si256((const __m256i*) ((const int8_t*) w + 32));
 
       $for M in range(MR):
-        vacc${M}x0123 = ${_MM256_DPBUSD_EPI32}(vacc${M}x0123, va${M}x01234567, vb01234567x0123);
-        vacc${M}x4567 = ${_MM256_DPBUSD_EPI32}(vacc${M}x4567, va${M}x01234567, vb89ABCDEFx0123);
+        $if DATATYPE in ["QS8_QC2", "QC2_F32", "QC2_F16", "QS8_QC4", "QC4_F32", "QC4_F16"] and VARIANT == "MADD":
+          vacc16_${M}x0123 = _mm256_add_epi16(vacc16_${M}x0123, _mm256_maddubs_epi16(va${M}x01234567, vb01234567x0123));
+          vacc16_${M}x4567 = _mm256_add_epi16(vacc16_${M}x4567, _mm256_maddubs_epi16(va${M}x01234567, vb89ABCDEFx0123));
+        $else:
+          vacc${M}x0123 = ${_MM256_DPBUSD_EPI32}(vacc${M}x0123, va${M}x01234567, vb01234567x0123);
+          vacc${M}x4567 = ${_MM256_DPBUSD_EPI32}(vacc${M}x4567, va${M}x01234567, vb89ABCDEFx0123);
       $if PREFETCH:
         xnn_prefetch_to_l1((const int8_t*) w + 960);
 
       w = (const int8_t*) w + 64;
       k -= 8 * sizeof(int8_t);
     }
+    $if DATATYPE in ["QS8_QC2", "QC2_F32", "QC2_F16", "QS8_QC4", "QC4_F32", "QC4_F16"] and VARIANT == "MADD":
+      $for M in range(MR):
+        vacc${M}x0123 = _mm256_sub_epi32(vacc${M}x0123, _mm256_madd_epi16(vacc16_${M}x0123, vminus_one));
+        vacc${M}x4567 = _mm256_sub_epi32(vacc${M}x4567, _mm256_madd_epi16(vacc16_${M}x4567, vminus_one));
+      $if MR < 3:
+        $for M in range(MR):
+          vacc1x${M}x0123 = _mm256_sub_epi32(vacc1x${M}x0123, _mm256_madd_epi16(vacc16_1x${M}x0123, vminus_one));
+          vacc1x${M}x4567 = _mm256_sub_epi32(vacc1x${M}x4567, _mm256_madd_epi16(vacc16_1x${M}x4567, vminus_one));
     $if DATATYPE in ["QC2_F32", "QC2_F16"]:
       // Make sure there were no leftovers.
       assert(k == 0);
