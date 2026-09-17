@@ -412,6 +412,130 @@ static void qs8_qc4w_packw(benchmark::State& state,
       benchmark::Counter::kIsRate);
 }
 
+static void qd8_qc2w_packw(benchmark::State& state,
+                           xnn_qd8_qc2w_packw_gemm_goi_ukernel_fn packw,
+                           size_t nr, size_t kr, size_t sr,
+                           uint64_t arch_flags = 0) {
+  if (!benchmark::utils::CheckArchFlags(state, arch_flags)) {
+    return;
+  }
+
+  const size_t batch = state.range(0);
+  const size_t dim_n = state.range(2);
+  const size_t dim_k = state.range(3);
+
+  const size_t rounded_n = benchmark::utils::RoundUp(dim_n, nr);
+  const size_t rounded_k = benchmark::utils::RoundUp(dim_k, kr * sr);
+  const size_t rounded_size =
+      rounded_n * rounded_k / 4 + rounded_n * sizeof(uint32_t) + rounded_n * sizeof(float);
+
+  xnnpack::ReplicableRandomDevice rng;
+
+  const size_t num_buffers =
+      1 + benchmark::utils::DivideRoundUp<size_t>(
+              benchmark::utils::GetMaxCacheSize(),
+              sizeof(int8_t) * batch * (dim_n * dim_k + rounded_size));
+
+  xnnpack::Buffer<uint8_t, XNN_ALLOCATION_ALIGNMENT> weights(
+      num_buffers * batch * (dim_n * dim_k + 3) / 4);
+  xnnpack::fill_uniform_random_bits(weights.data(), weights.size(), rng);
+  xnnpack::Buffer<int8_t, XNN_ALLOCATION_ALIGNMENT> packed_weights(
+      num_buffers * batch * rounded_size);
+
+  const xnn_qd8_qc2w_packing_params params = {0, nullptr};
+
+  size_t buffer_index = 0;
+  for (auto _ : state) {
+    if (++buffer_index == num_buffers) {
+      buffer_index = 0;
+    }
+
+    packw(batch, dim_n, dim_k, nr, kr, sr,
+          weights.data() + buffer_index * batch * (dim_n * dim_k + 3) / 4,
+          /*bias=*/nullptr, /*scale=*/nullptr,
+          packed_weights.data() + buffer_index * batch * rounded_size,
+          /*extra_bytes=*/0, &params);
+  }
+
+  const uint64_t cpu_frequency = benchmark::utils::GetCurrentCpuFrequency();
+  if (cpu_frequency != 0) {
+    state.counters["cpufreq"] = cpu_frequency;
+  }
+
+  const size_t elements_per_iteration = batch * dim_n * dim_k;
+  state.counters["elements"] = benchmark::Counter(
+      static_cast<uint64_t>(state.iterations()) * elements_per_iteration,
+      benchmark::Counter::kIsRate);
+
+  const size_t bytes_per_iteration =
+      (elements_per_iteration + batch * rounded_size);
+  state.counters["bytes"] = benchmark::Counter(
+      static_cast<uint64_t>(state.iterations()) * bytes_per_iteration,
+      benchmark::Counter::kIsRate);
+}
+
+static void qs8_qc2w_packw(benchmark::State& state,
+                           xnn_qs8_qc2w_packw_gemm_goi_ukernel_fn packw,
+                           size_t nr, size_t kr, size_t sr,
+                           uint64_t arch_flags = 0) {
+  if (!benchmark::utils::CheckArchFlags(state, arch_flags)) {
+    return;
+  }
+
+  const size_t batch = state.range(0);
+  const size_t dim_n = state.range(2);
+  const size_t dim_k = state.range(3);
+
+  const size_t rounded_n = benchmark::utils::RoundUp(dim_n, nr);
+  const size_t rounded_k = benchmark::utils::RoundUp(dim_k, kr * sr);
+  const size_t rounded_size =
+      rounded_n * rounded_k / 4 + rounded_n * sizeof(uint32_t);
+
+  xnnpack::ReplicableRandomDevice rng;
+
+  const size_t num_buffers =
+      1 + benchmark::utils::DivideRoundUp<size_t>(
+              benchmark::utils::GetMaxCacheSize(),
+              sizeof(int8_t) * batch * (dim_n * dim_k + rounded_size));
+
+  xnnpack::Buffer<uint8_t, XNN_ALLOCATION_ALIGNMENT> weights(
+      num_buffers * batch * (dim_n * dim_k + 3) / 4);
+  xnnpack::fill_uniform_random_bits(weights.data(), weights.size(), rng);
+  xnnpack::Buffer<int8_t, XNN_ALLOCATION_ALIGNMENT> packed_weights(
+      num_buffers * batch * rounded_size);
+
+  const xnn_qs8_qc2w_packing_params params = {0, 0.0f};
+
+  size_t buffer_index = 0;
+  for (auto _ : state) {
+    if (++buffer_index == num_buffers) {
+      buffer_index = 0;
+    }
+
+    packw(batch, dim_n, dim_k, nr, kr, sr,
+          weights.data() + buffer_index * batch * (dim_n * dim_k + 3) / 4,
+          /*bias=*/nullptr, /*scale=*/nullptr,
+          packed_weights.data() + buffer_index * batch * rounded_size,
+          /*extra_bytes=*/0, &params);
+  }
+
+  const uint64_t cpu_frequency = benchmark::utils::GetCurrentCpuFrequency();
+  if (cpu_frequency != 0) {
+    state.counters["cpufreq"] = cpu_frequency;
+  }
+
+  const size_t elements_per_iteration = batch * dim_n * dim_k;
+  state.counters["elements"] = benchmark::Counter(
+      static_cast<uint64_t>(state.iterations()) * elements_per_iteration,
+      benchmark::Counter::kIsRate);
+
+  const size_t bytes_per_iteration =
+      (elements_per_iteration + batch * rounded_size);
+  state.counters["bytes"] = benchmark::Counter(
+      static_cast<uint64_t>(state.iterations()) * bytes_per_iteration,
+      benchmark::Counter::kIsRate);
+}
+
 static void x16_packw(benchmark::State& state,
                       xnn_x16_packw_gemm_goi_ukernel_fn packw, size_t nr,
                       size_t kr, size_t sr, uint64_t arch_flags = 0) {
@@ -1045,3 +1169,44 @@ static void qb4_packw_x16c8_goi__reference(benchmark::State& state) {
 
 BENCHMARK_BGEMM(qb4_packw_x16c4_goi__reference)
 BENCHMARK_BGEMM(qb4_packw_x16c8_goi__reference)
+
+static void qd8_qc2w_packw__reference(
+    size_t batch, size_t dim_n, size_t dim_k, size_t nr, size_t kr, size_t sr,
+    const uint8_t* weights, const int32_t* bias, const float* ksum,
+    void* packed_weights, size_t extra_bytes,
+    const struct xnn_qd8_qc2w_packing_params* params) {
+  xnn_pack_qd8_qc2w_gemm_goi_w(
+      batch, dim_n, dim_k, nr, kr, sr, weights, bias, ksum, packed_weights,
+      extra_bytes, params);
+}
+
+static void qd8_qc2w_packw_x8c8__reference(benchmark::State& state) {
+  qd8_qc2w_packw(state, qd8_qc2w_packw__reference, /*nr=*/8, /*kr=*/8, /*sr=*/1);
+}
+static void qd8_qc2w_packw_x16c8__reference(benchmark::State& state) {
+  qd8_qc2w_packw(state, qd8_qc2w_packw__reference, /*nr=*/16, /*kr=*/8, /*sr=*/1);
+}
+
+BENCHMARK_BGEMM(qd8_qc2w_packw_x8c8__reference)
+BENCHMARK_BGEMM(qd8_qc2w_packw_x16c8__reference)
+
+static void qs8_qc2w_packw__reference(
+    size_t batch, size_t dim_n, size_t dim_k, size_t nr, size_t kr, size_t sr,
+    const uint8_t* weights, const int32_t* bias, const float* scale,
+    void* packed_weights, size_t extra_bytes,
+    const struct xnn_qs8_qc2w_packing_params* params) {
+  xnn_pack_qs8_to_qu8_qc2w_gemm_goi_w(
+      batch, dim_n, dim_k, nr, kr, sr, weights, bias, scale, packed_weights,
+      extra_bytes, params);
+}
+
+static void qs8_qc2w_packw_x8c8__reference(benchmark::State& state) {
+  qs8_qc2w_packw(state, qs8_qc2w_packw__reference, /*nr=*/8, /*kr=*/8, /*sr=*/1);
+}
+static void qs8_qc2w_packw_x16c8__reference(benchmark::State& state) {
+  qs8_qc2w_packw(state, qs8_qc2w_packw__reference, /*nr=*/16, /*kr=*/8, /*sr=*/1);
+}
+
+BENCHMARK_BGEMM(qs8_qc2w_packw_x8c8__reference)
+BENCHMARK_BGEMM(qs8_qc2w_packw_x16c8__reference)
+
