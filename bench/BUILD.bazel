@@ -118,6 +118,7 @@ xnnpack_cxx_library(
         "//:indirection",
         "//:microparams_h",
         "//src/configs:config_hdrs",
+        "//src/configs:microkernel_configs",
         "@com_google_benchmark//:benchmark",
     ] + xnnpack_if_kleidiai_enabled([
         "@KleidiAI//kai/ukernels/matmul",
@@ -205,6 +206,7 @@ xnnpack_cxx_library(
     "f16_gemm_minmax",
     "f32_gemm_minmax",
     "f32_gemm",
+    "pqs8_qc4w_gemm_minmax",
     "pqs8_qc8w_gemm_minmax",
     "qs8_gemm",
     "qu8_gemm",

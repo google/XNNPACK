@@ -1620,17 +1620,6 @@ void GEMMBenchmark(benchmark::State& state,
   const size_t nc = state.range(1);
   const size_t kc = state.range(2);
 
-  xnnpack::ReplicableRandomDevice rng;
-  auto i32rng = std::bind(std::uniform_int_distribution<int32_t>(-10000, 10000),
-                          std::ref(rng));
-
-  xnnpack::Buffer<int8_t> a(mc * kc, xnnpack::XnnExtraBytes);
-  xnnpack::fill_uniform_random_bits(a.data(), a.size(), rng);
-  xnnpack::Buffer<int8_t> k(nc * kc);
-  xnnpack::fill_uniform_random_bits(k.data(), k.size(), rng);
-  xnnpack::Buffer<int32_t> b(nc);
-  std::generate(b.begin(), b.end(), std::ref(i32rng));
-
   // Create a fake `gemm_config` for the packing functions.
   struct xnn_gemm_config gemm_config;
   gemm_config.mr = static_cast<uint8_t>(mr);
@@ -1639,8 +1628,27 @@ void GEMMBenchmark(benchmark::State& state,
   gemm_config.log2_kr = static_cast<uint8_t>(31 - math_clz_nonzero_u32(kr));
   gemm_config.log2_sr = static_cast<uint8_t>(31 - math_clz_nonzero_u32(sr));
 
+  // Determine if weights are 4-bit (0.5 bytes/element) or 8-bit (1
+  // byte/element) based on the packed stride difference for 32 K channels.
+  const bool is_qc4w =
+      (packed_stride(&gemm_config, 64, /*unused_block_size=*/0, /*k_stride=*/64,
+                     /*extra_bytes=*/0) -
+       packed_stride(&gemm_config, 32, /*unused_block_size=*/0, /*k_stride=*/32,
+                     /*extra_bytes=*/0)) < 32;
+
+  const size_t k2 = is_qc4w ? round_up_po2(kc, 2) : kc;
+
+  xnnpack::ReplicableRandomDevice rng;
+  auto i32rng = std::bind(std::uniform_int_distribution<int32_t>(-10000, 10000),
+                          std::ref(rng));
+
+  xnnpack::Buffer<int8_t> a(mc * k2, xnnpack::XnnExtraBytes);
+  xnnpack::fill_uniform_random_bits(a.data(), a.size(), rng);
+  xnnpack::Buffer<int32_t> b(nc);
+  std::generate(b.begin(), b.end(), std::ref(i32rng));
+
   const size_t packed_w_stride =
-      packed_stride(&gemm_config, kc, /*unused_block_size=*/0, /*k_stride=*/kc,
+      packed_stride(&gemm_config, k2, /*unused_block_size=*/0, /*k_stride=*/k2,
                     /*extra_bytes=*/0);
   const size_t packed_w_size = packed_w_stride * round_up(nc, nr);
 
@@ -1653,22 +1661,61 @@ void GEMMBenchmark(benchmark::State& state,
   xnnpack::Buffer<char, XNN_ALLOCATION_ALIGNMENT> w(packed_w_size *
                                                     num_buffers);
 
+  const struct xnn_pack_lh_config* pack_lh_config =
+      xnn_init_x8_pack_lh_config();
+  if (pack_lh_config == nullptr || pack_lh_config->pack_lh_fn == nullptr) {
+    state.SkipWithError("failed to get x8 pack-lh config");
+    return;
+  }
+
+  // Allocate buffer for packed left-hand operand.
+  const size_t input_packed_size =
+      pack_lh_config->size_fn(mc, k2, mr_packed, kr, sr);
+  xnnpack::Buffer<int8_t, XNN_ALLOCATION_ALIGNMENT> input_packed(
+      input_packed_size);
+
   // RHS packing
   xnnpack::Buffer<float> kernel_scale(nc, 1.0f);
-  const xnn_qs8_packing_params packing_params = {127};
-  pack_weights(/*flags=*/0, &gemm_config, kc, nc,
-               /*groups=*/1, /*unused_block_size=*/0, /*k_stride=*/kc,
-               /*accumulator_init=*/nullptr,
-               /*weights=*/k.data(),
-               /*int_extra_data0_fn=*/nullptr,
-               /*extra_data0=*/b.data(),
-               /*extra_data0_size=*/sizeof(int32_t),
-               /*init_extra_data1_fn=*/nullptr,
-               /*extra_data1=*/kernel_scale.data(),
-               /*extra_data1_size=*/sizeof(float),
-               /*packed_weights_ptr=*/w.data(), &packing_params);
+  if (is_qc4w) {
+    xnnpack::Buffer<uint8_t> k_qc4w(nc * k2 / 2);
+    xnnpack::fill_uniform_random_bits(k_qc4w.data(), k_qc4w.size(), rng);
+    const struct xnn_qs8_qc4w_packing_params packing_params = {
+        /*input_zero_point=*/int8_t(127 - 0x80),
+        /*kernel_zero_point=*/0,
+    };
+    pack_weights(/*flags=*/0, &gemm_config, k2, nc,
+                 /*groups=*/1, /*unused_block_size=*/0, /*k_stride=*/k2,
+                 /*accumulator_init=*/b.data(),
+                 /*weights=*/k_qc4w.data(),
+                 /*init_extra_data0_fn=*/nullptr,
+                 /*extra_data0=*/kernel_scale.data(),
+                 /*extra_data0_size=*/sizeof(float),
+                 /*init_extra_data1_fn=*/nullptr,
+                 /*extra_data1=*/nullptr,
+                 /*extra_data1_size=*/0,
+                 /*packed_weights_ptr=*/w.data(), &packing_params);
+  } else {
+    xnnpack::Buffer<int8_t> k(nc * kc);
+    xnnpack::fill_uniform_random_bits(k.data(), k.size(), rng);
+    const xnn_qs8_packing_params packing_params = {127};
+    pack_weights(/*flags=*/0, &gemm_config, kc, nc,
+                 /*groups=*/1, /*unused_block_size=*/0, /*k_stride=*/kc,
+                 /*accumulator_init=*/nullptr,
+                 /*weights=*/k.data(),
+                 /*int_extra_data0_fn=*/nullptr,
+                 /*extra_data0=*/b.data(),
+                 /*extra_data0_size=*/sizeof(int32_t),
+                 /*init_extra_data1_fn=*/nullptr,
+                 /*extra_data1=*/kernel_scale.data(),
+                 /*extra_data1_size=*/sizeof(float),
+                 /*packed_weights_ptr=*/w.data(), &packing_params);
+  }
+  for (size_t buffer = 1; buffer < num_buffers; ++buffer) {
+    memcpy(w.data() + buffer * packed_w_size, w.data(), packed_w_size);
+  }
 
   xnnpack::Buffer<int8_t> c(c_elements * num_buffers);
+  std::fill(c.begin(), c.end(), 0);
 
   // Prepare parameters.
   union xnn_qs8_qc8w_conv_minmax_params quantization_params;
@@ -1684,13 +1731,18 @@ void GEMMBenchmark(benchmark::State& state,
     buffer_index = (buffer_index + 1) % num_buffers;
     state.ResumeTiming();
 
+    pack_lh_config->pack_lh_fn(mc, k2, mr_packed, kr, sr, /*m_idx_start=*/0,
+                               a.data(), /*lhs_stride=*/k2 * sizeof(int8_t),
+                               input_packed.data());
+
     for (uint32_t m = 0; m < mc; m += mr) {
       const uint32_t mb = min(mc - m, mr);
-      gemm(mb, nc, kc * sizeof(int8_t),
-            a.data() + m * kc,
-            w.data() + packed_w_size * buffer_index,
-            c.data() + (buffer_index * mc + m) * nc, nc * sizeof(int8_t),
-            sizeof(int8_t), &quantization_params);
+      const void* lhs = input_packed.data() +
+                        pack_lh_config->offset_fn(m, k2, mr_packed, kr, sr);
+      gemm(mb, nc, k2 * sizeof(int8_t), lhs,
+           w.data() + packed_w_size * buffer_index,
+           c.data() + (buffer_index * mc + m) * nc, nc * sizeof(int8_t),
+           sizeof(int8_t), &quantization_params);
     }
   }
 
