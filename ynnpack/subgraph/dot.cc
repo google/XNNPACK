@@ -566,9 +566,13 @@ auto make_dot_impl(dot_type type, bool consistent_arithmetic, bool symmetric_b,
 
 // Make a kernel wrapper for packing the input of a dot kernel, i.e.
 // interleaving `tile_k` rows at a time.
-auto make_pack_impl(int elem_count) {
-  return [elem_count](slinky::raw_buffer input,
-                      slinky::raw_buffer output) -> index_t {
+auto make_pack_impl(int elem_count, size_t elem_size_bits, size_t tile_k) {
+  const packer p_no_transpose(/*transpose=*/false, elem_size_bits, tile_k,
+                              /*tile_n=*/1);
+  const packer p_transpose(/*transpose=*/true, elem_size_bits, tile_k,
+                           /*tile_n=*/1);
+  return [elem_count, elem_size_bits, tile_k, p_no_transpose, p_transpose](
+             slinky::raw_buffer input, slinky::raw_buffer output) -> index_t {
     const slinky::dim& input_n = input.dim(0);
     const slinky::dim& input_k = input.dim(1);
     const slinky::dim& output_ki = output.dim(0);
@@ -577,14 +581,16 @@ auto make_pack_impl(int elem_count) {
     const slinky::dim& output_no = output.dim(3);
 
     const index_t elem_size = output.elem_size;
-    const index_t tile_k = output_ki.extent() * elem_count;
     const index_t block_n = output_ni.extent();
+    assert(static_cast<size_t>(output_ki.extent() * elem_count) == tile_k);
+    assert(static_cast<size_t>(elem_size * 8 / elem_count) == elem_size_bits);
     assert(output_ki.min() == 0);
     assert(output_ni.min() == 0);
     assert(output_ki.extent() == 1 || output_ki.stride() == elem_size);
     assert(output_ni.extent() == 1 || output_ki.extent() == 1 ||
            output_ni.stride() == output_ki.stride() * output_ki.extent());
     (void)output_ki;
+    (void)elem_size_bits;
 
     input.slice(0, output_no.min() * block_n / elem_count);
     input.slice(0, output_ko.min() * tile_k);
@@ -598,9 +604,9 @@ auto make_pack_impl(int elem_count) {
         transpose ? input_n.stride() : input_k.stride();
 
     // We need the extent of the intersection of the input and output bounds.
-    const index_t k =
-        std::max<index_t>(0, std::min(output_ko.end() * tile_k, input_k.end()) -
-                                 output_ko.min() * tile_k);
+    const index_t k = std::max<index_t>(
+        0, std::min<index_t>(output_ko.end() * tile_k, input_k.end()) -
+               output_ko.min() * tile_k);
     assert(input_n.min() * elem_count <= output_no.min() * block_n);
     // For sub-byte datatypes (e.g. int4), Slinky's buffer extents represent
     // physical bytes, not logical elements. We must multiply `input_n.end()` by
@@ -610,7 +616,8 @@ auto make_pack_impl(int elem_count) {
         0, (std::min(output_no.end() * block_n, input_n.end() * elem_count) -
             output_no.min() * block_n));
 
-    packer p(transpose, elem_size * 8 / elem_count, tile_k, block_n);
+    const packer p =
+        (transpose ? p_transpose : p_no_transpose).with_tile_n(block_n);
 
     slinky::for_each_element(
         [=, &p](void* output, const void* input) {
@@ -687,13 +694,15 @@ uint32_t define_pack_b(ynn_subgraph& subgraph, const dot_type& type,
   node.inputs = {input_b_id};
   node.outputs = {packed_b_id};
   node.op = ynn_node::pack_b{};
-  node.create = [num_k_dims](const ynn_node& node, ynn_runtime& runtime) {
+  node.create = [num_k_dims, tile_k = kernel.tile_k](const ynn_node& node,
+                                                     ynn_runtime& runtime) {
     const ynn_runtime_value& input = runtime.value(node.inputs[0]);
     ynn_runtime_value& output = runtime.value(node.outputs[0]);
 
     output.make_buffer(runtime, input.buffer->elem_size());
 
     const int element_count = type_element_count(input.type);
+    const size_t elem_size_bits = type_size_bits(input.type);
 
     // Split + Transpose
     std::vector<slinky::var> dims =
@@ -721,9 +730,9 @@ uint32_t define_pack_b(ynn_subgraph& subgraph, const dot_type& type,
 
     slinky::call_stmt::attributes attrs;
     attrs.name = "pack_b";
-    auto func = slinky::func::make(make_pack_impl(element_count),
-                                   {std::move(func_input)},
-                                   {{output.buffer, dims}}, std::move(attrs));
+    auto func = slinky::func::make(
+        make_pack_impl(element_count, elem_size_bits, tile_k),
+        {std::move(func_input)}, {{output.buffer, dims}}, std::move(attrs));
 
     // Pin ki, ni and ko to their full extents (the packing kernel produces
     // whole ki x ni tiles and all of ko at once), and let make_schedule pick
