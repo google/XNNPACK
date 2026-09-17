@@ -1732,17 +1732,15 @@ enum xnn_status xnn_subgraph_fusion(xnn_subgraph_t subgraph) {
         assert(producer->num_inputs == 1);
         const uint32_t copy_input_id = producer->inputs[0];
         const uint32_t copy_output_id = producer->outputs[0];
+        // A node counts as a single consumer even when it uses the value for
+        // more than one input (e.g. `add(y, y)`), so rewrite every input that
+        // refers to the copy's output: the value is cleared below and any input
+        // still pointing at it would be dangling.
         bool found_consumer_input = false;
         for (size_t i = 0; i < consumer->num_inputs; i++) {
           if (consumer->inputs[i] == copy_output_id) {
             consumer->inputs[i] = copy_input_id;
-            ;
             found_consumer_input = true;
-            // TODO(b/254734644): A consumer can only consume this value once,
-            // since we asserted earlier that value has only 1 consumer, so we
-            // can break here as there will be no other consumer inputs that has
-            // the same id.
-            break;
           }
         }
         (void)found_consumer_input;  // Silence unused variable warning in
