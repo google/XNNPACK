@@ -22,6 +22,7 @@
 #include <vector>
 
 #include "ynnpack/base/ref_count.h"
+#include "ynnpack/base/span.h"
 #include "ynnpack/base/type.h"
 #include "ynnpack/include/ynnpack.h"
 #include "ynnpack/kernels/dequantize_dot/dequantize_dot.h"
@@ -29,6 +30,7 @@
 #include "ynnpack/kernels/unary/unary.h"
 #include "ynnpack/subgraph/iota.h"
 #include "ynnpack/subgraph/slinky.h"
+#include "slinky/base/arithmetic.h"
 #include "slinky/runtime/buffer.h"
 #include "slinky/runtime/evaluate.h"
 #include "slinky/runtime/expr.h"
@@ -56,6 +58,17 @@ struct axes_set : std::bitset<max_tensor_rank> {
 
 inline bool operator<(const axes_set& a, const axes_set& b) {
   return a.to_ulong() < b.to_ulong();
+}
+
+inline axes_set permute(span<const int32_t> p, const axes_set& x) {
+  axes_set result;
+  for (size_t i = 0; i < p.size(); ++i) {
+    int32_t src_i = p[i];
+    if (src_i >= 0 && static_cast<size_t>(src_i) < x.size()) {
+      result[i] = x[src_i];
+    }
+  }
+  return result;
 }
 
 // Validation helpers for public APIs.

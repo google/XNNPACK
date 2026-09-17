@@ -686,13 +686,15 @@ bool can_implicitly_broadcast(const ynn_node& node, uint32_t input_id) {
 
 // Returns true if a broadcast of `input_id` in `axes` is a no-op for `node`.
 bool is_broadcast_noop(const ynn_subgraph& subgraph, const ynn_node& node,
-                       uint32_t input_id, axes_set axes) {
+                       uint32_t input_id, axes_set axes,
+                       mutable_span<int32_t> perm = {}) {
+  std::iota(perm.begin(), perm.end(), 0);
   if (std::holds_alternative<ynn_node::unary_elementwise>(node.op) ||
       std::holds_alternative<ynn_node::binary_elementwise>(node.op) ||
       std::holds_alternative<ynn_node::ternary_elementwise>(node.op) ||
       std::holds_alternative<ynn_node::dequantize_dot>(node.op)) {
-    // A broadcast is a no-op the other inputs in the broadcasted dimension are
-    // broadcasts.
+    // A broadcast is a no-op if the other inputs in the broadcasted dimension
+    // are broadcasts.
     for (size_t d = 0; d < axes.size(); ++d) {
       if (!axes[d]) continue;
       for (uint32_t i : node.inputs) {
@@ -713,15 +715,8 @@ bool is_broadcast_noop(const ynn_subgraph& subgraph, const ynn_node& node,
   } else if (const auto* t =
                  std::get_if<ynn_node::static_transpose>(&node.op)) {
     assert(input_id == node.inputs[0]);
-    for (size_t i = 0; i < axes.size(); ++i) {
-      if (!axes[i]) continue;
-      if (i < t->permutation.size() && t->permutation[i] != i) {
-        // This transpose changes a dimension we broadcast, not a no-op.
-        // We could do better here, if we understood that we should change the
-        // dimensions that are broadcasted.
-        return false;
-      }
-    }
+    std::copy_n(t->permutation.begin(),
+                std::min(perm.size(), t->permutation.size()), perm.begin());
     return true;
   }
   // We can handle more ops here, especially if we allow changing which
@@ -765,9 +760,25 @@ bool move_broadcast_to_output(ynn_subgraph& subgraph, ynn_node& broadcast,
   // Currently we don't handle any ops with more than one output.
   if (consumer->outputs.size() != 1) return false;
 
-  if (!is_broadcast_noop(subgraph, *consumer, broadcast_id, axes)) {
+  const ynn_value& consumer_output = subgraph.value(consumer->outputs[0]);
+  std::vector<int32_t> perm(consumer_output.rank());
+  if (!is_broadcast_noop(subgraph, *consumer, broadcast_id, axes, perm)) {
     // This consumer needs this broadcast.
     return false;
+  }
+
+  if (std::holds_alternative<ynn_node::broadcast_like>(broadcast.op)) {
+    // broadcast_like takes shape from its template value, which is not permuted
+    // by this rewrite.
+    // We should probably add a permutation to broadcast_like (and slice_like)
+    // to allow those ops to use a different dimension than the corresponding
+    // one in the input, and we could apply this permutation here instead of
+    // bailing on this rewrite.
+    for (size_t i = 0; i < perm.size(); ++i) {
+      if (axes[i] && perm[i] != static_cast<int32_t>(i)) {
+        return false;
+      }
+    }
   }
 
   // Currently we have consumer(broadcast(x)), we want broadcast(consumer(x)).
@@ -778,12 +789,18 @@ bool move_broadcast_to_output(ynn_subgraph& subgraph, ynn_node& broadcast,
     }
   }
 
+  if (auto* b = std::get_if<ynn_node::static_broadcast>(&broadcast.op)) {
+    b->new_dims = permute(perm, b->new_dims, size_t{0});
+  } else if (auto* b = std::get_if<ynn_node::broadcast_like>(&broadcast.op)) {
+    b->axes = permute(perm, b->axes);
+  }
+
   ynn_value& broadcast_output = subgraph.value(broadcast.outputs[0]);
-  const ynn_value& consumer_output = subgraph.value(consumer->outputs[0]);
   broadcast_output.type = consumer_output.type;
-  broadcast_output.extents = input.extents;
+  broadcast_output.extents = permute(perm, input.extents, slinky::expr{});
 
   broadcast.inputs[0] = broadcast.outputs[0];
+
   std::swap(consumer->outputs[0], broadcast.outputs[0]);
   subgraph.topological_sort();
   analysis.invalidate();
