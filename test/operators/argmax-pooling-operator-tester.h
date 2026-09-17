@@ -390,10 +390,10 @@ class ArgmaxPoolingOperatorTester {
                             input_pixel_stride() +
                         c];
               uint32_t max_index = 0;
-              for (size_t py = 0; py < pooling_height(); py++) {
-                const size_t iy = oy * pooling_height() + py - padding_top();
-                for (size_t px = 0; px < pooling_width(); px++) {
-                  const size_t ix = ox * pooling_width() + px - padding_left();
+              for (size_t px = 0; px < pooling_width(); px++) {
+                const size_t ix = ox * pooling_width() + px - padding_left();
+                for (size_t py = 0; py < pooling_height(); py++) {
+                  const size_t iy = oy * pooling_height() + py - padding_top();
                   if (ix < input_width() && iy < input_height()) {
                     const float value =
                         input[((i * input_height() + iy) * input_width() + ix) *
@@ -546,10 +546,10 @@ class ArgmaxPoolingOperatorTester {
                             input_pixel_stride() +
                         c];
               uint32_t max_index = 0;
-              for (size_t py = 0; py < pooling_height(); py++) {
-                const size_t iy = oy * pooling_height() + py - padding_top();
-                for (size_t px = 0; px < pooling_width(); px++) {
-                  const size_t ix = ox * pooling_width() + px - padding_left();
+              for (size_t px = 0; px < pooling_width(); px++) {
+                const size_t ix = ox * pooling_width() + px - padding_left();
+                for (size_t py = 0; py < pooling_height(); py++) {
+                  const size_t iy = oy * pooling_height() + py - padding_top();
                   if (ix < input_width() && iy < input_height()) {
                     const float value =
                         input[((i * input_height() + iy) * input_width() + ix) *
@@ -647,10 +647,10 @@ class ArgmaxPoolingOperatorTester {
                                           input_pixel_stride() +
                                       c];
               uint32_t max_index = 0;
-              for (size_t py = 0; py < pooling_height(); py++) {
-                const size_t iy = oy * pooling_height() + py - padding_top();
-                for (size_t px = 0; px < pooling_width(); px++) {
-                  const size_t ix = ox * pooling_width() + px - padding_left();
+              for (size_t px = 0; px < pooling_width(); px++) {
+                const size_t ix = ox * pooling_width() + px - padding_left();
+                for (size_t py = 0; py < pooling_height(); py++) {
+                  const size_t iy = oy * pooling_height() + py - padding_top();
                   if (ix < next_input_width() && iy < next_input_height()) {
                     const float value = input[((i * next_input_height() + iy) *
                                                    next_input_width() +
