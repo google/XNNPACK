@@ -726,4 +726,73 @@ TEST(fusion, pack_b_gather) {
   }
 }
 
+TEST(fusion, pack_b_gather_multiple_consumers) {
+  const uint32_t a_id = 0;
+  const uint32_t index_id = 1;
+  const uint32_t out_id = 2;
+  const uint32_t abs_out_id = 3;
+  SubgraphBuilder builder(4);
+
+  // Same as above, but the gathered weights have a second consumer, so the
+  // rewrite has to leave the gather in place and pack `w` with a new node.
+  std::vector<float> weight_data(8 * 16 * 32, 1.0f);
+  uint32_t w_id = YNN_INVALID_VALUE_ID;
+  uint32_t gathered_w_id = YNN_INVALID_VALUE_ID;
+
+  builder.AddInput(ynn_type_fp32, {4, 1, 16}, a_id)
+      .AddInput(ynn_type_int32, {4, 1, 1}, index_id)
+      .AddTensor(ynn_type_fp32, {8, 16, 32}, w_id, weight_data.data())
+      .AddTensor(ynn_type_fp32, {4, 16, 32}, gathered_w_id)
+      .AddOutput(ynn_type_fp32, {4, 1, 32}, out_id)
+      .AddOutput(ynn_type_fp32, {4, 16, 32}, abs_out_id);
+
+  builder.AddGather({0}, 3, w_id, index_id, gathered_w_id)
+      .AddDot(1, a_id, gathered_w_id, YNN_INVALID_VALUE_ID, out_id)
+      .AddUnary(ynn_unary_abs, gathered_w_id, abs_out_id);
+
+  ynn_subgraph& subgraph = *builder.GetSubgraph();
+
+  subgraph.fusion();
+  subgraph.invalidate_dead_values();
+
+  // The dot's input_b is still a gather of the packed weights.
+  const ynn_node& dot_node = ProducerOf(out_id, subgraph);
+  EXPECT_THAT(dot_node, IsDot());
+  const ynn_node& packed_gather_node =
+      ProducerOf(dot_node.inputs[1], subgraph);
+  EXPECT_THAT(packed_gather_node, IsGather());
+  EXPECT_THAT(ProducerOf(packed_gather_node.inputs[0], subgraph),
+              AllOf(IsPackB(), InputsAre(w_id)));
+
+  // The original gather is untouched, feeding its other consumer.
+  const ynn_node& abs_node = ProducerOf(abs_out_id, subgraph);
+  EXPECT_THAT(abs_node, IsUnary(ynn_unary_abs));
+  EXPECT_THAT(ProducerOf(abs_node.inputs[0], subgraph),
+              AllOf(IsGather(), InputsAre(w_id, index_id)));
+
+  Runtime runtime(builder.GetSubgraph());
+  std::vector<float> a_data(4 * 1 * 16, 2.0f);
+  std::vector<int32_t> index_data = {0, 1, 2, 3};
+  std::vector<float> out_data(4 * 1 * 32, 0.0f);
+  std::vector<float> abs_out_data(4 * 16 * 32, 0.0f);
+
+  runtime.ReshapeExternalTensor(TensorShape({4, 1, 16}), a_data.data(), a_id)
+      .ReshapeExternalTensor(TensorShape({4, 1, 1}), index_data.data(),
+                             index_id);
+  runtime.ReshapeRuntime();
+  ASSERT_EQ(runtime.Status(), ynn_status_success);
+
+  runtime.SetupExternalTensor(out_data.data(), out_id)
+      .SetupExternalTensor(abs_out_data.data(), abs_out_id)
+      .InvokeRuntime();
+  ASSERT_EQ(runtime.Status(), ynn_status_success);
+
+  for (float v : out_data) {
+    EXPECT_FLOAT_EQ(v, 32.0f);
+  }
+  for (float v : abs_out_data) {
+    EXPECT_FLOAT_EQ(v, 1.0f);
+  }
+}
+
 }  // namespace ynn
