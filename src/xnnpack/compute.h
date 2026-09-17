@@ -14,6 +14,7 @@
 #include "src/xnnpack/config-types.h"
 #include "src/xnnpack/math.h"
 #include "src/xnnpack/microfnptr.h"
+#include "src/xnnpack/microkernel-timing.h"
 #include "src/xnnpack/microparams.h"
 #include <pthreadpool.h>
 
@@ -131,6 +132,10 @@ struct transpose_context {
   };
   size_t input_stride[XNN_MAX_TENSOR_DIMS];
   size_t output_stride[XNN_MAX_TENSOR_DIMS];
+#if XNN_ENABLE_UKERNEL_TIMING
+  // Shared by const_size / variable_size variants -- only one is live per op.
+  uint64_t ukernel_elapsed_us;
+#endif
 };
 
 XNN_PRIVATE void xnn_compute_transposec_2d(struct transpose_context* context,
@@ -385,6 +390,11 @@ struct gemm_context {
   // Whether to use the `dq_kernel` or not.
   bool dynamic_quantization;
   bool with_row_sum;
+#if XNN_ENABLE_UKERNEL_TIMING
+  // The ukernel/dq/dq_qc2w/qp8 variants alias the same union slot and only
+  // one is live per op; one accumulator covers all of them.
+  uint64_t ukernel_elapsed_us[XNN_MAX_UARCH_TYPES];
+#endif
 };
 
 XNN_PRIVATE void xnn_compute_grouped_gemm(
@@ -582,6 +592,10 @@ struct igemm_context {
   size_t workspace_offset;
   // Size, in bytes, of the workspace allocated to each thread.
   size_t per_thread_workspace_size;
+#if XNN_ENABLE_UKERNEL_TIMING
+  // ukernel and dq_ukernel alias the same union slot; one slot suffices.
+  uint64_t ukernel_elapsed_us[XNN_MAX_UARCH_TYPES];
+#endif
 };
 
 XNN_PRIVATE void xnn_compute_dqigemm(struct igemm_context* context,
@@ -742,6 +756,9 @@ struct dwconv_context {
     struct xnn_f32_minmax_params f32;
   } params;
   xnn_dwconv_ukernel_fn ukernel;
+#if XNN_ENABLE_UKERNEL_TIMING
+  uint64_t ukernel_elapsed_us;
+#endif
 };
 
 XNN_PRIVATE void xnn_compute_dwconv_indirection(
@@ -966,6 +983,9 @@ struct elementwise_binary_context {
   union xnn_binary_uparams params;
   xnn_vbinary_ukernel_fn ukernel;
   bool flip_a_b;
+#if XNN_ENABLE_UKERNEL_TIMING
+  uint64_t ukernel_elapsed_us;
+#endif
 };
 
 XNN_PRIVATE void xnn_compute_elementwise_binary_1d_tile(
@@ -1019,6 +1039,9 @@ struct univector_strided_context {
   size_t y_stride;
   xnn_vunary_ukernel_fn ukernel;
   union xnn_unary_uparams params;
+#if XNN_ENABLE_UKERNEL_TIMING
+  uint64_t ukernel_elapsed_us;
+#endif
 };
 
 XNN_PRIVATE void xnn_compute_univector_strided(
@@ -1032,6 +1055,9 @@ struct univector_contiguous_context {
   uint16_t log2_ysize;
   xnn_vunary_ukernel_fn ukernel;
   union xnn_unary_uparams params;
+#if XNN_ENABLE_UKERNEL_TIMING
+  uint64_t ukernel_elapsed_us;
+#endif
 };
 
 XNN_PRIVATE void xnn_compute_univector_contiguous(
@@ -1061,6 +1087,10 @@ struct reduce_context {
   // TODO(b/405244706): remove once all the datatypes and reductions are
   // supported.
   bool is_old_reduce;
+#if XNN_ENABLE_UKERNEL_TIMING
+  // Reduce-ukernel only; fill_ukernel / cvt_ukernel are bookkeeping.
+  uint64_t ukernel_elapsed_us;
+#endif
 };
 
 // Compute contiguous reduction over the 1st, 3rd and 5th dimensions of the

@@ -15,6 +15,7 @@
 #include "src/xnnpack/init-once.h"
 #include "src/xnnpack/microfnptr.h"
 #include "src/xnnpack/log.h"
+#include "src/xnnpack/microkernel-name-registry.h"
 #include "src/xnnpack/raddstoreexpminusmax.h"
 
 static const int default_config = 0;
@@ -27,9 +28,10 @@ XNN_INIT_ONCE_GUARD(f16_raddstoreexpminusmax);
 XNN_INIT_ONCE_GUARD(f32_raddstoreexpminusmax);
 
 // Macros to log the microkernel names if and when they are registered.
-#define XNN_INIT_RADDSTOREEXPMINUSMAX_UKERNEL(ukernel) \
-  (xnn_raddstoreexpminusmax_ukernel_fn) ukernel;       \
-  xnn_log_info("Using raddstoreexpminusmax microkernel '%s'.", #ukernel);
+#define XNN_INIT_RADDSTOREEXPMINUSMAX_UKERNEL(ukernel)                    \
+  (xnn_raddstoreexpminusmax_ukernel_fn) ukernel;                          \
+  xnn_log_info("Using raddstoreexpminusmax microkernel '%s'.", #ukernel); \
+  XNN_REGISTER_UKERNEL_NAME(ukernel);
 
 static void init_f16_raddstoreexpminusmax_config(void) {
   #if XNN_ENABLE_ARM_FP16_SCALAR && XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM

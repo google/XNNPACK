@@ -14,15 +14,17 @@
 #include "src/xnnpack/init-once.h"
 #include "src/xnnpack/log.h"
 #include "src/xnnpack/microfnptr.h"
+#include "src/xnnpack/microkernel-name-registry.h"
 
 static struct xnn_argmaxpool_config f32_argmaxpool_config = {0};
 
 XNN_INIT_ONCE_GUARD(f32_argmaxpool);
 
 // Macros to log the microkernel names if and when they are registered.
-#define XNN_INIT_ARGMAXPOOL_UKERNEL(ukernel)   \
-  (xnn_argmaxpool_unipass_ukernel_fn) ukernel; \
-  xnn_log_info("Using argmaxpool microkernel '%s'.", #ukernel);
+#define XNN_INIT_ARGMAXPOOL_UKERNEL(ukernel)                    \
+  (xnn_argmaxpool_unipass_ukernel_fn) ukernel;                  \
+  xnn_log_info("Using argmaxpool microkernel '%s'.", #ukernel); \
+  XNN_REGISTER_UKERNEL_NAME(ukernel);
 
 static void init_f32_argmaxpool_config(void) {
   f32_argmaxpool_config.primary_tile = 9;
