@@ -1,0 +1,88 @@
+// Copyright 2026 Kalray
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert LMUL in [1, 2]
+$assert CHANNEL_TILE >= 1
+#include <assert.h>
+#include <riscv_vector.h>
+#include <stddef.h>
+#include <stdint.h>
+
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/ibilinear.h"
+
+
+void xnn_f32_ibilinear_chw_ukernel__rvv_${CHANNEL_TILE}x${LMUL}v(
+    size_t output_pixels,
+    size_t channels,
+    const float** restrict input,
+    size_t input_offset,
+    const float* restrict weights,
+    float* restrict output,
+    size_t input_increment)
+{
+  assert(output_pixels != 0);
+  assert(channels != 0);
+  assert(input_increment % sizeof(float) == 0);
+
+  for (size_t cb = 0; cb < channels; cb += ${CHANNEL_TILE}) {
+    const size_t block = (channels - cb) < ${CHANNEL_TILE} ? (channels - cb) : ${CHANNEL_TILE};
+
+    const float** i = input;
+    const float* w = weights;
+    float* out = output + cb * output_pixels;
+    const size_t block_base = input_offset + cb * input_increment;
+
+    for (size_t p = output_pixels, vl; p > 0;
+          p -= vl, out += vl, i += 2 * vl, w += 2 * vl) {
+      vl = __riscv_vsetvl_e32m${LMUL}(p);
+
+      const vuint64m${LMUL*2}x2_t vptrs =
+          __riscv_vlseg2e64_v_u64m${LMUL*2}x2((const uint64_t*)i, vl);
+      const vuint64m${LMUL*2}_t vti_addr =
+          __riscv_vget_v_u64m${LMUL*2}x2_u64m${LMUL*2}(vptrs, 0);
+      const vuint64m${LMUL*2}_t vbi_addr =
+          __riscv_vget_v_u64m${LMUL*2}x2_u64m${LMUL*2}(vptrs, 1);
+
+      const vuint64m${LMUL*2}_t wpair =
+          __riscv_vle64_v_u64m${LMUL*2}((const uint64_t*)w, vl);
+      const vfloat32m${LMUL}_t vwh = __riscv_vreinterpret_v_u32m${LMUL}_f32m${LMUL}(
+          __riscv_vnsrl(wpair, 0, vl));
+      const vfloat32m${LMUL}_t vwv = __riscv_vreinterpret_v_u32m${LMUL}_f32m${LMUL}(
+          __riscv_vnsrl(wpair, 32, vl));
+
+      float* o = out;
+      size_t channel_offset = block_base;
+
+      for (size_t c = block; c != 0; c--) {
+        const vfloat32m${LMUL}x2_t vti = __riscv_vluxseg2ei64_v_f32m${LMUL}x2(
+            (const float*)channel_offset, vti_addr, vl);
+        const vfloat32m${LMUL}x2_t vbi = __riscv_vluxseg2ei64_v_f32m${LMUL}x2(
+            (const float*)channel_offset, vbi_addr, vl);
+
+        const vfloat32m${LMUL}_t vtl =
+            __riscv_vget_v_f32m${LMUL}x2_f32m${LMUL}(vti, 0);
+        const vfloat32m${LMUL}_t vtr =
+            __riscv_vget_v_f32m${LMUL}x2_f32m${LMUL}(vti, 1);
+        const vfloat32m${LMUL}_t vbl =
+            __riscv_vget_v_f32m${LMUL}x2_f32m${LMUL}(vbi, 0);
+        const vfloat32m${LMUL}_t vbr =
+            __riscv_vget_v_f32m${LMUL}x2_f32m${LMUL}(vbi, 1);
+
+        const vfloat32m${LMUL}_t vt = __riscv_vfmacc_vv_f32m${LMUL}(
+            vtl, __riscv_vfsub_vv_f32m${LMUL}(vtr, vtl, vl), vwh, vl);
+        const vfloat32m${LMUL}_t vb = __riscv_vfmacc_vv_f32m${LMUL}(
+            vbl, __riscv_vfsub_vv_f32m${LMUL}(vbr, vbl, vl), vwh, vl);
+        const vfloat32m${LMUL}_t vo = __riscv_vfmacc_vv_f32m${LMUL}(
+            vt, __riscv_vfsub_vv_f32m${LMUL}(vb, vt, vl), vwv, vl);
+
+        __riscv_vse32_v_f32m${LMUL}(o, vo, vl);
+
+        channel_offset += input_increment;
+        o += output_pixels;
+      }
+    }
+  }
+}
