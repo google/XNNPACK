@@ -7,6 +7,7 @@
 #include <cassert>
 #include <cstddef>
 #include <cstdint>
+#include <cstring>
 #include <utility>
 
 #include "ynnpack/base/log.h"
@@ -17,6 +18,7 @@
 #include "ynnpack/kernels/dequantize_dot/dequantize_dot.h"
 #include "ynnpack/kernels/ternary/ternary.h"
 #include "ynnpack/kernels/unary/unary.h"
+#include "ynnpack/subgraph/mask.h"
 #include "ynnpack/subgraph/runtime.h"
 #include "ynnpack/subgraph/slinky.h"
 #include "ynnpack/subgraph/subgraph.h"
@@ -131,15 +133,18 @@ auto make_dequantize_dot_impl(dequantize_dot_kernel_fn kernel,
                           slinky::raw_buffer b_offset,
                           slinky::raw_buffer a_scale,
                           slinky::raw_buffer b_scale, slinky::raw_buffer offset,
+                          slinky::raw_buffer mask,
                           slinky::raw_buffer output) -> slinky::index_t {
     using slinky::index_t;
 
+    const index_t mask_elem_size = mask.elem_size;
+    const index_t output_elem_size = output.elem_size;
+
     index_t n_extent = 1;
-    // These are intentionally left uninitialized, if the extent is 1 they
-    // should be unused.
-    index_t b_offset_n_stride, b_scale_n_stride, offset_n_stride;
+    index_t b_offset_n_stride = 0, b_scale_n_stride = 0, offset_n_stride = 0;
     if (is_contiguous(dot, 0, dot.elem_size) &&
-        is_broadcast(a_offset, 0) && is_broadcast(a_scale, 0)) {
+        is_broadcast(a_offset, 0) && is_broadcast(a_scale, 0) &&
+        is_broadcast(mask, 0)) {
       const slinky::dim& n = slice_dim0(output);
       assert(is_contiguous(n, output.elem_size));
       const slinky::in_bounds n_min{n.min()};
@@ -148,15 +153,15 @@ auto make_dequantize_dot_impl(dequantize_dot_kernel_fn kernel,
       dot.slice(0, n_min);
       a_offset.slice(0);
       a_scale.slice(0);
+      mask.slice(0);
       b_offset_n_stride = slice_dim0(b_offset, n_min).stride();
       b_scale_n_stride = slice_dim0(b_scale, n_min).stride();
       offset_n_stride = slice_dim0(offset, n_min).stride();
     }
 
     index_t m_extent = 1;
-    // These are intentionally left uninitialized, if the extent is 1 they
-    // should be unused.
-    index_t m_stride, dot_m_stride, a_offset_m_stride, a_scale_m_stride;
+    index_t m_stride = 0, dot_m_stride = 0, a_offset_m_stride = 0,
+            a_scale_m_stride = 0, mask_m_stride = 0;
     if (is_broadcast(b_offset, 0) && is_broadcast(b_scale, 0) &&
         is_broadcast(offset, 0)) {
       const slinky::dim& m = slice_dim0(output);
@@ -166,6 +171,11 @@ auto make_dequantize_dot_impl(dequantize_dot_kernel_fn kernel,
       dot_m_stride = slice_dim0(dot, m_min).stride();
       a_offset_m_stride = slice_dim0(a_offset, m_min).stride();
       a_scale_m_stride = slice_dim0(a_scale, m_min).stride();
+      if (is_broadcast(mask, 0)) {
+        mask.slice(0);
+      } else {
+        mask_m_stride = slice_dim0(mask, m_min).stride();
+      }
       b_offset.slice(0);
       b_scale.slice(0);
       offset.slice(0);
@@ -178,13 +188,31 @@ auto make_dequantize_dot_impl(dequantize_dot_kernel_fn kernel,
     slinky::for_each_element(
         [=, &params](void* output, const void* dot, const void* a_offset,
                      const void* b_offset, const void* offset,
-                     const void* a_scale, const void* b_scale) {
-          kernel(m_extent, n_extent, dot_m_stride, dot, a_offset_m_stride,
-                 a_offset, b_offset_n_stride, b_offset, offset_n_stride, offset,
-                 a_scale_m_stride, a_scale, b_scale_n_stride, b_scale, m_stride,
-                 output, &params);
+                     const void* a_scale, const void* b_scale,
+                     const void* mask) {
+          for_each_mask_run(
+              mask, mask_m_stride, mask_elem_size, m_extent,
+              /*granularity=*/1,
+              [&](index_t begin, index_t end) {
+                kernel(
+                    end - begin, n_extent, dot_m_stride,
+                    slinky::offset_bytes(dot, begin * dot_m_stride),
+                    a_offset_m_stride,
+                    slinky::offset_bytes(a_offset, begin * a_offset_m_stride),
+                    b_offset_n_stride, b_offset, offset_n_stride, offset,
+                    a_scale_m_stride,
+                    slinky::offset_bytes(a_scale, begin * a_scale_m_stride),
+                    b_scale_n_stride, b_scale, m_stride,
+                    slinky::offset_bytes(output, begin * m_stride), &params);
+              },
+              [&](index_t begin, index_t end) {
+                for (index_t i = begin; i < end; ++i) {
+                  memset(slinky::offset_bytes(output, i * m_stride), 0,
+                         n_extent * output_elem_size);
+                }
+              });
         },
-        output, dot, a_offset, b_offset, offset, a_scale, b_scale);
+        output, dot, a_offset, b_offset, offset, a_scale, b_scale, mask);
 
     return 0;
   };
@@ -380,7 +408,8 @@ bool define_dequantize_dot(ynn_subgraph& subgraph, ynn_node& node,
                            uint32_t a_offset_id, uint32_t b_offset_id,
                            uint32_t a_scale_id, uint32_t b_scale_id,
                            uint32_t offset_id, uint32_t& output_id,
-                           const dequantize_dot_params& params) {
+                           const dequantize_dot_params& params,
+                           uint32_t mask_id) {
   dequantize_dot_kernel_fn kernel = get_dequantize_dot_kernel(output_type);
   if (kernel == nullptr) {
     return false;
@@ -392,8 +421,8 @@ bool define_dequantize_dot(ynn_subgraph& subgraph, ynn_node& node,
   // Propagate shape from dot.
   output.extents = dot.extents;
 
-  node.inputs = {dot_id,     a_offset_id, b_offset_id,
-                 a_scale_id, b_scale_id,  offset_id};
+  node.inputs = {dot_id,     a_offset_id, b_offset_id, a_scale_id,
+                 b_scale_id, offset_id,   mask_id};
   node.outputs = {output_id};
   node.op = ynn_node::dequantize_dot{params};
 
@@ -406,6 +435,9 @@ bool define_dequantize_dot(ynn_subgraph& subgraph, ynn_node& node,
     const ynn_runtime_value& a_scale = runtime.value(node.inputs[3]);
     const ynn_runtime_value& b_scale = runtime.value(node.inputs[4]);
     const ynn_runtime_value& offset = runtime.value(node.inputs[5]);
+    const bool has_mask = node.inputs[6] != YNN_INVALID_VALUE_ID;
+    slinky::buffer_expr_ptr mask_buffer =
+        has_mask ? runtime.value(node.inputs[6]).buffer : runtime.null_buffer();
     ynn_runtime_value& output = runtime.value(node.outputs[0]);
 
     output.make_buffer(runtime);
@@ -415,22 +447,24 @@ bool define_dequantize_dot(ynn_subgraph& subgraph, ynn_node& node,
 
     std::vector<slinky::var> dims = runtime.globals.make_dims(output.rank());
 
-    slinky::box_expr bounds;
-    for (size_t i = 0; i < dims.size(); ++i) {
-      bounds.push_back(slinky::point(dims[i]));
-    }
+    auto make_bounds = [&](const ynn_runtime_value& input) {
+      return make_elementwise_bounds(dims, input.physical_extents());
+    };
 
     slinky::call_stmt::attributes attrs;
     attrs.name = "dequantize_dot";
     attrs.allow_in_place = compute_allow_in_place(node, *runtime.subgraph);
-    auto func = slinky::func::make(make_dequantize_dot_impl(kernel, op.params),
-                                   {{dot.buffer, bounds},
-                                    {a_offset.buffer, bounds},
-                                    {b_offset.buffer, bounds},
-                                    {a_scale.buffer, bounds},
-                                    {b_scale.buffer, bounds},
-                                    {offset.buffer, bounds}},
-                                   {{output.buffer, dims}}, std::move(attrs));
+    auto func = slinky::func::make(
+        make_dequantize_dot_impl(kernel, op.params),
+        {{dot.buffer, make_bounds(dot)},
+         {a_offset.buffer, make_bounds(a_offset)},
+         {b_offset.buffer, make_bounds(b_offset)},
+         {a_scale.buffer, make_bounds(a_scale)},
+         {b_scale.buffer, make_bounds(b_scale)},
+         {offset.buffer, make_bounds(offset)},
+         {mask_buffer, has_mask ? make_bounds(runtime.value(node.inputs[6]))
+                                : slinky::box_expr()}},
+        {{output.buffer, dims}}, std::move(attrs));
 
     auto sched = runtime.make_schedule(dims, output.physical_extents(),
                                        output.buffer->elem_size());

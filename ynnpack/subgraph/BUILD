@@ -82,6 +82,7 @@ cc_library(
         "get_tensor_shape.h",
         "iota.cc",
         "iota.h",
+        "mask.h",
         "reduce.cc",
         "reduce.h",
         "runtime.cc",

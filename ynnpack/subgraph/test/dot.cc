@@ -10,6 +10,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
+#include <limits>
 #include <numeric>
 #include <random>
 #include <utility>
@@ -669,5 +670,180 @@ INSTANTIATE_TEST_SUITE_P(
     [](const testing::TestParamInfo<multi_type>& info) {
       return to_string(info.param);
     });
+
+// Zero-scaled rows are poisoned with NaN (for floating point types) and the
+// output is pre-filled so the test verifies they are skipped and zeroed rather
+// than multiplied by 0 (`0 * NaN` is `NaN`).
+template <typename A, typename B, typename C>
+void TestScaledDot(size_t E, size_t M, size_t K, size_t N, bool per_row_scale,
+                   bool with_c) {
+  ReplicableRandomDevice rng;
+  constexpr float max_abs_value = 10.0f;
+
+  auto is_active = [&](size_t e, size_t i) {
+    return per_row_scale ? (e + i) % 3 == 0 : e % 3 == 0;
+  };
+
+  Tensor<A> a({E, M, K});
+  Tensor<B> b({E, K, N});
+  Tensor<C> init_c({E, M, N});
+  Tensor<float> scale({E, per_row_scale ? M : 1, 1});
+  fill_random(a.data(), a.size(), rng, -max_abs_value, max_abs_value);
+  fill_random(b.data(), b.size(), rng, -max_abs_value, max_abs_value);
+  fill_random(init_c.data(), init_c.size(), rng, -max_abs_value,
+              max_abs_value);
+  // Small integers, so the scaled result of integer dots is exact.
+  for (size_t i = 0; i < scale.size(); ++i) {
+    scale.data()[i] = static_cast<float>(i % 4 + 1);
+  }
+
+  const A a_poison = std::numeric_limits<A>::has_quiet_NaN
+                         ? std::numeric_limits<A>::quiet_NaN()
+                         : static_cast<A>(max_abs_value);
+  const C c_poison = std::numeric_limits<C>::has_quiet_NaN
+                         ? std::numeric_limits<C>::quiet_NaN()
+                         : static_cast<C>(12345);
+  for (size_t e = 0; e < E; ++e) {
+    for (size_t i = 0; i < M; ++i) {
+      if (is_active(e, i)) continue;
+      scale(e, per_row_scale ? i : 0, 0) = 0.0f;
+      for (size_t k = 0; k < K; ++k) a(e, i, k) = a_poison;
+      for (size_t j = 0; j < N; ++j) init_c(e, i, j) = c_poison;
+    }
+  }
+
+  SubgraphBuilder subgraph(5);
+  const uint32_t a_id = 0;
+  const uint32_t b_id = 1;
+  const uint32_t c_id = with_c ? 2 : YNN_INVALID_VALUE_ID;
+  const uint32_t scale_id = 3;
+  const uint32_t output_id = 4;
+  subgraph.AddInput(type_of<A>(), a.extents(), a_id)
+      .AddInput(type_of<B>(), b.extents(), b_id)
+      .AddInput(ynn_type_fp32, scale.extents(), scale_id)
+      .AddOutput(ynn_type_fp32, std::vector<size_t>{E, M, N}, output_id);
+  if (with_c) {
+    subgraph.AddInput(type_of<C>(), init_c.extents(), c_id);
+  }
+  subgraph.AddScaledDot(/*num_k_dims=*/1, a_id, b_id, c_id, scale_id,
+                        output_id);
+
+  Tensor<float> x({E, M, N});
+  x.fill(7.0f);
+  Runtime runtime(subgraph.GetSubgraph());
+  ASSERT_EQ(runtime.Status(), ynn_status_success);
+  runtime.SetupExternalTensor(a.data(), a_id)
+      .SetupExternalTensor(b.data(), b_id)
+      .SetupExternalTensor(scale.data(), scale_id)
+      .SetupExternalTensor(x.data(), output_id);
+  if (with_c) {
+    runtime.SetupExternalTensor(init_c.data(), c_id);
+  }
+  runtime.ReshapeRuntime().InvokeRuntime();
+  ASSERT_EQ(runtime.Status(), ynn_status_success);
+
+  for (size_t e = 0; e < E; ++e) {
+    for (size_t i = 0; i < M; ++i) {
+      const float s = scale(e, per_row_scale ? i : 0, 0);
+      for (size_t j = 0; j < N; ++j) {
+        if (!is_active(e, i)) {
+          ASSERT_EQ(x(e, i, j), 0.0f) << "e=" << e << " i=" << i << " j=" << j;
+          continue;
+        }
+        double expected = with_c ? static_cast<double>(init_c(e, i, j)) : 0.0;
+        for (size_t k = 0; k < K; ++k) {
+          expected += static_cast<double>(a(e, i, k)) *
+                      static_cast<double>(b(e, k, j));
+        }
+        expected *= s;
+        const double tolerance =
+            is_integral<C>::value
+                ? 0.0
+                : get_dot_tolerance<float>(K, max_abs_value) * s;
+        ASSERT_NEAR(static_cast<double>(x(e, i, j)), expected, tolerance)
+            << "e=" << e << " i=" << i << " j=" << j;
+      }
+    }
+  }
+}
+
+TEST(ScaledDot, PerRowScale) {
+  TestScaledDot<float, float, float>(/*E=*/4, /*M=*/7, /*K=*/16, /*N=*/5,
+                                     /*per_row_scale=*/true, /*with_c=*/false);
+}
+
+TEST(ScaledDot, PerRowScaleWithInitializer) {
+  TestScaledDot<float, float, float>(/*E=*/4, /*M=*/7, /*K=*/16, /*N=*/5,
+                                     /*per_row_scale=*/true, /*with_c=*/true);
+}
+
+TEST(ScaledDot, PerBatchScale) {
+  TestScaledDot<float, float, float>(/*E=*/6, /*M=*/3, /*K=*/16, /*N=*/5,
+                                     /*per_row_scale=*/false, /*with_c=*/true);
+}
+
+// Large enough m and n to have many blocks, and possibly a transposed A.
+TEST(ScaledDot, PerRowScaleLarge) {
+  TestScaledDot<float, float, float>(/*E=*/2, /*M=*/67, /*K=*/64, /*N=*/33,
+                                     /*per_row_scale=*/true, /*with_c=*/true);
+}
+
+TEST(ScaledDot, PerRowScaleIntKTail) {
+  TestScaledDot<int8_t, int8_t, int32_t>(/*E=*/3, /*M=*/11, /*K=*/19, /*N=*/9,
+                                         /*per_row_scale=*/true,
+                                         /*with_c=*/true);
+}
+
+TEST(ScaledDot, PerRowScaleIntLarge) {
+  TestScaledDot<int8_t, int8_t, int32_t>(/*E=*/2, /*M=*/67, /*K=*/67, /*N=*/33,
+                                         /*per_row_scale=*/true,
+                                         /*with_c=*/false);
+}
+
+TEST(ScaledDot, NoScaleMatchesDot) {
+  constexpr size_t E = 3, M = 4, K = 16, N = 5;
+  ReplicableRandomDevice rng;
+  constexpr float max_abs_value = 10.0f;
+
+  Tensor<float> a({E, M, K});
+  Tensor<float> b({E, K, N});
+  fill_random(a.data(), a.size(), rng, -max_abs_value, max_abs_value);
+  fill_random(b.data(), b.size(), rng, -max_abs_value, max_abs_value);
+
+  SubgraphBuilder subgraph(3);
+  const uint32_t a_id = 0;
+  const uint32_t b_id = 1;
+  const uint32_t output_id = 2;
+  subgraph.AddInput(ynn_type_fp32, a.extents(), a_id)
+      .AddInput(ynn_type_fp32, b.extents(), b_id)
+      .AddOutput(ynn_type_fp32, std::vector<size_t>{E, M, N}, output_id);
+  subgraph.AddScaledDot(/*num_k_dims=*/1, a_id, b_id,
+                        /*input_c_id=*/YNN_INVALID_VALUE_ID,
+                        /*input_scale_id=*/YNN_INVALID_VALUE_ID, output_id);
+
+  Tensor<float> x({E, M, N});
+  Runtime runtime(subgraph.GetSubgraph());
+  ASSERT_EQ(runtime.Status(), ynn_status_success);
+  runtime.SetupExternalTensor(a.data(), a_id)
+      .SetupExternalTensor(b.data(), b_id)
+      .SetupExternalTensor(x.data(), output_id)
+      .ReshapeRuntime()
+      .InvokeRuntime();
+  ASSERT_EQ(runtime.Status(), ynn_status_success);
+
+  const float tolerance = get_dot_tolerance<float>(K, max_abs_value);
+  for (size_t e = 0; e < E; ++e) {
+    for (size_t i = 0; i < M; ++i) {
+      for (size_t j = 0; j < N; ++j) {
+        float expected = 0.0f;
+        for (size_t k = 0; k < K; ++k) {
+          expected += a(e, i, k) * b(e, k, j);
+        }
+        ASSERT_NEAR(x(e, i, j), expected, tolerance)
+            << "e=" << e << " i=" << i << " j=" << j;
+      }
+    }
+  }
+}
 
 }  // namespace ynn

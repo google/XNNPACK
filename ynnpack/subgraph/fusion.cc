@@ -700,7 +700,7 @@ bool is_broadcast_noop(const ynn_subgraph& subgraph, const ynn_node& node,
     for (size_t d = 0; d < axes.size(); ++d) {
       if (!axes[d]) continue;
       for (uint32_t i : node.inputs) {
-        if (i == input_id) continue;
+        if (i == input_id || i == YNN_INVALID_VALUE_ID) continue;
         const ynn_value& input = subgraph.value(i);
         if (!slinky::is_one(input.extent(d))) {
           return false;
@@ -1376,8 +1376,8 @@ bool fuse_quantize(ynn_subgraph& subgraph, ynn_node& node,
   return true;
 }
 
-// Rewrite multiply(dot(..., subtract_multiply(0, a, b)), c, d) to
-// dequantize_dot(dot(..., YNN_INVALID_VALUE_ID), a, b, c, d, 0)
+// Rewrite multiply(dot(..., subtract_multiply(0, a, b), mask), c, d) to
+// dequantize_dot(dot(..., YNN_INVALID_VALUE_ID, mask), a, b, c, d, 0, mask)
 bool rewrite_dequantize_dot(ynn_subgraph& subgraph, ynn_node& node,
                             subgraph_analysis& analysis) {
   if (!is_ternary_node(node, ternary_op::multiply)) {
@@ -1388,6 +1388,7 @@ bool rewrite_dequantize_dot(ynn_subgraph& subgraph, ynn_node& node,
   if (!dot_node) return false;
   const ynn_node::dot* dot_op = std::get_if<ynn_node::dot>(&dot_node->op);
   if (!dot_op || dot_node->inputs.size() < 2) return false;
+  const uint32_t mask_id = dot_node->inputs[3];
 
   uint32_t input_c_id = dot_node->inputs[2];
   ynn_node* input_c_producer = analysis.producer_of(input_c_id);
@@ -1431,7 +1432,8 @@ bool rewrite_dequantize_dot(ynn_subgraph& subgraph, ynn_node& node,
     ynn::define_dequantize_dot(subgraph, node, output.type,
                                dot_node->outputs[0], a_offset_id, b_offset_id,
                                a_scale_id, b_scale_id, offset_id,
-                               node.outputs[0], dequantize_dot_params{});
+                               node.outputs[0], dequantize_dot_params{},
+                               mask_id);
   });
   return true;
 }
@@ -1460,6 +1462,11 @@ bool rewrite_dequantize_dot_add(ynn_subgraph& subgraph, ynn_node& node,
     uint32_t offset_id = dequantize_dot_node->inputs[5];
     const ynn_value& offset = subgraph.value(offset_id);
     if (!offset.is_static_scalar() || offset.as_scalar() != 0.0f) {
+      continue;
+    }
+    // Masked rows of a dequantize_dot are zero, not `offset`, so adding `x`
+    // afterwards is not equivalent to using `x` as the offset.
+    if (dequantize_dot_node->inputs[6] != YNN_INVALID_VALUE_ID) {
       continue;
     }
 

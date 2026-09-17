@@ -185,6 +185,11 @@ class SubgraphBuilder {
                           uint32_t input_b_id, uint32_t input_c_id,
                           uint32_t output_id, uint32_t flags = 0);
 
+  SubgraphBuilder& AddScaledDot(size_t num_k_dims, uint32_t input_a_id,
+                                uint32_t input_b_id, uint32_t input_c_id,
+                                uint32_t input_scale_id, uint32_t output_id,
+                                uint32_t flags = 0);
+
   SubgraphBuilder& AddReduce(ynn_reduce_operator op,
                              const std::vector<int32_t>& reduce_axes,
                              uint32_t input_a_id, uint32_t input_b_id,
