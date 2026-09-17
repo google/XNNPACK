@@ -107,6 +107,7 @@ SET(MICROKERNEL_BENCHMARKS
     vbinary
     indirection
     xN-transposec
+    xx-fill
     xx-pad
     xx-transposev)
 FOREACH(BENCH ${MICROKERNEL_BENCHMARKS})

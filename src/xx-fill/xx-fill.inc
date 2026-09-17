@@ -16,4 +16,8 @@ XNN_FILL_UKERNEL(xnn_arch_x86_sse2, xnn_xx_fill_ukernel__sse2_u64)
 XNN_FILL_UKERNEL(xnn_arch_none, xnn_xx_fill_ukernel__wasmsimd_u64)
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
+# if XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
+XNN_FILL_UKERNEL(xnn_arch_riscv_vector, xnn_xx_fill_ukernel__rvv_u4v)
+#endif // XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
+
 XNN_FILL_UKERNEL(xnn_arch_none, xnn_xx_fill_ukernel__scalar_u16)
