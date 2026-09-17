@@ -9,6 +9,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <random>
+#include <type_traits>
 #include <vector>
 
 #include <gmock/gmock.h>
@@ -153,5 +154,71 @@ TEST(MaxPooling2DQS8, test) { TestImpl<quantized<int8_t>>(); }
 TEST(MaxPooling2DQU8, test) { TestImpl<quantized<uint8_t>>(); }
 TEST(MaxPooling2DF16, test) { TestImpl<xnn_float16>(); }
 TEST(MaxPooling2DF32, test) { TestImpl<float>(); }
+
+TEST(MaxPooling2DQU8, IndirectionBufferSizeOverflow32BitSubgraph) {
+  if (sizeof(void*) != 4) {
+    GTEST_SKIP() << "requires 32-bit pointers";
+  }
+
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr));
+
+  xnn_subgraph_t subgraph = nullptr;
+  ASSERT_EQ(xnn_status_success,
+            xnn_create_subgraph(/*external_value_ids=*/2, /*flags=*/0,
+                                &subgraph));
+  std::unique_ptr<std::remove_pointer<xnn_subgraph_t>::type,
+                  decltype(&xnn_delete_subgraph)>
+      auto_subgraph(subgraph, xnn_delete_subgraph);
+
+  const size_t dynamic_shape[4] = {0, 0, 0, 0};
+  uint32_t input_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_quantized_tensor_value(
+                subgraph, xnn_datatype_quint8, /*zero_point=*/0,
+                /*scale=*/1.0f, /*num_dims=*/4, dynamic_shape,
+                /*data=*/nullptr, /*external_id=*/0,
+                XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id));
+  ASSERT_EQ(input_id, 0u);
+
+  uint32_t output_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_quantized_tensor_value(
+                subgraph, xnn_datatype_quint8, /*zero_point=*/0,
+                /*scale=*/1.0f, /*num_dims=*/4, dynamic_shape,
+                /*data=*/nullptr, /*external_id=*/1,
+                XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
+  ASSERT_EQ(output_id, 1u);
+
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_max_pooling_2d(
+                subgraph,
+                /*input_padding_top=*/0, /*input_padding_right=*/0,
+                /*input_padding_bottom=*/0, /*input_padding_left=*/0,
+                /*pooling_height=*/3, /*pooling_width=*/1,
+                /*stride_height=*/1, /*stride_width=*/1,
+                /*dilation_height=*/1, /*dilation_width=*/1,
+                /*output_min=*/0.0f, /*output_max=*/255.0f, input_id,
+                output_id, /*flags=*/0));
+
+  xnn_runtime_t runtime = nullptr;
+  const enum xnn_status create_status = xnn_create_runtime_v4(
+      subgraph, /*weights_cache=*/nullptr, /*workspace=*/nullptr,
+      /*threadpool=*/nullptr, /*flags=*/0, &runtime);
+  if (create_status == xnn_status_unsupported_hardware) {
+    GTEST_SKIP() << "maxpool runtime unsupported on this target";
+  }
+  ASSERT_EQ(xnn_status_success, create_status);
+  std::unique_ptr<std::remove_pointer<xnn_runtime_t>::type,
+                  decltype(&xnn_delete_runtime)>
+      auto_runtime(runtime, xnn_delete_runtime);
+
+  const size_t input_shape[4] = {1, 1, 357913941, 1};
+  ASSERT_EQ(xnn_status_success,
+            xnn_reshape_external_value(runtime, /*external_id=*/0,
+                                       /*num_dims=*/4, input_shape));
+
+  const enum xnn_status status = xnn_reshape_runtime(runtime);
+  EXPECT_EQ(xnn_status_out_of_memory, status);
+}
 
 }  // namespace xnnpack
