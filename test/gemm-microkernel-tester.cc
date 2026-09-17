@@ -844,7 +844,9 @@ void GemmMicrokernelTester::Test(
                              0, std::numeric_limits<uint8_t>::max()),
                          std::ref(rng));
 
-  const size_t k4 = round_up_po2(k(), 4);  // tester assumes byte aligned rows
+  const size_t k4 = round_up_po2(
+      k(),
+      std::max<size_t>(4, kr() * sr()));  // tester assumes byte aligned rows
   const size_t packed_k4 =
       round_up_po2(k(), kr() * sr() * planes());  // 4 blocks for crumbs
   const size_t packed_k_bytes = (packed_k4 + 3) / 4;
@@ -2141,7 +2143,9 @@ void GemmMicrokernelTester::Test(
   const float max_abs_product = 1.0f * 16.0f * 2.0f;
 
   // 2 bit is 4 planes - four 2-bit values (crumbs) per byte
-  const size_t k4 = round_up_po2(k(), 4);  // tester assumes byte aligned rows
+  const size_t k4 = round_up_po2(
+      k(),
+      std::max<size_t>(4, kr() * sr()));  // tester assumes byte aligned rows
   // 4 blocks for crumbs
   const size_t packed_k4 = round_up_po2(k(), kr() * sr() * planes());
   const size_t packed_k_bytes = (packed_k4 + 3) / 4;
@@ -2161,6 +2165,7 @@ void GemmMicrokernelTester::Test(
   xnnpack::Buffer<float> c_ref(m() * n());
   xnnpack::Buffer<float> row_sum(mr());
 
+  std::fill(a.begin(), a.end(), 0);
   std::generate(input.begin(), input.end(), std::ref(f32rng));
   for (size_t i = 0; i < m(); ++i) {
     const float* input_ptr = &input[i * k4];
@@ -2239,7 +2244,7 @@ void GemmMicrokernelTester::Test(
         const size_t nb_index = (ni * k4 + ki) / 4;
         const int crumb_shift = ((ni * k4 + ki) % 4) * 2;
         int8_t bv = static_cast<int8_t>((b[nb_index] >> crumb_shift) & 0x3);
-        bv = sign_extend_int2(bv);
+        bv = bv - 2;
         ksum += bv;
         c_ref[mi * n() + ni] +=
             static_cast<int32_t>(a[mi * a_stride() + ki]) *
@@ -2328,7 +2333,9 @@ void GemmMicrokernelTester::Test(
   const float max_abs_product = 1.0f * 16.0f * 2.0f;
 
   // 2 bit is 4 planes - four 2-bit values (crumbs) per byte
-  const size_t k4 = round_up_po2(k(), 4);  // tester assumes byte aligned rows
+  const size_t k4 = round_up_po2(
+      k(),
+      std::max<size_t>(4, kr() * sr()));  // tester assumes byte aligned rows
   // 4 blocks for crumbs
   const size_t packed_k4 = round_up_po2(k(), kr() * sr() * planes());
   const size_t packed_k_bytes = (packed_k4 + 3) / 4;
@@ -2348,6 +2355,7 @@ void GemmMicrokernelTester::Test(
   xnnpack::Buffer<float> c_ref(m() * n());
   xnnpack::Buffer<float> row_sum(mr());
 
+  std::fill(a.begin(), a.end(), 0);
   std::generate(input.begin(), input.end(), std::ref(f32rng));
   for (size_t i = 0; i < m(); ++i) {
     const float* input_ptr = &input[i * k4];
@@ -2426,7 +2434,7 @@ void GemmMicrokernelTester::Test(
         const size_t nb_index = (ni * k4 + ki) / 4;
         const int crumb_shift = ((ni * k4 + ki) % 4) * 2;
         int8_t bv = static_cast<int8_t>((b[nb_index] >> crumb_shift) & 0x3);
-        bv = sign_extend_int2(bv);
+        bv = bv - 2;
         ksum += bv;
         c_ref[mi * n() + ni] +=
             static_cast<int32_t>(a[mi * a_stride() + ki]) *
