@@ -35,12 +35,12 @@ TEST(PlanningTest, ReshapingToBroadcastWorks) {
   uint32_t c_id = XNN_INVALID_VALUE_ID;
 
   {
-    XTensor a({.type = lrt::Type::kI16, .shape = {3, 3}});
-    XTensor b({.type = lrt::Type::kI16, .shape = {3, 3}});
+    XTensor a({.type = lrt::Type::kFP16, .shape = {3, 3}});
+    XTensor b({.type = lrt::Type::kFP16, .shape = {3, 3}});
 
     XTensor c = Add(Cast(a, lrt::Type::kFP32), Cast(b, lrt::Type::kFP32));
     c.SetShape({3, 3});
-    c = Cast(c, lrt::Type::kI16);
+    c = Cast(c, lrt::Type::kFP16);
 
     LRT_TENSOR_ASSERT_OK_AND_ASSIGN(graph, lrt::BuildXnnpackGraph({c}));
     LRT_TENSOR_ASSERT_OK_AND_ASSIGN(const size_t a_idx, graph->Lookup(a));
