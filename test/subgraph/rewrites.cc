@@ -2076,4 +2076,53 @@ INSTANTIATE_TEST_SUITE_P(Rewrite, RewriteArithmeticTest,
                          testing::Values(0, 1, 3));
 INSTANTIATE_TEST_SUITE_P(Rewrite, RewriteGemmTest, testing::Values(3, 4));
 
+TEST(RewriteMinMaxToClamp, KeepsBroadcastingConstantOperand) {
+  // minimum(w[1, 5], pow(x[4, 5], 0)): the second operand is known to be all
+  // ones, but it broadcasts `w` up to [4, 5], so the node must not be turned
+  // into a clamp of `w`, whose output would only be [1, 5].
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  const uint32_t w_id = 0;
+  const uint32_t x_id = 1;
+  const uint32_t out_id = 2;
+  const std::vector<size_t> w_shape = {1, 5};
+  const std::vector<size_t> x_shape = {4, 5};
+  SubgraphTester subgraph(3);
+  subgraph.AddInputTensor(w_shape, xnn_datatype_fp32, w_id)
+      .AddInputTensor(x_shape, xnn_datatype_fp32, x_id)
+      .AddOutputTensor(x_shape, xnn_datatype_fp32, out_id);
+  Tensor<float> zero(std::vector<size_t>{1}, xnnpack::XnnExtraBytes);
+  std::fill(zero.begin(), zero.end(), 0.0f);
+  uint32_t zero_id = XNN_INVALID_VALUE_ID;
+  subgraph.AddInternalStaticTensor({1}, xnn_datatype_fp32, &zero_id,
+                                   zero.base(), /*flags=*/0);
+  const uint32_t ones_id =
+      add_internal_dynamic_tensor<float>(subgraph, x_shape);
+  subgraph.AddBinary(xnn_binary_pow, /*params=*/nullptr, x_id, zero_id, ones_id)
+      .AddBinary(xnn_binary_minimum, /*params=*/nullptr, w_id, ones_id, out_id);
+  ASSERT_EQ(subgraph.CreateRuntime(), xnn_status_success);
+
+  Tensor<float> w(w_shape, xnnpack::XnnExtraBytes);
+  std::iota(w.begin(), w.end(), -2.0f);
+  Tensor<float> x(x_shape, xnnpack::XnnExtraBytes);
+  std::fill(x.begin(), x.end(), 3.0f);
+  subgraph.ReshapeExternalTensor(w_shape, w.base(), w_id)
+      .ReshapeExternalTensor(x_shape, x.base(), x_id)
+      .ReshapeRuntime();
+  ASSERT_EQ(subgraph.Status(), xnn_status_success);
+  ASSERT_EQ(subgraph.GetExternalTensorShape(out_id), x_shape);
+
+  Tensor<float> output(x_shape);
+  subgraph.SetupExternalTensor(output.base(), out_id)
+      .SetupRuntime()
+      .InvokeRuntime();
+  ASSERT_EQ(subgraph.Status(), xnn_status_success);
+  std::vector<float> expected;
+  for (size_t i = 0; i < x_shape[0]; i++) {
+    for (size_t j = 0; j < x_shape[1]; j++) {
+      expected.push_back(std::min(-2.0f + j, 1.0f));
+    }
+  }
+  ASSERT_THAT(output, testing::ElementsAreArray(expected));
+}
+
 }  // namespace xnnpack
