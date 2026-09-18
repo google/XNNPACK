@@ -1,6 +1,6 @@
 // clang-format off
 // Auto-generated file. Do not edit!
-//   Template: src/f16-igemm/wasmrelaxedsimd-splat.c.in
+//   Template: src/f16-igemm/wasmrelaxedsimdfp16-splat.c.in
 //   Generator: tools/xngen
 //
 // Copyright 2025 Google LLC
@@ -14,7 +14,7 @@
 
 #include "src/xnnpack/igemm.h"
 
-void xnn_f16_igemm_minmax_ukernel_1x8__wasmrelaxedsimd_splat(
+void xnn_f16_igemm_minmax_ukernel_1x16__wasmrelaxedsimdfp16_splat(
     size_t mr,
     size_t nc,
     size_t kc,
@@ -48,7 +48,8 @@ void xnn_f16_igemm_minmax_ukernel_1x8__wasmrelaxedsimd_splat(
 
   do {
     v128_t vacc0x0 = wasm_v128_load(w);
-    w = (const xnn_float16*) w + 8;
+    v128_t vacc0x1 = wasm_v128_load((const uint16_t*) w + 8);
+    w = (const xnn_float16*) w + 16;
 
     size_t p = ks;
     do {
@@ -65,9 +66,11 @@ void xnn_f16_igemm_minmax_ukernel_1x8__wasmrelaxedsimd_splat(
         a0 += 1;
 
         const v128_t vb0 = wasm_v128_load(w);
-        w = (const xnn_float16*) w + 8;
+        const v128_t vb1 = wasm_v128_load((const uint16_t*) w + 8);
+        w = (const xnn_float16*) w + 16;
 
         vacc0x0 = wasm_f16x8_relaxed_madd(va0, vb0, vacc0x0);
+        vacc0x1 = wasm_f16x8_relaxed_madd(va0, vb1, vacc0x1);
 
         k -= sizeof(uint16_t);
       } while (k != 0);
@@ -75,18 +78,28 @@ void xnn_f16_igemm_minmax_ukernel_1x8__wasmrelaxedsimd_splat(
     } while (p != 0);
 
     vacc0x0 = wasm_f16x8_pmax(vacc0x0, vmin);
+    vacc0x1 = wasm_f16x8_pmax(vacc0x1, vmin);
 
     vacc0x0 = wasm_f16x8_pmin(vacc0x0, vmax);
+    vacc0x1 = wasm_f16x8_pmin(vacc0x1, vmax);
 
-    if XNN_LIKELY(nc >= 8) {
+    if XNN_LIKELY(nc >= 16) {
       wasm_v128_store(c0, vacc0x0);
+      wasm_v128_store(c0 + 8, vacc0x1);
       c0 = (uint16_t*) ((uintptr_t) c0 + cn_stride);
 
       a = (const xnn_float16**restrict) ((uintptr_t) a - ks);
 
-      nc -= 8;
+      nc -= 16;
     } else {
       v128_t vh0x0 = vacc0x0;
+      if (nc & 8) {
+        wasm_v128_store(c0, vh0x0);
+
+        vh0x0 = vacc0x1;
+
+        c0 += 8;
+      }
       if (nc & 4) {
         wasm_v128_store64_lane(c0, vh0x0, 0);
 

@@ -4,6 +4,10 @@
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
 
+##################################### Scalar ####################################
+tools/xngen src/f16-gemm/scalar.c.in -D MR=1 -D NR=8 -D ACTIVATION=MINMAX -o src/f16-gemm/gen/f16-gemm-1x8-minmax-scalar.c &
+tools/xngen src/f16-gemm/scalar.c.in -D MR=4 -D NR=8 -D ACTIVATION=MINMAX -o src/f16-gemm/gen/f16-gemm-4x8-minmax-scalar.c &
+
 ############################### AArch64 assembly ##############################
 tools/xngen src/f16-gemm/1x16-aarch64-neonfp16arith-ld64.S.in -D INC=0 -o src/f16-gemm/gen/f16-gemm-1x16-minmax-asm-aarch64-neonfp16arith-ld64.S &
 tools/xngen src/f16-gemm/4x16-aarch64-neonfp16arith-ld64.S.in -D INC=0 -o src/f16-gemm/gen/f16-gemm-4x16-minmax-asm-aarch64-neonfp16arith-ld64.S &
@@ -105,15 +109,15 @@ tools/xngen src/f16-gemm/avx512skx-broadcast.c.in -D MR=8 -D NR=32 -D ACCTYPE=F3
 
 ################################# WASM FP16 #################################
 ### WASM FP16X8 micro-kernels
-tools/xngen src/f16-gemm/wasmrelaxedsimd-splat.c.in -D MR=1 -D NR=8 -D -o src/f16-gemm/gen/f16-gemm-1x8-minmax-wasmrelaxedsimd-splat.c &
-tools/xngen src/f16-gemm/wasmrelaxedsimd-splat.c.in -D MR=4 -D NR=8 -D -o src/f16-gemm/gen/f16-gemm-4x8-minmax-wasmrelaxedsimd-splat.c &
-tools/xngen src/f16-gemm/wasmrelaxedsimd-splat.c.in -D MR=6 -D NR=8 -D -o src/f16-gemm/gen/f16-gemm-6x8-minmax-wasmrelaxedsimd-splat.c &
-tools/xngen src/f16-gemm/wasmrelaxedsimd-splat.c.in -D MR=8 -D NR=8 -D -o src/f16-gemm/gen/f16-gemm-8x8-minmax-wasmrelaxedsimd-splat.c &
+tools/xngen src/f16-gemm/wasmrelaxedsimdfp16-splat.c.in -D MR=1 -D NR=8 -D -o src/f16-gemm/gen/f16-gemm-1x8-minmax-wasmrelaxedsimdfp16-splat.c &
+tools/xngen src/f16-gemm/wasmrelaxedsimdfp16-splat.c.in -D MR=4 -D NR=8 -D -o src/f16-gemm/gen/f16-gemm-4x8-minmax-wasmrelaxedsimdfp16-splat.c &
+tools/xngen src/f16-gemm/wasmrelaxedsimdfp16-splat.c.in -D MR=6 -D NR=8 -D -o src/f16-gemm/gen/f16-gemm-6x8-minmax-wasmrelaxedsimdfp16-splat.c &
+tools/xngen src/f16-gemm/wasmrelaxedsimdfp16-splat.c.in -D MR=8 -D NR=8 -D -o src/f16-gemm/gen/f16-gemm-8x8-minmax-wasmrelaxedsimdfp16-splat.c &
 
-tools/xngen src/f16-gemm/wasmrelaxedsimd-splat.c.in -D MR=1 -D NR=16 -D -o src/f16-gemm/gen/f16-gemm-1x16-minmax-wasmrelaxedsimd-splat.c &
-tools/xngen src/f16-gemm/wasmrelaxedsimd-splat.c.in -D MR=4 -D NR=16 -D -o src/f16-gemm/gen/f16-gemm-4x16-minmax-wasmrelaxedsimd-splat.c &
-tools/xngen src/f16-gemm/wasmrelaxedsimd-splat.c.in -D MR=6 -D NR=16 -D -o src/f16-gemm/gen/f16-gemm-6x16-minmax-wasmrelaxedsimd-splat.c &
-tools/xngen src/f16-gemm/wasmrelaxedsimd-splat.c.in -D MR=8 -D NR=16 -D -o src/f16-gemm/gen/f16-gemm-8x16-minmax-wasmrelaxedsimd-splat.c &
+tools/xngen src/f16-gemm/wasmrelaxedsimdfp16-splat.c.in -D MR=1 -D NR=16 -D -o src/f16-gemm/gen/f16-gemm-1x16-minmax-wasmrelaxedsimdfp16-splat.c &
+tools/xngen src/f16-gemm/wasmrelaxedsimdfp16-splat.c.in -D MR=4 -D NR=16 -D -o src/f16-gemm/gen/f16-gemm-4x16-minmax-wasmrelaxedsimdfp16-splat.c &
+tools/xngen src/f16-gemm/wasmrelaxedsimdfp16-splat.c.in -D MR=6 -D NR=16 -D -o src/f16-gemm/gen/f16-gemm-6x16-minmax-wasmrelaxedsimdfp16-splat.c &
+tools/xngen src/f16-gemm/wasmrelaxedsimdfp16-splat.c.in -D MR=8 -D NR=16 -D -o src/f16-gemm/gen/f16-gemm-8x16-minmax-wasmrelaxedsimdfp16-splat.c &
 
 ################################ RISC-V Vector ##############################
 tools/xngen src/f16-gemm/MRxNRv-rvv.c.in -D MR=1 -D NR=m4 -o src/f16-gemm/gen/f16-gemm-1x4v-minmax-rvvfp16arith.c &
